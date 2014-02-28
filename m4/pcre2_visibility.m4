@@ -21,8 +21,9 @@ dnl Set the variable CFLAG_VISIBILITY.
 dnl Defines and sets the variable HAVE_VISIBILITY.
 
 dnl Modified to fit with PCRE build environment by Cristian Rodríguez.
+dnl Adjusted for PCRE2 by PH
 
-AC_DEFUN([PCRE_VISIBILITY],
+AC_DEFUN([PCRE2_VISIBILITY],
 [
   AC_REQUIRE([AC_PROG_CC])
   VISIBILITY_CFLAGS=
@@ -72,13 +73,11 @@ AC_DEFUN([PCRE_VISIBILITY],
       VISIBILITY_CFLAGS="-fvisibility=hidden"
       VISIBILITY_CXXFLAGS="-fvisibility=hidden -fvisibility-inlines-hidden"
       HAVE_VISIBILITY=1
-      AC_DEFINE(PCRE_EXP_DECL, [extern __attribute__ ((visibility ("default")))], [to make a symbol visible])
-      AC_DEFINE(PCRE_EXP_DEFN, [__attribute__ ((visibility ("default")))], [to make a symbol visible])
-      AC_DEFINE(PCRE_EXP_DATA_DEFN, [__attribute__ ((visibility ("default")))], [to make a symbol visible])
+      AC_DEFINE(PCRE2_EXP_DECL, [extern __attribute__ ((visibility ("default")))], [to make a symbol visible])
+      AC_DEFINE(PCRE2_EXP_DEFN, [__attribute__ ((visibility ("default")))], [to make a symbol visible])
+      AC_DEFINE(PCRE2_EXP_DATA_DEFN, [__attribute__ ((visibility ("default")))], [to make a symbol visible])
       AC_DEFINE(PCREPOSIX_EXP_DECL, [extern __attribute__ ((visibility ("default")))], [to make a symbol visible])
       AC_DEFINE(PCREPOSIX_EXP_DEFN, [extern __attribute__ ((visibility ("default")))], [to make a symbol visible])
-      AC_DEFINE(PCRECPP_EXP_DECL, [extern __attribute__ ((visibility ("default")))], [to make a symbol visible])
-      AC_DEFINE(PCRECPP_EXP_DEFN, [__attribute__ ((visibility ("default")))], [to make a symbol visible])
     fi
   fi
   AC_SUBST([VISIBILITY_CFLAGS])

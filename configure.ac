@@ -24,10 +24,10 @@ m4_define(libpcre2posix_version, [0:0:0])
 
 AC_PREREQ(2.57)
 AC_INIT(PCRE2, pcre2_major.pcre2_minor[]pcre2_prerelease, , pcre2)
-AC_CONFIG_SRCDIR([pcre2.h.in])
+AC_CONFIG_SRCDIR([src/pcre2.h.in])
 AM_INIT_AUTOMAKE([dist-bzip2 dist-zip])
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
-AC_CONFIG_HEADERS(config.h)
+AC_CONFIG_HEADERS(src/config.h)
 
 # This is a new thing required to stop a warning from automake 1.12
 m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
@@ -35,21 +35,17 @@ m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 # This was added at the suggestion of libtoolize (03-Jan-10)
 AC_CONFIG_MACRO_DIR([m4])
 
-# The default CFLAGS and CXXFLAGS in Autoconf are "-g -O2" for gcc and just
-# "-g" for any other compiler. There doesn't seem to be a standard way of
-# getting rid of the -g (which I don't think is needed for a production
-# library). This fudge seems to achieve the necessary. First, we remember the
-# externally set values of CFLAGS and CXXFLAGS. Then call the AC_PROG_CC and
-# AC_PROG_CXX macros to find the compilers - if CFLAGS and CXXFLAGS are not
-# set, they will be set to Autoconf's defaults. Afterwards, if the original
+# The default CFLAGS in Autoconf are "-g -O2" for gcc and just "-g" for any
+# other compiler. There doesn't seem to be a standard way of getting rid of the
+# -g (which I don't think is needed for a production library). This fudge seems
+# to achieve the necessary. First, we remember the externally set values of
+# CFLAGS. Then call the AC_PROG_CC macro to find the compiler - if CFLAGS is
+# not set, it will be set to Autoconf's defaults. Afterwards, if the original
 # values were not set, remove the -g from the Autoconf defaults.
-# (PH 02-May-07)
 
 remember_set_CFLAGS="$CFLAGS"
-remember_set_CXXFLAGS="$CXXFLAGS"
 
 AC_PROG_CC
-AC_PROG_CXX
 AM_PROG_CC_C_O
 
 if test "x$remember_set_CFLAGS" = "x"
@@ -63,23 +59,6 @@ then
   fi
 fi
 
-if test "x$remember_set_CXXFLAGS" = "x"
-then
-  if test "$CXXFLAGS" = "-g -O2"
-  then
-    CXXFLAGS="-O2"
-  elif test "$CXXFLAGS" = "-g"
-  then
-    CXXFLAGS=""
-  fi
-fi
-
-# AC_PROG_CXX will return "g++" even if no c++ compiler is installed.
-# Check for that case, and just disable c++ code if g++ doesn't run.
-AC_LANG_PUSH(C++)
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM([],[])],, CXX=""; CXXCP=""; CXXFLAGS="")
-AC_LANG_POP
-
 # Check for a 64-bit integer type
 AC_TYPE_INT64_T
 
@@ -90,7 +69,7 @@ AC_PROG_LN_S
 
 # Check for GCC visibility feature
 
-PCRE_VISIBILITY
+PCRE2_VISIBILITY
 
 # Versioning
 
@@ -103,7 +82,7 @@ if test "$PCRE2_MINOR" = "08" -o "$PCRE2_MINOR" = "09"
 then
   echo "***"
   echo "*** Minor version number $PCRE2_MINOR must not be used. ***"
-  echo "*** Use only 01 to 07 or 10 onwards, to avoid octal issues. ***"
+  echo "*** Use only 00 to 07 or 10 onwards, to avoid octal issues. ***"
   echo "***"
   exit 1
 fi
@@ -875,7 +854,7 @@ AC_CONFIG_FILES(
 	libpcre2-32.pc
 	libpcre2posix.pc
 	pcre2-config
-	pcre2.h
+	src/pcre2.h
 )
 
 # Make the generated script files executable.
