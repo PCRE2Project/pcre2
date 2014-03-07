@@ -39,10 +39,6 @@ POSSIBILITY OF SUCH DAMAGE.
 */
 
 
-/* This module contains the external function pcre2_version(), which returns a
-string that identifies the PCRE version that is in use. */
-
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -51,54 +47,42 @@ string that identifies the PCRE version that is in use. */
 
 
 /*************************************************
-*          Return version string                 *
+*     Match a pattern using the DFA algorithm    *
 *************************************************/
 
-/* These macros are the standard way of turning unquoted text into C strings.
-They allow macros like PCRE_MAJOR to be defined without quotes, which is
-convenient for user programs that want to test its value. */
-
-#define STRING(a)  # a
-#define XSTRING(s) STRING(s)
-
-/* A problem turned up with PCRE_PRERELEASE, which is defined empty for
-production releases. Originally, it was used naively in this code:
-
-  return XSTRING(PCRE_MAJOR)
-         "." XSTRING(PCRE_MINOR)
-             XSTRING(PCRE_PRERELEASE)
-         " " XSTRING(PCRE_DATE);
-
-However, when PCRE_PRERELEASE is empty, this leads to an attempted expansion of
-STRING(). The C standard states: "If (before argument substitution) any
-argument consists of no preprocessing tokens, the behavior is undefined." It
-turns out the gcc treats this case as a single empty string - which is what we
-really want - but Visual C grumbles about the lack of an argument for the
-macro. Unfortunately, both are within their rights. To cope with both ways of
-handling this, I had resort to some messy hackery that does a test at run time.
-I could find no way of detecting that a macro is defined as an empty string at
-pre-processor time. This hack uses a standard trick for avoiding calling
-the STRING macro with an empty argument when doing the test. 
+/* This function matches a compiled pattern to a subject string, using the
+alternate matching algorithm that finds all matches at once.
 
 Arguments:
-  buffer       where to return the version string
-  size         size of buffer
-  
-Returns:       number of characters, excluding trailing zero
-               or PCRE_ERROR_BADLENGTH if buffer too small  
-*/
+  context       points to a PCRE2 context
+  code          points to the compiled pattern
+  subject       subject string
+  length        length of subject string
+  startoffset   where to start matching in the subject
+  options       option bits
+  match_data    points to a match data structure
+  workspace     pointer to workspace
+  wscount       size of workspace
+
+Returns:        > 0 => number of match offset pairs placed in offsets
+                = 0 => offsets overflowed; longest matches are present
+                 -1 => failed to match
+               < -1 => some kind of unexpected problem
+*/                
+
+/* FIXME: this is currently a placeholder function */
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
-pcre2_version(PCRE2_UCHAR *buffer, size_t size)
+pcre2_dfa_exec(pcre2_context *context, const pcre2_code *code,
+  PCRE2_SPTR subject, int length, size_t startoffset, uint32_t options,
+  pcre2_match_data *match_data, int *workspace, size_t wscount)
 {
-PCRE2_UCHAR *t = buffer;
-const char *v = (XSTRING(Z PCRE2_PRERELEASE)[1] == 0)?
-  XSTRING(PCRE2_MAJOR.PCRE2_MINOR PCRE2_DATE) :
-  XSTRING(PCRE2_MAJOR.PCRE2_MINOR) XSTRING(PCRE2_PRERELEASE PCRE2_DATE);
-if (strlen(v) >= size) return PCRE2_ERROR_BADLENGTH; 
-while (*v != 0) *t++ = *v++;
-*t = 0;
-return t - buffer;
+
+context = context; code = code; subject = subject; length = length;
+startoffset = startoffset; options = options; match_data = match_data;
+workspace = workspace; wscount = wscount;
+
+return PCRE2_ERROR_NOMATCH;
 }
 
-/* End of pcre2_version.c */
+/* End of pcre2_dfa_exec.c */

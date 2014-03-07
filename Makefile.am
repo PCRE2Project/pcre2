@@ -3,6 +3,9 @@
 AUTOMAKE_OPTIONS = subdir-objects
 ACLOCAL_AMFLAGS = -I m4
 
+
+## Specify the documentation files that are distributed.
+
 # FIXME
 #dist_doc_DATA = \
 #  doc/pcre.txt \
@@ -71,6 +74,59 @@ ACLOCAL_AMFLAGS = -I m4
 #  doc/html/pcresyntax.html \
 #  doc/html/pcretest.html \
 #  doc/html/pcreunicode.html
+
+# FIXME
+#dist_man_MANS = \
+#  doc/pcre2-config.1 \
+#  doc/pcre2.3 \
+#  doc/pcre2-16.3 \
+#  doc/pcre2-32.3 \
+#  doc/pcre2_assign_jit_stack.3 \
+#  doc/pcre2_compile.3 \
+#  doc/pcre2_compile2.3 \
+#  doc/pcre2_config.3 \
+#  doc/pcre2_copy_named_substring.3 \
+#  doc/pcre2_copy_substring.3 \
+#  doc/pcre2_dfa_exec.3 \
+#  doc/pcre2_exec.3 \
+#  doc/pcre2_free_study.3 \
+#  doc/pcre2_free_substring.3 \
+#  doc/pcre2_free_substring_list.3 \
+#  doc/pcre2_fullinfo.3 \
+#  doc/pcre2_get_named_substring.3 \
+#  doc/pcre2_get_stringnumber.3 \
+#  doc/pcre2_get_stringtable_entries.3 \
+#  doc/pcre2_get_substring.3 \
+#  doc/pcre2_get_substring_list.3 \
+#  doc/pcre2_jit_exec.3 \
+#  doc/pcre2_jit_stack_alloc.3 \
+#  doc/pcre2_jit_stack_free.3 \
+#  doc/pcre2_maketables.3 \
+#  doc/pcre2_pattern_to_host_byte_order.3 \
+#  doc/pcre2_refcount.3 \
+#  doc/pcre2_study.3 \
+#  doc/pcre2_utf16_to_host_byte_order.3 \
+#  doc/pcre2_utf32_to_host_byte_order.3 \
+#  doc/pcre2_version.3 \
+#  doc/pcre2api.3 \
+#  doc/pcre2build.3 \
+#  doc/pcre2callout.3 \
+#  doc/pcre2compat.3 \
+#  doc/pcre2demo.3 \
+#  doc/pcre2grep.1 \
+#  doc/pcre2jit.3 \
+#  doc/pcre2limits.3 \
+#  doc/pcre2matching.3 \
+#  doc/pcre2partial.3 \
+#  doc/pcre2pattern.3 \
+#  doc/pcre2perform.3 \
+#  doc/pcre2posix.3 \
+#  doc/pcre2precompile.3 \
+#  doc/pcre2sample.3 \
+#  doc/pcre2stack.3 \
+#  doc/pcre2syntax.3 \
+#  doc/pcre2test.1 \
+#  doc/pcre2unicode.3
 
 # The Libtool libraries to install.  We'll add to this later.
 
@@ -147,7 +203,7 @@ src/pcre2.h.generic: src/pcre2.h.in configure.ac
 # resulting config.h is munged by perl to put #ifdefs round any #defines for
 # macros with values, and to #undef all boolean macros such as HAVE_xxx and
 # SUPPORT_xxx. We also get rid of any gcc-specific visibility settings. Make
-# sure that PCRE_EXP_DEFN is unset (in case it has visibility settings).
+# sure that PCRE2_EXP_DEFN is unset (in case it has visibility settings).
 
 src/config.h.generic: configure.ac
 	rm -rf $@ _generic
@@ -173,11 +229,8 @@ MAINTAINERCLEANFILES += src/pcre2.h.generic src/config.h.generic
 # These are the header files we'll install. We do not distribute pcre2.h
 # because it is generated from pcre2.h.in.
 
-nodist_include_HEADERS = \
-  src/pcre2.h
-#FIXME
-#include_HEADERS = \
-#  src/pcre2posix.h
+nodist_include_HEADERS = src/pcre2.h
+include_HEADERS = src/pcre2posix.h
 
 # This is the "config" script.
 
@@ -204,33 +257,37 @@ endif # WITH_REBUILD_CHARTABLES
 BUILT_SOURCES = src/pcre2_chartables.c
 NODIST_SOURCES = src/pcre2_chartables.c
 
-## Define the list of common sources, then build whichever of the 8-, 16-, or
-## 32-bit libraries are configured. 
+## Define the list of common sources, then arrange to build whichever of the
+## 8-, 16-, or 32-bit libraries are configured.
 
 COMMON_SOURCES = \
+  src/pcre2_byte_order.c \
+  src/pcre2_compile.c \
+  src/pcre2_config.c \
+  src/pcre2_context.c \
+  src/pcre2_dfa_exec.c \
+  src/pcre2_error.c \
+  src/pcre2_exec.c \
   src/pcre2_internal.h \
+  src/pcre2_jit_compile.c \
+  src/pcre2_jit_exec.c \
+  src/pcre2_jit_misc.c \
+  src/pcre2_maketables.c \
+  src/pcre2_match_data.c \
+  src/pcre2_pattern_info.c \
+  src/pcre2_substring.c \
   src/pcre2_version.c
 
-#  pcre2_byte_order.c \
-#  pcre2_compile.c \
-#  pcre2_config.c \
-#  pcre2_dfa_exec.c \
-#  pcre2_exec.c \
-#  pcre2_fullinfo.c \
-#  pcre2_get.c \
-#  pcre2_globals.c \
-#  pcre2_jit_compile.c \
-#  pcre2_maketables.c \
-#  pcre2_newline.c \
-#  pcre2_ord2utf8.c \
-#  pcre2_refcount.c \
-#  pcre2_string_utils.c \
-#  pcre2_study.c \
-#  pcre2_tables.c \
-#  pcre2_ucd.c \
-#  pcre2_valid_utf8.c \
-#  pcre2_xclass.c \
-#  ucp.h
+#  src/pcre2_newline.c \
+#  src/pcre2_ord2utf8.c \
+#  src/pcre2_refcount.c \
+#  src/pcre2_string_utils.c \
+#  src/pcre2_study.c \
+#  src/pcre2_tables.c \
+#  src/pcre2_ucd.c \
+#  src/pcre2_valid_utf8.c \
+#  src/pcre2_xclass.c \
+#  src/ucp.h
 
 
 if WITH_PCRE8
@@ -240,7 +297,7 @@ libpcre2_8_la_SOURCES = \
 nodist_libpcre2_8_la_SOURCES = \
   $(NODIST_SOURCES)
 libpcre2_8_la_CFLAGS = \
-  -DPCRE2_DATA_WIDTH=8 \
+  -DPCRE2_CODE_UNIT_WIDTH=8 \
   $(VISIBILITY_CFLAGS) \
   $(AM_CFLAGS)
 libpcre2_8_la_LIBADD =
@@ -253,7 +310,7 @@ libpcre2_16_la_SOURCES = \
 nodist_libpcre2_16_la_SOURCES = \
   $(NODIST_SOURCES)
 libpcre2_16_la_CFLAGS = \
-  -DPCRE2_DATA_WIDTH=16 \
+  -DPCRE2_CODE_UNIT_WIDTH=16 \
   $(VISIBILITY_CFLAGS) \
   $(AM_CFLAGS)
 libpcre2_16_la_LIBADD =
@@ -266,7 +323,7 @@ libpcre2_32_la_SOURCES = \
 nodist_libpcre2_32_la_SOURCES = \
   $(NODIST_SOURCES)
 libpcre2_32_la_CFLAGS = \
-  -DPCRE2_DATA_WIDTH=32 \
+  -DPCRE2_CODE_UNIT_WIDTH=32 \
   $(VISIBILITY_CFLAGS) \
   $(AM_CFLAGS)
 libpcre2_32_la_LIBADD =
@@ -276,6 +333,7 @@ endif # WITH_PCRE32
 # pcre2_chartables.c, used unless --enable-rebuild-chartables is specified.
 
 EXTRA_DIST += src/pcre2_chartables.c.dist
+CLEANFILES += src/pcre2_chartables.c
 
 # The JIT compiler lives in a separate directory, but its files are #included
 # when pcre2_jit_compile.c is processed, so they must be distributed.
@@ -337,7 +395,36 @@ libpcre2_32_la_CFLAGS += $(GCOV_CFLAGS)
 endif # WITH_PCRE32
 endif # WITH_GCOV
 
-CLEANFILES += src/pcre2_chartables.c
+## A version of the 8-bit library that has a POSIX API.
+
+if WITH_PCRE8
+lib_LTLIBRARIES += libpcre2-posix.la
+libpcre2_posix_la_SOURCES = src/pcre2posix.c
+libpcre2_posix_la_CFLAGS = \
+  -DPCRE2_CODE_UNIT_WIDTH=8 \
+  $(VISIBILITY_CFLAGS) $(AM_CFLAGS)
+libpcre2_posix_la_LDFLAGS = $(EXTRA_LIBPCRE2_POSIX_LDFLAGS)
+libpcre2_posix_la_LIBADD = libpcre2-8.la
+if WITH_GCOV
+libpcre2_posix_la_CFLAGS += $(GCOV_CFLAGS)
+endif # WITH_GCOV
+endif # WITH_PCRE8
+
+## Build pcre2grep if the 8-bit library is enabled
+
+if WITH_PCRE8
+bin_PROGRAMS += pcre2grep
+pcre2grep_SOURCES = src/pcre2grep.c
+pcre2grep_CFLAGS = $(AM_CFLAGS)
+pcre2grep_LDADD = $(LIBZ) $(LIBBZ2)
+pcre2grep_LDADD += libpcre2-8.la
+if WITH_GCOV
+pcre2grep_CFLAGS += $(GCOV_CFLAGS)
+pcre2grep_LDADD += $(GCOV_LIBS)
+endif # WITH_GCOV
+endif # WITH_PCRE8
+
+## -------- Testing ----------
 
 ## If JIT support is enabled, arrange for the JIT test program to run.
 
@@ -362,69 +449,54 @@ pcre2_jit_test_LDADD += $(GCOV_LIBS)
 endif # WITH_GCOV
 endif # WITH_JIT
 
-## A version of the 8-bit library that has a POSIX API.
+# Build the general pcre2test program. The file src/pcre2_printint.c is
+# #included by pcre2test as many times as needed, at different code unit 
+# widths.
 
-# FIXME
-#if WITH_PCRE8
-#lib_LTLIBRARIES += libpcre2posix.la
-#libpcre2posix_la_SOURCES = pcre2posix.c
-#libpcre2posix_la_CFLAGS = $(VISIBILITY_CFLAGS) $(AM_CFLAGS)
-#libpcre2posix_la_LDFLAGS = $(EXTRA_LIBPCREPOSIX_LDFLAGS)
-#libpcre2posix_la_LIBADD = libpcre2-8.la
-#if WITH_GCOV
-#libpcre2posix_la_CFLAGS += $(GCOV_CFLAGS)
-#endif # WITH_GCOV
-#endif # WITH_PCRE8
+bin_PROGRAMS += pcre2test
+EXTRA_DIST += src/pcre2_printint.c
+pcre2test_SOURCES = src/pcre2test.c
+pcre2test_CFLAGS = $(AM_CFLAGS)
+pcre2test_LDADD = $(LIBREADLINE)
 
-## The main unit tests
+if WITH_PCRE8
+pcre2test_LDADD += libpcre2-8.la libpcre2-posix.la
+endif # WITH_PCRE8
 
-# Each unit test is a binary plus a script that runs that binary in various
-# ways. We install these test binaries in case folks find it helpful.
+if WITH_PCRE16
+pcre2test_LDADD += libpcre2-16.la
+endif # WITH_PCRE16
+
+if WITH_PCRE32
+pcre2test_LDADD += libpcre2-32.la
+endif # WITH_PCRE32
+
+if WITH_VALGRIND
+pcre2test_CFLAGS += $(VALGRIND_CFLAGS)
+endif # WITH_VALGRIND
+
+if WITH_GCOV
+pcre2test_CFLAGS += $(GCOV_CFLAGS)
+pcre2test_LDADD += $(GCOV_LIBS)
+endif # WITH_GCOV
+
+## The main library tests. Each test is a binary plus a script that runs that
+## binary in various ways. We install these test binaries in case folks find it
+## helpful.
 
 # FIXME
 #TESTS += RunTest
 #dist_noinst_SCRIPTS += RunTest
 #EXTRA_DIST += RunTest.bat
-#bin_PROGRAMS += pcretest
-#pcretest_SOURCES = pcretest.c
-#pcretest_CFLAGS = $(AM_CFLAGS)
-#pcretest_LDADD = $(LIBREADLINE)
-#if WITH_PCRE8
-#pcretest_SOURCES += pcre2_printint.c
-#pcretest_LDADD += libpcre2-8.la libpcre2posix.la
-#endif # WITH_PCRE8
-#
-## FIXME
-##if WITH_PCRE16
-##pcretest_SOURCES += pcre16_printint.c
-##pcretest_LDADD += libpcre2-16.la
-##endif # WITH_PCRE16
-##if WITH_PCRE32
-##pcretest_SOURCES += pcre32_printint.c
-##pcretest_LDADD += libpcre2-32.la
-##endif # WITH_PCRE32
-#
-#if WITH_VALGRIND
-#pcretest_CFLAGS += $(VALGRIND_CFLAGS)
-#endif # WITH_VALGRIND
-#if WITH_GCOV
-#pcretest_CFLAGS += $(GCOV_CFLAGS)
-#pcretest_LDADD += $(GCOV_LIBS)
-#endif # WITH_GCOV
-#
-#if WITH_PCRE8
+
+## When the 8-bit library is configured, pcre2grep will have been built.
+
+#if WIDH_PCRE8
 #TESTS += RunGrepTest
 #dist_noinst_SCRIPTS += RunGrepTest
-#bin_PROGRAMS += pcregrep
-#pcregrep_SOURCES = pcregrep.c
-#pcregrep_CFLAGS = $(AM_CFLAGS)
-#pcregrep_LDADD = $(LIBZ) $(LIBBZ2)
-#pcregrep_LDADD += libpcre2-8.la
-#if WITH_GCOV
-#pcregrep_CFLAGS += $(GCOV_CFLAGS)
-#pcregrep_LDADD += $(GCOV_LIBS)
-#endif # WITH_GCOV
 #endif # WITH_PCRE8
+
+## Distribute all the test data files
 
 EXTRA_DIST += \
   testdata/grepbinary \
@@ -521,15 +593,15 @@ CLEANFILES += \
         testtemp* \
 	testtry \
         testNinput
+        
+## ------------ End of testing ------------- 
 
 
-# PCRE demonstration program. No longer built automatcally. The point is that
-# the users should build it themselves. So just distribute the source.
+# PCRE demonstration program. Not built automatcally. The point is that the
+# users should build it themselves. So just distribute the source.
 
 EXTRA_DIST += src/pcre2demo.c
 
-
-## Utility rules, documentation, etc.
 
 # We have .pc files for pkg-config users.
 
@@ -537,123 +609,17 @@ pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA =
 
 if WITH_PCRE8
-pkgconfig_DATA += libpcre2-8.pc libpcre2posix.pc
+pkgconfig_DATA += libpcre2-8.pc libpcre2-posix.pc
 endif
+
 if WITH_PCRE16
 pkgconfig_DATA += libpcre2-16.pc
 endif
+
 if WITH_PCRE32
 pkgconfig_DATA += libpcre2-32.pc
 endif
 
-# FIXME
-#dist_man_MANS = \
-#  doc/pcre2-config.1 \
-#  doc/pcre2.3 \
-#  doc/pcre2-16.3 \
-#  doc/pcre2-32.3 \
-#  doc/pcre2_assign_jit_stack.3 \
-#  doc/pcre2_compile.3 \
-#  doc/pcre2_compile2.3 \
-#  doc/pcre2_config.3 \
-#  doc/pcre2_copy_named_substring.3 \
-#  doc/pcre2_copy_substring.3 \
-#  doc/pcre2_dfa_exec.3 \
-#  doc/pcre2_exec.3 \
-#  doc/pcre2_free_study.3 \
-#  doc/pcre2_free_substring.3 \
-#  doc/pcre2_free_substring_list.3 \
-#  doc/pcre2_fullinfo.3 \
-#  doc/pcre2_get_named_substring.3 \
-#  doc/pcre2_get_stringnumber.3 \
-#  doc/pcre2_get_stringtable_entries.3 \
-#  doc/pcre2_get_substring.3 \
-#  doc/pcre2_get_substring_list.3 \
-#  doc/pcre2_jit_exec.3 \
-#  doc/pcre2_jit_stack_alloc.3 \
-#  doc/pcre2_jit_stack_free.3 \
-#  doc/pcre2_maketables.3 \
-#  doc/pcre2_pattern_to_host_byte_order.3 \
-#  doc/pcre2_refcount.3 \
-#  doc/pcre2_study.3 \
-#  doc/pcre2_utf16_to_host_byte_order.3 \
-#  doc/pcre2_utf32_to_host_byte_order.3 \
-#  doc/pcre2_version.3 \
-#  doc/pcre2api.3 \
-#  doc/pcre2build.3 \
-#  doc/pcre2callout.3 \
-#  doc/pcre2compat.3 \
-#  doc/pcre2demo.3 \
-#  doc/pcre2grep.1 \
-#  doc/pcre2jit.3 \
-#  doc/pcre2limits.3 \
-#  doc/pcre2matching.3 \
-#  doc/pcre2partial.3 \
-#  doc/pcre2pattern.3 \
-#  doc/pcre2perform.3 \
-#  doc/pcre2posix.3 \
-#  doc/pcre2precompile.3 \
-#  doc/pcre2sample.3 \
-#  doc/pcre2stack.3 \
-#  doc/pcre2syntax.3 \
-#  doc/pcre2test.1 \
-#  doc/pcre2unicode.3
-
-# FIXME
-# Arrange for the per-function man pages to have 16- and 32-bit names as well.
-#install-data-hook:
-#	 ln -sf pcre_assign_jit_stack.3		  $(DESTDIR)$(man3dir)/pcre16_assign_jit_stack.3
-#	 ln -sf pcre_compile.3			  $(DESTDIR)$(man3dir)/pcre16_compile.3
-#	 ln -sf pcre_compile2.3			  $(DESTDIR)$(man3dir)/pcre16_compile2.3
-#	 ln -sf pcre_config.3			  $(DESTDIR)$(man3dir)/pcre16_config.3
-#	 ln -sf pcre_copy_named_substring.3	  $(DESTDIR)$(man3dir)/pcre16_copy_named_substring.3
-#	 ln -sf pcre_copy_substring.3		  $(DESTDIR)$(man3dir)/pcre16_copy_substring.3
-#	 ln -sf pcre_dfa_exec.3			  $(DESTDIR)$(man3dir)/pcre16_dfa_exec.3
-#	 ln -sf pcre_exec.3			  $(DESTDIR)$(man3dir)/pcre16_exec.3
-#	 ln -sf pcre_free_study.3		  $(DESTDIR)$(man3dir)/pcre16_free_study.3
-#	 ln -sf pcre_free_substring.3		  $(DESTDIR)$(man3dir)/pcre16_free_substring.3
-#	 ln -sf pcre_free_substring_list.3	  $(DESTDIR)$(man3dir)/pcre16_free_substring_list.3
-#	 ln -sf pcre_fullinfo.3			  $(DESTDIR)$(man3dir)/pcre16_fullinfo.3
-#	 ln -sf pcre_get_named_substring.3	  $(DESTDIR)$(man3dir)/pcre16_get_named_substring.3
-#	 ln -sf pcre_get_stringnumber.3		  $(DESTDIR)$(man3dir)/pcre16_get_stringnumber.3
-#	 ln -sf pcre_get_stringtable_entries.3	  $(DESTDIR)$(man3dir)/pcre16_get_stringtable_entries.3
-#	 ln -sf pcre_get_substring.3		  $(DESTDIR)$(man3dir)/pcre16_get_substring.3
-#	 ln -sf pcre_get_substring_list.3	  $(DESTDIR)$(man3dir)/pcre16_get_substring_list.3
-#	 ln -sf pcre_jit_exec.3			  $(DESTDIR)$(man3dir)/pcre16_jit_exec.3
-#	 ln -sf pcre_jit_stack_alloc.3		  $(DESTDIR)$(man3dir)/pcre16_jit_stack_alloc.3
-#	 ln -sf pcre_jit_stack_free.3		  $(DESTDIR)$(man3dir)/pcre16_jit_stack_free.3
-#	 ln -sf pcre_maketables.3		  $(DESTDIR)$(man3dir)/pcre16_maketables.3
-#	 ln -sf pcre_pattern_to_host_byte_order.3 $(DESTDIR)$(man3dir)/pcre16_pattern_to_host_byte_order.3
-#	 ln -sf pcre_refcount.3			  $(DESTDIR)$(man3dir)/pcre16_refcount.3
-#	 ln -sf pcre_study.3			  $(DESTDIR)$(man3dir)/pcre16_study.3
-#	 ln -sf pcre_utf16_to_host_byte_order.3   $(DESTDIR)$(man3dir)/pcre16_utf16_to_host_byte_order.3
-#	 ln -sf pcre_version.3			  $(DESTDIR)$(man3dir)/pcre16_version.3
-#	 ln -sf pcre_assign_jit_stack.3		  $(DESTDIR)$(man3dir)/pcre32_assign_jit_stack.3
-#	 ln -sf pcre_compile.3			  $(DESTDIR)$(man3dir)/pcre32_compile.3
-#	 ln -sf pcre_compile2.3			  $(DESTDIR)$(man3dir)/pcre32_compile2.3
-#	 ln -sf pcre_config.3			  $(DESTDIR)$(man3dir)/pcre32_config.3
-#	 ln -sf pcre_copy_named_substring.3	  $(DESTDIR)$(man3dir)/pcre32_copy_named_substring.3
-#	 ln -sf pcre_copy_substring.3		  $(DESTDIR)$(man3dir)/pcre32_copy_substring.3
-#	 ln -sf pcre_dfa_exec.3			  $(DESTDIR)$(man3dir)/pcre32_dfa_exec.3
-#	 ln -sf pcre_exec.3			  $(DESTDIR)$(man3dir)/pcre32_exec.3
-#	 ln -sf pcre_free_study.3		  $(DESTDIR)$(man3dir)/pcre32_free_study.3
-#	 ln -sf pcre_free_substring.3		  $(DESTDIR)$(man3dir)/pcre32_free_substring.3
-#	 ln -sf pcre_free_substring_list.3	  $(DESTDIR)$(man3dir)/pcre32_free_substring_list.3
-#	 ln -sf pcre_fullinfo.3			  $(DESTDIR)$(man3dir)/pcre32_fullinfo.3
-#	 ln -sf pcre_get_named_substring.3	  $(DESTDIR)$(man3dir)/pcre32_get_named_substring.3
-#	 ln -sf pcre_get_stringnumber.3		  $(DESTDIR)$(man3dir)/pcre32_get_stringnumber.3
-#	 ln -sf pcre_get_stringtable_entries.3	  $(DESTDIR)$(man3dir)/pcre32_get_stringtable_entries.3
-#	 ln -sf pcre_get_substring.3		  $(DESTDIR)$(man3dir)/pcre32_get_substring.3
-#	 ln -sf pcre_get_substring_list.3	  $(DESTDIR)$(man3dir)/pcre32_get_substring_list.3
-#	 ln -sf pcre_jit_exec.3			  $(DESTDIR)$(man3dir)/pcre32_jit_exec.3
-#	 ln -sf pcre_jit_stack_alloc.3		  $(DESTDIR)$(man3dir)/pcre32_jit_stack_alloc.3
-#	 ln -sf pcre_jit_stack_free.3		  $(DESTDIR)$(man3dir)/pcre32_jit_stack_free.3
-#	 ln -sf pcre_maketables.3		  $(DESTDIR)$(man3dir)/pcre32_maketables.3
-#	 ln -sf pcre_pattern_to_host_byte_order.3 $(DESTDIR)$(man3dir)/pcre32_pattern_to_host_byte_order.3
-#	 ln -sf pcre_refcount.3			  $(DESTDIR)$(man3dir)/pcre32_refcount.3
-#	 ln -sf pcre_study.3			  $(DESTDIR)$(man3dir)/pcre32_study.3
-#	 ln -sf pcre_utf32_to_host_byte_order.3   $(DESTDIR)$(man3dir)/pcre32_utf32_to_host_byte_order.3
-#	 ln -sf pcre_version.3			  $(DESTDIR)$(man3dir)/pcre32_version.3
 
 # gcov/lcov code coverage reporting
 #

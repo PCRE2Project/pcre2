@@ -1,0 +1,13 @@
+# Package Information for pkg-config
+
+prefix=/usr/local
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: libpcre2-posix
+Description: Posix compatible interface to libpcre2-8
+Version: 9.00-DEV
+Libs: -L${libdir} -lpcre2-posix
+Cflags: -I${includedir} @PCRE_STATIC_CFLAG@
+Requires.private: libpcre2-8

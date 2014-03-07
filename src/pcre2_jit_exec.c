@@ -39,10 +39,6 @@ POSSIBILITY OF SUCH DAMAGE.
 */
 
 
-/* This module contains the external function pcre2_version(), which returns a
-string that identifies the PCRE version that is in use. */
-
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -51,54 +47,54 @@ string that identifies the PCRE version that is in use. */
 
 
 /*************************************************
-*          Return version string                 *
+*              Do a JIT pattern match            *
 *************************************************/
 
-/* These macros are the standard way of turning unquoted text into C strings.
-They allow macros like PCRE_MAJOR to be defined without quotes, which is
-convenient for user programs that want to test its value. */
-
-#define STRING(a)  # a
-#define XSTRING(s) STRING(s)
-
-/* A problem turned up with PCRE_PRERELEASE, which is defined empty for
-production releases. Originally, it was used naively in this code:
-
-  return XSTRING(PCRE_MAJOR)
-         "." XSTRING(PCRE_MINOR)
-             XSTRING(PCRE_PRERELEASE)
-         " " XSTRING(PCRE_DATE);
-
-However, when PCRE_PRERELEASE is empty, this leads to an attempted expansion of
-STRING(). The C standard states: "If (before argument substitution) any
-argument consists of no preprocessing tokens, the behavior is undefined." It
-turns out the gcc treats this case as a single empty string - which is what we
-really want - but Visual C grumbles about the lack of an argument for the
-macro. Unfortunately, both are within their rights. To cope with both ways of
-handling this, I had resort to some messy hackery that does a test at run time.
-I could find no way of detecting that a macro is defined as an empty string at
-pre-processor time. This hack uses a standard trick for avoiding calling
-the STRING macro with an empty argument when doing the test. 
+/* This function runs a JIT pattern match.
 
 Arguments:
-  buffer       where to return the version string
-  size         size of buffer
-  
-Returns:       number of characters, excluding trailing zero
-               or PCRE_ERROR_BADLENGTH if buffer too small  
+  context         points a PCRE2 context
+  code            points to the compiled expression
+  subject         points to the subject string
+  length          length of subject string (may contain binary zeros)
+  start_offset    where to start in the subject string
+  options         option bits
+  match_data      points to a match_data block 
+  jit_stack       points to a JIT stack 
+
+Returns:          > 0 => success; value is the number of ovector pairs filled
+                  = 0 => success, but ovector is not big enough
+                   -1 => failed to match (PCRE_ERROR_NOMATCH)
+                 < -1 => some kind of unexpected problem
 */
 
-PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
-pcre2_version(PCRE2_UCHAR *buffer, size_t size)
-{
-PCRE2_UCHAR *t = buffer;
-const char *v = (XSTRING(Z PCRE2_PRERELEASE)[1] == 0)?
-  XSTRING(PCRE2_MAJOR.PCRE2_MINOR PCRE2_DATE) :
-  XSTRING(PCRE2_MAJOR.PCRE2_MINOR) XSTRING(PCRE2_PRERELEASE PCRE2_DATE);
-if (strlen(v) >= size) return PCRE2_ERROR_BADLENGTH; 
-while (*v != 0) *t++ = *v++;
-*t = 0;
-return t - buffer;
-}
+/* FIXME: this is currently a placeholder function */
 
-/* End of pcre2_version.c */
+PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
+pcre2_jit_exec(pcre2_context *context, const pcre2_code *code,
+  PCRE2_SPTR subject, int length, size_t start_offset, uint32_t options,
+  pcre2_match_data *match_data, pcre2_jit_stack *jit_stack)
+{
+#ifndef SUPPORT_JIT
+(void)context;
+(void)code;
+(void)subject;
+(void)length;
+(void)start_offset;
+(void)options;
+(void)match_data;
+(void)jit_stack;
+return PCRE2_ERROR_NOMATCH;
+#else  /* SUPPORT_JIT */
+
+
+/* Dummy code */
+context=context;code=code;subject=subject;length=length;
+start_offset=start_offset; options=options; match_data=match_data;
+jit_stack=jit_stack;
+return PCRE2_ERROR_NOMATCH;
+
+#endif  /* SUPPORT_JIT */
+}    
+
+/* End of pcre2_jit_exec.c */

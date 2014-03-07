@@ -5,9 +5,9 @@ exec_prefix=@exec_prefix@
 libdir=@libdir@
 includedir=@includedir@
 
-Name: libpcreposix
-Description: PCREPosix - Posix compatible interface to libpcre
+Name: libpcre2-posix
+Description: Posix compatible interface to libpcre2-8
 Version: @PACKAGE_VERSION@
-Libs: -L${libdir} -lpcreposix
+Libs: -L${libdir} -lpcre2-posix
 Cflags: -I${includedir} @PCRE_STATIC_CFLAG@
-Requires.private: libpcre
+Requires.private: libpcre2-8

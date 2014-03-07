@@ -39,10 +39,6 @@ POSSIBILITY OF SUCH DAMAGE.
 */
 
 
-/* This module contains the external function pcre2_version(), which returns a
-string that identifies the PCRE version that is in use. */
-
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -50,55 +46,44 @@ string that identifies the PCRE version that is in use. */
 #include "pcre2_internal.h"
 
 
+/* FIXME: this is currently a placeholder function */
+
 /*************************************************
-*          Return version string                 *
+*            Return error message                *
 *************************************************/
 
-/* These macros are the standard way of turning unquoted text into C strings.
-They allow macros like PCRE_MAJOR to be defined without quotes, which is
-convenient for user programs that want to test its value. */
-
-#define STRING(a)  # a
-#define XSTRING(s) STRING(s)
-
-/* A problem turned up with PCRE_PRERELEASE, which is defined empty for
-production releases. Originally, it was used naively in this code:
-
-  return XSTRING(PCRE_MAJOR)
-         "." XSTRING(PCRE_MINOR)
-             XSTRING(PCRE_PRERELEASE)
-         " " XSTRING(PCRE_DATE);
-
-However, when PCRE_PRERELEASE is empty, this leads to an attempted expansion of
-STRING(). The C standard states: "If (before argument substitution) any
-argument consists of no preprocessing tokens, the behavior is undefined." It
-turns out the gcc treats this case as a single empty string - which is what we
-really want - but Visual C grumbles about the lack of an argument for the
-macro. Unfortunately, both are within their rights. To cope with both ways of
-handling this, I had resort to some messy hackery that does a test at run time.
-I could find no way of detecting that a macro is defined as an empty string at
-pre-processor time. This hack uses a standard trick for avoiding calling
-the STRING macro with an empty argument when doing the test. 
+/* This function copies an error message into a buffer whose units are of an 
+appropriate width. Error numbers are positive for compile-time errors, and 
+negative for exec-time errors.
 
 Arguments:
-  buffer       where to return the version string
-  size         size of buffer
+  enumber       error number
+  buffer        where to put the message (zero terminated)
+  size          size of the buffer
   
-Returns:       number of characters, excluding trailing zero
-               or PCRE_ERROR_BADLENGTH if buffer too small  
-*/
+Returns:        length of message if all is well
+                -1 on error
+*/                    
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
-pcre2_version(PCRE2_UCHAR *buffer, size_t size)
+pcre2_get_error_message(int enumber, PCRE2_UCHAR *buffer, size_t size)
 {
-PCRE2_UCHAR *t = buffer;
-const char *v = (XSTRING(Z PCRE2_PRERELEASE)[1] == 0)?
-  XSTRING(PCRE2_MAJOR.PCRE2_MINOR PCRE2_DATE) :
-  XSTRING(PCRE2_MAJOR.PCRE2_MINOR) XSTRING(PCRE2_PRERELEASE PCRE2_DATE);
-if (strlen(v) >= size) return PCRE2_ERROR_BADLENGTH; 
-while (*v != 0) *t++ = *v++;
-*t = 0;
-return t - buffer;
+size_t i;
+const char *message = "Dummy error message";
+enumber=enumber;
+
+if (size == 0) return -1;
+for (i = 0; *message != 0; i++)
+  {
+  if (i >= size - 1)
+    {
+    buffer[i] = 0;     /* Terminate partial message */
+    return -1;
+    }
+  buffer[i] = *message++;
+  }
+buffer[i] = 0;
+return i;            
 }
 
-/* End of pcre2_version.c */
+/* End of pcre2_error.c */

@@ -17,10 +17,10 @@ m4_define(pcre2_date, [2014-99-99])
 # 50 lines of this file. Please update that if the variables above are moved.
 
 # Libtool shared library interface versions (current:revision:age)
-m4_define(libpcre2-8_version,    [0:0:0])
-m4_define(libpcre2-16_version,   [0:0:0])
-m4_define(libpcre2-32_version,   [0:0:0])
-m4_define(libpcre2posix_version, [0:0:0])
+m4_define(libpcre2_8_version,     [0:0:0])
+m4_define(libpcre2_16_version,    [0:0:0])
+m4_define(libpcre2_32_version,    [0:0:0])
+m4_define(libpcre2_posix_version, [0:0:0])
 
 AC_PREREQ(2.57)
 AC_INIT(PCRE2, pcre2_major.pcre2_minor[]pcre2_prerelease, , pcre2)
@@ -300,16 +300,15 @@ then
   enable_utf=no
 fi
 
-# Convert the newline identifier into the appropriate integer value. The first
-# three are ASCII values 0x0a, 0x0d, and 0x0d0a, but if EBCDIC is enabled, they
-# are changed below.
+# Convert the newline identifier into the appropriate integer value. These must
+# agree with the PCRE2_NEWLINE_xxx values in pcre2.h.
 
 case "$enable_newline" in
-  lf)      ac_pcre_newline_value=10   ;;
-  cr)      ac_pcre_newline_value=13   ;;
-  crlf)    ac_pcre_newline_value=3338 ;;
-  anycrlf) ac_pcre_newline_value=-2   ;;
-  any)     ac_pcre_newline_value=-1   ;;
+  cr)      ac_pcre_newline_value=0 ;;
+  lf)      ac_pcre_newline_value=1 ;;
+  crlf)    ac_pcre_newline_value=2 ;;
+  any)     ac_pcre_newline_value=3 ;;
+  anycrlf) ac_pcre_newline_value=4 ;;
   *)
   AC_MSG_ERROR([invalid argument \"$enable_newline\" to --enable-newline option])
   ;;
@@ -320,29 +319,15 @@ if test "x$enable_ebcdic_nl25" = "xyes"; then
   enable_ebcdic=yes
 fi
 
-# Make sure that if enable_ebcdic is set, rebuild_chartables is also enabled,
-# and the newline value is adjusted appropriately (CR is still 13, but LF is
-# 21 or 37). Also check that UTF support is not requested, because PCRE cannot
-# handle EBCDIC and UTF in the same build. To do so it would need to use
-# different character constants depending on the mode.
+# Make sure that if enable_ebcdic is set, rebuild_chartables is also enabled.
+# Also check that UTF support is not requested, because PCRE cannot handle
+# EBCDIC and UTF in the same build. To do so it would need to use different
+# character constants depending on the mode.
 #
 if test "x$enable_ebcdic" = "xyes"; then
   enable_rebuild_chartables=yes
-
   if test "x$enable_utf" = "xyes"; then
     AC_MSG_ERROR([support for EBCDIC and UTF-8/16/32 cannot be enabled at the same time])
-  fi
-
-  if test "x$enable_ebcdic_nl25" = "xno"; then
-    case "$ac_pcre_newline_value" in
-      10)   ac_pcre_newline_value=21 ;;
-      3338) ac_pcre_newline_value=3349 ;;
-    esac
-  else
-    case "$ac_pcre_newline_value" in
-      10)   ac_pcre_newline_value=37 ;;
-      3338) ac_pcre_newline_value=3365 ;;
-    esac
   fi
 fi
 
@@ -490,13 +475,13 @@ fi
 # This facilitates -ansi builds under Linux
 dnl AC_DEFINE([_GNU_SOURCE], [], [Enable GNU extensions in glibc])
 
-PCRE_STATIC_CFLAG=""
+PCRE2_STATIC_CFLAG=""
 if test "x$enable_shared" = "xno" ; then
-  AC_DEFINE([PCRE_STATIC], [1], [
+  AC_DEFINE([PCRE2_STATIC], [1], [
     Define to any value if linking statically (TODO: make nice with Libtool)])
-  PCRE_STATIC_CFLAG="-DPCRE_STATIC"
+  PCRE2_STATIC_CFLAG="-DPCRE2_STATIC"
 fi
-AC_SUBST(PCRE_STATIC_CFLAG)
+AC_SUBST(PCRE2_STATIC_CFLAG)
 
 # Here is where pcre specific defines are handled
 
@@ -592,12 +577,8 @@ fi
 
 AC_DEFINE_UNQUOTED([NEWLINE], [$ac_pcre_newline_value], [
   The value of NEWLINE determines the default newline character sequence. PCRE
-  client programs can override this by selecting other values at run time. In
-  ASCII environments, the value can be 10 (LF), 13 (CR), or 3338 (CRLF); in
-  EBCDIC environments the value can be 21 or 37 (LF), 13 (CR), or 3349 or 3365
-  (CRLF) because there are two alternative codepoints (0x15 and 0x25) that are
-  used as the NL line terminator that is equivalent to ASCII LF. In both ASCII
-  and EBCDIC environments the value can also be -1 (ANY), or -2 (ANYCRLF).])
+  client programs can override this by selecting other values at run time. The
+  valid values are 0 (CR), 1 (LF), 2 (CRLF), 3 (ANY), and 4 (ANYCRLF).])
 
 if test "$enable_bsr_anycrlf" = "yes"; then
   AC_DEFINE([BSR_ANYCRLF], [], [
@@ -658,7 +639,7 @@ AC_DEFINE([MAX_NAME_COUNT], [10000], [
   change it. Care must be taken if it is increased, because it guards
   against integer overflow caused by enormously large patterns.])
 
-AH_VERBATIM([PCRE_EXP_DEFN], [
+AH_VERBATIM([PCRE2_EXP_DEFN], [
 /* If you are compiling for a system other than a Unix-like system or
    Win32, and it needs some magic to be inserted before the definition
    of a function that is exported by the library, define this macro to
@@ -668,27 +649,23 @@ AH_VERBATIM([PCRE_EXP_DEFN], [
    This macro apears at the start of every exported function that is part
    of the external API. It does not appear on functions that are "external"
    in the C sense, but which are internal to the library. */
-#undef PCRE_EXP_DEFN])
+#undef PCRE2_EXP_DEFN])
 
 if test "$enable_ebcdic" = "yes"; then
   AC_DEFINE_UNQUOTED([EBCDIC], [], [
     If you are compiling for a system that uses EBCDIC instead of ASCII
-    character codes, define this macro to any value. You must also edit the
-    NEWLINE macro below to set a suitable EBCDIC newline, commonly 21 (0x15).
-    On systems that can use "configure" or CMake to set EBCDIC, NEWLINE is
-    automatically adjusted. When EBCDIC is set, PCRE assumes that all input
-    strings are in EBCDIC. If you do not define this macro, PCRE will assume
-    input strings are ASCII or UTF-8/16/32 Unicode. It is not possible to build
-    a version of PCRE that supports both EBCDIC and UTF-8/16/32.])
+    character codes, define this macro to any value. When EBCDIC is set, PCRE
+    assumes that all input strings are in EBCDIC. If you do not define this
+    macro, PCRE will assume input strings are ASCII or UTF-8/16/32 Unicode. It
+    is not possible to build a version of PCRE that supports both EBCDIC and
+    UTF-8/16/32.])
 fi
 
 if test "$enable_ebcdic_nl25" = "yes"; then
   AC_DEFINE_UNQUOTED([EBCDIC_NL25], [], [
     In an EBCDIC environment, define this macro to any value to arrange for
     the NL character to be 0x25 instead of the default 0x15. NL plays the role
-    that LF does in an ASCII/Unicode environment. The value must also be set in
-    the NEWLINE macro below. On systems that can use "configure" or CMake to
-    set EBCDIC_NL25, the adjustment of NEWLINE is automatic.])
+    that LF does in an ASCII/Unicode environment.])
 fi
 
 if test "$enable_valgrind" = "yes"; then
@@ -708,25 +685,25 @@ case $host_os in
     ;;
 esac
 
-# The extra LDFLAGS for each particular library
-# (Note: The libpcre*_version bits are m4 variables, assigned above)
+# The extra LDFLAGS for each particular library. The libpcre2*_version values
+# are m4 variables, assigned above.
 
-EXTRA_LIBPCRE8_LDFLAGS="$EXTRA_LIBPCRE8_LDFLAGS \
-                        $NO_UNDEFINED -version-info libpcre8_version"
+EXTRA_LIBPCRE2_8_LDFLAGS="$EXTRA_LIBPCRE2_8_LDFLAGS \
+  $NO_UNDEFINED -version-info libpcre2_8_version"
 
-EXTRA_LIBPCRE16_LDFLAGS="$EXTRA_LIBPCRE16_LDFLAGS \
-                       $NO_UNDEFINED -version-info libpcre16_version"
+EXTRA_LIBPCRE2_16_LDFLAGS="$EXTRA_LIBPCRE2_16_LDFLAGS \
+  $NO_UNDEFINED -version-info libpcre2_16_version"
 
-EXTRA_LIBPCRE32_LDFLAGS="$EXTRA_LIBPCRE32_LDFLAGS \
-                       $NO_UNDEFINED -version-info libpcre32_version"
+EXTRA_LIBPCRE2_32_LDFLAGS="$EXTRA_LIBPCRE2_32_LDFLAGS \
+  $NO_UNDEFINED -version-info libpcre2_32_version"
 
-EXTRA_LIBPCREPOSIX_LDFLAGS="$EXTRA_LIBPCREPOSIX_LDFLAGS \
-                            $NO_UNDEFINED -version-info libpcre2posix_version"
+EXTRA_LIBPCRE2_POSIX_LDFLAGS="$EXTRA_LIBPCRE2_POSIX_LDFLAGS \
+  $NO_UNDEFINED -version-info libpcre2_posix_version"
 
-AC_SUBST(EXTRA_LIBPCRE8_LDFLAGS)
-AC_SUBST(EXTRA_LIBPCRE16_LDFLAGS)
-AC_SUBST(EXTRA_LIBPCRE32_LDFLAGS)
-AC_SUBST(EXTRA_LIBPCREPOSIX_LDFLAGS)
+AC_SUBST(EXTRA_LIBPCRE2_8_LDFLAGS)
+AC_SUBST(EXTRA_LIBPCRE2_16_LDFLAGS)
+AC_SUBST(EXTRA_LIBPCRE2_32_LDFLAGS)
+AC_SUBST(EXTRA_LIBPCRE2_POSIX_LDFLAGS)
 
 # When we run 'make distcheck', use these arguments. Turning off compiler
 # optimization makes it run faster.
@@ -852,7 +829,7 @@ AC_CONFIG_FILES(
 	libpcre2-8.pc
 	libpcre2-16.pc
 	libpcre2-32.pc
-	libpcre2posix.pc
+	libpcre2-posix.pc
 	pcre2-config
 	src/pcre2.h
 )

@@ -36,20 +36,16 @@ sure both macros are undefined; an emulation function will then be used. */
 /* #undef BSR_ANYCRLF */
 
 /* If you are compiling for a system that uses EBCDIC instead of ASCII
-   character codes, define this macro to any value. You must also edit the
-   NEWLINE macro below to set a suitable EBCDIC newline, commonly 21 (0x15).
-   On systems that can use "configure" or CMake to set EBCDIC, NEWLINE is
-   automatically adjusted. When EBCDIC is set, PCRE assumes that all input
-   strings are in EBCDIC. If you do not define this macro, PCRE will assume
-   input strings are ASCII or UTF-8/16/32 Unicode. It is not possible to build
-   a version of PCRE that supports both EBCDIC and UTF-8/16/32. */
+   character codes, define this macro to any value. When EBCDIC is set, PCRE
+   assumes that all input strings are in EBCDIC. If you do not define this
+   macro, PCRE will assume input strings are ASCII or UTF-8/16/32 Unicode. It
+   is not possible to build a version of PCRE that supports both EBCDIC and
+   UTF-8/16/32. */
 /* #undef EBCDIC */
 
 /* In an EBCDIC environment, define this macro to any value to arrange for the
    NL character to be 0x25 instead of the default 0x15. NL plays the role that
-   LF does in an ASCII/Unicode environment. The value must also be set in the
-   NEWLINE macro below. On systems that can use "configure" or CMake to set
-   EBCDIC_NL25, the adjustment of NEWLINE is automatic. */
+   LF does in an ASCII/Unicode environment. */
 /* #undef EBCDIC_NL25 */
 
 /* Define to 1 if you have the `bcopy' function. */
@@ -168,13 +164,9 @@ sure both macros are undefined; an emulation function will then be used. */
 
 /* The value of NEWLINE determines the default newline character sequence.
    PCRE client programs can override this by selecting other values at run
-   time. In ASCII environments, the value can be 10 (LF), 13 (CR), or 3338
-   (CRLF); in EBCDIC environments the value can be 21 or 37 (LF), 13 (CR), or
-   3349 or 3365 (CRLF) because there are two alternative codepoints (0x15 and
-   0x25) that are used as the NL line terminator that is equivalent to ASCII
-   LF. In both ASCII and EBCDIC environments the value can also be -1 (ANY),
-   or -2 (ANYCRLF). */
-#define NEWLINE 10
+   time. The valid values are 0 (CR), 1 (LF), 2 (CRLF), 3 (ANY), and 4
+   (ANYCRLF). */
+#define NEWLINE 1
 
 /* PCRE uses recursive function calls to handle backtracking while matching.
    This can sometimes be a problem on systems that have stacks of limited
@@ -212,26 +204,13 @@ sure both macros are undefined; an emulation function will then be used. */
 #define PARENS_NEST_LIMIT 250
 
 /* to make a symbol visible */
-#define PCRE2_EXP_DATA_DEFN __attribute__ ((visibility ("default")))
+#define PCRE2POSIX_EXP_DECL extern __attribute__ ((visibility ("default")))
+
+/* to make a symbol visible */
+#define PCRE2POSIX_EXP_DEFN extern __attribute__ ((visibility ("default")))
 
 /* to make a symbol visible */
 #define PCRE2_EXP_DECL extern __attribute__ ((visibility ("default")))
-
-/* to make a symbol visible */
-#define PCRE2_EXP_DEFN __attribute__ ((visibility ("default")))
-
-/* The value of PCREGREP_BUFSIZE determines the size of buffer used by
-   pcregrep to hold parts of the file it is searching. This is also the
-   minimum value. The actual amount of memory used by pcregrep is three times
-   this number, because it allows for the buffering of "before" and "after"
-   lines. */
-#define PCREGREP_BUFSIZE 20480
-
-/* to make a symbol visible */
-#define PCREPOSIX_EXP_DECL extern __attribute__ ((visibility ("default")))
-
-/* to make a symbol visible */
-#define PCREPOSIX_EXP_DEFN extern __attribute__ ((visibility ("default")))
 
 
 /* If you are compiling for a system other than a Unix-like system or
@@ -243,10 +222,17 @@ sure both macros are undefined; an emulation function will then be used. */
    This macro apears at the start of every exported function that is part
    of the external API. It does not appear on functions that are "external"
    in the C sense, but which are internal to the library. */
-/* #undef PCRE_EXP_DEFN */
+#define PCRE2_EXP_DEFN __attribute__ ((visibility ("default")))
 
 /* Define to any value if linking statically (TODO: make nice with Libtool) */
-#define PCRE_STATIC 1
+#define PCRE2_STATIC 1
+
+/* The value of PCREGREP_BUFSIZE determines the size of buffer used by
+   pcregrep to hold parts of the file it is searching. This is also the
+   minimum value. The actual amount of memory used by pcregrep is three times
+   this number, because it allows for the buffering of "before" and "after"
+   lines. */
+#define PCREGREP_BUFSIZE 20480
 
 /* When calling PCRE via the POSIX interface, additional working storage is
    required for holding the pointers to capturing substrings because PCRE
