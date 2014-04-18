@@ -53,7 +53,6 @@ POSSIBILITY OF SUCH DAMAGE.
 /* This function runs a JIT pattern match.
 
 Arguments:
-  context         points a PCRE2 context
   code            points to the compiled expression
   subject         points to the subject string
   length          length of subject string (may contain binary zeros)
@@ -71,12 +70,11 @@ Returns:          > 0 => success; value is the number of ovector pairs filled
 /* FIXME: this is currently a placeholder function */
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
-pcre2_jit_exec(pcre2_context *context, const pcre2_code *code,
-  PCRE2_SPTR subject, int length, size_t start_offset, uint32_t options,
-  pcre2_match_data *match_data, pcre2_jit_stack *jit_stack)
+pcre2_jit_match(const pcre2_code *code, PCRE2_SPTR subject, int length, 
+  size_t start_offset, uint32_t options, pcre2_match_data *match_data, 
+  pcre2_jit_stack *jit_stack)
 {
 #ifndef SUPPORT_JIT
-(void)context;
 (void)code;
 (void)subject;
 (void)length;
@@ -89,7 +87,7 @@ return PCRE2_ERROR_NOMATCH;
 
 
 /* Dummy code */
-context=context;code=code;subject=subject;length=length;
+code=code;subject=subject;length=length;
 start_offset=start_offset; options=options; match_data=match_data;
 jit_stack=jit_stack;
 return PCRE2_ERROR_NOMATCH;
@@ -97,4 +95,4 @@ return PCRE2_ERROR_NOMATCH;
 #endif  /* SUPPORT_JIT */
 }    
 
-/* End of pcre2_jit_exec.c */
+/* End of pcre2_jit_match.c */

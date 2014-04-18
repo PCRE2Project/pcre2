@@ -70,9 +70,9 @@ Returns:     pointer to the contiguous block of data
 /* FIXME: temporarily a dummy, until pcre2_internal is complete. */
 
 PCRE2_EXP_DEFN const unsigned char * PCRE2_CALL_CONVENTION
-pcre2_maketables(pcre2_context *context)
+pcre2_maketables(pcre2_general_context *gcontext)
 {
-context=context;
+gcontext=gcontext;
 return NULL;
 
 #ifdef NEVER

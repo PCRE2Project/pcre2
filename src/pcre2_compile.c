@@ -53,9 +53,9 @@ POSSIBILITY OF SUCH DAMAGE.
 *************************************************/
 
 PCRE2_EXP_DEFN void PCRE2_CALL_CONVENTION
-pcre2_free_compiled_code(pcre2_context *context, pcre2_code *code)
+pcre2_code_free(pcre2_code *code)
 {
-context=context;code=code;
+code=code;
 return;
 }
 
@@ -69,12 +69,12 @@ return;
 a pointer to a block of store holding a compiled version of the expression.
 
 Arguments:
-  context       points to a PCRE2 context
   pattern       the regular expression
   patlen        the length of the pattern, or < 0 for zero-terminated
   options       option bits
   errorcode     pointer to error code variable (positive error code)
   erroroffset   pointer for offset in pattern where error was detected
+  ccontext      points to a compile context or is NULL
 
 Returns:        pointer to compiled data block, or NULL on error,
                 with errorcode and erroroffset set
@@ -83,14 +83,35 @@ Returns:        pointer to compiled data block, or NULL on error,
 /* FIXME: this is currently a placeholder function */
 
 PCRE2_EXP_DEFN pcre2_code * PCRE2_CALL_CONVENTION
-pcre2_compile(pcre2_context *context,  PCRE2_SPTR pattern, int patlen,
-  uint32_t options, int *errorcode, size_t *erroroffset)
+pcre2_compile(PCRE2_SPTR pattern, int patlen, uint32_t options, int *errorcode,
+   size_t *erroroffset, pcre2_compile_context *ccontext)
 {
+pcre2_code *c = NULL;
 
-context = context; pattern = pattern; patlen = patlen; options = options;
-*errorcode = 1;
+patlen = patlen; options = options;
+
+/* Fudge while testing pcre2test. */
+
 *erroroffset = 0;
-return NULL;
+
+if (pattern[0] == 'Y')
+  {
+  c = ccontext->malloc(sizeof(pcre2_real_code), NULL);
+  c->magic_number = MAGIC_NUMBER;
+  c->size = sizeof(pcre2_real_code);  
+  c->name_table_offset = sizeof(pcre2_real_code); 
+  c->compile_options = options; 
+  c->flags = PCRE2_CODE_UNIT_WIDTH/8; 
+  c->name_count = 0; 
+  c->name_entry_size = 0; 
+  } 
+
+else
+  { 
+  *errorcode = 1;
+  }
+    
+return c;
 }
 
 /* End of pcre2_compile.c */

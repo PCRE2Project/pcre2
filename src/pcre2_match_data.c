@@ -49,14 +49,27 @@ POSSIBILITY OF SUCH DAMAGE.
 /* FIXME: these are all dummy functions */
 
 /*************************************************
-*              Create a match data block         *
+*  Create a match data block given ovector size  *
 *************************************************/
 
+PCRE2_EXP_DEFN pcre2_match_data * PCRE2_CALL_CONVENTION
+pcre2_match_data_create(size_t ovecsize, pcre2_general_context *gcontext)
+{
+gcontext=gcontext;ovecsize=ovecsize;
+return NULL;
+}
+
+
+
+/*************************************************
+*  Create a match data block using pattern data  *
+*************************************************/
 
 PCRE2_EXP_DEFN pcre2_match_data * PCRE2_CALL_CONVENTION
-pcre2_create_match_data(pcre2_context *context, size_t ovecsize)
+pcre2_match_data_create_from_pattern(pcre2_code *code, 
+  pcre2_general_context *gcontext)
 {
-context=context;ovecsize=ovecsize;
+code=code;gcontext=gcontext;
 return NULL;
 }
 
@@ -67,9 +80,9 @@ return NULL;
 *************************************************/
 
 PCRE2_EXP_DEFN void PCRE2_CALL_CONVENTION
-pcre2_free_match_data(pcre2_context *context, pcre2_match_data *match_data)
+pcre2_match_data_free(pcre2_match_data *match_data)
 {
-context=context;match_data=match_data;
+match_data=match_data;
 return;
 }
 
@@ -106,7 +119,7 @@ return NULL;
 *************************************************/
 
 PCRE2_EXP_DEFN size_t * PCRE2_CALL_CONVENTION
-pcre2_get_ovector(pcre2_match_data *match_data)
+pcre2_get_ovector_pointer(pcre2_match_data *match_data)
 {
 match_data=match_data;
 return NULL;
@@ -119,7 +132,7 @@ return NULL;
 *************************************************/
 
 PCRE2_EXP_DEFN size_t PCRE2_CALL_CONVENTION
-pcre2_get_ovector_slots(pcre2_match_data *match_data)
+pcre2_get_ovector_count(pcre2_match_data *match_data)
 {
 match_data=match_data;
 return 0;

@@ -54,7 +54,6 @@ POSSIBILITY OF SUCH DAMAGE.
 code.
 
 Arguments:
-  context       points to a PCRE2 context
   code          a compiled pattern 
   options       JIT option bits
 
@@ -64,17 +63,15 @@ Returns:        nothing
 /* FIXME: this is currently a placeholder function */
 
 PCRE2_EXP_DEFN void PCRE2_CALL_CONVENTION
-pcre2_jit_compile(pcre2_context *context,  pcre2_code *code, uint32_t options)
+pcre2_jit_compile(pcre2_code *code, uint32_t options)
 {
 #ifndef SUPPORT_JIT
-(void)context;
 (void)code;
 (void)options;
 #else  /* SUPPORT_JIT */
 
 
-context = context; code=code; options = options;  /* Dummy.... */
-
+code=code; options = options;  /* Dummy.... */
 
 #endif  /* SUPPORT_JIT */
 }

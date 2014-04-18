@@ -291,7 +291,7 @@ if ((cflags & REG_ICASE) != 0)    options |= PCRE2_CASELESS;
 if ((cflags & REG_NEWLINE) != 0)  options |= PCRE2_MULTILINE;
 if ((cflags & REG_DOTALL) != 0)   options |= PCRE2_DOTALL;
 if ((cflags & REG_NOSUB) != 0)    options |= PCRE2_NO_AUTO_CAPTURE;
-if ((cflags & REG_UTF8) != 0)     options |= PCRE2_UTF8;
+if ((cflags & REG_UTF8) != 0)     options |= PCRE2_UTF;
 if ((cflags & REG_UCP) != 0)      options |= PCRE2_UCP;
 if ((cflags & REG_UNGREEDY) != 0) options |= PCRE2_UNGREEDY;
 

@@ -55,13 +55,13 @@ POSSIBILITY OF SUCH DAMAGE.
 
 
 PCRE2_EXP_DEFN void PCRE2_CALL_CONVENTION     
-pcre2_jit_free_unused_memory(pcre2_context *context)
+pcre2_jit_free_unused_memory(pcre2_general_context *gcontext)
 {
 #ifndef SUPPORT_JIT
-(void)context;     /* Suppress warning */
+(void)gcontext;     /* Suppress warning */
 #else  /* SUPPORT_JIT */
 
-context=context;   /* Dummy */
+gcontext=gcontext;   /* Dummy */
 #endif  /* SUPPORT_JIT */
 }
 
@@ -72,16 +72,17 @@ context=context;   /* Dummy */
 *************************************************/
 
 PCRE2_EXP_DEFN pcre2_jit_stack * PCRE2_CALL_CONVENTION      
-pcre2_jit_stack_alloc(pcre2_context *context, size_t startsize, size_t maxsize)
+pcre2_jit_stack_alloc(pcre2_general_context *gcontext, size_t startsize, 
+  size_t maxsize)
 {
 #ifndef SUPPORT_JIT
-(void)context;
+(void)gcontext;
 (void)startsize;
 (void)maxsize;
 return NULL;
 #else  /* SUPPORT_JIT */
 
-context=context;startsize=startsize;maxsize=maxsize;
+gcontext=gcontext;startsize=startsize;maxsize=maxsize;
 return NULL;
 #endif
 }
@@ -92,18 +93,16 @@ return NULL;
 *************************************************/
 
 PCRE2_EXP_DEFN void PCRE2_CALL_CONVENTION     
-pcre2_jit_stack_assign(pcre2_context *context, const pcre2_code *code, 
-  pcre2_jit_callback callback, void *callback_data)
+pcre2_jit_stack_assign(const pcre2_code *code, pcre2_jit_callback callback, 
+  void *callback_data)
 {
 #ifndef SUPPORT_JIT
-(void)context;
 (void)code;
 (void)callback;
 (void)callback_data;
 #else  /* SUPPORT_JIT */
 
-
-context=context;code=code;callback=callback;callback_data=callback_data;
+code=code;callback=callback;callback_data=callback_data;
 #endif  /* SUPPORT_JIT */
 }
 
@@ -113,15 +112,13 @@ context=context;code=code;callback=callback;callback_data=callback_data;
 *************************************************/
 
 PCRE2_EXP_DEFN void PCRE2_CALL_CONVENTION     
-pcre2_jit_stack_free(pcre2_context *context, pcre2_jit_stack *jit_stack)
+pcre2_jit_stack_free(pcre2_jit_stack *jit_stack)
 {
 #ifndef SUPPORT_JIT
-(void)context;
 (void)jit_stack;
 #else  /* SUPPORT_JIT */
 
-
-context=context;jit_stack=jit_stack;
+jit_stack=jit_stack;
 #endif  /* SUPPORT_JIT */
 }
 

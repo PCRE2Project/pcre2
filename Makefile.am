@@ -34,8 +34,8 @@ ACLOCAL_AMFLAGS = -I m4
 #  doc/html/pcre_config.html \
 #  doc/html/pcre_copy_named_substring.html \
 #  doc/html/pcre_copy_substring.html \
-#  doc/html/pcre_dfa_exec.html \
-#  doc/html/pcre_exec.html \
+#  doc/html/pcre_dfa_match.html \
+#  doc/html/pcre_match.html \
 #  doc/html/pcre_free_study.html \
 #  doc/html/pcre_free_substring.html \
 #  doc/html/pcre_free_substring_list.html \
@@ -45,7 +45,7 @@ ACLOCAL_AMFLAGS = -I m4
 #  doc/html/pcre_get_stringtable_entries.html \
 #  doc/html/pcre_get_substring.html \
 #  doc/html/pcre_get_substring_list.html \
-#  doc/html/pcre_jit_exec.html \
+#  doc/html/pcre_jit_match.html \
 #  doc/html/pcre_jit_stack_alloc.html \
 #  doc/html/pcre_jit_stack_free.html \
 #  doc/html/pcre_maketables.html \
@@ -87,8 +87,8 @@ ACLOCAL_AMFLAGS = -I m4
 #  doc/pcre2_config.3 \
 #  doc/pcre2_copy_named_substring.3 \
 #  doc/pcre2_copy_substring.3 \
-#  doc/pcre2_dfa_exec.3 \
-#  doc/pcre2_exec.3 \
+#  doc/pcre2_dfa_match.3 \
+#  doc/pcre2_match.3 \
 #  doc/pcre2_free_study.3 \
 #  doc/pcre2_free_substring.3 \
 #  doc/pcre2_free_substring_list.3 \
@@ -98,7 +98,7 @@ ACLOCAL_AMFLAGS = -I m4
 #  doc/pcre2_get_stringtable_entries.3 \
 #  doc/pcre2_get_substring.3 \
 #  doc/pcre2_get_substring_list.3 \
-#  doc/pcre2_jit_exec.3 \
+#  doc/pcre2_jit_match.3 \
 #  doc/pcre2_jit_stack_alloc.3 \
 #  doc/pcre2_jit_stack_free.3 \
 #  doc/pcre2_maketables.3 \
@@ -265,12 +265,12 @@ COMMON_SOURCES = \
   src/pcre2_compile.c \
   src/pcre2_config.c \
   src/pcre2_context.c \
-  src/pcre2_dfa_exec.c \
+  src/pcre2_dfa_match.c \
   src/pcre2_error.c \
-  src/pcre2_exec.c \
+  src/pcre2_match.c \
   src/pcre2_internal.h \
   src/pcre2_jit_compile.c \
-  src/pcre2_jit_exec.c \
+  src/pcre2_jit_match.c \
   src/pcre2_jit_misc.c \
   src/pcre2_maketables.c \
   src/pcre2_match_data.c \

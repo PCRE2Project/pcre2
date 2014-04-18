@@ -59,13 +59,58 @@ Arguments:
 Returns:        0 if data returned, negative on error
 */
 
-/* FIXME: this is currently a placeholder function */
+/* FIXME: this is currently incomplete */
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_pattern_info(const pcre2_code *code, uint32_t what, void *where)
 {
-code=code;what=what;where=where;
-return -1;
+const pcre2_real_code *re = (pcre2_real_code *)code;
+                                                                          
+if (re == NULL || where == NULL) return PCRE2_ERROR_NULL;
+                                                                          
+/* Check that the first field in the block is the magic number. If it is not,
+return with PCRE2_ERROR_BADMAGIC. However, if the magic number is equal to
+REVERSED_MAGIC_NUMBER we return with PCRE2_ERROR_BADENDIANNESS, which      
+means that the pattern is likely compiled with different endianness. */ 
+                                                                   
+if (re->magic_number != MAGIC_NUMBER)                               
+  return re->magic_number == REVERSED_MAGIC_NUMBER?                     
+    PCRE2_ERROR_BADENDIANNESS:PCRE2_ERROR_BADMAGIC;                      
+                                                                       
+/* Check that this pattern was compiled in the correct bit mode */        
+                                                            
+if ((re->flags & (PCRE2_CODE_UNIT_WIDTH/8)) == 0) 
+  return PCRE2_ERROR_BADMODE;                 
+
+switch(what)
+  {
+  case PCRE2_INFO_NAMEENTRYSIZE:
+  *((int *)where) = re->name_entry_size;
+  break;
+       
+  case PCRE2_INFO_NAMECOUNT:
+  *((int *)where) = re->name_count;
+  break;
+        
+  case PCRE2_INFO_SIZE:
+  *((size_t *)where) = re->size;                                
+  break;   
+  
+  case PCRE2_INFO_JITSIZE:
+#ifdef SUPPORT_JIT
+  *((size_t *)where) =                                                     
+      (re->flags & PCRE2_EXTRA_EXECUTABLE_JIT) != 0 &&             
+      re->executable_jit != NULL)?                              
+    PRIV(jit_get_size)(re->executable_jit) : 0;            
+#else                                                               
+  *((size_t *)where) = 0;                                               
+#endif              
+  break;   
+  
+  default: return PCRE2_ERROR_BADOPTION;   
+  } 
+
+return 0;
 }
 
 /* End of pcre2_pattern_info.c */

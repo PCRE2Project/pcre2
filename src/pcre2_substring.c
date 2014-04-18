@@ -72,7 +72,7 @@ Returns:         if successful:
 */
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
-pcre2_copy_named_substring(pcre2_match_data *match_data, PCRE2_SPTR stringname,
+pcre2_substring_copy_byname(pcre2_match_data *match_data, PCRE2_SPTR stringname,
   PCRE2_UCHAR *buffer, size_t size)
 {
 match_data=match_data;stringname=stringname;buffer=buffer;size=size;
@@ -103,7 +103,7 @@ Returns:         if successful:
 */
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
-pcre2_copy_substring(pcre2_match_data *match_data, int stringnumber,
+pcre2_substring_copy_bynumber(pcre2_match_data *match_data, int stringnumber,
   PCRE2_UCHAR *buffer, size_t size)
 {
 match_data=match_data;stringnumber=stringnumber;buffer=buffer;size=size;
@@ -127,9 +127,9 @@ Returns:      nothing
 */
 
 PCRE2_EXP_DEFN void PCRE2_CALL_CONVENTION
-pcre2_free_substring(pcre2_context *context, PCRE2_UCHAR *string)
+pcre2_substring_free(PCRE2_UCHAR *string)
 {
-context->free(string, context->user_data);
+string=string;
 return;
 }
 
@@ -151,9 +151,9 @@ Returns:      nothing
 
 
 PCRE2_EXP_DEFN void PCRE2_CALL_CONVENTION
-pcre2_free_substring_list(pcre2_context *context, PCRE2_SPTR *list)
+pcre2_substring_list_free(PCRE2_SPTR *list)
 {
-context->free(list, context->user_data);
+list=list;
 return;
 }
 
@@ -182,62 +182,10 @@ Returns:         if successful:
 */
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
-pcre2_get_named_substring(pcre2_context *context, pcre2_match_data *match_data,
+pcre2_substring_get_byname(pcre2_match_data *match_data,
   PCRE2_SPTR stringname, PCRE2_UCHAR **stringptr)
 {
-context=context;match_data=match_data;stringname=stringname;stringptr=stringptr;
-return PCRE2_ERROR_NOSUBSTRING;
-}
-
-
-
-/*************************************************
-*         Get length of a named substring        *
-*************************************************/
-
-/* This function returns the length of a named captured substring. If the regex
-permits duplicate names, the first substring that is set is chosen.
-
-Arguments:
-  match_data      pointer to match data
-  stringname      the name of the required substring
-
-Returns:          a non-negative length if successful
-                  a negative error code otherwise
-*/
-
-PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
-pcre2_get_named_substring_length(pcre2_match_data *match_data,
-  PCRE2_SPTR stringname)
-{
-match_data=match_data;stringname=stringname;
-return PCRE2_ERROR_NOSUBSTRING;
-}
-
-
-
-/*************************************************
-*     Find (multiple) entries for named string   *
-*************************************************/
-
-/* This is used by the local get_first_set() function, as well as being
-generally available. It is used when duplicated names are permitted.
-
-Arguments:
-  code        the compiled regex
-  stringname  the name whose entries required
-  firstptr    where to put the pointer to the first entry
-  lastptr     where to put the pointer to the last entry
-
-Returns:      the length of each entry, or a negative number
-                (PCRE2_ERROR_NOSUBSTRING) if not found
-*/
-
-PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
-pcre2_get_stringtable_entries(const pcre2_code *code, PCRE2_SPTR stringname,
-  PCRE2_UCHAR **firstptr, PCRE2_UCHAR **lastptr)
-{
-code=code;stringname=stringname;firstptr=firstptr;lastptr=lastptr;
+match_data=match_data;stringname=stringname;stringptr=stringptr;
 return PCRE2_ERROR_NOSUBSTRING;
 }
 
@@ -265,11 +213,36 @@ Returns:         if successful:
 */
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
-pcre2_get_substring(pcre2_context *context, pcre2_match_data *match_data,
-  int stringnumber, PCRE2_UCHAR **stringptr)
+pcre2_substring_get_bynumber(pcre2_match_data *match_data, int stringnumber, 
+  PCRE2_UCHAR **stringptr)
 {
-context=context;match_data=match_data;stringnumber=stringnumber;
+match_data=match_data;stringnumber=stringnumber;
 stringptr=stringptr;
+return PCRE2_ERROR_NOSUBSTRING;
+}
+
+
+
+/*************************************************
+*         Get length of a named substring        *
+*************************************************/
+
+/* This function returns the length of a named captured substring. If the regex
+permits duplicate names, the first substring that is set is chosen.
+
+Arguments:
+  match_data      pointer to match data
+  stringname      the name of the required substring
+
+Returns:          a non-negative length if successful
+                  a negative error code otherwise
+*/
+
+PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
+pcre2_substring_length_byname(pcre2_match_data *match_data,
+  PCRE2_SPTR stringname)
+{
+match_data=match_data;stringname=stringname;
 return PCRE2_ERROR_NOSUBSTRING;
 }
 
@@ -290,7 +263,7 @@ Returns:          a non-negative length if successful
 */
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
-pcre2_get_substring_length(pcre2_match_data *match_data,
+pcre2_substring_length_bynumber(pcre2_match_data *match_data,
   int stringnumber)
 {
 match_data=match_data;stringnumber=stringnumber;
@@ -317,10 +290,10 @@ Returns:         if successful: 0
 */
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
-pcre2_get_substring_list(pcre2_context *context, pcre2_match_data *match_data,
-  PCRE2_UCHAR ***listptr)
+pcre2_substring_list_get(pcre2_match_data *match_data, PCRE2_UCHAR ***listptr, 
+  size_t **lengthsptr)
 {
-context=context;match_data=match_data;listptr=listptr;
+match_data=match_data;listptr=listptr;lengthsptr=lengthsptr;
 return PCRE2_ERROR_NOMEMORY;
 }
 
@@ -342,9 +315,37 @@ Returns:      the number of the named parentheses, or a negative number
 */
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
-  pcre2_get_substring_number(const pcre2_code *code, PCRE2_SPTR stringname)
+pcre2_substring_number_from_name(const pcre2_code *code, 
+  PCRE2_SPTR stringname)
 {
 code=code;stringname=stringname;
+return PCRE2_ERROR_NOSUBSTRING;
+}
+
+
+
+/*************************************************
+*     Find (multiple) entries for named string   *
+*************************************************/
+
+/* This is used by the local get_first_set() function, as well as being
+generally available. It is used when duplicated names are permitted.
+
+Arguments:
+  code        the compiled regex
+  stringname  the name whose entries required
+  firstptr    where to put the pointer to the first entry
+  lastptr     where to put the pointer to the last entry
+
+Returns:      the length of each entry, or a negative number
+                (PCRE2_ERROR_NOSUBSTRING) if not found
+*/
+
+PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
+pcre2_substring_nametable_scan(const pcre2_code *code, PCRE2_SPTR stringname,
+  PCRE2_UCHAR **firstptr, PCRE2_UCHAR **lastptr)
+{
+code=code;stringname=stringname;firstptr=firstptr;lastptr=lastptr;
 return PCRE2_ERROR_NOSUBSTRING;
 }
 

@@ -54,13 +54,13 @@ POSSIBILITY OF SUCH DAMAGE.
 alternate matching algorithm that finds all matches at once.
 
 Arguments:
-  context       points to a PCRE2 context
   code          points to the compiled pattern
   subject       subject string
   length        length of subject string
   startoffset   where to start matching in the subject
   options       option bits
   match_data    points to a match data structure
+  gcontext      points to a match context
   workspace     pointer to workspace
   wscount       size of workspace
 
@@ -73,16 +73,16 @@ Returns:        > 0 => number of match offset pairs placed in offsets
 /* FIXME: this is currently a placeholder function */
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
-pcre2_dfa_exec(pcre2_context *context, const pcre2_code *code,
-  PCRE2_SPTR subject, int length, size_t startoffset, uint32_t options,
-  pcre2_match_data *match_data, int *workspace, size_t wscount)
+pcre2_dfa_match(const pcre2_code *code, PCRE2_SPTR subject, int length, 
+  size_t startoffset, uint32_t options, pcre2_match_data *match_data, 
+  pcre2_match_context *mcontext, int *workspace, size_t wscount)
 {
 
-context = context; code = code; subject = subject; length = length;
+mcontext = mcontext; code = code; subject = subject; length = length;
 startoffset = startoffset; options = options; match_data = match_data;
 workspace = workspace; wscount = wscount;
 
 return PCRE2_ERROR_NOMATCH;
 }
 
-/* End of pcre2_dfa_exec.c */
+/* End of pcre2_dfa_match.c */
