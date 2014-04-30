@@ -46,17 +46,19 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "pcre2_internal.h"
 
 
-/* FIXME: these are all dummy functions */
 
 /*************************************************
 *  Create a match data block given ovector size  *
 *************************************************/
 
 PCRE2_EXP_DEFN pcre2_match_data * PCRE2_CALL_CONVENTION
-pcre2_match_data_create(size_t ovecsize, pcre2_general_context *gcontext)
+pcre2_match_data_create(size_t oveccount, pcre2_general_context *gcontext)
 {
-gcontext=gcontext;ovecsize=ovecsize;
-return NULL;
+pcre2_match_data *yield = PRIV(memctl_malloc)(
+  sizeof(pcre2_match_data) + 3*oveccount*sizeof(size_t),
+  offsetof(pcre2_real_match_data, memctl), gcontext);
+yield->oveccount = oveccount;
+return yield;
 }
 
 
@@ -69,8 +71,8 @@ PCRE2_EXP_DEFN pcre2_match_data * PCRE2_CALL_CONVENTION
 pcre2_match_data_create_from_pattern(pcre2_code *code, 
   pcre2_general_context *gcontext)
 {
-code=code;gcontext=gcontext;
-return NULL;
+return pcre2_match_data_create(((pcre2_real_code *)code)->top_bracket + 1, 
+  gcontext);
 }
 
 
@@ -82,8 +84,8 @@ return NULL;
 PCRE2_EXP_DEFN void PCRE2_CALL_CONVENTION
 pcre2_match_data_free(pcre2_match_data *match_data)
 {
-match_data=match_data;
-return;
+if (match_data != NULL) 
+  match_data->memctl.free(match_data, match_data->memctl.memory_data);
 }
 
 
@@ -95,8 +97,7 @@ return;
 PCRE2_EXP_DEFN size_t PCRE2_CALL_CONVENTION
 pcre2_get_leftchar(pcre2_match_data *match_data)
 {
-match_data=match_data;
-return 0;
+return match_data->leftchar;
 }
 
 
@@ -108,8 +109,7 @@ return 0;
 PCRE2_EXP_DEFN PCRE2_SPTR PCRE2_CALL_CONVENTION
 pcre2_get_mark(pcre2_match_data *match_data)
 {
-match_data=match_data;
-return NULL;
+return match_data->mark;
 }
 
 
@@ -121,8 +121,7 @@ return NULL;
 PCRE2_EXP_DEFN size_t * PCRE2_CALL_CONVENTION
 pcre2_get_ovector_pointer(pcre2_match_data *match_data)
 {
-match_data=match_data;
-return NULL;
+return match_data->ovector;
 }
 
 
@@ -134,8 +133,7 @@ return NULL;
 PCRE2_EXP_DEFN size_t PCRE2_CALL_CONVENTION
 pcre2_get_ovector_count(pcre2_match_data *match_data)
 {
-match_data=match_data;
-return 0;
+return match_data->oveccount;
 }
 
 
@@ -147,8 +145,7 @@ return 0;
 PCRE2_EXP_DEFN size_t PCRE2_CALL_CONVENTION
 pcre2_get_rightchar(pcre2_match_data *match_data)
 {
-match_data=match_data;
-return 0;
+return match_data->rightchar;
 }
 
 
@@ -160,8 +157,7 @@ return 0;
 PCRE2_EXP_DEFN size_t PCRE2_CALL_CONVENTION
 pcre2_get_startchar(pcre2_match_data *match_data)
 {
-match_data=match_data;
-return 0;
+return match_data->startchar;
 }
 
 /* End of pcre2_match_data.c */

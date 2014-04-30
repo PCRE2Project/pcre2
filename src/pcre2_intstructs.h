@@ -38,25 +38,21 @@ POSSIBILITY OF SUCH DAMAGE.
 -----------------------------------------------------------------------------
 */
 
-/* This module contains the private structures needed by pcre2_internal.h. They 
-are kept separate so that they can be #included multiple times for different 
-code unit widths by pcre2test. */
+/* This module contains the private mode-dependent structures needed by
+pcre2_internal.h. They are kept separate so that they can be #included multiple
+times for different code unit widths by pcre2test. */
 
-
-/* The real general context structure */
+/* The real general context structure. At present it hold only data for custom 
+memory control. */
 
 typedef struct pcre2_real_general_context {
-  void *    (*malloc)(size_t, void *);
-  void      (*free)(void *, void *);
-  void      *memory_data;
+  pcre2_memctl    memctl;
 } pcre2_real_general_context;
 
 /* The real compile context structure */
 
 typedef struct pcre2_real_compile_context {
-  void *    (*malloc)(size_t, void *);
-  void      (*free)(void *, void *);
-  void *    memory_data; 
+  pcre2_memctl    memctl;
   int       (*stack_guard)(uint32_t);
   const unsigned char *tables;
   uint16_t  bsr_convention;
@@ -67,9 +63,7 @@ typedef struct pcre2_real_compile_context {
 /* The real match context structure. */
 
 typedef struct pcre2_real_match_context {
-  void *    (*malloc)(size_t, void *);
-  void      (*free)(void *, void *);
-  void *    memory_data; 
+  pcre2_memctl    memctl;
 #ifdef NO_RECURSE
   void *    (*stack_malloc)(size_t, void *);
   void      (*stack_free)(void *, void *);
@@ -79,19 +73,37 @@ typedef struct pcre2_real_match_context {
   uint32_t  recursion_limit;
 } pcre2_real_match_context;
 
+/* The reat match data structure. */
+
+typedef struct pcre2_real_match_data {
+  pcre2_memctl    memctl;
+  size_t    leftchar;             /* Offset to leftmost code unit */
+  size_t    rightchar;            /* Offset to rightmost code unit */
+  size_t    startchar;            /* Offset to starting code unit */  
+  PCRE2_SPTR mark;                /* Pointer to last mark */  
+  uint16_t  oveccount;            /* Number of pairs */
+  size_t    ovector[1];           /* The first field */ 
+} pcre2_real_match_data;
+
 /* The real compiled code structure */
 
 typedef struct pcre2_real_code {
-  uint32_t magic_number;
+  pcre2_memctl   memctl;
+  void    *executable_jit;        /* Pointer to JIT code */  
+  uint8_t  start_bitmap[32];      /* Bitmap for starting code unit < 256 */
+  uint32_t magic_number;          /* Paranoid and endianness check */
   uint32_t size;                  /* Total that was malloc-ed */ 
   uint32_t compile_options;       /* Options passed to pcre2_compile() */
   uint32_t pattern_options;       /* Options taken from the pattern */
   uint32_t flags;                 /* Various state flags */
   uint32_t limit_match;           /* Limit set in the pattern */
   uint32_t limit_recursion;       /* Limit set in the pattern */
-  uint32_t first_char;            /* Starting character */
-  uint32_t req_char;              /* This character must be seen */
+  uint32_t first_codeunit;        /* Starting code unit */
+  uint32_t last_codeunit;         /* This codeunit must be seen */
+  uint16_t bsr_convention;        /* What \R matches */
+  uint16_t newline_convention;    /* What is a newline? */  
   uint16_t max_lookbehind;        /* Longest lookbehind (characters) */
+  uint16_t minlength;             /* Minimum length of match */ 
   uint16_t top_bracket;           /* Highest numbered group */ 
   uint16_t top_backref;           /* Highest numbered back reference */
   uint16_t name_table_offset;     /* Offset to name table that follows */

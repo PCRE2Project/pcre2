@@ -221,12 +221,6 @@ AC_ARG_ENABLE(pcretest-libreadline,
                              [link pcretest with libreadline]),
               , enable_pcretest_libreadline=no)
 
-# Handle --with-posix-malloc-threshold=NBYTES
-AC_ARG_WITH(posix-malloc-threshold,
-            AS_HELP_STRING([--with-posix-malloc-threshold=NBYTES],
-                           [threshold for POSIX malloc usage (default=10)]),
-            , with_posix_malloc_threshold=10)
-
 # Handle --with-link-size=N
 AC_ARG_WITH(link-size,
             AS_HELP_STRING([--with-link-size=N],
@@ -595,15 +589,6 @@ AC_DEFINE_UNQUOTED([LINK_SIZE], [$with_link_size], [
   majority of cases. However, PCRE can also be compiled to use 3 or 4
   bytes instead. This allows for longer patterns in extreme cases.])
 
-AC_DEFINE_UNQUOTED([POSIX_MALLOC_THRESHOLD], [$with_posix_malloc_threshold], [
-  When calling PCRE via the POSIX interface, additional working storage
-  is required for holding the pointers to capturing substrings because
-  PCRE requires three integers per substring, whereas the POSIX
-  interface provides only two. If the number of expected substrings is
-  small, the wrapper function uses space on the stack, because this is
-  faster than using malloc() for each call. The threshold above which
-  the stack is no longer used is defined by POSIX_MALLOC_THRESHOLD.])
-
 AC_DEFINE_UNQUOTED([PARENS_NEST_LIMIT], [$with_parens_nest_limit], [
   The value of PARENS_NEST_LIMIT specifies the maximum depth of nested
   parentheses (of any kind) in a pattern. This limits the amount of system
@@ -877,7 +862,6 @@ $PACKAGE-$VERSION configuration summary:
     EBCDIC code for NL .............. : ${ebcdic_nl_code}
     Rebuild char tables ............. : ${enable_rebuild_chartables}
     Use stack recursion ............. : ${enable_stack_for_recursion}
-    POSIX mem threshold ............. : ${with_posix_malloc_threshold}
     Internal link size .............. : ${with_link_size}
     Nested parentheses limit ........ : ${with_parens_nest_limit}
     Match limit ..................... : ${with_match_limit}

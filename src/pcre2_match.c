@@ -72,10 +72,37 @@ Returns:          > 0 => success; value is the number of ovector pairs filled
 /* FIXME: this is currently a placeholder function */
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
-pcre2_match( const pcre2_code *code, PCRE2_SPTR subject, int length, 
+pcre2_match(const pcre2_code *code, PCRE2_SPTR subject, int length, 
   size_t start_offset, uint32_t options, pcre2_match_data *match_data, 
   pcre2_match_context *mcontext)
 {
+
+/* Fudge for testing pcre2test */
+
+if (subject[start_offset] == 'Y')
+  {
+  match_data->leftchar = 0;
+  match_data->rightchar = 3;
+  match_data->startchar = 0;
+  match_data->mark = NULL;
+  
+  switch (match_data->oveccount)
+    {
+    case 0: return 0;
+    
+    case 1: match_data->ovector[0] = start_offset; 
+            match_data->ovector[1] = start_offset + 4;
+            return 0;
+            
+    default: match_data->ovector[0] = start_offset; 
+             match_data->ovector[1] = start_offset + 4;
+             match_data->ovector[2] = start_offset + 1;    
+             match_data->ovector[3] = start_offset + 3;
+             return 2;
+    }  
+  } 
+
+
 mcontext=mcontext;code=code;subject=subject;length=length;
 start_offset=start_offset; options=options; match_data=match_data;
 return PCRE2_ERROR_NOMATCH;

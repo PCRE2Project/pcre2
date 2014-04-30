@@ -1,5 +1,44 @@
-/* This is a placeholder, just enough to allow dummy functions to compile, but
-with some of the new PCRE2 context stuff added. */
+/*************************************************
+*      Perl-Compatible Regular Expressions       *
+*************************************************/
+
+/* PCRE is a library of functions to support regular expressions whose syntax
+and semantics are as close as possible to those of the Perl 5 language.
+
+                       Written by Philip Hazel
+     Original API code Copyright (c) 1997-2012 University of Cambridge
+         New API code Copyright (c) 2014 University of Cambridge
+
+-----------------------------------------------------------------------------
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+    * Redistributions of source code must retain the above copyright notice,
+      this list of conditions and the following disclaimer.
+
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+
+    * Neither the name of the University of Cambridge nor the names of its
+      contributors may be used to endorse or promote products derived from
+      this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.
+-----------------------------------------------------------------------------
+*/
+
+/* FIXME: this file is incomplete, being gradually built. */
 
 #include <ctype.h>
 #include <limits.h>
@@ -22,7 +61,6 @@ with some of the new PCRE2 context stuff added. */
 extern const uint8_t PRIV(default_tables)[];
 
 
-/* What follows is "real" code for PCRE2. */
 
 
 typedef int BOOL;
@@ -127,27 +165,28 @@ the pointer. */
 #endif  /* SUPPORT_UTF */
 
 
-/* Private flags containing information about the compiled pattern. The first 
-three must not be changed, because whichever is set is actually the number of 
+/* Private flags containing information about the compiled pattern. The first
+three must not be changed, because whichever is set is actually the number of
 bytes in a code unit in that mode. */
 
 #define PCRE2_MODE8         0x00000001  /* compiled in 8 bit mode */
 #define PCRE2_MODE16        0x00000002  /* compiled in 16 bit mode */
 #define PCRE2_MODE32        0x00000004  /* compiled in 32 bit mode */
-#define PCRE2_FIRSTSET      0x00000010  /* first_char is set */
-#define PCRE2_FCH_CASELESS  0x00000020  /* caseless first char */
-#define PCRE2_REQCHSET      0x00000040  /* req_byte is set */                 
-#define PCRE2_RCH_CASELESS  0x00000080  /* caseless requested char */   
-#define PCRE2_STARTLINE     0x00000100  /* start after \n for multiline */
-#define PCRE2_JCHANGED      0x00000200  /* j option used in pattern */
-#define PCRE2_HASCRORLF     0x00000400  /* explicit \r or \n in pattern */
-#define PCRE2_HASTHEN       0x00000800  /* pattern contains (*THEN) */        
-#define PCRE2_MLSET         0x00001000  /* match limit set by pattern */
-#define PCRE2_RLSET         0x00002000  /* recursion limit set by pattern */  
-#define PCRE2_MATCH_EMPTY   0x00004000  /* pattern can match empty string */
-                                                                            
-#define PCRE2_MODE_MASK     (PCRE2_MODE8 | PCRE2_MODE16 | PCRE2_MODE32)       
-                                                              
+#define PCRE2_FIRSTSET      0x00000010  /* first_code unit is set */
+#define PCRE2_FIRSTCASELESS 0x00000020  /* caseless first code unit */
+#define PCRE2_FIRSTMAPSET   0x00000040  /* bitmap of first code units is set */
+#define PCRE2_LASTSET       0x00000080  /* last code unit is set */
+#define PCRE2_LASTCASELESS  0x00000100  /* caseless last code unit */
+#define PCRE2_STARTLINE     0x00000200  /* start after \n for multiline */
+#define PCRE2_JCHANGED      0x00000400  /* j option used in pattern */
+#define PCRE2_HASCRORLF     0x00000800  /* explicit \r or \n in pattern */
+#define PCRE2_HASTHEN       0x00001000  /* pattern contains (*THEN) */
+#define PCRE2_MLSET         0x00002000  /* match limit set by pattern */
+#define PCRE2_RLSET         0x00004000  /* recursion limit set by pattern */
+#define PCRE2_MATCH_EMPTY   0x00008000  /* pattern can match empty string */
+
+#define PCRE2_MODE_MASK     (PCRE2_MODE8 | PCRE2_MODE16 | PCRE2_MODE32)
+
 
 /* Magic number to provide a small check against being handed junk. */
 
@@ -762,23 +801,40 @@ only. */
 
 /* -------------------- End of character and string names -------------------*/
 
+/* Private structures that are mode-independent. */
 
+/* Structure to hold data for custom memory management. */
 
-/* Only these bits are allowed when setting context options. */
+typedef struct pcre2_memctl {
+  void *    (*malloc)(size_t, void *);
+  void      (*free)(void *, void *);
+  void      *memory_data;
+} pcre2_memctl;
 
-#define PCRE2_CONTEXT_OPTIONS (\
-  PCRE2_ALT_BSUX|PCRE2_DOLLAR_ENDONLY|PCRE2_DUPNAMES|PCRE2_ALLOW_EMPTY_CLASS|\
-  PCRE2_MATCH_UNSET_BACKREF|PCRE2_NEVER_UTF|PCRE2_NEVER_UCP|PCRE2_UTF|\
-  PCRE2_UCP)
-  
-/* The private structures used by PCRE are defined in a separate file. When 
-compiling the library, PCRE2_CODE_UNIT_WIDTH will be defined, so we include 
-them at the appropriate width. When compiling pcretest, however, that macro is 
-not set at this point because pcretest needs to include them at all supported 
-widths. */ 
-  
-#ifdef PCRE2_CODE_UNIT_WIDTH 
+/* The other private structures used by PCRE are defined in a separate file.
+When compiling the library, PCRE2_CODE_UNIT_WIDTH will be defined, and we
+include them at the appropriate width. When compiling pcre2test, however, that
+macro is not set at this point because pcre2test needs to include them at all
+supported widths. */
+
+#ifdef PCRE2_CODE_UNIT_WIDTH
 #include "pcre2_intstructs.h"
+#endif
+
+/* Internal shared functions. These are functions that are used by more than
+one of the library's exported public functions. They have to be "external" in
+the C sense, but are not part of the PCRE public API. They are not referenced
+from pcre2test, and must not be defined when no code unit width is available.
+*/
+
+#ifdef PCRE2_CODE_UNIT_WIDTH
+#define _pcre2_compile_context_init  PCRE2_SUFFIX(_pcre2_compile_context_init_)
+#define _pcre2_match_context_init    PCRE2_SUFFIX(_pcre2_match_context_init_)
+#define _pcre2_memctl_malloc         PCRE2_SUFFIX(_pcre2_memctl_malloc_)
+
+extern void     _pcre2_compile_context_init(pcre2_compile_context *, BOOL);
+extern void     _pcre2_match_context_init(pcre2_match_context *, BOOL);
+extern void    *_pcre2_memctl_malloc(size_t, size_t, pcre2_general_context *);
 #endif
 
 /* End of pcre2_internal.h */

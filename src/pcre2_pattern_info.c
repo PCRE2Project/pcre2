@@ -50,7 +50,7 @@ POSSIBILITY OF SUCH DAMAGE.
 *        Return info about compiled pattern      *
 *************************************************/
 
-/* 
+/*
 Arguments:
   code          points to compiled code
   what          what information is required
@@ -65,50 +65,130 @@ PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_pattern_info(const pcre2_code *code, uint32_t what, void *where)
 {
 const pcre2_real_code *re = (pcre2_real_code *)code;
-                                                                          
+
 if (re == NULL || where == NULL) return PCRE2_ERROR_NULL;
-                                                                          
+
 /* Check that the first field in the block is the magic number. If it is not,
 return with PCRE2_ERROR_BADMAGIC. However, if the magic number is equal to
-REVERSED_MAGIC_NUMBER we return with PCRE2_ERROR_BADENDIANNESS, which      
-means that the pattern is likely compiled with different endianness. */ 
-                                                                   
-if (re->magic_number != MAGIC_NUMBER)                               
-  return re->magic_number == REVERSED_MAGIC_NUMBER?                     
-    PCRE2_ERROR_BADENDIANNESS:PCRE2_ERROR_BADMAGIC;                      
-                                                                       
-/* Check that this pattern was compiled in the correct bit mode */        
-                                                            
-if ((re->flags & (PCRE2_CODE_UNIT_WIDTH/8)) == 0) 
-  return PCRE2_ERROR_BADMODE;                 
+REVERSED_MAGIC_NUMBER we return with PCRE2_ERROR_BADENDIANNESS, which
+means that the pattern is likely compiled with different endianness. */
+
+if (re->magic_number != MAGIC_NUMBER)
+  return re->magic_number == REVERSED_MAGIC_NUMBER?
+    PCRE2_ERROR_BADENDIANNESS:PCRE2_ERROR_BADMAGIC;
+
+/* Check that this pattern was compiled in the correct bit mode */
+
+if ((re->flags & (PCRE2_CODE_UNIT_WIDTH/8)) == 0)
+  return PCRE2_ERROR_BADMODE;
 
 switch(what)
   {
+  case PCRE2_INFO_BACKREFMAX:
+  *((int *)where) = re->top_backref;
+  break;
+
+  case PCRE2_INFO_BSR_CONVENTION:
+  *((uint32_t *)where) = re->bsr_convention;
+  break;
+
+  case PCRE2_INFO_CAPTURECOUNT:
+  *((int *)where) = re->top_bracket;
+  break;
+
+  case PCRE2_INFO_COMPILE_OPTIONS:
+  *((int *)where) = re->compile_options;
+  break;
+
+  case PCRE2_INFO_FIRSTCODETYPE:
+  *((int *)where) = ((re->flags & PCRE2_FIRSTSET) != 0)? 1 :
+                    ((re->flags & PCRE2_STARTLINE) != 0)? 2 : 0;
+  break;
+
+  case PCRE2_INFO_FIRSTCODEUNIT:
+  *((uint32_t *)where) = ((re->flags & PCRE2_FIRSTSET) != 0)?
+    re->first_codeunit : 0;
+  break;
+
+  case PCRE2_INFO_FIRSTBITMAP:
+  *((const uint8_t **)where) = ((re->flags & PCRE2_FIRSTMAPSET) != 0)?
+    &(re->start_bitmap[0]) : NULL;
+  break;
+
+  case PCRE2_INFO_HASCRORLF:
+  *((int *)where) = (re->flags & PCRE2_HASCRORLF) != 0;
+  break;
+
+  case PCRE2_INFO_JCHANGED:
+  *((int *)where) = (re->flags & PCRE2_JCHANGED) != 0;
+  break;
+
+  case PCRE2_INFO_JITSIZE:
+#ifdef SUPPORT_JIT
+  *((size_t *)where) = (re->executable_jit != NULL)?
+    PRIV(jit_get_size)(re->executable_jit) : 0;
+#else
+  *((size_t *)where) = 0;
+#endif
+  break;
+
+  case PCRE2_INFO_LASTCODETYPE:
+  *((int *)where) = ((re->flags & PCRE2_LASTSET) != 0)? 1 : 0;
+  break;
+
+  case PCRE2_INFO_LASTCODEUNIT:
+  *((uint32_t *)where) = ((re->flags & PCRE2_LASTSET) != 0)?
+    re->last_codeunit : 0;
+  break;
+
+  case PCRE2_INFO_MATCH_EMPTY:
+  *((int *)where) = (re->flags & PCRE2_MATCH_EMPTY) != 0;
+  break;
+
+  case PCRE2_INFO_MATCH_LIMIT:
+  if ((re->flags & PCRE2_MLSET) == 0) return PCRE2_ERROR_UNSET;
+  *((uint32_t *)where) = re->limit_match;
+  break;
+
+  case PCRE2_INFO_MAXLOOKBEHIND:
+  *((int *)where) = re->max_lookbehind;
+  break;
+
+  case PCRE2_INFO_MINLENGTH:
+  *((int *)where) = re->minlength;
+  break;
+
   case PCRE2_INFO_NAMEENTRYSIZE:
   *((int *)where) = re->name_entry_size;
   break;
-       
+
   case PCRE2_INFO_NAMECOUNT:
   *((int *)where) = re->name_count;
   break;
-        
+
+  case PCRE2_INFO_NAMETABLE:
+  *((PCRE2_SPTR*)where) = (PCRE2_SPTR)re + re->name_table_offset;
+  break;
+
+  case PCRE2_INFO_NEWLINE_CONVENTION:
+  *((uint32_t *)where) = re->newline_convention;
+  break;
+
+  case PCRE2_INFO_PATTERN_OPTIONS:
+  *((int *)where) = re->pattern_options;
+  break;
+
+  case PCRE2_INFO_RECURSION_LIMIT:
+  if ((re->flags & PCRE2_RLSET) == 0) return PCRE2_ERROR_UNSET;
+  *((uint32_t *)where) = re->limit_recursion;
+  break;
+
   case PCRE2_INFO_SIZE:
-  *((size_t *)where) = re->size;                                
-  break;   
-  
-  case PCRE2_INFO_JITSIZE:
-#ifdef SUPPORT_JIT
-  *((size_t *)where) =                                                     
-      (re->flags & PCRE2_EXTRA_EXECUTABLE_JIT) != 0 &&             
-      re->executable_jit != NULL)?                              
-    PRIV(jit_get_size)(re->executable_jit) : 0;            
-#else                                                               
-  *((size_t *)where) = 0;                                               
-#endif              
-  break;   
-  
-  default: return PCRE2_ERROR_BADOPTION;   
-  } 
+  *((size_t *)where) = re->size;
+  break;
+
+  default: return PCRE2_ERROR_BADOPTION;
+  }
 
 return 0;
 }

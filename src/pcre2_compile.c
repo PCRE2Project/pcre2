@@ -55,8 +55,7 @@ POSSIBILITY OF SUCH DAMAGE.
 PCRE2_EXP_DEFN void PCRE2_CALL_CONVENTION
 pcre2_code_free(pcre2_code *code)
 {
-code=code;
-return;
+if (code != NULL) code->memctl.free(code, code->memctl.memory_data);
 }
 
 
@@ -86,9 +85,16 @@ PCRE2_EXP_DEFN pcre2_code * PCRE2_CALL_CONVENTION
 pcre2_compile(PCRE2_SPTR pattern, int patlen, uint32_t options, int *errorcode,
    size_t *erroroffset, pcre2_compile_context *ccontext)
 {
+pcre2_compile_context default_context;
 pcre2_code *c = NULL;
 
-patlen = patlen; options = options;
+patlen = patlen; 
+
+if (ccontext == NULL)
+  {
+  PRIV(compile_context_init)(&default_context, TRUE);
+  ccontext = &default_context;
+  }   
 
 /* Fudge while testing pcre2test. */
 
@@ -96,12 +102,21 @@ patlen = patlen; options = options;
 
 if (pattern[0] == 'Y')
   {
-  c = ccontext->malloc(sizeof(pcre2_real_code), NULL);
+  c = ccontext->memctl.malloc(sizeof(pcre2_real_code), NULL);
+  c->memctl = ccontext->memctl; 
   c->magic_number = MAGIC_NUMBER;
   c->size = sizeof(pcre2_real_code);  
   c->name_table_offset = sizeof(pcre2_real_code); 
   c->compile_options = options; 
-  c->flags = PCRE2_CODE_UNIT_WIDTH/8; 
+  c->flags = PCRE2_CODE_UNIT_WIDTH/8;
+  c->limit_match = 0;
+  c->limit_recursion = 0;
+  c->max_lookbehind = 0;
+  c->minlength = 3;
+  c->top_bracket = 1;
+  c->top_backref = 1;       
+  c->bsr_convention = ccontext->bsr_convention;
+  c->newline_convention = ccontext->newline_convention;  
   c->name_count = 0; 
   c->name_entry_size = 0; 
   } 

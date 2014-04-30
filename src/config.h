@@ -234,15 +234,6 @@ sure both macros are undefined; an emulation function will then be used. */
    lines. */
 #define PCREGREP_BUFSIZE 20480
 
-/* When calling PCRE via the POSIX interface, additional working storage is
-   required for holding the pointers to capturing substrings because PCRE
-   requires three integers per substring, whereas the POSIX interface provides
-   only two. If the number of expected substrings is small, the wrapper
-   function uses space on the stack, because this is faster than using
-   malloc() for each call. The threshold above which the stack is no longer
-   used is defined by POSIX_MALLOC_THRESHOLD. */
-#define POSIX_MALLOC_THRESHOLD 10
-
 /* Define to necessary symbol if this constant uses a non-standard name on
    your system. */
 /* #undef PTHREAD_CREATE_JOINABLE */

@@ -138,106 +138,114 @@ D   is inspected during pcre2_dfa_exec() execution
 
 /* Newline and \R settings, for use in the compile context. */
 
-#define PCRE2_NEWLINE_CR          0
-#define PCRE2_NEWLINE_LF          1
-#define PCRE2_NEWLINE_CRLF        2
-#define PCRE2_NEWLINE_ANY         3
-#define PCRE2_NEWLINE_ANYCRLF     4
+#define PCRE2_NEWLINE_DEFAULT     0
+#define PCRE2_NEWLINE_CR          1
+#define PCRE2_NEWLINE_LF          2
+#define PCRE2_NEWLINE_CRLF        3
+#define PCRE2_NEWLINE_ANY         4
+#define PCRE2_NEWLINE_ANYCRLF     5
 
-#define PCRE2_BSR_UNICODE         0
-#define PCRE2_BSR_ANYCRLF         1
+#define PCRE2_BSR_DEFAULT         0
+#define PCRE2_BSR_UNICODE         1
+#define PCRE2_BSR_ANYCRLF         2
 
-/* Exec-time and get/set-time error codes */
+/* Match-time and get/set-time error codes */
 
 #define PCRE2_ERROR_NOMATCH          (-1)
-#define PCRE2_ERROR_NULL             (-2)
-#define PCRE2_ERROR_BADOPTION        (-3)
-#define PCRE2_ERROR_BADMAGIC         (-4)
-#define PCRE2_ERROR_UNKNOWN_OPCODE   (-5)
-#define PCRE2_ERROR_NOMEMORY         (-6)
-#define PCRE2_ERROR_NOSUBSTRING      (-7)
-#define PCRE2_ERROR_MATCHLIMIT       (-8)
-#define PCRE2_ERROR_CALLOUT          (-9)  /* Never used by PCRE2 itself */
-#define PCRE2_ERROR_PARTIAL         (-10)
-#define PCRE2_ERROR_BADPARTIAL      (-11)
-#define PCRE2_ERROR_INTERNAL        (-12)
-#define PCRE2_ERROR_BADCOUNT        (-13)
-#define PCRE2_ERROR_DFA_UITEM       (-14)
-#define PCRE2_ERROR_DFA_UCOND       (-15)
-#define PCRE2_ERROR_DFA_UMLIMIT     (-16)
-#define PCRE2_ERROR_DFA_WSSIZE      (-17)
-#define PCRE2_ERROR_DFA_RECURSE     (-18)
-#define PCRE2_ERROR_RECURSIONLIMIT  (-19)
-#define PCRE2_ERROR_BADOFFSET       (-20)
+
+#define PCRE2_ERROR_BADCOUNT         (-2)
+#define PCRE2_ERROR_BADENDIANNESS    (-3)
+#define PCRE2_ERROR_BADLENGTH        (-4)
+#define PCRE2_ERROR_BADMAGIC         (-5)
+#define PCRE2_ERROR_BADMODE          (-6)
+#define PCRE2_ERROR_BADOFFSET        (-7)
+#define PCRE2_ERROR_BADOPTION        (-8)
+#define PCRE2_ERROR_BADPARTIAL       (-9)
+#define PCRE2_ERROR_BADUTF          (-10)
+#define PCRE2_ERROR_BADUTF_OFFSET   (-11)
+#define PCRE2_ERROR_CALLOUT         (-12)  /* Never used by PCRE2 itself */
+#define PCRE2_ERROR_INTERNAL        (-13)
+#define PCRE2_ERROR_JIT_BADOPTION   (-14)
+#define PCRE2_ERROR_JIT_STACKLIMIT  (-15)
+#define PCRE2_ERROR_MATCHLIMIT      (-16)
+#define PCRE2_ERROR_NOMEMORY        (-17)
+#define PCRE2_ERROR_NOSUBSTRING     (-18)
+#define PCRE2_ERROR_NULL            (-19)
+#define PCRE2_ERROR_PARTIAL         (-20)
 #define PCRE2_ERROR_RECURSELOOP     (-21)
-#define PCRE2_ERROR_JIT_STACKLIMIT  (-22)
-#define PCRE2_ERROR_BADMODE         (-23)
-#define PCRE2_ERROR_BADENDIANNESS   (-24)
-#define PCRE2_ERROR_DFA_BADRESTART  (-25)
-#define PCRE2_ERROR_JIT_BADOPTION   (-26)
-#define PCRE2_ERROR_BADLENGTH       (-27)
-#define PCRE2_ERROR_UNSET           (-28)
-#define PCRE2_ERROR_BADUTF_OFFSET   (-29)
+#define PCRE2_ERROR_RECURSIONLIMIT  (-22)
+#define PCRE2_ERROR_UNKNOWN_OPCODE  (-23)
+#define PCRE2_ERROR_UNSET           (-24)
+
+#define PCRE2_ERROR_DFA_BADRESTART  (-30)
+#define PCRE2_ERROR_DFA_RECURSE     (-31)
+#define PCRE2_ERROR_DFA_UCOND       (-32)
+#define PCRE2_ERROR_DFA_UITEM       (-33)
+#define PCRE2_ERROR_DFA_UMLIMIT     (-34)
+#define PCRE2_ERROR_DFA_WSSIZE      (-35)
+
 
 /* Specific error codes for UTF-8 validity checks */
 
-#define PCRE2_ERROR_UTF8_ERR1       (-31)
-#define PCRE2_ERROR_UTF8_ERR2       (-32)
-#define PCRE2_ERROR_UTF8_ERR3       (-33)
-#define PCRE2_ERROR_UTF8_ERR4       (-34)
-#define PCRE2_ERROR_UTF8_ERR5       (-35)
-#define PCRE2_ERROR_UTF8_ERR6       (-36)
-#define PCRE2_ERROR_UTF8_ERR7       (-37)
-#define PCRE2_ERROR_UTF8_ERR8       (-38)
-#define PCRE2_ERROR_UTF8_ERR9       (-39)
-#define PCRE2_ERROR_UTF8_ERR10      (-40)
-#define PCRE2_ERROR_UTF8_ERR11      (-41)
-#define PCRE2_ERROR_UTF8_ERR12      (-42)
-#define PCRE2_ERROR_UTF8_ERR13      (-43)
-#define PCRE2_ERROR_UTF8_ERR14      (-44)
-#define PCRE2_ERROR_UTF8_ERR15      (-45)
-#define PCRE2_ERROR_UTF8_ERR16      (-46)
-#define PCRE2_ERROR_UTF8_ERR17      (-47)
-#define PCRE2_ERROR_UTF8_ERR18      (-48)
-#define PCRE2_ERROR_UTF8_ERR19      (-49)
-#define PCRE2_ERROR_UTF8_ERR20      (-50)
-#define PCRE2_ERROR_UTF8_ERR21      (-51)
+#define PCRE2_ERROR_UTF8_ERR1       (-41)
+#define PCRE2_ERROR_UTF8_ERR2       (-42)
+#define PCRE2_ERROR_UTF8_ERR3       (-43)
+#define PCRE2_ERROR_UTF8_ERR4       (-44)
+#define PCRE2_ERROR_UTF8_ERR5       (-45)
+#define PCRE2_ERROR_UTF8_ERR6       (-46)
+#define PCRE2_ERROR_UTF8_ERR7       (-47)
+#define PCRE2_ERROR_UTF8_ERR8       (-48)
+#define PCRE2_ERROR_UTF8_ERR9       (-49)
+#define PCRE2_ERROR_UTF8_ERR10      (-50)
+#define PCRE2_ERROR_UTF8_ERR11      (-51)
+#define PCRE2_ERROR_UTF8_ERR12      (-52)
+#define PCRE2_ERROR_UTF8_ERR13      (-53)
+#define PCRE2_ERROR_UTF8_ERR14      (-54)
+#define PCRE2_ERROR_UTF8_ERR15      (-55)
+#define PCRE2_ERROR_UTF8_ERR16      (-56)
+#define PCRE2_ERROR_UTF8_ERR17      (-57)
+#define PCRE2_ERROR_UTF8_ERR18      (-58)
+#define PCRE2_ERROR_UTF8_ERR19      (-59)
+#define PCRE2_ERROR_UTF8_ERR20      (-60)
+#define PCRE2_ERROR_UTF8_ERR21      (-61)
 
 /* Specific error codes for UTF-16 validity checks */
 
-#define PCRE2_ERROR_UTF16_ERR1      (-52)
-#define PCRE2_ERROR_UTF16_ERR2      (-53)
-#define PCRE2_ERROR_UTF16_ERR3      (-54)
+#define PCRE2_ERROR_UTF16_ERR1      (-62)
+#define PCRE2_ERROR_UTF16_ERR2      (-63)
+#define PCRE2_ERROR_UTF16_ERR3      (-64)
 
 /* Specific error codes for UTF-32 validity checks */
 
-#define PCRE2_ERROR_UTF32_ERR1      (-55)
-#define PCRE2_ERROR_UTF32_ERR3      (-56)
+#define PCRE2_ERROR_UTF32_ERR1      (-65)
+#define PCRE2_ERROR_UTF32_ERR3      (-66)
 
 /* Request types for pcre2_pattern_info() */
 
-#define PCRE2_INFO_BACKREFMAX         0
-#define PCRE2_INFO_CAPTURECOUNT       1
-#define PCRE2_INFO_COMPILE_OPTIONS    2
-#define PCRE2_INFO_FIRSTCODEUNIT      3
-#define PCRE2_INFO_FIRSTCODETYPE      4
-#define PCRE2_INFO_FIRSTTABLE         5
-#define PCRE2_INFO_HASCRORLF          6
-#define PCRE2_INFO_JCHANGED           7
-#define PCRE2_INFO_JIT                8
-#define PCRE2_INFO_JITSIZE            9
-#define PCRE2_INFO_LASTCODEUNIT      10
-#define PCRE2_INFO_LASTCODETYPE      11
-#define PCRE2_INFO_MATCH_EMPTY       12
-#define PCRE2_INFO_MATCH_LIMIT       13
-#define PCRE2_INFO_MAXLOOKBEHIND     14
-#define PCRE2_INFO_MINLENGTH         15
-#define PCRE2_INFO_NAMECOUNT         16
-#define PCRE2_INFO_NAMEENTRYSIZE     17
-#define PCRE2_INFO_NAMETABLE         18
-#define PCRE2_INFO_PATTERN_OPTIONS   19
-#define PCRE2_INFO_RECURSION_LIMIT   20
-#define PCRE2_INFO_SIZE              21
+#define PCRE2_INFO_BACKREFMAX            0
+#define PCRE2_INFO_BSR_CONVENTION        1
+#define PCRE2_INFO_CAPTURECOUNT          2
+#define PCRE2_INFO_COMPILE_OPTIONS       3
+#define PCRE2_INFO_FIRSTCODEUNIT         4
+#define PCRE2_INFO_FIRSTCODETYPE         5
+#define PCRE2_INFO_FIRSTBITMAP           6
+#define PCRE2_INFO_HASCRORLF             7
+#define PCRE2_INFO_JCHANGED              8
+#define PCRE2_INFO_JIT                   9
+#define PCRE2_INFO_JITSIZE              10
+#define PCRE2_INFO_LASTCODEUNIT         11
+#define PCRE2_INFO_LASTCODETYPE         12
+#define PCRE2_INFO_MATCH_EMPTY          13
+#define PCRE2_INFO_MATCH_LIMIT          14
+#define PCRE2_INFO_MAXLOOKBEHIND        15
+#define PCRE2_INFO_MINLENGTH            16
+#define PCRE2_INFO_NAMECOUNT            17
+#define PCRE2_INFO_NAMEENTRYSIZE        18
+#define PCRE2_INFO_NAMETABLE            19
+#define PCRE2_INFO_NEWLINE_CONVENTION   20
+#define PCRE2_INFO_PATTERN_OPTIONS      21
+#define PCRE2_INFO_RECURSION_LIMIT      22
+#define PCRE2_INFO_SIZE                 23
 
 /* Request types for pcre2_config(). */
 
@@ -249,9 +257,8 @@ D   is inspected during pcre2_dfa_exec() execution
 #define PCRE2_CONFIG_MATCH_LIMIT_RECURSION   5
 #define PCRE2_CONFIG_NEWLINE                 6
 #define PCRE2_CONFIG_PARENS_LIMIT            7
-#define PCRE2_CONFIG_POSIX_MALLOC_THRESHOLD  8
-#define PCRE2_CONFIG_STACKRECURSE            9
-#define PCRE2_CONFIG_UTF                    10
+#define PCRE2_CONFIG_STACKRECURSE            8
+#define PCRE2_CONFIG_UTF                     9
 
 /* A value that is used to indicate 'unset' in unsigned size_t fields. */
 

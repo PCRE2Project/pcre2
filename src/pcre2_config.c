@@ -109,10 +109,6 @@ switch (what)
   *((unsigned long int *)where) = PARENS_NEST_LIMIT;
   break;
 
-  case PCRE2_CONFIG_POSIX_MALLOC_THRESHOLD:
-  *((int *)where) = POSIX_MALLOC_THRESHOLD;
-  break;
-
   case PCRE2_CONFIG_STACKRECURSE:
 #ifdef NO_RECURSE
   *((int *)where) = 0;
