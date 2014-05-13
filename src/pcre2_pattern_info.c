@@ -167,7 +167,7 @@ switch(what)
   break;
 
   case PCRE2_INFO_NAMETABLE:
-  *((PCRE2_SPTR*)where) = (PCRE2_SPTR)re + re->name_table_offset;
+  *((PCRE2_SPTR*)where) = (PCRE2_SPTR)((char *)re + sizeof(pcre2_real_code));
   break;
 
   case PCRE2_INFO_NEWLINE_CONVENTION:

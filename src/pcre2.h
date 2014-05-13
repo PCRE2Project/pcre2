@@ -451,7 +451,7 @@ PCRE2_EXP_DECL int       pcre2_substring_length_byname(pcre2_match_data *, \
 PCRE2_EXP_DECL int       pcre2_substring_length_bynumber(pcre2_match_data *, \
                            int); \
 PCRE2_EXP_DECL int       pcre2_substring_nametable_scan(const pcre2_code *, \
-                           PCRE2_SPTR, PCRE2_UCHAR **, PCRE2_UCHAR **); \
+                           PCRE2_SPTR, PCRE2_SPTR *, PCRE2_SPTR *); \
 PCRE2_EXP_DECL int       pcre2_substring_number_from_name(\
                            const pcre2_code *, PCRE2_SPTR); \
 PCRE2_EXP_DECL void      pcre2_substring_list_free(PCRE2_SPTR *); \

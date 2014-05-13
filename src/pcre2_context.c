@@ -78,27 +78,26 @@ memory control data is to be stored for future use.
 Arguments:
   size        amount of memory required
   offset      offset in memory block to memctl structure
-  gcontext    a general context or NULL
+  memctl      pointer to a memctl block or NULL
   
 Returns:      pointer to memory or NULL on failure
 */   
 
 PCRE2_EXP_DEFN void *
-PRIV(memctl_malloc)(size_t size, size_t offset, 
-  pcre2_general_context *gcontext)
+PRIV(memctl_malloc)(size_t size, size_t offset, pcre2_memctl *memctl)
 {
-pcre2_memctl *memctl;
-void *yield = (gcontext == NULL)? malloc(size) :
-  gcontext->memctl.malloc(size, gcontext->memctl.memory_data);
+pcre2_memctl *newmemctl;
+void *yield = (memctl == NULL)? malloc(size) :
+  memctl->malloc(size, memctl->memory_data);
 if (yield == NULL) return NULL; 
-memctl = (pcre2_memctl *)(((uint8_t *)yield) + offset);
-if (gcontext == NULL)
+newmemctl = (pcre2_memctl *)(((uint8_t *)yield) + offset);
+if (memctl == NULL)
   {
-  memctl->malloc = default_malloc;
-  memctl->free = default_free;
-  memctl->memory_data = NULL;
+  newmemctl->malloc = default_malloc;
+  newmemctl->free = default_free;
+  newmemctl->memory_data = NULL;
   }
-else *memctl = gcontext->memctl;       
+else *newmemctl = *memctl;       
 return yield;
 }   
 
@@ -152,7 +151,7 @@ pcre2_compile_context_create(pcre2_general_context *gcontext)
 pcre2_compile_context *ccontext = PRIV(memctl_malloc)(
   sizeof(pcre2_real_compile_context), 
   offsetof(pcre2_real_compile_context, memctl),
-  gcontext); 
+  &(gcontext->memctl)); 
 if (ccontext == NULL) return NULL;  
 PRIV(compile_context_init)(ccontext, FALSE);
 return ccontext;
@@ -184,7 +183,7 @@ pcre2_match_context_create(pcre2_general_context *gcontext)
 pcre2_match_context *mcontext = PRIV(memctl_malloc)(
   sizeof(pcre2_real_match_context),
   offsetof(pcre2_real_compile_context, memctl),
-  gcontext);  
+  &(gcontext->memctl));  
 if (mcontext == NULL) return NULL;   
 PRIV(match_context_init)(mcontext, FALSE);
 return mcontext;
@@ -240,21 +239,24 @@ return new;
 PCRE2_EXP_DEFN void PCRE2_CALL_CONVENTION
 pcre2_general_context_free(pcre2_general_context *gcontext)
 {
-gcontext->memctl.free(gcontext, gcontext->memctl.memory_data);
+if (gcontext != NULL)
+  gcontext->memctl.free(gcontext, gcontext->memctl.memory_data);
 }
 
 
 PCRE2_EXP_DEFN void PCRE2_CALL_CONVENTION
 pcre2_compile_context_free(pcre2_compile_context *ccontext)
 {
-ccontext->memctl.free(ccontext, ccontext->memctl.memory_data);
+if (ccontext != NULL)
+  ccontext->memctl.free(ccontext, ccontext->memctl.memory_data);
 }
 
 
 PCRE2_EXP_DEFN void PCRE2_CALL_CONVENTION
 pcre2_match_context_free(pcre2_match_context *mcontext)
 {
-mcontext->memctl.free(mcontext, mcontext->memctl.memory_data);
+if (mcontext != NULL)
+  mcontext->memctl.free(mcontext, mcontext->memctl.memory_data);
 }
 
 

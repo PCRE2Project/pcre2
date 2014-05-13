@@ -102,23 +102,57 @@ if (ccontext == NULL)
 
 if (pattern[0] == 'Y')
   {
-  c = ccontext->memctl.malloc(sizeof(pcre2_real_code), NULL);
+  PCRE2_UCHAR *n; 
+  int lennumber = (PCRE2_CODE_UNIT_WIDTH == 8)? 2 : 1;
+  size_t size = sizeof(pcre2_real_code) + 
+    (12 + 3*lennumber)*(PCRE2_CODE_UNIT_WIDTH/8) + CU2BYTES(20);
+  c = ccontext->memctl.malloc(size, NULL);
   c->memctl = ccontext->memctl; 
   c->magic_number = MAGIC_NUMBER;
-  c->size = sizeof(pcre2_real_code);  
-  c->name_table_offset = sizeof(pcre2_real_code); 
+  c->size = size;
   c->compile_options = options; 
   c->flags = PCRE2_CODE_UNIT_WIDTH/8;
   c->limit_match = 0;
   c->limit_recursion = 0;
   c->max_lookbehind = 0;
   c->minlength = 3;
-  c->top_bracket = 1;
+  c->top_bracket = 5;
   c->top_backref = 1;       
   c->bsr_convention = ccontext->bsr_convention;
   c->newline_convention = ccontext->newline_convention;  
-  c->name_count = 0; 
-  c->name_entry_size = 0; 
+  c->name_count = 3; 
+  c->name_entry_size = 4 + lennumber; 
+  
+  n = (PCRE2_UCHAR *)((char *)c + sizeof(pcre2_real_code));
+   
+  if (lennumber == 2) *n++ = 0 ;
+  *n++ = 1;
+  *n++ = 'x'; *n++ = 'x'; *n++ = 'x'; *n++ = 0;
+
+  if (lennumber == 2) *n++ = 0 ;
+  *n++ = 2;
+  *n++ = 'y'; *n++ = 'y'; *n++ = 'y'; *n++ = 0;
+
+  if (lennumber == 2) *n++ = 0 ;
+  *n++ = 3;
+  *n++ = 'y'; *n++ = 'y'; *n++ = 'y'; *n++ = 0;
+
+
+  *n++ = OP_CHAR;
+  *n++ = 'x';
+  *n++ = OP_CHARI;
+  *n++ = 'Y';   
+  
+  *n++ = OP_PROP;
+  *n++ = PT_SC;
+  *n++ = 0;  
+  
+  *n++ = OP_DNRREF;
+  *n++ = 0;  
+ 
+  *n++ = OP_END;
+
+ 
   } 
 
 else

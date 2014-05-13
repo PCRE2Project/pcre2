@@ -76,11 +76,19 @@ pcre2_match(const pcre2_code *code, PCRE2_SPTR subject, int length,
   size_t start_offset, uint32_t options, pcre2_match_data *match_data, 
   pcre2_match_context *mcontext)
 {
+int rc = PCRE2_ERROR_NOMATCH;
 
-/* Fudge for testing pcre2test */
+mcontext=mcontext;length=length;
+options=options;
 
-if (subject[start_offset] == 'Y')
+
+/* Fudges for testing pcre2test */
+
+if (subject[0] == 'Y')
   {
+  rc = 0;
+  match_data->code = code;
+  match_data->subject = subject;  
   match_data->leftchar = 0;
   match_data->rightchar = 3;
   match_data->startchar = 0;
@@ -88,24 +96,51 @@ if (subject[start_offset] == 'Y')
   
   switch (match_data->oveccount)
     {
-    case 0: return 0;
+    case 0: break;
     
     case 1: match_data->ovector[0] = start_offset; 
             match_data->ovector[1] = start_offset + 4;
-            return 0;
+            break;
             
-    default: match_data->ovector[0] = start_offset; 
+    default:
+    case 6:  match_data->ovector[10] = PCRE2_UNSET;
+             match_data->ovector[11] = PCRE2_UNSET; 
+            
+    case 5:  match_data->ovector[8] = PCRE2_UNSET;
+             match_data->ovector[9] = PCRE2_UNSET; 
+            
+    case 4:  match_data->ovector[6] = start_offset + 3;
+             match_data->ovector[7] = start_offset + 4; 
+             rc += 2; 
+            
+    case 3:  match_data->ovector[4] = PCRE2_UNSET;
+             match_data->ovector[5] = PCRE2_UNSET; 
+            
+    case 2:  match_data->ovector[0] = start_offset; 
              match_data->ovector[1] = start_offset + 4;
              match_data->ovector[2] = start_offset + 1;    
              match_data->ovector[3] = start_offset + 3;
-             return 2;
+             match_data->mark = subject; 
+             rc += 2;
+             break; 
     }  
+    
+  } 
+
+else if (subject[0] == 'P')
+  {
+  rc = PCRE2_ERROR_PARTIAL;
+  match_data->code = code;
+  match_data->subject = subject;  
+  match_data->leftchar = 0;
+  match_data->rightchar = length;
+  match_data->startchar = 1;
+  match_data->mark = NULL;
   } 
 
 
-mcontext=mcontext;code=code;subject=subject;length=length;
-start_offset=start_offset; options=options; match_data=match_data;
-return PCRE2_ERROR_NOMATCH;
+match_data->rc = rc;
+return rc; 
 }    
 
 /* End of pcre2_match.c */

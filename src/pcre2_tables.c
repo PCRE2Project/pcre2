@@ -38,34 +38,33 @@ POSSIBILITY OF SUCH DAMAGE.
 -----------------------------------------------------------------------------
 */
 
-#ifndef PCRE2_INCLUDED
-
 /* This module contains some fixed tables that are used by more than one of the
 PCRE code modules. The tables are also #included by the pcre2test program,
 which uses macros to change their names from _pcre2_xxx to xxxx, thereby
-avoiding name clashes with the library. */
+avoiding name clashes with the library. In this case, PCRE2_INCLUDED is 
+defined. */
 
+#ifndef PCRE2_INCLUDED           /* We're compiling the library */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
-
 #include "pcre2_internal.h"
 #endif /* PCRE2_INCLUDED */
 
 
-#ifdef FIXME
-
 /* Table of sizes for the fixed-length opcodes. It's defined in a macro so that
-the definition is next to the definition of the opcodes in pcre2_internal.h. */
+the definition is next to the definition of the opcodes in pcre2_internal.h. 
+This is mode-dependent, so is skipped when this file is included by pcre2test. */
 
+#ifndef PCRE2_INCLUDED
 const uint8_t PRIV(OP_lengths)[] = { OP_LENGTHS };
+#endif
 
 /* Tables of horizontal and vertical whitespace characters, suitable for
 adding to classes. */
 
 const uint32_t PRIV(hspace_list)[] = { HSPACE_LIST };
 const uint32_t PRIV(vspace_list)[] = { VSPACE_LIST };
-#endif /* FIXME */
 
 
 /*************************************************
@@ -103,8 +102,6 @@ const uint8_t PRIV(utf8_table4)[] = {
 #endif /* (SUPPORT_UTF && COMPILE_PCRE8) || (PCRE2_INCLUDED && SUPPORT_PCRE[16|32])*/
 
 
-#ifdef FIXME
-
 #ifdef SUPPORT_UTF
 
 /* Table to translate from particular type value to the general value. */
@@ -122,9 +119,9 @@ const uint32_t PRIV(ucp_gentype)[] = {
 
 /* This table encodes the rules for finding the end of an extended grapheme
 cluster. Every code point has a grapheme break property which is one of the
-ucp_gbXX values defined in ucp.h. The 2-dimensional table is indexed by the
-properties of two adjacent code points. The left property selects a word from
-the table, and the right property selects a bit from that word like this:
+ucp_gbXX values defined in pcre2_ucp.h. The 2-dimensional table is indexed by
+the properties of two adjacent code points. The left property selects a word
+from the table, and the right property selects a bit from that word like this:
 
   ucp_gbtable[left-property] & (1 << right-property)
 
@@ -659,7 +656,5 @@ const ucp_type_table PRIV(utt)[] = {
 const int PRIV(utt_size) = sizeof(PRIV(utt)) / sizeof(ucp_type_table);
 
 #endif /* SUPPORT_UTF */
-
-#endif /* FIXME */
 
 /* End of pcre2_tables.c */

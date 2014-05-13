@@ -269,25 +269,26 @@ COMMON_SOURCES = \
   src/pcre2_error.c \
   src/pcre2_match.c \
   src/pcre2_internal.h \
+  src/pcre2_intmodedep.h \
   src/pcre2_jit_compile.c \
   src/pcre2_jit_match.c \
   src/pcre2_jit_misc.c \
   src/pcre2_maketables.c \
   src/pcre2_match_data.c \
   src/pcre2_pattern_info.c \
+  src/pcre2_string_utils.c \
   src/pcre2_substring.c \
+  src/pcre2_tables.c \
+  src/pcre2_ucd.c \
+  src/pcre2_ucp.h \
   src/pcre2_version.c
 
 #  src/pcre2_newline.c \
 #  src/pcre2_ord2utf8.c \
 #  src/pcre2_refcount.c \
-#  src/pcre2_string_utils.c \
 #  src/pcre2_study.c \
-#  src/pcre2_tables.c \
-#  src/pcre2_ucd.c \
 #  src/pcre2_valid_utf8.c \
-#  src/pcre2_xclass.c \
-#  src/ucp.h
+#  src/pcre2_xclass.c
 
 
 if WITH_PCRE8
@@ -450,7 +451,7 @@ endif # WITH_GCOV
 endif # WITH_JIT
 
 # Build the general pcre2test program. The file src/pcre2_printint.c is
-# #included by pcre2test as many times as needed, at different code unit 
+# #included by pcre2test as many times as needed, at different code unit
 # widths.
 
 bin_PROGRAMS += pcre2test
@@ -593,8 +594,8 @@ CLEANFILES += \
         testtemp* \
 	testtry \
         testNinput
-        
-## ------------ End of testing ------------- 
+
+## ------------ End of testing -------------
 
 
 # PCRE demonstration program. Not built automatcally. The point is that the
