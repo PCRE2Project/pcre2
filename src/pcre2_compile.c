@@ -111,6 +111,7 @@ if (pattern[0] == 'Y')
   c->magic_number = MAGIC_NUMBER;
   c->size = size;
   c->compile_options = options; 
+  c->pattern_options = 0; 
   c->flags = PCRE2_CODE_UNIT_WIDTH/8;
   c->limit_match = 0;
   c->limit_recursion = 0;
@@ -148,6 +149,9 @@ if (pattern[0] == 'Y')
   *n++ = 0;  
   
   *n++ = OP_DNRREF;
+  *n++ = 0;  
+  *n++ = 0;  
+  *n++ = 0;  
   *n++ = 0;  
  
   *n++ = OP_END;

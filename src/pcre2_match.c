@@ -137,6 +137,8 @@ else if (subject[0] == 'P')
   match_data->startchar = 1;
   match_data->mark = NULL;
   } 
+  
+else if (subject[0] == 'E') rc = PCRE2_ERROR_MATCHLIMIT; 
 
 
 match_data->rc = rc;
