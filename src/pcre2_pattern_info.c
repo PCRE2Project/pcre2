@@ -59,7 +59,7 @@ Arguments:
 Returns:        0 if data returned, negative on error
 */
 
-/* FIXME: this is currently incomplete */
+/* FIXME: this is currently incomplete. Also, check int vs uint32_t */
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_pattern_info(const pcre2_code *code, uint32_t what, void *where)

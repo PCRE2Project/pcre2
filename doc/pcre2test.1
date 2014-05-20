@@ -190,7 +190,10 @@ the \fB-help\fP option states whether or not \fBreadline()\fP will be used.
 The program handles any number of tests, each of which consists of a set of
 input lines. Each set starts with a regular expression pattern, followed by any
 number of subject lines to be matched against that pattern. In between sets of
-test data, command lines that begin with a hash (#) character may appear.
+test data, command lines that begin with a hash (#) character may appear. This 
+file format, with some restrictions, can also be processed by the
+\fBperltest.pl\fP script that is distributed with PCRE2 as a means of checking
+that the behaviour of PCRE2 and Perl is the same.
 .P
 Each subject line is matched separately and independently. If you want to do
 multi-line matches, you have to use the \en escape sequence (or \er or \er\en,
@@ -223,6 +226,16 @@ pattern.
 .sp
 This command sets a default modifier list that applies to all subsequent 
 patterns. Modifiers on a pattern can change these settings.
+.sp
+  #perltest
+.sp
+The appearance of this line causes all subsequent modifier settings to be 
+checked for compatibility with the \fBperltest.pl\fP script, which is used to
+confirm that Perl gives the same results as PCRE2. Also, apart from comment
+lines, none of the other command lines are permitted, because they and many
+of the modifiers are specific to \fBpcre2test\fP, and should not be used in
+test files that are also processed by \fBperltest.pl\fP. The \fP#perltest\fB 
+command helps detect tests that are accidentally put in the wrong file.
 .sp   
   #subject <modifier-list>
 .sp
@@ -416,7 +429,7 @@ about the pattern:
       posix                     use the POSIX API
       save=<file name>          save compiled pattern
       stackguard=<number>       test the stackguard feature
-      tables=[0|1]              select internal tables
+      tables=[0|1|2]            select internal tables
 .sp
 The effects of these modifiers are described in the following sections.
 FIXME: Give more examples.
@@ -480,11 +493,12 @@ to 7:
   3  normal match and soft partial match
   4  hard partial match only
   6  soft and hard partial match
-  7  all three modes (default)
+  7  all three modes
 .sp
-If JIT compilation is successful, the compiled JIT code will automatically be
-used when \fBpcre2_match()\fP is run, except when incompatible run-time
-options are specified. For more details, see the
+If no number is given, 7 is assumed. If JIT compilation is successful, the
+compiled JIT code will automatically be used when \fBpcre2_match()\fP is run,
+except when incompatible run-time options are specified. For more details, see
+the
 .\" HREF
 \fBpcre2jit\fP
 .\"
@@ -503,13 +517,13 @@ The \fB/locale\fP modifier must specify the name of a locale, for example:
 .sp
   /pattern/locale=fr_FR
 .sp
-The given locale is set,
-\fBpcre2_maketables()\fP is called to build a set of character tables for
-the locale, and this is then passed to \fBpcre2_compile()\fP when compiling the
-regular expression. The same tables are used when matching the following
-subject lines. The \fB/locale\fP modifier applies only to the pattern on which
-it appears, but can be given in a \fB#pattern\fP command if a default is 
-needed.
+The given locale is set, \fBpcre2_maketables()\fP is called to build a set of
+character tables for the locale, and this is then passed to
+\fBpcre2_compile()\fP when compiling the regular expression. The same tables
+are used when matching the following subject lines. The \fB/locale\fP modifier
+applies only to the pattern on which it appears, but can be given in a
+\fB#pattern\fP command if a default is needed. Setting a locale and alternate 
+character tables are mutually exclusive.
 .
 .
 .SS "Showing pattern memory"
@@ -571,12 +585,14 @@ specific set of built-in character tables to be passed to
 \fBpcre2_compile()\fP. This is used in the PCRE2 tests to check behaviour with
 different character tables. The digit specifies the tables as follows:
 .sp
-  0   the default ASCII tables, as distributed in
+  0   do not pass any special character tables
+  1   the default ASCII tables, as distributed in
         pcre2_chartables.c.dist
-  1   a set of tables defining ISO 8859 characters
+  2   a set of tables defining ISO 8859 characters
 .sp
-In table 1, some characters whose codes are greater than 128 are identified as
-letters, digits, spaces, etc.
+In table 2, some characters whose codes are greater than 128 are identified as
+letters, digits, spaces, etc. Setting alternate character tables and a locale 
+are mutually exclusive.
 .
 .
 .SS "Locking out certain modifiers"
@@ -627,7 +643,8 @@ not affect the compilation process.
       jitverify                 verify JIT usage 
       mark                      show mark values
 .sp
-These modifiers may not appear in a \fB#pattern\fP command.
+These modifiers may not appear in a \fB#pattern\fP command. If you want them as 
+defaults, set them in a \fB#subject\fP command.
 .
 .
 .SH "SUBJECT MODIFIERS"
@@ -730,7 +747,7 @@ set, the current captured groups are output when a callout occurs.
 The \fBcallout_fail\fP modifier can be given one or two numbers. If there is 
 only one number, 1 is returned instead of 0 when a callout of that number is 
 reached. If two numbers are given, 1 is returned when callout <n> is reached 
-for the <m>th time. FIXME: this needs checking.
+for the <m>th time. FIXME: this needs checking. Disable by m=0?
 .
 .
 .SS "Testing substring extraction functions"
@@ -738,7 +755,15 @@ for the <m>th time. FIXME: this needs checking.
 .sp
 The \fBcopy\fP and \fBget\fP modifiers can be used to test the 
 \fBpcre2_substring_copy_xxx()\fP and \fBpcre2_substring_get_xxx()\fP functions.
-They can be given more than once, and each can specify a group name or number.
+They can be given more than once, and each can specify a group name or number,
+for example:
+.sp
+   abcd\=copy=1,copy=3,get=G1
+.sp
+If the \fB#subject\fP command is used to set default copy and get lists, these 
+can be unset by specifying a negative number for numbered groups and an empty 
+name for named groups.
+.P
 The \fBgetall\fP modifier tests \fBpcre2_substring_list_get()\fP, which 
 extracts all captured substrings.
 .P
