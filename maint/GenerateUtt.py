@@ -1,8 +1,6 @@
 #! /usr/bin/python
 
-# Generate utt tables. Note: this script is written in Python 2 and is
-# incompatible with Python 3. However, the 2to3 conversion script has been 
-# successfully tested on it.
+# Generate utt tables. Note: this script has now been converted to Python 3.
 
 # The source file pcre2_tables.c contains (amongst other things), a table that
 # is indexed by script name. In order to reduce the number of relocations when
@@ -22,6 +20,7 @@
 # necessary for Unicode 6.2.0 support.
 # Modfied by PH 26-February-2013 to add the Xuc special category.
 # Comment modified by PH 13-May-2014 to update to PCRE2 file names.
+# Script updated to Python 3 by running it through the 2to3 converter.
 
 script_names = ['Arabic', 'Armenian', 'Bengali', 'Bopomofo', 'Braille', 'Buginese', 'Buhid', 'Canadian_Aboriginal', \
  'Cherokee', 'Common', 'Coptic', 'Cypriot', 'Cyrillic', 'Deseret', 'Devanagari', 'Ethiopic', 'Georgian', \
@@ -53,9 +52,9 @@ general_category_names = ['C', 'L', 'M', 'N', 'P', 'S', 'Z']
 
 # First add the Unicode script and category names.
 
-utt_table  = zip(script_names, ['PT_SC'] * len(script_names))
-utt_table += zip(category_names, ['PT_PC'] * len(category_names))
-utt_table += zip(general_category_names, ['PT_GC'] * len(general_category_names))
+utt_table  = list(zip(script_names, ['PT_SC'] * len(script_names)))
+utt_table += list(zip(category_names, ['PT_PC'] * len(category_names)))
+utt_table += list(zip(general_category_names, ['PT_GC'] * len(general_category_names)))
 
 # Now add our own specials.
 
@@ -75,29 +74,29 @@ utt_table.sort()
 # UTF-8 mode on EBCDIC platforms.
 
 for utt in utt_table:
-        print '#define STRING_%s0' % (utt[0].replace('&', '_AMPERSAND')),
+        print('#define STRING_%s0' % (utt[0].replace('&', '_AMPERSAND')), end=' ')
         for c in utt[0]:
                 if c == '_':
-                        print 'STR_UNDERSCORE',
+                        print('STR_UNDERSCORE', end=' ')
                 elif c == '&':
-                        print 'STR_AMPERSAND',
+                        print('STR_AMPERSAND', end=' ')
                 else:
-                        print 'STR_%s' % c,;
-        print '"\\0"'
+                        print('STR_%s' % c, end=' ');
+        print('"\\0"')
 
 # Print the actual table, using the string names
 
-print ''
-print 'const char PRIV(utt_names)[] =';
+print('')
+print('const char PRIV(utt_names)[] =');
 last = ''
 for utt in utt_table:
         if utt == utt_table[-1]:
                 last = ';'
-        print '  STRING_%s0%s' % (utt[0].replace('&', '_AMPERSAND'), last)
+        print('  STRING_%s0%s' % (utt[0].replace('&', '_AMPERSAND'), last))
 # This was how it was done before the EBCDIC-compatible modification.
 #        print '  "%s\\0"%s' % (utt[0], last)
 
-print '\nconst ucp_type_table PRIV(utt)[] = {'
+print('\nconst ucp_type_table PRIV(utt)[] = {')
 offset = 0
 last = ','
 for utt in utt_table:
@@ -108,6 +107,6 @@ for utt in utt_table:
                 value = 'ucp_' + utt[0]
         if utt == utt_table[-1]:
                 last = ''
-        print '  { %3d, %s, %s }%s' % (offset, utt[1], value, last)
+        print('  { %3d, %s, %s }%s' % (offset, utt[1], value, last))
         offset += len(utt[0]) + 1
-print '};'
+print('};')
