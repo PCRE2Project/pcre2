@@ -275,19 +275,19 @@ COMMON_SOURCES = \
   src/pcre2_jit_misc.c \
   src/pcre2_maketables.c \
   src/pcre2_match_data.c \
+  src/pcre2_newline.c \
+  src/pcre2_ord2utf.c \
   src/pcre2_pattern_info.c \
   src/pcre2_string_utils.c \
   src/pcre2_substring.c \
   src/pcre2_tables.c \
   src/pcre2_ucd.c \
   src/pcre2_ucp.h \
+  src/pcre2_valid_utf.c \
   src/pcre2_version.c
 
-#  src/pcre2_newline.c \
-#  src/pcre2_ord2utf8.c \
 #  src/pcre2_refcount.c \
 #  src/pcre2_study.c \
-#  src/pcre2_valid_utf8.c \
 #  src/pcre2_xclass.c
 
 

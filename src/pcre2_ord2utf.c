@@ -38,6 +38,11 @@ POSSIBILITY OF SUCH DAMAGE.
 -----------------------------------------------------------------------------
 */
 
+
+/* This file contains a function that converts a Unicode character code point
+into a UTF string. The behaviour is different for each code unit width. */
+
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -45,90 +50,70 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "pcre2_internal.h"
 
 
+/* If SUPPORT_UTF is not defined, this function will never be called. Supply a 
+dummy function because some compilers do not like empty source modules. */
 
-/*************************************************
-* Return info about what features are configured *
-*************************************************/
-
-/* This function has an extensible interface so that additional items can be
-added compatibly.
-
-Arguments:
-  what             what information is required
-  where            where to put the information
-
-Returns:           0 if data returned, negative on error
-*/
-
-PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
-pcre2_config(int what, void *where)
+#ifndef SUPPORT_UTF
+unsigned int
+PRIV(ord2utf)(uint32_t cvalue, PCRE2_UCHAR *buffer)
 {
-switch (what)
-  {
-  case PCRE2_CONFIG_BSR:
-#ifdef BSR_ANYCRLF
-  *((int *)where) = 1;
-#else
-  *((int *)where) = 0;
-#endif
-  break;
-
-  case PCRE2_CONFIG_JIT:
-#ifdef SUPPORT_JIT
-  *((int *)where) = 1;
-#else
-  *((int *)where) = 0;
-#endif
-  break;
-
-  case PCRE2_CONFIG_JITTARGET:
-#ifdef SUPPORT_JIT
-  *((const char **)where) = PRIV(jit_get_target)();
-#else
-  *((const char **)where) = NULL;
-#endif
-  break;
-
-  case PCRE2_CONFIG_LINK_SIZE:
-  *((int *)where) = LINK_SIZE;
-  break;
-
-  case PCRE2_CONFIG_MATCH_LIMIT:
-  *((unsigned long int *)where) = MATCH_LIMIT;
-  break;
-
-  case PCRE2_CONFIG_MATCH_LIMIT_RECURSION:
-  *((unsigned long int *)where) = MATCH_LIMIT_RECURSION;
-  break;
-
-  case PCRE2_CONFIG_NEWLINE:
-  *((int *)where) = NEWLINE_DEFAULT;
-  break;
-
-  case PCRE2_CONFIG_PARENS_LIMIT:
-  *((unsigned long int *)where) = PARENS_NEST_LIMIT;
-  break;
-
-  case PCRE2_CONFIG_STACKRECURSE:
-#ifdef NO_RECURSE
-  *((int *)where) = 0;
-#else
-  *((int *)where) = 1;
-#endif
-  break;
-
-  case PCRE2_CONFIG_UTF:
-#if defined SUPPORT_UTF
-  *((int *)where) = 1;
-#else
-  *((int *)where) = 0;
-#endif
-  break;
-
-  default: return PCRE2_ERROR_BADOPTION;
-  }
-
+(void)(cvalue);
+(void)(buffer);
 return 0;
 }
+#else  /* SUPPORT_UTF */
 
-/* End of pcre2_config.c */
+
+/*************************************************
+*          Convert code point to UTF             *
+*************************************************/
+
+/*
+Arguments:
+  cvalue     the character value
+  buffer     pointer to buffer for result
+
+Returns:     number of code units placed in the buffer
+*/
+
+unsigned int
+PRIV(ord2utf)(uint32_t cvalue, PCRE2_UCHAR *buffer)
+{
+/* Convert to UTF-8 */
+
+#if PCRE2_CODE_UNIT_WIDTH == 8
+register int i, j;
+for (i = 0; i < PRIV(utf8_table1_size); i++)
+  if ((int)cvalue <= PRIV(utf8_table1)[i]) break;
+buffer += i;
+for (j = i; j > 0; j--)
+ {
+ *buffer-- = 0x80 | (cvalue & 0x3f);
+ cvalue >>= 6;
+ }
+*buffer = PRIV(utf8_table2)[i] | cvalue;
+return i + 1;
+
+/* Convert to UTF-16 */
+
+#elif PCRE2_CODE_UNIT_WIDTH == 16
+if (cvalue <= 0xffff)
+  {
+  *buffer = (PCRE2_UCHAR)cvalue;
+  return 1;
+  }
+cvalue -= 0x10000;
+*buffer++ = 0xd800 | (cvalue >> 10);
+*buffer = 0xdc00 | (cvalue & 0x3ff);
+return 2;
+
+/* Convert to UTF-32 */
+
+#else
+*buffer = (PCRE2_UCHAR)cvalue;
+return 1;
+#endif
+}
+#endif  /* SUPPORT_UTF */
+
+/* End of pcre_ord2utf.c */

@@ -184,7 +184,7 @@ switch(what)
   break;
 
   case PCRE2_INFO_SIZE:
-  *((size_t *)where) = re->size;
+  *((size_t *)where) = re->blocksize;
   break;
 
   default: return PCRE2_ERROR_BADOPTION;

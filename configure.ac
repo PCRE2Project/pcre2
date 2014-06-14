@@ -2,13 +2,13 @@ dnl Process this file with autoconf to produce a configure script.
 
 dnl NOTE FOR MAINTAINERS: Do not use minor version numbers 08 or 09 because
 dnl the leading zeros may cause them to be treated as invalid octal constants
-dnl if a PCRE user writes code that uses PCRE_MINOR as a number. There is now
+dnl if a PCRE2 user writes code that uses PCRE2_MINOR as a number. There is now
 dnl a check further down that throws an error if 08 or 09 are used.
 
-dnl The PCRE_PRERELEASE feature is for identifying release candidates. It might
+dnl The PCRE2_PRERELEASE feature is for identifying release candidates. It might
 dnl be defined as -RC2, for example. For real releases, it should be empty.
 
-m4_define(pcre2_major, [9])
+m4_define(pcre2_major, [10])
 m4_define(pcre2_minor, [00])
 m4_define(pcre2_prerelease, [-DEV])
 m4_define(pcre2_date, [2014-99-99])
@@ -125,11 +125,11 @@ AC_ARG_ENABLE(jit,
                              [enable Just-In-Time compiling support]),
               , enable_jit=no)
 
-# Handle --disable-pcregrep-jit (enabled by default)
-AC_ARG_ENABLE(pcregrep-jit,
-              AS_HELP_STRING([--disable-pcregrep-jit],
-                             [disable JIT support in pcregrep]),
-              , enable_pcregrep_jit=yes)
+# Handle --disable-pcre2grep-jit (enabled by default)
+AC_ARG_ENABLE(pcre2grep-jit,
+              AS_HELP_STRING([--disable-pcre2grep-jit],
+                             [disable JIT support in pcre2grep]),
+              , enable_pcre2grep_jit=yes)
 
 # Handle --enable-rebuild-chartables
 AC_ARG_ENABLE(rebuild-chartables,
@@ -144,28 +144,28 @@ AC_ARG_ENABLE(utf,
               , enable_utf=unset)
 
 # Handle newline options
-ac_pcre_newline=lf
+ac_pcre2_newline=lf
 AC_ARG_ENABLE(newline-is-cr,
               AS_HELP_STRING([--enable-newline-is-cr],
                              [use CR as newline character]),
-              ac_pcre_newline=cr)
+              ac_pcre2_newline=cr)
 AC_ARG_ENABLE(newline-is-lf,
               AS_HELP_STRING([--enable-newline-is-lf],
                              [use LF as newline character (default)]),
-              ac_pcre_newline=lf)
+              ac_pcre2_newline=lf)
 AC_ARG_ENABLE(newline-is-crlf,
               AS_HELP_STRING([--enable-newline-is-crlf],
                              [use CRLF as newline sequence]),
-              ac_pcre_newline=crlf)
+              ac_pcre2_newline=crlf)
 AC_ARG_ENABLE(newline-is-anycrlf,
               AS_HELP_STRING([--enable-newline-is-anycrlf],
                              [use CR, LF, or CRLF as newline sequence]),
-              ac_pcre_newline=anycrlf)
+              ac_pcre2_newline=anycrlf)
 AC_ARG_ENABLE(newline-is-any,
               AS_HELP_STRING([--enable-newline-is-any],
                              [use any valid Unicode newline sequence]),
-              ac_pcre_newline=any)
-enable_newline="$ac_pcre_newline"
+              ac_pcre2_newline=any)
+enable_newline="$ac_pcre2_newline"
 
 # Handle --enable-bsr-anycrlf
 AC_ARG_ENABLE(bsr-anycrlf,
@@ -191,35 +191,35 @@ AC_ARG_ENABLE(stack-for-recursion,
                              [don't use stack recursion when matching]),
               , enable_stack_for_recursion=yes)
 
-# Handle --enable-pcregrep-libz
-AC_ARG_ENABLE(pcregrep-libz,
-              AS_HELP_STRING([--enable-pcregrep-libz],
-                             [link pcregrep with libz to handle .gz files]),
-              , enable_pcregrep_libz=no)
+# Handle --enable-pcre2grep-libz
+AC_ARG_ENABLE(pcre2grep-libz,
+              AS_HELP_STRING([--enable-pcre2grep-libz],
+                             [link pcre2grep with libz to handle .gz files]),
+              , enable_pcre2grep_libz=no)
 
-# Handle --enable-pcregrep-libbz2
-AC_ARG_ENABLE(pcregrep-libbz2,
-              AS_HELP_STRING([--enable-pcregrep-libbz2],
-                             [link pcregrep with libbz2 to handle .bz2 files]),
-              , enable_pcregrep_libbz2=no)
+# Handle --enable-pcre2grep-libbz2
+AC_ARG_ENABLE(pcre2grep-libbz2,
+              AS_HELP_STRING([--enable-pcre2grep-libbz2],
+                             [link pcre2grep with libbz2 to handle .bz2 files]),
+              , enable_pcre2grep_libbz2=no)
 
-# Handle --with-pcregrep-bufsize=N
-AC_ARG_WITH(pcregrep-bufsize,
-              AS_HELP_STRING([--with-pcregrep-bufsize=N],
-                             [pcregrep buffer size (default=20480, minimum=8192)]),
-              , with_pcregrep_bufsize=20480)
+# Handle --with-pcre2grep-bufsize=N
+AC_ARG_WITH(pcre2grep-bufsize,
+              AS_HELP_STRING([--with-pcre2grep-bufsize=N],
+                             [pcre2grep buffer size (default=20480, minimum=8192)]),
+              , with_pcre2grep_bufsize=20480)
 
-# Handle --enable-pcretest-libedit
-AC_ARG_ENABLE(pcretest-libedit,
-              AS_HELP_STRING([--enable-pcretest-libedit],
-                             [link pcretest with libedit]),
-              , enable_pcretest_libedit=no)
+# Handle --enable-pcre2test-libedit
+AC_ARG_ENABLE(pcre2test-libedit,
+              AS_HELP_STRING([--enable-pcre2test-libedit],
+                             [link pcre2test with libedit]),
+              , enable_pcre2test_libedit=no)
 
-# Handle --enable-pcretest-libreadline
-AC_ARG_ENABLE(pcretest-libreadline,
-              AS_HELP_STRING([--enable-pcretest-libreadline],
-                             [link pcretest with libreadline]),
-              , enable_pcretest_libreadline=no)
+# Handle --enable-pcre2test-libreadline
+AC_ARG_ENABLE(pcre2test-libreadline,
+              AS_HELP_STRING([--enable-pcre2test-libreadline],
+                             [link pcre2test with libreadline]),
+              , enable_pcre2test_libreadline=no)
 
 # Handle --with-link-size=N
 AC_ARG_WITH(link-size,
@@ -298,11 +298,11 @@ fi
 # agree with the PCRE2_NEWLINE_xxx values in pcre2.h.
 
 case "$enable_newline" in
-  cr)      ac_pcre_newline_value=0 ;;
-  lf)      ac_pcre_newline_value=1 ;;
-  crlf)    ac_pcre_newline_value=2 ;;
-  any)     ac_pcre_newline_value=3 ;;
-  anycrlf) ac_pcre_newline_value=4 ;;
+  cr)      ac_pcre2_newline_value=1 ;;
+  lf)      ac_pcre2_newline_value=2 ;;
+  crlf)    ac_pcre2_newline_value=3 ;;
+  any)     ac_pcre2_newline_value=4 ;;
+  anycrlf) ac_pcre2_newline_value=5 ;;
   *)
   AC_MSG_ERROR([invalid argument \"$enable_newline\" to --enable-newline option])
   ;;
@@ -314,7 +314,7 @@ if test "x$enable_ebcdic_nl25" = "xyes"; then
 fi
 
 # Make sure that if enable_ebcdic is set, rebuild_chartables is also enabled.
-# Also check that UTF support is not requested, because PCRE cannot handle
+# Also check that UTF support is not requested, because PCRE2 cannot handle
 # EBCDIC and UTF in the same build. To do so it would need to use different
 # character constants depending on the mode.
 #
@@ -334,13 +334,13 @@ case "$with_link_size" in
 esac
 
 AH_TOP([
-/* PCRE is written in Standard C, but there are a few non-standard things it
+/* PCRE2 is written in Standard C, but there are a few non-standard things it
 can cope with, allowing it to run on SunOS4 and other "close to standard"
 systems.
 
 In environments that support the GNU autotools, config.h.in is converted into
 config.h by the "configure" script. In environments that use CMake,
-config-cmake.in is converted into config.h. If you are going to build PCRE "by
+config-cmake.in is converted into config.h. If you are going to build PCRE2 "by
 hand" without using "configure" or CMake, you should copy the distributed
 config.h.generic to config.h, and edit the macro definitions to be the way you
 need them. You must then add -DHAVE_CONFIG_H to all of your compile commands,
@@ -357,7 +357,7 @@ macros are listed as a commented #undef in config.h.generic. Macros such as
 MATCH_LIMIT, whose actual value is relevant, have defaults defined, but are
 surrounded by #ifndef/#endif lines so that the value can be overridden by -D.
 
-PCRE uses memmove() if HAVE_MEMMOVE is defined; otherwise it uses bcopy() if
+PCRE2 uses memmove() if HAVE_MEMMOVE is defined; otherwise it uses bcopy() if
 HAVE_BCOPY is defined. If your system has neither bcopy() nor memmove(), make
 sure both macros are undefined; an emulation function will then be used. */])
 
@@ -370,7 +370,7 @@ AC_CHECK_HEADERS([windows.h], [HAVE_WINDOWS_H=1])
 AM_CONDITIONAL(WITH_PCRE8, test "x$enable_pcre8" = "xyes")
 AM_CONDITIONAL(WITH_PCRE16, test "x$enable_pcre16" = "xyes")
 AM_CONDITIONAL(WITH_PCRE32, test "x$enable_pcre32" = "xyes")
-AM_CONDITIONAL(WITH_PCRE_CPP, test "x$enable_cpp" = "xyes")
+#AM_CONDITIONAL(WITH_PCRE2_CPP, test "x$enable_cpp" = "xyes")
 AM_CONDITIONAL(WITH_REBUILD_CHARTABLES, test "x$enable_rebuild_chartables" = "xyes")
 AM_CONDITIONAL(WITH_JIT, test "x$enable_jit" = "xyes")
 AM_CONDITIONAL(WITH_UTF, test "x$enable_utf" = "xyes")
@@ -400,7 +400,7 @@ AC_CHECK_LIB([z], [gzopen], [HAVE_LIBZ=1])
 #     therefore missing the function definition.
 #   - The compiler thus generates a "C" signature for the test function.
 #   - The linker fails to find the "C" function.
-#   - PCRE fails to configure if asked to do so against libbz2.
+#   - PCRE2 fails to configure if asked to do so against libbz2.
 #
 # Solution:
 #
@@ -426,7 +426,7 @@ LIBS="$OLD_LIBS"
 
 # Check for the availabiity of libreadline
 
-if test "$enable_pcretest_libreadline" = "yes"; then
+if test "$enable_pcre2test_libreadline" = "yes"; then
  AC_CHECK_HEADERS([readline/readline.h], [HAVE_READLINE_H=1])
  AC_CHECK_HEADERS([readline/history.h], [HAVE_HISTORY_H=1])
  AC_CHECK_LIB([readline], [readline], [LIBREADLINE="-lreadline"],
@@ -459,7 +459,7 @@ fi
 # Check for the availability of libedit. Different distributions put its
 # headers in different places. Try to cover the most common ones.
 
-if test "$enable_pcretest_libedit" = "yes"; then
+if test "$enable_pcre2test_libedit" = "yes"; then
   AC_CHECK_HEADERS([editline/readline.h], [HAVE_EDITLINE_READLINE_H=1],
     [AC_CHECK_HEADERS([edit/readline/readline.h], [HAVE_READLINE_READLINE_H=1],
       [AC_CHECK_HEADERS([readline/readline.h], [HAVE_READLINE_READLINE_H=1])])])
@@ -477,21 +477,21 @@ if test "x$enable_shared" = "xno" ; then
 fi
 AC_SUBST(PCRE2_STATIC_CFLAG)
 
-# Here is where pcre specific defines are handled
+# Here is where PCRE2-specific defines are handled
 
 if test "$enable_pcre8" = "yes"; then
   AC_DEFINE([SUPPORT_PCRE8], [], [
-    Define to any value to enable the 8 bit PCRE library.])
+    Define to any value to enable the 8 bit PCRE2 library.])
 fi
 
 if test "$enable_pcre16" = "yes"; then
   AC_DEFINE([SUPPORT_PCRE16], [], [
-    Define to any value to enable the 16 bit PCRE library.])
+    Define to any value to enable the 16 bit PCRE2 library.])
 fi
 
 if test "$enable_pcre32" = "yes"; then
   AC_DEFINE([SUPPORT_PCRE32], [], [
-    Define to any value to enable the 32 bit PCRE library.])
+    Define to any value to enable the 32 bit PCRE2 library.])
 fi
 
 # Unless running under Windows, JIT support requires pthreads.
@@ -506,87 +506,87 @@ if test "$enable_jit" = "yes"; then
   AC_DEFINE([SUPPORT_JIT], [], [
     Define to any value to enable support for Just-In-Time compiling.])
 else
-  enable_pcregrep_jit="no"
+  enable_pcre2grep_jit="no"
 fi
 
-if test "$enable_pcregrep_jit" = "yes"; then
-  AC_DEFINE([SUPPORT_PCREGREP_JIT], [], [
-    Define to any value to enable JIT support in pcregrep.])
+if test "$enable_pcre2grep_jit" = "yes"; then
+  AC_DEFINE([SUPPORT_PCRE2GREP_JIT], [], [
+    Define to any value to enable JIT support in pcre2grep.])
 fi
 
 if test "$enable_utf" = "yes"; then
   AC_DEFINE([SUPPORT_UTF], [], [
     Define to any value to enable support for the UTF-8/16/32 Unicode encoding.
     This will work even in an EBCDIC environment, but it is incompatible
-    with the EBCDIC macro. That is, PCRE can support *either* EBCDIC
+    with the EBCDIC macro. That is, PCRE2 can support *either* EBCDIC
     code *or* ASCII/UTF-8/16/32, but not both at once.])
 fi
 
 if test "$enable_stack_for_recursion" = "no"; then
   AC_DEFINE([NO_RECURSE], [], [
-    PCRE uses recursive function calls to handle backtracking while
+    PCRE2 uses recursive function calls to handle backtracking while
     matching. This can sometimes be a problem on systems that have
     stacks of limited size. Define NO_RECURSE to any value to get a
     version that doesn't use recursion in the match() function; instead
-    it creates its own stack by steam using pcre_recurse_malloc() to obtain
-    memory from the heap. For more detail, see the comments and other stuff
-    just above the match() function.])
+    it creates its own stack by steam using memory from the heap. For more 
+    detail, see the comments and other stuff just above the match() function.])
 fi
 
-if test "$enable_pcregrep_libz" = "yes"; then
+if test "$enable_pcre2grep_libz" = "yes"; then
   AC_DEFINE([SUPPORT_LIBZ], [], [
-    Define to any value to allow pcregrep to be linked with libz, so that it is
+    Define to any value to allow pcre2grep to be linked with libz, so that it is
     able to handle .gz files.])
 fi
 
-if test "$enable_pcregrep_libbz2" = "yes"; then
+if test "$enable_pcre2grep_libbz2" = "yes"; then
   AC_DEFINE([SUPPORT_LIBBZ2], [], [
-    Define to any value to allow pcregrep to be linked with libbz2, so that it
+    Define to any value to allow pcre2grep to be linked with libbz2, so that it
     is able to handle .bz2 files.])
 fi
 
-if test $with_pcregrep_bufsize -lt 8192 ; then
-  AC_MSG_WARN([$with_pcregrep_bufsize is too small for --with-pcregrep-bufsize; using 8192])
-  with_pcregrep_bufsize="8192"
+if test $with_pcre2grep_bufsize -lt 8192 ; then
+  AC_MSG_WARN([$with_pcre2grep_bufsize is too small for --with-pcre2grep-bufsize; using 8192])
+  with_pcre2grep_bufsize="8192"
 else
   if test $? -gt 1 ; then
-  AC_MSG_ERROR([Bad value for  --with-pcregrep-bufsize]) 
+  AC_MSG_ERROR([Bad value for  --with-pcre2grep-bufsize]) 
   fi    
 fi
 
-AC_DEFINE_UNQUOTED([PCREGREP_BUFSIZE], [$with_pcregrep_bufsize], [
-  The value of PCREGREP_BUFSIZE determines the size of buffer used by pcregrep
+AC_DEFINE_UNQUOTED([PCRE2GREP_BUFSIZE], [$with_pcre2grep_bufsize], [
+  The value of PCRE2GREP_BUFSIZE determines the size of buffer used by pcre2grep
   to hold parts of the file it is searching. This is also the minimum value.
-  The actual amount of memory used by pcregrep is three times this number,
+  The actual amount of memory used by pcre2grep is three times this number,
   because it allows for the buffering of "before" and "after" lines.])
 
-if test "$enable_pcretest_libedit" = "yes"; then
+if test "$enable_pcre2test_libedit" = "yes"; then
   AC_DEFINE([SUPPORT_LIBEDIT], [], [
-    Define to any value to allow pcretest to be linked with libedit.])
+    Define to any value to allow pcre2test to be linked with libedit.])
   LIBREADLINE="$LIBEDIT"
-elif test "$enable_pcretest_libreadline" = "yes"; then
+elif test "$enable_pcre2test_libreadline" = "yes"; then
   AC_DEFINE([SUPPORT_LIBREADLINE], [], [
-    Define to any value to allow pcretest to be linked with libreadline.])
+    Define to any value to allow pcre2test to be linked with libreadline.])
 fi
 
-AC_DEFINE_UNQUOTED([NEWLINE], [$ac_pcre_newline_value], [
-  The value of NEWLINE determines the default newline character sequence. PCRE
-  client programs can override this by selecting other values at run time. The
-  valid values are 0 (CR), 1 (LF), 2 (CRLF), 3 (ANY), and 4 (ANYCRLF).])
+AC_DEFINE_UNQUOTED([NEWLINE_DEFAULT], [$ac_pcre2_newline_value], [
+  The value of NEWLINE_DEFAULT determines the default newline character 
+  sequence. PCRE2 client programs can override this by selecting other values 
+  at run time. The valid values are 1 (CR), 2 (LF), 3 (CRLF), 4 (ANY), 
+  and 5 (ANYCRLF).])
 
 if test "$enable_bsr_anycrlf" = "yes"; then
   AC_DEFINE([BSR_ANYCRLF], [], [
     By default, the \R escape sequence matches any Unicode line ending
     character or sequence of characters. If BSR_ANYCRLF is defined (to any
     value), this is changed so that backslash-R matches only CR, LF, or CRLF.
-    The build-time default can be overridden by the user of PCRE at runtime.])
+    The build-time default can be overridden by the user of PCRE2 at runtime.])
 fi
 
 AC_DEFINE_UNQUOTED([LINK_SIZE], [$with_link_size], [
   The value of LINK_SIZE determines the number of bytes used to store
   links as offsets within the compiled regex. The default is 2, which
   allows for compiled patterns up to 64K long. This covers the vast
-  majority of cases. However, PCRE can also be compiled to use 3 or 4
+  majority of cases. However, PCRE2 can also be compiled to use 3 or 4
   bytes instead. This allows for longer patterns in extreme cases.])
 
 AC_DEFINE_UNQUOTED([PARENS_NEST_LIMIT], [$with_parens_nest_limit], [
@@ -597,7 +597,7 @@ AC_DEFINE_UNQUOTED([PARENS_NEST_LIMIT], [$with_parens_nest_limit], [
 AC_DEFINE_UNQUOTED([MATCH_LIMIT], [$with_match_limit], [
   The value of MATCH_LIMIT determines the default number of times the
   internal match() function can be called during a single execution of
-  pcre_exec(). There is a runtime interface for setting a different
+  pcre2_match(). There is a runtime interface for setting a different
   limit. The limit exists in order to catch runaway regular
   expressions that take for ever to determine that they do not match.
   The default is set very large so that it does not accidentally catch
@@ -639,10 +639,10 @@ AH_VERBATIM([PCRE2_EXP_DEFN], [
 if test "$enable_ebcdic" = "yes"; then
   AC_DEFINE_UNQUOTED([EBCDIC], [], [
     If you are compiling for a system that uses EBCDIC instead of ASCII
-    character codes, define this macro to any value. When EBCDIC is set, PCRE
+    character codes, define this macro to any value. When EBCDIC is set, PCRE2
     assumes that all input strings are in EBCDIC. If you do not define this
-    macro, PCRE will assume input strings are ASCII or UTF-8/16/32 Unicode. It
-    is not possible to build a version of PCRE that supports both EBCDIC and
+    macro, PCRE2 will assume input strings are ASCII or UTF-8/16/32 Unicode. It
+    is not possible to build a version of PCRE2 that supports both EBCDIC and
     UTF-8/16/32.])
 fi
 
@@ -695,65 +695,65 @@ AC_SUBST(EXTRA_LIBPCRE2_POSIX_LDFLAGS)
 DISTCHECK_CONFIGURE_FLAGS="CFLAGS='' CXXFLAGS='' --enable-pcre16 --enable-pcre32 --enable-jit --enable-utf"
 AC_SUBST(DISTCHECK_CONFIGURE_FLAGS)
 
-# Check that, if --enable-pcregrep-libz or --enable-pcregrep-libbz2 is
+# Check that, if --enable-pcre2grep-libz or --enable-pcre2grep-libbz2 is
 # specified, the relevant library is available.
 
-if test "$enable_pcregrep_libz" = "yes"; then
+if test "$enable_pcre2grep_libz" = "yes"; then
   if test "$HAVE_ZLIB_H" != "1"; then
-    echo "** Cannot --enable-pcregrep-libz because zlib.h was not found"
+    echo "** Cannot --enable-pcre2grep-libz because zlib.h was not found"
     exit 1
   fi
   if test "$HAVE_LIBZ" != "1"; then
-    echo "** Cannot --enable-pcregrep-libz because libz was not found"
+    echo "** Cannot --enable-pcre2grep-libz because libz was not found"
     exit 1
   fi
   LIBZ="-lz"
 fi
 AC_SUBST(LIBZ)
 
-if test "$enable_pcregrep_libbz2" = "yes"; then
+if test "$enable_pcre2grep_libbz2" = "yes"; then
   if test "$HAVE_BZLIB_H" != "1"; then
-    echo "** Cannot --enable-pcregrep-libbz2 because bzlib.h was not found"
+    echo "** Cannot --enable-pcre2grep-libbz2 because bzlib.h was not found"
     exit 1
   fi
   if test "$HAVE_LIBBZ2" != "1"; then
-    echo "** Cannot --enable-pcregrep-libbz2 because libbz2 was not found"
+    echo "** Cannot --enable-pcre2grep-libbz2 because libbz2 was not found"
     exit 1
   fi
   LIBBZ2="-lbz2"
 fi
 AC_SUBST(LIBBZ2)
 
-# Similarly for --enable-pcretest-readline
+# Similarly for --enable-pcre2test-readline
 
-if test "$enable_pcretest_libedit" = "yes"; then
-  if test "$enable_pcretest_libreadline" = "yes"; then
-    echo "** Cannot use both --enable-pcretest-libedit and --enable-pcretest-readline"
+if test "$enable_pcre2test_libedit" = "yes"; then
+  if test "$enable_pcre2test_libreadline" = "yes"; then
+    echo "** Cannot use both --enable-pcre2test-libedit and --enable-pcre2test-readline"
     exit 1
   fi
   if test "$HAVE_EDITLINE_READLINE_H" != "1" -a \
           "$HAVE_READLINE_READLINE_H" != "1"; then
-    echo "** Cannot --enable-pcretest-libedit because neither editline/readline.h"
+    echo "** Cannot --enable-pcre2test-libedit because neither editline/readline.h"
     echo "** nor readline/readline.h was found."
     exit 1
   fi
   if test -z "$LIBEDIT"; then
-    echo "** Cannot --enable-pcretest-libedit because libedit library was not found."
+    echo "** Cannot --enable-pcre2test-libedit because libedit library was not found."
     exit 1
   fi
 fi
 
-if test "$enable_pcretest_libreadline" = "yes"; then
+if test "$enable_pcre2test_libreadline" = "yes"; then
   if test "$HAVE_READLINE_H" != "1"; then
-    echo "** Cannot --enable-pcretest-readline because readline/readline.h was not found."
+    echo "** Cannot --enable-pcre2test-readline because readline/readline.h was not found."
     exit 1
   fi
   if test "$HAVE_HISTORY_H" != "1"; then
-    echo "** Cannot --enable-pcretest-readline because readline/history.h was not found."
+    echo "** Cannot --enable-pcre2test-readline because readline/history.h was not found."
     exit 1
   fi
   if test -z "$LIBREADLINE"; then
-    echo "** Cannot --enable-pcretest-readline because readline library was not found."
+    echo "** Cannot --enable-pcre2test-readline because readline library was not found."
     exit 1
   fi
 fi
@@ -868,12 +868,12 @@ $PACKAGE-$VERSION configuration summary:
     Match limit recursion ........... : ${with_match_limit_recursion}
     Build shared libs ............... : ${enable_shared}
     Build static libs ............... : ${enable_static}
-    Use JIT in pcregrep ............. : ${enable_pcregrep_jit}
-    Buffer size for pcregrep ........ : ${with_pcregrep_bufsize}
-    Link pcregrep with libz ......... : ${enable_pcregrep_libz}
-    Link pcregrep with libbz2 ....... : ${enable_pcregrep_libbz2}
-    Link pcretest with libedit ...... : ${enable_pcretest_libedit}
-    Link pcretest with libreadline .. : ${enable_pcretest_libreadline}
+    Use JIT in pcre2grep ............ : ${enable_pcre2grep_jit}
+    Buffer size for pcre2grep ....... : ${with_pcre2grep_bufsize}
+    Link pcre2grep with libz ........ : ${enable_pcre2grep_libz}
+    Link pcre2grep with libbz2 ...... : ${enable_pcre2grep_libbz2}
+    Link pcre2test with libedit ..... : ${enable_pcre2test_libedit}
+    Link pcre2test with libreadline . : ${enable_pcre2test_libreadline}
     Valgrind support ................ : ${enable_valgrind}
     Code coverage ................... : ${enable_coverage}
 

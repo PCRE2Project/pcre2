@@ -53,7 +53,7 @@ functions work only on 8-bit data. */
 
 
 /*************************************************
-*             Compare two strings                *
+*    Compare two zero-terminated PCRE2 strings   *
 *************************************************/
 
 /* 
@@ -75,6 +75,107 @@ while (*str1 != '\0' || *str2 != '\0')
   if (c1 != c2) return ((c1 > c2) << 1) - 1;
   }
 return 0;
+}
+
+
+/*************************************************
+*  Compare zero-terminated PCRE2 & 8-bit strings *
+*************************************************/
+
+/* 
+Arguments:
+  str1        first string
+  str2        second string
+
+Returns:      0, 1, or -1
+*/
+
+int
+PRIV(strcmp_c8)(PCRE2_SPTR str1, const char *str2)
+{
+PCRE2_UCHAR c1, c2;
+while (*str1 != '\0' || *str2 != '\0')
+  {
+  c1 = *str1++;
+  c2 = *str2++;
+  if (c1 != c2) return ((c1 > c2) << 1) - 1;
+  }
+return 0;
+}
+
+
+/*************************************************
+*    Compare two PCRE2 strings, given a length   *
+*************************************************/
+
+/* 
+Arguments:
+  str1        first string
+  str2        second string
+  len         the length
+
+Returns:      0, 1, or -1
+*/
+
+int
+PRIV(strncmp)(PCRE2_SPTR str1, PCRE2_SPTR str2, size_t len)
+{
+PCRE2_UCHAR c1, c2;
+while (len-- > 0)
+  {
+  c1 = *str1++;
+  c2 = *str2++;
+  if (c1 != c2) return ((c1 > c2) << 1) - 1;
+  }
+return 0;
+}
+
+
+/*************************************************
+* Compare PCRE2 string to 8-bit string by length *
+*************************************************/
+
+/* As the 8-bit string is almost always a literal, its type is specified as 
+'const char *'.
+
+Arguments:
+  str1        first string
+  str2        second string
+  len         the length
+
+Returns:      0, 1, or -1
+*/
+
+int
+PRIV(strncmp_c8)(PCRE2_SPTR str1, const char *str2, size_t len)
+{
+PCRE2_UCHAR c1, c2;
+while (len-- > 0)
+  {
+  c1 = *str1++;
+  c2 = *str2++;
+  if (c1 != c2) return ((c1 > c2) << 1) - 1;
+  }
+return 0;
+}
+
+
+
+/*************************************************
+*          Find the length of a string           *
+*************************************************/
+
+/* 
+Argument:    the string
+Returns:     the length
+*/
+
+int
+PRIV(strlen)(PCRE2_SPTR str)
+{
+int c = 0;
+while (*str++ != 0) c++;
+return c;
 }
 
 /* End of pcre2_string_utils.c */

@@ -211,10 +211,10 @@ for building the library. */
 #include "pcre2_internal.h"
 
 /* We need access to some of the data tables that PCRE uses. Defining
-PCRE2_INCLUDED makes some minor changes in the files. The previous definition
+PCRE2_PCRETEST makes some minor changes in the files. The previous definition
 of PRIV avoids name clashes. */
 
-#define PCRE2_INCLUDED
+#define PCRE2_PCRE2TEST
 #include "pcre2_tables.c"
 #include "pcre2_ucd.c"
 
@@ -340,12 +340,14 @@ either on a pattern or a data line, so they must all be distinct. */
 #define CTL_FULLBINCODE      0x00000200
 #define CTL_GETALL           0x00000400
 #define CTL_GLOBAL           0x00000800
-#define CTL_INFO             0x00001000
-#define CTL_JITVERIFY        0x00002000
-#define CTL_LIMITS           0x00004000
-#define CTL_MARK             0x00008000
-#define CTL_MEMORY           0x00010000
-#define CTL_POSIX            0x00020000
+#define CTL_HEXPAT           0x00001000
+#define CTL_INFO             0x00002000
+#define CTL_JITVERIFY        0x00004000
+#define CTL_LIMITS           0x00008000
+#define CTL_MARK             0x00010000
+#define CTL_MEMORY           0x00020000
+#define CTL_PATLEN           0x00040000
+#define CTL_POSIX            0x00080000
 
 #define CTL_DEBUG            (CTL_FULLBINCODE|CTL_INFO)  /* For setting */
 #define CTL_ANYINFO          (CTL_DEBUG|CTL_BINCODE)     /* For testing */
@@ -441,6 +443,7 @@ static modstruct modlist[] = {
   { "get",                 MOD_DAT,  MOD_NN,  DO(get_numbers),           DO(get_names) },
   { "getall",              MOD_DAT,  MOD_CTL, CTL_GETALL,                DO(control) },
   { "global",              MOD_PNDP, MOD_CTL, CTL_GLOBAL,                PO(control) },
+  { "hex",                 MOD_PAT,  MOD_CTL, CTL_HEXPAT,                PO(control) },
   { "info",                MOD_PAT,  MOD_CTL, CTL_INFO,                  PO(control) },
   { "jit",                 MOD_PAT,  MOD_IND, 7,                         PO(jit) },
   { "jitstack",            MOD_DAT,  MOD_INT, 0,                         DO(jitstack) },
@@ -475,6 +478,7 @@ static modstruct modlist[] = {
   { "tables",              MOD_PAT,  MOD_INT, 0,                         PO(tables_id) },
   { "ucp",                 MOD_PATP, MOD_OPT, PCRE2_UCP,                 PO(options) },
   { "ungreedy",            MOD_PAT,  MOD_OPT, PCRE2_UNGREEDY,            PO(options) },
+  { "use_length",          MOD_PAT,  MOD_CTL, CTL_PATLEN,                PO(control) },
   { "utf",                 MOD_PATP, MOD_OPT, PCRE2_UTF,                 PO(options) }
 };
 
@@ -625,14 +629,9 @@ buffer is where all input lines are read. Its size is the same as pbuffer8.
 Pattern lines are always copied to pbuffer8 for use in callouts, even if they
 are actually compiled from pbuffer16 or pbuffer32. */
 
-static int pbuffer8_size  = 50000;        /* Initial size, bytes */
-static int pbuffer16_size = 0;            /* Only set once needed */
-static int pbuffer32_size = 0;            /* Only set once needed */
-
-static uint8_t  *buffer = NULL;
+static int       pbuffer8_size  = 50000;        /* Initial size, bytes */
 static uint8_t  *pbuffer8 = NULL;
-static uint16_t *pbuffer16 = NULL;
-static uint32_t *pbuffer32 = NULL;
+static uint8_t  *buffer = NULL;
 
 /* The dbuffer is where all processed data lines are put. In non-8-bit modes it
 is cast as needed. For long data lines it grows as necessary. */
@@ -655,6 +654,8 @@ pcre2_code_16            *compiled_code16;
 pcre2_compile_context_16 *pat_context16, *default_pat_context16;
 pcre2_match_context_16   *dat_context16, *default_dat_context16;
 pcre2_match_data_16      *match_data16;
+static int pbuffer16_size = 0;            /* Only set once needed */
+static uint16_t *pbuffer16 = NULL;
 #endif
 
 #ifdef SUPPORT_PCRE32
@@ -662,6 +663,8 @@ pcre2_code_32            *compiled_code32;
 pcre2_compile_context_32 *pat_context32, *default_pat_context32;
 pcre2_match_context_32   *dat_context32, *default_dat_context32;
 pcre2_match_data_32      *match_data32;
+static int pbuffer32_size = 0;            /* Only set once needed */
+static uint32_t *pbuffer32 = NULL;
 #endif
 
 
@@ -997,10 +1000,10 @@ the three different cases. */
 
 #define PCRE2_DFA_MATCH(a,b,c,d,e,f,g,h,i,j) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
-    a = G(pcre2_dfa-match_,BITONE)(G(b,BITONE),(G(PCRE2_SPTR,BITONE))c,d,e,f, \
+    a = G(pcre2_dfa_match_,BITONE)(G(b,BITONE),(G(PCRE2_SPTR,BITONE))c,d,e,f, \
       G(g,BITONE),G(h,BITONE),i,j); \
   else \
-    a = G(pcre2_dfa-match_,BITTWO)(G(b,BITTWO),(G(PCRE2_SPTR,BITTWO))c,d,e,f, \
+    a = G(pcre2_dfa_match_,BITTWO)(G(b,BITTWO),(G(PCRE2_SPTR,BITTWO))c,d,e,f, \
       G(g,BITTWO),G(h,BITTWO),i,j)
 
 #define PCRE2_GET_ERROR_MESSAGE(r,a,b) \
@@ -1178,20 +1181,20 @@ the three different cases. */
 #define PCRE2_COMPILE(a,b,c,d,e,f,g) \
   G(a,8) = pcre2_compile_8(G(b,8),c,d,e,f,G(g,8))
 #define PCRE2_DFA_MATCH(a,b,c,d,e,f,g,h,i,j) \
-  G(a,8) = pcre2_dfa-match_8(G(b,8),(PCRE2_SPTR8)c,d,e,f,G(g,8),G(h,8),i,j)
+  a = pcre2_dfa_match_8(G(b,8),(PCRE2_SPTR8)c,d,e,f,G(g,8),G(h,8),i,j)
 #define PCRE2_GET_ERROR_MESSAGE(r,a,b) \
   r = pcre2_get_error_message_8(a,G(b,8),G(G(b,8),_size))
 #define PCRE2_JIT_COMPILE(a,b) pcre2_jit_compile_8(G(a,8),b)
 #define PCRE2_MATCH(a,b,c,d,e,f,g,h) \
-  G(a,8) = pcre2_match_8(G(b,8),(PCRE2_SPTR8)c,d,e,f,G(g,8),G(h,8))
+  a = pcre2_match_8(G(b,8),(PCRE2_SPTR8)c,d,e,f,G(g,8),G(h,8))
 #define PCRE2_MAKETABLES(a) a = pcre2_maketables_8(NULL)
 #define PCRE2_MATCH_DATA_CREATE(a,b,c) G(a,8) = pcre2_match_data_create_8(b,c)
-#define PCRE2_MATCH_DATA_FREE(a) pcre2_match_data_free_8(a)
-#define PCRE2_PATTERN_INFO(a,b,c,d) G(a,8) = pcre2_pattern_info_8(G(b,8),c,d)
-#define PCRE2_PRINTINT(a,b) pcre2_printint_8(compiled_code8,outfile,a)
-#define PCRE2_SET_CHARACTER_TABLES(a,b) pcre2_set_character_tables_8(G(a,8),b) \
+#define PCRE2_MATCH_DATA_FREE(a) pcre2_match_data_free_8(G(a,8))
+#define PCRE2_PATTERN_INFO(a,b,c,d) a = pcre2_pattern_info_8(G(b,8),c,d)
+#define PCRE2_PRINTINT(a) pcre2_printint_8(compiled_code8,outfile,a)
+#define PCRE2_SET_CHARACTER_TABLES(a,b) pcre2_set_character_tables_8(G(a,8),b)
 #define PCRE2_SUBSTRING_COPY_BYNAME(a,b,c,d,e) \
-  a = pcre2_substring_copy_bynumber_8(G(b,8),G(c,8),(PCRE2_UCHAR8 *)d,e)
+  a = pcre2_substring_copy_byname_8(G(b,8),G(c,8),(PCRE2_UCHAR8 *)d,e)
 #define PCRE2_SUBSTRING_COPY_BYNUMBER(a,b,c,d,e) \
   a = pcre2_substring_copy_bynumber_8(G(b,8),c,(PCRE2_UCHAR8 *)d,e)
 #define PCRE2_SUBSTRING_FREE(a) pcre2_substring_free_8((PCRE2_UCHAR8 *)a)
@@ -1207,12 +1210,12 @@ the three different cases. */
 #define SETFLD(x,y,z) G(x,8)->y = z
 #define SETFLDVEC(x,y,v,z) G(x,8)->y[v] = z
 #define SETOP(x,y,z) G(x,8) z y
-#define SETCASTPTR(x,y) G(x,8) = (uint8_t) *)y
-#define STRLEN(p) (int)strlen(p)
+#define SETCASTPTR(x,y) G(x,8) = (uint8_t *)y
+#define STRLEN(p) (int)strlen((char *)p)
 #define SUB1(a,b) G(a,8)(G(b,8))
 #define SUB2(a,b,c) G(a,8)(G(b,8),G(c,8))
-#define TEST(x,r,y) (G(a,8) r (y))
-#define TESTFLD(x,f,r,y) (G(a,8)->f r (y))
+#define TEST(x,r,y) (G(x,8) r (y))
+#define TESTFLD(x,f,r,y) (G(x,8)->f r (y))
 
 
 /* ----- Only 16-bit mode is supported ----- */
@@ -1231,20 +1234,20 @@ the three different cases. */
 #define PCRE2_COMPILE(a,b,c,d,e,f,g) \
   G(a,16) = pcre2_compile_16(G(b,16),c,d,e,f,G(g,16))
 #define PCRE2_DFA_MATCH(a,b,c,d,e,f,g,h,i,j) \
-  G(a,16) = pcre2_dfa_match_16(G(b,16),(PCRE2_SPTR16)c,d,e,f,G(g,16),G(h,16),i,j)
+  a = pcre2_dfa_match_16(G(b,16),(PCRE2_SPTR16)c,d,e,f,G(g,16),G(h,16),i,j)
 #define PCRE2_GET_ERROR_MESSAGE(r,a,b) \
   r = pcre2_get_error_message_16(a,G(b,16),G(G(b,16),_size))
 #define PCRE2_JIT_COMPILE(a,b) pcre2_jit_compile_16(G(a,16),b)
 #define PCRE2_MAKETABLES(a) a = pcre2_maketables_16(NULL)
 #define PCRE2_MATCH(a,b,c,d,e,f,g,h) \
-  G(a,16) = pcre2_match_16(G(b,16),(PCRE2_SPTR16)c,d,e,f,G(g,16),G(h,16))
+  a = pcre2_match_16(G(b,16),(PCRE2_SPTR16)c,d,e,f,G(g,16),G(h,16))
 #define PCRE2_MATCH_DATA_CREATE(a,b,c) G(a,16) = pcre2_match_data_create_16(b,c)
-#define PCRE2_MATCH_DATA_FREE(a) pcre2_match_data_free_16(a)
+#define PCRE2_MATCH_DATA_FREE(a) pcre2_match_data_free_16(G(a,16))
 #define PCRE2_PATTERN_INFO(a,b,c,d) G(a,16) = pcre2_pattern_info_16(G(b,16),c,d)
-#define PCRE2_PRINTINT(a,b) pcre2_printint_16(compiled_code16,outfile,a)
+#define PCRE2_PRINTINT(a) pcre2_printint_16(compiled_code16,outfile,a)
 #define PCRE2_SET_CHARACTER_TABLES(a,b) pcre2_set_character_tables_16(G(a,16),b)
 #define PCRE2_SUBSTRING_COPY_BYNAME(a,b,c,d,e) \
-  a = pcre2_substring_copy_bynumber_16(G(b,16),G(c,16),(PCRE2_UCHAR16 *)d,e);
+  a = pcre2_substring_copy_byname_16(G(b,16),G(c,16),(PCRE2_UCHAR16 *)d,e);
 #define PCRE2_SUBSTRING_COPY_BYNUMBER(a,b,c,d,e) \
   a = pcre2_substring_copy_bynumber_16(G(b,16),c,(PCRE2_UCHAR16 *)d,e);
 #define PCRE2_SUBSTRING_FREE(a) pcre2_substring_free_16((PCRE2_UCHAR16 *)a)
@@ -1260,12 +1263,12 @@ the three different cases. */
 #define SETFLD(x,y,z) G(x,16)->y = z
 #define SETFLDVEC(x,y,v,z) G(x,16)->y[v] = z
 #define SETOP(x,y,z) G(x,16) z y
-#define SETCASTPTR(x,y) G(x,16) = (uint16_t) *)y
+#define SETCASTPTR(x,y) G(x,16) = (uint16_t *)y
 #define STRLEN(p) (int)strlen16(p)
 #define SUB1(a,b) G(a,16)(G(b,16))
 #define SUB2(a,b,c) G(a,16)(G(b,16),G(c,16))
-#define TEST(x,r,y) (G(a,16) r (y))
-#define TESTFLD(x,f,r,y) (G(a,16)->f r (y))
+#define TEST(x,r,y) (G(x,16) r (y))
+#define TESTFLD(x,f,r,y) (G(x,16)->f r (y))
 
 
 /* ----- Only 32-bit mode is supported ----- */
@@ -1284,20 +1287,20 @@ the three different cases. */
 #define PCRE2_COMPILE(a,b,c,d,e,f,g) \
   G(a,32) = pcre2_compile_32(G(b,32),c,d,e,f,G(g,32))
 #define PCRE2_DFA_MATCH(a,b,c,d,e,f,g,h,i,j) \
-  G(a,32) = pcre2_dfa_match_32(G(b,32),(PCRE2_SPTR32)c,d,e,f,G(g,32),G(h,32),i,j)
+  a = pcre2_dfa_match_32(G(b,32),(PCRE2_SPTR32)c,d,e,f,G(g,32),G(h,32),i,j)
 #define PCRE2_GET_ERROR_MESSAGE(r,a,b) \
   r = pcre2_get_error_message_32(a,G(b,32),G(G(b,32),_size))
 #define PCRE2_JIT_COMPILE(a,b) pcre2_jit_compile_32(G(a,32),b)
 #define PCRE2_MATCH(a,b,c,d,e,f,g,h) \
-  G(a,32) = pcre2_match_32(G(b,32),(PCRE2_SPTR32)c,d,e,f,G(g,32),g(h,32))
+  a = pcre2_match_32(G(b,32),(PCRE2_SPTR32)c,d,e,f,G(g,32),g(h,32))
 #define PCRE2_MAKETABLES(a) a = pcre2_maketables_32(NULL)
 #define PCRE2_MATCH_DATA_CREATE(a,b,c) G(a,32) = pcre2_match_data_create_32(b,c)
-#define PCRE2_MATCH_DATA_FREE(a) pcre2_match_data_free_32(a)
+#define PCRE2_MATCH_DATA_FREE(a) pcre2_match_data_free_32(G(a,32))
 #define PCRE2_PATTERN_INFO(a,b,c,d) G(a,32) = pcre2_pattern_info_32(G(b,32),c,d)
-#define PCRE2_PRINTINT(a,b) pcre2_printint_32(compiled_code32,outfile,a)
+#define PCRE2_PRINTINT(a) pcre2_printint_32(compiled_code32,outfile,a)
 #define PCRE2_SET_CHARACTER_TABLES(a,b) pcre2_set_character_tables_32(G(a,32),b)
 #define PCRE2_SUBSTRING_COPY_BYNAME(a,b,c,d,e) \
-  a = pcre2_substring_copy_bynumber_32(G(b,32),G(c,32),(PCRE2_UCHAR32 *)d,e);
+  a = pcre2_substring_copy_byname_32(G(b,32),G(c,32),(PCRE2_UCHAR32 *)d,e);
 #define PCRE2_SUBSTRING_COPY_BYNUMBER(a,b,c,d,e) \
   a = pcre2_substring_copy_bynumber_32(G(b,32),c,(PCRE2_UCHAR32 *)d,e);
 #define PCRE2_SUBSTRING_FREE(a) pcre2_substring_free_32((PCRE2_UCHAR32 *)a)
@@ -1313,12 +1316,12 @@ define PCRE2_SUBSTRING_GET_BYNUMBER(a,b,c,d) \
 #define SETFLD(x,y,z) G(x,32)->y = z
 #define SETFLDVEC(x,y,v,z) G(x,32)->y[v] = z
 #define SETOP(x,y,z) G(x,32) z y
-#define SETCASTPTR(x,y) G(x,32) = (uint32_t) *)y
+#define SETCASTPTR(x,y) G(x,32) = (uint32_t *)y
 #define STRLEN(p) (int)strle32(p)
 #define SUB1(a,b) G(a,32)(G(b,32))
 #define SUB2(a,b,c) G(a,32)(G(b,32),G(c,32))
-#define TEST(x,r,y) (G(a,32) r (y))
-#define TESTFLD(x,f,r,y) (G(a,32)->f r (y))
+#define TEST(x,r,y) (G(x,32) r (y))
+#define TESTFLD(x,f,r,y) (G(x,32)->f r (y))
 
 #endif
 
@@ -2669,7 +2672,7 @@ Returns:      nothing
 static void
 show_compile_controls(uint32_t controls, const char *before, const char *after)
 {
-fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
+fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
   before,
   ((controls & CTL_AFTERTEXT) != 0)? " aftertext" : "",
   ((controls & CTL_ALLAFTERTEXT) != 0)? " allaftertext" : "",
@@ -2679,9 +2682,11 @@ fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
   ((controls & CTL_FLIPBYTES) != 0)? " flipbytes" : "",
   ((controls & CTL_FULLBINCODE) != 0)? " fullbincode" : "",
   ((controls & CTL_GLOBAL) != 0)? " global" : "",
+  ((controls & CTL_HEXPAT) != 0)? " hex" : "", 
   ((controls & CTL_INFO) != 0)? " info" : "",
   ((controls & CTL_JITVERIFY) != 0)? " jitverify" : "",
   ((controls & CTL_MARK) != 0)? " mark" : "",
+  ((controls & CTL_PATLEN) != 0)? " use_length" : "", 
   ((controls & CTL_POSIX) != 0)? " posix" : "",
   after);
 }
@@ -2705,7 +2710,8 @@ Returns:      nothing
 static void
 show_compile_options(uint32_t options, const char *before, const char *after)
 {
-fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
+if (options == 0) fprintf(outfile, "%s <none>%s", before, after);
+else fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
   before,
   ((options & PCRE2_ANCHORED) != 0)? " anchored" : "",
   ((options & PCRE2_CASELESS) != 0)? " caseless" : "",
@@ -2896,15 +2902,13 @@ if ((pat_patctl.control & CTL_INFO) != 0)
     fprintf(outfile, "No options\n");
   else
     {
-    if (compile_options != 0)
-      show_compile_options(compile_options, "Compile options:", "\n");
-    if (pattern_options != 0)
-      show_compile_options(pattern_options, "Pattern options:", "\n");
+    show_compile_options(compile_options, "Compile options:", "\n");
+    show_compile_options(pattern_options, "Pattern options:", "\n");
     }
 
   if (jchanged) fprintf(outfile, "Duplicate name status changes\n");
 
-  if (bsr_convention != PCRE2_BSR_DEFAULT)
+  if (bsr_convention != BSR_DEFAULT)
     fprintf(outfile, "\\R matches %s\n", (bsr_convention == PCRE2_BSR_UNICODE)?
       "any Unicode newline" : "CR, LF, or CRLF");
 
@@ -3272,25 +3276,63 @@ for(;;)
   if (infile != stdin) fprintf(outfile, "%s", (char *)p);
   }
 
-/* If the first character after the delimiter is backslash, make
-the pattern end with backslash. This is purely to provide a way
-of testing for the error message when a pattern ends with backslash. */
+/* If the first character after the delimiter is backslash, make the pattern
+end with backslash. This is purely to provide a way of testing for the error
+message when a pattern ends with backslash. */
 
 if (p[1] == '\\') *p++ = '\\';
 
-/* Terminate the pattern at the delimiter, and save a copy of the pattern
-for callouts. */
+/* Terminate the pattern at the delimiter, and compute the length. */
 
 *p++ = 0;
-patlen = p - buffer - 1;
-strncpy((char *)pbuffer8, (char *)(buffer+1), patlen);
+patlen = p - buffer - 2;
 
-/* Look for modifiers and options after the final delimiter. If successful,
-compile the pattern. */
+/* Look for modifiers and options after the final delimiter. */
 
 if (!decode_modifiers(p, CTX_PAT, &pat_patctl, NULL)) return PR_SKIP;
 utf = (pat_patctl.options & PCRE2_UTF) != 0;
 
+/* Now copy the pattern to pbuffer8 for use in 8-bit testing and for reflecting
+in callouts. Convert to binary if required. */
+
+if ((pat_patctl.control & CTL_HEXPAT) != 0)
+  {
+  uint8_t *pp, *pt;
+  uint32_t c, d;
+  
+  if ((pat_patctl.control & CTL_POSIX) != 0)
+    {
+    fprintf(outfile, "** Hex patterns are not supported for the POSIX API\n");
+    return PR_SKIP;
+    }    
+    
+  pt = pbuffer8;
+  for (pp = buffer + 1; *pp != 0; pp++)
+    {
+    if (isspace(*pp)) continue; 
+    c = toupper(*pp++); 
+    if (*pp == 0)
+      {
+      fprintf(outfile, "** Odd number of digits in hex pattern.\n");
+      return PR_SKIP;
+      }    
+    d = toupper(*pp); 
+    if (!isxdigit(c) || !isxdigit(d))
+      {
+      fprintf(outfile, "** Non-hex-digit in hex pattern.\n");
+      return PR_SKIP;
+      }
+    *pt++ = ((isdigit(c)? (c - '0') : (c - 'A' + 10)) << 4) +
+             (isdigit(d)? (d - '0') : (d - 'A' + 10)); 
+    }   
+  *pt = 0;
+  patlen = pt - pbuffer8; 
+  }
+else
+  {
+  strncpy((char *)pbuffer8, (char *)(buffer+1), patlen + 1);
+  } 
+  
 /* Sort out character tables */
 
 if (pat_patctl.locale[0] != 0)
@@ -3394,12 +3436,12 @@ modes. */
 
 #ifdef SUPPORT_PCRE16
 if (test_mode == PCRE16_MODE)
-  patlen = to16(pbuffer8, utf, (int)strlen((char *)pbuffer8));
+  patlen = to16(pbuffer8, utf, patlen);
 #endif
 
 #ifdef SUPPORT_PCRE32
 if (test_mode == PCRE32_MODE)
-  patlen = to32(pbuffer8, utf, (int)strlen((char *)pbuffer8));
+  patlen = to32(pbuffer8, utf, patlen);
 #endif
 
 switch(patlen)
@@ -3423,8 +3465,13 @@ switch(patlen)
   break;
   }
 
-/* The pattern in now in pbuffer[8|16|32], with the length in patlen. Compile
-many times when timing. */
+/* The pattern in now in pbuffer[8|16|32], with the length in patlen. By 
+default, however, we pass a zero-terminated pattern. The length is passed only 
+if we had a hex pattern or if use_length was set. */
+
+if ((pat_patctl.control & (CTL_PATLEN|CTL_HEXPAT)) == 0) patlen = -1;
+
+/* Compile many times when timing. */
 
 if (timeit > 0)
   {
@@ -3960,9 +4007,9 @@ if ((pat_patctl.control & CTL_POSIX) != 0)
 
   if (dat_datctl.cfail[0] != 0 || dat_datctl.cfail[1] != 0)
     prmsg(&msg, "callout_fail");
-  if (dat_datctl.copy_numbers[0] != 0 || dat_datctl.copy_names[0] != 0)
+  if (dat_datctl.copy_numbers[0] >= 0 || dat_datctl.copy_names[0] != 0)
     prmsg(&msg, "copy");
-  if (dat_datctl.get_numbers[0] != 0 || dat_datctl.get_names[0] != 0)
+  if (dat_datctl.get_numbers[0] >= 0 || dat_datctl.get_names[0] != 0)
     prmsg(&msg, "get");
   if (dat_datctl.jitstack != 0) prmsg(&msg, "jitstack");
 
@@ -4059,6 +4106,9 @@ for (gmatched = 0;; gmatched++)
 
 #ifdef FIXME
   jit_was_used = FALSE;
+  
+Need to set newline and bsr in match context and allow them to be
+set in the datctl block. 
 #endif
 
   /* Adjust match_data according to size of offsets required. */
@@ -4500,12 +4550,6 @@ if ((dat_datctl.control & CTL_DFA) != 0)
 
         fprintf(outfile, "\n");
         }
-      break;
-
-      case PCRE2_ERROR_BADUTF:
-      fprintf(outfile, "Error %d (bad UTF-%d string) offset=%d reason=%d\n",
-        capcount, test_mode, CASTFLD(int, match_data, startchar),
-        CASTFLD(int, match_data, utf_reason));
       break;
 
       case PCRE2_ERROR_BADUTF_OFFSET:

@@ -108,7 +108,7 @@ static const int eint2[] = {
   30, REG_ECTYPE,  /* unknown POSIX class name */
   32, REG_INVARG,  /* this version of PCRE2 is not compiled with PCRE2_UTF8 support */
   37, REG_EESCAPE, /* PCRE2 does not support \L, \l, \N, \U, or \u */
-  56, REG_INVARG,  /* inconsistent NEWLINE options */
+  56, REG_INVARG,  /* internal error: unknown newline setting */
   67, REG_INVARG,  /* this version of PCRE2 is not compiled with PCRE2_UCP support */
 };
 
@@ -147,6 +147,8 @@ regerror(int errcode, const regex_t *preg, char *errbuf, size_t errbuf_size)
 {
 const char *message, *addmessage;
 size_t length, addlength;
+
+errcode -= COMPILE_ERROR_BASE;
 
 message = (errcode >= (int)(sizeof(pstring)/sizeof(char *)))?
   "unknown error code" : pstring[errcode];
@@ -224,6 +226,8 @@ preg->re_erroffset = erroffset;
 if (preg->re_pcre2_code == NULL)
   {
   unsigned int i; 
+  if (errorcode < 0) return REG_BADPAT;   /* UTF error */ 
+  errorcode -= COMPILE_ERROR_BASE;
   if (errorcode < (int)(sizeof(eint1)/sizeof(const int)))
     return eint1[errorcode];
   for (i = 0; i < sizeof(eint2)/(2*sizeof(const int)); i += 2)
@@ -307,13 +311,15 @@ if (rc >= 0)
 
 /* Unsuccessful match */
 
+if (rc <= PCRE2_ERROR_UTF8_ERR1 && rc >= PCRE2_ERROR_UTF8_ERR21)
+  return REG_INVARG;
+
 switch(rc)
   {
   default: return REG_ASSERT;
   case PCRE2_ERROR_BADMODE: return REG_INVARG;
   case PCRE2_ERROR_BADMAGIC: return REG_INVARG;
   case PCRE2_ERROR_BADOPTION: return REG_INVARG;
-  case PCRE2_ERROR_BADUTF: return REG_INVARG;
   case PCRE2_ERROR_BADUTF_OFFSET: return REG_INVARG;
   case PCRE2_ERROR_MATCHLIMIT: return REG_ESPACE;
   case PCRE2_ERROR_NOMATCH: return REG_NOMATCH;

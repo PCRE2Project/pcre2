@@ -420,6 +420,7 @@ about the pattern:
       flipbytes                 flip endianness
   /BB fullbincode               show binary code with lengths
   /I  info                      show info about compiled pattern
+      hex                       pattern is coded in hexadecimal 
       jit[=<number>]            use JIT
       locale=<name>             use this locale
       memory                    show memory used 
@@ -430,6 +431,7 @@ about the pattern:
       save=<file name>          save compiled pattern
       stackguard=<number>       test the stackguard feature
       tables=[0|1|2]            select internal tables
+      use_length                use the pattern's length 
 .sp
 The effects of these modifiers are described in the following sections.
 FIXME: Give more examples.
@@ -479,6 +481,27 @@ host with a different endianness. This feature is not available when the POSIX
 interface is being used, that is, when the \fBposix\fP pattern modifier is
 specified. See also the section about saving and reloading compiled patterns
 below.
+.
+.
+.SS "Specifying a pattern in hex"
+.rs
+.sp
+The \fBhex\fP modifier specifies that the characters of the pattern are to be 
+interpreted as pairs of hexadecimal digits. White space is permitted between
+pairs. For example:
+.sp
+  /ab 32 59/hex
+.sp
+This feature is provided as a way of creating patterns that contain binary zero 
+characters. When \fBhex\fP is set, it implies \fBuse_length\fP.
+.
+.
+.SS "Using the pattern's length"
+.rs
+.sp
+By default, \fBpcre2test\fP passes patterns as zero-terminated strings to 
+\fBpcre2_compile()\fP, giving the length as -1. If \fBuse_length\fP is set, the 
+length of the pattern is passed. This is implied if \fBhex\fP is set.
 .
 .
 .SS "JIT compilation"
@@ -595,38 +618,6 @@ letters, digits, spaces, etc. Setting alternate character tables and a locale
 are mutually exclusive.
 .
 .
-.SS "Locking out certain modifiers"
-.rs
-.sp
-FIXME FIXME
-PCRE can be compiled with or without support for certain features such as
-UTF-8/16/32 or Unicode properties. Accordingly, the standard tests are split up
-into a number of different files that are selected for running depending on
-which features are available. When updating the tests, it is all too easy to
-put a new test into the wrong file by mistake; for example, to put a test that
-requires UTF support into a file that is used when it is not available. To help
-detect such mistakes as early as possible, there is a facility for locking out
-specific modifiers. If an input line for \fBpcre2test\fP starts with the string
-"< forbid " the following sequence of characters is taken as a list of
-forbidden modifiers. For example, in the test files that must not use UTF or
-Unicode property support, this line appears:
-.sp
-  < forbid 8W
-.sp
-This locks out the /8 and /W modifiers. An immediate error is given if they are
-subsequently encountered. If the character string contains < but not >, all the
-multi-character modifiers that begin with < are locked out. Otherwise, such
-modifiers must be explicitly listed, for example:
-.sp
-  < forbid <JS><cr>
-.sp
-There must be a single space between < and "forbid" for this feature to be
-recognised. If there is not, the line is interpreted either as a request to
-re-load a pre-compiled pattern (see "SAVING AND RELOADING COMPILED PATTERNS"
-below) or, if there is a another < character, as a pattern that uses < as its
-delimiter.
-.
-.
 .SS "Setting certain match controls"
 .rs
 .sp
@@ -652,6 +643,7 @@ defaults, set them in a \fB#subject\fP command.
 .sp
 The modifiers that can appear in subject lines and the \fB#subject\fP 
 command are of two types.
+.
 .
 .SS "Setting match options"
 .rs
@@ -1199,6 +1191,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 13 May 2014
+Last updated: 08 June 2014
 Copyright (c) 1997-2014 University of Cambridge.
 .fi

@@ -40,37 +40,31 @@ POSSIBILITY OF SUCH DAMAGE.
 
 /* FIXME: this file is incomplete, being gradually built. */
 
+/* We do not support both EBCDIC and UTF at the same time. The "configure"
+script prevents both being selected, but not everybody uses "configure". */
+
+#if defined EBCDIC && defined SUPPORT_UTF
+#error The use of both EBCDIC and SUPPORT_UTF is not supported.
+#endif
+
+/* Standard C headers */
+
 #include <ctype.h>
 #include <limits.h>
 #include <stddef.h>
-#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "pcre2.h"
-#include "pcre2_ucp.h"
-
-#define PUBL(name) pcre2_##name
-
-#ifndef PRIV
-#define PRIV(name) _pcre2_##name
-#endif
-
-#define PCRE2_CALL_CONVENTION
-
-extern const uint8_t PRIV(default_tables)[];
-
-
-
+/* Macros to make boolean values more obvious. The #ifndef is to pacify
+compiler warnings in environments where these macros are defined elsewhere.
+Unfortunately, there is no way to do the same for the typedef. */
 
 typedef int BOOL;
-
 #ifndef FALSE
 #define FALSE   0
 #define TRUE    1
 #endif
-
 
 /* Valgrind (memcheck) support */
 
@@ -78,39 +72,202 @@ typedef int BOOL;
 #include <valgrind/memcheck.h>
 #endif
 
-/* This is an unsigned int value that no character can ever have, as
+/* When compiling a DLL for Windows, the exported symbols have to be declared
+using some MS magic. I found some useful information on this web page:
+http://msdn2.microsoft.com/en-us/library/y4h7bcy6(VS.80).aspx. According to the
+information there, using __declspec(dllexport) without "extern" we have a
+definition; with "extern" we have a declaration. The settings here override the
+setting in pcre.h (which is included below); it defines only PCRE2_EXP_DECL,
+which is all that is needed for applications (they just import the symbols). We
+use:
+
+  PCRE2_EXP_DECL       for declarations
+  PCRE2_EXP_DEFN       for definitions of exported functions
+  PCRE2_EXP_DATA_DEFN  for definitions of exported variables
+
+The reason for the two DEFN macros is that in non-Windows environments, one
+does not want to have "extern" before variable definitions because it leads to
+compiler warnings. So we distinguish between functions and variables. In
+Windows, the two should always be the same.
+
+The reason for wrapping this in #ifndef PCRE2_EXP_DECL is so that pcretest,
+which is an application, but needs to import this file in order to "peek" at
+internals, can #include pcre.h first to get an application's-eye view.
+
+In principle, people compiling for non-Windows, non-Unix-like (i.e. uncommon,
+special-purpose environments) might want to stick other stuff in front of
+exported symbols. That's why, in the non-Windows case, we set PCRE2_EXP_DEFN and
+PCRE2_EXP_DATA_DEFN only if they are not already set. */
+
+#ifndef PCRE2_EXP_DECL
+#  ifdef _WIN32
+#    ifndef PCRE2_STATIC
+#      define PCRE2_EXP_DECL       extern __declspec(dllexport)
+#      define PCRE2_EXP_DEFN       __declspec(dllexport)
+#      define PCRE2_EXP_DATA_DEFN  __declspec(dllexport)
+#    else
+#      define PCRE2_EXP_DECL       extern
+#      define PCRE2_EXP_DEFN
+#      define PCRE2_EXP_DATA_DEFN
+#    endif
+#  else
+#    ifdef __cplusplus
+#      define PCRE2_EXP_DECL       extern "C"
+#    else
+#      define PCRE2_EXP_DECL       extern
+#    endif
+#    ifndef PCRE2_EXP_DEFN
+#      define PCRE2_EXP_DEFN       PCRE2_EXP_DECL
+#    endif
+#    ifndef PCRE2_EXP_DATA_DEFN
+#      define PCRE2_EXP_DATA_DEFN
+#    endif
+#  endif
+#endif
+
+/* Include the public PCRE2 header and the definitions of UCP character
+property values. This must follow the setting of PCRE2_EXP_DECL above. */
+
+#include "pcre2.h"
+#include "pcre2_ucp.h"
+
+/* When PCRE is compiled as a C++ library, the subject pointer can be replaced
+with a custom type. This makes it possible, for example, to allow pcre2_match()
+to process subject strings that are discontinuous by using a smart pointer
+class. It must always be possible to inspect all of the subject string in
+pcre2_match() because of the way it backtracks. */
+
+/* WARNING: This is as yet untested for PCRE2. */
+
+#ifdef CUSTOM_SUBJECT_PTR
+#undef PCRE2_SPTR
+#define PCRE2_SPTR CUSTOM_SUBJECT_PTR
+#endif
+
+/* When compiling with the MSVC compiler, it is sometimes necessary to include
+a "calling convention" before exported function names. (This is secondhand
+information; I know nothing about MSVC myself). For example, something like
+
+  void __cdecl function(....)
+
+might be needed. In order so make this easy, all the exported functions have
+PCRE2_CALL_CONVENTION just before their names. It is rarely needed; if not
+set, we ensure here that it has no effect. */
+
+#ifndef PCRE2_CALL_CONVENTION
+#define PCRE2_CALL_CONVENTION
+#endif
+
+/* When checking for integer overflow in pcre2_compile(), we need to handle
+large integers. If a 64-bit integer type is available, we can use that.
+Otherwise we have to cast to double, which of course requires floating point
+arithmetic. Handle this by defining a macro for the appropriate type. If
+stdint.h is available, include it; it may define INT64_MAX. Systems that do not
+have stdint.h (e.g. Solaris) may have inttypes.h. The macro int64_t may be set
+by "configure". */
+
+#if defined HAVE_STDINT_H
+#include <stdint.h>
+#elif defined HAVE_INTTYPES_H
+#include <inttypes.h>
+#endif
+
+#if defined INT64_MAX || defined int64_t
+#define INT64_OR_DOUBLE int64_t
+#else
+#define INT64_OR_DOUBLE double
+#endif
+
+/* When compiling for use with the Virtual Pascal compiler, these functions
+need to have their names changed. PCRE must be compiled with the -DVPCOMPAT
+option on the command line. */
+
+#ifdef VPCOMPAT
+#define strlen(s)        _strlen(s)
+#define strncmp(s1,s2,m) _strncmp(s1,s2,m)
+#define memcmp(s,c,n)    _memcmp(s,c,n)
+#define memcpy(d,s,n)    _memcpy(d,s,n)
+#define memmove(d,s,n)   _memmove(d,s,n)
+#define memset(s,c,n)    _memset(s,c,n)
+#else  /* VPCOMPAT */
+
+/* To cope with SunOS4 and other systems that lack memmove() but have bcopy(),
+define a macro for memmove() if HAVE_MEMMOVE is false, provided that HAVE_BCOPY
+is set. Otherwise, include an emulating function for those systems that have
+neither (there some non-Unix environments where this is the case). */
+
+#ifndef HAVE_MEMMOVE
+#undef  memmove        /* some systems may have a macro */
+#ifdef HAVE_BCOPY
+#define memmove(a, b, c) bcopy(b, a, c)
+#else  /* HAVE_BCOPY */
+static void *
+pcre_memmove(void *d, const void *s, size_t n)
+{
+size_t i;
+unsigned char *dest = (unsigned char *)d;
+const unsigned char *src = (const unsigned char *)s;
+if (dest > src)
+  {
+  dest += n;
+  src += n;
+  for (i = 0; i < n; ++i) *(--dest) = *(--src);
+  return (void *)dest;
+  }
+else
+  {
+  for (i = 0; i < n; ++i) *dest++ = *src++;
+  return (void *)(dest - n);
+  }
+}
+#define memmove(a, b, c) pcre_memmove(a, b, c)
+#endif   /* not HAVE_BCOPY */
+#endif   /* not HAVE_MEMMOVE */
+#endif   /* not VPCOMPAT */
+
+/* External (in the C sense) functions and macros that are private to the 
+libraries are always referenced using the PRIV macro. This makes it possible
+for pcre2test.c to include some of the source files from the libraries using a
+different PRIV definition to avoid name clashes. */
+
+#ifndef PRIV
+#define PRIV(name) _pcre2_##name
+#endif
+
+/* This is an unsigned int value that no UTF character can ever have, as
 Unicode doesn't go beyond 0x0010ffff. */
 
 #define NOTACHAR 0xffffffff
 
-/* When UTF encoding is being used, a character is no longer just a single
-byte in 8-bit mode or a single short in 16-bit mode. The macros for character
-handling generate simple sequences when used in the basic mode, and more
-complicated ones for UTF characters. GETCHARLENTEST and other macros are not
-used when UTF is not supported. To make sure they can never even appear when
-UTF support is omitted, we don't even define them. */
+/* Compile-time errors are added to this value. As they are documented, it
+should probably never be changed. */
 
-#ifndef SUPPORT_UTF
+#define COMPILE_ERROR_BASE 100
 
-/* #define MAX_VALUE_FOR_SINGLE_CHAR */
-/* #define HAS_EXTRALEN(c) */
-/* #define GET_EXTRALEN(c) */
-/* #define NOT_FIRSTCHAR(c) */
-#define GETCHAR(c, eptr) c = *eptr;
-#define GETCHARTEST(c, eptr) c = *eptr;
-#define GETCHARINC(c, eptr) c = *eptr++;
-#define GETCHARINCTEST(c, eptr) c = *eptr++;
-#define GETCHARLEN(c, eptr, len) c = *eptr;
-/* #define GETCHARLENTEST(c, eptr, len) */
-/* #define BACKCHAR(eptr) */
-/* #define FORWARDCHAR(eptr) */
-/* #define ACROSSCHAR(condition, eptr, action) */
+/* Define the default BSR convention. */
 
-#else   /* SUPPORT_UTF */
+#ifdef BSR_ANYCRLF
+#define BSR_DEFAULT PCRE2_BSR_ANYCRLF
+#else
+#define BSR_DEFAULT PCRE2_BSR_UNICODE
+#endif
+
+
+/* ---------------- Basic UTF-8 macros ---------------- */
+
+/* These UTF-8 macros are always defined because they are used in pcre2test for
+handling wide characters in 16-bit and 32-bit modes, even if an 8-bit library
+is not supported. */
 
 /* Tests whether a UTF-8 code point needs extra bytes to decode. */
 
 #define HASUTF8EXTRALEN(c) ((c) >= 0xc0)
+
+/* The following macros were originally written in the form of loops that used
+data from the tables whose names start with PRIV(utf8_table). They were
+rewritten by a user so as not to use loops, because in some environments this
+gives a significant performance advantage, and it seems never to do any harm.
+*/
 
 /* Base macro to pick up the remaining bytes of a UTF-8 character, not
 advancing the pointer. */
@@ -168,8 +325,44 @@ the pointer. */
       } \
     }
 
-#endif  /* SUPPORT_UTF */
+/* Base macro to pick up the remaining bytes of a UTF-8 character, not
+advancing the pointer, incrementing the length. */
 
+#define GETUTF8LEN(c, eptr, len) \
+    { \
+    if ((c & 0x20) == 0) \
+      { \
+      c = ((c & 0x1f) << 6) | (eptr[1] & 0x3f); \
+      len++; \
+      } \
+    else if ((c & 0x10)  == 0) \
+      { \
+      c = ((c & 0x0f) << 12) | ((eptr[1] & 0x3f) << 6) | (eptr[2] & 0x3f); \
+      len += 2; \
+      } \
+    else if ((c & 0x08)  == 0) \
+      {\
+      c = ((c & 0x07) << 18) | ((eptr[1] & 0x3f) << 12) | \
+          ((eptr[2] & 0x3f) << 6) | (eptr[3] & 0x3f); \
+      len += 3; \
+      } \
+    else if ((c & 0x04)  == 0) \
+      { \
+      c = ((c & 0x03) << 24) | ((eptr[1] & 0x3f) << 18) | \
+          ((eptr[2] & 0x3f) << 12) | ((eptr[3] & 0x3f) << 6) | \
+          (eptr[4] & 0x3f); \
+      len += 4; \
+      } \
+    else \
+      {\
+      c = ((c & 0x01) << 30) | ((eptr[1] & 0x3f) << 24) | \
+          ((eptr[2] & 0x3f) << 18) | ((eptr[3] & 0x3f) << 12) | \
+          ((eptr[4] & 0x3f) << 6) | (eptr[5] & 0x3f); \
+      len += 5; \
+      } \
+    }
+
+/* --------------- Whitespace macros ---------------- */
 
 /* Tests for Unicode horizontal and vertical whitespace characters must check a
 number of different values. Using a switch statement for this generates the
@@ -187,7 +380,7 @@ NOTACHAR (which is 0xffffffff).
 Any changes should ensure that the various macros are kept in step with each
 other. NOTE: The values also appear in pcre2_jit_compile.c. */
 
-/* ------ ASCII/Unicode environments ------ */
+/* -------------- ASCII/Unicode environments -------------- */
 
 #ifndef EBCDIC
 
@@ -242,7 +435,7 @@ other. NOTE: The values also appear in pcre2_jit_compile.c. */
   VSPACE_BYTE_CASES: \
   VSPACE_MULTIBYTE_CASES
 
-/* ------ EBCDIC environments ------ */
+/* -------------- EBCDIC environments -------------- */
 
 #else
 #define HSPACE_LIST CHAR_HT, CHAR_SPACE
@@ -271,8 +464,46 @@ other. NOTE: The values also appear in pcre2_jit_compile.c. */
 #define VSPACE_CASES VSPACE_BYTE_CASES
 #endif  /* EBCDIC */
 
-/* ------ End of whitespace macros ------ */
+/* -------------- End of whitespace macros -------------- */
 
+
+/* PCRE2 is able to support several different kinds of newline (CR, LF, CRLF,
+"any" and "anycrlf" at present). The following macros are used to package up
+testing for newlines. NLBLOCK, PSSTART, and PSEND are defined in the various
+modules to indicate in which datablock the parameters exist, and what the
+start/end of string field names are. */
+
+#define NLTYPE_FIXED    0     /* Newline is a fixed length string */
+#define NLTYPE_ANY      1     /* Newline is any Unicode line ending */
+#define NLTYPE_ANYCRLF  2     /* Newline is CR, LF, or CRLF */
+
+/* This macro checks for a newline at the given position */
+
+#define IS_NEWLINE(p) \
+  ((NLBLOCK->nltype != NLTYPE_FIXED)? \
+    ((p) < NLBLOCK->PSEND && \
+     PRIV(is_newline)((p), NLBLOCK->nltype, NLBLOCK->PSEND, \
+       &(NLBLOCK->nllen), utf)) \
+    : \
+    ((p) <= NLBLOCK->PSEND - NLBLOCK->nllen && \
+     UCHAR21TEST(p) == NLBLOCK->nl[0] && \
+     (NLBLOCK->nllen == 1 || UCHAR21TEST(p+1) == NLBLOCK->nl[1])       \
+    ) \
+  )
+
+/* This macro checks for a newline immediately preceding the given position */
+
+#define WAS_NEWLINE(p) \
+  ((NLBLOCK->nltype != NLTYPE_FIXED)? \
+    ((p) > NLBLOCK->PSSTART && \
+     PRIV(was_newline)((p), NLBLOCK->nltype, NLBLOCK->PSSTART, \
+       &(NLBLOCK->nllen), utf)) \
+    : \
+    ((p) >= NLBLOCK->PSSTART + NLBLOCK->nllen && \
+     UCHAR21TEST(p - NLBLOCK->nllen) == NLBLOCK->nl[0] &&              \
+     (NLBLOCK->nllen == 1 || UCHAR21TEST(p - NLBLOCK->nllen + 1) == NLBLOCK->nl[1]) \
+    ) \
+  )
 
 /* Private flags containing information about the compiled pattern. The first
 three must not be changed, because whichever is set is actually the number of
@@ -296,15 +527,54 @@ bytes in a code unit in that mode. */
 
 #define PCRE2_MODE_MASK     (PCRE2_MODE8 | PCRE2_MODE16 | PCRE2_MODE32)
 
-
 /* Magic number to provide a small check against being handed junk. */
 
 #define MAGIC_NUMBER  0x50435245UL   /* 'PCRE' */
 
-/* This variable is used to detect a loaded regular expression
-in different endianness. */
+/* This value is used to detect a loaded regular expression in different
+endianness. */
 
 #define REVERSED_MAGIC_NUMBER  0x45524350UL   /* 'ERCP' */
+
+/* The maximum remaining length of subject we are prepared to search for a
+req_unit match. */
+
+#define REQ_UNIT_MAX 1000
+
+/* Bit definitions for entries in the pcre_ctypes table. */
+
+#define ctype_space   0x01
+#define ctype_letter  0x02
+#define ctype_digit   0x04
+#define ctype_xdigit  0x08
+#define ctype_word    0x10    /* alphanumeric or '_' */
+#define ctype_meta    0x80    /* regexp meta char or zero (end pattern) */
+
+/* Offsets for the bitmap tables in pcre_cbits. Each table contains a set
+of bits for a class map. Some classes are built by combining these tables. */
+
+#define cbit_space     0      /* [:space:] or \s */
+#define cbit_xdigit   32      /* [:xdigit:] */
+#define cbit_digit    64      /* [:digit:] or \d */
+#define cbit_upper    96      /* [:upper:] */
+#define cbit_lower   128      /* [:lower:] */
+#define cbit_word    160      /* [:word:] or \w */
+#define cbit_graph   192      /* [:graph:] */
+#define cbit_print   224      /* [:print:] */
+#define cbit_punct   256      /* [:punct:] */
+#define cbit_cntrl   288      /* [:cntrl:] */
+#define cbit_length  320      /* Length of the cbits table */
+
+/* Offsets of the various tables from the base tables pointer, and
+total length. */
+
+#define lcc_offset      0
+#define fcc_offset    256
+#define cbits_offset  512
+#define ctypes_offset (cbits_offset + cbit_length)
+#define tables_length (ctypes_offset + 256)
+
+
 
 
 
@@ -1432,6 +1702,17 @@ typedef struct pcre2_memctl {
   void      *memory_data;
 } pcre2_memctl;
 
+/* Structure for building a chain of open capturing subpatterns during
+compiling, so that instructions to close them can be compiled when (*ACCEPT) is
+encountered. This is also used to identify subpatterns that contain recursive
+back references to themselves, so that they can be made atomic. */
+
+typedef struct open_capitem {
+  struct open_capitem *next;    /* Chain link */
+  uint16_t number;              /* Capture number */
+  uint16_t flag;                /* Set TRUE if recursive back ref */
+} open_capitem;
+
 /* Layout of the UCP type table that translates property names into types and
 codes. Each entry used to point directly to a name, but to reduce the number of
 relocations in shared libraries, it now has an offset into a single string
@@ -1481,13 +1762,52 @@ extern const int         PRIV(ucp_typerange)[];
 
 /* ----------------- Items that need PCRE2_CODE_UNIT_WIDTH ----------------- */
 
+/* When this file is included by pcre2test, PCRE2_CODE_UNIT_WIDTH is not 
+defined, so the following items are omitted. */
+
 #ifdef PCRE2_CODE_UNIT_WIDTH
 
-/* Mode-dependent macros and private structures are defined in a separate file.
-When compiling the library, PCRE2_CODE_UNIT_WIDTH will be defined, and we
-include them at the appropriate width. When compiling pcre2test, however, that
-macro is not set at this point because pcre2test needs to include them at all
-supported widths. */
+/* This is the largest non-UTF code point. */
+
+#define MAX_NON_UTF_CHAR (0xffffffffU >> (32 - PCRE2_CODE_UNIT_WIDTH))
+
+
+/* Internal shared data tables. These are tables that are used by more than one
+of the exported public functions. They have to be "external" in the C sense,
+but are not part of the PCRE2 public API. The data for these tables is in the
+pcre2_tables.c module. Even though some of them are identical in each library, 
+they must have different names so that more than one library can be linked with 
+an application. UTF-8 tables are needed only when compiling the 8-bit library.
+*/
+
+#if PCRE2_CODE_UNIT_WIDTH == 8
+extern const int              PRIV(utf8_table1)[];
+extern const int              PRIV(utf8_table1_size);                            
+extern const int              PRIV(utf8_table2)[];
+extern const int              PRIV(utf8_table3)[];
+extern const uint8_t          PRIV(utf8_table4)[];       
+#endif                        
+                              
+extern const uint8_t          PRIV(default_tables)[];
+extern const uint8_t          PRIV(OP_lengths)[];
+
+extern const uint32_t         PRIV(hspace_list)[];
+extern const uint32_t         PRIV(vspace_list)[];
+                              
+extern const ucp_type_table   PRIV(utt)[];
+extern const char             PRIV(utt_names)[];
+extern const size_t           PRIV(utt_size);
+
+
+/* Mode-dependent macros and hidden and private structures are defined in a
+separate file so that pcre2test can include them at all supported widths. When
+compiling the library, PCRE2_CODE_UNIT_WIDTH will be defined, and we can
+include them at the appropriate width, after setting up suffix macros for the
+private structures. */
+
+#define compile_data                 PCRE2_SUFFIX(compile_data_)
+#define branch_chain                 PCRE2_SUFFIX(branch_chain_)
+#define named_group                  PCRE2_SUFFIX(named_group_)
 
 #include "pcre2_intmodedep.h"
 
@@ -1498,14 +1818,32 @@ from pcre2test, and must not be defined when no code unit width is available.
 */
 
 #define _pcre2_compile_context_init  PCRE2_SUFFIX(_pcre2_compile_context_init_)
+#define _pcre2_find_bracket          PCRE2_SUFFIX(_pcre2_find_bracket_)
+#define _pcre2_is_newline            PCRE2_SUFFIX(_pcre2_is_newline_)
 #define _pcre2_match_context_init    PCRE2_SUFFIX(_pcre2_match_context_init_)
 #define _pcre2_memctl_malloc         PCRE2_SUFFIX(_pcre2_memctl_malloc_)
+#define _pcre2_ord2utf               PCRE2_SUFFIX(_pcre2_ord2utf_)
 #define _pcre2_strcmp                PCRE2_SUFFIX(_pcre_strcmp_)
+#define _pcre2_strcmp_c8             PCRE2_SUFFIX(_pcre_strcmp_c8_)
+#define _pcre2_strlen                PCRE2_SUFFIX(_pcre_strlen_)
+#define _pcre2_strncmp               PCRE2_SUFFIX(_pcre_strncmp_)
+#define _pcre2_strncmp_c8            PCRE2_SUFFIX(_pcre_strncmp_c8_)
+#define _pcre2_valid_utf             PCRE2_SUFFIX(_pcre_valid_utf_)
+#define _pcre2_was_newline           PCRE2_SUFFIX(_pcre2_was_newline_)
 
-extern void     _pcre2_compile_context_init(pcre2_compile_context *, BOOL);
-extern void     _pcre2_match_context_init(pcre2_match_context *, BOOL);
-extern void    *_pcre2_memctl_malloc(size_t, size_t, pcre2_memctl *);
-extern int      _pcre2_strcmp(PCRE2_SPTR, PCRE2_SPTR);
-#endif
+extern void  _pcre2_compile_context_init(pcre2_compile_context *, BOOL);
+extern PCRE2_SPTR _pcre2_find_bracket(PCRE2_SPTR, BOOL, int);
+extern BOOL  _pcre2_is_newline(PCRE2_SPTR, int, PCRE2_SPTR, int *, BOOL);
+extern void  _pcre2_match_context_init(pcre2_match_context *, BOOL);
+extern void  *_pcre2_memctl_malloc(size_t, size_t, pcre2_memctl *);
+extern unsigned int _pcre2_ord2utf(uint32_t, PCRE2_UCHAR *);
+extern int   _pcre2_strcmp(PCRE2_SPTR, PCRE2_SPTR);
+extern int   _pcre2_strcmp_c8(PCRE2_SPTR, const char *);
+extern int   _pcre2_strlen(PCRE2_SPTR);
+extern int   _pcre2_strncmp(PCRE2_SPTR, PCRE2_SPTR, size_t);
+extern int   _pcre2_strncmp_c8(PCRE2_SPTR, const char *, size_t);
+extern int   _pcre2_valid_utf(PCRE2_SPTR, int, size_t *);
+extern BOOL  _pcre2_was_newline(PCRE2_SPTR, int, PCRE2_SPTR, int *, BOOL);
+#endif  /* PCRE2_CODE_UNIT_WIDTH */
 
 /* End of pcre2_internal.h */

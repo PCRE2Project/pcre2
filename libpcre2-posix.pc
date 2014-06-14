@@ -7,7 +7,7 @@ includedir=${prefix}/include
 
 Name: libpcre2-posix
 Description: Posix compatible interface to libpcre2-8
-Version: 9.00-DEV
+Version: 10.00-DEV
 Libs: -L${libdir} -lpcre2-posix
 Cflags: -I${includedir} @PCRE_STATIC_CFLAG@
 Requires.private: libpcre2-8

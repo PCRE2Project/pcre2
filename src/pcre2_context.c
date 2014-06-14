@@ -139,9 +139,9 @@ if (defmemctl)
   } 
 ccontext->stack_guard = NULL;
 ccontext->tables = PRIV(default_tables);
-ccontext->bsr_convention = PCRE2_BSR_DEFAULT;
-ccontext->newline_convention = PCRE2_NEWLINE_DEFAULT;
 ccontext->parens_nest_limit = PARENS_NEST_LIMIT;
+ccontext->newline_convention = NEWLINE_DEFAULT;
+ccontext->bsr_convention = BSR_DEFAULT;
 }
 
 

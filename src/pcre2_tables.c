@@ -41,22 +41,22 @@ POSSIBILITY OF SUCH DAMAGE.
 /* This module contains some fixed tables that are used by more than one of the
 PCRE code modules. The tables are also #included by the pcre2test program,
 which uses macros to change their names from _pcre2_xxx to xxxx, thereby
-avoiding name clashes with the library. In this case, PCRE2_INCLUDED is 
+avoiding name clashes with the library. In this case, PCRE2_PCRE2TEST is
 defined. */
 
-#ifndef PCRE2_INCLUDED           /* We're compiling the library */
+#ifndef PCRE2_PCRE2TEST           /* We're compiling the library */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 #include "pcre2_internal.h"
-#endif /* PCRE2_INCLUDED */
+#endif /* PCRE2_PCRE2TEST */
 
 
 /* Table of sizes for the fixed-length opcodes. It's defined in a macro so that
-the definition is next to the definition of the opcodes in pcre2_internal.h. 
+the definition is next to the definition of the opcodes in pcre2_internal.h.
 This is mode-dependent, so is skipped when this file is included by pcre2test. */
 
-#ifndef PCRE2_INCLUDED
+#ifndef PCRE2_PCRE2TEST
 const uint8_t PRIV(OP_lengths)[] = { OP_LENGTHS };
 #endif
 
@@ -71,13 +71,17 @@ const uint32_t PRIV(vspace_list)[] = { VSPACE_LIST };
 *           Tables for UTF-8 support             *
 *************************************************/
 
+/* These tables are required by pcre2test in 16- or 32-bit mode, as well
+as for the library in 8-bit mode, because pcre2test uses UTF-8 internally for
+handling wide characters. */
+
+#if defined PCRE2_PCRE2TEST || \
+   (defined SUPPORT_UTF && \
+    defined PCRE2_CODE_UNIT_WIDTH && \
+    PCRE2_CODE_UNIT_WIDTH == 8)
+
 /* These are the breakpoints for different numbers of bytes in a UTF-8
 character. */
-
-#if (defined SUPPORT_UTF && defined COMPILE_PCRE8) \
-  || (defined PCRE2_INCLUDED && (defined SUPPORT_PCRE16 || defined SUPPORT_PCRE32))
-
-/* These tables are also required by pcretest in 16- or 32-bit mode. */
 
 const int PRIV(utf8_table1)[] =
   { 0x7f, 0x7ff, 0xffff, 0x1fffff, 0x3ffffff, 0x7fffffff};
@@ -99,7 +103,7 @@ const uint8_t PRIV(utf8_table4)[] = {
   2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
   3,3,3,3,3,3,3,3,4,4,4,4,5,5,5,5 };
 
-#endif /* (SUPPORT_UTF && COMPILE_PCRE8) || (PCRE2_INCLUDED && SUPPORT_PCRE[16|32])*/
+#endif /* UTF-8 support needed */
 
 
 #ifdef SUPPORT_UTF
@@ -653,7 +657,7 @@ const ucp_type_table PRIV(utt)[] = {
   { 1042, PT_PC, ucp_Zs }
 };
 
-const int PRIV(utt_size) = sizeof(PRIV(utt)) / sizeof(ucp_type_table);
+const size_t PRIV(utt_size) = sizeof(PRIV(utt)) / sizeof(ucp_type_table);
 
 #endif /* SUPPORT_UTF */
 

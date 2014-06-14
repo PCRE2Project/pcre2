@@ -51,7 +51,10 @@ POSSIBILITY OF SUCH DAMAGE.
 #define STRING(a)  # a
 #define XSTRING(s) STRING(s)
 
-/* The texts of compile-time error messages. Do not ever re-use any error
+/* The texts of compile-time error messages. Compile-time error numbers start 
+at COMPILE_ERROR_BASE (100).
+
+Do not ever re-use any error
 number, because they are documented. Always add a new error instead. Messages
 marked DEAD below are no longer used. This used to be a table of strings, but
 in order to reduce the number of relocations needed when a shared library is
@@ -85,7 +88,7 @@ static const char compile_error_texts[] =
   "missing )\0"
   /* 15 */
   "reference to non-existent subpattern\0"
-  "erroffset passed as NULL\0"
+  "pattern or erroffset passed as NULL\0"
   "unknown option bit(s) set\0"
   "missing ) after comment\0"
   "parentheses nested too deeply\0"  /** DEAD **/
@@ -104,7 +107,7 @@ static const char compile_error_texts[] =
   /* 30 */
   "unknown POSIX class name\0"
   "POSIX collating elements are not supported\0"
-  "this version of PCRE is compiled without UTF support\0"
+  "this version of PCRE does not have UTF or Unicode property support\0"
   "spare error\0"  /** DEAD **/
   "character value in \\x{} or \\o{} is too large\0"
   /* 35 */
@@ -133,7 +136,7 @@ static const char compile_error_texts[] =
   "DEFINE group contains more than one branch\0"
   /* 55 */
   "repeating a DEFINE group is not allowed\0"  /** DEAD **/
-  "inconsistent NEWLINE options\0"
+  "internal error: unknown newline setting\0"
   "\\g is not followed by a braced, angle-bracketed, or quoted name/number or by a plain number\0"
   "a numbered reference must not be zero\0"
   "an argument is not allowed for (*ACCEPT), (*FAIL), or (*COMMIT)\0"
@@ -171,58 +174,74 @@ static const char compile_error_texts[] =
   "parentheses are too deeply nested (stack check)\0"
   ;
 
-/* Match-time error texts are in the same format. */
+/* Match-time and UTF error texts are in the same format. */
 
 static const char match_error_texts[] =
   "no error\0"
   "no match\0" 
+  "partial match\0"
+  "UTF-8 error: 1 byte missing at end\0"
+  "UTF-8 error: 2 bytes missing at end\0"
+  /* 5 */ 
+  "UTF-8 error: 3 bytes missing at end\0"
+  "UTF-8 error: 4 bytes missing at end\0"
+  "UTF-8 error: 5 bytes missing at end\0"
+  "UTF-8 error: byte 2 top bits not 0x80\0" 
+  "UTF-8 error: byte 3 top bits not 0x80\0" 
+  /* 10 */ 
+  "UTF-8 error: byte 4 top bits not 0x80\0" 
+  "UTF-8 error: byte 5 top bits not 0x80\0" 
+  "UTF-8 error: byte 6 top bits not 0x80\0"
+  "UTF-8 error: 5-byte character is not allowed (RFC 3629)\0"  
+  "UTF-8 error: 6-byte character is not allowed (RFC 3629)\0"
+  /* 15 */ 
+  "UTF-8 error: code point > 0x10ffff is not defined\0"
+  "UTF-8 error: code points 0xd000-0xdfff are not defined\0"    
+  "UTF-8 error: overlong 2-byte sequence\0" 
+  "UTF-8 error: overlong 3-byte sequence\0" 
+  "UTF-8 error: overlong 4-byte sequence\0"
+  /* 20 */ 
+  "UTF-8 error: overlong 5-byte sequence\0"
+  "UTF-8 error: overlong 6-byte sequence\0"
+  "UTF-8 error: isolated 0x80 byte\0"
+  "UTF-8 error: illegal byte (0xfe or 0xff)\0" 
+  "UTF-16 error: missing low surrogate at end\0" 
+  /* 25 */ 
+  "UTF-16 error: invalid low surrogate\0" 
+  "UTF-16 error: isolated low surrogate\0" 
+  "UTF-32 error: surrogate character not allowed\0"
+  "UTF-32 error: code point > 0x10ffff is not defined\0" 
   "bad count value\0"
+  /* 30 */ 
   "pattern compiled with other endianness\0"
   "bad length\0"
-  /* -5 */ 
   "magic number missing\0"
   "pattern compiled in wrong mode: 8/16/32-bit error\0"
   "bad offset value\0"
+  /* 35 */ 
   "bad option value\0"
-  "bad UTF string\0"
-  /* -10 */
   "bad offset into UTF string\0"
   "callout error code\0"              /* Never returned by PCRE2 itself */   
+  "invalid data in workspace for DFA restart\0"
+  "too much recursion for DFA matching\0"
+  /* 40 */ 
+  "backreference condition or recursion test not supported for DFA matching\0"
+  "item unsupported for DFA matching\0"
+  "match limit not supported for DFA matching\0"
+  "workspace size exceeded in DFA matching\0"
   "internal error - pattern overwritten?\0"
+  /* 45 */ 
   "bad JIT option\0"
   "JIT stack limit reached\0"
-  /* -15 */
   "match limit exceeded\0"
   "no more memory\0"
   "unknown substring\0" 
+  /* 50 */ 
   "NULL argument passed\0"
-  "partial match\0"
-  /* -20 */ 
   "nested recursion at the same subject position\0"
   "recursion limit exceeded\0"
   "unknown opcode - pattern overwritten?\0"
   "value unset\0"                     /* Used by pcre2_pattern_info() */
-  "spare -24\0"
-  /* -25 */  
-  "spare -25\0" 
-  "spare -26\0" 
-  "spare -27\0" 
-  "spare -28\0" 
-  "spare -29\0" 
-  /* -30 */ 
-  "invalid data in workspace for DFA restart\0"
-  "too much recursion for DFA matching\0"
-  "backreference condition or recursion test not supported for DFA matching\0"
-  "item unsupported for DFA matching\0"
-  "match limit not supported for DFA matching\0"
-  /* -35 */ 
-  "workspace size exceeded in DFA matching\0"
-  "spare -36\0"
-  "spare -37\0"
-  "spare -38\0"
-  "spare -39\0"
-  /* -40 */
-  "spare -39\0"
   ; 
 
 
@@ -232,7 +251,8 @@ static const char match_error_texts[] =
 
 /* This function copies an error message into a buffer whose units are of an 
 appropriate width. Error numbers are positive for compile-time errors, and 
-negative for exec-time errors.
+negative for match-time errors (except for UTF errors), but the numbers are all 
+distinct.
 
 Arguments:
   enumber       error number
@@ -253,16 +273,15 @@ uint32_t n;
 
 if (size == 0) return PCRE2_ERROR_NOMEMORY;
 
-if (enumber > 0)    /* Compile-time error */
+if (enumber > COMPILE_ERROR_BASE)  /* Compile error */
   {
   message = compile_error_texts;
-  n = enumber;
+  n = enumber - COMPILE_ERROR_BASE; 
   }  
-  
-else                /* Match-time error */
+else                               /* Match or UTF error */
   {
   message = match_error_texts;
-  n = -enumber;
+  n = -enumber; 
   }    
      
 for (; n > 0; n--)

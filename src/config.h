@@ -2,13 +2,13 @@
 /* src/config.h.in.  Generated from configure.ac by autoheader.  */
 
 
-/* PCRE is written in Standard C, but there are a few non-standard things it
+/* PCRE2 is written in Standard C, but there are a few non-standard things it
 can cope with, allowing it to run on SunOS4 and other "close to standard"
 systems.
 
 In environments that support the GNU autotools, config.h.in is converted into
 config.h by the "configure" script. In environments that use CMake,
-config-cmake.in is converted into config.h. If you are going to build PCRE "by
+config-cmake.in is converted into config.h. If you are going to build PCRE2 "by
 hand" without using "configure" or CMake, you should copy the distributed
 config.h.generic to config.h, and edit the macro definitions to be the way you
 need them. You must then add -DHAVE_CONFIG_H to all of your compile commands,
@@ -25,21 +25,22 @@ macros are listed as a commented #undef in config.h.generic. Macros such as
 MATCH_LIMIT, whose actual value is relevant, have defaults defined, but are
 surrounded by #ifndef/#endif lines so that the value can be overridden by -D.
 
-PCRE uses memmove() if HAVE_MEMMOVE is defined; otherwise it uses bcopy() if
+PCRE2 uses memmove() if HAVE_MEMMOVE is defined; otherwise it uses bcopy() if
 HAVE_BCOPY is defined. If your system has neither bcopy() nor memmove(), make
 sure both macros are undefined; an emulation function will then be used. */
 
 /* By default, the \R escape sequence matches any Unicode line ending
    character or sequence of characters. If BSR_ANYCRLF is defined (to any
    value), this is changed so that backslash-R matches only CR, LF, or CRLF.
-   The build-time default can be overridden by the user of PCRE at runtime. */
+   The build-time default can be overridden by the user of PCRE2 at runtime.
+   */
 /* #undef BSR_ANYCRLF */
 
 /* If you are compiling for a system that uses EBCDIC instead of ASCII
-   character codes, define this macro to any value. When EBCDIC is set, PCRE
+   character codes, define this macro to any value. When EBCDIC is set, PCRE2
    assumes that all input strings are in EBCDIC. If you do not define this
-   macro, PCRE will assume input strings are ASCII or UTF-8/16/32 Unicode. It
-   is not possible to build a version of PCRE that supports both EBCDIC and
+   macro, PCRE2 will assume input strings are ASCII or UTF-8/16/32 Unicode. It
+   is not possible to build a version of PCRE2 that supports both EBCDIC and
    UTF-8/16/32. */
 /* #undef EBCDIC */
 
@@ -126,8 +127,8 @@ sure both macros are undefined; an emulation function will then be used. */
 /* The value of LINK_SIZE determines the number of bytes used to store links
    as offsets within the compiled regex. The default is 2, which allows for
    compiled patterns up to 64K long. This covers the vast majority of cases.
-   However, PCRE can also be compiled to use 3 or 4 bytes instead. This allows
-   for longer patterns in extreme cases. */
+   However, PCRE2 can also be compiled to use 3 or 4 bytes instead. This
+   allows for longer patterns in extreme cases. */
 #define LINK_SIZE 2
 
 /* Define to the sub-directory in which libtool stores uninstalled libraries.
@@ -136,7 +137,7 @@ sure both macros are undefined; an emulation function will then be used. */
 
 /* The value of MATCH_LIMIT determines the default number of times the
    internal match() function can be called during a single execution of
-   pcre_exec(). There is a runtime interface for setting a different limit.
+   pcre2_match(). There is a runtime interface for setting a different limit.
    The limit exists in order to catch runaway regular expressions that take
    for ever to determine that they do not match. The default is set very large
    so that it does not accidentally catch legitimate cases. */
@@ -162,19 +163,18 @@ sure both macros are undefined; an emulation function will then be used. */
    overflow caused by enormously large patterns. */
 #define MAX_NAME_SIZE 32
 
-/* The value of NEWLINE determines the default newline character sequence.
-   PCRE client programs can override this by selecting other values at run
-   time. The valid values are 0 (CR), 1 (LF), 2 (CRLF), 3 (ANY), and 4
+/* The value of NEWLINE_DEFAULT determines the default newline character
+   sequence. PCRE2 client programs can override this by selecting other values
+   at run time. The valid values are 1 (CR), 2 (LF), 3 (CRLF), 4 (ANY), and 5
    (ANYCRLF). */
-#define NEWLINE 1
+#define NEWLINE_DEFAULT 2
 
-/* PCRE uses recursive function calls to handle backtracking while matching.
+/* PCRE2 uses recursive function calls to handle backtracking while matching.
    This can sometimes be a problem on systems that have stacks of limited
    size. Define NO_RECURSE to any value to get a version that doesn't use
    recursion in the match() function; instead it creates its own stack by
-   steam using pcre_recurse_malloc() to obtain memory from the heap. For more
-   detail, see the comments and other stuff just above the match() function.
-   */
+   steam using memory from the heap. For more detail, see the comments and
+   other stuff just above the match() function. */
 /* #undef NO_RECURSE */
 
 /* Name of package */
@@ -187,7 +187,7 @@ sure both macros are undefined; an emulation function will then be used. */
 #define PACKAGE_NAME "PCRE2"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "PCRE2 9.00-DEV"
+#define PACKAGE_STRING "PCRE2 10.00-DEV"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "pcre2"
@@ -196,12 +196,19 @@ sure both macros are undefined; an emulation function will then be used. */
 #define PACKAGE_URL ""
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "9.00-DEV"
+#define PACKAGE_VERSION "10.00-DEV"
 
 /* The value of PARENS_NEST_LIMIT specifies the maximum depth of nested
    parentheses (of any kind) in a pattern. This limits the amount of system
    stack that is used while compiling a pattern. */
 #define PARENS_NEST_LIMIT 250
+
+/* The value of PCRE2GREP_BUFSIZE determines the size of buffer used by
+   pcre2grep to hold parts of the file it is searching. This is also the
+   minimum value. The actual amount of memory used by pcre2grep is three times
+   this number, because it allows for the buffering of "before" and "after"
+   lines. */
+#define PCRE2GREP_BUFSIZE 20480
 
 /* to make a symbol visible */
 #define PCRE2POSIX_EXP_DECL extern __attribute__ ((visibility ("default")))
@@ -227,13 +234,6 @@ sure both macros are undefined; an emulation function will then be used. */
 /* Define to any value if linking statically (TODO: make nice with Libtool) */
 #define PCRE2_STATIC 1
 
-/* The value of PCREGREP_BUFSIZE determines the size of buffer used by
-   pcregrep to hold parts of the file it is searching. This is also the
-   minimum value. The actual amount of memory used by pcregrep is three times
-   this number, because it allows for the buffering of "before" and "after"
-   lines. */
-#define PCREGREP_BUFSIZE 20480
-
 /* Define to necessary symbol if this constant uses a non-standard name on
    your system. */
 /* #undef PTHREAD_CREATE_JOINABLE */
@@ -244,35 +244,35 @@ sure both macros are undefined; an emulation function will then be used. */
 /* Define to any value to enable support for Just-In-Time compiling. */
 /* #undef SUPPORT_JIT */
 
-/* Define to any value to allow pcregrep to be linked with libbz2, so that it
+/* Define to any value to allow pcre2grep to be linked with libbz2, so that it
    is able to handle .bz2 files. */
 #define SUPPORT_LIBBZ2 /**/
 
-/* Define to any value to allow pcretest to be linked with libedit. */
+/* Define to any value to allow pcre2test to be linked with libedit. */
 /* #undef SUPPORT_LIBEDIT */
 
-/* Define to any value to allow pcretest to be linked with libreadline. */
+/* Define to any value to allow pcre2test to be linked with libreadline. */
 #define SUPPORT_LIBREADLINE /**/
 
-/* Define to any value to allow pcregrep to be linked with libz, so that it is
-   able to handle .gz files. */
+/* Define to any value to allow pcre2grep to be linked with libz, so that it
+   is able to handle .gz files. */
 #define SUPPORT_LIBZ /**/
 
-/* Define to any value to enable the 16 bit PCRE library. */
+/* Define to any value to enable the 16 bit PCRE2 library. */
 #define SUPPORT_PCRE16 /**/
 
-/* Define to any value to enable the 32 bit PCRE library. */
+/* Define to any value to enable JIT support in pcre2grep. */
+/* #undef SUPPORT_PCRE2GREP_JIT */
+
+/* Define to any value to enable the 32 bit PCRE2 library. */
 #define SUPPORT_PCRE32 /**/
 
-/* Define to any value to enable the 8 bit PCRE library. */
+/* Define to any value to enable the 8 bit PCRE2 library. */
 #define SUPPORT_PCRE8 /**/
-
-/* Define to any value to enable JIT support in pcregrep. */
-/* #undef SUPPORT_PCREGREP_JIT */
 
 /* Define to any value to enable support for the UTF-8/16/32 Unicode encoding.
    This will work even in an EBCDIC environment, but it is incompatible with
-   the EBCDIC macro. That is, PCRE can support *either* EBCDIC code *or*
+   the EBCDIC macro. That is, PCRE2 can support *either* EBCDIC code *or*
    ASCII/UTF-8/16/32, but not both at once. */
 #define SUPPORT_UTF /**/
 
@@ -280,7 +280,7 @@ sure both macros are undefined; an emulation function will then be used. */
 #define SUPPORT_VALGRIND /**/
 
 /* Version number of package */
-#define VERSION "9.00-DEV"
+#define VERSION "10.00-DEV"
 
 /* Define to empty if `const' does not conform to ANSI C. */
 /* #undef const */
