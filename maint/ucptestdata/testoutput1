@@ -357,3 +357,8 @@ findprop 0d 0a 0e 0711 1b04 1111 1169 11fe ae4c ad89
 11fe Letter: Other letter, Hangul, Hangul syllable type T
 ae4c Letter: Other letter, Hangul, Hangul syllable type LV
 ad89 Letter: Other letter, Hangul, Hangul syllable type LVT
+
+findprop 118a0 11ac7 16ad0
+118a0 Letter: Upper case letter, Warang_Citi, Other, 118c0
+11ac7 Letter: Other letter, Pau_Cin_Hau, Other
+16ad0 Letter: Other letter, Bassa_Vah, Other

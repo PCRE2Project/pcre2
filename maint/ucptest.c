@@ -2,7 +2,7 @@
 * A program for testing the Unicode property table *
 ***************************************************/
 
-/* Copyright (c) University of Cambridge 2008 */
+/* Copyright (c) University of Cambridge 2008 - 2014 */
 
 /* Compile thus:
    gcc -DHAVE_CONFIG_H -DPCRE2_CODE_UNIT_WIDTH=8 -o ucptest \
@@ -236,6 +236,30 @@ switch(script)
   case ucp_Sora_Sompeng:         scriptname = US"Sora Sompent"; break;
   case ucp_Takri:                scriptname = US"Takri"; break;
 
+  /* New for Unicode 7.0.0 */
+  case ucp_Bassa_Vah:          scriptname = US"Bassa_Vah"; break;
+  case ucp_Caucasian_Albanian: scriptname = US"Caucasian_Albanian"; break;
+  case ucp_Duployan:           scriptname = US"Duployan"; break;
+  case ucp_Elbasan:            scriptname = US"Elbasan"; break;
+  case ucp_Grantha:            scriptname = US"Grantha"; break;
+  case ucp_Khojki:             scriptname = US"Khojki"; break;
+  case ucp_Khudawadi:          scriptname = US"Khudawadi"; break;
+  case ucp_Linear_A:           scriptname = US"Linear_A"; break;
+  case ucp_Mahajani:           scriptname = US"Mahajani"; break;
+  case ucp_Manichaean:         scriptname = US"Manichaean"; break;
+  case ucp_Mende_Kikakui:      scriptname = US"Mende_Kikakui"; break;
+  case ucp_Modi:               scriptname = US"Modi"; break;
+  case ucp_Mro:                scriptname = US"Mro"; break;
+  case ucp_Nabataean:          scriptname = US"Nabataean"; break;
+  case ucp_Old_North_Arabian:  scriptname = US"Old_North_Arabian"; break;
+  case ucp_Old_Permic:         scriptname = US"Old_Permic"; break;
+  case ucp_Pahawh_Hmong:       scriptname = US"Pahawh_Hmong"; break;
+  case ucp_Palmyrene:          scriptname = US"Palmyrene"; break;
+  case ucp_Psalter_Pahlavi:    scriptname = US"Psalter_Pahlavi"; break;
+  case ucp_Pau_Cin_Hau:        scriptname = US"Pau_Cin_Hau"; break;
+  case ucp_Siddham:            scriptname = US"Siddham"; break;
+  case ucp_Tirhuta:            scriptname = US"Tirhuta"; break;
+  case ucp_Warang_Citi:        scriptname = US"Warang_Citi"; break;
   }
 
 printf("%04x %s: %s, %s, %s", c, typename, fulltypename, scriptname, graphbreak);
