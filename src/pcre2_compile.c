@@ -55,7 +55,6 @@ by defining macros in order to minimize #if usage. */
 
 #if PCRE2_CODE_UNIT_WIDTH == 8
 #define STRING_UTFn_RIGHTPAR        STRING_UTF8_RIGHTPAR, 5
-#define BAD_UTF_ERROR               ERR44
 #define XDIGIT(c)                   xdigitab[c]
 
 #else  /* Either 16-bit or 32-bit */
@@ -63,11 +62,9 @@ by defining macros in order to minimize #if usage. */
 
 #if PCRE2_CODE_UNIT_WIDTH == 16
 #define STRING_UTFn_RIGHTPAR        STRING_UTF16_RIGHTPAR, 6
-#define BAD_UTF_ERROR               ERR74
 
 #else
 #define STRING_UTFn_RIGHTPAR        STRING_UTF32_RIGHTPAR, 6
-#define BAD_UTF_ERROR               ERR77
 #endif
 #endif
 
@@ -150,8 +147,8 @@ have to check them every time. */
 #define REQ_CASELESS    (1 << 0)        /* Indicates caselessness */
 #define REQ_VARY        (1 << 1)        /* reqcu followed non-literal item */
 /* Negative values for the firstcu and reqcu flags */
-#define REQ_UNSET       (-2)
-#define REQ_NONE        (-1)
+#define REQ_UNSET       (-2)            /* Not yet found anything */
+#define REQ_NONE        (-1)            /* Found not fixed char */
 
 /* This bit (which is greater than any UTF value) is used to indicate that a 
 variable contains a number of code units instead of an actual code point. */
@@ -553,7 +550,8 @@ static PCRE2_SPTR posix_substitutes[] = {
 
 /* Compile time error code numbers. They are given names so that they can more
 easily be tracked. When a new number is added, the tables called eint1 and 
-eint2 in pcre2posix.c must be updated. */
+eint2 in pcre2posix.c must be updated, and a new error text must be added to 
+compile_error_texts in pcre2_error.c. */
 
 enum { ERR0 = COMPILE_ERROR_BASE,  
        ERR1,  ERR2,  ERR3,  ERR4,  ERR5,  ERR6,  ERR7,  ERR8,  ERR9,  ERR10, 
@@ -563,8 +561,7 @@ enum { ERR0 = COMPILE_ERROR_BASE,
        ERR41, ERR42, ERR43, ERR44, ERR45, ERR46, ERR47, ERR48, ERR49, ERR50, 
        ERR51, ERR52, ERR53, ERR54, ERR55, ERR56, ERR57, ERR58, ERR59, ERR60, 
        ERR61, ERR62, ERR63, ERR64, ERR65, ERR66, ERR67, ERR68, ERR69, ERR70, 
-       ERR71, ERR72, ERR73, ERR74, ERR75, ERR76, ERR77, ERR78, ERR79, ERR80, 
-       ERR81, ERR82, ERR83, ERR84, ERR85, ERR86 };
+       ERR71, ERR72, ERR73, ERR74, ERR75, ERR76, ERR77 }; 
 
 /* This is a table of start-of-pattern options such as (*UTF) and settings such
 as (*LIMIT_MATCH=nnnn) and (*CRLF). For completeness and backward
@@ -1782,8 +1779,7 @@ else
       }
     if (overflow) /* Integer overflow */
       {
-      while (IS_DIGIT(ptr[1]))
-        ptr++;
+      while (IS_DIGIT(ptr[1])) ptr++;
       *errorcodeptr = ERR61;
       break;
       }
@@ -1849,8 +1845,7 @@ else
         }
       if (overflow) /* Integer overflow */
         {
-        while (IS_DIGIT(ptr[1]))
-          ptr++;
+        while (IS_DIGIT(ptr[1])) ptr++;
         *errorcodeptr = ERR61;
         break;
         }
@@ -1890,8 +1885,8 @@ else
     specifying character codes in octal. The only supported form is \o{ddd}. */
 
     case CHAR_o:
-    if (ptr[1] != CHAR_LEFT_CURLY_BRACKET) *errorcodeptr = ERR81; else
-    if (ptr[2] == CHAR_RIGHT_CURLY_BRACKET) *errorcodeptr = ERR86; else 
+    if (ptr[1] != CHAR_LEFT_CURLY_BRACKET) *errorcodeptr = ERR55; else
+    if (ptr[2] == CHAR_RIGHT_CURLY_BRACKET) *errorcodeptr = ERR77; else 
       {
       ptr += 2;
       c = 0;
@@ -1921,7 +1916,7 @@ else
         {
         if (utf && c >= 0xd800 && c <= 0xdfff) *errorcodeptr = ERR73;
         }
-      else *errorcodeptr = ERR80;
+      else *errorcodeptr = ERR64;
       }
     break;
 
@@ -1952,7 +1947,7 @@ else
         ptr += 2;
         if (*ptr == CHAR_RIGHT_CURLY_BRACKET)
           {
-          *errorcodeptr = ERR86;
+          *errorcodeptr = ERR77;
           break;
           }    
         c = 0;
@@ -1988,7 +1983,7 @@ else
         \x handling, but nowadays Perl gives an error, which seems much more
         sensible, so we do too. */
 
-        else *errorcodeptr = ERR79;
+        else *errorcodeptr = ERR67;
         }   /* End of \x{} processing */
 
       /* Read a single-byte hex-defined char (up to two hex digits after \x) */
@@ -2013,7 +2008,7 @@ else
 
     case CHAR_c:
     c = *(++ptr);
-    if (c == CHAR_NULL)
+    if (c == CHAR_NULL && ptr >= cd->end_pattern)
       {
       *errorcodeptr = ERR2;
       break;
@@ -3309,7 +3304,8 @@ for (;; ptr++)
     previous = NULL;
     if ((options & PCRE2_MULTILINE) != 0)
       {
-      if (firstcuflags == REQ_UNSET) firstcuflags = REQ_NONE;
+      if (firstcuflags == REQ_UNSET) 
+        zerofirstcuflags = firstcuflags = REQ_NONE;
       *code++ = OP_CIRCM;
       }
     else *code++ = OP_CIRC;
@@ -3384,7 +3380,7 @@ for (;; ptr++)
          ptr[1] == CHAR_EQUALS_SIGN) &&
         check_posix_syntax(ptr, &tempptr))
       {
-      *errorcodeptr = (ptr[1] == CHAR_COLON)? ERR13 : ERR31;
+      *errorcodeptr = (ptr[1] == CHAR_COLON)? ERR12 : ERR13;
       goto FAILED;
       }
 
@@ -3525,7 +3521,7 @@ for (;; ptr++)
 
         if (ptr[1] != CHAR_COLON)
           {
-          *errorcodeptr = ERR31;
+          *errorcodeptr = ERR13;
           goto FAILED;
           }
 
@@ -3870,7 +3866,7 @@ for (;; ptr++)
               {
               if (descape == ESC_b) d = CHAR_BS; else
                 {
-                *errorcodeptr = ERR83;
+                *errorcodeptr = ERR50;
                 goto FAILED;
                 }
               }
@@ -3883,7 +3879,7 @@ for (;; ptr++)
                     ptr[1] == CHAR_EQUALS_SIGN) &&
                    check_posix_syntax(ptr, &tempptr))
             {
-            *errorcodeptr = ERR83;
+            *errorcodeptr = ERR50;
             goto FAILED;
             }
           }
@@ -3932,7 +3928,7 @@ for (;; ptr++)
       whatever repeat count may follow. In the case of reqcu, save the
       previous value for reinstating. */
 
-      if (class_one_char == 1 && ptr[1] == CHAR_RIGHT_SQUARE_BRACKET)
+      if (!inescq && class_one_char == 1 && ptr[1] == CHAR_RIGHT_SQUARE_BRACKET)
         {
         ptr++;
         zeroreqcu = reqcu;
@@ -4833,7 +4829,7 @@ for (;; ptr++)
 
     else
       {
-      *errorcodeptr = ERR11;
+      *errorcodeptr = ERR10;
       goto FAILED;
       }
 
@@ -5095,8 +5091,8 @@ for (;; ptr++)
         {
         case CHAR_NUMBER_SIGN:                 /* Comment; skip to ket */
         ptr++;
-        while (*ptr != CHAR_NULL && *ptr != CHAR_RIGHT_PARENTHESIS) ptr++;
-        if (*ptr == CHAR_NULL)
+        while (ptr < cd->end_pattern && *ptr != CHAR_RIGHT_PARENTHESIS) ptr++;
+        if (*ptr != CHAR_RIGHT_PARENTHESIS)
           {
           *errorcodeptr = ERR18;
           goto FAILED;
@@ -5216,7 +5212,7 @@ for (;; ptr++)
           {
           if (IS_DIGIT(*ptr))
             {
-            *errorcodeptr = ERR84;
+            *errorcodeptr = ERR44;  /* Group name must start with non-digit */
             goto FAILED;
             }
           if (!MAX_255(*ptr) || (cd->ctypes[*ptr] & ctype_word) == 0)
@@ -5477,7 +5473,7 @@ for (;; ptr++)
         name = ++ptr;
         if (IS_DIGIT(*ptr))
           {
-          *errorcodeptr = ERR84;   /* Group name must start with non-digit */
+          *errorcodeptr = ERR44;   /* Group name must start with non-digit */
           goto FAILED;
           }
         while (MAX_255(*ptr) && (cd->ctypes[*ptr] & ctype_word) != 0) ptr++;
@@ -5554,7 +5550,6 @@ for (;; ptr++)
               named_group *newspace = 
                 cd->cx->memctl.malloc(newsize * sizeof(named_group),
                 cd->cx->memctl.memory_data);
-
               if (newspace == NULL)
                 {
                 *errorcodeptr = ERR21;
@@ -5597,7 +5592,7 @@ for (;; ptr++)
         name = ++ptr;
         if (IS_DIGIT(*ptr))
           {
-          *errorcodeptr = ERR84;   /* Group name must start with non-digit */
+          *errorcodeptr = ERR44;   /* Group name must start with non-digit */
           goto FAILED;
           }
         while (MAX_255(*ptr) && (cd->ctypes[*ptr] & ctype_word) != 0) ptr++;
@@ -5613,7 +5608,6 @@ for (;; ptr++)
         if (lengthptr != NULL)
           {
           named_group *ng;
-
           if (namelen == 0)
             {
             *errorcodeptr = ERR62;
@@ -5915,7 +5909,7 @@ for (;; ptr++)
             case CHAR_x: *optset |= PCRE2_EXTENDED; break;
             case CHAR_U: *optset |= PCRE2_UNGREEDY; break;
 
-            default:  *errorcodeptr = ERR12;
+            default:  *errorcodeptr = ERR11;
                       ptr--;    /* Correct the offset */
                       goto FAILED;
             }
@@ -6002,7 +5996,7 @@ for (;; ptr++)
 
     if ((cd->parens_depth += 1) > PARENS_NEST_LIMIT)
       {
-      *errorcodeptr = ERR82;
+      *errorcodeptr = ERR19;
       goto FAILED;
       }
 
@@ -6580,7 +6574,7 @@ branch_chain bc;
 
 if (ccontext->stack_guard != NULL && ccontext->stack_guard(0))
   {
-  *errorcodeptr= ERR85;
+  *errorcodeptr= ERR33;
   return FALSE;
   }
 #endif   
@@ -7265,38 +7259,29 @@ PCRE2_EXP_DEFN pcre2_code * PCRE2_CALL_CONVENTION
 pcre2_compile(PCRE2_SPTR pattern, int patlen, uint32_t options,
    int *errorptr, size_t *erroroffset, pcre2_compile_context *ccontext)
 {
+BOOL utf;                               /* Set TRUE for UTF mode */
 pcre2_real_code *re = NULL;             /* What we will return */
 pcre2_compile_context default_context;  /* For use if no context given */
+compile_data cd;                        /* "Static" compile-time data */
+const uint8_t *tables;                  /* Char tables base pointer */
+
+PCRE2_UCHAR *code;                      /* Current pointer in compiled code */
+PCRE2_SPTR codestart;                   /* Start of compiled code */
+PCRE2_SPTR ptr;                         /* Current pointer in pattern */
 
 size_t length = 1;                      /* Allow or final END opcode */
+size_t re_blocksize;                    /* Size of memory block */
 
 int32_t firstcuflags, reqcuflags;       /* Type of first/req code unit */
 uint32_t firstcu, reqcu;                /* Value of first/req code unit */
 
+uint32_t skipatstart;                   /* When checking (*UTF) etc */
 uint32_t limit_match = MATCH_LIMIT;     /* Default match limits */
 uint32_t limit_recursion = MATCH_LIMIT_RECURSION;
 
-compile_data cd;                        /* "Static" compile-time data */
-
-PCRE2_SPTR codestart;                   /* Start of compiled code */
-PCRE2_SPTR ptr;                         /* Current pointer in pattern */
-PCRE2_UCHAR *code;                      /* Current pointer in compiled code */
-
-uint32_t skipatstart;                   /* When checking (*UTF) etc */
-
-const uint8_t *tables;                  /* Char tables base pointer */
-
-
-BOOL utf;
-
 int newline = 0;                        /* Unset; can be set by the pattern */
 int bsr = 0;                            /* Unset; can be set by the pattern */
-
-int errorcode = 0;                      /* Initialize  */
-
-size_t re_blocksize;
-
-
+int errorcode = 0;                      /* Initialize to avoid compiler warn */
 
 /* Comments at the head of this file explain about these variables. */
 
@@ -7494,7 +7479,7 @@ if (utf)
   {
   if ((options & PCRE2_NEVER_UTF) != 0)
     {
-    errorcode = ERR78;
+    errorcode = ERR74;
     goto HAD_ERROR;
     }
   if ((options & PCRE2_NO_UTF_CHECK) == 0 &&
@@ -7593,7 +7578,7 @@ if (re == NULL)
 re->memctl = ccontext->memctl;
 re->tables = tables;
 re->executable_jit = NULL;
-memset(re->start_bitmap, 32, 0);
+memset(re->start_bitmap, 0, 32 * sizeof(uint8_t));
 re->blocksize = re_blocksize;
 re->magic_number = MAGIC_NUMBER;
 re->compile_options = options;
@@ -7748,10 +7733,8 @@ if (errorcode == 0 && re->top_backref > re->top_bracket) errorcode = ERR15;
 /* Unless disabled, check whether single character iterators can be
 auto-possessified. The function overwrites the appropriate opcode values. */
 
-#ifdef FIXME
 if ((options & PCRE2_NO_AUTO_POSSESS) == 0)
-  auto_possessify((PCRE2_UCHAR *)codestart, utf, cd);
-#endif   
+  PRIV(auto_possessify)((PCRE2_UCHAR *)codestart, utf, &cd);
 
 /* If there were any lookbehind assertions that contained OP_RECURSE
 (recursions or subroutine calls), a flag is set for them to be checked here,
@@ -7900,6 +7883,15 @@ do
   codestart += GET(codestart, 1);
   }
 while (*codestart == OP_ALT);
+
+/* Finally, study the compiled pattern to set up information such as a bitmap 
+of starting code units and a minimum matching length. */
+
+if (PRIV(study)(re) != 0)
+  {
+  errorcode = ERR31;
+  goto HAD_ERROR;  
+  } 
 
 /* Control ends up here in all cases. If memory was obtained for a
 zero-terminated copy of the pattern, remember to free it before returning. */

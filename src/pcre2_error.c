@@ -54,15 +54,13 @@ POSSIBILITY OF SUCH DAMAGE.
 /* The texts of compile-time error messages. Compile-time error numbers start 
 at COMPILE_ERROR_BASE (100).
 
-Do not ever re-use any error
-number, because they are documented. Always add a new error instead. Messages
-marked DEAD below are no longer used. This used to be a table of strings, but
-in order to reduce the number of relocations needed when a shared library is
-loaded dynamically, it is now one long string. We cannot use a table of
-offsets, because the lengths of inserts such as XSTRING(MAX_NAME_SIZE) are not
-known. Instead, pcre2_get_error_message() counts through to the one it wants -
-this isn't a performance issue because these strings are used only when there
-is an error.
+Do not ever re-use any error number, because they are documented. Always add a
+new error instead. This used to be a table of strings, but in order to reduce
+the number of relocations needed when a shared library is loaded dynamically,
+it is now one long string. We cannot use a table of offsets, because the
+lengths of inserts such as XSTRING(MAX_NAME_SIZE) are not known. Instead,
+pcre2_get_error_message() counts through to the one it wants - this isn't a
+performance issue because these strings are used only when there is an error.
 
 Each substring ends with \0 to insert a null character. This includes the final
 substring, so that the whole string ends with \0\0, which can be detected when
@@ -81,21 +79,21 @@ static const char compile_error_texts[] =
   "range out of order in character class\0"
   "nothing to repeat\0"
   /* 10 */
-  "operand of unlimited repeat could match the empty string\0"  /** DEAD **/
   "internal error: unexpected repeat\0"
   "unrecognized character after (? or (?-\0"
   "POSIX named classes are supported only within a class\0"
-  "missing )\0"
+  "POSIX collating elements are not supported\0"
+  "missing closing parenthesis\0"
   /* 15 */
   "reference to non-existent subpattern\0"
-  "pattern or erroffset passed as NULL\0"
-  "unknown option bit(s) set\0"
-  "missing ) after comment\0"
-  "parentheses nested too deeply\0"  /** DEAD **/
+  "pattern passed as NULL\0"
+  "unknown compile-time option bit(s)\0"
+  "missing ) after (?# comment\0"
+  "parentheses are too deeply nested\0"
   /* 20 */
   "regular expression is too large\0"
-  "failed to get memory\0"
-  "unmatched parentheses\0"
+  "failed to allocate heap memory\0"
+  "unmatched closing parenthesis\0"
   "internal error: code overflow\0"
   "unrecognized character after (?<\0"
   /* 25 */
@@ -106,36 +104,36 @@ static const char compile_error_texts[] =
   "(?R or (?[+-]digits must be followed by )\0"
   /* 30 */
   "unknown POSIX class name\0"
-  "POSIX collating elements are not supported\0"
+  "internal error in pcre2_study(): should not occur\0" 
   "this version of PCRE does not have UTF or Unicode property support\0"
-  "spare error\0"  /** DEAD **/
-  "character value in \\x{} or \\o{} is too large\0"
+  "parentheses are too deeply nested (stack check)\0"
+  "character code point value in \\x{} or \\o{} is too large\0"
   /* 35 */
   "invalid condition (?(0)\0"
-  "\\C not allowed in lookbehind assertion\0"
+  "\\C is not allowed in a lookbehind assertion\0"
   "PCRE does not support \\L, \\l, \\N{name}, \\U, or \\u\0"
-  "number after (?C is > 255\0"
-  "closing ) for (?C expected\0"
+  "number after (?C is greater than 255\0"
+  "closing parenthesis for (?C expected\0"
   /* 40 */
-  "recursive call could loop indefinitely\0"
+  "recursion could loop indefinitely\0"
   "unrecognized character after (?P\0"
   "syntax error in subpattern name (missing terminator)\0"
-  "two named subpatterns have the same name\0"
-  "invalid UTF-8 string\0"
+  "two named subpatterns have the same name (PCRE2_DUPNAMES not set)\0"
+  "group name must start with a non-digit\0"
   /* 45 */
-  "support for \\P, \\p, and \\X has not been compiled\0"
+  "this version of PCRE does not have support for \\P, \\p, or \\X\0"
   "malformed \\P or \\p sequence\0"
   "unknown property name after \\P or \\p\0"
   "subpattern name is too long (maximum " XSTRING(MAX_NAME_SIZE) " characters)\0"
   "too many named subpatterns (maximum " XSTRING(MAX_NAME_COUNT) ")\0"
   /* 50 */
-  "repeated subpattern is too long\0"    /** DEAD **/
+  "invalid range in character class\0"
   "octal value is greater than \\377 in 8-bit non-UTF-8 mode\0"
   "internal error: overran compiling workspace\0"
   "internal error: previously-checked referenced subpattern not found\0"
   "DEFINE group contains more than one branch\0"
   /* 55 */
-  "repeating a DEFINE group is not allowed\0"  /** DEAD **/
+  "missing opening brace after \\o\0"
   "internal error: unknown newline setting\0"
   "\\g is not followed by a braced, angle-bracketed, or quoted name/number or by a plain number\0"
   "a numbered reference must not be zero\0"
@@ -145,11 +143,11 @@ static const char compile_error_texts[] =
   "number is too big\0"
   "subpattern name expected\0"
   "digit expected after (?+\0"
-  "] is an invalid data character in JavaScript compatibility mode\0"
+  "non-octal character in \\o{} (closing brace missing?)\0"
   /* 65 */
   "different names for subpatterns of the same number are not allowed\0"
   "(*MARK) must have an argument\0"
-  "this version of PCRE is not compiled with Unicode property support\0"
+  "non-hex character in \\x{} (closing brace missing?)\0"
   "\\c must be followed by an ASCII character\0"
   "\\k is not followed by a braced, angle-bracketed, or quoted name\0"
   /* 70 */
@@ -157,21 +155,11 @@ static const char compile_error_texts[] =
   "\\N is not supported in a class\0"
   "too many forward references\0"
   "disallowed Unicode code point (>= 0xd800 && <= 0xdfff)\0"
-  "invalid UTF-16 string\0"
+  "using (*UTF) is disabled by the application\0"
   /* 75 */
   "name is too long in (*MARK), (*PRUNE), (*SKIP), or (*THEN)\0"
-  "character value in \\u.... sequence is too large\0"
-  "invalid UTF-32 string\0"
-  "setting UTF is disabled by the application\0"
-  "non-hex character in \\x{} (closing brace missing?)\0"
-  /* 80 */
-  "non-octal character in \\o{} (closing brace missing?)\0"
-  "missing opening brace after \\o\0"
-  "parentheses are too deeply nested\0"
-  "invalid range in character class\0"
-  "group name must start with a non-digit\0"
-  /* 85 */
-  "parentheses are too deeply nested (stack check)\0"
+  "character code point value in \\u.... sequence is too large\0"
+  "digits missing in \\x{} or \\o{}\0" 
   ;
 
 /* Match-time and UTF error texts are in the same format. */

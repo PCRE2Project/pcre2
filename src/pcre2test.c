@@ -422,8 +422,8 @@ static modstruct modlist[] = {
   { "altglobal",           MOD_PND,  MOD_CTL, CTL_ALTGLOBAL,             PO(control) },
   { "anchored",            MOD_PD,   MOD_OPT, PCRE2_ANCHORED,            PD(options) },
   { "auto_callout",        MOD_PAT,  MOD_OPT, PCRE2_AUTO_CALLOUT,        PO(options) },
-  { "bsr",                 MOD_CTC,  MOD_BSR, 0,                         CO(bsr_convention) },
   { "bincode",             MOD_PAT,  MOD_CTL, CTL_BINCODE,               PO(control) },
+  { "bsr",                 MOD_CTC,  MOD_BSR, 0,                         CO(bsr_convention) },
   { "callout_capture",     MOD_DAT,  MOD_CTL, CTL_CALLOUT_CAPTURE,       DO(control) },
   { "callout_fail",        MOD_DAT,  MOD_IN2, 0,                         DO(cfail) },
   { "callout_none",        MOD_DAT,  MOD_CTL, CTL_CALLOUT_NONE,          DO(control) },
@@ -4899,8 +4899,8 @@ _setmode( _fileno( stdout ), _O_BINARY );
 
 /* Initialization that does not depend on the running mode. */
 
-memset(&def_patctl, sizeof(patctl), 0);
-memset(&def_datctl, sizeof(datctl), 0);
+memset(&def_patctl, 0, sizeof(patctl));
+memset(&def_datctl, 0, sizeof(datctl));
 def_datctl.oveccount = DEFAULT_OVECCOUNT;
 def_datctl.copy_numbers[0] = -1;
 def_datctl.get_numbers[0] = -1;

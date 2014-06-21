@@ -225,10 +225,11 @@ else
 #endif   /* not HAVE_MEMMOVE */
 #endif   /* not VPCOMPAT */
 
-/* External (in the C sense) functions and macros that are private to the 
+/* External (in the C sense) functions and tables that are private to the 
 libraries are always referenced using the PRIV macro. This makes it possible
 for pcre2test.c to include some of the source files from the libraries using a
-different PRIV definition to avoid name clashes. */
+different PRIV definition to avoid name clashes. It also makes it clear in the 
+code that a non-static object is being referenced. */
 
 #ifndef PRIV
 #define PRIV(name) _pcre2_##name
@@ -1686,7 +1687,7 @@ in UTF-8 mode. The code that uses this table must know about such things. */
   1, 3,                          /* THEN, THEN_ARG                         */ \
   1, 1, 1, 1,                    /* COMMIT, FAIL, ACCEPT, ASSERT_ACCEPT    */ \
   1+IMM2_SIZE, 1                 /* CLOSE, SKIPZERO                        */
-
+  
 /* A magic value for OP_RREF to indicate the "any recursion" condition. */
 
 #define RREF_ANY  0xffff
@@ -1724,7 +1725,7 @@ typedef struct {
   uint16_t value;
 } ucp_type_table;
 
-/* Unicode character database (UCD) */
+/* Unicode character database (UCD) record format */
 
 typedef struct {
   uint8_t script;     /* ucp_Arabic, etc. */
@@ -1733,16 +1734,6 @@ typedef struct {
   uint8_t caseset;    /* offset to multichar other cases or zero */
   int32_t other_case; /* offset to other case, or zero if none */
 } ucd_record;
-
-extern const uint32_t    PRIV(ucd_caseless_sets)[];
-extern const ucd_record  PRIV(ucd_records)[];
-extern const uint8_t     PRIV(ucd_stage1)[];
-extern const uint16_t    PRIV(ucd_stage2)[];
-extern const uint32_t    PRIV(ucp_gentype)[];
-extern const uint32_t    PRIV(ucp_gbtable)[];
-#ifdef SUPPORT_JIT
-extern const int         PRIV(ucp_typerange)[];
-#endif
 
 /* UCD access macros */
 
@@ -1774,11 +1765,10 @@ defined, so the following items are omitted. */
 
 /* Internal shared data tables. These are tables that are used by more than one
 of the exported public functions. They have to be "external" in the C sense,
-but are not part of the PCRE2 public API. The data for these tables is in the
-pcre2_tables.c module. Even though some of them are identical in each library, 
-they must have different names so that more than one library can be linked with 
-an application. UTF-8 tables are needed only when compiling the 8-bit library.
-*/
+but are not part of the PCRE2 public API. Although the data for some of the
+tables is identical in all libraries, they must have different names so that
+multiple libraries can be simultaneously linked to a single application.
+However, UTF-8 tables are needed only when compiling the 8-bit library. */
 
 #if PCRE2_CODE_UNIT_WIDTH == 8
 extern const int              PRIV(utf8_table1)[];
@@ -1787,17 +1777,38 @@ extern const int              PRIV(utf8_table2)[];
 extern const int              PRIV(utf8_table3)[];
 extern const uint8_t          PRIV(utf8_table4)[];       
 #endif                        
-                              
-extern const uint8_t          PRIV(default_tables)[];
-extern const uint8_t          PRIV(OP_lengths)[];
 
+#define _pcre2_OP_lengths         PCRE2_SUFFIX(_pcre2_OP_lengths_)
+#define _pcre2_default_tables     PCRE2_SUFFIX(_pcre2_default_tables_)
+#define _pcre2_hspace_list        PCRE2_SUFFIX(_pcre2_hspace_list_)
+#define _pcre2_vspace_list        PCRE2_SUFFIX(_pcre2_vspace_list_)
+#define _pcre2_ucd_caseless_sets  PCRE2_SUFFIX(_pcre2_ucd_caseless_sets_)
+#define _pcre2_ucd_records        PCRE2_SUFFIX(_pcre2_ucd_records_)
+#define _pcre2_ucd_stage1         PCRE2_SUFFIX(_pcre2_ucd_stage1_)
+#define _pcre2_ucd_stage2         PCRE2_SUFFIX(_pcre2_ucd_stage2_)
+#define _pcre2_ucp_gbtable        PCRE2_SUFFIX(_pcre2_ucp_gbtable_)
+#define _pcre2_ucp_gentype        PCRE2_SUFFIX(_pcre2_ucp_gentype_)
+#define _pcre2_ucp_typerange      PCRE2_SUFFIX(_pcre2_ucp_typerange_)
+#define _pcre2_utt                PCRE2_SUFFIX(_pcre2_utt_)
+#define _pcre2_utt_names          PCRE2_SUFFIX(_pcre2_utt_names_)
+#define _pcre2_utt_size           PCRE2_SUFFIX(_pcre2_utt_size_)
+
+extern const uint8_t          PRIV(OP_lengths)[];
+extern const uint8_t          PRIV(default_tables)[];
 extern const uint32_t         PRIV(hspace_list)[];
 extern const uint32_t         PRIV(vspace_list)[];
-                              
+extern const uint32_t         PRIV(ucd_caseless_sets)[];
+extern const ucd_record       PRIV(ucd_records)[];
+extern const uint8_t          PRIV(ucd_stage1)[];
+extern const uint16_t         PRIV(ucd_stage2)[];
+extern const uint32_t         PRIV(ucp_gbtable)[];
+extern const uint32_t         PRIV(ucp_gentype)[];
+#ifdef SUPPORT_JIT
+extern const int              PRIV(ucp_typerange)[];
+#endif
 extern const ucp_type_table   PRIV(utt)[];
 extern const char             PRIV(utt_names)[];
 extern const size_t           PRIV(utt_size);
-
 
 /* Mode-dependent macros and hidden and private structures are defined in a
 separate file so that pcre2test can include them at all supported widths. When
@@ -1811,12 +1822,13 @@ private structures. */
 
 #include "pcre2_intmodedep.h"
 
-/* Internal shared functions. These are functions that are used by more than
-one of the library's exported public functions. They have to be "external" in
-the C sense, but are not part of the PCRE public API. They are not referenced
-from pcre2test, and must not be defined when no code unit width is available.
-*/
+/* Private "external" functions. These are internal functions that are called
+from modules other than the one in which they are defined. They have to be
+"external" in the C sense, but are not part of the PCRE public API. They are
+not referenced from pcre2test, and must not be defined when no code unit width
+is available. */
 
+#define _pcre2_auto_possessify       PCRE2_SUFFIX(_pcre2_auto_possessify_)
 #define _pcre2_compile_context_init  PCRE2_SUFFIX(_pcre2_compile_context_init_)
 #define _pcre2_find_bracket          PCRE2_SUFFIX(_pcre2_find_bracket_)
 #define _pcre2_is_newline            PCRE2_SUFFIX(_pcre2_is_newline_)
@@ -1828,9 +1840,12 @@ from pcre2test, and must not be defined when no code unit width is available.
 #define _pcre2_strlen                PCRE2_SUFFIX(_pcre_strlen_)
 #define _pcre2_strncmp               PCRE2_SUFFIX(_pcre_strncmp_)
 #define _pcre2_strncmp_c8            PCRE2_SUFFIX(_pcre_strncmp_c8_)
+#define _pcre2_study                 PCRE2_SUFFIX(_pcre_study_)
 #define _pcre2_valid_utf             PCRE2_SUFFIX(_pcre_valid_utf_)
 #define _pcre2_was_newline           PCRE2_SUFFIX(_pcre2_was_newline_)
+#define _pcre2_xclass                PCRE2_SUFFIX(_pcre2_xclass_)
 
+extern void  _pcre2_auto_possessify(PCRE2_UCHAR *, BOOL, const compile_data *);
 extern void  _pcre2_compile_context_init(pcre2_compile_context *, BOOL);
 extern PCRE2_SPTR _pcre2_find_bracket(PCRE2_SPTR, BOOL, int);
 extern BOOL  _pcre2_is_newline(PCRE2_SPTR, int, PCRE2_SPTR, int *, BOOL);
@@ -1842,8 +1857,10 @@ extern int   _pcre2_strcmp_c8(PCRE2_SPTR, const char *);
 extern int   _pcre2_strlen(PCRE2_SPTR);
 extern int   _pcre2_strncmp(PCRE2_SPTR, PCRE2_SPTR, size_t);
 extern int   _pcre2_strncmp_c8(PCRE2_SPTR, const char *, size_t);
+extern int   _pcre2_study(pcre2_real_code *);
 extern int   _pcre2_valid_utf(PCRE2_SPTR, int, size_t *);
 extern BOOL  _pcre2_was_newline(PCRE2_SPTR, int, PCRE2_SPTR, int *, BOOL);
+extern BOOL  _pcre2_xclass(uint32_t, PCRE2_SPTR, BOOL);
 #endif  /* PCRE2_CODE_UNIT_WIDTH */
 
 /* End of pcre2_internal.h */

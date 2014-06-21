@@ -80,36 +80,35 @@ static const int eint1[] = {
   REG_EESCAPE, /* unrecognized character follows \ */
   REG_BADBR,   /* numbers out of order in {} quantifier */
   /* 5 */
-  5, REG_BADBR,   /* number too big in {} quantifier */
+  REG_BADBR,   /* number too big in {} quantifier */
   REG_EBRACK,  /* missing terminating ] for character class */
   REG_ECTYPE,  /* invalid escape sequence in character class */
   REG_ERANGE,  /* range out of order in character class */
   REG_BADRPT,  /* nothing to repeat */
   /* 10 */
-  REG_BADRPT,  /* operand of unlimited repeat could match the empty string */
   REG_ASSERT,  /* internal error: unexpected repeat */
-  REG_BADPAT,  /* unrecognized character after (? */
+  REG_BADPAT,  /* unrecognized character after (? or (?- */
   REG_BADPAT,  /* POSIX named classes are supported only within a class */
+  REG_BADPAT,  /* POSIX collating elements are not supported */ 
   REG_EPAREN,  /* missing ) */
   /* 15 */
   REG_ESUBREG, /* reference to non-existent subpattern */
-  REG_INVARG,  /* erroffset passed as NULL */
-  REG_INVARG,  /* unknown option bit(s) set */
-  REG_EPAREN,  /* missing ) after comment */
+  REG_INVARG,  /* pattern passed as NULL */
+  REG_INVARG,  /* unknown compile-time option bit(s) */
+  REG_EPAREN,  /* missing ) after (?# comment */
   REG_ESIZE,   /* parentheses nested too deeply */
   /* 20 */
   REG_ESIZE,   /* regular expression too large */
   REG_ESPACE,  /* failed to get memory */
-  REG_EPAREN,  /* unmatched parentheses */
+  REG_EPAREN,  /* unmatched closing parenthesis */
   REG_ASSERT   /* internal error: code overflow */
   };
   
 static const int eint2[] = {
   30, REG_ECTYPE,  /* unknown POSIX class name */
-  32, REG_INVARG,  /* this version of PCRE2 is not compiled with PCRE2_UTF8 support */
-  37, REG_EESCAPE, /* PCRE2 does not support \L, \l, \N, \U, or \u */
+  32, REG_INVARG,  /* this version of PCRE does not have UTF or UCP support */
+  37, REG_EESCAPE, /* PCRE2 does not support \L, \l, \N{name}, \U, or \u */
   56, REG_INVARG,  /* internal error: unknown newline setting */
-  67, REG_INVARG,  /* this version of PCRE2 is not compiled with PCRE2_UCP support */
 };
 
 /* Table of texts corresponding to POSIX error codes */

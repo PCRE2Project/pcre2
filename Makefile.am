@@ -261,6 +261,7 @@ NODIST_SOURCES = src/pcre2_chartables.c
 ## 8-, 16-, or 32-bit libraries are configured.
 
 COMMON_SOURCES = \
+  src/pcre2_auto_possess.c \
   src/pcre2_byte_order.c \
   src/pcre2_compile.c \
   src/pcre2_config.c \
@@ -279,17 +280,14 @@ COMMON_SOURCES = \
   src/pcre2_ord2utf.c \
   src/pcre2_pattern_info.c \
   src/pcre2_string_utils.c \
+  src/pcre2_study.c \
   src/pcre2_substring.c \
   src/pcre2_tables.c \
   src/pcre2_ucd.c \
   src/pcre2_ucp.h \
   src/pcre2_valid_utf.c \
-  src/pcre2_version.c
-
-#  src/pcre2_refcount.c \
-#  src/pcre2_study.c \
-#  src/pcre2_xclass.c
-
+  src/pcre2_version.c \
+  src/pcre2_xclass.c
 
 if WITH_PCRE8
 lib_LTLIBRARIES += libpcre2-8.la
