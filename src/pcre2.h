@@ -79,8 +79,8 @@ are defined. */
 extern "C" {
 #endif
 
-/* The following options can be passed to pcre2_compile(), pcre2_exec(), or
-pcre2_dfa_exec(). PCRE2_NO_UTF_CHECK affects only the function to which it is
+/* The following options can be passed to pcre2_compile(), pcre2_match(), or
+pcre2_dfa_match(). PCRE2_NO_UTF_CHECK affects only the function to which it is
 passed. */
 
 #define PCRE2_ANCHORED            0x00000001
@@ -93,8 +93,8 @@ indicate which:
 
 C   alters what is compiled
 J   alters what JIT compiles
-E   is inspected during pcre2_exec() execution
-D   is inspected during pcre2_dfa_exec() execution
+E   is inspected during pcre2_match() execution
+D   is inspected during pcre2_dfa_match() execution
 */
 
 #define PCRE2_ALLOW_EMPTY_CLASS   0x00000008   /* C       */
@@ -122,7 +122,7 @@ D   is inspected during pcre2_dfa_exec() execution
 #define PCRE2_JIT_PARTIAL_SOFT    0x00000002
 #define PCRE2_JIT_PARTIAL_HARD    0x00000004
 
-/* These are for pcre2_exec() and pcre2_dfa_exec(). */
+/* These are for pcre2_match() and pcre2_dfa_match(). */
 
 #define PCRE2_NOTBOL              0x00000001
 #define PCRE2_NOTEOL              0x00000002
@@ -131,7 +131,7 @@ D   is inspected during pcre2_dfa_exec() execution
 #define PCRE2_PARTIAL_SOFT        0x00000010
 #define PCRE2_PARTIAL_HARD        0x00000020
 
-/* These are additional options for pcre2_dfa_exec(). */
+/* These are additional options for pcre2_dfa_match(). */
 
 #define PCRE2_DFA_RESTART         0x00000040
 #define PCRE2_DFA_SHORTEST        0x00000080
@@ -256,7 +256,8 @@ D   is inspected during pcre2_dfa_exec() execution
 #define PCRE2_CONFIG_STACKRECURSE            8
 #define PCRE2_CONFIG_UTF                     9
 
-/* A value that is used to indicate 'unset' in unsigned size_t fields. */
+/* A value that is used to indicate 'unset' in unsigned size_t fields. In 
+particular, this value is used in the ovector. */
 
 #define PCRE2_UNSET (~(size_t)0)
 
@@ -581,49 +582,30 @@ pcre2_compile are called by application code. */
 /* Now generate all three sets of width-specific structures and function
 prototypes. */
 
-#define PCRE2_LOCAL_WIDTH 8
-PCRE2_TYPES_LIST
-PCRE2_STRUCTURE_LIST
-PCRE2_GENERAL_INFO_FUNCTIONS
-PCRE2_GENERAL_CONTEXT_FUNCTIONS
-PCRE2_COMPILE_CONTEXT_FUNCTIONS
-PCRE2_MATCH_CONTEXT_FUNCTIONS
-PCRE2_COMPILE_FUNCTIONS
-PCRE2_PATTERN_INFO_FUNCTIONS
-PCRE2_MATCH_FUNCTIONS
-PCRE2_SUBSTRING_FUNCTIONS
-PCRE2_JIT_FUNCTIONS
+#define PCRE2_TYPES_STRUCTURES_AND_FUNCTIONS \
+PCRE2_TYPES_LIST \
+PCRE2_STRUCTURE_LIST \
+PCRE2_GENERAL_INFO_FUNCTIONS \
+PCRE2_GENERAL_CONTEXT_FUNCTIONS \
+PCRE2_COMPILE_CONTEXT_FUNCTIONS \
+PCRE2_MATCH_CONTEXT_FUNCTIONS \
+PCRE2_COMPILE_FUNCTIONS \
+PCRE2_PATTERN_INFO_FUNCTIONS \
+PCRE2_MATCH_FUNCTIONS \
+PCRE2_SUBSTRING_FUNCTIONS \
+PCRE2_JIT_FUNCTIONS \
 PCRE2_OTHER_FUNCTIONS
+
+#define PCRE2_LOCAL_WIDTH 8
+PCRE2_TYPES_STRUCTURES_AND_FUNCTIONS
 #undef PCRE2_LOCAL_WIDTH
 
 #define PCRE2_LOCAL_WIDTH 16
-PCRE2_TYPES_LIST
-PCRE2_STRUCTURE_LIST
-PCRE2_GENERAL_INFO_FUNCTIONS
-PCRE2_GENERAL_CONTEXT_FUNCTIONS
-PCRE2_COMPILE_CONTEXT_FUNCTIONS
-PCRE2_MATCH_CONTEXT_FUNCTIONS
-PCRE2_COMPILE_FUNCTIONS
-PCRE2_PATTERN_INFO_FUNCTIONS
-PCRE2_MATCH_FUNCTIONS
-PCRE2_SUBSTRING_FUNCTIONS
-PCRE2_JIT_FUNCTIONS
-PCRE2_OTHER_FUNCTIONS
+PCRE2_TYPES_STRUCTURES_AND_FUNCTIONS
 #undef PCRE2_LOCAL_WIDTH
 
 #define PCRE2_LOCAL_WIDTH 32
-PCRE2_TYPES_LIST
-PCRE2_STRUCTURE_LIST
-PCRE2_GENERAL_INFO_FUNCTIONS
-PCRE2_GENERAL_CONTEXT_FUNCTIONS
-PCRE2_COMPILE_CONTEXT_FUNCTIONS
-PCRE2_MATCH_CONTEXT_FUNCTIONS
-PCRE2_COMPILE_FUNCTIONS
-PCRE2_PATTERN_INFO_FUNCTIONS
-PCRE2_MATCH_FUNCTIONS
-PCRE2_SUBSTRING_FUNCTIONS
-PCRE2_JIT_FUNCTIONS
-PCRE2_OTHER_FUNCTIONS
+PCRE2_TYPES_STRUCTURES_AND_FUNCTIONS
 #undef PCRE2_LOCAL_WIDTH
 
 /* Undefine the list macros; they are no longer needed. */
@@ -640,7 +622,7 @@ PCRE2_OTHER_FUNCTIONS
 #undef PCRE2_SUBSTRING_FUNCTIONS
 #undef PCRE2_JIT_FUNCTIONS
 #undef PCRE2_OTHER_FUNCTIONS
-
+#undef PCRE2_TYPES_STRUCTURES_AND_FUNCTIONS
 
 /* Re-define PCRE2_SUFFIX to use the external width value, if defined.
 Otherwise, undefine the other macros and make PCRE2_SUFFIX a no-op, to reduce
