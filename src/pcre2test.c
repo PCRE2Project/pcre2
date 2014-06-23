@@ -4678,18 +4678,18 @@ printf("  -32           use the 32-bit library\n");
 #endif
 printf("  -b            set default pattern control 'fullbincode'\n");
 printf("  -C            show PCRE2 compile-time options and exit\n");
-printf("  -C arg        show a specific compile-time option and exit\n");
-printf("                with its value if numeric (else 0). The arg can be:\n");
-printf("     bsr          \\R type [ANYCRLF, ANY]\n");
-printf("     ebcdic       compiled for EBCDIC character code [0,1]\n");
-printf("     ebcdic-nl    NL code if compiled for EBCDIC\n");
-printf("     jit          just-in-time compiler supported [0, 1]\n");
-printf("     linksize     internal link size [2, 3, 4]\n");
-printf("     newline      newline type [CR, LF, CRLF, ANYCRLF, ANY]\n");
-printf("     pcre8        8 bit library support enabled [0, 1]\n");
-printf("     pcre16       16 bit library support enabled [0, 1]\n");
-printf("     pcre32       32 bit library support enabled [0, 1]\n");
-printf("     utf          Unicode Transformation Format supported [0, 1]\n");
+printf("  -C arg        show a specific compile-time option and exit with its\n");
+printf("                  value if numeric (else 0). The arg can be:\n");
+printf("     bsr            \\R type [ANYCRLF, ANY]\n");
+printf("     ebcdic         compiled for EBCDIC character code [0,1]\n");
+printf("     ebcdic-nl      NL code if compiled for EBCDIC\n");
+printf("     jit            just-in-time compiler supported [0, 1]\n");
+printf("     linksize       internal link size [2, 3, 4]\n");
+printf("     newline        newline type [CR, LF, CRLF, ANYCRLF, ANY]\n");
+printf("     pcre8          8 bit library support enabled [0, 1]\n");
+printf("     pcre16         16 bit library support enabled [0, 1]\n");
+printf("     pcre32         32 bit library support enabled [0, 1]\n");
+printf("     utf            Unicode Transformation Format supported [0, 1]\n");
 printf("  -d            set default pattern control 'debug'\n");
 printf("  -help         show usage information\n");
 printf("  -i            set default pattern control 'info'\n");
@@ -4701,6 +4701,7 @@ printf("  -t [<n>]      time compilation and execution, repeating <n> times\n");
 printf("  -tm [<n>]     time execution (matching) only, repeating <n> times\n");
 printf("  -T            same as -t, but show total times at the end\n");
 printf("  -TM           same as -tm, but show total time at the end\n");
+printf("  -version      show PCRE2 version and exit\n");
 }
 
 
@@ -5012,6 +5013,15 @@ while (argc > 1 && argv[op][0] == '-')
            strcmp(arg, "--help") == 0)
     {
     usage();
+    goto EXIT;
+    }
+    
+  /* Show version */
+
+  else if (strcmp(arg, "-version") == 0 ||
+           strcmp(arg, "--version") == 0)
+    {
+    print_version(stdout);
     goto EXIT;
     }
 

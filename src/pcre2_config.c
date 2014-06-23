@@ -143,16 +143,31 @@ FIXME: This needs re-design.
 #endif
   break;
   
+  /* The hackery in setting "v" below is to cope with the case when 
+  PCRE2_PRERELEASE is set to an empty string (which it is for real releases).
+  If the second alternative is used in this case, it does not leave a space 
+  before the date. On the other hand, if all four macros are put into a single
+  XSTRING when PCRE2_PRERELEASE is not empty, an unwanted space is inserted. 
+  There are problems using an "obvious" approach like this:
+  
+     XSTRING(PCRE2_MAJOR) "." XSTRING(PCRE_MINOR) 
+     XSTRING(PCRE2_PRERELEASE) " " XSTRING(PCRE_DATE)
+
+  because, when PCRE2_PRERELEASE is empty, this leads to an attempted expansion
+  of STRING(). The C standard states: "If (before argument substitution) any
+  argument consists of no preprocessing tokens, the behavior is undefined." It
+  turns out the gcc treats this case as a single empty string - which is what
+  we really want - but Visual C grumbles about the lack of an argument for the
+  macro. Unfortunately, both are within their rights. As there seems to be no 
+  way to test for a macro's value being empty at compile time, we have to 
+  resort to a runtime test. */
+  
   case PCRE2_CONFIG_VERSION:
     { 
     PCRE2_UCHAR *t = (PCRE2_UCHAR *)where;
-/*
     const char *v = (XSTRING(Z PCRE2_PRERELEASE)[1] == 0)?
       XSTRING(PCRE2_MAJOR.PCRE2_MINOR PCRE2_DATE) :
       XSTRING(PCRE2_MAJOR.PCRE2_MINOR) XSTRING(PCRE2_PRERELEASE PCRE2_DATE);
-*/
-    const char *v = XSTRING(PCRE2_MAJOR.PCRE2_MINOR) 
-                    XSTRING(PCRE2_PRERELEASE PCRE2_DATE);
     if (strlen(v) >= BYTES2CU(length) - 1) return PCRE2_ERROR_BADLENGTH; 
     while (*v != 0) *t++ = *v++;
     *t = 0;
