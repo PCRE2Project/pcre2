@@ -44,27 +44,41 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #include "pcre2_internal.h"
 
+/* These macros are the standard way of turning unquoted text into C strings.
+They allow macros like PCRE2_MAJOR to be defined without quotes, which is
+convenient for user programs that want to test their values. */
+
+#define STRING(a)  # a
+#define XSTRING(s) STRING(s)
 
 
 /*************************************************
 * Return info about what features are configured *
 *************************************************/
 
-/* This function has an extensible interface so that additional items can be
-added compatibly.
+/* Most of the requests return an int value; others require more memory and do 
+their own checks.
 
 Arguments:
   what             what information is required
   where            where to put the information
+  length           length of "where" in bytes 
 
-Returns:           0 if data returned, negative on error
+Returns:           0 if data returned
+                   PCRE2_ERROR_BADLENGTH if not enough memory
+                   PCRE2_ERROR_BADOPTION if "where" not recognized
 */
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
-pcre2_config(int what, void *where)
+pcre2_config(int what, void *where, size_t length)
 {
+if (length < sizeof(int)) return PCRE2_ERROR_BADLENGTH;
+
 switch (what)
   {
+  default: 
+  return PCRE2_ERROR_BADOPTION;
+
   case PCRE2_CONFIG_BSR:
 #ifdef BSR_ANYCRLF
   *((int *)where) = 1;
@@ -83,6 +97,7 @@ switch (what)
 
   case PCRE2_CONFIG_JITTARGET:
 #ifdef SUPPORT_JIT
+FIXME: This needs re-design.
   *((const char **)where) = PRIV(jit_get_target)();
 #else
   *((const char **)where) = NULL;
@@ -94,10 +109,12 @@ switch (what)
   break;
 
   case PCRE2_CONFIG_MATCH_LIMIT:
+  if (length < sizeof(unsigned long int)) return PCRE2_ERROR_BADLENGTH;
   *((unsigned long int *)where) = MATCH_LIMIT;
   break;
 
   case PCRE2_CONFIG_MATCH_LIMIT_RECURSION:
+  if (length < sizeof(unsigned long int)) return PCRE2_ERROR_BADLENGTH;
   *((unsigned long int *)where) = MATCH_LIMIT_RECURSION;
   break;
 
@@ -106,6 +123,7 @@ switch (what)
   break;
 
   case PCRE2_CONFIG_PARENS_LIMIT:
+  if (length < sizeof(unsigned long int)) return PCRE2_ERROR_BADLENGTH;
   *((unsigned long int *)where) = PARENS_NEST_LIMIT;
   break;
 
@@ -124,8 +142,22 @@ switch (what)
   *((int *)where) = 0;
 #endif
   break;
-
-  default: return PCRE2_ERROR_BADOPTION;
+  
+  case PCRE2_CONFIG_VERSION:
+    { 
+    PCRE2_UCHAR *t = (PCRE2_UCHAR *)where;
+/*
+    const char *v = (XSTRING(Z PCRE2_PRERELEASE)[1] == 0)?
+      XSTRING(PCRE2_MAJOR.PCRE2_MINOR PCRE2_DATE) :
+      XSTRING(PCRE2_MAJOR.PCRE2_MINOR) XSTRING(PCRE2_PRERELEASE PCRE2_DATE);
+*/
+    const char *v = XSTRING(PCRE2_MAJOR.PCRE2_MINOR) 
+                    XSTRING(PCRE2_PRERELEASE PCRE2_DATE);
+    if (strlen(v) >= BYTES2CU(length) - 1) return PCRE2_ERROR_BADLENGTH; 
+    while (*v != 0) *t++ = *v++;
+    *t = 0;
+    return t - (PCRE2_UCHAR *)where;
+    } 
   }
 
 return 0;

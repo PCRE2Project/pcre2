@@ -48,11 +48,12 @@ to have access to the hidden structures at all supported widths.
 Some of the mode-dependent macros are required at different widths for
 different parts of the pcre2test code (in particular, the included
 pcre_printint.c file). We undefine them here so that they can be re-defined for
-multiple inclusions. Not all of these are used in pcretest, but it's easier 
+multiple inclusions. Not all of these are used in pcre2test, but it's easier 
 just to undefine them all. */
 
 #undef ACROSSCHAR
 #undef BACKCHAR
+#undef BYTES2CU
 #undef CU2BYTES
 #undef FORWARDCHAR
 #undef GET
@@ -522,7 +523,8 @@ These are all no-ops since all UTF-32 characters fit into one pcre_uchar. */
 
 /* Mode-dependent macros that have the same definition in all modes. */
 
-#define CU2BYTES(x)     (x)*((PCRE2_CODE_UNIT_WIDTH/8))
+#define CU2BYTES(x)     ((x)*((PCRE2_CODE_UNIT_WIDTH/8)))
+#define BYTES2CU(x)     ((x)/((PCRE2_CODE_UNIT_WIDTH/8)))
 #define PUTINC(a,n,d)   PUT(a,n,d), a += LINK_SIZE
 #define PUT2INC(a,n,d)  PUT2(a,n,d), a += IMM2_SIZE
 

@@ -286,7 +286,6 @@ COMMON_SOURCES = \
   src/pcre2_ucd.c \
   src/pcre2_ucp.h \
   src/pcre2_valid_utf.c \
-  src/pcre2_version.c \
   src/pcre2_xclass.c
 
 if WITH_PCRE8

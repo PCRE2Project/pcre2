@@ -266,33 +266,31 @@ modes, so use the form of the first that is available. */
 
 #if defined SUPPORT_PCRE8
 #define DEFAULT_TEST_MODE PCRE8_MODE
+#define VERSION_TYPE PCRE2_UCHAR8
 #define PCRE2_CONFIG pcre2_config_8
 #define PCRE2_JIT_STACK pcre2_jit_stack_8
 #define PCRE2_REAL_GENERAL_CONTEXT pcre2_real_general_context_8
 #define PCRE2_REAL_COMPILE_CONTEXT pcre2_real_compile_context_8
 #define PCRE2_REAL_MATCH_CONTEXT pcre2_real_match_context_8
-#define PCRE2_VERSION pcre2_version_8
 #define VERSION_TYPE PCRE2_UCHAR8
 
 #elif defined SUPPORT_PCRE16
 #define DEFAULT_TEST_MODE PCRE16_MODE
+#define VERSION_TYPE PCRE2_UCHAR16
 #define PCRE2_CONFIG pcre2_config_16
 #define PCRE2_JIT_STACK pcre2_jit_stack_16
 #define PCRE2_REAL_GENERAL_CONTEXT pcre2_real_general_context_16
 #define PCRE2_REAL_COMPILE_CONTEXT pcre2_real_compile_context_16
 #define PCRE2_REAL_MATCH_CONTEXT pcre2_real_match_context_16
-#define PCRE2_VERSION pcre2_version_16
-#define VERSION_TYPE PCRE2_UCHAR16
 
 #elif defined SUPPORT_PCRE32
 #define DEFAULT_TEST_MODE PCRE32_MODE
+#define VERSION_TYPE PCRE2_UCHAR32
 #define PCRE2_CONFIG pcre2_config_32
 #define PCRE2_JIT_STACK pcre2_jit_stack_32
 #define PCRE2_REAL_GENERAL_CONTEXT pcre2_real_general_context_32
 #define PCRE2_REAL_COMPILE_CONTEXT pcre2_real_compile_context_32
 #define PCRE2_REAL_MATCH_CONTEXT pcre2_real_match_context_32
-#define PCRE2_VERSION pcre2_version_32
-#define VERSION_TYPE PCRE2_UCHAR32
 #endif
 
 
@@ -610,7 +608,7 @@ clock_t total_match_time = 0;
 static uint32_t dfa_matched;
 static uint32_t max_oveccount;
 
-static VERSION_TYPE version[64];
+static VERSION_TYPE version[VERSION_SIZE];
 
 static patctl def_patctl;
 static patctl pat_patctl;
@@ -4743,7 +4741,7 @@ if (arg != NULL)
   switch (coptlist[i].type)
     {
     case CONF_BSR:
-    (void)PCRE2_CONFIG(coptlist[i].value, &rc);
+    (void)PCRE2_CONFIG(coptlist[i].value, &rc, sizeof(rc));
     printf("%s\n", rc? "ANYCRLF" : "ANY");
     break;
 
@@ -4758,12 +4756,12 @@ if (arg != NULL)
     break;
 
     case CONF_INT:
-    (void)PCRE2_CONFIG(coptlist[i].value, &yield);
+    (void)PCRE2_CONFIG(coptlist[i].value, &yield, sizeof(yield));
     printf("%d\n", yield);
     break;
 
     case CONF_NL:
-    (void)PCRE2_CONFIG(coptlist[i].value, &rc);
+    (void)PCRE2_CONFIG(coptlist[i].value, &rc, sizeof(rc));
     print_newline_config(rc, TRUE);
     break;
     }
@@ -4802,33 +4800,36 @@ printf("  16-bit support\n");
 printf("  32-bit support\n");
 #endif
 
-(void)PCRE2_CONFIG(PCRE2_CONFIG_UTF, &rc);
+(void)PCRE2_CONFIG(PCRE2_CONFIG_UTF, &rc, sizeof(rc));
 printf ("  %sUTF support\n", rc ? "" : "No ");
-(void)PCRE2_CONFIG(PCRE2_CONFIG_JIT, &rc);
+(void)PCRE2_CONFIG(PCRE2_CONFIG_JIT, &rc, sizeof(rc));
 if (rc != 0)
   {
+/* FIXME: config needs sorting for jit target    
   const char *arch;
   (void)PCRE2_CONFIG(PCRE2_CONFIG_JITTARGET, (void *)(&arch));
   printf("  Just-in-time compiler support: %s\n", arch);
+*/  
+  printf("  Just-in-time compiler support: FIXME\n");
   }
 else
   {
   printf("  No just-in-time compiler support\n");
   }
-(void)PCRE2_CONFIG(PCRE2_CONFIG_NEWLINE, &rc);
+(void)PCRE2_CONFIG(PCRE2_CONFIG_NEWLINE, &rc, sizeof(rc));
 print_newline_config(rc, FALSE);
-(void)PCRE2_CONFIG(PCRE2_CONFIG_BSR, &rc);
+(void)PCRE2_CONFIG(PCRE2_CONFIG_BSR, &rc, sizeof(rc));
 printf("  \\R matches %s\n", rc? "CR, LF, or CRLF only" :
                                  "all Unicode newlines");
-(void)PCRE2_CONFIG(PCRE2_CONFIG_LINK_SIZE, &rc);
+(void)PCRE2_CONFIG(PCRE2_CONFIG_LINK_SIZE, &rc, sizeof(rc));
 printf("  Internal link size = %d\n", rc);
-(void)PCRE2_CONFIG(PCRE2_CONFIG_PARENS_LIMIT, &lrc);
+(void)PCRE2_CONFIG(PCRE2_CONFIG_PARENS_LIMIT, &lrc, sizeof(lrc));
 printf("  Parentheses nest limit = %ld\n", lrc);
-(void)PCRE2_CONFIG(PCRE2_CONFIG_MATCH_LIMIT, &lrc);
+(void)PCRE2_CONFIG(PCRE2_CONFIG_MATCH_LIMIT, &lrc, sizeof(lrc));
 printf("  Default match limit = %ld\n", lrc);
-(void)PCRE2_CONFIG(PCRE2_CONFIG_MATCH_LIMIT_RECURSION, &lrc);
+(void)PCRE2_CONFIG(PCRE2_CONFIG_MATCH_LIMIT_RECURSION, &lrc, sizeof(lrc));
 printf("  Default recursion depth limit = %ld\n", lrc);
-(void)PCRE2_CONFIG(PCRE2_CONFIG_STACKRECURSE, &rc);
+(void)PCRE2_CONFIG(PCRE2_CONFIG_STACKRECURSE, &rc, sizeof(rc));
 printf("  Match recursion uses %s", rc? "stack" : "heap");
 
 #ifdef FIXME
@@ -4877,9 +4878,9 @@ if (PO(options) != DO(options) || PO(control) != DO(control))
   return 1;
   }
 
-/* Get the PCRE version number. */
+/* Get the PCRE version number information. */
 
-PCRE2_VERSION(version, VERSION_SIZE);
+PCRE2_CONFIG(PCRE2_CONFIG_VERSION, version, sizeof(VERSION_TYPE)*VERSION_SIZE);
 
 /* Get buffers from malloc() so that valgrind will check their misuse when
 debugging. They grow automatically when very long lines are read. The 16-

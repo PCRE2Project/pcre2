@@ -255,6 +255,7 @@ D   is inspected during pcre2_dfa_match() execution
 #define PCRE2_CONFIG_PARENS_LIMIT            7
 #define PCRE2_CONFIG_STACKRECURSE            8
 #define PCRE2_CONFIG_UTF                     9
+#define PCRE2_CONFIG_VERSION                10
 
 /* A value that is used to indicate 'unset' in unsigned size_t fields. In 
 particular, this value is used in the ovector. */
@@ -339,9 +340,8 @@ expanded for each width below. Start with functions that give general
 information. */
 
 #define PCRE2_GENERAL_INFO_FUNCTIONS \
-PCRE2_EXP_DECL int       pcre2_config(int, void *); \
-PCRE2_EXP_DECL size_t    pcre2_get_match_frame_size(void); \
-PCRE2_EXP_DECL int       pcre2_version(PCRE2_UCHAR *, size_t);
+PCRE2_EXP_DECL int       pcre2_config(int, void *, size_t); \
+PCRE2_EXP_DECL size_t    pcre2_get_match_frame_size(void);
 
 
 /* Functions for manipulating contexts. */
@@ -576,7 +576,6 @@ pcre2_compile are called by application code. */
 #define pcre2_substring_list_free             PCRE2_SUFFIX(pcre2_substring_list_free_)                  
 #define pcre2_substring_nametable_scan        PCRE2_SUFFIX(pcre2_substring_nametable_scan_)             
 #define pcre2_substring_number_from_name      PCRE2_SUFFIX(pcre2_substring_number_from_name_)           
-#define pcre2_version                         PCRE2_SUFFIX(pcre2_version_)
 
 
 /* Now generate all three sets of width-specific structures and function
