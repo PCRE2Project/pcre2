@@ -81,7 +81,6 @@ int rc = PCRE2_ERROR_NOMATCH;
 mcontext=mcontext;length=length;
 options=options;
 
-
 /* Fudges for testing pcre2test */
 
 if (subject[0] == 'Y')

@@ -1,4 +1,4 @@
-.TH PCRE2TEST 1 "13 May 2014" "PCRE 9.00"
+.TH PCRE2TEST 1 "24 June 2014" "PCRE 10.00"
 .SH NAME
 pcre2test - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -17,13 +17,6 @@ documentation. For details of the PCRE2 library function calls and their
 options, see the
 .\" HREF
 \fBpcre2api\fP
-.\"
-,
-.\" HREF
-\fBpcre16\fP
-and
-.\" HREF
-\fBpcre32\fP
 .\"
 documentation.
 .P
@@ -170,6 +163,9 @@ compile phase.
 \fB-T\fP \fB-TM\fP
 These behave like \fB-t\fP and \fB-tm\fP, but in addition, at the end of a run,
 the total times for all compiles and matches are output.
+.TP 10
+\fB-version\fP
+Output the PCRE2 version number and then exit.
 .
 .
 .SH "DESCRIPTION"
@@ -446,8 +442,11 @@ set to "anycrlf", \eR matches CR, LF, or CRLF only. If it is set to "unicode",
 is built, with the default default being Unicode.
 .P
 The \fBnewline\fP modifier specifies which characters are to be interpreted as 
-newlines, both in the pattern and in subject lines. The type must be one of
-CR, LF, CRLF, ANYCRLF, or ANY.
+newlines, both in the pattern and (by default) in subject lines. The type must
+be one of CR, LF, CRLF, ANYCRLF, or ANY.
+.P
+Both the \eR and newline settings can be changed at match time, but if this is 
+done, JIT matching is disabled.
 .
 .
 .SS "Information about a pattern"
@@ -685,6 +684,7 @@ pattern.
       allaftertext              show text after captures
       allcaptures               show all captures
   /gg altglobal                 alternative global matching
+      bsr=[anycrlf|unicode]     specify \eR handling
       callout_capture           show captures at callout time
       callout_fail=<n>[,<m>]    control callout failure
       callout_none              do not supply a callout function
@@ -699,12 +699,21 @@ pattern.
       mark                      show mark values
       match_limit=>n>           set a match limit
       memory                    show memory usage
+      newline=<type>            set newline type
       offset=<n>                set starting offset
       ovector=<n>               set size of output vector
       recursion_limit=<n>       set a recursion limit
 .sp
 The effects of these modifiers are described in the following sections.
 FIXME: Give more examples.
+.
+.
+.SS "Newline and \eR handling"
+.rs
+.sp
+These modifiers set the newline and \eR processing conventions for the subject 
+line, overriding any values that were set at compile time (as described above). 
+JIT matching is disabled if these settings are changed at match time. 
 .
 .
 .SS "Showing more text"
@@ -1191,6 +1200,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 08 June 2014
+Last updated: 24 June 2014
 Copyright (c) 1997-2014 University of Cambridge.
 .fi

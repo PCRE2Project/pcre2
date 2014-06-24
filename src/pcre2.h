@@ -136,7 +136,9 @@ D   is inspected during pcre2_dfa_match() execution
 #define PCRE2_DFA_RESTART         0x00000040
 #define PCRE2_DFA_SHORTEST        0x00000080
 
-/* Newline and \R settings, for use in the compile context. */
+/* Newline and \R settings, for use in the compile and match contexts. The 
+newline values must be kept in step with values set in config.h and both sets
+must all be greater than zero. */
 
 #define PCRE2_NEWLINE_CR          1
 #define PCRE2_NEWLINE_LF          2
@@ -361,11 +363,11 @@ PCRE2_EXP_DECL \
 PCRE2_EXP_DECL \
   pcre2_compile_context *pcre2_compile_context_create(pcre2_general_context *);\
 PCRE2_EXP_DECL void      pcre2_compile_context_free(pcre2_compile_context *); \
-PCRE2_EXP_DECL int       pcre2_set_bsr_convention(pcre2_compile_context *, \
+PCRE2_EXP_DECL int       pcre2_set_bsr_compile(pcre2_compile_context *, \
                            uint32_t); \
 PCRE2_EXP_DECL int       pcre2_set_character_tables(pcre2_compile_context *, \
                            const unsigned char *); \
-PCRE2_EXP_DECL int       pcre2_set_newline_convention(pcre2_compile_context *, \
+PCRE2_EXP_DECL int       pcre2_set_newline_compile(pcre2_compile_context *, \
                            uint32_t); \
 PCRE2_EXP_DECL int       pcre2_set_parens_nest_limit(pcre2_compile_context *, \
                            uint32_t); \
@@ -378,9 +380,13 @@ PCRE2_EXP_DECL \
 PCRE2_EXP_DECL \
   pcre2_match_context   *pcre2_match_context_create(pcre2_general_context *); \
 PCRE2_EXP_DECL void      pcre2_match_context_free(pcre2_match_context *); \
+PCRE2_EXP_DECL int       pcre2_set_bsr_match(pcre2_match_context *, \
+                           uint32_t); \
 PCRE2_EXP_DECL int       pcre2_set_callout(pcre2_match_context *, \
                            int (*)(pcre2_callout_block *, void *)); \
 PCRE2_EXP_DECL int       pcre2_set_match_limit(pcre2_match_context *, \
+                           uint32_t); \
+PCRE2_EXP_DECL int       pcre2_set_newline_match(pcre2_match_context *, \
                            uint32_t); \
 PCRE2_EXP_DECL int       pcre2_set_recursion_limit(pcre2_match_context *, \
                            uint32_t); \
@@ -556,12 +562,14 @@ pcre2_compile are called by application code. */
 #define pcre2_match_data_free                 PCRE2_SUFFIX(pcre2_match_data_free_)                      
 #define pcre2_pattern_info                    PCRE2_SUFFIX(pcre2_pattern_info_)
 #define pcre2_pattern_to_host_byte_order      PCRE2_SUFFIX(pcre2_pattern_to_host_byte_order_)
-#define pcre2_set_bsr_convention              PCRE2_SUFFIX(pcre2_set_bsr_convention_)
+#define pcre2_set_bsr_compile                 PCRE2_SUFFIX(pcre2_set_bsr_compile_)
+#define pcre2_set_bsr_match                   PCRE2_SUFFIX(pcre2_set_bsr_match_)
 #define pcre2_set_callout                     PCRE2_SUFFIX(pcre2_set_callout_)
 #define pcre2_set_character_tables            PCRE2_SUFFIX(pcre2_set_character_tables_)
 #define pcre2_set_compile_recursion_guard     PCRE2_SUFFIX(pcre2_set_compile_recursion_guard_)
 #define pcre2_set_match_limit                 PCRE2_SUFFIX(pcre2_set_match_limit_)
-#define pcre2_set_newline_convention          PCRE2_SUFFIX(pcre2_set_newline_convention_)
+#define pcre2_set_newline_compile             PCRE2_SUFFIX(pcre2_set_newline_compile_)
+#define pcre2_set_newline_match               PCRE2_SUFFIX(pcre2_set_newline_match_)
 #define pcre2_set_parens_nest_limit           PCRE2_SUFFIX(pcre2_set_parens_nest_limit_)
 #define pcre2_set_recursion_limit             PCRE2_SUFFIX(pcre2_set_recursion_limit_)
 #define pcre2_set_recursion_memory_management PCRE2_SUFFIX(pcre2_set_recursion_memory_management_)
