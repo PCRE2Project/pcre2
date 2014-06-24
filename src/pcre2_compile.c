@@ -7582,7 +7582,7 @@ memset(re->start_bitmap, 0, 32 * sizeof(uint8_t));
 re->blocksize = re_blocksize;
 re->magic_number = MAGIC_NUMBER;
 re->compile_options = options;
-re->pattern_options = cd.external_options;
+re->overall_options = cd.external_options;
 re->flags = PCRE2_CODE_UNIT_WIDTH/8 | cd.external_flags;
 re->limit_match = limit_match;
 re->limit_recursion = limit_recursion;
@@ -7662,7 +7662,7 @@ of the function here. */
 ptr = pattern + skipatstart;
 code = (PCRE2_UCHAR *)codestart;
 *code = OP_BRA;
-(void)compile_regex(re->pattern_options, &code, &ptr, &errorcode, FALSE, FALSE,
+(void)compile_regex(re->overall_options, &code, &ptr, &errorcode, FALSE, FALSE,
    0, 0, &firstcu, &firstcuflags, &reqcu, &reqcuflags, NULL, &cd, NULL);
 
 re->top_bracket = cd.bracount;
@@ -7796,15 +7796,15 @@ we can determine that the pattern is anchored by virtue of ^ characters or \A
 or anything else, such as starting with non-atomic .* when DOTALL is set and
 there are no occurrences of *PRUNE or *SKIP. */
 
-if ((re->pattern_options & PCRE2_ANCHORED) == 0 &&
+if ((re->overall_options & PCRE2_ANCHORED) == 0 &&
      is_anchored(codestart, 0, &cd, 0)) 
-  re->pattern_options |= PCRE2_ANCHORED;
+  re->overall_options |= PCRE2_ANCHORED;
   
 /* If the pattern is still not anchored and we do not have a first code unit,
 see if there is one that is asserted (these are not saved during the compile
 because they can cause conflicts with actual literals that follow). */
 
-if ((re->pattern_options & PCRE2_ANCHORED) == 0)
+if ((re->overall_options & PCRE2_ANCHORED) == 0)
   {
   if (firstcuflags < 0)
     firstcu = find_firstassertedcu(codestart, &firstcuflags, FALSE);
@@ -7849,7 +7849,7 @@ if ((re->pattern_options & PCRE2_ANCHORED) == 0)
 pattern, do this only if it follows a variable length item in the pattern. */
 
 if (reqcuflags >= 0 &&
-     ((re->pattern_options & PCRE2_ANCHORED) == 0 || 
+     ((re->overall_options & PCRE2_ANCHORED) == 0 || 
       (reqcuflags & REQ_VARY) != 0))
   {
   re->last_codeunit = reqcu;

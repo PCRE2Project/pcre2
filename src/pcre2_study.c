@@ -384,7 +384,7 @@ for (;;)
 
     case OP_DNREF:     /* Duplicate named pattern back reference */
     case OP_DNREFI:
-    if ((re->pattern_options & PCRE2_MATCH_UNSET_BACKREF) == 0)
+    if ((re->overall_options & PCRE2_MATCH_UNSET_BACKREF) == 0)
       {
       int count = GET2(cc, 1+IMM2_SIZE);
       PCRE2_UCHAR *slot = 
@@ -417,7 +417,7 @@ for (;;)
 
     case OP_REF:      /* Single back reference */
     case OP_REFI:
-    if ((re->pattern_options & PCRE2_MATCH_UNSET_BACKREF) == 0)
+    if ((re->overall_options & PCRE2_MATCH_UNSET_BACKREF) == 0)
       {
       ce = cs = (PCRE2_UCHAR *)PRIV(find_bracket)(startcode, utf, GET2(cc, 1));
       if (cs == NULL) return -2;
@@ -711,7 +711,7 @@ set_nottype_bits(pcre2_real_code *re, int cbit_type, unsigned int table_limit)
 register uint32_t c;
 for (c = 0; c < table_limit; c++) 
   re->start_bitmap[c] |= ~(re->tables[c+cbits_offset+cbit_type]);
-#if defined SUPPORT_UTF && defined PCRE2_CODE_UNIT_WIDTH == 8
+#if defined SUPPORT_UTF && PCRE2_CODE_UNIT_WIDTH == 8
 if (table_limit != 32) for (c = 24; c < 32; c++) re->start_bitmap[c] = 0xff;
 #endif
 }
@@ -1396,7 +1396,7 @@ PRIV(study)(pcre2_real_code *re)
 {
 int min;
 PCRE2_UCHAR *code;
-BOOL utf = (re->pattern_options & PCRE2_UTF) != 0;
+BOOL utf = (re->overall_options & PCRE2_UTF) != 0;
 
 /* Find start of compiled code */
 
@@ -1407,7 +1407,7 @@ code = (PCRE2_UCHAR *)((uint8_t *)re + sizeof(pcre2_real_code)) +
 unit, or a multiline pattern that matches only at "line start", there is no
 point in seeking a list of starting code units. */
 
-if ((re->pattern_options & PCRE2_ANCHORED) == 0 &&
+if ((re->overall_options & PCRE2_ANCHORED) == 0 &&
     (re->flags & (PCRE2_FIRSTSET|PCRE2_STARTLINE)) == 0)
   {
   int rc = set_start_bits(re, code, utf);

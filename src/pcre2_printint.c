@@ -175,7 +175,7 @@ as an indication. */
 #if PCRE2_CODE_UNIT_WIDTH == 32
 fprintf(f, "\\X{%x}", c);
 return 0;
-#endif  /* PCRE2_CODE_UNIT_WIDTH == 16 */
+#endif  /* PCRE2_CODE_UNIT_WIDTH == 32 */
 #endif /* SUPPORT_UTF */
 }
 

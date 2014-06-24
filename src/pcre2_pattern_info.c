@@ -85,7 +85,7 @@ if ((re->flags & (PCRE2_CODE_UNIT_WIDTH/8)) == 0)
 switch(what)
   {
   case PCRE2_INFO_ALLOPTIONS:
-  *((int *)where) = re->pattern_options;
+  *((int *)where) = re->overall_options;
   break;
 
   case PCRE2_INFO_ARGOPTIONS:

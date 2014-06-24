@@ -2814,7 +2814,7 @@ Returns:    PR_OK     continue processing next line
 static int
 show_pattern_info(void)
 {
-uint32_t compile_options, pattern_options;
+uint32_t compile_options, overall_options;
 
 if ((pat_patctl.control & (CTL_BINCODE|CTL_FULLBINCODE)) != 0)
   {
@@ -2902,14 +2902,14 @@ if ((pat_patctl.control & CTL_INFO) != 0)
   if (match_empty) fprintf(outfile, "May match empty string\n");
 
   pattern_info(PCRE2_INFO_ARGOPTIONS, &compile_options);
-  pattern_info(PCRE2_INFO_ALLOPTIONS, &pattern_options);
+  pattern_info(PCRE2_INFO_ALLOPTIONS, &overall_options);
 
-  if ((compile_options|pattern_options) == 0)
+  if ((compile_options|overall_options) == 0)
     fprintf(outfile, "No options\n");
   else
     {
     show_compile_options(compile_options, "Compile options:", "\n");
-    show_compile_options(pattern_options, "Overall options:", "\n");
+    show_compile_options(overall_options, "Overall options:", "\n");
     }
 
   if (jchanged) fprintf(outfile, "Duplicate name status changes\n");
