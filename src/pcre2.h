@@ -47,7 +47,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #define PCRE2_DATE           2014-99-99
 
 /* When an application links to a PCRE DLL in Windows, the symbols that are
-imported have to be identified as such. When building PCRE, the appropriate
+imported have to be identified as such. When building PCRE2, the appropriate
 export setting is defined in pcre2_internal.h, which includes this file. So we
 don't change existing definitions of PCRE2_EXP_DECL. */
 
@@ -198,7 +198,7 @@ must all be greater than zero. */
 #define PCRE2_ERROR_BADMODE         (-33)
 #define PCRE2_ERROR_BADOFFSET       (-34)
 #define PCRE2_ERROR_BADOPTION       (-35)
-#define PCRE2_ERROR_BADUTF_OFFSET   (-36)
+#define PCRE2_ERROR_BADUTFOFFSET    (-36)
 #define PCRE2_ERROR_CALLOUT         (-37)  /* Never used by PCRE2 itself */
 #define PCRE2_ERROR_DFA_BADRESTART  (-38)
 #define PCRE2_ERROR_DFA_RECURSE     (-39)
@@ -215,46 +215,44 @@ must all be greater than zero. */
 #define PCRE2_ERROR_NULL            (-50)
 #define PCRE2_ERROR_RECURSELOOP     (-51)
 #define PCRE2_ERROR_RECURSIONLIMIT  (-52)
-#define PCRE2_ERROR_UNKNOWN_OPCODE  (-53)
-#define PCRE2_ERROR_UNSET           (-54)
+#define PCRE2_ERROR_UNSET           (-53)
 
 /* Request types for pcre2_pattern_info() */
 
-#define PCRE2_INFO_BACKREFMAX            0
-#define PCRE2_INFO_BSR_CONVENTION        1
-#define PCRE2_INFO_CAPTURECOUNT          2
-#define PCRE2_INFO_COMPILE_OPTIONS       3
-#define PCRE2_INFO_FIRSTCODEUNIT         4
-#define PCRE2_INFO_FIRSTCODETYPE         5
-#define PCRE2_INFO_FIRSTBITMAP           6
-#define PCRE2_INFO_HASCRORLF             7
-#define PCRE2_INFO_JCHANGED              8
-#define PCRE2_INFO_JIT                   9
+#define PCRE2_INFO_ALLOPTIONS            0
+#define PCRE2_INFO_ARGOPTIONS            1
+#define PCRE2_INFO_BACKREFMAX            2
+#define PCRE2_INFO_BSR                   3
+#define PCRE2_INFO_CAPTURECOUNT          4
+#define PCRE2_INFO_FIRSTCODEUNIT         5
+#define PCRE2_INFO_FIRSTCODETYPE         6
+#define PCRE2_INFO_FIRSTBITMAP           7
+#define PCRE2_INFO_HASCRORLF             8
+#define PCRE2_INFO_JCHANGED              9
 #define PCRE2_INFO_JITSIZE              10
 #define PCRE2_INFO_LASTCODEUNIT         11
 #define PCRE2_INFO_LASTCODETYPE         12
-#define PCRE2_INFO_MATCH_EMPTY          13
-#define PCRE2_INFO_MATCH_LIMIT          14
+#define PCRE2_INFO_MATCHEMPTY           13
+#define PCRE2_INFO_MATCHLIMIT           14
 #define PCRE2_INFO_MAXLOOKBEHIND        15
 #define PCRE2_INFO_MINLENGTH            16
 #define PCRE2_INFO_NAMECOUNT            17
 #define PCRE2_INFO_NAMEENTRYSIZE        18
 #define PCRE2_INFO_NAMETABLE            19
-#define PCRE2_INFO_NEWLINE_CONVENTION   20
-#define PCRE2_INFO_PATTERN_OPTIONS      21
-#define PCRE2_INFO_RECURSION_LIMIT      22
-#define PCRE2_INFO_SIZE                 23
+#define PCRE2_INFO_NEWLINE              20
+#define PCRE2_INFO_RECURSIONLIMIT       21
+#define PCRE2_INFO_SIZE                 22
 
 /* Request types for pcre2_config(). */
 
 #define PCRE2_CONFIG_BSR                     0
 #define PCRE2_CONFIG_JIT                     1
 #define PCRE2_CONFIG_JITTARGET               2
-#define PCRE2_CONFIG_LINK_SIZE               3
-#define PCRE2_CONFIG_MATCH_LIMIT             4
-#define PCRE2_CONFIG_MATCH_LIMIT_RECURSION   5
+#define PCRE2_CONFIG_LINKSIZE                3
+#define PCRE2_CONFIG_MATCHLIMIT              4
 #define PCRE2_CONFIG_NEWLINE                 6
-#define PCRE2_CONFIG_PARENS_LIMIT            7
+#define PCRE2_CONFIG_PARENSLIMIT             7
+#define PCRE2_CONFIG_RECURSIONLIMIT          5
 #define PCRE2_CONFIG_STACKRECURSE            8
 #define PCRE2_CONFIG_UTF                     9
 #define PCRE2_CONFIG_VERSION                10

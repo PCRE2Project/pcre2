@@ -84,20 +84,24 @@ if ((re->flags & (PCRE2_CODE_UNIT_WIDTH/8)) == 0)
 
 switch(what)
   {
+  case PCRE2_INFO_ALLOPTIONS:
+  *((int *)where) = re->pattern_options;
+  break;
+
+  case PCRE2_INFO_ARGOPTIONS:
+  *((int *)where) = re->compile_options;
+  break;
+
   case PCRE2_INFO_BACKREFMAX:
   *((int *)where) = re->top_backref;
   break;
 
-  case PCRE2_INFO_BSR_CONVENTION:
+  case PCRE2_INFO_BSR:
   *((uint32_t *)where) = re->bsr_convention;
   break;
 
   case PCRE2_INFO_CAPTURECOUNT:
   *((int *)where) = re->top_bracket;
-  break;
-
-  case PCRE2_INFO_COMPILE_OPTIONS:
-  *((int *)where) = re->compile_options;
   break;
 
   case PCRE2_INFO_FIRSTCODETYPE:
@@ -141,11 +145,11 @@ switch(what)
     re->last_codeunit : 0;
   break;
 
-  case PCRE2_INFO_MATCH_EMPTY:
+  case PCRE2_INFO_MATCHEMPTY:
   *((int *)where) = (re->flags & PCRE2_MATCH_EMPTY) != 0;
   break;
 
-  case PCRE2_INFO_MATCH_LIMIT:
+  case PCRE2_INFO_MATCHLIMIT:
   if ((re->flags & PCRE2_MLSET) == 0) return PCRE2_ERROR_UNSET;
   *((uint32_t *)where) = re->limit_match;
   break;
@@ -170,15 +174,11 @@ switch(what)
   *((PCRE2_SPTR*)where) = (PCRE2_SPTR)((char *)re + sizeof(pcre2_real_code));
   break;
 
-  case PCRE2_INFO_NEWLINE_CONVENTION:
+  case PCRE2_INFO_NEWLINE:
   *((uint32_t *)where) = re->newline_convention;
   break;
 
-  case PCRE2_INFO_PATTERN_OPTIONS:
-  *((int *)where) = re->pattern_options;
-  break;
-
-  case PCRE2_INFO_RECURSION_LIMIT:
+  case PCRE2_INFO_RECURSIONLIMIT:
   if ((re->flags & PCRE2_RLSET) == 0) return PCRE2_ERROR_UNSET;
   *((uint32_t *)where) = re->limit_recursion;
   break;

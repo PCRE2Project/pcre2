@@ -104,27 +104,27 @@ FIXME: This needs re-design.
 #endif
   break;
 
-  case PCRE2_CONFIG_LINK_SIZE:
+  case PCRE2_CONFIG_LINKSIZE:
   *((int *)where) = LINK_SIZE;
   break;
 
-  case PCRE2_CONFIG_MATCH_LIMIT:
+  case PCRE2_CONFIG_MATCHLIMIT:
   if (length < sizeof(unsigned long int)) return PCRE2_ERROR_BADLENGTH;
   *((unsigned long int *)where) = MATCH_LIMIT;
-  break;
-
-  case PCRE2_CONFIG_MATCH_LIMIT_RECURSION:
-  if (length < sizeof(unsigned long int)) return PCRE2_ERROR_BADLENGTH;
-  *((unsigned long int *)where) = MATCH_LIMIT_RECURSION;
   break;
 
   case PCRE2_CONFIG_NEWLINE:
   *((int *)where) = NEWLINE_DEFAULT;
   break;
 
-  case PCRE2_CONFIG_PARENS_LIMIT:
+  case PCRE2_CONFIG_PARENSLIMIT:
   if (length < sizeof(unsigned long int)) return PCRE2_ERROR_BADLENGTH;
   *((unsigned long int *)where) = PARENS_NEST_LIMIT;
+  break;
+
+  case PCRE2_CONFIG_RECURSIONLIMIT:
+  if (length < sizeof(unsigned long int)) return PCRE2_ERROR_BADLENGTH;
+  *((unsigned long int *)where) = MATCH_LIMIT_RECURSION;
   break;
 
   case PCRE2_CONFIG_STACKRECURSE:

@@ -575,7 +575,7 @@ static coptstruct coptlist[] = {
   { "ebcdic",    CONF_FIX, SUPPORT_EBCDIC },
   { "ebcdic-nl", CONF_FIZ, EBCDIC_NL },
   { "jit",       CONF_INT, PCRE2_CONFIG_JIT },
-  { "linksize",  CONF_INT, PCRE2_CONFIG_LINK_SIZE },
+  { "linksize",  CONF_INT, PCRE2_CONFIG_LINKSIZE },
   { "newline",   CONF_NL,  PCRE2_CONFIG_NEWLINE },
   { "pcre16",    CONF_FIX, SUPPORT_16 },
   { "pcre32",    CONF_FIX, SUPPORT_32 },
@@ -2836,7 +2836,7 @@ if ((pat_patctl.control & CTL_INFO) != 0)
   /* These info requests should always succeed. */
 
   if (pattern_info(PCRE2_INFO_BACKREFMAX, &backrefmax) +
-      pattern_info(PCRE2_INFO_BSR_CONVENTION, &bsr_convention) +
+      pattern_info(PCRE2_INFO_BSR, &bsr_convention) +
       pattern_info(PCRE2_INFO_CAPTURECOUNT, &count) +
       pattern_info(PCRE2_INFO_FIRSTBITMAP, &start_bits) +
       pattern_info(PCRE2_INFO_FIRSTCODEUNIT, &first_cunit) +
@@ -2845,15 +2845,15 @@ if ((pat_patctl.control & CTL_INFO) != 0)
       pattern_info(PCRE2_INFO_JCHANGED, &jchanged) +
       pattern_info(PCRE2_INFO_LASTCODEUNIT, &last_cunit) +
       pattern_info(PCRE2_INFO_LASTCODETYPE, &last_ctype) +
-      pattern_info(PCRE2_INFO_MATCH_EMPTY, &match_empty) +
-      pattern_info(PCRE2_INFO_MATCH_LIMIT, &match_limit) +
+      pattern_info(PCRE2_INFO_MATCHEMPTY, &match_empty) +
+      pattern_info(PCRE2_INFO_MATCHLIMIT, &match_limit) +
       pattern_info(PCRE2_INFO_MAXLOOKBEHIND, &maxlookbehind) +
       pattern_info(PCRE2_INFO_MINLENGTH, &minlength) +
       pattern_info(PCRE2_INFO_NAMECOUNT, &namecount) +
       pattern_info(PCRE2_INFO_NAMEENTRYSIZE, &nameentrysize) +
       pattern_info(PCRE2_INFO_NAMETABLE, &nametable) +
-      pattern_info(PCRE2_INFO_NEWLINE_CONVENTION, &newline_convention) +
-      pattern_info(PCRE2_INFO_RECURSION_LIMIT, &recursion_limit)
+      pattern_info(PCRE2_INFO_NEWLINE, &newline_convention) +
+      pattern_info(PCRE2_INFO_RECURSIONLIMIT, &recursion_limit)
       != 0)
     return PR_ABEND;
 
@@ -2901,15 +2901,15 @@ if ((pat_patctl.control & CTL_INFO) != 0)
   if (hascrorlf)   fprintf(outfile, "Contains explicit CR or LF match\n");
   if (match_empty) fprintf(outfile, "May match empty string\n");
 
-  pattern_info(PCRE2_INFO_COMPILE_OPTIONS, &compile_options);
-  pattern_info(PCRE2_INFO_PATTERN_OPTIONS, &pattern_options);
+  pattern_info(PCRE2_INFO_ARGOPTIONS, &compile_options);
+  pattern_info(PCRE2_INFO_ALLOPTIONS, &pattern_options);
 
   if ((compile_options|pattern_options) == 0)
     fprintf(outfile, "No options\n");
   else
     {
     show_compile_options(compile_options, "Compile options:", "\n");
-    show_compile_options(pattern_options, "Pattern options:", "\n");
+    show_compile_options(pattern_options, "Overall options:", "\n");
     }
 
   if (jchanged) fprintf(outfile, "Duplicate name status changes\n");
@@ -4558,7 +4558,7 @@ if ((dat_datctl.control & CTL_DFA) != 0)
         }
       break;
 
-      case PCRE2_ERROR_BADUTF_OFFSET:
+      case PCRE2_ERROR_BADUTFOFFSET:
       fprintf(outfile, "Error %d (bad UTF-%d offset)\n", capcount, test_mode);
       break;
 
@@ -4830,13 +4830,13 @@ print_newline_config(rc, FALSE);
 (void)PCRE2_CONFIG(PCRE2_CONFIG_BSR, &rc, sizeof(rc));
 printf("  \\R matches %s\n", rc? "CR, LF, or CRLF only" :
                                  "all Unicode newlines");
-(void)PCRE2_CONFIG(PCRE2_CONFIG_LINK_SIZE, &rc, sizeof(rc));
+(void)PCRE2_CONFIG(PCRE2_CONFIG_LINKSIZE, &rc, sizeof(rc));
 printf("  Internal link size = %d\n", rc);
-(void)PCRE2_CONFIG(PCRE2_CONFIG_PARENS_LIMIT, &lrc, sizeof(lrc));
+(void)PCRE2_CONFIG(PCRE2_CONFIG_PARENSLIMIT, &lrc, sizeof(lrc));
 printf("  Parentheses nest limit = %ld\n", lrc);
-(void)PCRE2_CONFIG(PCRE2_CONFIG_MATCH_LIMIT, &lrc, sizeof(lrc));
+(void)PCRE2_CONFIG(PCRE2_CONFIG_MATCHLIMIT, &lrc, sizeof(lrc));
 printf("  Default match limit = %ld\n", lrc);
-(void)PCRE2_CONFIG(PCRE2_CONFIG_MATCH_LIMIT_RECURSION, &lrc, sizeof(lrc));
+(void)PCRE2_CONFIG(PCRE2_CONFIG_RECURSIONLIMIT, &lrc, sizeof(lrc));
 printf("  Default recursion depth limit = %ld\n", lrc);
 (void)PCRE2_CONFIG(PCRE2_CONFIG_STACKRECURSE, &rc, sizeof(rc));
 printf("  Match recursion uses %s", rc? "stack" : "heap");
