@@ -228,8 +228,6 @@ static const char match_error_texts[] =
   "NULL argument passed\0"
   "nested recursion at the same subject position\0"
   "recursion limit exceeded\0"
-  "unknown opcode - pattern overwritten?\0"
-  "value unset\0"                     /* Used by pcre2_pattern_info() */
   ; 
 
 

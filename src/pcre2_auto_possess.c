@@ -559,14 +559,14 @@ which case the base cannot be possessified.
 Arguments:
   code        points to the byte code
   utf         TRUE in UTF mode
-  cd          compile data block
+  cb          compile data block
   base_list   the data list of the base opcode
 
 Returns:      TRUE if the auto-possessification is possible
 */
 
 static BOOL
-compare_opcodes(PCRE2_SPTR code, BOOL utf, const compile_data *cd,
+compare_opcodes(PCRE2_SPTR code, BOOL utf, const compile_block *cb,
   const uint32_t *base_list, PCRE2_SPTR base_end)
 {
 PCRE2_UCHAR c;
@@ -654,7 +654,7 @@ for(;;)
 
     while (*next_code == OP_ALT)
       {
-      if (!compare_opcodes(code, utf, cd, base_list, base_end)) return FALSE;
+      if (!compare_opcodes(code, utf, cb, base_list, base_end)) return FALSE;
       code = next_code + 1 + LINK_SIZE;
       next_code += GET(next_code, 1);
       }
@@ -674,7 +674,7 @@ for(;;)
     /* The bracket content will be checked by the OP_BRA/OP_CBRA case above. */
      
     next_code += 1 + LINK_SIZE;
-    if (!compare_opcodes(next_code, utf, cd, base_list, base_end))
+    if (!compare_opcodes(next_code, utf, cb, base_list, base_end))
       return FALSE;
 
     code += PRIV(OP_lengths)[c];
@@ -686,7 +686,7 @@ for(;;)
 
   /* Check for a supported opcode, and load its properties. */
 
-  code = get_chr_property_list(code, utf, cd->fcc, list);
+  code = get_chr_property_list(code, utf, cb->fcc, list);
   if (code == NULL) return FALSE;    /* Unsupported */
   
   /* If either opcode is a small character list, set pointers for comparing
@@ -755,21 +755,21 @@ for(;;)
       invert_bits = TRUE;
       /* Fall through */
       case OP_DIGIT:
-      set2 = (uint8_t *)(cd->cbits + cbit_digit);
+      set2 = (uint8_t *)(cb->cbits + cbit_digit);
       break;
 
       case OP_NOT_WHITESPACE:
       invert_bits = TRUE;
       /* Fall through */
       case OP_WHITESPACE:
-      set2 = (uint8_t *)(cd->cbits + cbit_space);
+      set2 = (uint8_t *)(cb->cbits + cbit_space);
       break;
 
       case OP_NOT_WORDCHAR:
       invert_bits = TRUE;
       /* Fall through */
       case OP_WORDCHAR:
-      set2 = (uint8_t *)(cd->cbits + cbit_word);
+      set2 = (uint8_t *)(cb->cbits + cbit_word);
       break;
 
       default:
@@ -963,27 +963,27 @@ for(;;)
       set. When it is set, \d etc. are converted into OP_(NOT_)PROP codes. */
 
       case OP_DIGIT:
-      if (chr < 256 && (cd->ctypes[chr] & ctype_digit) != 0) return FALSE;
+      if (chr < 256 && (cb->ctypes[chr] & ctype_digit) != 0) return FALSE;
       break;
 
       case OP_NOT_DIGIT:
-      if (chr > 255 || (cd->ctypes[chr] & ctype_digit) == 0) return FALSE;
+      if (chr > 255 || (cb->ctypes[chr] & ctype_digit) == 0) return FALSE;
       break;
 
       case OP_WHITESPACE:
-      if (chr < 256 && (cd->ctypes[chr] & ctype_space) != 0) return FALSE;
+      if (chr < 256 && (cb->ctypes[chr] & ctype_space) != 0) return FALSE;
       break;
 
       case OP_NOT_WHITESPACE:
-      if (chr > 255 || (cd->ctypes[chr] & ctype_space) == 0) return FALSE;
+      if (chr > 255 || (cb->ctypes[chr] & ctype_space) == 0) return FALSE;
       break;
 
       case OP_WORDCHAR:
-      if (chr < 255 && (cd->ctypes[chr] & ctype_word) != 0) return FALSE;
+      if (chr < 255 && (cb->ctypes[chr] & ctype_word) != 0) return FALSE;
       break;
 
       case OP_NOT_WORDCHAR:
-      if (chr > 255 || (cd->ctypes[chr] & ctype_word) == 0) return FALSE;
+      if (chr > 255 || (cb->ctypes[chr] & ctype_word) == 0) return FALSE;
       break;
 
       case OP_HSPACE:
@@ -1095,13 +1095,13 @@ if appropriate. This function modifies the compiled opcode!
 Arguments:
   code        points to start of the byte code 
   utf         TRUE in UTF mode 
-  cd          compile data block
+  cb          compile data block
 
 Returns:      nothing
 */
 
 void
-PRIV(auto_possessify)(PCRE2_UCHAR *code, BOOL utf, const compile_data *cd)
+PRIV(auto_possessify)(PCRE2_UCHAR *code, BOOL utf, const compile_block *cb)
 {
 register PCRE2_UCHAR c;
 PCRE2_SPTR end;
@@ -1116,10 +1116,10 @@ for (;;)
     {
     c -= get_repeat_base(c) - OP_STAR;
     end = (c <= OP_MINUPTO) ?
-      get_chr_property_list(code, utf, cd->fcc, list) : NULL;
+      get_chr_property_list(code, utf, cb->fcc, list) : NULL;
     list[1] = c == OP_STAR || c == OP_PLUS || c == OP_QUERY || c == OP_UPTO;
 
-    if (end != NULL && compare_opcodes(end, utf, cd, list, end))
+    if (end != NULL && compare_opcodes(end, utf, cb, list, end))
       {
       switch(c)
         {
@@ -1171,11 +1171,11 @@ for (;;)
     if (c >= OP_CRSTAR && c <= OP_CRMINRANGE)
       {
       /* end must not be NULL. */
-      end = get_chr_property_list(code, utf, cd->fcc, list);
+      end = get_chr_property_list(code, utf, cb->fcc, list);
 
       list[1] = (c & 1) == 0;
 
-      if (compare_opcodes(end, utf, cd, list, end))
+      if (compare_opcodes(end, utf, cb, list, end))
         {
         switch (c)
           {

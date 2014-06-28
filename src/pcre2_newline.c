@@ -60,8 +60,10 @@ http://unicode.org/unicode/reports/tr18/. */
 *      Check for newline at given position       *
 *************************************************/
 
-/* It is guaranteed that the initial value of ptr is less than the end of the
-string that is being processed.
+/* This function is called only via the IS_NEWLINE macro, which does so only 
+when the newline type is NLTYPE_ANY or NLTYPE_ANYCRLF. The case of a fixed
+newline (NLTYPE_FIXED) is handled inline. It is guaranteed that the code unit 
+pointed to by ptr is less than the end of the string.
 
 Arguments:
   ptr          pointer to possible newline
@@ -74,27 +76,30 @@ Returns:       TRUE or FALSE
 */
 
 BOOL
-PRIV(is_newline)(PCRE2_SPTR ptr, int type, PCRE2_SPTR endptr, int *lenptr,
-  BOOL utf)
+PRIV(is_newline)(PCRE2_SPTR ptr, uint32_t type, PCRE2_SPTR endptr, 
+  uint32_t *lenptr, BOOL utf)
 {
 uint32_t c;
 
 #ifdef SUPPORT_UTF
-if (utf) { GETCHAR(c, ptr); } else
+if (utf) { GETCHAR(c, ptr); } else c = *ptr;
 #else
 (void)utf;
+c = *ptr;
 #endif  /* SUPPORT_UTF */
-
-  c = *ptr;
-
-/* Note that this function is called only for ANY or ANYCRLF. */
 
 if (type == NLTYPE_ANYCRLF) switch(c)
   {
-  case CHAR_LF: *lenptr = 1; return TRUE;
-  case CHAR_CR: *lenptr = (ptr < endptr - 1 && ptr[1] == CHAR_LF)? 2 : 1;
-               return TRUE;
-  default: return FALSE;
+  case CHAR_LF: 
+  *lenptr = 1; 
+  return TRUE;
+   
+  case CHAR_CR: 
+  *lenptr = (ptr < endptr - 1 && ptr[1] == CHAR_LF)? 2 : 1;
+  return TRUE;
+   
+  default:      
+  return FALSE;
   }
 
 /* NLTYPE_ANY */
@@ -106,7 +111,9 @@ else switch(c)
 #endif
   case CHAR_LF:
   case CHAR_VT:
-  case CHAR_FF: *lenptr = 1; return TRUE;
+  case CHAR_FF: 
+  *lenptr = 1; 
+  return TRUE;
 
   case CHAR_CR:
   *lenptr = (ptr < endptr - 1 && ptr[1] == CHAR_LF)? 2 : 1;
@@ -114,17 +121,26 @@ else switch(c)
 
 #ifndef EBCDIC
 #if PCRE2_CODE_UNIT_WIDTH == 8
-  case CHAR_NEL: *lenptr = utf? 2 : 1; return TRUE;
-  case 0x2028:                                       /* LS */
-  case 0x2029: *lenptr = 3; return TRUE;             /* PS */
+  case CHAR_NEL: 
+  *lenptr = utf? 2 : 1; 
+  return TRUE;
+   
+  case 0x2028:   /* LS */
+  case 0x2029:   /* PS */
+  *lenptr = 3; 
+  return TRUE;             
+   
 #else  /* 16-bit or 32-bit code units */
   case CHAR_NEL:
-  case 0x2028:                                       /* LS */
-  case 0x2029: *lenptr = 1; return TRUE;             /* PS */
+  case 0x2028:   /* LS */
+  case 0x2029:   /* PS */ 
+  *lenptr = 1; 
+  return TRUE;
 #endif
 #endif /* Not EBCDIC */
 
-  default: return FALSE;
+  default: 
+  return FALSE;
   }
 }
 
@@ -134,8 +150,10 @@ else switch(c)
 *     Check for newline at previous position     *
 *************************************************/
 
-/* It is guaranteed that the initial value of ptr is greater than the start of
-the string that is being processed.
+/* This function is called only via the WAS_NEWLINE macro, which does so only
+when the newline type is NLTYPE_ANY or NLTYPE_ANYCRLF. The case of a fixed
+newline (NLTYPE_FIXED) is handled inline. It is guaranteed that the initial
+value of ptr is greater than the start of the string that is being processed.
 
 Arguments:
   ptr          pointer to possible newline
@@ -148,8 +166,8 @@ Returns:       TRUE or FALSE
 */
 
 BOOL
-PRIV(was_newline)(PCRE2_SPTR ptr, int type, PCRE2_SPTR startptr, int *lenptr,
-  BOOL utf)
+PRIV(was_newline)(PCRE2_SPTR ptr, uint32_t type, PCRE2_SPTR startptr, 
+  uint32_t *lenptr, BOOL utf)
 {
 uint32_t c;
 ptr--;
@@ -160,14 +178,11 @@ if (utf)
   BACKCHAR(ptr);
   GETCHAR(c, ptr);
   }
-else
+else c = *ptr;
 #else
 (void)utf;
+c = *ptr;
 #endif  /* SUPPORT_UTF */
-
-  c = *ptr;
-
-/* Note that this function is called only for ANY or ANYCRLF. */
 
 if (type == NLTYPE_ANYCRLF) switch(c)
   {
@@ -175,8 +190,12 @@ if (type == NLTYPE_ANYCRLF) switch(c)
   *lenptr = (ptr > startptr && ptr[-1] == CHAR_CR)? 2 : 1;
   return TRUE;
 
-  case CHAR_CR: *lenptr = 1; return TRUE;
-  default: return FALSE;
+  case CHAR_CR: 
+  *lenptr = 1; 
+  return TRUE;
+   
+  default: 
+  return FALSE;
   }
 
 /* NLTYPE_ANY */
@@ -192,21 +211,32 @@ else switch(c)
 #endif
   case CHAR_VT:
   case CHAR_FF:
-  case CHAR_CR: *lenptr = 1; return TRUE;
+  case CHAR_CR: 
+  *lenptr = 1; 
+  return TRUE;
 
 #ifndef EBCDIC
 #if PCRE2_CODE_UNIT_WIDTH == 8
-  case CHAR_NEL: *lenptr = utf? 2 : 1; return TRUE;
-  case 0x2028:                                       /* LS */
-  case 0x2029: *lenptr = 3; return TRUE;             /* PS */
+  case CHAR_NEL: 
+  *lenptr = utf? 2 : 1; 
+  return TRUE;
+   
+  case 0x2028:   /* LS */
+  case 0x2029:   /* PS */
+  *lenptr = 3; 
+  return TRUE;
+   
 #else /* 16-bit or 32-bit code units */
   case CHAR_NEL:
-  case 0x2028:                                       /* LS */
-  case 0x2029: *lenptr = 1; return TRUE;             /* PS */
+  case 0x2028:   /* LS */
+  case 0x2029:   /* PS */
+  *lenptr = 1; 
+  return TRUE; 
 #endif
 #endif /* Not EBCDIC */
 
-  default: return FALSE;
+  default: 
+  return FALSE;
   }
 }
 

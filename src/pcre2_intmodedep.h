@@ -77,6 +77,7 @@ just to undefine them all. */
 #undef PUT2INC
 #undef PUTCHAR
 #undef PUTINC
+#undef TABLE_GET
 
 
 
@@ -197,8 +198,12 @@ arithmetic results in a signed value. Hence the cast. */
 #define PUT2(a,n,d) a[n] = d  
 #endif
 
-/* Other macros that are different for 8-bit mode. The maximum length of a MARK
-name must fit in one code unit; currently it is set to 255 or 65535. */
+/* Other macros that are different for 8-bit mode. The MAX_255 macro checks
+whether its argument is less than 256. The maximum length of a MARK name must
+fit in one code unit; currently it is set to 255 or 65535. The TABLE_GET macro
+is used to access elements of tables containing exactly 256 items. When code
+points can be greater than 255, a check is needed before accessing these
+tables. */
 
 #if PCRE2_CODE_UNIT_WIDTH == 8
 #define MAX_255(c) TRUE
@@ -206,11 +211,13 @@ name must fit in one code unit; currently it is set to 255 or 65535. */
 #ifdef SUPPORT_UTF
 #define SUPPORT_WIDE_CHARS
 #endif  /* SUPPORT_UTF */
+#define TABLE_GET(c, table, default) ((table)[c])
 
 #else  /* Code units are 16 or 32 bits */
 #define MAX_255(c) ((c) <= 255u)
 #define MAX_MARK ((1u << 16) - 1)
 #define SUPPORT_WIDE_CHARS
+#define TABLE_GET(c, table, default) (MAX_255(c)? ((table)[c]):(default))
 #endif
 
 
@@ -557,7 +564,8 @@ typedef struct pcre2_real_match_context {
   void *    (*stack_malloc)(size_t, void *);
   void      (*stack_free)(void *, void *);
 #endif   
-  int       (*callout)(pcre2_callout_block *, void *);
+  int       (*callout)(pcre2_callout_block *);
+  void      *callout_data; 
   uint16_t  bsr_convention;
   uint16_t  newline_convention;
   uint32_t  match_limit;
@@ -632,7 +640,7 @@ typedef struct named_group {
 /* Structure for passing "static" information around between the functions
 doing the compiling, so that they are thread-safe. */
 
-typedef struct compile_data {
+typedef struct compile_block {
   pcre2_real_compile_context *cx;  /* Points to the compile context */
   const uint8_t *lcc;              /* Points to lower casing table */
   const uint8_t *fcc;              /* Points to case-flipping table */
@@ -643,32 +651,131 @@ typedef struct compile_data {
   PCRE2_SPTR start_pattern;        /* The start of the pattern */
   PCRE2_SPTR end_pattern;          /* The end of the pattern */
   PCRE2_UCHAR *hwm;                /* High watermark of workspace */
+  PCRE2_UCHAR *name_table;         /* The name/number table */
+  size_t workspace_size;           /* Size of workspace */
+  uint16_t names_found;            /* Number of entries so far */
+  uint16_t name_entry_size;        /* Size of each entry */
   open_capitem *open_caps;         /* Chain of open capture items */
   named_group *named_groups;       /* Points to vector in pre-compile */
-  PCRE2_UCHAR *name_table;         /* The name/number table */
-  int  names_found;                /* Number of entries so far */
-  int  name_entry_size;            /* Size of each entry */
-  int  named_group_list_size;      /* Number of entries in the list */
-  int  workspace_size;             /* Size of workspace */
-  unsigned int bracount;           /* Count of capturing parens as we compile */
-  int  final_bracount;             /* Saved value after first pass */
-  int  max_lookbehind;             /* Maximum lookbehind (characters) */
-  int  top_backref;                /* Maximum back reference */
-  unsigned int backref_map;        /* Bitmap of low back refs */
-  unsigned int namedrefcount;      /* Number of backreferences by name */
-  int  parens_depth;               /* Depth of nested parentheses */
-  int  assert_depth;               /* Depth of nested assertions */
+  uint32_t named_group_list_size;  /* Number of entries in the list */
   uint32_t external_options;       /* External (initial) options */
   uint32_t external_flags;         /* External flag bits to be set */
+  uint32_t bracount;               /* Count of capturing parens as we compile */
+  uint32_t final_bracount;         /* Saved value after first pass */
+  uint32_t top_backref;            /* Maximum back reference */
+  uint32_t backref_map;            /* Bitmap of low back refs */
+  uint32_t namedrefcount;          /* Number of backreferences by name */
+  uint32_t nltype;                 /* Newline type */
+  uint32_t nllen;                  /* Newline string length */
+  PCRE2_UCHAR nl[4];               /* Newline string when fixed length */
+  int  max_lookbehind;             /* Maximum lookbehind (characters) */
+  int  parens_depth;               /* Depth of nested parentheses */
+  int  assert_depth;               /* Depth of nested assertions */
   int  req_varyopt;                /* "After variable item" flag for reqbyte */
   BOOL had_accept;                 /* (*ACCEPT) encountered */
   BOOL had_pruneorskip;            /* (*PRUNE) or (*SKIP) encountered */
   BOOL check_lookbehind;           /* Lookbehinds need later checking */
   BOOL dupnames;                   /* Duplicate names exist */
-  int  nltype;                     /* Newline type */
-  int  nllen;                      /* Newline string length */
-  PCRE2_UCHAR nl[4];               /* Newline string when fixed length */
-} compile_data;
+} compile_block;
+
+/* Structure for items in a linked list that represents an explicit recursive
+call within the pattern; used by pcre_match(). */
+
+typedef struct recursion_info {
+  struct recursion_info *prevrec; /* Previous recursion record (or NULL) */
+  unsigned int group_num;         /* Number of group that was called */
+  size_t *offset_save;            /* Pointer to start of saved offsets */
+  uint32_t saved_max;             /* Number of saved offsets */
+  uint32_t saved_capture_last;    /* Last capture number */
+  PCRE2_SPTR subject_position;    /* Position at start of recursion */
+} recursion_info;
+
+/* A similar structure for pcre_dfa_match(). */
+
+typedef struct dfa_recursion_info {
+  struct dfa_recursion_info *prevrec;
+  uint32_t group_num;
+  PCRE2_SPTR subject_position;
+} dfa_recursion_info;
+
+/* Structure for building a chain of data for holding the values of the subject
+pointer at the start of each subpattern, so as to detect when an empty string
+has been matched by a subpattern - to break infinite loops; used by
+pcre2_match(). */
+
+typedef struct eptrblock {
+  struct eptrblock *epb_prev;
+  PCRE2_SPTR epb_saved_eptr;
+} eptrblock;
+
+/* Structure for passing "static" information around between the functions
+doing traditional NFA matching (pcre2_match() and friends). */
+
+typedef struct match_block {
+  pcre2_memctl    memctl;
+  unsigned long int match_call_count;      /* As it says */
+  unsigned long int match_limit;           /* As it says */
+  unsigned long int match_limit_recursion; /* As it says */
+  BOOL hitend;                    /* Hit the end of the subject at some point */
+  BOOL hasthen;                   /* Pattern contains (*THEN) */
+  const uint8_t *lcc;             /* Points to lower casing table */
+  const uint8_t *fcc;             /* Points to case-flipping table */
+  const uint8_t *ctypes;          /* Points to table of type maps */
+  size_t *ovector;                /* Pointer to the offset vector */
+  size_t offset_end;              /* One past the end */
+  size_t offset_max;              /* The maximum usable for return data */
+  size_t start_offset;            /* The start offset value */
+  size_t end_offset_top;          /* Highwater mark at end of match */
+  uint16_t partial;               /* PARTIAL options */
+  uint16_t bsr_convention;        /* \R interpretation */
+  uint16_t name_count;            /* Number of names in name table */
+  uint16_t name_entry_size;       /* Size of entry in names table */
+  PCRE2_SPTR name_table;          /* Table of group names */
+  PCRE2_SPTR start_code;          /* For use when recursing */
+  PCRE2_SPTR start_subject;       /* Start of the subject string */
+  PCRE2_SPTR end_subject;         /* End of the subject string */
+  PCRE2_SPTR start_match_ptr;     /* Start of matched string */
+  PCRE2_SPTR end_match_ptr;       /* Subject position at end match */
+  PCRE2_SPTR start_used_ptr;      /* Earliest consulted character */
+  PCRE2_SPTR mark;                /* Mark pointer to pass back on success */
+  PCRE2_SPTR nomatch_mark;        /* Mark pointer to pass back on failure */
+  PCRE2_SPTR once_target;         /* Where to back up to for atomic groups */
+  uint32_t moptions;              /* Match options */
+  uint32_t poptions;              /* Pattern options */
+  uint32_t capture_last;          /* Most recent capture number + overflow flag */
+  uint32_t skip_arg_count;        /* For counting SKIP_ARGs */
+  uint32_t ignore_skip_arg;       /* For re-run when SKIP arg name not found */
+  uint32_t match_function_type;   /* Set for certain special calls of match() */
+  uint32_t nltype;                /* Newline type */
+  uint32_t nllen;                 /* Newline string length */
+  PCRE2_UCHAR nl[4];              /* Newline string when fixed */
+  eptrblock *eptrchain;           /* Chain of eptrblocks for tail recursions */
+  recursion_info *recursive;      /* Linked list of recursion data */
+  void  *callout_data;            /* To pass back to callouts */
+  int (*callout)(pcre2_callout_block *);  /* Callout function or NULL */
+#ifdef NO_RECURSE
+  void  *match_frames_base;       /* For remembering malloc'd frames */
+#endif
+} match_block;
+
+/* A similar structure is used for the same purpose by the DFA matching
+functions. */
+
+typedef struct dfa_match_block {
+  PCRE2_SPTR start_code;            /* Start of the compiled pattern */
+  PCRE2_SPTR start_subject ;        /* Start of the subject string */
+  PCRE2_SPTR end_subject;           /* End of subject string */
+  PCRE2_SPTR start_used_ptr;        /* Earliest consulted character */
+  const uint8_t *tables;            /* Character tables */
+  int   start_offset;               /* The start offset value */
+  uint32_t   moptions;                   /* Match options */
+  uint32_t   poptions;                   /* Pattern options */
+  int   nltype;                     /* Newline type */
+  int   nllen;                      /* Newline string length */
+  PCRE2_UCHAR nl[4];                /* Newline string when fixed */
+  void *callout_data;               /* To pass back to callouts */
+  dfa_recursion_info *recursive;    /* Linked list of recursion data */
+} dfa_match_block;
 
 #endif  /* PCRE2_PCRE2TEST */
 

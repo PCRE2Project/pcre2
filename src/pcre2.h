@@ -215,7 +215,6 @@ must all be greater than zero. */
 #define PCRE2_ERROR_NULL            (-50)
 #define PCRE2_ERROR_RECURSELOOP     (-51)
 #define PCRE2_ERROR_RECURSIONLIMIT  (-52)
-#define PCRE2_ERROR_UNSET           (-53)
 
 /* Request types for pcre2_pattern_info() */
 
@@ -309,17 +308,17 @@ typedef struct pcre2_callout_block { \
   int          version;           /* Identifies version of block */ \
   /* ------------------------ Version 0 ------------------------------- */ \
   int          callout_number;    /* Number compiled into pattern */ \
-  int         *offset_vector;     /* The offset vector */ \
+  size_t      *offset_vector;     /* The offset vector */ \
   PCRE2_SPTR   subject;           /* The subject being matched */ \
-  int          subject_length;    /* The length of the subject */ \
-  int          start_match;       /* Offset to start of this match attempt */ \
-  int          current_position;  /* Where we currently are in the subject */ \
-  int          capture_top;       /* Max current capture */ \
-  int          capture_last;      /* Most recently closed capture */ \
+  size_t       subject_length;    /* The length of the subject */ \
+  size_t       start_match;       /* Offset to start of this match attempt */ \
+  size_t       current_position;  /* Where we currently are in the subject */ \
+  uint32_t     capture_top;       /* Max current capture */ \
+  uint32_t     capture_last;      /* Most recently closed capture */ \
   void        *callout_data;      /* Data passed in with the call */ \
   /* ------------------- Added for Version 1 -------------------------- */ \
-  int          pattern_position;  /* Offset to next item in the pattern */ \
-  int          next_item_length;  /* Length of next item in the pattern */ \
+  size_t       pattern_position;  /* Offset to next item in the pattern */ \
+  size_t       next_item_length;  /* Length of next item in the pattern */ \
   /* ------------------- Added for Version 2 -------------------------- */ \
   PCRE2_SPTR   mark;              /* Pointer to current mark or NULL    */ \
   /* ------------------------------------------------------------------ */ \
@@ -381,7 +380,7 @@ PCRE2_EXP_DECL void      pcre2_match_context_free(pcre2_match_context *); \
 PCRE2_EXP_DECL int       pcre2_set_bsr_match(pcre2_match_context *, \
                            uint32_t); \
 PCRE2_EXP_DECL int       pcre2_set_callout(pcre2_match_context *, \
-                           int (*)(pcre2_callout_block *, void *)); \
+                           int (*)(pcre2_callout_block *), void *); \
 PCRE2_EXP_DECL int       pcre2_set_match_limit(pcre2_match_context *, \
                            uint32_t); \
 PCRE2_EXP_DECL int       pcre2_set_newline_match(pcre2_match_context *, \

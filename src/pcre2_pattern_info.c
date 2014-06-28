@@ -150,7 +150,6 @@ switch(what)
   break;
 
   case PCRE2_INFO_MATCHLIMIT:
-  if ((re->flags & PCRE2_MLSET) == 0) return PCRE2_ERROR_UNSET;
   *((uint32_t *)where) = re->limit_match;
   break;
 
@@ -179,7 +178,6 @@ switch(what)
   break;
 
   case PCRE2_INFO_RECURSIONLIMIT:
-  if ((re->flags & PCRE2_RLSET) == 0) return PCRE2_ERROR_UNSET;
   *((uint32_t *)where) = re->limit_recursion;
   break;
 

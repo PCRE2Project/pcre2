@@ -2632,7 +2632,7 @@ pattern_info(int what, void *where)
 {
 int rc;
 PCRE2_PATTERN_INFO(rc, compiled_code, what, where);
-if (rc >= 0 || rc == PCRE2_ERROR_UNSET) return 0;
+if (rc >= 0) return 0;
 fprintf(outfile, "Error %d from pcre2_pattern_info_%d(%d)\n", rc, test_mode,
   what);
 if (rc == PCRE2_ERROR_BADMODE)
@@ -2831,7 +2831,7 @@ if ((pat_patctl.control & CTL_INFO) != 0)
   int nameentrysize, namecount;
   uint32_t bsr_convention, newline_convention;
   uint32_t first_cunit, last_cunit;
-  uint32_t match_limit = 0, recursion_limit = 0;
+  uint32_t match_limit, recursion_limit;
 
   /* These info requests should always succeed. */
 
@@ -2865,10 +2865,10 @@ if ((pat_patctl.control & CTL_INFO) != 0)
   if (maxlookbehind > 0)
     fprintf(outfile, "Max lookbehind = %d\n", maxlookbehind);
 
-  if (match_limit > 0)
+  if (match_limit != UINT32_MAX)
     fprintf(outfile, "Match limit = %u\n", match_limit);
 
-  if (recursion_limit > 0)
+  if (recursion_limit != UINT32_MAX)
     fprintf(outfile, "Recursion limit = %u\n", recursion_limit);
 
   if (namecount > 0)

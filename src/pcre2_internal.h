@@ -522,9 +522,7 @@ bytes in a code unit in that mode. */
 #define PCRE2_JCHANGED      0x00000400  /* j option used in pattern */
 #define PCRE2_HASCRORLF     0x00000800  /* explicit \r or \n in pattern */
 #define PCRE2_HASTHEN       0x00001000  /* pattern contains (*THEN) */
-#define PCRE2_MLSET         0x00002000  /* match limit set by pattern */
-#define PCRE2_RLSET         0x00004000  /* recursion limit set by pattern */
-#define PCRE2_MATCH_EMPTY   0x00008000  /* pattern can match empty string */
+#define PCRE2_MATCH_EMPTY   0x00002000  /* pattern can match empty string */
 
 #define PCRE2_MODE_MASK     (PCRE2_MODE8 | PCRE2_MODE16 | PCRE2_MODE32)
 
@@ -540,7 +538,7 @@ endianness. */
 /* The maximum remaining length of subject we are prepared to search for a
 req_unit match. */
 
-#define REQ_UNIT_MAX 1000
+#define REQ_CU_MAX 1000
 
 /* Bit definitions for entries in the pcre_ctypes table. */
 
@@ -1816,8 +1814,10 @@ compiling the library, PCRE2_CODE_UNIT_WIDTH will be defined, and we can
 include them at the appropriate width, after setting up suffix macros for the
 private structures. */
 
-#define compile_data                 PCRE2_SUFFIX(compile_data_)
 #define branch_chain                 PCRE2_SUFFIX(branch_chain_)
+#define compile_block                PCRE2_SUFFIX(compile_block_)
+#define dfa_match_block              PCRE2_SUFFIX(dfa_match_block_)
+#define match_block                  PCRE2_SUFFIX(match_block_)
 #define named_group                  PCRE2_SUFFIX(named_group_)
 
 #include "pcre2_intmodedep.h"
@@ -1845,10 +1845,11 @@ is available. */
 #define _pcre2_was_newline           PCRE2_SUFFIX(_pcre2_was_newline_)
 #define _pcre2_xclass                PCRE2_SUFFIX(_pcre2_xclass_)
 
-extern void  _pcre2_auto_possessify(PCRE2_UCHAR *, BOOL, const compile_data *);
+extern void  _pcre2_auto_possessify(PCRE2_UCHAR *, BOOL, const compile_block *);
 extern void  _pcre2_compile_context_init(pcre2_compile_context *, BOOL);
 extern PCRE2_SPTR _pcre2_find_bracket(PCRE2_SPTR, BOOL, int);
-extern BOOL  _pcre2_is_newline(PCRE2_SPTR, int, PCRE2_SPTR, int *, BOOL);
+extern BOOL  _pcre2_is_newline(PCRE2_SPTR, uint32_t, PCRE2_SPTR, uint32_t *, 
+               BOOL);
 extern void  _pcre2_match_context_init(pcre2_match_context *, BOOL);
 extern void  *_pcre2_memctl_malloc(size_t, size_t, pcre2_memctl *);
 extern unsigned int _pcre2_ord2utf(uint32_t, PCRE2_UCHAR *);
@@ -1859,7 +1860,8 @@ extern int   _pcre2_strncmp(PCRE2_SPTR, PCRE2_SPTR, size_t);
 extern int   _pcre2_strncmp_c8(PCRE2_SPTR, const char *, size_t);
 extern int   _pcre2_study(pcre2_real_code *);
 extern int   _pcre2_valid_utf(PCRE2_SPTR, int, size_t *);
-extern BOOL  _pcre2_was_newline(PCRE2_SPTR, int, PCRE2_SPTR, int *, BOOL);
+extern BOOL  _pcre2_was_newline(PCRE2_SPTR, uint32_t, PCRE2_SPTR, uint32_t *, 
+               BOOL);
 extern BOOL  _pcre2_xclass(uint32_t, PCRE2_SPTR, BOOL);
 #endif  /* PCRE2_CODE_UNIT_WIDTH */
 
