@@ -691,12 +691,12 @@ pattern.
       callout_none              do not supply a callout function
       copy=<number or name>     copy captured substring
       dfa                       use \fBpcre2_dfa_match()\fP
+      find_limits               find match and recursion limits
       get=<number or name>      extract captured substring
       getall                    extract all captured substrings
   /g  global                    global matching
       jitstack=<n>              set size of JIT stack
       jitverify                 verify JIT usage
-      limits                    find match and recursion limits
       mark                      show mark values
       match_limit=>n>           set a match limit
       memory                    show memory usage
@@ -816,14 +816,14 @@ default 32K is necessary only for very complicated patterns.
 .rs
 .sp
 The \fBmatch_limit\fP and \fBrecursion_limit\fP modifiers set the appropriate 
-limits in the match context. These values are ignored when the \fBlimits\fP 
-modifier is specified.
+limits in the match context. These values are ignored when the
+\fBfind_limits\fP modifier is specified.
 .
 .
 .SS "Finding minimum limits"
 .rs
 .sp
-If the \fBlimits\fP modifier is present, \fBpcre2test\fP calls
+If the \fBfind_limits\fP modifier is present, \fBpcre2test\fP calls
 \fBpcre2_match()\fP several times, setting different values in the match
 context via \fBpcre2_set_match_limit()\fP and \fBpcre2_set_recursion_limit()\fP
 until it finds the minimum values for each parameter that allow
