@@ -307,7 +307,7 @@ versions are generated from this macro below. */
 typedef struct pcre2_callout_block { \
   int          version;           /* Identifies version of block */ \
   /* ------------------------ Version 0 ------------------------------- */ \
-  int          callout_number;    /* Number compiled into pattern */ \
+  uint32_t     callout_number;    /* Number compiled into pattern */ \
   size_t      *offset_vector;     /* The offset vector */ \
   PCRE2_SPTR   subject;           /* The subject being matched */ \
   size_t       subject_length;    /* The length of the subject */ \

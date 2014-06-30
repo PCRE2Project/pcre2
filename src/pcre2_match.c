@@ -6336,7 +6336,7 @@ else
   {    
   mb->memctl = mcontext->memctl; 
   mb->callout = mcontext->callout;
-  mb->callout_data = NULL;    /* FIXME */
+  mb->callout_data = mcontext->callout_data;
   } 
 
 mb->start_subject = subject;

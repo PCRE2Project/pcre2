@@ -1,4 +1,4 @@
-.TH PCRE2TEST 1 "24 June 2014" "PCRE 10.00"
+.TH PCRE2TEST 1 "30 June 2014" "PCRE 10.00"
 .SH NAME
 pcre2test - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -686,7 +686,8 @@ pattern.
   /gg altglobal                 alternative global matching
       bsr=[anycrlf|unicode]     specify \eR handling
       callout_capture           show captures at callout time
-      callout_fail=<n>[,<m>]    control callout failure
+      callout_data=<n>          set a value to pass via callouts 
+      callout_fail=<n>[:<m>]    control callout failure
       callout_none              do not supply a callout function
       copy=<number or name>     copy captured substring
       dfa                       use \fBpcre2_dfa_match()\fP
@@ -748,7 +749,11 @@ set, the current captured groups are output when a callout occurs.
 The \fBcallout_fail\fP modifier can be given one or two numbers. If there is 
 only one number, 1 is returned instead of 0 when a callout of that number is 
 reached. If two numbers are given, 1 is returned when callout <n> is reached 
-for the <m>th time. FIXME: this needs checking. Disable by m=0?
+for the <m>th time.
+.P
+The \fBcallout_data\fP modifier can be given an unsigned or a negative number. 
+Any value other than zero is used as a return from \fBpcre2test\fP's callout 
+function.
 .
 .
 .SS "Testing substring extraction functions"
@@ -1200,6 +1205,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 24 June 2014
+Last updated: 30 June 2014
 Copyright (c) 1997-2014 University of Cambridge.
 .fi
