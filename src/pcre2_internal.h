@@ -1859,7 +1859,7 @@ extern int   _pcre2_strlen(PCRE2_SPTR);
 extern int   _pcre2_strncmp(PCRE2_SPTR, PCRE2_SPTR, size_t);
 extern int   _pcre2_strncmp_c8(PCRE2_SPTR, const char *, size_t);
 extern int   _pcre2_study(pcre2_real_code *);
-extern int   _pcre2_valid_utf(PCRE2_SPTR, int, size_t *);
+extern int   _pcre2_valid_utf(PCRE2_SPTR, int, PCRE2_OFFSET *);
 extern BOOL  _pcre2_was_newline(PCRE2_SPTR, uint32_t, PCRE2_SPTR, uint32_t *, 
                BOOL);
 extern BOOL  _pcre2_xclass(uint32_t, PCRE2_SPTR, BOOL);

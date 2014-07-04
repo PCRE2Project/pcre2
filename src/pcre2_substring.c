@@ -322,10 +322,11 @@ pcre2_substring_list_get(pcre2_match_data *match_data, PCRE2_UCHAR ***listptr,
 {
 int i, count, count2;
 size_t size;
-size_t *lensp, *ovector;
+size_t *lensp;
 pcre2_memctl *memp;
 PCRE2_UCHAR **listp;
 PCRE2_UCHAR *sp;
+PCRE2_OFFSET *ovector;
 
 if ((count = match_data->rc) < 0) return count;
 

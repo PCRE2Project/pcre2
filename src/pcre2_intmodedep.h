@@ -559,10 +559,9 @@ typedef struct pcre2_real_compile_context {
 /* The real match context structure. */
 
 typedef struct pcre2_real_match_context {
-  pcre2_memctl    memctl;
+  pcre2_memctl  memctl;
 #ifdef NO_RECURSE
-  void *    (*stack_malloc)(size_t, void *);
-  void      (*stack_free)(void *, void *);
+  pcre2_memctl  stack_memctl;
 #endif   
   int       (*callout)(pcre2_callout_block *);
   void      *callout_data; 
@@ -605,12 +604,12 @@ typedef struct pcre2_real_match_data {
   const pcre2_real_code *code;    /* The pattern used for the match */
   PCRE2_SPTR       subject;       /* The subject that was matched */
   int              rc;            /* The return code from the match */
-  size_t           leftchar;      /* Offset to leftmost code unit */
-  size_t           rightchar;     /* Offset to rightmost code unit */
-  size_t           startchar;     /* Offset to starting code unit */  
+  PCRE2_OFFSET     leftchar;      /* Offset to leftmost code unit */
+  PCRE2_OFFSET     rightchar;     /* Offset to rightmost code unit */
+  PCRE2_OFFSET     startchar;     /* Offset to starting code unit */  
   PCRE2_SPTR       mark;          /* Pointer to last mark */  
   uint16_t         oveccount;     /* Number of pairs */
-  size_t           ovector[1];    /* The first field */ 
+  PCRE2_OFFSET     ovector[1];    /* The first field */ 
 } pcre2_real_match_data;
 
 
@@ -684,7 +683,7 @@ call within the pattern; used by pcre_match(). */
 typedef struct recursion_info {
   struct recursion_info *prevrec; /* Previous recursion record (or NULL) */
   unsigned int group_num;         /* Number of group that was called */
-  size_t *offset_save;            /* Pointer to start of saved offsets */
+  PCRE2_OFFSET *offset_save;      /* Pointer to start of saved offsets */
   uint32_t saved_max;             /* Number of saved offsets */
   uint32_t saved_capture_last;    /* Last capture number */
   PCRE2_SPTR subject_position;    /* Position at start of recursion */
@@ -694,8 +693,8 @@ typedef struct recursion_info {
 
 typedef struct dfa_recursion_info {
   struct dfa_recursion_info *prevrec;
-  uint32_t group_num;
   PCRE2_SPTR subject_position;
+  uint32_t group_num;
 } dfa_recursion_info;
 
 /* Structure for building a chain of data for holding the values of the subject
@@ -712,20 +711,23 @@ typedef struct eptrblock {
 doing traditional NFA matching (pcre2_match() and friends). */
 
 typedef struct match_block {
-  pcre2_memctl    memctl;
-  unsigned long int match_call_count;      /* As it says */
-  unsigned long int match_limit;           /* As it says */
-  unsigned long int match_limit_recursion; /* As it says */
+  pcre2_memctl memctl;            /* For general use */
+#ifdef NO_RECURSE
+  pcre2_memctl stack_memctl;      /* For "stack" frames */
+#endif      
+  uint32_t match_call_count;      /* As it says */
+  uint32_t match_limit;           /* As it says */
+  uint32_t match_limit_recursion; /* As it says */
   BOOL hitend;                    /* Hit the end of the subject at some point */
   BOOL hasthen;                   /* Pattern contains (*THEN) */
   const uint8_t *lcc;             /* Points to lower casing table */
   const uint8_t *fcc;             /* Points to case-flipping table */
   const uint8_t *ctypes;          /* Points to table of type maps */
-  size_t *ovector;                /* Pointer to the offset vector */
-  size_t offset_end;              /* One past the end */
-  size_t offset_max;              /* The maximum usable for return data */
-  size_t start_offset;            /* The start offset value */
-  size_t end_offset_top;          /* Highwater mark at end of match */
+  PCRE2_OFFSET *ovector;          /* Pointer to the offset vector */
+  PCRE2_OFFSET offset_end;        /* One past the end */
+  PCRE2_OFFSET offset_max;        /* The maximum usable for return data */
+  PCRE2_OFFSET start_offset;      /* The start offset value */
+  PCRE2_OFFSET end_offset_top;    /* Highwater mark at end of match */
   uint16_t partial;               /* PARTIAL options */
   uint16_t bsr_convention;        /* \R interpretation */
   uint16_t name_count;            /* Number of names in name table */
@@ -768,8 +770,8 @@ typedef struct dfa_match_block {
   PCRE2_SPTR start_used_ptr;        /* Earliest consulted character */
   const uint8_t *tables;            /* Character tables */
   int   start_offset;               /* The start offset value */
-  uint32_t   moptions;                   /* Match options */
-  uint32_t   poptions;                   /* Pattern options */
+  uint32_t moptions;                /* Match options */
+  uint32_t poptions;                /* Pattern options */
   int   nltype;                     /* Newline type */
   int   nllen;                      /* Newline string length */
   PCRE2_UCHAR nl[4];                /* Newline string when fixed */

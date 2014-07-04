@@ -52,10 +52,10 @@ POSSIBILITY OF SUCH DAMAGE.
 *************************************************/
 
 PCRE2_EXP_DEFN pcre2_match_data * PCRE2_CALL_CONVENTION
-pcre2_match_data_create(size_t oveccount, pcre2_general_context *gcontext)
+pcre2_match_data_create(uint32_t oveccount, pcre2_general_context *gcontext)
 {
 pcre2_match_data *yield = PRIV(memctl_malloc)(
-  sizeof(pcre2_match_data) + 3*oveccount*sizeof(size_t),
+  sizeof(pcre2_match_data) + 3*oveccount*sizeof(PCRE2_OFFSET),
   offsetof(pcre2_real_match_data, memctl), &(gcontext->memctl));
 yield->oveccount = oveccount;
 return yield;
@@ -94,7 +94,7 @@ if (match_data != NULL)
 *         Get left-most code unit in match       *
 *************************************************/
 
-PCRE2_EXP_DEFN size_t PCRE2_CALL_CONVENTION
+PCRE2_EXP_DEFN PCRE2_OFFSET PCRE2_CALL_CONVENTION
 pcre2_get_leftchar(pcre2_match_data *match_data)
 {
 return match_data->leftchar;
@@ -118,7 +118,7 @@ return match_data->mark;
 *          Get pointer to ovector                *
 *************************************************/
 
-PCRE2_EXP_DEFN size_t * PCRE2_CALL_CONVENTION
+PCRE2_EXP_DEFN PCRE2_OFFSET * PCRE2_CALL_CONVENTION
 pcre2_get_ovector_pointer(pcre2_match_data *match_data)
 {
 return match_data->ovector;
@@ -130,7 +130,7 @@ return match_data->ovector;
 *          Get number of ovector slots           *
 *************************************************/
 
-PCRE2_EXP_DEFN size_t PCRE2_CALL_CONVENTION
+PCRE2_EXP_DEFN uint32_t PCRE2_CALL_CONVENTION
 pcre2_get_ovector_count(pcre2_match_data *match_data)
 {
 return match_data->oveccount;
@@ -142,7 +142,7 @@ return match_data->oveccount;
 *         Get right-most code unit in match      *
 *************************************************/
 
-PCRE2_EXP_DEFN size_t PCRE2_CALL_CONVENTION
+PCRE2_EXP_DEFN PCRE2_OFFSET PCRE2_CALL_CONVENTION
 pcre2_get_rightchar(pcre2_match_data *match_data)
 {
 return match_data->rightchar;
@@ -154,7 +154,7 @@ return match_data->rightchar;
 *         Get starting code unit in match        *
 *************************************************/
 
-PCRE2_EXP_DEFN size_t PCRE2_CALL_CONVENTION
+PCRE2_EXP_DEFN PCRE2_OFFSET PCRE2_CALL_CONVENTION
 pcre2_get_startchar(pcre2_match_data *match_data)
 {
 return match_data->startchar;

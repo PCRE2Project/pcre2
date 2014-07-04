@@ -205,7 +205,7 @@ Returns:      0 on success
 PCRE2POSIX_EXP_DEFN int PCRE2_CALL_CONVENTION
 regcomp(regex_t *preg, const char *pattern, int cflags)
 {
-size_t erroffset;
+PCRE2_OFFSET erroffset;
 int errorcode;
 int options = 0;
 int re_nsub = 0;

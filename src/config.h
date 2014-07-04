@@ -175,7 +175,7 @@ sure both macros are undefined; an emulation function will then be used. */
    recursion in the match() function; instead it creates its own stack by
    steam using memory from the heap. For more detail, see the comments and
    other stuff just above the match() function. */
-/* #undef NO_RECURSE */
+#define NO_RECURSE /**/
 
 /* Name of package */
 #define PACKAGE "pcre2"

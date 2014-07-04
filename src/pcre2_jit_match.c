@@ -71,7 +71,7 @@ Returns:          > 0 => success; value is the number of ovector pairs filled
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_jit_match(const pcre2_code *code, PCRE2_SPTR subject, int length, 
-  size_t start_offset, uint32_t options, pcre2_match_data *match_data, 
+  PCRE2_OFFSET start_offset, uint32_t options, pcre2_match_data *match_data, 
   pcre2_jit_stack *jit_stack)
 {
 #ifndef SUPPORT_JIT

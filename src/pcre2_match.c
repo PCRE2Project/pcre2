@@ -144,7 +144,7 @@ register PCRE2_SPTR p = mb->start_subject + mb->ovector[offset];
 BOOL utf = (mb->poptions & PCRE2_UTF) != 0;
 #endif
 
-/* Always fail if reference not set (unless PCRE2_MATCH_UNSET_BACKREF is set, 
+/* Always fail if reference not set (unless PCRE2_MATCH_UNSET_BACKREF is set,
 in which case the length is passed as zero). */
 
 if (length < 0) return -1;
@@ -292,7 +292,8 @@ argument of match(), which never changes. */
   heapframe *newframe = frame->Xnextframe;\
   if (newframe == NULL)\
     {\
-    newframe = (heapframe *)(PUBL(stack_malloc))(sizeof(heapframe));\
+    newframe = (heapframe *)(mb->stack_memctl.malloc)\
+      (sizeof(heapframe), mb->stack_memctl.memory_data);\
     if (newframe == NULL) RRETURN(PCRE2_ERROR_NOMEMORY);\
     newframe->Xnextframe = NULL;\
     frame->Xnextframe = newframe;\
@@ -307,7 +308,7 @@ argument of match(), which never changes. */
   newframe->Xprevframe = frame;\
   frame = newframe;\
   goto HEAP_RECURSE;\
-  L_##rw:\
+  L_##rw:;\
   }
 
 #define RRETURN(ra)\
@@ -323,67 +324,64 @@ argument of match(), which never changes. */
   }
 
 
-/* Structure for remembering the local variables in a private frame */
+/* Structure for remembering the local variables in a private frame. Arrange it 
+so as to minimize the number of holes. */
 
 typedef struct heapframe {
   struct heapframe *Xprevframe;
   struct heapframe *Xnextframe;
 
-  /* Function arguments that may change */
-
-  PCRE2_SPTR Xeptr;
-  PCRE2_SPTR Xecode;
-  PCRE2_SPTR Xmstart;
-  int Xoffset_top;
-  eptrblock *Xeptrb;
-  unsigned int Xrdepth;
-
-  /* Function local variables */
-
-  PCRE2_SPTR Xcallpat;
 #ifdef SUPPORT_UTF
   PCRE2_SPTR Xcharptr;
 #endif
+  PCRE2_SPTR Xeptr;
+  PCRE2_SPTR Xecode;
+  PCRE2_SPTR Xmstart;
+  PCRE2_SPTR Xcallpat;
   PCRE2_SPTR Xdata;
   PCRE2_SPTR Xnext;
   PCRE2_SPTR Xpp;
   PCRE2_SPTR Xprev;
   PCRE2_SPTR Xsaved_eptr;
+  
+  eptrblock *Xeptrb;
 
-  recursion_info Xnew_recursive;
+  PCRE2_OFFSET Xoffset;
+  PCRE2_OFFSET Xoffset_top;
+  PCRE2_OFFSET Xstacksave[REC_STACK_SAVE_MAX];
+  PCRE2_OFFSET Xsave_offset1, Xsave_offset2, Xsave_offset3;
 
-  BOOL Xcur_is_word;
-  BOOL Xcondition;
-  BOOL Xprev_is_word;
-
+  uint32_t Xfc;
+  uint32_t Xnumber;
+  uint32_t Xrdepth;
+  uint32_t Xop;
+  uint32_t Xsave_capture_last;
+ 
 #ifdef SUPPORT_UTF
+  uint32_t Xprop_value;
   int Xprop_type;
-  unsigned int Xprop_value;
   int Xprop_fail_result;
   int Xoclength;
-  PCRE2_UCHAR Xocchars[6];
 #endif
 
   int Xcodelink;
   int Xctype;
-  unsigned int Xfc;
   int Xfi;
   int Xlength;
   int Xmax;
   int Xmin;
-  unsigned int Xnumber;
-  int Xoffset;
-  unsigned int Xop;
-  uint32_t Xsave_capture_last;
-  int Xsave_offset1, Xsave_offset2, Xsave_offset3;
-  size_t Xstacksave[REC_STACK_SAVE_MAX];
+  int Xwhere;    /* Where to jump back to */
+
+  BOOL Xcondition;
+  BOOL Xcur_is_word;
+  BOOL Xprev_is_word;
 
   eptrblock Xnewptrb;
+  recursion_info Xnew_recursive;
 
-  /* Where to jump back to */
-
-  int Xwhere;
-
+#ifdef SUPPORT_UTF
+  PCRE2_UCHAR Xocchars[6];
+#endif   
 } heapframe;
 
 #endif
@@ -450,8 +448,8 @@ Returns:       MATCH_MATCH if matched            )  these values are >= 0
 
 static int
 match(REGISTER PCRE2_SPTR eptr, REGISTER PCRE2_SPTR ecode,
-  PCRE2_SPTR mstart, size_t offset_top, match_block *mb, eptrblock *eptrb,
-  unsigned int rdepth)
+  PCRE2_SPTR mstart, PCRE2_OFFSET offset_top, match_block *mb, eptrblock *eptrb,
+  uint32_t rdepth)
 {
 /* These variables do not need to be preserved over recursion in this function,
 so they can be ordinary variables in all cases. Mark some of them with
@@ -459,7 +457,7 @@ so they can be ordinary variables in all cases. Mark some of them with
 
 register int  rrc;         /* Returns from recursive calls */
 register int  i;           /* Used for loops not involving calls to RMATCH() */
-register uint32_t c;    /* Character values not kept over RMATCH() calls */
+register uint32_t c;       /* Character values not kept over RMATCH() calls */
 register BOOL utf;         /* Local copy of UTF flag for speed */
 
 BOOL minimize, possessive; /* Quantifier options */
@@ -502,7 +500,14 @@ HEAP_RECURSE:
 
 #ifdef SUPPORT_UTF
 #define charptr            frame->Xcharptr
+#define prop_value         frame->Xprop_value
+#define prop_type          frame->Xprop_type
+#define prop_fail_result   frame->Xprop_fail_result
+#define oclength           frame->Xoclength
+#define occhars            frame->Xocchars
 #endif
+
+
 #define callpat            frame->Xcallpat
 #define codelink           frame->Xcodelink
 #define data               frame->Xdata
@@ -512,18 +517,6 @@ HEAP_RECURSE:
 #define saved_eptr         frame->Xsaved_eptr
 
 #define new_recursive      frame->Xnew_recursive
-
-#define cur_is_word        frame->Xcur_is_word
-#define condition          frame->Xcondition
-#define prev_is_word       frame->Xprev_is_word
-
-#ifdef SUPPORT_UTF
-#define prop_type          frame->Xprop_type
-#define prop_value         frame->Xprop_value
-#define prop_fail_result   frame->Xprop_fail_result
-#define oclength           frame->Xoclength
-#define occhars            frame->Xocchars
-#endif
 
 #define ctype              frame->Xctype
 #define fc                 frame->Xfc
@@ -539,6 +532,10 @@ HEAP_RECURSE:
 #define save_offset2       frame->Xsave_offset2
 #define save_offset3       frame->Xsave_offset3
 #define stacksave          frame->Xstacksave
+
+#define condition          frame->Xcondition
+#define cur_is_word        frame->Xcur_is_word
+#define prev_is_word       frame->Xprev_is_word
 
 #define newptrb            frame->Xnewptrb
 
@@ -564,19 +561,21 @@ PCRE2_SPTR charptr;
 PCRE2_SPTR callpat;
 PCRE2_SPTR data;
 PCRE2_SPTR next;
-PCRE2_SPTR       pp;
+PCRE2_SPTR pp;
 PCRE2_SPTR prev;
-PCRE2_SPTR       saved_eptr;
+PCRE2_SPTR saved_eptr;
 
-recursion_info new_recursive;
+PCRE2_OFFSET offset;
+PCRE2_OFFSET stacksave[REC_STACK_SAVE_MAX];
+PCRE2_OFFSET save_offset1, save_offset2, save_offset3;
 
-BOOL cur_is_word;
-BOOL condition;
-BOOL prev_is_word;
+uint32_t number;
+uint32_t op;
+uint32_t save_capture_last;
 
 #ifdef SUPPORT_UTF
+uint32_t prop_value;
 int prop_type;
-unsigned int prop_value;
 int prop_fail_result;
 int oclength;
 PCRE2_UCHAR occhars[6];
@@ -587,32 +586,14 @@ int ctype;
 int length;
 int max;
 int min;
-unsigned int number;
-size_t offset;
-unsigned int op;
-uint32_t save_capture_last;
-int save_offset1, save_offset2, save_offset3;
-size_t stacksave[REC_STACK_SAVE_MAX];
+
+BOOL condition;
+BOOL cur_is_word;
+BOOL prev_is_word;
 
 eptrblock newptrb;
-
-/* There is a special fudge for calling match() in a way that causes it to
-measure the size of its basic stack frame when the stack is being used for
-recursion. The second argument (ecode) being NULL triggers this behaviour. It
-cannot normally ever be NULL. The return is the negated value of the frame
-size. */
-
-if (ecode == NULL)
-  {
-  if (rdepth == 0)
-    return match((PCRE2_SPTR)&rdepth, NULL, NULL, 0, NULL, NULL, 1);
-  else
-    {
-    int len = (char *)&rdepth - (char *)eptr;
-    return (len > 0)? -len : len;
-    }
-  }
-#endif     /* NO_RECURSE */
+recursion_info new_recursive;
+#endif  /* NO_RECURSE not defined */
 
 /* To save space on the stack and in the heap frame, I have doubled up on some
 of the local variables that are used only in localised parts of the code, but
@@ -1248,7 +1229,7 @@ for (;;)
       case OP_RREF:         /* Numbered group recursion test */
       if (mb->recursive != NULL)     /* Not recursing => FALSE */
         {
-        unsigned int recno = GET2(ecode, 1);   /* Recursion group number*/
+        uint32_t recno = GET2(ecode, 1);   /* Recursion group number*/
         condition = (recno == RREF_ANY || recno == mb->recursive->group_num);
         }
       break;
@@ -1260,7 +1241,7 @@ for (;;)
         PCRE2_SPTR slot = mb->name_table + GET2(ecode, 1) * mb->name_entry_size;
         while (count-- > 0)
           {
-          unsigned int recno = GET2(slot, 0);
+          uint32_t recno = GET2(slot, 0);
           condition = recno == mb->recursive->group_num;
           if (condition) break;
           slot += mb->name_entry_size;
@@ -1270,7 +1251,7 @@ for (;;)
 
       case OP_CREF:                  /* Numbered group used test */
       offset = GET2(ecode, 1) << 1;  /* Doubled ref number */
-      condition = offset < offset_top && 
+      condition = offset < offset_top &&
         mb->ovector[offset] != PCRE2_UNSET;
       break;
 
@@ -1281,7 +1262,7 @@ for (;;)
         while (count-- > 0)
           {
           offset = GET2(slot, 0) << 1;
-          condition = offset < offset_top && 
+          condition = offset < offset_top &&
             mb->ovector[offset] != PCRE2_UNSET;
           if (condition) break;
           slot += mb->name_entry_size;
@@ -1638,7 +1619,7 @@ for (;;)
     case OP_RECURSE:
       {
       recursion_info *ri;
-      unsigned int recno;
+      uint32_t recno;
 
       callpat = mb->start_code + GET(ecode, 1);
       recno = (callpat == mb->start_code)? 0 :
@@ -1671,13 +1652,13 @@ for (;;)
         new_recursive.offset_save = stacksave;
       else
         {
-        new_recursive.offset_save = (size_t *)
-          (mb->memctl.malloc(new_recursive.saved_max * sizeof(size_t),
+        new_recursive.offset_save = (PCRE2_OFFSET *)
+          (mb->memctl.malloc(new_recursive.saved_max * sizeof(PCRE2_OFFSET),
             mb->memctl.memory_data));
         if (new_recursive.offset_save == NULL) RRETURN(PCRE2_ERROR_NOMEMORY);
         }
       memcpy(new_recursive.offset_save, mb->ovector,
-        new_recursive.saved_max * sizeof(size_t));
+        new_recursive.saved_max * sizeof(PCRE2_OFFSET));
 
       /* OK, now we can do the recursion. After processing each alternative,
       restore the offset data and the last captured value. If there were nested
@@ -1691,7 +1672,7 @@ for (;;)
         RMATCH(eptr, callpat + PRIV(OP_lengths)[*callpat], offset_top,
           mb, eptrb, RM6);
         memcpy(mb->ovector, new_recursive.offset_save,
-            new_recursive.saved_max * sizeof(size_t));
+            new_recursive.saved_max * sizeof(PCRE2_OFFSET));
         mb->capture_last = new_recursive.saved_capture_last;
         mb->recursive = new_recursive.prevrec;
         if (rrc == MATCH_MATCH || rrc == MATCH_ACCEPT)
@@ -1855,8 +1836,8 @@ for (;;)
 
         if (offset > offset_top)
           {
-          register size_t *iptr = mb->ovector + offset_top;
-          register size_t *iend = mb->ovector + offset;
+          register PCRE2_OFFSET *iptr = mb->ovector + offset_top;
+          register PCRE2_OFFSET *iend = mb->ovector + offset;
           while (iptr < iend) *iptr++ = PCRE2_UNSET;
           }
 
@@ -1948,7 +1929,7 @@ for (;;)
     /* Not multiline mode: start of subject assertion, unless notbol. */
 
     case OP_CIRC:
-    if ((mb->moptions & PCRE2_NOTBOL) != 0 && eptr == mb->start_subject) 
+    if ((mb->moptions & PCRE2_NOTBOL) != 0 && eptr == mb->start_subject)
       RRETURN(MATCH_NOMATCH);
 
     /* Start of subject assertion */
@@ -1961,7 +1942,7 @@ for (;;)
     /* Multiline mode: start of subject unless notbol, or after any newline. */
 
     case OP_CIRCM:
-    if ((mb->moptions & PCRE2_NOTBOL) != 0 && eptr == mb->start_subject) 
+    if ((mb->moptions & PCRE2_NOTBOL) != 0 && eptr == mb->start_subject)
       RRETURN(MATCH_NOMATCH);
     if (eptr != mb->start_subject &&
         (eptr == mb->end_subject || !WAS_NEWLINE(eptr)))
@@ -3655,7 +3636,7 @@ for (;;)
             RRETURN(MATCH_NOMATCH);
             }
           GETCHARINC(d, eptr);
-          if (fc == d || (unsigned int)foc == d) RRETURN(MATCH_NOMATCH);
+          if (fc == d || (uint32_t)foc == d) RRETURN(MATCH_NOMATCH);
           }
         }
       else
@@ -3693,7 +3674,7 @@ for (;;)
               RRETURN(MATCH_NOMATCH);
               }
             GETCHARINC(d, eptr);
-            if (fc == d || (unsigned int)foc == d) RRETURN(MATCH_NOMATCH);
+            if (fc == d || (uint32_t)foc == d) RRETURN(MATCH_NOMATCH);
             }
           }
         else
@@ -3736,7 +3717,7 @@ for (;;)
               break;
               }
             GETCHARLEN(d, eptr, len);
-            if (fc == d || (unsigned int)foc == d) break;
+            if (fc == d || (uint32_t)foc == d) break;
             eptr += len;
             }
           if (possessive) continue;    /* No backtracking */
@@ -5584,7 +5565,7 @@ for (;;)
 
           case OP_ANYBYTE:
           c = max - min;
-          if (c > (unsigned int)(mb->end_subject - eptr))
+          if (c > (uint32_t)(mb->end_subject - eptr))
             {
             eptr = mb->end_subject;
             SCHECK_PARTIAL();
@@ -5803,7 +5784,7 @@ for (;;)
           case OP_ALLANY:
           case OP_ANYBYTE:
           c = max - min;
-          if (c > (unsigned int)(mb->end_subject - eptr))
+          if (c > (uint32_t)(mb->end_subject - eptr))
             {
             eptr = mb->end_subject;
             SCHECK_PARTIAL();
@@ -6109,8 +6090,7 @@ Undefine all the macros that were defined above to handle this. */
 #undef stacksave
 
 #undef newptrb
-
-#endif
+#endif  /* NO_RECURSE */
 
 /* These two are defined as macros in both cases */
 
@@ -6129,44 +6109,26 @@ Undefine all the macros that were defined above to handle this. */
 /* This function releases all the allocated frames. The base frame is on the
 machine stack, and so must not be freed.
 
-Argument: the address of the base frame
+Argument:
+  frame_base    the address of the base frame
+  mb            the match block
+
 Returns:  nothing
 */
 
 static void
-release_match_heapframes (heapframe *frame_base)
+release_match_heapframes (heapframe *frame_base, match_block *mb)
 {
 heapframe *nextframe = frame_base->Xnextframe;
 while (nextframe != NULL)
   {
   heapframe *oldframe = nextframe;
   nextframe = nextframe->Xnextframe;
-  (PUBL(stack_free))(oldframe);
+  mb->stack_memctl.free(oldframe, mb->stack_memctl.memory_data);
   }
 }
-#endif
+#endif  /* NO_RECURSE */
 
-
-
-#ifdef FIXME
-
-/* FIXME: This must be in a new function..... */
-
-/* Check for the special magic call that measures the size of the stack used
-per recursive call of match(). Without the funny casting for sizeof, a Windows
-compiler gave this error: "unary minus operator applied to unsigned type,
-result still unsigned". Hopefully the cast fixes that. */
-
-if (re == NULL && extra_data == NULL && subject == NULL && length == -999 &&
-    start_offset == -999)
-#ifdef NO_RECURSE
-  return -((int)sizeof(heapframe));
-#else
-  return match(NULL, NULL, NULL, 0, NULL, NULL, 0);
-#endif
-
-
-#endif   /* FIXME */
 
 
 /*************************************************
@@ -6195,7 +6157,7 @@ Returns:          > 0 => success; value is the number of ovector pairs filled
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_match(const pcre2_code *code, PCRE2_SPTR subject, int length,
-  size_t start_offset, uint32_t options, pcre2_match_data *match_data,
+  PCRE2_OFFSET start_offset, uint32_t options, pcre2_match_data *match_data,
   pcre2_match_context *mcontext)
 {
 int rc;
@@ -6206,7 +6168,6 @@ const uint8_t *start_bits = NULL;
 
 const pcre2_real_code *re = (const pcre2_real_code *)code;
 pcre2_match_context default_context;  /* For use if no context given */
-
 
 BOOL anchored;
 BOOL firstline;
@@ -6227,7 +6188,7 @@ PCRE2_SPTR req_cu_ptr = start_match - 1;
 PCRE2_SPTR start_partial = NULL;
 PCRE2_SPTR match_partial = NULL;
 
-/* We need to have mb pointing to a match block, because the IS_NEWLINE macro 
+/* We need to have mb pointing to a match block, because the IS_NEWLINE macro
 is used below, and it expects NLBLOCK to be defined as a pointer. */
 
 match_block actual_match_block;
@@ -6259,12 +6220,12 @@ means that the pattern is likely compiled with different endianness. */
 if (re->magic_number != MAGIC_NUMBER)
   return re->magic_number == REVERSED_MAGIC_NUMBER?
     PCRE2_ERROR_BADENDIANNESS:PCRE2_ERROR_BADMAGIC;
-    
-/* Check the code unit width. */ 
-     
-if ((re->flags & PCRE2_MODE_MASK) != PCRE2_CODE_UNIT_WIDTH/8) 
+
+/* Check the code unit width. */
+
+if ((re->flags & PCRE2_MODE_MASK) != PCRE2_CODE_UNIT_WIDTH/8)
   return PCRE2_ERROR_BADMODE;
-  
+
 /* A NULL match context means "use a default context" */
 
 if (mcontext == NULL)
@@ -6282,8 +6243,8 @@ utf = (re->overall_options & PCRE2_UTF) != 0;
 mb->partial = ((options & PCRE2_PARTIAL_HARD) != 0)? 2 :
               ((options & PCRE2_PARTIAL_SOFT) != 0)? 1 : 0;
 
-/* Check a UTF string for validity if required. For 8-bit and 16-bit strings, 
-we must also check that a starting offset does not point into the middle of a 
+/* Check a UTF string for validity if required. For 8-bit and 16-bit strings,
+we must also check that a starting offset does not point into the middle of a
 multiunit character. */
 
 #ifdef SUPPORT_UTF
@@ -6295,7 +6256,7 @@ if (utf && (options & PCRE2_NO_UTF_CHECK) == 0)
     match_data->leftchar = 0;
     return match_data->rc;
     }
-#if PCRE2_CODE_UNIT_WIDTH != 32    
+#if PCRE2_CODE_UNIT_WIDTH != 32
   if (start_offset > 0 && (int)start_offset < length &&
       NOT_FIRSTCHAR(subject[start_offset]))
     return PCRE2_ERROR_BADUTFOFFSET;
@@ -6306,14 +6267,14 @@ if (utf && (options & PCRE2_NO_UTF_CHECK) == 0)
 /* If the pattern was successfully studied with JIT support, run the JIT
 executable instead of the rest of this function. Most options must be set at
 compile time for the JIT code to be usable. Fallback to the normal code path if
-an unsupported option is set or if JIT returns BADOPTION (which means that the 
+an unsupported option is set or if JIT returns BADOPTION (which means that the
 selected normal or partial matching mode was not compiled). */
 
 #ifdef SUPPORT_JIT
 if (re->executable_jit != NULL && (options & ~PUBLIC_JIT_EXEC_OPTIONS) == 0 &&
     mcontext->bsr_convention == 0 && mcontext->newline_convention == 0)
   {
-  rc = PRIV(jit_exec)(subject, length, start_offset, options, match_data, 
+  rc = PRIV(jit_exec)(subject, length, start_offset, options, match_data,
     mcontext);
   if (rc != PCRE2_ERROR_JIT_BADOPTION) return rc;
   }
@@ -6326,18 +6287,24 @@ firstline = (re->overall_options & PCRE2_FIRSTLINE) != 0;
 startline = (re->flags & PCRE2_STARTLINE) != 0;
 
 /* Fill in the fields in the match block. */
- 
+
 if (mcontext == NULL)
   {
-  mb->memctl = re->memctl; 
   mb->callout = NULL;
+  mb->memctl = re->memctl;
+#ifdef NO_RECURSE
+  mb->stack_memctl = re->memctl;
+#endif
   }
 else
-  {    
-  mb->memctl = mcontext->memctl; 
+  {
   mb->callout = mcontext->callout;
   mb->callout_data = mcontext->callout_data;
-  } 
+  mb->memctl = mcontext->memctl;
+#ifdef NO_RECURSE
+  mb->stack_memctl = mcontext->stack_memctl;
+#endif
+  }
 
 mb->start_subject = subject;
 mb->start_offset = start_offset;
@@ -6360,14 +6327,14 @@ mb->name_count = re->name_count;
 mb->name_entry_size = re->name_entry_size;
 mb->start_code = mb->name_table + re->name_count * re->name_entry_size;
 
-/* Limits set in the pattern override the match context only if they are 
+/* Limits set in the pattern override the match context only if they are
 smaller. */
 
 mb->match_limit = (mcontext->match_limit < re->limit_match)?
                   mcontext->match_limit : re->limit_match;
 mb->match_limit_recursion = (mcontext->recursion_limit > re->limit_recursion)?
                             mcontext->recursion_limit : re->limit_recursion;
-
+                            
 /* Pointers to the individual character tables */
 
 mb->lcc = re->tables + lcc_offset;
@@ -6413,26 +6380,26 @@ switch(newline)
 
   default: return PCRE2_ERROR_INTERNAL;
   }
-  
+
 /* If the expression has got more back references than the offsets supplied can
 hold, we get a temporary chunk of memory to use during the matching. Otherwise,
-we can use the vector supplied. The size of the ovector is three times the 
-value in the oveccount field. Two-thirds of it is pairs for storing matching 
+we can use the vector supplied. The size of the ovector is three times the
+value in the oveccount field. Two-thirds of it is pairs for storing matching
 offsets, and the top third is working space. */
 
 if (re->top_backref >= match_data->oveccount)
   {
   ocount = re->top_backref * 3 + 3;
-  mb->ovector = (size_t *)(mb->memctl.malloc(ocount * sizeof(size_t),
-    mb->memctl.memory_data)); 
+  mb->ovector = (PCRE2_OFFSET *)(mb->memctl.malloc(ocount * sizeof(PCRE2_OFFSET),
+    mb->memctl.memory_data));
   if (mb->ovector == NULL) return PCRE2_ERROR_NOMEMORY;
   using_temporary_offsets = TRUE;
   }
-else 
+else
   {
   ocount = 3 * match_data->oveccount;
   mb->ovector = match_data->ovector;
-  } 
+  }
 
 mb->offset_end = ocount;
 mb->offset_max = (2*ocount)/3;
@@ -6446,8 +6413,8 @@ in case they inspect these fields. */
 
 if (ocount > 0)
   {
-  register size_t *iptr = mb->ovector + ocount;
-  register size_t *iend = iptr - re->top_bracket;
+  register PCRE2_OFFSET *iptr = mb->ovector + ocount;
+  register PCRE2_OFFSET *iend = iptr - re->top_bracket;
   if (iend < mb->ovector + 2) iend = mb->ovector + 2;
   while (--iptr >= iend) *iptr = PCRE2_UNSET;
   mb->ovector[0] = mb->ovector[1] = PCRE2_UNSET;
@@ -6514,13 +6481,13 @@ for(;;)
   if (((options | re->overall_options) & PCRE2_NO_START_OPTIMIZE) == 0)
     {
     PCRE2_SPTR save_end_subject = end_subject;
-    
+
     /* If firstline is TRUE, the start of the match is constrained to the first
     line of a multiline string. That is, the match must be before or at the
     first newline. Implement this by temporarily adjusting end_subject so that
     we stop the optimization scans at a newline. If the match fails at the
     newline, later code breaks this loop. */
-    
+
     if (firstline)
       {
       PCRE2_SPTR t = start_match;
@@ -6538,7 +6505,7 @@ for(;;)
       while (t < mb->end_subject && !IS_NEWLINE(t)) t++;
       end_subject = t;
       }
-    
+
     /* Advance to a unique first code unit if there is one. */
 
     if (has_first_cu)
@@ -6586,8 +6553,8 @@ for(;;)
         }
       }
 
-    /* Or to a non-unique first code unit if any have been identified. The 
-    bitmap contains only 256 bits. When code units are 16 or 32 bits wide, all 
+    /* Or to a non-unique first code unit if any have been identified. The
+    bitmap contains only 256 bits. When code units are 16 or 32 bits wide, all
     code units greater than 254 set the 255 bit. */
 
     else if (start_bits != NULL)
@@ -6615,13 +6582,13 @@ for(;;)
       length may actually match the pattern. Although the value is, strictly,
       in characters, we treat it as code units to avoid spending too much time
       in this optimization. */
-    
+
       if (end_subject - start_match < re->minlength)
         {
         rc = MATCH_NOMATCH;
         break;
         }
-    
+
       /* If req_cu is set, we know that that code unit must appear in the
       subject for the match to succeed. If the first code unit is set, req_cu
       must be later in the subject; otherwise the test starts at the match
@@ -6629,20 +6596,20 @@ for(;;)
       patterns with nested unlimited repeats that aren't going to match.
       Writing separate code for cased/caseless versions makes it go faster, as
       does using an autoincrement and backing off on a match.
-    
+
       HOWEVER: when the subject string is very, very long, searching to its end
       can take a long time, and give bad performance on quite ordinary
       patterns. This showed up when somebody was matching something like
       /^\d+C/ on a 32-megabyte string... so we don't do this when the string is
       sufficiently long. */
-    
+
       if (has_req_cu && end_subject - start_match < REQ_CU_MAX)
         {
         register PCRE2_SPTR p = start_match + (has_first_cu? 1:0);
-    
+
         /* We don't need to repeat the search if we haven't yet reached the
         place we found it at last time. */
-    
+
         if (p > req_cu_ptr)
           {
           if (req_cu != req_cu2)
@@ -6660,25 +6627,25 @@ for(;;)
               if (UCHAR21INCTEST(p) == req_cu) { p--; break; }
               }
             }
-    
+
           /* If we can't find the required code unit, break the matching loop,
           forcing a match failure. */
-    
+
           if (p >= end_subject)
             {
             rc = MATCH_NOMATCH;
             break;
             }
-    
+
           /* If we have found the required code unit, save the point where we
           found it, so that we don't search again next time round the loop if
           the start hasn't passed this code unit yet. */
-    
+
           req_cu_ptr = p;
           }
         }
       }
-    }   
+    }
 
   /* ------------ End of start of match optimizations ------------ */
 
@@ -6692,7 +6659,7 @@ for(;;)
   mb->end_offset_top = 0;
   mb->skip_arg_count = 0;
   rc = match(start_match, mb->start_code, start_match, 2, mb, NULL, 0);
- 
+
   if (mb->hitend && start_partial == NULL)
     {
     start_partial = mb->start_used_ptr;
@@ -6804,15 +6771,15 @@ for(;;)
 (4) PCRE2_FIRSTLINE is set and we have failed to match at a newline, because
     this option requests that a match occur at or before the first newline in
     the subject.
-    
-(5) Some kind of error occurred. 
 
-*/     
+(5) Some kind of error occurred.
+
+*/
 
 ENDLOOP:
 
 #ifdef NO_RECURSE
-release_match_heapframes(&frame_zero);
+release_match_heapframes(&frame_zero, mb);
 #endif
 
 /* Handle a fully successful match. */
@@ -6833,7 +6800,7 @@ if (rc == MATCH_MATCH || rc == MATCH_ACCEPT)
     if (arg_offset_max >= 4)
       {
       memcpy(match_data->ovector + 2, mb->ovector + 2,
-        (arg_offset_max - 2) * sizeof(size_t));
+        (arg_offset_max - 2) * sizeof(PCRE2_OFFSET));
       }
     if (mb->end_offset_top > arg_offset_max) mb->capture_last |= OVFLBIT;
     mb->memctl.free(mb->ovector, mb->memctl.memory_data);
@@ -6857,7 +6824,7 @@ if (rc == MATCH_MATCH || rc == MATCH_ACCEPT)
 
   if (mb->end_offset_top/2 <= re->top_bracket)
     {
-    register size_t *iptr, *iend;
+    register PCRE2_OFFSET *iptr, *iend;
     int resetcount = re->top_bracket + 1;
     if (resetcount > match_data->oveccount) resetcount = match_data->oveccount;
     iptr = match_data->ovector + mb->end_offset_top;
@@ -6876,12 +6843,12 @@ if (rc == MATCH_MATCH || rc == MATCH_ACCEPT)
     }
 
   /* Fill in the remaining fields that are returned in the match data. */
-  
+
   match_data->code = re;
   match_data->subject = subject;
   match_data->leftchar = mb->start_used_ptr - subject;
   match_data->rightchar = 0;  /* FIXME */
-  match_data->startchar = start_match - subject;  
+  match_data->startchar = start_match - subject;
   match_data->mark = mb->mark;
   return match_data->rc;
   }
@@ -6892,7 +6859,7 @@ anything other than nomatch or partial match, just return the code. */
 
 if (rc != MATCH_NOMATCH && rc != PCRE2_ERROR_PARTIAL)
   match_data->rc = rc;
-     
+
 /* Handle a partial match. */
 
 else if (match_partial != NULL)
@@ -6902,7 +6869,7 @@ else if (match_partial != NULL)
     match_data->ovector[0] = match_partial - subject;
     match_data->ovector[1] = end_subject - subject;
     }
-  match_data->leftchar = start_partial - subject;    
+  match_data->leftchar = start_partial - subject;
   match_data->rc = PCRE2_ERROR_PARTIAL;
   }
 

@@ -768,7 +768,7 @@ do
   while (try_next)    /* Loop for items in this branch */
     {
     int rc;
-    uint8_t *classmap; 
+    uint8_t *classmap = NULL; 
     
     switch(*tcode)
       {

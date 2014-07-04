@@ -7257,7 +7257,7 @@ Returns:        pointer to compiled data block, or NULL on error,
 
 PCRE2_EXP_DEFN pcre2_code * PCRE2_CALL_CONVENTION
 pcre2_compile(PCRE2_SPTR pattern, int patlen, uint32_t options,
-   int *errorptr, size_t *erroroffset, pcre2_compile_context *ccontext)
+   int *errorptr, PCRE2_OFFSET *erroroffset, pcre2_compile_context *ccontext)
 {
 BOOL utf;                               /* Set TRUE for UTF mode */
 pcre2_real_code *re = NULL;             /* What we will return */

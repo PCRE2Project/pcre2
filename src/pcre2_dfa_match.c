@@ -74,7 +74,7 @@ Returns:        > 0 => number of match offset pairs placed in offsets
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_dfa_match(const pcre2_code *code, PCRE2_SPTR subject, int length, 
-  size_t startoffset, uint32_t options, pcre2_match_data *match_data, 
+  PCRE2_OFFSET startoffset, uint32_t options, pcre2_match_data *match_data, 
   pcre2_match_context *mcontext, int *workspace, size_t wscount)
 {
 

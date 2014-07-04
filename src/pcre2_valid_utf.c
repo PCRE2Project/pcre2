@@ -58,7 +58,7 @@ strings. */
 /* This function should never be called when UTF is not supported. */
 
 int
-PRIV(valid_utf)(PCRE2_SPTR string, int length, size_t *erroroffset)
+PRIV(valid_utf)(PCRE2_SPTR string, int length, PCRE2_OFFSET *erroroffset)
 {
 (void)string;
 (void)length;
@@ -89,7 +89,7 @@ Returns:       == 0    if the string is a valid UTF string
 */
 
 int
-PRIV(valid_utf)(PCRE2_SPTR string, int length, size_t *erroroffset)
+PRIV(valid_utf)(PCRE2_SPTR string, int length, PCRE2_OFFSET *erroroffset)
 {
 register PCRE2_SPTR p;
 register uint32_t c;

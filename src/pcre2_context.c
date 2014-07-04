@@ -168,8 +168,7 @@ if (defmemctl)
   mcontext->memctl.memory_data = NULL;
   } 
 #ifdef NO_RECURSE  
-mcontext->stack_malloc = mcontext->malloc;
-mcontext->stack_free = mcontext->free; 
+mcontext->stack_memctl = mcontext->memctl;
 #endif
 mcontext->callout = NULL;
 mcontext->callout_data = NULL;
@@ -392,16 +391,18 @@ return 1;
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_set_recursion_memory_management(pcre2_match_context *mcontext, 
-  void *(*mymalloc)(size_t, void *),
-  void (*myfree)(void *, void *))
+  void *(*mymalloc)(size_t, void *), void (*myfree)(void *, void *), 
+  void *mydata)
 {
-#ifdef NORECURSE
-mcontext->stack_malloc = mymalloc;
-mcontext->stack_free = myfree;
+#ifdef NO_RECURSE
+mcontext->stack_memctl.malloc = mymalloc;
+mcontext->stack_memctl.free = myfree;
+mcontext->stack_memctl.memory_data = mydata;
 #else
 (void)mcontext;
 (void)mymalloc;
 (void)myfree;
+(void)mydata;
 #endif
 return 1;
 }   

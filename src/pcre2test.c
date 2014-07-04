@@ -45,8 +45,6 @@ POSSIBILITY OF SUCH DAMAGE.
 /* FIXME: These are the as-yet-unimplemented features:
 . save code and #load
 . JIT - compile, time, verify
-. find match limit
-. show stack frame size
 . memory handling testing
 . stackguard testing
 */
@@ -317,7 +315,7 @@ enum { MOD_CTB,    /* Applies to a compile or a match context */
        MOD_CTL,    /* Is a control bit */
        MOD_BSR,    /* Is a BSR value */
        MOD_IN2,    /* Is one or two unsigned integers */
-       MOD_INS,    /* Is a signed integer */ 
+       MOD_INS,    /* Is a signed integer */
        MOD_INT,    /* Is an unsigned integer */
        MOD_IND,    /* Is an unsigned integer, but no value => default */
        MOD_NL,     /* Is a newline value */
@@ -377,7 +375,7 @@ typedef struct datctl {    /* Structure for data line modifiers. */
   uint32_t  options;       /* Must be in same position as patctl */
   uint32_t  control;       /* Must be in same position as patctl */
   uint32_t  cfail[2];
-   int32_t  callout_data; 
+   int32_t  callout_data;
    int32_t  copy_numbers[MAXCPYGET];
    int32_t  get_numbers[MAXCPYGET];
   uint32_t  jitstack;
@@ -407,11 +405,11 @@ enum { CTX_PAT,            /* Active pattern context */
 name because it is searched by binary chop. */
 
 typedef struct modstruct {
-  const char *name;
-  uint16_t    which;
-  uint16_t    type;
-  uint32_t    value;
-  size_t      offset;
+  const char   *name;
+  uint16_t      which;
+  uint16_t      type;
+  uint32_t      value;
+  PCRE2_OFFSET  offset;
 } modstruct;
 
 static modstruct modlist[] = {
@@ -847,7 +845,7 @@ are supported. */
   else if (test_mode == PCRE16_MODE) \
     pcre2_set_recursion_limit_16(G(a,16),b); \
   else \
-    pcre2_set_match_limit_32(G(a,32),b)
+    pcre2_set_recursion_limit_32(G(a,32),b)
 
 #define PCRE2_SUBSTRING_COPY_BYNAME(a,b,c,d,e) \
   if (test_mode == PCRE8_MODE) \
@@ -1016,9 +1014,9 @@ the three different cases. */
 
 #define PCHARS(lv, p, offset, len, utf, f) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
-    lv = G(pchars,BITONE)(p, offset, len, utf, f); \
+    lv = G(pchars,BITONE)((G(PCRE2_SPTR,BITONE))(p)+offset, len, utf, f); \
   else \
-    lv = G(PCHARS,BITTWO)(p, offset, len, utf, f)
+    lv = G(PCHARS,BITTWO)((G(PCRE2_SPTR,BITTWO))(p)+offset, len, utf, f)
 
 #define PCHARSV(p, offset, len, utf, f) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
@@ -1229,7 +1227,7 @@ the three different cases. */
 #define FLD(a,b) G(a,8)->b
 #define PATCTXCPY(a,b) memcpy(G(a,8),G(b,8),sizeof(pcre2_compile_context_8))
 #define PCHARS(lv, p, offset, len, utf, f) \
-  lv = pchars8(p, offset, len, utf, f)
+  lv = pchars8((PCRE2_SPTR8)(p)+offset, len, utf, f)
 #define PCHARSV(p, offset, len, utf, f) \
   (void)pchars8((PCRE2_SPTR8)(p)+offset, len, utf, f)
 #define PCRE2_COMPILE(a,b,c,d,e,f,g) \
@@ -1286,7 +1284,7 @@ the three different cases. */
 #define FLD(a,b) G(a,16)->b
 #define PATCTXCPY(a,b) memcpy(G(a,16),G(b,16),sizeof(pcre2_compile_context_16))
 #define PCHARS(lv, p, offset, len, utf, f) \
-  lv = pchars16(p, offset, len, utf, f)
+  lv = pchars16((PCRE2_SPTR16)(p)+offset, len, utf, f)
 #define PCHARSV(p, offset, len, utf, f) \
   (void)pchars16((PCRE2_SPTR16)(p)+offset, len, utf, f)
 #define PCRE2_COMPILE(a,b,c,d,e,f,g) \
@@ -1343,7 +1341,7 @@ the three different cases. */
 #define FLD(a,b) G(a,32)->b
 #define PATCTXCPY(a,b) memcpy(G(a,32),G(b,32),sizeof(pcre2_compile_context_32))
 #define PCHARS(lv, p, offset, len, utf, f) \
-  lv = pchars32(p, offset, len, utf, f)
+  lv = pchars32((PCRE2_SPTR32)(p)+offset, len, utf, f)
 #define PCHARSV(p, offset, len, utf, f) \
   (void)pchars32((PCRE2_SPTR32)(p)+offset, len, utf, f)
 #define PCRE2_COMPILE(a,b,c,d,e,f,g) \
@@ -1748,23 +1746,24 @@ free(block);
 
 /* For recursion malloc/free, to test stacking calls */
 
-#ifdef FIXME
-static void *stack_malloc(size_t size)
+#ifdef NO_RECURSE
+static void *my_stack_malloc(size_t size, void *data)
 {
 void *block = malloc(size);
+(void)data;
 if (show_memory)
   fprintf(outfile, "stack_malloc %3d %p\n", (int)size, block);
 return block;
 }
 
-static void stack_free(void *block)
+static void my_stack_free(void *block, void *data)
 {
+(void)data;
 if (show_memory)
   fprintf(outfile, "stack_free       %p\n", block);
 free(block);
 }
-#endif
-
+#endif  /* NO_RECURSE */
 
 
 /*************************************************
@@ -1834,7 +1833,7 @@ return i+1;
 *             Print one character                *
 *************************************************/
 
-/* Print a single character either literally, or as a hex escape, and count how 
+/* Print a single character either literally, or as a hex escape, and count how
 many printed characters are used.
 
 Arguments:
@@ -2383,7 +2382,7 @@ static void *
 check_modifier(modstruct *m, int ctx, patctl *pctl, datctl *dctl, uint32_t c)
 {
 void *field = NULL;
-size_t offset = m->offset;
+PCRE2_OFFSET offset = m->offset;
 
 if (restrict_for_perl_test) switch(m->which)
   {
@@ -2409,7 +2408,7 @@ switch (m->which)
   /* Fall through for something that can also be in a match context. In this
   case the offset is taken from the other field. */
 
-  offset = (size_t)(m->value);
+  offset = (PCRE2_OFFSET)(m->value);
 
   case MOD_CTM:  /* Match context modifier */
   if (ctx == CTX_DEFDAT || ctx == CTX_DEFANY) field = PTR(default_dat_context);
@@ -3373,7 +3372,7 @@ uint8_t *p = buffer;
 const uint8_t *use_tables;
 unsigned int delimiter = *p++;
 int patlen, errorcode;
-size_t erroroffset;
+PCRE2_OFFSET erroroffset;
 
 /* Initialize the context and pattern/data controls for this test from the
 defaults. */
@@ -3761,18 +3760,21 @@ uint32_t min = 0;
 uint32_t mid = 64;
 uint32_t max = UINT32_MAX;
 
+PCRE2_SET_MATCH_LIMIT(dat_context, max);
+PCRE2_SET_RECURSION_LIMIT(dat_context, max);
+
 for (;;)
   {
   if (errnumber == PCRE2_ERROR_MATCHLIMIT)
-    { 
+    {
     PCRE2_SET_MATCH_LIMIT(dat_context, mid);
     }
   else
-    {     
+    {
     PCRE2_SET_RECURSION_LIMIT(dat_context, mid);
-    } 
+    }
 
-  PCRE2_MATCH(capcount, compiled_code, pp, ulen, dat_datctl.offset, 
+  PCRE2_MATCH(capcount, compiled_code, pp, ulen, dat_datctl.offset,
     dat_datctl.options, match_data, dat_context);
 
   if (capcount == errnumber)
@@ -3781,13 +3783,13 @@ for (;;)
     mid = (mid == max - 1)? max : (max != UINT32_MAX)? (min + max)/2 : mid*2;
     }
 
-  else if (capcount >= 0 || 
+  else if (capcount >= 0 ||
            capcount == PCRE2_ERROR_NOMATCH ||
            capcount == PCRE2_ERROR_PARTIAL)
     {
     if (mid == min + 1)
       {
-      if (capcount != PCRE2_ERROR_NOMATCH) 
+      if (capcount != PCRE2_ERROR_NOMATCH)
         fprintf(outfile, "Minimum %s limit = %d\n", msg, mid);
       break;
       }
@@ -3823,7 +3825,7 @@ uint32_t i, pre_start, post_start, subject_length;
 BOOL utf = (FLD(compiled_code, compile_options) & PCRE2_UTF) != 0;
 BOOL callout_capture = (dat_datctl.control & CTL_CALLOUT_CAPTURE) != 0;
 FILE *f = (first_callout || callout_capture)? outfile : NULL;
-   
+
 if (callout_capture)
   {
   fprintf(f, "Callout %d: last capture = %d\n",
@@ -3887,7 +3889,7 @@ if (post_start > 0)
 for (i = 0; i < subject_length - pre_start - post_start + 4; i++)
   fprintf(outfile, " ");
 
-fprintf(outfile, "%.*s", 
+fprintf(outfile, "%.*s",
   (int)((cb->next_item_length == 0)? 1 : cb->next_item_length),
   pbuffer8 + cb->pattern_position);
 
@@ -3906,7 +3908,7 @@ if (cb->mark != last_callout_mark)
     }
   last_callout_mark = cb->mark;
   }
-  
+
 if (cb->callout_data != NULL)
   {
   int callout_data = *((int32_t *)(cb->callout_data));
@@ -3948,13 +3950,13 @@ size_t needlen;
 BOOL utf;
 
 #ifdef SUPPORT_PCRE8
-uint8_t *q8;
+uint8_t *q8 = NULL;
 #endif
 #ifdef SUPPORT_PCRE16
-uint16_t *q16;
+uint16_t *q16 = NULL;
 #endif
 #ifdef SUPPORT_PCRE32
-uint32_t *q32;
+uint32_t *q32 = NULL;
 #endif
 
 /* Copy the default context and data control blocks to the active ones. Then
@@ -4378,10 +4380,10 @@ if ((dat_datctl.control & CTL_ANYGLOB) != 0 && dat_datctl.oveccount < 1)
   printf("** Global matching requires a non-zero ovector count: ignored\n");
   dat_datctl.control &= ~CTL_ANYGLOB;
   }
-  
-/* Enable display of malloc/free if wanted. */ 
-  
-show_memory = (dat_datctl.control & CTL_MEMORY) != 0; 
+
+/* Enable display of malloc/free if wanted. */
+
+show_memory = (dat_datctl.control & CTL_MEMORY) != 0;
 
 /* Ensure that there is a JIT callback if we want to verify that JIT was
 actually used. If jit_stack == NULL, no stack has yet been assigned. */
@@ -4465,27 +4467,27 @@ set in the datctl block.
     capcount = check_match_limit(pp, ulen, PCRE2_ERROR_RECURSIONLIMIT,
       "recursion");
     }
-    
-  /* Otherwise just run a single match, setting up a callout if required (the 
+
+  /* Otherwise just run a single match, setting up a callout if required (the
   default). */
-    
+
   else
-    { 
+    {
     if ((dat_datctl.control & CTL_CALLOUT_NONE) == 0)
       {
-      PCRE2_SET_CALLOUT(dat_context, callout_function, 
+      PCRE2_SET_CALLOUT(dat_context, callout_function,
         (void *)(&dat_datctl.callout_data));
       first_callout = TRUE;
       last_callout_mark = NULL;
-      callout_count = 0;   
+      callout_count = 0;
       }
     else
       {
       PCRE2_SET_CALLOUT(dat_context, NULL, NULL);  /* No callout */
       }
-    
+
     /* Run a single DFA or NFA match. */
-    
+
     if ((dat_datctl.control & CTL_DFA) != 0)
       {
       if (dfa_workspace == NULL)
@@ -4511,7 +4513,7 @@ set in the datctl block.
         capcount = dat_datctl.oveccount;
         }
       }
-    }   
+    }
 
   /* The result of the match is in now capcount. First handle a successful
   match. */
@@ -4520,7 +4522,7 @@ set in the datctl block.
     {
     int i;
     uint8_t *nptr;
-    size_t *ovector;
+    PCRE2_OFFSET *ovector;
 
     /* This is a check against a lunatic return value. */
 
@@ -4555,8 +4557,8 @@ set in the datctl block.
     ovector = FLD(match_data, ovector);
     for (i = 0; i < 2*capcount; i += 2)
       {
-      size_t start = ovector[i];
-      size_t end = ovector[i+1];
+      PCRE2_OFFSET start = ovector[i];
+      PCRE2_OFFSET end = ovector[i+1];
 
       if (start > end)
         {
@@ -4738,7 +4740,7 @@ set in the datctl block.
 
   else if (capcount == PCRE2_ERROR_PARTIAL)
     {
-    size_t leftchar = FLD(match_data, leftchar);
+    PCRE2_OFFSET leftchar = FLD(match_data, leftchar);
 
     fprintf(outfile, "Partial match");
     if (leftchar != FLD(match_data, startchar))
@@ -4781,8 +4783,8 @@ set in the datctl block.
   else if (g_notempty != 0)   /* There was a previous null match */
     {
     uint16_t nl = FLD(compiled_code, newline_convention);
-    size_t start_offset = dat_datctl.offset;    /* Where the match was */
-    size_t end_offset = start_offset + 1;
+    PCRE2_OFFSET start_offset = dat_datctl.offset;    /* Where the match was */
+    PCRE2_OFFSET end_offset = start_offset + 1;
 
     if ((nl == PCRE2_NEWLINE_CRLF || nl == PCRE2_NEWLINE_ANY ||
          nl == PCRE2_NEWLINE_ANYCRLF) &&
@@ -4857,7 +4859,7 @@ set in the datctl block.
 
   if ((dat_datctl.control & CTL_ANYGLOB) == 0) break; else
     {
-    size_t end_offset = FLD(match_data, ovector)[1];
+    PCRE2_OFFSET end_offset = FLD(match_data, ovector)[1];
 
     /* We must now set up for the next iteration of a global search. If we have
     matched an empty string, first check to see if we are at the end of the
@@ -5069,7 +5071,7 @@ if (arg != NULL)
 /* No argument for -C: output all configuration information. */
 
 print_version(stdout);
-printf("\nCompiled with\n");
+printf("Compiled with\n");
 
 #ifdef EBCDIC
 printf("  EBCDIC code support: LF is 0x%02x\n", CHAR_LF);
@@ -5116,14 +5118,6 @@ printf("  Default match limit = %ld\n", lrc);
 printf("  Default recursion depth limit = %ld\n", lrc);
 (void)PCRE2_CONFIG(PCRE2_CONFIG_STACKRECURSE, &rc, sizeof(rc));
 printf("  Match recursion uses %s", rc? "stack" : "heap");
-
-#ifdef FIXME
-if (showstore)
-  {
-  PCRE_EXEC(stack_size, NULL, NULL, NULL, -999, -999, 0, NULL, 0);
-  printf(": %sframe size = %d bytes", rc? "approximate " : "", -stack_size);
-  }
-#endif
 
 printf("\n");
 return 0;
@@ -5361,32 +5355,44 @@ if (test_mode == PCRE8_MODE)
   default_dat_context8 = pcre2_match_context_create_8(general_context8);
   dat_context8 = pcre2_match_context_create_8(general_context8);
   match_data8 = pcre2_match_data_create_8(max_oveccount, general_context8);
+#ifdef NO_RECURSE
+  (void)pcre2_set_recursion_memory_management_8(default_dat_context8,
+    &my_stack_malloc, &my_stack_free, NULL);  
+#endif
   }
 #endif
 
 #ifdef SUPPORT_PCRE16
 if (test_mode == PCRE16_MODE)
   {
-  general_context16 = pcre2_general_context_create_16(&my_malloc, &my_free, 
+  general_context16 = pcre2_general_context_create_16(&my_malloc, &my_free,
     NULL);
   default_pat_context16 = pcre2_compile_context_create_16(general_context16);
   pat_context16 = pcre2_compile_context_create_16(general_context16);
   default_dat_context16 = pcre2_match_context_create_16(general_context16);
   dat_context16 = pcre2_match_context_create_16(general_context16);
   match_data16 = pcre2_match_data_create_16(max_oveccount, general_context16);
+#ifdef NO_RECURSE
+  (void)pcre2_set_recursion_memory_management_16(default_dat_context16,
+    &my_stack_malloc, &my_stack_free, NULL);  
+#endif
   }
 #endif
 
 #ifdef SUPPORT_PCRE32
 if (test_mode == PCRE32_MODE)
   {
-  general_context32 = pcre2_general_context_create_32(&my_malloc, &my_free, 
+  general_context32 = pcre2_general_context_create_32(&my_malloc, &my_free,
     NULL);
   default_pat_context32 = pcre2_compile_context_create_32(general_context32);
   pat_context32 = pcre2_compile_context_create_32(general_context32);
   default_dat_context32 = pcre2_match_context_create_32(general_context32);
   dat_context32 = pcre2_match_context_create_32(general_context32);
   match_data32 = pcre2_match_data_create_32(max_oveccount, general_context32);
+#ifdef NO_RECURSE
+  (void)pcre2_set_recursion_memory_management_32(default_dat_context32,
+    &my_stack_malloc, &my_stack_free, NULL);  
+#endif
   }
 #endif
 
