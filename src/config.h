@@ -175,7 +175,7 @@ sure both macros are undefined; an emulation function will then be used. */
    recursion in the match() function; instead it creates its own stack by
    steam using memory from the heap. For more detail, see the comments and
    other stuff just above the match() function. */
-#define NO_RECURSE /**/
+/* #undef NO_RECURSE */
 
 /* Name of package */
 #define PACKAGE "pcre2"
@@ -259,13 +259,13 @@ sure both macros are undefined; an emulation function will then be used. */
 #define SUPPORT_LIBZ /**/
 
 /* Define to any value to enable the 16 bit PCRE2 library. */
-#define SUPPORT_PCRE16 /**/
+/* #undef SUPPORT_PCRE16 */
 
 /* Define to any value to enable JIT support in pcre2grep. */
 /* #undef SUPPORT_PCRE2GREP_JIT */
 
 /* Define to any value to enable the 32 bit PCRE2 library. */
-#define SUPPORT_PCRE32 /**/
+/* #undef SUPPORT_PCRE32 */
 
 /* Define to any value to enable the 8 bit PCRE2 library. */
 #define SUPPORT_PCRE8 /**/

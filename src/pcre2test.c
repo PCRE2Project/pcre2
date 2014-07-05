@@ -4402,12 +4402,8 @@ for (gmatched = 0;; gmatched++)
   {
   int capcount;
 
-
 #ifdef FIXME
   jit_was_used = FALSE;
-
-Need to set newline and bsr in match context and allow them to be
-set in the datctl block.
 #endif
 
   /* Adjust match_data according to size of offsets required. */

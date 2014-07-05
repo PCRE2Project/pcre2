@@ -764,18 +764,21 @@ typedef struct match_block {
 functions. */
 
 typedef struct dfa_match_block {
+  pcre2_memctl memctl;              /* For general use */
   PCRE2_SPTR start_code;            /* Start of the compiled pattern */
   PCRE2_SPTR start_subject ;        /* Start of the subject string */
   PCRE2_SPTR end_subject;           /* End of subject string */
   PCRE2_SPTR start_used_ptr;        /* Earliest consulted character */
   const uint8_t *tables;            /* Character tables */
-  int   start_offset;               /* The start offset value */
+  PCRE2_OFFSET start_offset;        /* The start offset value */
   uint32_t moptions;                /* Match options */
   uint32_t poptions;                /* Pattern options */
-  int   nltype;                     /* Newline type */
-  int   nllen;                      /* Newline string length */
+  uint32_t nltype;                  /* Newline type */
+  uint32_t nllen;                   /* Newline string length */
   PCRE2_UCHAR nl[4];                /* Newline string when fixed */
+  uint16_t bsr_convention;          /* \R interpretation */
   void *callout_data;               /* To pass back to callouts */
+  int (*callout)(pcre2_callout_block *);  /* Callout function or NULL */
   dfa_recursion_info *recursive;    /* Linked list of recursion data */
 } dfa_match_block;
 
