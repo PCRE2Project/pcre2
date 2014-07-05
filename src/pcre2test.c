@@ -4973,6 +4973,7 @@ printf("     pcre16         16 bit library support enabled [0, 1]\n");
 printf("     pcre32         32 bit library support enabled [0, 1]\n");
 printf("     utf            Unicode Transformation Format supported [0, 1]\n");
 printf("  -d            set default pattern control 'debug'\n");
+printf("  -dfa          set default subject control 'dfa'\n");
 printf("  -help         show usage information\n");
 printf("  -i            set default pattern control 'info'\n");
 printf("  -q            quiet: do not output PCRE version number at start\n");
@@ -5258,11 +5259,12 @@ while (argc > 1 && argv[op][0] == '-')
 #endif
     }
 
-  /* Set some common pattern controls */
+  /* Set some common pattern and subject controls */
 
   else if (strcmp(arg, "-b") == 0) def_patctl.control |= CTL_FULLBINCODE;
   else if (strcmp(arg, "-d") == 0) def_patctl.control |= CTL_DEBUG;
   else if (strcmp(arg, "-i") == 0) def_patctl.control |= CTL_INFO;
+  else if (strcmp(arg, "-dfa") == 0) def_datctl.control |= CTL_DFA; 
 
   /* Set timing parameters */
 

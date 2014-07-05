@@ -1,4 +1,4 @@
-.TH PCRE2TEST 1 "30 June 2014" "PCRE 10.00"
+.TH PCRE2TEST 1 "05 July 2014" "PCRE 10.00"
 .SH NAME
 pcre2test - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -125,9 +125,14 @@ to the same value:
 If an unknown option is given, an error message is output; the exit code is 0.
 .TP 10
 \fB-d\fP
-Behave as if each pattern has the \fB/debug\fP modifier; the internal
+Behave as if each pattern has the \fBdebug\fP modifier; the internal
 form and information about the compiled pattern is output after compilation;
 \fB-d\fP is equivalent to \fB-b -i\fP.
+.TP 10
+\fB-dfa\fP
+Behave as if each subject line has the \fBdfa\fP modifier; matching is done 
+using the \fBpcre2_dfa_match()\fP function instead of the default 
+\fBpcre2_match()\fP.
 .TP 10
 \fB-help\fP
 Output a brief summary these options and then exit.
@@ -1205,6 +1210,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 30 June 2014
+Last updated: 05 July 2014
 Copyright (c) 1997-2014 University of Cambridge.
 .fi
