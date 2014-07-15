@@ -73,7 +73,9 @@ PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_substring_copy_byname(pcre2_match_data *match_data, PCRE2_SPTR stringname,
   PCRE2_UCHAR *buffer, size_t size)
 {
-PCRE2_SPTR first, last, entry;
+PCRE2_SPTR first;
+PCRE2_SPTR last;
+PCRE2_SPTR entry;
 int entrysize = pcre2_substring_nametable_scan(match_data->code, stringname,
   &first, &last);
 if (entrysize <= 0) return entrysize;
@@ -153,7 +155,9 @@ PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_substring_get_byname(pcre2_match_data *match_data,
   PCRE2_SPTR stringname, PCRE2_UCHAR **stringptr)
 {
-PCRE2_SPTR first, last, entry;
+PCRE2_SPTR first;
+PCRE2_SPTR last;
+PCRE2_SPTR entry;
 int entrysize = pcre2_substring_nametable_scan(match_data->code, stringname,
   &first, &last);
 if (entrysize <= 0) return entrysize;
@@ -253,7 +257,9 @@ PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_substring_length_byname(pcre2_match_data *match_data,
   PCRE2_SPTR stringname)
 {
-PCRE2_SPTR first, last, entry;
+PCRE2_SPTR first;
+PCRE2_SPTR last;
+PCRE2_SPTR entry;
 int entrysize = pcre2_substring_nametable_scan(match_data->code, stringname,
   &first, &last);
 if (entrysize <= 0) return entrysize;
@@ -424,7 +430,9 @@ while (top > bot)
   int c = PRIV(strcmp)(stringname, entry + IMM2_SIZE);
   if (c == 0) 
     {
-    PCRE2_SPTR first, last, lastentry; 
+    PCRE2_SPTR first;
+    PCRE2_SPTR last;
+    PCRE2_SPTR lastentry; 
     if (firstptr == NULL) return GET2(entry, 0);
     lastentry = nametable + entrysize * (code->name_count - 1);
     first = last = entry;

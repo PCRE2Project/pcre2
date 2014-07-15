@@ -377,7 +377,8 @@ stateblock *next_active_state, *next_new_state;
 
 const uint8_t *ctypes, *lcc, *fcc;
 PCRE2_SPTR ptr;
-PCRE2_SPTR end_code, first_op;
+PCRE2_SPTR end_code; 
+PCRE2_SPTR first_op;
 
 dfa_recursion_info new_recursive;
 

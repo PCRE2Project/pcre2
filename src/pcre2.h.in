@@ -67,9 +67,10 @@ don't change existing definitions of PCRE2_EXP_DECL. */
 #  endif
 #endif
 
-/* Have to include stdlib.h and stdint.h to ensure that size_t and uint8_t etc
-are defined. */
+/* Have to include limits.h, stdlib.h and stdint.h to ensure that size_t and
+uint8_t, UCHAR_MAX, etc are defined. */
 
+#include <limits.h>
 #include <stdlib.h>
 #include <stdint.h>
 
@@ -256,21 +257,22 @@ must all be greater than zero. */
 #define PCRE2_CONFIG_UTF                     9
 #define PCRE2_CONFIG_VERSION                10
 
-/* A value that is used to indicate 'unset' in unsigned size_t fields. In
-particular, this value is used in the ovector. */
+/* Types for code units in patterns and subject strings. */
 
-#define PCRE2_UNSET (~(PCRE2_OFFSET)0)
+typedef uint8_t  PCRE2_UCHAR8;                                                
+typedef uint16_t PCRE2_UCHAR16;                        
+typedef uint32_t PCRE2_UCHAR32;                      
+                                                                             
+typedef const PCRE2_UCHAR8  *PCRE2_SPTR8;                         
+typedef const PCRE2_UCHAR16 *PCRE2_SPTR16;                                 
+typedef const PCRE2_UCHAR32 *PCRE2_SPTR32;  
 
-/* Types for patterns, subject strings, and offsets. */
+/* Offsets in the pattern (for errors) and in the subject (after a match) are 
+unsigned 32-bit numbers. We also define a value to indicate "unset" in the 
+offset vector (ovector). */
 
-typedef uint8_t  PCRE2_UCHAR8;
-typedef uint16_t PCRE2_UCHAR16;
-typedef uint32_t PCRE2_UCHAR32;
-typedef uint32_t PCRE2_OFFSET;
-
-typedef const PCRE2_UCHAR8  *PCRE2_SPTR8;
-typedef const PCRE2_UCHAR16 *PCRE2_SPTR16;
-typedef const PCRE2_UCHAR32 *PCRE2_SPTR32;
+#define PCRE2_OFFSET PCRE2_UCHAR32
+#define PCRE2_UNSET  (~(PCRE2_OFFSET)0)
 
 /* Generic types for opaque structures and JIT callback functions. These
 declarations are defined in a macro that is expanded for each width later. */

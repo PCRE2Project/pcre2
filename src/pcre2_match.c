@@ -6332,7 +6332,7 @@ smaller. */
 
 mb->match_limit = (mcontext->match_limit < re->limit_match)?
                   mcontext->match_limit : re->limit_match;
-mb->match_limit_recursion = (mcontext->recursion_limit > re->limit_recursion)?
+mb->match_limit_recursion = (mcontext->recursion_limit < re->limit_recursion)?
                             mcontext->recursion_limit : re->limit_recursion;
                             
 /* Pointers to the individual character tables */
@@ -6380,7 +6380,7 @@ switch(newline)
 
   default: return PCRE2_ERROR_INTERNAL;
   }
-
+  
 /* If the expression has got more back references than the offsets supplied can
 hold, we get a temporary chunk of memory to use during the matching. Otherwise,
 we can use the vector supplied. The size of the ovector is three times the

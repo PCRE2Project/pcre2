@@ -6782,12 +6782,16 @@ for (;;)
 
     /* If it was a capturing subpattern, check to see if it contained any
     recursive back references. If so, we must wrap it in atomic brackets.
-    In any event, remove the block from the chain. */
+    Because we are moving code along, we must ensure that any pending recursive
+    references are updated. In any event, remove the block from the chain. */
 
     if (capnumber > 0)
       {
       if (cb->open_caps->flag)
         {
+        *code = OP_END;
+        adjust_recurse(start_bracket, 1 + LINK_SIZE,
+          (options & PCRE2_UTF) != 0, cb, cb->hwm);
         memmove(start_bracket + 1 + LINK_SIZE, start_bracket,
           CU2BYTES(code - start_bracket));
         *start_bracket = OP_ONCE;
@@ -7717,11 +7721,18 @@ subpattern. */
 
 if (errorcode == 0 && re->top_backref > re->top_bracket) errorcode = ERR15;
 
-/* Unless disabled, check whether single character iterators can be
-auto-possessified. The function overwrites the appropriate opcode values. */
+/* Unless disabled, check whether any single character iterators can be
+auto-possessified. The function overwrites the appropriate opcode values, so
+the type of the pointer must be cast. NOTE: the intermediate variable "temp" is
+used in this code because at least one compiler gives a warning about loss of
+"const" attribute if the cast (PCRE2_UCHAR *)codestart is used directly in the
+function call. */
 
 if ((options & PCRE2_NO_AUTO_POSSESS) == 0)
-  PRIV(auto_possessify)((PCRE2_UCHAR *)codestart, utf, &cb);
+  {
+  PCRE2_UCHAR *temp = (PCRE2_UCHAR *)codestart; 
+  PRIV(auto_possessify)(temp, utf, &cb);
+  } 
 
 /* If there were any lookbehind assertions that contained OP_RECURSE
 (recursions or subroutine calls), a flag is set for them to be checked here,
