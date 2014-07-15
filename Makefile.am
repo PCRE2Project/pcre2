@@ -489,10 +489,10 @@ endif # WITH_GCOV
 
 ## When the 8-bit library is configured, pcre2grep will have been built.
 
-#if WIDH_PCRE8
-#TESTS += RunGrepTest
-#dist_noinst_SCRIPTS += RunGrepTest
-#endif # WITH_PCRE8
+if WITH_PCRE8
+TESTS += RunGrepTest
+dist_noinst_SCRIPTS += RunGrepTest
+endif # WITH_PCRE8
 
 ## Distribute all the test data files
 
