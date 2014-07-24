@@ -119,6 +119,7 @@ size_t left, right;
 size_t p = 0;
 PCRE2_SPTR subject = match_data->subject;
 if (stringnumber >= match_data->oveccount ||
+    stringnumber > match_data->code->top_bracket ||
     (left = match_data->ovector[stringnumber*2]) == PCRE2_UNSET)
   return PCRE2_ERROR_NOSUBSTRING;
 right = match_data->ovector[stringnumber*2+1];
@@ -203,6 +204,7 @@ PCRE2_UCHAR *yield;
 
 PCRE2_SPTR subject = match_data->subject;
 if (stringnumber >= match_data->oveccount ||
+    stringnumber > match_data->code->top_bracket ||
     (left = match_data->ovector[stringnumber*2]) == PCRE2_UNSET)
   return PCRE2_ERROR_NOSUBSTRING;
 right = match_data->ovector[stringnumber*2+1];
@@ -293,6 +295,7 @@ pcre2_substring_length_bynumber(pcre2_match_data *match_data,
   int stringnumber)
 {
 if (stringnumber >= match_data->oveccount ||
+    stringnumber > match_data->code->top_bracket ||
     match_data->ovector[stringnumber*2] == PCRE2_UNSET)
   return PCRE2_ERROR_NOSUBSTRING;
 return match_data->ovector[stringnumber*2 + 1] -

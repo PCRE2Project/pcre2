@@ -561,7 +561,7 @@ enum { ERR0 = COMPILE_ERROR_BASE,
        ERR41, ERR42, ERR43, ERR44, ERR45, ERR46, ERR47, ERR48, ERR49, ERR50, 
        ERR51, ERR52, ERR53, ERR54, ERR55, ERR56, ERR57, ERR58, ERR59, ERR60, 
        ERR61, ERR62, ERR63, ERR64, ERR65, ERR66, ERR67, ERR68, ERR69, ERR70, 
-       ERR71, ERR72, ERR73, ERR74, ERR75, ERR76, ERR77 }; 
+       ERR71, ERR72, ERR73, ERR74, ERR75, ERR76, ERR77, ERR78 }; 
 
 /* This is a table of start-of-pattern options such as (*UTF) and settings such
 as (*LIMIT_MATCH=nnnn) and (*CRLF). For completeness and backward
@@ -1703,10 +1703,10 @@ else
       ptr += 4;
       if (utf)
         {
-        if (c > 0x10ffffU) *errorcodeptr = ERR76;
+        if (c > 0x10ffffU) *errorcodeptr = ERR77;
           else if (c >= 0xd800 && c <= 0xdfff) *errorcodeptr = ERR73;  
         }
-      else if (c > MAX_NON_UTF_CHAR) *errorcodeptr = ERR76; 
+      else if (c > MAX_NON_UTF_CHAR) *errorcodeptr = ERR77; 
       }
     break;
 
@@ -1815,12 +1815,11 @@ else
     recommended to avoid the ambiguities in the old syntax.
 
     Outside a character class, the digits are read as a decimal number. If the
-    number is less than 8 (used to be 10), or if there are that many previous
-    extracting left brackets, then it is a back reference. Otherwise, up to
-    three octal digits are read to form an escaped byte. Thus \123 is likely to
-    be octal 123 (cf \0123, which is octal 012 followed by the literal 3). If
-    the octal value is greater than 377, the least significant 8 bits are
-    taken. \8 and \9 are treated as the literal characters 8 and 9.
+    number is less than 10, or if there are that many previous extracting left
+    brackets, it is a back reference. Otherwise, up to three octal digits are
+    read to form an escaped byte. Thus \123 is likely to be octal 123 (cf
+    \0123, which is octal 012 followed by the literal 3). If the octal value is
+    greater than 377, the least significant 8 bits are taken.
 
     Inside a character class, \ followed by a digit is always either a literal
     8 or 9 or an octal number. */
@@ -1832,7 +1831,7 @@ else
       {
       oldptr = ptr;
       /* The integer range is limited by the machine's int representation. */
-      s = (int)(c -CHAR_0);
+      s = (int)(c - CHAR_0);
       overflow = FALSE;
       while (IS_DIGIT(ptr[1]))
         {
@@ -1849,7 +1848,7 @@ else
         *errorcodeptr = ERR61;
         break;
         }
-      if (s < 8 || s <= cb->bracount)  /* Check for back reference */
+      if (s < 10 || s <= cb->bracount)  /* Check for back reference */
         {
         escape = -s;
         break;
@@ -1886,7 +1885,7 @@ else
 
     case CHAR_o:
     if (ptr[1] != CHAR_LEFT_CURLY_BRACKET) *errorcodeptr = ERR55; else
-    if (ptr[2] == CHAR_RIGHT_CURLY_BRACKET) *errorcodeptr = ERR77; else 
+    if (ptr[2] == CHAR_RIGHT_CURLY_BRACKET) *errorcodeptr = ERR78; else 
       {
       ptr += 2;
       c = 0;
@@ -1947,7 +1946,7 @@ else
         ptr += 2;
         if (*ptr == CHAR_RIGHT_CURLY_BRACKET)
           {
-          *errorcodeptr = ERR77;
+          *errorcodeptr = ERR78;
           break;
           }    
         c = 0;
@@ -1955,12 +1954,12 @@ else
         
         while ((cc = XDIGIT(*ptr)) != 0xff)
           {
+          ptr++;
           if (c == 0 && cc == 0) continue;   /* Leading zeroes */
 #if PCRE2_CODE_UNIT_WIDTH == 32
           if (c >= 0x10000000l) { overflow = TRUE; break; }
 #endif
           c = (c << 4) | cc;
-          ptr++;
           if ((utf && c > 0x10ffffU) || (!utf && c > MAX_NON_UTF_CHAR))
             {
             overflow = TRUE;
@@ -2002,9 +2001,9 @@ else
     break;
 
     /* For \c, a following letter is upper-cased; then the 0x40 bit is flipped.
-    An error is given if the byte following \c is not an ASCII character. This
-    coding is ASCII-specific, but then the whole concept of \cx is
-    ASCII-specific. (However, an EBCDIC equivalent has now been added.) */
+    An error is given if the byte following \c is not a printable ASCII
+    character. This coding is ASCII-specific, but then the whole concept of \cx
+    is ASCII-specific. (However, an EBCDIC equivalent has now been added.) */
 
     case CHAR_c:
     c = *(++ptr);
@@ -2014,7 +2013,7 @@ else
       break;
       }
 #ifndef EBCDIC    /* ASCII/UTF-8 coding */
-    if (c > 127)  /* Excludes all non-ASCII in either mode */
+    if (c < 32 || c > 126)  /* Excludes all non-printable ASCII */
       {
       *errorcodeptr = ERR68;
       break;
@@ -3820,7 +3819,7 @@ for (;; ptr++)
           {
           ptr += 2;
           if (*ptr == CHAR_BACKSLASH && ptr[1] == CHAR_E)
-            { ptr += 2; goto CONTINUE_CLASS; }
+            { ptr += 2; continue; }
           inescq = TRUE;
           break;
           }
@@ -4981,7 +4980,7 @@ for (;; ptr++)
         arglen = (int)(ptr - arg);
         if ((unsigned int)arglen > MAX_MARK)
           {
-          *errorcodeptr = ERR75;
+          *errorcodeptr = ERR76;
           goto FAILED;
           }
         }
@@ -6533,10 +6532,10 @@ Arguments:
   reset_bracount    TRUE to reset the count for each branch
   skipunits         skip this many code units at start (for brackets and OP_COND) 
   cond_depth        depth of nesting for conditional subpatterns
-  firstcuptr      place to put the first required code unit 
-  firstcuflagsptr place to put the first code unit flags, or a negative number 
-  reqcuptr        place to put the last required code unit 
-  reqcuflagsptr   place to put the last required code unit flags, or a negative number 
+  firstcuptr        place to put the first required code unit 
+  firstcuflagsptr   place to put the first code unit flags, or a negative number 
+  reqcuptr          place to put the last required code unit 
+  reqcuflagsptr     place to put the last required code unit flags, or a negative number 
   bcptr             pointer to the chain of currently open branches 
   cb                points to the data block with tables pointers etc. 
   lengthptr         NULL during the real compile phase  
@@ -6548,10 +6547,9 @@ Returns:            TRUE on success
 static BOOL
 compile_regex(uint32_t options, PCRE2_UCHAR **codeptr, PCRE2_SPTR *ptrptr,
   int *errorcodeptr, BOOL lookbehind, BOOL reset_bracount, int skipunits,
-  int cond_depth,
-  uint32_t *firstcuptr, int32_t *firstcuflagsptr,
-  uint32_t *reqcuptr, int32_t *reqcuflagsptr,
-  branch_chain *bcptr, compile_block *cb, size_t *lengthptr)
+  int cond_depth, uint32_t *firstcuptr, int32_t *firstcuflagsptr,
+  uint32_t *reqcuptr, int32_t *reqcuflagsptr, branch_chain *bcptr, 
+  compile_block *cb, size_t *lengthptr)
 {
 PCRE2_SPTR ptr = *ptrptr;
 PCRE2_UCHAR *code = *codeptr;
@@ -6569,15 +6567,13 @@ unsigned int orig_bracount;
 unsigned int max_bracount;
 branch_chain bc;
 
-#ifdef FIXME
 /* If set, call the external function that checks for stack availability. */
 
-if (ccontext->stack_guard != NULL && ccontext->stack_guard(0))
+if (cb->cx->stack_guard != NULL && cb->cx->stack_guard(cb->parens_depth))
   {
   *errorcodeptr= ERR33;
   return FALSE;
   }
-#endif   
 
 /* Miscellaneous initialization */
 
@@ -7434,7 +7430,11 @@ while (ptr[skipatstart] == CHAR_LEFT_PARENTHESIS &&
           if (c > UINT32_MAX / 10 - 1) break;   /* Integer overflow */
           c = c*10 + ptr[pp++] - CHAR_0;
           }
-        if (ptr[pp++] != CHAR_RIGHT_PARENTHESIS) goto END_PSO;
+        if (ptr[pp++] != CHAR_RIGHT_PARENTHESIS) 
+          {
+          errorcode = ERR60; 
+          goto HAD_ERROR;
+          } 
         if (p->type == PSO_LIMM) limit_match = c;
           else limit_recursion = c;
         skipatstart += pp - skipatstart;
@@ -7443,12 +7443,11 @@ while (ptr[skipatstart] == CHAR_LEFT_PARENTHESIS &&
       break;   /* Out of the table scan loop */   
       }
     }
-  if (i > sizeof(pso_list)/sizeof(pso)) break;   /* Out of pso loop */
+  if (i >= sizeof(pso_list)/sizeof(pso)) break;   /* Out of pso loop */
   }
 
 /* End of pattern-start options; advance to start of real regex. */
 
-END_PSO:
 ptr += skipatstart;
 
 /* Can't support UTF or UCP unless PCRE2 has been compiled with UTF support. */
@@ -7476,6 +7475,15 @@ if (utf)
        (errorcode = PRIV(valid_utf)(pattern, -1, erroroffset)) != 0)
     goto HAD_ERROR;
   }   
+  
+/* Check UCP lockout. */
+
+if ((cb.external_options & (PCRE2_UCP|PCRE2_NEVER_UCP)) == 
+    (PCRE2_UCP|PCRE2_NEVER_UCP))
+  {
+  errorcode = ERR75;
+  goto HAD_ERROR;
+  }       
 
 /* Process the BSR setting. */
 

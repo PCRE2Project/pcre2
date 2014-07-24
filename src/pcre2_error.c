@@ -148,15 +148,16 @@ static const char compile_error_texts[] =
   "different names for subpatterns of the same number are not allowed\0"
   "(*MARK) must have an argument\0"
   "non-hex character in \\x{} (closing brace missing?)\0"
-  "\\c must be followed by an ASCII character\0"
+  "\\c must be followed by a printable ASCII character\0"
   "\\k is not followed by a braced, angle-bracketed, or quoted name\0"
   /* 70 */
   "internal error: unknown opcode in find_fixedlength()\0"
   "\\N is not supported in a class\0"
   "too many forward references\0"
   "disallowed Unicode code point (>= 0xd800 && <= 0xdfff)\0"
-  "using (*UTF) is disabled by the application\0"
+  "using UTF is disabled by the application\0"
   /* 75 */
+  "using UCP is disabled by the application\0"
   "name is too long in (*MARK), (*PRUNE), (*SKIP), or (*THEN)\0"
   "character code point value in \\u.... sequence is too large\0"
   "digits missing in \\x{} or \\o{}\0" 
@@ -223,7 +224,7 @@ static const char match_error_texts[] =
   "JIT stack limit reached\0"
   "match limit exceeded\0"
   "no more memory\0"
-  "unknown substring\0" 
+  "unknown or unset substring\0" 
   /* 50 */ 
   "NULL argument passed\0"
   "nested recursion at the same subject position\0"

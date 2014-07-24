@@ -6782,6 +6782,12 @@ ENDLOOP:
 release_match_heapframes(&frame_zero, mb);
 #endif
 
+/* Fill in fields that are always returned in the match data. */
+
+match_data->code = re;
+match_data->subject = subject;
+match_data->mark = mb->mark;
+
 /* Handle a fully successful match. */
 
 if (rc == MATCH_MATCH || rc == MATCH_ACCEPT)
@@ -6841,26 +6847,27 @@ if (rc == MATCH_MATCH || rc == MATCH_ACCEPT)
     match_data->ovector[0] = mb->start_match_ptr - mb->start_subject;
     match_data->ovector[1] = mb->end_match_ptr - mb->start_subject;
     }
+    
+  /* Set the remaining returned values */
 
-  /* Fill in the remaining fields that are returned in the match data. */
-
-  match_data->code = re;
-  match_data->subject = subject;
   match_data->leftchar = mb->start_used_ptr - subject;
   match_data->rightchar = 0;  /* FIXME */
   match_data->startchar = start_match - subject;
-  match_data->mark = mb->mark;
   return match_data->rc;
   }
 
 /* Control gets here if there has been a partial match, an error, or if the
-overall match attempt has failed at all permitted starting positions. For
-anything other than nomatch or partial match, just return the code. */
+overall match attempt has failed at all permitted starting positions. Any mark 
+data is in the nomatch_mark field. */
+
+match_data->mark = mb->nomatch_mark;
+
+/* For anything other than nomatch or partial match, just return the code. */
 
 if (rc != MATCH_NOMATCH && rc != PCRE2_ERROR_PARTIAL)
   match_data->rc = rc;
 
-/* Handle a partial match. */
+/* Else handle a partial match. */
 
 else if (match_partial != NULL)
   {
@@ -6870,16 +6877,16 @@ else if (match_partial != NULL)
     match_data->ovector[1] = end_subject - subject;
     }
   match_data->leftchar = start_partial - subject;
+  match_data->rightchar = 0;  /* FIXME */
+  match_data->startchar = match_partial - subject;
   match_data->rc = PCRE2_ERROR_PARTIAL;
   }
 
-/* This is the classic nomatch case. */
+/* Else this is the classic nomatch case. */
 
-else
-  {
-  match_data->rc = PCRE2_ERROR_NOMATCH;
-  match_data->mark = mb->nomatch_mark;
-  }
+else match_data->rc = PCRE2_ERROR_NOMATCH;
+
+/* Free any temporary offsets. */
 
 if (using_temporary_offsets)
   mb->memctl.free(mb->ovector, mb->memctl.memory_data);
