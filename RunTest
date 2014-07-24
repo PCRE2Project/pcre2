@@ -50,7 +50,7 @@
 
 title1="Test 1: Main functionality (Compatible with Perl >= 5.10)"
 title2="Test 2: API, errors, internals, and non-Perl stuff"
-#title3="Test 3: Locale-specific features"
+title3="Test 3: Locale-specific features"
 #title4A="Test 4: UTF"
 #title4B=" support (Compatible with Perl >= 5.10)"
 #title5="Test 5: API, internals, and non-Perl stuff for UTF"
@@ -81,7 +81,7 @@ maxtest=2
 if [ $# -eq 1 -a "$1" = "list" ]; then
   echo $title1
   echo $title2 "(not UTF)"
-#  echo $title3
+  echo $title3
 #  echo $title4A $title4B
 #  echo $title5 support
 #  echo $title6
@@ -174,7 +174,7 @@ unset cp ls mv rm
 
 do1=no
 do2=no
-#do3=no
+do3=no
 #do4=no
 #do5=no
 #do6=no
@@ -203,7 +203,7 @@ while [ $# -gt 0 ] ; do
   case $1 in
     1) do1=yes;;
     2) do2=yes;;
-#    3) do3=yes;;
+    3) do3=yes;;
 #    4) do4=yes;;
 #    5) do5=yes;;
 #    6) do6=yes;;
@@ -346,8 +346,8 @@ fi
 # If no specific tests were requested, select all. Those that are not
 # relevant will be automatically skipped.
 
-if [ $do1  = no -a $do2  = no ]; then
-#     -a $do3  = no -a $do4  = no -a \
+if [ $do1  = no -a $do2  = no -a $do3  = no ]; then
+#     -a $do4  = no -a \
 #     $do5  = no -a $do6  = no -a $do7  = no -a $do8  = no -a \
 #     $do9  = no -a $do10 = no -a $do11 = no -a $do12 = no -a \
 #     $do13 = no -a $do14 = no -a $do15 = no -a $do16 = no -a \
@@ -357,7 +357,7 @@ if [ $do1  = no -a $do2  = no ]; then
 
   do1=yes
   do2=yes
-#  do3=yes
+  do3=yes
 #  do4=yes
 #  do5=yes
 #  do6=yes
@@ -446,77 +446,76 @@ if [ $do2 = yes ] ; then
   done
 fi
 
-## Locale-specific tests, provided that either the "fr_FR" or the "french"
-## locale is available. The former is the Unix-like standard; the latter is
-## for Windows. Another possibility is "fr". Unfortunately, different versions
-## of the French locale give different outputs for some items. This test passes
-## if the output matches any one of the alternative output files.
-#
-#if [ $do3 = yes ] ; then
-#  locale -a | grep '^fr_FR$' >/dev/null
-#  if [ $? -eq 0 ] ; then
-#    locale=fr_FR
-#    infile=$testdata/testinput3
-#    outfile=$testdata/testoutput3
-#    outfile2=$testdata/testoutput3A
-#    outfile3=$testdata/testoutput3B
-#  else
-#    infile=test3input
-#    outfile=test3output
-#    outfile2=test3outputA
-#    outfile3=test3outputB
-#    locale -a | grep '^french$' >/dev/null
-#    if [ $? -eq 0 ] ; then
-#      locale=french
-#      sed 's/fr_FR/french/' $testdata/testinput3 >test3input
-#      sed 's/fr_FR/french/' $testdata/testoutput3 >test3output
-#      sed 's/fr_FR/french/' $testdata/testoutput3A >test3outputA
-#      sed 's/fr_FR/french/' $testdata/testoutput3B >test3outputB
-#    else
-#      locale -a | grep '^fr$' >/dev/null
-#      if [ $? -eq 0 ] ; then
-#        locale=fr
-#        sed 's/fr_FR/fr/' $testdata/intestinput3 >test3input
-#        sed 's/fr_FR/fr/' $testdata/intestoutput3 >test3output
-#        sed 's/fr_FR/fr/' $testdata/intestoutput3A >test3outputA
-#        sed 's/fr_FR/fr/' $testdata/intestoutput3B >test3outputB
-#      else
-#        locale=
-#      fi
-#    fi
-#  fi
-#
-#  if [ "$locale" != "" ] ; then
-#    echo $title3 "(using '$locale' locale)"
-#    for opt in "" "-s" $jitopt; do
-#      $sim $valgrind ./pcre2test -q $bmode $opt $infile testtry
-#      if [ $? = 0 ] ; then
-#        if $cf $outfile testtry >teststdout || \
-#           $cf $outfile2 testtry >teststdout || \
-#           $cf $outfile3 testtry >teststdout
-#        then
-#          if [ "$opt" = "-s" ] ; then echo "  OK with study"
-#          elif [ "$opt" = "-s+" ] ; then echo "  OK with JIT study"
-#          else echo "  OK"
-#          fi
-#        else
-#          echo "** Locale test did not run successfully. The output did not match"
-#          echo "   $outfile, $outfile2 or $outfile3."
-#          echo "   This may mean that there is a problem with the locale settings rather"
-#          echo "   than a bug in PCRE."
-#          exit 1
-#        fi
-#      else exit 1
-#      fi
-#    done
-#  else
-#    echo "Cannot test locale-specific features - none of the 'fr_FR', 'fr' or"
-#    echo "'french' locales exist, or the \"locale\" command is not available"
-#    echo "to check for them."
-#    echo " "
-#  fi
-#fi
-#
+# Locale-specific tests, provided that either the "fr_FR" or the "french"
+# locale is available. The former is the Unix-like standard; the latter is
+# for Windows. Another possibility is "fr". Unfortunately, different versions
+# of the French locale give different outputs for some items. This test passes
+# if the output matches any one of the alternative output files.
+
+if [ $do3 = yes ] ; then
+  locale -a | grep '^fr_FR$' >/dev/null
+  if [ $? -eq 0 ] ; then
+    locale=fr_FR
+    infile=$testdata/testinput3
+    outfile=$testdata/testoutput3
+    outfile2=$testdata/testoutput3A
+    outfile3=$testdata/testoutput3B
+  else
+    infile=test3input
+    outfile=test3output
+    outfile2=test3outputA
+    outfile3=test3outputB
+    locale -a | grep '^french$' >/dev/null
+    if [ $? -eq 0 ] ; then
+      locale=french
+      sed 's/fr_FR/french/' $testdata/testinput3 >test3input
+      sed 's/fr_FR/french/' $testdata/testoutput3 >test3output
+      sed 's/fr_FR/french/' $testdata/testoutput3A >test3outputA
+      sed 's/fr_FR/french/' $testdata/testoutput3B >test3outputB
+    else
+      locale -a | grep '^fr$' >/dev/null
+      if [ $? -eq 0 ] ; then
+        locale=fr
+        sed 's/fr_FR/fr/' $testdata/intestinput3 >test3input
+        sed 's/fr_FR/fr/' $testdata/intestoutput3 >test3output
+        sed 's/fr_FR/fr/' $testdata/intestoutput3A >test3outputA
+        sed 's/fr_FR/fr/' $testdata/intestoutput3B >test3outputB
+      else
+        locale=
+      fi
+    fi
+  fi
+
+  if [ "$locale" != "" ] ; then
+    echo $title3 "(using '$locale' locale)"
+    for opt in "" $jitopt; do
+      $sim $valgrind ./pcre2test -q $bmode $opt $infile testtry
+      if [ $? = 0 ] ; then
+        if $cf $outfile testtry >teststdout || \
+           $cf $outfile2 testtry >teststdout || \
+           $cf $outfile3 testtry >teststdout
+        then
+          if [ "$opt" = "-jit" ] ; then echo "  OK with JIT"
+          else echo "  OK"
+          fi
+        else
+          echo "** Locale test did not run successfully. The output did not match"
+          echo "   $outfile, $outfile2 or $outfile3."
+          echo "   This may mean that there is a problem with the locale settings rather"
+          echo "   than a bug in PCRE2."
+          exit 1
+        fi
+      else exit 1
+      fi
+    done
+  else
+    echo "Cannot test locale-specific features - none of the 'fr_FR', 'fr' or"
+    echo "'french' locales exist, or the \"locale\" command is not available"
+    echo "to check for them."
+    echo " "
+  fi
+fi
+
 ## Additional tests for UTF support
 #
 #if [ $do4 = yes ] ; then

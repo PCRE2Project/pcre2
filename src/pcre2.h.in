@@ -480,7 +480,7 @@ PCRE2_EXP_DECL void      pcre2_jit_stack_free(pcre2_jit_stack *);
 #define PCRE2_OTHER_FUNCTIONS \
 PCRE2_EXP_DECL int       pcre2_get_error_message(int, PCRE2_UCHAR *, size_t); \
 PCRE2_EXP_DECL \
-  const unsigned char   *pcre2_maketables(pcre2_general_context *); \
+  const uint8_t         *pcre2_maketables(pcre2_general_context *); \
 PCRE2_EXP_DECL int       pcre2_pattern_to_host_byte_order(pcre2_code *);
 
 

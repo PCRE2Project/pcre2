@@ -39,9 +39,9 @@ POSSIBILITY OF SUCH DAMAGE.
 */
 
 
-/* This module contains the external function pcre_maketables(), which builds
-character tables for PCRE in the current locale. The file is compiled on its
-own as part of the PCRE library. However, it is also included in the
+/* This module contains the external function pcre2_maketables(), which builds
+character tables for PCRE2 in the current locale. The file is compiled on its
+own as part of the PCRE2 library. However, it is also included in the
 compilation of dftables.c, in which case the macro DFTABLES is defined. */
 
 #ifndef DFTABLES
@@ -60,31 +60,26 @@ compilation of dftables.c, in which case the macro DFTABLES is defined. */
 /* This function builds a set of character tables for use by PCRE2 and returns
 a pointer to them. They are build using the ctype functions, and consequently
 their contents will depend upon the current locale setting. When compiled as
-part of the library, the store is obtained via the context malloc, but when
-compiled inside dftables, use malloc().
+part of the library, the store is obtained via a general context malloc, if 
+supplied, but otherwise via malloc().
 
-Arguments:   a PCRE2 context (for malloc)
+Arguments:   a PCRE2 general context (for malloc) or NULL
 Returns:     pointer to the contiguous block of data
 */
 
-/* FIXME: temporarily a dummy, until pcre2_internal is complete. */
-
-PCRE2_EXP_DEFN const unsigned char * PCRE2_CALL_CONVENTION
+PCRE2_EXP_DEFN const uint8_t * PCRE2_CALL_CONVENTION
 pcre2_maketables(pcre2_general_context *gcontext)
 {
-gcontext=gcontext;
-return NULL;
-
-#ifdef NEVER
-
-unsigned char *yield, *p;
+uint8_t *yield, *p;
 int i;
 
 #ifndef DFTABLES
-yield = (unsigned char*)context->malloc(tables_length);
-#else
-yield = (unsigned char*)malloc(tables_length);
+if (gcontext != NULL)
+  yield = (uint8_t *)gcontext->memctl.malloc(tables_length, 
+    gcontext->memctl.memory_data);
+else     
 #endif
+yield = (uint8_t *)malloc(tables_length);
 
 if (yield == NULL) return NULL;
 p = yield;
@@ -151,8 +146,6 @@ for (i = 0; i < 256; i++)
   }
 
 return yield;
-#endif
-
 }
 
 /* End of pcre2_maketables.c */

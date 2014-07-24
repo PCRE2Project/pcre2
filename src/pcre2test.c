@@ -5270,6 +5270,7 @@ _setmode( _fileno( stdout ), _O_BINARY );
 
 /* Initialization that does not depend on the running mode. */
 
+locale_name[0] = 0;
 memset(&def_patctl, 0, sizeof(patctl));
 memset(&def_datctl, 0, sizeof(datctl));
 def_datctl.oveccount = DEFAULT_OVECCOUNT;
