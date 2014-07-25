@@ -109,9 +109,9 @@ for (;;)
 
   $mod =~ s/mark,?//;
 
-  # "ucp" asks pcre2test to set PCRE_UCP; change this to /u for Perl
+  # "ucp" asks pcre2test to set PCRE2_UCP; change this to /u for Perl
 
-  $mod =~ s/W(?=[a-zA-Z]*$)/u/;
+  $mod =~ s/ucp,?/u/;
 
   # Remove "no_auto_possess" and "no_start_optimize" (disable PCRE2 optimizations)
 

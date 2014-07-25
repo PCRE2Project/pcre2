@@ -51,8 +51,8 @@
 title1="Test 1: Main functionality (Compatible with Perl >= 5.10)"
 title2="Test 2: API, errors, internals, and non-Perl stuff"
 title3="Test 3: Locale-specific features"
-#title4A="Test 4: UTF"
-#title4B=" support (Compatible with Perl >= 5.10)"
+title4A="Test 4: UTF"
+title4B=" and Unicode property support (Compatible with Perl >= 5.10)"
 #title5="Test 5: API, internals, and non-Perl stuff for UTF"
 #title6="Test 6: Unicode property support (Compatible with Perl >= 5.10)"
 #title7="Test 7: API, internals, and non-Perl stuff for Unicode property support"
@@ -82,7 +82,7 @@ if [ $# -eq 1 -a "$1" = "list" ]; then
   echo $title1
   echo $title2 "(not UTF)"
   echo $title3
-#  echo $title4A $title4B
+  echo $title4A $title4B
 #  echo $title5 support
 #  echo $title6
 #  echo $title7
@@ -175,7 +175,7 @@ unset cp ls mv rm
 do1=no
 do2=no
 do3=no
-#do4=no
+do4=no
 #do5=no
 #do6=no
 #do7=no
@@ -204,7 +204,7 @@ while [ $# -gt 0 ] ; do
     1) do1=yes;;
     2) do2=yes;;
     3) do3=yes;;
-#    4) do4=yes;;
+    4) do4=yes;;
 #    5) do5=yes;;
 #    6) do6=yes;;
 #    7) do7=yes;;
@@ -346,9 +346,9 @@ fi
 # If no specific tests were requested, select all. Those that are not
 # relevant will be automatically skipped.
 
-if [ $do1  = no -a $do2  = no -a $do3  = no ]; then
-#     -a $do4  = no -a \
-#     $do5  = no -a $do6  = no -a $do7  = no -a $do8  = no -a \
+if [ $do1  = no -a $do2  = no -a $do3  = no -a $do4  = no \
+   ]; then
+#     -a $do5  = no -a $do6  = no -a $do7  = no -a $do8  = no -a \
 #     $do9  = no -a $do10 = no -a $do11 = no -a $do12 = no -a \
 #     $do13 = no -a $do14 = no -a $do15 = no -a $do16 = no -a \
 #     $do17 = no -a $do18 = no -a $do19 = no -a $do20 = no -a \
@@ -358,7 +358,7 @@ if [ $do1  = no -a $do2  = no -a $do3  = no ]; then
   do1=yes
   do2=yes
   do3=yes
-#  do4=yes
+  do4=yes
 #  do5=yes
 #  do6=yes
 #  do7=yes
@@ -405,7 +405,7 @@ for bmode in "$test8" "$test16" "$test32"; do
     *)    bits=8; echo "---- Testing 8-bit library ----"; echo "";;
   esac
 
-# Primary test, compatible with JIT and all versions of Perl >= 5.8
+# Primary non-UTF test, compatible with JIT and all versions of Perl >= 5.8
 
 if [ $do1 = yes ] ; then
   echo $title1
@@ -516,28 +516,27 @@ if [ $do3 = yes ] ; then
   fi
 fi
 
-## Additional tests for UTF support
-#
-#if [ $do4 = yes ] ; then
-#  echo ${title4A}-${bits}${title4B}
-#  if [ $utf -eq 0 ] ; then
-#    echo "  Skipped because UTF-$bits support is not available"
-#  else
-#    for opt in "" "-s" $jitopt; do
-#      $sim $valgrind ./pcre2test -q $bmode $opt $testdata/testinput4 testtry
-#      if [ $? = 0 ] ; then
-#        $cf $testdata/testoutput4 testtry
-#        if [ $? != 0 ] ; then exit 1; fi
-#      else exit 1
-#      fi
-#      if [ "$opt" = "-s" ] ; then echo "  OK with study"
-#      elif [ "$opt" = "-s+" ] ; then echo "  OK with JIT study"
-#      else echo "  OK"
-#      fi
-#    done
-#  fi
-#fi
-#
+# Tests for UTF and Unicode property support
+
+if [ $do4 = yes ] ; then
+  echo ${title4A}-${bits}${title4B}
+  if [ $utf -eq 0 ] ; then
+    echo "  Skipped because UTF-$bits support is not available"
+  else
+    for opt in "" $jitopt; do
+      $sim $valgrind ./pcre2test -q $bmode $opt $testdata/testinput4 testtry
+      if [ $? = 0 ] ; then
+        $cf $testdata/testoutput4 testtry
+        if [ $? != 0 ] ; then exit 1; fi
+      else exit 1
+      fi
+      if [ "$opt" = "-jit" ] ; then echo "  OK with JIT"
+      else echo "  OK"
+      fi
+    done
+  fi
+fi
+
 #if [ $do5 = yes ] ; then
 #  echo ${title5}-${bits} support
 #  if [ $utf -eq 0 ] ; then

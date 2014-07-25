@@ -2608,7 +2608,7 @@ names.
 
 Arguments:
   ptr      pointer to the initial [
-  endptr   where to return the end pointer
+  endptr   where to return a pointer to the terminating ':', '.', or '='
 
 Returns:   TRUE or FALSE
 */
@@ -3988,13 +3988,13 @@ for (;; ptr++)
 
       CONTINUE_CLASS:
       c = *(++ptr);
-      if (c == CHAR_RIGHT_SQUARE_BRACKET && !inescq) break;  
       if (c == 0 && nestptr != NULL)
         {
         ptr = nestptr;
         nestptr = NULL;
-        c = *(++ptr);  
+        c = *(++ptr); 
         }  
+      if (c == CHAR_RIGHT_SQUARE_BRACKET && !inescq) break;  
       }   /* End of main class-processing loop */
 
     /* We will need an XCLASS if data has been placed in class_uchardata. In

@@ -1265,7 +1265,7 @@ do
       XCLASS would not have been created. This means that code points >= 255
       are always potential starters. */
 
-#ifdef SUPPORT_WIDE_CHARACTERS
+#ifdef SUPPORT_WIDE_CHARS
       case OP_XCLASS:
       if ((tcode[1 + LINK_SIZE] & XCL_HASPROP) != 0 ||
           (tcode[1 + LINK_SIZE] & (XCL_MAP|XCL_NOT)) == XCL_NOT) 
