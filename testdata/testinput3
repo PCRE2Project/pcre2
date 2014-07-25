@@ -62,39 +62,43 @@
 
 /\w/I,locale=fr_FR
 
-/^[\xc8-\xc9]/i,locale=fr_FR
+# All remaining tests are in the fr_FR locale, so set the default.
+
+#pattern locale=fr_FR
+
+/^[\xc8-\xc9]/i
     École
     école
 
-/^[\xc8-\xc9]/locale=fr_FR
+/^[\xc8-\xc9]/
     École
     *** Failers 
     école
 
-/\W+/locale=fr_FR
+/\W+/
     >>>\xaa<<<
     >>>\xba<<< 
 
-/[\W]+/locale=fr_FR
+/[\W]+/
     >>>\xaa<<<
     >>>\xba<<< 
 
-/[^[:alpha:]]+/locale=fr_FR
+/[^[:alpha:]]+/
     >>>\xaa<<<
     >>>\xba<<< 
 
-/\w+/locale=fr_FR
+/\w+/
     >>>\xaa<<<
     >>>\xba<<< 
 
-/[\w]+/locale=fr_FR
+/[\w]+/
     >>>\xaa<<<
     >>>\xba<<< 
 
-/[[:alpha:]]+/locale=fr_FR
+/[[:alpha:]]+/
     >>>\xaa<<<
     >>>\xba<<< 
     
-/[[:alpha:]][[:lower:]][[:upper:]]/IB,locale=fr_FR
+/[[:alpha:]][[:lower:]][[:upper:]]/IB
 
 # End of testinput3 

@@ -105,13 +105,17 @@ Starting code units: 0 1 2 3 4 5 6 7 8 9 A B C D E F G H I J K L M N O P
 No last code unit
 Subject length lower bound = 1
 
-/^[\xc8-\xc9]/i,locale=fr_FR
+# All remaining tests are in the fr_FR locale, so set the default.
+
+#pattern locale=fr_FR
+
+/^[\xc8-\xc9]/i
     École
  0: É
     école
  0: é
 
-/^[\xc8-\xc9]/locale=fr_FR
+/^[\xc8-\xc9]/
     École
  0: É
     *** Failers 
@@ -119,43 +123,43 @@ No match
     école
 No match
 
-/\W+/locale=fr_FR
+/\W+/
     >>>\xaa<<<
  0: >>>
     >>>\xba<<< 
  0: >>>
 
-/[\W]+/locale=fr_FR
+/[\W]+/
     >>>\xaa<<<
  0: >>>
     >>>\xba<<< 
  0: >>>
 
-/[^[:alpha:]]+/locale=fr_FR
+/[^[:alpha:]]+/
     >>>\xaa<<<
  0: >>>
     >>>\xba<<< 
  0: >>>
 
-/\w+/locale=fr_FR
-    >>>\xaa<<<
- 0: ª
-    >>>\xba<<< 
- 0: º
-
-/[\w]+/locale=fr_FR
+/\w+/
     >>>\xaa<<<
  0: ª
     >>>\xba<<< 
  0: º
 
-/[[:alpha:]]+/locale=fr_FR
+/[\w]+/
+    >>>\xaa<<<
+ 0: ª
+    >>>\xba<<< 
+ 0: º
+
+/[[:alpha:]]+/
     >>>\xaa<<<
  0: ª
     >>>\xba<<< 
  0: º
     
-/[[:alpha:]][[:lower:]][[:upper:]]/IB,locale=fr_FR
+/[[:alpha:]][[:lower:]][[:upper:]]/IB
 ------------------------------------------------------------------
         Bra
         [A-Za-z\xaa\xb5\xba\xc0-\xd6\xd8-\xf6\xf8-\xff]
