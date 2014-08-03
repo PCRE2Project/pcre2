@@ -751,7 +751,7 @@ set_start_bits(pcre2_real_code *re, PCRE2_SPTR code, BOOL utf)
 register uint32_t c;
 int yield = SSB_DONE;
 
-#if defined SUPPORT_UTF && defined COMPILE_PCRE8
+#if defined SUPPORT_UTF && PCRE2_CODE_UNIT_WIDTH == 8
 int table_limit = utf? 16:32;
 #else
 int table_limit = 32;

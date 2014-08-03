@@ -107,14 +107,14 @@ return -1;
 
 REAL_PCRE *re = (REAL_PCRE *)argument_re;
 pcre_study_data *study;
-#ifndef COMPILE_PCRE8
+#if PCRE2_CODE_UNIT_WIDTH != 8
 pcre_uchar *ptr;
 int length;
-#if defined SUPPORT_UTF && defined COMPILE_PCRE16
+#if defined SUPPORT_UTF && PCRE2_CODE_UNIT_WIDTH == 16
 BOOL utf;
 BOOL utf16_char;
-#endif /* SUPPORT_UTF && COMPILE_PCRE16 */
-#endif /* !COMPILE_PCRE8 */
+#endif
+#endif
 
 if (re == NULL) return PCRE_ERROR_NULL;
 if (re->magic_number == MAGIC_NUMBER)
@@ -134,10 +134,10 @@ re->flags = swap_uint32(re->flags);
 re->limit_match = swap_uint32(re->limit_match);
 re->limit_recursion = swap_uint32(re->limit_recursion);
 
-#if defined COMPILE_PCRE8 || defined COMPILE_PCRE16
+#if PCRE2_CODE_UNIT_WIDTH == 8 || PCRE2_CODE_UNIT_WIDTH == 16
 re->first_char = swap_uint16(re->first_char);
 re->req_char = swap_uint16(re->req_char);
-#elif defined COMPILE_PCRE32
+#elif PCRE2_CODE_UNIT_WIDTH == 32
 re->first_char = swap_uint32(re->first_char);
 re->req_char = swap_uint32(re->req_char);
 #endif
@@ -159,27 +159,27 @@ if (extra_data != NULL && (extra_data->flags & PCRE_EXTRA_STUDY_DATA) != 0)
   study->minlength = swap_uint32(study->minlength);
   }
 
-#ifndef COMPILE_PCRE8
+#if PCRE2_CODE_UNIT_WIDTH != 8
 ptr = (pcre_uchar *)re + re->name_table_offset;
 length = re->name_count * re->name_entry_size;
-#if defined SUPPORT_UTF && defined COMPILE_PCRE16
+#if defined SUPPORT_UTF && PCRE2_CODE_UNIT_WIDTH == 16
 utf = (re->options & PCRE_UTF16) != 0;
 utf16_char = FALSE;
-#endif /* SUPPORT_UTF && COMPILE_PCRE16 */
+#endif
 
 while(TRUE)
   {
   /* Swap previous characters. */
   while (length-- > 0)
     {
-#if defined COMPILE_PCRE16
+#if PCRE2_CODE_UNIT_WIDTH == 16
     *ptr = swap_uint16(*ptr);
-#elif defined COMPILE_PCRE32
+#elif PCRE2_CODE_UNIT_WIDTH == 32
     *ptr = swap_uint32(*ptr);
 #endif
     ptr++;
     }
-#if defined SUPPORT_UTF && defined COMPILE_PCRE16
+#if defined SUPPORT_UTF && PCRE2_CODE_UNIT_WIDTH == 16
   if (utf16_char)
     {
     if (HAS_EXTRALEN(ptr[-1]))
@@ -194,9 +194,9 @@ while(TRUE)
 
   /* Get next opcode. */
   length = 0;
-#if defined COMPILE_PCRE16
+#if PCRE2_CODE_UNIT_WIDTH == 16
   *ptr = swap_uint16(*ptr);
-#elif defined COMPILE_PCRE32
+#elif PCRE2_CODE_UNIT_WIDTH == 32
   *ptr = swap_uint32(*ptr);
 #endif
   switch (*ptr)
@@ -204,7 +204,7 @@ while(TRUE)
     case OP_END:
     return 0;
 
-#if defined SUPPORT_UTF && defined COMPILE_PCRE16
+#if defined SUPPORT_UTF && PCRE2_CODE_UNIT_WIDTH == 16
     case OP_CHAR:
     case OP_CHARI:
     case OP_NOT:
@@ -279,12 +279,12 @@ while(TRUE)
     case OP_XCLASS:
     /* Reverse the size of the XCLASS instance. */
     ptr++;
-#if defined COMPILE_PCRE16
+#if PCRE2_CODE_UNIT_WIDTH == 16
     *ptr = swap_uint16(*ptr);
-#elif defined COMPILE_PCRE32
+#elif PCRE2_CODE_UNIT_WIDTH == 32
     *ptr = swap_uint32(*ptr);
 #endif
-#ifndef COMPILE_PCRE32
+#if PCRE2_CODE_UNIT_WIDTH != 32
     if (LINK_SIZE > 1)
       {
       /* LINK_SIZE can be 1 or 2 in 16 bit mode. */
@@ -294,9 +294,9 @@ while(TRUE)
 #endif
     ptr++;
     length = (GET(ptr, -LINK_SIZE)) - (1 + LINK_SIZE + 1);
-#if defined COMPILE_PCRE16
+#if PCRE2_CODE_UNIT_WIDTH == 16
     *ptr = swap_uint16(*ptr);
-#elif defined COMPILE_PCRE32
+#elif PCRE2_CODE_UNIT_WIDTH == 32
     *ptr = swap_uint32(*ptr);
 #endif
     if ((*ptr & XCL_MAP) != 0)
@@ -310,7 +310,7 @@ while(TRUE)
   ptr++;
   }
 /* Control should never reach here in 16/32 bit mode. */
-#endif /* !COMPILE_PCRE8 */
+#endif
 
 
 #endif  /* NEVER */

@@ -123,19 +123,21 @@ D   is inspected during pcre2_dfa_match() execution
 #define PCRE2_JIT_PARTIAL_SOFT    0x00000002
 #define PCRE2_JIT_PARTIAL_HARD    0x00000004
 
-/* These are for pcre2_match() and pcre2_dfa_match(). */
+/* These are for pcre2_match() and pcre2_dfa_match(). Note that PCRE2_ANCHORED,
+PCRE2_NO_START_OPTIMIZE, and PCRE2_NO_UTF_CHECK can also be passed to these
+functions, so take care not to define synonyms by mistake. */
 
-#define PCRE2_NOTBOL              0x00000001
-#define PCRE2_NOTEOL              0x00000002
-#define PCRE2_NOTEMPTY            0x00000004
-#define PCRE2_NOTEMPTY_ATSTART    0x00000008
-#define PCRE2_PARTIAL_SOFT        0x00000010
-#define PCRE2_PARTIAL_HARD        0x00000020
+#define PCRE2_NOTBOL              0x00000008
+#define PCRE2_NOTEOL              0x00000010
+#define PCRE2_NOTEMPTY            0x00000020
+#define PCRE2_NOTEMPTY_ATSTART    0x00000040
+#define PCRE2_PARTIAL_SOFT        0x00000080
+#define PCRE2_PARTIAL_HARD        0x00000100
 
 /* These are additional options for pcre2_dfa_match(). */
 
-#define PCRE2_DFA_RESTART         0x00000040
-#define PCRE2_DFA_SHORTEST        0x00000080
+#define PCRE2_DFA_RESTART         0x00000200
+#define PCRE2_DFA_SHORTEST        0x00000400
 
 /* Newline and \R settings, for use in the compile and match contexts. The
 newline values must be kept in step with values set in config.h and both sets

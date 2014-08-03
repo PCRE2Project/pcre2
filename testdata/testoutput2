@@ -47,7 +47,7 @@ Subject length lower bound = 3
     abc
  0: abc
     abc\=anchored
-No match
+ 0: abc
     *** Failers
 No match
     defabc
@@ -352,7 +352,7 @@ Subject length lower bound = 3
     abcdef
  0: abc
     abcdef\=notbol
-No match
+ 0: def
 
 /.*((abc)$|(def))/I
 Capturing subpattern count = 3

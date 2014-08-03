@@ -632,7 +632,7 @@ for (;;)
 
     /* If this opcode inspects a character, but we are at the end of the
     subject, remember the fact for use when testing for a partial match. */
-
+    
     if (clen == 0 && poptable[codevalue] != 0)
       could_continue = TRUE;
 
@@ -1400,7 +1400,7 @@ for (;;)
           case 0x2028:
           case 0x2029:
 #endif  /* Not EBCDIC */
-          if ((mb->moptions & PCRE2_BSR_ANYCRLF) != 0) break;
+          if (mb->bsr_convention == PCRE2_BSR_ANYCRLF) break;
           goto ANYNL01;
 
           case CHAR_CR:
@@ -1669,7 +1669,7 @@ for (;;)
           case 0x2028:
           case 0x2029:
 #endif  /* Not EBCDIC */
-          if ((mb->moptions & PCRE2_BSR_ANYCRLF) != 0) break;
+          if (mb->bsr_convention == PCRE2_BSR_ANYCRLF) break;
           goto ANYNL02;
 
           case CHAR_CR:
@@ -1939,7 +1939,7 @@ for (;;)
           case 0x2028:
           case 0x2029:
 #endif  /* Not EBCDIC */
-          if ((mb->moptions & PCRE2_BSR_ANYCRLF) != 0) break;
+          if (mb->bsr_convention == PCRE2_BSR_ANYCRLF) break;
           goto ANYNL03;
 
           case CHAR_CR:
@@ -2121,7 +2121,7 @@ for (;;)
         case 0x2028:
         case 0x2029:
 #endif  /* Not EBCDIC */
-        if ((mb->moptions & PCRE2_BSR_ANYCRLF) != 0) break;
+        if (mb->bsr_convention == PCRE2_BSR_ANYCRLF) break;
 
         case CHAR_LF:
         ADD_NEW(state_offset + 1, 0);
@@ -2985,7 +2985,7 @@ for (;;)
 
   The "could_continue" variable is true if a state could have continued but
   for the fact that the end of the subject was reached. */
-
+  
   if (new_count <= 0)
     {
     if (rlevel == 1 &&                               /* Top level, and */
@@ -3378,7 +3378,7 @@ for (;;)
 
     /* The following two optimizations are disabled for partial matching. */
 
-    if ((mb->moptions & PCRE2_PARTIAL_HARD & PCRE2_PARTIAL_SOFT) == 0)
+    if ((mb->moptions & (PCRE2_PARTIAL_HARD|PCRE2_PARTIAL_SOFT)) == 0)
       {
       /* The minimum matching length is a lower bound; no actual string of that
       length may actually match the pattern. Although the value is, strictly,
@@ -3461,7 +3461,7 @@ for (;;)
 
   /* Anything other than "no match" means we are done, always; otherwise, carry
   on only if not anchored. */
-
+  
   if (rc != PCRE2_ERROR_NOMATCH || anchored)
     {
     if (rc == PCRE2_ERROR_PARTIAL && match_data->oveccount > 0)
@@ -3470,6 +3470,8 @@ for (;;)
       match_data->ovector[1] = (PCRE2_OFFSET)(end_subject - subject);
       }
     match_data->leftchar = (PCRE2_OFFSET)(mb->start_used_ptr - subject);
+    match_data->rightchar = 0; /* FIXME */
+    match_data->startchar = (PCRE2_OFFSET)(start_match - subject);  
     match_data->rc = rc; 
     return rc;
     }

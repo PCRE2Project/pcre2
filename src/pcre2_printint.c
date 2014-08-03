@@ -90,30 +90,26 @@ static unsigned int
 print_char(FILE *f, PCRE2_SPTR ptr, BOOL utf)
 {
 uint32_t c = *ptr;
-#if defined SUPPORT_UTF && PCRE2_CODE_UNIT_WIDTH == 8
-int a, i, s;
-#endif
+BOOL one_code_unit = !utf;
 
-/* If UTF is supported and requested, check for a one-code-unit character. The 
-16-bit and 32-bit tests are for malformed UTF, and should only trigger if the 
-sanity check is turned off. */
+/* If UTF is supported and requested, check for a valid single code unit. */
 
 #ifdef SUPPORT_UTF
 if (utf)
   {
 #if PCRE2_CODE_UNIT_WIDTH == 8
-  utf = (c & 0xc0) == 0xc0;
+  one_code_unit = c < 0x80;
 #elif PCRE2_CODE_UNIT_WIDTH == 16
-  utf = (c & 0xfc00) == 0xd800;
+  one_code_unit = (c & 0xfc00) != 0xd800;
 #else
-  utf = (c & 0xfffff800u) != 0xd800u;
+  one_code_unit = (c & 0xfffff800u) != 0xd800u;
 #endif
   }
 #endif  /* SUPPORT_UTF */  
 
-/* Handle a one-code-unit character at any width. */
+/* Handle a valid one-code-unit character at any width. */
 
-if (!utf)
+if (one_code_unit)
   {
   if (PRINTABLE(c)) fprintf(f, "%c", (char)c);
   else if (c < 0x80) fprintf(f, "\\x%02x", c);
@@ -121,41 +117,43 @@ if (!utf)
   return 0;
   } 
 
-/* Per-width code for handling non-one-code-unit UTF characters. */
+/* Per-width code for invalid UTF code units and multi-unit UTF characters. */
 
 #ifdef SUPPORT_UTF
 
-/* Handle a multi-byte UTF-8 character. */
+/* Malformed UTF-8 should occur only if the sanity check has been turned off.
+Rather than swallow random bytes, just stop if we hit a bad one. Print it with
+\X instead of \x as an indication. */
 
 #if PCRE2_CODE_UNIT_WIDTH == 8
-a = utf8_table4[c & 0x3f];  /* Number of additional bytes */
-s = 6*a;
-c = (c & utf8_table3[a]) << s;
-for (i = 1; i <= a; i++)
+if ((c & 0xc0) != 0xc0)
   {
-  /* This is a check for malformed UTF-8; it should only occur if the sanity
-  check has been turned off. Rather than swallow random bytes, just stop if
-  we hit a bad one. Print it with \X instead of \x as an indication. */
-
-  if ((ptr[i] & 0xc0) != 0x80)
+  fprintf(f, "\\X{%x}", c);       /* Invalid starting byte */
+  return 0;
+  }  
+else
+  {
+  int i; 
+  int a = utf8_table4[c & 0x3f];  /* Number of additional bytes */
+  int s = 6*a;
+  c = (c & utf8_table3[a]) << s;
+  for (i = 1; i <= a; i++)
     {
-    fprintf(f, "\\X{%x}", c);
-    return i - 1;
+    if ((ptr[i] & 0xc0) != 0x80)
+      {
+      fprintf(f, "\\X{%x}", c);   /* Invalid secondary byte */
+      return i - 1;
+      }
+    s -= 6;
+    c |= (ptr[i] & 0x3f) << s;
     }
-
-  /* The byte is OK */
-
-  s -= 6;
-  c |= (ptr[i] & 0x3f) << s;
-  }
-fprintf(f, "\\x{%x}", c);
-return a;
+  fprintf(f, "\\x{%x}", c);
+  return a;
+}   
 #endif  /* PCRE2_CODE_UNIT_WIDTH == 8 */
 
-/* Handle a multi-code-unit UTF-16 character, starting with a check for
-malformed UTF-16; it should only occur if the sanity check has been turned off.
-Rather than swallow a low surrogate, just stop if we hit a bad one. Print it
-with \X instead of \x as an indication. */
+/* UTF-16: rather than swallow a low surrogate, just stop if we hit a bad one.
+Print it with \X instead of \x as an indication. */
 
 #if PCRE2_CODE_UNIT_WIDTH == 16
 if ((ptr[1] & 0xfc00) != 0xdc00)
@@ -176,7 +174,7 @@ as an indication. */
 fprintf(f, "\\X{%x}", c);
 return 0;
 #endif  /* PCRE2_CODE_UNIT_WIDTH == 32 */
-#endif /* SUPPORT_UTF */
+#endif  /* SUPPORT_UTF */
 }
 
 

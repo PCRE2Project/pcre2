@@ -54,20 +54,21 @@ POSSIBILITY OF SUCH DAMAGE.
 by defining macros in order to minimize #if usage. */
 
 #if PCRE2_CODE_UNIT_WIDTH == 8
-#define STRING_UTFn_RIGHTPAR        STRING_UTF8_RIGHTPAR, 5
-#define XDIGIT(c)                   xdigitab[c]
+#define MAYBE_UTF_MULTI          /* UTF chars may use multiple code units */
+#define STRING_UTFn_RIGHTPAR     STRING_UTF8_RIGHTPAR, 5
+#define XDIGIT(c)                xdigitab[c]
 
 #else  /* Either 16-bit or 32-bit */
-#define XDIGIT(c)                   (MAX_255(c)? xdigitab[c] : 0xff)
+#define XDIGIT(c)                (MAX_255(c)? xdigitab[c] : 0xff)
 
 #if PCRE2_CODE_UNIT_WIDTH == 16
-#define STRING_UTFn_RIGHTPAR        STRING_UTF16_RIGHTPAR, 6
+#define MAYBE_UTF_MULTI          /* UTF chars may use multiple code units */
+#define STRING_UTFn_RIGHTPAR     STRING_UTF16_RIGHTPAR, 6
 
-#else
-#define STRING_UTFn_RIGHTPAR        STRING_UTF32_RIGHTPAR, 6
+#else  /* 33-bit */
+#define STRING_UTFn_RIGHTPAR     STRING_UTF32_RIGHTPAR, 6
 #endif
 #endif
-
 
 /* Function definitions to allow mutual recursion */
 
@@ -1308,7 +1309,7 @@ for (code = first_significant_code(code + PRIV(OP_lengths)[*code], TRUE);
     actual length is stored in the compiled code, so we must update "code"
     here. */
 
-#if defined SUPPORT_UTF || !defined COMPILE_PCRE8
+#if defined SUPPORT_UTF || PCRE2_CODE_UNIT_WIDTH != 8
     case OP_XCLASS:
     ccode = code += GET(code, 1);
     goto CHECK_CLASS_REPEAT;
@@ -1318,7 +1319,7 @@ for (code = first_significant_code(code + PRIV(OP_lengths)[*code], TRUE);
     case OP_NCLASS:
     ccode = code + PRIV(OP_lengths)[OP_CLASS];
 
-#if defined SUPPORT_UTF || !defined COMPILE_PCRE8
+#if defined SUPPORT_UTF || PCRE2_CODE_UNIT_WIDTH != 8
     CHECK_CLASS_REPEAT:
 #endif
 
@@ -1875,7 +1876,7 @@ else
     c -= CHAR_0;
     while(i++ < 2 && ptr[1] >= CHAR_0 && ptr[1] <= CHAR_7)
         c = c * 8 + *(++ptr) - CHAR_0;
-#ifdef COMPILE_PCRE8
+#if PCRE2_CODE_UNIT_WIDTH == 8
     if (!utf && c > 0xff) *errorcodeptr = ERR51;
 #endif
     break;
@@ -1894,15 +1895,15 @@ else
         {
         cc = *ptr++;
         if (c == 0 && cc == CHAR_0) continue;     /* Leading zeroes */
-#ifdef COMPILE_PCRE32
+#if PCRE2_CODE_UNIT_WIDTH == 32
         if (c >= 0x20000000l) { overflow = TRUE; break; }
 #endif
         c = (c << 3) + cc - CHAR_0 ;
-#if defined COMPILE_PCRE8
+#if PCRE2_CODE_UNIT_WIDTH == 8
         if (c > (utf ? 0x10ffffU : 0xffU)) { overflow = TRUE; break; }
-#elif defined COMPILE_PCRE16
+#elif PCRE2_CODE_UNIT_WIDTH == 16
         if (c > (utf ? 0x10ffffU : 0xffffU)) { overflow = TRUE; break; }
-#elif defined COMPILE_PCRE32
+#elif PCRE2_CODE_UNIT_WIDTH == 32
         if (utf && c > 0x10ffffU) { overflow = TRUE; break; }
 #endif
         }
@@ -2241,7 +2242,7 @@ PRIV(find_bracket)(PCRE2_SPTR code, BOOL utf, int number)
 for (;;)
   {
   register PCRE2_UCHAR c = *code;
-
+  
   if (c == OP_END) return NULL;
 
   /* XCLASS is used for classes that cannot be represented just by a bit
@@ -3039,7 +3040,6 @@ dynamically as we process the pattern. */
 #ifdef SUPPORT_UTF
 BOOL utf = (options & PCRE2_UTF) != 0;
 #if PCRE2_CODE_UNIT_WIDTH != 32
-#define MAYBE_UTF_MULTI        /* UTF chars may use multiple code units */
 PCRE2_UCHAR utf_units[6];      /* For setting up multi-cu chars */
 #endif
 
@@ -7608,7 +7608,7 @@ help in the case when a regex compiled on a system with 4-byte pointers is run
 on another with 8-byte pointers. */
 
 #ifdef FIXME
-#ifdef COMPILE_PCRE32
+#if PCRE2_CODE_UNIT_WIDTH == 32
 re->dummy = 0;
 #else
 re->dummy1 = re->dummy2 = re->dummy3 = 0;

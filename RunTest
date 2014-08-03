@@ -48,17 +48,16 @@
 # Define test titles in variables so that they can be output as a list. Some
 # of them are modified (e.g. with -8 or -16) when used in the actual tests.
 
-title1="Test 1: Main functionality (Compatible with Perl >= 5.10)"
+title1="Test 1: Main non-UTF, non-UCP functionality (compatible with Perl >= 5.10)"
 title2="Test 2: API, errors, internals, and non-Perl stuff"
 title3="Test 3: Locale-specific features"
 title4A="Test 4: UTF"
-title4B=" and Unicode property support (Compatible with Perl >= 5.10)"
-#title5="Test 5: API, internals, and non-Perl stuff for UTF"
-#title6="Test 6: Unicode property support (Compatible with Perl >= 5.10)"
-#title7="Test 7: API, internals, and non-Perl stuff for Unicode property support"
-#title8="Test 8: DFA matching main functionality"
-#title9="Test 9: DFA matching with UTF"
-#title10="Test 10: DFA matching with Unicode properties"
+title4B=" and Unicode property support (compatible with Perl >= 5.10)"
+title5A="Test 5: API, internals, and non-Perl stuff for UTF"
+title5B=" and UCP support"
+title6="Test 6: DFA matching main non-UTF, non-UCP functionality"
+title7A="Test 7: DFA matching with UTF"
+title7B=" and Unicode property support"
 #title11="Test 11: Internal offsets and code size tests"
 #title12="Test 12: JIT-specific features (when JIT is available)"
 #title13="Test 13: JIT-specific features (when JIT is not available)"
@@ -80,12 +79,12 @@ maxtest=2
 
 if [ $# -eq 1 -a "$1" = "list" ]; then
   echo $title1
-  echo $title2 "(not UTF)"
+  echo $title2 "(not UTF or UCP)"
   echo $title3
   echo $title4A $title4B
-#  echo $title5 support
-#  echo $title6
-#  echo $title7
+  echo $title5A $title5B
+  echo $title6
+  echo $title7A $title7B
 #  echo $title8
 #  echo $title9
 #  echo $title10
@@ -176,9 +175,9 @@ do1=no
 do2=no
 do3=no
 do4=no
-#do5=no
-#do6=no
-#do7=no
+do5=no
+do6=no
+do7=no
 #do8=no
 #do9=no
 #do10=no
@@ -205,9 +204,9 @@ while [ $# -gt 0 ] ; do
     2) do2=yes;;
     3) do3=yes;;
     4) do4=yes;;
-#    5) do5=yes;;
-#    6) do6=yes;;
-#    7) do7=yes;;
+    5) do5=yes;;
+    6) do6=yes;;
+    7) do7=yes;;
 #    8) do8=yes;;
 #    9) do9=yes;;
 #   10) do10=yes;;
@@ -346,9 +345,10 @@ fi
 # If no specific tests were requested, select all. Those that are not
 # relevant will be automatically skipped.
 
-if [ $do1  = no -a $do2  = no -a $do3  = no -a $do4  = no \
+if [ $do1  = no -a $do2  = no -a $do3  = no -a $do4  = no -a \
+     $do5  = no -a $do6  = no -a $do7  = no \
    ]; then
-#     -a $do5  = no -a $do6  = no -a $do7  = no -a $do8  = no -a \
+#     -a $do8  = no -a \
 #     $do9  = no -a $do10 = no -a $do11 = no -a $do12 = no -a \
 #     $do13 = no -a $do14 = no -a $do15 = no -a $do16 = no -a \
 #     $do17 = no -a $do18 = no -a $do19 = no -a $do20 = no -a \
@@ -359,9 +359,9 @@ if [ $do1  = no -a $do2  = no -a $do3  = no -a $do4  = no \
   do2=yes
   do3=yes
   do4=yes
-#  do5=yes
-#  do6=yes
-#  do7=yes
+  do5=yes
+  do6=yes
+  do7=yes
 #  do8=yes
 #  do9=yes
 #  do10=yes
@@ -425,7 +425,7 @@ fi
 # PCRE2 tests that are not JIT or Perl-compatible: API, errors, internals
 
 if [ $do2 = yes ] ; then
-  echo $title2 "(not UTF-$bits)"
+  echo $title2 "(excluding UTF-$bits)"
   for opt in "" $jitopt; do
     $sim $valgrind ./pcre2test -q $bmode $opt $testdata/testinput2 testtry
     if [ $? = 0 ] ; then
@@ -537,117 +537,53 @@ if [ $do4 = yes ] ; then
   fi
 fi
 
-#if [ $do5 = yes ] ; then
-#  echo ${title5}-${bits} support
-#  if [ $utf -eq 0 ] ; then
-#    echo "  Skipped because UTF-$bits support is not available"
-#  else
-#    for opt in "" "-s" $jitopt; do
-#      $sim $valgrind ./pcre2test -q $bmode $opt $testdata/testinput5 testtry
-#      if [ $? = 0 ] ; then
-#        $cf $testdata/testoutput5 testtry
-#        if [ $? != 0 ] ; then exit 1; fi
-#      else exit 1
-#      fi
-#      if [ "$opt" = "-s" ] ; then echo "  OK with study"
-#      elif [ "$opt" = "-s+" ] ; then echo "  OK with JIT study"
-#      else echo "  OK"
-#      fi
-#    done
-#  fi
-#fi
-#
-#if [ $do6 = yes ] ; then
-#  echo $title6
-#  if [ $utf -eq 0 -o $ucp -eq 0 ] ; then
-#    echo "  Skipped because Unicode property support is not available"
-#  else
-#    for opt in "" "-s" $jitopt; do
-#      $sim $valgrind ./pcre2test -q $bmode $opt $testdata/testinput6 testtry
-#      if [ $? = 0 ] ; then
-#        $cf $testdata/testoutput6 testtry
-#        if [ $? != 0 ] ; then exit 1; fi
-#      else exit 1
-#      fi
-#      if [ "$opt" = "-s" ] ; then echo "  OK with study"
-#      elif [ "$opt" = "-s+" ] ; then echo "  OK with JIT study"
-#      else echo "  OK"
-#      fi
-#    done
-#  fi
-#fi
-#
-## Test non-Perl-compatible Unicode property support
-#
-#if [ $do7 = yes ] ; then
-#  echo $title7
-#  if [ $utf -eq 0 -o $ucp -eq 0 ] ; then
-#    echo "  Skipped because Unicode property support is not available"
-#  else
-#    for opt in "" "-s" $jitopt; do
-#      $sim $valgrind ./pcre2test -q $bmode $opt $testdata/testinput7 testtry
-#      if [ $? = 0 ] ; then
-#        $cf $testdata/testoutput7 testtry
-#        if [ $? != 0 ] ; then exit 1; fi
-#      else exit 1
-#      fi
-#      if [ "$opt" = "-s" ] ; then echo "  OK with study"
-#      elif [ "$opt" = "-s+" ] ; then echo "  OK with JIT study"
-#      else echo "  OK"
-#      fi
-#    done
-#  fi
-#fi
-#
-## Tests for DFA matching support
-#
-#if [ $do8 = yes ] ; then
-#  echo $title8
-#  for opt in "" "-s"; do
-#    $sim $valgrind ./pcre2test -q $bmode $opt -dfa $testdata/testinput8 testtry
-#    if [ $? = 0 ] ; then
-#      $cf $testdata/testoutput8 testtry
-#      if [ $? != 0 ] ; then exit 1; fi
-#    else exit 1
-#    fi
-#    if [ "$opt" = "-s" ] ; then echo "  OK with study" ; else echo "  OK"; fi
-#  done
-#fi
-#
-#if [ $do9 = yes ] ; then
-#  echo ${title9}-${bits}
-#  if [ $utf -eq 0 ] ; then
-#    echo "  Skipped because UTF-$bits support is not available"
-#  else
-#    for opt in "" "-s"; do
-#      $sim $valgrind ./pcre2test -q $bmode $opt -dfa $testdata/testinput9 testtry
-#      if [ $? = 0 ] ; then
-#        $cf $testdata/testoutput9 testtry
-#        if [ $? != 0 ] ; then exit 1; fi
-#      else exit 1
-#      fi
-#      if [ "$opt" = "-s" ] ; then echo "  OK with study" ; else echo "  OK"; fi
-#    done
-#  fi
-#fi
-#
-#if [ $do10 = yes ] ; then
-#  echo $title10
-#  if [ $utf -eq 0 -o $ucp -eq 0 ] ; then
-#    echo "  Skipped because Unicode property support is not available"
-#  else
-#    for opt in "" "-s"; do
-#      $sim $valgrind ./pcre2test -q $bmode $opt -dfa $testdata/testinput10 testtry
-#      if [ $? = 0 ] ; then
-#        $cf $testdata/testoutput10 testtry
-#        if [ $? != 0 ] ; then exit 1; fi
-#      else exit 1
-#      fi
-#      if [ "$opt" = "-s" ] ; then echo "  OK with study" ; else echo "  OK"; fi
-#    done
-#  fi
-#fi
-#
+if [ $do5 = yes ] ; then
+  echo ${title5A}-${bits}$title5B
+  if [ $utf -eq 0 ] ; then
+    echo "  Skipped because UTF-$bits support is not available"
+  else
+    for opt in "" $jitopt; do
+      $sim $valgrind ./pcre2test -q $bmode $opt $testdata/testinput5 testtry
+      if [ $? = 0 ] ; then
+        $cf $testdata/testoutput5 testtry
+        if [ $? != 0 ] ; then exit 1; fi
+      else exit 1
+      fi
+      if [ "$opt" = "-jit" ] ; then echo "  OK with JIT"
+      else echo "  OK"
+      fi
+    done
+  fi
+fi
+
+# Tests for DFA matching support
+
+if [ $do6 = yes ] ; then
+  echo $title6
+  $sim $valgrind ./pcre2test -q $bmode $testdata/testinput6 testtry
+  if [ $? = 0 ] ; then
+    $cf $testdata/testoutput6 testtry
+    if [ $? != 0 ] ; then exit 1; fi
+  else exit 1
+  fi
+  echo "  OK"
+fi
+
+if [ $do7 = yes ] ; then
+  echo ${title7A}-${bits}$title7B
+  if [ $utf -eq 0 ] ; then
+    echo "  Skipped because UTF-$bits support is not available"
+  else
+    $sim $valgrind ./pcre2test -q $bmode $opt $testdata/testinput7 testtry
+    if [ $? = 0 ] ; then
+      $cf $testdata/testoutput7 testtry
+      if [ $? != 0 ] ; then exit 1; fi
+    else exit 1
+    fi
+    echo "  OK"
+  fi
+fi
+
 ## Test of internal offsets and code sizes. This test is run only when there
 ## is Unicode property support and the link size is 2. The actual tests are
 ## mostly the same as in some of the above, but in this test we inspect some
