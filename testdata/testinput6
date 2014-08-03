@@ -464,46 +464,46 @@
     defabcxyz
 
 /^abcdef/
-    ab\=P
-    abcde\=P
-    abcdef\=P
+    ab\=ps
+    abcde\=ps
+    abcdef\=ps
     *** Failers
-    abx\=P
+    abx\=ps
 
 /^a{2,4}\d+z/
-    a\=P
-    aa\=P
-    aa2\=P
-    aaa\=P
-    aaa23\=P
-    aaaa12345\=P
-    aa0z\=P
-    aaaa4444444444444z\=P
+    a\=ps
+    aa\=ps
+    aa2\=ps
+    aaa\=ps
+    aaa23\=ps
+    aaaa12345\=ps
+    aa0z\=ps
+    aaaa4444444444444z\=ps
     *** Failers
-    az\=P
-    aaaaa\=P
-    a56\=P
+    az\=ps
+    aaaaa\=ps
+    a56\=ps
 
 /^abcdef/
-   abc\=P
+   abc\=ps
    def\=dfa_restart
    
 /(?<=foo)bar/
-   xyzfo\=P
-   foob\=P,offset=2
-   foobar...\=P,dfa_restart,offset=4
-   xyzfo\=P
+   xyzfo\=ps
+   foob\=ps,offset=2
+   foobar...\=ps,dfa_restart,offset=4
+   xyzfo\=ps
    foobar\=offset=2
    *** Failers
-   xyzfo\=P
+   xyzfo\=ps
    obar\=dfa_restart
 
 /(ab*(cd|ef))+X/
-    adfadadaklhlkalkajhlkjahdfasdfasdfladsfjkj\=P,noteol
-    lkjhlkjhlkjhlkjhabbbbbbcdaefabbbbbbbefa\=P,notbol,noteol
-    cdabbbbbbbb\=P,notbol,dfa_restart,noteol
-    efabbbbbbbbbbbbbbbb\=P,notbol,dfa_restart,noteol
-    bbbbbbbbbbbbcdXyasdfadf\=P,notbol,dfa_restart,noteol
+    adfadadaklhlkalkajhlkjahdfasdfasdfladsfjkj\=ps,noteol
+    lkjhlkjhlkjhlkjhabbbbbbcdaefabbbbbbbefa\=ps,notbol,noteol
+    cdabbbbbbbb\=ps,notbol,dfa_restart,noteol
+    efabbbbbbbbbbbbbbbb\=ps,notbol,dfa_restart,noteol
+    bbbbbbbbbbbbcdXyasdfadf\=ps,notbol,dfa_restart,noteol
 
 /the quick brown fox/
     the quick brown fox
@@ -3961,12 +3961,12 @@
     line one\nthis is a line\nbreak in the second line 
 
 /1234/
-    123\=P
-    a4\=P,dfa_restart
+    123\=ps
+    a4\=ps,dfa_restart
 
 /1234/
-    123\=P
-    4\=P,dfa_restart
+    123\=ps
+    4\=ps,dfa_restart
 
 /^/gm
     a\nb\nc\n
@@ -4372,66 +4372,66 @@
     "ab"\=callout_none
 
 /\d+X|9+Y/
-    ++++123999\=P
-    ++++123999Y\=P
+    ++++123999\=ps
+    ++++123999Y\=ps
 
 /Z(*F)/
-    Z\=P
-    ZA\=P
+    Z\=ps
+    ZA\=ps
     
 /Z(?!)/
-    Z\=P
-    ZA\=P
+    Z\=ps
+    ZA\=ps
 
 /dog(sbody)?/
-    dogs\=P
-    dogs\=PP
+    dogs\=ps
+    dogs\=ph
     
 /dog(sbody)??/
-    dogs\=P
-    dogs\=PP
+    dogs\=ps
+    dogs\=ph
 
 /dog|dogsbody/
-    dogs\=P
-    dogs\=PP
+    dogs\=ps
+    dogs\=ph
  
 /dogsbody|dog/
-    dogs\=P
-    dogs\=PP
+    dogs\=ps
+    dogs\=ph
 
 /Z(*F)Q|ZXY/
-    Z\=P
-    ZA\=P
-    X\=P
+    Z\=ps
+    ZA\=ps
+    X\=ps
 
 /\bthe cat\b/
-    the cat\=P
-    the cat\=PP
+    the cat\=ps
+    the cat\=ph
 
 /dog(sbody)?/
-    dogs\=P
+    dogs\=ps
     body\=dfa_restart
 
 /dog(sbody)?/
-    dogs\=PP
+    dogs\=ph
     body\=dfa_restart
 
 /abc/
-   abc\=P
-   abc\=PP
+   abc\=ps
+   abc\=ph
 
 /abc\K123/
     xyzabc123pqr
     
 /(?<=abc)123/
     xyzabc123pqr 
-    xyzabc12\=P
-    xyzabc12\=PP
+    xyzabc12\=ps
+    xyzabc12\=ph
 
 /\babc\b/
     +++abc+++
-    +++ab\=P
-    +++ab\=PP
+    +++ab\=ps
+    +++ab\=ph
 
 /(?=C)/g,aftertext
     ABCDECBA
@@ -4455,25 +4455,25 @@
     thejk;adlfj aenjl;fda asdfasd ehj;kjxyasiupd\=no_start_optimize
 
 /abcd*/aftertext
-    xxxxabcd\=P
-    xxxxabcd\=PP
+    xxxxabcd\=ps
+    xxxxabcd\=ph
     dddxxx\=dfa_restart
-    xxxxabcd\=PP
+    xxxxabcd\=ph
     xxx\=dfa_restart
 
 /abcd*/i
-    xxxxabcd\=P
-    xxxxabcd\=PP
-    XXXXABCD\=P
-    XXXXABCD\=PP
+    xxxxabcd\=ps
+    xxxxabcd\=ph
+    XXXXABCD\=ps
+    XXXXABCD\=ph
 
 /abc\d*/
-    xxxxabc1\=P
-    xxxxabc1\=PP
+    xxxxabc1\=ps
+    xxxxabc1\=ph
 
 /abc[de]*/
-    xxxxabcde\=P
-    xxxxabcde\=PP
+    xxxxabcde\=ps
+    xxxxabcde\=ph
 
 /(?:(?1)|B)(A(*F)|C)/
     ABCD
@@ -4508,40 +4508,40 @@
     ac
 
 /(?<=abc)def/
-    abc\=PP
+    abc\=ph
 
 /abc$/
     abc
-    abc\=P
-    abc\=PP
+    abc\=ps
+    abc\=ph
 
 /abc$/m
     abc
     abc\n
-    abc\=PP
-    abc\n\=PP
-    abc\=P
-    abc\n\=P
+    abc\=ph
+    abc\n\=ph
+    abc\=ps
+    abc\n\=ps
 
 /abc\z/
     abc
-    abc\=P
-    abc\=PP
+    abc\=ps
+    abc\=ph
 
 /abc\Z/
     abc
-    abc\=P
-    abc\=PP
+    abc\=ps
+    abc\=ph
 
 /abc\b/
     abc
-    abc\=P
-    abc\=PP
+    abc\=ps
+    abc\=ph
 
 /abc\B/
     abc
-    abc\=P
-    abc\=PP
+    abc\=ps
+    abc\=ph
 
 /.+/
     abc\=offset=0
@@ -4654,77 +4654,77 @@
     abZdeX
 
 /^\R/
-    \r\=P
-    \r\=PP
+    \r\=ps
+    \r\=ph
     
 /^\R{2,3}x/
-    \r\=P
-    \r\=PP
-    \r\r\=P
-    \r\r\=PP
-    \r\r\r\=P
-    \r\r\r\=PP
+    \r\=ps
+    \r\=ph
+    \r\r\=ps
+    \r\r\=ph
+    \r\r\r\=ps
+    \r\r\r\=ph
     \r\rx
     \r\r\rx    
 
 /^\R{2,3}?x/
-    \r\=P
-    \r\=PP
-    \r\r\=P
-    \r\r\=PP
-    \r\r\r\=P
-    \r\r\r\=PP
+    \r\=ps
+    \r\=ph
+    \r\r\=ps
+    \r\r\=ph
+    \r\r\r\=ps
+    \r\r\r\=ph
     \r\rx
     \r\r\rx    
     
 /^\R?x/
-    \r\=P
-    \r\=PP
+    \r\=ps
+    \r\=ph
     x
     \rx  
 
 /^\R+x/
-    \r\=P
-    \r\=PP
-    \r\n\=P
-    \r\n\=PP
+    \r\=ps
+    \r\=ph
+    \r\n\=ps
+    \r\n\=ph
     \rx  
 
 /^a$/newline=crlf
-    a\r\=P
-    a\r\=PP
+    a\r\=ps
+    a\r\=ph
 
 /^a$/m,newline=crlf
-    a\r\=P
-    a\r\=PP
+    a\r\=ps
+    a\r\=ph
 
 /^(a$|a\r)/newline=crlf
-    a\r\=P
-    a\r\=PP
+    a\r\=ps
+    a\r\=ph
 
 /^(a$|a\r)/m,newline=crlf
-    a\r\=P
-    a\r\=PP
+    a\r\=ps
+    a\r\=ph
 
 /./newline=crlf
-    \r\=P
-    \r\=PP
+    \r\=ps
+    \r\=ph
   
 /.{2,3}/newline=crlf
-    \r\=P
-    \r\=PP
-    \r\r\=P
-    \r\r\=PP
-    \r\r\r\=P
-    \r\r\r\=PP
+    \r\=ps
+    \r\=ph
+    \r\r\=ps
+    \r\r\=ph
+    \r\r\r\=ps
+    \r\r\r\=ph
 
 /.{2,3}?/newline=crlf
-    \r\=P
-    \r\=PP
-    \r\r\=P
-    \r\r\=PP
-    \r\r\r\=P
-    \r\r\r\=PP
+    \r\=ps
+    \r\=ph
+    \r\r\=ps
+    \r\r\=ph
+    \r\r\r\=ps
+    \r\r\r\=ph
 
 # Test simple validity check for restarts 
 

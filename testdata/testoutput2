@@ -5683,19 +5683,19 @@ No options
 First code unit = 'a'
 Last code unit = 'e'
 Subject length lower bound = 5
-    ab\=P
+    ab\=ps
 Partial match: ab
-    abc\=P
+    abc\=ps
 Partial match: abc
-    abcd\=P
+    abcd\=ps
 Partial match: abcd
-    abcde\=P
+    abcde\=ps
  0: abcde
-    the quick brown abc\=P
+    the quick brown abc\=ps
 Partial match: abc
-    ** Failers\=P
+    ** Failers\=ps
 No match
-    the quick brown abxyz fox\=P
+    the quick brown abxyz fox\=ps
 No match
 
 "^(0?[1-9]|[12][0-9]|3[01])/(0?[1-9]|1[012])/(20)?\d\d$"I
@@ -5705,54 +5705,54 @@ Overall options: anchored
 No first code unit
 Last code unit = '/'
 Subject length lower bound = 6
-    13/05/04\=P
+    13/05/04\=ps
  0: 13/05/04
  1: 13
  2: 05
-    13/5/2004\=P
+    13/5/2004\=ps
  0: 13/5/2004
  1: 13
  2: 5
  3: 20
-    02/05/09\=P
+    02/05/09\=ps
  0: 02/05/09
  1: 02
  2: 05
-    1\=P
+    1\=ps
 Partial match: 1
-    1/2\=P
+    1/2\=ps
 Partial match: 1/2
-    1/2/0\=P
+    1/2/0\=ps
 Partial match: 1/2/0
-    1/2/04\=P
+    1/2/04\=ps
  0: 1/2/04
  1: 1
  2: 2
-    0\=P
+    0\=ps
 Partial match: 0
-    02/\=P
+    02/\=ps
 Partial match: 02/
-    02/0\=P
+    02/0\=ps
 Partial match: 02/0
-    02/1\=P
+    02/1\=ps
 Partial match: 02/1
-    ** Failers\=P
+    ** Failers\=ps
 No match
-    \=P
+    \=ps
 No match
-    123\=P
+    123\=ps
 No match
-    33/4/04\=P
+    33/4/04\=ps
 No match
-    3/13/04\=P
+    3/13/04\=ps
 No match
-    0/1/2003\=P
+    0/1/2003\=ps
 No match
-    0/\=P
+    0/\=ps
 No match
-    02/0/\=P
+    02/0/\=ps
 No match
-    02/13\=P
+    02/13\=ps
 No match
 
 /0{0,2}ABC/I
@@ -5789,17 +5789,17 @@ No options
 Starting code units: 1 a b c 
 Last code unit = '3'
 Subject length lower bound = 3
-    123\=P
+    123\=ps
  0: 123
-    a\=P
+    a\=ps
 Partial match: a
-    b\=P
+    b\=ps
 Partial match: b
-    c\=P
+    c\=ps
 Partial match: c
-    c12\=P
+    c12\=ps
 Partial match: c12
-    c123\=P
+    c123\=ps
  0: c123
 
 /^(?:\d){3,5}X/I
@@ -5809,17 +5809,17 @@ Overall options: anchored
 No first code unit
 Last code unit = 'X'
 Subject length lower bound = 4
-    1\=P
+    1\=ps
 Partial match: 1
-    123\=P
+    123\=ps
 Partial match: 123
     123X
  0: 123X
-    1234\=P
+    1234\=ps
 Partial match: 1234
     1234X
  0: 1234X
-    12345\=P
+    12345\=ps
 Partial match: 12345
     12345X
  0: 12345X
@@ -5827,7 +5827,7 @@ Partial match: 12345
 No match
     1X
 No match
-    123456\=P
+    123456\=ps
 No match
 
 "<(\w+)/?>(.)*</(\1)>"Igms
@@ -9648,299 +9648,299 @@ Failed: error 115 at offset 5: reference to non-existent subpattern
  5: Y
  
 /Xa{2,4}b/
-    X\=P
+    X\=ps
 Partial match: X
-    Xa\=P
+    Xa\=ps
 Partial match: Xa
-    Xaa\=P
+    Xaa\=ps
 Partial match: Xaa
-    Xaaa\=P
+    Xaaa\=ps
 Partial match: Xaaa
-    Xaaaa\=P
+    Xaaaa\=ps
 Partial match: Xaaaa
     
 /Xa{2,4}?b/
-    X\=P
+    X\=ps
 Partial match: X
-    Xa\=P
+    Xa\=ps
 Partial match: Xa
-    Xaa\=P
+    Xaa\=ps
 Partial match: Xaa
-    Xaaa\=P
+    Xaaa\=ps
 Partial match: Xaaa
-    Xaaaa\=P
+    Xaaaa\=ps
 Partial match: Xaaaa
     
 /Xa{2,4}+b/
-    X\=P
+    X\=ps
 Partial match: X
-    Xa\=P
+    Xa\=ps
 Partial match: Xa
-    Xaa\=P
+    Xaa\=ps
 Partial match: Xaa
-    Xaaa\=P
+    Xaaa\=ps
 Partial match: Xaaa
-    Xaaaa\=P
+    Xaaaa\=ps
 Partial match: Xaaaa
     
 /X\d{2,4}b/
-    X\=P
+    X\=ps
 Partial match: X
-    X3\=P
+    X3\=ps
 Partial match: X3
-    X33\=P
+    X33\=ps
 Partial match: X33
-    X333\=P
+    X333\=ps
 Partial match: X333
-    X3333\=P
+    X3333\=ps
 Partial match: X3333
     
 /X\d{2,4}?b/
-    X\=P
+    X\=ps
 Partial match: X
-    X3\=P
+    X3\=ps
 Partial match: X3
-    X33\=P
+    X33\=ps
 Partial match: X33
-    X333\=P
+    X333\=ps
 Partial match: X333
-    X3333\=P
+    X3333\=ps
 Partial match: X3333
     
 /X\d{2,4}+b/
-    X\=P
+    X\=ps
 Partial match: X
-    X3\=P
+    X3\=ps
 Partial match: X3
-    X33\=P
+    X33\=ps
 Partial match: X33
-    X333\=P
+    X333\=ps
 Partial match: X333
-    X3333\=P
+    X3333\=ps
 Partial match: X3333
     
 /X\D{2,4}b/
-    X\=P
+    X\=ps
 Partial match: X
-    Xa\=P
+    Xa\=ps
 Partial match: Xa
-    Xaa\=P
+    Xaa\=ps
 Partial match: Xaa
-    Xaaa\=P
+    Xaaa\=ps
 Partial match: Xaaa
-    Xaaaa\=P
+    Xaaaa\=ps
 Partial match: Xaaaa
     
 /X\D{2,4}?b/
-    X\=P
+    X\=ps
 Partial match: X
-    Xa\=P
+    Xa\=ps
 Partial match: Xa
-    Xaa\=P
+    Xaa\=ps
 Partial match: Xaa
-    Xaaa\=P
+    Xaaa\=ps
 Partial match: Xaaa
-    Xaaaa\=P
+    Xaaaa\=ps
 Partial match: Xaaaa
     
 /X\D{2,4}+b/
-    X\=P
+    X\=ps
 Partial match: X
-    Xa\=P
+    Xa\=ps
 Partial match: Xa
-    Xaa\=P
+    Xaa\=ps
 Partial match: Xaa
-    Xaaa\=P
+    Xaaa\=ps
 Partial match: Xaaa
-    Xaaaa\=P
+    Xaaaa\=ps
 Partial match: Xaaaa
     
 /X[abc]{2,4}b/
-    X\=P
+    X\=ps
 Partial match: X
-    Xa\=P
+    Xa\=ps
 Partial match: Xa
-    Xaa\=P
+    Xaa\=ps
 Partial match: Xaa
-    Xaaa\=P
+    Xaaa\=ps
 Partial match: Xaaa
-    Xaaaa\=P
+    Xaaaa\=ps
 Partial match: Xaaaa
     
 /X[abc]{2,4}?b/
-    X\=P
+    X\=ps
 Partial match: X
-    Xa\=P
+    Xa\=ps
 Partial match: Xa
-    Xaa\=P
+    Xaa\=ps
 Partial match: Xaa
-    Xaaa\=P
+    Xaaa\=ps
 Partial match: Xaaa
-    Xaaaa\=P
+    Xaaaa\=ps
 Partial match: Xaaaa
     
 /X[abc]{2,4}+b/
-    X\=P
+    X\=ps
 Partial match: X
-    Xa\=P
+    Xa\=ps
 Partial match: Xa
-    Xaa\=P
+    Xaa\=ps
 Partial match: Xaa
-    Xaaa\=P
+    Xaaa\=ps
 Partial match: Xaaa
-    Xaaaa\=P
+    Xaaaa\=ps
 Partial match: Xaaaa
     
 /X[^a]{2,4}b/
-    X\=P
+    X\=ps
 Partial match: X
-    Xz\=P
+    Xz\=ps
 Partial match: Xz
-    Xzz\=P
+    Xzz\=ps
 Partial match: Xzz
-    Xzzz\=P
+    Xzzz\=ps
 Partial match: Xzzz
-    Xzzzz\=P
+    Xzzzz\=ps
 Partial match: Xzzzz
     
 /X[^a]{2,4}?b/
-    X\=P
+    X\=ps
 Partial match: X
-    Xz\=P
+    Xz\=ps
 Partial match: Xz
-    Xzz\=P
+    Xzz\=ps
 Partial match: Xzz
-    Xzzz\=P
+    Xzzz\=ps
 Partial match: Xzzz
-    Xzzzz\=P
+    Xzzzz\=ps
 Partial match: Xzzzz
     
 /X[^a]{2,4}+b/
-    X\=P
+    X\=ps
 Partial match: X
-    Xz\=P
+    Xz\=ps
 Partial match: Xz
-    Xzz\=P
+    Xzz\=ps
 Partial match: Xzz
-    Xzzz\=P
+    Xzzz\=ps
 Partial match: Xzzz
-    Xzzzz\=P
+    Xzzzz\=ps
 Partial match: Xzzzz
     
 /(Y)X\1{2,4}b/
-    YX\=P
+    YX\=ps
 Partial match: YX
-    YXY\=P
+    YXY\=ps
 Partial match: YXY
-    YXYY\=P
+    YXYY\=ps
 Partial match: YXYY
-    YXYYY\=P
+    YXYYY\=ps
 Partial match: YXYYY
-    YXYYYY\=P
+    YXYYYY\=ps
 Partial match: YXYYYY
     
 /(Y)X\1{2,4}?b/
-    YX\=P
+    YX\=ps
 Partial match: YX
-    YXY\=P
+    YXY\=ps
 Partial match: YXY
-    YXYY\=P
+    YXYY\=ps
 Partial match: YXYY
-    YXYYY\=P
+    YXYYY\=ps
 Partial match: YXYYY
-    YXYYYY\=P
+    YXYYYY\=ps
 Partial match: YXYYYY
     
 /(Y)X\1{2,4}+b/
-    YX\=P
+    YX\=ps
 Partial match: YX
-    YXY\=P
+    YXY\=ps
 Partial match: YXY
-    YXYY\=P
+    YXYY\=ps
 Partial match: YXYY
-    YXYYY\=P
+    YXYYY\=ps
 Partial match: YXYYY
-    YXYYYY\=P
+    YXYYYY\=ps
 Partial match: YXYYYY
     
 /\++\KZ|\d+X|9+Y/
-    ++++123999\=P
+    ++++123999\=ps
 Partial match: 123999
-    ++++123999Y\=P
+    ++++123999Y\=ps
  0: 999Y
-    ++++Z1234\=P
+    ++++Z1234\=ps
  0: Z
 
 /Z(*F)/
-    Z\=P
+    Z\=ps
 No match
-    ZA\=P
+    ZA\=ps
 No match
     
 /Z(?!)/
-    Z\=P
+    Z\=ps
 No match
-    ZA\=P
+    ZA\=ps
 No match
 
 /dog(sbody)?/
-    dogs\=P
+    dogs\=ps
  0: dog
-    dogs\=PP
+    dogs\=ph
 Partial match: dogs
     
 /dog(sbody)??/
-    dogs\=P
+    dogs\=ps
  0: dog
-    dogs\=PP
+    dogs\=ph
  0: dog
 
 /dog|dogsbody/
-    dogs\=P
+    dogs\=ps
  0: dog
-    dogs\=PP
+    dogs\=ph
  0: dog
  
 /dogsbody|dog/
-    dogs\=P
+    dogs\=ps
  0: dog
-    dogs\=PP
+    dogs\=ph
 Partial match: dogs
 
 /\bthe cat\b/
-    the cat\=P
+    the cat\=ps
  0: the cat
-    the cat\=PP
+    the cat\=ph
 Partial match: the cat
 
 /abc/
-   abc\=P
+   abc\=ps
  0: abc
-   abc\=PP
+   abc\=ph
  0: abc
    
 /abc\K123/
     xyzabc123pqr
  0: 123
-    xyzabc12\=P
+    xyzabc12\=ps
 Partial match: abc12
-    xyzabc12\=PP
+    xyzabc12\=ph
 Partial match: abc12
     
 /(?<=abc)123/
     xyzabc123pqr 
  0: 123
-    xyzabc12\=P
+    xyzabc12\=ps
 Partial match at offset 6: abc12
-    xyzabc12\=PP
+    xyzabc12\=ph
 Partial match at offset 6: abc12
 
 /\babc\b/
     +++abc+++
  0: abc
-    +++ab\=P
+    +++ab\=ps
 Partial match at offset 3: +ab
-    +++ab\=PP
+    +++ab\=ph
 Partial match at offset 3: +ab
 
 /(?&word)(?&element)(?(DEFINE)(?<element><[^m][^>]>[^<])(?<word>\w*+))/B
@@ -10522,38 +10522,38 @@ No match
 No match
 
 /abcd*/
-    xxxxabcd\=P
+    xxxxabcd\=ps
  0: abcd
-    xxxxabcd\=PP
+    xxxxabcd\=ph
 Partial match: abcd
 
 /abcd*/i
-    xxxxabcd\=P
+    xxxxabcd\=ps
  0: abcd
-    xxxxabcd\=PP
+    xxxxabcd\=ph
 Partial match: abcd
-    XXXXABCD\=P
+    XXXXABCD\=ps
  0: ABCD
-    XXXXABCD\=PP
+    XXXXABCD\=ph
 Partial match: ABCD
 
 /abc\d*/
-    xxxxabc1\=P
+    xxxxabc1\=ps
  0: abc1
-    xxxxabc1\=PP
+    xxxxabc1\=ph
 Partial match: abc1
 
 /(a)bc\1*/
-    xxxxabca\=P
+    xxxxabca\=ps
  0: abca
  1: a
-    xxxxabca\=PP
+    xxxxabca\=ph
 Partial match: abca
 
 /abc[de]*/
-    xxxxabcde\=P
+    xxxxabcde\=ps
  0: abcde
-    xxxxabcde\=PP
+    xxxxabcde\=ph
 Partial match: abcde
 
 # This is not in the Perl-compatible test because Perl seems currently to be
@@ -10999,15 +10999,15 @@ No match
 No match
 
 /(?<=abc)def/
-    abc\=PP
+    abc\=ph
 Partial match at offset 3: abc
 
 /abc$/
     abc
  0: abc
-    abc\=P
+    abc\=ps
  0: abc
-    abc\=PP
+    abc\=ph
 Partial match: abc
 
 /abc$/m
@@ -11015,45 +11015,45 @@ Partial match: abc
  0: abc
     abc\n
  0: abc
-    abc\=PP
+    abc\=ph
 Partial match: abc
-    abc\n\=PP
+    abc\n\=ph
  0: abc
-    abc\=P
+    abc\=ps
  0: abc
-    abc\n\=P
+    abc\n\=ps
  0: abc
 
 /abc\z/
     abc
  0: abc
-    abc\=P
+    abc\=ps
  0: abc
-    abc\=PP
+    abc\=ph
 Partial match: abc
 
 /abc\Z/
     abc
  0: abc
-    abc\=P
+    abc\=ps
  0: abc
-    abc\=PP
+    abc\=ph
 Partial match: abc
 
 /abc\b/
     abc
  0: abc
-    abc\=P
+    abc\=ps
  0: abc
-    abc\=PP
+    abc\=ph
 Partial match: abc
 
 /abc\B/
     abc
 No match
-    abc\=P
+    abc\=ps
 Partial match: abc
-    abc\=PP
+    abc\=ph
 Partial match: abc
 
 /.+/
@@ -11870,7 +11870,7 @@ Latest Mark: B
  1: aeq
 
 /.(*F)/
-    abc\=PP
+    abc\=ph
 No match
 
 /\btype\b\W*?\btext\b\W*?\bjavascript\b/I
@@ -12197,7 +12197,7 @@ No match, mark = m
 # After a partial match, the behaviour is as for a failure. 
 
 /^a(*:X)bcde/mark
-   abc\=P
+   abc\=ps
 Partial match, mark=X: abc
    
 # These are here because Perl doesn't return a mark, except for the first.
@@ -12241,90 +12241,90 @@ MK: x
 MK: x
 
 /(..)\1/
-    ab\=P
+    ab\=ps
 Partial match: ab
-    aba\=P
+    aba\=ps
 Partial match: aba
-    abab\=P
+    abab\=ps
  0: abab
  1: ab
 
 /(..)\1/i
-    ab\=P
+    ab\=ps
 Partial match: ab
-    abA\=P
+    abA\=ps
 Partial match: abA
-    aBAb\=P
+    aBAb\=ps
  0: aBAb
  1: aB
 
 /(..)\1{2,}/
-    ab\=P
+    ab\=ps
 Partial match: ab
-    aba\=P
+    aba\=ps
 Partial match: aba
-    abab\=P
+    abab\=ps
 Partial match: abab
-    ababa\=P
+    ababa\=ps
 Partial match: ababa
-    ababab\=P
+    ababab\=ps
  0: ababab
  1: ab
-    ababab\=PP
+    ababab\=ph
 Partial match: ababab
-    abababa\=P
+    abababa\=ps
  0: ababab
  1: ab
-    abababa\=PP
+    abababa\=ph
 Partial match: abababa
 
 /(..)\1{2,}/i
-    ab\=P
+    ab\=ps
 Partial match: ab
-    aBa\=P
+    aBa\=ps
 Partial match: aBa
-    aBAb\=P
+    aBAb\=ps
 Partial match: aBAb
-    AbaBA\=P
+    AbaBA\=ps
 Partial match: AbaBA
-    abABAb\=P
+    abABAb\=ps
  0: abABAb
  1: ab
-    aBAbaB\=PP
+    aBAbaB\=ph
 Partial match: aBAbaB
-    abABabA\=P
+    abABabA\=ps
  0: abABab
  1: ab
-    abaBABa\=PP
+    abaBABa\=ph
 Partial match: abaBABa
 
 /(..)\1{2,}?x/i
-    ab\=P
+    ab\=ps
 Partial match: ab
-    abA\=P
+    abA\=ps
 Partial match: abA
-    aBAb\=P
+    aBAb\=ps
 Partial match: aBAb
-    abaBA\=P
+    abaBA\=ps
 Partial match: abaBA
-    abAbaB\=P
+    abAbaB\=ps
 Partial match: abAbaB
-    abaBabA\=P
+    abaBabA\=ps
 Partial match: abaBabA
-    abAbABaBx\=P
+    abAbABaBx\=ps
  0: abAbABaBx
  1: ab
 
 /^(..)\1/
-    aba\=P
+    aba\=ps
 Partial match: aba
 
 /^(..)\1{2,3}x/
-    aba\=P
+    aba\=ps
 Partial match: aba
-    ababa\=P
+    ababa\=ps
 Partial match: ababa
-    ababa\=PP
+    ababa\=ph
 Partial match: ababa
     abababx
  0: abababx
@@ -12334,11 +12334,11 @@ Partial match: ababa
  1: ab
 
 /^(..)\1{2,3}?x/
-    aba\=P
+    aba\=ps
 Partial match: aba
-    ababa\=P
+    ababa\=ps
 Partial match: ababa
-    ababa\=PP
+    ababa\=ph
 Partial match: ababa
     abababx
  0: abababx
@@ -12354,23 +12354,23 @@ Partial match: ababa
  2: abab
 
 /^\R/
-    \r\=P
+    \r\=ps
  0: \x0d
-    \r\=PP
+    \r\=ph
 Partial match: \x0d
     
 /^\R{2,3}x/
-    \r\=P
+    \r\=ps
 Partial match: \x0d
-    \r\=PP
+    \r\=ph
 Partial match: \x0d
-    \r\r\=P
+    \r\r\=ps
 Partial match: \x0d\x0d
-    \r\r\=PP
+    \r\r\=ph
 Partial match: \x0d\x0d
-    \r\r\r\=P
+    \r\r\r\=ps
 Partial match: \x0d\x0d\x0d
-    \r\r\r\=PP
+    \r\r\r\=ph
 Partial match: \x0d\x0d\x0d
     \r\rx
  0: \x0d\x0dx
@@ -12378,17 +12378,17 @@ Partial match: \x0d\x0d\x0d
  0: \x0d\x0d\x0dx
 
 /^\R{2,3}?x/
-    \r\=P
+    \r\=ps
 Partial match: \x0d
-    \r\=PP
+    \r\=ph
 Partial match: \x0d
-    \r\r\=P
+    \r\r\=ps
 Partial match: \x0d\x0d
-    \r\r\=PP
+    \r\r\=ph
 Partial match: \x0d\x0d
-    \r\r\r\=P
+    \r\r\r\=ps
 Partial match: \x0d\x0d\x0d
-    \r\r\r\=PP
+    \r\r\r\=ph
 Partial match: \x0d\x0d\x0d
     \r\rx
  0: \x0d\x0dx
@@ -12396,9 +12396,9 @@ Partial match: \x0d\x0d\x0d
  0: \x0d\x0d\x0dx
     
 /^\R?x/
-    \r\=P
+    \r\=ps
 Partial match: \x0d
-    \r\=PP
+    \r\=ph
 Partial match: \x0d
     x
  0: x
@@ -12406,75 +12406,75 @@ Partial match: \x0d
  0: \x0dx
 
 /^\R+x/
-    \r\=P
+    \r\=ps
 Partial match: \x0d
-    \r\=PP
+    \r\=ph
 Partial match: \x0d
-    \r\n\=P
+    \r\n\=ps
 Partial match: \x0d\x0a
-    \r\n\=PP
+    \r\n\=ph
 Partial match: \x0d\x0a
     \rx  
  0: \x0dx
 
 /^a$/newline=crlf
-    a\r\=P
+    a\r\=ps
 Partial match: a\x0d
-    a\r\=PP
+    a\r\=ph
 Partial match: a\x0d
 
 /^a$/m,newline=crlf
-    a\r\=P
+    a\r\=ps
 Partial match: a\x0d
-    a\r\=PP
+    a\r\=ph
 Partial match: a\x0d
 
 /^(a$|a\r)/newline=crlf
-    a\r\=P
+    a\r\=ps
  0: a\x0d
  1: a\x0d
-    a\r\=PP
+    a\r\=ph
 Partial match: a\x0d
 
 /^(a$|a\r)/m,newline=crlf
-    a\r\=P
+    a\r\=ps
  0: a\x0d
  1: a\x0d
-    a\r\=PP
+    a\r\=ph
 Partial match: a\x0d
 
 /./newline=crlf
-    \r\=P
+    \r\=ps
  0: \x0d
-    \r\=PP
+    \r\=ph
 Partial match: \x0d
   
 /.{2,3}/newline=crlf
-    \r\=P
+    \r\=ps
 Partial match: \x0d
-    \r\=PP
+    \r\=ph
 Partial match: \x0d
-    \r\r\=P
+    \r\r\=ps
  0: \x0d\x0d
-    \r\r\=PP
+    \r\r\=ph
 Partial match: \x0d\x0d
-    \r\r\r\=P
+    \r\r\r\=ps
  0: \x0d\x0d\x0d
-    \r\r\r\=PP
+    \r\r\r\=ph
 Partial match: \x0d\x0d\x0d
 
 /.{2,3}?/newline=crlf
-    \r\=P
+    \r\=ps
 Partial match: \x0d
-    \r\=PP
+    \r\=ph
 Partial match: \x0d
-    \r\r\=P
+    \r\r\=ps
  0: \x0d\x0d
-    \r\r\=PP
+    \r\r\=ph
 Partial match: \x0d\x0d
-    \r\r\r\=P
+    \r\r\r\=ps
  0: \x0d\x0d
-    \r\r\r\=PP
+    \r\r\r\=ph
  0: \x0d\x0d
 
 "AB(C(D))(E(F))?(?(?=\2)(?=\4))"
@@ -12718,15 +12718,15 @@ Matched, but too many substrings
  0: ab
   
 /(?<=123)(*MARK:xx)abc/mark
-    xxxx123a\=PP
+    xxxx123a\=ph
 Partial match at offset 7, mark=xx: 123a
-    xxxx123a\=P
+    xxxx123a\=ps
 Partial match at offset 7, mark=xx: 123a
     
 /123\Kabc/
-    xxxx123a\=PP
+    xxxx123a\=ph
 Partial match: 123a
-    xxxx123a\=P
+    xxxx123a\=ps
 Partial match: 123a
 
 /^(?(?=a)aa|bb)/auto_callout

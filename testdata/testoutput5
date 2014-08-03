@@ -805,480 +805,480 @@ No match
  0: X
 
 /Xa{2,4}b/utf
-    X\=P
+    X\=ps
 Partial match: X
-    Xa\=P
+    Xa\=ps
 Partial match: Xa
-    Xaa\=P
+    Xaa\=ps
 Partial match: Xaa
-    Xaaa\=P
+    Xaaa\=ps
 Partial match: Xaaa
-    Xaaaa\=P
+    Xaaaa\=ps
 Partial match: Xaaaa
     
 /Xa{2,4}?b/utf
-    X\=P
+    X\=ps
 Partial match: X
-    Xa\=P
+    Xa\=ps
 Partial match: Xa
-    Xaa\=P
+    Xaa\=ps
 Partial match: Xaa
-    Xaaa\=P
+    Xaaa\=ps
 Partial match: Xaaa
-    Xaaaa\=P
+    Xaaaa\=ps
 Partial match: Xaaaa
     
 /Xa{2,4}+b/utf
-    X\=P
+    X\=ps
 Partial match: X
-    Xa\=P
+    Xa\=ps
 Partial match: Xa
-    Xaa\=P
+    Xaa\=ps
 Partial match: Xaa
-    Xaaa\=P
+    Xaaa\=ps
 Partial match: Xaaa
-    Xaaaa\=P
+    Xaaaa\=ps
 Partial match: Xaaaa
     
 /X\x{123}{2,4}b/utf
-    X\=P
+    X\=ps
 Partial match: X
-    X\x{123}\=P
+    X\x{123}\=ps
 Partial match: X\x{123}
-    X\x{123}\x{123}\=P
+    X\x{123}\x{123}\=ps
 Partial match: X\x{123}\x{123}
-    X\x{123}\x{123}\x{123}\=P
+    X\x{123}\x{123}\x{123}\=ps
 Partial match: X\x{123}\x{123}\x{123}
-    X\x{123}\x{123}\x{123}\x{123}\=P
+    X\x{123}\x{123}\x{123}\x{123}\=ps
 Partial match: X\x{123}\x{123}\x{123}\x{123}
     
 /X\x{123}{2,4}?b/utf
-    X\=P
+    X\=ps
 Partial match: X
-    X\x{123}\=P
+    X\x{123}\=ps
 Partial match: X\x{123}
-    X\x{123}\x{123}\=P
+    X\x{123}\x{123}\=ps
 Partial match: X\x{123}\x{123}
-    X\x{123}\x{123}\x{123}\=P
+    X\x{123}\x{123}\x{123}\=ps
 Partial match: X\x{123}\x{123}\x{123}
-    X\x{123}\x{123}\x{123}\x{123}\=P
+    X\x{123}\x{123}\x{123}\x{123}\=ps
 Partial match: X\x{123}\x{123}\x{123}\x{123}
     
 /X\x{123}{2,4}+b/utf
-    X\=P
+    X\=ps
 Partial match: X
-    X\x{123}\=P
+    X\x{123}\=ps
 Partial match: X\x{123}
-    X\x{123}\x{123}\=P
+    X\x{123}\x{123}\=ps
 Partial match: X\x{123}\x{123}
-    X\x{123}\x{123}\x{123}\=P
+    X\x{123}\x{123}\x{123}\=ps
 Partial match: X\x{123}\x{123}\x{123}
-    X\x{123}\x{123}\x{123}\x{123}\=P
+    X\x{123}\x{123}\x{123}\x{123}\=ps
 Partial match: X\x{123}\x{123}\x{123}\x{123}
     
 /X\x{123}{2,4}b/utf
-    Xx\=P
+    Xx\=ps
 No match
-    X\x{123}x\=P
+    X\x{123}x\=ps
 No match
-    X\x{123}\x{123}x\=P
+    X\x{123}\x{123}x\=ps
 No match
-    X\x{123}\x{123}\x{123}x\=P
+    X\x{123}\x{123}\x{123}x\=ps
 No match
-    X\x{123}\x{123}\x{123}\x{123}x\=P
+    X\x{123}\x{123}\x{123}\x{123}x\=ps
 No match
     
 /X\x{123}{2,4}?b/utf
-    Xx\=P
+    Xx\=ps
 No match
-    X\x{123}x\=P
+    X\x{123}x\=ps
 No match
-    X\x{123}\x{123}x\=P
+    X\x{123}\x{123}x\=ps
 No match
-    X\x{123}\x{123}\x{123}x\=P
+    X\x{123}\x{123}\x{123}x\=ps
 No match
-    X\x{123}\x{123}\x{123}\x{123}x\=P
+    X\x{123}\x{123}\x{123}\x{123}x\=ps
 No match
     
 /X\x{123}{2,4}+b/utf
-    Xx\=P
+    Xx\=ps
 No match
-    X\x{123}x\=P
+    X\x{123}x\=ps
 No match
-    X\x{123}\x{123}x\=P
+    X\x{123}\x{123}x\=ps
 No match
-    X\x{123}\x{123}\x{123}x\=P
+    X\x{123}\x{123}\x{123}x\=ps
 No match
-    X\x{123}\x{123}\x{123}\x{123}x\=P
+    X\x{123}\x{123}\x{123}\x{123}x\=ps
 No match
     
 /X\d{2,4}b/utf
-    X\=P
+    X\=ps
 Partial match: X
-    X3\=P
+    X3\=ps
 Partial match: X3
-    X33\=P
+    X33\=ps
 Partial match: X33
-    X333\=P
+    X333\=ps
 Partial match: X333
-    X3333\=P
+    X3333\=ps
 Partial match: X3333
     
 /X\d{2,4}?b/utf
-    X\=P
+    X\=ps
 Partial match: X
-    X3\=P
+    X3\=ps
 Partial match: X3
-    X33\=P
+    X33\=ps
 Partial match: X33
-    X333\=P
+    X333\=ps
 Partial match: X333
-    X3333\=P
+    X3333\=ps
 Partial match: X3333
     
 /X\d{2,4}+b/utf
-    X\=P
+    X\=ps
 Partial match: X
-    X3\=P
+    X3\=ps
 Partial match: X3
-    X33\=P
+    X33\=ps
 Partial match: X33
-    X333\=P
+    X333\=ps
 Partial match: X333
-    X3333\=P
+    X3333\=ps
 Partial match: X3333
 
 /X\D{2,4}b/utf
-    X\=P
+    X\=ps
 Partial match: X
-    Xa\=P
+    Xa\=ps
 Partial match: Xa
-    Xaa\=P
+    Xaa\=ps
 Partial match: Xaa
-    Xaaa\=P
+    Xaaa\=ps
 Partial match: Xaaa
-    Xaaaa\=P
+    Xaaaa\=ps
 Partial match: Xaaaa
     
 /X\D{2,4}?b/utf
-    X\=P
+    X\=ps
 Partial match: X
-    Xa\=P
+    Xa\=ps
 Partial match: Xa
-    Xaa\=P
+    Xaa\=ps
 Partial match: Xaa
-    Xaaa\=P
+    Xaaa\=ps
 Partial match: Xaaa
-    Xaaaa\=P
+    Xaaaa\=ps
 Partial match: Xaaaa
     
 /X\D{2,4}+b/utf
-    X\=P
+    X\=ps
 Partial match: X
-    Xa\=P
+    Xa\=ps
 Partial match: Xa
-    Xaa\=P
+    Xaa\=ps
 Partial match: Xaa
-    Xaaa\=P
+    Xaaa\=ps
 Partial match: Xaaa
-    Xaaaa\=P
+    Xaaaa\=ps
 Partial match: Xaaaa
 
 /X\D{2,4}b/utf
-    X\=P
+    X\=ps
 Partial match: X
-    X\x{123}\=P
+    X\x{123}\=ps
 Partial match: X\x{123}
-    X\x{123}\x{123}\=P
+    X\x{123}\x{123}\=ps
 Partial match: X\x{123}\x{123}
-    X\x{123}\x{123}\x{123}\=P
+    X\x{123}\x{123}\x{123}\=ps
 Partial match: X\x{123}\x{123}\x{123}
-    X\x{123}\x{123}\x{123}\x{123}\=P
+    X\x{123}\x{123}\x{123}\x{123}\=ps
 Partial match: X\x{123}\x{123}\x{123}\x{123}
     
 /X\D{2,4}?b/utf
-    X\=P
+    X\=ps
 Partial match: X
-    X\x{123}\=P
+    X\x{123}\=ps
 Partial match: X\x{123}
-    X\x{123}\x{123}\=P
+    X\x{123}\x{123}\=ps
 Partial match: X\x{123}\x{123}
-    X\x{123}\x{123}\x{123}\=P
+    X\x{123}\x{123}\x{123}\=ps
 Partial match: X\x{123}\x{123}\x{123}
-    X\x{123}\x{123}\x{123}\x{123}\=P
+    X\x{123}\x{123}\x{123}\x{123}\=ps
 Partial match: X\x{123}\x{123}\x{123}\x{123}
     
 /X\D{2,4}+b/utf
-    X\=P
+    X\=ps
 Partial match: X
-    X\x{123}\=P
+    X\x{123}\=ps
 Partial match: X\x{123}
-    X\x{123}\x{123}\=P
+    X\x{123}\x{123}\=ps
 Partial match: X\x{123}\x{123}
-    X\x{123}\x{123}\x{123}\=P
+    X\x{123}\x{123}\x{123}\=ps
 Partial match: X\x{123}\x{123}\x{123}
-    X\x{123}\x{123}\x{123}\x{123}\=P
+    X\x{123}\x{123}\x{123}\x{123}\=ps
 Partial match: X\x{123}\x{123}\x{123}\x{123}
 
 /X[abc]{2,4}b/utf
-    X\=P
+    X\=ps
 Partial match: X
-    Xa\=P
+    Xa\=ps
 Partial match: Xa
-    Xaa\=P
+    Xaa\=ps
 Partial match: Xaa
-    Xaaa\=P
+    Xaaa\=ps
 Partial match: Xaaa
-    Xaaaa\=P
+    Xaaaa\=ps
 Partial match: Xaaaa
     
 /X[abc]{2,4}?b/utf
-    X\=P
+    X\=ps
 Partial match: X
-    Xa\=P
+    Xa\=ps
 Partial match: Xa
-    Xaa\=P
+    Xaa\=ps
 Partial match: Xaa
-    Xaaa\=P
+    Xaaa\=ps
 Partial match: Xaaa
-    Xaaaa\=P
+    Xaaaa\=ps
 Partial match: Xaaaa
     
 /X[abc]{2,4}+b/utf
-    X\=P
+    X\=ps
 Partial match: X
-    Xa\=P
+    Xa\=ps
 Partial match: Xa
-    Xaa\=P
+    Xaa\=ps
 Partial match: Xaa
-    Xaaa\=P
+    Xaaa\=ps
 Partial match: Xaaa
-    Xaaaa\=P
+    Xaaaa\=ps
 Partial match: Xaaaa
 
 /X[abc\x{123}]{2,4}b/utf
-    X\=P
+    X\=ps
 Partial match: X
-    X\x{123}\=P
+    X\x{123}\=ps
 Partial match: X\x{123}
-    X\x{123}\x{123}\=P
+    X\x{123}\x{123}\=ps
 Partial match: X\x{123}\x{123}
-    X\x{123}\x{123}\x{123}\=P
+    X\x{123}\x{123}\x{123}\=ps
 Partial match: X\x{123}\x{123}\x{123}
-    X\x{123}\x{123}\x{123}\x{123}\=P
+    X\x{123}\x{123}\x{123}\x{123}\=ps
 Partial match: X\x{123}\x{123}\x{123}\x{123}
     
 /X[abc\x{123}]{2,4}?b/utf
-    X\=P
+    X\=ps
 Partial match: X
-    X\x{123}\=P
+    X\x{123}\=ps
 Partial match: X\x{123}
-    X\x{123}\x{123}\=P
+    X\x{123}\x{123}\=ps
 Partial match: X\x{123}\x{123}
-    X\x{123}\x{123}\x{123}\=P
+    X\x{123}\x{123}\x{123}\=ps
 Partial match: X\x{123}\x{123}\x{123}
-    X\x{123}\x{123}\x{123}\x{123}\=P
+    X\x{123}\x{123}\x{123}\x{123}\=ps
 Partial match: X\x{123}\x{123}\x{123}\x{123}
     
 /X[abc\x{123}]{2,4}+b/utf
-    X\=P
+    X\=ps
 Partial match: X
-    X\x{123}\=P
+    X\x{123}\=ps
 Partial match: X\x{123}
-    X\x{123}\x{123}\=P
+    X\x{123}\x{123}\=ps
 Partial match: X\x{123}\x{123}
-    X\x{123}\x{123}\x{123}\=P
+    X\x{123}\x{123}\x{123}\=ps
 Partial match: X\x{123}\x{123}\x{123}
-    X\x{123}\x{123}\x{123}\x{123}\=P
+    X\x{123}\x{123}\x{123}\x{123}\=ps
 Partial match: X\x{123}\x{123}\x{123}\x{123}
 
 /X[^a]{2,4}b/utf
-    X\=P
+    X\=ps
 Partial match: X
-    Xz\=P
+    Xz\=ps
 Partial match: Xz
-    Xzz\=P
+    Xzz\=ps
 Partial match: Xzz
-    Xzzz\=P
+    Xzzz\=ps
 Partial match: Xzzz
-    Xzzzz\=P
+    Xzzzz\=ps
 Partial match: Xzzzz
     
 /X[^a]{2,4}?b/utf
-    X\=P
+    X\=ps
 Partial match: X
-    Xz\=P
+    Xz\=ps
 Partial match: Xz
-    Xzz\=P
+    Xzz\=ps
 Partial match: Xzz
-    Xzzz\=P
+    Xzzz\=ps
 Partial match: Xzzz
-    Xzzzz\=P
+    Xzzzz\=ps
 Partial match: Xzzzz
     
 /X[^a]{2,4}+b/utf
-    X\=P
+    X\=ps
 Partial match: X
-    Xz\=P
+    Xz\=ps
 Partial match: Xz
-    Xzz\=P
+    Xzz\=ps
 Partial match: Xzz
-    Xzzz\=P
+    Xzzz\=ps
 Partial match: Xzzz
-    Xzzzz\=P
+    Xzzzz\=ps
 Partial match: Xzzzz
 
 /X[^a]{2,4}b/utf
-    X\=P
+    X\=ps
 Partial match: X
-    X\x{123}\=P
+    X\x{123}\=ps
 Partial match: X\x{123}
-    X\x{123}\x{123}\=P
+    X\x{123}\x{123}\=ps
 Partial match: X\x{123}\x{123}
-    X\x{123}\x{123}\x{123}\=P
+    X\x{123}\x{123}\x{123}\=ps
 Partial match: X\x{123}\x{123}\x{123}
-    X\x{123}\x{123}\x{123}\x{123}\=P
+    X\x{123}\x{123}\x{123}\x{123}\=ps
 Partial match: X\x{123}\x{123}\x{123}\x{123}
     
 /X[^a]{2,4}?b/utf
-    X\=P
+    X\=ps
 Partial match: X
-    X\x{123}\=P
+    X\x{123}\=ps
 Partial match: X\x{123}
-    X\x{123}\x{123}\=P
+    X\x{123}\x{123}\=ps
 Partial match: X\x{123}\x{123}
-    X\x{123}\x{123}\x{123}\=P
+    X\x{123}\x{123}\x{123}\=ps
 Partial match: X\x{123}\x{123}\x{123}
-    X\x{123}\x{123}\x{123}\x{123}\=P
+    X\x{123}\x{123}\x{123}\x{123}\=ps
 Partial match: X\x{123}\x{123}\x{123}\x{123}
     
 /X[^a]{2,4}+b/utf
-    X\=P
+    X\=ps
 Partial match: X
-    X\x{123}\=P
+    X\x{123}\=ps
 Partial match: X\x{123}
-    X\x{123}\x{123}\=P
+    X\x{123}\x{123}\=ps
 Partial match: X\x{123}\x{123}
-    X\x{123}\x{123}\x{123}\=P
+    X\x{123}\x{123}\x{123}\=ps
 Partial match: X\x{123}\x{123}\x{123}
-    X\x{123}\x{123}\x{123}\x{123}\=P
+    X\x{123}\x{123}\x{123}\x{123}\=ps
 Partial match: X\x{123}\x{123}\x{123}\x{123}
 
 /(Y)X\1{2,4}b/utf
-    YX\=P
+    YX\=ps
 Partial match: YX
-    YXY\=P
+    YXY\=ps
 Partial match: YXY
-    YXYY\=P
+    YXYY\=ps
 Partial match: YXYY
-    YXYYY\=P
+    YXYYY\=ps
 Partial match: YXYYY
-    YXYYYY\=P
+    YXYYYY\=ps
 Partial match: YXYYYY
     
 /(Y)X\1{2,4}?b/utf
-    YX\=P
+    YX\=ps
 Partial match: YX
-    YXY\=P
+    YXY\=ps
 Partial match: YXY
-    YXYY\=P
+    YXYY\=ps
 Partial match: YXYY
-    YXYYY\=P
+    YXYYY\=ps
 Partial match: YXYYY
-    YXYYYY\=P
+    YXYYYY\=ps
 Partial match: YXYYYY
     
 /(Y)X\1{2,4}+b/utf
-    YX\=P
+    YX\=ps
 Partial match: YX
-    YXY\=P
+    YXY\=ps
 Partial match: YXY
-    YXYY\=P
+    YXYY\=ps
 Partial match: YXYY
-    YXYYY\=P
+    YXYYY\=ps
 Partial match: YXYYY
-    YXYYYY\=P
+    YXYYYY\=ps
 Partial match: YXYYYY
 
 /(\x{123})X\1{2,4}b/utf
-    \x{123}X\=P
+    \x{123}X\=ps
 Partial match: \x{123}X
-    \x{123}X\x{123}\=P
+    \x{123}X\x{123}\=ps
 Partial match: \x{123}X\x{123}
-    \x{123}X\x{123}\x{123}\=P
+    \x{123}X\x{123}\x{123}\=ps
 Partial match: \x{123}X\x{123}\x{123}
-    \x{123}X\x{123}\x{123}\x{123}\=P
+    \x{123}X\x{123}\x{123}\x{123}\=ps
 Partial match: \x{123}X\x{123}\x{123}\x{123}
-    \x{123}X\x{123}\x{123}\x{123}\x{123}\=P
+    \x{123}X\x{123}\x{123}\x{123}\x{123}\=ps
 Partial match: \x{123}X\x{123}\x{123}\x{123}\x{123}
     
 /(\x{123})X\1{2,4}?b/utf
-    \x{123}X\=P
+    \x{123}X\=ps
 Partial match: \x{123}X
-    \x{123}X\x{123}\=P
+    \x{123}X\x{123}\=ps
 Partial match: \x{123}X\x{123}
-    \x{123}X\x{123}\x{123}\=P
+    \x{123}X\x{123}\x{123}\=ps
 Partial match: \x{123}X\x{123}\x{123}
-    \x{123}X\x{123}\x{123}\x{123}\=P
+    \x{123}X\x{123}\x{123}\x{123}\=ps
 Partial match: \x{123}X\x{123}\x{123}\x{123}
-    \x{123}X\x{123}\x{123}\x{123}\x{123}\=P
+    \x{123}X\x{123}\x{123}\x{123}\x{123}\=ps
 Partial match: \x{123}X\x{123}\x{123}\x{123}\x{123}
     
 /(\x{123})X\1{2,4}+b/utf
-    \x{123}X\=P
+    \x{123}X\=ps
 Partial match: \x{123}X
-    \x{123}X\x{123}\=P
+    \x{123}X\x{123}\=ps
 Partial match: \x{123}X\x{123}
-    \x{123}X\x{123}\x{123}\=P
+    \x{123}X\x{123}\x{123}\=ps
 Partial match: \x{123}X\x{123}\x{123}
-    \x{123}X\x{123}\x{123}\x{123}\=P
+    \x{123}X\x{123}\x{123}\x{123}\=ps
 Partial match: \x{123}X\x{123}\x{123}\x{123}
-    \x{123}X\x{123}\x{123}\x{123}\x{123}\=P
+    \x{123}X\x{123}\x{123}\x{123}\x{123}\=ps
 Partial match: \x{123}X\x{123}\x{123}\x{123}\x{123}
 
 /\bthe cat\b/utf
-    the cat\=P
+    the cat\=ps
  0: the cat
-    the cat\=PP
+    the cat\=ph
 Partial match: the cat
 
 /abcd*/utf
-    xxxxabcd\=P
+    xxxxabcd\=ps
  0: abcd
-    xxxxabcd\=PP
+    xxxxabcd\=ph
 Partial match: abcd
 
 /abcd*/i,utf
-    xxxxabcd\=P
+    xxxxabcd\=ps
  0: abcd
-    xxxxabcd\=PP
+    xxxxabcd\=ph
 Partial match: abcd
-    XXXXABCD\=P
+    XXXXABCD\=ps
  0: ABCD
-    XXXXABCD\=PP
+    XXXXABCD\=ph
 Partial match: ABCD
 
 /abc\d*/utf
-    xxxxabc1\=P
+    xxxxabc1\=ps
  0: abc1
-    xxxxabc1\=PP
+    xxxxabc1\=ph
 Partial match: abc1
 
 /(a)bc\1*/utf
-    xxxxabca\=P
+    xxxxabca\=ps
  0: abca
  1: a
-    xxxxabca\=PP
+    xxxxabca\=ph
 Partial match: abca
 
 /abc[de]*/utf
-    xxxxabcde\=P
+    xxxxabcde\=ps
  0: abcde
-    xxxxabcde\=PP
+    xxxxabcde\=ph
 Partial match: abcde
 
 /X\W{3}X/utf
-    X\=P
+    X\=ps
 Partial match: X
 
 /\sxxx\s/utf,tables=1
@@ -1412,19 +1412,19 @@ No last code unit
 Subject length lower bound = 2
 
 /f.*/
-    for\=PP
+    for\=ph
 Partial match: for
 
 /f.*/s
-    for\=PP
+    for\=ph
 Partial match: for
 
 /f.*/utf
-    for\=PP
+    for\=ph
 Partial match: for
 
 /f.*/s,utf
-    for\=PP
+    for\=ph
 Partial match: for
     
 /\x{d7ff}\x{e000}/utf
@@ -1522,112 +1522,112 @@ Failed: error 173 at offset 7: disallowed Unicode code point (>= 0xd800 && <= 0x
  0: \x{85}\x{0a}\x{0b}\x{0c}\x{0d}
 
 /(..)\1/utf
-    ab\=P
+    ab\=ps
 Partial match: ab
-    aba\=P
+    aba\=ps
 Partial match: aba
-    abab\=P
+    abab\=ps
  0: abab
  1: ab
 
 /(..)\1/i,utf
-    ab\=P
+    ab\=ps
 Partial match: ab
-    abA\=P
+    abA\=ps
 Partial match: abA
-    aBAb\=P
+    aBAb\=ps
  0: aBAb
  1: aB
 
 /(..)\1{2,}/utf
-    ab\=P
+    ab\=ps
 Partial match: ab
-    aba\=P
+    aba\=ps
 Partial match: aba
-    abab\=P
+    abab\=ps
 Partial match: abab
-    ababa\=P
+    ababa\=ps
 Partial match: ababa
-    ababab\=P
+    ababab\=ps
  0: ababab
  1: ab
-    ababab\=PP
+    ababab\=ph
 Partial match: ababab
-    abababa\=P
+    abababa\=ps
  0: ababab
  1: ab
-    abababa\=PP
+    abababa\=ph
 Partial match: abababa
 
 /(..)\1{2,}/i,utf
-    ab\=P
+    ab\=ps
 Partial match: ab
-    aBa\=P
+    aBa\=ps
 Partial match: aBa
-    aBAb\=P
+    aBAb\=ps
 Partial match: aBAb
-    AbaBA\=P
+    AbaBA\=ps
 Partial match: AbaBA
-    abABAb\=P
+    abABAb\=ps
  0: abABAb
  1: ab
-    aBAbaB\=PP
+    aBAbaB\=ph
 Partial match: aBAbaB
-    abABabA\=P
+    abABabA\=ps
  0: abABab
  1: ab
-    abaBABa\=PP
+    abaBABa\=ph
 Partial match: abaBABa
 
 /(..)\1{2,}?x/i,utf
-    ab\=P
+    ab\=ps
 Partial match: ab
-    abA\=P
+    abA\=ps
 Partial match: abA
-    aBAb\=P
+    aBAb\=ps
 Partial match: aBAb
-    abaBA\=P
+    abaBA\=ps
 Partial match: abaBA
-    abAbaB\=P
+    abAbaB\=ps
 Partial match: abAbaB
-    abaBabA\=P
+    abaBabA\=ps
 Partial match: abaBabA
-    abAbABaBx\=P
+    abAbABaBx\=ps
  0: abAbABaBx
  1: ab
 
 /./utf,newline=crlf
-    \r\=P
+    \r\=ps
  0: \x{0d}
-    \r\=PP
+    \r\=ph
 Partial match: \x{0d}
   
 /.{2,3}/utf,newline=crlf
-    \r\=P
+    \r\=ps
 Partial match: \x{0d}
-    \r\=PP
+    \r\=ph
 Partial match: \x{0d}
-    \r\r\=P
+    \r\r\=ps
  0: \x{0d}\x{0d}
-    \r\r\=PP
+    \r\r\=ph
 Partial match: \x{0d}\x{0d}
-    \r\r\r\=P
+    \r\r\r\=ps
  0: \x{0d}\x{0d}\x{0d}
-    \r\r\r\=PP
+    \r\r\r\=ph
 Partial match: \x{0d}\x{0d}\x{0d}
 
 /.{2,3}?/utf,newline=crlf
-    \r\=P
+    \r\=ps
 Partial match: \x{0d}
-    \r\=PP
+    \r\=ph
 Partial match: \x{0d}
-    \r\r\=P
+    \r\r\=ps
  0: \x{0d}\x{0d}
-    \r\r\=PP
+    \r\r\=ph
 Partial match: \x{0d}\x{0d}
-    \r\r\r\=P
+    \r\r\r\=ps
  0: \x{0d}\x{0d}
-    \r\r\r\=PP
+    \r\r\r\=ph
  0: \x{0d}\x{0d}
 
 /[^\x{100}][^\x{1234}][^\x{ffff}][^\x{10000}][^\x{10ffff}]/B,utf
@@ -2915,41 +2915,41 @@ No match
 Failed: error 136 at offset 10: \C is not allowed in a lookbehind assertion
 
 /\X/
-    a\=P
+    a\=ps
  0: a
-    a\=PP
+    a\=ph
 Partial match: a
 
 /\Xa/
-    aa\=P
+    aa\=ps
  0: aa
-    aa\=PP
+    aa\=ph
  0: aa
 
 /\X{2}/
-    aa\=P
+    aa\=ps
  0: aa
-    aa\=PP
+    aa\=ph
 Partial match: aa
 
 /\X+a/
-    a\=P
+    a\=ps
 Partial match: a
-    aa\=P
+    aa\=ps
  0: aa
-    aa\=PP
+    aa\=ph
 Partial match: aa
 
 /\X+?a/
-    a\=P
+    a\=ps
 Partial match: a
-    ab\=P
+    ab\=ps
 Partial match: ab
-    aa\=P
+    aa\=ps
  0: aa
-    aa\=PP
+    aa\=ph
  0: aa
-    aba\=P
+    aba\=ps
  0: aba
     
 # These Unicode 6.1.0 scripts are not known to Perl.  
@@ -2963,57 +2963,57 @@ Partial match: ab
  0: \x{11680}\x{116c0}
 
 /^\X/utf
-    A\=P
+    A\=ps
  0: A
-    A\=PP
+    A\=ph
 Partial match: A
-    A\x{300}\x{301}\=P
+    A\x{300}\x{301}\=ps
  0: A\x{300}\x{301}
-    A\x{300}\x{301}\=PP
+    A\x{300}\x{301}\=ph
 Partial match: A\x{300}\x{301}
-    A\x{301}\=P
+    A\x{301}\=ps
  0: A\x{301}
-    A\x{301}\=PP
+    A\x{301}\=ph
 Partial match: A\x{301}
     
 /^\X{2,3}/utf
-    A\=P
+    A\=ps
 Partial match: A
-    A\=PP
+    A\=ph
 Partial match: A
-    AA\=P
+    AA\=ps
  0: AA
-    AA\=PP
+    AA\=ph
 Partial match: AA
-    A\x{300}\x{301}\=P
+    A\x{300}\x{301}\=ps
 Partial match: A\x{300}\x{301}
-    A\x{300}\x{301}\=PP
+    A\x{300}\x{301}\=ph
 Partial match: A\x{300}\x{301}
-    A\x{300}\x{301}A\x{300}\x{301}\=P
+    A\x{300}\x{301}A\x{300}\x{301}\=ps
  0: A\x{300}\x{301}A\x{300}\x{301}
-    A\x{300}\x{301}A\x{300}\x{301}\=PP
+    A\x{300}\x{301}A\x{300}\x{301}\=ph
 Partial match: A\x{300}\x{301}A\x{300}\x{301}
 
 /^\X{2}/utf
-    AA\=P
+    AA\=ps
  0: AA
-    AA\=PP
+    AA\=ph
 Partial match: AA
-    A\x{300}\x{301}A\x{300}\x{301}\=P
+    A\x{300}\x{301}A\x{300}\x{301}\=ps
  0: A\x{300}\x{301}A\x{300}\x{301}
-    A\x{300}\x{301}A\x{300}\x{301}\=PP
+    A\x{300}\x{301}A\x{300}\x{301}\=ph
 Partial match: A\x{300}\x{301}A\x{300}\x{301}
     
 /^\X+/utf
-    AA\=P
+    AA\=ps
  0: AA
-    AA\=PP
+    AA\=ph
 Partial match: AA
 
 /^\X+?Z/utf
-    AA\=P
+    AA\=ps
 Partial match: AA
-    AA\=PP
+    AA\=ph
 Partial match: AA
 
 /A\x{3a3}B/IBi,utf

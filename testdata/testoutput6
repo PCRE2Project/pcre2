@@ -900,77 +900,77 @@ No match
 No match
 
 /^abcdef/
-    ab\=P
+    ab\=ps
 Partial match: ab
-    abcde\=P
+    abcde\=ps
 Partial match: abcde
-    abcdef\=P
+    abcdef\=ps
  0: abcdef
     *** Failers
 No match
-    abx\=P
+    abx\=ps
 No match
 
 /^a{2,4}\d+z/
-    a\=P
+    a\=ps
 Partial match: a
-    aa\=P
+    aa\=ps
 Partial match: aa
-    aa2\=P
+    aa2\=ps
 Partial match: aa2
-    aaa\=P
+    aaa\=ps
 Partial match: aaa
-    aaa23\=P
+    aaa23\=ps
 Partial match: aaa23
-    aaaa12345\=P
+    aaaa12345\=ps
 Partial match: aaaa12345
-    aa0z\=P
+    aa0z\=ps
  0: aa0z
-    aaaa4444444444444z\=P
+    aaaa4444444444444z\=ps
  0: aaaa4444444444444z
     *** Failers
 No match
-    az\=P
+    az\=ps
 No match
-    aaaaa\=P
+    aaaaa\=ps
 No match
-    a56\=P
+    a56\=ps
 No match
 
 /^abcdef/
-   abc\=P
+   abc\=ps
 Partial match: abc
    def\=dfa_restart
  0: def
    
 /(?<=foo)bar/
-   xyzfo\=P
+   xyzfo\=ps
 No match
-   foob\=P,offset=2
+   foob\=ps,offset=2
 Partial match at offset 3: foob
-   foobar...\=P,dfa_restart,offset=4
+   foobar...\=ps,dfa_restart,offset=4
  0: ar
-   xyzfo\=P
+   xyzfo\=ps
 No match
    foobar\=offset=2
  0: bar
    *** Failers
 No match
-   xyzfo\=P
+   xyzfo\=ps
 No match
    obar\=dfa_restart
 No match
 
 /(ab*(cd|ef))+X/
-    adfadadaklhlkalkajhlkjahdfasdfasdfladsfjkj\=P,noteol
+    adfadadaklhlkalkajhlkjahdfasdfasdfladsfjkj\=ps,noteol
 No match
-    lkjhlkjhlkjhlkjhabbbbbbcdaefabbbbbbbefa\=P,notbol,noteol
+    lkjhlkjhlkjhlkjhabbbbbbcdaefabbbbbbbefa\=ps,notbol,noteol
 Partial match: abbbbbbcdaefabbbbbbbefa
-    cdabbbbbbbb\=P,notbol,dfa_restart,noteol
+    cdabbbbbbbb\=ps,notbol,dfa_restart,noteol
 Partial match: cdabbbbbbbb
-    efabbbbbbbbbbbbbbbb\=P,notbol,dfa_restart,noteol
+    efabbbbbbbbbbbbbbbb\=ps,notbol,dfa_restart,noteol
 Partial match: efabbbbbbbbbbbbbbbb
-    bbbbbbbbbbbbcdXyasdfadf\=P,notbol,dfa_restart,noteol
+    bbbbbbbbbbbbcdXyasdfadf\=ps,notbol,dfa_restart,noteol
  0: bbbbbbbbbbbbcdX
 
 /the quick brown fox/
@@ -6163,15 +6163,15 @@ No match
 No match
 
 /1234/
-    123\=P
+    123\=ps
 Partial match: 123
-    a4\=P,dfa_restart
+    a4\=ps,dfa_restart
 No match
 
 /1234/
-    123\=P
+    123\=ps
 Partial match: 123
-    4\=P,dfa_restart
+    4\=ps,dfa_restart
  0: 4
 
 /^/gm
@@ -6987,77 +6987,77 @@ No match
  0: "ab"
 
 /\d+X|9+Y/
-    ++++123999\=P
+    ++++123999\=ps
 Partial match: 123999
-    ++++123999Y\=P
+    ++++123999Y\=ps
  0: 999Y
 
 /Z(*F)/
-    Z\=P
+    Z\=ps
 No match
-    ZA\=P
+    ZA\=ps
 No match
     
 /Z(?!)/
-    Z\=P
+    Z\=ps
 No match
-    ZA\=P
+    ZA\=ps
 No match
 
 /dog(sbody)?/
-    dogs\=P
+    dogs\=ps
  0: dog
-    dogs\=PP
+    dogs\=ph
 Partial match: dogs
     
 /dog(sbody)??/
-    dogs\=P
+    dogs\=ps
  0: dog
-    dogs\=PP
+    dogs\=ph
 Partial match: dogs
 
 /dog|dogsbody/
-    dogs\=P
+    dogs\=ps
  0: dog
-    dogs\=PP
+    dogs\=ph
 Partial match: dogs
  
 /dogsbody|dog/
-    dogs\=P
+    dogs\=ps
  0: dog
-    dogs\=PP
+    dogs\=ph
 Partial match: dogs
 
 /Z(*F)Q|ZXY/
-    Z\=P
+    Z\=ps
 Partial match: Z
-    ZA\=P
+    ZA\=ps
 No match
-    X\=P
+    X\=ps
 No match
 
 /\bthe cat\b/
-    the cat\=P
+    the cat\=ps
  0: the cat
-    the cat\=PP
+    the cat\=ph
 Partial match: the cat
 
 /dog(sbody)?/
-    dogs\=P
+    dogs\=ps
  0: dog
     body\=dfa_restart
  0: body
 
 /dog(sbody)?/
-    dogs\=PP
+    dogs\=ph
 Partial match: dogs
     body\=dfa_restart
  0: body
 
 /abc/
-   abc\=P
+   abc\=ps
  0: abc
-   abc\=PP
+   abc\=ph
  0: abc
 
 /abc\K123/
@@ -7067,17 +7067,17 @@ Failed: error -41: item unsupported for DFA matching
 /(?<=abc)123/
     xyzabc123pqr 
  0: 123
-    xyzabc12\=P
+    xyzabc12\=ps
 Partial match at offset 6: abc12
-    xyzabc12\=PP
+    xyzabc12\=ph
 Partial match at offset 6: abc12
 
 /\babc\b/
     +++abc+++
  0: abc
-    +++ab\=P
+    +++ab\=ps
 Partial match at offset 3: +ab
-    +++ab\=PP
+    +++ab\=ph
 Partial match at offset 3: +ab
 
 /(?=C)/g,aftertext
@@ -7130,40 +7130,40 @@ No match
 No match
 
 /abcd*/aftertext
-    xxxxabcd\=P
+    xxxxabcd\=ps
  0: abcd
  0+ 
-    xxxxabcd\=PP
+    xxxxabcd\=ph
 Partial match: abcd
     dddxxx\=dfa_restart
  0: ddd
  0+ xxx
-    xxxxabcd\=PP
+    xxxxabcd\=ph
 Partial match: abcd
     xxx\=dfa_restart
  0: 
  0+ xxx
 
 /abcd*/i
-    xxxxabcd\=P
+    xxxxabcd\=ps
  0: abcd
-    xxxxabcd\=PP
+    xxxxabcd\=ph
 Partial match: abcd
-    XXXXABCD\=P
+    XXXXABCD\=ps
  0: ABCD
-    XXXXABCD\=PP
+    XXXXABCD\=ph
 Partial match: ABCD
 
 /abc\d*/
-    xxxxabc1\=P
+    xxxxabc1\=ps
  0: abc1
-    xxxxabc1\=PP
+    xxxxabc1\=ph
 Partial match: abc1
 
 /abc[de]*/
-    xxxxabcde\=P
+    xxxxabcde\=ps
  0: abcde
-    xxxxabcde\=PP
+    xxxxabcde\=ph
 Partial match: abcde
 
 /(?:(?1)|B)(A(*F)|C)/
@@ -7217,15 +7217,15 @@ Failed: error -41: item unsupported for DFA matching
 Failed: error -41: item unsupported for DFA matching
 
 /(?<=abc)def/
-    abc\=PP
+    abc\=ph
 Partial match at offset 3: abc
 
 /abc$/
     abc
  0: abc
-    abc\=P
+    abc\=ps
  0: abc
-    abc\=PP
+    abc\=ph
 Partial match: abc
 
 /abc$/m
@@ -7233,45 +7233,45 @@ Partial match: abc
  0: abc
     abc\n
  0: abc
-    abc\=PP
+    abc\=ph
 Partial match: abc
-    abc\n\=PP
+    abc\n\=ph
  0: abc
-    abc\=P
+    abc\=ps
  0: abc
-    abc\n\=P
+    abc\n\=ps
  0: abc
 
 /abc\z/
     abc
  0: abc
-    abc\=P
+    abc\=ps
  0: abc
-    abc\=PP
+    abc\=ph
 Partial match: abc
 
 /abc\Z/
     abc
  0: abc
-    abc\=P
+    abc\=ps
  0: abc
-    abc\=PP
+    abc\=ph
 Partial match: abc
 
 /abc\b/
     abc
  0: abc
-    abc\=P
+    abc\=ps
  0: abc
-    abc\=PP
+    abc\=ph
 Partial match: abc
 
 /abc\B/
     abc
 No match
-    abc\=P
+    abc\=ps
 Partial match: abc
-    abc\=PP
+    abc\=ph
 Partial match: abc
 
 /.+/
@@ -7453,23 +7453,23 @@ Matched, but offsets vector is too small to show all matches
  0: X
 
 /^\R/
-    \r\=P
+    \r\=ps
  0: \x0d
-    \r\=PP
+    \r\=ph
 Partial match: \x0d
     
 /^\R{2,3}x/
-    \r\=P
+    \r\=ps
 Partial match: \x0d
-    \r\=PP
+    \r\=ph
 Partial match: \x0d
-    \r\r\=P
+    \r\r\=ps
 Partial match: \x0d\x0d
-    \r\r\=PP
+    \r\r\=ph
 Partial match: \x0d\x0d
-    \r\r\r\=P
+    \r\r\r\=ps
 Partial match: \x0d\x0d\x0d
-    \r\r\r\=PP
+    \r\r\r\=ph
 Partial match: \x0d\x0d\x0d
     \r\rx
  0: \x0d\x0dx
@@ -7477,17 +7477,17 @@ Partial match: \x0d\x0d\x0d
  0: \x0d\x0d\x0dx
 
 /^\R{2,3}?x/
-    \r\=P
+    \r\=ps
 Partial match: \x0d
-    \r\=PP
+    \r\=ph
 Partial match: \x0d
-    \r\r\=P
+    \r\r\=ps
 Partial match: \x0d\x0d
-    \r\r\=PP
+    \r\r\=ph
 Partial match: \x0d\x0d
-    \r\r\r\=P
+    \r\r\r\=ps
 Partial match: \x0d\x0d\x0d
-    \r\r\r\=PP
+    \r\r\r\=ph
 Partial match: \x0d\x0d\x0d
     \r\rx
  0: \x0d\x0dx
@@ -7495,9 +7495,9 @@ Partial match: \x0d\x0d\x0d
  0: \x0d\x0d\x0dx
     
 /^\R?x/
-    \r\=P
+    \r\=ps
 Partial match: \x0d
-    \r\=PP
+    \r\=ph
 Partial match: \x0d
     x
  0: x
@@ -7505,74 +7505,74 @@ Partial match: \x0d
  0: \x0dx
 
 /^\R+x/
-    \r\=P
+    \r\=ps
 Partial match: \x0d
-    \r\=PP
+    \r\=ph
 Partial match: \x0d
-    \r\n\=P
+    \r\n\=ps
 Partial match: \x0d\x0a
-    \r\n\=PP
+    \r\n\=ph
 Partial match: \x0d\x0a
     \rx  
  0: \x0dx
 
 /^a$/newline=crlf
-    a\r\=P
+    a\r\=ps
 Partial match: a\x0d
-    a\r\=PP
+    a\r\=ph
 Partial match: a\x0d
 
 /^a$/m,newline=crlf
-    a\r\=P
+    a\r\=ps
 Partial match: a\x0d
-    a\r\=PP
+    a\r\=ph
 Partial match: a\x0d
 
 /^(a$|a\r)/newline=crlf
-    a\r\=P
+    a\r\=ps
  0: a\x0d
-    a\r\=PP
+    a\r\=ph
 Partial match: a\x0d
 
 /^(a$|a\r)/m,newline=crlf
-    a\r\=P
+    a\r\=ps
  0: a\x0d
-    a\r\=PP
+    a\r\=ph
 Partial match: a\x0d
 
 /./newline=crlf
-    \r\=P
+    \r\=ps
  0: \x0d
-    \r\=PP
+    \r\=ph
 Partial match: \x0d
   
 /.{2,3}/newline=crlf
-    \r\=P
+    \r\=ps
 Partial match: \x0d
-    \r\=PP
+    \r\=ph
 Partial match: \x0d
-    \r\r\=P
+    \r\r\=ps
  0: \x0d\x0d
-    \r\r\=PP
+    \r\r\=ph
 Partial match: \x0d\x0d
-    \r\r\r\=P
+    \r\r\r\=ps
  0: \x0d\x0d\x0d
-    \r\r\r\=PP
+    \r\r\r\=ph
 Partial match: \x0d\x0d\x0d
 
 /.{2,3}?/newline=crlf
-    \r\=P
+    \r\=ps
 Partial match: \x0d
-    \r\=PP
+    \r\=ph
 Partial match: \x0d
-    \r\r\=P
+    \r\r\=ps
  0: \x0d\x0d
-    \r\r\=PP
+    \r\r\=ph
 Partial match: \x0d\x0d
-    \r\r\r\=P
+    \r\r\r\=ps
  0: \x0d\x0d\x0d
  1: \x0d\x0d
-    \r\r\r\=PP
+    \r\r\r\=ph
 Partial match: \x0d\x0d\x0d
 
 # Test simple validity check for restarts 

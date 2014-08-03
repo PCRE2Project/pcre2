@@ -293,285 +293,285 @@
     A\x{1ec5}ABCXYZ
 
 /Xa{2,4}b/utf
-    X\=P
-    Xa\=P
-    Xaa\=P
-    Xaaa\=P
-    Xaaaa\=P
+    X\=ps
+    Xa\=ps
+    Xaa\=ps
+    Xaaa\=ps
+    Xaaaa\=ps
     
 /Xa{2,4}?b/utf
-    X\=P
-    Xa\=P
-    Xaa\=P
-    Xaaa\=P
-    Xaaaa\=P
+    X\=ps
+    Xa\=ps
+    Xaa\=ps
+    Xaaa\=ps
+    Xaaaa\=ps
     
 /Xa{2,4}+b/utf
-    X\=P
-    Xa\=P
-    Xaa\=P
-    Xaaa\=P
-    Xaaaa\=P
+    X\=ps
+    Xa\=ps
+    Xaa\=ps
+    Xaaa\=ps
+    Xaaaa\=ps
     
 /X\x{123}{2,4}b/utf
-    X\=P
-    X\x{123}\=P
-    X\x{123}\x{123}\=P
-    X\x{123}\x{123}\x{123}\=P
-    X\x{123}\x{123}\x{123}\x{123}\=P
+    X\=ps
+    X\x{123}\=ps
+    X\x{123}\x{123}\=ps
+    X\x{123}\x{123}\x{123}\=ps
+    X\x{123}\x{123}\x{123}\x{123}\=ps
     
 /X\x{123}{2,4}?b/utf
-    X\=P
-    X\x{123}\=P
-    X\x{123}\x{123}\=P
-    X\x{123}\x{123}\x{123}\=P
-    X\x{123}\x{123}\x{123}\x{123}\=P
+    X\=ps
+    X\x{123}\=ps
+    X\x{123}\x{123}\=ps
+    X\x{123}\x{123}\x{123}\=ps
+    X\x{123}\x{123}\x{123}\x{123}\=ps
     
 /X\x{123}{2,4}+b/utf
-    X\=P
-    X\x{123}\=P
-    X\x{123}\x{123}\=P
-    X\x{123}\x{123}\x{123}\=P
-    X\x{123}\x{123}\x{123}\x{123}\=P
+    X\=ps
+    X\x{123}\=ps
+    X\x{123}\x{123}\=ps
+    X\x{123}\x{123}\x{123}\=ps
+    X\x{123}\x{123}\x{123}\x{123}\=ps
     
 /X\x{123}{2,4}b/utf
-    Xx\=P
-    X\x{123}x\=P
-    X\x{123}\x{123}x\=P
-    X\x{123}\x{123}\x{123}x\=P
-    X\x{123}\x{123}\x{123}\x{123}x\=P
+    Xx\=ps
+    X\x{123}x\=ps
+    X\x{123}\x{123}x\=ps
+    X\x{123}\x{123}\x{123}x\=ps
+    X\x{123}\x{123}\x{123}\x{123}x\=ps
     
 /X\x{123}{2,4}?b/utf
-    Xx\=P
-    X\x{123}x\=P
-    X\x{123}\x{123}x\=P
-    X\x{123}\x{123}\x{123}x\=P
-    X\x{123}\x{123}\x{123}\x{123}x\=P
+    Xx\=ps
+    X\x{123}x\=ps
+    X\x{123}\x{123}x\=ps
+    X\x{123}\x{123}\x{123}x\=ps
+    X\x{123}\x{123}\x{123}\x{123}x\=ps
     
 /X\x{123}{2,4}+b/utf
-    Xx\=P
-    X\x{123}x\=P
-    X\x{123}\x{123}x\=P
-    X\x{123}\x{123}\x{123}x\=P
-    X\x{123}\x{123}\x{123}\x{123}x\=P
+    Xx\=ps
+    X\x{123}x\=ps
+    X\x{123}\x{123}x\=ps
+    X\x{123}\x{123}\x{123}x\=ps
+    X\x{123}\x{123}\x{123}\x{123}x\=ps
     
 /X\d{2,4}b/utf
-    X\=P
-    X3\=P
-    X33\=P
-    X333\=P
-    X3333\=P
+    X\=ps
+    X3\=ps
+    X33\=ps
+    X333\=ps
+    X3333\=ps
     
 /X\d{2,4}?b/utf
-    X\=P
-    X3\=P
-    X33\=P
-    X333\=P
-    X3333\=P
+    X\=ps
+    X3\=ps
+    X33\=ps
+    X333\=ps
+    X3333\=ps
     
 /X\d{2,4}+b/utf
-    X\=P
-    X3\=P
-    X33\=P
-    X333\=P
-    X3333\=P
+    X\=ps
+    X3\=ps
+    X33\=ps
+    X333\=ps
+    X3333\=ps
 
 /X\D{2,4}b/utf
-    X\=P
-    Xa\=P
-    Xaa\=P
-    Xaaa\=P
-    Xaaaa\=P
+    X\=ps
+    Xa\=ps
+    Xaa\=ps
+    Xaaa\=ps
+    Xaaaa\=ps
     
 /X\D{2,4}?b/utf
-    X\=P
-    Xa\=P
-    Xaa\=P
-    Xaaa\=P
-    Xaaaa\=P
+    X\=ps
+    Xa\=ps
+    Xaa\=ps
+    Xaaa\=ps
+    Xaaaa\=ps
     
 /X\D{2,4}+b/utf
-    X\=P
-    Xa\=P
-    Xaa\=P
-    Xaaa\=P
-    Xaaaa\=P
+    X\=ps
+    Xa\=ps
+    Xaa\=ps
+    Xaaa\=ps
+    Xaaaa\=ps
 
 /X\D{2,4}b/utf
-    X\=P
-    X\x{123}\=P
-    X\x{123}\x{123}\=P
-    X\x{123}\x{123}\x{123}\=P
-    X\x{123}\x{123}\x{123}\x{123}\=P
+    X\=ps
+    X\x{123}\=ps
+    X\x{123}\x{123}\=ps
+    X\x{123}\x{123}\x{123}\=ps
+    X\x{123}\x{123}\x{123}\x{123}\=ps
     
 /X\D{2,4}?b/utf
-    X\=P
-    X\x{123}\=P
-    X\x{123}\x{123}\=P
-    X\x{123}\x{123}\x{123}\=P
-    X\x{123}\x{123}\x{123}\x{123}\=P
+    X\=ps
+    X\x{123}\=ps
+    X\x{123}\x{123}\=ps
+    X\x{123}\x{123}\x{123}\=ps
+    X\x{123}\x{123}\x{123}\x{123}\=ps
     
 /X\D{2,4}+b/utf
-    X\=P
-    X\x{123}\=P
-    X\x{123}\x{123}\=P
-    X\x{123}\x{123}\x{123}\=P
-    X\x{123}\x{123}\x{123}\x{123}\=P
+    X\=ps
+    X\x{123}\=ps
+    X\x{123}\x{123}\=ps
+    X\x{123}\x{123}\x{123}\=ps
+    X\x{123}\x{123}\x{123}\x{123}\=ps
 
 /X[abc]{2,4}b/utf
-    X\=P
-    Xa\=P
-    Xaa\=P
-    Xaaa\=P
-    Xaaaa\=P
+    X\=ps
+    Xa\=ps
+    Xaa\=ps
+    Xaaa\=ps
+    Xaaaa\=ps
     
 /X[abc]{2,4}?b/utf
-    X\=P
-    Xa\=P
-    Xaa\=P
-    Xaaa\=P
-    Xaaaa\=P
+    X\=ps
+    Xa\=ps
+    Xaa\=ps
+    Xaaa\=ps
+    Xaaaa\=ps
     
 /X[abc]{2,4}+b/utf
-    X\=P
-    Xa\=P
-    Xaa\=P
-    Xaaa\=P
-    Xaaaa\=P
+    X\=ps
+    Xa\=ps
+    Xaa\=ps
+    Xaaa\=ps
+    Xaaaa\=ps
 
 /X[abc\x{123}]{2,4}b/utf
-    X\=P
-    X\x{123}\=P
-    X\x{123}\x{123}\=P
-    X\x{123}\x{123}\x{123}\=P
-    X\x{123}\x{123}\x{123}\x{123}\=P
+    X\=ps
+    X\x{123}\=ps
+    X\x{123}\x{123}\=ps
+    X\x{123}\x{123}\x{123}\=ps
+    X\x{123}\x{123}\x{123}\x{123}\=ps
     
 /X[abc\x{123}]{2,4}?b/utf
-    X\=P
-    X\x{123}\=P
-    X\x{123}\x{123}\=P
-    X\x{123}\x{123}\x{123}\=P
-    X\x{123}\x{123}\x{123}\x{123}\=P
+    X\=ps
+    X\x{123}\=ps
+    X\x{123}\x{123}\=ps
+    X\x{123}\x{123}\x{123}\=ps
+    X\x{123}\x{123}\x{123}\x{123}\=ps
     
 /X[abc\x{123}]{2,4}+b/utf
-    X\=P
-    X\x{123}\=P
-    X\x{123}\x{123}\=P
-    X\x{123}\x{123}\x{123}\=P
-    X\x{123}\x{123}\x{123}\x{123}\=P
+    X\=ps
+    X\x{123}\=ps
+    X\x{123}\x{123}\=ps
+    X\x{123}\x{123}\x{123}\=ps
+    X\x{123}\x{123}\x{123}\x{123}\=ps
 
 /X[^a]{2,4}b/utf
-    X\=P
-    Xz\=P
-    Xzz\=P
-    Xzzz\=P
-    Xzzzz\=P
+    X\=ps
+    Xz\=ps
+    Xzz\=ps
+    Xzzz\=ps
+    Xzzzz\=ps
     
 /X[^a]{2,4}?b/utf
-    X\=P
-    Xz\=P
-    Xzz\=P
-    Xzzz\=P
-    Xzzzz\=P
+    X\=ps
+    Xz\=ps
+    Xzz\=ps
+    Xzzz\=ps
+    Xzzzz\=ps
     
 /X[^a]{2,4}+b/utf
-    X\=P
-    Xz\=P
-    Xzz\=P
-    Xzzz\=P
-    Xzzzz\=P
+    X\=ps
+    Xz\=ps
+    Xzz\=ps
+    Xzzz\=ps
+    Xzzzz\=ps
 
 /X[^a]{2,4}b/utf
-    X\=P
-    X\x{123}\=P
-    X\x{123}\x{123}\=P
-    X\x{123}\x{123}\x{123}\=P
-    X\x{123}\x{123}\x{123}\x{123}\=P
+    X\=ps
+    X\x{123}\=ps
+    X\x{123}\x{123}\=ps
+    X\x{123}\x{123}\x{123}\=ps
+    X\x{123}\x{123}\x{123}\x{123}\=ps
     
 /X[^a]{2,4}?b/utf
-    X\=P
-    X\x{123}\=P
-    X\x{123}\x{123}\=P
-    X\x{123}\x{123}\x{123}\=P
-    X\x{123}\x{123}\x{123}\x{123}\=P
+    X\=ps
+    X\x{123}\=ps
+    X\x{123}\x{123}\=ps
+    X\x{123}\x{123}\x{123}\=ps
+    X\x{123}\x{123}\x{123}\x{123}\=ps
     
 /X[^a]{2,4}+b/utf
-    X\=P
-    X\x{123}\=P
-    X\x{123}\x{123}\=P
-    X\x{123}\x{123}\x{123}\=P
-    X\x{123}\x{123}\x{123}\x{123}\=P
+    X\=ps
+    X\x{123}\=ps
+    X\x{123}\x{123}\=ps
+    X\x{123}\x{123}\x{123}\=ps
+    X\x{123}\x{123}\x{123}\x{123}\=ps
 
 /(Y)X\1{2,4}b/utf
-    YX\=P
-    YXY\=P
-    YXYY\=P
-    YXYYY\=P
-    YXYYYY\=P
+    YX\=ps
+    YXY\=ps
+    YXYY\=ps
+    YXYYY\=ps
+    YXYYYY\=ps
     
 /(Y)X\1{2,4}?b/utf
-    YX\=P
-    YXY\=P
-    YXYY\=P
-    YXYYY\=P
-    YXYYYY\=P
+    YX\=ps
+    YXY\=ps
+    YXYY\=ps
+    YXYYY\=ps
+    YXYYYY\=ps
     
 /(Y)X\1{2,4}+b/utf
-    YX\=P
-    YXY\=P
-    YXYY\=P
-    YXYYY\=P
-    YXYYYY\=P
+    YX\=ps
+    YXY\=ps
+    YXYY\=ps
+    YXYYY\=ps
+    YXYYYY\=ps
 
 /(\x{123})X\1{2,4}b/utf
-    \x{123}X\=P
-    \x{123}X\x{123}\=P
-    \x{123}X\x{123}\x{123}\=P
-    \x{123}X\x{123}\x{123}\x{123}\=P
-    \x{123}X\x{123}\x{123}\x{123}\x{123}\=P
+    \x{123}X\=ps
+    \x{123}X\x{123}\=ps
+    \x{123}X\x{123}\x{123}\=ps
+    \x{123}X\x{123}\x{123}\x{123}\=ps
+    \x{123}X\x{123}\x{123}\x{123}\x{123}\=ps
     
 /(\x{123})X\1{2,4}?b/utf
-    \x{123}X\=P
-    \x{123}X\x{123}\=P
-    \x{123}X\x{123}\x{123}\=P
-    \x{123}X\x{123}\x{123}\x{123}\=P
-    \x{123}X\x{123}\x{123}\x{123}\x{123}\=P
+    \x{123}X\=ps
+    \x{123}X\x{123}\=ps
+    \x{123}X\x{123}\x{123}\=ps
+    \x{123}X\x{123}\x{123}\x{123}\=ps
+    \x{123}X\x{123}\x{123}\x{123}\x{123}\=ps
     
 /(\x{123})X\1{2,4}+b/utf
-    \x{123}X\=P
-    \x{123}X\x{123}\=P
-    \x{123}X\x{123}\x{123}\=P
-    \x{123}X\x{123}\x{123}\x{123}\=P
-    \x{123}X\x{123}\x{123}\x{123}\x{123}\=P
+    \x{123}X\=ps
+    \x{123}X\x{123}\=ps
+    \x{123}X\x{123}\x{123}\=ps
+    \x{123}X\x{123}\x{123}\x{123}\=ps
+    \x{123}X\x{123}\x{123}\x{123}\x{123}\=ps
 
 /\bthe cat\b/utf
-    the cat\=P
-    the cat\=PP
+    the cat\=ps
+    the cat\=ph
 
 /abcd*/utf
-    xxxxabcd\=P
-    xxxxabcd\=PP
+    xxxxabcd\=ps
+    xxxxabcd\=ph
 
 /abcd*/i,utf
-    xxxxabcd\=P
-    xxxxabcd\=PP
-    XXXXABCD\=P
-    XXXXABCD\=PP
+    xxxxabcd\=ps
+    xxxxabcd\=ph
+    XXXXABCD\=ps
+    XXXXABCD\=ph
 
 /abc\d*/utf
-    xxxxabc1\=P
-    xxxxabc1\=PP
+    xxxxabc1\=ps
+    xxxxabc1\=ph
 
 /(a)bc\1*/utf
-    xxxxabca\=P
-    xxxxabca\=PP
+    xxxxabca\=ps
+    xxxxabca\=ph
 
 /abc[de]*/utf
-    xxxxabcde\=P
-    xxxxabcde\=PP
+    xxxxabcde\=ps
+    xxxxabcde\=ph
 
 /X\W{3}X/utf
-    X\=P
+    X\=ps
 
 /\sxxx\s/utf,tables=1
     AB\x{85}xxx\x{a0}XYZ
@@ -616,16 +616,16 @@
 /[^\x{1234}]{2}/Ii,utf
 
 /f.*/
-    for\=PP
+    for\=ph
 
 /f.*/s
-    for\=PP
+    for\=ph
 
 /f.*/utf
-    for\=PP
+    for\=ph
 
 /f.*/s,utf
-    for\=PP
+    for\=ph
     
 /\x{d7ff}\x{e000}/utf
 
@@ -674,63 +674,63 @@
     \x09\x0e\x{84}\x{86}\x{85}\x0a\x0b\x0c\x0d
 
 /(..)\1/utf
-    ab\=P
-    aba\=P
-    abab\=P
+    ab\=ps
+    aba\=ps
+    abab\=ps
 
 /(..)\1/i,utf
-    ab\=P
-    abA\=P
-    aBAb\=P
+    ab\=ps
+    abA\=ps
+    aBAb\=ps
 
 /(..)\1{2,}/utf
-    ab\=P
-    aba\=P
-    abab\=P
-    ababa\=P
-    ababab\=P
-    ababab\=PP
-    abababa\=P
-    abababa\=PP
+    ab\=ps
+    aba\=ps
+    abab\=ps
+    ababa\=ps
+    ababab\=ps
+    ababab\=ph
+    abababa\=ps
+    abababa\=ph
 
 /(..)\1{2,}/i,utf
-    ab\=P
-    aBa\=P
-    aBAb\=P
-    AbaBA\=P
-    abABAb\=P
-    aBAbaB\=PP
-    abABabA\=P
-    abaBABa\=PP
+    ab\=ps
+    aBa\=ps
+    aBAb\=ps
+    AbaBA\=ps
+    abABAb\=ps
+    aBAbaB\=ph
+    abABabA\=ps
+    abaBABa\=ph
 
 /(..)\1{2,}?x/i,utf
-    ab\=P
-    abA\=P
-    aBAb\=P
-    abaBA\=P
-    abAbaB\=P
-    abaBabA\=P
-    abAbABaBx\=P
+    ab\=ps
+    abA\=ps
+    aBAb\=ps
+    abaBA\=ps
+    abAbaB\=ps
+    abaBabA\=ps
+    abAbABaBx\=ps
 
 /./utf,newline=crlf
-    \r\=P
-    \r\=PP
+    \r\=ps
+    \r\=ph
   
 /.{2,3}/utf,newline=crlf
-    \r\=P
-    \r\=PP
-    \r\r\=P
-    \r\r\=PP
-    \r\r\r\=P
-    \r\r\r\=PP
+    \r\=ps
+    \r\=ph
+    \r\r\=ps
+    \r\r\=ph
+    \r\r\r\=ps
+    \r\r\r\=ph
 
 /.{2,3}?/utf,newline=crlf
-    \r\=P
-    \r\=PP
-    \r\r\=P
-    \r\r\=PP
-    \r\r\r\=P
-    \r\r\r\=PP
+    \r\=ps
+    \r\=ph
+    \r\r\=ps
+    \r\r\=ph
+    \r\r\r\=ps
+    \r\r\r\=ph
 
 /[^\x{100}][^\x{1234}][^\x{ffff}][^\x{10000}][^\x{10ffff}]/B,utf
 
@@ -1305,28 +1305,28 @@
 /(?<=ab\Cde)X/utf
 
 /\X/
-    a\=P
-    a\=PP
+    a\=ps
+    a\=ph
 
 /\Xa/
-    aa\=P
-    aa\=PP
+    aa\=ps
+    aa\=ph
 
 /\X{2}/
-    aa\=P
-    aa\=PP
+    aa\=ps
+    aa\=ph
 
 /\X+a/
-    a\=P
-    aa\=P
-    aa\=PP
+    a\=ps
+    aa\=ps
+    aa\=ph
 
 /\X+?a/
-    a\=P
-    ab\=P
-    aa\=P
-    aa\=PP
-    aba\=P
+    a\=ps
+    ab\=ps
+    aa\=ps
+    aa\=ph
+    aba\=ps
     
 # These Unicode 6.1.0 scripts are not known to Perl.  
 
@@ -1337,36 +1337,36 @@
     \x{11680}\x{116c0}
 
 /^\X/utf
-    A\=P
-    A\=PP
-    A\x{300}\x{301}\=P
-    A\x{300}\x{301}\=PP
-    A\x{301}\=P
-    A\x{301}\=PP
+    A\=ps
+    A\=ph
+    A\x{300}\x{301}\=ps
+    A\x{300}\x{301}\=ph
+    A\x{301}\=ps
+    A\x{301}\=ph
     
 /^\X{2,3}/utf
-    A\=P
-    A\=PP
-    AA\=P
-    AA\=PP
-    A\x{300}\x{301}\=P
-    A\x{300}\x{301}\=PP
-    A\x{300}\x{301}A\x{300}\x{301}\=P
-    A\x{300}\x{301}A\x{300}\x{301}\=PP
+    A\=ps
+    A\=ph
+    AA\=ps
+    AA\=ph
+    A\x{300}\x{301}\=ps
+    A\x{300}\x{301}\=ph
+    A\x{300}\x{301}A\x{300}\x{301}\=ps
+    A\x{300}\x{301}A\x{300}\x{301}\=ph
 
 /^\X{2}/utf
-    AA\=P
-    AA\=PP
-    A\x{300}\x{301}A\x{300}\x{301}\=P
-    A\x{300}\x{301}A\x{300}\x{301}\=PP
+    AA\=ps
+    AA\=ph
+    A\x{300}\x{301}A\x{300}\x{301}\=ps
+    A\x{300}\x{301}A\x{300}\x{301}\=ph
     
 /^\X+/utf
-    AA\=P
-    AA\=PP
+    AA\=ps
+    AA\=ph
 
 /^\X+?Z/utf
-    AA\=P
-    AA\=PP
+    AA\=ps
+    AA\=ph
 
 /A\x{3a3}B/IBi,utf
 

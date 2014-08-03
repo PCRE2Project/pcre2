@@ -1,4 +1,4 @@
-.TH PCRE2TEST 1 "22 July 2014" "PCRE 10.00"
+.TH PCRE2TEST 1 "03 August 2014" "PCRE 10.00"
 .SH NAME
 pcre2test - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -270,12 +270,12 @@ them must be followed by an equals sign and a value, for example, "offset=12".
 Modifiers that do not take values may be preceded by a minus sign to turn off a
 previous default setting.
 .P
-A few of the more common modifiers can also be specified as single or double
-letters, for example "i" for "caseless". In documentation, following the Perl
-convention, these are written with a slash ("the /i modifier") for clarity.
-Abbreviated modifiers must all be concatenated in the first item of a modifier
-list. If the first item is not recognized as a long modifier name, it is
-interpreted as a sequence of these abbreviations. For example:
+A few of the more common modifiers can also be specified as single letters, for
+example "i" for "caseless". In documentation, following the Perl convention,
+these are written with a slash ("the /i modifier") for clarity. Abbreviated
+modifiers must all be concatenated in the first item of a modifier list. If the
+first item is not recognized as a long modifier name, it is interpreted as a
+sequence of these abbreviations. For example:
 .sp
   /abc/ig,newline=cr,jit=3
 .sp
@@ -433,9 +433,9 @@ about the pattern:
 .sp
       bsr=[anycrlf|unicode]     specify \eR handling
   /B  bincode                   show binary code without lengths
-  /D  debug                     same as /DBB
+  /D  debug                     same as info,fullbincode
       flipbytes                 flip endianness
-  /BB fullbincode               show binary code with lengths
+      fullbincode               show binary code with lengths
   /I  info                      show info about compiled pattern
       hex                       pattern is coded in hexadecimal
       jit[=<number>]            use JIT
@@ -652,7 +652,6 @@ not affect the compilation process.
       aftertext                 show text after match
       allaftertext              show text after captures
       allcaptures               show all captures
-  /gg altglobal                 alternative global matching
   /g  global                    global matching
       jitverify                 verify JIT usage
       mark                      show mark values
@@ -687,14 +686,18 @@ for a description of their effects.
       notempty                  set PCRE2_NOTEMPTY
       notempty_atstart          set PCRE2_NOTEMPTY_ATSTART
       noteol                    set PCRE2_NOTEOL
-  /PP partial_hard              set PCRE2_PARTIAL_HARD
-  /P  partial_soft              set PCRE2_PARTIAL_SOFT
+      partial_hard (or ph)      set PCRE2_PARTIAL_HARD
+      partial_soft (or ps)      set PCRE2_PARTIAL_SOFT
 .sp
+The partial matching modifiers are provided with abbreviations because they 
+appear frequently in tests.
+.P
 If the \fB/posix\fP modifier was present on the pattern, causing the POSIX
 wrapper API to be used, the only option-setting modifiers that have any effect
 are \fBnotbol\fP, \fBnotempty\fP, and \fBnoteol\fP, causing REG_NOTBOL,
 REG_NOTEMPTY, and REG_NOTEOL, respectively, to be passed to \fBregexec()\fP.
 Any other modifiers cause an error.
+.
 .
 .SS "Setting match controls"
 .rs
@@ -707,7 +710,7 @@ pattern.
       aftertext                 show text after match
       allaftertext              show text after captures
       allcaptures               show all captures
-  /gg altglobal                 alternative global matching
+      altglobal                 alternative global matching
       bsr=[anycrlf|unicode]     specify \eR handling
       callout_capture           show captures at callout time
       callout_data=<n>          set a value to pass via callouts
@@ -1229,6 +1232,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 22 July 2014
+Last updated: 03 August 2014
 Copyright (c) 1997-2014 University of Cambridge.
 .fi

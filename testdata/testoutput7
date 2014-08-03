@@ -1193,37 +1193,37 @@ No match
  0: X
 
 /abcd*/utf
-    xxxxabcd\=P
+    xxxxabcd\=ps
  0: abcd
-    xxxxabcd\=PP
+    xxxxabcd\=ph
 Partial match: abcd
 
 /abcd*/i,utf
-    xxxxabcd\=P
+    xxxxabcd\=ps
  0: abcd
-    xxxxabcd\=PP
+    xxxxabcd\=ph
 Partial match: abcd
-    XXXXABCD\=P
+    XXXXABCD\=ps
  0: ABCD
-    XXXXABCD\=PP
+    XXXXABCD\=ph
 Partial match: ABCD
 
 /abc\d*/utf
-    xxxxabc1\=P
+    xxxxabc1\=ps
  0: abc1
-    xxxxabc1\=PP
+    xxxxabc1\=ph
 Partial match: abc1
 
 /abc[de]*/utf
-    xxxxabcde\=P
+    xxxxabcde\=ps
  0: abcde
-    xxxxabcde\=PP
+    xxxxabcde\=ph
 Partial match: abcde
 
 /\bthe cat\b/utf
-    the cat\=P
+    the cat\=ps
  0: the cat
-    the cat\=PP
+    the cat\=ph
 Partial match: the cat
 
 /ab\Cde/utf
@@ -1234,38 +1234,38 @@ Failed: error -41: item unsupported for DFA matching
 Failed: error 136 at offset 10: \C is not allowed in a lookbehind assertion
 
 /./newline=crlf,utf
-    \r\=P
+    \r\=ps
  0: \x{0d}
-    \r\=PP
+    \r\=ph
 Partial match: \x{0d}
   
 /.{2,3}/newline=crlf,utf
-    \r\=P
+    \r\=ps
 Partial match: \x{0d}
-    \r\=PP
+    \r\=ph
 Partial match: \x{0d}
-    \r\r\=P
+    \r\r\=ps
  0: \x{0d}\x{0d}
-    \r\r\=PP
+    \r\r\=ph
 Partial match: \x{0d}\x{0d}
-    \r\r\r\=P
+    \r\r\r\=ps
  0: \x{0d}\x{0d}\x{0d}
-    \r\r\r\=PP
+    \r\r\r\=ph
 Partial match: \x{0d}\x{0d}\x{0d}
 
 /.{2,3}?/newline=crlf,utf
-    \r\=P
+    \r\=ps
 Partial match: \x{0d}
-    \r\=PP
+    \r\=ph
 Partial match: \x{0d}
-    \r\r\=P
+    \r\r\=ps
  0: \x{0d}\x{0d}
-    \r\r\=PP
+    \r\r\=ph
 Partial match: \x{0d}\x{0d}
-    \r\r\r\=P
+    \r\r\r\=ps
  0: \x{0d}\x{0d}\x{0d}
  1: \x{0d}\x{0d}
-    \r\r\r\=PP
+    \r\r\r\=ph
 Partial match: \x{0d}\x{0d}\x{0d}
 
 /[^\x{100}]/utf
@@ -3106,57 +3106,57 @@ No match
  0: XX
 
 /^\X/utf
-    A\=P
+    A\=ps
  0: A
-    A\=PP
+    A\=ph
 Partial match: A
-    A\x{300}\x{301}\=P
+    A\x{300}\x{301}\=ps
  0: A\x{300}\x{301}
-    A\x{300}\x{301}\=PP
+    A\x{300}\x{301}\=ph
 Partial match: A\x{300}\x{301}
-    A\x{301}\=P
+    A\x{301}\=ps
  0: A\x{301}
-    A\x{301}\=PP
+    A\x{301}\=ph
 Partial match: A\x{301}
     
 /^\X{2,3}/utf
-    A\=P
+    A\=ps
 Partial match: A
-    A\=PP
+    A\=ph
 Partial match: A
-    AA\=P
+    AA\=ps
  0: AA
-    AA\=PP
+    AA\=ph
 Partial match: AA
-    A\x{300}\x{301}\=P
+    A\x{300}\x{301}\=ps
 Partial match: A\x{300}\x{301}
-    A\x{300}\x{301}\=PP
+    A\x{300}\x{301}\=ph
 Partial match: A\x{300}\x{301}
-    A\x{300}\x{301}A\x{300}\x{301}\=P
+    A\x{300}\x{301}A\x{300}\x{301}\=ps
  0: A\x{300}\x{301}A\x{300}\x{301}
-    A\x{300}\x{301}A\x{300}\x{301}\=PP
+    A\x{300}\x{301}A\x{300}\x{301}\=ph
 Partial match: A\x{300}\x{301}A\x{300}\x{301}
 
 /^\X{2}/utf
-    AA\=P
+    AA\=ps
  0: AA
-    AA\=PP
+    AA\=ph
 Partial match: AA
-    A\x{300}\x{301}A\x{300}\x{301}\=P
+    A\x{300}\x{301}A\x{300}\x{301}\=ps
  0: A\x{300}\x{301}A\x{300}\x{301}
-    A\x{300}\x{301}A\x{300}\x{301}\=PP
+    A\x{300}\x{301}A\x{300}\x{301}\=ph
 Partial match: A\x{300}\x{301}A\x{300}\x{301}
     
 /^\X+/utf
-    AA\=P
+    AA\=ps
  0: AA
-    AA\=PP
+    AA\=ph
 Partial match: AA
 
 /^\X+?Z/utf
-    AA\=P
+    AA\=ps
 Partial match: AA
-    AA\=PP
+    AA\=ph
 Partial match: AA
 
 # These are tests for extended grapheme clusters  

@@ -470,7 +470,9 @@ static modstruct modlist[] = {
   { "parens_nest_limit",   MOD_CTC,  MOD_INT, 0,                         CO(parens_nest_limit) },
   { "partial_hard",        MOD_DAT,  MOD_OPT, PCRE2_PARTIAL_HARD,        DO(options) },
   { "partial_soft",        MOD_DAT,  MOD_OPT, PCRE2_PARTIAL_SOFT,        DO(options) },
+  { "ph",                  MOD_DAT,  MOD_OPT, PCRE2_PARTIAL_HARD,        DO(options) },
   { "posix",               MOD_PAT,  MOD_CTL, CTL_POSIX,                 PO(control) },
+  { "ps",                  MOD_DAT,  MOD_OPT, PCRE2_PARTIAL_SOFT,        DO(options) },
   { "recursion_limit",     MOD_CTM,  MOD_INT, 0,                         MO(recursion_limit) },
   { "save",                MOD_PAT,  MOD_STR, 0,                         PO(save) },
   { "stackguard",          MOD_PAT,  MOD_INT, 0,                         PO(stackguard_test) },
@@ -497,11 +499,11 @@ static modstruct modlist[] = {
 
 #define POSIX_SUPPORTED_MATCH_CONTROLS ( 0 )
 
-/* Table of single-character and doubled-character abbreviated modifiers. The
-index field is initialized to -1, but the first time the modifier is
-encountered, it is filled in with the index of the full entry in modlist, to
-save repeated searching when processing multiple test items. This short list is
-searched serially, so its order does not matter. */
+/* Table of single-character abbreviated modifiers. The index field is
+initialized to -1, but the first time the modifier is encountered, it is filled
+in with the index of the full entry in modlist, to save repeated searching when
+processing multiple test items. This short list is searched serially, so its
+order does not matter. */
 
 typedef struct c1modstruct {
   const char *fullname;
@@ -511,13 +513,9 @@ typedef struct c1modstruct {
 
 static c1modstruct c1modlist[] = {
   { "bincode",      'B',           -1 },
-  { "fullbincode",  ('B'<<8)|'B',  -1 },
   { "debug",        'D',           -1 },
   { "info",         'I',           -1 },
-  { "partial_soft", 'P',           -1 },
-  { "partial_hard", ('P'<<8)|'P',  -1 },
   { "global",       'g',           -1 },
-  { "altglobal",    ('g'<<8)|'g',  -1 },
   { "caseless",     'i',           -1 },
   { "multiline",    'm',           -1 },
   { "dotall",       's',           -1 },
@@ -2577,12 +2575,6 @@ for (;;)
 
     for (cc = *p; cc != ',' && cc != '\n' && cc != 0; cc = *(++p))
       {
-      if (p[1] == cc)           /* Handle doubled characters */
-        {
-        cc = (cc << 8) | cc;
-        p++;
-        }
-
       for (i = 0; i < C1MODLISTCOUNT; i++)
         if (cc == c1modlist[i].onechar) break;
 

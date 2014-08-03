@@ -1316,35 +1316,35 @@
   Xbcd12345
 
 /abcde/I
-    ab\=P
-    abc\=P
-    abcd\=P
-    abcde\=P
-    the quick brown abc\=P
-    ** Failers\=P
-    the quick brown abxyz fox\=P
+    ab\=ps
+    abc\=ps
+    abcd\=ps
+    abcde\=ps
+    the quick brown abc\=ps
+    ** Failers\=ps
+    the quick brown abxyz fox\=ps
 
 "^(0?[1-9]|[12][0-9]|3[01])/(0?[1-9]|1[012])/(20)?\d\d$"I
-    13/05/04\=P
-    13/5/2004\=P
-    02/05/09\=P
-    1\=P
-    1/2\=P
-    1/2/0\=P
-    1/2/04\=P
-    0\=P
-    02/\=P
-    02/0\=P
-    02/1\=P
-    ** Failers\=P
-    \=P
-    123\=P
-    33/4/04\=P
-    3/13/04\=P
-    0/1/2003\=P
-    0/\=P
-    02/0/\=P
-    02/13\=P
+    13/05/04\=ps
+    13/5/2004\=ps
+    02/05/09\=ps
+    1\=ps
+    1/2\=ps
+    1/2/0\=ps
+    1/2/04\=ps
+    0\=ps
+    02/\=ps
+    02/0\=ps
+    02/1\=ps
+    ** Failers\=ps
+    \=ps
+    123\=ps
+    33/4/04\=ps
+    3/13/04\=ps
+    0/1/2003\=ps
+    0/\=ps
+    02/0/\=ps
+    02/13\=ps
 
 /0{0,2}ABC/I
 
@@ -1355,24 +1355,24 @@
 /[abc]+DE/I
 
 /[abc]?123/I
-    123\=P
-    a\=P
-    b\=P
-    c\=P
-    c12\=P
-    c123\=P
+    123\=ps
+    a\=ps
+    b\=ps
+    c\=ps
+    c12\=ps
+    c123\=ps
 
 /^(?:\d){3,5}X/I
-    1\=P
-    123\=P
+    1\=ps
+    123\=ps
     123X
-    1234\=P
+    1234\=ps
     1234X
-    12345\=P
+    12345\=ps
     12345X
     *** Failers
     1X
-    123456\=P
+    123456\=ps
 
 "<(\w+)/?>(.)*</(\1)>"Igms
     <!DOCTYPE seite SYSTEM "http://www.lco.lineas.de/xmlCms.dtd">\n<seite>\n<dokumenteninformation>\n<seitentitel>Partner der LCO</seitentitel>\n<sprache>de</sprache>\n<seitenbeschreibung>Partner der LINEAS Consulting\nGmbH</seitenbeschreibung>\n<schluesselworte>LINEAS Consulting GmbH Hamburg\nPartnerfirmen</schluesselworte>\n<revisit>30 days</revisit>\n<robots>index,follow</robots>\n<menueinformation>\n<aktiv>ja</aktiv>\n<menueposition>3</menueposition>\n<menuetext>Partner</menuetext>\n</menueinformation>\n<lastedited>\n<autor>LCO</autor>\n<firma>LINEAS Consulting</firma>\n<datum>15.10.2003</datum>\n</lastedited>\n</dokumenteninformation>\n<inhalt>\n\n<absatzueberschrift>Die Partnerfirmen der LINEAS Consulting\nGmbH</absatzueberschrift>\n\n<absatz><link ziel="http://www.ca.com/" zielfenster="_blank">\n<bild name="logo_ca.gif" rahmen="no"/></link> <link\nziel="http://www.ey.com/" zielfenster="_blank"><bild\nname="logo_euy.gif" rahmen="no"/></link>\n</absatz>\n\n<absatz><link ziel="http://www.cisco.de/" zielfenster="_blank">\n<bild name="logo_cisco.gif" rahmen="ja"/></link></absatz>\n\n<absatz><link ziel="http://www.atelion.de/"\nzielfenster="_blank"><bild\nname="logo_atelion.gif" rahmen="no"/></link>\n</absatz>\n\n<absatz><link ziel="http://www.line-information.de/"\nzielfenster="_blank">\n<bild name="logo_line_information.gif" rahmen="no"/></link>\n</absatz>\n\n<absatz><bild name="logo_aw.gif" rahmen="no"/></absatz>\n\n<absatz><link ziel="http://www.incognis.de/"\nzielfenster="_blank"><bild\nname="logo_incognis.gif" rahmen="no"/></link></absatz>\n\n<absatz><link ziel="http://www.addcraft.com/"\nzielfenster="_blank"><bild\nname="logo_addcraft.gif" rahmen="no"/></link></absatz>\n\n<absatz><link ziel="http://www.comendo.com/"\nzielfenster="_blank"><bild\nname="logo_comendo.gif" rahmen="no"/></link></absatz>\n\n</inhalt>\n</seite>\=jitstack=1024
@@ -2505,182 +2505,182 @@ a random value. /Ix
     XYabcdY
  
 /Xa{2,4}b/
-    X\=P
-    Xa\=P
-    Xaa\=P
-    Xaaa\=P
-    Xaaaa\=P
+    X\=ps
+    Xa\=ps
+    Xaa\=ps
+    Xaaa\=ps
+    Xaaaa\=ps
     
 /Xa{2,4}?b/
-    X\=P
-    Xa\=P
-    Xaa\=P
-    Xaaa\=P
-    Xaaaa\=P
+    X\=ps
+    Xa\=ps
+    Xaa\=ps
+    Xaaa\=ps
+    Xaaaa\=ps
     
 /Xa{2,4}+b/
-    X\=P
-    Xa\=P
-    Xaa\=P
-    Xaaa\=P
-    Xaaaa\=P
+    X\=ps
+    Xa\=ps
+    Xaa\=ps
+    Xaaa\=ps
+    Xaaaa\=ps
     
 /X\d{2,4}b/
-    X\=P
-    X3\=P
-    X33\=P
-    X333\=P
-    X3333\=P
+    X\=ps
+    X3\=ps
+    X33\=ps
+    X333\=ps
+    X3333\=ps
     
 /X\d{2,4}?b/
-    X\=P
-    X3\=P
-    X33\=P
-    X333\=P
-    X3333\=P
+    X\=ps
+    X3\=ps
+    X33\=ps
+    X333\=ps
+    X3333\=ps
     
 /X\d{2,4}+b/
-    X\=P
-    X3\=P
-    X33\=P
-    X333\=P
-    X3333\=P
+    X\=ps
+    X3\=ps
+    X33\=ps
+    X333\=ps
+    X3333\=ps
     
 /X\D{2,4}b/
-    X\=P
-    Xa\=P
-    Xaa\=P
-    Xaaa\=P
-    Xaaaa\=P
+    X\=ps
+    Xa\=ps
+    Xaa\=ps
+    Xaaa\=ps
+    Xaaaa\=ps
     
 /X\D{2,4}?b/
-    X\=P
-    Xa\=P
-    Xaa\=P
-    Xaaa\=P
-    Xaaaa\=P
+    X\=ps
+    Xa\=ps
+    Xaa\=ps
+    Xaaa\=ps
+    Xaaaa\=ps
     
 /X\D{2,4}+b/
-    X\=P
-    Xa\=P
-    Xaa\=P
-    Xaaa\=P
-    Xaaaa\=P
+    X\=ps
+    Xa\=ps
+    Xaa\=ps
+    Xaaa\=ps
+    Xaaaa\=ps
     
 /X[abc]{2,4}b/
-    X\=P
-    Xa\=P
-    Xaa\=P
-    Xaaa\=P
-    Xaaaa\=P
+    X\=ps
+    Xa\=ps
+    Xaa\=ps
+    Xaaa\=ps
+    Xaaaa\=ps
     
 /X[abc]{2,4}?b/
-    X\=P
-    Xa\=P
-    Xaa\=P
-    Xaaa\=P
-    Xaaaa\=P
+    X\=ps
+    Xa\=ps
+    Xaa\=ps
+    Xaaa\=ps
+    Xaaaa\=ps
     
 /X[abc]{2,4}+b/
-    X\=P
-    Xa\=P
-    Xaa\=P
-    Xaaa\=P
-    Xaaaa\=P
+    X\=ps
+    Xa\=ps
+    Xaa\=ps
+    Xaaa\=ps
+    Xaaaa\=ps
     
 /X[^a]{2,4}b/
-    X\=P
-    Xz\=P
-    Xzz\=P
-    Xzzz\=P
-    Xzzzz\=P
+    X\=ps
+    Xz\=ps
+    Xzz\=ps
+    Xzzz\=ps
+    Xzzzz\=ps
     
 /X[^a]{2,4}?b/
-    X\=P
-    Xz\=P
-    Xzz\=P
-    Xzzz\=P
-    Xzzzz\=P
+    X\=ps
+    Xz\=ps
+    Xzz\=ps
+    Xzzz\=ps
+    Xzzzz\=ps
     
 /X[^a]{2,4}+b/
-    X\=P
-    Xz\=P
-    Xzz\=P
-    Xzzz\=P
-    Xzzzz\=P
+    X\=ps
+    Xz\=ps
+    Xzz\=ps
+    Xzzz\=ps
+    Xzzzz\=ps
     
 /(Y)X\1{2,4}b/
-    YX\=P
-    YXY\=P
-    YXYY\=P
-    YXYYY\=P
-    YXYYYY\=P
+    YX\=ps
+    YXY\=ps
+    YXYY\=ps
+    YXYYY\=ps
+    YXYYYY\=ps
     
 /(Y)X\1{2,4}?b/
-    YX\=P
-    YXY\=P
-    YXYY\=P
-    YXYYY\=P
-    YXYYYY\=P
+    YX\=ps
+    YXY\=ps
+    YXYY\=ps
+    YXYYY\=ps
+    YXYYYY\=ps
     
 /(Y)X\1{2,4}+b/
-    YX\=P
-    YXY\=P
-    YXYY\=P
-    YXYYY\=P
-    YXYYYY\=P
+    YX\=ps
+    YXY\=ps
+    YXYY\=ps
+    YXYYY\=ps
+    YXYYYY\=ps
     
 /\++\KZ|\d+X|9+Y/
-    ++++123999\=P
-    ++++123999Y\=P
-    ++++Z1234\=P
+    ++++123999\=ps
+    ++++123999Y\=ps
+    ++++Z1234\=ps
 
 /Z(*F)/
-    Z\=P
-    ZA\=P
+    Z\=ps
+    ZA\=ps
     
 /Z(?!)/
-    Z\=P
-    ZA\=P
+    Z\=ps
+    ZA\=ps
 
 /dog(sbody)?/
-    dogs\=P
-    dogs\=PP
+    dogs\=ps
+    dogs\=ph
     
 /dog(sbody)??/
-    dogs\=P
-    dogs\=PP
+    dogs\=ps
+    dogs\=ph
 
 /dog|dogsbody/
-    dogs\=P
-    dogs\=PP
+    dogs\=ps
+    dogs\=ph
  
 /dogsbody|dog/
-    dogs\=P
-    dogs\=PP
+    dogs\=ps
+    dogs\=ph
 
 /\bthe cat\b/
-    the cat\=P
-    the cat\=PP
+    the cat\=ps
+    the cat\=ph
 
 /abc/
-   abc\=P
-   abc\=PP
+   abc\=ps
+   abc\=ph
    
 /abc\K123/
     xyzabc123pqr
-    xyzabc12\=P
-    xyzabc12\=PP
+    xyzabc12\=ps
+    xyzabc12\=ph
     
 /(?<=abc)123/
     xyzabc123pqr 
-    xyzabc12\=P
-    xyzabc12\=PP
+    xyzabc12\=ps
+    xyzabc12\=ph
 
 /\babc\b/
     +++abc+++
-    +++ab\=P
-    +++ab\=PP
+    +++ab\=ps
+    +++ab\=ph
 
 /(?&word)(?&element)(?(DEFINE)(?<element><[^m][^>]>[^<])(?<word>\w*+))/B
 
@@ -2864,26 +2864,26 @@ a random value. /Ix
     abcdde  
 
 /abcd*/
-    xxxxabcd\=P
-    xxxxabcd\=PP
+    xxxxabcd\=ps
+    xxxxabcd\=ph
 
 /abcd*/i
-    xxxxabcd\=P
-    xxxxabcd\=PP
-    XXXXABCD\=P
-    XXXXABCD\=PP
+    xxxxabcd\=ps
+    xxxxabcd\=ph
+    XXXXABCD\=ps
+    XXXXABCD\=ph
 
 /abc\d*/
-    xxxxabc1\=P
-    xxxxabc1\=PP
+    xxxxabc1\=ps
+    xxxxabc1\=ph
 
 /(a)bc\1*/
-    xxxxabca\=P
-    xxxxabca\=PP
+    xxxxabca\=ps
+    xxxxabca\=ph
 
 /abc[de]*/
-    xxxxabcde\=P
-    xxxxabcde\=PP
+    xxxxabcde\=ps
+    xxxxabcde\=ph
 
 # This is not in the Perl-compatible test because Perl seems currently to be
 # broken and not behaving as specified in that it *does* bumpalong after
@@ -3046,40 +3046,40 @@ a random value. /Ix
     X\x0d\x0a
 
 /(?<=abc)def/
-    abc\=PP
+    abc\=ph
 
 /abc$/
     abc
-    abc\=P
-    abc\=PP
+    abc\=ps
+    abc\=ph
 
 /abc$/m
     abc
     abc\n
-    abc\=PP
-    abc\n\=PP
-    abc\=P
-    abc\n\=P
+    abc\=ph
+    abc\n\=ph
+    abc\=ps
+    abc\n\=ps
 
 /abc\z/
     abc
-    abc\=P
-    abc\=PP
+    abc\=ps
+    abc\=ph
 
 /abc\Z/
     abc
-    abc\=P
-    abc\=PP
+    abc\=ps
+    abc\=ph
 
 /abc\b/
     abc
-    abc\=P
-    abc\=PP
+    abc\=ps
+    abc\=ph
 
 /abc\B/
     abc
-    abc\=P
-    abc\=PP
+    abc\=ps
+    abc\=ph
 
 /.+/
     abc\=offset=0
@@ -3337,7 +3337,7 @@ a random value. /Ix
     aeqwerty
 
 /.(*F)/
-    abc\=PP
+    abc\=ph
 
 /\btype\b\W*?\btext\b\W*?\bjavascript\b/I
 
@@ -3469,7 +3469,7 @@ a random value. /Ix
 # After a partial match, the behaviour is as for a failure. 
 
 /^a(*:X)bcde/mark
-   abc\=P
+   abc\=ps
    
 # These are here because Perl doesn't return a mark, except for the first.
 
@@ -3492,58 +3492,58 @@ a random value. /Ix
     ab
 
 /(..)\1/
-    ab\=P
-    aba\=P
-    abab\=P
+    ab\=ps
+    aba\=ps
+    abab\=ps
 
 /(..)\1/i
-    ab\=P
-    abA\=P
-    aBAb\=P
+    ab\=ps
+    abA\=ps
+    aBAb\=ps
 
 /(..)\1{2,}/
-    ab\=P
-    aba\=P
-    abab\=P
-    ababa\=P
-    ababab\=P
-    ababab\=PP
-    abababa\=P
-    abababa\=PP
+    ab\=ps
+    aba\=ps
+    abab\=ps
+    ababa\=ps
+    ababab\=ps
+    ababab\=ph
+    abababa\=ps
+    abababa\=ph
 
 /(..)\1{2,}/i
-    ab\=P
-    aBa\=P
-    aBAb\=P
-    AbaBA\=P
-    abABAb\=P
-    aBAbaB\=PP
-    abABabA\=P
-    abaBABa\=PP
+    ab\=ps
+    aBa\=ps
+    aBAb\=ps
+    AbaBA\=ps
+    abABAb\=ps
+    aBAbaB\=ph
+    abABabA\=ps
+    abaBABa\=ph
 
 /(..)\1{2,}?x/i
-    ab\=P
-    abA\=P
-    aBAb\=P
-    abaBA\=P
-    abAbaB\=P
-    abaBabA\=P
-    abAbABaBx\=P
+    ab\=ps
+    abA\=ps
+    aBAb\=ps
+    abaBA\=ps
+    abAbaB\=ps
+    abaBabA\=ps
+    abAbABaBx\=ps
 
 /^(..)\1/
-    aba\=P
+    aba\=ps
 
 /^(..)\1{2,3}x/
-    aba\=P
-    ababa\=P
-    ababa\=PP
+    aba\=ps
+    ababa\=ps
+    ababa\=ph
     abababx
     ababababx  
 
 /^(..)\1{2,3}?x/
-    aba\=P
-    ababa\=P
-    ababa\=PP
+    aba\=ps
+    ababa\=ps
+    ababa\=ph
     abababx
     ababababx  
     
@@ -3551,77 +3551,77 @@ a random value. /Ix
     abababab
 
 /^\R/
-    \r\=P
-    \r\=PP
+    \r\=ps
+    \r\=ph
     
 /^\R{2,3}x/
-    \r\=P
-    \r\=PP
-    \r\r\=P
-    \r\r\=PP
-    \r\r\r\=P
-    \r\r\r\=PP
+    \r\=ps
+    \r\=ph
+    \r\r\=ps
+    \r\r\=ph
+    \r\r\r\=ps
+    \r\r\r\=ph
     \r\rx
     \r\r\rx    
 
 /^\R{2,3}?x/
-    \r\=P
-    \r\=PP
-    \r\r\=P
-    \r\r\=PP
-    \r\r\r\=P
-    \r\r\r\=PP
+    \r\=ps
+    \r\=ph
+    \r\r\=ps
+    \r\r\=ph
+    \r\r\r\=ps
+    \r\r\r\=ph
     \r\rx
     \r\r\rx    
     
 /^\R?x/
-    \r\=P
-    \r\=PP
+    \r\=ps
+    \r\=ph
     x
     \rx  
 
 /^\R+x/
-    \r\=P
-    \r\=PP
-    \r\n\=P
-    \r\n\=PP
+    \r\=ps
+    \r\=ph
+    \r\n\=ps
+    \r\n\=ph
     \rx  
 
 /^a$/newline=crlf
-    a\r\=P
-    a\r\=PP
+    a\r\=ps
+    a\r\=ph
 
 /^a$/m,newline=crlf
-    a\r\=P
-    a\r\=PP
+    a\r\=ps
+    a\r\=ph
 
 /^(a$|a\r)/newline=crlf
-    a\r\=P
-    a\r\=PP
+    a\r\=ps
+    a\r\=ph
 
 /^(a$|a\r)/m,newline=crlf
-    a\r\=P
-    a\r\=PP
+    a\r\=ps
+    a\r\=ph
 
 /./newline=crlf
-    \r\=P
-    \r\=PP
+    \r\=ps
+    \r\=ph
   
 /.{2,3}/newline=crlf
-    \r\=P
-    \r\=PP
-    \r\r\=P
-    \r\r\=PP
-    \r\r\r\=P
-    \r\r\r\=PP
+    \r\=ps
+    \r\=ph
+    \r\r\=ps
+    \r\r\=ph
+    \r\r\r\=ps
+    \r\r\r\=ph
 
 /.{2,3}?/newline=crlf
-    \r\=P
-    \r\=PP
-    \r\r\=P
-    \r\r\=PP
-    \r\r\r\=P
-    \r\r\r\=PP
+    \r\=ps
+    \r\=ph
+    \r\r\=ps
+    \r\r\=ph
+    \r\r\r\=ps
+    \r\r\r\=ph
 
 "AB(C(D))(E(F))?(?(?=\2)(?=\4))"
     ABCDGHI\=ovector=01
@@ -3685,12 +3685,12 @@ a random value. /Ix
     ab\=ovector=1
   
 /(?<=123)(*MARK:xx)abc/mark
-    xxxx123a\=PP
-    xxxx123a\=P
+    xxxx123a\=ph
+    xxxx123a\=ps
     
 /123\Kabc/
-    xxxx123a\=PP
-    xxxx123a\=P
+    xxxx123a\=ph
+    xxxx123a\=ps
 
 /^(?(?=a)aa|bb)/auto_callout
     bb

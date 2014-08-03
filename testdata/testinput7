@@ -664,26 +664,26 @@
     A\x{1ec5}ABCXYZ
 
 /abcd*/utf
-    xxxxabcd\=P
-    xxxxabcd\=PP
+    xxxxabcd\=ps
+    xxxxabcd\=ph
 
 /abcd*/i,utf
-    xxxxabcd\=P
-    xxxxabcd\=PP
-    XXXXABCD\=P
-    XXXXABCD\=PP
+    xxxxabcd\=ps
+    xxxxabcd\=ph
+    XXXXABCD\=ps
+    XXXXABCD\=ph
 
 /abc\d*/utf
-    xxxxabc1\=P
-    xxxxabc1\=PP
+    xxxxabc1\=ps
+    xxxxabc1\=ph
 
 /abc[de]*/utf
-    xxxxabcde\=P
-    xxxxabcde\=PP
+    xxxxabcde\=ps
+    xxxxabcde\=ph
 
 /\bthe cat\b/utf
-    the cat\=P
-    the cat\=PP
+    the cat\=ps
+    the cat\=ph
 
 /ab\Cde/utf
     abXde
@@ -691,24 +691,24 @@
 /(?<=ab\Cde)X/utf
 
 /./newline=crlf,utf
-    \r\=P
-    \r\=PP
+    \r\=ps
+    \r\=ph
   
 /.{2,3}/newline=crlf,utf
-    \r\=P
-    \r\=PP
-    \r\r\=P
-    \r\r\=PP
-    \r\r\r\=P
-    \r\r\r\=PP
+    \r\=ps
+    \r\=ph
+    \r\r\=ps
+    \r\r\=ph
+    \r\r\r\=ps
+    \r\r\r\=ph
 
 /.{2,3}?/newline=crlf,utf
-    \r\=P
-    \r\=PP
-    \r\r\=P
-    \r\r\=PP
-    \r\r\r\=P
-    \r\r\r\=PP
+    \r\=ps
+    \r\=ph
+    \r\r\=ps
+    \r\r\=ph
+    \r\r\r\=ps
+    \r\r\r\=ph
 
 /[^\x{100}]/utf
     \x{100}\x{101}X
@@ -1714,36 +1714,36 @@
     \x{100}\x{101}XX
 
 /^\X/utf
-    A\=P
-    A\=PP
-    A\x{300}\x{301}\=P
-    A\x{300}\x{301}\=PP
-    A\x{301}\=P
-    A\x{301}\=PP
+    A\=ps
+    A\=ph
+    A\x{300}\x{301}\=ps
+    A\x{300}\x{301}\=ph
+    A\x{301}\=ps
+    A\x{301}\=ph
     
 /^\X{2,3}/utf
-    A\=P
-    A\=PP
-    AA\=P
-    AA\=PP
-    A\x{300}\x{301}\=P
-    A\x{300}\x{301}\=PP
-    A\x{300}\x{301}A\x{300}\x{301}\=P
-    A\x{300}\x{301}A\x{300}\x{301}\=PP
+    A\=ps
+    A\=ph
+    AA\=ps
+    AA\=ph
+    A\x{300}\x{301}\=ps
+    A\x{300}\x{301}\=ph
+    A\x{300}\x{301}A\x{300}\x{301}\=ps
+    A\x{300}\x{301}A\x{300}\x{301}\=ph
 
 /^\X{2}/utf
-    AA\=P
-    AA\=PP
-    A\x{300}\x{301}A\x{300}\x{301}\=P
-    A\x{300}\x{301}A\x{300}\x{301}\=PP
+    AA\=ps
+    AA\=ph
+    A\x{300}\x{301}A\x{300}\x{301}\=ps
+    A\x{300}\x{301}A\x{300}\x{301}\=ph
     
 /^\X+/utf
-    AA\=P
-    AA\=PP
+    AA\=ps
+    AA\=ph
 
 /^\X+?Z/utf
-    AA\=P
-    AA\=PP
+    AA\=ps
+    AA\=ph
 
 # These are tests for extended grapheme clusters  
 
