@@ -1281,13 +1281,13 @@ Partial match: abcde
     X\=ps
 Partial match: X
 
-/\sxxx\s/utf,tables=1
+/\sxxx\s/utf,tables=2
     AB\x{85}xxx\x{a0}XYZ
-No match
+ 0: \x{85}xxx\x{a0}
     AB\x{a0}xxx\x{85}XYZ
-No match
+ 0: \x{a0}xxx\x{85}
 
-/\S \S/utf,tables=1
+/\S \S/utf,tables=2
     \x{a2} \x{84} 
  0: \x{a2} \x{84}
 

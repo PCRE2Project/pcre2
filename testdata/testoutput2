@@ -6723,7 +6723,7 @@ Subject length lower bound = 5
  1: \x0d
  2: \x0a
 
-+((?:\s|//.*\\n|/[*](?:\\n|.)*?[*]/)*)+I
+!((?:\s|//.*\\n|/[*](?:\\n|.)*?[*]/)*)!I
 Capturing subpattern count = 1
 May match empty string
 No options

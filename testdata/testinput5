@@ -573,11 +573,11 @@
 /X\W{3}X/utf
     X\=ps
 
-/\sxxx\s/utf,tables=1
+/\sxxx\s/utf,tables=2
     AB\x{85}xxx\x{a0}XYZ
     AB\x{a0}xxx\x{85}XYZ
 
-/\S \S/utf,tables=1
+/\S \S/utf,tables=2
     \x{a2} \x{84} 
 
 'A#хц'Bx,newline=any,utf

@@ -497,7 +497,7 @@ static modstruct modlist[] = {
 #define POSIX_SUPPORTED_MATCH_OPTIONS ( \
   PCRE2_NOTBOL|PCRE2_NOTEMPTY|PCRE2_NOTEOL)
 
-#define POSIX_SUPPORTED_MATCH_CONTROLS ( 0 )
+#define POSIX_SUPPORTED_MATCH_CONTROLS (CTL_AFTERTEXT|CTL_ALLAFTERTEXT)
 
 /* Table of single-character abbreviated modifiers. The index field is
 initialized to -1, but the first time the modifier is encountered, it is filled
@@ -2884,7 +2884,7 @@ else fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
   ((options & PCRE2_DOLLAR_ENDONLY) != 0)? " dollar_endonly" : "",
   ((options & PCRE2_UNGREEDY) != 0)? " ungreedy" : "",
   ((options & PCRE2_NO_AUTO_CAPTURE) != 0)? " no_auto_capture" : "",
-  ((options & PCRE2_NO_AUTO_POSSESS) != 0)? " no_auto_possessify" : "",
+  ((options & PCRE2_NO_AUTO_POSSESS) != 0)? " no_auto_possess" : "",
   ((options & PCRE2_UTF) != 0)? " utf" : "",
   ((options & PCRE2_UCP) != 0)? " ucp" : "",
   ((options & PCRE2_NO_UTF_CHECK) != 0)? " no_utf_check" : "",
@@ -3884,7 +3884,7 @@ static int
 callout_function(pcre2_callout_block_8 *cb)
 {
 uint32_t i, pre_start, post_start, subject_length;
-BOOL utf = (FLD(compiled_code, compile_options) & PCRE2_UTF) != 0;
+BOOL utf = (FLD(compiled_code, overall_options) & PCRE2_UTF) != 0;
 BOOL callout_capture = (dat_datctl.control & CTL_CALLOUT_CAPTURE) != 0;
 FILE *f = (first_callout || callout_capture)? outfile : NULL;
 
@@ -4033,8 +4033,10 @@ dat_datctl.control |= (pat_patctl.control & CTL_ALLPD);
 
 /* Initialize for scanning the data line. */
 
-utf = (pat_patctl.control & CTL_POSIX) == 0 &&
-  (FLD(compiled_code, compile_options) & PCRE2_UTF) != 0;
+utf = ((((pat_patctl.control & CTL_POSIX) != 0)?
+  ((pcre2_real_code_8 *)preg.re_pcre2_code)->overall_options :
+  FLD(compiled_code, overall_options)) & PCRE2_UTF) != 0;
+   
 start_rep = NULL;
 len = strlen((const char *)buffer);
 while (len > 0 && isspace(buffer[len-1])) len--;
@@ -4043,7 +4045,7 @@ p = buffer;
 while (isspace(*p)) p++;
 
 /* Check that the data is well-formed UTF-8 if we're in UTF mode. To create
-invalid input to pcre2_exec, you must use \x?? or \x{} sequences. */
+invalid input to pcre2_match(), you must use \x?? or \x{} sequences. */
 
 if (utf)
   {
@@ -4414,14 +4416,14 @@ if ((pat_patctl.control & CTL_POSIX) != 0)
         {
         fprintf(outfile, "%2d: ", (int)i);
         PCHARSV(dbuffer, pmatch[i].rm_so,
-          pmatch[i].rm_eo - pmatch[i].rm_so, FALSE, outfile);
+          pmatch[i].rm_eo - pmatch[i].rm_so, utf, outfile);
         fprintf(outfile, "\n");
         if ((i == 0 && (dat_datctl.control & CTL_AFTERTEXT) != 0) ||
             (dat_datctl.control & CTL_ALLAFTERTEXT) != 0)
           {
           fprintf(outfile, "%2d+ ", (int)i);
           PCHARSV(dbuffer, pmatch[i].rm_eo, len - pmatch[i].rm_eo,
-            FALSE, outfile);
+            utf, outfile);
           fprintf(outfile, "\n");
           }
         }
@@ -5587,7 +5589,7 @@ while (notdone)
     rc = process_command();
     }
 
-  else if (strchr("\"/!'`-+=:;.,", *p) != NULL)
+  else if (strchr("/!\"'`%&-=_:;,@~", *p) != NULL)
     {
     rc = process_pattern();
     dfa_matched = 0;

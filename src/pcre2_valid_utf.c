@@ -125,7 +125,7 @@ PCRE2_ERROR_UTF8_ERR10  6th-byte's two top bits are not 0x80
 PCRE2_ERROR_UTF8_ERR11  5-byte character is not permitted by RFC 3629
 PCRE2_ERROR_UTF8_ERR12  6-byte character is not permitted by RFC 3629
 PCRE2_ERROR_UTF8_ERR13  4-byte character with value > 0x10ffff is not permitted
-PCRE2_ERROR_UTF8_ERR14  3-byte character with value 0xd000-0xdfff is not permitted
+PCRE2_ERROR_UTF8_ERR14  3-byte character with value 0xd800-0xdfff is not permitted
 PCRE2_ERROR_UTF8_ERR15  Overlong 2-byte sequence
 PCRE2_ERROR_UTF8_ERR16  Overlong 3-byte sequence
 PCRE2_ERROR_UTF8_ERR17  Overlong 4-byte sequence

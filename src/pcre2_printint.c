@@ -279,9 +279,8 @@ static void
 pcre2_printint(pcre2_code *re, FILE *f, BOOL print_lengths)
 {
 PCRE2_SPTR codestart, nametable, code;
-uint32_t options = re->compile_options;
 uint32_t nesize = re->name_entry_size;
-BOOL utf = (options & PCRE2_UTF) != 0;
+BOOL utf = (re->overall_options & PCRE2_UTF) != 0;
 
 nametable = (PCRE2_SPTR)((uint8_t *)re + sizeof(pcre2_real_code));
 code = codestart = nametable + re->name_count * re->name_entry_size;

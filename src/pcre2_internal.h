@@ -240,6 +240,10 @@ Unicode doesn't go beyond 0x0010ffff. */
 
 #define NOTACHAR 0xffffffff
 
+/* This is the largest valid UTF/Unicode code point. */
+
+#define MAX_UTF_CODE_POINT 0x10ffff
+
 /* Compile-time errors are added to this value. As they are documented, it
 should probably never be changed. */
 
@@ -572,9 +576,6 @@ total length. */
 #define cbits_offset  512
 #define ctypes_offset (cbits_offset + cbit_length)
 #define tables_length (ctypes_offset + 256)
-
-
-
 
 
 /* -------------------- Character and string names ------------------------ */

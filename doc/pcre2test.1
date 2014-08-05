@@ -286,9 +286,10 @@ This is a pattern line whose modifier list starts with two one-letter modifiers
 .SH "PATTERN SYNTAX"
 .rs
 .sp
-A pattern line must start with one of the following characters:
+A pattern line must start with one of the following characters (common symbols,
+excluding pattern meta-characters):
 .sp
-  " / ! ' ` - + = : ; . ,
+  / ! " ' ` - = _ : ; , % & @ ~
 .sp
 This is interpreted as the pattern's delimiter. A regular expression may be
 continued over several input lines, in which case the newline characters are

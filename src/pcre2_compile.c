@@ -7833,11 +7833,12 @@ if ((re->overall_options & PCRE2_ANCHORED) == 0)
         
       /* The first code unit is > 128 in UTF mode, or > 255 otherwise. In 
       8-bit UTF mode, codepoints in the range 128-255 are introductory code 
-      points and cannot have another case. In 16-bit and 32-bit mode, we can 
+      points and cannot have another case. In 16-bit and 32-bit modes, we can 
       check wide characters when UTF (and therefore UCP) is supported. */
       
 #if defined SUPPORT_UTF && PCRE2_CODE_UNIT_WIDTH != 8
-      else if (UCD_OTHERCASE(firstcu) != firstcu)
+      else if (firstcu <= MAX_UTF_CODE_POINT && 
+               UCD_OTHERCASE(firstcu) != firstcu)
         re->flags |= PCRE2_FIRSTCASELESS;
 #endif          
       }
@@ -7870,7 +7871,7 @@ if (reqcuflags >= 0 &&
       if (cb.fcc[reqcu] != reqcu) re->flags |= PCRE2_LASTCASELESS;
       }
 #if defined SUPPORT_UTF && PCRE2_CODE_UNIT_WIDTH != 8
-    else if (UCD_OTHERCASE(reqcu) != reqcu)
+    else if (reqcu <= MAX_UTF_CODE_POINT && UCD_OTHERCASE(reqcu) != reqcu)
       re->flags |= PCRE2_LASTCASELESS;
 #endif
     }

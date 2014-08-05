@@ -147,8 +147,6 @@ regerror(int errcode, const regex_t *preg, char *errbuf, size_t errbuf_size)
 const char *message, *addmessage;
 size_t length, addlength;
 
-errcode -= COMPILE_ERROR_BASE;
-
 message = (errcode >= (int)(sizeof(pstring)/sizeof(char *)))?
   "unknown error code" : pstring[errcode];
 length = strlen(message) + 1;
@@ -237,8 +235,8 @@ if (preg->re_pcre2_code == NULL)
 (void)pcre2_pattern_info((const pcre2_code *)preg->re_pcre2_code, 
   PCRE2_INFO_CAPTURECOUNT, &re_nsub);
 preg->re_nsub = (size_t)re_nsub;
-preg->re_match_data = ((cflags & REG_NOSUB) != 0)? NULL :
-  pcre2_match_data_create(re_nsub + 1, NULL);
+if ((options & PCRE2_NO_AUTO_CAPTURE) != 0) re_nsub = -1;
+preg->re_match_data = pcre2_match_data_create(re_nsub + 1, NULL);
 return 0;
 }
 

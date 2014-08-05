@@ -1593,7 +1593,7 @@ a random value. /Ix
     abc\rdef
     abc\r\ndef
 
-+((?:\s|//.*\\n|/[*](?:\\n|.)*?[*]/)*)+I
+!((?:\s|//.*\\n|/[*](?:\\n|.)*?[*]/)*)!I
    /* this is a C style comment */\=find_limits
 
 /(?P<B>25[0-5]|2[0-4]\d|[01]?\d?\d)(?:\.(?P>B)){3}/I

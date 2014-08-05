@@ -184,8 +184,8 @@ static const char match_error_texts[] =
   "UTF-8 error: 5-byte character is not allowed (RFC 3629)\0"  
   "UTF-8 error: 6-byte character is not allowed (RFC 3629)\0"
   /* 15 */ 
-  "UTF-8 error: code point > 0x10ffff is not defined\0"
-  "UTF-8 error: code points 0xd000-0xdfff are not defined\0"    
+  "UTF-8 error: code points greater than 0x10ffff are not defined\0"
+  "UTF-8 error: code points 0xd800-0xdfff are not defined\0"    
   "UTF-8 error: overlong 2-byte sequence\0" 
   "UTF-8 error: overlong 3-byte sequence\0" 
   "UTF-8 error: overlong 4-byte sequence\0"
@@ -198,8 +198,8 @@ static const char match_error_texts[] =
   /* 25 */ 
   "UTF-16 error: invalid low surrogate\0" 
   "UTF-16 error: isolated low surrogate\0" 
-  "UTF-32 error: surrogate character not allowed\0"
-  "UTF-32 error: code point > 0x10ffff is not defined\0" 
+  "UTF-32 error: code points 0xd800-0xdfff are not defined\0"
+  "UTF-32 error: code points greater than 0x10ffff are not defined\0" 
   "bad count value\0"
   /* 30 */ 
   "pattern compiled with other endianness\0"
