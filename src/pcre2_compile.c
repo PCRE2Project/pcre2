@@ -470,6 +470,9 @@ general substitute of a Unicode property escape (\p or \P). However, for some
 POSIX classes (e.g. graph, print, punct) a special property code is compiled
 directly. */
 
+static const PCRE2_UCHAR string_pCc[] =  {
+  CHAR_BACKSLASH, CHAR_p, CHAR_LEFT_CURLY_BRACKET,
+  CHAR_C, CHAR_c, CHAR_RIGHT_CURLY_BRACKET, '\0' };
 static const PCRE2_UCHAR string_pL[] =   {
   CHAR_BACKSLASH, CHAR_p, CHAR_LEFT_CURLY_BRACKET,
   CHAR_L, CHAR_RIGHT_CURLY_BRACKET, '\0' };
@@ -487,6 +490,9 @@ static const PCRE2_UCHAR string_h[] =    {
 static const PCRE2_UCHAR string_pXps[] = {
   CHAR_BACKSLASH, CHAR_p, CHAR_LEFT_CURLY_BRACKET,
   CHAR_X, CHAR_p, CHAR_s, CHAR_RIGHT_CURLY_BRACKET, '\0' };
+static const PCRE2_UCHAR string_PCc[] =  {
+  CHAR_BACKSLASH, CHAR_P, CHAR_LEFT_CURLY_BRACKET,
+  CHAR_C, CHAR_c, CHAR_RIGHT_CURLY_BRACKET, '\0' };
 static const PCRE2_UCHAR string_PL[] =   {
   CHAR_BACKSLASH, CHAR_P, CHAR_LEFT_CURLY_BRACKET,
   CHAR_L, CHAR_RIGHT_CURLY_BRACKET, '\0' };
@@ -512,7 +518,7 @@ static PCRE2_SPTR posix_substitutes[] = {
   string_pXan,          /* alnum */
   NULL,                 /* ascii */
   string_h,             /* blank */
-  NULL,                 /* cntrl */
+  string_pCc,           /* cntrl */
   string_pNd,           /* digit */
   NULL,                 /* graph */
   NULL,                 /* print */
@@ -527,7 +533,7 @@ static PCRE2_SPTR posix_substitutes[] = {
   string_PXan,          /* ^alnum */
   NULL,                 /* ^ascii */
   string_H,             /* ^blank */
-  NULL,                 /* ^cntrl */
+  string_PCc,           /* ^cntrl */
   string_PNd,           /* ^digit */
   NULL,                 /* ^graph */
   NULL,                 /* ^print */

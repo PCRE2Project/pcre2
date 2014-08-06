@@ -1984,8 +1984,6 @@ No match
  0: \x{60b}
     ** Failers
 No match
-    \x{061c}
-No match
     X\x{06e9}   
 No match
 
@@ -2578,8 +2576,8 @@ No match
  0: > \x{a0}\x{1680}\x{2028}\x{2029}\x{202f}\x{09}\x{0b}
 
 /^>[[:blank:]]*/utf,ucp
-    >\x{20}\x{a0}\x{1680}\x{180e}\x{2000}\x{202f}\x{9}\x{b}\x{2028} 
- 0: > \x{a0}\x{1680}\x{180e}\x{2000}\x{202f}\x{09}
+    >\x{20}\x{a0}\x{1680}\x{2000}\x{202f}\x{9}\x{b}\x{2028} 
+ 0: > \x{a0}\x{1680}\x{2000}\x{202f}\x{09}
 
 /^[[:alpha:]]*/utf,ucp
     Az\x{aa}\x{c0}\x{1c5}\x{2b0}\x{3b6}\x{1d7c9}\x{2fa1d}
@@ -2591,7 +2589,7 @@ No match
 
 /^[[:cntrl:]]*/utf,ucp
     \x{0}\x{09}\x{1f}\x{7f}\x{9f} 
- 0: \x{00}\x{09}\x{1f}\x{7f}
+ 0: \x{00}\x{09}\x{1f}\x{7f}\x{9f}
 
 /^[[:graph:]]*/utf,ucp
     A\x{a1}\x{a0}
@@ -3414,14 +3412,14 @@ No match
 /^A\s+Z/utf,ucp
     A\x{2005}Z
  0: A\x{2005}Z
-    A\x{85}\x{180e}\x{2005}Z
- 0: A\x{85}\x{180e}\x{2005}Z
+    A\x{85}\x{2005}Z
+ 0: A\x{85}\x{2005}Z
 
 /^A[\s]+Z/utf,ucp
     A\x{2005}Z
  0: A\x{2005}Z
-    A\x{85}\x{180e}\x{2005}Z
- 0: A\x{85}\x{180e}\x{2005}Z
+    A\x{85}\x{2005}Z
+ 0: A\x{85}\x{2005}Z
 
 /^[[:graph:]]+$/utf,ucp
     Letter:ABC
@@ -3470,11 +3468,7 @@ No match
 No match
     \x{a0}
 No match
-    \x{61c}
-No match
     \x{1680}
-No match
-    \x{180e}
 No match
     \x{2028}
 No match
@@ -3483,14 +3477,6 @@ No match
     \x{202f}
 No match
     \x{2065}
-No match
-    \x{2066}
-No match
-    \x{2067}
-No match
-    \x{2068}
-No match
-    \x{2069}
 No match
     \x{3000}
 No match
@@ -3524,8 +3510,6 @@ No match
  0: Symbol:\x{6de}<>\x{fffc}
     Cf-property:\x{ad}\x{600}\x{601}\x{602}\x{603}\x{604}\x{6dd}\x{70f}
  0: Cf-property:\x{ad}\x{600}\x{601}\x{602}\x{603}\x{604}\x{6dd}\x{70f}
-    \x{180e}
- 0: \x{180e}
     \x{200b}\x{200c}\x{200d}\x{200e}\x{200f}
  0: \x{200b}\x{200c}\x{200d}\x{200e}\x{200f}
     \x{202a}\x{202b}\x{202c}\x{202d}\x{202e}
@@ -3556,21 +3540,11 @@ No match
 No match
     \x{85}
 No match
-    \x{61c}
-No match
     \x{2028}
 No match
     \x{2029}
 No match
     \x{2065}
-No match
-    \x{2066}
-No match
-    \x{2067}
-No match
-    \x{2068}
-No match
-    \x{2069}
 No match
     \x{e0002}
 No match
@@ -3594,10 +3568,10 @@ No match
 No match
 
 /^[[:^graph:]]+$/utf,ucp
-    \x{09}\x{0a}\x{1D}\x{20}\x{85}\x{a0}\x{61c}\x{1680}\x{180e}
- 0: \x{09}\x{0a}\x{1d} \x{85}\x{a0}\x{61c}\x{1680}\x{180e}
-    \x{2028}\x{2029}\x{202f}\x{2065}\x{2066}\x{2067}\x{2068}\x{2069}
- 0: \x{2028}\x{2029}\x{202f}\x{2065}\x{2066}\x{2067}\x{2068}\x{2069}
+    \x{09}\x{0a}\x{1D}\x{20}\x{85}\x{a0}\x{1680}
+ 0: \x{09}\x{0a}\x{1d} \x{85}\x{a0}\x{1680}
+    \x{2028}\x{2029}\x{202f}\x{2065}
+ 0: \x{2028}\x{2029}\x{202f}\x{2065}
     \x{3000}\x{e0002}\x{e001f}\x{e0080}
  0: \x{3000}\x{e0002}\x{e001f}\x{e0080}
     ** Failers
@@ -3636,10 +3610,10 @@ No match
 No match
 
 /^[[:^print:]]+$/utf,ucp
-    \x{09}\x{1D}\x{85}\x{61c}\x{2028}\x{2029}\x{2065}\x{2066}\x{2067}
- 0: \x{09}\x{1d}\x{85}\x{61c}\x{2028}\x{2029}\x{2065}\x{2066}\x{2067}
-    \x{2068}\x{2069}\x{e0002}\x{e001f}\x{e0080}
- 0: \x{2068}\x{2069}\x{e0002}\x{e001f}\x{e0080}
+    \x{09}\x{1D}\x{85}\x{2028}\x{2029}\x{2065}
+ 0: \x{09}\x{1d}\x{85}\x{2028}\x{2029}\x{2065}
+    \x{e0002}\x{e001f}\x{e0080}
+ 0: \x{e0002}\x{e001f}\x{e0080}
     ** Failers
 No match
     Space: \x{a0}
@@ -3663,8 +3637,6 @@ No match
     Symbol:\x{6de}<>\x{fffc}
 No match
     Cf-property:\x{ad}\x{600}\x{601}\x{602}\x{603}\x{604}\x{6dd}\x{70f}
-No match
-    \x{180e}
 No match
     \x{200b}\x{200c}\x{200d}\x{200e}\x{200f}
 No match

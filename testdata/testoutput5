@@ -2,7 +2,98 @@
 # support, including Unicode properties. However, tests that give different
 # results in 8-bit, 16-bit, and 32-bit modes are excluded (see tests 10 and
 # 12).
+
+# PCRE2 and Perl disagree about the characteristics of certain Unicode
+# characters. For example, 061C is considered by Perl to be Arabic, though
+# is it not listed as such in the Unicode Scripts.txt file, and 2066-2069 are
+# graphic and printable according to Perl, though they are actually "isolate"
+# control characters. That is why the following tests are here rather than in
+# test 4.
+
+/^[\p{Arabic}]/utf
+    ** Failers
+No match
+    \x{061c}
+No match
     
+/^[[:graph:]]+$/utf,ucp
+    ** Failers
+No match
+    \x{61c}
+No match
+    \x{2066}
+No match
+    \x{2067}
+No match
+    \x{2068}
+No match
+    \x{2069}
+No match
+
+/^[[:print:]]+$/utf,ucp
+    ** Failers
+ 0: ** Failers
+    \x{61c}
+No match
+    \x{2066}
+No match
+    \x{2067}
+No match
+    \x{2068}
+No match
+    \x{2069}
+No match
+
+/^[[:^graph:]]+$/utf,ucp
+    \x{09}\x{0a}\x{1D}\x{20}\x{85}\x{a0}\x{61c}\x{1680}
+ 0: \x{09}\x{0a}\x{1d} \x{85}\x{a0}\x{61c}\x{1680}
+    \x{2028}\x{2029}\x{202f}\x{2065}\x{2066}\x{2067}\x{2068}\x{2069}
+ 0: \x{2028}\x{2029}\x{202f}\x{2065}\x{2066}\x{2067}\x{2068}\x{2069}
+
+/^[[:^print:]]+$/utf,ucp
+    \x{09}\x{1D}\x{85}\x{61c}\x{2028}\x{2029}\x{2065}\x{2066}\x{2067}
+ 0: \x{09}\x{1d}\x{85}\x{61c}\x{2028}\x{2029}\x{2065}\x{2066}\x{2067}
+    \x{2068}\x{2069}
+ 0: \x{2068}\x{2069}
+     
+# Perl does not consider U+180e to be a space character. It is true that it
+# does not appear in the Unicode PropList.txt file as such, but in many other
+# sources it is listed as a space, and has been treated as such in PCRE for
+# a long time. 
+
+/^>[[:blank:]]*/utf,ucp
+    >\x{20}\x{a0}\x{1680}\x{180e}\x{2000}\x{202f}\x{9}\x{b}\x{2028} 
+ 0: > \x{a0}\x{1680}\x{180e}\x{2000}\x{202f}\x{09}
+
+/^A\s+Z/utf,ucp
+    A\x{85}\x{180e}\x{2005}Z
+ 0: A\x{85}\x{180e}\x{2005}Z
+
+/^A[\s]+Z/utf,ucp
+    A\x{2005}Z
+ 0: A\x{2005}Z
+    A\x{85}\x{2005}Z
+ 0: A\x{85}\x{2005}Z
+    
+/^[[:graph:]]+$/utf,ucp
+    \x{180e}
+No match
+
+/^[[:print:]]+$/utf,ucp
+    \x{180e}
+ 0: \x{180e}
+
+/^[[:^graph:]]+$/utf,ucp
+    \x{09}\x{0a}\x{1D}\x{20}\x{85}\x{a0}\x{61c}\x{1680}\x{180e}
+ 0: \x{09}\x{0a}\x{1d} \x{85}\x{a0}\x{61c}\x{1680}\x{180e}
+
+/^[[:^print:]]+$/utf,ucp
+    \x{180e}
+No match
+
+# End of U+180E tests.
+
+# ---------------------------------------------------------------------
 
 /\x{110000}/IB,utf
 Failed: error 134 at offset 9: character code point value in \x{} or \o{} is too large
@@ -2015,9 +2106,8 @@ No match
     \x{200d} 
 No match
   
-# These are here rather than in test 6 because Perl has problems with
-# the negative versions of the properties and behaves has changed how
-# it behaves for caseless matching. 
+# These are here because Perl has problems with the negative versions of the
+# properties and has changed how it behaves for caseless matching.
       
 /\p{^Lu}/i,utf
     1234
@@ -2520,7 +2610,7 @@ No match
 /[[:cntrl:]]/B,ucp
 ------------------------------------------------------------------
         Bra
-        [\x00-\x1f\x7f]
+        [\p{Cc}]
         Ket
         End
 ------------------------------------------------------------------
@@ -2626,7 +2716,7 @@ No match
 /[[:^alpha:][:^cntrl:]]+/B,utf,ucp
 ------------------------------------------------------------------
         Bra
-        [ -~\x80-\xff\P{L}]++
+        [\P{L}\P{Cc}]++
         Ket
         End
 ------------------------------------------------------------------
@@ -2638,7 +2728,7 @@ No match
 /[[:^cntrl:][:^alpha:]]+/B,utf,ucp
 ------------------------------------------------------------------
         Bra
-        [ -~\x80-\xff\P{L}]++
+        [\P{Cc}\P{L}]++
         Ket
         End
 ------------------------------------------------------------------
@@ -2850,8 +2940,6 @@ No match
  0: \x{2c65}\x{2c65}\x{23a}\x{23a}Y
  1: \x{2c65}\x{2c65}
 
-#  
-
 # These scripts weren't yet in Perl when I added Unicode 6.0.0 to PCRE 
 
 /^[\p{Batak}]/utf
@@ -2885,8 +2973,6 @@ No match
 No match
     \x{85d}    
 No match
-
-#  
 
 /(\X*)(.)/s,utf
     A\x{300}

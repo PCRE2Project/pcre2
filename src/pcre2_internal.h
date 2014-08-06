@@ -389,6 +389,11 @@ other. NOTE: The values also appear in pcre2_jit_compile.c. */
 
 #ifndef EBCDIC
 
+/* Character U+180E (Mongolian Vowel Separator) is not included in the list of 
+spaces in the Unicode file PropList.txt, and Perl does not recognize it as a 
+space. However, in many other sources it is listed as a space and has been in
+PCRE for a long time. */ 
+
 #define HSPACE_LIST \
   CHAR_HT, CHAR_SPACE, 0xa0, \
   0x1680, 0x180e, 0x2000, 0x2001, 0x2002, 0x2003, 0x2004, 0x2005, \
