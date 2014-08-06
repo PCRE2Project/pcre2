@@ -1,6 +1,7 @@
 # This set of tests checks the API, internals, and non-Perl stuff for UTF
-# support, excluding Unicode properties. However, tests that give different
-# results in 8-bit and 16-bit modes are excluded (see tests 16 and 17). 
+# support, including Unicode properties. However, tests that give different
+# results in 8-bit, 16-bit, and 32-bit modes are excluded (see tests 10 and
+# 12).
     
 
 /\x{110000}/IB,utf
@@ -3959,5 +3960,9 @@ Last code unit = 'c' (caseless)
 Subject length lower bound = 1
     scat
  0: sc
+
+/\X?abc/utf,no_start_optimize
+\xff\x7f\x00\x00\x03\x00\x41\xcc\x80\x41\x{300}\x61\x62\x63\x00\=no_utf_check,offset=06
+ 0: A\x{300}abc
 
 # End of testinput5 

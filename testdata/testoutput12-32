@@ -1,6 +1,6 @@
-# This set of tests is for UTF-16 and UTF-32 support, and is relevant only to
-# the 16-bit and 32-bit libraries. The output is different for each library,
-# so there are separate output files.
+# This set of tests is for UTF-16 and UTF-32 support, including Unicode
+# properties. It is relevant only to the 16-bit and 32-bit libraries. The
+# output is different for each library, so there are separate output files.
 
 /ÃÃÃxxx/IB,utf,no_utf_check
 ** Failed: invalid UTF-8 string cannot be converted to 32-bit string
@@ -1153,5 +1153,345 @@ Failed: error 134 at offset 10: character code point value in \x{} or \o{} is to
 /\C/utf
     \x{110000}
 Failed: error -28: UTF-32 error: code points greater than 0x10ffff are not defined
+
+/\x{100}*A/IB,utf
+------------------------------------------------------------------
+        Bra
+        \x{100}*+
+        A
+        Ket
+        End
+------------------------------------------------------------------
+Capturing subpattern count = 0
+Options: utf
+Starting code units: A \xff 
+Last code unit = 'A'
+Subject length lower bound = 1
+    A
+ 0: A
+
+/\x{100}*\d(?R)/IB,utf
+------------------------------------------------------------------
+        Bra
+        \x{100}*+
+        \d
+        Recurse
+        Ket
+        End
+------------------------------------------------------------------
+Capturing subpattern count = 0
+Options: utf
+Starting code units: 0 1 2 3 4 5 6 7 8 9 \xff 
+No last code unit
+Subject length lower bound = 1
+
+/[Z\x{100}]/IB,utf
+------------------------------------------------------------------
+        Bra
+        [Z\x{100}]
+        Ket
+        End
+------------------------------------------------------------------
+Capturing subpattern count = 0
+Options: utf
+Starting code units: Z \xff 
+No last code unit
+Subject length lower bound = 1
+    Z\x{100}
+ 0: Z
+    \x{100}
+ 0: \x{100}
+    \x{100}Z
+ 0: \x{100}
+    *** Failers 
+No match
+
+/[z-\x{100}]/IB,utf
+------------------------------------------------------------------
+        Bra
+        [z-\xff\x{100}]
+        Ket
+        End
+------------------------------------------------------------------
+Capturing subpattern count = 0
+Options: utf
+Starting code units: z { | } ~ \x7f \x80 \x81 \x82 \x83 \x84 \x85 \x86 \x87 
+  \x88 \x89 \x8a \x8b \x8c \x8d \x8e \x8f \x90 \x91 \x92 \x93 \x94 \x95 \x96 
+  \x97 \x98 \x99 \x9a \x9b \x9c \x9d \x9e \x9f \xa0 \xa1 \xa2 \xa3 \xa4 \xa5 
+  \xa6 \xa7 \xa8 \xa9 \xaa \xab \xac \xad \xae \xaf \xb0 \xb1 \xb2 \xb3 \xb4 
+  \xb5 \xb6 \xb7 \xb8 \xb9 \xba \xbb \xbc \xbd \xbe \xbf \xc0 \xc1 \xc2 \xc3 
+  \xc4 \xc5 \xc6 \xc7 \xc8 \xc9 \xca \xcb \xcc \xcd \xce \xcf \xd0 \xd1 \xd2 
+  \xd3 \xd4 \xd5 \xd6 \xd7 \xd8 \xd9 \xda \xdb \xdc \xdd \xde \xdf \xe0 \xe1 
+  \xe2 \xe3 \xe4 \xe5 \xe6 \xe7 \xe8 \xe9 \xea \xeb \xec \xed \xee \xef \xf0 
+  \xf1 \xf2 \xf3 \xf4 \xf5 \xf6 \xf7 \xf8 \xf9 \xfa \xfb \xfc \xfd \xfe \xff 
+No last code unit
+Subject length lower bound = 1
+
+/[z\Qa-d]Ä€\E]/IB,utf
+------------------------------------------------------------------
+        Bra
+        [\-\]adz\x{100}]
+        Ket
+        End
+------------------------------------------------------------------
+Capturing subpattern count = 0
+Options: utf
+Starting code units: - ] a d z \xff 
+No last code unit
+Subject length lower bound = 1
+    \x{100}
+ 0: \x{100}
+    Ä€ 
+ 0: \x{100}
+
+/[ab\x{100}]abc(xyz(?1))/IB,utf
+------------------------------------------------------------------
+        Bra
+        [ab\x{100}]
+        abc
+        CBra 1
+        xyz
+        Recurse
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+Capturing subpattern count = 1
+Options: utf
+Starting code units: a b \xff 
+Last code unit = 'z'
+Subject length lower bound = 7
+
+/\x{100}*\s/IB,utf
+------------------------------------------------------------------
+        Bra
+        \x{100}*+
+        \s
+        Ket
+        End
+------------------------------------------------------------------
+Capturing subpattern count = 0
+Options: utf
+Starting code units: \x09 \x0a \x0b \x0c \x0d \x20 \xff 
+No last code unit
+Subject length lower bound = 1
+
+/\x{100}*\d/IB,utf
+------------------------------------------------------------------
+        Bra
+        \x{100}*+
+        \d
+        Ket
+        End
+------------------------------------------------------------------
+Capturing subpattern count = 0
+Options: utf
+Starting code units: 0 1 2 3 4 5 6 7 8 9 \xff 
+No last code unit
+Subject length lower bound = 1
+
+/\x{100}*\w/IB,utf
+------------------------------------------------------------------
+        Bra
+        \x{100}*+
+        \w
+        Ket
+        End
+------------------------------------------------------------------
+Capturing subpattern count = 0
+Options: utf
+Starting code units: 0 1 2 3 4 5 6 7 8 9 A B C D E F G H I J K L M N O P 
+  Q R S T U V W X Y Z _ a b c d e f g h i j k l m n o p q r s t u v w x y z 
+  \xff 
+No last code unit
+Subject length lower bound = 1
+
+/\x{100}*\D/IB,utf
+------------------------------------------------------------------
+        Bra
+        \x{100}*
+        \D
+        Ket
+        End
+------------------------------------------------------------------
+Capturing subpattern count = 0
+Options: utf
+Starting code units: \x00 \x01 \x02 \x03 \x04 \x05 \x06 \x07 \x08 \x09 \x0a 
+  \x0b \x0c \x0d \x0e \x0f \x10 \x11 \x12 \x13 \x14 \x15 \x16 \x17 \x18 \x19 
+  \x1a \x1b \x1c \x1d \x1e \x1f \x20 ! " # $ % & ' ( ) * + , - . / : ; < = > 
+  ? @ A B C D E F G H I J K L M N O P Q R S T U V W X Y Z [ \ ] ^ _ ` a b c 
+  d e f g h i j k l m n o p q r s t u v w x y z { | } ~ \x7f \x80 \x81 \x82 
+  \x83 \x84 \x85 \x86 \x87 \x88 \x89 \x8a \x8b \x8c \x8d \x8e \x8f \x90 \x91 
+  \x92 \x93 \x94 \x95 \x96 \x97 \x98 \x99 \x9a \x9b \x9c \x9d \x9e \x9f \xa0 
+  \xa1 \xa2 \xa3 \xa4 \xa5 \xa6 \xa7 \xa8 \xa9 \xaa \xab \xac \xad \xae \xaf 
+  \xb0 \xb1 \xb2 \xb3 \xb4 \xb5 \xb6 \xb7 \xb8 \xb9 \xba \xbb \xbc \xbd \xbe 
+  \xbf \xc0 \xc1 \xc2 \xc3 \xc4 \xc5 \xc6 \xc7 \xc8 \xc9 \xca \xcb \xcc \xcd 
+  \xce \xcf \xd0 \xd1 \xd2 \xd3 \xd4 \xd5 \xd6 \xd7 \xd8 \xd9 \xda \xdb \xdc 
+  \xdd \xde \xdf \xe0 \xe1 \xe2 \xe3 \xe4 \xe5 \xe6 \xe7 \xe8 \xe9 \xea \xeb 
+  \xec \xed \xee \xef \xf0 \xf1 \xf2 \xf3 \xf4 \xf5 \xf6 \xf7 \xf8 \xf9 \xfa 
+  \xfb \xfc \xfd \xfe \xff 
+No last code unit
+Subject length lower bound = 1
+
+/\x{100}*\S/IB,utf
+------------------------------------------------------------------
+        Bra
+        \x{100}*
+        \S
+        Ket
+        End
+------------------------------------------------------------------
+Capturing subpattern count = 0
+Options: utf
+Starting code units: \x00 \x01 \x02 \x03 \x04 \x05 \x06 \x07 \x08 \x0e \x0f 
+  \x10 \x11 \x12 \x13 \x14 \x15 \x16 \x17 \x18 \x19 \x1a \x1b \x1c \x1d \x1e 
+  \x1f ! " # $ % & ' ( ) * + , - . / 0 1 2 3 4 5 6 7 8 9 : ; < = > ? @ A B C 
+  D E F G H I J K L M N O P Q R S T U V W X Y Z [ \ ] ^ _ ` a b c d e f g h 
+  i j k l m n o p q r s t u v w x y z { | } ~ \x7f \x80 \x81 \x82 \x83 \x84 
+  \x85 \x86 \x87 \x88 \x89 \x8a \x8b \x8c \x8d \x8e \x8f \x90 \x91 \x92 \x93 
+  \x94 \x95 \x96 \x97 \x98 \x99 \x9a \x9b \x9c \x9d \x9e \x9f \xa0 \xa1 \xa2 
+  \xa3 \xa4 \xa5 \xa6 \xa7 \xa8 \xa9 \xaa \xab \xac \xad \xae \xaf \xb0 \xb1 
+  \xb2 \xb3 \xb4 \xb5 \xb6 \xb7 \xb8 \xb9 \xba \xbb \xbc \xbd \xbe \xbf \xc0 
+  \xc1 \xc2 \xc3 \xc4 \xc5 \xc6 \xc7 \xc8 \xc9 \xca \xcb \xcc \xcd \xce \xcf 
+  \xd0 \xd1 \xd2 \xd3 \xd4 \xd5 \xd6 \xd7 \xd8 \xd9 \xda \xdb \xdc \xdd \xde 
+  \xdf \xe0 \xe1 \xe2 \xe3 \xe4 \xe5 \xe6 \xe7 \xe8 \xe9 \xea \xeb \xec \xed 
+  \xee \xef \xf0 \xf1 \xf2 \xf3 \xf4 \xf5 \xf6 \xf7 \xf8 \xf9 \xfa \xfb \xfc 
+  \xfd \xfe \xff 
+No last code unit
+Subject length lower bound = 1
+
+/\x{100}*\W/IB,utf
+------------------------------------------------------------------
+        Bra
+        \x{100}*
+        \W
+        Ket
+        End
+------------------------------------------------------------------
+Capturing subpattern count = 0
+Options: utf
+Starting code units: \x00 \x01 \x02 \x03 \x04 \x05 \x06 \x07 \x08 \x09 \x0a 
+  \x0b \x0c \x0d \x0e \x0f \x10 \x11 \x12 \x13 \x14 \x15 \x16 \x17 \x18 \x19 
+  \x1a \x1b \x1c \x1d \x1e \x1f \x20 ! " # $ % & ' ( ) * + , - . / : ; < = > 
+  ? @ [ \ ] ^ ` { | } ~ \x7f \x80 \x81 \x82 \x83 \x84 \x85 \x86 \x87 \x88 \x89 
+  \x8a \x8b \x8c \x8d \x8e \x8f \x90 \x91 \x92 \x93 \x94 \x95 \x96 \x97 \x98 
+  \x99 \x9a \x9b \x9c \x9d \x9e \x9f \xa0 \xa1 \xa2 \xa3 \xa4 \xa5 \xa6 \xa7 
+  \xa8 \xa9 \xaa \xab \xac \xad \xae \xaf \xb0 \xb1 \xb2 \xb3 \xb4 \xb5 \xb6 
+  \xb7 \xb8 \xb9 \xba \xbb \xbc \xbd \xbe \xbf \xc0 \xc1 \xc2 \xc3 \xc4 \xc5 
+  \xc6 \xc7 \xc8 \xc9 \xca \xcb \xcc \xcd \xce \xcf \xd0 \xd1 \xd2 \xd3 \xd4 
+  \xd5 \xd6 \xd7 \xd8 \xd9 \xda \xdb \xdc \xdd \xde \xdf \xe0 \xe1 \xe2 \xe3 
+  \xe4 \xe5 \xe6 \xe7 \xe8 \xe9 \xea \xeb \xec \xed \xee \xef \xf0 \xf1 \xf2 
+  \xf3 \xf4 \xf5 \xf6 \xf7 \xf8 \xf9 \xfa \xfb \xfc \xfd \xfe \xff 
+No last code unit
+Subject length lower bound = 1
+
+/[\x{105}-\x{109}]/IBi,utf
+------------------------------------------------------------------
+        Bra
+        [\x{104}-\x{109}]
+        Ket
+        End
+------------------------------------------------------------------
+Capturing subpattern count = 0
+Options: caseless utf
+Starting code units: \xff 
+No last code unit
+Subject length lower bound = 1
+    \x{104}
+ 0: \x{104}
+    \x{105}
+ 0: \x{105}
+    \x{109}  
+ 0: \x{109}
+    ** Failers
+No match
+    \x{100}
+No match
+    \x{10a} 
+No match
+    
+/[z-\x{100}]/IBi,utf
+------------------------------------------------------------------
+        Bra
+        [Zz-\xff\x{39c}\x{3bc}\x{212b}\x{1e9e}\x{212b}\x{178}\x{100}-\x{101}]
+        Ket
+        End
+------------------------------------------------------------------
+Capturing subpattern count = 0
+Options: caseless utf
+Starting code units: Z z { | } ~ \x7f \x80 \x81 \x82 \x83 \x84 \x85 \x86 
+  \x87 \x88 \x89 \x8a \x8b \x8c \x8d \x8e \x8f \x90 \x91 \x92 \x93 \x94 \x95 
+  \x96 \x97 \x98 \x99 \x9a \x9b \x9c \x9d \x9e \x9f \xa0 \xa1 \xa2 \xa3 \xa4 
+  \xa5 \xa6 \xa7 \xa8 \xa9 \xaa \xab \xac \xad \xae \xaf \xb0 \xb1 \xb2 \xb3 
+  \xb4 \xb5 \xb6 \xb7 \xb8 \xb9 \xba \xbb \xbc \xbd \xbe \xbf \xc0 \xc1 \xc2 
+  \xc3 \xc4 \xc5 \xc6 \xc7 \xc8 \xc9 \xca \xcb \xcc \xcd \xce \xcf \xd0 \xd1 
+  \xd2 \xd3 \xd4 \xd5 \xd6 \xd7 \xd8 \xd9 \xda \xdb \xdc \xdd \xde \xdf \xe0 
+  \xe1 \xe2 \xe3 \xe4 \xe5 \xe6 \xe7 \xe8 \xe9 \xea \xeb \xec \xed \xee \xef 
+  \xf0 \xf1 \xf2 \xf3 \xf4 \xf5 \xf6 \xf7 \xf8 \xf9 \xfa \xfb \xfc \xfd \xfe 
+  \xff 
+No last code unit
+Subject length lower bound = 1
+    Z
+ 0: Z
+    z
+ 0: z
+    \x{39c}
+ 0: \x{39c}
+    \x{178}
+ 0: \x{178}
+    |
+ 0: |
+    \x{80}
+ 0: \x{80}
+    \x{ff}
+ 0: \x{ff}
+    \x{100}
+ 0: \x{100}
+    \x{101} 
+ 0: \x{101}
+    ** Failers
+No match
+    \x{102}
+No match
+    Y
+No match
+    y           
+No match
+
+/[z-\x{100}]/IBi,utf
+------------------------------------------------------------------
+        Bra
+        [Zz-\xff\x{39c}\x{3bc}\x{212b}\x{1e9e}\x{212b}\x{178}\x{100}-\x{101}]
+        Ket
+        End
+------------------------------------------------------------------
+Capturing subpattern count = 0
+Options: caseless utf
+Starting code units: Z z { | } ~ \x7f \x80 \x81 \x82 \x83 \x84 \x85 \x86 
+  \x87 \x88 \x89 \x8a \x8b \x8c \x8d \x8e \x8f \x90 \x91 \x92 \x93 \x94 \x95 
+  \x96 \x97 \x98 \x99 \x9a \x9b \x9c \x9d \x9e \x9f \xa0 \xa1 \xa2 \xa3 \xa4 
+  \xa5 \xa6 \xa7 \xa8 \xa9 \xaa \xab \xac \xad \xae \xaf \xb0 \xb1 \xb2 \xb3 
+  \xb4 \xb5 \xb6 \xb7 \xb8 \xb9 \xba \xbb \xbc \xbd \xbe \xbf \xc0 \xc1 \xc2 
+  \xc3 \xc4 \xc5 \xc6 \xc7 \xc8 \xc9 \xca \xcb \xcc \xcd \xce \xcf \xd0 \xd1 
+  \xd2 \xd3 \xd4 \xd5 \xd6 \xd7 \xd8 \xd9 \xda \xdb \xdc \xdd \xde \xdf \xe0 
+  \xe1 \xe2 \xe3 \xe4 \xe5 \xe6 \xe7 \xe8 \xe9 \xea \xeb \xec \xed \xee \xef 
+  \xf0 \xf1 \xf2 \xf3 \xf4 \xf5 \xf6 \xf7 \xf8 \xf9 \xfa \xfb \xfc \xfd \xfe 
+  \xff 
+No last code unit
+Subject length lower bound = 1
+
+/\x{3a3}B/IBi,utf
+------------------------------------------------------------------
+        Bra
+        clist 03a3 03c2 03c3
+     /i B
+        Ket
+        End
+------------------------------------------------------------------
+Capturing subpattern count = 0
+Options: caseless utf
+Starting code units: \xff 
+Last code unit = 'B' (caseless)
+Subject length lower bound = 2
 
 # End of testinput12

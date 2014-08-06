@@ -10,6 +10,20 @@
 
 #forbid_utf
 
+# Test binary zeroes in the pattern
+
+# /a\0B/ where 0 is a binary zero
+/61 5c 00 62/B,hex
+    a\x{0}b
+
+# /a0b/ where 0 is a binary zero
+/61 00 62/B,hex
+    a\x{0}b
+
+# /(?#B0C)DE/ where 0 is a binary zero
+/28 3f 23 42 00 43 29 44 45/B,hex
+    DE
+
 /(a)b|/I
 
 /abc/I
