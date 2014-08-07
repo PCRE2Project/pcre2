@@ -513,7 +513,6 @@ typedef struct c1modstruct {
 
 static c1modstruct c1modlist[] = {
   { "bincode",      'B',           -1 },
-  { "debug",        'D',           -1 },
   { "info",         'I',           -1 },
   { "global",       'g',           -1 },
   { "caseless",     'i',           -1 },
