@@ -8199,6 +8199,16 @@ MK: M
     aaaabcde
  0: aaaab
  1: aaaab
+    
+/((?(R)a|(?1)))*/
+    aaa
+ 0: aaa
+ 1: a
+
+/((?(R)a|(?1)))+/
+    aaa 
+ 0: aaa
+ 1: a
 
 /a(*:any 
 name)/mark

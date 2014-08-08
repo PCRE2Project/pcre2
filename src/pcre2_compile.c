@@ -151,7 +151,7 @@ have to check them every time. */
 #define REQ_UNSET       (-2)            /* Not yet found anything */
 #define REQ_NONE        (-1)            /* Found not fixed char */
 
-/* This bit (which is greater than any UTF value) is used to indicate that a 
+/* This bit (which is greater than any UTF value) is used to indicate that a
 variable contains a number of code units instead of an actual code point. */
 
 #define UTF_LENGTH     0x10000000l
@@ -305,7 +305,7 @@ static const short int escapes[] = {
 
 #else
 
-/* This is the "abnormal" table for EBCDIC systems without UTF-8 support. 
+/* This is the "abnormal" table for EBCDIC systems without UTF-8 support.
 It runs from 'a' to '9'. */
 
 #define ESCAPES_FIRST  CHAR_a
@@ -327,7 +327,7 @@ static const short int escapes[] = {
 /*  E0 */  '\\',     0, -ESC_S,       0,      0,-ESC_V, -ESC_W, -ESC_X,
 /*  E8 */     0,-ESC_Z,      0,       0,      0,     0,      0,      0,
 /*  F0 */     0,     0,      0,       0,      0,     0,      0,      0,
-/*  F8 */     0,     0 
+/*  F8 */     0,     0
 };
 
 #endif
@@ -556,19 +556,19 @@ static PCRE2_SPTR posix_substitutes[] = {
    PCRE2_UCP|PCRE2_UNGREEDY|PCRE2_UTF)
 
 /* Compile time error code numbers. They are given names so that they can more
-easily be tracked. When a new number is added, the tables called eint1 and 
-eint2 in pcre2posix.c must be updated, and a new error text must be added to 
+easily be tracked. When a new number is added, the tables called eint1 and
+eint2 in pcre2posix.c must be updated, and a new error text must be added to
 compile_error_texts in pcre2_error.c. */
 
-enum { ERR0 = COMPILE_ERROR_BASE,  
-       ERR1,  ERR2,  ERR3,  ERR4,  ERR5,  ERR6,  ERR7,  ERR8,  ERR9,  ERR10, 
-       ERR11, ERR12, ERR13, ERR14, ERR15, ERR16, ERR17, ERR18, ERR19, ERR20, 
-       ERR21, ERR22, ERR23, ERR24, ERR25, ERR26, ERR27, ERR28, ERR29, ERR30, 
-       ERR31, ERR32, ERR33, ERR34, ERR35, ERR36, ERR37, ERR38, ERR39, ERR40, 
-       ERR41, ERR42, ERR43, ERR44, ERR45, ERR46, ERR47, ERR48, ERR49, ERR50, 
-       ERR51, ERR52, ERR53, ERR54, ERR55, ERR56, ERR57, ERR58, ERR59, ERR60, 
-       ERR61, ERR62, ERR63, ERR64, ERR65, ERR66, ERR67, ERR68, ERR69, ERR70, 
-       ERR71, ERR72, ERR73, ERR74, ERR75, ERR76, ERR77, ERR78 }; 
+enum { ERR0 = COMPILE_ERROR_BASE,
+       ERR1,  ERR2,  ERR3,  ERR4,  ERR5,  ERR6,  ERR7,  ERR8,  ERR9,  ERR10,
+       ERR11, ERR12, ERR13, ERR14, ERR15, ERR16, ERR17, ERR18, ERR19, ERR20,
+       ERR21, ERR22, ERR23, ERR24, ERR25, ERR26, ERR27, ERR28, ERR29, ERR30,
+       ERR31, ERR32, ERR33, ERR34, ERR35, ERR36, ERR37, ERR38, ERR39, ERR40,
+       ERR41, ERR42, ERR43, ERR44, ERR45, ERR46, ERR47, ERR48, ERR49, ERR50,
+       ERR51, ERR52, ERR53, ERR54, ERR55, ERR56, ERR57, ERR58, ERR59, ERR60,
+       ERR61, ERR62, ERR63, ERR64, ERR65, ERR66, ERR67, ERR68, ERR69, ERR70,
+       ERR71, ERR72, ERR73, ERR74, ERR75, ERR76, ERR77, ERR78 };
 
 /* This is a table of start-of-pattern options such as (*UTF) and settings such
 as (*LIMIT_MATCH=nnnn) and (*CRLF). For completeness and backward
@@ -725,7 +725,7 @@ Returns:             nothing
 */
 
 static void
-complete_callout(PCRE2_UCHAR *previous_callout, PCRE2_SPTR ptr, 
+complete_callout(PCRE2_UCHAR *previous_callout, PCRE2_SPTR ptr,
   compile_block *cb)
 {
 size_t length = ptr - cb->start_pattern - GET(previous_callout, 2);
@@ -1161,7 +1161,7 @@ typedef struct recurse_check {
 } recurse_check;
 
 static BOOL
-could_be_empty_branch(PCRE2_SPTR code, PCRE2_SPTR endcode, BOOL utf, 
+could_be_empty_branch(PCRE2_SPTR code, PCRE2_SPTR endcode, BOOL utf,
   compile_block *cb, recurse_check *recurses)
 {
 register PCRE2_UCHAR c;
@@ -1195,6 +1195,7 @@ for (code = first_significant_code(code + PRIV(OP_lengths)[*code], TRUE);
   if (c == OP_RECURSE)
     {
     PCRE2_SPTR scode = cb->start_code + GET(code, 1);
+    PCRE2_SPTR endgroup = scode;
     BOOL empty_branch;
 
     /* Test for forward reference or uncompleted reference. This is disabled
@@ -1209,20 +1210,16 @@ for (code = first_significant_code(code + PRIV(OP_lengths)[*code], TRUE);
       if (GET(scode, 1) == 0) return TRUE;    /* Unclosed */
       }
 
-    /* If we are scanning a completed pattern, there are no forward references
-    and all groups are complete. We need to detect whether this is a recursive
-    call, as otherwise there will be an infinite loop. If it is a recursion,
-    just skip over it. Simple recursions are easily detected. For mutual
-    recursions we keep a chain on the stack. */
+    /* If the reference is to a completed group, we need to detect whether this
+    is a recursive call, as otherwise there will be an infinite loop. If it is
+    a recursion, just skip over it. Simple recursions are easily detected. For
+    mutual recursions we keep a chain on the stack. */
 
+    do endgroup += GET(endgroup, 1); while (*endgroup == OP_ALT);
+    if (code >= scode && code <= endgroup) continue;  /* Simple recursion */
     else
       {
       recurse_check *r = recurses;
-      PCRE2_SPTR endgroup = scode;
-
-      do endgroup += GET(endgroup, 1); while (*endgroup == OP_ALT);
-      if (code >= scode && code <= endgroup) continue;  /* Simple recursion */
-
       for (r = recurses; r != NULL; r = r->prev)
         if (r->group == scode) break;
       if (r != NULL) continue;   /* Mutual recursion */
@@ -1539,7 +1536,7 @@ Returns:      TRUE if what is matched could be empty
 */
 
 static BOOL
-could_be_empty(PCRE2_SPTR code, PCRE2_SPTR endcode, branch_chain *bcptr, 
+could_be_empty(PCRE2_SPTR code, PCRE2_SPTR endcode, branch_chain *bcptr,
   BOOL utf, compile_block *cb)
 {
 while (bcptr != NULL && bcptr->current_branch >= code)
@@ -1593,7 +1590,7 @@ return 0;
 *************************************************/
 
 /* This function is called when a '{' is encountered in a place where it might
-start a quantifier. It looks ahead to see if it really is a quantifier, that 
+start a quantifier. It looks ahead to see if it really is a quantifier, that
 is, one of the forms {ddd} {ddd,} or {ddd,ddd} where the ddds are digits.
 
 Argument:   pointer to the first char after '{'
@@ -1628,7 +1625,7 @@ return (*p == CHAR_RIGHT_CURLY_BRACKET);
 positive value for a simple escape such as \d, or 0 for a data character, which
 is placed in chptr. A backreference to group n is returned as negative n. On
 entry, ptr is pointing at the \. On exit, it points the final code unit of the
-escape sequence. 
+escape sequence.
 
 Arguments:
   ptrptr         points to the pattern position pointer
@@ -1636,7 +1633,7 @@ Arguments:
   errorcodeptr   points to the errorcode variable (containing zero)
   options        the current options bits
   isclass        TRUE if inside a character class
-  cb             compile data block 
+  cb             compile data block
 
 Returns:         zero => a data character
                  positive => a special escape sequence
@@ -1669,7 +1666,7 @@ returned immediately. Otherwise further processing is required. */
 else if (c < ESCAPES_FIRST || c > ESCAPES_LAST) {}  /* Definitely literal */
 
 else if ((i = escapes[c - ESCAPES_FIRST]) != 0)
-  { 
+  {
   if (i > 0) c = (uint32_t)i;   /* Positive is a data character */
     else escape = -i;           /* Else return a special escape */
   }
@@ -1695,30 +1692,30 @@ else
     /* \u is unrecognized when PCRE2_ALT_BSUX is not set. When it is treated
     specially, \u must be followed by four hex digits. Otherwise it is a
     lowercase u letter. */
-       
+
     case CHAR_u:
     if ((options & PCRE2_ALT_BSUX) == 0) *errorcodeptr = ERR37; else
       {
       uint32_t xc;
       if ((cc = XDIGIT(ptr[1])) == 0xff) break;  /* Not a hex digit */
       if ((xc = XDIGIT(ptr[2])) == 0xff) break;  /* Not a hex digit */
-      cc = (cc << 4) | xc; 
+      cc = (cc << 4) | xc;
       if ((xc = XDIGIT(ptr[3])) == 0xff) break;  /* Not a hex digit */
-      cc = (cc << 4) | xc; 
+      cc = (cc << 4) | xc;
       if ((xc = XDIGIT(ptr[4])) == 0xff) break;  /* Not a hex digit */
-      c = (cc << 4) | xc; 
+      c = (cc << 4) | xc;
       ptr += 4;
       if (utf)
         {
         if (c > 0x10ffffU) *errorcodeptr = ERR77;
-          else if (c >= 0xd800 && c <= 0xdfff) *errorcodeptr = ERR73;  
+          else if (c >= 0xd800 && c <= 0xdfff) *errorcodeptr = ERR73;
         }
-      else if (c > MAX_NON_UTF_CHAR) *errorcodeptr = ERR77; 
+      else if (c > MAX_NON_UTF_CHAR) *errorcodeptr = ERR77;
       }
     break;
 
     case CHAR_U:
-    /* \U is unrecognized unless PCRE2_ALT_BSUX is set, in which case it is an 
+    /* \U is unrecognized unless PCRE2_ALT_BSUX is set, in which case it is an
     upper case letter. */
     if ((options & PCRE2_ALT_BSUX) == 0) *errorcodeptr = ERR37;
     break;
@@ -1892,7 +1889,7 @@ else
 
     case CHAR_o:
     if (ptr[1] != CHAR_LEFT_CURLY_BRACKET) *errorcodeptr = ERR55; else
-    if (ptr[2] == CHAR_RIGHT_CURLY_BRACKET) *errorcodeptr = ERR78; else 
+    if (ptr[2] == CHAR_RIGHT_CURLY_BRACKET) *errorcodeptr = ERR78; else
       {
       ptr += 2;
       c = 0;
@@ -1936,7 +1933,7 @@ else
       if ((cc = XDIGIT(ptr[1])) == 0xff) break;  /* Not a hex digit */
       if ((xc = XDIGIT(ptr[2])) == 0xff) break;  /* Not a hex digit */
       c = (cc << 4) | xc;
-      ptr += 2;  
+      ptr += 2;
       }    /* End PCRE2_ALT_BSUX handling */
 
     /* Handle \x in Perl's style. \x{ddd} is a character number which can be
@@ -1955,10 +1952,10 @@ else
           {
           *errorcodeptr = ERR78;
           break;
-          }    
+          }
         c = 0;
         overflow = FALSE;
-        
+
         while ((cc = XDIGIT(*ptr)) != 0xff)
           {
           ptr++;
@@ -1971,7 +1968,7 @@ else
             {
             overflow = TRUE;
             break;
-            }    
+            }
           }
 
         if (overflow)
@@ -1999,10 +1996,10 @@ else
         c = 0;
         if ((cc = XDIGIT(ptr[1])) == 0xff) break;  /* Not a hex digit */
         ptr++;
-        c = cc; 
+        c = cc;
         if ((cc = XDIGIT(ptr[1])) == 0xff) break;  /* Not a hex digit */
         ptr++;
-        c = (c << 4) | cc; 
+        c = (c << 4) | cc;
         }     /* End of \xdd handling */
       }       /* End of Perl-style \x handling */
     break;
@@ -2033,9 +2030,9 @@ else
 #endif
     break;
 
-    /* Any other alphanumeric following \ is an error. Perl gives an error only 
-    if in warning mode, but PCRE doesn't have a warning mode. */ 
-     
+    /* Any other alphanumeric following \ is an error. Perl gives an error only
+    if in warning mode, but PCRE doesn't have a warning mode. */
+
     default:
     *errorcodeptr = ERR3;
     break;
@@ -2080,7 +2077,7 @@ Arguments:
   ptypeptr       an unsigned int that is set to the type value
   pdataptr       an unsigned int that is set to the detailed property value
   errorcodeptr   the error code variable
-  cb             the compile data 
+  cb             the compile data
 
 Returns:         TRUE if the type value was found, or FALSE for an invalid type
 */
@@ -2126,7 +2123,7 @@ else if (MAX_255(c) && (cb->ctypes[c] & ctype_letter) != 0)
   name[0] = c;
   name[1] = 0;
   }
-else goto ERROR_RETURN;   
+else goto ERROR_RETURN;
 
 *ptrptr = ptr;
 
@@ -2179,13 +2176,13 @@ Returns:         pointer to '}' on success;
                  current ptr on error, with errorcodeptr set non-zero
 */
 
-static PCRE2_SPTR 
+static PCRE2_SPTR
 read_repeat_counts(PCRE2_SPTR p, int *minp, int *maxp, int *errorcodeptr)
 {
 int min = 0;
 int max = -1;
 
-while (IS_DIGIT(*p)) 
+while (IS_DIGIT(*p))
   {
   min = min * 10 + (int)(*p++ - CHAR_0);
   if (min > 65535)
@@ -2193,14 +2190,14 @@ while (IS_DIGIT(*p))
     *errorcodeptr = ERR5;
     return p;
     }
-  }   
+  }
 
 if (*p == CHAR_RIGHT_CURLY_BRACKET) max = min; else
   {
   if (*(++p) != CHAR_RIGHT_CURLY_BRACKET)
     {
     max = 0;
-    while(IS_DIGIT(*p)) 
+    while(IS_DIGIT(*p))
       {
       max = max * 10 + (int)(*p++ - CHAR_0);
       if (max > 65535)
@@ -2208,7 +2205,7 @@ if (*p == CHAR_RIGHT_CURLY_BRACKET) max = min; else
         *errorcodeptr = ERR5;
         return p;
         }
-      }   
+      }
     if (max < min)
       {
       *errorcodeptr = ERR4;
@@ -2242,13 +2239,13 @@ Arguments:
 Returns:      pointer to the opcode for the bracket, or NULL if not found
 */
 
-PCRE2_SPTR 
+PCRE2_SPTR
 PRIV(find_bracket)(PCRE2_SPTR code, BOOL utf, int number)
 {
 for (;;)
   {
   register PCRE2_UCHAR c = *code;
-  
+
   if (c == OP_END) return NULL;
 
   /* XCLASS is used for classes that cannot be represented just by a bit
@@ -2377,7 +2374,7 @@ Arguments:
 Returns:      pointer to the opcode for OP_RECURSE, or NULL if not found
 */
 
-static PCRE2_SPTR 
+static PCRE2_SPTR
 find_recurse(PCRE2_SPTR code, BOOL utf)
 {
 for (;;)
@@ -2845,7 +2842,7 @@ if (start <= 0xff) start = 0xff + 1;
 if (end >= start)
   {
   PCRE2_UCHAR *uchardata = *uchardptr;
-   
+
 #ifdef SUPPORT_UTF
   if ((options & PCRE2_UTF) != 0)
     {
@@ -3276,11 +3273,11 @@ for (;; ptr++)
     {
     /* ===================================================================*/
     /* The branch terminates at string end or | or ) */
- 
+
     case CHAR_NULL:
-    if (ptr < cb->end_pattern) goto NORMAL_CHAR;   /* Zero data character */ 
-    /* Fall through */ 
-     
+    if (ptr < cb->end_pattern) goto NORMAL_CHAR;   /* Zero data character */
+    /* Fall through */
+
     case CHAR_VERTICAL_LINE:
     case CHAR_RIGHT_PARENTHESIS:
     *firstcuptr = firstcu;
@@ -3309,7 +3306,7 @@ for (;; ptr++)
     previous = NULL;
     if ((options & PCRE2_MULTILINE) != 0)
       {
-      if (firstcuflags == REQ_UNSET) 
+      if (firstcuflags == REQ_UNSET)
         zerofirstcuflags = firstcuflags = REQ_NONE;
       *code++ = OP_CIRCM;
       }
@@ -3346,11 +3343,11 @@ for (;; ptr++)
     opcode is compiled. It may optionally have a bit map for characters < 256,
     but those above are are explicitly listed afterwards. A flag byte tells
     whether the bitmap is present, and whether this is a negated class or not.
-    
+
     An isolated ']' character is not treated specially, so is just another data
     character. In earlier versions of PCRE that used the original API there was
     a "JavaScript compatibility mode" in which it gave an error. However,
-    JavaScript itself has changed in this respect so there is no longer any 
+    JavaScript itself has changed in this respect so there is no longer any
     need for this special handling.
 
     In another (POSIX) regex library, the ugly syntax [[:<:]] and [[:>:]] is
@@ -3460,7 +3457,7 @@ for (;; ptr++)
 
     memset(classbits, 0, 32 * sizeof(uint8_t));
 
-    /* Process characters until ] is reached. As the test is at the end of the 
+    /* Process characters until ] is reached. As the test is at the end of the
     loop, an initial ] is taken as a data character. At the start of the loop,
     c contains the first code unit of the character. If it is zero, check for
     the end of the pattern, to allow binary zero as data. */
@@ -3468,13 +3465,13 @@ for (;; ptr++)
     for(;;)
       {
       PCRE2_SPTR oldptr;
-       
+
       if (c == CHAR_NULL && ptr >= cb->end_pattern)
         {
         *errorcodeptr = ERR6;  /* Missing terminating ']' */
         goto FAILED;
         }
- 
+
 #ifdef SUPPORT_UTF
       if (utf && HAS_EXTRALEN(c))
         {                           /* Braces are required because the */
@@ -3680,7 +3677,7 @@ for (;; ptr++)
           }
         else if (escape == ESC_E) goto CONTINUE_CLASS;  /* Ignore orphan \E */
 
-        else  /* Handle \d-type escapes */ 
+        else  /* Handle \d-type escapes */
           {
           register const uint8_t *cbits = cb->cbits;
           /* Every class contains at least two < 256 characters. */
@@ -3773,17 +3770,17 @@ for (;; ptr++)
               xclass_has_prop = TRUE;
               class_has_8bitchar--;                /* Undo! */
               }
-            break;   
-#endif      
+            break;
+#endif
             /* Unrecognized escapes are faulted. */
 
             default:
             *errorcodeptr = ERR7;
             goto FAILED;
             }
-            
+
           /* Handled \d-type escape */
-             
+
           goto CONTINUE_CLASS;
           }
 
@@ -3976,7 +3973,7 @@ for (;; ptr++)
 
         /* For a single, positive character, get the value into mcbuffer, and
         then we can handle this with the normal one-character code. */
-        
+
         mclength = PUTCHAR(c, mcbuffer);
         goto ONE_CHAR;
         }       /* End of 1-char optimization */
@@ -3986,8 +3983,8 @@ for (;; ptr++)
 
       class_has_8bitchar +=
         add_to_class(classbits, &class_uchardata, options, cb, c, c);
-        
-      /* Continue to the next character in the class. Closing square bracket 
+
+      /* Continue to the next character in the class. Closing square bracket
       not within \Q..\E ends the class. A NULL character terminates a
       nested substitution string, but may be a data character in the main
       pattern (tested at the start of this loop). */
@@ -3998,9 +3995,9 @@ for (;; ptr++)
         {
         ptr = nestptr;
         nestptr = NULL;
-        c = *(++ptr); 
-        }  
-      if (c == CHAR_RIGHT_SQUARE_BRACKET && !inescq) break;  
+        c = *(++ptr);
+        }
+      if (c == CHAR_RIGHT_SQUARE_BRACKET && !inescq) break;
       }   /* End of main class-processing loop */
 
     /* We will need an XCLASS if data has been placed in class_uchardata. In
@@ -4281,16 +4278,16 @@ for (;; ptr++)
         prop_type = previous[1];
         prop_value = previous[2];
         }
-      else 
+      else
         {
         /* Come here from just above with a character in c */
         OUTPUT_SINGLE_REPEAT:
         prop_type = prop_value = -1;
-        } 
-        
+        }
+
       /* At this point we either have prop_type == prop_value == -1 and either
-      a code point or a character type that is not OP_[NOT]PROP in c, or we 
-      have OP_[NOT]PROP in c and prop_type/prop_value not negative. */  
+      a code point or a character type that is not OP_[NOT]PROP in c, or we
+      have OP_[NOT]PROP in c and prop_type/prop_value not negative. */
 
       oldcode = code;                   /* Save where we were */
       code = previous;                  /* Usually overwrite previous item */
@@ -4343,16 +4340,16 @@ for (;; ptr++)
         {
         *code++ = OP_EXACT + op_type;  /* NB EXACT doesn't have repeat_type */
         PUT2INC(code, 0, repeat_min);
-        
+
         /* Unless repeat_max equals repeat_min, fill in the data for EXACT, and
         then generate the second opcode. In UTF mode, multi-code-unit
         characters have their length in c, with the UTF_LENGTH bit as a flag,
         and the code units in utf_units. For a repeated Unicode property match,
         there are two extra values that define the required property, and c
         never has the UTF_LENGTH bit set. */
-        
+
         if (repeat_max != repeat_min)
-          { 
+          {
 #ifdef MAYBE_UTF_MULTI
           if (utf && (c & UTF_LENGTH) != 0)
             {
@@ -4360,7 +4357,7 @@ for (;; ptr++)
             code += c & 7;
             }
           else
-#endif    
+#endif
             {
             *code++ = c;
             if (prop_type >= 0)
@@ -4369,7 +4366,7 @@ for (;; ptr++)
               *code++ = prop_value;
               }
             }
-          
+
           /* Now set up the following opcode */
 
           if (repeat_max < 0) *code++ = OP_STAR + repeat_type; else
@@ -4385,7 +4382,7 @@ for (;; ptr++)
               PUT2INC(code, 0, repeat_max);
               }
             }
-          }  
+          }
         }
 
       /* Fill in the character or character type for the final opcode. */
@@ -4405,7 +4402,7 @@ for (;; ptr++)
           *code++ = prop_type;
           *code++ = prop_value;
           }
-        }   
+        }
       }
 
     /* If previous was a character class or a back reference, we put the repeat
@@ -4562,7 +4559,7 @@ for (;; ptr++)
           just adjust the length as if we had. Do some paranoid checks for
           potential integer overflow. The INT64_OR_DOUBLE type is a 64-bit
           integer type when available, otherwise double. */
-          
+
           if (lengthptr != NULL)
             {
             size_t delta = (repeat_min - 1)*length_prevgroup;
@@ -4822,7 +4819,7 @@ for (;; ptr++)
         }
       }
 
-    /* If previous is OP_FAIL, it was generated by an empty class [] 
+    /* If previous is OP_FAIL, it was generated by an empty class []
     (PCRE2_ALLOW_EMPTY_CLASS is set). The other ways in which OP_FAIL can be
     generated, that is by (*FAIL) or (?!), set previous to NULL, which gives a
     "nothing to repeat" error above. We can just ignore the repeat in empty
@@ -5231,7 +5228,7 @@ for (;; ptr++)
             ptr++;
             }
           namelen = (int)(ptr - name);
-          if (lengthptr != NULL && (options & PCRE2_DUPNAMES) != 0) 
+          if (lengthptr != NULL && (options & PCRE2_DUPNAMES) != 0)
             *lengthptr += IMM2_SIZE;
           }
 
@@ -5297,7 +5294,7 @@ for (;; ptr++)
               (slot+IMM2_SIZE)[namelen] != 0) break;
             count++;
             }
- 
+
           if (count > 1)
             {
             PUT2(code, 2+LINK_SIZE, offset);
@@ -5552,7 +5549,7 @@ for (;; ptr++)
             if (cb->names_found >= cb->named_group_list_size)
               {
               int newsize = cb->named_group_list_size * 2;
-              named_group *newspace = 
+              named_group *newspace =
                 cb->cx->memctl.malloc(newsize * sizeof(named_group),
                 cb->cx->memctl.memory_data);
               if (newspace == NULL)
@@ -5646,7 +5643,7 @@ for (;; ptr++)
           /* Count named back references. */
 
           if (!is_recurse) cb->namedrefcount++;
-          
+
           /* If duplicate names are permitted, we have to allow for a named
           reference to a duplicated name (this cannot be determined until the
           second pass). This needs an extra 16-bit data item. */
@@ -5701,7 +5698,7 @@ for (;; ptr++)
             count++;
             cslot += cb->name_entry_size;
             }
-            
+
           if (count > 1)
             {
             if (firstcuflags == REQ_UNSET) firstcuflags = REQ_NONE;
@@ -6403,7 +6400,7 @@ for (;; ptr++)
     /* We have a data character whose value is in c. In UTF-8 mode it may have
     a value > 127. We set its representation in the length/buffer, and then
     handle it as a data character. */
-    
+
     mclength = PUTCHAR(c, mcbuffer);
     goto ONE_CHAR;
 
@@ -6536,15 +6533,15 @@ Arguments:
   errorcodeptr      -> pointer to error code variable
   lookbehind        TRUE if this is a lookbehind assertion
   reset_bracount    TRUE to reset the count for each branch
-  skipunits         skip this many code units at start (for brackets and OP_COND) 
+  skipunits         skip this many code units at start (for brackets and OP_COND)
   cond_depth        depth of nesting for conditional subpatterns
-  firstcuptr        place to put the first required code unit 
-  firstcuflagsptr   place to put the first code unit flags, or a negative number 
-  reqcuptr          place to put the last required code unit 
-  reqcuflagsptr     place to put the last required code unit flags, or a negative number 
-  bcptr             pointer to the chain of currently open branches 
-  cb                points to the data block with tables pointers etc. 
-  lengthptr         NULL during the real compile phase  
+  firstcuptr        place to put the first required code unit
+  firstcuflagsptr   place to put the first code unit flags, or a negative number
+  reqcuptr          place to put the last required code unit
+  reqcuflagsptr     place to put the last required code unit flags, or a negative number
+  bcptr             pointer to the chain of currently open branches
+  cb                points to the data block with tables pointers etc.
+  lengthptr         NULL during the real compile phase
                     points to length accumulator during pre-compile phase
 
 Returns:            TRUE on success
@@ -6554,7 +6551,7 @@ static BOOL
 compile_regex(uint32_t options, PCRE2_UCHAR **codeptr, PCRE2_SPTR *ptrptr,
   int *errorcodeptr, BOOL lookbehind, BOOL reset_bracount, int skipunits,
   int cond_depth, uint32_t *firstcuptr, int32_t *firstcuflagsptr,
-  uint32_t *reqcuptr, int32_t *reqcuflagsptr, branch_chain *bcptr, 
+  uint32_t *reqcuptr, int32_t *reqcuflagsptr, branch_chain *bcptr,
   compile_block *cb, size_t *lengthptr)
 {
 PCRE2_SPTR ptr = *ptrptr;
@@ -6687,7 +6684,7 @@ for (;;)
       previously no reqcu, it takes on the value of the old firstcu. */
 
       if (firstcuflags >= 0 &&
-         (firstcuflags != branchfirstcuflags || 
+         (firstcuflags != branchfirstcuflags ||
           firstcu != branchfirstcu))
         {
         if (reqcuflags < 0)
@@ -6701,7 +6698,7 @@ for (;;)
       /* If we (now or from before) have no firstcu, a firstcu from the
       branch becomes a reqcu if there isn't a branch reqcu. */
 
-      if (firstcuflags < 0 && branchfirstcuflags >= 0 && 
+      if (firstcuflags < 0 && branchfirstcuflags >= 0 &&
           branchreqcuflags < 0)
         {
         branchreqcu = branchfirstcu;
@@ -6852,7 +6849,7 @@ for (;;)
     bc.current_branch = last_branch = code;
     code += 1 + LINK_SIZE;
     }
-    
+
   /* Advance past the vertical bar */
 
   ptr++;
@@ -6994,7 +6991,7 @@ Returns:         TRUE or FALSE
 */
 
 static BOOL
-is_startline(PCRE2_SPTR code, unsigned int bracket_map, compile_block *cb, 
+is_startline(PCRE2_SPTR code, unsigned int bracket_map, compile_block *cb,
   int atomcount)
 {
 do {
@@ -7102,7 +7099,7 @@ follow. However, if we end up without a first code unit setting for an
 unanchored pattern, it is worth scanning the regex to see if there is an
 initial asserted first code unit. If all branches start with the same asserted
 code unit, or with a non-conditional bracket all of whose alternatives start
-with the same asserted code unit (recurse ad lib), then we return that code 
+with the same asserted code unit (recurse ad lib), then we return that code
 unit, with the flags set to zero or REQ_CASELESS; otherwise return zero with
 REQ_NONE in the flags.
 
@@ -7146,7 +7143,7 @@ do {
      d = find_firstassertedcu(scode, &dflags, op == OP_ASSERT);
      if (dflags < 0)
        return 0;
-     if (cflags < 0) { c = d; cflags = dflags; } 
+     if (cflags < 0) { c = d; cflags = dflags; }
        else if (c != d || cflags != dflags) return 0;
      break;
 
@@ -7254,7 +7251,7 @@ Arguments:
   patlen        the length of the pattern, or < 0 for zero-terminated
   options       option bits
   errorptr      pointer to errorcode
-  erroroffset   pointer to error offset 
+  erroroffset   pointer to error offset
   ccontext      points to a compile context or is NULL
 
 Returns:        pointer to compiled data block, or NULL on error,
@@ -7328,7 +7325,7 @@ if (ccontext == NULL)
   PRIV(compile_context_init)(&default_context, TRUE);
   ccontext = &default_context;
   }
-  
+
 /* A negative pattern length means "zero-terminated". Otherwise, we make
 a copy of the pattern and add a zero. */
 
@@ -7350,7 +7347,7 @@ if (patlen < 0) patlen = PRIV(strlen)(pattern); else
   copied_pattern[patlen] = 0;
   pattern = copied_pattern;
   }
-  
+
 /* ------------ Initialize the "static" compile data -------------- */
 
 
@@ -7407,7 +7404,7 @@ while (ptr[skipatstart] == CHAR_LEFT_PARENTHESIS &&
   for (i = 0; i < sizeof(pso_list)/sizeof(pso); i++)
     {
     pso *p = pso_list + i;
-    
+
     if (PRIV(strncmp_c8)(ptr+skipatstart+2, (char *)(p->name), p->length) == 0)
       {
       uint32_t c, pp;
@@ -7436,17 +7433,17 @@ while (ptr[skipatstart] == CHAR_LEFT_PARENTHESIS &&
           if (c > UINT32_MAX / 10 - 1) break;   /* Integer overflow */
           c = c*10 + ptr[pp++] - CHAR_0;
           }
-        if (ptr[pp++] != CHAR_RIGHT_PARENTHESIS) 
+        if (ptr[pp++] != CHAR_RIGHT_PARENTHESIS)
           {
-          errorcode = ERR60; 
+          errorcode = ERR60;
           goto HAD_ERROR;
-          } 
+          }
         if (p->type == PSO_LIMM) limit_match = c;
           else limit_recursion = c;
         skipatstart += pp - skipatstart;
         break;
         }
-      break;   /* Out of the table scan loop */   
+      break;   /* Out of the table scan loop */
       }
     }
   if (i >= sizeof(pso_list)/sizeof(pso)) break;   /* Out of pso loop */
@@ -7480,16 +7477,16 @@ if (utf)
   if ((options & PCRE2_NO_UTF_CHECK) == 0 &&
        (errorcode = PRIV(valid_utf)(pattern, -1, erroroffset)) != 0)
     goto HAD_ERROR;
-  }   
-  
+  }
+
 /* Check UCP lockout. */
 
-if ((cb.external_options & (PCRE2_UCP|PCRE2_NEVER_UCP)) == 
+if ((cb.external_options & (PCRE2_UCP|PCRE2_NEVER_UCP)) ==
     (PCRE2_UCP|PCRE2_NEVER_UCP))
   {
   errorcode = ERR75;
   goto HAD_ERROR;
-  }       
+  }
 
 /* Process the BSR setting. */
 
@@ -7529,7 +7526,7 @@ switch(newline)
   errorcode = ERR56;
   goto HAD_ERROR;
   }
-  
+
 /* Pretend to compile the pattern while actually just accumulating the amount
 of memory required in the 'length' variable. This behaviour is triggered by
 passing a non-NULL final argument to compile_regex(). We pass a block of
@@ -7541,7 +7538,7 @@ On error, errorcode will be set non-zero, so we don't need to look at the
 result of the function. The initial options have been put into the cb block so
 that they can be changed if an option setting is found within the regex right
 at the beginning. Bringing initial option settings outside can help speed up
-starting point checks. We still have to pass a separate options variable (the 
+starting point checks. We still have to pass a separate options variable (the
 first argument) because that may change as the pattern is processed. */
 
 code = cworkspace;
@@ -7550,14 +7547,14 @@ code = cworkspace;
 (void)compile_regex(cb.external_options, &code, &ptr, &errorcode, FALSE,
   FALSE, 0, 0, &firstcu, &firstcuflags, &reqcu, &reqcuflags, NULL,
   &cb, &length);
-   
+
 if (errorcode != 0) goto HAD_ERROR;
 if (length > MAX_PATTERN_SIZE)
   {
   errorcode = ERR20;
   goto HAD_ERROR;
   }
-  
+
 /* If there are groups with duplicate names and there are also references by
 name, we must allow for the possibility of named references to duplicated
 groups. These require an extra data item each. */
@@ -7570,7 +7567,7 @@ the compiled pattern and names table. Integer overflow should no longer be
 possible because nowadays we limit the maximum value of cb.names_found and
 cb.name_entry_size. */
 
-re_blocksize = sizeof(pcre2_real_code) + 
+re_blocksize = sizeof(pcre2_real_code) +
   CU2BYTES(length + cb.names_found * cb.name_entry_size);
 re = (pcre2_real_code *)
   ccontext->memctl.malloc(re_blocksize, ccontext->memctl.memory_data);
@@ -7595,17 +7592,17 @@ re->first_codeunit = 0;
 re->last_codeunit = 0;
 re->bsr_convention = bsr;
 re->newline_convention = newline;
-re->max_lookbehind = 
+re->max_lookbehind =
 re->minlength = 0;
 re->top_bracket = 0;
 re->top_backref = 0;
 re->name_entry_size = cb.name_entry_size;
 re->name_count = cb.names_found;
 
-/* The basic block is immediately followed by the name table, and the compiled 
+/* The basic block is immediately followed by the name table, and the compiled
 code follows after that. */
 
-codestart = (PCRE2_SPTR)((uint8_t *)re + sizeof(pcre2_real_code)) + 
+codestart = (PCRE2_SPTR)((uint8_t *)re + sizeof(pcre2_real_code)) +
   re->name_entry_size * re->name_count;
 
 
@@ -7646,7 +7643,7 @@ cb.check_lookbehind = FALSE;
 cb.open_caps = NULL;
 
 /* If any named groups were found, create the name/number table from the list
-created in the first pass. If the list was longer than the in-stack list, free 
+created in the first pass. If the list was longer than the in-stack list, free
 the heap memory. */
 
 if (cb.names_found > 0)
@@ -7726,7 +7723,7 @@ if (cb.hwm > cb.start_workspace)
 NULL to indicate that forward references have been filled in. */
 
 if (cb.workspace_size > COMPILE_WORK_SIZE)
-  ccontext->memctl.free((void *)cb.start_workspace, 
+  ccontext->memctl.free((void *)cb.start_workspace,
     ccontext->memctl.memory_data);
 cb.start_workspace = NULL;
 
@@ -7744,9 +7741,9 @@ function call. */
 
 if ((options & PCRE2_NO_AUTO_POSSESS) == 0)
   {
-  PCRE2_UCHAR *temp = (PCRE2_UCHAR *)codestart; 
+  PCRE2_UCHAR *temp = (PCRE2_UCHAR *)codestart;
   PRIV(auto_possessify)(temp, utf, &cb);
-  } 
+  }
 
 /* If there were any lookbehind assertions that contained OP_RECURSE
 (recursions or subroutine calls), a flag is set for them to be checked here,
@@ -7800,7 +7797,7 @@ if (errorcode != 0)
   re = NULL;
   *errorptr = errorcode;
   *erroroffset = (int)(ptr - pattern);
-  goto EXIT; 
+  goto EXIT;
   }
 
 /* Successful compile. If the anchored option was not passed, set it if
@@ -7809,9 +7806,9 @@ or anything else, such as starting with non-atomic .* when DOTALL is set and
 there are no occurrences of *PRUNE or *SKIP. */
 
 if ((re->overall_options & PCRE2_ANCHORED) == 0 &&
-     is_anchored(codestart, 0, &cb, 0)) 
+     is_anchored(codestart, 0, &cb, 0))
   re->overall_options |= PCRE2_ANCHORED;
-  
+
 /* If the pattern is still not anchored and we do not have a first code unit,
 see if there is one that is asserted (these are not saved during the compile
 because they can cause conflicts with actual literals that follow). */
@@ -7820,14 +7817,14 @@ if ((re->overall_options & PCRE2_ANCHORED) == 0)
   {
   if (firstcuflags < 0)
     firstcu = find_firstassertedcu(codestart, &firstcuflags, FALSE);
-    
+
   /* Save the data for a first code unit. */
 
   if (firstcuflags >= 0)
     {
     re->first_codeunit = firstcu;
     re->flags |= PCRE2_FIRSTSET;
-    
+
     /* Handle caseless first code units. */
 
     if ((firstcuflags & REQ_CASELESS) != 0)
@@ -7836,20 +7833,20 @@ if ((re->overall_options & PCRE2_ANCHORED) == 0)
         {
         if (cb.fcc[firstcu] != firstcu) re->flags |= PCRE2_FIRSTCASELESS;
         }
-        
-      /* The first code unit is > 128 in UTF mode, or > 255 otherwise. In 
-      8-bit UTF mode, codepoints in the range 128-255 are introductory code 
-      points and cannot have another case. In 16-bit and 32-bit modes, we can 
+
+      /* The first code unit is > 128 in UTF mode, or > 255 otherwise. In
+      8-bit UTF mode, codepoints in the range 128-255 are introductory code
+      points and cannot have another case. In 16-bit and 32-bit modes, we can
       check wide characters when UTF (and therefore UCP) is supported. */
-      
+
 #if defined SUPPORT_UTF && PCRE2_CODE_UNIT_WIDTH != 8
-      else if (firstcu <= MAX_UTF_CODE_POINT && 
+      else if (firstcu <= MAX_UTF_CODE_POINT &&
                UCD_OTHERCASE(firstcu) != firstcu)
         re->flags |= PCRE2_FIRSTCASELESS;
-#endif          
+#endif
       }
     }
-      
+
   /* When there is no first code unit, see if we can set the PCRE2_STARTLINE
   flag. This is helpful for multiline matches when all branches start with ^
   and also when all branches start with non-atomic .* for non-DOTALL matches
@@ -7857,19 +7854,19 @@ if ((re->overall_options & PCRE2_ANCHORED) == 0)
 
   else if (is_startline(codestart, 0, &cb, 0)) re->flags |= PCRE2_STARTLINE;
   }
-  
-/* Handle the "required code unit", if one is set. In the case of an anchored 
+
+/* Handle the "required code unit", if one is set. In the case of an anchored
 pattern, do this only if it follows a variable length item in the pattern. */
 
 if (reqcuflags >= 0 &&
-     ((re->overall_options & PCRE2_ANCHORED) == 0 || 
+     ((re->overall_options & PCRE2_ANCHORED) == 0 ||
       (reqcuflags & REQ_VARY) != 0))
   {
   re->last_codeunit = reqcu;
   re->flags |= PCRE2_LASTSET;
-  
+
   /* Handle caseless required code units as for first code units (above). */
-   
+
   if ((reqcuflags & REQ_CASELESS) != 0)
     {
     if (reqcu < 128 || (!utf && reqcu < 255))
@@ -7897,14 +7894,14 @@ do
   }
 while (*codestart == OP_ALT);
 
-/* Finally, study the compiled pattern to set up information such as a bitmap 
+/* Finally, study the compiled pattern to set up information such as a bitmap
 of starting code units and a minimum matching length. */
 
 if (PRIV(study)(re) != 0)
   {
   errorcode = ERR31;
-  goto HAD_ERROR;  
-  } 
+  goto HAD_ERROR;
+  }
 
 /* Control ends up here in all cases. If memory was obtained for a
 zero-terminated copy of the pattern, remember to free it before returning. */
