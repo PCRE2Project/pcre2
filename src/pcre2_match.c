@@ -56,6 +56,10 @@ POSSIBILITY OF SUCH DAMAGE.
   (PCRE2_ANCHORED|PCRE2_NOTBOL|PCRE2_NOTEOL|PCRE2_NOTEMPTY| \
    PCRE2_NOTEMPTY_ATSTART|PCRE2_NO_UTF_CHECK|PCRE2_PARTIAL_HARD| \
    PCRE2_PARTIAL_SOFT|PCRE2_NO_START_OPTIMIZE)
+   
+#define PUBLIC_JIT_MATCH_OPTIONS \
+   (PCRE2_NO_UTF_CHECK|PCRE2_NOTBOL|PCRE2_NOTEOL|PCRE2_NOTEMPTY|\
+    PCRE2_NOTEMPTY_ATSTART|PCRE2_PARTIAL_SOFT|PCRE2_PARTIAL_HARD)
 
 /* The mb->capture_last field uses the lower 16 bits for the last captured
 substring (which can never be greater than 65535) and a bit in the top half
@@ -6271,11 +6275,11 @@ an unsupported option is set or if JIT returns BADOPTION (which means that the
 selected normal or partial matching mode was not compiled). */
 
 #ifdef SUPPORT_JIT
-if (re->executable_jit != NULL && (options & ~PUBLIC_JIT_EXEC_OPTIONS) == 0 &&
+if (re->executable_jit != NULL && (options & ~PUBLIC_JIT_MATCH_OPTIONS) == 0 &&
     mcontext->bsr_convention == 0 && mcontext->newline_convention == 0)
   {
-  rc = PRIV(jit_exec)(subject, length, start_offset, options, match_data,
-    mcontext);
+  rc = pcre2_jit_match(code, subject, length, start_offset, options,
+    match_data, mcontext, NULL);
   if (rc != PCRE2_ERROR_JIT_BADOPTION) return rc;
   }
 #endif

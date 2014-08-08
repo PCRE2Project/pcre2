@@ -715,10 +715,6 @@ First code unit = \xc4
 Last code unit = 'z'
 Subject length lower bound = 7
 
-/a\x{1234}b/utf,posix
-    a\x{1234}b
- 0: a\x{1234}b
-
 /\777/I,utf
 Capturing subpattern count = 0
 Options: utf
@@ -1136,14 +1132,6 @@ Failed: error 174 at offset 7: using UTF is disabled by the application
 /abc/utf,never_utf
 Failed: error 174 at offset 0: using UTF is disabled by the application
 
-/\w/posix
-    +++\x{c2}
-No match: POSIX code 17: match failed
-
-/\w/ucp,posix
-    +++\x{c2}
- 0: \xc2
-    
 /A\x{391}\x{10427}\x{ff3a}\x{1fb0}/IBi,utf
 ------------------------------------------------------------------
         Bra

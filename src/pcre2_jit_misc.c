@@ -122,4 +122,22 @@ jit_stack=jit_stack;
 #endif  /* SUPPORT_JIT */
 }
 
+
+/*************************************************
+*              Get size of JIT code              *
+*************************************************/
+
+int
+PRIV(jit_get_size)(void *executable_jit)
+{
+#ifndef SUPPORT_JIT
+(void)executable_jit;
+return 0;
+#else  /* SUPPORT_JIT */
+
+executable_jit = executable_jit;
+return 0;   /* FIXME */
+#endif
+}
+
 /* End of pcre2_jit_misc.c */

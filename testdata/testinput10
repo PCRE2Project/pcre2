@@ -223,9 +223,6 @@
 
 /\x{100}abc(xyz(?1))/IB,utf
 
-/a\x{1234}b/utf,posix
-    a\x{1234}b
-
 /\777/I,utf
   \x{1ff}
   \777
@@ -359,12 +356,6 @@
 
 /abc/utf,never_utf
 
-/\w/posix
-    +++\x{c2}
-
-/\w/ucp,posix
-    +++\x{c2}
-    
 /A\x{391}\x{10427}\x{ff3a}\x{1fb0}/IBi,utf
 
 /A\x{391}\x{10427}\x{ff3a}\x{1fb0}/IB,utf

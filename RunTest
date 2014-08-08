@@ -64,9 +64,10 @@ title10="Test 10: Specials for the 8-bit library with UTF-8 and UCP support"
 title11="Test 11: Specials for the basic 16-bit and 32-bit libraries"
 title12="Test 12: Specials for the 16-bit and 32-bit libraries UTF and UCP support"
 title13="Test 13: DFA specials for the basic 16-bit and 32-bit libraries"
-
-#title12="Test 12: JIT-specific features (when JIT is available)"
-#title13="Test 13: JIT-specific features (when JIT is not available)"
+title14="Test 14: JIT-specific features (when JIT is not available)"
+title15="Test 15: JIT-specific features (when JIT is available)"
+title16="Test 16: Tests of the POSIX interface, excluding UTF/UCP"
+title17="Test 17: Tests of the POSIX interface with UTF/UCP"
 
 #title21="Test 21: Reloads for the basic 16/32-bit library"
 #title22="Test 22: Reloads for the 16/32-bit library with UTF-16/32 support"
@@ -87,10 +88,10 @@ if [ $# -eq 1 -a "$1" = "list" ]; then
   echo $title11
   echo $title12
   echo $title13
-#  echo $title14
-#  echo $title15
-#  echo $title16
-#  echo $title17
+  echo $title14
+  echo $title15
+  echo $title16
+  echo $title17
 #  echo $title18
 #  echo $title19
 #  echo $title20
@@ -176,10 +177,10 @@ do10=no
 do11=no
 do12=no
 do13=no
-#do14=no
-#do15=no
-#do16=no
-#do17=no
+do14=no
+do15=no
+do16=no
+do17=no
 #do18=no
 #do19=no
 #do20=no
@@ -201,10 +202,10 @@ while [ $# -gt 0 ] ; do
    11) do11=yes;;
    12) do12=yes;;
    13) do13=yes;;
-#   14) do14=yes;;
-#   15) do15=yes;;
-#   16) do16=yes;;
-#   17) do17=yes;;
+   14) do14=yes;;
+   15) do15=yes;;
+   16) do16=yes;;
+   17) do17=yes;;
 #   18) do18=yes;;
 #   19) do19=yes;;
 #   20) do20=yes;;
@@ -332,10 +333,10 @@ fi
 if [ $do1  = no -a $do2  = no -a $do3  = no -a $do4  = no -a \
      $do5  = no -a $do6  = no -a $do7  = no -a $do8  = no -a \
      $do9  = no -a $do10 = no -a $do11 = no -a $do12 = no -a \
-     $do13 = no \
+     $do13 = no -a $do14 = no -a $do15 = no -a $do16 = no -a \
+     $do17 = no \
    ]; then
-#     -a $do14 = no -a $do15 = no -a $do16 = no -a \
-#     $do17 = no -a $do18 = no -a $do19 = no -a $do20 = no -a \
+#     -a $do18 = no -a $do19 = no -a $do20 = no -a \
 #     $do21 = no -a $do22 = no
 
   do1=yes
@@ -351,10 +352,10 @@ if [ $do1  = no -a $do2  = no -a $do3  = no -a $do4  = no -a \
   do11=yes
   do12=yes
   do13=yes
-#  do14=yes
-#  do15=yes
-#  do16=yes
-#  do17=yes
+  do14=yes
+  do15=yes
+  do16=yes
+  do17=yes
 #  do18=yes
 #  do19=yes
 #  do20=yes
@@ -694,40 +695,76 @@ if [ $do13 = yes ] ; then
   fi
 fi
 
-## Test JIT-specific features when JIT is available
-#
-#if [ $do12 = yes ] ; then
-#  echo $title12
-#  if [ $jit -eq 0 -o "$nojit" = "yes" ] ; then
-#    echo "  Skipped because JIT is not available or not usable"
-#  else
-#    $sim $valgrind ./pcre2test -q $bmode $testdata/testinput12 testtry
-#    if [ $? = 0 ] ; then
-#      $cf $testdata/testoutput12 testtry
-#      if [ $? != 0 ] ; then exit 1; fi
-#    else exit 1
-#    fi
-#    echo "  OK"
-#  fi
-#fi
-#
-## Test JIT-specific features when JIT is not available
-#
-#if [ $do13 = yes ] ; then
-#  echo $title13
-#  if [ $jit -ne 0 ] ; then
-#    echo "  Skipped because JIT is available"
-#  else
-#    $sim $valgrind ./pcre2test -q $bmode $testdata/testinput13 testtry
-#    if [ $? = 0 ] ; then
-#      $cf $testdata/testoutput13 testtry
-#      if [ $? != 0 ] ; then exit 1; fi
-#    else exit 1
-#    fi
-#    echo "  OK"
-#  fi
-#fi
-#
+# Test JIT-specific features when JIT is not available
+
+if [ $do14 = yes ] ; then
+  echo $title14
+  if [ $jit -ne 0 ] ; then
+    echo "  Skipped because JIT is available"
+  else
+    $sim $valgrind ./pcre2test -q $bmode $testdata/testinput14 testtry
+    if [ $? = 0 ] ; then
+      $cf $testdata/testoutput14 testtry
+      if [ $? != 0 ] ; then exit 1; fi
+    else exit 1
+    fi
+    echo "  OK"
+  fi
+fi
+
+# Test JIT-specific features when JIT is available
+
+if [ $do15 = yes ] ; then
+  echo $title15
+  if [ $jit -eq 0 -o "$nojit" = "yes" ] ; then
+    echo "  Skipped because JIT is not available or not usable"
+  else
+    $sim $valgrind ./pcre2test -q $bmode $testdata/testinput15 testtry
+    if [ $? = 0 ] ; then
+      $cf $testdata/testoutput15 testtry
+      if [ $? != 0 ] ; then exit 1; fi
+    else exit 1
+    fi
+    echo "  OK"
+  fi
+fi
+
+# Tests for the POSIX interface without UTF/UCP (8-bit only)
+
+if [ $do16 = yes ] ; then
+  echo $title16
+  if [ "$bits" = "16" -o "$bits" = "32" ] ; then
+    echo "  Skipped when running 16/32-bit tests"
+  else
+    $sim $valgrind ./pcre2test -q $bmode $testdata/testinput16 testtry
+    if [ $? = 0 ] ; then
+      $cf $testdata/testoutput16 testtry
+      if [ $? != 0 ] ; then exit 1; fi
+    else exit 1
+    fi
+    echo "  OK"
+  fi
+fi
+
+# Tests for the POSIX interface with UTF/UCP (8-bit only)
+
+if [ $do17 = yes ] ; then
+  echo $title17
+  if [ "$bits" = "16" -o "$bits" = "32" ] ; then
+    echo "  Skipped when running 16/32-bit tests"
+  elif [ $utf -eq 0 ] ; then
+    echo "  Skipped because UTF-$bits support is not available"
+  else
+    $sim $valgrind ./pcre2test -q $bmode $testdata/testinput17 testtry
+    if [ $? = 0 ] ; then
+      $cf $testdata/testoutput17 testtry
+      if [ $? != 0 ] ; then exit 1; fi
+    else exit 1
+    fi
+    echo "  OK"
+  fi
+fi
+
 ## Tests for reloads with 16/32-bit library
 #
 #if [ $do21 = yes ] ; then

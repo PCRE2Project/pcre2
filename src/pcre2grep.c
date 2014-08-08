@@ -3115,14 +3115,14 @@ for (fn = pattern_files; fn != NULL; fn = fn->next)
 
 #ifdef SUPPORT_PCRE2GREP_JIT
 if (use_jit)
-  jit_stack = pcre_jit_stack_alloc(32*1024, 1024*1024);
+  jit_stack = pcre2_jit_stack_alloc(NULL, 32*1024, 1024*1024);
 #endif
 
 for (j = 1, cp = patterns; cp != NULL; j++, cp = cp->next)
   {
 #ifdef SUPPORT_PCRE2GREP_JIT
-  if (jit_stack != NULL && cp->hint != NULL)
-    pcre2_assign_jit_stack(cp->hint, NULL, jit_stack);
+  if (jit_stack != NULL && cp->compiled != NULL)
+    pcre2_jit_stack_assign(cp->compiled, NULL, jit_stack);
 #endif
   }
 

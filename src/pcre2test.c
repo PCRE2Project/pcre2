@@ -3190,18 +3190,18 @@ if ((pat_patctl.control & CTL_INFO) != 0)
 
 /* FIXME: tidy this up */
 
-  if (pat_patctl.jit != 0)
+  if (pat_patctl.jit != 0 && (pat_patctl.control & CTL_JITVERIFY) != 0) 
     {
     size_t jitsize;
     if (pattern_info(PCRE2_INFO_JITSIZE, &jitsize) == 0)
       {
       if (jitsize > 0)
-        fprintf(outfile, "JIT study was successful\n");
+        fprintf(outfile, "JIT compilation was successful\n");
       else
 #ifdef SUPPORT_JIT
-        fprintf(outfile, "JIT study was not successful\n");
+        fprintf(outfile, "JIT compilation was not successful\n");
 #else
-        fprintf(outfile, "JIT support is not available in this version of PCRE\n");
+        fprintf(outfile, "JIT support is not available in this version of PCRE2\n");
 #endif
       }
     }
@@ -4455,10 +4455,8 @@ show_memory = (dat_datctl.control & CTL_MEMORY) != 0;
 actually used. If jit_stack == NULL, no stack has yet been assigned. */
 
 #ifdef FIXME
-if ((dat_datctl.control & CTL_JITVERIFY) != 0 &&
-
-  jit_stack == NULL && extra != NULL)
-   { PCRE2_ASSIGN_JIT_STACK(extra, jit_callback, jit_stack); }
+if ((dat_datctl.control & CTL_JITVERIFY) != 0 && jit_stack == NULL)
+   { PCRE2_JIT_STACK_ASSIGN(compiled_code, jit_callback, jit_stack); }
 #endif
 
 

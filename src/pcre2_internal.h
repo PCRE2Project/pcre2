@@ -1838,6 +1838,7 @@ is available. */
 #define _pcre2_compile_context_init  PCRE2_SUFFIX(_pcre2_compile_context_init_)
 #define _pcre2_find_bracket          PCRE2_SUFFIX(_pcre2_find_bracket_)
 #define _pcre2_is_newline            PCRE2_SUFFIX(_pcre2_is_newline_)
+#define _pcre2_jit_get_size          PCRE2_SUFFIX(_pcre2_jit_get_size_)
 #define _pcre2_match_context_init    PCRE2_SUFFIX(_pcre2_match_context_init_)
 #define _pcre2_memctl_malloc         PCRE2_SUFFIX(_pcre2_memctl_malloc_)
 #define _pcre2_ord2utf               PCRE2_SUFFIX(_pcre2_ord2utf_)
@@ -1856,6 +1857,7 @@ extern void  _pcre2_compile_context_init(pcre2_compile_context *, BOOL);
 extern PCRE2_SPTR _pcre2_find_bracket(PCRE2_SPTR, BOOL, int);
 extern BOOL  _pcre2_is_newline(PCRE2_SPTR, uint32_t, PCRE2_SPTR, uint32_t *, 
                BOOL);
+extern int   _pcre2_jit_get_size(void *);
 extern void  _pcre2_match_context_init(pcre2_match_context *, BOOL);
 extern void  *_pcre2_memctl_malloc(size_t, size_t, pcre2_memctl *);
 extern unsigned int _pcre2_ord2utf(uint32_t, PCRE2_UCHAR *);

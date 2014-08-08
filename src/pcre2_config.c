@@ -97,8 +97,11 @@ switch (what)
 
   case PCRE2_CONFIG_JITTARGET:
 #ifdef SUPPORT_JIT
-FIXME: This needs re-design.
+/* FIXME: This needs re-design. 
   *((const char **)where) = PRIV(jit_get_target)();
+*/
+  *((const char **)where) = "<JIT target>";
+ 
 #else
   *((const char **)where) = NULL;
 #endif

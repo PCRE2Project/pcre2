@@ -467,7 +467,8 @@ PCRE2_EXP_DECL int       pcre2_substring_list_get(pcre2_match_data *, \
 PCRE2_EXP_DECL void      pcre2_jit_compile(pcre2_code *, uint32_t); \
 PCRE2_EXP_DECL int       pcre2_jit_match(const pcre2_code *, \
                            PCRE2_SPTR, int, PCRE2_OFFSET, uint32_t, \
-                           pcre2_match_data *, pcre2_jit_stack *); \
+                           pcre2_match_data *, pcre2_match_context *, \
+                           pcre2_jit_stack *); \
 PCRE2_EXP_DECL void      pcre2_jit_free_unused_memory(pcre2_general_context *);\
 PCRE2_EXP_DECL \
   pcre2_jit_stack       *pcre2_jit_stack_alloc(pcre2_general_context *, \

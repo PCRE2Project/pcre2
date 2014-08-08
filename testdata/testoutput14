@@ -1,0 +1,21 @@
+# This test is run only when JIT support is not available. It checks that an
+# attempt to use it has the expected behaviour. It also tests things that
+# are different without JIT.
+
+/abc/I,jit
+Capturing subpattern count = 0
+No options
+First code unit = 'a'
+Last code unit = 'c'
+Subject length lower bound = 3
+JIT support is not available in this version of PCRE
+
+/a*/I
+Capturing subpattern count = 0
+May match empty string
+No options
+No first code unit
+No last code unit
+Subject length lower bound = 0
+
+# End of testinput14

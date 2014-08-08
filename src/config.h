@@ -80,10 +80,10 @@ sure both macros are undefined; an emulation function will then be used. */
 #define HAVE_MEMORY_H 1
 
 /* Define if you have POSIX threads libraries and header files. */
-/* #undef HAVE_PTHREAD */
+#define HAVE_PTHREAD 1
 
 /* Have PTHREAD_PRIO_INHERIT. */
-/* #undef HAVE_PTHREAD_PRIO_INHERIT */
+#define HAVE_PTHREAD_PRIO_INHERIT 1
 
 /* Define to 1 if you have the <readline/history.h> header file. */
 #define HAVE_READLINE_HISTORY_H 1
@@ -242,7 +242,7 @@ sure both macros are undefined; an emulation function will then be used. */
 #define STDC_HEADERS 1
 
 /* Define to any value to enable support for Just-In-Time compiling. */
-/* #undef SUPPORT_JIT */
+#define SUPPORT_JIT /**/
 
 /* Define to any value to allow pcre2grep to be linked with libbz2, so that it
    is able to handle .bz2 files. */
@@ -262,7 +262,7 @@ sure both macros are undefined; an emulation function will then be used. */
 #define SUPPORT_PCRE16 /**/
 
 /* Define to any value to enable JIT support in pcre2grep. */
-/* #undef SUPPORT_PCRE2GREP_JIT */
+#define SUPPORT_PCRE2GREP_JIT /**/
 
 /* Define to any value to enable the 32 bit PCRE2 library. */
 #define SUPPORT_PCRE32 /**/

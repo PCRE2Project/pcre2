@@ -59,6 +59,7 @@ Arguments:
   start_offset    where to start in the subject string
   options         option bits
   match_data      points to a match_data block 
+  mcontext        points to a match context 
   jit_stack       points to a JIT stack 
 
 Returns:          > 0 => success; value is the number of ovector pairs filled
@@ -72,7 +73,7 @@ Returns:          > 0 => success; value is the number of ovector pairs filled
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_jit_match(const pcre2_code *code, PCRE2_SPTR subject, int length, 
   PCRE2_OFFSET start_offset, uint32_t options, pcre2_match_data *match_data, 
-  pcre2_jit_stack *jit_stack)
+  pcre2_match_context *mcontext, pcre2_jit_stack *jit_stack)
 {
 #ifndef SUPPORT_JIT
 (void)code;
@@ -81,16 +82,18 @@ pcre2_jit_match(const pcre2_code *code, PCRE2_SPTR subject, int length,
 (void)start_offset;
 (void)options;
 (void)match_data;
+(void)mcontext;
 (void)jit_stack;
-return PCRE2_ERROR_NOMATCH;
+return PCRE2_ERROR_JIT_BADOPTION;
 #else  /* SUPPORT_JIT */
 
 
 /* Dummy code */
 code=code;subject=subject;length=length;
 start_offset=start_offset; options=options; match_data=match_data;
+mcontext=mcontext;
 jit_stack=jit_stack;
-return PCRE2_ERROR_NOMATCH;
+return PCRE2_ERROR_JIT_BADOPTION;
 
 #endif  /* SUPPORT_JIT */
 }    
