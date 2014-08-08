@@ -2,7 +2,7 @@
 # attempt to use it has the expected behaviour. It also tests things that
 # are different without JIT.
 
-/abc/I,jit
+/abc/I,jit,jitverify
 
 /a*/I
 
