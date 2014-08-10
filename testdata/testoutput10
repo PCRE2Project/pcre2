@@ -793,6 +793,7 @@ No match
 Capturing subpattern count = 0
 Compile options: <none>
 Overall options: utf
+\R matches any Unicode newline
 Forced newline is CRLF
 First code unit = 'a'
 Last code unit = 'b'

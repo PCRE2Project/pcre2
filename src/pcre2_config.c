@@ -42,6 +42,11 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "config.h"
 #endif
 
+/* Save the configured link size, which is in bytes. In 16-bit and 32-bit modes 
+its value gets changed by pcre2_internal.h to be in code units. */
+
+static int configured_link_size = LINK_SIZE;
+
 #include "pcre2_internal.h"
 
 /* These macros are the standard way of turning unquoted text into C strings.
@@ -108,7 +113,7 @@ switch (what)
   break;
 
   case PCRE2_CONFIG_LINKSIZE:
-  *((int *)where) = LINK_SIZE;
+  *((int *)where) = configured_link_size;
   break;
 
   case PCRE2_CONFIG_MATCHLIMIT:

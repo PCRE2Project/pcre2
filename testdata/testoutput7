@@ -1125,6 +1125,7 @@ No match
 /a\Rb/I,bsr=unicode,utf
 Capturing subpattern count = 0
 Options: utf
+\R matches any Unicode newline
 First code unit = 'a'
 Last code unit = 'b'
 Subject length lower bound = 3
@@ -1168,6 +1169,7 @@ No match
 /a\R?b/I,bsr=unicode,utf
 Capturing subpattern count = 0
 Options: utf
+\R matches any Unicode newline
 First code unit = 'a'
 Last code unit = 'b'
 Subject length lower bound = 2

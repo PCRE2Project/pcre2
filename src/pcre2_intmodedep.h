@@ -127,7 +127,7 @@ values of 2 or 4 are also supported. */
 #define MAX_PATTERN_SIZE (1 << 30)   /* Keep it positive */
 
 #else
-#error LINK_SIZE must be either 2, 3, or 4
+#error LINK_SIZE must be 2, 3, or 4
 #endif
 
 
@@ -155,7 +155,7 @@ values of 2 or 4 are also supported. */
 #define MAX_PATTERN_SIZE (1 << 30)  /* Keep it positive */
 
 #else
-#error LINK_SIZE must be either 2, 3, or 4
+#error LINK_SIZE must be 2, 3, or 4
 #endif
 
 
@@ -268,6 +268,7 @@ UTF support is omitted, we don't even define them. */
 /* ------------------- 8-bit support  ------------------ */
 
 #if PCRE2_CODE_UNIT_WIDTH == 8
+#define MAYBE_UTF_MULTI          /* UTF chars may use multiple code units */
 
 /* The largest UTF code point that can be encoded as a single code unit. */
 
@@ -352,6 +353,7 @@ because almost all calls are already within a block of UTF-8 only code. */
 /* ------------------- 16-bit support  ------------------ */
 
 #elif PCRE2_CODE_UNIT_WIDTH == 16
+#define MAYBE_UTF_MULTI          /* UTF chars may use multiple code units */
 
 /* The largest UTF code point that can be encoded as a single code unit. */
 
@@ -458,7 +460,7 @@ code. */
 #else
 
 /* These are trivial for the 32-bit library, since all UTF-32 characters fit
-into one PCRE_UCHAR unit. */
+into one PCRE2_UCHAR unit. */
 
 #define MAX_UTF_SINGLE_CU (0x10ffffu)
 #define HAS_EXTRALEN(c) (0)

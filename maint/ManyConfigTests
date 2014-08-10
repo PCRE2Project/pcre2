@@ -1,50 +1,73 @@
 #! /bin/sh
 
-# This is a script for the use of PCRE maintainers. It configures and rebuilds
+# This is a script for the use of PCRE2 maintainers. It configures and rebuilds
 # PCRE2 with a variety of configuration options, and in each case runs the
 # tests to ensure that all goes well. Every possible combination would take far
 # too long, so we use a representative sample. This script should be run in the
 # PCRE2 source directory.
 
-# Some of the tests have to be skipped when PCRE2 is built with non-Unix
-# newline recognition. I am planning to reduce this as much as possible in due
-# course.
+# While debugging, it is sometimes useful to be able to cut out some of the
+# tests, in order to run those that are giving errors. The following options
+# do this:
+#
+# -nojit       skip JIT tests
+# -nomain      skip the main set of tests
+# -notmp       skip the test in a temporary directory
+# -novalgrind  skip the valgrind tests
 
+# The -v option causes a call to 'pcre2test -C' to happen for each
+# configuration.
+
+# Some of the tests are automatically skipped when PCRE2 is built with non-Unix
+# newline recognition because they don't work. I am hoping to reduce this as
+# much as possible in due course.
+
+usejit=1
+usemain=1
+usetmp=1
+usevalgrind=1
+verbose=0
+
+while [ $# -gt 0 ] ; do
+  case $1 in
+    -nojit)        usejit=0;;
+    -nomain)       usemain=0;;
+    -notmp)        usetmp=0;;
+    -novalgrind)   usevalgrind=0;;
+    -v)            verbose=1;;
+    *)             echo "Unknown option '$1'"; exit 1;;
+  esac
+  shift
+done
 
 # This is in case the caller has set aliases (as I do - PH)
 
 unset cp ls mv rm
 
-# Use -v to make the output more verbose
-
-verbose=0
-if [ "$1" = "-v" ] ; then verbose=1; fi
-
 # This is a temporary directory for testing out-of-line builds
 
-tmp=/tmp/pcretesting
+tmp=/tmp/pcre2testing
 
 # Don't bother with compiler optimization for most tests; it just slows down
-# compilation a lot (and running the tests themselves is quick). However, a
-# few specific tests turn optimization on, because it can provoke some compiler
+# compilation a lot (and running the tests themselves is quick). However, one
+# special test turns optimization on, because it can provoke some compiler
 # warnings.
 
 CFLAGS="-g -O0"
-CXXFLAGS="$CFLAGS"
-ISGCC="no"
+ISGCC=0
 
 # If the compiler is gcc, add a lot of warning switches.
 
 cc --version >zzz 2>/dev/null
 if [ $? -eq 0 ] && grep GCC zzz >/dev/null; then
-  ISGCC="yes"
+  ISGCC=1
   CFLAGS="$CFLAGS -Wall"
   CFLAGS="$CFLAGS -Wno-overlength-strings"
   CFLAGS="$CFLAGS -Wpointer-arith"
   CFLAGS="$CFLAGS -Wwrite-strings"
   CFLAGS="$CFLAGS -Wundef -Wshadow"
   CFLAGS="$CFLAGS -Wmissing-field-initializers"
-  CFLAGS="$CFLAGS -Wunused-parameter"  
+  CFLAGS="$CFLAGS -Wunused-parameter"
   CFLAGS="$CFLAGS -Wextra -Wformat"
   CFLAGS="$CFLAGS -Wbad-function-cast"
   CFLAGS="$CFLAGS -Wmissing-declarations"
@@ -71,12 +94,12 @@ function runtest()
     echo "  $opts"
   fi
 
-  CFLAGS="$CFLAGS" CXXFLAGS="$CXXFLAGS" \
+  CFLAGS="$CFLAGS" \
     $srcdir/configure $opts >/dev/null 2>teststderr
 
   if [ $? -ne 0 ]; then
     echo " "
-    echo "**** Error while configuring ****"
+    echo "******** Error while configuring ********"
     cat teststderr
     exit 1
   fi
@@ -85,7 +108,7 @@ function runtest()
   make -j >/dev/null 2>teststderr
   if [ $? -ne 0 -o -s teststderr ]; then
     echo " "
-    echo "**** Errors or warnings while making ****"
+    echo "******** Errors or warnings while making ********"
     echo " "
     cat teststderr
     exit 1
@@ -96,7 +119,7 @@ function runtest()
   fi
 
   nl=`./pcre2test -C newline`
-  ./pcretest -C jit >/dev/null
+  ./pcre2test -C jit >/dev/null
   jit=$?
   ./pcre2test -C utf >/dev/null
   utf=$?
@@ -141,38 +164,19 @@ function runtest()
   else
     echo "Skipping JIT regression tests: JIT or UTF not enabled"
   fi
-
-#  if [ "$nl" = "LF" -o "$nl" = "ANY" ]; then
-#    if [ -f pcrecpp_unittest ] ; then
-#      for utest in pcrecpp_unittest \
-#                   pcre_scanner_unittest \
-#                   pcre_stringpiece_unittest
-#      do
-#        echo "Running $utest $withvalgrind"
-#        $cvalgrind $utest >teststdout
-#        if [ $? -ne 0 ]; then
-#          echo " "
-#          echo "**** Test failed ****"
-#          cat teststdout
-#          exit 1
-#        fi
-#      done
-#    else
-#      echo "Skipping C++ tests: pcrecpp_unittest does not exist"
-#    fi
-#  else
-#    echo "Skipping C++ tests: newline is $nl"
-#  fi
   }
-
 
 # Update the total count whenever a new test is added; it is used to show
 # progess as each test is run.
 
-testtotal=40
+testtotal=`expr 20 \* $usemain + \
+  1 \* $usetmp + \
+  1 \* $ISGCC \* $usemain + \
+  13 \* $usejit + \
+  \( 3 + 2 \* $usejit \) \* $usevalgrind`
 testcount=0
 
-# This set of tests builds PCRE and runs the tests with a variety of configure
+# This set of tests builds PCRE2 and runs the tests with a variety of configure
 # options, in the current (source) directory. The empty configuration builds
 # with all the default settings. As well as testing that these options work, we
 # use --disable-shared or --disable-static after the default test (which builds
@@ -188,71 +192,99 @@ export srcdir
 # If gcc is in use, run a maximally configured test with -O2, because that can
 # throw up warnings that are not detected with -O0.
 
-if [ "$ISGCC" = "yes" ]; then
-  echo "Maximally configured test with -O2"
+if [ $usejit -ne 0 ]; then
+  enable_jit=--enable-jit
+else
+  enable_jit=
+fi
+
+if [ $ISGCC -ne 0 -a $usemain -ne 0 ]; then
+  echo "---------- Maximally configured test with -O2 ----------"
   SAVECLFAGS="$CFLAGS"
   CFLAGS="$CFLAGS -O2"
-  opts="--disable-shared --enable-utf --enable-jit --enable-pcre16 --enable-pcre32"
+  opts="--disable-shared --enable-utf $enable_jit --enable-pcre16 --enable-pcre32"
   runtest
   CFLAGS="$SAVECFLAGS"
 fi
 
-echo "General tests in the current directory"
-for opts in \
-  "" \
-  "--enable-utf --disable-static" \
-  "--disable-stack-for-recursion --disable-shared" \
-  "--enable-utf --disable-shared" \
-  "--enable-utf --disable-stack-for-recursion --disable-shared" \
-  "--enable-utf --with-link-size=3 --disable-shared" \
-  "--enable-rebuild-chartables --disable-shared" \
-  "--enable-newline-is-any --disable-shared" \
-  "--enable-newline-is-cr --disable-shared" \
-  "--enable-newline-is-crlf --disable-shared" \
-  "--enable-newline-is-anycrlf --enable-bsr-anycrlf --disable-shared" \
-  "--enable-utf --enable-newline-is-any --disable-stack-for-recursion --disable-static" \
-  "--enable-jit --disable-shared" \
-  "--enable-jit --enable-utf --disable-shared" \
-  "--enable-jit --enable-utf --with-link-size=3 --disable-shared" \
-  "--enable-pcre16" \
-  "--enable-pcre16 --enable-jit --enable-utf --disable-shared" \
-  "--enable-pcre16 --enable-jit --disable-pcre8 --disable-shared" \
-  "--enable-pcre16 --enable-jit --disable-pcre8 --enable-utf --disable-shared" \
-  "--enable-pcre16 --disable-stack-for-recursion --disable-shared" \
-  "--enable-pcre16 --enable-utf --disable-stack-for-recursion --disable-shared" \
-  "--enable-pcre16 --enable-jit --enable-utf --with-link-size=3 --disable-shared" \
-  "--enable-pcre16 --enable-jit --enable-utf --with-link-size=4 --disable-shared" \
-  "--enable-pcre32" \
-  "--enable-pcre32 --enable-jit --enable-utf --disable-shared" \
-  "--enable-pcre32 --enable-jit --disable-pcre8 --disable-shared" \
-  "--enable-pcre32 --enable-jit --disable-pcre8 --enable-utf --disable-shared" \
-  "--enable-pcre32 --disable-stack-for-recursion --disable-shared" \
-  "--enable-pcre32 --enable-utf --disable-stack-for-recursion --disable-shared" \
-  "--enable-pcre32 --enable-jit --enable-utf --with-link-size=4 --disable-shared" \
-  "--enable-pcre32 --enable-pcre16 --disable-shared" \
-  "--enable-pcre32 --enable-pcre16 --disable-pcre8 --disable-shared" \
-  "--enable-pcre32 --enable-pcre16 --disable-pcre8 --enable-jit --enable-utf --enable-newline-is-anycrlf --enable-bsr-anycrlf --disable-shared"
-do
-  runtest
-done
+if [ $usemain -ne 0 ]; then
+  echo "---------- Non-JIT tests in the current directory ----------"
+  for opts in \
+    "" \
+    "--enable-utf --disable-static" \
+    "--disable-stack-for-recursion --disable-shared" \
+    "--enable-utf --disable-shared" \
+    "--enable-utf --disable-stack-for-recursion --disable-shared" \
+    "--enable-utf --with-link-size=3 --disable-shared" \
+    "--enable-rebuild-chartables --disable-shared" \
+    "--enable-newline-is-any --disable-shared" \
+    "--enable-newline-is-cr --disable-shared" \
+    "--enable-newline-is-crlf --disable-shared" \
+    "--enable-newline-is-anycrlf --enable-bsr-anycrlf --disable-shared" \
+    "--enable-utf --enable-newline-is-any --disable-stack-for-recursion --disable-static" \
+    "--enable-pcre16" \
+    "--enable-pcre16 --disable-stack-for-recursion --disable-shared" \
+    "--enable-pcre16 --enable-utf --disable-stack-for-recursion --disable-shared" \
+    "--enable-pcre32" \
+    "--enable-pcre32 --disable-stack-for-recursion --disable-shared" \
+    "--enable-pcre32 --enable-utf --disable-stack-for-recursion --disable-shared" \
+    "--enable-pcre32 --enable-pcre16 --disable-shared" \
+    "--enable-pcre32 --enable-pcre16 --disable-pcre8 --disable-shared"
+  do
+    runtest
+  done
+fi
+
+# Now run the JIT tests unless disabled
+
+if [ $usejit -ne 0 ]; then
+  echo "---------- JIT tests in the current directory ----------"
+  for opts in \
+    "--enable-jit --disable-shared" \
+    "--enable-jit --enable-utf --disable-shared" \
+    "--enable-jit --enable-utf --with-link-size=3 --disable-shared" \
+    "--enable-jit --enable-pcre16 --enable-utf --disable-shared" \
+    "--enable-jit --enable-pcre16 --disable-pcre8 --disable-shared" \
+    "--enable-jit --enable-pcre16 --disable-pcre8 --enable-utf --disable-shared" \
+    "--enable-jit --enable-pcre16 --enable-utf --with-link-size=3 --disable-shared" \
+    "--enable-jit --enable-pcre16 --enable-utf --with-link-size=4 --disable-shared" \
+    "--enable-jit --enable-pcre32 --enable-utf --disable-shared" \
+    "--enable-jit --enable-pcre32 --disable-pcre8 --disable-shared" \
+    "--enable-jit --enable-pcre32 --disable-pcre8 --enable-utf --disable-shared" \
+    "--enable-jit --enable-pcre32 --enable-utf --with-link-size=4 --disable-shared" \
+    "--enable-jit --enable-pcre32 --enable-pcre16 --disable-pcre8 --enable-utf --enable-newline-is-anycrlf --enable-bsr-anycrlf --disable-shared"
+  do
+    runtest
+  done
+fi
 
 # Now re-run some of the tests under valgrind.
 
-echo "Tests in the current directory using valgrind"
-valgrind=valgrind
-cvalgrind="valgrind -q --smc-check=all"
-withvalgrind="with valgrind"
+if [ $usevalgrind -ne 0 ]; then
+  echo "---------- Tests in the current directory using valgrind ----------"
+  valgrind=valgrind
+  cvalgrind="valgrind -q --smc-check=all"
+  withvalgrind="with valgrind"
 
-for opts in \
-  "--enable-utf --disable-stack-for-recursion --disable-shared" \
-  "--enable-utf --with-link-size=3 --disable-shared" \
-  "--enable-jit --enable-utf --disable-shared" \
-  "--enable-pcre16 --enable-pcre32 --enable-jit --enable-utf " \
-  "--disable-shared"
-do
-  opts="--enable-valgrind $opts"
-  runtest
-done
+  for opts in \
+    "--enable-utf --disable-stack-for-recursion --disable-shared" \
+    "--enable-utf --with-link-size=3 --disable-shared" \
+    "--disable-shared"
+  do
+    opts="--enable-valgrind $opts"
+    runtest
+  done
+
+  if [ $usejit -ne 0 ]; then
+    for opts in \
+      "--enable-jit --enable-utf --disable-shared" \
+      "--enable-jit --enable-pcre16 --enable-pcre32 --enable-utf"
+    do
+      opts="--enable-valgrind $opts"
+      runtest
+    done
+  fi
+fi
 
 valgrind=
 cvalgrind=
@@ -271,7 +303,7 @@ if [ -f Makefile ]; then
   fi
 fi
 
-echo "Tests in the $tmp directory"
+echo "---------- Tests in the $tmp directory ----------"
 srcdir=`pwd`
 export srcdir
 
@@ -290,11 +322,13 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-for opts in \
-  "--enable-utf --disable-shared"
-do
-  runtest
-done
+if [ $usetmp -ne 0 ]; then
+  for opts in \
+    "--enable-utf --disable-shared"
+  do
+    runtest
+  done
+fi
 
 echo "Removing $tmp"
 

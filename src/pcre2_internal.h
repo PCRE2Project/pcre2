@@ -532,6 +532,8 @@ bytes in a code unit in that mode. */
 #define PCRE2_HASCRORLF     0x00000800  /* explicit \r or \n in pattern */
 #define PCRE2_HASTHEN       0x00001000  /* pattern contains (*THEN) */
 #define PCRE2_MATCH_EMPTY   0x00002000  /* pattern can match empty string */
+#define PCRE2_BSR_SET       0x00004000  /* BSR was set in the pattern */
+#define PCRE2_NL_SET        0x00008000  /* newline was set in the pattern */
 
 #define PCRE2_MODE_MASK     (PCRE2_MODE8 | PCRE2_MODE16 | PCRE2_MODE32)
 

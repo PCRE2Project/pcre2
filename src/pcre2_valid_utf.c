@@ -62,10 +62,10 @@ PRIV(valid_utf)(PCRE2_SPTR string, int length, PCRE2_OFFSET *erroroffset)
 {
 (void)string;
 (void)length;
-(void)erroroffset);
+(void)erroroffset;
 return 0;
 }
-#else
+#else  /* UTF is supported */
 
 
 
@@ -392,8 +392,8 @@ for (p = string; length-- > 0; p++)
     }
   }
 return 0;
-#endif      /* CODE_UNIT_WIDTH */
-#endif      /* SUPPORT_UTF */
+#endif  /* CODE_UNIT_WIDTH */
 }
+#endif  /* SUPPORT_UTF */
 
 /* End of pcre2_valid_utf.c */

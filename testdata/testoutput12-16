@@ -679,6 +679,7 @@ Failed: error 160 at offset 5: (*VERB) not recognized or malformed
 Capturing subpattern count = 0
 Compile options: <none>
 Overall options: utf
+\R matches any Unicode newline
 Forced newline is CRLF
 First code unit = 'a'
 Last code unit = 'b'
@@ -745,6 +746,7 @@ Subject length lower bound = 1
 /\R*A/I,bsr=unicode,utf
 Capturing subpattern count = 0
 Options: utf
+\R matches any Unicode newline
 Starting code units: \x0a \x0b \x0c \x0d A \x85 \xff 
 Last code unit = 'A'
 Subject length lower bound = 1

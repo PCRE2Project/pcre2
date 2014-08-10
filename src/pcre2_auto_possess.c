@@ -1251,7 +1251,7 @@ for (;;)
   followed by a multi-byte character. The length in the table is a minimum, so
   we have to arrange to skip the extra code units. */
 
-#ifdef SUPPORT_WIDE_CHARS
+#ifdef MAYBE_UTF_MULTI
   if (utf) switch(c)
     {
     case OP_CHAR:
@@ -1315,7 +1315,7 @@ for (;;)
     }
 #else
   (void)(utf);  /* Keep compiler happy by referencing function argument */
-#endif
+#endif  /* SUPPORT_WIDE_CHARS */
   }
 }
 

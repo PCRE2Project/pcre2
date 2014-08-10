@@ -54,7 +54,6 @@ POSSIBILITY OF SUCH DAMAGE.
 by defining macros in order to minimize #if usage. */
 
 #if PCRE2_CODE_UNIT_WIDTH == 8
-#define MAYBE_UTF_MULTI          /* UTF chars may use multiple code units */
 #define STRING_UTFn_RIGHTPAR     STRING_UTF8_RIGHTPAR, 5
 #define XDIGIT(c)                xdigitab[c]
 
@@ -62,10 +61,9 @@ by defining macros in order to minimize #if usage. */
 #define XDIGIT(c)                (MAX_255(c)? xdigitab[c] : 0xff)
 
 #if PCRE2_CODE_UNIT_WIDTH == 16
-#define MAYBE_UTF_MULTI          /* UTF chars may use multiple code units */
 #define STRING_UTFn_RIGHTPAR     STRING_UTF16_RIGHTPAR, 6
 
-#else  /* 33-bit */
+#else  /* 32-bit */
 #define STRING_UTFn_RIGHTPAR     STRING_UTF32_RIGHTPAR, 6
 #endif
 #endif
@@ -1469,7 +1467,6 @@ for (code = first_significant_code(code + PRIV(OP_lengths)[*code], TRUE);
     case OP_POSQUERYI:
     case OP_NOTPOSQUERY:
     case OP_NOTPOSQUERYI:
-
     if (utf && HAS_EXTRALEN(code[1])) code += GET_EXTRALEN(code[1]);
     break;
 
@@ -1487,10 +1484,9 @@ for (code = first_significant_code(code + PRIV(OP_lengths)[*code], TRUE);
     case OP_POSUPTOI:
     case OP_NOTPOSUPTO:
     case OP_NOTPOSUPTOI:
-
     if (utf && HAS_EXTRALEN(code[1 + IMM2_SIZE])) code += GET_EXTRALEN(code[1 + IMM2_SIZE]);
     break;
-#endif
+#endif  /* MAYBE_UTF_MULTI */
 
     /* MARK, and PRUNE/SKIP/THEN with an argument must skip over the argument
     string. */
@@ -2353,7 +2349,7 @@ for (;;)
       }
 #else
     (void)(utf);  /* Keep compiler happy by referencing function argument */
-#endif
+#endif  /* MAYBE_UTF_MULTI */
     }
   }
 }
@@ -2498,7 +2494,7 @@ for (;;)
       }
 #else
     (void)(utf);  /* Keep compiler happy by referencing function argument */
-#endif
+#endif  /* MAYBE_UTF_MULTI */
     }
   }
 }
@@ -2879,9 +2875,10 @@ if (end >= start)
     *uchardata++ = start;
     }
 #endif
-
   *uchardptr = uchardata;   /* Updata extra data pointer */
   }
+#else
+  (void)uchardptr;          /* Avoid compiler warning */
 #endif /* SUPPORT_WIDE_CHARS */
 
 return n8;    /* Number of 8-bit characters */
@@ -4244,7 +4241,7 @@ for (;; ptr++)
         c |= UTF_LENGTH;                          /* Flag c as a length */
         }
       else
-#endif /* SUPPORT_UTF */
+#endif  /* MAYBE_UTF_MULTI */
 
       /* Handle the case of a single charater - either with no UTF support, or
       with UTF disabled, or for a single-code-unit UTF character. */
@@ -4357,7 +4354,7 @@ for (;; ptr++)
             code += c & 7;
             }
           else
-#endif
+#endif  /* MAYBE_UTF_MULTI */
             {
             *code++ = c;
             if (prop_type >= 0)
@@ -4394,7 +4391,7 @@ for (;; ptr++)
         code += c & 7;
         }
       else
-#endif
+#endif  /* MAYBEW_UTF_MULTI */
         {
         *code++ = c;
         if (prop_type >= 0)
@@ -7265,7 +7262,7 @@ pcre2_compile(PCRE2_SPTR pattern, int patlen, uint32_t options,
 BOOL utf;                               /* Set TRUE for UTF mode */
 pcre2_real_code *re = NULL;             /* What we will return */
 pcre2_compile_context default_context;  /* For use if no context given */
-compile_block cb;                        /* "Static" compile-time data */
+compile_block cb;                       /* "Static" compile-time data */
 const uint8_t *tables;                  /* Char tables base pointer */
 
 PCRE2_UCHAR *code;                      /* Current pointer in compiled code */
@@ -7277,6 +7274,7 @@ size_t re_blocksize;                    /* Size of memory block */
 
 int32_t firstcuflags, reqcuflags;       /* Type of first/req code unit */
 uint32_t firstcu, reqcu;                /* Value of first/req code unit */
+uint32_t setflags = 0;                  /* NL and BSR set flags */
 
 uint32_t skipatstart;                   /* When checking (*UTF) etc */
 uint32_t limit_match = UINT32_MAX;      /* Unset match limits */
@@ -7350,7 +7348,6 @@ if (patlen < 0) patlen = PRIV(strlen)(pattern); else
 
 /* ------------ Initialize the "static" compile data -------------- */
 
-
 tables = (ccontext->tables != NULL)? ccontext->tables : PRIV(default_tables);
 
 cb.lcc = tables + lcc_offset;          /* Individual */
@@ -7388,7 +7385,6 @@ references to help in deciding whether (.*) can be treated as anchored or not.
 cb.top_backref = 0;
 cb.backref_map = 0;
 
-
 /* --------------- Start looking at the pattern --------------- */
 
 /* Check for global one-time option settings at the start of the pattern, and
@@ -7418,10 +7414,12 @@ while (ptr[skipatstart] == CHAR_LEFT_PARENTHESIS &&
 
         case PSO_NL:
         newline = p->value;
+        setflags |= PCRE2_NL_SET; 
         break;
 
         case PSO_BSR:
         bsr = p->value;
+        setflags |= PCRE2_BSR_SET; 
         break;
 
         case PSO_LIMM:
@@ -7456,7 +7454,7 @@ ptr += skipatstart;
 /* Can't support UTF or UCP unless PCRE2 has been compiled with UTF support. */
 
 #ifndef SUPPORT_UTF
-if ((cb->external_options & (PCRE2_UTF|PCRE2_UCP)) != 0)
+if ((cb.external_options & (PCRE2_UTF|PCRE2_UCP)) != 0)
   {
   errorcode = ERR32;
   goto HAD_ERROR;
@@ -7585,7 +7583,7 @@ re->blocksize = re_blocksize;
 re->magic_number = MAGIC_NUMBER;
 re->compile_options = options;
 re->overall_options = cb.external_options;
-re->flags = PCRE2_CODE_UNIT_WIDTH/8 | cb.external_flags;
+re->flags = PCRE2_CODE_UNIT_WIDTH/8 | cb.external_flags | setflags;
 re->limit_match = limit_match;
 re->limit_recursion = limit_recursion;
 re->first_codeunit = 0;

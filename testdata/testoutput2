@@ -6625,6 +6625,7 @@ No match
 /abc$/Im,newline=lf
 Capturing subpattern count = 0
 Options: multiline
+Forced newline is LF
 First code unit = 'a'
 Last code unit = 'c'
 Subject length lower bound = 3
@@ -6672,6 +6673,7 @@ No match
 /^abc/Im,newline=lf
 Capturing subpattern count = 0
 Options: multiline
+Forced newline is LF
 First code unit at start or follows newline
 Last code unit = 'c'
 Subject length lower bound = 3
@@ -6718,6 +6720,7 @@ Subject length lower bound = 3
 Capturing subpattern count = 0
 May match empty string
 No options
+Forced newline is LF
 First code unit at start or follows newline
 No last code unit
 Subject length lower bound = 0
@@ -9094,6 +9097,7 @@ No match
 /a\Rb/I,bsr=unicode
 Capturing subpattern count = 0
 No options
+\R matches any Unicode newline
 First code unit = 'a'
 Last code unit = 'b'
 Subject length lower bound = 3
@@ -9137,6 +9141,7 @@ No match
 /a\R?b/I,bsr=unicode
 Capturing subpattern count = 0
 No options
+\R matches any Unicode newline
 First code unit = 'a'
 Last code unit = 'b'
 Subject length lower bound = 2
@@ -9180,6 +9185,7 @@ No match
 /a\R{2,4}b/I,bsr=unicode
 Capturing subpattern count = 0
 No options
+\R matches any Unicode newline
 First code unit = 'a'
 Last code unit = 'b'
 Subject length lower bound = 4
@@ -9217,6 +9223,7 @@ Subject length lower bound = 3
 /(*BSR_UNICODE)a\Rb/I
 Capturing subpattern count = 0
 No options
+\R matches any Unicode newline
 First code unit = 'a'
 Last code unit = 'b'
 Subject length lower bound = 3
@@ -9239,6 +9246,7 @@ Subject length lower bound = 3
 /(*CRLF)(*BSR_UNICODE)a\Rb/I
 Capturing subpattern count = 0
 No options
+\R matches any Unicode newline
 Forced newline is CRLF
 First code unit = 'a'
 Last code unit = 'b'

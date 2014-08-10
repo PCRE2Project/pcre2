@@ -61,25 +61,31 @@ compilation of dftables.c, in which case the macro DFTABLES is defined. */
 a pointer to them. They are build using the ctype functions, and consequently
 their contents will depend upon the current locale setting. When compiled as
 part of the library, the store is obtained via a general context malloc, if 
-supplied, but otherwise via malloc().
+supplied, but when DFTABLES is defined (when compiling the dftables auxiliary 
+program) malloc() is used, and the function has a different name so as not to 
+clash with the prototype in pcre2.h.
 
-Arguments:   a PCRE2 general context (for malloc) or NULL
+Arguments:   none when DFTABLES is defined
+             else a PCRE2 general context or NULL
 Returns:     pointer to the contiguous block of data
 */
 
+#ifdef DFTABLES  /* Included in freestanding dftables.c program */
+static const uint8_t *maketables(void)
+{
+uint8_t *yield = (uint8_t *)malloc(tables_length);
+
+#else  /* Not DFTABLES, compiling the library */
 PCRE2_EXP_DEFN const uint8_t * PCRE2_CALL_CONVENTION
 pcre2_maketables(pcre2_general_context *gcontext)
 {
-uint8_t *yield, *p;
-int i;
+uint8_t *yield = (uint8_t *)((gcontext != NULL)?
+  gcontext->memctl.malloc(tables_length, gcontext->memctl.memory_data) :
+  malloc(tables_length));
+#endif  /* DFTABLES */
 
-#ifndef DFTABLES
-if (gcontext != NULL)
-  yield = (uint8_t *)gcontext->memctl.malloc(tables_length, 
-    gcontext->memctl.memory_data);
-else     
-#endif
-yield = (uint8_t *)malloc(tables_length);
+int i;
+uint8_t *p;
 
 if (yield == NULL) return NULL;
 p = yield;

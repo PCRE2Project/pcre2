@@ -346,6 +346,9 @@ either on a pattern or a data line, so they must all be distinct. */
 #define CTL_PATLEN           0x00040000
 #define CTL_POSIX            0x00080000
 
+#define CTL_BSR_SET          0x00100000   /* This is informational */
+#define CTL_NL_SET           0x00200000   /* This is informational */
+
 #define CTL_DEBUG            (CTL_FULLBINCODE|CTL_INFO)  /* For setting */
 #define CTL_ANYINFO          (CTL_DEBUG|CTL_BINCODE)     /* For testing */
 #define CTL_ANYGLOB          (CTL_ALTGLOBAL|CTL_GLOBAL)
@@ -389,8 +392,7 @@ typedef struct datctl {    /* Structure for data line modifiers. */
 enum { CTX_PAT,            /* Active pattern context */
        CTX_DEFPAT,         /* Default pattern context */
        CTX_DAT,            /* Active data (match) context */
-       CTX_DEFDAT,         /* Default data (match) context */
-       CTX_DEFANY };       /* Any default context (depends on the modifier) */
+       CTX_DEFDAT };       /* Default data (match) context */
 
 /* Macros to simplify the big table below. */
 
@@ -619,7 +621,9 @@ static patctl pat_patctl;
 static datctl def_datctl;
 static datctl dat_datctl;
 
+#ifdef SUPPORT_PCRE8
 static regex_t preg = { NULL, NULL, 0, 0 };
+#endif
 
 static int *dfa_workspace = NULL;
 static const uint8_t *locale_tables = NULL;
@@ -678,6 +682,7 @@ static uint32_t *pbuffer32 = NULL;
 #define CAST8VAR(x) CASTVAR(uint8_t *, x)
 #define SET(x,y) SETOP(x,y,=)
 #define SETPLUS(x,y) SETOP(x,y,+=)
+#define strlen8 strlen
 
 
 /* ---------------- Mode-dependent, runtime-testing macros ------------------*/
@@ -994,11 +999,11 @@ the three different cases. */
     (t)(G(a,BITTWO)->b))
 
 #define CASTVAR(t,x) ( \
-  (test_mode == G(G(PCRE,BITONE(,_MODE))? \
+  (test_mode == G(G(PCRE,BITONE),_MODE))? \
     (t)G(x,BITONE) : (t)G(x,BITTWO))
 
 #define CODE_UNIT(a,b) ( \
-  (test_mode == G(G(PCRE,BITONE(,_MODE))? \
+  (test_mode == G(G(PCRE,BITONE),_MODE))? \
   (uint32_t)(((G(PCRE2_SPTR,BITONE))(a))[b]) : \
   (uint32_t)(((G(PCRE2_SPTR,BITTWO))(a))[b]))
 
@@ -1021,13 +1026,13 @@ the three different cases. */
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
     lv = G(pchars,BITONE)((G(PCRE2_SPTR,BITONE))(p)+offset, len, utf, f); \
   else \
-    lv = G(PCHARS,BITTWO)((G(PCRE2_SPTR,BITTWO))(p)+offset, len, utf, f)
+    lv = G(pchars,BITTWO)((G(PCRE2_SPTR,BITTWO))(p)+offset, len, utf, f)
 
 #define PCHARSV(p, offset, len, utf, f) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
     (void)G(pchars,BITONE)((G(PCRE2_SPTR,BITONE))(p)+offset, len, utf, f); \
   else \
-    (void)G(PCHARS,BITTWO)((G(PCRE2_SPTR,BITTWO))(p)+offset, len, utf, f)
+    (void)G(pchars,BITTWO)((G(PCRE2_SPTR,BITTWO))(p)+offset, len, utf, f)
 
 #define PCRE2_COMPILE(a,b,c,d,e,f,g) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
@@ -1096,10 +1101,10 @@ the three different cases. */
 #define PCRE2_SET_CALLOUT(a,b,c) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
     G(pcre2_set_callout_,BITONE)(G(a,BITONE), \
-      (int (*)(G(pcre2_callout_block_BITONE) *))b,c); \
+      (int (*)(G(pcre2_callout_block_,BITONE) *))b,c); \
   else \
     G(pcre2_set_callout_,BITTWO)(G(a,BITTWO), \
-      (int (*)(G(pcre2_callout_block_BITTWO) *))b,c);
+      (int (*)(G(pcre2_callout_block_,BITTWO) *))b,c);
 
 #define PCRE2_SET_CHARACTER_TABLES(a,b) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
@@ -1127,10 +1132,10 @@ the three different cases. */
 
 #define PCRE2_SUBSTRING_COPY_BYNAME(a,b,c,d,e) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
-    a = G(pcre2_substring_copy_bynumber_,BITONE)(G(b,BITONE),G(c,BITONE),\
+    a = G(pcre2_substring_copy_byname_,BITONE)(G(b,BITONE),G(c,BITONE),\
       (G(PCRE2_UCHAR,BITONE) *)d,e); \
   else \
-    a = G(pcre2_substring_copy_bynumber_,BITTWO)(G(b,BITTWO),G(c,BITTWO),\
+    a = G(pcre2_substring_copy_byname_,BITTWO)(G(b,BITTWO),G(c,BITTWO),\
       (G(PCRE2_UCHAR,BITTWO) *)d,e)
 
 #define PCRE2_SUBSTRING_COPY_BYNUMBER(a,b,c,d,e) \
@@ -1193,20 +1198,20 @@ the three different cases. */
   else G(x,BITTWO) z y
 
 #define SETCASTPTR(x,y) \
-  if (test_mode == PCRE8_MODE) \
+  if (test_mode == G(G(PCRE,BITONE),_MODE)) \
     G(x,BITONE) = (G(G(uint,BITONE),_t) *)y; \
   else \
     G(x,BITTWO) = (G(G(uint,BITTWO),_t) *)y
 
 #define STRLEN(p) ((test_mode == G(G(PCRE,BITONE),_MODE))? \
-  G(strlen,BITONE)((G(PCRE2_SPTR,BITONE))p)) : \
-  G(strlen(BITTWO)((G(PCRE2_SPTR,BITTWO))p)))
+  G(strlen,BITONE)((G(PCRE2_SPTR,BITONE))p) : \
+  G(strlen,BITTWO)((G(PCRE2_SPTR,BITTWO))p))
 
 #define SUB1(a,b) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
-    G(a,BITONE))(G(b,BITONE)); \
+    G(a,BITONE)(G(b,BITONE)); \
   else \
-    G(a,BITTWO))(G(b,BITTWO))
+    G(a,BITTWO)(G(b,BITTWO))
 
 #define SUB2(a,b,c) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
@@ -2031,6 +2036,7 @@ return yield;
 
 
 
+#ifdef SUPPORT_PCRE8
 /*************************************************
 *       Convert character value to UTF-8         *
 *************************************************/
@@ -2062,6 +2068,7 @@ for (j = i; j > 0; j--)
 *utf8bytes = utf8_table2[i] | cvalue;
 return i + 1;
 }
+#endif  /* SUPPORT_PCRE8 */
 
 
 
@@ -2414,7 +2421,6 @@ Arguments:
              CTX_DEFPAT  => default pattern context
              CTX_DAT     => data context
              CTX_DEFDAT  => default data context
-             CTX_DEFANY  => any default context (depends on the modifier)
   pctl       point to pattern control block
   dctl       point to data control block
   c          a single character or 0
@@ -2445,7 +2451,7 @@ switch (m->which)
   {
   case MOD_CTB:  /* Compile or match context modifier */
   case MOD_CTC:  /* Compile context modifier */
-  if (ctx == CTX_DEFPAT || ctx == CTX_DEFANY) field = PTR(default_pat_context);
+  if (ctx == CTX_DEFPAT) field = PTR(default_pat_context);
     else if (ctx == CTX_PAT) field = PTR(pat_context);
   if (field != NULL || m->which == MOD_CTC) break;
 
@@ -2455,7 +2461,7 @@ switch (m->which)
   offset = (PCRE2_OFFSET)(m->value);
 
   case MOD_CTM:  /* Match context modifier */
-  if (ctx == CTX_DEFDAT || ctx == CTX_DEFANY) field = PTR(default_dat_context);
+  if (ctx == CTX_DEFDAT) field = PTR(default_dat_context);
     else if (ctx == CTX_DAT) field = PTR(dat_context);
   break;
 
@@ -2507,7 +2513,6 @@ Arguments:
              CTX_DEFPAT  => default pattern context
              CTX_DAT     => data context
              CTX_DEFDAT  => default data context
-             CTX_DEFANY  => any default context (depends on the modifier)
   pctl       point to pattern control block
   dctl       point to data control block
 
@@ -2656,11 +2661,26 @@ for (;;)
     break;
 
     case MOD_BSR:
-    if (len == 7 && strncmpic(pp, (const uint8_t *)"anycrlf", 7) == 0)
+    if (len == 7 && strncmpic(pp, (const uint8_t *)"default", 7) == 0)
+      {
+#ifdef BSR_ANYCRLF       
       *((uint16_t *)field) = PCRE2_BSR_ANYCRLF;
-    else if (len == 7 && strncmpic(pp, (const uint8_t *)"unicode", 7) == 0)
+#else      
       *((uint16_t *)field) = PCRE2_BSR_UNICODE;
-    else goto INVALID_VALUE;
+#endif
+      if (ctx == CTX_PAT || ctx == CTX_DEFPAT) pctl->control &= ~CTL_BSR_SET;
+        else dctl->control &= ~CTL_BSR_SET; 
+      }
+    else
+      {      
+      if (len == 7 && strncmpic(pp, (const uint8_t *)"anycrlf", 7) == 0)
+        *((uint16_t *)field) = PCRE2_BSR_ANYCRLF;
+      else if (len == 7 && strncmpic(pp, (const uint8_t *)"unicode", 7) == 0)
+        *((uint16_t *)field) = PCRE2_BSR_UNICODE;
+      else goto INVALID_VALUE;
+      if (ctx == CTX_PAT || ctx == CTX_DEFPAT) pctl->control |= CTL_BSR_SET;
+        else dctl->control |= CTL_BSR_SET; 
+      } 
     pp = ep;
     break;
 
@@ -2698,7 +2718,18 @@ for (;;)
       if (len == strlen(newlines[i]) &&
         strncmpic(pp, (const uint8_t *)newlines[i], len) == 0) break;
     if (i >= sizeof(newlines)/sizeof(char *)) goto INVALID_VALUE;
-    *((uint16_t *)field) = i;
+    if (i == 0)
+      {
+      *((uint16_t *)field) = NEWLINE_DEFAULT;
+      if (ctx == CTX_PAT || ctx == CTX_DEFPAT) pctl->control &= ~CTL_NL_SET;
+        else dctl->control &= ~CTL_NL_SET; 
+      }
+    else
+      {      
+      *((uint16_t *)field) = i;
+      if (ctx == CTX_PAT || ctx == CTX_DEFPAT) pctl->control |= CTL_NL_SET;
+        else dctl->control |= CTL_NL_SET; 
+      }   
     pp = ep;
     break;
 
@@ -2799,13 +2830,15 @@ return rc;
 
 
 
+#ifdef SUPPORT_PCRE8
 /*************************************************
 *             Show something in a list           *
 *************************************************/
 
 /* This function just helps to keep the code that uses it tidier. It's used for
 various lists of things where there needs to be introductory text before the
-first item. */
+first item. As these calls are all in the POSIX-support code, they happen only 
+when 8-bit mode is supported. */
 
 static void
 prmsg(const char **msg, const char *s)
@@ -2813,14 +2846,17 @@ prmsg(const char **msg, const char *s)
 fprintf(outfile, "%s %s", *msg, s);
 *msg = "";
 }
+#endif  /* SUPPORT_PCRE8 */
 
 
 
+#ifdef SUPPORT_PCRE8
 /*************************************************
 *                Show compile controls           *
 *************************************************/
 
-/* Called for unsupported POSIX modifiers.
+/* Called for unsupported POSIX modifiers, and therefore needed only when the 
+8-bit library is supported.
 
 Arguments:
   controls    control bits
@@ -2851,6 +2887,7 @@ fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
   ((controls & CTL_POSIX) != 0)? " posix" : "",
   after);
 }
+#endif  /* SUPPORT_PCRE8 */
 
 
 
@@ -2900,6 +2937,7 @@ else fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
 
 
 
+#ifdef SUPPORT_PCRE8
 /*************************************************
 *                Show match controls           *
 *************************************************/
@@ -2924,9 +2962,10 @@ fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s",
   ((controls & CTL_MARK) != 0)? " mark" : "",
   ((controls & CTL_MEMORY) != 0)? " memory" : "");
 }
+#endif  /* SUPPORT_PCRE8 */
 
 
-
+#ifdef SUPPORT_PCRE8
 /*************************************************
 *                Show match options              *
 *************************************************/
@@ -2949,6 +2988,7 @@ fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s",
   ((options & PCRE2_PARTIAL_HARD) != 0)? " partial_hard" : "",
   ((options & PCRE2_PARTIAL_SOFT) != 0)? " partial_soft" : "");
 }
+#endif  /* SUPPORT_PCRE8 */
 
 
 
@@ -3086,35 +3126,40 @@ if ((pat_patctl.control & CTL_INFO) != 0)
 
   if (jchanged) fprintf(outfile, "Duplicate name status changes\n");
 
-  if (bsr_convention != BSR_DEFAULT)
+  if ((pat_patctl.control & CTL_BSR_SET) != 0 ||
+      (FLD(compiled_code, flags) & PCRE2_BSR_SET) != 0) 
     fprintf(outfile, "\\R matches %s\n", (bsr_convention == PCRE2_BSR_UNICODE)?
       "any Unicode newline" : "CR, LF, or CRLF");
 
-  if (newline_convention != NEWLINE_DEFAULT) switch (newline_convention)
-    {
-    case PCRE2_NEWLINE_CR:
-    fprintf(outfile, "Forced newline is CR\n");
-    break;
-
-    case PCRE2_NEWLINE_LF:
-    fprintf(outfile, "Forced newline is LF\n");
-    break;
-
-    case PCRE2_NEWLINE_CRLF:
-    fprintf(outfile, "Forced newline is CRLF\n");
-    break;
-
-    case PCRE2_NEWLINE_ANYCRLF:
-    fprintf(outfile, "Forced newline is CR, LF, or CRLF\n");
-    break;
-
-    case PCRE2_NEWLINE_ANY:
-    fprintf(outfile, "Forced newline is any Unicode newline\n");
-    break;
-
-    default:
-    break;
-    }
+  if ((pat_patctl.control & CTL_NL_SET) != 0 ||
+      (FLD(compiled_code, flags) & PCRE2_NL_SET) != 0)
+    {   
+    switch (newline_convention)
+      {
+      case PCRE2_NEWLINE_CR:
+      fprintf(outfile, "Forced newline is CR\n");
+      break;
+      
+      case PCRE2_NEWLINE_LF:
+      fprintf(outfile, "Forced newline is LF\n");
+      break;
+      
+      case PCRE2_NEWLINE_CRLF:
+      fprintf(outfile, "Forced newline is CRLF\n");
+      break;
+      
+      case PCRE2_NEWLINE_ANYCRLF:
+      fprintf(outfile, "Forced newline is CR, LF, or CRLF\n");
+      break;
+      
+      case PCRE2_NEWLINE_ANY:
+      fprintf(outfile, "Forced newline is any Unicode newline\n");
+      break;
+      
+      default:
+      break;
+      }
+    }   
 
   if (first_ctype == 2)
     {
@@ -3560,9 +3605,11 @@ local character tables. Neither does it have 16-bit or 32-bit support. */
 
 if ((pat_patctl.control & CTL_POSIX) != 0)
   {
+#ifdef SUPPORT_PCRE8
   int rc;
   int cflags = 0;
   const char *msg = "** Ignored with POSIX interface:";
+#endif    
 
   if (test_mode != 8)
     {
@@ -4032,9 +4079,13 @@ dat_datctl.control |= (pat_patctl.control & CTL_ALLPD);
 
 /* Initialize for scanning the data line. */
 
+#ifdef SUPPORT_PCRE8
 utf = ((((pat_patctl.control & CTL_POSIX) != 0)?
   ((pcre2_real_code_8 *)preg.re_pcre2_code)->overall_options :
   FLD(compiled_code, overall_options)) & PCRE2_UTF) != 0;
+#else   
+utf = (FLD(compiled_code, overall_options) & PCRE2_UTF) != 0;
+#endif
    
 start_rep = NULL;
 len = strlen((const char *)buffer);
@@ -4359,6 +4410,7 @@ possible in 8-bit mode, and it does not support timing or other fancy features.
 Some were checked at compile time, but we need to check the match-time settings
 here. */
 
+#ifdef SUPPORT_PCRE8
 if ((pat_patctl.control & CTL_POSIX) != 0)
   {
   int rc;
@@ -4431,6 +4483,7 @@ if ((pat_patctl.control & CTL_POSIX) != 0)
   free(pmatch);
   return PR_OK;
   }
+#endif  /* SUPPORT_PCRE8 */   
 
  /* Handle matching via the native interface. Check for consistency of
 modifiers. */
@@ -4876,11 +4929,15 @@ for (gmatched = 0;; gmatched++)
     else if (utf && test_mode != PCRE32_MODE)
       {
       if (test_mode == PCRE8_MODE)
+        { 
         for (; end_offset < ulen; end_offset++)
           if ((((PCRE2_SPTR8)pp)[end_offset] & 0xc0) != 0x80) break;
-      else
+        }   
+      else  /* 16-bit mode */
+        {
         for (; end_offset < ulen; end_offset++)
           if ((((PCRE2_SPTR16)pp)[end_offset] & 0xfc00) != 0xdc00) break;
+        }   
       }
 
     SETFLDVEC(match_data, ovector, 0, start_offset);
@@ -5534,14 +5591,20 @@ if (argc > 2)
 if (!quiet) print_version(outfile);
 
 SET(compiled_code, NULL);
+
+#ifdef SUPPORT_PCRE8
 preg.re_pcre2_code = NULL;
 preg.re_match_data = NULL;
+#endif
 
 while (notdone)
   {
   uint8_t *p;
   int rc = PR_OK;
-  BOOL expectdata = TEST(compiled_code, !=, NULL) || preg.re_pcre2_code != NULL;
+  BOOL expectdata = TEST(compiled_code, !=, NULL);
+#ifdef SUPPORT_PCRE8   
+  expectdata |= preg.re_pcre2_code != NULL;
+#endif   
 
   if (extend_inputline(infile, buffer, expectdata? "data> " : "  re> ") == NULL)
     break;
@@ -5558,12 +5621,14 @@ while (notdone)
     while (isspace(*p)) p++;
     if (*p == 0)
       {
+#ifdef SUPPORT_PCRE8       
       if (preg.re_pcre2_code != NULL)
         {
         regfree(&preg);
         preg.re_pcre2_code = NULL;
         preg.re_match_data = NULL;
         }
+#endif  /* SUPPORT_PCRE8 */         
       if (TEST(compiled_code, !=, NULL))
         {
         SUB1(pcre2_code_free, compiled_code);
@@ -5641,11 +5706,11 @@ free(dbuffer);
 free(pbuffer8);
 free(dfa_workspace);
 free((void *)locale_tables);
-regfree(&preg);
 PCRE2_MATCH_DATA_FREE(match_data);
 SUB1(pcre2_code_free, compiled_code);
 
 #ifdef SUPPORT_PCRE8
+regfree(&preg);
 pcre2_general_context_free_8(general_context8);
 pcre2_compile_context_free_8(pat_context8);
 pcre2_compile_context_free_8(default_pat_context8);

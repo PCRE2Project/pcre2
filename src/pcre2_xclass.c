@@ -110,7 +110,7 @@ while ((t = *data++) != XCL_END)
       }
     else
 #endif
-      x = *data++;
+    x = *data++;
     if (c == x) return !negated;
     }
   else if (t == XCL_RANGE)
@@ -260,6 +260,8 @@ while ((t = *data++) != XCL_END)
 
     data += 2;
     }
+#else
+  (void)utf;  /* Avoid compiler warning */     
 #endif  /* SUPPORT_UTF */
   }
 

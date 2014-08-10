@@ -103,7 +103,7 @@ if (utf)
   one_code_unit = (c & 0xfc00) != 0xd800;
 #else
   one_code_unit = (c & 0xfffff800u) != 0xd800u;
-#endif
+#endif  /* CODE_UNIT_WIDTH */
   }
 #endif  /* SUPPORT_UTF */  
 
@@ -117,9 +117,13 @@ if (one_code_unit)
   return 0;
   } 
 
-/* Per-width code for invalid UTF code units and multi-unit UTF characters. */
+/* Code for invalid UTF code units and multi-unit UTF characters is different 
+for each width. If UTF is not supported, control should never get here, but we 
+need a return statement to keep the compiler happy. */
 
-#ifdef SUPPORT_UTF
+#ifndef SUPPORT_UTF
+return 0;
+#else
 
 /* Malformed UTF-8 should occur only if the sanity check has been turned off.
 Rather than swallow random bytes, just stop if we hit a bad one. Print it with
@@ -209,15 +213,27 @@ while (*ptr != '\0')
 *          Find Unicode property name            *
 *************************************************/
 
+/* When there is no UTF/UCP support, the table of names does not exist. This 
+function should not be called in such configurations, because a pattern that 
+tries to use Unicode properties won't compile. Rather than put lots of #ifdefs 
+into the main code, however, we just put one into this function. */
+
 static const char *
 get_ucpname(unsigned int ptype, unsigned int pvalue)
 {
+#ifdef SUPPORT_UTF
 int i;
 for (i = utt_size - 1; i >= 0; i--)
   {
   if (ptype == utt[i].type && pvalue == utt[i].value) break;
   }
 return (i >= 0)? utt_names + utt[i].name_offset : "??";
+
+#else   /* No UTF support */
+(void)ptype;
+(void)pvalue;
+return "??";
+#endif  /* SUPPORT_UTF */
 }
 
 

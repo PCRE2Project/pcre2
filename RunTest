@@ -72,7 +72,7 @@ title17="Test 17: Tests of the POSIX interface with UTF/UCP"
 #title21="Test 21: Reloads for the basic 16/32-bit library"
 #title22="Test 22: Reloads for the 16/32-bit library with UTF-16/32 support"
 
-maxtest=2
+maxtest=17
 
 if [ $# -eq 1 -a "$1" = "list" ]; then
   echo $title1

@@ -6706,6 +6706,7 @@ No match
 /a\Rb/I,bsr=unicode
 Capturing subpattern count = 0
 No options
+\R matches any Unicode newline
 First code unit = 'a'
 Last code unit = 'b'
 Subject length lower bound = 3
@@ -6749,6 +6750,7 @@ No match
 /a\R?b/I,bsr=unicode
 Capturing subpattern count = 0
 No options
+\R matches any Unicode newline
 First code unit = 'a'
 Last code unit = 'b'
 Subject length lower bound = 2
@@ -6792,6 +6794,7 @@ No match
 /a\R{2,4}b/I,bsr=unicode
 Capturing subpattern count = 0
 No options
+\R matches any Unicode newline
 First code unit = 'a'
 Last code unit = 'b'
 Subject length lower bound = 4

@@ -371,6 +371,7 @@ Subject length lower bound = 1
 /\R+/I,bsr=unicode
 Capturing subpattern count = 0
 No options
+\R matches any Unicode newline
 Starting code units: \x0a \x0b \x0c \x0d \x85 \xff 
 No last code unit
 Subject length lower bound = 1
