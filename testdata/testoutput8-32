@@ -67,8 +67,6 @@ Memory allocation (code space): 20
 Capturing subpattern count = 0
 May match empty string
 Options: extended
-No first code unit
-No last code unit
 Subject length lower bound = 0
 
 /a#/Ix
@@ -82,7 +80,6 @@ Memory allocation (code space): 28
 Capturing subpattern count = 0
 Options: extended
 First code unit = 'a'
-No last code unit
 Subject length lower bound = 1
 
 /x?+/

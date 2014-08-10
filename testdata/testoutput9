@@ -225,42 +225,29 @@ Options: extended
 Starting code units: \x09 \x20 ! " # $ % & ' ( * + - / 0 1 2 3 4 5 6 7 8 
   9 = ? A B C D E F G H I J K L M N O P Q R S T U V W X Y Z ^ _ ` a b c d e 
   f g h i j k l m n o p q r s t u v w x y z { | } ~ \x7f 
-No last code unit
 Subject length lower bound = 3
 
 /\h/I
 Capturing subpattern count = 0
-No options
 Starting code units: \x09 \x20 \xa0 
-No last code unit
 Subject length lower bound = 1
 
 /\H/I
 Capturing subpattern count = 0
-No options
-No first code unit
-No last code unit
 Subject length lower bound = 1
 
 /\v/I
 Capturing subpattern count = 0
-No options
 Starting code units: \x0a \x0b \x0c \x0d \x85 
-No last code unit
 Subject length lower bound = 1
 
 /\V/I
 Capturing subpattern count = 0
-No options
-No first code unit
-No last code unit
 Subject length lower bound = 1
 
 /\R/I
 Capturing subpattern count = 0
-No options
 Starting code units: \x0a \x0b \x0c \x0d \x85 
-No last code unit
 Subject length lower bound = 1
 
 /[\h]/B

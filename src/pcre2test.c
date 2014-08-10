@@ -3114,15 +3114,16 @@ if ((pat_patctl.control & CTL_INFO) != 0)
     overall_options &= ~PCRE2_NEVER_UCP; 
     }  
 
-  if ((compile_options|overall_options) == 0)
-    fprintf(outfile, "No options\n");
-  else if (compile_options == overall_options)
-    show_compile_options(compile_options, "Options:", "\n");    
-  else
-    {
-    show_compile_options(compile_options, "Compile options:", "\n");
-    show_compile_options(overall_options, "Overall options:", "\n");
-    }
+  if ((compile_options|overall_options) != 0)
+    { 
+    if (compile_options == overall_options)
+      show_compile_options(compile_options, "Options:", "\n");    
+    else
+      {
+      show_compile_options(compile_options, "Compile options:", "\n");
+      show_compile_options(overall_options, "Overall options:", "\n");
+      }
+    }   
 
   if (jchanged) fprintf(outfile, "Duplicate name status changes\n");
 
@@ -3207,16 +3208,8 @@ if ((pat_patctl.control & CTL_INFO) != 0)
       }
     fprintf(outfile, "\n");
     }
-  else
-    {
-    fprintf(outfile, "No first code unit\n");
-    }
 
-  if (last_ctype == 0)
-    {
-    fprintf(outfile, "No last code unit\n");
-    }
-  else
+  if (last_ctype != 0)
     {
     const char *caseless =
       ((FLD(compiled_code, flags) & PCRE2_LASTCASELESS) == 0)?

@@ -4,7 +4,6 @@
 
 /abc/I,jit,jitverify
 Capturing subpattern count = 0
-No options
 First code unit = 'a'
 Last code unit = 'c'
 Subject length lower bound = 3
@@ -13,9 +12,6 @@ JIT support is not available in this version of PCRE2
 /a*/I
 Capturing subpattern count = 0
 May match empty string
-No options
-No first code unit
-No last code unit
 Subject length lower bound = 0
 
 # End of testinput14

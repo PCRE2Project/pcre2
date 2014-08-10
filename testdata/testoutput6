@@ -6685,7 +6685,6 @@ No match
 
 /a\Rb/I,bsr=anycrlf
 Capturing subpattern count = 0
-No options
 \R matches CR, LF, or CRLF
 First code unit = 'a'
 Last code unit = 'b'
@@ -6705,7 +6704,6 @@ No match
 
 /a\Rb/I,bsr=unicode
 Capturing subpattern count = 0
-No options
 \R matches any Unicode newline
 First code unit = 'a'
 Last code unit = 'b'
@@ -6729,7 +6727,6 @@ No match
     
 /a\R?b/I,bsr=anycrlf
 Capturing subpattern count = 0
-No options
 \R matches CR, LF, or CRLF
 First code unit = 'a'
 Last code unit = 'b'
@@ -6749,7 +6746,6 @@ No match
 
 /a\R?b/I,bsr=unicode
 Capturing subpattern count = 0
-No options
 \R matches any Unicode newline
 First code unit = 'a'
 Last code unit = 'b'
@@ -6773,7 +6769,6 @@ No match
     
 /a\R{2,4}b/I,bsr=anycrlf
 Capturing subpattern count = 0
-No options
 \R matches CR, LF, or CRLF
 First code unit = 'a'
 Last code unit = 'b'
@@ -6793,7 +6788,6 @@ No match
 
 /a\R{2,4}b/I,bsr=unicode
 Capturing subpattern count = 0
-No options
 \R matches any Unicode newline
 First code unit = 'a'
 Last code unit = 'b'
@@ -7092,9 +7086,7 @@ Partial match at offset 3: +ab
 
 /(abc|def|xyz)/I
 Capturing subpattern count = 1
-No options
 Starting code units: a d x 
-No last code unit
 Subject length lower bound = 3
     terhjk;abcdaadsfe
  0: abc
@@ -7113,9 +7105,7 @@ No match
 
 /(abc|def|xyz)/I
 Capturing subpattern count = 1
-No options
 Starting code units: a d x 
-No last code unit
 Subject length lower bound = 3
     terhjk;abcdaadsfe
  0: abc

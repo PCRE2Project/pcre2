@@ -91,7 +91,6 @@ No match
 Capturing subpattern count = 0
 Options: utf
 First code unit = \x{ffff}
-No last code unit
 Subject length lower bound = 1
 
 /\x{10000}/IB,utf
@@ -104,7 +103,6 @@ Subject length lower bound = 1
 Capturing subpattern count = 0
 Options: utf
 First code unit = \x{10000}
-No last code unit
 Subject length lower bound = 1
 
 /\x{100}/IB,utf
@@ -117,7 +115,6 @@ Subject length lower bound = 1
 Capturing subpattern count = 0
 Options: utf
 First code unit = \x{100}
-No last code unit
 Subject length lower bound = 1
 
 /\x{1000}/IB,utf
@@ -130,7 +127,6 @@ Subject length lower bound = 1
 Capturing subpattern count = 0
 Options: utf
 First code unit = \x{1000}
-No last code unit
 Subject length lower bound = 1
 
 /\x{10000}/IB,utf
@@ -143,7 +139,6 @@ Subject length lower bound = 1
 Capturing subpattern count = 0
 Options: utf
 First code unit = \x{10000}
-No last code unit
 Subject length lower bound = 1
 
 /\x{100000}/IB,utf
@@ -156,7 +151,6 @@ Subject length lower bound = 1
 Capturing subpattern count = 0
 Options: utf
 First code unit = \x{100000}
-No last code unit
 Subject length lower bound = 1
 
 /\x{10ffff}/IB,utf
@@ -169,7 +163,6 @@ Subject length lower bound = 1
 Capturing subpattern count = 0
 Options: utf
 First code unit = \x{10ffff}
-No last code unit
 Subject length lower bound = 1
 
 /[\x{ff}]/IB,utf
@@ -182,7 +175,6 @@ Subject length lower bound = 1
 Capturing subpattern count = 0
 Options: utf
 First code unit = \xff
-No last code unit
 Subject length lower bound = 1
 
 /[\x{100}]/IB,utf
@@ -195,7 +187,6 @@ Subject length lower bound = 1
 Capturing subpattern count = 0
 Options: utf
 First code unit = \x{100}
-No last code unit
 Subject length lower bound = 1
 
 /\x80/IB,utf
@@ -208,7 +199,6 @@ Subject length lower bound = 1
 Capturing subpattern count = 0
 Options: utf
 First code unit = \x80
-No last code unit
 Subject length lower bound = 1
 
 /\xff/IB,utf
@@ -221,7 +211,6 @@ Subject length lower bound = 1
 Capturing subpattern count = 0
 Options: utf
 First code unit = \xff
-No last code unit
 Subject length lower bound = 1
 
 /\x{D55c}\x{ad6d}\x{C5B4}/IB,utf
@@ -264,7 +253,6 @@ Subject length lower bound = 3
 Capturing subpattern count = 0
 Options: utf
 First code unit = \x80
-No last code unit
 Subject length lower bound = 1
 
 /\x{084}/IB,utf
@@ -277,7 +265,6 @@ Subject length lower bound = 1
 Capturing subpattern count = 0
 Options: utf
 First code unit = \x84
-No last code unit
 Subject length lower bound = 1
 
 /\x{104}/IB,utf
@@ -290,7 +277,6 @@ Subject length lower bound = 1
 Capturing subpattern count = 0
 Options: utf
 First code unit = \x{104}
-No last code unit
 Subject length lower bound = 1
 
 /\x{861}/IB,utf
@@ -303,7 +289,6 @@ Subject length lower bound = 1
 Capturing subpattern count = 0
 Options: utf
 First code unit = \x{861}
-No last code unit
 Subject length lower bound = 1
 
 /\x{212ab}/IB,utf
@@ -316,7 +301,6 @@ Subject length lower bound = 1
 Capturing subpattern count = 0
 Options: utf
 First code unit = \x{212ab}
-No last code unit
 Subject length lower bound = 1
 
 # This one is here not because it's different to Perl, but because the way
@@ -362,7 +346,6 @@ Starting code units: \x00 \x01 \x02 \x03 \x04 \x05 \x06 \x07 \x08 \x09 \x0a
   \xad \xae \xaf \xb0 \xb1 \xb2 \xb3 \xb4 \xb5 \xb6 \xb7 \xb8 \xb9 \xba \xbb 
   \xbc \xbd \xbe \xbf \xf1 \xf2 \xf3 \xf4 \xf5 \xf6 \xf7 \xf8 \xf9 \xfa \xfb 
   \xfc \xfd \xfe \xff 
-No last code unit
 Subject length lower bound = 1
     \x{f1}
  0: \x{f1}
@@ -409,7 +392,6 @@ Subject length lower bound = 3
 Capturing subpattern count = 1
 Options: utf
 Starting code units: x \xff 
-No last code unit
 Subject length lower bound = 1
 
 /(\x{100}*a|x)/IB,utf
@@ -427,7 +409,6 @@ Subject length lower bound = 1
 Capturing subpattern count = 1
 Options: utf
 Starting code units: a x \xff 
-No last code unit
 Subject length lower bound = 1
 
 /(\x{100}{0,2}a|x)/IB,utf
@@ -445,7 +426,6 @@ Subject length lower bound = 1
 Capturing subpattern count = 1
 Options: utf
 Starting code units: a x \xff 
-No last code unit
 Subject length lower bound = 1
 
 /(\x{100}{1,2}a|x)/IB,utf
@@ -464,7 +444,6 @@ Subject length lower bound = 1
 Capturing subpattern count = 1
 Options: utf
 Starting code units: x \xff 
-No last code unit
 Subject length lower bound = 1
 
 /\x{100}/IB,utf
@@ -477,7 +456,6 @@ Subject length lower bound = 1
 Capturing subpattern count = 0
 Options: utf
 First code unit = \x{100}
-No last code unit
 Subject length lower bound = 1
 
 /a\x{100}\x{101}*/IB,utf
@@ -516,9 +494,6 @@ Subject length lower bound = 3
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
-No options
-No first code unit
-No last code unit
 Subject length lower bound = 1
 
 /[\x{100}]/IB,utf
@@ -531,7 +506,6 @@ Subject length lower bound = 1
 Capturing subpattern count = 0
 Options: utf
 First code unit = \x{100}
-No last code unit
 Subject length lower bound = 1
     \x{100}
  0: \x{100}
@@ -552,7 +526,6 @@ No match
 Capturing subpattern count = 0
 Options: utf
 First code unit = \xff
-No last code unit
 Subject length lower bound = 1
     >\x{ff}<
  0: \x{ff}
@@ -566,8 +539,6 @@ Subject length lower bound = 1
 ------------------------------------------------------------------
 Capturing subpattern count = 0
 Options: utf
-No first code unit
-No last code unit
 Subject length lower bound = 1
 
 /\x{100}abc(xyz(?1))/IB,utf
@@ -591,7 +562,6 @@ Subject length lower bound = 7
 Capturing subpattern count = 0
 Options: utf
 First code unit = \x{1ff}
-No last code unit
 Subject length lower bound = 1
   \x{1ff}
  0: \x{1ff}
@@ -664,7 +634,6 @@ Capturing subpattern count = 0
 Compile options: <none>
 Overall options: utf
 First code unit = \x{11234}
-No last code unit
 Subject length lower bound = 1
   abcd\x{11234}pqr
  0: \x{11234}
@@ -690,7 +659,6 @@ Subject length lower bound = 3
 Capturing subpattern count = 0
 Options: utf
 Starting code units: \x09 \x20 \xa0 \xff 
-No last code unit
 Subject length lower bound = 1
     ABC\x{09}
  0: \x{09}
@@ -715,7 +683,6 @@ Subject length lower bound = 1
 Capturing subpattern count = 0
 Options: utf
 Starting code units: \x0a \x0b \x0c \x0d \x85 \xff 
-No last code unit
 Subject length lower bound = 1
     ABC\x{0a}
  0: \x{0a}
@@ -820,21 +787,18 @@ Failed: error -34: bad offset value
 Capturing subpattern count = 0
 Options: caseless utf
 First code unit = \x{1234}
-No last code unit
 Subject length lower bound = 1
 
 /\x{1234}+?/Ii,utf
 Capturing subpattern count = 0
 Options: caseless utf
 First code unit = \x{1234}
-No last code unit
 Subject length lower bound = 1
 
 /\x{1234}++/Ii,utf
 Capturing subpattern count = 0
 Options: caseless utf
 First code unit = \x{1234}
-No last code unit
 Subject length lower bound = 1
 
 /\x{1234}{2}/Ii,utf
@@ -853,8 +817,6 @@ Subject length lower bound = 2
 ------------------------------------------------------------------
 Capturing subpattern count = 0
 Options: utf
-No first code unit
-No last code unit
 Subject length lower bound = 1
 
 /X+\x{200}/IB,utf
@@ -875,7 +837,6 @@ Subject length lower bound = 2
 Capturing subpattern count = 0
 Options: utf
 Starting code units: \x0a \x0b \x0c \x0d \x85 \xff 
-No last code unit
 Subject length lower bound = 1
 
 # Check bad offset 
@@ -1130,7 +1091,6 @@ Subject length lower bound = 17
 Capturing subpattern count = 0
 Options: caseless utf
 Starting code units: K k \xff 
-No last code unit
 Subject length lower bound = 1
     KKkk\x{212a}
  0: KKkk\x{212a}
@@ -1139,7 +1099,6 @@ Subject length lower bound = 1
 Capturing subpattern count = 0
 Options: caseless utf
 Starting code units: S s \xff 
-No last code unit
 Subject length lower bound = 1
     SSss\x{17f}
  0: SSss\x{17f}
@@ -1184,7 +1143,6 @@ Subject length lower bound = 1
 Capturing subpattern count = 0
 Options: utf
 Starting code units: 0 1 2 3 4 5 6 7 8 9 \xff 
-No last code unit
 Subject length lower bound = 1
 
 /[Z\x{100}]/IB,utf
@@ -1197,7 +1155,6 @@ Subject length lower bound = 1
 Capturing subpattern count = 0
 Options: utf
 Starting code units: Z \xff 
-No last code unit
 Subject length lower bound = 1
     Z\x{100}
  0: Z
@@ -1226,7 +1183,6 @@ Starting code units: z { | } ~ \x7f \x80 \x81 \x82 \x83 \x84 \x85 \x86 \x87
   \xd3 \xd4 \xd5 \xd6 \xd7 \xd8 \xd9 \xda \xdb \xdc \xdd \xde \xdf \xe0 \xe1 
   \xe2 \xe3 \xe4 \xe5 \xe6 \xe7 \xe8 \xe9 \xea \xeb \xec \xed \xee \xef \xf0 
   \xf1 \xf2 \xf3 \xf4 \xf5 \xf6 \xf7 \xf8 \xf9 \xfa \xfb \xfc \xfd \xfe \xff 
-No last code unit
 Subject length lower bound = 1
 
 /[z\Qa-d]Ā\E]/IB,utf
@@ -1239,7 +1195,6 @@ Subject length lower bound = 1
 Capturing subpattern count = 0
 Options: utf
 Starting code units: - ] a d z \xff 
-No last code unit
 Subject length lower bound = 1
     \x{100}
  0: \x{100}
@@ -1275,7 +1230,6 @@ Subject length lower bound = 7
 Capturing subpattern count = 0
 Options: utf
 Starting code units: \x09 \x0a \x0b \x0c \x0d \x20 \xff 
-No last code unit
 Subject length lower bound = 1
 
 /\x{100}*\d/IB,utf
@@ -1289,7 +1243,6 @@ Subject length lower bound = 1
 Capturing subpattern count = 0
 Options: utf
 Starting code units: 0 1 2 3 4 5 6 7 8 9 \xff 
-No last code unit
 Subject length lower bound = 1
 
 /\x{100}*\w/IB,utf
@@ -1305,7 +1258,6 @@ Options: utf
 Starting code units: 0 1 2 3 4 5 6 7 8 9 A B C D E F G H I J K L M N O P 
   Q R S T U V W X Y Z _ a b c d e f g h i j k l m n o p q r s t u v w x y z 
   \xff 
-No last code unit
 Subject length lower bound = 1
 
 /\x{100}*\D/IB,utf
@@ -1332,7 +1284,6 @@ Starting code units: \x00 \x01 \x02 \x03 \x04 \x05 \x06 \x07 \x08 \x09 \x0a
   \xdd \xde \xdf \xe0 \xe1 \xe2 \xe3 \xe4 \xe5 \xe6 \xe7 \xe8 \xe9 \xea \xeb 
   \xec \xed \xee \xef \xf0 \xf1 \xf2 \xf3 \xf4 \xf5 \xf6 \xf7 \xf8 \xf9 \xfa 
   \xfb \xfc \xfd \xfe \xff 
-No last code unit
 Subject length lower bound = 1
 
 /\x{100}*\S/IB,utf
@@ -1359,7 +1310,6 @@ Starting code units: \x00 \x01 \x02 \x03 \x04 \x05 \x06 \x07 \x08 \x0e \x0f
   \xdf \xe0 \xe1 \xe2 \xe3 \xe4 \xe5 \xe6 \xe7 \xe8 \xe9 \xea \xeb \xec \xed 
   \xee \xef \xf0 \xf1 \xf2 \xf3 \xf4 \xf5 \xf6 \xf7 \xf8 \xf9 \xfa \xfb \xfc 
   \xfd \xfe \xff 
-No last code unit
 Subject length lower bound = 1
 
 /\x{100}*\W/IB,utf
@@ -1384,7 +1334,6 @@ Starting code units: \x00 \x01 \x02 \x03 \x04 \x05 \x06 \x07 \x08 \x09 \x0a
   \xd5 \xd6 \xd7 \xd8 \xd9 \xda \xdb \xdc \xdd \xde \xdf \xe0 \xe1 \xe2 \xe3 
   \xe4 \xe5 \xe6 \xe7 \xe8 \xe9 \xea \xeb \xec \xed \xee \xef \xf0 \xf1 \xf2 
   \xf3 \xf4 \xf5 \xf6 \xf7 \xf8 \xf9 \xfa \xfb \xfc \xfd \xfe \xff 
-No last code unit
 Subject length lower bound = 1
 
 /[\x{105}-\x{109}]/IBi,utf
@@ -1397,7 +1346,6 @@ Subject length lower bound = 1
 Capturing subpattern count = 0
 Options: caseless utf
 Starting code units: \xff 
-No last code unit
 Subject length lower bound = 1
     \x{104}
  0: \x{104}
@@ -1431,7 +1379,6 @@ Starting code units: Z z { | } ~ \x7f \x80 \x81 \x82 \x83 \x84 \x85 \x86
   \xe1 \xe2 \xe3 \xe4 \xe5 \xe6 \xe7 \xe8 \xe9 \xea \xeb \xec \xed \xee \xef 
   \xf0 \xf1 \xf2 \xf3 \xf4 \xf5 \xf6 \xf7 \xf8 \xf9 \xfa \xfb \xfc \xfd \xfe 
   \xff 
-No last code unit
 Subject length lower bound = 1
     Z
  0: Z
@@ -1479,7 +1426,6 @@ Starting code units: Z z { | } ~ \x7f \x80 \x81 \x82 \x83 \x84 \x85 \x86
   \xe1 \xe2 \xe3 \xe4 \xe5 \xe6 \xe7 \xe8 \xe9 \xea \xeb \xec \xed \xee \xef 
   \xf0 \xf1 \xf2 \xf3 \xf4 \xf5 \xf6 \xf7 \xf8 \xf9 \xfa \xfb \xfc \xfd \xfe 
   \xff 
-No last code unit
 Subject length lower bound = 1
 
 /\x{3a3}B/IBi,utf

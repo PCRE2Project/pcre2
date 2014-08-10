@@ -163,7 +163,6 @@ Subject length lower bound = 4
 ------------------------------------------------------------------
 Capturing subpattern count = 0
 Options: utf
-No first code unit
 Last code unit = 'X'
 Subject length lower bound = 4
     \x{212ab}\x{212ab}\x{212ab}\x{861}X
@@ -179,8 +178,6 @@ Subject length lower bound = 4
 ------------------------------------------------------------------
 Capturing subpattern count = 0
 Options: utf
-No first code unit
-No last code unit
 Subject length lower bound = 3
     \x{212ab}\x{212ab}\x{212ab}\x{861}
  0: \x{212ab}\x{212ab}\x{212ab}
@@ -200,8 +197,6 @@ Failed: error 136 at offset 6: \C is not allowed in a lookbehind assertion
 Capturing subpattern count = 0
 Compile options: utf
 Overall options: anchored utf
-No first code unit
-No last code unit
 Subject length lower bound = 1
     bar
  0: b
@@ -225,8 +220,6 @@ No match
 Capturing subpattern count = 0
 Compile options: utf
 Overall options: anchored utf
-No first code unit
-No last code unit
 Subject length lower bound = 1
     c
  0: c
@@ -273,8 +266,6 @@ No match
 Capturing subpattern count = 0
 May match empty string
 Options: utf
-No first code unit
-No last code unit
 Subject length lower bound = 0
 
 /a\x{100}*/IB,utf
@@ -288,7 +279,6 @@ Subject length lower bound = 0
 Capturing subpattern count = 0
 Options: utf
 First code unit = 'a'
-No last code unit
 Subject length lower bound = 1
 
 /ab\x{100}*/IB,utf
@@ -328,9 +318,7 @@ No match
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
-No options
 First code unit = \xff
-No last code unit
 Subject length lower bound = 1
     >\xff<
  0: \xff
@@ -343,9 +331,6 @@ Subject length lower bound = 1
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
-No options
-No first code unit
-No last code unit
 Subject length lower bound = 1
 
 /[Ä-Ü]/utf
@@ -386,7 +371,6 @@ Subject length lower bound = 1
 ------------------------------------------------------------------
 Capturing subpattern count = 1
 Options: utf
-No first code unit
 Last code unit = 'z'
 Subject length lower bound = 7
 
@@ -408,8 +392,6 @@ Subject length lower bound = 7
 Capturing subpattern count = 2
 May match empty string
 Options: utf
-No first code unit
-No last code unit
 Subject length lower bound = 0
 
 /(\x{100}(b(?2)c)){0,2}/IB,utf
@@ -441,8 +423,6 @@ Subject length lower bound = 0
 Capturing subpattern count = 2
 May match empty string
 Options: utf
-No first code unit
-No last code unit
 Subject length lower bound = 0
 
 /(\x{100}(b(?1)c))?/IB,utf
@@ -463,8 +443,6 @@ Subject length lower bound = 0
 Capturing subpattern count = 2
 May match empty string
 Options: utf
-No first code unit
-No last code unit
 Subject length lower bound = 0
 
 /(\x{100}(b(?1)c)){0,2}/IB,utf
@@ -496,8 +474,6 @@ Subject length lower bound = 0
 Capturing subpattern count = 2
 May match empty string
 Options: utf
-No first code unit
-No last code unit
 Subject length lower bound = 0
 
 /\W/utf
@@ -521,8 +497,6 @@ Subject length lower bound = 0
 Capturing subpattern count = 0
 Compile options: utf
 Overall options: anchored utf
-No first code unit
-No last code unit
 Subject length lower bound = 1
 
 /()()()()()()()()()()
@@ -1480,29 +1454,21 @@ Failed: error 168 at offset 3: \c must be followed by a printable ASCII characte
 /[^\x{1234}]+/Ii,utf
 Capturing subpattern count = 0
 Options: caseless utf
-No first code unit
-No last code unit
 Subject length lower bound = 1
 
 /[^\x{1234}]+?/Ii,utf
 Capturing subpattern count = 0
 Options: caseless utf
-No first code unit
-No last code unit
 Subject length lower bound = 1
 
 /[^\x{1234}]++/Ii,utf
 Capturing subpattern count = 0
 Options: caseless utf
-No first code unit
-No last code unit
 Subject length lower bound = 1
 
 /[^\x{1234}]{2}/Ii,utf
 Capturing subpattern count = 0
 Options: caseless utf
-No first code unit
-No last code unit
 Subject length lower bound = 2
 
 /f.*/
@@ -1846,9 +1812,6 @@ Failed: error 173 at offset 5: disallowed Unicode code point (>= 0xd800 && <= 0x
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
-No options
-No first code unit
-No last code unit
 Subject length lower bound = 1
 
 /[\p{^L}]/IB
@@ -1859,9 +1822,6 @@ Subject length lower bound = 1
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
-No options
-No first code unit
-No last code unit
 Subject length lower bound = 1
 
 /[\P{L}]/IB
@@ -1872,9 +1832,6 @@ Subject length lower bound = 1
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
-No options
-No first code unit
-No last code unit
 Subject length lower bound = 1
 
 /[\P{^L}]/IB
@@ -1885,9 +1842,6 @@ Subject length lower bound = 1
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
-No options
-No first code unit
-No last code unit
 Subject length lower bound = 1
 
 /[abc\p{L}\x{0660}]/IB,utf
@@ -1899,8 +1853,6 @@ Subject length lower bound = 1
 ------------------------------------------------------------------
 Capturing subpattern count = 0
 Options: utf
-No first code unit
-No last code unit
 Subject length lower bound = 1
 
 /[\p{Nd}]/IB,utf
@@ -1912,8 +1864,6 @@ Subject length lower bound = 1
 ------------------------------------------------------------------
 Capturing subpattern count = 0
 Options: utf
-No first code unit
-No last code unit
 Subject length lower bound = 1
     1234
  0: 1
@@ -1927,8 +1877,6 @@ Subject length lower bound = 1
 ------------------------------------------------------------------
 Capturing subpattern count = 0
 Options: utf
-No first code unit
-No last code unit
 Subject length lower bound = 1
     1234
  0: 1234
