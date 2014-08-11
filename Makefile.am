@@ -483,9 +483,10 @@ endif # WITH_GCOV
 ## binary in various ways. We install these test binaries in case folks find it
 ## helpful.
 
+TESTS += RunTest
+dist_noinst_SCRIPTS += RunTest
+
 # FIXME
-#TESTS += RunTest
-#dist_noinst_SCRIPTS += RunTest
 #EXTRA_DIST += RunTest.bat
 
 ## When the 8-bit library is configured, pcre2grep will have been built.
