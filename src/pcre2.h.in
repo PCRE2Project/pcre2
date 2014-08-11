@@ -82,11 +82,12 @@ extern "C" {
 
 /* The following options can be passed to pcre2_compile(), pcre2_match(), or
 pcre2_dfa_match(). PCRE2_NO_UTF_CHECK affects only the function to which it is
-passed. */
+passed. Put these bits at the most significant end of the options word so
+others can be added next to them */
 
-#define PCRE2_ANCHORED            0x00000001
-#define PCRE2_NO_START_OPTIMIZE   0x00000002
-#define PCRE2_NO_UTF_CHECK        0x00000004
+#define PCRE2_ANCHORED            0x80000000u
+#define PCRE2_NO_START_OPTIMIZE   0x40000000u
+#define PCRE2_NO_UTF_CHECK        0x20000000u
 
 /* Other options that can be passed to pcre2_compile(). They may affect
 compilation, JIT compilation, and/or interpretive execution. The following tags
@@ -98,46 +99,46 @@ E   is inspected during pcre2_match() execution
 D   is inspected during pcre2_dfa_match() execution
 */
 
-#define PCRE2_ALLOW_EMPTY_CLASS   0x00000008   /* C       */
-#define PCRE2_ALT_BSUX            0x00000010   /* C       */
-#define PCRE2_AUTO_CALLOUT        0x00000020   /* C       */
-#define PCRE2_CASELESS            0x00000040   /* C       */
-#define PCRE2_DOLLAR_ENDONLY      0x00000080   /*   J E D */
-#define PCRE2_DOTALL              0x00000100   /* C       */
-#define PCRE2_DUPNAMES            0x00000200   /* C       */
-#define PCRE2_EXTENDED            0x00000400   /* C       */
-#define PCRE2_FIRSTLINE           0x00000800   /*   J E D */
-#define PCRE2_MATCH_UNSET_BACKREF 0x00001000   /* C J E   */
-#define PCRE2_MULTILINE           0x00002000   /* C       */
-#define PCRE2_NEVER_UCP           0x00004000   /* C       */
-#define PCRE2_NEVER_UTF           0x00008000   /* C       */
-#define PCRE2_NO_AUTO_CAPTURE     0x00010000   /* C       */
-#define PCRE2_NO_AUTO_POSSESS     0x00020000   /* C       */
-#define PCRE2_UCP                 0x00040000   /* C J E D */
-#define PCRE2_UNGREEDY            0x00080000   /* C       */
-#define PCRE2_UTF                 0x00100000   /* C J E D */
+#define PCRE2_ALLOW_EMPTY_CLASS   0x00000001u  /* C       */
+#define PCRE2_ALT_BSUX            0x00000002u  /* C       */
+#define PCRE2_AUTO_CALLOUT        0x00000004u  /* C       */
+#define PCRE2_CASELESS            0x00000008u  /* C       */
+#define PCRE2_DOLLAR_ENDONLY      0x00000010u  /*   J E D */
+#define PCRE2_DOTALL              0x00000020u  /* C       */
+#define PCRE2_DUPNAMES            0x00000040u  /* C       */
+#define PCRE2_EXTENDED            0x00000080u  /* C       */
+#define PCRE2_FIRSTLINE           0x00000100u  /*   J E D */
+#define PCRE2_MATCH_UNSET_BACKREF 0x00000200u  /* C J E   */
+#define PCRE2_MULTILINE           0x00000400u  /* C       */
+#define PCRE2_NEVER_UCP           0x00000800u  /* C       */
+#define PCRE2_NEVER_UTF           0x00001000u  /* C       */
+#define PCRE2_NO_AUTO_CAPTURE     0x00002000u  /* C       */
+#define PCRE2_NO_AUTO_POSSESS     0x00004000u  /* C       */
+#define PCRE2_UCP                 0x00008000u  /* C J E D */
+#define PCRE2_UNGREEDY            0x00010000u  /* C       */
+#define PCRE2_UTF                 0x00020000u  /* C J E D */
 
 /* These are for pcre2_jit_compile(). */
 
-#define PCRE2_JIT                 0x00000001   /* For full matching */
-#define PCRE2_JIT_PARTIAL_SOFT    0x00000002
-#define PCRE2_JIT_PARTIAL_HARD    0x00000004
+#define PCRE2_JIT                 0x00000001u  /* For full matching */
+#define PCRE2_JIT_PARTIAL_SOFT    0x00000002u
+#define PCRE2_JIT_PARTIAL_HARD    0x00000004u
 
 /* These are for pcre2_match() and pcre2_dfa_match(). Note that PCRE2_ANCHORED,
 PCRE2_NO_START_OPTIMIZE, and PCRE2_NO_UTF_CHECK can also be passed to these
 functions, so take care not to define synonyms by mistake. */
 
-#define PCRE2_NOTBOL              0x00000008
-#define PCRE2_NOTEOL              0x00000010
-#define PCRE2_NOTEMPTY            0x00000020
-#define PCRE2_NOTEMPTY_ATSTART    0x00000040
-#define PCRE2_PARTIAL_SOFT        0x00000080
-#define PCRE2_PARTIAL_HARD        0x00000100
+#define PCRE2_NOTBOL              0x00000001u
+#define PCRE2_NOTEOL              0x00000002u
+#define PCRE2_NOTEMPTY            0x00000004u
+#define PCRE2_NOTEMPTY_ATSTART    0x00000008u
+#define PCRE2_PARTIAL_SOFT        0x00000010u
+#define PCRE2_PARTIAL_HARD        0x00000020u
 
 /* These are additional options for pcre2_dfa_match(). */
 
-#define PCRE2_DFA_RESTART         0x00000200
-#define PCRE2_DFA_SHORTEST        0x00000400
+#define PCRE2_DFA_RESTART         0x00000040u
+#define PCRE2_DFA_SHORTEST        0x00000080u
 
 /* Newline and \R settings, for use in the compile and match contexts. The
 newline values must be kept in step with values set in config.h and both sets
@@ -261,16 +262,16 @@ must all be greater than zero. */
 
 /* Types for code units in patterns and subject strings. */
 
-typedef uint8_t  PCRE2_UCHAR8;                                                
-typedef uint16_t PCRE2_UCHAR16;                        
-typedef uint32_t PCRE2_UCHAR32;                      
-                                                                             
-typedef const PCRE2_UCHAR8  *PCRE2_SPTR8;                         
-typedef const PCRE2_UCHAR16 *PCRE2_SPTR16;                                 
-typedef const PCRE2_UCHAR32 *PCRE2_SPTR32;  
+typedef uint8_t  PCRE2_UCHAR8;
+typedef uint16_t PCRE2_UCHAR16;
+typedef uint32_t PCRE2_UCHAR32;
 
-/* Offsets in the pattern (for errors) and in the subject (after a match) are 
-unsigned 32-bit numbers. We also define a value to indicate "unset" in the 
+typedef const PCRE2_UCHAR8  *PCRE2_SPTR8;
+typedef const PCRE2_UCHAR16 *PCRE2_SPTR16;
+typedef const PCRE2_UCHAR32 *PCRE2_SPTR32;
+
+/* Offsets in the pattern (for errors) and in the subject (after a match) are
+unsigned 32-bit numbers. We also define a value to indicate "unset" in the
 offset vector (ovector). */
 
 #define PCRE2_OFFSET PCRE2_UCHAR32
@@ -353,8 +354,8 @@ PCRE2_EXP_DECL \
   pcre2_general_context *pcre2_general_context_copy(pcre2_general_context *); \
 PCRE2_EXP_DECL \
   pcre2_general_context *pcre2_general_context_create( \
-    void *(*)(size_t, void *), \
-    void (*)(void *, void *), void *); \
+                           void *(*)(size_t, void *), \
+                           void (*)(void *, void *), void *); \
 PCRE2_EXP_DECL void      pcre2_general_context_free(pcre2_general_context *);
 
 #define PCRE2_COMPILE_CONTEXT_FUNCTIONS \
