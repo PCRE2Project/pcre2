@@ -39,6 +39,8 @@ const uint16_t PRIV(ucd_stage2)[] = {0};
 const uint32_t PRIV(ucd_caseless_sets)[] = {0};
 #else
 
+const char *PRIV(unicode_version) = "7.0.0";
+
 /* When recompiling tables with a new Unicode version, please check the
 types in this structure definition from pcre2_internal.h (the actual
 field names will be different):

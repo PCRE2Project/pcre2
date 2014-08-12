@@ -142,6 +142,21 @@ switch (what)
   *((int *)where) = 1;
 #endif
   break;
+  
+  case PCRE2_CONFIG_UNICODE_VERSION:
+    { 
+#if defined SUPPORT_UTF
+    const char *v = PRIV(unicode_version);
+#else
+    const char *v = "Unicode not supported";
+#endif
+    PCRE2_UCHAR *t = (PCRE2_UCHAR *)where;
+    if (strlen(v) >= BYTES2CU(length) - 1) return PCRE2_ERROR_BADLENGTH; 
+    while (*v != 0) *t++ = *v++;
+    *t = 0;
+    return t - (PCRE2_UCHAR *)where;
+    }
+  break;
 
   case PCRE2_CONFIG_UTF:
 #if defined SUPPORT_UTF

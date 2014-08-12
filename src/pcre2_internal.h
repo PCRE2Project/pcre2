@@ -1795,6 +1795,7 @@ extern const uint8_t          PRIV(utf8_table4)[];
 #define _pcre2_ucp_gbtable        PCRE2_SUFFIX(_pcre2_ucp_gbtable_)
 #define _pcre2_ucp_gentype        PCRE2_SUFFIX(_pcre2_ucp_gentype_)
 #define _pcre2_ucp_typerange      PCRE2_SUFFIX(_pcre2_ucp_typerange_)
+#define _pcre2_unicode_version    PCRE2_SUFFIX(_pcre2_unicode_version_)
 #define _pcre2_utt                PCRE2_SUFFIX(_pcre2_utt_)
 #define _pcre2_utt_names          PCRE2_SUFFIX(_pcre2_utt_names_)
 #define _pcre2_utt_size           PCRE2_SUFFIX(_pcre2_utt_size_)
@@ -1812,6 +1813,7 @@ extern const uint32_t         PRIV(ucp_gentype)[];
 #ifdef SUPPORT_JIT
 extern const int              PRIV(ucp_typerange)[];
 #endif
+extern const char            *PRIV(unicode_version);
 extern const ucp_type_table   PRIV(utt)[];
 extern const char             PRIV(utt_names)[];
 extern const size_t           PRIV(utt_size);

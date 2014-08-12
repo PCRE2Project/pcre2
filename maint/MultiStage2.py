@@ -120,6 +120,7 @@
 # 13-May-2014:       Updated for PCRE2
 # 03-June-2014:      Updated for Python 3
 # 20-June-2014:      Updated for Unicode 7.0.0
+# 12-August-2014:    Updated to put Unicode version into the file
 ##############################################################################
 
 
@@ -129,6 +130,7 @@ import sys
 
 MAX_UNICODE = 0x110000
 NOTACHAR = 0xffffffff
+
 
 # Parse a line of Scripts.txt, GraphemeBreakProperty.txt or DerivedGeneralCategory.txt
 def make_get_names(enum):
@@ -141,9 +143,21 @@ def get_other_case(chardata):
         return 0
 
 
-# Read the whole table in memory
+# Read the whole table in memory, setting/checking the Unicode version
 def read_table(file_name, get_value, default_value):
+        global unicode_version
+         
+        f = re.match(r'^[^/]+/([^.]+)\.txt$', file_name)
+        file_base = f.group(1)
+        version_pat = r"^# " + re.escape(file_base) + r"-(\d+\.\d+\.\d+)\.txt$"
         file = open(file_name, 'r', encoding='utf-8')
+        f = re.match(version_pat, file.readline())
+        version = f.group(1)
+        if unicode_version == "":
+                unicode_version = version
+        elif unicode_version != version:
+                print("WARNING: Unicode version differs in %s", file_name, file=sys.stderr)
+ 
         table = [default_value] * MAX_UNICODE
         for line in file:
                 line = re.sub(r'#.*', '', line)
@@ -327,6 +341,7 @@ break_property_names = ['CR', 'LF', 'Control', 'Extend', 'Prepend',
   'SpacingMark', 'L', 'V', 'T', 'LV', 'LVT', 'Regional_Indicator', 'Other' ]
 
 test_record_size()
+unicode_version = ""
 
 script = read_table('Unicode.tables/Scripts.txt', make_get_names(script_names), script_names.index('Common'))
 category = read_table('Unicode.tables/DerivedGeneralCategory.txt', make_get_names(category_names), category_names.index('Cn'))
@@ -463,6 +478,8 @@ print("const uint8_t PRIV(ucd_stage1)[] = {0};")
 print("const uint16_t PRIV(ucd_stage2)[] = {0};")
 print("const uint32_t PRIV(ucd_caseless_sets)[] = {0};")
 print("#else")
+print()
+print("const char *PRIV(unicode_version) = \"{}\";".format(unicode_version))
 print()
 print(record_struct)
 

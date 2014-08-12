@@ -257,8 +257,9 @@ must all be greater than zero. */
 #define PCRE2_CONFIG_PARENSLIMIT             7
 #define PCRE2_CONFIG_RECURSIONLIMIT          5
 #define PCRE2_CONFIG_STACKRECURSE            8
-#define PCRE2_CONFIG_UTF                     9
-#define PCRE2_CONFIG_VERSION                10
+#define PCRE2_CONFIG_UNICODE_VERSION         9
+#define PCRE2_CONFIG_UTF                    10
+#define PCRE2_CONFIG_VERSION                11
 
 /* Types for code units in patterns and subject strings. */
 

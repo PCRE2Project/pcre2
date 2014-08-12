@@ -164,8 +164,8 @@ void vms_setsymbol( char *, char *, int );
 #define CFAIL_UNSET UINT32_MAX  /* Unset value for cfail fields */
 #define DFA_WS_DIMENSION 1000   /* Size of DFA workspace */
 #define DEFAULT_OVECCOUNT 15    /* Default ovector count */
-#define LOOPREPEAT 500000       /* Default loop count for timing. */
-#define VERSION_SIZE 64         /* Size of buffer for the version string. */
+#define LOOPREPEAT 500000       /* Default loop count for timing */
+#define VERSION_SIZE 64         /* Size of buffer for the version strings */
 
 /* Execution modes */
 
@@ -615,6 +615,7 @@ static uint32_t max_oveccount;
 static uint32_t callout_count;
 
 static VERSION_TYPE version[VERSION_SIZE];
+static VERSION_TYPE uversion[VERSION_SIZE];
 
 static patctl def_patctl;
 static patctl pat_patctl;
@@ -5220,7 +5221,10 @@ printf("  32-bit support\n");
 #endif
 
 (void)PCRE2_CONFIG(PCRE2_CONFIG_UTF, &rc, sizeof(rc));
-printf ("  %sUTF support\n", rc ? "" : "No ");
+if (rc != 0)
+  printf("  UTF support (Unicode version %s)\n", uversion);
+else 
+  printf("  No UTF support\n");
 (void)PCRE2_CONFIG(PCRE2_CONFIG_JIT, &rc, sizeof(rc));
 if (rc != 0)
   {
@@ -5289,9 +5293,11 @@ if (PO(options) != DO(options) || PO(control) != DO(control))
   return 1;
   }
 
-/* Get the PCRE version number information. */
+/* Get the PCRE2 and Unicode version number information. */
 
 PCRE2_CONFIG(PCRE2_CONFIG_VERSION, version, sizeof(VERSION_TYPE)*VERSION_SIZE);
+PCRE2_CONFIG(PCRE2_CONFIG_UNICODE_VERSION, uversion, 
+  sizeof(VERSION_TYPE)*VERSION_SIZE);
 
 /* Get buffers from malloc() so that valgrind will check their misuse when
 debugging. They grow automatically when very long lines are read. The 16-
