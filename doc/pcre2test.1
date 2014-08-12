@@ -1,4 +1,4 @@
-.TH PCRE2TEST 1 "07 August 2014" "PCRE 10.00"
+.TH PCRE2TEST 1 "12 August 2014" "PCRE 10.00"
 .SH NAME
 pcre2test - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -232,12 +232,6 @@ included in the library. This effect can also be obtained by the use of
 the automatic options are not displayed in pattern information, to avoid
 cluttering up test output.
 .sp
-  #load <file name>
-.sp
-Load a pre-compiled pattern that has been saved in a file. This command must be
-followed immediately by any subject lines that are to be matched by the
-pattern.
-.sp
   #pattern <modifier-list>
 .sp
 This command sets a default modifier list that applies to all subsequent
@@ -435,7 +429,6 @@ about the pattern:
       bsr=[anycrlf|unicode]     specify \eR handling
   /B  bincode                   show binary code without lengths
       debug                     same as info,fullbincode
-      flipbytes                 flip endianness
       fullbincode               show binary code with lengths
   /I  info                      show info about compiled pattern
       hex                       pattern is coded in hexadecimal
@@ -446,7 +439,6 @@ about the pattern:
       parens_nest_limit=<n>     set maximum parentheses depth
       perlcompat                lock out non-Perl modifiers
       posix                     use the POSIX API
-      save=<file name>          save compiled pattern
       stackguard=<number>       test the stackguard feature
       tables=[0|1|2]            select internal tables
       use_length                use the pattern's length
@@ -490,18 +482,6 @@ one-off tests.
 The \fBinfo\fP modifier requests information about the compiled pattern
 (whether it is anchored, has a fixed first character, and so on). The
 information is obtained from the \fBpcre2_pattern_info()\fP function.
-.
-.
-.SS "Changing byte order"
-.rs
-.sp
-The \fBflipbytes\fP modifier causes \fBpcre2test\fP to flip the byte order of
-the 2-byte and 4-byte fields in the compiled pattern. This facility is for
-testing the feature that allows PCRE2 to use patterns that were compiled on a
-host with a different endianness. This feature is not available when the POSIX
-interface is being used, that is, when the \fBposix\fP pattern modifier is
-specified. See also the section about saving and reloading compiled patterns
-below.
 .
 .
 .SS "Specifying a pattern in hex"
@@ -1139,77 +1119,6 @@ characters.
 .
 .
 .
-.SH "SAVING AND RELOADING COMPILED PATTERNS"
-.rs
-.sp
-FIXME FIXME
-The facilities described in this section are not available when the POSIX
-interface to PCRE is being used, that is, when the \fB/P\fP pattern modifier is
-specified.
-.P
-When the POSIX interface is not in use, you can cause \fBpcre2test\fP to write a
-compiled pattern to a file, by following the modifiers with > and a file name.
-For example:
-.sp
-  /pattern/im >/some/file
-.sp
-See the
-.\" HREF
-\fBpcreprecompile\fP
-.\"
-documentation for a discussion about saving and re-using compiled patterns.
-Note that if the pattern was successfully studied with JIT optimization, the
-JIT data cannot be saved.
-.P
-The data that is written is binary. The first eight bytes are the length of the
-compiled pattern data followed by the length of the optional study data, each
-written as four bytes in big-endian order (most significant byte first). If
-there is no study data (either the pattern was not studied, or studying did not
-return any data), the second length is zero. The lengths are followed by an
-exact copy of the compiled pattern. If there is additional study data, this
-(excluding any JIT data) follows immediately after the compiled pattern. After
-writing the file, \fBpcre2test\fP expects to read a new pattern.
-.P
-A saved pattern can be reloaded into \fBpcre2test\fP by specifying < and a file
-name instead of a pattern. There must be no space between < and the file name,
-which must not contain a < character, as otherwise \fBpcre2test\fP will
-interpret the line as a pattern delimited by < characters. For example:
-.sp
-   re> </some/file
-  Compiled pattern loaded from /some/file
-  No study data
-.sp
-If the pattern was previously studied with the JIT optimization, the JIT
-information cannot be saved and restored, and so is lost. When the pattern has
-been loaded, \fBpcre2test\fP proceeds to read data lines in the usual way.
-.P
-You can copy a file written by \fBpcre2test\fP to a different host and reload it
-there, even if the new host has opposite endianness to the one on which the
-pattern was compiled. For example, you can compile on an i86 machine and run on
-a SPARC machine. When a pattern is reloaded on a host with different
-endianness, the confirmation message is changed to:
-.sp
-  Compiled pattern (byte-inverted) loaded from /some/file
-.sp
-The test suite contains some saved pre-compiled patterns with different
-endianness. These are reloaded using "<!" instead of just "<". This suppresses
-the "(byte-inverted)" text so that the output is the same on all hosts. It also
-forces debugging output once the pattern has been reloaded.
-.P
-File names for saving and reloading can be absolute or relative, but note that
-the shell facility of expanding a file name that starts with a tilde (~) is not
-available.
-.P
-The ability to save and reload files in \fBpcre2test\fP is intended for testing
-and experimentation. It is not intended for production use because only a
-single pattern can be written to a file. Furthermore, there is no facility for
-supplying custom character tables for use with a reloaded pattern. If the
-original pattern was compiled with custom tables, an attempt to match a subject
-string using a reloaded pattern is likely to cause \fBpcre2test\fP to crash.
-Finally, if you attempt to load a file that is not in the correct format, the
-result is undefined.
-.
-.
 .SH "SEE ALSO"
 .rs
 .sp
@@ -1233,6 +1142,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 07 August 2014
+Last updated: 12 August 2014
 Copyright (c) 1997-2014 University of Cambridge.
 .fi

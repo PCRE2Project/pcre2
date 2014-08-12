@@ -42,13 +42,6 @@ POSSIBILITY OF SUCH DAMAGE.
 -----------------------------------------------------------------------------
 */
 
-/* FIXME: These are the as-yet-unimplemented features:
-. save code and #load
-. JIT - compile, time, verify
-. memory handling testing
-*/
-
-
 
 /* This program supports testing of the 8-bit, 16-bit, and 32-bit PCRE2
 libraries in a single program, though its input and output are always 8-bit.
@@ -325,29 +318,28 @@ enum { MOD_CTB,    /* Applies to a compile or a match context */
 /* Control bits. Some apply to compiling, some to matching, but some can be set
 either on a pattern or a data line, so they must all be distinct. */
 
-#define CTL_AFTERTEXT        0x00000001
-#define CTL_ALLAFTERTEXT     0x00000002
-#define CTL_ALLCAPTURES      0x00000004
-#define CTL_ALTGLOBAL        0x00000008
-#define CTL_BINCODE          0x00000010
-#define CTL_CALLOUT_CAPTURE  0x00000020
-#define CTL_CALLOUT_NONE     0x00000040
-#define CTL_DFA              0x00000080
-#define CTL_FINDLIMITS       0x00000100
-#define CTL_FLIPBYTES        0x00000200
-#define CTL_FULLBINCODE      0x00000400
-#define CTL_GETALL           0x00000800
-#define CTL_GLOBAL           0x00001000
-#define CTL_HEXPAT           0x00002000
-#define CTL_INFO             0x00004000
-#define CTL_JITVERIFY        0x00008000
-#define CTL_MARK             0x00010000
-#define CTL_MEMORY           0x00020000
-#define CTL_PATLEN           0x00040000
-#define CTL_POSIX            0x00080000
+#define CTL_AFTERTEXT        0x00000001u
+#define CTL_ALLAFTERTEXT     0x00000002u
+#define CTL_ALLCAPTURES      0x00000004u
+#define CTL_ALTGLOBAL        0x00000008u
+#define CTL_BINCODE          0x00000010u
+#define CTL_CALLOUT_CAPTURE  0x00000020u
+#define CTL_CALLOUT_NONE     0x00000040u
+#define CTL_DFA              0x00000080u
+#define CTL_FINDLIMITS       0x00000100u
+#define CTL_FULLBINCODE      0x00000200u
+#define CTL_GETALL           0x00000400u
+#define CTL_GLOBAL           0x00000800u
+#define CTL_HEXPAT           0x00001000u
+#define CTL_INFO             0x00002000u
+#define CTL_JITVERIFY        0x00004000u
+#define CTL_MARK             0x00008000u
+#define CTL_MEMORY           0x00010000u
+#define CTL_PATLEN           0x00020000u
+#define CTL_POSIX            0x00040000u
 
-#define CTL_BSR_SET          0x00100000   /* This is informational */
-#define CTL_NL_SET           0x00200000   /* This is informational */
+#define CTL_BSR_SET          0x00080000u  /* This is informational */
+#define CTL_NL_SET           0x00100000u  /* This is informational */
 
 #define CTL_DEBUG            (CTL_FULLBINCODE|CTL_INFO)  /* For setting */
 #define CTL_ANYINFO          (CTL_DEBUG|CTL_BINCODE)     /* For testing */
@@ -367,7 +359,6 @@ typedef struct patctl {    /* Structure for pattern modifiers. */
   uint32_t  stackguard_test;
   uint32_t  tables_id;
   uint8_t   locale[32];
-  uint8_t   save[64];
 } patctl;
 
 #define MAXCPYGET 10
@@ -440,7 +431,6 @@ static modstruct modlist[] = {
   { "extended",            MOD_PATP, MOD_OPT, PCRE2_EXTENDED,            PO(options) },
   { "find_limits",         MOD_DAT,  MOD_CTL, CTL_FINDLIMITS,            DO(control) },
   { "firstline",           MOD_PAT,  MOD_OPT, PCRE2_FIRSTLINE,           PO(options) },
-  { "flipbytes",           MOD_PAT,  MOD_CTL, CTL_FLIPBYTES,             PO(control) },
   { "fullbincode",         MOD_PAT,  MOD_CTL, CTL_FULLBINCODE,           PO(control) },
   { "get",                 MOD_DAT,  MOD_NN,  DO(get_numbers),           DO(get_names) },
   { "getall",              MOD_DAT,  MOD_CTL, CTL_GETALL,                DO(control) },
@@ -476,7 +466,6 @@ static modstruct modlist[] = {
   { "posix",               MOD_PAT,  MOD_CTL, CTL_POSIX,                 PO(control) },
   { "ps",                  MOD_DAT,  MOD_OPT, PCRE2_PARTIAL_SOFT,        DO(options) },
   { "recursion_limit",     MOD_CTM,  MOD_INT, 0,                         MO(recursion_limit) },
-  { "save",                MOD_PAT,  MOD_STR, 0,                         PO(save) },
   { "stackguard",          MOD_PAT,  MOD_INT, 0,                         PO(stackguard_test) },
   { "tables",              MOD_PAT,  MOD_INT, 0,                         PO(tables_id) },
   { "ucp",                 MOD_PATP, MOD_OPT, PCRE2_UCP,                 PO(options) },
@@ -2870,14 +2859,13 @@ Returns:      nothing
 static void
 show_compile_controls(uint32_t controls, const char *before, const char *after)
 {
-fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
+fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
   before,
   ((controls & CTL_AFTERTEXT) != 0)? " aftertext" : "",
   ((controls & CTL_ALLAFTERTEXT) != 0)? " allaftertext" : "",
   ((controls & CTL_ALLCAPTURES) != 0)? " allcaptures" : "",
   ((controls & CTL_ALTGLOBAL) != 0)? " altglobal" : "",
   ((controls & CTL_BINCODE) != 0)? " bincode" : "",
-  ((controls & CTL_FLIPBYTES) != 0)? " flipbytes" : "",
   ((controls & CTL_FULLBINCODE) != 0)? " fullbincode" : "",
   ((controls & CTL_GLOBAL) != 0)? " global" : "",
   ((controls & CTL_HEXPAT) != 0)? " hex" : "",
@@ -2997,8 +2985,8 @@ fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s",
 *        Show information about a pattern        *
 *************************************************/
 
-/* This function is called after a pattern has been compiled or loaded from a
-file, if any of the information-requesting controls have been set.
+/* This function is called after a pattern has been compiled if any of the
+information-requesting controls have been set.
 
 Arguments:  none
 
@@ -3290,149 +3278,6 @@ else if (strncmp((char *)buffer, "#subject", 8) == 0 && isspace(buffer[8]))
   {
   (void)decode_modifiers(buffer + 8, CTX_DEFDAT, NULL, &def_datctl);
   }
-else if (strncmp((char *)buffer, "#load", 5) == 0 && isspace(buffer[5]))
-  {
-/* FIXME */
-fprintf(outfile, "** #load not yet implemented\n");
-return PR_ABEND;
-
-#ifdef FIXME
-
-
-/* See if the pattern is to be loaded pre-compiled from a file. */
-
-if (*p == '<' && strchr((char *)(p+1), '<') == NULL)
-  {
-  uint32_t magic;
-  uint8_t sbuf[8];
-  FILE *f;
-
-  p++;
-  if (*p == '!')
-    {
-    do_debug = TRUE;
-    do_showinfo = TRUE;
-    p++;
-    }
-
-  pp = p + (int)strlen((char *)p);
-  while (isspace(pp[-1])) pp--;
-  *pp = 0;
-
-  f = fopen((char *)p, "rb");
-  if (f == NULL)
-    {
-    fprintf(outfile, "Failed to open %s: %s\n", p, strerror(errno));
-    continue;
-    }
-  if (fread(sbuf, 1, 8, f) != 8) goto FAIL_READ;
-
-  true_size =
-    (sbuf[0] << 24) | (sbuf[1] << 16) | (sbuf[2] << 8) | sbuf[3];
-  true_study_size =
-    (sbuf[4] << 24) | (sbuf[5] << 16) | (sbuf[6] << 8) | sbuf[7];
-
-  re = (pcre *)new_malloc(true_size);
-  if (re == NULL)
-    {
-    printf("** Failed to get %d bytes of memory for pcre object\n",
-      (int)true_size);
-    yield = 1;
-    goto EXIT;
-    }
-  if (fread(re, 1, true_size, f) != true_size) goto FAIL_READ;
-
-  magic = REAL_PCRE_MAGIC(re);
-  if (magic != MAGIC_NUMBER)
-    {
-    if (swap_uint32(magic) == MAGIC_NUMBER)
-      {
-      do_flip = 1;
-      }
-    else
-      {
-      fprintf(outfile, "Data in %s is not a compiled PCRE regex\n", p);
-      new_free(re);
-      fclose(f);
-      continue;
-      }
-    }
-
-  /* We hide the byte-invert info for little and big endian tests. */
-  fprintf(outfile, "Compiled pattern%s loaded from %s\n",
-    do_flip && (p[-1] == '<') ? " (byte-inverted)" : "", p);
-
-  /* Now see if there is any following study data. */
-
-  if (true_study_size != 0)
-    {
-    pcre_study_data *psd;
-
-    extra = (pcre_extra *)new_malloc(sizeof(pcre_extra) + true_study_size);
-    extra->flags = PCRE_EXTRA_STUDY_DATA;
-
-    psd = (pcre_study_data *)(((char *)extra) + sizeof(pcre_extra));
-    extra->study_data = psd;
-
-    if (fread(psd, 1, true_study_size, f) != true_study_size)
-      {
-      FAIL_READ:
-      fprintf(outfile, "Failed to read data from %s\n", p);
-      if (extra != NULL)
-        {
-        PCRE_FREE_STUDY(extra);
-        }
-      new_free(re);
-      fclose(f);
-      continue;
-      }
-    fprintf(outfile, "Study data loaded from %s\n", p);
-    do_study = 1;     /* To get the data output if requested */
-    }
-  else fprintf(outfile, "No study data\n");
-
-  /* Flip the necessary bytes. */
-  if (do_flip)
-    {
-    int rc;
-    PCRE_PATTERN_TO_HOST_BYTE_ORDER(rc, re, extra, NULL);
-    if (rc == PCRE_ERROR_BADMODE)
-      {
-      uint32_t flags_in_host_byte_order;
-      if (REAL_PCRE_MAGIC(re) == MAGIC_NUMBER)
-        flags_in_host_byte_order = REAL_PCRE_FLAGS(re);
-      else
-        flags_in_host_byte_order = swap_uint32(REAL_PCRE_FLAGS(re));
-      /* Simulate the result of the function call below. */
-      fprintf(outfile, "Error %d from pcre%s_fullinfo(%d)\n", rc,
-        test_mode == PCRE32_MODE ? "32" : test_mode == PCRE16_MODE ? "16" : "",
-        PCRE_INFO_OPTIONS);
-      fprintf(outfile, "Running in %d-bit mode but pattern was compiled in "
-        "%d-bit mode\n", test_mode, 8 * (flags_in_host_byte_order & test_mode_MASK));
-      new_free(re);
-      fclose(f);
-      continue;
-      }
-    }
-
-  /* Need to know if UTF-8 for printing data strings. */
-
-  if (new_info(re, NULL, PCRE_INFO_OPTIONS, &get_options) < 0)
-    {
-    new_free(re);
-    fclose(f);
-    continue;
-    }
-  use_utf = (get_options & PCRE_UTF8) != 0;
-
-  fclose(f);
-  goto SHOW_INFO;
-  }
-
-#endif  /* FIXME */
-
-  }
-
 else
   {
   fprintf(outfile, "** Unknown command: %s", buffer);
@@ -3619,7 +3464,6 @@ if ((pat_patctl.control & CTL_POSIX) != 0)
   if (pat_patctl.stackguard_test != 0) prmsg(&msg, "stackguard");
   if (timeit > 0) prmsg(&msg, "timing");
   if (pat_patctl.jit != 0) prmsg(&msg, "JIT");
-  if (pat_patctl.save[0] != 0) prmsg(&msg, "save");
 
   if ((pat_patctl.options & ~POSIX_SUPPORTED_COMPILE_OPTIONS) != 0)
     {
@@ -3778,74 +3622,6 @@ if ((pat_patctl.control & CTL_ANYINFO) != 0)
   int rc = show_pattern_info();
   if (rc != PR_OK) return rc;
   }
-
-
-#ifdef FIXME
-
-/* If the '>' option was present, we write out the regex to a file, and
-that is all. The first 8 bytes of the file are the regex length and then
-the study length, in big-endian order. */
-
-if (to_file != NULL)
-  {
-  FILE *f = fopen((char *)to_file, "wb");
-  if (f == NULL)
-    {
-    fprintf(outfile, "Unable to open %s: %s\n", to_file, strerror(errno));
-    }
-  else
-    {
-    uint8_t sbuf[8];
-
-/* Extract the size for possible writing before possibly flipping it,
-and remember the store that was got. */
-
-true_size = REAL_PCRE_SIZE(re);
-
-    if (do_flip) regexflip(re, extra);
-    sbuf[0] = (uint8_t)((true_size >> 24) & 255);
-    sbuf[1] = (uint8_t)((true_size >> 16) & 255);
-    sbuf[2] = (uint8_t)((true_size >>  8) & 255);
-    sbuf[3] = (uint8_t)((true_size) & 255);
-    sbuf[4] = (uint8_t)((true_study_size >> 24) & 255);
-    sbuf[5] = (uint8_t)((true_study_size >> 16) & 255);
-    sbuf[6] = (uint8_t)((true_study_size >>  8) & 255);
-    sbuf[7] = (uint8_t)((true_study_size) & 255);
-
-    if (fwrite(sbuf, 1, 8, f) < 8 ||
-        fwrite(re, 1, true_size, f) < true_size)
-      {
-      fprintf(outfile, "Write error on %s: %s\n", to_file, strerror(errno));
-      }
-    else
-      {
-      fprintf(outfile, "Compiled pattern written to %s\n", to_file);
-
-      /* If there is study data, write it. */
-
-      if (extra != NULL)
-        {
-        if (fwrite(extra->study_data, 1, true_study_size, f) <
-            true_study_size)
-          {
-          fprintf(outfile, "Write error on %s: %s\n", to_file,
-            strerror(errno));
-          }
-        else fprintf(outfile, "Study data written to %s\n", to_file);
-        }
-      }
-    fclose(f);
-    }
-
-  new_free(re);
-  if (extra != NULL)
-    {
-    PCRE_FREE_STUDY(extra);
-    }
-  continue;  /* With next regex */
-  }
-
-#endif /* FIXME */
 
 return PR_OK;
 }

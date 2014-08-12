@@ -5373,12 +5373,6 @@ Subject length lower bound = 7
  2: \x0a
  3: seite
 
-/^a/I,flipbytes
-Capturing subpattern count = 0
-Compile options: <none>
-Overall options: anchored
-Subject length lower bound = 1
-
 /line\nbreak/I
 Capturing subpattern count = 0
 Contains explicit CR or LF match
