@@ -56,7 +56,7 @@ pcre2_match_data_create(uint32_t oveccount, pcre2_general_context *gcontext)
 {
 pcre2_match_data *yield = PRIV(memctl_malloc)(
   sizeof(pcre2_match_data) + 3*oveccount*sizeof(PCRE2_OFFSET),
-  offsetof(pcre2_real_match_data, memctl), &(gcontext->memctl));
+  (pcre2_memctl *)gcontext);
 yield->oveccount = oveccount;
 return yield;
 }

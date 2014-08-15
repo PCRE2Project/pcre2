@@ -73,24 +73,23 @@ free(block);
 *************************************************/
 
 /* This internal function is called to get a block of memory in which the 
-memory control data is to be stored for future use.
+memory control data is to be stored at the start for future use.
 
 Arguments:
   size        amount of memory required
-  offset      offset in memory block to memctl structure
   memctl      pointer to a memctl block or NULL
   
 Returns:      pointer to memory or NULL on failure
 */   
 
 PCRE2_EXP_DEFN void *
-PRIV(memctl_malloc)(size_t size, size_t offset, pcre2_memctl *memctl)
+PRIV(memctl_malloc)(size_t size, pcre2_memctl *memctl)
 {
 pcre2_memctl *newmemctl;
 void *yield = (memctl == NULL)? malloc(size) :
   memctl->malloc(size, memctl->memory_data);
 if (yield == NULL) return NULL; 
-newmemctl = (pcre2_memctl *)(((uint8_t *)yield) + offset);
+newmemctl = (pcre2_memctl *)yield;
 if (memctl == NULL)
   {
   newmemctl->malloc = default_malloc;
@@ -149,9 +148,7 @@ PCRE2_EXP_DEFN pcre2_compile_context * PCRE2_CALL_CONVENTION
 pcre2_compile_context_create(pcre2_general_context *gcontext)
 {
 pcre2_compile_context *ccontext = PRIV(memctl_malloc)(
-  sizeof(pcre2_real_compile_context), 
-  offsetof(pcre2_real_compile_context, memctl),
-  &(gcontext->memctl)); 
+  sizeof(pcre2_real_compile_context), (pcre2_memctl *)gcontext); 
 if (ccontext == NULL) return NULL;  
 PRIV(compile_context_init)(ccontext, FALSE);
 return ccontext;
@@ -183,9 +180,7 @@ PCRE2_EXP_DEFN pcre2_match_context * PCRE2_CALL_CONVENTION
 pcre2_match_context_create(pcre2_general_context *gcontext)
 {
 pcre2_match_context *mcontext = PRIV(memctl_malloc)(
-  sizeof(pcre2_real_match_context),
-  offsetof(pcre2_real_compile_context, memctl),
-  &(gcontext->memctl));  
+  sizeof(pcre2_real_match_context), (pcre2_memctl *)gcontext);  
 if (mcontext == NULL) return NULL;   
 PRIV(match_context_init)(mcontext, FALSE);
 return mcontext;

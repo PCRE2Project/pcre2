@@ -210,7 +210,7 @@ if (stringnumber >= match_data->oveccount ||
 right = match_data->ovector[stringnumber*2+1];
 
 block = PRIV(memctl_malloc)(sizeof(pcre2_memctl) + 
-  (right-left+1)*PCRE2_CODE_UNIT_WIDTH, 0, &(match_data->memctl)); 
+  (right-left+1)*PCRE2_CODE_UNIT_WIDTH, (pcre2_memctl *)match_data); 
 if (block == NULL) return PCRE2_ERROR_NOMEMORY;
 
 yield = (PCRE2_UCHAR *)((char *)block + sizeof(pcre2_memctl));
@@ -346,7 +346,7 @@ if (lengthsptr != NULL) size += sizeof(size_t) * count;  /* For lengths */
 
 for (i = 0; i < count2; i += 2)
    size += sizeof(PCRE2_UCHAR *) + CU2BYTES(ovector[i+1] - ovector[i] + 1);
-memp = PRIV(memctl_malloc)(size, 0, &(match_data->memctl)); 
+memp = PRIV(memctl_malloc)(size, (pcre2_memctl *)match_data); 
 if (memp == NULL) return PCRE2_ERROR_NOMEMORY;
 
 *listptr = listp = (PCRE2_UCHAR **)((char *)memp + sizeof(pcre2_memctl));

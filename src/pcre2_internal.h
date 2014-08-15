@@ -1863,7 +1863,7 @@ extern BOOL  _pcre2_is_newline(PCRE2_SPTR, uint32_t, PCRE2_SPTR, uint32_t *,
                BOOL);
 extern int   _pcre2_jit_get_size(void *);
 extern void  _pcre2_match_context_init(pcre2_match_context *, BOOL);
-extern void  *_pcre2_memctl_malloc(size_t, size_t, pcre2_memctl *);
+extern void  *_pcre2_memctl_malloc(size_t, pcre2_memctl *);
 extern unsigned int _pcre2_ord2utf(uint32_t, PCRE2_UCHAR *);
 extern int   _pcre2_strcmp(PCRE2_SPTR, PCRE2_SPTR);
 extern int   _pcre2_strcmp_c8(PCRE2_SPTR, const char *);

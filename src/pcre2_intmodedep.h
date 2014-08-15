@@ -540,6 +540,9 @@ These are all no-ops since all UTF-32 characters fit into one pcre_uchar. */
 
 /* ----------------------- HIDDEN STRUCTURES ----------------------------- */
 
+/* NOTE: All these structures *must* start with a pcre2_memctl structure. The 
+code that uses them is simpler because it assumes this. */
+
 /* The real general context structure. At present it hold only data for custom 
 memory control. */
 
