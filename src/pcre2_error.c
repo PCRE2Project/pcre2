@@ -45,9 +45,6 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #include "pcre2_internal.h"
 
-
-/* FIXME: check out the errors */
-
 #define STRING(a)  # a
 #define XSTRING(s) STRING(s)
 

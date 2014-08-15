@@ -59,7 +59,7 @@ Arguments:
 Returns:        0 if data returned, negative on error
 */
 
-/* FIXME: this is currently incomplete. Also, check int vs uint32_t */
+/* FIXME: Remove BADENDIANNESS if saving/restoring is not to be implemented. */
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_pattern_info(const pcre2_code *code, uint32_t what, void *where)
@@ -85,15 +85,15 @@ if ((re->flags & (PCRE2_CODE_UNIT_WIDTH/8)) == 0)
 switch(what)
   {
   case PCRE2_INFO_ALLOPTIONS:
-  *((int *)where) = re->overall_options;
+  *((uint32_t *)where) = re->overall_options;
   break;
 
   case PCRE2_INFO_ARGOPTIONS:
-  *((int *)where) = re->compile_options;
+  *((uint32_t *)where) = re->compile_options;
   break;
 
   case PCRE2_INFO_BACKREFMAX:
-  *((int *)where) = re->top_backref;
+  *((uint32_t *)where) = re->top_backref;
   break;
 
   case PCRE2_INFO_BSR:
@@ -101,12 +101,12 @@ switch(what)
   break;
 
   case PCRE2_INFO_CAPTURECOUNT:
-  *((int *)where) = re->top_bracket;
+  *((uint32_t *)where) = re->top_bracket;
   break;
 
   case PCRE2_INFO_FIRSTCODETYPE:
-  *((int *)where) = ((re->flags & PCRE2_FIRSTSET) != 0)? 1 :
-                    ((re->flags & PCRE2_STARTLINE) != 0)? 2 : 0;
+  *((uint32_t *)where) = ((re->flags & PCRE2_FIRSTSET) != 0)? 1 :
+                         ((re->flags & PCRE2_STARTLINE) != 0)? 2 : 0;
   break;
 
   case PCRE2_INFO_FIRSTCODEUNIT:
@@ -120,11 +120,11 @@ switch(what)
   break;
 
   case PCRE2_INFO_HASCRORLF:
-  *((int *)where) = (re->flags & PCRE2_HASCRORLF) != 0;
+  *((uint32_t *)where) = (re->flags & PCRE2_HASCRORLF) != 0;
   break;
 
   case PCRE2_INFO_JCHANGED:
-  *((int *)where) = (re->flags & PCRE2_JCHANGED) != 0;
+  *((uint32_t *)where) = (re->flags & PCRE2_JCHANGED) != 0;
   break;
 
   case PCRE2_INFO_JITSIZE:
@@ -137,7 +137,7 @@ switch(what)
   break;
 
   case PCRE2_INFO_LASTCODETYPE:
-  *((int *)where) = ((re->flags & PCRE2_LASTSET) != 0)? 1 : 0;
+  *((uint32_t *)where) = ((re->flags & PCRE2_LASTSET) != 0)? 1 : 0;
   break;
 
   case PCRE2_INFO_LASTCODEUNIT:
@@ -146,7 +146,7 @@ switch(what)
   break;
 
   case PCRE2_INFO_MATCHEMPTY:
-  *((int *)where) = (re->flags & PCRE2_MATCH_EMPTY) != 0;
+  *((uint32_t *)where) = (re->flags & PCRE2_MATCH_EMPTY) != 0;
   break;
 
   case PCRE2_INFO_MATCHLIMIT:
@@ -154,19 +154,19 @@ switch(what)
   break;
 
   case PCRE2_INFO_MAXLOOKBEHIND:
-  *((int *)where) = re->max_lookbehind;
+  *((uint32_t *)where) = re->max_lookbehind;
   break;
 
   case PCRE2_INFO_MINLENGTH:
-  *((int *)where) = re->minlength;
+  *((uint32_t *)where) = re->minlength;
   break;
 
   case PCRE2_INFO_NAMEENTRYSIZE:
-  *((int *)where) = re->name_entry_size;
+  *((uint32_t *)where) = re->name_entry_size;
   break;
 
   case PCRE2_INFO_NAMECOUNT:
-  *((int *)where) = re->name_count;
+  *((uint32_t *)where) = re->name_count;
   break;
 
   case PCRE2_INFO_NAMETABLE:

@@ -38,8 +38,6 @@ POSSIBILITY OF SUCH DAMAGE.
 -----------------------------------------------------------------------------
 */
 
-/* FIXME: this file is incomplete, being gradually built. */
-
 /* We do not support both EBCDIC and UTF at the same time. The "configure"
 script prevents both being selected, but not everybody uses "configure". */
 

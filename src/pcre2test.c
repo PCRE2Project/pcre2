@@ -3010,18 +3010,16 @@ if ((pat_patctl.control & CTL_INFO) != 0)
   {
   const void *nametable;
   const uint8_t *start_bits;
-  int count, backrefmax, first_ctype, last_ctype, jchanged,
-    hascrorlf, maxlookbehind, match_empty, minlength;
-  int nameentrysize, namecount;
-  uint32_t bsr_convention, newline_convention;
-  uint32_t first_cunit, last_cunit;
-  uint32_t match_limit, recursion_limit;
+  uint32_t backrefmax, bsr_convention, capture_count, first_ctype, first_cunit,
+    hascrorlf, jchanged, last_ctype, last_cunit, match_empty, match_limit, 
+    maxlookbehind, minlength, nameentrysize, namecount, newline_convention, 
+    recursion_limit;
 
   /* These info requests should always succeed. */
 
   if (pattern_info(PCRE2_INFO_BACKREFMAX, &backrefmax) +
       pattern_info(PCRE2_INFO_BSR, &bsr_convention) +
-      pattern_info(PCRE2_INFO_CAPTURECOUNT, &count) +
+      pattern_info(PCRE2_INFO_CAPTURECOUNT, &capture_count) +
       pattern_info(PCRE2_INFO_FIRSTBITMAP, &start_bits) +
       pattern_info(PCRE2_INFO_FIRSTCODEUNIT, &first_cunit) +
       pattern_info(PCRE2_INFO_FIRSTCODETYPE, &first_ctype) +
@@ -3041,7 +3039,7 @@ if ((pat_patctl.control & CTL_INFO) != 0)
       != 0)
     return PR_ABEND;
 
-  fprintf(outfile, "Capturing subpattern count = %d\n", count);
+  fprintf(outfile, "Capturing subpattern count = %d\n", capture_count);
 
   if (backrefmax > 0)
     fprintf(outfile, "Max back reference = %d\n", backrefmax);
@@ -3061,7 +3059,7 @@ if ((pat_patctl.control & CTL_INFO) != 0)
     while (namecount-- > 0)
       {
       int imm2_size = test_mode == PCRE8_MODE ? 2 : 1;
-      int length = (int)STRLEN(nametable + imm2_size);
+      uint32_t length = (uint32_t)STRLEN(nametable + imm2_size);
       fprintf(outfile, "  ");
       PCHARSV(nametable, imm2_size, length, FALSE, outfile);
       while (length++ < nameentrysize - imm2_size) putc(' ', outfile);
@@ -3592,8 +3590,8 @@ if (pat_patctl.jit != 0)
 
 if ((pat_patctl.control & CTL_MEMORY) != 0)
   {
-  int name_count;
-  size_t size, cblock_size, name_entry_size;
+  uint32_t name_count, name_entry_size;
+  size_t size, cblock_size;
 
 #ifdef SUPPORT_PCRE8
   if (test_mode == 8) cblock_size = sizeof(pcre2_real_code_8);
@@ -4428,9 +4426,10 @@ for (gmatched = 0;; gmatched++)
 
     if ((dat_datctl.control & CTL_ALLCAPTURES) != 0)
       {
-      if (pattern_info(PCRE2_INFO_CAPTURECOUNT, &capcount) < 0)
+      uint32_t maxcapcount; 
+      if (pattern_info(PCRE2_INFO_CAPTURECOUNT, &maxcapcount) < 0)
         return PR_SKIP;
-      capcount++;   /* Allow for full match */
+      capcount = maxcapcount + 1;   /* Allow for full match */
       if (capcount > (int)dat_datctl.oveccount) capcount = dat_datctl.oveccount;
       }
 

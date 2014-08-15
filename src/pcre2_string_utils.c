@@ -49,8 +49,6 @@ functions work only on 8-bit data. */
 
 #include "pcre2_internal.h"
 
-/* FIXME: this module is incomplete */
-
 
 /*************************************************
 *    Compare two zero-terminated PCRE2 strings   *
@@ -82,7 +80,9 @@ return 0;
 *  Compare zero-terminated PCRE2 & 8-bit strings *
 *************************************************/
 
-/* 
+/* As the 8-bit string is almost always a literal, its type is specified as 
+const char *.
+
 Arguments:
   str1        first string
   str2        second string
@@ -136,7 +136,7 @@ return 0;
 *************************************************/
 
 /* As the 8-bit string is almost always a literal, its type is specified as 
-'const char *'.
+const char *.
 
 Arguments:
   str1        first string
@@ -162,7 +162,7 @@ return 0;
 
 
 /*************************************************
-*          Find the length of a string           *
+*        Find the length of a PCRE2 string       *
 *************************************************/
 
 /* 
