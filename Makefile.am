@@ -263,7 +263,6 @@ NODIST_SOURCES = src/pcre2_chartables.c
 
 COMMON_SOURCES = \
   src/pcre2_auto_possess.c \
-  src/pcre2_byte_order.c \
   src/pcre2_compile.c \
   src/pcre2_config.c \
   src/pcre2_context.c \
