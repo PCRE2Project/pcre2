@@ -136,7 +136,7 @@ switch (what)
   break;
 
   case PCRE2_CONFIG_STACKRECURSE:
-#ifdef NO_RECURSE
+#ifdef HEAP_MATCH_RECURSE
   *((int *)where) = 0;
 #else
   *((int *)where) = 1;

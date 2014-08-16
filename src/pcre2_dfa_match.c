@@ -365,8 +365,8 @@ internal_dfa_match(
   dfa_match_block *mb,
   PCRE2_SPTR this_start_code,
   PCRE2_SPTR current_subject,
-  PCRE2_OFFSET start_offset,
-  PCRE2_OFFSET *offsets,
+  PCRE2_SIZE start_offset,
+  PCRE2_SIZE *offsets,
   uint32_t offsetcount,
   int *workspace,
   int wscount,
@@ -730,7 +730,7 @@ for (;;)
             else if (match_count > 0 && ++match_count * 2 > (int)offsetcount)
               match_count = 0;
           count = ((match_count == 0)? (int)offsetcount : match_count * 2) - 2;
-          if (count > 0) memmove(offsets + 2, offsets, count * sizeof(int));
+          if (count > 0) memmove(offsets + 2, offsets, count * sizeof(PCRE2_SIZE));
           if (offsetcount >= 2)
             {
             offsets[0] = (int)(current_subject - start_subject);
@@ -2560,7 +2560,7 @@ for (;;)
       case OP_ASSERTBACK_NOT:
         {
         PCRE2_SPTR endasscode = code + GET(code, 1);
-        PCRE2_OFFSET local_offsets[2];
+        PCRE2_SIZE local_offsets[2];
         int rc;
         int local_workspace[1000];
 
@@ -2572,7 +2572,7 @@ for (;;)
           ptr,                                  /* where we currently are */
           (int)(ptr - start_subject),           /* start offset */
           local_offsets,                        /* offset vector */
-          sizeof(local_offsets)/sizeof(PCRE2_OFFSET), /* size of same */
+          sizeof(local_offsets)/sizeof(PCRE2_SIZE), /* size of same */
           local_workspace,                      /* workspace vector */
           sizeof(local_workspace)/sizeof(int),  /* size of same */
           rlevel);                              /* function recursion level */
@@ -2587,7 +2587,7 @@ for (;;)
       case OP_COND:
       case OP_SCOND:
         {
-        PCRE2_OFFSET local_offsets[1000];
+        PCRE2_SIZE local_offsets[1000];
         int local_workspace[1000];
         int codelink = GET(code, 1);
         int condcode;
@@ -2606,9 +2606,9 @@ for (;;)
             cb.callout_number   = code[LINK_SIZE+2];
             cb.offset_vector    = offsets;
             cb.subject          = start_subject;
-            cb.subject_length   = (int)(end_subject - start_subject);
-            cb.start_match      = (int)(current_subject - start_subject);
-            cb.current_position = (int)(ptr - start_subject);
+            cb.subject_length   = (PCRE2_SIZE)(end_subject - start_subject);
+            cb.start_match      = (PCRE2_SIZE)(current_subject - start_subject);
+            cb.current_position = (PCRE2_SIZE)(ptr - start_subject);
             cb.pattern_position = GET(code, LINK_SIZE + 3);
             cb.next_item_length = GET(code, 3 + 2*LINK_SIZE);
             cb.capture_top      = 1;
@@ -2664,7 +2664,7 @@ for (;;)
             ptr,                                  /* where we currently are */
             (int)(ptr - start_subject),           /* start offset */
             local_offsets,                        /* offset vector */
-            sizeof(local_offsets)/sizeof(PCRE2_OFFSET), /* size of same */
+            sizeof(local_offsets)/sizeof(PCRE2_SIZE), /* size of same */
             local_workspace,                      /* workspace vector */
             sizeof(local_workspace)/sizeof(int),  /* size of same */
             rlevel);                              /* function recursion level */
@@ -2683,7 +2683,7 @@ for (;;)
       case OP_RECURSE:
         {
         dfa_recursion_info *ri;
-        PCRE2_OFFSET local_offsets[1000];
+        PCRE2_SIZE local_offsets[1000];
         int local_workspace[1000];
         PCRE2_SPTR callpat = start_code + GET(code, 1);
         uint32_t recno = (callpat == mb->start_code)? 0 :
@@ -2712,7 +2712,7 @@ for (;;)
           ptr,                                  /* where we currently are */
           (int)(ptr - start_subject),           /* start offset */
           local_offsets,                        /* offset vector */
-          sizeof(local_offsets)/sizeof(PCRE2_OFFSET), /* size of same */
+          sizeof(local_offsets)/sizeof(PCRE2_SIZE), /* size of same */
           local_workspace,                      /* workspace vector */
           sizeof(local_workspace)/sizeof(int),  /* size of same */
           rlevel);                              /* function recursion level */
@@ -2777,7 +2777,7 @@ for (;;)
 
         for (matched_count = 0;; matched_count++)
           {
-          PCRE2_OFFSET local_offsets[2];
+          PCRE2_SIZE local_offsets[2];
           int local_workspace[1000];
 
           int rc = internal_dfa_match(
@@ -2786,7 +2786,7 @@ for (;;)
             local_ptr,                            /* where we currently are */
             (int)(ptr - start_subject),           /* start offset */
             local_offsets,                        /* offset vector */
-            sizeof(local_offsets)/sizeof(PCRE2_OFFSET), /* size of same */
+            sizeof(local_offsets)/sizeof(PCRE2_SIZE), /* size of same */
             local_workspace,                      /* workspace vector */
             sizeof(local_workspace)/sizeof(int),  /* size of same */
             rlevel);                              /* function recursion level */
@@ -2849,7 +2849,7 @@ for (;;)
       case OP_ONCE:
       case OP_ONCE_NC:
         {
-        PCRE2_OFFSET local_offsets[2];
+        PCRE2_SIZE local_offsets[2];
         int local_workspace[1000];
 
         int rc = internal_dfa_match(
@@ -2858,7 +2858,7 @@ for (;;)
           ptr,                                  /* where we currently are */
           (int)(ptr - start_subject),           /* start offset */
           local_offsets,                        /* offset vector */
-          sizeof(local_offsets)/sizeof(PCRE2_OFFSET), /* size of same */
+          sizeof(local_offsets)/sizeof(PCRE2_SIZE), /* size of same */
           local_workspace,                      /* workspace vector */
           sizeof(local_workspace)/sizeof(int),  /* size of same */
           rlevel);                              /* function recursion level */
@@ -2948,9 +2948,9 @@ for (;;)
         cb.callout_number   = code[1];
         cb.offset_vector    = offsets;
         cb.subject          = start_subject;
-        cb.subject_length   = (int)(end_subject - start_subject);
-        cb.start_match      = (int)(current_subject - start_subject);
-        cb.current_position = (int)(ptr - start_subject);
+        cb.subject_length   = (PCRE2_SIZE)(end_subject - start_subject);
+        cb.start_match      = (PCRE2_SIZE)(current_subject - start_subject);
+        cb.current_position = (PCRE2_SIZE)(ptr - start_subject);
         cb.pattern_position = GET(code, 2);
         cb.next_item_length = GET(code, 2 + LINK_SIZE);
         cb.capture_top      = 1;
@@ -3049,8 +3049,8 @@ Returns:        > 0 => number of match offset pairs placed in offsets
 */
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
-pcre2_dfa_match(const pcre2_code *code, PCRE2_SPTR subject, int length,
-  PCRE2_OFFSET start_offset, uint32_t options, pcre2_match_data *match_data,
+pcre2_dfa_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
+  PCRE2_SIZE start_offset, uint32_t options, pcre2_match_data *match_data,
   pcre2_match_context *mcontext, int *workspace, size_t wscount)
 {
 const pcre2_real_code *re = (const pcre2_real_code *)code;
@@ -3078,9 +3078,10 @@ is used below, and it expects NLBLOCK to be defined as a pointer. */
 dfa_match_block actual_match_block;
 dfa_match_block *mb = &actual_match_block;
 
-/* A negative length implies a zero-terminated subject string. */
+/* A length equal to PCRE2_ZERO_TERMINATED implies a zero-terminated
+subject string. */
 
-if (length < 0) length = PRIV(strlen)(subject);
+if (length == PCRE2_ZERO_TERMINATED) length = PRIV(strlen)(subject);
 
 /* Plausibility checks */
 
@@ -3088,7 +3089,7 @@ if ((options & ~PUBLIC_DFA_MATCH_OPTIONS) != 0) return PCRE2_ERROR_BADOPTION;
 if (re == NULL || subject == NULL || workspace == NULL || match_data == NULL) 
   return PCRE2_ERROR_NULL;
 if (wscount < 20) return PCRE2_ERROR_DFA_WSSIZE;
-if ((int)start_offset > length) return PCRE2_ERROR_BADOFFSET;
+if (start_offset > length) return PCRE2_ERROR_BADOFFSET;
 
 /* Check that the first field in the block is the magic number. If it is not,
 return with PCRE2_ERROR_BADMAGIC. However, if the magic number is equal to
@@ -3214,7 +3215,7 @@ if (utf && (options & PCRE2_NO_UTF_CHECK) == 0)
     return match_data->rc;
     }
 #if PCRE2_CODE_UNIT_WIDTH != 32
-  if (start_offset > 0 && (int)start_offset < length &&
+  if (start_offset > 0 && start_offset < length &&
       NOT_FIRSTCHAR(subject[start_offset]))
     return PCRE2_ERROR_BADUTFOFFSET;
 #endif  /* PCRE2_CODE_UNIT_WIDTH != 32 */
@@ -3466,12 +3467,12 @@ for (;;)
     {
     if (rc == PCRE2_ERROR_PARTIAL && match_data->oveccount > 0)
       {
-      match_data->ovector[0] = (PCRE2_OFFSET)(start_match - subject);
-      match_data->ovector[1] = (PCRE2_OFFSET)(end_subject - subject);
+      match_data->ovector[0] = (PCRE2_SIZE)(start_match - subject);
+      match_data->ovector[1] = (PCRE2_SIZE)(end_subject - subject);
       }
-    match_data->leftchar = (PCRE2_OFFSET)(mb->start_used_ptr - subject);
+    match_data->leftchar = (PCRE2_SIZE)(mb->start_used_ptr - subject);
     match_data->rightchar = 0; /* FIXME */
-    match_data->startchar = (PCRE2_OFFSET)(start_match - subject);  
+    match_data->startchar = (PCRE2_SIZE)(start_match - subject);
     match_data->rc = rc; 
     return rc;
     }

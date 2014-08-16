@@ -523,10 +523,10 @@ if test "$enable_utf" = "yes"; then
 fi
 
 if test "$enable_stack_for_recursion" = "no"; then
-  AC_DEFINE([NO_RECURSE], [], [
+  AC_DEFINE([HEAP_MATCH_RECURSE], [], [
     PCRE2 uses recursive function calls to handle backtracking while
     matching. This can sometimes be a problem on systems that have
-    stacks of limited size. Define NO_RECURSE to any value to get a
+    stacks of limited size. Define HEAP_MATCH_RECURSE to any value to get a
     version that doesn't use recursion in the match() function; instead
     it creates its own stack by steam using memory from the heap. For more 
     detail, see the comments and other stuff just above the match() function.])
@@ -608,7 +608,7 @@ AC_DEFINE_UNQUOTED([MATCH_LIMIT_RECURSION], [$with_match_limit_recursion], [
   increase the recursion depth. In some environments it is desirable
   to limit the depth of recursive calls of match() more strictly, in
   order to restrict the maximum amount of stack (or heap, if
-  NO_RECURSE is defined) that is used. The value of
+  HEAP_MATCH_RECURSE is defined) that is used. The value of
   MATCH_LIMIT_RECURSION applies only to recursive calls of match(). To
   have any useful effect, it must be less than the value of
   MATCH_LIMIT. The default is to use the same value as MATCH_LIMIT.

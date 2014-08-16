@@ -179,7 +179,7 @@ static uint32_t recursion_limit = 0;
 static pcre2_compile_context *compile_context;
 static pcre2_match_context *match_context;
 static pcre2_match_data *match_data;
-static PCRE2_OFFSET *offsets;
+static PCRE2_SIZE *offsets;
 
 static BOOL count_only = FALSE;
 static BOOL do_colour = FALSE;
@@ -1736,14 +1736,14 @@ while (ptr < endptr)
 
         if (line_offsets)
           fprintf(stdout, "%d,%d\n", (int)(matchptr + offsets[0] - ptr),
-            offsets[1] - offsets[0]);
+            (int)(offsets[1] - offsets[0]));
 
         /* Handle --file-offsets */
 
         else if (file_offsets)
           fprintf(stdout, "%d,%d\n",
             (int)(filepos + matchptr + offsets[0] - ptr),
-            offsets[1] - offsets[0]);
+            (int)(offsets[1] - offsets[0]));
 
         /* Handle --only-matching, which may occur many times */
 
@@ -2451,7 +2451,7 @@ compile_pattern(patstr *p, int options, int popts, int fromfile,
   const char *fromtext, int count)
 {
 unsigned char buffer[PATBUFSIZE];
-PCRE2_OFFSET erroffset;
+PCRE2_SIZE erroffset;
 char *ps = p->string;
 unsigned int patlen = strlen(ps);
 int errcode;
@@ -2485,16 +2485,16 @@ pcre2_get_error_message(errcode, buffer, PATBUFSIZE);
 if (fromfile)
   {
   fprintf(stderr, "pcre2grep: Error in regex in line %d of %s "
-    "at offset %d: %s\n", count, fromtext, erroffset, buffer);
+    "at offset %d: %s\n", count, fromtext, (int)erroffset, buffer);
   }
 else
   {
   if (count == 0)
     fprintf(stderr, "pcre2grep: Error in %s regex at offset %d: %s\n",
-      fromtext, erroffset, buffer);
+      fromtext, (int)erroffset, buffer);
   else
     fprintf(stderr, "pcre2grep: Error in %s %s regex at offset %d: %s\n",
-      ordin(count), fromtext, erroffset, buffer);
+      ordin(count), fromtext, (int)erroffset, buffer);
   }
 
 return FALSE;

@@ -71,11 +71,12 @@ Returns:          > 0 => success; value is the number of ovector pairs filled
 /* FIXME: this is currently a placeholder function */
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
-pcre2_jit_match(const pcre2_code *code, PCRE2_SPTR subject, int length, 
-  PCRE2_OFFSET start_offset, uint32_t options, pcre2_match_data *match_data, 
+pcre2_jit_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
+  PCRE2_SIZE start_offset, uint32_t options, pcre2_match_data *match_data,
   pcre2_match_context *mcontext, pcre2_jit_stack *jit_stack)
 {
 #ifndef SUPPORT_JIT
+
 (void)code;
 (void)subject;
 (void)length;
@@ -85,17 +86,21 @@ pcre2_jit_match(const pcre2_code *code, PCRE2_SPTR subject, int length,
 (void)mcontext;
 (void)jit_stack;
 return PCRE2_ERROR_JIT_BADOPTION;
+
 #else  /* SUPPORT_JIT */
 
-
 /* Dummy code */
-code=code;subject=subject;length=length;
-start_offset=start_offset; options=options; match_data=match_data;
+code=code;
+subject=subject;
+length=length;
+start_offset=start_offset;
+options=options;
+match_data=match_data;
 mcontext=mcontext;
 jit_stack=jit_stack;
 return PCRE2_ERROR_JIT_BADOPTION;
 
 #endif  /* SUPPORT_JIT */
-}    
+}
 
 /* End of pcre2_jit_match.c */

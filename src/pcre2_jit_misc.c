@@ -54,14 +54,18 @@ POSSIBILITY OF SUCH DAMAGE.
 *************************************************/
 
 
-PCRE2_EXP_DEFN void PCRE2_CALL_CONVENTION     
+PCRE2_EXP_DEFN void PCRE2_CALL_CONVENTION
 pcre2_jit_free_unused_memory(pcre2_general_context *gcontext)
 {
 #ifndef SUPPORT_JIT
+
 (void)gcontext;     /* Suppress warning */
+
 #else  /* SUPPORT_JIT */
 
-gcontext=gcontext;   /* Dummy */
+/* Dummy code */
+gcontext=gcontext;
+
 #endif  /* SUPPORT_JIT */
 }
 
@@ -71,19 +75,25 @@ gcontext=gcontext;   /* Dummy */
 *            Allocate a JIT stack                *
 *************************************************/
 
-PCRE2_EXP_DEFN pcre2_jit_stack * PCRE2_CALL_CONVENTION      
-pcre2_jit_stack_alloc(pcre2_general_context *gcontext, size_t startsize, 
+PCRE2_EXP_DEFN pcre2_jit_stack * PCRE2_CALL_CONVENTION
+pcre2_jit_stack_alloc(pcre2_general_context *gcontext, size_t startsize,
   size_t maxsize)
 {
 #ifndef SUPPORT_JIT
+
 (void)gcontext;
 (void)startsize;
 (void)maxsize;
 return NULL;
+
 #else  /* SUPPORT_JIT */
 
-gcontext=gcontext;startsize=startsize;maxsize=maxsize;
+/* Dummy code */
+gcontext=gcontext;
+startsize=startsize;
+maxsize=maxsize;
 return NULL;
+
 #endif
 }
 
@@ -97,12 +107,18 @@ pcre2_jit_stack_assign(const pcre2_code *code, pcre2_jit_callback callback,
   void *callback_data)
 {
 #ifndef SUPPORT_JIT
+
 (void)code;
 (void)callback;
 (void)callback_data;
+
 #else  /* SUPPORT_JIT */
 
-code=code;callback=callback;callback_data=callback_data;
+/* Dummy code */
+code=code;
+callback=callback;
+callback_data=callback_data;
+
 #endif  /* SUPPORT_JIT */
 }
 
@@ -115,10 +131,14 @@ PCRE2_EXP_DEFN void PCRE2_CALL_CONVENTION
 pcre2_jit_stack_free(pcre2_jit_stack *jit_stack)
 {
 #ifndef SUPPORT_JIT
+
 (void)jit_stack;
+
 #else  /* SUPPORT_JIT */
 
+/* Dummy code */
 jit_stack=jit_stack;
+
 #endif  /* SUPPORT_JIT */
 }
 
@@ -127,16 +147,20 @@ jit_stack=jit_stack;
 *              Get size of JIT code              *
 *************************************************/
 
-int
+size_t
 PRIV(jit_get_size)(void *executable_jit)
 {
 #ifndef SUPPORT_JIT
+
 (void)executable_jit;
 return 0;
+
 #else  /* SUPPORT_JIT */
 
+/* Dummy code */
 executable_jit = executable_jit;
-return 0;   /* FIXME */
+return 0;
+
 #endif
 }
 

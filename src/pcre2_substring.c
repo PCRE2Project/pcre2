@@ -335,7 +335,7 @@ size_t *lensp;
 pcre2_memctl *memp;
 PCRE2_UCHAR **listp;
 PCRE2_UCHAR *sp;
-PCRE2_OFFSET *ovector;
+PCRE2_SIZE *ovector;
 
 if ((count = match_data->rc) < 0) return count;
 

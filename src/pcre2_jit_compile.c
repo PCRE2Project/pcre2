@@ -50,11 +50,11 @@ POSSIBILITY OF SUCH DAMAGE.
 *        JIT compile a Regular Expression        *
 *************************************************/
 
-/* This function used JIT to convert a previously-compiled pattern into machine 
+/* This function used JIT to convert a previously-compiled pattern into machine
 code.
 
 Arguments:
-  code          a compiled pattern 
+  code          a compiled pattern
   options       JIT option bits
 
 Returns:        nothing
@@ -62,16 +62,21 @@ Returns:        nothing
 
 /* FIXME: this is currently a placeholder function */
 
-PCRE2_EXP_DEFN void PCRE2_CALL_CONVENTION
+PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_jit_compile(pcre2_code *code, uint32_t options)
 {
 #ifndef SUPPORT_JIT
+
 (void)code;
 (void)options;
+return PCRE2_ERROR_JIT_BADOPTION;
+
 #else  /* SUPPORT_JIT */
 
-
-code=code; options = options;  /* Dummy.... */
+/* Dummy code */
+code=code;
+options = options;
+return PCRE2_ERROR_JIT_BADOPTION;
 
 #endif  /* SUPPORT_JIT */
 }

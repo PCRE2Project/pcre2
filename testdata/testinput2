@@ -4042,5 +4042,11 @@ a random value. /Ix
     abxxx
     ca
     cd 
+    
+# This should test both paths for processing OP_RECURSE. 
+
+/(?(R)a+|(?R)b)/
+    aaaabcde
+    aaaabcde\=ovector=100
 
 # End of testinput2 

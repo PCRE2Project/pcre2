@@ -164,7 +164,7 @@ if (defmemctl)
   mcontext->memctl.free = default_free;
   mcontext->memctl.memory_data = NULL;
   } 
-#ifdef NO_RECURSE  
+#ifdef HEAP_MATCH_RECURSE  
 mcontext->stack_memctl = mcontext->memctl;
 #endif
 mcontext->callout = NULL;
@@ -389,7 +389,7 @@ pcre2_set_recursion_memory_management(pcre2_match_context *mcontext,
   void *(*mymalloc)(size_t, void *), void (*myfree)(void *, void *), 
   void *mydata)
 {
-#ifdef NO_RECURSE
+#ifdef HEAP_MATCH_RECURSE
 mcontext->stack_memctl.malloc = mymalloc;
 mcontext->stack_memctl.free = myfree;
 mcontext->stack_memctl.memory_data = mydata;

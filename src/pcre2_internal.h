@@ -1859,7 +1859,7 @@ extern void  _pcre2_compile_context_init(pcre2_compile_context *, BOOL);
 extern PCRE2_SPTR _pcre2_find_bracket(PCRE2_SPTR, BOOL, int);
 extern BOOL  _pcre2_is_newline(PCRE2_SPTR, uint32_t, PCRE2_SPTR, uint32_t *, 
                BOOL);
-extern int   _pcre2_jit_get_size(void *);
+extern size_t _pcre2_jit_get_size(void *);
 extern void  _pcre2_match_context_init(pcre2_match_context *, BOOL);
 extern void  *_pcre2_memctl_malloc(size_t, pcre2_memctl *);
 extern unsigned int _pcre2_ord2utf(uint32_t, PCRE2_UCHAR *);
@@ -1869,7 +1869,7 @@ extern int   _pcre2_strlen(PCRE2_SPTR);
 extern int   _pcre2_strncmp(PCRE2_SPTR, PCRE2_SPTR, size_t);
 extern int   _pcre2_strncmp_c8(PCRE2_SPTR, const char *, size_t);
 extern int   _pcre2_study(pcre2_real_code *);
-extern int   _pcre2_valid_utf(PCRE2_SPTR, int, PCRE2_OFFSET *);
+extern int   _pcre2_valid_utf(PCRE2_SPTR, PCRE2_SIZE, PCRE2_SIZE *);
 extern BOOL  _pcre2_was_newline(PCRE2_SPTR, uint32_t, PCRE2_SPTR, uint32_t *, 
                BOOL);
 extern BOOL  _pcre2_xclass(uint32_t, PCRE2_SPTR, BOOL);

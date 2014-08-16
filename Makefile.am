@@ -429,7 +429,7 @@ endif # WITH_PCRE8
 if WITH_JIT
 TESTS += pcre2_jit_test
 noinst_PROGRAMS += pcre2_jit_test
-pcre2_jit_test_SOURCES = pcre2_jit_test.c
+pcre2_jit_test_SOURCES = src/pcre2_jit_test.c
 pcre2_jit_test_CFLAGS = $(AM_CFLAGS)
 pcre2_jit_test_LDADD =
 if WITH_PCRE8

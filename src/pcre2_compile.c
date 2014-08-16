@@ -7256,8 +7256,8 @@ Returns:        pointer to compiled data block, or NULL on error,
 */
 
 PCRE2_EXP_DEFN pcre2_code * PCRE2_CALL_CONVENTION
-pcre2_compile(PCRE2_SPTR pattern, int patlen, uint32_t options,
-   int *errorptr, PCRE2_OFFSET *erroroffset, pcre2_compile_context *ccontext)
+pcre2_compile(PCRE2_SPTR pattern, PCRE2_SIZE patlen, uint32_t options,
+   int *errorptr, PCRE2_SIZE *erroroffset, pcre2_compile_context *ccontext)
 {
 BOOL utf;                               /* Set TRUE for UTF mode */
 pcre2_real_code *re = NULL;             /* What we will return */
@@ -7324,10 +7324,12 @@ if (ccontext == NULL)
   ccontext = &default_context;
   }
 
-/* A negative pattern length means "zero-terminated". Otherwise, we make
-a copy of the pattern and add a zero. */
+/* A zero-terminated pattern is indicated by the special length value 
+PCRE2_ZERO_TERMINATED. Otherwise, we make a copy of the pattern and add a zero, 
+to ensure that it is always possible to look one code unit beyond the end of 
+the pattern's characters. */
 
-if (patlen < 0) patlen = PRIV(strlen)(pattern); else
+if (patlen == PCRE2_ZERO_TERMINATED) patlen = PRIV(strlen)(pattern); else
   {
   if (patlen < COPIED_PATTERN_SIZE)
     copied_pattern = stack_copied_pattern;
@@ -7473,7 +7475,7 @@ if (utf)
     goto HAD_ERROR;
     }
   if ((options & PCRE2_NO_UTF_CHECK) == 0 &&
-       (errorcode = PRIV(valid_utf)(pattern, -1, erroroffset)) != 0)
+       (errorcode = PRIV(valid_utf)(pattern, patlen, erroroffset)) != 0)
     goto HAD_ERROR;
   }
 

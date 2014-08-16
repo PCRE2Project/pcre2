@@ -58,7 +58,7 @@ strings. */
 /* This function should never be called when UTF is not supported. */
 
 int
-PRIV(valid_utf)(PCRE2_SPTR string, int length, PCRE2_OFFSET *erroroffset)
+PRIV(valid_utf)(PCRE2_SPTR string, PCRE2_SIZE length, PCRE2_SIZE *erroroffset)
 {
 (void)string;
 (void)length;
@@ -81,7 +81,7 @@ invalid string are then undefined.
 
 Arguments:
   string       points to the string
-  length       length of string, or -1 if the string is zero-terminated
+  length       length of string
   errp         pointer to an error position offset variable
 
 Returns:       == 0    if the string is a valid UTF string
@@ -89,16 +89,10 @@ Returns:       == 0    if the string is a valid UTF string
 */
 
 int
-PRIV(valid_utf)(PCRE2_SPTR string, int length, PCRE2_OFFSET *erroroffset)
+PRIV(valid_utf)(PCRE2_SPTR string, PCRE2_SIZE length, PCRE2_SIZE *erroroffset)
 {
 register PCRE2_SPTR p;
 register uint32_t c;
-
-if (length < 0)
-  {
-  for (p = string; *p != 0; p++);
-  length = (int)(p - string);
-  }
 
 /* ----------------- Check a UTF-8 string ----------------- */
 
@@ -155,7 +149,7 @@ for (p = string; length-- > 0; p++)
     }
 
   ab = PRIV(utf8_table4)[c & 0x3f];     /* Number of additional bytes (1-5) */
-  if (length < (int)ab)                 /* Missing bytes */
+  if (length < ab)                      /* Missing bytes */
     {
     *erroroffset = (int)(p - string);
     switch(ab - length)

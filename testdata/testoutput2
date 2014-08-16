@@ -13671,5 +13671,13 @@ No match
     cd 
  0: 
  0+ cd
+    
+# This should test both paths for processing OP_RECURSE. 
+
+/(?(R)a+|(?R)b)/
+    aaaabcde
+ 0: aaaab
+    aaaabcde\=ovector=100
+ 0: aaaab
 
 # End of testinput2 

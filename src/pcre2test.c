@@ -401,7 +401,7 @@ typedef struct modstruct {
   uint16_t      which;
   uint16_t      type;
   uint32_t      value;
-  PCRE2_OFFSET  offset;
+  PCRE2_SIZE    offset;
 } modstruct;
 
 static modstruct modlist[] = {
@@ -1758,7 +1758,7 @@ free(block);
 
 /* For recursion malloc/free, to test stacking calls */
 
-#ifdef NO_RECURSE
+#ifdef HEAP_MATCH_RECURSE
 static void *my_stack_malloc(size_t size, void *data)
 {
 void *block = malloc(size);
@@ -1775,7 +1775,7 @@ if (show_memory)
   fprintf(outfile, "stack_free       %p\n", block);
 free(block);
 }
-#endif  /* NO_RECURSE */
+#endif  /* HEAP_MATCH_RECURSE */
 
 
 /*************************************************
@@ -2422,7 +2422,7 @@ static void *
 check_modifier(modstruct *m, int ctx, patctl *pctl, datctl *dctl, uint32_t c)
 {
 void *field = NULL;
-PCRE2_OFFSET offset = m->offset;
+PCRE2_SIZE offset = m->offset;
 
 if (restrict_for_perl_test) switch(m->which)
   {
@@ -2448,7 +2448,7 @@ switch (m->which)
   /* Fall through for something that can also be in a match context. In this
   case the offset is taken from the other field. */
 
-  offset = (PCRE2_OFFSET)(m->value);
+  offset = (PCRE2_SIZE)(m->value);
 
   case MOD_CTM:  /* Match context modifier */
   if (ctx == CTX_DEFDAT) field = PTR(default_dat_context);
@@ -3310,7 +3310,7 @@ uint8_t *p = buffer;
 const uint8_t *use_tables;
 unsigned int delimiter = *p++;
 int patlen, errorcode;
-PCRE2_OFFSET erroroffset;
+PCRE2_SIZE erroroffset;
 
 /* Initialize the context and pattern/data controls for this test from the
 defaults. */
@@ -4403,7 +4403,7 @@ for (gmatched = 0;; gmatched++)
     {
     int i;
     uint8_t *nptr;
-    PCRE2_OFFSET *ovector;
+    PCRE2_SIZE *ovector;
 
     /* This is a check against a lunatic return value. */
 
@@ -4439,8 +4439,8 @@ for (gmatched = 0;; gmatched++)
     ovector = FLD(match_data, ovector);
     for (i = 0; i < 2*capcount; i += 2)
       {
-      PCRE2_OFFSET start = ovector[i];
-      PCRE2_OFFSET end = ovector[i+1];
+      PCRE2_SIZE start = ovector[i];
+      PCRE2_SIZE end = ovector[i+1];
 
       if (start > end)
         {
@@ -4643,7 +4643,7 @@ for (gmatched = 0;; gmatched++)
 
   else if (capcount == PCRE2_ERROR_PARTIAL)
     {
-    PCRE2_OFFSET leftchar = FLD(match_data, leftchar);
+    PCRE2_SIZE leftchar = FLD(match_data, leftchar);
     fprintf(outfile, "Partial match");
     if (leftchar != FLD(match_data, startchar))
       fprintf(outfile, " at offset %d", (int)FLD(match_data, startchar));
@@ -4685,8 +4685,8 @@ for (gmatched = 0;; gmatched++)
   else if (g_notempty != 0)   /* There was a previous null match */
     {
     uint16_t nl = FLD(compiled_code, newline_convention);
-    PCRE2_OFFSET start_offset = dat_datctl.offset;    /* Where the match was */
-    PCRE2_OFFSET end_offset = start_offset + 1;
+    PCRE2_SIZE start_offset = dat_datctl.offset;    /* Where the match was */
+    PCRE2_SIZE end_offset = start_offset + 1;
 
     if ((nl == PCRE2_NEWLINE_CRLF || nl == PCRE2_NEWLINE_ANY ||
          nl == PCRE2_NEWLINE_ANYCRLF) &&
@@ -4765,7 +4765,7 @@ for (gmatched = 0;; gmatched++)
 
   if ((dat_datctl.control & CTL_ANYGLOB) == 0) break; else
     {
-    PCRE2_OFFSET end_offset = FLD(match_data, ovector)[1];
+    PCRE2_SIZE end_offset = FLD(match_data, ovector)[1];
 
     /* We must now set up for the next iteration of a global search. If we have
     matched an empty string, first check to see if we are at the end of the
@@ -5278,7 +5278,7 @@ if (test_mode == PCRE8_MODE)
   default_dat_context8 = pcre2_match_context_create_8(general_context8);
   dat_context8 = pcre2_match_context_create_8(general_context8);
   match_data8 = pcre2_match_data_create_8(max_oveccount, general_context8);
-#ifdef NO_RECURSE
+#ifdef HEAP_MATCH_RECURSE
   (void)pcre2_set_recursion_memory_management_8(default_dat_context8,
     &my_stack_malloc, &my_stack_free, NULL);  
 #endif
@@ -5295,7 +5295,7 @@ if (test_mode == PCRE16_MODE)
   default_dat_context16 = pcre2_match_context_create_16(general_context16);
   dat_context16 = pcre2_match_context_create_16(general_context16);
   match_data16 = pcre2_match_data_create_16(max_oveccount, general_context16);
-#ifdef NO_RECURSE
+#ifdef HEAP_MATCH_RECURSE
   (void)pcre2_set_recursion_memory_management_16(default_dat_context16,
     &my_stack_malloc, &my_stack_free, NULL);  
 #endif
@@ -5312,7 +5312,7 @@ if (test_mode == PCRE32_MODE)
   default_dat_context32 = pcre2_match_context_create_32(general_context32);
   dat_context32 = pcre2_match_context_create_32(general_context32);
   match_data32 = pcre2_match_data_create_32(max_oveccount, general_context32);
-#ifdef NO_RECURSE
+#ifdef HEAP_MATCH_RECURSE
   (void)pcre2_set_recursion_memory_management_32(default_dat_context32,
     &my_stack_malloc, &my_stack_free, NULL);  
 #endif

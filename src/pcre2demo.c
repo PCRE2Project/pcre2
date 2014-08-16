@@ -77,8 +77,8 @@ int utf8;
 uint32_t option_bits;
 uint32_t newline;
 
-PCRE2_OFFSET erroroffset;
-PCRE2_OFFSET *ovector;
+PCRE2_SIZE erroroffset;
+PCRE2_SIZE *ovector;
 
 size_t subject_length;
 pcre2_match_data *match_data;
@@ -314,7 +314,7 @@ crlf_is_newline = newline == PCRE2_NEWLINE_ANY ||
 for (;;)
   {
   uint32_t options = 0;                    /* Normally no options */
-  PCRE2_OFFSET start_offset = ovector[1];  /* Start at end of previous match */
+  PCRE2_SIZE start_offset = ovector[1];  /* Start at end of previous match */
 
   /* If the previous match was for an empty string, we are finished if we are
   at the end of the subject. Otherwise, arrange to run another match at the

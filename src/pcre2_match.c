@@ -104,16 +104,17 @@ for any one of them can use a range. */
 #define MATCH_BACKTRACK_MAX MATCH_THEN
 #define MATCH_BACKTRACK_MIN MATCH_COMMIT
 
-/* Maximum number of ints of offset to save on the stack for recursive calls.
-If the offset vector is bigger, malloc is used. This should be a multiple of 3,
-because the offset vector is always a multiple of 3 long. */
-
-#define REC_STACK_SAVE_MAX 30
-
 /* Min and max values for the common repeats; for the maxima, 0 => infinity */
 
 static const char rep_min[] = { 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, };
 static const char rep_max[] = { 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, };
+
+/* Maximum number of ovector elements that can be saved on the system stack
+when processing OP_RECURSE in non-HEAP_MATCH_RECURSE mode. If the ovector is
+bigger, malloc() is used. This value should be a multiple of 3, because the
+ovector length is always a multiple of 3. */
+
+#define OP_RECURSE_STACK_SAVE_MAX 45
 
 
 
@@ -129,11 +130,11 @@ subject bytes matched may be different to the number of reference bytes.
 Arguments:
   offset      index into the offset vector
   eptr        pointer into the subject
-  length      length of reference to be matched (number of bytes)
+  length      length of reference to be matched (number of code units)
   mb          points to match block
   caseless    TRUE if caseless
 
-Returns:      >= 0 the number of subject bytes matched
+Returns:      >= 0 the number of subject code units matched
               -1 no match
               -2 partial match; always given if at end subject
 */
@@ -230,7 +231,7 @@ return (int)(eptr - eptr_start);
                    RECURSION IN THE match() FUNCTION
 
 The match() function is highly recursive, though not every recursive call
-increases the recursive depth. Nevertheless, some regular expressions can cause
+increases the recursion depth. Nevertheless, some regular expressions can cause
 it to recurse to a great depth. I was writing for Unix, so I just let it call
 itself recursively. This uses the stack for saving everything that has to be
 saved for a recursive call. On Unix, the stack can be large, and this works
@@ -241,9 +242,9 @@ programs that use a lot of stack. (This despite the fact that every last chip
 has oodles of memory these days, and techniques for extending the stack have
 been known for decades.) So....
 
-There is a fudge, triggered by defining NO_RECURSE, which avoids recursive
-calls by keeping local variables that need to be preserved in blocks of memory
-obtained from malloc() instead instead of on the stack. Macros are used to
+There is a fudge, triggered by defining HEAP_MATCH_RECURSE, which avoids
+recursive calls by keeping local variables that need to be preserved in blocks
+of memory on the heap instead instead of on the stack. Macros are used to
 achieve this so that the actual code doesn't look very different to what it
 always used to.
 
@@ -274,11 +275,10 @@ enum { RM1=1, RM2,  RM3,  RM4,  RM5,  RM6,  RM7,  RM8,  RM9,  RM10,
        RM51,  RM52, RM53, RM54, RM55, RM56, RM57, RM58, RM59, RM60,
        RM61,  RM62, RM63, RM64, RM65, RM66, RM67 };
 
-/* These versions of the macros use the stack, as normal. There are debugging
-versions and production versions. Note that the "rw" argument of RMATCH isn't
-actually used in this definition. */
+/* These versions of the macros use the stack, as normal. Note that the "rw"
+argument of RMATCH isn't actually used in this definition. */
 
-#ifndef NO_RECURSE
+#ifndef HEAP_MATCH_RECURSE
 #define REGISTER register
 #define RMATCH(ra,rb,rc,rd,re,rw) \
   rrc = match(ra,rb,mstart,rc,rd,re,rdepth+1)
@@ -350,10 +350,9 @@ typedef struct heapframe {
   
   eptrblock *Xeptrb;
 
-  PCRE2_OFFSET Xoffset;
-  PCRE2_OFFSET Xoffset_top;
-  PCRE2_OFFSET Xstacksave[REC_STACK_SAVE_MAX];
-  PCRE2_OFFSET Xsave_offset1, Xsave_offset2, Xsave_offset3;
+  PCRE2_SIZE Xoffset;
+  PCRE2_SIZE Xoffset_top;
+  PCRE2_SIZE Xsave_offset1, Xsave_offset2, Xsave_offset3;
 
   uint32_t Xfc;
   uint32_t Xnumber;
@@ -393,6 +392,99 @@ typedef struct heapframe {
 
 /***************************************************************************
 ***************************************************************************/
+
+
+/* When HEAP_MATCH_RECURSE is not defined, the match() function implements
+backtrack points by calling itself recursively in all but one case. The one
+special case is when processing OP_RECURSE, which specifies recursion in the
+pattern. The entire ovector must be saved and restored while processing 
+OP_RECURSE. If the ovector is small enough, instead of calling match() 
+directly, op_recurse_ovecsave() is called. This function uses the system stack 
+to save the ovector while calling match() to process the pattern recursion. */
+
+#ifndef HEAP_MATCH_RECURSE
+
+/* We need a prototype for match() because it is mutually recursive with
+op_recurse_ovecsave(). */
+
+static int
+match(REGISTER PCRE2_SPTR eptr, REGISTER PCRE2_SPTR ecode, PCRE2_SPTR mstart, 
+  PCRE2_SIZE offset_top, match_block *mb, eptrblock *eptrb, uint32_t rdepth);
+
+
+/*************************************************
+*      Process OP_RECURSE, stacking ovector      *
+*************************************************/
+
+/* When this function is called, mb->recursive has already been updated to 
+point to a new recursion data block, and all its fields other than ovec_save
+have been set.
+
+Arguments:
+  eptr        pointer to current character in subject
+  callpat     the recursion point in the pattern
+  mstart      pointer to the current match start position (can be modified
+                by encountering \K)
+  offset_top  current top pointer
+  mb          pointer to "static" info block for the match
+  eptrb       pointer to chain of blocks containing eptr at start of
+                brackets - for testing for empty matches
+  rdepth      the recursion depth
+  
+Returns:      a match() return code
+*/        
+
+static int
+op_recurse_ovecsave(REGISTER PCRE2_SPTR eptr, PCRE2_SPTR callpat,
+  PCRE2_SPTR mstart, PCRE2_SIZE offset_top, match_block *mb, eptrblock *eptrb,
+  uint32_t rdepth)
+{
+register int rrc;
+BOOL cbegroup = *callpat >= OP_SBRA;
+recursion_info *new_recursive = mb->recursive;
+PCRE2_SIZE ovecsave[OP_RECURSE_STACK_SAVE_MAX];
+
+/* Save the ovector */
+
+new_recursive->ovec_save = ovecsave;
+memcpy(ovecsave, mb->ovector, new_recursive->saved_max * sizeof(PCRE2_SIZE));
+
+/* Do the recursion. After processing each alternative, restore the ovector
+data and the last captured value. */
+
+do
+  {
+  if (cbegroup) mb->match_function_type = MATCH_CBEGROUP;
+  rrc = match(eptr, callpat + PRIV(OP_lengths)[*callpat], mstart, offset_top, 
+    mb, eptrb, rdepth + 1);
+  memcpy(mb->ovector, new_recursive->ovec_save,
+      new_recursive->saved_max * sizeof(PCRE2_SIZE));
+  mb->capture_last = new_recursive->saved_capture_last;
+  if (rrc == MATCH_MATCH || rrc == MATCH_ACCEPT) return rrc;
+
+  /* PCRE does not allow THEN, SKIP, PRUNE or COMMIT to escape beyond a
+  recursion; they cause a NOMATCH for the entire recursion. These codes
+  are defined in a range that can be tested for. */
+
+  if (rrc >= MATCH_BACKTRACK_MIN && rrc <= MATCH_BACKTRACK_MAX)
+    return MATCH_NOMATCH;
+
+  /* Any return code other than NOMATCH is an error. Otherwise, advance to the
+  next alternative or to the end of the recursing subpattern. If there were
+  nested recursions, mb->recursive might be changed, so reset it before
+  looping. */
+
+  if (rrc != MATCH_NOMATCH) return rrc;
+  mb->recursive = new_recursive;
+  callpat += GET(callpat, 1);
+  }
+while (*callpat == OP_ALT);  /* Loop for the alternatives */
+
+/* None of the alternatives matched. */
+
+return MATCH_NOMATCH;
+}
+#endif  /* HEAP_MATCH_RECURSE */
 
 
 
@@ -451,9 +543,8 @@ Returns:       MATCH_MATCH if matched            )  these values are >= 0
 */
 
 static int
-match(REGISTER PCRE2_SPTR eptr, REGISTER PCRE2_SPTR ecode,
-  PCRE2_SPTR mstart, PCRE2_OFFSET offset_top, match_block *mb, eptrblock *eptrb,
-  uint32_t rdepth)
+match(REGISTER PCRE2_SPTR eptr, REGISTER PCRE2_SPTR ecode, PCRE2_SPTR mstart, 
+  PCRE2_SIZE offset_top, match_block *mb, eptrblock *eptrb, uint32_t rdepth)
 {
 /* These variables do not need to be preserved over recursion in this function,
 so they can be ordinary variables in all cases. Mark some of them with
@@ -475,7 +566,7 @@ whenever RMATCH() does a "recursion". See the macro definitions above. Putting
 the top-level on the stack rather than malloc-ing them all gives a performance
 boost in many cases where there is not much "recursion". */
 
-#ifdef NO_RECURSE
+#ifdef HEAP_MATCH_RECURSE
 heapframe *frame = (heapframe *)mb->match_frames_base;
 
 /* Copy in the original argument variables */
@@ -535,7 +626,6 @@ HEAP_RECURSE:
 #define save_offset1       frame->Xsave_offset1
 #define save_offset2       frame->Xsave_offset2
 #define save_offset3       frame->Xsave_offset3
-#define stacksave          frame->Xstacksave
 
 #define condition          frame->Xcondition
 #define cur_is_word        frame->Xcur_is_word
@@ -543,11 +633,11 @@ HEAP_RECURSE:
 
 #define newptrb            frame->Xnewptrb
 
-/* When recursion is being used, local variables are allocated on the stack and
-get preserved during recursion in the normal way. In this environment, fi and
-i, and fc and c, can be the same variables. */
+/* When normal stack-based recursion is being used for match(), local variables
+are allocated on the stack and get preserved during recursion in the usual way.
+In this environment, fi and i, and fc and c, can be the same variables. */
 
-#else         /* NO_RECURSE not defined */
+#else         /* HEAP_MATCH_RECURSE not defined */
 #define fi i
 #define fc c
 
@@ -569,9 +659,8 @@ PCRE2_SPTR pp;
 PCRE2_SPTR prev;
 PCRE2_SPTR saved_eptr;
 
-PCRE2_OFFSET offset;
-PCRE2_OFFSET stacksave[REC_STACK_SAVE_MAX];
-PCRE2_OFFSET save_offset1, save_offset2, save_offset3;
+PCRE2_SIZE offset;
+PCRE2_SIZE save_offset1, save_offset2, save_offset3;
 
 uint32_t number;
 uint32_t op;
@@ -597,7 +686,7 @@ BOOL prev_is_word;
 
 eptrblock newptrb;
 recursion_info new_recursive;
-#endif  /* NO_RECURSE not defined */
+#endif  /* HEAP_MATCH_RECURSE not defined */
 
 /* To save space on the stack and in the heap frame, I have doubled up on some
 of the local variables that are used only in localised parts of the code, but
@@ -622,19 +711,19 @@ prop_fail_result = 0;
 
 
 /* This label is used for tail recursion, which is used in a few cases even
-when NO_RECURSE is not defined, in order to reduce the amount of stack that is
-used. Thanks to Ian Taylor for noticing this possibility and sending the
-original patch. */
+when HEAP_MATCH_RECURSE is not defined, in order to reduce the amount of stack
+that is used. Thanks to Ian Taylor for noticing this possibility and sending
+the original patch. */
 
 TAIL_RECURSE:
 
 /* OK, now we can get on with the real code of the function. Recursive calls
 are specified by the macro RMATCH and RRETURN is used to return. When
-NO_RECURSE is *not* defined, these just turn into a recursive call to match()
-and a "return", respectively. However, RMATCH isn't like a function call
-because it's quite a complicated macro. It has to be used in one particular
-way. This shouldn't, however, impact performance when true recursion is being
-used. */
+HEAP_MATCH_RECURSE is *not* defined, these just turn into a recursive call to
+match() and a "return", respectively. However, RMATCH isn't like a function
+call because it's quite a complicated macro. It has to be used in one
+particular way. This shouldn't, however, impact performance when true recursion
+is being used. */
 
 #ifdef SUPPORT_UTF
 utf = (mb->poptions & PCRE2_UTF) != 0;
@@ -668,7 +757,7 @@ if (mb->match_function_type == MATCH_CBEGROUP)
   mb->match_function_type = 0;
   }
 
-/* Now start processing the opcodes. */
+/* Now, at last, we can start processing the opcodes. */
 
 for (;;)
   {
@@ -1205,9 +1294,9 @@ for (;;)
         cb.callout_number   = ecode[1];
         cb.offset_vector    = mb->ovector;
         cb.subject          = mb->start_subject;
-        cb.subject_length   = (int)(mb->end_subject - mb->start_subject);
-        cb.start_match      = (int)(mstart - mb->start_subject);
-        cb.current_position = (int)(eptr - mb->start_subject);
+        cb.subject_length   = (PCRE2_SIZE)(mb->end_subject - mb->start_subject);
+        cb.start_match      = (PCRE2_SIZE)(mstart - mb->start_subject);
+        cb.current_position = (PCRE2_SIZE)(eptr - mb->start_subject);
         cb.pattern_position = GET(ecode, 2);
         cb.next_item_length = GET(ecode, 2 + LINK_SIZE);
         cb.capture_top      = offset_top/2;
@@ -1230,7 +1319,7 @@ for (;;)
     condition = FALSE;
     switch(condcode = *ecode)
       {
-      case OP_RREF:         /* Numbered group recursion test */
+      case OP_RREF:                  /* Numbered group recursion test */
       if (mb->recursive != NULL)     /* Not recursing => FALSE */
         {
         uint32_t recno = GET2(ecode, 1);   /* Recursion group number*/
@@ -1588,9 +1677,9 @@ for (;;)
       cb.callout_number   = ecode[1];
       cb.offset_vector    = mb->ovector;
       cb.subject          = mb->start_subject;
-      cb.subject_length   = (int)(mb->end_subject - mb->start_subject);
-      cb.start_match      = (int)(mstart - mb->start_subject);
-      cb.current_position = (int)(eptr - mb->start_subject);
+      cb.subject_length   = (PCRE2_SIZE)(mb->end_subject - mb->start_subject);
+      cb.start_match      = (PCRE2_SIZE)(mstart - mb->start_subject);
+      cb.current_position = (PCRE2_SIZE)(eptr - mb->start_subject);
       cb.pattern_position = GET(ecode, 2);
       cb.next_item_length = GET(ecode, 2 + LINK_SIZE);
       cb.capture_top      = offset_top/2;
@@ -1613,7 +1702,7 @@ for (;;)
     all the potential data. There may be up to 65535 such values, which is too
     large to put on the stack, but using malloc for small numbers seems
     expensive. As a compromise, the stack is used when there are no more than
-    REC_STACK_SAVE_MAX values to store; otherwise malloc is used.
+    OP_RECURSE_STACK_SAVE_MAX values to store; otherwise malloc is used.
 
     There are also other values that have to be saved. We use a chained
     sequence of blocks that actually live on the stack. Thanks to Robin Houston
@@ -1626,12 +1715,11 @@ for (;;)
       uint32_t recno;
 
       callpat = mb->start_code + GET(ecode, 1);
-      recno = (callpat == mb->start_code)? 0 :
-        GET2(callpat, 1 + LINK_SIZE);
+      recno = (callpat == mb->start_code)? 0 : GET2(callpat, 1 + LINK_SIZE);
 
-      /* Check for repeating a recursion without advancing the subject pointer.
-      This should catch convoluted mutual recursions. (Some simple cases are
-      caught at compile time.) */
+      /* Check for repeating a pattern recursion without advancing the subject
+      pointer. This should catch convoluted mutual recursions. (Some simple
+      cases are caught at compile time.) */
 
       for (ri = mb->recursive; ri != NULL; ri = ri->prevrec)
         if (recno == ri->group_num && eptr == ri->subject_position)
@@ -1641,6 +1729,7 @@ for (;;)
 
       new_recursive.group_num = recno;
       new_recursive.saved_capture_last = mb->capture_last;
+      new_recursive.saved_max = mb->offset_end;
       new_recursive.subject_position = eptr;
       new_recursive.prevrec = mb->recursive;
       mb->recursive = &new_recursive;
@@ -1649,78 +1738,93 @@ for (;;)
 
       ecode += 1 + LINK_SIZE;
 
-      /* Now save the offset data */
-
-      new_recursive.saved_max = mb->offset_end;
-      if (new_recursive.saved_max <= REC_STACK_SAVE_MAX)
-        new_recursive.offset_save = stacksave;
-      else
+      /* When we are using the system stack for match() recursion we can call a 
+      function that uses the system stack for preserving the ovector while 
+      processing the pattern recursion, but only if the ovector is small
+      enough. */
+      
+#ifndef HEAP_MATCH_RECURSE
+      if (new_recursive.saved_max <= OP_RECURSE_STACK_SAVE_MAX)
         {
-        new_recursive.offset_save = (PCRE2_OFFSET *)
-          (mb->memctl.malloc(new_recursive.saved_max * sizeof(PCRE2_OFFSET),
-            mb->memctl.memory_data));
-        if (new_recursive.offset_save == NULL) RRETURN(PCRE2_ERROR_NOMEMORY);
+        rrc = op_recurse_ovecsave(eptr, callpat, mstart, offset_top, mb, 
+          eptrb, rdepth);
+        mb->recursive = new_recursive.prevrec;
+        if (rrc != MATCH_MATCH && rrc != MATCH_ACCEPT) RRETURN(rrc);
+
+        /* Set where we got to in the subject, and reset the start, in case
+        it was changed by \K. This *is* propagated back out of a recursion,
+        for Perl compatibility. */
+
+        eptr = mb->end_match_ptr;
+        mstart = mb->start_match_ptr;
+        break;   /* End of processing OP_RECURSE */
         }
-      memcpy(new_recursive.offset_save, mb->ovector,
-        new_recursive.saved_max * sizeof(PCRE2_OFFSET));
-
-      /* OK, now we can do the recursion. After processing each alternative,
-      restore the offset data and the last captured value. If there were nested
-      recursions, mb->recursive might be changed, so reset it before looping.
-      */
-
+#endif
+      /* If the ovector is too big, or if we are using the heap for match()
+      recursion, we have to use the heap for saving the ovector. */
+      
+      new_recursive.ovec_save = (PCRE2_SIZE *)
+        (mb->memctl.malloc(new_recursive.saved_max * sizeof(PCRE2_SIZE),
+          mb->memctl.memory_data));
+      if (new_recursive.ovec_save == NULL) RRETURN(PCRE2_ERROR_NOMEMORY);
+      memcpy(new_recursive.ovec_save, mb->ovector,
+        new_recursive.saved_max * sizeof(PCRE2_SIZE));
+      
+      /* Do the recursion. After processing each alternative, restore the
+      ovector data and the last captured value. This code has the same overall
+      logic as the code in the op_recurse_ovecsave() function, but is adapted
+      to use RMATCH/RRETURN and to release the heap block containing the saved
+      ovector. */
+      
       cbegroup = (*callpat >= OP_SBRA);
       do
         {
         if (cbegroup) mb->match_function_type = MATCH_CBEGROUP;
         RMATCH(eptr, callpat + PRIV(OP_lengths)[*callpat], offset_top,
           mb, eptrb, RM6);
-        memcpy(mb->ovector, new_recursive.offset_save,
-            new_recursive.saved_max * sizeof(PCRE2_OFFSET));
+        memcpy(mb->ovector, new_recursive.ovec_save,
+            new_recursive.saved_max * sizeof(PCRE2_SIZE));
         mb->capture_last = new_recursive.saved_capture_last;
         mb->recursive = new_recursive.prevrec;
+         
         if (rrc == MATCH_MATCH || rrc == MATCH_ACCEPT)
           {
-          if (new_recursive.offset_save != stacksave)
-            mb->memctl.free(new_recursive.offset_save, mb->memctl.memory_data);
-
-          /* Set where we got to in the subject, and reset the start in case
+          mb->memctl.free(new_recursive.ovec_save, mb->memctl.memory_data);
+      
+          /* Set where we got to in the subject, and reset the start, in case
           it was changed by \K. This *is* propagated back out of a recursion,
           for Perl compatibility. */
-
+      
           eptr = mb->end_match_ptr;
           mstart = mb->start_match_ptr;
           goto RECURSION_MATCHED;        /* Exit loop; end processing */
           }
-
+      
         /* PCRE does not allow THEN, SKIP, PRUNE or COMMIT to escape beyond a
         recursion; they cause a NOMATCH for the entire recursion. These codes
         are defined in a range that can be tested for. */
-
+      
         if (rrc >= MATCH_BACKTRACK_MIN && rrc <= MATCH_BACKTRACK_MAX)
-          RRETURN(MATCH_NOMATCH);
-
-        /* Any return code other than NOMATCH is an error. */
-
-        if (rrc != MATCH_NOMATCH)
-          {
-          if (new_recursive.offset_save != stacksave)
-            mb->memctl.free(new_recursive.offset_save, mb->memctl.memory_data);
-          RRETURN(rrc);
+          { 
+          rrc = MATCH_NOMATCH;
+          goto RECURSION_RETURN; 
           }
-
+      
+        /* Any return code other than NOMATCH is an error. */
+      
+        if (rrc != MATCH_NOMATCH) goto RECURSION_RETURN;
         mb->recursive = &new_recursive;
         callpat += GET(callpat, 1);
         }
       while (*callpat == OP_ALT);
-
+      
+      RECURSION_RETURN:
       mb->recursive = new_recursive.prevrec;
-      if (new_recursive.offset_save != stacksave)
-        mb->memctl.free(new_recursive.offset_save, mb->memctl.memory_data);
-      RRETURN(MATCH_NOMATCH);
+      mb->memctl.free(new_recursive.ovec_save, mb->memctl.memory_data);
+      RRETURN(rrc);
       }
-
-    RECURSION_MATCHED:
+       
+    RECURSION_MATCHED:      
     break;
 
     /* An alternation is the end of a branch; scan along to find the end of the
@@ -1840,8 +1944,8 @@ for (;;)
 
         if (offset > offset_top)
           {
-          register PCRE2_OFFSET *iptr = mb->ovector + offset_top;
-          register PCRE2_OFFSET *iend = mb->ovector + offset;
+          register PCRE2_SIZE *iptr = mb->ovector + offset_top;
+          register PCRE2_SIZE *iend = mb->ovector + offset;
           while (iptr < iend) *iptr++ = PCRE2_UNSET;
           }
 
@@ -6023,7 +6127,7 @@ for (;;)
 match(), the RRETURN() macro jumps here. The number that is saved in
 frame->Xwhere indicates which label we actually want to return to. */
 
-#ifdef NO_RECURSE
+#ifdef HEAP_MATCH_RECURSE
 #define LBL(val) case val: goto L_RM##val;
 HEAP_RETURN:
 switch (frame->Xwhere)
@@ -6048,7 +6152,7 @@ switch (frame->Xwhere)
   return PCRE2_ERROR_INTERNAL;
   }
 #undef LBL
-#endif  /* NO_RECURSE */
+#endif  /* HEAP_MATCH_RECURSE */
 }
 
 
@@ -6058,7 +6162,7 @@ switch (frame->Xwhere)
 
 Undefine all the macros that were defined above to handle this. */
 
-#ifdef NO_RECURSE
+#ifdef HEAP_MATCH_RECURSE
 #undef eptr
 #undef ecode
 #undef mstart
@@ -6091,10 +6195,9 @@ Undefine all the macros that were defined above to handle this. */
 #undef save_offset1
 #undef save_offset2
 #undef save_offset3
-#undef stacksave
 
 #undef newptrb
-#endif  /* NO_RECURSE */
+#endif  /* HEAP_MATCH_RECURSE */
 
 /* These two are defined as macros in both cases */
 
@@ -6105,7 +6208,7 @@ Undefine all the macros that were defined above to handle this. */
 ***************************************************************************/
 
 
-#ifdef NO_RECURSE
+#ifdef HEAP_MATCH_RECURSE
 /*************************************************
 *          Release allocated heap frames         *
 *************************************************/
@@ -6131,7 +6234,7 @@ while (nextframe != NULL)
   mb->stack_memctl.free(oldframe, mb->stack_memctl.memory_data);
   }
 }
-#endif  /* NO_RECURSE */
+#endif  /* HEAP_MATCH_RECURSE */
 
 
 
@@ -6160,8 +6263,8 @@ Returns:          > 0 => success; value is the number of ovector pairs filled
 */
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
-pcre2_match(const pcre2_code *code, PCRE2_SPTR subject, int length,
-  PCRE2_OFFSET start_offset, uint32_t options, pcre2_match_data *match_data,
+pcre2_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
+  PCRE2_SIZE start_offset, uint32_t options, pcre2_match_data *match_data,
   pcre2_match_context *mcontext)
 {
 int rc;
@@ -6198,23 +6301,24 @@ is used below, and it expects NLBLOCK to be defined as a pointer. */
 match_block actual_match_block;
 match_block *mb = &actual_match_block;
 
-#ifdef NO_RECURSE
+#ifdef HEAP_MATCH_RECURSE
 heapframe frame_zero;
 frame_zero.Xprevframe = NULL;            /* Marks the top level */
 frame_zero.Xnextframe = NULL;            /* None are allocated yet */
 mb->match_frames_base = &frame_zero;
 #endif
 
-/* A negative length implies a zero-terminated subject string. */
+/* A length equal to PCRE2_ZERO_TERMINATED implies a zero-terminated
+subject string. */
 
-if (length < 0) length = PRIV(strlen)(subject);
+if (length == PCRE2_ZERO_TERMINATED) length = PRIV(strlen)(subject);
 
 /* Plausibility checks */
 
 if ((options & ~PUBLIC_MATCH_OPTIONS) != 0) return PCRE2_ERROR_BADOPTION;
 if (code == NULL || subject == NULL || match_data == NULL)
   return PCRE2_ERROR_NULL;
-if ((int)start_offset > length) return PCRE2_ERROR_BADOFFSET;
+if (start_offset > length) return PCRE2_ERROR_BADOFFSET;
 
 /* Check that the first field in the block is the magic number. If it is not,
 return with PCRE2_ERROR_BADMAGIC. However, if the magic number is equal to
@@ -6261,7 +6365,7 @@ if (utf && (options & PCRE2_NO_UTF_CHECK) == 0)
     return match_data->rc;
     }
 #if PCRE2_CODE_UNIT_WIDTH != 32
-  if (start_offset > 0 && (int)start_offset < length &&
+  if (start_offset > 0 && start_offset < length &&
       NOT_FIRSTCHAR(subject[start_offset]))
     return PCRE2_ERROR_BADUTFOFFSET;
 #endif  /* PCRE2_CODE_UNIT_WIDTH != 32 */
@@ -6296,7 +6400,7 @@ if (mcontext == NULL)
   {
   mb->callout = NULL;
   mb->memctl = re->memctl;
-#ifdef NO_RECURSE
+#ifdef HEAP_MATCH_RECURSE
   mb->stack_memctl = re->memctl;
 #endif
   }
@@ -6305,7 +6409,7 @@ else
   mb->callout = mcontext->callout;
   mb->callout_data = mcontext->callout_data;
   mb->memctl = mcontext->memctl;
-#ifdef NO_RECURSE
+#ifdef HEAP_MATCH_RECURSE
   mb->stack_memctl = mcontext->stack_memctl;
 #endif
   }
@@ -6394,7 +6498,7 @@ offsets, and the top third is working space. */
 if (re->top_backref >= match_data->oveccount)
   {
   ocount = re->top_backref * 3 + 3;
-  mb->ovector = (PCRE2_OFFSET *)(mb->memctl.malloc(ocount * sizeof(PCRE2_OFFSET),
+  mb->ovector = (PCRE2_SIZE *)(mb->memctl.malloc(ocount * sizeof(PCRE2_SIZE),
     mb->memctl.memory_data));
   if (mb->ovector == NULL) return PCRE2_ERROR_NOMEMORY;
   using_temporary_offsets = TRUE;
@@ -6417,8 +6521,8 @@ in case they inspect these fields. */
 
 if (ocount > 0)
   {
-  register PCRE2_OFFSET *iptr = mb->ovector + ocount;
-  register PCRE2_OFFSET *iend = iptr - re->top_bracket;
+  register PCRE2_SIZE *iptr = mb->ovector + ocount;
+  register PCRE2_SIZE *iend = iptr - re->top_bracket;
   if (iend < mb->ovector + 2) iend = mb->ovector + 2;
   while (--iptr >= iend) *iptr = PCRE2_UNSET;
   mb->ovector[0] = mb->ovector[1] = PCRE2_UNSET;
@@ -6782,7 +6886,7 @@ for(;;)
 
 ENDLOOP:
 
-#ifdef NO_RECURSE
+#ifdef HEAP_MATCH_RECURSE
 release_match_heapframes(&frame_zero, mb);
 #endif
 
@@ -6810,7 +6914,7 @@ if (rc == MATCH_MATCH || rc == MATCH_ACCEPT)
     if (arg_offset_max >= 4)
       {
       memcpy(match_data->ovector + 2, mb->ovector + 2,
-        (arg_offset_max - 2) * sizeof(PCRE2_OFFSET));
+        (arg_offset_max - 2) * sizeof(PCRE2_SIZE));
       }
     if (mb->end_offset_top > arg_offset_max) mb->capture_last |= OVFLBIT;
     mb->memctl.free(mb->ovector, mb->memctl.memory_data);
@@ -6834,7 +6938,7 @@ if (rc == MATCH_MATCH || rc == MATCH_ACCEPT)
 
   if (mb->end_offset_top/2 <= re->top_bracket)
     {
-    register PCRE2_OFFSET *iptr, *iend;
+    register PCRE2_SIZE *iptr, *iend;
     int resetcount = re->top_bracket + 1;
     if (resetcount > match_data->oveccount) resetcount = match_data->oveccount;
     iptr = match_data->ovector + mb->end_offset_top;
