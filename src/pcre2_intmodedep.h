@@ -682,14 +682,22 @@ typedef struct compile_block {
   BOOL dupnames;                   /* Duplicate names exist */
 } compile_block;
 
+/* Structure for keeping a chain of heap blocks used for saving ovectors
+during pattern recursion when the ovector is larger than can be saved on
+the system stack. */
+
+typedef struct ovecsave_frame {
+  struct ovecsave_frame *next;     /* Next frame on free chain */
+  PCRE2_SIZE saved_ovec[1];        /* First vector element */
+} ovecsave_frame;    
+
 /* Structure for items in a linked list that represents an explicit recursive
 call within the pattern; used by pcre_match(). */
 
 typedef struct recursion_info {
   struct recursion_info *prevrec;  /* Previous recursion record (or NULL) */
   unsigned int group_num;          /* Number of group that was called */
-  PCRE2_SIZE *ovec_save;           /* Pointer to start of saved ovector */
-  uint32_t saved_max;              /* Number of saved offsets */
+  PCRE2_SIZE *ovec_save;           /* Pointer to saved ovector frame */
   uint32_t saved_capture_last;     /* Last capture number */
   PCRE2_SPTR subject_position;     /* Position at start of recursion */
 } recursion_info;
@@ -758,6 +766,7 @@ typedef struct match_block {
   PCRE2_UCHAR nl[4];              /* Newline string when fixed */
   eptrblock *eptrchain;           /* Chain of eptrblocks for tail recursions */
   recursion_info *recursive;      /* Linked list of recursion data */
+  ovecsave_frame *ovecsave_chain; /* Linked list of free ovecsave blocks */ 
   void  *callout_data;            /* To pass back to callouts */
   int (*callout)(pcre2_callout_block *);  /* Callout function or NULL */
 #ifdef HEAP_MATCH_RECURSE

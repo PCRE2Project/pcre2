@@ -343,7 +343,7 @@ typedef struct heapframe {
   PCRE2_SPTR Xmstart;
   PCRE2_SPTR Xcallpat;
   PCRE2_SPTR Xdata;
-  PCRE2_SPTR Xnext;
+  PCRE2_SPTR Xnext_ecode;
   PCRE2_SPTR Xpp;
   PCRE2_SPTR Xprev;
   PCRE2_SPTR Xsaved_eptr;
@@ -447,7 +447,7 @@ PCRE2_SIZE ovecsave[OP_RECURSE_STACK_SAVE_MAX];
 /* Save the ovector */
 
 new_recursive->ovec_save = ovecsave;
-memcpy(ovecsave, mb->ovector, new_recursive->saved_max * sizeof(PCRE2_SIZE));
+memcpy(ovecsave, mb->ovector, mb->offset_end * sizeof(PCRE2_SIZE));
 
 /* Do the recursion. After processing each alternative, restore the ovector
 data and the last captured value. */
@@ -458,7 +458,7 @@ do
   rrc = match(eptr, callpat + PRIV(OP_lengths)[*callpat], mstart, offset_top, 
     mb, eptrb, rdepth + 1);
   memcpy(mb->ovector, new_recursive->ovec_save,
-      new_recursive->saved_max * sizeof(PCRE2_SIZE));
+      mb->offset_end * sizeof(PCRE2_SIZE));
   mb->capture_last = new_recursive->saved_capture_last;
   if (rrc == MATCH_MATCH || rrc == MATCH_ACCEPT) return rrc;
 
@@ -606,7 +606,7 @@ HEAP_RECURSE:
 #define callpat            frame->Xcallpat
 #define codelink           frame->Xcodelink
 #define data               frame->Xdata
-#define next               frame->Xnext
+#define next_ecode         frame->Xnext_ecode
 #define pp                 frame->Xpp
 #define prev               frame->Xprev
 #define saved_eptr         frame->Xsaved_eptr
@@ -654,7 +654,7 @@ PCRE2_SPTR charptr;
 #endif
 PCRE2_SPTR callpat;
 PCRE2_SPTR data;
-PCRE2_SPTR next;
+PCRE2_SPTR next_ecode;
 PCRE2_SPTR pp;
 PCRE2_SPTR prev;
 PCRE2_SPTR saved_eptr;
@@ -897,9 +897,9 @@ for (;;)
         }
       if (rrc == MATCH_THEN)
         {
-        next = ecode + GET(ecode,1);
-        if (mb->start_match_ptr < next &&
-            (*ecode == OP_ALT || *next == OP_ALT))
+        next_ecode = ecode + GET(ecode,1);
+        if (mb->start_match_ptr < next_ecode &&
+            (*ecode == OP_ALT || *next_ecode == OP_ALT))
           rrc = MATCH_NOMATCH;
         }
 
@@ -1001,9 +1001,9 @@ for (;;)
 
         if (rrc == MATCH_THEN)
           {
-          next = ecode + GET(ecode,1);
-          if (mb->start_match_ptr < next &&
-              (*ecode == OP_ALT || *next == OP_ALT))
+          next_ecode = ecode + GET(ecode,1);
+          if (mb->start_match_ptr < next_ecode &&
+              (*ecode == OP_ALT || *next_ecode == OP_ALT))
             rrc = MATCH_NOMATCH;
           }
 
@@ -1082,9 +1082,9 @@ for (;;)
 
       if (rrc == MATCH_THEN)
         {
-        next = ecode + GET(ecode,1);
-        if (mb->start_match_ptr < next &&
-            (*ecode == OP_ALT || *next == OP_ALT))
+        next_ecode = ecode + GET(ecode,1);
+        if (mb->start_match_ptr < next_ecode &&
+            (*ecode == OP_ALT || *next_ecode == OP_ALT))
           rrc = MATCH_NOMATCH;
         }
 
@@ -1172,9 +1172,9 @@ for (;;)
 
         if (rrc == MATCH_THEN)
           {
-          next = ecode + GET(ecode,1);
-          if (mb->start_match_ptr < next &&
-              (*ecode == OP_ALT || *next == OP_ALT))
+          next_ecode = ecode + GET(ecode,1);
+          if (mb->start_match_ptr < next_ecode &&
+              (*ecode == OP_ALT || *next_ecode == OP_ALT))
             rrc = MATCH_NOMATCH;
           }
 
@@ -1245,9 +1245,9 @@ for (;;)
 
       if (rrc == MATCH_THEN)
         {
-        next = ecode + GET(ecode,1);
-        if (mb->start_match_ptr < next &&
-            (*ecode == OP_ALT || *next == OP_ALT))
+        next_ecode = ecode + GET(ecode,1);
+        if (mb->start_match_ptr < next_ecode &&
+            (*ecode == OP_ALT || *next_ecode == OP_ALT))
           rrc = MATCH_NOMATCH;
         }
 
@@ -1525,9 +1525,9 @@ for (;;)
 
       if (rrc == MATCH_THEN)
         {
-        next = ecode + GET(ecode,1);
-        if (mb->start_match_ptr < next &&
-            (*ecode == OP_ALT || *next == OP_ALT))
+        next_ecode = ecode + GET(ecode,1);
+        if (mb->start_match_ptr < next_ecode &&
+            (*ecode == OP_ALT || *next_ecode == OP_ALT))
           rrc = MATCH_NOMATCH;
         }
 
@@ -1592,9 +1592,9 @@ for (;;)
         THEN. */
 
         case MATCH_THEN:
-        next = ecode + GET(ecode,1);
-        if (mb->start_match_ptr < next &&
-            (*ecode == OP_ALT || *next == OP_ALT))
+        next_ecode = ecode + GET(ecode,1);
+        if (mb->start_match_ptr < next_ecode &&
+            (*ecode == OP_ALT || *next_ecode == OP_ALT))
           {
           rrc = MATCH_NOMATCH;
           break;
@@ -1711,6 +1711,7 @@ for (;;)
 
     case OP_RECURSE:
       {
+      ovecsave_frame *fr; 
       recursion_info *ri;
       uint32_t recno;
 
@@ -1729,7 +1730,6 @@ for (;;)
 
       new_recursive.group_num = recno;
       new_recursive.saved_capture_last = mb->capture_last;
-      new_recursive.saved_max = mb->offset_end;
       new_recursive.subject_position = eptr;
       new_recursive.prevrec = mb->recursive;
       mb->recursive = &new_recursive;
@@ -1744,7 +1744,7 @@ for (;;)
       enough. */
       
 #ifndef HEAP_MATCH_RECURSE
-      if (new_recursive.saved_max <= OP_RECURSE_STACK_SAVE_MAX)
+      if (mb->offset_end <= OP_RECURSE_STACK_SAVE_MAX)
         {
         rrc = op_recurse_ovecsave(eptr, callpat, mstart, offset_top, mb, 
           eptrb, rdepth);
@@ -1761,14 +1761,25 @@ for (;;)
         }
 #endif
       /* If the ovector is too big, or if we are using the heap for match()
-      recursion, we have to use the heap for saving the ovector. */
+      recursion, we have to use the heap for saving the ovector. Used ovecsave 
+      frames are kept on a chain and re-used. This makes a small improvement in 
+      execution time on Linux. */
       
-      new_recursive.ovec_save = (PCRE2_SIZE *)
-        (mb->memctl.malloc(new_recursive.saved_max * sizeof(PCRE2_SIZE),
-          mb->memctl.memory_data));
-      if (new_recursive.ovec_save == NULL) RRETURN(PCRE2_ERROR_NOMEMORY);
+      if (mb->ovecsave_chain != NULL)
+        {
+        new_recursive.ovec_save = mb->ovecsave_chain->saved_ovec;
+        mb->ovecsave_chain = mb->ovecsave_chain->next;
+        }
+      else
+        {
+        fr = (ovecsave_frame *)(mb->memctl.malloc(sizeof(ovecsave_frame *) +
+          mb->offset_end * sizeof(PCRE2_SIZE), mb->memctl.memory_data));
+        if (fr == NULL) RRETURN(PCRE2_ERROR_NOMEMORY);
+        new_recursive.ovec_save = fr->saved_ovec;
+        }     
+           
       memcpy(new_recursive.ovec_save, mb->ovector,
-        new_recursive.saved_max * sizeof(PCRE2_SIZE));
+        mb->offset_end * sizeof(PCRE2_SIZE));
       
       /* Do the recursion. After processing each alternative, restore the
       ovector data and the last captured value. This code has the same overall
@@ -1783,13 +1794,16 @@ for (;;)
         RMATCH(eptr, callpat + PRIV(OP_lengths)[*callpat], offset_top,
           mb, eptrb, RM6);
         memcpy(mb->ovector, new_recursive.ovec_save,
-            new_recursive.saved_max * sizeof(PCRE2_SIZE));
+            mb->offset_end * sizeof(PCRE2_SIZE));
         mb->capture_last = new_recursive.saved_capture_last;
         mb->recursive = new_recursive.prevrec;
          
         if (rrc == MATCH_MATCH || rrc == MATCH_ACCEPT)
           {
-          mb->memctl.free(new_recursive.ovec_save, mb->memctl.memory_data);
+          fr = (ovecsave_frame *)
+            ((uint8_t *)new_recursive.ovec_save - sizeof(ovecsave_frame *));
+          fr->next = mb->ovecsave_chain;
+          mb->ovecsave_chain = fr;  
       
           /* Set where we got to in the subject, and reset the start, in case
           it was changed by \K. This *is* propagated back out of a recursion,
@@ -1820,7 +1834,10 @@ for (;;)
       
       RECURSION_RETURN:
       mb->recursive = new_recursive.prevrec;
-      mb->memctl.free(new_recursive.ovec_save, mb->memctl.memory_data);
+      fr = (ovecsave_frame *)
+        ((uint8_t *)new_recursive.ovec_save - sizeof(ovecsave_frame *));
+      fr->next = mb->ovecsave_chain;
+      mb->ovecsave_chain = fr;  
       RRETURN(rrc);
       }
        
@@ -1841,25 +1858,25 @@ for (;;)
     optional ones preceded by BRAZERO or BRAMINZERO. */
 
     case OP_BRAZERO:
-    next = ecode + 1;
-    RMATCH(eptr, next, offset_top, mb, eptrb, RM10);
+    next_ecode = ecode + 1;
+    RMATCH(eptr, next_ecode, offset_top, mb, eptrb, RM10);
     if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-    do next += GET(next, 1); while (*next == OP_ALT);
-    ecode = next + 1 + LINK_SIZE;
+    do next_ecode += GET(next_ecode, 1); while (*next_ecode == OP_ALT);
+    ecode = next_ecode + 1 + LINK_SIZE;
     break;
 
     case OP_BRAMINZERO:
-    next = ecode + 1;
-    do next += GET(next, 1); while (*next == OP_ALT);
-    RMATCH(eptr, next + 1+LINK_SIZE, offset_top, mb, eptrb, RM11);
+    next_ecode = ecode + 1;
+    do next_ecode += GET(next_ecode, 1); while (*next_ecode == OP_ALT);
+    RMATCH(eptr, next_ecode + 1+LINK_SIZE, offset_top, mb, eptrb, RM11);
     if (rrc != MATCH_NOMATCH) RRETURN(rrc);
     ecode++;
     break;
 
     case OP_SKIPZERO:
-    next = ecode+1;
-    do next += GET(next,1); while (*next == OP_ALT);
-    ecode = next + 1 + LINK_SIZE;
+    next_ecode = ecode+1;
+    do next_ecode += GET(next_ecode,1); while (*next_ecode == OP_ALT);
+    ecode = next_ecode + 1 + LINK_SIZE;
     break;
 
     /* BRAPOSZERO occurs before a possessive bracket group. Don't do anything
@@ -6173,7 +6190,7 @@ Undefine all the macros that were defined above to handle this. */
 #undef callpat
 #undef charptr
 #undef data
-#undef next
+#undef next_ecode
 #undef pp
 #undef prev
 #undef saved_eptr
@@ -6425,6 +6442,7 @@ mb->poptions = re->overall_options;     /* Pattern options */
 mb->ignore_skip_arg = 0;
 mb->mark = mb->nomatch_mark = NULL;     /* In case never set */
 mb->recursive = NULL;                   /* No recursion at top level */
+mb->ovecsave_chain = NULL;              /* No ovecsave blocks yet */
 mb->hitend = FALSE;
 
 /* The name table is needed for finding all the numbers associated with a
@@ -6889,6 +6907,15 @@ ENDLOOP:
 #ifdef HEAP_MATCH_RECURSE
 release_match_heapframes(&frame_zero, mb);
 #endif
+
+/* Release any frames that were saved from recursions. */
+
+while (mb->ovecsave_chain != NULL)
+  {
+  ovecsave_frame *this = mb->ovecsave_chain;
+  mb->ovecsave_chain = this->next;
+  mb->memctl.free(this, mb->memctl.memory_data);
+  } 
 
 /* Fill in fields that are always returned in the match data. */
 
