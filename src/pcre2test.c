@@ -652,7 +652,7 @@ static pcre2_general_context_16 *general_context16;
 static pcre2_compile_context_16 *pat_context16, *default_pat_context16;
 static pcre2_match_context_16   *dat_context16, *default_dat_context16;
 static pcre2_match_data_16      *match_data16;
-static int pbuffer16_size = 0;        /* Set only when needed */
+static PCRE2_SIZE pbuffer16_size = 0;   /* Set only when needed */
 static uint16_t *pbuffer16 = NULL;
 #endif
 
@@ -662,7 +662,7 @@ static pcre2_general_context_32 *general_context32;
 static pcre2_compile_context_32 *pat_context32, *default_pat_context32;
 static pcre2_match_context_32   *dat_context32, *default_dat_context32;
 static pcre2_match_data_32      *match_data32;
-static int pbuffer32_size = 0;        /* Set only when needed */
+static PCRE2_SIZE pbuffer32_size = 0;   /* Set only when needed */
 static uint32_t *pbuffer32 = NULL;
 #endif
 
@@ -2082,18 +2082,20 @@ for the purpose of testing that they are correctly faulted.
 Arguments:
   p          points to a byte string
   utf        non-zero if converting to UTF-16
-  len        number of bytes in the string (excluding trailing zero)
+  lenptr     points to number of bytes in the string (excluding trailing zero)
 
-Returns:     number of 16-bit data items used (excluding trailing zero)
+Returns:     0 on success, with the length updated to the number of 16-bit
+               data items used (excluding the trailing zero)
              OR -1 if a UTF-8 string is malformed
              OR -2 if a value > 0x10ffff is encountered in UTF mode
              OR -3 if a value > 0xffff is encountered when not in UTF mode
 */
 
-static int
-to16(uint8_t *p, int utf, int len)
+static PCRE2_SIZE
+to16(uint8_t *p, int utf, PCRE2_SIZE *lenptr)
 {
 uint16_t *pp;
+PCRE2_SIZE len = *lenptr;
 
 if (pbuffer16_size < 2*len + 2)
   {
@@ -2103,7 +2105,8 @@ if (pbuffer16_size < 2*len + 2)
   pbuffer16 = (uint16_t *)malloc(pbuffer16_size);
   if (pbuffer16 == NULL)
     {
-    fprintf(stderr, "pcretest: malloc(%d) failed for pbuffer16\n", pbuffer16_size);
+    fprintf(stderr, "pcretest: malloc(%ld) failed for pbuffer16\n", 
+      pbuffer16_size);
     exit(1);
     }
   }
@@ -2131,7 +2134,8 @@ else while (len > 0)
   }
 
 *pp = 0;
-return pp - pbuffer16;
+*lenptr = pp - pbuffer16;
+return 0;
 }
 #endif
 
@@ -2156,17 +2160,19 @@ for the purpose of testing that they are correctly faulted.
 Arguments:
   p          points to a byte string
   utf        true if UTF-8 (to be converted to UTF-32)
-  len        number of bytes in the string (excluding trailing zero)
+  lenptr     points to number of bytes in the string (excluding trailing zero)
 
-Returns:     number of 32-bit data items used (excluding trailing zero)
+Returns:     0 on success, with the length updated to the number of 32-bit
+               data items used (excluding the trailing zero)
              OR -1 if a UTF-8 string is malformed
              OR -2 if a value > 0x10ffff is encountered in UTF mode
 */
 
-static int
-to32(uint8_t *p, int utf, int len)
+static PCRE2_SIZE
+to32(uint8_t *p, int utf, PCRE2_SIZE *lenptr)
 {
 uint32_t *pp;
+PCRE2_SIZE len = *lenptr;
 
 if (pbuffer32_size < 4*len + 4)
   {
@@ -2176,7 +2182,8 @@ if (pbuffer32_size < 4*len + 4)
   pbuffer32 = (uint32_t *)malloc(pbuffer32_size);
   if (pbuffer32 == NULL)
     {
-    fprintf(stderr, "pcretest: malloc(%d) failed for pbuffer32\n", pbuffer32_size);
+    fprintf(stderr, "pcretest: malloc(%ld) failed for pbuffer32\n", 
+      pbuffer32_size);
     exit(1);
     }
   }
@@ -2198,7 +2205,8 @@ else while (len > 0)
   }
 
 *pp = 0;
-return pp - pbuffer32;
+*lenptr = pp - pbuffer32;
+return 0;
 }
 #endif /* SUPPORT_PCRE32 */
 
@@ -3309,7 +3317,8 @@ BOOL utf;
 uint8_t *p = buffer;
 const uint8_t *use_tables;
 unsigned int delimiter = *p++;
-int patlen, errorcode;
+int errorcode;
+PCRE2_SIZE patlen;
 PCRE2_SIZE erroroffset;
 
 /* Initialize the context and pattern/data controls for this test from the
@@ -3503,17 +3512,22 @@ if ((pat_patctl.control & CTL_POSIX) != 0)
 /* Handle compiling via the native interface, converting the input in non-8-bit
 modes. */
 
+#ifdef SUPPORT_PCRE8
+if (test_mode == PCRE8_MODE)
+  errorcode = 0;
+#endif   
+
 #ifdef SUPPORT_PCRE16
 if (test_mode == PCRE16_MODE)
-  patlen = to16(pbuffer8, utf, patlen);
+  errorcode = to16(pbuffer8, utf, &patlen);
 #endif
 
 #ifdef SUPPORT_PCRE32
 if (test_mode == PCRE32_MODE)
-  patlen = to32(pbuffer8, utf, patlen);
+  errorcode = to32(pbuffer8, utf, &patlen);
 #endif
 
-switch(patlen)
+switch(errorcode)
   {
   case -1:
   fprintf(outfile, "** Failed: invalid UTF-8 string cannot be "
@@ -3817,7 +3831,7 @@ Returns:    PR_OK     continue processing next line
 static int
 process_data(void)
 {
-size_t len, ulen;
+PCRE2_SIZE len, ulen;
 uint32_t gmatched;
 uint32_t c;
 uint32_t g_notempty = 0;
@@ -4514,18 +4528,20 @@ for (gmatched = 0;; gmatched++)
     for (;;)
       {
       int rc;
+      PCRE2_SIZE cnl; 
       uint32_t copybuffer[256];
       int namelen = strlen((const char *)nptr);
       if (namelen == 0) break;
+      cnl = namelen; 
 
 #ifdef SUPPORT_PCRE8
       if (test_mode == PCRE8_MODE) strcpy((char *)pbuffer8, (char *)nptr);
 #endif
 #ifdef SUPPORT_PCRE16
-      if (test_mode == PCRE16_MODE)(void)to16(nptr, utf, namelen);
+      if (test_mode == PCRE16_MODE)(void)to16(nptr, utf, &cnl);
 #endif
 #ifdef SUPPORT_PCRE32
-      if (test_mode == PCRE32_MODE)(void)to32(nptr, utf, namelen);
+      if (test_mode == PCRE32_MODE)(void)to32(nptr, utf, &cnl);
 #endif
 
       PCRE2_SUBSTRING_COPY_BYNAME(rc, match_data, pbuffer,
@@ -4575,19 +4591,21 @@ for (gmatched = 0;; gmatched++)
     nptr = dat_datctl.get_names;
     for (;;)
       {
+      PCRE2_SIZE cnl; 
       void *gotbuffer;
       int rc;
       int namelen = strlen((const char *)nptr);
       if (namelen == 0) break;
+      cnl = namelen; 
 
 #ifdef SUPPORT_PCRE8
       if (test_mode == PCRE8_MODE) strcpy((char *)pbuffer8, (char *)nptr);
 #endif
 #ifdef SUPPORT_PCRE16
-      if (test_mode == PCRE16_MODE)(void)to16(nptr, utf, namelen);
+      if (test_mode == PCRE16_MODE)(void)to16(nptr, utf, &cnl);
 #endif
 #ifdef SUPPORT_PCRE32
-      if (test_mode == PCRE32_MODE)(void)to32(nptr, utf, namelen);
+      if (test_mode == PCRE32_MODE)(void)to32(nptr, utf, &cnl);
 #endif
 
       PCRE2_SUBSTRING_GET_BYNAME(rc, match_data, pbuffer, &gotbuffer);
