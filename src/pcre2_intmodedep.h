@@ -752,6 +752,7 @@ typedef struct match_block {
   PCRE2_SPTR start_match_ptr;     /* Start of matched string */
   PCRE2_SPTR end_match_ptr;       /* Subject position at end match */
   PCRE2_SPTR start_used_ptr;      /* Earliest consulted character */
+  PCRE2_SPTR last_used_ptr;       /* Latest consulted character */ 
   PCRE2_SPTR mark;                /* Mark pointer to pass back on success */
   PCRE2_SPTR nomatch_mark;        /* Mark pointer to pass back on failure */
   PCRE2_SPTR once_target;         /* Where to back up to for atomic groups */
@@ -783,6 +784,7 @@ typedef struct dfa_match_block {
   PCRE2_SPTR start_subject ;      /* Start of the subject string */
   PCRE2_SPTR end_subject;         /* End of subject string */
   PCRE2_SPTR start_used_ptr;      /* Earliest consulted character */
+  PCRE2_SPTR last_used_ptr;       /* Latest consulted character */ 
   const uint8_t *tables;          /* Character tables */
   PCRE2_SIZE start_offset;        /* The start offset value */
   uint32_t moptions;              /* Match options */

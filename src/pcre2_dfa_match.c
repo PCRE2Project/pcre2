@@ -543,6 +543,8 @@ for (;;)
   BOOL partial_newline = FALSE;
   BOOL could_continue = reset_could_continue;
   reset_could_continue = FALSE;
+  
+  if (ptr > mb->last_used_ptr) mb->last_used_ptr = ptr; 
 
   /* Make the new state list into the active state list and empty the
   new state list. */
@@ -967,6 +969,14 @@ for (;;)
 
         if (clen > 0)
           {
+          if (ptr >= mb->last_used_ptr)
+            {
+            PCRE2_SPTR temp = ptr + 1;
+#if defined SUPPORT_UTF && PCRE2_CODE_UNIT_WIDTH != 32
+            if (utf) { FORWARDCHAR(temp); }
+#endif
+            mb->last_used_ptr = temp;
+            } 
 #ifdef SUPPORT_UTF
           if ((mb->poptions & PCRE2_UCP) != 0)
             {
@@ -3447,6 +3457,7 @@ for (;;)
   /* OK, now we can do the business */
 
   mb->start_used_ptr = start_match;
+  mb->last_used_ptr = start_match;
   mb->recursive = NULL;
 
   rc = internal_dfa_match(
@@ -3471,7 +3482,7 @@ for (;;)
       match_data->ovector[1] = (PCRE2_SIZE)(end_subject - subject);
       }
     match_data->leftchar = (PCRE2_SIZE)(mb->start_used_ptr - subject);
-    match_data->rightchar = 0; /* FIXME */
+    match_data->rightchar = mb->last_used_ptr - subject;
     match_data->startchar = (PCRE2_SIZE)(start_match - subject);
     match_data->rc = rc; 
     return rc;

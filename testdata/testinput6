@@ -4783,4 +4783,19 @@
 '\A(?:[^\"]++|\"(?:[^\"]++|\"\")*+\")++'
     NON QUOTED \"QUOT\"\"ED\" AFTER \"NOT MATCHED
 
-# End of testinput8 
+/abc(?=xyz)/allusedtext
+    abcxyzpqr
+    abcxyzpqr\=aftertext
+    
+/(?<=pqr)abc(?=xyz)/allusedtext
+    xyzpqrabcxyzpqr
+    xyzpqrabcxyzpqr\=aftertext
+    
+/a\b/
+    a.\=allusedtext
+    a\=allusedtext  
+
+/abc(?=abcde)(?=ab)/allusedtext
+    abcabcdefg
+
+# End of testinput6

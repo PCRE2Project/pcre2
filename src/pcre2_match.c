@@ -1450,11 +1450,14 @@ for (;;)
     break;
 
 
-    /* End of the pattern, either real or forced. */
+    /* End of the pattern, either real or forced. In an assertion ACCEPT,
+    update the last used pointer. */
 
-    case OP_END:
-    case OP_ACCEPT:
     case OP_ASSERT_ACCEPT:
+    if (eptr > mb->last_used_ptr) mb->last_used_ptr = eptr; 
+
+    case OP_ACCEPT:
+    case OP_END:
 
     /* If we have matched an empty string, fail if not in an assertion and not
     in a recursion if either PCRE2_NOTEMPTY is set, or if PCRE2_NOTEMPTY_ATSTART
@@ -1918,6 +1921,7 @@ for (;;)
       mb->end_match_ptr = eptr;      /* For ONCE_NC */
       mb->end_offset_top = offset_top;
       mb->start_match_ptr = mstart;
+      if (eptr > mb->last_used_ptr) mb->last_used_ptr = eptr; 
       RRETURN(MATCH_MATCH);         /* Sets mb->mark */
       }
 
@@ -1941,6 +1945,7 @@ for (;;)
         {
         mb->end_match_ptr = eptr;
         mb->start_match_ptr = mstart;
+        if (eptr > mb->last_used_ptr) mb->last_used_ptr = eptr; 
         RRETURN(MATCH_MATCH);
         }
 
@@ -1984,6 +1989,7 @@ for (;;)
       mb->start_match_ptr = mstart;    /* In case \K reset it */
       mb->end_match_ptr = eptr;
       mb->end_offset_top = offset_top;
+      if (eptr > mb->last_used_ptr) mb->last_used_ptr = eptr; 
       RRETURN(MATCH_KETRPOS);
       }
 
@@ -2202,6 +2208,9 @@ for (;;)
           }
         else
           {
+          PCRE2_SPTR nextptr = eptr + 1;
+          FORWARDCHAR(nextptr);  
+          if (nextptr > mb->last_used_ptr) mb->last_used_ptr = nextptr; 
           GETCHAR(c, eptr);
           if ((mb->poptions & PCRE2_UCP) != 0)
             {
@@ -2251,20 +2260,23 @@ for (;;)
           cur_is_word = FALSE;
           }
         else
-#ifdef SUPPORT_UTF
-        if ((mb->poptions & PCRE2_UCP) != 0)
           {
-          c = *eptr;
-          if (c == '_') cur_is_word = TRUE; else
+          if (eptr >= mb->last_used_ptr) mb->last_used_ptr = eptr + 1; 
+#ifdef SUPPORT_UTF
+          if ((mb->poptions & PCRE2_UCP) != 0)
             {
-            int cat = UCD_CATEGORY(c);
-            cur_is_word = (cat == ucp_L || cat == ucp_N);
+            c = *eptr;
+            if (c == '_') cur_is_word = TRUE; else
+              {
+              int cat = UCD_CATEGORY(c);
+              cur_is_word = (cat == ucp_L || cat == ucp_N);
+              }
             }
-          }
-        else
+          else
 #endif
-        cur_is_word = MAX_255(*eptr)
-          && ((mb->ctypes[*eptr] & ctype_word) != 0);
+          cur_is_word = MAX_255(*eptr)
+            && ((mb->ctypes[*eptr] & ctype_word) != 0);
+          }   
         }
 
       /* Now see if the situation is what we want */
@@ -6780,6 +6792,7 @@ for(;;)
 
   mb->start_match_ptr = start_match;
   mb->start_used_ptr = start_match;
+  mb->last_used_ptr = start_match; 
   mb->match_call_count = 0;
   mb->match_function_type = 0;
   mb->end_offset_top = 0;
@@ -6984,10 +6997,11 @@ if (rc == MATCH_MATCH || rc == MATCH_ACCEPT)
     }
     
   /* Set the remaining returned values */
-
-  match_data->leftchar = mb->start_used_ptr - subject;
-  match_data->rightchar = 0;  /* FIXME */
+  
   match_data->startchar = start_match - subject;
+  match_data->leftchar = mb->start_used_ptr - subject;
+  match_data->rightchar = ((mb->last_used_ptr > mb->end_match_ptr)?
+    mb->last_used_ptr : mb->end_match_ptr) - subject;
   return match_data->rc;
   }
 
@@ -7011,9 +7025,9 @@ else if (match_partial != NULL)
     match_data->ovector[0] = match_partial - subject;
     match_data->ovector[1] = end_subject - subject;
     }
-  match_data->leftchar = start_partial - subject;
-  match_data->rightchar = 0;  /* FIXME */
   match_data->startchar = match_partial - subject;
+  match_data->leftchar = start_partial - subject;
+  match_data->rightchar = end_subject - subject;
   match_data->rc = PCRE2_ERROR_PARTIAL;
   }
 

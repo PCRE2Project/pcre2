@@ -1630,4 +1630,7 @@
 /\X?abc/utf,no_start_optimize
 \xff\x7f\x00\x00\x03\x00\x41\xcc\x80\x41\x{300}\x61\x62\x63\x00\=no_utf_check,offset=06
 
+/(?<=\x{100})\x{200}(?=\x{300})/utf,allusedtext
+    \x{100}\x{200}\x{300}
+
 # End of testinput5 

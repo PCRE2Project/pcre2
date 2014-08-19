@@ -2123,4 +2123,7 @@
     A\x{2005}Z
     A\x{85}\x{180e}\x{2005}Z
 
+/(?<=\x{100})\x{200}(?=\x{300})/utf,allusedtext
+    \x{100}\x{200}\x{300}
+
 # End of testinput7

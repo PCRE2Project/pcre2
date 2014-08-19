@@ -1,4 +1,4 @@
-.TH PCRE2TEST 1 "12 August 2014" "PCRE 10.00"
+.TH PCRE2TEST 1 "19 August 2014" "PCRE 10.00"
 .SH NAME
 pcre2test - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -633,6 +633,7 @@ not affect the compilation process.
       aftertext                 show text after match
       allaftertext              show text after captures
       allcaptures               show all captures
+      allusedtext               show all consulted text 
   /g  global                    global matching
       jitverify                 verify JIT usage
       mark                      show mark values
@@ -691,6 +692,7 @@ pattern.
       aftertext                 show text after match
       allaftertext              show text after captures
       allcaptures               show all captures
+      allusedtext               show all consulted text 
       altglobal                 alternative global matching
       bsr=[anycrlf|unicode]     specify \eR handling
       callout_capture           show captures at callout time
@@ -735,6 +737,21 @@ contains multiple copies of the same substring. The \fBallaftertext\fP modifier
 requests the same action for captured substrings as well as the main matched
 substring. In each case the remainder is output on the following line with a
 plus character following the capture number.
+.P
+The \fBallusedtext\fP modifier requests that all the text that was consulted 
+during a successful pattern match be shown. This affects the output if there 
+is a lookbehind at the start of a match, or a lookahead at the end, or if \eK 
+is used in the pattern. Characters that precede or follow the start and end of 
+the actual match are indicated in the output by '<' or '>' characters 
+underneath them. Here is an example:
+.sp
+  /(?<=pqr)abc(?=xyz)/
+      123pqrabcxyz456\=allusedtext
+   0: pqrabcxyz
+      <<<   >>>
+.sp
+This shows that the matched string is "abc", with the preceding and following
+strings "pqr" and "xyz" also consulted during the match.
 .
 .
 .SS "Showing the value of all capture groups"
@@ -1142,6 +1159,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 12 August 2014
+Last updated: 19 August 2014
 Copyright (c) 1997-2014 University of Cambridge.
 .fi
