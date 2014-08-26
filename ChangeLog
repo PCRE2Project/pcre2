@@ -1,1 +1,26 @@
-This is a placeholder ChangeLog file for a work in progress.
+Change Log for PCRE2
+--------------------
+
+Version 10.0 xx-xxxx-2014
+-------------------------
+
+Version 10.0 is the first release of PCRE2, a revised API for the PCRE library.
+Changes prior to 10.0 are logged in the ChangeLog file for the old API.
+
+The code of the library was heavily revised as part of the new API 
+implementation. Details of each and every modification were not individually 
+logged. In addition to the API changes, the following changes were made:
+
+1. The test program, now called pcre2test, was re-specified and almost 
+completely re-written. Its input is not compatible with input for pcretest.
+
+2. Patterns may start with (*NOTEMPTY) or (*NOTEMPTY_ATSTART) to set the
+PCRE2_NOTEMPTY or PCRE2_NOTEMPTY_ATSTART options for every subject line that is 
+matched by that pattern.
+
+3. For the benefit of those who use PCRE2 via some other application, that is, 
+not writing the function calls themselves, it is possible to check the PCRE2 
+version by matching a pattern such as /(?(VERSION>=10.0)yes|no)/ against a 
+string such as "yesno".
+
+****
