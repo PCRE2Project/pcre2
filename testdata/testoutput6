@@ -7689,4 +7689,28 @@ Matched, but offsets vector is too small to show all matches
  0: abcabcde
        >>>>>
 
+/a*?b*?/
+    ab
+ 0: ab
+ 1: a
+ 2: 
+
+/(*NOTEMPTY)a*?b*?/
+    ab
+ 0: ab
+ 1: a
+    ba
+ 0: b
+    cb  
+ 0: b
+
+/(*NOTEMPTY_ATSTART)a*?b*?/aftertext
+    ab
+ 0: ab
+ 0+ 
+ 1: a
+    cdab 
+ 0: 
+ 0+ dab
+
 # End of testinput6

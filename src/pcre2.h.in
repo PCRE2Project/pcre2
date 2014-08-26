@@ -130,8 +130,8 @@ functions, so take care not to define synonyms by mistake. */
 
 #define PCRE2_NOTBOL              0x00000001u
 #define PCRE2_NOTEOL              0x00000002u
-#define PCRE2_NOTEMPTY            0x00000004u
-#define PCRE2_NOTEMPTY_ATSTART    0x00000008u
+#define PCRE2_NOTEMPTY            0x00000004u  /* ) These two must be kept */
+#define PCRE2_NOTEMPTY_ATSTART    0x00000008u  /* ) adjacent to each other. */
 #define PCRE2_PARTIAL_SOFT        0x00000010u
 #define PCRE2_PARTIAL_HARD        0x00000020u
 

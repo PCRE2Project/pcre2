@@ -181,7 +181,8 @@ for (;;)
     case OP_DNCREF:
     case OP_RREF:
     case OP_DNRREF:
-    case OP_DEF:
+    case OP_FALSE:
+    case OP_TRUE:
     case OP_CALLOUT:
     case OP_SOD:
     case OP_SOM:
@@ -792,7 +793,8 @@ do
       case OP_COMMIT:
       case OP_COND:
       case OP_CREF:
-      case OP_DEF:
+      case OP_FALSE:
+      case OP_TRUE:
       case OP_DNCREF:
       case OP_DNREF:
       case OP_DNREFI:

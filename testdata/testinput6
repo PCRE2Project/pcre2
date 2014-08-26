@@ -4798,4 +4798,16 @@
 /abc(?=abcde)(?=ab)/allusedtext
     abcabcdefg
 
+/a*?b*?/
+    ab
+
+/(*NOTEMPTY)a*?b*?/
+    ab
+    ba
+    cb  
+
+/(*NOTEMPTY_ATSTART)a*?b*?/aftertext
+    ab
+    cdab 
+
 # End of testinput6

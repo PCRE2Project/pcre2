@@ -566,7 +566,7 @@ enum { ERR0 = COMPILE_ERROR_BASE,
        ERR41, ERR42, ERR43, ERR44, ERR45, ERR46, ERR47, ERR48, ERR49, ERR50,
        ERR51, ERR52, ERR53, ERR54, ERR55, ERR56, ERR57, ERR58, ERR59, ERR60,
        ERR61, ERR62, ERR63, ERR64, ERR65, ERR66, ERR67, ERR68, ERR69, ERR70,
-       ERR71, ERR72, ERR73, ERR74, ERR75, ERR76, ERR77, ERR78 };
+       ERR71, ERR72, ERR73, ERR74, ERR75, ERR76, ERR77, ERR78, ERR79 };
 
 /* This is a table of start-of-pattern options such as (*UTF) and settings such
 as (*LIMIT_MATCH=nnnn) and (*CRLF). For completeness and backward
@@ -574,6 +574,7 @@ compatibility, (*UTFn) is supported in the relevant libraries, but (*UTF) is
 generic and always supported. */
 
 enum { PSO_OPT,     /* Value is an option bit */
+       PSO_FLG,     /* Value is a flag bit */
        PSO_NL,      /* Value is a newline type */
        PSO_BSR,     /* Value is a \R type */
        PSO_LIMM,    /* Read integer value for match limit */
@@ -592,6 +593,8 @@ static pso pso_list[] = {
   { (uint8_t *)STRING_UTFn_RIGHTPAR,                PSO_OPT, PCRE2_UTF },
   { (uint8_t *)STRING_UTF_RIGHTPAR,              4, PSO_OPT, PCRE2_UTF },
   { (uint8_t *)STRING_UCP_RIGHTPAR,              4, PSO_OPT, PCRE2_UCP },
+  { (uint8_t *)STRING_NOTEMPTY_RIGHTPAR,         9, PSO_FLG, PCRE2_NOTEMPTY_SET },
+  { (uint8_t *)STRING_NOTEMPTY_ATSTART_RIGHTPAR,17, PSO_FLG, PCRE2_NE_ATST_SET },  
   { (uint8_t *)STRING_NO_AUTO_POSSESS_RIGHTPAR, 16, PSO_OPT, PCRE2_NO_AUTO_POSSESS },
   { (uint8_t *)STRING_NO_START_OPT_RIGHTPAR,    13, PSO_OPT, PCRE2_NO_START_OPTIMIZE },
   { (uint8_t *)STRING_LIMIT_MATCH_EQ,           12, PSO_LIMM, 0 },
@@ -854,7 +857,8 @@ for (;;)
     case OP_CLOSE:
     case OP_COMMIT:
     case OP_CREF:
-    case OP_DEF:
+    case OP_FALSE:
+    case OP_TRUE:
     case OP_DNCREF:
     case OP_DNRREF:
     case OP_DOLL:
@@ -1118,7 +1122,8 @@ for (;;)
     case OP_DNCREF:
     case OP_RREF:
     case OP_DNRREF:
-    case OP_DEF:
+    case OP_FALSE:
+    case OP_TRUE:
     code += PRIV(OP_lengths)[*code];
     break;
 
@@ -4449,10 +4454,12 @@ for (;; ptr++)
       PCRE2_UCHAR *bralink = NULL;
       PCRE2_UCHAR *brazeroptr = NULL;
 
-      /* Repeating a DEFINE group is pointless, but Perl allows the syntax, so
-      we just ignore the repeat. */
+      /* Repeating a DEFINE group (or any group where the condition is always
+      FALSE and there is only one branch) is pointless, but Perl allows the
+      syntax, so we just ignore the repeat. */
 
-      if (*previous == OP_COND && previous[LINK_SIZE+1] == OP_DEF)
+      if (*previous == OP_COND && previous[LINK_SIZE+1] == OP_FALSE &&
+          previous[GET(previous, 1)] != OP_ALT) 
         goto END_REPEAT;
 
       /* There is no sense in actually repeating assertions. The only potential
@@ -5159,10 +5166,66 @@ for (;; ptr++)
         namelen = -1;     /* => not a name; must set to avoid warning */
         name = NULL;      /* Always set to avoid warning */
         recno = 0;        /* Always set to avoid warning */
+        
+        /* Point at character after (?( */
+        
+        ptr++;
 
+        /* Check for (?(VERSION[>]=n.m), which is a facility whereby indirect
+        users of PCRE2 via an application can discover which release of PCRE2 
+        is being used. */
+         
+        if (PRIV(strncmp_c8)(ptr, STRING_VERSION, 7) == 0 && 
+            ptr[7] != CHAR_RIGHT_PARENTHESIS)
+          {
+          BOOL ge = FALSE; 
+          int major = 0;
+          int minor = 0;
+             
+          ptr += 7;
+          if (*ptr == CHAR_GREATER_THAN_SIGN)
+            {
+            ge = TRUE;
+            ptr++;
+            }   
+            
+          /* NOTE: cannot write IS_DIGIT(*(++ptr)) here because IS_DIGIT
+          references its argument twice. */
+            
+          if (*ptr != CHAR_EQUALS_SIGN || (ptr++, !IS_DIGIT(*ptr)))
+            {    
+            *errorcodeptr = ERR79;
+            goto FAILED; 
+            } 
+
+          while (IS_DIGIT(*ptr)) major = major * 10 + *ptr++ - '0';
+          if (*ptr == CHAR_DOT)
+            {
+            ptr++; 
+            while (IS_DIGIT(*ptr)) minor = minor * 10 + *ptr++ - '0'; 
+            }     
+
+          if (*ptr != CHAR_RIGHT_PARENTHESIS)
+            {
+            *errorcodeptr = ERR79;
+            goto FAILED;
+            }    
+
+          if (ge)
+            code[1+LINK_SIZE] = ((PCRE2_MAJOR > major) ||
+              (PCRE2_MAJOR == major && PCRE2_MINOR >= minor))?
+                OP_TRUE : OP_FALSE;
+          else     
+            code[1+LINK_SIZE] = (PCRE2_MAJOR == major && PCRE2_MINOR == minor)?
+              OP_TRUE : OP_FALSE;
+ 
+          ptr++;
+          skipbytes = 1;
+          break;  /* End of condition processing */
+          }  
+         
         /* Check for a test for recursion in a named group. */
 
-        ptr++;
         if (*ptr == CHAR_R && ptr[1] == CHAR_AMPERSAND)
           {
           terminator = -1;
@@ -5338,11 +5401,13 @@ for (;; ptr++)
           }
 
         /* Similarly, check for the (?(DEFINE) "condition", which is always
-        false. */
+        false. During compilation we set OP_DEFINE to distinguish this from 
+        other OP_FALSE conditions so that it can be checked for having only one 
+        branch, but after that the opcode is changed to OP_FALSE. */
 
         else if (namelen == 6 && PRIV(strncmp_c8)(name, STRING_DEFINE, 6) == 0)
           {
-          code[1+LINK_SIZE] = OP_DEF;
+          code[1+LINK_SIZE] = OP_DEFINE;
           skipbytes = 1;
           }
 
@@ -6065,16 +6130,18 @@ for (;; ptr++)
       while (*tc != OP_KET);
 
       /* A DEFINE group is never obeyed inline (the "condition" is always
-      false). It must have only one branch. */
+      false). It must have only one branch. Having checked this, change the 
+      opcode to OP_FALSE. */
 
-      if (code[LINK_SIZE+1] == OP_DEF)
+      if (code[LINK_SIZE+1] == OP_DEFINE)
         {
         if (condcount > 1)
           {
           *errorcodeptr = ERR54;
           goto FAILED;
           }
-        bravalue = OP_DEF;   /* Just a flag to suppress char handling below */
+        code[LINK_SIZE+1] = OP_FALSE; 
+        bravalue = OP_DEFINE;   /* Just a flag to suppress char handling below */
         }
 
       /* A "normal" conditional group. If there is just one branch, we must not
@@ -6127,7 +6194,7 @@ for (;; ptr++)
     /* For a DEFINE group, required and first character settings are not
     relevant. */
 
-    if (bravalue == OP_DEF) break;
+    if (bravalue == OP_DEFINE) break;
 
     /* Handle updating of the required and first characters for other types of
     group. Update for normal brackets of all kinds, and conditions with two
@@ -7011,7 +7078,8 @@ do {
        case OP_DNCREF:
        case OP_RREF:
        case OP_DNRREF:
-       case OP_DEF:
+       case OP_FALSE:
+       case OP_TRUE:
        return FALSE;
 
        default:     /* Assertion */
@@ -7413,6 +7481,10 @@ while (ptr[skipatstart] == CHAR_LEFT_PARENTHESIS &&
         case PSO_OPT:
         cb.external_options |= p->value;
         break;
+        
+        case PSO_FLG:
+        setflags |= p->value;
+        break;   
 
         case PSO_NL:
         newline = p->value;

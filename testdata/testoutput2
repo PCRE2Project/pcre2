@@ -9357,7 +9357,7 @@ Partial match at offset 3: +ab
         Recurse
         Recurse
         Cond
-        Cond def
+        Cond false
         CBra 1
         <
         [^m]
@@ -9379,7 +9379,7 @@ Partial match at offset 3: +ab
         Recurse
         Recurse
         Cond
-        Cond def
+        Cond false
         CBra 1
         <
         [\x00-/:-\xff] (neg)
@@ -10095,7 +10095,7 @@ No match
         Recurse
         KetRpos
         Cond
-        Cond def
+        Cond false
         CBra 1
         Any
         Ket
@@ -10114,7 +10114,7 @@ No match
         Recurse
         KetRmax
         Cond
-        Cond def
+        Cond false
         CBra 1
         Any
         Ket
@@ -11058,7 +11058,7 @@ Matched, but too many substrings
 ------------------------------------------------------------------
         Bra
         Cond
-        Cond def
+        Cond false
         CBra 1
         a
         Ket
@@ -13719,5 +13719,85 @@ No match
     abcabcdefg
  0: abcabcde
        >>>>>
+
+/a*?b*?/
+    ab
+ 0: 
+
+/(*NOTEMPTY)a*?b*?/
+    ab
+ 0: a
+    ba
+ 0: b
+    cb  
+ 0: b
+
+/(*NOTEMPTY_ATSTART)a*?b*?/aftertext
+    ab
+ 0: a
+ 0+ b
+    cdab 
+ 0: 
+ 0+ dab
+
+/(?(VERSION>=10.0)yes|no)/I
+Capturing subpattern count = 0
+Subject length lower bound = 2
+    yesno
+ 0: yes
+    
+/(?(VERSION=8)yes){3}/BI,aftertext
+------------------------------------------------------------------
+        Bra
+        Cond
+        Cond false
+        yes
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+Capturing subpattern count = 0
+May match empty string
+Subject length lower bound = 0
+    yesno
+ 0: 
+ 0+ yesno
+
+/(?(VERSION=8)yes|no){3}/I
+Capturing subpattern count = 0
+Subject length lower bound = 6
+    yesnononoyes
+ 0: nonono
+    ** Failers
+No match
+    yesno   
+No match
+
+/(?:(?<VERSION>abc)|xyz)(?(VERSION)yes|no)/I
+Capturing subpattern count = 1
+Named capturing subpatterns:
+  VERSION   1
+Starting code units: a x 
+Subject length lower bound = 5
+    abcyes
+ 0: abcyes
+ 1: abc
+    xyzno
+ 0: xyzno
+    ** Failers
+No match
+    abcno
+No match
+    xyzyes    
+No match
+
+/(?(VERSION<10)yes|no)/
+Failed: error 179 at offset 10: syntax error in (?(VERSION condition
+
+/(?(VERSION>10)yes|no)/
+Failed: error 179 at offset 11: syntax error in (?(VERSION condition
+
+/(?(VERSION>=10.0.0)yes|no)/
+Failed: error 179 at offset 16: syntax error in (?(VERSION condition
 
 # End of testinput2 

@@ -4070,4 +4070,40 @@ a random value. /Ix
 /abc(?=abcde)(?=ab)/allusedtext
     abcabcdefg
 
+/a*?b*?/
+    ab
+
+/(*NOTEMPTY)a*?b*?/
+    ab
+    ba
+    cb  
+
+/(*NOTEMPTY_ATSTART)a*?b*?/aftertext
+    ab
+    cdab 
+
+/(?(VERSION>=10.0)yes|no)/I
+    yesno
+    
+/(?(VERSION=8)yes){3}/BI,aftertext
+    yesno
+
+/(?(VERSION=8)yes|no){3}/I
+    yesnononoyes
+    ** Failers
+    yesno   
+
+/(?:(?<VERSION>abc)|xyz)(?(VERSION)yes|no)/I
+    abcyes
+    xyzno
+    ** Failers
+    abcno
+    xyzyes    
+
+/(?(VERSION<10)yes|no)/
+
+/(?(VERSION>10)yes|no)/
+
+/(?(VERSION>=10.0.0)yes|no)/
+
 # End of testinput2 

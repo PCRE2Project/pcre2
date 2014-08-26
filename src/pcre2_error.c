@@ -157,7 +157,8 @@ static const char compile_error_texts[] =
   "using UCP is disabled by the application\0"
   "name is too long in (*MARK), (*PRUNE), (*SKIP), or (*THEN)\0"
   "character code point value in \\u.... sequence is too large\0"
-  "digits missing in \\x{} or \\o{}\0" 
+  "digits missing in \\x{} or \\o{}\0"
+  "syntax error in (?(VERSION condition\0"  
   ;
 
 /* Match-time and UTF error texts are in the same format. */

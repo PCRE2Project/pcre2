@@ -177,12 +177,12 @@ static const uint8_t coptable[] = {
   0, 0, 0, 0, 0,                 /* SBRA, SBRAPOS, SCBRA, SCBRAPOS, SCOND  */
   0, 0,                          /* CREF, DNCREF                           */
   0, 0,                          /* RREF, DNRREF                           */
-  0,                             /* DEF                                    */
+  0, 0,                          /* FALSE, TRUE                            */
   0, 0, 0,                       /* BRAZERO, BRAMINZERO, BRAPOSZERO        */
   0, 0, 0,                       /* MARK, PRUNE, PRUNE_ARG                 */
   0, 0, 0, 0,                    /* SKIP, SKIP_ARG, THEN, THEN_ARG         */
   0, 0, 0, 0,                    /* COMMIT, FAIL, ACCEPT, ASSERT_ACCEPT    */
-  0, 0                           /* CLOSE, SKIPZERO  */
+  0, 0, 0                        /* CLOSE, SKIPZERO, DEFINE                */
 };
 
 /* This table identifies those opcodes that inspect a character. It is used to
@@ -249,12 +249,12 @@ static const uint8_t poptable[] = {
   0, 0, 0, 0, 0,                 /* SBRA, SBRAPOS, SCBRA, SCBRAPOS, SCOND  */
   0, 0,                          /* CREF, DNCREF                           */
   0, 0,                          /* RREF, DNRREF                           */
-  0,                             /* DEF                                    */
+  0, 0,                          /* FALSE, TRUE                            */
   0, 0, 0,                       /* BRAZERO, BRAMINZERO, BRAPOSZERO        */
   0, 0, 0,                       /* MARK, PRUNE, PRUNE_ARG                 */
   0, 0, 0, 0,                    /* SKIP, SKIP_ARG, THEN, THEN_ARG         */
   0, 0, 0, 0,                    /* COMMIT, FAIL, ACCEPT, ASSERT_ACCEPT    */
-  0, 0                           /* CLOSE, SKIPZERO                        */
+  0, 0, 0                        /* CLOSE, SKIPZERO, DEFINE                */
 };
 
 /* These 2 tables allow for compact code for testing for \D, \d, \S, \s, \W,
@@ -2642,8 +2642,13 @@ for (;;)
 
         /* The DEFINE condition is always false */
 
-        if (condcode == OP_DEF)
+        if (condcode == OP_FALSE)
           { ADD_ACTIVE(state_offset + codelink + LINK_SIZE + 1, 0); }
+          
+        /* There is also an always-true condition */
+
+        if (condcode == OP_TRUE)
+          { ADD_ACTIVE(state_offset + LINK_SIZE + 2 + IMM2_SIZE, 0); }
 
         /* The only supported version of OP_RREF is for the value RREF_ANY,
         which means "test if in any recursion". We can't test for specifically
@@ -3114,6 +3119,24 @@ if (re->magic_number != MAGIC_NUMBER)
 
 if ((re->flags & PCRE2_MODE_MASK) != PCRE2_CODE_UNIT_WIDTH/8)
   return PCRE2_ERROR_BADMODE;
+
+/* PCRE2_NOTEMPTY and PCRE2_NOTEMPTY_ATSTART are match-time flags in the 
+options variable for this function. Users of PCRE2 who are not calling the 
+function directly would like to have a way of setting these flags, in the same 
+way that they can set pcre2_compile() flags like PCRE2_NO_AUTOPOSSESS with
+constructions like (*NO_AUTOPOSSESS). To enable this, (*NOTEMPTY) and 
+(*NOTEMPTY_ATSTART) set bits in the pattern's "flag" function which can now be 
+transferred to the options for this function. The bits are guaranteed to be 
+adjacent, but do not have the same values. This bit of Boolean trickery assumes 
+that the match-time bits are not more significant than the flag bits. If by 
+accident this is not the case, a compile-time division by zero error will 
+occur. */
+
+#define FF (PCRE2_NOTEMPTY_SET|PCRE2_NE_ATST_SET) 
+#define OO (PCRE2_NOTEMPTY|PCRE2_NOTEMPTY_ATSTART)
+options |= (re->flags & FF) / ((FF & -FF) / (OO & -OO));
+#undef FF
+#undef OO
 
 /* A NULL match context means "use a default context" */
 

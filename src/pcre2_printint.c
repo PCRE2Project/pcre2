@@ -422,8 +422,12 @@ for(;;)
       }
     break;
 
-    case OP_DEF:
-    fprintf(f, "    Cond def");
+    case OP_FALSE:
+    fprintf(f, "    Cond false");
+    break;
+
+    case OP_TRUE:
+    fprintf(f, "    Cond true");
     break;
 
     case OP_STARI:
