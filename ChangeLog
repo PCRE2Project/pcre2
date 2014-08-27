@@ -5,11 +5,14 @@ Version 10.0 xx-xxxx-2014
 -------------------------
 
 Version 10.0 is the first release of PCRE2, a revised API for the PCRE library.
-Changes prior to 10.0 are logged in the ChangeLog file for the old API.
+Changes prior to 10.0 are logged in the ChangeLog file for the old API, up to 
+item 20 for release 8.36.
 
 The code of the library was heavily revised as part of the new API 
 implementation. Details of each and every modification were not individually 
-logged. In addition to the API changes, the following changes were made:
+logged. In addition to the API changes, the following changes were made. They 
+are either new functionality, or bugs that were fixed after the code had been 
+forked.
 
 1. The test program, now called pcre2test, was re-specified and almost 
 completely re-written. Its input is not compatible with input for pcretest.
@@ -22,5 +25,17 @@ matched by that pattern.
 not writing the function calls themselves, it is possible to check the PCRE2 
 version by matching a pattern such as /(?(VERSION>=10.0)yes|no)/ against a 
 string such as "yesno".
+
+4. There are case-equivalent Unicode characters whose encodings use different 
+numbers of code units in UTF-8. U+023A and U+2C65 are one example. (It is 
+theoretically possible for this to happen in UTF-16 too.) If a backreference to 
+a group containing one of these characters was greedily repeated, and during 
+the match a backtrack occurred, the subject might be backtracked by the wrong
+number of code units. For example, if /^(\x{23a})\1*(.)/ is matched caselessly 
+(and in UTF-8 mode) against "\x{23a}\x{2c65}\x{2c65}\x{2c65}", group 2 should 
+capture the final character, which is the three bytes E2, B1, and A5 in UTF-8.
+Incorrect backtracking meant that group 2 captured only the last two bytes. 
+This bug has been fixed; the new code is slower, but it is used only when the 
+strings matched by the repetition are not all the same length.
 
 ****

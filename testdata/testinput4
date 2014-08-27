@@ -2194,5 +2194,26 @@
 
 /^s?c/im,utf
     scat
+    
+# The next four tests are for repeated caseless back references when the 
+# code unit length of the matched text is different to that of the original
+# group in the UTF-8 case.
+
+/^(\x{23a})\1*(.)/i,utf
+    \x{23a}\x{23a}\x{23a}\x{23a}
+    \x{23a}\x{2c65}\x{2c65}\x{2c65}
+    \x{23a}\x{23a}\x{2c65}\x{23a}
+
+/^(\x{23a})\1*(..)/i,utf
+    \x{23a}\x{2c65}\x{2c65}\x{2c65}
+    \x{23a}\x{23a}\x{2c65}\x{23a}
+
+/^(\x{23a})\1*(...)/i,utf
+    \x{23a}\x{2c65}\x{2c65}\x{2c65}
+    \x{23a}\x{23a}\x{2c65}\x{23a}
+
+/^(\x{23a})\1*(....)/i,utf
+    \x{23a}\x{2c65}\x{2c65}\x{2c65}
+    \x{23a}\x{23a}\x{2c65}\x{23a}
 
 # End of testinput4

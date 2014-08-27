@@ -122,39 +122,54 @@ ovector length is always a multiple of 3. */
 *          Match a back-reference                *
 *************************************************/
 
-/* Normally, if a back reference hasn't been set, the length that is passed is
-negative, so the match always fails. However, in JavaScript compatibility mode,
-the length passed is zero. Note that in caseless UTF-8 mode, the number of
-subject bytes matched may be different to the number of reference bytes.
+/* This function is called only when it is known that the offset lies within
+the offsets that have so far been used in the match. Note that in caseless
+UTF-8 mode, the number of subject bytes matched may be different to the number
+of reference bytes. (In theory this could also happen in UTF-16 mode, but it 
+seems unlikely.)
 
 Arguments:
   offset      index into the offset vector
+  offset_top  top of the used offset vector 
   eptr        pointer into the subject
-  length      length of reference to be matched (number of code units)
   mb          points to match block
   caseless    TRUE if caseless
+  lengthptr   pointer for returning the length matched 
 
-Returns:      >= 0 the number of subject code units matched
-              -1 no match
-              -2 partial match; always given if at end subject
+Returns:      = 0 sucessful match; number of code units matched is set
+              < 0 no match
+              > 0 partial match 
 */
 
 static int
-match_ref(int offset, register PCRE2_SPTR eptr, int length, match_block *mb,
-  BOOL caseless)
+match_ref(PCRE2_SIZE offset, PCRE2_SIZE offset_top, register PCRE2_SPTR eptr, 
+  match_block *mb, BOOL caseless, PCRE2_SIZE *lengthptr)
 {
-PCRE2_SPTR eptr_start = eptr;
-register PCRE2_SPTR p = mb->start_subject + mb->ovector[offset];
 #if defined SUPPORT_UTF
 BOOL utf = (mb->poptions & PCRE2_UTF) != 0;
 #endif
 
-/* Always fail if reference not set (unless PCRE2_MATCH_UNSET_BACKREF is set,
-in which case the length is passed as zero). */
+register PCRE2_SPTR p;
+PCRE2_SIZE length;
+PCRE2_SPTR eptr_start = eptr;
 
-if (length < 0) return -1;
+/* Deal with an unset group. The default is no match, but there is an option to 
+match an empty string. */
 
-/* Separate the caseless and UTF case for speed. */
+if (offset >= offset_top || mb->ovector[offset] == PCRE2_UNSET)
+  {
+  if ((mb->poptions & PCRE2_MATCH_UNSET_BACKREF) != 0)
+    {
+    *lengthptr = 0;
+    return 0;      /* Match */
+    }
+  else return -1;  /* No match */
+  }        
+
+/* Separate the caseless and UTF cases for speed. */
+
+p = mb->start_subject + mb->ovector[offset];
+length = mb->ovector[offset+1] - mb->ovector[offset];
 
 if (caseless)
   {
@@ -175,7 +190,7 @@ if (caseless)
       {
       uint32_t c, d;
       const ucd_record *ur;
-      if (eptr >= mb->end_subject) return -2;   /* Partial match */
+      if (eptr >= mb->end_subject) return 1;   /* Partial match */
       GETCHARINC(c, eptr);
       GETCHARINC(d, p);
       ur = GET_UCD(d);
@@ -184,7 +199,7 @@ if (caseless)
         const uint32_t *pp = PRIV(ucd_caseless_sets) + ur->caseset;
         for (;;)
           {
-          if (c < *pp) return -1;
+          if (c < *pp) return -1;  /* No match */
           if (c == *pp++) break;
           }
         }
@@ -199,29 +214,31 @@ if (caseless)
     while (length-- > 0)
       {
       uint32_t cc, cp;
-      if (eptr >= mb->end_subject) return -2;   /* Partial match */
+      if (eptr >= mb->end_subject) return 1;   /* Partial match */
       cc = UCHAR21TEST(eptr);
       cp = UCHAR21TEST(p);
-      if (TABLE_GET(cp, mb->lcc, cp) != TABLE_GET(cc, mb->lcc, cc)) return -1;
+      if (TABLE_GET(cp, mb->lcc, cp) != TABLE_GET(cc, mb->lcc, cc)) 
+        return -1;  /* No match */
       p++;
       eptr++;
       }
     }
   }
 
-/* In the caseful case, we can just compare the bytes, whether or not we
-are in UTF-8 mode. */
+/* In the caseful case, we can just compare the code units, whether or not we
+are in UT mode. */
 
 else
   {
   while (length-- > 0)
     {
-    if (eptr >= mb->end_subject) return -2;   /* Partial match */
-    if (UCHAR21INCTEST(p) != UCHAR21INCTEST(eptr)) return -1;
+    if (eptr >= mb->end_subject) return 1;   /* Partial match */
+    if (UCHAR21INCTEST(p) != UCHAR21INCTEST(eptr)) return -1;  /*No match */
     }
   }
 
-return (int)(eptr - eptr_start);
+*lengthptr = eptr - eptr_start;
+return 0;  /* Match */
 }
 
 
@@ -350,6 +367,7 @@ typedef struct heapframe {
   
   eptrblock *Xeptrb;
 
+  PCRE2_SIZE Xlength;
   PCRE2_SIZE Xoffset;
   PCRE2_SIZE Xoffset_top;
   PCRE2_SIZE Xsave_offset1, Xsave_offset2, Xsave_offset3;
@@ -370,7 +388,6 @@ typedef struct heapframe {
   int Xcodelink;
   int Xctype;
   int Xfi;
-  int Xlength;
   int Xmax;
   int Xmin;
   int Xwhere;    /* Where to jump back to */
@@ -425,7 +442,7 @@ Arguments:
   callpat     the recursion point in the pattern
   mstart      pointer to the current match start position (can be modified
                 by encountering \K)
-  offset_top  current top pointer
+  offset_top  current top pointer (highest ovector offset used + 1)
   mb          pointer to "static" info block for the match
   eptrb       pointer to chain of blocks containing eptr at start of
                 brackets - for testing for empty matches
@@ -529,7 +546,7 @@ Arguments:
    ecode       pointer to current position in compiled code
    mstart      pointer to the current match start position (can be modified
                  by encountering \K)
-   offset_top  current top pointer
+   offset_top  current top pointer (highest ovector offset used + 1)
    mb          pointer to "static" info block for the match
    eptrb       pointer to chain of blocks containing eptr at start of
                  brackets - for testing for empty matches
@@ -659,6 +676,7 @@ PCRE2_SPTR pp;
 PCRE2_SPTR prev;
 PCRE2_SPTR saved_eptr;
 
+PCRE2_SIZE length;
 PCRE2_SIZE offset;
 PCRE2_SIZE save_offset1, save_offset2, save_offset3;
 
@@ -676,7 +694,6 @@ PCRE2_UCHAR occhars[6];
 
 int codelink;
 int ctype;
-int length;
 int max;
 int min;
 
@@ -693,13 +710,13 @@ of the local variables that are used only in localised parts of the code, but
 still need to be preserved over recursive calls of match(). These macros define
 the alternative names that are used. */
 
-#define allow_zero    cur_is_word
-#define cbegroup      condition
-#define code_offset   codelink
-#define condassert    condition
-#define matched_once  prev_is_word
-#define foc           number
-#define save_mark     data
+#define allow_zero      cur_is_word
+#define cbegroup        condition
+#define code_offset     codelink
+#define condassert      condition
+#define foc             number
+#define matched_once    prev_is_word
+#define save_mark       data
 
 /* These statements are here to stop the compiler complaining about unitialized
 variables. */
@@ -2671,23 +2688,8 @@ for (;;)
 
 
     /* Match a back reference, possibly repeatedly. Look past the end of the
-    item to see if there is repeat information following. The code is similar
-    to that for character classes, but repeated for efficiency. Then obey
-    similar code to character type repeats - written out again for speed.
-    However, if the referenced string is the empty string, always treat
-    it as matched, any number of times (otherwise there could be infinite
-    loops). If the reference is unset, there are two possibilities:
-
-    (a) In the default, Perl-compatible state, set the length negative;
-    this ensures that every attempt at a match fails. We can't just fail
-    here, because of the possibility of quantifiers with zero minima.
-
-    (b) If the JavaScript compatibility flag is set, set the length to zero
-    so that the back reference matches an empty string.
-
-    Otherwise, set the length to the length of what was matched by the
-    referenced subpattern.
-
+    item to see if there is repeat information following.
+     
     The OP_REF and OP_REFI opcodes are used for a reference to a numbered group
     or to a non-duplicated named group. For a duplicated named group, OP_DNREF
     and OP_DNREFI are used. In this case we must scan the list of groups to
@@ -2701,20 +2703,14 @@ for (;;)
       PCRE2_SPTR slot = mb->name_table + GET2(ecode, 1) * mb->name_entry_size;
       ecode += 1 + 2*IMM2_SIZE;
 
-      /* Setting the default length first and initializing 'offset' avoids
-      compiler warnings in the REF_REPEAT code. */
-
-      length = ((mb->poptions & PCRE2_MATCH_UNSET_BACKREF) != 0)? 0 : -1;
+      /* Initializing 'offset' avoids a compiler warning in the REF_REPEAT
+      code. */
+       
       offset = 0;
-
       while (count-- > 0)
         {
         offset = GET2(slot, 0) << 1;
-        if (offset < offset_top && mb->ovector[offset] != PCRE2_UNSET)
-          {
-          length = mb->ovector[offset+1] - mb->ovector[offset];
-          break;
-          }
+        if (offset < offset_top && mb->ovector[offset] != PCRE2_UNSET) break;
         slot += mb->name_entry_size;
         }
       }
@@ -2725,11 +2721,7 @@ for (;;)
     caseless = op == OP_REFI;
     offset = GET2(ecode, 1) << 1;               /* Doubled ref number */
     ecode += 1 + IMM2_SIZE;
-    if (offset >= offset_top || mb->ovector[offset] == PCRE2_UNSET)
-      length = ((mb->poptions & PCRE2_MATCH_UNSET_BACKREF) != 0)? 0 : -1;
-    else
-      length = mb->ovector[offset+1] - mb->ovector[offset];
-
+    
     /* Set up for repetition, or handle the non-repeated case */
 
     REF_REPEAT:
@@ -2757,25 +2749,35 @@ for (;;)
       ecode += 1 + 2 * IMM2_SIZE;
       break;
 
-      default:               /* No repeat follows */
-      if ((length = match_ref(offset, eptr, length, mb, caseless)) < 0)
-        {
-        if (length == -2) eptr = mb->end_subject;   /* Partial match */
-        CHECK_PARTIAL();
-        RRETURN(MATCH_NOMATCH);
-        }
+      default:                  /* No repeat follows */
+        { 
+        int rc = match_ref(offset, offset_top, eptr, mb, caseless, &length);
+        if (rc != 0)
+          {
+          if (rc > 0) eptr = mb->end_subject;   /* Partial match */
+          CHECK_PARTIAL();
+          RRETURN(MATCH_NOMATCH);
+          }
+        }   
       eptr += length;
       continue;              /* With the main loop */
       }
 
-    /* Handle repeated back references. If the length of the reference is
-    zero, just continue with the main loop. If the length is negative, it
-    means the reference is unset in non-Java-compatible mode. If the minimum is
+    /* Handle repeated back references. If a set group has length zero, just 
+    continue with the main loop, because it matches however many times. For an 
+    unset reference, in non-match-unset-backref mode, if the minimum is
     zero, we can continue at the same level without recursion. For any other
     minimum, carrying on will result in NOMATCH. */
-
-    if (length == 0) continue;
-    if (length < 0 && min == 0) continue;
+    
+    if (offset < offset_top && mb->ovector[offset] != PCRE2_UNSET)
+      { 
+      if (mb->ovector[offset] == mb->ovector[offset + 1]) continue;
+      }
+    else
+      {
+      if (min == 0 && (mb->poptions & PCRE2_MATCH_UNSET_BACKREF) == 0)
+        continue; 
+      }      
 
     /* First, ensure the minimum number of matches are present. We get back
     the length of the reference string explicitly rather than passing the
@@ -2783,10 +2785,11 @@ for (;;)
 
     for (i = 1; i <= min; i++)
       {
-      int slength;
-      if ((slength = match_ref(offset, eptr, length, mb, caseless)) < 0)
+      PCRE2_SIZE slength;
+      int rc = match_ref(offset, offset_top, eptr, mb, caseless, &slength); 
+      if (rc != 0)
         {
-        if (slength == -2) eptr = mb->end_subject;   /* Partial match */
+        if (rc > 0) eptr = mb->end_subject;   /* Partial match */
         CHECK_PARTIAL();
         RRETURN(MATCH_NOMATCH);
         }
@@ -2804,13 +2807,15 @@ for (;;)
       {
       for (fi = min;; fi++)
         {
-        int slength;
+        int rc; 
+        PCRE2_SIZE slength;
         RMATCH(eptr, ecode, offset_top, mb, eptrb, RM14);
         if (rrc != MATCH_NOMATCH) RRETURN(rrc);
         if (fi >= max) RRETURN(MATCH_NOMATCH);
-        if ((slength = match_ref(offset, eptr, length, mb, caseless)) < 0)
+        rc = match_ref(offset, offset_top, eptr, mb, caseless, &slength);
+        if (rc != 0) 
           {
-          if (slength == -2) eptr = mb->end_subject;   /* Partial match */
+          if (rc > 0) eptr = mb->end_subject;   /* Partial match */
           CHECK_PARTIAL();
           RRETURN(MATCH_NOMATCH);
           }
@@ -2819,20 +2824,26 @@ for (;;)
       /* Control never gets here */
       }
 
-    /* If maximizing, find the longest string and work backwards */
+    /* If maximizing, find the longest string and work backwards, as long as 
+    the matched lengths for each iteration are the same. */
 
     else
       {
+      BOOL samelengths = TRUE; 
       pp = eptr;
+      length = mb->ovector[offset+1] - mb->ovector[offset];
+
       for (i = min; i < max; i++)
         {
-        int slength;
-        if ((slength = match_ref(offset, eptr, length, mb, caseless)) < 0)
+        PCRE2_SIZE slength;
+        int rc = match_ref(offset, offset_top, eptr, mb, caseless, &slength);
+
+        if (rc != 0) 
           {
           /* Can't use CHECK_PARTIAL because we don't want to update eptr in
           the soft partial matching case. */
 
-          if (slength == -2 && mb->partial != 0 &&
+          if (rc > 0 && mb->partial != 0 &&
               mb->end_subject > mb->start_used_ptr)
             {
             mb->hitend = TRUE;
@@ -2840,15 +2851,49 @@ for (;;)
             }
           break;
           }
+
+        if (slength != length) samelengths = FALSE;
         eptr += slength;
         }
 
-      while (eptr >= pp)
-        {
-        RMATCH(eptr, ecode, offset_top, mb, eptrb, RM15);
-        if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-        eptr -= length;
+      /* If the length matched for each repetiaion is the same as the length of 
+      the captured group, we can easily work backwards. This is the normal 
+      case. However, in caseless UTF-8 mode there are pairs of case-equivalent 
+      characters whose lengths (in terms of code units) differ. However, this
+      is very rare, so we handle it by re-matching fewer and fewer times. */
+      
+      if (samelengths)
+        { 
+        while (eptr >= pp)
+          {
+          RMATCH(eptr, ecode, offset_top, mb, eptrb, RM15);
+          if (rrc != MATCH_NOMATCH) RRETURN(rrc);
+          eptr -= length;
+          }
         }
+        
+      /* The rare case of non-matching lengths. Re-scan the repetition for each 
+      iteration. We know that match_ref() will succeed every time. */
+       
+      else
+        {
+        max = i; 
+        for (;;)
+          {
+          RMATCH(eptr, ecode, offset_top, mb, eptrb, RM15);
+          if (rrc != MATCH_NOMATCH) RRETURN(rrc);
+          if (eptr == pp) break;  /* Failed after minimal repetition */
+          eptr = pp;
+          max--; 
+          for (i = min; i < max; i++)
+            {
+            PCRE2_SIZE slength;
+            (void)match_ref(offset, offset_top, eptr, mb, caseless, &slength);
+            eptr += slength;
+            }
+          }
+        }        
+ 
       RRETURN(MATCH_NOMATCH);
       }
     /* Control never gets here */
@@ -3223,7 +3268,7 @@ for (;;)
       length = 1;
       ecode++;
       GETCHARLEN(fc, ecode, length);
-      if (length > mb->end_subject - eptr)
+      if (length > (PCRE2_SIZE)(mb->end_subject - eptr))
         {
         CHECK_PARTIAL();             /* Not SCHECK_PARTIAL() */
         RRETURN(MATCH_NOMATCH);

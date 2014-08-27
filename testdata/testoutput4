@@ -3690,5 +3690,49 @@ No match
 /^s?c/im,utf
     scat
  0: sc
+    
+# The next four tests are for repeated caseless back references when the 
+# code unit length of the matched text is different to that of the original
+# group in the UTF-8 case.
+
+/^(\x{23a})\1*(.)/i,utf
+    \x{23a}\x{23a}\x{23a}\x{23a}
+ 0: \x{23a}\x{23a}\x{23a}\x{23a}
+ 1: \x{23a}
+ 2: \x{23a}
+    \x{23a}\x{2c65}\x{2c65}\x{2c65}
+ 0: \x{23a}\x{2c65}\x{2c65}\x{2c65}
+ 1: \x{23a}
+ 2: \x{2c65}
+    \x{23a}\x{23a}\x{2c65}\x{23a}
+ 0: \x{23a}\x{23a}\x{2c65}\x{23a}
+ 1: \x{23a}
+ 2: \x{23a}
+
+/^(\x{23a})\1*(..)/i,utf
+    \x{23a}\x{2c65}\x{2c65}\x{2c65}
+ 0: \x{23a}\x{2c65}\x{2c65}\x{2c65}
+ 1: \x{23a}
+ 2: \x{2c65}\x{2c65}
+    \x{23a}\x{23a}\x{2c65}\x{23a}
+ 0: \x{23a}\x{23a}\x{2c65}\x{23a}
+ 1: \x{23a}
+ 2: \x{2c65}\x{23a}
+
+/^(\x{23a})\1*(...)/i,utf
+    \x{23a}\x{2c65}\x{2c65}\x{2c65}
+ 0: \x{23a}\x{2c65}\x{2c65}\x{2c65}
+ 1: \x{23a}
+ 2: \x{2c65}\x{2c65}\x{2c65}
+    \x{23a}\x{23a}\x{2c65}\x{23a}
+ 0: \x{23a}\x{23a}\x{2c65}\x{23a}
+ 1: \x{23a}
+ 2: \x{23a}\x{2c65}\x{23a}
+
+/^(\x{23a})\1*(....)/i,utf
+    \x{23a}\x{2c65}\x{2c65}\x{2c65}
+No match
+    \x{23a}\x{23a}\x{2c65}\x{23a}
+No match
 
 # End of testinput4
