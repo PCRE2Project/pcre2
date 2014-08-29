@@ -20,6 +20,11 @@ unset cp ls mv rm
 builddir=`pwd`
 pcre2grep=$builddir/pcre2grep
 
+if [ ! -x $pcre2grep ] ; then
+  echo "** $pcre2grep does not exist or is not execuatble."
+  exit 1
+fi    
+
 valgrind=
 while [ $# -gt 0 ] ; do
   case $1 in
@@ -565,6 +570,9 @@ $valgrind $pcre2grep -n --newline=anycrlf "^(abc|def|ghi|jkl)" testNinputgrep >>
 
 $cf $srcdir/testdata/grepoutputN testtrygrep
 if [ $? != 0 ] ; then exit 1; fi
+
+# Clean up local working files
+rm -f testNinputgrep teststderrgrep testtrygrep testtemp1grep testtemp2grep
 
 exit 0
 
