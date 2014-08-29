@@ -271,7 +271,7 @@ typedef const PCRE2_UCHAR8  *PCRE2_SPTR8;
 typedef const PCRE2_UCHAR16 *PCRE2_SPTR16;
 typedef const PCRE2_UCHAR32 *PCRE2_SPTR32;
 
-/* The PCRE2_SIZE type is used for all string lengths and offsets in PCRE22,
+/* The PCRE2_SIZE type is used for all string lengths and offsets in PCRE2,
 including pattern offsets for errors and subject offsets after a match. We
 define special values to indicate zero-terminated strings and unset offsets in
 the offset vector (ovector). */
@@ -435,18 +435,18 @@ PCRE2_EXP_DECL PCRE2_SIZE  pcre2_get_startchar(pcre2_match_data *);
 
 #define PCRE2_SUBSTRING_FUNCTIONS \
 PCRE2_EXP_DECL int       pcre2_substring_copy_byname(pcre2_match_data *, \
-                           PCRE2_SPTR, PCRE2_UCHAR *, size_t); \
+                           PCRE2_SPTR, PCRE2_UCHAR *, PCRE2_SIZE *); \
 PCRE2_EXP_DECL int       pcre2_substring_copy_bynumber(pcre2_match_data *, \
-                           int, PCRE2_UCHAR *, size_t); \
+                           int, PCRE2_UCHAR *, PCRE2_SIZE *); \
 PCRE2_EXP_DECL void      pcre2_substring_free(PCRE2_UCHAR *); \
 PCRE2_EXP_DECL int       pcre2_substring_get_byname(pcre2_match_data *, \
-                           PCRE2_SPTR, PCRE2_UCHAR **); \
+                           PCRE2_SPTR, PCRE2_UCHAR **, PCRE2_SIZE *); \
 PCRE2_EXP_DECL int       pcre2_substring_get_bynumber(pcre2_match_data *, \
-                           int, PCRE2_UCHAR **); \
+                           int, PCRE2_UCHAR **, PCRE2_SIZE *); \
 PCRE2_EXP_DECL int       pcre2_substring_length_byname(pcre2_match_data *, \
-                           PCRE2_SPTR); \
+                           PCRE2_SPTR, PCRE2_SIZE *); \
 PCRE2_EXP_DECL int       pcre2_substring_length_bynumber(pcre2_match_data *, \
-                           int); \
+                           int, PCRE2_SIZE *); \
 PCRE2_EXP_DECL int       pcre2_substring_nametable_scan(const pcre2_code *, \
                            PCRE2_SPTR, PCRE2_SPTR *, PCRE2_SPTR *); \
 PCRE2_EXP_DECL int       pcre2_substring_number_from_name(\

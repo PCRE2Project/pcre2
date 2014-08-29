@@ -877,21 +877,21 @@ are supported. */
     pcre2_substring_free_16((PCRE2_UCHAR16 *)a); \
   else pcre2_substring_free_32((PCRE2_UCHAR32 *)a)
 
-#define PCRE2_SUBSTRING_GET_BYNAME(a,b,c,d) \
+#define PCRE2_SUBSTRING_GET_BYNAME(a,b,c,d,e) \
   if (test_mode == PCRE8_MODE) \
-    a = pcre2_substring_get_byname_8(G(b,8),G(c,8),(PCRE2_UCHAR8 **)d); \
+    a = pcre2_substring_get_byname_8(G(b,8),G(c,8),(PCRE2_UCHAR8 **)d,e); \
   else if (test_mode == PCRE16_MODE) \
-    a = pcre2_substring_get_byname_16(G(b,16),G(c,16),(PCRE2_UCHAR16 **)d); \
+    a = pcre2_substring_get_byname_16(G(b,16),G(c,16),(PCRE2_UCHAR16 **)d,e); \
   else \
-    a = pcre2_substring_get_byname_32(G(b,32),G(c,32),(PCRE2_UCHAR32 **)d)
+    a = pcre2_substring_get_byname_32(G(b,32),G(c,32),(PCRE2_UCHAR32 **)d,e)
 
-#define PCRE2_SUBSTRING_GET_BYNUMBER(a,b,c,d) \
+#define PCRE2_SUBSTRING_GET_BYNUMBER(a,b,c,d,e) \
   if (test_mode == PCRE8_MODE) \
-    a = pcre2_substring_get_bynumber_8(G(b,8),c,(PCRE2_UCHAR8 **)d); \
+    a = pcre2_substring_get_bynumber_8(G(b,8),c,(PCRE2_UCHAR8 **)d,e); \
   else if (test_mode == PCRE16_MODE) \
-    a = pcre2_substring_get_bynumber_16(G(b,16),c,(PCRE2_UCHAR16 **)d); \
+    a = pcre2_substring_get_bynumber_16(G(b,16),c,(PCRE2_UCHAR16 **)d,e); \
   else \
-    a = pcre2_substring_get_bynumber_32(G(b,32),c,(PCRE2_UCHAR32 **)d)
+    a = pcre2_substring_get_bynumber_32(G(b,32),c,(PCRE2_UCHAR32 **)d,e)
 
 #define PCRE2_SUBSTRING_LIST_GET(a,b,c,d) \
   if (test_mode == PCRE8_MODE) \
@@ -1149,21 +1149,21 @@ the three different cases. */
     G(pcre2_substring_free_,BITONE)((G(PCRE2_UCHAR,BITONE) *)a); \
   else G(pcre2_substring_free_,BITTWO)((G(PCRE2_UCHAR,BITTWO) *)a)
 
-#define PCRE2_SUBSTRING_GET_BYNAME(a,b,c,d) \
+#define PCRE2_SUBSTRING_GET_BYNAME(a,b,c,d,e) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
     a = G(pcre2_substring_get_byname_,BITONE)(G(b,BITONE),G(c,BITONE),\
-      (G(PCRE2_UCHAR,BITONE) **)d); \
+      (G(PCRE2_UCHAR,BITONE) **)d,e); \
   else \
     a = G(pcre2_substring_get_byname_,BITTWO)(G(b,BITTWO),G(c,BITTWO),\
-      (G(PCRE2_UCHAR,BITTWO) **)d)
+      (G(PCRE2_UCHAR,BITTWO) **)d,e)
 
-#define PCRE2_SUBSTRING_GET_BYNUMBER(a,b,c,d) \
+#define PCRE2_SUBSTRING_GET_BYNUMBER(a,b,c,d,e) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
     a = G(pcre2_substring_get_bynumber_,BITONE)(G(b,BITONE),c,\
-      (G(PCRE2_UCHAR,BITONE) **)d); \
+      (G(PCRE2_UCHAR,BITONE) **)d,e); \
   else \
     a = G(pcre2_substring_get_bynumber_,BITTWO)(G(b,BITTWO),c,\
-      (G(PCRE2_UCHAR,BITTWO) **)d)
+      (G(PCRE2_UCHAR,BITTWO) **)d,e)
 
 #define PCRE2_SUBSTRING_LIST_GET(a,b,c,d) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
@@ -1270,10 +1270,10 @@ the three different cases. */
 #define PCRE2_SUBSTRING_COPY_BYNUMBER(a,b,c,d,e) \
   a = pcre2_substring_copy_bynumber_8(G(b,8),c,(PCRE2_UCHAR8 *)d,e)
 #define PCRE2_SUBSTRING_FREE(a) pcre2_substring_free_8((PCRE2_UCHAR8 *)a)
-#define PCRE2_SUBSTRING_GET_BYNAME(a,b,c,d) \
-  a = pcre2_substring_get_byname_8(G(b,8),G(c,8),(PCRE2_UCHAR8 **)d)
-#define PCRE2_SUBSTRING_GET_BYNUMBER(a,b,c,d) \
-  a = pcre2_substring_get_bynumber_8(G(b,8),c,(PCRE2_UCHAR8 **)d)
+#define PCRE2_SUBSTRING_GET_BYNAME(a,b,c,d,e) \
+  a = pcre2_substring_get_byname_8(G(b,8),G(c,8),(PCRE2_UCHAR8 **)d,e)
+#define PCRE2_SUBSTRING_GET_BYNUMBER(a,b,c,d,e) \
+  a = pcre2_substring_get_bynumber_8(G(b,8),c,(PCRE2_UCHAR8 **)d,e)
 #define PCRE2_SUBSTRING_LIST_GET(a,b,c,d) \
   a = pcre2_substring_list_get_8(G(b,8),(PCRE2_UCHAR8 ***)c,d)
 #define PCRE2_SUBSTRING_LIST_FREE(a) \
@@ -1329,10 +1329,10 @@ the three different cases. */
 #define PCRE2_SUBSTRING_COPY_BYNUMBER(a,b,c,d,e) \
   a = pcre2_substring_copy_bynumber_16(G(b,16),c,(PCRE2_UCHAR16 *)d,e)
 #define PCRE2_SUBSTRING_FREE(a) pcre2_substring_free_16((PCRE2_UCHAR16 *)a)
-#define PCRE2_SUBSTRING_GET_BYNAME(a,b,c,d) \
-  a = pcre2_substring_get_byname_16(G(b,16),G(c,16),(PCRE2_UCHAR16 **)d)
-#define PCRE2_SUBSTRING_GET_BYNUMBER(a,b,c,d) \
-  a = pcre2_substring_get_bynumber_16(G(b,16),c,(PCRE2_UCHAR16 **)d)
+#define PCRE2_SUBSTRING_GET_BYNAME(a,b,c,d,e) \
+  a = pcre2_substring_get_byname_16(G(b,16),G(c,16),(PCRE2_UCHAR16 **)d,e)
+#define PCRE2_SUBSTRING_GET_BYNUMBER(a,b,c,d,e) \
+  a = pcre2_substring_get_bynumber_16(G(b,16),c,(PCRE2_UCHAR16 **)d,e)
 #define PCRE2_SUBSTRING_LIST_GET(a,b,c,d) \
   a = pcre2_substring_list_get_16(G(b,16),(PCRE2_UCHAR16 ***)c,d)
 #define PCRE2_SUBSTRING_LIST_FREE(a) \
@@ -1388,11 +1388,11 @@ the three different cases. */
 #define PCRE2_SUBSTRING_COPY_BYNUMBER(a,b,c,d,e) \
   a = pcre2_substring_copy_bynumber_32(G(b,32),c,(PCRE2_UCHAR32 *)d,e);
 #define PCRE2_SUBSTRING_FREE(a) pcre2_substring_free_32((PCRE2_UCHAR32 *)a)
-##define PCRE2_SUBSTRING_GET_BYNAME(a,b,c,d) \
-  a = pcre2_substring_get_byname_32(G(b,32),G(c,32),(PCRE2_UCHAR32 **)d)
-define PCRE2_SUBSTRING_GET_BYNUMBER(a,b,c,d) \
+##define PCRE2_SUBSTRING_GET_BYNAME(a,b,c,d,e) \
+  a = pcre2_substring_get_byname_32(G(b,32),G(c,32),(PCRE2_UCHAR32 **)d,e)
+define PCRE2_SUBSTRING_GET_BYNUMBER(a,b,c,d,e) \
   a = pcre2_substring_get_bynumber_32(G(b,32),c,(PCRE2_UCHAR32 **)d)
-#define PCRE2_SUBSTRING_LIST_GET(a,b,c,d) \
+#define PCRE2_SUBSTRING_LIST_GET(a,b,c,d,e) \
   a = pcre2_substring_list_get_32(G(b,32),(PCRE2_UCHAR32 ***)c,d)
 #define PCRE2_SUBSTRING_LIST_FREE(a) \
   pcre2_substring_list_free_32((PCRE2_SPTR32 *)a)
@@ -4543,10 +4543,11 @@ for (gmatched = 0;; gmatched++)
     for (i = 0; i < MAXCPYGET && dat_datctl.copy_numbers[i] >= 0; i++)
       {
       int rc;
+      PCRE2_SIZE length; 
       uint32_t copybuffer[256];
       uint32_t n = (uint32_t)(dat_datctl.copy_numbers[i]);
-      PCRE2_SUBSTRING_COPY_BYNUMBER(rc, match_data, n, copybuffer,
-        sizeof(copybuffer)/code_unit_size);
+      length = sizeof(copybuffer)/code_unit_size;
+      PCRE2_SUBSTRING_COPY_BYNUMBER(rc, match_data, n, copybuffer, &length);
       if (rc < 0)
         {
         fprintf(outfile, "copy substring %d failed (%d): ", n, rc);
@@ -4557,8 +4558,8 @@ for (gmatched = 0;; gmatched++)
       else
         {
         fprintf(outfile, "%2dC ", n);
-        PCHARSV(copybuffer, 0, rc, utf, outfile);
-        fprintf(outfile, " (%d)\n", rc);
+        PCHARSV(copybuffer, 0, length, utf, outfile);
+        fprintf(outfile, " (%lu)\n", (unsigned long)length);
         }
       }
 
@@ -4569,6 +4570,7 @@ for (gmatched = 0;; gmatched++)
       {
       int rc;
       PCRE2_SIZE cnl;
+      PCRE2_SIZE length; 
       uint32_t copybuffer[256];
       int namelen = strlen((const char *)nptr);
       if (namelen == 0) break;
@@ -4584,8 +4586,8 @@ for (gmatched = 0;; gmatched++)
       if (test_mode == PCRE32_MODE)(void)to32(nptr, utf, &cnl);
 #endif
 
-      PCRE2_SUBSTRING_COPY_BYNAME(rc, match_data, pbuffer,
-        copybuffer, sizeof(copybuffer)/code_unit_size);
+      length = sizeof(copybuffer)/code_unit_size;
+      PCRE2_SUBSTRING_COPY_BYNAME(rc, match_data, pbuffer, copybuffer, &length);
       if (rc < 0)
         {
         fprintf(outfile, "copy substring '%s' failed (%d): ", nptr, rc);
@@ -4596,8 +4598,8 @@ for (gmatched = 0;; gmatched++)
       else
         {
         fprintf(outfile, "  C ");
-        PCHARSV(copybuffer, 0, rc, utf, outfile);
-        fprintf(outfile, " (%d) %s\n", rc, nptr);
+        PCHARSV(copybuffer, 0, length, utf, outfile);
+        fprintf(outfile, " (%lu) %s\n", (unsigned long)length, nptr);
         }
       nptr += namelen + 1;
       }
@@ -4607,9 +4609,10 @@ for (gmatched = 0;; gmatched++)
     for (i = 0; i < MAXCPYGET && dat_datctl.get_numbers[i] >= 0; i++)
       {
       int rc;
+      PCRE2_SIZE length; 
       void *gotbuffer;
       uint32_t n = (uint32_t)(dat_datctl.get_numbers[i]);
-      PCRE2_SUBSTRING_GET_BYNUMBER(rc, match_data, n, &gotbuffer);
+      PCRE2_SUBSTRING_GET_BYNUMBER(rc, match_data, n, &gotbuffer, &length);
       if (rc < 0)
         {
         fprintf(outfile, "get substring %d failed (%d): ", n, rc);
@@ -4620,8 +4623,8 @@ for (gmatched = 0;; gmatched++)
       else
         {
         fprintf(outfile, "%2dG ", n);
-        PCHARSV(gotbuffer, 0, rc, utf, outfile);
-        fprintf(outfile, " (%d)\n", rc);
+        PCHARSV(gotbuffer, 0, length, utf, outfile);
+        fprintf(outfile, " (%lu)\n", (unsigned long)length);
         PCRE2_SUBSTRING_FREE(gotbuffer);
         }
       }
@@ -4632,6 +4635,7 @@ for (gmatched = 0;; gmatched++)
     for (;;)
       {
       PCRE2_SIZE cnl;
+      PCRE2_SIZE length; 
       void *gotbuffer;
       int rc;
       int namelen = strlen((const char *)nptr);
@@ -4648,7 +4652,7 @@ for (gmatched = 0;; gmatched++)
       if (test_mode == PCRE32_MODE)(void)to32(nptr, utf, &cnl);
 #endif
 
-      PCRE2_SUBSTRING_GET_BYNAME(rc, match_data, pbuffer, &gotbuffer);
+      PCRE2_SUBSTRING_GET_BYNAME(rc, match_data, pbuffer, &gotbuffer, &length);
       if (rc < 0)
         {
         fprintf(outfile, "get substring '%s' failed (%d): ", nptr, rc);
@@ -4659,8 +4663,8 @@ for (gmatched = 0;; gmatched++)
       else
         {
         fprintf(outfile, "  G ");
-        PCHARSV(gotbuffer, 0, rc, utf, outfile);
-        fprintf(outfile, " (%d) %s\n", rc, nptr);
+        PCHARSV(gotbuffer, 0, length, utf, outfile);
+        fprintf(outfile, " (%lu) %s\n", (unsigned long)length, nptr);
         PCRE2_SUBSTRING_FREE(gotbuffer);
         }
       nptr += namelen + 1;
@@ -4672,7 +4676,7 @@ for (gmatched = 0;; gmatched++)
       {
       int rc;
       void **stringlist;
-      size_t *lengths;
+      PCRE2_SIZE *lengths;
       PCRE2_SUBSTRING_LIST_GET(rc, match_data, &stringlist, &lengths);
       if (rc < 0)
         {
