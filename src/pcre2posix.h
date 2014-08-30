@@ -2,7 +2,7 @@
 *      Perl-Compatible Regular Expressions       *
 *************************************************/
 
-/* PCRE is a library of functions to support regular expressions whose syntax
+/* PCRE2 is a library of functions to support regular expressions whose syntax
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
@@ -63,8 +63,8 @@ extern "C" {
 #define REG_UNGREEDY  0x0200  /* NOT defined by POSIX; maps to PCRE2_UNGREEDY */
 #define REG_UCP       0x0400  /* NOT defined by POSIX; maps to PCRE2_UCP */
 
-/* This is not used by PCRE, but by defining it we make it easier
-to slot PCRE into existing programs that make POSIX calls. */
+/* This is not used by PCRE2, but by defining it we make it easier
+to slot PCRE2 into existing programs that make POSIX calls. */
 
 #define REG_EXTENDED  0
 
@@ -109,35 +109,35 @@ typedef struct {
   regoff_t rm_eo;
 } regmatch_t;
 
-/* When an application links to a PCRE DLL in Windows, the symbols that are
-imported have to be identified as such. When building PCRE, the appropriate
+/* When an application links to a PCRE2 DLL in Windows, the symbols that are
+imported have to be identified as such. When building PCRE2, the appropriate
 export settings are needed, and are set in pcre2posix.c before including this
 file. */
 
-#if defined(_WIN32) && !defined(PCRE_STATIC) && !defined(PCREPOSIX_EXP_DECL)
-#  define PCREPOSIX_EXP_DECL  extern __declspec(dllimport)
-#  define PCREPOSIX_EXP_DEFN  __declspec(dllimport)
+#if defined(_WIN32) && !defined(PCRE2_STATIC) && !defined(PCRE2POSIX_EXP_DECL)
+#  define PCRE2POSIX_EXP_DECL  extern __declspec(dllimport)
+#  define PCRE2POSIX_EXP_DEFN  __declspec(dllimport)
 #endif
 
 /* By default, we use the standard "extern" declarations. */
 
-#ifndef PCREPOSIX_EXP_DECL
+#ifndef PCRE2POSIX_EXP_DECL
 #  ifdef __cplusplus
-#    define PCREPOSIX_EXP_DECL  extern "C"
-#    define PCREPOSIX_EXP_DEFN  extern "C"
+#    define PCRE2POSIX_EXP_DECL  extern "C"
+#    define PCRE2POSIX_EXP_DEFN  extern "C"
 #  else
-#    define PCREPOSIX_EXP_DECL  extern
-#    define PCREPOSIX_EXP_DEFN  extern
+#    define PCRE2POSIX_EXP_DECL  extern
+#    define PCRE2POSIX_EXP_DEFN  extern
 #  endif
 #endif
 
 /* The functions */
 
-PCREPOSIX_EXP_DECL int regcomp(regex_t *, const char *, int);
-PCREPOSIX_EXP_DECL int regexec(const regex_t *, const char *, size_t,
+PCRE2POSIX_EXP_DECL int regcomp(regex_t *, const char *, int);
+PCRE2POSIX_EXP_DECL int regexec(const regex_t *, const char *, size_t,
                      regmatch_t *, int);
-PCREPOSIX_EXP_DECL size_t regerror(int, const regex_t *, char *, size_t);
-PCREPOSIX_EXP_DECL void regfree(regex_t *);
+PCRE2POSIX_EXP_DECL size_t regerror(int, const regex_t *, char *, size_t);
+PCRE2POSIX_EXP_DECL void regfree(regex_t *);
 
 #ifdef __cplusplus
 }   /* extern "C" */
