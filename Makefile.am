@@ -145,9 +145,11 @@ dist_noinst_SCRIPTS =
 bin_PROGRAMS =
 noinst_PROGRAMS =
 
-# Additional files to delete on 'make clean' and 'make maintainer-clean'.
+# Additional files to delete on 'make clean', 'make distclean',
+# and 'make maintainer-clean'.
 
 CLEANFILES =
+DISTCLEANFILES = src/config.h.in~
 MAINTAINERCLEANFILES =
 
 # Additional files to bundle with the distribution, over and above what
@@ -268,13 +270,13 @@ COMMON_SOURCES = \
   src/pcre2_context.c \
   src/pcre2_dfa_match.c \
   src/pcre2_error.c \
-  src/pcre2_match.c \
   src/pcre2_internal.h \
   src/pcre2_intmodedep.h \
   src/pcre2_jit_compile.c \
   src/pcre2_jit_match.c \
   src/pcre2_jit_misc.c \
   src/pcre2_maketables.c \
+  src/pcre2_match.c \
   src/pcre2_match_data.c \
   src/pcre2_newline.c \
   src/pcre2_ord2utf.c \
@@ -589,9 +591,12 @@ EXTRA_DIST += \
 CLEANFILES += \
 	testsavedregex \
 	teststderr \
+        teststderrgrep \
         testtemp* \
 	testtry \
-        testNinput
+        testtrygrep \
+        testNinput \
+        testNinputgrep
 
 ## ------------ End of testing -------------
 
@@ -704,10 +709,19 @@ distclean-local: coverage-distclean
 
 .PHONY: coverage coverage-baseline coverage-check coverage-report coverage-reset coverage-clean-report coverage-clean-data coverage-clean coverage-distclean
 
+# Without coverage support, still arrange for 'make distclean' to get rid of
+# any coverage files that may have been left from a different configuration.
+
 else
 
 coverage:
 	@echo "Configuring with --enable-coverage is required to generate code coverage report."
+
+DISTCLEANFILES += src/*.gcda src/*.gcno 
+
+distclean-local: 
+	rm -rf $(PACKAGE)-$(VERSION)-coverage*
+
 endif # WITH_GCOV
 
 ## CMake support
