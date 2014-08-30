@@ -3327,8 +3327,13 @@ Subject length lower bound = 2
 
 /()a/I
 Capturing subpattern count = 1
-Starting code units: a 
-Last code unit = 'a'
+First code unit = 'a'
+Subject length lower bound = 1
+
+/(?:(?=.)|(?<!x))a/I
+Capturing subpattern count = 0
+Max lookbehind = 1
+First code unit = 'a'
 Subject length lower bound = 1
 
 /(?(1)ab|ac)(.)/I
@@ -10000,8 +10005,7 @@ Subject length lower bound = 1
     
 /()i(?(1)a)/I
 Capturing subpattern count = 1
-Starting code units: i 
-Last code unit = 'i'
+First code unit = 'i'
 Subject length lower bound = 1
     ia
  0: ia

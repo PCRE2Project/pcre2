@@ -6217,7 +6217,7 @@ for (;; ptr++)
       no firstcu, set "none" for the whole branch. In both cases, a zero
       repeat forces firstcu to "none". */
 
-      if (firstcuflags == REQ_UNSET)
+      if (firstcuflags == REQ_UNSET && subfirstcuflags != REQ_UNSET)
         {
         if (subfirstcuflags >= 0)
           {

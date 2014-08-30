@@ -11,8 +11,8 @@ item 20 for release 8.36.
 The code of the library was heavily revised as part of the new API 
 implementation. Details of each and every modification were not individually 
 logged. In addition to the API changes, the following changes were made. They 
-are either new functionality, or bugs that were fixed after the code had been 
-forked.
+are either new functionality, or bug fixes and other noticeable changes of 
+behaviour that were implemented after the code had been forked.
 
 1. The test program, now called pcre2test, was re-specified and almost 
 completely re-written. Its input is not compatible with input for pcretest.
@@ -37,5 +37,9 @@ capture the final character, which is the three bytes E2, B1, and A5 in UTF-8.
 Incorrect backtracking meant that group 2 captured only the last two bytes. 
 This bug has been fixed; the new code is slower, but it is used only when the 
 strings matched by the repetition are not all the same length.
+
+5. A pattern such as /()a/ was not setting the "first character must be 'a'"
+information. This applied to any pattern with a group that matched no 
+characters, for example: /(?:(?=.)|(?<!x))a/.
 
 ****
