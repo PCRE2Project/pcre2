@@ -287,7 +287,7 @@ static const char *incexname[4] = { "--include", "--exclude",
 
 /* Structure for options and list of them */
 
-enum { OP_NODATA, OP_STRING, OP_OP_STRING, OP_NUMBER, OP_LONGNUMBER,
+enum { OP_NODATA, OP_STRING, OP_OP_STRING, OP_NUMBER, OP_U32NUMBER,
        OP_OP_NUMBER, OP_OP_NUMBERS, OP_PATLIST, OP_FILELIST, OP_BINFILES };
 
 typedef struct option_item {
@@ -357,8 +357,8 @@ static option_item optionlist[] = {
   { OP_NODATA,     N_LBUFFER, NULL,             "line-buffered", "use line buffering" },
   { OP_NODATA,     N_LOFFSETS, NULL,            "line-offsets",  "output line numbers and offsets, not text" },
   { OP_STRING,     N_LOCALE, &locale,           "locale=locale", "use the named locale" },
-  { OP_LONGNUMBER, N_M_LIMIT, &match_limit,     "match-limit=number", "set PCRE match limit option" },
-  { OP_LONGNUMBER, N_M_LIMIT_REC, &recursion_limit, "recursion-limit=number", "set PCRE match recursion limit option" },
+  { OP_U32NUMBER,  N_M_LIMIT, &match_limit,     "match-limit=number", "set PCRE match limit option" },
+  { OP_U32NUMBER,  N_M_LIMIT_REC, &recursion_limit, "recursion-limit=number", "set PCRE match recursion limit option" },
   { OP_NODATA,     'M',      NULL,              "multiline",     "run in multiline mode" },
   { OP_STRING,     'N',      &newline_arg,      "newline=type",  "set newline type (CR, LF, CRLF, ANYCRLF or ANY)" },
   { OP_NODATA,     'n',      NULL,              "line-number",   "print line number with output lines" },
@@ -2913,7 +2913,7 @@ for (i = 1; i < argc; i++)
 
   /* Otherwise, deal with a single string or numeric data value. */
 
-  else if (op->type != OP_NUMBER && op->type != OP_LONGNUMBER &&
+  else if (op->type != OP_NUMBER && op->type != OP_U32NUMBER &&
            op->type != OP_OP_NUMBER)
     {
     *((char **)op->dataptr) = option_data;
@@ -2921,7 +2921,7 @@ for (i = 1; i < argc; i++)
   else
     {
     unsigned long int n = decode_number(option_data, op, longop);
-    if (op->type == OP_LONGNUMBER) *((unsigned long int *)op->dataptr) = n;
+    if (op->type == OP_U32NUMBER) *((uint32_t *)op->dataptr) = n;
       else *((int *)op->dataptr) = n;
     }
   }
