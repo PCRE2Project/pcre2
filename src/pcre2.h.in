@@ -318,7 +318,7 @@ typedef struct pcre2_callout_block { \
   uint32_t      callout_number;    /* Number compiled into pattern */ \
   PCRE2_SIZE   *offset_vector;     /* The offset vector */ \
   PCRE2_SPTR    subject;           /* The subject being matched */ \
-  size_t        subject_length;    /* The length of the subject */ \
+  PCRE2_SIZE    subject_length;    /* The length of the subject */ \
   PCRE2_SIZE    start_match;       /* Offset to start of this match attempt */ \
   PCRE2_SIZE    current_position;  /* Where we currently are in the subject */ \
   uint32_t      capture_top;       /* Max current capture */ \
@@ -338,7 +338,7 @@ expanded for each width below. Start with functions that give general
 information. */
 
 #define PCRE2_GENERAL_INFO_FUNCTIONS \
-PCRE2_EXP_DECL int       pcre2_config(int, void *, size_t);
+PCRE2_EXP_DECL int       pcre2_config(int, void *, PCRE2_SIZE);
 
 
 /* Functions for manipulating contexts. */
@@ -348,7 +348,7 @@ PCRE2_EXP_DECL \
   pcre2_general_context *pcre2_general_context_copy(pcre2_general_context *); \
 PCRE2_EXP_DECL \
   pcre2_general_context *pcre2_general_context_create( \
-                           void *(*)(size_t, void *), \
+                           void *(*)(PCRE2_SIZE, void *), \
                            void (*)(void *, void *), void *); \
 PCRE2_EXP_DECL void      pcre2_general_context_free(pcre2_general_context *);
 
@@ -386,7 +386,7 @@ PCRE2_EXP_DECL int       pcre2_set_newline_match(pcre2_match_context *, \
 PCRE2_EXP_DECL int       pcre2_set_recursion_limit(pcre2_match_context *, \
                            uint32_t); \
 PCRE2_EXP_DECL int       pcre2_set_recursion_memory_management( \
-                           pcre2_match_context *, void *(*)(size_t, void *), \
+                           pcre2_match_context *, void *(*)(PCRE2_SIZE, void *), \
                            void (*)(void *, void *), void *);
 
 
@@ -418,7 +418,7 @@ PCRE2_EXP_DECL \
 PCRE2_EXP_DECL int         pcre2_dfa_match(const pcre2_code *, PCRE2_SPTR, \
                              PCRE2_SIZE, PCRE2_SIZE, uint32_t, \
                              pcre2_match_data *, pcre2_match_context *, int *, \
-                             size_t); \
+                             PCRE2_SIZE); \
 PCRE2_EXP_DECL int         pcre2_match(const pcre2_code *, \
                              PCRE2_SPTR, PCRE2_SIZE, PCRE2_SIZE, uint32_t, \
                              pcre2_match_data *, pcre2_match_context *); \
@@ -453,7 +453,7 @@ PCRE2_EXP_DECL int       pcre2_substring_number_from_name(\
                            const pcre2_code *, PCRE2_SPTR); \
 PCRE2_EXP_DECL void      pcre2_substring_list_free(PCRE2_SPTR *); \
 PCRE2_EXP_DECL int       pcre2_substring_list_get(pcre2_match_data *, \
-                           PCRE2_UCHAR ***, size_t **);
+                           PCRE2_UCHAR ***, PCRE2_SIZE **);
 
 
 /* Functions for JIT processing */
@@ -467,7 +467,7 @@ PCRE2_EXP_DECL int       pcre2_jit_match(const pcre2_code *, \
 PCRE2_EXP_DECL void      pcre2_jit_free_unused_memory(pcre2_general_context *);\
 PCRE2_EXP_DECL \
   pcre2_jit_stack       *pcre2_jit_stack_alloc(pcre2_general_context *, \
-                           size_t, size_t); \
+                           PCRE2_SIZE, PCRE2_SIZE); \
 PCRE2_EXP_DECL void      pcre2_jit_stack_assign(const pcre2_code *, \
                            pcre2_jit_callback, void *); \
 PCRE2_EXP_DECL void      pcre2_jit_stack_free(pcre2_jit_stack *);
@@ -476,7 +476,7 @@ PCRE2_EXP_DECL void      pcre2_jit_stack_free(pcre2_jit_stack *);
 /* Other miscellaneous functions. */
 
 #define PCRE2_OTHER_FUNCTIONS \
-PCRE2_EXP_DECL int       pcre2_get_error_message(int, PCRE2_UCHAR *, size_t); \
+PCRE2_EXP_DECL int       pcre2_get_error_message(int, PCRE2_UCHAR *, PCRE2_SIZE); \
 PCRE2_EXP_DECL \
   const uint8_t         *pcre2_maketables(pcre2_general_context *); \
 
