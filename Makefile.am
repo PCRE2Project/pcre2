@@ -7,17 +7,18 @@ AM_CPPFLAGS = -I$(builddir)/src -I$(srcdir)/src
 ## Specify the documentation files that are distributed.
 
 # FIXME
-#dist_doc_DATA = \
+dist_doc_DATA = \
+  AUTHORS \
+  COPYING \
+  ChangeLog \
+  LICENCE \
+  README
+
 #  doc/pcre.txt \
 #  doc/pcre-config.txt \
 #  doc/pcregrep.txt \
 #  doc/pcretest.txt \
-#  AUTHORS \
-#  COPYING \
-#  ChangeLog \
-#  LICENCE \
 #  NEWS \
-#  README
 
 # FIXME
 #dist_html_DATA = \
@@ -77,8 +78,10 @@ AM_CPPFLAGS = -I$(builddir)/src -I$(srcdir)/src
 
 # FIXME
 dist_man_MANS = \
-  doc/pcre2api.3
-
+  doc/pcre2api.3 \
+  doc/pcre2callout.3 \
+  doc/pcre2test.1 \
+  doc/pcre2unicode.3
 
 #  doc/pcre2-config.1 \
 #  doc/pcre2.3 \
@@ -112,7 +115,6 @@ dist_man_MANS = \
 #  doc/pcre2_utf32_to_host_byte_order.3 \
 #  doc/pcre2_version.3 \
 #  doc/pcre2build.3 \
-#  doc/pcre2callout.3 \
 #  doc/pcre2compat.3 \
 #  doc/pcre2demo.3 \
 #  doc/pcre2grep.1 \
@@ -127,8 +129,6 @@ dist_man_MANS = \
 #  doc/pcre2sample.3 \
 #  doc/pcre2stack.3 \
 #  doc/pcre2syntax.3 \
-#  doc/pcre2test.1 \
-#  doc/pcre2unicode.3
 
 # The Libtool libraries to install.  We'll add to this later.
 
