@@ -51,8 +51,8 @@ enabled, for example, pcre2_compile.c is compiled twice. In contrast,
 pcre2test.c is compiled only once, and linked with all the enabled libraries.
 Therefore, it must not make use of any of the macros from pcre2.h or
 pcre2_internal.h that depend on PCRE2_CODE_UNIT_WIDTH. It does, however, make
-use of SUPPORT_PCRE8, SUPPORT_PCRE16, and SUPPORT_PCRE32, to ensure that it
-references only the enabled library functions. */
+use of SUPPORT_PCRE2_8, SUPPORT_PCRE2_16, and SUPPORT_PCRE2_32, to ensure that
+it references only the enabled library functions. */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -221,32 +221,32 @@ these inclusions should not be changed. */
 #undef PCRE2_SUFFIX
 #undef PCRE2_CODE_UNIT_WIDTH
 
-#ifdef   SUPPORT_PCRE8
+#ifdef   SUPPORT_PCRE2_8
 #define  PCRE2_CODE_UNIT_WIDTH 8
 #define  PCRE2_SUFFIX(a) G(a,8)
 #include "pcre2_intmodedep.h"
 #include "pcre2_printint.c"
 #undef   PCRE2_CODE_UNIT_WIDTH
 #undef   PCRE2_SUFFIX
-#endif   /* SUPPORT_PCRE8 */
+#endif   /* SUPPORT_PCRE2_8 */
 
-#ifdef   SUPPORT_PCRE16
+#ifdef   SUPPORT_PCRE2_16
 #define  PCRE2_CODE_UNIT_WIDTH 16
 #define  PCRE2_SUFFIX(a) G(a,16)
 #include "pcre2_intmodedep.h"
 #include "pcre2_printint.c"
 #undef   PCRE2_CODE_UNIT_WIDTH
 #undef   PCRE2_SUFFIX
-#endif   /* SUPPORT_PCRE16 */
+#endif   /* SUPPORT_PCRE2_16 */
 
-#ifdef   SUPPORT_PCRE32
+#ifdef   SUPPORT_PCRE2_32
 #define  PCRE2_CODE_UNIT_WIDTH 32
 #define  PCRE2_SUFFIX(a) G(a,32)
 #include "pcre2_intmodedep.h"
 #include "pcre2_printint.c"
 #undef   PCRE2_CODE_UNIT_WIDTH
 #undef   PCRE2_SUFFIX
-#endif   /* SUPPORT_PCRE32 */
+#endif   /* SUPPORT_PCRE2_32 */
 
 #define PCRE2_SUFFIX(a) a
 
@@ -256,7 +256,7 @@ support, there must be 16- or 32-bit support, so default to one of them. The
 config function, JIT stack, contexts, and version string are the same in all
 modes, so use the form of the first that is available. */
 
-#if defined SUPPORT_PCRE8
+#if defined SUPPORT_PCRE2_8
 #define DEFAULT_TEST_MODE PCRE8_MODE
 #define VERSION_TYPE PCRE2_UCHAR8
 #define PCRE2_CONFIG pcre2_config_8
@@ -266,7 +266,7 @@ modes, so use the form of the first that is available. */
 #define PCRE2_REAL_MATCH_CONTEXT pcre2_real_match_context_8
 #define VERSION_TYPE PCRE2_UCHAR8
 
-#elif defined SUPPORT_PCRE16
+#elif defined SUPPORT_PCRE2_16
 #define DEFAULT_TEST_MODE PCRE16_MODE
 #define VERSION_TYPE PCRE2_UCHAR16
 #define PCRE2_CONFIG pcre2_config_16
@@ -275,7 +275,7 @@ modes, so use the form of the first that is available. */
 #define PCRE2_REAL_COMPILE_CONTEXT pcre2_real_compile_context_16
 #define PCRE2_REAL_MATCH_CONTEXT pcre2_real_match_context_16
 
-#elif defined SUPPORT_PCRE32
+#elif defined SUPPORT_PCRE2_32
 #define DEFAULT_TEST_MODE PCRE32_MODE
 #define VERSION_TYPE PCRE2_UCHAR32
 #define PCRE2_CONFIG pcre2_config_32
@@ -527,13 +527,13 @@ static c1modstruct c1modlist[] = {
 /* Table of arguments for the -C command line option. Use macros to make the
 table itself easier to read. */
 
-#if defined SUPPORT_PCRE8
+#if defined SUPPORT_PCRE2_8
 #define SUPPORT_8 1
 #endif
-#if defined SUPPORT_PCRE16
+#if defined SUPPORT_PCRE2_16
 #define SUPPORT_16 1
 #endif
-#if defined SUPPORT_PCRE32
+#if defined SUPPORT_PCRE2_32
 #define SUPPORT_32 1
 #endif
 
@@ -621,7 +621,7 @@ static patctl pat_patctl;
 static datctl def_datctl;
 static datctl dat_datctl;
 
-#ifdef SUPPORT_PCRE8
+#ifdef SUPPORT_PCRE2_8
 static regex_t preg = { NULL, NULL, 0, 0 };
 #endif
 
@@ -648,7 +648,7 @@ static uint8_t *dbuffer = NULL;
 
 /* ---------------- Mode-dependent variables -------------------*/
 
-#ifdef SUPPORT_PCRE8
+#ifdef SUPPORT_PCRE2_8
 static pcre2_code_8             *compiled_code8;
 static pcre2_general_context_8  *general_context8;
 static pcre2_compile_context_8  *pat_context8, *default_pat_context8;
@@ -656,7 +656,7 @@ static pcre2_match_context_8    *dat_context8, *default_dat_context8;
 static pcre2_match_data_8       *match_data8;
 #endif
 
-#ifdef SUPPORT_PCRE16
+#ifdef SUPPORT_PCRE2_16
 static pcre2_code_16            *compiled_code16;
 static pcre2_general_context_16 *general_context16;
 static pcre2_compile_context_16 *pat_context16, *default_pat_context16;
@@ -666,7 +666,7 @@ static PCRE2_SIZE pbuffer16_size = 0;   /* Set only when needed */
 static uint16_t *pbuffer16 = NULL;
 #endif
 
-#ifdef SUPPORT_PCRE32
+#ifdef SUPPORT_PCRE2_32
 static pcre2_code_32            *compiled_code32;
 static pcre2_general_context_32 *general_context32;
 static pcre2_compile_context_32 *pat_context32, *default_pat_context32;
@@ -691,12 +691,12 @@ static uint32_t *pbuffer32 = NULL;
 depending on the mode setting (8, 16, 32). These are dependent on which modes
 are supported. */
 
-#if (defined (SUPPORT_PCRE8) + defined (SUPPORT_PCRE16) + \
-     defined (SUPPORT_PCRE32)) >= 2
+#if (defined (SUPPORT_PCRE2_8) + defined (SUPPORT_PCRE2_16) + \
+     defined (SUPPORT_PCRE2_32)) >= 2
 
 /* ----- All three modes supported ----- */
 
-#if defined(SUPPORT_PCRE8) && defined(SUPPORT_PCRE16) && defined(SUPPORT_PCRE32)
+#if defined(SUPPORT_PCRE2_8) && defined(SUPPORT_PCRE2_16) && defined(SUPPORT_PCRE2_32)
 
 #define CASTFLD(t,a,b) ((test_mode == PCRE8_MODE)? (t)(G(a,8)->b) : \
   (test_mode == PCRE16_MODE)? (t)(G(a,16)->b) : (t)(G(a,32)->b))
@@ -974,13 +974,13 @@ the three different cases. */
 
 /* ----- 32-bit and 16-bit but not 8-bit supported ----- */
 
-#if defined(SUPPORT_PCRE32) && defined(SUPPORT_PCRE16)
+#if defined(SUPPORT_PCRE2_32) && defined(SUPPORT_PCRE2_16)
 #define BITONE 32
 #define BITTWO 16
 
 /* ----- 32-bit and 8-bit but not 16-bit supported ----- */
 
-#elif defined(SUPPORT_PCRE32) && defined(SUPPORT_PCRE8)
+#elif defined(SUPPORT_PCRE2_32) && defined(SUPPORT_PCRE2_8)
 #define BITONE 32
 #define BITTWO 8
 
@@ -1235,7 +1235,7 @@ the three different cases. */
 
 /* ----- Only 8-bit mode is supported ----- */
 
-#elif defined SUPPORT_PCRE8
+#elif defined SUPPORT_PCRE2_8
 #define CASTFLD(t,a,b) (t)(G(a,8)->b)
 #define CASTVAR(t,x) (t)G(x,8)
 #define CODE_UNIT(a,b) (uint32_t)(((PCRE2_SPTR8)(a))[b])
@@ -1294,7 +1294,7 @@ the three different cases. */
 
 /* ----- Only 16-bit mode is supported ----- */
 
-#elif defined SUPPORT_PCRE16
+#elif defined SUPPORT_PCRE2_16
 #define CASTFLD(t,a,b) (t)(G(a,16)->b)
 #define CASTVAR(t,x) (t)G(x,16)
 #define CODE_UNIT(a,b) (uint32_t)(((PCRE2_SPTR16)(a))[b])
@@ -1353,7 +1353,7 @@ the three different cases. */
 
 /* ----- Only 32-bit mode is supported ----- */
 
-#elif defined SUPPORT_PCRE32
+#elif defined SUPPORT_PCRE2_32
 #define CASTFLD(t,a,b) (t)(G(a,32)->b)
 #define CASTVAR(t,x) (t)G(x,32)
 #define CODE_UNIT(a,b) (uint32_t)(((PCRE2_SPTR32)(a))[b])
@@ -1915,7 +1915,7 @@ return n >= 0 ? n : 0;
 
 
 
-#ifdef SUPPORT_PCRE16
+#ifdef SUPPORT_PCRE2_16
 /*************************************************
 *    Find length of 0-terminated 16-bit string   *
 *************************************************/
@@ -1926,11 +1926,11 @@ PCRE2_SPTR16 pp = p;
 while (*pp != 0) pp++;
 return (int)(pp - p);
 }
-#endif  /* SUPPORT_PCRE16 */
+#endif  /* SUPPORT_PCRE2_16 */
 
 
 
-#ifdef SUPPORT_PCRE32
+#ifdef SUPPORT_PCRE2_32
 /*************************************************
 *    Find length of 0-terminated 32-bit string   *
 *************************************************/
@@ -1941,10 +1941,10 @@ PCRE2_SPTR32 pp = p;
 while (*pp != 0) pp++;
 return (int)(pp - p);
 }
-#endif  /* SUPPORT_PCRE32 */
+#endif  /* SUPPORT_PCRE2_32 */
 
 
-#ifdef SUPPORT_PCRE8
+#ifdef SUPPORT_PCRE2_8
 /*************************************************
 *         Print 8-bit character string           *
 *************************************************/
@@ -1978,7 +1978,7 @@ return yield;
 #endif
 
 
-#ifdef SUPPORT_PCRE16
+#ifdef SUPPORT_PCRE2_16
 /*************************************************
 *           Print 16-bit character string        *
 *************************************************/
@@ -2007,11 +2007,11 @@ while (length-- > 0)
   }
 return yield;
 }
-#endif  /* SUPPORT_PCRE16 */
+#endif  /* SUPPORT_PCRE2_16 */
 
 
 
-#ifdef SUPPORT_PCRE32
+#ifdef SUPPORT_PCRE2_32
 /*************************************************
 *           Print 32-bit character string        *
 *************************************************/
@@ -2031,12 +2031,12 @@ while (length-- > 0)
   }
 return yield;
 }
-#endif  /* SUPPORT_PCRE32 */
+#endif  /* SUPPORT_PCRE2_32 */
 
 
 
 
-#ifdef SUPPORT_PCRE8
+#ifdef SUPPORT_PCRE2_8
 /*************************************************
 *       Convert character value to UTF-8         *
 *************************************************/
@@ -2068,11 +2068,11 @@ for (j = i; j > 0; j--)
 *utf8bytes = utf8_table2[i] | cvalue;
 return i + 1;
 }
-#endif  /* SUPPORT_PCRE8 */
+#endif  /* SUPPORT_PCRE2_8 */
 
 
 
-#ifdef SUPPORT_PCRE16
+#ifdef SUPPORT_PCRE2_16
 /*************************************************
 *          Convert pattern to 16-bit             *
 *************************************************/
@@ -2151,7 +2151,7 @@ return 0;
 
 
 
-#ifdef SUPPORT_PCRE32
+#ifdef SUPPORT_PCRE2_32
 /*************************************************
 *          Convert pattern to 32-bit             *
 *************************************************/
@@ -2218,7 +2218,7 @@ else while (len > 0)
 *lenptr = pp - pbuffer32;
 return 0;
 }
-#endif /* SUPPORT_PCRE32 */
+#endif /* SUPPORT_PCRE2_32 */
 
 
 
@@ -2842,7 +2842,7 @@ return rc;
 
 
 
-#ifdef SUPPORT_PCRE8
+#ifdef SUPPORT_PCRE2_8
 /*************************************************
 *             Show something in a list           *
 *************************************************/
@@ -2858,11 +2858,11 @@ prmsg(const char **msg, const char *s)
 fprintf(outfile, "%s %s", *msg, s);
 *msg = "";
 }
-#endif  /* SUPPORT_PCRE8 */
+#endif  /* SUPPORT_PCRE2_8 */
 
 
 
-#ifdef SUPPORT_PCRE8
+#ifdef SUPPORT_PCRE2_8
 /*************************************************
 *                Show compile controls           *
 *************************************************/
@@ -2898,7 +2898,7 @@ fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
   ((controls & CTL_POSIX) != 0)? " posix" : "",
   after);
 }
-#endif  /* SUPPORT_PCRE8 */
+#endif  /* SUPPORT_PCRE2_8 */
 
 
 
@@ -2948,7 +2948,7 @@ else fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
 
 
 
-#ifdef SUPPORT_PCRE8
+#ifdef SUPPORT_PCRE2_8
 /*************************************************
 *                Show match controls           *
 *************************************************/
@@ -2973,10 +2973,10 @@ fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s",
   ((controls & CTL_MARK) != 0)? " mark" : "",
   ((controls & CTL_MEMORY) != 0)? " memory" : "");
 }
-#endif  /* SUPPORT_PCRE8 */
+#endif  /* SUPPORT_PCRE2_8 */
 
 
-#ifdef SUPPORT_PCRE8
+#ifdef SUPPORT_PCRE2_8
 /*************************************************
 *                Show match options              *
 *************************************************/
@@ -2999,7 +2999,7 @@ fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s",
   ((options & PCRE2_PARTIAL_HARD) != 0)? " partial_hard" : "",
   ((options & PCRE2_PARTIAL_SOFT) != 0)? " partial_soft" : "");
 }
-#endif  /* SUPPORT_PCRE8 */
+#endif  /* SUPPORT_PCRE2_8 */
 
 
 
@@ -3114,15 +3114,15 @@ if ((pat_patctl.control & CTL_INFO) != 0)
       fprintf(outfile, "  ");
       PCHARSV(nametable, imm2_size, length, FALSE, outfile);
       while (length++ < nameentrysize - imm2_size) putc(' ', outfile);
-#ifdef SUPPORT_PCRE32
+#ifdef SUPPORT_PCRE2_32
       if (test_mode == PCRE32_MODE)
         fprintf(outfile, "%3d\n", (int)(((PCRE2_SPTR32)nametable)[0]));
 #endif
-#ifdef SUPPORT_PCRE16
+#ifdef SUPPORT_PCRE2_16
       if (test_mode == PCRE16_MODE)
         fprintf(outfile, "%3d\n", (int)(((PCRE2_SPTR16)nametable)[0]));
 #endif
-#ifdef SUPPORT_PCRE8
+#ifdef SUPPORT_PCRE2_8
       if (test_mode == PCRE8_MODE)
         fprintf(outfile, "%3d\n", (int)(
         ((((PCRE2_SPTR8)nametable)[0]) << 8) | ((PCRE2_SPTR8)nametable)[1]));
@@ -3494,7 +3494,7 @@ local character tables. Neither does it have 16-bit or 32-bit support. */
 
 if ((pat_patctl.control & CTL_POSIX) != 0)
   {
-#ifdef SUPPORT_PCRE8
+#ifdef SUPPORT_PCRE2_8
   int rc;
   int cflags = 0;
   const char *msg = "** Ignored with POSIX interface:";
@@ -3506,7 +3506,7 @@ if ((pat_patctl.control & CTL_POSIX) != 0)
     return PR_SKIP;
     }
 
-#ifdef SUPPORT_PCRE8
+#ifdef SUPPORT_PCRE2_8
   /* Check for features that the POSIX interface does not support. */
 
   if (pat_patctl.locale[0] != 0) prmsg(&msg, "locale");
@@ -3549,23 +3549,23 @@ if ((pat_patctl.control & CTL_POSIX) != 0)
     return PR_SKIP;
     }
   return PR_OK;
-#endif  /* SUPPORT_PCRE8 */
+#endif  /* SUPPORT_PCRE2_8 */
   }
 
 /* Handle compiling via the native interface, converting the input in non-8-bit
 modes. */
 
-#ifdef SUPPORT_PCRE8
+#ifdef SUPPORT_PCRE2_8
 if (test_mode == PCRE8_MODE)
   errorcode = 0;
 #endif
 
-#ifdef SUPPORT_PCRE16
+#ifdef SUPPORT_PCRE2_16
 if (test_mode == PCRE16_MODE)
   errorcode = to16(pbuffer8, utf, &patlen);
 #endif
 
-#ifdef SUPPORT_PCRE32
+#ifdef SUPPORT_PCRE2_32
 if (test_mode == PCRE32_MODE)
   errorcode = to32(pbuffer8, utf, &patlen);
 #endif
@@ -3650,13 +3650,13 @@ if ((pat_patctl.control & CTL_MEMORY) != 0)
   uint32_t name_count, name_entry_size;
   size_t size, cblock_size;
 
-#ifdef SUPPORT_PCRE8
+#ifdef SUPPORT_PCRE2_8
   if (test_mode == 8) cblock_size = sizeof(pcre2_real_code_8);
 #endif
-#ifdef SUPPORT_PCRE16
+#ifdef SUPPORT_PCRE2_16
   if (test_mode == 16) cblock_size = sizeof(pcre2_real_code_16);
 #endif
-#ifdef SUPPORT_PCRE32
+#ifdef SUPPORT_PCRE2_32
   if (test_mode == 32) cblock_size = sizeof(pcre2_real_code_32);
 #endif
 
@@ -3882,13 +3882,13 @@ uint8_t *p, *pp, *start_rep;
 size_t needlen;
 BOOL utf;
 
-#ifdef SUPPORT_PCRE8
+#ifdef SUPPORT_PCRE2_8
 uint8_t *q8 = NULL;
 #endif
-#ifdef SUPPORT_PCRE16
+#ifdef SUPPORT_PCRE2_16
 uint16_t *q16 = NULL;
 #endif
-#ifdef SUPPORT_PCRE32
+#ifdef SUPPORT_PCRE2_32
 uint32_t *q32 = NULL;
 #endif
 
@@ -3904,7 +3904,7 @@ dat_datctl.control |= (pat_patctl.control & CTL_ALLPD);
 
 /* Initialize for scanning the data line. */
 
-#ifdef SUPPORT_PCRE8
+#ifdef SUPPORT_PCRE2_8
 utf = ((((pat_patctl.control & CTL_POSIX) != 0)?
   ((pcre2_real_code_8 *)preg.re_pcre2_code)->overall_options :
   FLD(compiled_code, overall_options)) & PCRE2_UTF) != 0;
@@ -4097,7 +4097,7 @@ while ((c = *p++) != 0)
       c = c * 16 + tolower(*p) - ((isdigit(*p))? '0' : 'a' - 10);
       p++;
       }
-#if defined SUPPORT_PCRE8
+#if defined SUPPORT_PCRE2_8
     if (utf && (test_mode == PCRE8_MODE))
       {
       *q8++ = c;
@@ -4135,7 +4135,7 @@ while ((c = *p++) != 0)
   than 127 in UTF mode must have come from \x{...} or octal constructs
   because values from \x.. get this far only in non-UTF mode. */
 
-#ifdef SUPPORT_PCRE8
+#ifdef SUPPORT_PCRE2_8
   if (test_mode == PCRE8_MODE)
     {
     if (utf)
@@ -4161,7 +4161,7 @@ while ((c = *p++) != 0)
       }
     }
 #endif
-#ifdef SUPPORT_PCRE16
+#ifdef SUPPORT_PCRE2_16
   if (test_mode == PCRE16_MODE)
     {
     if (utf)
@@ -4195,7 +4195,7 @@ while ((c = *p++) != 0)
       }
     }
 #endif
-#ifdef SUPPORT_PCRE32
+#ifdef SUPPORT_PCRE2_32
   if (test_mode == PCRE32_MODE)
     {
     *q32++ = c;
@@ -4235,7 +4235,7 @@ possible in 8-bit mode, and it does not support timing or other fancy features.
 Some were checked at compile time, but we need to check the match-time settings
 here. */
 
-#ifdef SUPPORT_PCRE8
+#ifdef SUPPORT_PCRE2_8
 if ((pat_patctl.control & CTL_POSIX) != 0)
   {
   int rc;
@@ -4308,7 +4308,7 @@ if ((pat_patctl.control & CTL_POSIX) != 0)
   free(pmatch);
   return PR_OK;
   }
-#endif  /* SUPPORT_PCRE8 */
+#endif  /* SUPPORT_PCRE2_8 */
 
  /* Handle matching via the native interface. Check for consistency of
 modifiers. */
@@ -4611,13 +4611,13 @@ for (gmatched = 0;; gmatched++)
       if (namelen == 0) break;
       cnl = namelen;
 
-#ifdef SUPPORT_PCRE8
+#ifdef SUPPORT_PCRE2_8
       if (test_mode == PCRE8_MODE) strcpy((char *)pbuffer8, (char *)nptr);
 #endif
-#ifdef SUPPORT_PCRE16
+#ifdef SUPPORT_PCRE2_16
       if (test_mode == PCRE16_MODE)(void)to16(nptr, utf, &cnl);
 #endif
-#ifdef SUPPORT_PCRE32
+#ifdef SUPPORT_PCRE2_32
       if (test_mode == PCRE32_MODE)(void)to32(nptr, utf, &cnl);
 #endif
 
@@ -4677,13 +4677,13 @@ for (gmatched = 0;; gmatched++)
       if (namelen == 0) break;
       cnl = namelen;
 
-#ifdef SUPPORT_PCRE8
+#ifdef SUPPORT_PCRE2_8
       if (test_mode == PCRE8_MODE) strcpy((char *)pbuffer8, (char *)nptr);
 #endif
-#ifdef SUPPORT_PCRE16
+#ifdef SUPPORT_PCRE2_16
       if (test_mode == PCRE16_MODE)(void)to16(nptr, utf, &cnl);
 #endif
-#ifdef SUPPORT_PCRE32
+#ifdef SUPPORT_PCRE2_32
       if (test_mode == PCRE32_MODE)(void)to32(nptr, utf, &cnl);
 #endif
 
@@ -4956,13 +4956,13 @@ printf("If input is a terminal, readline() is used to read from it.\n");
 printf("This version of pcre2test is not linked with readline().\n");
 #endif
 printf("\nOptions:\n");
-#ifdef SUPPORT_PCRE8
+#ifdef SUPPORT_PCRE2_8
 printf("  -8            use the 8-bit library\n");
 #endif
-#ifdef SUPPORT_PCRE16
+#ifdef SUPPORT_PCRE2_16
 printf("  -16           use the 16-bit library\n");
 #endif
-#ifdef SUPPORT_PCRE32
+#ifdef SUPPORT_PCRE2_32
 printf("  -32           use the 32-bit library\n");
 #endif
 printf("  -b            set default pattern control 'fullbincode'\n");
@@ -5082,13 +5082,13 @@ printf("Compiled with\n");
 printf("  EBCDIC code support: LF is 0x%02x\n", CHAR_LF);
 #endif
 
-#ifdef SUPPORT_PCRE8
+#ifdef SUPPORT_PCRE2_8
 printf("  8-bit support\n");
 #endif
-#ifdef SUPPORT_PCRE16
+#ifdef SUPPORT_PCRE2_16
 printf("  16-bit support\n");
 #endif
-#ifdef SUPPORT_PCRE32
+#ifdef SUPPORT_PCRE2_32
 printf("  32-bit support\n");
 #endif
 
@@ -5216,7 +5216,7 @@ while (argc > 1 && argv[op][0] == '-')
 
   if (strcmp(arg, "-8") == 0)
     {
-#ifdef SUPPORT_PCRE8
+#ifdef SUPPORT_PCRE2_8
     test_mode = PCRE8_MODE;
 #else
     fprintf(stderr,
@@ -5226,7 +5226,7 @@ while (argc > 1 && argv[op][0] == '-')
     }
   else if (strcmp(arg, "-16") == 0)
     {
-#ifdef SUPPORT_PCRE16
+#ifdef SUPPORT_PCRE2_16
     test_mode = PCRE16_MODE;
 #else
     fprintf(stderr,
@@ -5236,7 +5236,7 @@ while (argc > 1 && argv[op][0] == '-')
     }
   else if (strcmp(arg, "-32") == 0)
     {
-#ifdef SUPPORT_PCRE32
+#ifdef SUPPORT_PCRE2_32
     test_mode = PCRE32_MODE;
 #else
     fprintf(stderr,
@@ -5366,7 +5366,7 @@ running in. */
 code_unit_size = test_mode/8;
 max_oveccount = DEFAULT_OVECCOUNT;
 
-#ifdef SUPPORT_PCRE8
+#ifdef SUPPORT_PCRE2_8
 if (test_mode == PCRE8_MODE)
   {
   general_context8 = pcre2_general_context_create_8(&my_malloc, &my_free, NULL);
@@ -5382,7 +5382,7 @@ if (test_mode == PCRE8_MODE)
   }
 #endif
 
-#ifdef SUPPORT_PCRE16
+#ifdef SUPPORT_PCRE2_16
 if (test_mode == PCRE16_MODE)
   {
   general_context16 = pcre2_general_context_create_16(&my_malloc, &my_free,
@@ -5399,7 +5399,7 @@ if (test_mode == PCRE16_MODE)
   }
 #endif
 
-#ifdef SUPPORT_PCRE32
+#ifdef SUPPORT_PCRE2_32
 if (test_mode == PCRE32_MODE)
   {
   general_context32 = pcre2_general_context_create_32(&my_malloc, &my_free,
@@ -5463,7 +5463,7 @@ if (!quiet) print_version(outfile);
 
 SET(compiled_code, NULL);
 
-#ifdef SUPPORT_PCRE8
+#ifdef SUPPORT_PCRE2_8
 preg.re_pcre2_code = NULL;
 preg.re_match_data = NULL;
 #endif
@@ -5473,7 +5473,7 @@ while (notdone)
   uint8_t *p;
   int rc = PR_OK;
   BOOL expectdata = TEST(compiled_code, !=, NULL);
-#ifdef SUPPORT_PCRE8
+#ifdef SUPPORT_PCRE2_8
   expectdata |= preg.re_pcre2_code != NULL;
 #endif
 
@@ -5492,14 +5492,14 @@ while (notdone)
     while (isspace(*p)) p++;
     if (*p == 0)
       {
-#ifdef SUPPORT_PCRE8
+#ifdef SUPPORT_PCRE2_8
       if (preg.re_pcre2_code != NULL)
         {
         regfree(&preg);
         preg.re_pcre2_code = NULL;
         preg.re_match_data = NULL;
         }
-#endif  /* SUPPORT_PCRE8 */
+#endif  /* SUPPORT_PCRE2_8 */
       if (TEST(compiled_code, !=, NULL))
         {
         SUB1(pcre2_code_free, compiled_code);
@@ -5580,7 +5580,7 @@ free((void *)locale_tables);
 PCRE2_MATCH_DATA_FREE(match_data);
 SUB1(pcre2_code_free, compiled_code);
 
-#ifdef SUPPORT_PCRE8
+#ifdef SUPPORT_PCRE2_8
 regfree(&preg);
 pcre2_general_context_free_8(general_context8);
 pcre2_compile_context_free_8(pat_context8);
@@ -5589,7 +5589,7 @@ pcre2_match_context_free_8(dat_context8);
 pcre2_match_context_free_8(default_dat_context8);
 #endif
 
-#ifdef SUPPORT_PCRE16
+#ifdef SUPPORT_PCRE2_16
 free(pbuffer16);
 pcre2_general_context_free_16(general_context16);
 pcre2_compile_context_free_16(pat_context16);
@@ -5598,7 +5598,7 @@ pcre2_match_context_free_16(dat_context16);
 pcre2_match_context_free_16(default_dat_context16);
 #endif
 
-#ifdef SUPPORT_PCRE32
+#ifdef SUPPORT_PCRE2_32
 free(pbuffer32);
 pcre2_general_context_free_32(general_context32);
 pcre2_compile_context_free_32(pat_context32);

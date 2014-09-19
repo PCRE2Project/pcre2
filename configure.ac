@@ -351,7 +351,7 @@ to set the macro values. In this case, you do not have to set -DHAVE_CONFIG_H,
 but if you do, default values will be taken from config.h for non-boolean
 macros that are not defined on the command line.
 
-Boolean macros such as HAVE_STDLIB_H and SUPPORT_PCRE8 should either be defined
+Boolean macros such as HAVE_STDLIB_H and SUPPORT_PCRE2_8 should either be defined
 (conventionally to 1) for TRUE, and not defined at all for FALSE. All such
 macros are listed as a commented #undef in config.h.generic. Macros such as
 MATCH_LIMIT, whose actual value is relevant, have defaults defined, but are
@@ -479,17 +479,17 @@ AC_SUBST(PCRE2_STATIC_CFLAG)
 # Here is where PCRE2-specific defines are handled
 
 if test "$enable_pcre8" = "yes"; then
-  AC_DEFINE([SUPPORT_PCRE8], [], [
+  AC_DEFINE([SUPPORT_PCRE2_8], [], [
     Define to any value to enable the 8 bit PCRE2 library.])
 fi
 
 if test "$enable_pcre16" = "yes"; then
-  AC_DEFINE([SUPPORT_PCRE16], [], [
+  AC_DEFINE([SUPPORT_PCRE2_16], [], [
     Define to any value to enable the 16 bit PCRE2 library.])
 fi
 
 if test "$enable_pcre32" = "yes"; then
-  AC_DEFINE([SUPPORT_PCRE32], [], [
+  AC_DEFINE([SUPPORT_PCRE2_32], [], [
     Define to any value to enable the 32 bit PCRE2 library.])
 fi
 
