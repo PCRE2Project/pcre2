@@ -1,0 +1,243 @@
+.TH PCRE2CALLOUT 3 "19 October 2014" "PCRE2 10.00"
+.SH NAME
+PCRE2 - Perl-compatible regular expressions (revised API)
+.SH SYNOPSIS
+.rs
+.sp
+.B #include <pcre2.h>
+.PP
+.SM
+.B int (*pcre2_callout)(pcre2_callout_block *);
+.
+.SH DESCRIPTION
+.rs
+.sp
+PCRE2 provides a feature called "callout", which is a means of temporarily
+passing control to the caller of PCRE2 in the middle of pattern matching. The
+caller of PCRE2 provides an external function by putting its entry point in
+a match context (see \fBpcre2_set_callout()\fP) in the
+.\" HREF                                                                  
+\fBpcre2api\fP                                           
+.\"                                                               
+documentation).
+.P
+Within a regular expression, (?C) indicates the points at which the external
+function is to be called. Different callout points can be identified by putting
+a number less than 256 after the letter C. The default value is zero.
+For example, this pattern has two callout points:
+.sp
+  (?C1)abc(?C2)def
+.sp
+If the PCRE2_AUTO_CALLOUT option bit is set when a pattern is compiled, PCRE2
+automatically inserts callouts, all with number 255, before each item in the
+pattern. For example, if PCRE2_AUTO_CALLOUT is used with the pattern
+.sp
+  A(\ed{2}|--)
+.sp
+it is processed as if it were
+.sp
+(?C255)A(?C255)((?C255)\ed{2}(?C255)|(?C255)-(?C255)-(?C255))(?C255)
+.sp
+Notice that there is a callout before and after each parenthesis and
+alternation bar. If the pattern contains a conditional group whose condition is
+an assertion, an automatic callout is inserted immediately before the
+condition. Such a callout may also be inserted explicitly, for example:
+.sp
+  (?(?C9)(?=a)ab|de)
+.sp
+This applies only to assertion conditions (because they are themselves
+independent groups).
+.P
+Automatic callouts can be used for tracking the progress of pattern matching.
+The
+.\" HREF
+\fBpcre2test\fP
+.\"
+program has a pattern qualifier (/auto_callout) that sets automatic callouts;
+when it is used, the output indicates how the pattern is being matched. This is
+useful information when you are trying to optimize the performance of a
+particular pattern.
+.
+.
+.SH "MISSING CALLOUTS"
+.rs
+.sp
+You should be aware that, because of optimizations in the way PCRE2 compiles
+and matches patterns, callouts sometimes do not happen exactly as you might
+expect.
+.P
+At compile time, PCRE2 "auto-possessifies" repeated items when it knows that
+what follows cannot be part of the repeat. For example, a+[bc] is compiled as
+if it were a++[bc]. The \fBpcre2test\fP output when this pattern is anchored
+and then applied with automatic callouts to the string "aaaa" is:
+.sp
+  --->aaaa
+   +0 ^        ^
+   +1 ^        a+
+   +3 ^   ^    [bc]
+  No match
+.sp
+This indicates that when matching [bc] fails, there is no backtracking into a+
+and therefore the callouts that would be taken for the backtracks do not occur.
+You can disable the auto-possessify feature by passing PCRE2_NO_AUTO_POSSESS
+to \fBpcre2_compile()\fP, or starting the pattern with (*NO_AUTO_POSSESS). If
+this is done in \fBpcre2test\fP (using the /no_auto_possess qualifier), the
+output changes to this:
+.sp
+  --->aaaa
+   +0 ^        ^
+   +1 ^        a+
+   +3 ^   ^    [bc]
+   +3 ^  ^     [bc]
+   +3 ^ ^      [bc]
+   +3 ^^       [bc]
+  No match
+.sp
+This time, when matching [bc] fails, the matcher backtracks into a+ and tries
+again, repeatedly, until a+ itself fails.
+.P
+Other optimizations that provide fast "no match" results also affect callouts.
+For example, if the pattern is
+.sp
+  ab(?C4)cd
+.sp
+PCRE2 knows that any matching string must contain the letter "d". If the
+subject string is "abyz", the lack of "d" means that matching doesn't ever
+start, and the callout is never reached. However, with "abyd", though the
+result is still no match, the callout is obeyed.
+.P
+PCRE2 also knows the minimum length of a matching string, and will immediately
+give a "no match" return without actually running a match if the subject is not
+long enough, or, for unanchored patterns, if it has been scanned far enough.
+.P
+You can disable these optimizations by passing the PCRE2_NO_START_OPTIMIZE
+option to the matching function, or by starting the pattern with
+(*NO_START_OPT). This slows down the matching process, but does ensure that
+callouts such as the example above are obeyed.
+.
+.
+.SH "THE CALLOUT INTERFACE"
+.rs
+.sp
+During matching, when PCRE2 reaches a callout point, the external function that
+is set in the match context is called (if it is set). This applies to both
+normal and DFA matching. The only argument to the callout function is a pointer
+to a \fBpcre2_callout\fP block. This structure contains the following fields:
+.sp
+  uint32_t      \fIversion\fP;
+  uint32_t      \fIcallout_number\fP;
+  uint32_t      \fIcapture_top\fP;
+  uint32_t      \fIcapture_last\fP;
+  void         *\fIcallout_data\fP;
+  PCRE2_SIZE   *\fIoffset_vector\fP;
+  PCRE2_SPTR    \fImark\fP;
+  PCRE2_SPTR    \fIsubject\fP;
+  PCRE2_SIZE    \fIsubject_length\fP;
+  PCRE2_SIZE    \fIstart_match\fP;
+  PCRE2_SIZE    \fIcurrent_position\fP;
+  PCRE2_SIZE    \fIpattern_position\fP;
+  PCRE2_SIZE    \fInext_item_length\fP;
+.sp
+The \fIversion\fP field contains the version number of the block format. The
+current version is 0. The version number will change in future if additional
+fields are added, but the intention is never to remove any of the existing
+fields.
+.P
+The \fIcallout_number\fP field contains the number of the callout, as compiled
+into the pattern (that is, the number after ?C for manual callouts, and 255 for
+automatically generated callouts).
+.P
+The \fIoffset_vector\fP field is a pointer to the vector of capturing offsets
+(the "ovector") that was passed to the matching function in the match data
+block. When \fBpcre2_match()\fP is used, the contents can be inspected, in
+order to extract substrings that have been matched so far, in the same way as
+for extracting substrings after a match has completed. For the DFA matching
+function, this field is not useful.
+.P
+The \fIsubject\fP and \fIsubject_length\fP fields contain copies of the values
+that were passed to the matching function.
+.P
+The \fIstart_match\fP field normally contains the offset within the subject at
+which the current match attempt started. However, if the escape sequence \eK
+has been encountered, this value is changed to reflect the modified starting
+point. If the pattern is not anchored, the callout function may be called
+several times from the same point in the pattern for different starting points
+in the subject.
+.P
+The \fIcurrent_position\fP field contains the offset within the subject of the
+current match pointer.
+.P
+When the \fBpcre2_match()\fP is used, the \fIcapture_top\fP field contains one
+more than the number of the highest numbered captured substring so far. If no
+substrings have been captured, the value of \fIcapture_top\fP is one. This is
+always the case when the DFA functions are used, because they do not support
+captured substrings.
+.P
+The \fIcapture_last\fP field contains the number of the most recently captured
+substring. However, when a recursion exits, the value reverts to what it was
+outside the recursion, as do the values of all captured substrings. If no
+substrings have been captured, the value of \fIcapture_last\fP is 0. This is
+always the case for the DFA matching functions.
+.P
+The \fIcallout_data\fP field contains a value that is passed to a matching
+function specifically so that it can be passed back in callouts. It is set in
+the match context when the callout is set up by calling
+\fBpcre2_set_callout()\fP (see the
+.\" HREF
+\fBpcre2api\fP
+.\"
+documentation).
+.P
+The \fIpattern_position\fP field contains the offset to the next item to be
+matched in the pattern string.
+.P
+The \fInext_item_length\fP field contains the length of the next item to be
+matched in the pattern string. When the callout immediately precedes an
+alternation bar, a closing parenthesis, or the end of the pattern, the length
+is zero. When the callout precedes an opening parenthesis, the length is that
+of the entire subpattern.
+.P
+The \fIpattern_position\fP and \fInext_item_length\fP fields are intended to
+help in distinguishing between different automatic callouts, which all have the
+same callout number. However, they are set for all callouts.
+.P
+In callouts from \fBpcre2_match()\fP the \fImark\fP field contains a pointer to
+the zero-terminated name of the most recently passed (*MARK), (*PRUNE), or
+(*THEN) item in the match, or NULL if no such items have been passed. Instances
+of (*PRUNE) or (*THEN) without a name do not obliterate a previous (*MARK). In
+callouts from the DFA matching function this field always contains NULL.
+.
+.
+.SH "RETURN VALUES"
+.rs
+.sp
+The external callout function returns an integer to PCRE2. If the value is
+zero, matching proceeds as normal. If the value is greater than zero, matching
+fails at the current point, but the testing of other matching possibilities
+goes ahead, just as if a lookahead assertion had failed. If the value is less
+than zero, the match is abandoned, and the matching function returns the
+negative value.
+.P
+Negative values should normally be chosen from the set of PCRE2_ERROR_xxx
+values. In particular, PCRE2_ERROR_NOMATCH forces a standard "no match"
+failure. The error number PCRE2_ERROR_CALLOUT is reserved for use by callout
+functions; it will never be used by PCRE2 itself.
+.
+.
+.SH AUTHOR
+.rs
+.sp
+.nf
+Philip Hazel
+University Computing Service
+Cambridge CB2 3QH, England.
+.fi
+.
+.
+.SH REVISION
+.rs
+.sp
+.nf
+Last updated: 19 October 2014
+Copyright (c) 1997-2014 University of Cambridge.
+.fi
