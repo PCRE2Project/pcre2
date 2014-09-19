@@ -313,22 +313,20 @@ versions are generated from this macro below. */
 
 #define PCRE2_STRUCTURE_LIST \
 typedef struct pcre2_callout_block { \
-  int           version;           /* Identifies version of block */ \
+  uint32_t      version;           /* Identifies version of block */ \
   /* ------------------------ Version 0 ------------------------------- */ \
   uint32_t      callout_number;    /* Number compiled into pattern */ \
+  uint32_t      capture_top;       /* Max current capture */ \
+  uint32_t      capture_last;      /* Most recently closed capture */ \
+  void         *callout_data;      /* Data passed in with the call */ \
   PCRE2_SIZE   *offset_vector;     /* The offset vector */ \
+  PCRE2_SPTR    mark;              /* Pointer to current mark or NULL */ \
   PCRE2_SPTR    subject;           /* The subject being matched */ \
   PCRE2_SIZE    subject_length;    /* The length of the subject */ \
   PCRE2_SIZE    start_match;       /* Offset to start of this match attempt */ \
   PCRE2_SIZE    current_position;  /* Where we currently are in the subject */ \
-  uint32_t      capture_top;       /* Max current capture */ \
-  uint32_t      capture_last;      /* Most recently closed capture */ \
-  void         *callout_data;      /* Data passed in with the call */ \
-  /* ------------------- Added for Version 1 -------------------------- */ \
   PCRE2_SIZE    pattern_position;  /* Offset to next item in the pattern */ \
   PCRE2_SIZE    next_item_length;  /* Length of next item in the pattern */ \
-  /* ------------------- Added for Version 2 -------------------------- */ \
-  PCRE2_SPTR    mark;              /* Pointer to current mark or NULL    */ \
   /* ------------------------------------------------------------------ */ \
 } pcre2_callout_block;
 
@@ -641,7 +639,7 @@ PCRE2_SUFFIX a no-op. Otherwise, generate an error. */
 #define PCRE2_SUFFIX(a) a
 #else
 #error PCRE2_CODE_UNIT_WIDTH must be 0, 8, 16, or 32.
-#endif 
+#endif
 #endif  /* PCRE2_CODE_UNIT_WIDTH is defined */
 
 #ifdef __cplusplus
