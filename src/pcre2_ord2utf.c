@@ -50,10 +50,11 @@ into a UTF string. The behaviour is different for each code unit width. */
 #include "pcre2_internal.h"
 
 
-/* If SUPPORT_UTF is not defined, this function will never be called. Supply a 
-dummy function because some compilers do not like empty source modules. */
+/* If SUPPORT_UNICODE is not defined, this function will never be called.
+Supply a dummy function because some compilers do not like empty source
+modules. */
 
-#ifndef SUPPORT_UTF
+#ifndef SUPPORT_UNICODE
 unsigned int
 PRIV(ord2utf)(uint32_t cvalue, PCRE2_UCHAR *buffer)
 {
@@ -61,7 +62,7 @@ PRIV(ord2utf)(uint32_t cvalue, PCRE2_UCHAR *buffer)
 (void)(buffer);
 return 0;
 }
-#else  /* SUPPORT_UTF */
+#else  /* SUPPORT_UNICODE */
 
 
 /*************************************************
@@ -114,6 +115,6 @@ return 2;
 return 1;
 #endif
 }
-#endif  /* SUPPORT_UTF */
+#endif  /* SUPPORT_UNICODE */
 
 /* End of pcre_ord2utf.c */

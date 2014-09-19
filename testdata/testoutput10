@@ -888,7 +888,7 @@ Subject length lower bound = 3
     a\x{123}aa\=offset=1
  0: aa
     a\x{123}aa\=offset=2
-Error -36 (bad UTF-8 offset)
+Error -35 (bad UTF-8 offset)
     a\x{123}aa\=offset=3
  0: aa
     a\x{123}aa\=offset=4
@@ -896,7 +896,7 @@ Error -36 (bad UTF-8 offset)
     a\x{123}aa\=offset=5
 No match
     a\x{123}aa\=offset=6
-Failed: error -34: bad offset value
+Failed: error -33: bad offset value
 
 /\x{1234}+/Ii,utf
 Capturing subpattern count = 0

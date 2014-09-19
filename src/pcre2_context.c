@@ -263,8 +263,9 @@ if (mcontext != NULL)
 *             Set values in contexts             *
 *************************************************/
 
-/* All these functions return 1 for success or 0 if invalid data is given. Only 
-some of the functions are able to test the validity of the data. */
+/* All these functions return 0 for success or PCRE2_ERROR_BADDATA if invalid
+data is given. Only some of the functions are able to test the validity of the
+data. */
 
 
 /* ------------ Compile contexts ------------ */
@@ -274,7 +275,7 @@ pcre2_set_character_tables(pcre2_compile_context *ccontext,
   const unsigned char *tables)
 {
 ccontext->tables = tables;
-return 1;
+return 0;
 }
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION 
@@ -285,10 +286,10 @@ switch(value)
   case PCRE2_BSR_ANYCRLF:
   case PCRE2_BSR_UNICODE:
   ccontext->bsr_convention = value;
-  return 1;
+  return 0;
   
   default:
-  return 0;  
+  return PCRE2_ERROR_BADDATA;  
   }
 }
 
@@ -303,10 +304,10 @@ switch(newline)
   case PCRE2_NEWLINE_ANY:
   case PCRE2_NEWLINE_ANYCRLF:
   ccontext->newline_convention = newline;
-  return 1;
+  return 0;
      
   default: 
-  return 0;  
+  return PCRE2_ERROR_BADDATA;  
   }   
 }
 
@@ -314,7 +315,7 @@ PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_set_parens_nest_limit(pcre2_compile_context *ccontext, uint32_t limit)
 {
 ccontext->parens_nest_limit = limit;
-return 1;
+return 0;
 }
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
@@ -322,7 +323,7 @@ pcre2_set_compile_recursion_guard(pcre2_compile_context *ccontext,
   int (*guard)(uint32_t))
 {
 ccontext->stack_guard = guard;
-return 1;
+return 0;
 }
 
 
@@ -336,10 +337,10 @@ switch(value)
   case PCRE2_BSR_ANYCRLF:
   case PCRE2_BSR_UNICODE:
   mcontext->bsr_convention = value;
-  return 1;
+  return 0;
   
   default:
-  return 0;  
+  return PCRE2_ERROR_BADDATA;  
   }
 }
 
@@ -354,10 +355,10 @@ switch(newline)
   case PCRE2_NEWLINE_ANY:
   case PCRE2_NEWLINE_ANYCRLF:
   mcontext->newline_convention = newline;
-  return 1;
+  return 0;
      
   default: 
-  return 0;  
+  return PCRE2_ERROR_BADDATA;  
   }   
 }
 
@@ -367,21 +368,21 @@ pcre2_set_callout(pcre2_match_context *mcontext,
 {
 mcontext->callout = callout;
 mcontext->callout_data = callout_data;
-return 1;
+return 0;
 }
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_set_match_limit(pcre2_match_context *mcontext, uint32_t limit)
 {
 mcontext->match_limit = limit;
-return 1;
+return 0;
 }
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_set_recursion_limit(pcre2_match_context *mcontext, uint32_t limit)
 {
 mcontext->recursion_limit = limit;
-return 1;
+return 0;
 }
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
@@ -399,7 +400,7 @@ mcontext->stack_memctl.memory_data = mydata;
 (void)myfree;
 (void)mydata;
 #endif
-return 1;
+return 0;
 }   
 
 /* End of pcre2_context.c */

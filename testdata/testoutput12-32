@@ -779,9 +779,9 @@ Subject length lower bound = 3
     a\x{123}aa\=offset=4
 No match
     a\x{123}aa\=offset=5
-Failed: error -34: bad offset value
+Failed: error -33: bad offset value
     a\x{123}aa\=offset=6
-Failed: error -34: bad offset value
+Failed: error -33: bad offset value
 
 /\x{1234}+/Ii,utf
 Capturing subpattern count = 0
@@ -851,9 +851,9 @@ No match
     \x{10000}ab\=offset=3
 No match
     \x{10000}ab\=offset=4
-Failed: error -34: bad offset value
+Failed: error -33: bad offset value
     \x{10000}ab\=offset=5
-Failed: error -34: bad offset value
+Failed: error -33: bad offset value
 
 /í¼€/utf
 Failed: error -27 at offset 0: UTF-32 error: code points 0xd800-0xdfff are not defined

@@ -50,12 +50,12 @@ strings. */
 #include "pcre2_internal.h"
 
 
-#ifndef SUPPORT_UTF
+#ifndef SUPPORT_UNICODE
 /*************************************************
-*        Dummy function when UTF not supported   *
+*  Dummy function when Unicode is not supported  *
 *************************************************/
 
-/* This function should never be called when UTF is not supported. */
+/* This function should never be called when Unicode is not supported. */
 
 int
 PRIV(valid_utf)(PCRE2_SPTR string, PCRE2_SIZE length, PCRE2_SIZE *erroroffset)
@@ -388,6 +388,6 @@ for (p = string; length-- > 0; p++)
 return 0;
 #endif  /* CODE_UNIT_WIDTH */
 }
-#endif  /* SUPPORT_UTF */
+#endif  /* SUPPORT_UNICODE */
 
 /* End of pcre2_valid_utf.c */

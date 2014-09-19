@@ -149,8 +149,8 @@ SET(PCRE2_SUPPORT_JIT OFF CACHE BOOL
 SET(PCRE2_SUPPORT_PCRE2GREP_JIT ON CACHE BOOL
     "Enable use of Just-in-time compiling in pcre2grep.")
 
-SET(PCRE2_SUPPORT_UTF OFF CACHE BOOL
-    "Enable support for Unicode Transformation Format (UTF-8/UTF-16/UTF-32) encoding.")
+SET(PCRE2_SUPPORT_UNICODE OFF CACHE BOOL
+    "Enable support for Unicode and UTF-8/UTF-16/UTF-32 encoding.")
 
 SET(PCRE2_SUPPORT_BSR_ANYCRLF OFF CACHE BOOL
     "ON=Backslash-R matches only LF CR and CRLF, OFF=Backslash-R matches all Unicode Linebreaks")
@@ -245,9 +245,9 @@ IF(PCRE2_SUPPORT_BSR_ANYCRLF)
         SET(BSR_ANYCRLF 1)
 ENDIF(PCRE2_SUPPORT_BSR_ANYCRLF)
 
-IF(PCRE2_SUPPORT_UTF)
-        SET(SUPPORT_UTF 1)
-ENDIF(PCRE2_SUPPORT_UTF)
+IF(PCRE2_SUPPORT_UNICODE)
+        SET(SUPPORT_UNICODE 1)
+ENDIF(PCRE2_SUPPORT_UNICODE)
 
 IF(PCRE2_SUPPORT_JIT)
         SET(SUPPORT_JIT 1)
@@ -709,7 +709,7 @@ IF(PCRE2_SHOW_REPORT)
   MESSAGE(STATUS "  Build 16 bit PCRE2 library ...... : ${PCRE2_BUILD_PCRE16}")
   MESSAGE(STATUS "  Build 32 bit PCRE2 library ...... : ${PCRE2_BUILD_PCRE32}")
   MESSAGE(STATUS "  Enable JIT compiling support .... : ${PCRE2_SUPPORT_JIT}")
-  MESSAGE(STATUS "  Enable UTF support .............. : ${PCRE2_SUPPORT_UTF}")
+  MESSAGE(STATUS "  Enable Unicode support .......... : ${PCRE2_SUPPORT_UNICODE}")
   MESSAGE(STATUS "  Newline char/sequence ........... : ${PCRE2_NEWLINE}")
   MESSAGE(STATUS "  \\R matches only ANYCRLF ......... : ${PCRE2_SUPPORT_BSR_ANYCRLF}")
   MESSAGE(STATUS "  EBCDIC coding ................... : ${PCRE2_EBCDIC}")

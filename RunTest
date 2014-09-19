@@ -314,10 +314,11 @@ else
   fi
 fi
 
-# UTF support always applies to all bit sizes if both are supported; we can't
-# have UTF-8 support without UTF-16 or UTF-32 support.
+# UTF support is implied by Unicode support, and it always applies to all bit
+# sizes if both are supported; we can't have UTF-8 support without UTF-16 or
+# UTF-32 support.
 
-$sim ./pcre2test -C utf >/dev/null
+$sim ./pcre2test -C unicode >/dev/null
 utf=$?
 
 jitopt=

@@ -231,7 +231,7 @@ static const uint8_t opcode_possessify[] = {
 
 
 
-#ifdef SUPPORT_UTF
+#ifdef SUPPORT_UNICODE
 /*************************************************
 *        Check a character and a property        *
 *************************************************/
@@ -311,7 +311,7 @@ switch(ptype)
 
 return FALSE;
 }
-#endif  /* SUPPORT_UTF */
+#endif  /* SUPPORT_UNICODE */
 
 
 
@@ -368,7 +368,7 @@ PCRE2_UCHAR base;
 PCRE2_SPTR end;
 uint32_t chr;
 
-#ifdef SUPPORT_UTF
+#ifdef SUPPORT_UNICODE
 uint32_t *clist_dest;
 const uint32_t *clist_src;
 #else
@@ -451,7 +451,7 @@ switch(c)
   GETCHARINCTEST(chr, code);
   list[2] = chr;
 
-#ifdef SUPPORT_UTF
+#ifdef SUPPORT_UNICODE
   if (chr < 128 || (chr < 256 && !utf))
     list[3] = fcc[chr];
   else
@@ -470,7 +470,7 @@ switch(c)
     list[4] = NOTACHAR;
   return code;
 
-#ifdef SUPPORT_UTF
+#ifdef SUPPORT_UNICODE
   case OP_PROP:
   case OP_NOTPROP:
   if (code[0] != PT_CLIST)
@@ -812,7 +812,7 @@ for(;;)
     leftop = base_list[0];
     rightop = list[0];
 
-#ifdef SUPPORT_UTF
+#ifdef SUPPORT_UNICODE
     accepted = FALSE; /* Always set in non-unicode case. */
     if (leftop == OP_PROP || leftop == OP_NOTPROP)
       {
@@ -915,7 +915,7 @@ for(;;)
       }
 
     else
-#endif  /* SUPPORT_UTF */
+#endif  /* SUPPORT_UNICODE */
 
     accepted = leftop >= FIRST_AUTOTAB_OP && leftop <= LAST_AUTOTAB_LEFT_OP &&
            rightop >= FIRST_AUTOTAB_OP && rightop <= LAST_AUTOTAB_RIGHT_OP &&
@@ -1039,7 +1039,7 @@ for(;;)
       case OP_EOD:    /* Can always possessify before \z */
       break;
 
-#ifdef SUPPORT_UTF
+#ifdef SUPPORT_UNICODE
       case OP_PROP:
       case OP_NOTPROP:
       if (!check_char_prop(chr, list_ptr[2], list_ptr[3],

@@ -193,32 +193,32 @@ must all be greater than zero. */
 #define PCRE2_ERROR_UTF32_ERR1      (-27)
 #define PCRE2_ERROR_UTF32_ERR2      (-28)
 
-/* Error codes for pcre2[_dfa]_match() */
+/* Error codes for pcre2[_dfa]_match(), substring extraction functions, and
+context functions. */
 
-#define PCRE2_ERROR_BADCOUNT        (-29)
-#define PCRE2_ERROR_BADENDIANNESS   (-30)
-#define PCRE2_ERROR_BADLENGTH       (-31)
-#define PCRE2_ERROR_BADMAGIC        (-32)
-#define PCRE2_ERROR_BADMODE         (-33)
-#define PCRE2_ERROR_BADOFFSET       (-34)
-#define PCRE2_ERROR_BADOPTION       (-35)
-#define PCRE2_ERROR_BADUTFOFFSET    (-36)
-#define PCRE2_ERROR_CALLOUT         (-37)  /* Never used by PCRE2 itself */
-#define PCRE2_ERROR_DFA_BADRESTART  (-38)
-#define PCRE2_ERROR_DFA_RECURSE     (-39)
-#define PCRE2_ERROR_DFA_UCOND       (-40)
-#define PCRE2_ERROR_DFA_UITEM       (-41)
-#define PCRE2_ERROR_DFA_UMLIMIT     (-42)
-#define PCRE2_ERROR_DFA_WSSIZE      (-43)
-#define PCRE2_ERROR_INTERNAL        (-44)
-#define PCRE2_ERROR_JIT_BADOPTION   (-45)
-#define PCRE2_ERROR_JIT_STACKLIMIT  (-46)
-#define PCRE2_ERROR_MATCHLIMIT      (-47)
-#define PCRE2_ERROR_NOMEMORY        (-48)
-#define PCRE2_ERROR_NOSUBSTRING     (-49)
-#define PCRE2_ERROR_NULL            (-50)
-#define PCRE2_ERROR_RECURSELOOP     (-51)
-#define PCRE2_ERROR_RECURSIONLIMIT  (-52)
+#define PCRE2_ERROR_BADDATA         (-29)
+#define PCRE2_ERROR_BADLENGTH       (-30)
+#define PCRE2_ERROR_BADMAGIC        (-31)
+#define PCRE2_ERROR_BADMODE         (-32)
+#define PCRE2_ERROR_BADOFFSET       (-33)
+#define PCRE2_ERROR_BADOPTION       (-34)
+#define PCRE2_ERROR_BADUTFOFFSET    (-35)
+#define PCRE2_ERROR_CALLOUT         (-36)  /* Never used by PCRE2 itself */
+#define PCRE2_ERROR_DFA_BADRESTART  (-37)
+#define PCRE2_ERROR_DFA_RECURSE     (-38)
+#define PCRE2_ERROR_DFA_UCOND       (-39)
+#define PCRE2_ERROR_DFA_UITEM       (-40)
+#define PCRE2_ERROR_DFA_WSSIZE      (-41)
+#define PCRE2_ERROR_INTERNAL        (-42)
+#define PCRE2_ERROR_JIT_BADOPTION   (-43)
+#define PCRE2_ERROR_JIT_STACKLIMIT  (-44)
+#define PCRE2_ERROR_MATCHLIMIT      (-45)
+#define PCRE2_ERROR_NOMEMORY        (-46)
+#define PCRE2_ERROR_NOSUBSTRING     (-47)
+#define PCRE2_ERROR_NULL            (-48)
+#define PCRE2_ERROR_RECURSELOOP     (-49)
+#define PCRE2_ERROR_RECURSIONLIMIT  (-50)
+#define PCRE2_ERROR_UNSET           (-51)
 
 /* Request types for pcre2_pattern_info() */
 
@@ -257,8 +257,8 @@ must all be greater than zero. */
 #define PCRE2_CONFIG_PARENSLIMIT             7
 #define PCRE2_CONFIG_RECURSIONLIMIT          5
 #define PCRE2_CONFIG_STACKRECURSE            8
-#define PCRE2_CONFIG_UNICODE_VERSION         9
-#define PCRE2_CONFIG_UTF                    10
+#define PCRE2_CONFIG_UNICODE                 9
+#define PCRE2_CONFIG_UNICODE_VERSION        10
 #define PCRE2_CONFIG_VERSION                11
 
 /* Types for code units in patterns and subject strings. */
@@ -338,7 +338,7 @@ expanded for each width below. Start with functions that give general
 information. */
 
 #define PCRE2_GENERAL_INFO_FUNCTIONS \
-PCRE2_EXP_DECL int       pcre2_config(int, void *, PCRE2_SIZE);
+PCRE2_EXP_DECL int       pcre2_config(uint32_t, void *, PCRE2_SIZE);
 
 
 /* Functions for manipulating contexts. */
@@ -437,16 +437,16 @@ PCRE2_EXP_DECL PCRE2_SIZE  pcre2_get_startchar(pcre2_match_data *);
 PCRE2_EXP_DECL int       pcre2_substring_copy_byname(pcre2_match_data *, \
                            PCRE2_SPTR, PCRE2_UCHAR *, PCRE2_SIZE *); \
 PCRE2_EXP_DECL int       pcre2_substring_copy_bynumber(pcre2_match_data *, \
-                           int, PCRE2_UCHAR *, PCRE2_SIZE *); \
+                           unsigned int, PCRE2_UCHAR *, PCRE2_SIZE *); \
 PCRE2_EXP_DECL void      pcre2_substring_free(PCRE2_UCHAR *); \
 PCRE2_EXP_DECL int       pcre2_substring_get_byname(pcre2_match_data *, \
                            PCRE2_SPTR, PCRE2_UCHAR **, PCRE2_SIZE *); \
 PCRE2_EXP_DECL int       pcre2_substring_get_bynumber(pcre2_match_data *, \
-                           int, PCRE2_UCHAR **, PCRE2_SIZE *); \
+                           unsigned int, PCRE2_UCHAR **, PCRE2_SIZE *); \
 PCRE2_EXP_DECL int       pcre2_substring_length_byname(pcre2_match_data *, \
                            PCRE2_SPTR, PCRE2_SIZE *); \
 PCRE2_EXP_DECL int       pcre2_substring_length_bynumber(pcre2_match_data *, \
-                           int, PCRE2_SIZE *); \
+                           unsigned int, PCRE2_SIZE *); \
 PCRE2_EXP_DECL int       pcre2_substring_nametable_scan(const pcre2_code *, \
                            PCRE2_SPTR, PCRE2_SPTR *, PCRE2_SPTR *); \
 PCRE2_EXP_DECL int       pcre2_substring_number_from_name(\
@@ -622,24 +622,27 @@ PCRE2_TYPES_STRUCTURES_AND_FUNCTIONS
 #undef PCRE2_OTHER_FUNCTIONS
 #undef PCRE2_TYPES_STRUCTURES_AND_FUNCTIONS
 
-/* Re-define PCRE2_SUFFIX to use the external width value, if defined.
-Otherwise, undefine the other macros and make PCRE2_SUFFIX a no-op, to reduce
-confusion. */
+/* PCRE2_CODE_UNIT_WIDTH must be defined. If it is 8, 16, or 32, redefine
+PCRE2_SUFFIX to use it. If it is 0, undefine the other macros and make
+PCRE2_SUFFIX a no-op. Otherwise, generate an error. */
 
 #undef PCRE2_SUFFIX
-#ifdef PCRE2_CODE_UNIT_WIDTH
-#if PCRE2_CODE_UNIT_WIDTH != 8 && \
-    PCRE2_CODE_UNIT_WIDTH != 16 && \
-    PCRE2_CODE_UNIT_WIDTH != 32
-#error PCRE2_CODE_UNIT_WIDTH must be 8, 16, or 32
-#endif
+#ifndef PCRE2_CODE_UNIT_WIDTH
+#error PCRE2_CODE_UNIT_WIDTH must be defined before including pcre2.h.
+#error Use 8, 16, or 32; or 0 for a multi-width application.
+#else  /* PCRE2_CODE_UNIT_WIDTH is defined */
+#if PCRE2_CODE_UNIT_WIDTH == 8 || \
+    PCRE2_CODE_UNIT_WIDTH == 16 || \
+    PCRE2_CODE_UNIT_WIDTH == 32
 #define PCRE2_SUFFIX(a) PCRE2_GLUE(a, PCRE2_CODE_UNIT_WIDTH)
-#else
+#elif PCRE2_CODE_UNIT_WIDTH == 0
 #undef PCRE2_JOIN
 #undef PCRE2_GLUE
 #define PCRE2_SUFFIX(a) a
-#endif
-
+#else
+#error PCRE2_CODE_UNIT_WIDTH must be 0, 8, 16, or 32.
+#endif 
+#endif  /* PCRE2_CODE_UNIT_WIDTH is defined */
 
 #ifdef __cplusplus
 }  /* extern "C" */

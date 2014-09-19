@@ -94,7 +94,7 @@ BOOL one_code_unit = !utf;
 
 /* If UTF is supported and requested, check for a valid single code unit. */
 
-#ifdef SUPPORT_UTF
+#ifdef SUPPORT_UNICODE
 if (utf)
   {
 #if PCRE2_CODE_UNIT_WIDTH == 8
@@ -105,7 +105,7 @@ if (utf)
   one_code_unit = (c & 0xfffff800u) != 0xd800u;
 #endif  /* CODE_UNIT_WIDTH */
   }
-#endif  /* SUPPORT_UTF */  
+#endif  /* SUPPORT_UNICODE */  
 
 /* Handle a valid one-code-unit character at any width. */
 
@@ -121,7 +121,7 @@ if (one_code_unit)
 for each width. If UTF is not supported, control should never get here, but we 
 need a return statement to keep the compiler happy. */
 
-#ifndef SUPPORT_UTF
+#ifndef SUPPORT_UNICODE
 return 0;
 #else
 
@@ -178,7 +178,7 @@ as an indication. */
 fprintf(f, "\\X{%x}", c);
 return 0;
 #endif  /* PCRE2_CODE_UNIT_WIDTH == 32 */
-#endif  /* SUPPORT_UTF */
+#endif  /* SUPPORT_UNICODE */
 }
 
 
@@ -221,7 +221,7 @@ into the main code, however, we just put one into this function. */
 static const char *
 get_ucpname(unsigned int ptype, unsigned int pvalue)
 {
-#ifdef SUPPORT_UTF
+#ifdef SUPPORT_UNICODE
 int i;
 for (i = utt_size - 1; i >= 0; i--)
   {
@@ -233,7 +233,7 @@ return (i >= 0)? utt_names + utt[i].name_offset : "??";
 (void)ptype;
 (void)pvalue;
 return "??";
-#endif  /* SUPPORT_UTF */
+#endif  /* SUPPORT_UNICODE */
 }
 
 

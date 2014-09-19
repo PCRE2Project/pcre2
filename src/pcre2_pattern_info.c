@@ -56,10 +56,8 @@ Arguments:
   what          what information is required
   where         where to put the information
 
-Returns:        0 if data returned, negative on error
+Returns:        0 if data returned, negative on error or unset value
 */
-
-/* FIXME: Remove BADENDIANNESS if saving/restoring is not to be implemented. */
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_pattern_info(const pcre2_code *code, uint32_t what, void *where)
@@ -69,13 +67,21 @@ const pcre2_real_code *re = (pcre2_real_code *)code;
 if (re == NULL || where == NULL) return PCRE2_ERROR_NULL;
 
 /* Check that the first field in the block is the magic number. If it is not,
-return with PCRE2_ERROR_BADMAGIC. However, if the magic number is equal to
-REVERSED_MAGIC_NUMBER we return with PCRE2_ERROR_BADENDIANNESS, which
-means that the pattern is likely compiled with different endianness. */
+return with PCRE2_ERROR_BADMAGIC. */
 
-if (re->magic_number != MAGIC_NUMBER)
+if (re->magic_number != MAGIC_NUMBER) return PCRE2_ERROR_BADMAGIC;
+
+#ifdef FIXME
+If saving restoring gets implemented, define PCRE2_ERROR_BADENDIANNESS, and add
+this comment and code:
+
+/* However, if the magic number is equal to REVERSED_MAGIC_NUMBER we return
+with PCRE2_ERROR_BADENDIANNESS, which means that the pattern is likely compiled
+with different endianness. */
+
   return re->magic_number == REVERSED_MAGIC_NUMBER?
     PCRE2_ERROR_BADENDIANNESS:PCRE2_ERROR_BADMAGIC;
+#endif
 
 /* Check that this pattern was compiled in the correct bit mode */
 
@@ -151,6 +157,7 @@ switch(what)
 
   case PCRE2_INFO_MATCHLIMIT:
   *((uint32_t *)where) = re->limit_match;
+  if (re->limit_match == UINT32_MAX) return PCRE2_ERROR_UNSET; 
   break;
 
   case PCRE2_INFO_MAXLOOKBEHIND:
@@ -179,6 +186,7 @@ switch(what)
 
   case PCRE2_INFO_RECURSIONLIMIT:
   *((uint32_t *)where) = re->limit_recursion;
+  if (re->limit_recursion == UINT32_MAX) return PCRE2_ERROR_UNSET; 
   break;
 
   case PCRE2_INFO_SIZE:

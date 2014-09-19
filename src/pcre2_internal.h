@@ -38,11 +38,11 @@ POSSIBILITY OF SUCH DAMAGE.
 -----------------------------------------------------------------------------
 */
 
-/* We do not support both EBCDIC and UTF at the same time. The "configure"
+/* We do not support both EBCDIC and Unicode at the same time. The "configure"
 script prevents both being selected, but not everybody uses "configure". */
 
-#if defined EBCDIC && defined SUPPORT_UTF
-#error The use of both EBCDIC and SUPPORT_UTF is not supported.
+#if defined EBCDIC && defined SUPPORT_UNICODE
+#error The use of both EBCDIC and SUPPORT_UNICODE is not supported.
 #endif
 
 /* Standard C headers */
@@ -597,14 +597,14 @@ there are some longer strings as well.
 
 This means that, on EBCDIC platforms, the PCRE library can handle either
 EBCDIC, or UTF-8, but not both. To support both in the same compiled library
-would need different lookups depending on whether PCRE_UTF8 was set or not.
+would need different lookups depending on whether PCRE2_UTF was set or not.
 This would make it impossible to use characters in switch/case statements,
 which would reduce performance. For a theoretical use (which nobody has asked
 for) in a minority area (EBCDIC platforms), this is not sensible. Any
 application that did need both could compile two versions of the library, using
 macros to give the functions distinct names. */
 
-#ifndef SUPPORT_UTF
+#ifndef SUPPORT_UNICODE
 
 /* UTF-8 support is not enabled; use the platform-dependent character literals
 so that PCRE works in both ASCII and EBCDIC environments, but only in non-UTF
@@ -920,7 +920,7 @@ a positive value. */
 #define STRING_LIMIT_MATCH_EQ             "LIMIT_MATCH="
 #define STRING_LIMIT_RECURSION_EQ         "LIMIT_RECURSION="
 
-#else  /* SUPPORT_UTF */
+#else  /* SUPPORT_UNICODE */
 
 /* UTF-8 support is enabled; always use UTF-8 (=ASCII) character codes. This
 works in both modes non-EBCDIC platforms, and on EBCDIC platforms in UTF-8 mode
@@ -1189,7 +1189,7 @@ only. */
 #define STRING_LIMIT_MATCH_EQ             STR_L STR_I STR_M STR_I STR_T STR_UNDERSCORE STR_M STR_A STR_T STR_C STR_H STR_EQUALS_SIGN
 #define STRING_LIMIT_RECURSION_EQ         STR_L STR_I STR_M STR_I STR_T STR_UNDERSCORE STR_R STR_E STR_C STR_U STR_R STR_S STR_I STR_O STR_N STR_EQUALS_SIGN
 
-#endif  /* SUPPORT_UTF */
+#endif  /* SUPPORT_UNICODE */
 
 /* -------------------- End of character and string names -------------------*/
 
@@ -1775,10 +1775,10 @@ typedef struct {
 
 /* ----------------- Items that need PCRE2_CODE_UNIT_WIDTH ----------------- */
 
-/* When this file is included by pcre2test, PCRE2_CODE_UNIT_WIDTH is not
-defined, so the following items are omitted. */
+/* When this file is included by pcre2test, PCRE2_CODE_UNIT_WIDTH is defined as
+0, so the following items are omitted. */
 
-#ifdef PCRE2_CODE_UNIT_WIDTH
+#if defined PCRE2_CODE_UNIT_WIDTH && PCRE2_CODE_UNIT_WIDTH != 0
 
 /* This is the largest non-UTF code point. */
 

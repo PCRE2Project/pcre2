@@ -787,9 +787,9 @@ Subject length lower bound = 3
     a\x{123}aa\=offset=4
 No match
     a\x{123}aa\=offset=5
-Failed: error -34: bad offset value
+Failed: error -33: bad offset value
     a\x{123}aa\=offset=6
-Failed: error -34: bad offset value
+Failed: error -33: bad offset value
 
 /\x{1234}+/Ii,utf
 Capturing subpattern count = 0
@@ -851,9 +851,9 @@ Subject length lower bound = 1
 
 /a/utf
     \x{10000}\=offset=1
-Error -36 (bad UTF-16 offset)
+Error -35 (bad UTF-16 offset)
     \x{10000}ab\=offset=1
-Error -36 (bad UTF-16 offset)
+Error -35 (bad UTF-16 offset)
     \x{10000}ab\=offset=2
  0: a
     \x{10000}ab\=offset=3
@@ -861,7 +861,7 @@ No match
     \x{10000}ab\=offset=4
 No match
     \x{10000}ab\=offset=5
-Failed: error -34: bad offset value
+Failed: error -33: bad offset value
 
 /í¼€/utf
 Failed: error -26 at offset 0: UTF-16 error: isolated low surrogate

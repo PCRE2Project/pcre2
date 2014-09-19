@@ -75,7 +75,7 @@ Returns:           0 if data returned
 */
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
-pcre2_config(int what, void *where, size_t length)
+pcre2_config(uint32_t what, void *where, size_t length)
 {
 if (length < sizeof(int)) return PCRE2_ERROR_BADLENGTH;
 
@@ -145,7 +145,7 @@ switch (what)
   
   case PCRE2_CONFIG_UNICODE_VERSION:
     { 
-#if defined SUPPORT_UTF
+#if defined SUPPORT_UNICODE
     const char *v = PRIV(unicode_version);
 #else
     const char *v = "Unicode not supported";
@@ -158,8 +158,8 @@ switch (what)
     }
   break;
 
-  case PCRE2_CONFIG_UTF:
-#if defined SUPPORT_UTF
+  case PCRE2_CONFIG_UNICODE:
+#if defined SUPPORT_UNICODE
   *((int *)where) = 1;
 #else
   *((int *)where) = 0;

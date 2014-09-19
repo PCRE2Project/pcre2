@@ -196,6 +196,7 @@ so that the PCRE2_EXP_xxx macros get set appropriately for an application, not
 for building the library. */
 
 #define PRIV(name) name
+#define PCRE2_CODE_UNIT_WIDTH 0
 #include "pcre2.h"
 #include "pcre2posix.h"
 #include "pcre2_internal.h"
@@ -208,16 +209,17 @@ of PRIV avoids name clashes. */
 #include "pcre2_tables.c"
 #include "pcre2_ucd.c"
 
-/* When PCRE2_CODE_UNIT_WIDTH is unset, pcre2_internal.h does not include
+/* When PCRE2_CODE_UNIT_WIDTH is zero, pcre2_internal.h does not include
 pcre2_intmodedep.h, which is where mode-dependent macros and structures are
 defined. We can now include it for each supported code unit width. Because
-PCRE2_CODE_UNIT_WIDTH was not defined before including pcre2.h, it will have
-left PCRE2_SUFFIX defined as a no-op. We must re-define it appropriately while
-including these files, and then restore it to a no-op. Because LINK_SIZE may be
-changed in 16-bit mode and forced to 1 in 32-bit mode, the order of these
-inclusions should not be changed. */
+PCRE2_CODE_UNIT_WIDTH was defined as zero before including pcre2.h, it will
+have left PCRE2_SUFFIX defined as a no-op. We must re-define it appropriately
+while including these files, and then restore it to a no-op. Because LINK_SIZE
+may be changed in 16-bit mode and forced to 1 in 32-bit mode, the order of
+these inclusions should not be changed. */
 
 #undef PCRE2_SUFFIX
+#undef PCRE2_CODE_UNIT_WIDTH
 
 #ifdef   SUPPORT_PCRE8
 #define  PCRE2_CODE_UNIT_WIDTH 8
@@ -576,7 +578,7 @@ static coptstruct coptlist[] = {
   { "pcre16",    CONF_FIX, SUPPORT_16 },
   { "pcre32",    CONF_FIX, SUPPORT_32 },
   { "pcre8",     CONF_FIX, SUPPORT_8 },
-  { "utf",       CONF_INT, PCRE2_CONFIG_UTF }
+  { "unicode",   CONF_INT, PCRE2_CONFIG_UNICODE }
 };
 
 #define COPTLISTCOUNT sizeof(coptlist)/sizeof(coptstruct)
@@ -2815,22 +2817,26 @@ pattern.
 Arguments:
   what        code for the required information
   where       where to put the answer
+  unsetok     PCRE2_ERROR_UNSET is an "expected" result 
 
 Returns:      the return from pcre2_pattern_info()
 */
 
 static int
-pattern_info(int what, void *where)
+pattern_info(int what, void *where, BOOL unsetok)
 {
 int rc;
 PCRE2_PATTERN_INFO(rc, compiled_code, what, where);
 if (rc >= 0) return 0;
-fprintf(outfile, "Error %d from pcre2_pattern_info_%d(%d)\n", rc, test_mode,
-  what);
-if (rc == PCRE2_ERROR_BADMODE)
-  fprintf(outfile, "Running in %d-bit mode but pattern was compiled in "
-    "%d-bit mode\n", test_mode,
-    8 * (FLD(compiled_code, flags) & PCRE2_MODE_MASK));
+if (rc != PCRE2_ERROR_UNSET || !unsetok)
+  {
+  fprintf(outfile, "Error %d from pcre2_pattern_info_%d(%d)\n", rc, test_mode,
+    what);
+  if (rc == PCRE2_ERROR_BADMODE)
+    fprintf(outfile, "Running in %d-bit mode but pattern was compiled in "
+      "%d-bit mode\n", test_mode,
+      8 * (FLD(compiled_code, flags) & PCRE2_MODE_MASK));
+  }     
 return rc;
 }
 
@@ -3026,32 +3032,61 @@ if ((pat_patctl.control & CTL_INFO) != 0)
   {
   const void *nametable;
   const uint8_t *start_bits;
+  BOOL match_limit_set, recursion_limit_set; 
   uint32_t backrefmax, bsr_convention, capture_count, first_ctype, first_cunit,
     hascrorlf, jchanged, last_ctype, last_cunit, match_empty, match_limit,
     maxlookbehind, minlength, nameentrysize, namecount, newline_convention,
     recursion_limit;
+    
+  /* These info requests may return PCRE2_ERROR_UNSET. */
+
+  switch(pattern_info(PCRE2_INFO_MATCHLIMIT, &match_limit, TRUE))
+    {
+    case 0:
+    match_limit_set = TRUE;
+    break;
+    
+    case PCRE2_ERROR_UNSET:
+    match_limit_set = FALSE;
+    break;
+    
+    default:
+    return PR_ABEND;
+    }          
+      
+  switch(pattern_info(PCRE2_INFO_RECURSIONLIMIT, &recursion_limit, TRUE))
+    { 
+    case 0:
+    recursion_limit_set = TRUE;
+    break;
+    
+    case PCRE2_ERROR_UNSET:
+    recursion_limit_set = FALSE;
+    break;
+      
+    default:
+    return PR_ABEND;        
+    }
 
   /* These info requests should always succeed. */
 
-  if (pattern_info(PCRE2_INFO_BACKREFMAX, &backrefmax) +
-      pattern_info(PCRE2_INFO_BSR, &bsr_convention) +
-      pattern_info(PCRE2_INFO_CAPTURECOUNT, &capture_count) +
-      pattern_info(PCRE2_INFO_FIRSTBITMAP, &start_bits) +
-      pattern_info(PCRE2_INFO_FIRSTCODEUNIT, &first_cunit) +
-      pattern_info(PCRE2_INFO_FIRSTCODETYPE, &first_ctype) +
-      pattern_info(PCRE2_INFO_HASCRORLF, &hascrorlf) +
-      pattern_info(PCRE2_INFO_JCHANGED, &jchanged) +
-      pattern_info(PCRE2_INFO_LASTCODEUNIT, &last_cunit) +
-      pattern_info(PCRE2_INFO_LASTCODETYPE, &last_ctype) +
-      pattern_info(PCRE2_INFO_MATCHEMPTY, &match_empty) +
-      pattern_info(PCRE2_INFO_MATCHLIMIT, &match_limit) +
-      pattern_info(PCRE2_INFO_MAXLOOKBEHIND, &maxlookbehind) +
-      pattern_info(PCRE2_INFO_MINLENGTH, &minlength) +
-      pattern_info(PCRE2_INFO_NAMECOUNT, &namecount) +
-      pattern_info(PCRE2_INFO_NAMEENTRYSIZE, &nameentrysize) +
-      pattern_info(PCRE2_INFO_NAMETABLE, &nametable) +
-      pattern_info(PCRE2_INFO_NEWLINE, &newline_convention) +
-      pattern_info(PCRE2_INFO_RECURSIONLIMIT, &recursion_limit)
+  if (pattern_info(PCRE2_INFO_BACKREFMAX, &backrefmax, FALSE) +
+      pattern_info(PCRE2_INFO_BSR, &bsr_convention, FALSE) +
+      pattern_info(PCRE2_INFO_CAPTURECOUNT, &capture_count, FALSE) +
+      pattern_info(PCRE2_INFO_FIRSTBITMAP, &start_bits, FALSE) +
+      pattern_info(PCRE2_INFO_FIRSTCODEUNIT, &first_cunit, FALSE) +
+      pattern_info(PCRE2_INFO_FIRSTCODETYPE, &first_ctype, FALSE) +
+      pattern_info(PCRE2_INFO_HASCRORLF, &hascrorlf, FALSE) +
+      pattern_info(PCRE2_INFO_JCHANGED, &jchanged, FALSE) +
+      pattern_info(PCRE2_INFO_LASTCODEUNIT, &last_cunit, FALSE) +
+      pattern_info(PCRE2_INFO_LASTCODETYPE, &last_ctype, FALSE) +
+      pattern_info(PCRE2_INFO_MATCHEMPTY, &match_empty, FALSE) +
+      pattern_info(PCRE2_INFO_MAXLOOKBEHIND, &maxlookbehind, FALSE) +
+      pattern_info(PCRE2_INFO_MINLENGTH, &minlength, FALSE) +
+      pattern_info(PCRE2_INFO_NAMECOUNT, &namecount, FALSE) +
+      pattern_info(PCRE2_INFO_NAMEENTRYSIZE, &nameentrysize, FALSE) +
+      pattern_info(PCRE2_INFO_NAMETABLE, &nametable, FALSE) +
+      pattern_info(PCRE2_INFO_NEWLINE, &newline_convention, FALSE)
       != 0)
     return PR_ABEND;
 
@@ -3062,11 +3097,11 @@ if ((pat_patctl.control & CTL_INFO) != 0)
 
   if (maxlookbehind > 0)
     fprintf(outfile, "Max lookbehind = %d\n", maxlookbehind);
-
-  if (match_limit != UINT32_MAX)
+    
+  if (match_limit_set)
     fprintf(outfile, "Match limit = %u\n", match_limit);
 
-  if (recursion_limit != UINT32_MAX)
+  if (recursion_limit_set)
     fprintf(outfile, "Recursion limit = %u\n", recursion_limit);
 
   if (namecount > 0)
@@ -3099,8 +3134,8 @@ if ((pat_patctl.control & CTL_INFO) != 0)
   if (hascrorlf)   fprintf(outfile, "Contains explicit CR or LF match\n");
   if (match_empty) fprintf(outfile, "May match empty string\n");
 
-  pattern_info(PCRE2_INFO_ARGOPTIONS, &compile_options);
-  pattern_info(PCRE2_INFO_ALLOPTIONS, &overall_options);
+  pattern_info(PCRE2_INFO_ARGOPTIONS, &compile_options, FALSE);
+  pattern_info(PCRE2_INFO_ALLOPTIONS, &overall_options, FALSE);
 
   /* Remove UTF/UCP if they were there only because of forbid_utf. This saves
   cluttering up the verification output of non-UTF test files. */
@@ -3234,7 +3269,7 @@ if ((pat_patctl.control & CTL_INFO) != 0)
   if (pat_patctl.jit != 0 && (pat_patctl.control & CTL_JITVERIFY) != 0)
     {
     size_t jitsize;
-    if (pattern_info(PCRE2_INFO_JITSIZE, &jitsize) == 0)
+    if (pattern_info(PCRE2_INFO_JITSIZE, &jitsize, FALSE) == 0)
       {
       if (jitsize > 0)
         fprintf(outfile, "JIT compilation was successful\n");
@@ -3625,14 +3660,14 @@ if ((pat_patctl.control & CTL_MEMORY) != 0)
   if (test_mode == 32) cblock_size = sizeof(pcre2_real_code_32);
 #endif
 
-  (void)pattern_info(PCRE2_INFO_SIZE, &size);
-  (void)pattern_info(PCRE2_INFO_NAMECOUNT, &name_count);
-  (void)pattern_info(PCRE2_INFO_NAMEENTRYSIZE, &name_entry_size);
+  (void)pattern_info(PCRE2_INFO_SIZE, &size, FALSE);
+  (void)pattern_info(PCRE2_INFO_NAMECOUNT, &name_count, FALSE);
+  (void)pattern_info(PCRE2_INFO_NAMEENTRYSIZE, &name_entry_size, FALSE);
   fprintf(outfile, "Memory allocation (code space): %d\n",
     (int)(size - name_count*name_entry_size*code_unit_size - cblock_size));
   if (pat_patctl.jit != 0)
     {
-    (void)pattern_info(PCRE2_INFO_JITSIZE, &size);
+    (void)pattern_info(PCRE2_INFO_JITSIZE, &size, FALSE);
     fprintf(outfile, "Memory allocation (JIT code): %d\n", (int)size);
     }
   }
@@ -4452,7 +4487,7 @@ for (gmatched = 0;; gmatched++)
     if ((dat_datctl.control & CTL_ALLCAPTURES) != 0)
       {
       uint32_t maxcapcount;
-      if (pattern_info(PCRE2_INFO_CAPTURECOUNT, &maxcapcount) < 0)
+      if (pattern_info(PCRE2_INFO_CAPTURECOUNT, &maxcapcount, FALSE) < 0)
         return PR_SKIP;
       capcount = maxcapcount + 1;   /* Allow for full match */
       if (capcount > (int)dat_datctl.oveccount) capcount = dat_datctl.oveccount;
@@ -4943,7 +4978,7 @@ printf("     newline        newline type [CR, LF, CRLF, ANYCRLF, ANY]\n");
 printf("     pcre8          8 bit library support enabled [0, 1]\n");
 printf("     pcre16         16 bit library support enabled [0, 1]\n");
 printf("     pcre32         32 bit library support enabled [0, 1]\n");
-printf("     utf            Unicode Transformation Format supported [0, 1]\n");
+printf("     unicode        Unicode and UTF support enabled [0, 1]\n");
 printf("  -d            set default pattern control 'debug'\n");
 printf("  -dfa          set default subject control 'dfa'\n");
 printf("  -help         show usage information\n");
@@ -5057,7 +5092,7 @@ printf("  16-bit support\n");
 printf("  32-bit support\n");
 #endif
 
-(void)PCRE2_CONFIG(PCRE2_CONFIG_UTF, &rc, sizeof(rc));
+(void)PCRE2_CONFIG(PCRE2_CONFIG_UNICODE, &rc, sizeof(rc));
 if (rc != 0)
   printf("  UTF support (Unicode version %s)\n", uversion);
 else

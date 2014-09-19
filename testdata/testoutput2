@@ -986,7 +986,7 @@ Subject length lower bound = 4
  0: abcd
  1: a
  2: d
-copy substring 5 failed (-49): unknown or unset substring
+copy substring 5 failed (-47): unknown or unset substring
 
 /(.{20})/I
 Capturing subpattern count = 1
@@ -1040,9 +1040,9 @@ Subject length lower bound = 4
  2: <unset>
  3: f
  1G a (1)
-get substring 2 failed (-49): unknown or unset substring
+get substring 2 failed (-47): unknown or unset substring
  3G f (1)
-get substring 4 failed (-49): unknown or unset substring
+get substring 4 failed (-47): unknown or unset substring
  0L adef
  1L a
  2L 
@@ -1055,7 +1055,7 @@ get substring 4 failed (-49): unknown or unset substring
  1G bc (2)
  2G bc (2)
  3G f (1)
-get substring 4 failed (-49): unknown or unset substring
+get substring 4 failed (-47): unknown or unset substring
  0L bcdef
  1L bc
  2L bc
@@ -4370,7 +4370,7 @@ Subject length lower bound = 8
  0: abcdefgh
  1: cd
  2: gh
-copy substring 'three' failed (-49): unknown or unset substring
+copy substring 'three' failed (-47): unknown or unset substring
 
 /(?P<Tes>)(?P<Test>)/IB
 ------------------------------------------------------------------
@@ -5737,7 +5737,7 @@ No match
  0: a1
  1: a1
  2: a1
-copy substring 'Z' failed (-49): unknown or unset substring
+copy substring 'Z' failed (-47): unknown or unset substring
   C a1 (2) A
     
 /(?|(?<a>)(?<b>)(?<a>)|(?<a>)(?<b>)(?<a>))/I,dupnames
@@ -5778,7 +5778,7 @@ Subject length lower bound = 2
   C a (1) A
     cd\=copy=A
  0: cd
-copy substring 'A' failed (-49): unknown or unset substring
+copy substring 'A' failed (-47): unknown or unset substring
 
 /^(?P<A>a)(?P<A>b)|cd(?P<A>ef)(?P<A>gh)/I,dupnames
 Capturing subpattern count = 4
@@ -5822,7 +5822,7 @@ No match
  0: a1
  1: a1
  2: a1
-get substring 'Z' failed (-49): unknown or unset substring
+get substring 'Z' failed (-47): unknown or unset substring
   G a1 (2) A
 
 /^(?P<A>a)(?P<A>b)/I,dupnames
@@ -5853,7 +5853,7 @@ Subject length lower bound = 2
   G a (1) A
     cd\=get=A
  0: cd
-get substring 'A' failed (-49): unknown or unset substring
+get substring 'A' failed (-47): unknown or unset substring
 
 /^(?P<A>a)(?P<A>b)|cd(?P<A>ef)(?P<A>gh)/I,dupnames
 Capturing subpattern count = 4
@@ -10446,7 +10446,7 @@ Partial match: abc
     abc\=offset=3
 No match
     abc\=offset=4
-Failed: error -34: bad offset value
+Failed: error -33: bad offset value
     abc\=offset=-4 
 ** Invalid value in 'offset=-4'
 
@@ -11129,15 +11129,15 @@ Matched, but too many substrings
 
 /((?2))((?1))/
     abc
-Failed: error -51: nested recursion at the same subject position
+Failed: error -49: nested recursion at the same subject position
 
 /((?(R2)a+|(?1)b))/
     aaaabcde
-Failed: error -51: nested recursion at the same subject position
+Failed: error -49: nested recursion at the same subject position
 
 /(?(R)a*(?1)|((?R))b)/
     aaaabcde
-Failed: error -51: nested recursion at the same subject position
+Failed: error -49: nested recursion at the same subject position
 
 /(a+|(?R)b)/
 Failed: error 140 at offset 7: recursion could loop indefinitely
@@ -12129,11 +12129,11 @@ Subject length lower bound = 3
     aaaaaaaaaaaaaz
 No match
     aaaaaaaaaaaaaz\=match_limit=3000
-Failed: error -47: match limit exceeded
+Failed: error -45: match limit exceeded
 
 /(a+)*zz/
     aaaaaaaaaaaaaz\=recursion_limit=10
-Failed: error -52: recursion limit exceeded
+Failed: error -50: recursion limit exceeded
 
 /(*LIMIT_MATCH=3000)(a+)*zz/I
 Capturing subpattern count = 1
@@ -12142,9 +12142,9 @@ Starting code units: a z
 Last code unit = 'z'
 Subject length lower bound = 2
     aaaaaaaaaaaaaz
-Failed: error -47: match limit exceeded
+Failed: error -45: match limit exceeded
     aaaaaaaaaaaaaz\=match_limit=60000
-Failed: error -47: match limit exceeded
+Failed: error -45: match limit exceeded
 
 /(*LIMIT_MATCH=60000)(*LIMIT_MATCH=3000)(a+)*zz/I
 Capturing subpattern count = 1
@@ -12153,7 +12153,7 @@ Starting code units: a z
 Last code unit = 'z'
 Subject length lower bound = 2
     aaaaaaaaaaaaaz
-Failed: error -47: match limit exceeded
+Failed: error -45: match limit exceeded
 
 /(*LIMIT_MATCH=60000)(a+)*zz/I
 Capturing subpattern count = 1
@@ -12164,7 +12164,7 @@ Subject length lower bound = 2
     aaaaaaaaaaaaaz
 No match
     aaaaaaaaaaaaaz\=match_limit=3000
-Failed: error -47: match limit exceeded
+Failed: error -45: match limit exceeded
 
 /(*LIMIT_RECURSION=10)(a+)*zz/I
 Capturing subpattern count = 1
@@ -12173,9 +12173,9 @@ Starting code units: a z
 Last code unit = 'z'
 Subject length lower bound = 2
     aaaaaaaaaaaaaz
-Failed: error -52: recursion limit exceeded
+Failed: error -50: recursion limit exceeded
     aaaaaaaaaaaaaz\=recursion_limit=1000
-Failed: error -52: recursion limit exceeded
+Failed: error -50: recursion limit exceeded
 
 /(*LIMIT_RECURSION=10)(*LIMIT_RECURSION=1000)(a+)*zz/I
 Capturing subpattern count = 1
@@ -12195,7 +12195,7 @@ Subject length lower bound = 2
     aaaaaaaaaaaaaz
 No match
     aaaaaaaaaaaaaz\=recursion_limit=10
-Failed: error -52: recursion limit exceeded
+Failed: error -50: recursion limit exceeded
 
 # This test causes a segfault with Perl 5.18.0 
 

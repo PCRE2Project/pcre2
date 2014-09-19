@@ -108,8 +108,8 @@ Returns:         if successful: 0
 */
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
-pcre2_substring_copy_bynumber(pcre2_match_data *match_data, int stringnumber,
-  PCRE2_UCHAR *buffer, PCRE2_SIZE *sizeptr)
+pcre2_substring_copy_bynumber(pcre2_match_data *match_data, 
+  unsigned int stringnumber, PCRE2_UCHAR *buffer, PCRE2_SIZE *sizeptr)
 {
 PCRE2_SIZE left, right;
 PCRE2_SIZE p = 0;
@@ -189,8 +189,8 @@ Returns:         if successful: zero
 */
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
-pcre2_substring_get_bynumber(pcre2_match_data *match_data, int stringnumber, 
-  PCRE2_UCHAR **stringptr, PCRE2_SIZE *sizeptr)
+pcre2_substring_get_bynumber(pcre2_match_data *match_data, 
+  unsigned int stringnumber, PCRE2_UCHAR **stringptr, PCRE2_SIZE *sizeptr)
 {
 PCRE2_SIZE left, right;
 PCRE2_SIZE p = 0;
@@ -288,7 +288,7 @@ Returns:          0 if successful, else a negative error number
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_substring_length_bynumber(pcre2_match_data *match_data,
-  int stringnumber, PCRE2_SIZE *sizeptr)
+  unsigned int stringnumber, PCRE2_SIZE *sizeptr)
 {
 if (stringnumber >= match_data->oveccount ||
     stringnumber > match_data->code->top_bracket ||

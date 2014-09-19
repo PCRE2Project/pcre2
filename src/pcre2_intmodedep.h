@@ -208,9 +208,9 @@ tables. */
 #if PCRE2_CODE_UNIT_WIDTH == 8
 #define MAX_255(c) TRUE
 #define MAX_MARK ((1u << 8) - 1)
-#ifdef SUPPORT_UTF
+#ifdef SUPPORT_UNICODE
 #define SUPPORT_WIDE_CHARS
-#endif  /* SUPPORT_UTF */
+#endif  /* SUPPORT_UNICODE */
 #define TABLE_GET(c, table, default) ((table)[c])
 
 #else  /* Code units are 16 or 32 bits */
@@ -246,7 +246,7 @@ complicated ones for UTF characters. GETCHARLENTEST and other macros are not
 used when UTF is not supported. To make sure they can never even appear when
 UTF support is omitted, we don't even define them. */
 
-#ifndef SUPPORT_UTF
+#ifndef SUPPORT_UNICODE
 
 /* #define MAX_UTF_SINGLE_CU */
 /* #define HAS_EXTRALEN(c) */
@@ -263,7 +263,7 @@ UTF support is omitted, we don't even define them. */
 /* #define FORWARDCHAR(eptr) */
 /* #define ACROSSCHAR(condition, eptr, action) */
 
-#else   /* SUPPORT_UTF */
+#else   /* SUPPORT_UNICODE */
 
 /* ------------------- 8-bit support  ------------------ */
 
@@ -527,7 +527,7 @@ These are all no-ops since all UTF-32 characters fit into one pcre_uchar. */
 #define PUTCHAR(c, p) (*p = c, 1)
 
 #endif  /* UTF-32 character handling */
-#endif  /* SUPPORT_UTF */
+#endif  /* SUPPORT_UNICODE */
 
 
 /* Mode-dependent macros that have the same definition in all modes. */

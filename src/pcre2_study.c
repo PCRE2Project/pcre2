@@ -228,7 +228,7 @@ for (;;)
     case OP_NOTPOSPLUSI:
     branchlength++;
     cc += 2;
-#ifdef SUPPORT_UTF
+#ifdef SUPPORT_UNICODE
     if (utf && HAS_EXTRALEN(cc[-1])) cc += GET_EXTRALEN(cc[-1]);
 #endif
     break;
@@ -249,7 +249,7 @@ for (;;)
     case OP_NOTEXACTI:
     branchlength += GET2(cc,1);
     cc += 2 + IMM2_SIZE;
-#ifdef SUPPORT_UTF
+#ifdef SUPPORT_UNICODE
     if (utf && HAS_EXTRALEN(cc[-1])) cc += GET_EXTRALEN(cc[-1]);
 #endif
     break;
@@ -297,7 +297,7 @@ for (;;)
     appear, but leave the code, just in case.) */
 
     case OP_ANYBYTE:
-#ifdef SUPPORT_UTF
+#ifdef SUPPORT_UNICODE
     if (utf) return -1;
 #endif
     branchlength++;
@@ -536,7 +536,7 @@ for (;;)
     case OP_NOTPOSQUERYI:
 
     cc += PRIV(OP_lengths)[op];
-#ifdef SUPPORT_UTF
+#ifdef SUPPORT_UNICODE
     if (utf && HAS_EXTRALEN(cc[-1])) cc += GET_EXTRALEN(cc[-1]);
 #endif
     break;
@@ -608,7 +608,7 @@ SET_BIT(c);
 /* In UTF-8 or UTF-16 mode, pick up the remaining code units in order to find
 the end of the character, even when caseless. */
 
-#ifdef SUPPORT_UTF
+#ifdef SUPPORT_UNICODE
 if (utf)
   {
 #if PCRE2_CODE_UNIT_WIDTH == 8
@@ -617,7 +617,7 @@ if (utf)
   if ((c & 0xfc00) == 0xd800) GETUTF16INC(c, p);
 #endif
   }
-#endif  /* SUPPORT_UTF */   
+#endif  /* SUPPORT_UNICODE */   
 
 /* If caseless, handle the other case of the character. */
 
@@ -671,7 +671,7 @@ set_type_bits(pcre2_real_code *re, int cbit_type, unsigned int table_limit)
 register uint32_t c;
 for (c = 0; c < table_limit; c++) 
   re->start_bitmap[c] |= re->tables[c+cbits_offset+cbit_type];
-#if defined SUPPORT_UTF && PCRE2_CODE_UNIT_WIDTH == 8
+#if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH == 8
 if (table_limit == 32) return;
 for (c = 128; c < 256; c++)
   {
@@ -712,7 +712,7 @@ set_nottype_bits(pcre2_real_code *re, int cbit_type, unsigned int table_limit)
 register uint32_t c;
 for (c = 0; c < table_limit; c++) 
   re->start_bitmap[c] |= ~(re->tables[c+cbits_offset+cbit_type]);
-#if defined SUPPORT_UTF && PCRE2_CODE_UNIT_WIDTH == 8
+#if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH == 8
 if (table_limit != 32) for (c = 24; c < 32; c++) re->start_bitmap[c] = 0xff;
 #endif
 }
@@ -752,7 +752,7 @@ set_start_bits(pcre2_real_code *re, PCRE2_SPTR code, BOOL utf)
 register uint32_t c;
 int yield = SSB_DONE;
 
-#if defined SUPPORT_UTF && PCRE2_CODE_UNIT_WIDTH == 8
+#if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH == 8
 int table_limit = utf? 16:32;
 #else
 int table_limit = 32;
@@ -866,7 +866,7 @@ do
         const uint32_t *p = PRIV(ucd_caseless_sets) + tcode[2];
         while ((c = *p++) < NOTACHAR)
           {
-#if defined SUPPORT_UTF && PCRE2_CODE_UNIT_WIDTH == 8         
+#if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH == 8         
           if (utf)
             {
             PCRE2_UCHAR buff[6];
@@ -1042,7 +1042,7 @@ do
       /* For the 8-bit library in UTF-8 mode, set the bits for the first code 
       units of horizontal space characters. */
 
-#ifdef SUPPORT_UTF
+#ifdef SUPPORT_UNICODE
       if (utf)
         {
         SET_BIT(0xC2);  /* For U+00A0 */
@@ -1081,7 +1081,7 @@ do
       /* For the 8-bit library in UTF-8 mode, set the bits for the first code 
       units of vertical space characters. */
  
-#ifdef SUPPORT_UTF
+#ifdef SUPPORT_UNICODE
       if (utf)
         {
         SET_BIT(0xC2);  /* For U+0085 (NEL) */
@@ -1181,7 +1181,7 @@ do
         /* For the 8-bit library in UTF-8 mode, set the bits for the first code 
         units of horizontal space characters. */
 
-#ifdef SUPPORT_UTF
+#ifdef SUPPORT_UNICODE
         if (utf)
           {
           SET_BIT(0xC2);  /* For U+00A0 */
@@ -1218,7 +1218,7 @@ do
         /* For the 8-bit library in UTF-8 mode, set the bits for the first code 
         units of vertical space characters. */
  
-#ifdef SUPPORT_UTF
+#ifdef SUPPORT_UNICODE
         if (utf)
           {
           SET_BIT(0xC2);  /* For U+0085 (NEL) */
@@ -1287,7 +1287,7 @@ do
       character modes, set the 0xFF bit to indicate code units >= 255. */
 
       case OP_NCLASS:
-#if defined SUPPORT_UTF && PCRE2_CODE_UNIT_WIDTH == 8
+#if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH == 8
       if (utf)
         {
         re->start_bitmap[24] |= 0xf0;            /* Bits for 0xc4 - 0xc8 */
@@ -1318,7 +1318,7 @@ do
       
       if (classmap != NULL)
         { 
-#if defined SUPPORT_UTF && PCRE2_CODE_UNIT_WIDTH == 8
+#if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH == 8
         if (utf)
           {
           for (c = 0; c < 16; c++) re->start_bitmap[c] |= classmap[c];

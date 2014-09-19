@@ -32,7 +32,7 @@ condition to cut out the tables when not needed. But don't leave
 a totally empty module because some compilers barf at that.
 Instead, just supply small dummy tables. */
 
-#ifndef SUPPORT_UTF
+#ifndef SUPPORT_UNICODE
 const ucd_record PRIV(ucd_records)[] = {{0,0,0,0,0 }};
 const uint8_t PRIV(ucd_stage1)[] = {0};
 const uint16_t PRIV(ucd_stage2)[] = {0};
@@ -3628,6 +3628,6 @@ const uint16_t PRIV(ucd_stage2)[] = { /* 58112 bytes, block = 128 */
 #if UCD_BLOCK_SIZE != 128
 #error Please correct UCD_BLOCK_SIZE in pcre2_internal.h
 #endif
-#endif  /* SUPPORT_UTF */
+#endif  /* SUPPORT_UNICODE */
 
 #endif  /* PCRE2_PCRE2TEST */

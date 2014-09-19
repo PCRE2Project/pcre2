@@ -103,7 +103,7 @@ while ((t = *data++) != XCL_END)
   uint32_t x, y;
   if (t == XCL_SINGLE)
     {
-#ifdef SUPPORT_UTF
+#ifdef SUPPORT_UNICODE
     if (utf)
       {
       GETCHARINC(x, data); /* macro generates multiple statements */
@@ -115,7 +115,7 @@ while ((t = *data++) != XCL_END)
     }
   else if (t == XCL_RANGE)
     {
-#ifdef SUPPORT_UTF
+#ifdef SUPPORT_UNICODE
     if (utf)
       {
       GETCHARINC(x, data); /* macro generates multiple statements */
@@ -130,7 +130,7 @@ while ((t = *data++) != XCL_END)
     if (c >= x && c <= y) return !negated;
     }
 
-#ifdef SUPPORT_UTF
+#ifdef SUPPORT_UNICODE
   else  /* XCL_PROP & XCL_NOTPROP */
     {
     const ucd_record *prop = GET_UCD(c);
@@ -262,7 +262,7 @@ while ((t = *data++) != XCL_END)
     }
 #else
   (void)utf;  /* Avoid compiler warning */     
-#endif  /* SUPPORT_UTF */
+#endif  /* SUPPORT_UNICODE */
   }
 
 return negated;   /* char did not match */

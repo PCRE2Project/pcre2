@@ -81,12 +81,12 @@ PRIV(is_newline)(PCRE2_SPTR ptr, uint32_t type, PCRE2_SPTR endptr,
 {
 uint32_t c;
 
-#ifdef SUPPORT_UTF
+#ifdef SUPPORT_UNICODE
 if (utf) { GETCHAR(c, ptr); } else c = *ptr;
 #else
 (void)utf;
 c = *ptr;
-#endif  /* SUPPORT_UTF */
+#endif  /* SUPPORT_UNICODE */
 
 if (type == NLTYPE_ANYCRLF) switch(c)
   {
@@ -172,7 +172,7 @@ PRIV(was_newline)(PCRE2_SPTR ptr, uint32_t type, PCRE2_SPTR startptr,
 uint32_t c;
 ptr--;
 
-#ifdef SUPPORT_UTF
+#ifdef SUPPORT_UNICODE
 if (utf)
   {
   BACKCHAR(ptr);
@@ -182,7 +182,7 @@ else c = *ptr;
 #else
 (void)utf;
 c = *ptr;
-#endif  /* SUPPORT_UTF */
+#endif  /* SUPPORT_UNICODE */
 
 if (type == NLTYPE_ANYCRLF) switch(c)
   {

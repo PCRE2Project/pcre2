@@ -1230,7 +1230,7 @@ Partial match: the cat
 
 /ab\Cde/utf
     abXde
-Failed: error -41: item unsupported for DFA matching
+Failed: error -40: item unsupported for DFA matching
 
 /(?<=ab\Cde)X/utf
 Failed: error 136 at offset 10: \C is not allowed in a lookbehind assertion

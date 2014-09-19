@@ -19,8 +19,8 @@ one. */
 #include "../src/config.h"
 #endif
 
-#ifndef SUPPORT_UTF
-#define SUPPORT_UTF
+#ifndef SUPPORT_UNICODE
+#define SUPPORT_UNICODE
 #endif
 
 #include <ctype.h>

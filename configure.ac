@@ -137,11 +137,11 @@ AC_ARG_ENABLE(rebuild-chartables,
                              [rebuild character tables in current locale]),
               , enable_rebuild_chartables=no)
 
-# Handle --enable-utf (disabled by default)
-AC_ARG_ENABLE(utf,
-              AS_HELP_STRING([--enable-utf],
-                             [enable UTF-8/16/32 support (incompatible with --enable-ebcdic)]),
-              , enable_utf=unset)
+# Handle --enable-unicode (disabled by default)
+AC_ARG_ENABLE(unicode,
+              AS_HELP_STRING([--enable-unicode],
+                             [enable Unicode support (incompatible with --enable-ebcdic)]),
+              , enable_unicode=unset)
 
 # Handle newline options
 ac_pcre2_newline=lf
@@ -288,10 +288,10 @@ then
   AC_MSG_ERROR([At least one of the 8, 16 or 32 bit libraries must be enabled])
 fi
 
-# enable_utf is disabled by default.
-if test "x$enable_utf" = "xunset"
+# enable_unicode is disabled by default.
+if test "x$enable_unicode" = "xunset"
 then
-  enable_utf=no
+  enable_unicode=no
 fi
 
 # Convert the newline identifier into the appropriate integer value. These must
@@ -320,8 +320,8 @@ fi
 #
 if test "x$enable_ebcdic" = "xyes"; then
   enable_rebuild_chartables=yes
-  if test "x$enable_utf" = "xyes"; then
-    AC_MSG_ERROR([support for EBCDIC and UTF-8/16/32 cannot be enabled at the same time])
+  if test "x$enable_unicode" = "xyes"; then
+    AC_MSG_ERROR([support for EBCDIC and Unicode cannot be enabled at the same time])
   fi
 fi
 
@@ -372,7 +372,7 @@ AM_CONDITIONAL(WITH_PCRE16, test "x$enable_pcre16" = "xyes")
 AM_CONDITIONAL(WITH_PCRE32, test "x$enable_pcre32" = "xyes")
 AM_CONDITIONAL(WITH_REBUILD_CHARTABLES, test "x$enable_rebuild_chartables" = "xyes")
 AM_CONDITIONAL(WITH_JIT, test "x$enable_jit" = "xyes")
-AM_CONDITIONAL(WITH_UTF, test "x$enable_utf" = "xyes")
+AM_CONDITIONAL(WITH_UNICODE, test "x$enable_unicode" = "xyes")
 AM_CONDITIONAL(WITH_VALGRIND, test "x$enable_valgrind" = "xyes")
 
 # Checks for typedefs, structures, and compiler characteristics.
@@ -513,12 +513,12 @@ if test "$enable_pcre2grep_jit" = "yes"; then
     Define to any value to enable JIT support in pcre2grep.])
 fi
 
-if test "$enable_utf" = "yes"; then
-  AC_DEFINE([SUPPORT_UTF], [], [
-    Define to any value to enable support for the UTF-8/16/32 Unicode encoding.
+if test "$enable_unicode" = "yes"; then
+  AC_DEFINE([SUPPORT_UNICODE], [], [
+    Define to any value to enable support for Unicode and UTF encoding.
     This will work even in an EBCDIC environment, but it is incompatible
     with the EBCDIC macro. That is, PCRE2 can support *either* EBCDIC
-    code *or* ASCII/UTF-8/16/32, but not both at once.])
+    code *or* ASCII/Unicode, but not both at once.])
 fi
 
 if test "$enable_stack_for_recursion" = "no"; then
@@ -854,7 +854,7 @@ $PACKAGE-$VERSION configuration summary:
     Build 16-bit pcre2 library ...... : ${enable_pcre16}
     Build 32-bit pcre2 library ...... : ${enable_pcre32}
     Enable JIT compiling support .... : ${enable_jit}
-    Enable UTF-8/16/32 support ...... : ${enable_utf}
+    Enable Unicode support .......... : ${enable_unicode}
     Newline char/sequence ........... : ${enable_newline}
     \R matches only ANYCRLF ......... : ${enable_bsr_anycrlf}
     EBCDIC coding ................... : ${enable_ebcdic}

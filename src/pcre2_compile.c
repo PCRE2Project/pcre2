@@ -433,7 +433,7 @@ static const int posix_class_maps[] = {
 /* Table of substitutes for \d etc when PCRE2_UCP is set. They are replaced by
 Unicode property escapes. */
 
-#ifdef SUPPORT_UTF
+#ifdef SUPPORT_UNICODE
 static const PCRE2_UCHAR string_PNd[]  = {
   CHAR_BACKSLASH, CHAR_P, CHAR_LEFT_CURLY_BRACKET,
   CHAR_N, CHAR_d, CHAR_RIGHT_CURLY_BRACKET, '\0' };
@@ -541,7 +541,7 @@ static PCRE2_SPTR posix_substitutes[] = {
   NULL                  /* ^xdigit */
 };
 #define POSIX_SUBSIZE (sizeof(posix_substitutes) / sizeof(PCRE2_UCHAR *))
-#endif  /* SUPPORT_UTF */
+#endif  /* SUPPORT_UNICODE */
 
 /* Masks for checking option settings. */
 
@@ -887,7 +887,7 @@ for (;;)
     case OP_NOTI:
     branchlength++;
     cc += 2;
-#ifdef SUPPORT_UTF
+#ifdef SUPPORT_UNICODE
     if (utf && HAS_EXTRALEN(cc[-1])) cc += GET_EXTRALEN(cc[-1]);
 #endif
     break;
@@ -901,7 +901,7 @@ for (;;)
     case OP_NOTEXACTI:
     branchlength += (int)GET2(cc,1);
     cc += 2 + IMM2_SIZE;
-#ifdef SUPPORT_UTF
+#ifdef SUPPORT_UNICODE
     if (utf && HAS_EXTRALEN(cc[-1])) cc += GET_EXTRALEN(cc[-1]);
 #endif
     break;
@@ -1315,7 +1315,7 @@ for (code = first_significant_code(code + PRIV(OP_lengths)[*code], TRUE);
     actual length is stored in the compiled code, so we must update "code"
     here. */
 
-#if defined SUPPORT_UTF || PCRE2_CODE_UNIT_WIDTH != 8
+#if defined SUPPORT_UNICODE || PCRE2_CODE_UNIT_WIDTH != 8
     case OP_XCLASS:
     ccode = code += GET(code, 1);
     goto CHECK_CLASS_REPEAT;
@@ -1325,7 +1325,7 @@ for (code = first_significant_code(code + PRIV(OP_lengths)[*code], TRUE);
     case OP_NCLASS:
     ccode = code + PRIV(OP_lengths)[OP_CLASS];
 
-#if defined SUPPORT_UTF || PCRE2_CODE_UNIT_WIDTH != 8
+#if defined SUPPORT_UNICODE || PCRE2_CODE_UNIT_WIDTH != 8
     CHECK_CLASS_REPEAT:
 #endif
 
@@ -2062,7 +2062,7 @@ return escape;
 
 
 
-#ifdef SUPPORT_UTF
+#ifdef SUPPORT_UNICODE
 /*************************************************
 *               Handle \P and \p                 *
 *************************************************/
@@ -2678,7 +2678,7 @@ return -1;
 
 
 
-#ifdef SUPPORT_UTF
+#ifdef SUPPORT_UNICODE
 /*************************************************
 *           Get othercase range                  *
 *************************************************/
@@ -2740,7 +2740,7 @@ for (++c; c <= d; c++)
 *cptr = c;             /* Rest of input range */
 return 0;
 }
-#endif  /* SUPPORT_UTF */
+#endif  /* SUPPORT_UNICODE */
 
 
 
@@ -2780,7 +2780,7 @@ range. */
 
 if ((options & PCRE2_CASELESS) != 0)
   {
-#ifdef SUPPORT_UTF
+#ifdef SUPPORT_UNICODE
   if ((options & PCRE2_UTF) != 0)
     {
     int rc;
@@ -2810,7 +2810,7 @@ if ((options & PCRE2_CASELESS) != 0)
       }
     }
   else
-#endif  /* SUPPORT_UTF */
+#endif  /* SUPPORT_UNICODE */
 
   /* Not UTF mode */
 
@@ -2844,7 +2844,7 @@ if (end >= start)
   {
   PCRE2_UCHAR *uchardata = *uchardptr;
 
-#ifdef SUPPORT_UTF
+#ifdef SUPPORT_UNICODE
   if ((options & PCRE2_UTF) != 0)
     {
     if (start < end)
@@ -2860,7 +2860,7 @@ if (end >= start)
       }
     }
   else
-#endif  /* SUPPORT_UTF */
+#endif  /* SUPPORT_UNICODE */
 
   /* Without UTF support, character values are constrained by the bit length,
   and can only be > 256 for 16-bit and 32-bit libraries. */
@@ -3042,7 +3042,7 @@ uint8_t classbits[32];
 not do this for other options (e.g. PCRE2_EXTENDED) because they may change
 dynamically as we process the pattern. */
 
-#ifdef SUPPORT_UTF
+#ifdef SUPPORT_UNICODE
 BOOL utf = (options & PCRE2_UTF) != 0;
 #if PCRE2_CODE_UNIT_WIDTH != 32
 PCRE2_UCHAR utf_units[6];      /* For setting up multi-cu chars */
@@ -3235,7 +3235,7 @@ for (;; ptr++)
           break;
           }
         ptr++;
-#ifdef SUPPORT_UTF
+#ifdef SUPPORT_UNICODE
         if (utf) FORWARDCHAR(ptr);
 #endif
         }
@@ -3474,7 +3474,7 @@ for (;; ptr++)
         goto FAILED;
         }
 
-#ifdef SUPPORT_UTF
+#ifdef SUPPORT_UNICODE
       if (utf && HAS_EXTRALEN(c))
         {                           /* Braces are required because the */
         GETCHARLEN(c, ptr, ptr);    /* macro generates multiple statements */
@@ -3556,7 +3556,7 @@ for (;; ptr++)
         that are not available via \p or \P generate XCL_PROP/XCL_NOTPROP
         directly. UCP support is not available unless UTF support is.*/
 
-#ifdef SUPPORT_UTF
+#ifdef SUPPORT_UNICODE
         if ((options & PCRE2_UCP) != 0)
           {
           unsigned int ptype = 0;
@@ -3599,7 +3599,7 @@ for (;; ptr++)
             break;
             }
           }
-#endif  /* SUPPORT_UTF */
+#endif  /* SUPPORT_UNICODE */
 
         /* In the non-UCP case, or when UCP makes no difference, we build the
         bit map for the POSIX class in a chunk of local store because we may be
@@ -3689,7 +3689,7 @@ for (;; ptr++)
 
           switch (escape)
             {
-#ifdef SUPPORT_UTF
+#ifdef SUPPORT_UNICODE
             case ESC_du:     /* These are the values given for \d etc */
             case ESC_DU:     /* when PCRE2_UCP is set. We replace the */
             case ESC_wu:     /* escape sequence with an appropriate \p */
@@ -3757,7 +3757,7 @@ for (;; ptr++)
               cb, PRIV(vspace_list));
             break;
 
-#ifdef SUPPORT_UTF
+#ifdef SUPPORT_UNICODE
             case ESC_p:
             case ESC_P:
               {
@@ -3840,7 +3840,7 @@ for (;; ptr++)
 
         /* Otherwise, we have a potential range; pick up the next character */
 
-#ifdef SUPPORT_UTF
+#ifdef SUPPORT_UNICODE
         if (utf)
           {                           /* Braces are required because the */
           GETCHARLEN(d, ptr, ptr);    /* macro generates multiple statements */
@@ -3940,7 +3940,7 @@ for (;; ptr++)
 
         if (negate_class)
           {
-#ifdef SUPPORT_UTF
+#ifdef SUPPORT_UNICODE
           int d;
 #endif
           if (firstcuflags == REQ_UNSET) firstcuflags = REQ_NONE;
@@ -3951,7 +3951,7 @@ for (;; ptr++)
           one other case. If so, generate a special OP_NOTPROP item instead of
           OP_NOTI. */
 
-#ifdef SUPPORT_UTF
+#ifdef SUPPORT_UNICODE
           if (utf && (options & PCRE2_CASELESS) != 0 &&
               (d = UCD_CASESET(c)) != 0)
             {
@@ -4032,7 +4032,7 @@ for (;; ptr++)
     be listed) there are no characters < 256, we can omit the bitmap in the
     actual compiled code. */
 
-#ifdef SUPPORT_UTF
+#ifdef SUPPORT_UNICODE
     if (xclass && (!should_flip_negation || (options & PCRE2_UCP) != 0))
 #elif PCRE2_CODE_UNIT_WIDTH != 8
     if (xclass && !should_flip_negation)
@@ -4157,7 +4157,7 @@ for (;; ptr++)
             break;
             }
           p++;
-#ifdef SUPPORT_UTF
+#ifdef SUPPORT_UNICODE
           if (utf) FORWARDCHAR(p);
 #endif
           }           /* Loop for comment characters */
@@ -4265,7 +4265,7 @@ for (;; ptr++)
     /* If previous was a character type match (\d or similar), abolish it and
     create a suitable repeat item. The code is shared with single-character
     repeats by setting op_type to add a suitable offset into repeat_type. Note
-    the the Unicode property types will be present only when SUPPORT_UTF is
+    the the Unicode property types will be present only when SUPPORT_UNICODE is
     defined, but we don't wrap the little bits of code here because it just
     makes it horribly messy. */
 
@@ -4880,7 +4880,7 @@ for (;; ptr++)
         case OP_NOTEXACT:
         case OP_NOTEXACTI:
         tempcode += PRIV(OP_lengths)[*tempcode];
-#ifdef SUPPORT_UTF
+#ifdef SUPPORT_UNICODE
         if (utf && HAS_EXTRALEN(tempcode[-1]))
           tempcode += GET_EXTRALEN(tempcode[-1]);
 #endif
@@ -6407,7 +6407,7 @@ for (;; ptr++)
 
       /* So are Unicode property matches, if supported. */
 
-#ifdef SUPPORT_UTF
+#ifdef SUPPORT_UNICODE
       else if (escape == ESC_P || escape == ESC_p)
         {
         BOOL negated;
@@ -6442,7 +6442,7 @@ for (;; ptr++)
         if ((escape == ESC_b || escape == ESC_B || escape == ESC_A) &&
              cb->max_lookbehind == 0)
           cb->max_lookbehind = 1;
-#ifdef SUPPORT_UTF
+#ifdef SUPPORT_UNICODE
         if (escape >= ESC_DU && escape <= ESC_wu)
           {
           nestptr = ptr + 1;                   /* Where to resume */
@@ -6479,7 +6479,7 @@ for (;; ptr++)
     mclength = 1;
     mcbuffer[0] = c;
 
-#ifdef SUPPORT_UTF
+#ifdef SUPPORT_UNICODE
     if (utf && HAS_EXTRALEN(c))
       ACROSSCHAR(TRUE, ptr[1], mcbuffer[mclength++] = *(++ptr));
 #endif
@@ -6493,7 +6493,7 @@ for (;; ptr++)
     /* For caseless UTF mode, check whether this character has more than one
     other case. If so, generate a special OP_PROP item instead of OP_CHARI. */
 
-#ifdef SUPPORT_UTF
+#ifdef SUPPORT_UNICODE
     if (utf && (options & PCRE2_CASELESS) != 0)
       {
       GETCHAR(c, mcbuffer);
@@ -7527,7 +7527,7 @@ ptr += skipatstart;
 
 /* Can't support UTF or UCP unless PCRE2 has been compiled with UTF support. */
 
-#ifndef SUPPORT_UTF
+#ifndef SUPPORT_UNICODE
 if ((cb.external_options & (PCRE2_UTF|PCRE2_UCP)) != 0)
   {
   errorcode = ERR32;
@@ -7911,7 +7911,7 @@ if ((re->overall_options & PCRE2_ANCHORED) == 0)
       points and cannot have another case. In 16-bit and 32-bit modes, we can
       check wide characters when UTF (and therefore UCP) is supported. */
 
-#if defined SUPPORT_UTF && PCRE2_CODE_UNIT_WIDTH != 8
+#if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 8
       else if (firstcu <= MAX_UTF_CODE_POINT &&
                UCD_OTHERCASE(firstcu) != firstcu)
         re->flags |= PCRE2_FIRSTCASELESS;
@@ -7945,7 +7945,7 @@ if (reqcuflags >= 0 &&
       {
       if (cb.fcc[reqcu] != reqcu) re->flags |= PCRE2_LASTCASELESS;
       }
-#if defined SUPPORT_UTF && PCRE2_CODE_UNIT_WIDTH != 8
+#if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 8
     else if (reqcu <= MAX_UTF_CODE_POINT && UCD_OTHERCASE(reqcu) != reqcu)
       re->flags |= PCRE2_LASTCASELESS;
 #endif

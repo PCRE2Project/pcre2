@@ -76,7 +76,7 @@ as for the library in 8-bit mode, because pcre2test uses UTF-8 internally for
 handling wide characters. */
 
 #if defined PCRE2_PCRE2TEST || \
-   (defined SUPPORT_UTF && \
+   (defined SUPPORT_UNICODE && \
     defined PCRE2_CODE_UNIT_WIDTH && \
     PCRE2_CODE_UNIT_WIDTH == 8)
 
@@ -106,7 +106,7 @@ const uint8_t PRIV(utf8_table4)[] = {
 #endif /* UTF-8 support needed */
 
 
-#ifdef SUPPORT_UTF
+#ifdef SUPPORT_UNICODE
 
 /* Table to translate from particular type value to the general value. */
 
@@ -728,6 +728,6 @@ const ucp_type_table PRIV(utt)[] = {
 
 const size_t PRIV(utt_size) = sizeof(PRIV(utt)) / sizeof(ucp_type_table);
 
-#endif /* SUPPORT_UTF */
+#endif /* SUPPORT_UNICODE */
 
 /* End of pcre2_tables.c */

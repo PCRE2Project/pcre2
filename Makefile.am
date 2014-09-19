@@ -76,7 +76,10 @@ AM_CPPFLAGS = -I$(builddir)/src -I$(srcdir)/src
 #  doc/html/pcreunicode.html
 
 # FIXME
-#dist_man_MANS = \
+dist_man_MANS = \
+  doc/pcre2api.3
+
+
 #  doc/pcre2-config.1 \
 #  doc/pcre2.3 \
 #  doc/pcre2-16.3 \
@@ -108,7 +111,6 @@ AM_CPPFLAGS = -I$(builddir)/src -I$(srcdir)/src
 #  doc/pcre2_utf16_to_host_byte_order.3 \
 #  doc/pcre2_utf32_to_host_byte_order.3 \
 #  doc/pcre2_version.3 \
-#  doc/pcre2api.3 \
 #  doc/pcre2build.3 \
 #  doc/pcre2callout.3 \
 #  doc/pcre2compat.3 \
