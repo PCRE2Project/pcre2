@@ -1,3 +1,20 @@
+<html>
+<head>
+<title>pcre2demo specification</title>
+</head>
+<body bgcolor="#FFFFFF" text="#00005A" link="#0066FF" alink="#3399FF" vlink="#2222BB">
+<h1>pcre2demo man page</h1>
+<p>
+Return to the <a href="index.html">PCRE2 index page</a>.
+</p>
+<p>
+This page is part of the PCRE2 HTML documentation. It was generated
+automatically from the original man page. If there is any nonsense in it,
+please consult the man page, in case the conversion went wrong.
+<br>
+<ul>
+</ul>
+<PRE>
 /*************************************************
 *           PCRE2 DEMONSTRATION PROGRAM          *
 *************************************************/
@@ -45,9 +62,9 @@ such as pcre2_compile(). */
 
 #define PCRE2_CODE_UNIT_WIDTH 8
 
-#include <stdio.h>
-#include <string.h>
-#include <pcre2.h>
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;pcre2.h&gt;
 
 
 /**************************************************************************
@@ -94,7 +111,7 @@ pcre2_match_data *match_data;
 **************************************************************************/
 
 find_all = 0;
-for (i = 1; i < argc; i++)
+for (i = 1; i &lt; argc; i++)
   {
   if (strcmp(argv[i], "-g") == 0) find_all = 1;
     else break;
@@ -126,8 +143,8 @@ re = pcre2_compile(
   pattern,              /* the pattern */
   -1,                   /* indicates pattern is zero-terminated */ 
   0,                    /* default options */
-  &errornumber,         /* for error number */
-  &erroroffset,         /* for error offset */
+  &amp;errornumber,         /* for error number */
+  &amp;erroroffset,         /* for error offset */
   NULL);                /* use default compile context */
 
 /* Compilation failed: print the error message and exit. */
@@ -165,7 +182,7 @@ rc = pcre2_match(
 
 /* Matching failed: handle error cases */
 
-if (rc < 0)
+if (rc &lt; 0)
   {
   switch(rc)
     {
@@ -202,7 +219,7 @@ if (rc == 0)
 /* Show substrings stored in the output vector by number. Obviously, in a real
 application you might want to do things other than print them. */
 
-for (i = 0; i < rc; i++)
+for (i = 0; i &lt; rc; i++)
   {
   PCRE2_SPTR substring_start = subject + ovector[2*i];
   size_t substring_length = ovector[2*i+1] - ovector[2*i];
@@ -223,9 +240,9 @@ we have to extract the count of named parentheses from the pattern. */
 (void)pcre2_pattern_info(
   re,                   /* the compiled pattern */
   PCRE2_INFO_NAMECOUNT, /* get the number of named substrings */
-  &namecount);          /* where to put the answer */
+  &amp;namecount);          /* where to put the answer */
 
-if (namecount <= 0) printf("No named substrings\n"); else
+if (namecount &lt;= 0) printf("No named substrings\n"); else
   {
   PCRE2_SPTR tabptr;
   printf("Named substrings\n");
@@ -236,21 +253,21 @@ if (namecount <= 0) printf("No named substrings\n"); else
   (void)pcre2_pattern_info(
     re,                       /* the compiled pattern */
     PCRE2_INFO_NAMETABLE,     /* address of the table */
-    &name_table);             /* where to put the answer */
+    &amp;name_table);             /* where to put the answer */
 
   (void)pcre2_pattern_info(
     re,                       /* the compiled pattern */
     PCRE2_INFO_NAMEENTRYSIZE, /* size of each entry in the table */
-    &name_entry_size);        /* where to put the answer */
+    &amp;name_entry_size);        /* where to put the answer */
 
   /* Now we can scan the table and, for each entry, print the number, the name,
   and the substring itself. In the 8-bit library the number is held in two 
   bytes, most significant first. */
 
   tabptr = name_table;
-  for (i = 0; i < namecount; i++)
+  for (i = 0; i &lt; namecount; i++)
     {
-    int n = (tabptr[0] << 8) | tabptr[1];
+    int n = (tabptr[0] &lt;&lt; 8) | tabptr[1];
     printf("(%d) %*s: %.*s\n", n, name_entry_size - 3, tabptr + 2,
       (int)(ovector[2*n+1] - ovector[2*n]), subject + ovector[2*n]);
     tabptr += name_entry_size;
@@ -298,13 +315,13 @@ if (!find_all)     /* Check for -g */
 sequence. First, find the options with which the regex was compiled and extract
 the UTF state. */
 
-(void)pcre2_pattern_info(re, PCRE2_INFO_ALLOPTIONS, &option_bits);
-utf8 = (option_bits & PCRE2_UTF) != 0;
+(void)pcre2_pattern_info(re, PCRE2_INFO_ALLOPTIONS, &amp;option_bits);
+utf8 = (option_bits &amp; PCRE2_UTF) != 0;
 
 /* Now find the newline convention and see whether CRLF is a valid newline
 sequence. */
 
-(void)pcre2_pattern_info(re, PCRE2_INFO_NEWLINE, &newline);
+(void)pcre2_pattern_info(re, PCRE2_INFO_NEWLINE, &amp;newline);
 crlf_is_newline = newline == PCRE2_NEWLINE_ANY ||
                   newline == PCRE2_NEWLINE_CRLF ||
                   newline == PCRE2_NEWLINE_ANYCRLF; 
@@ -354,16 +371,16 @@ for (;;)
     {
     if (options == 0) break;                    /* All matches found */
     ovector[1] = start_offset + 1;              /* Advance one code unit */
-    if (crlf_is_newline &&                      /* If CRLF is newline & */
-        start_offset < subject_length - 1 &&    /* we are at CRLF, */
-        subject[start_offset] == '\r' &&
+    if (crlf_is_newline &amp;&amp;                      /* If CRLF is newline &amp; */
+        start_offset &lt; subject_length - 1 &amp;&amp;    /* we are at CRLF, */
+        subject[start_offset] == '\r' &amp;&amp;
         subject[start_offset + 1] == '\n')
       ovector[1] += 1;                          /* Advance by one more. */
     else if (utf8)                              /* Otherwise, ensure we */
       {                                         /* advance a whole UTF-8 */
-      while (ovector[1] < subject_length)       /* character. */
+      while (ovector[1] &lt; subject_length)       /* character. */
         {
-        if ((subject[ovector[1]] & 0xc0) != 0x80) break;
+        if ((subject[ovector[1]] &amp; 0xc0) != 0x80) break;
         ovector[1] += 1;
         }
       }
@@ -372,7 +389,7 @@ for (;;)
 
   /* Other matching errors are not recoverable. */
 
-  if (rc < 0)
+  if (rc &lt; 0)
     {
     printf("Matching error %d\n", rc);
     pcre2_match_data_free(match_data);
@@ -393,20 +410,20 @@ for (;;)
   /* As before, show substrings stored in the output vector by number, and then
   also any named substrings. */
 
-  for (i = 0; i < rc; i++)
+  for (i = 0; i &lt; rc; i++)
     {
     PCRE2_SPTR substring_start = subject + ovector[2*i];
     size_t substring_length = ovector[2*i+1] - ovector[2*i];
     printf("%2d: %.*s\n", i, (int)substring_length, (char *)substring_start);
     }
 
-  if (namecount <= 0) printf("No named substrings\n"); else
+  if (namecount &lt;= 0) printf("No named substrings\n"); else
     {
     PCRE2_SPTR tabptr = name_table;
     printf("Named substrings\n");
-    for (i = 0; i < namecount; i++)
+    for (i = 0; i &lt; namecount; i++)
       {
-      int n = (tabptr[0] << 8) | tabptr[1];
+      int n = (tabptr[0] &lt;&lt; 8) | tabptr[1];
       printf("(%d) %*s: %.*s\n", n, name_entry_size - 3, tabptr + 2,
         (int)(ovector[2*n+1] - ovector[2*n]), subject + ovector[2*n]);
       tabptr += name_entry_size;
@@ -421,3 +438,6 @@ return 0;
 }
 
 /* End of pcre2demo.c */
+<p>
+Return to the <a href="index.html">PCRE2 index page</a>.
+</p>

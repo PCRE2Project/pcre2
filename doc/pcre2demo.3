@@ -1,3 +1,20 @@
+.\" Start example.
+.de EX
+.  nr mE \\n(.f
+.  nf
+.  nh
+.  ft CW
+..
+.
+.
+.\" End example.
+.de EE
+.  ft \\n(mE
+.  fi
+.  hy \\n(HY
+..
+.
+.EX
 /*************************************************
 *           PCRE2 DEMONSTRATION PROGRAM          *
 *************************************************/
@@ -24,7 +41,7 @@ gcc -Wall pcre2demo.c `pkg-config --cflags --libs libpcre2-8` -o pcre2demo
 
 If you do not have pkg-config, you may have to use this:
 
-gcc -Wall pcre2demo.c -I/usr/local/include -L/usr/local/lib \
+gcc -Wall pcre2demo.c -I/usr/local/include -L/usr/local/lib \e
   -R/usr/local/lib -lpcre2-8 -o pcre2demo
 
 Replace "/usr/local/include" and "/usr/local/lib" with wherever the include and
@@ -105,7 +122,7 @@ and the subject string. */
 
 if (argc - i != 2)
   {
-  printf("Two arguments required: a regex and a subject string\n");
+  printf("Two arguments required: a regex and a subject string\en");
   return 1;
   }
 
@@ -136,7 +153,7 @@ if (re == NULL)
   {
   PCRE2_UCHAR buffer[256]; 
   pcre2_get_error_message(errornumber, buffer, sizeof(buffer));
-  printf("PCRE2 compilation failed at offset %d: %s\n", (int)erroroffset, 
+  printf("PCRE2 compilation failed at offset %d: %s\en", (int)erroroffset, 
     buffer);
   return 1;
   }
@@ -169,11 +186,11 @@ if (rc < 0)
   {
   switch(rc)
     {
-    case PCRE2_ERROR_NOMATCH: printf("No match\n"); break;
+    case PCRE2_ERROR_NOMATCH: printf("No match\en"); break;
     /*
     Handle other special cases if you like
     */
-    default: printf("Matching error %d\n", rc); break;
+    default: printf("Matching error %d\en", rc); break;
     }
   pcre2_match_data_free(match_data);   /* Release memory used for the match */
   pcre2_code_free(re);                 /* data and the compiled pattern. */
@@ -184,7 +201,7 @@ if (rc < 0)
 stored. */
 
 ovector = pcre2_get_ovector_pointer(match_data);
-printf("\nMatch succeeded at offset %d\n", (int)ovector[0]);
+printf("\enMatch succeeded at offset %d\en", (int)ovector[0]);
 
 
 /*************************************************************************
@@ -197,7 +214,7 @@ printf("\nMatch succeeded at offset %d\n", (int)ovector[0]);
 pcre2_match_data_create_from_pattern() above. */
 
 if (rc == 0)
-  printf("ovector was not big enough for all the captured substrings\n");
+  printf("ovector was not big enough for all the captured substrings\en");
 
 /* Show substrings stored in the output vector by number. Obviously, in a real
 application you might want to do things other than print them. */
@@ -206,7 +223,7 @@ for (i = 0; i < rc; i++)
   {
   PCRE2_SPTR substring_start = subject + ovector[2*i];
   size_t substring_length = ovector[2*i+1] - ovector[2*i];
-  printf("%2d: %.*s\n", i, (int)substring_length, (char *)substring_start);
+  printf("%2d: %.*s\en", i, (int)substring_length, (char *)substring_start);
   }
 
 
@@ -225,10 +242,10 @@ we have to extract the count of named parentheses from the pattern. */
   PCRE2_INFO_NAMECOUNT, /* get the number of named substrings */
   &namecount);          /* where to put the answer */
 
-if (namecount <= 0) printf("No named substrings\n"); else
+if (namecount <= 0) printf("No named substrings\en"); else
   {
   PCRE2_SPTR tabptr;
-  printf("Named substrings\n");
+  printf("Named substrings\en");
 
   /* Before we can access the substrings, we must extract the table for
   translating names to numbers, and the size of each entry in the table. */
@@ -251,7 +268,7 @@ if (namecount <= 0) printf("No named substrings\n"); else
   for (i = 0; i < namecount; i++)
     {
     int n = (tabptr[0] << 8) | tabptr[1];
-    printf("(%d) %*s: %.*s\n", n, name_entry_size - 3, tabptr + 2,
+    printf("(%d) %*s: %.*s\en", n, name_entry_size - 3, tabptr + 2,
       (int)(ovector[2*n+1] - ovector[2*n]), subject + ovector[2*n]);
     tabptr += name_entry_size;
     }
@@ -356,8 +373,8 @@ for (;;)
     ovector[1] = start_offset + 1;              /* Advance one code unit */
     if (crlf_is_newline &&                      /* If CRLF is newline & */
         start_offset < subject_length - 1 &&    /* we are at CRLF, */
-        subject[start_offset] == '\r' &&
-        subject[start_offset + 1] == '\n')
+        subject[start_offset] == '\er' &&
+        subject[start_offset + 1] == '\en')
       ovector[1] += 1;                          /* Advance by one more. */
     else if (utf8)                              /* Otherwise, ensure we */
       {                                         /* advance a whole UTF-8 */
@@ -374,7 +391,7 @@ for (;;)
 
   if (rc < 0)
     {
-    printf("Matching error %d\n", rc);
+    printf("Matching error %d\en", rc);
     pcre2_match_data_free(match_data);
     pcre2_code_free(re);
     return 1;
@@ -382,13 +399,13 @@ for (;;)
 
   /* Match succeded */
 
-  printf("\nMatch succeeded again at offset %d\n", (int)ovector[0]);
+  printf("\enMatch succeeded again at offset %d\en", (int)ovector[0]);
 
   /* The match succeeded, but the output vector wasn't big enough. This
   should not happen. */
 
   if (rc == 0)
-    printf("ovector was not big enough for all the captured substrings\n");
+    printf("ovector was not big enough for all the captured substrings\en");
 
   /* As before, show substrings stored in the output vector by number, and then
   also any named substrings. */
@@ -397,27 +414,28 @@ for (;;)
     {
     PCRE2_SPTR substring_start = subject + ovector[2*i];
     size_t substring_length = ovector[2*i+1] - ovector[2*i];
-    printf("%2d: %.*s\n", i, (int)substring_length, (char *)substring_start);
+    printf("%2d: %.*s\en", i, (int)substring_length, (char *)substring_start);
     }
 
-  if (namecount <= 0) printf("No named substrings\n"); else
+  if (namecount <= 0) printf("No named substrings\en"); else
     {
     PCRE2_SPTR tabptr = name_table;
-    printf("Named substrings\n");
+    printf("Named substrings\en");
     for (i = 0; i < namecount; i++)
       {
       int n = (tabptr[0] << 8) | tabptr[1];
-      printf("(%d) %*s: %.*s\n", n, name_entry_size - 3, tabptr + 2,
+      printf("(%d) %*s: %.*s\en", n, name_entry_size - 3, tabptr + 2,
         (int)(ovector[2*n+1] - ovector[2*n]), subject + ovector[2*n]);
       tabptr += name_entry_size;
       }
     }
   }      /* End of loop to find second and subsequent matches */
 
-printf("\n");
+printf("\en");
 pcre2_match_data_free(match_data);
 pcre2_code_free(re);
 return 0;
 }
 
 /* End of pcre2demo.c */
+.EE

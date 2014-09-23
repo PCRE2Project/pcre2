@@ -1,0 +1,177 @@
+<html>
+<!-- This is a manually maintained file that is the root of the HTML version of 
+     the PCRE2 documentation. When the HTML documents are built from the man 
+     page versions, the entire doc/html directory is emptied, this file is then 
+     copied into doc/html/index.html, and the remaining files therein are 
+     created by the 132html script.
+-->      
+<head>
+<title>PCRE2 specification</title>
+</head>
+<body bgcolor="#FFFFFF" text="#00005A" link="#0066FF" alink="#3399FF" vlink="#2222BB">
+<h1>Perl-compatible Regular Expressions (revised API: PCRE2)</h1>
+<p>
+The HTML documentation for PCRE2 consists of a number of pages that are listed
+below in alphabetical order. If you are new to PCRE2, please read the first one
+first.
+</p>
+
+<table>
+<tr><td><a href="pcre2.html">pcre</a></td>
+    <td>&nbsp;&nbsp;Introductory page</td></tr>
+
+<tr><td><a href="pcre2-config.html">pcre-config</a></td>
+    <td>&nbsp;&nbsp;Information about the installation configuration</td></tr>
+
+<tr><td><a href="pcre2api.html">pcreapi</a></td>
+    <td>&nbsp;&nbsp;PCRE2's native API</td></tr>
+
+<tr><td><a href="pcre2build.html">pcrebuild</a></td>
+    <td>&nbsp;&nbsp;Building PCRE2</td></tr>
+
+<tr><td><a href="pcre2callout.html">pcre2callout</a></td>
+    <td>&nbsp;&nbsp;The <i>callout</i> facility</td></tr>
+
+<tr><td><a href="pcre2compat.html">pcre2compat</a></td>
+    <td>&nbsp;&nbsp;Compability with Perl</td></tr>
+
+<tr><td><a href="pcre2demo.html">pcre2demo</a></td>
+    <td>&nbsp;&nbsp;A demonstration C program that uses the PCRE2 library</td></tr>
+
+<tr><td><a href="pcre2grep.html">pcre2grep</a></td>
+    <td>&nbsp;&nbsp;The <b>pcre2grep</b> command</td></tr>
+
+<tr><td><a href="pcre2jit.html">pcre2jit</a></td>
+    <td>&nbsp;&nbsp;Discussion of the just-in-time optimization support</td></tr>
+
+<tr><td><a href="pcre2limits.html">pcre2limits</a></td>
+    <td>&nbsp;&nbsp;Details of size and other limits</td></tr>
+
+<tr><td><a href="pcre2matching.html">pcre2matching</a></td>
+    <td>&nbsp;&nbsp;Discussion of the two matching algorithms</td></tr>
+
+<tr><td><a href="pcre2partial.html">pcre2partial</a></td>
+    <td>&nbsp;&nbsp;Using PCRE2 for partial matching</td></tr>
+
+<tr><td><a href="pcre2pattern.html">pcre2pattern</a></td>
+    <td>&nbsp;&nbsp;Specification of the regular expressions supported by PCRE2</td></tr>
+
+<tr><td><a href="pcre2perform.html">pcre2perform</a></td>
+    <td>&nbsp;&nbsp;Some comments on performance</td></tr>
+
+<tr><td><a href="pcre2posix.html">pcre2posix</a></td>
+    <td>&nbsp;&nbsp;The POSIX API to the PCRE2 8-bit library</td></tr>
+
+<tr><td><a href="pcre2precompile.html">pcre2precompile</a></td>
+    <td>&nbsp;&nbsp;How to save and re-use compiled patterns</td></tr>
+
+<tr><td><a href="pcre2sample.html">pcre2sample</a></td>
+    <td>&nbsp;&nbsp;Discussion of the pcre2demo program</td></tr>
+
+<tr><td><a href="pcre2stack.html">pcre2stack</a></td>
+    <td>&nbsp;&nbsp;Discussion of PCRE2's stack usage</td></tr>
+
+<tr><td><a href="pcre2syntax.html">pcre2syntax</a></td>
+    <td>&nbsp;&nbsp;Syntax quick-reference summary</td></tr>
+
+<tr><td><a href="pcre2test.html">pcre2test</a></td>
+    <td>&nbsp;&nbsp;The <b>pcre2test</b> command for testing PCRE2</td></tr>
+
+<tr><td><a href="pcre2unicode.html">pcre2unicode</a></td>
+    <td>&nbsp;&nbsp;Discussion of Unicode and UTF-8/UTF-16/UTF-32 support</td></tr>
+</table>
+
+<p>
+There are also individual pages that summarize the interface for each function
+in the library. There is a single page for each triple of 8-bit/16-bit/32-bit
+functions.
+</p>
+
+<table>    
+
+<tr><td><a href="pcre2_assign_jit_stack.html">pcre2_assign_jit_stack</a></td>
+    <td>&nbsp;&nbsp;Assign stack for JIT matching</td></tr>
+
+<tr><td><a href="pcre2_compile.html">pcre2_compile</a></td>
+    <td>&nbsp;&nbsp;Compile a regular expression</td></tr>
+
+<tr><td><a href="pcre2_compile2.html">pcre2_compile2</a></td>
+    <td>&nbsp;&nbsp;Compile a regular expression (alternate interface)</td></tr>
+
+<tr><td><a href="pcre2_config.html">pcre2_config</a></td>
+    <td>&nbsp;&nbsp;Show build-time configuration options</td></tr>
+
+<tr><td><a href="pcre2_copy_named_substring.html">pcre2_copy_named_substring</a></td>
+    <td>&nbsp;&nbsp;Extract named substring into given buffer</td></tr>
+
+<tr><td><a href="pcre2_copy_substring.html">pcre2_copy_substring</a></td>
+    <td>&nbsp;&nbsp;Extract numbered substring into given buffer</td></tr>
+
+<tr><td><a href="pcre2_dfa_exec.html">pcre2_dfa_exec</a></td>
+    <td>&nbsp;&nbsp;Match a compiled pattern to a subject string
+    (DFA algorithm; <i>not</i> Perl compatible)</td></tr>
+
+<tr><td><a href="pcre2_exec.html">pcre2_exec</a></td>
+    <td>&nbsp;&nbsp;Match a compiled pattern to a subject string
+    (Perl compatible)</td></tr>
+
+<tr><td><a href="pcre2_free_study.html">pcre2_free_study</a></td>
+    <td>&nbsp;&nbsp;Free study data</td></tr>
+
+<tr><td><a href="pcre2_free_substring.html">pcre2_free_substring</a></td>
+    <td>&nbsp;&nbsp;Free extracted substring</td></tr>
+
+<tr><td><a href="pcre2_free_substring_list.html">pcre2_free_substring_list</a></td>
+    <td>&nbsp;&nbsp;Free list of extracted substrings</td></tr>
+
+<tr><td><a href="pcre2_fullinfo.html">pcre2_fullinfo</a></td>
+    <td>&nbsp;&nbsp;Extract information about a pattern</td></tr>
+
+<tr><td><a href="pcre2_get_named_substring.html">pcre2_get_named_substring</a></td>
+    <td>&nbsp;&nbsp;Extract named substring into new memory</td></tr>
+
+<tr><td><a href="pcre2_get_stringnumber.html">pcre2_get_stringnumber</a></td>
+    <td>&nbsp;&nbsp;Convert captured string name to number</td></tr>
+
+<tr><td><a href="pcre2_get_stringtable_entries.html">pcre2_get_stringtable_entries</a></td>
+    <td>&nbsp;&nbsp;Find table entries for given string name</td></tr>
+
+<tr><td><a href="pcre2_get_substring.html">pcre2_get_substring</a></td>
+    <td>&nbsp;&nbsp;Extract numbered substring into new memory</td></tr>
+
+<tr><td><a href="pcre2_get_substring_list.html">pcre2_get_substring_list</a></td>
+    <td>&nbsp;&nbsp;Extract all substrings into new memory</td></tr>
+
+<tr><td><a href="pcre2_jit_exec.html">pcre2_jit_exec</a></td>
+    <td>&nbsp;&nbsp;Fast path interface to JIT matching</td></tr>
+
+<tr><td><a href="pcre2_jit_stack_alloc.html">pcre2_jit_stack_alloc</a></td>
+    <td>&nbsp;&nbsp;Create a stack for JIT matching</td></tr>
+
+<tr><td><a href="pcre2_jit_stack_free.html">pcre2_jit_stack_free</a></td>
+    <td>&nbsp;&nbsp;Free a JIT matching stack</td></tr>
+
+<tr><td><a href="pcre2_maketables.html">pcre2_maketables</a></td>
+    <td>&nbsp;&nbsp;Build character tables in current locale</td></tr>
+    
+<tr><td><a href="pcre2_pattern_to_host_byte_order.html">pcre2_pattern_to_host_byte_order</a></td>
+    <td>&nbsp;&nbsp;Convert compiled pattern to host byte order if necessary</td></tr>
+
+<tr><td><a href="pcre2_refcount.html">pcre2_refcount</a></td>
+    <td>&nbsp;&nbsp;Maintain reference count in compiled pattern</td></tr>
+
+<tr><td><a href="pcre2_study.html">pcre2_study</a></td>
+    <td>&nbsp;&nbsp;Study a compiled pattern</td></tr>
+
+<tr><td><a href="pcre2_utf16_to_host_byte_order.html">pcre2_utf16_to_host_byte_order</a></td>
+    <td>&nbsp;&nbsp;Convert UTF-16 string to host byte order if necessary</td></tr>
+
+<tr><td><a href="pcre2_utf32_to_host_byte_order.html">pcre2_utf32_to_host_byte_order</a></td>
+    <td>&nbsp;&nbsp;Convert UTF-32 string to host byte order if necessary</td></tr>
+
+<tr><td><a href="pcre2_version.html">pcre2_version</a></td>
+    <td>&nbsp;&nbsp;Return PCRE2 version and release date</td></tr>
+</table>
+
+</html>
+
