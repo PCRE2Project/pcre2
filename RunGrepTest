@@ -69,7 +69,7 @@ fi
 
 # Check for the availability of UTF-8 support
 
-./pcre2test -C utf >/dev/null
+./pcre2test -C unicode >/dev/null
 utf8=$?
 
 echo "Testing pcre2grep main features"

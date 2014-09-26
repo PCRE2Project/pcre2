@@ -18,7 +18,7 @@ dist_doc_DATA = \
 #  doc/pcre-config.txt \
 #  doc/pcregrep.txt \
 #  doc/pcretest.txt \
-#  NEWS \
+#  NEWS
 
 # FIXME
 #dist_html_DATA = \
@@ -128,7 +128,7 @@ dist_man_MANS = \
 #  doc/pcre2precompile.3 \
 #  doc/pcre2sample.3 \
 #  doc/pcre2stack.3 \
-#  doc/pcre2syntax.3 \
+#  doc/pcre2syntax.3
 
 # The Libtool libraries to install.  We'll add to this later.
 
