@@ -2997,7 +2997,7 @@ if (colour_option != NULL && strcmp(colour_option, "never") != 0)
     }
   if (do_colour)
     {
-    char *cs = getenv("pcre2grep_COLOUR");
+    char *cs = getenv("PCRE2GREP_COLOUR");
     if (cs == NULL) cs = getenv("PCRE2GREP_COLOR");
     if (cs != NULL) colour_string = cs;
     }

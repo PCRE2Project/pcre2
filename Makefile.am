@@ -6,29 +6,31 @@ AM_CPPFLAGS = -I$(builddir)/src -I$(srcdir)/src
 
 ## Specify the documentation files that are distributed.
 
-# FIXME
 dist_doc_DATA = \
   AUTHORS \
   COPYING \
   ChangeLog \
   LICENCE \
-  README
-
-#  doc/pcre.txt \
-#  doc/pcre-config.txt \
-#  doc/pcregrep.txt \
-#  doc/pcretest.txt \
-#  NEWS
+  NEWS \
+  README \
+  doc/pcre2.txt \
+  doc/pcre2-config.txt \
+  doc/pcre2grep.txt \
+  doc/pcre2test.txt
 
 # FIXME
-#dist_html_DATA = \
-#  doc/html/NON-AUTOTOOLS-BUILD.txt \
-#  doc/html/README.txt \
-#  doc/html/index.html \
-#  doc/html/pcre-config.html \
+dist_html_DATA = \
+  doc/html/NON-AUTOTOOLS-BUILD.txt \
+  doc/html/README.txt \
+  doc/html/index.html \
+  doc/html/pcre2-config.html \
+  doc/html/pcre2api.html \
+  doc/html/pcre2callout.html \
+  doc/html/pcre2demo.html \
+  doc/html/pcre2test.html \
+  doc/html/pcre2unicode.html
+
 #  doc/html/pcre.html \
-#  doc/html/pcre16.html \
-#  doc/html/pcre32.html \
 #  doc/html/pcre_assign_jit_stack.html \
 #  doc/html/pcre_compile.html \
 #  doc/html/pcre_compile2.html \
@@ -56,11 +58,8 @@ dist_doc_DATA = \
 #  doc/html/pcre_utf16_to_host_byte_order.html \
 #  doc/html/pcre_utf32_to_host_byte_order.html \
 #  doc/html/pcre_version.html \
-#  doc/html/pcreapi.html \
 #  doc/html/pcrebuild.html \
-#  doc/html/pcrecallout.html \
 #  doc/html/pcrecompat.html \
-#  doc/html/pcredemo.html \
 #  doc/html/pcregrep.html \
 #  doc/html/pcrejit.html \
 #  doc/html/pcrelimits.html \
@@ -72,18 +71,16 @@ dist_doc_DATA = \
 #  doc/html/pcreprecompile.html \
 #  doc/html/pcresample.html \
 #  doc/html/pcrestack.html \
-#  doc/html/pcresyntax.html \
-#  doc/html/pcretest.html \
-#  doc/html/pcreunicode.html
+#  doc/html/pcresyntax.html
 
 # FIXME
 dist_man_MANS = \
+  doc/pcre2-config.1 \
   doc/pcre2api.3 \
   doc/pcre2callout.3 \
   doc/pcre2test.1 \
   doc/pcre2unicode.3
 
-#  doc/pcre2-config.1 \
 #  doc/pcre2.3 \
 #  doc/pcre2-16.3 \
 #  doc/pcre2-32.3 \
@@ -168,7 +165,6 @@ EXTRA_DIST += \
 
 EXTRA_DIST += \
   doc/perltest.txt \
-  NON-UNIX-USE \
   NON-AUTOTOOLS-BUILD \
   HACKING
 
@@ -719,9 +715,9 @@ else
 coverage:
 	@echo "Configuring with --enable-coverage is required to generate code coverage report."
 
-DISTCLEANFILES += src/*.gcda src/*.gcno 
+DISTCLEANFILES += src/*.gcda src/*.gcno
 
-distclean-local: 
+distclean-local:
 	rm -rf $(PACKAGE)-$(VERSION)-coverage*
 
 endif # WITH_GCOV

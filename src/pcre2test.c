@@ -5094,9 +5094,9 @@ printf("  32-bit support\n");
 
 (void)PCRE2_CONFIG(PCRE2_CONFIG_UNICODE, &rc, sizeof(rc));
 if (rc != 0)
-  printf("  UTF support (Unicode version %s)\n", uversion);
+  printf("  UTF and UCP support (Unicode version %s)\n", uversion);
 else
-  printf("  No UTF support\n");
+  printf("  No UTF or UCP support\n");
 (void)PCRE2_CONFIG(PCRE2_CONFIG_JIT, &rc, sizeof(rc));
 if (rc != 0)
   {

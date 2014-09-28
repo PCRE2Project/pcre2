@@ -83,8 +83,7 @@ for file in pcre2api pcre2callout pcre2unicode ; do
 done
 
 # The three commands
-for file in pcre2test ; do
-# for file in pcre2test pcre2grep pcre-config ; do
+for file in pcre2test pcre2grep pcre2-config ; do
   echo Making $file.txt
   nroff -c -man $file.1 >$file.rawtxt
   perl ../CleanTxt <$file.rawtxt >$file.txt
@@ -133,7 +132,7 @@ echo "Making HTML documentation"
 /bin/rm html/*
 cp index.html.src html/index.html
 cp ../README html/README.txt
-# cp ../NON-AUTOTOOLS-BUILD html/NON-AUTOTOOLS-BUILD.txt
+cp ../NON-AUTOTOOLS-BUILD html/NON-AUTOTOOLS-BUILD.txt
 
 for file in *.1 ; do
   base=`basename $file .1`
@@ -187,7 +186,6 @@ files="\
   COPYING \
   AUTHORS \
   NEWS \
-  NON-UNIX-USE \
   NON-AUTOTOOLS-BUILD \
   INSTALL \
   132html \
@@ -240,16 +238,6 @@ files="\
   pcre32_utf32_utils.c \
   pcre16_valid_utf16.c \
   pcre32_valid_utf32.c \
-  pcre_scanner.cc \
-  pcre_scanner.h \
-  pcre_scanner_unittest.cc \
-  pcrecpp.cc \
-  pcrecpp.h \
-  pcrecpparg.h.in \
-  pcrecpp_unittest.cc \
-  pcre_stringpiece.cc \
-  pcre_stringpiece.h.in \
-  pcre_stringpiece_unittest.cc \
   perltest.pl \
   ucp.h \
   makevp.bat \
