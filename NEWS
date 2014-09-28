@@ -1,1 +1,11 @@
-This is a placeholder NEWS file for a work in progress.
+News about PCRE2 releases
+-------------------------
+
+Version 10.0 xx-xxxx-2014
+-------------------------
+
+Version 10.0 is the first release of PCRE2, a revised API for the PCRE library.
+Changes prior to 10.0 are logged in the ChangeLog file for the old API, up to 
+item 20 for release 8.36.
+
+****
