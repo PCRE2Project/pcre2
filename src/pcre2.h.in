@@ -120,7 +120,7 @@ D   is inspected during pcre2_dfa_match() execution
 
 /* These are for pcre2_jit_compile(). */
 
-#define PCRE2_JIT                 0x00000001u  /* For full matching */
+#define PCRE2_JIT_COMPLETE        0x00000001u  /* For full matching */
 #define PCRE2_JIT_PARTIAL_SOFT    0x00000002u
 #define PCRE2_JIT_PARTIAL_HARD    0x00000004u
 

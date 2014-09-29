@@ -123,12 +123,12 @@ subject_length = strlen((char *)subject);
 *************************************************************************/
 
 re = pcre2_compile(
-  pattern,              /* the pattern */
-  -1,                   /* indicates pattern is zero-terminated */ 
-  0,                    /* default options */
-  &errornumber,         /* for error number */
-  &erroroffset,         /* for error offset */
-  NULL);                /* use default compile context */
+  pattern,               /* the pattern */
+  PCRE2_ZERO_TERMINATED, /* indicates pattern is zero-terminated */ 
+  0,                     /* default options */
+  &errornumber,          /* for error number */
+  &erroroffset,          /* for error offset */
+  NULL);                 /* use default compile context */
 
 /* Compilation failed: print the error message and exit. */
 

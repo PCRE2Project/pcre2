@@ -24,64 +24,71 @@ dist_html_DATA = \
   doc/html/README.txt \
   doc/html/index.html \
   doc/html/pcre2-config.html \
+  doc/html/pcre2.html \
   doc/html/pcre2api.html \
+  doc/html/pcre2build.html \
   doc/html/pcre2callout.html \
+  doc/html/pcre2compat.html \
   doc/html/pcre2demo.html \
+  doc/html/pcre2grep.html \
+  doc/html/pcre2jit.html \
+  doc/html/pcre2limits.html \
+  doc/html/pcre2matching.html \
   doc/html/pcre2test.html \
   doc/html/pcre2unicode.html
 
-#  doc/html/pcre.html \
-#  doc/html/pcre_assign_jit_stack.html \
-#  doc/html/pcre_compile.html \
-#  doc/html/pcre_compile2.html \
-#  doc/html/pcre_config.html \
-#  doc/html/pcre_copy_named_substring.html \
-#  doc/html/pcre_copy_substring.html \
-#  doc/html/pcre_dfa_match.html \
-#  doc/html/pcre_match.html \
-#  doc/html/pcre_free_study.html \
-#  doc/html/pcre_free_substring.html \
-#  doc/html/pcre_free_substring_list.html \
-#  doc/html/pcre_fullinfo.html \
-#  doc/html/pcre_get_named_substring.html \
-#  doc/html/pcre_get_stringnumber.html \
-#  doc/html/pcre_get_stringtable_entries.html \
-#  doc/html/pcre_get_substring.html \
-#  doc/html/pcre_get_substring_list.html \
-#  doc/html/pcre_jit_match.html \
-#  doc/html/pcre_jit_stack_alloc.html \
-#  doc/html/pcre_jit_stack_free.html \
-#  doc/html/pcre_maketables.html \
-#  doc/html/pcre_pattern_to_host_byte_order.html \
-#  doc/html/pcre_refcount.html \
-#  doc/html/pcre_study.html \
-#  doc/html/pcre_utf16_to_host_byte_order.html \
-#  doc/html/pcre_utf32_to_host_byte_order.html \
-#  doc/html/pcre_version.html \
-#  doc/html/pcrebuild.html \
-#  doc/html/pcrecompat.html \
-#  doc/html/pcregrep.html \
-#  doc/html/pcrejit.html \
-#  doc/html/pcrelimits.html \
-#  doc/html/pcrematching.html \
-#  doc/html/pcrepartial.html \
-#  doc/html/pcrepattern.html \
-#  doc/html/pcreperform.html \
-#  doc/html/pcreposix.html \
-#  doc/html/pcreprecompile.html \
-#  doc/html/pcresample.html \
-#  doc/html/pcrestack.html \
-#  doc/html/pcresyntax.html
+#  doc/html/pcre2_assign_jit_stack.html \
+#  doc/html/pcre2_compile.html \
+#  doc/html/pcre2_compile2.html \
+#  doc/html/pcre2_config.html \
+#  doc/html/pcre2_copy_named_substring.html \
+#  doc/html/pcre2_copy_substring.html \
+#  doc/html/pcre2_dfa_match.html \
+#  doc/html/pcre2_match.html \
+#  doc/html/pcre2_free_study.html \
+#  doc/html/pcre2_free_substring.html \
+#  doc/html/pcre2_free_substring_list.html \
+#  doc/html/pcre2_fullinfo.html \
+#  doc/html/pcre2_get_named_substring.html \
+#  doc/html/pcre2_get_stringnumber.html \
+#  doc/html/pcre2_get_stringtable_entries.html \
+#  doc/html/pcre2_get_substring.html \
+#  doc/html/pcre2_get_substring_list.html \
+#  doc/html/pcre2_jit_match.html \
+#  doc/html/pcre2_jit_stack_alloc.html \
+#  doc/html/pcre2_jit_stack_free.html \
+#  doc/html/pcre2_maketables.html \
+#  doc/html/pcre2_pattern_to_host_byte_order.html \
+#  doc/html/pcre2_refcount.html \
+#  doc/html/pcre2_study.html \
+#  doc/html/pcre2_utf16_to_host_byte_order.html \
+#  doc/html/pcre2_utf32_to_host_byte_order.html \
+#  doc/html/pcre2_version.html \
+#  doc/html/pcre2partial.html \
+#  doc/html/pcre2pattern.html \
+#  doc/html/pcre2perform.html \
+#  doc/html/pcre2posix.html \
+#  doc/html/pcre2precompile.html \
+#  doc/html/pcre2sample.html \
+#  doc/html/pcre2stack.html \
+#  doc/html/pcre2syntax.html
 
 # FIXME
 dist_man_MANS = \
   doc/pcre2-config.1 \
+  doc/pcre2.3 \
   doc/pcre2api.3 \
+  doc/pcre2build.3 \
   doc/pcre2callout.3 \
+  doc/pcre2compat.3 \
+  doc/pcre2demo.3 \
+  doc/pcre2grep.1 \
+  doc/pcre2jit.3 \
+  doc/pcre2limits.3 \
+  doc/pcre2matching.3 \
   doc/pcre2test.1 \
   doc/pcre2unicode.3
 
-#  doc/pcre2.3 \
 #  doc/pcre2-16.3 \
 #  doc/pcre2-32.3 \
 #  doc/pcre2_assign_jit_stack.3 \
@@ -111,13 +118,6 @@ dist_man_MANS = \
 #  doc/pcre2_utf16_to_host_byte_order.3 \
 #  doc/pcre2_utf32_to_host_byte_order.3 \
 #  doc/pcre2_version.3 \
-#  doc/pcre2build.3 \
-#  doc/pcre2compat.3 \
-#  doc/pcre2demo.3 \
-#  doc/pcre2grep.1 \
-#  doc/pcre2jit.3 \
-#  doc/pcre2limits.3 \
-#  doc/pcre2matching.3 \
 #  doc/pcre2partial.3 \
 #  doc/pcre2pattern.3 \
 #  doc/pcre2perform.3 \
