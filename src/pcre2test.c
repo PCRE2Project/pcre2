@@ -595,8 +595,11 @@ static FILE *infile;
 static FILE *outfile;
 
 static const void *last_callout_mark;
+static PCRE2_JIT_STACK *jit_stack = NULL;
+static size_t jit_stack_size = 0;
 
 static BOOL first_callout;
+static BOOL jit_was_used;
 static BOOL restrict_for_perl_test = FALSE;
 static BOOL show_memory = FALSE;
 
@@ -771,6 +774,30 @@ are supported. */
   if (test_mode == PCRE8_MODE) pcre2_jit_compile_8(G(a,8),b,G(c,8)); \
   else if (test_mode == PCRE16_MODE) pcre2_jit_compile_16(G(a,16),b,G(c,16)); \
   else pcre2_jit_compile_32(G(a,32),b,G(c,32))
+
+#define PCRE2_JIT_STACK_ALLOC(a,b,c,d) \
+  if (test_mode == PCRE8_MODE) \
+    a = (PCRE2_JIT_STACK *)pcre2_jit_stack_alloc_8(b,c,d); \
+  else if (test_mode == PCRE16_MODE) \
+    a = (PCRE2_JIT_STACK *)pcre2_jit_stack_alloc_16(b,c,d); \
+  else \
+    a = (PCRE2_JIT_STACK *)pcre2_jit_stack_alloc_32(b,c,d);
+
+#define PCRE2_JIT_STACK_ASSIGN(a,b,c) \
+  if (test_mode == PCRE8_MODE) \
+    pcre2_jit_stack_assign_8(G(a,8),(pcre2_jit_callback_8)b,c); \
+  else if (test_mode == PCRE16_MODE) \
+    pcre2_jit_stack_assign_16(G(a,16),(pcre2_jit_callback_16)b,c); \
+  else \
+    pcre2_jit_stack_assign_32(G(a,32),(pcre2_jit_callback_32)b,c);
+
+#define PCRE2_JIT_STACK_FREE(a) \
+  if (test_mode == PCRE8_MODE) \
+    pcre2_jit_stack_free_8((pcre2_jit_stack_8 *)a); \
+  else if (test_mode == PCRE16_MODE) \
+    pcre2_jit_stack_free_16((pcre2_jit_stack_16 *)a); \
+  else \
+    pcre2_jit_stack_free_32((pcre2_jit_stack_32 *)a);
 
 #define PCRE2_MAKETABLES(a) \
   if (test_mode == PCRE8_MODE) a = pcre2_maketables_8(NULL); \
@@ -1060,6 +1087,24 @@ the three different cases. */
   else \
     G(pcre2_jit_compile_,BITTWO)(G(a,BITTWO),b,G(c,BITTWO))
 
+#define PCRE2_JIT_STACK_ALLOC(a,b,c,d) \
+  if (test_mode == G(G(PCRE,BITONE),_MODE)) \
+    a = (PCRE2_JIT_STACK *)G(pcre2_jit_stack_alloc_,BITONE)(b,c,d); \
+  else \
+    a = (PCRE2_JIT_STACK *)G(pcre2_jit_stack_alloc_,BITTWO)(b,c,d); \
+
+#define PCRE2_JIT_STACK_ASSIGN(a,b,c) \
+  if (test_mode == G(G(PCRE,BITONE),_MODE)) \
+    G(pcre2_jit_stack_assign_,BITONE)(G(a,BITONE),(G(pcre2_jit_callback_,BITONE))b,c); \
+  else \
+    G(pcre2_jit_stack_assign_,BITTWO)(G(a,BITTWO),(G(pcre2_jit_callback_,BITTWO))b,c);
+
+#define PCRE2_JIT_STACK_FREE(a) \
+  if (test_mode == G(G(PCRE,BITONE),_MODE)) \
+    G(pcre2_jit_stack_free_,BITONE)((G(pcre2_jit_stack_,BITONE) *)a); \
+  else \
+    G(pcre2_jit_stack_free_,BITWO)((G(pcre2_jit_stack_,BITTWO) *)a);
+
 #define PCRE2_MAKETABLES(a) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
     a = G(pcre2_maketables_,BITONE)(NULL); \
@@ -1253,6 +1298,11 @@ the three different cases. */
 #define PCRE2_GET_ERROR_MESSAGE(r,a,b) \
   r = pcre2_get_error_message_8(a,G(b,8),G(G(b,8),_size))
 #define PCRE2_JIT_COMPILE(a,b,c) pcre2_jit_compile_8(G(a,8),b,G(c,8))
+#define PCRE2_JIT_STACK_ALLOC(a,b,c,d) \
+  a = (PCRE2_JIT_STACK *)pcre2_jit_stack_alloc_8(b,c,d);
+#define PCRE2_JIT_STACK_ASSIGN(a,b,c) \
+  pcre2_jit_stack_assign_8(G(a,8),(pcre2_jit_callback_8)b,c);
+#define PCRE2_JIT_STACK_FREE(a) pcre2_jit_stack_free_8((pcre2_jit_stack_8 *)a);
 #define PCRE2_MATCH(a,b,c,d,e,f,g,h) \
   a = pcre2_match_8(G(b,8),(PCRE2_SPTR8)c,d,e,f,G(g,8),G(h,8))
 #define PCRE2_MAKETABLES(a) a = pcre2_maketables_8(NULL)
@@ -1312,6 +1362,11 @@ the three different cases. */
 #define PCRE2_GET_ERROR_MESSAGE(r,a,b) \
   r = pcre2_get_error_message_16(a,G(b,16),G(G(b,16),_size))
 #define PCRE2_JIT_COMPILE(a,b,c) pcre2_jit_compile_16(G(a,16),b,G(c,16))
+#define PCRE2_JIT_STACK_ALLOC(a,b,c,d) \
+  a = (PCRE2_JIT_STACK *)pcre2_jit_stack_alloc_16(b,c,d);
+#define PCRE2_JIT_STACK_ASSIGN(a,b,c) \
+  pcre2_jit_stack_assign_16(G(a,16),(pcre2_jit_callback_16)b,c);
+#define PCRE2_JIT_STACK_FREE(a) pcre2_jit_stack_free_16((pcre2_jit_stack_16 *)a);
 #define PCRE2_MAKETABLES(a) a = pcre2_maketables_16(NULL)
 #define PCRE2_MATCH(a,b,c,d,e,f,g,h) \
   a = pcre2_match_16(G(b,16),(PCRE2_SPTR16)c,d,e,f,G(g,16),G(h,16))
@@ -1371,6 +1426,11 @@ the three different cases. */
 #define PCRE2_GET_ERROR_MESSAGE(r,a,b) \
   r = pcre2_get_error_message_32(a,G(b,32),G(G(b,32),_size))
 #define PCRE2_JIT_COMPILE(a,b,c) pcre2_jit_compile_32(G(a,32),b,G(c,32))
+#define PCRE2_JIT_STACK_ALLOC(a,b,c,d) \
+  a = (PCRE2_JIT_STACK *)pcre2_jit_stack_alloc_32(b,c,d);
+#define PCRE2_JIT_STACK_ASSIGN(a,b,c) \
+  pcre2_jit_stack_assign_32(G(a,32),(pcre2_jit_callback_32)b,c);
+#define PCRE2_JIT_STACK_FREE(a) pcre2_jit_stack_free_32((pcre2_jit_stack_32 *)a);
 #define PCRE2_MATCH(a,b,c,d,e,f,g,h) \
   a = pcre2_match_32(G(b,32),(PCRE2_SPTR32)c,d,e,f,G(g,32),g(h,32))
 #define PCRE2_MAKETABLES(a) a = pcre2_maketables_32(NULL)
@@ -1804,6 +1864,18 @@ static int
 stack_guard(uint32_t depth)
 {
 return depth > pat_patctl.stackguard_test;
+}
+
+
+/*************************************************
+*         JIT memory callback                    *
+*************************************************/
+
+static PCRE2_JIT_STACK*
+jit_callback(void *arg)
+{
+jit_was_used = TRUE;
+return (PCRE2_JIT_STACK *)arg;
 }
 
 
@@ -2817,7 +2889,7 @@ pattern.
 Arguments:
   what        code for the required information
   where       where to put the answer
-  unsetok     PCRE2_ERROR_UNSET is an "expected" result 
+  unsetok     PCRE2_ERROR_UNSET is an "expected" result
 
 Returns:      the return from pcre2_pattern_info()
 */
@@ -2836,7 +2908,7 @@ if (rc != PCRE2_ERROR_UNSET || !unsetok)
     fprintf(outfile, "Running in %d-bit mode but pattern was compiled in "
       "%d-bit mode\n", test_mode,
       8 * (FLD(compiled_code, flags) & PCRE2_MODE_MASK));
-  }     
+  }
 return rc;
 }
 
@@ -3032,12 +3104,12 @@ if ((pat_patctl.control & CTL_INFO) != 0)
   {
   const void *nametable;
   const uint8_t *start_bits;
-  BOOL match_limit_set, recursion_limit_set; 
+  BOOL match_limit_set, recursion_limit_set;
   uint32_t backrefmax, bsr_convention, capture_count, first_ctype, first_cunit,
     hascrorlf, jchanged, last_ctype, last_cunit, match_empty, match_limit,
     maxlookbehind, minlength, nameentrysize, namecount, newline_convention,
     recursion_limit;
-    
+
   /* These info requests may return PCRE2_ERROR_UNSET. */
 
   switch(pattern_info(PCRE2_INFO_MATCHLIMIT, &match_limit, TRUE))
@@ -3045,27 +3117,27 @@ if ((pat_patctl.control & CTL_INFO) != 0)
     case 0:
     match_limit_set = TRUE;
     break;
-    
+
     case PCRE2_ERROR_UNSET:
     match_limit_set = FALSE;
     break;
-    
+
     default:
     return PR_ABEND;
-    }          
-      
+    }
+
   switch(pattern_info(PCRE2_INFO_RECURSIONLIMIT, &recursion_limit, TRUE))
-    { 
+    {
     case 0:
     recursion_limit_set = TRUE;
     break;
-    
+
     case PCRE2_ERROR_UNSET:
     recursion_limit_set = FALSE;
     break;
-      
+
     default:
-    return PR_ABEND;        
+    return PR_ABEND;
     }
 
   /* These info requests should always succeed. */
@@ -3097,7 +3169,7 @@ if ((pat_patctl.control & CTL_INFO) != 0)
 
   if (maxlookbehind > 0)
     fprintf(outfile, "Max lookbehind = %d\n", maxlookbehind);
-    
+
   if (match_limit_set)
     fprintf(outfile, "Match limit = %u\n", match_limit);
 
@@ -3641,7 +3713,9 @@ if (TEST(compiled_code, ==, NULL))
 /* Call the JIT compiler if requested. */
 
 if (pat_patctl.jit != 0)
-  { PCRE2_JIT_COMPILE(compiled_code, pat_patctl.jit, dat_context); }
+  { 
+  PCRE2_JIT_COMPILE(compiled_code, pat_patctl.jit, dat_context); 
+  }
 
 /* Output code size and other information if requested. */
 
@@ -4329,24 +4403,43 @@ if ((dat_datctl.control & CTL_ANYGLOB) != 0 && dat_datctl.oveccount < 1)
 
 show_memory = (dat_datctl.control & CTL_MEMORY) != 0;
 
-/* Ensure that there is a JIT callback if we want to verify that JIT was
-actually used. If jit_stack == NULL, no stack has yet been assigned. */
+/* Create and assign a JIT stack if requested. */
 
-#ifdef FIXME
+if (dat_datctl.jitstack != 0)
+  {
+  if (dat_datctl.jitstack != jit_stack_size)
+    {
+    PCRE2_JIT_STACK_FREE(jit_stack);
+    PCRE2_JIT_STACK_ALLOC(jit_stack, NULL, 1, dat_datctl.jitstack * 1024);
+    jit_stack_size = dat_datctl.jitstack;
+    }
+  PCRE2_JIT_STACK_ASSIGN(compiled_code, jit_callback, jit_stack);
+  }
+
+/* Or de-assign */
+
+else if (jit_stack != NULL)
+  {
+  PCRE2_JIT_STACK_ASSIGN(compiled_code, NULL, NULL);
+  PCRE2_JIT_STACK_FREE(jit_stack);
+  jit_stack = NULL;
+  jit_stack_size = 0;
+  }
+
+/* When no JIT stack is assigned, we must ensure that there is a JIT callback
+if we want to verify that JIT was actually used. */
+
 if ((dat_datctl.control & CTL_JITVERIFY) != 0 && jit_stack == NULL)
-   { PCRE2_JIT_STACK_ASSIGN(compiled_code, jit_callback, jit_stack); }
-#endif
-
+   {
+   PCRE2_JIT_STACK_ASSIGN(compiled_code, jit_callback, NULL);
+   }
 
 /* Loop for global matching */
 
 for (gmatched = 0;; gmatched++)
   {
   int capcount;
-
-#ifdef FIXME
   jit_was_used = FALSE;
-#endif
 
   /* Adjust match_data according to size of offsets required. */
 
@@ -4460,7 +4553,7 @@ for (gmatched = 0;; gmatched++)
     {
     int i;
     uint8_t *nptr;
-    BOOL showallused; 
+    BOOL showallused;
     PCRE2_SIZE *ovector;
     PCRE2_SIZE leftchar = FLD(match_data, leftchar);
     PCRE2_SIZE rightchar = FLD(match_data, rightchar);
@@ -4499,7 +4592,7 @@ for (gmatched = 0;; gmatched++)
     ovector = FLD(match_data, ovector);
     for (i = 0; i < 2*capcount; i += 2)
       {
-      PCRE2_SIZE lleft, lmiddle, lright; 
+      PCRE2_SIZE lleft, lmiddle, lright;
       PCRE2_SIZE start = ovector[i];
       PCRE2_SIZE end = ovector[i+1];
 
@@ -4517,40 +4610,39 @@ for (gmatched = 0;; gmatched++)
         fprintf(outfile, "<unset>\n");
         continue;
         }
-         
+
       /* For the whole matched string, if ALLUSEDTEXT is set, and if the
       leftmost consulted character is before the start of the match or the
       rightmost consulted character is past the end of the match, we want to
       show all consulted characters, and indicate which were lookarounds. */
-         
+
       showallused = i == 0 && (dat_datctl.control & CTL_ALLUSEDTEXT) != 0 &&
-        (leftchar < start || rightchar > end); 
+        (leftchar < start || rightchar > end);
       if (showallused)
-        { 
+        {
         PCHARS(lleft, pp, leftchar, start - leftchar, utf, outfile);
         PCHARS(lmiddle, pp, start, end - start, utf, outfile);
         PCHARS(lright, pp, end, rightchar - end, utf, outfile);
         }
       else
-        {     
+        {
         PCHARSV(pp, start, end - start, utf, outfile);
-        } 
-       
-#ifdef FIXME
-      if (verify_jit && jit_was_used) fprintf(outfile, " (JIT)");
-#endif
+        }
+
+      if ((pat_patctl.control & CTL_JITVERIFY) != 0 && jit_was_used) 
+        fprintf(outfile, " (JIT)");
       fprintf(outfile, "\n");
-       
+
       if (showallused)
         {
-        PCRE2_SIZE j; 
+        PCRE2_SIZE j;
         fprintf(outfile, "    ");
         for (j = 0; j < lleft; j++) fprintf(outfile, "<");
         for (j = 0; j < lmiddle; j++) fprintf(outfile, " ");
         for (j = 0; j < lright; j++) fprintf(outfile, ">");
-        fprintf(outfile, "\n");    
-        }  
- 
+        fprintf(outfile, "\n");
+        }
+
       /* Note: don't use the start/end variables here because we want to
       show the text from what is reported as the end. */
 
@@ -4578,7 +4670,7 @@ for (gmatched = 0;; gmatched++)
     for (i = 0; i < MAXCPYGET && dat_datctl.copy_numbers[i] >= 0; i++)
       {
       int rc;
-      PCRE2_SIZE length; 
+      PCRE2_SIZE length;
       uint32_t copybuffer[256];
       uint32_t n = (uint32_t)(dat_datctl.copy_numbers[i]);
       length = sizeof(copybuffer)/code_unit_size;
@@ -4605,7 +4697,7 @@ for (gmatched = 0;; gmatched++)
       {
       int rc;
       PCRE2_SIZE cnl;
-      PCRE2_SIZE length; 
+      PCRE2_SIZE length;
       uint32_t copybuffer[256];
       int namelen = strlen((const char *)nptr);
       if (namelen == 0) break;
@@ -4644,7 +4736,7 @@ for (gmatched = 0;; gmatched++)
     for (i = 0; i < MAXCPYGET && dat_datctl.get_numbers[i] >= 0; i++)
       {
       int rc;
-      PCRE2_SIZE length; 
+      PCRE2_SIZE length;
       void *gotbuffer;
       uint32_t n = (uint32_t)(dat_datctl.get_numbers[i]);
       PCRE2_SUBSTRING_GET_BYNUMBER(rc, match_data, n, &gotbuffer, &length);
@@ -4670,7 +4762,7 @@ for (gmatched = 0;; gmatched++)
     for (;;)
       {
       PCRE2_SIZE cnl;
-      PCRE2_SIZE length; 
+      PCRE2_SIZE length;
       void *gotbuffer;
       int rc;
       int namelen = strlen((const char *)nptr);
@@ -4754,11 +4846,8 @@ for (gmatched = 0;; gmatched++)
 
     fprintf(outfile, ": ");
     PCHARSV(pp, leftchar, ulen - leftchar, utf, outfile);
-
-#ifdef FIXME
-    if (verify_jit && jit_was_used) fprintf(outfile, " (JIT)");
-#endif
-
+    if ((pat_patctl.control & CTL_JITVERIFY) != 0 && jit_was_used) 
+      fprintf(outfile, " (JIT)");
     fprintf(outfile, "\n");
     break;  /* Out of the /g loop */
     }       /* End of handling partial match */
@@ -4829,11 +4918,8 @@ for (gmatched = 0;; gmatched++)
           fprintf(outfile, ", mark = ");
           PCHARSV(CASTFLD(void *, match_data, mark), 0, -1, utf, outfile);
           }
-
-#ifdef FIXME
-        if (verify_jit && jit_was_used) fprintf(outfile, " (JIT)");
-#endif
-
+        if ((pat_patctl.control & CTL_JITVERIFY) != 0 && jit_was_used) 
+          fprintf(outfile, " (JIT)");
         fprintf(outfile, "\n");
         }
       break;
@@ -5149,8 +5235,6 @@ BOOL showtotaltimes = FALSE;
 BOOL skipping = FALSE;
 char *arg_subject = NULL;
 char *arg_pattern = NULL;
-
-PCRE2_JIT_STACK *jit_stack = NULL;
 
 /* The offsets to the options and control bits fields of the pattern and data
 control blocks must be the same so that common options and controls such as
@@ -5580,6 +5664,11 @@ free((void *)locale_tables);
 PCRE2_MATCH_DATA_FREE(match_data);
 SUB1(pcre2_code_free, compiled_code);
 
+if (jit_stack != NULL)
+  {
+  PCRE2_JIT_STACK_FREE(jit_stack);
+  }
+
 #ifdef SUPPORT_PCRE2_8
 regfree(&preg);
 pcre2_general_context_free_8(general_context8);
@@ -5610,10 +5699,6 @@ pcre2_match_context_free_32(default_dat_context32);
 #if defined(__VMS)
   yield = SS$_NORMAL;  /* Return values via DCL symbols */
 #endif
-
-/* FIXME: temp avoid compiler warnings. */
-
-(void)jit_stack;
 
 return yield;
 }
