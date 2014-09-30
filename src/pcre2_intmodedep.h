@@ -682,6 +682,14 @@ typedef struct compile_block {
   BOOL dupnames;                   /* Duplicate names exist */
 } compile_block;
 
+/* Structure for keeping the properties of the in-memory stack used
+by the JIT matcher. */
+
+typedef struct pcre2_real_jit_stack {
+  pcre2_memctl memctl;
+  void* stack;
+} pcre2_real_jit_stack;
+
 /* Structure for keeping a chain of heap blocks used for saving ovectors
 during pattern recursion when the ovector is larger than can be saved on
 the system stack. */

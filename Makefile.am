@@ -271,8 +271,6 @@ COMMON_SOURCES = \
   src/pcre2_internal.h \
   src/pcre2_intmodedep.h \
   src/pcre2_jit_compile.c \
-  src/pcre2_jit_match.c \
-  src/pcre2_jit_misc.c \
   src/pcre2_maketables.c \
   src/pcre2_match.c \
   src/pcre2_match_data.c \

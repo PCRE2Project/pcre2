@@ -45,6 +45,68 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #include "pcre2_internal.h"
 
+#ifdef SUPPORT_JIT
+
+/* All-in-one: Since we use the JIT compiler only from here,
+we just include it. This way we don't need to touch the build
+system files. */
+
+#define SLJIT_CONFIG_AUTO 1
+#define SLJIT_CONFIG_STATIC 1
+#define SLJIT_VERBOSE 0
+#define SLJIT_DEBUG 0
+
+#define SLJIT_MALLOC(size, allocator_data) pcre2_jit_malloc(size, allocator_data)
+#define SLJIT_FREE(ptr, allocator_data) pcre2_jit_free(ptr, allocator_data)
+
+static void * pcre2_jit_malloc(size_t size, void *allocator_data)
+{
+pcre2_memctl *allocator = ((pcre2_memctl*)allocator_data);
+return allocator->malloc(size, allocator->memory_data);
+}
+
+static void pcre2_jit_free(void *ptr, void *allocator_data)
+{
+pcre2_memctl *allocator = ((pcre2_memctl*)allocator_data);
+return allocator->free(ptr, allocator->memory_data);
+}
+
+#include "sljit/sljitLir.c"
+
+#if defined SLJIT_CONFIG_UNSUPPORTED && SLJIT_CONFIG_UNSUPPORTED
+#error Unsupported architecture
+#endif
+
+/* Defines for debugging purposes. */
+
+/* 1 - Use unoptimized capturing brackets.
+   2 - Enable capture_last_ptr (includes option 1). */
+/* #define DEBUG_FORCE_UNOPTIMIZED_CBRAS 2 */
+
+/* 1 - Always have a control head. */
+/* #define DEBUG_FORCE_CONTROL_HEAD 1 */
+
+/* Allocate memory for the regex stack on the real machine stack.
+Fast, but limited size. */
+#define MACHINE_STACK_SIZE 32768
+
+/* Growth rate for stack allocated by the OS. Should be the multiply
+of page size. */
+#define STACK_GROWTH_RATE 8192
+
+/* Enable to check that the allocation could destroy temporaries. */
+#if defined SLJIT_DEBUG && SLJIT_DEBUG
+#define DESTROY_REGISTERS 1
+#endif
+
+
+
+
+
+
+
+
+#endif
 
 /*************************************************
 *        JIT compile a Regular Expression        *
@@ -63,7 +125,7 @@ Returns:        nothing
 /* FIXME: this is currently a placeholder function */
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
-pcre2_jit_compile(pcre2_code *code, uint32_t options)
+pcre2_jit_compile(pcre2_code *code, uint32_t options, pcre2_match_context *mcontext)
 {
 #ifndef SUPPORT_JIT
 
@@ -80,5 +142,13 @@ return PCRE2_ERROR_JIT_BADOPTION;
 
 #endif  /* SUPPORT_JIT */
 }
+
+/* JIT compiler uses an all-in-one approach. This improves security,
+   since the code generator functions are not exported. */
+
+#define INCLUDED_FROM_PCRE2_JIT_COMPILE
+
+#include "pcre2_jit_match.c"
+#include "pcre2_jit_misc.c"
 
 /* End of pcre2_jit_compile.c */

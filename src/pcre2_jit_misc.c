@@ -39,11 +39,9 @@ POSSIBILITY OF SUCH DAMAGE.
 */
 
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
+#ifndef INCLUDED_FROM_PCRE2_JIT_COMPILE
+#error This file must be included from pcre2_jit_compile.c.
 #endif
-
-#include "pcre2_internal.h"
 
 
 /* FIXME: these are dummy functions */
@@ -64,7 +62,7 @@ pcre2_jit_free_unused_memory(pcre2_general_context *gcontext)
 #else  /* SUPPORT_JIT */
 
 /* Dummy code */
-gcontext=gcontext;
+sljit_free_unused_memory_exec();
 
 #endif  /* SUPPORT_JIT */
 }
@@ -88,11 +86,18 @@ return NULL;
 
 #else  /* SUPPORT_JIT */
 
-/* Dummy code */
-gcontext=gcontext;
-startsize=startsize;
-maxsize=maxsize;
-return NULL;
+pcre2_jit_stack *jit_stack;
+
+if (startsize < 1 || maxsize < 1)
+  return NULL;
+if (startsize > maxsize)
+  startsize = maxsize;
+startsize = (startsize + STACK_GROWTH_RATE - 1) & ~(STACK_GROWTH_RATE - 1);
+maxsize = (maxsize + STACK_GROWTH_RATE - 1) & ~(STACK_GROWTH_RATE - 1);
+
+jit_stack = PRIV(memctl_malloc)(sizeof(pcre2_real_jit_stack), (pcre2_memctl *)gcontext);
+jit_stack->stack = sljit_allocate_stack(startsize, maxsize, &jit_stack->memctl);
+return jit_stack;
 
 #endif
 }
@@ -137,7 +142,12 @@ pcre2_jit_stack_free(pcre2_jit_stack *jit_stack)
 #else  /* SUPPORT_JIT */
 
 /* Dummy code */
-jit_stack=jit_stack;
+
+if (jit_stack != NULL)
+  {
+  sljit_free_stack((struct sljit_stack *)(jit_stack->stack), &jit_stack->memctl);
+  jit_stack->memctl.free(jit_stack, jit_stack->memctl.memory_data);
+  }
 
 #endif  /* SUPPORT_JIT */
 }
