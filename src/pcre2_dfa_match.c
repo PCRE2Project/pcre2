@@ -85,8 +85,7 @@ in others, so I abandoned this code. */
 #define PUBLIC_DFA_MATCH_OPTIONS \
   (PCRE2_ANCHORED|PCRE2_NOTBOL|PCRE2_NOTEOL|PCRE2_NOTEMPTY| \
    PCRE2_NOTEMPTY_ATSTART|PCRE2_NO_UTF_CHECK|PCRE2_PARTIAL_HARD| \
-   PCRE2_PARTIAL_SOFT|PCRE2_DFA_SHORTEST|PCRE2_DFA_RESTART| \
-   PCRE2_NO_START_OPTIMIZE)
+   PCRE2_PARTIAL_SOFT|PCRE2_DFA_SHORTEST|PCRE2_DFA_RESTART)
 
 
 /*************************************************
@@ -3319,12 +3318,12 @@ for (;;)
 
   /* There are some optimizations that avoid running the match if a known
   starting point is not found, or if a known later code unit is not present.
-  However, there is an option (settable at compile or match time) that disables
+  However, there is an option (settable at compile time) that disables
   these, for testing and for ensuring that all callouts do actually occur. 
-  The must also be avoided when restarting a DFA match. */
+  The optimizations must also be avoided when restarting a DFA match. */
 
-  if (((options | re->overall_options) &
-       (PCRE2_NO_START_OPTIMIZE|PCRE2_DFA_RESTART)) == 0)
+  if ((re->overall_options & PCRE2_NO_START_OPTIMIZE) == 0 &&
+      (options & PCRE2_DFA_RESTART) == 0)
     {
     PCRE2_SPTR save_end_subject = end_subject;
 

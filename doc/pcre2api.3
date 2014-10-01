@@ -930,9 +930,8 @@ documentation).
 .P
 For those options that can be different in different parts of the pattern, the
 contents of the \fIoptions\fP argument specifies their settings at the start of
-compilation. The PCRE2_ANCHORED, PCRE2_NO_UTF_CHECK, and
-PCRE2_NO_START_OPTIMIZE options can be set at the time of matching as well as
-at compile time.
+compilation. The PCRE2_ANCHORED and PCRE2_NO_UTF_CHECK options can be set at
+the time of matching as well as at compile time.
 .P
 Other, less frequently required compile-time parameters (for example, the 
 newline setting) can be provided in a compile context (as described
@@ -1150,17 +1149,52 @@ purposes.
 .sp
   PCRE2_NO_START_OPTIMIZE
 .sp
-This is an option that acts at matching time; that is, it is really an option
-for \fBpcre2_match()\fP or \fBpcre_dfa_match()\fP. If it is set at compile
-time, it is remembered with the compiled pattern and assumed at matching time.
-This is necessary if you want to use JIT execution, because the JIT compiler
-needs to know whether or not this option is set. For details, see the
-discussion of PCRE2_NO_START_OPTIMIZE in the section on \fBpcre2_match()\fP 
-options
-.\" HTML <a href="#matchoptions">
-.\" </a>
-below.
-.\"
+This is an option whose main effect is at matching time. It does not change
+what \fBpcre2_compile()\fP generates, but it does affect the output of the JIT
+compiler.
+.P
+There are a number of optimizations that may occur at the start of a match, in
+order to speed up the process. For example, if it is known that an unanchored
+match must start with a specific character, the matching code searches the
+subject for that character, and fails immediately if it cannot find it, without
+actually running the main matching function. This means that a special item
+such as (*COMMIT) at the start of a pattern is not considered until after a
+suitable starting point for the match has been found. Also, when callouts or
+(*MARK) items are in use, these "start-up" optimizations can cause them to be
+skipped if the pattern is never actually used. The start-up optimizations are
+in effect a pre-scan of the subject that takes place before the pattern is run.
+.P
+The PCRE2_NO_START_OPTIMIZE option disables the start-up optimizations,
+possibly causing performance to suffer, but ensuring that in cases where the
+result is "no match", the callouts do occur, and that items such as (*COMMIT)
+and (*MARK) are considered at every possible starting position in the subject
+string.
+.P
+Setting PCRE2_NO_START_OPTIMIZE may change the outcome of a matching operation.
+Consider the pattern
+.sp
+  (*COMMIT)ABC
+.sp
+When this is compiled, PCRE2 records the fact that a match must start with the
+character "A". Suppose the subject string is "DEFABC". The start-up
+optimization scans along the subject, finds "A" and runs the first match
+attempt from there. The (*COMMIT) item means that the pattern must match the
+current starting position, which in this case, it does. However, if the same
+match is run with PCRE2_NO_START_OPTIMIZE set, the initial scan along the
+subject string does not happen. The first match attempt is run starting from
+"D" and when this fails, (*COMMIT) prevents any further matches being tried, so
+the overall result is "no match". There are also other start-up optimizations.
+For example, a minimum length for the subject may be recorded. Consider the
+pattern
+.sp
+  (*MARK:A)(X|Y)
+.sp
+The minimum length for a match is one character. If the subject is "ABC", there
+will be attempts to match "ABC", "BC", and "C". An attempt to match an empty 
+string at the end of the subject does not take place, because PCRE2 knows that
+the subject is now too short, and so the (*MARK) is never encountered. In this
+case, the optimization does not affect the overall match result, which is still
+"no match", but it does affect the auxiliary information that is returned.
 .sp
   PCRE2_NO_UTF_CHECK
 .sp
@@ -1787,10 +1821,9 @@ pattern does not require the match to be at the start of the subject.
 .rs
 .sp
 The unused bits of the \fIoptions\fP argument for \fBpcre2_match()\fP must be
-zero. The only bits that may be set are PCRE2_ANCHORED, 
-PCRE2_NOTBOL, PCRE2_NOTEOL, PCRE2_NOTEMPTY, PCRE2_NOTEMPTY_ATSTART,
-PCRE2_NO_START_OPTIMIZE, PCRE2_NO_UTF_CHECK, PCRE2_PARTIAL_HARD, and
-PCRE2_PARTIAL_SOFT. Their action is described below.
+zero. The only bits that may be set are PCRE2_ANCHORED, PCRE2_NOTBOL,
+PCRE2_NOTEOL, PCRE2_NOTEMPTY, PCRE2_NOTEMPTY_ATSTART, PCRE2_NO_UTF_CHECK,
+PCRE2_PARTIAL_HARD, and PCRE2_PARTIAL_SOFT. Their action is described below.
 .P
 If the pattern was successfully processed by the just-in-time (JIT) compiler,
 the only supported options for matching using the JIT code are PCRE2_NOTBOL,
@@ -1840,54 +1873,6 @@ valid, so PCRE2 searches further into the string for occurrences of "a" or "b".
 This is like PCRE2_NOTEMPTY, except that an empty string match that is not at
 the start of the subject is permitted. If the pattern is anchored, such a match
 can occur only if the pattern contains \eK.
-.sp
-  PCRE2_NO_START_OPTIMIZE
-.sp
-There are a number of optimizations that \fBpcre2_match()\fP uses at the start
-of a match, in order to speed up the process. For example, if it is known that
-an unanchored match must start with a specific character, it searches the
-subject for that character, and fails immediately if it cannot find it, without
-actually running the main matching function. This means that a special item
-such as (*COMMIT) at the start of a pattern is not considered until after a
-suitable starting point for the match has been found. Also, when callouts or
-(*MARK) items are in use, these "start-up" optimizations can cause them to be
-skipped if the pattern is never actually used. The start-up optimizations are
-in effect a pre-scan of the subject that takes place before the pattern is run.
-.P
-The PCRE2_NO_START_OPTIMIZE option disables the start-up optimizations,
-possibly causing performance to suffer, but ensuring that in cases where the
-result is "no match", the callouts do occur, and that items such as (*COMMIT)
-and (*MARK) are considered at every possible starting position in the subject
-string. If PCRE2_NO_START_OPTIMIZE is set at compile time, it cannot be unset
-at matching time. The use of PCRE2_NO_START_OPTIMIZE at matching time (that is,
-passing it to \fBpcre2_match()\fP) disables JIT execution; in this situation,
-matching is always done using interpretively.
-.P
-Setting PCRE2_NO_START_OPTIMIZE can change the outcome of a matching operation.
-Consider the pattern
-.sp
-  (*COMMIT)ABC
-.sp
-When this is compiled, PCRE2 records the fact that a match must start with the
-character "A". Suppose the subject string is "DEFABC". The start-up
-optimization scans along the subject, finds "A" and runs the first match
-attempt from there. The (*COMMIT) item means that the pattern must match the
-current starting position, which in this case, it does. However, if the same
-match is run with PCRE2_NO_START_OPTIMIZE set, the initial scan along the
-subject string does not happen. The first match attempt is run starting from
-"D" and when this fails, (*COMMIT) prevents any further matches being tried, so
-the overall result is "no match". There are also other start-up optimizations.
-For example, a minimum length for the subject may be recorded. Consider the
-pattern
-.sp
-  (*MARK:A)(X|Y)
-.sp
-The minimum length for a match is one character. If the subject is "ABC", there
-will be attempts to match "ABC", "BC", and "C". An attempt to match an empty 
-string at the end of the subject does not take place, because PCRE2 knows that
-the subject is now too short, and so the (*MARK) is never encountered. In this
-case, the optimization does not affect the overall match result, which is still
-"no match", but it does affect the auxiliary information that is returned.
 .sp
   PCRE2_NO_UTF_CHECK
 .sp
@@ -2550,10 +2535,9 @@ Here is an example of a simple call to \fBpcre2_dfa_match()\fP:
 The unused bits of the \fIoptions\fP argument for \fBpcre2_dfa_match()\fP must
 be zero. The only bits that may be set are PCRE2_ANCHORED, PCRE2_NOTBOL,
 PCRE2_NOTEOL, PCRE2_NOTEMPTY, PCRE2_NOTEMPTY_ATSTART, PCRE2_NO_UTF_CHECK,
-PCRE2_NO_START_OPTIMIZE, PCRE2_PARTIAL_HARD, PCRE2_PARTIAL_SOFT,
-PCRE2_DFA_SHORTEST, and PCRE2_DFA_RESTART. All but the last four of these are
-exactly the same as for \fBpcre2_match()\fP, so their description is not
-repeated here.
+PCRE2_PARTIAL_HARD, PCRE2_PARTIAL_SOFT, PCRE2_DFA_SHORTEST, and
+PCRE2_DFA_RESTART. All but the last four of these are exactly the same as for
+\fBpcre2_match()\fP, so their description is not repeated here.
 .sp
   PCRE2_PARTIAL_HARD
   PCRE2_PARTIAL_SOFT

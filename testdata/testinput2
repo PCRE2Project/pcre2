@@ -2491,12 +2491,15 @@ a random value. /Ix
 /xyz/auto_callout
   xyz 
   abcxyz 
-  abcxyz\=no_start_optimize
   ** Failers 
   abc
-  abc\=no_start_optimize
   abcxypqr  
-  abcxypqr\=no_start_optimize
+  
+/xyz/auto_callout,no_start_optimize
+  abcxyz 
+  ** Failers 
+  abc
+  abcxypqr  
   
 /(*NO_START_OPT)xyz/auto_callout
   abcxyz
@@ -2987,8 +2990,10 @@ a random value. /Ix
 
 /(*COMMIT)ABC/
     ABCDEFG
+    
+/(*COMMIT)ABC/no_start_optimize
     ** Failers
-    DEFGABC\=no_start_optimize
+    DEFGABC
     
 /^(ab (c+(*THEN)cd) | xyz)/x
     abcccd  

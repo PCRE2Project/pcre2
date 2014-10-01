@@ -4349,12 +4349,15 @@
 /xyz/auto_callout
   xyz 
   abcxyz 
-  abcxyz\=no_start_optimize
   ** Failers 
   abc
-  abc\=no_start_optimize
   abcxypqr  
-  abcxypqr\=no_start_optimize
+
+/xyz/auto_callout,no_start_optimize
+  abcxyz 
+  ** Failers 
+  abc
+  abcxypqr  
 
 /(*NO_START_OPT)xyz/auto_callout
   abcxyz 
@@ -4439,20 +4442,14 @@
 /(abc|def|xyz)/I
     terhjk;abcdaadsfe
     the quick xyz brown fox 
-    terhjk;abcdaadsfe\=no_start_optimize
-    the quick xyz brown fox\=no_start_optimize
     ** Failers
     thejk;adlfj aenjl;fda asdfasd ehj;kjxyasiupd
-    thejk;adlfj aenjl;fda asdfasd ehj;kjxyasiupd\=no_start_optimize
 
-/(abc|def|xyz)/I
+/(abc|def|xyz)/I,no_start_optimize
     terhjk;abcdaadsfe
-    the quick xyz brown fox 
-    terhjk;abcdaadsfe\=no_start_optimize
-    the quick xyz brown fox\=no_start_optimize
+    the quick xyz brown fox
     ** Failers
     thejk;adlfj aenjl;fda asdfasd ehj;kjxyasiupd
-    thejk;adlfj aenjl;fda asdfasd ehj;kjxyasiupd\=no_start_optimize
 
 /abcd*/aftertext
     xxxxabcd\=ps

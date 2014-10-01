@@ -107,9 +107,8 @@ or the JIT compiler was not able to handle the pattern.
 .sp
 The \fBpcre2_match()\fP options that are supported for JIT matching are
 PCRE2_NOTBOL, PCRE2_NOTEOL, PCRE2_NOTEMPTY, PCRE2_NOTEMPTY_ATSTART,
-PCRE2_NO_UTF_CHECK, PCRE2_PARTIAL_HARD, and PCRE2_PARTIAL_SOFT. The options 
-that are not supported at match time are PCRE2_ANCHORED and
-PCRE2_NO_START_OPTIMIZE, though they are supported if given at compile time.
+PCRE2_NO_UTF_CHECK, PCRE2_PARTIAL_HARD, and PCRE2_PARTIAL_SOFT. The
+PCRE2_ANCHORED option is not supported at match time.
 .P
 The only unsupported pattern items are \eC (match a single data unit) when
 running in a UTF mode, and a callout immediately before an assertion condition

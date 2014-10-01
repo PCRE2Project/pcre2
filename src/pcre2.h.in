@@ -86,8 +86,7 @@ passed. Put these bits at the most significant end of the options word so
 others can be added next to them */
 
 #define PCRE2_ANCHORED            0x80000000u
-#define PCRE2_NO_START_OPTIMIZE   0x40000000u
-#define PCRE2_NO_UTF_CHECK        0x20000000u
+#define PCRE2_NO_UTF_CHECK        0x40000000u
 
 /* Other options that can be passed to pcre2_compile(). They may affect
 compilation, JIT compilation, and/or interpretive execution. The following tags
@@ -95,7 +94,7 @@ indicate which:
 
 C   alters what is compiled
 J   alters what JIT compiles
-E   is inspected during pcre2_match() execution
+M   is inspected during pcre2_match() execution
 D   is inspected during pcre2_dfa_match() execution
 */
 
@@ -103,20 +102,21 @@ D   is inspected during pcre2_dfa_match() execution
 #define PCRE2_ALT_BSUX            0x00000002u  /* C       */
 #define PCRE2_AUTO_CALLOUT        0x00000004u  /* C       */
 #define PCRE2_CASELESS            0x00000008u  /* C       */
-#define PCRE2_DOLLAR_ENDONLY      0x00000010u  /*   J E D */
+#define PCRE2_DOLLAR_ENDONLY      0x00000010u  /*   J M D */
 #define PCRE2_DOTALL              0x00000020u  /* C       */
 #define PCRE2_DUPNAMES            0x00000040u  /* C       */
 #define PCRE2_EXTENDED            0x00000080u  /* C       */
-#define PCRE2_FIRSTLINE           0x00000100u  /*   J E D */
-#define PCRE2_MATCH_UNSET_BACKREF 0x00000200u  /* C J E   */
+#define PCRE2_FIRSTLINE           0x00000100u  /*   J M D */
+#define PCRE2_MATCH_UNSET_BACKREF 0x00000200u  /* C J M   */
 #define PCRE2_MULTILINE           0x00000400u  /* C       */
 #define PCRE2_NEVER_UCP           0x00000800u  /* C       */
 #define PCRE2_NEVER_UTF           0x00001000u  /* C       */
 #define PCRE2_NO_AUTO_CAPTURE     0x00002000u  /* C       */
 #define PCRE2_NO_AUTO_POSSESS     0x00004000u  /* C       */
-#define PCRE2_UCP                 0x00008000u  /* C J E D */
-#define PCRE2_UNGREEDY            0x00010000u  /* C       */
-#define PCRE2_UTF                 0x00020000u  /* C J E D */
+#define PCRE2_NO_START_OPTIMIZE   0x00008000u  /*   J M D */
+#define PCRE2_UCP                 0x00010000u  /* C J M D */
+#define PCRE2_UNGREEDY            0x00020000u  /* C       */
+#define PCRE2_UTF                 0x00040000u  /* C J M D */
 
 /* These are for pcre2_jit_compile(). */
 

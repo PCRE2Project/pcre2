@@ -6882,7 +6882,15 @@ No match
  +2    ^ ^     z
  +3    ^  ^    
  0: xyz
-  abcxyz\=no_start_optimize
+  ** Failers 
+No match
+  abc
+No match
+  abcxypqr  
+No match
+
+/xyz/auto_callout,no_start_optimize
+  abcxyz 
 --->abcxyz
  +0 ^          x
  +0  ^         x
@@ -6893,10 +6901,20 @@ No match
  +3    ^  ^    
  0: xyz
   ** Failers 
+--->** Failers
+ +0 ^              x
+ +0  ^             x
+ +0   ^            x
+ +0    ^           x
+ +0     ^          x
+ +0      ^         x
+ +0       ^        x
+ +0        ^       x
+ +0         ^      x
+ +0          ^     x
+ +0           ^    x
 No match
   abc
-No match
-  abc\=no_start_optimize
 --->abc
  +0 ^       x
  +0  ^      x
@@ -6904,8 +6922,6 @@ No match
  +0    ^    x
 No match
   abcxypqr  
-No match
-  abcxypqr\=no_start_optimize
 --->abcxypqr
  +0 ^            x
  +0  ^           x
@@ -7092,34 +7108,23 @@ Subject length lower bound = 3
  0: abc
     the quick xyz brown fox 
  0: xyz
-    terhjk;abcdaadsfe\=no_start_optimize
- 0: abc
-    the quick xyz brown fox\=no_start_optimize
- 0: xyz
     ** Failers
 No match
     thejk;adlfj aenjl;fda asdfasd ehj;kjxyasiupd
 No match
-    thejk;adlfj aenjl;fda asdfasd ehj;kjxyasiupd\=no_start_optimize
-No match
 
-/(abc|def|xyz)/I
+/(abc|def|xyz)/I,no_start_optimize
 Capturing subpattern count = 1
+Options: no_start_optimize
 Starting code units: a d x 
 Subject length lower bound = 3
     terhjk;abcdaadsfe
  0: abc
-    the quick xyz brown fox 
- 0: xyz
-    terhjk;abcdaadsfe\=no_start_optimize
- 0: abc
-    the quick xyz brown fox\=no_start_optimize
+    the quick xyz brown fox
  0: xyz
     ** Failers
 No match
     thejk;adlfj aenjl;fda asdfasd ehj;kjxyasiupd
-No match
-    thejk;adlfj aenjl;fda asdfasd ehj;kjxyasiupd\=no_start_optimize
 No match
 
 /abcd*/aftertext

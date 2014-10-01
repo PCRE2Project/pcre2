@@ -55,7 +55,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #define PUBLIC_MATCH_OPTIONS \
   (PCRE2_ANCHORED|PCRE2_NOTBOL|PCRE2_NOTEOL|PCRE2_NOTEMPTY| \
    PCRE2_NOTEMPTY_ATSTART|PCRE2_NO_UTF_CHECK|PCRE2_PARTIAL_HARD| \
-   PCRE2_PARTIAL_SOFT|PCRE2_NO_START_OPTIMIZE)
+   PCRE2_PARTIAL_SOFT)
    
 #define PUBLIC_JIT_MATCH_OPTIONS \
    (PCRE2_NO_UTF_CHECK|PCRE2_NOTBOL|PCRE2_NOTEOL|PCRE2_NOTEMPTY|\
@@ -6687,10 +6687,10 @@ for(;;)
 
   /* There are some optimizations that avoid running the match if a known
   starting point is not found, or if a known later code unit is not present.
-  However, there is an option (settable at compile or match time) that disables
-  these, for testing and for ensuring that all callouts do actually occur. */
+  However, there is an option (settable at compile time) that disables these,
+  for testing and for ensuring that all callouts do actually occur. */
 
-  if (((options | re->overall_options) & PCRE2_NO_START_OPTIMIZE) == 0)
+  if ((re->overall_options & PCRE2_NO_START_OPTIMIZE) == 0)
     {
     PCRE2_SPTR save_end_subject = end_subject;
 
