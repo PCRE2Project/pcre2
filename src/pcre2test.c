@@ -296,8 +296,7 @@ static const char *newlines[] = {
 
 /* Modifier types and applicability */
 
-enum { MOD_CTB,    /* Applies to a compile or a match context */
-       MOD_CTC,    /* Applies to a compile context */
+enum { MOD_CTC,    /* Applies to a compile context */
        MOD_CTM,    /* Applies to a match context */
        MOD_PAT,    /* Applies to a pattern */
        MOD_PATP,   /* Ditto, OK for Perl test */
@@ -424,7 +423,7 @@ static modstruct modlist[] = {
   { "anchored",            MOD_PD,   MOD_OPT, PCRE2_ANCHORED,            PD(options) },
   { "auto_callout",        MOD_PAT,  MOD_OPT, PCRE2_AUTO_CALLOUT,        PO(options) },
   { "bincode",             MOD_PAT,  MOD_CTL, CTL_BINCODE,               PO(control) },
-  { "bsr",                 MOD_CTB,  MOD_BSR, MO(bsr_convention),        CO(bsr_convention) },
+  { "bsr",                 MOD_CTC,  MOD_BSR, 0,                         CO(bsr_convention) },
   { "callout_capture",     MOD_DAT,  MOD_CTL, CTL_CALLOUT_CAPTURE,       DO(control) },
   { "callout_data",        MOD_DAT,  MOD_INS, 0,                         DO(callout_data) },
   { "callout_fail",        MOD_DAT,  MOD_IN2, 0,                         DO(cfail) },
@@ -458,7 +457,7 @@ static modstruct modlist[] = {
   { "multiline",           MOD_PATP, MOD_OPT, PCRE2_MULTILINE,           PO(options) },
   { "never_ucp",           MOD_PAT,  MOD_OPT, PCRE2_NEVER_UCP,           PO(options) },
   { "never_utf",           MOD_PAT,  MOD_OPT, PCRE2_NEVER_UTF,           PO(options) },
-  { "newline",             MOD_CTB,  MOD_NL,  MO(newline_convention),    CO(newline_convention) },
+  { "newline",             MOD_CTC,  MOD_NL,  0,                         CO(newline_convention) },
   { "no_auto_capture",     MOD_PAT,  MOD_OPT, PCRE2_NO_AUTO_CAPTURE,     PO(options) },
   { "no_auto_possess",     MOD_PATP, MOD_OPT, PCRE2_NO_AUTO_POSSESS,     PO(options) },
   { "no_start_optimize",   MOD_PATP, MOD_OPT, PCRE2_NO_START_OPTIMIZE,   PO(options) },
@@ -2529,16 +2528,10 @@ if (restrict_for_perl_test) switch(m->which)
 
 switch (m->which)
   {
-  case MOD_CTB:  /* Compile or match context modifier */
   case MOD_CTC:  /* Compile context modifier */
   if (ctx == CTX_DEFPAT) field = PTR(default_pat_context);
     else if (ctx == CTX_PAT) field = PTR(pat_context);
-  if (field != NULL || m->which == MOD_CTC) break;
-
-  /* Fall through for something that can also be in a match context. In this
-  case the offset is taken from the other field. */
-
-  offset = (PCRE2_SIZE)(m->value);
+  break;   
 
   case MOD_CTM:  /* Match context modifier */
   if (ctx == CTX_DEFDAT) field = PTR(default_dat_context);

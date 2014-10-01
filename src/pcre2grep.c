@@ -3013,7 +3013,7 @@ if (newline_arg != NULL)
     if (strcmpic(newline_arg, newlines[endlinetype]) == 0) break;
     }
   if (endlinetype < (int)(sizeof(newlines)/sizeof(char *)))
-    pcre2_set_newline_compile(compile_context, endlinetype);
+    pcre2_set_newline(compile_context, endlinetype);
   else        
     {
     fprintf(stderr, "pcre2grep: Invalid newline specifier \"%s\"\n", 

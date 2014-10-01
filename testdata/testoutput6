@@ -6226,105 +6226,114 @@ Partial match: 123
     Content-Type:xxxyyyz
  0: Content-Type:xxxyyyz
 
-/^abc/m
+/^abc/Im,newline=lf
+Capturing subpattern count = 0
+Options: multiline
+Forced newline is LF
+First code unit at start or follows newline
+Last code unit = 'c'
+Subject length lower bound = 3
     xyz\nabc
  0: abc
-    xyz\nabc\=newline=lf
- 0: abc
-    xyz\r\nabc\=newline=lf
- 0: abc
-    xyz\rabc\=newline=cr
- 0: abc
-    xyz\r\nabc\=newline=crlf
- 0: abc
-    ** Failers 
-No match
-    xyz\nabc\=newline=cr
-No match
-    xyz\r\nabc\=newline=cr
-No match
-    xyz\nabc\=newline=crlf
-No match
-    xyz\rabc\=newline=crlf
-No match
-    xyz\rabc\=newline=lf
-No match
-    
-/abc$/m,newline=lf
-    xyzabc
- 0: abc
-    xyzabc\n 
- 0: abc
-    xyzabc\npqr 
- 0: abc
-    xyzabc\r\=newline=cr
- 0: abc
-    xyzabc\rpqr\=newline=cr
- 0: abc
-    xyzabc\r\n\=newline=crlf
- 0: abc
-    xyzabc\r\npqr\=newline=crlf
+    xyz\r\nabc
  0: abc
     ** Failers
 No match
-    xyzabc\r 
+    xyz\rabc
 No match
-    xyzabc\rpqr 
+    xyzabc\r
 No match
-    xyzabc\r\n 
+    xyzabc\rpqr
 No match
-    xyzabc\r\npqr 
+    xyzabc\r\n
+No match
+    xyzabc\r\npqr
+No match
+
+/^abc/Im,newline=crlf
+Capturing subpattern count = 0
+Options: multiline
+Forced newline is CRLF
+First code unit at start or follows newline
+Last code unit = 'c'
+Subject length lower bound = 3
+    xyz\r\nabclf>
+ 0: abc
+    ** Failers
+No match
+    xyz\nabclf
+No match
+    xyz\rabclf
 No match
     
-/^abc/m,newline=cr
-    xyz\rabcdef
+/^abc/Im,newline=cr
+Capturing subpattern count = 0
+Options: multiline
+Forced newline is CR
+First code unit at start or follows newline
+Last code unit = 'c'
+Subject length lower bound = 3
+    xyz\rabc
  0: abc
-    xyz\nabcdef\=newline=lf
- 0: abc
-    ** Failers  
+    ** Failers
 No match
-    xyz\nabcdef
+    xyz\nabc
 No match
-       
-/^abc/m,newline=lf
-    xyz\nabcdef
- 0: abc
-    xyz\rabcdef\=newline=cr
- 0: abc
-    ** Failers  
+    xyz\r\nabc
 No match
-    xyz\rabcdef
-No match
-       
-/^abc/m,newline=crlf
-    xyz\r\nabcdef
- 0: abc
-    xyz\rabcdef\=newline=cr
- 0: abc
-    ** Failers  
-No match
-    xyz\rabcdef
-No match
-    
-/.*/newline=lf
+
+/.*/I,newline=lf
+Capturing subpattern count = 0
+May match empty string
+Forced newline is LF
+First code unit at start or follows newline
+Subject length lower bound = 0
     abc\ndef
  0: abc
     abc\rdef
  0: abc\x0ddef
     abc\r\ndef
  0: abc\x0d
-    abc\ndef\=newline=cr
+
+/.*/I,newline=cr
+Capturing subpattern count = 0
+May match empty string
+Forced newline is CR
+First code unit at start or follows newline
+Subject length lower bound = 0
+    abc\ndef
  0: abc\x0adef
-    abc\rdef\=newline=cr
+    abc\rdef
  0: abc
-    abc\r\ndef\=newline=cr
+    abc\r\ndef
  0: abc
-    abc\ndef\=newline=crlf
+
+/.*/I,newline=crlf
+Capturing subpattern count = 0
+May match empty string
+Forced newline is CRLF
+First code unit at start or follows newline
+Subject length lower bound = 0
+    abc\ndef
  0: abc\x0adef
-    abc\rdef\=newline=crlf
+    abc\rdef
  0: abc\x0ddef
-    abc\r\ndef\=newline=crlf
+    abc\r\ndef
  0: abc
+
+/\w+(.)(.)?def/Is
+Capturing subpattern count = 2
+Options: dotall
+Starting code units: 0 1 2 3 4 5 6 7 8 9 A B C D E F G H I J K L M N O P 
+  Q R S T U V W X Y Z _ a b c d e f g h i j k l m n o p q r s t u v w x y z 
+Last code unit = 'f'
+Subject length lower bound = 5
+    abc\ndef
+ 0: abc\x0adef
+    abc\rdef
+ 0: abc\x0ddef
+    abc\r\ndef
+ 0: abc\x0d\x0adef
 
 /\w+(.)(.)?def/s
     abc\ndef
@@ -6397,17 +6406,35 @@ No match
 /^a.b/newline=lf
     a\rb
  0: a\x0db
-    a\nb\=newline=cr
- 0: a\x0ab
     ** Failers
 No match
     a\nb
 No match
-    a\nb\=newline=any
+
+/^a.b/newline=cr
+    a\nb
+ 0: a\x0ab
+    ** Failers
 No match
-    a\rb\=newline=cr
+    a\rb
 No match
-    a\rb\=newline=any
+
+/^a.b/newline=anycrlf
+    a\x85b
+ 0: a\x85b
+    ** Failers
+No match
+    a\rb
+No match
+
+/^a.b/newline=any
+    ** Failers
+No match
+    a\nb
+No match
+    a\rb
+No match
+    a\x85b
 No match
 
 /^abc./gmx,newline=any
@@ -6718,12 +6745,6 @@ Subject length lower bound = 3
  0: a\x85b
     a\x0bb     
  0: a\x0bb
-    ** Failers 
-No match
-    a\x85b\=bsr=anycrlf
-No match
-    a\x0bb\=bsr=anycrlf
-No match
     
 /a\R?b/I,bsr=anycrlf
 Capturing subpattern count = 0
@@ -6760,12 +6781,6 @@ Subject length lower bound = 2
  0: a\x85b
     a\x0bb     
  0: a\x0bb
-    ** Failers 
-No match
-    a\x85b\=bsr=anycrlf
-No match
-    a\x0bb\=bsr=anycrlf
-No match
     
 /a\R{2,4}b/I,bsr=anycrlf
 Capturing subpattern count = 0
@@ -6805,10 +6820,6 @@ No match
     ** Failers 
 No match
     a\r\r\r\r\rb 
-No match
-    a\x85\x85b\=bsr=anycrlf
-No match
-    a\x0b\0bb\=bsr=anycrlf
 No match
     
 /a(?!)|\wbc/

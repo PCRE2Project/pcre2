@@ -6346,7 +6346,6 @@ pcre2_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
   pcre2_match_context *mcontext)
 {
 int rc;
-int newline;
 int ocount;
 
 const uint8_t *start_bits = NULL;
@@ -6482,8 +6481,7 @@ an unsupported option is set or if JIT returns BADOPTION (which means that the
 selected normal or partial matching mode was not compiled). */
 
 #ifdef SUPPORT_JIT
-if (re->executable_jit != NULL && (options & ~PUBLIC_JIT_MATCH_OPTIONS) == 0 &&
-    mcontext->bsr_convention == 0 && mcontext->newline_convention == 0)
+if (re->executable_jit != NULL && (options & ~PUBLIC_JIT_MATCH_OPTIONS) == 0)
   {
   rc = pcre2_jit_match(code, subject, length, start_offset, options,
     match_data, mcontext, NULL);
@@ -6553,18 +6551,11 @@ mb->lcc = re->tables + lcc_offset;
 mb->fcc = re->tables + fcc_offset;
 mb->ctypes = re->tables + ctypes_offset;
 
-/* The match context /R convention, if set, overrides. */
+/* Process the \R and newline settings. */
 
-mb->bsr_convention = (mcontext->bsr_convention != 0)?
-  mcontext->bsr_convention : re->bsr_convention;
-
-/* Process the newline setting. */
-
-newline = (mcontext->newline_convention == 0)?
-  re->newline_convention : mcontext->newline_convention;
-
+mb->bsr_convention = re->bsr_convention;
 mb->nltype = NLTYPE_FIXED;
-switch(newline)
+switch(re->newline_convention)
   {
   case PCRE2_NEWLINE_CR:
   mb->nllen = 1;

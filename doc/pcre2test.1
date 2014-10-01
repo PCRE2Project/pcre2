@@ -458,9 +458,6 @@ is built, with the default default being Unicode.
 The \fBnewline\fP modifier specifies which characters are to be interpreted as
 newlines, both in the pattern and (by default) in subject lines. The type must
 be one of CR, LF, CRLF, ANYCRLF, or ANY.
-.P
-Both the \eR and newline settings can be changed at match time, but if this is
-done, JIT matching is disabled.
 .
 .
 .SS "Information about a pattern"
@@ -693,7 +690,6 @@ pattern.
       allcaptures               show all captures
       allusedtext               show all consulted text 
       altglobal                 alternative global matching
-      bsr=[anycrlf|unicode]     specify \eR handling
       callout_capture           show captures at callout time
       callout_data=<n>          set a value to pass via callouts
       callout_fail=<n>[:<m>]    control callout failure
@@ -709,21 +705,12 @@ pattern.
       mark                      show mark values
       match_limit=>n>           set a match limit
       memory                    show memory usage
-      newline=<type>            set newline type
       offset=<n>                set starting offset
       ovector=<n>               set size of output vector
       recursion_limit=<n>       set a recursion limit
 .sp
 The effects of these modifiers are described in the following sections.
 FIXME: Give more examples.
-.
-.
-.SS "Newline and \eR handling"
-.rs
-.sp
-These modifiers set the newline and \eR processing conventions for the subject
-line, overriding any values that were set at compile time (as described above).
-JIT matching is disabled if these settings are changed at match time.
 .
 .
 .SS "Showing more text"

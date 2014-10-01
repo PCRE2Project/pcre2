@@ -570,8 +570,6 @@ typedef struct pcre2_real_match_context {
 #endif   
   int       (*callout)(pcre2_callout_block *);
   void      *callout_data; 
-  uint16_t  bsr_convention;
-  uint16_t  newline_convention;
   uint32_t  match_limit;
   uint32_t  recursion_limit;
 } pcre2_real_match_context;

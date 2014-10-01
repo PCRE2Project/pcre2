@@ -3069,7 +3069,6 @@ pcre2_dfa_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
 {
 const pcre2_real_code *re = (const pcre2_real_code *)code;
 pcre2_match_context default_context;  /* For use if no context given */
-int newline;
 
 PCRE2_SPTR start_match;
 PCRE2_SPTR end_subject;
@@ -3203,18 +3202,11 @@ mb->start_offset = start_offset;
 mb->moptions = options;
 mb->poptions = re->overall_options;
 
-/* The match context /R convention, if set, overrides. */
+/* Process the \R and newline settings. */
 
-mb->bsr_convention = (mcontext->bsr_convention != 0)?
-  mcontext->bsr_convention : re->bsr_convention;
-
-/* Process the newline setting. */
-
-newline = (mcontext->newline_convention == 0)?
-  re->newline_convention : mcontext->newline_convention;
-
+mb->bsr_convention = re->bsr_convention;
 mb->nltype = NLTYPE_FIXED;
-switch(newline)
+switch(re->newline_convention)
   {
   case PCRE2_NEWLINE_CR:
   mb->nllen = 1;

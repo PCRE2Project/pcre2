@@ -779,12 +779,6 @@ Subject length lower bound = 3
  0: a\x{85}b
     a\x0bb     
  0: a\x{0b}b
-    ** Failers 
-No match
-    a\x{85}b\=bsr=anycrlf
-No match
-    a\x0bb\=bsr=anycrlf
-No match
     
 /a\R?b/I,bsr=anycrlf,utf
 Capturing subpattern count = 0
@@ -824,10 +818,6 @@ Subject length lower bound = 2
     a\x0bb     
  0: a\x{0b}b
     ** Failers 
-No match
-    a\x{85}b\=bsr=anycrlf
-No match
-    a\x0bb\=bsr=anycrlf
 No match
  
 /.*a.*=.b.*/utf,newline=any

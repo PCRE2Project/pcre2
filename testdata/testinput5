@@ -310,9 +310,6 @@
     a\r\nb
     a\x{85}b
     a\x0bb     
-    ** Failers 
-    a\x{85}b\=bsr=anycrlf
-    a\x0bb\=bsr=anycrlf
     
 /a\R?b/I,bsr=anycrlf,utf
     a\rb
@@ -329,8 +326,6 @@
     a\x{85}b
     a\x0bb     
     ** Failers 
-    a\x{85}b\=bsr=anycrlf
-    a\x0bb\=bsr=anycrlf
  
 /.*a.*=.b.*/utf,newline=any
     QQQ\x{2029}ABCaXYZ=!bPQR

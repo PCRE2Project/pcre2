@@ -638,9 +638,6 @@
     a\r\nb
     a\x{85}b
     a\x0bb     
-    ** Failers 
-    a\x{85}b\=bsr=anycrlf
-    a\x0bb\=bsr=anycrlf
     
 /a\R?b/I,bsr=anycrlf,utf
     a\rb
@@ -656,9 +653,6 @@
     a\r\nb
     a\x{85}b
     a\x0bb     
-    ** Failers 
-    a\x{85}b\=bsr=anycrlf
-    a\x0bb\=bsr=anycrlf
  
 /X/newline=any,utf,firstline
     A\x{1ec5}ABCXYZ

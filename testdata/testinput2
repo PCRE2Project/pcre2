@@ -1540,67 +1540,44 @@ a random value. /Ix
     \x0b,\x0b
     \x0c,\x0d
 
-/^abc/Im
+/^abc/Im,newline=lf
     xyz\nabc
-    xyz\nabc>\=newline=lf
-    xyz\r\nabc>\=newline=lf
-    xyz\rabc>\=newline=cr
-    xyz\r\nabclf>\=newline=crlf
+    xyz\r\nabc
     ** Failers
-    xyz\nabc>\=newline=cr
-    xyz\r\nabc>\=newline=cr
-    xyz\nabclf>\=newline=crlf
-    xyz\rabclf>\=newline=crlf
-    xyz\rabc>\=newline=lf
-
-/abc$/Im,newline=lf
-    xyzabc
-    xyzabc\n
-    xyzabc\npqr
-    xyzabc\r>\=newline=cr
-    xyzabc\rpqr>\=newline=cr
-    xyzabc\r\nlf>\=newline=crlf
-    xyzabc\r\npqrlf>\=newline=crlf
-    ** Failers
+    xyz\rabc
     xyzabc\r
     xyzabc\rpqr
     xyzabc\r\n
     xyzabc\r\npqr
 
-/^abc/Im,newline=cr
-    xyz\rabcdef
-    xyz\nabcdef>\=newline=lf
-    ** Failers
-    xyz\nabcdef
-
-/^abc/Im,newline=lf
-    xyz\nabcdef
-    xyz\rabcdef>\=newline=cr
-    ** Failers
-    xyz\rabcdef
-
 /^abc/Im,newline=crlf
-    xyz\r\nabcdef
-    xyz\rabcdef>\=newline=cr
+    xyz\r\nabclf>
     ** Failers
-    xyz\rabcdef
+    xyz\nabclf
+    xyz\rabclf
+    
+/^abc/Im,newline=cr
+    xyz\rabc
+    ** Failers
+    xyz\nabc
+    xyz\r\nabc
 
 /^abc/Im,newline=bad
-
-/abc/I
-    xyz\rabc\=newline=bad
-    abc
 
 /.*/I,newline=lf
     abc\ndef
     abc\rdef
     abc\r\ndef
-    abc\ndef\=newline=cr
-    abc\rdef\=newline=cr
-    abc\r\ndef\=newline=cr
-    abc\ndef\=newline=crlf
-    abc\rdef\=newline=crlf
-    abc\r\ndef\=newline=crlf
+
+/.*/I,newline=cr
+    abc\ndef
+    abc\rdef
+    abc\r\ndef
+
+/.*/I,newline=crlf
+    abc\ndef
+    abc\rdef
+    abc\r\ndef
 
 /\w+(.)(.)?def/Is
     abc\ndef
@@ -1920,15 +1897,24 @@ a random value. /Ix
 
 /^a.b/newline=lf
     a\rb
-    a\nb>\=newline=cr
-    a\x85b>\=newline=anycrlf
     ** Failers
     a\nb
-    a\nb\=newline=any
-    a\rb>\=newline=cr
-    a\rb\=newline=any
-    a\x85b\=newline=any
-    a\rb>\=newline=anycrlf
+
+/^a.b/newline=cr
+    a\nb
+    ** Failers
+    a\rb
+
+/^a.b/newline=anycrlf
+    a\x85b
+    ** Failers
+    a\rb
+
+/^a.b/newline=any
+    ** Failers
+    a\nb
+    a\rb
+    a\x85b
 
 /^abc./gmx,newline=any
     abc1 \x0aabc2 \x0babc3xx \x0cabc4 \x0dabc5xx \x0d\x0aabc6 \x85abc7 JUNK
@@ -2281,9 +2267,6 @@ a random value. /Ix
     a\r\nb
     a\x85b
     a\x0bb     
-    ** Failers 
-    a\x85b\=bsr=anycrlf
-    a\x0bb\=bsr=anycrlf
     
 /a\R?b/I,bsr=anycrlf
     a\rb
@@ -2299,9 +2282,6 @@ a random value. /Ix
     a\r\nb
     a\x85b
     a\x0bb     
-    ** Failers 
-    a\x85b\=bsr=anycrlf
-    a\x0bb\=bsr=anycrlf
     
 /a\R{2,4}b/I,bsr=anycrlf
     a\r\n\nb
@@ -2319,8 +2299,6 @@ a random value. /Ix
     a\x0b\x0bb     
     ** Failers 
     a\r\r\r\r\rb 
-    a\x85\x85b\=bsr=anycrlf
-    a\x0b\x0bb\=bsr=anycrlf
  
 /(*BSR_ANYCRLF)a\Rb/I
     a\nb

@@ -169,8 +169,6 @@ mcontext->stack_memctl = mcontext->memctl;
 #endif
 mcontext->callout = NULL;
 mcontext->callout_data = NULL;
-mcontext->newline_convention = 0;
-mcontext->bsr_convention = 0;
 mcontext->match_limit = MATCH_LIMIT;
 mcontext->recursion_limit = MATCH_LIMIT_RECURSION;
 }
@@ -279,7 +277,7 @@ return 0;
 }
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION 
-pcre2_set_bsr_compile(pcre2_compile_context *ccontext, uint32_t value)
+pcre2_set_bsr(pcre2_compile_context *ccontext, uint32_t value)
 {
 switch(value)
   {
@@ -294,7 +292,7 @@ switch(value)
 }
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION 
-pcre2_set_newline_compile(pcre2_compile_context *ccontext, uint32_t newline)
+pcre2_set_newline(pcre2_compile_context *ccontext, uint32_t newline)
 {
 switch(newline)
   {
@@ -328,39 +326,6 @@ return 0;
 
 
 /* ------------ Match contexts ------------ */
-
-PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION 
-pcre2_set_bsr_match(pcre2_match_context *mcontext, uint32_t value)
-{
-switch(value)
-  {
-  case PCRE2_BSR_ANYCRLF:
-  case PCRE2_BSR_UNICODE:
-  mcontext->bsr_convention = value;
-  return 0;
-  
-  default:
-  return PCRE2_ERROR_BADDATA;  
-  }
-}
-
-PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION 
-pcre2_set_newline_match(pcre2_match_context *mcontext, uint32_t newline)
-{
-switch(newline)
-  {
-  case PCRE2_NEWLINE_CR:
-  case PCRE2_NEWLINE_LF:
-  case PCRE2_NEWLINE_CRLF:
-  case PCRE2_NEWLINE_ANY:
-  case PCRE2_NEWLINE_ANYCRLF:
-  mcontext->newline_convention = newline;
-  return 0;
-     
-  default: 
-  return PCRE2_ERROR_BADDATA;  
-  }   
-}
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION 
 pcre2_set_callout(pcre2_match_context *mcontext, 
