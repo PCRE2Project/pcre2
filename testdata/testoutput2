@@ -13769,4 +13769,15 @@ Failed: error 179 at offset 11: syntax error in (?(VERSION condition
 /(?(VERSION>=10.0.0)yes|no)/
 Failed: error 179 at offset 16: syntax error in (?(VERSION condition
 
+/abcd/I
+Capturing subpattern count = 0
+First code unit = 'a'
+Last code unit = 'd'
+Subject length lower bound = 4
+
+/abcd/I,no_start_optimize
+Capturing subpattern count = 0
+Options: no_start_optimize
+Subject length lower bound = 0
+
 # End of testinput2 

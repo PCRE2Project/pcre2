@@ -7883,9 +7883,11 @@ if ((re->overall_options & PCRE2_ANCHORED) == 0 &&
 
 /* If the pattern is still not anchored and we do not have a first code unit,
 see if there is one that is asserted (these are not saved during the compile
-because they can cause conflicts with actual literals that follow). */
+because they can cause conflicts with actual literals that follow). This code 
+need not be obeyed if PCRE2_NO_START_OPTIMIZE is set, as the data it would 
+create will not be used. */
 
-if ((re->overall_options & PCRE2_ANCHORED) == 0)
+if ((re->overall_options & (PCRE2_ANCHORED|PCRE2_NO_START_OPTIMIZE)) == 0)
   {
   if (firstcuflags < 0)
     firstcu = find_firstassertedcu(codestart, &firstcuflags, FALSE);
@@ -7928,10 +7930,11 @@ if ((re->overall_options & PCRE2_ANCHORED) == 0)
   }
 
 /* Handle the "required code unit", if one is set. In the case of an anchored
-pattern, do this only if it follows a variable length item in the pattern. */
+pattern, do this only if it follows a variable length item in the pattern. 
+Again, skip this if PCRE2_NO_START_OPTIMIZE is set. */
 
 if (reqcuflags >= 0 &&
-     ((re->overall_options & PCRE2_ANCHORED) == 0 ||
+     ((re->overall_options & (PCRE2_ANCHORED|PCRE2_NO_START_OPTIMIZE)) == 0 ||
       (reqcuflags & REQ_VARY) != 0))
   {
   re->last_codeunit = reqcu;
@@ -7966,10 +7969,12 @@ do
   }
 while (*codestart == OP_ALT);
 
-/* Finally, study the compiled pattern to set up information such as a bitmap
-of starting code units and a minimum matching length. */
+/* Finally, unless PCRE2_NO_START_OPTIMIZE is set, study the compiled pattern
+to set up information such as a bitmap of starting code units and a minimum
+matching length. */
 
-if (PRIV(study)(re) != 0)
+if ((re->overall_options & PCRE2_NO_START_OPTIMIZE) == 0 && 
+    PRIV(study)(re) != 0)
   {
   errorcode = ERR31;
   goto HAD_ERROR;

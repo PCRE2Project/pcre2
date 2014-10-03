@@ -7127,8 +7127,7 @@ No match
 /(abc|def|xyz)/I,no_start_optimize
 Capturing subpattern count = 1
 Options: no_start_optimize
-Starting code units: a d x 
-Subject length lower bound = 3
+Subject length lower bound = 0
     terhjk;abcdaadsfe
  0: abc
     the quick xyz brown fox

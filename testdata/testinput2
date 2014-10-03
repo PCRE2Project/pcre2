@@ -4091,4 +4091,8 @@ a random value. /Ix
 
 /(?(VERSION>=10.0.0)yes|no)/
 
+/abcd/I
+
+/abcd/I,no_start_optimize
+
 # End of testinput2 
