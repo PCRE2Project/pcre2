@@ -42,6 +42,23 @@ POSSIBILITY OF SUCH DAMAGE.
 #error This file must be included from pcre2_jit_compile.c.
 #endif
 
+#ifdef SUPPORT_JIT
+
+static int jit_machine_stack_exec(jit_arguments *arguments, jit_function executable_func)
+{
+sljit_ub local_space[MACHINE_STACK_SIZE];
+struct sljit_stack local_stack;
+
+local_stack.top = (sljit_sw)&local_space;
+local_stack.base = local_stack.top;
+local_stack.limit = local_stack.base + MACHINE_STACK_SIZE;
+local_stack.max_limit = local_stack.limit;
+arguments->stack = &local_stack;
+return executable_func(arguments);
+}
+
+#endif
+
 
 /*************************************************
 *              Do a JIT pattern match            *
@@ -86,16 +103,82 @@ return PCRE2_ERROR_JIT_BADOPTION;
 
 #else  /* SUPPORT_JIT */
 
-/* Dummy code */
-code=code;
-subject=subject;
-length=length;
-start_offset=start_offset;
-options=options;
-match_data=match_data;
-mcontext=mcontext;
-jit_stack=jit_stack;
-return PCRE2_ERROR_JIT_BADOPTION;
+pcre2_real_code *re = (pcre2_real_code *)code;
+executable_functions *functions = (executable_functions *)re->executable_jit;
+uint32_t oveccount = match_data->oveccount;
+uint32_t max_oveccount;
+union {
+   void* executable_func;
+   jit_function call_executable_func;
+} convert_executable_func;
+jit_arguments arguments;
+int rc;
+int index = 0;
+
+if ((options & PCRE2_PARTIAL_HARD) != 0)
+  index = 2;
+else if ((options & PCRE2_PARTIAL_SOFT) != 0)
+  index = 1;
+
+if (functions->executable_funcs[index] == NULL)
+  return PCRE2_ERROR_JIT_BADOPTION;
+
+/* Sanity checks should be handled by pcre_exec. */
+arguments.str = subject + start_offset;
+arguments.begin = subject;
+arguments.end = subject + length;
+arguments.mark_ptr = NULL;
+/* JIT decreases this value less frequently than the interpreter. */
+arguments.limit_match = (mcontext != NULL && mcontext->match_limit < re->limit_match)?
+   mcontext->match_limit : re->limit_match;
+arguments.notbol = (options & PCRE2_NOTBOL) != 0;
+arguments.noteol = (options & PCRE2_NOTEOL) != 0;
+arguments.notempty = (options & PCRE2_NOTEMPTY) != 0;
+arguments.notempty_atstart = (options & PCRE2_NOTEMPTY_ATSTART) != 0;
+arguments.ovector = match_data->ovector;
+arguments.callout = NULL;
+arguments.callout_data = NULL;
+if (mcontext != NULL)
+  {
+  arguments.callout = mcontext->callout;
+  arguments.callout_data = mcontext->callout_data;
+  }
+arguments.real_oveccount = oveccount;
+
+/* pcre_exec() rounds offset_count to a multiple of 3, and then uses only 2/3 of
+the output vector for storing captured strings, with the remainder used as
+workspace. We don't need the workspace here. For compatibility, we limit the
+number of captured strings in the same way as pcre_exec(), so that the user
+gets the same result with and without JIT. */
+
+max_oveccount = functions->top_bracket;
+if (oveccount > max_oveccount)
+  oveccount = max_oveccount;
+arguments.oveccount = oveccount;
+
+convert_executable_func.executable_func = functions->executable_funcs[index];
+if (jit_stack != NULL)
+  {
+  arguments.stack = (struct sljit_stack *)(jit_stack->stack);
+  rc = convert_executable_func.call_executable_func(&arguments);
+  }
+else
+  rc = jit_machine_stack_exec(&arguments, convert_executable_func.call_executable_func);
+
+if (rc * 2 > oveccount)
+  rc = 0;
+match_data->code = re;
+match_data->subject = subject;
+match_data->rc = rc;
+/*
+match_data->startchar = start_match - subject;
+match_data->leftchar = mb->start_used_ptr - subject;
+match_data->rightchar = ((mb->last_used_ptr > mb->end_match_ptr)?
+          mb->last_used_ptr : mb->end_match_ptr) - subject;
+*/
+match_data->mark = arguments.mark_ptr;
+
+return match_data->rc;
 
 #endif  /* SUPPORT_JIT */
 }
