@@ -769,10 +769,10 @@ are supported. */
   else \
     r = pcre2_get_error_message_32(a,G(b,32),G(G(b,32),_size))
 
-#define PCRE2_JIT_COMPILE(a,b,c) \
-  if (test_mode == PCRE8_MODE) pcre2_jit_compile_8(G(a,8),b,G(c,8)); \
-  else if (test_mode == PCRE16_MODE) pcre2_jit_compile_16(G(a,16),b,G(c,16)); \
-  else pcre2_jit_compile_32(G(a,32),b,G(c,32))
+#define PCRE2_JIT_COMPILE(a,b) \
+  if (test_mode == PCRE8_MODE) pcre2_jit_compile_8(G(a,8),b); \
+  else if (test_mode == PCRE16_MODE) pcre2_jit_compile_16(G(a,16),b); \
+  else pcre2_jit_compile_32(G(a,32),b)
 
 #define PCRE2_JIT_STACK_ALLOC(a,b,c,d) \
   if (test_mode == PCRE8_MODE) \
@@ -1080,11 +1080,11 @@ the three different cases. */
   else \
     r = G(pcre2_get_error_message_,BITTWO)(a,G(b,BITTWO),G(G(b,BITTWO),_size))
 
-#define PCRE2_JIT_COMPILE(a,b,c) \
+#define PCRE2_JIT_COMPILE(a,b) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
-    G(pcre2_jit_compile_,BITONE)(G(a,BITONE),b,G(c,BITONE)); \
+    G(pcre2_jit_compile_,BITONE)(G(a,BITONE),b); \
   else \
-    G(pcre2_jit_compile_,BITTWO)(G(a,BITTWO),b,G(c,BITTWO))
+    G(pcre2_jit_compile_,BITTWO)(G(a,BITTWO),b)
 
 #define PCRE2_JIT_STACK_ALLOC(a,b,c,d) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
@@ -1296,7 +1296,7 @@ the three different cases. */
   a = pcre2_dfa_match_8(G(b,8),(PCRE2_SPTR8)c,d,e,f,G(g,8),G(h,8),i,j)
 #define PCRE2_GET_ERROR_MESSAGE(r,a,b) \
   r = pcre2_get_error_message_8(a,G(b,8),G(G(b,8),_size))
-#define PCRE2_JIT_COMPILE(a,b,c) pcre2_jit_compile_8(G(a,8),b,G(c,8))
+#define PCRE2_JIT_COMPILE(a,b) pcre2_jit_compile_8(G(a,8),b)
 #define PCRE2_JIT_STACK_ALLOC(a,b,c,d) \
   a = (PCRE2_JIT_STACK *)pcre2_jit_stack_alloc_8(b,c,d);
 #define PCRE2_JIT_STACK_ASSIGN(a,b,c) \
@@ -1360,7 +1360,7 @@ the three different cases. */
   a = pcre2_dfa_match_16(G(b,16),(PCRE2_SPTR16)c,d,e,f,G(g,16),G(h,16),i,j)
 #define PCRE2_GET_ERROR_MESSAGE(r,a,b) \
   r = pcre2_get_error_message_16(a,G(b,16),G(G(b,16),_size))
-#define PCRE2_JIT_COMPILE(a,b,c) pcre2_jit_compile_16(G(a,16),b,G(c,16))
+#define PCRE2_JIT_COMPILE(a,b) pcre2_jit_compile_16(G(a,16),b)
 #define PCRE2_JIT_STACK_ALLOC(a,b,c,d) \
   a = (PCRE2_JIT_STACK *)pcre2_jit_stack_alloc_16(b,c,d);
 #define PCRE2_JIT_STACK_ASSIGN(a,b,c) \
@@ -1424,7 +1424,7 @@ the three different cases. */
   a = pcre2_dfa_match_32(G(b,32),(PCRE2_SPTR32)c,d,e,f,G(g,32),G(h,32),i,j)
 #define PCRE2_GET_ERROR_MESSAGE(r,a,b) \
   r = pcre2_get_error_message_32(a,G(b,32),G(G(b,32),_size))
-#define PCRE2_JIT_COMPILE(a,b,c) pcre2_jit_compile_32(G(a,32),b,G(c,32))
+#define PCRE2_JIT_COMPILE(a,b) pcre2_jit_compile_32(G(a,32),b)
 #define PCRE2_JIT_STACK_ALLOC(a,b,c,d) \
   a = (PCRE2_JIT_STACK *)pcre2_jit_stack_alloc_32(b,c,d);
 #define PCRE2_JIT_STACK_ASSIGN(a,b,c) \
@@ -3706,7 +3706,7 @@ if (TEST(compiled_code, ==, NULL))
 
 if (pat_patctl.jit != 0)
   { 
-  PCRE2_JIT_COMPILE(compiled_code, pat_patctl.jit, dat_context); 
+  PCRE2_JIT_COMPILE(compiled_code, pat_patctl.jit); 
   }
 
 /* Output code size and other information if requested. */

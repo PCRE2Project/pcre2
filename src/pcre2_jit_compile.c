@@ -125,7 +125,7 @@ Returns:        nothing
 /* FIXME: this is currently a placeholder function */
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
-pcre2_jit_compile(pcre2_code *code, uint32_t options, pcre2_match_context *mcontext)
+pcre2_jit_compile(pcre2_code *code, uint32_t options)
 {
 #ifndef SUPPORT_JIT
 
