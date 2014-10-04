@@ -143,7 +143,6 @@ if (mcontext != NULL)
   arguments.callout = mcontext->callout;
   arguments.callout_data = mcontext->callout_data;
   }
-arguments.real_oveccount = oveccount;
 
 /* pcre_exec() rounds offset_count to a multiple of 3, and then uses only 2/3 of
 the output vector for storing captured strings, with the remainder used as
@@ -154,7 +153,7 @@ gets the same result with and without JIT. */
 max_oveccount = functions->top_bracket;
 if (oveccount > max_oveccount)
   oveccount = max_oveccount;
-arguments.oveccount = oveccount;
+arguments.oveccount = oveccount << 1;
 
 convert_executable_func.executable_func = functions->executable_funcs[index];
 if (jit_stack != NULL)
@@ -165,7 +164,7 @@ if (jit_stack != NULL)
 else
   rc = jit_machine_stack_exec(&arguments, convert_executable_func.call_executable_func);
 
-if (rc * 2 > oveccount)
+if (rc > (int)oveccount)
   rc = 0;
 match_data->code = re;
 match_data->subject = subject;

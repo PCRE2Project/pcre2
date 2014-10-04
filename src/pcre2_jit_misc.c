@@ -62,6 +62,7 @@ pcre2_jit_free_unused_memory(pcre2_general_context *gcontext)
 #else  /* SUPPORT_JIT */
 
 /* Dummy code */
+SLJIT_UNUSED_ARG(gcontext);
 sljit_free_unused_memory_exec();
 
 #endif  /* SUPPORT_JIT */

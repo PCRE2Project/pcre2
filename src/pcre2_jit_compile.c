@@ -68,7 +68,7 @@ return allocator->malloc(size, allocator->memory_data);
 static void pcre2_jit_free(void *ptr, void *allocator_data)
 {
 pcre2_memctl *allocator = ((pcre2_memctl*)allocator_data);
-return allocator->free(ptr, allocator->memory_data);
+allocator->free(ptr, allocator->memory_data);
 }
 
 #include "sljit/sljitLir.c"
@@ -182,7 +182,6 @@ typedef struct jit_arguments {
   void *callout_data;
   /* Everything else after. */
   sljit_ui limit_match;
-  uint32_t real_oveccount;
   uint32_t oveccount;
   sljit_ub notbol;
   sljit_ub noteol;
@@ -2245,7 +2244,7 @@ OP2(SLJIT_ASHR, SLJIT_S1, 0, SLJIT_S1, 0, SLJIT_IMM, UCHAR_SHIFT);
 #endif
 SLJIT_ASSERT(sizeof(PCRE2_SIZE) == 4 || sizeof(PCRE2_SIZE) == 8);
 if (sizeof(PCRE2_SIZE) == 4)
-  OP1(SLJIT_MOVU_SI, SLJIT_MEM1(SLJIT_R2), sizeof(PCRE2_SIZE), SLJIT_S1, 0);
+  OP1(SLJIT_MOVU_UI, SLJIT_MEM1(SLJIT_R2), sizeof(PCRE2_SIZE), SLJIT_S1, 0);
 else
   OP1(SLJIT_MOVU, SLJIT_MEM1(SLJIT_R2), sizeof(PCRE2_SIZE), SLJIT_S1, 0);
 OP2(SLJIT_SUB | SLJIT_SET_E, SLJIT_R1, 0, SLJIT_R1, 0, SLJIT_IMM, 1);
@@ -2272,7 +2271,7 @@ else
 static SLJIT_INLINE void return_with_partial_match(compiler_common *common, struct sljit_label *quit)
 {
 DEFINE_COMPILER;
-struct sljit_jump *jump;
+sljit_si mov_opcode;
 
 SLJIT_COMPILE_ASSERT(STR_END == SLJIT_S1, str_end_must_be_saved_reg2);
 SLJIT_ASSERT(common->start_used_ptr != 0 && common->start_ptr != 0
@@ -2280,33 +2279,33 @@ SLJIT_ASSERT(common->start_used_ptr != 0 && common->start_ptr != 0
 
 OP1(SLJIT_MOV, SLJIT_R1, 0, ARGUMENTS, 0);
 OP1(SLJIT_MOV, SLJIT_RETURN_REG, 0, SLJIT_IMM, PCRE2_ERROR_PARTIAL);
-OP1(SLJIT_MOV_SI, SLJIT_R2, 0, SLJIT_MEM1(SLJIT_R1), SLJIT_OFFSETOF(jit_arguments, real_oveccount));
-CMPTO(SLJIT_SIG_LESS, SLJIT_R2, 0, SLJIT_IMM, 2, quit);
+OP1(SLJIT_MOV_SI, SLJIT_R2, 0, SLJIT_MEM1(SLJIT_R1), SLJIT_OFFSETOF(jit_arguments, oveccount));
+CMPTO(SLJIT_SIG_LESS, SLJIT_R2, 0, SLJIT_IMM, 1, quit);
 
 /* Store match begin and end. */
 OP1(SLJIT_MOV, SLJIT_S0, 0, SLJIT_MEM1(SLJIT_R1), SLJIT_OFFSETOF(jit_arguments, begin));
 OP1(SLJIT_MOV, SLJIT_R1, 0, SLJIT_MEM1(SLJIT_R1), SLJIT_OFFSETOF(jit_arguments, ovector));
 
-jump = CMP(SLJIT_SIG_LESS, SLJIT_R2, 0, SLJIT_IMM, 3);
+mov_opcode = (sizeof(PCRE2_SIZE) == 4) ? SLJIT_MOV_UI : SLJIT_MOV;
+
 OP2(SLJIT_SUB, SLJIT_R2, 0, SLJIT_MEM1(SLJIT_SP), common->mode == PCRE2_JIT_PARTIAL_HARD ? common->start_ptr : (common->hit_start + (int)sizeof(sljit_sw)), SLJIT_S0, 0);
 #if PCRE2_CODE_UNIT_WIDTH == 16 || PCRE2_CODE_UNIT_WIDTH == 32
 OP2(SLJIT_ASHR, SLJIT_R2, 0, SLJIT_R2, 0, SLJIT_IMM, UCHAR_SHIFT);
 #endif
-OP1(SLJIT_MOV_SI, SLJIT_MEM1(SLJIT_R1), 2 * sizeof(int), SLJIT_R2, 0);
-JUMPHERE(jump);
+OP1(mov_opcode, SLJIT_MEM1(SLJIT_R1), 2 * sizeof(PCRE2_SIZE), SLJIT_R2, 0);
 
 OP1(SLJIT_MOV, SLJIT_R2, 0, SLJIT_MEM1(SLJIT_SP), common->mode == PCRE2_JIT_PARTIAL_HARD ? common->start_used_ptr : common->hit_start);
 OP2(SLJIT_SUB, SLJIT_S1, 0, STR_END, 0, SLJIT_S0, 0);
 #if PCRE2_CODE_UNIT_WIDTH == 16 || PCRE2_CODE_UNIT_WIDTH == 32
 OP2(SLJIT_ASHR, SLJIT_S1, 0, SLJIT_S1, 0, SLJIT_IMM, UCHAR_SHIFT);
 #endif
-OP1(SLJIT_MOV_SI, SLJIT_MEM1(SLJIT_R1), sizeof(int), SLJIT_S1, 0);
+OP1(mov_opcode, SLJIT_MEM1(SLJIT_R1), sizeof(PCRE2_SIZE), SLJIT_S1, 0);
 
 OP2(SLJIT_SUB, SLJIT_R2, 0, SLJIT_R2, 0, SLJIT_S0, 0);
 #if PCRE2_CODE_UNIT_WIDTH == 16 || PCRE2_CODE_UNIT_WIDTH == 32
 OP2(SLJIT_ASHR, SLJIT_R2, 0, SLJIT_R2, 0, SLJIT_IMM, UCHAR_SHIFT);
 #endif
-OP1(SLJIT_MOV_SI, SLJIT_MEM1(SLJIT_R1), 0, SLJIT_R2, 0);
+OP1(mov_opcode, SLJIT_MEM1(SLJIT_R1), 0, SLJIT_R2, 0);
 
 JUMPTO(SLJIT_JUMP, quit);
 }
@@ -6316,7 +6315,7 @@ int i;
 if (arguments->callout == NULL)
   return 0;
 
-callout_block->version = 2;
+callout_block->version = 0;
 callout_block->callout_data = arguments->callout_data;
 
 /* Offsets in subject. */
@@ -6338,9 +6337,10 @@ for (i = 2; i < oveccount; i += 2)
 
 callout_block->capture_top = (callout_block->capture_top >> 1) + 1;
 if (oveccount > 0)
+  {
   ovector[0] = PCRE2_UNSET;
-if (oveccount > 1)
   ovector[1] = PCRE2_UNSET;
+  }
 return (arguments->callout)(callout_block);
 }
 
@@ -10317,7 +10317,7 @@ else
     return PCRE2_ERROR_NOMEMORY;
     }
   memset(functions, 0, sizeof(executable_functions));
-  functions->top_bracket = (re->top_bracket + 1) * 2;
+  functions->top_bracket = re->top_bracket + 1;
   functions->limit_match = re->limit_match;
   re->executable_jit = functions;
   }
@@ -10377,21 +10377,21 @@ if ((options & ~PUBLIC_JIT_COMPILE_OPTIONS) != 0)
 functions = (executable_functions *)re->executable_jit;
 
 if ((options & PCRE2_JIT_COMPLETE) != 0 && (functions == NULL
-    || functions->executable_funcs[PCRE2_JIT_COMPLETE] == NULL)) {
+    || functions->executable_funcs[0] == NULL)) {
   result = jit_compile(code, PCRE2_JIT_COMPLETE);
   if (result != 0)
     return result;
   }
 
 if ((options & PCRE2_JIT_PARTIAL_SOFT) != 0 && (functions == NULL
-    || functions->executable_funcs[PCRE2_JIT_PARTIAL_SOFT] == NULL)) {
+    || functions->executable_funcs[1] == NULL)) {
   result = jit_compile(code, PCRE2_JIT_PARTIAL_SOFT);
   if (result != 0)
     return result;
   }
 
 if ((options & PCRE2_JIT_PARTIAL_HARD) != 0 && (functions == NULL
-    || functions->executable_funcs[PCRE2_JIT_PARTIAL_HARD] == NULL)) {
+    || functions->executable_funcs[2] == NULL)) {
   result = jit_compile(code, PCRE2_JIT_PARTIAL_HARD);
   if (result != 0)
     return result;
