@@ -4426,26 +4426,40 @@ if ((dat_datctl.control & CTL_JITVERIFY) != 0 && jit_stack == NULL)
    PCRE2_JIT_STACK_ASSIGN(compiled_code, jit_callback, NULL);
    }
 
+/* Adjust match_data according to size of offsets required. */
+
+if (dat_datctl.oveccount <= max_oveccount)
+  {
+  SETFLD(match_data, oveccount, dat_datctl.oveccount);
+  }
+else
+  {
+  max_oveccount = dat_datctl.oveccount;
+  PCRE2_MATCH_DATA_FREE(match_data);
+  PCRE2_MATCH_DATA_CREATE(match_data, max_oveccount, NULL);
+  }
+     
 /* Loop for global matching */
 
 for (gmatched = 0;; gmatched++)
   {
   int capcount;
+  PCRE2_SIZE *ovector;
+  PCRE2_SIZE ovecsave[2]; 
+
   jit_was_used = FALSE;
+  ovector = FLD(match_data, ovector);
+  
+  /* After the first time round a global loop, save the current ovector[0,1] so
+  that we can check that they do change each time. Otherwise a matching bug 
+  that returns the same string causes an infinite loop. It has happened! */
 
-  /* Adjust match_data according to size of offsets required. */
-
-  if (dat_datctl.oveccount <= max_oveccount)
-    {
-    SETFLD(match_data, oveccount, dat_datctl.oveccount);
-    }
-  else
-    {
-    max_oveccount = dat_datctl.oveccount;
-    PCRE2_MATCH_DATA_FREE(match_data);
-    PCRE2_MATCH_DATA_CREATE(match_data, max_oveccount, NULL);
-    }
-
+  if (gmatched > 0)
+    {  
+    ovecsave[0] = ovector[0];
+    ovecsave[1] = ovector[1];  
+    } 
+   
   /* Do timing if required. */
 
   if (timeitm > 0)
@@ -4538,7 +4552,7 @@ for (gmatched = 0;; gmatched++)
       }
     }
 
-  /* The result of the match is in now capcount. First handle a successful
+  /* The result of the match is now in capcount. First handle a successful
   match. */
 
   if (capcount >= 0)
@@ -4546,24 +4560,37 @@ for (gmatched = 0;; gmatched++)
     int i;
     uint8_t *nptr;
     BOOL showallused;
-    PCRE2_SIZE *ovector;
     PCRE2_SIZE leftchar = FLD(match_data, leftchar);
     PCRE2_SIZE rightchar = FLD(match_data, rightchar);
 
     /* This is a check against a lunatic return value. */
-
+    
     if (capcount > (int)dat_datctl.oveccount)
       {
       fprintf(outfile,
-        "** PCRE error: returned count %d is too big for ovector count %d\n",
+        "** PCRE2 error: returned count %d is too big for ovector count %d\n",
         capcount, dat_datctl.oveccount);
       capcount = dat_datctl.oveccount;
       if ((dat_datctl.control & CTL_ANYGLOB) != 0)
         {
         fprintf(outfile, "** Global loop abandoned\n");
-        pat_patctl.options &= ~CTL_ANYGLOB;        /* Break g/G loop */
+        dat_datctl.control &= ~CTL_ANYGLOB;        /* Break g/G loop */
         }
       }
+      
+    /* If this is not the first time round a global loop, check that the 
+    returned string has changed. If not, there is a bug somewhere and we must 
+    break the loop because it will go on for ever. We know that for a global
+    match there must be at least two elements in the ovector. This is checked 
+    above. */
+    
+    if (gmatched > 0 && ovecsave[0] == ovector[0] && ovecsave[1] == ovector[1])
+      {
+      fprintf(outfile,  
+        "** PCRE2 error: global repeat returned the same string as previous\n");
+      fprintf(outfile, "** Global loop abandoned\n");
+      dat_datctl.control &= ~CTL_ANYGLOB;        /* Break g/G loop */
+      }   
 
     /* "allcaptures" requests showing of all captures in the pattern, to check
     unset ones at the end. It may be set on the pattern or the data. Implement
@@ -4581,7 +4608,6 @@ for (gmatched = 0;; gmatched++)
     /* Output the captured substrings. Note that, for the matched string,
     the use of \K in an assertion can make the start later than the end. */
 
-    ovector = FLD(match_data, ovector);
     for (i = 0; i < 2*capcount; i += 2)
       {
       PCRE2_SIZE lleft, lmiddle, lright;
