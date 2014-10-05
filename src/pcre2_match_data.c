@@ -51,10 +51,14 @@ POSSIBILITY OF SUCH DAMAGE.
 *  Create a match data block given ovector size  *
 *************************************************/
 
+/* A minimum of 1 is imposed on the number of ovector triplets. */
+
 PCRE2_EXP_DEFN pcre2_match_data * PCRE2_CALL_CONVENTION
 pcre2_match_data_create(uint32_t oveccount, pcre2_general_context *gcontext)
 {
-pcre2_match_data *yield = PRIV(memctl_malloc)(
+pcre2_match_data *yield;
+if (oveccount < 1) oveccount = 1;
+yield = PRIV(memctl_malloc)(
   sizeof(pcre2_match_data) + 3*oveccount*sizeof(PCRE2_SIZE),
   (pcre2_memctl *)gcontext);
 yield->oveccount = oveccount;

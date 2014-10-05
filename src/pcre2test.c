@@ -2531,7 +2531,7 @@ switch (m->which)
   case MOD_CTC:  /* Compile context modifier */
   if (ctx == CTX_DEFPAT) field = PTR(default_pat_context);
     else if (ctx == CTX_PAT) field = PTR(pat_context);
-  break;   
+  break;
 
   case MOD_CTM:  /* Match context modifier */
   if (ctx == CTX_DEFDAT) field = PTR(default_dat_context);
@@ -3705,8 +3705,8 @@ if (TEST(compiled_code, ==, NULL))
 /* Call the JIT compiler if requested. */
 
 if (pat_patctl.jit != 0)
-  { 
-  PCRE2_JIT_COMPILE(compiled_code, pat_patctl.jit); 
+  {
+  PCRE2_JIT_COMPILE(compiled_code, pat_patctl.jit);
   }
 
 /* Output code size and other information if requested. */
@@ -4385,11 +4385,10 @@ if ((dat_datctl.control & (CTL_DFA|CTL_FINDLIMITS)) == (CTL_DFA|CTL_FINDLIMITS))
   dat_datctl.control &= ~CTL_FINDLIMITS;
   }
 
-if ((dat_datctl.control & CTL_ANYGLOB) != 0 && dat_datctl.oveccount < 1)
-  {
-  printf("** Global matching requires a non-zero ovector count: ignored\n");
-  dat_datctl.control &= ~CTL_ANYGLOB;
-  }
+/* As pcre2_match_data_create() imposes a minimum of 1 on the ovector count, we
+must do so too. */
+
+if (dat_datctl.oveccount < 1) dat_datctl.oveccount = 1;
 
 /* Enable display of malloc/free if wanted. */
 
@@ -4438,28 +4437,28 @@ else
   PCRE2_MATCH_DATA_FREE(match_data);
   PCRE2_MATCH_DATA_CREATE(match_data, max_oveccount, NULL);
   }
-     
+
 /* Loop for global matching */
 
 for (gmatched = 0;; gmatched++)
   {
   int capcount;
   PCRE2_SIZE *ovector;
-  PCRE2_SIZE ovecsave[2]; 
+  PCRE2_SIZE ovecsave[2];
 
   jit_was_used = FALSE;
   ovector = FLD(match_data, ovector);
-  
+
   /* After the first time round a global loop, save the current ovector[0,1] so
-  that we can check that they do change each time. Otherwise a matching bug 
+  that we can check that they do change each time. Otherwise a matching bug
   that returns the same string causes an infinite loop. It has happened! */
 
   if (gmatched > 0)
-    {  
+    {
     ovecsave[0] = ovector[0];
-    ovecsave[1] = ovector[1];  
-    } 
-   
+    ovecsave[1] = ovector[1];
+    }
+
   /* Do timing if required. */
 
   if (timeitm > 0)
@@ -4564,7 +4563,7 @@ for (gmatched = 0;; gmatched++)
     PCRE2_SIZE rightchar = FLD(match_data, rightchar);
 
     /* This is a check against a lunatic return value. */
-    
+
     if (capcount > (int)dat_datctl.oveccount)
       {
       fprintf(outfile,
@@ -4577,20 +4576,20 @@ for (gmatched = 0;; gmatched++)
         dat_datctl.control &= ~CTL_ANYGLOB;        /* Break g/G loop */
         }
       }
-      
-    /* If this is not the first time round a global loop, check that the 
-    returned string has changed. If not, there is a bug somewhere and we must 
+
+    /* If this is not the first time round a global loop, check that the
+    returned string has changed. If not, there is a bug somewhere and we must
     break the loop because it will go on for ever. We know that for a global
-    match there must be at least two elements in the ovector. This is checked 
+    match there must be at least two elements in the ovector. This is checked
     above. */
-    
+
     if (gmatched > 0 && ovecsave[0] == ovector[0] && ovecsave[1] == ovector[1])
       {
-      fprintf(outfile,  
+      fprintf(outfile,
         "** PCRE2 error: global repeat returned the same string as previous\n");
       fprintf(outfile, "** Global loop abandoned\n");
       dat_datctl.control &= ~CTL_ANYGLOB;        /* Break g/G loop */
-      }   
+      }
 
     /* "allcaptures" requests showing of all captures in the pattern, to check
     unset ones at the end. It may be set on the pattern or the data. Implement
@@ -4647,7 +4646,7 @@ for (gmatched = 0;; gmatched++)
         PCHARSV(pp, start, end - start, utf, outfile);
         }
 
-      if ((pat_patctl.control & CTL_JITVERIFY) != 0 && jit_was_used) 
+      if ((pat_patctl.control & CTL_JITVERIFY) != 0 && jit_was_used)
         fprintf(outfile, " (JIT)");
       fprintf(outfile, "\n");
 
@@ -4864,7 +4863,7 @@ for (gmatched = 0;; gmatched++)
 
     fprintf(outfile, ": ");
     PCHARSV(pp, leftchar, ulen - leftchar, utf, outfile);
-    if ((pat_patctl.control & CTL_JITVERIFY) != 0 && jit_was_used) 
+    if ((pat_patctl.control & CTL_JITVERIFY) != 0 && jit_was_used)
       fprintf(outfile, " (JIT)");
     fprintf(outfile, "\n");
     break;  /* Out of the /g loop */
@@ -4875,8 +4874,7 @@ for (gmatched = 0;; gmatched++)
   If that is the case, this is not necessarily the end. We want to advance the
   start offset, and continue. We won't be at the end of the string - that was
   checked before setting g_notempty. We achieve the effect by pretending that a
-  single character was matched. We know that match_data->oveccount is at least
-  1 because that was checked above.
+  single character was matched.
 
   Complication arises in the case when the newline convention is "any", "crlf",
   or "anycrlf". If the previous match was at the end of a line terminated by
@@ -4936,7 +4934,7 @@ for (gmatched = 0;; gmatched++)
           fprintf(outfile, ", mark = ");
           PCHARSV(CASTFLD(void *, match_data, mark), 0, -1, utf, outfile);
           }
-        if ((pat_patctl.control & CTL_JITVERIFY) != 0 && jit_was_used) 
+        if ((pat_patctl.control & CTL_JITVERIFY) != 0 && jit_was_used)
           fprintf(outfile, " (JIT)");
         fprintf(outfile, "\n");
         }

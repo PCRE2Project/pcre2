@@ -1,4 +1,4 @@
-.TH PCRE2TEST 1 "19 August 2014" "PCRE 10.00"
+.TH PCRE2TEST 1 "05 October 2014" "PCRE 10.00"
 .SH NAME
 pcre2test - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -881,6 +881,12 @@ The \fBovector\fP modifier applies only to the subject line in which it
 appears, though of course it can also be used to set a default in a
 \fB#subject\fP command. It specifies the number of pairs of offsets that are
 available for storing matching information. The default is 15.
+.P
+At least one pair of offsets is always created by 
+\fBpcre2_match_data_create()\fP, for matching with PCRE2's native API, so a 
+value of 0 is the same as 1. However a value of 0 is useful when testing the 
+POSIX API because it causes \fBregexec()\fP to be called with a NULL capture 
+vector.
 .
 .
 .SH "THE ALTERNATIVE MATCHING FUNCTION"
@@ -1145,6 +1151,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 19 August 2014
+Last updated: 05 October 2014
 Copyright (c) 1997-2014 University of Cambridge.
 .fi

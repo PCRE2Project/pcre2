@@ -245,6 +245,7 @@ Subject length lower bound = 4
  3: c
     abcb\=ovector=0
 Matched, but too many substrings
+ 0: abcb
     abcb\=ovector=1
 Matched, but too many substrings
  0: abcb
@@ -273,6 +274,7 @@ Subject length lower bound = 3
  1: a
     abc\=ovector=0
 Matched, but too many substrings
+ 0: abc
     abc\=ovector=1
 Matched, but too many substrings
  0: abc
@@ -286,6 +288,7 @@ Matched, but too many substrings
  3: b
     aba\=ovector=0
 Matched, but too many substrings
+ 0: aba
     aba\=ovector=1
 Matched, but too many substrings
  0: aba
@@ -7404,6 +7407,7 @@ Subject length lower bound = 3
 No match
   aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa4\=ovector=0
 Matched, but too many substrings
+ 0: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa4
 
 /^a.b/newline=lf
     a\rb
@@ -10922,6 +10926,7 @@ Minimum recursion limit = 4
  3: baz
     bazfooX\=ovector=0
 Matched, but too many substrings
+ 0: fooX
     bazfooX\=ovector=1
 Matched, but too many substrings
  0: fooX
@@ -11970,7 +11975,7 @@ Callout 2: last capture = 0
 
 /(ab)x|ab/
     ab\=ovector=0
-Matched, but too many substrings
+ 0: ab
     ab\=ovector=1
  0: ab
   

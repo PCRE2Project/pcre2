@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "01 October 2014" "PCRE2 10.00"
+.TH PCRE2API 3 "05 October 2014" "PCRE2 10.00"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -1650,13 +1650,15 @@ particular, the match data block contains a vector of offsets into the subject
 string that define the matched part of the subject and any substrings that were
 capured. This is know as the \fIovector\fP. 
 .P
-Before calling \fBpcre2_match()\fP or \fBpcre2_dfa_match()\fP you must create a 
+Before calling \fBpcre2_match()\fP or \fBpcre2_dfa_match()\fP you must create a
 match data block by calling one of the creation functions above. For
 \fBpcre2_match_data_create()\fP, the first argument is the number of pairs of
 offsets in the \fIovector\fP. One pair of offsets is required to identify the
 string that matched the whole pattern, with another pair for each captured
-substring. For example, a value of 4 creates enough space to record the
-matched portion of the subject plus three captured substrings. 
+substring. For example, a value of 4 creates enough space to record the matched
+portion of the subject plus three captured substrings. A minimum of at least 1
+pair is imposed by \fBpcre2_match_data_create()\fP, so it is always possible to
+return the overall matched string.
 .P
 For \fBpcre2_match_data_create_from_pattern()\fP, the first argument is a
 pointer to a compiled pattern. In this case the ovector is created to be 
@@ -2015,13 +2017,13 @@ operation, it is the last portion of the string that it matched that is
 returned.
 .P
 If the ovector is too small to hold all the captured substring offsets, as much
-as possible is filled in, and the function returns a value of zero. If neither
-the actual string matched nor any captured substrings are of interest,
-\fBpcre2_match()\fP may be called with a match data block whose ovector is of
-zero length. However, if the pattern contains back references and the
-\fIovector\fP is not big enough to remember the related substrings, PCRE2 has
-to get additional memory for use during matching. Thus it is usually advisable
-to set up a match data block containing an ovector of reasonable size.
+as possible is filled in, and the function returns a value of zero. If captured
+substrings are not of interest, \fBpcre2_match()\fP may be called with a match
+data block whose ovector is of minimum length (that is, one pair). However, if
+the pattern contains back references and the \fIovector\fP is not big enough to
+remember the related substrings, PCRE2 has to get additional memory for use
+during matching. Thus it is usually advisable to set up a match data block
+containing an ovector of reasonable size.
 .P
 It is possible for capturing subpattern number \fIn+1\fP to match some part of
 the subject when subpattern \fIn\fP has not been used at all. For example, if
@@ -2652,6 +2654,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 01 October 2014
+Last updated: 05 October 2014
 Copyright (c) 1997-2014 University of Cambridge.
 .fi

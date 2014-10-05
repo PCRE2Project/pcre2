@@ -7611,7 +7611,7 @@ Failed: error -37: invalid data in workspace for DFA restart
 
 /abcd/
     abcd\=ovector=0
-Matched, but offsets vector is too small to show all matches
+ 0: abcd
 
 # These tests show up auto-possessification 
 
