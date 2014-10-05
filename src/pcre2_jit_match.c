@@ -155,6 +155,9 @@ if (oveccount > max_oveccount)
   oveccount = max_oveccount;
 arguments.oveccount = oveccount << 1;
 
+if (jit_stack == NULL && functions->callback != NULL)
+  jit_stack = functions->callback(functions->callback_data);
+
 convert_executable_func.executable_func = functions->executable_funcs[index];
 if (jit_stack != NULL)
   {
@@ -169,12 +172,9 @@ if (rc > (int)oveccount)
 match_data->code = re;
 match_data->subject = subject;
 match_data->rc = rc;
-/*
-match_data->startchar = start_match - subject;
-match_data->leftchar = mb->start_used_ptr - subject;
-match_data->rightchar = ((mb->last_used_ptr > mb->end_match_ptr)?
-          mb->last_used_ptr : mb->end_match_ptr) - subject;
-*/
+match_data->startchar = 0;
+match_data->leftchar = 0;
+match_data->rightchar = 0;
 match_data->mark = arguments.mark_ptr;
 
 return match_data->rc;

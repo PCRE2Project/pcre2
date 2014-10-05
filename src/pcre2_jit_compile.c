@@ -196,7 +196,7 @@ typedef struct executable_functions {
   sljit_uw *read_only_data[JIT_NUMBER_OF_COMPILE_MODES];
   sljit_uw executable_sizes[JIT_NUMBER_OF_COMPILE_MODES];
   pcre2_jit_callback callback;
-  void *userdata;
+  void *callback_data;
   sljit_ui top_bracket;
   sljit_ui limit_match;
 } executable_functions;
@@ -5769,7 +5769,7 @@ switch(type)
 
   return cc + 32 / sizeof(PCRE2_UCHAR);
 
-#if defined SUPPORT_UTF || PCRE2_CODE_UNIT_WIDTH == 16 || PCRE2_CODE_UNIT_WIDTH == 32
+#if defined SUPPORT_UNICODE || PCRE2_CODE_UNIT_WIDTH == 16 || PCRE2_CODE_UNIT_WIDTH == 32
   case OP_XCLASS:
   compile_xclass_matchingpath(common, cc + LINK_SIZE, backtracks);
   return cc + GET(cc, 0) - 1;
@@ -6355,16 +6355,17 @@ static SLJIT_INLINE PCRE2_SPTR compile_callout_matchingpath(compiler_common *com
 {
 DEFINE_COMPILER;
 backtrack_common *backtrack;
+sljit_si mov_opcode;
 
 PUSH_BACKTRACK(sizeof(backtrack_common), cc, NULL);
 
 allocate_stack(common, CALLOUT_ARG_SIZE / sizeof(sljit_sw));
 
+SLJIT_ASSERT(common->capture_last_ptr != 0);
 OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(SLJIT_SP), common->capture_last_ptr);
 OP1(SLJIT_MOV, TMP1, 0, ARGUMENTS, 0);
-SLJIT_ASSERT(common->capture_last_ptr != 0);
-OP1(SLJIT_MOV_SI, SLJIT_MEM1(STACK_TOP), CALLOUT_ARG_OFFSET(callout_number), SLJIT_IMM, cc[1]);
-OP1(SLJIT_MOV_SI, SLJIT_MEM1(STACK_TOP), CALLOUT_ARG_OFFSET(capture_last), TMP2, 0);
+OP1(SLJIT_MOV_UI, SLJIT_MEM1(STACK_TOP), CALLOUT_ARG_OFFSET(callout_number), SLJIT_IMM, cc[1]);
+OP1(SLJIT_MOV_UI, SLJIT_MEM1(STACK_TOP), CALLOUT_ARG_OFFSET(capture_last), TMP2, 0);
 
 /* These pointer sized fields temporarly stores internal variables. */
 OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(SLJIT_SP), OVECTOR(0));
@@ -6373,8 +6374,9 @@ OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), CALLOUT_ARG_OFFSET(subject), TMP2, 0);
 
 if (common->mark_ptr != 0)
   OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(TMP1), SLJIT_OFFSETOF(jit_arguments, mark_ptr));
-OP1(SLJIT_MOV_SI, SLJIT_MEM1(STACK_TOP), CALLOUT_ARG_OFFSET(pattern_position), SLJIT_IMM, GET(cc, 2));
-OP1(SLJIT_MOV_SI, SLJIT_MEM1(STACK_TOP), CALLOUT_ARG_OFFSET(next_item_length), SLJIT_IMM, GET(cc, 2 + LINK_SIZE));
+mov_opcode = (sizeof(PCRE2_SIZE) == 4) ? SLJIT_MOV_UI : SLJIT_MOV;
+OP1(mov_opcode, SLJIT_MEM1(STACK_TOP), CALLOUT_ARG_OFFSET(pattern_position), SLJIT_IMM, GET(cc, 2));
+OP1(mov_opcode, SLJIT_MEM1(STACK_TOP), CALLOUT_ARG_OFFSET(next_item_length), SLJIT_IMM, GET(cc, 2 + LINK_SIZE));
 OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), CALLOUT_ARG_OFFSET(mark), (common->mark_ptr != 0) ? TMP2 : SLJIT_IMM, 0);
 
 /* Needed to save important temporary registers. */
@@ -6971,13 +6973,6 @@ if (ket == OP_KET && PRIVATE_DATA(matchingpath) != 0)
     ket = OP_KETRMIN;
   }
 
-if ((opcode == OP_COND || opcode == OP_SCOND) && cc[1 + LINK_SIZE] == OP_FALSE)
-  {
-  /* Drop this bracket_backtrack. */
-  parent->top = backtrack->prev;
-  return matchingpath + 1 + LINK_SIZE + repeat_length;
-  }
-
 matchingpath = ccbegin + 1 + LINK_SIZE;
 SLJIT_ASSERT(ket == OP_KET || ket == OP_KETRMAX || ket == OP_KETRMIN);
 SLJIT_ASSERT(!((bra == OP_BRAZERO && ket == OP_KETRMIN) || (bra == OP_BRAMINZERO && ket == OP_KETRMAX)));
@@ -6985,7 +6980,11 @@ cc += GET(cc, 1);
 
 has_alternatives = *cc == OP_ALT;
 if (SLJIT_UNLIKELY(opcode == OP_COND || opcode == OP_SCOND))
-  has_alternatives = (*matchingpath == OP_RREF || *matchingpath == OP_DNRREF) ? FALSE : TRUE;
+  {
+  SLJIT_COMPILE_ASSERT(OP_DNRREF == OP_RREF + 1 && OP_FALSE == OP_RREF + 2 && OP_TRUE == OP_RREF + 3,
+    compile_time_checks_must_be_grouped_together);
+  has_alternatives = (*matchingpath >= OP_RREF && *matchingpath <= OP_TRUE) ? FALSE : TRUE;
+  }
 
 if (SLJIT_UNLIKELY(opcode == OP_COND) && (*cc == OP_KETRMAX || *cc == OP_KETRMIN))
   opcode = OP_SCOND;
@@ -7243,13 +7242,20 @@ if (opcode == OP_COND || opcode == OP_SCOND)
     add_jump(compiler, &(BACKTRACK_AS(bracket_backtrack)->u.condfailed), JUMP(SLJIT_ZERO));
     matchingpath += 1 + 2 * IMM2_SIZE;
     }
-  else if (*matchingpath == OP_RREF || *matchingpath == OP_DNRREF)
+  else if (*matchingpath >= OP_RREF && *matchingpath <= OP_TRUE)
     {
     /* Never has other case. */
     BACKTRACK_AS(bracket_backtrack)->u.condfailed = NULL;
     SLJIT_ASSERT(!has_alternatives);
 
-    if (*matchingpath == OP_RREF)
+    if (*matchingpath == OP_TRUE)
+      {
+      stacksize = 1;
+      matchingpath++;
+      }
+    else if (*matchingpath == OP_FALSE)
+      stacksize = 0;
+    else if (*matchingpath == OP_RREF)
       {
       stacksize = GET2(matchingpath, 1);
       if (common->currententry == NULL)
@@ -10023,7 +10029,7 @@ OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), OVECTOR(0), STR_PTR, 0);
 /* Copy the limit of allowed recursions. */
 OP1(SLJIT_MOV, COUNT_MATCH, 0, SLJIT_MEM1(SLJIT_SP), LIMIT_MATCH);
 if (common->capture_last_ptr != 0)
-  OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), common->capture_last_ptr, SLJIT_IMM, -1);
+  OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), common->capture_last_ptr, SLJIT_IMM, 0);
 
 if (common->needs_start_ptr)
   {

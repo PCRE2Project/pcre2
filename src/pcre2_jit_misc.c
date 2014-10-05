@@ -108,8 +108,8 @@ return jit_stack;
 *         Assign a JIT stack to a pattern        *
 *************************************************/
 
-PCRE2_EXP_DEFN void PCRE2_CALL_CONVENTION     
-pcre2_jit_stack_assign(const pcre2_code *code, pcre2_jit_callback callback, 
+PCRE2_EXP_DEFN void PCRE2_CALL_CONVENTION
+pcre2_jit_stack_assign(const pcre2_code *code, pcre2_jit_callback callback,
   void *callback_data)
 {
 #ifndef SUPPORT_JIT
@@ -120,10 +120,18 @@ pcre2_jit_stack_assign(const pcre2_code *code, pcre2_jit_callback callback,
 
 #else  /* SUPPORT_JIT */
 
-/* Dummy code */
-code=code;
-callback=callback;
-callback_data=callback_data;
+pcre2_real_code *re = (pcre2_real_code *)code;
+executable_functions *functions;
+
+if (re == NULL)
+  return;
+
+functions = (executable_functions *)re->executable_jit;
+if (functions != NULL)
+  {
+  functions->callback = callback;
+  functions->callback_data = callback_data;
+  }
 
 #endif  /* SUPPORT_JIT */
 }
@@ -133,7 +141,7 @@ callback_data=callback_data;
 *               Free a JIT stack                 *
 *************************************************/
 
-PCRE2_EXP_DEFN void PCRE2_CALL_CONVENTION     
+PCRE2_EXP_DEFN void PCRE2_CALL_CONVENTION
 pcre2_jit_stack_free(pcre2_jit_stack *jit_stack)
 {
 #ifndef SUPPORT_JIT
