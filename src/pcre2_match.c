@@ -290,7 +290,7 @@ enum { RM1=1, RM2,  RM3,  RM4,  RM5,  RM6,  RM7,  RM8,  RM9,  RM10,
        RM31,  RM32, RM33, RM34, RM35, RM36, RM37, RM38, RM39, RM40,
        RM41,  RM42, RM43, RM44, RM45, RM46, RM47, RM48, RM49, RM50,
        RM51,  RM52, RM53, RM54, RM55, RM56, RM57, RM58, RM59, RM60,
-       RM61,  RM62, RM63, RM64, RM65, RM66, RM67 };
+       RM61,  RM62, RM63, RM64, RM65, RM66, RM67, RM68 };
 
 /* These versions of the macros use the stack, as normal. Note that the "rw"
 argument of RMATCH isn't actually used in this definition. */
@@ -2880,7 +2880,7 @@ for (;;)
         max = i; 
         for (;;)
           {
-          RMATCH(eptr, ecode, offset_top, mb, eptrb, RM15);
+          RMATCH(eptr, ecode, offset_top, mb, eptrb, RM68);
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
           if (eptr == pp) break;  /* Failed after minimal repetition */
           eptr = pp;
@@ -6215,7 +6215,7 @@ switch (frame->Xwhere)
   LBL(19) LBL(24) LBL(25) LBL(26) LBL(27) LBL(29) LBL(31) LBL(33)
   LBL(35) LBL(43) LBL(47) LBL(48) LBL(49) LBL(50) LBL(51) LBL(52)
   LBL(53) LBL(54) LBL(55) LBL(56) LBL(57) LBL(58) LBL(63) LBL(64)
-  LBL(65) LBL(66)
+  LBL(65) LBL(66) LBL(68)
 #ifdef SUPPORT_WIDE_CHARS
   LBL(20) LBL(21)
 #endif
