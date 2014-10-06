@@ -1,81 +1,87 @@
-# This set of tests is run only with the 8-bit library. It tests the POSIX
-# interface, which is supported only with the 8-bit library. This test should
-# not be run with JIT (which is not available for the POSIX interface).
-    
-#forbid_utf
-#pattern posix
+# This test is run only when JIT support is available. It checks for a
+# successful and an unsuccessful JIT compile, and a couple of things that are
+# different with JIT.
 
-/abc/
-    abc
-    *** Failers
+/abc/I,jit
 
-/^abc|def/
-    abcdef
-    abcdef\=notbol
+/(?(?C1)(?=a)a)/I,jit
 
-/.*((abc)$|(def))/
-    defabc
-    defabc\=noteol
+/(?(?C1)(?=a)a)/I
 
-/the quick brown fox/
-    the quick brown fox
-    *** Failers
-    The Quick Brown Fox
+/a*/I
 
-/the quick brown fox/i
-    the quick brown fox
-    The Quick Brown Fox
+/(?(R)a*(?1)|((?R))b)/jit
+    aaaabcde
 
-/abc.def/
-    *** Failers
-    abc\ndef
+# Test various compile modes
 
-/abc$/
-    abc
-    abc\n
+#pattern jit,jitverify
 
-/(abc)\2/
+/abcd/
+    abcd
+    xyz
 
-/(abc\1)/
-    abc
+/abcd/
+    abcd
+    ab\=ps
+    ab\=ph
+    xyz
 
-/a*(b+)(z)(z)/
-    aaaabbbbzzzz
-    aaaabbbbzzzz\=ovector=0
-    aaaabbbbzzzz\=ovector=1
-    aaaabbbbzzzz\=ovector=2
+/abcd/
+    abcd
+    ab\=ps
+    ab\=ph
+    xyz
 
-/ab.cd/
-    ab-cd
-    ab=cd
-    ** Failers
-    ab\ncd
+/abcd/jit=1
+    abcd
+    ab\=ps
+    ab\=ph
+    xyz
+    xyz\=ps
 
-/ab.cd/s
-    ab-cd
-    ab=cd
-    ab\ncd
+/abcd/jit=2
+    abcd
+    ab\=ps
+    ab\=ph
+    xyz
 
-/a(b)c/no_auto_capture
-    abc
+/abcd/jit=3
+    abcd
+    ab\=ps
+    ab\=ph
+    xyz
 
-/a(?P<name>b)c/no_auto_capture
-    abc
+/abcd/jit=4
+    abcd
+    ab\=ps
+    ab\=ph
+    xyz
 
-/a?|b?/
-    abc
-    ** Failers
-    ddd\=notempty
+/abcd/jit=5
+    abcd
+    ab\=ps
+    ab\=ph
+    xyz
 
-/\w+A/
-   CDAAAAB
+/abcd/jit=6
+    abcd
+    ab\=ps
+    ab\=ph
+    xyz
 
-/\w+A/ungreedy
-   CDAAAAB
-   
-/\Biss\B/I,aftertext
-    Mississippi
+/abcd/jit=7
+    abcd
+    ab\=ps
+    ab\=ph
+    xyz
 
-/abc/\
+/abcd/I,jit=2
 
-# End of testdata/testinput16  
+/(*NO_START_OPT)a(*:m)b/mark
+    a
+
+/^12345678abcd/m
+    12345678abcd
+
+# End of testinput15

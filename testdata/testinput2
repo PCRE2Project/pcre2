@@ -1220,10 +1220,6 @@
 
 /(a)(?P<named>bc)/IB,no_auto_capture
 
-/(a+)*zz/I
-  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaazzbbbbbb\=find_limits
-  aaaaaaaaaaaaaz\=find_limits
-
 /(aaa(?C1)bbb|ab)/I
    aaabbb
    aaabbb\=callout_data=0
@@ -1583,9 +1579,6 @@ a random value. /Ix
     abc\ndef
     abc\rdef
     abc\r\ndef
-
-!((?:\s|//.*\\n|/[*](?:\\n|.)*?[*]/)*)!I
-   /* this is a C style comment */\=find_limits
 
 /(?P<B>25[0-5]|2[0-4]\d|[01]?\d?\d)(?:\.(?P>B)){3}/I
 
@@ -3274,14 +3267,6 @@ a random value. /Ix
 
 /(abc)(?1)/I
 
-/^(?>a)++/
-    aa\=find_limits
-    aaaaaaaaa\=find_limits
-    
-/(a)(?1)++/
-    aa\=find_limits
-    aaaaaaaaa\=find_limits
-
 /(?:(foo)|(bar)|(baz))X/allcaptures
     bazfooX
     foobazbarX
@@ -3317,15 +3302,6 @@ a random value. /Ix
 
 /[:a[:abc]b:]/B
 
-/((?2))((?1))/
-    abc
-
-/((?(R2)a+|(?1)b))/
-    aaaabcde
-
-/(?(R)a*(?1)|((?R))b)/
-    aaaabcde
-
 /(a+|(?R)b)/
 
 /^(a(*:A)(d|e(*:B))z|aeq)/auto_callout
@@ -3357,15 +3333,6 @@ a random value. /Ix
 /z(*ACCEPT)a/I,aftertext
     baxzbx
 
-/a(?:.)*?a/ims
-    abbbbbbbbbbbbbbbbbbbbba\=find_limits
-    
-/a(?:.(*THEN))*?a/ims
-    abbbbbbbbbbbbbbbbbbbbba\=find_limits
-
-/a(?:.(*THEN:ABC))*?a/ims
-    abbbbbbbbbbbbbbbbbbbbba\=find_limits
-
 /^(?>a+)(?>(z+))\w/B
     aaaazzzzb
     ** Failers
@@ -3383,15 +3350,6 @@ a random value. /Ix
 /(?P<abn>(?P=abn)xxx)/B
 
 /(a\1z)/B
-
-/^(?>a+)(?>b+)(?>c+)(?>d+)(?>e+)/
-     aabbccddee\=find_limits
-
-/^(?>(a+))(?>(b+))(?>(c+))(?>(d+))(?>(e+))/
-     aabbccddee\=find_limits
-
-/^(?>(a+))(?>b+)(?>(c+))(?>d+)(?>(e+))/
-     aabbccddee\=find_limits
 
 /^a\x41z/alt_bsux,allow_empty_class,match_unset_backref,dupnames
     aAz
@@ -3740,43 +3698,6 @@ a random value. /Ix
 
 /(?=b(*THEN)a|)bn|bnn/
     bnn
-
-# --------------------- 
-
-/(*LIMIT_MATCH=12bc)abc/
-
-/(*LIMIT_MATCH=4294967290)abc/
-
-/(*LIMIT_RECURSION=4294967280)abc/I
-
-/(a+)*zz/
-    aaaaaaaaaaaaaz
-    aaaaaaaaaaaaaz\=match_limit=3000
-
-/(a+)*zz/
-    aaaaaaaaaaaaaz\=recursion_limit=10
-
-/(*LIMIT_MATCH=3000)(a+)*zz/I
-    aaaaaaaaaaaaaz
-    aaaaaaaaaaaaaz\=match_limit=60000
-
-/(*LIMIT_MATCH=60000)(*LIMIT_MATCH=3000)(a+)*zz/I
-    aaaaaaaaaaaaaz
-
-/(*LIMIT_MATCH=60000)(a+)*zz/I
-    aaaaaaaaaaaaaz
-    aaaaaaaaaaaaaz\=match_limit=3000
-
-/(*LIMIT_RECURSION=10)(a+)*zz/I
-    aaaaaaaaaaaaaz
-    aaaaaaaaaaaaaz\=recursion_limit=1000
-
-/(*LIMIT_RECURSION=10)(*LIMIT_RECURSION=1000)(a+)*zz/I
-    aaaaaaaaaaaaaz
-
-/(*LIMIT_RECURSION=1000)(a+)*zz/I
-    aaaaaaaaaaaaaz
-    aaaaaaaaaaaaaz\=recursion_limit=10
 
 # This test causes a segfault with Perl 5.18.0 
 

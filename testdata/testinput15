@@ -1,87 +1,9 @@
-# This test is run only when JIT support is available. It checks for a
-# successful and an unsuccessful JIT compile, and a couple of things that are
-# different with JIT.
+# This test is run only when JIT support is not available. It checks that an
+# attempt to use it has the expected behaviour. It also tests things that
+# are different without JIT.
 
-/abc/I,jit
-
-/(?(?C1)(?=a)a)/I,jit
-
-/(?(?C1)(?=a)a)/I
+/abc/I,jit,jitverify
 
 /a*/I
 
-/(?(R)a*(?1)|((?R))b)/jit
-    aaaabcde
-
-# Test various compile modes
-
-#pattern jit,jitverify
-
-/abcd/
-    abcd
-    xyz
-
-/abcd/
-    abcd
-    ab\=ps
-    ab\=ph
-    xyz
-
-/abcd/
-    abcd
-    ab\=ps
-    ab\=ph
-    xyz
-
-/abcd/jit=1
-    abcd
-    ab\=ps
-    ab\=ph
-    xyz
-    xyz\=ps
-
-/abcd/jit=2
-    abcd
-    ab\=ps
-    ab\=ph
-    xyz
-
-/abcd/jit=3
-    abcd
-    ab\=ps
-    ab\=ph
-    xyz
-
-/abcd/jit=4
-    abcd
-    ab\=ps
-    ab\=ph
-    xyz
-
-/abcd/jit=5
-    abcd
-    ab\=ps
-    ab\=ph
-    xyz
-
-/abcd/jit=6
-    abcd
-    ab\=ps
-    ab\=ph
-    xyz
-
-/abcd/jit=7
-    abcd
-    ab\=ps
-    ab\=ph
-    xyz
-
-/abcd/I,jit=2
-
-/(*NO_START_OPT)a(*:m)b/mark
-    a
-
-/^12345678abcd/m
-    12345678abcd
-
-# End of testinput15
+# End of testinput14

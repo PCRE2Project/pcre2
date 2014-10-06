@@ -1,17 +1,195 @@
-# This test is run only when JIT support is not available. It checks that an
-# attempt to use it has the expected behaviour. It also tests things that
-# are different without JIT.
+# These are tests of the match-limiting features. The results are different for 
+# interpretive or JIT matching, so this test should not be run with JIT. The
+# same tests are run using JIT in test 16.
 
-/abc/I,jit,jitverify
+/(a+)*zz/I
+Capturing subpattern count = 1
+Starting code units: a z 
+Last code unit = 'z'
+Subject length lower bound = 2
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaazzbbbbbb\=find_limits
+Minimum match limit = 8
+Minimum recursion limit = 6
+ 0: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaazz
+ 1: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+  aaaaaaaaaaaaaz\=find_limits
+Minimum match limit = 32768
+Minimum recursion limit = 29
+No match
+
+!((?:\s|//.*\\n|/[*](?:\\n|.)*?[*]/)*)!I
+Capturing subpattern count = 1
+May match empty string
+Subject length lower bound = 0
+   /* this is a C style comment */\=find_limits
+Minimum match limit = 120
+Minimum recursion limit = 6
+ 0: /* this is a C style comment */
+ 1: /* this is a C style comment */
+
+/^(?>a)++/
+    aa\=find_limits
+Minimum match limit = 5
+Minimum recursion limit = 2
+ 0: aa
+    aaaaaaaaa\=find_limits
+Minimum match limit = 12
+Minimum recursion limit = 2
+ 0: aaaaaaaaa
+    
+/(a)(?1)++/
+    aa\=find_limits
+Minimum match limit = 7
+Minimum recursion limit = 4
+ 0: aa
+ 1: a
+    aaaaaaaaa\=find_limits
+Minimum match limit = 21
+Minimum recursion limit = 4
+ 0: aaaaaaaaa
+ 1: a
+
+/a(?:.)*?a/ims
+    abbbbbbbbbbbbbbbbbbbbba\=find_limits
+Minimum match limit = 65
+Minimum recursion limit = 2
+ 0: abbbbbbbbbbbbbbbbbbbbba
+    
+/a(?:.(*THEN))*?a/ims
+    abbbbbbbbbbbbbbbbbbbbba\=find_limits
+Minimum match limit = 86
+Minimum recursion limit = 45
+ 0: abbbbbbbbbbbbbbbbbbbbba
+
+/a(?:.(*THEN:ABC))*?a/ims
+    abbbbbbbbbbbbbbbbbbbbba\=find_limits
+Minimum match limit = 86
+Minimum recursion limit = 45
+ 0: abbbbbbbbbbbbbbbbbbbbba
+
+/^(?>a+)(?>b+)(?>c+)(?>d+)(?>e+)/
+     aabbccddee\=find_limits
+Minimum match limit = 7
+Minimum recursion limit = 2
+ 0: aabbccddee
+
+/^(?>(a+))(?>(b+))(?>(c+))(?>(d+))(?>(e+))/
+     aabbccddee\=find_limits
+Minimum match limit = 17
+Minimum recursion limit = 16
+ 0: aabbccddee
+ 1: aa
+ 2: bb
+ 3: cc
+ 4: dd
+ 5: ee
+
+/^(?>(a+))(?>b+)(?>(c+))(?>d+)(?>(e+))/
+     aabbccddee\=find_limits
+Minimum match limit = 13
+Minimum recursion limit = 10
+ 0: aabbccddee
+ 1: aa
+ 2: cc
+ 3: ee
+
+/(*LIMIT_MATCH=12bc)abc/
+Failed: error 160 at offset 0: (*VERB) not recognized or malformed
+
+/(*LIMIT_MATCH=4294967290)abc/
+Failed: error 160 at offset 0: (*VERB) not recognized or malformed
+
+/(*LIMIT_RECURSION=4294967280)abc/I
 Capturing subpattern count = 0
+Recursion limit = 4294967280
 First code unit = 'a'
 Last code unit = 'c'
 Subject length lower bound = 3
-JIT support is not available in this version of PCRE2
 
-/a*/I
-Capturing subpattern count = 0
-May match empty string
-Subject length lower bound = 0
+/(a+)*zz/
+    aaaaaaaaaaaaaz
+No match
+    aaaaaaaaaaaaaz\=match_limit=3000
+Failed: error -45: match limit exceeded
+
+/(a+)*zz/
+    aaaaaaaaaaaaaz\=recursion_limit=10
+Failed: error -50: recursion limit exceeded
+
+/(*LIMIT_MATCH=3000)(a+)*zz/I
+Capturing subpattern count = 1
+Match limit = 3000
+Starting code units: a z 
+Last code unit = 'z'
+Subject length lower bound = 2
+    aaaaaaaaaaaaaz
+Failed: error -45: match limit exceeded
+    aaaaaaaaaaaaaz\=match_limit=60000
+Failed: error -45: match limit exceeded
+
+/(*LIMIT_MATCH=60000)(*LIMIT_MATCH=3000)(a+)*zz/I
+Capturing subpattern count = 1
+Match limit = 3000
+Starting code units: a z 
+Last code unit = 'z'
+Subject length lower bound = 2
+    aaaaaaaaaaaaaz
+Failed: error -45: match limit exceeded
+
+/(*LIMIT_MATCH=60000)(a+)*zz/I
+Capturing subpattern count = 1
+Match limit = 60000
+Starting code units: a z 
+Last code unit = 'z'
+Subject length lower bound = 2
+    aaaaaaaaaaaaaz
+No match
+    aaaaaaaaaaaaaz\=match_limit=3000
+Failed: error -45: match limit exceeded
+
+/(*LIMIT_RECURSION=10)(a+)*zz/I
+Capturing subpattern count = 1
+Recursion limit = 10
+Starting code units: a z 
+Last code unit = 'z'
+Subject length lower bound = 2
+    aaaaaaaaaaaaaz
+Failed: error -50: recursion limit exceeded
+    aaaaaaaaaaaaaz\=recursion_limit=1000
+Failed: error -50: recursion limit exceeded
+
+/(*LIMIT_RECURSION=10)(*LIMIT_RECURSION=1000)(a+)*zz/I
+Capturing subpattern count = 1
+Recursion limit = 1000
+Starting code units: a z 
+Last code unit = 'z'
+Subject length lower bound = 2
+    aaaaaaaaaaaaaz
+No match
+
+/(*LIMIT_RECURSION=1000)(a+)*zz/I
+Capturing subpattern count = 1
+Recursion limit = 1000
+Starting code units: a z 
+Last code unit = 'z'
+Subject length lower bound = 2
+    aaaaaaaaaaaaaz
+No match
+    aaaaaaaaaaaaaz\=recursion_limit=10
+Failed: error -50: recursion limit exceeded
+    
+# These three have infinitely nested recursions. 
+    
+/((?2))((?1))/
+    abc
+Failed: error -49: nested recursion at the same subject position
+
+/((?(R2)a+|(?1)b))/
+    aaaabcde
+Failed: error -49: nested recursion at the same subject position
+
+/(?(R)a*(?1)|((?R))b)/
+    aaaabcde
+Failed: error -49: nested recursion at the same subject position
 
 # End of testinput14

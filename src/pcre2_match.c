@@ -6606,7 +6606,6 @@ else
 
 mb->offset_end = ocount;
 mb->offset_max = (2*ocount)/3;
-mb->capture_last = 0;
 
 /* Reset the working variable associated with each extraction. These should
 never be used unless previously set, but they get saved and restored, and so we
@@ -6673,6 +6672,7 @@ the loop runs just once. */
 for(;;)
   {
   PCRE2_SPTR new_start_match;
+  mb->capture_last = 0;
 
   /* ----------------- Start of match optimizations ---------------- */
 

@@ -4303,21 +4303,6 @@ First code unit = 'a'
 Last code unit = 'c'
 Subject length lower bound = 3
 
-/(a+)*zz/I
-Capturing subpattern count = 1
-Starting code units: a z 
-Last code unit = 'z'
-Subject length lower bound = 2
-  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaazzbbbbbb\=find_limits
-Minimum match limit = 8
-Minimum recursion limit = 6
- 0: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaazz
- 1: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-  aaaaaaaaaaaaaz\=find_limits
-Minimum match limit = 32768
-Minimum recursion limit = 29
-No match
-
 /(aaa(?C1)bbb|ab)/I
 Capturing subpattern count = 1
 First code unit = 'a'
@@ -6142,16 +6127,6 @@ Subject length lower bound = 5
  0: abc\x0d\x0adef
  1: \x0d
  2: \x0a
-
-!((?:\s|//.*\\n|/[*](?:\\n|.)*?[*]/)*)!I
-Capturing subpattern count = 1
-May match empty string
-Subject length lower bound = 0
-   /* this is a C style comment */\=find_limits
-Minimum match limit = 120
-Minimum recursion limit = 6
- 0: /* this is a C style comment */
- 1: /* this is a C style comment */
 
 /(?P<B>25[0-5]|2[0-4]\d|[01]?\d?\d)(?:\.(?P>B)){3}/I
 Capturing subpattern count = 1
@@ -10876,28 +10851,6 @@ First code unit = 'a'
 Last code unit = 'c'
 Subject length lower bound = 6
 
-/^(?>a)++/
-    aa\=find_limits
-Minimum match limit = 5
-Minimum recursion limit = 2
- 0: aa
-    aaaaaaaaa\=find_limits
-Minimum match limit = 12
-Minimum recursion limit = 2
- 0: aaaaaaaaa
-    
-/(a)(?1)++/
-    aa\=find_limits
-Minimum match limit = 7
-Minimum recursion limit = 4
- 0: aa
- 1: a
-    aaaaaaaaa\=find_limits
-Minimum match limit = 21
-Minimum recursion limit = 4
- 0: aaaaaaaaa
- 1: a
-
 /(?:(foo)|(bar)|(baz))X/allcaptures
     bazfooX
  0: fooX
@@ -10931,7 +10884,6 @@ Matched, but too many substrings
 Matched, but too many substrings
  0: fooX
     bazfooX\=ovector=2
-Matched, but too many substrings
  0: fooX
  1: foo
     bazfooX\=ovector=3
@@ -11097,18 +11049,6 @@ Matched, but too many substrings
         End
 ------------------------------------------------------------------
 
-/((?2))((?1))/
-    abc
-Failed: error -49: nested recursion at the same subject position
-
-/((?(R2)a+|(?1)b))/
-    aaaabcde
-Failed: error -49: nested recursion at the same subject position
-
-/(?(R)a*(?1)|((?R))b)/
-    aaaabcde
-Failed: error -49: nested recursion at the same subject position
-
 /(a+|(?R)b)/
 Failed: error 140 at offset 7: recursion could loop indefinitely
 
@@ -11227,24 +11167,6 @@ Subject length lower bound = 0
  0: z
  0+ bx
 
-/a(?:.)*?a/ims
-    abbbbbbbbbbbbbbbbbbbbba\=find_limits
-Minimum match limit = 65
-Minimum recursion limit = 2
- 0: abbbbbbbbbbbbbbbbbbbbba
-    
-/a(?:.(*THEN))*?a/ims
-    abbbbbbbbbbbbbbbbbbbbba\=find_limits
-Minimum match limit = 86
-Minimum recursion limit = 45
- 0: abbbbbbbbbbbbbbbbbbbbba
-
-/a(?:.(*THEN:ABC))*?a/ims
-    abbbbbbbbbbbbbbbbbbbbba\=find_limits
-Minimum match limit = 86
-Minimum recursion limit = 45
- 0: abbbbbbbbbbbbbbbbbbbbba
-
 /^(?>a+)(?>(z+))\w/B
 ------------------------------------------------------------------
         Bra
@@ -11310,32 +11232,6 @@ No match
         Ket
         End
 ------------------------------------------------------------------
-
-/^(?>a+)(?>b+)(?>c+)(?>d+)(?>e+)/
-     aabbccddee\=find_limits
-Minimum match limit = 7
-Minimum recursion limit = 2
- 0: aabbccddee
-
-/^(?>(a+))(?>(b+))(?>(c+))(?>(d+))(?>(e+))/
-     aabbccddee\=find_limits
-Minimum match limit = 17
-Minimum recursion limit = 16
- 0: aabbccddee
- 1: aa
- 2: bb
- 3: cc
- 4: dd
- 5: ee
-
-/^(?>(a+))(?>b+)(?>(c+))(?>d+)(?>(e+))/
-     aabbccddee\=find_limits
-Minimum match limit = 13
-Minimum recursion limit = 10
- 0: aabbccddee
- 1: aa
- 2: cc
- 3: ee
 
 /^a\x41z/alt_bsux,allow_empty_class,match_unset_backref,dupnames
     aAz
@@ -12079,93 +11975,6 @@ No match
 /(?=b(*THEN)a|)bn|bnn/
     bnn
  0: bn
-
-# --------------------- 
-
-/(*LIMIT_MATCH=12bc)abc/
-Failed: error 160 at offset 0: (*VERB) not recognized or malformed
-
-/(*LIMIT_MATCH=4294967290)abc/
-Failed: error 160 at offset 0: (*VERB) not recognized or malformed
-
-/(*LIMIT_RECURSION=4294967280)abc/I
-Capturing subpattern count = 0
-Recursion limit = 4294967280
-First code unit = 'a'
-Last code unit = 'c'
-Subject length lower bound = 3
-
-/(a+)*zz/
-    aaaaaaaaaaaaaz
-No match
-    aaaaaaaaaaaaaz\=match_limit=3000
-Failed: error -45: match limit exceeded
-
-/(a+)*zz/
-    aaaaaaaaaaaaaz\=recursion_limit=10
-Failed: error -50: recursion limit exceeded
-
-/(*LIMIT_MATCH=3000)(a+)*zz/I
-Capturing subpattern count = 1
-Match limit = 3000
-Starting code units: a z 
-Last code unit = 'z'
-Subject length lower bound = 2
-    aaaaaaaaaaaaaz
-Failed: error -45: match limit exceeded
-    aaaaaaaaaaaaaz\=match_limit=60000
-Failed: error -45: match limit exceeded
-
-/(*LIMIT_MATCH=60000)(*LIMIT_MATCH=3000)(a+)*zz/I
-Capturing subpattern count = 1
-Match limit = 3000
-Starting code units: a z 
-Last code unit = 'z'
-Subject length lower bound = 2
-    aaaaaaaaaaaaaz
-Failed: error -45: match limit exceeded
-
-/(*LIMIT_MATCH=60000)(a+)*zz/I
-Capturing subpattern count = 1
-Match limit = 60000
-Starting code units: a z 
-Last code unit = 'z'
-Subject length lower bound = 2
-    aaaaaaaaaaaaaz
-No match
-    aaaaaaaaaaaaaz\=match_limit=3000
-Failed: error -45: match limit exceeded
-
-/(*LIMIT_RECURSION=10)(a+)*zz/I
-Capturing subpattern count = 1
-Recursion limit = 10
-Starting code units: a z 
-Last code unit = 'z'
-Subject length lower bound = 2
-    aaaaaaaaaaaaaz
-Failed: error -50: recursion limit exceeded
-    aaaaaaaaaaaaaz\=recursion_limit=1000
-Failed: error -50: recursion limit exceeded
-
-/(*LIMIT_RECURSION=10)(*LIMIT_RECURSION=1000)(a+)*zz/I
-Capturing subpattern count = 1
-Recursion limit = 1000
-Starting code units: a z 
-Last code unit = 'z'
-Subject length lower bound = 2
-    aaaaaaaaaaaaaz
-No match
-
-/(*LIMIT_RECURSION=1000)(a+)*zz/I
-Capturing subpattern count = 1
-Recursion limit = 1000
-Starting code units: a z 
-Last code unit = 'z'
-Subject length lower bound = 2
-    aaaaaaaaaaaaaz
-No match
-    aaaaaaaaaaaaaz\=recursion_limit=10
-Failed: error -50: recursion limit exceeded
 
 # This test causes a segfault with Perl 5.18.0 
 
