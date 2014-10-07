@@ -44,13 +44,28 @@ POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 
-/* FIXME: these are dummy functions */
+
+/*************************************************
+*           Free JIT compiled code               *
+*************************************************/
+
+void
+PRIV(jit_free)(void *executable_jit)
+{
+#ifndef SUPPORT_JIT
+(void)executable_jit;
+#else  /* SUPPORT_JIT */
+
+/* Dummy code */
+(void)executable_jit;
+
+#endif /* SUPPORT_JIT */
+}
 
 
 /*************************************************
 *            Free unused JIT memory              *
 *************************************************/
-
 
 PCRE2_EXP_DEFN void PCRE2_CALL_CONVENTION
 pcre2_jit_free_unused_memory(pcre2_general_context *gcontext)

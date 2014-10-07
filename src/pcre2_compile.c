@@ -668,8 +668,6 @@ static const uint8_t opcode_possessify[] = {
 };
 
 
-/* FIXME: this is currently incomplete (free JIT?) */
-
 /*************************************************
 *               Free compiled code               *
 *************************************************/
@@ -677,7 +675,11 @@ static const uint8_t opcode_possessify[] = {
 PCRE2_EXP_DEFN void PCRE2_CALL_CONVENTION
 pcre2_code_free(pcre2_code *code)
 {
-if (code != NULL) code->memctl.free(code, code->memctl.memory_data);
+if (code != NULL) 
+  {
+  if (code->executable_jit != NULL) PRIV(jit_free(code->executable_jit)); 
+  code->memctl.free(code, code->memctl.memory_data);
+  } 
 }
 
 
