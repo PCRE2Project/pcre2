@@ -191,9 +191,8 @@ return 0;
 
 #else  /* SUPPORT_JIT */
 
-/* Dummy code */
-executable_jit = executable_jit;
-return 0;
+sljit_uw *executable_sizes = ((executable_functions *)executable_jit)->executable_sizes;
+return executable_sizes[0] + executable_sizes[1] + executable_sizes[2];
 
 #endif
 }

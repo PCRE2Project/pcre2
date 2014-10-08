@@ -108,7 +108,7 @@ executable_functions *functions = (executable_functions *)re->executable_jit;
 uint32_t oveccount = match_data->oveccount;
 uint32_t max_oveccount;
 union {
-   void* executable_func;
+   void *executable_func;
    jit_function call_executable_func;
 } convert_executable_func;
 jit_arguments arguments;
@@ -127,6 +127,8 @@ if (functions->executable_funcs[index] == NULL)
 arguments.str = subject + start_offset;
 arguments.begin = subject;
 arguments.end = subject + length;
+arguments.match_data = match_data;
+arguments.startchar_ptr = subject;
 arguments.mark_ptr = NULL;
 /* JIT decreases this value less frequently than the interpreter. */
 arguments.limit_match = (mcontext != NULL && mcontext->match_limit < re->limit_match)?
@@ -135,7 +137,6 @@ arguments.notbol = (options & PCRE2_NOTBOL) != 0;
 arguments.noteol = (options & PCRE2_NOTEOL) != 0;
 arguments.notempty = (options & PCRE2_NOTEMPTY) != 0;
 arguments.notempty_atstart = (options & PCRE2_NOTEMPTY_ATSTART) != 0;
-arguments.ovector = match_data->ovector;
 arguments.callout = NULL;
 arguments.callout_data = NULL;
 if (mcontext != NULL)
@@ -172,7 +173,7 @@ if (rc > (int)oveccount)
 match_data->code = re;
 match_data->subject = subject;
 match_data->rc = rc;
-match_data->startchar = 0;
+match_data->startchar = arguments.startchar_ptr - subject;
 match_data->leftchar = 0;
 match_data->rightchar = 0;
 match_data->mark = arguments.mark_ptr;
