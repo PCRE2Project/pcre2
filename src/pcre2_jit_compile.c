@@ -352,6 +352,8 @@ typedef struct compiler_common {
   int cbra_ptr;
   /* Output vector starting point. Must be divisible by 2. */
   int ovector_start;
+  /* Points to the starting character of the current match. */
+  int start_ptr;
   /* Last known position of the requested byte. */
   int req_char_ptr;
   /* Head of the last recursion. */
@@ -369,8 +371,6 @@ typedef struct compiler_common {
   int control_head_ptr;
   /* Points to the last matched capture block index. */
   int capture_last_ptr;
-  /* Points to the starting position of the current match. */
-  int start_ptr;
 
   /* Flipped and lower case tables. */
   const sljit_ub *fcc;
@@ -2271,7 +2271,7 @@ SLJIT_ASSERT(common->start_used_ptr != 0 && common->start_ptr != 0
 
 OP1(SLJIT_MOV, SLJIT_R1, 0, ARGUMENTS, 0);
 OP1(SLJIT_MOV, SLJIT_R2, 0, SLJIT_MEM1(SLJIT_SP),
-  common->mode == PCRE2_JIT_PARTIAL_SOFT ? (common->hit_start + sizeof(sljit_sw)) : common->start_ptr);
+  common->mode == PCRE2_JIT_PARTIAL_SOFT ? common->hit_start : common->start_ptr);
 OP1(SLJIT_MOV, SLJIT_RETURN_REG, 0, SLJIT_IMM, PCRE2_ERROR_PARTIAL);
 
 /* Store match begin and end. */
@@ -9851,7 +9851,7 @@ if (mode != PCRE2_JIT_COMPLETE)
   if (mode == PCRE2_JIT_PARTIAL_SOFT)
     {
     common->hit_start = common->ovector_start;
-    common->ovector_start += 2 * sizeof(sljit_sw);
+    common->ovector_start += sizeof(sljit_sw);
     }
   }
 if ((re->overall_options & PCRE2_FIRSTLINE) != 0)
@@ -10015,7 +10015,6 @@ if (mode == PCRE2_JIT_PARTIAL_SOFT)
   {
   jump = CMP(SLJIT_NOT_EQUAL, SLJIT_MEM1(SLJIT_SP), common->hit_start, SLJIT_IMM, -1);
   OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), common->start_used_ptr, STR_PTR, 0);
-  OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), common->hit_start + sizeof(sljit_sw), STR_PTR, 0);
   JUMPHERE(jump);
   }
 else if (mode == PCRE2_JIT_PARTIAL_HARD)
@@ -10080,7 +10079,7 @@ if (mode == PCRE2_JIT_PARTIAL_SOFT)
   {
   /* Update hit_start only in the first time. */
   jump = CMP(SLJIT_NOT_EQUAL, SLJIT_MEM1(SLJIT_SP), common->hit_start, SLJIT_IMM, 0);
-  OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_SP), common->start_used_ptr);
+  OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_SP), common->start_ptr);
   OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), common->start_used_ptr, SLJIT_IMM, -1);
   OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), common->hit_start, TMP1, 0);
   JUMPHERE(jump);
@@ -10305,6 +10304,7 @@ if (mode == PCRE2_JIT_COMPLETE)
 else
   mode = (mode == PCRE2_JIT_PARTIAL_SOFT) ? 1 : 2;
 
+SLJIT_ASSERT(mode >= 0 && mode < JIT_NUMBER_OF_COMPILE_MODES);
 functions->executable_funcs[mode] = executable_func;
 functions->read_only_data[mode] = common->read_only_data;
 functions->executable_sizes[mode] = executable_size;

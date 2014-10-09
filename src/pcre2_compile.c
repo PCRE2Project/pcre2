@@ -677,7 +677,8 @@ pcre2_code_free(pcre2_code *code)
 {
 if (code != NULL) 
   {
-  if (code->executable_jit != NULL) PRIV(jit_free(code->executable_jit)); 
+  if (code->executable_jit != NULL)
+    PRIV(jit_free)(code->executable_jit, &code->memctl);
   code->memctl.free(code, code->memctl.memory_data);
   } 
 }

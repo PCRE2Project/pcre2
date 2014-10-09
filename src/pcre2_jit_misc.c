@@ -50,14 +50,26 @@ POSSIBILITY OF SUCH DAMAGE.
 *************************************************/
 
 void
-PRIV(jit_free)(void *executable_jit)
+PRIV(jit_free)(void *executable_jit, pcre2_memctl *memctl)
 {
 #ifndef SUPPORT_JIT
 (void)executable_jit;
+(void)memctl;
 #else  /* SUPPORT_JIT */
 
-/* Dummy code */
-(void)executable_jit;
+executable_functions *functions = (executable_functions *)executable_jit;
+void *allocator_data = memctl;
+int i;
+
+for (i = 0; i < JIT_NUMBER_OF_COMPILE_MODES; i++)
+  {
+  if (functions->executable_funcs[i] != NULL)
+    sljit_free_code(functions->executable_funcs[i]);
+  if (functions->read_only_data[i] != NULL)
+    SLJIT_FREE(functions->read_only_data[i], allocator_data);
+  }
+
+SLJIT_FREE(functions, allocator_data);
 
 #endif /* SUPPORT_JIT */
 }
@@ -192,6 +204,7 @@ return 0;
 #else  /* SUPPORT_JIT */
 
 sljit_uw *executable_sizes = ((executable_functions *)executable_jit)->executable_sizes;
+SLJIT_COMPILE_ASSERT(JIT_NUMBER_OF_COMPILE_MODES == 3, number_of_compile_modes_changed);
 return executable_sizes[0] + executable_sizes[1] + executable_sizes[2];
 
 #endif
