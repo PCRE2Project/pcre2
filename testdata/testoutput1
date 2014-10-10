@@ -9396,4 +9396,11 @@ No match
     A9B  
  0: A9B
 
+/(|ab)*?d/
+   abd
+ 0: abd
+ 1: ab
+   xyd 
+ 0: d
+
 # End of testinput1 

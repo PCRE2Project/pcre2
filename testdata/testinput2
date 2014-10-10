@@ -3995,4 +3995,12 @@ a random value. /Ix
 
 /abcd/I,no_start_optimize
 
+/(|ab)*?d/I
+   abd
+   xyd 
+
+/(|ab)*?d/I,no_start_optimize
+   abd
+   xyd 
+
 # End of testinput2 

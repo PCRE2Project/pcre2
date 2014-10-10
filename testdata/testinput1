@@ -5698,4 +5698,8 @@ name)/mark
     A8B
     A9B  
 
+/(|ab)*?d/
+   abd
+   xyd 
+
 # End of testinput1 

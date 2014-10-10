@@ -6219,7 +6219,7 @@ for (;; ptr++)
       than one can replicate it as reqcu if necessary. If the subpattern has
       no firstcu, set "none" for the whole branch. In both cases, a zero
       repeat forces firstcu to "none". */
-
+      
       if (firstcuflags == REQ_UNSET && subfirstcuflags != REQ_UNSET)
         {
         if (subfirstcuflags >= 0)
@@ -6750,15 +6750,16 @@ for (;;)
       we have to abandon the firstcu for the regex, but if there was
       previously no reqcu, it takes on the value of the old firstcu. */
 
-      if (firstcuflags >= 0 &&
-         (firstcuflags != branchfirstcuflags ||
-          firstcu != branchfirstcu))
+      if (firstcuflags != branchfirstcuflags || firstcu != branchfirstcu)
         {
-        if (reqcuflags < 0)
+        if (firstcuflags >= 0)
           {
-          reqcu = firstcu;
-          reqcuflags = firstcuflags;
-          }
+          if (reqcuflags < 0)
+            {
+            reqcu = firstcu;
+            reqcuflags = firstcuflags;
+            }
+          }   
         firstcuflags = REQ_NONE;
         }
 

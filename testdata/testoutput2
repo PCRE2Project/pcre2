@@ -13554,4 +13554,26 @@ Capturing subpattern count = 0
 Options: no_start_optimize
 Subject length lower bound = 0
 
+/(|ab)*?d/I
+Capturing subpattern count = 1
+Starting code units: a d 
+Last code unit = 'd'
+Subject length lower bound = 1
+   abd
+ 0: abd
+ 1: ab
+   xyd 
+ 0: d
+
+/(|ab)*?d/I,no_start_optimize
+Capturing subpattern count = 1
+Options: no_start_optimize
+Last code unit = 'd'
+Subject length lower bound = 0
+   abd
+ 0: abd
+ 1: ab
+   xyd 
+ 0: d
+
 # End of testinput2 
