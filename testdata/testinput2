@@ -3955,27 +3955,6 @@ a random value. /Ix
     aaaabcde
     aaaabcde\=ovector=100
 
-/abc(?=xyz)/allusedtext
-    abcxyzpqr
-    abcxyzpqr\=aftertext
-    
-/(?<=pqr)abc(?=xyz)/allusedtext
-    xyzpqrabcxyzpqr
-    xyzpqrabcxyzpqr\=aftertext
-    
-/a\b/
-    a.\=allusedtext
-    a\=allusedtext  
-
-/abc\Kxyz/
-    abcxyz\=allusedtext
-
-/abc(?=xyz(*ACCEPT))/
-    abcxyz\=allusedtext
-
-/abc(?=abcde)(?=ab)/allusedtext
-    abcabcdefg
-
 /a*?b*?/
     ab
 

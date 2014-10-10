@@ -1,4 +1,4 @@
-.TH PCRE2TEST 1 "05 October 2014" "PCRE 10.00"
+.TH PCRE2TEST 1 "10 October 2014" "PCRE 10.00"
 .SH NAME
 pcre2test - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -630,7 +630,7 @@ not affect the compilation process.
       aftertext                 show text after match
       allaftertext              show text after captures
       allcaptures               show all captures
-      allusedtext               show all consulted text 
+      allusedtext               show all consulted text
   /g  global                    global matching
       jitverify                 verify JIT usage
       mark                      show mark values
@@ -688,7 +688,7 @@ pattern.
       aftertext                 show text after match
       allaftertext              show text after captures
       allcaptures               show all captures
-      allusedtext               show all consulted text 
+      allusedtext               show all consulted text (non-JIT only)
       altglobal                 alternative global matching
       callout_capture           show captures at callout time
       callout_data=<n>          set a value to pass via callouts
@@ -724,11 +724,13 @@ requests the same action for captured substrings as well as the main matched
 substring. In each case the remainder is output on the following line with a
 plus character following the capture number.
 .P
-The \fBallusedtext\fP modifier requests that all the text that was consulted 
-during a successful pattern match be shown. This affects the output if there 
-is a lookbehind at the start of a match, or a lookahead at the end, or if \eK 
-is used in the pattern. Characters that precede or follow the start and end of 
-the actual match are indicated in the output by '<' or '>' characters 
+The \fBallusedtext\fP modifier requests that all the text that was consulted
+during a successful pattern match by the interpreter should be shown. This
+feature is not supported for JIT matching, and if requested with JIT it is
+ignored (with a warning message). Setting this modifier affects the output if
+there is a lookbehind at the start of a match, or a lookahead at the end, or if
+\eK is used in the pattern. Characters that precede or follow the start and end
+of the actual match are indicated in the output by '<' or '>' characters
 underneath them. Here is an example:
 .sp
   /(?<=pqr)abc(?=xyz)/
@@ -1151,6 +1153,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 05 October 2014
+Last updated: 10 October 2014
 Copyright (c) 1997-2014 University of Cambridge.
 .fi

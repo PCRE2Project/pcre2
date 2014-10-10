@@ -515,10 +515,10 @@ same response. */
 
 /* These macros pack up tests that are used for partial matching, and which
 appear several times in the code. We set the "hit end" flag if the pointer is
-at the end of the subject and also past the start of the subject (i.e.
-something has been matched). For hard partial matching, we then return
-immediately. The second one is used when we already know we are past the end of
-the subject. */
+at the end of the subject and also past the earliest inspected character (i.e.
+something has been matched, even if not part of the actual matched string). For
+hard partial matching, we then return immediately. The second one is used when
+we already know we are past the end of the subject. */
 
 #define CHECK_PARTIAL()\
   if (mb->partial != 0 && eptr >= mb->end_subject && \

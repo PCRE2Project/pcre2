@@ -95,18 +95,6 @@ if (match_data != NULL)
 
 
 /*************************************************
-*         Get left-most code unit in match       *
-*************************************************/
-
-PCRE2_EXP_DEFN PCRE2_SIZE PCRE2_CALL_CONVENTION
-pcre2_get_leftchar(pcre2_match_data *match_data)
-{
-return match_data->leftchar;
-}
-
-
-
-/*************************************************
 *         Get last mark in match                 *
 *************************************************/
 
@@ -138,18 +126,6 @@ PCRE2_EXP_DEFN uint32_t PCRE2_CALL_CONVENTION
 pcre2_get_ovector_count(pcre2_match_data *match_data)
 {
 return match_data->oveccount;
-}
-
-
-
-/*************************************************
-*         Get right-most code unit in match      *
-*************************************************/
-
-PCRE2_EXP_DEFN PCRE2_SIZE PCRE2_CALL_CONVENTION
-pcre2_get_rightchar(pcre2_match_data *match_data)
-{
-return match_data->rightchar;
 }
 
 

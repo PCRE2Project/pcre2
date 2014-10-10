@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "05 October 2014" "PCRE2 10.00"
+.TH PCRE2API 3 "10 October 2014" "PCRE2 10.00"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -47,15 +47,11 @@ document for an overview of all the PCRE2 documentation.
 .rs
 .sp
 .nf
-.B PCRE2_SIZE pcre2_get_leftchar(pcre2_match_data *\fImatch_data\fP);
-.sp
 .B PCRE2_SPTR pcre2_get_mark(pcre2_match_data *\fImatch_data\fP);
 .sp
 .B uint32_t pcre2_get_ovector_count(pcre2_match_data *\fImatch_data\fP);
 .sp
 .B PCRE2_SIZE *pcre2_get_ovector_pointer(pcre2_match_data *\fImatch_data\fP);
-.sp
-.B PCRE2_SIZE pcre2_get_rightchar(pcre2_match_data *\fImatch_data\fP);
 .sp
 .B PCRE2_SIZE pcre2_get_startchar(pcre2_match_data *\fImatch_data\fP);
 .fi
@@ -2054,10 +2050,6 @@ had.
 .nf
 .B PCRE2_SPTR pcre2_get_mark(pcre2_match_data *\fImatch_data\fP);
 .sp
-.B PCRE2_SIZE pcre2_get_leftchar(pcre2_match_data *\fImatch_data\fP);
-.sp
-.B PCRE2_SIZE pcre2_get_rightchar(pcre2_match_data *\fImatch_data\fP);
-.sp
 .B PCRE2_SIZE pcre2_get_startchar(pcre2_match_data *\fImatch_data\fP);
 .fi
 .P
@@ -2069,35 +2061,15 @@ pointer to the zero-terminated name, which is within the compiled pattern.
 Otherwise NULL is returned. A (*MARK) name may be available after a failed 
 match or a partial match, as well as after a successful one.
 .P
-The other three functions yield values that give information about the part of 
-the subject string that was inspected during a successful match or a partial 
-match. Their results are undefined after a failed match. They return the 
-following values, respectively:
-.sp
-(1) The offset of the leftmost character that was inspected during the match.
-This can be earlier than the point at which the match started if the pattern
-contains lookbehind assertions or \eb or \eB at the start.
-.sp
-(2) The offset of the character that follows the rightmost character that was
-inspected during the match. This can be after the end of the match if the 
-pattern contains lookahead assertions.
-.sp
-(3) The offset of the character at which the successful or partial match 
-started. This can be different to the value of \fIovector[0]\fP if the pattern 
-contains the \eK escape sequence.
-.P
-For example, if the pattern (?<=abc)xx\eKyy(?=def) is matched against the
-string "123abcxxyydef123", the resulting offsets are:
-.sp
-  ovector[0]   8
-  ovector[1]  10
-  leftchar     3
-  rightchar   13
-  startchar    6
-.sp
-The \fBallusedtext\fP modifier in \fBpcre2test\fP can be used to display a
-longer string that shows the leftmost and rightmost characters in a match
-instead of just the matched string.
+The offset of the character at which the successful or partial match started is
+returned by \fBpcre2_get_startchar()\fP. This can be different to the value of
+\fIovector[0]\fP if the pattern contains the \eK escape sequence. This 
+information is needed when doing partial matching over multiple data segments 
+(see the
+.\" HREF
+\fBpcre2partial\fP
+.\"
+documentation).
 .
 .
 .\" HTML <a name="errorlist"></a>
@@ -2654,6 +2626,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 05 October 2014
+Last updated: 10 October 2014
 Copyright (c) 1997-2014 University of Cambridge.
 .fi

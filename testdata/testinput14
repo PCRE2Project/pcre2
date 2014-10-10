@@ -1,6 +1,10 @@
-# These are tests of the match-limiting features. The results are different for 
+# These are:
+#
+# (1) Tests of the match-limiting features. The results are different for
 # interpretive or JIT matching, so this test should not be run with JIT. The
 # same tests are run using JIT in test 16.
+
+# (2) Other tests that must not be run with JIT.
 
 /(a+)*zz/I
   aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaazzbbbbbb\=find_limits
@@ -80,5 +84,29 @@
 
 /(?(R)a*(?1)|((?R))b)/
     aaaabcde
+    
+# The allusedtext modifier does not work with JIT, which does not maintain
+# the leftchar/rightchar data.
+
+/abc(?=xyz)/allusedtext
+    abcxyzpqr
+    abcxyzpqr\=aftertext
+    
+/(?<=pqr)abc(?=xyz)/allusedtext
+    xyzpqrabcxyzpqr
+    xyzpqrabcxyzpqr\=aftertext
+    
+/a\b/
+    a.\=allusedtext
+    a\=allusedtext  
+
+/abc\Kxyz/
+    abcxyz\=allusedtext
+
+/abc(?=xyz(*ACCEPT))/
+    abcxyz\=allusedtext
+
+/abc(?=abcde)(?=ab)/allusedtext
+    abcabcdefg
 
 # End of testinput14

@@ -1,6 +1,10 @@
-# These are tests of the match-limiting features. The results are different for 
+# These are:
+#
+# (1) Tests of the match-limiting features. The results are different for
 # interpretive or JIT matching, so this test should not be run with JIT. The
 # same tests are run using JIT in test 16.
+
+# (2) Other tests that must not be run with JIT.
 
 /(a+)*zz/I
 Capturing subpattern count = 1
@@ -191,5 +195,48 @@ Failed: error -49: nested recursion at the same subject position
 /(?(R)a*(?1)|((?R))b)/
     aaaabcde
 Failed: error -49: nested recursion at the same subject position
+    
+# The allusedtext modifier does not work with JIT, which does not maintain
+# the leftchar/rightchar data.
+
+/abc(?=xyz)/allusedtext
+    abcxyzpqr
+ 0: abcxyz
+       >>>
+    abcxyzpqr\=aftertext
+ 0: abcxyz
+       >>>
+ 0+ xyzpqr
+    
+/(?<=pqr)abc(?=xyz)/allusedtext
+    xyzpqrabcxyzpqr
+ 0: pqrabcxyz
+    <<<   >>>
+    xyzpqrabcxyzpqr\=aftertext
+ 0: pqrabcxyz
+    <<<   >>>
+ 0+ xyzpqr
+    
+/a\b/
+    a.\=allusedtext
+ 0: a.
+     >
+    a\=allusedtext  
+ 0: a
+
+/abc\Kxyz/
+    abcxyz\=allusedtext
+ 0: abcxyz
+    <<<   
+
+/abc(?=xyz(*ACCEPT))/
+    abcxyz\=allusedtext
+ 0: abcxyz
+       >>>
+
+/abc(?=abcde)(?=ab)/allusedtext
+    abcabcdefg
+ 0: abcabcde
+       >>>>>
 
 # End of testinput14

@@ -13463,46 +13463,6 @@ No match
     aaaabcde\=ovector=100
  0: aaaab
 
-/abc(?=xyz)/allusedtext
-    abcxyzpqr
- 0: abcxyz
-       >>>
-    abcxyzpqr\=aftertext
- 0: abcxyz
-       >>>
- 0+ xyzpqr
-    
-/(?<=pqr)abc(?=xyz)/allusedtext
-    xyzpqrabcxyzpqr
- 0: pqrabcxyz
-    <<<   >>>
-    xyzpqrabcxyzpqr\=aftertext
- 0: pqrabcxyz
-    <<<   >>>
- 0+ xyzpqr
-    
-/a\b/
-    a.\=allusedtext
- 0: a.
-     >
-    a\=allusedtext  
- 0: a
-
-/abc\Kxyz/
-    abcxyz\=allusedtext
- 0: abcxyz
-    <<<   
-
-/abc(?=xyz(*ACCEPT))/
-    abcxyz\=allusedtext
- 0: abcxyz
-       >>>
-
-/abc(?=abcde)(?=ab)/allusedtext
-    abcabcdefg
- 0: abcabcde
-       >>>>>
-
 /a*?b*?/
     ab
  0: 

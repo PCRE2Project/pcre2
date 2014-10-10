@@ -4381,9 +4381,16 @@ modifiers. */
 
 if ((dat_datctl.control & (CTL_DFA|CTL_FINDLIMITS)) == (CTL_DFA|CTL_FINDLIMITS))
   {
-  printf("** Finding match limits is not relevant for DFA matching: ignored\n");
+  fprintf(outfile, "** Finding match limits is not relevant for DFA matching: ignored\n");
   dat_datctl.control &= ~CTL_FINDLIMITS;
   }
+  
+if ((dat_datctl.control & CTL_ALLUSEDTEXT) != 0 && 
+    FLD(compiled_code, executable_jit) != NULL)
+  {
+  fprintf(outfile, "** Showing all consulted text is not supported by JIT: ignored\n");
+  dat_datctl.control &= ~CTL_ALLUSEDTEXT;  
+  }  
 
 /* As pcre2_match_data_create() imposes a minimum of 1 on the ovector count, we
 must do so too. */
