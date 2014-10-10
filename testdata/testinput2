@@ -4003,4 +4003,7 @@ a random value. /Ix
    abd
    xyd 
 
+/\k<A>*(?<A>aa)(?<A>bb)/match_unset_backref,dupnames
+    aabb
+
 # End of testinput2 

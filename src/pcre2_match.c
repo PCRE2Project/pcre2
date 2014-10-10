@@ -2763,19 +2763,20 @@ for (;;)
       continue;              /* With the main loop */
       }
 
-    /* Handle repeated back references. If a set group has length zero, just 
-    continue with the main loop, because it matches however many times. For an 
-    unset reference, in non-match-unset-backref mode, if the minimum is
-    zero, we can continue at the same level without recursion. For any other
-    minimum, carrying on will result in NOMATCH. */
+    /* Handle repeated back references. If a set group has length zero, just
+    continue with the main loop, because it matches however many times. For an
+    unset reference, if the minimum is zero, we can also just continue. We an
+    also continue if PCRE2_MATCH_UNSET_BACKREF is set, because this makes unset
+    group be have as a zero-length group. For any other unset cases, carrying
+    on will result in NOMATCH. */
     
     if (offset < offset_top && mb->ovector[offset] != PCRE2_UNSET)
       { 
       if (mb->ovector[offset] == mb->ovector[offset + 1]) continue;
       }
-    else
+    else  /* Group is not set */
       {
-      if (min == 0 && (mb->poptions & PCRE2_MATCH_UNSET_BACKREF) == 0)
+      if (min == 0 || (mb->poptions & PCRE2_MATCH_UNSET_BACKREF) != 0)
         continue; 
       }      
 
@@ -2856,7 +2857,7 @@ for (;;)
         eptr += slength;
         }
 
-      /* If the length matched for each repetiaion is the same as the length of 
+      /* If the length matched for each repetition is the same as the length of 
       the captured group, we can easily work backwards. This is the normal 
       case. However, in caseless UTF-8 mode there are pairs of case-equivalent 
       characters whose lengths (in terms of code units) differ. However, this

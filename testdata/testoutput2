@@ -13576,4 +13576,10 @@ Subject length lower bound = 0
    xyd 
  0: d
 
+/\k<A>*(?<A>aa)(?<A>bb)/match_unset_backref,dupnames
+    aabb
+ 0: aabb
+ 1: aa
+ 2: bb
+
 # End of testinput2 
