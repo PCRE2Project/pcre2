@@ -131,25 +131,27 @@ arguments.match_data = match_data;
 arguments.startchar_ptr = subject;
 arguments.mark_ptr = NULL;
 /* JIT decreases this value less frequently than the interpreter. */
-arguments.limit_match = (mcontext != NULL && mcontext->match_limit < re->limit_match)?
-   mcontext->match_limit : re->limit_match;
 arguments.notbol = (options & PCRE2_NOTBOL) != 0;
 arguments.noteol = (options & PCRE2_NOTEOL) != 0;
 arguments.notempty = (options & PCRE2_NOTEMPTY) != 0;
 arguments.notempty_atstart = (options & PCRE2_NOTEMPTY_ATSTART) != 0;
-arguments.callout = NULL;
-arguments.callout_data = NULL;
 if (mcontext != NULL)
   {
   arguments.callout = mcontext->callout;
   arguments.callout_data = mcontext->callout_data;
+  arguments.limit_match = (mcontext->match_limit < re->limit_match)?
+    mcontext->match_limit : re->limit_match;
+  }
+else
+  {
+  arguments.callout = NULL;
+  arguments.callout_data = NULL;
+  arguments.limit_match = (MATCH_LIMIT < re->limit_match)?
+    MATCH_LIMIT : re->limit_match;
   }
 
-/* pcre_exec() rounds offset_count to a multiple of 3, and then uses only 2/3 of
-the output vector for storing captured strings, with the remainder used as
-workspace. We don't need the workspace here. For compatibility, we limit the
-number of captured strings in the same way as pcre_exec(), so that the user
-gets the same result with and without JIT. */
+/* JIT only need two offsets for each ovector entry. Hence
+   the last 1/3 of the ovector will never be touched. */
 
 max_oveccount = functions->top_bracket;
 if (oveccount > max_oveccount)
