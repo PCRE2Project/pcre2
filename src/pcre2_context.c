@@ -127,22 +127,19 @@ return gcontext;
 }
 
 
-PCRE2_EXP_DEFN void
-PRIV(compile_context_init)(pcre2_compile_context *ccontext, BOOL defmemctl)
-{
-if (defmemctl)
-  {
-  ccontext->memctl.malloc = default_malloc;
-  ccontext->memctl.free = default_free;
-  ccontext->memctl.memory_data = NULL;
-  } 
-ccontext->stack_guard = NULL;
-ccontext->tables = PRIV(default_tables);
-ccontext->parens_nest_limit = PARENS_NEST_LIMIT;
-ccontext->newline_convention = NEWLINE_DEFAULT;
-ccontext->bsr_convention = BSR_DEFAULT;
-}
+/* A default compile context is set up to save having to initialize at run time
+when no context is supplied to the compile function. */
 
+const pcre2_compile_context PRIV(default_compile_context) = {
+  { default_malloc, default_free, NULL },
+  NULL,
+  PRIV(default_tables),
+  BSR_DEFAULT,
+  NEWLINE_DEFAULT,
+  PARENS_NEST_LIMIT };     
+
+/* The create function copies the default into the new memory, but must
+override the default memory handling functions if a gcontext was provided. */
 
 PCRE2_EXP_DEFN pcre2_compile_context * PCRE2_CALL_CONVENTION
 pcre2_compile_context_create(pcre2_general_context *gcontext)
@@ -150,29 +147,28 @@ pcre2_compile_context_create(pcre2_general_context *gcontext)
 pcre2_compile_context *ccontext = PRIV(memctl_malloc)(
   sizeof(pcre2_real_compile_context), (pcre2_memctl *)gcontext); 
 if (ccontext == NULL) return NULL;  
-PRIV(compile_context_init)(ccontext, FALSE);
+*ccontext = PRIV(default_compile_context);
+if (gcontext != NULL)
+  *((pcre2_memctl *)ccontext) = *((pcre2_memctl *)gcontext);
 return ccontext;
 }
 
 
-PCRE2_EXP_DEFN void
-PRIV(match_context_init)(pcre2_match_context *mcontext, BOOL defmemctl)
-{
-if (defmemctl)
-  {
-  mcontext->memctl.malloc = default_malloc;
-  mcontext->memctl.free = default_free;
-  mcontext->memctl.memory_data = NULL;
-  } 
-#ifdef HEAP_MATCH_RECURSE  
-mcontext->stack_memctl = mcontext->memctl;
-#endif
-mcontext->callout = NULL;
-mcontext->callout_data = NULL;
-mcontext->match_limit = MATCH_LIMIT;
-mcontext->recursion_limit = MATCH_LIMIT_RECURSION;
-}
+/* A default match context is set up to save having to initialize at run time
+when no context is supplied to a match function. */
 
+const pcre2_match_context PRIV(default_match_context) = {
+  { default_malloc, default_free, NULL },
+#ifdef HEAP_MATCH_RECURSE   
+  { default_malloc, default_free, NULL },
+#endif
+  NULL,
+  NULL,
+  MATCH_LIMIT,
+  MATCH_LIMIT_RECURSION };  
+ 
+/* The create function copies the default into the new memory, but must
+override the default memory handling functions if a gcontext was provided. */
 
 PCRE2_EXP_DEFN pcre2_match_context * PCRE2_CALL_CONVENTION
 pcre2_match_context_create(pcre2_general_context *gcontext)
@@ -180,7 +176,9 @@ pcre2_match_context_create(pcre2_general_context *gcontext)
 pcre2_match_context *mcontext = PRIV(memctl_malloc)(
   sizeof(pcre2_real_match_context), (pcre2_memctl *)gcontext);  
 if (mcontext == NULL) return NULL;   
-PRIV(match_context_init)(mcontext, FALSE);
+*mcontext = PRIV(default_match_context);
+if (gcontext != NULL)
+  *((pcre2_memctl *)mcontext) = *((pcre2_memctl *)gcontext);
 return mcontext;
 }
 

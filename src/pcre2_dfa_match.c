@@ -3068,7 +3068,6 @@ pcre2_dfa_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
   pcre2_match_context *mcontext, int *workspace, size_t wscount)
 {
 const pcre2_real_code *re = (const pcre2_real_code *)code;
-pcre2_match_context default_context;  /* For use if no context given */
 
 PCRE2_SPTR start_match;
 PCRE2_SPTR end_subject;
@@ -3149,10 +3148,7 @@ options |= (re->flags & FF) / ((FF & -FF) / (OO & -OO));
 /* A NULL match context means "use a default context" */
 
 if (mcontext == NULL)
-  {
-  PRIV(match_context_init)(&default_context, TRUE);
-  mcontext = &default_context;
-  }
+  mcontext = (pcre2_match_context *)(&PRIV(default_match_context));
 
 /* If restarting after a partial match, do some sanity checks on the contents
 of the workspace. */

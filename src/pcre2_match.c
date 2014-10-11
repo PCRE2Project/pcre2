@@ -6352,7 +6352,6 @@ int ocount;
 const uint8_t *start_bits = NULL;
 
 const pcre2_real_code *re = (const pcre2_real_code *)code;
-pcre2_match_context default_context;  /* For use if no context given */
 
 BOOL anchored;
 BOOL firstline;
@@ -6440,10 +6439,7 @@ options |= (re->flags & FF) / ((FF & -FF) / (OO & -OO));
 /* A NULL match context means "use a default context" */
 
 if (mcontext == NULL)
-  {
-  PRIV(match_context_init)(&default_context, TRUE);
-  mcontext = &default_context;
-  }
+  mcontext = (pcre2_match_context *)(&PRIV(default_match_context));
 
 /* These two settings are used in the code for checking a UTF string that
 follows immediately afterwards. Other values in the mb block are used only

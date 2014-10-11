@@ -1785,12 +1785,12 @@ typedef struct {
 #define MAX_NON_UTF_CHAR (0xffffffffU >> (32 - PCRE2_CODE_UNIT_WIDTH))
 
 
-/* Internal shared data tables. These are tables that are used by more than one
+/* Internal shared data tables and variables. These are used by more than one
 of the exported public functions. They have to be "external" in the C sense,
-but are not part of the PCRE2 public API. Although the data for some of the
-tables is identical in all libraries, they must have different names so that
-multiple libraries can be simultaneously linked to a single application.
-However, UTF-8 tables are needed only when compiling the 8-bit library. */
+but are not part of the PCRE2 public API. Although the data for some of them is
+identical in all libraries, they must have different names so that multiple
+libraries can be simultaneously linked to a single application. However, UTF-8
+tables are needed only when compiling the 8-bit library. */
 
 #if PCRE2_CODE_UNIT_WIDTH == 8
 extern const int              PRIV(utf8_table1)[];
@@ -1800,39 +1800,43 @@ extern const int              PRIV(utf8_table3)[];
 extern const uint8_t          PRIV(utf8_table4)[];
 #endif
 
-#define _pcre2_OP_lengths         PCRE2_SUFFIX(_pcre2_OP_lengths_)
-#define _pcre2_default_tables     PCRE2_SUFFIX(_pcre2_default_tables_)
-#define _pcre2_hspace_list        PCRE2_SUFFIX(_pcre2_hspace_list_)
-#define _pcre2_vspace_list        PCRE2_SUFFIX(_pcre2_vspace_list_)
-#define _pcre2_ucd_caseless_sets  PCRE2_SUFFIX(_pcre2_ucd_caseless_sets_)
-#define _pcre2_ucd_records        PCRE2_SUFFIX(_pcre2_ucd_records_)
-#define _pcre2_ucd_stage1         PCRE2_SUFFIX(_pcre2_ucd_stage1_)
-#define _pcre2_ucd_stage2         PCRE2_SUFFIX(_pcre2_ucd_stage2_)
-#define _pcre2_ucp_gbtable        PCRE2_SUFFIX(_pcre2_ucp_gbtable_)
-#define _pcre2_ucp_gentype        PCRE2_SUFFIX(_pcre2_ucp_gentype_)
-#define _pcre2_ucp_typerange      PCRE2_SUFFIX(_pcre2_ucp_typerange_)
-#define _pcre2_unicode_version    PCRE2_SUFFIX(_pcre2_unicode_version_)
-#define _pcre2_utt                PCRE2_SUFFIX(_pcre2_utt_)
-#define _pcre2_utt_names          PCRE2_SUFFIX(_pcre2_utt_names_)
-#define _pcre2_utt_size           PCRE2_SUFFIX(_pcre2_utt_size_)
+#define _pcre2_OP_lengths              PCRE2_SUFFIX(_pcre2_OP_lengths_)
+#define _pcre2_default_compile_context PCRE2_SUFFIX(_pcre2_default_compile_context_)
+#define _pcre2_default_match_context   PCRE2_SUFFIX(_pcre2_default_match_context_)
+#define _pcre2_default_tables          PCRE2_SUFFIX(_pcre2_default_tables_)
+#define _pcre2_hspace_list             PCRE2_SUFFIX(_pcre2_hspace_list_)
+#define _pcre2_vspace_list             PCRE2_SUFFIX(_pcre2_vspace_list_)
+#define _pcre2_ucd_caseless_sets       PCRE2_SUFFIX(_pcre2_ucd_caseless_sets_)
+#define _pcre2_ucd_records             PCRE2_SUFFIX(_pcre2_ucd_records_)
+#define _pcre2_ucd_stage1              PCRE2_SUFFIX(_pcre2_ucd_stage1_)
+#define _pcre2_ucd_stage2              PCRE2_SUFFIX(_pcre2_ucd_stage2_)
+#define _pcre2_ucp_gbtable             PCRE2_SUFFIX(_pcre2_ucp_gbtable_)
+#define _pcre2_ucp_gentype             PCRE2_SUFFIX(_pcre2_ucp_gentype_)
+#define _pcre2_ucp_typerange           PCRE2_SUFFIX(_pcre2_ucp_typerange_)
+#define _pcre2_unicode_version         PCRE2_SUFFIX(_pcre2_unicode_version_)
+#define _pcre2_utt                     PCRE2_SUFFIX(_pcre2_utt_)
+#define _pcre2_utt_names               PCRE2_SUFFIX(_pcre2_utt_names_)
+#define _pcre2_utt_size                PCRE2_SUFFIX(_pcre2_utt_size_)
 
-extern const uint8_t          PRIV(OP_lengths)[];
-extern const uint8_t          PRIV(default_tables)[];
-extern const uint32_t         PRIV(hspace_list)[];
-extern const uint32_t         PRIV(vspace_list)[];
-extern const uint32_t         PRIV(ucd_caseless_sets)[];
-extern const ucd_record       PRIV(ucd_records)[];
-extern const uint8_t          PRIV(ucd_stage1)[];
-extern const uint16_t         PRIV(ucd_stage2)[];
-extern const uint32_t         PRIV(ucp_gbtable)[];
-extern const uint32_t         PRIV(ucp_gentype)[];
-#ifdef SUPPORT_JIT
-extern const int              PRIV(ucp_typerange)[];
-#endif
-extern const char            *PRIV(unicode_version);
-extern const ucp_type_table   PRIV(utt)[];
-extern const char             PRIV(utt_names)[];
-extern const size_t           PRIV(utt_size);
+extern const uint8_t                   PRIV(OP_lengths)[];
+extern const pcre2_compile_context     PRIV(default_compile_context);
+extern const pcre2_match_context       PRIV(default_match_context);
+extern const uint8_t                   PRIV(default_tables)[];
+extern const uint32_t                  PRIV(hspace_list)[];
+extern const uint32_t                  PRIV(vspace_list)[];
+extern const uint32_t                  PRIV(ucd_caseless_sets)[];
+extern const ucd_record                PRIV(ucd_records)[];
+extern const uint8_t                   PRIV(ucd_stage1)[];
+extern const uint16_t                  PRIV(ucd_stage2)[];
+extern const uint32_t                  PRIV(ucp_gbtable)[];
+extern const uint32_t                  PRIV(ucp_gentype)[];
+#ifdef SUPPORT_JIT                     
+extern const int                       PRIV(ucp_typerange)[];
+#endif                                
+extern const char                     *PRIV(unicode_version);
+extern const ucp_type_table            PRIV(utt)[];
+extern const char                      PRIV(utt_names)[];
+extern const size_t                    PRIV(utt_size);
 
 /* Mode-dependent macros and hidden and private structures are defined in a
 separate file so that pcre2test can include them at all supported widths. When
@@ -1855,12 +1859,10 @@ not referenced from pcre2test, and must not be defined when no code unit width
 is available. */
 
 #define _pcre2_auto_possessify       PCRE2_SUFFIX(_pcre2_auto_possessify_)
-#define _pcre2_compile_context_init  PCRE2_SUFFIX(_pcre2_compile_context_init_)
 #define _pcre2_find_bracket          PCRE2_SUFFIX(_pcre2_find_bracket_)
 #define _pcre2_is_newline            PCRE2_SUFFIX(_pcre2_is_newline_)
 #define _pcre2_jit_free              PCRE2_SUFFIX(_pcre2_jit_free_)
 #define _pcre2_jit_get_size          PCRE2_SUFFIX(_pcre2_jit_get_size_)
-#define _pcre2_match_context_init    PCRE2_SUFFIX(_pcre2_match_context_init_)
 #define _pcre2_memctl_malloc         PCRE2_SUFFIX(_pcre2_memctl_malloc_)
 #define _pcre2_ord2utf               PCRE2_SUFFIX(_pcre2_ord2utf_)
 #define _pcre2_strcmp                PCRE2_SUFFIX(_pcre_strcmp_)
@@ -1874,13 +1876,11 @@ is available. */
 #define _pcre2_xclass                PCRE2_SUFFIX(_pcre2_xclass_)
 
 extern void  _pcre2_auto_possessify(PCRE2_UCHAR *, BOOL, const compile_block *);
-extern void  _pcre2_compile_context_init(pcre2_compile_context *, BOOL);
 extern PCRE2_SPTR _pcre2_find_bracket(PCRE2_SPTR, BOOL, int);
 extern BOOL  _pcre2_is_newline(PCRE2_SPTR, uint32_t, PCRE2_SPTR, uint32_t *,
                BOOL);
 extern void  _pcre2_jit_free(void *, pcre2_memctl *);
 extern size_t _pcre2_jit_get_size(void *);
-extern void  _pcre2_match_context_init(pcre2_match_context *, BOOL);
 extern void  *_pcre2_memctl_malloc(size_t, pcre2_memctl *);
 extern unsigned int _pcre2_ord2utf(uint32_t, PCRE2_UCHAR *);
 extern int   _pcre2_strcmp(PCRE2_SPTR, PCRE2_SPTR);

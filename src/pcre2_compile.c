@@ -7333,7 +7333,6 @@ pcre2_compile(PCRE2_SPTR pattern, PCRE2_SIZE patlen, uint32_t options,
 {
 BOOL utf;                               /* Set TRUE for UTF mode */
 pcre2_real_code *re = NULL;             /* What we will return */
-pcre2_compile_context default_context;  /* For use if no context given */
 compile_block cb;                       /* "Static" compile-time data */
 const uint8_t *tables;                  /* Char tables base pointer */
 
@@ -7390,11 +7389,8 @@ if ((options & ~PUBLIC_COMPILE_OPTIONS) != 0)
 
 /* A NULL compile context means "use a default context" */
 
-if (ccontext == NULL)
-  {
-  PRIV(compile_context_init)(&default_context, TRUE);
-  ccontext = &default_context;
-  }
+if (ccontext == NULL) 
+  ccontext = (pcre2_compile_context *)(&PRIV(default_compile_context));
 
 /* A zero-terminated pattern is indicated by the special length value 
 PCRE2_ZERO_TERMINATED. Otherwise, we make a copy of the pattern and add a zero, 
