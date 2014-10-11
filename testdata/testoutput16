@@ -1,52 +1,28 @@
-# This test is run only when JIT support is available. It checks for a
-# successful and an unsuccessful JIT compile, and a couple of things that are
-# different with JIT.
+# This test is run only when JIT support is available. It checks JIT complete
+# and partial modes, and things that are different with JIT.
 
-/abc/I,jit
-Capturing subpattern count = 0
-No options
-First code unit = 'a'
-Need char = 'c'
-Subject length lower bound = 3
-No starting char list
-JIT study was successful
+#pattern jitverify
 
-/(?(?C1)(?=a)a)/I,jit
-Capturing subpattern count = 0
-May match empty string
-No options
-No first code unit
-No last code unit
-Study returned NULL
-JIT study was not successful
+# JIT does not support this pattern (callout at start of condition).
 
 /(?(?C1)(?=a)a)/I
 Capturing subpattern count = 0
 May match empty string
-No options
-No first code unit
-No last code unit
-Subject length lower bound = -1
-No starting char list
-JIT study was not successful
+Subject length lower bound = 0
+JIT compilation was not successful
 
-/a*/I
-Capturing subpattern count = 0
-May match empty string
-No options
-No first code unit
-No last code unit
-Study returned NULL
+# Check that an infinite recursion loop is caught.
 
-/(?(R)a*(?1)|((?R))b)/S+
+/(?(R)a*(?1)|((?R))b)/
     aaaabcde
-Error -27 (JIT stack limit reached)
+Failed: error -44: JIT stack limit reached
 
-# Test various compile modes
-
-#pattern jit,jitverify
-
-/abcd/
+/abcd/I
+Capturing subpattern count = 0
+First code unit = 'a'
+Last code unit = 'd'
+Subject length lower bound = 4
+JIT compilation was successful
     abcd
  0: abcd (JIT)
     xyz
@@ -55,19 +31,9 @@ No match (JIT)
 /abcd/
     abcd
  0: abcd (JIT)
-    ab\P
+    ab\=ps
 Partial match: ab (JIT)
-    ab\P\P
-Partial match: ab (JIT)
-    xyz
-No match (JIT)
-
-/abcd/
-    abcd
- 0: abcd (JIT)
-    ab\P
-Partial match: ab (JIT)
-    ab\P\P
+    ab\=ph
 Partial match: ab (JIT)
     xyz
 No match (JIT)
@@ -75,21 +41,21 @@ No match (JIT)
 /abcd/jit=1
     abcd
  0: abcd (JIT)
-    ab\P
+    ab\=ps
 Partial match: ab
-    ab\P\P
+    ab\=ph
 Partial match: ab
     xyz
 No match (JIT)
-    xyz\P
+    xyz\=ps
 No match
 
 /abcd/jit=2
     abcd
  0: abcd
-    ab\P
+    ab\=ps
 Partial match: ab (JIT)
-    ab\P\P
+    ab\=ph
 Partial match: ab
     xyz
 No match
@@ -97,9 +63,9 @@ No match
 /abcd/jit=3
     abcd
  0: abcd (JIT)
-    ab\P
+    ab\=ps
 Partial match: ab (JIT)
-    ab\P\P
+    ab\=ph
 Partial match: ab
     xyz
 No match (JIT)
@@ -107,9 +73,9 @@ No match (JIT)
 /abcd/jit=4
     abcd
  0: abcd
-    ab\P
+    ab\=ps
 Partial match: ab
-    ab\P\P
+    ab\=ph
 Partial match: ab (JIT)
     xyz
 No match
@@ -117,9 +83,9 @@ No match
 /abcd/jit=5
     abcd
  0: abcd (JIT)
-    ab\P
+    ab\=ps
 Partial match: ab
-    ab\P\P
+    ab\=ph
 Partial match: ab (JIT)
     xyz
 No match (JIT)
@@ -127,9 +93,9 @@ No match (JIT)
 /abcd/jit=6
     abcd
  0: abcd
-    ab\P
+    ab\=ps
 Partial match: ab (JIT)
-    ab\P\P
+    ab\=ph
 Partial match: ab (JIT)
     xyz
 No match
@@ -137,21 +103,19 @@ No match
 /abcd/jit=7
     abcd
  0: abcd (JIT)
-    ab\P
+    ab\=ps
 Partial match: ab (JIT)
-    ab\P\P
+    ab\=ph
 Partial match: ab (JIT)
     xyz
 No match (JIT)
 
 /abcd/I,jit=2
 Capturing subpattern count = 0
-No options
 First code unit = 'a'
 Last code unit = 'd'
 Subject length lower bound = 4
-No starting char list
-JIT study was successful
+JIT compilation was successful
 
 /(*NO_START_OPT)a(*:m)b/mark
     a
@@ -160,5 +124,141 @@ No match, mark = m (JIT)
 /^12345678abcd/m
     12345678abcd
  0: 12345678abcd (JIT)
+    
+# Limits tests that give different output with JIT. 
 
-# End of testinput15
+/(a+)*zz/I
+Capturing subpattern count = 1
+Starting code units: a z 
+Last code unit = 'z'
+Subject length lower bound = 2
+JIT compilation was successful
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaazzbbbbbb\=find_limits
+Minimum match limit = 3
+ 0: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaazz (JIT)
+ 1: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+  aaaaaaaaaaaaaz\=find_limits
+Minimum match limit = 16384
+No match (JIT)
+
+!((?:\s|//.*\\n|/[*](?:\\n|.)*?[*]/)*)!I
+Capturing subpattern count = 1
+May match empty string
+Subject length lower bound = 0
+JIT compilation was successful
+   /* this is a C style comment */\=find_limits
+Minimum match limit = 2
+ 0: /* this is a C style comment */ (JIT)
+ 1: /* this is a C style comment */
+
+/^(?>a)++/
+    aa\=find_limits
+Minimum match limit = 2
+ 0: aa (JIT)
+    aaaaaaaaa\=find_limits
+Minimum match limit = 2
+ 0: aaaaaaaaa (JIT)
+    
+/(a)(?1)++/
+    aa\=find_limits
+Minimum match limit = 2
+ 0: aa (JIT)
+ 1: a
+    aaaaaaaaa\=find_limits
+Minimum match limit = 2
+ 0: aaaaaaaaa (JIT)
+ 1: a
+
+/a(?:.)*?a/ims
+    abbbbbbbbbbbbbbbbbbbbba\=find_limits
+Minimum match limit = 1
+ 0: abbbbbbbbbbbbbbbbbbbbba (JIT)
+    
+/a(?:.(*THEN))*?a/ims
+    abbbbbbbbbbbbbbbbbbbbba\=find_limits
+Minimum match limit = 1
+ 0: abbbbbbbbbbbbbbbbbbbbba (JIT)
+
+/a(?:.(*THEN:ABC))*?a/ims
+    abbbbbbbbbbbbbbbbbbbbba\=find_limits
+Minimum match limit = 1
+ 0: abbbbbbbbbbbbbbbbbbbbba (JIT)
+
+/^(?>a+)(?>b+)(?>c+)(?>d+)(?>e+)/
+     aabbccddee\=find_limits
+Minimum match limit = 6
+ 0: aabbccddee (JIT)
+
+/^(?>(a+))(?>(b+))(?>(c+))(?>(d+))(?>(e+))/
+     aabbccddee\=find_limits
+Minimum match limit = 6
+ 0: aabbccddee (JIT)
+ 1: aa
+ 2: bb
+ 3: cc
+ 4: dd
+ 5: ee
+
+/^(?>(a+))(?>b+)(?>(c+))(?>d+)(?>(e+))/
+     aabbccddee\=find_limits
+Minimum match limit = 6
+ 0: aabbccddee (JIT)
+ 1: aa
+ 2: cc
+ 3: ee
+
+/(a+)*zz/
+    aaaaaaaaaaaaaz
+No match (JIT)
+    aaaaaaaaaaaaaz\=match_limit=3000
+Failed: error -45: match limit exceeded
+
+/(*LIMIT_MATCH=3000)(a+)*zz/I
+Capturing subpattern count = 1
+Match limit = 3000
+Starting code units: a z 
+Last code unit = 'z'
+Subject length lower bound = 2
+JIT compilation was successful
+    aaaaaaaaaaaaaz
+Failed: error -45: match limit exceeded
+    aaaaaaaaaaaaaz\=match_limit=60000
+Failed: error -45: match limit exceeded
+
+/(*LIMIT_MATCH=60000)(*LIMIT_MATCH=3000)(a+)*zz/I
+Capturing subpattern count = 1
+Match limit = 3000
+Starting code units: a z 
+Last code unit = 'z'
+Subject length lower bound = 2
+JIT compilation was successful
+    aaaaaaaaaaaaaz
+Failed: error -45: match limit exceeded
+
+/(*LIMIT_MATCH=60000)(a+)*zz/I
+Capturing subpattern count = 1
+Match limit = 60000
+Starting code units: a z 
+Last code unit = 'z'
+Subject length lower bound = 2
+JIT compilation was successful
+    aaaaaaaaaaaaaz
+No match (JIT)
+    aaaaaaaaaaaaaz\=match_limit=3000
+Failed: error -45: match limit exceeded
+
+# These three have infinitely nested recursions. 
+    
+/((?2))((?1))/
+    abc
+Failed: error -44: JIT stack limit reached
+
+/((?(R2)a+|(?1)b))/
+    aaaabcde
+Failed: error -44: JIT stack limit reached
+
+/(?(R)a*(?1)|((?R))b)/
+    aaaabcde
+Failed: error -44: JIT stack limit reached
+    
+# End of testinput16

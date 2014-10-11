@@ -448,7 +448,7 @@ static modstruct modlist[] = {
   { "info",                MOD_PAT,  MOD_CTL, CTL_INFO,                  PO(control) },
   { "jit",                 MOD_PAT,  MOD_IND, 7,                         PO(jit) },
   { "jitstack",            MOD_DAT,  MOD_INT, 0,                         DO(jitstack) },
-  { "jitverify",           MOD_PND,  MOD_CTL, CTL_JITVERIFY,             PO(control) },
+  { "jitverify",           MOD_PAT,  MOD_CTL, CTL_JITVERIFY,             PO(control) },
   { "locale",              MOD_PAT,  MOD_STR, 0,                         PO(locale) },
   { "mark",                MOD_PNDP, MOD_CTL, CTL_MARK,                  PO(control) },
   { "match_limit",         MOD_CTM,  MOD_INT, 0,                         MO(match_limit) },
@@ -2632,7 +2632,7 @@ for (;;)
   pp = p;
   while (pp < ep && *pp != '=') pp++;
   index = scan_modifiers(p, pp - p);
-
+  
   /* If the first modifier is unrecognized, try to interpret it as a sequence
   of single-character abbreviated modifiers. None of these modifiers have any
   associated data. They just set options or control bits. */
@@ -2709,7 +2709,7 @@ for (;;)
 
   /* These on/off types have no data. */
 
-  else if (*pp != ',' && *pp != '\n' && *pp != 0)
+  else if (*pp != ',' && *pp != '\n' && *pp != ' ' && *pp != 0)
     {
     fprintf(outfile, "** Unrecognized modifier '%.*s'\n", (int)(ep-p), p);
     return FALSE;
@@ -2855,7 +2855,7 @@ for (;;)
     break;
     }
 
-  if (*pp != ',' && *pp != '\n' && *pp != 0)
+  if (*pp != ',' && *pp != '\n' && *pp != ' ' && *pp != 0)
     {
     fprintf(outfile, "** Comma expected after modifier item '%s'\n", m->name);
     return FALSE;
@@ -3328,22 +3328,16 @@ if ((pat_patctl.control & CTL_INFO) != 0)
 
   fprintf(outfile, "Subject length lower bound = %d\n", minlength);
 
-/* FIXME: tidy this up */
-
   if (pat_patctl.jit != 0 && (pat_patctl.control & CTL_JITVERIFY) != 0)
     {
-    size_t jitsize;
-    if (pattern_info(PCRE2_INFO_JITSIZE, &jitsize, FALSE) == 0)
-      {
-      if (jitsize > 0)
-        fprintf(outfile, "JIT compilation was successful\n");
-      else
+    if (FLD(compiled_code, executable_jit) != NULL)    
+      fprintf(outfile, "JIT compilation was successful\n");
+    else
 #ifdef SUPPORT_JIT
-        fprintf(outfile, "JIT compilation was not successful\n");
+      fprintf(outfile, "JIT compilation was not successful\n");
 #else
-        fprintf(outfile, "JIT support is not available in this version of PCRE2\n");
+      fprintf(outfile, "JIT support is not available in this version of PCRE2\n");
 #endif
-      }
     }
   }
 
@@ -3382,6 +3376,8 @@ if (strncmp((char *)buffer, "#forbid_utf", 11) == 0 && isspace(buffer[11]))
 else if (strncmp((char *)buffer, "#pattern", 8) == 0 && isspace(buffer[8]))
   {
   (void)decode_modifiers(buffer + 8, CTX_DEFPAT, &def_patctl, NULL);
+  if (def_patctl.jit == 0 && (def_patctl.control & CTL_JITVERIFY) != 0)
+    def_patctl.jit = 7; 
   }
 else if (strncmp((char *)buffer, "#perltest", 9) == 0 && isspace(buffer[9]))
   {
@@ -3467,6 +3463,9 @@ patlen = p - buffer - 2;
 /* Look for modifiers and options after the final delimiter. */
 
 if (!decode_modifiers(p, CTX_PAT, &pat_patctl, NULL)) return PR_SKIP;
+
+if (pat_patctl.jit == 0 && (pat_patctl.control & CTL_JITVERIFY) != 0)
+  pat_patctl.jit = 7; 
 utf = (pat_patctl.options & PCRE2_UTF) != 0;
 
 /* Now copy the pattern to pbuffer8 for use in 8-bit testing and for reflecting
@@ -4385,7 +4384,10 @@ if ((dat_datctl.control & (CTL_DFA|CTL_FINDLIMITS)) == (CTL_DFA|CTL_FINDLIMITS))
   dat_datctl.control &= ~CTL_FINDLIMITS;
   }
   
-if ((dat_datctl.control & CTL_ALLUSEDTEXT) != 0 && 
+/* ALLUSEDTEXT is not supported with JIT, but JIT is not used with DFA 
+matching, even if the JIT compiler was used. */ 
+  
+if ((dat_datctl.control & (CTL_ALLUSEDTEXT|CTL_DFA)) == CTL_ALLUSEDTEXT && 
     FLD(compiled_code, executable_jit) != NULL)
   {
   fprintf(outfile, "** Showing all consulted text is not supported by JIT: ignored\n");
@@ -4427,7 +4429,7 @@ else if (jit_stack != NULL)
 /* When no JIT stack is assigned, we must ensure that there is a JIT callback
 if we want to verify that JIT was actually used. */
 
-if ((dat_datctl.control & CTL_JITVERIFY) != 0 && jit_stack == NULL)
+if ((pat_patctl.control & CTL_JITVERIFY) != 0 && jit_stack == NULL)
    {
    PCRE2_JIT_STACK_ASSIGN(compiled_code, jit_callback, NULL);
    }
@@ -4502,13 +4504,15 @@ for (gmatched = 0;; gmatched++)
         (double)CLOCKS_PER_SEC);
     }
 
-  /* Find the match and recursion limits if requested. */
+  /* Find the match and recursion limits if requested. The recursion limit
+  is not relevant for JIT. */
 
   if ((dat_datctl.control & CTL_FINDLIMITS) != 0)
     {
-    (void)check_match_limit(pp, ulen, PCRE2_ERROR_MATCHLIMIT, "match");
-    capcount = check_match_limit(pp, ulen, PCRE2_ERROR_RECURSIONLIMIT,
-      "recursion");
+    capcount = check_match_limit(pp, ulen, PCRE2_ERROR_MATCHLIMIT, "match");
+    if (FLD(compiled_code, executable_jit) == NULL)   
+      (void)check_match_limit(pp, ulen, PCRE2_ERROR_RECURSIONLIMIT,
+        "recursion");
     }
 
   /* Otherwise just run a single match, setting up a callout if required (the
@@ -4565,10 +4569,7 @@ for (gmatched = 0;; gmatched++)
     {
     int i;
     uint8_t *nptr;
-    BOOL showallused;
-    PCRE2_SIZE leftchar = FLD(match_data, leftchar);
-    PCRE2_SIZE rightchar = FLD(match_data, rightchar);
-
+    
     /* This is a check against a lunatic return value. */
 
     if (capcount > (int)dat_datctl.oveccount)
@@ -4635,38 +4636,60 @@ for (gmatched = 0;; gmatched++)
         continue;
         }
 
-      /* For the whole matched string, if ALLUSEDTEXT is set, and if the
-      leftmost consulted character is before the start of the match or the
-      rightmost consulted character is past the end of the match, we want to
-      show all consulted characters, and indicate which were lookarounds. */
-
-      showallused = i == 0 && (dat_datctl.control & CTL_ALLUSEDTEXT) != 0 &&
-        (leftchar < start || rightchar > end);
-      if (showallused)
+      /* When JIT is not being used, ALLUSEDTEXT may be set. (It if is set with 
+      JIT, it is disabled above, with a comment.) When the match is done by the 
+      interpreter, leftchar and rightchar are available, and if ALLUSEDTEXT is
+      set, and if the leftmost consulted character is before the start of the
+      match or the rightmost consulted character is past the end of the match,
+      we want to show all consulted characters for the main matched string, and
+      indicate which were lookarounds. */
+      
+      if (i == 0)
         {
-        PCHARS(lleft, pp, leftchar, start - leftchar, utf, outfile);
-        PCHARS(lmiddle, pp, start, end - start, utf, outfile);
-        PCHARS(lright, pp, end, rightchar - end, utf, outfile);
+        BOOL showallused;
+        PCRE2_SIZE leftchar, rightchar;
+         
+        if ((dat_datctl.control & CTL_ALLUSEDTEXT) != 0)
+          {
+          leftchar = FLD(match_data, leftchar);
+          rightchar = FLD(match_data, rightchar);
+          showallused = i == 0 && (leftchar < start || rightchar > end);
+          }
+        else showallused = FALSE;   
+     
+        if (showallused)
+          {
+          PCHARS(lleft, pp, leftchar, start - leftchar, utf, outfile);
+          PCHARS(lmiddle, pp, start, end - start, utf, outfile);
+          PCHARS(lright, pp, end, rightchar - end, utf, outfile);
+          }
+        else
+          {
+          PCHARSV(pp, start, end - start, utf, outfile);
+          }
+     
+        if ((pat_patctl.control & CTL_JITVERIFY) != 0 && jit_was_used)
+          fprintf(outfile, " (JIT)");
+     
+        if (showallused)
+          {
+          PCRE2_SIZE j;
+          fprintf(outfile, "\n    ");
+          for (j = 0; j < lleft; j++) fprintf(outfile, "<");
+          for (j = 0; j < lmiddle; j++) fprintf(outfile, " ");
+          for (j = 0; j < lright; j++) fprintf(outfile, ">");
+          }
         }
+            
+      /* Not the main matched string. Just show it unadorned. */  
+
       else
         {
         PCHARSV(pp, start, end - start, utf, outfile);
         }
-
-      if ((pat_patctl.control & CTL_JITVERIFY) != 0 && jit_was_used)
-        fprintf(outfile, " (JIT)");
+ 
       fprintf(outfile, "\n");
-
-      if (showallused)
-        {
-        PCRE2_SIZE j;
-        fprintf(outfile, "    ");
-        for (j = 0; j < lleft; j++) fprintf(outfile, "<");
-        for (j = 0; j < lmiddle; j++) fprintf(outfile, " ");
-        for (j = 0; j < lright; j++) fprintf(outfile, ">");
-        fprintf(outfile, "\n");
-        }
-
+       
       /* Note: don't use the start/end variables here because we want to
       show the text from what is reported as the end. */
 
@@ -4851,25 +4874,20 @@ for (gmatched = 0;; gmatched++)
       }
     }    /* End of handling a successful match */
 
-  /* There was a partial match. If the bumpalong point is not the same as
-  the first inspected character, show the offset explicitly. */
+  /* There was a partial match. The value of ovector[0] is the bumpalong point, 
+  not any \K point that might exist. */ 
 
   else if (capcount == PCRE2_ERROR_PARTIAL)
     {
-    PCRE2_SIZE leftchar = FLD(match_data, leftchar);
     fprintf(outfile, "Partial match");
-    if (leftchar != FLD(match_data, startchar))
-      fprintf(outfile, " at offset %d", (int)FLD(match_data, startchar));
-
     if ((dat_datctl.control & CTL_MARK) != 0 &&
          TESTFLD(match_data, mark, !=, NULL))
       {
       fprintf(outfile, ", mark=");
       PCHARSV(CASTFLD(void *, match_data, mark), 0, -1, utf, outfile);
       }
-
     fprintf(outfile, ": ");
-    PCHARSV(pp, leftchar, ulen - leftchar, utf, outfile);
+    PCHARSV(pp, ovector[0], ulen - ovector[0], utf, outfile);
     if ((pat_patctl.control & CTL_JITVERIFY) != 0 && jit_was_used)
       fprintf(outfile, " (JIT)");
     fprintf(outfile, "\n");

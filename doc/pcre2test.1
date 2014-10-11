@@ -1,4 +1,4 @@
-.TH PCRE2TEST 1 "10 October 2014" "PCRE 10.00"
+.TH PCRE2TEST 1 "11 October 2014" "PCRE 10.00"
 .SH NAME
 pcre2test - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -433,6 +433,7 @@ about the pattern:
   /I  info                      show info about compiled pattern
       hex                       pattern is coded in hexadecimal
       jit[=<number>]            use JIT
+      jitverify                 verify JIT use 
       locale=<name>             use this locale
       memory                    show memory used
       newline=<type>            set newline type
@@ -505,30 +506,33 @@ length of the pattern is passed. This is implied if \fBhex\fP is set.
 .SS "JIT compilation"
 .rs
 .sp
-The \fB/jit\fP modifier may optionally be followed by a number in the range 0
-to 7:
+The \fB/jit\fP modifier may optionally be followed by and equals sign and a
+number in the range 0 to 7:
 .sp
   0  disable JIT
-  1  normal match only
-  2  soft partial match only
-  3  normal match and soft partial match
-  4  hard partial match only
-  6  soft and hard partial match
+  1  use JIT for normal match only
+  2  use JIT for soft partial match only
+  3  use JIT for normal match and soft partial match
+  4  use JIT for hard partial match only
+  6  use JIT for soft and hard partial match
   7  all three modes
 .sp
 If no number is given, 7 is assumed. If JIT compilation is successful, the
-compiled JIT code will automatically be used when \fBpcre2_match()\fP is run,
-except when incompatible run-time options are specified. For more details, see
-the
+compiled JIT code will automatically be used when \fBpcre2_match()\fP is run 
+for the appropriate type of match, except when incompatible run-time options
+are specified. For more details, see the
 .\" HREF
 \fBpcre2jit\fP
 .\"
 documentation. See also the \fBjitstack\fP modifier below for a way of
 setting the size of the JIT stack.
 .P
-If the \fBjitverify\fP modifier is specified, the text "(JIT)" is added to the
-first output line after a match or non match when JIT-compiled code was
-actually used. This modifier can also be set on a subject line.
+If the \fBjitverify\fP modifier is specified, information about the compiled
+pattern shows whether JIT compilation was or was not successful. If
+\fBjitverify\fP is specified without \fBjit\fP, jit=7 is assumed. If JIT
+compilation is successful when \fBjitverify\fP is set, the text "(JIT)" is
+added to the first output line after a match or non match when JIT-compiled
+code was actually used.
 .
 .
 .SS "Setting a locale"
@@ -632,7 +636,6 @@ not affect the compilation process.
       allcaptures               show all captures
       allusedtext               show all consulted text
   /g  global                    global matching
-      jitverify                 verify JIT usage
       mark                      show mark values
 .sp
 These modifiers may not appear in a \fB#pattern\fP command. If you want them as
@@ -701,7 +704,6 @@ pattern.
       getall                    extract all captured substrings
   /g  global                    global matching
       jitstack=<n>              set size of JIT stack
-      jitverify                 verify JIT usage
       mark                      show mark values
       match_limit=>n>           set a match limit
       memory                    show memory usage
@@ -841,6 +843,10 @@ If the \fBfind_limits\fP modifier is present, \fBpcre2test\fP calls
 context via \fBpcre2_set_match_limit()\fP and \fBpcre2_set_recursion_limit()\fP
 until it finds the minimum values for each parameter that allow
 \fBpcre2_match()\fP to complete without error.
+.P
+If JIT is being used, only the match limit is relevant. If DFA matching is 
+being used, neither limit is relevant, and this modifier is ignored (with a 
+warning message).
 .P
 The \fImatch_limit\fP number is a measure of the amount of backtracking
 that takes place, and learning the minimum value can be instructive. For most
@@ -1153,6 +1159,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 10 October 2014
+Last updated: 11 October 2014
 Copyright (c) 1997-2014 University of Cambridge.
 .fi

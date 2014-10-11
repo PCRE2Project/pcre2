@@ -1,30 +1,19 @@
-# This test is run only when JIT support is available. It checks for a
-# successful and an unsuccessful JIT compile, and a couple of things that are
-# different with JIT.
+# This test is run only when JIT support is available. It checks JIT complete
+# and partial modes, and things that are different with JIT.
 
-/abc/I,jit
+#pattern jitverify
 
-/(?(?C1)(?=a)a)/I,jit
+# JIT does not support this pattern (callout at start of condition).
 
 /(?(?C1)(?=a)a)/I
 
-/a*/I
+# Check that an infinite recursion loop is caught.
 
-/(?(R)a*(?1)|((?R))b)/jit
+/(?(R)a*(?1)|((?R))b)/
     aaaabcde
 
-# Test various compile modes
-
-#pattern jit,jitverify
-
-/abcd/
+/abcd/I
     abcd
-    xyz
-
-/abcd/
-    abcd
-    ab\=ps
-    ab\=ph
     xyz
 
 /abcd/
@@ -83,5 +72,66 @@
 
 /^12345678abcd/m
     12345678abcd
+    
+# Limits tests that give different output with JIT. 
 
-# End of testinput15
+/(a+)*zz/I
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaazzbbbbbb\=find_limits
+  aaaaaaaaaaaaaz\=find_limits
+
+!((?:\s|//.*\\n|/[*](?:\\n|.)*?[*]/)*)!I
+   /* this is a C style comment */\=find_limits
+
+/^(?>a)++/
+    aa\=find_limits
+    aaaaaaaaa\=find_limits
+    
+/(a)(?1)++/
+    aa\=find_limits
+    aaaaaaaaa\=find_limits
+
+/a(?:.)*?a/ims
+    abbbbbbbbbbbbbbbbbbbbba\=find_limits
+    
+/a(?:.(*THEN))*?a/ims
+    abbbbbbbbbbbbbbbbbbbbba\=find_limits
+
+/a(?:.(*THEN:ABC))*?a/ims
+    abbbbbbbbbbbbbbbbbbbbba\=find_limits
+
+/^(?>a+)(?>b+)(?>c+)(?>d+)(?>e+)/
+     aabbccddee\=find_limits
+
+/^(?>(a+))(?>(b+))(?>(c+))(?>(d+))(?>(e+))/
+     aabbccddee\=find_limits
+
+/^(?>(a+))(?>b+)(?>(c+))(?>d+)(?>(e+))/
+     aabbccddee\=find_limits
+
+/(a+)*zz/
+    aaaaaaaaaaaaaz
+    aaaaaaaaaaaaaz\=match_limit=3000
+
+/(*LIMIT_MATCH=3000)(a+)*zz/I
+    aaaaaaaaaaaaaz
+    aaaaaaaaaaaaaz\=match_limit=60000
+
+/(*LIMIT_MATCH=60000)(*LIMIT_MATCH=3000)(a+)*zz/I
+    aaaaaaaaaaaaaz
+
+/(*LIMIT_MATCH=60000)(a+)*zz/I
+    aaaaaaaaaaaaaz
+    aaaaaaaaaaaaaz\=match_limit=3000
+
+# These three have infinitely nested recursions. 
+    
+/((?2))((?1))/
+    abc
+
+/((?(R2)a+|(?1)b))/
+    aaaabcde
+
+/(?(R)a*(?1)|((?R))b)/
+    aaaabcde
+    
+# End of testinput16
