@@ -150,11 +150,7 @@ switch (what)
 #else
     const char *v = "Unicode not supported";
 #endif
-    PCRE2_UCHAR *t = (PCRE2_UCHAR *)where;
-    if (strlen(v) >= BYTES2CU(length) - 1) return PCRE2_ERROR_BADLENGTH; 
-    while (*v != 0) *t++ = *v++;
-    *t = 0;
-    return t - (PCRE2_UCHAR *)where;
+    return PRIV(strcpy_c8)((PCRE2_UCHAR *)where, BYTES2CU(length), v);
     }
   break;
 
@@ -187,14 +183,10 @@ switch (what)
   
   case PCRE2_CONFIG_VERSION:
     { 
-    PCRE2_UCHAR *t = (PCRE2_UCHAR *)where;
     const char *v = (XSTRING(Z PCRE2_PRERELEASE)[1] == 0)?
       XSTRING(PCRE2_MAJOR.PCRE2_MINOR PCRE2_DATE) :
       XSTRING(PCRE2_MAJOR.PCRE2_MINOR) XSTRING(PCRE2_PRERELEASE PCRE2_DATE);
-    if (strlen(v) >= BYTES2CU(length) - 1) return PCRE2_ERROR_BADLENGTH; 
-    while (*v != 0) *t++ = *v++;
-    *t = 0;
-    return t - (PCRE2_UCHAR *)where;
+    return PRIV(strcpy_c8)((PCRE2_UCHAR *)where, BYTES2CU(length), v);
     } 
   }
 

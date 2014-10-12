@@ -1865,13 +1865,14 @@ is available. */
 #define _pcre2_jit_get_size          PCRE2_SUFFIX(_pcre2_jit_get_size_)
 #define _pcre2_memctl_malloc         PCRE2_SUFFIX(_pcre2_memctl_malloc_)
 #define _pcre2_ord2utf               PCRE2_SUFFIX(_pcre2_ord2utf_)
-#define _pcre2_strcmp                PCRE2_SUFFIX(_pcre_strcmp_)
-#define _pcre2_strcmp_c8             PCRE2_SUFFIX(_pcre_strcmp_c8_)
-#define _pcre2_strlen                PCRE2_SUFFIX(_pcre_strlen_)
-#define _pcre2_strncmp               PCRE2_SUFFIX(_pcre_strncmp_)
-#define _pcre2_strncmp_c8            PCRE2_SUFFIX(_pcre_strncmp_c8_)
-#define _pcre2_study                 PCRE2_SUFFIX(_pcre_study_)
-#define _pcre2_valid_utf             PCRE2_SUFFIX(_pcre_valid_utf_)
+#define _pcre2_strcmp                PCRE2_SUFFIX(_pcre2_strcmp_)
+#define _pcre2_strcmp_c8             PCRE2_SUFFIX(_pcre2_strcmp_c8_)
+#define _pcre2_strcpy_c8             PCRE2_SUFFIX(_pcre2_strcpy_c8_)
+#define _pcre2_strlen                PCRE2_SUFFIX(_pcre2_strlen_)
+#define _pcre2_strncmp               PCRE2_SUFFIX(_pcre2_strncmp_)
+#define _pcre2_strncmp_c8            PCRE2_SUFFIX(_pcre2_strncmp_c8_)
+#define _pcre2_study                 PCRE2_SUFFIX(_pcre2_study_)
+#define _pcre2_valid_utf             PCRE2_SUFFIX(_pcre2_valid_utf_)
 #define _pcre2_was_newline           PCRE2_SUFFIX(_pcre2_was_newline_)
 #define _pcre2_xclass                PCRE2_SUFFIX(_pcre2_xclass_)
 
@@ -1885,6 +1886,7 @@ extern void  *_pcre2_memctl_malloc(size_t, pcre2_memctl *);
 extern unsigned int _pcre2_ord2utf(uint32_t, PCRE2_UCHAR *);
 extern int   _pcre2_strcmp(PCRE2_SPTR, PCRE2_SPTR);
 extern int   _pcre2_strcmp_c8(PCRE2_SPTR, const char *);
+extern int   _pcre2_strcpy_c8(PCRE2_UCHAR *, size_t, const char *);
 extern int   _pcre2_strlen(PCRE2_SPTR);
 extern int   _pcre2_strncmp(PCRE2_SPTR, PCRE2_SPTR, size_t);
 extern int   _pcre2_strncmp_c8(PCRE2_SPTR, const char *, size_t);
