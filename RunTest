@@ -114,6 +114,35 @@ else
 fi
 
 
+# ------ Function to check results of a test -------
+
+# This function is called with three parameters:
+#
+#  $1 the value of $? after a call to pcre2test
+#  $2 the suffix of the output file to compare with
+#  $3 the $opt value (empty, -jit, or -dfa)
+
+function checkresult()
+  {
+  if [ $1 -ne 0 ] ; then 
+    echo "** pcre2test failed - check testtry"
+    exit 1
+  fi
+  case "$3" in
+    -jit) with=" with JIT";;
+    -dfa) with=" with DFA";;
+    *)    with="";;
+  esac
+  $cf $testdata/testoutput$2 testtry
+  if [ $? != 0 ] ; then
+    echo ""
+    echo "** Test $2 failed$with"
+    exit 1
+  fi
+  echo "  OK$with"
+  }
+
+
 # ------ Special EBCDIC Test -------
 
 if [ $# -eq 1 -a "$1" = "ebcdic" ]; then
@@ -123,19 +152,10 @@ if [ $# -eq 1 -a "$1" = "ebcdic" ]; then
     echo "Cannot run EBCDIC tests: EBCDIC support not compiled"
     exit 1
   fi
-
   for opt in "" "-dfa"; do
     ./pcre2test -q $opt $testdata/testinputEBC >testtry
-    if [ $? = 0 ] ; then
-      $cf $testdata/testoutputEBC testtry
-      if [ $? != 0 ] ; then exit 1; fi
-    else exit 1
-    fi
-    if [ "$opt" = "-dfa" ] ; then echo "  OK using DFA"
-    else echo "  OK"
-    fi
+    checkresult $? EBC "$opt"
   done
-
 exit 0
 fi
 
@@ -371,14 +391,7 @@ if [ $do1 = yes ] ; then
   echo $title1
   for opt in "" $jitopt; do
     $sim $valgrind ./pcre2test -q $bmode $opt $testdata/testinput1 testtry
-    if [ $? = 0 ] ; then
-      $cf $testdata/testoutput1 testtry
-      if [ $? != 0 ] ; then exit 1; fi
-    else exit 1
-    fi
-    if [ "$opt" = "-jit" ] ; then echo "  OK with JIT"
-    else echo "  OK"
-    fi
+    checkresult $? 1 "$opt"
   done
 fi
 
@@ -389,8 +402,7 @@ if [ $do2 = yes ] ; then
   for opt in "" $jitopt; do
     $sim $valgrind ./pcre2test -q $bmode $opt $testdata/testinput2 testtry
     if [ $? = 0 ] ; then
-      $cf $testdata/testoutput2 testtry
-      if [ $? != 0 ] ; then exit 1; fi
+      checkresult $? 2 "$opt"
     else
       echo " "
       echo "** Test 2 requires a lot of stack. If it has crashed with a"
@@ -399,9 +411,6 @@ if [ $do2 = yes ] ; then
       echo "** page for a discussion of PCRE2's stack usage."
       echo " "
       exit 1
-    fi
-    if [ "$opt" = "-jit" ] ; then echo "  OK with JIT"
-    else echo "  OK"
     fi
   done
 fi
@@ -451,15 +460,17 @@ if [ $do3 = yes ] ; then
     for opt in "" $jitopt; do
       $sim $valgrind ./pcre2test -q $bmode $opt $infile testtry
       if [ $? = 0 ] ; then
+        case "$opt" in
+          -jit) with=" with JIT";;
+          *)    with="";;
+        esac
         if $cf $outfile testtry >teststdout || \
            $cf $outfile2 testtry >teststdout || \
            $cf $outfile3 testtry >teststdout
         then
-          if [ "$opt" = "-jit" ] ; then echo "  OK with JIT"
-          else echo "  OK"
-          fi
+          echo "  OK$with"
         else
-          echo "** Locale test did not run successfully. The output did not match"
+          echo "** Locale test did not run successfully$with. The output did not match"
           echo "   $outfile, $outfile2 or $outfile3."
           echo "   This may mean that there is a problem with the locale settings rather"
           echo "   than a bug in PCRE2."
@@ -485,14 +496,7 @@ if [ $do4 = yes ] ; then
   else
     for opt in "" $jitopt; do
       $sim $valgrind ./pcre2test -q $bmode $opt $testdata/testinput4 testtry
-      if [ $? = 0 ] ; then
-        $cf $testdata/testoutput4 testtry
-        if [ $? != 0 ] ; then exit 1; fi
-      else exit 1
-      fi
-      if [ "$opt" = "-jit" ] ; then echo "  OK with JIT"
-      else echo "  OK"
-      fi
+      checkresult $? 4 "$opt"
     done
   fi
 fi
@@ -504,14 +508,7 @@ if [ $do5 = yes ] ; then
   else
     for opt in "" $jitopt; do
       $sim $valgrind ./pcre2test -q $bmode $opt $testdata/testinput5 testtry
-      if [ $? = 0 ] ; then
-        $cf $testdata/testoutput5 testtry
-        if [ $? != 0 ] ; then exit 1; fi
-      else exit 1
-      fi
-      if [ "$opt" = "-jit" ] ; then echo "  OK with JIT"
-      else echo "  OK"
-      fi
+      checkresult $? 5 "$opt"
     done
   fi
 fi
@@ -521,12 +518,7 @@ fi
 if [ $do6 = yes ] ; then
   echo $title6
   $sim $valgrind ./pcre2test -q $bmode $testdata/testinput6 testtry
-  if [ $? = 0 ] ; then
-    $cf $testdata/testoutput6 testtry
-    if [ $? != 0 ] ; then exit 1; fi
-  else exit 1
-  fi
-  echo "  OK"
+  checkresult $? 6 ""
 fi
 
 if [ $do7 = yes ] ; then
@@ -535,12 +527,7 @@ if [ $do7 = yes ] ; then
     echo "  Skipped because UTF-$bits support is not available"
   else
     $sim $valgrind ./pcre2test -q $bmode $opt $testdata/testinput7 testtry
-    if [ $? = 0 ] ; then
-      $cf $testdata/testoutput7 testtry
-      if [ $? != 0 ] ; then exit 1; fi
-    else exit 1
-    fi
-    echo "  OK"
+    checkresult $? 7 ""
   fi
 fi
 
@@ -560,12 +547,7 @@ if [ $do8 = yes ] ; then
     echo "  Skipped because UTF-$bits support is not available"
   else
     $sim $valgrind ./pcre2test -q $bmode $testdata/testinput8 testtry
-    if [ $? = 0 ] ; then
-      $cf $testdata/testoutput8-$bits testtry
-      if [ $? != 0 ] ; then exit 1; fi
-    else exit 1
-    fi
-    echo "  OK"
+    checkresult $? 8-$bits ""
   fi
 fi
 
@@ -578,14 +560,7 @@ if [ "$do9" = yes ] ; then
   else
     for opt in "" $jitopt; do
       $sim $valgrind ./pcre2test -q $bmode $opt $testdata/testinput9 testtry
-      if [ $? = 0 ] ; then
-        $cf $testdata/testoutput9 testtry
-        if [ $? != 0 ] ; then exit 1; fi
-      else exit 1
-      fi
-      if [ "$opt" = "-jit" ] ; then echo "  OK with JIT"
-      else echo "  OK"
-      fi
+      checkresult $? 9 "$opt"
     done
   fi
 fi
@@ -601,14 +576,7 @@ if [ "$do10" = yes ] ; then
   else
     for opt in "" $jitopt; do
       $sim $valgrind ./pcre2test -q $bmode $opt $testdata/testinput10 testtry
-      if [ $? = 0 ] ; then
-        $cf $testdata/testoutput10 testtry
-        if [ $? != 0 ] ; then exit 1; fi
-      else exit 1
-      fi
-      if [ "$opt" = "-jit" ] ; then echo "  OK with JIT"
-      else echo "  OK"
-      fi
+      checkresult $? 10 "$opt"
     done
   fi
 fi
@@ -622,14 +590,7 @@ if [ $do11 = yes ] ; then
   else
     for opt in "" $jitopt; do
       $sim $valgrind ./pcre2test -q $bmode $opt $testdata/testinput11 testtry
-      if [ $? = 0 ] ; then
-        $cf $testdata/testoutput11-$bits testtry
-        if [ $? != 0 ] ; then exit 1; fi
-      else exit 1
-      fi
-      if [ "$opt" = "-jit" ] ; then echo "  OK with JIT"
-      else echo "  OK"
-      fi
+      checkresult $? 11-$bits "$opt"
     done
   fi
 fi
@@ -646,14 +607,7 @@ if [ $do12 = yes ] ; then
   else
     for opt in "" $jitopt; do
       $sim $valgrind ./pcre2test -q $bmode $opt $testdata/testinput12 testtry
-      if [ $? = 0 ] ; then
-        $cf $testdata/testoutput12-$bits testtry
-        if [ $? != 0 ] ; then exit 1; fi
-      else exit 1
-      fi
-      if [ "$opt" = "-jit" ] ; then echo "  OK with JIT"
-      else echo "  OK"
-      fi
+      checkresult $? 12-$bits "$opt"
     done
   fi
 fi
@@ -666,12 +620,7 @@ if [ $do13 = yes ] ; then
     echo "  Skipped when running 8-bit tests"
   else
     $sim $valgrind ./pcre2test -q $bmode $testdata/testinput13 testtry
-    if [ $? = 0 ] ; then
-      $cf $testdata/testoutput13 testtry
-      if [ $? != 0 ] ; then exit 1; fi
-    else exit 1
-    fi
-    echo "  OK"
+    checkresult $? 13 ""
   fi
 fi
 
@@ -680,12 +629,7 @@ fi
 if [ $do14 = yes ] ; then
   echo $title14
   $sim $valgrind ./pcre2test -q $bmode $testdata/testinput14 testtry
-  if [ $? = 0 ] ; then
-    $cf $testdata/testoutput14 testtry
-    if [ $? != 0 ] ; then exit 1; fi
-  else exit 1
-  fi
-  echo "  OK"
+  checkresult $? 14 ""
 fi
 
 # Test JIT-specific features when JIT is not available
@@ -696,12 +640,7 @@ if [ $do15 = yes ] ; then
     echo "  Skipped because JIT is available"
   else
     $sim $valgrind ./pcre2test -q $bmode $testdata/testinput15 testtry
-    if [ $? = 0 ] ; then
-      $cf $testdata/testoutput15 testtry
-      if [ $? != 0 ] ; then exit 1; fi
-    else exit 1
-    fi
-    echo "  OK"
+    checkresult $? 15 ""
   fi
 fi
 
@@ -713,12 +652,7 @@ if [ $do16 = yes ] ; then
     echo "  Skipped because JIT is not available or not usable"
   else
     $sim $valgrind ./pcre2test -q $bmode $testdata/testinput16 testtry
-    if [ $? = 0 ] ; then
-      $cf $testdata/testoutput16 testtry
-      if [ $? != 0 ] ; then exit 1; fi
-    else exit 1
-    fi
-    echo "  OK"
+    checkresult $? 16 ""
   fi
 fi
 
@@ -730,12 +664,7 @@ if [ $do17 = yes ] ; then
     echo "  Skipped when running 16/32-bit tests"
   else
     $sim $valgrind ./pcre2test -q $bmode $testdata/testinput17 testtry
-    if [ $? = 0 ] ; then
-      $cf $testdata/testoutput17 testtry
-      if [ $? != 0 ] ; then exit 1; fi
-    else exit 1
-    fi
-    echo "  OK"
+    checkresult $? 17 ""
   fi
 fi
 
@@ -749,12 +678,7 @@ if [ $do18 = yes ] ; then
     echo "  Skipped because UTF-$bits support is not available"
   else
     $sim $valgrind ./pcre2test -q $bmode $testdata/testinput18 testtry
-    if [ $? = 0 ] ; then
-      $cf $testdata/testoutput18 testtry
-      if [ $? != 0 ] ; then exit 1; fi
-    else exit 1
-    fi
-    echo "  OK"
+    checkresult $? 18 ""
   fi
 fi
 
