@@ -94,7 +94,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 static int regression_tests(void);
 
-int main()
+int main(void)
 {
 	int jit = 0;
 #if defined SUPPORT_PCRE2_8
@@ -194,7 +194,7 @@ static struct regression_test_case regression_test_cases[] = {
 	{ M, A, 0, 0 | F_NOMATCH, "\\b\\W", "\n*" },
 	{ MU, A, 0, 0, "\\B[^,]\\b[^s]\\b", "#X" },
 	{ MP, A, 0, 0, "\\B", "_\xa1" },
-	{ MP, A, 0, 0, "\\b_\\b[,A]\\B", "_," },
+	{ MP, A, 0, 0 | F_PROPERTY, "\\b_\\b[,A]\\B", "_," },
 	{ MUP, A, 0, 0, "\\b", "\xe6\x92\xad!" },
 	{ MUP, A, 0, 0, "\\B", "_\xc2\xa1\xc3\xa1\xc2\x85" },
 	{ MUP, A, 0, 0, "\\b[^A]\\B[^c]\\b[^_]\\B", "_\xc3\xa1\xe2\x80\xa8" },
@@ -379,7 +379,7 @@ static struct regression_test_case regression_test_cases[] = {
 	{ CMUP, A, 0, 0, "[\xc3\xa1-\xc3\xa9_\xe2\x80\xa0-\xe2\x80\xaf]{1,5}[^\xe2\x80\xa0-\xe2\x80\xaf]", "\xc2\xa1\xc3\x89\xc3\x89\xe2\x80\xaf_\xe2\x80\xa0" },
 	{ MUP, A, 0, 0 | F_PROPERTY, "[\xc3\xa2-\xc3\xa6\xc3\x81-\xc3\x84\xe2\x80\xa8-\xe2\x80\xa9\xe6\x92\xad\\p{Zs}]{2,}", "\xe2\x80\xa7\xe2\x80\xa9\xe6\x92\xad \xe6\x92\xae" },
 	{ MUP, A, 0, 0 | F_PROPERTY, "[\\P{L&}]{2}[^\xc2\x85-\xc2\x89\\p{Ll}\\p{Lu}]{2}", "\xc3\xa9\xe6\x92\xad.a\xe6\x92\xad|\xc2\x8a#" },
-	{ PCRE2_UCP, 0, 0, 0, "[a-b\\s]{2,5}[^a]", "AB  baaa" },
+	{ PCRE2_UCP, 0, 0, 0 | F_PROPERTY, "[a-b\\s]{2,5}[^a]", "AB  baaa" },
 
 	/* Possible empty brackets. */
 	{ MU, A, 0, 0, "(?:|ab||bc|a)+d", "abcxabcabd" },
@@ -1067,9 +1067,8 @@ static int regression_tests(void)
 	struct regression_test_case *current = regression_test_cases;
 	int error;
 	PCRE2_SIZE err_offs;
-	char *cpu_info;
-	int i;
-	int is_successful, is_ascii;
+	int is_successful;
+	int is_ascii;
 	int total = 0;
 	int successful = 0;
 	int successful_row = 0;
@@ -1077,13 +1076,14 @@ static int regression_tests(void)
 	int jit_compile_mode;
 	int utf = 0;
 	int disabled_options = 0;
+	int i;
 #ifdef SUPPORT_PCRE2_8
 	pcre2_code_8 *re8;
 	pcre2_compile_context_8 *ccontext8;
 	pcre2_match_data_8 *mdata8_1;
 	pcre2_match_data_8 *mdata8_2;
-	PCRE2_SIZE *ovector8_1;
-	PCRE2_SIZE *ovector8_2;
+	PCRE2_SIZE *ovector8_1 = NULL;
+	PCRE2_SIZE *ovector8_2 = NULL;
 	int return_value8[2];
 #endif
 #ifdef SUPPORT_PCRE2_16
@@ -1091,8 +1091,8 @@ static int regression_tests(void)
 	pcre2_compile_context_16 *ccontext16;
 	pcre2_match_data_16 *mdata16_1;
 	pcre2_match_data_16 *mdata16_2;
-	PCRE2_SIZE *ovector16_1;
-	PCRE2_SIZE *ovector16_2;
+	PCRE2_SIZE *ovector16_1 = NULL;
+	PCRE2_SIZE *ovector16_2 = NULL;
 	int return_value16[2];
 	int length16;
 #endif
@@ -1101,10 +1101,21 @@ static int regression_tests(void)
 	pcre2_compile_context_32 *ccontext32;
 	pcre2_match_data_32 *mdata32_1;
 	pcre2_match_data_32 *mdata32_2;
-	PCRE2_SIZE *ovector32_1;
-	PCRE2_SIZE *ovector32_2;
+	PCRE2_SIZE *ovector32_1 = NULL;
+	PCRE2_SIZE *ovector32_2 = NULL;
 	int return_value32[2];
 	int length32;
+#endif
+
+#if defined SUPPORT_PCRE2_8
+	PCRE2_UCHAR8 cpu_info[128];
+#elif defined SUPPORT_PCRE2_16
+	PCRE2_UCHAR16 cpu_info[128];
+#elif defined SUPPORT_PCRE2_32
+	PCRE2_UCHAR32 cpu_info[128];
+#endif
+#if defined SUPPORT_UTF && ((defined(SUPPORT_PCRE2_8) + defined(SUPPORT_PCRE2_16) + defined(SUPPORT_PCRE2_32)) >= 2)
+	int return_value;
 #endif
 
 	/* This test compares the behaviour of interpreter and JIT. Although disabling
@@ -1112,21 +1123,24 @@ static int regression_tests(void)
 	still considered successful from pcre_jit_test point of view. */
 
 #if defined SUPPORT_PCRE2_8
-	pcre2_config_8(PCRE2_CONFIG_JITTARGET, &cpu_info, 0);
+	pcre2_config_8(PCRE2_CONFIG_JITTARGET, &cpu_info, 128 * sizeof(PCRE2_UCHAR8));
 #elif defined SUPPORT_PCRE2_16
-	pcre2_config_16(PCRE2_CONFIG_JITTARGET, &cpu_info, 0);
+	pcre2_config_16(PCRE2_CONFIG_JITTARGET, &cpu_info, 128 * sizeof(PCRE2_UCHAR16));
 #elif defined SUPPORT_PCRE2_32
-	pcre2_config_32(PCRE2_CONFIG_JITTARGET, &cpu_info, 0);
+	pcre2_config_32(PCRE2_CONFIG_JITTARGET, &cpu_info, 128 * sizeof(PCRE2_UCHAR32));
 #endif
 
 	printf("Running JIT regression tests\n");
-//	printf("  target CPU of SLJIT compiler: %s\n", cpu_info);
+	printf("  target CPU of SLJIT compiler: ");
+	for (i = 0; cpu_info[i]; i++)
+		printf("%c", (char)(cpu_info[i]));
+	printf("\n");
 
 #if defined SUPPORT_PCRE2_8
 	pcre2_config_8(PCRE2_CONFIG_UNICODE, &utf, sizeof(int));
 #elif defined SUPPORT_PCRE2_16
 	pcre2_config_16(PCRE2_CONFIG_UNICODE, &utf, sizeof(int));
-#elif defined SUPPORT_PCRE2_16
+#elif defined SUPPORT_PCRE2_32
 	pcre2_config_32(PCRE2_CONFIG_UNICODE, &utf, sizeof(int));
 #endif
 
@@ -1378,7 +1392,6 @@ static int regression_tests(void)
 		if (!(current->start_offset & F_DIFF)) {
 #if defined SUPPORT_UTF && ((defined(SUPPORT_PCRE2_8) + defined(SUPPORT_PCRE2_16) + defined(SUPPORT_PCRE2_32)) >= 2)
 			if (!(current->start_offset & F_FORCECONV)) {
-				int return_value;
 
 				/* All results must be the same. */
 #ifdef SUPPORT_PCRE2_8
@@ -1491,7 +1504,6 @@ static int regression_tests(void)
 			} else
 #endif /* more than one of SUPPORT_PCRE2_8, SUPPORT_PCRE2_16 and SUPPORT_PCRE2_32 */
 			{
-				/* Only the 8 bit and 16 bit results must be equal. */
 #ifdef SUPPORT_PCRE2_8
 				if (return_value8[0] != return_value8[1]) {
 					printf("\n8 bit: Return value differs(%d:%d): [%d] '%s' @ '%s'\n",
@@ -1604,21 +1616,21 @@ static int regression_tests(void)
 
 		if (is_successful) {
 #ifdef SUPPORT_PCRE2_8
-			if (!(current->start_offset & F_NO8) && pcre2_get_mark_8(mdata8_1) != pcre2_get_mark_8(mdata8_2)) {
+			if (re8 && !(current->start_offset & F_NO8) && pcre2_get_mark_8(mdata8_1) != pcre2_get_mark_8(mdata8_2)) {
 				printf("8 bit: Mark value mismatch: [%d] '%s' @ '%s'\n",
 					total, current->pattern, current->input);
 				is_successful = 0;
 			}
 #endif
 #ifdef SUPPORT_PCRE2_16
-			if (!(current->start_offset & F_NO16) && pcre2_get_mark_16(mdata16_1) != pcre2_get_mark_16(mdata16_2)) {
+			if (re16 && !(current->start_offset & F_NO16) && pcre2_get_mark_16(mdata16_1) != pcre2_get_mark_16(mdata16_2)) {
 				printf("16 bit: Mark value mismatch: [%d] '%s' @ '%s'\n",
 					total, current->pattern, current->input);
 				is_successful = 0;
 			}
 #endif
 #ifdef SUPPORT_PCRE2_32
-			if (!(current->start_offset & F_NO32) && pcre2_get_mark_32(mdata32_1) != pcre2_get_mark_32(mdata32_2)) {
+			if (re32 && !(current->start_offset & F_NO32) && pcre2_get_mark_32(mdata32_1) != pcre2_get_mark_32(mdata32_2)) {
 				printf("32 bit: Mark value mismatch: [%d] '%s' @ '%s'\n",
 					total, current->pattern, current->input);
 				is_successful = 0;
@@ -1627,16 +1639,19 @@ static int regression_tests(void)
 		}
 
 #ifdef SUPPORT_PCRE2_8
-		if (re8)
-			pcre2_code_free_8(re8);
+		pcre2_code_free_8(re8);
+		pcre2_match_data_free_8(mdata8_1);
+		pcre2_match_data_free_8(mdata8_2);
 #endif
 #ifdef SUPPORT_PCRE2_16
-		if (re16)
-			pcre2_code_free_16(re16);
+		pcre2_code_free_16(re16);
+		pcre2_match_data_free_16(mdata16_1);
+		pcre2_match_data_free_16(mdata16_2);
 #endif
 #ifdef SUPPORT_PCRE2_32
-		if (re32)
-			pcre2_code_free_32(re32);
+		pcre2_code_free_32(re32);
+		pcre2_match_data_free_32(mdata32_1);
+		pcre2_match_data_free_32(mdata32_2);
 #endif
 
 		if (is_successful) {
