@@ -616,6 +616,7 @@ static uint32_t maxlookbehind;
 static uint32_t max_oveccount;
 static uint32_t callout_count;
 
+static VERSION_TYPE jittarget[VERSION_SIZE];
 static VERSION_TYPE version[VERSION_SIZE];
 static VERSION_TYPE uversion[VERSION_SIZE];
 
@@ -1103,7 +1104,7 @@ the three different cases. */
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
     G(pcre2_jit_stack_free_,BITONE)((G(pcre2_jit_stack_,BITONE) *)a); \
   else \
-    G(pcre2_jit_stack_free_,BITWO)((G(pcre2_jit_stack_,BITTWO) *)a);
+    G(pcre2_jit_stack_free_,BITTWO)((G(pcre2_jit_stack_,BITTWO) *)a);
 
 #define PCRE2_MAKETABLES(a) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
@@ -5103,8 +5104,6 @@ return PR_OK;
 *               Print PCRE2 version              *
 *************************************************/
 
-/* The version string was read into 'version' at the start of execution. */
-
 static void
 print_version(FILE *f)
 {
@@ -5112,6 +5111,33 @@ VERSION_TYPE *vp;
 fprintf(f, "PCRE2 version ");
 for (vp = version; *vp != 0; vp++) fprintf(f, "%c", *vp);
 fprintf(f, "\n");
+}
+
+
+
+/*************************************************
+*               Print Unicode version            *
+*************************************************/
+
+static void
+print_unicode_version(FILE *f)
+{
+VERSION_TYPE *vp;
+fprintf(f, "Unicode version ");
+for (vp = uversion; *vp != 0; vp++) fprintf(f, "%c", *vp);
+}
+
+
+
+/*************************************************
+*               Print JIT target                 *
+*************************************************/
+
+static void
+print_jit_target(FILE *f)
+{
+VERSION_TYPE *vp;
+for (vp = jittarget; *vp != 0; vp++) fprintf(f, "%c", *vp);
 }
 
 
@@ -5293,23 +5319,25 @@ printf("  32-bit support\n");
 
 (void)PCRE2_CONFIG(PCRE2_CONFIG_UNICODE, &rc, sizeof(rc));
 if (rc != 0)
-  printf("  UTF and UCP support (Unicode version %s)\n", uversion);
-else
-  printf("  No UTF or UCP support\n");
+  {
+  printf("  UTF and UCP support (");
+  print_unicode_version(stdout);
+  printf(")\n");
+  } 
+else printf("  No UTF or UCP support\n");
+   
 (void)PCRE2_CONFIG(PCRE2_CONFIG_JIT, &rc, sizeof(rc));
 if (rc != 0)
   {
-/* FIXME: config needs sorting for jit target
-  const char *arch;
-  (void)PCRE2_CONFIG(PCRE2_CONFIG_JITTARGET, (void *)(&arch));
-  printf("  Just-in-time compiler support: %s\n", arch);
-*/
-  printf("  Just-in-time compiler support: FIXME\n");
+  printf("  Just-in-time compiler support: ");
+  print_jit_target(stdout); 
+  printf("\n"); 
   }
 else
   {
   printf("  No just-in-time compiler support\n");
   }
+   
 (void)PCRE2_CONFIG(PCRE2_CONFIG_NEWLINE, &rc, sizeof(rc));
 print_newline_config(rc, FALSE);
 (void)PCRE2_CONFIG(PCRE2_CONFIG_BSR, &rc, sizeof(rc));
@@ -5362,10 +5390,12 @@ if (PO(options) != DO(options) || PO(control) != DO(control))
   return 1;
   }
 
-/* Get the PCRE2 and Unicode version number information. */
+/* Get the PCRE2 and Unicode version number and JIT target information. */
 
 PCRE2_CONFIG(PCRE2_CONFIG_VERSION, version, sizeof(VERSION_TYPE)*VERSION_SIZE);
 PCRE2_CONFIG(PCRE2_CONFIG_UNICODE_VERSION, uversion,
+  sizeof(VERSION_TYPE)*VERSION_SIZE);
+PCRE2_CONFIG(PCRE2_CONFIG_JITTARGET, jittarget, 
   sizeof(VERSION_TYPE)*VERSION_SIZE);
 
 /* Get buffers from malloc() so that valgrind will check their misuse when
