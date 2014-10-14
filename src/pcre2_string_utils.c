@@ -195,7 +195,7 @@ int
 PRIV(strcpy_c8)(PCRE2_UCHAR *str1, size_t length, const char *str2)
 {
 PCRE2_UCHAR *t = str1;
-if (strlen(str2) >= length) return PCRE2_ERROR_BADLENGTH; 
+if (strlen(str2) >= length - 1) return PCRE2_ERROR_BADLENGTH; 
 while (*str2 != 0) *t++ = *str2++;
 *t = 0;
 return t - str1;
