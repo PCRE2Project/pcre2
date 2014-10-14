@@ -947,7 +947,8 @@ Partial match: abc
    xyzfo\=ps
 No match
    foob\=ps,offset=2
-Partial match: b
+Partial match: foob
+               <<<
    foobar...\=ps,dfa_restart,offset=4
  0: ar
    xyzfo\=ps
@@ -7092,17 +7093,21 @@ Failed: error -40: item unsupported for DFA matching
     xyzabc123pqr 
  0: 123
     xyzabc12\=ps
-Partial match: 12
+Partial match: abc12
+               <<<
     xyzabc12\=ph
-Partial match: 12
+Partial match: abc12
+               <<<
 
 /\babc\b/
     +++abc+++
  0: abc
     +++ab\=ps
-Partial match: ab
+Partial match: +ab
+               <
     +++ab\=ph
-Partial match: ab
+Partial match: +ab
+               <
 
 /(?=C)/g,aftertext
     ABCDECBA
@@ -7226,7 +7231,8 @@ Failed: error -40: item unsupported for DFA matching
 
 /(?<=abc)def/
     abc\=ph
-Partial match: 
+Partial match: abc
+               <<<
 
 /abc$/
     abc

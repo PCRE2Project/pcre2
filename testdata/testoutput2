@@ -9286,17 +9286,21 @@ Partial match: abc12
     xyzabc123pqr 
  0: 123
     xyzabc12\=ps
-Partial match: 12
+Partial match: abc12
+               <<<
     xyzabc12\=ph
-Partial match: 12
+Partial match: abc12
+               <<<
 
 /\babc\b/
     +++abc+++
  0: abc
     +++ab\=ps
-Partial match: ab
+Partial match: +ab
+               <
     +++ab\=ph
-Partial match: ab
+Partial match: +ab
+               <
 
 /(?&word)(?&element)(?(DEFINE)(?<element><[^m][^>]>[^<])(?<word>\w*+))/B
 ------------------------------------------------------------------
@@ -10324,7 +10328,8 @@ No match
 
 /(?<=abc)def/
     abc\=ph
-Partial match: 
+Partial match: abc
+               <<<
 
 /abc$/
     abc
@@ -11877,9 +11882,11 @@ Callout 2: last capture = 0
   
 /(?<=123)(*MARK:xx)abc/mark
     xxxx123a\=ph
-Partial match, mark=xx: a
+Partial match, mark=xx: 123a
+                        <<<
     xxxx123a\=ps
-Partial match, mark=xx: a
+Partial match, mark=xx: 123a
+                        <<<
     
 /123\Kabc/
     xxxx123a\=ph

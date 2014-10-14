@@ -131,7 +131,7 @@ long enough, or, for unanchored patterns, if it has been scanned far enough.
 </P>
 <P>
 You can disable these optimizations by passing the PCRE2_NO_START_OPTIMIZE
-option to the matching function, or by starting the pattern with
+option to <b>pcre2_compile()</b>, or by starting the pattern with
 (*NO_START_OPT). This slows down the matching process, but does ensure that
 callouts such as the example above are obeyed.
 </P>

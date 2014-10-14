@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "10 October 2014" "PCRE2 10.00"
+.TH PCRE2API 3 "14 October 2014" "PCRE2 10.00"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -2061,15 +2061,10 @@ pointer to the zero-terminated name, which is within the compiled pattern.
 Otherwise NULL is returned. A (*MARK) name may be available after a failed 
 match or a partial match, as well as after a successful one.
 .P
-The offset of the character at which the successful or partial match started is
+The offset of the character at which the successful match started is
 returned by \fBpcre2_get_startchar()\fP. This can be different to the value of
-\fIovector[0]\fP if the pattern contains the \eK escape sequence. This 
-information is needed when doing partial matching over multiple data segments 
-(see the
-.\" HREF
-\fBpcre2partial\fP
-.\"
-documentation).
+\fIovector[0]\fP if the pattern contains the \eK escape sequence. Note, 
+however, the \eK has no effect for a partial match.
 .
 .
 .\" HTML <a name="errorlist"></a>
@@ -2626,6 +2621,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 10 October 2014
+Last updated: 14 October 2014
 Copyright (c) 1997-2014 University of Cambridge.
 .fi

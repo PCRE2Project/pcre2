@@ -612,6 +612,7 @@ clock_t total_match_time = 0;
 
 static uint32_t dfa_matched;
 static uint32_t forbid_utf = 0;
+static uint32_t maxlookbehind;
 static uint32_t max_oveccount;
 static uint32_t callout_count;
 
@@ -2294,6 +2295,55 @@ return 0;
 
 
 /*************************************************
+*         Move back by so many characters        *
+*************************************************/
+
+/* Given a code unit offset in a subject string, move backwards by a number of 
+characters, and return the resulting offset.
+
+Arguments:
+  subject   pointer to the string
+  offset    start offset
+  count     count to move back by
+  utf       TRUE if in UTF mode
+  
+Returns:   a possibly changed offset
+*/    
+
+static PCRE2_SIZE
+backchars(uint8_t *subject, PCRE2_SIZE offset, uint32_t count, BOOL utf)
+{
+long int yield;
+
+if (!utf || test_mode == PCRE32_MODE) yield = offset - count;
+
+else if (test_mode == PCRE8_MODE)
+  {
+  PCRE2_SPTR8 pp = (PCRE2_SPTR8)subject + offset;
+  for (; count > 0; count--)
+    {
+    pp--;
+    while ((*pp & 0xc0) == 0x80) pp--;
+    }
+  yield = pp - (PCRE2_SPTR8)subject;     
+  }
+  
+else  /* 16-bit mode */
+  { 
+  PCRE2_SPTR16 pp = (PCRE2_SPTR16)subject + offset;
+  for (; count > 0; count--)
+    {
+    pp--;
+    if ((*pp & 0xfc00) == 0xdc00) pp--; 
+    }
+  yield = pp - (PCRE2_SPTR16)subject;     
+  }
+  
+return (yield >= 0)? yield : 0; 
+}
+
+
+/*************************************************
 *        Read or extend an input line            *
 *************************************************/
 
@@ -3099,8 +3149,7 @@ if ((pat_patctl.control & CTL_INFO) != 0)
   BOOL match_limit_set, recursion_limit_set;
   uint32_t backrefmax, bsr_convention, capture_count, first_ctype, first_cunit,
     hascrorlf, jchanged, last_ctype, last_cunit, match_empty, match_limit,
-    maxlookbehind, minlength, nameentrysize, namecount, newline_convention,
-    recursion_limit;
+    minlength, nameentrysize, namecount, newline_convention, recursion_limit;
 
   /* These info requests may return PCRE2_ERROR_UNSET. */
 
@@ -3145,7 +3194,6 @@ if ((pat_patctl.control & CTL_INFO) != 0)
       pattern_info(PCRE2_INFO_LASTCODEUNIT, &last_cunit, FALSE) +
       pattern_info(PCRE2_INFO_LASTCODETYPE, &last_ctype, FALSE) +
       pattern_info(PCRE2_INFO_MATCHEMPTY, &match_empty, FALSE) +
-      pattern_info(PCRE2_INFO_MAXLOOKBEHIND, &maxlookbehind, FALSE) +
       pattern_info(PCRE2_INFO_MINLENGTH, &minlength, FALSE) +
       pattern_info(PCRE2_INFO_NAMECOUNT, &namecount, FALSE) +
       pattern_info(PCRE2_INFO_NAMEENTRYSIZE, &nameentrysize, FALSE) +
@@ -3700,6 +3748,11 @@ if (TEST(compiled_code, ==, NULL))
   fprintf(outfile, "\n");
   return PR_SKIP;
   }
+  
+/* Remember the maximum lookbehind, for partial matching. */ 
+
+if (pattern_info(PCRE2_INFO_MAXLOOKBEHIND, &maxlookbehind, FALSE) != 0)
+  return PR_ABEND;
 
 /* Call the JIT compiler if requested. */
 
@@ -4875,22 +4928,41 @@ for (gmatched = 0;; gmatched++)
     }    /* End of handling a successful match */
 
   /* There was a partial match. The value of ovector[0] is the bumpalong point, 
-  not any \K point that might exist. */ 
+  that is, startchar, not any \K point that might have been passed. */ 
 
   else if (capcount == PCRE2_ERROR_PARTIAL)
     {
+    PCRE2_SIZE poffset; 
+    int backlength; 
+    int rubriclength = 0;
+    
     fprintf(outfile, "Partial match");
     if ((dat_datctl.control & CTL_MARK) != 0 &&
          TESTFLD(match_data, mark, !=, NULL))
       {
       fprintf(outfile, ", mark=");
-      PCHARSV(CASTFLD(void *, match_data, mark), 0, -1, utf, outfile);
+      PCHARS(rubriclength, CASTFLD(void *, match_data, mark), 0, -1, utf, outfile);
+      rubriclength += 7;
       }
     fprintf(outfile, ": ");
+    rubriclength += 15; 
+
+    poffset = backchars(pp, ovector[0], maxlookbehind, utf);
+    PCHARS(backlength, pp, poffset, ovector[0] - poffset, utf, outfile); 
     PCHARSV(pp, ovector[0], ulen - ovector[0], utf, outfile);
+    
     if ((pat_patctl.control & CTL_JITVERIFY) != 0 && jit_was_used)
       fprintf(outfile, " (JIT)");
     fprintf(outfile, "\n");
+    
+    if (backlength != 0)
+      {
+      int i; 
+      for (i = 0; i < rubriclength; i++) fprintf(outfile, " ");
+      for (i = 0; i < backlength; i++) fprintf(outfile, "<");
+      fprintf(outfile, "\n"); 
+      }  
+ 
     break;  /* Out of the /g loop */
     }       /* End of handling partial match */
 

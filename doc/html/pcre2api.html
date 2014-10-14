@@ -90,9 +90,6 @@ document for an overview of all the PCRE2 documentation.
 </P>
 <br><a name="SEC2" href="#TOC1">PCRE2 NATIVE API AUXILIARY MATCH FUNCTIONS</a><br>
 <P>
-<b>PCRE2_SIZE pcre2_get_leftchar(pcre2_match_data *<i>match_data</i>);</b>
-<br>
-<br>
 <b>PCRE2_SPTR pcre2_get_mark(pcre2_match_data *<i>match_data</i>);</b>
 <br>
 <br>
@@ -100,9 +97,6 @@ document for an overview of all the PCRE2 documentation.
 <br>
 <br>
 <b>PCRE2_SIZE *pcre2_get_ovector_pointer(pcre2_match_data *<i>match_data</i>);</b>
-<br>
-<br>
-<b>PCRE2_SIZE pcre2_get_rightchar(pcre2_match_data *<i>match_data</i>);</b>
 <br>
 <br>
 <b>PCRE2_SIZE pcre2_get_startchar(pcre2_match_data *<i>match_data</i>);</b>
@@ -133,7 +127,7 @@ document for an overview of all the PCRE2 documentation.
 <b>void pcre2_compile_context_free(pcre2_compile_context *<i>ccontext</i>);</b>
 <br>
 <br>
-<b>int pcre2_set_bsr_compile(pcre2_compile_context *<i>ccontext</i>,</b>
+<b>int pcre2_set_bsr(pcre2_compile_context *<i>ccontext</i>,</b>
 <b>  uint32_t <i>value</i>);</b>
 <br>
 <br>
@@ -141,7 +135,7 @@ document for an overview of all the PCRE2 documentation.
 <b>  const unsigned char *<i>tables</i>);</b>
 <br>
 <br>
-<b>int pcre2_set_newline_compile(pcre2_compile_context *<i>ccontext</i>,</b>
+<b>int pcre2_set_newline(pcre2_compile_context *<i>ccontext</i>,</b>
 <b>  uint32_t <i>value</i>);</b>
 <br>
 <br>
@@ -165,20 +159,12 @@ document for an overview of all the PCRE2 documentation.
 <b>void pcre2_match_context_free(pcre2_match_context *<i>mcontext</i>);</b>
 <br>
 <br>
-<b>int pcre2_set_bsr_match(pcre2_match_context *<i>mcontext</i>,</b>
-<b>  uint32_t <i>value</i>);</b>
-<br>
-<br>
 <b>int pcre2_set_callout(pcre2_match_context *<i>mcontext</i>,</b>
 <b>  int (*<i>callout_function</i>)(pcre2_callout_block *),</b>
 <b>  void *<i>callout_data</i>);</b>
 <br>
 <br>
 <b>int pcre2_set_match_limit(pcre2_match_context *<i>mcontext</i>,</b>
-<b>  uint32_t <i>value</i>);</b>
-<br>
-<br>
-<b>int pcre2_set_newline_match(pcre2_match_context *<i>mcontext</i>,</b>
 <b>  uint32_t <i>value</i>);</b>
 <br>
 <br>
@@ -596,7 +582,7 @@ A compile context is created, copied, and freed by the following functions:
 A compile context is created with default values for its parameters. These can 
 be changed by calling the following functions, which return 0 on success, or 
 PCRE2_ERROR_BADDATA if invalid data is detected.
-<b>int pcre2_set_bsr_compile(pcre2_compile_context *<i>ccontext</i>,</b>
+<b>int pcre2_set_bsr(pcre2_compile_context *<i>ccontext</i>,</b>
 <b>  uint32_t <i>value</i>);</b>
 <br>
 <br>
@@ -605,8 +591,7 @@ or CRLF, or PCRE2_BSR_UNICODE, to specify that \R matches any Unicode line
 ending sequence. The value of this parameter does not affect what is compiled; 
 it is just saved with the compiled pattern. The value is used by the JIT
 compiler and by the two interpreted matching functions, <i>pcre2_match()</i> and 
-<i>pcre2_dfa_match()</i>. You can change the value when calling these functions, 
-but doing so disables the use of JIT.
+<i>pcre2_dfa_match()</i>.
 <b>int pcre2_set_character_tables(pcre2_compile_context *<i>ccontext</i>,</b>
 <b>  const unsigned char *<i>tables</i>);</b>
 <br>
@@ -614,7 +599,7 @@ but doing so disables the use of JIT.
 The value must be the result of a call to <i>pcre2_maketables()</i>, whose only 
 argument is a general context. This function builds a set of character tables
 in the current locale.
-<b>int pcre2_set_newline_compile(pcre2_compile_context *<i>ccontext</i>,</b>
+<b>int pcre2_set_newline(pcre2_compile_context *<i>ccontext</i>,</b>
 <b>  uint32_t <i>value</i>);</b>
 <br>
 <br>
@@ -629,8 +614,7 @@ When a pattern is compiled with the PCRE2_EXTENDED option, the value of this
 parameter affects the recognition of white space and the end of internal
 comments starting with #. The value is saved with the compiled pattern for
 subsequent use by the JIT compiler and by the two interpreted matching
-functions, <i>pcre2_match()</i> and <i>pcre2_dfa_match()</i>. You can change the
-value when calling these functions, but doing so disables the use of JIT.
+functions, <i>pcre2_match()</i> and <i>pcre2_dfa_match()</i>.
 <b>int pcre2_set_parens_nest_limit(pcre2_compile_context *<i>ccontext</i>,</b>
 <b>  uint32_t <i>value</i>);</b>
 <br>
@@ -685,14 +669,6 @@ A match context is created, copied, and freed by the following functions:
 A match context is created with default values for its parameters. These can 
 be changed by calling the following functions, which return 0 on success, or 
 PCRE2_ERROR_BADDATA if invalid data is detected.
-<b>int pcre2_set_bsr_match(pcre2_match_context *<i>mcontext</i>,</b>
-<b>  uint32_t <i>value</i>);</b>
-<br>
-<br>
-The value must be PCRE2_BSR_ANYCRLF, to specify that \R matches only CR, LF, 
-or CRLF, or PCRE2_BSR_UNICODE, to specify that \R matches any Unicode line 
-ending sequence. If you want to make use of JIT matching, you should not use 
-this function, but instead set the value in a compile context.
 <b>int pcre2_set_callout(pcre2_match_context *<i>mcontext</i>,</b>
 <b>  int (*<i>callout_function</i>)(pcre2_callout_block *),</b>
 <b>  void *<i>callout_data</i>);</b>
@@ -769,17 +745,6 @@ pattern of the form
 where ddd is a decimal number. However, such a setting is ignored unless ddd is
 less than the limit set by the caller of <b>pcre2_match()</b> or, if no such
 limit is set, less than the default.
-<b>int pcre2_set_newline_match(pcre2_match_context *<i>mcontext</i>,</b>
-<b>  uint32_t <i>value</i>);</b>
-<br>
-<br>
-This specifies which characters or character sequences are to be recognized as
-newlines. The value must be one of PCRE2_NEWLINE_CR (carriage return only),
-PCRE2_NEWLINE_LF (linefeed only), PCRE2_NEWLINE_CRLF (the two-character
-sequence CR followed by LF), PCRE2_NEWLINE_ANYCRLF (any of the above), or
-PCRE2_NEWLINE_ANY (any Unicode newline sequence). If you want to make use of
-JIT matching, you should not use this function, but instead set the value in a
-compile context.
 <b>int pcre2_set_recursion_memory_management(</b>
 <b>  pcre2_match_context *<i>mcontext</i>,</b>
 <b>  void *(*<i>private_malloc</i>)(PCRE2_SIZE, void *),</b>
@@ -956,9 +921,8 @@ documentation).
 <P>
 For those options that can be different in different parts of the pattern, the
 contents of the <i>options</i> argument specifies their settings at the start of
-compilation. The PCRE2_ANCHORED, PCRE2_NO_UTF_CHECK, and
-PCRE2_NO_START_OPTIMIZE options can be set at the time of matching as well as
-at compile time.
+compilation. The PCRE2_ANCHORED and PCRE2_NO_UTF_CHECK options can be set at
+the time of matching as well as at compile time.
 </P>
 <P>
 Other, less frequently required compile-time parameters (for example, the 
@@ -1176,14 +1140,55 @@ purposes.
 <pre>
   PCRE2_NO_START_OPTIMIZE
 </pre>
-This is an option that acts at matching time; that is, it is really an option
-for <b>pcre2_match()</b> or <b>pcre_dfa_match()</b>. If it is set at compile
-time, it is remembered with the compiled pattern and assumed at matching time.
-This is necessary if you want to use JIT execution, because the JIT compiler
-needs to know whether or not this option is set. For details, see the
-discussion of PCRE2_NO_START_OPTIMIZE in the section on <b>pcre2_match()</b> 
-options
-<a href="#matchoptions">below.</a>
+This is an option whose main effect is at matching time. It does not change
+what <b>pcre2_compile()</b> generates, but it does affect the output of the JIT
+compiler.
+</P>
+<P>
+There are a number of optimizations that may occur at the start of a match, in
+order to speed up the process. For example, if it is known that an unanchored
+match must start with a specific character, the matching code searches the
+subject for that character, and fails immediately if it cannot find it, without
+actually running the main matching function. This means that a special item
+such as (*COMMIT) at the start of a pattern is not considered until after a
+suitable starting point for the match has been found. Also, when callouts or
+(*MARK) items are in use, these "start-up" optimizations can cause them to be
+skipped if the pattern is never actually used. The start-up optimizations are
+in effect a pre-scan of the subject that takes place before the pattern is run.
+</P>
+<P>
+The PCRE2_NO_START_OPTIMIZE option disables the start-up optimizations,
+possibly causing performance to suffer, but ensuring that in cases where the
+result is "no match", the callouts do occur, and that items such as (*COMMIT)
+and (*MARK) are considered at every possible starting position in the subject
+string.
+</P>
+<P>
+Setting PCRE2_NO_START_OPTIMIZE may change the outcome of a matching operation.
+Consider the pattern
+<pre>
+  (*COMMIT)ABC
+</pre>
+When this is compiled, PCRE2 records the fact that a match must start with the
+character "A". Suppose the subject string is "DEFABC". The start-up
+optimization scans along the subject, finds "A" and runs the first match
+attempt from there. The (*COMMIT) item means that the pattern must match the
+current starting position, which in this case, it does. However, if the same
+match is run with PCRE2_NO_START_OPTIMIZE set, the initial scan along the
+subject string does not happen. The first match attempt is run starting from
+"D" and when this fails, (*COMMIT) prevents any further matches being tried, so
+the overall result is "no match". There are also other start-up optimizations.
+For example, a minimum length for the subject may be recorded. Consider the
+pattern
+<pre>
+  (*MARK:A)(X|Y)
+</pre>
+The minimum length for a match is one character. If the subject is "ABC", there
+will be attempts to match "ABC", "BC", and "C". An attempt to match an empty 
+string at the end of the subject does not take place, because PCRE2 knows that
+the subject is now too short, and so the (*MARK) is never encountered. In this
+case, the optimization does not affect the overall match result, which is still
+"no match", but it does affect the auxiliary information that is returned.
 <pre>
   PCRE2_NO_UTF_CHECK
 </pre>
@@ -1648,13 +1653,15 @@ string that define the matched part of the subject and any substrings that were
 capured. This is know as the <i>ovector</i>. 
 </P>
 <P>
-Before calling <b>pcre2_match()</b> or <b>pcre2_dfa_match()</b> you must create a 
+Before calling <b>pcre2_match()</b> or <b>pcre2_dfa_match()</b> you must create a
 match data block by calling one of the creation functions above. For
 <b>pcre2_match_data_create()</b>, the first argument is the number of pairs of
 offsets in the <i>ovector</i>. One pair of offsets is required to identify the
 string that matched the whole pattern, with another pair for each captured
-substring. For example, a value of 4 creates enough space to record the
-matched portion of the subject plus three captured substrings. 
+substring. For example, a value of 4 creates enough space to record the matched
+portion of the subject plus three captured substrings. A minimum of at least 1
+pair is imposed by <b>pcre2_match_data_create()</b>, so it is always possible to
+return the overall matched string.
 </P>
 <P>
 For <b>pcre2_match_data_create_from_pattern()</b>, the first argument is a
@@ -1779,10 +1786,9 @@ Option bits for <b>pcre2_match()</b>
 </b><br>
 <P>
 The unused bits of the <i>options</i> argument for <b>pcre2_match()</b> must be
-zero. The only bits that may be set are PCRE2_ANCHORED, 
-PCRE2_NOTBOL, PCRE2_NOTEOL, PCRE2_NOTEMPTY, PCRE2_NOTEMPTY_ATSTART,
-PCRE2_NO_START_OPTIMIZE, PCRE2_NO_UTF_CHECK, PCRE2_PARTIAL_HARD, and
-PCRE2_PARTIAL_SOFT. Their action is described below.
+zero. The only bits that may be set are PCRE2_ANCHORED, PCRE2_NOTBOL,
+PCRE2_NOTEOL, PCRE2_NOTEMPTY, PCRE2_NOTEMPTY_ATSTART, PCRE2_NO_UTF_CHECK,
+PCRE2_PARTIAL_HARD, and PCRE2_PARTIAL_SOFT. Their action is described below.
 </P>
 <P>
 If the pattern was successfully processed by the just-in-time (JIT) compiler,
@@ -1833,56 +1839,6 @@ valid, so PCRE2 searches further into the string for occurrences of "a" or "b".
 This is like PCRE2_NOTEMPTY, except that an empty string match that is not at
 the start of the subject is permitted. If the pattern is anchored, such a match
 can occur only if the pattern contains \K.
-<pre>
-  PCRE2_NO_START_OPTIMIZE
-</pre>
-There are a number of optimizations that <b>pcre2_match()</b> uses at the start
-of a match, in order to speed up the process. For example, if it is known that
-an unanchored match must start with a specific character, it searches the
-subject for that character, and fails immediately if it cannot find it, without
-actually running the main matching function. This means that a special item
-such as (*COMMIT) at the start of a pattern is not considered until after a
-suitable starting point for the match has been found. Also, when callouts or
-(*MARK) items are in use, these "start-up" optimizations can cause them to be
-skipped if the pattern is never actually used. The start-up optimizations are
-in effect a pre-scan of the subject that takes place before the pattern is run.
-</P>
-<P>
-The PCRE2_NO_START_OPTIMIZE option disables the start-up optimizations,
-possibly causing performance to suffer, but ensuring that in cases where the
-result is "no match", the callouts do occur, and that items such as (*COMMIT)
-and (*MARK) are considered at every possible starting position in the subject
-string. If PCRE2_NO_START_OPTIMIZE is set at compile time, it cannot be unset
-at matching time. The use of PCRE2_NO_START_OPTIMIZE at matching time (that is,
-passing it to <b>pcre2_match()</b>) disables JIT execution; in this situation,
-matching is always done using interpretively.
-</P>
-<P>
-Setting PCRE2_NO_START_OPTIMIZE can change the outcome of a matching operation.
-Consider the pattern
-<pre>
-  (*COMMIT)ABC
-</pre>
-When this is compiled, PCRE2 records the fact that a match must start with the
-character "A". Suppose the subject string is "DEFABC". The start-up
-optimization scans along the subject, finds "A" and runs the first match
-attempt from there. The (*COMMIT) item means that the pattern must match the
-current starting position, which in this case, it does. However, if the same
-match is run with PCRE2_NO_START_OPTIMIZE set, the initial scan along the
-subject string does not happen. The first match attempt is run starting from
-"D" and when this fails, (*COMMIT) prevents any further matches being tried, so
-the overall result is "no match". There are also other start-up optimizations.
-For example, a minimum length for the subject may be recorded. Consider the
-pattern
-<pre>
-  (*MARK:A)(X|Y)
-</pre>
-The minimum length for a match is one character. If the subject is "ABC", there
-will be attempts to match "ABC", "BC", and "C". An attempt to match an empty 
-string at the end of the subject does not take place, because PCRE2 knows that
-the subject is now too short, and so the (*MARK) is never encountered. In this
-case, the optimization does not affect the overall match result, which is still
-"no match", but it does affect the auxiliary information that is returned.
 <pre>
   PCRE2_NO_UTF_CHECK
 </pre>
@@ -2035,13 +1991,13 @@ returned.
 </P>
 <P>
 If the ovector is too small to hold all the captured substring offsets, as much
-as possible is filled in, and the function returns a value of zero. If neither
-the actual string matched nor any captured substrings are of interest,
-<b>pcre2_match()</b> may be called with a match data block whose ovector is of
-zero length. However, if the pattern contains back references and the
-<i>ovector</i> is not big enough to remember the related substrings, PCRE2 has
-to get additional memory for use during matching. Thus it is usually advisable
-to set up a match data block containing an ovector of reasonable size.
+as possible is filled in, and the function returns a value of zero. If captured
+substrings are not of interest, <b>pcre2_match()</b> may be called with a match
+data block whose ovector is of minimum length (that is, one pair). However, if
+the pattern contains back references and the <i>ovector</i> is not big enough to
+remember the related substrings, PCRE2 has to get additional memory for use
+during matching. Thus it is usually advisable to set up a match data block
+containing an ovector of reasonable size.
 </P>
 <P>
 It is possible for capturing subpattern number <i>n+1</i> to match some part of
@@ -2074,12 +2030,6 @@ Other information about the match
 <b>PCRE2_SPTR pcre2_get_mark(pcre2_match_data *<i>match_data</i>);</b>
 <br>
 <br>
-<b>PCRE2_SIZE pcre2_get_leftchar(pcre2_match_data *<i>match_data</i>);</b>
-<br>
-<br>
-<b>PCRE2_SIZE pcre2_get_rightchar(pcre2_match_data *<i>match_data</i>);</b>
-<br>
-<br>
 <b>PCRE2_SIZE pcre2_get_startchar(pcre2_match_data *<i>match_data</i>);</b>
 </P>
 <P>
@@ -2093,39 +2043,10 @@ Otherwise NULL is returned. A (*MARK) name may be available after a failed
 match or a partial match, as well as after a successful one.
 </P>
 <P>
-The other three functions yield values that give information about the part of 
-the subject string that was inspected during a successful match or a partial 
-match. Their results are undefined after a failed match. They return the 
-following values, respectively:
-<br>
-<br>
-(1) The offset of the leftmost character that was inspected during the match.
-This can be earlier than the point at which the match started if the pattern
-contains lookbehind assertions or \b or \B at the start.
-<br>
-<br>
-(2) The offset of the character that follows the rightmost character that was
-inspected during the match. This can be after the end of the match if the 
-pattern contains lookahead assertions.
-<br>
-<br>
-(3) The offset of the character at which the successful or partial match 
-started. This can be different to the value of <i>ovector[0]</i> if the pattern 
-contains the \K escape sequence.
-</P>
-<P>
-For example, if the pattern (?&#60;=abc)xx\Kyy(?=def) is matched against the
-string "123abcxxyydef123", the resulting offsets are:
-<pre>
-  ovector[0]   8
-  ovector[1]  10
-  leftchar     3
-  rightchar   13
-  startchar    6
-</pre>
-The <b>allusedtext</b> modifier in <b>pcre2test</b> can be used to display a
-longer string that shows the leftmost and rightmost characters in a match
-instead of just the matched string.
+The offset of the character at which the successful match started is
+returned by <b>pcre2_get_startchar()</b>. This can be different to the value of
+<i>ovector[0]</i> if the pattern contains the \K escape sequence. Note, 
+however, the \K has no effect for a partial match.
 <a name="errorlist"></a></P>
 <br><b>
 Error return values from <b>pcre2_match()</b>
@@ -2513,10 +2434,9 @@ Option bits for <b>pcre_dfa_match()</b>
 The unused bits of the <i>options</i> argument for <b>pcre2_dfa_match()</b> must
 be zero. The only bits that may be set are PCRE2_ANCHORED, PCRE2_NOTBOL,
 PCRE2_NOTEOL, PCRE2_NOTEMPTY, PCRE2_NOTEMPTY_ATSTART, PCRE2_NO_UTF_CHECK,
-PCRE2_NO_START_OPTIMIZE, PCRE2_PARTIAL_HARD, PCRE2_PARTIAL_SOFT,
-PCRE2_DFA_SHORTEST, and PCRE2_DFA_RESTART. All but the last four of these are
-exactly the same as for <b>pcre2_match()</b>, so their description is not
-repeated here.
+PCRE2_PARTIAL_HARD, PCRE2_PARTIAL_SOFT, PCRE2_DFA_SHORTEST, and
+PCRE2_DFA_RESTART. All but the last four of these are exactly the same as for
+<b>pcre2_match()</b>, so their description is not repeated here.
 <pre>
   PCRE2_PARTIAL_HARD
   PCRE2_PARTIAL_SOFT
@@ -2650,7 +2570,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC32" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 16 September 2014
+Last updated: 14 October 2014
 <br>
 Copyright &copy; 1997-2014 University of Cambridge.
 <br>
