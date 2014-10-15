@@ -1888,7 +1888,7 @@ extern void  *_pcre2_memctl_malloc(size_t, pcre2_memctl *);
 extern unsigned int _pcre2_ord2utf(uint32_t, PCRE2_UCHAR *);
 extern int   _pcre2_strcmp(PCRE2_SPTR, PCRE2_SPTR);
 extern int   _pcre2_strcmp_c8(PCRE2_SPTR, const char *);
-extern int   _pcre2_strcpy_c8(PCRE2_UCHAR *, size_t, const char *);
+extern int   _pcre2_strcpy_c8(PCRE2_UCHAR *, const char *);
 extern int   _pcre2_strlen(PCRE2_SPTR);
 extern int   _pcre2_strncmp(PCRE2_SPTR, PCRE2_SPTR, size_t);
 extern int   _pcre2_strncmp_c8(PCRE2_SPTR, const char *, size_t);

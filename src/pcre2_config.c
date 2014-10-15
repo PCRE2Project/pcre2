@@ -61,23 +61,48 @@ convenient for user programs that want to test their values. */
 * Return info about what features are configured *
 *************************************************/
 
-/* Most of the requests return an int value; others require more memory and do 
-their own checks.
-
+/*
 Arguments:
   what             what information is required
   where            where to put the information
-  length           length of "where" in bytes 
 
 Returns:           0 if data returned
-                   PCRE2_ERROR_BADLENGTH if not enough memory
+                   >= 0 if where is NULL, giving length required
                    PCRE2_ERROR_BADOPTION if "where" not recognized
+                   or JIT target requested when JIT not enabled 
 */
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
-pcre2_config(uint32_t what, void *where, size_t length)
+pcre2_config(uint32_t what, void *where)
 {
-if (length < sizeof(int)) return PCRE2_ERROR_BADLENGTH;
+if (where == NULL)  /* Requests a length */
+  {
+  switch(what)
+    {
+    default:
+    return PCRE2_ERROR_BADOPTION;  
+       
+    case PCRE2_CONFIG_BSR:
+    case PCRE2_CONFIG_JIT:
+    case PCRE2_CONFIG_LINKSIZE:
+    case PCRE2_CONFIG_NEWLINE:
+    case PCRE2_CONFIG_STACKRECURSE:
+    case PCRE2_CONFIG_UNICODE:
+    return sizeof(int); 
+  
+    case PCRE2_CONFIG_MATCHLIMIT:
+    case PCRE2_CONFIG_PARENSLIMIT:
+    case PCRE2_CONFIG_RECURSIONLIMIT:
+    return sizeof(long int);
+    
+    /* These are handled below */
+  
+    case PCRE2_CONFIG_JITTARGET:
+    case PCRE2_CONFIG_UNICODE_VERSION:
+    case PCRE2_CONFIG_VERSION:
+    break;
+    }
+  }    
 
 switch (what)
   {
@@ -102,18 +127,20 @@ switch (what)
 
   case PCRE2_CONFIG_JITTARGET:
 #ifdef SUPPORT_JIT
-  return PRIV(strcpy_c8)((PCRE2_UCHAR *)where, BYTES2CU(length), PRIV(jit_get_target)());
+    {
+    const char *v = PRIV(jit_get_target)();
+    return (where == NULL)? (int)strlen(v) : 
+      PRIV(strcpy_c8)((PCRE2_UCHAR *)where, v);
+    }   
 #else
-  *((const char **)where) = NULL;
+  return PCRE2_ERROR_BADOPTION;
 #endif
-  break;
 
   case PCRE2_CONFIG_LINKSIZE:
   *((int *)where) = configured_link_size;
   break;
 
   case PCRE2_CONFIG_MATCHLIMIT:
-  if (length < sizeof(unsigned long int)) return PCRE2_ERROR_BADLENGTH;
   *((unsigned long int *)where) = MATCH_LIMIT;
   break;
 
@@ -122,12 +149,10 @@ switch (what)
   break;
 
   case PCRE2_CONFIG_PARENSLIMIT:
-  if (length < sizeof(unsigned long int)) return PCRE2_ERROR_BADLENGTH;
   *((unsigned long int *)where) = PARENS_NEST_LIMIT;
   break;
 
   case PCRE2_CONFIG_RECURSIONLIMIT:
-  if (length < sizeof(unsigned long int)) return PCRE2_ERROR_BADLENGTH;
   *((unsigned long int *)where) = MATCH_LIMIT_RECURSION;
   break;
 
@@ -146,7 +171,8 @@ switch (what)
 #else
     const char *v = "Unicode not supported";
 #endif
-    return PRIV(strcpy_c8)((PCRE2_UCHAR *)where, BYTES2CU(length), v);
+    return (where == NULL)? (int)strlen(v) :
+      PRIV(strcpy_c8)((PCRE2_UCHAR *)where, v);
     }
   break;
 
@@ -182,7 +208,8 @@ switch (what)
     const char *v = (XSTRING(Z PCRE2_PRERELEASE)[1] == 0)?
       XSTRING(PCRE2_MAJOR.PCRE2_MINOR PCRE2_DATE) :
       XSTRING(PCRE2_MAJOR.PCRE2_MINOR) XSTRING(PCRE2_PRERELEASE PCRE2_DATE);
-    return PRIV(strcpy_c8)((PCRE2_UCHAR *)where, BYTES2CU(length), v);
+    return (where == NULL)? (int)strlen(v) : 
+      PRIV(strcpy_c8)((PCRE2_UCHAR *)where, v);
     } 
   }
 

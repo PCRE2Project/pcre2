@@ -203,7 +203,7 @@ document for an overview of all the PCRE2 documentation.
 .sp
 .B int pcre2_pattern_info(const pcre2 *\fIcode\fP, uint32_t \fIwhat\fP, void *\fIwhere\fP);
 .sp
-.B int pcre2_config(uint32_t \fIwhat\fP, void *\fIwhere\fP, PCRE2_SIZE \fIlength\fP);
+.B int pcre2_config(uint32_t \fIwhat\fP, void *\fIwhere\fP);
 .fi
 .
 .
@@ -746,7 +746,7 @@ supplied, otherwise the system functions.
 .SH "CHECKING BUILD-TIME OPTIONS"
 .rs
 .sp
-.B int pcre2_config(uint32_t \fIwhat\fP, void *\fIwhere\fP, PCRE2_SIZE \fIlength\fP);
+.B int pcre2_config(uint32_t \fIwhat\fP, void *\fIwhere\fP);
 .P
 The function \fBpcre2_config()\fP makes it possible for a PCRE2 client to
 discover which optional features have been compiled into the PCRE2 library. The
@@ -757,12 +757,11 @@ documentation has more details about these optional features.
 .P
 The first argument for \fBpcre2_config()\fP specifies which information is
 required. The second argument is a pointer to memory into which the information
-is placed, with the final argument giving the length of this memory in bytes.
-For calls that return numerical values, \fIwhere\fP should point to
-appropriately aligned memory, with \fIlength\fP set to at least the "sizeof"
-the data type.
+is placed. If NULL is passed, the function returns the number of bytes that are
+needed for the requested information. For calls that return numerical values,
+\fIwhere\fP should point to appropriately aligned memory.
 .P
-The returned value from \fBpcre2_config()\fP is zero on success, or the
+The returned value from \fBpcre2_config()\fP is non-negative on success, or the
 negative error code PCRE2_ERROR_BADOPTION if the value in the first argument is
 not recognized. The following information is available:
 .sp
@@ -780,10 +779,12 @@ compiling is available; otherwise it is set to zero.
 .sp
   PCRE2_CONFIG_JITTARGET
 .sp
-FIXME: this needs sorting out once JIT is implemented.
-If JIT support is available, the string contains the name of the architecture
-for which the JIT compiler is configured, for example "x86 32bit (little endian
-+ unaligned)". If JIT support is not available, FIXME.
+The \fIwhere\fP argument should point to a buffer that is at least 64 code
+units long. It is filled with a string that contains the name of the
+architecture for which the JIT compiler is configured, for example "x86 32bit
+(little endian + unaligned)". If JIT support is not available,
+PCRE2_ERROR_BADOPTION is returned, otherwise the length of the string, in code 
+units, is returned.
 .sp
   PCRE2_CONFIG_LINKSIZE
 .sp
@@ -848,7 +849,8 @@ heap instead of recursive function calls.
 The \fIwhere\fP argument should point to a buffer that is at least 24 code
 units long. If PCRE2 has been compiled without Unicode support, this is filled
 with the text "Unicode not supported". Otherwise, the Unicode version string
-(for example, "7.0.0") is returnd. The string is zero-terminated.
+(for example, "7.0.0") is inserted. The string is zero-terminated. The function 
+returns the length of the string in code units.
 .sp
   PCRE2_CONFIG_UNICODE
 .sp
@@ -858,7 +860,8 @@ otherwise it is set to zero. Unicode support implies UTF support.
   PCRE2_CONFIG_VERSION
 .sp
 The \fIwhere\fP argument should point to a buffer that is at least 12 code 
-units long. It is filled with the PCRE2 version string, zero-terminated.   
+units long. It is filled with the PCRE2 version string, zero-terminated. The 
+length of the string (in code units) is returned.  
 .
 .
 .SH "COMPILING A PATTERN"

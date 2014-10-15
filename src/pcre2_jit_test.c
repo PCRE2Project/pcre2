@@ -98,11 +98,11 @@ int main(void)
 {
 	int jit = 0;
 #if defined SUPPORT_PCRE2_8
-	pcre2_config_8(PCRE2_CONFIG_JIT, &jit, sizeof(int));
+	pcre2_config_8(PCRE2_CONFIG_JIT, &jit);
 #elif defined SUPPORT_PCRE2_16
-	pcre2_config_16(PCRE2_CONFIG_JIT, &jit, sizeof(int));
+	pcre2_config_16(PCRE2_CONFIG_JIT, &jit);
 #elif defined SUPPORT_PCRE2_32
-	pcre2_config_32(PCRE2_CONFIG_JIT, &jit, sizeof(int));
+	pcre2_config_32(PCRE2_CONFIG_JIT, &jit);
 #endif
 	if (!jit) {
 		printf("JIT must be enabled to run pcre_jit_test\n");
@@ -1123,11 +1123,11 @@ static int regression_tests(void)
 	still considered successful from pcre_jit_test point of view. */
 
 #if defined SUPPORT_PCRE2_8
-	pcre2_config_8(PCRE2_CONFIG_JITTARGET, &cpu_info, 128 * sizeof(PCRE2_UCHAR8));
+	pcre2_config_8(PCRE2_CONFIG_JITTARGET, &cpu_info);
 #elif defined SUPPORT_PCRE2_16
-	pcre2_config_16(PCRE2_CONFIG_JITTARGET, &cpu_info, 128 * sizeof(PCRE2_UCHAR16));
+	pcre2_config_16(PCRE2_CONFIG_JITTARGET, &cpu_info);
 #elif defined SUPPORT_PCRE2_32
-	pcre2_config_32(PCRE2_CONFIG_JITTARGET, &cpu_info, 128 * sizeof(PCRE2_UCHAR32));
+	pcre2_config_32(PCRE2_CONFIG_JITTARGET, &cpu_info));
 #endif
 
 	printf("Running JIT regression tests\n");
@@ -1137,11 +1137,11 @@ static int regression_tests(void)
 	printf("\n");
 
 #if defined SUPPORT_PCRE2_8
-	pcre2_config_8(PCRE2_CONFIG_UNICODE, &utf, sizeof(int));
+	pcre2_config_8(PCRE2_CONFIG_UNICODE, &utf);
 #elif defined SUPPORT_PCRE2_16
-	pcre2_config_16(PCRE2_CONFIG_UNICODE, &utf, sizeof(int));
+	pcre2_config_16(PCRE2_CONFIG_UNICODE, &utf);
 #elif defined SUPPORT_PCRE2_32
-	pcre2_config_32(PCRE2_CONFIG_UNICODE, &utf, sizeof(int));
+	pcre2_config_32(PCRE2_CONFIG_UNICODE, &utf);
 #endif
 
 	if (!utf)

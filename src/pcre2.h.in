@@ -336,7 +336,7 @@ expanded for each width below. Start with functions that give general
 information. */
 
 #define PCRE2_GENERAL_INFO_FUNCTIONS \
-PCRE2_EXP_DECL int       pcre2_config(uint32_t, void *, PCRE2_SIZE);
+PCRE2_EXP_DECL int       pcre2_config(uint32_t, void *);
 
 
 /* Functions for manipulating contexts. */

@@ -184,18 +184,15 @@ return c;
 
 /* Arguments:
   str1     buffer to receive the string
-  length   length of buffer in code units
   str2     8-bit string to be copied
   
 Returns:   the number of code units used (excluding trailing zero)
-           PCRE2_ERROR_BADLENGTH (a negative number) if buffer is too small
 */              
 
 int
-PRIV(strcpy_c8)(PCRE2_UCHAR *str1, size_t length, const char *str2)
+PRIV(strcpy_c8)(PCRE2_UCHAR *str1, const char *str2)
 {
 PCRE2_UCHAR *t = str1;
-if (strlen(str2) >= length - 1) return PCRE2_ERROR_BADLENGTH; 
 while (*str2 != 0) *t++ = *str2++;
 *t = 0;
 return t - str1;

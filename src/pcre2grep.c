@@ -2379,7 +2379,7 @@ switch(letter)
   case 'V':
     {
     unsigned char buffer[128];
-    (void)pcre2_config(PCRE2_CONFIG_VERSION, buffer, 128);
+    (void)pcre2_config(PCRE2_CONFIG_VERSION, buffer);
     fprintf(stdout, "pcre2grep version %s\n", buffer);
     } 
   pcre2grep_exit(0);
@@ -3026,7 +3026,7 @@ if (newline_arg != NULL)
   
 else
   {
-  (void)pcre2_config(PCRE2_CONFIG_NEWLINE, &endlinetype, sizeof(endlinetype));
+  (void)pcre2_config(PCRE2_CONFIG_NEWLINE, &endlinetype);
   } 
 
 /* Interpret the text values for -d and -D */
