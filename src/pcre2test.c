@@ -574,9 +574,9 @@ static coptstruct coptlist[] = {
   { "jit",       CONF_INT, PCRE2_CONFIG_JIT },
   { "linksize",  CONF_INT, PCRE2_CONFIG_LINKSIZE },
   { "newline",   CONF_NL,  PCRE2_CONFIG_NEWLINE },
-  { "pcre16",    CONF_FIX, SUPPORT_16 },
-  { "pcre32",    CONF_FIX, SUPPORT_32 },
-  { "pcre8",     CONF_FIX, SUPPORT_8 },
+  { "pcre2_16",  CONF_FIX, SUPPORT_16 },
+  { "pcre2_32",  CONF_FIX, SUPPORT_32 },
+  { "pcre2_8",   CONF_FIX, SUPPORT_8 },
   { "unicode",   CONF_INT, PCRE2_CONFIG_UNICODE }
 };
 
@@ -1304,9 +1304,9 @@ the three different cases. */
 #define PCRE2_JIT_STACK_ASSIGN(a,b,c) \
   pcre2_jit_stack_assign_8(G(a,8),(pcre2_jit_callback_8)b,c);
 #define PCRE2_JIT_STACK_FREE(a) pcre2_jit_stack_free_8((pcre2_jit_stack_8 *)a);
+#define PCRE2_MAKETABLES(a) a = pcre2_maketables_8(NULL)
 #define PCRE2_MATCH(a,b,c,d,e,f,g,h) \
   a = pcre2_match_8(G(b,8),(PCRE2_SPTR8)c,d,e,f,G(g,8),G(h,8))
-#define PCRE2_MAKETABLES(a) a = pcre2_maketables_8(NULL)
 #define PCRE2_MATCH_DATA_CREATE(a,b,c) G(a,8) = pcre2_match_data_create_8(b,c)
 #define PCRE2_MATCH_DATA_FREE(a) pcre2_match_data_free_8(G(a,8))
 #define PCRE2_PATTERN_INFO(a,b,c,d) a = pcre2_pattern_info_8(G(b,8),c,d)
@@ -1373,7 +1373,7 @@ the three different cases. */
   a = pcre2_match_16(G(b,16),(PCRE2_SPTR16)c,d,e,f,G(g,16),G(h,16))
 #define PCRE2_MATCH_DATA_CREATE(a,b,c) G(a,16) = pcre2_match_data_create_16(b,c)
 #define PCRE2_MATCH_DATA_FREE(a) pcre2_match_data_free_16(G(a,16))
-#define PCRE2_PATTERN_INFO(a,b,c,d) G(a,16) = pcre2_pattern_info_16(G(b,16),c,d)
+#define PCRE2_PATTERN_INFO(a,b,c,d) a = pcre2_pattern_info_16(G(b,16),c,d)
 #define PCRE2_PRINTINT(a) pcre2_printint_16(compiled_code16,outfile,a)
 #define PCRE2_SET_CALLOUT(a,b,c) \
   pcre2_set_callout_16(G(a,16),(int (*)(pcre2_callout_block_16 *))b,c);
@@ -1432,12 +1432,12 @@ the three different cases. */
 #define PCRE2_JIT_STACK_ASSIGN(a,b,c) \
   pcre2_jit_stack_assign_32(G(a,32),(pcre2_jit_callback_32)b,c);
 #define PCRE2_JIT_STACK_FREE(a) pcre2_jit_stack_free_32((pcre2_jit_stack_32 *)a);
-#define PCRE2_MATCH(a,b,c,d,e,f,g,h) \
-  a = pcre2_match_32(G(b,32),(PCRE2_SPTR32)c,d,e,f,G(g,32),g(h,32))
 #define PCRE2_MAKETABLES(a) a = pcre2_maketables_32(NULL)
+#define PCRE2_MATCH(a,b,c,d,e,f,g,h) \
+  a = pcre2_match_32(G(b,32),(PCRE2_SPTR32)c,d,e,f,G(g,32),G(h,32))
 #define PCRE2_MATCH_DATA_CREATE(a,b,c) G(a,32) = pcre2_match_data_create_32(b,c)
 #define PCRE2_MATCH_DATA_FREE(a) pcre2_match_data_free_32(G(a,32))
-#define PCRE2_PATTERN_INFO(a,b,c,d) G(a,32) = pcre2_pattern_info_32(G(b,32),c,d)
+#define PCRE2_PATTERN_INFO(a,b,c,d) a = pcre2_pattern_info_32(G(b,32),c,d)
 #define PCRE2_PRINTINT(a) pcre2_printint_32(compiled_code32,outfile,a)
 #define PCRE2_SET_CALLOUT(a,b,c) \
   pcre2_set_callout_32(G(a,32),(int (*)(pcre2_callout_block_32 *))b,c);
@@ -1451,11 +1451,11 @@ the three different cases. */
 #define PCRE2_SUBSTRING_COPY_BYNUMBER(a,b,c,d,e) \
   a = pcre2_substring_copy_bynumber_32(G(b,32),c,(PCRE2_UCHAR32 *)d,e);
 #define PCRE2_SUBSTRING_FREE(a) pcre2_substring_free_32((PCRE2_UCHAR32 *)a)
-##define PCRE2_SUBSTRING_GET_BYNAME(a,b,c,d,e) \
+#define PCRE2_SUBSTRING_GET_BYNAME(a,b,c,d,e) \
   a = pcre2_substring_get_byname_32(G(b,32),G(c,32),(PCRE2_UCHAR32 **)d,e)
-define PCRE2_SUBSTRING_GET_BYNUMBER(a,b,c,d,e) \
-  a = pcre2_substring_get_bynumber_32(G(b,32),c,(PCRE2_UCHAR32 **)d)
-#define PCRE2_SUBSTRING_LIST_GET(a,b,c,d,e) \
+#define PCRE2_SUBSTRING_GET_BYNUMBER(a,b,c,d,e) \
+  a = pcre2_substring_get_bynumber_32(G(b,32),c,(PCRE2_UCHAR32 **)d,e)
+#define PCRE2_SUBSTRING_LIST_GET(a,b,c,d) \
   a = pcre2_substring_list_get_32(G(b,32),(PCRE2_UCHAR32 ***)c,d)
 #define PCRE2_SUBSTRING_LIST_FREE(a) \
   pcre2_substring_list_free_32((PCRE2_SPTR32 *)a)
@@ -1464,7 +1464,7 @@ define PCRE2_SUBSTRING_GET_BYNUMBER(a,b,c,d,e) \
 #define SETFLDVEC(x,y,v,z) G(x,32)->y[v] = z
 #define SETOP(x,y,z) G(x,32) z y
 #define SETCASTPTR(x,y) G(x,32) = (uint32_t *)y
-#define STRLEN(p) (int)strle32(p)
+#define STRLEN(p) (int)strlen32(p)
 #define SUB1(a,b) G(a,32)(G(b,32))
 #define SUB2(a,b,c) G(a,32)(G(b,32),G(c,32))
 #define TEST(x,r,y) (G(x,32) r (y))
@@ -2299,7 +2299,7 @@ return 0;
 *         Move back by so many characters        *
 *************************************************/
 
-/* Given a code unit offset in a subject string, move backwards by a number of 
+/* Given a code unit offset in a subject string, move backwards by a number of
 characters, and return the resulting offset.
 
 Arguments:
@@ -2307,9 +2307,9 @@ Arguments:
   offset    start offset
   count     count to move back by
   utf       TRUE if in UTF mode
-  
+
 Returns:   a possibly changed offset
-*/    
+*/
 
 static PCRE2_SIZE
 backchars(uint8_t *subject, PCRE2_SIZE offset, uint32_t count, BOOL utf)
@@ -2321,26 +2321,26 @@ if (!utf || test_mode == PCRE32_MODE) yield = offset - count;
 else if (test_mode == PCRE8_MODE)
   {
   PCRE2_SPTR8 pp = (PCRE2_SPTR8)subject + offset;
-  for (; count > 0; count--)
+  for (; count > 0 && pp > (PCRE2_SPTR8)subject; count--)
     {
     pp--;
     while ((*pp & 0xc0) == 0x80) pp--;
     }
-  yield = pp - (PCRE2_SPTR8)subject;     
+  yield = pp - (PCRE2_SPTR8)subject;
   }
-  
+
 else  /* 16-bit mode */
-  { 
+  {
   PCRE2_SPTR16 pp = (PCRE2_SPTR16)subject + offset;
-  for (; count > 0; count--)
+  for (; count > 0 && pp > (PCRE2_SPTR16)subject; count--)
     {
     pp--;
-    if ((*pp & 0xfc00) == 0xdc00) pp--; 
+    if ((*pp & 0xfc00) == 0xdc00) pp--;
     }
-  yield = pp - (PCRE2_SPTR16)subject;     
+  yield = pp - (PCRE2_SPTR16)subject;
   }
-  
-return (yield >= 0)? yield : 0; 
+
+return (yield >= 0)? yield : 0;
 }
 
 
@@ -2683,7 +2683,7 @@ for (;;)
   pp = p;
   while (pp < ep && *pp != '=') pp++;
   index = scan_modifiers(p, pp - p);
-  
+
   /* If the first modifier is unrecognized, try to interpret it as a sequence
   of single-character abbreviated modifiers. None of these modifiers have any
   associated data. They just set options or control bits. */
@@ -3379,7 +3379,7 @@ if ((pat_patctl.control & CTL_INFO) != 0)
 
   if (pat_patctl.jit != 0 && (pat_patctl.control & CTL_JITVERIFY) != 0)
     {
-    if (FLD(compiled_code, executable_jit) != NULL)    
+    if (FLD(compiled_code, executable_jit) != NULL)
       fprintf(outfile, "JIT compilation was successful\n");
     else
 #ifdef SUPPORT_JIT
@@ -3426,7 +3426,7 @@ else if (strncmp((char *)buffer, "#pattern", 8) == 0 && isspace(buffer[8]))
   {
   (void)decode_modifiers(buffer + 8, CTX_DEFPAT, &def_patctl, NULL);
   if (def_patctl.jit == 0 && (def_patctl.control & CTL_JITVERIFY) != 0)
-    def_patctl.jit = 7; 
+    def_patctl.jit = 7;
   }
 else if (strncmp((char *)buffer, "#perltest", 9) == 0 && isspace(buffer[9]))
   {
@@ -3514,7 +3514,7 @@ patlen = p - buffer - 2;
 if (!decode_modifiers(p, CTX_PAT, &pat_patctl, NULL)) return PR_SKIP;
 
 if (pat_patctl.jit == 0 && (pat_patctl.control & CTL_JITVERIFY) != 0)
-  pat_patctl.jit = 7; 
+  pat_patctl.jit = 7;
 utf = (pat_patctl.options & PCRE2_UTF) != 0;
 
 /* Now copy the pattern to pbuffer8 for use in 8-bit testing and for reflecting
@@ -3668,18 +3668,15 @@ if ((pat_patctl.control & CTL_POSIX) != 0)
 modes. */
 
 #ifdef SUPPORT_PCRE2_8
-if (test_mode == PCRE8_MODE)
-  errorcode = 0;
+if (test_mode == PCRE8_MODE) errorcode = 0;
 #endif
 
 #ifdef SUPPORT_PCRE2_16
-if (test_mode == PCRE16_MODE)
-  errorcode = to16(pbuffer8, utf, &patlen);
+if (test_mode == PCRE16_MODE) errorcode = to16(pbuffer8, utf, &patlen);
 #endif
 
 #ifdef SUPPORT_PCRE2_32
-if (test_mode == PCRE32_MODE)
-  errorcode = to32(pbuffer8, utf, &patlen);
+if (test_mode == PCRE32_MODE) errorcode = to32(pbuffer8, utf, &patlen);
 #endif
 
 switch(errorcode)
@@ -3749,8 +3746,8 @@ if (TEST(compiled_code, ==, NULL))
   fprintf(outfile, "\n");
   return PR_SKIP;
   }
-  
-/* Remember the maximum lookbehind, for partial matching. */ 
+
+/* Remember the maximum lookbehind, for partial matching. */
 
 if (pattern_info(PCRE2_INFO_MAXLOOKBEHIND, &maxlookbehind, FALSE) != 0)
   return PR_ABEND;
@@ -4437,16 +4434,16 @@ if ((dat_datctl.control & (CTL_DFA|CTL_FINDLIMITS)) == (CTL_DFA|CTL_FINDLIMITS))
   fprintf(outfile, "** Finding match limits is not relevant for DFA matching: ignored\n");
   dat_datctl.control &= ~CTL_FINDLIMITS;
   }
-  
-/* ALLUSEDTEXT is not supported with JIT, but JIT is not used with DFA 
-matching, even if the JIT compiler was used. */ 
-  
-if ((dat_datctl.control & (CTL_ALLUSEDTEXT|CTL_DFA)) == CTL_ALLUSEDTEXT && 
+
+/* ALLUSEDTEXT is not supported with JIT, but JIT is not used with DFA
+matching, even if the JIT compiler was used. */
+
+if ((dat_datctl.control & (CTL_ALLUSEDTEXT|CTL_DFA)) == CTL_ALLUSEDTEXT &&
     FLD(compiled_code, executable_jit) != NULL)
   {
   fprintf(outfile, "** Showing all consulted text is not supported by JIT: ignored\n");
-  dat_datctl.control &= ~CTL_ALLUSEDTEXT;  
-  }  
+  dat_datctl.control &= ~CTL_ALLUSEDTEXT;
+  }
 
 /* As pcre2_match_data_create() imposes a minimum of 1 on the ovector count, we
 must do so too. */
@@ -4564,7 +4561,7 @@ for (gmatched = 0;; gmatched++)
   if ((dat_datctl.control & CTL_FINDLIMITS) != 0)
     {
     capcount = check_match_limit(pp, ulen, PCRE2_ERROR_MATCHLIMIT, "match");
-    if (FLD(compiled_code, executable_jit) == NULL)   
+    if (FLD(compiled_code, executable_jit) == NULL)
       (void)check_match_limit(pp, ulen, PCRE2_ERROR_RECURSIONLIMIT,
         "recursion");
     }
@@ -4623,7 +4620,7 @@ for (gmatched = 0;; gmatched++)
     {
     int i;
     uint8_t *nptr;
-    
+
     /* This is a check against a lunatic return value. */
 
     if (capcount > (int)dat_datctl.oveccount)
@@ -4690,27 +4687,27 @@ for (gmatched = 0;; gmatched++)
         continue;
         }
 
-      /* When JIT is not being used, ALLUSEDTEXT may be set. (It if is set with 
-      JIT, it is disabled above, with a comment.) When the match is done by the 
+      /* When JIT is not being used, ALLUSEDTEXT may be set. (It if is set with
+      JIT, it is disabled above, with a comment.) When the match is done by the
       interpreter, leftchar and rightchar are available, and if ALLUSEDTEXT is
       set, and if the leftmost consulted character is before the start of the
       match or the rightmost consulted character is past the end of the match,
       we want to show all consulted characters for the main matched string, and
       indicate which were lookarounds. */
-      
+
       if (i == 0)
         {
         BOOL showallused;
         PCRE2_SIZE leftchar, rightchar;
-         
+
         if ((dat_datctl.control & CTL_ALLUSEDTEXT) != 0)
           {
           leftchar = FLD(match_data, leftchar);
           rightchar = FLD(match_data, rightchar);
           showallused = i == 0 && (leftchar < start || rightchar > end);
           }
-        else showallused = FALSE;   
-     
+        else showallused = FALSE;
+
         if (showallused)
           {
           PCHARS(lleft, pp, leftchar, start - leftchar, utf, outfile);
@@ -4721,10 +4718,10 @@ for (gmatched = 0;; gmatched++)
           {
           PCHARSV(pp, start, end - start, utf, outfile);
           }
-     
+
         if ((pat_patctl.control & CTL_JITVERIFY) != 0 && jit_was_used)
           fprintf(outfile, " (JIT)");
-     
+
         if (showallused)
           {
           PCRE2_SIZE j;
@@ -4734,16 +4731,16 @@ for (gmatched = 0;; gmatched++)
           for (j = 0; j < lright; j++) fprintf(outfile, ">");
           }
         }
-            
-      /* Not the main matched string. Just show it unadorned. */  
+
+      /* Not the main matched string. Just show it unadorned. */
 
       else
         {
         PCHARSV(pp, start, end - start, utf, outfile);
         }
- 
+
       fprintf(outfile, "\n");
-       
+
       /* Note: don't use the start/end variables here because we want to
       show the text from what is reported as the end. */
 
@@ -4797,12 +4794,13 @@ for (gmatched = 0;; gmatched++)
     for (;;)
       {
       int rc;
-      PCRE2_SIZE cnl;
       PCRE2_SIZE length;
       uint32_t copybuffer[256];
       int namelen = strlen((const char *)nptr);
+#if defined SUPPORT_PCRE2_16 || defined SUPPORT_PCRE2_32      
+      PCRE2_SIZE cnl = namelen;
+#endif       
       if (namelen == 0) break;
-      cnl = namelen;
 
 #ifdef SUPPORT_PCRE2_8
       if (test_mode == PCRE8_MODE) strcpy((char *)pbuffer8, (char *)nptr);
@@ -4862,13 +4860,14 @@ for (gmatched = 0;; gmatched++)
     nptr = dat_datctl.get_names;
     for (;;)
       {
-      PCRE2_SIZE cnl;
       PCRE2_SIZE length;
       void *gotbuffer;
       int rc;
       int namelen = strlen((const char *)nptr);
+#if defined SUPPORT_PCRE2_16 || defined SUPPORT_PCRE2_32      
+      PCRE2_SIZE cnl = namelen;
+#endif       
       if (namelen == 0) break;
-      cnl = namelen;
 
 #ifdef SUPPORT_PCRE2_8
       if (test_mode == PCRE8_MODE) strcpy((char *)pbuffer8, (char *)nptr);
@@ -4928,15 +4927,15 @@ for (gmatched = 0;; gmatched++)
       }
     }    /* End of handling a successful match */
 
-  /* There was a partial match. The value of ovector[0] is the bumpalong point, 
-  that is, startchar, not any \K point that might have been passed. */ 
+  /* There was a partial match. The value of ovector[0] is the bumpalong point,
+  that is, startchar, not any \K point that might have been passed. */
 
   else if (capcount == PCRE2_ERROR_PARTIAL)
     {
-    PCRE2_SIZE poffset; 
-    int backlength; 
+    PCRE2_SIZE poffset;
+    int backlength;
     int rubriclength = 0;
-    
+
     fprintf(outfile, "Partial match");
     if ((dat_datctl.control & CTL_MARK) != 0 &&
          TESTFLD(match_data, mark, !=, NULL))
@@ -4946,24 +4945,24 @@ for (gmatched = 0;; gmatched++)
       rubriclength += 7;
       }
     fprintf(outfile, ": ");
-    rubriclength += 15; 
+    rubriclength += 15;
 
     poffset = backchars(pp, ovector[0], maxlookbehind, utf);
-    PCHARS(backlength, pp, poffset, ovector[0] - poffset, utf, outfile); 
+    PCHARS(backlength, pp, poffset, ovector[0] - poffset, utf, outfile);
     PCHARSV(pp, ovector[0], ulen - ovector[0], utf, outfile);
-    
+
     if ((pat_patctl.control & CTL_JITVERIFY) != 0 && jit_was_used)
       fprintf(outfile, " (JIT)");
     fprintf(outfile, "\n");
-    
+
     if (backlength != 0)
       {
-      int i; 
+      int i;
       for (i = 0; i < rubriclength; i++) fprintf(outfile, " ");
       for (i = 0; i < backlength; i++) fprintf(outfile, "<");
-      fprintf(outfile, "\n"); 
-      }  
- 
+      fprintf(outfile, "\n");
+      }
+
     break;  /* Out of the /g loop */
     }       /* End of handling partial match */
 
@@ -5200,9 +5199,9 @@ printf("     ebcdic-nl      NL code if compiled for EBCDIC\n");
 printf("     jit            just-in-time compiler supported [0, 1]\n");
 printf("     linksize       internal link size [2, 3, 4]\n");
 printf("     newline        newline type [CR, LF, CRLF, ANYCRLF, ANY]\n");
-printf("     pcre8          8 bit library support enabled [0, 1]\n");
-printf("     pcre16         16 bit library support enabled [0, 1]\n");
-printf("     pcre32         32 bit library support enabled [0, 1]\n");
+printf("     pcre2_8        8 bit library support enabled [0, 1]\n");
+printf("     pcre2_16       16 bit library support enabled [0, 1]\n");
+printf("     pcre2_32       32 bit library support enabled [0, 1]\n");
 printf("     unicode        Unicode and UTF support enabled [0, 1]\n");
 printf("  -d            set default pattern control 'debug'\n");
 printf("  -dfa          set default subject control 'dfa'\n");
@@ -5323,21 +5322,21 @@ if (rc != 0)
   printf("  UTF and UCP support (");
   print_unicode_version(stdout);
   printf(")\n");
-  } 
+  }
 else printf("  No UTF or UCP support\n");
-   
+
 (void)PCRE2_CONFIG(PCRE2_CONFIG_JIT, &rc, sizeof(rc));
 if (rc != 0)
   {
   printf("  Just-in-time compiler support: ");
-  print_jit_target(stdout); 
-  printf("\n"); 
+  print_jit_target(stdout);
+  printf("\n");
   }
 else
   {
   printf("  No just-in-time compiler support\n");
   }
-   
+
 (void)PCRE2_CONFIG(PCRE2_CONFIG_NEWLINE, &rc, sizeof(rc));
 print_newline_config(rc, FALSE);
 (void)PCRE2_CONFIG(PCRE2_CONFIG_BSR, &rc, sizeof(rc));
@@ -5395,7 +5394,7 @@ if (PO(options) != DO(options) || PO(control) != DO(control))
 PCRE2_CONFIG(PCRE2_CONFIG_VERSION, version, sizeof(VERSION_TYPE)*VERSION_SIZE);
 PCRE2_CONFIG(PCRE2_CONFIG_UNICODE_VERSION, uversion,
   sizeof(VERSION_TYPE)*VERSION_SIZE);
-PCRE2_CONFIG(PCRE2_CONFIG_JITTARGET, jittarget, 
+PCRE2_CONFIG(PCRE2_CONFIG_JITTARGET, jittarget,
   sizeof(VERSION_TYPE)*VERSION_SIZE);
 
 /* Get buffers from malloc() so that valgrind will check their misuse when

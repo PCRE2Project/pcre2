@@ -56,6 +56,7 @@ just to undefine them all. */
 #undef BYTES2CU
 #undef CU2BYTES
 #undef FORWARDCHAR
+#undef FORWARDCHARTEST
 #undef GET
 #undef GET2
 #undef GETCHAR
@@ -261,6 +262,7 @@ UTF support is omitted, we don't even define them. */
 /* #define GETCHARLENTEST(c, eptr, len) */
 /* #define BACKCHAR(eptr) */
 /* #define FORWARDCHAR(eptr) */
+/* #define FORWARCCHARTEST(eptr,end) */
 /* #define ACROSSCHAR(condition, eptr, action) */
 
 #else   /* SUPPORT_UNICODE */
@@ -339,6 +341,7 @@ because almost all calls are already within a block of UTF-8 only code. */
 
 /* Same as above, just in the other direction. */
 #define FORWARDCHAR(eptr) while((*eptr & 0xc0) == 0x80) eptr++
+#define FORWARDCHARTEST(eptr,end) while(eptr < end && (*eptr & 0xc0) == 0x80) eptr++
 
 /* Same as above, but it allows a fully customizable form. */
 #define ACROSSCHAR(condition, eptr, action) \
@@ -444,6 +447,7 @@ code. */
 
 /* Same as above, just in the other direction. */
 #define FORWARDCHAR(eptr) if ((*eptr & 0xfc00) == 0xdc00) eptr++
+#define FORWARDCHARTEST(eptr,end) if (eptr < end && (*eptr & 0xfc00) == 0xdc00) eptr++
 
 /* Same as above, but it allows a fully customizable form. */
 #define ACROSSCHAR(condition, eptr, action) \
@@ -517,6 +521,7 @@ These are all no-ops since all UTF-32 characters fit into one pcre_uchar. */
 /* Same as above, just in the other direction. */
 
 #define FORWARDCHAR(eptr) do { } while (0)
+#define FORWARDCHARTEST(eptr,end) do { } while (0)
 
 /* Same as above, but it allows a fully customizable form. */
 

@@ -84,7 +84,7 @@ fi
 
 function runtest()
   {
-  rm -f *_unittest
+  rm -f $srcdir/pcre2test $srcdir/pcre2grep $srcdir/pcre2_jit_test
   testcount=`expr $testcount + 1`
 
   if [ "$opts" = "" ] ; then
@@ -119,42 +119,53 @@ function runtest()
   fi
 
   nl=`./pcre2test -C newline`
+  if [ "$nl" = "LF" -o "$nl" = "ANY" -o "$nl" = "ANYCRLF" ]; then
+    nlok=1
+  else
+    nlok=0
+  fi        
+ 
   ./pcre2test -C jit >/dev/null
   jit=$?
-  ./pcre2test -C utf >/dev/null
+  ./pcre2test -C unicode >/dev/null
   utf=$?
+  ./pcre2test -C pcre2_8 >/dev/null
+  pcre2_8=$?
 
-  if [ "$nl" = "LF" -o "$nl" = "ANY" ]; then
+  if [ $nlok -gt 0 ]; then
     echo "Running C library tests $withvalgrind"
-    $srcdir/RunTest $valgrind >teststdout
-    if [ $? -ne 0 ]; then
+    $srcdir/RunTest $valgrind >teststdout 2>teststderr
+    if [ $? -ne 0 -o -s teststderr ]; then
       echo " "
       echo "**** Test failed ****"
-      cat teststdout
+      cat teststderr 
+      if [ -s teststdout ] ; then cat teststdout; fi
       exit 1
     fi
   else
     echo "Skipping C library tests: newline is $nl"
   fi
 
-  if [ "$nl" = "LF" ]; then
+  if [ $nlok -gt 0 -a $pcre2_8 -gt 0 ]; then
     echo "Running pcre2grep tests $withvalgrind"
     $srcdir/RunGrepTest $valgrind >teststdout 2>teststderr
-    if [ $? -ne 0 ]; then
+    if [ $? -ne 0 -o -s teststderr ]; then
       echo " "
       echo "**** Test failed ****"
       cat teststderr
       cat teststdout
       exit 1
     fi
-  else
+  elif [ $nlok -gt 0 ]; then
+    echo "Skipping pcre2grep tests: 8-bit library not compiled"
+  else   
     echo "Skipping pcre2grep tests: newline is $nl"
   fi
 
   if [ "$jit" -gt 0 -a $utf -gt 0 ]; then
     echo "Running JIT regression tests $withvalgrind"
     $cvalgrind $srcdir/pcre2_jit_test >teststdout 2>teststderr
-    if [ $? -ne 0 ]; then
+    if [ $? -ne 0 -o -s teststderr ]; then
       echo " "
       echo "**** Test failed ****"
       cat teststderr

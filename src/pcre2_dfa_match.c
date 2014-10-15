@@ -972,7 +972,7 @@ for (;;)
             {
             PCRE2_SPTR temp = ptr + 1;
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
-            if (utf) { FORWARDCHAR(temp); }
+            if (utf) { FORWARDCHARTEST(temp, mb->end_subject); }
 #endif
             mb->last_used_ptr = temp;
             } 

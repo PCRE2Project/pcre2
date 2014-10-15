@@ -53,9 +53,10 @@ locale using the pcre2_maketables() function, which is part of the PCRE2 API.
 #include <string.h>
 #include <locale.h>
 
+#define PCRE2_CODE_UNIT_WIDTH 0   /* Must be set, but not relevant here */
 #include "pcre2_internal.h"
 
-#define DFTABLES          /* pcre2_maketables.c notices this */
+#define DFTABLES     /* pcre2_maketables.c notices this */
 #include "pcre2_maketables.c"
 
 int main(int argc, char **argv)

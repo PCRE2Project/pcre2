@@ -172,19 +172,13 @@ PCRE2_EXP_DEFN void PCRE2_CALL_CONVENTION
 pcre2_jit_stack_free(pcre2_jit_stack *jit_stack)
 {
 #ifndef SUPPORT_JIT
-
 (void)jit_stack;
-
 #else  /* SUPPORT_JIT */
-
-/* Dummy code */
-
 if (jit_stack != NULL)
   {
   sljit_free_stack((struct sljit_stack *)(jit_stack->stack), &jit_stack->memctl);
   jit_stack->memctl.free(jit_stack, jit_stack->memctl.memory_data);
   }
-
 #endif  /* SUPPORT_JIT */
 }
 
@@ -196,7 +190,11 @@ if (jit_stack != NULL)
 const char*
 PRIV(jit_get_target)(void)
 {
+#ifndef SUPPORT_JIT
+return "JIT is not supported";
+#else  /* SUPPORT_JIT */
 return sljit_get_platform_name();
+#endif  /* SUPPORT_JIT */
 }
 
 
@@ -208,16 +206,12 @@ size_t
 PRIV(jit_get_size)(void *executable_jit)
 {
 #ifndef SUPPORT_JIT
-
 (void)executable_jit;
 return 0;
-
 #else  /* SUPPORT_JIT */
-
 sljit_uw *executable_sizes = ((executable_functions *)executable_jit)->executable_sizes;
 SLJIT_COMPILE_ASSERT(JIT_NUMBER_OF_COMPILE_MODES == 3, number_of_compile_modes_changed);
 return executable_sizes[0] + executable_sizes[1] + executable_sizes[2];
-
 #endif
 }
 

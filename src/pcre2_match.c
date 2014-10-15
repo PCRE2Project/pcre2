@@ -2230,7 +2230,7 @@ for (;;)
         else
           {
           PCRE2_SPTR nextptr = eptr + 1;
-          FORWARDCHAR(nextptr);  
+          FORWARDCHARTEST(nextptr, mb->end_subject);  
           if (nextptr > mb->last_used_ptr) mb->last_used_ptr = nextptr; 
           GETCHAR(c, eptr);
           if ((mb->poptions & PCRE2_UCP) != 0)

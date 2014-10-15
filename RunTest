@@ -268,11 +268,11 @@ fi
 # All of 8-bit, 16-bit, and 32-bit character strings may be supported, but only
 # one need be.
 
-$sim ./pcre2test -C pcre8 >/dev/null
+$sim ./pcre2test -C pcre2_8 >/dev/null
 support8=$?
-$sim ./pcre2test -C pcre16 >/dev/null
+$sim ./pcre2test -C pcre2_16 >/dev/null
 support16=$?
-$sim ./pcre2test -C pcre32 >/dev/null
+$sim ./pcre2test -C pcre2_32 >/dev/null
 support32=$?
 
 # Initialize all bitsizes skipped
@@ -686,6 +686,6 @@ fi
 done
 
 # Clean up local working files
-rm -f test3input test3output test3outputA testNinput testsaved* teststderr teststdout testtry
+rm -f test3input test3output test3outputA testNinput testsaved* teststdout testtry
 
 # End
