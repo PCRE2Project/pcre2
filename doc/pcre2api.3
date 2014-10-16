@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "14 October 2014" "PCRE2 10.00"
+.TH PCRE2API 3 "16 October 2014" "PCRE2 10.00"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -757,13 +757,16 @@ documentation has more details about these optional features.
 .P
 The first argument for \fBpcre2_config()\fP specifies which information is
 required. The second argument is a pointer to memory into which the information
-is placed. If NULL is passed, the function returns the number of bytes that are
+is placed. If NULL is passed, the function returns the amount of memory that is
 needed for the requested information. For calls that return numerical values,
-\fIwhere\fP should point to appropriately aligned memory.
+the value is in bytes; when requesting these values, \fIwhere\fP should point
+to appropriately aligned memory. For calls that return strings, the required 
+length is given in code units, not counting the terminating zero.
 .P
-The returned value from \fBpcre2_config()\fP is non-negative on success, or the
-negative error code PCRE2_ERROR_BADOPTION if the value in the first argument is
-not recognized. The following information is available:
+When requesting information, the returned value from \fBpcre2_config()\fP is
+non-negative on success, or the negative error code PCRE2_ERROR_BADOPTION if
+the value in the first argument is not recognized. The following information is
+available:
 .sp
   PCRE2_CONFIG_BSR
 .sp
@@ -779,12 +782,13 @@ compiling is available; otherwise it is set to zero.
 .sp
   PCRE2_CONFIG_JITTARGET
 .sp
-The \fIwhere\fP argument should point to a buffer that is at least 64 code
-units long. It is filled with a string that contains the name of the
-architecture for which the JIT compiler is configured, for example "x86 32bit
-(little endian + unaligned)". If JIT support is not available,
-PCRE2_ERROR_BADOPTION is returned, otherwise the length of the string, in code 
-units, is returned.
+The \fIwhere\fP argument should point to a buffer that is at least 48 code
+units long. (The exact length needed can be found by calling 
+\fBpcre2_config()\fP with \fBwhere\fP set to NULL.) The buffer is filled with a
+string that contains the name of the architecture for which the JIT compiler is
+configured, for example "x86 32bit (little endian + unaligned)". If JIT support
+is not available, PCRE2_ERROR_BADOPTION is returned, otherwise the length of
+the string, in code units, is returned.
 .sp
   PCRE2_CONFIG_LINKSIZE
 .sp
@@ -847,10 +851,12 @@ heap instead of recursive function calls.
   PCRE2_CONFIG_UNICODE_VERSION
 .sp   
 The \fIwhere\fP argument should point to a buffer that is at least 24 code
-units long. If PCRE2 has been compiled without Unicode support, this is filled
-with the text "Unicode not supported". Otherwise, the Unicode version string
-(for example, "7.0.0") is inserted. The string is zero-terminated. The function 
-returns the length of the string in code units.
+units long. (The exact length needed can be found by calling
+\fBpcre2_config()\fP with \fBwhere\fP set to NULL.) If PCRE2 has been compiled
+without Unicode support, the buffer is filled with the text "Unicode not
+supported". Otherwise, the Unicode version string (for example, "7.0.0") is
+inserted. The string is zero-terminated. The function returns the length of the
+string in code units.
 .sp
   PCRE2_CONFIG_UNICODE
 .sp
@@ -859,9 +865,11 @@ otherwise it is set to zero. Unicode support implies UTF support.
 .sp
   PCRE2_CONFIG_VERSION
 .sp
-The \fIwhere\fP argument should point to a buffer that is at least 12 code 
-units long. It is filled with the PCRE2 version string, zero-terminated. The 
-length of the string (in code units) is returned.  
+The \fIwhere\fP argument should point to a buffer that is at least 12 code
+units long. (The exact length needed can be found by calling
+\fBpcre2_config()\fP with \fBwhere\fP set to NULL.) The buffer is filled with
+the PCRE2 version string, zero-terminated. The length of the string (in code
+units) is returned.
 .
 .
 .SH "COMPILING A PATTERN"
@@ -1350,20 +1358,20 @@ can be processed in different locales.
 The \fBpcre2_pattern_info()\fP function returns information about a compiled
 pattern. The first argument is a pointer to the compiled pattern. The second
 argument specifies which piece of information is required, and the third
-argument is a pointer to a variable to receive the data. The yield of the
-function is zero for success, or one of the following negative numbers:
+argument is a pointer to a variable to receive the data. If the third argument
+is NULL, the first argument is ignored, and the function returns the size in
+bytes of the variable that is required for the information requested.
+Otherwise, The yield of the function is zero for success, or one of the
+following negative numbers:
 .sp
   PCRE2_ERROR_NULL           the argument \fIcode\fP was NULL
-                             the argument \fIwhere\fP was NULL
   PCRE2_ERROR_BADMAGIC       the "magic number" was not found
   PCRE2_ERROR_BADOPTION      the value of \fIwhat\fP was invalid
   PCRE2_ERROR_UNSET          the requested field is not set
 .sp
 The "magic number" is placed at the start of each compiled pattern as an simple
-check against passing an arbitrary memory pointer.
-Here is
-a typical call of \fBpcre2_pattern_info()\fP, to obtain the length of the compiled
-pattern:
+check against passing an arbitrary memory pointer. Here is a typical call of
+\fBpcre2_pattern_info()\fP, to obtain the length of the compiled pattern:
 .sp
   int rc;
   size_t length;
@@ -2624,6 +2632,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 14 October 2014
+Last updated: 16 October 2014
 Copyright (c) 1997-2014 University of Cambridge.
 .fi

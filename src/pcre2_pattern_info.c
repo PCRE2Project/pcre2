@@ -54,9 +54,11 @@ POSSIBILITY OF SUCH DAMAGE.
 Arguments:
   code          points to compiled code
   what          what information is required
-  where         where to put the information
+  where         where to put the information; if NULL, return length
 
-Returns:        0 if data returned, negative on error or unset value
+Returns:        0 when data returned
+                > 0 when length requested
+                < 0 on error or unset value
 */
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
@@ -64,7 +66,44 @@ pcre2_pattern_info(const pcre2_code *code, uint32_t what, void *where)
 {
 const pcre2_real_code *re = (pcre2_real_code *)code;
 
-if (re == NULL || where == NULL) return PCRE2_ERROR_NULL;
+if (where == NULL)   /* Requests field length */
+  {
+  switch(what)
+    {
+    case PCRE2_INFO_ALLOPTIONS:
+    case PCRE2_INFO_ARGOPTIONS:
+    case PCRE2_INFO_BACKREFMAX:
+    case PCRE2_INFO_BSR:
+    case PCRE2_INFO_CAPTURECOUNT:
+    case PCRE2_INFO_FIRSTCODETYPE:
+    case PCRE2_INFO_FIRSTCODEUNIT:
+    case PCRE2_INFO_HASCRORLF:
+    case PCRE2_INFO_JCHANGED:
+    case PCRE2_INFO_LASTCODETYPE:
+    case PCRE2_INFO_LASTCODEUNIT:
+    case PCRE2_INFO_MATCHEMPTY:
+    case PCRE2_INFO_MATCHLIMIT:
+    case PCRE2_INFO_MAXLOOKBEHIND:
+    case PCRE2_INFO_MINLENGTH:
+    case PCRE2_INFO_NAMEENTRYSIZE:
+    case PCRE2_INFO_NAMECOUNT:
+    case PCRE2_INFO_NEWLINE:
+    case PCRE2_INFO_RECURSIONLIMIT:
+    return sizeof(uint32_t); 
+
+    case PCRE2_INFO_FIRSTBITMAP:
+    return sizeof(const uint8_t *);
+
+    case PCRE2_INFO_JITSIZE:
+    case PCRE2_INFO_SIZE:
+    return sizeof(size_t); 
+
+    case PCRE2_INFO_NAMETABLE:
+    return sizeof(PCRE2_SPTR); 
+    }
+  }
+
+if (re == NULL) return PCRE2_ERROR_NULL;
 
 /* Check that the first field in the block is the magic number. If it is not,
 return with PCRE2_ERROR_BADMAGIC. */
@@ -85,8 +124,7 @@ with different endianness. */
 
 /* Check that this pattern was compiled in the correct bit mode */
 
-if ((re->flags & (PCRE2_CODE_UNIT_WIDTH/8)) == 0)
-  return PCRE2_ERROR_BADMODE;
+if ((re->flags & (PCRE2_CODE_UNIT_WIDTH/8)) == 0) return PCRE2_ERROR_BADMODE;
 
 switch(what)
   {
@@ -157,7 +195,7 @@ switch(what)
 
   case PCRE2_INFO_MATCHLIMIT:
   *((uint32_t *)where) = re->limit_match;
-  if (re->limit_match == UINT32_MAX) return PCRE2_ERROR_UNSET; 
+  if (re->limit_match == UINT32_MAX) return PCRE2_ERROR_UNSET;
   break;
 
   case PCRE2_INFO_MAXLOOKBEHIND:
@@ -177,7 +215,7 @@ switch(what)
   break;
 
   case PCRE2_INFO_NAMETABLE:
-  *((PCRE2_SPTR*)where) = (PCRE2_SPTR)((char *)re + sizeof(pcre2_real_code));
+  *((PCRE2_SPTR *)where) = (PCRE2_SPTR)((char *)re + sizeof(pcre2_real_code));
   break;
 
   case PCRE2_INFO_NEWLINE:
@@ -186,7 +224,7 @@ switch(what)
 
   case PCRE2_INFO_RECURSIONLIMIT:
   *((uint32_t *)where) = re->limit_recursion;
-  if (re->limit_recursion == UINT32_MAX) return PCRE2_ERROR_UNSET; 
+  if (re->limit_recursion == UINT32_MAX) return PCRE2_ERROR_UNSET;
   break;
 
   case PCRE2_INFO_SIZE:
