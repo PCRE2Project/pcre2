@@ -80,9 +80,11 @@ fi
 
 
 # This function runs a single test with the set of configuration options that
-# are in $opts. The source directory must be set in srcdir.
+# are in $opts. The source directory must be set in srcdir. The function must
+# be defined as "runtest()" not "function runtest()" in order to run on 
+# Solaris.
 
-function runtest()
+runtest()
   {
   rm -f $srcdir/pcre2test $srcdir/pcre2grep $srcdir/pcre2_jit_test
   testcount=`expr $testcount + 1`

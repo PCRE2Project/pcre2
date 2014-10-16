@@ -121,8 +121,10 @@ fi
 #  $1 the value of $? after a call to pcre2test
 #  $2 the suffix of the output file to compare with
 #  $3 the $opt value (empty, -jit, or -dfa)
+#
+# Note: must define using name(), not "function name", for Solaris.
 
-function checkresult()
+checkresult()
   {
   if [ $1 -ne 0 ] ; then 
     echo "** pcre2test failed - check testtry"
