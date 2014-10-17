@@ -574,9 +574,9 @@ static coptstruct coptlist[] = {
   { "jit",       CONF_INT, PCRE2_CONFIG_JIT },
   { "linksize",  CONF_INT, PCRE2_CONFIG_LINKSIZE },
   { "newline",   CONF_NL,  PCRE2_CONFIG_NEWLINE },
-  { "pcre2_16",  CONF_FIX, SUPPORT_16 },
-  { "pcre2_32",  CONF_FIX, SUPPORT_32 },
-  { "pcre2_8",   CONF_FIX, SUPPORT_8 },
+  { "pcre2-16",  CONF_FIX, SUPPORT_16 },
+  { "pcre2-32",  CONF_FIX, SUPPORT_32 },
+  { "pcre2-8",   CONF_FIX, SUPPORT_8 },
   { "unicode",   CONF_INT, PCRE2_CONFIG_UNICODE }
 };
 
@@ -5199,9 +5199,9 @@ printf("     ebcdic-nl      NL code if compiled for EBCDIC\n");
 printf("     jit            just-in-time compiler supported [0, 1]\n");
 printf("     linksize       internal link size [2, 3, 4]\n");
 printf("     newline        newline type [CR, LF, CRLF, ANYCRLF, ANY]\n");
-printf("     pcre2_8        8 bit library support enabled [0, 1]\n");
-printf("     pcre2_16       16 bit library support enabled [0, 1]\n");
-printf("     pcre2_32       32 bit library support enabled [0, 1]\n");
+printf("     pcre2-8        8 bit library support enabled [0, 1]\n");
+printf("     pcre2-16       16 bit library support enabled [0, 1]\n");
+printf("     pcre2-32       32 bit library support enabled [0, 1]\n");
 printf("     unicode        Unicode and UTF support enabled [0, 1]\n");
 printf("  -d            set default pattern control 'debug'\n");
 printf("  -dfa          set default subject control 'dfa'\n");
@@ -5389,11 +5389,25 @@ if (PO(options) != DO(options) || PO(control) != DO(control))
   return 1;
   }
 
-/* Get the PCRE2 and Unicode version number and JIT target information. */
+/* Get the PCRE2 and Unicode version number and JIT target information, at the 
+same time checking that a request for the length gives the same answer. Also 
+check lengths for non-string items. */
 
-PCRE2_CONFIG(PCRE2_CONFIG_VERSION, version);
-PCRE2_CONFIG(PCRE2_CONFIG_UNICODE_VERSION, uversion);
-PCRE2_CONFIG(PCRE2_CONFIG_JITTARGET, jittarget);
+if (PCRE2_CONFIG(PCRE2_CONFIG_VERSION, NULL) != 
+    PCRE2_CONFIG(PCRE2_CONFIG_VERSION, version) ||
+     
+    PCRE2_CONFIG(PCRE2_CONFIG_UNICODE_VERSION, NULL) !=
+    PCRE2_CONFIG(PCRE2_CONFIG_UNICODE_VERSION, uversion) ||
+     
+    PCRE2_CONFIG(PCRE2_CONFIG_JITTARGET, NULL) !=
+    PCRE2_CONFIG(PCRE2_CONFIG_JITTARGET, jittarget) ||
+    
+    PCRE2_CONFIG(PCRE2_CONFIG_UNICODE, NULL) != sizeof(int) ||
+    PCRE2_CONFIG(PCRE2_CONFIG_MATCHLIMIT, NULL) != sizeof(long int))  
+  {
+  fprintf(stderr, "** Error in pcre2_config(): bad length\n");
+  return 1;
+  }      
 
 /* Get buffers from malloc() so that valgrind will check their misuse when
 debugging. They grow automatically when very long lines are read. The 16-

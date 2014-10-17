@@ -159,7 +159,7 @@ EXTRA_DIST =
 # These files contain additional m4 macros that are used by autoconf.
 
 EXTRA_DIST += \
-  m4/ax_pthread.m4 m4/pcre_visibility.m4
+  m4/ax_pthread.m4 m4/pcre2_visibility.m4
 
 # These files contain maintenance information
 
@@ -179,7 +179,7 @@ EXTRA_DIST += \
   doc/index.html.src
 
 # These files are usable versions of pcre2.h and config.h that are distributed
-# for the benefit of people who are building PCRE manually, without the
+# for the benefit of people who are building PCRE2 manually, without the
 # Autotools support.
 
 EXTRA_DIST += \
@@ -286,7 +286,7 @@ COMMON_SOURCES = \
   src/pcre2_valid_utf.c \
   src/pcre2_xclass.c
 
-if WITH_PCRE8
+if WITH_PCRE2_8
 lib_LTLIBRARIES += libpcre2-8.la
 libpcre2_8_la_SOURCES = \
   $(COMMON_SOURCES)
@@ -297,9 +297,9 @@ libpcre2_8_la_CFLAGS = \
   $(VISIBILITY_CFLAGS) \
   $(AM_CFLAGS)
 libpcre2_8_la_LIBADD =
-endif # WITH_PCRE8
+endif # WITH_PCRE2_8
 
-if WITH_PCRE16
+if WITH_PCRE2_16
 lib_LTLIBRARIES += libpcre2-16.la
 libpcre2_16_la_SOURCES = \
   $(COMMON_SOURCES)
@@ -310,9 +310,9 @@ libpcre2_16_la_CFLAGS = \
   $(VISIBILITY_CFLAGS) \
   $(AM_CFLAGS)
 libpcre2_16_la_LIBADD =
-endif # WITH_PCRE16
+endif # WITH_PCRE2_16
 
-if WITH_PCRE32
+if WITH_PCRE2_32
 lib_LTLIBRARIES += libpcre2-32.la
 libpcre2_32_la_SOURCES = \
   $(COMMON_SOURCES)
@@ -323,7 +323,7 @@ libpcre2_32_la_CFLAGS = \
   $(VISIBILITY_CFLAGS) \
   $(AM_CFLAGS)
 libpcre2_32_la_LIBADD =
-endif # WITH_PCRE32
+endif # WITH_PCRE2_32
 
 # The pcre2_chartables.c.dist file is the default version of
 # pcre2_chartables.c, used unless --enable-rebuild-chartables is specified.
@@ -357,43 +357,43 @@ EXTRA_DIST += \
   sljit/sljitNativeX86_common.c \
   sljit/sljitUtils.c
 
-if WITH_PCRE8
+if WITH_PCRE2_8
 libpcre2_8_la_LDFLAGS = $(EXTRA_LIBPCRE2_8_LDFLAGS)
-endif # WITH_PCRE8
-if WITH_PCRE16
+endif # WITH_PCRE2_8
+if WITH_PCRE2_16
 libpcre2_16_la_LDFLAGS = $(EXTRA_LIBPCRE2_16_LDFLAGS)
-endif # WITH_PCRE16
-if WITH_PCRE32
+endif # WITH_PCRE2_16
+if WITH_PCRE2_32
 libpcre2_32_la_LDFLAGS = $(EXTRA_LIBPCRE2_32_LDFLAGS)
-endif # WITH_PCRE32
+endif # WITH_PCRE2_32
 
 if WITH_VALGRIND
-if WITH_PCRE8
+if WITH_PCRE2_8
 libpcre2_8_la_CFLAGS += $(VALGRIND_CFLAGS)
-endif # WITH_PCRE8
-if WITH_PCRE16
+endif # WITH_PCRE2_8
+if WITH_PCRE2_16
 libpcre2_16_la_CFLAGS += $(VALGRIND_CFLAGS)
-endif # WITH_PCRE16
-if WITH_PCRE32
+endif # WITH_PCRE2_16
+if WITH_PCRE2_32
 libpcre2_32_la_CFLAGS += $(VALGRIND_CFLAGS)
-endif # WITH_PCRE32
+endif # WITH_PCRE2_32
 endif # WITH_VALGRIND
 
 if WITH_GCOV
-if WITH_PCRE8
+if WITH_PCRE2_8
 libpcre2_8_la_CFLAGS += $(GCOV_CFLAGS)
-endif # WITH_PCRE8
-if WITH_PCRE16
+endif # WITH_PCRE2_8
+if WITH_PCRE2_16
 libpcre2_16_la_CFLAGS += $(GCOV_CFLAGS)
-endif # WITH_PCRE16
-if WITH_PCRE32
+endif # WITH_PCRE2_16
+if WITH_PCRE2_32
 libpcre2_32_la_CFLAGS += $(GCOV_CFLAGS)
-endif # WITH_PCRE32
+endif # WITH_PCRE2_32
 endif # WITH_GCOV
 
 ## A version of the 8-bit library that has a POSIX API.
 
-if WITH_PCRE8
+if WITH_PCRE2_8
 lib_LTLIBRARIES += libpcre2-posix.la
 libpcre2_posix_la_SOURCES = src/pcre2posix.c
 libpcre2_posix_la_CFLAGS = \
@@ -404,11 +404,11 @@ libpcre2_posix_la_LIBADD = libpcre2-8.la
 if WITH_GCOV
 libpcre2_posix_la_CFLAGS += $(GCOV_CFLAGS)
 endif # WITH_GCOV
-endif # WITH_PCRE8
+endif # WITH_PCRE2_8
 
 ## Build pcre2grep if the 8-bit library is enabled
 
-if WITH_PCRE8
+if WITH_PCRE2_8
 bin_PROGRAMS += pcre2grep
 pcre2grep_SOURCES = src/pcre2grep.c
 pcre2grep_CFLAGS = $(AM_CFLAGS)
@@ -418,7 +418,7 @@ if WITH_GCOV
 pcre2grep_CFLAGS += $(GCOV_CFLAGS)
 pcre2grep_LDADD += $(GCOV_LIBS)
 endif # WITH_GCOV
-endif # WITH_PCRE8
+endif # WITH_PCRE2_8
 
 ## -------- Testing ----------
 
@@ -430,15 +430,15 @@ noinst_PROGRAMS += pcre2_jit_test
 pcre2_jit_test_SOURCES = src/pcre2_jit_test.c
 pcre2_jit_test_CFLAGS = $(AM_CFLAGS)
 pcre2_jit_test_LDADD =
-if WITH_PCRE8
+if WITH_PCRE2_8
 pcre2_jit_test_LDADD += libpcre2-8.la
-endif # WITH_PCRE8
-if WITH_PCRE16
+endif # WITH_PCRE2_8
+if WITH_PCRE2_16
 pcre2_jit_test_LDADD += libpcre2-16.la
-endif # WITH_PCRE16
-if WITH_PCRE32
+endif # WITH_PCRE2_16
+if WITH_PCRE2_32
 pcre2_jit_test_LDADD += libpcre2-32.la
-endif # WITH_PCRE32
+endif # WITH_PCRE2_32
 if WITH_GCOV
 pcre2_jit_test_CFLAGS += $(GCOV_CFLAGS)
 pcre2_jit_test_LDADD += $(GCOV_LIBS)
@@ -455,17 +455,17 @@ pcre2test_SOURCES = src/pcre2test.c
 pcre2test_CFLAGS = $(AM_CFLAGS)
 pcre2test_LDADD = $(LIBREADLINE)
 
-if WITH_PCRE8
+if WITH_PCRE2_8
 pcre2test_LDADD += libpcre2-8.la libpcre2-posix.la
-endif # WITH_PCRE8
+endif # WITH_PCRE2_8
 
-if WITH_PCRE16
+if WITH_PCRE2_16
 pcre2test_LDADD += libpcre2-16.la
-endif # WITH_PCRE16
+endif # WITH_PCRE2_16
 
-if WITH_PCRE32
+if WITH_PCRE2_32
 pcre2test_LDADD += libpcre2-32.la
-endif # WITH_PCRE32
+endif # WITH_PCRE2_32
 
 if WITH_VALGRIND
 pcre2test_CFLAGS += $(VALGRIND_CFLAGS)
@@ -488,10 +488,10 @@ dist_noinst_SCRIPTS += RunTest
 
 ## When the 8-bit library is configured, pcre2grep will have been built.
 
-if WITH_PCRE8
+if WITH_PCRE2_8
 TESTS += RunGrepTest
 dist_noinst_SCRIPTS += RunGrepTest
-endif # WITH_PCRE8
+endif # WITH_PCRE2_8
 
 ## Distribute all the test data files
 
@@ -597,7 +597,7 @@ CLEANFILES += \
 ## ------------ End of testing -------------
 
 
-# PCRE demonstration program. Not built automatcally. The point is that the
+# PCRE2 demonstration program. Not built automatcally. The point is that the
 # users should build it themselves. So just distribute the source.
 
 EXTRA_DIST += src/pcre2demo.c
@@ -608,15 +608,15 @@ EXTRA_DIST += src/pcre2demo.c
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA =
 
-if WITH_PCRE8
+if WITH_PCRE2_8
 pkgconfig_DATA += libpcre2-8.pc libpcre2-posix.pc
 endif
 
-if WITH_PCRE16
+if WITH_PCRE2_16
 pkgconfig_DATA += libpcre2-16.pc
 endif
 
-if WITH_PCRE32
+if WITH_PCRE2_32
 pkgconfig_DATA += libpcre2-32.pc
 endif
 

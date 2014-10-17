@@ -131,7 +131,7 @@ runtest()
   jit=$?
   ./pcre2test -C unicode >/dev/null
   utf=$?
-  ./pcre2test -C pcre2_8 >/dev/null
+  ./pcre2test -C pcre2-8 >/dev/null
   pcre2_8=$?
 
   if [ $nlok -gt 0 ]; then
@@ -215,7 +215,7 @@ if [ $ISGCC -ne 0 -a $usemain -ne 0 ]; then
   echo "---------- Maximally configured test with -O2 ----------"
   SAVECLFAGS="$CFLAGS"
   CFLAGS="$CFLAGS -O2"
-  opts="--disable-shared --enable-unicode $enable_jit --enable-pcre16 --enable-pcre32"
+  opts="--disable-shared --enable-unicode $enable_jit --enable-pcre2-16 --enable-pcre2-32"
   runtest
   CFLAGS="$SAVECFLAGS"
 fi
@@ -235,14 +235,14 @@ if [ $usemain -ne 0 ]; then
     "--enable-newline-is-crlf --disable-shared" \
     "--enable-newline-is-anycrlf --enable-bsr-anycrlf --disable-shared" \
     "--enable-unicode --enable-newline-is-any --disable-stack-for-recursion --disable-static" \
-    "--enable-pcre16" \
-    "--enable-pcre16 --disable-stack-for-recursion --disable-shared" \
-    "--enable-pcre16 --enable-unicode --disable-stack-for-recursion --disable-shared" \
-    "--enable-pcre32" \
-    "--enable-pcre32 --disable-stack-for-recursion --disable-shared" \
-    "--enable-pcre32 --enable-unicode --disable-stack-for-recursion --disable-shared" \
-    "--enable-pcre32 --enable-pcre16 --disable-shared" \
-    "--enable-pcre32 --enable-pcre16 --disable-pcre8 --disable-shared"
+    "--enable-pcre2-16" \
+    "--enable-pcre2-16 --disable-stack-for-recursion --disable-shared" \
+    "--enable-pcre2-16 --enable-unicode --disable-stack-for-recursion --disable-shared" \
+    "--enable-pcre2-32" \
+    "--enable-pcre2-32 --disable-stack-for-recursion --disable-shared" \
+    "--enable-pcre2-32 --enable-unicode --disable-stack-for-recursion --disable-shared" \
+    "--enable-pcre2-32 --enable-pcre2-16 --disable-shared" \
+    "--enable-pcre2-32 --enable-pcre2-16 --disable-pcre2-8 --disable-shared"
   do
     runtest
   done
@@ -256,16 +256,16 @@ if [ $usejit -ne 0 ]; then
     "--enable-jit --disable-shared" \
     "--enable-jit --enable-unicode --disable-shared" \
     "--enable-jit --enable-unicode --with-link-size=3 --disable-shared" \
-    "--enable-jit --enable-pcre16 --enable-unicode --disable-shared" \
-    "--enable-jit --enable-pcre16 --disable-pcre8 --disable-shared" \
-    "--enable-jit --enable-pcre16 --disable-pcre8 --enable-unicode --disable-shared" \
-    "--enable-jit --enable-pcre16 --enable-unicode --with-link-size=3 --disable-shared" \
-    "--enable-jit --enable-pcre16 --enable-unicode --with-link-size=4 --disable-shared" \
-    "--enable-jit --enable-pcre32 --enable-unicode --disable-shared" \
-    "--enable-jit --enable-pcre32 --disable-pcre8 --disable-shared" \
-    "--enable-jit --enable-pcre32 --disable-pcre8 --enable-unicode --disable-shared" \
-    "--enable-jit --enable-pcre32 --enable-unicode --with-link-size=4 --disable-shared" \
-    "--enable-jit --enable-pcre32 --enable-pcre16 --disable-pcre8 --enable-unicode --enable-newline-is-anycrlf --enable-bsr-anycrlf --disable-shared"
+    "--enable-jit --enable-pcre2-16 --enable-unicode --disable-shared" \
+    "--enable-jit --enable-pcre2-16 --disable-pcre2-8 --disable-shared" \
+    "--enable-jit --enable-pcre2-16 --disable-pcre2-8 --enable-unicode --disable-shared" \
+    "--enable-jit --enable-pcre2-16 --enable-unicode --with-link-size=3 --disable-shared" \
+    "--enable-jit --enable-pcre2-16 --enable-unicode --with-link-size=4 --disable-shared" \
+    "--enable-jit --enable-pcre2-32 --enable-unicode --disable-shared" \
+    "--enable-jit --enable-pcre2-32 --disable-pcre2-8 --disable-shared" \
+    "--enable-jit --enable-pcre2-32 --disable-pcre2-8 --enable-unicode --disable-shared" \
+    "--enable-jit --enable-pcre2-32 --enable-unicode --with-link-size=4 --disable-shared" \
+    "--enable-jit --enable-pcre2-32 --enable-pcre2-16 --disable-pcre2-8 --enable-unicode --enable-newline-is-anycrlf --enable-bsr-anycrlf --disable-shared"
   do
     runtest
   done
@@ -291,7 +291,7 @@ if [ $usevalgrind -ne 0 ]; then
   if [ $usejit -ne 0 ]; then
     for opts in \
       "--enable-jit --enable-unicode --disable-shared" \
-      "--enable-jit --enable-pcre16 --enable-pcre32 --enable-unicode"
+      "--enable-jit --enable-pcre2-16 --enable-pcre2-32 --enable-unicode"
     do
       opts="--enable-valgrind $opts"
       runtest

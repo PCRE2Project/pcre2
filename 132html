@@ -232,7 +232,7 @@ while (<STDIN>)
       redo;            # Process the joined lines
       }
 
-    # .EX/.EE are used in the pcredemo page to bracket the entire program,
+    # .EX/.EE are used in the pcre2demo page to bracket the entire program,
     # which is unmodified except for turning backslash into "\e".
 
     elsif (/^\.EX\s*$/)

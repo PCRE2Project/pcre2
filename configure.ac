@@ -98,26 +98,37 @@ then
   htmldir='${docdir}/html'
 fi
 
-# Handle --disable-pcre8 (enabled by default)
-AC_ARG_ENABLE(pcre8,
-              AS_HELP_STRING([--disable-pcre8],
+# Force an error for PCRE1 size options
+AC_ARG_ENABLE(pcre8,,,enable_pcre8=no)
+AC_ARG_ENABLE(pcre16,,,enable_pcre16=no)
+AC_ARG_ENABLE(pcre32,,,enable_pcre32=no)
+
+if test "$enable_pcre8$enable_pcre16$enable_pcre32" != "nonono"
+then
+  echo "** ERROR: Use --[[en|dis]]able-pcre2-[[8|16|32]], not --[[en|dis]]able-pcre[[8|16|32]]"
+  exit 1 
+fi
+
+# Handle --disable-pcre2-8 (enabled by default)
+AC_ARG_ENABLE(pcre2-8,
+              AS_HELP_STRING([--disable-pcre2-8],
                              [disable 8 bit character support]),
-              , enable_pcre8=unset)
-AC_SUBST(enable_pcre8)
+              , enable_pcre2_8=unset)
+AC_SUBST(enable_pcre2_8)
 
-# Handle --enable-pcre16 (disabled by default)
-AC_ARG_ENABLE(pcre16,
-              AS_HELP_STRING([--enable-pcre16],
+# Handle --enable-pcre2-16 (disabled by default)
+AC_ARG_ENABLE(pcre2-16,
+              AS_HELP_STRING([--enable-pcre2-16],
                              [enable 16 bit character support]),
-              , enable_pcre16=unset)
-AC_SUBST(enable_pcre16)
+              , enable_pcre2_16=unset)
+AC_SUBST(enable_pcre2_16)
 
-# Handle --enable-pcre32 (disabled by default)
-AC_ARG_ENABLE(pcre32,
-              AS_HELP_STRING([--enable-pcre32],
+# Handle --enable-pcre2-32 (disabled by default)
+AC_ARG_ENABLE(pcre2-32,
+              AS_HELP_STRING([--enable-pcre2-32],
                              [enable 32 bit character support]),
-              , enable_pcre32=unset)
-AC_SUBST(enable_pcre32)
+              , enable_pcre2_32=unset)
+AC_SUBST(enable_pcre2_32)
 
 # Handle --enable-jit (disabled by default)
 AC_ARG_ENABLE(jit,
@@ -264,26 +275,26 @@ AC_ARG_ENABLE(coverage,
                              [enable code coverage reports using gcov]),
               , enable_coverage=no)
 
-# Set the default value for pcre8
-if test "x$enable_pcre8" = "xunset"
+# Set the default value for pcre2-8
+if test "x$enable_pcre2_8" = "xunset"
 then
-  enable_pcre8=yes
+  enable_pcre2_8=yes
 fi
 
-# Set the default value for pcre16
-if test "x$enable_pcre16" = "xunset"
+# Set the default value for pcre2-16
+if test "x$enable_pcre2_16" = "xunset"
 then
-  enable_pcre16=no
+  enable_pcre2_16=no
 fi
 
-# Set the default value for pcre32
-if test "x$enable_pcre32" = "xunset"
+# Set the default value for pcre2-32
+if test "x$enable_pcre2_32" = "xunset"
 then
-  enable_pcre32=no
+  enable_pcre2_32=no
 fi
 
 # Make sure at least one library is selected
-if test "x$enable_pcre8$enable_pcre16$enable_pcre32" = "xnonono"
+if test "x$enable_pcre2_8$enable_pcre2_16$enable_pcre2_32" = "xnonono"
 then
   AC_MSG_ERROR([At least one of the 8, 16 or 32 bit libraries must be enabled])
 fi
@@ -367,9 +378,9 @@ AC_CHECK_HEADERS(limits.h sys/types.h sys/stat.h dirent.h)
 AC_CHECK_HEADERS([windows.h], [HAVE_WINDOWS_H=1])
 
 # Conditional compilation
-AM_CONDITIONAL(WITH_PCRE8, test "x$enable_pcre8" = "xyes")
-AM_CONDITIONAL(WITH_PCRE16, test "x$enable_pcre16" = "xyes")
-AM_CONDITIONAL(WITH_PCRE32, test "x$enable_pcre32" = "xyes")
+AM_CONDITIONAL(WITH_PCRE2_8, test "x$enable_pcre2_8" = "xyes")
+AM_CONDITIONAL(WITH_PCRE2_16, test "x$enable_pcre2_16" = "xyes")
+AM_CONDITIONAL(WITH_PCRE2_32, test "x$enable_pcre2_32" = "xyes")
 AM_CONDITIONAL(WITH_REBUILD_CHARTABLES, test "x$enable_rebuild_chartables" = "xyes")
 AM_CONDITIONAL(WITH_JIT, test "x$enable_jit" = "xyes")
 AM_CONDITIONAL(WITH_UNICODE, test "x$enable_unicode" = "xyes")
@@ -478,17 +489,17 @@ AC_SUBST(PCRE2_STATIC_CFLAG)
 
 # Here is where PCRE2-specific defines are handled
 
-if test "$enable_pcre8" = "yes"; then
+if test "$enable_pcre2_8" = "yes"; then
   AC_DEFINE([SUPPORT_PCRE2_8], [], [
     Define to any value to enable the 8 bit PCRE2 library.])
 fi
 
-if test "$enable_pcre16" = "yes"; then
+if test "$enable_pcre2_16" = "yes"; then
   AC_DEFINE([SUPPORT_PCRE2_16], [], [
     Define to any value to enable the 16 bit PCRE2 library.])
 fi
 
-if test "$enable_pcre32" = "yes"; then
+if test "$enable_pcre2_32" = "yes"; then
   AC_DEFINE([SUPPORT_PCRE2_32], [], [
     Define to any value to enable the 32 bit PCRE2 library.])
 fi
@@ -691,7 +702,7 @@ AC_SUBST(EXTRA_LIBPCRE2_POSIX_LDFLAGS)
 
 # When we run 'make distcheck', use these arguments. Turning off compiler
 # optimization makes it run faster.
-DISTCHECK_CONFIGURE_FLAGS="CFLAGS='' CXXFLAGS='' --enable-pcre16 --enable-pcre32 --enable-jit --enable-utf"
+DISTCHECK_CONFIGURE_FLAGS="CFLAGS='' CXXFLAGS='' --enable-pcre2-16 --enable-pcre2-32 --enable-jit --enable-utf"
 AC_SUBST(DISTCHECK_CONFIGURE_FLAGS)
 
 # Check that, if --enable-pcre2grep-libz or --enable-pcre2grep-libbz2 is
@@ -850,9 +861,9 @@ $PACKAGE-$VERSION configuration summary:
     Linker flags .................... : ${LDFLAGS}
     Extra libraries ................. : ${LIBS}
 
-    Build 8-bit pcre2 library ....... : ${enable_pcre8}
-    Build 16-bit pcre2 library ...... : ${enable_pcre16}
-    Build 32-bit pcre2 library ...... : ${enable_pcre32}
+    Build 8-bit pcre2 library ....... : ${enable_pcre2_8}
+    Build 16-bit pcre2 library ...... : ${enable_pcre2_16}
+    Build 32-bit pcre2 library ...... : ${enable_pcre2_32}
     Enable JIT compiling support .... : ${enable_jit}
     Enable Unicode support .......... : ${enable_unicode}
     Newline char/sequence ........... : ${enable_newline}

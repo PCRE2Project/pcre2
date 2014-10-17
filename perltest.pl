@@ -93,7 +93,7 @@ for (;;)
 
   $showrest = ($mod =~ s/aftertext,?//);
 
-  # "allaftertext" is used by pcretest to print remainders after captures
+  # "allaftertext" is used by pcre2test to print remainders after captures
 
   $mod =~ s/allaftertext,?//;
 
@@ -162,7 +162,6 @@ for (;;)
 
     s/\s+$//;  # Remove trailing space
     s/^\s+//;  # Remove leading space
-    s/\\Y//g;  # Remove \Y (pcretest flag to set PCRE_NO_START_OPTIMIZE)
 
     last if ($_ eq "");
     $x = eval "\"$_\"";   # To get escapes processed

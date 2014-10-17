@@ -1,6 +1,6 @@
 #! /bin/sh
 
-# Run pcre2grep tests. The assumption is that the PCRE tests check the library
+# Run pcre2grep tests. The assumption is that the PCRE2 tests check the library
 # itself. What we are checking here is the file handling and options that are
 # supported by pcre2grep. This script must be run in the build directory.
 
@@ -535,7 +535,7 @@ if [ $utf8 -ne 0 ] ; then
   if [ $? != 0 ] ; then exit 1; fi
 
 else
-  echo "Skipping pcre2grep UTF-8 tests: no UTF-8 support in PCRE library"
+  echo "Skipping pcre2grep UTF-8 tests: no UTF-8 support in PCRE2 library"
 fi
 
 

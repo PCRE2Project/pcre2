@@ -270,11 +270,11 @@ fi
 # All of 8-bit, 16-bit, and 32-bit character strings may be supported, but only
 # one need be.
 
-$sim ./pcre2test -C pcre2_8 >/dev/null
+$sim ./pcre2test -C pcre2-8 >/dev/null
 support8=$?
-$sim ./pcre2test -C pcre2_16 >/dev/null
+$sim ./pcre2test -C pcre2-16 >/dev/null
 support16=$?
-$sim ./pcre2test -C pcre2_32 >/dev/null
+$sim ./pcre2test -C pcre2-32 >/dev/null
 support32=$?
 
 # Initialize all bitsizes skipped

@@ -64,12 +64,13 @@ pcre2test commands.
 End
 
 echo "Making pcre2.txt"
-for file in pcre2api pcre2callout pcre2unicode ; do
+for file in pcre2 pcre2api pcre2build pcre2callout pcre2compat pcre2jit \
+            pcre2limits pcre2matching pcre2partial pcre2unicode ; do
 
-#for file in pcre pcre16 pcre32 pcrebuild pcrematching \
-#            pcrecompat pcrepattern pcresyntax pcrejit pcrepartial \
-#            pcreprecompile pcreperform pcreposix pcrecpp pcresample \
-#            pcrelimits pcrestack ; do
+#for file in  \
+#            pcre2syntax \
+#            pcre2precompile pcre2perform pcre2posix pcre2sample \
+#            pcre2stack ; do
  
   echo "  Processing $file.3"
   nroff -c -man $file.3 >$file.rawtxt
@@ -173,9 +174,7 @@ exit
 # These files are detrailed; do not detrail the test data because there may be
 # significant trailing spaces. Do not detrail RunTest.bat, because it has CRLF
 # line endings and the detrail script removes all trailing white space. The
-# configure files are also omitted from the detrailing. We don't bother with
-# those pcre[16|32]_xx files that just define COMPILE_PCRE16 and then #include the
-# common file, because they aren't going to change.
+# configure files are also omitted from the detrailing. 
 
 files="\
   Makefile.am \
@@ -195,45 +194,45 @@ files="\
   CMakeLists.txt \
   RunGrepTest \
   RunTest \
-  pcre-config.in \
+  pcre2-config.in \
   libpcre.pc.in \
   libpcre16.pc.in \
   libpcre32.pc.in \
   libpcreposix.pc.in \
   libpcrecpp.pc.in \
   config.h.in \
-  pcre_chartables.c.dist \
-  pcredemo.c \
-  pcregrep.c \
-  pcretest.c \
+  pcre2_chartables.c.dist \
+  pcre2demo.c \
+  pcre2grep.c \
+  pcre2test.c \
   dftables.c \
-  pcreposix.c \
-  pcreposix.h \
-  pcre.h.in \
-  pcre_internal.h \
-  pcre_byte_order.c \
-  pcre_compile.c \
-  pcre_config.c \
-  pcre_dfa_exec.c \
-  pcre_exec.c \
-  pcre_fullinfo.c \
-  pcre_get.c \
-  pcre_globals.c \
-  pcre_jit_compile.c \
-  pcre_jit_test.c \
-  pcre_maketables.c \
-  pcre_newline.c \
-  pcre_ord2utf8.c \
+  pcre2posix.c \
+  pcre2posix.h \
+  pcre2.h.in \
+  pcre2_internal.h \
+  pcre2_byte_order.c \
+  pcre2_compile.c \
+  pcre2_config.c \
+  pcre2_dfa_exec.c \
+  pcre2_exec.c \
+  pcre2_fullinfo.c \
+  pcre2_get.c \
+  pcre2_globals.c \
+  pcre2_jit_compile.c \
+  pcre2_jit_test.c \
+  pcre2_maketables.c \
+  pcre2_newline.c \
+  pcre2_ord2utf8.c \
   pcre16_ord2utf16.c \
   pcre32_ord2utf32.c \
-  pcre_printint.c \
-  pcre_refcount.c \
-  pcre_string_utils.c \
-  pcre_study.c \
-  pcre_tables.c \
-  pcre_valid_utf8.c \
-  pcre_version.c \
-  pcre_xclass.c \
+  pcre2_printint.c \
+  pcre2_refcount.c \
+  pcre2_string_utils.c \
+  pcre2_study.c \
+  pcre2_tables.c \
+  pcre2_valid_utf8.c \
+  pcre2_version.c \
+  pcre2_xclass.c \
   pcre16_utf16_utils.c \
   pcre32_utf32_utils.c \
   pcre16_valid_utf16.c \

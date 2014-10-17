@@ -261,8 +261,7 @@ IF(PCRE2_SUPPORT_VALGRIND)
         SET(SUPPORT_VALGRIND 1)
 ENDIF(PCRE2_SUPPORT_VALGRIND)
 
-# This next one used to contain
-#       SET(PCRETEST_LIBS ${READLINE_LIBRARY})
+# This next one used to reference ${READLINE_LIBRARY})
 # but I was advised to add the NCURSES test as well, along with
 # some modifications to cmake/FindReadline.cmake which should
 # make it possible to override the default if necessary. PH
@@ -518,15 +517,6 @@ ENDIF(MINGW AND NOT PCRE2_STATIC)
 ENDIF(PCRE2_BUILD_PCRE2_32)
 
 # Executables
-
-# Removed by PH (2008-01-23) because pcredemo shouldn't really be built
-# automatically, and it gave trouble in some environments anyway.
-# ADD_EXECUTABLE(pcredemo pcredemo.c)
-# TARGET_LINK_LIBRARIES(pcredemo pcreposix)
-# IF(NOT BUILD_SHARED_LIBS)
-#     # make sure to not use declspec(dllimport) in static mode on windows
-#         SET_TARGET_PROPERTIES(pcredemo PROPERTIES COMPILE_FLAGS "-DPCRE_STATIC")
-# ENDIF(NOT BUILD_SHARED_LIBS)
 
 IF(PCRE2_BUILD_PCRE2GREP)
   ADD_EXECUTABLE(pcre2grep src/pcre2grep.c)

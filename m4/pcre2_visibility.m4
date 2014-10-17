@@ -34,26 +34,26 @@ AC_DEFUN([PCRE2_VISIBILITY],
     dnl whether it leads to an error because of some other option that the
     dnl user has put into $CC $CFLAGS $CPPFLAGS.
     AC_MSG_CHECKING([whether the -Werror option is usable])
-    AC_CACHE_VAL([pcre_cv_cc_vis_werror], [
-      pcre_save_CFLAGS="$CFLAGS"
+    AC_CACHE_VAL([pcre2_cv_cc_vis_werror], [
+      pcre2_save_CFLAGS="$CFLAGS"
       CFLAGS="$CFLAGS -Werror"
       AC_COMPILE_IFELSE(
         [AC_LANG_PROGRAM([[]], [[]])],
-        [pcre_cv_cc_vis_werror=yes],
-        [pcre_cv_cc_vis_werror=no])
-      CFLAGS="$pcre_save_CFLAGS"])
-    AC_MSG_RESULT([$pcre_cv_cc_vis_werror])
+        [pcre2_cv_cc_vis_werror=yes],
+        [pcre2_cv_cc_vis_werror=no])
+      CFLAGS="$pcre2_save_CFLAGS"])
+    AC_MSG_RESULT([$pcre2_cv_cc_vis_werror])
     dnl Now check whether visibility declarations are supported.
     AC_MSG_CHECKING([for simple visibility declarations])
-    AC_CACHE_VAL([pcre_cv_cc_visibility], [
-      pcre_save_CFLAGS="$CFLAGS"
+    AC_CACHE_VAL([pcre2_cv_cc_visibility], [
+      pcre2_save_CFLAGS="$CFLAGS"
       CFLAGS="$CFLAGS -fvisibility=hidden"
       dnl We use the option -Werror and a function dummyfunc, because on some
       dnl platforms (Cygwin 1.7) the use of -fvisibility triggers a warning
       dnl "visibility attribute not supported in this configuration; ignored"
       dnl at the first function definition in every compilation unit, and we
       dnl don't want to use the option in this case.
-      if test $pcre_cv_cc_vis_werror = yes; then
+      if test $pcre2_cv_cc_vis_werror = yes; then
         CFLAGS="$CFLAGS -Werror"
       fi
       AC_COMPILE_IFELSE(
@@ -65,11 +65,11 @@ AC_DEFUN([PCRE2_VISIBILITY],
              void dummyfunc (void) {}
            ]],
            [[]])],
-        [pcre_cv_cc_visibility=yes],
-        [pcre_cv_cc_visibility=no])
-      CFLAGS="$pcre_save_CFLAGS"])
-    AC_MSG_RESULT([$pcre_cv_cc_visibility])
-    if test $pcre_cv_cc_visibility = yes; then
+        [pcre2_cv_cc_visibility=yes],
+        [pcre2_cv_cc_visibility=no])
+      CFLAGS="$pcre2_save_CFLAGS"])
+    AC_MSG_RESULT([$pcre2_cv_cc_visibility])
+    if test $pcre2_cv_cc_visibility = yes; then
       VISIBILITY_CFLAGS="-fvisibility=hidden"
       VISIBILITY_CXXFLAGS="-fvisibility=hidden -fvisibility-inlines-hidden"
       HAVE_VISIBILITY=1
