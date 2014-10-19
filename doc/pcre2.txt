@@ -8,6 +8,158 @@ pcre2test commands.
 -----------------------------------------------------------------------------
 
 
+PCRE2(3)                   Library Functions Manual                   PCRE2(3)
+
+
+
+NAME
+       PCRE2 - Perl-compatible regular expressions (revised API)
+
+INTRODUCTION
+
+       PCRE2 is the name used for a revised API for the PCRE library, which is
+       a set of functions, written in C,  that  implement  regular  expression
+       pattern matching using the same syntax and semantics as Perl, with just
+       a few differences. Some features that appeared in Python and the origi-
+       nal  PCRE  before  they  appeared  in Perl are also available using the
+       Python syntax, there is some support for one or two .NET and  Oniguruma
+       syntax  items,  and there are options for requesting some minor changes
+       that give better ECMAScript (aka JavaScript) compatibility.
+
+       The source code for PCRE2 can be compiled to support 8-bit, 16-bit,  or
+       32-bit  code units, which means that up to three separate libraries may
+       be installed.  The original work to extend PCRE to  16-bit  and  32-bit
+       code  units  was  done  by Zoltan Herczeg and Christian Persch, respec-
+       tively. In all three cases, strings can be interpreted  either  as  one
+       character  per  code  unit, or as UTF-encoded Unicode, with support for
+       Unicode general category properties. Unicode is optional at build time,
+       and  must  be enabled explicitly at run time. The version of Unicode in
+       use can be discovered by running
+
+         pcre2test -C
+
+       The three libraries contain identical sets  of  functions,  with  names
+       ending  in  _8,  _16,  or  _32,  respectively  (for example, pcre2_com-
+       pile_8()). However, by defining PCRE2_CODE_UNIT_WIDTH to be 8,  16,  or
+       32,  a  program that uses just one code unit width can be written using
+       generic names such as pcre2_compile(), and the documentation is written
+       assuming that this is the case.
+
+       In addition to the Perl-compatible matching function, PCRE2 contains an
+       alternative function that matches the same compiled patterns in a  dif-
+       ferent way. In certain circumstances, the alternative function has some
+       advantages.  For a discussion of the two matching algorithms,  see  the
+       pcre2matching page.
+
+       Details  of  exactly which Perl regular expression features are and are
+       not supported by  PCRE2  are  given  in  separate  documents.  See  the
+       pcre2pattern  and  pcre2compat  pages. There is a syntax summary in the
+       pcre2syntax page.
+
+       Some features of PCRE2 can be included, excluded, or changed  when  the
+       library  is  built. The pcre2_config() function makes it possible for a
+       client to discover which features are  available.  The  features  them-
+       selves are described in the pcre2build page. Documentation about build-
+       ing PCRE2 for various operating systems can be found in the README  and
+       NON-AUTOTOOLS_BUILD files in the source distribution.
+
+       The  libraries contains a number of undocumented internal functions and
+       data tables that are used by more than one  of  the  exported  external
+       functions,  but  which  are  not  intended for use by external callers.
+       Their names all begin with "_pcre2", which hopefully will  not  provoke
+       any name clashes. In some environments, it is possible to control which
+       external symbols are exported when a shared library is  built,  and  in
+       these cases the undocumented symbols are not exported.
+
+
+SECURITY CONSIDERATIONS
+
+       If  you  are using PCRE2 in a non-UTF application that permits users to
+       supply arbitrary patterns for compilation, you should  be  aware  of  a
+       feature that allows users to turn on UTF support from within a pattern,
+       provided that PCRE2 was built with Unicode  support.  For  example,  an
+       8-bit  pattern  that  begins  with  "(*UTF)" turns on UTF-8 mode, which
+       interprets patterns and subjects as strings of UTF-8 code units instead
+       of  individual  8-bit  characters. This causes both the pattern and any
+       data against which it is matched to be checked for UTF-8  validity.  If
+       the  data string is very long, such a check might use sufficiently many
+       resources as to cause your application to lose performance.
+
+       One way of guarding against this possibility is to use  the  pcre2_pat-
+       tern_info()  function  to check the compiled pattern's options for UTF.
+       Alternatively, you can set the PCRE2_NEVER_UTF option at compile  time.
+       This  causes  an compile time error if a pattern contains a UTF-setting
+       sequence.
+
+       If your application is one that supports UTF, be  aware  that  validity
+       checking  can  take time. If the same data string is to be matched many
+       times, you can use the PCRE2_NO_UTF_CHECK option  for  the  second  and
+       subsequent matches to avoid running redundant checks.
+
+       Another  way  that  performance can be hit is by running a pattern that
+       has a very large search tree against a string that  will  never  match.
+       Nested  unlimited repeats in a pattern are a common example. PCRE2 pro-
+       vides some protection against  this:  see  the  pcre2_set_match_limit()
+       function in the pcre2api page.
+
+
+USER DOCUMENTATION
+
+       The  user  documentation for PCRE2 comprises a number of different sec-
+       tions. In the "man" format, each of these is a separate "man page".  In
+       the  HTML  format, each is a separate page, linked from the index page.
+       In the plain  text  format,  the  descriptions  of  the  pcre2grep  and
+       pcre2test programs are in files called pcre2grep.txt and pcre2test.txt,
+       respectively. The remaining sections, except for the pcre2demo  section
+       (which  is a program listing), and the short pages for individual func-
+       tions, are concatenated in pcre2.txt, for ease of searching.  The  sec-
+       tions are as follows:
+
+         pcre2              this document FIXME CHECK THIS LIST
+         pcre2-config       show PCRE2 installation configuration information
+         pcre2api           details of PCRE2's native C API
+         pcre2build         building PCRE2
+         pcre2callout       details of the callout feature
+         pcre2compat        discussion of Perl compatibility
+         pcre2demo          a demonstration C program that uses PCRE2
+         pcre2grep          description of the pcre2grep command (8-bit only)
+         pcre2jit            discussion  of the just-in-time optimization sup-
+       port
+         pcre2limits        details of size and other limits
+         pcre2matching      discussion of the two matching algorithms
+         pcre2partial       details of the partial matching facility
+         pcre2pattern       syntax and semantics of supported
+                             regular expressions
+         pcre2perform       discussion of performance issues
+         pcre2posix         the POSIX-compatible C API for the 8-bit library
+         pcre2sample        discussion of the pcre2demo program
+         pcre2stack         discussion of stack usage
+         pcre2syntax        quick syntax reference
+         pcre2test          description of the pcre2test testing command
+         pcre2unicode       discussion of Unicode and UTF support
+
+       In the "man" and HTML formats, there is also a short page  for  each  C
+       library function, listing its arguments and results.
+
+
+AUTHOR
+
+       Philip Hazel
+       University Computing Service
+       Cambridge CB2 3QH, England.
+
+       Putting  an  actual email address here is a spam magnet. If you want to
+       email me, use my two initials, followed by the two digits  10,  at  the
+       domain cam.ac.uk.
+
+
+REVISION
+
+       Last updated: 28 September 2014
+       Copyright (c) 1997-2014 University of Cambridge.
+------------------------------------------------------------------------------
+ 
+ 
 PCRE2API(3)                Library Functions Manual                PCRE2API(3)
 
 
@@ -190,7 +342,7 @@ PCRE2 NATIVE API AUXILIARY FUNCTIONS
 
        int pcre2_pattern_info(const pcre2 *code, uint32_t what, void *where);
 
-       int pcre2_config(uint32_t what, void *where, PCRE2_SIZE length);
+       int pcre2_config(uint32_t what, void *where);
 
 
 PCRE2 8-BIT, 16-BIT, AND 32-BIT LIBRARIES
@@ -670,7 +822,7 @@ PCRE2 CONTEXTS
 
 CHECKING BUILD-TIME OPTIONS
 
-       int pcre2_config(uint32_t what, void *where, PCRE2_SIZE length);
+       int pcre2_config(uint32_t what, void *where);
 
        The  function  pcre2_config()  makes  it possible for a PCRE2 client to
        discover which optional features have  been  compiled  into  the  PCRE2
@@ -679,20 +831,23 @@ CHECKING BUILD-TIME OPTIONS
 
        The first argument for pcre2_config() specifies  which  information  is
        required.  The  second  argument  is a pointer to memory into which the
-       information is placed, with the final argument  giving  the  length  of
-       this  memory  in  bytes.  For calls that return numerical values, where
-       should point to appropriately aligned memory, with  length  set  to  at
-       least the "sizeof" the data type.
+       information is placed. If NULL is  passed,  the  function  returns  the
+       amount  of  memory  that  is  needed for the requested information. For
+       calls that return  numerical  values,  the  value  is  in  bytes;  when
+       requesting  these  values,  where should point to appropriately aligned
+       memory. For calls that return strings, the required length is given  in
+       code units, not counting the terminating zero.
 
-       The returned value from pcre2_config() is zero on success, or the nega-
-       tive error code PCRE2_ERROR_BADOPTION if the value in the  first  argu-
-       ment is not recognized. The following information is available:
+       When  requesting information, the returned value from pcre2_config() is
+       non-negative on success, or the negative error code  PCRE2_ERROR_BADOP-
+       TION  if the value in the first argument is not recognized. The follow-
+       ing information is available:
 
          PCRE2_CONFIG_BSR
 
        The output is an integer whose value indicates what character sequences
-       the \R escape sequence matches by default. A value of 0 means  that  \R
-       matches  any  Unicode  line ending sequence; a value of 1 means that \R
+       the  \R  escape sequence matches by default. A value of 0 means that \R
+       matches any Unicode line ending sequence; a value of 1  means  that  \R
        matches only CR, LF, or CRLF. The default can be overridden when a pat-
        tern is compiled or matched.
 
@@ -703,10 +858,13 @@ CHECKING BUILD-TIME OPTIONS
 
          PCRE2_CONFIG_JITTARGET
 
-       FIXME: this needs sorting out once JIT is implemented.  If JIT  support
-       is  available,  the  string  contains  the name of the architecture for
-       which the JIT compiler is configured, for example  "x86  32bit  (little
-       endian + unaligned)". If JIT support is not available, FIXME.
+       The  where  argument  should point to a buffer that is at least 48 code
+       units long. (The exact length needed can be found by calling pcre2_con-
+       fig()  with where set to NULL.) The buffer is filled with a string that
+       contains the name of the architecture for which  the  JIT  compiler  is
+       configured, for example "x86 32bit (little endian + unaligned)". If JIT
+       support is not available, PCRE2_ERROR_BADOPTION is returned,  otherwise
+       the length of the string, in code units, is returned.
 
          PCRE2_CONFIG_LINKSIZE
 
@@ -772,10 +930,12 @@ CHECKING BUILD-TIME OPTIONS
          PCRE2_CONFIG_UNICODE_VERSION
 
        The where argument should point to a buffer that is at  least  24  code
-       units long. If PCRE2 has been compiled without Unicode support, this is
-       filled with the text "Unicode not supported".  Otherwise,  the  Unicode
-       version  string  (for example, "7.0.0") is returnd. The string is zero-
-       terminated.
+       units long. (The exact length needed can be found by calling pcre2_con-
+       fig() with where set to NULL.) If PCRE2 has been compiled without  Uni-
+       code  support,  the  buffer  is  filled with the text "Unicode not sup-
+       ported". Otherwise, the Unicode version string (for  example,  "7.0.0")
+       is  inserted.  The  string is zero-terminated. The function returns the
+       length of the string in code units.
 
          PCRE2_CONFIG_UNICODE
 
@@ -786,8 +946,10 @@ CHECKING BUILD-TIME OPTIONS
          PCRE2_CONFIG_VERSION
 
        The where argument should point to a buffer that is at  least  12  code
-       units  long.  It  is  filled with the PCRE2 version string, zero-termi-
-       nated.
+       units long. (The exact length needed can be found by calling pcre2_con-
+       fig() with where set to NULL.) The buffer is filled with the PCRE2 ver-
+       sion  string, zero-terminated. The length of the string (in code units)
+       is returned.
 
 
 COMPILING A PATTERN
@@ -1227,18 +1389,19 @@ INFORMATION ABOUT A COMPILED PATTERN
        The pcre2_pattern_info() function returns information about a  compiled
        pattern.  The  first argument is a pointer to the compiled pattern. The
        second argument specifies which piece of information is  required,  and
-       the  third argument is a pointer to a variable to receive the data. The
-       yield of the function is zero for success, or one of the following neg-
-       ative numbers:
+       the  third  argument is a pointer to a variable to receive the data. If
+       the third argument is NULL, the first  argument  is  ignored,  and  the
+       function returns the size in bytes of the variable that is required for
+       the information requested.  Otherwise, The yield  of  the  function  is
+       zero for success, or one of the following negative numbers:
 
          PCRE2_ERROR_NULL           the argument code was NULL
-                                    the argument where was NULL
          PCRE2_ERROR_BADMAGIC       the "magic number" was not found
          PCRE2_ERROR_BADOPTION      the value of what was invalid
          PCRE2_ERROR_UNSET          the requested field is not set
 
        The  "magic  number" is placed at the start of each compiled pattern as
-       an simple check against passing an arbitrary memory pointer.  Here is a
+       an simple check against passing an arbitrary memory pointer. Here is  a
        typical  call of pcre2_pattern_info(), to obtain the length of the com-
        piled pattern:
 
@@ -2363,7 +2526,459 @@ AUTHOR
 
 REVISION
 
-       Last updated: 14 October 2014
+       Last updated: 16 October 2014
+       Copyright (c) 1997-2014 University of Cambridge.
+------------------------------------------------------------------------------
+ 
+ 
+PCRE2BUILD(3)              Library Functions Manual              PCRE2BUILD(3)
+
+
+
+NAME
+       PCRE2 - Perl-compatible regular expressions (revised API)
+
+BUILDING PCRE2
+
+       PCRE2  is distributed with a configure script that can be used to build
+       the library in Unix-like environments using the applications  known  as
+       Autotools. Also in the distribution are files to support building using
+       CMake instead of configure.  The  text  file  README  contains  general
+       information  about  building  with Autotools (some of which is repeated
+       below), and also has some comments about building on various  operating
+       systems.  There  is a lot more information about building PCRE2 without
+       using Autotools (including information about using CMake  and  building
+       "by  hand")  in  the  text file called NON-AUTOTOOLS-BUILD.  You should
+       consult this file as well as the README file if you are building  in  a
+       non-Unix-like environment.
+
+
+PCRE2 BUILD-TIME OPTIONS
+
+       The rest of this document describes the optional features of PCRE2 that
+       can be selected when the library is compiled. It  assumes  use  of  the
+       configure  script,  where  the  optional features are selected or dese-
+       lected by providing options to configure before running the  make  com-
+       mand.  However,  the same options can be selected in both Unix-like and
+       non-Unix-like environments if you are using CMake instead of  configure
+       to build PCRE2.
+
+       If  you  are not using Autotools or CMake, option selection can be done
+       by editing the config.h file, or by passing parameter settings  to  the
+       compiler, as described in NON-AUTOTOOLS-BUILD.
+
+       The complete list of options for configure (which includes the standard
+       ones such as the  selection  of  the  installation  directory)  can  be
+       obtained by running
+
+         ./configure --help
+
+       The  following  sections  include  descriptions  of options whose names
+       begin with --enable or --disable. These settings specify changes to the
+       defaults  for  the configure command. Because of the way that configure
+       works, --enable and --disable always come in pairs, so  the  complemen-
+       tary  option always exists as well, but as it specifies the default, it
+       is not described.
+
+
+BUILDING 8-BIT, 16-BIT AND 32-BIT LIBRARIES
+
+       By default, a library called libpcre2-8 is built, containing  functions
+       that  take  string arguments contained in vectors of bytes, interpreted
+       either as single-byte characters, or UTF-8 strings. You can also  build
+       two  other libraries, called libpcre2-16 and libpcre2-32, which process
+       strings that are contained in vectors of 16-bit and 32-bit code  units,
+       respectively. These can be interpreted either as single-unit characters
+       or UTF-16/UTF-32 strings. To build these additional libraries, add  one
+       or both of the following to the configure command:
+
+         --enable-pcre16
+         --enable-pcre32
+
+       If you do not want the 8-bit library, add
+
+         --disable-pcre8
+
+       as  well.  At least one of the three libraries must be built. Note that
+       the POSIX wrapper is for the 8-bit library only, and that pcre2grep  is
+       an  8-bit  program.  Neither  of these are built if you select only the
+       16-bit or 32-bit libraries.
+
+
+BUILDING SHARED AND STATIC LIBRARIES
+
+       The Autotools PCRE2 building process uses libtool to build both  shared
+       and  static  libraries  by  default.  You  can suppress one of these by
+       adding one of
+
+         --disable-shared
+         --disable-static
+
+       to the configure command, as required.
+
+
+Unicode and UTF SUPPORT
+
+       To build PCRE2 with support for Unicode and UTF character strings, add
+
+         --enable-unicode
+
+       to the configure command. This setting applies to all three  libraries,
+       adding  support  for  UTF-8 to the 8-bit library, support for UTF-16 to
+       the 16-bit library, and  support  for  UTF-32  to  the  to  the  32-bit
+       library.   It is not possible to build one library with UTF support and
+       another without in the same configuration.
+
+       Of itself, this setting does not make PCRE2  treat  strings  as  UTF-8,
+       UTF-16 or UTF-32. As well as compiling PCRE2 with this option, you also
+       have have to set the PCRE2_UTF option when you call pcre2_compile()  to
+       compile a pattern.
+
+       If  you  set  --enable-unicode when compiling in an EBCDIC environment,
+       PCRE2 expects its input to be either ASCII or UTF-8 (depending  on  the
+       run-time  option).  It is not possible to support both EBCDIC and UTF-8
+       codes in the same version of the library.  Consequently,  --enable-uni-
+       code and --enable-ebcdic are mutually exclusive.
+
+       UTF  support allows the libraries to process character codepoints up to
+       0x10ffff in the strings that they handle. It also provides support  for
+       accessing the properties of such characters, using pattern escapes such
+       as \P, \p, and \X.  Only the general category properties such as Lu and
+       Nd are supported. Details are given in the pcre2pattern documentation.
+
+
+JUST-IN-TIME COMPILER SUPPORT
+
+       Just-in-time compiler support is included in the build by specifying
+
+         --enable-jit
+
+       This  support  is available only for certain hardware architectures. If
+       this option is set for an  unsupported  architecture,  a  compile  time
+       error  occurs.   See the pcre2jit documentation for a discussion of JIT
+       usage. When JIT support is enabled, pcre2grep automatically  makes  use
+       of it, unless you add
+
+         --disable-pcre2grep-jit
+
+       to the "configure" command.
+
+
+CODE VALUE OF NEWLINE
+
+       By  default, PCRE2 interprets the linefeed (LF) character as indicating
+       the end of a line. This is the normal newline  character  on  Unix-like
+       systems.  You can compile PCRE2 to use carriage return (CR) instead, by
+       adding
+
+         --enable-newline-is-cr
+
+       to the  configure  command.  There  is  also  a  --enable-newline-is-lf
+       option, which explicitly specifies linefeed as the newline character.
+
+       Alternatively, you can specify that line endings are to be indicated by
+       the two character sequence CRLF. If you want this, add
+
+         --enable-newline-is-crlf
+
+       to the configure command. There is a fourth option, specified by
+
+         --enable-newline-is-anycrlf
+
+       which causes PCRE2 to recognize any of the three sequences CR,  LF,  or
+       CRLF as indicating a line ending. Finally, a fifth option, specified by
+
+         --enable-newline-is-any
+
+       causes PCRE2 to recognize any Unicode newline sequence.
+
+       Whatever  line ending convention is selected when PCRE2 is built can be
+       overridden when the library functions are called. At build time  it  is
+       conventional to use the standard for your operating system.
+
+
+WHAT \R MATCHES
+
+       By  default,  the  sequence \R in a pattern matches any Unicode newline
+       sequence, whatever has been selected as the line  ending  sequence.  If
+       you specify
+
+         --enable-bsr-anycrlf
+
+       the  default  is changed so that \R matches only CR, LF, or CRLF. What-
+       ever is selected when PCRE2 is built can be overridden when the library
+       functions are called.
+
+
+HANDLING VERY LARGE PATTERNS
+
+       Within  a  compiled  pattern,  offset values are used to point from one
+       part to another (for example, from an opening parenthesis to an  alter-
+       nation  metacharacter).  By default, in the 8-bit and 16-bit libraries,
+       two-byte values are used for these offsets, leading to a  maximum  size
+       for  a compiled pattern of around 64K. This is sufficient to handle all
+       but the most gigantic patterns.  Nevertheless, some people do  want  to
+       process  truly enormous patterns, so it is possible to compile PCRE2 to
+       use three-byte or four-byte offsets by adding a setting such as
+
+         --with-link-size=3
+
+       to the configure command. The value given must be 2, 3, or 4.  For  the
+       16-bit  library,  a  value of 3 is rounded up to 4. In these libraries,
+       using longer offsets slows down the operation of PCRE2 because  it  has
+       to  load additional data when handling them. For the 32-bit library the
+       value is always 4 and cannot be overridden; the value  of  --with-link-
+       size is ignored.
+
+
+AVOIDING EXCESSIVE STACK USAGE
+
+       When  matching  with the pcre2_match() function, PCRE2 implements back-
+       tracking by making recursive  calls  to  an  internal  function  called
+       match().  In  environments where the size of the stack is limited, this
+       can severely limit PCRE2's operation. (The Unix  environment  does  not
+       usually  suffer from this problem, but it may sometimes be necessary to
+       increase  the  maximum  stack  size.  There  is  a  discussion  in  the
+       pcre2stack  documentation.)  An  alternative approach to recursion that
+       uses memory from the heap to remember data, instead of using  recursive
+       function  calls, has been implemented to work round the problem of lim-
+       ited stack size. If you want to build a version  of  PCRE2  that  works
+       this way, add
+
+         --disable-stack-for-recursion
+
+       to the configure command. By default, the system functions malloc() and
+       free() are called to manage the heap memory that is required, but  cus-
+       tom  memory  management  functions  can  be  called instead. PCRE2 runs
+       noticeably more slowly when built in this way. This option affects only
+       the pcre2_match() function; it is not relevant for pcre2_dfa_match().
+
+
+LIMITING PCRE2 RESOURCE USAGE
+
+       Internally, PCRE2 has a function called match(), which it calls repeat-
+       edly  (sometimes  recursively)  when  matching  a  pattern   with   the
+       pcre2_match() function. By controlling the maximum number of times this
+       function may be called during a single matching operation, a limit  can
+       be  placed on the resources used by a single call to pcre2_match(). The
+       limit can be changed at run time, as described in the pcre2api documen-
+       tation.  The default is 10 million, but this can be changed by adding a
+       setting such as
+
+         --with-match-limit=500000
+
+       to  the  configure  command.  This  setting  has  no  effect   on   the
+       pcre2_dfa_match() matching function.
+
+       In  some  environments  it is desirable to limit the depth of recursive
+       calls of match() more strictly than the total number of calls, in order
+       to  restrict  the maximum amount of stack (or heap, if --disable-stack-
+       for-recursion is specified) that is used. A second limit controls this;
+       it  defaults  to  the  value  that is set for --with-match-limit, which
+       imposes no additional constraints. However, you can set a  lower  limit
+       by adding, for example,
+
+         --with-match-limit-recursion=10000
+
+       to  the  configure  command.  This  value can also be overridden at run
+       time.
+
+
+CREATING CHARACTER TABLES AT BUILD TIME
+
+       PCRE2 uses fixed tables for processing characters whose code points are
+       less than 256. By default, PCRE2 is built with a set of tables that are
+       distributed in the file src/pcre2_chartables.c.dist. These  tables  are
+       for ASCII codes only. If you add
+
+         --enable-rebuild-chartables
+
+       to  the  configure  command, the distributed tables are no longer used.
+       Instead, a program called dftables is compiled and  run.  This  outputs
+       the source for new set of tables, created in the default locale of your
+       C run-time system. (This method of replacing the tables does  not  work
+       if  you are cross compiling, because dftables is run on the local host.
+       If you need to create alternative tables when cross compiling, you will
+       have to do so "by hand".)
+
+
+USING EBCDIC CODE
+
+       PCRE2  assumes  by default that it will run in an environment where the
+       character code is ASCII (or Unicode, which is  a  superset  of  ASCII).
+       This  is  the case for most computer operating systems. PCRE2 can, how-
+       ever, be compiled to run in an EBCDIC environment by adding
+
+         --enable-ebcdic
+
+       to the configure command. This setting implies --enable-rebuild-charta-
+       bles.  You  should  only  use  it if you know that you are in an EBCDIC
+       environment (for example,  an  IBM  mainframe  operating  system).  The
+       --enable-ebcdic option is incompatible with --enable-unicode.
+
+       The EBCDIC character that corresponds to an ASCII LF is assumed to have
+       the value 0x15 by default. However, in some EBCDIC  environments,  0x25
+       is used. In such an environment you should use
+
+         --enable-ebcdic-nl25
+
+       as well as, or instead of, --enable-ebcdic. The EBCDIC character for CR
+       has the same value as in ASCII, namely, 0x0d.  Whichever  of  0x15  and
+       0x25 is not chosen as LF is made to correspond to the Unicode NEL char-
+       acter (which, in Unicode, is 0x85).
+
+       The options that select newline behaviour, such as --enable-newline-is-
+       cr, and equivalent run-time options, refer to these character values in
+       an EBCDIC environment.
+
+
+PCRE2GREP OPTIONS FOR COMPRESSED FILE SUPPORT
+
+       By default, pcre2grep reads all files as plain text. You can  build  it
+       so  that  it recognizes files whose names end in .gz or .bz2, and reads
+       them with libz or libbz2, respectively, by adding one or both of
+
+         --enable-pcre2grep-libz
+         --enable-pcre2grep-libbz2
+
+       to the configure command. These options naturally require that the rel-
+       evant  libraries  are installed on your system. Configuration will fail
+       if they are not.
+
+
+PCRE2GREP BUFFER SIZE
+
+       pcre2grep uses an internal buffer to hold a "window" on the file it  is
+       scanning, in order to be able to output "before" and "after" lines when
+       it finds a match. The size of the buffer is controlled by  a  parameter
+       whose default value is 20K. The buffer itself is three times this size,
+       but because of the way it is used for holding "before" lines, the long-
+       est  line  that  is guaranteed to be processable is the parameter size.
+       You can change the default parameter value by adding, for example,
+
+         --with-pcre2grep-bufsize=50K
+
+       to the configure command. The caller of pcre2grep can,  however,  over-
+       ride this value by specifying a run-time option.
+
+
+PCRE2TEST OPTION FOR LIBREADLINE SUPPORT
+
+       If you add one of
+
+         --enable-pcre2test-libreadline
+         --enable-pcre2test-libedit
+
+       to  the  configure  command,  pcre2test  is linked with the libreadline
+       orlibedit library, respectively, and when its input is from a terminal,
+       it  reads  it using the readline() function. This provides line-editing
+       and history facilities. Note that libreadline is  GPL-licensed,  so  if
+       you  distribute  a binary of pcre2test linked in this way, there may be
+       licensing issues. These can be avoided by linking with  libedit  (which
+       has a BSD licence) instead.
+
+       Setting  this  option  causes  the -lreadline option to be added to the
+       pcre2test build. In many operating environments with a  sytem-installed
+       readline  library  this  is  sufficient.  However, in some environments
+       (e.g. if an unmodified distribution version of  readline  is  in  use),
+       some  extra  configuration  may  be  necessary.  The  INSTALL  file for
+       libreadline says this:
+
+         "Readline uses the termcap functions, but does not link with
+         the termcap or curses library itself, allowing applications
+         which link with readline the to choose an appropriate library."
+
+       If your environment has not been set up so that an appropriate  library
+       is automatically included, you may need to add something like
+
+         LIBS="-ncurses"
+
+       immediately before the configure command.
+
+
+DEBUGGING WITH VALGRIND SUPPORT
+
+       By adding the
+
+         --enable-valgrind
+
+       option to to the configure command, PCRE2 will use valgrind annotations
+       to mark certain memory regions as  unaddressable.  This  allows  it  to
+       detect  invalid  memory  accesses,  and  is mostly useful for debugging
+       PCRE2 itself.
+
+
+CODE COVERAGE REPORTING
+
+       If your C compiler is gcc, you can build a version of  PCRE2  that  can
+       generate a code coverage report for its test suite. To enable this, you
+       must install lcov version 1.6 or above. Then specify
+
+         --enable-coverage
+
+       to the configure command and build PCRE2 in the usual way.
+
+       Note that using ccache (a caching C compiler) is incompatible with code
+       coverage  reporting. If you have configured ccache to run automatically
+       on your system, you must set the environment variable
+
+         CCACHE_DISABLE=1
+
+       before running make to build PCRE2, so that ccache is not used.
+
+       When --enable-coverage is used,  the  following  addition  targets  are
+       added to the Makefile:
+
+         make coverage
+
+       This  creates  a  fresh coverage report for the PCRE2 test suite. It is
+       equivalent to running "make coverage-reset", "make  coverage-baseline",
+       "make check", and then "make coverage-report".
+
+         make coverage-reset
+
+       This zeroes the coverage counters, but does nothing else.
+
+         make coverage-baseline
+
+       This captures baseline coverage information.
+
+         make coverage-report
+
+       This creates the coverage report.
+
+         make coverage-clean-report
+
+       This  removes the generated coverage report without cleaning the cover-
+       age data itself.
+
+         make coverage-clean-data
+
+       This removes the captured coverage data without removing  the  coverage
+       files created at compile time (*.gcno).
+
+         make coverage-clean
+
+       This  cleans all coverage data including the generated coverage report.
+       For more information about code coverage, see the gcov and  lcov  docu-
+       mentation.
+
+
+SEE ALSO
+
+       pcre2api(3), pcre2_config(3).
+
+
+AUTHOR
+
+       Philip Hazel
+       University Computing Service
+       Cambridge CB2 3QH, England.
+
+
+REVISION
+
+       Last updated: 28 September 2014
        Copyright (c) 1997-2014 University of Cambridge.
 ------------------------------------------------------------------------------
  
@@ -2600,6 +3215,1274 @@ AUTHOR
 REVISION
 
        Last updated: 19 October 2014
+       Copyright (c) 1997-2014 University of Cambridge.
+------------------------------------------------------------------------------
+ 
+ 
+PCRE2COMPAT(3)             Library Functions Manual             PCRE2COMPAT(3)
+
+
+
+NAME
+       PCRE2 - Perl-compatible regular expressions (revised API)
+
+DIFFERENCES BETWEEN PCRE2 AND PERL
+
+       This document describes the differences in the ways that PCRE2 and Perl
+       handle regular expressions. The differences  described  here  are  with
+       respect to Perl versions 5.10 and above.
+
+       1.  PCRE2  has only a subset of Perl's Unicode support. Details of what
+       it does have are given in the pcre2unicode page.
+
+       2. PCRE2 allows repeat quantifiers only  on  parenthesized  assertions,
+       but  they  do not mean what you might think. For example, (?!a){3} does
+       not assert that the next three characters are not "a". It just  asserts
+       that  the  next  character  is not "a" three times (in principle: PCRE2
+       optimizes this to run the assertion  just  once).  Perl  allows  repeat
+       quantifiers  on  other  assertions such as \b, but these do not seem to
+       have any use.
+
+       3. Capturing subpatterns that occur inside  negative  lookahead  asser-
+       tions  are  counted,  but their entries in the offsets vector are never
+       set. Perl sometimes (but not always) sets its numerical variables  from
+       inside negative assertions.
+
+       4.  The  following Perl escape sequences are not supported: \l, \u, \L,
+       \U, and \N when followed by a character name or Unicode value.  (\N  on
+       its own, matching a non-newline character, is supported.) In fact these
+       are implemented by Perl's general string-handling and are not  part  of
+       its  pattern matching engine. If any of these are encountered by PCRE2,
+       an error is generated by default. However, if the PCRE2_ALT_BSUX option
+       is set, \U and \u are interpreted as ECMAScript interprets them.
+
+       5. The Perl escape sequences \p, \P, and \X are supported only if PCRE2
+       is built with Unicode support. The properties that can be  tested  with
+       \p and \P are limited to the general category properties such as Lu and
+       Nd, script names such as Greek or Han, and the derived  properties  Any
+       and L&. PCRE2 does support the Cs (surrogate) property, which Perl does
+       not; the Perl documentation says "Because Perl hides the need  for  the
+       user  to  understand the internal representation of Unicode characters,
+       there is no need to implement the  somewhat  messy  concept  of  surro-
+       gates."
+
+       6.  PCRE2 does support the \Q...\E escape for quoting substrings. Char-
+       acters in between are treated as literals. This is  slightly  different
+       from  Perl  in  that  $  and  @ are also handled as literals inside the
+       quotes. In Perl, they cause variable interpolation (but of course PCRE2
+       does not have variables).  Note the following examples:
+
+           Pattern            PCRE2 matches      Perl matches
+
+           \Qabc$xyz\E        abc$xyz           abc followed by the
+                                                  contents of $xyz
+           \Qabc\$xyz\E       abc\$xyz          abc\$xyz
+           \Qabc\E\$\Qxyz\E   abc$xyz           abc$xyz
+
+       The  \Q...\E  sequence  is recognized both inside and outside character
+       classes.
+
+       7.  Fairly  obviously,  PCRE2  does  not  support  the  (?{code})   and
+       (??{code})  constructions. However, there is support for recursive pat-
+       terns. This is not available in Perl 5.8, but it is in Perl 5.10. Also,
+       the  PCRE2  "callout"  feature allows an external function to be called
+       during  pattern  matching.  See  the  pcre2callout  documentation   for
+       details.
+
+       8.  Subpatterns  that  are called as subroutines (whether or not recur-
+       sively) are always treated as atomic groups  in  PCRE2.  This  is  like
+       Python,  but  unlike Perl.  Captured values that are set outside a sub-
+       routine call can be reference from inside in PCRE2, but  not  in  Perl.
+       There is a discussion that explains these differences in more detail in
+       the section on recursion differences  from  Perl  in  the  pcre2pattern
+       page.
+
+       9.  If  any  of the backtracking control verbs are used in a subpattern
+       that is called as a subroutine  (whether  or  not  recursively),  their
+       effect  is  confined to that subpattern; it does not extend to the sur-
+       rounding pattern. This is not always the case in Perl.  In  particular,
+       if  (*THEN)  is  present in a group that is called as a subroutine, its
+       action is limited to that group, even if the group does not contain any
+       |  characters.  Note that such subpatterns are processed as anchored at
+       the point where they are tested.
+
+       10. If a pattern contains more than one backtracking control verb,  the
+       first  one  that  is backtracked onto acts. For example, in the pattern
+       A(*COMMIT)B(*PRUNE)C a failure in B triggers (*COMMIT), but  a  failure
+       in C triggers (*PRUNE). Perl's behaviour is more complex; in many cases
+       it is the same as PCRE2, but there are examples where it differs.
+
+       11. Most backtracking verbs in assertions have  their  normal  actions.
+       They are not confined to the assertion.
+
+       12.  There are some differences that are concerned with the settings of
+       captured strings when part of  a  pattern  is  repeated.  For  example,
+       matching  "aba"  against  the  pattern  /^(a(b)?)+$/  in Perl leaves $2
+       unset, but in PCRE2 it is set to "b".
+
+       13. PCRE2's handling of duplicate subpattern numbers and duplicate sub-
+       pattern names is not as general as Perl's. This is a consequence of the
+       fact the PCRE2 works internally just with numbers,  using  an  external
+       table  to translate between numbers and names. In particular, a pattern
+       such as (?|(?<a>A)|(?<b)B), where the two  capturing  parentheses  have
+       the  same  number  but different names, is not supported, and causes an
+       error at compile time. If it were allowed, it would not be possible  to
+       distinguish  which  parentheses matched, because both names map to cap-
+       turing subpattern number 1. To avoid this confusing situation, an error
+       is given at compile time.
+
+       14.  Perl  recognizes  comments in some places that PCRE2 does not, for
+       example, between the ( and ? at the start of a subpattern.  If  the  /x
+       modifier  is  set, Perl allows white space between ( and ? (though cur-
+       rent Perls warn that this is deprecated) but PCRE2 never does, even  if
+       the PCRE2_EXTENDED option is set.
+
+       15.  Perl,  when  in warning mode, gives warnings for character classes
+       such as [A-\d] or [a-[:digit:]]. It then treats the hyphens  as  liter-
+       als. PCRE2 has no warning features, so it gives an error in these cases
+       because they are almost certainly user mistakes.
+
+       16. In PCRE2, the upper/lower case character properties Lu and  Ll  are
+       not  affected when case-independent matching is specified. For example,
+       \p{Lu} always matches an upper case letter. I think Perl has changed in
+       this  respect; in the release at the time of writing (5.16), \p{Lu} and
+       \p{Ll} match all letters, regardless of case, when case independence is
+       specified.
+
+       17.  PCRE2  provides  some  extensions  to  the Perl regular expression
+       facilities.  Perl 5.10 includes new features that are  not  in  earlier
+       versions  of  Perl, some of which (such as named parentheses) have been
+       in PCRE2 for some time. This list is with respect to Perl 5.10:
+
+       (a) Although lookbehind assertions in PCRE2  must  match  fixed  length
+       strings,  each alternative branch of a lookbehind assertion can match a
+       different length of string. Perl requires them all  to  have  the  same
+       length.
+
+       (b)  If PCRE2_DOLLAR_ENDONLY is set and PCRE2_MULTILINE is not set, the
+       $ meta-character matches only at the very end of the string.
+
+       (c) A backslash followed  by  a  letter  with  no  special  meaning  is
+       faulted. (Perl can be made to issue a warning.)
+
+       (d)  If PCRE2_UNGREEDY is set, the greediness of the repetition quanti-
+       fiers is inverted, that is, by default they are not greedy, but if fol-
+       lowed by a question mark they are.
+
+       (e)  PCRE2_ANCHORED  can be used at matching time to force a pattern to
+       be tried only at the first matching position in the subject string.
+
+       (f)      The      PCRE2_NOTBOL,      PCRE2_NOTEOL,      PCRE2_NOTEMPTY,
+       PCRE2_NOTEMPTY_ATSTART,  and PCRE2_NO_AUTO_CAPTURE options have no Perl
+       equivalents.
+
+       (g) The \R escape sequence can be restricted to match only CR,  LF,  or
+       CRLF by the PCRE2_BSR_ANYCRLF option.
+
+       (h) The callout facility is PCRE2-specific.
+
+       (i) The partial matching facility is PCRE2-specific.
+
+       (j)  The  alternative matching function (pcre2_dfa_match() matches in a
+       different way and is not Perl-compatible.
+
+       (k) PCRE2 recognizes some special sequences such as (*CR) at the  start
+       of a pattern that set overall options that cannot be changed within the
+       pattern.
+
+
+AUTHOR
+
+       Philip Hazel
+       University Computing Service
+       Cambridge CB2 3QH, England.
+
+
+REVISION
+
+       Last updated: 28 September 2014
+       Copyright (c) 1997-2014 University of Cambridge.
+------------------------------------------------------------------------------
+ 
+ 
+PCRE2JIT(3)                Library Functions Manual                PCRE2JIT(3)
+
+
+
+NAME
+       PCRE2 - Perl-compatible regular expressions (revised API)
+
+PCRE2 JUST-IN-TIME COMPILER SUPPORT
+
+       FIXME: This needs checking over once JIT support is implemented.
+
+       Just-in-time  compiling  is a heavyweight optimization that can greatly
+       speed up pattern matching. However, it comes at the cost of extra  pro-
+       cessing before the match is performed. Therefore, it is of most benefit
+       when the same pattern is going to be matched many times. This does  not
+       necessarily  mean  many calls of a matching function; if the pattern is
+       not anchored, matching attempts may take place many  times  at  various
+       positions  in  the  subject, even for a single call.  Therefore, if the
+       subject string is very long, it may still pay to use  JIT  for  one-off
+       matches.  JIT  support  is  available  for all of the 8-bit, 16-bit and
+       32-bit PCRE2 libraries.
+
+       JIT support applies only to the  traditional  Perl-compatible  matching
+       function.   It  does  not apply when the DFA matching function is being
+       used. The code for this support was written by Zoltan Herczeg.
+
+
+AVAILABILITY OF JIT SUPPORT
+
+       JIT support is an optional feature of  PCRE2.  The  "configure"  option
+       --enable-jit  (or  equivalent  CMake  option) must be set when PCRE2 is
+       built if you want to use JIT. The support is limited to  the  following
+       hardware platforms:
+
+         ARM v5, v7, and Thumb2
+         Intel x86 32-bit and 64-bit
+         MIPS 32-bit
+         Power PC 32-bit and 64-bit
+         SPARC 32-bit (experimental)
+
+       If --enable-jit is set on an unsupported platform, compilation fails.
+
+       A  program  can  tell if JIT support is available by calling pcre2_con-
+       fig() with the PCRE2_CONFIG_JIT option. The result is  1  when  JIT  is
+       available,  and 0 otherwise. However, a simple program does not need to
+       check this in order to use JIT. The API is implemented in  a  way  that
+       falls  back  to the interpretive code if JIT is not available. For pro-
+       grams that need the best possible performance, there is  also  a  "fast
+       path" API that is JIT-specific.
+
+
+SIMPLE USE OF JIT
+
+       To  make use of the JIT support in the simplest way, all you have to do
+       is to call pcre2_jit_compile() after successfully compiling  a  pattern
+       with pcre2_compile(). This function has two arguments: the first is the
+       compiled pattern pointer that was returned by pcre2_compile(), and  the
+       second  is  a  set  of  option bits, which must include at least one of
+       PCRE2_JIT_COMPLETE, PCRE2_JIT_PARTIAL_HARD, or PCRE2_JIT_PARTIAL_SOFT.
+
+       The returned value from pcre2_jit_compile() is FIXME FIXME.
+
+       PCRE2_JIT_COMPLETE requests the JIT compiler to generate code for  com-
+       plete  matches. If you want to run partial matches using the PCRE2_PAR-
+       TIAL_HARD or PCRE2_PARTIAL_SOFT options of  pcre2_match(),  you  should
+       set  one  or  both  of  the  other  options  as  well as, or instead of
+       PCRE2_JIT_COMPLETE. The JIT compiler generates different optimized code
+       for  each of the three modes (normal, soft partial, hard partial). When
+       pcre2_match() is called, the appropriate code is run if  it  is  avail-
+       able. Otherwise, the pattern is matched using interpretive code.
+
+       In  some circumstances you may need to call additional functions. These
+       are described in the  section  entitled  "Controlling  the  JIT  stack"
+       below.
+
+       If  JIT  support  is  not  available, a call to pcre2_jit_comple() does
+       nothing and returns FIXME. Otherwise, the compiled pattern is passed to
+       the  JIT  compiler, which turns it into machine code that executes much
+       faster than the normal interpretive code, but yields exactly  the  same
+       results.
+
+       There are some pcre2_match() options that are not supported by JIT, and
+       there are also some pattern items that JIT cannot handle.  Details  are
+       given  below.  In  both cases, matching automatically falls back to the
+       interpretive code. If you want to know whether JIT  was  actually  used
+       for  a particular match, you should arrange for a JIT callback function
+       to be set up as described in the section entitled "Controlling the  JIT
+       stack"  below,  even  if  you  do  not need to supply a non-default JIT
+       stack. Such a callback function is called whenever JIT code is about to
+       be  obeyed.  If the match-time options are not right for JIT execution,
+       the callback function is not obeyed.
+
+       If the JIT compiler finds an unsupported item, no JIT  data  is  gener-
+       ated.  You  can find out if JIT matching is available after compiling a
+       pattern by calling pcre2_pattern_info() with the PCRE2_INFO_JIT option.
+       A  result of 1 means that JIT compilation was successful. A result of 0
+       means that JIT support is not available, or the pattern  was  not  pro-
+       cessed by pcre2_jit_compile(), or the JIT compiler was not able to han-
+       dle the pattern.
+
+
+UNSUPPORTED OPTIONS AND PATTERN ITEMS
+
+       The pcre2_match() options that  are  supported  for  JIT  matching  are
+       PCRE2_NOTBOL,   PCRE2_NOTEOL,  PCRE2_NOTEMPTY,  PCRE2_NOTEMPTY_ATSTART,
+       PCRE2_NO_UTF_CHECK,  PCRE2_PARTIAL_HARD,  and  PCRE2_PARTIAL_SOFT.  The
+       PCRE2_ANCHORED option is not supported at match time.
+
+       The  only  unsupported  pattern items are \C (match a single data unit)
+       when running in a UTF mode, and a callout immediately before an  asser-
+       tion condition in a conditional group.
+
+
+RETURN VALUES FROM JIT MATCHING
+
+       When a pattern is matched using JIT matching, the return values are the
+       same as those given by the interpretive pcre2_match()  code,  with  the
+       addition  of one new error code: PCRE2_ERROR_JIT_STACKLIMIT. This means
+       that the memory used for the JIT stack was insufficient. See  "Control-
+       ling the JIT stack" below for a discussion of JIT stack usage.
+
+       The  error  code  PCRE2_ERROR_MATCHLIMIT is returned by the JIT code if
+       searching a very large pattern tree goes on for too long, as it  is  in
+       the  same circumstance when JIT is not used, but the details of exactly
+       what is counted are not the same. The PCRE2_ERROR_RECURSIONLIMIT  error
+       code is never returned when JIT matching is used.
+
+
+CONTROLLING THE JIT STACK
+
+       When the compiled JIT code runs, it needs a block of memory to use as a
+       stack.  By default, it uses 32K on the  machine  stack.  However,  some
+       large   or   complicated  patterns  need  more  than  this.  The  error
+       PCRE2_ERROR_JIT_STACKLIMIT is given when there  is  not  enough  stack.
+       Three  functions  are provided for managing blocks of memory for use as
+       JIT stacks. There is further discussion about the use of JIT stacks  in
+       the section entitled "JIT stack FAQ" below.
+
+       The pcre2_jit_stack_alloc() function creates a JIT stack. Its arguments
+       are a general context (for memory allocation  functions,  or  NULL  for
+       standard memory allocation), a starting size and a maximum size, and it
+       returns a pointer to an opaque structure of  type  pcre2_jit_stack,  or
+       NULL  if there is an error. The pcre2_jit_stack_free() function is used
+       to free a stack that is no longer needed. (For the technically  minded:
+       the address space is allocated by mmap or VirtualAlloc.)  FIXME Is this
+       right?
+
+       JIT uses far less memory for recursion than the interpretive code,  and
+       a  maximum  stack size of 512K to 1M should be more than enough for any
+       pattern.
+
+       The pcre2_jit_stack_assign() function specifies which  stack  JIT  code
+       should use. Its arguments are as follows:
+
+         pcre2_code         *code
+         pcre2_jit_callback  callback
+         void               *data
+
+       The code argument is a pointer to a compiled pattern, after it has been
+       processed by pcre2_jit_compile(). There are three cases for the  values
+       of the other two options:
+
+         (1) If callback is NULL and data is NULL, an internal 32K block
+             on the machine stack is used.
+
+         (2) If callback is NULL and data is not NULL, data must be
+             a valid JIT stack, the result of calling pcre2_jit_stack_alloc().
+
+         (3) If callback is not NULL, it must point to a function that is
+             called with data as an argument at the start of matching, in
+             order to set up a JIT stack. If the return from the callback
+             function is NULL, the internal 32K stack is used; otherwise the
+             return value must be a valid JIT stack, the result of calling
+             pcre2_jit_stack_alloc().
+
+       A  callback function is obeyed whenever JIT code is about to be run; it
+       is not obeyed when pcre2_match() is called with options that are incom-
+       patible  for JIT matching. A callback function can therefore be used to
+       determine whether a match operation was  executed  by  JIT  or  by  the
+       interpreter.
+
+       You may safely use the same JIT stack for more than one pattern (either
+       by assigning directly or by callback), as long as the patterns are  all
+       matched  sequentially in the same thread. In a multithread application,
+       if you do not specify a JIT stack, or if you assign or pass  back  NULL
+       from  a  callback, that is thread-safe, because each thread has its own
+       machine stack. However, if you assign  or  pass  back  a  non-NULL  JIT
+       stack,  this  must  be  a  different  stack for each thread so that the
+       application is thread-safe.
+
+       Strictly speaking, even more is allowed. You can assign the  same  non-
+       NULL  stack  to any number of patterns as long as they are not used for
+       matching by multiple threads at the same time.  For  example,  you  can
+       assign  the same stack to all compiled patterns, and use a global mutex
+       in the callback to wait until the stack is available for use.  However,
+       this is an inefficient solution, and not recommended.
+
+       This  is a suggestion for how a multithreaded program that needs to set
+       up non-default JIT stacks might operate:
+
+         During thread initalization
+           thread_local_var = pcre2_jit_stack_alloc(...)
+
+         During thread exit
+           pcre2_jit_stack_free(thread_local_var)
+
+         Use a one-line callback function
+           return thread_local_var
+
+       All the functions described in this section do nothing if  JIT  is  not
+       available,  and  pcre2_jit_stack_assign()  does nothing unless the code
+       argument is non-NULL and points to a pcre2_code  block  that  has  been
+       successfully processed by pcre2_jit_compile().
+
+
+JIT STACK FAQ
+
+       (1) Why do we need JIT stacks?
+
+       PCRE2 (and JIT) is a recursive, depth-first engine, so it needs a stack
+       where the local data of the current node is pushed before checking  its
+       child nodes.  Allocating real machine stack on some platforms is diffi-
+       cult. For example, the stack chain needs to be updated every time if we
+       extend  the  stack  on  PowerPC.  Although it is possible, its updating
+       time overhead decreases performance. So we do the recursion in memory.
+
+       (2) Why don't we simply allocate blocks of memory with malloc()?
+
+       Modern operating systems have a  nice  feature:  they  can  reserve  an
+       address space instead of allocating memory. We can safely allocate mem-
+       ory pages inside this address space, so the stack  could  grow  without
+       moving memory data (this is important because of pointers). Thus we can
+       allocate 1M address space, and use only a single memory  page  (usually
+       4K)  if  that is enough. However, we can still grow up to 1M anytime if
+       needed.
+
+       (3) Who "owns" a JIT stack?
+
+       The owner of the stack is the user program, not the JIT studied pattern
+       or  anything else. The user program must ensure that if a stack is used
+       by pcre2_match(), (that is, it is assigned  to  the  pattern  currently
+       running),  that  stack  must not be used by any other threads (to avoid
+       overwriting the same memory area). The best practice for  multithreaded
+       programs  is to allocate a stack for each thread, and return this stack
+       through the JIT callback function.
+
+       (4) When should a JIT stack be freed?
+
+       You can free a JIT stack at any time, as long as it will not be used by
+       pcre2_match()  again.  When  you  assign the stack to a pattern, only a
+       pointer is set. There is no reference counting or any other magic.  You
+       can  free  the  patterns  and stacks in any order, anytime. Just do not
+       call pcre2_match() with a pattern pointing to an already  freed  stack,
+       as  that will cause SEGFAULT. (Also, do not free a stack currently used
+       by pcre2_match() in another thread). You can also replace the stack for
+       a  pattern  at  any  time.  You can even free the previous stack before
+       assigning a replacement.
+
+       (5) Should I allocate/free a  stack  every  time  before/after  calling
+       pcre2_match()?
+
+       No,  because  this  is  too  costly in terms of resources. However, you
+       could implement some clever idea which release the stack if it  is  not
+       used  in  let's  say  two minutes. The JIT callback can help to achieve
+       this without keeping a list of the currently JIT studied patterns.
+
+       (6) OK, the stack is for long term memory allocation. But what  happens
+       if  a pattern causes stack overflow with a stack of 1M? Is that 1M kept
+       until the stack is freed?
+
+       Especially on embedded sytems, it might be a good idea to release  mem-
+       ory  sometimes  without  freeing the stack. There is no API for this at
+       the moment.  Probably a function call which returns with the  currently
+       allocated  memory for any stack and another which allows releasing mem-
+       ory (shrinking the stack) would be a good idea if someone needs this.
+
+       (7) This is too much of a headache. Isn't there any better solution for
+       JIT stack handling?
+
+       No,  thanks to Windows. If POSIX threads were used everywhere, we could
+       throw out this complicated API.
+
+
+EXAMPLE CODE
+
+       This is a single-threaded example that specifies a  JIT  stack  without
+       using a callback.
+
+         int rc;
+         pcre2_code *re;
+         pcre2_match_data *match_data;
+         pcre2_jit_stack *jit_stack;
+
+         re = pcre2_compile(pattern, PCRE2_ZERO_TERMINATED, 0,
+           &errornumber, &erroffset, NULL);
+         /* Check for errors */
+         rc = pcre2_jit_compile(re, PCRE2_JIT_COMPLETE);
+         /* Check for errors */
+         jit_stack = pcre2_jit_stack_alloc(NULL, 32*1024, 512*1024);
+         /* Check for error (NULL) */
+         pcre2_jit_stack_assign(re, NULL, jit_stack);
+         match_data = pcre2_match_data_create(re, 10);
+         rc = pcre2_match(re, subject, length, 0, 0, match_data, NULL);
+         /* Check results */
+         pcre2_free(re);
+         pcre2_jit_stack_free(jit_stack);
+
+
+JIT FAST PATH API
+
+       Because the API described above falls back to interpreted matching when
+       JIT is not available, it is convenient for programs  that  are  written
+       for  general  use  in  many  environments.  However,  calling  JIT  via
+       pcre2_match() does have a performance impact. Programs that are written
+       for  use  where  JIT  is known to be available, and which need the best
+       possible performance, can instead use a "fast path"  API  to  call  JIT
+       matching  directly instead of calling pcre2_match() (obviously only for
+       patterns that have been successfully processed by pcre2_jit_compile()).
+
+       The fast path  function  is  called  pcre2_jit_match(),  and  it  takes
+       exactly  the same arguments as pcre2_match(), plus one additional argu-
+       ment that must point  to  a  JIT  stack.  The  JIT  stack  arrangements
+       described  above  do  not  apply. The return values are the same as for
+       pcre2_match().
+
+       When you call pcre2_match(), as well as testing for invalid options,  a
+       number of other sanity checks are performed on the arguments. For exam-
+       ple, if the subject pointer is NULL, an immediate error is given. Also,
+       unless  PCRE2_NO_UTF_CHECK  is  set, a UTF subject string is tested for
+       validity. In the interests of speed, these checks do not happen on  the
+       JIT fast path, and if invalid data is passed, the result is undefined.
+
+       Bypassing  the  sanity  checks  and the pcre2_match() wrapping can give
+       speedups of more than 10%.
+
+
+SEE ALSO
+
+       pcre2api(3)
+
+
+AUTHOR
+
+       Philip Hazel (FAQ by Zoltan Herczeg)
+       University Computing Service
+       Cambridge CB2 3QH, England.
+
+
+REVISION
+
+       Last updated: 29 September 2014
+       Copyright (c) 1997-2014 University of Cambridge.
+------------------------------------------------------------------------------
+ 
+ 
+PCRE2LIMITS(3)             Library Functions Manual             PCRE2LIMITS(3)
+
+
+
+NAME
+       PCRE2 - Perl-compatible regular expressions (revised API)
+
+SIZE AND OTHER LIMITATIONS
+
+       There are some size limitations in PCRE2 but it is hoped that they will
+       never in practice be relevant.
+
+       The maximum size of a compiled pattern is approximately 64K code  units
+       for  the  8-bit  and  16-bit  libraries  if  PCRE2 is compiled with the
+       default internal linkage size, which is 2 bytes for these libraries. If
+       you  want  to  process regular expressions that are truly enormous, you
+       can compile PCRE2 with an internal linkage size of 3 or 4 (when  build-
+       ing  the  16-bit library, 3 is rounded up to 4). See the README file in
+       the source distribution and the pcre2build documentation  for  details.
+       In  these  cases the limit is substantially larger.  However, the speed
+       of execution is slower. In the 32-bit  library,  the  internal  linkage
+       size is always 4.
+
+       All values in repeating quantifiers must be less than 65536.
+
+       There is no limit to the number of parenthesized subpatterns, but there
+       can be no more than 65535 capturing subpatterns. There is,  however,  a
+       limit  to  the  depth  of  nesting  of parenthesized subpatterns of all
+       kinds. This is imposed in order to limit the  amount  of  system  stack
+       used  at  compile time. The limit can be specified when PCRE2 is built;
+       the default is 250.
+
+       There is a limit to the number of forward references to subsequent sub-
+       patterns  of  around  200,000.  Repeated  forward references with fixed
+       upper limits, for example, (?2){0,100} when subpattern number 2  is  to
+       the  right,  are included in the count. There is no limit to the number
+       of backward references.
+
+       The maximum length of name for a named subpattern is 32 code units, and
+       the maximum number of named subpatterns is 10000.
+
+       The  maximum  length  of  a  name  in  a (*MARK), (*PRUNE), (*SKIP), or
+       (*THEN) verb is 255 for the 8-bit library and 65535 for the 16-bit  and
+       32-bit libraries.
+
+       The  maximum  length  of  a  subject  string  is  the  largest number a
+       PCRE2_SIZE variable can hold. PCRE2_SIZE is an unsigned  integer  type,
+       usually defined as size_t. However, when using the traditional matching
+       function, PCRE2 uses recursion to  handle  subpatterns  and  indefinite
+       repetition.  This  means  that  the available stack space may limit the
+       size of a subject string that can be processed by certain patterns. For
+       a discussion of stack issues, see the pcre2stack documentation.
+
+
+AUTHOR
+
+       Philip Hazel
+       University Computing Service
+       Cambridge CB2 3QH, England.
+
+
+REVISION
+
+       Last updated: 29 September 2014
+       Copyright (c) 1997-2014 University of Cambridge.
+------------------------------------------------------------------------------
+ 
+ 
+PCRE2MATCHING(3)           Library Functions Manual           PCRE2MATCHING(3)
+
+
+
+NAME
+       PCRE2 - Perl-compatible regular expressions (revised API)
+
+PCRE2 MATCHING ALGORITHMS
+
+       This document describes the two different algorithms that are available
+       in PCRE2 for matching a compiled regular  expression  against  a  given
+       subject  string.  The  "standard"  algorithm is the one provided by the
+       pcre2_match() function. This works in the same as  as  Perl's  matching
+       function,  and  provide a Perl-compatible matching operation. The just-
+       in-time (JIT) optimization that is described in the pcre2jit documenta-
+       tion is compatible with this function.
+
+       An alternative algorithm is provided by the pcre2_dfa_match() function;
+       it operates in a different way, and is not Perl-compatible. This alter-
+       native  has  advantages  and  disadvantages  compared with the standard
+       algorithm, and these are described below.
+
+       When there is only one possible way in which a given subject string can
+       match  a pattern, the two algorithms give the same answer. A difference
+       arises, however, when there are multiple possibilities. For example, if
+       the pattern
+
+         ^<.*>
+
+       is matched against the string
+
+         <something> <something else> <something further>
+
+       there are three possible answers. The standard algorithm finds only one
+       of them, whereas the alternative algorithm finds all three.
+
+
+REGULAR EXPRESSIONS AS TREES
+
+       The set of strings that are matched by a regular expression can be rep-
+       resented  as  a  tree structure. An unlimited repetition in the pattern
+       makes the tree of infinite size, but it is still a tree.  Matching  the
+       pattern  to a given subject string (from a given starting point) can be
+       thought of as a search of the tree.  There are two  ways  to  search  a
+       tree:  depth-first  and  breadth-first, and these correspond to the two
+       matching algorithms provided by PCRE2.
+
+
+THE STANDARD MATCHING ALGORITHM
+
+       In the terminology of Jeffrey Friedl's book "Mastering Regular  Expres-
+       sions",  the  standard  algorithm  is an "NFA algorithm". It conducts a
+       depth-first search of the pattern tree. That is, it  proceeds  along  a
+       single path through the tree, checking that the subject matches what is
+       required. When there is a mismatch, the algorithm  tries  any  alterna-
+       tives  at  the  current point, and if they all fail, it backs up to the
+       previous branch point in the  tree,  and  tries  the  next  alternative
+       branch  at  that  level.  This often involves backing up (moving to the
+       left) in the subject string as well.  The  order  in  which  repetition
+       branches  are  tried  is controlled by the greedy or ungreedy nature of
+       the quantifier.
+
+       If a leaf node is reached, a matching string has  been  found,  and  at
+       that  point the algorithm stops. Thus, if there is more than one possi-
+       ble match, this algorithm returns the first one that it finds.  Whether
+       this  is the shortest, the longest, or some intermediate length depends
+       on the way the greedy and ungreedy repetition quantifiers are specified
+       in the pattern.
+
+       Because  it  ends  up  with a single path through the tree, it is rela-
+       tively straightforward for this algorithm to keep  track  of  the  sub-
+       strings  that  are  matched  by portions of the pattern in parentheses.
+       This provides support for capturing parentheses and back references.
+
+
+THE ALTERNATIVE MATCHING ALGORITHM
+
+       This algorithm conducts a breadth-first search of  the  tree.  Starting
+       from  the  first  matching  point  in the subject, it scans the subject
+       string from left to right, once, character by character, and as it does
+       this,  it remembers all the paths through the tree that represent valid
+       matches. In Friedl's terminology, this is a kind  of  "DFA  algorithm",
+       though  it is not implemented as a traditional finite state machine (it
+       keeps multiple states active simultaneously).
+
+       Although the general principle of this matching algorithm  is  that  it
+       scans  the subject string only once, without backtracking, there is one
+       exception: when a lookaround assertion is encountered,  the  characters
+       following  or  preceding  the  current  point  have to be independently
+       inspected.
+
+       The scan continues until either the end of the subject is  reached,  or
+       there  are  no more unterminated paths. At this point, terminated paths
+       represent the different matching possibilities (if there are none,  the
+       match  has  failed).   Thus,  if there is more than one possible match,
+       this algorithm finds all of them, and in particular, it finds the long-
+       est.  The  matches are returned in decreasing order of length. There is
+       an option to stop the algorithm after the first match (which is  neces-
+       sarily the shortest) is found.
+
+       Note that all the matches that are found start at the same point in the
+       subject. If the pattern
+
+         cat(er(pillar)?)?
+
+       is matched against the string "the caterpillar catchment",  the  result
+       is  the  three  strings "caterpillar", "cater", and "cat" that start at
+       the fifth character of the subject. The algorithm  does  not  automati-
+       cally move on to find matches that start at later positions.
+
+       PCRE2's "auto-possessification" optimization usually applies to charac-
+       ter repeats at the end of a pattern (as well as internally). For  exam-
+       ple, the pattern "a\d+" is compiled as if it were "a\d++" because there
+       is no point even considering the possibility of backtracking  into  the
+       repeated  digits.  For  DFA matching, this means that only one possible
+       match is found. If you really do want multiple matches in  such  cases,
+       either  use  an ungreedy repeat ("a\d+?") or set the PCRE2_NO_AUTO_POS-
+       SESS option when compiling.
+
+       There are a number of features of PCRE2 regular  expressions  that  are
+       not  supported  by the alternative matching algorithm. They are as fol-
+       lows:
+
+       1. Because the algorithm finds all  possible  matches,  the  greedy  or
+       ungreedy  nature  of  repetition quantifiers is not relevant (though it
+       may affect auto-possessification, as just described). During  matching,
+       greedy  and  ungreedy  quantifiers are treated in exactly the same way.
+       However, possessive quantifiers can make a difference when what follows
+       could  also  match  what  is  quantified, for example in a pattern like
+       this:
+
+         ^a++\w!
+
+       This pattern matches "aaab!" but not "aaa!", which would be matched  by
+       a  non-possessive quantifier. Similarly, if an atomic group is present,
+       it is matched as if it were a standalone pattern at the current  point,
+       and  the  longest match is then "locked in" for the rest of the overall
+       pattern.
+
+       2. When dealing with multiple paths through the tree simultaneously, it
+       is  not  straightforward  to  keep track of captured substrings for the
+       different matching possibilities, and PCRE2's  implementation  of  this
+       algorithm does not attempt to do this. This means that no captured sub-
+       strings are available.
+
+       3. Because no substrings are captured, back references within the  pat-
+       tern are not supported, and cause errors if encountered.
+
+       4.  For  the same reason, conditional expressions that use a backrefer-
+       ence as the condition or test for a specific group  recursion  are  not
+       supported.
+
+       5.  Because  many  paths  through the tree may be active, the \K escape
+       sequence, which resets the start of the match when encountered (but may
+       be  on  some  paths  and not on others), is not supported. It causes an
+       error if encountered.
+
+       6. Callouts are supported, but the value of the  capture_top  field  is
+       always 1, and the value of the capture_last field is always 0.
+
+       7.  The  \C  escape  sequence, which (in the standard algorithm) always
+       matches a single code unit, even in a UTF mode,  is  not  supported  in
+       these  modes,  because the alternative algorithm moves through the sub-
+       ject string one character (not code unit) at a  time,  for  all  active
+       paths through the tree.
+
+       8.  Except for (*FAIL), the backtracking control verbs such as (*PRUNE)
+       are not supported. (*FAIL) is supported, and  behaves  like  a  failing
+       negative assertion.
+
+
+ADVANTAGES OF THE ALTERNATIVE ALGORITHM
+
+       Using  the alternative matching algorithm provides the following advan-
+       tages:
+
+       1. All possible matches (at a single point in the subject) are automat-
+       ically  found,  and  in particular, the longest match is found. To find
+       more than one match using the standard algorithm, you have to do kludgy
+       things with callouts.
+
+       2.  Because  the  alternative  algorithm  scans the subject string just
+       once, and never needs to backtrack (except for lookbehinds), it is pos-
+       sible  to  pass  very  long subject strings to the matching function in
+       several pieces, checking for partial matching each time. Although it is
+       also  possible  to  do  multi-segment matching using the standard algo-
+       rithm, by retaining partially matched substrings, it  is  more  compli-
+       cated. The pcre2partial documentation gives details of partial matching
+       and discusses multi-segment matching.
+
+
+DISADVANTAGES OF THE ALTERNATIVE ALGORITHM
+
+       The alternative algorithm suffers from a number of disadvantages:
+
+       1. It is substantially slower than  the  standard  algorithm.  This  is
+       partly  because  it has to search for all possible matches, but is also
+       because it is less susceptible to optimization.
+
+       2. Capturing parentheses and back references are not supported.
+
+       3. Although atomic groups are supported, their use does not provide the
+       performance advantage that it does for the standard algorithm.
+
+
+AUTHOR
+
+       Philip Hazel
+       University Computing Service
+       Cambridge CB2 3QH, England.
+
+
+REVISION
+
+       Last updated: 29 September 2014
+       Copyright (c) 1997-2014 University of Cambridge.
+------------------------------------------------------------------------------
+ 
+ 
+PCRE2PARTIAL(3)            Library Functions Manual            PCRE2PARTIAL(3)
+
+
+
+NAME
+       PCRE2 - Perl-compatible regular expressions
+
+PARTIAL MATCHING IN PCRE2
+
+       In  normal  use  of  PCRE2,  if  the subject string that is passed to a
+       matching function matches as far as it goes, but is too short to  match
+       the  entire pattern, PCRE2_ERROR_NOMATCH is returned. There are circum-
+       stances where it might be helpful to distinguish this case  from  other
+       cases in which there is no match.
+
+       Consider, for example, an application where a human is required to type
+       in data for a field with specific formatting requirements.  An  example
+       might be a date in the form ddmmmyy, defined by this pattern:
+
+         ^\d?\d(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\d\d$
+
+       If the application sees the user's keystrokes one by one, and can check
+       that what has been typed so far is potentially valid,  it  is  able  to
+       raise  an  error  as  soon  as  a  mistake  is made, by beeping and not
+       reflecting the character that has been typed, for example. This immedi-
+       ate  feedback is likely to be a better user interface than a check that
+       is delayed until the entire string has been entered.  Partial  matching
+       can  also be useful when the subject string is very long and is not all
+       available at once.
+
+       PCRE2 supports partial matching by means of the PCRE2_PARTIAL_SOFT  and
+       PCRE2_PARTIAL_HARD  options,  which  can be set when calling a matching
+       function.  The difference between the two options is whether or  not  a
+       partial match is preferred to an alternative complete match, though the
+       details differ between the two types  of  matching  function.  If  both
+       options are set, PCRE2_PARTIAL_HARD takes precedence.
+
+       If  you  want to use partial matching with just-in-time optimized code,
+       you must call pcre2_jit_compile() with one or both of these options:
+
+         PCRE2_JIT_PARTIAL_SOFT
+         PCRE2_JIT_PARTIAL_HARD
+
+       PCRE2_JIT_COMPLETE should also be set if you are going to run  non-par-
+       tial  matches  on the same pattern. If the appropriate JIT mode has not
+       been compiled, interpretive matching code is used.
+
+       Setting a partial matching option  disables  two  of  PCRE2's  standard
+       optimizations. PCRE2 remembers the last literal code unit in a pattern,
+       and abandons matching immediately if it is not present in  the  subject
+       string.  This  optimization  cannot  be  used for a subject string that
+       might match only partially. PCRE2 also knows the minimum  length  of  a
+       matching  string,  and  does not bother to run the matching function on
+       shorter strings. This optimization is also disabled for partial  match-
+       ing.
+
+
+PARTIAL MATCHING USING pcre2_match()
+
+       A  partial  match occurs during a call to pcre2_match() when the end of
+       the subject string is reached successfully, but  matching  cannot  con-
+       tinue because more characters are needed. However, at least one charac-
+       ter in the subject must have been inspected. This  character  need  not
+       form part of the final matched string; lookbehind assertions and the \K
+       escape sequence provide ways of inspecting characters before the  start
+       of  a matched string. The requirement for inspecting at least one char-
+       acter exists because an empty string can  always  be  matched;  without
+       such  a  restriction  there would always be a partial match of an empty
+       string at the end of the subject.
+
+       When a partial match is returned, the first two elements in the ovector
+       point to the portion of the subject that was matched. The appearance of
+       \K in the pattern has no effect for a partial match. Consider this pat-
+       tern:
+
+         /abc\K123/
+
+       If it is matched against "456abc123xyz" the result is a complete match,
+       and the ovector defines the matched string as "123", because \K  resets
+       the  "start  of  match" point. However, if a partial match is requested
+       and the subject string is "456abc12", a partial match is found for  the
+       string  "abc12",  because  all these characters are needed for a subse-
+       quent re-match with additional characters.
+
+       What happens when a partial match is identified depends on which of the
+       two partial matching options are set.
+
+   PCRE2_PARTIAL_SOFT WITH pcre2_match()
+
+       If  PCRE2_PARTIAL_SOFT  is  set when pcre2_match() identifies a partial
+       match, the partial match is remembered, but matching continues as  nor-
+       mal,  and  other  alternatives in the pattern are tried. If no complete
+       match  can  be  found,  PCRE2_ERROR_PARTIAL  is  returned  instead   of
+       PCRE2_ERROR_NOMATCH.
+
+       This  option  is "soft" because it prefers a complete match over a par-
+       tial match.  All the various matching items in a pattern behave  as  if
+       the  subject string is potentially complete. For example, \z, \Z, and $
+       match at the end of the subject, as normal, and for \b and \B  the  end
+       of the subject is treated as a non-alphanumeric.
+
+       If  there  is more than one partial match, the first one that was found
+       provides the data that is returned. Consider this pattern:
+
+         /123\w+X|dogY/
+
+       If this is matched against the subject string "abc123dog", both  alter-
+       natives  fail  to  match,  but the end of the subject is reached during
+       matching, so PCRE2_ERROR_PARTIAL is returned. The offsets are set to  3
+       and  9, identifying "123dog" as the first partial match that was found.
+       (In this example, there are two partial matches, because "dog"  on  its
+       own partially matches the second alternative.)
+
+   PCRE2_PARTIAL_HARD WITH pcre2_match()
+
+       If  PCRE2_PARTIAL_HARD is set for pcre2_match(), PCRE2_ERROR_PARTIAL is
+       returned as soon as a partial match is  found,  without  continuing  to
+       search  for possible complete matches. This option is "hard" because it
+       prefers an earlier partial match over a later complete match. For  this
+       reason,  the  assumption  is  made that the end of the supplied subject
+       string may not be the true end of the available data, and  so,  if  \z,
+       \Z,  \b, \B, or $ are encountered at the end of the subject, the result
+       is PCRE2_ERROR_PARTIAL, provided that at least  one  character  in  the
+       subject has been inspected.
+
+   Comparing hard and soft partial matching
+
+       The  difference  between the two partial matching options can be illus-
+       trated by a pattern such as:
+
+         /dog(sbody)?/
+
+       This matches either "dog" or "dogsbody", greedily (that is, it  prefers
+       the  longer  string  if  possible). If it is matched against the string
+       "dog" with PCRE2_PARTIAL_SOFT, it yields a complete  match  for  "dog".
+       However,  if  PCRE2_PARTIAL_HARD is set, the result is PCRE2_ERROR_PAR-
+       TIAL. On the other hand, if the pattern is made ungreedy the result  is
+       different:
+
+         /dog(sbody)??/
+
+       In  this  case  the  result  is always a complete match because that is
+       found first, and matching never  continues  after  finding  a  complete
+       match. It might be easier to follow this explanation by thinking of the
+       two patterns like this:
+
+         /dog(sbody)?/    is the same as  /dogsbody|dog/
+         /dog(sbody)??/   is the same as  /dog|dogsbody/
+
+       The second pattern will never match "dogsbody", because it will  always
+       find the shorter match first.
+
+
+PARTIAL MATCHING USING pcre2_dfa_match()
+
+       The DFA functions move along the subject string character by character,
+       without backtracking, searching for  all  possible  matches  simultane-
+       ously.  If the end of the subject is reached before the end of the pat-
+       tern, there is the possibility of a partial match, again provided  that
+       at least one character has been inspected.
+
+       When PCRE2_PARTIAL_SOFT is set, PCRE2_ERROR_PARTIAL is returned only if
+       there have been no complete matches. Otherwise,  the  complete  matches
+       are  returned.   However, if PCRE2_PARTIAL_HARD is set, a partial match
+       takes precedence over any complete matches. The portion of  the  string
+       that was matched when the longest partial match was found is set as the
+       first matching string.
+
+       Because the DFA functions always search for all possible  matches,  and
+       there  is  no  difference between greedy and ungreedy repetition, their
+       behaviour is different from  the  standard  functions  when  PCRE2_PAR-
+       TIAL_HARD  is  set.  Consider  the  string  "dog"  matched  against the
+       ungreedy pattern shown above:
+
+         /dog(sbody)??/
+
+       Whereas the standard functions stop as soon as they find  the  complete
+       match  for  "dog",  the  DFA  functions also find the partial match for
+       "dogsbody", and so return that when PCRE2_PARTIAL_HARD is set.
+
+
+PARTIAL MATCHING AND WORD BOUNDARIES
+
+       If a pattern ends with one of sequences \b or \B, which test  for  word
+       boundaries,  partial matching with PCRE2_PARTIAL_SOFT can give counter-
+       intuitive results. Consider this pattern:
+
+         /\bcat\b/
+
+       This matches "cat", provided there is a word boundary at either end. If
+       the subject string is "the cat", the comparison of the final "t" with a
+       following character cannot take place, so a  partial  match  is  found.
+       However,  normal  matching carries on, and \b matches at the end of the
+       subject when the last character is a letter, so  a  complete  match  is
+       found.   The  result,  therefore,  is  not  PCRE2_ERROR_PARTIAL.  Using
+       PCRE2_PARTIAL_HARD in this case does yield PCRE2_ERROR_PARTIAL, because
+       then the partial match takes precedence.
+
+
+EXAMPLE OF PARTIAL MATCHING USING PCRE2TEST
+
+       If  the  partial_soft  (or  ps) modifier is present on a pcre2test data
+       line, the PCRE2_PARTIAL_SOFT option is used for the match.  Here  is  a
+       run of pcre2test that uses the date example quoted above:
+
+           re> /^\d?\d(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\d\d$/
+         data> 25jun04\=ps
+          0: 25jun04
+          1: jun
+         data> 25dec3\=ps
+         Partial match: 23dec3
+         data> 3ju\=ps
+         Partial match: 3ju
+         data> 3juj\=ps
+         No match
+         data> j\=ps
+         No match
+
+       The  first  data  string  is matched completely, so pcre2test shows the
+       matched substrings. The remaining four strings do not  match  the  com-
+       plete pattern, but the first two are partial matches. Similar output is
+       obtained if DFA matching is used.
+
+       If the partial_hard (or ph) modifier is present  on  a  pcre2test  data
+       line, the PCRE2_PARTIAL_HARD option is set for the match.
+
+
+MULTI-SEGMENT MATCHING WITH pcre2_dfa_match()
+
+       When  a  partial match has been found using a DFA matching function, it
+       is possible to continue the match by providing additional subject  data
+       and  calling  the function again with the same compiled regular expres-
+       sion, this time setting the PCRE2_DFA_RESTART option. You must pass the
+       same working space as before, because this is where details of the pre-
+       vious partial match are stored. Here is an example using pcre2test:
+
+           re> /^\d?\d(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\d\d$/
+         data> 23ja\=dfa,ps
+         Partial match: 23ja
+         data> n05\=dfa,dfa_restart
+          0: n05
+
+       The first call has "23ja" as the subject, and requests  partial  match-
+       ing;  the  second  call  has  "n05"  as  the  subject for the continued
+       (restarted) match.  Notice that when the match is  complete,  only  the
+       last  part  is  shown;  PCRE2 does not retain the previously partially-
+       matched string. It is up to the calling program to do that if it  needs
+       to.
+
+       That means that, for an unanchored pattern, if a continued match fails,
+       it is not possible to try again at  a  new  starting  point.  All  this
+       facility  is  capable  of  doing  is continuing with the previous match
+       attempt. In the previous example, if the second set of data  is  "ug23"
+       the  result is no match, even though there would be a match for "aug23"
+       if the entire string were given at once. Depending on the  application,
+       this may or may not be what you want.  The only way to allow for start-
+       ing again at the next character is to retain the matched  part  of  the
+       subject and try a new complete match.
+
+       You  can  set the PCRE2_PARTIAL_SOFT or PCRE2_PARTIAL_HARD options with
+       PCRE2_DFA_RESTART to continue partial matching over multiple  segments.
+       This  facility can be used to pass very long subject strings to the DFA
+       matching functions.
+
+
+MULTI-SEGMENT MATCHING WITH pcre2_match()
+
+       Unlike the DFA function, it is not possible  to  restart  the  previous
+       match with a new segment of data when using pcre2_match(). Instead, new
+       data must be added to the previous subject string, and the entire match
+       re-run,  starting from the point where the partial match occurred. Ear-
+       lier data can be discarded.
+
+       It is best to use PCRE2_PARTIAL_HARD in this situation, because it does
+       not  treat the end of a segment as the end of the subject when matching
+       \z, \Z, \b, \B, and $. Consider  an  unanchored  pattern  that  matches
+       dates:
+
+           re> /\d?\d(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\d\d/
+         data> The date is 23ja\=ph
+         Partial match: 23ja
+
+       At  this stage, an application could discard the text preceding "23ja",
+       add on text from the next  segment,  and  call  the  matching  function
+       again.  Unlike  the  DFA  matching function, the entire matching string
+       must always be available, and the complete matching process occurs  for
+       each call, so more memory and more processing time is needed.
+
+
+ISSUES WITH MULTI-SEGMENT MATCHING
+
+       Certain types of pattern may give problems with multi-segment matching,
+       whichever matching function is used.
+
+       1. If the pattern contains a test for the beginning of a line, you need
+       to  pass  the  PCRE2_NOTBOL option when the subject string for any call
+       does start at the beginning of a line. There  is  also  a  PCRE2_NOTEOL
+       option, but in practice when doing multi-segment matching you should be
+       using PCRE2_PARTIAL_HARD, which includes the effect of PCRE2_NOTEOL.
+
+       2. If a pattern contains a lookbehind assertion, characters  that  pre-
+       cede  the start of the partial match may have been inspected during the
+       matching process.  When using pcre2_match(), sufficient characters must
+       be  retained  for  the  next  match attempt. You can ensure that enough
+       characters are retained by doing the following:
+
+       Before doing any matching, find the length of the longest lookbehind in
+       the     pattern    by    calling    pcre2_pattern_info()    with    the
+       PCRE2_INFO_MAXLOOKBEHIND option. Note that the resulting  count  is  in
+       characters, not code units. After a partial match, moving back from the
+       ovector[0] offset in the subject by the number of characters given  for
+       the  maximum lookbehind gets you to the earliest character that must be
+       retained. In a non-UTF or a 32-bit situation, moving  back  is  just  a
+       subtraction,  but in UTF-8 or UTF-16 you have to count characters while
+       moving back through the code units.
+
+       Characters before the point you have now reached can be discarded,  and
+       after  the  next segment has been added to what is retained, you should
+       run the next match with the startoffset argument set so that the  match
+       begins at the same point as before.
+
+       For  example, if the pattern "(?<=123)abc" is partially matched against
+       the string "xx123ab", the ovector offsets are 5 and 7 ("ab"). The maxi-
+       mum  lookbehind  count  is  3, so all characters before offset 2 can be
+       discarded. The value of startoffset for the next  match  should  be  3.
+       When  pcre2test  displays  a partial match, it indicates the lookbehind
+       characters with '<' characters:
+
+           re> "(?<=123)abc"
+         data> xx123ab\=ph
+         Partial match: 123ab
+                        <<<
+
+       3. Because a partial match must always contain at least one  character,
+       what  might  be  considered a partial match of an empty string actually
+       gives a "no match" result. For example:
+
+           re> /c(?<=abc)x/
+         data> ab\=ps
+         No match
+
+       If the next segment begins "cx", a match should be found, but this will
+       only  happen  if characters from the previous segment are retained. For
+       this reason, a "no match" result  should  be  interpreted  as  "partial
+       match of an empty string" when the pattern contains lookbehinds.
+
+       4.  Matching  a subject string that is split into multiple segments may
+       not always produce exactly the same result as matching over one  single
+       long  string,  especially  when PCRE2_PARTIAL_SOFT is used. The section
+       "Partial Matching and Word Boundaries" above describes  an  issue  that
+       arises  if  the  pattern ends with \b or \B. Another kind of difference
+       may occur when there are multiple matching possibilities, because  (for
+       PCRE2_PARTIAL_SOFT) a partial match result is given only when there are
+       no completed matches. This means that as soon as the shortest match has
+       been  found,  continuation to a new subject segment is no longer possi-
+       ble. Consider this pcre2test example:
+
+           re> /dog(sbody)?/
+         data> dogsb\=ps
+          0: dog
+         data> do\=ps,dfa
+         Partial match: do
+         data> gsb\=ps,dfa,dfa_restart
+          0: g
+         data> dogsbody\=dfa
+          0: dogsbody
+          1: dog
+
+       The first data line passes the string "dogsb" to  a  standard  matching
+       function, setting the PCRE2_PARTIAL_SOFT option. Although the string is
+       a partial match for "dogsbody", the result is not  PCRE2_ERROR_PARTIAL,
+       because  the  shorter string "dog" is a complete match. Similarly, when
+       the subject is presented to a DFA matching function  in  several  parts
+       ("do"  and  "gsb"  being  the first two) the match stops when "dog" has
+       been found, and it is not possible to continue.  On the other hand,  if
+       "dogsbody"  is  presented  as  a single string, a DFA matching function
+       finds both matches.
+
+       Because of these problems, it is best to  use  PCRE2_PARTIAL_HARD  when
+       matching  multi-segment  data.  The  example above then behaves differ-
+       ently:
+
+           re> /dog(sbody)?/
+         data> dogsb\=ph
+         Partial match: dogsb
+         data> do\=ps,dfa
+         Partial match: do
+         data> gsb\=ph,dfa,dfa_restart
+         Partial match: gsb
+
+       5. Patterns that contain alternatives at the top level which do not all
+       start  with  the  same  pattern  item  may  not  work  as expected when
+       PCRE2_DFA_RESTART is used. For example, consider this pattern:
+
+         1234|3789
+
+       If the first part of the subject is "ABC123", a partial  match  of  the
+       first  alternative  is found at offset 3. There is no partial match for
+       the second alternative, because such a match does not start at the same
+       point  in  the  subject  string. Attempting to continue with the string
+       "7890" does not yield a match  because  only  those  alternatives  that
+       match  at  one  point in the subject are remembered. The problem arises
+       because the start of the second alternative matches  within  the  first
+       alternative.  There  is  no  problem with anchored patterns or patterns
+       such as:
+
+         1234|ABCD
+
+       where no string can be a partial match for both alternatives.  This  is
+       not  a  problem  if  a  standard matching function is used, because the
+       entire match has to be rerun each time:
+
+           re> /1234|3789/
+         data> ABC123\=ph
+         Partial match: 123
+         data> 1237890
+          0: 3789
+
+       Of course, instead of using PCRE2_DFA_RESTART, the  same  technique  of
+       re-running  the  entire  match  can  also be used with the DFA matching
+       function. Another possibility is to work with two buffers. If a partial
+       match  at  offset  n in the first buffer is followed by "no match" when
+       PCRE2_DFA_RESTART is used on the second buffer, you can then try a  new
+       match starting at offset n+1 in the first buffer.
+
+
+AUTHOR
+
+       Philip Hazel
+       University Computing Service
+       Cambridge CB2 3QH, England.
+
+
+REVISION
+
+       Last updated: 14 October 2014
        Copyright (c) 1997-2014 University of Cambridge.
 ------------------------------------------------------------------------------
  

@@ -164,10 +164,10 @@ library. They are also documented in the pcre2build man page.
 
   (See also "Shared libraries on Unix-like systems" below.)
 
-. By default, only the 8-bit library is built. If you add --enable-pcre16 to
+. By default, only the 8-bit library is built. If you add --enable-pcre2-16 to
   the "configure" command, the 16-bit library is also built. If you add
-  --enable-pcre32 to the "configure" command, the 32-bit library is also built.
-  If you want only the 16-bit or 32-bit library, use --disable-pcre8 to disable
+  --enable-pcre2-32 to the "configure" command, the 32-bit library is also built.
+  If you want only the 16-bit or 32-bit library, use --disable-pcre2-8 to disable
   building the 8-bit library.
 
 . If you want to include support for just-in-time compiling, which can give

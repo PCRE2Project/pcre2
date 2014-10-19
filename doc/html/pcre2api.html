@@ -258,7 +258,7 @@ document for an overview of all the PCRE2 documentation.
 <b>int pcre2_pattern_info(const pcre2 *<i>code</i>, uint32_t <i>what</i>, void *<i>where</i>);</b>
 <br>
 <br>
-<b>int pcre2_config(uint32_t <i>what</i>, void *<i>where</i>, PCRE2_SIZE <i>length</i>);</b>
+<b>int pcre2_config(uint32_t <i>what</i>, void *<i>where</i>);</b>
 </P>
 <br><a name="SEC9" href="#TOC1">PCRE2 8-BIT, 16-BIT, AND 32-BIT LIBRARIES</a><br>
 <P>
@@ -771,7 +771,7 @@ supplied, otherwise the system functions.
 </P>
 <br><a name="SEC14" href="#TOC1">CHECKING BUILD-TIME OPTIONS</a><br>
 <P>
-<b>int pcre2_config(uint32_t <i>what</i>, void *<i>where</i>, PCRE2_SIZE <i>length</i>);</b>
+<b>int pcre2_config(uint32_t <i>what</i>, void *<i>where</i>);</b>
 </P>
 <P>
 The function <b>pcre2_config()</b> makes it possible for a PCRE2 client to
@@ -782,15 +782,17 @@ documentation has more details about these optional features.
 <P>
 The first argument for <b>pcre2_config()</b> specifies which information is
 required. The second argument is a pointer to memory into which the information
-is placed, with the final argument giving the length of this memory in bytes.
-For calls that return numerical values, <i>where</i> should point to
-appropriately aligned memory, with <i>length</i> set to at least the "sizeof"
-the data type.
+is placed. If NULL is passed, the function returns the amount of memory that is
+needed for the requested information. For calls that return numerical values,
+the value is in bytes; when requesting these values, <i>where</i> should point
+to appropriately aligned memory. For calls that return strings, the required 
+length is given in code units, not counting the terminating zero.
 </P>
 <P>
-The returned value from <b>pcre2_config()</b> is zero on success, or the
-negative error code PCRE2_ERROR_BADOPTION if the value in the first argument is
-not recognized. The following information is available:
+When requesting information, the returned value from <b>pcre2_config()</b> is
+non-negative on success, or the negative error code PCRE2_ERROR_BADOPTION if
+the value in the first argument is not recognized. The following information is
+available:
 <pre>
   PCRE2_CONFIG_BSR
 </pre>
@@ -806,10 +808,13 @@ compiling is available; otherwise it is set to zero.
 <pre>
   PCRE2_CONFIG_JITTARGET
 </pre>
-FIXME: this needs sorting out once JIT is implemented.
-If JIT support is available, the string contains the name of the architecture
-for which the JIT compiler is configured, for example "x86 32bit (little endian
-+ unaligned)". If JIT support is not available, FIXME.
+The <i>where</i> argument should point to a buffer that is at least 48 code
+units long. (The exact length needed can be found by calling 
+<b>pcre2_config()</b> with <b>where</b> set to NULL.) The buffer is filled with a
+string that contains the name of the architecture for which the JIT compiler is
+configured, for example "x86 32bit (little endian + unaligned)". If JIT support
+is not available, PCRE2_ERROR_BADOPTION is returned, otherwise the length of
+the string, in code units, is returned.
 <pre>
   PCRE2_CONFIG_LINKSIZE
 </pre>
@@ -873,9 +878,12 @@ heap instead of recursive function calls.
   PCRE2_CONFIG_UNICODE_VERSION
 </pre>
 The <i>where</i> argument should point to a buffer that is at least 24 code
-units long. If PCRE2 has been compiled without Unicode support, this is filled
-with the text "Unicode not supported". Otherwise, the Unicode version string
-(for example, "7.0.0") is returnd. The string is zero-terminated.
+units long. (The exact length needed can be found by calling
+<b>pcre2_config()</b> with <b>where</b> set to NULL.) If PCRE2 has been compiled
+without Unicode support, the buffer is filled with the text "Unicode not
+supported". Otherwise, the Unicode version string (for example, "7.0.0") is
+inserted. The string is zero-terminated. The function returns the length of the
+string in code units.
 <pre>
   PCRE2_CONFIG_UNICODE
 </pre>
@@ -884,9 +892,12 @@ otherwise it is set to zero. Unicode support implies UTF support.
 <pre>
   PCRE2_CONFIG_VERSION
 </pre>
-The <i>where</i> argument should point to a buffer that is at least 12 code 
-units long. It is filled with the PCRE2 version string, zero-terminated.   
-</P>
+The <i>where</i> argument should point to a buffer that is at least 12 code
+units long. (The exact length needed can be found by calling
+<b>pcre2_config()</b> with <b>where</b> set to NULL.) The buffer is filled with
+the PCRE2 version string, zero-terminated. The length of the string (in code
+units) is returned.
+<a name="compiling"></a></P>
 <br><a name="SEC15" href="#TOC1">COMPILING A PATTERN</a><br>
 <P>
 <b>pcre2_code *pcre2_compile(PCRE2_SPTR <i>pattern</i>, PCRE2_SIZE <i>length</i>,</b>
@@ -1354,20 +1365,20 @@ can be processed in different locales.
 The <b>pcre2_pattern_info()</b> function returns information about a compiled
 pattern. The first argument is a pointer to the compiled pattern. The second
 argument specifies which piece of information is required, and the third
-argument is a pointer to a variable to receive the data. The yield of the
-function is zero for success, or one of the following negative numbers:
+argument is a pointer to a variable to receive the data. If the third argument
+is NULL, the first argument is ignored, and the function returns the size in
+bytes of the variable that is required for the information requested.
+Otherwise, The yield of the function is zero for success, or one of the
+following negative numbers:
 <pre>
   PCRE2_ERROR_NULL           the argument <i>code</i> was NULL
-                             the argument <i>where</i> was NULL
   PCRE2_ERROR_BADMAGIC       the "magic number" was not found
   PCRE2_ERROR_BADOPTION      the value of <i>what</i> was invalid
   PCRE2_ERROR_UNSET          the requested field is not set
 </pre>
 The "magic number" is placed at the start of each compiled pattern as an simple
-check against passing an arbitrary memory pointer.
-Here is
-a typical call of <b>pcre2_pattern_info()</b>, to obtain the length of the compiled
-pattern:
+check against passing an arbitrary memory pointer. Here is a typical call of
+<b>pcre2_pattern_info()</b>, to obtain the length of the compiled pattern:
 <pre>
   int rc;
   size_t length;
@@ -2570,7 +2581,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC32" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 14 October 2014
+Last updated: 16 October 2014
 <br>
 Copyright &copy; 1997-2014 University of Cambridge.
 <br>
