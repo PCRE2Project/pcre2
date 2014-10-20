@@ -36,6 +36,11 @@ dist_html_DATA = \
   doc/html/pcre2matching.html \
   doc/html/pcre2partial.html \
   doc/html/pcre2pattern.html \
+  doc/html/pcre2perform.html \
+  doc/html/pcre2posix.html \
+  doc/html/pcre2sample.html \
+  doc/html/pcre2stack.html \
+  doc/html/pcre2syntax.html \
   doc/html/pcre2test.html \
   doc/html/pcre2unicode.html
 
@@ -66,12 +71,7 @@ dist_html_DATA = \
 #  doc/html/pcre2_utf16_to_host_byte_order.html \
 #  doc/html/pcre2_utf32_to_host_byte_order.html \
 #  doc/html/pcre2_version.html \
-#  doc/html/pcre2perform.html \
-#  doc/html/pcre2posix.html \
-#  doc/html/pcre2precompile.html \
-#  doc/html/pcre2sample.html \
-#  doc/html/pcre2stack.html \
-#  doc/html/pcre2syntax.html
+#  doc/html/pcre2precompile.html
 
 # FIXME
 dist_man_MANS = \
@@ -88,6 +88,11 @@ dist_man_MANS = \
   doc/pcre2matching.3 \
   doc/pcre2partial.3 \
   doc/pcre2pattern.3 \
+  doc/pcre2perform.3 \
+  doc/pcre2posix.3 \
+  doc/pcre2sample.3 \
+  doc/pcre2stack.3 \
+  doc/pcre2syntax.3 \
   doc/pcre2test.1 \
   doc/pcre2unicode.3
 
@@ -120,12 +125,7 @@ dist_man_MANS = \
 #  doc/pcre2_utf16_to_host_byte_order.3 \
 #  doc/pcre2_utf32_to_host_byte_order.3 \
 #  doc/pcre2_version.3 \
-#  doc/pcre2perform.3 \
-#  doc/pcre2posix.3 \
-#  doc/pcre2precompile.3 \
-#  doc/pcre2sample.3 \
-#  doc/pcre2stack.3 \
-#  doc/pcre2syntax.3
+#  doc/pcre2precompile.3
 
 # The Libtool libraries to install.  We'll add to this later.
 
