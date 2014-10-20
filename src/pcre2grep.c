@@ -450,7 +450,7 @@ pcre2grep_exit(int rc)
 if (resource_error)
   {
   fprintf(stderr, "pcre2grep: Error %d, %d or %d means that a resource limit "
-    "was exceeded.\n", PCRE2_ERROR_JIT_STACKLIMIT, PCRE2_ERROR_MATCHLIMIT, 
+    "was exceeded.\n", PCRE2_ERROR_JIT_STACKLIMIT, PCRE2_ERROR_MATCHLIMIT,
     PCRE2_ERROR_RECURSIONLIMIT);
   fprintf(stderr, "pcre2grep: Check your regex for nested unlimited loops.\n");
   }
@@ -485,7 +485,7 @@ if (strlen(s) > MAXPATLEN)
   {
   fprintf(stderr, "pcre2grep: pattern is too long (limit is %d bytes)\n",
     MAXPATLEN);
-  free(p);   
+  free(p);
   return NULL;
   }
 p->next = NULL;
@@ -2381,7 +2381,7 @@ switch(letter)
     unsigned char buffer[128];
     (void)pcre2_config(PCRE2_CONFIG_VERSION, buffer);
     fprintf(stdout, "pcre2grep version %s\n", buffer);
-    } 
+    }
   pcre2grep_exit(0);
   break;
 
@@ -2472,7 +2472,7 @@ if ((popts & PO_FIXED_STRINGS) != 0)
   }
 
 sprintf((char *)buffer, "%s%.*s%s", prefix[popts], patlen, ps, suffix[popts]);
-p->compiled = pcre2_compile(buffer, -1, options, &errcode, &erroffset, 
+p->compiled = pcre2_compile(buffer, -1, options, &errcode, &erroffset,
   compile_context);
 if (p->compiled != NULL) return TRUE;
 
@@ -2555,11 +2555,11 @@ while (fgets(buffer, PATBUFSIZE, f) != NULL)
   afterwards, as a precaution against any later code trying to use it. */
 
   *patlastptr = add_pattern(buffer, *patlastptr);
-  if (*patlastptr == NULL) 
+  if (*patlastptr == NULL)
     {
     if (f != stdin) fclose(f);
     return FALSE;
-    } 
+    }
   if (*patptr == NULL) *patptr = *patlastptr;
 
   /* This loop is needed because compiling a "pattern" when -F is set may add
@@ -2571,10 +2571,10 @@ while (fgets(buffer, PATBUFSIZE, f) != NULL)
     {
     if (!compile_pattern(*patlastptr, pcre2_options, popts, TRUE, filename,
         linenumber))
-      {   
+      {
       if (f != stdin) fclose(f);
       return FALSE;
-      } 
+      }
     (*patlastptr)->string = NULL;            /* Insurance */
     if ((*patlastptr)->next == NULL) break;
     *patlastptr = (*patlastptr)->next;
@@ -2622,7 +2622,7 @@ for (i = 1; i < argc; i++)
   char *option_data = (char *)"";    /* default to keep compiler happy */
   BOOL longop;
   BOOL longopwasequals = FALSE;
-  
+
   if (argv[i][0] != '-') break;
 
   /* If we hit an argument that is just "-", it may be a reference to STDIN,
@@ -2925,7 +2925,7 @@ for (i = 1; i < argc; i++)
       else *((int *)op->dataptr) = n;
     }
   }
-  
+
 /* Options have been decoded. If -C was used, its value is used as a default
 for -A and -B. */
 
@@ -2946,15 +2946,15 @@ if ((only_matching != NULL && (file_offsets || line_offsets)) ||
     "and/or --line-offsets\n");
   pcre2grep_exit(usage(2));
   }
-  
+
 /* Put limits into the match data block. */
 
-if (match_limit > 0) pcre2_set_match_limit(match_context, match_limit); 
-if (recursion_limit > 0) pcre2_set_recursion_limit(match_context, recursion_limit); 
+if (match_limit > 0) pcre2_set_match_limit(match_context, match_limit);
+if (recursion_limit > 0) pcre2_set_recursion_limit(match_context, recursion_limit);
 
 if (only_matching != NULL || file_offsets || line_offsets)
   show_only_matching = TRUE;
-  
+
 /* If a locale has not been provided as an option, see if the LC_CTYPE or
 LC_ALL environment variable is set, and if so, use it. */
 
@@ -2980,7 +2980,7 @@ if (locale != NULL)
       locale, locale_from);
     goto EXIT2;
     }
-  pcre2_set_character_tables(compile_context, pcre2_maketables(NULL));  
+  pcre2_set_character_tables(compile_context, pcre2_maketables(NULL));
   }
 
 /* Sort out colouring */
@@ -3007,27 +3007,27 @@ if (colour_option != NULL && strcmp(colour_option, "never") != 0)
 
 if (newline_arg != NULL)
   {
-  for (endlinetype = 1; endlinetype < (int)(sizeof(newlines)/sizeof(char *)); 
+  for (endlinetype = 1; endlinetype < (int)(sizeof(newlines)/sizeof(char *));
        endlinetype++)
     {
     if (strcmpic(newline_arg, newlines[endlinetype]) == 0) break;
     }
   if (endlinetype < (int)(sizeof(newlines)/sizeof(char *)))
     pcre2_set_newline(compile_context, endlinetype);
-  else        
+  else
     {
-    fprintf(stderr, "pcre2grep: Invalid newline specifier \"%s\"\n", 
+    fprintf(stderr, "pcre2grep: Invalid newline specifier \"%s\"\n",
       newline_arg);
     goto EXIT2;
-    } 
+    }
   }
-  
-/* Find default newline convention */ 
-  
+
+/* Find default newline convention */
+
 else
   {
   (void)pcre2_config(PCRE2_CONFIG_NEWLINE, &endlinetype);
-  } 
+  }
 
 /* Interpret the text values for -d and -D */
 

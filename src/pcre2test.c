@@ -4797,9 +4797,9 @@ for (gmatched = 0;; gmatched++)
       PCRE2_SIZE length;
       uint32_t copybuffer[256];
       int namelen = strlen((const char *)nptr);
-#if defined SUPPORT_PCRE2_16 || defined SUPPORT_PCRE2_32      
+#if defined SUPPORT_PCRE2_16 || defined SUPPORT_PCRE2_32
       PCRE2_SIZE cnl = namelen;
-#endif       
+#endif
       if (namelen == 0) break;
 
 #ifdef SUPPORT_PCRE2_8
@@ -4864,9 +4864,9 @@ for (gmatched = 0;; gmatched++)
       void *gotbuffer;
       int rc;
       int namelen = strlen((const char *)nptr);
-#if defined SUPPORT_PCRE2_16 || defined SUPPORT_PCRE2_32      
+#if defined SUPPORT_PCRE2_16 || defined SUPPORT_PCRE2_32
       PCRE2_SIZE cnl = namelen;
-#endif       
+#endif
       if (namelen == 0) break;
 
 #ifdef SUPPORT_PCRE2_8
@@ -5389,25 +5389,25 @@ if (PO(options) != DO(options) || PO(control) != DO(control))
   return 1;
   }
 
-/* Get the PCRE2 and Unicode version number and JIT target information, at the 
-same time checking that a request for the length gives the same answer. Also 
+/* Get the PCRE2 and Unicode version number and JIT target information, at the
+same time checking that a request for the length gives the same answer. Also
 check lengths for non-string items. */
 
-if (PCRE2_CONFIG(PCRE2_CONFIG_VERSION, NULL) != 
+if (PCRE2_CONFIG(PCRE2_CONFIG_VERSION, NULL) !=
     PCRE2_CONFIG(PCRE2_CONFIG_VERSION, version) ||
-     
+
     PCRE2_CONFIG(PCRE2_CONFIG_UNICODE_VERSION, NULL) !=
     PCRE2_CONFIG(PCRE2_CONFIG_UNICODE_VERSION, uversion) ||
-     
+
     PCRE2_CONFIG(PCRE2_CONFIG_JITTARGET, NULL) !=
     PCRE2_CONFIG(PCRE2_CONFIG_JITTARGET, jittarget) ||
-    
+
     PCRE2_CONFIG(PCRE2_CONFIG_UNICODE, NULL) != sizeof(int) ||
-    PCRE2_CONFIG(PCRE2_CONFIG_MATCHLIMIT, NULL) != sizeof(long int))  
+    PCRE2_CONFIG(PCRE2_CONFIG_MATCHLIMIT, NULL) != sizeof(long int))
   {
   fprintf(stderr, "** Error in pcre2_config(): bad length\n");
   return 1;
-  }      
+  }
 
 /* Get buffers from malloc() so that valgrind will check their misuse when
 debugging. They grow automatically when very long lines are read. The 16-

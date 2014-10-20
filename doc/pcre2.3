@@ -23,11 +23,11 @@ of Unicode in use can be discovered by running
 .sp
   pcre2test -C
 .P
-The three libraries contain identical sets of functions, with names ending in 
-_8, _16, or _32, respectively (for example, \fBpcre2_compile_8()\fP). However, 
-by defining PCRE2_CODE_UNIT_WIDTH to be 8, 16, or 32, a program that uses just 
+The three libraries contain identical sets of functions, with names ending in
+_8, _16, or _32, respectively (for example, \fBpcre2_compile_8()\fP). However,
+by defining PCRE2_CODE_UNIT_WIDTH to be 8, 16, or 32, a program that uses just
 one code unit width can be written using generic names such as
-\fBpcre2_compile()\fP, and the documentation is written assuming that this is 
+\fBpcre2_compile()\fP, and the documentation is written assuming that this is
 the case.
 .P
 In addition to the Perl-compatible matching function, PCRE2 contains an

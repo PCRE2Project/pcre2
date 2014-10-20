@@ -106,7 +106,7 @@ AC_ARG_ENABLE(pcre32,,,enable_pcre32=no)
 if test "$enable_pcre8$enable_pcre16$enable_pcre32" != "nonono"
 then
   echo "** ERROR: Use --[[en|dis]]able-pcre2-[[8|16|32]], not --[[en|dis]]able-pcre[[8|16|32]]"
-  exit 1 
+  exit 1
 fi
 
 # Handle --disable-pcre2-8 (enabled by default)
@@ -512,7 +512,7 @@ if test "$enable_jit" = "yes"; then
     CC="$PTHREAD_CC"
     CFLAGS="$PTHREAD_CFLAGS $CFLAGS"
     LIBS="$PTHREAD_LIBS $LIBS"
-  fi   
+  fi
   AC_DEFINE([SUPPORT_JIT], [], [
     Define to any value to enable support for Just-In-Time compiling.])
 else
@@ -538,7 +538,7 @@ if test "$enable_stack_for_recursion" = "no"; then
     matching. This can sometimes be a problem on systems that have
     stacks of limited size. Define HEAP_MATCH_RECURSE to any value to get a
     version that doesn't use recursion in the match() function; instead
-    it creates its own stack by steam using memory from the heap. For more 
+    it creates its own stack by steam using memory from the heap. For more
     detail, see the comments and other stuff just above the match() function.])
 fi
 
@@ -559,8 +559,8 @@ if test $with_pcre2grep_bufsize -lt 8192 ; then
   with_pcre2grep_bufsize="8192"
 else
   if test $? -gt 1 ; then
-  AC_MSG_ERROR([Bad value for  --with-pcre2grep-bufsize]) 
-  fi    
+  AC_MSG_ERROR([Bad value for  --with-pcre2grep-bufsize])
+  fi
 fi
 
 AC_DEFINE_UNQUOTED([PCRE2GREP_BUFSIZE], [$with_pcre2grep_bufsize], [
@@ -579,9 +579,9 @@ elif test "$enable_pcre2test_libreadline" = "yes"; then
 fi
 
 AC_DEFINE_UNQUOTED([NEWLINE_DEFAULT], [$ac_pcre2_newline_value], [
-  The value of NEWLINE_DEFAULT determines the default newline character 
-  sequence. PCRE2 client programs can override this by selecting other values 
-  at run time. The valid values are 1 (CR), 2 (LF), 3 (CRLF), 4 (ANY), 
+  The value of NEWLINE_DEFAULT determines the default newline character
+  sequence. PCRE2 client programs can override this by selecting other values
+  at run time. The valid values are 1 (CR), 2 (LF), 3 (CRLF), 4 (ANY),
   and 5 (ANYCRLF).])
 
 if test "$enable_bsr_anycrlf" = "yes"; then

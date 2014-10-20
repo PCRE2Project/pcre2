@@ -39,7 +39,7 @@ POSSIBILITY OF SUCH DAMAGE.
 */
 
 /* This module contains internal functions for comparing and finding the length
-of strings. These are used instead of strcmp() etc because the standard 
+of strings. These are used instead of strcmp() etc because the standard
 functions work only on 8-bit data. */
 
 
@@ -54,7 +54,7 @@ functions work only on 8-bit data. */
 *    Compare two zero-terminated PCRE2 strings   *
 *************************************************/
 
-/* 
+/*
 Arguments:
   str1        first string
   str2        second string
@@ -80,7 +80,7 @@ return 0;
 *  Compare zero-terminated PCRE2 & 8-bit strings *
 *************************************************/
 
-/* As the 8-bit string is almost always a literal, its type is specified as 
+/* As the 8-bit string is almost always a literal, its type is specified as
 const char *.
 
 Arguments:
@@ -108,7 +108,7 @@ return 0;
 *    Compare two PCRE2 strings, given a length   *
 *************************************************/
 
-/* 
+/*
 Arguments:
   str1        first string
   str2        second string
@@ -135,7 +135,7 @@ return 0;
 * Compare PCRE2 string to 8-bit string by length *
 *************************************************/
 
-/* As the 8-bit string is almost always a literal, its type is specified as 
+/* As the 8-bit string is almost always a literal, its type is specified as
 const char *.
 
 Arguments:
@@ -164,7 +164,7 @@ return 0;
 *        Find the length of a PCRE2 string       *
 *************************************************/
 
-/* 
+/*
 Argument:    the string
 Returns:     the length
 */
@@ -185,9 +185,9 @@ return c;
 /* Arguments:
   str1     buffer to receive the string
   str2     8-bit string to be copied
-  
+
 Returns:   the number of code units used (excluding trailing zero)
-*/              
+*/
 
 int
 PRIV(strcpy_c8)(PCRE2_UCHAR *str1, const char *str2)

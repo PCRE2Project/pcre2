@@ -71,10 +71,10 @@ performance, there is also a "fast path" API that is JIT-specific.
 </P>
 <br><a name="SEC3" href="#TOC1">SIMPLE USE OF JIT</a><br>
 <P>
-To make use of the JIT support in the simplest way, all you have to do is to 
-call <b>pcre2_jit_compile()</b> after successfully compiling a pattern with 
-<b>pcre2_compile()</b>. This function has two arguments: the first is the 
-compiled pattern pointer that was returned by <b>pcre2_compile()</b>, and the 
+To make use of the JIT support in the simplest way, all you have to do is to
+call <b>pcre2_jit_compile()</b> after successfully compiling a pattern with
+<b>pcre2_compile()</b>. This function has two arguments: the first is the
+compiled pattern pointer that was returned by <b>pcre2_compile()</b>, and the
 second is a set of option bits, which must include at least one of
 PCRE2_JIT_COMPLETE, PCRE2_JIT_PARTIAL_HARD, or PCRE2_JIT_PARTIAL_SOFT.
 </P>
@@ -239,7 +239,7 @@ non-default JIT stacks might operate:
 </pre>
 All the functions described in this section do nothing if JIT is not available,
 and <b>pcre2_jit_stack_assign()</b> does nothing unless the <b>code</b> argument
-is non-NULL and points to a <b>pcre2_code</b> block that has been successfully 
+is non-NULL and points to a <b>pcre2_code</b> block that has been successfully
 processed by <b>pcre2_jit_compile()</b>.
 <a name="stackfaq"></a></P>
 <br><a name="SEC7" href="#TOC1">JIT STACK FAQ</a><br>
@@ -328,18 +328,18 @@ callback.
 <pre>
   int rc;
   pcre2_code *re;
-  pcre2_match_data *match_data; 
+  pcre2_match_data *match_data;
   pcre2_jit_stack *jit_stack;
 
-  re = pcre2_compile(pattern, PCRE2_ZERO_TERMINATED, 0, 
+  re = pcre2_compile(pattern, PCRE2_ZERO_TERMINATED, 0,
     &errornumber, &erroffset, NULL);
   /* Check for errors */
   rc = pcre2_jit_compile(re, PCRE2_JIT_COMPLETE);
-  /* Check for errors */ 
+  /* Check for errors */
   jit_stack = pcre2_jit_stack_alloc(NULL, 32*1024, 512*1024);
   /* Check for error (NULL) */
   pcre2_jit_stack_assign(re, NULL, jit_stack);
-  match_data = pcre2_match_data_create(re, 10); 
+  match_data = pcre2_match_data_create(re, 10);
   rc = pcre2_match(re, subject, length, 0, 0, match_data, NULL);
   /* Check results */
   pcre2_free(re);

@@ -56,7 +56,7 @@ POSSIBILITY OF SUCH DAMAGE.
   (PCRE2_ANCHORED|PCRE2_NOTBOL|PCRE2_NOTEOL|PCRE2_NOTEMPTY| \
    PCRE2_NOTEMPTY_ATSTART|PCRE2_NO_UTF_CHECK|PCRE2_PARTIAL_HARD| \
    PCRE2_PARTIAL_SOFT)
-   
+
 #define PUBLIC_JIT_MATCH_OPTIONS \
    (PCRE2_NO_UTF_CHECK|PCRE2_NOTBOL|PCRE2_NOTEOL|PCRE2_NOTEMPTY|\
     PCRE2_NOTEMPTY_ATSTART|PCRE2_PARTIAL_SOFT|PCRE2_PARTIAL_HARD)
@@ -125,24 +125,24 @@ ovector length is always a multiple of 3. */
 /* This function is called only when it is known that the offset lies within
 the offsets that have so far been used in the match. Note that in caseless
 UTF-8 mode, the number of subject bytes matched may be different to the number
-of reference bytes. (In theory this could also happen in UTF-16 mode, but it 
+of reference bytes. (In theory this could also happen in UTF-16 mode, but it
 seems unlikely.)
 
 Arguments:
   offset      index into the offset vector
-  offset_top  top of the used offset vector 
+  offset_top  top of the used offset vector
   eptr        pointer into the subject
   mb          points to match block
   caseless    TRUE if caseless
-  lengthptr   pointer for returning the length matched 
+  lengthptr   pointer for returning the length matched
 
 Returns:      = 0 sucessful match; number of code units matched is set
               < 0 no match
-              > 0 partial match 
+              > 0 partial match
 */
 
 static int
-match_ref(PCRE2_SIZE offset, PCRE2_SIZE offset_top, register PCRE2_SPTR eptr, 
+match_ref(PCRE2_SIZE offset, PCRE2_SIZE offset_top, register PCRE2_SPTR eptr,
   match_block *mb, BOOL caseless, PCRE2_SIZE *lengthptr)
 {
 #if defined SUPPORT_UNICODE
@@ -153,7 +153,7 @@ register PCRE2_SPTR p;
 PCRE2_SIZE length;
 PCRE2_SPTR eptr_start = eptr;
 
-/* Deal with an unset group. The default is no match, but there is an option to 
+/* Deal with an unset group. The default is no match, but there is an option to
 match an empty string. */
 
 if (offset >= offset_top || mb->ovector[offset] == PCRE2_UNSET)
@@ -164,7 +164,7 @@ if (offset >= offset_top || mb->ovector[offset] == PCRE2_UNSET)
     return 0;      /* Match */
     }
   else return -1;  /* No match */
-  }        
+  }
 
 /* Separate the caseless and UTF cases for speed. */
 
@@ -217,7 +217,7 @@ if (caseless)
       if (eptr >= mb->end_subject) return 1;   /* Partial match */
       cc = UCHAR21TEST(eptr);
       cp = UCHAR21TEST(p);
-      if (TABLE_GET(cp, mb->lcc, cp) != TABLE_GET(cc, mb->lcc, cc)) 
+      if (TABLE_GET(cp, mb->lcc, cp) != TABLE_GET(cc, mb->lcc, cc))
         return -1;  /* No match */
       p++;
       eptr++;
@@ -345,7 +345,7 @@ argument of match(), which never changes. */
   }
 
 
-/* Structure for remembering the local variables in a private frame. Arrange it 
+/* Structure for remembering the local variables in a private frame. Arrange it
 so as to minimize the number of holes. */
 
 typedef struct heapframe {
@@ -364,7 +364,7 @@ typedef struct heapframe {
   PCRE2_SPTR Xpp;
   PCRE2_SPTR Xprev;
   PCRE2_SPTR Xsaved_eptr;
-  
+
   eptrblock *Xeptrb;
 
   PCRE2_SIZE Xlength;
@@ -377,7 +377,7 @@ typedef struct heapframe {
   uint32_t Xrdepth;
   uint32_t Xop;
   uint32_t Xsave_capture_last;
- 
+
 #ifdef SUPPORT_UNICODE
   uint32_t Xprop_value;
   int Xprop_type;
@@ -401,7 +401,7 @@ typedef struct heapframe {
 
 #ifdef SUPPORT_UNICODE
   PCRE2_UCHAR Xocchars[6];
-#endif   
+#endif
 } heapframe;
 
 #endif
@@ -414,9 +414,9 @@ typedef struct heapframe {
 /* When HEAP_MATCH_RECURSE is not defined, the match() function implements
 backtrack points by calling itself recursively in all but one case. The one
 special case is when processing OP_RECURSE, which specifies recursion in the
-pattern. The entire ovector must be saved and restored while processing 
-OP_RECURSE. If the ovector is small enough, instead of calling match() 
-directly, op_recurse_ovecsave() is called. This function uses the system stack 
+pattern. The entire ovector must be saved and restored while processing
+OP_RECURSE. If the ovector is small enough, instead of calling match()
+directly, op_recurse_ovecsave() is called. This function uses the system stack
 to save the ovector while calling match() to process the pattern recursion. */
 
 #ifndef HEAP_MATCH_RECURSE
@@ -425,7 +425,7 @@ to save the ovector while calling match() to process the pattern recursion. */
 op_recurse_ovecsave(). */
 
 static int
-match(REGISTER PCRE2_SPTR eptr, REGISTER PCRE2_SPTR ecode, PCRE2_SPTR mstart, 
+match(REGISTER PCRE2_SPTR eptr, REGISTER PCRE2_SPTR ecode, PCRE2_SPTR mstart,
   PCRE2_SIZE offset_top, match_block *mb, eptrblock *eptrb, uint32_t rdepth);
 
 
@@ -433,7 +433,7 @@ match(REGISTER PCRE2_SPTR eptr, REGISTER PCRE2_SPTR ecode, PCRE2_SPTR mstart,
 *      Process OP_RECURSE, stacking ovector      *
 *************************************************/
 
-/* When this function is called, mb->recursive has already been updated to 
+/* When this function is called, mb->recursive has already been updated to
 point to a new recursion data block, and all its fields other than ovec_save
 have been set.
 
@@ -447,9 +447,9 @@ Arguments:
   eptrb       pointer to chain of blocks containing eptr at start of
                 brackets - for testing for empty matches
   rdepth      the recursion depth
-  
+
 Returns:      a match() return code
-*/        
+*/
 
 static int
 op_recurse_ovecsave(REGISTER PCRE2_SPTR eptr, PCRE2_SPTR callpat,
@@ -472,7 +472,7 @@ data and the last captured value. */
 do
   {
   if (cbegroup) mb->match_function_type = MATCH_CBEGROUP;
-  rrc = match(eptr, callpat + PRIV(OP_lengths)[*callpat], mstart, offset_top, 
+  rrc = match(eptr, callpat + PRIV(OP_lengths)[*callpat], mstart, offset_top,
     mb, eptrb, rdepth + 1);
   memcpy(mb->ovector, new_recursive->ovec_save,
       mb->offset_end * sizeof(PCRE2_SIZE));
@@ -560,7 +560,7 @@ Returns:       MATCH_MATCH if matched            )  these values are >= 0
 */
 
 static int
-match(REGISTER PCRE2_SPTR eptr, REGISTER PCRE2_SPTR ecode, PCRE2_SPTR mstart, 
+match(REGISTER PCRE2_SPTR eptr, REGISTER PCRE2_SPTR ecode, PCRE2_SPTR mstart,
   PCRE2_SIZE offset_top, match_block *mb, eptrblock *eptrb, uint32_t rdepth)
 {
 /* These variables do not need to be preserved over recursion in this function,
@@ -1382,10 +1382,10 @@ for (;;)
 
       case OP_FALSE:
       break;
-      
+
       case OP_TRUE:
       condition = TRUE;
-      break;   
+      break;
 
       /* The condition is an assertion. Call match() to evaluate it - setting
       mb->match_function_type to MATCH_CONDASSERT causes it to stop at the end
@@ -1475,7 +1475,7 @@ for (;;)
     update the last used pointer. */
 
     case OP_ASSERT_ACCEPT:
-    if (eptr > mb->last_used_ptr) mb->last_used_ptr = eptr; 
+    if (eptr > mb->last_used_ptr) mb->last_used_ptr = eptr;
 
     case OP_ACCEPT:
     case OP_END:
@@ -1735,7 +1735,7 @@ for (;;)
 
     case OP_RECURSE:
       {
-      ovecsave_frame *fr; 
+      ovecsave_frame *fr;
       recursion_info *ri;
       uint32_t recno;
 
@@ -1762,15 +1762,15 @@ for (;;)
 
       ecode += 1 + LINK_SIZE;
 
-      /* When we are using the system stack for match() recursion we can call a 
-      function that uses the system stack for preserving the ovector while 
+      /* When we are using the system stack for match() recursion we can call a
+      function that uses the system stack for preserving the ovector while
       processing the pattern recursion, but only if the ovector is small
       enough. */
-      
+
 #ifndef HEAP_MATCH_RECURSE
       if (mb->offset_end <= OP_RECURSE_STACK_SAVE_MAX)
         {
-        rrc = op_recurse_ovecsave(eptr, callpat, mstart, offset_top, mb, 
+        rrc = op_recurse_ovecsave(eptr, callpat, mstart, offset_top, mb,
           eptrb, rdepth);
         mb->recursive = new_recursive.prevrec;
         if (rrc != MATCH_MATCH && rrc != MATCH_ACCEPT) RRETURN(rrc);
@@ -1785,10 +1785,10 @@ for (;;)
         }
 #endif
       /* If the ovector is too big, or if we are using the heap for match()
-      recursion, we have to use the heap for saving the ovector. Used ovecsave 
-      frames are kept on a chain and re-used. This makes a small improvement in 
+      recursion, we have to use the heap for saving the ovector. Used ovecsave
+      frames are kept on a chain and re-used. This makes a small improvement in
       execution time on Linux. */
-      
+
       if (mb->ovecsave_chain != NULL)
         {
         new_recursive.ovec_save = mb->ovecsave_chain->saved_ovec;
@@ -1800,17 +1800,17 @@ for (;;)
           mb->offset_end * sizeof(PCRE2_SIZE), mb->memctl.memory_data));
         if (fr == NULL) RRETURN(PCRE2_ERROR_NOMEMORY);
         new_recursive.ovec_save = fr->saved_ovec;
-        }     
-           
+        }
+
       memcpy(new_recursive.ovec_save, mb->ovector,
         mb->offset_end * sizeof(PCRE2_SIZE));
-      
+
       /* Do the recursion. After processing each alternative, restore the
       ovector data and the last captured value. This code has the same overall
       logic as the code in the op_recurse_ovecsave() function, but is adapted
       to use RMATCH/RRETURN and to release the heap block containing the saved
       ovector. */
-      
+
       cbegroup = (*callpat >= OP_SBRA);
       do
         {
@@ -1821,51 +1821,51 @@ for (;;)
             mb->offset_end * sizeof(PCRE2_SIZE));
         mb->capture_last = new_recursive.saved_capture_last;
         mb->recursive = new_recursive.prevrec;
-         
+
         if (rrc == MATCH_MATCH || rrc == MATCH_ACCEPT)
           {
           fr = (ovecsave_frame *)
             ((uint8_t *)new_recursive.ovec_save - sizeof(ovecsave_frame *));
           fr->next = mb->ovecsave_chain;
-          mb->ovecsave_chain = fr;  
-      
+          mb->ovecsave_chain = fr;
+
           /* Set where we got to in the subject, and reset the start, in case
           it was changed by \K. This *is* propagated back out of a recursion,
           for Perl compatibility. */
-      
+
           eptr = mb->end_match_ptr;
           mstart = mb->start_match_ptr;
           goto RECURSION_MATCHED;        /* Exit loop; end processing */
           }
-      
+
         /* PCRE does not allow THEN, SKIP, PRUNE or COMMIT to escape beyond a
         recursion; they cause a NOMATCH for the entire recursion. These codes
         are defined in a range that can be tested for. */
-      
+
         if (rrc >= MATCH_BACKTRACK_MIN && rrc <= MATCH_BACKTRACK_MAX)
-          { 
+          {
           rrc = MATCH_NOMATCH;
-          goto RECURSION_RETURN; 
+          goto RECURSION_RETURN;
           }
-      
+
         /* Any return code other than NOMATCH is an error. */
-      
+
         if (rrc != MATCH_NOMATCH) goto RECURSION_RETURN;
         mb->recursive = &new_recursive;
         callpat += GET(callpat, 1);
         }
       while (*callpat == OP_ALT);
-      
+
       RECURSION_RETURN:
       mb->recursive = new_recursive.prevrec;
       fr = (ovecsave_frame *)
         ((uint8_t *)new_recursive.ovec_save - sizeof(ovecsave_frame *));
       fr->next = mb->ovecsave_chain;
-      mb->ovecsave_chain = fr;  
+      mb->ovecsave_chain = fr;
       RRETURN(rrc);
       }
-       
-    RECURSION_MATCHED:      
+
+    RECURSION_MATCHED:
     break;
 
     /* An alternation is the end of a branch; scan along to find the end of the
@@ -1942,7 +1942,7 @@ for (;;)
       mb->end_match_ptr = eptr;      /* For ONCE_NC */
       mb->end_offset_top = offset_top;
       mb->start_match_ptr = mstart;
-      if (eptr > mb->last_used_ptr) mb->last_used_ptr = eptr; 
+      if (eptr > mb->last_used_ptr) mb->last_used_ptr = eptr;
       RRETURN(MATCH_MATCH);         /* Sets mb->mark */
       }
 
@@ -1966,7 +1966,7 @@ for (;;)
         {
         mb->end_match_ptr = eptr;
         mb->start_match_ptr = mstart;
-        if (eptr > mb->last_used_ptr) mb->last_used_ptr = eptr; 
+        if (eptr > mb->last_used_ptr) mb->last_used_ptr = eptr;
         RRETURN(MATCH_MATCH);
         }
 
@@ -2010,7 +2010,7 @@ for (;;)
       mb->start_match_ptr = mstart;    /* In case \K reset it */
       mb->end_match_ptr = eptr;
       mb->end_offset_top = offset_top;
-      if (eptr > mb->last_used_ptr) mb->last_used_ptr = eptr; 
+      if (eptr > mb->last_used_ptr) mb->last_used_ptr = eptr;
       RRETURN(MATCH_KETRPOS);
       }
 
@@ -2230,8 +2230,8 @@ for (;;)
         else
           {
           PCRE2_SPTR nextptr = eptr + 1;
-          FORWARDCHARTEST(nextptr, mb->end_subject);  
-          if (nextptr > mb->last_used_ptr) mb->last_used_ptr = nextptr; 
+          FORWARDCHARTEST(nextptr, mb->end_subject);
+          if (nextptr > mb->last_used_ptr) mb->last_used_ptr = nextptr;
           GETCHAR(c, eptr);
           if ((mb->poptions & PCRE2_UCP) != 0)
             {
@@ -2282,7 +2282,7 @@ for (;;)
           }
         else
           {
-          if (eptr >= mb->last_used_ptr) mb->last_used_ptr = eptr + 1; 
+          if (eptr >= mb->last_used_ptr) mb->last_used_ptr = eptr + 1;
 #ifdef SUPPORT_UNICODE
           if ((mb->poptions & PCRE2_UCP) != 0)
             {
@@ -2297,7 +2297,7 @@ for (;;)
 #endif
           cur_is_word = MAX_255(*eptr)
             && ((mb->ctypes[*eptr] & ctype_word) != 0);
-          }   
+          }
         }
 
       /* Now see if the situation is what we want */
@@ -2689,7 +2689,7 @@ for (;;)
 
     /* Match a back reference, possibly repeatedly. Look past the end of the
     item to see if there is repeat information following.
-     
+
     The OP_REF and OP_REFI opcodes are used for a reference to a numbered group
     or to a non-duplicated named group. For a duplicated named group, OP_DNREF
     and OP_DNREFI are used. In this case we must scan the list of groups to
@@ -2705,7 +2705,7 @@ for (;;)
 
       /* Initializing 'offset' avoids a compiler warning in the REF_REPEAT
       code. */
-       
+
       offset = 0;
       while (count-- > 0)
         {
@@ -2721,7 +2721,7 @@ for (;;)
     caseless = op == OP_REFI;
     offset = GET2(ecode, 1) << 1;               /* Doubled ref number */
     ecode += 1 + IMM2_SIZE;
-    
+
     /* Set up for repetition, or handle the non-repeated case */
 
     REF_REPEAT:
@@ -2750,7 +2750,7 @@ for (;;)
       break;
 
       default:                  /* No repeat follows */
-        { 
+        {
         int rc = match_ref(offset, offset_top, eptr, mb, caseless, &length);
         if (rc != 0)
           {
@@ -2758,7 +2758,7 @@ for (;;)
           CHECK_PARTIAL();
           RRETURN(MATCH_NOMATCH);
           }
-        }   
+        }
       eptr += length;
       continue;              /* With the main loop */
       }
@@ -2769,16 +2769,16 @@ for (;;)
     also continue if PCRE2_MATCH_UNSET_BACKREF is set, because this makes unset
     group be have as a zero-length group. For any other unset cases, carrying
     on will result in NOMATCH. */
-    
+
     if (offset < offset_top && mb->ovector[offset] != PCRE2_UNSET)
-      { 
+      {
       if (mb->ovector[offset] == mb->ovector[offset + 1]) continue;
       }
     else  /* Group is not set */
       {
       if (min == 0 || (mb->poptions & PCRE2_MATCH_UNSET_BACKREF) != 0)
-        continue; 
-      }      
+        continue;
+      }
 
     /* First, ensure the minimum number of matches are present. We get back
     the length of the reference string explicitly rather than passing the
@@ -2787,7 +2787,7 @@ for (;;)
     for (i = 1; i <= min; i++)
       {
       PCRE2_SIZE slength;
-      int rc = match_ref(offset, offset_top, eptr, mb, caseless, &slength); 
+      int rc = match_ref(offset, offset_top, eptr, mb, caseless, &slength);
       if (rc != 0)
         {
         if (rc > 0) eptr = mb->end_subject;   /* Partial match */
@@ -2808,13 +2808,13 @@ for (;;)
       {
       for (fi = min;; fi++)
         {
-        int rc; 
+        int rc;
         PCRE2_SIZE slength;
         RMATCH(eptr, ecode, offset_top, mb, eptrb, RM14);
         if (rrc != MATCH_NOMATCH) RRETURN(rrc);
         if (fi >= max) RRETURN(MATCH_NOMATCH);
         rc = match_ref(offset, offset_top, eptr, mb, caseless, &slength);
-        if (rc != 0) 
+        if (rc != 0)
           {
           if (rc > 0) eptr = mb->end_subject;   /* Partial match */
           CHECK_PARTIAL();
@@ -2825,12 +2825,12 @@ for (;;)
       /* Control never gets here */
       }
 
-    /* If maximizing, find the longest string and work backwards, as long as 
+    /* If maximizing, find the longest string and work backwards, as long as
     the matched lengths for each iteration are the same. */
 
     else
       {
-      BOOL samelengths = TRUE; 
+      BOOL samelengths = TRUE;
       pp = eptr;
       length = mb->ovector[offset+1] - mb->ovector[offset];
 
@@ -2839,7 +2839,7 @@ for (;;)
         PCRE2_SIZE slength;
         int rc = match_ref(offset, offset_top, eptr, mb, caseless, &slength);
 
-        if (rc != 0) 
+        if (rc != 0)
           {
           /* Can't use CHECK_PARTIAL because we don't want to update eptr in
           the soft partial matching case. */
@@ -2857,14 +2857,14 @@ for (;;)
         eptr += slength;
         }
 
-      /* If the length matched for each repetition is the same as the length of 
-      the captured group, we can easily work backwards. This is the normal 
-      case. However, in caseless UTF-8 mode there are pairs of case-equivalent 
+      /* If the length matched for each repetition is the same as the length of
+      the captured group, we can easily work backwards. This is the normal
+      case. However, in caseless UTF-8 mode there are pairs of case-equivalent
       characters whose lengths (in terms of code units) differ. However, this
       is very rare, so we handle it by re-matching fewer and fewer times. */
-      
+
       if (samelengths)
-        { 
+        {
         while (eptr >= pp)
           {
           RMATCH(eptr, ecode, offset_top, mb, eptrb, RM15);
@@ -2872,20 +2872,20 @@ for (;;)
           eptr -= length;
           }
         }
-        
-      /* The rare case of non-matching lengths. Re-scan the repetition for each 
+
+      /* The rare case of non-matching lengths. Re-scan the repetition for each
       iteration. We know that match_ref() will succeed every time. */
-       
+
       else
         {
-        max = i; 
+        max = i;
         for (;;)
           {
           RMATCH(eptr, ecode, offset_top, mb, eptrb, RM68);
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
           if (eptr == pp) break;  /* Failed after minimal repetition */
           eptr = pp;
-          max--; 
+          max--;
           for (i = min; i < max; i++)
             {
             PCRE2_SIZE slength;
@@ -2893,8 +2893,8 @@ for (;;)
             eptr += slength;
             }
           }
-        }        
- 
+        }
+
       RRETURN(MATCH_NOMATCH);
       }
     /* Control never gets here */
@@ -6417,20 +6417,20 @@ with different endianness. */
 
 if ((re->flags & PCRE2_MODE_MASK) != PCRE2_CODE_UNIT_WIDTH/8)
   return PCRE2_ERROR_BADMODE;
-  
-/* PCRE2_NOTEMPTY and PCRE2_NOTEMPTY_ATSTART are match-time flags in the 
-options variable for this function. Users of PCRE2 who are not calling the 
-function directly would like to have a way of setting these flags, in the same 
+
+/* PCRE2_NOTEMPTY and PCRE2_NOTEMPTY_ATSTART are match-time flags in the
+options variable for this function. Users of PCRE2 who are not calling the
+function directly would like to have a way of setting these flags, in the same
 way that they can set pcre2_compile() flags like PCRE2_NO_AUTOPOSSESS with
-constructions like (*NO_AUTOPOSSESS). To enable this, (*NOTEMPTY) and 
-(*NOTEMPTY_ATSTART) set bits in the pattern's "flag" function which can now be 
-transferred to the options for this function. The bits are guaranteed to be 
-adjacent, but do not have the same values. This bit of Boolean trickery assumes 
-that the match-time bits are not more significant than the flag bits. If by 
-accident this is not the case, a compile-time division by zero error will 
+constructions like (*NO_AUTOPOSSESS). To enable this, (*NOTEMPTY) and
+(*NOTEMPTY_ATSTART) set bits in the pattern's "flag" function which can now be
+transferred to the options for this function. The bits are guaranteed to be
+adjacent, but do not have the same values. This bit of Boolean trickery assumes
+that the match-time bits are not more significant than the flag bits. If by
+accident this is not the case, a compile-time division by zero error will
 occur. */
 
-#define FF (PCRE2_NOTEMPTY_SET|PCRE2_NE_ATST_SET) 
+#define FF (PCRE2_NOTEMPTY_SET|PCRE2_NE_ATST_SET)
 #define OO (PCRE2_NOTEMPTY|PCRE2_NOTEMPTY_ATSTART)
 options |= (re->flags & FF) / ((FF & -FF) / (OO & -OO));
 #undef FF
@@ -6541,7 +6541,7 @@ mb->match_limit = (mcontext->match_limit < re->limit_match)?
                   mcontext->match_limit : re->limit_match;
 mb->match_limit_recursion = (mcontext->recursion_limit < re->limit_recursion)?
                             mcontext->recursion_limit : re->limit_recursion;
-    
+
 /* Pointers to the individual character tables */
 
 mb->lcc = re->tables + lcc_offset;
@@ -6580,7 +6580,7 @@ switch(re->newline_convention)
 
   default: return PCRE2_ERROR_INTERNAL;
   }
-  
+
 /* If the expression has got more back references than the offsets supplied can
 hold, we get a temporary chunk of memory to use during the matching. Otherwise,
 we can use the vector supplied. The size of the ovector is three times the
@@ -6854,7 +6854,7 @@ for(;;)
 
   mb->start_match_ptr = start_match;
   mb->start_used_ptr = start_match;
-  mb->last_used_ptr = start_match; 
+  mb->last_used_ptr = start_match;
   mb->match_call_count = 0;
   mb->match_function_type = 0;
   mb->end_offset_top = 0;
@@ -6990,7 +6990,7 @@ while (mb->ovecsave_chain != NULL)
   ovecsave_frame *this = mb->ovecsave_chain;
   mb->ovecsave_chain = this->next;
   mb->memctl.free(this, mb->memctl.memory_data);
-  } 
+  }
 
 /* Fill in fields that are always returned in the match data. */
 
@@ -7057,9 +7057,9 @@ if (rc == MATCH_MATCH || rc == MATCH_ACCEPT)
     match_data->ovector[0] = mb->start_match_ptr - mb->start_subject;
     match_data->ovector[1] = mb->end_match_ptr - mb->start_subject;
     }
-    
+
   /* Set the remaining returned values */
-  
+
   match_data->startchar = start_match - subject;
   match_data->leftchar = mb->start_used_ptr - subject;
   match_data->rightchar = ((mb->last_used_ptr > mb->end_match_ptr)?
@@ -7068,7 +7068,7 @@ if (rc == MATCH_MATCH || rc == MATCH_ACCEPT)
   }
 
 /* Control gets here if there has been a partial match, an error, or if the
-overall match attempt has failed at all permitted starting positions. Any mark 
+overall match attempt has failed at all permitted starting positions. Any mark
 data is in the nomatch_mark field. */
 
 match_data->mark = mb->nomatch_mark;

@@ -41,7 +41,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 /* This is a freestanding support program to generate a file containing
 character tables for PCRE2. The tables are built according to the current
-locale using the pcre2_maketables() function, which is part of the PCRE2 API. 
+locale using the pcre2_maketables() function, which is part of the PCRE2 API.
 */
 
 #ifdef HAVE_CONFIG_H

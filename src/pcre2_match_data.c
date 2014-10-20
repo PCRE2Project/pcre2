@@ -72,10 +72,10 @@ return yield;
 *************************************************/
 
 PCRE2_EXP_DEFN pcre2_match_data * PCRE2_CALL_CONVENTION
-pcre2_match_data_create_from_pattern(pcre2_code *code, 
+pcre2_match_data_create_from_pattern(pcre2_code *code,
   pcre2_general_context *gcontext)
 {
-return pcre2_match_data_create(((pcre2_real_code *)code)->top_bracket + 1, 
+return pcre2_match_data_create(((pcre2_real_code *)code)->top_bracket + 1,
   gcontext);
 }
 
@@ -88,7 +88,7 @@ return pcre2_match_data_create(((pcre2_real_code *)code)->top_bracket + 1,
 PCRE2_EXP_DEFN void PCRE2_CALL_CONVENTION
 pcre2_match_data_free(pcre2_match_data *match_data)
 {
-if (match_data != NULL) 
+if (match_data != NULL)
   match_data->memctl.free(match_data, match_data->memctl.memory_data);
 }
 

@@ -74,7 +74,7 @@ Arguments:
   code            pointer to start of group (the bracket)
   startcode       pointer to start of the whole pattern's code
   recurse_depth   RECURSE depth
-  utf             UTF flag 
+  utf             UTF flag
 
 Returns:   the minimum length
            -1 if \C in UTF-8 mode or (*ACCEPT) was encountered
@@ -388,10 +388,10 @@ for (;;)
     if ((re->overall_options & PCRE2_MATCH_UNSET_BACKREF) == 0)
       {
       int count = GET2(cc, 1+IMM2_SIZE);
-      PCRE2_UCHAR *slot = 
+      PCRE2_UCHAR *slot =
         (PCRE2_UCHAR *)((uint8_t *)re + sizeof(pcre2_real_code)) +
-          GET2(cc, 1) * re->name_entry_size; 
- 
+          GET2(cc, 1) * re->name_entry_size;
+
       d = INT_MAX;
       while (count-- > 0)
         {
@@ -579,7 +579,7 @@ for (;;)
 *************************************************/
 
 /* Given a character, set its first code unit's bit in the table, and also the
-corresponding bit for the other version of a letter if we are caseless. 
+corresponding bit for the other version of a letter if we are caseless.
 
 Arguments:
   re            points to the regex block
@@ -590,20 +590,20 @@ Arguments:
 Returns:        pointer after the character
 */
 
-static PCRE2_SPTR 
+static PCRE2_SPTR
 set_table_bit(pcre2_real_code *re, PCRE2_SPTR p, BOOL caseless, BOOL utf)
 {
 uint32_t c = *p++;   /* First code unit */
 (void)utf;           /* Stop compiler warning when UTF not supported */
 
-/* In 16-bit and 32-bit modes, code units greater than 0xff set the bit for 
+/* In 16-bit and 32-bit modes, code units greater than 0xff set the bit for
 0xff. */
 
 #if PCRE2_CODE_UNIT_WIDTH != 8
-if (c > 0xff) SET_BIT(0xff); else 
+if (c > 0xff) SET_BIT(0xff); else
 #endif
 
-SET_BIT(c); 
+SET_BIT(c);
 
 /* In UTF-8 or UTF-16 mode, pick up the remaining code units in order to find
 the end of the character, even when caseless. */
@@ -617,7 +617,7 @@ if (utf)
   if ((c & 0xfc00) == 0xd800) GETUTF16INC(c, p);
 #endif
   }
-#endif  /* SUPPORT_UNICODE */   
+#endif  /* SUPPORT_UNICODE */
 
 /* If caseless, handle the other case of the character. */
 
@@ -669,7 +669,7 @@ static void
 set_type_bits(pcre2_real_code *re, int cbit_type, unsigned int table_limit)
 {
 register uint32_t c;
-for (c = 0; c < table_limit; c++) 
+for (c = 0; c < table_limit; c++)
   re->start_bitmap[c] |= re->tables[c+cbits_offset+cbit_type];
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH == 8
 if (table_limit == 32) return;
@@ -710,7 +710,7 @@ static void
 set_nottype_bits(pcre2_real_code *re, int cbit_type, unsigned int table_limit)
 {
 register uint32_t c;
-for (c = 0; c < table_limit; c++) 
+for (c = 0; c < table_limit; c++)
   re->start_bitmap[c] |= ~(re->tables[c+cbits_offset+cbit_type]);
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH == 8
 if (table_limit != 32) for (c = 24; c < 32; c++) re->start_bitmap[c] = 0xff;
@@ -724,10 +724,10 @@ if (table_limit != 32) for (c = 24; c < 32; c++) re->start_bitmap[c] = 0xff;
 *************************************************/
 
 /* This function scans a compiled unanchored expression recursively and
-attempts to build a bitmap of the set of possible starting code units whose 
-values are less than 256. In 16-bit and 32-bit mode, values above 255 all cause 
+attempts to build a bitmap of the set of possible starting code units whose
+values are less than 256. In 16-bit and 32-bit mode, values above 255 all cause
 the 255 bit to be set. When calling set[_not]_type_bits() in UTF-8 (sic) mode
-we pass a value of 16 rather than 32 as the final argument. (See comments in 
+we pass a value of 16 rather than 32 as the final argument. (See comments in
 those functions for the reason.)
 
 The SSB_CONTINUE return is useful for parenthesized groups in patterns such as
@@ -769,8 +769,8 @@ do
   while (try_next)    /* Loop for items in this branch */
     {
     int rc;
-    uint8_t *classmap = NULL; 
-    
+    uint8_t *classmap = NULL;
+
     switch(*tcode)
       {
       /* If we reach something we don't understand, it means a new opcode has
@@ -854,31 +854,31 @@ do
       case OP_THEN:
       case OP_THEN_ARG:
       return SSB_FAIL;
-      
+
       /* A "real" property test implies no starting bits, but the fake property
       PT_CLIST identifies a list of characters. These lists are short, as they
       are used for characters with more than one "other case", so there is no
       point in recognizing them for OP_NOTPROP. */
-      
+
       case OP_PROP:
       if (tcode[1] != PT_CLIST) return SSB_FAIL;
-        { 
+        {
         const uint32_t *p = PRIV(ucd_caseless_sets) + tcode[2];
         while ((c = *p++) < NOTACHAR)
           {
-#if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH == 8         
+#if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH == 8
           if (utf)
             {
             PCRE2_UCHAR buff[6];
             (void)PRIV(ord2utf)(c, buff);
             c = buff[0];
-            } 
-#endif        
+            }
+#endif
           if (c > 0xff) SET_BIT(0xff); else SET_BIT(c);
           }
-        } 
+        }
       try_next = FALSE;
-      break;   
+      break;
 
       /* We can ignore word boundary tests. */
 
@@ -1032,14 +1032,14 @@ do
       SET_BIT(CHAR_HT);
       SET_BIT(CHAR_SPACE);
 
-      /* For the 16-bit and 32-bit libraries (which can never be EBCDIC), set 
+      /* For the 16-bit and 32-bit libraries (which can never be EBCDIC), set
       the bits for 0xA0 and for code units >= 255, independently of UTF. */
 
 #if PCRE2_CODE_UNIT_WIDTH != 8
       SET_BIT(0xA0);
       SET_BIT(0xFF);
 #else
-      /* For the 8-bit library in UTF-8 mode, set the bits for the first code 
+      /* For the 8-bit library in UTF-8 mode, set the bits for the first code
       units of horizontal space characters. */
 
 #ifdef SUPPORT_UNICODE
@@ -1052,7 +1052,7 @@ do
         }
       else
 #endif
-      /* For the 8-bit library not in UTF-8 mode, set the bit for 0xA0, unless 
+      /* For the 8-bit library not in UTF-8 mode, set the bit for 0xA0, unless
       the code is EBCDIC. */
         {
 #ifndef EBCDIC
@@ -1060,7 +1060,7 @@ do
 #endif  /* Not EBCDIC */
         }
 #endif  /* 8-bit support */
-         
+
       try_next = FALSE;
       break;
 
@@ -1071,16 +1071,16 @@ do
       SET_BIT(CHAR_FF);
       SET_BIT(CHAR_CR);
 
-      /* For the 16-bit and 32-bit libraries (which can never be EBCDIC), set 
+      /* For the 16-bit and 32-bit libraries (which can never be EBCDIC), set
       the bits for NEL and for code units >= 255, independently of UTF. */
 
 #if PCRE2_CODE_UNIT_WIDTH != 8
       SET_BIT(CHAR_NEL);
       SET_BIT(0xFF);
 #else
-      /* For the 8-bit library in UTF-8 mode, set the bits for the first code 
+      /* For the 8-bit library in UTF-8 mode, set the bits for the first code
       units of vertical space characters. */
- 
+
 #ifdef SUPPORT_UNICODE
       if (utf)
         {
@@ -1093,8 +1093,8 @@ do
         {
         SET_BIT(CHAR_NEL);
         }
-#endif  /* 8-bit support */        
- 
+#endif  /* 8-bit support */
+
       try_next = FALSE;
       break;
 
@@ -1166,7 +1166,7 @@ do
         case OP_ANY:
         case OP_ALLANY:
         return SSB_FAIL;
-        
+
         case OP_HSPACE:
         SET_BIT(CHAR_HT);
         SET_BIT(CHAR_SPACE);
@@ -1178,7 +1178,7 @@ do
         SET_BIT(0xA0);
         SET_BIT(0xFF);
 #else
-        /* For the 8-bit library in UTF-8 mode, set the bits for the first code 
+        /* For the 8-bit library in UTF-8 mode, set the bits for the first code
         units of horizontal space characters. */
 
 #ifdef SUPPORT_UNICODE
@@ -1191,7 +1191,7 @@ do
           }
         else
 #endif
-        /* For the 8-bit library not in UTF-8 mode, set the bit for 0xA0, unless 
+        /* For the 8-bit library not in UTF-8 mode, set the bit for 0xA0, unless
         the code is EBCDIC. */
           {
 #ifndef EBCDIC
@@ -1208,16 +1208,16 @@ do
         SET_BIT(CHAR_FF);
         SET_BIT(CHAR_CR);
 
-        /* For the 16-bit and 32-bit libraries (which can never be EBCDIC), set 
+        /* For the 16-bit and 32-bit libraries (which can never be EBCDIC), set
         the bits for NEL and for code units >= 255, independently of UTF. */
 
 #if PCRE2_CODE_UNIT_WIDTH != 8
         SET_BIT(CHAR_NEL);
         SET_BIT(0xFF);
 #else
-        /* For the 8-bit library in UTF-8 mode, set the bits for the first code 
+        /* For the 8-bit library in UTF-8 mode, set the bits for the first code
         units of vertical space characters. */
- 
+
 #ifdef SUPPORT_UNICODE
         if (utf)
           {
@@ -1230,7 +1230,7 @@ do
           {
           SET_BIT(CHAR_NEL);
           }
-#endif  /* 8-bit support */        
+#endif  /* 8-bit support */
         break;
 
         case OP_NOT_DIGIT:
@@ -1260,8 +1260,8 @@ do
 
       tcode += 2;
       break;
-      
-      /* Extended class: if there are any property checks, or if this is a 
+
+      /* Extended class: if there are any property checks, or if this is a
       negative XCLASS without a map, give up. If there are no property checks,
       there must be wide characters on the XCLASS list, because otherwise an
       XCLASS would not have been created. This means that code points >= 255
@@ -1270,19 +1270,19 @@ do
 #ifdef SUPPORT_WIDE_CHARS
       case OP_XCLASS:
       if ((tcode[1 + LINK_SIZE] & XCL_HASPROP) != 0 ||
-          (tcode[1 + LINK_SIZE] & (XCL_MAP|XCL_NOT)) == XCL_NOT) 
+          (tcode[1 + LINK_SIZE] & (XCL_MAP|XCL_NOT)) == XCL_NOT)
         return SSB_FAIL;
-       
+
       /* We have a positive XCLASS or a negative one without a map. Set up the
       map pointer if there is one, and fall through. */
-           
+
       classmap = ((tcode[1 + LINK_SIZE] & XCL_MAP) == 0)? NULL :
         (uint8_t *)(tcode + 1 + LINK_SIZE + 1);
 #endif
 
       /* Enter here for a negative non-XCLASS. In the 8-bit library, if we are
       in UTF mode, any byte with a value >= 0xc4 is a potentially valid starter
-      because it starts a character with a value > 255. In 8-bit non-UTF mode, 
+      because it starts a character with a value > 255. In 8-bit non-UTF mode,
       there is no difference between CLASS and NCLASS. In all other wide
       character modes, set the 0xFF bit to indicate code units >= 255. */
 
@@ -1298,26 +1298,26 @@ do
 #endif
       /* Fall through */
 
-      /* Enter here for a positive non-XCLASS. If we have fallen through from 
-      an XCLASS, classmap will already be set; just advance the code pointer. 
+      /* Enter here for a positive non-XCLASS. If we have fallen through from
+      an XCLASS, classmap will already be set; just advance the code pointer.
       Otherwise, set up classmap for a a non-XCLASS and advance past it. */
-       
+
       case OP_CLASS:
       if (*tcode == OP_XCLASS) tcode += GET(tcode, 1); else
-        { 
+        {
         classmap = (uint8_t *)(++tcode);
         tcode += 32 / sizeof(PCRE2_UCHAR);
         }
-        
+
       /* When wide characters are supported, classmap may be NULL. In UTF-8
       (sic) mode, the bits in a class bit map correspond to character values,
       not to byte values. However, the bit map we are constructing is for byte
-      values. So we have to do a conversion for characters whose code point is 
+      values. So we have to do a conversion for characters whose code point is
       greater than 127. In fact, there are only two possible starting bytes for
       characters in the range 128 - 255. */
-      
+
       if (classmap != NULL)
-        { 
+        {
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH == 8
         if (utf)
           {
@@ -1334,11 +1334,11 @@ do
           }
         else
 #endif
-        /* In all modes except UTF-8, the two bit maps are compatible. */ 
-           
+        /* In all modes except UTF-8, the two bit maps are compatible. */
+
           {
           for (c = 0; c < 32; c++) re->start_bitmap[c] |= classmap[c];
-          }   
+          }
         }
 
       /* Act on what follows the class. For a zero minimum repeat, continue;
@@ -1384,13 +1384,13 @@ return yield;
 *************************************************/
 
 /* This function is handed a compiled expression that it must study to produce
-information that will speed up the matching. 
+information that will speed up the matching.
 
 Argument:  points to the compiled expression
 Returns:   0 normally; non-zero should never normally occur
            1 unknown opcode in set_start_bits
            2 missing capturing bracket
-           3 unknown opcode in find_minlength  
+           3 unknown opcode in find_minlength
 */
 
 int
@@ -1402,7 +1402,7 @@ BOOL utf = (re->overall_options & PCRE2_UTF) != 0;
 
 /* Find start of compiled code */
 
-code = (PCRE2_UCHAR *)((uint8_t *)re + sizeof(pcre2_real_code)) + 
+code = (PCRE2_UCHAR *)((uint8_t *)re + sizeof(pcre2_real_code)) +
   re->name_entry_size * re->name_count;
 
 /* For an anchored pattern, or an unanchored pattern that has a first code
@@ -1422,17 +1422,17 @@ if ((re->overall_options & PCRE2_ANCHORED) == 0 &&
 switch(min = find_minlength(re, code, code, 0, utf))
   {
   case -1:  /* \C in UTF mode or (*ACCEPT) was encountered */
-  break;  
- 
+  break;
+
   case -2:
   return 2; /* missing capturing bracket */
-  
+
   case -3:
   return 3; /* unrecognized opcode */
-  
+
   default:
   re->minlength = min;
-  break;      
+  break;
   }
 
 return 0;

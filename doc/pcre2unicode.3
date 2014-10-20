@@ -57,7 +57,7 @@ individual code units.
 In UTF modes, the dot metacharacter matches one UTF character instead of a
 single code unit.
 .P
-The escape sequence \eC can be used to match a single code unit, in a UTF mode, 
+The escape sequence \eC can be used to match a single code unit, in a UTF mode,
 but its use can lead to some strange effects because it breaks up multi-unit
 characters (see the description of \eC in the
 .\" HREF
@@ -107,8 +107,8 @@ case-equivalent, and these are treated as such.
 .rs
 .sp
 When the PCRE2_UTF option is set, the strings passed as patterns and subjects
-are (by default) checked for validity on entry to the relevant functions. 
-If an invalid UTF string is passed, an error return is given. 
+are (by default) checked for validity on entry to the relevant functions.
+If an invalid UTF string is passed, an error return is given.
 .P
 UTF-16 and UTF-32 strings can indicate their endianness by special code knows
 as a byte-order mark (BOM). The PCRE2 functions do not handle this, expecting

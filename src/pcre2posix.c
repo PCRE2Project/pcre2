@@ -68,7 +68,7 @@ already set. */
 #include "pcre2_internal.h"
 #include "pcre2posix.h"
 
-/* Table to translate PCRE2 compile time error codes into POSIX error codes. 
+/* Table to translate PCRE2 compile time error codes into POSIX error codes.
 Only a few PCRE2 errors with a value greater than 23 turn into special POSIX
 codes: most go to REG_BADPAT. The second table lists, in pairs, those that
 don't. */
@@ -89,7 +89,7 @@ static const int eint1[] = {
   REG_ASSERT,  /* internal error: unexpected repeat */
   REG_BADPAT,  /* unrecognized character after (? or (?- */
   REG_BADPAT,  /* POSIX named classes are supported only within a class */
-  REG_BADPAT,  /* POSIX collating elements are not supported */ 
+  REG_BADPAT,  /* POSIX collating elements are not supported */
   REG_EPAREN,  /* missing ) */
   /* 15 */
   REG_ESUBREG, /* reference to non-existent subpattern */
@@ -103,7 +103,7 @@ static const int eint1[] = {
   REG_EPAREN,  /* unmatched closing parenthesis */
   REG_ASSERT   /* internal error: code overflow */
   };
-  
+
 static const int eint2[] = {
   30, REG_ECTYPE,  /* unknown POSIX class name */
   32, REG_INVARG,  /* this version of PCRE does not have UTF or UCP support */
@@ -216,14 +216,14 @@ if ((cflags & REG_UTF) != 0)      options |= PCRE2_UTF;
 if ((cflags & REG_UCP) != 0)      options |= PCRE2_UCP;
 if ((cflags & REG_UNGREEDY) != 0) options |= PCRE2_UNGREEDY;
 
-preg->re_pcre2_code = pcre2_compile((PCRE2_SPTR)pattern, -1, options, 
+preg->re_pcre2_code = pcre2_compile((PCRE2_SPTR)pattern, -1, options,
   &errorcode, &erroffset, NULL);
 preg->re_erroffset = erroffset;
 
 if (preg->re_pcre2_code == NULL)
   {
-  unsigned int i; 
-  if (errorcode < 0) return REG_BADPAT;   /* UTF error */ 
+  unsigned int i;
+  if (errorcode < 0) return REG_BADPAT;   /* UTF error */
   errorcode -= COMPILE_ERROR_BASE;
   if (errorcode < (int)(sizeof(eint1)/sizeof(const int)))
     return eint1[errorcode];
@@ -232,7 +232,7 @@ if (preg->re_pcre2_code == NULL)
   return REG_BADPAT;
   }
 
-(void)pcre2_pattern_info((const pcre2_code *)preg->re_pcre2_code, 
+(void)pcre2_pattern_info((const pcre2_code *)preg->re_pcre2_code,
   PCRE2_INFO_CAPTURECOUNT, &re_nsub);
 preg->re_nsub = (size_t)re_nsub;
 if ((options & PCRE2_NO_AUTO_CAPTURE) != 0) re_nsub = -1;
@@ -288,7 +288,7 @@ else
   eo = (int)strlen(string);
   }
 
-rc = pcre2_match((const pcre2_code *)preg->re_pcre2_code, 
+rc = pcre2_match((const pcre2_code *)preg->re_pcre2_code,
   (PCRE2_SPTR)string + so, (eo - so), 0, options, md, NULL);
 
 /* Successful match */

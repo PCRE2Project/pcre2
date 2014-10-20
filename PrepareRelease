@@ -27,7 +27,7 @@
 
 # README & NON-AUTOTOOLS-BUILD
 #             These files are copied into the doc/html directory, with .txt
-#             extensions so that they can by hyperlinked from the HTML 
+#             extensions so that they can by hyperlinked from the HTML
 #             documentation, because some people just go to the HTML without
 #             looking for text files.
 
@@ -71,7 +71,7 @@ for file in pcre2 pcre2api pcre2build pcre2callout pcre2compat pcre2jit \
 #            pcre2syntax \
 #            pcre2precompile pcre2perform pcre2posix pcre2sample \
 #            pcre2stack ; do
- 
+
   echo "  Processing $file.3"
   nroff -c -man $file.3 >$file.rawtxt
   perl ../CleanTxt <$file.rawtxt >>pcre2.txt
@@ -168,17 +168,13 @@ cd ..
 echo Documentation done
 if [ "$1" = "doc" ] ; then exit; fi
 
-# FIXME pro tem only do docs
-exit
-
 # These files are detrailed; do not detrail the test data because there may be
 # significant trailing spaces. Do not detrail RunTest.bat, because it has CRLF
 # line endings and the detrail script removes all trailing white space. The
-# configure files are also omitted from the detrailing. 
+# configure files are also omitted from the detrailing.
 
 files="\
   Makefile.am \
-  Makefile.in \
   configure.ac \
   README \
   LICENCE \
@@ -195,54 +191,45 @@ files="\
   RunGrepTest \
   RunTest \
   pcre2-config.in \
-  libpcre.pc.in \
-  libpcre16.pc.in \
-  libpcre32.pc.in \
-  libpcreposix.pc.in \
-  libpcrecpp.pc.in \
-  config.h.in \
-  pcre2_chartables.c.dist \
-  pcre2demo.c \
-  pcre2grep.c \
-  pcre2test.c \
-  dftables.c \
-  pcre2posix.c \
-  pcre2posix.h \
-  pcre2.h.in \
-  pcre2_internal.h \
-  pcre2_byte_order.c \
-  pcre2_compile.c \
-  pcre2_config.c \
-  pcre2_dfa_exec.c \
-  pcre2_exec.c \
-  pcre2_fullinfo.c \
-  pcre2_get.c \
-  pcre2_globals.c \
-  pcre2_jit_compile.c \
-  pcre2_jit_test.c \
-  pcre2_maketables.c \
-  pcre2_newline.c \
-  pcre2_ord2utf8.c \
-  pcre16_ord2utf16.c \
-  pcre32_ord2utf32.c \
-  pcre2_printint.c \
-  pcre2_refcount.c \
-  pcre2_string_utils.c \
-  pcre2_study.c \
-  pcre2_tables.c \
-  pcre2_valid_utf8.c \
-  pcre2_version.c \
-  pcre2_xclass.c \
-  pcre16_utf16_utils.c \
-  pcre32_utf32_utils.c \
-  pcre16_valid_utf16.c \
-  pcre32_valid_utf32.c \
   perltest.pl \
-  ucp.h \
-  makevp.bat \
-  pcre.def \
-  libpcre.def \
-  libpcreposix.def"
+  libpcre2-8.pc.in \
+  libpcre2-16.pc.in \
+  libpcre2-32.pc.in \
+  libpcre2-posix.pc.in \
+  src/dftables.c \
+  src/pcre2.h.in \
+  src/pcre2_auto_possess.c \
+  src/pcre2_compile.c \
+  src/pcre2_config.c \
+  src/pcre2_context.c \
+  src/pcre2_dfa_match.c \
+  src/pcre2_error.c \
+  src/pcre2_internal.h \
+  src/pcre2_intmodedep.h \
+  src/pcre2_jit_compile.c \
+  src/pcre2_jit_match.c \
+  src/pcre2_jit_misc.c \
+  src/pcre2_jit_test.c \
+  src/pcre2_maketables.c \
+  src/pcre2_match.c \
+  src/pcre2_match_data.c \
+  src/pcre2_newline.c \
+  src/pcre2_ord2utf.c \
+  src/pcre2_pattern_info.c \
+  src/pcre2_printint.c \
+  src/pcre2_string_utils.c \
+  src/pcre2_study.c \
+  src/pcre2_substring.c \
+  src/pcre2_tables.c \
+  src/pcre2_ucd.c \
+  src/pcre2_ucp.h \
+  src/pcre2_valid_utf.c \
+  src/pcre2_xclass.c \
+  src/pcre2demo.c \
+  src/pcre2grep.c \
+  src/pcre2posix.c \
+  src/pcre2posix.h \
+  src/pcre2test.c"
 
 echo Detrailing
 perl ./Detrail $files doc/p* doc/html/*

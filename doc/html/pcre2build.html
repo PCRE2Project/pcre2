@@ -88,11 +88,11 @@ single-byte characters, or UTF-8 strings. You can also build two other
 libraries, called <b>libpcre2-16</b> and <b>libpcre2-32</b>, which process
 strings that are contained in vectors of 16-bit and 32-bit code units,
 respectively. These can be interpreted either as single-unit characters or
-UTF-16/UTF-32 strings. To build these additional libraries, add one or both of 
+UTF-16/UTF-32 strings. To build these additional libraries, add one or both of
 the following to the <b>configure</b> command:
 <pre>
   --enable-pcre16
-  --enable-pcre32 
+  --enable-pcre32
 </pre>
 If you do not want the 8-bit library, add
 <pre>
@@ -358,7 +358,7 @@ override this value by specifying a run-time option.
 If you add one of
 <pre>
   --enable-pcre2test-libreadline
-  --enable-pcre2test-libedit 
+  --enable-pcre2test-libedit
 </pre>
 to the <b>configure</b> command, <b>pcre2test</b> is linked with the
 <b>libreadline</b> or<b>libedit</b> library, respectively, and when its input is
@@ -376,8 +376,8 @@ unmodified distribution version of readline is in use), some extra
 configuration may be necessary. The INSTALL file for <b>libreadline</b> says
 this:
 <pre>
-  "Readline uses the termcap functions, but does not link with 
-  the termcap or curses library itself, allowing applications 
+  "Readline uses the termcap functions, but does not link with
+  the termcap or curses library itself, allowing applications
   which link with readline the to choose an appropriate library."
 </pre>
 If your environment has not been set up so that an appropriate library is

@@ -60,9 +60,9 @@ compilation of dftables.c, in which case the macro DFTABLES is defined. */
 /* This function builds a set of character tables for use by PCRE2 and returns
 a pointer to them. They are build using the ctype functions, and consequently
 their contents will depend upon the current locale setting. When compiled as
-part of the library, the store is obtained via a general context malloc, if 
-supplied, but when DFTABLES is defined (when compiling the dftables auxiliary 
-program) malloc() is used, and the function has a different name so as not to 
+part of the library, the store is obtained via a general context malloc, if
+supplied, but when DFTABLES is defined (when compiling the dftables auxiliary
+program) malloc() is used, and the function has a different name so as not to
 clash with the prototype in pcre2.h.
 
 Arguments:   none when DFTABLES is defined

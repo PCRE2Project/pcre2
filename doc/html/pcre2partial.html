@@ -89,15 +89,15 @@ empty string at the end of the subject.
 </P>
 <P>
 When a partial match is returned, the first two elements in the ovector point
-to the portion of the subject that was matched. The appearance of \K in the 
+to the portion of the subject that was matched. The appearance of \K in the
 pattern has no effect for a partial match. Consider this pattern:
 <pre>
   /abc\K123/
 </pre>
 If it is matched against "456abc123xyz" the result is a complete match, and the
-ovector defines the matched string as "123", because \K resets the "start of 
-match" point. However, if a partial match is requested and the subject string 
-is "456abc12", a partial match is found for the string "abc12", because all 
+ovector defines the matched string as "123", because \K resets the "start of
+match" point. However, if a partial match is requested and the subject string
+is "456abc12", a partial match is found for the string "abc12", because all
 these characters are needed for a subsequent re-match with additional
 characters.
 </P>
@@ -343,14 +343,14 @@ same point as before.
 For example, if the pattern "(?&#60;=123)abc" is partially matched against the
 string "xx123ab", the ovector offsets are 5 and 7 ("ab"). The maximum
 lookbehind count is 3, so all characters before offset 2 can be discarded. The
-value of <b>startoffset</b> for the next match should be 3. When <b>pcre2test</b> 
-displays a partial match, it indicates the lookbehind characters with '&#60;' 
+value of <b>startoffset</b> for the next match should be 3. When <b>pcre2test</b>
+displays a partial match, it indicates the lookbehind characters with '&#60;'
 characters:
 <pre>
     re&#62; "(?&#60;=123)abc"
   data&#62; xx123ab\=ph
   Partial match: 123ab
-                 &#60;&#60;&#60; 
+                 &#60;&#60;&#60;
 </PRE>
 </P>
 <P>

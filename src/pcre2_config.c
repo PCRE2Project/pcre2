@@ -42,7 +42,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "config.h"
 #endif
 
-/* Save the configured link size, which is in bytes. In 16-bit and 32-bit modes 
+/* Save the configured link size, which is in bytes. In 16-bit and 32-bit modes
 its value gets changed by pcre2_internal.h to be in code units. */
 
 static int configured_link_size = LINK_SIZE;
@@ -69,7 +69,7 @@ Arguments:
 Returns:           0 if data returned
                    >= 0 if where is NULL, giving length required
                    PCRE2_ERROR_BADOPTION if "where" not recognized
-                   or JIT target requested when JIT not enabled 
+                   or JIT target requested when JIT not enabled
 */
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
@@ -80,33 +80,33 @@ if (where == NULL)  /* Requests a length */
   switch(what)
     {
     default:
-    return PCRE2_ERROR_BADOPTION;  
-       
+    return PCRE2_ERROR_BADOPTION;
+
     case PCRE2_CONFIG_BSR:
     case PCRE2_CONFIG_JIT:
     case PCRE2_CONFIG_LINKSIZE:
     case PCRE2_CONFIG_NEWLINE:
     case PCRE2_CONFIG_STACKRECURSE:
     case PCRE2_CONFIG_UNICODE:
-    return sizeof(int); 
-  
+    return sizeof(int);
+
     case PCRE2_CONFIG_MATCHLIMIT:
     case PCRE2_CONFIG_PARENSLIMIT:
     case PCRE2_CONFIG_RECURSIONLIMIT:
     return sizeof(long int);
-    
+
     /* These are handled below */
-  
+
     case PCRE2_CONFIG_JITTARGET:
     case PCRE2_CONFIG_UNICODE_VERSION:
     case PCRE2_CONFIG_VERSION:
     break;
     }
-  }    
+  }
 
 switch (what)
   {
-  default: 
+  default:
   return PCRE2_ERROR_BADOPTION;
 
   case PCRE2_CONFIG_BSR:
@@ -129,9 +129,9 @@ switch (what)
 #ifdef SUPPORT_JIT
     {
     const char *v = PRIV(jit_get_target)();
-    return (where == NULL)? (int)strlen(v) : 
+    return (where == NULL)? (int)strlen(v) :
       PRIV(strcpy_c8)((PCRE2_UCHAR *)where, v);
-    }   
+    }
 #else
   return PCRE2_ERROR_BADOPTION;
 #endif
@@ -163,9 +163,9 @@ switch (what)
   *((int *)where) = 1;
 #endif
   break;
-  
+
   case PCRE2_CONFIG_UNICODE_VERSION:
-    { 
+    {
 #if defined SUPPORT_UNICODE
     const char *v = PRIV(unicode_version);
 #else
@@ -183,15 +183,15 @@ switch (what)
   *((int *)where) = 0;
 #endif
   break;
-  
-  /* The hackery in setting "v" below is to cope with the case when 
+
+  /* The hackery in setting "v" below is to cope with the case when
   PCRE2_PRERELEASE is set to an empty string (which it is for real releases).
-  If the second alternative is used in this case, it does not leave a space 
+  If the second alternative is used in this case, it does not leave a space
   before the date. On the other hand, if all four macros are put into a single
-  XSTRING when PCRE2_PRERELEASE is not empty, an unwanted space is inserted. 
+  XSTRING when PCRE2_PRERELEASE is not empty, an unwanted space is inserted.
   There are problems using an "obvious" approach like this:
-  
-     XSTRING(PCRE2_MAJOR) "." XSTRING(PCRE_MINOR) 
+
+     XSTRING(PCRE2_MAJOR) "." XSTRING(PCRE_MINOR)
      XSTRING(PCRE2_PRERELEASE) " " XSTRING(PCRE_DATE)
 
   because, when PCRE2_PRERELEASE is empty, this leads to an attempted expansion
@@ -199,18 +199,18 @@ switch (what)
   argument consists of no preprocessing tokens, the behavior is undefined." It
   turns out the gcc treats this case as a single empty string - which is what
   we really want - but Visual C grumbles about the lack of an argument for the
-  macro. Unfortunately, both are within their rights. As there seems to be no 
-  way to test for a macro's value being empty at compile time, we have to 
+  macro. Unfortunately, both are within their rights. As there seems to be no
+  way to test for a macro's value being empty at compile time, we have to
   resort to a runtime test. */
-  
+
   case PCRE2_CONFIG_VERSION:
-    { 
+    {
     const char *v = (XSTRING(Z PCRE2_PRERELEASE)[1] == 0)?
       XSTRING(PCRE2_MAJOR.PCRE2_MINOR PCRE2_DATE) :
       XSTRING(PCRE2_MAJOR.PCRE2_MINOR) XSTRING(PCRE2_PRERELEASE PCRE2_DATE);
-    return (where == NULL)? (int)strlen(v) : 
+    return (where == NULL)? (int)strlen(v) :
       PRIV(strcpy_c8)((PCRE2_UCHAR *)where, v);
-    } 
+    }
   }
 
 return 0;

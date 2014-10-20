@@ -154,11 +154,11 @@ for (p = string; length-- > 0; p++)
     *erroroffset = (int)(p - string);
     switch(ab - length)
       {
-      case 1: return PCRE2_ERROR_UTF8_ERR1;  
-      case 2: return PCRE2_ERROR_UTF8_ERR2;  
-      case 3: return PCRE2_ERROR_UTF8_ERR3;  
-      case 4: return PCRE2_ERROR_UTF8_ERR4;  
-      case 5: return PCRE2_ERROR_UTF8_ERR5;  
+      case 1: return PCRE2_ERROR_UTF8_ERR1;
+      case 2: return PCRE2_ERROR_UTF8_ERR2;
+      case 3: return PCRE2_ERROR_UTF8_ERR3;
+      case 4: return PCRE2_ERROR_UTF8_ERR4;
+      case 5: return PCRE2_ERROR_UTF8_ERR5;
       }
     }
   length -= ab;                         /* Length remaining */
@@ -314,7 +314,7 @@ return 0;
 
 /* ----------------- Check a UTF-16 string ----------------- */
 
-#elif PCRE2_CODE_UNIT_WIDTH == 16 
+#elif PCRE2_CODE_UNIT_WIDTH == 16
 
 /* There's not so much work, nor so many errors, for UTF-16.
 PCRE2_ERROR_UTF16_ERR1  Missing low surrogate at the end of the string

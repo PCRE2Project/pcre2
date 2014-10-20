@@ -232,7 +232,7 @@ enum {
   ucp_Takri,
   /* New for Unicode 7.0.0: */
   ucp_Bassa_Vah,
-  ucp_Caucasian_Albanian, 
+  ucp_Caucasian_Albanian,
   ucp_Duployan,
   ucp_Elbasan,
   ucp_Grantha,

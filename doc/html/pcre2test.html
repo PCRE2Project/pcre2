@@ -476,7 +476,7 @@ about the pattern:
   /I  info                      show info about compiled pattern
       hex                       pattern is coded in hexadecimal
       jit[=&#60;number&#62;]            use JIT
-      jitverify                 verify JIT use 
+      jitverify                 verify JIT use
       locale=&#60;name&#62;             use this locale
       memory                    show memory used
       newline=&#60;type&#62;            set newline type
@@ -565,7 +565,7 @@ number in the range 0 to 7:
   7  all three modes
 </pre>
 If no number is given, 7 is assumed. If JIT compilation is successful, the
-compiled JIT code will automatically be used when <b>pcre2_match()</b> is run 
+compiled JIT code will automatically be used when <b>pcre2_match()</b> is run
 for the appropriate type of match, except when incompatible run-time options
 are specified. For more details, see the
 <a href="pcre2jit.html"><b>pcre2jit</b></a>
@@ -710,7 +710,7 @@ for a description of their effects.
       partial_hard (or ph)      set PCRE2_PARTIAL_HARD
       partial_soft (or ps)      set PCRE2_PARTIAL_SOFT
 </pre>
-The partial matching modifiers are provided with abbreviations because they 
+The partial matching modifiers are provided with abbreviations because they
 appear frequently in tests.
 </P>
 <P>
@@ -892,8 +892,8 @@ until it finds the minimum values for each parameter that allow
 <b>pcre2_match()</b> to complete without error.
 </P>
 <P>
-If JIT is being used, only the match limit is relevant. If DFA matching is 
-being used, neither limit is relevant, and this modifier is ignored (with a 
+If JIT is being used, only the match limit is relevant. If DFA matching is
+being used, neither limit is relevant, and this modifier is ignored (with a
 warning message).
 </P>
 <P>
@@ -939,10 +939,10 @@ appears, though of course it can also be used to set a default in a
 available for storing matching information. The default is 15.
 </P>
 <P>
-At least one pair of offsets is always created by 
-<b>pcre2_match_data_create()</b>, for matching with PCRE2's native API, so a 
-value of 0 is the same as 1. However a value of 0 is useful when testing the 
-POSIX API because it causes <b>regexec()</b> to be called with a NULL capture 
+At least one pair of offsets is always created by
+<b>pcre2_match_data_create()</b>, for matching with PCRE2's native API, so a
+value of 0 is the same as 1. However a value of 0 is useful when testing the
+POSIX API because it causes <b>regexec()</b> to be called with a NULL capture
 vector.
 </P>
 <br><a name="SEC12" href="#TOC1">THE ALTERNATIVE MATCHING FUNCTION</a><br>

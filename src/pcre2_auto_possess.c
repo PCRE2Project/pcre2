@@ -38,7 +38,7 @@ POSSIBILITY OF SUCH DAMAGE.
 -----------------------------------------------------------------------------
 */
 
-/* This module contains functions that scan a compiled pattern and change 
+/* This module contains functions that scan a compiled pattern and change
 repeats into possessive repeats where possible. */
 
 
@@ -359,8 +359,8 @@ Returns:      points to the start of the next opcode if *code is accepted
               NULL if *code is not accepted
 */
 
-static PCRE2_SPTR 
-get_chr_property_list(PCRE2_SPTR code, BOOL utf, const uint8_t *fcc, 
+static PCRE2_SPTR
+get_chr_property_list(PCRE2_SPTR code, BOOL utf, const uint8_t *fcc,
   uint32_t *list)
 {
 PCRE2_UCHAR c = *code;
@@ -387,7 +387,7 @@ if (c >= OP_STAR && c <= OP_TYPEPOSUPTO)
   if (c == OP_UPTO || c == OP_MINUPTO || c == OP_EXACT || c == OP_POSUPTO)
     code += IMM2_SIZE;
 
-  list[1] = (c != OP_PLUS && c != OP_MINPLUS && c != OP_EXACT && 
+  list[1] = (c != OP_PLUS && c != OP_MINPLUS && c != OP_EXACT &&
              c != OP_POSPLUS);
 
   switch(base)
@@ -595,7 +595,7 @@ for(;;)
   Therefore infinite recursions are not possible. */
 
   c = *code;
-  
+
   /* Skip over callouts */
 
   if (c == OP_CALLOUT)
@@ -624,7 +624,7 @@ for(;;)
     /* If the bracket is capturing, and referenced by an OP_RECURSE, or
     it is an atomic sub-pattern (assert, once, etc.) the non-greedy case
     cannot be converted to a possessive form. */
-    
+
     if (base_list[1] == 0) return FALSE;
 
     switch(*(code - GET(code, 1)))
@@ -636,7 +636,7 @@ for(;;)
       case OP_ONCE:
       case OP_ONCE_NC:
       /* Atomic sub-patterns and assertions can always auto-possessify their
-      last iterator. However, if the group was entered as a result of checking 
+      last iterator. However, if the group was entered as a result of checking
       a previous iterator, this is not possible. */
 
       return !entered_a_group;
@@ -672,7 +672,7 @@ for(;;)
     do next_code += GET(next_code, 1); while (*next_code == OP_ALT);
 
     /* The bracket content will be checked by the OP_BRA/OP_CBRA case above. */
-     
+
     next_code += 1 + LINK_SIZE;
     if (!compare_opcodes(next_code, utf, cb, base_list, base_end))
       return FALSE;
@@ -681,14 +681,14 @@ for(;;)
     continue;
 
     default:
-    break; 
+    break;
     }
 
   /* Check for a supported opcode, and load its properties. */
 
   code = get_chr_property_list(code, utf, cb->fcc, list);
   if (code == NULL) return FALSE;    /* Unsupported */
-  
+
   /* If either opcode is a small character list, set pointers for comparing
   characters from that list with another list, or with a property. */
 
@@ -778,7 +778,7 @@ for(;;)
 
     /* Because the bit sets are unaligned bytes, we need to perform byte
     comparison here. */
-     
+
     set_end = set1 + 32;
     if (invert_bits)
       {
@@ -922,7 +922,7 @@ for(;;)
            autoposstab[leftop - FIRST_AUTOTAB_OP][rightop - FIRST_AUTOTAB_OP];
 
     if (!accepted) return FALSE;
-      
+
     if (list[1] == 0) return TRUE;
     /* Might be an empty repeat. */
     continue;
@@ -1093,8 +1093,8 @@ but some compilers complain about an unreachable statement. */
 if appropriate. This function modifies the compiled opcode!
 
 Arguments:
-  code        points to start of the byte code 
-  utf         TRUE in UTF mode 
+  code        points to start of the byte code
+  utf         TRUE in UTF mode
   cb          compile data block
 
 Returns:      nothing
@@ -1111,7 +1111,7 @@ uint32_t list[8];
 for (;;)
   {
   c = *code;
-  
+
   if (c >= OP_STAR && c <= OP_TYPEPOSUPTO)
     {
     c -= get_repeat_base(c) - OP_STAR;
@@ -1244,7 +1244,7 @@ for (;;)
     }
 
   /* Add in the fixed length from the table */
-  
+
   code += PRIV(OP_lengths)[c];
 
   /* In UTF-8 and UTF-16 modes, opcodes that are followed by a character may be

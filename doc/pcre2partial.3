@@ -64,15 +64,15 @@ matched; without such a restriction there would always be a partial match of an
 empty string at the end of the subject.
 .P
 When a partial match is returned, the first two elements in the ovector point
-to the portion of the subject that was matched. The appearance of \eK in the 
+to the portion of the subject that was matched. The appearance of \eK in the
 pattern has no effect for a partial match. Consider this pattern:
 .sp
   /abc\eK123/
 .sp
 If it is matched against "456abc123xyz" the result is a complete match, and the
-ovector defines the matched string as "123", because \eK resets the "start of 
-match" point. However, if a partial match is requested and the subject string 
-is "456abc12", a partial match is found for the string "abc12", because all 
+ovector defines the matched string as "123", because \eK resets the "start of
+match" point. However, if a partial match is requested and the subject string
+is "456abc12", a partial match is found for the string "abc12", because all
 these characters are needed for a subsequent re-match with additional
 characters.
 .P
@@ -316,14 +316,14 @@ same point as before.
 For example, if the pattern "(?<=123)abc" is partially matched against the
 string "xx123ab", the ovector offsets are 5 and 7 ("ab"). The maximum
 lookbehind count is 3, so all characters before offset 2 can be discarded. The
-value of \fBstartoffset\fP for the next match should be 3. When \fBpcre2test\fP 
-displays a partial match, it indicates the lookbehind characters with '<' 
+value of \fBstartoffset\fP for the next match should be 3. When \fBpcre2test\fP
+displays a partial match, it indicates the lookbehind characters with '<'
 characters:
 .sp
     re> "(?<=123)abc"
   data> xx123ab\e=ph
   Partial match: 123ab
-                 <<< 
+                 <<<
 .P
 3. Because a partial match must always contain at least one character, what
 might be considered a partial match of an empty string actually gives a "no

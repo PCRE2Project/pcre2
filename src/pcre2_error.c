@@ -48,7 +48,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #define STRING(a)  # a
 #define XSTRING(s) STRING(s)
 
-/* The texts of compile-time error messages. Compile-time error numbers start 
+/* The texts of compile-time error messages. Compile-time error numbers start
 at COMPILE_ERROR_BASE (100).
 
 Do not ever re-use any error number, because they are documented. Always add a
@@ -101,7 +101,7 @@ static const char compile_error_texts[] =
   "(?R or (?[+-]digits must be followed by )\0"
   /* 30 */
   "unknown POSIX class name\0"
-  "internal error in pcre2_study(): should not occur\0" 
+  "internal error in pcre2_study(): should not occur\0"
   "this version of PCRE does not have UTF or Unicode property support\0"
   "parentheses are too deeply nested (stack check)\0"
   "character code point value in \\x{} or \\o{} is too large\0"
@@ -158,94 +158,94 @@ static const char compile_error_texts[] =
   "name is too long in (*MARK), (*PRUNE), (*SKIP), or (*THEN)\0"
   "character code point value in \\u.... sequence is too large\0"
   "digits missing in \\x{} or \\o{}\0"
-  "syntax error in (?(VERSION condition\0"  
+  "syntax error in (?(VERSION condition\0"
   ;
 
 /* Match-time and UTF error texts are in the same format. */
 
 static const char match_error_texts[] =
   "no error\0"
-  "no match\0" 
+  "no match\0"
   "partial match\0"
   "UTF-8 error: 1 byte missing at end\0"
   "UTF-8 error: 2 bytes missing at end\0"
-  /* 5 */ 
+  /* 5 */
   "UTF-8 error: 3 bytes missing at end\0"
   "UTF-8 error: 4 bytes missing at end\0"
   "UTF-8 error: 5 bytes missing at end\0"
-  "UTF-8 error: byte 2 top bits not 0x80\0" 
-  "UTF-8 error: byte 3 top bits not 0x80\0" 
-  /* 10 */ 
-  "UTF-8 error: byte 4 top bits not 0x80\0" 
-  "UTF-8 error: byte 5 top bits not 0x80\0" 
+  "UTF-8 error: byte 2 top bits not 0x80\0"
+  "UTF-8 error: byte 3 top bits not 0x80\0"
+  /* 10 */
+  "UTF-8 error: byte 4 top bits not 0x80\0"
+  "UTF-8 error: byte 5 top bits not 0x80\0"
   "UTF-8 error: byte 6 top bits not 0x80\0"
-  "UTF-8 error: 5-byte character is not allowed (RFC 3629)\0"  
+  "UTF-8 error: 5-byte character is not allowed (RFC 3629)\0"
   "UTF-8 error: 6-byte character is not allowed (RFC 3629)\0"
-  /* 15 */ 
+  /* 15 */
   "UTF-8 error: code points greater than 0x10ffff are not defined\0"
-  "UTF-8 error: code points 0xd800-0xdfff are not defined\0"    
-  "UTF-8 error: overlong 2-byte sequence\0" 
-  "UTF-8 error: overlong 3-byte sequence\0" 
+  "UTF-8 error: code points 0xd800-0xdfff are not defined\0"
+  "UTF-8 error: overlong 2-byte sequence\0"
+  "UTF-8 error: overlong 3-byte sequence\0"
   "UTF-8 error: overlong 4-byte sequence\0"
-  /* 20 */ 
+  /* 20 */
   "UTF-8 error: overlong 5-byte sequence\0"
   "UTF-8 error: overlong 6-byte sequence\0"
   "UTF-8 error: isolated 0x80 byte\0"
-  "UTF-8 error: illegal byte (0xfe or 0xff)\0" 
-  "UTF-16 error: missing low surrogate at end\0" 
-  /* 25 */ 
-  "UTF-16 error: invalid low surrogate\0" 
-  "UTF-16 error: isolated low surrogate\0" 
+  "UTF-8 error: illegal byte (0xfe or 0xff)\0"
+  "UTF-16 error: missing low surrogate at end\0"
+  /* 25 */
+  "UTF-16 error: invalid low surrogate\0"
+  "UTF-16 error: isolated low surrogate\0"
   "UTF-32 error: code points 0xd800-0xdfff are not defined\0"
-  "UTF-32 error: code points greater than 0x10ffff are not defined\0" 
+  "UTF-32 error: code points greater than 0x10ffff are not defined\0"
   "bad data value\0"
-  /* 30 */ 
+  /* 30 */
   "bad length\0"
   "magic number missing\0"
   "pattern compiled in wrong mode: 8/16/32-bit error\0"
   "bad offset value\0"
   "bad option value\0"
-  /* 35 */ 
+  /* 35 */
   "bad offset into UTF string\0"
-  "callout error code\0"              /* Never returned by PCRE2 itself */   
+  "callout error code\0"              /* Never returned by PCRE2 itself */
   "invalid data in workspace for DFA restart\0"
   "too much recursion for DFA matching\0"
   "backreference condition or recursion test not supported for DFA matching\0"
-  /* 40 */ 
+  /* 40 */
   "item unsupported for DFA matching\0"
   "workspace size exceeded in DFA matching\0"
   "internal error - pattern overwritten?\0"
   "bad JIT option\0"
   "JIT stack limit reached\0"
-  /* 45 */ 
+  /* 45 */
   "match limit exceeded\0"
   "no more memory\0"
-  "unknown or unset substring\0" 
+  "unknown or unset substring\0"
   "NULL argument passed\0"
   "nested recursion at the same subject position\0"
-  /* 50 */ 
+  /* 50 */
   "recursion limit exceeded\0"
-  "requested value is not set\0" 
-  ; 
+  "requested value is not set\0"
+  ;
 
 
 /*************************************************
 *            Return error message                *
 *************************************************/
 
-/* This function copies an error message into a buffer whose units are of an 
-appropriate width. Error numbers are positive for compile-time errors, and 
-negative for match-time errors (except for UTF errors), but the numbers are all 
+/* This function copies an error message into a buffer whose units are of an
+appropriate width. Error numbers are positive for compile-time errors, and
+negative for match-time errors (except for UTF errors), but the numbers are all
 distinct.
 
 Arguments:
   enumber       error number
   buffer        where to put the message (zero terminated)
   size          size of the buffer
-  
+
 Returns:        length of message if all is well
                 negative on error
-*/                    
+*/
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_get_error_message(int enumber, PCRE2_UCHAR *buffer, size_t size)
@@ -260,23 +260,23 @@ if (size == 0) return PCRE2_ERROR_NOMEMORY;
 if (enumber > COMPILE_ERROR_BASE)  /* Compile error */
   {
   message = compile_error_texts;
-  n = enumber - COMPILE_ERROR_BASE; 
-  }  
+  n = enumber - COMPILE_ERROR_BASE;
+  }
 else                               /* Match or UTF error */
   {
   message = match_error_texts;
-  n = -enumber; 
-  }    
-     
+  n = -enumber;
+  }
+
 for (; n > 0; n--)
   {
   while (*message++ != CHAR_NULL) {};
-  if (*message == CHAR_NULL) 
-    { 
+  if (*message == CHAR_NULL)
+    {
     sprintf(xbuff, "Internal error: no text for error %d", enumber);
-    break; 
+    break;
     }
-  }    
+  }
 
 for (i = 0; *message != 0; i++)
   {
@@ -287,9 +287,9 @@ for (i = 0; *message != 0; i++)
     }
   buffer[i] = *message++;
   }
- 
+
 buffer[i] = 0;
-return i;            
+return i;
 }
 
 /* End of pcre2_error.c */

@@ -376,7 +376,7 @@ stateblock *next_active_state, *next_new_state;
 
 const uint8_t *ctypes, *lcc, *fcc;
 PCRE2_SPTR ptr;
-PCRE2_SPTR end_code; 
+PCRE2_SPTR end_code;
 PCRE2_SPTR first_op;
 
 dfa_recursion_info new_recursive;
@@ -542,8 +542,8 @@ for (;;)
   BOOL partial_newline = FALSE;
   BOOL could_continue = reset_could_continue;
   reset_could_continue = FALSE;
-  
-  if (ptr > mb->last_used_ptr) mb->last_used_ptr = ptr; 
+
+  if (ptr > mb->last_used_ptr) mb->last_used_ptr = ptr;
 
   /* Make the new state list into the active state list and empty the
   new state list. */
@@ -633,7 +633,7 @@ for (;;)
 
     /* If this opcode inspects a character, but we are at the end of the
     subject, remember the fact for use when testing for a partial match. */
-    
+
     if (clen == 0 && poptable[codevalue] != 0)
       could_continue = TRUE;
 
@@ -975,7 +975,7 @@ for (;;)
             if (utf) { FORWARDCHARTEST(temp, mb->end_subject); }
 #endif
             mb->last_used_ptr = temp;
-            } 
+            }
 #ifdef SUPPORT_UNICODE
           if ((mb->poptions & PCRE2_UCP) != 0)
             {
@@ -2643,7 +2643,7 @@ for (;;)
 
         if (condcode == OP_FALSE)
           { ADD_ACTIVE(state_offset + codelink + LINK_SIZE + 1, 0); }
-          
+
         /* There is also an always-true condition */
 
         if (condcode == OP_TRUE)
@@ -2999,7 +2999,7 @@ for (;;)
 
   The "could_continue" variable is true if a state could have continued but
   for the fact that the end of the subject was reached. */
-  
+
   if (new_count <= 0)
     {
     if (rlevel == 1 &&                               /* Top level, and */
@@ -3098,7 +3098,7 @@ if (length == PCRE2_ZERO_TERMINATED) length = PRIV(strlen)(subject);
 /* Plausibility checks */
 
 if ((options & ~PUBLIC_DFA_MATCH_OPTIONS) != 0) return PCRE2_ERROR_BADOPTION;
-if (re == NULL || subject == NULL || workspace == NULL || match_data == NULL) 
+if (re == NULL || subject == NULL || workspace == NULL || match_data == NULL)
   return PCRE2_ERROR_NULL;
 if (wscount < 20) return PCRE2_ERROR_DFA_WSSIZE;
 if (start_offset > length) return PCRE2_ERROR_BADOFFSET;
@@ -3127,19 +3127,19 @@ with different endianness. */
 if ((re->flags & PCRE2_MODE_MASK) != PCRE2_CODE_UNIT_WIDTH/8)
   return PCRE2_ERROR_BADMODE;
 
-/* PCRE2_NOTEMPTY and PCRE2_NOTEMPTY_ATSTART are match-time flags in the 
-options variable for this function. Users of PCRE2 who are not calling the 
-function directly would like to have a way of setting these flags, in the same 
+/* PCRE2_NOTEMPTY and PCRE2_NOTEMPTY_ATSTART are match-time flags in the
+options variable for this function. Users of PCRE2 who are not calling the
+function directly would like to have a way of setting these flags, in the same
 way that they can set pcre2_compile() flags like PCRE2_NO_AUTOPOSSESS with
-constructions like (*NO_AUTOPOSSESS). To enable this, (*NOTEMPTY) and 
-(*NOTEMPTY_ATSTART) set bits in the pattern's "flag" function which can now be 
-transferred to the options for this function. The bits are guaranteed to be 
-adjacent, but do not have the same values. This bit of Boolean trickery assumes 
-that the match-time bits are not more significant than the flag bits. If by 
-accident this is not the case, a compile-time division by zero error will 
+constructions like (*NO_AUTOPOSSESS). To enable this, (*NOTEMPTY) and
+(*NOTEMPTY_ATSTART) set bits in the pattern's "flag" function which can now be
+transferred to the options for this function. The bits are guaranteed to be
+adjacent, but do not have the same values. This bit of Boolean trickery assumes
+that the match-time bits are not more significant than the flag bits. If by
+accident this is not the case, a compile-time division by zero error will
 occur. */
 
-#define FF (PCRE2_NOTEMPTY_SET|PCRE2_NE_ATST_SET) 
+#define FF (PCRE2_NOTEMPTY_SET|PCRE2_NE_ATST_SET)
 #define OO (PCRE2_NOTEMPTY|PCRE2_NOTEMPTY_ATSTART)
 options |= (re->flags & FF) / ((FF & -FF) / (OO & -OO));
 #undef FF
@@ -3168,7 +3168,7 @@ end_subject = subject + length;
 req_cu_ptr = start_match - 1;
 anchored = (options & (PCRE2_ANCHORED|PCRE2_DFA_RESTART)) != 0 ||
   (re->overall_options & PCRE2_ANCHORED) != 0;
-  
+
 /* The "must be at the start of a line" flags are used in a loop when finding
 where to start. */
 
@@ -3307,7 +3307,7 @@ for (;;)
   /* There are some optimizations that avoid running the match if a known
   starting point is not found, or if a known later code unit is not present.
   However, there is an option (settable at compile time) that disables
-  these, for testing and for ensuring that all callouts do actually occur. 
+  these, for testing and for ensuring that all callouts do actually occur.
   The optimizations must also be avoided when restarting a DFA match. */
 
   if ((re->overall_options & PCRE2_NO_START_OPTIMIZE) == 0 &&
@@ -3493,7 +3493,7 @@ for (;;)
 
   /* Anything other than "no match" means we are done, always; otherwise, carry
   on only if not anchored. */
-  
+
   if (rc != PCRE2_ERROR_NOMATCH || anchored)
     {
     if (rc == PCRE2_ERROR_PARTIAL && match_data->oveccount > 0)
@@ -3504,7 +3504,7 @@ for (;;)
     match_data->leftchar = (PCRE2_SIZE)(mb->start_used_ptr - subject);
     match_data->rightchar = mb->last_used_ptr - subject;
     match_data->startchar = (PCRE2_SIZE)(start_match - subject);
-    match_data->rc = rc; 
+    match_data->rc = rc;
     return rc;
     }
 

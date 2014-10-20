@@ -41,8 +41,8 @@ POSSIBILITY OF SUCH DAMAGE.
 
 /* This module contains a PCRE private debugging function for printing out the
 internal form of a compiled regular expression, along with some supporting
-local functions. This source file is #included in pcre2test.c at each supported 
-code unit width, with PCRE2_SUFFIX set appropriately, just like the functions 
+local functions. This source file is #included in pcre2test.c at each supported
+code unit width, with PCRE2_SUFFIX set appropriately, just like the functions
 that comprise the library. */
 
 
@@ -82,9 +82,9 @@ Arguments:
   f           file to write to
   ptr         pointer to first code unit of the character
   utf         TRUE if string is UTF (will be FALSE if UTF is not supported)
-  
+
 Returns:      number of additional code units used
-*/   
+*/
 
 static unsigned int
 print_char(FILE *f, PCRE2_SPTR ptr, BOOL utf)
@@ -105,7 +105,7 @@ if (utf)
   one_code_unit = (c & 0xfffff800u) != 0xd800u;
 #endif  /* CODE_UNIT_WIDTH */
   }
-#endif  /* SUPPORT_UNICODE */  
+#endif  /* SUPPORT_UNICODE */
 
 /* Handle a valid one-code-unit character at any width. */
 
@@ -115,10 +115,10 @@ if (one_code_unit)
   else if (c < 0x80) fprintf(f, "\\x%02x", c);
   else fprintf(f, "\\x{%02x}", c);
   return 0;
-  } 
+  }
 
-/* Code for invalid UTF code units and multi-unit UTF characters is different 
-for each width. If UTF is not supported, control should never get here, but we 
+/* Code for invalid UTF code units and multi-unit UTF characters is different
+for each width. If UTF is not supported, control should never get here, but we
 need a return statement to keep the compiler happy. */
 
 #ifndef SUPPORT_UNICODE
@@ -134,10 +134,10 @@ if ((c & 0xc0) != 0xc0)
   {
   fprintf(f, "\\X{%x}", c);       /* Invalid starting byte */
   return 0;
-  }  
+  }
 else
   {
-  int i; 
+  int i;
   int a = utf8_table4[c & 0x3f];  /* Number of additional bytes */
   int s = 6*a;
   c = (c & utf8_table3[a]) << s;
@@ -153,7 +153,7 @@ else
     }
   fprintf(f, "\\x{%x}", c);
   return a;
-}   
+}
 #endif  /* PCRE2_CODE_UNIT_WIDTH == 8 */
 
 /* UTF-16: rather than swallow a low surrogate, just stop if we hit a bad one.
@@ -173,7 +173,7 @@ return 1;
 /* For UTF-32 we get here only for a malformed code unit, which should only
 occur if the sanity check has been turned off. Print it with \X instead of \x
 as an indication. */
-  
+
 #if PCRE2_CODE_UNIT_WIDTH == 32
 fprintf(f, "\\X{%x}", c);
 return 0;
@@ -187,15 +187,15 @@ return 0;
 *     Print string as a list of code units       *
 *************************************************/
 
-/* This takes no account of UTF as it always prints each individual code unit. 
+/* This takes no account of UTF as it always prints each individual code unit.
 The string is zero-terminated.
 
 Arguments:
   f          file to write to
   ptr        point to the string
-  
+
 Returns:     nothing
-*/  
+*/
 
 static void
 print_custring(FILE *f, PCRE2_SPTR ptr)
@@ -213,9 +213,9 @@ while (*ptr != '\0')
 *          Find Unicode property name            *
 *************************************************/
 
-/* When there is no UTF/UCP support, the table of names does not exist. This 
-function should not be called in such configurations, because a pattern that 
-tries to use Unicode properties won't compile. Rather than put lots of #ifdefs 
+/* When there is no UTF/UCP support, the table of names does not exist. This
+function should not be called in such configurations, because a pattern that
+tries to use Unicode properties won't compile. Rather than put lots of #ifdefs
 into the main code, however, we just put one into this function. */
 
 static const char *
@@ -244,15 +244,15 @@ return "??";
 
 /* "Normal" properties can be printed from tables. The PT_CLIST property is a
 pseudo-property that contains a pointer to a list of case-equivalent
-characters. 
+characters.
 
 Arguments:
   f            file to write to
   code         pointer in the compiled code
   before       text to print before
   after        text to print after
-  
-Returns:       nothing    
+
+Returns:       nothing
 */
 
 static void
@@ -281,14 +281,14 @@ else
 
 /* The print_lengths flag controls whether offsets and lengths of items are
 printed. Lenths can be turned off from pcre2test so that automatic tests on
-bytecode can be written that do not depend on the value of LINK_SIZE. 
+bytecode can be written that do not depend on the value of LINK_SIZE.
 
 Arguments:
   re              a compiled pattern
   f               the file to write to
-  print_lenghts   show various lengths  
-  
-Returns:          nothing 
+  print_lenghts   show various lengths
+
+Returns:          nothing
 */
 
 static void
@@ -460,7 +460,7 @@ for(;;)
     case OP_TYPEMINQUERY:
     case OP_TYPEPOSQUERY:
     fprintf(f, " %s ", flag);
-    
+
     if (*code >= OP_TYPESTAR)
       {
       if (code[1] == OP_PROP || code[1] == OP_NOTPROP)

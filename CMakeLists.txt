@@ -382,21 +382,21 @@ SET(PCRE2_SOURCES
   ${PROJECT_BINARY_DIR}/pcre2_chartables.c
   src/pcre2_compile.c
   src/pcre2_config.c
-  src/pcre2_context.c 
+  src/pcre2_context.c
   src/pcre2_dfa_match.c
-  src/pcre2_error.c 
+  src/pcre2_error.c
   src/pcre2_jit_compile.c
   src/pcre2_jit_match.c
   src/pcre2_jit_misc.c
   src/pcre2_maketables.c
   src/pcre2_match.c
-  src/pcre2_match_data.c 
+  src/pcre2_match_data.c
   src/pcre2_newline.c
   src/pcre2_ord2utf.c
-  src/pcre2_pattern_info.c 
+  src/pcre2_pattern_info.c
   src/pcre2_string_utils.c
   src/pcre2_study.c
-  src/pcre2_substring.c 
+  src/pcre2_substring.c
   src/pcre2_tables.c
   src/pcre2_ucd.c
   src/pcre2_valid_utf.c
@@ -462,11 +462,11 @@ SET(targets)
 IF(PCRE2_BUILD_PCRE2_8)
 ADD_LIBRARY(pcre2-8 ${PCRE2_HEADERS} ${PCRE2_SOURCES} ${PROJECT_BINARY_DIR}/config.h)
 SET_PROPERTY(TARGET pcre2-8
-  PROPERTY COMPILE_DEFINITIONS PCRE2_CODE_UNIT_WIDTH=8)  
+  PROPERTY COMPILE_DEFINITIONS PCRE2_CODE_UNIT_WIDTH=8)
 SET(targets ${targets} pcre2-8)
 ADD_LIBRARY(pcre2posix ${PCRE2POSIX_HEADERS} ${PCRE2POSIX_SOURCES})
 SET_PROPERTY(TARGET pcre2posix
-  PROPERTY COMPILE_DEFINITIONS PCRE2_CODE_UNIT_WIDTH=8)  
+  PROPERTY COMPILE_DEFINITIONS PCRE2_CODE_UNIT_WIDTH=8)
 SET(targets ${targets} pcre2posix)
 TARGET_LINK_LIBRARIES(pcre2posix pcre2-8)
 
@@ -503,7 +503,7 @@ ENDIF(PCRE2_BUILD_PCRE2_16)
 IF(PCRE2_BUILD_PCRE2_32)
 ADD_LIBRARY(pcre2-32 ${PCRE2_HEADERS} ${PCRE2_SOURCES} ${PROJECT_BINARY_DIR}/config.h)
 SET_PROPERTY(TARGET pcre2-32
-  PROPERTY COMPILE_DEFINITIONS PCRE2_CODE_UNIT_WIDTH=32)  
+  PROPERTY COMPILE_DEFINITIONS PCRE2_CODE_UNIT_WIDTH=32)
 SET(targets ${targets} pcre2-32)
 
 IF(MINGW AND NOT PCRE2_STATIC)
@@ -521,7 +521,7 @@ ENDIF(PCRE2_BUILD_PCRE2_32)
 IF(PCRE2_BUILD_PCRE2GREP)
   ADD_EXECUTABLE(pcre2grep src/pcre2grep.c)
   SET_PROPERTY(TARGET pcre2grep
-    PROPERTY COMPILE_DEFINITIONS PCRE2_CODE_UNIT_WIDTH=8)  
+    PROPERTY COMPILE_DEFINITIONS PCRE2_CODE_UNIT_WIDTH=8)
   SET(targets ${targets} pcre2grep)
   TARGET_LINK_LIBRARIES(pcre2grep pcre2posix ${PCRE2GREP_LIBS})
 ENDIF(PCRE2_BUILD_PCRE2GREP)

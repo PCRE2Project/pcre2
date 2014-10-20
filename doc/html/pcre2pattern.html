@@ -145,7 +145,7 @@ Unicode newline sequence. The
 <a href="pcre2api.html"><b>pcre2api</b></a>
 page has
 <a href="pcre2api.html#newlines">further discussion</a>
-about newlines, and shows how to set the newline convention when calling 
+about newlines, and shows how to set the newline convention when calling
 <b>pcre2_compile()</b>.
 </P>
 <P>
@@ -218,7 +218,7 @@ corresponding characters in the subject. As a trivial example, the pattern
 </pre>
 matches a portion of a subject string that is identical to itself. When
 caseless matching is specified (the PCRE2_CASELESS option), letters are matched
-independently of case. 
+independently of case.
 </P>
 <P>
 The power of regular expressions comes from the ability to include alternatives
@@ -1191,8 +1191,8 @@ An opening square bracket introduces a character class, terminated by a closing
 square bracket. A closing square bracket on its own is not special by default.
 If a closing square bracket is required as a member of the class, it should be
 the first data character in the class (after an initial circumflex, if present)
-or escaped with a backslash. This means that, by default, an empty class cannot 
-be defined. However, if the PCRE2_ALLOW_EMPTY_CLASS option is set, a closing 
+or escaped with a backslash. This means that, by default, an empty class cannot
+be defined. However, if the PCRE2_ALLOW_EMPTY_CLASS option is set, a closing
 square bracket at the start does end the (empty) class.
 </P>
 <P>
@@ -1216,7 +1216,7 @@ string.
 When caseless matching is set, any letters in a class represent both their
 upper case and lower case versions, so for example, a caseless [aeiou] matches
 "A" as well as "a", and a caseless [^aeiou] does not match "A", whereas a
-caseful version would. 
+caseful version would.
 </P>
 <P>
 Characters that might indicate line breaks are never treated in any special way
@@ -1341,7 +1341,7 @@ classes by other sequences, as follows:
   [:alnum:]  becomes  \p{Xan}
   [:alpha:]  becomes  \p{L}
   [:blank:]  becomes  \h
-  [:cntrl:]  becomes  \p{Cc} 
+  [:cntrl:]  becomes  \p{Cc}
   [:digit:]  becomes  \p{Nd}
   [:lower:]  becomes  \p{Ll}
   [:space:]  becomes  \p{Xps}
@@ -1490,7 +1490,7 @@ match "cataract", "erpillar" or an empty string.
 <br>
 2. It sets up the subpattern as a capturing subpattern. This means that, when
 the whole pattern matches, the portion of the subject string that matched the
-subpattern is passed back to the caller, separately from the portion that 
+subpattern is passed back to the caller, separately from the portion that
 matched the whole pattern. (This applies only to the traditional matching
 function; the DFA matching function does not support capturing.)
 </P>
@@ -1908,7 +1908,7 @@ at release 5.10.
 PCRE2 has an optimization that automatically "possessifies" certain simple
 pattern constructs. For example, the sequence A+B is treated as A++B because
 there is no point in backtracking into a sequence of A's when B must follow.
-This feature can be disabled by the PCRE2_NO_AUTOPOSSESS option, or starting 
+This feature can be disabled by the PCRE2_NO_AUTOPOSSESS option, or starting
 the pattern with (*NO_AUTO_POSSESS).
 </P>
 <P>
@@ -2216,7 +2216,7 @@ if the pattern is written as
 <pre>
   ^.*+(?&#60;=abcd)
 </pre>
-there can be no backtracking for the .*+ item because of the possessive 
+there can be no backtracking for the .*+ item because of the possessive
 quantifier; it can match only the entire string. The subsequent lookbehind
 assertion does a single test on the last four characters. If it fails, the
 match fails immediately. For long strings, this approach makes a significant
@@ -2720,8 +2720,8 @@ same pair of parentheses when there is a repetition.
 <P>
 PCRE2 provides a similar feature, but of course it cannot obey arbitrary Perl
 code. The feature is called "callout". The caller of PCRE2 provides an external
-function by putting its entry point in a match context using the function 
-<b>pcre2_set_callout()</b> and passing the context to <b>pcre2_match()</b> or 
+function by putting its entry point in a match context using the function
+<b>pcre2_set_callout()</b> and passing the context to <b>pcre2_match()</b> or
 <b>pcre2_dfa_match()</b>. If no match context is passed, or if the callout entry
 point is set to NULL, callouts are disabled.
 </P>
@@ -2961,7 +2961,7 @@ output from <b>pcre2test</b>:
     re&#62; /(*COMMIT)abc/
   data&#62; xyzabc
    0: abc
-  data&#62;  
+  data&#62;
   re&#62; /(*COMMIT)abc/no_start_optimize
   data&#62; xyzabc
   No match
@@ -2989,7 +2989,7 @@ as (*COMMIT).
 <P>
 The behaviour of (*PRUNE:NAME) is the not the same as (*MARK:NAME)(*PRUNE).
 It is like (*MARK:NAME) in that the name is remembered for passing back to the
-caller. However, (*SKIP:NAME) searches only for names set with (*MARK), 
+caller. However, (*SKIP:NAME) searches only for names set with (*MARK),
 ignoring those set by (*PRUNE) or (*THEN).
 <pre>
   (*SKIP)
@@ -3041,7 +3041,7 @@ group. If (*THEN) is not inside an alternation, it acts like (*PRUNE).
 <P>
 The behaviour of (*THEN:NAME) is the not the same as (*MARK:NAME)(*THEN).
 It is like (*MARK:NAME) in that the name is remembered for passing back to the
-caller. However, (*SKIP:NAME) searches only for names set with (*MARK), 
+caller. However, (*SKIP:NAME) searches only for names set with (*MARK),
 ignoring those set by (*PRUNE) and (*THEN).
 </P>
 <P>

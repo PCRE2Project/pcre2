@@ -72,9 +72,9 @@ Arguments:
   length          length of subject string (may contain binary zeros)
   start_offset    where to start in the subject string
   options         option bits
-  match_data      points to a match_data block 
-  mcontext        points to a match context 
-  jit_stack       points to a JIT stack 
+  match_data      points to a match_data block
+  mcontext        points to a match context
+  jit_stack       points to a JIT stack
 
 Returns:          > 0 => success; value is the number of ovector pairs filled
                   = 0 => success, but ovector is not big enough

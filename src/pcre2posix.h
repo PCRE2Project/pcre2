@@ -95,7 +95,7 @@ enum {
 
 typedef struct {
   void *re_pcre2_code;
-  void *re_match_data; 
+  void *re_match_data;
   size_t re_nsub;
   size_t re_erroffset;
 } regex_t;

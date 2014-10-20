@@ -1553,11 +1553,11 @@ enum {
   /* This is used to skip a subpattern with a {0} quantifier */
 
   OP_SKIPZERO,       /* 162 */
-  
+
   /* This is used to identify a DEFINE group during compilation so that it can
-  be checked for having only one branch. It is changed to OP_FALSE before 
+  be checked for having only one branch. It is changed to OP_FALSE before
   compilation finishes. */
-  
+
   OP_DEFINE,         /* 163 */
 
   /* This is not an opcode, but is used to check that tables indexed by opcode
@@ -1565,7 +1565,7 @@ enum {
   some in the past. */
 
   OP_TABLE_LENGTH
-  
+
 };
 
 /* *** NOTE NOTE NOTE *** Whenever the list above is updated, the two macro
@@ -1708,7 +1708,7 @@ in UTF-8 mode. The code that uses this table must know about such things. */
   1, 3,                          /* THEN, THEN_ARG                         */ \
   1, 1, 1, 1,                    /* COMMIT, FAIL, ACCEPT, ASSERT_ACCEPT    */ \
   1+IMM2_SIZE, 1,                /* CLOSE, SKIPZERO                        */ \
-  1                              /* DEFINE                                 */ 
+  1                              /* DEFINE                                 */
 
 /* A magic value for OP_RREF to indicate the "any recursion" condition. */
 
@@ -1830,9 +1830,9 @@ extern const uint8_t                   PRIV(ucd_stage1)[];
 extern const uint16_t                  PRIV(ucd_stage2)[];
 extern const uint32_t                  PRIV(ucp_gbtable)[];
 extern const uint32_t                  PRIV(ucp_gentype)[];
-#ifdef SUPPORT_JIT                     
+#ifdef SUPPORT_JIT
 extern const int                       PRIV(ucp_typerange)[];
-#endif                                
+#endif
 extern const char                     *PRIV(unicode_version);
 extern const ucp_type_table            PRIV(utt)[];
 extern const char                      PRIV(utt_names)[];

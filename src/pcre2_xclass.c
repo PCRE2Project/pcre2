@@ -60,7 +60,7 @@ might contain codepoints above 255 and/or Unicode properties.
 Arguments:
   c           the character
   data        points to the flag code unit of the XCLASS data
-  utf         TRUE if in UTF mode 
+  utf         TRUE if in UTF mode
 
 Returns:      TRUE if character matches, else FALSE
 */
@@ -261,7 +261,7 @@ while ((t = *data++) != XCL_END)
     data += 2;
     }
 #else
-  (void)utf;  /* Avoid compiler warning */     
+  (void)utf;  /* Avoid compiler warning */
 #endif  /* SUPPORT_UNICODE */
   }
 

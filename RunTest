@@ -126,7 +126,7 @@ fi
 
 checkresult()
   {
-  if [ $1 -ne 0 ] ; then 
+  if [ $1 -ne 0 ] ; then
     echo "** pcre2test failed - check testtry"
     exit 1
   fi

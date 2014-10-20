@@ -72,15 +72,15 @@ free(block);
 *        Get a block and save memory control     *
 *************************************************/
 
-/* This internal function is called to get a block of memory in which the 
+/* This internal function is called to get a block of memory in which the
 memory control data is to be stored at the start for future use.
 
 Arguments:
   size        amount of memory required
   memctl      pointer to a memctl block or NULL
-  
+
 Returns:      pointer to memory or NULL on failure
-*/   
+*/
 
 PCRE2_EXP_DEFN void *
 PRIV(memctl_malloc)(size_t size, pcre2_memctl *memctl)
@@ -88,7 +88,7 @@ PRIV(memctl_malloc)(size_t size, pcre2_memctl *memctl)
 pcre2_memctl *newmemctl;
 void *yield = (memctl == NULL)? malloc(size) :
   memctl->malloc(size, memctl->memory_data);
-if (yield == NULL) return NULL; 
+if (yield == NULL) return NULL;
 newmemctl = (pcre2_memctl *)yield;
 if (memctl == NULL)
   {
@@ -96,9 +96,9 @@ if (memctl == NULL)
   newmemctl->free = default_free;
   newmemctl->memory_data = NULL;
   }
-else *newmemctl = *memctl;       
+else *newmemctl = *memctl;
 return yield;
-}   
+}
 
 
 
@@ -108,11 +108,11 @@ return yield;
 
 /* Initializing for compile and match contexts is done in separate, private
 functions so that these can be called from functions such as pcre2_compile()
-when an external context is not supplied. The initializing functions have an 
+when an external context is not supplied. The initializing functions have an
 option to set up default memory management. */
 
 PCRE2_EXP_DEFN pcre2_general_context * PCRE2_CALL_CONVENTION
-pcre2_general_context_create(void *(*private_malloc)(size_t, void *), 
+pcre2_general_context_create(void *(*private_malloc)(size_t, void *),
   void (*private_free)(void *, void *), void *memory_data)
 {
 pcre2_general_context *gcontext;
@@ -121,7 +121,7 @@ if (private_free == NULL) private_free = default_free;
 gcontext = private_malloc(sizeof(pcre2_real_general_context), memory_data);
 if (gcontext == NULL) return NULL;
 gcontext->memctl.malloc = private_malloc;
-gcontext->memctl.free = private_free;      
+gcontext->memctl.free = private_free;
 gcontext->memctl.memory_data = memory_data;
 return gcontext;
 }
@@ -136,7 +136,7 @@ const pcre2_compile_context PRIV(default_compile_context) = {
   PRIV(default_tables),
   BSR_DEFAULT,
   NEWLINE_DEFAULT,
-  PARENS_NEST_LIMIT };     
+  PARENS_NEST_LIMIT };
 
 /* The create function copies the default into the new memory, but must
 override the default memory handling functions if a gcontext was provided. */
@@ -145,8 +145,8 @@ PCRE2_EXP_DEFN pcre2_compile_context * PCRE2_CALL_CONVENTION
 pcre2_compile_context_create(pcre2_general_context *gcontext)
 {
 pcre2_compile_context *ccontext = PRIV(memctl_malloc)(
-  sizeof(pcre2_real_compile_context), (pcre2_memctl *)gcontext); 
-if (ccontext == NULL) return NULL;  
+  sizeof(pcre2_real_compile_context), (pcre2_memctl *)gcontext);
+if (ccontext == NULL) return NULL;
 *ccontext = PRIV(default_compile_context);
 if (gcontext != NULL)
   *((pcre2_memctl *)ccontext) = *((pcre2_memctl *)gcontext);
@@ -159,14 +159,14 @@ when no context is supplied to a match function. */
 
 const pcre2_match_context PRIV(default_match_context) = {
   { default_malloc, default_free, NULL },
-#ifdef HEAP_MATCH_RECURSE   
+#ifdef HEAP_MATCH_RECURSE
   { default_malloc, default_free, NULL },
 #endif
   NULL,
   NULL,
   MATCH_LIMIT,
-  MATCH_LIMIT_RECURSION };  
- 
+  MATCH_LIMIT_RECURSION };
+
 /* The create function copies the default into the new memory, but must
 override the default memory handling functions if a gcontext was provided. */
 
@@ -174,8 +174,8 @@ PCRE2_EXP_DEFN pcre2_match_context * PCRE2_CALL_CONVENTION
 pcre2_match_context_create(pcre2_general_context *gcontext)
 {
 pcre2_match_context *mcontext = PRIV(memctl_malloc)(
-  sizeof(pcre2_real_match_context), (pcre2_memctl *)gcontext);  
-if (mcontext == NULL) return NULL;   
+  sizeof(pcre2_real_match_context), (pcre2_memctl *)gcontext);
+if (mcontext == NULL) return NULL;
 *mcontext = PRIV(default_match_context);
 if (gcontext != NULL)
   *((pcre2_memctl *)mcontext) = *((pcre2_memctl *)gcontext);
@@ -190,8 +190,8 @@ return mcontext;
 PCRE2_EXP_DEFN pcre2_general_context * PCRE2_CALL_CONVENTION
 pcre2_general_context_copy(pcre2_general_context *gcontext)
 {
-pcre2_general_context *new = 
-  gcontext->memctl.malloc(sizeof(pcre2_real_general_context), 
+pcre2_general_context *new =
+  gcontext->memctl.malloc(sizeof(pcre2_real_general_context),
   gcontext->memctl.memory_data);
 if (new == NULL) return NULL;
 memcpy(new, gcontext, sizeof(pcre2_real_general_context));
@@ -202,8 +202,8 @@ return new;
 PCRE2_EXP_DEFN pcre2_compile_context * PCRE2_CALL_CONVENTION
 pcre2_compile_context_copy(pcre2_compile_context *ccontext)
 {
-pcre2_compile_context *new = 
-  ccontext->memctl.malloc(sizeof(pcre2_real_compile_context), 
+pcre2_compile_context *new =
+  ccontext->memctl.malloc(sizeof(pcre2_real_compile_context),
   ccontext->memctl.memory_data);
 if (new == NULL) return NULL;
 memcpy(new, ccontext, sizeof(pcre2_real_compile_context));
@@ -214,8 +214,8 @@ return new;
 PCRE2_EXP_DEFN pcre2_match_context * PCRE2_CALL_CONVENTION
 pcre2_match_context_copy(pcre2_match_context *mcontext)
 {
-pcre2_match_context *new = 
-  mcontext->memctl.malloc(sizeof(pcre2_real_match_context), 
+pcre2_match_context *new =
+  mcontext->memctl.malloc(sizeof(pcre2_real_match_context),
   mcontext->memctl.memory_data);
 if (new == NULL) return NULL;
 memcpy(new, mcontext, sizeof(pcre2_real_match_context));
@@ -267,14 +267,14 @@ data. */
 /* ------------ Compile contexts ------------ */
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
-pcre2_set_character_tables(pcre2_compile_context *ccontext, 
+pcre2_set_character_tables(pcre2_compile_context *ccontext,
   const unsigned char *tables)
 {
 ccontext->tables = tables;
 return 0;
 }
 
-PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION 
+PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_set_bsr(pcre2_compile_context *ccontext, uint32_t value)
 {
 switch(value)
@@ -283,13 +283,13 @@ switch(value)
   case PCRE2_BSR_UNICODE:
   ccontext->bsr_convention = value;
   return 0;
-  
+
   default:
-  return PCRE2_ERROR_BADDATA;  
+  return PCRE2_ERROR_BADDATA;
   }
 }
 
-PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION 
+PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_set_newline(pcre2_compile_context *ccontext, uint32_t newline)
 {
 switch(newline)
@@ -301,10 +301,10 @@ switch(newline)
   case PCRE2_NEWLINE_ANYCRLF:
   ccontext->newline_convention = newline;
   return 0;
-     
-  default: 
-  return PCRE2_ERROR_BADDATA;  
-  }   
+
+  default:
+  return PCRE2_ERROR_BADDATA;
+  }
 }
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
@@ -315,7 +315,7 @@ return 0;
 }
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
-pcre2_set_compile_recursion_guard(pcre2_compile_context *ccontext, 
+pcre2_set_compile_recursion_guard(pcre2_compile_context *ccontext,
   int (*guard)(uint32_t))
 {
 ccontext->stack_guard = guard;
@@ -325,8 +325,8 @@ return 0;
 
 /* ------------ Match contexts ------------ */
 
-PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION 
-pcre2_set_callout(pcre2_match_context *mcontext, 
+PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
+pcre2_set_callout(pcre2_match_context *mcontext,
   int (*callout)(pcre2_callout_block *), void *callout_data)
 {
 mcontext->callout = callout;
@@ -349,8 +349,8 @@ return 0;
 }
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
-pcre2_set_recursion_memory_management(pcre2_match_context *mcontext, 
-  void *(*mymalloc)(size_t, void *), void (*myfree)(void *, void *), 
+pcre2_set_recursion_memory_management(pcre2_match_context *mcontext,
+  void *(*mymalloc)(size_t, void *), void (*myfree)(void *, void *),
   void *mydata)
 {
 #ifdef HEAP_MATCH_RECURSE
@@ -364,6 +364,6 @@ mcontext->stack_memctl.memory_data = mydata;
 (void)mydata;
 #endif
 return 0;
-}   
+}
 
 /* End of pcre2_context.c */

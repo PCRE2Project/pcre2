@@ -594,7 +594,7 @@ static pso pso_list[] = {
   { (uint8_t *)STRING_UTF_RIGHTPAR,              4, PSO_OPT, PCRE2_UTF },
   { (uint8_t *)STRING_UCP_RIGHTPAR,              4, PSO_OPT, PCRE2_UCP },
   { (uint8_t *)STRING_NOTEMPTY_RIGHTPAR,         9, PSO_FLG, PCRE2_NOTEMPTY_SET },
-  { (uint8_t *)STRING_NOTEMPTY_ATSTART_RIGHTPAR,17, PSO_FLG, PCRE2_NE_ATST_SET },  
+  { (uint8_t *)STRING_NOTEMPTY_ATSTART_RIGHTPAR,17, PSO_FLG, PCRE2_NE_ATST_SET },
   { (uint8_t *)STRING_NO_AUTO_POSSESS_RIGHTPAR, 16, PSO_OPT, PCRE2_NO_AUTO_POSSESS },
   { (uint8_t *)STRING_NO_START_OPT_RIGHTPAR,    13, PSO_OPT, PCRE2_NO_START_OPTIMIZE },
   { (uint8_t *)STRING_LIMIT_MATCH_EQ,           12, PSO_LIMM, 0 },
@@ -675,12 +675,12 @@ static const uint8_t opcode_possessify[] = {
 PCRE2_EXP_DEFN void PCRE2_CALL_CONVENTION
 pcre2_code_free(pcre2_code *code)
 {
-if (code != NULL) 
+if (code != NULL)
   {
   if (code->executable_jit != NULL)
     PRIV(jit_free)(code->executable_jit, &code->memctl);
   code->memctl.free(code, code->memctl.memory_data);
-  } 
+  }
 }
 
 
@@ -4462,7 +4462,7 @@ for (;; ptr++)
       syntax, so we just ignore the repeat. */
 
       if (*previous == OP_COND && previous[LINK_SIZE+1] == OP_FALSE &&
-          previous[GET(previous, 1)] != OP_ALT) 
+          previous[GET(previous, 1)] != OP_ALT)
         goto END_REPEAT;
 
       /* There is no sense in actually repeating assertions. The only potential
@@ -5169,64 +5169,64 @@ for (;; ptr++)
         namelen = -1;     /* => not a name; must set to avoid warning */
         name = NULL;      /* Always set to avoid warning */
         recno = 0;        /* Always set to avoid warning */
-        
+
         /* Point at character after (?( */
-        
+
         ptr++;
 
         /* Check for (?(VERSION[>]=n.m), which is a facility whereby indirect
-        users of PCRE2 via an application can discover which release of PCRE2 
+        users of PCRE2 via an application can discover which release of PCRE2
         is being used. */
-         
-        if (PRIV(strncmp_c8)(ptr, STRING_VERSION, 7) == 0 && 
+
+        if (PRIV(strncmp_c8)(ptr, STRING_VERSION, 7) == 0 &&
             ptr[7] != CHAR_RIGHT_PARENTHESIS)
           {
-          BOOL ge = FALSE; 
+          BOOL ge = FALSE;
           int major = 0;
           int minor = 0;
-             
+
           ptr += 7;
           if (*ptr == CHAR_GREATER_THAN_SIGN)
             {
             ge = TRUE;
             ptr++;
-            }   
-            
+            }
+
           /* NOTE: cannot write IS_DIGIT(*(++ptr)) here because IS_DIGIT
           references its argument twice. */
-            
+
           if (*ptr != CHAR_EQUALS_SIGN || (ptr++, !IS_DIGIT(*ptr)))
-            {    
+            {
             *errorcodeptr = ERR79;
-            goto FAILED; 
-            } 
+            goto FAILED;
+            }
 
           while (IS_DIGIT(*ptr)) major = major * 10 + *ptr++ - '0';
           if (*ptr == CHAR_DOT)
             {
-            ptr++; 
-            while (IS_DIGIT(*ptr)) minor = minor * 10 + *ptr++ - '0'; 
-            }     
+            ptr++;
+            while (IS_DIGIT(*ptr)) minor = minor * 10 + *ptr++ - '0';
+            }
 
           if (*ptr != CHAR_RIGHT_PARENTHESIS)
             {
             *errorcodeptr = ERR79;
             goto FAILED;
-            }    
+            }
 
           if (ge)
             code[1+LINK_SIZE] = ((PCRE2_MAJOR > major) ||
               (PCRE2_MAJOR == major && PCRE2_MINOR >= minor))?
                 OP_TRUE : OP_FALSE;
-          else     
+          else
             code[1+LINK_SIZE] = (PCRE2_MAJOR == major && PCRE2_MINOR == minor)?
               OP_TRUE : OP_FALSE;
- 
+
           ptr++;
           skipbytes = 1;
           break;  /* End of condition processing */
-          }  
-         
+          }
+
         /* Check for a test for recursion in a named group. */
 
         if (*ptr == CHAR_R && ptr[1] == CHAR_AMPERSAND)
@@ -5404,8 +5404,8 @@ for (;; ptr++)
           }
 
         /* Similarly, check for the (?(DEFINE) "condition", which is always
-        false. During compilation we set OP_DEFINE to distinguish this from 
-        other OP_FALSE conditions so that it can be checked for having only one 
+        false. During compilation we set OP_DEFINE to distinguish this from
+        other OP_FALSE conditions so that it can be checked for having only one
         branch, but after that the opcode is changed to OP_FALSE. */
 
         else if (namelen == 6 && PRIV(strncmp_c8)(name, STRING_DEFINE, 6) == 0)
@@ -6133,7 +6133,7 @@ for (;; ptr++)
       while (*tc != OP_KET);
 
       /* A DEFINE group is never obeyed inline (the "condition" is always
-      false). It must have only one branch. Having checked this, change the 
+      false). It must have only one branch. Having checked this, change the
       opcode to OP_FALSE. */
 
       if (code[LINK_SIZE+1] == OP_DEFINE)
@@ -6143,7 +6143,7 @@ for (;; ptr++)
           *errorcodeptr = ERR54;
           goto FAILED;
           }
-        code[LINK_SIZE+1] = OP_FALSE; 
+        code[LINK_SIZE+1] = OP_FALSE;
         bravalue = OP_DEFINE;   /* Just a flag to suppress char handling below */
         }
 
@@ -6219,7 +6219,7 @@ for (;; ptr++)
       than one can replicate it as reqcu if necessary. If the subpattern has
       no firstcu, set "none" for the whole branch. In both cases, a zero
       repeat forces firstcu to "none". */
-      
+
       if (firstcuflags == REQ_UNSET && subfirstcuflags != REQ_UNSET)
         {
         if (subfirstcuflags >= 0)
@@ -6759,7 +6759,7 @@ for (;;)
             reqcu = firstcu;
             reqcuflags = firstcuflags;
             }
-          }   
+          }
         firstcuflags = REQ_NONE;
         }
 
@@ -7389,12 +7389,12 @@ if ((options & ~PUBLIC_COMPILE_OPTIONS) != 0)
 
 /* A NULL compile context means "use a default context" */
 
-if (ccontext == NULL) 
+if (ccontext == NULL)
   ccontext = (pcre2_compile_context *)(&PRIV(default_compile_context));
 
-/* A zero-terminated pattern is indicated by the special length value 
-PCRE2_ZERO_TERMINATED. Otherwise, we make a copy of the pattern and add a zero, 
-to ensure that it is always possible to look one code unit beyond the end of 
+/* A zero-terminated pattern is indicated by the special length value
+PCRE2_ZERO_TERMINATED. Otherwise, we make a copy of the pattern and add a zero,
+to ensure that it is always possible to look one code unit beyond the end of
 the pattern's characters. */
 
 if (patlen == PCRE2_ZERO_TERMINATED) patlen = PRIV(strlen)(pattern); else
@@ -7481,19 +7481,19 @@ while (ptr[skipatstart] == CHAR_LEFT_PARENTHESIS &&
         case PSO_OPT:
         cb.external_options |= p->value;
         break;
-        
+
         case PSO_FLG:
         setflags |= p->value;
-        break;   
+        break;
 
         case PSO_NL:
         newline = p->value;
-        setflags |= PCRE2_NL_SET; 
+        setflags |= PCRE2_NL_SET;
         break;
 
         case PSO_BSR:
         bsr = p->value;
-        setflags |= PCRE2_BSR_SET; 
+        setflags |= PCRE2_BSR_SET;
         break;
 
         case PSO_LIMM:
@@ -7883,8 +7883,8 @@ if ((re->overall_options & PCRE2_ANCHORED) == 0 &&
 
 /* If the pattern is still not anchored and we do not have a first code unit,
 see if there is one that is asserted (these are not saved during the compile
-because they can cause conflicts with actual literals that follow). This code 
-need not be obeyed if PCRE2_NO_START_OPTIMIZE is set, as the data it would 
+because they can cause conflicts with actual literals that follow). This code
+need not be obeyed if PCRE2_NO_START_OPTIMIZE is set, as the data it would
 create will not be used. */
 
 if ((re->overall_options & (PCRE2_ANCHORED|PCRE2_NO_START_OPTIMIZE)) == 0)
@@ -7930,7 +7930,7 @@ if ((re->overall_options & (PCRE2_ANCHORED|PCRE2_NO_START_OPTIMIZE)) == 0)
   }
 
 /* Handle the "required code unit", if one is set. In the case of an anchored
-pattern, do this only if it follows a variable length item in the pattern. 
+pattern, do this only if it follows a variable length item in the pattern.
 Again, skip this if PCRE2_NO_START_OPTIMIZE is set. */
 
 if (reqcuflags >= 0 &&
@@ -7973,7 +7973,7 @@ while (*codestart == OP_ALT);
 to set up information such as a bitmap of starting code units and a minimum
 matching length. */
 
-if ((re->overall_options & PCRE2_NO_START_OPTIMIZE) == 0 && 
+if ((re->overall_options & PCRE2_NO_START_OPTIMIZE) == 0 &&
     PRIV(study)(re) != 0)
   {
   errorcode = ERR31;

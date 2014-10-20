@@ -103,17 +103,17 @@ PCRE2 to use heap memory instead of stack for remembering back-up points when
 of how to do this are given in the
 <a href="pcre2build.html"><b>pcre2build</b></a>
 documentation. When built in this way, instead of using the stack, PCRE2
-gets memory for remembering backup points from the heap. By default, the memory 
-is obtained by calling the system <b>malloc()</b> function, but you can arrange 
-to supply your own memory management function. For details, see the section 
-entitled 
+gets memory for remembering backup points from the heap. By default, the memory
+is obtained by calling the system <b>malloc()</b> function, but you can arrange
+to supply your own memory management function. For details, see the section
+entitled
 <a href="pcre2api.html#matchcontext">"The match context"</a>
 in the
 <a href="pcre2api.html"><b>pcre2api</b></a>
 documentation. Since the block sizes are always the same, it may be possible to
 implement customized a memory handler that is more efficient than the standard
-function. The memory blocks obtained for this purpose are retained and re-used  
-if possible while <b>pcre2_match()</b> is running. They are all freed just 
+function. The memory blocks obtained for this purpose are retained and re-used
+if possible while <b>pcre2_match()</b> is running. They are all freed just
 before it exits.
 </P>
 <br><b>

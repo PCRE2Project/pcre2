@@ -1,7 +1,7 @@
 README file for PCRE2 (Perl-compatible regular expression library)
 ------------------------------------------------------------------
 
-PCRE2 is a re-implementation of the original PCRE library with an entirely new 
+PCRE2 is a re-implementation of the original PCRE library with an entirely new
 API. The latest release of PCRE2 is always available in three alternative
 formats from:
 
@@ -11,7 +11,7 @@ FIXME: THIS WILL NOT BE THE CASE UNTIL THERE IS A FORMAL RELEASE.
   ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre2/pcre2-xxx.tar.bz2
   ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre2/pcre2-xxx.zip
 
-There is a mailing list for discussion about the development of PCRE (both the 
+There is a mailing list for discussion about the development of PCRE (both the
 original and new APIs) at pcre-dev@exim.org. You can access the archives and
 subscribe or manage your subscription here:
 
@@ -41,7 +41,7 @@ The PCRE2 APIs
 PCRE2 is written in C, and it has its own API. There are three sets of
 functions, one for the 8-bit library, which processes strings of bytes, one for
 the 16-bit library, which processes strings of 16-bit values, and one for the
-32-bit library, which processes strings of 32-bit values. As this is a new API, 
+32-bit library, which processes strings of 32-bit values. As this is a new API,
 there as yet no C++ wrappers.
 
 The distribution does contain a set of C wrapper functions for the 8-bit
@@ -102,7 +102,7 @@ NON-AUTOTOOLS-BUILD, though if your system supports the use of "configure" and
 "make" you may be able to build PCRE2 using autotools in the same way as for
 many Unix-like systems.
 
-PCRE2 can also be configured using CMake, which can be run in various ways 
+PCRE2 can also be configured using CMake, which can be run in various ways
 (command line, GUI, etc). This creates Makefiles, solution files, etc. The file
 NON-AUTOTOOLS-BUILD has information about CMake.
 
@@ -186,13 +186,13 @@ library. They are also documented in the pcre2build man page.
   handling UTF-8, UTF-16 and UTF-8 is not included. It is not possible to
   configure one library with UTF support and the other without in the same
   configuration.
- 
+
   Even when --enable-unicode is included, the use of a UTF encoding still has
   to be enabled by an option at run time. When PCRE2 is compiled with this
   option, its input can only either be ASCII or UTF-8/16/32, even when running
   on EBCDIC platforms. It is not possible to use both --enable-unicode and
   --enable-ebcdic at the same time.
-  
+
   When --enable-unicode is specified, as well as supporting UTF strings, PCRE2
   includes support for the \P, \p, and \X sequences that recognize Unicode
   character properties. However, only the basic two-letter properties such as
@@ -248,7 +248,7 @@ library. They are also documented in the pcre2build man page.
   cause programs to crash in strange ways. There is a discussion about stack
   sizes in the pcre2stack man page.
 
-. In the 8-bit library, the default maximum compiled pattern size is around 
+. In the 8-bit library, the default maximum compiled pattern size is around
   64K. You can increase this by adding --with-link-size=3 to the "configure"
   command. PCRE2 then uses three bytes instead of two for offsets to different
   parts of the compiled pattern. In the 16-bit library, --with-link-size=3 is
@@ -360,7 +360,7 @@ The "configure" script builds the following files for the basic C library:
 . src/pcre2.h          the public PCRE2 header file
 . pcre2-config          script that shows the building settings such as CFLAGS
                          that were set for "configure"
-. libpcre2-8.pc        ) 
+. libpcre2-8.pc        )
 . libpcre2-16.pc       ) data for the pkg-config command
 . libpcre2-32.pc       )
 . libpcre2-posix.pc    )
@@ -452,7 +452,7 @@ prints the version number, and
 
 outputs information about where the 8-bit library is installed. This command
 can be included in makefiles for programs that use PCRE2, saving the programmer
-from having to remember too many details. Run pcre2-config with no arguments to 
+from having to remember too many details. Run pcre2-config with no arguments to
 obtain a list of possible arguments.
 
 The pkg-config command is another system for saving and retrieving information
@@ -593,7 +593,7 @@ bug in PCRE2.
 
 The third set of tests checks pcre2_maketables(), the facility for building a
 set of character tables for a specific locale and using them instead of the
-default tables. The script uses the "locale" command to check for the 
+default tables. The script uses the "locale" command to check for the
 availability of the "fr_FR", "french", or "fr" locale, and uses the first one
 that it finds. If the "locale" command fails, or if its output doesn't include
 "fr_FR", "french", or "fr" in the list of available locales, the third test
@@ -609,7 +609,7 @@ of the French locale have been encountered. The test passes if its output
 matches any one of them.
 
 The fourth and fifth tests check UTF and Unicode property support, the fourth
-being compatible with the perltest.pl script, and the fifth checking 
+being compatible with the perltest.pl script, and the fifth checking
 PCRE2-specific things.
 
 The sixth and seventh tests check the pcre2_dfa_match() alternative matching
@@ -623,8 +623,8 @@ change) and when Unicode support is enabled.
 The ninth and tenth tests are run only in 8-bit mode, and the eleventh and
 twelfth tests are run only in 16-bit and 32-bit modes. These are tests that
 generate different output in 8-bit mode. Each pair are for general cases and
-Unicode support, respectively. The thirteenth test checks the handling of 
-non-UTF characters greater than 255 by pcre2_dfa_match() in 16-bit and 32-bit 
+Unicode support, respectively. The thirteenth test checks the handling of
+non-UTF characters greater than 255 by pcre2_dfa_match() in 16-bit and 32-bit
 modes.
 
 The fourteenth test is run only when JIT support is not available, and the
@@ -632,8 +632,8 @@ fifteenth test is run only when JIT support is available. They test some
 JIT-specific features such as information output from pcre2test about JIT
 compilation.
 
-The sixteenth and seventeenth tests are run only in 8-bit mode. They check the 
-POSIX interface to the 8-bit library, withouth and with Unicode support, 
+The sixteenth and seventeenth tests are run only in 8-bit mode. They check the
+POSIX interface to the 8-bit library, withouth and with Unicode support,
 respectively.
 
 
@@ -692,9 +692,9 @@ will cause PCRE2 to malfunction.
 File manifest
 -------------
 
-The distribution should contain the files listed below. 
+The distribution should contain the files listed below.
 
-(A) Source files for the PCRE2 library functions and their headers are found in 
+(A) Source files for the PCRE2 library functions and their headers are found in
     the src directory:
 
   src/dftables.c           auxiliary program for building pcre2_chartables.c
@@ -705,25 +705,25 @@ The distribution should contain the files listed below.
                            specified, used by copying to pcre2_chartables.c
 
   src/pcre2posix.c         )
-  src/pcre2_auto_possess.c ) 
+  src/pcre2_auto_possess.c )
   src/pcre2_compile.c      )
   src/pcre2_config.c       )
-  src/pcre2_context.c      ) 
+  src/pcre2_context.c      )
   src/pcre2_dfa_match.c    )
-  src/pcre2_error.c        ) 
+  src/pcre2_error.c        )
   src/pcre2_exec.c         )
   src/pcre2_jit_compile.c  )
-  src/pcre2_jit_match.c    ) sources for the functions in the library,  
+  src/pcre2_jit_match.c    ) sources for the functions in the library,
   src/pcre2_jit_misc.c     )   and some internal functions that they use
   src/pcre2_maketables.c   )
   src/pcre2_match.c        )
-  src/pcre2_match_data.c   )  
+  src/pcre2_match_data.c   )
   src/pcre2_newline.c      )
   src/pcre2_ord2utf.c      )
   src/pcre2_pattern_info.c )
   src/pcre2_string_utils.c )
   src/pcre2_study.c        )
-  src/pcre2_substring.c    ) 
+  src/pcre2_substring.c    )
   src/pcre2_tables.c       )
   src/pcre2_ucd.c          )
   src/pcre2_valid_utf.c    )

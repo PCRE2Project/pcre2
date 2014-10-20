@@ -82,13 +82,13 @@ for (;;)
 
   chomp($pattern);
   $pattern =~ s/\s+$//;
-  
+
   # Split the pattern from the modifiers and adjust them as necessary.
-  
+
   $pattern =~ /^\s*((.).*\2)(.*)$/s;
   $pat = $1;
   $mod = $3;
-  
+
   # The private "aftertext" modifier means "print $' afterwards".
 
   $showrest = ($mod =~ s/aftertext,?//);
@@ -131,9 +131,9 @@ for (;;)
       for (;;)
         {
         last if ! ($_ = <$infile>);
-        last if $_ =~ /^\s*$/; 
-        }   
-      }  
+        last if $_ =~ /^\s*$/;
+        }
+      }
     next NEXT_RE;
     }
 

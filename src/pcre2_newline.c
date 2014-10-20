@@ -60,9 +60,9 @@ http://unicode.org/unicode/reports/tr18/. */
 *      Check for newline at given position       *
 *************************************************/
 
-/* This function is called only via the IS_NEWLINE macro, which does so only 
+/* This function is called only via the IS_NEWLINE macro, which does so only
 when the newline type is NLTYPE_ANY or NLTYPE_ANYCRLF. The case of a fixed
-newline (NLTYPE_FIXED) is handled inline. It is guaranteed that the code unit 
+newline (NLTYPE_FIXED) is handled inline. It is guaranteed that the code unit
 pointed to by ptr is less than the end of the string.
 
 Arguments:
@@ -76,7 +76,7 @@ Returns:       TRUE or FALSE
 */
 
 BOOL
-PRIV(is_newline)(PCRE2_SPTR ptr, uint32_t type, PCRE2_SPTR endptr, 
+PRIV(is_newline)(PCRE2_SPTR ptr, uint32_t type, PCRE2_SPTR endptr,
   uint32_t *lenptr, BOOL utf)
 {
 uint32_t c;
@@ -90,15 +90,15 @@ c = *ptr;
 
 if (type == NLTYPE_ANYCRLF) switch(c)
   {
-  case CHAR_LF: 
-  *lenptr = 1; 
+  case CHAR_LF:
+  *lenptr = 1;
   return TRUE;
-   
-  case CHAR_CR: 
+
+  case CHAR_CR:
   *lenptr = (ptr < endptr - 1 && ptr[1] == CHAR_LF)? 2 : 1;
   return TRUE;
-   
-  default:      
+
+  default:
   return FALSE;
   }
 
@@ -111,8 +111,8 @@ else switch(c)
 #endif
   case CHAR_LF:
   case CHAR_VT:
-  case CHAR_FF: 
-  *lenptr = 1; 
+  case CHAR_FF:
+  *lenptr = 1;
   return TRUE;
 
   case CHAR_CR:
@@ -121,25 +121,25 @@ else switch(c)
 
 #ifndef EBCDIC
 #if PCRE2_CODE_UNIT_WIDTH == 8
-  case CHAR_NEL: 
-  *lenptr = utf? 2 : 1; 
+  case CHAR_NEL:
+  *lenptr = utf? 2 : 1;
   return TRUE;
-   
+
   case 0x2028:   /* LS */
   case 0x2029:   /* PS */
-  *lenptr = 3; 
-  return TRUE;             
-   
+  *lenptr = 3;
+  return TRUE;
+
 #else  /* 16-bit or 32-bit code units */
   case CHAR_NEL:
   case 0x2028:   /* LS */
-  case 0x2029:   /* PS */ 
-  *lenptr = 1; 
+  case 0x2029:   /* PS */
+  *lenptr = 1;
   return TRUE;
 #endif
 #endif /* Not EBCDIC */
 
-  default: 
+  default:
   return FALSE;
   }
 }
@@ -166,7 +166,7 @@ Returns:       TRUE or FALSE
 */
 
 BOOL
-PRIV(was_newline)(PCRE2_SPTR ptr, uint32_t type, PCRE2_SPTR startptr, 
+PRIV(was_newline)(PCRE2_SPTR ptr, uint32_t type, PCRE2_SPTR startptr,
   uint32_t *lenptr, BOOL utf)
 {
 uint32_t c;
@@ -190,11 +190,11 @@ if (type == NLTYPE_ANYCRLF) switch(c)
   *lenptr = (ptr > startptr && ptr[-1] == CHAR_CR)? 2 : 1;
   return TRUE;
 
-  case CHAR_CR: 
-  *lenptr = 1; 
+  case CHAR_CR:
+  *lenptr = 1;
   return TRUE;
-   
-  default: 
+
+  default:
   return FALSE;
   }
 
@@ -211,31 +211,31 @@ else switch(c)
 #endif
   case CHAR_VT:
   case CHAR_FF:
-  case CHAR_CR: 
-  *lenptr = 1; 
+  case CHAR_CR:
+  *lenptr = 1;
   return TRUE;
 
 #ifndef EBCDIC
 #if PCRE2_CODE_UNIT_WIDTH == 8
-  case CHAR_NEL: 
-  *lenptr = utf? 2 : 1; 
+  case CHAR_NEL:
+  *lenptr = utf? 2 : 1;
   return TRUE;
-   
+
   case 0x2028:   /* LS */
   case 0x2029:   /* PS */
-  *lenptr = 3; 
+  *lenptr = 3;
   return TRUE;
-   
+
 #else /* 16-bit or 32-bit code units */
   case CHAR_NEL:
   case 0x2028:   /* LS */
   case 0x2029:   /* PS */
-  *lenptr = 1; 
-  return TRUE; 
+  *lenptr = 1;
+  return TRUE;
 #endif
 #endif /* Not EBCDIC */
 
-  default: 
+  default:
   return FALSE;
   }
 }

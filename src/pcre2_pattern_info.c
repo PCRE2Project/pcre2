@@ -89,17 +89,17 @@ if (where == NULL)   /* Requests field length */
     case PCRE2_INFO_NAMECOUNT:
     case PCRE2_INFO_NEWLINE:
     case PCRE2_INFO_RECURSIONLIMIT:
-    return sizeof(uint32_t); 
+    return sizeof(uint32_t);
 
     case PCRE2_INFO_FIRSTBITMAP:
     return sizeof(const uint8_t *);
 
     case PCRE2_INFO_JITSIZE:
     case PCRE2_INFO_SIZE:
-    return sizeof(size_t); 
+    return sizeof(size_t);
 
     case PCRE2_INFO_NAMETABLE:
-    return sizeof(PCRE2_SPTR); 
+    return sizeof(PCRE2_SPTR);
     }
   }
 

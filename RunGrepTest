@@ -23,7 +23,7 @@ pcre2grep=$builddir/pcre2grep
 if [ ! -x $pcre2grep ] ; then
   echo "** $pcre2grep does not exist or is not execuatble."
   exit 1
-fi    
+fi
 
 valgrind=
 while [ $# -gt 0 ] ; do

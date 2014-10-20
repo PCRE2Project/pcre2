@@ -433,7 +433,7 @@ about the pattern:
   /I  info                      show info about compiled pattern
       hex                       pattern is coded in hexadecimal
       jit[=<number>]            use JIT
-      jitverify                 verify JIT use 
+      jitverify                 verify JIT use
       locale=<name>             use this locale
       memory                    show memory used
       newline=<type>            set newline type
@@ -518,7 +518,7 @@ number in the range 0 to 7:
   7  all three modes
 .sp
 If no number is given, 7 is assumed. If JIT compilation is successful, the
-compiled JIT code will automatically be used when \fBpcre2_match()\fP is run 
+compiled JIT code will automatically be used when \fBpcre2_match()\fP is run
 for the appropriate type of match, except when incompatible run-time options
 are specified. For more details, see the
 .\" HREF
@@ -670,7 +670,7 @@ for a description of their effects.
       partial_hard (or ph)      set PCRE2_PARTIAL_HARD
       partial_soft (or ps)      set PCRE2_PARTIAL_SOFT
 .sp
-The partial matching modifiers are provided with abbreviations because they 
+The partial matching modifiers are provided with abbreviations because they
 appear frequently in tests.
 .P
 If the \fB/posix\fP modifier was present on the pattern, causing the POSIX
@@ -844,8 +844,8 @@ context via \fBpcre2_set_match_limit()\fP and \fBpcre2_set_recursion_limit()\fP
 until it finds the minimum values for each parameter that allow
 \fBpcre2_match()\fP to complete without error.
 .P
-If JIT is being used, only the match limit is relevant. If DFA matching is 
-being used, neither limit is relevant, and this modifier is ignored (with a 
+If JIT is being used, only the match limit is relevant. If DFA matching is
+being used, neither limit is relevant, and this modifier is ignored (with a
 warning message).
 .P
 The \fImatch_limit\fP number is a measure of the amount of backtracking
@@ -890,10 +890,10 @@ appears, though of course it can also be used to set a default in a
 \fB#subject\fP command. It specifies the number of pairs of offsets that are
 available for storing matching information. The default is 15.
 .P
-At least one pair of offsets is always created by 
-\fBpcre2_match_data_create()\fP, for matching with PCRE2's native API, so a 
-value of 0 is the same as 1. However a value of 0 is useful when testing the 
-POSIX API because it causes \fBregexec()\fP to be called with a NULL capture 
+At least one pair of offsets is always created by
+\fBpcre2_match_data_create()\fP, for matching with PCRE2's native API, so a
+value of 0 is the same as 1. However a value of 0 is useful when testing the
+POSIX API because it causes \fBregexec()\fP to be called with a NULL capture
 vector.
 .
 .

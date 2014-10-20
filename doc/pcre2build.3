@@ -71,11 +71,11 @@ single-byte characters, or UTF-8 strings. You can also build two other
 libraries, called \fBlibpcre2-16\fP and \fBlibpcre2-32\fP, which process
 strings that are contained in vectors of 16-bit and 32-bit code units,
 respectively. These can be interpreted either as single-unit characters or
-UTF-16/UTF-32 strings. To build these additional libraries, add one or both of 
+UTF-16/UTF-32 strings. To build these additional libraries, add one or both of
 the following to the \fBconfigure\fP command:
 .sp
   --enable-pcre16
-  --enable-pcre32 
+  --enable-pcre32
 .sp
 If you do not want the 8-bit library, add
 .sp
@@ -367,7 +367,7 @@ override this value by specifying a run-time option.
 If you add one of
 .sp
   --enable-pcre2test-libreadline
-  --enable-pcre2test-libedit 
+  --enable-pcre2test-libedit
 .sp
 to the \fBconfigure\fP command, \fBpcre2test\fP is linked with the
 \fBlibreadline\fP or\fBlibedit\fP library, respectively, and when its input is
@@ -384,8 +384,8 @@ unmodified distribution version of readline is in use), some extra
 configuration may be necessary. The INSTALL file for \fBlibreadline\fP says
 this:
 .sp
-  "Readline uses the termcap functions, but does not link with 
-  the termcap or curses library itself, allowing applications 
+  "Readline uses the termcap functions, but does not link with
+  the termcap or curses library itself, allowing applications
   which link with readline the to choose an appropriate library."
 .sp
 If your environment has not been set up so that an appropriate library is

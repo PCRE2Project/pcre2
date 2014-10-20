@@ -25,7 +25,7 @@ pcre2sample documentation for a short discussion ("man pcre2sample" if you have
 the PCRE2 man pages installed). PCRE2 is a revised API for the library, and is
 incompatible with the original PCRE API.
 
-There are actually three libraries, each supporting a different code unit 
+There are actually three libraries, each supporting a different code unit
 width. This demonstration program uses the 8-bit library.
 
 In Unix-like environments, if PCRE2 is installed in your standard system
@@ -56,8 +56,8 @@ the following line. */
 
 /* #define PCRE2_STATIC */
 
-/* This macro must be defined before including pcre2.h. For a program that uses 
-only one code unit width, it makes it possible to use generic function names 
+/* This macro must be defined before including pcre2.h. For a program that uses
+only one code unit width, it makes it possible to use generic function names
 such as pcre2_compile(). */
 
 #define PCRE2_CODE_UNIT_WIDTH 8
@@ -141,7 +141,7 @@ subject_length = strlen((char *)subject);
 
 re = pcre2_compile(
   pattern,               /* the pattern */
-  PCRE2_ZERO_TERMINATED, /* indicates pattern is zero-terminated */ 
+  PCRE2_ZERO_TERMINATED, /* indicates pattern is zero-terminated */
   0,                     /* default options */
   &amp;errornumber,          /* for error number */
   &amp;erroroffset,          /* for error offset */
@@ -151,9 +151,9 @@ re = pcre2_compile(
 
 if (re == NULL)
   {
-  PCRE2_UCHAR buffer[256]; 
+  PCRE2_UCHAR buffer[256];
   pcre2_get_error_message(errornumber, buffer, sizeof(buffer));
-  printf("PCRE2 compilation failed at offset %d: %s\n", (int)erroroffset, 
+  printf("PCRE2 compilation failed at offset %d: %s\n", (int)erroroffset,
     buffer);
   return 1;
   }
@@ -197,7 +197,7 @@ if (rc &lt; 0)
   return 1;
   }
 
-/* Match succeded. Get a pointer to the output vector, where string offsets are 
+/* Match succeded. Get a pointer to the output vector, where string offsets are
 stored. */
 
 ovector = pcre2_get_ovector_pointer(match_data);
@@ -210,7 +210,7 @@ printf("\nMatch succeeded at offset %d\n", (int)ovector[0]);
 * captured.                                                              *
 *************************************************************************/
 
-/* The output vector wasn't big enough. This should not happen, because we used 
+/* The output vector wasn't big enough. This should not happen, because we used
 pcre2_match_data_create_from_pattern() above. */
 
 if (rc == 0)
@@ -261,7 +261,7 @@ if (namecount &lt;= 0) printf("No named substrings\n"); else
     &amp;name_entry_size);        /* where to put the answer */
 
   /* Now we can scan the table and, for each entry, print the number, the name,
-  and the substring itself. In the 8-bit library the number is held in two 
+  and the substring itself. In the 8-bit library the number is held in two
   bytes, most significant first. */
 
   tabptr = name_table;
@@ -306,7 +306,7 @@ if (namecount &lt;= 0) printf("No named substrings\n"); else
 
 if (!find_all)     /* Check for -g */
   {
-  pcre2_match_data_free(match_data);  /* Release the memory that was used */ 
+  pcre2_match_data_free(match_data);  /* Release the memory that was used */
   pcre2_code_free(re);                /* for the match data and the pattern. */
   return 0;                           /* Exit the program. */
   }
@@ -324,7 +324,7 @@ sequence. */
 (void)pcre2_pattern_info(re, PCRE2_INFO_NEWLINE, &amp;newline);
 crlf_is_newline = newline == PCRE2_NEWLINE_ANY ||
                   newline == PCRE2_NEWLINE_CRLF ||
-                  newline == PCRE2_NEWLINE_ANYCRLF; 
+                  newline == PCRE2_NEWLINE_ANYCRLF;
 
 /* Loop for second and subsequent matches */
 
