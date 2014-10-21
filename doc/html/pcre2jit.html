@@ -79,7 +79,9 @@ second is a set of option bits, which must include at least one of
 PCRE2_JIT_COMPLETE, PCRE2_JIT_PARTIAL_HARD, or PCRE2_JIT_PARTIAL_SOFT.
 </P>
 <P>
-The returned value from <b>pcre2_jit_compile()</b> is FIXME FIXME.
+The returned value from <b>pcre2_jit_compile()</b> is zero on success, or a
+negative error code. In particular, PCRE2_ERROR_JIT_BADOPTION is returned if
+JIT is not supported or if an unknown options bit is set.
 </P>
 <P>
 PCRE2_JIT_COMPLETE requests the JIT compiler to generate code for complete
@@ -361,8 +363,12 @@ processed by <b>pcre2_jit_compile()</b>).
 <P>
 The fast path function is called <b>pcre2_jit_match()</b>, and it takes exactly
 the same arguments as <b>pcre2_match()</b>, plus one additional argument that
-must point to a JIT stack. The JIT stack arrangements described above do not
-apply. The return values are the same as for <b>pcre2_match()</b>.
+must either point to a JIT stack or be NULL. In the latter case, if a callback
+function has been set up by <b>pcre2_jit_stack_alloc()</b>, it is called.
+Otherwise the system stack is used. The return values are the same as for
+<b>pcre2_match()</b>, plus PCRE2_ERROR_JIT_BADOPTION if a matching mode (partial
+or complete) is requested that was not compiled. Unsupported option bits are
+ignored.
 </P>
 <P>
 When you call <b>pcre2_match()</b>, as well as testing for invalid options, a
@@ -391,7 +397,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC12" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 29 September 2014
+Last updated: 21 October 2014
 <br>
 Copyright &copy; 1997-2014 University of Cambridge.
 <br>

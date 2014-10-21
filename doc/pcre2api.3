@@ -319,7 +319,7 @@ performance. The JIT-specific functions are discussed in the
 .\"
 documentation.
 .P
-A second matching function, \fBpcre2_dfa_exec()\fP, which is not
+A second matching function, \fBpcre2_dfa_match()\fP, which is not
 Perl-compatible, is also provided. This uses a different algorithm for the
 matching. The alternative algorithm finds all possible matches (at a given
 point in the subject), and scans the subject just once (unless there are
@@ -606,17 +606,13 @@ function should return zero if all is well, or non-zero to force an error.
 A match context is required if you want to change the default values of any
 of the following match-time parameters:
 .sp
-  What \eR matches (Unicode newlines or CR, LF, CRLF only);
-  A callout function;
-  The limit for calling \fImatch()\fP;
-  The limit for calling \fImatch()\fP recursively;
-  The newline character sequence;
+  A callout function
+  The limit for calling \fImatch()\fP
+  The limit for calling \fImatch()\fP recursively
 .sp
 A match context is also required if you are using custom memory management.
 If none of these apply, just pass NULL as the context argument of
 \fBpcre2_match()\fP, \fBpcre2_dfa_match()\fP, or \fBpcre2_jit_match()\fP.
-Changing the newline value or what \eR matches at match time disables the use
-of JIT via \fBpcre2_match()\fP.
 .P
 A match context is created, copied, and freed by the following functions:
 .sp

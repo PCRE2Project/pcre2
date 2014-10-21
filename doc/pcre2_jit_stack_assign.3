@@ -1,0 +1,53 @@
+.TH PCRE2_JIT_STACK_ASSIGN 3 "21 October 2014" "PCRE2 10.0"
+.SH NAME
+PCRE2 - Perl-compatible regular expressions (revised API)
+.SH SYNOPSIS
+.rs
+.sp
+.B #include <pcre2.h>
+.PP
+.nf
+.B void pcre2_jit_stack_assign(const pcre2_code *\fIcode\fP,
+.B "  pcre2_jit_callback \fIcallback_function\fP, void *\fIcallback_data\fP);"
+.fi
+.
+.SH DESCRIPTION
+.rs
+.sp
+This function provides control over the memory used as a stack at run-time by a
+call to \fBpcre2_match()\fP or \fBpcre2_jit_match()\fP with a pattern that has
+been successfully processed by the JIT compiler. The arguments are:
+.sp
+  code           the pointer returned by \fBpcre2_compile()\fP
+  callback       a callback function
+  callback_data  a JIT stack or a value to be passed to the callback
+.P
+If \fIcallback\fP is NULL and \fIcallback_data\fP is NULL, an internal 32K
+block on the machine stack is used.
+.P
+If \fIcallback\fP is NULL and \fIcallback_data\fP is not NULL,
+\fIcallback_data\fP must be a valid JIT stack, the result of calling
+\fBpcre2_jit_stack_alloc()\fP.
+.P
+If \fIcallback\fP not NULL, it is called with \fIcallback_data\fP as an
+argument at the start of matching, in order to set up a JIT stack. If the
+result is NULL, the internal 32K stack is used; otherwise the return value must
+be a valid JIT stack, the result of calling \fBpcre2_jit_stack_alloc()\fP.
+.P
+You may safely assign the same JIT stack to multiple patterns, as long as they
+are all matched in the same thread. In a multithread application, each thread
+must use its own JIT stack. For more details, see the
+.\" HREF
+\fBpcre2jit\fP
+.\"
+page.
+.P
+There is a complete description of the PCRE2 native API in the
+.\" HREF
+\fBpcre2api\fP
+.\"
+page and a description of the POSIX API in the
+.\" HREF
+\fBpcre2posix\fP
+.\"
+page.

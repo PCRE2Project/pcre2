@@ -273,7 +273,7 @@ for (; n > 0; n--)
   while (*message++ != CHAR_NULL) {};
   if (*message == CHAR_NULL)
     {
-    sprintf(xbuff, "Internal error: no text for error %d", enumber);
+    sprintf(xbuff, "No text for error %d", enumber);
     break;
     }
   }

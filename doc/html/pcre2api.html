@@ -374,7 +374,7 @@ performance. The JIT-specific functions are discussed in the
 documentation.
 </P>
 <P>
-A second matching function, <b>pcre2_dfa_exec()</b>, which is not
+A second matching function, <b>pcre2_dfa_match()</b>, which is not
 Perl-compatible, is also provided. This uses a different algorithm for the
 matching. The alternative algorithm finds all possible matches (at a given
 point in the subject), and scans the subject just once (unless there are
@@ -641,17 +641,13 @@ The match context
 A match context is required if you want to change the default values of any
 of the following match-time parameters:
 <pre>
-  What \R matches (Unicode newlines or CR, LF, CRLF only);
-  A callout function;
-  The limit for calling <i>match()</i>;
-  The limit for calling <i>match()</i> recursively;
-  The newline character sequence;
+  A callout function
+  The limit for calling <i>match()</i>
+  The limit for calling <i>match()</i> recursively
 </pre>
 A match context is also required if you are using custom memory management.
 If none of these apply, just pass NULL as the context argument of
 <b>pcre2_match()</b>, <b>pcre2_dfa_match()</b>, or <b>pcre2_jit_match()</b>.
-Changing the newline value or what \R matches at match time disables the use
-of JIT via <b>pcre2_match()</b>.
 </P>
 <P>
 A match context is created, copied, and freed by the following functions:

@@ -25,6 +25,29 @@ dist_html_DATA = \
   doc/html/index.html \
   doc/html/pcre2-config.html \
   doc/html/pcre2.html \
+  doc/html/pcre2_code_free.html \
+  doc/html/pcre2_compile.html \
+  doc/html/pcre2_config.html \
+  doc/html/pcre2_dfa_match.html \
+  doc/html/pcre2_get_error_message.html \
+  doc/html/pcre2_jit_compile.html \
+  doc/html/pcre2_jit_match.html \
+  doc/html/pcre2_jit_stack_alloc.html \
+  doc/html/pcre2_jit_stack_assign.html \
+  doc/html/pcre2_jit_stack_free.html \
+  doc/html/pcre2_maketables.html \
+  doc/html/pcre2_match.html \
+  doc/html/pcre2_pattern_info.html \
+  doc/html/pcre2_substring_copy_byname.html \
+  doc/html/pcre2_substring_copy_bynumber.html \
+  doc/html/pcre2_substring_free.html \
+  doc/html/pcre2_substring_get_byname.html \
+  doc/html/pcre2_substring_length_byname.html \
+  doc/html/pcre2_substring_length_bynumber.html \
+  doc/html/pcre2_substring_list_free.html \
+  doc/html/pcre2_substring_list_get.html \
+  doc/html/pcre2_substring_nametable_scan.html \
+  doc/html/pcre2_substring_number_from_name.html \
   doc/html/pcre2api.html \
   doc/html/pcre2build.html \
   doc/html/pcre2callout.html \
@@ -44,39 +67,34 @@ dist_html_DATA = \
   doc/html/pcre2test.html \
   doc/html/pcre2unicode.html
 
-#  doc/html/pcre2_assign_jit_stack.html \
-#  doc/html/pcre2_compile.html \
-#  doc/html/pcre2_compile2.html \
-#  doc/html/pcre2_config.html \
-#  doc/html/pcre2_copy_named_substring.html \
-#  doc/html/pcre2_copy_substring.html \
-#  doc/html/pcre2_dfa_match.html \
-#  doc/html/pcre2_match.html \
-#  doc/html/pcre2_free_study.html \
-#  doc/html/pcre2_free_substring.html \
-#  doc/html/pcre2_free_substring_list.html \
-#  doc/html/pcre2_fullinfo.html \
-#  doc/html/pcre2_get_named_substring.html \
-#  doc/html/pcre2_get_stringnumber.html \
-#  doc/html/pcre2_get_stringtable_entries.html \
-#  doc/html/pcre2_get_substring.html \
-#  doc/html/pcre2_get_substring_list.html \
-#  doc/html/pcre2_jit_match.html \
-#  doc/html/pcre2_jit_stack_alloc.html \
-#  doc/html/pcre2_jit_stack_free.html \
-#  doc/html/pcre2_maketables.html \
-#  doc/html/pcre2_pattern_to_host_byte_order.html \
-#  doc/html/pcre2_refcount.html \
-#  doc/html/pcre2_study.html \
-#  doc/html/pcre2_utf16_to_host_byte_order.html \
-#  doc/html/pcre2_utf32_to_host_byte_order.html \
-#  doc/html/pcre2_version.html \
-#  doc/html/pcre2precompile.html
 
 # FIXME
 dist_man_MANS = \
   doc/pcre2-config.1 \
   doc/pcre2.3 \
+  doc/pcre2_code_free.3 \
+  doc/pcre2_compile.3 \
+  doc/pcre2_config.3 \
+  doc/pcre2_dfa_match.3 \
+  doc/pcre2_get_error_message.3 \
+  doc/pcre2_jit_compile.3 \
+  doc/pcre2_jit_match.3 \
+  doc/pcre2_jit_stack_alloc.3 \
+  doc/pcre2_jit_stack_assign.3 \
+  doc/pcre2_jit_stack_free.3 \
+  doc/pcre2_maketables.3 \
+  doc/pcre2_match.3 \
+  doc/pcre2_pattern_info.3 \
+  doc/pcre2_substring_copy_byname.3 \
+  doc/pcre2_substring_copy_bynumber.3 \
+  doc/pcre2_substring_free.3 \
+  doc/pcre2_substring_get_byname.3 \
+  doc/pcre2_substring_length_byname.3 \
+  doc/pcre2_substring_length_bynumber.3 \
+  doc/pcre2_substring_list_free.3 \
+  doc/pcre2_substring_list_get.3 \
+  doc/pcre2_substring_nametable_scan.3 \
+  doc/pcre2_substring_number_from_name.3 \
   doc/pcre2api.3 \
   doc/pcre2build.3 \
   doc/pcre2callout.3 \
@@ -95,37 +113,6 @@ dist_man_MANS = \
   doc/pcre2syntax.3 \
   doc/pcre2test.1 \
   doc/pcre2unicode.3
-
-#  doc/pcre2-16.3 \
-#  doc/pcre2-32.3 \
-#  doc/pcre2_assign_jit_stack.3 \
-#  doc/pcre2_compile.3 \
-#  doc/pcre2_compile2.3 \
-#  doc/pcre2_config.3 \
-#  doc/pcre2_copy_named_substring.3 \
-#  doc/pcre2_copy_substring.3 \
-#  doc/pcre2_dfa_match.3 \
-#  doc/pcre2_match.3 \
-#  doc/pcre2_free_study.3 \
-#  doc/pcre2_free_substring.3 \
-#  doc/pcre2_free_substring_list.3 \
-#  doc/pcre2_fullinfo.3 \
-#  doc/pcre2_get_named_substring.3 \
-#  doc/pcre2_get_stringnumber.3 \
-#  doc/pcre2_get_stringtable_entries.3 \
-#  doc/pcre2_get_substring.3 \
-#  doc/pcre2_get_substring_list.3 \
-#  doc/pcre2_jit_match.3 \
-#  doc/pcre2_jit_stack_alloc.3 \
-#  doc/pcre2_jit_stack_free.3 \
-#  doc/pcre2_maketables.3 \
-#  doc/pcre2_pattern_to_host_byte_order.3 \
-#  doc/pcre2_refcount.3 \
-#  doc/pcre2_study.3 \
-#  doc/pcre2_utf16_to_host_byte_order.3 \
-#  doc/pcre2_utf32_to_host_byte_order.3 \
-#  doc/pcre2_version.3 \
-#  doc/pcre2precompile.3
 
 # The Libtool libraries to install.  We'll add to this later.
 
