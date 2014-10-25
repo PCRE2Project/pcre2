@@ -124,6 +124,7 @@ startsize = (startsize + STACK_GROWTH_RATE - 1) & ~(STACK_GROWTH_RATE - 1);
 maxsize = (maxsize + STACK_GROWTH_RATE - 1) & ~(STACK_GROWTH_RATE - 1);
 
 jit_stack = PRIV(memctl_malloc)(sizeof(pcre2_real_jit_stack), (pcre2_memctl *)gcontext);
+if (jit_stack == NULL) return NULL;
 jit_stack->stack = sljit_allocate_stack(startsize, maxsize, &jit_stack->memctl);
 return jit_stack;
 

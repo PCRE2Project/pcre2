@@ -18,7 +18,6 @@ dist_doc_DATA = \
   doc/pcre2grep.txt \
   doc/pcre2test.txt
 
-# FIXME
 dist_html_DATA = \
   doc/html/NON-AUTOTOOLS-BUILD.txt \
   doc/html/README.txt \
@@ -27,17 +26,43 @@ dist_html_DATA = \
   doc/html/pcre2.html \
   doc/html/pcre2_code_free.html \
   doc/html/pcre2_compile.html \
+  doc/html/pcre2_compile_context_copy.html \
+  doc/html/pcre2_compile_context_create.html \
+  doc/html/pcre2_compile_context_free.html \
   doc/html/pcre2_config.html \
   doc/html/pcre2_dfa_match.html \
+  doc/html/pcre2_general_context_copy.html \
+  doc/html/pcre2_general_context_create.html \
+  doc/html/pcre2_general_context_free.html \
   doc/html/pcre2_get_error_message.html \
+  doc/html/pcre2_get_mark.html \
+  doc/html/pcre2_get_ovector_count.html \
+  doc/html/pcre2_get_ovector_pointer.html \
+  doc/html/pcre2_get_startchar.html \
   doc/html/pcre2_jit_compile.html \
+  doc/html/pcre2_jit_free_unused_memory.html \
   doc/html/pcre2_jit_match.html \
   doc/html/pcre2_jit_stack_alloc.html \
   doc/html/pcre2_jit_stack_assign.html \
   doc/html/pcre2_jit_stack_free.html \
   doc/html/pcre2_maketables.html \
   doc/html/pcre2_match.html \
+  doc/html/pcre2_match_context_copy.html \
+  doc/html/pcre2_match_context_create.html \
+  doc/html/pcre2_match_context_free.html \
+  doc/html/pcre2_match_data_create.html \
+  doc/html/pcre2_match_data_create_from_pattern.html \
+  doc/html/pcre2_match_data_free.html \
   doc/html/pcre2_pattern_info.html \
+  doc/html/pcre2_set_bsr.html \
+  doc/html/pcre2_set_callout.html \
+  doc/html/pcre2_set_character_tables.html \
+  doc/html/pcre2_set_compile_recursion_guard.html \
+  doc/html/pcre2_set_match_limit.html \
+  doc/html/pcre2_set_newline.html \
+  doc/html/pcre2_set_parens_nest_limit.html \
+  doc/html/pcre2_set_recursion_limit.html \
+  doc/html/pcre2_set_recursion_memory_management.html \
   doc/html/pcre2_substring_copy_byname.html \
   doc/html/pcre2_substring_copy_bynumber.html \
   doc/html/pcre2_substring_free.html \
@@ -67,24 +92,48 @@ dist_html_DATA = \
   doc/html/pcre2test.html \
   doc/html/pcre2unicode.html
 
-
-# FIXME
 dist_man_MANS = \
   doc/pcre2-config.1 \
   doc/pcre2.3 \
   doc/pcre2_code_free.3 \
   doc/pcre2_compile.3 \
+  doc/pcre2_compile_context_copy.3 \
+  doc/pcre2_compile_context_create.3 \
+  doc/pcre2_compile_context_free.3 \
   doc/pcre2_config.3 \
   doc/pcre2_dfa_match.3 \
+  doc/pcre2_general_context_copy.3 \
+  doc/pcre2_general_context_create.3 \
+  doc/pcre2_general_context_free.3 \
   doc/pcre2_get_error_message.3 \
+  doc/pcre2_get_mark.3 \
+  doc/pcre2_get_ovector_count.3 \
+  doc/pcre2_get_ovector_pointer.3 \
+  doc/pcre2_get_startchar.3 \
   doc/pcre2_jit_compile.3 \
+  doc/pcre2_jit_free_unused_memory.3 \
   doc/pcre2_jit_match.3 \
   doc/pcre2_jit_stack_alloc.3 \
   doc/pcre2_jit_stack_assign.3 \
   doc/pcre2_jit_stack_free.3 \
   doc/pcre2_maketables.3 \
   doc/pcre2_match.3 \
+  doc/pcre2_match_context_copy.3 \
+  doc/pcre2_match_context_create.3 \
+  doc/pcre2_match_context_free.3 \
+  doc/pcre2_match_data_create.3 \
+  doc/pcre2_match_data_create_from_pattern.3 \
+  doc/pcre2_match_data_free.3 \
   doc/pcre2_pattern_info.3 \
+  doc/pcre2_set_bsr.3 \
+  doc/pcre2_set_callout.3 \
+  doc/pcre2_set_character_tables.3 \
+  doc/pcre2_set_compile_recursion_guard.3 \
+  doc/pcre2_set_match_limit.3 \
+  doc/pcre2_set_newline.3 \
+  doc/pcre2_set_parens_nest_limit.3 \
+  doc/pcre2_set_recursion_limit.3 \
+  doc/pcre2_set_recursion_memory_management.3 \
   doc/pcre2_substring_copy_byname.3 \
   doc/pcre2_substring_copy_bynumber.3 \
   doc/pcre2_substring_free.3 \
@@ -151,7 +200,6 @@ EXTRA_DIST += \
 # These files contain maintenance information
 
 EXTRA_DIST += \
-  doc/perltest.txt \
   NON-AUTOTOOLS-BUILD \
   HACKING
 
@@ -569,7 +617,7 @@ EXTRA_DIST += \
   testdata/testoutputEBC \
   testdata/wintestinput3 \
   testdata/wintestoutput3 \
-  perltest.pl
+  perltest.sh
 
 CLEANFILES += \
 	testsavedregex \

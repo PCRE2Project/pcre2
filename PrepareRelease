@@ -191,7 +191,7 @@ files="\
   RunGrepTest \
   RunTest \
   pcre2-config.in \
-  perltest.pl \
+  perltest.sh \
   libpcre2-8.pc.in \
   libpcre2-16.pc.in \
   libpcre2-32.pc.in \

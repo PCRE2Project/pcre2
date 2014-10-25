@@ -2037,7 +2037,7 @@ HOW PCRE2_MATCH() RETURNS A STRING AND CAPTURED SUBSTRINGS
        The  offset  of  the character at which the successful match started is
        returned by pcre2_get_startchar(). This can be different to  the  value
        of  ovector[0]  if  the  pattern contains the \K escape sequence. Note,
-       however, the \K has no effect for a partial match.
+       however, that \K has no effect for a partial match.
 
    Error return values from pcre2_match()
 

@@ -61,6 +61,7 @@ if (oveccount < 1) oveccount = 1;
 yield = PRIV(memctl_malloc)(
   sizeof(pcre2_match_data) + 3*oveccount*sizeof(PCRE2_SIZE),
   (pcre2_memctl *)gcontext);
+if (yield == NULL) return NULL;
 yield->oveccount = oveccount;
 return yield;
 }

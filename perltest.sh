@@ -1,20 +1,61 @@
-#! /usr/bin/env perl
+#! /bin/sh
 
-# Program for testing regular expressions with perl to check that PCRE2 handles
-# them the same. This version needs to have "use utf8" at the start for running
-# the UTF-8 tests, but *not* for the other tests. The only way I've found for
-# doing this is to cat this line in explicitly in the RunPerlTest script. I've
-# also used this method to supply "require Encode" for the UTF-8 tests, so that
-# the main test will still run where Encode is not installed.
+# Script for testing regular expressions with perl to check that PCRE2 handles
+# them the same. The Perl code has to have "use utf8" and "require Encode" at
+# the start when running UTF-8 tests, but *not* for non-utf8 tests. (The
+# "require" would actually be OK for non-utf8-tests, but is not always
+# installed, so this way the script will always run for these tests.)
+#
+# The desired effect is achieved by making this a shell script that passes the
+# Perl script to Perl through a pipe. If the first argument is "-utf8", a
+# suitable prefix is set up. 
+#
+# The remaining arguments, if any, are passed to Perl. They are an input file
+# and an output file. If there is one argument, the output is written to
+# STDOUT. If Perl receives no arguments, it opens /dev/tty as input, and writes
+# output to STDOUT. (I haven't found a way of getting it to use STDIN, because
+# of the contorted piping input.)
 
-#use utf8;
-#require Encode;
+perl=perl
+prefix=''
+if [ $# > 0 -a "$1" = "-utf8" ] ; then
+  prefix="use utf8; require Encode;"
+  shift 
+fi
+
+
+# The Perl script that follows has a similar specification to pcre2test, and so
+# can be given identical input, except that input patterns can be followed only
+# by Perl's lower case modifiers and certain other pcre2test modifiers that are
+# either handled or ignored:
+# 
+#   aftertext          interpreted as "print $' afterwards"
+#   afteralltext       ignored
+#   dupnames           ignored (Perl always allows)
+#   mark               ignored
+#   no_auto_possess    ignored
+#   no_start_optimize  ignored  
+#   ucp                sets Perl's /u modifier   
+#   utf                invoke UTF-8 functionality  
+# 
+# The data lines must not have any pcre2test modifiers. They are processed as
+# Perl double-quoted strings, so if they contain " $ or @ characters, these
+# have to be escaped. For this reason, all such characters in the
+# Perl-compatible testinput1 and testinput4 files are escaped so that they can
+# be used for perltest as well as for pcre2test. The output from this script
+# should be same as from pcre2test, apart from the initial identifying banner.
+# 
+# The other testinput files are not suitable for feeding to perltest.sh,
+# because they make use of the special modifiers that pcre2test uses for
+# testing features of PCRE2. Some of these files also contain malformed regular
+# expressions, in order to check that PCRE2 diagnoses them correctly.
+
+(echo "$prefix" ; cat <<'PERLEND'
 
 # Function for turning a string into a string of printing chars.
 
 sub pchars {
 my($t) = "";
-
 if ($utf8)
   {
   @p = unpack('U*', $_[0]);
@@ -33,14 +74,13 @@ else
       else { $t .= sprintf("\\x%02x", ord $c); }
     }
   }
-
 $t;
 }
 
 
-# Read lines from named file or stdin and write to named file or stdout; lines
-# consist of a regular expression, in delimiters and optionally followed by
-# options, followed by a set of test data, terminated by an empty line.
+# Read lines from a named file or stdin and write to a named file or stdout;
+# lines consist of a regular expression, in delimiters and optionally followed
+# by options, followed by a set of test data, terminated by an empty line.
 
 # Sort out the input and output files
 
@@ -48,8 +88,14 @@ if (@ARGV > 0)
   {
   open(INFILE, "<$ARGV[0]") || die "Failed to open $ARGV[0]\n";
   $infile = "INFILE";
+  $interact = 0;
   }
-else { $infile = "STDIN"; }
+else 
+  { 
+  open(INFILE, "</dev/tty") || die "Failed to open /dev/tty\n";
+  $infile = "INFILE";
+  $interact = 1; 
+  }
 
 if (@ARGV > 1)
   {
@@ -65,18 +111,18 @@ printf($outfile "Perl $] Regular Expressions\n\n");
 NEXT_RE:
 for (;;)
   {
-  printf "  re> " if $infile eq "STDIN";
+  printf "  re> " if $interact;
   last if ! ($_ = <$infile>);
-  printf $outfile "$_" if $infile ne "STDIN";
+  printf $outfile "$_" if ! $interact;
   next if ($_ =~ /^\s*$/ || $_ =~ /^#/);
 
   $pattern = $_;
 
   while ($pattern !~ /^\s*(.).*\1/s)
     {
-    printf "    > " if $infile eq "STDIN";
+    printf "    > " if $interact;
     last if ! ($_ = <$infile>);
-    printf $outfile "$_" if $infile ne "STDIN";
+    printf $outfile "$_" if ! $interact;
     $pattern .= $_;
     }
 
@@ -126,7 +172,7 @@ for (;;)
   if ($@)
     {
     printf $outfile "Error: $@";
-    if ($infile != "STDIN")
+    if (! $interact)
       {
       for (;;)
         {
@@ -155,10 +201,10 @@ for (;;)
 
   for (;;)
     {
-    printf "data> " if $infile eq "STDIN";
+    printf "data> " if $interact;
     last NEXT_RE if ! ($_ = <$infile>);
     chomp;
-    printf $outfile "$_\n" if $infile ne "STDIN";
+    printf $outfile "$_\n" if ! $interact;
 
     s/\s+$//;  # Remove trailing space
     s/^\s+//;  # Remove leading space
@@ -243,4 +289,7 @@ for (;;)
 
 # printf $outfile "\n";
 
+PERLEND
+) | $perl - $@
+   
 # End
