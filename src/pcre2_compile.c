@@ -7677,22 +7677,6 @@ code follows after that. */
 codestart = (PCRE2_SPTR)((uint8_t *)re + sizeof(pcre2_real_code)) +
   re->name_entry_size * re->name_count;
 
-
-/* FIXME: Is this necessary? The nullpad field is at the end; it's there to
-help in the case when a regex compiled on a system with 4-byte pointers is run
-on another with 8-byte pointers. */
-
-#ifdef FIXME
-#if PCRE2_CODE_UNIT_WIDTH == 32
-re->dummy = 0;
-#else
-re->dummy1 = re->dummy2 = re->dummy3 = 0;
-#endif
-#endif
-
-
-
-
 /* Update the compile data block for the actual compile. The starting points of
 the name/number translation table and of the code are passed around in the
 compile data block. The start/end pattern and initial options are already set

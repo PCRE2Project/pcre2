@@ -83,15 +83,10 @@ PCRE2_EXP_DEFN void PCRE2_CALL_CONVENTION
 pcre2_jit_free_unused_memory(pcre2_general_context *gcontext)
 {
 #ifndef SUPPORT_JIT
-
 (void)gcontext;     /* Suppress warning */
-
 #else  /* SUPPORT_JIT */
-
-/* Dummy code */
 SLJIT_UNUSED_ARG(gcontext);
 sljit_free_unused_memory_exec();
-
 #endif  /* SUPPORT_JIT */
 }
 
@@ -141,18 +136,15 @@ pcre2_jit_stack_assign(const pcre2_code *code, pcre2_jit_callback callback,
   void *callback_data)
 {
 #ifndef SUPPORT_JIT
-
 (void)code;
 (void)callback;
 (void)callback_data;
-
 #else  /* SUPPORT_JIT */
 
 pcre2_real_code *re = (pcre2_real_code *)code;
 executable_functions *functions;
 
-if (re == NULL)
-  return;
+if (re == NULL) return;
 
 functions = (executable_functions *)re->executable_jit;
 if (functions != NULL)

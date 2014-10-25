@@ -5522,7 +5522,7 @@ while (argc > 1 && argv[op][0] == '-')
     def_patctl.jit = 7;  /* full & partial */
 #ifndef SUPPORT_JIT
     fprintf(stderr, "** Warning: JIT support is not available: "
-                    "-jit calls dummy functions.\n");
+                    "-jit calls functions that do nothing.\n");
 #endif
     }
 
