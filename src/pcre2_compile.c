@@ -304,10 +304,17 @@ static const short int escapes[] = {
 #else
 
 /* This is the "abnormal" table for EBCDIC systems without UTF-8 support.
-It runs from 'a' to '9'. */
+It runs from 'a' to '9'. For some minimal testing of EBCDIC features, the code 
+is sometimes compiled on an ASCII system. In this case, we must not use CHAR_a 
+because it is defined as 'a', which of course picks up the ASCII value. */
 
+#if 'a' == 0x81                 /* Check for a real EBCDIC environment */
 #define ESCAPES_FIRST  CHAR_a
 #define ESCAPES_LAST   CHAR_9
+#else                           /* Testing in an ASCII environment */
+#define ESCAPES_FIRST  ((unsigned char)'\x81')   /* EBCDIC 'a' */
+#define ESCAPES_LAST   ((unsigned char)'\xf9')   /* EBCDIC '9' */
+#endif
 
 static const short int escapes[] = {
 /*  80 */            7, -ESC_b,       0, -ESC_d, ESC_e,  ESC_f,      0,
@@ -328,7 +335,7 @@ static const short int escapes[] = {
 /*  F8 */     0,     0
 };
 
-#endif
+#endif   /* EBCDIC */
 
 
 /* Table of special "verbs" like (*PRUNE). This is a short table, so it is
