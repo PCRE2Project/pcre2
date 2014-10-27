@@ -1,11 +1,9 @@
-.TH PCRE2JIT 3 "21 October 2014" "PCRE2 10.00"
+.TH PCRE2JIT 3 "27 October 2014" "PCRE2 10.00"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 JUST-IN-TIME COMPILER SUPPORT"
 .rs
 .sp
-FIXME: This needs checking over once JIT support is implemented.
-.P
 Just-in-time compiling is a heavyweight optimization that can greatly speed up
 pattern matching. However, it comes at the cost of extra processing before the
 match is performed. Therefore, it is of most benefit when the same pattern is
@@ -55,9 +53,12 @@ compiled pattern pointer that was returned by \fBpcre2_compile()\fP, and the
 second is a set of option bits, which must include at least one of
 PCRE2_JIT_COMPLETE, PCRE2_JIT_PARTIAL_HARD, or PCRE2_JIT_PARTIAL_SOFT.
 .P
-The returned value from \fBpcre2_jit_compile()\fP is zero on success, or a
-negative error code. In particular, PCRE2_ERROR_JIT_BADOPTION is returned if
-JIT is not supported or if an unknown options bit is set.
+If JIT support is not available, a call to \fBpcre2_jit_comple()\fP does
+nothing and returns PCRE2_ERROR_JIT_BADOPTION. Otherwise, the compiled pattern
+is passed to the JIT compiler, which turns it into machine code that executes
+much faster than the normal interpretive code, but yields exactly the same
+results. The returned value from \fBpcre2_jit_compile()\fP is zero on success,
+or a negative error code.
 .P
 PCRE2_JIT_COMPLETE requests the JIT compiler to generate code for complete
 matches. If you want to run partial matches using the PCRE2_PARTIAL_HARD or
@@ -75,11 +76,6 @@ described in the section entitled
 "Controlling the JIT stack"
 .\"
 below.
-.P
-If JIT support is not available, a call to \fBpcre2_jit_comple()\fP does
-nothing and returns FIXME. Otherwise, the compiled pattern is passed to the JIT
-compiler, which turns it into machine code that executes much faster than the
-normal interpretive code, but yields exactly the same results.
 .P
 There are some \fBpcre2_match()\fP options that are not supported by JIT, and
 there are also some pattern items that JIT cannot handle. Details are given
@@ -296,6 +292,21 @@ No, thanks to Windows. If POSIX threads were used everywhere, we could throw
 out this complicated API.
 .
 .
+.SH "FREEING JIT SPECULATIVE MEMORY"
+.rs
+.sp
+.nf
+.B void pcre2_jit_free_unused_memory(pcre2_general_context *\fIgcontext\fP);
+.fi
+.P
+The JIT executable allocator does not free all memory when it is possible.
+It expects new allocations, and keeps some free memory around to improve
+allocation speed. However, in low memory conditions, it might be better to free
+all possible memory. You can cause this to happen by calling
+pcre2_jit_free_unused_memory(). Its argument is a general context, for custom
+memory management, or NULL for standard memory management.
+.
+.
 .SH "EXAMPLE CODE"
 .rs
 .sp
@@ -375,6 +386,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 21 October 2014
+Last updated: 27 October 2014
 Copyright (c) 1997-2014 University of Cambridge.
 .fi

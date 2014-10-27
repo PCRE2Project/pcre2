@@ -1,4 +1,4 @@
-.TH PCRE2_JIT_FREE_UNUSED_MEMORY 3 "24 October 2014" "PCRE2 10.00"
+.TH PCRE2_JIT_FREE_UNUSED_MEMORY 3 "27 October 2014" "PCRE2 10.00"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH SYNOPSIS
@@ -15,7 +15,10 @@ PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
 This function frees unused JIT executable memory. The argument is a general
 context, for custom memory management, or NULL for standard memory management.
-FIXME: more detail needed.
+JIT memory allocation retains some memory in order to improve future JIT 
+compilation speed. In low memory conditions, 
+\fBpcre2_jit_free_unused_memory()\fB can be used to cause this memory to be 
+freed.
 .P
 There is a complete description of the PCRE2 native API in the
 .\" HREF
