@@ -543,17 +543,6 @@ EXTRA_DIST += \
   testdata/grepoutput8 \
   testdata/grepoutputN \
   testdata/greppatN4 \
-  testdata/saved16 \
-  testdata/saved16BE-1 \
-  testdata/saved16BE-2 \
-  testdata/saved16LE-1 \
-  testdata/saved16LE-2 \
-  testdata/saved32 \
-  testdata/saved32BE-1 \
-  testdata/saved32BE-2 \
-  testdata/saved32LE-1 \
-  testdata/saved32LE-2 \
-  testdata/saved8 \
   testdata/testinput1 \
   testdata/testinput2 \
   testdata/testinput3 \
@@ -572,14 +561,6 @@ EXTRA_DIST += \
   testdata/testinput16 \
   testdata/testinput17 \
   testdata/testinput18 \
-  testdata/testinput19 \
-  testdata/testinput20 \
-  testdata/testinput21 \
-  testdata/testinput22 \
-  testdata/testinput23 \
-  testdata/testinput24 \
-  testdata/testinput25 \
-  testdata/testinput26 \
   testdata/testinputEBC \
   testdata/testoutput1 \
   testdata/testoutput2 \
@@ -589,44 +570,39 @@ EXTRA_DIST += \
   testdata/testoutput4 \
   testdata/testoutput5 \
   testdata/testoutput6 \
-  testdata/testoutput7 \
-  testdata/testoutput8 \
+  testdata/testoutput8-8 \
+  testdata/testoutput8-16 \
+  testdata/testoutput8-32 \
   testdata/testoutput9 \
   testdata/testoutput10 \
-  testdata/testoutput11-8 \
   testdata/testoutput11-16 \
   testdata/testoutput11-32 \
-  testdata/testoutput12 \
+  testdata/testoutput12-16 \
+  testdata/testoutput12-32 \
   testdata/testoutput13 \
   testdata/testoutput14 \
   testdata/testoutput15 \
   testdata/testoutput16 \
   testdata/testoutput17 \
-  testdata/testoutput18-16 \
-  testdata/testoutput18-32 \
-  testdata/testoutput19 \
-  testdata/testoutput20 \
-  testdata/testoutput21-16 \
-  testdata/testoutput21-32 \
-  testdata/testoutput22-16 \
-  testdata/testoutput22-32 \
-  testdata/testoutput23 \
-  testdata/testoutput24 \
-  testdata/testoutput25 \
-  testdata/testoutput26 \
+  testdata/testoutput18 \
   testdata/testoutputEBC \
-  testdata/wintestinput3 \
-  testdata/wintestoutput3 \
   perltest.sh
+  
+# RunTest and RunGrepTest should clean up after themselves, but just in case
+# they don't, add their working files to CLEANFILES. 
 
 CLEANFILES += \
-	testsavedregex \
+        test3input \
+        test3output \
+        test3outputA \
+        test3outputB \
+        testtry \
+        teststdout \
 	teststderr \
         teststderrgrep \
-        testtemp* \
-	testtry \
+        testtemp1grep \
+        testtemp2grep \
         testtrygrep \
-        testNinput \
         testNinputgrep
 
 ## ------------ End of testing -------------

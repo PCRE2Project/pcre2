@@ -688,6 +688,6 @@ fi
 done
 
 # Clean up local working files
-rm -f test3input test3output test3outputA testNinput testsaved* teststdout testtry
+rm -f test3input test3output test3outputA test3outputB teststdout testtry
 
 # End
