@@ -181,10 +181,12 @@ Output the PCRE2 version number and then exit.
 .rs
 .sp
 If \fBpcre2test\fP is given two filename arguments, it reads from the first and
-writes to the second. If it is given only one filename argument, it reads from
+writes to the second. If the first name is "-", input is taken from the
+standard input. If \fBpcre2test\fP is given only one argument, it reads from
 that file and writes to stdout. Otherwise, it reads from stdin and writes to
-stdout, and prompts for each line of input, using "re>" to prompt for regular
-expression patterns, and "data>" to prompt for subject lines.
+stdout. When the input is a terminal, it prompts for each line of input, using
+"re>" to prompt for regular expression patterns, and "data>" to prompt for
+subject lines.
 .P
 When \fBpcre2test\fP is built, a configuration option can specify that it
 should be linked with the \fBlibreadline\fP or \fBlibedit\fP library. When this

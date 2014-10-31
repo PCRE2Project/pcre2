@@ -66,15 +66,16 @@ it references only the enabled library functions. */
 #include <locale.h>
 #include <errno.h>
 
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+
 /* Both libreadline and libedit are optionally supported. The user-supplied
 original patch uses readline/readline.h for libedit, but in at least one system
 it is installed as editline/readline.h, so the configuration code now looks for
 that first, falling back to readline/readline.h. */
 
 #if defined(SUPPORT_LIBREADLINE) || defined(SUPPORT_LIBEDIT)
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
 #if defined(SUPPORT_LIBREADLINE)
 #include <readline/readline.h>
 #include <readline/history.h>
@@ -86,6 +87,11 @@ that first, falling back to readline/readline.h. */
 #endif
 #endif
 #endif
+
+/* Put the test for interactive input into a macro so that it can be changed if 
+required for different environments. */
+
+#define INTERACTIVE(f) isatty(fileno(f))
 
 
 /* ---------------------- System-specific definitions ---------------------- */
@@ -2537,7 +2543,7 @@ for (;;)
     newline, so we must put it back again, to be compatible with fgets(). */
 
 #if defined(SUPPORT_LIBREADLINE) || defined(SUPPORT_LIBEDIT)
-    if (isatty(fileno(f)))
+    if (INTERACTIVE(f))
       {
       size_t len;
       char *s = readline(prompt);
@@ -2553,10 +2559,10 @@ for (;;)
     else
 #endif
 
-    /* Read the next line by normal means, prompting if the file is stdin. */
+    /* Read the next line by normal means, prompting if the file is a tty. */
 
       {
-      if (f == stdin) printf("%s", prompt);
+      if (INTERACTIVE(f)) printf("%s", prompt);
       if (fgets((char *)here, rlen,  f) == NULL)
         return (here == start)? NULL : start;
       }
@@ -3624,7 +3630,7 @@ for(;;)
     fprintf(outfile, "** Unexpected EOF\n");
     return PR_ABEND;
     }
-  if (infile != stdin) fprintf(outfile, "%s", (char *)p);
+  if (!INTERACTIVE(infile)) fprintf(outfile, "%s", (char *)p);
   }
 
 /* If the first character after the delimiter is backslash, make the pattern
@@ -5637,7 +5643,7 @@ def_datctl.cfail[0] = def_datctl.cfail[1] = CFAIL_UNSET;
 
 /* Scan command line options. */
 
-while (argc > 1 && argv[op][0] == '-')
+while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
   {
   const char *endptr;
   char *arg = argv[op];
@@ -5883,7 +5889,7 @@ if ((arg_pattern != NULL &&
 infile = stdin;
 outfile = stdout;
 
-if (argc > 1)
+if (argc > 1 && strcmp(argv[op], "-") != 0)
   {
   infile = fopen(argv[op], INPUT_MODE);
   if (infile == NULL)
@@ -5927,7 +5933,7 @@ while (notdone)
 
   if (extend_inputline(infile, buffer, expectdata? "data> " : "  re> ") == NULL)
     break;
-  if (infile != stdin) fprintf(outfile, "%s", (char *)buffer);
+  if (!INTERACTIVE(infile)) fprintf(outfile, "%s", (char *)buffer);
   fflush(outfile);
   p = buffer;
 
@@ -5987,7 +5993,7 @@ while (notdone)
       }
     }
 
-  if (rc == PR_SKIP && infile != stdin) skipping = TRUE;
+  if (rc == PR_SKIP && !INTERACTIVE(infile)) skipping = TRUE;
   else if (rc == PR_ABEND)
     {
     fprintf(outfile, "** pcre2test run abandoned\n");
@@ -5998,7 +6004,7 @@ while (notdone)
 
 /* Finish off a normal run. */
 
-if (infile == stdin) fprintf(outfile, "\n");
+if (INTERACTIVE(infile)) fprintf(outfile, "\n");
 
 if (showtotaltimes)
   {
