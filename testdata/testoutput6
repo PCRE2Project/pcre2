@@ -7424,7 +7424,7 @@ No match
 
 /((?2))((?1))/
     abc
-Failed: error -49: nested recursion at the same subject position
+Failed: error -50: nested recursion at the same subject position
 
 /(?(R)a+|(?R)b)/
     aaaabcde
@@ -7444,7 +7444,7 @@ Failed: error -39: backreference condition or recursion test not supported for D
 
 /(?(R)a*(?1)|((?R))b)/
     aaaabcde
-Failed: error -49: nested recursion at the same subject position
+Failed: error -50: nested recursion at the same subject position
 
 /(a+)/no_auto_possess
     aaaa\=ovector=3

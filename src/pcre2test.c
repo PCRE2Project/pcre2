@@ -319,29 +319,30 @@ enum { MOD_CTC,    /* Applies to a compile context */
 /* Control bits. Some apply to compiling, some to matching, but some can be set
 either on a pattern or a data line, so they must all be distinct. */
 
-#define CTL_AFTERTEXT        0x00000001u
-#define CTL_ALLAFTERTEXT     0x00000002u
-#define CTL_ALLCAPTURES      0x00000004u
-#define CTL_ALLUSEDTEXT      0x00000008u
-#define CTL_ALTGLOBAL        0x00000010u
-#define CTL_BINCODE          0x00000020u
-#define CTL_CALLOUT_CAPTURE  0x00000040u
-#define CTL_CALLOUT_NONE     0x00000080u
-#define CTL_DFA              0x00000100u
-#define CTL_FINDLIMITS       0x00000200u
-#define CTL_FULLBINCODE      0x00000400u
-#define CTL_GETALL           0x00000800u
-#define CTL_GLOBAL           0x00001000u
-#define CTL_HEXPAT           0x00002000u
-#define CTL_INFO             0x00004000u
-#define CTL_JITVERIFY        0x00008000u
-#define CTL_MARK             0x00010000u
-#define CTL_MEMORY           0x00020000u
-#define CTL_PATLEN           0x00040000u
-#define CTL_POSIX            0x00080000u
+#define CTL_AFTERTEXT          0x00000001u
+#define CTL_ALLAFTERTEXT       0x00000002u
+#define CTL_ALLCAPTURES        0x00000004u
+#define CTL_ALLUSEDTEXT        0x00000008u
+#define CTL_ALTGLOBAL          0x00000010u
+#define CTL_BINCODE            0x00000020u
+#define CTL_CALLOUT_CAPTURE    0x00000040u
+#define CTL_CALLOUT_NONE       0x00000080u
+#define CTL_DFA                0x00000100u
+#define CTL_FINDLIMITS         0x00000200u
+#define CTL_FULLBINCODE        0x00000400u
+#define CTL_GETALL             0x00000800u
+#define CTL_GLOBAL             0x00001000u
+#define CTL_HEXPAT             0x00002000u
+#define CTL_INFO               0x00004000u
+#define CTL_JITVERIFY          0x00008000u
+#define CTL_MARK               0x00010000u
+#define CTL_MEMORY             0x00020000u
+#define CTL_PATLEN             0x00040000u
+#define CTL_POSIX              0x00080000u
+#define CTL_STARTCHAR          0x00100000u
 
-#define CTL_BSR_SET          0x00100000u  /* This is informational */
-#define CTL_NL_SET           0x00200000u  /* This is informational */
+#define CTL_BSR_SET          0x80000000u  /* This is informational */
+#define CTL_NL_SET           0x40000000u  /* This is informational */
 
 #define CTL_DEBUG            (CTL_FULLBINCODE|CTL_INFO)  /* For setting */
 #define CTL_ANYINFO          (CTL_DEBUG|CTL_BINCODE)     /* For testing */
@@ -358,7 +359,8 @@ data line. */
                     CTL_GLOBAL|\
                     CTL_JITVERIFY|\
                     CTL_MARK|\
-                    CTL_MEMORY)
+                    CTL_MEMORY|\
+                    CTL_STARTCHAR)
 
 typedef struct patctl {    /* Structure for pattern modifiers. */
   uint32_t  options;       /* Must be in same position as datctl */
@@ -476,6 +478,7 @@ static modstruct modlist[] = {
   { "ps",                  MOD_DAT,  MOD_OPT, PCRE2_PARTIAL_SOFT,        DO(options) },
   { "recursion_limit",     MOD_CTM,  MOD_INT, 0,                         MO(recursion_limit) },
   { "stackguard",          MOD_PAT,  MOD_INT, 0,                         PO(stackguard_test) },
+  { "startchar",           MOD_PND,  MOD_CTL, CTL_STARTCHAR,             PO(control) },
   { "tables",              MOD_PAT,  MOD_INT, 0,                         PO(tables_id) },
   { "ucp",                 MOD_PATP, MOD_OPT, PCRE2_UCP,                 PO(options) },
   { "ungreedy",            MOD_PAT,  MOD_OPT, PCRE2_UNGREEDY,            PO(options) },
@@ -498,6 +501,10 @@ static modstruct modlist[] = {
   PCRE2_NOTBOL|PCRE2_NOTEMPTY|PCRE2_NOTEOL)
 
 #define POSIX_SUPPORTED_MATCH_CONTROLS (CTL_AFTERTEXT|CTL_ALLAFTERTEXT)
+
+/* Controls that are mutually exclusive. */
+
+#define EXCLUSIVE_DAT_CONTROLS (CTL_ALLUSEDTEXT|CTL_STARTCHAR)
 
 /* Table of single-character abbreviated modifiers. The index field is
 initialized to -1, but the first time the modifier is encountered, it is filled
@@ -654,7 +661,7 @@ static uint8_t *dbuffer = NULL;
 
 #ifdef SUPPORT_PCRE2_8
 static pcre2_code_8             *compiled_code8;
-static pcre2_general_context_8  *general_context8;
+static pcre2_general_context_8  *general_context8, *general_context_copy8;
 static pcre2_compile_context_8  *pat_context8, *default_pat_context8;
 static pcre2_match_context_8    *dat_context8, *default_dat_context8;
 static pcre2_match_data_8       *match_data8;
@@ -662,7 +669,7 @@ static pcre2_match_data_8       *match_data8;
 
 #ifdef SUPPORT_PCRE2_16
 static pcre2_code_16            *compiled_code16;
-static pcre2_general_context_16 *general_context16;
+static pcre2_general_context_16 *general_context16, *general_context_copy16;
 static pcre2_compile_context_16 *pat_context16, *default_pat_context16;
 static pcre2_match_context_16   *dat_context16, *default_dat_context16;
 static pcre2_match_data_16      *match_data16;
@@ -672,7 +679,7 @@ static uint16_t *pbuffer16 = NULL;
 
 #ifdef SUPPORT_PCRE2_32
 static pcre2_code_32            *compiled_code32;
-static pcre2_general_context_32 *general_context32;
+static pcre2_general_context_32 *general_context32, *general_context_copy32;
 static pcre2_compile_context_32 *pat_context32, *default_pat_context32;
 static pcre2_match_context_32   *dat_context32, *default_dat_context32;
 static pcre2_match_data_32      *match_data32;
@@ -771,10 +778,31 @@ are supported. */
   else \
     r = pcre2_get_error_message_32(a,G(b,32),G(G(b,32),_size))
 
+#define PCRE2_GET_OVECTOR_COUNT(a,b) \
+  if (test_mode == PCRE8_MODE) \
+    a = pcre2_get_ovector_count_8(G(b,8)); \
+  else if (test_mode == PCRE16_MODE) \
+    a = pcre2_get_ovector_count_16(G(b,16)); \
+  else \
+    a = pcre2_get_ovector_count_32(G(b,32))
+
+#define PCRE2_GET_STARTCHAR(a,b) \
+  if (test_mode == PCRE8_MODE) \
+    a = pcre2_get_startchar_8(G(b,8)); \
+  else if (test_mode == PCRE16_MODE) \
+    a = pcre2_get_startchar_16(G(b,16)); \
+  else \
+    a = pcre2_get_startchar_32(G(b,32))
+
 #define PCRE2_JIT_COMPILE(a,b) \
   if (test_mode == PCRE8_MODE) pcre2_jit_compile_8(G(a,8),b); \
   else if (test_mode == PCRE16_MODE) pcre2_jit_compile_16(G(a,16),b); \
   else pcre2_jit_compile_32(G(a,32),b)
+
+#define PCRE2_JIT_FREE_UNUSED_MEMORY(a) \
+  if (test_mode == PCRE8_MODE) pcre2_jit_free_unused_memory_8(G(a,8)); \
+  else if (test_mode == PCRE16_MODE) pcre2_jit_free_unused_memory_16(G(a,16)); \
+  else pcre2_jit_free_unused_memory_32(G(a,32))
 
 #define PCRE2_JIT_STACK_ALLOC(a,b,c,d) \
   if (test_mode == PCRE8_MODE) \
@@ -820,6 +848,14 @@ are supported. */
     G(a,16) = pcre2_match_data_create_16(b,c); \
   else \
     G(a,32) = pcre2_match_data_create_32(b,c)
+
+#define PCRE2_MATCH_DATA_CREATE_FROM_PATTERN(a,b,c) \
+  if (test_mode == PCRE8_MODE) \
+    G(a,8) = pcre2_match_data_create_from_pattern_8(G(b,8),c); \
+  else if (test_mode == PCRE16_MODE) \
+    G(a,16) = pcre2_match_data_create_from_pattern_16(G(b,16),c); \
+  else \
+    G(a,32) = pcre2_match_data_create_from_pattern_32(G(b,32),c)
 
 #define PCRE2_MATCH_DATA_FREE(a) \
   if (test_mode == PCRE8_MODE) \
@@ -877,6 +913,14 @@ are supported. */
   else \
     pcre2_set_match_limit_32(G(a,32),b)
 
+#define PCRE2_SET_PARENS_NEST_LIMIT(a,b) \
+  if (test_mode == PCRE8_MODE) \
+    pcre2_set_parens_nest_limit_8(G(a,8),b); \
+  else if (test_mode == PCRE16_MODE) \
+    pcre2_set_parens_nest_limit_16(G(a,16),b); \
+  else \
+    pcre2_set_parens_nest_limit_32(G(a,32),b)
+
 #define PCRE2_SET_RECURSION_LIMIT(a,b) \
   if (test_mode == PCRE8_MODE) \
     pcre2_set_recursion_limit_8(G(a,8),b); \
@@ -923,6 +967,22 @@ are supported. */
   else \
     a = pcre2_substring_get_bynumber_32(G(b,32),c,(PCRE2_UCHAR32 **)d,e)
 
+#define PCRE2_SUBSTRING_LENGTH_BYNAME(a,b,c,d) \
+  if (test_mode == PCRE8_MODE) \
+    a = pcre2_substring_length_byname_8(G(b,8),G(c,8),d); \
+  else if (test_mode == PCRE16_MODE) \
+    a = pcre2_substring_length_byname_16(G(b,16),G(c,16),d); \
+  else \
+    a = pcre2_substring_length_byname_32(G(b,32),G(c,32),d)
+
+#define PCRE2_SUBSTRING_LENGTH_BYNUMBER(a,b,c,d) \
+  if (test_mode == PCRE8_MODE) \
+    a = pcre2_substring_length_bynumber_8(G(b,8),c,d); \
+  else if (test_mode == PCRE16_MODE) \
+    a = pcre2_substring_length_bynumber_16(G(b,16),c,d); \
+  else \
+    a = pcre2_substring_length_bynumber_32(G(b,32),c,d)
+
 #define PCRE2_SUBSTRING_LIST_GET(a,b,c,d) \
   if (test_mode == PCRE8_MODE) \
     a = pcre2_substring_list_get_8(G(b,8),(PCRE2_UCHAR8 ***)c,d); \
@@ -938,6 +998,14 @@ are supported. */
     pcre2_substring_list_free_16((PCRE2_SPTR16 *)a); \
   else \
     pcre2_substring_list_free_32((PCRE2_SPTR32 *)a)
+
+#define PCRE2_SUBSTRING_NUMBER_FROM_NAME(a,b,c) \
+  if (test_mode == PCRE8_MODE) \
+    a = pcre2_substring_number_from_name_8(G(b,8),G(c,8)); \
+  else if (test_mode == PCRE16_MODE) \
+    a = pcre2_substring_number_from_name_16(G(b,16),G(c,16)); \
+  else \
+    a = pcre2_substring_number_from_name_32(G(b,32),G(c,32))
 
 #define PTR(x) ( \
   (test_mode == PCRE8_MODE)? (void *)G(x,8) : \
@@ -1082,11 +1150,29 @@ the three different cases. */
   else \
     r = G(pcre2_get_error_message_,BITTWO)(a,G(b,BITTWO),G(G(b,BITTWO),_size))
 
+#define PCRE2_GET_OVECTOR_COUNT(a,b) \
+  if (test_mode == G(G(PCRE,BITONE),_MODE)) \
+    a = G(pcre2_get_ovector_count_,BITONE)(G(b,BITONE)); \
+  else \
+    a = G(pcre2_get_ovector_count_,BITTWO)(G(b,BITTWO))
+
+#define PCRE2_GET_STARTCHAR(a,b) \
+  if (test_mode == G(G(PCRE,BITONE),_MODE)) \
+    a = G(pcre2_get_startchar_,BITONE)(G(b,BITONE)); \
+  else \
+    a = G(pcre2_get_startchar_,BITTWO)(G(b,BITTWO))
+
 #define PCRE2_JIT_COMPILE(a,b) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
     G(pcre2_jit_compile_,BITONE)(G(a,BITONE),b); \
   else \
     G(pcre2_jit_compile_,BITTWO)(G(a,BITTWO),b)
+
+#define PCRE2_JIT_FREE_UNUSED_MEMORY(a) \
+  if (test_mode == G(G(PCRE,BITONE),_MODE)) \
+    G(pcre2_jit_free_unused_memory_,BITONE)(G(a,BITONE)); \
+  else \
+    G(pcre2_jit_free_unused_memory_,BITTWO)(G(a,BITTWO))
 
 #define PCRE2_JIT_STACK_ALLOC(a,b,c,d) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
@@ -1125,6 +1211,12 @@ the three different cases. */
     G(a,BITONE) = G(pcre2_match_data_create_,BITONE)(b,c); \
   else \
     G(a,BITTWO) = G(pcre2_match_data_create_,BITTWO)(b,c)
+
+#define PCRE2_MATCH_DATA_CREATE_FROM_PATTERN(a,b,c) \
+  if (test_mode == G(G(PCRE,BITONE),_MODE)) \
+    G(a,BITONE) = G(pcre2_match_data_create_from_pattern_,BITONE)(G(b,BITONE),c); \
+  else \
+    G(a,BITTWO) = G(pcre2_match_data_create_from_pattern_,BITTWO)(G(b,BITTWO),c)
 
 #define PCRE2_MATCH_DATA_FREE(a) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
@@ -1170,6 +1262,12 @@ the three different cases. */
   else \
     G(pcre2_set_match_limit_,BITTWO)(G(a,BITTWO),b)
 
+#define PCRE2_SET_PARENS_NEST_LIMIT(a,b) \
+  if (test_mode == G(G(PCRE,BITONE),_MODE)) \
+    G(pcre2_set_parens_nest_limit_,BITONE)(G(a,BITONE),b); \
+  else \
+    G(pcre2_set_parens_nest_limit_,BITTWO)(G(a,BITTWO),b)
+
 #define PCRE2_SET_RECURSION_LIMIT(a,b) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
     G(pcre2_set_recursion_limit_,BITONE)(G(a,BITONE),b); \
@@ -1213,6 +1311,18 @@ the three different cases. */
     a = G(pcre2_substring_get_bynumber_,BITTWO)(G(b,BITTWO),c,\
       (G(PCRE2_UCHAR,BITTWO) **)d,e)
 
+#define PCRE2_SUBSTRING_LENGTH_BYNAME(a,b,c,d) \
+  if (test_mode == G(G(PCRE,BITONE),_MODE)) \
+    a = G(pcre2_substring_length_byname_,BITONE)(G(b,BITONE),G(c,BITONE),d); \
+  else \
+    a = G(pcre2_substring_length_byname_,BITTWO)(G(b,BITTWO),G(c,BITTWO),d)
+
+#define PCRE2_SUBSTRING_LENGTH_BYNUMBER(a,b,c,d) \
+  if (test_mode == G(G(PCRE,BITONE),_MODE)) \
+    a = G(pcre2_substring_length_bynumber_,BITONE)(G(b,BITONE),c,d); \
+  else \
+    a = G(pcre2_substring_length_bynumber_,BITTWO)(G(b,BITTWO),c,d)
+
 #define PCRE2_SUBSTRING_LIST_GET(a,b,c,d) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
     a = G(pcre2_substring_list_get_,BITONE)(G(b,BITONE), \
@@ -1226,6 +1336,12 @@ the three different cases. */
     G(pcre2_substring_list_free_,BITONE)((G(PCRE2_SPTR,BITONE) *)a); \
   else \
     G(pcre2_substring_list_free_,BITTWO)((G(PCRE2_SPTR,BITTWO) *)a)
+
+#define PCRE2_SUBSTRING_NUMBER_FROM_NAME(a,b,c) \
+  if (test_mode == G(G(PCRE,BITONE),_MODE)) \
+    a = G(pcre2_substring_number_from_name_,BITONE)(G(b,BITONE),G(c,BITONE)); \
+  else \
+    a = G(pcre2_substring_number_from_name_,BITTWO)(G(b,BITTWO),G(c,BITTWO))
 
 #define PTR(x) ( \
   (test_mode == G(G(PCRE,BITONE),_MODE))? (void *)G(x,BITONE) : \
@@ -1298,7 +1414,10 @@ the three different cases. */
   a = pcre2_dfa_match_8(G(b,8),(PCRE2_SPTR8)c,d,e,f,G(g,8),G(h,8),i,j)
 #define PCRE2_GET_ERROR_MESSAGE(r,a,b) \
   r = pcre2_get_error_message_8(a,G(b,8),G(G(b,8),_size))
+#define PCRE2_GET_OVECTOR_COUNT(a,b) a = pcre2_get_ovector_count_8(G(b,8))
+#define PCRE2_GET_STARTCHAR(a,b) a = pcre2_get_startchar_8(G(b,8))
 #define PCRE2_JIT_COMPILE(a,b) pcre2_jit_compile_8(G(a,8),b)
+#define PCRE2_JIT_FREE_UNUSED_MEMORY(a) pcre2_jit_free_unused_memory_8(G(a,8))
 #define PCRE2_JIT_STACK_ALLOC(a,b,c,d) \
   a = (PCRE2_JIT_STACK *)pcre2_jit_stack_alloc_8(b,c,d);
 #define PCRE2_JIT_STACK_ASSIGN(a,b,c) \
@@ -1308,6 +1427,8 @@ the three different cases. */
 #define PCRE2_MATCH(a,b,c,d,e,f,g,h) \
   a = pcre2_match_8(G(b,8),(PCRE2_SPTR8)c,d,e,f,G(g,8),G(h,8))
 #define PCRE2_MATCH_DATA_CREATE(a,b,c) G(a,8) = pcre2_match_data_create_8(b,c)
+#define PCRE2_MATCH_DATA_CREATE_FROM_PATTERN(a,b,c) \
+  G(a,8) = pcre2_match_data_create_from_pattern_8(G(b,8),c)
 #define PCRE2_MATCH_DATA_FREE(a) pcre2_match_data_free_8(G(a,8))
 #define PCRE2_PATTERN_INFO(a,b,c,d) a = pcre2_pattern_info_8(G(b,8),c,d)
 #define PCRE2_PRINTINT(a) pcre2_printint_8(compiled_code8,outfile,a)
@@ -1317,6 +1438,7 @@ the three different cases. */
 #define PCRE2_SET_COMPILE_RECURSION_GUARD(a,b) \
   pcre2_set_compile_recursion_guard_8(G(a,8),b)
 #define PCRE2_SET_MATCH_LIMIT(a,b) pcre2_set_match_limit_8(G(a,8),b)
+#define PCRE2_SET_PARENS_NEST_LIMIT(a,b) pcre2_set_parens_nest_limit_8(G(a,8),b)
 #define PCRE2_SET_RECURSION_LIMIT(a,b) pcre2_set_recursion_limit_8(G(a,8),b)
 #define PCRE2_SUBSTRING_COPY_BYNAME(a,b,c,d,e) \
   a = pcre2_substring_copy_byname_8(G(b,8),G(c,8),(PCRE2_UCHAR8 *)d,e)
@@ -1327,10 +1449,16 @@ the three different cases. */
   a = pcre2_substring_get_byname_8(G(b,8),G(c,8),(PCRE2_UCHAR8 **)d,e)
 #define PCRE2_SUBSTRING_GET_BYNUMBER(a,b,c,d,e) \
   a = pcre2_substring_get_bynumber_8(G(b,8),c,(PCRE2_UCHAR8 **)d,e)
+#define PCRE2_SUBSTRING_LENGTH_BYNAME(a,b,c,d) \
+    a = pcre2_substring_length_byname_8(G(b,8),G(c,8),d)
+#define PCRE2_SUBSTRING_LENGTH_BYNUMBER(a,b,c,d) \
+    a = pcre2_substring_length_bynumber_8(G(b,8),c,d)
 #define PCRE2_SUBSTRING_LIST_GET(a,b,c,d) \
   a = pcre2_substring_list_get_8(G(b,8),(PCRE2_UCHAR8 ***)c,d)
 #define PCRE2_SUBSTRING_LIST_FREE(a) \
   pcre2_substring_list_free_8((PCRE2_SPTR8 *)a)
+#define PCRE2_SUBSTRING_NUMBER_FROM_NAME(a,b,c) \
+  a = pcre2_substring_number_from_name_8(G(b,8),G(c,8));
 #define PTR(x) (void *)G(x,8)
 #define SETFLD(x,y,z) G(x,8)->y = z
 #define SETFLDVEC(x,y,v,z) G(x,8)->y[v] = z
@@ -1362,7 +1490,10 @@ the three different cases. */
   a = pcre2_dfa_match_16(G(b,16),(PCRE2_SPTR16)c,d,e,f,G(g,16),G(h,16),i,j)
 #define PCRE2_GET_ERROR_MESSAGE(r,a,b) \
   r = pcre2_get_error_message_16(a,G(b,16),G(G(b,16),_size))
+#define PCRE2_GET_OVECTOR_COUNT(a,b) a = pcre2_get_ovector_count_16(G(b,16))
+#define PCRE2_GET_STARTCHAR(a,b) a = pcre2_get_startchar_16(G(b,16))
 #define PCRE2_JIT_COMPILE(a,b) pcre2_jit_compile_16(G(a,16),b)
+#define PCRE2_JIT_FREE_UNUSED_MEMORY(a) pcre2_jit_free_unused_memory_16(G(a,16))
 #define PCRE2_JIT_STACK_ALLOC(a,b,c,d) \
   a = (PCRE2_JIT_STACK *)pcre2_jit_stack_alloc_16(b,c,d);
 #define PCRE2_JIT_STACK_ASSIGN(a,b,c) \
@@ -1372,6 +1503,8 @@ the three different cases. */
 #define PCRE2_MATCH(a,b,c,d,e,f,g,h) \
   a = pcre2_match_16(G(b,16),(PCRE2_SPTR16)c,d,e,f,G(g,16),G(h,16))
 #define PCRE2_MATCH_DATA_CREATE(a,b,c) G(a,16) = pcre2_match_data_create_16(b,c)
+#define PCRE2_MATCH_DATA_CREATE_FROM_PATTERN(a,b,c) \
+  G(a,16) = pcre2_match_data_create_from_pattern_16(G(b,16),c)
 #define PCRE2_MATCH_DATA_FREE(a) pcre2_match_data_free_16(G(a,16))
 #define PCRE2_PATTERN_INFO(a,b,c,d) a = pcre2_pattern_info_16(G(b,16),c,d)
 #define PCRE2_PRINTINT(a) pcre2_printint_16(compiled_code16,outfile,a)
@@ -1381,6 +1514,7 @@ the three different cases. */
 #define PCRE2_SET_COMPILE_RECURSION_GUARD(a,b) \
   pcre2_set_compile_recursion_guard_16(G(a,16),b)
 #define PCRE2_SET_MATCH_LIMIT(a,b) pcre2_set_match_limit_16(G(a,16),b)
+#define PCRE2_SET_PARENS_NEST_LIMIT(a,b) pcre2_set_parens_nest_limit_16(G(a,16),b)
 #define PCRE2_SET_RECURSION_LIMIT(a,b) pcre2_set_recursion_limit_16(G(a,16),b)
 #define PCRE2_SUBSTRING_COPY_BYNAME(a,b,c,d,e) \
   a = pcre2_substring_copy_byname_16(G(b,16),G(c,16),(PCRE2_UCHAR16 *)d,e)
@@ -1391,10 +1525,16 @@ the three different cases. */
   a = pcre2_substring_get_byname_16(G(b,16),G(c,16),(PCRE2_UCHAR16 **)d,e)
 #define PCRE2_SUBSTRING_GET_BYNUMBER(a,b,c,d,e) \
   a = pcre2_substring_get_bynumber_16(G(b,16),c,(PCRE2_UCHAR16 **)d,e)
+#define PCRE2_SUBSTRING_LENGTH_BYNAME(a,b,c,d) \
+    a = pcre2_substring_length_byname_16(G(b,16),G(c,16),d)
+#define PCRE2_SUBSTRING_LENGTH_BYNUMBER(a,b,c,d) \
+    a = pcre2_substring_length_bynumber_16(G(b,16),c,d)
 #define PCRE2_SUBSTRING_LIST_GET(a,b,c,d) \
   a = pcre2_substring_list_get_16(G(b,16),(PCRE2_UCHAR16 ***)c,d)
 #define PCRE2_SUBSTRING_LIST_FREE(a) \
   pcre2_substring_list_free_16((PCRE2_SPTR16 *)a)
+#define PCRE2_SUBSTRING_NUMBER_FROM_NAME(a,b,c) \
+  a = pcre2_substring_number_from_name_16(G(b,16),G(c,16));
 #define PTR(x) (void *)G(x,16)
 #define SETFLD(x,y,z) G(x,16)->y = z
 #define SETFLDVEC(x,y,v,z) G(x,16)->y[v] = z
@@ -1426,7 +1566,10 @@ the three different cases. */
   a = pcre2_dfa_match_32(G(b,32),(PCRE2_SPTR32)c,d,e,f,G(g,32),G(h,32),i,j)
 #define PCRE2_GET_ERROR_MESSAGE(r,a,b) \
   r = pcre2_get_error_message_32(a,G(b,32),G(G(b,32),_size))
+#define PCRE2_GET_OVECTOR_COUNT(a,b) a = pcre2_get_ovector_count_32(G(b,32))
+#define PCRE2_GET_STARTCHAR(a,b) a = pcre2_get_startchar_32(G(b,32))
 #define PCRE2_JIT_COMPILE(a,b) pcre2_jit_compile_32(G(a,32),b)
+#define PCRE2_JIT_FREE_UNUSED_MEMORY(a) pcre2_jit_free_unused_memory_32(G(a,32))
 #define PCRE2_JIT_STACK_ALLOC(a,b,c,d) \
   a = (PCRE2_JIT_STACK *)pcre2_jit_stack_alloc_32(b,c,d);
 #define PCRE2_JIT_STACK_ASSIGN(a,b,c) \
@@ -1436,6 +1579,8 @@ the three different cases. */
 #define PCRE2_MATCH(a,b,c,d,e,f,g,h) \
   a = pcre2_match_32(G(b,32),(PCRE2_SPTR32)c,d,e,f,G(g,32),G(h,32))
 #define PCRE2_MATCH_DATA_CREATE(a,b,c) G(a,32) = pcre2_match_data_create_32(b,c)
+#define PCRE2_MATCH_DATA_CREATE_FROM_PATTERN(a,b,c) \
+  G(a,32) = pcre2_match_data_create_from_pattern_32(G(b,32),c)
 #define PCRE2_MATCH_DATA_FREE(a) pcre2_match_data_free_32(G(a,32))
 #define PCRE2_PATTERN_INFO(a,b,c,d) a = pcre2_pattern_info_32(G(b,32),c,d)
 #define PCRE2_PRINTINT(a) pcre2_printint_32(compiled_code32,outfile,a)
@@ -1445,6 +1590,7 @@ the three different cases. */
 #define PCRE2_SET_COMPILE_RECURSION_GUARD(a,b) \
   pcre2_set_compile_recursion_guard_32(G(a,32),b)
 #define PCRE2_SET_MATCH_LIMIT(a,b) pcre2_set_match_limit_32(G(a,32),b)
+#define PCRE2_SET_PARENS_NEST_LIMIT(a,b) pcre2_set_parens_nest_limit_32(G(a,32),b)
 #define PCRE2_SET_RECURSION_LIMIT(a,b) pcre2_set_recursion_limit_32(G(a,32),b)
 #define PCRE2_SUBSTRING_COPY_BYNAME(a,b,c,d,e) \
   a = pcre2_substring_copy_byname_32(G(b,32),G(c,32),(PCRE2_UCHAR32 *)d,e)
@@ -1455,10 +1601,16 @@ the three different cases. */
   a = pcre2_substring_get_byname_32(G(b,32),G(c,32),(PCRE2_UCHAR32 **)d,e)
 #define PCRE2_SUBSTRING_GET_BYNUMBER(a,b,c,d,e) \
   a = pcre2_substring_get_bynumber_32(G(b,32),c,(PCRE2_UCHAR32 **)d,e)
+#define PCRE2_SUBSTRING_LENGTH_BYNAME(a,b,c,d) \
+    a = pcre2_substring_length_byname_32(G(b,32),G(c,32),d)
+#define PCRE2_SUBSTRING_LENGTH_BYNUMBER(a,b,c,d) \
+    a = pcre2_substring_length_bynumber_32(G(b,32),c,d)
 #define PCRE2_SUBSTRING_LIST_GET(a,b,c,d) \
   a = pcre2_substring_list_get_32(G(b,32),(PCRE2_UCHAR32 ***)c,d)
 #define PCRE2_SUBSTRING_LIST_FREE(a) \
   pcre2_substring_list_free_32((PCRE2_SPTR32 *)a)
+#define PCRE2_SUBSTRING_NUMBER_FROM_NAME(a,b,c) \
+  a = pcre2_substring_number_from_name_32(G(b,32),G(c,32));
 #define PTR(x) (void *)G(x,32)
 #define SETFLD(x,y,z) G(x,32)->y = z
 #define SETFLDVEC(x,y,v,z) G(x,32)->y[v] = z
@@ -2978,43 +3130,48 @@ fprintf(outfile, "%s %s", *msg, s);
 
 
 
-#ifdef SUPPORT_PCRE2_8
 /*************************************************
-*                Show compile controls           *
+*                Show control bits               *
 *************************************************/
 
-/* Called for unsupported POSIX modifiers, and therefore needed only when the
-8-bit library is supported.
+/* Called for mutually exclusive controls and for unsupported POSIX controls.
+Because the bits are unique, this can be used for both pattern and data control
+words.
 
 Arguments:
   controls    control bits
   before      text to print before
-  after       text to print after
 
 Returns:      nothing
 */
 
 static void
-show_compile_controls(uint32_t controls, const char *before, const char *after)
+show_controls(uint32_t controls, const char *before)
 {
-fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
+fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
   before,
   ((controls & CTL_AFTERTEXT) != 0)? " aftertext" : "",
   ((controls & CTL_ALLAFTERTEXT) != 0)? " allaftertext" : "",
   ((controls & CTL_ALLCAPTURES) != 0)? " allcaptures" : "",
+  ((controls & CTL_ALLUSEDTEXT) != 0)? " allusedtext" : "",
   ((controls & CTL_ALTGLOBAL) != 0)? " altglobal" : "",
   ((controls & CTL_BINCODE) != 0)? " bincode" : "",
+  ((controls & CTL_CALLOUT_CAPTURE) != 0)? " callout_capture" : "",
+  ((controls & CTL_CALLOUT_NONE) != 0)? " callout_none" : "",
+  ((controls & CTL_DFA) != 0)? " dfa" : "",
+  ((controls & CTL_FINDLIMITS) != 0)? " find_limits" : "",
   ((controls & CTL_FULLBINCODE) != 0)? " fullbincode" : "",
+  ((controls & CTL_GETALL) != 0)? " getall" : "",
   ((controls & CTL_GLOBAL) != 0)? " global" : "",
   ((controls & CTL_HEXPAT) != 0)? " hex" : "",
   ((controls & CTL_INFO) != 0)? " info" : "",
   ((controls & CTL_JITVERIFY) != 0)? " jitverify" : "",
   ((controls & CTL_MARK) != 0)? " mark" : "",
+  ((controls & CTL_MEMORY) != 0)? " memory" : "",
   ((controls & CTL_PATLEN) != 0)? " use_length" : "",
   ((controls & CTL_POSIX) != 0)? " posix" : "",
-  after);
+  ((controls & CTL_STARTCHAR) != 0)? " startchar" : "");
 }
-#endif  /* SUPPORT_PCRE2_8 */
 
 
 
@@ -3062,34 +3219,6 @@ else fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
   after);
 }
 
-
-
-#ifdef SUPPORT_PCRE2_8
-/*************************************************
-*                Show match controls           *
-*************************************************/
-
-/* Called for unsupported POSIX modifiers. */
-
-static void
-show_match_controls(uint32_t controls)
-{
-fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s",
-  ((controls & CTL_AFTERTEXT) != 0)? " aftertext" : "",
-  ((controls & CTL_ALLAFTERTEXT) != 0)? " allaftertext" : "",
-  ((controls & CTL_ALLCAPTURES) != 0)? " allcaptures" : "",
-  ((controls & CTL_ALTGLOBAL) != 0)? " altglobal" : "",
-  ((controls & CTL_CALLOUT_CAPTURE) != 0)? " callout_capture" : "",
-  ((controls & CTL_CALLOUT_NONE) != 0)? " callout_none" : "",
-  ((controls & CTL_DFA) != 0)? " dfa" : "",
-  ((controls & CTL_FINDLIMITS) != 0)? " find_limits" : "",
-  ((controls & CTL_GETALL) != 0)? " getall" : "",
-  ((controls & CTL_GLOBAL) != 0)? " global" : "",
-  ((controls & CTL_JITVERIFY) != 0)? " jitverify" : "",
-  ((controls & CTL_MARK) != 0)? " mark" : "",
-  ((controls & CTL_MEMORY) != 0)? " memory" : "");
-}
-#endif  /* SUPPORT_PCRE2_8 */
 
 
 #ifdef SUPPORT_PCRE2_8
@@ -3635,8 +3764,7 @@ if ((pat_patctl.control & CTL_POSIX) != 0)
     }
   if ((pat_patctl.control & ~POSIX_SUPPORTED_COMPILE_CONTROLS) != 0)
     {
-    show_compile_controls(
-      pat_patctl.control & ~POSIX_SUPPORTED_COMPILE_CONTROLS, msg, "");
+    show_controls(pat_patctl.control & ~POSIX_SUPPORTED_COMPILE_CONTROLS, msg);
     msg = "";
     }
 
@@ -4345,6 +4473,16 @@ c = code_unit_size * ((pat_patctl.control & CTL_POSIX) != 0)? 1:0;
 if (p[-1] != 0 && !decode_modifiers(p, CTX_DAT, NULL, &dat_datctl))
   return PR_OK;
 
+/* Check for mutually exclusive modifiers. */
+
+c = dat_datctl.control & EXCLUSIVE_DAT_CONTROLS;
+if (c - (c & -c) != 0)
+  {
+  show_controls(c, "** Not allowed together:");
+  fprintf(outfile, "\n");
+  return PR_OK;
+  }
+
 /* Now run the pattern match: len contains the byte length, ulen contains the
 code unit length, and pp points to the subject string. POSIX matching is only
 possible in 8-bit mode, and it does not support timing or other fancy features.
@@ -4375,8 +4513,7 @@ if ((pat_patctl.control & CTL_POSIX) != 0)
     }
   if ((dat_datctl.control & ~POSIX_SUPPORTED_MATCH_CONTROLS) != 0)
     {
-    fprintf(outfile, "%s", msg);
-    show_match_controls(dat_datctl.control & ~POSIX_SUPPORTED_MATCH_CONTROLS);
+    show_controls(dat_datctl.control & ~POSIX_SUPPORTED_MATCH_CONTROLS, msg);
     msg = "";
     }
 
@@ -4445,11 +4582,6 @@ if ((dat_datctl.control & (CTL_ALLUSEDTEXT|CTL_DFA)) == CTL_ALLUSEDTEXT &&
   dat_datctl.control &= ~CTL_ALLUSEDTEXT;
   }
 
-/* As pcre2_match_data_create() imposes a minimum of 1 on the ovector count, we
-must do so too. */
-
-if (dat_datctl.oveccount < 1) dat_datctl.oveccount = 1;
-
 /* Enable display of malloc/free if wanted. */
 
 show_memory = (dat_datctl.control & CTL_MEMORY) != 0;
@@ -4485,9 +4617,16 @@ if ((pat_patctl.control & CTL_JITVERIFY) != 0 && jit_stack == NULL)
    PCRE2_JIT_STACK_ASSIGN(compiled_code, jit_callback, NULL);
    }
 
-/* Adjust match_data according to size of offsets required. */
+/* Adjust match_data according to size of offsets required. A size of zero
+causes a new match data block to be obtained that exactly fits the pattern. */
 
-if (dat_datctl.oveccount <= max_oveccount)
+if (dat_datctl.oveccount == 0)
+  {
+  PCRE2_MATCH_DATA_FREE(match_data);
+  PCRE2_MATCH_DATA_CREATE_FROM_PATTERN(match_data, compiled_code, NULL);
+  PCRE2_GET_OVECTOR_COUNT(max_oveccount, match_data);
+  }
+else if (dat_datctl.oveccount <= max_oveccount)
   {
   SETFLD(match_data, oveccount, dat_datctl.oveccount);
   }
@@ -4619,16 +4758,18 @@ for (gmatched = 0;; gmatched++)
   if (capcount >= 0)
     {
     int i;
+    uint32_t oveccount;
     uint8_t *nptr;
 
     /* This is a check against a lunatic return value. */
 
-    if (capcount > (int)dat_datctl.oveccount)
+    PCRE2_GET_OVECTOR_COUNT(oveccount, match_data);
+    if (capcount > (int)oveccount)
       {
       fprintf(outfile,
         "** PCRE2 error: returned count %d is too big for ovector count %d\n",
-        capcount, dat_datctl.oveccount);
-      capcount = dat_datctl.oveccount;
+        capcount, oveccount);
+      capcount = oveccount;
       if ((dat_datctl.control & CTL_ANYGLOB) != 0)
         {
         fprintf(outfile, "** Global loop abandoned\n");
@@ -4638,9 +4779,8 @@ for (gmatched = 0;; gmatched++)
 
     /* If this is not the first time round a global loop, check that the
     returned string has changed. If not, there is a bug somewhere and we must
-    break the loop because it will go on for ever. We know that for a global
-    match there must be at least two elements in the ovector. This is checked
-    above. */
+    break the loop because it will go on for ever. We know that there are
+    always at least two elements in the ovector. */
 
     if (gmatched > 0 && ovecsave[0] == ovector[0] && ovecsave[1] == ovector[1])
       {
@@ -4660,7 +4800,7 @@ for (gmatched = 0;; gmatched++)
       if (pattern_info(PCRE2_INFO_CAPTURECOUNT, &maxcapcount, FALSE) < 0)
         return PR_SKIP;
       capcount = maxcapcount + 1;   /* Allow for full match */
-      if (capcount > (int)dat_datctl.oveccount) capcount = dat_datctl.oveccount;
+      if (capcount > (int)oveccount) capcount = oveccount;
       }
 
     /* Output the captured substrings. Note that, for the matched string,
@@ -4710,25 +4850,45 @@ for (gmatched = 0;; gmatched++)
 
         if (showallused)
           {
+          PCRE2_SIZE j;
           PCHARS(lleft, pp, leftchar, start - leftchar, utf, outfile);
           PCHARS(lmiddle, pp, start, end - start, utf, outfile);
           PCHARS(lright, pp, end, rightchar - end, utf, outfile);
-          }
-        else
-          {
-          PCHARSV(pp, start, end - start, utf, outfile);
-          }
-
-        if ((pat_patctl.control & CTL_JITVERIFY) != 0 && jit_was_used)
-          fprintf(outfile, " (JIT)");
-
-        if (showallused)
-          {
-          PCRE2_SIZE j;
+          if ((pat_patctl.control & CTL_JITVERIFY) != 0 && jit_was_used)
+            fprintf(outfile, " (JIT)");
           fprintf(outfile, "\n    ");
           for (j = 0; j < lleft; j++) fprintf(outfile, "<");
           for (j = 0; j < lmiddle; j++) fprintf(outfile, " ");
           for (j = 0; j < lright; j++) fprintf(outfile, ">");
+          }
+
+        /* When a pattern contains \K, the start of match position may be
+        different to the start of the matched string. When this is the case,
+        show it when requested. */
+
+        else if ((dat_datctl.control & CTL_STARTCHAR) != 0)
+          {
+          PCRE2_SIZE startchar;
+          PCRE2_GET_STARTCHAR(startchar, match_data);
+          PCHARS(lleft, pp, startchar, start - startchar, utf, outfile);
+          PCHARSV(pp, start, end - start, utf, outfile);
+          if ((pat_patctl.control & CTL_JITVERIFY) != 0 && jit_was_used)
+            fprintf(outfile, " (JIT)");
+          if (startchar != start)
+            {
+            PCRE2_SIZE j;
+            fprintf(outfile, "\n    ");
+            for (j = 0; j < lleft; j++) fprintf(outfile, "^");
+            }
+          }
+
+        /* Otherwise, just show the matched string. */
+
+        else
+          {
+          PCHARSV(pp, start, end - start, utf, outfile);
+          if ((pat_patctl.control & CTL_JITVERIFY) != 0 && jit_was_used)
+            fprintf(outfile, " (JIT)");
           }
         }
 
@@ -4768,20 +4928,33 @@ for (gmatched = 0;; gmatched++)
     for (i = 0; i < MAXCPYGET && dat_datctl.copy_numbers[i] >= 0; i++)
       {
       int rc;
-      PCRE2_SIZE length;
+      PCRE2_SIZE length, length2;
       uint32_t copybuffer[256];
       uint32_t n = (uint32_t)(dat_datctl.copy_numbers[i]);
       length = sizeof(copybuffer)/code_unit_size;
       PCRE2_SUBSTRING_COPY_BYNUMBER(rc, match_data, n, copybuffer, &length);
       if (rc < 0)
         {
-        fprintf(outfile, "copy substring %d failed (%d): ", n, rc);
+        fprintf(outfile, "Copy substring %d failed (%d): ", n, rc);
         PCRE2_GET_ERROR_MESSAGE(rc, rc, pbuffer);
         PCHARSV(CASTVAR(void *, pbuffer), 0, rc, FALSE, outfile);
         fprintf(outfile, "\n");
         }
       else
         {
+        PCRE2_SUBSTRING_LENGTH_BYNUMBER(rc, match_data, n, &length2);
+        if (rc < 0)
+          {
+          fprintf(outfile, "Get substring %d length failed (%d): ", n, rc);
+          PCRE2_GET_ERROR_MESSAGE(rc, rc, pbuffer);
+          PCHARSV(CASTVAR(void *, pbuffer), 0, rc, FALSE, outfile);
+          fprintf(outfile, "\n");
+          }
+        else if (length2 != length)
+          {
+          fprintf(outfile, "Mismatched substring lengths: %ld %ld\n",
+            length, length2);
+          }
         fprintf(outfile, "%2dC ", n);
         PCHARSV(copybuffer, 0, length, utf, outfile);
         fprintf(outfile, " (%lu)\n", (unsigned long)length);
@@ -4794,7 +4967,8 @@ for (gmatched = 0;; gmatched++)
     for (;;)
       {
       int rc;
-      PCRE2_SIZE length;
+      int groupnumber;
+      PCRE2_SIZE length, length2;
       uint32_t copybuffer[256];
       int namelen = strlen((const char *)nptr);
 #if defined SUPPORT_PCRE2_16 || defined SUPPORT_PCRE2_32
@@ -4812,20 +4986,39 @@ for (gmatched = 0;; gmatched++)
       if (test_mode == PCRE32_MODE)(void)to32(nptr, utf, &cnl);
 #endif
 
+      PCRE2_SUBSTRING_NUMBER_FROM_NAME(groupnumber, compiled_code, pbuffer);
+      if (groupnumber < 0 && groupnumber != PCRE2_ERROR_NOUNIQUESUBSTRING)
+        fprintf(outfile, "Number not found for group '%s'\n", nptr);
+
       length = sizeof(copybuffer)/code_unit_size;
       PCRE2_SUBSTRING_COPY_BYNAME(rc, match_data, pbuffer, copybuffer, &length);
       if (rc < 0)
         {
-        fprintf(outfile, "copy substring '%s' failed (%d): ", nptr, rc);
+        fprintf(outfile, "Copy substring '%s' failed (%d): ", nptr, rc);
         PCRE2_GET_ERROR_MESSAGE(rc, rc, pbuffer);
         PCHARSV(CASTVAR(void *, pbuffer), 0, rc, FALSE, outfile);
         fprintf(outfile, "\n");
         }
       else
         {
+        PCRE2_SUBSTRING_LENGTH_BYNAME(rc, match_data, pbuffer, &length2);
+        if (rc < 0)
+          {
+          fprintf(outfile, "Get substring '%s' length failed (%d): ", nptr, rc);
+          PCRE2_GET_ERROR_MESSAGE(rc, rc, pbuffer);
+          PCHARSV(CASTVAR(void *, pbuffer), 0, rc, FALSE, outfile);
+          fprintf(outfile, "\n");
+          }
+        else if (length2 != length)
+          {
+          fprintf(outfile, "Mismatched substring lengths: %ld %ld\n",
+            length, length2);
+          }
         fprintf(outfile, "  C ");
         PCHARSV(copybuffer, 0, length, utf, outfile);
-        fprintf(outfile, " (%lu) %s\n", (unsigned long)length, nptr);
+        fprintf(outfile, " (%lu) %s", (unsigned long)length, nptr);
+        if (groupnumber >= 0) fprintf(outfile, " (group %d)\n", groupnumber);
+          else fprintf(outfile, " (non-unique)\n");
         }
       nptr += namelen + 1;
       }
@@ -4841,7 +5034,7 @@ for (gmatched = 0;; gmatched++)
       PCRE2_SUBSTRING_GET_BYNUMBER(rc, match_data, n, &gotbuffer, &length);
       if (rc < 0)
         {
-        fprintf(outfile, "get substring %d failed (%d): ", n, rc);
+        fprintf(outfile, "Get substring %d failed (%d): ", n, rc);
         PCRE2_GET_ERROR_MESSAGE(rc, rc, pbuffer);
         PCHARSV(CASTVAR(void *, pbuffer), 0, rc, FALSE, outfile);
         fprintf(outfile, "\n");
@@ -4863,6 +5056,7 @@ for (gmatched = 0;; gmatched++)
       PCRE2_SIZE length;
       void *gotbuffer;
       int rc;
+      int groupnumber;
       int namelen = strlen((const char *)nptr);
 #if defined SUPPORT_PCRE2_16 || defined SUPPORT_PCRE2_32
       PCRE2_SIZE cnl = namelen;
@@ -4879,10 +5073,14 @@ for (gmatched = 0;; gmatched++)
       if (test_mode == PCRE32_MODE)(void)to32(nptr, utf, &cnl);
 #endif
 
+      PCRE2_SUBSTRING_NUMBER_FROM_NAME(groupnumber, compiled_code, pbuffer);
+      if (groupnumber < 0 && groupnumber != PCRE2_ERROR_NOUNIQUESUBSTRING)
+        fprintf(outfile, "Number not found for group '%s'\n", nptr);
+
       PCRE2_SUBSTRING_GET_BYNAME(rc, match_data, pbuffer, &gotbuffer, &length);
       if (rc < 0)
         {
-        fprintf(outfile, "get substring '%s' failed (%d): ", nptr, rc);
+        fprintf(outfile, "Get substring '%s' failed (%d): ", nptr, rc);
         PCRE2_GET_ERROR_MESSAGE(rc, rc, pbuffer);
         PCHARSV(CASTVAR(void *, pbuffer), 0, rc, FALSE, outfile);
         fprintf(outfile, "\n");
@@ -4891,7 +5089,9 @@ for (gmatched = 0;; gmatched++)
         {
         fprintf(outfile, "  G ");
         PCHARSV(gotbuffer, 0, length, utf, outfile);
-        fprintf(outfile, " (%lu) %s\n", (unsigned long)length, nptr);
+        fprintf(outfile, " (%lu) %s", (unsigned long)length, nptr);
+        if (groupnumber >= 0) fprintf(outfile, " (group %d)\n", groupnumber);
+          else fprintf(outfile, " (non-unique)\n");
         PCRE2_SUBSTRING_FREE(gotbuffer);
         }
       nptr += namelen + 1;
@@ -5599,60 +5799,70 @@ while (argc > 1 && argv[op][0] == '-')
   }
 
 /* Initialize things that cannot be done until we know which test mode we are
-running in. */
+running in. When HEAP_MATCH_RECURSE is undefined, calling pcre2_set_recursion_
+memory_management() is a no-op, but we call it in order to exercise it. Also
+exercise the general context copying function, which is not otherwise used. */
 
 code_unit_size = test_mode/8;
 max_oveccount = DEFAULT_OVECCOUNT;
 
+/* Use macros to save a lot of duplication. */
+
+#define CREATECONTEXTS \
+  G(general_context,BITS) = G(pcre2_general_context_create_,BITS)(&my_malloc, &my_free, NULL); \
+  G(general_context_copy,BITS) = G(pcre2_general_context_copy_,BITS)(G(general_context,BITS)); \
+  G(default_pat_context,BITS) = G(pcre2_compile_context_create_,BITS)(G(general_context,BITS)); \
+  G(pat_context,BITS) = G(pcre2_compile_context_copy_,BITS)(G(default_pat_context,BITS)); \
+  G(default_dat_context,BITS) = G(pcre2_match_context_create_,BITS)(G(general_context,BITS)); \
+  G(dat_context,BITS) = G(pcre2_match_context_copy_,BITS)(G(default_dat_context,BITS)); \
+  G(match_data,BITS) = G(pcre2_match_data_create_,BITS)(max_oveccount, G(general_context,BITS))
+
+#ifdef HEAP_MATCH_RECURSE
+#define SETRECURSEMEMMAN \
+  (void)G(pcre2_set_recursion_memory_management_,BITS) \
+    (G(default_dat_context,BITS), \
+    &my_stack_malloc, &my_stack_free, NULL)
+#else
+#define SETRECURSEMEMMAN \
+  (void)G(pcre2_set_recursion_memory_management_,BITS)(NULL, NULL, NULL, NULL)
+#endif
+
+/* Call the appropriate functions for the current mode. */
+
 #ifdef SUPPORT_PCRE2_8
+#undef BITS
+#define BITS 8
 if (test_mode == PCRE8_MODE)
   {
-  general_context8 = pcre2_general_context_create_8(&my_malloc, &my_free, NULL);
-  default_pat_context8 = pcre2_compile_context_create_8(general_context8);
-  pat_context8 = pcre2_compile_context_create_8(general_context8);
-  default_dat_context8 = pcre2_match_context_create_8(general_context8);
-  dat_context8 = pcre2_match_context_create_8(general_context8);
-  match_data8 = pcre2_match_data_create_8(max_oveccount, general_context8);
-#ifdef HEAP_MATCH_RECURSE
-  (void)pcre2_set_recursion_memory_management_8(default_dat_context8,
-    &my_stack_malloc, &my_stack_free, NULL);
-#endif
+  CREATECONTEXTS;
+  SETRECURSEMEMMAN;
   }
 #endif
 
 #ifdef SUPPORT_PCRE2_16
+#undef BITS
+#define BITS 16
 if (test_mode == PCRE16_MODE)
   {
-  general_context16 = pcre2_general_context_create_16(&my_malloc, &my_free,
-    NULL);
-  default_pat_context16 = pcre2_compile_context_create_16(general_context16);
-  pat_context16 = pcre2_compile_context_create_16(general_context16);
-  default_dat_context16 = pcre2_match_context_create_16(general_context16);
-  dat_context16 = pcre2_match_context_create_16(general_context16);
-  match_data16 = pcre2_match_data_create_16(max_oveccount, general_context16);
-#ifdef HEAP_MATCH_RECURSE
-  (void)pcre2_set_recursion_memory_management_16(default_dat_context16,
-    &my_stack_malloc, &my_stack_free, NULL);
-#endif
+  CREATECONTEXTS;
+  SETRECURSEMEMMAN;
   }
 #endif
 
 #ifdef SUPPORT_PCRE2_32
+#undef BITS
+#define BITS 32
 if (test_mode == PCRE32_MODE)
   {
-  general_context32 = pcre2_general_context_create_32(&my_malloc, &my_free,
-    NULL);
-  default_pat_context32 = pcre2_compile_context_create_32(general_context32);
-  pat_context32 = pcre2_compile_context_create_32(general_context32);
-  default_dat_context32 = pcre2_match_context_create_32(general_context32);
-  dat_context32 = pcre2_match_context_create_32(general_context32);
-  match_data32 = pcre2_match_data_create_32(max_oveccount, general_context32);
-#ifdef HEAP_MATCH_RECURSE
-  (void)pcre2_set_recursion_memory_management_32(default_dat_context32,
-    &my_stack_malloc, &my_stack_free, NULL);
-#endif
+  CREATECONTEXTS;
+  SETRECURSEMEMMAN;
   }
 #endif
+
+/* Set a default parentheses nest limit that is large enough to run the
+standard tests (this also exercises the function). */
+
+PCRE2_SET_PARENS_NEST_LIMIT(default_pat_context, 220);
 
 /* Handle command line modifier settings, sending any error messages to
 stderr. We need to know the mode before modifying the context, and it is tidier
@@ -5818,36 +6028,39 @@ free((void *)locale_tables);
 PCRE2_MATCH_DATA_FREE(match_data);
 SUB1(pcre2_code_free, compiled_code);
 
+PCRE2_JIT_FREE_UNUSED_MEMORY(general_context);
 if (jit_stack != NULL)
   {
   PCRE2_JIT_STACK_FREE(jit_stack);
   }
 
+#define FREECONTEXTS \
+  G(pcre2_general_context_free_,BITS)(G(general_context,BITS)); \
+  G(pcre2_general_context_free_,BITS)(G(general_context_copy,BITS)); \
+  G(pcre2_compile_context_free_,BITS)(G(pat_context,BITS)); \
+  G(pcre2_compile_context_free_,BITS)(G(default_pat_context,BITS)); \
+  G(pcre2_match_context_free_,BITS)(G(dat_context,BITS)); \
+  G(pcre2_match_context_free_,BITS)(G(default_dat_context,BITS))
+
 #ifdef SUPPORT_PCRE2_8
+#undef BITS
+#define BITS 8
 regfree(&preg);
-pcre2_general_context_free_8(general_context8);
-pcre2_compile_context_free_8(pat_context8);
-pcre2_compile_context_free_8(default_pat_context8);
-pcre2_match_context_free_8(dat_context8);
-pcre2_match_context_free_8(default_dat_context8);
+FREECONTEXTS;
 #endif
 
 #ifdef SUPPORT_PCRE2_16
+#undef BITS
+#define BITS 16
 free(pbuffer16);
-pcre2_general_context_free_16(general_context16);
-pcre2_compile_context_free_16(pat_context16);
-pcre2_compile_context_free_16(default_pat_context16);
-pcre2_match_context_free_16(dat_context16);
-pcre2_match_context_free_16(default_dat_context16);
+FREECONTEXTS;
 #endif
 
 #ifdef SUPPORT_PCRE2_32
+#undef BITS
+#define BITS 32
 free(pbuffer32);
-pcre2_general_context_free_32(general_context32);
-pcre2_compile_context_free_32(pat_context32);
-pcre2_compile_context_free_32(default_pat_context32);
-pcre2_match_context_free_32(dat_context32);
-pcre2_match_context_free_32(default_dat_context32);
+FREECONTEXTS;
 #endif
 
 #if defined(__VMS)

@@ -2618,7 +2618,7 @@ a random value. /Ix
     YXYYY\=ps
     YXYYYY\=ps
     
-/\++\KZ|\d+X|9+Y/
+/\++\KZ|\d+X|9+Y/startchar
     ++++123999\=ps
     ++++123999Y\=ps
     ++++Z1234\=ps
@@ -2655,7 +2655,7 @@ a random value. /Ix
    abc\=ps
    abc\=ph
    
-/abc\K123/
+/abc\K123/startchar
     xyzabc123pqr
     xyzabc12\=ps
     xyzabc12\=ph
@@ -2676,7 +2676,7 @@ a random value. /Ix
 
 /(ab)(x(y)z(cd(*ACCEPT)))pq/B
 
-/abc\K/aftertext
+/abc\K/aftertext,startchar
     abcdef
     abcdef\=notempty_atstart
     xyzabcdef\=notempty_atstart
@@ -2684,7 +2684,7 @@ a random value. /Ix
     abcdef\=notempty
     xyzabcdef\=notempty
     
-/^(?:(?=abc)|abc\K)/aftertext
+/^(?:(?=abc)|abc\K)/aftertext,startchar
     abcdef
     abcdef\=notempty_atstart
     ** Failers 
@@ -2923,7 +2923,7 @@ a random value. /Ix
      believe this to be a Perl bug. --/
       
 /(?>a\Kb)z|(ab)/
-    ab 
+    ab\=startchar 
 
 /(?P<L1>(?P<L2>0|)|(?P>L2)(?P>L1))/
 
@@ -3643,7 +3643,7 @@ a random value. /Ix
     xxxx123a\=ph
     xxxx123a\=ps
     
-/123\Kabc/
+/123\Kabc/startchar
     xxxx123a\=ph
     xxxx123a\=ps
 
@@ -3896,7 +3896,7 @@ a random value. /Ix
 /[a[:<:]] should give error/
 
 /(?=ab\K)/aftertext
-    abcd
+    abcd\=startchar
 
 /abcd/newline=lf,firstline
     xx\nxabcd
@@ -4005,5 +4005,7 @@ a random value. /Ix
 
 /\k<A>*(?<A>aa)(?<A>bb)/match_unset_backref,dupnames
     aabb
+
+/(((((a)))))/parens_nest_limit=2
 
 # End of testinput2 

@@ -15,16 +15,17 @@ PCRE2 - Perl-compatible regular expressions (revised API)
 .rs
 .sp
 This convenience function finds the number of a named substring capturing
-parenthesis in a compiled pattern. Its arguments are:
+parenthesis in a compiled pattern, provided that it is a unique name. The 
+function arguments are:
 .sp
   \fIcode\fP    Compiled regular expression
   \fIname\fP    Name whose number is required
 .sp
 The yield of the function is the number of the parenthesis if the name is
-found, or PCRE2_ERROR_NOSUBSTRING otherwise. When duplicate names are allowed
-(PCRE2_DUPNAMES is set), it is not defined which of the numbers is returned.
-You can obtain the complete list by calling
-\fBpcre2_substring_nametable_scan()\fP.
+found, or PCRE2_ERROR_NOSUBSTRING if it is not found. When duplicate names are
+allowed (PCRE2_DUPNAMES is set), if the name is not unique,
+PCRE2_ERROR_NOUNIQUESUBSTRING is returned. You can obtain the list of numbers
+with the same name by calling \fBpcre2_substring_nametable_scan()\fP.
 .P
 There is a complete description of the PCRE2 native API in the
 .\" HREF

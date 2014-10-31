@@ -72,6 +72,19 @@ fi
 ./pcre2test -C unicode >/dev/null
 utf8=$?
 
+# ------ Function to run and check a special pcre2grep arguments test -------
+
+checkspecial()
+  {
+  $valgrind ./pcre2grep $1 >>testtrygrep 2>&1
+  if [ $? -ne $2 ] ; then
+    echo "** pcre2grep $1 failed - check testtrygrep"
+    exit 1
+  fi
+  }
+  
+# ------ Normal tests ------ 
+
 echo "Testing pcre2grep main features"
 
 echo "---------------------------- Test 1 ------------------------------" >testtrygrep
@@ -570,6 +583,17 @@ $valgrind $pcre2grep -n --newline=anycrlf "^(abc|def|ghi|jkl)" testNinputgrep >>
 
 $cf $srcdir/testdata/grepoutputN testtrygrep
 if [ $? != 0 ] ; then exit 1; fi
+
+
+# Finally, some tests to exercise code that is not tested above, just to be 
+# sure that it runs OK. Doing this improves the coverage statistics. The output
+# is not checked.
+
+echo "Testing miscellaneous pcre2grep arguments (unchecked)"
+echo '' >testtrygrep
+checkspecial '-xxxxx' 2
+checkspecial '--help' 0
+checkspecial '--line-buffered --colour=auto abc /dev/null' 1
 
 # Clean up local working files
 rm -f testNinputgrep teststderrgrep testtrygrep testtemp1grep testtemp2grep

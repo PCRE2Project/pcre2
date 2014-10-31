@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "25 October 2014" "PCRE2 10.00"
+.TH PCRE2API 3 "29 October 2014" "PCRE2 10.00"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -2332,8 +2332,9 @@ the number of the subpattern called "xxx" is 2. If the name is known to be
 unique (PCRE2_DUPNAMES was not set), you can find the number from the name by
 calling \fBpcre2_substring_number_from_name()\fP. The first argument is the
 compiled pattern, and the second is the name. The yield of the function is the
-subpattern number, or PCRE2_ERROR_NOSUBSTRING if there is no subpattern of that
-name.
+subpattern number, PCRE2_ERROR_NOSUBSTRING if there is no subpattern of that
+name, or PCRE2_ERROR_NOUNIQUESUBSTRING if there is more than one subpattern of 
+that name.
 .P
 Given the number, you can extract the substring directly, or use one of the
 functions described in the previous section. For convenience, there are also
@@ -2630,6 +2631,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 25 October 2014
+Last updated: 29 October 2014
 Copyright (c) 1997-2014 University of Cambridge.
 .fi

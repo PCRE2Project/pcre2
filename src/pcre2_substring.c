@@ -409,7 +409,8 @@ Arguments:
   firstptr    where to put the pointer to the first entry
   lastptr     where to put the pointer to the last entry
 
-Returns:      if firstptr and lastptr are NULL, a group number;
+Returns:      if firstptr and lastptr are NULL, a group number for a
+                unique substring, or PCRE2_ERROR_NOUNIQUESUBSTRING
               otherwise, the length of each entry, or a negative number
                 (PCRE2_ERROR_NOSUBSTRING) if not found
 */
@@ -433,7 +434,6 @@ while (top > bot)
     PCRE2_SPTR first;
     PCRE2_SPTR last;
     PCRE2_SPTR lastentry;
-    if (firstptr == NULL) return GET2(entry, 0);
     lastentry = nametable + entrysize * (code->name_count - 1);
     first = last = entry;
     while (first > nametable)
@@ -446,6 +446,8 @@ while (top > bot)
       if (PRIV(strcmp)(stringname, (last + entrysize + IMM2_SIZE)) != 0) break;
       last += entrysize;
       }
+    if (firstptr == NULL) 
+      return (first == last)? (int)GET2(entry, 0) : PCRE2_ERROR_NOUNIQUESUBSTRING;
     *firstptr = first;
     *lastptr = last;
     return entrysize;

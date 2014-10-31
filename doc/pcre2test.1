@@ -1,4 +1,4 @@
-.TH PCRE2TEST 1 "11 October 2014" "PCRE 10.00"
+.TH PCRE2TEST 1 "31 October 2014" "PCRE 10.00"
 .SH NAME
 pcre2test - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -383,6 +383,7 @@ which may also be used in a \fB#pattern\fP command. A pattern's modifier list
 can add to or override default modifiers that were set by a previous
 \fB#pattern\fP command.
 .
+.
 .SS "Setting compilation options"
 .rs
 .sp
@@ -419,6 +420,7 @@ As well as turning on the PCRE2_UTF option, the \fButf\fP modifier causes all
 non-printing characters in output strings to be printed using the \ex{hh...}
 notation. Otherwise, those less than 0x100 are output in hex without the curly
 brackets.
+.
 .
 .SS "Setting compilation controls"
 .rs
@@ -566,6 +568,9 @@ also output.
 .sp
 The \fBparens_nest_limit\fP modifier sets a limit on the depth of nested
 parentheses in a pattern. Breaching the limit causes a compilation error.
+The default for the library is set when PCRE2 is built, but \fBpcre2test\fP 
+sets its own default of 220, which is required for running the standard test 
+suite.
 .
 .
 .SS "Using the POSIX wrapper API"
@@ -631,12 +636,13 @@ However, they may be included in a pattern's modifier list, in which case they
 are applied to every subject line that is processed with that pattern. They do
 not affect the compilation process.
 .sp
-      aftertext                 show text after match
-      allaftertext              show text after captures
-      allcaptures               show all captures
-      allusedtext               show all consulted text
-  /g  global                    global matching
-      mark                      show mark values
+      aftertext           show text after match
+      allaftertext        show text after captures
+      allcaptures         show all captures
+      allusedtext         show all consulted text
+  /g  global              global matching
+      mark                show mark values
+      startchar           show starting character when relevant 
 .sp
 These modifiers may not appear in a \fB#pattern\fP command. If you want them as
 defaults, set them in a \fB#subject\fP command.
@@ -710,6 +716,7 @@ pattern.
       offset=<n>                set starting offset
       ovector=<n>               set size of output vector
       recursion_limit=<n>       set a recursion limit
+      startchar                 show startchar when relevant 
 .sp
 The effects of these modifiers are described in the following sections.
 FIXME: Give more examples.
@@ -735,13 +742,28 @@ there is a lookbehind at the start of a match, or a lookahead at the end, or if
 of the actual match are indicated in the output by '<' or '>' characters
 underneath them. Here is an example:
 .sp
-  /(?<=pqr)abc(?=xyz)/
-      123pqrabcxyz456\e=allusedtext
+    re> /(?<=pqr)abc(?=xyz)/
+  data> 123pqrabcxyz456\e=allusedtext
    0: pqrabcxyz
       <<<   >>>
 .sp
 This shows that the matched string is "abc", with the preceding and following
 strings "pqr" and "xyz" also consulted during the match.
+.P
+The \fBstartchar\fP modifier requests that the starting character for the match 
+be indicated, if it is different to the start of the matched string. The only 
+time when this occurs is when \eK has been processed as part of the match. In 
+this situation, the output for the matched string is displayed from the 
+starting character instead of from the match point, with circumflex characters 
+under the earlier characters. For example:
+.sp
+    re> /abc\eKxyz/
+  data> abcxyz\e=startchar
+   0: abcxyz
+      ^^^ 
+.sp
+Unlike \fBallusedtext\fP, the \fBstartchar\fP modifier can be used with JIT.
+However, these two modifiers are mutually exclusive.
 .
 .
 .SS "Showing the value of all capture groups"
@@ -890,11 +912,13 @@ appears, though of course it can also be used to set a default in a
 \fB#subject\fP command. It specifies the number of pairs of offsets that are
 available for storing matching information. The default is 15.
 .P
-At least one pair of offsets is always created by
-\fBpcre2_match_data_create()\fP, for matching with PCRE2's native API, so a
-value of 0 is the same as 1. However a value of 0 is useful when testing the
-POSIX API because it causes \fBregexec()\fP to be called with a NULL capture
-vector.
+A value of zero is useful when testing the POSIX API because it causes
+\fBregexec()\fP to be called with a NULL capture vector. When not testing the
+POSIX API, a value of zero is used to cause
+\fBpcre2_match_data_create_from_pattern\fP to be called, in order to create a 
+match block of exactly the right size for the pattern. (It is not possible to 
+create a match block with a zero-length ovector; there is always one pair of 
+offsets.)
 .
 .
 .SH "THE ALTERNATIVE MATCHING FUNCTION"
@@ -1159,6 +1183,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 11 October 2014
+Last updated: 31 October 2014
 Copyright (c) 1997-2014 University of Cambridge.
 .fi

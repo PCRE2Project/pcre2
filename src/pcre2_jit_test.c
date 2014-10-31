@@ -1127,7 +1127,7 @@ static int regression_tests(void)
 #elif defined SUPPORT_PCRE2_16
 	pcre2_config_16(PCRE2_CONFIG_JITTARGET, &cpu_info);
 #elif defined SUPPORT_PCRE2_32
-	pcre2_config_32(PCRE2_CONFIG_JITTARGET, &cpu_info));
+	pcre2_config_32(PCRE2_CONFIG_JITTARGET, &cpu_info);
 #endif
 
 	printf("Running JIT regression tests\n");

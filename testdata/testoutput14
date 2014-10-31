@@ -118,7 +118,7 @@ Failed: error -45: match limit exceeded
 
 /(a+)*zz/
     aaaaaaaaaaaaaz\=recursion_limit=10
-Failed: error -50: recursion limit exceeded
+Failed: error -51: recursion limit exceeded
 
 /(*LIMIT_MATCH=3000)(a+)*zz/I
 Capturing subpattern count = 1
@@ -158,9 +158,9 @@ Starting code units: a z
 Last code unit = 'z'
 Subject length lower bound = 2
     aaaaaaaaaaaaaz
-Failed: error -50: recursion limit exceeded
+Failed: error -51: recursion limit exceeded
     aaaaaaaaaaaaaz\=recursion_limit=1000
-Failed: error -50: recursion limit exceeded
+Failed: error -51: recursion limit exceeded
 
 /(*LIMIT_RECURSION=10)(*LIMIT_RECURSION=1000)(a+)*zz/I
 Capturing subpattern count = 1
@@ -180,21 +180,21 @@ Subject length lower bound = 2
     aaaaaaaaaaaaaz
 No match
     aaaaaaaaaaaaaz\=recursion_limit=10
-Failed: error -50: recursion limit exceeded
+Failed: error -51: recursion limit exceeded
     
 # These three have infinitely nested recursions. 
     
 /((?2))((?1))/
     abc
-Failed: error -49: nested recursion at the same subject position
+Failed: error -50: nested recursion at the same subject position
 
 /((?(R2)a+|(?1)b))/
     aaaabcde
-Failed: error -49: nested recursion at the same subject position
+Failed: error -50: nested recursion at the same subject position
 
 /(?(R)a*(?1)|((?R))b)/
     aaaabcde
-Failed: error -49: nested recursion at the same subject position
+Failed: error -50: nested recursion at the same subject position
     
 # The allusedtext modifier does not work with JIT, which does not maintain
 # the leftchar/rightchar data.

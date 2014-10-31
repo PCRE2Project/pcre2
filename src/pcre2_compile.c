@@ -6068,7 +6068,7 @@ for (;; ptr++)
     /* Process nested bracketed regex. First check for parentheses nested too
     deeply. */
 
-    if ((cb->parens_depth += 1) > PARENS_NEST_LIMIT)
+    if ((cb->parens_depth += 1) > (int)(cb->cx->parens_nest_limit))
       {
       *errorcodeptr = ERR19;
       goto FAILED;
@@ -7786,7 +7786,7 @@ if (cb.hwm > cb.start_workspace)
 NULL to indicate that forward references have been filled in. */
 
 if (cb.workspace_size > COMPILE_WORK_SIZE)
-  ccontext->memctl.free((void *)cb.start_workspace,
+  ccontext->memctl.free((void *)cb.start_workspace, 
     ccontext->memctl.memory_data);
 cb.start_workspace = NULL;
 

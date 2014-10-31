@@ -5,6 +5,18 @@
 #forbid_utf
 #pattern posix
 
+# Test invalid options
+
+/abc/auto_callout
+
+/abc/
+   abc\=find_limits
+
+/abc/
+  abc\=partial_hard
+
+# Real tests
+
 /abc/
     abc
     *** Failers

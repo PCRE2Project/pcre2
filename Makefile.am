@@ -587,11 +587,12 @@ EXTRA_DIST += \
   testdata/testoutput18 \
   testdata/testoutputEBC \
   perltest.sh
-  
+
 # RunTest and RunGrepTest should clean up after themselves, but just in case
-# they don't, add their working files to CLEANFILES. 
+# they don't, add their working files to CLEANFILES.
 
 CLEANFILES += \
+        testSinput \
         test3input \
         test3output \
         test3outputA \

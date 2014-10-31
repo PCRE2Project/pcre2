@@ -221,9 +221,10 @@ static const char match_error_texts[] =
   "match limit exceeded\0"
   "no more memory\0"
   "unknown or unset substring\0"
+  "non-unique substring name\0" 
   "NULL argument passed\0"
-  "nested recursion at the same subject position\0"
   /* 50 */
+  "nested recursion at the same subject position\0"
   "recursion limit exceeded\0"
   "requested value is not set\0"
   ;

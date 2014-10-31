@@ -5,6 +5,23 @@
 #forbid_utf
 #pattern posix
 
+# Test invalid options
+
+/abc/auto_callout
+** Ignored with POSIX interface: auto_callout
+
+/abc/
+   abc\=find_limits
+** Ignored with POSIX interface: find_limits
+ 0: abc
+
+/abc/
+  abc\=partial_hard
+** Ignored with POSIX interface: partial_hard
+ 0: abc
+
+# Real tests
+
 /abc/
     abc
  0: abc

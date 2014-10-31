@@ -244,8 +244,10 @@ Subject length lower bound = 4
  2: b
  3: c
     abcb\=ovector=0
-Matched, but too many substrings
  0: abcb
+ 1: a
+ 2: b
+ 3: c
     abcb\=ovector=1
 Matched, but too many substrings
  0: abcb
@@ -273,8 +275,8 @@ Subject length lower bound = 3
  0: abc
  1: a
     abc\=ovector=0
-Matched, but too many substrings
  0: abc
+ 1: a
     abc\=ovector=1
 Matched, but too many substrings
  0: abc
@@ -287,8 +289,10 @@ Matched, but too many substrings
  2: a
  3: b
     aba\=ovector=0
-Matched, but too many substrings
  0: aba
+ 1: <unset>
+ 2: a
+ 3: b
     aba\=ovector=1
 Matched, but too many substrings
  0: aba
@@ -989,7 +993,7 @@ Subject length lower bound = 4
  0: abcd
  1: a
  2: d
-copy substring 5 failed (-47): unknown or unset substring
+Copy substring 5 failed (-47): unknown or unset substring
 
 /(.{20})/I
 Capturing subpattern count = 1
@@ -1043,9 +1047,9 @@ Subject length lower bound = 4
  2: <unset>
  3: f
  1G a (1)
-get substring 2 failed (-47): unknown or unset substring
+Get substring 2 failed (-47): unknown or unset substring
  3G f (1)
-get substring 4 failed (-47): unknown or unset substring
+Get substring 4 failed (-47): unknown or unset substring
  0L adef
  1L a
  2L 
@@ -1058,7 +1062,7 @@ get substring 4 failed (-47): unknown or unset substring
  1G bc (2)
  2G bc (2)
  3G f (1)
-get substring 4 failed (-47): unknown or unset substring
+Get substring 4 failed (-47): unknown or unset substring
  0L bcdef
  1L bc
  2L bc
@@ -4347,18 +4351,19 @@ Subject length lower bound = 8
  1: cd
  2: gh
  1C cd (2)
-  G gh (2) two
+  G gh (2) two (group 2)
     abcdefgh\=copy=one,copy=two
  0: abcdefgh
  1: cd
  2: gh
-  C cd (2) one
-  C gh (2) two
+  C cd (2) one (group 1)
+  C gh (2) two (group 2)
     abcdefgh\=copy=three
  0: abcdefgh
  1: cd
  2: gh
-copy substring 'three' failed (-47): unknown or unset substring
+Number not found for group 'three'
+Copy substring 'three' failed (-47): unknown or unset substring
 
 /(?P<Tes>)(?P<Test>)/IB
 ------------------------------------------------------------------
@@ -4406,12 +4411,12 @@ Subject length lower bound = 4
  0: zzaa
  1: zz
  2: aa
-  C zz (2) Z
+  C zz (2) Z (group 1)
     zzaa\=copy=A
  0: zzaa
  1: zz
  2: aa
-  C aa (2) A
+  C aa (2) A (group 2)
 
 /(?P<x>eks)(?P<x>eccs)/I
 Failed: error 143 at offset 15: two named subpatterns have the same name (PCRE2_DUPNAMES not set)
@@ -5712,21 +5717,22 @@ Subject length lower bound = 2
  0: a1
  1: a1
  2: a1
-  C a1 (2) A
+  C a1 (2) A (non-unique)
     a2b\=copy=A
  0: a2b
  1: a2b
  2: <unset>
  3: a2
-  C a2 (2) A
+  C a2 (2) A (non-unique)
     ** Failers
 No match
     a1b\=copy=Z,copy=A
  0: a1
  1: a1
  2: a1
-copy substring 'Z' failed (-47): unknown or unset substring
-  C a1 (2) A
+Number not found for group 'Z'
+Copy substring 'Z' failed (-47): unknown or unset substring
+  C a1 (2) A (non-unique)
     
 /(?|(?<a>)(?<b>)(?<a>)|(?<a>)(?<b>)(?<a>))/I,dupnames
 Capturing subpattern count = 3
@@ -5750,7 +5756,7 @@ Subject length lower bound = 2
  0: ab
  1: a
  2: b
-  C a (1) A
+  C a (1) A (non-unique)
 
 /^(?P<A>a)(?P<A>b)|cd/I,dupnames
 Capturing subpattern count = 2
@@ -5763,10 +5769,10 @@ Subject length lower bound = 2
  0: ab
  1: a
  2: b
-  C a (1) A
+  C a (1) A (non-unique)
     cd\=copy=A
  0: cd
-copy substring 'A' failed (-47): unknown or unset substring
+Copy substring 'A' failed (-47): unknown or unset substring
 
 /^(?P<A>a)(?P<A>b)|cd(?P<A>ef)(?P<A>gh)/I,dupnames
 Capturing subpattern count = 4
@@ -5783,7 +5789,7 @@ Subject length lower bound = 2
  2: <unset>
  3: ef
  4: gh
-  C ef (2) A
+  C ef (2) A (non-unique)
 
 /^((?P<A>a1)|(?P<A>a2)b)/I,dupnames
 Capturing subpattern count = 3
@@ -5797,21 +5803,22 @@ Subject length lower bound = 2
  0: a1
  1: a1
  2: a1
-  G a1 (2) A
+  G a1 (2) A (non-unique)
     a2b\=get=A
  0: a2b
  1: a2b
  2: <unset>
  3: a2
-  G a2 (2) A
+  G a2 (2) A (non-unique)
     ** Failers
 No match
     a1b\=get=Z,get=A
  0: a1
  1: a1
  2: a1
-get substring 'Z' failed (-47): unknown or unset substring
-  G a1 (2) A
+Number not found for group 'Z'
+Get substring 'Z' failed (-47): unknown or unset substring
+  G a1 (2) A (non-unique)
 
 /^(?P<A>a)(?P<A>b)/I,dupnames
 Capturing subpattern count = 2
@@ -5825,7 +5832,7 @@ Subject length lower bound = 2
  0: ab
  1: a
  2: b
-  G a (1) A
+  G a (1) A (non-unique)
 
 /^(?P<A>a)(?P<A>b)|cd/I,dupnames
 Capturing subpattern count = 2
@@ -5838,10 +5845,10 @@ Subject length lower bound = 2
  0: ab
  1: a
  2: b
-  G a (1) A
+  G a (1) A (non-unique)
     cd\=get=A
  0: cd
-get substring 'A' failed (-47): unknown or unset substring
+Get substring 'A' failed (-47): unknown or unset substring
 
 /^(?P<A>a)(?P<A>b)|cd(?P<A>ef)(?P<A>gh)/I,dupnames
 Capturing subpattern count = 4
@@ -5858,7 +5865,7 @@ Subject length lower bound = 2
  2: <unset>
  3: ef
  4: gh
-  G ef (2) A
+  G ef (2) A (non-unique)
 
 /(?J)^((?P<A>a1)|(?P<A>a2)b)/I
 Capturing subpattern count = 3
@@ -5873,13 +5880,13 @@ Subject length lower bound = 2
  0: a1
  1: a1
  2: a1
-  C a1 (2) A
+  C a1 (2) A (non-unique)
     a2b\=copy=A
  0: a2b
  1: a2b
  2: <unset>
  3: a2
-  C a2 (2) A
+  C a2 (2) A (non-unique)
 
 /^(?P<A>a) (?J:(?P<B>b)(?P<B>c)) (?P<A>d)/I
 Failed: error 143 at offset 37: two named subpatterns have the same name (PCRE2_DUPNAMES not set)
@@ -5910,9 +5917,9 @@ Subject length lower bound = 6
  2: b
  3: c
  4: d
-  C a (1) A
-  C b (1) B
-  C d (1) C
+  C a (1) A (group 1)
+  C b (1) B (non-unique)
+  C d (1) C (group 4)
 
 /^(?P<A>a)?(?(A)a|b)/I
 Capturing subpattern count = 1
@@ -7037,8 +7044,8 @@ Subject length lower bound = 2
  0: xy
  1: x
  2: y
-  C x (1) abc
-  C y (1) xyz
+  C x (1) abc (group 1)
+  C y (1) xyz (group 2)
 
 /(?<abc>x)(?'xyz'y)/I
 Capturing subpattern count = 2
@@ -7052,8 +7059,8 @@ Subject length lower bound = 2
  0: xy
  1: x
  2: y
-  C x (1) abc
-  C y (1) xyz
+  C x (1) abc (group 1)
+  C y (1) xyz (group 2)
 
 /(?<abc'x)(?'xyz'y)/I
 Failed: error 142 at offset 6: syntax error in subpattern name (missing terminator)
@@ -7381,8 +7388,8 @@ Subject length lower bound = 3
   aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\=ovector=0
 No match
   aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa4\=ovector=0
-Matched, but too many substrings
  0: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa4
+ 1: 
 
 /^a.b/newline=lf
     a\rb
@@ -9218,13 +9225,14 @@ Partial match: YXYYY
     YXYYYY\=ps
 Partial match: YXYYYY
     
-/\++\KZ|\d+X|9+Y/
+/\++\KZ|\d+X|9+Y/startchar
     ++++123999\=ps
 Partial match: 123999
     ++++123999Y\=ps
  0: 999Y
     ++++Z1234\=ps
- 0: Z
+ 0: ++++Z
+    ^^^^
 
 /Z(*F)/
     Z\=ps
@@ -9274,9 +9282,10 @@ Partial match: the cat
    abc\=ph
  0: abc
    
-/abc\K123/
+/abc\K123/startchar
     xyzabc123pqr
- 0: 123
+ 0: abc123
+    ^^^
     xyzabc12\=ps
 Partial match: abc12
     xyzabc12\=ph
@@ -9370,15 +9379,18 @@ Partial match: +ab
         End
 ------------------------------------------------------------------
 
-/abc\K/aftertext
+/abc\K/aftertext,startchar
     abcdef
- 0: 
+ 0: abc
+    ^^^
  0+ def
     abcdef\=notempty_atstart
- 0: 
+ 0: abc
+    ^^^
  0+ def
     xyzabcdef\=notempty_atstart
- 0: 
+ 0: abc
+    ^^^
  0+ def
     ** Failers
 No match
@@ -9387,12 +9399,13 @@ No match
     xyzabcdef\=notempty
 No match
     
-/^(?:(?=abc)|abc\K)/aftertext
+/^(?:(?=abc)|abc\K)/aftertext,startchar
     abcdef
  0: 
  0+ abcdef
     abcdef\=notempty_atstart
- 0: 
+ 0: abc
+    ^^^
  0+ def
     ** Failers 
 No match
@@ -9714,11 +9727,11 @@ Subject length lower bound = 1
     AB\=copy=a
  0: A
  1: A
-  C A (1) a
+  C A (1) a (group 1)
     BA\=copy=a
  0: B
  1: B
-  C B (1) a
+  C B (1) a (group 1)
 
 /(?|(?<a>A)|(?<b>B))/
 Failed: error 165 at offset 15: different names for subpatterns of the same number are not allowed
@@ -10078,7 +10091,7 @@ No match
      believe this to be a Perl bug. --/
       
 /(?>a\Kb)z|(ab)/
-    ab 
+    ab\=startchar 
  0: ab
  1: ab
 
@@ -10883,8 +10896,10 @@ Subject length lower bound = 6
  2: <unset>
  3: baz
     bazfooX\=ovector=0
-Matched, but too many substrings
  0: fooX
+ 1: foo
+ 2: <unset>
+ 3: <unset>
     bazfooX\=ovector=1
 Matched, but too many substrings
  0: fooX
@@ -11888,7 +11903,7 @@ Partial match, mark=xx: 123a
 Partial match, mark=xx: 123a
                         <<<
     
-/123\Kabc/
+/123\Kabc/startchar
     xxxx123a\=ph
 Partial match: 123a
     xxxx123a\=ps
@@ -13371,7 +13386,7 @@ No match
 Failed: error 130 at offset 4: unknown POSIX class name
 
 /(?=ab\K)/aftertext
-    abcd
+    abcd\=startchar
 Start of matched string is beyond its end - displaying from end to start.
  0: ab
  0+ abcd
@@ -13588,5 +13603,8 @@ Subject length lower bound = 0
  0: aabb
  1: aa
  2: bb
+
+/(((((a)))))/parens_nest_limit=2
+Failed: error 119 at offset 3: parentheses are too deeply nested
 
 # End of testinput2 
