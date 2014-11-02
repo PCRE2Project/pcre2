@@ -22,6 +22,12 @@
     ab\=ph
     xyz
 
+/abcd/jitfast
+    abcd
+    ab\=ps
+    ab\=ph
+    xyz
+
 /abcd/jit=1
     abcd
     ab\=ps
@@ -29,7 +35,20 @@
     xyz
     xyz\=ps
 
+/abcd/jit=1,jitfast
+    abcd
+    ab\=ps
+    ab\=ph
+    xyz
+    xyz\=ps
+
 /abcd/jit=2
+    abcd
+    ab\=ps
+    ab\=ph
+    xyz
+
+/abcd/jit=2,jitfast
     abcd
     ab\=ps
     ab\=ph
@@ -108,6 +127,10 @@
 /^(?>(a+))(?>b+)(?>(c+))(?>d+)(?>(e+))/
      aabbccddee\=find_limits
 
+/^(?>(a+))(?>b+)(?>(c+))(?>d+)(?>(e+))/jitfast
+     aabbccddee\=find_limits
+     aabbccddee\=jitstack=1
+
 /(a+)*zz/
     aaaaaaaaaaaaaz
     aaaaaaaaaaaaaz\=match_limit=3000
@@ -133,5 +156,17 @@
 
 /(?(R)a*(?1)|((?R))b)/
     aaaabcde
+    
+# Invalid options disable JIT when called via pcre2_match(), causing the
+# match to happen via the interpreter, but for fast JIT invalid options are
+# ignored, so an unanchored match happens.
+
+/abcd/jit
+    abcd\=anchored
+    fail abcd\=anchored 
+    
+/abcd/jitfast
+    abcd\=anchored 
+    succeed abcd\=anchored 
     
 # End of testinput16

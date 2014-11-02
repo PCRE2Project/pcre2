@@ -1,4 +1,4 @@
-.TH PCRE2TEST 1 "31 October 2014" "PCRE 10.00"
+.TH PCRE2TEST 1 "02 November 2014" "PCRE 10.00"
 .SH NAME
 pcre2test - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -437,6 +437,7 @@ about the pattern:
   /I  info                      show info about compiled pattern
       hex                       pattern is coded in hexadecimal
       jit[=<number>]            use JIT
+      jitfast                   use JIT fast path 
       jitverify                 verify JIT use
       locale=<name>             use this locale
       memory                    show memory used
@@ -530,6 +531,12 @@ are specified. For more details, see the
 .\"
 documentation. See also the \fBjitstack\fP modifier below for a way of
 setting the size of the JIT stack.
+.P
+If the \fBjitfast\fP modifier is specified, matching is done using the JIT
+"fast path" interface (\fBpcre2_jit_match()), which skips some of the sanity
+checks that are done by \fBpcre2_match()\fP, and of course does not work when
+JIT is not supported. If \fBjitfast\fP is specified without \fBjit\fP, jit=7 is
+assumed.
 .P
 If the \fBjitverify\fP modifier is specified, information about the compiled
 pattern shows whether JIT compilation was or was not successful. If
@@ -847,8 +854,9 @@ current character is CR followed by LF, an advance of two is used.
 .sp
 The \fBjitstack\fP modifier provides a way of setting the maximum stack size
 that is used by the just-in-time optimization code. It is ignored if JIT
-optimization is not being used. Providing a stack that is larger than the
-default 32K is necessary only for very complicated patterns.
+optimization is not being used. The value is a number of kilobytes. Providing a
+stack that is larger than the default 32K is necessary only for very
+complicated patterns. 
 .
 .
 .SS "Setting match and recursion limits"
@@ -1165,10 +1173,9 @@ characters.
 .SH "SEE ALSO"
 .rs
 .sp
-\fBpcre2\fP(3), \fBpcre16\fP(3), \fBpcre32\fP(3), \fBpcre2api\fP(3),
-\fBpcre2callout\fP(3),
+\fBpcre2\fP(3), \fBpcre2api\fP(3), \fBpcre2callout\fP(3),
 \fBpcre2jit\fP, \fBpcre2matching\fP(3), \fBpcre2partial\fP(d),
-\fBpcre2pattern\fP(3), \fBpcre2precompile\fP(3).
+\fBpcre2pattern\fP(3).
 .
 .
 .SH AUTHOR
@@ -1185,6 +1192,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 31 October 2014
+Last updated: 02 November 2014
 Copyright (c) 1997-2014 University of Cambridge.
 .fi

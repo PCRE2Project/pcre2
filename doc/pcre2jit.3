@@ -1,4 +1,4 @@
-.TH PCRE2JIT 3 "27 October 2014" "PCRE2 10.00"
+.TH PCRE2JIT 3 "02 November 2014" "PCRE2 10.00"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 JUST-IN-TIME COMPILER SUPPORT"
@@ -349,11 +349,11 @@ processed by \fBpcre2_jit_compile()\fP).
 The fast path function is called \fBpcre2_jit_match()\fP, and it takes exactly
 the same arguments as \fBpcre2_match()\fP, plus one additional argument that
 must either point to a JIT stack or be NULL. In the latter case, if a callback
-function has been set up by \fBpcre2_jit_stack_alloc()\fP, it is called.
+function has been set up by \fBpcre2_jit_stack_assign()\fP, it is called.
 Otherwise the system stack is used. The return values are the same as for
 \fBpcre2_match()\fP, plus PCRE2_ERROR_JIT_BADOPTION if a matching mode (partial
-or complete) is requested that was not compiled. Unsupported option bits are
-ignored.
+or complete) is requested that was not compiled. Unsupported option bits (for 
+example, PCRE2_ANCHORED) are ignored.
 .P
 When you call \fBpcre2_match()\fP, as well as testing for invalid options, a
 number of other sanity checks are performed on the arguments. For example, if
@@ -386,6 +386,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 27 October 2014
+Last updated: 02 November 2014
 Copyright (c) 1997-2014 University of Cambridge.
 .fi

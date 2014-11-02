@@ -38,6 +38,16 @@ Partial match: ab (JIT)
     xyz
 No match (JIT)
 
+/abcd/jitfast
+    abcd
+ 0: abcd (JIT)
+    ab\=ps
+Partial match: ab (JIT)
+    ab\=ph
+Partial match: ab (JIT)
+    xyz
+No match (JIT)
+
 /abcd/jit=1
     abcd
  0: abcd (JIT)
@@ -50,6 +60,18 @@ No match (JIT)
     xyz\=ps
 No match
 
+/abcd/jit=1,jitfast
+    abcd
+ 0: abcd (JIT)
+    ab\=ps
+Failed: error -43: bad JIT option
+    ab\=ph
+Failed: error -43: bad JIT option
+    xyz
+No match (JIT)
+    xyz\=ps
+Failed: error -43: bad JIT option
+
 /abcd/jit=2
     abcd
  0: abcd
@@ -59,6 +81,16 @@ Partial match: ab (JIT)
 Partial match: ab
     xyz
 No match
+
+/abcd/jit=2,jitfast
+    abcd
+Failed: error -43: bad JIT option
+    ab\=ps
+Partial match: ab (JIT)
+    ab\=ph
+Failed: error -43: bad JIT option
+    xyz
+Failed: error -43: bad JIT option
 
 /abcd/jit=3
     abcd
@@ -207,6 +239,14 @@ Minimum match limit = 6
  2: cc
  3: ee
 
+/^(?>(a+))(?>b+)(?>(c+))(?>d+)(?>(e+))/jitfast
+     aabbccddee\=find_limits
+Minimum match limit = 6
+ 0: aabbccddee (JIT)
+ 1: aa
+ 2: cc
+ 3: ee
+
 /(a+)*zz/
     aaaaaaaaaaaaaz
 No match (JIT)
@@ -260,5 +300,21 @@ Failed: error -44: JIT stack limit reached
 /(?(R)a*(?1)|((?R))b)/
     aaaabcde
 Failed: error -44: JIT stack limit reached
+    
+# Invalid options disable JIT when called via pcre2_match(), causing the
+# match to happen via the interpreter, but for fast JIT invalid options are
+# ignored, so an unanchored match happens.
+
+/abcd/jit
+    abcd\=anchored
+ 0: abcd
+    fail abcd\=anchored 
+No match
+    
+/abcd/jitfast
+    abcd\=anchored 
+ 0: abcd (JIT)
+    succeed abcd\=anchored 
+ 0: abcd (JIT)
     
 # End of testinput16
