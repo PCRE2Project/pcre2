@@ -42,13 +42,13 @@ block on the machine stack is used.
 <P>
 If <i>callback</i> is NULL and <i>callback_data</i> is not NULL,
 <i>callback_data</i> must be a valid JIT stack, the result of calling
-<b>pcre2_jit_stack_alloc()</b>.
+<b>pcre2_jit_stack_create()</b>.
 </P>
 <P>
 If <i>callback</i> not NULL, it is called with <i>callback_data</i> as an
 argument at the start of matching, in order to set up a JIT stack. If the
 result is NULL, the internal 32K stack is used; otherwise the return value must
-be a valid JIT stack, the result of calling <b>pcre2_jit_stack_alloc()</b>.
+be a valid JIT stack, the result of calling <b>pcre2_jit_stack_create()</b>.
 </P>
 <P>
 You may safely assign the same JIT stack to multiple patterns, as long as they

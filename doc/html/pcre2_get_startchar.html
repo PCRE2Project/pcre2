@@ -27,9 +27,11 @@ DESCRIPTION
 <P>
 After a successful call of <b>pcre2_match()</b> that was passed the match block
 that is this function's argument, this function returns the code unit offset of
-the character at which the successful match started. This can be different to
-the value of <i>ovector[0]</i> if the pattern contains the \K escape sequence.
-Note, however, that \K has no effect for a partial match.
+the character at which the successful match started. For a non-partial match,
+this can be different to the value of <i>ovector[0]</i> if the pattern contains
+the \K escape sequence. After a partial match, however, this value is always
+the same as <i>ovector[0]</i> because \K does not affect the result of a
+partial match.
 </P>
 <P>
 There is a complete description of the PCRE2 native API in the

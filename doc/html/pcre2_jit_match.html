@@ -36,7 +36,7 @@ Its arguments are exactly the same as for
 <a href="pcre2_match.html"><b>pcre2_match()</b></a>
 plus one additional argument that must either point to a JIT stack or be NULL.
 In the latter case, if a callback function has been set up by
-<b>pcre2_jit_stack_alloc()</b>, it is called. Otherwise the system stack is
+<b>pcre2_jit_stack_create()</b>, it is called. Otherwise the system stack is
 used.
 </P>
 <P>

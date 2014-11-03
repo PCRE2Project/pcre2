@@ -82,8 +82,8 @@ checkspecial()
     exit 1
   fi
   }
-  
-# ------ Normal tests ------ 
+
+# ------ Normal tests ------
 
 echo "Testing pcre2grep main features"
 
@@ -585,7 +585,7 @@ $cf $srcdir/testdata/grepoutputN testtrygrep
 if [ $? != 0 ] ; then exit 1; fi
 
 
-# Finally, some tests to exercise code that is not tested above, just to be 
+# Finally, some tests to exercise code that is not tested above, just to be
 # sure that it runs OK. Doing this improves the coverage statistics. The output
 # is not checked.
 

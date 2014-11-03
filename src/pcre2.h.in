@@ -457,7 +457,7 @@ PCRE2_EXP_DECL int       pcre2_jit_match(const pcre2_code *, \
                            pcre2_jit_stack *); \
 PCRE2_EXP_DECL void      pcre2_jit_free_unused_memory(pcre2_general_context *);\
 PCRE2_EXP_DECL \
-  pcre2_jit_stack       *pcre2_jit_stack_alloc(pcre2_general_context *, \
+  pcre2_jit_stack       *pcre2_jit_stack_create(pcre2_general_context *, \
                            PCRE2_SIZE, PCRE2_SIZE); \
 PCRE2_EXP_DECL void      pcre2_jit_stack_assign(const pcre2_code *, \
                            pcre2_jit_callback, void *); \
@@ -531,8 +531,8 @@ pcre2_compile are called by application code. */
 #define pcre2_jit_compile                     PCRE2_SUFFIX(pcre2_jit_compile_)
 #define pcre2_jit_match                       PCRE2_SUFFIX(pcre2_jit_match_)
 #define pcre2_jit_free_unused_memory          PCRE2_SUFFIX(pcre2_jit_free_unused_memory_)
-#define pcre2_jit_stack_alloc                 PCRE2_SUFFIX(pcre2_jit_stack_alloc_)
 #define pcre2_jit_stack_assign                PCRE2_SUFFIX(pcre2_jit_stack_assign_)
+#define pcre2_jit_stack_create                PCRE2_SUFFIX(pcre2_jit_stack_create_)
 #define pcre2_jit_stack_free                  PCRE2_SUFFIX(pcre2_jit_stack_free_)
 #define pcre2_maketables                      PCRE2_SUFFIX(pcre2_maketables_)
 #define pcre2_match_context_copy              PCRE2_SUFFIX(pcre2_match_context_copy_)

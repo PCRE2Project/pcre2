@@ -27,16 +27,17 @@ DESCRIPTION
 </b><br>
 <P>
 This convenience function finds the number of a named substring capturing
-parenthesis in a compiled pattern. Its arguments are:
+parenthesis in a compiled pattern, provided that it is a unique name. The
+function arguments are:
 <pre>
   <i>code</i>    Compiled regular expression
   <i>name</i>    Name whose number is required
 </pre>
 The yield of the function is the number of the parenthesis if the name is
-found, or PCRE2_ERROR_NOSUBSTRING otherwise. When duplicate names are allowed
-(PCRE2_DUPNAMES is set), it is not defined which of the numbers is returned.
-You can obtain the complete list by calling
-<b>pcre2_substring_nametable_scan()</b>.
+found, or PCRE2_ERROR_NOSUBSTRING if it is not found. When duplicate names are
+allowed (PCRE2_DUPNAMES is set), if the name is not unique,
+PCRE2_ERROR_NOUNIQUESUBSTRING is returned. You can obtain the list of numbers
+with the same name by calling <b>pcre2_substring_nametable_scan()</b>.
 </P>
 <P>
 There is a complete description of the PCRE2 native API in the

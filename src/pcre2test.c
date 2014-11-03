@@ -88,7 +88,7 @@ that first, falling back to readline/readline.h. */
 #endif
 #endif
 
-/* Put the test for interactive input into a macro so that it can be changed if 
+/* Put the test for interactive input into a macro so that it can be changed if
 required for different environments. */
 
 #define INTERACTIVE(f) isatty(fileno(f))
@@ -822,13 +822,13 @@ are supported. */
     a = pcre2_jit_match_32(G(b,32),(PCRE2_SPTR32)c,d,e,f,G(g,32),G(h,32), \
       (pcre2_jit_stack_32 *)i)
 
-#define PCRE2_JIT_STACK_ALLOC(a,b,c,d) \
+#define PCRE2_JIT_STACK_CREATE(a,b,c,d) \
   if (test_mode == PCRE8_MODE) \
-    a = (PCRE2_JIT_STACK *)pcre2_jit_stack_alloc_8(b,c,d); \
+    a = (PCRE2_JIT_STACK *)pcre2_jit_stack_create_8(b,c,d); \
   else if (test_mode == PCRE16_MODE) \
-    a = (PCRE2_JIT_STACK *)pcre2_jit_stack_alloc_16(b,c,d); \
+    a = (PCRE2_JIT_STACK *)pcre2_jit_stack_create_16(b,c,d); \
   else \
-    a = (PCRE2_JIT_STACK *)pcre2_jit_stack_alloc_32(b,c,d);
+    a = (PCRE2_JIT_STACK *)pcre2_jit_stack_create_32(b,c,d);
 
 #define PCRE2_JIT_STACK_ASSIGN(a,b,c) \
   if (test_mode == PCRE8_MODE) \
@@ -1200,11 +1200,11 @@ the three different cases. */
     a = G(pcre2_jit_match_,BITTWO)(G(b,BITTWO),(G(PCRE2_SPTR,BITTWO))c,d,e,f, \
       G(g,BITTWO),G(h,BITTWO),(G(pcre2_jit_stack_,BITTWO) *)i)
 
-#define PCRE2_JIT_STACK_ALLOC(a,b,c,d) \
+#define PCRE2_JIT_STACK_CREATE(a,b,c,d) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
-    a = (PCRE2_JIT_STACK *)G(pcre2_jit_stack_alloc_,BITONE)(b,c,d); \
+    a = (PCRE2_JIT_STACK *)G(pcre2_jit_stack_create_,BITONE)(b,c,d); \
   else \
-    a = (PCRE2_JIT_STACK *)G(pcre2_jit_stack_alloc_,BITTWO)(b,c,d); \
+    a = (PCRE2_JIT_STACK *)G(pcre2_jit_stack_create_,BITTWO)(b,c,d); \
 
 #define PCRE2_JIT_STACK_ASSIGN(a,b,c) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
@@ -1447,8 +1447,8 @@ the three different cases. */
 #define PCRE2_JIT_MATCH(a,b,c,d,e,f,g,h,(pcre2_jit_stack_8 *)i) \
   a = pcre2_jit_match_8(G(b,8),(PCRE2_SPTR8)c,d,e,f,G(g,8),G(h,8), \
     (pcre2_jit_stack_8 *)i)
-#define PCRE2_JIT_STACK_ALLOC(a,b,c,d) \
-  a = (PCRE2_JIT_STACK *)pcre2_jit_stack_alloc_8(b,c,d);
+#define PCRE2_JIT_STACK_CREATE(a,b,c,d) \
+  a = (PCRE2_JIT_STACK *)pcre2_jit_stack_create_8(b,c,d);
 #define PCRE2_JIT_STACK_ASSIGN(a,b,c) \
   pcre2_jit_stack_assign_8(G(a,8),(pcre2_jit_callback_8)b,c);
 #define PCRE2_JIT_STACK_FREE(a) pcre2_jit_stack_free_8((pcre2_jit_stack_8 *)a);
@@ -1526,8 +1526,8 @@ the three different cases. */
 #define PCRE2_JIT_MATCH(a,b,c,d,e,f,g,h,i) \
   a = pcre2_jit_match_16(G(b,16),(PCRE2_SPTR16)c,d,e,f,G(g,16),G(h,16), \
     (pcre2_jit_stack_16 *)i)
-#define PCRE2_JIT_STACK_ALLOC(a,b,c,d) \
-  a = (PCRE2_JIT_STACK *)pcre2_jit_stack_alloc_16(b,c,d);
+#define PCRE2_JIT_STACK_CREATE(a,b,c,d) \
+  a = (PCRE2_JIT_STACK *)pcre2_jit_stack_create_16(b,c,d);
 #define PCRE2_JIT_STACK_ASSIGN(a,b,c) \
   pcre2_jit_stack_assign_16(G(a,16),(pcre2_jit_callback_16)b,c);
 #define PCRE2_JIT_STACK_FREE(a) pcre2_jit_stack_free_16((pcre2_jit_stack_16 *)a);
@@ -1605,8 +1605,8 @@ the three different cases. */
 #define PCRE2_JIT_MATCH(a,b,c,d,e,f,g,h,i) \
   a = pcre2_jit_match_32(G(b,32),(PCRE2_SPTR32)c,d,e,f,G(g,32),G(h,32), \
     (pcre2_jit_stack_32 *)i)
-#define PCRE2_JIT_STACK_ALLOC(a,b,c,d) \
-  a = (PCRE2_JIT_STACK *)pcre2_jit_stack_alloc_32(b,c,d);
+#define PCRE2_JIT_STACK_CREATE(a,b,c,d) \
+  a = (PCRE2_JIT_STACK *)pcre2_jit_stack_create_32(b,c,d);
 #define PCRE2_JIT_STACK_ASSIGN(a,b,c) \
   pcre2_jit_stack_assign_32(G(a,32),(pcre2_jit_callback_32)b,c);
 #define PCRE2_JIT_STACK_FREE(a) pcre2_jit_stack_free_32((pcre2_jit_stack_32 *)a);
@@ -3681,7 +3681,7 @@ if (!decode_modifiers(p, CTX_PAT, &pat_patctl, NULL)) return PR_SKIP;
 /* Assume full JIT compile for jitverify and/or jitfast if nothing else was
 specified. */
 
-if (pat_patctl.jit == 0 && 
+if (pat_patctl.jit == 0 &&
     (pat_patctl.control & (CTL_JITVERIFY|CTL_JITFAST)) != 0)
   pat_patctl.jit = 7;
 utf = (pat_patctl.options & PCRE2_UTF) != 0;
@@ -3996,7 +3996,7 @@ for (;;)
   if ((pat_patctl.control & CTL_JITFAST) != 0)
     PCRE2_JIT_MATCH(capcount, compiled_code, pp, ulen, dat_datctl.offset,
       dat_datctl.options, match_data, dat_context, jit_stack);
-  else     
+  else
     PCRE2_MATCH(capcount, compiled_code, pp, ulen, dat_datctl.offset,
       dat_datctl.options, match_data, dat_context);
 
@@ -4637,7 +4637,7 @@ if (dat_datctl.jitstack != 0)
   if (dat_datctl.jitstack != jit_stack_size)
     {
     PCRE2_JIT_STACK_FREE(jit_stack);
-    PCRE2_JIT_STACK_ALLOC(jit_stack, NULL, 1, dat_datctl.jitstack * 1024);
+    PCRE2_JIT_STACK_CREATE(jit_stack, NULL, 1, dat_datctl.jitstack * 1024);
     jit_stack_size = dat_datctl.jitstack;
     }
   PCRE2_JIT_STACK_ASSIGN(compiled_code, jit_callback, jit_stack);
@@ -4690,10 +4690,10 @@ for (gmatched = 0;; gmatched++)
   PCRE2_SIZE ovecsave[2];
 
   ovector = FLD(match_data, ovector);
-  
+
   /* When matching is via pcre2_match(), we will detect the use of JIT via the
   stack callback function. */
- 
+
   jit_was_used = (pat_patctl.control & CTL_JITFAST) != 0;
 
   /* After the first time round a global loop, save the current ovector[0,1] so
@@ -4722,7 +4722,7 @@ for (gmatched = 0;; gmatched++)
         }
       if (dfa_workspace == NULL)
         dfa_workspace = (int *)malloc(DFA_WS_DIMENSION*sizeof(int));
-      start_time = clock();   
+      start_time = clock();
       for (i = 0; i < timeitm; i++)
         {
         PCRE2_DFA_MATCH(capcount, compiled_code, pp, ulen,
@@ -4730,7 +4730,7 @@ for (gmatched = 0;; gmatched++)
           dat_context, dfa_workspace, DFA_WS_DIMENSION);
         }
       }
-      
+
     else if ((pat_patctl.control & CTL_JITFAST) != 0)
       {
       start_time = clock();
@@ -4740,9 +4740,9 @@ for (gmatched = 0;; gmatched++)
           dat_datctl.offset, dat_datctl.options | g_notempty, match_data,
           dat_context, jit_stack);
         }
-      }  
- 
-    else 
+      }
+
+    else
       {
       start_time = clock();
       for (i = 0; i < timeitm; i++)
@@ -4751,7 +4751,7 @@ for (gmatched = 0;; gmatched++)
           dat_datctl.offset, dat_datctl.options | g_notempty, match_data,
           dat_context);
         }
-      }   
+      }
     total_match_time += (time_taken = clock() - start_time);
     fprintf(outfile, "Match time %.4f milliseconds\n",
       (((double)time_taken * 1000.0) / (double)timeitm) /
@@ -4809,7 +4809,7 @@ for (gmatched = 0;; gmatched++)
       if ((pat_patctl.control & CTL_JITFAST) != 0)
         PCRE2_JIT_MATCH(capcount, compiled_code, pp, ulen, dat_datctl.offset,
           dat_datctl.options | g_notempty, match_data, dat_context, jit_stack);
-      else   
+      else
         PCRE2_MATCH(capcount, compiled_code, pp, ulen, dat_datctl.offset,
           dat_datctl.options | g_notempty, match_data, dat_context);
       if (capcount == 0)

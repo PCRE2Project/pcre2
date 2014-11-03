@@ -140,11 +140,11 @@ in the library.
 <tr><td><a href="pcre2_jit_match.html">pcre2_jit_match</a></td>
     <td>&nbsp;&nbsp;Fast path interface to JIT matching</td></tr>
 
-<tr><td><a href="pcre2_jit_stack_alloc.html">pcre2_jit_stack_alloc</a></td>
-    <td>&nbsp;&nbsp;Create a stack for JIT matching</td></tr>
-
 <tr><td><a href="pcre2_jit_stack_assign.html">pcre2_jit_stack_assign</a></td>
     <td>&nbsp;&nbsp;Assign stack for JIT matching</td></tr>
+
+<tr><td><a href="pcre2_jit_stack_create.html">pcre2_jit_stack_create</a></td>
+    <td>&nbsp;&nbsp;Create a stack for JIT matching</td></tr>
 
 <tr><td><a href="pcre2_jit_stack_free.html">pcre2_jit_stack_free</a></td>
     <td>&nbsp;&nbsp;Free a JIT matching stack</td></tr>

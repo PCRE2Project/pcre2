@@ -223,10 +223,12 @@ Output the PCRE2 version number and then exit.
 <br><a name="SEC5" href="#TOC1">DESCRIPTION</a><br>
 <P>
 If <b>pcre2test</b> is given two filename arguments, it reads from the first and
-writes to the second. If it is given only one filename argument, it reads from
+writes to the second. If the first name is "-", input is taken from the
+standard input. If <b>pcre2test</b> is given only one argument, it reads from
 that file and writes to stdout. Otherwise, it reads from stdin and writes to
-stdout, and prompts for each line of input, using "re&#62;" to prompt for regular
-expression patterns, and "data&#62;" to prompt for subject lines.
+stdout. When the input is a terminal, it prompts for each line of input, using
+"re&#62;" to prompt for regular expression patterns, and "data&#62;" to prompt for
+subject lines.
 </P>
 <P>
 When <b>pcre2test</b> is built, a configuration option can specify that it
@@ -476,6 +478,7 @@ about the pattern:
   /I  info                      show info about compiled pattern
       hex                       pattern is coded in hexadecimal
       jit[=&#60;number&#62;]            use JIT
+      jitfast                   use JIT fast path
       jitverify                 verify JIT use
       locale=&#60;name&#62;             use this locale
       memory                    show memory used
@@ -573,6 +576,13 @@ documentation. See also the <b>jitstack</b> modifier below for a way of
 setting the size of the JIT stack.
 </P>
 <P>
+If the <b>jitfast</b> modifier is specified, matching is done using the JIT
+"fast path" interface (\fBpcre2_jit_match()), which skips some of the sanity
+checks that are done by <b>pcre2_match()</b>, and of course does not work when
+JIT is not supported. If <b>jitfast</b> is specified without <b>jit</b>, jit=7 is
+assumed.
+</P>
+<P>
 If the <b>jitverify</b> modifier is specified, information about the compiled
 pattern shows whether JIT compilation was or was not successful. If
 <b>jitverify</b> is specified without <b>jit</b>, jit=7 is assumed. If JIT
@@ -612,6 +622,9 @@ Limiting nested parentheses
 <P>
 The <b>parens_nest_limit</b> modifier sets a limit on the depth of nested
 parentheses in a pattern. Breaching the limit causes a compilation error.
+The default for the library is set when PCRE2 is built, but <b>pcre2test</b>
+sets its own default of 220, which is required for running the standard test
+suite.
 </P>
 <br><b>
 Using the POSIX wrapper API
@@ -675,12 +688,13 @@ However, they may be included in a pattern's modifier list, in which case they
 are applied to every subject line that is processed with that pattern. They do
 not affect the compilation process.
 <pre>
-      aftertext                 show text after match
-      allaftertext              show text after captures
-      allcaptures               show all captures
-      allusedtext               show all consulted text
-  /g  global                    global matching
-      mark                      show mark values
+      aftertext           show text after match
+      allaftertext        show text after captures
+      allcaptures         show all captures
+      allusedtext         show all consulted text
+  /g  global              global matching
+      mark                show mark values
+      startchar           show starting character when relevant
 </pre>
 These modifiers may not appear in a <b>#pattern</b> command. If you want them as
 defaults, set them in a <b>#subject</b> command.
@@ -751,6 +765,7 @@ pattern.
       offset=&#60;n&#62;                set starting offset
       ovector=&#60;n&#62;               set size of output vector
       recursion_limit=&#60;n&#62;       set a recursion limit
+      startchar                 show startchar when relevant
 </pre>
 The effects of these modifiers are described in the following sections.
 FIXME: Give more examples.
@@ -777,13 +792,29 @@ there is a lookbehind at the start of a match, or a lookahead at the end, or if
 of the actual match are indicated in the output by '&#60;' or '&#62;' characters
 underneath them. Here is an example:
 <pre>
-  /(?&#60;=pqr)abc(?=xyz)/
-      123pqrabcxyz456\=allusedtext
+    re&#62; /(?&#60;=pqr)abc(?=xyz)/
+  data&#62; 123pqrabcxyz456\=allusedtext
    0: pqrabcxyz
       &#60;&#60;&#60;   &#62;&#62;&#62;
 </pre>
 This shows that the matched string is "abc", with the preceding and following
 strings "pqr" and "xyz" also consulted during the match.
+</P>
+<P>
+The <b>startchar</b> modifier requests that the starting character for the match
+be indicated, if it is different to the start of the matched string. The only
+time when this occurs is when \K has been processed as part of the match. In
+this situation, the output for the matched string is displayed from the
+starting character instead of from the match point, with circumflex characters
+under the earlier characters. For example:
+<pre>
+    re&#62; /abc\Kxyz/
+  data&#62; abcxyz\=startchar
+   0: abcxyz
+      ^^^
+</pre>
+Unlike <b>allusedtext</b>, the <b>startchar</b> modifier can be used with JIT.
+However, these two modifiers are mutually exclusive.
 </P>
 <br><b>
 Showing the value of all capture groups
@@ -870,8 +901,9 @@ Setting the JIT stack size
 <P>
 The <b>jitstack</b> modifier provides a way of setting the maximum stack size
 that is used by the just-in-time optimization code. It is ignored if JIT
-optimization is not being used. Providing a stack that is larger than the
-default 32K is necessary only for very complicated patterns.
+optimization is not being used. The value is a number of kilobytes. Providing a
+stack that is larger than the default 32K is necessary only for very
+complicated patterns.
 </P>
 <br><b>
 Setting match and recursion limits
@@ -939,11 +971,13 @@ appears, though of course it can also be used to set a default in a
 available for storing matching information. The default is 15.
 </P>
 <P>
-At least one pair of offsets is always created by
-<b>pcre2_match_data_create()</b>, for matching with PCRE2's native API, so a
-value of 0 is the same as 1. However a value of 0 is useful when testing the
-POSIX API because it causes <b>regexec()</b> to be called with a NULL capture
-vector.
+A value of zero is useful when testing the POSIX API because it causes
+<b>regexec()</b> to be called with a NULL capture vector. When not testing the
+POSIX API, a value of zero is used to cause
+<b>pcre2_match_data_create_from_pattern</b> to be called, in order to create a
+match block of exactly the right size for the pattern. (It is not possible to
+create a match block with a zero-length ovector; there is always one pair of
+offsets.)
 </P>
 <br><a name="SEC12" href="#TOC1">THE ALTERNATIVE MATCHING FUNCTION</a><br>
 <P>
@@ -1175,10 +1209,9 @@ characters.
 </P>
 <br><a name="SEC18" href="#TOC1">SEE ALSO</a><br>
 <P>
-<b>pcre2</b>(3), <b>pcre16</b>(3), <b>pcre32</b>(3), <b>pcre2api</b>(3),
-<b>pcre2callout</b>(3),
+<b>pcre2</b>(3), <b>pcre2api</b>(3), <b>pcre2callout</b>(3),
 <b>pcre2jit</b>, <b>pcre2matching</b>(3), <b>pcre2partial</b>(d),
-<b>pcre2pattern</b>(3), <b>pcre2precompile</b>(3).
+<b>pcre2pattern</b>(3).
 </P>
 <br><a name="SEC19" href="#TOC1">AUTHOR</a><br>
 <P>
@@ -1191,7 +1224,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC20" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 11 October 2014
+Last updated: 02 November 2014
 <br>
 Copyright &copy; 1997-2014 University of Cambridge.
 <br>

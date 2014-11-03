@@ -437,7 +437,7 @@ about the pattern:
   /I  info                      show info about compiled pattern
       hex                       pattern is coded in hexadecimal
       jit[=<number>]            use JIT
-      jitfast                   use JIT fast path 
+      jitfast                   use JIT fast path
       jitverify                 verify JIT use
       locale=<name>             use this locale
       memory                    show memory used
@@ -577,8 +577,8 @@ also output.
 .sp
 The \fBparens_nest_limit\fP modifier sets a limit on the depth of nested
 parentheses in a pattern. Breaching the limit causes a compilation error.
-The default for the library is set when PCRE2 is built, but \fBpcre2test\fP 
-sets its own default of 220, which is required for running the standard test 
+The default for the library is set when PCRE2 is built, but \fBpcre2test\fP
+sets its own default of 220, which is required for running the standard test
 suite.
 .
 .
@@ -651,7 +651,7 @@ not affect the compilation process.
       allusedtext         show all consulted text
   /g  global              global matching
       mark                show mark values
-      startchar           show starting character when relevant 
+      startchar           show starting character when relevant
 .sp
 These modifiers may not appear in a \fB#pattern\fP command. If you want them as
 defaults, set them in a \fB#subject\fP command.
@@ -725,7 +725,7 @@ pattern.
       offset=<n>                set starting offset
       ovector=<n>               set size of output vector
       recursion_limit=<n>       set a recursion limit
-      startchar                 show startchar when relevant 
+      startchar                 show startchar when relevant
 .sp
 The effects of these modifiers are described in the following sections.
 FIXME: Give more examples.
@@ -759,17 +759,17 @@ underneath them. Here is an example:
 This shows that the matched string is "abc", with the preceding and following
 strings "pqr" and "xyz" also consulted during the match.
 .P
-The \fBstartchar\fP modifier requests that the starting character for the match 
-be indicated, if it is different to the start of the matched string. The only 
-time when this occurs is when \eK has been processed as part of the match. In 
-this situation, the output for the matched string is displayed from the 
-starting character instead of from the match point, with circumflex characters 
+The \fBstartchar\fP modifier requests that the starting character for the match
+be indicated, if it is different to the start of the matched string. The only
+time when this occurs is when \eK has been processed as part of the match. In
+this situation, the output for the matched string is displayed from the
+starting character instead of from the match point, with circumflex characters
 under the earlier characters. For example:
 .sp
     re> /abc\eKxyz/
   data> abcxyz\e=startchar
    0: abcxyz
-      ^^^ 
+      ^^^
 .sp
 Unlike \fBallusedtext\fP, the \fBstartchar\fP modifier can be used with JIT.
 However, these two modifiers are mutually exclusive.
@@ -856,7 +856,7 @@ The \fBjitstack\fP modifier provides a way of setting the maximum stack size
 that is used by the just-in-time optimization code. It is ignored if JIT
 optimization is not being used. The value is a number of kilobytes. Providing a
 stack that is larger than the default 32K is necessary only for very
-complicated patterns. 
+complicated patterns.
 .
 .
 .SS "Setting match and recursion limits"
@@ -925,9 +925,9 @@ available for storing matching information. The default is 15.
 A value of zero is useful when testing the POSIX API because it causes
 \fBregexec()\fP to be called with a NULL capture vector. When not testing the
 POSIX API, a value of zero is used to cause
-\fBpcre2_match_data_create_from_pattern\fP to be called, in order to create a 
-match block of exactly the right size for the pattern. (It is not possible to 
-create a match block with a zero-length ovector; there is always one pair of 
+\fBpcre2_match_data_create_from_pattern\fP to be called, in order to create a
+match block of exactly the right size for the pattern. (It is not possible to
+create a match block with a zero-length ovector; there is always one pair of
 offsets.)
 .
 .

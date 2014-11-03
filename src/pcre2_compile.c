@@ -304,8 +304,8 @@ static const short int escapes[] = {
 #else
 
 /* This is the "abnormal" table for EBCDIC systems without UTF-8 support.
-It runs from 'a' to '9'. For some minimal testing of EBCDIC features, the code 
-is sometimes compiled on an ASCII system. In this case, we must not use CHAR_a 
+It runs from 'a' to '9'. For some minimal testing of EBCDIC features, the code
+is sometimes compiled on an ASCII system. In this case, we must not use CHAR_a
 because it is defined as 'a', which of course picks up the ASCII value. */
 
 #if 'a' == 0x81                 /* Check for a real EBCDIC environment */
@@ -7786,7 +7786,7 @@ if (cb.hwm > cb.start_workspace)
 NULL to indicate that forward references have been filled in. */
 
 if (cb.workspace_size > COMPILE_WORK_SIZE)
-  ccontext->memctl.free((void *)cb.start_workspace, 
+  ccontext->memctl.free((void *)cb.start_workspace,
     ccontext->memctl.memory_data);
 cb.start_workspace = NULL;
 

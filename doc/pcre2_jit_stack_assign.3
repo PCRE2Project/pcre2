@@ -1,4 +1,4 @@
-.TH PCRE2_JIT_STACK_ASSIGN 3 "21 October 2014" "PCRE2 10.0"
+.TH PCRE2_JIT_STACK_ASSIGN 3 "03 November 2014" "PCRE2 10.0"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH SYNOPSIS
@@ -27,12 +27,12 @@ block on the machine stack is used.
 .P
 If \fIcallback\fP is NULL and \fIcallback_data\fP is not NULL,
 \fIcallback_data\fP must be a valid JIT stack, the result of calling
-\fBpcre2_jit_stack_alloc()\fP.
+\fBpcre2_jit_stack_create()\fP.
 .P
 If \fIcallback\fP not NULL, it is called with \fIcallback_data\fP as an
 argument at the start of matching, in order to set up a JIT stack. If the
 result is NULL, the internal 32K stack is used; otherwise the return value must
-be a valid JIT stack, the result of calling \fBpcre2_jit_stack_alloc()\fP.
+be a valid JIT stack, the result of calling \fBpcre2_jit_stack_create()\fP.
 .P
 You may safely assign the same JIT stack to multiple patterns, as long as they
 are all matched in the same thread. In a multithread application, each thread

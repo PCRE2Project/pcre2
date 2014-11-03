@@ -97,7 +97,7 @@ sljit_free_unused_memory_exec();
 *************************************************/
 
 PCRE2_EXP_DEFN pcre2_jit_stack * PCRE2_CALL_CONVENTION
-pcre2_jit_stack_alloc(pcre2_general_context *gcontext, size_t startsize,
+pcre2_jit_stack_create(pcre2_general_context *gcontext, size_t startsize,
   size_t maxsize)
 {
 #ifndef SUPPORT_JIT

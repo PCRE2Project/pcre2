@@ -446,7 +446,7 @@ while (top > bot)
       if (PRIV(strcmp)(stringname, (last + entrysize + IMM2_SIZE)) != 0) break;
       last += entrysize;
       }
-    if (firstptr == NULL) 
+    if (firstptr == NULL)
       return (first == last)? (int)GET2(entry, 0) : PCRE2_ERROR_NOUNIQUESUBSTRING;
     *firstptr = first;
     *lastptr = last;

@@ -20,16 +20,14 @@ please consult the man page, in case the conversion went wrong.
 <li><a name="TOC5" href="#SEC5">RETURN VALUES FROM JIT MATCHING</a>
 <li><a name="TOC6" href="#SEC6">CONTROLLING THE JIT STACK</a>
 <li><a name="TOC7" href="#SEC7">JIT STACK FAQ</a>
-<li><a name="TOC8" href="#SEC8">EXAMPLE CODE</a>
-<li><a name="TOC9" href="#SEC9">JIT FAST PATH API</a>
-<li><a name="TOC10" href="#SEC10">SEE ALSO</a>
-<li><a name="TOC11" href="#SEC11">AUTHOR</a>
-<li><a name="TOC12" href="#SEC12">REVISION</a>
+<li><a name="TOC8" href="#SEC8">FREEING JIT SPECULATIVE MEMORY</a>
+<li><a name="TOC9" href="#SEC9">EXAMPLE CODE</a>
+<li><a name="TOC10" href="#SEC10">JIT FAST PATH API</a>
+<li><a name="TOC11" href="#SEC11">SEE ALSO</a>
+<li><a name="TOC12" href="#SEC12">AUTHOR</a>
+<li><a name="TOC13" href="#SEC13">REVISION</a>
 </ul>
 <br><a name="SEC1" href="#TOC1">PCRE2 JUST-IN-TIME COMPILER SUPPORT</a><br>
-<P>
-FIXME: This needs checking over once JIT support is implemented.
-</P>
 <P>
 Just-in-time compiling is a heavyweight optimization that can greatly speed up
 pattern matching. However, it comes at the cost of extra processing before the
@@ -79,9 +77,12 @@ second is a set of option bits, which must include at least one of
 PCRE2_JIT_COMPLETE, PCRE2_JIT_PARTIAL_HARD, or PCRE2_JIT_PARTIAL_SOFT.
 </P>
 <P>
-The returned value from <b>pcre2_jit_compile()</b> is zero on success, or a
-negative error code. In particular, PCRE2_ERROR_JIT_BADOPTION is returned if
-JIT is not supported or if an unknown options bit is set.
+If JIT support is not available, a call to <b>pcre2_jit_comple()</b> does
+nothing and returns PCRE2_ERROR_JIT_BADOPTION. Otherwise, the compiled pattern
+is passed to the JIT compiler, which turns it into machine code that executes
+much faster than the normal interpretive code, but yields exactly the same
+results. The returned value from <b>pcre2_jit_compile()</b> is zero on success,
+or a negative error code.
 </P>
 <P>
 PCRE2_JIT_COMPLETE requests the JIT compiler to generate code for complete
@@ -98,12 +99,6 @@ In some circumstances you may need to call additional functions. These are
 described in the section entitled
 <a href="#stackcontrol">"Controlling the JIT stack"</a>
 below.
-</P>
-<P>
-If JIT support is not available, a call to <b>pcre2_jit_comple()</b> does
-nothing and returns FIXME. Otherwise, the compiled pattern is passed to the JIT
-compiler, which turns it into machine code that executes much faster than the
-normal interpretive code, but yields exactly the same results.
 </P>
 <P>
 There are some <b>pcre2_match()</b> options that are not supported by JIT, and
@@ -166,7 +161,7 @@ about the use of JIT stacks in the section entitled
 below.
 </P>
 <P>
-The <b>pcre2_jit_stack_alloc()</b> function creates a JIT stack. Its arguments
+The <b>pcre2_jit_stack_create()</b> function creates a JIT stack. Its arguments
 are a general context (for memory allocation functions, or NULL for standard
 memory allocation), a starting size and a maximum size, and it returns a
 pointer to an opaque structure of type <b>pcre2_jit_stack</b>, or NULL if there
@@ -195,14 +190,14 @@ the other two options:
       on the machine stack is used.
 
   (2) If <i>callback</i> is NULL and <i>data</i> is not NULL, <i>data</i> must be
-      a valid JIT stack, the result of calling <b>pcre2_jit_stack_alloc()</b>.
+      a valid JIT stack, the result of calling <b>pcre2_jit_stack_create()</b>.
 
   (3) If <i>callback</i> is not NULL, it must point to a function that is
       called with <i>data</i> as an argument at the start of matching, in
       order to set up a JIT stack. If the return from the callback
       function is NULL, the internal 32K stack is used; otherwise the
       return value must be a valid JIT stack, the result of calling
-      <b>pcre2_jit_stack_alloc()</b>.
+      <b>pcre2_jit_stack_create()</b>.
 </pre>
 A callback function is obeyed whenever JIT code is about to be run; it is not
 obeyed when <b>pcre2_match()</b> is called with options that are incompatible
@@ -231,7 +226,7 @@ This is a suggestion for how a multithreaded program that needs to set up
 non-default JIT stacks might operate:
 <pre>
   During thread initalization
-    thread_local_var = pcre2_jit_stack_alloc(...)
+    thread_local_var = pcre2_jit_stack_create(...)
 
   During thread exit
     pcre2_jit_stack_free(thread_local_var)
@@ -323,7 +318,19 @@ stack handling?
 No, thanks to Windows. If POSIX threads were used everywhere, we could throw
 out this complicated API.
 </P>
-<br><a name="SEC8" href="#TOC1">EXAMPLE CODE</a><br>
+<br><a name="SEC8" href="#TOC1">FREEING JIT SPECULATIVE MEMORY</a><br>
+<P>
+<b>void pcre2_jit_free_unused_memory(pcre2_general_context *<i>gcontext</i>);</b>
+</P>
+<P>
+The JIT executable allocator does not free all memory when it is possible.
+It expects new allocations, and keeps some free memory around to improve
+allocation speed. However, in low memory conditions, it might be better to free
+all possible memory. You can cause this to happen by calling
+pcre2_jit_free_unused_memory(). Its argument is a general context, for custom
+memory management, or NULL for standard memory management.
+</P>
+<br><a name="SEC9" href="#TOC1">EXAMPLE CODE</a><br>
 <P>
 This is a single-threaded example that specifies a JIT stack without using a
 callback.
@@ -338,7 +345,7 @@ callback.
   /* Check for errors */
   rc = pcre2_jit_compile(re, PCRE2_JIT_COMPLETE);
   /* Check for errors */
-  jit_stack = pcre2_jit_stack_alloc(NULL, 32*1024, 512*1024);
+  jit_stack = pcre2_jit_stack_create(NULL, 32*1024, 512*1024);
   /* Check for error (NULL) */
   pcre2_jit_stack_assign(re, NULL, jit_stack);
   match_data = pcre2_match_data_create(re, 10);
@@ -349,7 +356,7 @@ callback.
 
 </PRE>
 </P>
-<br><a name="SEC9" href="#TOC1">JIT FAST PATH API</a><br>
+<br><a name="SEC10" href="#TOC1">JIT FAST PATH API</a><br>
 <P>
 Because the API described above falls back to interpreted matching when JIT is
 not available, it is convenient for programs that are written for general use
@@ -364,11 +371,11 @@ processed by <b>pcre2_jit_compile()</b>).
 The fast path function is called <b>pcre2_jit_match()</b>, and it takes exactly
 the same arguments as <b>pcre2_match()</b>, plus one additional argument that
 must either point to a JIT stack or be NULL. In the latter case, if a callback
-function has been set up by <b>pcre2_jit_stack_alloc()</b>, it is called.
+function has been set up by <b>pcre2_jit_stack_assign()</b>, it is called.
 Otherwise the system stack is used. The return values are the same as for
 <b>pcre2_match()</b>, plus PCRE2_ERROR_JIT_BADOPTION if a matching mode (partial
-or complete) is requested that was not compiled. Unsupported option bits are
-ignored.
+or complete) is requested that was not compiled. Unsupported option bits (for
+example, PCRE2_ANCHORED) are ignored.
 </P>
 <P>
 When you call <b>pcre2_match()</b>, as well as testing for invalid options, a
@@ -382,11 +389,11 @@ invalid data is passed, the result is undefined.
 Bypassing the sanity checks and the <b>pcre2_match()</b> wrapping can give
 speedups of more than 10%.
 </P>
-<br><a name="SEC10" href="#TOC1">SEE ALSO</a><br>
+<br><a name="SEC11" href="#TOC1">SEE ALSO</a><br>
 <P>
 <b>pcre2api</b>(3)
 </P>
-<br><a name="SEC11" href="#TOC1">AUTHOR</a><br>
+<br><a name="SEC12" href="#TOC1">AUTHOR</a><br>
 <P>
 Philip Hazel (FAQ by Zoltan Herczeg)
 <br>
@@ -395,9 +402,9 @@ University Computing Service
 Cambridge CB2 3QH, England.
 <br>
 </P>
-<br><a name="SEC12" href="#TOC1">REVISION</a><br>
+<br><a name="SEC13" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 21 October 2014
+Last updated: 03 November 2014
 <br>
 Copyright &copy; 1997-2014 University of Cambridge.
 <br>

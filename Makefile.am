@@ -42,8 +42,8 @@ dist_html_DATA = \
   doc/html/pcre2_jit_compile.html \
   doc/html/pcre2_jit_free_unused_memory.html \
   doc/html/pcre2_jit_match.html \
-  doc/html/pcre2_jit_stack_alloc.html \
   doc/html/pcre2_jit_stack_assign.html \
+  doc/html/pcre2_jit_stack_create.html \
   doc/html/pcre2_jit_stack_free.html \
   doc/html/pcre2_maketables.html \
   doc/html/pcre2_match.html \
@@ -113,8 +113,8 @@ dist_man_MANS = \
   doc/pcre2_jit_compile.3 \
   doc/pcre2_jit_free_unused_memory.3 \
   doc/pcre2_jit_match.3 \
-  doc/pcre2_jit_stack_alloc.3 \
   doc/pcre2_jit_stack_assign.3 \
+  doc/pcre2_jit_stack_create.3 \
   doc/pcre2_jit_stack_free.3 \
   doc/pcre2_maketables.3 \
   doc/pcre2_match.3 \

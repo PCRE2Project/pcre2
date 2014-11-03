@@ -8,7 +8,7 @@
 #
 # The desired effect is achieved by making this a shell script that passes the
 # Perl script to Perl through a pipe. If the first argument is "-utf8", a
-# suitable prefix is set up. 
+# suitable prefix is set up.
 #
 # The remaining arguments, if any, are passed to Perl. They are an input file
 # and an output file. If there is one argument, the output is written to
@@ -20,7 +20,7 @@ perl=perl
 prefix=''
 if [ $# > 0 -a "$1" = "-utf8" ] ; then
   prefix="use utf8; require Encode;"
-  shift 
+  shift
 fi
 
 
@@ -28,23 +28,23 @@ fi
 # can be given identical input, except that input patterns can be followed only
 # by Perl's lower case modifiers and certain other pcre2test modifiers that are
 # either handled or ignored:
-# 
+#
 #   aftertext          interpreted as "print $' afterwards"
 #   afteralltext       ignored
 #   dupnames           ignored (Perl always allows)
 #   mark               ignored
 #   no_auto_possess    ignored
-#   no_start_optimize  ignored  
-#   ucp                sets Perl's /u modifier   
-#   utf                invoke UTF-8 functionality  
-# 
+#   no_start_optimize  ignored
+#   ucp                sets Perl's /u modifier
+#   utf                invoke UTF-8 functionality
+#
 # The data lines must not have any pcre2test modifiers. They are processed as
 # Perl double-quoted strings, so if they contain " $ or @ characters, these
 # have to be escaped. For this reason, all such characters in the
 # Perl-compatible testinput1 and testinput4 files are escaped so that they can
 # be used for perltest as well as for pcre2test. The output from this script
 # should be same as from pcre2test, apart from the initial identifying banner.
-# 
+#
 # The other testinput files are not suitable for feeding to perltest.sh,
 # because they make use of the special modifiers that pcre2test uses for
 # testing features of PCRE2. Some of these files also contain malformed regular
@@ -90,11 +90,11 @@ if (@ARGV > 0)
   $infile = "INFILE";
   $interact = 0;
   }
-else 
-  { 
+else
+  {
   open(INFILE, "</dev/tty") || die "Failed to open /dev/tty\n";
   $infile = "INFILE";
-  $interact = 1; 
+  $interact = 1;
   }
 
 if (@ARGV > 1)
@@ -291,5 +291,5 @@ for (;;)
 
 PERLEND
 ) | $perl - $@
-   
+
 # End

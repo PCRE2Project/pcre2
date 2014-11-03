@@ -236,7 +236,7 @@ document for an overview of all the PCRE2 documentation.
 <b>void pcre2_jit_free_unused_memory(pcre2_general_context *<i>gcontext</i>);</b>
 <br>
 <br>
-<b>pcre2_jit_stack *pcre2_jit_stack_alloc(pcre2_general_context *<i>gcontext</i>,</b>
+<b>pcre2_jit_stack *pcre2_jit_stack_create(pcre2_general_context *<i>gcontext</i>,</b>
 <b>  PCRE2_SIZE <i>startsize</i>, PCRE2_SIZE <i>maxsize</i>);</b>
 <br>
 <br>
@@ -363,7 +363,7 @@ support is not available.
 </P>
 <P>
 More complicated programs might need to make use of the specialist functions
-<b>pcre2_jit_stack_alloc()</b>, <b>pcre2_jit_stack_free()</b>, and
+<b>pcre2_jit_stack_create()</b>, <b>pcre2_jit_stack_free()</b>, and
 <b>pcre2_jit_stack_assign()</b> in order to control the JIT code's memory usage.
 </P>
 <P>
@@ -1272,7 +1272,7 @@ textual error message from any error code.
 <b>void pcre2_jit_free_unused_memory(pcre2_general_context *<i>gcontext</i>);</b>
 <br>
 <br>
-<b>pcre2_jit_stack *pcre2_jit_stack_alloc(pcre2_general_context *<i>gcontext</i>,</b>
+<b>pcre2_jit_stack *pcre2_jit_stack_create(pcre2_general_context *<i>gcontext</i>,</b>
 <b>  PCRE2_SIZE <i>startsize</i>, PCRE2_SIZE <i>maxsize</i>);</b>
 <br>
 <br>
@@ -2050,10 +2050,11 @@ Otherwise NULL is returned. A (*MARK) name may be available after a failed
 match or a partial match, as well as after a successful one.
 </P>
 <P>
-The offset of the character at which the successful match started is
-returned by <b>pcre2_get_startchar()</b>. This can be different to the value of
-<i>ovector[0]</i> if the pattern contains the \K escape sequence. Note,
-however, that \K has no effect for a partial match.
+The code unit offset of the character at which a successful match started is
+returned by <b>pcre2_get_startchar()</b>. For a non-partial match, this can be
+different to the value of <i>ovector[0]</i> if the pattern contains the \K
+escape sequence. After a partial match, however, this value is always the same
+as <i>ovector[0]</i> because \K does not affect the result of a partial match.
 <a name="errorlist"></a></P>
 <br><b>
 Error return values from <b>pcre2_match()</b>
@@ -2302,8 +2303,9 @@ the number of the subpattern called "xxx" is 2. If the name is known to be
 unique (PCRE2_DUPNAMES was not set), you can find the number from the name by
 calling <b>pcre2_substring_number_from_name()</b>. The first argument is the
 compiled pattern, and the second is the name. The yield of the function is the
-subpattern number, or PCRE2_ERROR_NOSUBSTRING if there is no subpattern of that
-name.
+subpattern number, PCRE2_ERROR_NOSUBSTRING if there is no subpattern of that
+name, or PCRE2_ERROR_NOUNIQUESUBSTRING if there is more than one subpattern of
+that name.
 </P>
 <P>
 Given the number, you can extract the substring directly, or use one of the
@@ -2577,7 +2579,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC32" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 16 October 2014
+Last updated: 03 November 2014
 <br>
 Copyright &copy; 1997-2014 University of Cambridge.
 <br>

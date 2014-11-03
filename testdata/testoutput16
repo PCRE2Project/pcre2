@@ -246,6 +246,11 @@ Minimum match limit = 6
  1: aa
  2: cc
  3: ee
+     aabbccddee\=jitstack=1
+ 0: aabbccddee (JIT)
+ 1: aa
+ 2: cc
+ 3: ee
 
 /(a+)*zz/
     aaaaaaaaaaaaaz

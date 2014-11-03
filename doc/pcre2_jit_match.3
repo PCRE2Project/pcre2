@@ -1,4 +1,4 @@
-.TH PCRE2_JIT_MATCH 3 "21 October 2014" "PCRE2 10.0"
+.TH PCRE2_JIT_MATCH 3 "03 November 2014" "PCRE2 10.0"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH SYNOPSIS
@@ -26,7 +26,7 @@ Its arguments are exactly the same as for
 .\"
 plus one additional argument that must either point to a JIT stack or be NULL.
 In the latter case, if a callback function has been set up by
-\fBpcre2_jit_stack_alloc()\fP, it is called. Otherwise the system stack is
+\fBpcre2_jit_stack_create()\fP, it is called. Otherwise the system stack is
 used.
 .P
 The supported options are PCRE2_NOTBOL, PCRE2_NOTEOL, PCRE2_NOTEMPTY,
