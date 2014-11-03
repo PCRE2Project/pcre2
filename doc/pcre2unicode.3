@@ -1,14 +1,15 @@
-.TH PCRE2UNICODE 3 "16 September 2014" "PCRE2 10.00"
+.TH PCRE2UNICODE 3 "03 November 2014" "PCRE2 10.00"
 .SH NAME
 PCRE - Perl-compatible regular expressions (revised API)
 .SH "UNICODE AND UTF SUPPORT"
 .rs
 .sp
-When PCRE2 is built with Unicode support, it acquires knowledge of Unicode
-character properties and can process text strings in UTF-8, UTF-16, or UTF-32
-format (depending on the code unit width). By default, PCRE2 assumes that one
-code unit is one character. To process a pattern as a UTF string, where a
-character may require more than one code unit, you must call
+When PCRE2 is built with Unicode support (which is the default), it has
+knowledge of Unicode character properties and can process text strings in
+UTF-8, UTF-16, or UTF-32 format (depending on the code unit width). However, by
+default, PCRE2 assumes that one code unit is one character. To process a
+pattern as a UTF string, where a character may require more than one code unit,
+you must call
 .\" HREF
 \fBpcre2_compile()\fP
 .\"
@@ -17,9 +18,8 @@ with the PCRE2_UTF option flag, or the pattern must start with the sequence
 strings that are matched against it are treated as UTF strings instead of
 strings of individual one-code-unit characters.
 .P
-If you build PCRE2 with Unicode support, the library will be bigger, but the
-additional run time overhead is limited to testing the PCRE2_UTF flag
-occasionally, so should not be very much.
+If you do not need Unicode support you can build PCRE2 without it, in which
+case the library will be smaller.
 .
 .
 .SH "UNICODE PROPERTY SUPPORT"
@@ -249,6 +249,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 16 September 2014
+Last updated: 03 November 2014
 Copyright (c) 1997-2014 University of Cambridge.
 .fi

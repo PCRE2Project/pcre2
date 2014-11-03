@@ -325,7 +325,7 @@ cache can be deleted by selecting "File > Delete Cache".
     Studio, MSYS makefiles, MinGW makefiles, etc.)
 
 8.  The GUI will then list several configuration options. This is where
-    you can enable Unicode support or other PCRE2 optional features.
+    you can disable Unicode support or select other PCRE2 optional features.
 
 9.  Hit "Configure" again. The adjacent "Generate" button should now be
     active.
@@ -399,4 +399,4 @@ The site currently has ports for PCRE1 releases, but PCRE2 should follow in due
 course.
 
 ==========================
-Last Updated: 28 September 2014
+Last Updated: 03 November 2014

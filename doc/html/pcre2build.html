@@ -115,27 +115,24 @@ to the <b>configure</b> command, as required.
 </P>
 <br><a name="SEC5" href="#TOC1">Unicode and UTF SUPPORT</a><br>
 <P>
-To build PCRE2 with support for Unicode and UTF character strings, add
+By default, PCRE2 is built with support for Unicode and UTF character strings.
+To build it without Unicode support, add
 <pre>
-  --enable-unicode
+  --disable-unicode
 </pre>
-to the <b>configure</b> command. This setting applies to all three libraries,
-adding support for UTF-8 to the 8-bit library, support for UTF-16 to the 16-bit
-library, and support for UTF-32 to the to the 32-bit library.
-It is not possible to build one library with
-UTF support and another without in the same configuration.
+to the <b>configure</b> command. This setting applies to all three libraries. It
+is not possible to build one library with Unicode support, and another without,
+in the same configuration.
 </P>
 <P>
-Of itself, this setting does not make PCRE2 treat strings as UTF-8, UTF-16 or
-UTF-32. As well as compiling PCRE2 with this option, you also have have to set
-the PCRE2_UTF option when you call <b>pcre2_compile()</b> to compile a pattern.
+Of itself, Unicode support does not make PCRE2 treat strings as UTF-8, UTF-16
+or UTF-32. To do that you have have to set the PCRE2_UTF option when you call
+<b>pcre2_compile()</b> to compile a pattern.
 </P>
 <P>
-If you set --enable-unicode when compiling in an EBCDIC environment, PCRE2
-expects its input to be either ASCII or UTF-8 (depending on the run-time
-option). It is not possible to support both EBCDIC and UTF-8 codes in the same
-version of the library. Consequently, --enable-unicode and --enable-ebcdic are
-mutually exclusive.
+It is not possible to support both EBCDIC and UTF-8 codes in the same version
+of the library. Consequently, --enable-unicode and --enable-ebcdic are mutually
+exclusive.
 </P>
 <P>
 UTF support allows the libraries to process character codepoints up to 0x10ffff
@@ -301,12 +298,12 @@ code is ASCII (or Unicode, which is a superset of ASCII). This is the case for
 most computer operating systems. PCRE2 can, however, be compiled to run in an
 EBCDIC environment by adding
 <pre>
-  --enable-ebcdic
+  --enable-ebcdic --disable-unicode
 </pre>
 to the <b>configure</b> command. This setting implies
 --enable-rebuild-chartables. You should only use it if you know that you are in
 an EBCDIC environment (for example, an IBM mainframe operating system). The
---enable-ebcdic option is incompatible with --enable-unicode.
+--enable-ebcdic option is incompatible with Unicode support.
 </P>
 <P>
 The EBCDIC character that corresponds to an ASCII LF is assumed to have the
@@ -469,7 +466,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC21" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 28 September 2014
+Last updated: 03 November 2014
 <br>
 Copyright &copy; 1997-2014 University of Cambridge.
 <br>

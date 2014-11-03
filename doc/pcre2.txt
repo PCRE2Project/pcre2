@@ -32,87 +32,88 @@ INTRODUCTION
        code  units  was  done  by Zoltan Herczeg and Christian Persch, respec-
        tively. In all three cases, strings can be interpreted  either  as  one
        character  per  code  unit, or as UTF-encoded Unicode, with support for
-       Unicode general category properties. Unicode is optional at build time,
-       and  must  be enabled explicitly at run time. The version of Unicode in
-       use can be discovered by running
+       Unicode general category properties. Unicode  support  is  optional  at
+       build  time  (but  is  the default); however, processing strings as UTF
+       code units must be enabled explicitly at run time. The version of  Uni-
+       code in use can be discovered by running
 
          pcre2test -C
 
-       The three libraries contain identical sets  of  functions,  with  names
-       ending  in  _8,  _16,  or  _32,  respectively  (for example, pcre2_com-
-       pile_8()). However, by defining PCRE2_CODE_UNIT_WIDTH to be 8,  16,  or
-       32,  a  program that uses just one code unit width can be written using
+       The  three  libraries  contain  identical sets of functions, with names
+       ending in _8,  _16,  or  _32,  respectively  (for  example,  pcre2_com-
+       pile_8()).  However,  by defining PCRE2_CODE_UNIT_WIDTH to be 8, 16, or
+       32, a program that uses just one code unit width can be  written  using
        generic names such as pcre2_compile(), and the documentation is written
        assuming that this is the case.
 
        In addition to the Perl-compatible matching function, PCRE2 contains an
-       alternative function that matches the same compiled patterns in a  dif-
+       alternative  function that matches the same compiled patterns in a dif-
        ferent way. In certain circumstances, the alternative function has some
-       advantages.  For a discussion of the two matching algorithms,  see  the
+       advantages.   For  a discussion of the two matching algorithms, see the
        pcre2matching page.
 
-       Details  of  exactly which Perl regular expression features are and are
-       not supported by  PCRE2  are  given  in  separate  documents.  See  the
-       pcre2pattern  and  pcre2compat  pages. There is a syntax summary in the
+       Details of exactly which Perl regular expression features are  and  are
+       not  supported  by  PCRE2  are  given  in  separate  documents. See the
+       pcre2pattern and pcre2compat pages. There is a syntax  summary  in  the
        pcre2syntax page.
 
-       Some features of PCRE2 can be included, excluded, or changed  when  the
-       library  is  built. The pcre2_config() function makes it possible for a
-       client to discover which features are  available.  The  features  them-
+       Some  features  of PCRE2 can be included, excluded, or changed when the
+       library is built. The pcre2_config() function makes it possible  for  a
+       client  to  discover  which  features are available. The features them-
        selves are described in the pcre2build page. Documentation about build-
-       ing PCRE2 for various operating systems can be found in the README  and
+       ing  PCRE2 for various operating systems can be found in the README and
        NON-AUTOTOOLS_BUILD files in the source distribution.
 
-       The  libraries contains a number of undocumented internal functions and
-       data tables that are used by more than one  of  the  exported  external
-       functions,  but  which  are  not  intended for use by external callers.
-       Their names all begin with "_pcre2", which hopefully will  not  provoke
+       The libraries contains a number of undocumented internal functions  and
+       data  tables  that  are  used by more than one of the exported external
+       functions, but which are not intended  for  use  by  external  callers.
+       Their  names  all begin with "_pcre2", which hopefully will not provoke
        any name clashes. In some environments, it is possible to control which
-       external symbols are exported when a shared library is  built,  and  in
+       external  symbols  are  exported when a shared library is built, and in
        these cases the undocumented symbols are not exported.
 
 
 SECURITY CONSIDERATIONS
 
-       If  you  are using PCRE2 in a non-UTF application that permits users to
-       supply arbitrary patterns for compilation, you should  be  aware  of  a
-       feature that allows users to turn on UTF support from within a pattern,
-       provided that PCRE2 was built with Unicode  support.  For  example,  an
-       8-bit  pattern  that  begins  with  "(*UTF)" turns on UTF-8 mode, which
-       interprets patterns and subjects as strings of UTF-8 code units instead
-       of  individual  8-bit  characters. This causes both the pattern and any
-       data against which it is matched to be checked for UTF-8  validity.  If
-       the  data string is very long, such a check might use sufficiently many
-       resources as to cause your application to lose performance.
+       If you are using PCRE2 in a non-UTF application that permits  users  to
+       supply  arbitrary  patterns  for  compilation, you should be aware of a
+       feature that allows users to turn on UTF support from within a pattern.
+       For  example, an 8-bit pattern that begins with "(*UTF)" turns on UTF-8
+       mode, which interprets patterns and subjects as strings of  UTF-8  code
+       units instead of individual 8-bit characters. This causes both the pat-
+       tern and any data against which it is matched to be checked  for  UTF-8
+       validity.  If the data string is very long, such a check might use suf-
+       ficiently many resources as to cause your application to  lose  perfor-
+       mance.
 
-       One way of guarding against this possibility is to use  the  pcre2_pat-
-       tern_info()  function  to check the compiled pattern's options for UTF.
-       Alternatively, you can set the PCRE2_NEVER_UTF option at compile  time.
-       This  causes  an compile time error if a pattern contains a UTF-setting
+       One  way  of guarding against this possibility is to use the pcre2_pat-
+       tern_info() function to check the compiled pattern's options  for  UTF.
+       Alternatively,  you can set the PCRE2_NEVER_UTF option at compile time.
+       This causes an compile time error if a pattern contains  a  UTF-setting
        sequence.
 
-       If your application is one that supports UTF, be  aware  that  validity
-       checking  can  take time. If the same data string is to be matched many
-       times, you can use the PCRE2_NO_UTF_CHECK option  for  the  second  and
+       If  your  application  is one that supports UTF, be aware that validity
+       checking can take time. If the same data string is to be  matched  many
+       times,  you  can  use  the PCRE2_NO_UTF_CHECK option for the second and
        subsequent matches to avoid running redundant checks.
 
-       Another  way  that  performance can be hit is by running a pattern that
-       has a very large search tree against a string that  will  never  match.
-       Nested  unlimited repeats in a pattern are a common example. PCRE2 pro-
-       vides some protection against  this:  see  the  pcre2_set_match_limit()
+       Another way that performance can be hit is by running  a  pattern  that
+       has  a  very  large search tree against a string that will never match.
+       Nested unlimited repeats in a pattern are a common example. PCRE2  pro-
+       vides  some  protection  against  this: see the pcre2_set_match_limit()
        function in the pcre2api page.
 
 
 USER DOCUMENTATION
 
-       The  user  documentation for PCRE2 comprises a number of different sec-
-       tions. In the "man" format, each of these is a separate "man page".  In
-       the  HTML  format, each is a separate page, linked from the index page.
-       In the plain  text  format,  the  descriptions  of  the  pcre2grep  and
+       The user documentation for PCRE2 comprises a number of  different  sec-
+       tions.  In the "man" format, each of these is a separate "man page". In
+       the HTML format, each is a separate page, linked from the  index  page.
+       In  the  plain  text  format,  the  descriptions  of  the pcre2grep and
        pcre2test programs are in files called pcre2grep.txt and pcre2test.txt,
-       respectively. The remaining sections, except for the pcre2demo  section
-       (which  is a program listing), and the short pages for individual func-
-       tions, are concatenated in pcre2.txt, for ease of searching.  The  sec-
+       respectively.  The remaining sections, except for the pcre2demo section
+       (which is a program listing), and the short pages for individual  func-
+       tions,  are  concatenated in pcre2.txt, for ease of searching. The sec-
        tions are as follows:
 
          pcre2              this document FIXME CHECK THIS LIST
@@ -123,7 +124,7 @@ USER DOCUMENTATION
          pcre2compat        discussion of Perl compatibility
          pcre2demo          a demonstration C program that uses PCRE2
          pcre2grep          description of the pcre2grep command (8-bit only)
-         pcre2jit            discussion  of the just-in-time optimization sup-
+         pcre2jit           discussion of the just-in-time  optimization  sup-
        port
          pcre2limits        details of size and other limits
          pcre2matching      discussion of the two matching algorithms
@@ -138,7 +139,7 @@ USER DOCUMENTATION
          pcre2test          description of the pcre2test testing command
          pcre2unicode       discussion of Unicode and UTF support
 
-       In the "man" and HTML formats, there is also a short page  for  each  C
+       In  the  "man"  and HTML formats, there is also a short page for each C
        library function, listing its arguments and results.
 
 
@@ -148,14 +149,14 @@ AUTHOR
        University Computing Service
        Cambridge CB2 3QH, England.
 
-       Putting  an  actual email address here is a spam magnet. If you want to
-       email me, use my two initials, followed by the two digits  10,  at  the
+       Putting an actual email address here is a spam magnet. If you  want  to
+       email  me,  use  my two initials, followed by the two digits 10, at the
        domain cam.ac.uk.
 
 
 REVISION
 
-       Last updated: 28 September 2014
+       Last updated: 03 November 2014
        Copyright (c) 1997-2014 University of Cambridge.
 ------------------------------------------------------------------------------
 
@@ -2619,26 +2620,22 @@ BUILDING SHARED AND STATIC LIBRARIES
 
 Unicode and UTF SUPPORT
 
-       To build PCRE2 with support for Unicode and UTF character strings, add
+       By default, PCRE2 is built with support for Unicode and  UTF  character
+       strings.  To build it without Unicode support, add
 
-         --enable-unicode
+         --disable-unicode
 
-       to the configure command. This setting applies to all three  libraries,
-       adding  support  for  UTF-8 to the 8-bit library, support for UTF-16 to
-       the 16-bit library, and  support  for  UTF-32  to  the  to  the  32-bit
-       library.   It is not possible to build one library with UTF support and
-       another without in the same configuration.
+       to  the configure command. This setting applies to all three libraries.
+       It is not possible to build  one  library  with  Unicode  support,  and
+       another without, in the same configuration.
 
-       Of itself, this setting does not make PCRE2  treat  strings  as  UTF-8,
-       UTF-16 or UTF-32. As well as compiling PCRE2 with this option, you also
-       have have to set the PCRE2_UTF option when you call pcre2_compile()  to
-       compile a pattern.
+       Of  itself, Unicode support does not make PCRE2 treat strings as UTF-8,
+       UTF-16 or UTF-32. To do that you have have to set the PCRE2_UTF  option
+       when you call pcre2_compile() to compile a pattern.
 
-       If  you  set  --enable-unicode when compiling in an EBCDIC environment,
-       PCRE2 expects its input to be either ASCII or UTF-8 (depending  on  the
-       run-time  option).  It is not possible to support both EBCDIC and UTF-8
-       codes in the same version of the library.  Consequently,  --enable-uni-
-       code and --enable-ebcdic are mutually exclusive.
+       It  is  not possible to support both EBCDIC and UTF-8 codes in the same
+       version of the library. Consequently,  --enable-unicode  and  --enable-
+       ebcdic are mutually exclusive.
 
        UTF  support allows the libraries to process character codepoints up to
        0x10ffff in the strings that they handle. It also provides support  for
@@ -2809,12 +2806,12 @@ USING EBCDIC CODE
        This  is  the case for most computer operating systems. PCRE2 can, how-
        ever, be compiled to run in an EBCDIC environment by adding
 
-         --enable-ebcdic
+         --enable-ebcdic --disable-unicode
 
        to the configure command. This setting implies --enable-rebuild-charta-
        bles.  You  should  only  use  it if you know that you are in an EBCDIC
        environment (for example,  an  IBM  mainframe  operating  system).  The
-       --enable-ebcdic option is incompatible with --enable-unicode.
+       --enable-ebcdic option is incompatible with Unicode support.
 
        The EBCDIC character that corresponds to an ASCII LF is assumed to have
        the value 0x15 by default. However, in some EBCDIC  environments,  0x25
@@ -2978,7 +2975,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 28 September 2014
+       Last updated: 03 November 2014
        Copyright (c) 1997-2014 University of Cambridge.
 ------------------------------------------------------------------------------
 
@@ -4511,122 +4508,121 @@ NAME
 
 UNICODE AND UTF SUPPORT
 
-       When PCRE2 is built with Unicode support, it acquires knowledge of Uni-
-       code character properties  and  can  process  text  strings  in  UTF-8,
-       UTF-16,  or  UTF-32  format  (depending  on  the  code  unit width). By
-       default, PCRE2 assumes that one code unit is one character. To  process
-       a  pattern as a UTF string, where a character may require more than one
-       code unit, you must call  pcre2_compile()  with  the  PCRE2_UTF  option
-       flag,  or  the pattern must start with the sequence (*UTF). When either
-       of these is the case, both the pattern and any subject strings that are
-       matched  against  it  are  treated as UTF strings instead of strings of
-       individual one-code-unit characters.
+       When PCRE2 is built with Unicode support (which is the default), it has
+       knowledge of Unicode character properties and can process text  strings
+       in  UTF-8, UTF-16, or UTF-32 format (depending on the code unit width).
+       However, by default, PCRE2 assumes that one code unit is one character.
+       To  process  a  pattern  as a UTF string, where a character may require
+       more than one  code  unit,  you  must  call  pcre2_compile()  with  the
+       PCRE2_UTF  option  flag,  or  the  pattern must start with the sequence
+       (*UTF). When either of these is the case, both the pattern and any sub-
+       ject  strings  that  are  matched against it are treated as UTF strings
+       instead of strings of individual one-code-unit characters.
 
-       If you build PCRE2 with Unicode support, the library  will  be  bigger,
-       but  the  additional  run  time  overhead  is  limited  to  testing the
-       PCRE2_UTF flag occasionally, so should not be very much.
+       If you do not need Unicode support you can build PCRE2 without  it,  in
+       which case the library will be smaller.
 
 
 UNICODE PROPERTY SUPPORT
 
-       When PCRE2 is built with Unicode support, the escape sequences  \p{..},
-       \P{..},  and  \X can be used. The Unicode properties that can be tested
-       are limited to the general category properties such as Lu for an  upper
-       case  letter  or Nd for a decimal number, the Unicode script names such
+       When  PCRE2 is built with Unicode support, the escape sequences \p{..},
+       \P{..}, and \X can be used. The Unicode properties that can  be  tested
+       are  limited to the general category properties such as Lu for an upper
+       case letter or Nd for a decimal number, the Unicode script  names  such
        as Arabic or Han, and the derived properties Any and L&. Full lists are
        given in the pcre2pattern and pcre2syntax documentation. Only the short
-       names for properties are supported. For example, \p{L} matches  a  let-
-       ter.  Its  Perl synonym, \p{Letter}, is not supported.  Furthermore, in
-       Perl, many properties may optionally be prefixed by "Is", for  compati-
+       names  for  properties are supported. For example, \p{L} matches a let-
+       ter. Its Perl synonym, \p{Letter}, is not supported.   Furthermore,  in
+       Perl,  many properties may optionally be prefixed by "Is", for compati-
        bility with Perl 5.6. PCRE does not support this.
 
 
 WIDE CHARACTERS AND UTF MODES
 
-       Codepoints  less than 256 can be specified in patterns by either braced
+       Codepoints less than 256 can be specified in patterns by either  braced
        or unbraced hexadecimal escape sequences (for example, \x{b3} or \xb3).
-       Larger  values have to use braced sequences. Unbraced octal code points
+       Larger values have to use braced sequences. Unbraced octal code  points
        up to \777 are also recognized; larger ones can be coded using \o{...}.
 
-       In UTF modes, repeat quantifiers apply to complete UTF characters,  not
+       In  UTF modes, repeat quantifiers apply to complete UTF characters, not
        to individual code units.
 
-       In  UTF  modes, the dot metacharacter matches one UTF character instead
+       In UTF modes, the dot metacharacter matches one UTF  character  instead
        of a single code unit.
 
-       The escape sequence \C can be used to match a single code  unit,  in  a
-       UTF  mode,  but  its  use  can  lead to some strange effects because it
-       breaks up multi-unit characters (see  the  description  of  \C  in  the
-       pcre2pattern  documentation).  The  use  of  \C is not supported in the
-       alternative matching function pcre2_dfa_exec(), nor is it supported  in
-       UTF  mode by the JIT optimization. If JIT optimization is requested for
-       a UTF pattern that contains \C, it will not succeed, and so the  match-
+       The  escape  sequence  \C can be used to match a single code unit, in a
+       UTF mode, but its use can lead  to  some  strange  effects  because  it
+       breaks  up  multi-unit  characters  (see  the  description of \C in the
+       pcre2pattern documentation). The use of \C  is  not  supported  in  the
+       alternative  matching function pcre2_dfa_exec(), nor is it supported in
+       UTF mode by the JIT optimization. If JIT optimization is requested  for
+       a  UTF pattern that contains \C, it will not succeed, and so the match-
        ing will be carried out by the normal interpretive function.
 
        The character escapes \b, \B, \d, \D, \s, \S, \w, and \W correctly test
-       characters of any code value, but,  by  default,  the  characters  that
-       PCRE2  recognizes as digits, spaces, or word characters remain the same
-       set as in non-UTF mode, all  with  code  points  less  than  256.  This
-       remains  true  even  when  PCRE2  is  built to include Unicode support,
-       because to do otherwise would slow down matching in many common  cases.
-       Note  that  this also applies to \b and \B, because they are defined in
-       terms of \w and \W. If you want to test for  a  wider  sense  of,  say,
-       "digit",  you  can  use explicit Unicode property tests such as \p{Nd}.
-       Alternatively, if you set the PCRE2_UCP option, the way that the  char-
-       acter  escapes  work  is changed so that Unicode properties are used to
+       characters  of  any  code  value,  but, by default, the characters that
+       PCRE2 recognizes as digits, spaces, or word characters remain the  same
+       set  as  in  non-UTF  mode,  all  with  code points less than 256. This
+       remains true even when PCRE2  is  built  to  include  Unicode  support,
+       because  to do otherwise would slow down matching in many common cases.
+       Note that this also applies to \b and \B, because they are  defined  in
+       terms  of  \w  and  \W.  If you want to test for a wider sense of, say,
+       "digit", you can use explicit Unicode property tests  such  as  \p{Nd}.
+       Alternatively,  if you set the PCRE2_UCP option, the way that the char-
+       acter escapes work is changed so that Unicode properties  are  used  to
        determine which characters match. There are more details in the section
        on generic character types in the pcre2pattern documentation.
 
-       Similarly,  characters that match the POSIX named character classes are
+       Similarly, characters that match the POSIX named character classes  are
        all low-valued characters, unless the PCRE2_UCP option is set.
 
-       However, the special  horizontal  and  vertical  white  space  matching
+       However,  the  special  horizontal  and  vertical  white space matching
        escapes (\h, \H, \v, and \V) do match all the appropriate Unicode char-
        acters, whether or not PCRE2_UCP is set.
 
-       Case-insensitive matching in UTF mode makes use of Unicode  properties.
-       A  few  Unicode characters such as Greek sigma have more than two code-
+       Case-insensitive  matching in UTF mode makes use of Unicode properties.
+       A few Unicode characters such as Greek sigma have more than  two  code-
        points that are case-equivalent, and these are treated as such.
 
 
 VALIDITY OF UTF STRINGS
 
-       When the PCRE2_UTF option is set, the strings passed  as  patterns  and
+       When  the  PCRE2_UTF  option is set, the strings passed as patterns and
        subjects are (by default) checked for validity on entry to the relevant
-       functions.  If an invalid UTF string is  passed,  an  error  return  is
+       functions.   If  an  invalid  UTF  string is passed, an error return is
        given.
 
        UTF-16 and UTF-32 strings can indicate their endianness by special code
-       knows as a byte-order mark (BOM). The PCRE2  functions  do  not  handle
+       knows  as  a  byte-order  mark (BOM). The PCRE2 functions do not handle
        this, expecting strings to be in host byte order.
 
-       The  entire  string is checked before any other processing takes place.
-       In addition to checking the format of the string, there is a  check  to
+       The entire string is checked before any other processing  takes  place.
+       In  addition  to checking the format of the string, there is a check to
        ensure that all code points lie in the range U+0 to U+10FFFF, excluding
-       the surrogate area.  The so-called "non-character" code points are  not
+       the  surrogate area.  The so-called "non-character" code points are not
        excluded because Unicode corrigendum #9 makes it clear that they should
        not be.
 
-       Characters in the "Surrogate Area" of Unicode are reserved for  use  by
-       UTF-16,  where they are used in pairs to encode code points with values
-       greater than 0xFFFF. The code points that are encoded by  UTF-16  pairs
-       are  available  independently  in  the  UTF-8 and UTF-32 encodings. (In
-       other words, the whole surrogate thing is  a  fudge  for  UTF-16  which
+       Characters  in  the "Surrogate Area" of Unicode are reserved for use by
+       UTF-16, where they are used in pairs to encode code points with  values
+       greater  than  0xFFFF. The code points that are encoded by UTF-16 pairs
+       are available independently in the  UTF-8  and  UTF-32  encodings.  (In
+       other  words,  the  whole  surrogate  thing is a fudge for UTF-16 which
        unfortunately messes up UTF-8 and UTF-32.)
 
-       In  some  situations, you may already know that your strings are valid,
-       and therefore want to skip these checks in  order  to  improve  perfor-
-       mance,  for  example in the case of a long subject string that is being
-       scanned repeatedly.  If you set the PCRE2_NO_UTF_CHECK flag at  compile
-       time  or  at  run time, PCRE2 assumes that the pattern or subject it is
+       In some situations, you may already know that your strings  are  valid,
+       and  therefore  want  to  skip these checks in order to improve perfor-
+       mance, for example in the case of a long subject string that  is  being
+       scanned  repeatedly.  If you set the PCRE2_NO_UTF_CHECK flag at compile
+       time or at run time, PCRE2 assumes that the pattern or  subject  it  is
        given (respectively) contains only valid UTF code unit sequences.
 
-       Passing PCRE2_NO_UTF_CHECK to pcre2_compile() just disables  the  check
+       Passing  PCRE2_NO_UTF_CHECK  to pcre2_compile() just disables the check
        for the pattern; it does not also apply to subject strings. If you want
-       to disable the check for a subject string you must pass this option  to
+       to  disable the check for a subject string you must pass this option to
        pcre2_exec() or pcre2_dfa_exec().
 
-       If  you  pass an invalid UTF string when PCRE2_NO_UTF_CHECK is set, the
+       If you pass an invalid UTF string when PCRE2_NO_UTF_CHECK is  set,  the
        result is undefined and your program may crash or loop indefinitely.
 
    Errors in UTF-8 strings
@@ -4639,10 +4635,10 @@ VALIDITY OF UTF STRINGS
          PCRE2_ERROR_UTF8_ERR4
          PCRE2_ERROR_UTF8_ERR5
 
-       The string ends with a truncated UTF-8 character;  the  code  specifies
-       how  many bytes are missing (1 to 5). Although RFC 3629 restricts UTF-8
-       characters to be no longer than 4 bytes, the  encoding  scheme  (origi-
-       nally  defined  by  RFC  2279)  allows  for  up to 6 bytes, and this is
+       The  string  ends  with a truncated UTF-8 character; the code specifies
+       how many bytes are missing (1 to 5). Although RFC 3629 restricts  UTF-8
+       characters  to  be  no longer than 4 bytes, the encoding scheme (origi-
+       nally defined by RFC 2279) allows for  up  to  6  bytes,  and  this  is
        checked first; hence the possibility of 4 or 5 missing bytes.
 
          PCRE2_ERROR_UTF8_ERR6
@@ -4652,24 +4648,24 @@ VALIDITY OF UTF STRINGS
          PCRE2_ERROR_UTF8_ERR10
 
        The two most significant bits of the 2nd, 3rd, 4th, 5th, or 6th byte of
-       the  character  do  not have the binary value 0b10 (that is, either the
+       the character do not have the binary value 0b10 (that  is,  either  the
        most significant bit is 0, or the next bit is 1).
 
          PCRE2_ERROR_UTF8_ERR11
          PCRE2_ERROR_UTF8_ERR12
 
-       A character that is valid by the RFC 2279 rules is either 5 or 6  bytes
+       A  character that is valid by the RFC 2279 rules is either 5 or 6 bytes
        long; these code points are excluded by RFC 3629.
 
          PCRE2_ERROR_UTF8_ERR13
 
-       A  4-byte character has a value greater than 0x10fff; these code points
+       A 4-byte character has a value greater than 0x10fff; these code  points
        are excluded by RFC 3629.
 
          PCRE2_ERROR_UTF8_ERR14
 
-       A 3-byte character has a value in the  range  0xd800  to  0xdfff;  this
-       range  of code points are reserved by RFC 3629 for use with UTF-16, and
+       A  3-byte  character  has  a  value in the range 0xd800 to 0xdfff; this
+       range of code points are reserved by RFC 3629 for use with UTF-16,  and
        so are excluded from UTF-8.
 
          PCRE2_ERROR_UTF8_ERR15
@@ -4678,26 +4674,26 @@ VALIDITY OF UTF STRINGS
          PCRE2_ERROR_UTF8_ERR18
          PCRE2_ERROR_UTF8_ERR19
 
-       A 2-, 3-, 4-, 5-, or 6-byte character is "overlong", that is, it  codes
-       for  a  value that can be represented by fewer bytes, which is invalid.
-       For example, the two bytes 0xc0, 0xae give the value 0x2e,  whose  cor-
+       A  2-, 3-, 4-, 5-, or 6-byte character is "overlong", that is, it codes
+       for a value that can be represented by fewer bytes, which  is  invalid.
+       For  example,  the two bytes 0xc0, 0xae give the value 0x2e, whose cor-
        rect coding uses just one byte.
 
          PCRE2_ERROR_UTF8_ERR20
 
        The two most significant bits of the first byte of a character have the
-       binary value 0b10 (that is, the most significant bit is 1 and the  sec-
-       ond  is  0). Such a byte can only validly occur as the second or subse-
+       binary  value 0b10 (that is, the most significant bit is 1 and the sec-
+       ond is 0). Such a byte can only validly occur as the second  or  subse-
        quent byte of a multi-byte character.
 
          PCRE2_ERROR_UTF8_ERR21
 
-       The first byte of a character has the value 0xfe or 0xff. These  values
+       The  first byte of a character has the value 0xfe or 0xff. These values
        can never occur in a valid UTF-8 string.
 
    Errors in UTF-16 strings
 
-       The  following  negative  error  codes  are  given  for  invalid UTF-16
+       The following  negative  error  codes  are  given  for  invalid  UTF-16
        strings:
 
          PCRE_UTF16_ERR1  Missing low surrogate at end of string
@@ -4707,7 +4703,7 @@ VALIDITY OF UTF STRINGS
 
    Errors in UTF-32 strings
 
-       The following  negative  error  codes  are  given  for  invalid  UTF-32
+       The  following  negative  error  codes  are  given  for  invalid UTF-32
        strings:
 
          PCRE_UTF32_ERR1  Surrogate character (range from 0xd800 to 0xdfff)
@@ -4723,7 +4719,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 16 September 2014
+       Last updated: 03 November 2014
        Copyright (c) 1997-2014 University of Cambridge.
 ------------------------------------------------------------------------------
 

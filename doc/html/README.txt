@@ -179,24 +179,22 @@ library. They are also documented in the pcre2build man page.
 . When JIT support is enabled, pcre2grep automatically makes use of it, unless
   you add --disable-pcre2grep-jit to the "configure" command.
 
-. If you want to make use of the support for UTF-8 Unicode character strings in
-  the 8-bit library, UTF-16 Unicode character strings in the 16-bit library,
-  and UTF-32 Unicode character strings in the 32-bit library, you must add
-  --enable-unicode to the "configure" command. Without it, the code for
-  handling UTF-8, UTF-16 and UTF-8 is not included. It is not possible to
-  configure one library with UTF support and the other without in the same
-  configuration.
+. If you do not want to make use of the support for UTF-8 Unicode character
+  strings in the 8-bit library, UTF-16 Unicode character strings in the 16-bit
+  library, and UTF-32 Unicode character strings in the 32-bit library, you can
+  add --disable-unicode to the "configure" command. This reduces the size of
+  the libraries. It is not possible to configure one library with Unicode
+  support, and another without, in the same configuration.
 
-  Even when --enable-unicode is included, the use of a UTF encoding still has
-  to be enabled by an option at run time. When PCRE2 is compiled with this
-  option, its input can only either be ASCII or UTF-8/16/32, even when running
+  When Unicode support is available, the use of a UTF encoding still has to be
+  enabled by an option at run time. When PCRE2 is compiled with Unicode
+  support, its input can only either be ASCII or UTF-8/16/32, even when running
   on EBCDIC platforms. It is not possible to use both --enable-unicode and
   --enable-ebcdic at the same time.
 
-  When --enable-unicode is specified, as well as supporting UTF strings, PCRE2
-  includes support for the \P, \p, and \X sequences that recognize Unicode
-  character properties. However, only the basic two-letter properties such as
-  Lu are supported.
+  As well as supporting UTF strings, Unicode support includes support for the
+  \P, \p, and \X sequences that recognize Unicode character properties.
+  However, only the basic two-letter properties such as Lu are supported.
 
 . You can build PCRE2 to recognize either CR or LF or the sequence CRLF or any
   of the preceding, or any of the Unicode newline sequences as indicating the
@@ -285,7 +283,7 @@ library. They are also documented in the pcre2build man page.
 . It is possible to compile PCRE2 for use on systems that use EBCDIC as their
   character code (as opposed to ASCII/Unicode) by specifying
 
-  --enable-ebcdic
+  --enable-ebcdic --disable-unicode
 
   This automatically implies --enable-rebuild-chartables (see above). However,
   when PCRE2 is built this way, it always operates in EBCDIC. It cannot support
@@ -543,8 +541,8 @@ from pcre2test. Other files whose names begin with "test" are used as working
 files in some tests.
 
 Some tests are relevant only when certain build-time options were selected. For
-example, the tests for UTF-8/16/32 support are run only if --enable-unicode was
-used. RunTest outputs a comment when it skips a test.
+example, the tests for UTF-8/16/32 features are run only when Unicode support
+is available. RunTest outputs a comment when it skips a test.
 
 Many of the tests that are not skipped are run twice if JIT support is
 available. On the second run, JIT compilation is forced. This testing can be
@@ -633,7 +631,7 @@ JIT-specific features such as information output from pcre2test about JIT
 compilation.
 
 The sixteenth and seventeenth tests are run only in 8-bit mode. They check the
-POSIX interface to the 8-bit library, withouth and with Unicode support,
+POSIX interface to the 8-bit library, without and with Unicode support,
 respectively.
 
 
@@ -828,4 +826,4 @@ The distribution should contain the files listed below.
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 25 October 2014
+Last updated: 03 November 2014

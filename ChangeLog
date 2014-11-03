@@ -14,19 +14,21 @@ logged. In addition to the API changes, the following changes were made. They
 are either new functionality, or bug fixes and other noticeable changes of
 behaviour that were implemented after the code had been forked.
 
-1. The test program, now called pcre2test, was re-specified and almost
+1. Unicode support is now enabled by default.
+
+2. The test program, now called pcre2test, was re-specified and almost
 completely re-written. Its input is not compatible with input for pcretest.
 
-2. Patterns may start with (*NOTEMPTY) or (*NOTEMPTY_ATSTART) to set the
+3. Patterns may start with (*NOTEMPTY) or (*NOTEMPTY_ATSTART) to set the
 PCRE2_NOTEMPTY or PCRE2_NOTEMPTY_ATSTART options for every subject line that is
 matched by that pattern.
 
-3. For the benefit of those who use PCRE2 via some other application, that is,
+4. For the benefit of those who use PCRE2 via some other application, that is,
 not writing the function calls themselves, it is possible to check the PCRE2
 version by matching a pattern such as /(?(VERSION>=10.0)yes|no)/ against a
 string such as "yesno".
 
-4. There are case-equivalent Unicode characters whose encodings use different
+5. There are case-equivalent Unicode characters whose encodings use different
 numbers of code units in UTF-8. U+023A and U+2C65 are one example. (It is
 theoretically possible for this to happen in UTF-16 too.) If a backreference to
 a group containing one of these characters was greedily repeated, and during
@@ -38,7 +40,7 @@ Incorrect backtracking meant that group 2 captured only the last two bytes.
 This bug has been fixed; the new code is slower, but it is used only when the
 strings matched by the repetition are not all the same length.
 
-5. A pattern such as /()a/ was not setting the "first character must be 'a'"
+6. A pattern such as /()a/ was not setting the "first character must be 'a'"
 information. This applied to any pattern with a group that matched no
 characters, for example: /(?:(?=.)|(?<!x))a/.
 

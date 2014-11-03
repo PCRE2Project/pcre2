@@ -35,9 +35,10 @@ code units, which means that up to three separate libraries may be installed.
 The original work to extend PCRE to 16-bit and 32-bit code units was done by
 Zoltan Herczeg and Christian Persch, respectively. In all three cases, strings
 can be interpreted either as one character per code unit, or as UTF-encoded
-Unicode, with support for Unicode general category properties. Unicode is
-optional at build time, and must be enabled explicitly at run time. The version
-of Unicode in use can be discovered by running
+Unicode, with support for Unicode general category properties. Unicode support
+is optional at build time (but is the default); however, processing strings as
+UTF code units must be enabled explicitly at run time. The version of Unicode
+in use can be discovered by running
 <pre>
   pcre2test -C
 </PRE>
@@ -95,13 +96,13 @@ not exported.
 <P>
 If you are using PCRE2 in a non-UTF application that permits users to supply
 arbitrary patterns for compilation, you should be aware of a feature that
-allows users to turn on UTF support from within a pattern, provided that PCRE2
-was built with Unicode support. For example, an 8-bit pattern that begins with
-"(*UTF)" turns on UTF-8 mode, which interprets patterns and subjects as strings
-of UTF-8 code units instead of individual 8-bit characters. This causes both
-the pattern and any data against which it is matched to be checked for UTF-8
-validity. If the data string is very long, such a check might use sufficiently
-many resources as to cause your application to lose performance.
+allows users to turn on UTF support from within a pattern. For example, an
+8-bit pattern that begins with "(*UTF)" turns on UTF-8 mode, which interprets
+patterns and subjects as strings of UTF-8 code units instead of individual
+8-bit characters. This causes both the pattern and any data against which it is
+matched to be checked for UTF-8 validity. If the data string is very long, such
+a check might use sufficiently many resources as to cause your application to
+lose performance.
 </P>
 <P>
 One way of guarding against this possibility is to use the
@@ -173,7 +174,7 @@ use my two initials, followed by the two digits 10, at the domain cam.ac.uk.
 </P>
 <br><a name="SEC5" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 28 September 2014
+Last updated: 03 November 2014
 <br>
 Copyright &copy; 1997-2014 University of Cambridge.
 <br>

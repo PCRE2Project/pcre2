@@ -148,10 +148,10 @@ AC_ARG_ENABLE(rebuild-chartables,
                              [rebuild character tables in current locale]),
               , enable_rebuild_chartables=no)
 
-# Handle --enable-unicode (disabled by default)
+# Handle --disable-unicode (enabled by default)
 AC_ARG_ENABLE(unicode,
-              AS_HELP_STRING([--enable-unicode],
-                             [enable Unicode support (incompatible with --enable-ebcdic)]),
+              AS_HELP_STRING([--disable-unicode],
+                             [disable Unicode support]),
               , enable_unicode=unset)
 
 # Handle newline options
@@ -299,10 +299,10 @@ then
   AC_MSG_ERROR([At least one of the 8, 16 or 32 bit libraries must be enabled])
 fi
 
-# enable_unicode is disabled by default.
+# Unicode is enabled by default.
 if test "x$enable_unicode" = "xunset"
 then
-  enable_unicode=no
+  enable_unicode=yes
 fi
 
 # Convert the newline identifier into the appropriate integer value. These must

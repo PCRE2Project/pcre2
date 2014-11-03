@@ -89,11 +89,11 @@ In the 8-bit and 16-bit PCRE2 libraries, characters may be coded either as
 single code units, or as multiple UTF-8 or UTF-16 code units. UTF-32 can be
 specified for the 32-bit library, in which case it constrains the character
 values to valid Unicode code points. To process UTF strings, PCRE2 must be
-built to include Unicode support. When using UTF strings you must either call
-the compiling function with the PCRE2_UTF option, or the pattern must start
-with the special sequence (*UTF), which is equivalent to setting the relevant
-option. How setting a UTF mode affects pattern matching is mentioned in several
-places below. There is also a summary of features in the
+built to include Unicode support (which is the default). When using UTF strings
+you must either call the compiling function with the PCRE2_UTF option, or the
+pattern must start with the special sequence (*UTF), which is equivalent to
+setting the relevant option. How setting a UTF mode affects pattern matching is
+mentioned in several places below. There is also a summary of features in the
 <a href="pcre2unicode.html"><b>pcre2unicode</b></a>
 page.
 </P>
@@ -538,9 +538,9 @@ By default, characters whose code points are greater than 127 never match \d,
 \s, or \w, and always match \D, \S, and \W, although this may vary for
 characters in the range 128-255 when locale-specific matching is happening.
 These escape sequences retain their original meanings from before Unicode
-support was available, mainly for efficiency reasons. If PCRE2 is compiled with
-Unicode support, and the PCRE2_UCP option is set, the behaviour is changed so
-that Unicode properties are used to determine character types, as follows:
+support was available, mainly for efficiency reasons. If the PCRE2_UCP option
+is set, the behaviour is changed so that Unicode properties are used to
+determine character types, as follows:
 <pre>
   \d  any character that matches \p{Nd} (decimal digit)
   \s  any character that matches \p{Z} or \h or \v
@@ -641,11 +641,11 @@ an error.
 Unicode character properties
 </b><br>
 <P>
-When PCRE2 is built with Unicode support, three additional escape sequences
-that match characters with specific properties are available. In 8-bit
-non-UTF-8 mode, these sequences are of course limited to testing characters
-whose codepoints are less than 256, but they do work in this mode. The extra
-escape sequences are:
+When PCRE2 is built with Unicode support (the default), three additional escape
+sequences that match characters with specific properties are available. In
+8-bit non-UTF-8 mode, these sequences are of course limited to testing
+characters whose codepoints are less than 256, but they do work in this mode.
+The extra escape sequences are:
 <pre>
   \p{<i>xx</i>}   a character with the <i>xx</i> property
   \P{<i>xx</i>}   a character without the <i>xx</i> property
@@ -3193,7 +3193,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC30" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 19 October 2014
+Last updated: 03 November 2014
 <br>
 Copyright &copy; 1997-2014 University of Cambridge.
 <br>

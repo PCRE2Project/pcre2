@@ -1444,7 +1444,7 @@ the three different cases. */
 #define PCRE2_GET_STARTCHAR(a,b) a = pcre2_get_startchar_8(G(b,8))
 #define PCRE2_JIT_COMPILE(a,b) pcre2_jit_compile_8(G(a,8),b)
 #define PCRE2_JIT_FREE_UNUSED_MEMORY(a) pcre2_jit_free_unused_memory_8(G(a,8))
-#define PCRE2_JIT_MATCH(a,b,c,d,e,f,g,h,(pcre2_jit_stack_8 *)i) \
+#define PCRE2_JIT_MATCH(a,b,c,d,e,f,g,h,i) \
   a = pcre2_jit_match_8(G(b,8),(PCRE2_SPTR8)c,d,e,f,G(g,8),G(h,8), \
     (pcre2_jit_stack_8 *)i)
 #define PCRE2_JIT_STACK_CREATE(a,b,c,d) \

@@ -215,7 +215,7 @@ if [ $ISGCC -ne 0 -a $usemain -ne 0 ]; then
   echo "---------- Maximally configured test with -O2 ----------"
   SAVECLFAGS="$CFLAGS"
   CFLAGS="$CFLAGS -O2"
-  opts="--disable-shared --enable-unicode $enable_jit --enable-pcre2-16 --enable-pcre2-32"
+  opts="--disable-shared $enable_jit --enable-pcre2-16 --enable-pcre2-32"
   runtest
   CFLAGS="$SAVECFLAGS"
 fi
@@ -224,25 +224,25 @@ if [ $usemain -ne 0 ]; then
   echo "---------- Non-JIT tests in the current directory ----------"
   for opts in \
     "" \
-    "--enable-unicode --disable-static" \
+    "--disable-static" \
+    "--disable-shared" \
+    "--disable-unicode --disable-stack-for-recursion --disable-shared" \
     "--disable-stack-for-recursion --disable-shared" \
-    "--enable-unicode --disable-shared" \
-    "--enable-unicode --disable-stack-for-recursion --disable-shared" \
-    "--enable-unicode --with-link-size=3 --disable-shared" \
-    "--enable-rebuild-chartables --disable-shared" \
-    "--enable-newline-is-any --disable-shared" \
-    "--enable-newline-is-cr --disable-shared" \
-    "--enable-newline-is-crlf --disable-shared" \
-    "--enable-newline-is-anycrlf --enable-bsr-anycrlf --disable-shared" \
-    "--enable-unicode --enable-newline-is-any --disable-stack-for-recursion --disable-static" \
-    "--enable-pcre2-16" \
+    "--with-link-size=3 --disable-shared" \
+    "--disable-unicode --enable-rebuild-chartables --disable-shared" \
+    "--disable-unicode --enable-newline-is-any --disable-shared" \
+    "--disable-unicode --enable-newline-is-cr --disable-shared" \
+    "--disable-unicode --enable-newline-is-crlf --disable-shared" \
+    "--disable-unicode --enable-newline-is-anycrlf --enable-bsr-anycrlf --disable-shared" \
+    "--enable-newline-is-any --disable-stack-for-recursion --disable-static" \
+    "--disable-unicode --enable-pcre2-16" \
+    "--disable-unicode --enable-pcre2-16 --disable-stack-for-recursion --disable-shared" \
     "--enable-pcre2-16 --disable-stack-for-recursion --disable-shared" \
-    "--enable-pcre2-16 --enable-unicode --disable-stack-for-recursion --disable-shared" \
-    "--enable-pcre2-32" \
+    "--disable-unicode --enable-pcre2-32" \
+    "--disable-unicode --enable-pcre2-32 --disable-stack-for-recursion --disable-shared" \
     "--enable-pcre2-32 --disable-stack-for-recursion --disable-shared" \
-    "--enable-pcre2-32 --enable-unicode --disable-stack-for-recursion --disable-shared" \
-    "--enable-pcre2-32 --enable-pcre2-16 --disable-shared" \
-    "--enable-pcre2-32 --enable-pcre2-16 --disable-pcre2-8 --disable-shared"
+    "--disable-unicode --enable-pcre2-32 --enable-pcre2-16 --disable-shared" \
+    "--disable-unicode --enable-pcre2-32 --enable-pcre2-16 --disable-pcre2-8 --disable-shared"
   do
     runtest
   done
@@ -253,19 +253,19 @@ fi
 if [ $usejit -ne 0 ]; then
   echo "---------- JIT tests in the current directory ----------"
   for opts in \
+    "--disable-unicode --enable-jit --disable-shared" \
     "--enable-jit --disable-shared" \
-    "--enable-jit --enable-unicode --disable-shared" \
-    "--enable-jit --enable-unicode --with-link-size=3 --disable-shared" \
-    "--enable-jit --enable-pcre2-16 --enable-unicode --disable-shared" \
+    "--enable-jit --with-link-size=3 --disable-shared" \
+    "--enable-jit --enable-pcre2-16 --disable-shared" \
+    "--disable-unicode --enable-jit --enable-pcre2-16 --disable-pcre2-8 --disable-shared" \
     "--enable-jit --enable-pcre2-16 --disable-pcre2-8 --disable-shared" \
-    "--enable-jit --enable-pcre2-16 --disable-pcre2-8 --enable-unicode --disable-shared" \
-    "--enable-jit --enable-pcre2-16 --enable-unicode --with-link-size=3 --disable-shared" \
-    "--enable-jit --enable-pcre2-16 --enable-unicode --with-link-size=4 --disable-shared" \
-    "--enable-jit --enable-pcre2-32 --enable-unicode --disable-shared" \
+    "--enable-jit --enable-pcre2-16 --with-link-size=3 --disable-shared" \
+    "--enable-jit --enable-pcre2-16 --with-link-size=4 --disable-shared" \
+    "--enable-jit --enable-pcre2-32 --disable-shared" \
+    "--disable-unicode --enable-jit --enable-pcre2-32 --disable-pcre2-8 --disable-shared" \
     "--enable-jit --enable-pcre2-32 --disable-pcre2-8 --disable-shared" \
-    "--enable-jit --enable-pcre2-32 --disable-pcre2-8 --enable-unicode --disable-shared" \
-    "--enable-jit --enable-pcre2-32 --enable-unicode --with-link-size=4 --disable-shared" \
-    "--enable-jit --enable-pcre2-32 --enable-pcre2-16 --disable-pcre2-8 --enable-unicode --enable-newline-is-anycrlf --enable-bsr-anycrlf --disable-shared"
+    "--enable-jit --enable-pcre2-32 --with-link-size=4 --disable-shared" \
+    "--enable-jit --enable-pcre2-32 --enable-pcre2-16 --disable-pcre2-8 --enable-newline-is-anycrlf --enable-bsr-anycrlf --disable-shared"
   do
     runtest
   done
@@ -280,9 +280,9 @@ if [ $usevalgrind -ne 0 ]; then
   withvalgrind="with valgrind"
 
   for opts in \
-    "--enable-unicode --disable-stack-for-recursion --disable-shared" \
-    "--enable-unicode --with-link-size=3 --disable-shared" \
-    "--disable-shared"
+    "--disable-stack-for-recursion --disable-shared" \
+    "--with-link-size=3 --disable-shared" \
+    "--disable-unicode --disable-shared"
   do
     opts="--enable-valgrind $opts"
     runtest
@@ -290,8 +290,8 @@ if [ $usevalgrind -ne 0 ]; then
 
   if [ $usejit -ne 0 ]; then
     for opts in \
-      "--enable-jit --enable-unicode --disable-shared" \
-      "--enable-jit --enable-pcre2-16 --enable-pcre2-32 --enable-unicode"
+      "--enable-jit --disable-shared" \
+      "--enable-jit --enable-pcre2-16 --enable-pcre2-32"
     do
       opts="--enable-valgrind $opts"
       runtest
@@ -337,7 +337,7 @@ fi
 
 if [ $usetmp -ne 0 ]; then
   for opts in \
-    "--enable-unicode --disable-shared"
+    "--disable-shared"
   do
     runtest
   done
