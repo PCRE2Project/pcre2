@@ -44,4 +44,11 @@ strings matched by the repetition are not all the same length.
 information. This applied to any pattern with a group that matched no
 characters, for example: /(?:(?=.)|(?<!x))a/.
 
+7. When an (*ACCEPT) is triggered inside capturing parentheses, it arranges for
+those parentheses to be closed with whatever has been captured so far. However,
+it was failing to mark any other groups between the hightest capture so far and
+the currrent group as "unset". Thus, the ovector for those groups contained
+whatever was previously there. An example is the pattern /(x)|((*ACCEPT))/ when
+matched against "abcd".
+
 ****

@@ -163,6 +163,7 @@ void vms_setsymbol( char *, char *, int );
 #define CFAIL_UNSET UINT32_MAX  /* Unset value for cfail fields */
 #define DFA_WS_DIMENSION 1000   /* Size of DFA workspace */
 #define DEFAULT_OVECCOUNT 15    /* Default ovector count */
+#define JUNK_OFFSET 0xdeadbeef  /* For initializing ovector */
 #define LOOPREPEAT 500000       /* Default loop count for timing */
 #define VERSION_SIZE 64         /* Size of buffer for the version strings */
 
@@ -4685,11 +4686,17 @@ else
 
 for (gmatched = 0;; gmatched++)
   {
+  PCRE2_SIZE j;
   int capcount;
   PCRE2_SIZE *ovector;
   PCRE2_SIZE ovecsave[2];
 
   ovector = FLD(match_data, ovector);
+
+  /* Fill the ovector with junk to detect elements that do not get set
+  when they should be. */
+    
+  for (j = 0; j < 2*dat_datctl.oveccount; j++) ovector[j] = JUNK_OFFSET;
 
   /* When matching is via pcre2_match(), we will detect the use of JIT via the
   stack callback function. */
@@ -4786,7 +4793,7 @@ for (gmatched = 0;; gmatched++)
       {
       PCRE2_SET_CALLOUT(dat_context, NULL, NULL);  /* No callout */
       }
-
+      
     /* Run a single DFA or NFA match. */
 
     if ((dat_datctl.control & CTL_DFA) != 0)
@@ -4887,14 +4894,27 @@ for (gmatched = 0;; gmatched++)
         fprintf(outfile, "Start of matched string is beyond its end - "
           "displaying from end to start.\n");
         }
-
+        
       fprintf(outfile, "%2d: ", i/2);
+
+      /* Check for an unset group */
+
       if (start == PCRE2_UNSET)
         {
         fprintf(outfile, "<unset>\n");
         continue;
         }
 
+      /* Check for silly offsets, in particular, values that have not been
+      set when they should have been. */ 
+        
+      if (start > ulen || end > ulen)
+        {
+        fprintf(outfile, "ERROR: bad value(s) for offset(s): 0x%lx 0x%lx\n",
+          start, end);
+        continue;    
+        }  
+ 
       /* When JIT is not being used, ALLUSEDTEXT may be set. (It if is set with
       JIT, it is disabled above, with a comment.) When the match is done by the
       interpreter, leftchar and rightchar are available, and if ALLUSEDTEXT is
@@ -4918,7 +4938,6 @@ for (gmatched = 0;; gmatched++)
 
         if (showallused)
           {
-          PCRE2_SIZE j;
           PCHARS(lleft, pp, leftchar, start - leftchar, utf, outfile);
           PCHARS(lmiddle, pp, start, end - start, utf, outfile);
           PCHARS(lright, pp, end, rightchar - end, utf, outfile);
@@ -4944,7 +4963,6 @@ for (gmatched = 0;; gmatched++)
             fprintf(outfile, " (JIT)");
           if (startchar != start)
             {
-            PCRE2_SIZE j;
             fprintf(outfile, "\n    ");
             for (j = 0; j < lleft; j++) fprintf(outfile, "^");
             }

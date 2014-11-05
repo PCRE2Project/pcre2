@@ -1465,7 +1465,18 @@ for (;;)
       mb->ovector[offset] =
         mb->ovector[mb->offset_end - number];
       mb->ovector[offset+1] = eptr - mb->start_subject;
-      if (offset_top <= offset) offset_top = offset + 2;
+
+      /* If this group is at or above the current highwater mark, ensure that
+      any groups between the current high water mark and this group are marked
+      unset and then update the high water mark. */
+
+      if (offset >= offset_top)
+        {
+        register PCRE2_SIZE *iptr = mb->ovector + offset_top;
+        register PCRE2_SIZE *iend = mb->ovector + offset;
+        while (iptr < iend) *iptr++ = PCRE2_UNSET;
+        offset_top = offset + 2;
+        }
       }
     ecode += 1 + IMM2_SIZE;
     break;
@@ -6321,18 +6332,18 @@ while (nextframe != NULL)
 *           Match a Regular Expression           *
 *************************************************/
 
-/* This function applies a compiled re to a subject string and picks out
+/* This function applies a compiled pattern to a subject string and picks out
 portions of the string if it matches. Two elements in the vector are set for
 each substring: the offsets to the start and end of the substring.
 
 Arguments:
-  context         points a PCRE2 context
   code            points to the compiled expression
   subject         points to the subject string
   length          length of subject string (may contain binary zeros)
   start_offset    where to start in the subject string
   options         option bits
   match_data      points to a match_data block
+  mcontext        points a PCRE2 context
 
 Returns:          > 0 => success; value is the number of ovector pairs filled
                   = 0 => success, but ovector is not big enough
