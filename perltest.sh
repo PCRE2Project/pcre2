@@ -18,7 +18,7 @@
 
 perl=perl
 prefix=''
-if [ $# > 0 -a "$1" = "-utf8" ] ; then
+if [ $# -gt 0 -a "$1" = "-utf8" ] ; then
   prefix="use utf8; require Encode;"
   shift
 fi
