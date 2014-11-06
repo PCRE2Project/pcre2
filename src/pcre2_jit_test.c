@@ -858,16 +858,16 @@ static pcre2_jit_stack_8 *getstack8(void)
 	return stack8;
 }
 
-static void setstack8(pcre2_code_8 *code)
+static void setstack8(pcre2_match_context_8 *mcontext)
 {
-	if (!code) {
+	if (!mcontext) {
 		if (stack8)
 			pcre2_jit_stack_free_8(stack8);
 		stack8 = NULL;
 		return;
 	}
 
-	pcre2_jit_stack_assign_8(code, callback8, getstack8());
+	pcre2_jit_stack_assign_8(mcontext, callback8, getstack8());
 }
 #endif /* SUPPORT_PCRE2_8 */
 
@@ -881,18 +881,18 @@ static pcre2_jit_stack_16 *getstack16(void)
 	return stack16;
 }
 
-static void setstack16(pcre2_code_16 *code)
+static void setstack16(pcre2_match_context_16 *mcontext)
 {
-	if (!code) {
+	if (!mcontext) {
 		if (stack16)
 			pcre2_jit_stack_free_16(stack16);
 		stack16 = NULL;
 		return;
 	}
 
-	pcre2_jit_stack_assign_16(code, callback16, getstack16());
+	pcre2_jit_stack_assign_16(mcontext, callback16, getstack16());
 }
-#endif /* SUPPORT_PCRE2_8 */
+#endif /* SUPPORT_PCRE2_16 */
 
 #ifdef SUPPORT_PCRE2_32
 static pcre2_jit_stack_32 *stack32;
@@ -904,18 +904,18 @@ static pcre2_jit_stack_32 *getstack32(void)
 	return stack32;
 }
 
-static void setstack32(pcre2_code_32 *code)
+static void setstack32(pcre2_match_context_32 *mcontext)
 {
-	if (!code) {
+	if (!mcontext) {
 		if (stack32)
 			pcre2_jit_stack_free_32(stack32);
 		stack32 = NULL;
 		return;
 	}
 
-	pcre2_jit_stack_assign_32(code, callback32, getstack32());
+	pcre2_jit_stack_assign_32(mcontext, callback32, getstack32());
 }
-#endif /* SUPPORT_PCRE2_8 */
+#endif /* SUPPORT_PCRE2_32 */
 
 #ifdef SUPPORT_PCRE2_16
 
@@ -1082,6 +1082,7 @@ static int regression_tests(void)
 	pcre2_compile_context_8 *ccontext8;
 	pcre2_match_data_8 *mdata8_1;
 	pcre2_match_data_8 *mdata8_2;
+	pcre2_match_context_8 *mcontext8;
 	PCRE2_SIZE *ovector8_1 = NULL;
 	PCRE2_SIZE *ovector8_2 = NULL;
 	int return_value8[2];
@@ -1091,6 +1092,7 @@ static int regression_tests(void)
 	pcre2_compile_context_16 *ccontext16;
 	pcre2_match_data_16 *mdata16_1;
 	pcre2_match_data_16 *mdata16_2;
+	pcre2_match_context_16 *mcontext16;
 	PCRE2_SIZE *ovector16_1 = NULL;
 	PCRE2_SIZE *ovector16_2 = NULL;
 	int return_value16[2];
@@ -1101,6 +1103,7 @@ static int regression_tests(void)
 	pcre2_compile_context_32 *ccontext32;
 	pcre2_match_data_32 *mdata32_1;
 	pcre2_match_data_32 *mdata32_2;
+	pcre2_match_context_32 *mcontext32;
 	PCRE2_SIZE *ovector32_1 = NULL;
 	PCRE2_SIZE *ovector32_2 = NULL;
 	int return_value32[2];
@@ -1265,10 +1268,12 @@ static int regression_tests(void)
 		return_value8[1] = -1000;
 		mdata8_1 = pcre2_match_data_create_8(OVECTOR_SIZE, NULL);
 		mdata8_2 = pcre2_match_data_create_8(OVECTOR_SIZE, NULL);
-		if (!mdata8_1 || !mdata8_2) {
+		mcontext8 = pcre2_match_context_create_8(NULL);
+		if (!mdata8_1 || !mdata8_2 || !mcontext8) {
 			printf("\n8 bit: Cannot allocate match data\n");
 			pcre2_match_data_free_8(mdata8_1);
 			pcre2_match_data_free_8(mdata8_2);
+			pcre2_match_context_free_8(mcontext8);
 			pcre2_code_free_8(re8);
 			re8 = NULL;
 		} else {
@@ -1286,12 +1291,12 @@ static int regression_tests(void)
 			if (pcre2_jit_compile_8(re8, jit_compile_mode)) {
 				printf("\n8 bit: JIT compiler does not support \"%s\"\n", current->pattern);
 			} else if ((counter & 0x1) != 0) {
-				setstack8(re8);
+				setstack8(mcontext8);
 				return_value8[0] = pcre2_match_8(re8, (PCRE2_SPTR8)current->input, strlen(current->input),
-					current->start_offset & OFFSET_MASK, current->match_options, mdata8_1, NULL);
+					current->start_offset & OFFSET_MASK, current->match_options, mdata8_1, mcontext8);
 			} else {
 				return_value8[0] = pcre2_jit_match_8(re8, (PCRE2_SPTR8)current->input, strlen(current->input),
-					current->start_offset & OFFSET_MASK, current->match_options, mdata8_1, NULL, getstack8());
+					current->start_offset & OFFSET_MASK, current->match_options, mdata8_1, mcontext8, getstack8());
 			}
 		}
 #endif
@@ -1301,10 +1306,12 @@ static int regression_tests(void)
 		return_value16[1] = -1000;
 		mdata16_1 = pcre2_match_data_create_16(OVECTOR_SIZE, NULL);
 		mdata16_2 = pcre2_match_data_create_16(OVECTOR_SIZE, NULL);
-		if (!mdata16_1 || !mdata16_2) {
+		mcontext16 = pcre2_match_context_create_16(NULL);
+		if (!mdata16_1 || !mdata16_2 || !mcontext16) {
 			printf("\n16 bit: Cannot allocate match data\n");
 			pcre2_match_data_free_16(mdata16_1);
 			pcre2_match_data_free_16(mdata16_2);
+			pcre2_match_context_free_16(mcontext16);
 			pcre2_code_free_16(re16);
 			re16 = NULL;
 		} else {
@@ -1327,12 +1334,12 @@ static int regression_tests(void)
 			if (pcre2_jit_compile_16(re16, jit_compile_mode)) {
 				printf("\n16 bit: JIT compiler does not support \"%s\"\n", current->pattern);
 			} else if ((counter & 0x1) != 0) {
-				setstack16(re16);
+				setstack16(mcontext16);
 				return_value16[0] = pcre2_match_16(re16, regtest_buf16, length16,
-					current->start_offset & OFFSET_MASK, current->match_options, mdata16_1, NULL);
+					current->start_offset & OFFSET_MASK, current->match_options, mdata16_1, mcontext16);
 			} else {
 				return_value16[0] = pcre2_jit_match_16(re16, regtest_buf16, length16,
-					current->start_offset & OFFSET_MASK, current->match_options, mdata16_1, NULL, getstack16());
+					current->start_offset & OFFSET_MASK, current->match_options, mdata16_1, mcontext16, getstack16());
 			}
 		}
 #endif
@@ -1342,10 +1349,12 @@ static int regression_tests(void)
 		return_value32[1] = -1000;
 		mdata32_1 = pcre2_match_data_create_32(OVECTOR_SIZE, NULL);
 		mdata32_2 = pcre2_match_data_create_32(OVECTOR_SIZE, NULL);
-		if (!mdata32_1 || !mdata32_2) {
+		mcontext32 = pcre2_match_context_create_32(NULL);
+		if (!mdata32_1 || !mdata32_2 || !mcontext32) {
 			printf("\n32 bit: Cannot allocate match data\n");
 			pcre2_match_data_free_32(mdata32_1);
 			pcre2_match_data_free_32(mdata32_2);
+			pcre2_match_context_free_32(mcontext32);
 			pcre2_code_free_32(re32);
 			re32 = NULL;
 		} else {
@@ -1368,12 +1377,12 @@ static int regression_tests(void)
 			if (pcre2_jit_compile_32(re32, jit_compile_mode)) {
 				printf("\n32 bit: JIT compiler does not support \"%s\"\n", current->pattern);
 			} else if ((counter & 0x1) != 0) {
-				setstack32(re32);
+				setstack32(mcontext32);
 				return_value32[0] = pcre2_match_32(re32, regtest_buf32, length32,
-					current->start_offset & OFFSET_MASK, current->match_options, mdata32_1, NULL);
+					current->start_offset & OFFSET_MASK, current->match_options, mdata32_1, mcontext32);
 			} else {
 				return_value32[0] = pcre2_jit_match_32(re32, regtest_buf32, length32,
-					current->start_offset & OFFSET_MASK, current->match_options, mdata32_1, NULL, getstack32());
+					current->start_offset & OFFSET_MASK, current->match_options, mdata32_1, mcontext32, getstack32());
 			}
 		}
 #endif
@@ -1642,16 +1651,19 @@ static int regression_tests(void)
 		pcre2_code_free_8(re8);
 		pcre2_match_data_free_8(mdata8_1);
 		pcre2_match_data_free_8(mdata8_2);
+		pcre2_match_context_free_8(mcontext8);
 #endif
 #ifdef SUPPORT_PCRE2_16
 		pcre2_code_free_16(re16);
 		pcre2_match_data_free_16(mdata16_1);
 		pcre2_match_data_free_16(mdata16_2);
+		pcre2_match_context_free_16(mcontext16);
 #endif
 #ifdef SUPPORT_PCRE2_32
 		pcre2_code_free_32(re32);
 		pcre2_match_data_free_32(mdata32_1);
 		pcre2_match_data_free_32(mdata32_2);
+		pcre2_match_context_free_32(mcontext32);
 #endif
 
 		if (is_successful) {

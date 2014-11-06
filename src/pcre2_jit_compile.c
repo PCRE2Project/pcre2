@@ -195,8 +195,6 @@ typedef struct executable_functions {
   void *executable_funcs[JIT_NUMBER_OF_COMPILE_MODES];
   sljit_uw *read_only_data[JIT_NUMBER_OF_COMPILE_MODES];
   sljit_uw executable_sizes[JIT_NUMBER_OF_COMPILE_MODES];
-  pcre2_jit_callback callback;
-  void *callback_data;
   sljit_ui top_bracket;
   sljit_ui limit_match;
 } executable_functions;

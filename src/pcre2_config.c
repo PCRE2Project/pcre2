@@ -129,7 +129,8 @@ switch (what)
 #ifdef SUPPORT_JIT
     {
     const char *v = PRIV(jit_get_target)();
-    return (where == NULL)? (int)strlen(v) :
+    return (where == NULL)?
+      (int)((strlen(v) + 1) * sizeof(PCRE2_UCHAR)) :
       PRIV(strcpy_c8)((PCRE2_UCHAR *)where, v);
     }
 #else
@@ -171,7 +172,8 @@ switch (what)
 #else
     const char *v = "Unicode not supported";
 #endif
-    return (where == NULL)? (int)strlen(v) :
+    return (where == NULL)?
+      (int)((strlen(v) + 1) * sizeof(PCRE2_UCHAR)) :
       PRIV(strcpy_c8)((PCRE2_UCHAR *)where, v);
     }
   break;
@@ -208,7 +210,8 @@ switch (what)
     const char *v = (XSTRING(Z PCRE2_PRERELEASE)[1] == 0)?
       XSTRING(PCRE2_MAJOR.PCRE2_MINOR PCRE2_DATE) :
       XSTRING(PCRE2_MAJOR.PCRE2_MINOR) XSTRING(PCRE2_PRERELEASE PCRE2_DATE);
-    return (where == NULL)? (int)strlen(v) :
+    return (where == NULL)?
+      (int)((strlen(v) + 1) * sizeof(PCRE2_UCHAR)) :
       PRIV(strcpy_c8)((PCRE2_UCHAR *)where, v);
     }
   }
