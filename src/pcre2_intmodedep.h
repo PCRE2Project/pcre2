@@ -573,14 +573,14 @@ typedef struct pcre2_real_match_context {
 #ifdef HEAP_MATCH_RECURSE
   pcre2_memctl  stack_memctl;
 #endif
-  int       (*callout)(pcre2_callout_block *);
-  void      *callout_data;
-  uint32_t  match_limit;
-  uint32_t  recursion_limit;
 #ifdef SUPPORT_JIT
   pcre2_jit_callback jit_callback;
   void *jit_callback_data;
 #endif
+  int       (*callout)(pcre2_callout_block *);
+  void      *callout_data;
+  uint32_t  match_limit;
+  uint32_t  recursion_limit;
 } pcre2_real_match_context;
 
 /* The real compiled code structure */

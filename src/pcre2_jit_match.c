@@ -87,7 +87,7 @@ Returns:          > 0 => success; value is the number of ovector pairs filled
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_jit_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
   PCRE2_SIZE start_offset, uint32_t options, pcre2_match_data *match_data,
-  pcre2_match_context *mcontext, pcre2_jit_stack *jit_stack)
+  pcre2_match_context *mcontext)
 {
 #ifndef SUPPORT_JIT
 
@@ -105,6 +105,7 @@ return PCRE2_ERROR_JIT_BADOPTION;
 
 pcre2_real_code *re = (pcre2_real_code *)code;
 executable_functions *functions = (executable_functions *)re->executable_jit;
+pcre2_jit_stack *jit_stack;
 uint32_t oveccount = match_data->oveccount;
 uint32_t max_oveccount;
 union {
@@ -158,8 +159,10 @@ if (oveccount > max_oveccount)
   oveccount = max_oveccount;
 arguments.oveccount = oveccount << 1;
 
-if (jit_stack == NULL && mcontext->jit_callback != NULL)
+if (mcontext->jit_callback != NULL)
   jit_stack = mcontext->jit_callback(mcontext->jit_callback_data);
+else
+  jit_stack = (pcre2_jit_stack *)mcontext->jit_callback_data;
 
 convert_executable_func.executable_func = functions->executable_funcs[index];
 if (jit_stack != NULL)

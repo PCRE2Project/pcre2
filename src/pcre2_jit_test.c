@@ -1295,8 +1295,9 @@ static int regression_tests(void)
 				return_value8[0] = pcre2_match_8(re8, (PCRE2_SPTR8)current->input, strlen(current->input),
 					current->start_offset & OFFSET_MASK, current->match_options, mdata8_1, mcontext8);
 			} else {
+				pcre2_jit_stack_assign_8(mcontext8, NULL, getstack8());
 				return_value8[0] = pcre2_jit_match_8(re8, (PCRE2_SPTR8)current->input, strlen(current->input),
-					current->start_offset & OFFSET_MASK, current->match_options, mdata8_1, mcontext8, getstack8());
+					current->start_offset & OFFSET_MASK, current->match_options, mdata8_1, mcontext8);
 			}
 		}
 #endif
@@ -1338,8 +1339,9 @@ static int regression_tests(void)
 				return_value16[0] = pcre2_match_16(re16, regtest_buf16, length16,
 					current->start_offset & OFFSET_MASK, current->match_options, mdata16_1, mcontext16);
 			} else {
+				pcre2_jit_stack_assign_16(mcontext16, NULL, getstack16());
 				return_value16[0] = pcre2_jit_match_16(re16, regtest_buf16, length16,
-					current->start_offset & OFFSET_MASK, current->match_options, mdata16_1, mcontext16, getstack16());
+					current->start_offset & OFFSET_MASK, current->match_options, mdata16_1, mcontext16);
 			}
 		}
 #endif
@@ -1381,8 +1383,9 @@ static int regression_tests(void)
 				return_value32[0] = pcre2_match_32(re32, regtest_buf32, length32,
 					current->start_offset & OFFSET_MASK, current->match_options, mdata32_1, mcontext32);
 			} else {
+				pcre2_jit_stack_assign_32(mcontext32, NULL, getstack32());
 				return_value32[0] = pcre2_jit_match_32(re32, regtest_buf32, length32,
-					current->start_offset & OFFSET_MASK, current->match_options, mdata32_1, mcontext32, getstack32());
+					current->start_offset & OFFSET_MASK, current->match_options, mdata32_1, mcontext32);
 			}
 		}
 #endif

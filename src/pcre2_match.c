@@ -6492,7 +6492,7 @@ selected normal or partial matching mode was not compiled). */
 if (re->executable_jit != NULL && (options & ~PUBLIC_JIT_MATCH_OPTIONS) == 0)
   {
   rc = pcre2_jit_match(code, subject, length, start_offset, options,
-    match_data, mcontext, NULL);
+    match_data, mcontext);
   if (rc != PCRE2_ERROR_JIT_BADOPTION) return rc;
   }
 #endif

@@ -162,6 +162,10 @@ const pcre2_match_context PRIV(default_match_context) = {
 #ifdef HEAP_MATCH_RECURSE
   { default_malloc, default_free, NULL },
 #endif
+#ifdef SUPPORT_JIT
+  NULL,
+  NULL,
+#endif
   NULL,
   NULL,
   MATCH_LIMIT,
