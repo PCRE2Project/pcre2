@@ -1,4 +1,4 @@
-.TH PCRE2_JIT_STACK_ASSIGN 3 "03 November 2014" "PCRE2 10.0"
+.TH PCRE2_JIT_STACK_ASSIGN 3 "08 November 2014" "PCRE2 10.0"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH SYNOPSIS
@@ -7,18 +7,20 @@ PCRE2 - Perl-compatible regular expressions (revised API)
 .B #include <pcre2.h>
 .PP
 .nf
-.B void pcre2_jit_stack_assign(const pcre2_code *\fIcode\fP,
+.B void pcre2_jit_stack_assign(pcre2_match_context *\fImcontext\fP,
 .B "  pcre2_jit_callback \fIcallback_function\fP, void *\fIcallback_data\fP);"
 .fi
 .
 .SH DESCRIPTION
 .rs
 .sp
-This function provides control over the memory used as a stack at run-time by a
-call to \fBpcre2_match()\fP or \fBpcre2_jit_match()\fP with a pattern that has
-been successfully processed by the JIT compiler. The arguments are:
+This function provides control over the memory used by JIT as a run-time stack 
+when \fBpcre2_match()\fP or \fBpcre2_jit_match()\fP is called with a pattern
+that has been successfully processed by the JIT compiler. The information that
+determines which stack is used is put into a match context that is subsequently
+passed to a matching function. The arguments of this function are:
 .sp
-  code           the pointer returned by \fBpcre2_compile()\fP
+  mcontext       a pointer to a match context
   callback       a callback function
   callback_data  a JIT stack or a value to be passed to the callback
 .P
@@ -34,7 +36,7 @@ argument at the start of matching, in order to set up a JIT stack. If the
 result is NULL, the internal 32K stack is used; otherwise the return value must
 be a valid JIT stack, the result of calling \fBpcre2_jit_stack_create()\fP.
 .P
-You may safely assign the same JIT stack to multiple patterns, as long as they
+You may safely use the same JIT stack for multiple patterns, as long as they
 are all matched in the same thread. In a multithread application, each thread
 must use its own JIT stack. For more details, see the
 .\" HREF

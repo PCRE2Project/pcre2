@@ -131,7 +131,7 @@ switch (what)
     const char *v = PRIV(jit_get_target)();
     return (where == NULL)?
       (int)((strlen(v) + 1) * sizeof(PCRE2_UCHAR)) :
-      PRIV(strcpy_c8)((PCRE2_UCHAR *)where, v);
+      PRIV(strcpy_c8)((PCRE2_UCHAR *)where, v) + 1;
     }
 #else
   return PCRE2_ERROR_BADOPTION;
@@ -174,7 +174,7 @@ switch (what)
 #endif
     return (where == NULL)?
       (int)((strlen(v) + 1) * sizeof(PCRE2_UCHAR)) :
-      PRIV(strcpy_c8)((PCRE2_UCHAR *)where, v);
+      PRIV(strcpy_c8)((PCRE2_UCHAR *)where, v) + 1;
     }
   break;
 
@@ -212,7 +212,7 @@ switch (what)
       XSTRING(PCRE2_MAJOR.PCRE2_MINOR) XSTRING(PCRE2_PRERELEASE PCRE2_DATE);
     return (where == NULL)?
       (int)((strlen(v) + 1) * sizeof(PCRE2_UCHAR)) :
-      PRIV(strcpy_c8)((PCRE2_UCHAR *)where, v);
+      PRIV(strcpy_c8)((PCRE2_UCHAR *)where, v) + 1;
     }
   }
 

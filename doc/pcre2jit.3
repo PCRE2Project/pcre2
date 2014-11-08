@@ -1,4 +1,4 @@
-.TH PCRE2JIT 3 "03 November 2014" "PCRE2 10.00"
+.TH PCRE2JIT 3 "08 November 2014" "PCRE2 10.00"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 JUST-IN-TIME COMPILER SUPPORT"
@@ -164,19 +164,20 @@ pattern.
 The \fBpcre2_jit_stack_assign()\fP function specifies which stack JIT code
 should use. Its arguments are as follows:
 .sp
-  pcre2_code         *code
-  pcre2_jit_callback  callback
-  void               *data
+  pcre2_match_context  *mcontext
+  pcre2_jit_callback    callback
+  void                 *data
 .sp
-The \fIcode\fP argument is a pointer to a compiled pattern, after it has been
-processed by \fBpcre2_jit_compile()\fP. There are three cases for the values of
-the other two options:
+The first argument is a pointer to a match context. When this is subsequently
+passed to a matching function, its information determines which JIT stack is 
+used. There are three cases for the values of the other two options:
 .sp
   (1) If \fIcallback\fP is NULL and \fIdata\fP is NULL, an internal 32K block
       on the machine stack is used.
 .sp
   (2) If \fIcallback\fP is NULL and \fIdata\fP is not NULL, \fIdata\fP must be
-      a valid JIT stack, the result of calling \fBpcre2_jit_stack_create()\fP.
+      a pointer to a valid JIT stack, the result of calling
+      \fBpcre2_jit_stack_create()\fP.
 .sp
   (3) If \fIcallback\fP is not NULL, it must point to a function that is
       called with \fIdata\fP as an argument at the start of matching, in
@@ -199,11 +200,11 @@ assign or pass back a non-NULL JIT stack, this must be a different stack for
 each thread so that the application is thread-safe.
 .P
 Strictly speaking, even more is allowed. You can assign the same non-NULL stack
-to any number of patterns as long as they are not used for matching by multiple
-threads at the same time. For example, you can assign the same stack to all
-compiled patterns, and use a global mutex in the callback to wait until the
-stack is available for use. However, this is an inefficient solution, and not
-recommended.
+to a match context that is used by any number of patterns, as long as they are
+not used for matching by multiple threads at the same time. For example, you
+could use the same stack in all compiled patterns, with a global mutex in the
+callback to wait until the stack is available for use. However, this is an
+inefficient solution, and not recommended.
 .P
 This is a suggestion for how a multithreaded program that needs to set up
 non-default JIT stacks might operate:
@@ -217,10 +218,7 @@ non-default JIT stacks might operate:
   Use a one-line callback function
     return thread_local_var
 .sp
-All the functions described in this section do nothing if JIT is not available,
-and \fBpcre2_jit_stack_assign()\fP does nothing unless the \fBcode\fP argument
-is non-NULL and points to a \fBpcre2_code\fP block that has been successfully
-processed by \fBpcre2_jit_compile()\fP.
+All the functions described in this section do nothing if JIT is not available.
 .
 .
 .\" HTML <a name="stackfaq"></a>
@@ -248,24 +246,24 @@ grow up to 1M anytime if needed.
 (3) Who "owns" a JIT stack?
 .sp
 The owner of the stack is the user program, not the JIT studied pattern or
-anything else. The user program must ensure that if a stack is used by
-\fBpcre2_match()\fP, (that is, it is assigned to the pattern currently
-running), that stack must not be used by any other threads (to avoid
-overwriting the same memory area). The best practice for multithreaded programs
-is to allocate a stack for each thread, and return this stack through the JIT
-callback function.
+anything else. The user program must ensure that if a stack is being used by
+\fBpcre2_match()\fP, (that is, it is assigned to a match context that is passed
+to the pattern currently running), that stack must not be used by any other
+threads (to avoid overwriting the same memory area). The best practice for
+multithreaded programs is to allocate a stack for each thread, and return this
+stack through the JIT callback function.
 .P
 (4) When should a JIT stack be freed?
 .sp
 You can free a JIT stack at any time, as long as it will not be used by
-\fBpcre2_match()\fP again. When you assign the stack to a pattern, only a
+\fBpcre2_match()\fP again. When you assign the stack to a match context, only a
 pointer is set. There is no reference counting or any other magic. You can free
-the patterns and stacks in any order, anytime. Just \fIdo not\fP call
-\fBpcre2_match()\fP with a pattern pointing to an already freed stack, as that
-will cause SEGFAULT. (Also, do not free a stack currently used by
-\fBpcre2_match()\fP in another thread). You can also replace the stack for a
-pattern at any time. You can even free the previous stack before assigning a
-replacement.
+compiled patterns, contexts, and stacks in any order, anytime. Just \fIdo
+not\fP call \fBpcre2_match()\fP with a match context pointing to an already
+freed stack, as that will cause SEGFAULT. (Also, do not free a stack currently
+used by \fBpcre2_match()\fP in another thread). You can also replace the stack
+in a context at any time when it is not in use. You can also free the previous
+stack before assigning a replacement.
 .P
 (5) Should I allocate/free a stack every time before/after calling
 \fBpcre2_match()\fP?
@@ -273,7 +271,7 @@ replacement.
 No, because this is too costly in terms of resources. However, you could
 implement some clever idea which release the stack if it is not used in let's
 say two minutes. The JIT callback can help to achieve this without keeping a
-list of the currently JIT studied patterns.
+list of patterns.
 .P
 (6) OK, the stack is for long term memory allocation. But what happens if a
 pattern causes stack overflow with a stack of 1M? Is that 1M kept until the
@@ -311,25 +309,28 @@ memory management, or NULL for standard memory management.
 .rs
 .sp
 This is a single-threaded example that specifies a JIT stack without using a
-callback.
+callback. A real program should include error checking after all the function 
+calls.
 .sp
   int rc;
   pcre2_code *re;
   pcre2_match_data *match_data;
+  pcre2_match_context *mcontext; 
   pcre2_jit_stack *jit_stack;
 .sp
-  re = pcre2_compile(pattern, PCRE2_ZERO_TERMINATED, 0,
+  re = pcre2_compile(pattern, PCRE2_ZERO_TERMINATED, 0, 
     &errornumber, &erroffset, NULL);
-  /* Check for errors */
   rc = pcre2_jit_compile(re, PCRE2_JIT_COMPLETE);
-  /* Check for errors */
+  mcontext = pcre2_match_context_create(NULL); 
   jit_stack = pcre2_jit_stack_create(NULL, 32*1024, 512*1024);
-  /* Check for error (NULL) */
-  pcre2_jit_stack_assign(re, NULL, jit_stack);
+  pcre2_jit_stack_assign(mcontext, NULL, jit_stack);
   match_data = pcre2_match_data_create(re, 10);
-  rc = pcre2_match(re, subject, length, 0, 0, match_data, NULL);
-  /* Check results */
-  pcre2_free(re);
+  rc = pcre2_match(re, subject, length, 0, 0, match_data, mcontext);
+  /* Process result */ 
+.sp
+  pcre2_code_free(re);
+  pcre2_match_data_free(match_data);  
+  pcre2_match_context_free(mcontext);
   pcre2_jit_stack_free(jit_stack);
 .sp
 .
@@ -347,13 +348,10 @@ available, and which need the best possible performance, can instead use a
 processed by \fBpcre2_jit_compile()\fP).
 .P
 The fast path function is called \fBpcre2_jit_match()\fP, and it takes exactly
-the same arguments as \fBpcre2_match()\fP, plus one additional argument that
-must either point to a JIT stack or be NULL. In the latter case, if a callback
-function has been set up by \fBpcre2_jit_stack_assign()\fP, it is called.
-Otherwise the system stack is used. The return values are the same as for
-\fBpcre2_match()\fP, plus PCRE2_ERROR_JIT_BADOPTION if a matching mode (partial
-or complete) is requested that was not compiled. Unsupported option bits (for
-example, PCRE2_ANCHORED) are ignored.
+the same arguments as \fBpcre2_match()\fP. The return values are also the same,
+plus PCRE2_ERROR_JIT_BADOPTION if a matching mode (partial or complete) is
+requested that was not compiled. Unsupported option bits (for example,
+PCRE2_ANCHORED) are ignored.
 .P
 When you call \fBpcre2_match()\fP, as well as testing for invalid options, a
 number of other sanity checks are performed on the arguments. For example, if
@@ -386,6 +384,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 03 November 2014
+Last updated: 08 November 2014
 Copyright (c) 1997-2014 University of Cambridge.
 .fi

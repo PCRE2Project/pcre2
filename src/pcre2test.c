@@ -812,16 +812,13 @@ are supported. */
   else if (test_mode == PCRE16_MODE) pcre2_jit_free_unused_memory_16(G(a,16)); \
   else pcre2_jit_free_unused_memory_32(G(a,32))
 
-#define PCRE2_JIT_MATCH(a,b,c,d,e,f,g,h,i) \
+#define PCRE2_JIT_MATCH(a,b,c,d,e,f,g,h) \
   if (test_mode == PCRE8_MODE) \
-    a = pcre2_jit_match_8(G(b,8),(PCRE2_SPTR8)c,d,e,f,G(g,8),G(h,8), \
-      (pcre2_jit_stack_8 *)i); \
+    a = pcre2_jit_match_8(G(b,8),(PCRE2_SPTR8)c,d,e,f,G(g,8),G(h,8)); \
   else if (test_mode == PCRE16_MODE) \
-    a = pcre2_jit_match_16(G(b,16),(PCRE2_SPTR16)c,d,e,f,G(g,16),G(h,16), \
-      (pcre2_jit_stack_16 *)i); \
+    a = pcre2_jit_match_16(G(b,16),(PCRE2_SPTR16)c,d,e,f,G(g,16),G(h,16)); \
   else \
-    a = pcre2_jit_match_32(G(b,32),(PCRE2_SPTR32)c,d,e,f,G(g,32),G(h,32), \
-      (pcre2_jit_stack_32 *)i)
+    a = pcre2_jit_match_32(G(b,32),(PCRE2_SPTR32)c,d,e,f,G(g,32),G(h,32))
 
 #define PCRE2_JIT_STACK_CREATE(a,b,c,d) \
   if (test_mode == PCRE8_MODE) \
@@ -1193,13 +1190,13 @@ the three different cases. */
   else \
     G(pcre2_jit_free_unused_memory_,BITTWO)(G(a,BITTWO))
 
-#define PCRE2_JIT_MATCH(a,b,c,d,e,f,g,h,i) \
+#define PCRE2_JIT_MATCH(a,b,c,d,e,f,g,h) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
     a = G(pcre2_jit_match_,BITONE)(G(b,BITONE),(G(PCRE2_SPTR,BITONE))c,d,e,f, \
-      G(g,BITONE),G(h,BITONE),(G(pcre2_jit_stack_,BITONE) *)i); \
+      G(g,BITONE),G(h,BITONE)); \
   else \
     a = G(pcre2_jit_match_,BITTWO)(G(b,BITTWO),(G(PCRE2_SPTR,BITTWO))c,d,e,f, \
-      G(g,BITTWO),G(h,BITTWO),(G(pcre2_jit_stack_,BITTWO) *)i)
+      G(g,BITTWO),G(h,BITTWO))
 
 #define PCRE2_JIT_STACK_CREATE(a,b,c,d) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
@@ -1445,9 +1442,8 @@ the three different cases. */
 #define PCRE2_GET_STARTCHAR(a,b) a = pcre2_get_startchar_8(G(b,8))
 #define PCRE2_JIT_COMPILE(a,b) pcre2_jit_compile_8(G(a,8),b)
 #define PCRE2_JIT_FREE_UNUSED_MEMORY(a) pcre2_jit_free_unused_memory_8(G(a,8))
-#define PCRE2_JIT_MATCH(a,b,c,d,e,f,g,h,i) \
-  a = pcre2_jit_match_8(G(b,8),(PCRE2_SPTR8)c,d,e,f,G(g,8),G(h,8), \
-    (pcre2_jit_stack_8 *)i)
+#define PCRE2_JIT_MATCH(a,b,c,d,e,f,g,h) \
+  a = pcre2_jit_match_8(G(b,8),(PCRE2_SPTR8)c,d,e,f,G(g,8),G(h,8))
 #define PCRE2_JIT_STACK_CREATE(a,b,c,d) \
   a = (PCRE2_JIT_STACK *)pcre2_jit_stack_create_8(b,c,d);
 #define PCRE2_JIT_STACK_ASSIGN(a,b,c) \
@@ -1525,8 +1521,7 @@ the three different cases. */
 #define PCRE2_JIT_COMPILE(a,b) pcre2_jit_compile_16(G(a,16),b)
 #define PCRE2_JIT_FREE_UNUSED_MEMORY(a) pcre2_jit_free_unused_memory_16(G(a,16))
 #define PCRE2_JIT_MATCH(a,b,c,d,e,f,g,h,i) \
-  a = pcre2_jit_match_16(G(b,16),(PCRE2_SPTR16)c,d,e,f,G(g,16),G(h,16), \
-    (pcre2_jit_stack_16 *)i)
+  a = pcre2_jit_match_16(G(b,16),(PCRE2_SPTR16)c,d,e,f,G(g,16),G(h,16))
 #define PCRE2_JIT_STACK_CREATE(a,b,c,d) \
   a = (PCRE2_JIT_STACK *)pcre2_jit_stack_create_16(b,c,d);
 #define PCRE2_JIT_STACK_ASSIGN(a,b,c) \
@@ -1604,8 +1599,7 @@ the three different cases. */
 #define PCRE2_JIT_COMPILE(a,b) pcre2_jit_compile_32(G(a,32),b)
 #define PCRE2_JIT_FREE_UNUSED_MEMORY(a) pcre2_jit_free_unused_memory_32(G(a,32))
 #define PCRE2_JIT_MATCH(a,b,c,d,e,f,g,h,i) \
-  a = pcre2_jit_match_32(G(b,32),(PCRE2_SPTR32)c,d,e,f,G(g,32),G(h,32), \
-    (pcre2_jit_stack_32 *)i)
+  a = pcre2_jit_match_32(G(b,32),(PCRE2_SPTR32)c,d,e,f,G(g,32),G(h,32))
 #define PCRE2_JIT_STACK_CREATE(a,b,c,d) \
   a = (PCRE2_JIT_STACK *)pcre2_jit_stack_create_32(b,c,d);
 #define PCRE2_JIT_STACK_ASSIGN(a,b,c) \
@@ -3996,7 +3990,7 @@ for (;;)
 
   if ((pat_patctl.control & CTL_JITFAST) != 0)
     PCRE2_JIT_MATCH(capcount, compiled_code, pp, ulen, dat_datctl.offset,
-      dat_datctl.options, match_data, dat_context, jit_stack);
+      dat_datctl.options, match_data, dat_context);
   else
     PCRE2_MATCH(capcount, compiled_code, pp, ulen, dat_datctl.offset,
       dat_datctl.options, match_data, dat_context);
@@ -4641,14 +4635,14 @@ if (dat_datctl.jitstack != 0)
     PCRE2_JIT_STACK_CREATE(jit_stack, NULL, 1, dat_datctl.jitstack * 1024);
     jit_stack_size = dat_datctl.jitstack;
     }
-  PCRE2_JIT_STACK_ASSIGN(compiled_code, jit_callback, jit_stack);
+  PCRE2_JIT_STACK_ASSIGN(dat_context, jit_callback, jit_stack);
   }
 
 /* Or de-assign */
 
 else if (jit_stack != NULL)
   {
-  PCRE2_JIT_STACK_ASSIGN(compiled_code, NULL, NULL);
+  PCRE2_JIT_STACK_ASSIGN(dat_context, NULL, NULL);
   PCRE2_JIT_STACK_FREE(jit_stack);
   jit_stack = NULL;
   jit_stack_size = 0;
@@ -4659,7 +4653,7 @@ if we want to verify that JIT was actually used. */
 
 if ((pat_patctl.control & CTL_JITVERIFY) != 0 && jit_stack == NULL)
    {
-   PCRE2_JIT_STACK_ASSIGN(compiled_code, jit_callback, NULL);
+   PCRE2_JIT_STACK_ASSIGN(dat_context, jit_callback, NULL);
    }
 
 /* Adjust match_data according to size of offsets required. A size of zero
@@ -4745,7 +4739,7 @@ for (gmatched = 0;; gmatched++)
         {
         PCRE2_JIT_MATCH(capcount, compiled_code, pp, ulen,
           dat_datctl.offset, dat_datctl.options | g_notempty, match_data,
-          dat_context, jit_stack);
+          dat_context);
         }
       }
 
@@ -4815,7 +4809,7 @@ for (gmatched = 0;; gmatched++)
       {
       if ((pat_patctl.control & CTL_JITFAST) != 0)
         PCRE2_JIT_MATCH(capcount, compiled_code, pp, ulen, dat_datctl.offset,
-          dat_datctl.options | g_notempty, match_data, dat_context, jit_stack);
+          dat_datctl.options | g_notempty, match_data, dat_context);
       else
         PCRE2_MATCH(capcount, compiled_code, pp, ulen, dat_datctl.offset,
           dat_datctl.options | g_notempty, match_data, dat_context);

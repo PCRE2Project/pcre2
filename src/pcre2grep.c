@@ -3122,7 +3122,7 @@ for (j = 1, cp = patterns; cp != NULL; j++, cp = cp->next)
   {
 #ifdef SUPPORT_PCRE2GREP_JIT
   if (jit_stack != NULL && cp->compiled != NULL)
-    pcre2_jit_stack_assign(cp->compiled, NULL, jit_stack);
+    pcre2_jit_stack_assign(match_context, NULL, jit_stack);
 #endif
   }
 

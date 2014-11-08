@@ -269,11 +269,11 @@ done
 $sim ./pcre2test -C linksize >/dev/null
 link_size=$?
 if [ $link_size -lt 2 ] ; then
-  echo "Failed to find internal link size"
+  echo "RunTest: Failed to find internal link size"
   exit 1
 fi
 if [ $link_size -gt 4 ] ; then
-  echo "Failed to find internal link size"
+  echo "RunTest: Failed to find internal link size"
   exit 1
 fi
 
