@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "03 November 2014" "PCRE2 10.00"
+.TH PCRE2API 3 "08 November 2014" "PCRE2 10.00"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -25,7 +25,7 @@ document for an overview of all the PCRE2 documentation.
 .B pcre2_match_data_create(uint32_t \fIovecsize\fP,
 .B "  pcre2_general_context *\fIgcontext\fP);"
 .sp
-.B pcre2_match_data_create_from_pattern(pcre2_code *\fIcode\fP,
+.B pcre2_match_data_create_from_pattern(const pcre2_code *\fIcode\fP,
 .B "  pcre2_general_context *\fIgcontext\fP);"
 .sp
 .B int pcre2_match(const pcre2_code *\fIcode\fP, PCRE2_SPTR \fIsubject\fP,
@@ -178,14 +178,14 @@ document for an overview of all the PCRE2 documentation.
 .B int pcre2_jit_match(const pcre2_code *\fIcode\fP, PCRE2_SPTR \fIsubject\fP,
 .B "  PCRE2_SIZE \fIlength\fP, PCRE2_SIZE \fIstartoffset\fP,"
 .B "  uint32_t \fIoptions\fP, pcre2_match_data *\fImatch_data\fP,"
-.B "  pcre2_match_context *\fImcontext\fP, pcre2_jit_stack *\fIjit_stack\fP);"
+.B "  pcre2_match_context *\fImcontext\fP);"
 .sp
 .B void pcre2_jit_free_unused_memory(pcre2_general_context *\fIgcontext\fP);
 .sp
 .B pcre2_jit_stack *pcre2_jit_stack_create(pcre2_general_context *\fIgcontext\fP,
 .B "  PCRE2_SIZE \fIstartsize\fP, PCRE2_SIZE \fImaxsize\fP);"
 .sp
-.B void pcre2_jit_stack_assign(const pcre2_code *\fIcode\fP,
+.B void pcre2_jit_stack_assign(pcre2_match_context *\fImcontext\fP,
 .B "  pcre2_jit_callback \fIcallback_function\fP, void *\fIcallback_data\fP);"
 .sp
 .B void pcre2_jit_stack_free(pcre2_jit_stack *\fIjit_stack\fP);
@@ -783,8 +783,9 @@ units long. (The exact length needed can be found by calling
 \fBpcre2_config()\fP with \fBwhere\fP set to NULL.) The buffer is filled with a
 string that contains the name of the architecture for which the JIT compiler is
 configured, for example "x86 32bit (little endian + unaligned)". If JIT support
-is not available, PCRE2_ERROR_BADOPTION is returned, otherwise the length of
-the string, in code units, is returned.
+is not available, PCRE2_ERROR_BADOPTION is returned, otherwise the number of
+code units used is returned. This is the length of the string, plus one unit
+for the terminating zero.
 .sp
   PCRE2_CONFIG_LINKSIZE
 .sp
@@ -851,8 +852,8 @@ units long. (The exact length needed can be found by calling
 \fBpcre2_config()\fP with \fBwhere\fP set to NULL.) If PCRE2 has been compiled
 without Unicode support, the buffer is filled with the text "Unicode not
 supported". Otherwise, the Unicode version string (for example, "7.0.0") is
-inserted. The string is zero-terminated. The function returns the length of the
-string in code units.
+inserted. The number of code units used is returned. This is the length of the
+string plus one unit for the terminating zero.
 .sp
   PCRE2_CONFIG_UNICODE
 .sp
@@ -864,8 +865,9 @@ otherwise it is set to zero. Unicode support implies UTF support.
 The \fIwhere\fP argument should point to a buffer that is at least 12 code
 units long. (The exact length needed can be found by calling
 \fBpcre2_config()\fP with \fBwhere\fP set to NULL.) The buffer is filled with
-the PCRE2 version string, zero-terminated. The length of the string (in code
-units) is returned.
+the PCRE2 version string, zero-terminated. The number of code units used is 
+returned. This is the length of the string plus one unit for the terminating 
+zero.
 .
 .
 .\" HTML <a name="compiling"></a>
@@ -1261,14 +1263,14 @@ textual error message from any error code.
 .B int pcre2_jit_match(const pcre2_code *\fIcode\fP, PCRE2_SPTR \fIsubject\fP,
 .B "  PCRE2_SIZE \fIlength\fP, PCRE2_SIZE \fIstartoffset\fP,"
 .B "  uint32_t \fIoptions\fP, pcre2_match_data *\fImatch_data\fP,"
-.B "  pcre2_match_context *\fImcontext\fP, pcre2_jit_stack *\fIjit_stack\fP);"
+.B "  pcre2_match_context *\fImcontext\fP);"
 .sp
 .B void pcre2_jit_free_unused_memory(pcre2_general_context *\fIgcontext\fP);
 .sp
 .B pcre2_jit_stack *pcre2_jit_stack_create(pcre2_general_context *\fIgcontext\fP,
 .B "  PCRE2_SIZE \fIstartsize\fP, PCRE2_SIZE \fImaxsize\fP);"
 .sp
-.B void pcre2_jit_stack_assign(const pcre2_code *\fIcode\fP,
+.B void pcre2_jit_stack_assign(pcre2_match_context *\fImcontext\fP,
 .B "  pcre2_jit_callback \fIcallback_function\fP, void *\fIcallback_data\fP);"
 .sp
 .B void pcre2_jit_stack_free(pcre2_jit_stack *\fIjit_stack\fP);
@@ -1642,7 +1644,7 @@ pattern with the JIT compiler does not alter the value returned by this option.
 .B pcre2_match_data_create(uint32_t \fIovecsize\fP,
 .B "  pcre2_general_context *\fIgcontext\fP);"
 .sp
-.B pcre2_match_data_create_from_pattern(pcre2_code *\fIcode\fP,
+.B pcre2_match_data_create_from_pattern(const pcre2_code *\fIcode\fP,
 .B "  pcre2_general_context *\fIgcontext\fP);"
 .sp
 .B void pcre2_match_data_free(pcre2_match_data *\fImatch_data\fP);
@@ -2631,6 +2633,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 03 November 2014
+Last updated: 08 November 2014
 Copyright (c) 1997-2014 University of Cambridge.
 .fi

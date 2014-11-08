@@ -314,6 +314,7 @@ COMMON_SOURCES = \
   src/pcre2_pattern_info.c \
   src/pcre2_string_utils.c \
   src/pcre2_study.c \
+  src/pcre2_substitute.c \
   src/pcre2_substring.c \
   src/pcre2_tables.c \
   src/pcre2_ucd.c \

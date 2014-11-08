@@ -472,7 +472,8 @@ Arguments:
   stringname  the name whose number is required
 
 Returns:      the number of the named parenthesis, or a negative number
-                (PCRE2_ERROR_NOSUBSTRING) if not found
+                PCRE2_ERROR_NOSUBSTRING if not found
+                PCRE2_ERROR_NOUNIQUESUBSTRING if not unique 
 */
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
