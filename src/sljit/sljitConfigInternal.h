@@ -243,6 +243,15 @@
 #endif
 #endif /* !SLJIT_INLINE */
 
+#ifndef SLJIT_NOINLINE
+/* Not inline functions. */
+#if defined(__GNUC__)
+#define SLJIT_NOINLINE __attribute__ ((noinline))
+#else
+#define SLJIT_NOINLINE
+#endif
+#endif /* !SLJIT_INLINE */
+
 #ifndef SLJIT_CONST
 /* Const variables. */
 #define SLJIT_CONST const

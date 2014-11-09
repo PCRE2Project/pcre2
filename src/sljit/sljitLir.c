@@ -1325,6 +1325,7 @@ static SLJIT_INLINE CHECK_RETURN_TYPE check_sljit_emit_jump(struct sljit_compile
 	CHECK_ARGUMENT(!(type & ~(0xff | SLJIT_REWRITABLE_JUMP | SLJIT_INT_OP)));
 	CHECK_ARGUMENT((type & 0xff) >= SLJIT_EQUAL && (type & 0xff) <= SLJIT_CALL3);
 	CHECK_ARGUMENT((type & 0xff) < SLJIT_JUMP || !(type & SLJIT_INT_OP));
+	CHECK_ARGUMENT((type & 0xff) <= SLJIT_CALL0 || ((type & 0xff) - SLJIT_CALL0) <= compiler->scratches);
 #endif
 #if (defined SLJIT_VERBOSE && SLJIT_VERBOSE)
 	if (SLJIT_UNLIKELY(!!compiler->verbose))
@@ -1390,6 +1391,7 @@ static SLJIT_INLINE CHECK_RETURN_TYPE check_sljit_emit_ijump(struct sljit_compil
 
 #if (defined SLJIT_ARGUMENT_CHECKS && SLJIT_ARGUMENT_CHECKS)
 	CHECK_ARGUMENT(type >= SLJIT_JUMP && type <= SLJIT_CALL3);
+	CHECK_ARGUMENT(type <= SLJIT_CALL0 || (type - SLJIT_CALL0) <= compiler->scratches);
 	FUNCTION_CHECK_SRC(src, srcw);
 #endif
 #if (defined SLJIT_VERBOSE && SLJIT_VERBOSE)

@@ -44,7 +44,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #ifdef SUPPORT_JIT
 
-static int jit_machine_stack_exec(jit_arguments *arguments, jit_function executable_func)
+static SLJIT_NOINLINE int jit_machine_stack_exec(jit_arguments *arguments, jit_function executable_func)
 {
 sljit_ub local_space[MACHINE_STACK_SIZE];
 struct sljit_stack local_stack;

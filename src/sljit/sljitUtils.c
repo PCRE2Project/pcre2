@@ -211,6 +211,7 @@ SLJIT_API_FUNC_ATTRIBUTE struct sljit_stack* SLJIT_CALL sljit_allocate_stack(slj
 	SYSTEM_INFO si;
 #endif
 
+	SLJIT_UNUSED_ARG(allocator_data);
 	if (limit > max_limit || limit < 1)
 		return NULL;
 
@@ -239,14 +240,14 @@ SLJIT_API_FUNC_ATTRIBUTE struct sljit_stack* SLJIT_CALL sljit_allocate_stack(slj
 #ifdef _WIN32
 	base.ptr = VirtualAlloc(NULL, max_limit, MEM_RESERVE, PAGE_READWRITE);
 	if (!base.ptr) {
-		SLJIT_FREE(stack);
+		SLJIT_FREE(stack, allocator_data);
 		return NULL;
 	}
 	stack->base = base.uw;
 	stack->limit = stack->base;
 	stack->max_limit = stack->base + max_limit;
 	if (sljit_stack_resize(stack, stack->base + limit)) {
-		sljit_free_stack(stack);
+		sljit_free_stack(stack, allocator_data);
 		return NULL;
 	}
 #else
@@ -255,7 +256,7 @@ SLJIT_API_FUNC_ATTRIBUTE struct sljit_stack* SLJIT_CALL sljit_allocate_stack(slj
 #else
 	if (dev_zero < 0) {
 		if (open_dev_zero()) {
-			SLJIT_FREE(stack);
+			SLJIT_FREE(stack, allocator_data);
 			return NULL;
 		}
 	}
@@ -277,6 +278,7 @@ SLJIT_API_FUNC_ATTRIBUTE struct sljit_stack* SLJIT_CALL sljit_allocate_stack(slj
 
 SLJIT_API_FUNC_ATTRIBUTE void SLJIT_CALL sljit_free_stack(struct sljit_stack* stack, void *allocator_data)
 {
+	SLJIT_UNUSED_ARG(allocator_data);
 #ifdef _WIN32
 	VirtualFree((void*)stack->base, 0, MEM_RELEASE);
 #else
