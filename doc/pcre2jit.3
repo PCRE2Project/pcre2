@@ -169,7 +169,7 @@ should use. Its arguments are as follows:
   void                 *data
 .sp
 The first argument is a pointer to a match context. When this is subsequently
-passed to a matching function, its information determines which JIT stack is 
+passed to a matching function, its information determines which JIT stack is
 used. There are three cases for the values of the other two options:
 .sp
   (1) If \fIcallback\fP is NULL and \fIdata\fP is NULL, an internal 32K block
@@ -309,27 +309,27 @@ memory management, or NULL for standard memory management.
 .rs
 .sp
 This is a single-threaded example that specifies a JIT stack without using a
-callback. A real program should include error checking after all the function 
+callback. A real program should include error checking after all the function
 calls.
 .sp
   int rc;
   pcre2_code *re;
   pcre2_match_data *match_data;
-  pcre2_match_context *mcontext; 
+  pcre2_match_context *mcontext;
   pcre2_jit_stack *jit_stack;
 .sp
-  re = pcre2_compile(pattern, PCRE2_ZERO_TERMINATED, 0, 
+  re = pcre2_compile(pattern, PCRE2_ZERO_TERMINATED, 0,
     &errornumber, &erroffset, NULL);
   rc = pcre2_jit_compile(re, PCRE2_JIT_COMPLETE);
-  mcontext = pcre2_match_context_create(NULL); 
+  mcontext = pcre2_match_context_create(NULL);
   jit_stack = pcre2_jit_stack_create(NULL, 32*1024, 512*1024);
   pcre2_jit_stack_assign(mcontext, NULL, jit_stack);
   match_data = pcre2_match_data_create(re, 10);
   rc = pcre2_match(re, subject, length, 0, 0, match_data, mcontext);
-  /* Process result */ 
+  /* Process result */
 .sp
   pcre2_code_free(re);
-  pcre2_match_data_free(match_data);  
+  pcre2_match_data_free(match_data);
   pcre2_match_context_free(mcontext);
   pcre2_jit_stack_free(jit_stack);
 .sp

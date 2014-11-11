@@ -1547,7 +1547,7 @@ the three different cases. */
 #define PCRE2_GET_STARTCHAR(a,b) a = pcre2_get_startchar_16(G(b,16))
 #define PCRE2_JIT_COMPILE(a,b) pcre2_jit_compile_16(G(a,16),b)
 #define PCRE2_JIT_FREE_UNUSED_MEMORY(a) pcre2_jit_free_unused_memory_16(G(a,16))
-#define PCRE2_JIT_MATCH(a,b,c,d,e,f,g,h,i) \
+#define PCRE2_JIT_MATCH(a,b,c,d,e,f,g,h) \
   a = pcre2_jit_match_16(G(b,16),(PCRE2_SPTR16)c,d,e,f,G(g,16),G(h,16))
 #define PCRE2_JIT_STACK_CREATE(a,b,c,d) \
   a = (PCRE2_JIT_STACK *)pcre2_jit_stack_create_16(b,c,d);
@@ -1628,7 +1628,7 @@ the three different cases. */
 #define PCRE2_GET_STARTCHAR(a,b) a = pcre2_get_startchar_32(G(b,32))
 #define PCRE2_JIT_COMPILE(a,b) pcre2_jit_compile_32(G(a,32),b)
 #define PCRE2_JIT_FREE_UNUSED_MEMORY(a) pcre2_jit_free_unused_memory_32(G(a,32))
-#define PCRE2_JIT_MATCH(a,b,c,d,e,f,g,h,i) \
+#define PCRE2_JIT_MATCH(a,b,c,d,e,f,g,h) \
   a = pcre2_jit_match_32(G(b,32),(PCRE2_SPTR32)c,d,e,f,G(g,32),G(h,32))
 #define PCRE2_JIT_STACK_CREATE(a,b,c,d) \
   a = (PCRE2_JIT_STACK *)pcre2_jit_stack_create_32(b,c,d);

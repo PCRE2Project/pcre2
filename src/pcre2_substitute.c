@@ -67,8 +67,8 @@ Arguments:
   buffer          where to put the substituted string
   blength         points to length of buffer; updated to length of string
 
-Returns:        > 0 number of substitutions made
-                < 0 an error code, including PCRE2_ERROR_NOMATCH if no match
+Returns:          >= 0 number of substitutions made
+                  < 0 an error code
                   PCRE2_ERROR_BADREPLACEMENT means invalid use of $ 
 */
 
@@ -78,8 +78,8 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
   pcre2_match_context *mcontext, PCRE2_SPTR replacement, PCRE2_SIZE rlength,
   PCRE2_UCHAR *buffer, PCRE2_SIZE *blength)
 {
-int rc = 0;
-int subs = 0;
+int rc;
+int subs;
 uint32_t ovector_count;
 uint32_t goptions = 0;
 BOOL match_data_created = FALSE;
@@ -91,7 +91,7 @@ PCRE2_SIZE *ovector;
 
 if ((options & (PCRE2_PARTIAL_HARD|PCRE2_PARTIAL_SOFT)) != 0)
   return PCRE2_ERROR_BADOPTION;
-
+  
 /* If no match data block is provided, create one. */
 
 if (match_data == NULL)
@@ -106,6 +106,21 @@ if (match_data == NULL)
 ovector = pcre2_get_ovector_pointer(match_data);
 ovector_count = pcre2_get_ovector_count(match_data);
 
+/* Check UTF replacement string if necessary. */
+
+#ifdef SUPPORT_UNICODE
+if ((code->overall_options & PCRE2_UTF) != 0 &&
+    (options & PCRE2_NO_UTF_CHECK) == 0)
+  {
+  rc = PRIV(valid_utf)(replacement, rlength, &(match_data->rightchar));
+  if (rc != 0)
+    {
+    match_data->leftchar = 0;
+    goto EXIT;
+    }
+  }
+#endif  /* SUPPORT_UNICODE */
+ 
 /* Notice the global option and remove it from the options that are passed to
 pcre2_match(). */
 
@@ -129,6 +144,7 @@ lengthleft = *blength - start_offset;
 
 /* Loop for global substituting. */
 
+subs = 0;
 do
   {
   PCRE2_SIZE i;
@@ -273,6 +289,7 @@ buffer[buff_offset] = 0;
 
 EXIT:
 if (match_data_created) pcre2_match_data_free(match_data);
+  else match_data->rc = rc;   
 return rc;
 
 NOROOM:

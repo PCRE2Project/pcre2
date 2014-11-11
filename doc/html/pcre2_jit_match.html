@@ -22,7 +22,7 @@ SYNOPSIS
 <b>int pcre2_jit_match(const pcre2_code *<i>code</i>, PCRE2_SPTR <i>subject</i>,</b>
 <b>  PCRE2_SIZE <i>length</i>, PCRE2_SIZE <i>startoffset</i>,</b>
 <b>  uint32_t <i>options</i>, pcre2_match_data *<i>match_data</i>,</b>
-<b>  pcre2_match_context *<i>mcontext</i>, pcre2_jit_stack *<i>jit_stack</i>);</b>
+<b>  pcre2_match_context *<i>mcontext</i>);</b>
 </P>
 <br><b>
 DESCRIPTION
@@ -33,11 +33,7 @@ processed by the JIT compiler against a given subject string, using a matching
 algorithm that is similar to Perl's. It is a "fast path" interface to JIT, and
 it bypasses some of the sanity checks that <b>pcre2_match()</b> applies.
 Its arguments are exactly the same as for
-<a href="pcre2_match.html"><b>pcre2_match()</b></a>
-plus one additional argument that must either point to a JIT stack or be NULL.
-In the latter case, if a callback function has been set up by
-<b>pcre2_jit_stack_create()</b>, it is called. Otherwise the system stack is
-used.
+<a href="pcre2_match.html"><b>pcre2_match()</b>.</a>
 </P>
 <P>
 The supported options are PCRE2_NOTBOL, PCRE2_NOTEOL, PCRE2_NOTEMPTY,

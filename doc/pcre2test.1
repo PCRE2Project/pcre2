@@ -720,7 +720,7 @@ pattern.
       ovector=<n>               set size of output vector
       recursion_limit=<n>       set a recursion limit
       startchar                 show startchar when relevant
-      zero_terminate            pass the subject as zero-terminated 
+      zero_terminate            pass the subject as zero-terminated
 .sp
 The effects of these modifiers are described in the following sections.
 FIXME: Give more examples.
@@ -932,7 +932,7 @@ offsets.)
 By default, the subject string is passed to a native API matching function with
 its correct length. In order to test the facility for passing a zero-terminated
 string, the \fBzero_terminate\fP modifier is provided. It causes the length to
-be passed as PCRE2_ZERO_TERMINATED. (When matching via the POSIX interface, 
+be passed as PCRE2_ZERO_TERMINATED. (When matching via the POSIX interface,
 this modifier has no effect, as there is no facility for passing a length.)
 .P
 When testing \fBpcre2_substitute\fP, this modifier also has the effect of

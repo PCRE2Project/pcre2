@@ -488,7 +488,6 @@ about the pattern:
       posix                     use the POSIX API
       stackguard=&#60;number&#62;       test the stackguard feature
       tables=[0|1|2]            select internal tables
-      use_length                use the pattern's length
 </pre>
 The effects of these modifiers are described in the following sections.
 FIXME: Give more examples.
@@ -542,15 +541,10 @@ pairs. For example:
   /ab 32 59/hex
 </pre>
 This feature is provided as a way of creating patterns that contain binary zero
-characters. When <b>hex</b> is set, it implies <b>use_length</b>.
-</P>
-<br><b>
-Using the pattern's length
-</b><br>
-<P>
-By default, <b>pcre2test</b> passes patterns as zero-terminated strings to
-<b>pcre2_compile()</b>, giving the length as -1. If <b>use_length</b> is set, the
-length of the pattern is passed. This is implied if <b>hex</b> is set.
+characters. By default, <b>pcre2test</b> passes patterns as zero-terminated
+strings to <b>pcre2_compile()</b>, giving the length as PCRE2_ZERO_TERMINATED.
+However, for patterns specified in hexadecimal, the length of the pattern is
+passed.
 </P>
 <br><b>
 JIT compilation
@@ -766,6 +760,7 @@ pattern.
       ovector=&#60;n&#62;               set size of output vector
       recursion_limit=&#60;n&#62;       set a recursion limit
       startchar                 show startchar when relevant
+      zero_terminate            pass the subject as zero-terminated
 </pre>
 The effects of these modifiers are described in the following sections.
 FIXME: Give more examples.
@@ -978,6 +973,20 @@ POSIX API, a value of zero is used to cause
 match block of exactly the right size for the pattern. (It is not possible to
 create a match block with a zero-length ovector; there is always one pair of
 offsets.)
+</P>
+<br><b>
+Passing the subject as zero-terminated
+</b><br>
+<P>
+By default, the subject string is passed to a native API matching function with
+its correct length. In order to test the facility for passing a zero-terminated
+string, the <b>zero_terminate</b> modifier is provided. It causes the length to
+be passed as PCRE2_ZERO_TERMINATED. (When matching via the POSIX interface,
+this modifier has no effect, as there is no facility for passing a length.)
+</P>
+<P>
+When testing <b>pcre2_substitute</b>, this modifier also has the effect of
+passing the replacement string as zero-terminated.
 </P>
 <br><a name="SEC12" href="#TOC1">THE ALTERNATIVE MATCHING FUNCTION</a><br>
 <P>
@@ -1224,7 +1233,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC20" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 02 November 2014
+Last updated: 09 November 2014
 <br>
 Copyright &copy; 1997-2014 University of Cambridge.
 <br>

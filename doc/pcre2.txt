@@ -186,7 +186,7 @@ PCRE2 NATIVE API BASIC FUNCTIONS
        pcre2_match_data_create(uint32_t ovecsize,
          pcre2_general_context *gcontext);
 
-       pcre2_match_data_create_from_pattern(pcre2_code *code,
+       pcre2_match_data_create_from_pattern(const pcre2_code *code,
          pcre2_general_context *gcontext);
 
        int pcre2_match(const pcre2_code *code, PCRE2_SPTR subject,
@@ -314,6 +314,16 @@ PCRE2 NATIVE API STRING EXTRACTION FUNCTIONS
          PCRE2_UCHAR ***listptr, PCRE2_SIZE **lengthsptr);
 
 
+PCRE2 NATIVE API STRING SUBSTITUTION FUNCTION
+
+       int pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject,
+         PCRE2_SIZE length, PCRE2_SIZE startoffset,
+         uint32_t options, pcre2_match_data *match_data,
+         pcre2_match_context *mcontext, PCRE2_SPTR replacementzfP,
+         PCRE2_SIZE rlength, PCRE2_UCHAR *outputbuffer,
+         PCRE2_SIZE *outlengthptr);
+
+
 PCRE2 NATIVE API JIT FUNCTIONS
 
        int pcre2_jit_compile(pcre2_code *code, uint32_t options);
@@ -321,14 +331,14 @@ PCRE2 NATIVE API JIT FUNCTIONS
        int pcre2_jit_match(const pcre2_code *code, PCRE2_SPTR subject,
          PCRE2_SIZE length, PCRE2_SIZE startoffset,
          uint32_t options, pcre2_match_data *match_data,
-         pcre2_match_context *mcontext, pcre2_jit_stack *jit_stack);
+         pcre2_match_context *mcontext);
 
        void pcre2_jit_free_unused_memory(pcre2_general_context *gcontext);
 
        pcre2_jit_stack *pcre2_jit_stack_create(pcre2_general_context *gcontext,
          PCRE2_SIZE startsize, PCRE2_SIZE maxsize);
 
-       void pcre2_jit_stack_assign(const pcre2_code *code,
+       void pcre2_jit_stack_assign(pcre2_match_context *mcontext,
          pcre2_jit_callback callback_function, void *callback_data);
 
        void pcre2_jit_stack_free(pcre2_jit_stack *jit_stack);
@@ -459,7 +469,7 @@ PCRE2 API OVERVIEW
 
        In addition to the main compiling and  matching  functions,  there  are
        convenience functions for extracting captured substrings from a subject
-       string that is matched by pcre2_match(). They are:
+       string that has been matched by pcre2_match(). They are:
 
          pcre2_substring_copy_byname()
          pcre2_substring_copy_bynumber()
@@ -474,9 +484,13 @@ PCRE2 API OVERVIEW
        pcre2_substring_free() and pcre2_substring_list_free()  are  also  pro-
        vided, to free the memory used for extracted strings.
 
-       There  are  functions for finding out information about a compiled pat-
-       tern (pcre2_pattern_info()) and  about  the  configuration  with  which
-       PCRE2 was built (pcre2_config()).
+       The  function  pcre2_substitute()  can be called to match a pattern and
+       return a copy of the subject string with substitutions for  parts  that
+       were matched.
+
+       Finally,  there  are functions for finding out information about a com-
+       piled pattern (pcre2_pattern_info()) and about the  configuration  with
+       which PCRE2 was built (pcre2_config()).
 
 
 NEWLINES
@@ -862,33 +876,34 @@ CHECKING BUILD-TIME OPTIONS
        contains  the  name  of  the architecture for which the JIT compiler is
        configured, for example "x86 32bit (little endian + unaligned)". If JIT
        support  is not available, PCRE2_ERROR_BADOPTION is returned, otherwise
-       the length of the string, in code units, is returned.
+       the number of code units used is returned. This is the  length  of  the
+       string, plus one unit for the terminating zero.
 
          PCRE2_CONFIG_LINKSIZE
 
-       The output is an integer that contains the number  of  bytes  used  for
+       The  output  is  an  integer that contains the number of bytes used for
        internal linkage in compiled regular expressions. When PCRE2 is config-
-       ured, the value can be set to 2, 3, or 4, with  the  default  being  2.
+       ured,  the  value  can  be set to 2, 3, or 4, with the default being 2.
        This is the value that is returned by pcre2_config(). However, when the
-       16-bit library is compiled, a value of 3 is rounded up to 4,  and  when
-       the  32-bit  library is compiled, internal linkages always use 4 bytes,
+       16-bit  library  is compiled, a value of 3 is rounded up to 4, and when
+       the 32-bit library is compiled, internal linkages always use  4  bytes,
        so the configured value is not relevant.
 
        The default value of 2 for the 8-bit and 16-bit libraries is sufficient
-       for  all but the most massive patterns, since it allows the size of the
+       for all but the most massive patterns, since it allows the size of  the
        compiled pattern to be up to 64K code units. Larger values allow larger
-       regular  expressions  to be compiled by those two libraries, but at the
+       regular expressions to be compiled by those two libraries, but  at  the
        expense of slower matching.
 
          PCRE2_CONFIG_MATCHLIMIT
 
        The output is an unsigned long integer that gives the default limit for
-       the  number of internal matching function calls in a pcre2_match() exe-
+       the number of internal matching function calls in a pcre2_match()  exe-
        cution.  Further details are given with pcre2_match() below.
 
          PCRE2_CONFIG_NEWLINE
 
-       The output is an integer whose value specifies  the  default  character
+       The  output  is  an integer whose value specifies the default character
        sequence that is recognized as meaning "newline". The values are:
 
          1  Carriage return (CR)
@@ -897,57 +912,58 @@ CHECKING BUILD-TIME OPTIONS
          4  Any Unicode line ending
          5  Any of CR, LF, or CRLF
 
-       The  default  should  normally  correspond to the standard sequence for
+       The default should normally correspond to  the  standard  sequence  for
        your operating system.
 
          PCRE2_CONFIG_PARENSLIMIT
 
-       The output is an unsigned long integer that gives the maximum depth  of
-       nesting  of  parentheses  (of  any  kind)  in  a pattern. This limit is
-       imposed to cap the amount of system stack used when a pattern  is  com-
-       piled.  It  is  specified when PCRE2 is built; the default is 250. This
-       limit does not take into account the stack that may already be used  by
-       the  calling  application.  For  finer  control  over compilation stack
+       The  output is an unsigned long integer that gives the maximum depth of
+       nesting of parentheses (of any  kind)  in  a  pattern.  This  limit  is
+       imposed  to  cap the amount of system stack used when a pattern is com-
+       piled. It is specified when PCRE2 is built; the default  is  250.  This
+       limit  does not take into account the stack that may already be used by
+       the calling application.  For  finer  control  over  compilation  stack
        usage, see pcre2_set_compile_recursion_guard().
 
          PCRE2_CONFIG_RECURSIONLIMIT
 
        The output is an unsigned long integer that gives the default limit for
        the depth of recursion when calling the internal matching function in a
-       pcre2_match() execution. Further details are given  with  pcre2_match()
+       pcre2_match()  execution.  Further details are given with pcre2_match()
        below.
 
          PCRE2_CONFIG_STACKRECURSE
 
-       The  output is an integer that is set to one if internal recursion when
-       running pcre2_match() is implemented by recursive function  calls  that
-       use  the  system  stack  to remember their state. This is the usual way
+       The output is an integer that is set to one if internal recursion  when
+       running  pcre2_match()  is implemented by recursive function calls that
+       use the system stack to remember their state. This  is  the  usual  way
        that PCRE2 is compiled. The output is zero if PCRE2 was compiled to use
        blocks of data on the heap instead of recursive function calls.
 
          PCRE2_CONFIG_UNICODE_VERSION
 
-       The  where  argument  should point to a buffer that is at least 24 code
+       The where argument should point to a buffer that is at  least  24  code
        units long. (The exact length needed can be found by calling pcre2_con-
-       fig()  with where set to NULL.) If PCRE2 has been compiled without Uni-
-       code support, the buffer is filled with  the  text  "Unicode  not  sup-
-       ported".  Otherwise,  the Unicode version string (for example, "7.0.0")
-       is inserted. The string is zero-terminated. The  function  returns  the
-       length of the string in code units.
+       fig() with where set to NULL.) If PCRE2 has been compiled without  Uni-
+       code  support,  the  buffer  is  filled with the text "Unicode not sup-
+       ported". Otherwise, the Unicode version string (for  example,  "7.0.0")
+       is  inserted.  The  number  of code units used is returned. This is the
+       length of the string plus one unit for the terminating zero.
 
          PCRE2_CONFIG_UNICODE
 
-       The  output  is  an  integer  that  is set to one if Unicode support is
-       available; otherwise it is set to zero.  Unicode  support  implies  UTF
+       The output is an integer that is set  to  one  if  Unicode  support  is
+       available;  otherwise  it  is  set to zero. Unicode support implies UTF
        support.
 
          PCRE2_CONFIG_VERSION
 
-       The  where  argument  should point to a buffer that is at least 12 code
+       The where argument should point to a buffer that is at  least  12  code
        units long. (The exact length needed can be found by calling pcre2_con-
        fig() with where set to NULL.) The buffer is filled with the PCRE2 ver-
-       sion string, zero-terminated. The length of the string (in code  units)
-       is returned.
+       sion  string,  zero-terminated.  The  number  of  code  units  used  is
+       returned. This is the length of the string plus one unit for the termi-
+       nating zero.
 
 
 COMPILING A PATTERN
@@ -1300,14 +1316,14 @@ JUST-IN-TIME (JIT) COMPILATION
        int pcre2_jit_match(const pcre2_code *code, PCRE2_SPTR subject,
          PCRE2_SIZE length, PCRE2_SIZE startoffset,
          uint32_t options, pcre2_match_data *match_data,
-         pcre2_match_context *mcontext, pcre2_jit_stack *jit_stack);
+         pcre2_match_context *mcontext);
 
        void pcre2_jit_free_unused_memory(pcre2_general_context *gcontext);
 
        pcre2_jit_stack *pcre2_jit_stack_create(pcre2_general_context *gcontext,
          PCRE2_SIZE startsize, PCRE2_SIZE maxsize);
 
-       void pcre2_jit_stack_assign(const pcre2_code *code,
+       void pcre2_jit_stack_assign(pcre2_match_context *mcontext,
          pcre2_jit_callback callback_function, void *callback_data);
 
        void pcre2_jit_stack_free(pcre2_jit_stack *jit_stack);
@@ -1674,7 +1690,7 @@ THE MATCH DATA BLOCK
        pcre2_match_data_create(uint32_t ovecsize,
          pcre2_general_context *gcontext);
 
-       pcre2_match_data_create_from_pattern(pcre2_code *code,
+       pcre2_match_data_create_from_pattern(const pcre2_code *code,
          pcre2_general_context *gcontext);
 
        void pcre2_match_data_free(pcre2_match_data *match_data);
@@ -2290,59 +2306,117 @@ EXTRACTING CAPTURED SUBSTRINGS BY NAME
        causes an error at compile time.
 
 
+CREATING A NEW STRING WITH SUBSTITUTIONS
+
+       int pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject,
+         PCRE2_SIZE length, PCRE2_SIZE startoffset,
+         uint32_t options, pcre2_match_data *match_data,
+         pcre2_match_context *mcontext, PCRE2_SPTR replacementzfP,
+         PCRE2_SIZE rlength, PCRE2_UCHAR *outputbufferP,
+         PCRE2_SIZE *outlengthptr);
+       This function calls pcre2_match() and then makes a copy of the  subject
+       string  in  outputbuffer,  replacing the part that was matched with the
+       replacement string, whose length is supplied in rlength.  This  can  be
+       given as PCRE2_ZERO_TERMINATED for a zero-terminated string.
+
+       In  the replacement string, which is interpreted as a UTF string in UTF
+       mode, a dollar character is an escape character that  can  specify  the
+       insertion  of characters from capturing groups in the pattern. The fol-
+       lowing forms are recognized:
+
+         $$      insert a dollar character
+         $<n>    insert the contents of group <n>
+         ${<n>}  insert the contents of group <n>
+
+       Either a group number or a group name  can  be  given  for  <n>.  Curly
+       brackets  are  required only if the following character would be inter-
+       preted as part of the number or name. The number may be zero to include
+       the  entire  matched  string.   For  example,  if  the pattern a(b)c is
+       matched with "[abc]" and the replacement string "+$1$0$1+", the  result
+       is  "[+babcb+]". Group insertion is done by calling pcre2_copy_byname()
+       or pcre2_copy_bynumber() as appropriate.
+
+       The first seven arguments of pcre2_substitute() are  the  same  as  for
+       pcre2_match(), except that the partial matching options are not permit-
+       ted, and match_data may be passed as NULL, in which case a  match  data
+       block  is obtained and freed within this function, using memory manage-
+       ment functions from the match context, if provided, or else those  that
+       were used to allocate memory for the compiled code.
+
+       There  is  one additional option, PCRE2_SUBSTITUTE_GLOBAL, which causes
+       the function to iterate over the subject string, replacing every match-
+       ing substring. If this is not set, only the first matching substring is
+       replaced.
+
+       The outlengthptr argument must point to a variable  that  contains  the
+       length,  in  code units, of the output buffer. It is updated to contain
+       the length of the new string, excluding the trailing zero that is auto-
+       matically added.
+
+       The  function  returns  the number of replacements that were made. This
+       may be zero if no matches were found,  and  is  never  greater  than  1
+       unless PCRE2_SUBSTITUTE_GLOBAL is set. In the event of an error, a neg-
+       ative error code is returned. Except for PCRE2_ERROR_NOMATCH (which  is
+       never returned), any errors from pcre2_match() or the substring copying
+       functions  are  passed  straight  back.  PCRE2_ERROR_BADREPLACEMENT  is
+       returned  for an invalid replacement string (unrecognized sequence fol-
+       lowing a dollar sign), and PCRE2_ERROR_NOMEMORY is returned if the out-
+       put buffer is not big enough.
+
+
 DUPLICATE SUBPATTERN NAMES
 
        int pcre2_substring_nametable_scan(const pcre2_code *code,
          PCRE2_SPTR name, PCRE2_SPTR *first, PCRE2_SPTR *last);
 
-       When a pattern is compiled with the PCRE2_DUPNAMES  option,  names  for
-       subpatterns  are  not required to be unique. Duplicate names are always
-       allowed for subpatterns with the same number, created by using the  (?|
-       feature.  Indeed,  if  such subpatterns are named, they are required to
+       When  a  pattern  is compiled with the PCRE2_DUPNAMES option, names for
+       subpatterns are not required to be unique. Duplicate names  are  always
+       allowed  for subpatterns with the same number, created by using the (?|
+       feature. Indeed, if such subpatterns are named, they  are  required  to
        use the same names.
 
        Normally, patterns with duplicate names are such that in any one match,
-       only  one of the named subpatterns participates. An example is shown in
+       only one of the named subpatterns participates. An example is shown  in
        the pcre2pattern documentation.
 
-       When  duplicates   are   present,   pcre2_substring_copy_byname()   and
-       pcre2_substring_get_byname()  return  the first substring corresponding
+       When   duplicates   are   present,   pcre2_substring_copy_byname()  and
+       pcre2_substring_get_byname() return the first  substring  corresponding
        to the given name that is set. If none are set, PCRE2_ERROR_NOSUBSTRING
-       is  returned.  The  pcre2_substring_number_from_name() function returns
-       one of the numbers that are associated with the name,  but  it  is  not
+       is returned. The  pcre2_substring_number_from_name()  function  returns
+       one  of  the  numbers  that are associated with the name, but it is not
        defined which it is.
 
-       If  you want to get full details of all captured substrings for a given
-       name, you must use the pcre2_substring_nametable_scan()  function.  The
-       first  argument is the compiled pattern, and the second is the name. If
-       the third and fourth arguments are NULL, the function returns  a  group
+       If you want to get full details of all captured substrings for a  given
+       name,  you  must use the pcre2_substring_nametable_scan() function. The
+       first argument is the compiled pattern, and the second is the name.  If
+       the  third  and fourth arguments are NULL, the function returns a group
        number (it is not defined which). Otherwise, the third and fourth argu-
-       ments must be pointers to variables that are updated by  the  function.
+       ments  must  be pointers to variables that are updated by the function.
        After it has run, they point to the first and last entries in the name-
        to-number table for the given name, and the function returns the length
-       of  each  entry.  In both cases, PCRE2_ERROR_NOSUBSTRING is returned if
+       of each entry. In both cases, PCRE2_ERROR_NOSUBSTRING  is  returned  if
        there are no entries for the given name.
 
        The format of the name table is described above in the section entitled
-       Information  about a pattern above.  Given all the relevant entries for
+       Information about a pattern above.  Given all the relevant entries  for
        the name, you can extract each of their numbers, and hence the captured
        data.
 
 
 FINDING ALL POSSIBLE MATCHES
 
-       The  traditional  matching  function  uses a similar algorithm to Perl,
+       The traditional matching function uses a  similar  algorithm  to  Perl,
        which stops when it finds the first match, starting at a given point in
-       the  subject.  If you want to find all possible matches, or the longest
-       possible match at a given  position,  consider  using  the  alternative
-       matching  function (see below) instead.  If you cannot use the alterna-
+       the subject. If you want to find all possible matches, or  the  longest
+       possible  match  at  a  given  position, consider using the alternative
+       matching function (see below) instead.  If you cannot use the  alterna-
        tive function, you can kludge it up by making use of the callout facil-
        ity, which is described in the pcre2callout documentation.
 
        What you have to do is to insert a callout right at the end of the pat-
-       tern.  When your callout function is called, extract and save the  cur-
-       rent  matched  substring.  Then return 1, which forces pcre2_match() to
-       backtrack and try other alternatives. Ultimately, when it runs  out  of
+       tern.   When your callout function is called, extract and save the cur-
+       rent matched substring. Then return 1, which  forces  pcre2_match()  to
+       backtrack  and  try other alternatives. Ultimately, when it runs out of
        matches, pcre2_match() will yield PCRE2_ERROR_NOMATCH.
 
 
@@ -2354,26 +2428,26 @@ MATCHING A PATTERN: THE ALTERNATIVE FUNCTION
          pcre2_match_context *mcontext,
          int *workspace, PCRE2_SIZE wscount);
 
-       The  function  pcre2_dfa_match()  is  called  to match a subject string
-       against a compiled pattern, using a matching algorithm that  scans  the
-       subject  string  just  once, and does not backtrack. This has different
-       characteristics to the normal algorithm, and  is  not  compatible  with
-       Perl.  Some of the features of PCRE2 patterns are not supported. Never-
-       theless, there are times when this kind of matching can be useful.  For
-       a  discussion  of  the  two matching algorithms, and a list of features
+       The function pcre2_dfa_match() is called  to  match  a  subject  string
+       against  a  compiled pattern, using a matching algorithm that scans the
+       subject string just once, and does not backtrack.  This  has  different
+       characteristics  to  the  normal  algorithm, and is not compatible with
+       Perl. Some of the features of PCRE2 patterns are not supported.  Never-
+       theless,  there are times when this kind of matching can be useful. For
+       a discussion of the two matching algorithms, and  a  list  of  features
        that pcre2_dfa_match() does not support, see the pcre2matching documen-
        tation.
 
-       The  arguments  for  the pcre2_dfa_match() function are the same as for
+       The arguments for the pcre2_dfa_match() function are the  same  as  for
        pcre2_match(), plus two extras. The ovector within the match data block
        is used in a different way, and this is described below. The other com-
-       mon arguments are used in the same way as for pcre2_match(),  so  their
+       mon  arguments  are used in the same way as for pcre2_match(), so their
        description is not repeated here.
 
-       The  two  additional  arguments provide workspace for the function. The
-       workspace vector should contain at least 20 elements. It  is  used  for
+       The two additional arguments provide workspace for  the  function.  The
+       workspace  vector  should  contain at least 20 elements. It is used for
        keeping  track  of  multiple  paths  through  the  pattern  tree.  More
-       workspace is needed for patterns and subjects where there are a lot  of
+       workspace  is needed for patterns and subjects where there are a lot of
        potential matches.
 
        Here is an example of a simple call to pcre2_dfa_match():
@@ -2393,45 +2467,45 @@ MATCHING A PATTERN: THE ALTERNATIVE FUNCTION
 
    Option bits for pcre_dfa_match()
 
-       The  unused  bits of the options argument for pcre2_dfa_match() must be
-       zero. The only bits that may be set are  PCRE2_ANCHORED,  PCRE2_NOTBOL,
+       The unused bits of the options argument for pcre2_dfa_match()  must  be
+       zero.  The  only bits that may be set are PCRE2_ANCHORED, PCRE2_NOTBOL,
        PCRE2_NOTEOL,          PCRE2_NOTEMPTY,          PCRE2_NOTEMPTY_ATSTART,
        PCRE2_NO_UTF_CHECK,       PCRE2_PARTIAL_HARD,       PCRE2_PARTIAL_SOFT,
-       PCRE2_DFA_SHORTEST,  and  PCRE2_DFA_RESTART.  All  but the last four of
-       these are exactly the same as for pcre2_match(), so  their  description
+       PCRE2_DFA_SHORTEST, and PCRE2_DFA_RESTART. All but  the  last  four  of
+       these  are  exactly the same as for pcre2_match(), so their description
        is not repeated here.
 
          PCRE2_PARTIAL_HARD
          PCRE2_PARTIAL_SOFT
 
-       These  have  the  same general effect as they do for pcre2_match(), but
-       the details are slightly different. When PCRE2_PARTIAL_HARD is set  for
-       pcre2_dfa_match(),  it  returns  PCRE2_ERROR_PARTIAL  if the end of the
+       These have the same general effect as they do  for  pcre2_match(),  but
+       the  details are slightly different. When PCRE2_PARTIAL_HARD is set for
+       pcre2_dfa_match(), it returns PCRE2_ERROR_PARTIAL if  the  end  of  the
        subject is reached and there is still at least one matching possibility
        that requires additional characters. This happens even if some complete
-       matches have already been found. When PCRE2_PARTIAL_SOFT  is  set,  the
-       return  code  PCRE2_ERROR_NOMATCH is converted into PCRE2_ERROR_PARTIAL
-       if the end of the subject is  reached,  there  have  been  no  complete
+       matches  have  already  been found. When PCRE2_PARTIAL_SOFT is set, the
+       return code PCRE2_ERROR_NOMATCH is converted  into  PCRE2_ERROR_PARTIAL
+       if  the  end  of  the  subject  is reached, there have been no complete
        matches, but there is still at least one matching possibility. The por-
-       tion of the string that was inspected when the  longest  partial  match
+       tion  of  the  string that was inspected when the longest partial match
        was found is set as the first matching string in both cases. There is a
-       more detailed discussion of partial and  multi-segment  matching,  with
+       more  detailed  discussion  of partial and multi-segment matching, with
        examples, in the pcre2partial documentation.
 
          PCRE2_DFA_SHORTEST
 
-       Setting  the PCRE2_DFA_SHORTEST option causes the matching algorithm to
+       Setting the PCRE2_DFA_SHORTEST option causes the matching algorithm  to
        stop as soon as it has found one match. Because of the way the alterna-
-       tive  algorithm  works, this is necessarily the shortest possible match
+       tive algorithm works, this is necessarily the shortest  possible  match
        at the first possible matching point in the subject string.
 
          PCRE2_DFA_RESTART
 
-       When pcre2_dfa_match() returns a partial match, it is possible to  call
+       When  pcre2_dfa_match() returns a partial match, it is possible to call
        it again, with additional subject characters, and have it continue with
        the same match. The PCRE2_DFA_RESTART option requests this action; when
-       it  is  set,  the workspace and wscount options must reference the same
-       vector as before because data about the match so far is  left  in  them
+       it is set, the workspace and wscount options must  reference  the  same
+       vector  as  before  because data about the match so far is left in them
        after a partial match. There is more discussion of this facility in the
        pcre2partial documentation.
 
@@ -2439,8 +2513,8 @@ MATCHING A PATTERN: THE ALTERNATIVE FUNCTION
 
        When pcre2_dfa_match() succeeds, it may have matched more than one sub-
        string in the subject. Note, however, that all the matches from one run
-       of the function start at the same point in  the  subject.  The  shorter
-       matches  are all initial substrings of the longer matches. For example,
+       of  the  function  start  at the same point in the subject. The shorter
+       matches are all initial substrings of the longer matches. For  example,
        if the pattern
 
          <.*>
@@ -2455,66 +2529,66 @@ MATCHING A PATTERN: THE ALTERNATIVE FUNCTION
          <something> <something else>
          <something> <something else> <something further>
 
-       On success, the yield of the function is a number  greater  than  zero,
-       which  is  the  number  of  matched substrings. The offsets of the sub-
-       strings are returned in the ovector, and can be extracted in  the  same
-       way  as  for  pcre2_match().   They  are  returned  in reverse order of
-       length; that is, the longest matching string is given first.  If  there
-       were  too  many matches to fit into the ovector, the yield of the func-
+       On  success,  the  yield of the function is a number greater than zero,
+       which is the number of matched substrings.  The  offsets  of  the  sub-
+       strings  are  returned in the ovector, and can be extracted in the same
+       way as for pcre2_match().   They  are  returned  in  reverse  order  of
+       length;  that  is, the longest matching string is given first. If there
+       were too many matches to fit into the ovector, the yield of  the  func-
        tion is zero, and the vector is filled with the longest matches.
 
-       NOTE: PCRE2's "auto-possessification" optimization usually  applies  to
-       character  repeats at the end of a pattern (as well as internally). For
-       example, the pattern "a\d+" is compiled as if it were  "a\d++"  because
-       there  is  no  point  in backtracking into the repeated digits. For DFA
-       matching, this means that only one possible  match  is  found.  If  you
-       really  do  want multiple matches in such cases, either use an ungreedy
-       repeat ("a\d+?") or set the PCRE2_NO_AUTO_POSSESS option  when  compil-
+       NOTE:  PCRE2's  "auto-possessification" optimization usually applies to
+       character repeats at the end of a pattern (as well as internally).  For
+       example,  the  pattern "a\d+" is compiled as if it were "a\d++" because
+       there is no point in backtracking into the  repeated  digits.  For  DFA
+       matching,  this  means  that  only  one possible match is found. If you
+       really do want multiple matches in such cases, either use  an  ungreedy
+       repeat  ("a\d+?")  or set the PCRE2_NO_AUTO_POSSESS option when compil-
        ing.
 
    Error returns from pcre2_dfa_match()
 
        The pcre2_dfa_match() function returns a negative number when it fails.
-       Many of the errors are the same  as  for  pcre2_match(),  as  described
+       Many  of  the  errors  are  the same as for pcre2_match(), as described
        above.  There are in addition the following errors that are specific to
        pcre2_dfa_match():
 
          PCRE2_ERROR_DFA_UITEM
 
-       This return is given if pcre2_dfa_match() encounters  an  item  in  the
+       This  return  is  given  if pcre2_dfa_match() encounters an item in the
        pattern that it does not support, for instance, the use of \C or a back
        reference.
 
          PCRE2_ERROR_DFA_UCOND
 
-       This return is given if pcre2_dfa_match() encounters a  condition  item
-       that  uses  a back reference for the condition, or a test for recursion
+       This  return  is given if pcre2_dfa_match() encounters a condition item
+       that uses a back reference for the condition, or a test  for  recursion
        in a specific group. These are not supported.
 
          PCRE2_ERROR_DFA_WSSIZE
 
-       This return is given if pcre2_dfa_match() runs  out  of  space  in  the
+       This  return  is  given  if  pcre2_dfa_match() runs out of space in the
        workspace vector.
 
          PCRE2_ERROR_DFA_RECURSE
 
-       When  a  recursive subpattern is processed, the matching function calls
+       When a recursive subpattern is processed, the matching  function  calls
        itself recursively, using private memory for the ovector and workspace.
-       This  error  is given if the internal ovector is not large enough. This
+       This error is given if the internal ovector is not large  enough.  This
        should be extremely rare, as a vector of size 1000 is used.
 
          PCRE2_ERROR_DFA_BADRESTART
 
-       When pcre2_dfa_match() is called  with  the  pcre2_dfa_RESTART  option,
-       some  plausibility  checks  are  made on the contents of the workspace,
-       which should contain data about the previous partial match. If  any  of
+       When  pcre2_dfa_match()  is  called  with the pcre2_dfa_RESTART option,
+       some plausibility checks are made on the  contents  of  the  workspace,
+       which  should  contain data about the previous partial match. If any of
        these checks fail, this error is given.
 
 
 SEE ALSO
 
-       pcre2build(3),    pcre2libs(3),    pcre2callout(3),   pcre2matching(3),
-       pcre2partial(3),    pcre2posix(3),    pcre2demo(3),     pcre2sample(3),
+       pcre2build(3),   pcre2libs(3),    pcre2callout(3),    pcre2matching(3),
+       pcre2partial(3),     pcre2posix(3),    pcre2demo(3),    pcre2sample(3),
        pcre2stack(3).
 
 
@@ -2527,7 +2601,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 03 November 2014
+       Last updated: 11 November 2014
        Copyright (c) 1997-2014 University of Cambridge.
 ------------------------------------------------------------------------------
 
@@ -3553,20 +3627,21 @@ CONTROLLING THE JIT STACK
        The  pcre2_jit_stack_assign()  function  specifies which stack JIT code
        should use. Its arguments are as follows:
 
-         pcre2_code         *code
-         pcre2_jit_callback  callback
-         void               *data
+         pcre2_match_context  *mcontext
+         pcre2_jit_callback    callback
+         void                 *data
 
-       The code argument is a pointer to a compiled pattern, after it has been
-       processed  by pcre2_jit_compile(). There are three cases for the values
-       of the other two options:
+       The first argument is a pointer to a match context. When this is subse-
+       quently passed to a matching function, its information determines which
+       JIT stack is used. There are three cases for the values  of  the  other
+       two options:
 
          (1) If callback is NULL and data is NULL, an internal 32K block
              on the machine stack is used.
 
          (2) If callback is NULL and data is not NULL, data must be
-             a valid JIT stack, the  result  of  calling  pcre2_jit_stack_cre-
-       ate().
+             a pointer to a valid JIT stack, the result of calling
+             pcre2_jit_stack_create().
 
          (3) If callback is not NULL, it must point to a function that is
              called with data as an argument at the start of matching, in
@@ -3591,13 +3666,14 @@ CONTROLLING THE JIT STACK
        application is thread-safe.
 
        Strictly speaking, even more is allowed. You can assign the  same  non-
-       NULL  stack  to any number of patterns as long as they are not used for
-       matching by multiple threads at the same time.  For  example,  you  can
-       assign  the same stack to all compiled patterns, and use a global mutex
-       in the callback to wait until the stack is available for use.  However,
-       this is an inefficient solution, and not recommended.
+       NULL  stack  to a match context that is used by any number of patterns,
+       as long as they are not used for matching by multiple  threads  at  the
+       same  time.  For  example, you could use the same stack in all compiled
+       patterns, with a global mutex in the callback to wait until  the  stack
+       is available for use. However, this is an inefficient solution, and not
+       recommended.
 
-       This  is a suggestion for how a multithreaded program that needs to set
+       This is a suggestion for how a multithreaded program that needs to  set
        up non-default JIT stacks might operate:
 
          During thread initalization
@@ -3609,10 +3685,8 @@ CONTROLLING THE JIT STACK
          Use a one-line callback function
            return thread_local_var
 
-       All the functions described in this section do nothing if  JIT  is  not
-       available,  and  pcre2_jit_stack_assign()  does nothing unless the code
-       argument is non-NULL and points to a pcre2_code  block  that  has  been
-       successfully processed by pcre2_jit_compile().
+       All  the  functions  described in this section do nothing if JIT is not
+       available.
 
 
 JIT STACK FAQ
@@ -3620,66 +3694,66 @@ JIT STACK FAQ
        (1) Why do we need JIT stacks?
 
        PCRE2 (and JIT) is a recursive, depth-first engine, so it needs a stack
-       where the local data of the current node is pushed before checking  its
+       where  the local data of the current node is pushed before checking its
        child nodes.  Allocating real machine stack on some platforms is diffi-
        cult. For example, the stack chain needs to be updated every time if we
-       extend  the  stack  on  PowerPC.  Although it is possible, its updating
+       extend the stack on PowerPC.  Although it  is  possible,  its  updating
        time overhead decreases performance. So we do the recursion in memory.
 
        (2) Why don't we simply allocate blocks of memory with malloc()?
 
-       Modern operating systems have a  nice  feature:  they  can  reserve  an
+       Modern  operating  systems  have  a  nice  feature: they can reserve an
        address space instead of allocating memory. We can safely allocate mem-
-       ory pages inside this address space, so the stack  could  grow  without
+       ory  pages  inside  this address space, so the stack could grow without
        moving memory data (this is important because of pointers). Thus we can
-       allocate 1M address space, and use only a single memory  page  (usually
-       4K)  if  that is enough. However, we can still grow up to 1M anytime if
+       allocate  1M  address space, and use only a single memory page (usually
+       4K) if that is enough. However, we can still grow up to 1M  anytime  if
        needed.
 
        (3) Who "owns" a JIT stack?
 
        The owner of the stack is the user program, not the JIT studied pattern
-       or  anything else. The user program must ensure that if a stack is used
-       by pcre2_match(), (that is, it is assigned  to  the  pattern  currently
-       running),  that  stack  must not be used by any other threads (to avoid
-       overwriting the same memory area). The best practice for  multithreaded
-       programs  is to allocate a stack for each thread, and return this stack
-       through the JIT callback function.
+       or anything else. The user program must ensure that if a stack is being
+       used by pcre2_match(), (that is, it is assigned to a match context that
+       is passed to the pattern currently running), that  stack  must  not  be
+       used  by any other threads (to avoid overwriting the same memory area).
+       The best practice for multithreaded programs is to allocate a stack for
+       each thread, and return this stack through the JIT callback function.
 
        (4) When should a JIT stack be freed?
 
        You can free a JIT stack at any time, as long as it will not be used by
-       pcre2_match()  again.  When  you  assign the stack to a pattern, only a
-       pointer is set. There is no reference counting or any other magic.  You
-       can  free  the  patterns  and stacks in any order, anytime. Just do not
-       call pcre2_match() with a pattern pointing to an already  freed  stack,
-       as  that will cause SEGFAULT. (Also, do not free a stack currently used
-       by pcre2_match() in another thread). You can also replace the stack for
-       a  pattern  at  any  time.  You can even free the previous stack before
-       assigning a replacement.
+       pcre2_match() again. When you assign the stack to a match context, only
+       a  pointer  is  set. There is no reference counting or any other magic.
+       You can free compiled patterns, contexts, and stacks in any order, any-
+       time.  Just  do not call pcre2_match() with a match context pointing to
+       an already freed stack, as that will cause SEGFAULT. (Also, do not free
+       a  stack  currently  used  by pcre2_match() in another thread). You can
+       also replace the stack in a context at any time when it is not in  use.
+       You can also free the previous stack before assigning a replacement.
 
-       (5) Should I allocate/free a  stack  every  time  before/after  calling
+       (5)  Should  I  allocate/free  a  stack every time before/after calling
        pcre2_match()?
 
-       No,  because  this  is  too  costly in terms of resources. However, you
-       could implement some clever idea which release the stack if it  is  not
-       used  in  let's  say  two minutes. The JIT callback can help to achieve
-       this without keeping a list of the currently JIT studied patterns.
+       No, because this is too costly in  terms  of  resources.  However,  you
+       could  implement  some clever idea which release the stack if it is not
+       used in let's say two minutes. The JIT callback  can  help  to  achieve
+       this without keeping a list of patterns.
 
-       (6) OK, the stack is for long term memory allocation. But what  happens
-       if  a pattern causes stack overflow with a stack of 1M? Is that 1M kept
+       (6)  OK, the stack is for long term memory allocation. But what happens
+       if a pattern causes stack overflow with a stack of 1M? Is that 1M  kept
        until the stack is freed?
 
-       Especially on embedded sytems, it might be a good idea to release  mem-
-       ory  sometimes  without  freeing the stack. There is no API for this at
-       the moment.  Probably a function call which returns with the  currently
-       allocated  memory for any stack and another which allows releasing mem-
+       Especially  on embedded sytems, it might be a good idea to release mem-
+       ory sometimes without freeing the stack. There is no API  for  this  at
+       the  moment.  Probably a function call which returns with the currently
+       allocated memory for any stack and another which allows releasing  mem-
        ory (shrinking the stack) would be a good idea if someone needs this.
 
        (7) This is too much of a headache. Isn't there any better solution for
        JIT stack handling?
 
-       No,  thanks to Windows. If POSIX threads were used everywhere, we could
+       No, thanks to Windows. If POSIX threads were used everywhere, we  could
        throw out this complicated API.
 
 
@@ -3688,36 +3762,39 @@ FREEING JIT SPECULATIVE MEMORY
        void pcre2_jit_free_unused_memory(pcre2_general_context *gcontext);
 
        The JIT executable allocator does not free all memory when it is possi-
-       ble.   It expects new allocations, and keeps some free memory around to
-       improve allocation speed. However, in low memory conditions,  it  might
-       be  better to free all possible memory. You can cause this to happen by
-       calling pcre2_jit_free_unused_memory(). Its argument is a general  con-
+       ble.  It expects new allocations, and keeps some free memory around  to
+       improve  allocation  speed. However, in low memory conditions, it might
+       be better to free all possible memory. You can cause this to happen  by
+       calling  pcre2_jit_free_unused_memory(). Its argument is a general con-
        text, for custom memory management, or NULL for standard memory manage-
        ment.
 
 
 EXAMPLE CODE
 
-       This is a single-threaded example that specifies a  JIT  stack  without
-       using a callback.
+       This  is  a  single-threaded example that specifies a JIT stack without
+       using a callback. A real program should include  error  checking  after
+       all the function calls.
 
          int rc;
          pcre2_code *re;
          pcre2_match_data *match_data;
+         pcre2_match_context *mcontext;
          pcre2_jit_stack *jit_stack;
 
          re = pcre2_compile(pattern, PCRE2_ZERO_TERMINATED, 0,
            &errornumber, &erroffset, NULL);
-         /* Check for errors */
          rc = pcre2_jit_compile(re, PCRE2_JIT_COMPLETE);
-         /* Check for errors */
+         mcontext = pcre2_match_context_create(NULL);
          jit_stack = pcre2_jit_stack_create(NULL, 32*1024, 512*1024);
-         /* Check for error (NULL) */
-         pcre2_jit_stack_assign(re, NULL, jit_stack);
+         pcre2_jit_stack_assign(mcontext, NULL, jit_stack);
          match_data = pcre2_match_data_create(re, 10);
-         rc = pcre2_match(re, subject, length, 0, 0, match_data, NULL);
-         /* Check results */
-         pcre2_free(re);
+         rc = pcre2_match(re, subject, length, 0, 0, match_data, mcontext);
+         /* Process result */
+
+         pcre2_code_free(re);
+         pcre2_match_data_free(match_data);
+         pcre2_match_context_free(mcontext);
          pcre2_jit_stack_free(jit_stack);
 
 
@@ -3733,14 +3810,10 @@ JIT FAST PATH API
        patterns that have been successfully processed by pcre2_jit_compile()).
 
        The fast path  function  is  called  pcre2_jit_match(),  and  it  takes
-       exactly  the same arguments as pcre2_match(), plus one additional argu-
-       ment that must either point to a JIT stack or be NULL.  In  the  latter
-       case,    if    a    callback    function    has    been   set   up   by
-       pcre2_jit_stack_assign(), it is called.  Otherwise the system stack  is
-       used.  The  return  values  are  the  same  as  for pcre2_match(), plus
-       PCRE2_ERROR_JIT_BADOPTION if a matching mode (partial or  complete)  is
-       requested  that was not compiled. Unsupported option bits (for example,
-       PCRE2_ANCHORED) are ignored.
+       exactly the same arguments as pcre2_match(). The return values are also
+       the same, plus PCRE2_ERROR_JIT_BADOPTION if a matching mode (partial or
+       complete)  is  requested that was not compiled. Unsupported option bits
+       (for example, PCRE2_ANCHORED) are ignored.
 
        When you call pcre2_match(), as well as testing for invalid options,  a
        number of other sanity checks are performed on the arguments. For exam-
@@ -3767,7 +3840,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 03 November 2014
+       Last updated: 08 November 2014
        Copyright (c) 1997-2014 University of Cambridge.
 ------------------------------------------------------------------------------
 

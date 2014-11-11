@@ -70,8 +70,8 @@ available codes are:
 </pre>
 The function yields a non-negative value on success or the negative value
 PCRE2_ERROR_BADOPTION otherwise. This is also the result for the
-PCRE2_CONFIG_JITTARGET code if JIT support is not available. When a string
-is returned the yield is the length of the string, in code units, excluding the
+PCRE2_CONFIG_JITTARGET code if JIT support is not available. When a string is
+requested, the function returns the number of code units used, including the
 terminating zero.
 </P>
 <P>

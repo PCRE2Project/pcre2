@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "08 November 2014" "PCRE2 10.00"
+.TH PCRE2API 3 "11 November 2014" "PCRE2 10.00"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -169,6 +169,19 @@ document for an overview of all the PCRE2 documentation.
 .fi
 .
 .
+.SH "PCRE2 NATIVE API STRING SUBSTITUTION FUNCTION"
+.rs
+.sp
+.nf
+.B int pcre2_substitute(const pcre2_code *\fIcode\fP, PCRE2_SPTR \fIsubject\fP,
+.B "  PCRE2_SIZE \fIlength\fP, PCRE2_SIZE \fIstartoffset\fP,"
+.B "  uint32_t \fIoptions\fP, pcre2_match_data *\fImatch_data\fP,"
+.B "  pcre2_match_context *\fImcontext\fP, PCRE2_SPTR \fIreplacementzfP,"
+.B "  PCRE2_SIZE \fIrlength\fP, PCRE2_UCHAR *\fIoutputbuffer\fP,"
+.B "  PCRE2_SIZE *\fIoutlengthptr\fP);"
+.fi
+.
+.
 .SH "PCRE2 NATIVE API JIT FUNCTIONS"
 .rs
 .sp
@@ -332,8 +345,8 @@ and disadvantages is given in the
 documentation. There is no JIT support for \fBpcre2_dfa_match()\fP.
 .P
 In addition to the main compiling and matching functions, there are convenience
-functions for extracting captured substrings from a subject string that is
-matched by \fBpcre2_match()\fP. They are:
+functions for extracting captured substrings from a subject string that has
+been matched by \fBpcre2_match()\fP. They are:
 .sp
   \fBpcre2_substring_copy_byname()\fP
   \fBpcre2_substring_copy_bynumber()\fP
@@ -348,9 +361,13 @@ matched by \fBpcre2_match()\fP. They are:
 \fBpcre2_substring_free()\fP and \fBpcre2_substring_list_free()\fP are also
 provided, to free the memory used for extracted strings.
 .P
-There are functions for finding out information about a compiled pattern
-(\fBpcre2_pattern_info()\fP) and about the configuration with which PCRE2 was
-built (\fBpcre2_config()\fP).
+The function \fBpcre2_substitute()\fP can be called to match a pattern and
+return a copy of the subject string with substitutions for parts that were
+matched.
+.P
+Finally, there are functions for finding out information about a compiled
+pattern (\fBpcre2_pattern_info()\fP) and about the configuration with which
+PCRE2 was built (\fBpcre2_config()\fP).
 .
 .
 .\" HTML <a name="newlines"></a>
@@ -865,8 +882,8 @@ otherwise it is set to zero. Unicode support implies UTF support.
 The \fIwhere\fP argument should point to a buffer that is at least 12 code
 units long. (The exact length needed can be found by calling
 \fBpcre2_config()\fP with \fBwhere\fP set to NULL.) The buffer is filled with
-the PCRE2 version string, zero-terminated. The number of code units used is 
-returned. This is the length of the string plus one unit for the terminating 
+the PCRE2 version string, zero-terminated. The number of code units used is
+returned. This is the length of the string plus one unit for the terminating
 zero.
 .
 .
@@ -2361,6 +2378,66 @@ numbers. For this reason, the use of different names for subpatterns of the
 same number causes an error at compile time.
 .
 .
+.SH "CREATING A NEW STRING WITH SUBSTITUTIONS"
+.rs
+.sp
+.nf
+.B int pcre2_substitute(const pcre2_code *\fIcode\fP, PCRE2_SPTR \fIsubject\fP,
+.B "  PCRE2_SIZE \fIlength\fP, PCRE2_SIZE \fIstartoffset\fP,"
+.B "  uint32_t \fIoptions\fP, pcre2_match_data *\fImatch_data\fP,"
+.B "  pcre2_match_context *\fImcontext\fP, PCRE2_SPTR \fIreplacementzfP,"
+.B "  PCRE2_SIZE \fIrlength\fP, PCRE2_UCHAR *\fIoutputbuffer\zfP,"
+.B "  PCRE2_SIZE *\fIoutlengthptr\fP);"
+.fi
+This function calls \fBpcre2_match()\fP and then makes a copy of the subject
+string in \fIoutputbuffer\fP, replacing the part that was matched with the
+\fIreplacement\fP string, whose length is supplied in \fBrlength\fP. This can
+be given as PCRE2_ZERO_TERMINATED for a zero-terminated string.
+.P
+In the replacement string, which is interpreted as a UTF string in UTF mode,
+and is checked for UTF validity unless the PCRE2_NO_UTF_CHECK option is set, a
+dollar character is an escape character that can specify the insertion of
+characters from capturing groups in the pattern. The following forms are
+recognized:
+.sp
+  $$      insert a dollar character
+  $<n>    insert the contents of group <n>
+  ${<n>}  insert the contents of group <n>
+.sp
+Either a group number or a group name can be given for <n>. Curly brackets are
+required only if the following character would be interpreted as part of the
+number or name. The number may be zero to include the entire matched string.
+For example, if the pattern a(b)c is matched with "[abc]" and the replacement
+string "+$1$0$1+", the result is "[+babcb+]". Group insertion is done by
+calling \fBpcre2_copy_byname()\fP or \fBpcre2_copy_bynumber()\fP as
+appropriate.
+.P
+The first seven arguments of \fBpcre2_substitute()\fP are the same as for
+\fBpcre2_match()\fP, except that the partial matching options are not
+permitted, and \fImatch_data\fP may be passed as NULL, in which case a match
+data block is obtained and freed within this function, using memory management
+functions from the match context, if provided, or else those that were used to
+allocate memory for the compiled code.
+.P
+There is one additional option, PCRE2_SUBSTITUTE_GLOBAL, which causes the
+function to iterate over the subject string, replacing every matching
+substring. If this is not set, only the first matching substring is replaced.
+.P
+The \fIoutlengthptr\fP argument must point to a variable that contains the
+length, in code units, of the output buffer. It is updated to contain the
+length of the new string, excluding the trailing zero that is automatically
+added.
+.P
+The function returns the number of replacements that were made. This may be
+zero if no matches were found, and is never greater than 1 unless
+PCRE2_SUBSTITUTE_GLOBAL is set. In the event of an error, a negative error code
+is returned. Except for PCRE2_ERROR_NOMATCH (which is never returned), any
+errors from \fBpcre2_match()\fP or the substring copying functions are passed
+straight back. PCRE2_ERROR_BADREPLACEMENT is returned for an invalid
+replacement string (unrecognized sequence following a dollar sign), and
+PCRE2_ERROR_NOMEMORY is returned if the output buffer is not big enough.
+.
+.
 .SH "DUPLICATE SUBPATTERN NAMES"
 .rs
 .sp
@@ -2633,6 +2710,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 08 November 2014
+Last updated: 11 November 2014
 Copyright (c) 1997-2014 University of Cambridge.
 .fi

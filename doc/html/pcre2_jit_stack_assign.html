@@ -19,18 +19,20 @@ SYNOPSIS
 <b>#include &#60;pcre2.h&#62;</b>
 </P>
 <P>
-<b>void pcre2_jit_stack_assign(const pcre2_code *<i>code</i>,</b>
+<b>void pcre2_jit_stack_assign(pcre2_match_context *<i>mcontext</i>,</b>
 <b>  pcre2_jit_callback <i>callback_function</i>, void *<i>callback_data</i>);</b>
 </P>
 <br><b>
 DESCRIPTION
 </b><br>
 <P>
-This function provides control over the memory used as a stack at run-time by a
-call to <b>pcre2_match()</b> or <b>pcre2_jit_match()</b> with a pattern that has
-been successfully processed by the JIT compiler. The arguments are:
+This function provides control over the memory used by JIT as a run-time stack
+when <b>pcre2_match()</b> or <b>pcre2_jit_match()</b> is called with a pattern
+that has been successfully processed by the JIT compiler. The information that
+determines which stack is used is put into a match context that is subsequently
+passed to a matching function. The arguments of this function are:
 <pre>
-  code           the pointer returned by <b>pcre2_compile()</b>
+  mcontext       a pointer to a match context
   callback       a callback function
   callback_data  a JIT stack or a value to be passed to the callback
 </PRE>
@@ -51,7 +53,7 @@ result is NULL, the internal 32K stack is used; otherwise the return value must
 be a valid JIT stack, the result of calling <b>pcre2_jit_stack_create()</b>.
 </P>
 <P>
-You may safely assign the same JIT stack to multiple patterns, as long as they
+You may safely use the same JIT stack for multiple patterns, as long as they
 are all matched in the same thread. In a multithread application, each thread
 must use its own JIT stack. For more details, see the
 <a href="pcre2jit.html"><b>pcre2jit</b></a>

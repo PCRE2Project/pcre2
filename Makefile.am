@@ -63,6 +63,7 @@ dist_html_DATA = \
   doc/html/pcre2_set_parens_nest_limit.html \
   doc/html/pcre2_set_recursion_limit.html \
   doc/html/pcre2_set_recursion_memory_management.html \
+  doc/html/pcre2_substitute.html \
   doc/html/pcre2_substring_copy_byname.html \
   doc/html/pcre2_substring_copy_bynumber.html \
   doc/html/pcre2_substring_free.html \
@@ -134,6 +135,7 @@ dist_man_MANS = \
   doc/pcre2_set_parens_nest_limit.3 \
   doc/pcre2_set_recursion_limit.3 \
   doc/pcre2_set_recursion_memory_management.3 \
+  doc/pcre2_substitute.3 \
   doc/pcre2_substring_copy_byname.3 \
   doc/pcre2_substring_copy_bynumber.3 \
   doc/pcre2_substring_free.3 \
