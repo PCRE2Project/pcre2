@@ -5768,7 +5768,7 @@ if (rc != 0)
   print_unicode_version(stdout);
   printf(")\n");
   }
-else printf("  No UTF or UCP support\n");
+else printf("  No Unicode support\n");
 
 (void)PCRE2_CONFIG(PCRE2_CONFIG_JIT, &rc);
 if (rc != 0)
