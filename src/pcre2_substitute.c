@@ -51,7 +51,7 @@ POSSIBILITY OF SUCH DAMAGE.
 *************************************************/
 
 /* This function applies a compiled re to a subject string and creates a new
-string with substitutione. The first 7 arguments are the same as for
+string with substitutions. The first 7 arguments are the same as for
 pcre2_match(). Either string length may be PCRE2_ZERO_TERMINATED.
 
 Arguments:
@@ -69,6 +69,7 @@ Arguments:
 
 Returns:        > 0 number of substitutions made
                 < 0 an error code, including PCRE2_ERROR_NOMATCH if no match
+                  PCRE2_ERROR_BADREPLACEMENT means invalid use of $ 
 */
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
@@ -85,6 +86,11 @@ BOOL match_data_created = FALSE;
 BOOL global = FALSE;
 PCRE2_SIZE buff_offset, lengthleft, endlength;
 PCRE2_SIZE *ovector;
+
+/* Partial matching is not valid. */
+
+if ((options & (PCRE2_PARTIAL_HARD|PCRE2_PARTIAL_SOFT)) != 0)
+  return PCRE2_ERROR_BADOPTION;
 
 /* If no match data block is provided, create one. */
 
@@ -129,11 +135,16 @@ do
 
   rc = pcre2_match(code, subject, length, start_offset, options|goptions,
     match_data, mcontext);
+    
+  /* Any error other than no match returns the error code. No match when not 
+  doing the special after-empty-match global rematch, or when at the end of the 
+  subject, breaks the global loop. Otherwise, advance the starting point and 
+  try again. */ 
 
   if (rc < 0)
     {
-    if (goptions == 0 || rc != PCRE2_ERROR_NOMATCH || start_offset >= length)
-      break;
+    if (rc != PCRE2_ERROR_NOMATCH) goto EXIT;
+    if (goptions == 0 || start_offset >= length) break;
     start_offset++;
     if ((code->overall_options & PCRE2_UTF) != 0)
       {
@@ -149,6 +160,8 @@ do
     goptions = 0;
     continue;
     }
+    
+  /* Handle a successful match. */
 
   subs++;
   if (rc == 0) rc = ovector_count;
@@ -161,29 +174,34 @@ do
 
   for (i = 0; i < rlength; i++)
     {
-    if (replacement[i] == CHAR_DOLLAR_SIGN && i != rlength - 1)
+    if (replacement[i] == CHAR_DOLLAR_SIGN)
       {
-      int group = -1;
-      int n = 0;
-      BOOL inparens = FALSE;
-      PCRE2_SIZE j = i + 1;
-      PCRE2_SIZE sublength; 
-      PCRE2_UCHAR next = replacement[j];
-      PCRE2_UCHAR name[33];
+      int group, n;
+      BOOL inparens;
+      PCRE2_SIZE sublength;
+      PCRE2_UCHAR next;
+      PCRE2_UCHAR name[33];    
+ 
+      if (++i == rlength) goto BAD;
+      if ((next = replacement[i]) == CHAR_DOLLAR_SIGN) goto LITERAL;
+ 
+      group = -1;
+      n = 0;
+      inparens = FALSE;
 
       if (next == CHAR_LEFT_CURLY_BRACKET)
         {
-        if (j == rlength - 1) goto LITERAL;
+        if (++i == rlength) goto BAD;
+        next = replacement[i];
         inparens = TRUE;
-        next = replacement[++j];
         }
 
       if (next >= CHAR_0 && next <= CHAR_9)
         {
         group = next - CHAR_0;
-        while (j < rlength - 1)
+        while (i < rlength - 1)
           {
-          next = replacement[++j];
+          next = replacement[++i];
           if (next < CHAR_0 || next > CHAR_9) break;
           group = group * 10 + next - CHAR_0;
           }
@@ -194,31 +212,31 @@ do
         while (MAX_255(next) && (ctypes[next] & ctype_word) != 0)
           {
           name[n++] = next;
-          if (n > 32) goto LITERAL;
-          if (j == rlength - 1) break;
-          next = replacement[++j];
+          if (n > 32) goto BAD;
+          if (i == rlength) break;
+          next = replacement[++i];
           }
+        if (n == 0) goto BAD;   
         name[n] = 0;
         }
 
       if (inparens)
         {
-        if (j == rlength || next != CHAR_RIGHT_CURLY_BRACKET) goto LITERAL;
+        if (i == rlength || next != CHAR_RIGHT_CURLY_BRACKET) goto BAD;
         }
-      else j--;   /* Last code unit of name/number */
-
+      else i--;   /* Last code unit of name/number */
+      
       /* Have found a syntactically correct group number or name. */
 
-      i = j;   /* Where to continue from */
-
+      sublength = lengthleft;
       if (group < 0)
         rc = pcre2_substring_copy_byname(match_data, name,
           buffer + buff_offset, &sublength);
       else
         rc = pcre2_substring_copy_bynumber(match_data, group,
           buffer + buff_offset, &sublength);
-
-      if (rc < 0) goto EXIT;
+          
+      if (rc < 0) goto EXIT;    
       buff_offset += sublength;
       lengthleft -= sublength;
       }
@@ -242,20 +260,16 @@ do
     PCRE2_ANCHORED|PCRE2_NOTEMPTY_ATSTART;
   } while (global);  /* Repeat "do" loop */
 
-/* No match is a "normal" end; copy the rest of the subject and return the
-number of substitutions. */
+/* Copy the rest of the subject and return the number of substitutions. */
 
-if (rc == PCRE2_ERROR_NOMATCH)
-  {
-  rc = subs;
-  endlength = length - start_offset;
-  if (endlength + 1 >= lengthleft) goto NOROOM;
-  memcpy(buffer + buff_offset, subject + start_offset,
-    endlength*(PCRE2_CODE_UNIT_WIDTH/8));
-  buff_offset += endlength;
-  buffer[buff_offset] = 0;
-  *blength = buff_offset;
-  }
+rc = subs;
+endlength = length - start_offset;
+if (endlength + 1 > lengthleft) goto NOROOM;
+memcpy(buffer + buff_offset, subject + start_offset,
+  endlength*(PCRE2_CODE_UNIT_WIDTH/8));
+buff_offset += endlength;
+buffer[buff_offset] = 0;
+*blength = buff_offset;
 
 EXIT:
 if (match_data_created) pcre2_match_data_free(match_data);
@@ -263,6 +277,10 @@ return rc;
 
 NOROOM:
 rc = PCRE2_ERROR_NOMEMORY;
+goto EXIT;
+
+BAD:
+rc = PCRE2_ERROR_BADREPLACEMENT;
 goto EXIT;
 }
 

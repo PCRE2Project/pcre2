@@ -206,24 +206,25 @@ static const char match_error_texts[] =
   "bad offset value\0"
   "bad option value\0"
   /* 35 */
+  "invalid replacement string\0"
   "bad offset into UTF string\0"
   "callout error code\0"              /* Never returned by PCRE2 itself */
   "invalid data in workspace for DFA restart\0"
   "too much recursion for DFA matching\0"
-  "backreference condition or recursion test not supported for DFA matching\0"
   /* 40 */
+  "backreference condition or recursion test not supported for DFA matching\0"
   "item unsupported for DFA matching\0"
   "workspace size exceeded in DFA matching\0"
   "internal error - pattern overwritten?\0"
   "bad JIT option\0"
-  "JIT stack limit reached\0"
   /* 45 */
+  "JIT stack limit reached\0"
   "match limit exceeded\0"
   "no more memory\0"
   "unknown or unset substring\0"
   "non-unique substring name\0"
-  "NULL argument passed\0"
   /* 50 */
+  "NULL argument passed\0"
   "nested recursion at the same subject position\0"
   "recursion limit exceeded\0"
   "requested value is not set\0"

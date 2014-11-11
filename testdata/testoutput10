@@ -888,7 +888,7 @@ Subject length lower bound = 3
     a\x{123}aa\=offset=1
  0: aa
     a\x{123}aa\=offset=2
-Error -35 (bad UTF-8 offset)
+Error -36 (bad UTF-8 offset)
     a\x{123}aa\=offset=3
  0: aa
     a\x{123}aa\=offset=4

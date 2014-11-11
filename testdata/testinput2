@@ -4008,4 +4008,65 @@ a random value. /Ix
 
 /(((((a)))))/parens_nest_limit=2
 
+# Tests for pcre2_substitute()
+
+/abc/replace=XYZ
+    123123
+    123abc123
+    123abc123abc123
+    123123\=zero_terminate
+    123abc123\=zero_terminate
+    123abc123abc123\=zero_terminate
+
+/abc/g,replace=XYZ
+    123abc123
+    123abc123abc123
+
+/abc/replace=X$$Z
+    123abc123
+
+/abc/g,replace=X$$Z
+    123abc123abc123
+
+/a(b)c(d)e/replace=X$1Y${2}Z
+    "abcde"
+
+/a(b)c(d)e/replace=X$1Y${2}Z,global
+    "abcde-abcde"
+
+/a(?<ONE>b)c(?<TWO>d)e/replace=X$ONE+${TWO}Z
+    "abcde"
+
+/a(?<ONE>b)c(?<TWO>d)e/g,replace=X$ONE+${TWO}Z
+    "abcde-abcde-"
+
+/abc/replace=a$++
+    123abc
+
+/abc/replace=a$bad
+    123abc
+
+/abc/replace=a${A234567890123456789_123456789012}z
+    123abc
+
+/abc/replace=a${A23456789012345678901234567890123}z
+    123abc
+
+/abc/replace=a${bcd
+    123abc
+
+/abc/replace=a${b+d}z
+    123abc
+
+/abc/replace=[10]XYZ
+    123abc123
+
+/abc/replace=[9]XYZ
+    123abc123
+    
+/abc/replace=xyz
+    1abc2\=partial_hard
+
+# End of substitute tests 
+
 # End of testinput2 

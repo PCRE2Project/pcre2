@@ -165,6 +165,7 @@ void vms_setsymbol( char *, char *, int );
 #define DEFAULT_OVECCOUNT 15    /* Default ovector count */
 #define JUNK_OFFSET 0xdeadbeef  /* For initializing ovector */
 #define LOOPREPEAT 500000       /* Default loop count for timing */
+#define REPLACE_BUFFSIZE 400    /* For replacement strings */
 #define VERSION_SIZE 64         /* Size of buffer for the version strings */
 
 /* Execution modes */
@@ -345,9 +346,9 @@ either on a pattern or a data line, so they must all be distinct. */
 #define CTL_JITVERIFY          0x00010000u
 #define CTL_MARK               0x00020000u
 #define CTL_MEMORY             0x00040000u
-#define CTL_PATLEN             0x00080000u
-#define CTL_POSIX              0x00100000u
-#define CTL_STARTCHAR          0x00200000u
+#define CTL_POSIX              0x00080000u
+#define CTL_STARTCHAR          0x00100000u
+#define CTL_ZERO_TERMINATE     0x00200000u
 
 #define CTL_BSR_SET          0x80000000u  /* This is informational */
 #define CTL_NL_SET           0x40000000u  /* This is informational */
@@ -376,6 +377,7 @@ typedef struct patctl {    /* Structure for pattern modifiers. */
   uint32_t  stackguard_test;
   uint32_t  tables_id;
   uint8_t   locale[32];
+  uint8_t   replacement[REPLACE_BUFFSIZE];
 } patctl;
 
 #define MAXCPYGET 10
@@ -485,13 +487,14 @@ static modstruct modlist[] = {
   { "posix",               MOD_PAT,  MOD_CTL, CTL_POSIX,                 PO(control) },
   { "ps",                  MOD_DAT,  MOD_OPT, PCRE2_PARTIAL_SOFT,        DO(options) },
   { "recursion_limit",     MOD_CTM,  MOD_INT, 0,                         MO(recursion_limit) },
+  { "replace",             MOD_PAT,  MOD_STR, 0,                         PO(replacement) },
   { "stackguard",          MOD_PAT,  MOD_INT, 0,                         PO(stackguard_test) },
   { "startchar",           MOD_PND,  MOD_CTL, CTL_STARTCHAR,             PO(control) },
   { "tables",              MOD_PAT,  MOD_INT, 0,                         PO(tables_id) },
   { "ucp",                 MOD_PATP, MOD_OPT, PCRE2_UCP,                 PO(options) },
   { "ungreedy",            MOD_PAT,  MOD_OPT, PCRE2_UNGREEDY,            PO(options) },
-  { "use_length",          MOD_PAT,  MOD_CTL, CTL_PATLEN,                PO(control) },
-  { "utf",                 MOD_PATP, MOD_OPT, PCRE2_UTF,                 PO(options) }
+  { "utf",                 MOD_PATP, MOD_OPT, PCRE2_UTF,                 PO(options) },
+  { "zero_terminate",      MOD_DAT,  MOD_CTL, CTL_ZERO_TERMINATE,        DO(control) }
 };
 
 #define MODLISTCOUNT sizeof(modlist)/sizeof(modstruct)
@@ -945,6 +948,17 @@ are supported. */
   else \
     pcre2_set_recursion_limit_32(G(a,32),b)
 
+#define PCRE2_SUBSTITUTE(a,b,c,d,e,f,g,h,i,j,k,l) \
+  if (test_mode == PCRE8_MODE) \
+    a = pcre2_substitute_8(G(b,8),(PCRE2_SPTR8)c,d,e,f,G(g,8),G(h,8), \
+      (PCRE2_SPTR8)i,j,(PCRE2_UCHAR8 *)k,l); \
+  else if (test_mode == PCRE16_MODE) \
+    a = pcre2_substitute_16(G(b,16),(PCRE2_SPTR16)c,d,e,f,G(g,16),G(h,16), \
+      (PCRE2_SPTR16)i,j,(PCRE2_UCHAR16 *)k,l); \
+  else \
+    a = pcre2_substitute_32(G(b,32),(PCRE2_SPTR32)c,d,e,f,G(g,32),G(h,32), \
+      (PCRE2_SPTR32)i,j,(PCRE2_UCHAR32 *)k,l)
+
 #define PCRE2_SUBSTRING_COPY_BYNAME(a,b,c,d,e) \
   if (test_mode == PCRE8_MODE) \
     a = pcre2_substring_copy_byname_8(G(b,8),G(c,8),(PCRE2_UCHAR8 *)d,e); \
@@ -1298,6 +1312,16 @@ the three different cases. */
   else \
     G(pcre2_set_recursion_limit_,BITTWO)(G(a,BITTWO),b)
 
+#define PCRE2_SUBSTITUTE(a,b,c,d,e,f,g,h,i,j,k,l) \
+  if (test_mode == G(G(PCRE,BITONE),_MODE)) \
+    a = G(pcre2_substitute_,BITONE)(G(b,BITONE),(G(PCRE2_SPTR,BITONE))c,d,e,f, \
+      G(g,BITONE),G(h,BITONE),(G(PCRE2_SPTR,BITONE))i,j, \
+      (G(PCRE2_UCHAR,BITONE) *)k,l); \
+  else \
+    a = G(pcre2_substitute_,BITTWO)(G(b,BITTWO),(G(PCRE2_SPTR,BITTWO))c,d,e,f, \
+      G(g,BITTWO),G(h,BITTWO),(G(PCRE2_SPTR,BITTWO))i,j, \
+      (G(PCRE2_UCHAR,BITTWO) *)k,l)
+
 #define PCRE2_SUBSTRING_COPY_BYNAME(a,b,c,d,e) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
     a = G(pcre2_substring_copy_byname_,BITONE)(G(b,BITONE),G(c,BITONE),\
@@ -1466,6 +1490,9 @@ the three different cases. */
 #define PCRE2_SET_MATCH_LIMIT(a,b) pcre2_set_match_limit_8(G(a,8),b)
 #define PCRE2_SET_PARENS_NEST_LIMIT(a,b) pcre2_set_parens_nest_limit_8(G(a,8),b)
 #define PCRE2_SET_RECURSION_LIMIT(a,b) pcre2_set_recursion_limit_8(G(a,8),b)
+#define PCRE2_SUBSTITUTE(a,b,c,d,e,f,g,h,i,j,k,l) \
+  a = pcre2_substitute_8(G(b,8),(PCRE2_SPTR8)c,d,e,f,G(g,8),G(h,8), \
+    (PCRE2_SPTR8)i,j,(PCRE2_UCHAR8 *)k,l)
 #define PCRE2_SUBSTRING_COPY_BYNAME(a,b,c,d,e) \
   a = pcre2_substring_copy_byname_8(G(b,8),G(c,8),(PCRE2_UCHAR8 *)d,e)
 #define PCRE2_SUBSTRING_COPY_BYNUMBER(a,b,c,d,e) \
@@ -1544,6 +1571,9 @@ the three different cases. */
 #define PCRE2_SET_MATCH_LIMIT(a,b) pcre2_set_match_limit_16(G(a,16),b)
 #define PCRE2_SET_PARENS_NEST_LIMIT(a,b) pcre2_set_parens_nest_limit_16(G(a,16),b)
 #define PCRE2_SET_RECURSION_LIMIT(a,b) pcre2_set_recursion_limit_16(G(a,16),b)
+#define PCRE2_SUBSTITUTE(a,b,c,d,e,f,g,h,i,j,k,l) \
+  a = pcre2_substitute_16(G(b,16),(PCRE2_SPTR16)c,d,e,f,G(g,16),G(h,16), \
+    (PCRE2_SPTR16)i,j,(PCRE2_UCHAR16 *)k,l)
 #define PCRE2_SUBSTRING_COPY_BYNAME(a,b,c,d,e) \
   a = pcre2_substring_copy_byname_16(G(b,16),G(c,16),(PCRE2_UCHAR16 *)d,e)
 #define PCRE2_SUBSTRING_COPY_BYNUMBER(a,b,c,d,e) \
@@ -1622,6 +1652,9 @@ the three different cases. */
 #define PCRE2_SET_MATCH_LIMIT(a,b) pcre2_set_match_limit_32(G(a,32),b)
 #define PCRE2_SET_PARENS_NEST_LIMIT(a,b) pcre2_set_parens_nest_limit_32(G(a,32),b)
 #define PCRE2_SET_RECURSION_LIMIT(a,b) pcre2_set_recursion_limit_32(G(a,32),b)
+#define PCRE2_SUBSTITUTE(a,b,c,d,e,f,g,h,i,j,k,l) \
+  a = pcre2_substitute_32(G(b,32),(PCRE2_SPTR32)c,d,e,f,G(g,32),G(h,32), \
+    (PCRE2_SPTR32)i,j,(PCRE2_UCHAR32 *)k,l)
 #define PCRE2_SUBSTRING_COPY_BYNAME(a,b,c,d,e) \
   a = pcre2_substring_copy_byname_32(G(b,32),G(c,32),(PCRE2_UCHAR32 *)d,e)
 #define PCRE2_SUBSTRING_COPY_BYNUMBER(a,b,c,d,e) \
@@ -3199,9 +3232,9 @@ fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
   ((controls & CTL_JITVERIFY) != 0)? " jitverify" : "",
   ((controls & CTL_MARK) != 0)? " mark" : "",
   ((controls & CTL_MEMORY) != 0)? " memory" : "",
-  ((controls & CTL_PATLEN) != 0)? " use_length" : "",
   ((controls & CTL_POSIX) != 0)? " posix" : "",
-  ((controls & CTL_STARTCHAR) != 0)? " startchar" : "");
+  ((controls & CTL_STARTCHAR) != 0)? " startchar" : "",
+  ((controls & CTL_ZERO_TERMINATE) != 0)? " zero_terminate" : "");
 }
 
 
@@ -3672,6 +3705,7 @@ patlen = p - buffer - 2;
 /* Look for modifiers and options after the final delimiter. */
 
 if (!decode_modifiers(p, CTX_PAT, &pat_patctl, NULL)) return PR_SKIP;
+utf = (pat_patctl.options & PCRE2_UTF) != 0;
 
 /* Assume full JIT compile for jitverify and/or jitfast if nothing else was
 specified. */
@@ -3679,7 +3713,6 @@ specified. */
 if (pat_patctl.jit == 0 &&
     (pat_patctl.control & (CTL_JITVERIFY|CTL_JITFAST)) != 0)
   pat_patctl.jit = 7;
-utf = (pat_patctl.options & PCRE2_UTF) != 0;
 
 /* Now copy the pattern to pbuffer8 for use in 8-bit testing and for reflecting
 in callouts. Convert to binary if required. */
@@ -3786,6 +3819,7 @@ if ((pat_patctl.control & CTL_POSIX) != 0)
   /* Check for features that the POSIX interface does not support. */
 
   if (pat_patctl.locale[0] != 0) prmsg(&msg, "locale");
+  if (pat_patctl.replacement[0] != 0) prmsg(&msg, "replace");
   if (pat_patctl.tables_id != 0) prmsg(&msg, "tables");
   if (pat_patctl.stackguard_test != 0) prmsg(&msg, "stackguard");
   if (timeit > 0) prmsg(&msg, "timing");
@@ -3863,11 +3897,11 @@ switch(errorcode)
   break;
   }
 
-/* The pattern in now in pbuffer[8|16|32], with the length in patlen. By
+/* The pattern is now in pbuffer[8|16|32], with the length in patlen. By
 default, however, we pass a zero-terminated pattern. The length is passed only
-if we had a hex pattern or if use_length was set. */
+if we had a hex pattern. */
 
-if ((pat_patctl.control & (CTL_PATLEN|CTL_HEXPAT)) == 0) patlen = -1;
+if ((pat_patctl.control & CTL_HEXPAT) == 0) patlen = PCRE2_ZERO_TERMINATED;
 
 /* Compile many times when timing. */
 
@@ -4491,22 +4525,6 @@ SET(*q, 0);
 len = CASTVAR(uint8_t *, q) - dbuffer;    /* Length in bytes */
 ulen = len/code_unit_size;                /* Length in code units */
 
-/* If we have explicit valgrind support, mark the data from after its end to
-the end of the buffer as unaddressable, so that a read over the end of the
-buffer will be seen by valgrind, even if it doesn't cause a crash. If we're not
-building with valgrind support, at least move the data to the end of the buffer
-so that it might at least cause a crash. If we are using the POSIX interface,
-we must include the terminating zero. */
-
-pp = dbuffer;
-c = code_unit_size * ((pat_patctl.control & CTL_POSIX) != 0)? 1:0;
-
-#ifdef SUPPORT_VALGRIND
-  VALGRIND_MAKE_MEM_NOACCESS(dbuffer + len + c, dbuffer_size - (len + c));
-#else
-  pp = memmove(pp + dbuffer_size - len - c, pp, len + c);
-#endif
-
 /* If the string was terminated by \= we must now interpret modifiers. */
 
 if (p[-1] != 0 && !decode_modifiers(p, CTX_DAT, NULL, &dat_datctl))
@@ -4522,10 +4540,27 @@ if (c - (c & -c) != 0)
   return PR_OK;
   }
 
-/* Now run the pattern match: len contains the byte length, ulen contains the
-code unit length, and pp points to the subject string. POSIX matching is only
-possible in 8-bit mode, and it does not support timing or other fancy features.
-Some were checked at compile time, but we need to check the match-time settings
+/* If we have explicit valgrind support, mark the data from after its end to
+the end of the buffer as unaddressable, so that a read over the end of the
+buffer will be seen by valgrind, even if it doesn't cause a crash. If we're not
+building with valgrind support, at least move the data to the end of the buffer
+so that it might at least cause a crash. If we are using the POSIX interface,
+or testing zero-termination, we must include the terminating zero. */
+
+pp = dbuffer;
+c = code_unit_size * (((pat_patctl.control & CTL_POSIX) +
+                       (dat_datctl.control & CTL_ZERO_TERMINATE) != 0)? 1:0);
+
+#ifdef SUPPORT_VALGRIND
+  VALGRIND_MAKE_MEM_NOACCESS(dbuffer + len + c, dbuffer_size - (len + c));
+#else
+  pp = memmove(pp + dbuffer_size - len - c, pp, len + c);
+#endif
+
+/* We now have len containing the byte length, ulen containing the code unit
+length, and pp pointing to the subject string. POSIX matching is only possible
+in 8-bit mode, and it does not support timing or other fancy features. Some
+were checked at compile time, but we need to check the match-time settings
 here. */
 
 #ifdef SUPPORT_PCRE2_8
@@ -4621,6 +4656,11 @@ if ((dat_datctl.control & (CTL_ALLUSEDTEXT|CTL_DFA)) == CTL_ALLUSEDTEXT &&
   dat_datctl.control &= ~CTL_ALLUSEDTEXT;
   }
 
+/* Handle passing the subject as zero-terminated. */
+
+if ((dat_datctl.control & CTL_ZERO_TERMINATE) != 0)
+  ulen = PCRE2_ZERO_TERMINATED;
+
 /* Enable display of malloc/free if wanted. */
 
 show_memory = (dat_datctl.control & CTL_MEMORY) != 0;
@@ -4676,9 +4716,134 @@ else
   PCRE2_MATCH_DATA_CREATE(match_data, max_oveccount, NULL);
   }
 
-/* Loop for global matching */
+/* If a replacement string is provided, call pcre2_substitute() instead of one
+of the matching functions. First we have to convert the replacement string to
+the appropriate width. */
 
-for (gmatched = 0;; gmatched++)
+if (pat_patctl.replacement[0] != 0)
+  {
+  int rc;
+  uint8_t *pr;
+  uint8_t rbuffer[REPLACE_BUFFSIZE];
+  uint8_t nbuffer[REPLACE_BUFFSIZE];
+  uint32_t goption;
+  PCRE2_SIZE rlen;
+  PCRE2_SIZE nsize;
+
+#ifdef SUPPORT_PCRE2_8
+  uint8_t *r8 = NULL;
+#endif
+#ifdef SUPPORT_PCRE2_16
+  uint16_t *r16 = NULL;
+#endif
+#ifdef SUPPORT_PCRE2_32
+  uint32_t *r32 = NULL;
+#endif
+
+  goption = ((pat_patctl.control & CTL_GLOBAL) == 0)? 0 :
+    PCRE2_SUBSTITUTE_GLOBAL;
+  SETCASTPTR(r, rbuffer);  /* Sets r8, r16, or r32, as appropriate. */
+  pr = pat_patctl.replacement;
+
+  /* If the replacement starts with '[<number>]' we interpret that as length
+  value for the replacement buffer. */
+
+  nsize = REPLACE_BUFFSIZE/code_unit_size;
+  if (*pr == '[')
+    {
+    PCRE2_SIZE n = 0;
+    while ((c = *(++pr)) >= CHAR_0 && c <= CHAR_9) n = n * 10 + c - CHAR_0;
+    if (*pr++ != ']')
+      {
+      fprintf(outfile, "Bad buffer size in replacement string\n");
+      return PR_OK;
+      }
+    if (n > nsize)
+      {
+      fprintf(outfile, "Replacement buffer setting (%ld) is too large "
+        "(max %ld)\n", n, nsize);
+      return PR_OK;
+      }
+    nsize = n;
+    }
+
+  /* Now copy the replacement string to a buffer of the appropriate width. */
+
+  while ((c = *pr++) != 0)
+    {
+    if (utf && HASUTF8EXTRALEN(c)) { GETUTF8INC(c, pr); }
+
+    /* At present no escape processing is provided for replacements. */
+
+#ifdef SUPPORT_PCRE2_8
+    if (test_mode == PCRE8_MODE)
+      {
+      if (utf)
+        {
+        r8 += ord2utf8(c, r8);
+        }
+      else
+        {
+        *r8++ = c;
+        }
+      }
+#endif
+#ifdef SUPPORT_PCRE2_16
+    if (test_mode == PCRE16_MODE)
+      {
+      if (utf)
+        {
+        if (c >= 0x10000u)
+          {
+          c-= 0x10000u;
+          *r16++ = 0xD800 | (c >> 10);
+          *r16++ = 0xDC00 | (c & 0x3ff);
+          }
+        else
+          *r16++ = c;
+        }
+      else
+        {
+        *r16++ = c;
+        }
+      }
+#endif
+#ifdef SUPPORT_PCRE2_32
+    if (test_mode == PCRE32_MODE)
+      {
+      *r32++ = c;
+      }
+#endif
+    }
+
+  SET(*r, 0);
+  if ((dat_datctl.control & CTL_ZERO_TERMINATE) != 0)
+    rlen = PCRE2_ZERO_TERMINATED;
+  else
+    rlen = (CASTVAR(uint8_t *, r) - rbuffer)/code_unit_size;
+  PCRE2_SUBSTITUTE(rc, compiled_code, pp, ulen, dat_datctl.offset,
+    dat_datctl.options|goption, match_data, dat_context,
+    rbuffer, rlen, nbuffer, &nsize);
+
+  if (rc < 0)
+    {
+    fprintf(outfile, "Failed: error %d: ", rc);
+    PCRE2_GET_ERROR_MESSAGE(nsize, rc, pbuffer);
+    PCHARSV(CASTVAR(void *, pbuffer), 0, nsize, FALSE, outfile);
+    }
+  else
+    {
+    fprintf(outfile, "%2d: ", rc);
+    PCHARSV(nbuffer, 0, nsize, utf, outfile);
+    }
+
+  fprintf(outfile, "\n");
+  }   /* End of substitution handling */
+
+/* When a replacement string is not provided, run a loop for global matching
+with one of the basic matching functions. */
+
+else for (gmatched = 0;; gmatched++)
   {
   PCRE2_SIZE j;
   int capcount;
@@ -4689,7 +4854,7 @@ for (gmatched = 0;; gmatched++)
 
   /* Fill the ovector with junk to detect elements that do not get set
   when they should be. */
-    
+
   for (j = 0; j < 2*dat_datctl.oveccount; j++) ovector[j] = JUNK_OFFSET;
 
   /* When matching is via pcre2_match(), we will detect the use of JIT via the
@@ -4787,7 +4952,7 @@ for (gmatched = 0;; gmatched++)
       {
       PCRE2_SET_CALLOUT(dat_context, NULL, NULL);  /* No callout */
       }
-      
+
     /* Run a single DFA or NFA match. */
 
     if ((dat_datctl.control & CTL_DFA) != 0)
@@ -4888,7 +5053,7 @@ for (gmatched = 0;; gmatched++)
         fprintf(outfile, "Start of matched string is beyond its end - "
           "displaying from end to start.\n");
         }
-        
+
       fprintf(outfile, "%2d: ", i/2);
 
       /* Check for an unset group */
@@ -4900,15 +5065,15 @@ for (gmatched = 0;; gmatched++)
         }
 
       /* Check for silly offsets, in particular, values that have not been
-      set when they should have been. */ 
-        
+      set when they should have been. */
+
       if (start > ulen || end > ulen)
         {
         fprintf(outfile, "ERROR: bad value(s) for offset(s): 0x%lx 0x%lx\n",
           start, end);
-        continue;    
-        }  
- 
+        continue;
+        }
+
       /* When JIT is not being used, ALLUSEDTEXT may be set. (It if is set with
       JIT, it is disabled above, with a comment.) When the match is done by the
       interpreter, leftchar and rightchar are available, and if ALLUSEDTEXT is

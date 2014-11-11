@@ -1627,5 +1627,10 @@
 
 /\x{100}\x{200}\K\x{300}/utf,startchar
     \x{100}\x{200}\x{300}
+    
+# Test UTF characters in a substitution
+
+/ábc/utf,replace=XሴZ
+    123ábc123
 
 # End of testinput5 

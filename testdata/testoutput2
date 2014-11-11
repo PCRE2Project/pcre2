@@ -993,7 +993,7 @@ Subject length lower bound = 4
  0: abcd
  1: a
  2: d
-Copy substring 5 failed (-47): unknown or unset substring
+Copy substring 5 failed (-48): unknown or unset substring
 
 /(.{20})/I
 Capturing subpattern count = 1
@@ -1047,9 +1047,9 @@ Subject length lower bound = 4
  2: <unset>
  3: f
  1G a (1)
-Get substring 2 failed (-47): unknown or unset substring
+Get substring 2 failed (-48): unknown or unset substring
  3G f (1)
-Get substring 4 failed (-47): unknown or unset substring
+Get substring 4 failed (-48): unknown or unset substring
  0L adef
  1L a
  2L 
@@ -1062,7 +1062,7 @@ Get substring 4 failed (-47): unknown or unset substring
  1G bc (2)
  2G bc (2)
  3G f (1)
-Get substring 4 failed (-47): unknown or unset substring
+Get substring 4 failed (-48): unknown or unset substring
  0L bcdef
  1L bc
  2L bc
@@ -4363,7 +4363,7 @@ Subject length lower bound = 8
  1: cd
  2: gh
 Number not found for group 'three'
-Copy substring 'three' failed (-47): unknown or unset substring
+Copy substring 'three' failed (-48): unknown or unset substring
 
 /(?P<Tes>)(?P<Test>)/IB
 ------------------------------------------------------------------
@@ -5731,7 +5731,7 @@ No match
  1: a1
  2: a1
 Number not found for group 'Z'
-Copy substring 'Z' failed (-47): unknown or unset substring
+Copy substring 'Z' failed (-48): unknown or unset substring
   C a1 (2) A (non-unique)
     
 /(?|(?<a>)(?<b>)(?<a>)|(?<a>)(?<b>)(?<a>))/I,dupnames
@@ -5772,7 +5772,7 @@ Subject length lower bound = 2
   C a (1) A (non-unique)
     cd\=copy=A
  0: cd
-Copy substring 'A' failed (-47): unknown or unset substring
+Copy substring 'A' failed (-48): unknown or unset substring
 
 /^(?P<A>a)(?P<A>b)|cd(?P<A>ef)(?P<A>gh)/I,dupnames
 Capturing subpattern count = 4
@@ -5817,7 +5817,7 @@ No match
  1: a1
  2: a1
 Number not found for group 'Z'
-Get substring 'Z' failed (-47): unknown or unset substring
+Get substring 'Z' failed (-48): unknown or unset substring
   G a1 (2) A (non-unique)
 
 /^(?P<A>a)(?P<A>b)/I,dupnames
@@ -5848,7 +5848,7 @@ Subject length lower bound = 2
   G a (1) A (non-unique)
     cd\=get=A
  0: cd
-Get substring 'A' failed (-47): unknown or unset substring
+Get substring 'A' failed (-48): unknown or unset substring
 
 /^(?P<A>a)(?P<A>b)|cd(?P<A>ef)(?P<A>gh)/I,dupnames
 Capturing subpattern count = 4
@@ -13606,5 +13606,89 @@ Subject length lower bound = 0
 
 /(((((a)))))/parens_nest_limit=2
 Failed: error 119 at offset 3: parentheses are too deeply nested
+
+# Tests for pcre2_substitute()
+
+/abc/replace=XYZ
+    123123
+ 0: 123123
+    123abc123
+ 1: 123XYZ123
+    123abc123abc123
+ 1: 123XYZ123abc123
+    123123\=zero_terminate
+ 0: 123123
+    123abc123\=zero_terminate
+ 1: 123XYZ123
+    123abc123abc123\=zero_terminate
+ 1: 123XYZ123abc123
+
+/abc/g,replace=XYZ
+    123abc123
+ 1: 123XYZ123
+    123abc123abc123
+ 2: 123XYZ123XYZ123
+
+/abc/replace=X$$Z
+    123abc123
+ 1: 123X$Z123
+
+/abc/g,replace=X$$Z
+    123abc123abc123
+ 2: 123X$Z123X$Z123
+
+/a(b)c(d)e/replace=X$1Y${2}Z
+    "abcde"
+ 1: "XbYdZ"
+
+/a(b)c(d)e/replace=X$1Y${2}Z,global
+    "abcde-abcde"
+ 2: "XbYdZ-XbYdZ"
+
+/a(?<ONE>b)c(?<TWO>d)e/replace=X$ONE+${TWO}Z
+    "abcde"
+ 1: "Xb+dZ"
+
+/a(?<ONE>b)c(?<TWO>d)e/g,replace=X$ONE+${TWO}Z
+    "abcde-abcde-"
+ 2: "Xb+dZ-Xb+dZ-"
+
+/abc/replace=a$++
+    123abc
+Failed: error -35: invalid replacement string
+
+/abc/replace=a$bad
+    123abc
+Failed: error -48: unknown or unset substring
+
+/abc/replace=a${A234567890123456789_123456789012}z
+    123abc
+Failed: error -48: unknown or unset substring
+
+/abc/replace=a${A23456789012345678901234567890123}z
+    123abc
+Failed: error -35: invalid replacement string
+
+/abc/replace=a${bcd
+    123abc
+Failed: error -35: invalid replacement string
+
+/abc/replace=a${b+d}z
+    123abc
+Failed: error -35: invalid replacement string
+
+/abc/replace=[10]XYZ
+    123abc123
+ 1: 123XYZ123
+
+/abc/replace=[9]XYZ
+    123abc123
+Failed: error -47: no more memory
+    
+/abc/replace=xyz
+    1abc2\=partial_hard
+Failed: error -34: bad option value
+
+# End of substitute tests 
 
 # End of testinput2 
