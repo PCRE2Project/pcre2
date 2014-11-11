@@ -136,7 +136,7 @@ pcre2_jit_stack_assign(pcre2_match_context *mcontext, pcre2_jit_callback callbac
   void *callback_data)
 {
 #ifndef SUPPORT_JIT
-(void)code;
+(void)mcontext;
 (void)callback;
 (void)callback_data;
 #else  /* SUPPORT_JIT */

@@ -98,7 +98,6 @@ pcre2_jit_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
 (void)options;
 (void)match_data;
 (void)mcontext;
-(void)jit_stack;
 return PCRE2_ERROR_JIT_BADOPTION;
 
 #else  /* SUPPORT_JIT */
