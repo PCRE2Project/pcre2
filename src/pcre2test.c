@@ -651,6 +651,7 @@ static int timeit = 0;
 static int timeitm = 0;
 
 clock_t total_compile_time = 0;
+clock_t total_jit_compile_time = 0;
 clock_t total_match_time = 0;
 
 static uint32_t dfa_matched;
@@ -3933,22 +3934,21 @@ if ((pat_patctl.control & CTL_HEXPAT) == 0) patlen = PCRE2_ZERO_TERMINATED;
 if (timeit > 0)
   {
   register int i;
-  clock_t time_taken;
-  clock_t start_time = clock();
+  clock_t time_taken = 0;
   for (i = 0; i < timeit; i++)
     {
+    clock_t start_time = clock();
     PCRE2_COMPILE(compiled_code, pbuffer, patlen,
       pat_patctl.options|forbid_utf, &errorcode, &erroroffset, pat_context);
+    time_taken += clock() - start_time;
     if (TEST(compiled_code, !=, NULL))
       { SUB1(pcre2_code_free, compiled_code); }
     }
-  total_compile_time += (time_taken = clock() - start_time);
+  total_compile_time += time_taken;
   fprintf(outfile, "Compile time %.4f milliseconds\n",
     (((double)time_taken * 1000.0) / (double)timeit) /
       (double)CLOCKS_PER_SEC);
   }
-
-/* FIXME: implement timing for JIT compile. */
 
 /* A final compile that is used "for real". */
 
@@ -3974,11 +3974,35 @@ if (TEST(compiled_code, ==, NULL))
 if (pattern_info(PCRE2_INFO_MAXLOOKBEHIND, &maxlookbehind, FALSE) != 0)
   return PR_ABEND;
 
-/* Call the JIT compiler if requested. */
+/* Call the JIT compiler if requested. When timing, we must free and recompile 
+the pattern each time because that is the only way to free the JIT compiled 
+code. We know that compilation will always succeed. */
 
 if (pat_patctl.jit != 0)
   {
-  PCRE2_JIT_COMPILE(compiled_code, pat_patctl.jit);
+  if (timeit > 0)
+    {
+    register int i;
+    clock_t time_taken = 0;
+    for (i = 0; i < timeit; i++)
+      {
+      clock_t start_time;
+      SUB1(pcre2_code_free, compiled_code);
+      PCRE2_COMPILE(compiled_code, pbuffer, patlen,
+        pat_patctl.options|forbid_utf, &errorcode, &erroroffset, pat_context);
+      start_time = clock();
+      PCRE2_JIT_COMPILE(compiled_code, pat_patctl.jit);
+      time_taken += clock() - start_time; 
+      }
+    total_jit_compile_time += time_taken;
+    fprintf(outfile, "JIT compile  %.4f milliseconds\n",
+      (((double)time_taken * 1000.0) / (double)timeit) /
+        (double)CLOCKS_PER_SEC);
+    }
+  else
+    { 
+    PCRE2_JIT_COMPILE(compiled_code, pat_patctl.jit);
+    } 
   }
 
 /* Output code size and other information if requested. */
@@ -6290,14 +6314,20 @@ if (INTERACTIVE(infile)) fprintf(outfile, "\n");
 
 if (showtotaltimes)
   {
+  const char *pad = ""; 
   fprintf(outfile, "--------------------------------------\n");
   if (timeit > 0)
     {
     fprintf(outfile, "Total compile time %.4f milliseconds\n",
       (((double)total_compile_time * 1000.0) / (double)timeit) /
         (double)CLOCKS_PER_SEC);
+    if (total_jit_compile_time > 0)
+      fprintf(outfile, "Total JIT compile  %.4f milliseconds\n",
+        (((double)total_jit_compile_time * 1000.0) / (double)timeit) /
+          (double)CLOCKS_PER_SEC);
+    pad = "  ";       
     }
-  fprintf(outfile, "Total match time %.4f milliseconds\n",
+  fprintf(outfile, "Total match time %s%.4f milliseconds\n", pad,
     (((double)total_match_time * 1000.0) / (double)timeitm) /
       (double)CLOCKS_PER_SEC);
   }

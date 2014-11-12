@@ -3103,24 +3103,10 @@ if (re == NULL || subject == NULL || workspace == NULL || match_data == NULL)
 if (wscount < 20) return PCRE2_ERROR_DFA_WSSIZE;
 if (start_offset > length) return PCRE2_ERROR_BADOFFSET;
 
-/* FIXME: Remove BADENDIANNESS if saving/restoring is not to be implemented. */
-
 /* Check that the first field in the block is the magic number. If it is not,
 return with PCRE2_ERROR_BADMAGIC. */
 
 if (re->magic_number != MAGIC_NUMBER) return PCRE2_ERROR_BADMAGIC;
-
-#ifdef FIXME
-If saving restoring gets implemented, define PCRE2_ERROR_BADENDIANNESS, and add
-this comment and code:
-
-/* However, if the magic number is equal to REVERSED_MAGIC_NUMBER we return
-with PCRE2_ERROR_BADENDIANNESS, which means that the pattern is likely compiled
-with different endianness. */
-
-  return re->magic_number == REVERSED_MAGIC_NUMBER?
-    PCRE2_ERROR_BADENDIANNESS:PCRE2_ERROR_BADMAGIC;
-#endif
 
 /* Check the code unit width. */
 

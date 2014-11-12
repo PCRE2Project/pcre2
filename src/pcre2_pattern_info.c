@@ -110,18 +110,6 @@ return with PCRE2_ERROR_BADMAGIC. */
 
 if (re->magic_number != MAGIC_NUMBER) return PCRE2_ERROR_BADMAGIC;
 
-#ifdef FIXME
-If saving restoring gets implemented, define PCRE2_ERROR_BADENDIANNESS, and add
-this comment and code:
-
-/* However, if the magic number is equal to REVERSED_MAGIC_NUMBER we return
-with PCRE2_ERROR_BADENDIANNESS, which means that the pattern is likely compiled
-with different endianness. */
-
-  return re->magic_number == REVERSED_MAGIC_NUMBER?
-    PCRE2_ERROR_BADENDIANNESS:PCRE2_ERROR_BADMAGIC;
-#endif
-
 /* Check that this pattern was compiled in the correct bit mode */
 
 if ((re->flags & (PCRE2_CODE_UNIT_WIDTH/8)) == 0) return PCRE2_ERROR_BADMODE;

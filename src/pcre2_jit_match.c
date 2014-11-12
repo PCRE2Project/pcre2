@@ -82,8 +82,6 @@ Returns:          > 0 => success; value is the number of ovector pairs filled
                  < -1 => some kind of unexpected problem
 */
 
-/* FIXME: this is currently a placeholder function */
-
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_jit_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
   PCRE2_SIZE start_offset, uint32_t options, pcre2_match_data *match_data,

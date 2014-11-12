@@ -6412,18 +6412,6 @@ if (start_offset > length) return PCRE2_ERROR_BADOFFSET;
 
 if (re->magic_number != MAGIC_NUMBER) return PCRE2_ERROR_BADMAGIC;
 
-#ifdef FIXME
-If saving restoring gets implemented, define PCRE2_ERROR_BADENDIANNESS, and add
-this comment and code:
-
-/* However, if the magic number is equal to REVERSED_MAGIC_NUMBER we return
-with PCRE2_ERROR_BADENDIANNESS, which means that the pattern is likely compiled
-with different endianness. */
-
-  return re->magic_number == REVERSED_MAGIC_NUMBER?
-    PCRE2_ERROR_BADENDIANNESS:PCRE2_ERROR_BADMAGIC;
-#endif
-
 /* Check the code unit width. */
 
 if ((re->flags & PCRE2_MODE_MASK) != PCRE2_CODE_UNIT_WIDTH/8)

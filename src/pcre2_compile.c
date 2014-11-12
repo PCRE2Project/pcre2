@@ -7734,10 +7734,6 @@ re->top_bracket = cb.bracount;
 re->top_backref = cb.top_backref;
 re->max_lookbehind = cb.max_lookbehind;
 
-#ifdef FIXME  /* Is this necessary? Set above */
-re->flags = cb.external_flags | PCRE2_MODE;
-#endif
-
 if (cb.had_accept)
   {
   reqcu = 0;              /* Must disable after (*ACCEPT) */

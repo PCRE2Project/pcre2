@@ -160,10 +160,11 @@ Behave as if each subject line contains the given modifiers.
 .TP 10
 \fB-t\fP
 Run each compile and match many times with a timer, and output the resulting
-times per compile or match. You can control the number of iterations that are
-used for timing by following \fB-t\fP with a number (as a separate item on the
-command line). For example, "-t 1000" iterates 1000 times. The default is to
-iterate 500,000 times.
+times per compile or match. When JIT is used, separate times are given for the
+initial compile and the JIT compile. You can control the number of iterations
+that are used for timing by following \fB-t\fP with a number (as a separate
+item on the command line). For example, "-t 1000" iterates 1000 times. The
+default is to iterate 500,000 times.
 .TP 10
 \fB-tm\fP
 This is like \fB-t\fP except that it times only the matching phase, not the
