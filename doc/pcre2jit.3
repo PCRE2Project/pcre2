@@ -1,4 +1,4 @@
-.TH PCRE2JIT 3 "08 November 2014" "PCRE2 10.00"
+.TH PCRE2JIT 3 "12 November 2014" "PCRE2 10.00"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 JUST-IN-TIME COMPILER SUPPORT"
@@ -27,11 +27,12 @@ JIT support is an optional feature of PCRE2. The "configure" option
 you want to use JIT. The support is limited to the following hardware
 platforms:
 .sp
-  ARM v5, v7, and Thumb2
+  ARM 32-bit (v5, v7, and Thumb2)
+  ARM 64-bit 
   Intel x86 32-bit and 64-bit
-  MIPS 32-bit
+  MIPS 32-bit and 64-bit
   Power PC 32-bit and 64-bit
-  SPARC 32-bit (experimental)
+  SPARC 32-bit
 .sp
 If --enable-jit is set on an unsupported platform, compilation fails.
 .P
@@ -50,10 +51,10 @@ To make use of the JIT support in the simplest way, all you have to do is to
 call \fBpcre2_jit_compile()\fP after successfully compiling a pattern with
 \fBpcre2_compile()\fP. This function has two arguments: the first is the
 compiled pattern pointer that was returned by \fBpcre2_compile()\fP, and the
-second is a set of option bits, which must include at least one of
-PCRE2_JIT_COMPLETE, PCRE2_JIT_PARTIAL_HARD, or PCRE2_JIT_PARTIAL_SOFT.
+second is zero or more of the following option bits: PCRE2_JIT_COMPLETE,
+PCRE2_JIT_PARTIAL_HARD, or PCRE2_JIT_PARTIAL_SOFT.
 .P
-If JIT support is not available, a call to \fBpcre2_jit_comple()\fP does
+If JIT support is not available, a call to \fBpcre2_jit_compile()\fP does
 nothing and returns PCRE2_ERROR_JIT_BADOPTION. Otherwise, the compiled pattern
 is passed to the JIT compiler, which turns it into machine code that executes
 much faster than the normal interpretive code, but yields exactly the same
@@ -68,6 +69,18 @@ compiler generates different optimized code for each of the three modes
 (normal, soft partial, hard partial). When \fBpcre2_match()\fP is called, the
 appropriate code is run if it is available. Otherwise, the pattern is matched
 using interpretive code.
+.P
+You can call \fBpcre2_jit_compile()\fP multiple times for the same compiled
+pattern. It does nothing if it has previously compiled code for any of the
+option bits. For example, you can call it once with PCRE2_JIT_COMPLETE and
+(perhaps later, when you find you need partial matching) again with
+PCRE2_JIT_COMPLETE and PCRE2_JIT_PARTIAL_HARD. This time it will ignore
+PCRE2_JIT_COMPLETE and just compile code for partial matching. If
+\fBpcre2_jit_compile()\fP is called with no option bits set, it immediately
+returns zero. This is an alternative way of testing if JIT is available.
+.P
+At present, it is not possible to free JIT compiled code except when the entire 
+compiled pattern is freed by calling \fBpcre2_free_code()\fP.
 .P
 In some circumstances you may need to call additional functions. These are
 described in the section entitled
@@ -155,7 +168,7 @@ memory allocation), a starting size and a maximum size, and it returns a
 pointer to an opaque structure of type \fBpcre2_jit_stack\fP, or NULL if there
 is an error. The \fBpcre2_jit_stack_free()\fP function is used to free a stack
 that is no longer needed. (For the technically minded: the address space is
-allocated by mmap or VirtualAlloc.)  FIXME Is this right?
+allocated by mmap or VirtualAlloc.)
 .P
 JIT uses far less memory for recursion than the interpretive code,
 and a maximum stack size of 512K to 1M should be more than enough for any
@@ -173,7 +186,8 @@ passed to a matching function, its information determines which JIT stack is
 used. There are three cases for the values of the other two options:
 .sp
   (1) If \fIcallback\fP is NULL and \fIdata\fP is NULL, an internal 32K block
-      on the machine stack is used.
+      on the machine stack is used. This is the default when a match 
+      context is created. 
 .sp
   (2) If \fIcallback\fP is NULL and \fIdata\fP is not NULL, \fIdata\fP must be
       a pointer to a valid JIT stack, the result of calling
@@ -384,6 +398,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 08 November 2014
+Last updated: 12 November 2014
 Copyright (c) 1997-2014 University of Cambridge.
 .fi
