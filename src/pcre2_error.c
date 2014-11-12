@@ -102,7 +102,7 @@ static const char compile_error_texts[] =
   /* 30 */
   "unknown POSIX class name\0"
   "internal error in pcre2_study(): should not occur\0"
-  "this version of PCRE does not have UTF or Unicode property support\0"
+  "this version of PCRE2 does not have Unicode support\0"
   "parentheses are too deeply nested (stack check)\0"
   "character code point value in \\x{} or \\o{} is too large\0"
   /* 35 */
@@ -118,7 +118,7 @@ static const char compile_error_texts[] =
   "two named subpatterns have the same name (PCRE2_DUPNAMES not set)\0"
   "group name must start with a non-digit\0"
   /* 45 */
-  "this version of PCRE does not have support for \\P, \\p, or \\X\0"
+  "this version of PCRE2 does not have support for \\P, \\p, or \\X\0"
   "malformed \\P or \\p sequence\0"
   "unknown property name after \\P or \\p\0"
   "subpattern name is too long (maximum " XSTRING(MAX_NAME_SIZE) " characters)\0"

@@ -165,8 +165,13 @@ void vms_setsymbol( char *, char *, int );
 #define DEFAULT_OVECCOUNT 15    /* Default ovector count */
 #define JUNK_OFFSET 0xdeadbeef  /* For initializing ovector */
 #define LOOPREPEAT 500000       /* Default loop count for timing */
-#define REPLACE_BUFFSIZE 400    /* For replacement strings */
+#define REPLACE_MODSIZE 96      /* Field for reading 8-bit replacement */
 #define VERSION_SIZE 64         /* Size of buffer for the version strings */
+
+/* Make sure the buffer into which replacement strings are copied is big enough 
+to hold them as 32-bit code units. */
+
+#define REPLACE_BUFFSIZE (4*REPLACE_MODSIZE)
 
 /* Execution modes */
 
@@ -257,6 +262,20 @@ these inclusions should not be changed. */
 #endif   /* SUPPORT_PCRE2_32 */
 
 #define PCRE2_SUFFIX(a) a
+
+/* We need to be able to check input text for UTF-8 validity, whatever code 
+widths are actually available, because the input to pcre2test is always in 
+8-bit code units. So we include the UTF validity checking function for 8-bit 
+code units. */
+
+extern int valid_utf(PCRE2_SPTR8, PCRE2_SIZE, PCRE2_SIZE *);
+
+#define  PCRE2_CODE_UNIT_WIDTH 8
+#undef   PCRE2_SPTR
+#define  PCRE2_SPTR PCRE2_SPTR8
+#include "pcre2_valid_utf.c"
+#undef   PCRE2_CODE_UNIT_WIDTH
+#undef   PCRE2_SPTR
 
 /* If we have 8-bit support, default to it; if there is also 16-or 32-bit
 support, it can be selected by a command-line option. If there is no 8-bit
@@ -369,15 +388,20 @@ data line. */
                     CTL_MARK|\
                     CTL_MEMORY|\
                     CTL_STARTCHAR)
+                    
+/* Structures for holding modifier information for patterns and subject strings 
+(data). Fields containing modifiers that can be set either for a pattern or a 
+subject must be at the start and in the same order in both cases so that the 
+same offset in the big table below works for both. */
 
 typedef struct patctl {    /* Structure for pattern modifiers. */
   uint32_t  options;       /* Must be in same position as datctl */
   uint32_t  control;       /* Must be in same position as datctl */
+   uint8_t  replacement[REPLACE_MODSIZE];  /* So must this */
   uint32_t  jit;
   uint32_t  stackguard_test;
   uint32_t  tables_id;
   uint8_t   locale[32];
-  uint8_t   replacement[REPLACE_BUFFSIZE];
 } patctl;
 
 #define MAXCPYGET 10
@@ -386,6 +410,7 @@ typedef struct patctl {    /* Structure for pattern modifiers. */
 typedef struct datctl {    /* Structure for data line modifiers. */
   uint32_t  options;       /* Must be in same position as patctl */
   uint32_t  control;       /* Must be in same position as patctl */
+   uint8_t  replacement[REPLACE_MODSIZE];  /* So must this */
   uint32_t  cfail[2];
    int32_t  callout_data;
    int32_t  copy_numbers[MAXCPYGET];
@@ -487,7 +512,7 @@ static modstruct modlist[] = {
   { "posix",               MOD_PAT,  MOD_CTL, CTL_POSIX,                 PO(control) },
   { "ps",                  MOD_DAT,  MOD_OPT, PCRE2_PARTIAL_SOFT,        DO(options) },
   { "recursion_limit",     MOD_CTM,  MOD_INT, 0,                         MO(recursion_limit) },
-  { "replace",             MOD_PAT,  MOD_STR, 0,                         PO(replacement) },
+  { "replace",             MOD_PND,  MOD_STR, 0,                         PO(replacement) },
   { "stackguard",          MOD_PAT,  MOD_INT, 0,                         PO(stackguard_test) },
   { "startchar",           MOD_PND,  MOD_CTL, CTL_STARTCHAR,             PO(control) },
   { "tables",              MOD_PAT,  MOD_INT, 0,                         PO(tables_id) },
@@ -4211,13 +4236,14 @@ uint32_t *q32 = NULL;
 
 /* Copy the default context and data control blocks to the active ones. Then
 copy from the pattern the controls that can be set in either the pattern or the
-data. This allows them to be unset in the data line. We do not do this for
+data. This allows them to be overridden in the data line. We do not do this for
 options because those that are common apply separately to compiling and
 matching. */
 
 DATCTXCPY(dat_context, default_dat_context);
 memcpy(&dat_datctl, &def_datctl, sizeof(datctl));
 dat_datctl.control |= (pat_patctl.control & CTL_ALLPD);
+strcpy((char *)dat_datctl.replacement, (char *)pat_patctl.replacement);
 
 /* Initialize for scanning the data line. */
 
@@ -4715,20 +4741,28 @@ else
   PCRE2_MATCH_DATA_FREE(match_data);
   PCRE2_MATCH_DATA_CREATE(match_data, max_oveccount, NULL);
   }
+  
+/* Replacement processing is ignored for DFA matching. */ 
+
+if (dat_datctl.replacement[0] != 0 && (dat_datctl.control & CTL_DFA) != 0)
+  {
+  fprintf(outfile, "** Ignored for DFA matching: replace\n");
+  dat_datctl.replacement[0] = 0;
+  }
 
 /* If a replacement string is provided, call pcre2_substitute() instead of one
 of the matching functions. First we have to convert the replacement string to
 the appropriate width. */
 
-if (pat_patctl.replacement[0] != 0)
+if (dat_datctl.replacement[0] != 0)
   {
   int rc;
   uint8_t *pr;
   uint8_t rbuffer[REPLACE_BUFFSIZE];
   uint8_t nbuffer[REPLACE_BUFFSIZE];
   uint32_t goption;
-  PCRE2_SIZE rlen;
-  PCRE2_SIZE nsize;
+  PCRE2_SIZE rlen, nsize, erroroffset;
+  BOOL badutf = FALSE;
 
 #ifdef SUPPORT_PCRE2_8
   uint8_t *r8 = NULL;
@@ -4740,10 +4774,13 @@ if (pat_patctl.replacement[0] != 0)
   uint32_t *r32 = NULL;
 #endif
 
-  goption = ((pat_patctl.control & CTL_GLOBAL) == 0)? 0 :
+  if (timeitm)
+    fprintf(outfile, "** Timing is not supported with replace: ignored\n"); 
+
+  goption = ((dat_datctl.control & CTL_GLOBAL) == 0)? 0 :
     PCRE2_SUBSTITUTE_GLOBAL;
   SETCASTPTR(r, rbuffer);  /* Sets r8, r16, or r32, as appropriate. */
-  pr = pat_patctl.replacement;
+  pr = dat_datctl.replacement;
 
   /* If the replacement starts with '[<number>]' we interpret that as length
   value for the replacement buffer. */
@@ -4767,52 +4804,58 @@ if (pat_patctl.replacement[0] != 0)
     nsize = n;
     }
 
-  /* Now copy the replacement string to a buffer of the appropriate width. */
+  /* Now copy the replacement string to a buffer of the appropriate width. No 
+  escape processing is done for replacements. In UTF mode, check for an invalid 
+  UTF-8 input string, and if it is invalid, just copy its code units without 
+  UTF interpretation. This provides a means of checking that an invalid string 
+  is detected. Otherwise, UTF-8 can be used to include wide characters in a 
+  replacement. */
+  
+  if (utf) badutf = valid_utf(pr, strlen((const char *)pr), &erroroffset);
 
-  while ((c = *pr++) != 0)
+  /* Not UTF or invalid UTF-8: just copy the code units. */
+  
+  if (!utf || badutf)
     {
-    if (utf && HASUTF8EXTRALEN(c)) { GETUTF8INC(c, pr); }
-
-    /* At present no escape processing is provided for replacements. */
+    while ((c = *pr++) != 0)
+      { 
+#ifdef SUPPORT_PCRE2_8
+      if (test_mode == PCRE8_MODE) *r8++ = c;
+#endif
+#ifdef SUPPORT_PCRE2_16
+      if (test_mode == PCRE16_MODE) *r16++ = c;
+#endif
+#ifdef SUPPORT_PCRE2_32
+      if (test_mode == PCRE32_MODE) *r32++ = c;
+#endif
+      }
+    }
+    
+  /* Valid UTF-8 replacement string */
+        
+  else while ((c = *pr++) != 0)
+    {
+    if (HASUTF8EXTRALEN(c)) { GETUTF8INC(c, pr); }
 
 #ifdef SUPPORT_PCRE2_8
-    if (test_mode == PCRE8_MODE)
-      {
-      if (utf)
-        {
-        r8 += ord2utf8(c, r8);
-        }
-      else
-        {
-        *r8++ = c;
-        }
-      }
+    if (test_mode == PCRE8_MODE) r8 += ord2utf8(c, r8);
 #endif
+
 #ifdef SUPPORT_PCRE2_16
     if (test_mode == PCRE16_MODE)
       {
-      if (utf)
+      if (c >= 0x10000u)
         {
-        if (c >= 0x10000u)
-          {
-          c-= 0x10000u;
-          *r16++ = 0xD800 | (c >> 10);
-          *r16++ = 0xDC00 | (c & 0x3ff);
-          }
-        else
-          *r16++ = c;
+        c-= 0x10000u;
+        *r16++ = 0xD800 | (c >> 10);
+        *r16++ = 0xDC00 | (c & 0x3ff);
         }
-      else
-        {
-        *r16++ = c;
-        }
+      else *r16++ = c;
       }
 #endif
+
 #ifdef SUPPORT_PCRE2_32
-    if (test_mode == PCRE32_MODE)
-      {
-      *r32++ = c;
-      }
+    if (test_mode == PCRE32_MODE) *r32++ = c;
 #endif
     }
 

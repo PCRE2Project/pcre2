@@ -4067,6 +4067,12 @@ a random value. /Ix
 /abc/replace=xyz
     1abc2\=partial_hard
 
+/abc/replace=xyz
+    123abc456
+    123abc456\=replace=pqr
+    123abc456abc789
+    123abc456abc789\=g
+
 # End of substitute tests 
 
 # End of testinput2 

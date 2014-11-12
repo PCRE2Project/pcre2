@@ -1546,4 +1546,8 @@ Starting code units: \xce \xcf
 Last code unit = 'B' (caseless)
 Subject length lower bound = 2
 
+/abc/utf,replace=Ã
+   abc
+Failed: error -3: UTF-8 error: 1 byte missing at end
+
 # End of testinput10

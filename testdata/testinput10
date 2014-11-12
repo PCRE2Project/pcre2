@@ -444,4 +444,7 @@
 
 /\x{3a3}B/IBi,utf
 
+/abc/utf,replace=Ã
+   abc
+
 # End of testinput10

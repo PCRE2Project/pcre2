@@ -13689,6 +13689,16 @@ Failed: error -47: no more memory
     1abc2\=partial_hard
 Failed: error -34: bad option value
 
+/abc/replace=xyz
+    123abc456
+ 1: 123xyz456
+    123abc456\=replace=pqr
+ 1: 123pqr456
+    123abc456abc789
+ 1: 123xyz456abc789
+    123abc456abc789\=g
+ 2: 123xyz456xyz789
+
 # End of substitute tests 
 
 # End of testinput2 
