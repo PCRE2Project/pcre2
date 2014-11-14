@@ -28,7 +28,7 @@ you want to use JIT. The support is limited to the following hardware
 platforms:
 .sp
   ARM 32-bit (v5, v7, and Thumb2)
-  ARM 64-bit 
+  ARM 64-bit
   Intel x86 32-bit and 64-bit
   MIPS 32-bit and 64-bit
   Power PC 32-bit and 64-bit
@@ -79,7 +79,7 @@ PCRE2_JIT_COMPLETE and just compile code for partial matching. If
 \fBpcre2_jit_compile()\fP is called with no option bits set, it immediately
 returns zero. This is an alternative way of testing if JIT is available.
 .P
-At present, it is not possible to free JIT compiled code except when the entire 
+At present, it is not possible to free JIT compiled code except when the entire
 compiled pattern is freed by calling \fBpcre2_free_code()\fP.
 .P
 In some circumstances you may need to call additional functions. These are
@@ -186,8 +186,8 @@ passed to a matching function, its information determines which JIT stack is
 used. There are three cases for the values of the other two options:
 .sp
   (1) If \fIcallback\fP is NULL and \fIdata\fP is NULL, an internal 32K block
-      on the machine stack is used. This is the default when a match 
-      context is created. 
+      on the machine stack is used. This is the default when a match
+      context is created.
 .sp
   (2) If \fIcallback\fP is NULL and \fIdata\fP is not NULL, \fIdata\fP must be
       a pointer to a valid JIT stack, the result of calling

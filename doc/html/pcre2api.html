@@ -1089,7 +1089,7 @@ equivalent to Perl's /x option, and it can be changed within a pattern by a
 Which characters are interpreted as newlines can be specified by a setting in
 the compile context that is passed to <b>pcre2_compile()</b> or by a special
 sequence at the start of the pattern, as described in the section entitled
-<a href="pcrepattern.html#newlines">"Newline conventions"</a>
+<a href="pcre2pattern.html#newlines">"Newline conventions"</a>
 in the <b>pcre2pattern</b> documentation. A default is defined when PCRE2 is
 built.
 <pre>
@@ -1243,7 +1243,7 @@ This option changes the way PCRE2 processes \B, \b, \D, \d, \S, \s, \W,
 \w, and some of the POSIX character classes. By default, only ASCII characters
 are recognized, but if PCRE2_UCP is set, Unicode properties are used instead to
 classify characters. More details are given in the section on
-<a href="pcre2.html#genericchartypes">generic character types</a>
+<a href="pcre2pattern.html#genericchartypes">generic character types</a>
 in the
 <a href="pcre2pattern.html"><b>pcre2pattern</b></a>
 page. If you set PCRE2_UCP, matching one of the items it affects takes much
@@ -1924,11 +1924,8 @@ documentation.
 <P>
 When PCRE2 is built, a default newline convention is set; this is usually the
 standard convention for the operating system. The default can be overridden in
-either a
-<a href="#compilecontext">compile context</a>
-or a
-<a href="#matchcontext">match context.</a>
-However, changing the newline convention at match time disables JIT matching.
+a
+<a href="#compilecontext">compile context.</a>
 During matching, the newline choice affects the behaviour of the dot,
 circumflex, and dollar metacharacters. It may also alter the way the match
 position is advanced after a match failure for an unanchored pattern.
@@ -2290,7 +2287,7 @@ subpattern <i>n</i> has not been used at all, it returns an empty string. This
 can be distinguished from a genuine zero-length substring by inspecting the
 appropriate offset in the ovector, which contains PCRE2_UNSET for unset
 substrings.
-<a name="extractbynname"></a></P>
+<a name="extractbyname"></a></P>
 <br><a name="SEC27" href="#TOC1">EXTRACTING CAPTURED SUBSTRINGS BY NAME</a><br>
 <P>
 <b>int pcre2_substring_number_from_name(const pcre2_code *<i>code</i>,</b>
@@ -2358,7 +2355,8 @@ string in <i>outputbuffer</i>, replacing the part that was matched with the
 be given as PCRE2_ZERO_TERMINATED for a zero-terminated string.
 </P>
 <P>
-In the replacement string, which is interpreted as a UTF string in UTF mode, a
+In the replacement string, which is interpreted as a UTF string in UTF mode,
+and is checked for UTF validity unless the PCRE2_NO_UTF_CHECK option is set, a
 dollar character is an escape character that can specify the insertion of
 characters from capturing groups in the pattern. The following forms are
 recognized:

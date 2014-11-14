@@ -69,7 +69,7 @@ Arguments:
 
 Returns:          >= 0 number of substitutions made
                   < 0 an error code
-                  PCRE2_ERROR_BADREPLACEMENT means invalid use of $ 
+                  PCRE2_ERROR_BADREPLACEMENT means invalid use of $
 */
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
@@ -84,14 +84,14 @@ uint32_t ovector_count;
 uint32_t goptions = 0;
 BOOL match_data_created = FALSE;
 BOOL global = FALSE;
-PCRE2_SIZE buff_offset, lengthleft, endlength;
+PCRE2_SIZE buff_offset, lengthleft, fraglength;
 PCRE2_SIZE *ovector;
 
 /* Partial matching is not valid. */
 
 if ((options & (PCRE2_PARTIAL_HARD|PCRE2_PARTIAL_SOFT)) != 0)
   return PCRE2_ERROR_BADOPTION;
-  
+
 /* If no match data block is provided, create one. */
 
 if (match_data == NULL)
@@ -120,7 +120,7 @@ if ((code->overall_options & PCRE2_UTF) != 0 &&
     }
   }
 #endif  /* SUPPORT_UNICODE */
- 
+
 /* Notice the global option and remove it from the options that are passed to
 pcre2_match(). */
 
@@ -151,17 +151,20 @@ do
 
   rc = pcre2_match(code, subject, length, start_offset, options|goptions,
     match_data, mcontext);
-    
-  /* Any error other than no match returns the error code. No match when not 
-  doing the special after-empty-match global rematch, or when at the end of the 
-  subject, breaks the global loop. Otherwise, advance the starting point and 
-  try again. */ 
+
+  /* Any error other than no match returns the error code. No match when not
+  doing the special after-empty-match global rematch, or when at the end of the
+  subject, breaks the global loop. Otherwise, advance the starting point by one
+  character, copying it to the output, and try again. */
 
   if (rc < 0)
     {
+    PCRE2_SIZE save_start;
+
     if (rc != PCRE2_ERROR_NOMATCH) goto EXIT;
     if (goptions == 0 || start_offset >= length) break;
-    start_offset++;
+
+    save_start = start_offset++;
     if ((code->overall_options & PCRE2_UTF) != 0)
       {
 #if PCRE2_CODE_UNIT_WIDTH == 8
@@ -173,20 +176,28 @@ do
         start_offset++;
 #endif
       }
+
+    fraglength = start_offset - save_start;
+    if (lengthleft < fraglength) goto NOROOM;
+    memcpy(buffer + buff_offset, subject + save_start,
+      fraglength*(PCRE2_CODE_UNIT_WIDTH/8));
+    buff_offset += fraglength;
+    lengthleft -= fraglength;
+
     goptions = 0;
     continue;
     }
-    
+
   /* Handle a successful match. */
 
   subs++;
   if (rc == 0) rc = ovector_count;
-  endlength = ovector[0] - start_offset;
-  if (endlength >= lengthleft) goto NOROOM;
-  memcpy(buffer + buff_offset, subject + start_offset, 
-    endlength*(PCRE2_CODE_UNIT_WIDTH/8));
-  buff_offset += endlength;
-  lengthleft -= endlength;
+  fraglength = ovector[0] - start_offset;
+  if (fraglength >= lengthleft) goto NOROOM;
+  memcpy(buffer + buff_offset, subject + start_offset,
+    fraglength*(PCRE2_CODE_UNIT_WIDTH/8));
+  buff_offset += fraglength;
+  lengthleft -= fraglength;
 
   for (i = 0; i < rlength; i++)
     {
@@ -196,11 +207,11 @@ do
       BOOL inparens;
       PCRE2_SIZE sublength;
       PCRE2_UCHAR next;
-      PCRE2_UCHAR name[33];    
- 
+      PCRE2_UCHAR name[33];
+
       if (++i == rlength) goto BAD;
       if ((next = replacement[i]) == CHAR_DOLLAR_SIGN) goto LITERAL;
- 
+
       group = -1;
       n = 0;
       inparens = FALSE;
@@ -232,7 +243,7 @@ do
           if (i == rlength) break;
           next = replacement[++i];
           }
-        if (n == 0) goto BAD;   
+        if (n == 0) goto BAD;
         name[n] = 0;
         }
 
@@ -241,7 +252,7 @@ do
         if (i == rlength || next != CHAR_RIGHT_CURLY_BRACKET) goto BAD;
         }
       else i--;   /* Last code unit of name/number */
-      
+
       /* Have found a syntactically correct group number or name. */
 
       sublength = lengthleft;
@@ -251,8 +262,8 @@ do
       else
         rc = pcre2_substring_copy_bynumber(match_data, group,
           buffer + buff_offset, &sublength);
-          
-      if (rc < 0) goto EXIT;    
+
+      if (rc < 0) goto EXIT;
       buff_offset += sublength;
       lengthleft -= sublength;
       }
@@ -279,17 +290,17 @@ do
 /* Copy the rest of the subject and return the number of substitutions. */
 
 rc = subs;
-endlength = length - start_offset;
-if (endlength + 1 > lengthleft) goto NOROOM;
+fraglength = length - start_offset;
+if (fraglength + 1 > lengthleft) goto NOROOM;
 memcpy(buffer + buff_offset, subject + start_offset,
-  endlength*(PCRE2_CODE_UNIT_WIDTH/8));
-buff_offset += endlength;
+  fraglength*(PCRE2_CODE_UNIT_WIDTH/8));
+buff_offset += fraglength;
 buffer[buff_offset] = 0;
 *blength = buff_offset;
 
 EXIT:
 if (match_data_created) pcre2_match_data_free(match_data);
-  else match_data->rc = rc;   
+  else match_data->rc = rc;
 return rc;
 
 NOROOM:

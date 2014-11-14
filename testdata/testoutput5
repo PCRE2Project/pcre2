@@ -4002,4 +4002,8 @@ Subject length lower bound = 1
     123ábc123
  1: 123X\x{1234}Z123
 
+/(?<=abc)(|def)/g,utf,replace=<$0>
+      123abcáyzabcdef789abcሴqr
+ 4: 123abc<>\x{e1}yzabc<><def>789abc<>\x{1234}qr
+
 # End of testinput5 

@@ -164,11 +164,12 @@ void vms_setsymbol( char *, char *, int );
 #define DFA_WS_DIMENSION 1000   /* Size of DFA workspace */
 #define DEFAULT_OVECCOUNT 15    /* Default ovector count */
 #define JUNK_OFFSET 0xdeadbeef  /* For initializing ovector */
+#define LOCALESIZE 32           /* Size of locale name */
 #define LOOPREPEAT 500000       /* Default loop count for timing */
 #define REPLACE_MODSIZE 96      /* Field for reading 8-bit replacement */
 #define VERSION_SIZE 64         /* Size of buffer for the version strings */
 
-/* Make sure the buffer into which replacement strings are copied is big enough 
+/* Make sure the buffer into which replacement strings are copied is big enough
 to hold them as 32-bit code units. */
 
 #define REPLACE_BUFFSIZE (4*REPLACE_MODSIZE)
@@ -263,9 +264,9 @@ these inclusions should not be changed. */
 
 #define PCRE2_SUFFIX(a) a
 
-/* We need to be able to check input text for UTF-8 validity, whatever code 
-widths are actually available, because the input to pcre2test is always in 
-8-bit code units. So we include the UTF validity checking function for 8-bit 
+/* We need to be able to check input text for UTF-8 validity, whatever code
+widths are actually available, because the input to pcre2test is always in
+8-bit code units. So we include the UTF validity checking function for 8-bit
 code units. */
 
 extern int valid_utf(PCRE2_SPTR8, PCRE2_SIZE, PCRE2_SIZE *);
@@ -388,10 +389,10 @@ data line. */
                     CTL_MARK|\
                     CTL_MEMORY|\
                     CTL_STARTCHAR)
-                    
-/* Structures for holding modifier information for patterns and subject strings 
-(data). Fields containing modifiers that can be set either for a pattern or a 
-subject must be at the start and in the same order in both cases so that the 
+
+/* Structures for holding modifier information for patterns and subject strings
+(data). Fields containing modifiers that can be set either for a pattern or a
+subject must be at the start and in the same order in both cases so that the
 same offset in the big table below works for both. */
 
 typedef struct patctl {    /* Structure for pattern modifiers. */
@@ -401,7 +402,7 @@ typedef struct patctl {    /* Structure for pattern modifiers. */
   uint32_t  jit;
   uint32_t  stackguard_test;
   uint32_t  tables_id;
-  uint8_t   locale[32];
+  uint8_t   locale[LOCALESIZE];
 } patctl;
 
 #define MAXCPYGET 10
@@ -486,7 +487,7 @@ static modstruct modlist[] = {
   { "jitfast",             MOD_PAT,  MOD_CTL, CTL_JITFAST,               PO(control) },
   { "jitstack",            MOD_DAT,  MOD_INT, 0,                         DO(jitstack) },
   { "jitverify",           MOD_PAT,  MOD_CTL, CTL_JITVERIFY,             PO(control) },
-  { "locale",              MOD_PAT,  MOD_STR, 0,                         PO(locale) },
+  { "locale",              MOD_PAT,  MOD_STR, LOCALESIZE,                PO(locale) },
   { "mark",                MOD_PNDP, MOD_CTL, CTL_MARK,                  PO(control) },
   { "match_limit",         MOD_CTM,  MOD_INT, 0,                         MO(match_limit) },
   { "match_unset_backref", MOD_PAT,  MOD_OPT, PCRE2_MATCH_UNSET_BACKREF, PO(options) },
@@ -512,7 +513,7 @@ static modstruct modlist[] = {
   { "posix",               MOD_PAT,  MOD_CTL, CTL_POSIX,                 PO(control) },
   { "ps",                  MOD_DAT,  MOD_OPT, PCRE2_PARTIAL_SOFT,        DO(options) },
   { "recursion_limit",     MOD_CTM,  MOD_INT, 0,                         MO(recursion_limit) },
-  { "replace",             MOD_PND,  MOD_STR, 0,                         PO(replacement) },
+  { "replace",             MOD_PND,  MOD_STR, REPLACE_MODSIZE,           PO(replacement) },
   { "stackguard",          MOD_PAT,  MOD_INT, 0,                         PO(stackguard_test) },
   { "startchar",           MOD_PND,  MOD_CTL, CTL_STARTCHAR,             PO(control) },
   { "tables",              MOD_PAT,  MOD_INT, 0,                         PO(tables_id) },
@@ -3141,6 +3142,12 @@ for (;;)
     break;
 
     case MOD_STR:
+    if (len + 1 > m->value)
+      {
+      fprintf(outfile, "** Overlong value for '%s' (max %d code units)\n",
+        m->name, m->value - 1);
+      return FALSE;
+      }
     memcpy(field, pp, len);
     ((uint8_t *)field)[len] = 0;
     pp = ep;
@@ -3974,8 +3981,8 @@ if (TEST(compiled_code, ==, NULL))
 if (pattern_info(PCRE2_INFO_MAXLOOKBEHIND, &maxlookbehind, FALSE) != 0)
   return PR_ABEND;
 
-/* Call the JIT compiler if requested. When timing, we must free and recompile 
-the pattern each time because that is the only way to free the JIT compiled 
+/* Call the JIT compiler if requested. When timing, we must free and recompile
+the pattern each time because that is the only way to free the JIT compiled
 code. We know that compilation will always succeed. */
 
 if (pat_patctl.jit != 0)
@@ -3992,7 +3999,7 @@ if (pat_patctl.jit != 0)
         pat_patctl.options|forbid_utf, &errorcode, &erroroffset, pat_context);
       start_time = clock();
       PCRE2_JIT_COMPILE(compiled_code, pat_patctl.jit);
-      time_taken += clock() - start_time; 
+      time_taken += clock() - start_time;
       }
     total_jit_compile_time += time_taken;
     fprintf(outfile, "JIT compile  %.4f milliseconds\n",
@@ -4000,9 +4007,9 @@ if (pat_patctl.jit != 0)
         (double)CLOCKS_PER_SEC);
     }
   else
-    { 
+    {
     PCRE2_JIT_COMPILE(compiled_code, pat_patctl.jit);
-    } 
+    }
   }
 
 /* Output code size and other information if requested. */
@@ -4765,8 +4772,8 @@ else
   PCRE2_MATCH_DATA_FREE(match_data);
   PCRE2_MATCH_DATA_CREATE(match_data, max_oveccount, NULL);
   }
-  
-/* Replacement processing is ignored for DFA matching. */ 
+
+/* Replacement processing is ignored for DFA matching. */
 
 if (dat_datctl.replacement[0] != 0 && (dat_datctl.control & CTL_DFA) != 0)
   {
@@ -4799,7 +4806,7 @@ if (dat_datctl.replacement[0] != 0)
 #endif
 
   if (timeitm)
-    fprintf(outfile, "** Timing is not supported with replace: ignored\n"); 
+    fprintf(outfile, "** Timing is not supported with replace: ignored\n");
 
   goption = ((dat_datctl.control & CTL_GLOBAL) == 0)? 0 :
     PCRE2_SUBSTITUTE_GLOBAL;
@@ -4828,21 +4835,21 @@ if (dat_datctl.replacement[0] != 0)
     nsize = n;
     }
 
-  /* Now copy the replacement string to a buffer of the appropriate width. No 
-  escape processing is done for replacements. In UTF mode, check for an invalid 
-  UTF-8 input string, and if it is invalid, just copy its code units without 
-  UTF interpretation. This provides a means of checking that an invalid string 
-  is detected. Otherwise, UTF-8 can be used to include wide characters in a 
+  /* Now copy the replacement string to a buffer of the appropriate width. No
+  escape processing is done for replacements. In UTF mode, check for an invalid
+  UTF-8 input string, and if it is invalid, just copy its code units without
+  UTF interpretation. This provides a means of checking that an invalid string
+  is detected. Otherwise, UTF-8 can be used to include wide characters in a
   replacement. */
-  
+
   if (utf) badutf = valid_utf(pr, strlen((const char *)pr), &erroroffset);
 
   /* Not UTF or invalid UTF-8: just copy the code units. */
-  
+
   if (!utf || badutf)
     {
     while ((c = *pr++) != 0)
-      { 
+      {
 #ifdef SUPPORT_PCRE2_8
       if (test_mode == PCRE8_MODE) *r8++ = c;
 #endif
@@ -4854,9 +4861,9 @@ if (dat_datctl.replacement[0] != 0)
 #endif
       }
     }
-    
+
   /* Valid UTF-8 replacement string */
-        
+
   else while ((c = *pr++) != 0)
     {
     if (HASUTF8EXTRALEN(c)) { GETUTF8INC(c, pr); }
@@ -6314,7 +6321,7 @@ if (INTERACTIVE(infile)) fprintf(outfile, "\n");
 
 if (showtotaltimes)
   {
-  const char *pad = ""; 
+  const char *pad = "";
   fprintf(outfile, "--------------------------------------\n");
   if (timeit > 0)
     {
@@ -6325,7 +6332,7 @@ if (showtotaltimes)
       fprintf(outfile, "Total JIT compile  %.4f milliseconds\n",
         (((double)total_jit_compile_time * 1000.0) / (double)timeit) /
           (double)CLOCKS_PER_SEC);
-    pad = "  ";       
+    pad = "  ";
     }
   fprintf(outfile, "Total match time %s%.4f milliseconds\n", pad,
     (((double)total_match_time * 1000.0) / (double)timeitm) /

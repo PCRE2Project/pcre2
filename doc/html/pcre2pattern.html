@@ -100,8 +100,8 @@ page.
 <P>
 Some applications that allow their users to supply patterns may wish to
 restrict them to non-UTF data for security reasons. If the PCRE2_NEVER_UTF
-option is set at compile time, (*UTF) is not allowed, and its appearance causes
-an error.
+option is passed to <b>pcre2_compile()</b>, (*UTF) is not allowed, and its
+appearance in a pattern causes an error.
 </P>
 <br><b>
 Unicode property support
@@ -112,6 +112,22 @@ This has the same effect as setting the PCRE2_UCP option: it causes sequences
 such as \d and \w to use Unicode properties to determine character types,
 instead of recognizing only characters with codes less than 128 via a lookup
 table.
+</P>
+<P>
+Some applications that allow their users to supply patterns may wish to
+restrict them for security reasons. If the PCRE2_NEVER_UCP option is passed to
+<b>pcre2_compile()</b>, (*UCP) is not allowed, and its appearance in a pattern
+causes an error.
+</P>
+<br><b>
+Locking out empty string matching
+</b><br>
+<P>
+Starting a pattern with (*NOTEMPTY) or (*NOTEMPTY_ATSTART) has the same effect
+as passing the PCRE2_NOTEMPTY or PCRE2_NOTEMPTY_ATSTART option to whichever
+matching function is subsequently called to match the pattern. These options
+lock out the matching of empty strings, either entirely, or only at the start
+of the subject.
 </P>
 <br><b>
 Disabling auto-possessification
@@ -133,6 +149,28 @@ PCRE2_NO_START_OPTIMIZE option. This disables several optimizations for quickly
 reaching "no match" results. For more details, see the
 <a href="pcre2api.html"><b>pcre2api</b></a>
 documentation.
+</P>
+<br><b>
+Setting match and recursion limits
+</b><br>
+<P>
+The caller of <b>pcre2_match()</b> can set a limit on the number of times the
+internal <b>match()</b> function is called and on the maximum depth of
+recursive calls. These facilities are provided to catch runaway matches that
+are provoked by patterns with huge matching trees (a typical example is a
+pattern with nested unlimited repeats) and to avoid running out of system stack
+by too much recursion. When one of these limits is reached, <b>pcre2_match()</b>
+gives an error return. The limits can also be set by items at the start of the
+pattern of the form
+<pre>
+  (*LIMIT_MATCH=d)
+  (*LIMIT_RECURSION=d)
+</pre>
+where d is any number of decimal digits. However, the value of the setting must
+be less than the value set (or defaulted) by the caller of <b>pcre2_match()</b>
+for it to have any effect. In other words, the pattern writer can lower the
+limits set by the programmer, but not raise them. If there is more than one
+setting of one of these limits, the lower value is used.
 <a name="newlines"></a></P>
 <br><b>
 Newline conventions
@@ -179,26 +217,14 @@ below. A change of \R setting can be combined with a change of newline
 convention.
 </P>
 <br><b>
-Setting match and recursion limits
+Specifying what \R matches
 </b><br>
 <P>
-The caller of <b>pcre2_match()</b> can set a limit on the number of times the
-internal <b>match()</b> function is called and on the maximum depth of
-recursive calls. These facilities are provided to catch runaway matches that
-are provoked by patterns with huge matching trees (a typical example is a
-pattern with nested unlimited repeats) and to avoid running out of system stack
-by too much recursion. When one of these limits is reached, <b>pcre2_match()</b>
-gives an error return. The limits can also be set by items at the start of the
-pattern of the form
-<pre>
-  (*LIMIT_MATCH=d)
-  (*LIMIT_RECURSION=d)
-</pre>
-where d is any number of decimal digits. However, the value of the setting must
-be less than the value set (or defaulted) by the caller of <b>pcre2_match()</b>
-for it to have any effect. In other words, the pattern writer can lower the
-limits set by the programmer, but not raise them. If there is more than one
-setting of one of these limits, the lower value is used.
+It is possible to restrict \R to match only CR, LF, or CRLF (instead of the
+complete set of Unicode line endings) by setting the option PCRE2_BSR_ANYCRLF
+at compile time. This effect can also be achieved by starting a pattern with
+(*BSR_ANYCRLF). For completeness, (*BSR_UNICODE) is also recognized,
+corresponding to PCRE2_BSR_UNICODE.
 </P>
 <br><a name="SEC3" href="#TOC1">EBCDIC CHARACTER CODES</a><br>
 <P>
@@ -2280,8 +2306,8 @@ complex:
 </PRE>
 </P>
 <P>
-There are four kinds of condition: references to subpatterns, references to
-recursion, a pseudo-condition called DEFINE, and assertions.
+There are five kinds of condition: references to subpatterns, references to
+recursion, two pseudo-conditions called DEFINE and VERSION, and assertions.
 </P>
 <br><b>
 Checking for a used subpattern by number
@@ -2387,6 +2413,23 @@ address (a number less than 256). When matching takes place, this part of the
 pattern is skipped because DEFINE acts like a false condition. The rest of the
 pattern uses references to the named group to match the four dot-separated
 components of an IPv4 address, insisting on a word boundary at each end.
+</P>
+<br><b>
+Checking the PCRE2 version
+</b><br>
+<P>
+Programs that link with a PCRE2 library can check the version by calling
+<b>pcre2_config()</b> with appropriate arguments. Users of applications that do
+not have access to the underlying code cannot do this. A special "condition"
+called VERSION exists to allow such users to discover which version of PCRE2
+they are dealing with by using this condition to match a string such as
+"yesno". VERSION must be followed either by "=" or "&#62;=" and a version number.
+For example:
+<pre>
+  (?(VERSION&#62;=10.4)yes|no)
+</pre>
+This pattern matches "yes" if the PCRE2 version is greater or equal to 10.4, or
+"no" otherwise.
 </P>
 <br><b>
 Assertion conditions
@@ -3180,7 +3223,7 @@ subpattern, (*THEN) causes the subroutine match to fail.
 <br><a name="SEC28" href="#TOC1">SEE ALSO</a><br>
 <P>
 <b>pcre2api</b>(3), <b>pcre2callout</b>(3), <b>pcre2matching</b>(3),
-<b>pcre2syntax</b>(3), <b>pcre2</b>(3), <b>pcre216(3)</b>, <b>pcre232(3)</b>.
+<b>pcre2syntax</b>(3), <b>pcre2</b>(3).
 </P>
 <br><a name="SEC29" href="#TOC1">AUTHOR</a><br>
 <P>
@@ -3193,7 +3236,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC30" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 03 November 2014
+Last updated: 14 November 2014
 <br>
 Copyright &copy; 1997-2014 University of Cambridge.
 <br>

@@ -1,4 +1,4 @@
-.TH PCRE2SYNTAX 3 "20 October 2014" "PCRE2 10.00"
+.TH PCRE2SYNTAX 3 "14 November 2014" "PCRE2 10.00"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION SYNTAX SUMMARY"
@@ -470,17 +470,18 @@ Each top-level branch of a look behind must be of a fixed length.
   (?(condition)yes-pattern)
   (?(condition)yes-pattern|no-pattern)
 .sp
-  (?(n)...        absolute reference condition
-  (?(+n)...       relative reference condition
-  (?(-n)...       relative reference condition
-  (?(<name>)...   named reference condition (Perl)
-  (?('name')...   named reference condition (Perl)
-  (?(name)...     named reference condition (PCRE2)
-  (?(R)...        overall recursion condition
-  (?(Rn)...       specific group recursion condition
-  (?(R&name)...   specific recursion condition
-  (?(DEFINE)...   define subpattern for reference
-  (?(assert)...   assertion condition
+  (?(n)               absolute reference condition
+  (?(+n)              relative reference condition
+  (?(-n)              relative reference condition
+  (?(<name>)          named reference condition (Perl)
+  (?('name')          named reference condition (Perl)
+  (?(name)            named reference condition (PCRE2)
+  (?(R)               overall recursion condition
+  (?(Rn)              specific group recursion condition
+  (?(R&name)          specific recursion condition
+  (?(DEFINE)          define subpattern for reference
+  (?(VERSION[>]=n.m)  test PCRE2 version
+  (?(assert)          assertion condition
 .
 .
 .SH "BACKTRACKING CONTROL"
@@ -535,6 +536,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 20 October 2014
+Last updated: 14 November 2014
 Copyright (c) 1997-2014 University of Cambridge.
 .fi

@@ -51,4 +51,6 @@ the currrent group as "unset". Thus, the ovector for those groups contained
 whatever was previously there. An example is the pattern /(x)|((*ACCEPT))/ when
 matched against "abcd".
 
+8. The pcre2_substitute() function has been implemented.
+
 ****

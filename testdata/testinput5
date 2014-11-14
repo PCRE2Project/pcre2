@@ -1633,4 +1633,7 @@
 /ábc/utf,replace=XሴZ
     123ábc123
 
+/(?<=abc)(|def)/g,utf,replace=<$0>
+      123abcáyzabcdef789abcሴqr
+
 # End of testinput5 

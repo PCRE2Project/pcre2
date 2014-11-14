@@ -4073,6 +4073,9 @@ a random value. /Ix
     123abc456abc789
     123abc456abc789\=g
 
+/(?<=abc)(|def)/g,replace=<$0>
+    123abcxyzabcdef789abcpqr
+
 # End of substitute tests 
 
 # End of testinput2 

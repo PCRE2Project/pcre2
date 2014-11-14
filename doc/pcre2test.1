@@ -1,4 +1,4 @@
-.TH PCRE2TEST 1 "12 November 2014" "PCRE 10.00"
+.TH PCRE2TEST 1 "14 November 2014" "PCRE 10.00"
 .SH NAME
 pcre2test - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -450,7 +450,6 @@ about the pattern:
       tables=[0|1|2]            select internal tables
 .sp
 The effects of these modifiers are described in the following sections.
-FIXME: Give more examples.
 .
 .
 .SS "Newline and \eR handling"
@@ -484,7 +483,31 @@ one-off tests.
 .P
 The \fBinfo\fP modifier requests information about the compiled pattern
 (whether it is anchored, has a fixed first character, and so on). The
-information is obtained from the \fBpcre2_pattern_info()\fP function.
+information is obtained from the \fBpcre2_pattern_info()\fP function. Here are
+some typical examples:
+.sp
+    re> /(?i)(^a|^b)/m,info
+  Capturing subpattern count = 1
+  Compile options: multiline
+  Overall options: caseless multiline
+  First code unit at start or follows newline
+  Subject length lower bound = 1
+.sp
+    re> /(?i)abc/info
+  Capturing subpattern count = 0
+  Compile options: <none>
+  Overall options: caseless
+  First code unit = 'a' (caseless)
+  Last code unit = 'c' (caseless)
+  Subject length lower bound = 3
+.sp
+"Compile options" are those specified to the compile function; "overall
+options" have added options that are taken or deduced from the pattern. If both
+sets of options are the same, just a single "options" line is output. "First
+code unit" is where any match must start; if there is more than one they are
+listed as "starting code units". "Last code unit" is the last literal code unit
+that must be present in any match. This is not necessarily the last character.
+These lines are omitted if no starting or ending code units are recorded.
 .
 .
 .SS "Specifying a pattern in hex"
@@ -499,8 +522,8 @@ pairs. For example:
 This feature is provided as a way of creating patterns that contain binary zero
 characters. By default, \fBpcre2test\fP passes patterns as zero-terminated
 strings to \fBpcre2_compile()\fP, giving the length as PCRE2_ZERO_TERMINATED.
-However, for patterns specified in hexadecimal, the length of the pattern is
-passed.
+However, for patterns specified in hexadecimal, the actual length of the
+pattern is passed.
 .
 .
 .SS "JIT compilation"
@@ -528,7 +551,7 @@ documentation. See also the \fBjitstack\fP modifier below for a way of
 setting the size of the JIT stack.
 .P
 If the \fBjitfast\fP modifier is specified, matching is done using the JIT
-"fast path" interface (\fBpcre2_jit_match()), which skips some of the sanity
+"fast path" interface, \fBpcre2_jit_match(), which skips some of the sanity
 checks that are done by \fBpcre2_match()\fP, and of course does not work when
 JIT is not supported. If \fBjitfast\fP is specified without \fBjit\fP, jit=7 is
 assumed.
@@ -560,11 +583,16 @@ character tables are mutually exclusive.
 .SS "Showing pattern memory"
 .rs
 .sp
-The \fB/memory\fP modifier causes the size in bytes of the memory block used to
-hold the compiled pattern to be output. This does not include the size of the
+The \fB/memory\fP modifier causes the size in bytes of the memory used to hold
+the compiled pattern to be output. This does not include the size of the
 \fBpcre2_code\fP block; it is just the actual compiled data. If the pattern is
 subsequently passed to the JIT compiler, the size of the JIT compiled code is
-also output.
+also output. Here is an example:
+.sp
+    re> /a(b)c/jit,memory
+  Memory allocation (code space): 21
+  Memory allocation (JIT code): 1910
+.sp
 .
 .
 .SS "Limiting nested parentheses"
@@ -608,8 +636,8 @@ enable stack availability to be checked during compilation (see the
 .\"
 documentation for details). If the number specified by the modifier is greater
 than zero, \fBpcre2_set_compile_recursion_guard()\fP is called to set up
-callback from \fBpcre2_compile()\fP to a local function. The argument it is
-passed is the current nesting parenthesis depth; if this is greater than the
+callback from \fBpcre2_compile()\fP to a local function. The argument it
+receives is the current nesting parenthesis depth; if this is greater than the
 value given by the modifier, non-zero is returned, causing the compilation to
 be aborted.
 .
@@ -646,7 +674,7 @@ not affect the compilation process.
       allusedtext         show all consulted text
   /g  global              global matching
       mark                show mark values
-      replace=<string>    specify a replacement string 
+      replace=<string>    specify a replacement string
       startchar           show starting character when relevant
 .sp
 These modifiers may not appear in a \fB#pattern\fP command. If you want them as
@@ -721,12 +749,11 @@ pattern.
       offset=<n>                set starting offset
       ovector=<n>               set size of output vector
       recursion_limit=<n>       set a recursion limit
-      replace=<string>          specify a replacement string 
+      replace=<string>          specify a replacement string
       startchar                 show startchar when relevant
       zero_terminate            pass the subject as zero-terminated
 .sp
 The effects of these modifiers are described in the following sections.
-FIXME: Give more examples.
 .
 .
 .SS "Showing more text"
@@ -850,14 +877,14 @@ parentheses after each substring.
 .SS "Testing the substitution function"
 .rs
 .sp
-If the \fBreplace\fP modifier is set, the \fBpcre2_substitute()\fP function is 
+If the \fBreplace\fP modifier is set, the \fBpcre2_substitute()\fP function is
 called instead of one of the matching functions. Unlike subject strings,
 \fBpcre2test\fP does not process replacement strings for escape sequences. In
 UTF mode, a replacement string is checked to see if it is a valid UTF-8 string.
 If so, it is correctly converted to a UTF string of the appropriate code unit
 width. If it is not a valid UTF-8 string, the individual code units are copied
 directly. This provides a means of passing an invalid UTF-8 string for testing
-purposes. 
+purposes.
 .P
 If the \fBglobal\fP modifier is set, PCRE2_SUBSTITUTE_GLOBAL is passed to
 \fBpcre2_substitute()\fP. After a successful substitution, the modified string
@@ -867,16 +894,23 @@ were no matches. Here is a simple example of a substitution test:
   /abc/replace=xxx
       =abc=abc=
    1: =xxx=abc=
-      =abc=abc=\=global
+      =abc=abc=\e=global
    2: =xxx=xxx=
 .sp
-Subject and replacement strings should be kept relatively short for 
+Subject and replacement strings should be kept relatively short for
 substitution tests, as fixed-size buffers are used. To make it easy to test for
-buffer overflow, if the replacement string starts with a number in square 
-brackets, that number is passed to \fBpcre2_substitute()\fP as the size of the 
-output buffer, with the replacement string starting at the next character.
-.P
-A replacement string is ignored with POSIX and DFA matching. Specifying partial 
+buffer overflow, if the replacement string starts with a number in square
+brackets, that number is passed to \fBpcre2_substitute()\fP as the size of the
+output buffer, with the replacement string starting at the next character. Here
+is an example that tests the edge case:
+.sp
+  /abc/
+      123abc123\e=replace=[10]XYZ
+   1: 123XYZ123
+      123abc123\e=replace=[9]XYZ
+  Failed: error -47: no more memory
+.sp
+A replacement string is ignored with POSIX and DFA matching. Specifying partial
 matching provokes an error return ("bad option value") from
 \fBpcre2_substitute()\fP.
 .
@@ -957,10 +991,10 @@ available for storing matching information. The default is 15.
 A value of zero is useful when testing the POSIX API because it causes
 \fBregexec()\fP to be called with a NULL capture vector. When not testing the
 POSIX API, a value of zero is used to cause
-\fBpcre2_match_data_create_from_pattern\fP to be called, in order to create a
+\fBpcre2_match_data_create_from_pattern()\fP to be called, in order to create a
 match block of exactly the right size for the pattern. (It is not possible to
-create a match block with a zero-length ovector; there is always one pair of
-offsets.)
+create a match block with a zero-length ovector; there is always at least one
+pair of offsets.)
 .
 .
 .SS "Passing the subject as zero-terminated"
@@ -972,7 +1006,7 @@ string, the \fBzero_terminate\fP modifier is provided. It causes the length to
 be passed as PCRE2_ZERO_TERMINATED. (When matching via the POSIX interface,
 this modifier has no effect, as there is no facility for passing a length.)
 .P
-When testing \fBpcre2_substitute\fP, this modifier also has the effect of
+When testing \fBpcre2_substitute()\fP, this modifier also has the effect of
 passing the replacement string as zero-terminated.
 .
 .
@@ -1237,6 +1271,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 12 November 2014
+Last updated: 14 November 2014
 Copyright (c) 1997-2014 University of Cambridge.
 .fi

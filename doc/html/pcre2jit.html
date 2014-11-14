@@ -51,11 +51,12 @@ JIT support is an optional feature of PCRE2. The "configure" option
 you want to use JIT. The support is limited to the following hardware
 platforms:
 <pre>
-  ARM v5, v7, and Thumb2
+  ARM 32-bit (v5, v7, and Thumb2)
+  ARM 64-bit
   Intel x86 32-bit and 64-bit
-  MIPS 32-bit
+  MIPS 32-bit and 64-bit
   Power PC 32-bit and 64-bit
-  SPARC 32-bit (experimental)
+  SPARC 32-bit
 </pre>
 If --enable-jit is set on an unsupported platform, compilation fails.
 </P>
@@ -73,11 +74,11 @@ To make use of the JIT support in the simplest way, all you have to do is to
 call <b>pcre2_jit_compile()</b> after successfully compiling a pattern with
 <b>pcre2_compile()</b>. This function has two arguments: the first is the
 compiled pattern pointer that was returned by <b>pcre2_compile()</b>, and the
-second is a set of option bits, which must include at least one of
-PCRE2_JIT_COMPLETE, PCRE2_JIT_PARTIAL_HARD, or PCRE2_JIT_PARTIAL_SOFT.
+second is zero or more of the following option bits: PCRE2_JIT_COMPLETE,
+PCRE2_JIT_PARTIAL_HARD, or PCRE2_JIT_PARTIAL_SOFT.
 </P>
 <P>
-If JIT support is not available, a call to <b>pcre2_jit_comple()</b> does
+If JIT support is not available, a call to <b>pcre2_jit_compile()</b> does
 nothing and returns PCRE2_ERROR_JIT_BADOPTION. Otherwise, the compiled pattern
 is passed to the JIT compiler, which turns it into machine code that executes
 much faster than the normal interpretive code, but yields exactly the same
@@ -93,6 +94,20 @@ compiler generates different optimized code for each of the three modes
 (normal, soft partial, hard partial). When <b>pcre2_match()</b> is called, the
 appropriate code is run if it is available. Otherwise, the pattern is matched
 using interpretive code.
+</P>
+<P>
+You can call <b>pcre2_jit_compile()</b> multiple times for the same compiled
+pattern. It does nothing if it has previously compiled code for any of the
+option bits. For example, you can call it once with PCRE2_JIT_COMPLETE and
+(perhaps later, when you find you need partial matching) again with
+PCRE2_JIT_COMPLETE and PCRE2_JIT_PARTIAL_HARD. This time it will ignore
+PCRE2_JIT_COMPLETE and just compile code for partial matching. If
+<b>pcre2_jit_compile()</b> is called with no option bits set, it immediately
+returns zero. This is an alternative way of testing if JIT is available.
+</P>
+<P>
+At present, it is not possible to free JIT compiled code except when the entire
+compiled pattern is freed by calling <b>pcre2_free_code()</b>.
 </P>
 <P>
 In some circumstances you may need to call additional functions. These are
@@ -167,7 +182,7 @@ memory allocation), a starting size and a maximum size, and it returns a
 pointer to an opaque structure of type <b>pcre2_jit_stack</b>, or NULL if there
 is an error. The <b>pcre2_jit_stack_free()</b> function is used to free a stack
 that is no longer needed. (For the technically minded: the address space is
-allocated by mmap or VirtualAlloc.)  FIXME Is this right?
+allocated by mmap or VirtualAlloc.)
 </P>
 <P>
 JIT uses far less memory for recursion than the interpretive code,
@@ -187,7 +202,8 @@ passed to a matching function, its information determines which JIT stack is
 used. There are three cases for the values of the other two options:
 <pre>
   (1) If <i>callback</i> is NULL and <i>data</i> is NULL, an internal 32K block
-      on the machine stack is used.
+      on the machine stack is used. This is the default when a match
+      context is created.
 
   (2) If <i>callback</i> is NULL and <i>data</i> is not NULL, <i>data</i> must be
       a pointer to a valid JIT stack, the result of calling
@@ -402,7 +418,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC13" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 08 November 2014
+Last updated: 12 November 2014
 <br>
 Copyright &copy; 1997-2014 University of Cambridge.
 <br>

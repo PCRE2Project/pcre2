@@ -1063,7 +1063,7 @@ equivalent to Perl's /x option, and it can be changed within a pattern by a
 Which characters are interpreted as newlines can be specified by a setting in
 the compile context that is passed to \fBpcre2_compile()\fP or by a special
 sequence at the start of the pattern, as described in the section entitled
-.\" HTML <a href="pcrepattern.html#newlines">
+.\" HTML <a href="pcre2pattern.html#newlines">
 .\" </a>
 "Newline conventions"
 .\"
@@ -1226,7 +1226,7 @@ This option changes the way PCRE2 processes \eB, \eb, \eD, \ed, \eS, \es, \eW,
 \ew, and some of the POSIX character classes. By default, only ASCII characters
 are recognized, but if PCRE2_UCP is set, Unicode properties are used instead to
 classify characters. More details are given in the section on
-.\" HTML <a href="pcre2.html#genericchartypes">
+.\" HTML <a href="pcre2pattern.html#genericchartypes">
 .\" </a>
 generic character types
 .\"
@@ -1939,17 +1939,11 @@ documentation.
 .sp
 When PCRE2 is built, a default newline convention is set; this is usually the
 standard convention for the operating system. The default can be overridden in
-either a
+a
 .\" HTML <a href="#compilecontext">
 .\" </a>
-compile context
+compile context.
 .\"
-or a
-.\" HTML <a href="#matchcontext">
-.\" </a>
-match context.
-.\"
-However, changing the newline convention at match time disables JIT matching.
 During matching, the newline choice affects the behaviour of the dot,
 circumflex, and dollar metacharacters. It may also alter the way the match
 position is advanced after a match failure for an unanchored pattern.
@@ -2322,7 +2316,7 @@ appropriate offset in the ovector, which contains PCRE2_UNSET for unset
 substrings.
 .
 .
-.\" HTML <a name="extractbynname"></a>
+.\" HTML <a name="extractbyname"></a>
 .SH "EXTRACTING CAPTURED SUBSTRINGS BY NAME"
 .rs
 .sp

@@ -13699,6 +13699,10 @@ Failed: error -34: bad option value
     123abc456abc789\=g
  2: 123xyz456xyz789
 
+/(?<=abc)(|def)/g,replace=<$0>
+    123abcxyzabcdef789abcpqr
+ 4: 123abc<>xyzabc<><def>789abc<>pqr
+
 # End of substitute tests 
 
 # End of testinput2 

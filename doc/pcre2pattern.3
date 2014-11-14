@@ -1,4 +1,4 @@
-.TH PCRE2PATTERN 3 "03 November 2014" "PCRE2 10.00"
+.TH PCRE2PATTERN 3 "14 November 2014" "PCRE2 10.00"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION DETAILS"
@@ -63,8 +63,8 @@ page.
 .P
 Some applications that allow their users to supply patterns may wish to
 restrict them to non-UTF data for security reasons. If the PCRE2_NEVER_UTF
-option is set at compile time, (*UTF) is not allowed, and its appearance causes
-an error.
+option is passed to \fBpcre2_compile()\fP, (*UTF) is not allowed, and its
+appearance in a pattern causes an error.
 .
 .
 .SS "Unicode property support"
@@ -75,6 +75,21 @@ This has the same effect as setting the PCRE2_UCP option: it causes sequences
 such as \ed and \ew to use Unicode properties to determine character types,
 instead of recognizing only characters with codes less than 128 via a lookup
 table.
+.P
+Some applications that allow their users to supply patterns may wish to
+restrict them for security reasons. If the PCRE2_NEVER_UCP option is passed to
+\fBpcre2_compile()\fP, (*UCP) is not allowed, and its appearance in a pattern
+causes an error.
+.
+.
+.SS "Locking out empty string matching"
+.rs
+.sp
+Starting a pattern with (*NOTEMPTY) or (*NOTEMPTY_ATSTART) has the same effect
+as passing the PCRE2_NOTEMPTY or PCRE2_NOTEMPTY_ATSTART option to whichever
+matching function is subsequently called to match the pattern. These options
+lock out the matching of empty strings, either entirely, or only at the start
+of the subject.
 .
 .
 .SS "Disabling auto-possessification"
@@ -100,6 +115,28 @@ reaching "no match" results. For more details, see the
 \fBpcre2api\fP
 .\"
 documentation.
+.
+.
+.SS "Setting match and recursion limits"
+.rs
+.sp
+The caller of \fBpcre2_match()\fP can set a limit on the number of times the
+internal \fBmatch()\fP function is called and on the maximum depth of
+recursive calls. These facilities are provided to catch runaway matches that
+are provoked by patterns with huge matching trees (a typical example is a
+pattern with nested unlimited repeats) and to avoid running out of system stack
+by too much recursion. When one of these limits is reached, \fBpcre2_match()\fP
+gives an error return. The limits can also be set by items at the start of the
+pattern of the form
+.sp
+  (*LIMIT_MATCH=d)
+  (*LIMIT_RECURSION=d)
+.sp
+where d is any number of decimal digits. However, the value of the setting must
+be less than the value set (or defaulted) by the caller of \fBpcre2_match()\fP
+for it to have any effect. In other words, the pattern writer can lower the
+limits set by the programmer, but not raise them. If there is more than one
+setting of one of these limits, the lower value is used.
 .
 .
 .\" HTML <a name="newlines"></a>
@@ -153,26 +190,14 @@ below. A change of \eR setting can be combined with a change of newline
 convention.
 .
 .
-.SS "Setting match and recursion limits"
+.SS "Specifying what \eR matches"
 .rs
 .sp
-The caller of \fBpcre2_match()\fP can set a limit on the number of times the
-internal \fBmatch()\fP function is called and on the maximum depth of
-recursive calls. These facilities are provided to catch runaway matches that
-are provoked by patterns with huge matching trees (a typical example is a
-pattern with nested unlimited repeats) and to avoid running out of system stack
-by too much recursion. When one of these limits is reached, \fBpcre2_match()\fP
-gives an error return. The limits can also be set by items at the start of the
-pattern of the form
-.sp
-  (*LIMIT_MATCH=d)
-  (*LIMIT_RECURSION=d)
-.sp
-where d is any number of decimal digits. However, the value of the setting must
-be less than the value set (or defaulted) by the caller of \fBpcre2_match()\fP
-for it to have any effect. In other words, the pattern writer can lower the
-limits set by the programmer, but not raise them. If there is more than one
-setting of one of these limits, the lower value is used.
+It is possible to restrict \eR to match only CR, LF, or CRLF (instead of the
+complete set of Unicode line endings) by setting the option PCRE2_BSR_ANYCRLF
+at compile time. This effect can also be achieved by starting a pattern with
+(*BSR_ANYCRLF). For completeness, (*BSR_UNICODE) is also recognized,
+corresponding to PCRE2_BSR_UNICODE.
 .
 .
 .SH "EBCDIC CHARACTER CODES"
@@ -2302,8 +2327,8 @@ complex:
   (?(1) (A|B|C) | (D | (?(2)E|F) | E) )
 .sp
 .P
-There are four kinds of condition: references to subpatterns, references to
-recursion, a pseudo-condition called DEFINE, and assertions.
+There are five kinds of condition: references to subpatterns, references to
+recursion, two pseudo-conditions called DEFINE and VERSION, and assertions.
 .
 .
 .SS "Checking for a used subpattern by number"
@@ -2416,6 +2441,23 @@ address (a number less than 256). When matching takes place, this part of the
 pattern is skipped because DEFINE acts like a false condition. The rest of the
 pattern uses references to the named group to match the four dot-separated
 components of an IPv4 address, insisting on a word boundary at each end.
+.
+.
+.SS "Checking the PCRE2 version"
+.rs
+.sp
+Programs that link with a PCRE2 library can check the version by calling
+\fBpcre2_config()\fP with appropriate arguments. Users of applications that do
+not have access to the underlying code cannot do this. A special "condition"
+called VERSION exists to allow such users to discover which version of PCRE2
+they are dealing with by using this condition to match a string such as
+"yesno". VERSION must be followed either by "=" or ">=" and a version number.
+For example:
+.sp
+  (?(VERSION>=10.4)yes|no)
+.sp
+This pattern matches "yes" if the PCRE2 version is greater or equal to 10.4, or
+"no" otherwise.
 .
 .
 .SS "Assertion conditions"
@@ -3219,7 +3261,7 @@ subpattern, (*THEN) causes the subroutine match to fail.
 .rs
 .sp
 \fBpcre2api\fP(3), \fBpcre2callout\fP(3), \fBpcre2matching\fP(3),
-\fBpcre2syntax\fP(3), \fBpcre2\fP(3), \fBpcre216(3)\fP, \fBpcre232(3)\fP.
+\fBpcre2syntax\fP(3), \fBpcre2\fP(3).
 .
 .
 .SH AUTHOR
@@ -3236,6 +3278,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 03 November 2014
+Last updated: 14 November 2014
 Copyright (c) 1997-2014 University of Cambridge.
 .fi
