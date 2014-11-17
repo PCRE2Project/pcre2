@@ -68,6 +68,7 @@ dist_html_DATA = \
   doc/html/pcre2_substring_copy_bynumber.html \
   doc/html/pcre2_substring_free.html \
   doc/html/pcre2_substring_get_byname.html \
+  doc/html/pcre2_substring_get_bynumber.html \
   doc/html/pcre2_substring_length_byname.html \
   doc/html/pcre2_substring_length_bynumber.html \
   doc/html/pcre2_substring_list_free.html \
@@ -140,6 +141,7 @@ dist_man_MANS = \
   doc/pcre2_substring_copy_bynumber.3 \
   doc/pcre2_substring_free.3 \
   doc/pcre2_substring_get_byname.3 \
+  doc/pcre2_substring_get_bynumber.3 \
   doc/pcre2_substring_length_byname.3 \
   doc/pcre2_substring_length_bynumber.3 \
   doc/pcre2_substring_list_free.3 \
@@ -378,18 +380,19 @@ EXTRA_DIST += \
   sljit/sljitExecAllocator.c \
   sljit/sljitLir.c \
   sljit/sljitLir.h \
+  sljit/sljitNativeARM_32.c \
   sljit/sljitNativeARM_64.c \
-  sljit/sljitNativeARM_Thumb2.c \
-  sljit/sljitNativeARM_v5.c \
+  sljit/sljitNativeARM_T2_32.c \
   sljit/sljitNativeMIPS_32.c \
+  sljit/sljitNativeMIPS_64.c \
   sljit/sljitNativeMIPS_common.c \
   sljit/sljitNativePPC_32.c \
   sljit/sljitNativePPC_64.c \
   sljit/sljitNativePPC_common.c \
   sljit/sljitNativeSPARC_32.c \
   sljit/sljitNativeSPARC_common.c \
-  sljit/sljitNativeTILEGX.c \
   sljit/sljitNativeTILEGX-encoder.c \
+  sljit/sljitNativeTILEGX_64.c \
   sljit/sljitNativeX86_32.c \
   sljit/sljitNativeX86_64.c \
   sljit/sljitNativeX86_common.c \
@@ -521,7 +524,7 @@ endif # WITH_GCOV
 TESTS += RunTest
 dist_noinst_SCRIPTS += RunTest
 
-# FIXME
+# FIXME when somebody updates RunTest.bat
 #EXTRA_DIST += RunTest.bat
 
 ## When the 8-bit library is configured, pcre2grep will have been built.
@@ -573,9 +576,10 @@ EXTRA_DIST += \
   testdata/testoutput4 \
   testdata/testoutput5 \
   testdata/testoutput6 \
-  testdata/testoutput8-8 \
+  testdata/testoutput7 \
   testdata/testoutput8-16 \
   testdata/testoutput8-32 \
+  testdata/testoutput8-8 \
   testdata/testoutput9 \
   testdata/testoutput10 \
   testdata/testoutput11-16 \
