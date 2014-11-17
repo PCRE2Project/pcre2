@@ -3036,7 +3036,7 @@ CODE COVERAGE REPORTING
 
 SEE ALSO
 
-       pcre2api(3), pcre2_config(3).
+       pcre2api(3), pcre2-config(3).
 
 
 AUTHOR
