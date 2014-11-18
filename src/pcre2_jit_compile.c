@@ -3438,7 +3438,10 @@ while (TRUE)
       }
     }
   else
+    { 
     caseless = FALSE;
+    othercase[0] = 0; /* Stops compiler warning - PH */ 
+    } 
 
   len_save = len;
   cc_save = cc;
