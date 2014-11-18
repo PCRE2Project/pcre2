@@ -65,7 +65,7 @@ Updating to a new Unicode release
 
 When there is a new release of Unicode, the files in Unicode.tables must be
 refreshed from the web site. If the new version of Unicode adds new character
-scripts, the source file pacr2_ucp.h and both the MultiStage2.py and the
+scripts, the source file pcre2_ucp.h and both the MultiStage2.py and the
 GenerateUtt.py scripts must be edited to add the new names. Then MultiStage2.py
 can be run to generate a new version of pcre2_ucd.c, and GenerateUtt.py can be
 run to generate the tricky tables for inclusion in pcre2_tables.c.
@@ -73,7 +73,7 @@ run to generate the tricky tables for inclusion in pcre2_tables.c.
 If MultiStage2.py gives the error "ValueError: list.index(x): x not in list",
 the cause is usually a missing (or misspelt) name in the list of scripts. I
 couldn't find a straightforward list of scripts on the Unicode site, but
-there's a useful Wikipedia page that list them, and notes the Unicode version
+there's a useful Wikipedia page that lists them, and notes the Unicode version
 in which they were introduced:
 
 http://en.wikipedia.org/wiki/Unicode_scripts#Table_of_Unicode_scripts
@@ -130,7 +130,7 @@ distribution for a new release.
   systems, using different compilers as well. For example, on Solaris it is
   helpful to test using Sun's cc compiler as a change from gcc. Adding
   -xarch=v9 to the cc options does a 64-bit test, but it also needs -S 64 for
-  pcretest to increase the stack size for test 2. Since I retired I can no
+  pcre2test to increase the stack size for test 2. Since I retired I can no
   longer do this, but instead I rely on putting out release candidates for
   folks on the pcre-dev list to test.
   
@@ -194,7 +194,7 @@ and the zipball. Double-check with "svn status", then create an SVN tagged
 copy:
 
   svn copy svn://vcs.exim.org/pcre2/code/trunk \
-           svn://vcs.exim.org/pcre2/code/tags/pcre-8.xx
+           svn://vcs.exim.org/pcre2/code/tags/pcre-10.xx
 
 When the new release is out, don't forget to tell webmaster@pcre.org and the
 mailing list. Also, update the list of version numbers in Bugzilla (edit
@@ -206,8 +206,7 @@ Future ideas (wish list)
 
 This section records a list of ideas so that they do not get forgotten. They
 vary enormously in their usefulness and potential for implementation. Some are
-very sensible; some are rather wacky. Some have been on this list for years;
-others are relatively new.
+very sensible; some are rather wacky. Some have been on this list for years.
 
 . Optimization
 
@@ -226,42 +225,38 @@ others are relatively new.
     over the existing "required code unit" feature that just remembers one code
     unit.
 
-  * Remember an initial string rather than just 1 code unit?
+  * Remember an initial string rather than just 1 code unit.
 
   * A required code unit from alternatives - not just the last unit, but an
     earlier one if common to all alternatives.
 
-  o Friedl contains other ideas.
+  * Friedl contains other ideas.
 
   * The code does not set initial code unit flags for Unicode property types
     such as \p; I don't know how much benefit there would be for, for example,
     setting the bits for 0-9 and all values >= xC0 (in 8-bit mode) when a
     pattern starts with \p{N}.
 
-  * There is scope for more "auto-possessifying" in connection with \p and \P.
-
 . If Perl gets to a consistent state over the settings of capturing sub-
   patterns inside repeats, see if we can match it. One example of the
-  difference is the matching of /(main(O)?)+/ against mainOmain, where PCRE
-  leaves $2 set. In Perl, it's unset. Changing this in PCRE will be very hard
+  difference is the matching of /(main(O)?)+/ against mainOmain, where PCRE2
+  leaves $2 set. In Perl, it's unset. Changing this in PCRE2 will be very hard
   because I think it needs much more state to be remembered.
 
 . Perl 6 will be a revolution. Is it a revolution too far for PCRE?
 
-. Line endings:
-
-  * Option to use NUL as a line terminator in subject strings. This could now
-    be done relatively easily since the extension to support LF, CR, and CRLF.
-    If it is done, a suitable option for pcre2grep is also required.
+. An option to use NUL as a line terminator in subject strings. This could be
+  done relatively easily. If it is done, a suitable option for pcre2grep is
+  also required.
 
 . Catch SIGSEGV for stack overflows?
 
 . A feature to suspend a match via a callout was once requested.
 
-. Option to convert results into character offsets and character lengths.
+. An option to convert results into character offsets and character lengths.
 
-. Option for pcre2grep to scan only the start of a file. I am not keen - this
-  is the job of "head".
+. An option for pcre2grep to scan only the start of a file. I am not keen - 
+  this is the job of "head".
 
 . A (non-Unix) user wanted pcregrep options to (a) list a file name just once,
   preceded by a blank line, instead of adding it to every matched line, and (b)
@@ -273,11 +268,6 @@ others are relatively new.
   is stored is independent of PCRE2. For efficiency, it probably isn't possible
   to switch this dynamically. It would have to be specified when PCRE2 was
   compiled. PCRE2 would then call a function every time it wanted a character.
-
-. Wild thought: the ability to compile from PCRE2's internal code to a real 
-  FSM and a very fast (third) matcher to process the result. There would be
-  even more restrictions than for pcre2_dfa_exec(), however. This is not easy.
-  This is probably obsolete now that we have the JIT support.
 
 . pcre2grep: add -rs for a sorted recurse? Having to store file names and sort
   them will of course slow it down.
@@ -296,10 +286,10 @@ others are relatively new.
   pattern.
 
 . Pcre2grep: an option to specify the output line separator, either as a string
-  or select from a fixed list. This is not dead easy, because at the moment it
-  outputs whatever is in the input file.
+  or select from a fixed list. This is not straightforward, because at the
+  moment it outputs whatever is in the input file.
 
-. Improve the code for duplicate checking in pcre_dfa_exec(). An incomplete,
+. Improve the code for duplicate checking in pcre_dfa_match(). An incomplete,
   non-thread-safe patch showed that this can help performance for patterns
   where there are many alternatives. However, a simple thread-safe
   implementation that I tried made things worse in many simple cases, so this
@@ -308,8 +298,7 @@ others are relatively new.
 . PCRE2 cannot at present distinguish between subpatterns with different names,
   but the same number (created by the use of ?|). In order to do so, a way of
   remembering *which* subpattern numbered n matched is needed. Bugzilla #760.
-  Now that (*MARK) has been implemented, it can perhaps be used as a way round
-  this problem.
+  (*MARK) can perhaps be used as a way round this problem.
 
 . Instead of having #ifdef HAVE_CONFIG_H in each module, put #include
   "something" and the the #ifdef appears only in one place, in "something".
@@ -317,4 +306,4 @@ others are relatively new.
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 25 October 2014
+Last updated: 18 November 2014
