@@ -386,8 +386,6 @@ SET(PCRE2_SOURCES
   src/pcre2_dfa_match.c
   src/pcre2_error.c
   src/pcre2_jit_compile.c
-  src/pcre2_jit_match.c
-  src/pcre2_jit_misc.c
   src/pcre2_maketables.c
   src/pcre2_match.c
   src/pcre2_match_data.c
@@ -396,6 +394,7 @@ SET(PCRE2_SOURCES
   src/pcre2_pattern_info.c
   src/pcre2_string_utils.c
   src/pcre2_study.c
+  src/pcre2_substitute.c 
   src/pcre2_substring.c
   src/pcre2_tables.c
   src/pcre2_ucd.c
