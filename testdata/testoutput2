@@ -13705,4 +13705,14 @@ Failed: error -34: bad option value
 
 # End of substitute tests 
 
+"((?=(?(?=(?(?=(?(?=())))*)))))"
+    a
+ 0: 
+ 1: 
+ 2: 
+
+"(?(?=)?==)(((((((((?=)))))))))"
+    a
+No match
+
 # End of testinput2 

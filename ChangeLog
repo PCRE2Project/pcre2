@@ -53,4 +53,7 @@ matched against "abcd".
 
 8. The pcre2_substitute() function has been implemented.
 
+9. If an assertion condition was quantified with a minimum of zero (an odd
+thing to do, but it happened), SIGSEGV or other misbehaviour could occur.
+
 ****

@@ -4078,4 +4078,10 @@ a random value. /Ix
 
 # End of substitute tests 
 
+"((?=(?(?=(?(?=(?(?=())))*)))))"
+    a
+
+"(?(?=)?==)(((((((((?=)))))))))"
+    a
+
 # End of testinput2 
