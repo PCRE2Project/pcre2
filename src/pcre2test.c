@@ -4926,16 +4926,6 @@ else for (gmatched = 0;; gmatched++)
 
   ovector = FLD(match_data, ovector);
 
-  /* Fill the ovector with junk to detect elements that do not get set
-  when they should be. */
-
-  for (j = 0; j < 2*dat_datctl.oveccount; j++) ovector[j] = JUNK_OFFSET;
-
-  /* When matching is via pcre2_match(), we will detect the use of JIT via the
-  stack callback function. */
-
-  jit_was_used = (pat_patctl.control & CTL_JITFAST) != 0;
-
   /* After the first time round a global loop, save the current ovector[0,1] so
   that we can check that they do change each time. Otherwise a matching bug
   that returns the same string causes an infinite loop. It has happened! */
@@ -4945,6 +4935,21 @@ else for (gmatched = 0;; gmatched++)
     ovecsave[0] = ovector[0];
     ovecsave[1] = ovector[1];
     }
+
+  /* Set the variables on the first iteration, just to stop a compiler warning
+  when ovecsave[] is referenced below. */
+
+  else ovecsave[0] = ovecsave[1] = 0;
+
+  /* Fill the ovector with junk to detect elements that do not get set
+  when they should be. */
+
+  for (j = 0; j < 2*dat_datctl.oveccount; j++) ovector[j] = JUNK_OFFSET;
+
+  /* When matching is via pcre2_match(), we will detect the use of JIT via the
+  stack callback function. */
+
+  jit_was_used = (pat_patctl.control & CTL_JITFAST) != 0;
 
   /* Do timing if required. */
 
