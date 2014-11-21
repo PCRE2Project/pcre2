@@ -286,7 +286,7 @@ if [ $? -eq 0 ] ; then
   test2stack="-S 16"
 else
   test2stack=""
-fi      
+fi
 
 # All of 8-bit, 16-bit, and 32-bit character strings may be supported, but only
 # one need be.

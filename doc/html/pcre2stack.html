@@ -33,6 +33,13 @@ the recursive call would immediately be passed back as the result of the
 current call (a "tail recursion"), the function is just restarted instead.
 </P>
 <P>
+Each time the internal <b>match()</b> function is called recursively, it uses
+memory from the process stack. For certain kinds of pattern and data, very
+large amounts of stack may be needed, despite the recognition of "tail
+recursion". Note that if PCRE2 is compiled with the -fsanitize=address option
+of the GCC compiler, the stack requirements are greatly increased.
+</P>
+<P>
 The above comments apply when <b>pcre2_match()</b> is run in its normal
 interpretive manner. If the compiled pattern was processed by
 <b>pcre2_jit_compile()</b>, and just-in-time compiling was successful, and the
@@ -61,10 +68,7 @@ relevant only for <b>pcre2_match()</b> without the JIT optimization.
 Reducing <b>pcre2_match()</b>'s stack usage
 </b><br>
 <P>
-Each time that the internal <b>match()</b> function is called recursively, it
-uses memory from the process stack. For certain kinds of pattern and data, very
-large amounts of stack may be needed, despite the recognition of "tail
-recursion". You can often reduce the amount of recursion, and therefore the
+You can often reduce the amount of recursion, and therefore the
 amount of stack used, by modifying the pattern that is being matched. Consider,
 for example, this pattern:
 <pre>
@@ -187,14 +191,14 @@ Philip Hazel
 <br>
 University Computing Service
 <br>
-Cambridge CB2 3QH, England.
+Cambridge, England.
 <br>
 </P>
 <br><b>
 REVISION
 </b><br>
 <P>
-Last updated: 20 October 2014
+Last updated: 21 November 2014
 <br>
 Copyright &copy; 1997-2014 University of Cambridge.
 <br>

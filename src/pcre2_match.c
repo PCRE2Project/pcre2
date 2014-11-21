@@ -1401,11 +1401,11 @@ for (;;)
         condition = TRUE;
 
         /* Advance ecode past the assertion to the start of the first branch,
-        but adjust it so that the general choosing code below works. If the 
-        assertion has a quantifier that allows zero repeats we must skip over 
+        but adjust it so that the general choosing code below works. If the
+        assertion has a quantifier that allows zero repeats we must skip over
         the BRAZERO. This is a lunatic thing to do, but somebody did! */
-        
-        if (*ecode == OP_BRAZERO) ecode++; 
+
+        if (*ecode == OP_BRAZERO) ecode++;
         ecode += GET(ecode, 1);
         while (*ecode == OP_ALT) ecode += GET(ecode, 1);
         ecode += 1 + LINK_SIZE - PRIV(OP_lengths)[condcode];
