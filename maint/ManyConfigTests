@@ -53,7 +53,8 @@ tmp=/tmp/pcre2testing
 # special test turns optimization on, because it can provoke some compiler
 # warnings.
 
-CFLAGS="-g -O0"
+CFLAGS="-g"
+OFLAGS="-O0"
 ISGCC=0
 
 # If the compiler is gcc, add a lot of warning switches.
@@ -81,7 +82,7 @@ rm -f /tmp/pcre2ccversion
 
 # This function runs a single test with the set of configuration options that
 # are in $opts. The source directory must be set in srcdir. The function must
-# be defined as "runtest()" not "function runtest()" in order to run on 
+# be defined as "runtest()" not "function runtest()" in order to run on
 # Solaris.
 
 runtest()
@@ -125,8 +126,8 @@ runtest()
     nlok=1
   else
     nlok=0
-  fi        
- 
+  fi
+
   ./pcre2test -C jit >/dev/null
   jit=$?
   ./pcre2test -C pcre2-8 >/dev/null
@@ -138,7 +139,7 @@ runtest()
     if [ $? -ne 0 -o -s teststderr ]; then
       echo " "
       echo "**** Test failed ****"
-      cat teststderr 
+      cat teststderr
       if [ -s teststdout ] ; then cat teststdout; fi
       exit 1
     fi
@@ -158,7 +159,7 @@ runtest()
     fi
   elif [ $nlok -gt 0 ]; then
     echo "Skipping pcre2grep tests: 8-bit library not compiled"
-  else   
+  else
     echo "Skipping pcre2grep tests: newline is $nl"
   fi
 
@@ -182,7 +183,7 @@ runtest()
 
 testtotal=`expr 20 \* $usemain + \
   1 \* $usetmp + \
-  1 \* $ISGCC \* $usemain + \
+  2 \* $ISGCC \* $usemain + \
   13 \* $usejit + \
   \( 3 + 2 \* $usejit \) \* $usevalgrind`
 testcount=0
@@ -201,7 +202,11 @@ srcdir=.
 export srcdir
 
 # If gcc is in use, run a maximally configured test with -O2, because that can
-# throw up warnings that are not detected with -O0.
+# throw up warnings that are not detected with -O0. Then run a second test with
+# -fsanitize=address, which also may throw up new warnings as well as checking
+# things at runtime. Using -fsanitize=address increases the size of stack
+# frames by a lot, so run this test with --disable-stack-for-recursion, as
+# otherwise RunTest may fail on test 2.
 
 if [ $usejit -ne 0 ]; then
   enable_jit=--enable-jit
@@ -211,12 +216,21 @@ fi
 
 if [ $ISGCC -ne 0 -a $usemain -ne 0 ]; then
   echo "---------- Maximally configured test with -O2 ----------"
-  SAVECLFAGS="$CFLAGS"
-  CFLAGS="$CFLAGS -O2"
+  SAVECFLAGS="$CFLAGS"
+  CFLAGS="-O2 $CFLAGS"
+  echo "CFLAGS=$CFLAGS"
   opts="--disable-shared $enable_jit --enable-pcre2-16 --enable-pcre2-32"
   runtest
-  CFLAGS="$SAVECFLAGS"
+  echo "---------- Maximally configured test with -fsanitize=address ----------"
+  CFLAGS="$OFLAGS $SAVECFLAGS -fsanitize=address"
+  echo "CFLAGS=$CFLAGS"
+  opts="--disable-shared $enable_jit --disable-stack-for-recursion --enable-pcre2-16 --enable-pcre2-32"
+  runtest
+  CFLAGS="$OFLAGS $SAVECFLAGS"
 fi
+
+echo "---------- CFLAGS for the remaining tests ----------"
+echo "CFLAGS=$CFLAGS"
 
 if [ $usemain -ne 0 ]; then
   echo "---------- Non-JIT tests in the current directory ----------"

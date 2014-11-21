@@ -277,6 +277,17 @@ if [ $link_size -gt 4 ] ; then
   exit 1
 fi
 
+# If it is possible to set the system stack size, arrange to set a value for
+# test 2, which needs more than the even the Linux default when PCRE2 has been
+# compiled with -fsanitize=address.
+
+$sim ./pcre2test -S 1 /dev/null /dev/null
+if [ $? -eq 0 ] ; then
+  test2stack="-S 16"
+else
+  test2stack=""
+fi      
+
 # All of 8-bit, 16-bit, and 32-bit character strings may be supported, but only
 # one need be.
 
@@ -423,12 +434,12 @@ for bmode in "$test8" "$test16" "$test32"; do
     done
   fi
 
-  # PCRE2 tests that are not JIT or Perl-compatible: API, errors, internals
+  # PCRE2 tests that are not Perl-compatible: API, errors, internals
 
   if [ $do2 = yes ] ; then
     echo $title2 "(excluding UTF-$bits)"
     for opt in "" $jitopt; do
-      $sim $valgrind ./pcre2test -q $bmode $opt $testdata/testinput2 testtry
+      $sim $valgrind ./pcre2test -q $test2stack $bmode $opt $testdata/testinput2 testtry
       if [ $? = 0 ] ; then
         checkresult $? 2 "$opt"
       else

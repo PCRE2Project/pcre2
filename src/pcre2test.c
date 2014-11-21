@@ -215,7 +215,7 @@ for building the library. */
 #include "pcre2posix.h"
 #include "pcre2_internal.h"
 
-/* We need access to some of the data tables that PCRE uses. Defining
+/* We need access to some of the data tables that PCRE2 uses. Defining
 PCRE2_PCRETEST makes some minor changes in the files. The previous definition
 of PRIV avoids name clashes. */
 
@@ -731,7 +731,7 @@ static uint32_t *pbuffer32 = NULL;
 #define CAST8VAR(x) CASTVAR(uint8_t *, x)
 #define SET(x,y) SETOP(x,y,=)
 #define SETPLUS(x,y) SETOP(x,y,+=)
-#define strlen8 strlen
+#define strlen8(x) strlen((char *)x)
 
 
 /* ---------------- Mode-dependent, runtime-testing macros ------------------*/
@@ -1625,7 +1625,7 @@ the three different cases. */
 #define SETFLDVEC(x,y,v,z) G(x,16)->y[v] = z
 #define SETOP(x,y,z) G(x,16) z y
 #define SETCASTPTR(x,y) G(x,16) = (uint16_t *)y
-#define STRLEN(p) (int)strlen16(p)
+#define STRLEN(p) (int)strlen16((PCRE2_SPTR16)p)
 #define SUB1(a,b) G(a,16)(G(b,16))
 #define SUB2(a,b,c) G(a,16)(G(b,16),G(c,16))
 #define TEST(x,r,y) (G(x,16) r (y))
@@ -1706,7 +1706,7 @@ the three different cases. */
 #define SETFLDVEC(x,y,v,z) G(x,32)->y[v] = z
 #define SETOP(x,y,z) G(x,32) z y
 #define SETCASTPTR(x,y) G(x,32) = (uint32_t *)y
-#define STRLEN(p) (int)strlen32(p)
+#define STRLEN(p) (int)strlen32((PCRE2_SPTR32)p)
 #define SUB1(a,b) G(a,32)(G(b,32))
 #define SUB2(a,b,c) G(a,32)(G(b,32),G(c,32))
 #define TEST(x,r,y) (G(x,32) r (y))
@@ -2130,7 +2130,7 @@ return (PCRE2_JIT_STACK *)arg;
 and returns the codepoint of that character. Note that the function supports
 the original UTF-8 definition of RFC 2279, allowing for values in the range 0
 to 0x7fffffff, up to 6 bytes long. This makes it possible to generate
-codepoints greater than 0x10ffff which are useful for testing PCRE's error
+codepoints greater than 0x10ffff which are useful for testing PCRE2's error
 checking, and also for generating 32-bit non-UTF data values above the UTF
 limit.
 
@@ -2235,7 +2235,7 @@ return n >= 0 ? n : 0;
 *    Find length of 0-terminated 16-bit string   *
 *************************************************/
 
-static int strlen16(PCRE2_SPTR16 p)
+static size_t strlen16(PCRE2_SPTR16 p)
 {
 PCRE2_SPTR16 pp = p;
 while (*pp != 0) pp++;
@@ -2250,7 +2250,7 @@ return (int)(pp - p);
 *    Find length of 0-terminated 32-bit string   *
 *************************************************/
 
-static int strlen32(PCRE2_SPTR32 p)
+static size_t strlen32(PCRE2_SPTR32 p)
 {
 PCRE2_SPTR32 pp = p;
 while (*pp != 0) pp++;
@@ -2430,7 +2430,7 @@ if (pbuffer16_size < 2*len + 2)
   pbuffer16 = (uint16_t *)malloc(pbuffer16_size);
   if (pbuffer16 == NULL)
     {
-    fprintf(stderr, "pcretest: malloc(%ld) failed for pbuffer16\n",
+    fprintf(stderr, "pcre2test: malloc(%ld) failed for pbuffer16\n",
       pbuffer16_size);
     exit(1);
     }
@@ -2507,7 +2507,7 @@ if (pbuffer32_size < 4*len + 4)
   pbuffer32 = (uint32_t *)malloc(pbuffer32_size);
   if (pbuffer32 == NULL)
     {
-    fprintf(stderr, "pcretest: malloc(%ld) failed for pbuffer32\n",
+    fprintf(stderr, "pcre2test: malloc(%ld) failed for pbuffer32\n",
       pbuffer32_size);
     exit(1);
     }
@@ -4114,11 +4114,12 @@ return capcount;
 *              Callout function                  *
 *************************************************/
 
-/* Called from PCRE as a result of the (?C) item. We print out where we are in
-the match. Yield zero unless more callouts than the fail count, or the callout
-data is not zero. The only differences in the callout block for different code
-unit widths are that the pointers to the subject and the most recent MARK point
-to strings of the appropriate width. Casts can be used to deal with this.
+/* Called from a PCRE2 library as a result of the (?C) item. We print out where
+we are in the match. Yield zero unless more callouts than the fail count, or
+the callout data is not zero. The only differences in the callout block for
+different code unit widths are that the pointers to the subject and the most
+recent MARK point to strings of the appropriate width. Casts can be used to
+deal with this.
 
 Argument:  a pointer to a callout block
 Return:
@@ -5672,7 +5673,7 @@ for (vp = jittarget; *vp != 0; vp++) fprintf(f, "%c", *vp);
 /* Output is always to stdout.
 
 Arguments:
-  rc         the return code from PCRE_CONFIG_NEWLINE
+  rc         the return code from PCRE2_CONFIG_NEWLINE
   isc        TRUE if called from "-C newline"
 Returns:     nothing
 */
@@ -5732,7 +5733,7 @@ printf("  -dfa          set default subject control 'dfa'\n");
 printf("  -help         show usage information\n");
 printf("  -i            set default pattern control 'info'\n");
 printf("  -jit          set default pattern control 'jit'\n");
-printf("  -q            quiet: do not output PCRE version number at start\n");
+printf("  -q            quiet: do not output PCRE2 version number at start\n");
 printf("  -pattern <s>  set default pattern control fields\n");
 printf("  -subject <s>  set default subject control fields\n");
 printf("  -S <n>        set stack size to <n> megabytes\n");
@@ -5982,7 +5983,7 @@ while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
     test_mode = PCRE8_MODE;
 #else
     fprintf(stderr,
-      "** This version of PCRE was built without 8-bit support\n");
+      "** This version of PCRE2 was built without 8-bit support\n");
     exit(1);
 #endif
     }
@@ -5992,7 +5993,7 @@ while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
     test_mode = PCRE16_MODE;
 #else
     fprintf(stderr,
-      "** This version of PCRE was built without 16-bit support\n");
+      "** This version of PCRE2 was built without 16-bit support\n");
     exit(1);
 #endif
     }
@@ -6002,7 +6003,7 @@ while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
     test_mode = PCRE32_MODE;
 #else
     fprintf(stderr,
-      "** This version of PCRE was built without 32-bit support\n");
+      "** This version of PCRE2 was built without 32-bit support\n");
     exit(1);
 #endif
     }
@@ -6017,7 +6018,7 @@ while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
       ((stack_size = get_value(argv[op+1], &endptr)), *endptr == 0))
     {
 #if defined(_WIN32) || defined(WIN32) || defined(__minix) || defined(NATIVE_ZOS) || defined(__VMS)
-    fprintf(stderr, "PCRE: -S is not supported on this OS\n");
+    fprintf(stderr, "pcre2test: -S is not supported on this OS\n");
     exit(1);
 #else
     int rc;
@@ -6027,7 +6028,7 @@ while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
     rc = setrlimit(RLIMIT_STACK, &rlim);
     if (rc != 0)
       {
-      fprintf(stderr, "PCRE: setrlimit() failed with error %d\n", rc);
+      fprintf(stderr, "pcre2test: setrlimit() failed with error %d\n", rc);
       exit(1);
       }
     op++;

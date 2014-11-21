@@ -1,4 +1,4 @@
-.TH PCRE2STACK 3 "20 October 2014" "PCRE2 10.00"
+.TH PCRE2STACK 3 "21 November 2014" "PCRE2 10.00"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 DISCUSSION OF STACK USAGE"
@@ -18,6 +18,12 @@ as a* it may be called several times at the same level, after matching
 different numbers of a's. Furthermore, in a number of cases where the result of
 the recursive call would immediately be passed back as the result of the
 current call (a "tail recursion"), the function is just restarted instead.
+.P
+Each time the internal \fBmatch()\fP function is called recursively, it uses
+memory from the process stack. For certain kinds of pattern and data, very
+large amounts of stack may be needed, despite the recognition of "tail
+recursion". Note that if PCRE2 is compiled with the -fsanitize=address option
+of the GCC compiler, the stack requirements are greatly increased.
 .P
 The above comments apply when \fBpcre2_match()\fP is run in its normal
 interpretive manner. If the compiled pattern was processed by
@@ -47,10 +53,7 @@ relevant only for \fBpcre2_match()\fP without the JIT optimization.
 .SS "Reducing \fBpcre2_match()\fP's stack usage"
 .rs
 .sp
-Each time that the internal \fBmatch()\fP function is called recursively, it
-uses memory from the process stack. For certain kinds of pattern and data, very
-large amounts of stack may be needed, despite the recognition of "tail
-recursion". You can often reduce the amount of recursion, and therefore the
+You can often reduce the amount of recursion, and therefore the
 amount of stack used, by modifying the pattern that is being matched. Consider,
 for example, this pattern:
 .sp
@@ -194,6 +197,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 20 October 2014
+Last updated: 21 November 2014
 Copyright (c) 1997-2014 University of Cambridge.
 .fi
