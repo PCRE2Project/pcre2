@@ -31,11 +31,11 @@ please consult the man page, in case the conversion went wrong.
 <P>
 Just-in-time compiling is a heavyweight optimization that can greatly speed up
 pattern matching. However, it comes at the cost of extra processing before the
-match is performed. Therefore, it is of most benefit when the same pattern is
-going to be matched many times. This does not necessarily mean many calls of a
-matching function; if the pattern is not anchored, matching attempts may take
-place many times at various positions in the subject, even for a single call.
-Therefore, if the subject string is very long, it may still pay to use JIT for
+match is performed, so it is of most benefit when the same pattern is going to
+be matched many times. This does not necessarily mean many calls of a matching
+function; if the pattern is not anchored, matching attempts may take place many
+times at various positions in the subject, even for a single call. Therefore,
+if the subject string is very long, it may still pay to use JIT even for
 one-off matches. JIT support is available for all of the 8-bit, 16-bit and
 32-bit PCRE2 libraries.
 </P>
@@ -103,7 +103,7 @@ option bits. For example, you can call it once with PCRE2_JIT_COMPLETE and
 PCRE2_JIT_COMPLETE and PCRE2_JIT_PARTIAL_HARD. This time it will ignore
 PCRE2_JIT_COMPLETE and just compile code for partial matching. If
 <b>pcre2_jit_compile()</b> is called with no option bits set, it immediately
-returns zero. This is an alternative way of testing if JIT is available.
+returns zero. This is an alternative way of testing whether JIT is available.
 </P>
 <P>
 At present, it is not possible to free JIT compiled code except when the entire
@@ -299,7 +299,7 @@ compiled patterns, contexts, and stacks in any order, anytime. Just \fIdo
 not\fP call <b>pcre2_match()</b> with a match context pointing to an already
 freed stack, as that will cause SEGFAULT. (Also, do not free a stack currently
 used by <b>pcre2_match()</b> in another thread). You can also replace the stack
-in a context at any time when it is not in use. You can also free the previous
+in a context at any time when it is not in use. You should free the previous
 stack before assigning a replacement.
 </P>
 <P>
@@ -418,7 +418,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC13" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 12 November 2014
+Last updated: 23 November 2014
 <br>
 Copyright &copy; 1997-2014 University of Cambridge.
 <br>

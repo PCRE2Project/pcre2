@@ -1,4 +1,4 @@
-.TH PCRE2GREP 1 "28 September 2014" "PCRE2 10.00"
+.TH PCRE2GREP 1 "23 November 2014" "PCRE2 10.00"
 .SH NAME
 pcre2grep - a grep with Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -403,8 +403,8 @@ used. There is no short form for this option.
 Processing some regular expression patterns can require a very large amount of
 memory, leading in some cases to a program crash if not enough is available.
 Other patterns may take a very long time to search for all possible matching
-strings. The \fBpcre2_exec()\fP function that is called by \fBpcre2grep\fP to do
-the matching has two parameters that can limit the resources that it uses.
+strings. The \fBpcre2_match()\fP function that is called by \fBpcre2grep\fP to
+do the matching has two parameters that can limit the resources that it uses.
 .sp
 The \fB--match-limit\fP option provides a means of limiting resource usage
 when processing patterns that are not going to match, but which have a very
@@ -678,6 +678,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 28 September 2014
+Last updated: 23 November 2014
 Copyright (c) 1997-2014 University of Cambridge.
 .fi

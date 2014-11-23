@@ -607,30 +607,30 @@ Subject length lower bound = 2
 Failed: error 106 at offset 13: missing terminating ] for character class
 
 /X/utf
-    \x{d800}
-Failed: error -24: UTF-16 error: missing low surrogate at end
-    \x{d800}\=no_utf_check
-No match
-    \x{da00}
-Failed: error -24: UTF-16 error: missing low surrogate at end
-    \x{da00}\=no_utf_check
-No match
-    \x{dc00}
-Failed: error -26: UTF-16 error: isolated low surrogate
-    \x{dc00}\=no_utf_check
-No match
-    \x{de00}
-Failed: error -26: UTF-16 error: isolated low surrogate
-    \x{de00}\=no_utf_check
-No match
-    \x{dfff}
-Failed: error -26: UTF-16 error: isolated low surrogate
-    \x{dfff}\=no_utf_check
-No match
-    \x{110000}
+    XX\x{d800}
+Failed: error -24: UTF-16 error: missing low surrogate at end at offset 2
+    XX\x{d800}\=no_utf_check
+ 0: X
+    XX\x{da00}
+Failed: error -24: UTF-16 error: missing low surrogate at end at offset 2
+    XX\x{da00}\=no_utf_check
+ 0: X
+    XX\x{dc00}
+Failed: error -26: UTF-16 error: isolated low surrogate at offset 2
+    XX\x{dc00}\=no_utf_check
+ 0: X
+    XX\x{de00}
+Failed: error -26: UTF-16 error: isolated low surrogate at offset 2
+    XX\x{de00}\=no_utf_check
+ 0: X
+    XX\x{dfff}
+Failed: error -26: UTF-16 error: isolated low surrogate at offset 2
+    XX\x{dfff}\=no_utf_check
+ 0: X
+    XX\x{110000}
 ** Failed: character \x{110000} is greater than 0x10ffff and so cannot be converted to UTF-16
-    \x{d800}\x{1234}
-Failed: error -25: UTF-16 error: invalid low surrogate
+    XX\x{d800}\x{1234}
+Failed: error -25: UTF-16 error: invalid low surrogate at offset 3
 
 /(*UTF16)\x{11234}/
   abcd\x{11234}pqr

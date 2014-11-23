@@ -3224,12 +3224,8 @@ multiunit character. */
 #ifdef SUPPORT_UNICODE
 if (utf && (options & PCRE2_NO_UTF_CHECK) == 0)
   {
-  match_data->rc = PRIV(valid_utf)(subject, length, &(match_data->rightchar));
-  if (match_data->rc != 0)
-    {
-    match_data->leftchar = 0;
-    return match_data->rc;
-    }
+  match_data->rc = PRIV(valid_utf)(subject, length, &(match_data->startchar));
+  if (match_data->rc != 0) return match_data->rc;
 #if PCRE2_CODE_UNIT_WIDTH != 32
   if (start_offset > 0 && start_offset < length &&
       NOT_FIRSTCHAR(subject[start_offset]))

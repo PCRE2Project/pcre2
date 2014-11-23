@@ -446,7 +446,7 @@ OPTIONS
                  very large amount of memory, leading in some cases to a  pro-
                  gram  crash  if  not enough is available.  Other patterns may
                  take a very long time to search  for  all  possible  matching
-                 strings.   The   pcre2_exec()  function  that  is  called  by
+                 strings.   The  pcre2_match()  function  that  is  called  by
                  pcre2grep to do the matching  has  two  parameters  that  can
                  limit the resources that it uses.
 
@@ -737,5 +737,5 @@ AUTHOR
 
 REVISION
 
-       Last updated: 28 September 2014
+       Last updated: 23 November 2014
        Copyright (c) 1997-2014 University of Cambridge.

@@ -72,7 +72,7 @@ but its use can lead to some strange effects because it breaks up multi-unit
 characters (see the description of \C in the
 <a href="pcre2pattern.html"><b>pcre2pattern</b></a>
 documentation). The use of \C is not supported in the alternative matching
-function <b>pcre2_dfa_exec()</b>, nor is it supported in UTF mode by the JIT
+function <b>pcre2_dfa_match()</b>, nor is it supported in UTF mode by the JIT
 optimization. If JIT optimization is requested for a UTF pattern that contains
 \C, it will not succeed, and so the matching will be carried out by the normal
 interpretive function.
@@ -141,15 +141,15 @@ UTF-32.)
 In some situations, you may already know that your strings are valid, and
 therefore want to skip these checks in order to improve performance, for
 example in the case of a long subject string that is being scanned repeatedly.
-If you set the PCRE2_NO_UTF_CHECK flag at compile time or at run time, PCRE2
-assumes that the pattern or subject it is given (respectively) contains only
-valid UTF code unit sequences.
+If you set the PCRE2_NO_UTF_CHECK option at compile time or at match time,
+PCRE2 assumes that the pattern or subject it is given (respectively) contains
+only valid UTF code unit sequences.
 </P>
 <P>
 Passing PCRE2_NO_UTF_CHECK to <b>pcre2_compile()</b> just disables the check for
 the pattern; it does not also apply to subject strings. If you want to disable
-the check for a subject string you must pass this option to <b>pcre2_exec()</b>
-or <b>pcre2_dfa_exec()</b>.
+the check for a subject string you must pass this option to <b>pcre2_match()</b>
+or <b>pcre2_dfa_match()</b>.
 </P>
 <P>
 If you pass an invalid UTF string when PCRE2_NO_UTF_CHECK is set, the result
@@ -261,7 +261,7 @@ Cambridge, England.
 REVISION
 </b><br>
 <P>
-Last updated: 03 November 2014
+Last updated: 23 November 2014
 <br>
 Copyright &copy; 1997-2014 University of Cambridge.
 <br>

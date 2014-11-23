@@ -600,30 +600,30 @@ Subject length lower bound = 2
 Failed: error 106 at offset 13: missing terminating ] for character class
 
 /X/utf
-    \x{d800}
-Failed: error -27: UTF-32 error: code points 0xd800-0xdfff are not defined
-    \x{d800}\=no_utf_check
-No match
-    \x{da00}
-Failed: error -27: UTF-32 error: code points 0xd800-0xdfff are not defined
-    \x{da00}\=no_utf_check
-No match
-    \x{dc00}
-Failed: error -27: UTF-32 error: code points 0xd800-0xdfff are not defined
-    \x{dc00}\=no_utf_check
-No match
-    \x{de00}
-Failed: error -27: UTF-32 error: code points 0xd800-0xdfff are not defined
-    \x{de00}\=no_utf_check
-No match
-    \x{dfff}
-Failed: error -27: UTF-32 error: code points 0xd800-0xdfff are not defined
-    \x{dfff}\=no_utf_check
-No match
-    \x{110000}
-Failed: error -28: UTF-32 error: code points greater than 0x10ffff are not defined
-    \x{d800}\x{1234}
-Failed: error -27: UTF-32 error: code points 0xd800-0xdfff are not defined
+    XX\x{d800}
+Failed: error -27: UTF-32 error: code points 0xd800-0xdfff are not defined at offset 2
+    XX\x{d800}\=no_utf_check
+ 0: X
+    XX\x{da00}
+Failed: error -27: UTF-32 error: code points 0xd800-0xdfff are not defined at offset 2
+    XX\x{da00}\=no_utf_check
+ 0: X
+    XX\x{dc00}
+Failed: error -27: UTF-32 error: code points 0xd800-0xdfff are not defined at offset 2
+    XX\x{dc00}\=no_utf_check
+ 0: X
+    XX\x{de00}
+Failed: error -27: UTF-32 error: code points 0xd800-0xdfff are not defined at offset 2
+    XX\x{de00}\=no_utf_check
+ 0: X
+    XX\x{dfff}
+Failed: error -27: UTF-32 error: code points 0xd800-0xdfff are not defined at offset 2
+    XX\x{dfff}\=no_utf_check
+ 0: X
+    XX\x{110000}
+Failed: error -28: UTF-32 error: code points greater than 0x10ffff are not defined at offset 2
+    XX\x{d800}\x{1234}
+Failed: error -27: UTF-32 error: code points 0xd800-0xdfff are not defined at offset 2
 
 /(*UTF16)\x{11234}/
 Failed: error 160 at offset 5: (*VERB) not recognized or malformed
@@ -1113,7 +1113,7 @@ Failed: error 134 at offset 10: character code point value in \x{} or \o{} is to
 
 /\C/utf
     \x{110000}
-Failed: error -28: UTF-32 error: code points greater than 0x10ffff are not defined
+Failed: error -28: UTF-32 error: code points greater than 0x10ffff are not defined at offset 0
 
 /\x{100}*A/IB,utf
 ------------------------------------------------------------------

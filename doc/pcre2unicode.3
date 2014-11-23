@@ -1,4 +1,4 @@
-.TH PCRE2UNICODE 3 "03 November 2014" "PCRE2 10.00"
+.TH PCRE2UNICODE 3 "23 November 2014" "PCRE2 10.00"
 .SH NAME
 PCRE - Perl-compatible regular expressions (revised API)
 .SH "UNICODE AND UTF SUPPORT"
@@ -64,7 +64,7 @@ characters (see the description of \eC in the
 \fBpcre2pattern\fP
 .\"
 documentation). The use of \eC is not supported in the alternative matching
-function \fBpcre2_dfa_exec()\fP, nor is it supported in UTF mode by the JIT
+function \fBpcre2_dfa_match()\fP, nor is it supported in UTF mode by the JIT
 optimization. If JIT optimization is requested for a UTF pattern that contains
 \eC, it will not succeed, and so the matching will be carried out by the normal
 interpretive function.
@@ -108,7 +108,10 @@ case-equivalent, and these are treated as such.
 .sp
 When the PCRE2_UTF option is set, the strings passed as patterns and subjects
 are (by default) checked for validity on entry to the relevant functions.
-If an invalid UTF string is passed, an error return is given.
+If an invalid UTF string is passed, an negative error code is returned. The 
+code unit offset to the offending character can be extracted from the match 
+data block by calling \fBpcre2_get_startchar()\fP, which is used for this
+purpose after a UTF error.
 .P
 UTF-16 and UTF-32 strings can indicate their endianness by special code knows
 as a byte-order mark (BOM). The PCRE2 functions do not handle this, expecting
@@ -130,14 +133,14 @@ UTF-32.)
 In some situations, you may already know that your strings are valid, and
 therefore want to skip these checks in order to improve performance, for
 example in the case of a long subject string that is being scanned repeatedly.
-If you set the PCRE2_NO_UTF_CHECK flag at compile time or at run time, PCRE2
-assumes that the pattern or subject it is given (respectively) contains only
-valid UTF code unit sequences.
+If you set the PCRE2_NO_UTF_CHECK option at compile time or at match time,
+PCRE2 assumes that the pattern or subject it is given (respectively) contains
+only valid UTF code unit sequences.
 .P
 Passing PCRE2_NO_UTF_CHECK to \fBpcre2_compile()\fP just disables the check for
 the pattern; it does not also apply to subject strings. If you want to disable
-the check for a subject string you must pass this option to \fBpcre2_exec()\fP
-or \fBpcre2_dfa_exec()\fP.
+the check for a subject string you must pass this option to \fBpcre2_match()\fP
+or \fBpcre2_dfa_match()\fP.
 .P
 If you pass an invalid UTF string when PCRE2_NO_UTF_CHECK is set, the result
 is undefined and your program may crash or loop indefinitely.
@@ -249,6 +252,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 03 November 2014
+Last updated: 23 November 2014
 Copyright (c) 1997-2014 University of Cambridge.
 .fi

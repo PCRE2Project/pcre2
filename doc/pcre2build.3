@@ -1,4 +1,4 @@
-.TH PCRE2BUILD 3 "03 November 2014" "PCRE2 10.00"
+.TH PCRE2BUILD 3 "23 November 2014" "PCRE2 10.00"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .
@@ -74,12 +74,12 @@ respectively. These can be interpreted either as single-unit characters or
 UTF-16/UTF-32 strings. To build these additional libraries, add one or both of
 the following to the \fBconfigure\fP command:
 .sp
-  --enable-pcre16
-  --enable-pcre32
+  --enable-pcre2-16
+  --enable-pcre2-32
 .sp
 If you do not want the 8-bit library, add
 .sp
-  --disable-pcre8
+  --disable-pcre2-8
 .sp
 as well. At least one of the three libraries must be built. Note that the POSIX
 wrapper is for the 8-bit library only, and that \fBpcre2grep\fP is an 8-bit
@@ -91,15 +91,16 @@ libraries.
 .rs
 .sp
 The Autotools PCRE2 building process uses \fBlibtool\fP to build both shared
-and static libraries by default. You can suppress one of these by adding one of
+and static libraries by default. You can suppress an unwanted library by adding
+one of
 .sp
   --disable-shared
   --disable-static
 .sp
-to the \fBconfigure\fP command, as required.
+to the \fBconfigure\fP command.
 .
 .
-.SH "Unicode and UTF SUPPORT"
+.SH "UNICODE AND UTF SUPPORT"
 .rs
 .sp
 By default, PCRE2 is built with support for Unicode and UTF character strings.
@@ -112,18 +113,14 @@ is not possible to build one library with Unicode support, and another without,
 in the same configuration.
 .P
 Of itself, Unicode support does not make PCRE2 treat strings as UTF-8, UTF-16
-or UTF-32. To do that you have have to set the PCRE2_UTF option when you call
-\fBpcre2_compile()\fP to compile a pattern.
+or UTF-32. To do that, applications that use the library have to set the
+PCRE2_UTF option when they call \fBpcre2_compile()\fP to compile a pattern.
 .P
-It is not possible to support both EBCDIC and UTF-8 codes in the same version
-of the library. Consequently, --enable-unicode and --enable-ebcdic are mutually
-exclusive.
-.P
-UTF support allows the libraries to process character codepoints up to 0x10ffff
-in the strings that they handle. It also provides support for accessing the
-properties of such characters, using pattern escapes such as \eP, \ep, and \eX.
-Only the general category properties such as \fILu\fP and \fINd\fP are
-supported. Details are given in the
+UTF support allows the libraries to process character code points up to
+0x10ffff in the strings that they handle. It also provides support for
+accessing the Unicode properties of such characters, using pattern escapes such
+as \eP, \ep, and \eX. Only the general category properties such as \fILu\fP and
+\fINd\fP are supported. Details are given in the
 .\" HREF
 \fBpcre2pattern\fP
 .\"
@@ -138,7 +135,7 @@ Just-in-time compiler support is included in the build by specifying
   --enable-jit
 .sp
 This support is available only for certain hardware architectures. If this
-option is set for an unsupported architecture, a compile time error occurs.
+option is set for an unsupported architecture, a building error occurs.
 See the
 .\" HREF
 \fBpcre2jit\fP
@@ -151,7 +148,7 @@ pcre2grep automatically makes use of it, unless you add
 to the "configure" command.
 .
 .
-.SH "CODE VALUE OF NEWLINE"
+.SH "NEWLINE RECOGNITION"
 .rs
 .sp
 By default, PCRE2 interprets the linefeed (LF) character as indicating the end
@@ -160,11 +157,12 @@ compile PCRE2 to use carriage return (CR) instead, by adding
 .sp
   --enable-newline-is-cr
 .sp
-to the \fBconfigure\fP command. There is also a --enable-newline-is-lf option,
+to the \fBconfigure\fP command. There is also an --enable-newline-is-lf option,
 which explicitly specifies linefeed as the newline character.
-.sp
-Alternatively, you can specify that line endings are to be indicated by the two
-character sequence CRLF. If you want this, add
+.P
+Alternatively, you can specify that line endings are to be indicated by the
+two-character sequence CRLF (CR immediately followed by LF). If you want this,
+add
 .sp
   --enable-newline-is-crlf
 .sp
@@ -177,10 +175,13 @@ indicating a line ending. Finally, a fifth option, specified by
 .sp
   --enable-newline-is-any
 .sp
-causes PCRE2 to recognize any Unicode newline sequence.
+causes PCRE2 to recognize any Unicode newline sequence. The Unicode newline
+sequences are the three just mentioned, plus the single characters VT (vertical
+tab, U+000B), FF (form feed, U+000C), NEL (next line, U+0085), LS (line
+separator, U+2028), and PS (paragraph separator, U+2029).
 .P
-Whatever line ending convention is selected when PCRE2 is built can be
-overridden when the library functions are called. At build time it is
+Whatever default line ending convention is selected when PCRE2 is built can be
+overridden by applications that use the library. At build time it is
 conventional to use the standard for your operating system.
 .
 .
@@ -188,12 +189,13 @@ conventional to use the standard for your operating system.
 .rs
 .sp
 By default, the sequence \eR in a pattern matches any Unicode newline sequence,
-whatever has been selected as the line ending sequence. If you specify
+independently of what has been selected as the line ending sequence. If you
+specify
 .sp
   --enable-bsr-anycrlf
 .sp
 the default is changed so that \eR matches only CR, LF, or CRLF. Whatever is
-selected when PCRE2 is built can be overridden when the library functions are
+selected when PCRE2 is built can be overridden by applications that use the
 called.
 .
 .
@@ -204,10 +206,10 @@ Within a compiled pattern, offset values are used to point from one part to
 another (for example, from an opening parenthesis to an alternation
 metacharacter). By default, in the 8-bit and 16-bit libraries, two-byte values
 are used for these offsets, leading to a maximum size for a compiled pattern of
-around 64K. This is sufficient to handle all but the most gigantic patterns.
-Nevertheless, some people do want to process truly enormous patterns, so it is
-possible to compile PCRE2 to use three-byte or four-byte offsets by adding a
-setting such as
+around 64K code units. This is sufficient to handle all but the most gigantic
+patterns. Nevertheless, some people do want to process truly enormous patterns,
+so it is possible to compile PCRE2 to use three-byte or four-byte offsets by
+adding a setting such as
 .sp
   --with-link-size=3
 .sp
@@ -299,16 +301,19 @@ hand".)
 .rs
 .sp
 PCRE2 assumes by default that it will run in an environment where the character
-code is ASCII (or Unicode, which is a superset of ASCII). This is the case for
+code is ASCII or Unicode, which is a superset of ASCII. This is the case for
 most computer operating systems. PCRE2 can, however, be compiled to run in an
-EBCDIC environment by adding
+8-bit EBCDIC environment by adding
 .sp
   --enable-ebcdic --disable-unicode
 .sp
 to the \fBconfigure\fP command. This setting implies
 --enable-rebuild-chartables. You should only use it if you know that you are in
-an EBCDIC environment (for example, an IBM mainframe operating system). The
---enable-ebcdic option is incompatible with Unicode support.
+an EBCDIC environment (for example, an IBM mainframe operating system).
+.P
+It is not possible to support both EBCDIC and UTF-8 codes in the same version
+of the library. Consequently, --enable-unicode and --enable-ebcdic are mutually
+exclusive.
 .P
 The EBCDIC character that corresponds to an ASCII LF is assumed to have the
 value 0x15 by default. However, in some EBCDIC environments, 0x25 is used. In
@@ -354,8 +359,8 @@ parameter value by adding, for example,
 .sp
   --with-pcre2grep-bufsize=50K
 .sp
-to the \fBconfigure\fP command. The caller of \fPpcre2grep\fP can, however,
-override this value by specifying a run-time option.
+to the \fBconfigure\fP command. The caller of \fPpcre2grep\fP can override this
+value by using --buffer-size on the command line..
 .
 .
 .SH "PCRE2TEST OPTION FOR LIBREADLINE SUPPORT"
@@ -371,15 +376,15 @@ to the \fBconfigure\fP command, \fBpcre2test\fP is linked with the
 from a terminal, it reads it using the \fBreadline()\fP function. This provides
 line-editing and history facilities. Note that \fBlibreadline\fP is
 GPL-licensed, so if you distribute a binary of \fBpcre2test\fP linked in this
-way, there may be licensing issues. These can be avoided by linking with
-\fBlibedit\fP (which has a BSD licence) instead.
+way, there may be licensing issues. These can be avoided by linking instead
+with \fBlibedit\fP, which has a BSD licence.
 .P
-Setting this option causes the \fB-lreadline\fP option to be added to the
-\fBpcre2test\fP build. In many operating environments with a sytem-installed
-readline library this is sufficient. However, in some environments (e.g. if an
-unmodified distribution version of readline is in use), some extra
-configuration may be necessary. The INSTALL file for \fBlibreadline\fP says
-this:
+Setting --enable-pcre2test-libreadline causes the \fB-lreadline\fP option to be
+added to the \fBpcre2test\fP build. In many operating environments with a
+sytem-installed readline library this is sufficient. However, in some
+environments (e.g. if an unmodified distribution version of readline is in
+use), some extra configuration may be necessary. The INSTALL file for
+\fBlibreadline\fP says this:
 .sp
   "Readline uses the termcap functions, but does not link with
   the termcap or curses library itself, allowing applications
@@ -396,13 +401,13 @@ immediately before the \fBconfigure\fP command.
 .SH "DEBUGGING WITH VALGRIND SUPPORT"
 .rs
 .sp
-By adding the
+If you add
 .sp
   --enable-valgrind
 .sp
-option to to the \fBconfigure\fP command, PCRE2 will use valgrind annotations
-to mark certain memory regions as unaddressable. This allows it to detect
-invalid memory accesses, and is mostly useful for debugging PCRE2 itself.
+to the \fBconfigure\fP command, PCRE2 will use valgrind annotations to mark
+certain memory regions as unaddressable. This allows it to detect invalid
+memory accesses, and is mostly useful for debugging PCRE2 itself.
 .
 .
 .SH "CODE COVERAGE REPORTING"
@@ -482,6 +487,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 03 November 2014
+Last updated: 23 November 2014
 Copyright (c) 1997-2014 University of Cambridge.
 .fi

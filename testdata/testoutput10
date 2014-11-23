@@ -73,142 +73,142 @@ Failed: error -3 at offset 0: UTF-8 error: 1 byte missing at end
 Failed: error -8 at offset 0: UTF-8 error: byte 2 top bits not 0x80
 
 /badutf/utf
-    \xdf
-Failed: error -3: UTF-8 error: 1 byte missing at end
-    \xef
-Failed: error -4: UTF-8 error: 2 bytes missing at end
-    \xef\x80
-Failed: error -3: UTF-8 error: 1 byte missing at end
-    \xf7
-Failed: error -5: UTF-8 error: 3 bytes missing at end
-    \xf7\x80
-Failed: error -4: UTF-8 error: 2 bytes missing at end
-    \xf7\x80\x80
-Failed: error -3: UTF-8 error: 1 byte missing at end
+    X\xdf
+Failed: error -3: UTF-8 error: 1 byte missing at end at offset 1
+    XX\xef
+Failed: error -4: UTF-8 error: 2 bytes missing at end at offset 2
+    XXX\xef\x80
+Failed: error -3: UTF-8 error: 1 byte missing at end at offset 3
+    X\xf7
+Failed: error -5: UTF-8 error: 3 bytes missing at end at offset 1
+    XX\xf7\x80
+Failed: error -4: UTF-8 error: 2 bytes missing at end at offset 2
+    XXX\xf7\x80\x80
+Failed: error -3: UTF-8 error: 1 byte missing at end at offset 3
     \xfb
-Failed: error -6: UTF-8 error: 4 bytes missing at end
+Failed: error -6: UTF-8 error: 4 bytes missing at end at offset 0
     \xfb\x80
-Failed: error -5: UTF-8 error: 3 bytes missing at end
+Failed: error -5: UTF-8 error: 3 bytes missing at end at offset 0
     \xfb\x80\x80
-Failed: error -4: UTF-8 error: 2 bytes missing at end
+Failed: error -4: UTF-8 error: 2 bytes missing at end at offset 0
     \xfb\x80\x80\x80
-Failed: error -3: UTF-8 error: 1 byte missing at end
+Failed: error -3: UTF-8 error: 1 byte missing at end at offset 0
     \xfd
-Failed: error -7: UTF-8 error: 5 bytes missing at end
+Failed: error -7: UTF-8 error: 5 bytes missing at end at offset 0
     \xfd\x80
-Failed: error -6: UTF-8 error: 4 bytes missing at end
+Failed: error -6: UTF-8 error: 4 bytes missing at end at offset 0
     \xfd\x80\x80
-Failed: error -5: UTF-8 error: 3 bytes missing at end
+Failed: error -5: UTF-8 error: 3 bytes missing at end at offset 0
     \xfd\x80\x80\x80
-Failed: error -4: UTF-8 error: 2 bytes missing at end
+Failed: error -4: UTF-8 error: 2 bytes missing at end at offset 0
     \xfd\x80\x80\x80\x80
-Failed: error -3: UTF-8 error: 1 byte missing at end
+Failed: error -3: UTF-8 error: 1 byte missing at end at offset 0
     \xdf\x7f
-Failed: error -8: UTF-8 error: byte 2 top bits not 0x80
+Failed: error -8: UTF-8 error: byte 2 top bits not 0x80 at offset 0
     \xef\x7f\x80
-Failed: error -8: UTF-8 error: byte 2 top bits not 0x80
+Failed: error -8: UTF-8 error: byte 2 top bits not 0x80 at offset 0
     \xef\x80\x7f
-Failed: error -9: UTF-8 error: byte 3 top bits not 0x80
+Failed: error -9: UTF-8 error: byte 3 top bits not 0x80 at offset 0
     \xf7\x7f\x80\x80
-Failed: error -8: UTF-8 error: byte 2 top bits not 0x80
+Failed: error -8: UTF-8 error: byte 2 top bits not 0x80 at offset 0
     \xf7\x80\x7f\x80
-Failed: error -9: UTF-8 error: byte 3 top bits not 0x80
+Failed: error -9: UTF-8 error: byte 3 top bits not 0x80 at offset 0
     \xf7\x80\x80\x7f
-Failed: error -10: UTF-8 error: byte 4 top bits not 0x80
+Failed: error -10: UTF-8 error: byte 4 top bits not 0x80 at offset 0
     \xfb\x7f\x80\x80\x80
-Failed: error -8: UTF-8 error: byte 2 top bits not 0x80
+Failed: error -8: UTF-8 error: byte 2 top bits not 0x80 at offset 0
     \xfb\x80\x7f\x80\x80
-Failed: error -9: UTF-8 error: byte 3 top bits not 0x80
+Failed: error -9: UTF-8 error: byte 3 top bits not 0x80 at offset 0
     \xfb\x80\x80\x7f\x80
-Failed: error -10: UTF-8 error: byte 4 top bits not 0x80
+Failed: error -10: UTF-8 error: byte 4 top bits not 0x80 at offset 0
     \xfb\x80\x80\x80\x7f
-Failed: error -11: UTF-8 error: byte 5 top bits not 0x80
+Failed: error -11: UTF-8 error: byte 5 top bits not 0x80 at offset 0
     \xfd\x7f\x80\x80\x80\x80
-Failed: error -8: UTF-8 error: byte 2 top bits not 0x80
+Failed: error -8: UTF-8 error: byte 2 top bits not 0x80 at offset 0
     \xfd\x80\x7f\x80\x80\x80
-Failed: error -9: UTF-8 error: byte 3 top bits not 0x80
+Failed: error -9: UTF-8 error: byte 3 top bits not 0x80 at offset 0
     \xfd\x80\x80\x7f\x80\x80
-Failed: error -10: UTF-8 error: byte 4 top bits not 0x80
+Failed: error -10: UTF-8 error: byte 4 top bits not 0x80 at offset 0
     \xfd\x80\x80\x80\x7f\x80
-Failed: error -11: UTF-8 error: byte 5 top bits not 0x80
+Failed: error -11: UTF-8 error: byte 5 top bits not 0x80 at offset 0
     \xfd\x80\x80\x80\x80\x7f
-Failed: error -12: UTF-8 error: byte 6 top bits not 0x80
+Failed: error -12: UTF-8 error: byte 6 top bits not 0x80 at offset 0
     \xed\xa0\x80
-Failed: error -16: UTF-8 error: code points 0xd800-0xdfff are not defined
+Failed: error -16: UTF-8 error: code points 0xd800-0xdfff are not defined at offset 0
     \xc0\x8f
-Failed: error -17: UTF-8 error: overlong 2-byte sequence
+Failed: error -17: UTF-8 error: overlong 2-byte sequence at offset 0
     \xe0\x80\x8f
-Failed: error -18: UTF-8 error: overlong 3-byte sequence
+Failed: error -18: UTF-8 error: overlong 3-byte sequence at offset 0
     \xf0\x80\x80\x8f
-Failed: error -19: UTF-8 error: overlong 4-byte sequence
+Failed: error -19: UTF-8 error: overlong 4-byte sequence at offset 0
     \xf8\x80\x80\x80\x8f
-Failed: error -20: UTF-8 error: overlong 5-byte sequence
+Failed: error -20: UTF-8 error: overlong 5-byte sequence at offset 0
     \xfc\x80\x80\x80\x80\x8f
-Failed: error -21: UTF-8 error: overlong 6-byte sequence
+Failed: error -21: UTF-8 error: overlong 6-byte sequence at offset 0
     \x80
-Failed: error -22: UTF-8 error: isolated 0x80 byte
+Failed: error -22: UTF-8 error: isolated 0x80 byte at offset 0
     \xfe
-Failed: error -23: UTF-8 error: illegal byte (0xfe or 0xff)
+Failed: error -23: UTF-8 error: illegal byte (0xfe or 0xff) at offset 0
     \xff
-Failed: error -23: UTF-8 error: illegal byte (0xfe or 0xff)
+Failed: error -23: UTF-8 error: illegal byte (0xfe or 0xff) at offset 0
 
 /badutf/utf
-    \xfb\x80\x80\x80\x80
-Failed: error -13: UTF-8 error: 5-byte character is not allowed (RFC 3629)
-    \xfd\x80\x80\x80\x80\x80
-Failed: error -14: UTF-8 error: 6-byte character is not allowed (RFC 3629)
-    \xf7\xbf\xbf\xbf
-Failed: error -15: UTF-8 error: code points greater than 0x10ffff are not defined
+    XX\xfb\x80\x80\x80\x80
+Failed: error -13: UTF-8 error: 5-byte character is not allowed (RFC 3629) at offset 2
+    XX\xfd\x80\x80\x80\x80\x80
+Failed: error -14: UTF-8 error: 6-byte character is not allowed (RFC 3629) at offset 2
+    XX\xf7\xbf\xbf\xbf
+Failed: error -15: UTF-8 error: code points greater than 0x10ffff are not defined at offset 2
 
 /shortutf/utf
-    \xdf\=ph
-Failed: error -3: UTF-8 error: 1 byte missing at end
-    \xef\=ph
-Failed: error -4: UTF-8 error: 2 bytes missing at end
-    \xef\x80\=ph
-Failed: error -3: UTF-8 error: 1 byte missing at end
+    XX\xdf\=ph
+Failed: error -3: UTF-8 error: 1 byte missing at end at offset 2
+    XX\xef\=ph
+Failed: error -4: UTF-8 error: 2 bytes missing at end at offset 2
+    XX\xef\x80\=ph
+Failed: error -3: UTF-8 error: 1 byte missing at end at offset 2
     \xf7\=ph
-Failed: error -5: UTF-8 error: 3 bytes missing at end
+Failed: error -5: UTF-8 error: 3 bytes missing at end at offset 0
     \xf7\x80\=ph
-Failed: error -4: UTF-8 error: 2 bytes missing at end
+Failed: error -4: UTF-8 error: 2 bytes missing at end at offset 0
     \xf7\x80\x80\=ph
-Failed: error -3: UTF-8 error: 1 byte missing at end
+Failed: error -3: UTF-8 error: 1 byte missing at end at offset 0
     \xfb\=ph
-Failed: error -6: UTF-8 error: 4 bytes missing at end
+Failed: error -6: UTF-8 error: 4 bytes missing at end at offset 0
     \xfb\x80\=ph
-Failed: error -5: UTF-8 error: 3 bytes missing at end
+Failed: error -5: UTF-8 error: 3 bytes missing at end at offset 0
     \xfb\x80\x80\=ph
-Failed: error -4: UTF-8 error: 2 bytes missing at end
+Failed: error -4: UTF-8 error: 2 bytes missing at end at offset 0
     \xfb\x80\x80\x80\=ph
-Failed: error -3: UTF-8 error: 1 byte missing at end
+Failed: error -3: UTF-8 error: 1 byte missing at end at offset 0
     \xfd\=ph
-Failed: error -7: UTF-8 error: 5 bytes missing at end
+Failed: error -7: UTF-8 error: 5 bytes missing at end at offset 0
     \xfd\x80\=ph
-Failed: error -6: UTF-8 error: 4 bytes missing at end
+Failed: error -6: UTF-8 error: 4 bytes missing at end at offset 0
     \xfd\x80\x80\=ph
-Failed: error -5: UTF-8 error: 3 bytes missing at end
+Failed: error -5: UTF-8 error: 3 bytes missing at end at offset 0
     \xfd\x80\x80\x80\=ph
-Failed: error -4: UTF-8 error: 2 bytes missing at end
+Failed: error -4: UTF-8 error: 2 bytes missing at end at offset 0
     \xfd\x80\x80\x80\x80\=ph
-Failed: error -3: UTF-8 error: 1 byte missing at end
+Failed: error -3: UTF-8 error: 1 byte missing at end at offset 0
 
 /anything/utf
-    \xc0\x80
-Failed: error -17: UTF-8 error: overlong 2-byte sequence
-    \xc1\x8f
-Failed: error -17: UTF-8 error: overlong 2-byte sequence
-    \xe0\x9f\x80
-Failed: error -18: UTF-8 error: overlong 3-byte sequence
+    X\xc0\x80
+Failed: error -17: UTF-8 error: overlong 2-byte sequence at offset 1
+    XX\xc1\x8f
+Failed: error -17: UTF-8 error: overlong 2-byte sequence at offset 2
+    XXX\xe0\x9f\x80
+Failed: error -18: UTF-8 error: overlong 3-byte sequence at offset 3
     \xf0\x8f\x80\x80
-Failed: error -19: UTF-8 error: overlong 4-byte sequence
+Failed: error -19: UTF-8 error: overlong 4-byte sequence at offset 0
     \xf8\x87\x80\x80\x80
-Failed: error -20: UTF-8 error: overlong 5-byte sequence
+Failed: error -20: UTF-8 error: overlong 5-byte sequence at offset 0
     \xfc\x83\x80\x80\x80\x80
-Failed: error -21: UTF-8 error: overlong 6-byte sequence
+Failed: error -21: UTF-8 error: overlong 6-byte sequence at offset 0
     \xfe\x80\x80\x80\x80\x80
-Failed: error -23: UTF-8 error: illegal byte (0xfe or 0xff)
+Failed: error -23: UTF-8 error: illegal byte (0xfe or 0xff) at offset 0
     \xff\x80\x80\x80\x80\x80
-Failed: error -23: UTF-8 error: illegal byte (0xfe or 0xff)
+Failed: error -23: UTF-8 error: illegal byte (0xfe or 0xff) at offset 0
     \xc3\x8f
 No match
     \xe0\xaf\x80
@@ -220,13 +220,13 @@ No match
     \xf1\x8f\x80\x80
 No match
     \xf8\x88\x80\x80\x80
-Failed: error -13: UTF-8 error: 5-byte character is not allowed (RFC 3629)
+Failed: error -13: UTF-8 error: 5-byte character is not allowed (RFC 3629) at offset 0
     \xf9\x87\x80\x80\x80
-Failed: error -13: UTF-8 error: 5-byte character is not allowed (RFC 3629)
+Failed: error -13: UTF-8 error: 5-byte character is not allowed (RFC 3629) at offset 0
     \xfc\x84\x80\x80\x80\x80
-Failed: error -14: UTF-8 error: 6-byte character is not allowed (RFC 3629)
+Failed: error -14: UTF-8 error: 6-byte character is not allowed (RFC 3629) at offset 0
     \xfd\x83\x80\x80\x80\x80
-Failed: error -14: UTF-8 error: 6-byte character is not allowed (RFC 3629)
+Failed: error -14: UTF-8 error: 6-byte character is not allowed (RFC 3629) at offset 0
     \xf8\x88\x80\x80\x80\=no_utf_check
 No match
     \xf9\x87\x80\x80\x80\=no_utf_check
@@ -751,27 +751,27 @@ Failed: error 106 at offset 15: missing terminating ] for character class
 
 /X/utf
     \x{d800}
-Failed: error -16: UTF-8 error: code points 0xd800-0xdfff are not defined
+Failed: error -16: UTF-8 error: code points 0xd800-0xdfff are not defined at offset 0
     \x{d800}\=no_utf_check
 No match
     \x{da00}
-Failed: error -16: UTF-8 error: code points 0xd800-0xdfff are not defined
+Failed: error -16: UTF-8 error: code points 0xd800-0xdfff are not defined at offset 0
     \x{da00}\=no_utf_check
 No match
     \x{dfff}
-Failed: error -16: UTF-8 error: code points 0xd800-0xdfff are not defined
+Failed: error -16: UTF-8 error: code points 0xd800-0xdfff are not defined at offset 0
     \x{dfff}\=no_utf_check
 No match
     \x{110000}
-Failed: error -15: UTF-8 error: code points greater than 0x10ffff are not defined
+Failed: error -15: UTF-8 error: code points greater than 0x10ffff are not defined at offset 0
     \x{110000}\=no_utf_check
 No match
     \x{2000000}
-Failed: error -13: UTF-8 error: 5-byte character is not allowed (RFC 3629)
+Failed: error -13: UTF-8 error: 5-byte character is not allowed (RFC 3629) at offset 0
     \x{2000000}\=no_utf_check
 No match
     \x{7fffffff}
-Failed: error -14: UTF-8 error: 6-byte character is not allowed (RFC 3629)
+Failed: error -14: UTF-8 error: 6-byte character is not allowed (RFC 3629) at offset 0
     \x{7fffffff}\=no_utf_check
 No match
 
@@ -1106,7 +1106,7 @@ Subject length lower bound = 1
   \x{ff000041}
 ** Character \x{ff000041} is greater than 0x7fffffff and so cannot be converted to UTF-8
   \x{7f000041}
-Failed: error -14: UTF-8 error: 6-byte character is not allowed (RFC 3629)
+Failed: error -14: UTF-8 error: 6-byte character is not allowed (RFC 3629) at offset 0
 
 /(*UTF8)abc/never_utf
 Failed: error 174 at offset 7: using UTF is disabled by the application

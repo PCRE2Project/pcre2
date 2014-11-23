@@ -157,18 +157,18 @@
 /^[\QĀ\E-\QŐ\E/B,utf
 
 /X/utf
-    \x{d800}
-    \x{d800}\=no_utf_check
-    \x{da00}
-    \x{da00}\=no_utf_check
-    \x{dc00}
-    \x{dc00}\=no_utf_check
-    \x{de00}
-    \x{de00}\=no_utf_check
-    \x{dfff}
-    \x{dfff}\=no_utf_check
-    \x{110000}
-    \x{d800}\x{1234}
+    XX\x{d800}
+    XX\x{d800}\=no_utf_check
+    XX\x{da00}
+    XX\x{da00}\=no_utf_check
+    XX\x{dc00}
+    XX\x{dc00}\=no_utf_check
+    XX\x{de00}
+    XX\x{de00}\=no_utf_check
+    XX\x{dfff}
+    XX\x{dfff}\=no_utf_check
+    XX\x{110000}
+    XX\x{d800}\x{1234}
 
 /(*UTF16)\x{11234}/
   abcd\x{11234}pqr

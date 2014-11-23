@@ -467,8 +467,8 @@ used. There is no short form for this option.
 Processing some regular expression patterns can require a very large amount of
 memory, leading in some cases to a program crash if not enough is available.
 Other patterns may take a very long time to search for all possible matching
-strings. The <b>pcre2_exec()</b> function that is called by <b>pcre2grep</b> to do
-the matching has two parameters that can limit the resources that it uses.
+strings. The <b>pcre2_match()</b> function that is called by <b>pcre2grep</b> to
+do the matching has two parameters that can limit the resources that it uses.
 <br>
 <br>
 The <b>--match-limit</b> option provides a means of limiting resource usage
@@ -750,7 +750,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC14" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 28 September 2014
+Last updated: 23 November 2014
 <br>
 Copyright &copy; 1997-2014 University of Cambridge.
 <br>

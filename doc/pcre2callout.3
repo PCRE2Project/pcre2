@@ -1,4 +1,4 @@
-.TH PCRE2CALLOUT 3 "19 October 2014" "PCRE2 10.00"
+.TH PCRE2CALLOUT 3 "23 November 2014" "PCRE2 10.00"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH SYNOPSIS
@@ -68,29 +68,27 @@ expect.
 .P
 At compile time, PCRE2 "auto-possessifies" repeated items when it knows that
 what follows cannot be part of the repeat. For example, a+[bc] is compiled as
-if it were a++[bc]. The \fBpcre2test\fP output when this pattern is anchored
-and then applied with automatic callouts to the string "aaaa" is:
+if it were a++[bc]. The \fBpcre2test\fP output when this pattern is compiled
+with PCRE2_ANCHORED and PCRE2_AUTO_CALLOUT and then applied to the string
+"aaaa" is:
 .sp
   --->aaaa
-   +0 ^        ^
-   +1 ^        a+
-   +3 ^   ^    [bc]
+   +0 ^        a+
+   +2 ^   ^    [bc]
   No match
 .sp
 This indicates that when matching [bc] fails, there is no backtracking into a+
 and therefore the callouts that would be taken for the backtracks do not occur.
-You can disable the auto-possessify feature by passing PCRE2_NO_AUTO_POSSESS
-to \fBpcre2_compile()\fP, or starting the pattern with (*NO_AUTO_POSSESS). If
-this is done in \fBpcre2test\fP (using the /no_auto_possess qualifier), the
-output changes to this:
+You can disable the auto-possessify feature by passing PCRE2_NO_AUTO_POSSESS to
+\fBpcre2_compile()\fP, or starting the pattern with (*NO_AUTO_POSSESS). In this
+case, the output changes to this:
 .sp
   --->aaaa
-   +0 ^        ^
-   +1 ^        a+
-   +3 ^   ^    [bc]
-   +3 ^  ^     [bc]
-   +3 ^ ^      [bc]
-   +3 ^^       [bc]
+   +0 ^        a+
+   +2 ^   ^    [bc]
+   +2 ^  ^     [bc]
+   +2 ^ ^      [bc]
+   +2 ^^       [bc]
   No match
 .sp
 This time, when matching [bc] fails, the matcher backtracks into a+ and tries
@@ -119,10 +117,10 @@ callouts such as the example above are obeyed.
 .SH "THE CALLOUT INTERFACE"
 .rs
 .sp
-During matching, when PCRE2 reaches a callout point, the external function that
-is set in the match context is called (if it is set). This applies to both
-normal and DFA matching. The only argument to the callout function is a pointer
-to a \fBpcre2_callout\fP block. This structure contains the following fields:
+During matching, when PCRE2 reaches a callout point, if an external function is
+set in the match context, it is called. This applies to both normal and DFA
+matching. The only argument to the callout function is a pointer to a
+\fBpcre2_callout\fP block. This structure contains the following fields:
 .sp
   uint32_t      \fIversion\fP;
   uint32_t      \fIcallout_number\fP;
@@ -149,7 +147,7 @@ automatically generated callouts).
 .P
 The \fIoffset_vector\fP field is a pointer to the vector of capturing offsets
 (the "ovector") that was passed to the matching function in the match data
-block. When \fBpcre2_match()\fP is used, the contents can be inspected, in
+block. When \fBpcre2_match()\fP is used, the contents can be inspected in
 order to extract substrings that have been matched so far, in the same way as
 for extracting substrings after a match has completed. For the DFA matching
 function, this field is not useful.
@@ -238,6 +236,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 19 October 2014
+Last updated: 23 November 2014
 Copyright (c) 1997-2014 University of Cambridge.
 .fi

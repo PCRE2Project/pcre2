@@ -85,29 +85,27 @@ expect.
 <P>
 At compile time, PCRE2 "auto-possessifies" repeated items when it knows that
 what follows cannot be part of the repeat. For example, a+[bc] is compiled as
-if it were a++[bc]. The <b>pcre2test</b> output when this pattern is anchored
-and then applied with automatic callouts to the string "aaaa" is:
+if it were a++[bc]. The <b>pcre2test</b> output when this pattern is compiled
+with PCRE2_ANCHORED and PCRE2_AUTO_CALLOUT and then applied to the string
+"aaaa" is:
 <pre>
   ---&#62;aaaa
-   +0 ^        ^
-   +1 ^        a+
-   +3 ^   ^    [bc]
+   +0 ^        a+
+   +2 ^   ^    [bc]
   No match
 </pre>
 This indicates that when matching [bc] fails, there is no backtracking into a+
 and therefore the callouts that would be taken for the backtracks do not occur.
-You can disable the auto-possessify feature by passing PCRE2_NO_AUTO_POSSESS
-to <b>pcre2_compile()</b>, or starting the pattern with (*NO_AUTO_POSSESS). If
-this is done in <b>pcre2test</b> (using the /no_auto_possess qualifier), the
-output changes to this:
+You can disable the auto-possessify feature by passing PCRE2_NO_AUTO_POSSESS to
+<b>pcre2_compile()</b>, or starting the pattern with (*NO_AUTO_POSSESS). In this
+case, the output changes to this:
 <pre>
   ---&#62;aaaa
-   +0 ^        ^
-   +1 ^        a+
-   +3 ^   ^    [bc]
-   +3 ^  ^     [bc]
-   +3 ^ ^      [bc]
-   +3 ^^       [bc]
+   +0 ^        a+
+   +2 ^   ^    [bc]
+   +2 ^  ^     [bc]
+   +2 ^ ^      [bc]
+   +2 ^^       [bc]
   No match
 </pre>
 This time, when matching [bc] fails, the matcher backtracks into a+ and tries
@@ -137,10 +135,10 @@ callouts such as the example above are obeyed.
 </P>
 <br><a name="SEC4" href="#TOC1">THE CALLOUT INTERFACE</a><br>
 <P>
-During matching, when PCRE2 reaches a callout point, the external function that
-is set in the match context is called (if it is set). This applies to both
-normal and DFA matching. The only argument to the callout function is a pointer
-to a <b>pcre2_callout</b> block. This structure contains the following fields:
+During matching, when PCRE2 reaches a callout point, if an external function is
+set in the match context, it is called. This applies to both normal and DFA
+matching. The only argument to the callout function is a pointer to a
+<b>pcre2_callout</b> block. This structure contains the following fields:
 <pre>
   uint32_t      <i>version</i>;
   uint32_t      <i>callout_number</i>;
@@ -169,7 +167,7 @@ automatically generated callouts).
 <P>
 The <i>offset_vector</i> field is a pointer to the vector of capturing offsets
 (the "ovector") that was passed to the matching function in the match data
-block. When <b>pcre2_match()</b> is used, the contents can be inspected, in
+block. When <b>pcre2_match()</b> is used, the contents can be inspected in
 order to extract substrings that have been matched so far, in the same way as
 for extracting substrings after a match has completed. For the DFA matching
 function, this field is not useful.
@@ -261,7 +259,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC7" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 19 October 2014
+Last updated: 23 November 2014
 <br>
 Copyright &copy; 1997-2014 University of Cambridge.
 <br>

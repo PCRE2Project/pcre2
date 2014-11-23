@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "21 November 2014" "PCRE2 10.00"
+.TH PCRE2API 3 "23 November 2014" "PCRE2 10.00"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -2090,6 +2090,13 @@ returned by \fBpcre2_get_startchar()\fP. For a non-partial match, this can be
 different to the value of \fIovector[0]\fP if the pattern contains the \eK
 escape sequence. After a partial match, however, this value is always the same
 as \fIovector[0]\fP because \eK does not affect the result of a partial match.
+.P
+The \fBstartchar\fP field is also used to return the offset of an invalid 
+UTF character when UTF checking fails. Details are given in the
+.\" HREF
+\fBpcre2unicode\fP
+.\"
+page. 
 .
 .
 .\" HTML <a name="errorlist"></a>
@@ -2707,6 +2714,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 21 November 2014
+Last updated: 23 November 2014
 Copyright (c) 1997-2014 University of Cambridge.
 .fi
