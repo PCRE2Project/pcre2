@@ -5570,13 +5570,13 @@ else for (gmatched = 0;; gmatched++)
       fprintf(outfile, "Failed: error %d: ", capcount);
       PCRE2_GET_ERROR_MESSAGE(mlen, capcount, pbuffer);
       PCHARSV(CASTVAR(void *, pbuffer), 0, mlen, FALSE, outfile);
-      if (capcount <= PCRE2_ERROR_UTF8_ERR1 && 
+      if (capcount <= PCRE2_ERROR_UTF8_ERR1 &&
           capcount >= PCRE2_ERROR_UTF32_ERR2)
         {
         PCRE2_SIZE startchar;
         PCRE2_GET_STARTCHAR(startchar, match_data);
         fprintf(outfile, " at offset %ld", startchar);
-        }    
+        }
       fprintf(outfile, "\n");
       break;
       }

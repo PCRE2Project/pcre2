@@ -1,11 +1,13 @@
 News about PCRE2 releases
 -------------------------
 
-Version 10.0 xx-xxxx-2014
--------------------------
+Version 10.00 24-November-2014
+------------------------------
 
-Version 10.0 is the first release of PCRE2, a revised API for the PCRE library.
-Changes prior to 10.0 are logged in the ChangeLog file for the old API, up to
-item 20 for release 8.36.
+Version 10.00 is the first release of PCRE2, a revised API for the PCRE
+library. Changes prior to 10.00 are logged in the ChangeLog file for the old
+API, up to item 20 for release 8.36. New programs are recommended to use the
+new library. Programs that use the original (PCRE1) API will need changing
+before linking with the new library.
 
 ****

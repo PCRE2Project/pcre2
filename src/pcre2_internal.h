@@ -1570,13 +1570,13 @@ enum {
 
 /* *** NOTE NOTE NOTE *** Whenever the list above is updated, the two macro
 definitions that follow must also be updated to match. There are also tables
-called "opcode_possessify" in pcre_compile.c and "coptable" and "poptable" in
-pcre_dfa_exec.c that must be updated. */
+called "opcode_possessify" in pcre2_compile.c and "coptable" and "poptable" in
+pcre2_dfa_exec.c that must be updated. */
 
 
 /* This macro defines textual names for all the opcodes. These are used only
 for debugging, and some of them are only partial names. The macro is referenced
-only in pcre_printint.c, which fills out the full names in many cases (and in
+only in pcre2_printint.c, which fills out the full names in many cases (and in
 some cases doesn't actually use these names at all). */
 
 #define OP_NAME_LIST \

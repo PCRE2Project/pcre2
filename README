@@ -5,11 +5,9 @@ PCRE2 is a re-implementation of the original PCRE library with an entirely new
 API. The latest release of PCRE2 is always available in three alternative
 formats from:
 
-FIXME: THIS WILL NOT BE THE CASE UNTIL THERE IS A FORMAL RELEASE.
-
-  ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre2/pcre2-xxx.tar.gz
-  ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre2/pcre2-xxx.tar.bz2
-  ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre2/pcre2-xxx.zip
+  ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/pcre2-xxx.tar.gz
+  ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/pcre2-xxx.tar.bz2
+  ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/pcre2-xxx.zip
 
 There is a mailing list for discussion about the development of PCRE (both the
 original and new APIs) at pcre-dev@exim.org. You can access the archives and
@@ -46,7 +44,7 @@ there as yet no C++ wrappers.
 
 The distribution does contain a set of C wrapper functions for the 8-bit
 library that are based on the POSIX regular expression API (see the pcre2posix
-man page). These end up in the library called libpcre2posix. Note that this
+man page). These can be found in a library called libpcre2posix. Note that this
 just provides a POSIX calling interface to PCRE2; the regular expressions
 themselves still follow Perl syntax and semantics. The POSIX API is restricted,
 and does not give full access to all of PCRE2's facilities.
@@ -72,7 +70,7 @@ new names.
 
 
 Documentation for PCRE2
-----------------------
+-----------------------
 
 If you install PCRE2 in the normal way on a Unix-like system, you will end up
 with a set of man pages whose names all start with "pcre2". The one that is
@@ -95,7 +93,7 @@ PCRE2 documentation is supplied in two other forms:
 
 
 Building PCRE2 on non-Unix-like systems
---------------------------------------
+---------------------------------------
 
 For a non-Unix-like system, please read the comments in the file
 NON-AUTOTOOLS-BUILD, though if your system supports the use of "configure" and
@@ -112,7 +110,7 @@ library, because it uses only Standard C functions.
 
 
 Building PCRE2 without using autotools
--------------------------------------
+--------------------------------------
 
 The use of autotools (in particular, libtool) is problematic in some
 environments, even some that are Unix or Unix-like. See the NON-AUTOTOOLS-BUILD
@@ -120,7 +118,7 @@ file for ways of building PCRE2 without using autotools.
 
 
 Building PCRE2 using autotools
------------------------------
+------------------------------
 
 The following instructions assume the use of the widely used "configure; make;
 make install" (autotools) process.
@@ -166,15 +164,15 @@ library. They are also documented in the pcre2build man page.
 
 . By default, only the 8-bit library is built. If you add --enable-pcre2-16 to
   the "configure" command, the 16-bit library is also built. If you add
-  --enable-pcre2-32 to the "configure" command, the 32-bit library is also built.
-  If you want only the 16-bit or 32-bit library, use --disable-pcre2-8 to disable
-  building the 8-bit library.
+  --enable-pcre2-32 to the "configure" command, the 32-bit library is also
+  built. If you want only the 16-bit or 32-bit library, use --disable-pcre2-8
+  to disable building the 8-bit library.
 
 . If you want to include support for just-in-time compiling, which can give
   large performance improvements on certain platforms, add --enable-jit to the
   "configure" command. This support is available only for certain hardware
   architectures. If you try to enable it on an unsupported architecture, there
-  will be a compile time error.  FIXME: NOT YET IMPLEMENTED.
+  will be a compile time error.
 
 . When JIT support is enabled, pcre2grep automatically makes use of it, unless
   you add --disable-pcre2grep-jit to the "configure" command.
@@ -196,13 +194,13 @@ library. They are also documented in the pcre2build man page.
   \P, \p, and \X sequences that recognize Unicode character properties.
   However, only the basic two-letter properties such as Lu are supported.
 
-. You can build PCRE2 to recognize either CR or LF or the sequence CRLF or any
-  of the preceding, or any of the Unicode newline sequences as indicating the
+. You can build PCRE2 to recognize either CR or LF or the sequence CRLF, or any
+  of the preceding, or any of the Unicode newline sequences, as indicating the
   end of a line. Whatever you specify at build time is the default; the caller
   of PCRE2 can change the selection at run time. The default newline indicator
   is a single LF character (the Unix standard). You can specify the default
-  newline indicator by adding --enable-newline-is-cr or --enable-newline-is-lf
-  or --enable-newline-is-crlf or --enable-newline-is-anycrlf or
+  newline indicator by adding --enable-newline-is-cr, --enable-newline-is-lf,
+  --enable-newline-is-crlf, --enable-newline-is-anycrlf, or
   --enable-newline-is-any to the "configure" command, respectively.
 
   If you specify --enable-newline-is-cr or --enable-newline-is-crlf, some of
@@ -251,8 +249,9 @@ library. They are also documented in the pcre2build man page.
   command. PCRE2 then uses three bytes instead of two for offsets to different
   parts of the compiled pattern. In the 16-bit library, --with-link-size=3 is
   the same as --with-link-size=4, which (in both libraries) uses four-byte
-  offsets. Increasing the internal link size reduces performance. In the 32-bit
-  library, the link size setting is ignored, as 4-byte offsets are always used.
+  offsets. Increasing the internal link size reduces performance in the 8-bit
+  and 16-bit libraries. In the 32-bit library, the link size setting is
+  ignored, as 4-byte offsets are always used.
 
 . You can build PCRE2 so that its internal match() function that is called from
   pcre2_match() does not call itself recursively. Instead, it uses memory
@@ -376,12 +375,13 @@ contains compiler output from tests that "configure" runs.
 Once "configure" has run, you can run "make". This builds whichever of the
 libraries libpcre2-8, libpcre2-16 and libpcre2-32 are configured, and a test
 program called pcre2test. If you enabled JIT support with --enable-jit, another
-test program called pcre2_jit_test is built as well. FIXME: still to be
-implemented. If the 8-bit library is built, libpcre2-posix and the pcre2grep
-command are also built.
+test program called pcre2_jit_test is built as well. If the 8-bit library is
+built, libpcre2-posix and the pcre2grep command are also built. Running
+"make" with the -j option may speed up compilation on multiprocessor systems.
 
 The command "make check" runs all the appropriate tests. Details of the PCRE2
-tests are given below in a separate section of this document.
+tests are given below in a separate section of this document. The -j option of
+"make" can also be used when running the tests.
 
 You can use "make install" to install PCRE2 into live directories on your
 system. The following are installed (file names are all relative to the
@@ -528,7 +528,7 @@ Testing PCRE2
 
 To test the basic PCRE2 library on a Unix-like system, run the RunTest script.
 There is another script called RunGrepTest that tests the options of the
-pcre2grep command. When JIT support is enabled, another test program called
+pcre2grep command. When JIT support is enabled, a third test program called
 pcre2_jit_test is built. Both the scripts and all the program tests are run if
 you obey "make check". For other environments, see the instructions in
 NON-AUTOTOOLS-BUILD.
@@ -709,7 +709,6 @@ The distribution should contain the files listed below.
   src/pcre2_context.c      )
   src/pcre2_dfa_match.c    )
   src/pcre2_error.c        )
-  src/pcre2_exec.c         )
   src/pcre2_jit_compile.c  )
   src/pcre2_jit_match.c    ) sources for the functions in the library,
   src/pcre2_jit_misc.c     )   and some internal functions that they use
@@ -721,6 +720,7 @@ The distribution should contain the files listed below.
   src/pcre2_pattern_info.c )
   src/pcre2_string_utils.c )
   src/pcre2_study.c        )
+  src/pcre2_substitute.c   )
   src/pcre2_substring.c    )
   src/pcre2_tables.c       )
   src/pcre2_ucd.c          )
@@ -736,13 +736,15 @@ The distribution should contain the files listed below.
   src/pcre2_intmodedep.h   a mode-specific internal header
   src/pcre2_ucp.h          header for Unicode property handling
 
-  sljit/*                  16 files that make up the JIT compiler FIXME
+  sljit/*                  source files for the JIT compiler
 
 (B) Source files for programs that use PCRE2:
 
   src/pcre2demo.c          simple demonstration of coding calls to PCRE2
   src/pcre2grep.c          source of a grep utility that uses PCRE2
   src/pcre2test.c          comprehensive test program
+  src/pcre2_printint.c     part of pcre2test
+  src/pcre2_jit_test.c     JIT test program
 
 (C) Auxiliary files:
 
@@ -790,7 +792,6 @@ The distribution should contain the files listed below.
   mkinstalldirs            script for making install directories
   perltest.sh              Script for running a Perl test program
   pcre2-config.in          source of script which retains PCRE2 information
-  pcre2_jit_test.c         test program for the JIT compiler
   testdata/testinput*      test data for main library tests
   testdata/testoutput*     expected test results
   testdata/grep*           input and output for pcre2grep tests
@@ -805,25 +806,14 @@ The distribution should contain the files listed below.
   CMakeLists.txt
   config-cmake.h.in
 
-(E) Auxiliary files for VPASCAL  FIXME FIXME
-
-  makevp.bat
-  makevp_c.txt
-  makevp_l.txt
-  pcre2gexp.pas
-
-(F) Auxiliary files for building PCRE2 "by hand"
+(E) Auxiliary files for building PCRE2 "by hand"
 
   pcre2.h.generic         ) a version of the public PCRE2 header file
                           )   for use in non-"configure" environments
   config.h.generic        ) a version of config.h for use in non-"configure"
                           )   environments
 
-(F) Miscellaneous
-
-  RunTest.bat            a script for running tests under Windows  FIXME
-
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 03 November 2014
+Last updated: 24 November 2014

@@ -244,7 +244,7 @@ input lines. Each set starts with a regular expression pattern, followed by any
 number of subject lines to be matched against that pattern. In between sets of
 test data, command lines that begin with a hash (#) character may appear. This
 file format, with some restrictions, can also be processed by the
-<b>perltest.pl</b> script that is distributed with PCRE2 as a means of checking
+<b>perltest.sh</b> script that is distributed with PCRE2 as a means of checking
 that the behaviour of PCRE2 and Perl is the same.
 </P>
 <P>
@@ -287,11 +287,11 @@ patterns. Modifiers on a pattern can change these settings.
   #perltest
 </pre>
 The appearance of this line causes all subsequent modifier settings to be
-checked for compatibility with the <b>perltest.pl</b> script, which is used to
+checked for compatibility with the <b>perltest.sh</b> script, which is used to
 confirm that Perl gives the same results as PCRE2. Also, apart from comment
 lines, none of the other command lines are permitted, because they and many
 of the modifiers are specific to <b>pcre2test</b>, and should not be used in
-test files that are also processed by <b>perltest.pl</b>. The \fP#perltest\fB
+test files that are also processed by <b>perltest.sh</b>. The \fP#perltest\fB
 command helps detect tests that are accidentally put in the wrong file.
 <pre>
   #subject &#60;modifier-list&#62;
@@ -307,7 +307,7 @@ for both patterns and subject lines, whereas others are valid for one or the
 other only. Each modifier has a long name, for example "anchored", and some of
 them must be followed by an equals sign and a value, for example, "offset=12".
 Modifiers that do not take values may be preceded by a minus sign to turn off a
-previous default setting.
+previous setting.
 </P>
 <P>
 A few of the more common modifiers can also be specified as single letters, for
@@ -376,7 +376,7 @@ encoding non-printing characters in a visible way:
   \xhh       hexadecimal byte (up to 2 hex digits)
   \x{hh...}  hexadecimal character (any number of hex digits)
 </pre>
-The use of \x{hh...} is not dependent on the use of the utf modifier on
+The use of \x{hh...} is not dependent on the use of the <b>utf</b> modifier on
 the pattern. It is recognized always. There may be any number of hexadecimal
 digits inside the braces; invalid values provoke error messages.
 </P>
@@ -411,7 +411,7 @@ is converted to "abcabcabcabc". This feature does not support nesting. To
 include a closing square bracket in the characters, code it as \x5D.
 </P>
 <P>
-A backslash followed by an equals sign marke the end of the subject string and
+A backslash followed by an equals sign marks the end of the subject string and
 the start of a modifier list. For example:
 <pre>
   abc\=notbol,notempty
@@ -503,8 +503,8 @@ is built, with the default default being Unicode.
 </P>
 <P>
 The <b>newline</b> modifier specifies which characters are to be interpreted as
-newlines, both in the pattern and (by default) in subject lines. The type must
-be one of CR, LF, CRLF, ANYCRLF, or ANY.
+newlines, both in the pattern and in subject lines. The type must be one of CR,
+LF, CRLF, ANYCRLF, or ANY (in upper or lower case).
 </P>
 <br><b>
 Information about a pattern
@@ -522,8 +522,8 @@ regression tests can be used in different environments.
 </P>
 <P>
 The <b>fullbincode</b> modifier, by contrast, <i>does</i> include length and
-offset values. This is used in a few special tests and is also useful for
-one-off tests.
+offset values. This is used in a few special tests that run only for specific
+code unit widths and link sizes, and is also useful for one-off tests.
 </P>
 <P>
 The <b>info</b> modifier requests information about the compiled pattern
@@ -546,13 +546,14 @@ some typical examples:
   Last code unit = 'c' (caseless)
   Subject length lower bound = 3
 </pre>
-"Compile options" are those specified to the compile function; "overall
-options" have added options that are taken or deduced from the pattern. If both
-sets of options are the same, just a single "options" line is output. "First
-code unit" is where any match must start; if there is more than one they are
-listed as "starting code units". "Last code unit" is the last literal code unit
-that must be present in any match. This is not necessarily the last character.
-These lines are omitted if no starting or ending code units are recorded.
+"Compile options" are those specified by modifiers; "overall options" have
+added options that are taken or deduced from the pattern. If both sets of
+options are the same, just a single "options" line is output; if there are no
+options, the line is omitted. "First code unit" is where any match must start;
+if there is more than one they are listed as "starting code units". "Last code
+unit" is the last literal code unit that must be present in any match. This is
+not necessarily the last character. These lines are omitted if no starting or
+ending code units are recorded.
 </P>
 <br><b>
 Specifying a pattern in hex
@@ -565,16 +566,16 @@ pairs. For example:
   /ab 32 59/hex
 </pre>
 This feature is provided as a way of creating patterns that contain binary zero
-characters. By default, <b>pcre2test</b> passes patterns as zero-terminated
-strings to <b>pcre2_compile()</b>, giving the length as PCRE2_ZERO_TERMINATED.
-However, for patterns specified in hexadecimal, the actual length of the
-pattern is passed.
+and other non-printing characters. By default, <b>pcre2test</b> passes patterns
+as zero-terminated strings to <b>pcre2_compile()</b>, giving the length as
+PCRE2_ZERO_TERMINATED. However, for patterns specified in hexadecimal, the
+actual length of the pattern is passed.
 </P>
 <br><b>
 JIT compilation
 </b><br>
 <P>
-The <b>/jit</b> modifier may optionally be followed by and equals sign and a
+The <b>/jit</b> modifier may optionally be followed by an equals sign and a
 number in the range 0 to 7:
 <pre>
   0  disable JIT
@@ -606,7 +607,7 @@ pattern shows whether JIT compilation was or was not successful. If
 <b>jitverify</b> is specified without <b>jit</b>, jit=7 is assumed. If JIT
 compilation is successful when <b>jitverify</b> is set, the text "(JIT)" is
 added to the first output line after a match or non match when JIT-compiled
-code was actually used.
+code was actually used in the match.
 </P>
 <br><b>
 Setting a locale
@@ -689,8 +690,8 @@ be aborted.
 Using alternative character tables
 </b><br>
 <P>
-The <b>/tables</b> modifier must be followed by a single digit. It causes a
-specific set of built-in character tables to be passed to
+The value specified for the <b>/tables</b> modifier must be one of the digits 0,
+1, or 2. It causes a specific set of built-in character tables to be passed to
 <b>pcre2_compile()</b>. This is used in the PCRE2 tests to check behaviour with
 different character tables. The digit specifies the tables as follows:
 <pre>
@@ -800,13 +801,13 @@ The effects of these modifiers are described in the following sections.
 Showing more text
 </b><br>
 <P>
-The <b>aftertext</b> modifier requests that as well as outputting the substring
-that matched the entire pattern, <b>pcre2test</b> should in addition output the
-remainder of the subject string. This is useful for tests where the subject
-contains multiple copies of the same substring. The <b>allaftertext</b> modifier
-requests the same action for captured substrings as well as the main matched
-substring. In each case the remainder is output on the following line with a
-plus character following the capture number.
+The <b>aftertext</b> modifier requests that as well as outputting the part of
+the subject string that matched the entire pattern, <b>pcre2test</b> should in
+addition output the remainder of the subject string. This is useful for tests
+where the subject contains multiple copies of the same substring. The
+<b>allaftertext</b> modifier requests the same action for captured substrings as
+well as the main matched substring. In each case the remainder is output on the
+following line with a plus character following the capture number.
 </P>
 <P>
 The <b>allusedtext</b> modifier requests that all the text that was consulted
@@ -824,7 +825,8 @@ underneath them. Here is an example:
       &#60;&#60;&#60;   &#62;&#62;&#62;
 </pre>
 This shows that the matched string is "abc", with the preceding and following
-strings "pqr" and "xyz" also consulted during the match.
+strings "pqr" and "xyz" having been consulted during the match (when processing
+the assertions).
 </P>
 <P>
 The <b>startchar</b> modifier requests that the starting character for the match
@@ -881,7 +883,7 @@ function is called again to search the remainder of the subject. The difference
 between <b>global</b> and <b>altglobal</b> is that the former uses the
 <i>start_offset</i> argument to <b>pcre2_match()</b> or <b>pcre2_dfa_match()</b>
 to start searching at a new point within the entire string (which is what Perl
-does), whereas the latter passes over a shortened substring. This makes a
+does), whereas the latter passes over a shortened subject. This makes a
 difference to the matching process if the pattern begins with a lookbehind
 assertion (including \b or \B).
 </P>
@@ -893,7 +895,7 @@ fails, the start offset is advanced, and the normal match is retried. This
 imitates the way Perl handles such cases when using the <b>/g</b> modifier or
 the <b>split()</b> function. Normally, the start offset is advanced by one
 character, but if the newline convention recognizes CRLF as a newline, and the
-current character is CR followed by LF, an advance of two is used.
+current character is CR followed by LF, an advance of two characters occurs.
 </P>
 <br><b>
 Testing substring extraction functions
@@ -906,9 +908,9 @@ for example:
 <pre>
    abcd\=copy=1,copy=3,get=G1
 </pre>
-If the <b>#subject</b> command is used to set default copy and get lists, these
-can be unset by specifying a negative number for numbered groups and an empty
-name for named groups.
+If the <b>#subject</b> command is used to set default copy and/or get lists,
+these can be unset by specifying a negative number to cancel all numbered
+groups and an empty name to cancel all named groups.
 </P>
 <P>
 The <b>getall</b> modifier tests <b>pcre2_substring_list_get()</b>, which
@@ -919,7 +921,8 @@ If the subject line is successfully matched, the substrings extracted by the
 convenience functions are output with C, G, or L after the string number
 instead of a colon. This is in addition to the normal full list. The string
 length (that is, the return from the extraction function) is given in
-parentheses after each substring.
+parentheses after each substring, followed by the name when the extraction was
+by name.
 </P>
 <br><b>
 Testing the substitution function
@@ -1093,11 +1096,10 @@ characters before the actual match start if a lookbehind assertion, \K, \b,
 or \B was involved.)
 </P>
 <P>
-For any other return, <b>pcre2test</b> outputs the PCRE2
-negative error number and a short descriptive phrase. If the error is a failed
-UTF string check, the offset of the start of the failing character and the
-reason code are also output. Here is an example of an interactive
-<b>pcre2test</b> run.
+For any other return, <b>pcre2test</b> outputs the PCRE2 negative error number
+and a short descriptive phrase. If the error is a failed UTF string check, the
+code unit offset of the start of the failing character is also output. Here is
+an example of an interactive <b>pcre2test</b> run.
 <pre>
   $ pcre2test
   PCRE2 version 9.00 2014-05-10
@@ -1110,10 +1112,10 @@ reason code are also output. Here is an example of an interactive
   No match
 </pre>
 Unset capturing substrings that are not followed by one that is set are not
-returned by <b>pcre2_match()</b>, and are not shown by <b>pcre2test</b>. In the
-following example, there are two capturing substrings, but when the first data
-line is matched, the second, unset substring is not shown. An "internal" unset
-substring is shown as "&#60;unset&#62;", as for the second data line.
+shown by <b>pcre2test</b> unless the <b>allcaptures</b> modifier is specified. In
+the following example, there are two capturing substrings, but when the first
+data line is matched, the second, unset substring is not shown. An "internal"
+unset substring is shown as "&#60;unset&#62;", as for the second data line.
 <pre>
     re&#62; /(a)|(b)/
   data&#62; a
@@ -1149,8 +1151,8 @@ are output in sequence, like this:
    1: pp
 </pre>
 "No match" is output only if the first match attempt fails. Here is an example
-of a failure message (the offset 4 that is specified by \&#62;4 is past the end of
-the subject string):
+of a failure message (the offset 4 that is specified by the <b>offset</b>
+modifier is past the end of the subject string):
 <pre>
     re&#62; /xyz/
   data&#62; xyz\=offset=4
@@ -1175,12 +1177,13 @@ the subject where there is at least one match. For example:
    1: tang
    2: tan
 </pre>
-(Using the normal matching function on this data finds only "tang".) The
+Using the normal matching function on this data finds only "tang". The
 longest matching string is always given first (and numbered zero). After a
 PCRE2_ERROR_PARTIAL return, the output is "Partial match:", followed by the
-partially matching substring. (Note that this is the entire substring that was
+partially matching substring. Note that this is the entire substring that was
 inspected during the partial match; it may include characters before the actual
-match start if a lookbehind assertion, \K, \b, or \B was involved.)
+match start if a lookbehind assertion, \b, or \B was involved. (\K is not
+supported for DFA matching.)
 </P>
 <P>
 If global matching is requested, the search for further matches resumes
@@ -1217,9 +1220,9 @@ documentation.
 </P>
 <br><a name="SEC16" href="#TOC1">CALLOUTS</a><br>
 <P>
-If the pattern contains any callout requests, <b>pcre2test</b>'s callout function
-is called during matching. This works with both matching functions. By default,
-the called function displays the callout number, the start and current
+If the pattern contains any callout requests, <b>pcre2test</b>'s callout
+function is called during matching. This works with both matching functions. By
+default, the called function displays the callout number, the start and current
 positions in the text at the callout time, and the next pattern item to be
 tested. For example:
 <pre>
@@ -1306,7 +1309,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC20" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 14 November 2014
+Last updated: 23 November 2014
 <br>
 Copyright &copy; 1997-2014 University of Cambridge.
 <br>

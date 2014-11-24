@@ -108,8 +108,8 @@ case-equivalent, and these are treated as such.
 .sp
 When the PCRE2_UTF option is set, the strings passed as patterns and subjects
 are (by default) checked for validity on entry to the relevant functions.
-If an invalid UTF string is passed, an negative error code is returned. The 
-code unit offset to the offending character can be extracted from the match 
+If an invalid UTF string is passed, an negative error code is returned. The
+code unit offset to the offending character can be extracted from the match
 data block by calling \fBpcre2_get_startchar()\fP, which is used for this
 purpose after a UTF error.
 .P

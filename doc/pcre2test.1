@@ -478,7 +478,7 @@ link sizes and different code unit widths. By using \fBbincode\fP, the same
 regression tests can be used in different environments.
 .P
 The \fBfullbincode\fP modifier, by contrast, \fIdoes\fP include length and
-offset values. This is used in a few special tests that run only for specific 
+offset values. This is used in a few special tests that run only for specific
 code unit widths and link sizes, and is also useful for one-off tests.
 .P
 The \fBinfo\fP modifier requests information about the compiled pattern
@@ -503,7 +503,7 @@ some typical examples:
 .sp
 "Compile options" are those specified by modifiers; "overall options" have
 added options that are taken or deduced from the pattern. If both sets of
-options are the same, just a single "options" line is output; if there are no 
+options are the same, just a single "options" line is output; if there are no
 options, the line is omitted. "First code unit" is where any match must start;
 if there is more than one they are listed as "starting code units". "Last code
 unit" is the last literal code unit that must be present in any match. This is
@@ -646,7 +646,7 @@ be aborted.
 .SS "Using alternative character tables"
 .rs
 .sp
-The value specified for the \fB/tables\fP modifier must be one of the digits 0, 
+The value specified for the \fB/tables\fP modifier must be one of the digits 0,
 1, or 2. It causes a specific set of built-in character tables to be passed to
 \fBpcre2_compile()\fP. This is used in the PCRE2 tests to check behaviour with
 different character tables. The digit specifies the tables as follows:
@@ -760,7 +760,7 @@ The effects of these modifiers are described in the following sections.
 .SS "Showing more text"
 .rs
 .sp
-The \fBaftertext\fP modifier requests that as well as outputting the part of 
+The \fBaftertext\fP modifier requests that as well as outputting the part of
 the subject string that matched the entire pattern, \fBpcre2test\fP should in
 addition output the remainder of the subject string. This is useful for tests
 where the subject contains multiple copies of the same substring. The
@@ -783,7 +783,7 @@ underneath them. Here is an example:
       <<<   >>>
 .sp
 This shows that the matched string is "abc", with the preceding and following
-strings "pqr" and "xyz" having been consulted during the match (when processing 
+strings "pqr" and "xyz" having been consulted during the match (when processing
 the assertions).
 .P
 The \fBstartchar\fP modifier requests that the starting character for the match
@@ -873,7 +873,7 @@ If the subject line is successfully matched, the substrings extracted by the
 convenience functions are output with C, G, or L after the string number
 instead of a colon. This is in addition to the normal full list. The string
 length (that is, the return from the extraction function) is given in
-parentheses after each substring, followed by the name when the extraction was 
+parentheses after each substring, followed by the name when the extraction was
 by name.
 .
 .
@@ -1102,7 +1102,7 @@ are output in sequence, like this:
    1: pp
 .sp
 "No match" is output only if the first match attempt fails. Here is an example
-of a failure message (the offset 4 that is specified by the \fBoffset\fP 
+of a failure message (the offset 4 that is specified by the \fBoffset\fP
 modifier is past the end of the subject string):
 .sp
     re> /xyz/
@@ -1134,7 +1134,7 @@ longest matching string is always given first (and numbered zero). After a
 PCRE2_ERROR_PARTIAL return, the output is "Partial match:", followed by the
 partially matching substring. Note that this is the entire substring that was
 inspected during the partial match; it may include characters before the actual
-match start if a lookbehind assertion, \eb, or \eB was involved. (\eK is not 
+match start if a lookbehind assertion, \eb, or \eB was involved. (\eK is not
 supported for DFA matching.)
 .P
 If global matching is requested, the search for further matches resumes

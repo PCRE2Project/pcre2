@@ -1,12 +1,12 @@
 Change Log for PCRE2
 --------------------
 
-Version 10.0 xx-xxxx-2014
--------------------------
+Version 10.00 24-November-2014
+------------------------------
 
-Version 10.0 is the first release of PCRE2, a revised API for the PCRE library.
-Changes prior to 10.0 are logged in the ChangeLog file for the old API, up to
-item 20 for release 8.36.
+Version 10.00 is the first release of PCRE2, a revised API for the PCRE
+library. Changes prior to 10.00 are logged in the ChangeLog file for the old
+API, up to item 20 for release 8.36.
 
 The code of the library was heavily revised as part of the new API
 implementation. Details of each and every modification were not individually
@@ -25,7 +25,7 @@ matched by that pattern.
 
 4. For the benefit of those who use PCRE2 via some other application, that is,
 not writing the function calls themselves, it is possible to check the PCRE2
-version by matching a pattern such as /(?(VERSION>=10.0)yes|no)/ against a
+version by matching a pattern such as /(?(VERSION>=10)yes|no)/ against a
 string such as "yesno".
 
 5. There are case-equivalent Unicode characters whose encodings use different
@@ -46,14 +46,15 @@ characters, for example: /(?:(?=.)|(?<!x))a/.
 
 7. When an (*ACCEPT) is triggered inside capturing parentheses, it arranges for
 those parentheses to be closed with whatever has been captured so far. However,
-it was failing to mark any other groups between the hightest capture so far and
+it was failing to mark any other groups between the highest capture so far and
 the currrent group as "unset". Thus, the ovector for those groups contained
 whatever was previously there. An example is the pattern /(x)|((*ACCEPT))/ when
 matched against "abcd".
 
 8. The pcre2_substitute() function has been implemented.
 
-9. If an assertion condition was quantified with a minimum of zero (an odd
-thing to do, but it happened), SIGSEGV or other misbehaviour could occur.
+9. If an assertion used as a condition was quantified with a minimum of zero
+(an odd thing to do, but it happened), SIGSEGV or other misbehaviour could
+occur.
 
 ****

@@ -375,28 +375,34 @@ CLEANFILES += src/pcre2_chartables.c
 # when pcre2_jit_compile.c is processed, so they must be distributed.
 
 EXTRA_DIST += \
-  sljit/sljitConfig.h \
-  sljit/sljitConfigInternal.h \
-  sljit/sljitExecAllocator.c \
-  sljit/sljitLir.c \
-  sljit/sljitLir.h \
-  sljit/sljitNativeARM_32.c \
-  sljit/sljitNativeARM_64.c \
-  sljit/sljitNativeARM_T2_32.c \
-  sljit/sljitNativeMIPS_32.c \
-  sljit/sljitNativeMIPS_64.c \
-  sljit/sljitNativeMIPS_common.c \
-  sljit/sljitNativePPC_32.c \
-  sljit/sljitNativePPC_64.c \
-  sljit/sljitNativePPC_common.c \
-  sljit/sljitNativeSPARC_32.c \
-  sljit/sljitNativeSPARC_common.c \
-  sljit/sljitNativeTILEGX-encoder.c \
-  sljit/sljitNativeTILEGX_64.c \
-  sljit/sljitNativeX86_32.c \
-  sljit/sljitNativeX86_64.c \
-  sljit/sljitNativeX86_common.c \
-  sljit/sljitUtils.c
+  src/sljit/sljitConfig.h \
+  src/sljit/sljitConfigInternal.h \
+  src/sljit/sljitExecAllocator.c \
+  src/sljit/sljitLir.c \
+  src/sljit/sljitLir.h \
+  src/sljit/sljitNativeARM_32.c \
+  src/sljit/sljitNativeARM_64.c \
+  src/sljit/sljitNativeARM_T2_32.c \
+  src/sljit/sljitNativeMIPS_32.c \
+  src/sljit/sljitNativeMIPS_64.c \
+  src/sljit/sljitNativeMIPS_common.c \
+  src/sljit/sljitNativePPC_32.c \
+  src/sljit/sljitNativePPC_64.c \
+  src/sljit/sljitNativePPC_common.c \
+  src/sljit/sljitNativeSPARC_32.c \
+  src/sljit/sljitNativeSPARC_common.c \
+  src/sljit/sljitNativeTILEGX-encoder.c \
+  src/sljit/sljitNativeTILEGX_64.c \
+  src/sljit/sljitNativeX86_32.c \
+  src/sljit/sljitNativeX86_64.c \
+  src/sljit/sljitNativeX86_common.c \
+  src/sljit/sljitUtils.c
+
+# Some of the JIT sources are also in separate files that are #included.
+
+EXTRA_DIST += \
+  src/pcre2_jit_match.c \
+  src/pcre2_jit_misc.c
 
 if WITH_PCRE2_8
 libpcre2_8_la_LDFLAGS = $(EXTRA_LIBPCRE2_8_LDFLAGS)

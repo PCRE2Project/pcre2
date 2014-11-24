@@ -115,7 +115,10 @@ VALIDITY OF UTF STRINGS
 <P>
 When the PCRE2_UTF option is set, the strings passed as patterns and subjects
 are (by default) checked for validity on entry to the relevant functions.
-If an invalid UTF string is passed, an error return is given.
+If an invalid UTF string is passed, an negative error code is returned. The
+code unit offset to the offending character can be extracted from the match
+data block by calling <b>pcre2_get_startchar()</b>, which is used for this
+purpose after a UTF error.
 </P>
 <P>
 UTF-16 and UTF-32 strings can indicate their endianness by special code knows

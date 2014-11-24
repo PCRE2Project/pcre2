@@ -2074,6 +2074,12 @@ returned by <b>pcre2_get_startchar()</b>. For a non-partial match, this can be
 different to the value of <i>ovector[0]</i> if the pattern contains the \K
 escape sequence. After a partial match, however, this value is always the same
 as <i>ovector[0]</i> because \K does not affect the result of a partial match.
+</P>
+<P>
+The <b>startchar</b> field is also used to return the offset of an invalid
+UTF character when UTF checking fails. Details are given in the
+<a href="pcre2unicode.html"><b>pcre2unicode</b></a>
+page.
 <a name="errorlist"></a></P>
 <br><a name="SEC26" href="#TOC1">ERROR RETURNS FROM <b>pcre2_match()</b></a><br>
 <P>
@@ -2658,7 +2664,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC36" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 21 November 2014
+Last updated: 23 November 2014
 <br>
 Copyright &copy; 1997-2014 University of Cambridge.
 <br>

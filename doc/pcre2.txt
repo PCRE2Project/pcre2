@@ -2057,6 +2057,10 @@ OTHER INFORMATION ABOUT A MATCH
        value is always the same as ovector[0] because \K does not  affect  the
        result of a partial match.
 
+       The startchar field is also used to return the offset of an invalid UTF
+       character when UTF checking fails. Details are given in  the  pcre2uni-
+       code page.
+
 
 ERROR RETURNS FROM pcre2_match()
 
@@ -2601,7 +2605,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 21 November 2014
+       Last updated: 23 November 2014
        Copyright (c) 1997-2014 University of Cambridge.
 ------------------------------------------------------------------------------
 
@@ -4327,9 +4331,9 @@ PARTIAL MATCHING USING pcre2_dfa_match()
 
          /dog(sbody)??/
 
-       Whereas the standard functions stop as soon as they find  the  complete
-       match  for  "dog",  the  DFA  functions also find the partial match for
-       "dogsbody", and so return that when PCRE2_PARTIAL_HARD is set.
+       Whereas the standard function stops as soon as it  finds  the  complete
+       match  for  "dog",  the  DFA  function also finds the partial match for
+       "dogsbody", and so returns that when PCRE2_PARTIAL_HARD is set.
 
 
 PARTIAL MATCHING AND WORD BOUNDARIES
@@ -4681,8 +4685,10 @@ VALIDITY OF UTF STRINGS
 
        When  the  PCRE2_UTF  option is set, the strings passed as patterns and
        subjects are (by default) checked for validity on entry to the relevant
-       functions.   If  an  invalid  UTF  string is passed, an error return is
-       given.
+       functions.   If an invalid UTF string is passed, an negative error code
+       is returned. The code unit offset to the  offending  character  can  be
+       extracted  from  the match data block by calling pcre2_get_startchar(),
+       which is used for this purpose after a UTF error.
 
        UTF-16 and UTF-32 strings can indicate their endianness by special code
        knows  as  a  byte-order  mark (BOM). The PCRE2 functions do not handle
