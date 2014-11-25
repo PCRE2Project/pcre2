@@ -3603,6 +3603,8 @@ if (range_right >= 0)
   }
 
 offsets[0] = -1;
+offsets[1] = -1;
+offsets[2] = -1;
 /* Scan forward. */
 for (i = 0; i < max; i++)
   if (ones[i] <= 2) {
@@ -3616,7 +3618,6 @@ if (offsets[0] < 0 && range_right < 0)
 if (offsets[0] >= 0)
   {
   /* Scan backward. */
-  offsets[1] = -1;
   for (i = max - 1; i > offsets[0]; i--)
     if (ones[i] <= 2 && i != range_right)
       {
@@ -3628,7 +3629,6 @@ if (offsets[0] >= 0)
   if (offsets[1] == -1 && offsets[0] == 0 && range_right < 0)
     return FALSE;
 
-  offsets[2] = -1;
   /* We only search for a middle character if there is no range check. */
   if (offsets[1] >= 0 && range_right == -1)
     {
