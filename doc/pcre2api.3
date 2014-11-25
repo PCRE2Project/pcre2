@@ -370,6 +370,18 @@ pattern (\fBpcre2_pattern_info()\fP) and about the configuration with which
 PCRE2 was built (\fBpcre2_config()\fP).
 .
 .
+.SH "STRING LENGTHS AND OFFSETS"
+.rs
+.sp
+The PCRE2 API uses string lengths and offsets into strings of code units in
+several places. These values are always of type PCRE2_SIZE, which is an
+unsigned integer type, currently always defined as \fIsize_t\fP. The largest 
+value that can be stored in such a type (that is ~(PCRE2_SIZE)0) is reserved 
+as a special indicator for zero-terminated strings and unset offsets. 
+Therefore, the longest string that can be handled is one less than this 
+maximum. 
+.
+.
 .\" HTML <a name="newlines"></a>
 .SH NEWLINES
 .rs
