@@ -5934,8 +5934,8 @@ if (PCRE2_CONFIG(PCRE2_CONFIG_VERSION, NULL) !=
     PCRE2_CONFIG(PCRE2_CONFIG_JITTARGET, NULL) !=
     PCRE2_CONFIG(PCRE2_CONFIG_JITTARGET, jittarget) ||
 
-    PCRE2_CONFIG(PCRE2_CONFIG_UNICODE, NULL) != sizeof(int) ||
-    PCRE2_CONFIG(PCRE2_CONFIG_MATCHLIMIT, NULL) != sizeof(long int))
+    PCRE2_CONFIG(PCRE2_CONFIG_UNICODE, NULL) != sizeof(uint32_t) ||
+    PCRE2_CONFIG(PCRE2_CONFIG_MATCHLIMIT, NULL) != sizeof(uint32_t))
   {
   fprintf(stderr, "** Error in pcre2_config(): bad length\n");
   return 1;

@@ -259,9 +259,9 @@ context functions. */
 #define PCRE2_CONFIG_JITTARGET               2
 #define PCRE2_CONFIG_LINKSIZE                3
 #define PCRE2_CONFIG_MATCHLIMIT              4
-#define PCRE2_CONFIG_NEWLINE                 6
-#define PCRE2_CONFIG_PARENSLIMIT             7
-#define PCRE2_CONFIG_RECURSIONLIMIT          5
+#define PCRE2_CONFIG_NEWLINE                 5
+#define PCRE2_CONFIG_PARENSLIMIT             6
+#define PCRE2_CONFIG_RECURSIONLIMIT          7
 #define PCRE2_CONFIG_STACKRECURSE            8
 #define PCRE2_CONFIG_UNICODE                 9
 #define PCRE2_CONFIG_UNICODE_VERSION        10

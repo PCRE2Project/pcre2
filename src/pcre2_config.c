@@ -85,15 +85,13 @@ if (where == NULL)  /* Requests a length */
     case PCRE2_CONFIG_BSR:
     case PCRE2_CONFIG_JIT:
     case PCRE2_CONFIG_LINKSIZE:
-    case PCRE2_CONFIG_NEWLINE:
-    case PCRE2_CONFIG_STACKRECURSE:
-    case PCRE2_CONFIG_UNICODE:
-    return sizeof(int);
-
     case PCRE2_CONFIG_MATCHLIMIT:
+    case PCRE2_CONFIG_NEWLINE:
     case PCRE2_CONFIG_PARENSLIMIT:
     case PCRE2_CONFIG_RECURSIONLIMIT:
-    return sizeof(long int);
+    case PCRE2_CONFIG_STACKRECURSE:
+    case PCRE2_CONFIG_UNICODE:
+    return sizeof(uint32_t);
 
     /* These are handled below */
 
@@ -111,17 +109,17 @@ switch (what)
 
   case PCRE2_CONFIG_BSR:
 #ifdef BSR_ANYCRLF
-  *((int *)where) = 1;
+  *((uint32_t *)where) = PCRE2_BSR_ANYCRLF;
 #else
-  *((int *)where) = 0;
+  *((uint32_t *)where) = PCRE2_BSR_UNICODE;
 #endif
   break;
 
   case PCRE2_CONFIG_JIT:
 #ifdef SUPPORT_JIT
-  *((int *)where) = 1;
+  *((uint32_t *)where) = 1;
 #else
-  *((int *)where) = 0;
+  *((uint32_t *)where) = 0;
 #endif
   break;
 
@@ -130,37 +128,37 @@ switch (what)
     {
     const char *v = PRIV(jit_get_target)();
     return 1 + ((where == NULL)?
-      (int)strlen(v) : PRIV(strcpy_c8)((PCRE2_UCHAR *)where, v));
+      strlen(v) : PRIV(strcpy_c8)((PCRE2_UCHAR *)where, v));
     }
 #else
   return PCRE2_ERROR_BADOPTION;
 #endif
 
   case PCRE2_CONFIG_LINKSIZE:
-  *((int *)where) = configured_link_size;
+  *((uint32_t *)where) = configured_link_size;
   break;
 
   case PCRE2_CONFIG_MATCHLIMIT:
-  *((unsigned long int *)where) = MATCH_LIMIT;
+  *((uint32_t *)where) = MATCH_LIMIT;
   break;
 
   case PCRE2_CONFIG_NEWLINE:
-  *((int *)where) = NEWLINE_DEFAULT;
+  *((uint32_t *)where) = NEWLINE_DEFAULT;
   break;
 
   case PCRE2_CONFIG_PARENSLIMIT:
-  *((unsigned long int *)where) = PARENS_NEST_LIMIT;
+  *((uint32_t *)where) = PARENS_NEST_LIMIT;
   break;
 
   case PCRE2_CONFIG_RECURSIONLIMIT:
-  *((unsigned long int *)where) = MATCH_LIMIT_RECURSION;
+  *((uint32_t *)where) = MATCH_LIMIT_RECURSION;
   break;
 
   case PCRE2_CONFIG_STACKRECURSE:
 #ifdef HEAP_MATCH_RECURSE
-  *((int *)where) = 0;
+  *((uint32_t *)where) = 0;
 #else
-  *((int *)where) = 1;
+  *((uint32_t *)where) = 1;
 #endif
   break;
 
@@ -172,15 +170,15 @@ switch (what)
     const char *v = "Unicode not supported";
 #endif
     return 1 + ((where == NULL)?
-      (int)strlen(v): PRIV(strcpy_c8)((PCRE2_UCHAR *)where, v));
+      strlen(v): PRIV(strcpy_c8)((PCRE2_UCHAR *)where, v));
    }
   break;
 
   case PCRE2_CONFIG_UNICODE:
 #if defined SUPPORT_UNICODE
-  *((int *)where) = 1;
+  *((uint32_t *)where) = 1;
 #else
-  *((int *)where) = 0;
+  *((uint32_t *)where) = 0;
 #endif
   break;
 
@@ -209,7 +207,7 @@ switch (what)
       XSTRING(PCRE2_MAJOR.PCRE2_MINOR PCRE2_DATE) :
       XSTRING(PCRE2_MAJOR.PCRE2_MINOR) XSTRING(PCRE2_PRERELEASE PCRE2_DATE);
     return 1 + ((where == NULL)?
-      (int)strlen(v) : PRIV(strcpy_c8)((PCRE2_UCHAR *)where, v));
+      strlen(v) : PRIV(strcpy_c8)((PCRE2_UCHAR *)where, v));
     }
   }
 

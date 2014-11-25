@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "23 November 2014" "PCRE2 10.00"
+.TH PCRE2API 3 "25 November 2014" "PCRE2 10.00"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -780,15 +780,15 @@ available:
 .sp
   PCRE2_CONFIG_BSR
 .sp
-The output is an integer whose value indicates what character sequences the \eR
-escape sequence matches by default. A value of PCRE2_BSR_UNICODE means that \eR
-matches any Unicode line ending sequence; a value of PCRE2_BSR_ANYCRLF means
-that \eR matches only CR, LF, or CRLF. The default can be overridden when a
-pattern is compiled.
+The output is a uint32_t integer whose value indicates what character
+sequences the \eR escape sequence matches by default. A value of
+PCRE2_BSR_UNICODE means that \eR matches any Unicode line ending sequence; a
+value of PCRE2_BSR_ANYCRLF means that \eR matches only CR, LF, or CRLF. The
+default can be overridden when a pattern is compiled.
 .sp
   PCRE2_CONFIG_JIT
 .sp
-The output is an integer that is set to one if support for just-in-time
+The output is a uint32_t integer that is set to one if support for just-in-time
 compiling is available; otherwise it is set to zero.
 .sp
   PCRE2_CONFIG_JITTARGET
@@ -804,12 +804,13 @@ for the terminating zero.
 .sp
   PCRE2_CONFIG_LINKSIZE
 .sp
-The output is an integer that contains the number of bytes used for internal
-linkage in compiled regular expressions. When PCRE2 is configured, the value
-can be set to 2, 3, or 4, with the default being 2. This is the value that is
-returned by \fBpcre2_config()\fP. However, when the 16-bit library is compiled,
-a value of 3 is rounded up to 4, and when the 32-bit library is compiled,
-internal linkages always use 4 bytes, so the configured value is not relevant.
+The output is a uint32_t integer that contains the number of bytes used for
+internal linkage in compiled regular expressions. When PCRE2 is configured, the
+value can be set to 2, 3, or 4, with the default being 2. This is the value
+that is returned by \fBpcre2_config()\fP. However, when the 16-bit library is
+compiled, a value of 3 is rounded up to 4, and when the 32-bit library is
+compiled, internal linkages always use 4 bytes, so the configured value is not
+relevant.
 .P
 The default value of 2 for the 8-bit and 16-bit libraries is sufficient for all
 but the most massive patterns, since it allows the size of the compiled pattern
@@ -818,14 +819,14 @@ be compiled by those two libraries, but at the expense of slower matching.
 .sp
   PCRE2_CONFIG_MATCHLIMIT
 .sp
-The output is an unsigned long integer that gives the default limit for the
-number of internal matching function calls in a \fBpcre2_match()\fP execution.
-Further details are given with \fBpcre2_match()\fP below.
+The output is a uint32_t integer that gives the default limit for the number of
+internal matching function calls in a \fBpcre2_match()\fP execution. Further
+details are given with \fBpcre2_match()\fP below.
 .sp
   PCRE2_CONFIG_NEWLINE
 .sp
-The output is an integer whose value specifies the default character sequence
-that is recognized as meaning "newline". The values are:
+The output is a uint32_t integer whose value specifies the default character
+sequence that is recognized as meaning "newline". The values are:
 .sp
   PCRE2_NEWLINE_CR       Carriage return (CR)
   PCRE2_NEWLINE_LF       Linefeed (LF)
@@ -838,7 +839,7 @@ operating system.
 .sp
   PCRE2_CONFIG_PARENSLIMIT
 .sp
-The output is an unsigned long integer that gives the maximum depth of nesting
+The output is a uint32_t integer that gives the maximum depth of nesting
 of parentheses (of any kind) in a pattern. This limit is imposed to cap the
 amount of system stack used when a pattern is compiled. It is specified when
 PCRE2 is built; the default is 250. This limit does not take into account the
@@ -847,16 +848,15 @@ over compilation stack usage, see \fBpcre2_set_compile_recursion_guard()\fP.
 .sp
   PCRE2_CONFIG_RECURSIONLIMIT
 .sp
-The output is an unsigned long integer that gives the default limit for the
-depth of recursion when calling the internal matching function in a
-\fBpcre2_match()\fP execution. Further details are given with
-\fBpcre2_match()\fP below.
+The output is a uint32_t integer that gives the default limit for the depth of
+recursion when calling the internal matching function in a \fBpcre2_match()\fP
+execution. Further details are given with \fBpcre2_match()\fP below.
 .sp
   PCRE2_CONFIG_STACKRECURSE
 .sp
-The output is an integer that is set to one if internal recursion when running
-\fBpcre2_match()\fP is implemented by recursive function calls that use the
-system stack to remember their state. This is the usual way that PCRE2 is
+The output is a uint32_t integer that is set to one if internal recursion when
+running \fBpcre2_match()\fP is implemented by recursive function calls that use
+the system stack to remember their state. This is the usual way that PCRE2 is
 compiled. The output is zero if PCRE2 was compiled to use blocks of data on the
 heap instead of recursive function calls.
 .sp
@@ -872,8 +872,8 @@ string plus one unit for the terminating zero.
 .sp
   PCRE2_CONFIG_UNICODE
 .sp
-The output is an integer that is set to one if Unicode support is available;
-otherwise it is set to zero. Unicode support implies UTF support.
+The output is a uint32_t integer that is set to one if Unicode support is
+available; otherwise it is set to zero. Unicode support implies UTF support.
 .sp
   PCRE2_CONFIG_VERSION
 .sp
@@ -2714,6 +2714,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 23 November 2014
+Last updated: 25 November 2014
 Copyright (c) 1997-2014 University of Cambridge.
 .fi

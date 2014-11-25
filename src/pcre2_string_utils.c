@@ -169,10 +169,10 @@ Argument:    the string
 Returns:     the length
 */
 
-int
+PCRE2_SIZE
 PRIV(strlen)(PCRE2_SPTR str)
 {
-int c = 0;
+PCRE2_SIZE c = 0;
 while (*str++ != 0) c++;
 return c;
 }
@@ -189,7 +189,7 @@ return c;
 Returns:   the number of code units used (excluding trailing zero)
 */
 
-int
+PCRE2_SIZE
 PRIV(strcpy_c8)(PCRE2_UCHAR *str1, const char *str2)
 {
 PCRE2_UCHAR *t = str1;
