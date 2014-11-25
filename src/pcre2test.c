@@ -929,11 +929,11 @@ are supported. */
 
 #define PCRE2_SET_CALLOUT(a,b,c) \
   if (test_mode == PCRE8_MODE) \
-    pcre2_set_callout_8(G(a,8),(int (*)(pcre2_callout_block_8 *))b,c); \
+    pcre2_set_callout_8(G(a,8),(int (*)(pcre2_callout_block_8 *, void *))b,c); \
   else if (test_mode == PCRE16_MODE) \
-    pcre2_set_callout_16(G(a,16),(int (*)(pcre2_callout_block_16 *))b,c); \
+    pcre2_set_callout_16(G(a,16),(int (*)(pcre2_callout_block_16 *, void *))b,c); \
   else \
-    pcre2_set_callout_32(G(a,32),(int (*)(pcre2_callout_block_32 *))b,c);
+    pcre2_set_callout_32(G(a,32),(int (*)(pcre2_callout_block_32 *, void *))b,c);
 
 #define PCRE2_SET_CHARACTER_TABLES(a,b) \
   if (test_mode == PCRE8_MODE) \
@@ -1304,10 +1304,10 @@ the three different cases. */
 #define PCRE2_SET_CALLOUT(a,b,c) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
     G(pcre2_set_callout_,BITONE)(G(a,BITONE), \
-      (int (*)(G(pcre2_callout_block_,BITONE) *))b,c); \
+      (int (*)(G(pcre2_callout_block_,BITONE) *, void *))b,c); \
   else \
     G(pcre2_set_callout_,BITTWO)(G(a,BITTWO), \
-      (int (*)(G(pcre2_callout_block_,BITTWO) *))b,c);
+      (int (*)(G(pcre2_callout_block_,BITTWO) *, void *))b,c);
 
 #define PCRE2_SET_CHARACTER_TABLES(a,b) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
@@ -1510,7 +1510,7 @@ the three different cases. */
 #define PCRE2_PATTERN_INFO(a,b,c,d) a = pcre2_pattern_info_8(G(b,8),c,d)
 #define PCRE2_PRINTINT(a) pcre2_printint_8(compiled_code8,outfile,a)
 #define PCRE2_SET_CALLOUT(a,b,c) \
-  pcre2_set_callout_8(G(a,8),(int (*)(pcre2_callout_block_8 *))b,c)
+  pcre2_set_callout_8(G(a,8),(int (*)(pcre2_callout_block_8 *, void *))b,c)
 #define PCRE2_SET_CHARACTER_TABLES(a,b) pcre2_set_character_tables_8(G(a,8),b)
 #define PCRE2_SET_COMPILE_RECURSION_GUARD(a,b) \
   pcre2_set_compile_recursion_guard_8(G(a,8),b)
@@ -1591,7 +1591,7 @@ the three different cases. */
 #define PCRE2_PATTERN_INFO(a,b,c,d) a = pcre2_pattern_info_16(G(b,16),c,d)
 #define PCRE2_PRINTINT(a) pcre2_printint_16(compiled_code16,outfile,a)
 #define PCRE2_SET_CALLOUT(a,b,c) \
-  pcre2_set_callout_16(G(a,16),(int (*)(pcre2_callout_block_16 *))b,c);
+  pcre2_set_callout_16(G(a,16),(int (*)(pcre2_callout_block_16 *, void *))b,c);
 #define PCRE2_SET_CHARACTER_TABLES(a,b) pcre2_set_character_tables_16(G(a,16),b)
 #define PCRE2_SET_COMPILE_RECURSION_GUARD(a,b) \
   pcre2_set_compile_recursion_guard_16(G(a,16),b)
@@ -1672,7 +1672,7 @@ the three different cases. */
 #define PCRE2_PATTERN_INFO(a,b,c,d) a = pcre2_pattern_info_32(G(b,32),c,d)
 #define PCRE2_PRINTINT(a) pcre2_printint_32(compiled_code32,outfile,a)
 #define PCRE2_SET_CALLOUT(a,b,c) \
-  pcre2_set_callout_32(G(a,32),(int (*)(pcre2_callout_block_32 *))b,c);
+  pcre2_set_callout_32(G(a,32),(int (*)(pcre2_callout_block_32 *, void *))b,c);
 #define PCRE2_SET_CHARACTER_TABLES(a,b) pcre2_set_character_tables_32(G(a,32),b)
 #define PCRE2_SET_COMPILE_RECURSION_GUARD(a,b) \
   pcre2_set_compile_recursion_guard_32(G(a,32),b)
@@ -4126,7 +4126,7 @@ Return:
 */
 
 static int
-callout_function(pcre2_callout_block_8 *cb)
+callout_function(pcre2_callout_block_8 *cb, void *callout_data_ptr)
 {
 uint32_t i, pre_start, post_start, subject_length;
 BOOL utf = (FLD(compiled_code, overall_options) & PCRE2_UTF) != 0;
@@ -4216,9 +4216,9 @@ if (cb->mark != last_callout_mark)
   last_callout_mark = cb->mark;
   }
 
-if (cb->callout_data != NULL)
+if (callout_data_ptr != NULL)
   {
-  int callout_data = *((int32_t *)(cb->callout_data));
+  int callout_data = *((int32_t *)callout_data_ptr);
   if (callout_data != 0)
     {
     fprintf(outfile, "Callout data = %d\n", callout_data);

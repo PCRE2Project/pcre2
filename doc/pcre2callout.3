@@ -1,4 +1,4 @@
-.TH PCRE2CALLOUT 3 "23 November 2014" "PCRE2 10.00"
+.TH PCRE2CALLOUT 3 "25 November 2014" "PCRE2 10.00"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH SYNOPSIS
@@ -7,7 +7,7 @@ PCRE2 - Perl-compatible regular expressions (revised API)
 .B #include <pcre2.h>
 .PP
 .SM
-.B int (*pcre2_callout)(pcre2_callout_block *);
+.B int (*pcre2_callout)(pcre2_callout_block *, void *);
 .
 .SH DESCRIPTION
 .rs
@@ -119,14 +119,19 @@ callouts such as the example above are obeyed.
 .sp
 During matching, when PCRE2 reaches a callout point, if an external function is
 set in the match context, it is called. This applies to both normal and DFA
-matching. The only argument to the callout function is a pointer to a
-\fBpcre2_callout\fP block. This structure contains the following fields:
+matching. The first argument to the callout function is a pointer to a
+\fBpcre2_callout\fP block. The second argument is the void * callout data that
+was supplied when the callout was set up by calling \fBpcre2_set_callout()\fP
+(see the
+.\" HREF
+\fBpcre2api\fP
+.\"
+documentation). The callout block structure contains the following fields:
 .sp
   uint32_t      \fIversion\fP;
   uint32_t      \fIcallout_number\fP;
   uint32_t      \fIcapture_top\fP;
   uint32_t      \fIcapture_last\fP;
-  void         *\fIcallout_data\fP;
   PCRE2_SIZE   *\fIoffset_vector\fP;
   PCRE2_SPTR    \fImark\fP;
   PCRE2_SPTR    \fIsubject\fP;
@@ -176,15 +181,6 @@ substring. However, when a recursion exits, the value reverts to what it was
 outside the recursion, as do the values of all captured substrings. If no
 substrings have been captured, the value of \fIcapture_last\fP is 0. This is
 always the case for the DFA matching functions.
-.P
-The \fIcallout_data\fP field contains a value that is passed to a matching
-function specifically so that it can be passed back in callouts. It is set in
-the match context when the callout is set up by calling
-\fBpcre2_set_callout()\fP (see the
-.\" HREF
-\fBpcre2api\fP
-.\"
-documentation).
 .P
 The \fIpattern_position\fP field contains the offset to the next item to be
 matched in the pattern string.
@@ -236,6 +232,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 23 November 2014
+Last updated: 25 November 2014
 Copyright (c) 1997-2014 University of Cambridge.
 .fi

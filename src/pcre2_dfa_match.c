@@ -2615,7 +2615,6 @@ for (;;)
             cb.callout_number   = code[LINK_SIZE+2];
             cb.capture_top      = 1;
             cb.capture_last     = 0;
-            cb.callout_data     = mb->callout_data;
             cb.offset_vector    = offsets;
             cb.mark             = NULL;   /* No (*MARK) support */
             cb.subject          = start_subject;
@@ -2624,7 +2623,8 @@ for (;;)
             cb.current_position = (PCRE2_SIZE)(ptr - start_subject);
             cb.pattern_position = GET(code, LINK_SIZE + 3);
             cb.next_item_length = GET(code, 3 + 2*LINK_SIZE);
-            if ((rrc = (mb->callout)(&cb)) < 0) return rrc;   /* Abandon */
+            if ((rrc = (mb->callout)(&cb, mb->callout_data)) < 0) 
+              return rrc;   /* Abandon */
             }
           if (rrc > 0) break;                      /* Fail this thread */
           code += PRIV(OP_lengths)[OP_CALLOUT];    /* Skip callout data */
@@ -2962,7 +2962,6 @@ for (;;)
         cb.callout_number   = code[1];
         cb.capture_top      = 1;
         cb.capture_last     = 0;
-        cb.callout_data     = mb->callout_data;
         cb.offset_vector    = offsets;
         cb.mark             = NULL;   /* No (*MARK) support */
         cb.subject          = start_subject;
@@ -2971,7 +2970,8 @@ for (;;)
         cb.current_position = (PCRE2_SIZE)(ptr - start_subject);
         cb.pattern_position = GET(code, 2);
         cb.next_item_length = GET(code, 2 + LINK_SIZE);
-        if ((rrc = (mb->callout)(&cb)) < 0) return rrc;   /* Abandon */
+        if ((rrc = (mb->callout)(&cb, mb->callout_data)) < 0) 
+          return rrc;   /* Abandon */
         }
       if (rrc == 0)
         { ADD_ACTIVE(state_offset + PRIV(OP_lengths)[OP_CALLOUT], 0); }

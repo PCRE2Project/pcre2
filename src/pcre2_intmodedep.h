@@ -577,7 +577,7 @@ typedef struct pcre2_real_match_context {
   pcre2_jit_callback jit_callback;
   void *jit_callback_data;
 #endif
-  int       (*callout)(pcre2_callout_block *);
+  int       (*callout)(pcre2_callout_block *, void *);
   void      *callout_data;
   uint32_t  match_limit;
   uint32_t  recursion_limit;
@@ -784,7 +784,7 @@ typedef struct match_block {
   recursion_info *recursive;      /* Linked list of recursion data */
   ovecsave_frame *ovecsave_chain; /* Linked list of free ovecsave blocks */
   void  *callout_data;            /* To pass back to callouts */
-  int (*callout)(pcre2_callout_block *);  /* Callout function or NULL */
+  int (*callout)(pcre2_callout_block *,void *);  /* Callout function or NULL */
 #ifdef HEAP_MATCH_RECURSE
   void  *match_frames_base;       /* For remembering malloc'd frames */
 #endif
@@ -809,7 +809,7 @@ typedef struct dfa_match_block {
   PCRE2_UCHAR nl[4];              /* Newline string when fixed */
   uint16_t bsr_convention;        /* \R interpretation */
   void *callout_data;             /* To pass back to callouts */
-  int (*callout)(pcre2_callout_block *);  /* Callout function or NULL */
+  int (*callout)(pcre2_callout_block *,void *);  /* Callout function or NULL */
   dfa_recursion_info *recursive;  /* Linked list of recursion data */
 } dfa_match_block;
 

@@ -324,7 +324,6 @@ typedef struct pcre2_callout_block { \
   uint32_t      callout_number;    /* Number compiled into pattern */ \
   uint32_t      capture_top;       /* Max current capture */ \
   uint32_t      capture_last;      /* Most recently closed capture */ \
-  void         *callout_data;      /* Data passed in with the call */ \
   PCRE2_SIZE   *offset_vector;     /* The offset vector */ \
   PCRE2_SPTR    mark;              /* Pointer to current mark or NULL */ \
   PCRE2_SPTR    subject;           /* The subject being matched */ \
@@ -378,7 +377,7 @@ PCRE2_EXP_DECL \
   pcre2_match_context   *pcre2_match_context_create(pcre2_general_context *); \
 PCRE2_EXP_DECL void      pcre2_match_context_free(pcre2_match_context *); \
 PCRE2_EXP_DECL int       pcre2_set_callout(pcre2_match_context *, \
-                           int (*)(pcre2_callout_block *), void *); \
+                           int (*)(pcre2_callout_block *, void *), void *); \
 PCRE2_EXP_DECL int       pcre2_set_match_limit(pcre2_match_context *, \
                            uint32_t); \
 PCRE2_EXP_DECL int       pcre2_set_recursion_limit(pcre2_match_context *, \

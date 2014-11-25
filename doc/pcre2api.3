@@ -114,7 +114,7 @@ document for an overview of all the PCRE2 documentation.
 .B void pcre2_match_context_free(pcre2_match_context *\fImcontext\fP);
 .sp
 .B int pcre2_set_callout(pcre2_match_context *\fImcontext\fP,
-.B "  int (*\fIcallout_function\fP)(pcre2_callout_block *),"
+.B "  int (*\fIcallout_function\fP)(pcre2_callout_block *, void *),"
 .B "  void *\fIcallout_data\fP);"
 .sp
 .B int pcre2_set_match_limit(pcre2_match_context *\fImcontext\fP,
@@ -645,7 +645,7 @@ PCRE2_ERROR_BADDATA if invalid data is detected.
 .sp
 .nf
 .B int pcre2_set_callout(pcre2_match_context *\fImcontext\fP,
-.B "  int (*\fIcallout_function\fP)(pcre2_callout_block *),"
+.B "  int (*\fIcallout_function\fP)(pcre2_callout_block *, void *),"
 .B "  void *\fIcallout_data\fP);"
 .fi
 .sp

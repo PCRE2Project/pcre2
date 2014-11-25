@@ -178,7 +178,7 @@ typedef struct jit_arguments {
   pcre2_match_data *match_data;
   PCRE2_SPTR startchar_ptr;
   PCRE2_UCHAR *mark_ptr;
-  int (*callout)(pcre2_callout_block *);
+  int (*callout)(pcre2_callout_block *, void *);
   void *callout_data;
   /* Everything else after. */
   sljit_ui limit_match;
@@ -6303,7 +6303,6 @@ if (arguments->callout == NULL)
   return 0;
 
 callout_block->version = 0;
-callout_block->callout_data = arguments->callout_data;
 
 /* Offsets in subject. */
 callout_block->subject_length = arguments->end - arguments->begin;
@@ -6325,7 +6324,7 @@ for (i = 2; i < oveccount; i += 2)
 callout_block->capture_top = (callout_block->capture_top >> 1) + 1;
 ovector[0] = PCRE2_UNSET;
 ovector[1] = PCRE2_UNSET;
-return (arguments->callout)(callout_block);
+return (arguments->callout)(callout_block, arguments->callout_data);
 }
 
 /* Aligning to 8 byte. */

@@ -331,7 +331,7 @@ return 0;
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_set_callout(pcre2_match_context *mcontext,
-  int (*callout)(pcre2_callout_block *), void *callout_data)
+  int (*callout)(pcre2_callout_block *, void *), void *callout_data)
 {
 mcontext->callout = callout;
 mcontext->callout_data = callout_data;

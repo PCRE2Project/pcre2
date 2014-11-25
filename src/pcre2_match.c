@@ -1311,7 +1311,6 @@ for (;;)
         cb.callout_number   = ecode[1];
         cb.capture_top      = offset_top/2;
         cb.capture_last     = mb->capture_last & CAPLMASK;
-        cb.callout_data     = mb->callout_data;
         cb.offset_vector    = mb->ovector;
         cb.mark             = mb->nomatch_mark;
         cb.subject          = mb->start_subject;
@@ -1320,7 +1319,8 @@ for (;;)
         cb.current_position = (PCRE2_SIZE)(eptr - mb->start_subject);
         cb.pattern_position = GET(ecode, 2);
         cb.next_item_length = GET(ecode, 2 + LINK_SIZE);
-        if ((rrc = mb->callout(&cb)) > 0) RRETURN(MATCH_NOMATCH);
+        if ((rrc = mb->callout(&cb, mb->callout_data)) > 0) 
+          RRETURN(MATCH_NOMATCH);
         if (rrc < 0) RRETURN(rrc);
         }
 
@@ -1715,7 +1715,6 @@ for (;;)
       cb.callout_number   = ecode[1];
       cb.capture_top      = offset_top/2;
       cb.capture_last     = mb->capture_last & CAPLMASK;
-      cb.callout_data     = mb->callout_data;
       cb.offset_vector    = mb->ovector;
       cb.mark             = mb->nomatch_mark;
       cb.subject          = mb->start_subject;
@@ -1724,7 +1723,8 @@ for (;;)
       cb.current_position = (PCRE2_SIZE)(eptr - mb->start_subject);
       cb.pattern_position = GET(ecode, 2);
       cb.next_item_length = GET(ecode, 2 + LINK_SIZE);
-      if ((rrc = mb->callout(&cb)) > 0) RRETURN(MATCH_NOMATCH);
+      if ((rrc = mb->callout(&cb, mb->callout_data)) > 0) 
+        RRETURN(MATCH_NOMATCH);
       if (rrc < 0) RRETURN(rrc);
       }
     ecode += 2 + 2*LINK_SIZE;
