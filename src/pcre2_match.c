@@ -1319,7 +1319,7 @@ for (;;)
         cb.current_position = (PCRE2_SIZE)(eptr - mb->start_subject);
         cb.pattern_position = GET(ecode, 2);
         cb.next_item_length = GET(ecode, 2 + LINK_SIZE);
-        if ((rrc = mb->callout(&cb, mb->callout_data)) > 0) 
+        if ((rrc = mb->callout(&cb, mb->callout_data)) > 0)
           RRETURN(MATCH_NOMATCH);
         if (rrc < 0) RRETURN(rrc);
         }
@@ -1723,7 +1723,7 @@ for (;;)
       cb.current_position = (PCRE2_SIZE)(eptr - mb->start_subject);
       cb.pattern_position = GET(ecode, 2);
       cb.next_item_length = GET(ecode, 2 + LINK_SIZE);
-      if ((rrc = mb->callout(&cb, mb->callout_data)) > 0) 
+      if ((rrc = mb->callout(&cb, mb->callout_data)) > 0)
         RRETURN(MATCH_NOMATCH);
       if (rrc < 0) RRETURN(rrc);
       }

@@ -6646,7 +6646,8 @@ branch_chain bc;
 
 /* If set, call the external function that checks for stack availability. */
 
-if (cb->cx->stack_guard != NULL && cb->cx->stack_guard(cb->parens_depth))
+if (cb->cx->stack_guard != NULL &&
+    cb->cx->stack_guard(cb->parens_depth, cb->cx->stack_guard_data))
   {
   *errorcodeptr= ERR33;
   return FALSE;

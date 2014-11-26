@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "25 November 2014" "PCRE2 10.00"
+.TH PCRE2API 3 "26 November 2014" "PCRE2 10.00"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -97,7 +97,7 @@ document for an overview of all the PCRE2 documentation.
 .B "  uint32_t \fIvalue\fP);"
 .sp
 .B int pcre2_set_compile_recursion_guard(pcre2_compile_context *\fIccontext\fP,
-.B "  int (*\fIguard_function\fP)(uint32_t));"
+.B "  int (*\fIguard_function\fP)(uint32_t, void *), void *\fIuser_data\fP);"
 .fi
 .
 .
@@ -375,11 +375,11 @@ PCRE2 was built (\fBpcre2_config()\fP).
 .sp
 The PCRE2 API uses string lengths and offsets into strings of code units in
 several places. These values are always of type PCRE2_SIZE, which is an
-unsigned integer type, currently always defined as \fIsize_t\fP. The largest 
-value that can be stored in such a type (that is ~(PCRE2_SIZE)0) is reserved 
-as a special indicator for zero-terminated strings and unset offsets. 
-Therefore, the longest string that can be handled is one less than this 
-maximum. 
+unsigned integer type, currently always defined as \fIsize_t\fP. The largest
+value that can be stored in such a type (that is ~(PCRE2_SIZE)0) is reserved
+as a special indicator for zero-terminated strings and unset offsets.
+Therefore, the longest string that can be handled is one less than this
+maximum.
 .
 .
 .\" HTML <a name="newlines"></a>
@@ -612,7 +612,7 @@ using up too much system stack when being compiled.
 .sp
 .nf
 .B int pcre2_set_compile_recursion_guard(pcre2_compile_context *\fIccontext\fP,
-.B "  int (*\fIguard_function\fP)(uint32_t));"
+.B "  int (*\fIguard_function\fP)(uint32_t, void *), void *\fIuser_data\fP);"
 .fi
 .sp
 There is at least one application that runs PCRE2 in threads with very limited
@@ -620,8 +620,13 @@ system stack, where running out of stack is to be avoided at all costs. The
 parenthesis limit above cannot take account of how much stack is actually
 available. For a finer control, you can supply a function that is called
 whenever \fBpcre2_compile()\fP starts to compile a parenthesized part of a
-pattern. The argument to the function gives the current depth of nesting. The
-function should return zero if all is well, or non-zero to force an error.
+pattern. This function can check the actual stack size (or anything else that
+it wants to, of course).
+.P
+The first argument to the callout function gives the current depth of
+nesting, and the second is user data that is set up by the last argument of
+\fBpcre2_set_compile_recursion_guard()\fP. The callout function should return
+zero if all is well, or non-zero to force an error.
 .
 .
 .\" HTML <a name="matchcontext"></a>
@@ -2726,6 +2731,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 25 November 2014
+Last updated: 26 November 2014
 Copyright (c) 1997-2014 University of Cambridge.
 .fi

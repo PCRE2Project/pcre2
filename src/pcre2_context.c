@@ -133,6 +133,7 @@ when no context is supplied to the compile function. */
 const pcre2_compile_context PRIV(default_compile_context) = {
   { default_malloc, default_free, NULL },
   NULL,
+  NULL,
   PRIV(default_tables),
   BSR_DEFAULT,
   NEWLINE_DEFAULT,
@@ -320,9 +321,10 @@ return 0;
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_set_compile_recursion_guard(pcre2_compile_context *ccontext,
-  int (*guard)(uint32_t))
+  int (*guard)(uint32_t, void *), void *user_data)
 {
 ccontext->stack_guard = guard;
+ccontext->stack_guard_data = user_data;
 return 0;
 }
 

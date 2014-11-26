@@ -39,14 +39,12 @@ code units; for other types of data it is in bytes.
 <P>
 If <b>where</b> is not NULL, for PCRE2_CONFIG_JITTARGET,
 PCRE2_CONFIG_UNICODE_VERSION, and PCRE2_CONFIG_VERSION it must point to a
-buffer that is large enough to hold the string. For PCRE2_CONFIG_MATCHLIMIT,
-PCRE2_CONFIG_PARENSLIMIT, and PCRE2_CONFIG_RECURSIONLIMIT it must point to an
-unsigned long int variable, and for all other codes to an int variable. The
-available codes are:
+buffer that is large enough to hold the string. For all other codes it must
+point to a uint32_t integer variable. The available codes are:
 <pre>
   PCRE2_CONFIG_BSR             Indicates what \R matches by default:
-                                 0    all Unicode line endings
-                                 1    CR, LF, or CRLF only
+                                 PCRE2_BSR_UNICODE
+                                 PCRE2_BSR_ANYCRLF
   PCRE2_CONFIG_JIT             Availability of just-in-time compiler
                                 support (1=yes 0=no)
   PCRE2_CONFIG_JITTARGET       Information about the target archi-
@@ -54,11 +52,11 @@ available codes are:
   PCRE2_CONFIG_LINKSIZE        Configured internal link size (2, 3, 4)
   PCRE2_CONFIG_MATCHLIMIT      Default internal resource limit
   PCRE2_CONFIG_NEWLINE         Code for the default newline sequence:
-                                 1    for CR
-                                 2    for LF
-                                 3    for CRLF
-                                 4    for ANY
-                                 5    for ANYCRLF
+                                 PCRE2_NEWLINE_CR
+                                 PCRE2_NEWLINE_LF
+                                 PCRE2_NEWLINE_CRLF
+                                 PCRE2_NEWLINE_ANY
+                                 PCRE2_NEWLINE_ANYCRLF
   PCRE2_CONFIG_PARENSLIMIT     Default parentheses nesting limit
   PCRE2_CONFIG_RECURSIONLIMIT  Internal recursion depth limit
   PCRE2_CONFIG_STACKRECURSE    Recursion implementation (1=stack

@@ -2623,7 +2623,7 @@ for (;;)
             cb.current_position = (PCRE2_SIZE)(ptr - start_subject);
             cb.pattern_position = GET(code, LINK_SIZE + 3);
             cb.next_item_length = GET(code, 3 + 2*LINK_SIZE);
-            if ((rrc = (mb->callout)(&cb, mb->callout_data)) < 0) 
+            if ((rrc = (mb->callout)(&cb, mb->callout_data)) < 0)
               return rrc;   /* Abandon */
             }
           if (rrc > 0) break;                      /* Fail this thread */
@@ -2970,7 +2970,7 @@ for (;;)
         cb.current_position = (PCRE2_SIZE)(ptr - start_subject);
         cb.pattern_position = GET(code, 2);
         cb.next_item_length = GET(code, 2 + LINK_SIZE);
-        if ((rrc = (mb->callout)(&cb, mb->callout_data)) < 0) 
+        if ((rrc = (mb->callout)(&cb, mb->callout_data)) < 0)
           return rrc;   /* Abandon */
         }
       if (rrc == 0)

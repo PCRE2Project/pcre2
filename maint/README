@@ -37,11 +37,11 @@ pcre2_chartables.c.non-standard
 
 README           This file.
 
-Unicode.tables   The files in this directory (CaseFolding.txt, 
+Unicode.tables   The files in this directory (CaseFolding.txt,
                  DerivedGeneralCategory.txt, GraphemeBreakProperty.txt,
                  Scripts.txt and UnicodeData.txt) were downloaded from the
                  Unicode web site. They contain information about Unicode
-                 characters and scripts. 
+                 characters and scripts.
 
 ucptest.c        A short C program for testing the Unicode property macros
                  that do lookups in the pcre2_ucd.c data, mainly useful after
@@ -87,21 +87,21 @@ Note also that both the pcre2syntax.3 and pcre2pattern.3 man pages contain
 lists of Unicode script names.
 
 
-Preparing for a PCRE release
-============================
+Preparing for a PCRE2 release
+=============================
 
 This section contains a checklist of things that I consult before building a
 distribution for a new release.
 
 . Ensure that the version number and version date are correct in configure.ac.
 
-. Update the library version numbers in configure.ac according to the rules 
+. Update the library version numbers in configure.ac according to the rules
   given below.
 
 . If new build options have been added, ensure that they are added to the CMake
   files as well as to the autoconf files. The relevant files are CMakeLists.txt
-  and config-cmake.h.in. After making a release tarball, test it out with CMake 
-  if there have been changes here.  
+  and config-cmake.h.in. After making a release tarball, test it out with CMake
+  if there have been changes here.
 
 . Run ./autogen.sh to ensure everything is up-to-date.
 
@@ -112,7 +112,7 @@ distribution for a new release.
   different configurations, and it also runs some of them with valgrind, all of
   which can take quite some time.
 
-. Run perltest.sh on the test data for tests 1 and 4. The output should match 
+. Run perltest.sh on the test data for tests 1 and 4. The output should match
   the PCRE2 test output, apart from the version identification at the start of
   each test. The other tests are not Perl-compatible (they use various
   PCRE2-specific features or options).
@@ -122,7 +122,7 @@ distribution for a new release.
   may see a number of "pcre2_memmove defined but not used" warnings for the
   modules in which there is no call to memmove(). These can be ignored.
 
-. Documentation: check AUTHORS, ChangeLog (check version and date), LICENCE, 
+. Documentation: check AUTHORS, ChangeLog (check version and date), LICENCE,
   NEWS (check version and date), NON-AUTOTOOLS-BUILD, and README. Many of these
   won't need changing, but over the long term things do change.
 
@@ -133,15 +133,15 @@ distribution for a new release.
   pcre2test to increase the stack size for test 2. Since I retired I can no
   longer do this, but instead I rely on putting out release candidates for
   folks on the pcre-dev list to test.
-  
+
 . The buildbots at http://buildfarm.opencsw.org/ do some automated testing
-  of PCRE2 and should be checked before putting out a release. 
-  
+  of PCRE2 and should be checked before putting out a release.
+
 
 Updating version info for libtool
 =================================
 
-This set of rules for updating library version information came from a web page 
+This set of rules for updating library version information came from a web page
 whose URL I have forgotten. The version information consists of three parts:
 (current, revision, age).
 
@@ -194,7 +194,7 @@ and the zipball. Double-check with "svn status", then create an SVN tagged
 copy:
 
   svn copy svn://vcs.exim.org/pcre2/code/trunk \
-           svn://vcs.exim.org/pcre2/code/tags/pcre-10.xx
+           svn://vcs.exim.org/pcre2/code/tags/pcre2-10.xx
 
 When the new release is out, don't forget to tell webmaster@pcre.org and the
 mailing list. Also, update the list of version numbers in Bugzilla (edit
@@ -255,7 +255,7 @@ very sensible; some are rather wacky. Some have been on this list for years.
 
 . An option to convert results into character offsets and character lengths.
 
-. An option for pcre2grep to scan only the start of a file. I am not keen - 
+. An option for pcre2grep to scan only the start of a file. I am not keen -
   this is the job of "head".
 
 . A (non-Unix) user wanted pcregrep options to (a) list a file name just once,
@@ -282,14 +282,14 @@ very sensible; some are rather wacky. Some have been on this list for years.
 
 . Callouts with arguments: (?Cn:ARG) for instance.
 
-. Write a function that generates random matching strings for a compiled 
+. Write a function that generates random matching strings for a compiled
   pattern.
 
 . Pcre2grep: an option to specify the output line separator, either as a string
   or select from a fixed list. This is not straightforward, because at the
   moment it outputs whatever is in the input file.
 
-. Improve the code for duplicate checking in pcre_dfa_match(). An incomplete,
+. Improve the code for duplicate checking in pcre2_dfa_match(). An incomplete,
   non-thread-safe patch showed that this can help performance for patterns
   where there are many alternatives. However, a simple thread-safe
   implementation that I tried made things worse in many simple cases, so this
@@ -303,7 +303,12 @@ very sensible; some are rather wacky. Some have been on this list for years.
 . Instead of having #ifdef HAVE_CONFIG_H in each module, put #include
   "something" and the the #ifdef appears only in one place, in "something".
 
+. Implement something like (?(R2+)... to check outer recursions.
+
+. If Perl ever supports the POSIX notation [[.something.]] PCRE2 should try
+  to follow.
+
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 18 November 2014
+Last updated: 26 November 2014

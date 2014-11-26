@@ -248,7 +248,7 @@ PCRE2 NATIVE API COMPILE CONTEXT FUNCTIONS
          uint32_t value);
 
        int pcre2_set_compile_recursion_guard(pcre2_compile_context *ccontext,
-         int (*guard_function)(uint32_t));
+         int (*guard_function)(uint32_t, void *), void *user_data);
 
 
 PCRE2 NATIVE API MATCH CONTEXT FUNCTIONS
@@ -262,7 +262,7 @@ PCRE2 NATIVE API MATCH CONTEXT FUNCTIONS
        void pcre2_match_context_free(pcre2_match_context *mcontext);
 
        int pcre2_set_callout(pcre2_match_context *mcontext,
-         int (*callout_function)(pcre2_callout_block *),
+         int (*callout_function)(pcre2_callout_block *, void *),
          void *callout_data);
 
        int pcre2_set_match_limit(pcre2_match_context *mcontext,
@@ -492,6 +492,17 @@ PCRE2 API OVERVIEW
        which PCRE2 was built (pcre2_config()).
 
 
+STRING LENGTHS AND OFFSETS
+
+       The  PCRE2  API  uses  string  lengths and offsets into strings of code
+       units in several places. These values are always  of  type  PCRE2_SIZE,
+       which  is an unsigned integer type, currently always defined as size_t.
+       The largest  value  that  can  be  stored  in  such  a  type  (that  is
+       ~(PCRE2_SIZE)0)  is reserved as a special indicator for zero-terminated
+       strings and unset offsets.  Therefore, the longest string that  can  be
+       handled is one less than this maximum.
+
+
 NEWLINES
 
        PCRE2 supports five different conventions for indicating line breaks in
@@ -694,16 +705,20 @@ PCRE2 CONTEXTS
        rogue patterns using up too much system stack when being compiled.
 
        int pcre2_set_compile_recursion_guard(pcre2_compile_context *ccontext,
-         int (*guard_function)(uint32_t));
+         int (*guard_function)(uint32_t, void *), void *user_data);
 
        There  is at least one application that runs PCRE2 in threads with very
        limited system stack, where running out of stack is to  be  avoided  at
        all  costs. The parenthesis limit above cannot take account of how much
        stack is actually available. For a finer  control,  you  can  supply  a
        function  that  is  called whenever pcre2_compile() starts to compile a
-       parenthesized part of a pattern. The argument to the function gives the
-       current  depth  of  nesting.  The function should return zero if all is
-       well, or non-zero to force an error.
+       parenthesized part of a pattern. This function  can  check  the  actual
+       stack size (or anything else that it wants to, of course).
+
+       The  first  argument to the callout function gives the current depth of
+       nesting, and the second is user data that is set up by the  last  argu-
+       ment   of  pcre2_set_compile_recursion_guard().  The  callout  function
+       should return zero if all is well, or non-zero to force an error.
 
    The match context
 
@@ -734,7 +749,7 @@ PCRE2 CONTEXTS
        on success, or PCRE2_ERROR_BADDATA if invalid data is detected.
 
        int pcre2_set_callout(pcre2_match_context *mcontext,
-         int (*callout_function)(pcre2_callout_block *),
+         int (*callout_function)(pcre2_callout_block *, void *),
          void *callout_data);
 
        This sets up a "callout" function, which PCRE2 will call  at  specified
@@ -853,16 +868,16 @@ CHECKING BUILD-TIME OPTIONS
 
          PCRE2_CONFIG_BSR
 
-       The output is an integer whose value indicates what character sequences
-       the \R escape sequence matches by default. A value of PCRE2_BSR_UNICODE
-       means that \R matches any Unicode line  ending  sequence;  a  value  of
-       PCRE2_BSR_ANYCRLF  means  that  \R  matches  only  CR, LF, or CRLF. The
-       default can be overridden when a pattern is compiled.
+       The output is a uint32_t integer whose value indicates  what  character
+       sequences  the  \R  escape  sequence  matches  by  default.  A value of
+       PCRE2_BSR_UNICODE  means  that  \R  matches  any  Unicode  line  ending
+       sequence;  a  value of PCRE2_BSR_ANYCRLF means that \R matches only CR,
+       LF, or CRLF. The default can be overridden when a pattern is compiled.
 
          PCRE2_CONFIG_JIT
 
-       The output is an integer that is set to one if support for just-in-time
-       compiling is available; otherwise it is set to zero.
+       The output is a uint32_t integer that is set  to  one  if  support  for
+       just-in-time compiling is available; otherwise it is set to zero.
 
          PCRE2_CONFIG_JITTARGET
 
@@ -877,13 +892,13 @@ CHECKING BUILD-TIME OPTIONS
 
          PCRE2_CONFIG_LINKSIZE
 
-       The output is an integer that contains the number  of  bytes  used  for
-       internal linkage in compiled regular expressions. When PCRE2 is config-
-       ured, the value can be set to 2, 3, or 4, with  the  default  being  2.
-       This is the value that is returned by pcre2_config(). However, when the
-       16-bit library is compiled, a value of 3 is rounded up to 4,  and  when
-       the  32-bit  library is compiled, internal linkages always use 4 bytes,
-       so the configured value is not relevant.
+       The output is a uint32_t integer that contains the number of bytes used
+       for  internal  linkage  in  compiled regular expressions. When PCRE2 is
+       configured, the value can be set to 2, 3, or 4, with the default  being
+       2.  This is the value that is returned by pcre2_config(). However, when
+       the 16-bit library is compiled, a value of 3 is rounded up  to  4,  and
+       when  the  32-bit  library  is compiled, internal linkages always use 4
+       bytes, so the configured value is not relevant.
 
        The default value of 2 for the 8-bit and 16-bit libraries is sufficient
        for  all but the most massive patterns, since it allows the size of the
@@ -893,14 +908,15 @@ CHECKING BUILD-TIME OPTIONS
 
          PCRE2_CONFIG_MATCHLIMIT
 
-       The output is an unsigned long integer that gives the default limit for
-       the  number of internal matching function calls in a pcre2_match() exe-
-       cution.  Further details are given with pcre2_match() below.
+       The output is a uint32_t integer that gives the default limit  for  the
+       number  of  internal  matching function calls in a pcre2_match() execu-
+       tion. Further details are given with pcre2_match() below.
 
          PCRE2_CONFIG_NEWLINE
 
-       The output is an integer whose value specifies  the  default  character
-       sequence that is recognized as meaning "newline". The values are:
+       The output is a uint32_t integer  whose  value  specifies  the  default
+       character  sequence that is recognized as meaning "newline". The values
+       are:
 
          PCRE2_NEWLINE_CR       Carriage return (CR)
          PCRE2_NEWLINE_LF       Linefeed (LF)
@@ -908,33 +924,34 @@ CHECKING BUILD-TIME OPTIONS
          PCRE2_NEWLINE_ANY      Any Unicode line ending
          PCRE2_NEWLINE_ANYCRLF  Any of CR, LF, or CRLF
 
-       The  default  should  normally  correspond to the standard sequence for
+       The default should normally correspond to  the  standard  sequence  for
        your operating system.
 
          PCRE2_CONFIG_PARENSLIMIT
 
-       The output is an unsigned long integer that gives the maximum depth  of
-       nesting  of  parentheses  (of  any  kind)  in  a pattern. This limit is
-       imposed to cap the amount of system stack used when a pattern  is  com-
-       piled.  It  is  specified when PCRE2 is built; the default is 250. This
-       limit does not take into account the stack that may already be used  by
-       the  calling  application.  For  finer  control  over compilation stack
-       usage, see pcre2_set_compile_recursion_guard().
+       The  output is a uint32_t integer that gives the maximum depth of nest-
+       ing of parentheses (of any kind) in a pattern. This limit is imposed to
+       cap  the  amount of system stack used when a pattern is compiled. It is
+       specified when PCRE2 is built; the default is 250. This limit does  not
+       take  into  account  the  stack that may already be used by the calling
+       application. For  finer  control  over  compilation  stack  usage,  see
+       pcre2_set_compile_recursion_guard().
 
          PCRE2_CONFIG_RECURSIONLIMIT
 
-       The output is an unsigned long integer that gives the default limit for
-       the depth of recursion when calling the internal matching function in a
-       pcre2_match() execution. Further details are given  with  pcre2_match()
+       The  output  is a uint32_t integer that gives the default limit for the
+       depth of recursion when calling the internal  matching  function  in  a
+       pcre2_match()  execution.  Further details are given with pcre2_match()
        below.
 
          PCRE2_CONFIG_STACKRECURSE
 
-       The  output is an integer that is set to one if internal recursion when
-       running pcre2_match() is implemented by recursive function  calls  that
-       use  the  system  stack  to remember their state. This is the usual way
-       that PCRE2 is compiled. The output is zero if PCRE2 was compiled to use
-       blocks of data on the heap instead of recursive function calls.
+       The output is a uint32_t integer that is set to one if internal  recur-
+       sion  when  running  pcre2_match() is implemented by recursive function
+       calls that use the system stack to remember their state.  This  is  the
+       usual  way that PCRE2 is compiled. The output is zero if PCRE2 was com-
+       piled to use blocks of data on the heap instead of  recursive  function
+       calls.
 
          PCRE2_CONFIG_UNICODE_VERSION
 
@@ -948,8 +965,8 @@ CHECKING BUILD-TIME OPTIONS
 
          PCRE2_CONFIG_UNICODE
 
-       The  output  is  an  integer  that  is set to one if Unicode support is
-       available; otherwise it is set to zero.  Unicode  support  implies  UTF
+       The  output is a uint32_t integer that is set to one if Unicode support
+       is available; otherwise it is set to zero. Unicode support implies  UTF
        support.
 
          PCRE2_CONFIG_VERSION
@@ -2605,7 +2622,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 23 November 2014
+       Last updated: 26 November 2014
        Copyright (c) 1997-2014 University of Cambridge.
 ------------------------------------------------------------------------------
 
@@ -3076,7 +3093,7 @@ SYNOPSIS
 
        #include <pcre2.h>
 
-       int (*pcre2_callout)(pcre2_callout_block *);
+       int (*pcre2_callout)(pcre2_callout_block *, void *);
 
 
 DESCRIPTION
@@ -3183,15 +3200,16 @@ THE CALLOUT INTERFACE
 
        During matching, when PCRE2 reaches a callout  point,  if  an  external
        function  is  set  in  the match context, it is called. This applies to
-       both normal and DFA matching. The only argument to the callout function
-       is a pointer to a pcre2_callout block. This structure contains the fol-
-       lowing fields:
+       both normal and DFA matching. The first argument to the  callout  func-
+       tion  is a pointer to a pcre2_callout block. The second argument is the
+       void * callout data that was supplied when the callout was  set  up  by
+       calling pcre2_set_callout() (see the pcre2api documentation). The call-
+       out block structure contains the following fields:
 
          uint32_t      version;
          uint32_t      callout_number;
          uint32_t      capture_top;
          uint32_t      capture_last;
-         void         *callout_data;
          PCRE2_SIZE   *offset_vector;
          PCRE2_SPTR    mark;
          PCRE2_SPTR    subject;
@@ -3242,28 +3260,23 @@ THE CALLOUT INTERFACE
        substrings. If no substrings have been  captured,  the  value  of  cap-
        ture_last is 0. This is always the case for the DFA matching functions.
 
-       The  callout_data  field  contains a value that is passed to a matching
-       function specifically so that it can be passed back in callouts. It  is
-       set  in  the  match  context  when  the  callout  is  set up by calling
-       pcre2_set_callout() (see the pcre2api documentation).
-
-       The pattern_position field contains the offset to the next item  to  be
+       The  pattern_position  field contains the offset to the next item to be
        matched in the pattern string.
 
-       The  next_item_length  field contains the length of the next item to be
+       The next_item_length field contains the length of the next item  to  be
        matched in the pattern string. When the callout immediately precedes an
-       alternation  bar, a closing parenthesis, or the end of the pattern, the
-       length is zero. When the callout precedes an opening  parenthesis,  the
+       alternation bar, a closing parenthesis, or the end of the pattern,  the
+       length  is  zero. When the callout precedes an opening parenthesis, the
        length is that of the entire subpattern.
 
-       The  pattern_position  and next_item_length fields are intended to help
-       in distinguishing between different automatic callouts, which all  have
+       The pattern_position and next_item_length fields are intended  to  help
+       in  distinguishing between different automatic callouts, which all have
        the same callout number. However, they are set for all callouts.
 
        In callouts from pcre2_match() the mark field contains a pointer to the
-       zero-terminated name of the most recently passed (*MARK), (*PRUNE),  or
-       (*THEN)  item  in the match, or NULL if no such items have been passed.
-       Instances of (*PRUNE) or (*THEN) without a name  do  not  obliterate  a
+       zero-terminated  name of the most recently passed (*MARK), (*PRUNE), or
+       (*THEN) item in the match, or NULL if no such items have  been  passed.
+       Instances  of  (*PRUNE)  or  (*THEN) without a name do not obliterate a
        previous (*MARK). In callouts from the DFA matching function this field
        always contains NULL.
 
@@ -3271,16 +3284,16 @@ THE CALLOUT INTERFACE
 RETURN VALUES
 
        The external callout function returns an integer to PCRE2. If the value
-       is  zero,  matching  proceeds  as  normal. If the value is greater than
-       zero, matching fails at the current point, but  the  testing  of  other
+       is zero, matching proceeds as normal. If  the  value  is  greater  than
+       zero,  matching  fails  at  the current point, but the testing of other
        matching possibilities goes ahead, just as if a lookahead assertion had
        failed. If the value is less than zero, the match is abandoned, and the
        matching function returns the negative value.
 
-       Negative   values   should   normally   be   chosen  from  the  set  of
-       PCRE2_ERROR_xxx values. In  particular,  PCRE2_ERROR_NOMATCH  forces  a
-       standard  "no  match"  failure. The error number PCRE2_ERROR_CALLOUT is
-       reserved for use by callout functions; it will never be used  by  PCRE2
+       Negative  values  should  normally  be   chosen   from   the   set   of
+       PCRE2_ERROR_xxx  values.  In  particular,  PCRE2_ERROR_NOMATCH forces a
+       standard "no match" failure. The error  number  PCRE2_ERROR_CALLOUT  is
+       reserved  for  use by callout functions; it will never be used by PCRE2
        itself.
 
 
@@ -3293,7 +3306,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 23 November 2014
+       Last updated: 25 November 2014
        Copyright (c) 1997-2014 University of Cambridge.
 ------------------------------------------------------------------------------
 
@@ -3891,6 +3904,18 @@ SIZE AND OTHER LIMITATIONS
        of execution is slower. In the 32-bit  library,  the  internal  linkage
        size is always 4.
 
+       The maximum length (in code units) of a subject string is one less than
+       the largest number a PCRE2_SIZE variable can  hold.  PCRE2_SIZE  is  an
+       unsigned  integer  type,  usually  defined as size_t. Its maximum value
+       (that is ~(PCRE2_SIZE)0) is reserved as a special indicator  for  zero-
+       terminated strings and unset offsets.
+
+       Note  that  when  using  the  traditional matching function, PCRE2 uses
+       recursion to handle subpatterns and indefinite repetition.  This  means
+       that  the  available stack space may limit the size of a subject string
+       that can be processed by certain patterns. For a  discussion  of  stack
+       issues, see the pcre2stack documentation.
+
        All values in repeating quantifiers must be less than 65536.
 
        There is no limit to the number of parenthesized subpatterns, but there
@@ -3913,14 +3938,6 @@ SIZE AND OTHER LIMITATIONS
        (*THEN) verb is 255 for the 8-bit library and 65535 for the 16-bit  and
        32-bit libraries.
 
-       The  maximum  length  of  a  subject  string  is  the  largest number a
-       PCRE2_SIZE variable can hold. PCRE2_SIZE is an unsigned  integer  type,
-       usually defined as size_t. However, when using the traditional matching
-       function, PCRE2 uses recursion to  handle  subpatterns  and  indefinite
-       repetition.  This  means  that  the available stack space may limit the
-       size of a subject string that can be processed by certain patterns. For
-       a discussion of stack issues, see the pcre2stack documentation.
-
 
 AUTHOR
 
@@ -3931,7 +3948,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 29 September 2014
+       Last updated: 25 November 2014
        Copyright (c) 1997-2014 University of Cambridge.
 ------------------------------------------------------------------------------
 

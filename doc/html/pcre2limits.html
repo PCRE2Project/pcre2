@@ -32,6 +32,21 @@ However, the speed of execution is slower. In the 32-bit library, the internal
 linkage size is always 4.
 </P>
 <P>
+The maximum length (in code units) of a subject string is one less than the
+largest number a PCRE2_SIZE variable can hold. PCRE2_SIZE is an unsigned
+integer type, usually defined as size_t. Its maximum value (that is
+~(PCRE2_SIZE)0) is reserved as a special indicator for zero-terminated strings
+and unset offsets.
+</P>
+<P>
+Note that when using the traditional matching function, PCRE2 uses recursion to
+handle subpatterns and indefinite repetition. This means that the available
+stack space may limit the size of a subject string that can be processed by
+certain patterns. For a discussion of stack issues, see the
+<a href="pcre2stack.html"><b>pcre2stack</b></a>
+documentation.
+</P>
+<P>
 All values in repeating quantifiers must be less than 65536.
 </P>
 <P>
@@ -55,16 +70,6 @@ maximum number of named subpatterns is 10000.
 The maximum length of a name in a (*MARK), (*PRUNE), (*SKIP), or (*THEN) verb
 is 255 for the 8-bit library and 65535 for the 16-bit and 32-bit libraries.
 </P>
-<P>
-The maximum length of a subject string is the largest number a PCRE2_SIZE
-variable can hold. PCRE2_SIZE is an unsigned integer type, usually defined as
-size_t. However, when using the traditional matching function, PCRE2 uses
-recursion to handle subpatterns and indefinite repetition. This means that the
-available stack space may limit the size of a subject string that can be
-processed by certain patterns. For a discussion of stack issues, see the
-<a href="pcre2stack.html"><b>pcre2stack</b></a>
-documentation.
-</P>
 <br><b>
 AUTHOR
 </b><br>
@@ -80,7 +85,7 @@ Cambridge, England.
 REVISION
 </b><br>
 <P>
-Last updated: 29 September 2014
+Last updated: 25 November 2014
 <br>
 Copyright &copy; 1997-2014 University of Cambridge.
 <br>

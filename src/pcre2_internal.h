@@ -1877,10 +1877,10 @@ is available. */
 #define _pcre2_was_newline           PCRE2_SUFFIX(_pcre2_was_newline_)
 #define _pcre2_xclass                PCRE2_SUFFIX(_pcre2_xclass_)
 
-extern void         _pcre2_auto_possessify(PCRE2_UCHAR *, BOOL, 
+extern void         _pcre2_auto_possessify(PCRE2_UCHAR *, BOOL,
                       const compile_block *);
 extern PCRE2_SPTR   _pcre2_find_bracket(PCRE2_SPTR, BOOL, int);
-extern BOOL         _pcre2_is_newline(PCRE2_SPTR, uint32_t, PCRE2_SPTR, 
+extern BOOL         _pcre2_is_newline(PCRE2_SPTR, uint32_t, PCRE2_SPTR,
                       uint32_t *, BOOL);
 extern void         _pcre2_jit_free(void *, pcre2_memctl *);
 extern size_t       _pcre2_jit_get_size(void *);
@@ -1895,7 +1895,7 @@ extern int          _pcre2_strncmp(PCRE2_SPTR, PCRE2_SPTR, size_t);
 extern int          _pcre2_strncmp_c8(PCRE2_SPTR, const char *, size_t);
 extern int          _pcre2_study(pcre2_real_code *);
 extern int          _pcre2_valid_utf(PCRE2_SPTR, PCRE2_SIZE, PCRE2_SIZE *);
-extern BOOL         _pcre2_was_newline(PCRE2_SPTR, uint32_t, PCRE2_SPTR, 
+extern BOOL         _pcre2_was_newline(PCRE2_SPTR, uint32_t, PCRE2_SPTR,
                       uint32_t *, BOOL);
 extern BOOL         _pcre2_xclass(uint32_t, PCRE2_SPTR, BOOL);
 #endif  /* PCRE2_CODE_UNIT_WIDTH */

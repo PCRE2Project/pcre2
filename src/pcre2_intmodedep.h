@@ -552,41 +552,42 @@ code that uses them is simpler because it assumes this. */
 memory control. */
 
 typedef struct pcre2_real_general_context {
-  pcre2_memctl    memctl;
+  pcre2_memctl memctl;
 } pcre2_real_general_context;
 
 /* The real compile context structure */
 
 typedef struct pcre2_real_compile_context {
-  pcre2_memctl    memctl;
-  int       (*stack_guard)(uint32_t);
+  pcre2_memctl memctl;
+  int (*stack_guard)(uint32_t, void *);
+  void *stack_guard_data;
   const uint8_t *tables;
-  uint16_t  bsr_convention;
-  uint16_t  newline_convention;
-  uint32_t  parens_nest_limit;
+  uint16_t bsr_convention;
+  uint16_t newline_convention;
+  uint32_t parens_nest_limit;
 } pcre2_real_compile_context;
 
 /* The real match context structure. */
 
 typedef struct pcre2_real_match_context {
-  pcre2_memctl  memctl;
+  pcre2_memctl memctl;
 #ifdef HEAP_MATCH_RECURSE
-  pcre2_memctl  stack_memctl;
+  pcre2_memctl stack_memctl;
 #endif
 #ifdef SUPPORT_JIT
   pcre2_jit_callback jit_callback;
   void *jit_callback_data;
 #endif
-  int       (*callout)(pcre2_callout_block *, void *);
-  void      *callout_data;
-  uint32_t  match_limit;
-  uint32_t  recursion_limit;
+  int    (*callout)(pcre2_callout_block *, void *);
+  void    *callout_data;
+  uint32_t match_limit;
+  uint32_t recursion_limit;
 } pcre2_real_match_context;
 
 /* The real compiled code structure */
 
 typedef struct pcre2_real_code {
-  pcre2_memctl   memctl;          /* Memory control fields */
+  pcre2_memctl memctl;            /* Memory control fields */
   const uint8_t *tables;          /* The character tables */
   void    *executable_jit;        /* Pointer to JIT code */
   uint8_t  start_bitmap[32];      /* Bitmap for starting code unit < 256 */

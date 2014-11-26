@@ -943,13 +943,13 @@ are supported. */
   else \
     pcre2_set_character_tables_32(G(a,32),b)
 
-#define PCRE2_SET_COMPILE_RECURSION_GUARD(a,b) \
+#define PCRE2_SET_COMPILE_RECURSION_GUARD(a,b,c) \
   if (test_mode == PCRE8_MODE) \
-    pcre2_set_compile_recursion_guard_8(G(a,8),b); \
+    pcre2_set_compile_recursion_guard_8(G(a,8),b,c); \
   else if (test_mode == PCRE16_MODE) \
-    pcre2_set_compile_recursion_guard_16(G(a,16),b); \
+    pcre2_set_compile_recursion_guard_16(G(a,16),b,c); \
   else \
-    pcre2_set_compile_recursion_guard_32(G(a,32),b)
+    pcre2_set_compile_recursion_guard_32(G(a,32),b,c)
 
 #define PCRE2_SET_MATCH_LIMIT(a,b) \
   if (test_mode == PCRE8_MODE) \
@@ -1315,11 +1315,11 @@ the three different cases. */
   else \
     G(pcre2_set_character_tables_,BITTWO)(G(a,BITTWO),b)
 
-#define PCRE2_SET_COMPILE_RECURSION_GUARD(a,b) \
+#define PCRE2_SET_COMPILE_RECURSION_GUARD(a,b,c) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
-    G(pcre2_set_compile_recursion_guard_,BITONE)(G(a,BITONE),b); \
+    G(pcre2_set_compile_recursion_guard_,BITONE)(G(a,BITONE),b,c); \
   else \
-    G(pcre2_set_compile_recursion_guard_,BITTWO)(G(a,BITTWO),b)
+    G(pcre2_set_compile_recursion_guard_,BITTWO)(G(a,BITTWO),b,c)
 
 #define PCRE2_SET_MATCH_LIMIT(a,b) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
@@ -1512,8 +1512,8 @@ the three different cases. */
 #define PCRE2_SET_CALLOUT(a,b,c) \
   pcre2_set_callout_8(G(a,8),(int (*)(pcre2_callout_block_8 *, void *))b,c)
 #define PCRE2_SET_CHARACTER_TABLES(a,b) pcre2_set_character_tables_8(G(a,8),b)
-#define PCRE2_SET_COMPILE_RECURSION_GUARD(a,b) \
-  pcre2_set_compile_recursion_guard_8(G(a,8),b)
+#define PCRE2_SET_COMPILE_RECURSION_GUARD(a,b,c) \
+  pcre2_set_compile_recursion_guard_8(G(a,8),b,c)
 #define PCRE2_SET_MATCH_LIMIT(a,b) pcre2_set_match_limit_8(G(a,8),b)
 #define PCRE2_SET_PARENS_NEST_LIMIT(a,b) pcre2_set_parens_nest_limit_8(G(a,8),b)
 #define PCRE2_SET_RECURSION_LIMIT(a,b) pcre2_set_recursion_limit_8(G(a,8),b)
@@ -1593,8 +1593,8 @@ the three different cases. */
 #define PCRE2_SET_CALLOUT(a,b,c) \
   pcre2_set_callout_16(G(a,16),(int (*)(pcre2_callout_block_16 *, void *))b,c);
 #define PCRE2_SET_CHARACTER_TABLES(a,b) pcre2_set_character_tables_16(G(a,16),b)
-#define PCRE2_SET_COMPILE_RECURSION_GUARD(a,b) \
-  pcre2_set_compile_recursion_guard_16(G(a,16),b)
+#define PCRE2_SET_COMPILE_RECURSION_GUARD(a,b,c) \
+  pcre2_set_compile_recursion_guard_16(G(a,16),b,c)
 #define PCRE2_SET_MATCH_LIMIT(a,b) pcre2_set_match_limit_16(G(a,16),b)
 #define PCRE2_SET_PARENS_NEST_LIMIT(a,b) pcre2_set_parens_nest_limit_16(G(a,16),b)
 #define PCRE2_SET_RECURSION_LIMIT(a,b) pcre2_set_recursion_limit_16(G(a,16),b)
@@ -1674,8 +1674,8 @@ the three different cases. */
 #define PCRE2_SET_CALLOUT(a,b,c) \
   pcre2_set_callout_32(G(a,32),(int (*)(pcre2_callout_block_32 *, void *))b,c);
 #define PCRE2_SET_CHARACTER_TABLES(a,b) pcre2_set_character_tables_32(G(a,32),b)
-#define PCRE2_SET_COMPILE_RECURSION_GUARD(a,b) \
-  pcre2_set_compile_recursion_guard_32(G(a,32),b)
+#define PCRE2_SET_COMPILE_RECURSION_GUARD(a,b,c) \
+  pcre2_set_compile_recursion_guard_32(G(a,32),b,c)
 #define PCRE2_SET_MATCH_LIMIT(a,b) pcre2_set_match_limit_32(G(a,32),b)
 #define PCRE2_SET_PARENS_NEST_LIMIT(a,b) pcre2_set_parens_nest_limit_32(G(a,32),b)
 #define PCRE2_SET_RECURSION_LIMIT(a,b) pcre2_set_recursion_limit_32(G(a,32),b)
@@ -2104,8 +2104,9 @@ Returns:   non-zero to kill the compilation
 */
 
 static int
-stack_guard(uint32_t depth)
+stack_guard(uint32_t depth, void *user_data)
 {
+(void)user_data;
 return depth > pat_patctl.stackguard_test;
 }
 
@@ -3827,7 +3828,7 @@ PCRE2_SET_CHARACTER_TABLES(pat_context, use_tables);
 
 if (pat_patctl.stackguard_test != 0)
   {
-  PCRE2_SET_COMPILE_RECURSION_GUARD(pat_context, stack_guard);
+  PCRE2_SET_COMPILE_RECURSION_GUARD(pat_context, stack_guard, NULL);
   }
 
 /* Handle compiling via the POSIX interface, which doesn't support the
@@ -5686,13 +5687,13 @@ Returns:     nothing
 */
 
 static void
-print_newline_config(unsigned int rc, BOOL isc)
+print_newline_config(uint32_t optval, BOOL isc)
 {
 if (!isc) printf("  Newline sequence is ");
-if (rc < sizeof(newlines)/sizeof(char *))
-  printf("%s\n", newlines[rc]);
+if (optval < sizeof(newlines)/sizeof(char *))
+  printf("%s\n", newlines[optval]);
 else
-  printf("a non-standard value: %d\n", rc);
+  printf("a non-standard value: %d\n", optval);
 }
 
 
@@ -5769,8 +5770,7 @@ Returns:    the return code
 static int
 c_option(const char *arg)
 {
-unsigned long int lrc;
-int rc;
+uint32_t optval;
 int yield = 0;
 
 if (arg != NULL)
@@ -5789,8 +5789,8 @@ if (arg != NULL)
   switch (coptlist[i].type)
     {
     case CONF_BSR:
-    (void)PCRE2_CONFIG(coptlist[i].value, &rc);
-    printf("%s\n", rc? "ANYCRLF" : "ANY");
+    (void)PCRE2_CONFIG(coptlist[i].value, &optval);
+    printf("%s\n", optval? "ANYCRLF" : "ANY");
     break;
 
     case CONF_FIX:
@@ -5799,8 +5799,8 @@ if (arg != NULL)
     break;
 
     case CONF_FIZ:
-    rc = coptlist[i].value;
-    printf("%d\n", rc);
+    optval = coptlist[i].value;
+    printf("%d\n", optval);
     break;
 
     case CONF_INT:
@@ -5809,8 +5809,8 @@ if (arg != NULL)
     break;
 
     case CONF_NL:
-    (void)PCRE2_CONFIG(coptlist[i].value, &rc);
-    print_newline_config(rc, TRUE);
+    (void)PCRE2_CONFIG(coptlist[i].value, &optval);
+    print_newline_config(optval, TRUE);
     break;
     }
 
@@ -5822,7 +5822,7 @@ if (arg != NULL)
     char ucname[16];
     strcpy(ucname, coptlist[i].name);
     for (i = 0; ucname[i] != 0; i++) ucname[i] = toupper[ucname[i];
-    vms_setsymbol(ucname, 0, rc);
+    vms_setsymbol(ucname, 0, optval);
     }
 #endif
 
@@ -5848,8 +5848,8 @@ printf("  16-bit support\n");
 printf("  32-bit support\n");
 #endif
 
-(void)PCRE2_CONFIG(PCRE2_CONFIG_UNICODE, &rc);
-if (rc != 0)
+(void)PCRE2_CONFIG(PCRE2_CONFIG_UNICODE, &optval);
+if (optval != 0)
   {
   printf("  UTF and UCP support (");
   print_unicode_version(stdout);
@@ -5857,8 +5857,8 @@ if (rc != 0)
   }
 else printf("  No Unicode support\n");
 
-(void)PCRE2_CONFIG(PCRE2_CONFIG_JIT, &rc);
-if (rc != 0)
+(void)PCRE2_CONFIG(PCRE2_CONFIG_JIT, &optval);
+if (optval != 0)
   {
   printf("  Just-in-time compiler support: ");
   print_jit_target(stdout);
@@ -5869,21 +5869,21 @@ else
   printf("  No just-in-time compiler support\n");
   }
 
-(void)PCRE2_CONFIG(PCRE2_CONFIG_NEWLINE, &rc);
-print_newline_config(rc, FALSE);
-(void)PCRE2_CONFIG(PCRE2_CONFIG_BSR, &rc);
-printf("  \\R matches %s\n", rc? "CR, LF, or CRLF only" :
+(void)PCRE2_CONFIG(PCRE2_CONFIG_NEWLINE, &optval);
+print_newline_config(optval, FALSE);
+(void)PCRE2_CONFIG(PCRE2_CONFIG_BSR, &optval);
+printf("  \\R matches %s\n", optval? "CR, LF, or CRLF only" :
                                  "all Unicode newlines");
-(void)PCRE2_CONFIG(PCRE2_CONFIG_LINKSIZE, &rc);
-printf("  Internal link size = %d\n", rc);
-(void)PCRE2_CONFIG(PCRE2_CONFIG_PARENSLIMIT, &lrc);
-printf("  Parentheses nest limit = %ld\n", lrc);
-(void)PCRE2_CONFIG(PCRE2_CONFIG_MATCHLIMIT, &lrc);
-printf("  Default match limit = %ld\n", lrc);
-(void)PCRE2_CONFIG(PCRE2_CONFIG_RECURSIONLIMIT, &lrc);
-printf("  Default recursion depth limit = %ld\n", lrc);
-(void)PCRE2_CONFIG(PCRE2_CONFIG_STACKRECURSE, &rc);
-printf("  Match recursion uses %s", rc? "stack" : "heap");
+(void)PCRE2_CONFIG(PCRE2_CONFIG_LINKSIZE, &optval);
+printf("  Internal link size = %d\n", optval);
+(void)PCRE2_CONFIG(PCRE2_CONFIG_PARENSLIMIT, &optval);
+printf("  Parentheses nest limit = %d\n", optval);
+(void)PCRE2_CONFIG(PCRE2_CONFIG_MATCHLIMIT, &optval);
+printf("  Default match limit = %d\n", optval);
+(void)PCRE2_CONFIG(PCRE2_CONFIG_RECURSIONLIMIT, &optval);
+printf("  Default recursion depth limit = %d\n", optval);
+(void)PCRE2_CONFIG(PCRE2_CONFIG_STACKRECURSE, &optval);
+printf("  Match recursion uses %s", optval? "stack" : "heap");
 
 printf("\n");
 return 0;
