@@ -3604,11 +3604,11 @@ SIMPLE USE OF JIT
 
        If the JIT compiler finds an unsupported item, no JIT  data  is  gener-
        ated.  You  can find out if JIT matching is available after compiling a
-       pattern by calling pcre2_pattern_info() with the PCRE2_INFO_JIT option.
-       A  result of 1 means that JIT compilation was successful. A result of 0
-       means that JIT support is not available, or the pattern  was  not  pro-
-       cessed by pcre2_jit_compile(), or the JIT compiler was not able to han-
-       dle the pattern.
+       pattern by calling  pcre2_pattern_info()  with  the  PCRE2_INFO_JITSIZE
+       option.  A non-zero result means that JIT compilation was successful. A
+       result of 0 means that JIT support is not available, or the pattern was
+       not  processed by pcre2_jit_compile(), or the JIT compiler was not able
+       to handle the pattern.
 
 
 UNSUPPORTED OPTIONS AND PATTERN ITEMS

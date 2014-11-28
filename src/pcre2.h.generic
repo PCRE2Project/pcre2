@@ -44,7 +44,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #define PCRE2_MAJOR          10
 #define PCRE2_MINOR          00
 #define PCRE2_PRERELEASE     -RC1
-#define PCRE2_DATE           2014-11-24
+#define PCRE2_DATE           2014-11-28
 
 /* When an application links to a PCRE DLL in Windows, the symbols that are
 imported have to be identified as such. When building PCRE2, the appropriate
@@ -259,9 +259,9 @@ context functions. */
 #define PCRE2_CONFIG_JITTARGET               2
 #define PCRE2_CONFIG_LINKSIZE                3
 #define PCRE2_CONFIG_MATCHLIMIT              4
-#define PCRE2_CONFIG_NEWLINE                 6
-#define PCRE2_CONFIG_PARENSLIMIT             7
-#define PCRE2_CONFIG_RECURSIONLIMIT          5
+#define PCRE2_CONFIG_NEWLINE                 5
+#define PCRE2_CONFIG_PARENSLIMIT             6
+#define PCRE2_CONFIG_RECURSIONLIMIT          7
 #define PCRE2_CONFIG_STACKRECURSE            8
 #define PCRE2_CONFIG_UNICODE                 9
 #define PCRE2_CONFIG_UNICODE_VERSION        10
@@ -324,7 +324,6 @@ typedef struct pcre2_callout_block { \
   uint32_t      callout_number;    /* Number compiled into pattern */ \
   uint32_t      capture_top;       /* Max current capture */ \
   uint32_t      capture_last;      /* Most recently closed capture */ \
-  void         *callout_data;      /* Data passed in with the call */ \
   PCRE2_SIZE   *offset_vector;     /* The offset vector */ \
   PCRE2_SPTR    mark;              /* Pointer to current mark or NULL */ \
   PCRE2_SPTR    subject;           /* The subject being matched */ \
@@ -369,7 +368,8 @@ PCRE2_EXP_DECL int       pcre2_set_newline(pcre2_compile_context *, uint32_t); \
 PCRE2_EXP_DECL int       pcre2_set_parens_nest_limit(pcre2_compile_context *, \
                            uint32_t); \
 PCRE2_EXP_DECL int       pcre2_set_compile_recursion_guard(\
-                           pcre2_compile_context *, int (*)(uint32_t)); \
+                           pcre2_compile_context *, int (*)(uint32_t, void *), \
+                           void *);
 
 #define PCRE2_MATCH_CONTEXT_FUNCTIONS \
 PCRE2_EXP_DECL \
@@ -378,7 +378,7 @@ PCRE2_EXP_DECL \
   pcre2_match_context   *pcre2_match_context_create(pcre2_general_context *); \
 PCRE2_EXP_DECL void      pcre2_match_context_free(pcre2_match_context *); \
 PCRE2_EXP_DECL int       pcre2_set_callout(pcre2_match_context *, \
-                           int (*)(pcre2_callout_block *), void *); \
+                           int (*)(pcre2_callout_block *, void *), void *); \
 PCRE2_EXP_DECL int       pcre2_set_match_limit(pcre2_match_context *, \
                            uint32_t); \
 PCRE2_EXP_DECL int       pcre2_set_recursion_limit(pcre2_match_context *, \
@@ -472,8 +472,8 @@ PCRE2_EXP_DECL int       pcre2_jit_match(const pcre2_code *, \
                            pcre2_match_data *, pcre2_match_context *); \
 PCRE2_EXP_DECL void      pcre2_jit_free_unused_memory(pcre2_general_context *); \
 PCRE2_EXP_DECL \
-  pcre2_jit_stack       *pcre2_jit_stack_create(pcre2_general_context *, \
-                           PCRE2_SIZE, PCRE2_SIZE); \
+  pcre2_jit_stack       *pcre2_jit_stack_create(PCRE2_SIZE, PCRE2_SIZE, \
+                           pcre2_general_context *); \
 PCRE2_EXP_DECL void      pcre2_jit_stack_assign(pcre2_match_context *, \
                            pcre2_jit_callback, void *); \
 PCRE2_EXP_DECL void      pcre2_jit_stack_free(pcre2_jit_stack *);

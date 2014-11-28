@@ -131,10 +131,11 @@ not obeyed.
 <P>
 If the JIT compiler finds an unsupported item, no JIT data is generated. You
 can find out if JIT matching is available after compiling a pattern by calling
-<b>pcre2_pattern_info()</b> with the PCRE2_INFO_JIT option. A result of 1 means
-that JIT compilation was successful. A result of 0 means that JIT support is
-not available, or the pattern was not processed by <b>pcre2_jit_compile()</b>,
-or the JIT compiler was not able to handle the pattern.
+<b>pcre2_pattern_info()</b> with the PCRE2_INFO_JITSIZE option. A non-zero
+result means that JIT compilation was successful. A result of 0 means that JIT
+support is not available, or the pattern was not processed by
+<b>pcre2_jit_compile()</b>, or the JIT compiler was not able to handle the
+pattern.
 </P>
 <br><a name="SEC4" href="#TOC1">UNSUPPORTED OPTIONS AND PATTERN ITEMS</a><br>
 <P>
