@@ -1700,13 +1700,17 @@ substrings. A minimum of at least 1 pair is imposed by
 \fBpcre2_match_data_create()\fP, so it is always possible to return the overall
 matched string.
 .P
-For \fBpcre2_match_data_create_from_pattern()\fP, the first argument is a
-pointer to a compiled pattern. In this case the ovector is created to be
-exactly the right size to hold all the substrings a pattern might capture.
+The second argument of \fBpcre2_match_data_create()\fP is a pointer to a
+general context, which can specify custom memory management for obtaining the
+memory for the match data block. If you are not using custom memory management,
+pass NULL, which causes \fBmalloc()\fP to be used.
 .P
-The second argument of both these functions is a pointer to a general context,
-which can specify custom memory management for obtaining the memory for the
-match data block. If you are not using custom memory management, pass NULL.
+For \fBpcre2_match_data_create_from_pattern()\fP, the first argument is a
+pointer to a compiled pattern. The ovector is created to be exactly the right
+size to hold all the substrings a pattern might capture. The second argument is
+again a pointer to a general context, but in this case if NULL is passed, the
+memory is obtained using the same allocator that was used for the compiled
+pattern (custom or default).
 .P
 A match data block can be used many times, with the same or different compiled
 patterns. When it is no longer needed, it should be freed by calling

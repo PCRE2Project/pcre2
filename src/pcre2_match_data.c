@@ -72,10 +72,13 @@ return yield;
 *  Create a match data block using pattern data  *
 *************************************************/
 
+/* If no context is supplied, use the memory allocator from the code. */
+
 PCRE2_EXP_DEFN pcre2_match_data * PCRE2_CALL_CONVENTION
 pcre2_match_data_create_from_pattern(const pcre2_code *code,
   pcre2_general_context *gcontext)
 {
+if (gcontext == NULL) gcontext = (pcre2_general_context *)code;
 return pcre2_match_data_create(((pcre2_real_code *)code)->top_bracket + 1,
   gcontext);
 }

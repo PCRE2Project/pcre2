@@ -35,8 +35,9 @@ the matched string and any captured substrings.
 </P>
 <P>
 The second argument points to a general context, for custom memory management,
-or is NULL for system memory management. The result of the function is NULL if
-the memory for the block could not be obtained.
+or is NULL to use the same memory allocator as was used for the compiled
+pattern. The result of the function is NULL if the memory for the block could
+not be obtained.
 </P>
 <P>
 There is a complete description of the PCRE2 native API in the
