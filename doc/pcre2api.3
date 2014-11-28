@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "26 November 2014" "PCRE2 10.00"
+.TH PCRE2API 3 "27 November 2014" "PCRE2 10.00"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -195,8 +195,8 @@ document for an overview of all the PCRE2 documentation.
 .sp
 .B void pcre2_jit_free_unused_memory(pcre2_general_context *\fIgcontext\fP);
 .sp
-.B pcre2_jit_stack *pcre2_jit_stack_create(pcre2_general_context *\fIgcontext\fP,
-.B "  PCRE2_SIZE \fIstartsize\fP, PCRE2_SIZE \fImaxsize\fP);"
+.B pcre2_jit_stack *pcre2_jit_stack_create(PCRE2_SIZE \fIstartsize\fP,
+.B "  PCRE2_SIZE \fImaxsize\fP, pcre2_general_context *\fIgcontext\fP);"
 .sp
 .B void pcre2_jit_stack_assign(pcre2_match_context *\fImcontext\fP,
 .B "  pcre2_jit_callback \fIcallback_function\fP, void *\fIcallback_data\fP);"
@@ -1300,8 +1300,8 @@ textual error message from any error code.
 .sp
 .B void pcre2_jit_free_unused_memory(pcre2_general_context *\fIgcontext\fP);
 .sp
-.B pcre2_jit_stack *pcre2_jit_stack_create(pcre2_general_context *\fIgcontext\fP,
-.B "  PCRE2_SIZE \fIstartsize\fP, PCRE2_SIZE \fImaxsize\fP);"
+.B pcre2_jit_stack *pcre2_jit_stack_create(PCRE2_SIZE \fIstartsize\fP,
+.B "  PCRE2_SIZE \fImaxsize\fP, pcre2_general_context *\fIgcontext\fP);"
 .sp
 .B void pcre2_jit_stack_assign(pcre2_match_context *\fImcontext\fP,
 .B "  pcre2_jit_callback \fIcallback_function\fP, void *\fIcallback_data\fP);"
@@ -2731,6 +2731,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 26 November 2014
+Last updated: 27 November 2014
 Copyright (c) 1997-2014 University of Cambridge.
 .fi

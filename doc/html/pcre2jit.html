@@ -177,8 +177,8 @@ below.
 </P>
 <P>
 The <b>pcre2_jit_stack_create()</b> function creates a JIT stack. Its arguments
-are a general context (for memory allocation functions, or NULL for standard
-memory allocation), a starting size and a maximum size, and it returns a
+are a starting size, a maximum size, and a general context (for memory
+allocation functions, or NULL for standard memory allocation). It returns a
 pointer to an opaque structure of type <b>pcre2_jit_stack</b>, or NULL if there
 is an error. The <b>pcre2_jit_stack_free()</b> function is used to free a stack
 that is no longer needed. (For the technically minded: the address space is
@@ -360,7 +360,7 @@ calls.
     &errornumber, &erroffset, NULL);
   rc = pcre2_jit_compile(re, PCRE2_JIT_COMPLETE);
   mcontext = pcre2_match_context_create(NULL);
-  jit_stack = pcre2_jit_stack_create(NULL, 32*1024, 512*1024);
+  jit_stack = pcre2_jit_stack_create(32*1024, 512*1024, NULL);
   pcre2_jit_stack_assign(mcontext, NULL, jit_stack);
   match_data = pcre2_match_data_create(re, 10);
   rc = pcre2_match(re, subject, length, 0, 0, match_data, mcontext);
@@ -418,7 +418,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC13" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 23 November 2014
+Last updated: 27 November 2014
 <br>
 Copyright &copy; 1997-2014 University of Cambridge.
 <br>

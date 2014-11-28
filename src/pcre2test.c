@@ -4731,7 +4731,7 @@ if (dat_datctl.jitstack != 0)
   if (dat_datctl.jitstack != jit_stack_size)
     {
     PCRE2_JIT_STACK_FREE(jit_stack);
-    PCRE2_JIT_STACK_CREATE(jit_stack, NULL, 1, dat_datctl.jitstack * 1024);
+    PCRE2_JIT_STACK_CREATE(jit_stack, 1, dat_datctl.jitstack * 1024, NULL);
     jit_stack_size = dat_datctl.jitstack;
     }
   PCRE2_JIT_STACK_ASSIGN(dat_context, jit_callback, jit_stack);

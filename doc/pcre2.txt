@@ -334,8 +334,8 @@ PCRE2 NATIVE API JIT FUNCTIONS
 
        void pcre2_jit_free_unused_memory(pcre2_general_context *gcontext);
 
-       pcre2_jit_stack *pcre2_jit_stack_create(pcre2_general_context *gcontext,
-         PCRE2_SIZE startsize, PCRE2_SIZE maxsize);
+       pcre2_jit_stack *pcre2_jit_stack_create(PCRE2_SIZE startsize,
+         PCRE2_SIZE maxsize, pcre2_general_context *gcontext);
 
        void pcre2_jit_stack_assign(pcre2_match_context *mcontext,
          pcre2_jit_callback callback_function, void *callback_data);
@@ -1337,8 +1337,8 @@ JUST-IN-TIME (JIT) COMPILATION
 
        void pcre2_jit_free_unused_memory(pcre2_general_context *gcontext);
 
-       pcre2_jit_stack *pcre2_jit_stack_create(pcre2_general_context *gcontext,
-         PCRE2_SIZE startsize, PCRE2_SIZE maxsize);
+       pcre2_jit_stack *pcre2_jit_stack_create(PCRE2_SIZE startsize,
+         PCRE2_SIZE maxsize, pcre2_general_context *gcontext);
 
        void pcre2_jit_stack_assign(pcre2_match_context *mcontext,
          pcre2_jit_callback callback_function, void *callback_data);
@@ -2622,7 +2622,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 26 November 2014
+       Last updated: 27 November 2014
        Copyright (c) 1997-2014 University of Cambridge.
 ------------------------------------------------------------------------------
 
@@ -3647,19 +3647,18 @@ CONTROLLING THE JIT STACK
        the section entitled "JIT stack FAQ" below.
 
        The  pcre2_jit_stack_create()  function  creates a JIT stack. Its argu-
-       ments are a general context (for memory allocation functions,  or  NULL
-       for  standard  memory  allocation), a starting size and a maximum size,
-       and  it  returns  a  pointer   to   an   opaque   structure   of   type
-       pcre2_jit_stack,    or    NULL    if    there    is   an   error.   The
-       pcre2_jit_stack_free() function is used to free  a  stack  that  is  no
-       longer  needed. (For the technically minded: the address space is allo-
-       cated by mmap or VirtualAlloc.)
+       ments are a starting size, a maximum size, and a general  context  (for
+       memory  allocation  functions, or NULL for standard memory allocation).
+       It returns a pointer to an opaque structure of type pcre2_jit_stack, or
+       NULL  if there is an error. The pcre2_jit_stack_free() function is used
+       to free a stack that is no longer needed. (For the technically  minded:
+       the address space is allocated by mmap or VirtualAlloc.)
 
-       JIT uses far less memory for recursion than the interpretive code,  and
-       a  maximum  stack size of 512K to 1M should be more than enough for any
+       JIT  uses far less memory for recursion than the interpretive code, and
+       a maximum stack size of 512K to 1M should be more than enough  for  any
        pattern.
 
-       The pcre2_jit_stack_assign() function specifies which  stack  JIT  code
+       The  pcre2_jit_stack_assign()  function  specifies which stack JIT code
        should use. Its arguments are as follows:
 
          pcre2_match_context  *mcontext
@@ -3668,7 +3667,7 @@ CONTROLLING THE JIT STACK
 
        The first argument is a pointer to a match context. When this is subse-
        quently passed to a matching function, its information determines which
-       JIT  stack  is  used. There are three cases for the values of the other
+       JIT stack is used. There are three cases for the values  of  the  other
        two options:
 
          (1) If callback is NULL and data is NULL, an internal 32K block
@@ -3686,30 +3685,30 @@ CONTROLLING THE JIT STACK
              return value must be a valid JIT stack, the result of calling
              pcre2_jit_stack_create().
 
-       A callback function is obeyed whenever JIT code is about to be run;  it
+       A  callback function is obeyed whenever JIT code is about to be run; it
        is not obeyed when pcre2_match() is called with options that are incom-
-       patible for JIT matching. A callback function can therefore be used  to
-       determine  whether  a  match  operation  was  executed by JIT or by the
+       patible  for JIT matching. A callback function can therefore be used to
+       determine whether a match operation was  executed  by  JIT  or  by  the
        interpreter.
 
        You may safely use the same JIT stack for more than one pattern (either
-       by  assigning directly or by callback), as long as the patterns are all
-       matched sequentially in the same thread. In a multithread  application,
-       if  you  do not specify a JIT stack, or if you assign or pass back NULL
-       from a callback, that is thread-safe, because each thread has  its  own
-       machine  stack.  However,  if  you  assign  or pass back a non-NULL JIT
-       stack, this must be a different stack  for  each  thread  so  that  the
+       by assigning directly or by callback), as long as the patterns are  all
+       matched  sequentially in the same thread. In a multithread application,
+       if you do not specify a JIT stack, or if you assign or pass  back  NULL
+       from  a  callback, that is thread-safe, because each thread has its own
+       machine stack. However, if you assign  or  pass  back  a  non-NULL  JIT
+       stack,  this  must  be  a  different  stack for each thread so that the
        application is thread-safe.
 
-       Strictly  speaking,  even more is allowed. You can assign the same non-
-       NULL stack to a match context that is used by any number  of  patterns,
-       as  long  as  they are not used for matching by multiple threads at the
-       same time. For example, you could use the same stack  in  all  compiled
-       patterns,  with  a global mutex in the callback to wait until the stack
+       Strictly speaking, even more is allowed. You can assign the  same  non-
+       NULL  stack  to a match context that is used by any number of patterns,
+       as long as they are not used for matching by multiple  threads  at  the
+       same  time.  For  example, you could use the same stack in all compiled
+       patterns, with a global mutex in the callback to wait until  the  stack
        is available for use. However, this is an inefficient solution, and not
        recommended.
 
-       This  is a suggestion for how a multithreaded program that needs to set
+       This is a suggestion for how a multithreaded program that needs to  set
        up non-default JIT stacks might operate:
 
          During thread initalization
@@ -3721,7 +3720,7 @@ CONTROLLING THE JIT STACK
          Use a one-line callback function
            return thread_local_var
 
-       All the functions described in this section do nothing if  JIT  is  not
+       All  the  functions  described in this section do nothing if JIT is not
        available.
 
 
@@ -3730,20 +3729,20 @@ JIT STACK FAQ
        (1) Why do we need JIT stacks?
 
        PCRE2 (and JIT) is a recursive, depth-first engine, so it needs a stack
-       where the local data of the current node is pushed before checking  its
+       where  the local data of the current node is pushed before checking its
        child nodes.  Allocating real machine stack on some platforms is diffi-
        cult. For example, the stack chain needs to be updated every time if we
-       extend  the  stack  on  PowerPC.  Although it is possible, its updating
+       extend the stack on PowerPC.  Although it  is  possible,  its  updating
        time overhead decreases performance. So we do the recursion in memory.
 
        (2) Why don't we simply allocate blocks of memory with malloc()?
 
-       Modern operating systems have a  nice  feature:  they  can  reserve  an
+       Modern  operating  systems  have  a  nice  feature: they can reserve an
        address space instead of allocating memory. We can safely allocate mem-
-       ory pages inside this address space, so the stack  could  grow  without
+       ory  pages  inside  this address space, so the stack could grow without
        moving memory data (this is important because of pointers). Thus we can
-       allocate 1M address space, and use only a single memory  page  (usually
-       4K)  if  that is enough. However, we can still grow up to 1M anytime if
+       allocate  1M  address space, and use only a single memory page (usually
+       4K) if that is enough. However, we can still grow up to 1M  anytime  if
        needed.
 
        (3) Who "owns" a JIT stack?
@@ -3751,8 +3750,8 @@ JIT STACK FAQ
        The owner of the stack is the user program, not the JIT studied pattern
        or anything else. The user program must ensure that if a stack is being
        used by pcre2_match(), (that is, it is assigned to a match context that
-       is  passed  to  the  pattern currently running), that stack must not be
-       used by any other threads (to avoid overwriting the same memory  area).
+       is passed to the pattern currently running), that  stack  must  not  be
+       used  by any other threads (to avoid overwriting the same memory area).
        The best practice for multithreaded programs is to allocate a stack for
        each thread, and return this stack through the JIT callback function.
 
@@ -3760,36 +3759,36 @@ JIT STACK FAQ
 
        You can free a JIT stack at any time, as long as it will not be used by
        pcre2_match() again. When you assign the stack to a match context, only
-       a pointer is set. There is no reference counting or  any  other  magic.
+       a  pointer  is  set. There is no reference counting or any other magic.
        You can free compiled patterns, contexts, and stacks in any order, any-
-       time. Just do not call pcre2_match() with a match context  pointing  to
+       time.  Just  do not call pcre2_match() with a match context pointing to
        an already freed stack, as that will cause SEGFAULT. (Also, do not free
-       a stack currently used by pcre2_match() in  another  thread).  You  can
-       also  replace the stack in a context at any time when it is not in use.
+       a  stack  currently  used  by pcre2_match() in another thread). You can
+       also replace the stack in a context at any time when it is not in  use.
        You should free the previous stack before assigning a replacement.
 
-       (5) Should I allocate/free a  stack  every  time  before/after  calling
+       (5)  Should  I  allocate/free  a  stack every time before/after calling
        pcre2_match()?
 
-       No,  because  this  is  too  costly in terms of resources. However, you
-       could implement some clever idea which release the stack if it  is  not
-       used  in  let's  say  two minutes. The JIT callback can help to achieve
+       No, because this is too costly in  terms  of  resources.  However,  you
+       could  implement  some clever idea which release the stack if it is not
+       used in let's say two minutes. The JIT callback  can  help  to  achieve
        this without keeping a list of patterns.
 
-       (6) OK, the stack is for long term memory allocation. But what  happens
-       if  a pattern causes stack overflow with a stack of 1M? Is that 1M kept
+       (6)  OK, the stack is for long term memory allocation. But what happens
+       if a pattern causes stack overflow with a stack of 1M? Is that 1M  kept
        until the stack is freed?
 
-       Especially on embedded sytems, it might be a good idea to release  mem-
-       ory  sometimes  without  freeing the stack. There is no API for this at
-       the moment.  Probably a function call which returns with the  currently
-       allocated  memory for any stack and another which allows releasing mem-
+       Especially  on embedded sytems, it might be a good idea to release mem-
+       ory sometimes without freeing the stack. There is no API  for  this  at
+       the  moment.  Probably a function call which returns with the currently
+       allocated memory for any stack and another which allows releasing  mem-
        ory (shrinking the stack) would be a good idea if someone needs this.
 
        (7) This is too much of a headache. Isn't there any better solution for
        JIT stack handling?
 
-       No,  thanks to Windows. If POSIX threads were used everywhere, we could
+       No, thanks to Windows. If POSIX threads were used everywhere, we  could
        throw out this complicated API.
 
 
@@ -3798,18 +3797,18 @@ FREEING JIT SPECULATIVE MEMORY
        void pcre2_jit_free_unused_memory(pcre2_general_context *gcontext);
 
        The JIT executable allocator does not free all memory when it is possi-
-       ble.   It expects new allocations, and keeps some free memory around to
-       improve allocation speed. However, in low memory conditions,  it  might
-       be  better to free all possible memory. You can cause this to happen by
-       calling pcre2_jit_free_unused_memory(). Its argument is a general  con-
+       ble.  It expects new allocations, and keeps some free memory around  to
+       improve  allocation  speed. However, in low memory conditions, it might
+       be better to free all possible memory. You can cause this to happen  by
+       calling  pcre2_jit_free_unused_memory(). Its argument is a general con-
        text, for custom memory management, or NULL for standard memory manage-
        ment.
 
 
 EXAMPLE CODE
 
-       This is a single-threaded example that specifies a  JIT  stack  without
-       using  a  callback.  A real program should include error checking after
+       This  is  a  single-threaded example that specifies a JIT stack without
+       using a callback. A real program should include  error  checking  after
        all the function calls.
 
          int rc;
@@ -3822,7 +3821,7 @@ EXAMPLE CODE
            &errornumber, &erroffset, NULL);
          rc = pcre2_jit_compile(re, PCRE2_JIT_COMPLETE);
          mcontext = pcre2_match_context_create(NULL);
-         jit_stack = pcre2_jit_stack_create(NULL, 32*1024, 512*1024);
+         jit_stack = pcre2_jit_stack_create(32*1024, 512*1024, NULL);
          pcre2_jit_stack_assign(mcontext, NULL, jit_stack);
          match_data = pcre2_match_data_create(re, 10);
          rc = pcre2_match(re, subject, length, 0, 0, match_data, mcontext);
@@ -3837,28 +3836,28 @@ EXAMPLE CODE
 JIT FAST PATH API
 
        Because the API described above falls back to interpreted matching when
-       JIT  is  not  available, it is convenient for programs that are written
+       JIT is not available, it is convenient for programs  that  are  written
        for  general  use  in  many  environments.  However,  calling  JIT  via
        pcre2_match() does have a performance impact. Programs that are written
-       for use where JIT is known to be available, and  which  need  the  best
-       possible  performance,  can  instead  use a "fast path" API to call JIT
-       matching directly instead of calling pcre2_match() (obviously only  for
+       for  use  where  JIT  is known to be available, and which need the best
+       possible performance, can instead use a "fast path"  API  to  call  JIT
+       matching  directly instead of calling pcre2_match() (obviously only for
        patterns that have been successfully processed by pcre2_jit_compile()).
 
-       The  fast  path  function  is  called  pcre2_jit_match(),  and it takes
+       The fast path  function  is  called  pcre2_jit_match(),  and  it  takes
        exactly the same arguments as pcre2_match(). The return values are also
        the same, plus PCRE2_ERROR_JIT_BADOPTION if a matching mode (partial or
-       complete) is requested that was not compiled. Unsupported  option  bits
+       complete)  is  requested that was not compiled. Unsupported option bits
        (for example, PCRE2_ANCHORED) are ignored.
 
-       When  you call pcre2_match(), as well as testing for invalid options, a
+       When you call pcre2_match(), as well as testing for invalid options,  a
        number of other sanity checks are performed on the arguments. For exam-
        ple, if the subject pointer is NULL, an immediate error is given. Also,
-       unless PCRE2_NO_UTF_CHECK is set, a UTF subject string  is  tested  for
-       validity.  In the interests of speed, these checks do not happen on the
+       unless  PCRE2_NO_UTF_CHECK  is  set, a UTF subject string is tested for
+       validity. In the interests of speed, these checks do not happen on  the
        JIT fast path, and if invalid data is passed, the result is undefined.
 
-       Bypassing the sanity checks and the  pcre2_match()  wrapping  can  give
+       Bypassing  the  sanity  checks  and the pcre2_match() wrapping can give
        speedups of more than 10%.
 
 
@@ -3876,7 +3875,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 23 November 2014
+       Last updated: 27 November 2014
        Copyright (c) 1997-2014 University of Cambridge.
 ------------------------------------------------------------------------------
 

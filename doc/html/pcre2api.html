@@ -250,8 +250,8 @@ document for an overview of all the PCRE2 documentation.
 <b>void pcre2_jit_free_unused_memory(pcre2_general_context *<i>gcontext</i>);</b>
 <br>
 <br>
-<b>pcre2_jit_stack *pcre2_jit_stack_create(pcre2_general_context *<i>gcontext</i>,</b>
-<b>  PCRE2_SIZE <i>startsize</i>, PCRE2_SIZE <i>maxsize</i>);</b>
+<b>pcre2_jit_stack *pcre2_jit_stack_create(PCRE2_SIZE <i>startsize</i>,</b>
+<b>  PCRE2_SIZE <i>maxsize</i>, pcre2_general_context *<i>gcontext</i>);</b>
 <br>
 <br>
 <b>void pcre2_jit_stack_assign(pcre2_match_context *<i>mcontext</i>,</b>
@@ -1308,8 +1308,8 @@ textual error message from any error code.
 <b>void pcre2_jit_free_unused_memory(pcre2_general_context *<i>gcontext</i>);</b>
 <br>
 <br>
-<b>pcre2_jit_stack *pcre2_jit_stack_create(pcre2_general_context *<i>gcontext</i>,</b>
-<b>  PCRE2_SIZE <i>startsize</i>, PCRE2_SIZE <i>maxsize</i>);</b>
+<b>pcre2_jit_stack *pcre2_jit_stack_create(PCRE2_SIZE <i>startsize</i>,</b>
+<b>  PCRE2_SIZE <i>maxsize</i>, pcre2_general_context *<i>gcontext</i>);</b>
 <br>
 <br>
 <b>void pcre2_jit_stack_assign(pcre2_match_context *<i>mcontext</i>,</b>
@@ -2681,7 +2681,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC37" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 26 November 2014
+Last updated: 27 November 2014
 <br>
 Copyright &copy; 1997-2014 University of Cambridge.
 <br>

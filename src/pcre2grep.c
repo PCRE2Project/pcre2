@@ -3115,7 +3115,7 @@ for (fn = pattern_files; fn != NULL; fn = fn->next)
 
 #ifdef SUPPORT_PCRE2GREP_JIT
 if (use_jit)
-  jit_stack = pcre2_jit_stack_create(NULL, 32*1024, 1024*1024);
+  jit_stack = pcre2_jit_stack_create(32*1024, 1024*1024, NULL);
 #endif
 
 for (j = 1, cp = patterns; cp != NULL; j++, cp = cp->next)

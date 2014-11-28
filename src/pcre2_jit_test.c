@@ -854,7 +854,7 @@ static pcre2_jit_stack_8 *stack8;
 static pcre2_jit_stack_8 *getstack8(void)
 {
 	if (!stack8)
-		stack8 = pcre2_jit_stack_create_8(NULL, 1, 1024 * 1024);
+		stack8 = pcre2_jit_stack_create_8(1, 1024 * 1024, NULL);
 	return stack8;
 }
 
@@ -877,7 +877,7 @@ static pcre2_jit_stack_16 *stack16;
 static pcre2_jit_stack_16 *getstack16(void)
 {
 	if (!stack16)
-		stack16 = pcre2_jit_stack_create_16(NULL, 1, 1024 * 1024);
+		stack16 = pcre2_jit_stack_create_16(1, 1024 * 1024, NULL);
 	return stack16;
 }
 
@@ -900,7 +900,7 @@ static pcre2_jit_stack_32 *stack32;
 static pcre2_jit_stack_32 *getstack32(void)
 {
 	if (!stack32)
-		stack32 = pcre2_jit_stack_create_32(NULL, 1, 1024 * 1024);
+		stack32 = pcre2_jit_stack_create_32(1, 1024 * 1024, NULL);
 	return stack32;
 }
 
