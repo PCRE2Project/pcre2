@@ -156,7 +156,7 @@ if (oveccount > max_oveccount)
   oveccount = max_oveccount;
 arguments.oveccount = oveccount << 1;
 
-if (mcontext->jit_callback != NULL)
+if (mcontext && mcontext->jit_callback != NULL)
   jit_stack = mcontext->jit_callback(mcontext->jit_callback_data);
 else
   jit_stack = (pcre2_jit_stack *)mcontext->jit_callback_data;
