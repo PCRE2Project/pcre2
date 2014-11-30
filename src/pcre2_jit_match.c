@@ -139,6 +139,10 @@ if (mcontext != NULL)
   arguments.callout_data = mcontext->callout_data;
   arguments.limit_match = (mcontext->match_limit < re->limit_match)?
     mcontext->match_limit : re->limit_match;
+  if (mcontext->jit_callback != NULL)
+    jit_stack = mcontext->jit_callback(mcontext->jit_callback_data);
+  else
+    jit_stack = (pcre2_jit_stack *)mcontext->jit_callback_data;
   }
 else
   {
@@ -146,6 +150,7 @@ else
   arguments.callout_data = NULL;
   arguments.limit_match = (MATCH_LIMIT < re->limit_match)?
     MATCH_LIMIT : re->limit_match;
+  jit_stack = NULL;
   }
 
 /* JIT only need two offsets for each ovector entry. Hence
@@ -156,10 +161,6 @@ if (oveccount > max_oveccount)
   oveccount = max_oveccount;
 arguments.oveccount = oveccount << 1;
 
-if (mcontext && mcontext->jit_callback != NULL)
-  jit_stack = mcontext->jit_callback(mcontext->jit_callback_data);
-else
-  jit_stack = (pcre2_jit_stack *)mcontext->jit_callback_data;
 
 convert_executable_func.executable_func = functions->executable_funcs[index];
 if (jit_stack != NULL)
