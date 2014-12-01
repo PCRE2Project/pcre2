@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "27 November 2014" "PCRE2 10.00"
+.TH PCRE2API 3 "01 December 2014" "PCRE2 10.00"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -138,7 +138,7 @@ document for an overview of all the PCRE2 documentation.
 .B "  PCRE2_SPTR \fIname\fP, PCRE2_UCHAR *\fIbuffer\fP, PCRE2_SIZE *\fIbufflen\fP);"
 .sp
 .B int pcre2_substring_copy_bynumber(pcre2_match_data *\fImatch_data\fP,
-.B "  unsigned int \fInumber\fP, PCRE2_UCHAR *\fIbuffer\fP,"
+.B "  uint32_t \fInumber\fP, PCRE2_UCHAR *\fIbuffer\fP,"
 .B "  PCRE2_SIZE *\fIbufflen\fP);"
 .sp
 .B void pcre2_substring_free(PCRE2_UCHAR *\fIbuffer\fP);
@@ -147,14 +147,14 @@ document for an overview of all the PCRE2 documentation.
 .B "  PCRE2_SPTR \fIname\fP, PCRE2_UCHAR **\fIbufferptr\fP, PCRE2_SIZE *\fIbufflen\fP);"
 .sp
 .B int pcre2_substring_get_bynumber(pcre2_match_data *\fImatch_data\fP,
-.B "  unsigned int \fInumber\fP, PCRE2_UCHAR **\fIbufferptr\fP,"
+.B "  uint32_t \fInumber\fP, PCRE2_UCHAR **\fIbufferptr\fP,"
 .B "  PCRE2_SIZE *\fIbufflen\fP);"
 .sp
 .B int pcre2_substring_length_byname(pcre2_match_data *\fImatch_data\fP,
 .B "  PCRE2_SPTR \fIname\fP, PCRE2_SIZE *\fIlength\fP);"
 .sp
 .B int pcre2_substring_length_bynumber(pcre2_match_data *\fImatch_data\fP,
-.B "  unsigned int \fInumber\fP, PCRE2_SIZE *\fIlength\fP);"
+.B "  uint32_t \fInumber\fP, PCRE2_SIZE *\fIlength\fP);"
 .sp
 .B int pcre2_substring_nametable_scan(const pcre2_code *\fIcode\fP,
 .B "  PCRE2_SPTR \fIname\fP, PCRE2_SPTR *\fIfirst\fP, PCRE2_SPTR *\fIlast\fP);"
@@ -2248,14 +2248,14 @@ The internal recursion limit was reached.
 .sp
 .nf
 .B int pcre2_substring_length_bynumber(pcre2_match_data *\fImatch_data\fP,
-.B "  unsigned int \fInumber\fP, PCRE2_SIZE *\fIlength\fP);"
+.B "  uint32_t \fInumber\fP, PCRE2_SIZE *\fIlength\fP);"
 .sp
 .B int pcre2_substring_copy_bynumber(pcre2_match_data *\fImatch_data\fP,
-.B "  unsigned int \fInumber\fP, PCRE2_UCHAR *\fIbuffer\fP,"
+.B "  uint32_t \fInumber\fP, PCRE2_UCHAR *\fIbuffer\fP,"
 .B "  PCRE2_SIZE *\fIbufflen\fP);"
 .sp
 .B int pcre2_substring_get_bynumber(pcre2_match_data *\fImatch_data\fP,
-.B "  unsigned int \fInumber\fP, PCRE2_UCHAR **\fIbufferptr\fP,"
+.B "  uint32_t \fInumber\fP, PCRE2_UCHAR **\fIbufferptr\fP,"
 .B "  PCRE2_SIZE *\fIbufflen\fP);"
 .sp
 .B void pcre2_substring_free(PCRE2_UCHAR *\fIbuffer\fP);
@@ -2735,6 +2735,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 27 November 2014
+Last updated: 01 December 2014
 Copyright (c) 1997-2014 University of Cambridge.
 .fi

@@ -1,4 +1,4 @@
-.TH PCRE2_SUBSTRING_GET_BYNUMBER 3 "21 October 2014" "PCRE2 10.00"
+.TH PCRE2_SUBSTRING_GET_BYNUMBER 3 "01 December 2014" "PCRE2 10.00"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH SYNOPSIS
@@ -8,14 +8,14 @@ PCRE2 - Perl-compatible regular expressions (revised API)
 .PP
 .nf
 .B int pcre2_substring_get_bynumber(pcre2_match_data *\fImatch_data\fP,
-.B "  unsigned int \fInumber\fP, PCRE2_UCHAR **\fIbufferptr\fP, PCRE2_SIZE *\fIbufflen\fP);"
+.B "  uint32_t \fInumber\fP, PCRE2_UCHAR **\fIbufferptr\fP, PCRE2_SIZE *\fIbufflen\fP);"
 .fi
 .
 .SH DESCRIPTION
 .rs
 .sp
-This is a convenience function for extracting a captured substring by number into
-newly acquired memory. The arguments are:
+This is a convenience function for extracting a captured substring by number
+into newly acquired memory. The arguments are:
 .sp
   \fImatch_data\fP    The match data for the match
   \fInumber\fP        Number of the required substring

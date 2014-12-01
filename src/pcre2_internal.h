@@ -75,38 +75,30 @@ using some MS magic. I found some useful information on this web page:
 http://msdn2.microsoft.com/en-us/library/y4h7bcy6(VS.80).aspx. According to the
 information there, using __declspec(dllexport) without "extern" we have a
 definition; with "extern" we have a declaration. The settings here override the
-setting in pcre.h (which is included below); it defines only PCRE2_EXP_DECL,
+setting in pcre2.h (which is included below); it defines only PCRE2_EXP_DECL,
 which is all that is needed for applications (they just import the symbols). We
 use:
 
-  PCRE2_EXP_DECL       for declarations
-  PCRE2_EXP_DEFN       for definitions of exported functions
-  PCRE2_EXP_DATA_DEFN  for definitions of exported variables
+  PCRE2_EXP_DECL    for declarations
+  PCRE2_EXP_DEFN    for definitions
 
-The reason for the two DEFN macros is that in non-Windows environments, one
-does not want to have "extern" before variable definitions because it leads to
-compiler warnings. So we distinguish between functions and variables. In
-Windows, the two should always be the same.
-
-The reason for wrapping this in #ifndef PCRE2_EXP_DECL is so that pcretest,
+The reason for wrapping this in #ifndef PCRE2_EXP_DECL is so that pcre2test,
 which is an application, but needs to import this file in order to "peek" at
-internals, can #include pcre.h first to get an application's-eye view.
+internals, can #include pcre2.h first to get an application's-eye view.
 
 In principle, people compiling for non-Windows, non-Unix-like (i.e. uncommon,
 special-purpose environments) might want to stick other stuff in front of
-exported symbols. That's why, in the non-Windows case, we set PCRE2_EXP_DEFN and
-PCRE2_EXP_DATA_DEFN only if they are not already set. */
+exported symbols. That's why, in the non-Windows case, we set PCRE2_EXP_DEFN
+only if it is not already set. */
 
 #ifndef PCRE2_EXP_DECL
 #  ifdef _WIN32
 #    ifndef PCRE2_STATIC
 #      define PCRE2_EXP_DECL       extern __declspec(dllexport)
 #      define PCRE2_EXP_DEFN       __declspec(dllexport)
-#      define PCRE2_EXP_DATA_DEFN  __declspec(dllexport)
 #    else
 #      define PCRE2_EXP_DECL       extern
 #      define PCRE2_EXP_DEFN
-#      define PCRE2_EXP_DATA_DEFN
 #    endif
 #  else
 #    ifdef __cplusplus
@@ -117,9 +109,6 @@ PCRE2_EXP_DATA_DEFN only if they are not already set. */
 #    ifndef PCRE2_EXP_DEFN
 #      define PCRE2_EXP_DEFN       PCRE2_EXP_DECL
 #    endif
-#    ifndef PCRE2_EXP_DATA_DEFN
-#      define PCRE2_EXP_DATA_DEFN
-#    endif
 #  endif
 #endif
 
@@ -129,7 +118,7 @@ property values. This must follow the setting of PCRE2_EXP_DECL above. */
 #include "pcre2.h"
 #include "pcre2_ucp.h"
 
-/* When PCRE is compiled as a C++ library, the subject pointer can be replaced
+/* When PCRE2 is compiled as a C++ library, the subject pointer can be replaced
 with a custom type. This makes it possible, for example, to allow pcre2_match()
 to process subject strings that are discontinuous by using a smart pointer
 class. It must always be possible to inspect all of the subject string in

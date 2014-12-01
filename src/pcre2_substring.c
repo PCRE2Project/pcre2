@@ -79,7 +79,7 @@ int entrysize = pcre2_substring_nametable_scan(match_data->code, stringname,
 if (entrysize < 0) return entrysize;
 for (entry = first; entry <= last; entry += entrysize)
   {
-  uint16_t n = GET2(entry, 0);
+  uint32_t n = GET2(entry, 0);
   if (n < match_data->oveccount && match_data->ovector[n*2] != PCRE2_UNSET)
     return pcre2_substring_copy_bynumber(match_data, n, buffer, sizeptr);
   }
@@ -109,7 +109,7 @@ Returns:         if successful: 0
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_substring_copy_bynumber(pcre2_match_data *match_data,
-  unsigned int stringnumber, PCRE2_UCHAR *buffer, PCRE2_SIZE *sizeptr)
+  uint32_t stringnumber, PCRE2_UCHAR *buffer, PCRE2_SIZE *sizeptr)
 {
 PCRE2_SIZE left, right;
 PCRE2_SIZE p = 0;
@@ -160,7 +160,7 @@ int entrysize = pcre2_substring_nametable_scan(match_data->code, stringname,
 if (entrysize < 0) return entrysize;
 for (entry = first; entry <= last; entry += entrysize)
   {
-  uint16_t n = GET2(entry, 0);
+  uint32_t n = GET2(entry, 0);
   if (n < match_data->oveccount && match_data->ovector[n*2] != PCRE2_UNSET)
     return pcre2_substring_get_bynumber(match_data, n, stringptr, sizeptr);
   }
@@ -190,7 +190,7 @@ Returns:         if successful: zero
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_substring_get_bynumber(pcre2_match_data *match_data,
-  unsigned int stringnumber, PCRE2_UCHAR **stringptr, PCRE2_SIZE *sizeptr)
+  uint32_t stringnumber, PCRE2_UCHAR **stringptr, PCRE2_SIZE *sizeptr)
 {
 PCRE2_SIZE left, right;
 PCRE2_SIZE p = 0;
@@ -263,7 +263,7 @@ int entrysize = pcre2_substring_nametable_scan(match_data->code, stringname,
 if (entrysize <= 0) return entrysize;
 for (entry = first; entry <= last; entry += entrysize)
   {
-  uint16_t n = GET2(entry, 0);
+  uint32_t n = GET2(entry, 0);
   if (n < match_data->oveccount && match_data->ovector[n*2] != PCRE2_UNSET)
     return pcre2_substring_length_bynumber(match_data, n, sizeptr);
   }
@@ -288,7 +288,7 @@ Returns:          0 if successful, else a negative error number
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_substring_length_bynumber(pcre2_match_data *match_data,
-  unsigned int stringnumber, PCRE2_SIZE *sizeptr)
+  uint32_t stringnumber, PCRE2_SIZE *sizeptr)
 {
 if (stringnumber >= match_data->oveccount ||
     stringnumber > match_data->code->top_bracket ||

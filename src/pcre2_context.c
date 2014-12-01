@@ -82,7 +82,7 @@ Arguments:
 Returns:      pointer to memory or NULL on failure
 */
 
-PCRE2_EXP_DEFN void *
+extern void *
 PRIV(memctl_malloc)(size_t size, pcre2_memctl *memctl)
 {
 pcre2_memctl *newmemctl;

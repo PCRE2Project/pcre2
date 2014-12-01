@@ -1,4 +1,4 @@
-.TH PCRE2_PATTERN_INFO 3 "21 October 2014" "PCRE2 10.00"
+.TH PCRE2_PATTERN_INFO 3 "01 December 2014" "PCRE2 10.00"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH SYNOPSIS
@@ -15,19 +15,19 @@ PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
 This function returns information about a compiled pattern. Its arguments are:
 .sp
-  \fIcode\fP                      Compiled regular expression
-  \fIwhat\fP                      What information is required
-  \fIwhere\fP                     Where to put the information
+  \fIcode\fP     Pointer to a compiled regular expression
+  \fIwhat\fP     What information is required
+  \fIwhere\fP    Where to put the information
 .sp
-If \fIwhere\fP is NULL, the function returns the amount of memory needed for
-the requested information, in bytes. The following information is available:
+The recognized values for the \fIwhat\fP argument, and the information they
+request are as follows:
 .sp
   PCRE2_INFO_ALLOPTIONS      Final options after compiling
   PCRE2_INFO_ARGOPTIONS      Options passed to \fBpcre2_compile()\fP
   PCRE2_INFO_BACKREFMAX      Number of highest back reference
-  PCRE2_INFO_BSR             What \eR matches
-                               0 all Unicode line endings
-                               1 CR, LF, or CRLF only
+  PCRE2_INFO_BSR             What \eR matches:
+                               PCRE2_BSR_UNICODE: Unicode line endings
+                               PCRE2_BSR_ANYCRLF: CR, LF, or CRLF only
   PCRE2_INFO_CAPTURECOUNT    Number of capturing subpatterns
   PCRE2_INFO_FIRSTBITMAP     Bitmap of first code units, or NULL
   PCRE2_INFO_FIRSTCODEUNIT   First code unit when type is 1
@@ -46,7 +46,7 @@ the requested information, in bytes. The following information is available:
   PCRE2_INFO_MATCHEMPTY      1 if the pattern can match an
                                empty string, 0 otherwise
   PCRE2_INFO_MATCHLIMIT      Match limit if set,
-                               otherwise PCRE2_RROR_UNSET
+                               otherwise PCRE2_ERROR_UNSET
   PCRE2_INFO_MAXLOOKBEHIND   Length (in characters) of the longest
                                lookbehind assertion
   PCRE2_INFO_MINLENGTH       Lower bound length of matching strings
@@ -54,17 +54,20 @@ the requested information, in bytes. The following information is available:
   PCRE2_INFO_NAMECOUNT       Number of named subpatterns
   PCRE2_INFO_NAMETABLE       Pointer to name table
   PCRE2_CONFIG_NEWLINE       Code for the newline sequence:
-                               1    for CR
-                               2    for LF
-                               3    for CRLF
-                               4    for ANY
-                               5    for ANYCRLF
+                               PCRE2_NEWLINE_CR
+                               PCRE2_NEWLINE_LF
+                               PCRE2_NEWLINE_CRLF
+                               PCRE2_NEWLINE_ANY
+                               PCRE2_NEWLINE_ANYCRLF
   PCRE2_INFO_RECURSIONLIMIT  Recursion limit if set,
                                otherwise PCRE2_ERROR_UNSET
   PCRE2_INFO_SIZE            Size of compiled pattern
 .sp
-The \fIwhere\fP argument must point to an unsigned 32-bit integer (uint32_t
-variable), except for the following \fIwhat\fP values:
+If \fIwhere\fP is NULL, the function returns the amount of memory needed for
+the requested information, in bytes. Otherwise, the \fIwhere\fP argument must
+point to an unsigned 32-bit integer (uint32_t variable), except for the
+following \fIwhat\fP values, when it must point to a variable of the type
+shown:
 .sp
   PCRE2_INFO_FIRSTBITMAP     const uint8_t *
   PCRE2_INFO_JITSIZE         size_t

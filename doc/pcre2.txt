@@ -283,7 +283,7 @@ PCRE2 NATIVE API STRING EXTRACTION FUNCTIONS
          PCRE2_SPTR name, PCRE2_UCHAR *buffer, PCRE2_SIZE *bufflen);
 
        int pcre2_substring_copy_bynumber(pcre2_match_data *match_data,
-         unsigned int number, PCRE2_UCHAR *buffer,
+         uint32_t number, PCRE2_UCHAR *buffer,
          PCRE2_SIZE *bufflen);
 
        void pcre2_substring_free(PCRE2_UCHAR *buffer);
@@ -292,14 +292,14 @@ PCRE2 NATIVE API STRING EXTRACTION FUNCTIONS
          PCRE2_SPTR name, PCRE2_UCHAR **bufferptr, PCRE2_SIZE *bufflen);
 
        int pcre2_substring_get_bynumber(pcre2_match_data *match_data,
-         unsigned int number, PCRE2_UCHAR **bufferptr,
+         uint32_t number, PCRE2_UCHAR **bufferptr,
          PCRE2_SIZE *bufflen);
 
        int pcre2_substring_length_byname(pcre2_match_data *match_data,
          PCRE2_SPTR name, PCRE2_SIZE *length);
 
        int pcre2_substring_length_bynumber(pcre2_match_data *match_data,
-         unsigned int number, PCRE2_SIZE *length);
+         uint32_t number, PCRE2_SIZE *length);
 
        int pcre2_substring_nametable_scan(const pcre2_code *code,
          PCRE2_SPTR name, PCRE2_SPTR *first, PCRE2_SPTR *last);
@@ -2189,14 +2189,14 @@ ERROR RETURNS FROM pcre2_match()
 EXTRACTING CAPTURED SUBSTRINGS BY NUMBER
 
        int pcre2_substring_length_bynumber(pcre2_match_data *match_data,
-         unsigned int number, PCRE2_SIZE *length);
+         uint32_t number, PCRE2_SIZE *length);
 
        int pcre2_substring_copy_bynumber(pcre2_match_data *match_data,
-         unsigned int number, PCRE2_UCHAR *buffer,
+         uint32_t number, PCRE2_UCHAR *buffer,
          PCRE2_SIZE *bufflen);
 
        int pcre2_substring_get_bynumber(pcre2_match_data *match_data,
-         unsigned int number, PCRE2_UCHAR **bufferptr,
+         uint32_t number, PCRE2_UCHAR **bufferptr,
          PCRE2_SIZE *bufflen);
 
        void pcre2_substring_free(PCRE2_UCHAR *buffer);
@@ -2624,7 +2624,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 27 November 2014
+       Last updated: 01 December 2014
        Copyright (c) 1997-2014 University of Cambridge.
 ------------------------------------------------------------------------------
 
