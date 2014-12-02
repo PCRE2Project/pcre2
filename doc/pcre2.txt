@@ -3585,7 +3585,7 @@ SIMPLE USE OF JIT
        is available.
 
        At present, it is not possible to free JIT compiled  code  except  when
-       the entire compiled pattern is freed by calling pcre2_free_code().
+       the entire compiled pattern is freed by calling pcre2_code_free().
 
        In  some circumstances you may need to call additional functions. These
        are described in the  section  entitled  "Controlling  the  JIT  stack"
