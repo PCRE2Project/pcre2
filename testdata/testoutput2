@@ -993,7 +993,7 @@ Subject length lower bound = 4
  0: abcd
  1: a
  2: d
-Copy substring 5 failed (-48): unknown or unset substring
+Copy substring 5 failed (-48): unknown substring
 
 /(.{20})/I
 Capturing subpattern count = 1
@@ -1047,9 +1047,9 @@ Subject length lower bound = 4
  2: <unset>
  3: f
  1G a (1)
-Get substring 2 failed (-48): unknown or unset substring
+Get substring 2 failed (-54): requested value is not set
  3G f (1)
-Get substring 4 failed (-48): unknown or unset substring
+Get substring 4 failed (-48): unknown substring
  0L adef
  1L a
  2L 
@@ -1062,7 +1062,7 @@ Get substring 4 failed (-48): unknown or unset substring
  1G bc (2)
  2G bc (2)
  3G f (1)
-Get substring 4 failed (-48): unknown or unset substring
+Get substring 4 failed (-48): unknown substring
  0L bcdef
  1L bc
  2L bc
@@ -4363,7 +4363,7 @@ Subject length lower bound = 8
  1: cd
  2: gh
 Number not found for group 'three'
-Copy substring 'three' failed (-48): unknown or unset substring
+Copy substring 'three' failed (-48): unknown substring
 
 /(?P<Tes>)(?P<Test>)/IB
 ------------------------------------------------------------------
@@ -5731,7 +5731,7 @@ No match
  1: a1
  2: a1
 Number not found for group 'Z'
-Copy substring 'Z' failed (-48): unknown or unset substring
+Copy substring 'Z' failed (-48): unknown substring
   C a1 (2) A (non-unique)
     
 /(?|(?<a>)(?<b>)(?<a>)|(?<a>)(?<b>)(?<a>))/I,dupnames
@@ -5772,7 +5772,7 @@ Subject length lower bound = 2
   C a (1) A (non-unique)
     cd\=copy=A
  0: cd
-Copy substring 'A' failed (-48): unknown or unset substring
+Copy substring 'A' failed (-54): requested value is not set
 
 /^(?P<A>a)(?P<A>b)|cd(?P<A>ef)(?P<A>gh)/I,dupnames
 Capturing subpattern count = 4
@@ -5817,7 +5817,7 @@ No match
  1: a1
  2: a1
 Number not found for group 'Z'
-Get substring 'Z' failed (-48): unknown or unset substring
+Get substring 'Z' failed (-48): unknown substring
   G a1 (2) A (non-unique)
 
 /^(?P<A>a)(?P<A>b)/I,dupnames
@@ -5848,7 +5848,7 @@ Subject length lower bound = 2
   G a (1) A (non-unique)
     cd\=get=A
  0: cd
-Get substring 'A' failed (-48): unknown or unset substring
+Get substring 'A' failed (-54): requested value is not set
 
 /^(?P<A>a)(?P<A>b)|cd(?P<A>ef)(?P<A>gh)/I,dupnames
 Capturing subpattern count = 4
@@ -13659,11 +13659,11 @@ Failed: error -35: invalid replacement string
 
 /abc/replace=a$bad
     123abc
-Failed: error -48: unknown or unset substring
+Failed: error -48: unknown substring
 
 /abc/replace=a${A234567890123456789_123456789012}z
     123abc
-Failed: error -48: unknown or unset substring
+Failed: error -48: unknown substring
 
 /abc/replace=a${A23456789012345678901234567890123}z
     123abc
@@ -13714,5 +13714,27 @@ Failed: error -34: bad option value
 "(?(?=)?==)(((((((((?=)))))))))"
     a
 No match
+
+/(a)(b)|(c)/
+    XcX\=ovector=2,get=1,get=2,get=3,get=4,getall
+Matched, but too many substrings
+ 0: c
+ 1: <unset>
+Get substring 1 failed (-54): requested value is not set
+Get substring 2 failed (-53): requested value is not available
+Get substring 3 failed (-53): requested value is not available
+Get substring 4 failed (-48): unknown substring
+ 0L c
+ 1L 
+    
+/x(?=ab\K)/
+    xab\=get=0 
+Start of matched string is beyond its end - displaying from end to start.
+ 0: ab
+ 0G  (0)
+    xab\=copy=0 
+Start of matched string is beyond its end - displaying from end to start.
+ 0: ab
+ 0C  (0)
 
 # End of testinput2 

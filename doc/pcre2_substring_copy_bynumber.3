@@ -1,4 +1,4 @@
-.TH PCRE2_SUBSTRING_COPY_BYNUMBER 3 "01 December 2014" "PCRE2 10.00"
+.TH PCRE2_SUBSTRING_COPY_BYNUMBER 3 "13 December 2014" "PCRE2 10.00"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH SYNOPSIS
@@ -24,9 +24,14 @@ buffer. The arguments are:
   \fIbufflen\fP       Length of buffer
 .sp
 The \fIbufflen\fP variable is updated with the length of the extracted string,
-excluding the terminating zero. The yield of the function is zero for success,
-PCRE2_ERROR_NOMEMORY if the buffer was too small, or PCRE2_ERROR_NOSUBSTRING if
-the string number is invalid.
+excluding the terminating zero. The yield of the function is zero for success
+or one of the following error numbers:
+.sp
+  PCRE2_ERROR_NOSUBSTRING   there are no groups of that number
+  PCRE2_ERROR_UNAVAILBLE    the ovector was too small for that group
+  PCRE2_ERROR_UNSET         the group did not participate in the match
+  PCRE2_ERROR_NOMEMORY      the buffer is too small
+.sp
 .P
 There is a complete description of the PCRE2 native API in the
 .\" HREF

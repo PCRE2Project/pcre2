@@ -7023,8 +7023,7 @@ if (rc == MATCH_MATCH || rc == MATCH_ACCEPT)
   /* Set the return code to the number of captured strings, or 0 if there were
   too many to fit into the ovector. */
 
-  match_data->rc = ((mb->capture_last & OVFLBIT) != 0 &&
-                     mb->end_offset_top >= arg_offset_max)?
+  match_data->rc = ((mb->capture_last & OVFLBIT) != 0)?
     0 : mb->end_offset_top/2;
 
   /* If there is space in the offset vector, set any unused pairs at the end to

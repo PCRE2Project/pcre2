@@ -1,4 +1,4 @@
-.TH PCRE2_SUBSTRING_GET_BYNUMBER 3 "01 December 2014" "PCRE2 10.00"
+.TH PCRE2_SUBSTRING_GET_BYNUMBER 3 "13 December 2014" "PCRE2 10.00"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH SYNOPSIS
@@ -25,9 +25,14 @@ into newly acquired memory. The arguments are:
 The memory in which the substring is placed is obtained by calling the same
 memory allocation function that was used for the match data block. The
 convenience function \fBpcre2_substring_free()\fP can be used to free it when
-it is no longer needed. The yield of the function is zero for success,
-PCRE2_ERROR_NOMEMORY if sufficient memory could not be obtained, or
-PCRE2_ERROR_NOSUBSTRING if the string number is invalid.
+it is no longer needed. The yield of the function is zero for success or one of
+the following error numbers:
+.sp
+  PCRE2_ERROR_NOSUBSTRING   there are no groups of that number
+  PCRE2_ERROR_UNAVAILBLE    the ovector was too small for that group
+  PCRE2_ERROR_UNSET         the group did not participate in the match
+  PCRE2_ERROR_NOMEMORY      memory could not be obtained
+.sp
 .P
 There is a complete description of the PCRE2 native API in the
 .\" HREF

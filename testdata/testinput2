@@ -4084,4 +4084,11 @@ a random value. /Ix
 "(?(?=)?==)(((((((((?=)))))))))"
     a
 
+/(a)(b)|(c)/
+    XcX\=ovector=2,get=1,get=2,get=3,get=4,getall
+    
+/x(?=ab\K)/
+    xab\=get=0 
+    xab\=copy=0 
+
 # End of testinput2 

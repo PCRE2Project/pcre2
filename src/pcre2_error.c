@@ -221,12 +221,13 @@ static const char match_error_texts[] =
   "JIT stack limit reached\0"
   "match limit exceeded\0"
   "no more memory\0"
-  "unknown or unset substring\0"
+  "unknown substring\0"
   "non-unique substring name\0"
   /* 50 */
   "NULL argument passed\0"
   "nested recursion at the same subject position\0"
   "recursion limit exceeded\0"
+  "requested value is not available\0" 
   "requested value is not set\0"
   ;
 

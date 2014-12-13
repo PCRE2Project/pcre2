@@ -80,20 +80,20 @@ uint8_t, UCHAR_MAX, etc are defined. */
 extern "C" {
 #endif
 
-/* The following options can be passed to pcre2_compile(), pcre2_match(), or
-pcre2_dfa_match(). PCRE2_NO_UTF_CHECK affects only the function to which it is
-passed. Put these bits at the most significant end of the options word so
+/* The following option bits can be passed to pcre2_compile(), pcre2_match(),
+or pcre2_dfa_match(). PCRE2_NO_UTF_CHECK affects only the function to which it
+is passed. Put these bits at the most significant end of the options word so
 others can be added next to them */
 
 #define PCRE2_ANCHORED            0x80000000u
 #define PCRE2_NO_UTF_CHECK        0x40000000u
 
-/* Other options that can be passed to pcre2_compile(). They may affect
-compilation, JIT compilation, and/or interpretive execution. The following tags
-indicate which:
+/* The following option bits can be passed only to pcre2_compile(). However,
+they may affect compilation, JIT compilation, and/or interpretive execution.
+The following tags indicate which:
 
-C   alters what is compiled
-J   alters what JIT compiles
+C   alters what is compiled by pcre2_compile()
+J   alters what is compiled by pcre2_jit_compile()
 M   is inspected during pcre2_match() execution
 D   is inspected during pcre2_dfa_match() execution
 */
@@ -224,7 +224,8 @@ context functions. */
 #define PCRE2_ERROR_NULL              (-50)
 #define PCRE2_ERROR_RECURSELOOP       (-51)
 #define PCRE2_ERROR_RECURSIONLIMIT    (-52)
-#define PCRE2_ERROR_UNSET             (-53)
+#define PCRE2_ERROR_UNAVAILABLE       (-53)
+#define PCRE2_ERROR_UNSET             (-54)
 
 /* Request types for pcre2_pattern_info() */
 

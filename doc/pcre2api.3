@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "01 December 2014" "PCRE2 10.00"
+.TH PCRE2API 3 "13 December 2014" "PCRE2 10.00"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -2307,10 +2307,19 @@ attempt to get memory failed for \fBpcre2_substring_get_bynumber()\fP.
 .sp
   PCRE2_ERROR_NOSUBSTRING
 .sp
-No substring with the given number was captured. This could be because there is
-no capturing group of that number in the pattern, or because the group with
-that number did not participate in the match, or because the ovector was too
-small to capture that group.
+There is no substring with that number in the pattern, that is, the number is 
+greater than the number of capturing parentheses.
+.sp
+  PCRE2_ERROR_UNAVAILABLE
+.sp
+The substring number, though not greater than the number of captures in the 
+pattern, is greater than the number of slots in the ovector, so the substring 
+could not be captured.
+.sp
+  PCRE2_ERROR_UNSET
+.sp
+The substring did not participate in the match. For example, if the pattern is
+(abc)|(def) and the subject is "def", substring number 1 is unset.  
 .
 .
 .SH "EXTRACTING A LIST OF ALL CAPTURED SUBSTRINGS"
@@ -2345,7 +2354,7 @@ capturing subpattern number \fIn+1\fP matches some part of the subject, but
 subpattern \fIn\fP has not been used at all, it returns an empty string. This
 can be distinguished from a genuine zero-length substring by inspecting the
 appropriate offset in the ovector, which contain PCRE2_UNSET for unset
-substrings.
+substrings, or by calling \fBpcre2_substring_length_bynumber()\fP.
 .
 .
 .\" HTML <a name="extractbyname"></a>
@@ -2384,8 +2393,10 @@ that name.
 Given the number, you can extract the substring directly, or use one of the
 functions described above. For convenience, there are also "byname" functions
 that correspond to the "bynumber" functions, the only difference being that the
-second argument is a name instead of a number. However, if PCRE2_DUPNAMES is
-set and there are duplicate names, the behaviour may not be what you want.
+second argument is a name instead of a number. If PCRE2_DUPNAMES is
+set and there are duplicate names, these functions return the first named 
+string that is set. PCRE2_ERROR_UNSET is returned only if all groups of the 
+same name are unset.
 .P
 \fBWarning:\fP If the pattern uses the (?| feature to set up multiple
 subpatterns with the same number, as described in the
@@ -2485,9 +2496,9 @@ documentation.
 .P
 When duplicates are present, \fBpcre2_substring_copy_byname()\fP and
 \fBpcre2_substring_get_byname()\fP return the first substring corresponding to
-the given name that is set. If none are set, PCRE2_ERROR_NOSUBSTRING is
-returned. The \fBpcre2_substring_number_from_name()\fP function returns
-the error PCRE2_ERROR_NOUNIQUESUBSTRING.
+the given name that is set. Only if none are set is PCRE2_ERROR_UNSET is
+returned. The \fBpcre2_substring_number_from_name()\fP function returns the
+error PCRE2_ERROR_NOUNIQUESUBSTRING when there are duplicate names.
 .P
 If you want to get full details of all captured substrings for a given name,
 you must use the \fBpcre2_substring_nametable_scan()\fP function. The first
@@ -2735,6 +2746,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 01 December 2014
+Last updated: 13 December 2014
 Copyright (c) 1997-2014 University of Cambridge.
 .fi

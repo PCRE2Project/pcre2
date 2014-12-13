@@ -63,8 +63,9 @@ Arguments:
 
 Returns:         if successful: zero
                  if not successful, a negative error code:
-                   PCRE2_ERROR_NOMEMORY: buffer too small
-                   PCRE2_ERROR_NOSUBSTRING: no such captured substring
+                   (1) an error from nametable_scan()
+                   (2) an error from copy_bynumber()  
+                   (3) PCRE2_ERROR_UNSET: all named groups are unset
 */
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
@@ -83,7 +84,7 @@ for (entry = first; entry <= last; entry += entrysize)
   if (n < match_data->oveccount && match_data->ovector[n*2] != PCRE2_UNSET)
     return pcre2_substring_copy_bynumber(match_data, n, buffer, sizeptr);
   }
-return PCRE2_ERROR_NOSUBSTRING;
+return PCRE2_ERROR_UNSET;
 }
 
 
@@ -104,25 +105,24 @@ Arguments:
 Returns:         if successful: 0
                  if not successful, a negative error code:
                    PCRE2_ERROR_NOMEMORY: buffer too small
-                   PCRE2_ERROR_NOSUBSTRING: no such captured substring
+                   PCRE2_ERROR_NOSUBSTRING: no such substring
+                   PCRE2_ERROR_UNAVAILABLE: ovector too small
+                   PCRE2_ERROR_UNSET: substring is not set  
 */
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_substring_copy_bynumber(pcre2_match_data *match_data,
   uint32_t stringnumber, PCRE2_UCHAR *buffer, PCRE2_SIZE *sizeptr)
 {
-PCRE2_SIZE left, right;
-PCRE2_SIZE p = 0;
-PCRE2_SPTR subject = match_data->subject;
-if (stringnumber >= match_data->oveccount ||
-    stringnumber > match_data->code->top_bracket ||
-    (left = match_data->ovector[stringnumber*2]) == PCRE2_UNSET)
-  return PCRE2_ERROR_NOSUBSTRING;
-right = match_data->ovector[stringnumber*2+1];
-if (right - left + 1 > *sizeptr) return PCRE2_ERROR_NOMEMORY;
-while (left < right) buffer[p++] = subject[left++];
-buffer[p] = 0;
-*sizeptr = p;
+int rc;
+PCRE2_SIZE size;
+rc = pcre2_substring_length_bynumber(match_data, stringnumber, &size);
+if (rc < 0) return rc;
+if (size + 1 > *sizeptr) return PCRE2_ERROR_NOMEMORY;
+memcpy(buffer, match_data->subject + match_data->ovector[stringnumber*2], 
+  CU2BYTES(size));
+buffer[size] = 0;
+*sizeptr = size;
 return 0;
 }
 
@@ -144,8 +144,9 @@ Arguments:
 
 Returns:         if successful: zero
                  if not successful, a negative value:
-                   PCRE2_ERROR_NOMEMORY: couldn't get memory
-                   PCRE2_ERROR_NOSUBSTRING: no such captured substring
+                   (1) an error from nametable_scan()
+                   (2) an error from get_bynumber()  
+                   (3) PCRE2_ERROR_UNSET: all named groups are unset
 */
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
@@ -164,7 +165,7 @@ for (entry = first; entry <= last; entry += entrysize)
   if (n < match_data->oveccount && match_data->ovector[n*2] != PCRE2_UNSET)
     return pcre2_substring_get_bynumber(match_data, n, stringptr, sizeptr);
   }
-return PCRE2_ERROR_NOSUBSTRING;
+return PCRE2_ERROR_UNSET;
 }
 
 
@@ -182,37 +183,32 @@ Arguments:
   stringptr      where to put a pointer to the new memory
   sizeptr        where to put the size of the substring
 
-Returns:         if successful: zero
-                 if not successful a negative error code:
+Returns:         if successful: 0
+                 if not successful, a negative error code:
                    PCRE2_ERROR_NOMEMORY: failed to get memory
-                   PCRE2_ERROR_NOSUBSTRING: substring not present
+                   PCRE2_ERROR_NOSUBSTRING: no such substring
+                   PCRE2_ERROR_UNAVAILABLE: ovector too small
+                   PCRE2_ERROR_UNSET: substring is not set  
 */
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_substring_get_bynumber(pcre2_match_data *match_data,
   uint32_t stringnumber, PCRE2_UCHAR **stringptr, PCRE2_SIZE *sizeptr)
 {
-PCRE2_SIZE left, right;
-PCRE2_SIZE p = 0;
-void *block;
+int rc;
+PCRE2_SIZE size;
 PCRE2_UCHAR *yield;
-
-PCRE2_SPTR subject = match_data->subject;
-if (stringnumber >= match_data->oveccount ||
-    stringnumber > match_data->code->top_bracket ||
-    (left = match_data->ovector[stringnumber*2]) == PCRE2_UNSET)
-  return PCRE2_ERROR_NOSUBSTRING;
-right = match_data->ovector[stringnumber*2+1];
-
-block = PRIV(memctl_malloc)(sizeof(pcre2_memctl) +
-  (right-left+1)*PCRE2_CODE_UNIT_WIDTH, (pcre2_memctl *)match_data);
-if (block == NULL) return PCRE2_ERROR_NOMEMORY;
-
-yield = (PCRE2_UCHAR *)((char *)block + sizeof(pcre2_memctl));
-while (left < right) yield[p++] = subject[left++];
-yield[p] = 0;
+rc = pcre2_substring_length_bynumber(match_data, stringnumber, &size);
+if (rc < 0) return rc;
+yield = PRIV(memctl_malloc)(sizeof(pcre2_memctl) +
+  (size + 1)*PCRE2_CODE_UNIT_WIDTH, (pcre2_memctl *)match_data);
+if (yield == NULL) return PCRE2_ERROR_NOMEMORY;
+yield = (PCRE2_UCHAR *)(((char *)yield) + sizeof(pcre2_memctl));
+memcpy(yield, match_data->subject + match_data->ovector[stringnumber*2], 
+  CU2BYTES(size));
+yield[size] = 0;
 *stringptr = yield;
-*sizeptr = p;
+*sizeptr = size;
 return 0;
 }
 
@@ -260,14 +256,14 @@ PCRE2_SPTR last;
 PCRE2_SPTR entry;
 int entrysize = pcre2_substring_nametable_scan(match_data->code, stringname,
   &first, &last);
-if (entrysize <= 0) return entrysize;
+if (entrysize < 0) return entrysize;
 for (entry = first; entry <= last; entry += entrysize)
   {
   uint32_t n = GET2(entry, 0);
   if (n < match_data->oveccount && match_data->ovector[n*2] != PCRE2_UNSET)
     return pcre2_substring_length_bynumber(match_data, n, sizeptr);
   }
-return PCRE2_ERROR_NOSUBSTRING;
+return PCRE2_ERROR_UNSET;
 }
 
 
@@ -276,27 +272,37 @@ return PCRE2_ERROR_NOSUBSTRING;
 *        Get length of a numbered substring      *
 *************************************************/
 
-/* This function returns the length of a captured substring.
+/* This function returns the length of a captured substring. If the start is 
+beyond the end (which can happen when \K is used in an assertion), it sets the 
+length to zero.
 
 Arguments:
   match_data      pointer to match data
   stringnumber    the number of the required substring
-  sizeptr         where to put the length
+  sizeptr         where to put the length, if not NULL
 
-Returns:          0 if successful, else a negative error number
+Returns:         if successful: 0
+                 if not successful, a negative error code:
+                   PCRE2_ERROR_NOSUBSTRING: no such substring
+                   PCRE2_ERROR_UNAVAILABLE: ovector is too small
+                   PCRE2_ERROR_UNSET: substring is not set  
 */
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_substring_length_bynumber(pcre2_match_data *match_data,
   uint32_t stringnumber, PCRE2_SIZE *sizeptr)
 {
-if (stringnumber >= match_data->oveccount ||
-    stringnumber > match_data->code->top_bracket ||
-    match_data->ovector[stringnumber*2] == PCRE2_UNSET)
+PCRE2_SIZE left, right;
+if (stringnumber > match_data->code->top_bracket) 
   return PCRE2_ERROR_NOSUBSTRING;
-*sizeptr = match_data->ovector[stringnumber*2 + 1] -
-           match_data->ovector[stringnumber*2];
-return 0;
+if (stringnumber >= match_data->oveccount) 
+  return PCRE2_ERROR_UNAVAILABLE;
+if (match_data->ovector[stringnumber*2] == PCRE2_UNSET)
+  return PCRE2_ERROR_UNSET;
+left = match_data->ovector[stringnumber*2];
+right = match_data->ovector[stringnumber*2+1];
+if (sizeptr != NULL) *sizeptr = (left > right)? 0 : right - left;
+return 0; 
 }
 
 
@@ -334,7 +340,8 @@ PCRE2_UCHAR **listp;
 PCRE2_UCHAR *sp;
 PCRE2_SIZE *ovector;
 
-if ((count = match_data->rc) < 0) return count;
+if ((count = match_data->rc) < 0) return count;   /* Match failed */
+if (count == 0) count = match_data->oveccount;    /* Ovector too small */
 
 count2 = 2*count;
 ovector = match_data->ovector;
@@ -342,7 +349,11 @@ size = sizeof(pcre2_memctl) + sizeof(PCRE2_UCHAR *);      /* For final NULL */
 if (lengthsptr != NULL) size += sizeof(PCRE2_SIZE) * count;  /* For lengths */
 
 for (i = 0; i < count2; i += 2)
-   size += sizeof(PCRE2_UCHAR *) + CU2BYTES(ovector[i+1] - ovector[i] + 1);
+  {
+  size += sizeof(PCRE2_UCHAR *) + CU2BYTES(1);
+  if (ovector[i+1] > ovector[i]) size += CU2BYTES(ovector[i+1] - ovector[i]);
+  } 
+  
 memp = PRIV(memctl_malloc)(size, (pcre2_memctl *)match_data);
 if (memp == NULL) return PCRE2_ERROR_NOMEMORY;
 
@@ -362,7 +373,7 @@ else
 
 for (i = 0; i < count2; i += 2)
   {
-  size = ovector[i+1] - ovector[i];
+  size = (ovector[i+1] > ovector[i])? (ovector[i+1] - ovector[i]) : 0;
   memcpy(sp, match_data->subject + ovector[i], CU2BYTES(size));
   *listp++ = sp;
   if (lensp != NULL) *lensp++ = size;
@@ -400,8 +411,8 @@ memctl->free(memctl, memctl->memory_data);
 
 /* This function scans the nametable for a given name, using binary chop. It
 returns either two pointers to the entries in the table, or, if no pointers are
-given, the number of a group with the given name. If duplicate names are
-permitted, this may not be unique.
+given, the number of a unique group with the given name. If duplicate names are
+permitted, and the name is not unique, an error is generated.
 
 Arguments:
   code        the compiled regex
@@ -409,10 +420,12 @@ Arguments:
   firstptr    where to put the pointer to the first entry
   lastptr     where to put the pointer to the last entry
 
-Returns:      if firstptr and lastptr are NULL, a group number for a
-                unique substring, or PCRE2_ERROR_NOUNIQUESUBSTRING
-              otherwise, the length of each entry, or a negative number
-                (PCRE2_ERROR_NOSUBSTRING) if not found
+Returns:      PCRE2_ERROR_NOSUBSTRING if the name is not found
+              otherwise, if firstptr and lastptr are NULL:
+                a group number for a unique substring
+                else PCRE2_ERROR_NOUNIQUESUBSTRING
+              otherwise:
+                the length of each entry, having set firstptr and lastptr
 */
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
@@ -446,8 +459,8 @@ while (top > bot)
       if (PRIV(strcmp)(stringname, (last + entrysize + IMM2_SIZE)) != 0) break;
       last += entrysize;
       }
-    if (firstptr == NULL)
-      return (first == last)? (int)GET2(entry, 0) : PCRE2_ERROR_NOUNIQUESUBSTRING;
+    if (firstptr == NULL) return (first == last)? 
+      (int)GET2(entry, 0) : PCRE2_ERROR_NOUNIQUESUBSTRING;
     *firstptr = first;
     *lastptr = last;
     return entrysize;
