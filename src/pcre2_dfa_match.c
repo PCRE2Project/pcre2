@@ -3275,6 +3275,12 @@ if ((re->flags & PCRE2_LASTSET) != 0)
     }
   }
 
+/* Fill in fields that are always returned in the match data. */
+
+match_data->code = re;
+match_data->subject = subject;
+match_data->mark = NULL;
+match_data->matchedby = PCRE2_MATCHEDBY_DFA_INTERPRETER;
 
 /* Call the main matching function, looping for a non-anchored regex after a
 failed match. If not restarting, perform certain optimizations at the start of

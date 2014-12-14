@@ -15,7 +15,7 @@ JIT compilation was not successful
 
 /(?(R)a*(?1)|((?R))b)/
     aaaabcde
-Failed: error -45: JIT stack limit reached
+Failed: error -46: JIT stack limit reached
 
 /abcd/I
 Capturing subpattern count = 0
@@ -64,13 +64,13 @@ No match
     abcd
  0: abcd (JIT)
     ab\=ps
-Failed: error -44: bad JIT option
+Failed: error -45: bad JIT option
     ab\=ph
-Failed: error -44: bad JIT option
+Failed: error -45: bad JIT option
     xyz
 No match (JIT)
     xyz\=ps
-Failed: error -44: bad JIT option
+Failed: error -45: bad JIT option
 
 /abcd/jit=2
     abcd
@@ -84,13 +84,13 @@ No match
 
 /abcd/jit=2,jitfast
     abcd
-Failed: error -44: bad JIT option
+Failed: error -45: bad JIT option
     ab\=ps
 Partial match: ab (JIT)
     ab\=ph
-Failed: error -44: bad JIT option
+Failed: error -45: bad JIT option
     xyz
-Failed: error -44: bad JIT option
+Failed: error -45: bad JIT option
 
 /abcd/jit=3
     abcd
@@ -256,7 +256,7 @@ Minimum match limit = 6
     aaaaaaaaaaaaaz
 No match (JIT)
     aaaaaaaaaaaaaz\=match_limit=3000
-Failed: error -46: match limit exceeded
+Failed: error -47: match limit exceeded
 
 /(*LIMIT_MATCH=3000)(a+)*zz/I
 Capturing subpattern count = 1
@@ -266,9 +266,9 @@ Last code unit = 'z'
 Subject length lower bound = 2
 JIT compilation was successful
     aaaaaaaaaaaaaz
-Failed: error -46: match limit exceeded
+Failed: error -47: match limit exceeded
     aaaaaaaaaaaaaz\=match_limit=60000
-Failed: error -46: match limit exceeded
+Failed: error -47: match limit exceeded
 
 /(*LIMIT_MATCH=60000)(*LIMIT_MATCH=3000)(a+)*zz/I
 Capturing subpattern count = 1
@@ -278,7 +278,7 @@ Last code unit = 'z'
 Subject length lower bound = 2
 JIT compilation was successful
     aaaaaaaaaaaaaz
-Failed: error -46: match limit exceeded
+Failed: error -47: match limit exceeded
 
 /(*LIMIT_MATCH=60000)(a+)*zz/I
 Capturing subpattern count = 1
@@ -290,21 +290,21 @@ JIT compilation was successful
     aaaaaaaaaaaaaz
 No match (JIT)
     aaaaaaaaaaaaaz\=match_limit=3000
-Failed: error -46: match limit exceeded
+Failed: error -47: match limit exceeded
 
 # These three have infinitely nested recursions. 
     
 /((?2))((?1))/
     abc
-Failed: error -45: JIT stack limit reached
+Failed: error -46: JIT stack limit reached
 
 /((?(R2)a+|(?1)b))/
     aaaabcde
-Failed: error -45: JIT stack limit reached
+Failed: error -46: JIT stack limit reached
 
 /(?(R)a*(?1)|((?R))b)/
     aaaabcde
-Failed: error -45: JIT stack limit reached
+Failed: error -46: JIT stack limit reached
     
 # Invalid options disable JIT when called via pcre2_match(), causing the
 # match to happen via the interpreter, but for fast JIT invalid options are

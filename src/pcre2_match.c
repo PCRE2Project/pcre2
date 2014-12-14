@@ -6995,6 +6995,7 @@ while (mb->ovecsave_chain != NULL)
 match_data->code = re;
 match_data->subject = subject;
 match_data->mark = mb->mark;
+match_data->matchedby = PCRE2_MATCHEDBY_INTERPRETER;
 
 /* Handle a fully successful match. */
 
@@ -7026,14 +7027,15 @@ if (rc == MATCH_MATCH || rc == MATCH_ACCEPT)
   match_data->rc = ((mb->capture_last & OVFLBIT) != 0)?
     0 : mb->end_offset_top/2;
 
-  /* If there is space in the offset vector, set any unused pairs at the end to
-  PCRE2_UNSET for backwards compatibility. It is documented that this happens.
-  In earlier versions, the whole set of potential capturing offsets was
-  initialized each time round the loop, but this is handled differently now.
-  "Gaps" are set to PCRE2_UNSET dynamically instead (this fixes a bug). Thus,
-  it is only those at the end that need setting here. We can't just set them
-  all at the start of the whole thing because they may get set in one branch
-  that is not the final matching branch. */
+  /* If there is space in the offset vector, set any pairs that follow the
+  highest-numbered captured string but are less than the number of capturing
+  groups in the pattern (and are within the ovector) to PCRE2_UNSET. It is
+  documented that this happens. In earlier versions, the whole set of potential
+  capturing offsets was initialized each time round the loop, but this is
+  handled differently now. "Gaps" are set to PCRE2_UNSET dynamically instead
+  (this fixed a bug). Thus, it is only those at the end that need setting here.
+  We can't just mark them all unset at the start of the whole thing because
+  they may get set in one branch that is not the final matching branch. */
 
   if (mb->end_offset_top/2 <= re->top_bracket)
     {

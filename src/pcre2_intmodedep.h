@@ -616,12 +616,13 @@ typedef struct pcre2_real_match_data {
   pcre2_memctl     memctl;
   const pcre2_real_code *code;    /* The pattern used for the match */
   PCRE2_SPTR       subject;       /* The subject that was matched */
-  int              rc;            /* The return code from the match */
+  PCRE2_SPTR       mark;          /* Pointer to last mark */
   PCRE2_SIZE       leftchar;      /* Offset to leftmost code unit */
   PCRE2_SIZE       rightchar;     /* Offset to rightmost code unit */
   PCRE2_SIZE       startchar;     /* Offset to starting code unit */
-  PCRE2_SPTR       mark;          /* Pointer to last mark */
+  uint16_t         matchedby;     /* Type of match (normal, JIT, DFA) */ 
   uint16_t         oveccount;     /* Number of pairs */
+  int              rc;            /* The return code from the match */
   PCRE2_SIZE       ovector[1];    /* The first field */
 } pcre2_real_match_data;
 

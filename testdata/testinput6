@@ -4797,4 +4797,15 @@
     ab
     cdab 
 
+/(a)(b)|(c)/
+    XcX\=ovector=2,get=1,get=2,get=3,get=4,getall
+
+/(?<A>aa)/
+    aa\=get=A
+    aa\=copy=A 
+
+/a+/no_auto_possess
+    a\=ovector=2,get=1,get=2,getall
+    aaa\=ovector=2,get=1,get=2,getall
+
 # End of testinput6

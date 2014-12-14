@@ -6133,7 +6133,7 @@ No match
 
 /^(?(2)a|(1)(2))+$/
     123a
-Failed: error -40: backreference condition or recursion test not supported for DFA matching
+Failed: error -40: backreference condition or recursion test is not supported for DFA matching
 
 /(?<=a|bbbb)c/
     ac
@@ -7087,7 +7087,7 @@ Partial match: dogs
 
 /abc\K123/
     xyzabc123pqr
-Failed: error -41: item unsupported for DFA matching
+Failed: error -42: pattern contains an item that is not supported for DFA matching
     
 /(?<=abc)123/
     xyzabc123pqr 
@@ -7205,29 +7205,29 @@ No match
 
 /^(?!a(*SKIP)b)/
     ac
-Failed: error -41: item unsupported for DFA matching
+Failed: error -42: pattern contains an item that is not supported for DFA matching
     
 /^(?=a(*SKIP)b|ac)/
     ** Failers
 No match
     ac
-Failed: error -41: item unsupported for DFA matching
+Failed: error -42: pattern contains an item that is not supported for DFA matching
     
 /^(?=a(*THEN)b|ac)/
     ac
-Failed: error -41: item unsupported for DFA matching
+Failed: error -42: pattern contains an item that is not supported for DFA matching
     
 /^(?=a(*PRUNE)b)/
     ab  
-Failed: error -41: item unsupported for DFA matching
+Failed: error -42: pattern contains an item that is not supported for DFA matching
     ** Failers 
 No match
     ac
-Failed: error -41: item unsupported for DFA matching
+Failed: error -42: pattern contains an item that is not supported for DFA matching
 
 /^(?(?!a(*SKIP)b))/
     ac
-Failed: error -41: item unsupported for DFA matching
+Failed: error -42: pattern contains an item that is not supported for DFA matching
 
 /(?<=abc)def/
     abc\=ph
@@ -7424,7 +7424,7 @@ No match
 
 /((?2))((?1))/
     abc
-Failed: error -51: nested recursion at the same subject position
+Failed: error -52: nested recursion at the same subject position
 
 /(?(R)a+|(?R)b)/
     aaaabcde
@@ -7440,11 +7440,11 @@ Failed: error -51: nested recursion at the same subject position
 
 /((?(R2)a+|(?1)b))/
     aaaabcde
-Failed: error -40: backreference condition or recursion test not supported for DFA matching
+Failed: error -40: backreference condition or recursion test is not supported for DFA matching
 
 /(?(R)a*(?1)|((?R))b)/
     aaaabcde
-Failed: error -51: nested recursion at the same subject position
+Failed: error -52: nested recursion at the same subject position
 
 /(a+)/no_auto_possess
     aaaa\=ovector=3
@@ -7733,5 +7733,37 @@ Failed: error -38: invalid data in workspace for DFA restart
     cdab 
  0: 
  0+ dab
+
+/(a)(b)|(c)/
+    XcX\=ovector=2,get=1,get=2,get=3,get=4,getall
+ 0: c
+Get substring 1 failed (-55): requested value is not set
+Get substring 2 failed (-54): requested value is not available
+Get substring 3 failed (-54): requested value is not available
+Get substring 4 failed (-54): requested value is not available
+ 0L c
+
+/(?<A>aa)/
+    aa\=get=A
+ 0: aa
+Get substring 'A' failed (-41): function is not supported for DFA matching
+    aa\=copy=A 
+ 0: aa
+Copy substring 'A' failed (-41): function is not supported for DFA matching
+
+/a+/no_auto_possess
+    a\=ovector=2,get=1,get=2,getall
+ 0: a
+Get substring 1 failed (-55): requested value is not set
+Get substring 2 failed (-54): requested value is not available
+ 0L a
+    aaa\=ovector=2,get=1,get=2,getall
+Matched, but offsets vector is too small to show all matches
+ 0: aaa
+ 1: aa
+ 1G aa (2)
+Get substring 2 failed (-54): requested value is not available
+ 0L aaa
+ 1L aa
 
 # End of testinput6

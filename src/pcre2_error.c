@@ -212,18 +212,19 @@ static const char match_error_texts[] =
   "invalid data in workspace for DFA restart\0"
   "too much recursion for DFA matching\0"
   /* 40 */
-  "backreference condition or recursion test not supported for DFA matching\0"
-  "item unsupported for DFA matching\0"
+  "backreference condition or recursion test is not supported for DFA matching\0"
+  "function is not supported for DFA matching\0"
+  "pattern contains an item that is not supported for DFA matching\0"
   "workspace size exceeded in DFA matching\0"
   "internal error - pattern overwritten?\0"
-  "bad JIT option\0"
   /* 45 */
+  "bad JIT option\0"
   "JIT stack limit reached\0"
   "match limit exceeded\0"
   "no more memory\0"
   "unknown substring\0"
-  "non-unique substring name\0"
   /* 50 */
+  "non-unique substring name\0"
   "NULL argument passed\0"
   "nested recursion at the same subject position\0"
   "recursion limit exceeded\0"

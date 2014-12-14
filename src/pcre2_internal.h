@@ -526,14 +526,15 @@ bytes in a code unit in that mode. */
 
 #define PCRE2_MODE_MASK     (PCRE2_MODE8 | PCRE2_MODE16 | PCRE2_MODE32)
 
+/* Values for the matchedby field in a match data block. */
+
+enum { PCRE2_MATCHEDBY_INTERPRETER,     /* pcre2_match() */
+       PCRE2_MATCHEDBY_DFA_INTERPRETER, /* pcre2_dfa_match() */
+       PCRE2_MATCHEDBY_JIT };           /* pcre2_jit_match() */ 
+
 /* Magic number to provide a small check against being handed junk. */
 
 #define MAGIC_NUMBER  0x50435245UL   /* 'PCRE' */
-
-/* This value is used to detect a loaded regular expression in different
-endianness. */
-
-#define REVERSED_MAGIC_NUMBER  0x45524350UL   /* 'ERCP' */
 
 /* The maximum remaining length of subject we are prepared to search for a
 req_unit match. */

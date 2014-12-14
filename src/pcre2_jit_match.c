@@ -180,6 +180,7 @@ match_data->startchar = arguments.startchar_ptr - subject;
 match_data->leftchar = 0;
 match_data->rightchar = 0;
 match_data->mark = arguments.mark_ptr;
+match_data->matchedby = PCRE2_MATCHEDBY_JIT;
 
 return match_data->rc;
 

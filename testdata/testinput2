@@ -4090,5 +4090,11 @@ a random value. /Ix
 /x(?=ab\K)/
     xab\=get=0 
     xab\=copy=0 
+    xab\=getall
+
+/(?<A>a)|(?<A>b)/dupnames
+    a\=ovector=1,copy=A,get=A,get=2
+    a\=ovector=2,copy=A,get=A,get=2
+    b\=ovector=2,copy=A,get=A,get=2
 
 # End of testinput2 

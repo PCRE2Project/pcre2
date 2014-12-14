@@ -64,27 +64,34 @@ Arguments:
 Returns:         if successful: zero
                  if not successful, a negative error code:
                    (1) an error from nametable_scan()
-                   (2) an error from copy_bynumber()  
-                   (3) PCRE2_ERROR_UNSET: all named groups are unset
+                   (2) an error from copy_bynumber()
+                   (3) PCRE2_ERROR_UNAVAILABLE: no group is in ovector 
+                   (4) PCRE2_ERROR_UNSET: all named groups in ovector are unset
 */
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_substring_copy_byname(pcre2_match_data *match_data, PCRE2_SPTR stringname,
   PCRE2_UCHAR *buffer, PCRE2_SIZE *sizeptr)
 {
-PCRE2_SPTR first;
-PCRE2_SPTR last;
-PCRE2_SPTR entry;
-int entrysize = pcre2_substring_nametable_scan(match_data->code, stringname,
+PCRE2_SPTR first, last, entry;
+int failrc, entrysize;
+if (match_data->matchedby == PCRE2_MATCHEDBY_DFA_INTERPRETER)
+  return PCRE2_ERROR_DFA_UFUNC;
+entrysize = pcre2_substring_nametable_scan(match_data->code, stringname,
   &first, &last);
 if (entrysize < 0) return entrysize;
+failrc = PCRE2_ERROR_UNAVAILABLE;
 for (entry = first; entry <= last; entry += entrysize)
   {
   uint32_t n = GET2(entry, 0);
-  if (n < match_data->oveccount && match_data->ovector[n*2] != PCRE2_UNSET)
-    return pcre2_substring_copy_bynumber(match_data, n, buffer, sizeptr);
+  if (n < match_data->oveccount)
+    {
+    if (match_data->ovector[n*2] != PCRE2_UNSET)
+      return pcre2_substring_copy_bynumber(match_data, n, buffer, sizeptr);
+    failrc = PCRE2_ERROR_UNSET;   
+    }   
   }
-return PCRE2_ERROR_UNSET;
+return failrc;
 }
 
 
@@ -146,26 +153,33 @@ Returns:         if successful: zero
                  if not successful, a negative value:
                    (1) an error from nametable_scan()
                    (2) an error from get_bynumber()  
-                   (3) PCRE2_ERROR_UNSET: all named groups are unset
+                   (3) PCRE2_ERROR_UNAVAILABLE: no group is in ovector 
+                   (4) PCRE2_ERROR_UNSET: all named groups in ovector are unset
 */
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_substring_get_byname(pcre2_match_data *match_data,
   PCRE2_SPTR stringname, PCRE2_UCHAR **stringptr, PCRE2_SIZE *sizeptr)
 {
-PCRE2_SPTR first;
-PCRE2_SPTR last;
-PCRE2_SPTR entry;
-int entrysize = pcre2_substring_nametable_scan(match_data->code, stringname,
+PCRE2_SPTR first, last, entry;
+int failrc, entrysize;
+if (match_data->matchedby == PCRE2_MATCHEDBY_DFA_INTERPRETER)
+  return PCRE2_ERROR_DFA_UFUNC;
+entrysize = pcre2_substring_nametable_scan(match_data->code, stringname,
   &first, &last);
 if (entrysize < 0) return entrysize;
+failrc = PCRE2_ERROR_UNAVAILABLE;
 for (entry = first; entry <= last; entry += entrysize)
   {
   uint32_t n = GET2(entry, 0);
-  if (n < match_data->oveccount && match_data->ovector[n*2] != PCRE2_UNSET)
-    return pcre2_substring_get_bynumber(match_data, n, stringptr, sizeptr);
+  if (n < match_data->oveccount)
+    {
+    if (match_data->ovector[n*2] != PCRE2_UNSET)
+      return pcre2_substring_get_bynumber(match_data, n, stringptr, sizeptr);
+    failrc = PCRE2_ERROR_UNSET;
+    }    
   }
-return PCRE2_ERROR_UNSET;
+return failrc;
 }
 
 
@@ -251,19 +265,25 @@ PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_substring_length_byname(pcre2_match_data *match_data,
   PCRE2_SPTR stringname, PCRE2_SIZE *sizeptr)
 {
-PCRE2_SPTR first;
-PCRE2_SPTR last;
-PCRE2_SPTR entry;
-int entrysize = pcre2_substring_nametable_scan(match_data->code, stringname,
+PCRE2_SPTR first, last, entry;
+int failrc, entrysize;
+if (match_data->matchedby == PCRE2_MATCHEDBY_DFA_INTERPRETER)
+  return PCRE2_ERROR_DFA_UFUNC;
+entrysize = pcre2_substring_nametable_scan(match_data->code, stringname,
   &first, &last);
 if (entrysize < 0) return entrysize;
+failrc = PCRE2_ERROR_UNAVAILABLE;
 for (entry = first; entry <= last; entry += entrysize)
   {
   uint32_t n = GET2(entry, 0);
-  if (n < match_data->oveccount && match_data->ovector[n*2] != PCRE2_UNSET)
-    return pcre2_substring_length_bynumber(match_data, n, sizeptr);
+  if (n < match_data->oveccount)
+    {
+    if (match_data->ovector[n*2] != PCRE2_UNSET)
+      return pcre2_substring_length_bynumber(match_data, n, sizeptr);
+    failrc = PCRE2_ERROR_UNSET;
+    }    
   }
-return PCRE2_ERROR_UNSET;
+return failrc;
 }
 
 
@@ -292,13 +312,23 @@ PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_substring_length_bynumber(pcre2_match_data *match_data,
   uint32_t stringnumber, PCRE2_SIZE *sizeptr)
 {
+int count;
 PCRE2_SIZE left, right;
-if (stringnumber > match_data->code->top_bracket) 
-  return PCRE2_ERROR_NOSUBSTRING;
-if (stringnumber >= match_data->oveccount) 
-  return PCRE2_ERROR_UNAVAILABLE;
-if (match_data->ovector[stringnumber*2] == PCRE2_UNSET)
-  return PCRE2_ERROR_UNSET;
+if ((count = match_data->rc) < 0) return count;   /* Match failed */
+if (match_data->matchedby != PCRE2_MATCHEDBY_DFA_INTERPRETER)
+  {
+  if (stringnumber > match_data->code->top_bracket) 
+    return PCRE2_ERROR_NOSUBSTRING;
+  if (stringnumber >= match_data->oveccount) 
+    return PCRE2_ERROR_UNAVAILABLE;
+  if (match_data->ovector[stringnumber*2] == PCRE2_UNSET)
+    return PCRE2_ERROR_UNSET;
+  }
+else  /* Matched using pcre2_dfa_match() */
+  {
+  if (stringnumber >= match_data->oveccount) return PCRE2_ERROR_UNAVAILABLE;
+  if (count != 0 && stringnumber >= (uint32_t)count) return PCRE2_ERROR_UNSET;
+  } 
 left = match_data->ovector[stringnumber*2];
 right = match_data->ovector[stringnumber*2+1];
 if (sizeptr != NULL) *sizeptr = (left > right)? 0 : right - left;
