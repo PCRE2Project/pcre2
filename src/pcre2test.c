@@ -4141,15 +4141,15 @@ if (callout_capture)
 
   for (i = 0; i < cb->capture_top * 2; i += 2)
     {
-    if (cb->offset_vector[i] == PCRE2_UNSET)
-      fprintf(f, "%2d: <unset>\n", i/2);
+    fprintf(f, "%2d: ", i/2);
+    if (cb->offset_vector[i] == PCRE2_UNSET) 
+      fprintf(f, "<unset>");
     else
       {
-      fprintf(f, "%2d: ", i/2);
       PCHARSV(cb->subject, cb->offset_vector[i],
         cb->offset_vector[i+1] - cb->offset_vector[i], utf, f);
-      fprintf(f, "\n");
       }
+    fprintf(f, "\n");
     }
   }
 
