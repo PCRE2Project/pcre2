@@ -228,7 +228,7 @@ static const char match_error_texts[] =
   "NULL argument passed\0"
   "nested recursion at the same subject position\0"
   "recursion limit exceeded\0"
-  "requested value is not available\0" 
+  "requested value is not available\0"
   "requested value is not set\0"
   ;
 

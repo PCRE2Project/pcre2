@@ -43,8 +43,8 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #define PCRE2_MAJOR          10
 #define PCRE2_MINOR          00
-#define PCRE2_PRERELEASE     -RC1
-#define PCRE2_DATE           2014-11-28
+#define PCRE2_PRERELEASE     -RC2
+#define PCRE2_DATE           2014-12-19
 
 /* When an application links to a PCRE DLL in Windows, the symbols that are
 imported have to be identified as such. When building PCRE2, the appropriate
@@ -80,20 +80,20 @@ uint8_t, UCHAR_MAX, etc are defined. */
 extern "C" {
 #endif
 
-/* The following options can be passed to pcre2_compile(), pcre2_match(), or
-pcre2_dfa_match(). PCRE2_NO_UTF_CHECK affects only the function to which it is
-passed. Put these bits at the most significant end of the options word so
+/* The following option bits can be passed to pcre2_compile(), pcre2_match(),
+or pcre2_dfa_match(). PCRE2_NO_UTF_CHECK affects only the function to which it
+is passed. Put these bits at the most significant end of the options word so
 others can be added next to them */
 
 #define PCRE2_ANCHORED            0x80000000u
 #define PCRE2_NO_UTF_CHECK        0x40000000u
 
-/* Other options that can be passed to pcre2_compile(). They may affect
-compilation, JIT compilation, and/or interpretive execution. The following tags
-indicate which:
+/* The following option bits can be passed only to pcre2_compile(). However,
+they may affect compilation, JIT compilation, and/or interpretive execution.
+The following tags indicate which:
 
-C   alters what is compiled
-J   alters what JIT compiles
+C   alters what is compiled by pcre2_compile()
+J   alters what is compiled by pcre2_jit_compile()
 M   is inspected during pcre2_match() execution
 D   is inspected during pcre2_dfa_match() execution
 */
@@ -212,19 +212,21 @@ context functions. */
 #define PCRE2_ERROR_DFA_BADRESTART    (-38)
 #define PCRE2_ERROR_DFA_RECURSE       (-39)
 #define PCRE2_ERROR_DFA_UCOND         (-40)
-#define PCRE2_ERROR_DFA_UITEM         (-41)
-#define PCRE2_ERROR_DFA_WSSIZE        (-42)
-#define PCRE2_ERROR_INTERNAL          (-43)
-#define PCRE2_ERROR_JIT_BADOPTION     (-44)
-#define PCRE2_ERROR_JIT_STACKLIMIT    (-45)
-#define PCRE2_ERROR_MATCHLIMIT        (-46)
-#define PCRE2_ERROR_NOMEMORY          (-47)
-#define PCRE2_ERROR_NOSUBSTRING       (-48)
-#define PCRE2_ERROR_NOUNIQUESUBSTRING (-49)
-#define PCRE2_ERROR_NULL              (-50)
-#define PCRE2_ERROR_RECURSELOOP       (-51)
-#define PCRE2_ERROR_RECURSIONLIMIT    (-52)
-#define PCRE2_ERROR_UNSET             (-53)
+#define PCRE2_ERROR_DFA_UFUNC         (-41)
+#define PCRE2_ERROR_DFA_UITEM         (-42)
+#define PCRE2_ERROR_DFA_WSSIZE        (-43)
+#define PCRE2_ERROR_INTERNAL          (-44)
+#define PCRE2_ERROR_JIT_BADOPTION     (-45)
+#define PCRE2_ERROR_JIT_STACKLIMIT    (-46)
+#define PCRE2_ERROR_MATCHLIMIT        (-47)
+#define PCRE2_ERROR_NOMEMORY          (-48)
+#define PCRE2_ERROR_NOSUBSTRING       (-49)
+#define PCRE2_ERROR_NOUNIQUESUBSTRING (-50)
+#define PCRE2_ERROR_NULL              (-51)
+#define PCRE2_ERROR_RECURSELOOP       (-52)
+#define PCRE2_ERROR_RECURSIONLIMIT    (-53)
+#define PCRE2_ERROR_UNAVAILABLE       (-54)
+#define PCRE2_ERROR_UNSET             (-55)
 
 /* Request types for pcre2_pattern_info() */
 
@@ -434,16 +436,16 @@ PCRE2_EXP_DECL PCRE2_SIZE  pcre2_get_startchar(pcre2_match_data *);
 PCRE2_EXP_DECL int       pcre2_substring_copy_byname(pcre2_match_data *, \
                            PCRE2_SPTR, PCRE2_UCHAR *, PCRE2_SIZE *); \
 PCRE2_EXP_DECL int       pcre2_substring_copy_bynumber(pcre2_match_data *, \
-                           unsigned int, PCRE2_UCHAR *, PCRE2_SIZE *); \
+                           uint32_t, PCRE2_UCHAR *, PCRE2_SIZE *); \
 PCRE2_EXP_DECL void      pcre2_substring_free(PCRE2_UCHAR *); \
 PCRE2_EXP_DECL int       pcre2_substring_get_byname(pcre2_match_data *, \
                            PCRE2_SPTR, PCRE2_UCHAR **, PCRE2_SIZE *); \
 PCRE2_EXP_DECL int       pcre2_substring_get_bynumber(pcre2_match_data *, \
-                           unsigned int, PCRE2_UCHAR **, PCRE2_SIZE *); \
+                           uint32_t, PCRE2_UCHAR **, PCRE2_SIZE *); \
 PCRE2_EXP_DECL int       pcre2_substring_length_byname(pcre2_match_data *, \
                            PCRE2_SPTR, PCRE2_SIZE *); \
 PCRE2_EXP_DECL int       pcre2_substring_length_bynumber(pcre2_match_data *, \
-                           unsigned int, PCRE2_SIZE *); \
+                           uint32_t, PCRE2_SIZE *); \
 PCRE2_EXP_DECL int       pcre2_substring_nametable_scan(const pcre2_code *, \
                            PCRE2_SPTR, PCRE2_SPTR *, PCRE2_SPTR *); \
 PCRE2_EXP_DECL int       pcre2_substring_number_from_name(\

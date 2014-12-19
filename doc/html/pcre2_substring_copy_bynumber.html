@@ -36,9 +36,15 @@ buffer. The arguments are:
   <i>bufflen</i>       Length of buffer
 </pre>
 The <i>bufflen</i> variable is updated with the length of the extracted string,
-excluding the terminating zero. The yield of the function is zero for success,
-PCRE2_ERROR_NOMEMORY if the buffer was too small, or PCRE2_ERROR_NOSUBSTRING if
-the string number is invalid.
+excluding the terminating zero. The yield of the function is zero for success
+or one of the following error numbers:
+<pre>
+  PCRE2_ERROR_NOSUBSTRING   there are no groups of that number
+  PCRE2_ERROR_UNAVAILBLE    the ovector was too small for that group
+  PCRE2_ERROR_UNSET         the group did not participate in the match
+  PCRE2_ERROR_NOMEMORY      the buffer is too small
+
+</PRE>
 </P>
 <P>
 There is a complete description of the PCRE2 native API in the

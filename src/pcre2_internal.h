@@ -530,7 +530,7 @@ bytes in a code unit in that mode. */
 
 enum { PCRE2_MATCHEDBY_INTERPRETER,     /* pcre2_match() */
        PCRE2_MATCHEDBY_DFA_INTERPRETER, /* pcre2_dfa_match() */
-       PCRE2_MATCHEDBY_JIT };           /* pcre2_jit_match() */ 
+       PCRE2_MATCHEDBY_JIT };           /* pcre2_jit_match() */
 
 /* Magic number to provide a small check against being handed junk. */
 

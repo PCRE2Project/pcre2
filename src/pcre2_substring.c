@@ -65,7 +65,7 @@ Returns:         if successful: zero
                  if not successful, a negative error code:
                    (1) an error from nametable_scan()
                    (2) an error from copy_bynumber()
-                   (3) PCRE2_ERROR_UNAVAILABLE: no group is in ovector 
+                   (3) PCRE2_ERROR_UNAVAILABLE: no group is in ovector
                    (4) PCRE2_ERROR_UNSET: all named groups in ovector are unset
 */
 
@@ -88,8 +88,8 @@ for (entry = first; entry <= last; entry += entrysize)
     {
     if (match_data->ovector[n*2] != PCRE2_UNSET)
       return pcre2_substring_copy_bynumber(match_data, n, buffer, sizeptr);
-    failrc = PCRE2_ERROR_UNSET;   
-    }   
+    failrc = PCRE2_ERROR_UNSET;
+    }
   }
 return failrc;
 }
@@ -114,7 +114,7 @@ Returns:         if successful: 0
                    PCRE2_ERROR_NOMEMORY: buffer too small
                    PCRE2_ERROR_NOSUBSTRING: no such substring
                    PCRE2_ERROR_UNAVAILABLE: ovector too small
-                   PCRE2_ERROR_UNSET: substring is not set  
+                   PCRE2_ERROR_UNSET: substring is not set
 */
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
@@ -126,7 +126,7 @@ PCRE2_SIZE size;
 rc = pcre2_substring_length_bynumber(match_data, stringnumber, &size);
 if (rc < 0) return rc;
 if (size + 1 > *sizeptr) return PCRE2_ERROR_NOMEMORY;
-memcpy(buffer, match_data->subject + match_data->ovector[stringnumber*2], 
+memcpy(buffer, match_data->subject + match_data->ovector[stringnumber*2],
   CU2BYTES(size));
 buffer[size] = 0;
 *sizeptr = size;
@@ -152,8 +152,8 @@ Arguments:
 Returns:         if successful: zero
                  if not successful, a negative value:
                    (1) an error from nametable_scan()
-                   (2) an error from get_bynumber()  
-                   (3) PCRE2_ERROR_UNAVAILABLE: no group is in ovector 
+                   (2) an error from get_bynumber()
+                   (3) PCRE2_ERROR_UNAVAILABLE: no group is in ovector
                    (4) PCRE2_ERROR_UNSET: all named groups in ovector are unset
 */
 
@@ -177,7 +177,7 @@ for (entry = first; entry <= last; entry += entrysize)
     if (match_data->ovector[n*2] != PCRE2_UNSET)
       return pcre2_substring_get_bynumber(match_data, n, stringptr, sizeptr);
     failrc = PCRE2_ERROR_UNSET;
-    }    
+    }
   }
 return failrc;
 }
@@ -202,7 +202,7 @@ Returns:         if successful: 0
                    PCRE2_ERROR_NOMEMORY: failed to get memory
                    PCRE2_ERROR_NOSUBSTRING: no such substring
                    PCRE2_ERROR_UNAVAILABLE: ovector too small
-                   PCRE2_ERROR_UNSET: substring is not set  
+                   PCRE2_ERROR_UNSET: substring is not set
 */
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
@@ -218,7 +218,7 @@ yield = PRIV(memctl_malloc)(sizeof(pcre2_memctl) +
   (size + 1)*PCRE2_CODE_UNIT_WIDTH, (pcre2_memctl *)match_data);
 if (yield == NULL) return PCRE2_ERROR_NOMEMORY;
 yield = (PCRE2_UCHAR *)(((char *)yield) + sizeof(pcre2_memctl));
-memcpy(yield, match_data->subject + match_data->ovector[stringnumber*2], 
+memcpy(yield, match_data->subject + match_data->ovector[stringnumber*2],
   CU2BYTES(size));
 yield[size] = 0;
 *stringptr = yield;
@@ -281,7 +281,7 @@ for (entry = first; entry <= last; entry += entrysize)
     if (match_data->ovector[n*2] != PCRE2_UNSET)
       return pcre2_substring_length_bynumber(match_data, n, sizeptr);
     failrc = PCRE2_ERROR_UNSET;
-    }    
+    }
   }
 return failrc;
 }
@@ -292,8 +292,8 @@ return failrc;
 *        Get length of a numbered substring      *
 *************************************************/
 
-/* This function returns the length of a captured substring. If the start is 
-beyond the end (which can happen when \K is used in an assertion), it sets the 
+/* This function returns the length of a captured substring. If the start is
+beyond the end (which can happen when \K is used in an assertion), it sets the
 length to zero.
 
 Arguments:
@@ -305,7 +305,7 @@ Returns:         if successful: 0
                  if not successful, a negative error code:
                    PCRE2_ERROR_NOSUBSTRING: no such substring
                    PCRE2_ERROR_UNAVAILABLE: ovector is too small
-                   PCRE2_ERROR_UNSET: substring is not set  
+                   PCRE2_ERROR_UNSET: substring is not set
 */
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
@@ -317,9 +317,9 @@ PCRE2_SIZE left, right;
 if ((count = match_data->rc) < 0) return count;   /* Match failed */
 if (match_data->matchedby != PCRE2_MATCHEDBY_DFA_INTERPRETER)
   {
-  if (stringnumber > match_data->code->top_bracket) 
+  if (stringnumber > match_data->code->top_bracket)
     return PCRE2_ERROR_NOSUBSTRING;
-  if (stringnumber >= match_data->oveccount) 
+  if (stringnumber >= match_data->oveccount)
     return PCRE2_ERROR_UNAVAILABLE;
   if (match_data->ovector[stringnumber*2] == PCRE2_UNSET)
     return PCRE2_ERROR_UNSET;
@@ -328,11 +328,11 @@ else  /* Matched using pcre2_dfa_match() */
   {
   if (stringnumber >= match_data->oveccount) return PCRE2_ERROR_UNAVAILABLE;
   if (count != 0 && stringnumber >= (uint32_t)count) return PCRE2_ERROR_UNSET;
-  } 
+  }
 left = match_data->ovector[stringnumber*2];
 right = match_data->ovector[stringnumber*2+1];
 if (sizeptr != NULL) *sizeptr = (left > right)? 0 : right - left;
-return 0; 
+return 0;
 }
 
 
@@ -382,8 +382,8 @@ for (i = 0; i < count2; i += 2)
   {
   size += sizeof(PCRE2_UCHAR *) + CU2BYTES(1);
   if (ovector[i+1] > ovector[i]) size += CU2BYTES(ovector[i+1] - ovector[i]);
-  } 
-  
+  }
+
 memp = PRIV(memctl_malloc)(size, (pcre2_memctl *)match_data);
 if (memp == NULL) return PCRE2_ERROR_NOMEMORY;
 
@@ -489,7 +489,7 @@ while (top > bot)
       if (PRIV(strcmp)(stringname, (last + entrysize + IMM2_SIZE)) != 0) break;
       last += entrysize;
       }
-    if (firstptr == NULL) return (first == last)? 
+    if (firstptr == NULL) return (first == last)?
       (int)GET2(entry, 0) : PCRE2_ERROR_NOUNIQUESUBSTRING;
     *firstptr = first;
     *lastptr = last;

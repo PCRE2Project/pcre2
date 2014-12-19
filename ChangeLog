@@ -1,7 +1,7 @@
 Change Log for PCRE2
 --------------------
 
-Version 10.00 28-November-2014
+Version 10.00 19-December-2014
 ------------------------------
 
 Version 10.00 is the first release of PCRE2, a revised API for the PCRE
@@ -14,7 +14,8 @@ logged. In addition to the API changes, the following changes were made. They
 are either new functionality, or bug fixes and other noticeable changes of
 behaviour that were implemented after the code had been forked.
 
-1. Unicode support is now enabled by default.
+1. Unicode support is now enabled by default, but it can optionally be
+disabled.
 
 2. The test program, now called pcre2test, was re-specified and almost
 completely re-written. Its input is not compatible with input for pcretest.

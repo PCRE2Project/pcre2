@@ -927,7 +927,7 @@ be referenced by the extraction functions. After running a match, you must not
 free a compiled pattern (or a subject string) until after all operations on the
 .\" HTML <a href="#matchdatablock">
 .\" </a>
-match data block 
+match data block
 .\"
 have taken place.
 .P
@@ -2070,9 +2070,9 @@ returned value is 3. If there are no capturing subpatterns, the return value
 from a successful match is 1, indicating that just the first pair of offsets
 has been set.
 .P
-If a pattern uses the \eK escape sequence within a positive assertion, the 
-reported start of the match can be greater than the end of the match. For 
-example, if the pattern (?=ab\eK) is matched against "ab", the start and end 
+If a pattern uses the \eK escape sequence within a positive assertion, the
+reported start of the match can be greater than the end of the match. For
+example, if the pattern (?=ab\eK) is matched against "ab", the start and end
 offset values for the match are 2 and 0.
 .P
 If a capturing subpattern group is matched repeatedly within a single match
@@ -2297,17 +2297,17 @@ extracting captured substrings by name. A substring that contains a binary zero
 is correctly extracted and has a further zero added on the end, but the result
 is not, of course, a C string.
 .P
-If a pattern uses the \eK escape sequence within a positive assertion, the 
-reported start of the match can be greater than the end of the match. For 
-example, if the pattern (?=ab\eK) is matched against "ab", the start and end 
-offset values for the match are 2 and 0. In this situation, calling these 
+If a pattern uses the \eK escape sequence within a positive assertion, the
+reported start of the match can be greater than the end of the match. For
+example, if the pattern (?=ab\eK) is matched against "ab", the start and end
+offset values for the match are 2 and 0. In this situation, calling these
 functions with a zero substring number extracts a zero-length empty string.
 .P
 You can find the length in code units of a captured substring without
 extracting it by calling \fBpcre2_substring_length_bynumber()\fP. The first
 argument is a pointer to the match data block, the second is the group number,
-and the third is a pointer to a variable into which the length is placed. If 
-you just want to know whether or not the substring has been captured, you can 
+and the third is a pointer to a variable into which the length is placed. If
+you just want to know whether or not the substring has been captured, you can
 pass the third argument as NULL.
 .P
 The \fBpcre2_substring_copy_bynumber()\fP function copies a captured substring
@@ -2338,13 +2338,13 @@ attempt to get memory failed for \fBpcre2_substring_get_bynumber()\fP.
 .sp
   PCRE2_ERROR_NOSUBSTRING
 .sp
-There is no substring with that number in the pattern, that is, the number is 
+There is no substring with that number in the pattern, that is, the number is
 greater than the number of capturing parentheses.
 .sp
   PCRE2_ERROR_UNAVAILABLE
 .sp
-The substring number, though not greater than the number of captures in the 
-pattern, is greater than the number of slots in the ovector, so the substring 
+The substring number, though not greater than the number of captures in the
+pattern, is greater than the number of slots in the ovector, so the substring
 could not be captured.
 .sp
   PCRE2_ERROR_UNSET
@@ -2429,10 +2429,10 @@ name instead of a number. If PCRE2_DUPNAMES is set and there are duplicate
 names, these functions scan all the groups with the given name, and return the
 first named string that is set.
 .P
-If there are no groups with the given name, PCRE2_ERROR_NOSUBSTRING is 
-returned. If all groups with the name have numbers that are greater than the 
-number of slots in the ovector, PCRE2_ERROR_UNAVAILABLE is returned. If there 
-is at least one group with a slot in the ovector, but no group is found to be 
+If there are no groups with the given name, PCRE2_ERROR_NOSUBSTRING is
+returned. If all groups with the name have numbers that are greater than the
+number of slots in the ovector, PCRE2_ERROR_UNAVAILABLE is returned. If there
+is at least one group with a slot in the ovector, but no group is found to be
 set, PCRE2_ERROR_UNSET is returned.
 .P
 \fBWarning:\fP If the pattern uses the (?| feature to set up multiple
@@ -2706,7 +2706,7 @@ the number of matched substrings. The offsets of the substrings are returned in
 the ovector, and can be extracted by number in the same way as for
 \fBpcre2_match()\fP, but the numbers bear no relation to any capturing groups
 that may exist in the pattern, because DFA matching does not support group
-capture. 
+capture.
 .P
 Calls to the convenience functions that extract substrings by name
 return the error PCRE2_ERROR_DFA_UFUNC (unsupported function) if used after a
@@ -2720,7 +2720,7 @@ The ovector is not big enough to include a slot for the given substring number.
 .sp
   PCRE2_ERROR_UNSET
 .sp
-There is a slot in the ovector for this substring, but there were insufficient 
+There is a slot in the ovector for this substring, but there were insufficient
 matches to fill it.
 .P
 The matched strings are stored in the ovector in reverse order of length; that

@@ -4142,7 +4142,7 @@ if (callout_capture)
   for (i = 0; i < cb->capture_top * 2; i += 2)
     {
     fprintf(f, "%2d: ", i/2);
-    if (cb->offset_vector[i] == PCRE2_UNSET) 
+    if (cb->offset_vector[i] == PCRE2_UNSET)
       fprintf(f, "<unset>");
     else
       {

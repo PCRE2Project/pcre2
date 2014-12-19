@@ -947,6 +947,14 @@ contains the compiled pattern and related data. The caller must free the memory
 by calling <b>pcre2_code_free()</b> when it is no longer needed.
 </P>
 <P>
+NOTE: When one of the matching functions is called, pointers to the compiled
+pattern and the subject string are set in the match data block so that they can
+be referenced by the extraction functions. After running a match, you must not
+free a compiled pattern (or a subject string) until after all operations on the
+<a href="#matchdatablock">match data block</a>
+have taken place.
+</P>
+<P>
 If the compile context argument <i>ccontext</i> is NULL, memory for the compiled
 pattern is obtained by calling <b>malloc()</b>. Otherwise, it is obtained from
 the same memory function that was used for the compile context.
@@ -1690,7 +1698,7 @@ pattern with the JIT compiler does not alter the value returned by this option.
 <b>void pcre2_match_data_free(pcre2_match_data *<i>match_data</i>);</b>
 </P>
 <P>
-Information about successful and unsuccessful matches is placed in a match
+Information about a successful or unsuccessful match is placed in a match
 data block, which is an opaque structure that is accessed by function calls. In
 particular, the match data block contains a vector of offsets into the subject
 string that define the matched part of the subject and any substrings that were
@@ -1724,14 +1732,23 @@ pattern (custom or default).
 </P>
 <P>
 A match data block can be used many times, with the same or different compiled
-patterns. When it is no longer needed, it should be freed by calling
-<b>pcre2_match_data_free()</b>. You can extract information from a match data
-block after a match operation has finished, using functions that are described
-in the sections on
+patterns. You can extract information from a match data block after a match
+operation has finished, using functions that are described in the sections on
 <a href="#matchedstrings">matched strings</a>
 and
 <a href="#matchotherdata">other match data</a>
 below.
+</P>
+<P>
+When one of the matching functions is called, pointers to the compiled pattern
+and the subject string are set in the match data block so that they can be
+referenced by the extraction functions. After running a match, you must not
+free a compiled pattern or a subject string until after all operations on the
+match data block (for that match) have taken place.
+</P>
+<P>
+When a match data block itself is no longer needed, it should be freed by
+calling <b>pcre2_match_data_free()</b>.
 </P>
 <br><a name="SEC23" href="#TOC1">MATCHING A PATTERN: THE TRADITIONAL FUNCTION</a><br>
 <P>
@@ -2034,8 +2051,14 @@ from a successful match is 1, indicating that just the first pair of offsets
 has been set.
 </P>
 <P>
-If a capturing subpattern is matched repeatedly within a single match
-operation, it is the last portion of the string that it matched that is
+If a pattern uses the \K escape sequence within a positive assertion, the
+reported start of the match can be greater than the end of the match. For
+example, if the pattern (?=ab\K) is matched against "ab", the start and end
+offset values for the match are 2 and 0.
+</P>
+<P>
+If a capturing subpattern group is matched repeatedly within a single match
+operation, it is the last portion of the subject that it matched that is
 returned.
 </P>
 <P>
@@ -2234,25 +2257,34 @@ Captured substrings can be accessed directly by using the ovector as described
 <a href="#matchedstrings">above.</a>
 For convenience, auxiliary functions are provided for extracting captured
 substrings as new, separate, zero-terminated strings. The functions in this
-section identify substrings by number. The next section describes similar
-functions for extracting substrings by name. A substring that contains a binary
-zero is correctly extracted and has a further zero added on the end, but the
-result is not, of course, a C string.
+section identify substrings by number. The number zero refers to the entire
+matched substring, with higher numbers referring to substrings captured by
+parenthesized groups. The next section describes similar functions for
+extracting captured substrings by name. A substring that contains a binary zero
+is correctly extracted and has a further zero added on the end, but the result
+is not, of course, a C string.
+</P>
+<P>
+If a pattern uses the \K escape sequence within a positive assertion, the
+reported start of the match can be greater than the end of the match. For
+example, if the pattern (?=ab\K) is matched against "ab", the start and end
+offset values for the match are 2 and 0. In this situation, calling these
+functions with a zero substring number extracts a zero-length empty string.
 </P>
 <P>
 You can find the length in code units of a captured substring without
 extracting it by calling <b>pcre2_substring_length_bynumber()</b>. The first
 argument is a pointer to the match data block, the second is the group number,
-and the third is a pointer to a variable into which the length is placed.
+and the third is a pointer to a variable into which the length is placed. If
+you just want to know whether or not the substring has been captured, you can
+pass the third argument as NULL.
 </P>
 <P>
-The <b>pcre2_substring_copy_bynumber()</b> function copies one string into a
-supplied buffer, whereas <b>pcre2_substring_get_bynumber()</b> copies it into
-new memory, obtained using the same memory allocation function that was used
-for the match data block. The first two arguments of these functions are a
-pointer to the match data block and a capturing group number. A group number of
-zero extracts the substring that matched the entire pattern, and higher values
-extract the captured substrings.
+The <b>pcre2_substring_copy_bynumber()</b> function copies a captured substring
+into a supplied buffer, whereas <b>pcre2_substring_get_bynumber()</b> copies it
+into new memory, obtained using the same memory allocation function that was
+used for the match data block. The first two arguments of these functions are a
+pointer to the match data block and a capturing group number.
 </P>
 <P>
 The final arguments of <b>pcre2_substring_copy_bynumber()</b> are a pointer to
@@ -2268,8 +2300,9 @@ zero. When the substring is no longer needed, the memory should be freed by
 calling <b>pcre2_substring_free()</b>.
 </P>
 <P>
-The return value from these functions is zero for success, or one of these
-error codes:
+The return value from all these functions is zero for success, or a negative
+error code. If the pattern match failed, the match failure code is returned.
+Other possible error codes are:
 <pre>
   PCRE2_ERROR_NOMEMORY
 </pre>
@@ -2278,10 +2311,20 @@ attempt to get memory failed for <b>pcre2_substring_get_bynumber()</b>.
 <pre>
   PCRE2_ERROR_NOSUBSTRING
 </pre>
-No substring with the given number was captured. This could be because there is
-no capturing group of that number in the pattern, or because the group with
-that number did not participate in the match, or because the ovector was too
-small to capture that group.
+There is no substring with that number in the pattern, that is, the number is
+greater than the number of capturing parentheses.
+<pre>
+  PCRE2_ERROR_UNAVAILABLE
+</pre>
+The substring number, though not greater than the number of captures in the
+pattern, is greater than the number of slots in the ovector, so the substring
+could not be captured.
+<pre>
+  PCRE2_ERROR_UNSET
+</pre>
+The substring did not participate in the match. For example, if the pattern is
+(abc)|(def) and the subject is "def", and the ovector contains at least two
+capturing slots, substring number 1 is unset.
 </P>
 <br><a name="SEC29" href="#TOC1">EXTRACTING A LIST OF ALL CAPTURED SUBSTRINGS</a><br>
 <P>
@@ -2316,7 +2359,7 @@ capturing subpattern number <i>n+1</i> matches some part of the subject, but
 subpattern <i>n</i> has not been used at all, it returns an empty string. This
 can be distinguished from a genuine zero-length substring by inspecting the
 appropriate offset in the ovector, which contain PCRE2_UNSET for unset
-substrings.
+substrings, or by calling <b>pcre2_substring_length_bynumber()</b>.
 <a name="extractbyname"></a></P>
 <br><a name="SEC30" href="#TOC1">EXTRACTING CAPTURED SUBSTRINGS BY NAME</a><br>
 <P>
@@ -2350,14 +2393,22 @@ calling <b>pcre2_substring_number_from_name()</b>. The first argument is the
 compiled pattern, and the second is the name. The yield of the function is the
 subpattern number, PCRE2_ERROR_NOSUBSTRING if there is no subpattern of that
 name, or PCRE2_ERROR_NOUNIQUESUBSTRING if there is more than one subpattern of
-that name.
+that name. Given the number, you can extract the substring directly, or use one
+of the functions described above.
 </P>
 <P>
-Given the number, you can extract the substring directly, or use one of the
-functions described above. For convenience, there are also "byname" functions
-that correspond to the "bynumber" functions, the only difference being that the
-second argument is a name instead of a number. However, if PCRE2_DUPNAMES is
-set and there are duplicate names, the behaviour may not be what you want.
+For convenience, there are also "byname" functions that correspond to the
+"bynumber" functions, the only difference being that the second argument is a
+name instead of a number. If PCRE2_DUPNAMES is set and there are duplicate
+names, these functions scan all the groups with the given name, and return the
+first named string that is set.
+</P>
+<P>
+If there are no groups with the given name, PCRE2_ERROR_NOSUBSTRING is
+returned. If all groups with the name have numbers that are greater than the
+number of slots in the ovector, PCRE2_ERROR_UNAVAILABLE is returned. If there
+is at least one group with a slot in the ovector, but no group is found to be
+set, PCRE2_ERROR_UNSET is returned.
 </P>
 <P>
 <b>Warning:</b> If the pattern uses the (?| feature to set up multiple
@@ -2451,9 +2502,9 @@ documentation.
 <P>
 When duplicates are present, <b>pcre2_substring_copy_byname()</b> and
 <b>pcre2_substring_get_byname()</b> return the first substring corresponding to
-the given name that is set. If none are set, PCRE2_ERROR_NOSUBSTRING is
-returned. The <b>pcre2_substring_number_from_name()</b> function returns
-the error PCRE2_ERROR_NOUNIQUESUBSTRING.
+the given name that is set. Only if none are set is PCRE2_ERROR_UNSET is
+returned. The <b>pcre2_substring_number_from_name()</b> function returns the
+error PCRE2_ERROR_NOUNIQUESUBSTRING when there are duplicate names.
 </P>
 <P>
 If you want to get full details of all captured substrings for a given name,
@@ -2607,17 +2658,38 @@ is matched against the string
 </pre>
 the three matched strings are
 <pre>
-  &#60;something&#62;
-  &#60;something&#62; &#60;something else&#62;
   &#60;something&#62; &#60;something else&#62; &#60;something further&#62;
+  &#60;something&#62; &#60;something else&#62;
+  &#60;something&#62;
 </pre>
 On success, the yield of the function is a number greater than zero, which is
 the number of matched substrings. The offsets of the substrings are returned in
-the ovector, and can be extracted in the same way as for <b>pcre2_match()</b>.
-They are returned in reverse order of length; that is, the longest
-matching string is given first. If there were too many matches to fit into
-the ovector, the yield of the function is zero, and the vector is filled with
-the longest matches.
+the ovector, and can be extracted by number in the same way as for
+<b>pcre2_match()</b>, but the numbers bear no relation to any capturing groups
+that may exist in the pattern, because DFA matching does not support group
+capture.
+</P>
+<P>
+Calls to the convenience functions that extract substrings by name
+return the error PCRE2_ERROR_DFA_UFUNC (unsupported function) if used after a
+DFA match. The convenience functions that extract substrings by number never
+return PCRE2_ERROR_NOSUBSTRING, and the meanings of some other errors are
+slightly different:
+<pre>
+  PCRE2_ERROR_UNAVAILABLE
+</pre>
+The ovector is not big enough to include a slot for the given substring number.
+<pre>
+  PCRE2_ERROR_UNSET
+</pre>
+There is a slot in the ovector for this substring, but there were insufficient
+matches to fill it.
+</P>
+<P>
+The matched strings are stored in the ovector in reverse order of length; that
+is, the longest matching string is first. If there were too many matches to fit
+into the ovector, the yield of the function is zero, and the vector is filled
+with the longest matches.
 </P>
 <P>
 NOTE: PCRE2's "auto-possessification" optimization usually applies to character
@@ -2685,7 +2757,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC37" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 01 December 2014
+Last updated: 14 December 2014
 <br>
 Copyright &copy; 1997-2014 University of Cambridge.
 <br>

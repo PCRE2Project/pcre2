@@ -29,10 +29,10 @@ success or one of the following error numbers:
   PCRE2_ERROR_NOSUBSTRING   there are no groups of that name
   PCRE2_ERROR_UNAVAILBLE    the ovector was too small for that group
   PCRE2_ERROR_UNSET         the group did not participate in the match
-  PCRE2_ERROR_NOMEMORY      the buffer is not big enough   
+  PCRE2_ERROR_NOMEMORY      the buffer is not big enough
 .sp
-If there is more than one group with the given name, the first one that is set 
-is returned. In this situation PCRE2_ERROR_UNSET means that no group with the 
+If there is more than one group with the given name, the first one that is set
+is returned. In this situation PCRE2_ERROR_UNSET means that no group with the
 given name was set.
 .P
 There is a complete description of the PCRE2 native API in the
