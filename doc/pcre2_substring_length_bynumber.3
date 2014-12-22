@@ -1,4 +1,4 @@
-.TH PCRE2_SUBSTRING_LENGTH_BYNUMBER 3 "01 December 2014" "PCRE2 10.00"
+.TH PCRE2_SUBSTRING_LENGTH_BYNUMBER 3 "22 December 2014" "PCRE2 10.00"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH SYNOPSIS
@@ -19,9 +19,11 @@ The arguments are:
 .sp
   \fImatch_data\fP   The match data block for the match
   \fInumber\fP       The substring number
-  \fIlength\fP       Where to return the length
+  \fIlength\fP       Where to return the length, or NULL
 .sp
-The yield is zero on success, or an error code if the substring is not found.
+The third argument may be NULL if all you want to know is whether or not a
+substring is set. The yield is zero on success, or a negative error code
+otherwise. After a partial match, only substring 0 is available.
 .P
 There is a complete description of the PCRE2 native API in the
 .\" HREF

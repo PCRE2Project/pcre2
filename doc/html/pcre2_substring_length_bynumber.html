@@ -31,9 +31,11 @@ The arguments are:
 <pre>
   <i>match_data</i>   The match data block for the match
   <i>number</i>       The substring number
-  <i>length</i>       Where to return the length
+  <i>length</i>       Where to return the length, or NULL
 </pre>
-The yield is zero on success, or an error code if the substring is not found.
+The third argument may be NULL if all you want to know is whether or not a
+substring is set. The yield is zero on success, or a negative error code
+otherwise. After a partial match, only substring 0 is available.
 </P>
 <P>
 There is a complete description of the PCRE2 native API in the

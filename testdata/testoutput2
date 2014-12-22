@@ -13762,4 +13762,11 @@ Copy substring 'A' failed (-55): requested value is not set
 Get substring 2 failed (-54): requested value is not available
 Get substring 'A' failed (-55): requested value is not set
 
+/a(b)c(d)/
+    abc\=ph,copy=0,copy=1,getall
+Partial match: abc
+ 0C abc (3)
+Copy substring 1 failed (-2): partial match
+get substring list failed (-2): partial match
+
 # End of testinput2 

@@ -4234,6 +4234,232 @@ return (cb->callout_number != dat_datctl.cfail[0])? 0 :
 
 
 /*************************************************
+*       Handle *MARK and copy/get tests          *
+*************************************************/
+
+/* This function is called after complete and partial matches. It runs the
+tests for substring extraction.
+
+Arguments:
+  utf       TRUE for utf
+  capcount  return from pcre2_match()
+
+Returns:    nothing
+*/
+
+static void
+copy_and_get(BOOL utf, int capcount)
+{
+int i;
+uint8_t *nptr;
+
+/* Test copy strings by number */
+
+for (i = 0; i < MAXCPYGET && dat_datctl.copy_numbers[i] >= 0; i++)
+  {
+  int rc;
+  PCRE2_SIZE length, length2;
+  uint32_t copybuffer[256];
+  uint32_t n = (uint32_t)(dat_datctl.copy_numbers[i]);
+  length = sizeof(copybuffer)/code_unit_size;
+  PCRE2_SUBSTRING_COPY_BYNUMBER(rc, match_data, n, copybuffer, &length);
+  if (rc < 0)
+    {
+    fprintf(outfile, "Copy substring %d failed (%d): ", n, rc);
+    PCRE2_GET_ERROR_MESSAGE(rc, rc, pbuffer);
+    PCHARSV(CASTVAR(void *, pbuffer), 0, rc, FALSE, outfile);
+    fprintf(outfile, "\n");
+    }
+  else
+    {
+    PCRE2_SUBSTRING_LENGTH_BYNUMBER(rc, match_data, n, &length2);
+    if (rc < 0)
+      {
+      fprintf(outfile, "Get substring %d length failed (%d): ", n, rc);
+      PCRE2_GET_ERROR_MESSAGE(rc, rc, pbuffer);
+      PCHARSV(CASTVAR(void *, pbuffer), 0, rc, FALSE, outfile);
+      fprintf(outfile, "\n");
+      }
+    else if (length2 != length)
+      {
+      fprintf(outfile, "Mismatched substring lengths: %ld %ld\n",
+        length, length2);
+      }
+    fprintf(outfile, "%2dC ", n);
+    PCHARSV(copybuffer, 0, length, utf, outfile);
+    fprintf(outfile, " (%lu)\n", (unsigned long)length);
+    }
+  }
+
+/* Test copy strings by name */
+
+nptr = dat_datctl.copy_names;
+for (;;)
+  {
+  int rc;
+  int groupnumber;
+  PCRE2_SIZE length, length2;
+  uint32_t copybuffer[256];
+  int namelen = strlen((const char *)nptr);
+#if defined SUPPORT_PCRE2_16 || defined SUPPORT_PCRE2_32
+  PCRE2_SIZE cnl = namelen;
+#endif
+  if (namelen == 0) break;
+
+#ifdef SUPPORT_PCRE2_8
+  if (test_mode == PCRE8_MODE) strcpy((char *)pbuffer8, (char *)nptr);
+#endif
+#ifdef SUPPORT_PCRE2_16
+  if (test_mode == PCRE16_MODE)(void)to16(nptr, utf, &cnl);
+#endif
+#ifdef SUPPORT_PCRE2_32
+  if (test_mode == PCRE32_MODE)(void)to32(nptr, utf, &cnl);
+#endif
+
+  PCRE2_SUBSTRING_NUMBER_FROM_NAME(groupnumber, compiled_code, pbuffer);
+  if (groupnumber < 0 && groupnumber != PCRE2_ERROR_NOUNIQUESUBSTRING)
+    fprintf(outfile, "Number not found for group '%s'\n", nptr);
+
+  length = sizeof(copybuffer)/code_unit_size;
+  PCRE2_SUBSTRING_COPY_BYNAME(rc, match_data, pbuffer, copybuffer, &length);
+  if (rc < 0)
+    {
+    fprintf(outfile, "Copy substring '%s' failed (%d): ", nptr, rc);
+    PCRE2_GET_ERROR_MESSAGE(rc, rc, pbuffer);
+    PCHARSV(CASTVAR(void *, pbuffer), 0, rc, FALSE, outfile);
+    fprintf(outfile, "\n");
+    }
+  else
+    {
+    PCRE2_SUBSTRING_LENGTH_BYNAME(rc, match_data, pbuffer, &length2);
+    if (rc < 0)
+      {
+      fprintf(outfile, "Get substring '%s' length failed (%d): ", nptr, rc);
+      PCRE2_GET_ERROR_MESSAGE(rc, rc, pbuffer);
+      PCHARSV(CASTVAR(void *, pbuffer), 0, rc, FALSE, outfile);
+      fprintf(outfile, "\n");
+      }
+    else if (length2 != length)
+      {
+      fprintf(outfile, "Mismatched substring lengths: %ld %ld\n",
+        length, length2);
+      }
+    fprintf(outfile, "  C ");
+    PCHARSV(copybuffer, 0, length, utf, outfile);
+    fprintf(outfile, " (%lu) %s", (unsigned long)length, nptr);
+    if (groupnumber >= 0) fprintf(outfile, " (group %d)\n", groupnumber);
+      else fprintf(outfile, " (non-unique)\n");
+    }
+  nptr += namelen + 1;
+  }
+
+/* Test get strings by number */
+
+for (i = 0; i < MAXCPYGET && dat_datctl.get_numbers[i] >= 0; i++)
+  {
+  int rc;
+  PCRE2_SIZE length;
+  void *gotbuffer;
+  uint32_t n = (uint32_t)(dat_datctl.get_numbers[i]);
+  PCRE2_SUBSTRING_GET_BYNUMBER(rc, match_data, n, &gotbuffer, &length);
+  if (rc < 0)
+    {
+    fprintf(outfile, "Get substring %d failed (%d): ", n, rc);
+    PCRE2_GET_ERROR_MESSAGE(rc, rc, pbuffer);
+    PCHARSV(CASTVAR(void *, pbuffer), 0, rc, FALSE, outfile);
+    fprintf(outfile, "\n");
+    }
+  else
+    {
+    fprintf(outfile, "%2dG ", n);
+    PCHARSV(gotbuffer, 0, length, utf, outfile);
+    fprintf(outfile, " (%lu)\n", (unsigned long)length);
+    PCRE2_SUBSTRING_FREE(gotbuffer);
+    }
+  }
+
+/* Test get strings by name */
+
+nptr = dat_datctl.get_names;
+for (;;)
+  {
+  PCRE2_SIZE length;
+  void *gotbuffer;
+  int rc;
+  int groupnumber;
+  int namelen = strlen((const char *)nptr);
+#if defined SUPPORT_PCRE2_16 || defined SUPPORT_PCRE2_32
+  PCRE2_SIZE cnl = namelen;
+#endif
+  if (namelen == 0) break;
+
+#ifdef SUPPORT_PCRE2_8
+  if (test_mode == PCRE8_MODE) strcpy((char *)pbuffer8, (char *)nptr);
+#endif
+#ifdef SUPPORT_PCRE2_16
+  if (test_mode == PCRE16_MODE)(void)to16(nptr, utf, &cnl);
+#endif
+#ifdef SUPPORT_PCRE2_32
+  if (test_mode == PCRE32_MODE)(void)to32(nptr, utf, &cnl);
+#endif
+
+  PCRE2_SUBSTRING_NUMBER_FROM_NAME(groupnumber, compiled_code, pbuffer);
+  if (groupnumber < 0 && groupnumber != PCRE2_ERROR_NOUNIQUESUBSTRING)
+    fprintf(outfile, "Number not found for group '%s'\n", nptr);
+
+  PCRE2_SUBSTRING_GET_BYNAME(rc, match_data, pbuffer, &gotbuffer, &length);
+  if (rc < 0)
+    {
+    fprintf(outfile, "Get substring '%s' failed (%d): ", nptr, rc);
+    PCRE2_GET_ERROR_MESSAGE(rc, rc, pbuffer);
+    PCHARSV(CASTVAR(void *, pbuffer), 0, rc, FALSE, outfile);
+    fprintf(outfile, "\n");
+    }
+  else
+    {
+    fprintf(outfile, "  G ");
+    PCHARSV(gotbuffer, 0, length, utf, outfile);
+    fprintf(outfile, " (%lu) %s", (unsigned long)length, nptr);
+    if (groupnumber >= 0) fprintf(outfile, " (group %d)\n", groupnumber);
+      else fprintf(outfile, " (non-unique)\n");
+    PCRE2_SUBSTRING_FREE(gotbuffer);
+    }
+  nptr += namelen + 1;
+  }
+
+/* Test getting the complete list of captured strings. */
+
+if ((dat_datctl.control & CTL_GETALL) != 0)
+  {
+  int rc;
+  void **stringlist;
+  PCRE2_SIZE *lengths;
+  PCRE2_SUBSTRING_LIST_GET(rc, match_data, &stringlist, &lengths);
+  if (rc < 0)
+    {
+    fprintf(outfile, "get substring list failed (%d): ", rc);
+    PCRE2_GET_ERROR_MESSAGE(rc, rc, pbuffer);
+    PCHARSV(CASTVAR(void *, pbuffer), 0, rc, FALSE, outfile);
+    fprintf(outfile, "\n");
+    }
+  else
+    {
+    for (i = 0; i < capcount; i++)
+      {
+      fprintf(outfile, "%2dL ", i);
+      PCHARSV(stringlist[i], 0, lengths[i], utf, outfile);
+      putc('\n', outfile);
+      }
+    if (stringlist[i] != NULL)
+      fprintf(outfile, "string list not terminated by NULL\n");
+    PCRE2_SUBSTRING_LIST_FREE(stringlist);
+    }
+  }
+}
+
+
+
+/*************************************************
 *               Process a data line              *
 *************************************************/
 
@@ -5074,7 +5300,6 @@ else for (gmatched = 0;; gmatched++)
     {
     int i;
     uint32_t oveccount;
-    uint8_t *nptr;
 
     /* This is a check against a lunatic return value. */
 
@@ -5239,7 +5464,7 @@ else for (gmatched = 0;; gmatched++)
         }
       }
 
-    /* Output mark data if requested. */
+    /* Output (*MARK) data if requested */
 
     if ((dat_datctl.control & CTL_MARK) != 0 &&
          TESTFLD(match_data, mark, !=, NULL))
@@ -5249,208 +5474,10 @@ else for (gmatched = 0;; gmatched++)
       fprintf(outfile, "\n");
       }
 
-    /* Test copy strings by number */
+    /* Process copy/get strings */
 
-    for (i = 0; i < MAXCPYGET && dat_datctl.copy_numbers[i] >= 0; i++)
-      {
-      int rc;
-      PCRE2_SIZE length, length2;
-      uint32_t copybuffer[256];
-      uint32_t n = (uint32_t)(dat_datctl.copy_numbers[i]);
-      length = sizeof(copybuffer)/code_unit_size;
-      PCRE2_SUBSTRING_COPY_BYNUMBER(rc, match_data, n, copybuffer, &length);
-      if (rc < 0)
-        {
-        fprintf(outfile, "Copy substring %d failed (%d): ", n, rc);
-        PCRE2_GET_ERROR_MESSAGE(rc, rc, pbuffer);
-        PCHARSV(CASTVAR(void *, pbuffer), 0, rc, FALSE, outfile);
-        fprintf(outfile, "\n");
-        }
-      else
-        {
-        PCRE2_SUBSTRING_LENGTH_BYNUMBER(rc, match_data, n, &length2);
-        if (rc < 0)
-          {
-          fprintf(outfile, "Get substring %d length failed (%d): ", n, rc);
-          PCRE2_GET_ERROR_MESSAGE(rc, rc, pbuffer);
-          PCHARSV(CASTVAR(void *, pbuffer), 0, rc, FALSE, outfile);
-          fprintf(outfile, "\n");
-          }
-        else if (length2 != length)
-          {
-          fprintf(outfile, "Mismatched substring lengths: %ld %ld\n",
-            length, length2);
-          }
-        fprintf(outfile, "%2dC ", n);
-        PCHARSV(copybuffer, 0, length, utf, outfile);
-        fprintf(outfile, " (%lu)\n", (unsigned long)length);
-        }
-      }
+    copy_and_get(utf, capcount);
 
-    /* Test copy strings by name */
-
-    nptr = dat_datctl.copy_names;
-    for (;;)
-      {
-      int rc;
-      int groupnumber;
-      PCRE2_SIZE length, length2;
-      uint32_t copybuffer[256];
-      int namelen = strlen((const char *)nptr);
-#if defined SUPPORT_PCRE2_16 || defined SUPPORT_PCRE2_32
-      PCRE2_SIZE cnl = namelen;
-#endif
-      if (namelen == 0) break;
-
-#ifdef SUPPORT_PCRE2_8
-      if (test_mode == PCRE8_MODE) strcpy((char *)pbuffer8, (char *)nptr);
-#endif
-#ifdef SUPPORT_PCRE2_16
-      if (test_mode == PCRE16_MODE)(void)to16(nptr, utf, &cnl);
-#endif
-#ifdef SUPPORT_PCRE2_32
-      if (test_mode == PCRE32_MODE)(void)to32(nptr, utf, &cnl);
-#endif
-
-      PCRE2_SUBSTRING_NUMBER_FROM_NAME(groupnumber, compiled_code, pbuffer);
-      if (groupnumber < 0 && groupnumber != PCRE2_ERROR_NOUNIQUESUBSTRING)
-        fprintf(outfile, "Number not found for group '%s'\n", nptr);
-
-      length = sizeof(copybuffer)/code_unit_size;
-      PCRE2_SUBSTRING_COPY_BYNAME(rc, match_data, pbuffer, copybuffer, &length);
-      if (rc < 0)
-        {
-        fprintf(outfile, "Copy substring '%s' failed (%d): ", nptr, rc);
-        PCRE2_GET_ERROR_MESSAGE(rc, rc, pbuffer);
-        PCHARSV(CASTVAR(void *, pbuffer), 0, rc, FALSE, outfile);
-        fprintf(outfile, "\n");
-        }
-      else
-        {
-        PCRE2_SUBSTRING_LENGTH_BYNAME(rc, match_data, pbuffer, &length2);
-        if (rc < 0)
-          {
-          fprintf(outfile, "Get substring '%s' length failed (%d): ", nptr, rc);
-          PCRE2_GET_ERROR_MESSAGE(rc, rc, pbuffer);
-          PCHARSV(CASTVAR(void *, pbuffer), 0, rc, FALSE, outfile);
-          fprintf(outfile, "\n");
-          }
-        else if (length2 != length)
-          {
-          fprintf(outfile, "Mismatched substring lengths: %ld %ld\n",
-            length, length2);
-          }
-        fprintf(outfile, "  C ");
-        PCHARSV(copybuffer, 0, length, utf, outfile);
-        fprintf(outfile, " (%lu) %s", (unsigned long)length, nptr);
-        if (groupnumber >= 0) fprintf(outfile, " (group %d)\n", groupnumber);
-          else fprintf(outfile, " (non-unique)\n");
-        }
-      nptr += namelen + 1;
-      }
-
-    /* Test get strings by number */
-
-    for (i = 0; i < MAXCPYGET && dat_datctl.get_numbers[i] >= 0; i++)
-      {
-      int rc;
-      PCRE2_SIZE length;
-      void *gotbuffer;
-      uint32_t n = (uint32_t)(dat_datctl.get_numbers[i]);
-      PCRE2_SUBSTRING_GET_BYNUMBER(rc, match_data, n, &gotbuffer, &length);
-      if (rc < 0)
-        {
-        fprintf(outfile, "Get substring %d failed (%d): ", n, rc);
-        PCRE2_GET_ERROR_MESSAGE(rc, rc, pbuffer);
-        PCHARSV(CASTVAR(void *, pbuffer), 0, rc, FALSE, outfile);
-        fprintf(outfile, "\n");
-        }
-      else
-        {
-        fprintf(outfile, "%2dG ", n);
-        PCHARSV(gotbuffer, 0, length, utf, outfile);
-        fprintf(outfile, " (%lu)\n", (unsigned long)length);
-        PCRE2_SUBSTRING_FREE(gotbuffer);
-        }
-      }
-
-    /* Test get strings by name */
-
-    nptr = dat_datctl.get_names;
-    for (;;)
-      {
-      PCRE2_SIZE length;
-      void *gotbuffer;
-      int rc;
-      int groupnumber;
-      int namelen = strlen((const char *)nptr);
-#if defined SUPPORT_PCRE2_16 || defined SUPPORT_PCRE2_32
-      PCRE2_SIZE cnl = namelen;
-#endif
-      if (namelen == 0) break;
-
-#ifdef SUPPORT_PCRE2_8
-      if (test_mode == PCRE8_MODE) strcpy((char *)pbuffer8, (char *)nptr);
-#endif
-#ifdef SUPPORT_PCRE2_16
-      if (test_mode == PCRE16_MODE)(void)to16(nptr, utf, &cnl);
-#endif
-#ifdef SUPPORT_PCRE2_32
-      if (test_mode == PCRE32_MODE)(void)to32(nptr, utf, &cnl);
-#endif
-
-      PCRE2_SUBSTRING_NUMBER_FROM_NAME(groupnumber, compiled_code, pbuffer);
-      if (groupnumber < 0 && groupnumber != PCRE2_ERROR_NOUNIQUESUBSTRING)
-        fprintf(outfile, "Number not found for group '%s'\n", nptr);
-
-      PCRE2_SUBSTRING_GET_BYNAME(rc, match_data, pbuffer, &gotbuffer, &length);
-      if (rc < 0)
-        {
-        fprintf(outfile, "Get substring '%s' failed (%d): ", nptr, rc);
-        PCRE2_GET_ERROR_MESSAGE(rc, rc, pbuffer);
-        PCHARSV(CASTVAR(void *, pbuffer), 0, rc, FALSE, outfile);
-        fprintf(outfile, "\n");
-        }
-      else
-        {
-        fprintf(outfile, "  G ");
-        PCHARSV(gotbuffer, 0, length, utf, outfile);
-        fprintf(outfile, " (%lu) %s", (unsigned long)length, nptr);
-        if (groupnumber >= 0) fprintf(outfile, " (group %d)\n", groupnumber);
-          else fprintf(outfile, " (non-unique)\n");
-        PCRE2_SUBSTRING_FREE(gotbuffer);
-        }
-      nptr += namelen + 1;
-      }
-
-    /* Test getting the complete list of captured strings. */
-
-    if ((dat_datctl.control & CTL_GETALL) != 0)
-      {
-      int rc;
-      void **stringlist;
-      PCRE2_SIZE *lengths;
-      PCRE2_SUBSTRING_LIST_GET(rc, match_data, &stringlist, &lengths);
-      if (rc < 0)
-        {
-        fprintf(outfile, "get substring list failed (%d): ", rc);
-        PCRE2_GET_ERROR_MESSAGE(rc, rc, pbuffer);
-        PCHARSV(CASTVAR(void *, pbuffer), 0, rc, FALSE, outfile);
-        fprintf(outfile, "\n");
-        }
-      else
-        {
-        for (i = 0; i < capcount; i++)
-          {
-          fprintf(outfile, "%2dL ", i);
-          PCHARSV(stringlist[i], 0, lengths[i], utf, outfile);
-          putc('\n', outfile);
-          }
-        if (stringlist[i] != NULL)
-          fprintf(outfile, "string list not terminated by NULL\n");
-        PCRE2_SUBSTRING_LIST_FREE(stringlist);
-        }
-      }
     }    /* End of handling a successful match */
 
   /* There was a partial match. The value of ovector[0] is the bumpalong point,
@@ -5488,6 +5515,10 @@ else for (gmatched = 0;; gmatched++)
       for (i = 0; i < backlength; i++) fprintf(outfile, "<");
       fprintf(outfile, "\n");
       }
+
+    /* Process copy/get strings */
+
+    copy_and_get(utf, 1);
 
     break;  /* Out of the /g loop */
     }       /* End of handling partial match */

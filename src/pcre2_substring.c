@@ -312,9 +312,15 @@ PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_substring_length_bynumber(pcre2_match_data *match_data,
   uint32_t stringnumber, PCRE2_SIZE *sizeptr)
 {
-int count;
 PCRE2_SIZE left, right;
-if ((count = match_data->rc) < 0) return count;   /* Match failed */
+int count = match_data->rc;
+if (count == PCRE2_ERROR_PARTIAL)
+  {
+  if (stringnumber > 0) return PCRE2_ERROR_PARTIAL;
+  count = 0;
+  }
+else if (count < 0) return count;            /* Match failed */
+
 if (match_data->matchedby != PCRE2_MATCHEDBY_DFA_INTERPRETER)
   {
   if (stringnumber > match_data->code->top_bracket)
@@ -329,6 +335,7 @@ else  /* Matched using pcre2_dfa_match() */
   if (stringnumber >= match_data->oveccount) return PCRE2_ERROR_UNAVAILABLE;
   if (count != 0 && stringnumber >= (uint32_t)count) return PCRE2_ERROR_UNSET;
   }
+
 left = match_data->ovector[stringnumber*2];
 right = match_data->ovector[stringnumber*2+1];
 if (sizeptr != NULL) *sizeptr = (left > right)? 0 : right - left;

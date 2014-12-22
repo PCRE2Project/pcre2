@@ -1740,6 +1740,12 @@ and
 below.
 </P>
 <P>
+When a call of <b>pcre2_match()</b> fails, valid data is available in the match
+block only when the error is PCRE2_ERROR_NOMATCH, PCRE2_ERROR_PARTIAL, or one
+of the error codes for an invalid UTF string. Exactly what is available depends
+on the error, and is detailed below.
+</P>
+<P>
 When one of the matching functions is called, pointers to the compiled pattern
 and the subject string are set in the match data block so that they can be
 referenced by the extraction functions. After running a match, you must not
@@ -2018,9 +2024,9 @@ function can be used to find out how many capturing subpatterns there are in a
 compiled pattern.
 </P>
 <P>
-The overall matched string and any captured substrings are returned to the
-caller via a vector of PCRE2_SIZE values. This is called the <b>ovector</b>, and
-is contained within the
+A successful match returns the overall matched string and any captured
+substrings to the caller via a vector of PCRE2_SIZE values. This is called the
+<b>ovector</b>, and is contained within the
 <a href="#matchdatablock">match data block.</a>
 You can obtain direct access to the ovector by calling
 <b>pcre2_get_ovector_pointer()</b> to find its address, and
@@ -2041,20 +2047,26 @@ library, 16-bit offsets in the 16-bit library, and 32-bit offsets in the 32-bit
 library.
 </P>
 <P>
-The first pair of offsets (that is, <i>ovector[0]</i> and <i>ovector[1]</i>)
-identifies the portion of the subject string that was matched by the entire
-pattern. The next pair is used for the first capturing subpattern, and so on.
-The value returned by <b>pcre2_match()</b> is one more than the highest numbered
-pair that has been set. For example, if two substrings have been captured, the
-returned value is 3. If there are no capturing subpatterns, the return value
-from a successful match is 1, indicating that just the first pair of offsets
-has been set.
+After a partial match (error return PCRE2_ERROR_PARTIAL), only the first pair
+of offsets (that is, <i>ovector[0]</i> and <i>ovector[1]</i>) are set. They
+identify the part of the subject that was partially matched. See the
+<a href="pcre2partial.html"><b>pcre2partial</b></a>
+documentation for details of partial matching.
+</P>
+<P>
+After a successful match, the first pair of offsets identifies the portion of
+the subject string that was matched by the entire pattern. The next pair is
+used for the first capturing subpattern, and so on. The value returned by
+<b>pcre2_match()</b> is one more than the highest numbered pair that has been
+set. For example, if two substrings have been captured, the returned value is
+3. If there are no capturing subpatterns, the return value from a successful
+match is 1, indicating that just the first pair of offsets has been set.
 </P>
 <P>
 If a pattern uses the \K escape sequence within a positive assertion, the
-reported start of the match can be greater than the end of the match. For
-example, if the pattern (?=ab\K) is matched against "ab", the start and end
-offset values for the match are 2 and 0.
+reported start of a successful match can be greater than the end of the match.
+For example, if the pattern (?=ab\K) is matched against "ab", the start and
+end offset values for the match are 2 and 0.
 </P>
 <P>
 If a capturing subpattern group is matched repeatedly within a single match
@@ -2104,24 +2116,38 @@ had.
 </P>
 <P>
 As well as the offsets in the ovector, other information about a match is
-retained in the match data block and can be retrieved by the above functions.
+retained in the match data block and can be retrieved by the above functions in
+appropriate circumstances. If they are called at other times, the result is
+undefined.
 </P>
 <P>
-When a (*MARK) name is to be passed back, <b>pcre2_get_mark()</b> returns a
-pointer to the zero-terminated name, which is within the compiled pattern.
-Otherwise NULL is returned. A (*MARK) name may be available after a failed
-match or a partial match, as well as after a successful one.
+After a successful match, a partial match (PCRE2_ERROR_PARTIAL), or a failure
+to match (PCRE2_ERROR_NOMATCH), a (*MARK) name may be available, and
+<b>pcre2_get_mark()</b> can be called. It returns a pointer to the
+zero-terminated name, which is within the compiled pattern. Otherwise NULL is
+returned. After a successful match, the (*MARK) name that is returned is the
+last one encountered on the matching path through the pattern. After a "no
+match" or a partial match, the last encountered (*MARK) name is returned. For
+example, consider this pattern:
+<pre>
+  ^(*MARK:A)((*MARK:B)a|b)c
+</pre>
+When it matches "bc", the returned mark is A. The B mark is "seen" in the first
+branch of the group, but it is not on the matching path. On the other hand,
+when this pattern fails to match "bx", the returned mark is B.
 </P>
 <P>
-The code unit offset of the character at which a successful match started is
-returned by <b>pcre2_get_startchar()</b>. For a non-partial match, this can be
+After a successful match, a partial match, or one of the invalid UTF errors
+(for example, PCRE2_ERROR_UTF8_ERR5), <b>pcre2_get_startchar()</b> can be
+called. After a successful or partial match it returns the code unit offset of
+the character at which the match started. For a non-partial match, this can be
 different to the value of <i>ovector[0]</i> if the pattern contains the \K
 escape sequence. After a partial match, however, this value is always the same
 as <i>ovector[0]</i> because \K does not affect the result of a partial match.
 </P>
 <P>
-The <b>startchar</b> field is also used to return the offset of an invalid
-UTF character when UTF checking fails. Details are given in the
+After a UTF check failure, \fBpcre2_get_startchar()\fB can be used to obtain
+the code unit offset of the invalid UTF character. Details are given in the
 <a href="pcre2unicode.html"><b>pcre2unicode</b></a>
 page.
 <a name="errorlist"></a></P>
@@ -2256,19 +2282,23 @@ The internal recursion limit was reached.
 Captured substrings can be accessed directly by using the ovector as described
 <a href="#matchedstrings">above.</a>
 For convenience, auxiliary functions are provided for extracting captured
-substrings as new, separate, zero-terminated strings. The functions in this
-section identify substrings by number. The number zero refers to the entire
-matched substring, with higher numbers referring to substrings captured by
-parenthesized groups. The next section describes similar functions for
-extracting captured substrings by name. A substring that contains a binary zero
-is correctly extracted and has a further zero added on the end, but the result
-is not, of course, a C string.
+substrings as new, separate, zero-terminated strings. A substring that contains
+a binary zero is correctly extracted and has a further zero added on the end,
+but the result is not, of course, a C string.
+</P>
+<P>
+The functions in this section identify substrings by number. The number zero
+refers to the entire matched substring, with higher numbers referring to
+substrings captured by parenthesized groups. After a partial match, only
+substring zero is available. An attempt to extract any other substring gives
+the error PCRE2_ERROR_PARTIAL. The next section describes similar functions for
+extracting captured substrings by name.
 </P>
 <P>
 If a pattern uses the \K escape sequence within a positive assertion, the
-reported start of the match can be greater than the end of the match. For
-example, if the pattern (?=ab\K) is matched against "ab", the start and end
-offset values for the match are 2 and 0. In this situation, calling these
+reported start of a successful match can be greater than the end of the match.
+For example, if the pattern (?=ab\K) is matched against "ab", the start and
+end offset values for the match are 2 and 0. In this situation, calling these
 functions with a zero substring number extracts a zero-length empty string.
 </P>
 <P>
@@ -2302,7 +2332,8 @@ calling <b>pcre2_substring_free()</b>.
 <P>
 The return value from all these functions is zero for success, or a negative
 error code. If the pattern match failed, the match failure code is returned.
-Other possible error codes are:
+If a substring number greater than zero is used after a partial match,
+PCRE2_ERROR_PARTIAL is returned. Other possible error codes are:
 <pre>
   PCRE2_ERROR_NOMEMORY
 </pre>
@@ -2341,6 +2372,10 @@ list that contains their lengths (in code units), excluding a terminating zero
 that is added to each of them. All this is done in a single block of memory
 that is obtained using the same memory allocation function that was used to get
 the match data block.
+</P>
+<P>
+This function must be called only after a successful match. If called after a
+partial match, the error code PCRE2_ERROR_PARTIAL is returned.
 </P>
 <P>
 The address of the memory block is returned via <i>listptr</i>, which is also
@@ -2757,7 +2792,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC37" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 14 December 2014
+Last updated: 22 December 2014
 <br>
 Copyright &copy; 1997-2014 University of Cambridge.
 <br>

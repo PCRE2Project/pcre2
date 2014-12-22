@@ -4097,4 +4097,7 @@ a random value. /Ix
     a\=ovector=2,copy=A,get=A,get=2
     b\=ovector=2,copy=A,get=A,get=2
 
+/a(b)c(d)/
+    abc\=ph,copy=0,copy=1,getall
+
 # End of testinput2 

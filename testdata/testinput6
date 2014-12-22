@@ -4808,4 +4808,7 @@
     a\=ovector=2,get=1,get=2,getall
     aaa\=ovector=2,get=1,get=2,getall
 
+/a(b)c(d)/
+    abc\=ph,copy=0,copy=1,getall
+
 # End of testinput6

@@ -1,4 +1,4 @@
-.TH PCRE2PARTIAL 3 "14 October 2014" "PCRE2 10.00"
+.TH PCRE2PARTIAL 3 "22 December 2014" "PCRE2 10.00"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions
 .SH "PARTIAL MATCHING IN PCRE2"
@@ -64,8 +64,9 @@ matched; without such a restriction there would always be a partial match of an
 empty string at the end of the subject.
 .P
 When a partial match is returned, the first two elements in the ovector point
-to the portion of the subject that was matched. The appearance of \eK in the
-pattern has no effect for a partial match. Consider this pattern:
+to the portion of the subject that was matched, but the values in the rest of
+the ovector are undefined. The appearance of \eK in the pattern has no effect
+for a partial match. Consider this pattern:
 .sp
   /abc\eK123/
 .sp
@@ -428,6 +429,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 14 October 2014
+Last updated: 22 December 2014
 Copyright (c) 1997-2014 University of Cambridge.
 .fi

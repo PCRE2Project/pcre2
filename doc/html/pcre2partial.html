@@ -89,8 +89,9 @@ empty string at the end of the subject.
 </P>
 <P>
 When a partial match is returned, the first two elements in the ovector point
-to the portion of the subject that was matched. The appearance of \K in the
-pattern has no effect for a partial match. Consider this pattern:
+to the portion of the subject that was matched, but the values in the rest of
+the ovector are undefined. The appearance of \K in the pattern has no effect
+for a partial match. Consider this pattern:
 <pre>
   /abc\K123/
 </pre>
@@ -455,7 +456,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC10" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 14 October 2014
+Last updated: 22 December 2014
 <br>
 Copyright &copy; 1997-2014 University of Cambridge.
 <br>
