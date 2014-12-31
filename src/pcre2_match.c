@@ -437,6 +437,19 @@ match(REGISTER PCRE2_SPTR eptr, REGISTER PCRE2_SPTR ecode, PCRE2_SPTR mstart,
 point to a new recursion data block, and all its fields other than ovec_save
 have been set.
 
+This function exists so that the local vector variable ovecsave is no longer
+defined in the match() function, as it was in PCRE1. It is used only when there
+is recursion in the pattern, so it wastes a lot of stack to have it defined for
+every call of match(). We now use this function as an indirect way of calling
+match() only in the case when ovecsave is needed. (David Wheeler used to say
+"All problems in computer science can be solved by another level of
+indirection.")
+
+HOWEVER: when this file is compiled by gcc in an optimizing mode, because this 
+function is called only once, and only from within match(), gcc will "inline"
+it - that is, move it inside match() - and this completely negates its reason
+for existence. Therefore, we mark it as non-inline when gcc is in use.
+
 Arguments:
   eptr        pointer to current character in subject
   callpat     the recursion point in the pattern
@@ -452,6 +465,9 @@ Returns:      a match() return code
 */
 
 static int
+#ifdef __GNUC__
+__attribute__ ((noinline))
+#endif
 op_recurse_ovecsave(REGISTER PCRE2_SPTR eptr, PCRE2_SPTR callpat,
   PCRE2_SPTR mstart, PCRE2_SIZE offset_top, match_block *mb, eptrblock *eptrb,
   uint32_t rdepth)
