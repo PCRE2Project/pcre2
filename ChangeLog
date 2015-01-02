@@ -58,4 +58,6 @@ matched against "abcd".
 (an odd thing to do, but it happened), SIGSEGV or other misbehaviour could
 occur.
 
+10. The PCRE2_NO_DOTSTAR_ANCHOR option has been implemented.
+
 ****

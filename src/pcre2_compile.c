@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-         New API code Copyright (c) 2014 University of Cambridge
+         New API code Copyright (c) 2015 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -557,8 +557,8 @@ static PCRE2_SPTR posix_substitutes[] = {
    PCRE2_CASELESS|PCRE2_DOLLAR_ENDONLY|PCRE2_DOTALL|PCRE2_DUPNAMES| \
    PCRE2_EXTENDED|PCRE2_FIRSTLINE|PCRE2_MATCH_UNSET_BACKREF| \
    PCRE2_MULTILINE|PCRE2_NEVER_UCP|PCRE2_NEVER_UTF|PCRE2_NO_AUTO_CAPTURE| \
-   PCRE2_NO_AUTO_POSSESS|PCRE2_NO_START_OPTIMIZE|PCRE2_NO_UTF_CHECK| \
-   PCRE2_UCP|PCRE2_UNGREEDY|PCRE2_UTF)
+   PCRE2_NO_AUTO_POSSESS|PCRE2_NO_DOTSTAR_ANCHOR|PCRE2_NO_START_OPTIMIZE| \
+   PCRE2_NO_UTF_CHECK|PCRE2_UCP|PCRE2_UNGREEDY|PCRE2_UTF)
 
 /* Compile time error code numbers. They are given names so that they can more
 easily be tracked. When a new number is added, the tables called eint1 and
@@ -597,22 +597,23 @@ typedef struct pso {
 /* NB: STRING_UTFn_RIGHTPAR contains the length as well */
 
 static pso pso_list[] = {
-  { (uint8_t *)STRING_UTFn_RIGHTPAR,                PSO_OPT, PCRE2_UTF },
-  { (uint8_t *)STRING_UTF_RIGHTPAR,              4, PSO_OPT, PCRE2_UTF },
-  { (uint8_t *)STRING_UCP_RIGHTPAR,              4, PSO_OPT, PCRE2_UCP },
-  { (uint8_t *)STRING_NOTEMPTY_RIGHTPAR,         9, PSO_FLG, PCRE2_NOTEMPTY_SET },
-  { (uint8_t *)STRING_NOTEMPTY_ATSTART_RIGHTPAR,17, PSO_FLG, PCRE2_NE_ATST_SET },
-  { (uint8_t *)STRING_NO_AUTO_POSSESS_RIGHTPAR, 16, PSO_OPT, PCRE2_NO_AUTO_POSSESS },
-  { (uint8_t *)STRING_NO_START_OPT_RIGHTPAR,    13, PSO_OPT, PCRE2_NO_START_OPTIMIZE },
-  { (uint8_t *)STRING_LIMIT_MATCH_EQ,           12, PSO_LIMM, 0 },
-  { (uint8_t *)STRING_LIMIT_RECURSION_EQ,       16, PSO_LIMR, 0 },
-  { (uint8_t *)STRING_CR_RIGHTPAR,               3, PSO_NL,  PCRE2_NEWLINE_CR },
-  { (uint8_t *)STRING_LF_RIGHTPAR,               3, PSO_NL,  PCRE2_NEWLINE_LF },
-  { (uint8_t *)STRING_CRLF_RIGHTPAR,             5, PSO_NL,  PCRE2_NEWLINE_CRLF },
-  { (uint8_t *)STRING_ANY_RIGHTPAR,              4, PSO_NL,  PCRE2_NEWLINE_ANY },
-  { (uint8_t *)STRING_ANYCRLF_RIGHTPAR,          8, PSO_NL,  PCRE2_NEWLINE_ANYCRLF },
-  { (uint8_t *)STRING_BSR_ANYCRLF_RIGHTPAR,     12, PSO_BSR, PCRE2_BSR_ANYCRLF },
-  { (uint8_t *)STRING_BSR_UNICODE_RIGHTPAR,     12, PSO_BSR, PCRE2_BSR_UNICODE }
+  { (uint8_t *)STRING_UTFn_RIGHTPAR,                  PSO_OPT, PCRE2_UTF },
+  { (uint8_t *)STRING_UTF_RIGHTPAR,                4, PSO_OPT, PCRE2_UTF },
+  { (uint8_t *)STRING_UCP_RIGHTPAR,                4, PSO_OPT, PCRE2_UCP },
+  { (uint8_t *)STRING_NOTEMPTY_RIGHTPAR,           9, PSO_FLG, PCRE2_NOTEMPTY_SET },
+  { (uint8_t *)STRING_NOTEMPTY_ATSTART_RIGHTPAR,  17, PSO_FLG, PCRE2_NE_ATST_SET },
+  { (uint8_t *)STRING_NO_AUTO_POSSESS_RIGHTPAR,   16, PSO_OPT, PCRE2_NO_AUTO_POSSESS },
+  { (uint8_t *)STRING_NO_DOTSTAR_ANCHOR_RIGHTPAR, 18, PSO_OPT, PCRE2_NO_DOTSTAR_ANCHOR },
+  { (uint8_t *)STRING_NO_START_OPT_RIGHTPAR,      13, PSO_OPT, PCRE2_NO_START_OPTIMIZE },
+  { (uint8_t *)STRING_LIMIT_MATCH_EQ,             12, PSO_LIMM, 0 },
+  { (uint8_t *)STRING_LIMIT_RECURSION_EQ,         16, PSO_LIMR, 0 },
+  { (uint8_t *)STRING_CR_RIGHTPAR,                 3, PSO_NL,  PCRE2_NEWLINE_CR },
+  { (uint8_t *)STRING_LF_RIGHTPAR,                 3, PSO_NL,  PCRE2_NEWLINE_LF },
+  { (uint8_t *)STRING_CRLF_RIGHTPAR,               5, PSO_NL,  PCRE2_NEWLINE_CRLF },
+  { (uint8_t *)STRING_ANY_RIGHTPAR,                4, PSO_NL,  PCRE2_NEWLINE_ANY },
+  { (uint8_t *)STRING_ANYCRLF_RIGHTPAR,            8, PSO_NL,  PCRE2_NEWLINE_ANYCRLF },
+  { (uint8_t *)STRING_BSR_ANYCRLF_RIGHTPAR,       12, PSO_BSR, PCRE2_BSR_ANYCRLF },
+  { (uint8_t *)STRING_BSR_UNICODE_RIGHTPAR,       12, PSO_BSR, PCRE2_BSR_UNICODE }
 };
 
 
@@ -7020,13 +7021,14 @@ do {
 
    /* .* is not anchored unless DOTALL is set (which generates OP_ALLANY) and
    it isn't in brackets that are or may be referenced or inside an atomic
-   group. */
+   group. There is also an option that disables auto-anchoring. */
 
    else if ((op == OP_TYPESTAR || op == OP_TYPEMINSTAR ||
              op == OP_TYPEPOSSTAR))
      {
      if (scode[1] != OP_ALLANY || (bracket_map & cb->backref_map) != 0 ||
-         atomcount > 0 || cb->had_pruneorskip)
+         atomcount > 0 || cb->had_pruneorskip ||
+         (cb->external_options & PCRE2_NO_DOTSTAR_ANCHOR) != 0)
        return FALSE;
      }
 
@@ -7140,12 +7142,13 @@ do {
    brackets that may be referenced, as long as the pattern does not contain
    *PRUNE or *SKIP, because these break the feature. Consider, for example,
    /.*?a(*PRUNE)b/ with the subject "aab", which matches "ab", i.e. not at the
-   start of a line. */
+   start of a line. There is also an option that disables this optimization. */
 
    else if (op == OP_TYPESTAR || op == OP_TYPEMINSTAR || op == OP_TYPEPOSSTAR)
      {
      if (scode[1] != OP_ANY || (bracket_map & cb->backref_map) != 0 ||
-         atomcount > 0 || cb->had_pruneorskip)
+         atomcount > 0 || cb->had_pruneorskip ||
+         (cb->external_options & PCRE2_NO_DOTSTAR_ANCHOR) != 0)
        return FALSE;
      }
 
@@ -7863,7 +7866,8 @@ if (errorcode != 0)
 /* Successful compile. If the anchored option was not passed, set it if
 we can determine that the pattern is anchored by virtue of ^ characters or \A
 or anything else, such as starting with non-atomic .* when DOTALL is set and
-there are no occurrences of *PRUNE or *SKIP. */
+there are no occurrences of *PRUNE or *SKIP (though there is an option to
+disable this case). */
 
 if ((re->overall_options & PCRE2_ANCHORED) == 0 &&
      is_anchored(codestart, 0, &cb, 0))
@@ -7912,7 +7916,8 @@ if ((re->overall_options & (PCRE2_ANCHORED|PCRE2_NO_START_OPTIMIZE)) == 0)
   /* When there is no first code unit, see if we can set the PCRE2_STARTLINE
   flag. This is helpful for multiline matches when all branches start with ^
   and also when all branches start with non-atomic .* for non-DOTALL matches
-  when *PRUNE and SKIP are not present. */
+  when *PRUNE and SKIP are not present. (There is an option that disables this
+  case.) */
 
   else if (is_startline(codestart, 0, &cb, 0)) re->flags |= PCRE2_STARTLINE;
   }

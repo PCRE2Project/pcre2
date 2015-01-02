@@ -1,4 +1,4 @@
-.TH PCRE2PERFORM 3 "20 Ocbober 2014" "PCRE2 10.00"
+.TH PCRE2PERFORM 3 "02 January 2015" "PCRE2 10.00"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 PERFORMANCE"
@@ -105,14 +105,18 @@ such as \ed, when matched with \fBpcre2_match()\fP; the performance loss is
 less with a DFA matching function, and in both cases there is not much
 difference for \eb.
 .P
-When a pattern begins with .* not in parentheses, or in parentheses that are
-not the subject of a backreference, and the PCRE2_DOTALL option is set, the
-pattern is implicitly anchored by PCRE2, since it can match only at the start
-of a subject string. However, if PCRE2_DOTALL is not set, PCRE2 cannot make
-this optimization, because the dot metacharacter does not then match a newline,
-and if the subject string contains newlines, the pattern may match from the
-character immediately following one of them instead of from the very start. For
-example, the pattern
+When a pattern begins with .* not in atomic parentheses, nor in parentheses
+that are the subject of a backreference, and the PCRE2_DOTALL option is set,
+the pattern is implicitly anchored by PCRE2, since it can match only at the
+start of a subject string. If the pattern has multiple top-level branches, they
+must all be anchorable. The optimization can be disabled by the
+PCRE2_NO_DOTSTAR_ANCHOR option, and is automatically disabled if the pattern
+contains (*PRUNE) or (*SKIP).
+.P
+If PCRE2_DOTALL is not set, PCRE2 cannot make this optimization, because the
+dot metacharacter does not then match a newline, and if the subject string
+contains newlines, the pattern may match from the character immediately
+following one of them instead of from the very start. For example, the pattern
 .sp
   .*second
 .sp
@@ -173,6 +177,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 20 October 2014
-Copyright (c) 1997-2014 University of Cambridge.
+Last updated: 02 January 2015
+Copyright (c) 1997-2015 University of Cambridge.
 .fi

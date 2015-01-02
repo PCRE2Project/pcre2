@@ -11,7 +11,7 @@ hacked-up (non-) design had also run out of steam.
 
                        Written by Philip Hazel
      Original code Copyright (c) 1997-2012 University of Cambridge
-         Rewritten code Copyright (c) 2014 University of Cambridge
+         Rewritten code Copyright (c) 2015 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -498,6 +498,7 @@ static modstruct modlist[] = {
   { "newline",             MOD_CTC,  MOD_NL,  0,                         CO(newline_convention) },
   { "no_auto_capture",     MOD_PAT,  MOD_OPT, PCRE2_NO_AUTO_CAPTURE,     PO(options) },
   { "no_auto_possess",     MOD_PATP, MOD_OPT, PCRE2_NO_AUTO_POSSESS,     PO(options) },
+  { "no_dotstar_anchor",   MOD_PAT,  MOD_OPT, PCRE2_NO_DOTSTAR_ANCHOR,   PO(options) },
   { "no_start_optimize",   MOD_PATP, MOD_OPT, PCRE2_NO_START_OPTIMIZE,   PO(options) },
   { "no_utf_check",        MOD_PD,   MOD_OPT, PCRE2_NO_UTF_CHECK,        PD(options) },
   { "notbol",              MOD_DAT,  MOD_OPT, PCRE2_NOTBOL,              DO(options) },
@@ -3291,29 +3292,30 @@ static void
 show_compile_options(uint32_t options, const char *before, const char *after)
 {
 if (options == 0) fprintf(outfile, "%s <none>%s", before, after);
-else fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
+else fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
   before,
-  ((options & PCRE2_ANCHORED) != 0)? " anchored" : "",
-  ((options & PCRE2_CASELESS) != 0)? " caseless" : "",
-  ((options & PCRE2_EXTENDED) != 0)? " extended" : "",
-  ((options & PCRE2_MULTILINE) != 0)? " multiline" : "",
-  ((options & PCRE2_FIRSTLINE) != 0)? " firstline" : "",
-  ((options & PCRE2_DOTALL) != 0)? " dotall" : "",
-  ((options & PCRE2_DOLLAR_ENDONLY) != 0)? " dollar_endonly" : "",
-  ((options & PCRE2_UNGREEDY) != 0)? " ungreedy" : "",
-  ((options & PCRE2_NO_AUTO_CAPTURE) != 0)? " no_auto_capture" : "",
-  ((options & PCRE2_NO_AUTO_POSSESS) != 0)? " no_auto_possess" : "",
-  ((options & PCRE2_UTF) != 0)? " utf" : "",
-  ((options & PCRE2_UCP) != 0)? " ucp" : "",
-  ((options & PCRE2_NO_UTF_CHECK) != 0)? " no_utf_check" : "",
-  ((options & PCRE2_NO_START_OPTIMIZE) != 0)? " no_start_optimize" : "",
-  ((options & PCRE2_DUPNAMES) != 0)? " dupnames" : "",
   ((options & PCRE2_ALT_BSUX) != 0)? " alt_bsux" : "",
   ((options & PCRE2_ALLOW_EMPTY_CLASS) != 0)? " allow_empty_class" : "",
+  ((options & PCRE2_ANCHORED) != 0)? " anchored" : "",
   ((options & PCRE2_AUTO_CALLOUT) != 0)? " auto_callout" : "",
+  ((options & PCRE2_CASELESS) != 0)? " caseless" : "",
+  ((options & PCRE2_DOLLAR_ENDONLY) != 0)? " dollar_endonly" : "",
+  ((options & PCRE2_DOTALL) != 0)? " dotall" : "",
+  ((options & PCRE2_DUPNAMES) != 0)? " dupnames" : "",
+  ((options & PCRE2_EXTENDED) != 0)? " extended" : "",
+  ((options & PCRE2_FIRSTLINE) != 0)? " firstline" : "",
   ((options & PCRE2_MATCH_UNSET_BACKREF) != 0)? " match_unset_backref" : "",
+  ((options & PCRE2_MULTILINE) != 0)? " multiline" : "",
   ((options & PCRE2_NEVER_UCP) != 0)? " never_ucp" : "",
   ((options & PCRE2_NEVER_UTF) != 0)? " never_utf" : "",
+  ((options & PCRE2_NO_AUTO_CAPTURE) != 0)? " no_auto_capture" : "",
+  ((options & PCRE2_NO_AUTO_POSSESS) != 0)? " no_auto_possess" : "",
+  ((options & PCRE2_NO_DOTSTAR_ANCHOR) != 0)? " no_dotstar_anchor" : "",
+  ((options & PCRE2_NO_UTF_CHECK) != 0)? " no_utf_check" : "",
+  ((options & PCRE2_NO_START_OPTIMIZE) != 0)? " no_start_optimize" : "",
+  ((options & PCRE2_UCP) != 0)? " ucp" : "",
+  ((options & PCRE2_UNGREEDY) != 0)? " ungreedy" : "",
+  ((options & PCRE2_UTF) != 0)? " utf" : "",
   after);
 }
 

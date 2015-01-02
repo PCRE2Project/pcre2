@@ -445,7 +445,7 @@ match() only in the case when ovecsave is needed. (David Wheeler used to say
 "All problems in computer science can be solved by another level of
 indirection.")
 
-HOWEVER: when this file is compiled by gcc in an optimizing mode, because this 
+HOWEVER: when this file is compiled by gcc in an optimizing mode, because this
 function is called only once, and only from within match(), gcc will "inline"
 it - that is, move it inside match() - and this completely negates its reason
 for existence. Therefore, we mark it as non-inline when gcc is in use.

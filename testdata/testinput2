@@ -4100,4 +4100,20 @@ a random value. /Ix
 /a(b)c(d)/
     abc\=ph,copy=0,copy=1,getall
 
+/^abc/info
+
+/^abc/info,no_dotstar_anchor
+
+/.*\d/info,auto_callout
+    aaa
+
+/.*\d/info,no_dotstar_anchor,auto_callout
+    aaa
+
+/.*\d/dotall,info
+
+/.*\d/dotall,no_dotstar_anchor,info
+
+/(*NO_DOTSTAR_ANCHOR)(?s).*\d/info
+
 # End of testinput2 

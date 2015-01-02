@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "22 December 2014" "PCRE2 10.00"
+.TH PCRE2API 3 "02 January 2015" "PCRE2 10.00"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -1164,6 +1164,19 @@ set this option if you want the matching functions to do a full unoptimized
 search and run all the callouts, but it is mainly provided for testing
 purposes.
 .sp
+  PCRE2_NO_DOTSTAR_ANCHOR
+.sp
+If this option is set, it disables an optimization that is applied when .* is
+the first significant item in a top-level branch of a pattern, and all the
+other branches also start with .* or with \eA or \eG or ^. The optimization is
+automatically disabled for .* if it is inside an atomic group or a capturing
+group that is the subject of a back reference, or if the pattern contains
+(*PRUNE) or (*SKIP). When the optimization is not disabled, such a pattern is
+automatically anchored if PCRE2_DOTALL is set for all the .* items and
+PCRE2_MULTILINE is not set for any ^ items. Otherwise, the fact that any match
+must start either at the start of the subject or following a newline is
+remembered. Like other optimizations, this can cause callouts to be skipped.
+.sp
   PCRE2_NO_START_OPTIMIZE
 .sp
 This is an option whose main effect is at matching time. It does not change
@@ -1436,18 +1449,27 @@ force when matching starts. For example, if the pattern /(?im)abc(?-i)d/ is
 compiled with the PCRE2_EXTENDED option, the result is PCRE2_CASELESS,
 PCRE2_MULTILINE, and PCRE2_EXTENDED.
 .P
-A pattern is automatically anchored by PCRE2 if all of its top-level
-alternatives begin with one of the following:
+A pattern compiled without PCRE2_ANCHORED is automatically anchored by PCRE2 if
+the first significant item in every top-level branch is one of the following:
 .sp
   ^     unless PCRE2_MULTILINE is set
   \eA    always
   \eG    always
-.\" JOIN
-  .*    if PCRE2_DOTALL is set and there are no back
-          references to the subpattern in which .* appears
+  .*    sometimes - see below
 .sp
-For such patterns, the PCRE2_ANCHORED bit is set in the options returned for
-PCRE2_INFO_ALLOPTIONS.
+When .* is the first significant item, anchoring is possible only when all the
+following are true:
+.sp
+  .* is not in an atomic group
+.\" JOIN
+  .* is not in a capturing group that is the subject
+       of a back reference
+  PCRE2_DOTALL is in force for .*
+  Neither (*PRUNE) nor (*SKIP) appears in the pattern.
+  PCRE2_NO_DOTSTAR_ANCHOR is not set.
+.sp
+For patterns that are auto-anchored, the PCRE2_ANCHORED bit is set in the
+options returned for PCRE2_INFO_ALLOPTIONS.
 .sp
   PCRE2_INFO_BACKREFMAX
 .sp
@@ -1475,18 +1497,10 @@ variable.
 .P
 If there is a fixed first value, for example, the letter "c" from a pattern
 such as (cat|cow|coyote), 1 is returned, and the character value can be
-retrieved using PCRE2_INFO_FIRSTCODEUNIT. If there is no fixed first value, and
-if either
-.sp
-(a) the pattern was compiled with the PCRE2_MULTILINE option, and every branch
-starts with "^", or
-.sp
-(b) every branch of the pattern starts with ".*" and PCRE2_DOTALL is not set
-(if it were set, the pattern would be anchored),
-.sp
-2 is returned, indicating that the pattern matches only at the start of a
-subject string or after any newline within the string. Otherwise 0 is
-returned. For anchored patterns, 0 is returned.
+retrieved using PCRE2_INFO_FIRSTCODEUNIT. If there is no fixed first value, but
+it is known that a match can occur only at the start of the subject or
+following a newline in the subject, 2 is returned. Otherwise, and for anchored
+patterns, 0 is returned.
 .sp
   PCRE2_INFO_FIRSTCODEUNIT
 .sp
@@ -2835,6 +2849,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 22 December 2014
-Copyright (c) 1997-2014 University of Cambridge.
+Last updated: 02 January 2015
+Copyright (c) 1997-2015 University of Cambridge.
 .fi

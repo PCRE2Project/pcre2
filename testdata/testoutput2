@@ -5361,7 +5361,7 @@ No match
 "<(\w+)/?>(.)*</(\1)>"Igms
 Capturing subpattern count = 3
 Max back reference = 1
-Options: multiline dotall
+Options: dotall multiline
 First code unit = '<'
 Last code unit = '>'
 Subject length lower bound = 7
@@ -5399,7 +5399,7 @@ No match
 /line\nbreak/Im,firstline
 Capturing subpattern count = 0
 Contains explicit CR or LF match
-Options: multiline firstline
+Options: firstline multiline
 First code unit = 'l'
 Last code unit = 'k'
 Subject length lower bound = 10
@@ -9698,7 +9698,7 @@ Subject length lower bound = 41
 /Iisx
 Capturing subpattern count = 3
 Max back reference = 1
-Options: caseless extended dotall
+Options: caseless dotall extended
 First code unit = '<'
 Last code unit = '='
 Subject length lower bound = 9
@@ -9747,7 +9747,7 @@ Named capturing subpatterns:
   quote        4
   realquote    3
   realquote    6
-Options: extended dupnames
+Options: dupnames extended
 Starting code units: a b 
 Subject length lower bound = 3
     a"aaaaa
@@ -9805,8 +9805,8 @@ Capturing subpattern count = 4
 Named capturing subpatterns:
   D   4
   D   1
-Compile options: extended dupnames
-Overall options: anchored extended dupnames
+Compile options: dupnames extended
+Overall options: anchored dupnames extended
 Subject length lower bound = 2
     abcdX
  0: abcdX
@@ -9852,7 +9852,7 @@ Capturing subpattern count = 4
 Named capturing subpatterns:
   A   1
   A   4
-Options: extended dupnames
+Options: dupnames extended
 First code unit = 'a'
 Last code unit = 'd'
 Subject length lower bound = 4
@@ -9936,7 +9936,7 @@ No match
 /(\3)(\1)(a)/I,alt_bsux,allow_empty_class,match_unset_backref,dupnames
 Capturing subpattern count = 3
 Max back reference = 3
-Options: dupnames alt_bsux allow_empty_class match_unset_backref
+Options: alt_bsux allow_empty_class dupnames match_unset_backref
 Last code unit = 'a'
 Subject length lower bound = 1
     cat
@@ -13768,5 +13768,68 @@ Partial match: abc
  0C abc (3)
 Copy substring 1 failed (-2): partial match
 get substring list failed (-2): partial match
+
+/^abc/info
+Capturing subpattern count = 0
+Compile options: <none>
+Overall options: anchored
+Subject length lower bound = 3
+
+/^abc/info,no_dotstar_anchor
+Capturing subpattern count = 0
+Compile options: no_dotstar_anchor
+Overall options: anchored no_dotstar_anchor
+Subject length lower bound = 3
+
+/.*\d/info,auto_callout
+Capturing subpattern count = 0
+Options: auto_callout
+First code unit at start or follows newline
+Subject length lower bound = 1
+    aaa
+--->aaa
+ +0 ^       .*
+ +2 ^  ^    \d
+ +2 ^ ^     \d
+ +2 ^^      \d
+ +2 ^       \d
+No match
+
+/.*\d/info,no_dotstar_anchor,auto_callout
+Capturing subpattern count = 0
+Options: auto_callout no_dotstar_anchor
+Subject length lower bound = 1
+    aaa
+--->aaa
+ +0 ^       .*
+ +2 ^  ^    \d
+ +2 ^ ^     \d
+ +2 ^^      \d
+ +2 ^       \d
+ +0  ^      .*
+ +2  ^ ^    \d
+ +2  ^^     \d
+ +2  ^      \d
+ +0   ^     .*
+ +2   ^^    \d
+ +2   ^     \d
+No match
+
+/.*\d/dotall,info
+Capturing subpattern count = 0
+Compile options: dotall
+Overall options: anchored dotall
+Subject length lower bound = 1
+
+/.*\d/dotall,no_dotstar_anchor,info
+Capturing subpattern count = 0
+Options: dotall no_dotstar_anchor
+Subject length lower bound = 1
+
+/(*NO_DOTSTAR_ANCHOR)(?s).*\d/info
+Capturing subpattern count = 0
+Compile options: <none>
+Overall options: dotall no_dotstar_anchor
+Subject length lower bound = 1
 
 # End of testinput2 
