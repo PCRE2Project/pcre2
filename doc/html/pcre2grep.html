@@ -67,22 +67,23 @@ If no files are specified, <b>pcre2grep</b> reads the standard input. The
 standard input can also be referenced by a name consisting of a single hyphen.
 For example:
 <pre>
-  pcre2grep some-pattern /file1 - /file3
+  pcre2grep some-pattern file1 - file3
 </pre>
-By default, each line that matches a pattern is copied to the standard
-output, and if there is more than one file, the file name is output at the
-start of each line, followed by a colon. However, there are options that can
-change how <b>pcre2grep</b> behaves. In particular, the <b>-M</b> option makes it
-possible to search for patterns that span line boundaries. What defines a line
-boundary is controlled by the <b>-N</b> (<b>--newline</b>) option.
+Input files are searched line by line. By default, each line that matches a
+pattern is copied to the standard output, and if there is more than one file,
+the file name is output at the start of each line, followed by a colon.
+However, there are options that can change how <b>pcre2grep</b> behaves. In
+particular, the <b>-M</b> option makes it possible to search for strings that
+span line boundaries. What defines a line boundary is controlled by the
+<b>-N</b> (<b>--newline</b>) option.
 </P>
 <P>
 The amount of memory used for buffering files that are being scanned is
 controlled by a parameter that can be set by the <b>--buffer-size</b> option.
-The default value for this parameter is specified when <b>pcre2grep</b> is built,
-with the default default being 20K. A block of memory three times this size is
-used (to allow for buffering "before" and "after" lines). An error occurs if a
-line overflows the buffer.
+The default value for this parameter is specified when <b>pcre2grep</b> is
+built, with the default default being 20K. A block of memory three times this
+size is used (to allow for buffering "before" and "after" lines). An error
+occurs if a line overflows the buffer.
 </P>
 <P>
 Patterns can be no longer than 8K or BUFSIZ bytes, whichever is the greater.
@@ -149,11 +150,11 @@ to signify multiplication by 1024 or 1024*1024 respectively.
 <b>--</b>
 This terminates the list of options. It is useful if the next item on the
 command line starts with a hyphen but is not an option. This allows for the
-processing of patterns and filenames that start with hyphens.
+processing of patterns and file names that start with hyphens.
 </P>
 <P>
 <b>-A</b> <i>number</i>, <b>--after-context=</b><i>number</i>
-Output <i>number</i> lines of context after each matching line. If filenames
+Output <i>number</i> lines of context after each matching line. If file names
 and/or line numbers are being output, a hyphen separator is used instead of a
 colon for the context lines. A line containing "--" is output between each
 group of lines, unless they are in fact contiguous in the input file. The value
@@ -167,7 +168,7 @@ Treat binary files as text. This is equivalent to
 </P>
 <P>
 <b>-B</b> <i>number</i>, <b>--before-context=</b><i>number</i>
-Output <i>number</i> lines of context before each matching line. If filenames
+Output <i>number</i> lines of context before each matching line. If file names
 and/or line numbers are being output, a hyphen separator is used instead of a
 colon for the context lines. A line containing "--" is output between each
 group of lines, unless they are in fact contiguous in the input file. The value
@@ -184,7 +185,8 @@ processed in the same way as any other file. In this case, when a match
 succeeds, the output may be binary garbage, which can have nasty effects if
 sent to a terminal. If the word is "without-match", which is equivalent to the
 <b>-I</b> option, binary files are not processed at all; they are assumed not to
-be of interest.
+be of interest and are skipped without causing any output or affecting the
+return code.
 </P>
 <P>
 <b>--buffer-size=</b><i>number</i>
@@ -198,10 +200,15 @@ This is equivalent to setting both <b>-A</b> and <b>-B</b> to the same value.
 </P>
 <P>
 <b>-c</b>, <b>--count</b>
-Do not output individual lines from the files that are being scanned; instead
-output the number of lines that would otherwise have been shown. If no lines
-are selected, the number zero is output. If several files are are being
-scanned, a count is output for each of them. However, if the
+Do not output lines from the files that are being scanned; instead output the
+number of matches (or non-matches if <b>-v</b> is used) that would otherwise
+have caused lines to be shown. By default, this count is the same as the number
+of suppressed lines, but if the <b>-M</b> (multiline) option is used (without
+<b>-v</b>), there may be more suppressed lines than the number of matches.
+<br>
+<br>
+If no lines are selected, the number zero is output. If several files are are
+being scanned, a count is output for each of them. However, if the
 <b>--files-with-matches</b> option is also used, only those files whose counts
 are greater than zero are listed. When <b>-c</b> is used, the <b>-A</b>,
 <b>-B</b>, and <b>-C</b> options are ignored.
@@ -271,10 +278,10 @@ of the line that matched.
 Files (but not directories) whose names match the pattern are skipped without
 being processed. This applies to all files, whether listed on the command line,
 obtained from <b>--file-list</b>, or by scanning a directory. The pattern is a
-PCRE2 regular expression, and is matched against the final component of the file
-name, not the entire path. The <b>-F</b>, <b>-w</b>, and <b>-x</b> options do not
-apply to this pattern. The option may be given any number of times in order to
-specify multiple patterns. If a file name matches both an <b>--include</b>
+PCRE2 regular expression, and is matched against the final component of the
+file name, not the entire path. The <b>-F</b>, <b>-w</b>, and <b>-x</b> options do
+not apply to this pattern. The option may be given any number of times in order
+to specify multiple patterns. If a file name matches both an <b>--include</b>
 and an <b>--exclude</b> pattern, it is excluded. There is no short form for this
 option.
 </P>
@@ -323,7 +330,7 @@ alternatives in the description of <b>-e</b> above.
 <br>
 <br>
 If this option is given more than once, all the specified files are
-read. A data line is output if any of the patterns match it. A filename can
+read. A data line is output if any of the patterns match it. A file name can
 be given as "-" to refer to the standard input. When <b>-f</b> is used, patterns
 specified on the command line using <b>-e</b> may also be present; they are
 tested before the file's patterns. However, no other pattern is taken from the
@@ -334,7 +341,7 @@ command line; all arguments are treated as the names of paths to be searched.
 Read a list of files and/or directories that are to be scanned from the given
 file, one per line. Trailing white space is removed from each line, and blank
 lines are ignored. These paths are processed before any that are listed on the
-command line. The filename can be given as "-" to refer to the standard input.
+command line. The file name can be given as "-" to refer to the standard input.
 If <b>--file</b> and <b>--file-list</b> are both specified as "-", patterns are
 read first. This is useful only when the standard input is a terminal, from
 which further lines (the list of files) can be read after an end-of-file
@@ -352,17 +359,18 @@ and <b>--only-matching</b>.
 </P>
 <P>
 <b>-H</b>, <b>--with-filename</b>
-Force the inclusion of the filename at the start of output lines when searching
-a single file. By default, the filename is not shown in this case. For matching
-lines, the filename is followed by a colon; for context lines, a hyphen
-separator is used. If a line number is also being output, it follows the file
-name.
+Force the inclusion of the file name at the start of output lines when
+searching a single file. By default, the file name is not shown in this case.
+For matching lines, the file name is followed by a colon; for context lines, a
+hyphen separator is used. If a line number is also being output, it follows the
+file name. When the <b>-M</b> option causes a pattern to match more than one
+line, only the first is preceded by the file name.
 </P>
 <P>
 <b>-h</b>, <b>--no-filename</b>
-Suppress the output filenames when searching multiple files. By default,
-filenames are shown when multiple files are searched. For matching lines, the
-filename is followed by a colon; for context lines, a hyphen separator is used.
+Suppress the output file names when searching multiple files. By default,
+file names are shown when multiple files are searched. For matching lines, the
+file name is followed by a colon; for context lines, a hyphen separator is used.
 If a line number is also being output, it follows the file name.
 </P>
 <P>
@@ -373,7 +381,7 @@ ignored.
 </P>
 <P>
 <b>-I</b>
-Treat binary files as never matching. This is equivalent to
+Ignore binary files. This is equivalent to
 <b>--binary-files</b>=<i>without-match</i>.
 </P>
 <P>
@@ -406,8 +414,8 @@ If any <b>--include-dir</b> patterns are specified, the only directories that
 are processed are those that match one of the patterns (and do not match an
 <b>--exclude-dir</b> pattern). This applies to all directories, whether listed
 on the command line, obtained from <b>--file-list</b>, or by scanning a parent
-directory. The pattern is a PCRE2 regular expression, and is matched against the
-final component of the directory name, not the entire path. The <b>-F</b>,
+directory. The pattern is a PCRE2 regular expression, and is matched against
+the final component of the directory name, not the entire path. The <b>-F</b>,
 <b>-w</b>, and <b>-x</b> options do not apply to this pattern. The option may be
 given any number of times. If a directory matches both <b>--include-dir</b> and
 <b>--exclude-dir</b>, it is excluded. There is no short form for this option.
@@ -442,8 +450,8 @@ unless <b>pcre2grep</b> can determine that it is reading from a terminal (which
 is currently possible only in Unix-like environments). Output to terminal is
 normally automatically flushed by the operating system. This option can be
 useful when the input or output is attached to a pipe and you do not want
-<b>pcre2grep</b> to buffer up large amounts of data. However, its use will affect
-performance, and the <b>-M</b> (multiline) option ceases to work.
+<b>pcre2grep</b> to buffer up large amounts of data. However, its use will
+affect performance, and the <b>-M</b> (multiline) option ceases to work.
 </P>
 <P>
 <b>--line-offsets</b>
@@ -497,18 +505,33 @@ when the PCRE2 library is compiled, with the default default being 10 million.
 Allow patterns to match more than one line. When this option is given, patterns
 may usefully contain literal newline characters and internal occurrences of ^
 and $ characters. The output for a successful match may consist of more than
-one line, the last of which is the one in which the match ended. If the matched
-string ends with a newline sequence the output ends at the end of that line.
+one line. The first is the line in which the match started, and the last is the
+line in which the match ended. If the matched string ends with a newline
+sequence the output ends at the end of that line.
 <br>
 <br>
 When this option is set, the PCRE2 library is called in "multiline" mode.
+However, <b>pcre2grep</b> still processes the input line by line. The difference
+is that a matched string may extend past the end of a line and continue on
+one or more subsequent lines. The newline sequence must be matched as part of
+the pattern. For example, to find the phrase "regular expression" in a file
+where "regular" might be at the end of a line and "expression" at the start of
+the next line, you could use this command:
+<pre>
+  pcre2grep -M 'regular\s+expression' &#60;file&#62;
+</pre>
+The \s escape sequence matches any white space character, including newlines,
+and is followed by + so as to match trailing white space on the first line as
+well as possibly handling a two-character newline sequence.
+<br>
+<br>
 There is a limit to the number of lines that can be matched, imposed by the way
 that <b>pcre2grep</b> buffers the input file as it scans it. However,
-<b>pcre2grep</b> ensures that at least 8K characters or the rest of the document
+<b>pcre2grep</b> ensures that at least 8K characters or the rest of the file
 (whichever is the shorter) are available for forward matching, and similarly
 the previous 8K characters (or all the previous characters, if fewer than 8K)
-are guaranteed to be available for lookbehind assertions. This option does not
-work when input is read line by line (see \fP--line-buffered\fP.)
+are guaranteed to be available for lookbehind assertions. The <b>-M</b> option
+does not work when input is read line by line (see \fP--line-buffered\fP.)
 </P>
 <P>
 <b>-N</b> <i>newline-type</i>, <b>--newline</b>=<i>newline-type</i>
@@ -526,9 +549,9 @@ When the PCRE2 library is built, a default line-ending sequence is specified.
 This is normally the standard sequence for the operating system. Unless
 otherwise specified by this option, <b>pcre2grep</b> uses the library's default.
 The possible values for this option are CR, LF, CRLF, ANYCRLF, or ANY. This
-makes it possible to use <b>pcre2grep</b> to scan files that have come from other
-environments without having to modify their line endings. If the data that is
-being scanned does not agree with the convention set by this option,
+makes it possible to use <b>pcre2grep</b> to scan files that have come from
+other environments without having to modify their line endings. If the data
+that is being scanned does not agree with the convention set by this option,
 <b>pcre2grep</b> may behave in strange ways. Note that this option does not
 apply to files specified by the <b>-f</b>, <b>--exclude-from</b>, or
 <b>--include-from</b> options, which are expected to use the operating system's
@@ -537,9 +560,10 @@ standard newline sequence.
 <P>
 <b>-n</b>, <b>--line-number</b>
 Precede each output line by its line number in the file, followed by a colon
-for matching lines or a hyphen for context lines. If the filename is also being
-output, it precedes the line number. This option is forced if
-<b>--line-offsets</b> is used.
+for matching lines or a hyphen for context lines. If the file name is also
+being output, it precedes the line number. When the <b>-M</b> option causes a
+pattern to match more than one line, only the first is preceded by its line
+number. This option is forced if <b>--line-offsets</b> is used.
 </P>
 <P>
 <b>--no-jit</b>
@@ -570,7 +594,7 @@ without an argument (see above), if an argument is present, it must be given in
 the same shell item, for example, -o3 or --only-matching=2. The comments given
 for the non-argument case above also apply to this case. If the specified
 capturing parentheses do not exist in the pattern, or were not set in the
-match, nothing is output unless the file name or line number are being printed.
+match, nothing is output unless the file name or line number are being output.
 <br>
 <br>
 If this option is given multiple times, multiple substrings are output, in the
@@ -635,10 +659,10 @@ specified by any of the <b>--include</b> or <b>--exclude</b> options.
 <b>-x</b>, <b>--line-regex</b>, <b>--line-regexp</b>
 Force the patterns to be anchored (each must start matching at the beginning of
 a line) and in addition, require them to match entire lines. This is equivalent
-to having ^ and $ characters at the start and end of each alternative branch in
-every pattern. This option applies only to the patterns that are matched
-against the contents of files; it does not apply to patterns specified by any
-of the <b>--include</b> or <b>--exclude</b> options.
+to having ^ and $ characters at the start and end of each alternative top-level
+branch in every pattern. This option applies only to the patterns that are
+matched against the contents of files; it does not apply to patterns specified
+by any of the <b>--include</b> or <b>--exclude</b> options.
 </P>
 <br><a name="SEC6" href="#TOC1">ENVIRONMENT VARIABLES</a><br>
 <P>
@@ -677,7 +701,7 @@ Although most of the common options work the same way, a few are different in
 <b>pcre2grep</b>. For example, the <b>--include</b> option's argument is a glob
 for GNU <b>grep</b>, but a regular expression for <b>pcre2grep</b>. If both the
 <b>-c</b> and <b>-l</b> options are given, GNU grep lists only file names,
-without counts, but <b>pcre2grep</b> gives the counts.
+without counts, but <b>pcre2grep</b> gives the counts as well.
 </P>
 <br><a name="SEC9" href="#TOC1">OPTIONS WITH DATA</a><br>
 <P>
@@ -722,9 +746,9 @@ message and the line that caused the problem to the standard error stream. If
 there are more than 20 such errors, <b>pcre2grep</b> gives up.
 </P>
 <P>
-The <b>--match-limit</b> option of <b>pcre2grep</b> can be used to set the overall
-resource limit; there is a second option called <b>--recursion-limit</b> that
-sets a limit on the amount of memory (usually stack) that is used (see the
+The <b>--match-limit</b> option of <b>pcre2grep</b> can be used to set the
+overall resource limit; there is a second option called <b>--recursion-limit</b>
+that sets a limit on the amount of memory (usually stack) that is used (see the
 discussion of these options above).
 </P>
 <br><a name="SEC11" href="#TOC1">DIAGNOSTICS</a><br>
@@ -737,7 +761,7 @@ affect the return code.
 </P>
 <br><a name="SEC12" href="#TOC1">SEE ALSO</a><br>
 <P>
-<b>pcre2pattern</b>(3), <b>pcre2syntax</b>(3), <b>pcre2test</b>(1).
+<b>pcre2pattern</b>(3), <b>pcre2syntax</b>(3).
 </P>
 <br><a name="SEC13" href="#TOC1">AUTHOR</a><br>
 <P>
@@ -750,9 +774,9 @@ Cambridge, England.
 </P>
 <br><a name="SEC14" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 23 November 2014
+Last updated: 03 January 2015
 <br>
-Copyright &copy; 1997-2014 University of Cambridge.
+Copyright &copy; 1997-2015 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE2 index page</a>.
