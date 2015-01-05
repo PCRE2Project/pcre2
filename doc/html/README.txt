@@ -1,7 +1,7 @@
 README file for PCRE2 (Perl-compatible regular expression library)
 ------------------------------------------------------------------
 
-PCRE2 is a re-implementation of the original PCRE library with an entirely new
+PCRE2 is a re-working of the original PCRE library to provide an entirely new
 API. The latest release of PCRE2 is always available in three alternative
 formats from:
 
@@ -39,8 +39,8 @@ The PCRE2 APIs
 PCRE2 is written in C, and it has its own API. There are three sets of
 functions, one for the 8-bit library, which processes strings of bytes, one for
 the 16-bit library, which processes strings of 16-bit values, and one for the
-32-bit library, which processes strings of 32-bit values. As this is a new API,
-there as yet no C++ wrappers.
+32-bit library, which processes strings of 32-bit values. There are no C++
+wrappers.
 
 The distribution does contain a set of C wrapper functions for the 8-bit
 library that are based on the POSIX regular expression API (see the pcre2posix
@@ -816,4 +816,4 @@ The distribution should contain the files listed below.
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 24 November 2014
+Last updated: 05 January 2015

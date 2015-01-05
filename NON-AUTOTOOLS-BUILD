@@ -1,17 +1,14 @@
 Building PCRE2 without using autotools
 --------------------------------------
 
-This document has been converted from the PCRE1 document, but is not yet
-complete. I have removed a number of quite old sections about building in
-various environments, as they applied only to PCRE1 and are probably out of
-date.
-
+This document has been converted from the PCRE1 document. I have removed a
+number of sections about building in various environments, as they applied only
+to PCRE1 and are probably out of date.
 
 This document contains the following sections:
 
   General
   Generic instructions for the PCRE2 C library
-  Building for virtual Pascal
   Stack size in Windows environments
   Linking programs in Windows environments
   Calling conventions in Windows environments
@@ -91,10 +88,11 @@ can skip ahead to the CMake section.
      The tables in src/pcre2_chartables.c are defaults. The caller of PCRE2 can
      specify alternative tables at run time.
 
- (4) For an 8-bit library, compile the following source files, setting
-     -DPCRE2_CODE_UNIT_WIDTH=8 as a compiler option. Also set -DHAVE_CONFIG_H
-     if you have set up src/config.h with your configuration, or else use other
-     -D settings to change the configuration as required.
+ (4) For an 8-bit library, compile the following source files from the src
+     directory, setting -DPCRE2_CODE_UNIT_WIDTH=8 as a compiler option. Also
+     set -DHAVE_CONFIG_H if you have set up src/config.h with your
+     configuration, or else use other -D settings to change the configuration
+     as required.
 
        pcre2_auto_possess.c
        pcre2_chartables.c
@@ -104,8 +102,6 @@ can skip ahead to the CMake section.
        pcre2_dfa_match.c
        pcre2_error.c
        pcre2_jit_compile.c
-       pcre2_jit_match.c
-       pcre2_jit_misc.c
        pcre2_maketables.c
        pcre2_match.c
        pcre2_match_data.c
@@ -114,6 +110,7 @@ can skip ahead to the CMake section.
        pcre2_pattern_info.c
        pcre2_string_utils.c
        pcre2_study.c
+       pcre2_substitute.c
        pcre2_substring.c
        pcre2_tables.c
        pcre2_ucd.c
@@ -125,11 +122,13 @@ can skip ahead to the CMake section.
      sought in the src directory under the current directory. Otherwise you run
      the risk of picking up a previously-installed file from somewhere else.
 
-     Note that you must compile pcre2_jit_xxx.c, even if you have not defined
-     SUPPORT_JIT in src/config.h, because when JIT support is not configured,
-     dummy functions are compiled. When JIT support IS configured, the JIT
-     sources #include other files from the sljit subdirectory, where there
-     should be 16 files, all of whose names begin with "sljit".
+     Note that you must compile pcre2_jit_compile.c, even if you have not
+     defined SUPPORT_JIT in src/config.h, because when JIT support is not
+     configured, dummy functions are compiled. When JIT support IS configured,
+     pcre2_compile.c #includes other files from the sljit subdirectory, where
+     there should be 16 files, all of whose names begin with "sljit". It also
+     #includes src/pcre2_jit_match.c and src/pcre2_jit_misc.c, so you should
+     not compile these yourself.
 
  (5) Now link all the compiled code into an object library in whichever form
      your system keeps such libraries. This is the basic PCRE2 C 8-bit library.
@@ -141,13 +140,13 @@ can skip ahead to the CMake section.
      -DPCRE2_CODE_UNIT_WIDTH when you are compiling.
 
  (7) If you want to build the POSIX wrapper functions (which apply only to the
-     8-bit library), ensure that you have the pcre2posix.h file and then
-     compile pcre2posix.c. Link the result (on its own) as the pcre2posix
+     8-bit library), ensure that you have the src/pcre2posix.h file and then
+     compile src/pcre2posix.c. Link the result (on its own) as the pcre2posix
      library.
 
  (8) The pcre2test program can be linked with any combination of the 8-bit,
      16-bit and 32-bit libraries (depending on what you selected in
-     src/config.h). Compile pcre2test.c; don't forget -DHAVE_CONFIG_H if
+     src/config.h). Compile src/pcre2test.c; don't forget -DHAVE_CONFIG_H if
      necessary, but do NOT define PCRE2_CODE_UNIT_WIDTH. Then link with the
      appropriate library/ies. If you compiled an 8-bit library, pcre2test also
      needs the pcre2posix wrapper library.
@@ -173,22 +172,11 @@ can skip ahead to the CMake section.
 (10) If you have built PCRE2 with SUPPORT_JIT, the JIT features can be tested
      by running pcre2test with the -jit option. This is done automatically by
      the RunTest script. You might also like to build and run the freestanding
-     JIT test program, pcre2_jit_test.c.
+     JIT test program, src/pcre2_jit_test.c.
 
-(11) If you want to use the pcre2grep command, compile and link pcre2grep.c; it
-     uses only the basic 8-bit PCRE2 library (it does not need the pcre2posix
-     library).
-
-
-BUILDING FOR VIRTUAL PASCAL
-
-FIXME FOR PCRE2
-
-A script for building PCRE2 using Borland's C++ compiler for use with VPASCAL
-was contributed by Alexander Tokarev. Stefan Weber updated the script and added
-additional files. The following files in the distribution are for building
-PCRE2 for use with VP/Borland: makevp_c.txt, makevp_l.txt, makevp.bat,
-pcre2gexp.pas.
+(11) If you want to use the pcre2grep command, compile and link
+     src/pcre2grep.c; it uses only the basic 8-bit PCRE2 library (it does not
+     need the pcre2posix library).
 
 
 STACK SIZE IN WINDOWS ENVIRONMENTS
@@ -347,12 +335,16 @@ cache can be deleted by selecting "File > Delete Cache".
     available for review in Testing\Temporary under your build dir.
 
 
-TESTING WITH RUNTEST.BAT  FIXME FIXME NOT YET TESTED/UPDATED FIXME
+TESTING WITH RUNTEST.BAT IS NOT YET TESTED/UPDATED
 
 If configured with CMake, building the test project ("make check" or building
 ALL_TESTS in Visual Studio) creates (and runs) pcre2_test.bat (and depending
 on your configuration options, possibly other test programs) in the build
 directory. Pcre_test.bat runs RunTest.Bat with correct source and exe paths.
+
+INCOMPLETE: Nobody has yet provided a RunTest.Bat for PCRE2 and I have no means
+of doing so. These instructions are those for PCRE1, left here in the hope that
+one day they will be usable.
 
 For manual testing with RunTest.bat, provided the build dir is a subdirectory
 of the source directory: Open command shell window. Chdir to the location
@@ -398,5 +390,5 @@ There is also a mirror here:
 The site currently has ports for PCRE1 releases, but PCRE2 should follow in due
 course.
 
-==========================
-Last Updated: 03 November 2014
+=============================
+Last Updated: 05 January 2015

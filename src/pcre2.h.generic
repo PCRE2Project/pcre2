@@ -5,7 +5,7 @@
 /* This is the public header file for the PCRE library, second API, to be
 #included by applications that call PCRE2 functions.
 
-           Copyright (c) 2014 University of Cambridge
+           Copyright (c) 2015 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -43,8 +43,8 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #define PCRE2_MAJOR          10
 #define PCRE2_MINOR          00
-#define PCRE2_PRERELEASE     -RC2
-#define PCRE2_DATE           2014-12-19
+#define PCRE2_PRERELEASE     
+#define PCRE2_DATE           2014-01-05
 
 /* When an application links to a PCRE DLL in Windows, the symbols that are
 imported have to be identified as such. When building PCRE2, the appropriate
@@ -113,10 +113,11 @@ D   is inspected during pcre2_dfa_match() execution
 #define PCRE2_NEVER_UTF           0x00001000u  /* C       */
 #define PCRE2_NO_AUTO_CAPTURE     0x00002000u  /* C       */
 #define PCRE2_NO_AUTO_POSSESS     0x00004000u  /* C       */
-#define PCRE2_NO_START_OPTIMIZE   0x00008000u  /*   J M D */
-#define PCRE2_UCP                 0x00010000u  /* C J M D */
-#define PCRE2_UNGREEDY            0x00020000u  /* C       */
-#define PCRE2_UTF                 0x00040000u  /* C J M D */
+#define PCRE2_NO_DOTSTAR_ANCHOR   0x00008000u  /* C       */
+#define PCRE2_NO_START_OPTIMIZE   0x00010000u  /*   J M D */
+#define PCRE2_UCP                 0x00020000u  /* C J M D */
+#define PCRE2_UNGREEDY            0x00040000u  /* C       */
+#define PCRE2_UTF                 0x00080000u  /* C J M D */
 
 /* These are for pcre2_jit_compile(). */
 
