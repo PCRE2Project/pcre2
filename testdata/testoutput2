@@ -1535,28 +1535,33 @@ Subject length lower bound = 3
 
 /a(?(1)b)(.)/I
 Capturing subpattern count = 1
+Max back reference = 1
 First code unit = 'a'
 Subject length lower bound = 2
 
 /a(?(1)bag|big)(.)/I
 Capturing subpattern count = 1
+Max back reference = 1
 First code unit = 'a'
 Last code unit = 'g'
 Subject length lower bound = 5
 
 /a(?(1)bag|big)*(.)/I
 Capturing subpattern count = 1
+Max back reference = 1
 First code unit = 'a'
 Subject length lower bound = 2
 
 /a(?(1)bag|big)+(.)/I
 Capturing subpattern count = 1
+Max back reference = 1
 First code unit = 'a'
 Last code unit = 'g'
 Subject length lower bound = 5
 
 /a(?(1)b..|b..)(.)/I
 Capturing subpattern count = 1
+Max back reference = 1
 First code unit = 'a'
 Last code unit = 'b'
 Subject length lower bound = 5
@@ -3345,21 +3350,25 @@ Subject length lower bound = 1
 
 /(?(1)ab|ac)(.)/I
 Capturing subpattern count = 1
+Max back reference = 1
 First code unit = 'a'
 Subject length lower bound = 3
 
 /(?(1)abz|acz)(.)/I
 Capturing subpattern count = 1
+Max back reference = 1
 First code unit = 'a'
 Last code unit = 'z'
 Subject length lower bound = 4
 
 /(?(1)abz)(.)/I
 Capturing subpattern count = 1
+Max back reference = 1
 Subject length lower bound = 1
 
 /(?(1)abz)(1)23/I
 Capturing subpattern count = 1
+Max back reference = 1
 Last code unit = '3'
 Subject length lower bound = 3
 
@@ -5923,6 +5932,7 @@ Subject length lower bound = 6
 
 /^(?P<A>a)?(?(A)a|b)/I
 Capturing subpattern count = 1
+Max back reference = 1
 Named capturing subpatterns:
   A   1
 Compile options: <none>
@@ -5940,6 +5950,7 @@ No match
 
 /(?:(?(ZZ)a|b)(?P<ZZ>X))+/I
 Capturing subpattern count = 1
+Max back reference = 1
 Named capturing subpatterns:
   ZZ   1
 Last code unit = 'X'
@@ -5956,6 +5967,7 @@ Failed: error 115 at offset 9: reference to non-existent subpattern
 
 /(?:(?(ZZ)a|b)(?(ZZ)a|b)(?P<ZZ>X))+/I
 Capturing subpattern count = 1
+Max back reference = 1
 Named capturing subpatterns:
   ZZ   1
 Last code unit = 'X'
@@ -5966,6 +5978,7 @@ Subject length lower bound = 3
 
 /(?:(?(ZZ)a|\(b\))\\(?P<ZZ>X))+/I
 Capturing subpattern count = 1
+Max back reference = 1
 Named capturing subpatterns:
   ZZ   1
 Last code unit = 'X'
@@ -9713,6 +9726,7 @@ Subject length lower bound = 9
   (?(1)|.)                    # check that there was an empty component
   /Iix
 Capturing subpattern count = 1
+Max back reference = 1
 Compile options: caseless extended
 Overall options: anchored caseless extended
 Last code unit = ':'
@@ -9740,6 +9754,7 @@ Failed: error 165 at offset 15: different names for subpatterns of the same numb
     b(?<quote> (?<apostrophe>')|(?<realquote>")) ) 
     (?('quote')[a-z]+|[0-9]+)/Ix,dupnames
 Capturing subpattern count = 6
+Max back reference = 4
 Named capturing subpatterns:
   apostrophe   2
   apostrophe   5
@@ -9802,6 +9817,7 @@ No match
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 4
+Max back reference = 4
 Named capturing subpatterns:
   D   4
   D   1
@@ -9849,6 +9865,7 @@ No match
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 4
+Max back reference = 4
 Named capturing subpatterns:
   A   1
   A   4
@@ -9964,6 +9981,7 @@ Subject length lower bound = 1
     
 /()i(?(1)a)/I
 Capturing subpattern count = 1
+Max back reference = 1
 First code unit = 'i'
 Subject length lower bound = 1
     ia
@@ -13540,6 +13558,7 @@ No match
 
 /(?:(?<VERSION>abc)|xyz)(?(VERSION)yes|no)/I
 Capturing subpattern count = 1
+Max back reference = 1
 Named capturing subpatterns:
   VERSION   1
 Starting code units: a x 
@@ -13831,5 +13850,47 @@ Capturing subpattern count = 0
 Compile options: <none>
 Overall options: dotall no_dotstar_anchor
 Subject length lower bound = 1
+
+'^(?:(a)|b)(?(1)A|B)'
+    aA123\=ovector=1
+Matched, but too many substrings
+ 0: aA
+    aA123\=ovector=2
+ 0: aA
+ 1: a
+
+'^(?:(?<AA>a)|b)(?(<AA>)A|B)'
+    aA123\=ovector=1
+Matched, but too many substrings
+ 0: aA
+    aA123\=ovector=2
+ 0: aA
+ 1: a
+
+'^(?<AA>)(?:(?<AA>a)|b)(?(<AA>)A|B)'dupnames
+    aA123\=ovector=1
+Matched, but too many substrings
+ 0: aA
+    aA123\=ovector=2
+Matched, but too many substrings
+ 0: aA
+ 1: 
+    aA123\=ovector=3
+ 0: aA
+ 1: 
+ 2: a
+
+'^(?:(?<AA>X)|)(?:(?<AA>a)|b)\k{AA}'dupnames
+    aa123\=ovector=1
+Matched, but too many substrings
+ 0: aa
+    aa123\=ovector=2
+Matched, but too many substrings
+ 0: aa
+ 1: <unset>
+    aa123\=ovector=3
+ 0: aa
+ 1: <unset>
+ 2: a
 
 # End of testinput2 

@@ -5336,6 +5336,7 @@ for (;; ptr++)
             goto FAILED;
             }
           PUT2(code, 2+LINK_SIZE, recno);
+          if (recno > cb->top_backref) cb->top_backref = recno;
           break;
           }
 
@@ -5355,15 +5356,18 @@ for (;; ptr++)
 
         if (i < cb->names_found)
           {
-          int offset = i++;
-          int count = 1;
-          recno = GET2(slot, 0);   /* Number from first found */
-          for (; i < cb->names_found; i++)
+          int offset = i;            /* Offset of first name found */
+          int count = 0;
+           
+          for (;;)
             {
+            recno = GET2(slot, 0);   /* Number for last found */
+            if (recno > cb->top_backref) cb->top_backref = recno;
+            count++;
+            if (++i >= cb->names_found) break; 
             slot += cb->name_entry_size;
             if (PRIV(strncmp)(name, slot+IMM2_SIZE, namelen) != 0 ||
               (slot+IMM2_SIZE)[namelen] != 0) break;
-            count++;
             }
 
           if (count > 1)

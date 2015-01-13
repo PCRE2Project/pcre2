@@ -4116,4 +4116,22 @@ a random value. /Ix
 
 /(*NO_DOTSTAR_ANCHOR)(?s).*\d/info
 
+'^(?:(a)|b)(?(1)A|B)'
+    aA123\=ovector=1
+    aA123\=ovector=2
+
+'^(?:(?<AA>a)|b)(?(<AA>)A|B)'
+    aA123\=ovector=1
+    aA123\=ovector=2
+
+'^(?<AA>)(?:(?<AA>a)|b)(?(<AA>)A|B)'dupnames
+    aA123\=ovector=1
+    aA123\=ovector=2
+    aA123\=ovector=3
+
+'^(?:(?<AA>X)|)(?:(?<AA>a)|b)\k{AA}'dupnames
+    aa123\=ovector=1
+    aa123\=ovector=2
+    aa123\=ovector=3
+
 # End of testinput2 

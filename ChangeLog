@@ -1,7 +1,23 @@
 Change Log for PCRE2
 --------------------
 
-Version 10.00 05-January-2015
+Version 10.10 13-January-2015
+-----------------------------
+
+1. When a pattern is compiled, it remembers the highest back reference so that 
+when matching, if the ovector is too small, extra memory can be obtained to 
+use instead. A conditional subpattern whose condition is a check on a capture
+having happened, such as, for example in the pattern /^(?:(a)|b)(?(1)A|B)/, is
+another kind of back reference, but it was not setting the highest
+backreference number. This mattered only if pcre2_match() was called with an
+ovector that was too small to hold the capture, and there was no other kind of
+back reference (a situation which is probably quite rare). The effect of the
+bug was that the condition was always treated as FALSE when the capture could
+not be consulted, leading to a incorrect behaviour by pcre2_match(). This bug
+has been fixed.
+
+
+Version 10.00 05-January-2015 
 -----------------------------
 
 Version 10.00 is the first release of PCRE2, a revised API for the PCRE
