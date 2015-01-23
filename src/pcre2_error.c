@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-         New API code Copyright (c) 2014 University of Cambridge
+         New API code Copyright (c) 2015 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -200,7 +200,7 @@ static const char match_error_texts[] =
   "UTF-32 error: code points greater than 0x10ffff are not defined\0"
   "bad data value\0"
   /* 30 */
-  "bad length\0"
+  "patterns do not all use the same character tables\0"
   "magic number missing\0"
   "pattern compiled in wrong mode: 8/16/32-bit error\0"
   "bad offset value\0"

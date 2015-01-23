@@ -683,10 +683,28 @@ static const uint8_t opcode_possessify[] = {
 PCRE2_EXP_DEFN void PCRE2_CALL_CONVENTION
 pcre2_code_free(pcre2_code *code)
 {
+PCRE2_SIZE* ref_count;
+
 if (code != NULL)
   {
   if (code->executable_jit != NULL)
     PRIV(jit_free)(code->executable_jit, &code->memctl);
+
+  if ((code->flags & PCRE2_DEREF_TABLES) != 0)
+    {
+    /* Decoded tables belong to the codes after deserialization, and they must
+    be freed when there are no more reference to them. The *ref_count should
+    always be > 0. */
+
+    ref_count = (PCRE2_SIZE *)(code->tables + tables_length);
+    if (*ref_count > 0)
+      {
+      (*ref_count)--;
+      if (*ref_count == 0)
+        code->memctl.free((void *)code->tables, code->memctl.memory_data);
+      }
+    }
+
   code->memctl.free(code, code->memctl.memory_data);
   }
 }
@@ -5358,13 +5376,13 @@ for (;; ptr++)
           {
           int offset = i;            /* Offset of first name found */
           int count = 0;
-           
+
           for (;;)
             {
             recno = GET2(slot, 0);   /* Number for last found */
             if (recno > cb->top_backref) cb->top_backref = recno;
             count++;
-            if (++i >= cb->names_found) break; 
+            if (++i >= cb->names_found) break;
             slot += cb->name_entry_size;
             if (PRIV(strncmp)(name, slot+IMM2_SIZE, namelen) != 0 ||
               (slot+IMM2_SIZE)[namelen] != 0) break;
@@ -7317,8 +7335,14 @@ for (i = 0; i < cb->names_found; i++)
 
 PUT2(slot, 0, groupno);
 memcpy(slot + IMM2_SIZE, name, CU2BYTES(length));
-slot[IMM2_SIZE + length] = 0;
 cb->names_found++;
+
+/* Add a terminating zero and fill the rest of the slot with zeroes so that
+the memory is all initialized. Otherwise valgrind moans about uninitialized
+memory when saving serialized compiled patterns. */
+
+memset(slot + IMM2_SIZE + length, 0,
+  CU2BYTES(cb->name_entry_size - length - IMM2_SIZE));
 }
 
 
@@ -7356,6 +7380,7 @@ PCRE2_SPTR codestart;                   /* Start of compiled code */
 PCRE2_SPTR ptr;                         /* Current pointer in pattern */
 
 size_t length = 1;                      /* Allow or final END opcode */
+size_t usedlength;                      /* Actual length used */
 size_t re_blocksize;                    /* Size of memory block */
 
 int32_t firstcuflags, reqcuflags;       /* Type of first/req code unit */
@@ -7754,13 +7779,16 @@ overflow. */
 
 if (errorcode == 0 && ptr < cb.end_pattern) errorcode = ERR22;
 *code++ = OP_END;
-if ((size_t)(code - codestart) > length) errorcode = ERR23;
+usedlength = code - codestart;
+if (usedlength > length) errorcode = ERR23;
 
+/* If the estimated length exceeds the really used length, adjust the value of
+re->blocksize, and if valgrind support is configured, mark the extra allocated
+memory as unaddressable, so that any out-of-bound reads can be detected. */
+
+re->blocksize -= CU2BYTES(length - usedlength);
 #ifdef SUPPORT_VALGRIND
-/* If the estimated length exceeds the really used length, mark the extra
-allocated memory as unaddressable, so that any out-of-bound reads can be
-detected. */
-VALGRIND_MAKE_MEM_NOACCESS(code, (length - (code - codestart)) * sizeof(PCRE2_UCHAR));
+VALGRIND_MAKE_MEM_NOACCESS(code, CU2BYTES(length - usedlength));
 #endif
 
 /* Fill in any forward references that are required. There may be repeated

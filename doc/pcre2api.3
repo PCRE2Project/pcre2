@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "13 January 2015" "PCRE2 10.10"
+.TH PCRE2API 3 "23 January 2015" "PCRE2 10.10"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -202,6 +202,24 @@ document for an overview of all the PCRE2 documentation.
 .B "  pcre2_jit_callback \fIcallback_function\fP, void *\fIcallback_data\fP);"
 .sp
 .B void pcre2_jit_stack_free(pcre2_jit_stack *\fIjit_stack\fP);
+.fi
+.
+.
+.SH "PCRE2 NATIVE API SERIALIZATION FUNCTIONS"
+.rs
+.sp
+.nf
+.B int32_t pcre2_serialize_decode(pcre2_code **\fIcodes\fP,
+.B "  int32_t \fInumber_of_codes\fP, const uint32_t *\fIbytes\fP,"
+.B "  pcre2_general_context *\fIgcontext\fP);"
+.sp
+.B int32_t pcre2_serialize_encode(pcre2_code **\fIcodes\fP,
+.B "  int32_t \fInumber_of_codes\fP, uint32_t **\fIserialized_bytes\fP,"
+.B "  PCRE2_SIZE *\fIserialized_size\fP, pcre2_general_context *\fIgcontext\fP);"
+.sp
+.B void pcre2_serialize_free(uint8_t *\fIbytes\fP);
+.sp
+.B int32_t pcre2_serialize_get_number_of_codes(const uint8_t *\fIbytes\fP);
 .fi
 .
 .
@@ -1689,12 +1707,26 @@ set, the call to \fBpcre2_pattern_info()\fP returns the error PCRE2_ERROR_UNSET.
   PCRE2_INFO_SIZE
 .sp
 Return the size of the compiled pattern in bytes (for all three libraries). The
-third argument should point to a \fBsize_t\fP variable. This value does not
-include the size of the \fBpcre2_code\fP structure that is returned by
-\fBpcre_compile()\fP. The value that is used when \fBpcre2_compile()\fP is
-getting memory in which to place the compiled data is the value returned by
-this option plus the size of the \fBpcre2_code\fP structure. Processing a
-pattern with the JIT compiler does not alter the value returned by this option.
+third argument should point to a \fBsize_t\fP variable. This value includes the
+size of the general data block that precedes the code units of the compiled
+pattern itself. The value that is used when \fBpcre2_compile()\fP is getting
+memory in which to place the compiled pattern may be slightly larger than the
+value returned by this option, because there are cases where the code that
+calculates the size has to over-estimate. Processing a pattern with the JIT
+compiler does not alter the value returned by this option.
+.
+.
+.SH "SERIALIZATION AND PRECOMPILING"
+.rs
+.sp
+It is possible to save compiled patterns on disc or elsewhere, and reload them
+later, subject to a number of restrictions. The functions whose names begin
+with \fBpcre2_serialize_\fP are used for this purpose. They are described in
+the
+.\" HREF
+\fBpcre2serialize\fP
+.\"
+documentation.
 .
 .
 .\" HTML <a name="matchdatablock"></a>
@@ -2853,6 +2885,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 13 January 2015
+Last updated: 23 January 2015
 Copyright (c) 1997-2015 University of Cambridge.
 .fi

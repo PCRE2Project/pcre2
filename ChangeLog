@@ -1,11 +1,11 @@
 Change Log for PCRE2
 --------------------
 
-Version 10.10 13-January-2015
------------------------------
+Version 10.10 xx-xxx-2015
+-------------------------
 
-1. When a pattern is compiled, it remembers the highest back reference so that 
-when matching, if the ovector is too small, extra memory can be obtained to 
+1. When a pattern is compiled, it remembers the highest back reference so that
+when matching, if the ovector is too small, extra memory can be obtained to
 use instead. A conditional subpattern whose condition is a check on a capture
 having happened, such as, for example in the pattern /^(?:(a)|b)(?(1)A|B)/, is
 another kind of back reference, but it was not setting the highest
@@ -16,8 +16,21 @@ bug was that the condition was always treated as FALSE when the capture could
 not be consulted, leading to a incorrect behaviour by pcre2_match(). This bug
 has been fixed.
 
+2. Functions for serialization and deserialization of sets of compiled patterns
+have been added.
 
-Version 10.00 05-January-2015 
+3. The value that is returned by PCRE2_INFO_SIZE has been corrected to remove
+excess code units at the end of the data block that may occasionally occur if
+the code for calculating the size over-estimates. This change stops the
+serialization code copying uninitialized data, to which valgrind objects. The
+documentation of PCRE2_INFO_SIZE was incorrect in stating that the size did not
+include the general overhead. This has been corrected.
+
+4. All code units in every slot in the table of group names are now set, again
+in order to avoid accessing uninitialized data when serializing.
+
+
+Version 10.00 05-January-2015
 -----------------------------
 
 Version 10.00 is the first release of PCRE2, a revised API for the PCRE
@@ -30,8 +43,9 @@ logged. In addition to the API changes, the following changes were made. They
 are either new functionality, or bug fixes and other noticeable changes of
 behaviour that were implemented after the code had been forked.
 
-1. Unicode support is now enabled by default, but it can optionally be
-disabled.
+1. Including Unicode support at build time is now enabled by default, but it
+can optionally be disabled. It is not enabled by default at run time (no
+change).
 
 2. The test program, now called pcre2test, was re-specified and almost
 completely re-written. Its input is not compatible with input for pcretest.

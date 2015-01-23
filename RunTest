@@ -65,6 +65,7 @@ title15="Test 15: JIT-specific features when JIT is not available"
 title16="Test 16: JIT-specific features when JIT is available"
 title17="Test 17: Tests of the POSIX interface, excluding UTF/UCP"
 title18="Test 18: Tests of the POSIX interface with UTF/UCP"
+title19="Test 19: Serialization tests"
 maxtest=18
 
 if [ $# -eq 1 -a "$1" = "list" ]; then
@@ -87,6 +88,7 @@ if [ $# -eq 1 -a "$1" = "list" ]; then
   echo $title16
   echo $title17
   echo $title18
+  echo $title19
   exit 0
 fi
 
@@ -207,6 +209,7 @@ do15=no
 do16=no
 do17=no
 do18=no
+do19=no
 
 while [ $# -gt 0 ] ; do
   case $1 in
@@ -229,6 +232,7 @@ while [ $# -gt 0 ] ; do
    16) do16=yes;;
    17) do17=yes;;
    18) do18=yes;;
+   19) do19=yes;;
    -8) arg8=yes;;
   -16) arg16=yes;;
   -32) arg32=yes;;
@@ -364,7 +368,7 @@ if [ $do0  = no -a $do1  = no -a $do2  = no -a $do3  = no -a \
      $do4  = no -a $do5  = no -a $do6  = no -a $do7  = no -a \
      $do8  = no -a $do9  = no -a $do10 = no -a $do11 = no -a \
      $do12 = no -a $do13 = no -a $do14 = no -a $do15 = no -a \
-     $do16 = no -a $do17 = no -a $do18 = no \
+     $do16 = no -a $do17 = no -a $do18 = no -a $do19 = no \
    ]; then
   do0=yes
   do1=yes
@@ -385,6 +389,7 @@ if [ $do0  = no -a $do1  = no -a $do2  = no -a $do3  = no -a \
   do16=yes
   do17=yes
   do18=yes
+  do19=yes
 fi
 
 # Handle any explicit skips at this stage, so that an argument list may consist
@@ -721,10 +726,18 @@ for bmode in "$test8" "$test16" "$test32"; do
     fi
   fi
 
+  # Serialization tests
+
+  if [ $do19 = yes ] ; then
+    echo $title19
+    $sim $valgrind ./pcre2test -q $bmode $testdata/testinput19 testtry
+    checkresult $? 19 ""
+  fi
+
 # End of loop for 8/16/32-bit tests
 done
 
 # Clean up local working files
-rm -f testSinput test3input test3output test3outputA test3outputB teststdout testtry
+rm -f testSinput test3input testsaved1 testsaved2 test3output test3outputA test3outputB teststdout testtry
 
 # End

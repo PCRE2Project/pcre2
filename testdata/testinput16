@@ -161,12 +161,29 @@
 # match to happen via the interpreter, but for fast JIT invalid options are
 # ignored, so an unanchored match happens.
 
-/abcd/jit
+/abcd/
     abcd\=anchored
     fail abcd\=anchored 
     
 /abcd/jitfast
     abcd\=anchored 
     succeed abcd\=anchored 
+    
+# Push/pop does not lose the JIT information, though jitverify applies only to
+# compilation, but serializing (save/load) discards JIT data completely.
+
+/^abc\Kdef/info,push
+#pop jitverify
+    abcdef
+
+/^abc\Kdef/info,push
+#save testsaved1
+#load testsaved1
+#pop jitverify
+    abcdef
+    
+#load testsaved1
+#pop jit,jitverify
+    abcdef
     
 # End of testinput16

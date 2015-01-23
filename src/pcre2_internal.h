@@ -523,6 +523,7 @@ bytes in a code unit in that mode. */
 #define PCRE2_NL_SET        0x00008000  /* newline was set in the pattern */
 #define PCRE2_NOTEMPTY_SET  0x00010000  /* (*NOTEMPTY) used        ) keep */
 #define PCRE2_NE_ATST_SET   0x00020000  /* (*NOTEMPTY_ATSTART) used) together */
+#define PCRE2_DEREF_TABLES  0x00040000  /* Release character tables. */
 
 #define PCRE2_MODE_MASK     (PCRE2_MODE8 | PCRE2_MODE16 | PCRE2_MODE32)
 
@@ -1762,6 +1763,15 @@ typedef struct {
 #define UCD_GRAPHBREAK(ch)  GET_UCD(ch)->gbprop
 #define UCD_CASESET(ch)     GET_UCD(ch)->caseset
 #define UCD_OTHERCASE(ch)   ((uint32_t)((int)ch + (int)(GET_UCD(ch)->other_case)))
+
+/* Header for serialized pcre2 codes. */
+
+typedef struct pcre2_serialized_data {
+  uint32_t magic;
+  uint32_t version;
+  uint32_t config;
+  int32_t  number_of_codes;
+} pcre2_serialized_data;
 
 
 

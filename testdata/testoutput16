@@ -310,7 +310,7 @@ Failed: error -46: JIT stack limit reached
 # match to happen via the interpreter, but for fast JIT invalid options are
 # ignored, so an unanchored match happens.
 
-/abcd/jit
+/abcd/
     abcd\=anchored
  0: abcd
     fail abcd\=anchored 
@@ -321,5 +321,37 @@ No match
  0: abcd (JIT)
     succeed abcd\=anchored 
  0: abcd (JIT)
+    
+# Push/pop does not lose the JIT information, though jitverify applies only to
+# compilation, but serializing (save/load) discards JIT data completely.
+
+/^abc\Kdef/info,push
+** Applied only to compile when pattern is stacked with 'push': jitverify
+Capturing subpattern count = 0
+Compile options: <none>
+Overall options: anchored
+Subject length lower bound = 6
+JIT compilation was successful
+#pop jitverify
+    abcdef
+ 0: def (JIT)
+
+/^abc\Kdef/info,push
+** Applied only to compile when pattern is stacked with 'push': jitverify
+Capturing subpattern count = 0
+Compile options: <none>
+Overall options: anchored
+Subject length lower bound = 6
+JIT compilation was successful
+#save testsaved1
+#load testsaved1
+#pop jitverify
+    abcdef
+ 0: def
+    
+#load testsaved1
+#pop jit,jitverify
+    abcdef
+ 0: def (JIT)
     
 # End of testinput16

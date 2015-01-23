@@ -293,7 +293,7 @@ if [ $usevalgrind -ne 0 ]; then
 
   for opts in \
     "--disable-stack-for-recursion --disable-shared" \
-    "--with-link-size=3 --disable-shared" \
+    "--with-link-size=3 --enable-pcre2-16 --enable-pcre2-32 --disable-shared" \
     "--disable-unicode --disable-shared"
   do
     opts="--enable-valgrind $opts"

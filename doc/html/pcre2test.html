@@ -30,9 +30,10 @@ please consult the man page, in case the conversion went wrong.
 <li><a name="TOC15" href="#SEC15">RESTARTING AFTER A PARTIAL MATCH</a>
 <li><a name="TOC16" href="#SEC16">CALLOUTS</a>
 <li><a name="TOC17" href="#SEC17">NON-PRINTING CHARACTERS</a>
-<li><a name="TOC18" href="#SEC18">SEE ALSO</a>
-<li><a name="TOC19" href="#SEC19">AUTHOR</a>
-<li><a name="TOC20" href="#SEC20">REVISION</a>
+<li><a name="TOC18" href="#SEC18">SAVING AND RESTORING COMPILED PATTERNS</a>
+<li><a name="TOC19" href="#SEC19">SEE ALSO</a>
+<li><a name="TOC20" href="#SEC20">AUTHOR</a>
+<li><a name="TOC21" href="#SEC21">REVISION</a>
 </ul>
 <br><a name="SEC1" href="#TOC1">SYNOPSIS</a><br>
 <P>
@@ -51,10 +52,11 @@ documentation.
 </P>
 <P>
 The input for <b>pcre2test</b> is a sequence of regular expression patterns and
-subject strings to be matched. The output shows the result of each match
-attempt. Modifiers on the command line, the patterns, and the subject lines
-specify PCRE2 function options, control how the subject is processed, and what
-output is produced.
+subject strings to be matched. There are also command lines for setting
+defaults and controlling some special actions. The output shows the result of
+each match attempt. Modifiers on external or internal command lines, the
+patterns, and the subject lines specify PCRE2 function options, control how the
+subject is processed, and what output is produced.
 </P>
 <P>
 As the original fairly simple PCRE library evolved, it acquired many different
@@ -227,9 +229,7 @@ If <b>pcre2test</b> is given two filename arguments, it reads from the first and
 writes to the second. If the first name is "-", input is taken from the
 standard input. If <b>pcre2test</b> is given only one argument, it reads from
 that file and writes to stdout. Otherwise, it reads from stdin and writes to
-stdout. When the input is a terminal, it prompts for each line of input, using
-"re&#62;" to prompt for regular expression patterns, and "data&#62;" to prompt for
-subject lines.
+stdout.
 </P>
 <P>
 When <b>pcre2test</b> is built, a configuration option can specify that it
@@ -242,10 +242,16 @@ the <b>-help</b> option states whether or not <b>readline()</b> will be used.
 The program handles any number of tests, each of which consists of a set of
 input lines. Each set starts with a regular expression pattern, followed by any
 number of subject lines to be matched against that pattern. In between sets of
-test data, command lines that begin with a hash (#) character may appear. This
-file format, with some restrictions, can also be processed by the
-<b>perltest.sh</b> script that is distributed with PCRE2 as a means of checking
-that the behaviour of PCRE2 and Perl is the same.
+test data, command lines that begin with # may appear. This file format, with
+some restrictions, can also be processed by the <b>perltest.sh</b> script that
+is distributed with PCRE2 as a means of checking that the behaviour of PCRE2
+and Perl is the same.
+</P>
+<P>
+When the input is a terminal, <b>pcre2test</b> prompts for each line of input,
+using "re&#62;" to prompt for regular expression patterns, and "data&#62;" to prompt
+for subject lines. Command lines starting with # can be entered only in
+response to the "re&#62;" prompt.
 </P>
 <P>
 Each subject line is matched separately and independently. If you want to do
@@ -263,21 +269,27 @@ still input to be read.
 </P>
 <br><a name="SEC6" href="#TOC1">COMMAND LINES</a><br>
 <P>
-In between sets of test data, a line that begins with a hash (#) character is
-interpreted as a command line. If the first character is followed by white
-space or an exclamation mark, the line is treated as a comment, and ignored.
-Otherwise, the following commands are recognized:
+In between sets of test data, a line that begins with # is interpreted as a
+command line. If the first character is followed by white space or an
+exclamation mark, the line is treated as a comment, and ignored. Otherwise, the
+following commands are recognized:
 <pre>
   #forbid_utf
 </pre>
 Subsequent patterns automatically have the PCRE2_NEVER_UTF and PCRE2_NEVER_UCP
 options set, which locks out the use of UTF and Unicode property features. This
-is a trigger guard that is used in test files to ensure that UTF/Unicode tests
-are not accidentally added to files that are used when UTF support is not
-included in the library. This effect can also be obtained by the use of
-<b>#pattern</b>; the difference is that <b>#forbid_utf</b> cannot be unset, and
-the automatic options are not displayed in pattern information, to avoid
-cluttering up test output.
+is a trigger guard that is used in test files to ensure that UTF or Unicode
+property tests are not accidentally added to files that are used when Unicode
+support is not included in the library. This effect can also be obtained by the
+use of <b>#pattern</b>; the difference is that <b>#forbid_utf</b> cannot be
+unset, and the automatic options are not displayed in pattern information, to
+avoid cluttering up test output.
+<pre>
+  #load &#60;filename&#62;
+</pre>
+This command is used to load a set of precompiled patterns from a file, as
+described in the section entitled "Saving and restoring compiled patterns"
+<a href="#saverestore">below.</a>
 <pre>
   #pattern &#60;modifier-list&#62;
 </pre>
@@ -293,6 +305,18 @@ lines, none of the other command lines are permitted, because they and many
 of the modifiers are specific to <b>pcre2test</b>, and should not be used in
 test files that are also processed by <b>perltest.sh</b>. The <b>#perltest</b>
 command helps detect tests that are accidentally put in the wrong file.
+<pre>
+  #pop [&#60;modifiers&#62;]
+</pre>
+This command is used to manipulate the stack of compiled patterns, as described
+in the section entitled "Saving and restoring compiled patterns"
+<a href="#saverestore">below.</a>
+<pre>
+  #save &#60;filename&#62;
+</pre>
+This command is used to save a set of compiled patterns to a file, as described
+in the section entitled "Saving and restoring compiled patterns"
+<a href="#saverestore">below.</a>
 <pre>
   #subject &#60;modifier-list&#62;
 </pre>
@@ -428,7 +452,7 @@ There are three types of modifier that can appear in pattern lines, two of
 which may also be used in a <b>#pattern</b> command. A pattern's modifier list
 can add to or override default modifiers that were set by a previous
 <b>#pattern</b> command.
-</P>
+<a name="optionmodifiers"></a></P>
 <br><b>
 Setting compilation options
 </b><br>
@@ -465,7 +489,7 @@ As well as turning on the PCRE2_UTF option, the <b>utf</b> modifier causes all
 non-printing characters in output strings to be printed using the \x{hh...}
 notation. Otherwise, those less than 0x100 are output in hex without the curly
 brackets.
-</P>
+<a name="controlmodifiers"></a></P>
 <br><b>
 Setting compilation controls
 </b><br>
@@ -486,8 +510,8 @@ about the pattern:
       memory                    show memory used
       newline=&#60;type&#62;            set newline type
       parens_nest_limit=&#60;n&#62;     set maximum parentheses depth
-      perlcompat                lock out non-Perl modifiers
       posix                     use the POSIX API
+      push                      push compiled pattern onto the stack
       stackguard=&#60;number&#62;       test the stackguard feature
       tables=[0|1|2]            select internal tables
 </pre>
@@ -725,6 +749,22 @@ not affect the compilation process.
 </pre>
 These modifiers may not appear in a <b>#pattern</b> command. If you want them as
 defaults, set them in a <b>#subject</b> command.
+</P>
+<br><b>
+Saving a compiled pattern
+</b><br>
+<P>
+When a pattern with the <b>push</b> modifier is successfully compiled, it is
+pushed onto a stack of compiled patterns, and <b>pcre2test</b> expects the next
+line to contain a new pattern (or a command) instead of a subject line. This
+facility is used when saving compiled patterns to a file, as described in the
+section entitled "Saving and restoring compiled patterns"
+<a href="#saverestore">below.</a>
+The <b>push</b> modifier is incompatible with compilation modifiers such as
+<b>global</b> that act at match time. Any that are specified are ignored, with a
+warning message, except for <b>replace</b>, which causes an error. Note that,
+<b>jitverify</b>, which is allowed, does not carry through to any subsequent
+matching that uses this pattern.
 </P>
 <br><a name="SEC11" href="#TOC1">SUBJECT MODIFIERS</a><br>
 <P>
@@ -1292,14 +1332,75 @@ string, it behaves in the same way, unless a different locale has been set for
 the pattern (using the <b>/locale</b> modifier). In this case, the
 <b>isprint()</b> function is used to distinguish printing and non-printing
 characters.
+<a name="saverestore"></a></P>
+<br><a name="SEC18" href="#TOC1">SAVING AND RESTORING COMPILED PATTERNS</a><br>
+<P>
+It is possible to save compiled patterns on disc or elsewhere, and reload them
+later, subject to a number of restrictions. JIT data cannot be saved. The host
+on which the patterns are reloaded must be running the same version of PCRE2,
+with the same code unit width, and must also have the same endianness, pointer
+width and PCRE2_SIZE type. Before compiled patterns can be saved they must be
+serialized, that is, converted to a stream of bytes. A single byte stream may
+contain any number of compiled patterns, but they must all use the same
+character tables. A single copy of the tables is included in the byte stream
+(its size is 1088 bytes).
 </P>
-<br><a name="SEC18" href="#TOC1">SEE ALSO</a><br>
+<P>
+The functions whose names begin with <b>pcre2_serialize_</b> are used
+for serializing and de-serializing. They are described in the
+<a href="pcre2serialize.html"><b>pcre2serialize</b></a>
+documentation. In this section we describe the features of <b>pcre2test</b> that
+can be used to test these functions.
+</P>
+<P>
+When a pattern with <b>push</b> modifier is successfully compiled, it is pushed
+onto a stack of compiled patterns, and <b>pcre2test</b> expects the next line to
+contain a new pattern (or command) instead of a subject line. By this means, a
+number of patterns can be compiled and retained. The <b>push</b> modifier is
+incompatible with <b>posix</b>, and control modifiers that act at match time are
+ignored (with a message). The <b>jitverify</b> modifier applies only at compile
+time. The command
+<pre>
+  #save &#60;filename&#62;
+</pre>
+causes all the stacked patterns to be serialized and the result written to the
+named file. Afterwards, all the stacked patterns are freed. The command
+<pre>
+  #load &#60;filename&#62;
+</pre>
+reads the data in the file, and then arranges for it to be de-serialized, with
+the resulting compiled patterns added to the pattern stack. The pattern on the
+top of the stack can be retrieved by the #pop command, which must be followed
+by lines of subjects that are to be matched with the pattern, terminated as
+usual by an empty line or end of file. This command may be followed by a
+modifier list containing only
+<a href="#controlmodifiers">control modifiers</a>
+that act after a pattern has been compiled. In particular, <b>hex</b>,
+<b>posix</b>, and <b>push</b> are not allowed, nor are any
+<a href="#optionmodifiers">option-setting modifiers.</a>
+The JIT modifiers are, however permitted. Here is an example that saves and
+reloads two patterns.
+<pre>
+  /abc/push
+  /xyz/push
+  #save tempfile
+  #load tempfile
+  #pop info
+  xyz
+
+  #pop jit,bincode
+  abc
+</pre>
+If <b>jitverify</b> is used with #pop, it does not automatically imply
+<b>jit</b>, which is different behaviour from when it is used on a pattern.
+</P>
+<br><a name="SEC19" href="#TOC1">SEE ALSO</a><br>
 <P>
 <b>pcre2</b>(3), <b>pcre2api</b>(3), <b>pcre2callout</b>(3),
 <b>pcre2jit</b>, <b>pcre2matching</b>(3), <b>pcre2partial</b>(d),
-<b>pcre2pattern</b>(3).
+<b>pcre2pattern</b>(3), <b>pcre2serialize</b>(3).
 </P>
-<br><a name="SEC19" href="#TOC1">AUTHOR</a><br>
+<br><a name="SEC20" href="#TOC1">AUTHOR</a><br>
 <P>
 Philip Hazel
 <br>
@@ -1308,9 +1409,9 @@ University Computing Service
 Cambridge, England.
 <br>
 </P>
-<br><a name="SEC20" href="#TOC1">REVISION</a><br>
+<br><a name="SEC21" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 02 January 2015
+Last updated: 23 January 2015
 <br>
 Copyright &copy; 1997-2015 University of Cambridge.
 <br>

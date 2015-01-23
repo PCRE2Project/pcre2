@@ -198,11 +198,13 @@ greater than zero. */
 #define PCRE2_ERROR_UTF32_ERR1      (-27)
 #define PCRE2_ERROR_UTF32_ERR2      (-28)
 
-/* Error codes for pcre2[_dfa]_match(), substring extraction functions, and
-context functions. */
+/* Error codes for pcre2[_dfa]_match(), substring extraction functions, context
+functions, and serializing functions. They are in numerical order. Originally
+they were in alphabetical order too, but now that PCRE2 is released, the
+numbers must not be changed. */
 
 #define PCRE2_ERROR_BADDATA           (-29)
-#define PCRE2_ERROR_BADLENGTH         (-30)
+#define PCRE2_ERROR_MIXEDTABLES       (-30)  /* Name was changed */
 #define PCRE2_ERROR_BADMAGIC          (-31)
 #define PCRE2_ERROR_BADMODE           (-32)
 #define PCRE2_ERROR_BADOFFSET         (-33)
@@ -455,6 +457,17 @@ PCRE2_EXP_DECL void      pcre2_substring_list_free(PCRE2_SPTR *); \
 PCRE2_EXP_DECL int       pcre2_substring_list_get(pcre2_match_data *, \
                            PCRE2_UCHAR ***, PCRE2_SIZE **);
 
+/* Functions for serializing / deserializing compiled patterns. */
+
+#define PCRE2_SERIALIZE_FUNCTIONS \
+PCRE2_EXP_DECL int32_t   pcre2_serialize_encode(const pcre2_code **, \
+                           int32_t, uint8_t **, PCRE2_SIZE *, \
+                           pcre2_general_context *); \
+PCRE2_EXP_DECL int32_t   pcre2_serialize_decode(pcre2_code **, int32_t, \
+                           const uint8_t *, pcre2_general_context *); \
+PCRE2_EXP_DECL int32_t   pcre2_serialize_get_number_of_codes(const uint8_t *); \
+PCRE2_EXP_DECL void      pcre2_serialize_free(uint8_t *);
+
 
 /* Convenience function for match + substitute. */
 
@@ -560,6 +573,10 @@ pcre2_compile are called by application code. */
 #define pcre2_match_data_create_from_pattern  PCRE2_SUFFIX(pcre2_match_data_create_from_pattern_)
 #define pcre2_match_data_free                 PCRE2_SUFFIX(pcre2_match_data_free_)
 #define pcre2_pattern_info                    PCRE2_SUFFIX(pcre2_pattern_info_)
+#define pcre2_serialize_decode                PCRE2_SUFFIX(pcre2_serialize_decode_)
+#define pcre2_serialize_encode                PCRE2_SUFFIX(pcre2_serialize_encode_)
+#define pcre2_serialize_free                  PCRE2_SUFFIX(pcre2_serialize_free_)
+#define pcre2_serialize_get_number_of_codes   PCRE2_SUFFIX(pcre2_serialize_get_number_of_codes_)
 #define pcre2_set_bsr                         PCRE2_SUFFIX(pcre2_set_bsr_)
 #define pcre2_set_callout                     PCRE2_SUFFIX(pcre2_set_callout_)
 #define pcre2_set_character_tables            PCRE2_SUFFIX(pcre2_set_character_tables_)
@@ -596,8 +613,9 @@ PCRE2_MATCH_CONTEXT_FUNCTIONS \
 PCRE2_COMPILE_FUNCTIONS \
 PCRE2_PATTERN_INFO_FUNCTIONS \
 PCRE2_MATCH_FUNCTIONS \
-PCRE2_SUBSTITUTE_FUNCTION \
 PCRE2_SUBSTRING_FUNCTIONS \
+PCRE2_SERIALIZE_FUNCTIONS \
+PCRE2_SUBSTITUTE_FUNCTION \
 PCRE2_JIT_FUNCTIONS \
 PCRE2_OTHER_FUNCTIONS
 
@@ -625,6 +643,8 @@ PCRE2_TYPES_STRUCTURES_AND_FUNCTIONS
 #undef PCRE2_PATTERN_INFO_FUNCTIONS
 #undef PCRE2_MATCH_FUNCTIONS
 #undef PCRE2_SUBSTRING_FUNCTIONS
+#undef PCRE2_SERIALIZE_FUNCTIONS
+#undef PCRE2_SUBSTITUTE_FUNCTION
 #undef PCRE2_JIT_FUNCTIONS
 #undef PCRE2_OTHER_FUNCTIONS
 #undef PCRE2_TYPES_STRUCTURES_AND_FUNCTIONS
