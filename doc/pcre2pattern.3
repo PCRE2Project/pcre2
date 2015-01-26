@@ -130,6 +130,14 @@ of arbitrary characters). For more details, see the
 documentation.
 .
 .
+.SS "Disabling JIT compilation"
+.rs
+.sp
+If a pattern that starts with (*NO_JIT) is successfully compiled, an attempt by 
+the application to apply the JIT optimization by calling 
+\fBpcre2_jit_compile()\fP is ignored. 
+.
+.
 .SS "Setting match and recursion limits"
 .rs
 .sp

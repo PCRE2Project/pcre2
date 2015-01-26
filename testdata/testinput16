@@ -16,6 +16,10 @@
     abcd
     xyz
 
+/(*NO_JIT)abcd/I
+    abcd
+    xyz
+
 /abcd/
     abcd
     ab\=ps

@@ -29,6 +29,8 @@ include the general overhead. This has been corrected.
 4. All code units in every slot in the table of group names are now set, again
 in order to avoid accessing uninitialized data when serializing.
 
+5. The (*NO_JIT) feature is implemented.
+
 
 Version 10.00 05-January-2015
 -----------------------------

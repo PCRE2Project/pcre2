@@ -10324,7 +10324,8 @@ Arguments:
   code          a compiled pattern
   options       JIT option bits
 
-Returns:        nothing
+Returns:        0: success or (*NOJIT) was used
+               <0: an error code 
 */
 
 #define PUBLIC_JIT_COMPILE_OPTIONS \
@@ -10350,6 +10351,8 @@ if (code == NULL)
 
 if ((options & ~PUBLIC_JIT_COMPILE_OPTIONS) != 0)
   return PCRE2_ERROR_JIT_BADOPTION;
+  
+if ((re->flags & PCRE2_NOJIT) != 0) return 0;
 
 functions = (executable_functions *)re->executable_jit;
 
