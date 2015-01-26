@@ -2874,16 +2874,22 @@ UNICODE AND UTF SUPPORT
        another without, in the same configuration.
 
        Of  itself, Unicode support does not make PCRE2 treat strings as UTF-8,
-       UTF-16 or UTF-32. To do that, applications that use the library have to
-       set  the  PCRE2_UTF  option when they call pcre2_compile() to compile a
-       pattern.
+       UTF-16 or UTF-32. To do that, applications that use the library can set
+       the  PCRE2_UTF  option when they call pcre2_compile() to compile a pat-
+       tern.  Alternatively, patterns may be started with  (*UTF)  unless  the
+       application has locked this out by setting PCRE2_NEVER_UTF.
 
        UTF support allows the libraries to process character code points up to
-       0x10ffff  in the strings that they handle. It also provides support for
-       accessing the Unicode properties  of  such  characters,  using  pattern
-       escapes  such  as  \P, \p, and \X. Only the general category properties
-       such as Lu and Nd are supported. Details are given in the  pcre2pattern
+       0x10ffff in the strings that they handle. It also provides support  for
+       accessing  the  Unicode  properties  of  such characters, using pattern
+       escapes such as \P, \p, and \X. Only the  general  category  properties
+       such  as Lu and Nd are supported. Details are given in the pcre2pattern
        documentation.
+
+       Pattern escapes such as \d and \w do not by default make use of Unicode
+       properties.  The  application  can  request that they do by setting the
+       PCRE2_UCP option. Unless the application  has  set  PCRE2_NEVER_UCP,  a
+       pattern may also request this by starting with (*UCP).
 
 
 JUST-IN-TIME COMPILER SUPPORT
@@ -3226,8 +3232,8 @@ AUTHOR
 
 REVISION
 
-       Last updated: 23 November 2014
-       Copyright (c) 1997-2014 University of Cambridge.
+       Last updated: 26 January 2015
+       Copyright (c) 1997-2015 University of Cambridge.
 ------------------------------------------------------------------------------
 
 
