@@ -31,6 +31,15 @@ in order to avoid accessing uninitialized data when serializing.
 
 5. The (*NO_JIT) feature is implemented.
 
+6. If a bug that caused pcre2_compile() to use more memory than allocated was
+triggered when using valgrind, the code in (3) above passed a stupidly large 
+value to valgrind. This caused a crash instead of an "internal error" return.
+
+7. A reference to a duplicated named group (either a back reference or a test 
+for being set in a conditional) that occurred in a part of the pattern where 
+PCRE2_DUPNAMES was not set caused the amount of memory needed for the pattern 
+to be incorrectly calculated, leading to overwriting.
+
 
 Version 10.00 05-January-2015
 -----------------------------

@@ -677,7 +677,6 @@ typedef struct compile_block {
   uint32_t final_bracount;         /* Saved value after first pass */
   uint32_t top_backref;            /* Maximum back reference */
   uint32_t backref_map;            /* Bitmap of low back refs */
-  uint32_t namedrefcount;          /* Number of backreferences by name */
   uint32_t nltype;                 /* Newline type */
   uint32_t nllen;                  /* Newline string length */
   PCRE2_UCHAR nl[4];               /* Newline string when fixed length */

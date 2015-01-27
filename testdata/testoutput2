@@ -13893,4 +13893,8 @@ Matched, but too many substrings
  1: <unset>
  2: a
 
+/(?<N111>(?J)(?<N111>1(111111)11|)1|1|)(?(<N111>)1)/
+
+/(?<N>(?J)(?<N>))(?-J)\k<N>/
+
 # End of testinput2 

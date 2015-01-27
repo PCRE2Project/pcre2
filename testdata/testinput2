@@ -4134,4 +4134,8 @@ a random value. /Ix
     aa123\=ovector=2
     aa123\=ovector=3
 
+/(?<N111>(?J)(?<N111>1(111111)11|)1|1|)(?(<N111>)1)/
+
+/(?<N>(?J)(?<N>))(?-J)\k<N>/
+
 # End of testinput2 

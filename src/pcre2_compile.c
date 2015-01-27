@@ -5296,9 +5296,10 @@ for (;; ptr++)
           }
 
         /* Otherwise we expect to read a name; anything else is an error. When
-        a name is one of a number of duplicates, a different opcode is used and
-        it needs more memory. Unfortunately we cannot tell whether a name is a
-        duplicate in the first pass, so we have to allow for more memory. */
+        the referenced name is one of a number of duplicates, a different
+        opcode is used and it needs more memory. Unfortunately we cannot tell
+        whether this is the case in the first pass, so we have to allow for
+        more memory always. */
 
         else
           {
@@ -5318,8 +5319,7 @@ for (;; ptr++)
             ptr++;
             }
           namelen = (int)(ptr - name);
-          if (lengthptr != NULL && (options & PCRE2_DUPNAMES) != 0)
-            *lengthptr += IMM2_SIZE;
+          if (lengthptr != NULL) *lengthptr += IMM2_SIZE;
           }
 
         /* Check the terminator */
@@ -5736,15 +5736,15 @@ for (;; ptr++)
             }
           recno = (i < cb->names_found)? ng->number : 0;
 
-          /* Count named back references. */
-
-          if (!is_recurse) cb->namedrefcount++;
-
           /* If duplicate names are permitted, we have to allow for a named
           reference to a duplicated name (this cannot be determined until the
-          second pass). This needs an extra 16-bit data item. */
+          second pass). This needs an extra data item. Counting named back 
+          references and incrementing the count at the end does not work 
+          because it does not account for duplication of groups containing such 
+          references. Nor does checking for PCRE2_DUPNAMES because that need 
+          not be set at the point of reference. */
 
-          if ((options & PCRE2_DUPNAMES) != 0) *lengthptr += IMM2_SIZE;
+          *lengthptr += IMM2_SIZE;
           }
 
         /* In the real compile, search the name table. We check the name
@@ -6874,7 +6874,7 @@ for (;;)
       }
 
     /* Fill in the ket */
-
+    
     *code = OP_KET;
     PUT(code, 1, (int)(code - start_bracket));
     code += 1 + LINK_SIZE;
@@ -7479,7 +7479,6 @@ cb.name_entry_size = 0;
 cb.name_table = NULL;
 cb.named_groups = named_groups;
 cb.named_group_list_size = NAMED_GROUP_LIST_SIZE;
-cb.namedrefcount = 0;
 cb.names_found = 0;
 cb.open_caps = NULL;
 cb.parens_depth = 0;
@@ -7668,13 +7667,6 @@ if (length > MAX_PATTERN_SIZE)
   goto HAD_ERROR;
   }
 
-/* If there are groups with duplicate names and there are also references by
-name, we must allow for the possibility of named references to duplicated
-groups. These require an extra data item each. */
-
-if (cb.dupnames && cb.namedrefcount > 0)
-  length += cb.namedrefcount * IMM2_SIZE * sizeof(PCRE2_UCHAR);
-
 /* Compute the size of, and then get and initialize, the data block for storing
 the compiled pattern and names table. Integer overflow should no longer be
 possible because nowadays we limit the maximum value of cb.names_found and
@@ -7689,7 +7681,7 @@ if (re == NULL)
   errorcode = ERR21;
   goto HAD_ERROR;
   }
-
+  
 re->memctl = ccontext->memctl;
 re->tables = tables;
 re->executable_jit = NULL;
@@ -7775,22 +7767,22 @@ if (cb.had_accept)
   }
 
 /* If we have not reached end of pattern after a successful compile, there's an
-excess bracket. Otherwise, fill in the final opcode and check for disastrous
-overflow. */
+excess bracket. Fill in the final opcode and check for disastrous overflow.
+If no overflow, but the estimated length exceeds the really used length, adjust
+the value of re->blocksize, and if valgrind support is configured, mark the
+extra allocated memory as unaddressable, so that any out-of-bound reads can be
+detected. */
 
 if (errorcode == 0 && ptr < cb.end_pattern) errorcode = ERR22;
 *code++ = OP_END;
 usedlength = code - codestart;
-if (usedlength > length) errorcode = ERR23;
-
-/* If the estimated length exceeds the really used length, adjust the value of
-re->blocksize, and if valgrind support is configured, mark the extra allocated
-memory as unaddressable, so that any out-of-bound reads can be detected. */
-
-re->blocksize -= CU2BYTES(length - usedlength);
+if (usedlength > length) errorcode = ERR23; else
+  {
+  re->blocksize -= CU2BYTES(length - usedlength);
 #ifdef SUPPORT_VALGRIND
-VALGRIND_MAKE_MEM_NOACCESS(code, CU2BYTES(length - usedlength));
+  VALGRIND_MAKE_MEM_NOACCESS(code, CU2BYTES(length - usedlength));
 #endif
+  }
 
 /* Fill in any forward references that are required. There may be repeated
 references; optimize for them, as searching a large regex takes time. */
