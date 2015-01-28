@@ -74,7 +74,7 @@ static const char compile_error_texts[] =
   "missing terminating ] for character class\0"
   "invalid escape sequence in character class\0"
   "range out of order in character class\0"
-  "nothing to repeat\0"
+  "quantifier does not follow a repeatable item\0"
   /* 10 */
   "internal error: unexpected repeat\0"
   "unrecognized character after (? or (?-\0"

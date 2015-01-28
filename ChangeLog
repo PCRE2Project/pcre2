@@ -44,6 +44,17 @@ to be incorrectly calculated, leading to overwriting.
 segfault at compile time (while trying to find the minimum matching length). 
 The infinite loop is now broken (with the minimum length unset, that is, zero).
 
+9. If an assertion that was used as a condition was quantified with a minimum 
+of zero, matching went wrong. In particular, if the whole group had unlimited 
+repetition and could match an empty string, a segfault was likely. The pattern
+(?(?=0)?)+ is an example that caused this. Perl allows assertions to be
+quantified, but not if they are being used as conditions, so the above pattern
+is faulted by Perl. PCRE2 has now been changed so that it also rejects such
+patterns.
+
+10. The error message for an invalid quantifier has been changed from "nothing 
+to repeat" to "quantifier does not follow a repeatable item".
+
 
 Version 10.00 05-January-2015
 -----------------------------

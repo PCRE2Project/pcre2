@@ -688,6 +688,7 @@ typedef struct compile_block {
   BOOL had_pruneorskip;            /* (*PRUNE) or (*SKIP) encountered */
   BOOL check_lookbehind;           /* Lookbehinds need later checking */
   BOOL dupnames;                   /* Duplicate names exist */
+  BOOL iscondassert;               /* Next assert is a condition */ 
 } compile_block;
 
 /* Structure for keeping the properties of the in-memory stack used

@@ -5178,14 +5178,19 @@ for (;; ptr++)
           }
 
         /* For conditions that are assertions, check the syntax, and then exit
-        the switch. This will take control down to where bracketed groups,
-        including assertions, are processed. */
+        the switch. This will take control down to where bracketed groups
+        are processed. The assertion will be handled as part of the group,
+        but we need to identify this case because the conditional assertion may 
+        not be quantifier. */
 
         if (tempptr[1] == CHAR_QUESTION_MARK &&
               (tempptr[2] == CHAR_EQUALS_SIGN ||
                tempptr[2] == CHAR_EXCLAMATION_MARK ||
                tempptr[2] == CHAR_LESS_THAN_SIGN))
+          {
+          cb->iscondassert = TRUE;       
           break;
+          } 
 
         /* Other conditions use OP_CREF/OP_DNCREF/OP_RREF/OP_DNRREF, and all
         need to skip at least 1+IMM2_SIZE bytes at the start of the group. */
@@ -6098,12 +6103,22 @@ for (;; ptr++)
       goto FAILED;
       }
 
-    /* Assertions used not to be repeatable, but this was changed for Perl
-    compatibility, so all kinds can now be repeated. We copy code into a
+    /* All assertions used not to be repeatable, but this was changed for Perl
+    compatibility. All kinds can now be repeated except for assertions that are 
+    conditions (Perl also forbids these to be repeated). We copy code into a
     non-register variable (tempcode) in order to be able to pass its address
-    because some compilers complain otherwise. */
+    because some compilers complain otherwise. At the start of a conditional 
+    group whose condition is an assertion, cb->iscondassert is set. We unset it 
+    here so as to allow assertions later in the group to be quantified. */
 
-    previous = code;                      /* For handling repetition */
+    if (bravalue >= OP_ASSERT && bravalue <= OP_ASSERTBACK_NOT &&
+        cb->iscondassert)
+      {
+      previous = NULL;
+      cb->iscondassert = FALSE;
+      }
+    else previous = code;          
+      
     *code = bravalue;
     tempcode = code;
     tempreqvary = cb->req_varyopt;        /* Save value before bracket */
@@ -6121,9 +6136,9 @@ for (;; ptr++)
          skipbytes,                       /* Skip over bracket number */
          cond_depth +
            ((bravalue == OP_COND)?1:0),   /* Depth of condition subpatterns */
-         &subfirstcu,                   /* For possible first char */
+         &subfirstcu,                     /* For possible first char */
          &subfirstcuflags,
-         &subreqcu,                     /* For possible last char */
+         &subreqcu,                       /* For possible last char */
          &subreqcuflags,
          bcptr,                           /* Current branch chain */
          cb,                              /* Compile data block */
@@ -7474,6 +7489,7 @@ cb.end_pattern = pattern + patlen;
 cb.external_flags = 0;
 cb.external_options = options;
 cb.hwm = cworkspace;
+cb.iscondassert = FALSE;
 cb.max_lookbehind = 0;
 cb.name_entry_size = 0;
 cb.name_table = NULL;
@@ -7725,6 +7741,7 @@ cb.max_lookbehind = 0;
 cb.name_table = (PCRE2_UCHAR *)((uint8_t *)re + sizeof(pcre2_real_code));
 cb.start_code = codestart;
 cb.hwm = (PCRE2_UCHAR *)(cb.start_workspace);
+cb.iscondassert = FALSE;
 cb.req_varyopt = 0;
 cb.had_accept = FALSE;
 cb.had_pruneorskip = FALSE;

@@ -147,7 +147,7 @@ Failed: error 107 at offset 2: invalid escape sequence in character class
 Failed: error 108 at offset 3: range out of order in character class
 
 /^*/
-Failed: error 109 at offset 1: nothing to repeat
+Failed: error 109 at offset 1: quantifier does not follow a repeatable item
 
 /(abc/
 Failed: error 114 at offset 4: missing closing parenthesis
@@ -230,7 +230,7 @@ Subject length lower bound = 1
 Failed: error 115 at offset 6: reference to non-existent subpattern
 
 /{4,5}abc/
-Failed: error 109 at offset 4: nothing to repeat
+Failed: error 109 at offset 4: quantifier does not follow a repeatable item
 
 /(a)(b)(c)\2/I
 Capturing subpattern count = 3
@@ -883,10 +883,10 @@ Failed: error 106 at offset 4: missing terminating ] for character class
 Failed: error 106 at offset 2: missing terminating ] for character class
 
 /*a/
-Failed: error 109 at offset 0: nothing to repeat
+Failed: error 109 at offset 0: quantifier does not follow a repeatable item
 
 /(*)b/
-Failed: error 109 at offset 1: nothing to repeat
+Failed: error 109 at offset 1: quantifier does not follow a repeatable item
 
 /abc)/
 Failed: error 122 at offset 3: unmatched closing parenthesis
@@ -895,7 +895,7 @@ Failed: error 122 at offset 3: unmatched closing parenthesis
 Failed: error 114 at offset 4: missing closing parenthesis
 
 /a**/
-Failed: error 109 at offset 2: nothing to repeat
+Failed: error 109 at offset 2: quantifier does not follow a repeatable item
 
 /)(/
 Failed: error 122 at offset 0: unmatched closing parenthesis
@@ -919,10 +919,10 @@ Failed: error 106 at offset 4: missing terminating ] for character class
 Failed: error 106 at offset 2: missing terminating ] for character class
 
 /*a/Ii
-Failed: error 109 at offset 0: nothing to repeat
+Failed: error 109 at offset 0: quantifier does not follow a repeatable item
 
 /(*)b/Ii
-Failed: error 109 at offset 1: nothing to repeat
+Failed: error 109 at offset 1: quantifier does not follow a repeatable item
 
 /abc)/Ii
 Failed: error 122 at offset 3: unmatched closing parenthesis
@@ -931,7 +931,7 @@ Failed: error 122 at offset 3: unmatched closing parenthesis
 Failed: error 114 at offset 4: missing closing parenthesis
 
 /a**/Ii
-Failed: error 109 at offset 2: nothing to repeat
+Failed: error 109 at offset 2: quantifier does not follow a repeatable item
 
 /)(/Ii
 Failed: error 122 at offset 0: unmatched closing parenthesis
@@ -3025,16 +3025,16 @@ Last code unit = 'c'
 Subject length lower bound = 3
 
 /a+?+/I
-Failed: error 109 at offset 3: nothing to repeat
+Failed: error 109 at offset 3: quantifier does not follow a repeatable item
 
 /a{2,3}?+b/I
-Failed: error 109 at offset 7: nothing to repeat
+Failed: error 109 at offset 7: quantifier does not follow a repeatable item
 
 /(?U)a+?+/I
-Failed: error 109 at offset 7: nothing to repeat
+Failed: error 109 at offset 7: quantifier does not follow a repeatable item
 
 /a{2,3}?+b/I,ungreedy
-Failed: error 109 at offset 7: nothing to repeat
+Failed: error 109 at offset 7: quantifier does not follow a repeatable item
 
 /x(?U)a++b/IB
 ------------------------------------------------------------------
@@ -8816,7 +8816,7 @@ No match
  0: a
 
 /a(*FAIL)+b/
-Failed: error 109 at offset 8: nothing to repeat
+Failed: error 109 at offset 8: quantifier does not follow a repeatable item
 
 /(abc|pqr|123){0}[xyz]/I
 Capturing subpattern count = 1
@@ -13724,13 +13724,13 @@ Failed: error -34: bad option value
 
 # End of substitute tests 
 
-"((?=(?(?=(?(?=(?(?=())))*)))))"
+"((?=(?(?=(?(?=(?(?=()))))))))"
     a
  0: 
  1: 
  2: 
 
-"(?(?=)?==)(((((((((?=)))))))))"
+"(?(?=)==)(((((((((?=)))))))))"
     a
 No match
 
@@ -13896,5 +13896,25 @@ Matched, but too many substrings
 /(?<N111>(?J)(?<N111>1(111111)11|)1|1|)(?(<N111>)1)/
 
 /(?<N>(?J)(?<N>))(?-J)\k<N>/
+
+# Quantifiers are not allowed on condition assertions, but are otherwise
+# OK in conditions.
+
+/(?(?=0)?)+/
+Failed: error 109 at offset 7: quantifier does not follow a repeatable item
+
+/(?(?=0)(?=00)?00765)/
+     00765
+ 0: 00765
+
+/(?(?=0)(?=00)?00765|(?!3).56)/
+     00765
+ 0: 00765
+     456
+ 0: 456
+     ** Failers
+No match
+     356   
+No match
 
 # End of testinput2 

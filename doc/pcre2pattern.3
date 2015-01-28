@@ -1,4 +1,4 @@
-.TH PCRE2PATTERN 3 "26 January 2015" "PCRE2 10.00"
+.TH PCRE2PATTERN 3 "28 January 2015" "PCRE2 10.00"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION DETAILS"
@@ -1742,8 +1742,8 @@ items:
   the \eR escape sequence
   an escape such as \ed or \epL that matches a single character
   a character class
-  a back reference (see next section)
-  a parenthesized subpattern (including assertions)
+  a back reference
+  a parenthesized subpattern (including most assertions)
   a subroutine call to a subpattern (recursive or otherwise)
 .sp
 The general repetition quantifier specifies a minimum and maximum number of
@@ -2152,10 +2152,11 @@ numbering the capturing subpatterns in the whole pattern. However, substring
 capturing is carried out only for positive assertions. (Perl sometimes, but not
 always, does do capturing in negative assertions.)
 .P
-For compatibility with Perl, assertion subpatterns may be repeated; though
+For compatibility with Perl, most assertion subpatterns may be repeated; though
 it makes no sense to assert the same thing several times, the side effect of
-capturing parentheses may occasionally be useful. In practice, there only three
-cases:
+capturing parentheses may occasionally be useful. However, an assertion that 
+forms the condition for a conditional subpattern may not be quantified. In
+practice, for other assertions, there only three cases:
 .sp
 (1) If the quantifier is {0}, the assertion is never obeyed during matching.
 However, it may contain internal capturing parenthesized groups that are called
@@ -3301,6 +3302,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 26 January 2015
+Last updated: 28 January 2015
 Copyright (c) 1997-2015 University of Cambridge.
 .fi

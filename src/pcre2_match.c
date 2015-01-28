@@ -75,7 +75,7 @@ implementing this. */
 #define OVFLMASK    0xffff0000    /* The bits used for the overflow flag */
 #define OVFLBIT     0x00010000    /* The bit that is set for overflow */
 
-/* Values for setting in mb->match_function_type to indicate two special types
+/* Bits for setting in mb->match_function_type to indicate two special types
 of call to match(). We do it this way to save on using another stack variable,
 as stack usage is to be discouraged. */
 
@@ -487,7 +487,7 @@ data and the last captured value. */
 
 do
   {
-  if (cbegroup) mb->match_function_type = MATCH_CBEGROUP;
+  if (cbegroup) mb->match_function_type |= MATCH_CBEGROUP;
   rrc = match(eptr, callpat + PRIV(OP_lengths)[*callpat], mstart, offset_top,
     mb, eptrb, rdepth + 1);
   memcpy(mb->ovector, new_recursive->ovec_save,
@@ -771,9 +771,9 @@ if (mb->match_call_count++ >= mb->match_limit) RRETURN(PCRE2_ERROR_MATCHLIMIT);
 if (rdepth >= mb->match_limit_recursion) RRETURN(PCRE2_ERROR_RECURSIONLIMIT);
 
 /* At the start of a group with an unlimited repeat that may match an empty
-string, the variable mb->match_function_type is set to MATCH_CBEGROUP. It is
-done this way to save having to use another function argument, which would take
-up space on the stack. See also MATCH_CONDASSERT below.
+string, the variable mb->match_function_type contains the MATCH_CBEGROUP bit.
+It is done this way to save having to use another function argument, which
+would take up space on the stack. See also MATCH_CONDASSERT below.
 
 When MATCH_CBEGROUP is set, add the current subject pointer to the chain of
 such remembered pointers, to be checked when we hit the closing ket, in order
@@ -782,12 +782,12 @@ other circumstances, don't add to the chain. The MATCH_CBEGROUP feature must
 NOT be used with tail recursion, because the memory block that is used is on
 the stack, so a new one may be required for each match(). */
 
-if (mb->match_function_type == MATCH_CBEGROUP)
+if ((mb->match_function_type & MATCH_CBEGROUP) != 0)
   {
   newptrb.epb_saved_eptr = eptr;
   newptrb.epb_prev = eptrb;
   eptrb = &newptrb;
-  mb->match_function_type = 0;
+  mb->match_function_type &= ~MATCH_CBEGROUP;
   }
 
 /* Now, at last, we can start processing the opcodes. */
@@ -1016,7 +1016,7 @@ for (;;)
 
       for (;;)
         {
-        if (op >= OP_SBRA) mb->match_function_type = MATCH_CBEGROUP;
+        if (op >= OP_SBRA) mb->match_function_type |= MATCH_CBEGROUP;
         RMATCH(eptr, ecode + PRIV(OP_lengths)[*ecode], offset_top, mb,
           eptrb, RM1);
         if (rrc == MATCH_ONCE) break;  /* Backing up through an atomic group */
@@ -1091,7 +1091,7 @@ for (;;)
     for (;;)
       {
       if (op >= OP_SBRA || op == OP_ONCE)
-        mb->match_function_type = MATCH_CBEGROUP;
+        mb->match_function_type |= MATCH_CBEGROUP;
 
       /* If this is not a possibly empty group, and there are no (*THEN)s in
       the pattern, and this is the final alternative, optimize as described
@@ -1181,7 +1181,7 @@ for (;;)
       for (;;)
         {
         mb->ovector[mb->offset_end - number] = eptr - mb->start_subject;
-        if (op >= OP_SBRA) mb->match_function_type = MATCH_CBEGROUP;
+        if (op >= OP_SBRA) mb->match_function_type |= MATCH_CBEGROUP;
         RMATCH(eptr, ecode + PRIV(OP_lengths)[*ecode], offset_top, mb,
           eptrb, RM63);
         if (rrc == MATCH_KETRPOS)
@@ -1255,7 +1255,7 @@ for (;;)
 
     for (;;)
       {
-      if (op >= OP_SBRA) mb->match_function_type = MATCH_CBEGROUP;
+      if (op >= OP_SBRA) mb->match_function_type |= MATCH_CBEGROUP;
       RMATCH(eptr, ecode + PRIV(OP_lengths)[*ecode], offset_top, mb,
         eptrb, RM48);
       if (rrc == MATCH_KETRPOS)
@@ -1404,11 +1404,11 @@ for (;;)
       break;
 
       /* The condition is an assertion. Call match() to evaluate it - setting
-      mb->match_function_type to MATCH_CONDASSERT causes it to stop at the end
-      of an assertion. */
+      the MATCH_CONDASSERT bit in mb->match_function_type causes it to stop at
+      the end of an assertion. */
 
       default:
-      mb->match_function_type = MATCH_CONDASSERT;
+      mb->match_function_type |= MATCH_CONDASSERT;
       RMATCH(eptr, ecode, offset_top, mb, NULL, RM3);
       if (rrc == MATCH_MATCH)
         {
@@ -1459,7 +1459,7 @@ for (;;)
         goto TAIL_RECURSE;
         }
 
-      mb->match_function_type = MATCH_CBEGROUP;
+      mb->match_function_type |= MATCH_CBEGROUP;
       RMATCH(eptr, ecode, offset_top, mb, eptrb, RM49);
       RRETURN(rrc);
       }
@@ -1548,10 +1548,10 @@ for (;;)
     case OP_ASSERT:
     case OP_ASSERTBACK:
     save_mark = mb->mark;
-    if (mb->match_function_type == MATCH_CONDASSERT)
+    if ((mb->match_function_type & MATCH_CONDASSERT) != 0)
       {
       condassert = TRUE;
-      mb->match_function_type = 0;
+      mb->match_function_type &= ~MATCH_CONDASSERT;
       }
     else condassert = FALSE;
 
@@ -1619,10 +1619,10 @@ for (;;)
     case OP_ASSERT_NOT:
     case OP_ASSERTBACK_NOT:
     save_mark = mb->mark;
-    if (mb->match_function_type == MATCH_CONDASSERT)
+    if ((mb->match_function_type & MATCH_CONDASSERT) != 0)
       {
       condassert = TRUE;
-      mb->match_function_type = 0;
+      mb->match_function_type &= ~MATCH_CONDASSERT;
       }
     else condassert = FALSE;
 
@@ -1844,7 +1844,7 @@ for (;;)
       cbegroup = (*callpat >= OP_SBRA);
       do
         {
-        if (cbegroup) mb->match_function_type = MATCH_CBEGROUP;
+        if (cbegroup) mb->match_function_type |= MATCH_CBEGROUP;
         RMATCH(eptr, callpat + PRIV(OP_lengths)[*callpat], offset_top,
           mb, eptrb, RM6);
         memcpy(mb->ovector, new_recursive.ovec_save,

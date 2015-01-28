@@ -4078,10 +4078,10 @@ a random value. /Ix
 
 # End of substitute tests 
 
-"((?=(?(?=(?(?=(?(?=())))*)))))"
+"((?=(?(?=(?(?=(?(?=()))))))))"
     a
 
-"(?(?=)?==)(((((((((?=)))))))))"
+"(?(?=)==)(((((((((?=)))))))))"
     a
 
 /(a)(b)|(c)/
@@ -4137,5 +4137,19 @@ a random value. /Ix
 /(?<N111>(?J)(?<N111>1(111111)11|)1|1|)(?(<N111>)1)/
 
 /(?<N>(?J)(?<N>))(?-J)\k<N>/
+
+# Quantifiers are not allowed on condition assertions, but are otherwise
+# OK in conditions.
+
+/(?(?=0)?)+/
+
+/(?(?=0)(?=00)?00765)/
+     00765
+
+/(?(?=0)(?=00)?00765|(?!3).56)/
+     00765
+     456
+     ** Failers
+     356   
 
 # End of testinput2 
