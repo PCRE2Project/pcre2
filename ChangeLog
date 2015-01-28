@@ -40,6 +40,10 @@ for being set in a conditional) that occurred in a part of the pattern where
 PCRE2_DUPNAMES was not set caused the amount of memory needed for the pattern 
 to be incorrectly calculated, leading to overwriting.
 
+8. A mutually recursive set of back references such as (\2)(\1) caused a 
+segfault at compile time (while trying to find the minimum matching length). 
+The infinite loop is now broken (with the minimum length unset, that is, zero).
+
 
 Version 10.00 05-January-2015
 -----------------------------

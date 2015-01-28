@@ -9412,4 +9412,10 @@ No match
  4: <unset>
  5: 
 
+/(\2|a)(\1)/
+    aaa
+ 0: aa
+ 1: a
+ 2: a
+
 # End of testinput1 

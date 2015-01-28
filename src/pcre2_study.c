@@ -73,11 +73,13 @@ Arguments:
   re              compiled pattern block
   code            pointer to start of group (the bracket)
   startcode       pointer to start of the whole pattern's code
-  recurse_depth   RECURSE depth
+  recurse_depth   RECURSE and/or backreference depth
   utf             UTF flag
 
 Returns:   the minimum length
-           -1 if \C in UTF-8 mode or (*ACCEPT) was encountered
+           -1 \C in UTF-8 mode 
+              or (*ACCEPT)
+              or too much back reference recursion 
            -2 internal error (missing capturing bracket)
            -3 internal error (opcode not listed)
 */
@@ -375,7 +377,7 @@ for (;;)
     the minimum length for the subpattern. A recursion, however, causes an
     a flag to be set that causes the length of this branch to be ignored. The
     logic is that a recursion can only make sense if there is another
-    alternation that stops the recursing. That will provide the minimum length
+    alternative that stops the recursing. That will provide the minimum length
     (when no recursion happens). A backreference within the group that it is
     referencing behaves in the same way.
 
@@ -398,7 +400,7 @@ for (;;)
         ce = cs = (PCRE2_UCHAR *)PRIV(find_bracket)(startcode, utf, GET2(slot, 0));
         if (cs == NULL) return -2;
         do ce += GET(ce, 1); while (*ce == OP_ALT);
-        if (cc > cs && cc < ce)
+        if ((cc > cs && cc < ce) || recurse_depth > 10)
           {
           d = 0;
           had_recurse = TRUE;
@@ -406,7 +408,7 @@ for (;;)
           }
         else
           {
-          int dd = find_minlength(re, cs, startcode, recurse_depth, utf);
+          int dd = find_minlength(re, cs, startcode, recurse_depth + 1, utf);
           if (dd < d) d = dd;
           }
         slot += re->name_entry_size;
@@ -423,14 +425,14 @@ for (;;)
       ce = cs = (PCRE2_UCHAR *)PRIV(find_bracket)(startcode, utf, GET2(cc, 1));
       if (cs == NULL) return -2;
       do ce += GET(ce, 1); while (*ce == OP_ALT);
-      if (cc > cs && cc < ce)
+      if ((cc > cs && cc < ce) || recurse_depth > 10)
         {
         d = 0;
         had_recurse = TRUE;
         }
       else
         {
-        d = find_minlength(re, cs, startcode, recurse_depth, utf);
+        d = find_minlength(re, cs, startcode, recurse_depth + 1, utf);
         }
       }
     else d = 0;
@@ -1421,8 +1423,8 @@ if ((re->overall_options & PCRE2_ANCHORED) == 0 &&
 
 switch(min = find_minlength(re, code, code, 0, utf))
   {
-  case -1:  /* \C in UTF mode or (*ACCEPT) was encountered */
-  break;
+  case -1:  /* \C in UTF mode or (*ACCEPT) or too much backref recursion */
+  break;    /* Leave minlength unchanged (will be zero) */
 
   case -2:
   return 2; /* missing capturing bracket */
