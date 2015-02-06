@@ -1882,7 +1882,7 @@ is available. */
 #define _pcre2_was_newline           PCRE2_SUFFIX(_pcre2_was_newline_)
 #define _pcre2_xclass                PCRE2_SUFFIX(_pcre2_xclass_)
 
-extern void         _pcre2_auto_possessify(PCRE2_UCHAR *, BOOL,
+extern int          _pcre2_auto_possessify(PCRE2_UCHAR *, BOOL,
                       const compile_block *);
 extern PCRE2_SPTR   _pcre2_find_bracket(PCRE2_SPTR, BOOL, int);
 extern BOOL         _pcre2_is_newline(PCRE2_SPTR, uint32_t, PCRE2_SPTR,

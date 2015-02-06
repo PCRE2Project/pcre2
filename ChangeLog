@@ -55,6 +55,13 @@ patterns.
 10. The error message for an invalid quantifier has been changed from "nothing 
 to repeat" to "quantifier does not follow a repeatable item".
 
+11. If a bad UTF string is compiled with NO_UTF_CHECK, it may succeed, but
+scanning the compiled pattern in subsequent auto-possessification can get out
+of step and lead to an unknown opcode. Previously this could have caused an
+infinite loop. Now it generates an "internal error" error. This is a tidyup,
+not a bug fix; passing bad UTF with NO_UTF_CHECK is documented as having an
+undefined outcome.
+
 
 Version 10.00 05-January-2015
 -----------------------------

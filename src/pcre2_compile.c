@@ -573,7 +573,7 @@ enum { ERR0 = COMPILE_ERROR_BASE,
        ERR41, ERR42, ERR43, ERR44, ERR45, ERR46, ERR47, ERR48, ERR49, ERR50,
        ERR51, ERR52, ERR53, ERR54, ERR55, ERR56, ERR57, ERR58, ERR59, ERR60,
        ERR61, ERR62, ERR63, ERR64, ERR65, ERR66, ERR67, ERR68, ERR69, ERR70,
-       ERR71, ERR72, ERR73, ERR74, ERR75, ERR76, ERR77, ERR78, ERR79 };
+       ERR71, ERR72, ERR73, ERR74, ERR75, ERR76, ERR77, ERR78, ERR79, ERR80 };
 
 /* This is a table of start-of-pattern options such as (*UTF) and settings such
 as (*LIMIT_MATCH=nnnn) and (*CRLF). For completeness and backward
@@ -7802,7 +7802,9 @@ if (usedlength > length) errorcode = ERR23; else
   }
 
 /* Fill in any forward references that are required. There may be repeated
-references; optimize for them, as searching a large regex takes time. */
+references; optimize for them, as searching a large regex takes time. The
+test of errorcode inside the loop means that nothing is done if it is already 
+non-zero. */
 
 if (cb.hwm > cb.start_workspace)
   {
@@ -7832,23 +7834,23 @@ if (cb.workspace_size > COMPILE_WORK_SIZE)
     ccontext->memctl.memory_data);
 cb.start_workspace = NULL;
 
-/* Give an error if there's back reference to a non-existent capturing
-subpattern. */
+/* After a successful compile, give an error if there's back reference to a
+non-existent capturing subpattern. Then, unless disabled, check whether any
+single character iterators can be auto-possessified. The function overwrites
+the appropriate opcode values, so the type of the pointer must be cast. NOTE:
+the intermediate variable "temp" is used in this code because at least one
+compiler gives a warning about loss of "const" attribute if the cast
+(PCRE2_UCHAR *)codestart is used directly in the function call. */
 
-if (errorcode == 0 && re->top_backref > re->top_bracket) errorcode = ERR15;
-
-/* Unless disabled, check whether any single character iterators can be
-auto-possessified. The function overwrites the appropriate opcode values, so
-the type of the pointer must be cast. NOTE: the intermediate variable "temp" is
-used in this code because at least one compiler gives a warning about loss of
-"const" attribute if the cast (PCRE2_UCHAR *)codestart is used directly in the
-function call. */
-
-if ((options & PCRE2_NO_AUTO_POSSESS) == 0)
+if (errorcode == 0)
   {
-  PCRE2_UCHAR *temp = (PCRE2_UCHAR *)codestart;
-  PRIV(auto_possessify)(temp, utf, &cb);
-  }
+  if (re->top_backref > re->top_bracket) errorcode = ERR15;
+  else if ((options & PCRE2_NO_AUTO_POSSESS) == 0)
+    {
+    PCRE2_UCHAR *temp = (PCRE2_UCHAR *)codestart;
+    if (PRIV(auto_possessify)(temp, utf, &cb) != 0) errorcode = ERR80;
+    }
+  }   
 
 /* If there were any lookbehind assertions that contained OP_RECURSE
 (recursions or subroutine calls), a flag is set for them to be checked here,
@@ -7858,7 +7860,7 @@ OP_RECURSE that are not fixed length get a diagnosic with a useful offset. The
 exceptional ones forgo this. We scan the pattern to check that they are fixed
 length, and set their lengths. */
 
-if (cb.check_lookbehind)
+if (errorcode == 0 && cb.check_lookbehind)
   {
   PCRE2_UCHAR *cc = (PCRE2_UCHAR *)codestart;
 

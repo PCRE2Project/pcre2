@@ -1090,17 +1090,20 @@ but some compilers complain about an unreachable statement. */
 *************************************************/
 
 /* Replaces single character iterations with their possessive alternatives
-if appropriate. This function modifies the compiled opcode!
+if appropriate. This function modifies the compiled opcode! Hitting a 
+non-existant opcode may indicate a bug in PCRE2, but it can also be caused if a 
+bad UTF string was compiled with PCRE2_NO_UTF_CHECK.
 
 Arguments:
   code        points to start of the byte code
   utf         TRUE in UTF mode
   cb          compile data block
 
-Returns:      nothing
+Returns:      0 for success
+              -1 if a non-existant opcode is encountered
 */
 
-void
+int
 PRIV(auto_possessify)(PCRE2_UCHAR *code, BOOL utf, const compile_block *cb)
 {
 register PCRE2_UCHAR c;
@@ -1111,7 +1114,9 @@ uint32_t list[8];
 for (;;)
   {
   c = *code;
-
+  
+  if (c > OP_TABLE_LENGTH) return -1;   /* Something gone wrong */ 
+  
   if (c >= OP_STAR && c <= OP_TYPEPOSUPTO)
     {
     c -= get_repeat_base(c) - OP_STAR;
@@ -1207,7 +1212,7 @@ for (;;)
   switch(c)
     {
     case OP_END:
-    return;
+    return 0;
 
     case OP_TYPESTAR:
     case OP_TYPEMINSTAR:
