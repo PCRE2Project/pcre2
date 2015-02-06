@@ -62,6 +62,9 @@ infinite loop. Now it generates an "internal error" error. This is a tidyup,
 not a bug fix; passing bad UTF with NO_UTF_CHECK is documented as having an
 undefined outcome.
 
+12. A UTF pattern containing a "not" match of a non-ASCII character and a 
+subroutine reference could loop at compile time. Example: /[^\xff]((?1))/.
+
 
 Version 10.00 05-January-2015
 -----------------------------
