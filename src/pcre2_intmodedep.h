@@ -584,14 +584,21 @@ typedef struct pcre2_real_match_context {
   uint32_t recursion_limit;
 } pcre2_real_match_context;
 
-/* The real compiled code structure */
+/* The real compiled code structure. The type for the blocksize field is
+defined specially because it is required in pcre2_serialize_decode() when 
+copying the size from possibly unaligned memory into a variable of the same 
+type. Use a macro rather than a typedef to avoid compiler warnings when this 
+file is included multiple times by pcre2test. */
+
+#undef  CODE_BLOCKSIZE_TYPE
+#define CODE_BLOCKSIZE_TYPE size_t
 
 typedef struct pcre2_real_code {
   pcre2_memctl memctl;            /* Memory control fields */
   const uint8_t *tables;          /* The character tables */
   void    *executable_jit;        /* Pointer to JIT code */
   uint8_t  start_bitmap[32];      /* Bitmap for starting code unit < 256 */
-  size_t   blocksize;             /* Total (bytes) that was malloc-ed */
+  CODE_BLOCKSIZE_TYPE blocksize;  /* Total (bytes) that was malloc-ed */
   uint32_t magic_number;          /* Paranoid and endianness check */
   uint32_t compile_options;       /* Options passed to pcre2_compile() */
   uint32_t overall_options;       /* Options after processing the pattern */

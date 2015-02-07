@@ -150,7 +150,6 @@ const pcre2_memctl *memctl = (gcontext != NULL) ?
   &gcontext->memctl : &PRIV(default_compile_context).memctl;
 
 const uint8_t *src_bytes;
-pcre2_real_code *src_re;
 pcre2_real_code *dst_re;
 uint8_t *tables;
 int32_t i, j;
@@ -178,15 +177,22 @@ memcpy(tables, src_bytes, tables_length);
 *(PCRE2_SIZE *)(tables + tables_length) = number_of_codes;
 src_bytes += tables_length;
 
-/* Decode byte stream. */
+/* Decode the byte stream. We must not try to read the size from the compiled
+code block in the stream, because it might be unaligned, which causes errors on
+hardware such as Sparc-64 that doesn't like unaligned memory accesses. The type 
+of the blocksize field is given its own name to ensure that it is the same here 
+as in the block. */
 
 for (i = 0; i < number_of_codes; i++)
   {
-  src_re = (pcre2_real_code *)src_bytes;
+  CODE_BLOCKSIZE_TYPE blocksize;
+  memcpy(&blocksize, src_bytes + offsetof(pcre2_real_code, blocksize),
+    sizeof(CODE_BLOCKSIZE_TYPE));
 
   /* The allocator provided by gcontext replaces the original one. */
-  dst_re = (pcre2_real_code *)PRIV(memctl_malloc)
-    (src_re->blocksize, (pcre2_memctl *)gcontext);
+   
+  dst_re = (pcre2_real_code *)PRIV(memctl_malloc)(blocksize, 
+    (pcre2_memctl *)gcontext);
   if (dst_re == NULL)
     {
     memctl->free(tables, memctl->memory_data);
@@ -199,17 +205,18 @@ for (i = 0; i < number_of_codes; i++)
     }
 
   /* The new allocator must be preserved. */
+   
   memcpy(((uint8_t *)dst_re) + sizeof(pcre2_memctl),
-    src_bytes + sizeof(pcre2_memctl),
-    src_re->blocksize - sizeof(pcre2_memctl));
+    src_bytes + sizeof(pcre2_memctl), blocksize - sizeof(pcre2_memctl));
 
   /* At the moment only one table is supported. */
+   
   dst_re->tables = tables;
   dst_re->executable_jit = NULL;
   dst_re->flags |= PCRE2_DEREF_TABLES;
 
   codes[i] = dst_re;
-  src_bytes += src_re->blocksize;
+  src_bytes += blocksize;
   }
 
 return number_of_codes;
