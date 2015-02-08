@@ -9418,4 +9418,6 @@ No match
  1: a
  2: a
 
+/(\2)(\1)/
+
 # End of testinput1 

@@ -5708,4 +5708,6 @@ name)/mark
 /(\2|a)(\1)/
     aaa
 
+/(\2)(\1)/
+
 # End of testinput1 
