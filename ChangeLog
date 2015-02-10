@@ -72,6 +72,10 @@ but would not set (an example does exist), the test would "pass" without
 actually doing anything. Also the fr_CA locale has been added to the list of 
 locales that can be used.
 
+14. Fixed a bug in pcre2_substitute(). If a replacement string ended in a
+capturing group number without parentheses, the last character was incorrectly
+literally included at the end of the replacement string.
+
 
 Version 10.00 05-January-2015
 -----------------------------

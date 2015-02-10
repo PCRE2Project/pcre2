@@ -226,9 +226,9 @@ do
       if (next >= CHAR_0 && next <= CHAR_9)
         {
         group = next - CHAR_0;
-        while (i < rlength - 1)
+        while (++i < rlength)
           {
-          next = replacement[++i];
+          next = replacement[i];
           if (next < CHAR_0 || next > CHAR_9) break;
           group = group * 10 + next - CHAR_0;
           }

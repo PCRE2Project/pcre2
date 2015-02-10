@@ -13721,6 +13721,22 @@ Failed: error -34: bad option value
 /(?<=abc)(|def)/g,replace=<$0>
     123abcxyzabcdef789abcpqr
  4: 123abc<>xyzabc<><def>789abc<>pqr
+    
+/./replace=$0
+    a
+ 1: a
+    
+/(.)(.)/replace=$2+$1
+    abc
+ 1: b+ac
+    
+/(?<A>.)(?<B>.)/replace=$B+$A
+    abc
+ 1: b+ac
+    
+/(.)(.)/g,replace=$2$1
+    abcdefgh  
+ 4: badcfehg
 
 # End of substitute tests 
 

@@ -4075,6 +4075,18 @@ a random value. /Ix
 
 /(?<=abc)(|def)/g,replace=<$0>
     123abcxyzabcdef789abcpqr
+    
+/./replace=$0
+    a
+    
+/(.)(.)/replace=$2+$1
+    abc
+    
+/(?<A>.)(?<B>.)/replace=$B+$A
+    abc
+    
+/(.)(.)/g,replace=$2$1
+    abcdefgh  
 
 # End of substitute tests 
 
