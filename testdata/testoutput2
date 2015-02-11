@@ -13933,4 +13933,21 @@ No match
      356   
 No match
 
+'^(a)*+(\w)'
+    g
+ 0: g
+ 1: <unset>
+ 2: g
+    g\=ovector=1 
+Matched, but too many substrings
+ 0: g
+
+'^(?:a)*+(\w)'
+    g
+ 0: g
+ 1: g
+    g\=ovector=1 
+Matched, but too many substrings
+ 0: g
+
 # End of testinput2 

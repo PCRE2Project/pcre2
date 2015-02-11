@@ -76,6 +76,10 @@ locales that can be used.
 capturing group number without parentheses, the last character was incorrectly
 literally included at the end of the replacement string.
 
+15. A possessive capturing group such as (a)*+ with a minimum repeat of zero
+failed to allow the zero-repeat case if pcre2_match() was called with an 
+ovector too small to capture the group.
+
 
 Version 10.00 05-January-2015
 -----------------------------

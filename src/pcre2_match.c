@@ -1149,7 +1149,8 @@ for (;;)
     different. The end of these brackets will always be OP_KETRPOS, which
     returns MATCH_KETRPOS without going further in the pattern. By this means
     we can handle the group by iteration rather than recursion, thereby
-    reducing the amount of stack needed. */
+    reducing the amount of stack needed. If the ovector is too small for
+    capturing, treat as non-capturing. */
 
     case OP_CBRAPOS:
     case OP_SCBRAPOS:
@@ -1158,86 +1159,77 @@ for (;;)
     POSSESSIVE_CAPTURE:
     number = GET2(ecode, 1+LINK_SIZE);
     offset = number << 1;
+    if (offset >= mb->offset_max) goto POSSESSIVE_NON_CAPTURE;
 
-    if (offset < mb->offset_max)
+    matched_once = FALSE;
+    code_offset = (int)(ecode - mb->start_code);
+
+    save_offset1 = mb->ovector[offset];
+    save_offset2 = mb->ovector[offset+1];
+    save_offset3 = mb->ovector[mb->offset_end - number];
+    save_capture_last = mb->capture_last;
+
+    /* Each time round the loop, save the current subject position for use
+    when the group matches. For MATCH_MATCH, the group has matched, so we
+    restart it with a new subject starting position, remembering that we had
+    at least one match. For MATCH_NOMATCH, carry on with the alternatives, as
+    usual. If we haven't matched any alternatives in any iteration, check to
+    see if a previous iteration matched. If so, the group has matched;
+    continue from afterwards. Otherwise it has failed; restore the previous
+    capture values before returning NOMATCH. */
+
+    for (;;)
       {
-      matched_once = FALSE;
-      code_offset = (int)(ecode - mb->start_code);
-
-      save_offset1 = mb->ovector[offset];
-      save_offset2 = mb->ovector[offset+1];
-      save_offset3 = mb->ovector[mb->offset_end - number];
-      save_capture_last = mb->capture_last;
-
-      /* Each time round the loop, save the current subject position for use
-      when the group matches. For MATCH_MATCH, the group has matched, so we
-      restart it with a new subject starting position, remembering that we had
-      at least one match. For MATCH_NOMATCH, carry on with the alternatives, as
-      usual. If we haven't matched any alternatives in any iteration, check to
-      see if a previous iteration matched. If so, the group has matched;
-      continue from afterwards. Otherwise it has failed; restore the previous
-      capture values before returning NOMATCH. */
-
-      for (;;)
+      mb->ovector[mb->offset_end - number] = eptr - mb->start_subject;
+      if (op >= OP_SBRA) mb->match_function_type |= MATCH_CBEGROUP;
+      RMATCH(eptr, ecode + PRIV(OP_lengths)[*ecode], offset_top, mb,
+        eptrb, RM63);
+      if (rrc == MATCH_KETRPOS)
         {
-        mb->ovector[mb->offset_end - number] = eptr - mb->start_subject;
-        if (op >= OP_SBRA) mb->match_function_type |= MATCH_CBEGROUP;
-        RMATCH(eptr, ecode + PRIV(OP_lengths)[*ecode], offset_top, mb,
-          eptrb, RM63);
-        if (rrc == MATCH_KETRPOS)
+        offset_top = mb->end_offset_top;
+        ecode = mb->start_code + code_offset;
+        save_capture_last = mb->capture_last;
+        matched_once = TRUE;
+        mstart = mb->start_match_ptr;    /* In case \K changed it */
+        if (eptr == mb->end_match_ptr)   /* Matched an empty string */
           {
-          offset_top = mb->end_offset_top;
-          ecode = mb->start_code + code_offset;
-          save_capture_last = mb->capture_last;
-          matched_once = TRUE;
-          mstart = mb->start_match_ptr;    /* In case \K changed it */
-          if (eptr == mb->end_match_ptr)   /* Matched an empty string */
-            {
-            do ecode += GET(ecode, 1); while (*ecode == OP_ALT);
-            break;
-            }
-          eptr = mb->end_match_ptr;
-          continue;
+          do ecode += GET(ecode, 1); while (*ecode == OP_ALT);
+          break;
           }
-
-        /* See comment in the code for capturing groups above about handling
-        THEN. */
-
-        if (rrc == MATCH_THEN)
-          {
-          next_ecode = ecode + GET(ecode,1);
-          if (mb->start_match_ptr < next_ecode &&
-              (*ecode == OP_ALT || *next_ecode == OP_ALT))
-            rrc = MATCH_NOMATCH;
-          }
-
-        if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-        mb->capture_last = save_capture_last;
-        ecode += GET(ecode, 1);
-        if (*ecode != OP_ALT) break;
+        eptr = mb->end_match_ptr;
+        continue;
         }
 
-      if (!matched_once)
+      /* See comment in the code for capturing groups above about handling
+      THEN. */
+
+      if (rrc == MATCH_THEN)
         {
-        mb->ovector[offset] = save_offset1;
-        mb->ovector[offset+1] = save_offset2;
-        mb->ovector[mb->offset_end - number] = save_offset3;
+        next_ecode = ecode + GET(ecode,1);
+        if (mb->start_match_ptr < next_ecode &&
+            (*ecode == OP_ALT || *next_ecode == OP_ALT))
+          rrc = MATCH_NOMATCH;
         }
 
-      if (allow_zero || matched_once)
-        {
-        ecode += 1 + LINK_SIZE;
-        break;
-        }
-
-      RRETURN(MATCH_NOMATCH);
+      if (rrc != MATCH_NOMATCH) RRETURN(rrc);
+      mb->capture_last = save_capture_last;
+      ecode += GET(ecode, 1);
+      if (*ecode != OP_ALT) break;
       }
 
-    /* FALL THROUGH ... Insufficient room for saving captured contents. Treat
-    as a non-capturing bracket. */
+    if (!matched_once)
+      {
+      mb->ovector[offset] = save_offset1;
+      mb->ovector[offset+1] = save_offset2;
+      mb->ovector[mb->offset_end - number] = save_offset3;
+      }
 
-    /* VVVVVVVVVVVVVVVVVVVVVVVVV */
-    /* VVVVVVVVVVVVVVVVVVVVVVVVV */
+    if (allow_zero || matched_once)
+      {
+      ecode += 1 + LINK_SIZE;
+      break;
+      }
+    RRETURN(MATCH_NOMATCH);
 
     /* Non-capturing possessive bracket with unlimited repeat. We come here
     from BRAZERO with allow_zero = TRUE. The code is similar to the above,

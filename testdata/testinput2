@@ -4164,4 +4164,12 @@ a random value. /Ix
      ** Failers
      356   
 
+'^(a)*+(\w)'
+    g
+    g\=ovector=1 
+
+'^(?:a)*+(\w)'
+    g
+    g\=ovector=1 
+
 # End of testinput2 
