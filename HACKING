@@ -497,8 +497,8 @@ matcher to check if any group with the given name is set.
 
 If the condition is "in recursion" (coded as "(?(R)"), or "in recursion of
 group x" (coded as "(?(Rx)"), the group number is stored at the start of the
-subpattern using the opcode OP_RREF (with a value of zero for "the whole
-pattern") or OP_DNRREF (with data as for OP_DNCREF). 
+subpattern using the opcode OP_RREF (with a value of RREF_ANY (0xffff) for "the
+whole pattern") or OP_DNRREF (with data as for OP_DNCREF).
 
 For a DEFINE condition, OP_FALSE is used (with no associated data). During 
 compilation, however, a DEFINE condition is coded as OP_DEFINE so that, when 
