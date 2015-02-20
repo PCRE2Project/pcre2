@@ -77,9 +77,9 @@ Arguments:
   utf             UTF flag
 
 Returns:   the minimum length
-           -1 \C in UTF-8 mode 
+           -1 \C in UTF-8 mode
               or (*ACCEPT)
-              or too much back reference recursion 
+              or too much back reference recursion
            -2 internal error (missing capturing bracket)
            -3 internal error (opcode not listed)
 */

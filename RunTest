@@ -466,20 +466,20 @@ for bmode in "$test8" "$test16" "$test32"; do
   # output matches any one of the alternative output files.
 
   if [ $do3 = yes ] ; then
-    locale= 
-      
+    locale=
+
     # In some environments locales that are listed by the "locale -a"
     # command do not seem to work with setlocale(). Therefore, we do
     # a preliminary test to see if pcre2test can set one before going
-    # on to use it.   
+    # on to use it.
 
-    for loc in 'fr_FR' 'french' 'fr' 'fr_CA'; do 
+    for loc in 'fr_FR' 'french' 'fr' 'fr_CA'; do
       locale -a | grep "^$loc\$" >/dev/null
       if [ $? -eq 0 ] ; then
         echo "/a/locale=$loc" | \
           $sim $valgrind ./pcre2test -q $bmode | \
             grep "Failed to set locale" >/dev/null
-        if [ $? -ne 0 ] ; then    
+        if [ $? -ne 0 ] ; then
           locale=$loc
           if [ "$locale" = "fr_FR" ] ; then
             infile=$testdata/testinput3
@@ -495,11 +495,11 @@ for bmode in "$test8" "$test16" "$test32"; do
             sed "s/fr_FR/$loc/" $testdata/testoutput3 >test3output
             sed "s/fr_FR/$loc/" $testdata/testoutput3A >test3outputA
             sed "s/fr_FR/$loc/" $testdata/testoutput3B >test3outputB
-          fi   
-          break 
-        fi    
+          fi
+          break
+        fi
       fi
-    done   
+    done
 
     if [ "$locale" != "" ] ; then
       echo $title3 "(using '$locale' locale)"
@@ -528,7 +528,7 @@ for bmode in "$test8" "$test16" "$test32"; do
     else
       echo "Cannot test locale-specific features - none of the 'fr_FR', 'fr_CA',"
       echo "'fr' or 'french' locales can be set, or the \"locale\" command is"
-      echo "not available to check for them." 
+      echo "not available to check for them."
       echo " "
     fi
   fi

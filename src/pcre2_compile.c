@@ -5208,7 +5208,7 @@ for (;; ptr++)
         /* For conditions that are assertions, check the syntax, and then exit
         the switch. This will take control down to where bracketed groups
         are processed. The assertion will be handled as part of the group,
-        but we need to identify this case because the conditional assertion may 
+        but we need to identify this case because the conditional assertion may
         not be quantifier. */
 
         if (tempptr[1] == CHAR_QUESTION_MARK &&
@@ -5216,9 +5216,9 @@ for (;; ptr++)
                tempptr[2] == CHAR_EXCLAMATION_MARK ||
                tempptr[2] == CHAR_LESS_THAN_SIGN))
           {
-          cb->iscondassert = TRUE;       
+          cb->iscondassert = TRUE;
           break;
-          } 
+          }
 
         /* Other conditions use OP_CREF/OP_DNCREF/OP_RREF/OP_DNRREF, and all
         need to skip at least 1+IMM2_SIZE bytes at the start of the group. */
@@ -5771,10 +5771,10 @@ for (;; ptr++)
 
           /* If duplicate names are permitted, we have to allow for a named
           reference to a duplicated name (this cannot be determined until the
-          second pass). This needs an extra data item. Counting named back 
-          references and incrementing the count at the end does not work 
-          because it does not account for duplication of groups containing such 
-          references. Nor does checking for PCRE2_DUPNAMES because that need 
+          second pass). This needs an extra data item. Counting named back
+          references and incrementing the count at the end does not work
+          because it does not account for duplication of groups containing such
+          references. Nor does checking for PCRE2_DUPNAMES because that need
           not be set at the point of reference. */
 
           *lengthptr += IMM2_SIZE;
@@ -6132,11 +6132,11 @@ for (;; ptr++)
       }
 
     /* All assertions used not to be repeatable, but this was changed for Perl
-    compatibility. All kinds can now be repeated except for assertions that are 
+    compatibility. All kinds can now be repeated except for assertions that are
     conditions (Perl also forbids these to be repeated). We copy code into a
     non-register variable (tempcode) in order to be able to pass its address
-    because some compilers complain otherwise. At the start of a conditional 
-    group whose condition is an assertion, cb->iscondassert is set. We unset it 
+    because some compilers complain otherwise. At the start of a conditional
+    group whose condition is an assertion, cb->iscondassert is set. We unset it
     here so as to allow assertions later in the group to be quantified. */
 
     if (bravalue >= OP_ASSERT && bravalue <= OP_ASSERTBACK_NOT &&
@@ -6145,8 +6145,8 @@ for (;; ptr++)
       previous = NULL;
       cb->iscondassert = FALSE;
       }
-    else previous = code;          
-      
+    else previous = code;
+
     *code = bravalue;
     tempcode = code;
     tempreqvary = cb->req_varyopt;        /* Save value before bracket */
@@ -6917,7 +6917,7 @@ for (;;)
       }
 
     /* Fill in the ket */
-    
+
     *code = OP_KET;
     PUT(code, 1, (int)(code - start_bracket));
     code += 1 + LINK_SIZE;
@@ -7725,7 +7725,7 @@ if (re == NULL)
   errorcode = ERR21;
   goto HAD_ERROR;
   }
-  
+
 re->memctl = ccontext->memctl;
 re->tables = tables;
 re->executable_jit = NULL;
@@ -7831,7 +7831,7 @@ if (usedlength > length) errorcode = ERR23; else
 
 /* Fill in any forward references that are required. There may be repeated
 references; optimize for them, as searching a large regex takes time. The
-test of errorcode inside the loop means that nothing is done if it is already 
+test of errorcode inside the loop means that nothing is done if it is already
 non-zero. */
 
 if (cb.hwm > cb.start_workspace)
@@ -7878,7 +7878,7 @@ if (errorcode == 0)
     PCRE2_UCHAR *temp = (PCRE2_UCHAR *)codestart;
     if (PRIV(auto_possessify)(temp, utf, &cb) != 0) errorcode = ERR80;
     }
-  }   
+  }
 
 /* If there were any lookbehind assertions that contained OP_RECURSE
 (recursions or subroutine calls), a flag is set for them to be checked here,

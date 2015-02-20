@@ -585,9 +585,9 @@ typedef struct pcre2_real_match_context {
 } pcre2_real_match_context;
 
 /* The real compiled code structure. The type for the blocksize field is
-defined specially because it is required in pcre2_serialize_decode() when 
-copying the size from possibly unaligned memory into a variable of the same 
-type. Use a macro rather than a typedef to avoid compiler warnings when this 
+defined specially because it is required in pcre2_serialize_decode() when
+copying the size from possibly unaligned memory into a variable of the same
+type. Use a macro rather than a typedef to avoid compiler warnings when this
 file is included multiple times by pcre2test. */
 
 #undef  CODE_BLOCKSIZE_TYPE
@@ -695,7 +695,7 @@ typedef struct compile_block {
   BOOL had_pruneorskip;            /* (*PRUNE) or (*SKIP) encountered */
   BOOL check_lookbehind;           /* Lookbehinds need later checking */
   BOOL dupnames;                   /* Duplicate names exist */
-  BOOL iscondassert;               /* Next assert is a condition */ 
+  BOOL iscondassert;               /* Next assert is a condition */
 } compile_block;
 
 /* Structure for keeping the properties of the in-memory stack used

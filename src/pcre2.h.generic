@@ -44,7 +44,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #define PCRE2_MAJOR          10
 #define PCRE2_MINOR          10
 #define PCRE2_PRERELEASE     -RC1
-#define PCRE2_DATE           2014-01-13
+#define PCRE2_DATE           2015-02-20
 
 /* When an application links to a PCRE DLL in Windows, the symbols that are
 imported have to be identified as such. When building PCRE2, the appropriate
@@ -198,11 +198,13 @@ greater than zero. */
 #define PCRE2_ERROR_UTF32_ERR1      (-27)
 #define PCRE2_ERROR_UTF32_ERR2      (-28)
 
-/* Error codes for pcre2[_dfa]_match(), substring extraction functions, and
-context functions. */
+/* Error codes for pcre2[_dfa]_match(), substring extraction functions, context
+functions, and serializing functions. They are in numerical order. Originally
+they were in alphabetical order too, but now that PCRE2 is released, the
+numbers must not be changed. */
 
 #define PCRE2_ERROR_BADDATA           (-29)
-#define PCRE2_ERROR_BADLENGTH         (-30)
+#define PCRE2_ERROR_MIXEDTABLES       (-30)  /* Name was changed */
 #define PCRE2_ERROR_BADMAGIC          (-31)
 #define PCRE2_ERROR_BADMODE           (-32)
 #define PCRE2_ERROR_BADOFFSET         (-33)
@@ -458,13 +460,12 @@ PCRE2_EXP_DECL int       pcre2_substring_list_get(pcre2_match_data *, \
 /* Functions for serializing / deserializing compiled patterns. */
 
 #define PCRE2_SERIALIZE_FUNCTIONS \
-PCRE2_EXP_DECL int       pcre2_serialize_encode(const pcre2_code **, \
-                           PCRE2_SIZE, uint8_t **, PCRE2_SIZE *, \
+PCRE2_EXP_DECL int32_t   pcre2_serialize_encode(const pcre2_code **, \
+                           int32_t, uint8_t **, PCRE2_SIZE *, \
                            pcre2_general_context *); \
-PCRE2_EXP_DECL int       pcre2_serialize_decode(pcre2_code **, PCRE2_SIZE, \
+PCRE2_EXP_DECL int32_t   pcre2_serialize_decode(pcre2_code **, int32_t, \
                            const uint8_t *, pcre2_general_context *); \
-PCRE2_EXP_DECL int       pcre2_serialize_get_number_of_codes(const uint8_t *, \
-                           PCRE2_SIZE *); \
+PCRE2_EXP_DECL int32_t   pcre2_serialize_get_number_of_codes(const uint8_t *); \
 PCRE2_EXP_DECL void      pcre2_serialize_free(uint8_t *);
 
 

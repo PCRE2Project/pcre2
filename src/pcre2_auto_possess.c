@@ -1090,8 +1090,8 @@ but some compilers complain about an unreachable statement. */
 *************************************************/
 
 /* Replaces single character iterations with their possessive alternatives
-if appropriate. This function modifies the compiled opcode! Hitting a 
-non-existant opcode may indicate a bug in PCRE2, but it can also be caused if a 
+if appropriate. This function modifies the compiled opcode! Hitting a
+non-existant opcode may indicate a bug in PCRE2, but it can also be caused if a
 bad UTF string was compiled with PCRE2_NO_UTF_CHECK.
 
 Arguments:
@@ -1114,9 +1114,9 @@ uint32_t list[8];
 for (;;)
   {
   c = *code;
-  
-  if (c > OP_TABLE_LENGTH) return -1;   /* Something gone wrong */ 
-  
+
+  if (c > OP_TABLE_LENGTH) return -1;   /* Something gone wrong */
+
   if (c >= OP_STAR && c <= OP_TYPEPOSUPTO)
     {
     c -= get_repeat_base(c) - OP_STAR;

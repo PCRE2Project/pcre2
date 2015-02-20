@@ -1,8 +1,8 @@
 Change Log for PCRE2
 --------------------
 
-Version 10.10 xx-xxx-2015
--------------------------
+Version 10.10 20-February-2015
+------------------------------
 
 1. When a pattern is compiled, it remembers the highest back reference so that
 when matching, if the ovector is too small, extra memory can be obtained to
@@ -32,27 +32,27 @@ in order to avoid accessing uninitialized data when serializing.
 5. The (*NO_JIT) feature is implemented.
 
 6. If a bug that caused pcre2_compile() to use more memory than allocated was
-triggered when using valgrind, the code in (3) above passed a stupidly large 
+triggered when using valgrind, the code in (3) above passed a stupidly large
 value to valgrind. This caused a crash instead of an "internal error" return.
 
-7. A reference to a duplicated named group (either a back reference or a test 
-for being set in a conditional) that occurred in a part of the pattern where 
-PCRE2_DUPNAMES was not set caused the amount of memory needed for the pattern 
+7. A reference to a duplicated named group (either a back reference or a test
+for being set in a conditional) that occurred in a part of the pattern where
+PCRE2_DUPNAMES was not set caused the amount of memory needed for the pattern
 to be incorrectly calculated, leading to overwriting.
 
-8. A mutually recursive set of back references such as (\2)(\1) caused a 
-segfault at compile time (while trying to find the minimum matching length). 
+8. A mutually recursive set of back references such as (\2)(\1) caused a
+segfault at compile time (while trying to find the minimum matching length).
 The infinite loop is now broken (with the minimum length unset, that is, zero).
 
-9. If an assertion that was used as a condition was quantified with a minimum 
-of zero, matching went wrong. In particular, if the whole group had unlimited 
+9. If an assertion that was used as a condition was quantified with a minimum
+of zero, matching went wrong. In particular, if the whole group had unlimited
 repetition and could match an empty string, a segfault was likely. The pattern
 (?(?=0)?)+ is an example that caused this. Perl allows assertions to be
 quantified, but not if they are being used as conditions, so the above pattern
 is faulted by Perl. PCRE2 has now been changed so that it also rejects such
 patterns.
 
-10. The error message for an invalid quantifier has been changed from "nothing 
+10. The error message for an invalid quantifier has been changed from "nothing
 to repeat" to "quantifier does not follow a repeatable item".
 
 11. If a bad UTF string is compiled with NO_UTF_CHECK, it may succeed, but
@@ -62,14 +62,14 @@ infinite loop. Now it generates an "internal error" error. This is a tidyup,
 not a bug fix; passing bad UTF with NO_UTF_CHECK is documented as having an
 undefined outcome.
 
-12. A UTF pattern containing a "not" match of a non-ASCII character and a 
+12. A UTF pattern containing a "not" match of a non-ASCII character and a
 subroutine reference could loop at compile time. Example: /[^\xff]((?1))/.
 
-13. The locale test (RunTest 3) has been upgraded. It now checks that a locale 
-that is found in the output of "locale -a" can actually be set by pcre2test 
-before it is accepted. Previously, in an environment where a locale was listed 
-but would not set (an example does exist), the test would "pass" without 
-actually doing anything. Also the fr_CA locale has been added to the list of 
+13. The locale test (RunTest 3) has been upgraded. It now checks that a locale
+that is found in the output of "locale -a" can actually be set by pcre2test
+before it is accepted. Previously, in an environment where a locale was listed
+but would not set (an example does exist), the test would "pass" without
+actually doing anything. Also the fr_CA locale has been added to the list of
 locales that can be used.
 
 14. Fixed a bug in pcre2_substitute(). If a replacement string ended in a
@@ -77,7 +77,7 @@ capturing group number without parentheses, the last character was incorrectly
 literally included at the end of the replacement string.
 
 15. A possessive capturing group such as (a)*+ with a minimum repeat of zero
-failed to allow the zero-repeat case if pcre2_match() was called with an 
+failed to allow the zero-repeat case if pcre2_match() was called with an
 ovector too small to capture the group.
 
 
