@@ -2550,7 +2550,7 @@ if (pbuffer16_size < 2*len + 2)
   pbuffer16 = (uint16_t *)malloc(pbuffer16_size);
   if (pbuffer16 == NULL)
     {
-    fprintf(stderr, "pcre2test: malloc(%ld) failed for pbuffer16\n",
+    fprintf(stderr, "pcre2test: malloc(%lu) failed for pbuffer16\n",
       (unsigned long int)pbuffer16_size);
     exit(1);
     }
@@ -2627,7 +2627,7 @@ if (pbuffer32_size < 4*len + 4)
   pbuffer32 = (uint32_t *)malloc(pbuffer32_size);
   if (pbuffer32 == NULL)
     {
-    fprintf(stderr, "pcre2test: malloc(%ld) failed for pbuffer32\n",
+    fprintf(stderr, "pcre2test: malloc(%lu) failed for pbuffer32\n",
       (unsigned long int)pbuffer32_size);
     exit(1);
     }
@@ -4010,7 +4010,7 @@ switch(cmd)
   serial = malloc(serial_size);
   if (serial == NULL)
     {
-    fprintf(outfile, "** Failed to get memory (size %ld) for #load\n",
+    fprintf(outfile, "** Failed to get memory (size %lu) for #load\n",
       (unsigned long int)serial_size);
     return PR_ABEND;
     }
@@ -4676,7 +4676,7 @@ for (i = 0; i < MAXCPYGET && dat_datctl.copy_numbers[i] >= 0; i++)
       }
     else if (length2 != length)
       {
-      fprintf(outfile, "Mismatched substring lengths: %ld %ld\n",
+      fprintf(outfile, "Mismatched substring lengths: %lu %lu\n",
         (unsigned long int)length, (unsigned long int)length2);
       }
     fprintf(outfile, "%2dC ", n);
@@ -4735,7 +4735,7 @@ for (;;)
       }
     else if (length2 != length)
       {
-      fprintf(outfile, "Mismatched substring lengths: %ld %ld\n",
+      fprintf(outfile, "Mismatched substring lengths: %lu %lu\n",
         (unsigned long int)length, (unsigned long int)length2);
       }
     fprintf(outfile, "  C ");
@@ -5450,8 +5450,8 @@ if (dat_datctl.replacement[0] != 0)
       }
     if (n > nsize)
       {
-      fprintf(outfile, "Replacement buffer setting (%ld) is too large "
-        "(max %ld)\n", (unsigned long int)n, (unsigned long int)nsize);
+      fprintf(outfile, "Replacement buffer setting (%lu) is too large "
+        "(max %lu)\n", (unsigned long int)n, (unsigned long int)nsize);
       return PR_OK;
       }
     nsize = n;
@@ -6001,7 +6001,7 @@ else for (gmatched = 0;; gmatched++)
         {
         PCRE2_SIZE startchar;
         PCRE2_GET_STARTCHAR(startchar, match_data);
-        fprintf(outfile, " at offset %ld", (unsigned long int)startchar);
+        fprintf(outfile, " at offset %lu", (unsigned long int)startchar);
         }
       fprintf(outfile, "\n");
       break;
@@ -6457,10 +6457,19 @@ while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
     struct rlimit rlim;
     getrlimit(RLIMIT_STACK, &rlim);
     rlim.rlim_cur = stack_size * 1024 * 1024;
+    if (rlim.rlim_cur > rlim.rlim_max)
+      {
+      fprintf(stderr, 
+        "pcre2test: requested stack size %luM is greater than hard limit %lu\n",
+        (unsigned long int)stack_size, 
+        (unsigned long int)(rlim.rlim_max));
+      exit(1);
+      }     
     rc = setrlimit(RLIMIT_STACK, &rlim);
     if (rc != 0)
       {
-      fprintf(stderr, "pcre2test: setrlimit() failed with error %d\n", rc);
+      fprintf(stderr, "pcre2test: setting stack size %luM failed: %s\n", 
+        (unsigned long int)stack_size, strerror(errno));
       exit(1);
       }
     op++;

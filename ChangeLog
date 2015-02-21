@@ -80,6 +80,8 @@ literally included at the end of the replacement string.
 failed to allow the zero-repeat case if pcre2_match() was called with an
 ovector too small to capture the group.
 
+16. Improved error message in pcre2test when setting the stack size (-S) fails.
+
 
 Version 10.00 05-January-2015
 -----------------------------
