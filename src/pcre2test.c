@@ -5770,7 +5770,7 @@ else for (gmatched = 0;; gmatched++)
       if (start > ulen || end > ulen)
         {
         fprintf(outfile, "ERROR: bad value(s) for offset(s): 0x%lx 0x%lx\n",
-          start, end);
+          (unsigned long int)start, (unsigned long int)end);
         continue;
         }
 
