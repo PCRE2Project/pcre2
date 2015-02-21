@@ -2551,7 +2551,7 @@ if (pbuffer16_size < 2*len + 2)
   if (pbuffer16 == NULL)
     {
     fprintf(stderr, "pcre2test: malloc(%ld) failed for pbuffer16\n",
-      pbuffer16_size);
+      (unsigned long int)pbuffer16_size);
     exit(1);
     }
   }
@@ -2628,7 +2628,7 @@ if (pbuffer32_size < 4*len + 4)
   if (pbuffer32 == NULL)
     {
     fprintf(stderr, "pcre2test: malloc(%ld) failed for pbuffer32\n",
-      pbuffer32_size);
+      (unsigned long int)pbuffer32_size);
     exit(1);
     }
   }
@@ -4011,7 +4011,7 @@ switch(cmd)
   if (serial == NULL)
     {
     fprintf(outfile, "** Failed to get memory (size %ld) for #load\n",
-      serial_size);
+      (unsigned long int)serial_size);
     return PR_ABEND;
     }
 
@@ -4677,7 +4677,7 @@ for (i = 0; i < MAXCPYGET && dat_datctl.copy_numbers[i] >= 0; i++)
     else if (length2 != length)
       {
       fprintf(outfile, "Mismatched substring lengths: %ld %ld\n",
-        length, length2);
+        (unsigned long int)length, (unsigned long int)length2);
       }
     fprintf(outfile, "%2dC ", n);
     PCHARSV(copybuffer, 0, length, utf, outfile);
@@ -4736,7 +4736,7 @@ for (;;)
     else if (length2 != length)
       {
       fprintf(outfile, "Mismatched substring lengths: %ld %ld\n",
-        length, length2);
+        (unsigned long int)length, (unsigned long int)length2);
       }
     fprintf(outfile, "  C ");
     PCHARSV(copybuffer, 0, length, utf, outfile);
@@ -5451,7 +5451,7 @@ if (dat_datctl.replacement[0] != 0)
     if (n > nsize)
       {
       fprintf(outfile, "Replacement buffer setting (%ld) is too large "
-        "(max %ld)\n", n, nsize);
+        "(max %ld)\n", (unsigned long int)n, (unsigned long int)nsize);
       return PR_OK;
       }
     nsize = n;
@@ -6001,7 +6001,7 @@ else for (gmatched = 0;; gmatched++)
         {
         PCRE2_SIZE startchar;
         PCRE2_GET_STARTCHAR(startchar, match_data);
-        fprintf(outfile, " at offset %ld", startchar);
+        fprintf(outfile, " at offset %ld", (unsigned long int)startchar);
         }
       fprintf(outfile, "\n");
       break;
