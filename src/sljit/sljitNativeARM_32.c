@@ -315,7 +315,7 @@ struct future_patch {
 	sljit_si value;
 };
 
-static SLJIT_INLINE sljit_si resolve_const_pool_index(struct future_patch **first_patch, sljit_uw cpool_current_index, sljit_uw *cpool_start_address, sljit_uw *buf_ptr)
+static SLJIT_INLINE sljit_si resolve_const_pool_index(struct sljit_compiler *compiler, struct future_patch **first_patch, sljit_uw cpool_current_index, sljit_uw *cpool_start_address, sljit_uw *buf_ptr)
 {
 	sljit_si value;
 	struct future_patch *curr_patch, *prev_patch;
@@ -623,7 +623,7 @@ SLJIT_API_FUNC_ATTRIBUTE void* sljit_generate_code(struct sljit_compiler *compil
 					cpool_skip_alignment--;
 				}
 				else {
-					if (SLJIT_UNLIKELY(resolve_const_pool_index(&first_patch, cpool_current_index, cpool_start_address, buf_ptr))) {
+					if (SLJIT_UNLIKELY(resolve_const_pool_index(compiler, &first_patch, cpool_current_index, cpool_start_address, buf_ptr))) {
 						SLJIT_FREE_EXEC(code);
 						compiler->error = SLJIT_ERR_ALLOC_FAILED;
 						return NULL;
@@ -713,7 +713,7 @@ SLJIT_API_FUNC_ATTRIBUTE void* sljit_generate_code(struct sljit_compiler *compil
 		buf_end = buf_ptr + compiler->cpool_fill;
 		cpool_current_index = 0;
 		while (buf_ptr < buf_end) {
-			if (SLJIT_UNLIKELY(resolve_const_pool_index(&first_patch, cpool_current_index, cpool_start_address, buf_ptr))) {
+			if (SLJIT_UNLIKELY(resolve_const_pool_index(compiler, &first_patch, cpool_current_index, cpool_start_address, buf_ptr))) {
 				SLJIT_FREE_EXEC(code);
 				compiler->error = SLJIT_ERR_ALLOC_FAILED;
 				return NULL;
