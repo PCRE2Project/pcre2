@@ -87,6 +87,9 @@ transfer from PCRE1, meaning that CMake configuration failed if "build tests"
 was selected. (2) The file src/pcre2_serialize.c had not been added to the list 
 of PCRE2 sources, which caused a failure to build pcre2test.
 
+18. Fixed typo in pcre2_serialize.c (DECL instead of DEFN) that causes problems 
+only on Windows.
+
 
 Version 10.00 05-January-2015
 -----------------------------

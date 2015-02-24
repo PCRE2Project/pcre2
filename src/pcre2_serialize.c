@@ -68,7 +68,7 @@ character width. */
 *           Serialize compiled patterns          *
 *************************************************/
 
-PCRE2_EXP_DECL int32_t PCRE2_CALL_CONVENTION
+PCRE2_EXP_DEFN int32_t PCRE2_CALL_CONVENTION
 pcre2_serialize_encode(const pcre2_code **codes, int32_t number_of_codes,
    uint8_t **serialized_bytes, PCRE2_SIZE *serialized_size,
    pcre2_general_context *gcontext)
@@ -141,7 +141,7 @@ return number_of_codes;
 *          Deserialize compiled patterns         *
 *************************************************/
 
-PCRE2_EXP_DECL int32_t PCRE2_CALL_CONVENTION
+PCRE2_EXP_DEFN int32_t PCRE2_CALL_CONVENTION
 pcre2_serialize_decode(pcre2_code **codes, int32_t number_of_codes,
    const uint8_t *bytes, pcre2_general_context *gcontext)
 {
@@ -227,7 +227,7 @@ return number_of_codes;
 *    Get the number of serialized patterns       *
 *************************************************/
 
-PCRE2_EXP_DECL int32_t PCRE2_CALL_CONVENTION
+PCRE2_EXP_DEFN int32_t PCRE2_CALL_CONVENTION
 pcre2_serialize_get_number_of_codes(const uint8_t *bytes)
 {
 const pcre2_serialized_data *data = (const pcre2_serialized_data *)bytes;
@@ -245,7 +245,7 @@ return data->number_of_codes;
 *            Free the allocated stream           *
 *************************************************/
 
-PCRE2_EXP_DECL void PCRE2_CALL_CONVENTION
+PCRE2_EXP_DEFN void PCRE2_CALL_CONVENTION
 pcre2_serialize_free(uint8_t *bytes)
 {
 if (bytes != NULL)
