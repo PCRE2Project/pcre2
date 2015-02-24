@@ -82,6 +82,11 @@ ovector too small to capture the group.
 
 16. Improved error message in pcre2test when setting the stack size (-S) fails.
 
+17. Fixed two bugs in CMakeLists.txt: (1) Some lines had got lost in the 
+transfer from PCRE1, meaning that CMake configuration failed if "build tests" 
+was selected. (2) The file src/pcre2_serialize.c had not been added to the list 
+of PCRE2 sources, which caused a failure to build pcre2test.
+
 
 Version 10.00 05-January-2015
 -----------------------------
