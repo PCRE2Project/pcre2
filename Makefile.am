@@ -541,8 +541,7 @@ endif # WITH_GCOV
 TESTS += RunTest
 dist_noinst_SCRIPTS += RunTest
 
-# FIXME when somebody updates RunTest.bat
-#EXTRA_DIST += RunTest.bat
+EXTRA_DIST += RunTest.bat
 
 ## When the 8-bit library is configured, pcre2grep will have been built.
 
@@ -612,6 +611,8 @@ EXTRA_DIST += \
   testdata/testoutput18 \
   testdata/testoutput19 \
   testdata/testoutputEBC \
+  testdata/wintestinput3 \
+  testdata/wintestoutput3 \
   perltest.sh
 
 # RunTest and RunGrepTest should clean up after themselves, but just in case

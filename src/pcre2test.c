@@ -100,15 +100,18 @@ required for different environments. */
 input and output without "b"; then I was told that "b" was needed in some
 environments, so it was added for release 5.0 to both the input and output. (It
 makes no difference on Unix-like systems.) Later I was told that it is wrong
-for the input on Windows. I've now abstracted the modes into two macros that
-are set here, to make it easier to fiddle with them, and removed "b" from the
-input mode under Windows. */
+for the input on Windows. I've now abstracted the modes into macros that are
+set here, to make it easier to fiddle with them, and removed "b" from the input
+mode under Windows. The BINARY versions are used when saving/restoring compiled 
+patterns. */
 
 #if defined(_WIN32) || defined(WIN32)
 #include <io.h>                /* For _setmode() */
 #include <fcntl.h>             /* For _O_BINARY */
-#define INPUT_MODE   "r"
-#define OUTPUT_MODE  "wb"
+#define INPUT_MODE          "r"
+#define OUTPUT_MODE         "wb"
+#define BINARY_INPUT_MODE   "rb"
+#define BINARY_OUTPUT_MODE  "wb"
 
 #ifndef isatty
 #define isatty _isatty         /* This is what Windows calls them, I'm told, */
@@ -132,9 +135,13 @@ input mode under Windows. */
 #if defined NATIVE_ZOS         /* z/OS uses non-binary I/O */
 #define INPUT_MODE   "r"
 #define OUTPUT_MODE  "w"
+#define BINARY_INPUT_MODE   "rb"
+#define BINARY_OUTPUT_MODE  "wb"
 #else
-#define INPUT_MODE   "rb"
-#define OUTPUT_MODE  "wb"
+#define INPUT_MODE          "rb"
+#define OUTPUT_MODE         "wb"
+#define BINARY_INPUT_MODE   "rb"
+#define BINARY_OUTPUT_MODE  "wb"
 #endif
 #endif
 
@@ -3964,7 +3971,7 @@ switch(cmd)
     return PR_OK;
     }
 
-  rc = open_file(argptr+1, OUTPUT_MODE, &f);
+  rc = open_file(argptr+1, BINARY_OUTPUT_MODE, &f);
   if (rc != PR_OK) return rc;
 
   PCRE2_SERIALIZE_ENCODE(rc, patstack, patstacknext, &serial, &serial_size,
@@ -4001,7 +4008,7 @@ switch(cmd)
   /* Load a set of compiled patterns from a file onto the stack */
 
   case CMD_LOAD:
-  rc = open_file(argptr+1, INPUT_MODE, &f);
+  rc = open_file(argptr+1, BINARY_INPUT_MODE, &f);
   if (rc != PR_OK) return rc;
 
   serial_size = 0;
