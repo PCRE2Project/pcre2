@@ -20,10 +20,6 @@ This document contains the following sections:
 
 GENERAL
 
-I (Philip Hazel) have no experience of Windows or VMS sytems and how their
-libraries work. The items in the PCRE2 distribution and Makefile that relate to
-anything other than Linux systems are untested by me.
-
 The basic PCRE2 library consists entirely of code written in Standard C, and so
 should compile successfully on any system that has a Standard C compiler and
 library.
@@ -186,9 +182,12 @@ The default processor stack size of 1Mb in some Windows environments is too
 small for matching patterns that need much recursion. In particular, test 2 may
 fail because of this. Normally, running out of stack causes a crash, but there
 have been cases where the test program has just died silently. See your linker
-documentation for how to increase stack size if you experience problems. The
-Linux default of 8Mb is a reasonable choice for the stack, though even that can
-be too small for some pattern/subject combinations.
+documentation for how to increase stack size if you experience problems. If you
+are using CMake (see "BUILDING PCRE2 ON WINDOWS WITH CMAKE" below) and the gcc
+compiler, you can increase the stack size for pcre2test and pcre2grep by
+setting the CMAKE_EXE_LINKER_FLAGS variable to "-Wl,--stack,8388608" (for
+example). The Linux default of 8Mb is a reasonable choice for the stack, though
+even that can be too small for some pattern/subject combinations.
 
 PCRE2 has a compile configuration option to disable the use of stack for
 recursion so that heap is used instead. However, pattern matching is
@@ -330,22 +329,19 @@ cache can be deleted by selecting "File > Delete Cache".
 
 12. If during configuration with cmake-gui you've elected to build the test
     programs, you can execute them by building the test project. E.g., for
-    MinGW: "make check"; for Visual Studio build the RUN_TESTS project. The
+    MinGW: "make test"; for Visual Studio build the RUN_TESTS project. The
     most recent build configuration is targeted by the tests. A summary of
     test results is presented. Complete test output is subsequently
     available for review in Testing\Temporary under your build dir.
 
 
-TESTING WITH RUNTEST.BAT IS NOT YET TESTED/UPDATED
+TESTING WITH RUNTEST.BAT
 
-If configured with CMake, building the test project ("make check" or building
+If configured with CMake, building the test project ("make test" or building
 ALL_TESTS in Visual Studio) creates (and runs) pcre2_test.bat (and depending
 on your configuration options, possibly other test programs) in the build
-directory. Pcre_test.bat runs RunTest.Bat with correct source and exe paths.
-
-INCOMPLETE: Nobody has yet provided a RunTest.Bat for PCRE2 and I have no means
-of doing so. These instructions are those for PCRE1, left here in the hope that
-one day they will be usable.
+directory. The pcre2_test.bat script runs RunTest.bat with correct source and
+exe paths.
 
 For manual testing with RunTest.bat, provided the build dir is a subdirectory
 of the source directory: Open command shell window. Chdir to the location
@@ -392,4 +388,4 @@ The site currently has ports for PCRE1 releases, but PCRE2 should follow in due
 course.
 
 =============================
-Last Updated: 19 January 2015
+Last Updated: 25 February 2015

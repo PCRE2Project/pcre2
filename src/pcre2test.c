@@ -102,7 +102,7 @@ environments, so it was added for release 5.0 to both the input and output. (It
 makes no difference on Unix-like systems.) Later I was told that it is wrong
 for the input on Windows. I've now abstracted the modes into macros that are
 set here, to make it easier to fiddle with them, and removed "b" from the input
-mode under Windows. The BINARY versions are used when saving/restoring compiled 
+mode under Windows. The BINARY versions are used when saving/restoring compiled
 patterns. */
 
 #if defined(_WIN32) || defined(WIN32)
@@ -6466,16 +6466,16 @@ while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
     rlim.rlim_cur = stack_size * 1024 * 1024;
     if (rlim.rlim_cur > rlim.rlim_max)
       {
-      fprintf(stderr, 
+      fprintf(stderr,
         "pcre2test: requested stack size %luM is greater than hard limit %lu\n",
-        (unsigned long int)stack_size, 
+        (unsigned long int)stack_size,
         (unsigned long int)(rlim.rlim_max));
       exit(1);
-      }     
+      }
     rc = setrlimit(RLIMIT_STACK, &rlim);
     if (rc != 0)
       {
-      fprintf(stderr, "pcre2test: setting stack size %luM failed: %s\n", 
+      fprintf(stderr, "pcre2test: setting stack size %luM failed: %s\n",
         (unsigned long int)stack_size, strerror(errno));
       exit(1);
       }

@@ -394,7 +394,7 @@ SET(PCRE2_SOURCES
   src/pcre2_newline.c
   src/pcre2_ord2utf.c
   src/pcre2_pattern_info.c
-  src/pcre2_serialize.c 
+  src/pcre2_serialize.c
   src/pcre2_string_utils.c
   src/pcre2_study.c
   src/pcre2_substitute.c
@@ -566,7 +566,7 @@ IF(PCRE2_BUILD_TESTS)
 
   # exes in Debug location tested by the RunTest shell script
   # via "make test"
-   
+
   IF(PCRE2_BUILD_PCRE2GREP)
     GET_TARGET_PROPERTY(PCRE2GREP_EXE pcre2grep DEBUG_LOCATION)
   ENDIF(PCRE2_BUILD_PCRE2GREP)

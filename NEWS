@@ -1,7 +1,7 @@
 News about PCRE2 releases
 -------------------------
 
-Version 10.10 20-February-2015
+Version 10.10 26-February-2015
 ------------------------------
 
 1. Serialization and de-serialization functions have been added to the API,
@@ -11,7 +11,8 @@ restoration must be done in the same environment that was used for compilation.
 2. The (*NO_JIT) feature has been added; this makes it possible for a pattern
 creator to specify that JIT is not to be used.
 
-3. A number of bugs have been fixed.
+3. A number of bugs have been fixed. In particular, bugs that caused building
+on Windows using CMake have been mended.
 
 
 Version 10.00 05-January-2015

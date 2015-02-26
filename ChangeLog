@@ -82,19 +82,19 @@ ovector too small to capture the group.
 
 16. Improved error message in pcre2test when setting the stack size (-S) fails.
 
-17. Fixed two bugs in CMakeLists.txt: (1) Some lines had got lost in the 
-transfer from PCRE1, meaning that CMake configuration failed if "build tests" 
-was selected. (2) The file src/pcre2_serialize.c had not been added to the list 
+17. Fixed two bugs in CMakeLists.txt: (1) Some lines had got lost in the
+transfer from PCRE1, meaning that CMake configuration failed if "build tests"
+was selected. (2) The file src/pcre2_serialize.c had not been added to the list
 of PCRE2 sources, which caused a failure to build pcre2test.
 
-18. Fixed typo in pcre2_serialize.c (DECL instead of DEFN) that causes problems 
+18. Fixed typo in pcre2_serialize.c (DECL instead of DEFN) that causes problems
 only on Windows.
 
 19. Use binary input when reading back saved serialized patterns in pcre2test.
 
 20. Added RunTest.bat for running the tests under Windows.
 
-21. "make distclean" was not removing config.h, a file that is created for use 
+21. "make distclean" was not removing config.h, a file that is created for use
 with CMake.
 
 
