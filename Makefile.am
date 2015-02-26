@@ -198,7 +198,7 @@ noinst_PROGRAMS =
 # and 'make maintainer-clean'.
 
 CLEANFILES =
-DISTCLEANFILES = src/config.h.in~
+DISTCLEANFILES = src/config.h.in~ config.h
 MAINTAINERCLEANFILES =
 
 # Additional files to bundle with the distribution, over and above what

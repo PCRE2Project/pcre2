@@ -1,7 +1,7 @@
 Change Log for PCRE2
 --------------------
 
-Version 10.10 20-February-2015
+Version 10.10 26-February-2015
 ------------------------------
 
 1. When a pattern is compiled, it remembers the highest back reference so that
@@ -93,6 +93,9 @@ only on Windows.
 19. Use binary input when reading back saved serialized patterns in pcre2test.
 
 20. Added RunTest.bat for running the tests under Windows.
+
+21. "make distclean" was not removing config.h, a file that is created for use 
+with CMake.
 
 
 Version 10.00 05-January-2015
