@@ -4171,5 +4171,9 @@ a random value. /Ix
 '^(?:a)*+(\w)'
     g
     g\=ovector=1 
+    
+# This pattern showed up a compile-time bug
+
+"((?2){0,1999}())?"
 
 # End of testinput2 

@@ -97,6 +97,14 @@ only on Windows.
 21. "make distclean" was not removing config.h, a file that is created for use
 with CMake.
 
+22. A pattern such as "((?2){0,1999}())?", which has a group containing a
+forward reference repeated a large (but limited) number of times within a
+repeated outer group that has a zero minimum quantifier, caused incorrect code
+to be compiled, leading to the error "internal error: previously-checked
+referenced subpattern not found" when an incorrect memory address was read.
+This bug was reported as "heap overflow", discovered by Kai Lu of Fortinet's
+FortiGuard Labs.
+
 
 Version 10.00 05-January-2015
 -----------------------------
