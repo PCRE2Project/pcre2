@@ -105,6 +105,11 @@ referenced subpattern not found" when an incorrect memory address was read.
 This bug was reported as "heap overflow", discovered by Kai Lu of Fortinet's
 FortiGuard Labs.
 
+23. A pattern such as "((?+1)(\1))/" containing a forward reference subroutine
+call within a group that also contained a recursive back reference caused
+incorrect code to be compiled. This bug was reported as "heap overflow",
+discovered by Kai Lu of Fortinet's FortiGuard Labs.
+
 
 Version 10.00 05-January-2015
 -----------------------------

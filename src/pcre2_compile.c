@@ -6713,6 +6713,7 @@ int32_t firstcuflags, reqcuflags;
 uint32_t branchfirstcu, branchreqcu;
 int32_t branchfirstcuflags, branchreqcuflags;
 size_t length;
+size_t save_hwm_offset;
 unsigned int orig_bracount;
 unsigned int max_bracount;
 branch_chain bc;
@@ -6733,6 +6734,8 @@ bc.current_branch = code;
 
 firstcu = reqcu = 0;
 firstcuflags = reqcuflags = REQ_UNSET;
+
+save_hwm_offset = cb->hwm - cb->start_workspace;  /* hwm at start of group */
 
 /* Accumulate the length for use in the pre-compile phase. Start with the
 length of the BRA and KET and any extra code units that are required at the
@@ -6939,7 +6942,7 @@ for (;;)
         {
         *code = OP_END;
         adjust_recurse(start_bracket, 1 + LINK_SIZE,
-          (options & PCRE2_UTF) != 0, cb, cb->hwm - cb->start_workspace);
+          (options & PCRE2_UTF) != 0, cb, save_hwm_offset);
         memmove(start_bracket + 1 + LINK_SIZE, start_bracket,
           CU2BYTES(code - start_bracket));
         *start_bracket = OP_ONCE;

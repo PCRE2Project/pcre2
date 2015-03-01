@@ -13950,8 +13950,23 @@ Matched, but too many substrings
 Matched, but too many substrings
  0: g
     
-# This pattern showed up a compile-time bug
+# These two pattern showeds up compile-time bugs
 
 "((?2){0,1999}())?"
+
+/((?+1)(\1))/B
+------------------------------------------------------------------
+        Bra
+        Once
+        CBra 1
+        Recurse
+        CBra 2
+        \1
+        Ket
+        Ket
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
 
 # End of testinput2 

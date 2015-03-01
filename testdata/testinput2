@@ -4172,8 +4172,10 @@ a random value. /Ix
     g
     g\=ovector=1 
     
-# This pattern showed up a compile-time bug
+# These two pattern showeds up compile-time bugs
 
 "((?2){0,1999}())?"
+
+/((?+1)(\1))/B
 
 # End of testinput2 
