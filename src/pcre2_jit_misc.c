@@ -52,6 +52,10 @@ POSSIBILITY OF SUCH DAMAGE.
 void
 PRIV(jit_free_rodata)(void *current, void *allocator_data)
 {
+#ifndef SUPPORT_JIT
+(void)current;
+(void)allocator_data;
+#else  /* SUPPORT_JIT */
 void *next;
 
 SLJIT_UNUSED_ARG(allocator_data);
@@ -62,6 +66,8 @@ while (current != NULL)
   SLJIT_FREE(current, allocator_data);
   current = next;
   }
+
+#endif /* SUPPORT_JIT */
 }
 
 /*************************************************
