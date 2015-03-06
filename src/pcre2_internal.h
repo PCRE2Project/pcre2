@@ -1866,6 +1866,7 @@ is available. */
 #define _pcre2_auto_possessify       PCRE2_SUFFIX(_pcre2_auto_possessify_)
 #define _pcre2_find_bracket          PCRE2_SUFFIX(_pcre2_find_bracket_)
 #define _pcre2_is_newline            PCRE2_SUFFIX(_pcre2_is_newline_)
+#define _pcre2_jit_free_rodata       PCRE2_SUFFIX(_pcre2_jit_free_rodata_)
 #define _pcre2_jit_free              PCRE2_SUFFIX(_pcre2_jit_free_)
 #define _pcre2_jit_get_size          PCRE2_SUFFIX(_pcre2_jit_get_size_)
 #define _pcre2_jit_get_target        PCRE2_SUFFIX(_pcre2_jit_get_target_)
@@ -1887,6 +1888,7 @@ extern int          _pcre2_auto_possessify(PCRE2_UCHAR *, BOOL,
 extern PCRE2_SPTR   _pcre2_find_bracket(PCRE2_SPTR, BOOL, int);
 extern BOOL         _pcre2_is_newline(PCRE2_SPTR, uint32_t, PCRE2_SPTR,
                       uint32_t *, BOOL);
+extern void         _pcre2_jit_free_rodata(void *, void *);
 extern void         _pcre2_jit_free(void *, pcre2_memctl *);
 extern size_t       _pcre2_jit_get_size(void *);
 const char *        _pcre2_jit_get_target(void);

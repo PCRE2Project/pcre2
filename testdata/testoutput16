@@ -365,4 +365,12 @@ JIT compilation was successful
     abcdef
  0: def (JIT)
     
+# Test pattern compilation
+
+/(?:a|b|c|d|e)(?R)/jit=1
+
+/(?:a|b|c|d|e)(?R)(?R)/jit=1
+
+/(a(?:a|b|c|d|e)b){8,16}/jit=1
+
 # End of testinput16
