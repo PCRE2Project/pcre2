@@ -1,8 +1,8 @@
 Change Log for PCRE2
 --------------------
 
-Version 10.10 26-February-2015
-------------------------------
+Version 10.10 06-March-2015
+---------------------------
 
 1. When a pattern is compiled, it remembers the highest back reference so that
 when matching, if the ovector is too small, extra memory can be obtained to
@@ -94,8 +94,8 @@ only on Windows.
 
 20. Added RunTest.bat for running the tests under Windows.
 
-21. "make distclean" was not removing config.h, a file that is created for use
-with CMake.
+21. "make distclean" was not removing config.h, a file that may be created for
+use with CMake.
 
 22. A pattern such as "((?2){0,1999}())?", which has a group containing a
 forward reference repeated a large (but limited) number of times within a
