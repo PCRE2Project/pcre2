@@ -2216,4 +2216,7 @@
     \x{23a}\x{2c65}\x{2c65}\x{2c65}
     \x{23a}\x{23a}\x{2c65}\x{23a}
 
+/[A-`]/i,utf
+    abcdefghijklmno
+
 # End of testinput4

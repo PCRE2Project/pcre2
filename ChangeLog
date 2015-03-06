@@ -115,6 +115,11 @@ of various issues, and new ones are still appear unfortunately. To fix
 existing and future issues, size computation is eliminated from the code,
 and replaced by on-demand memory allocation.
 
+25. A pattern such as /(?i)[A-`]/, where characters in the other case are
+adjacent to the end of the range, and the range contained characters with more
+than one other case, caused incorrect behaviour when compiled in UTF mode. In
+that example, the range a-j was left out of the class.
+
 
 Version 10.00 05-January-2015
 -----------------------------

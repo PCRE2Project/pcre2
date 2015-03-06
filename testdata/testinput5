@@ -1638,4 +1638,7 @@
 
 /[^\xff]((?1))/utf,debug
 
+/[A-`]/iB,utf
+    abcdefghijklmno
+
 # End of testinput5 

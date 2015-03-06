@@ -4009,4 +4009,14 @@ Subject length lower bound = 1
 /[^\xff]((?1))/utf,debug
 Failed: error 140 at offset 11: recursion could loop indefinitely
 
+/[A-`]/iB,utf
+------------------------------------------------------------------
+        Bra
+        [A-z\x{212a}\x{17f}]
+        Ket
+        End
+------------------------------------------------------------------
+    abcdefghijklmno
+ 0: a
+
 # End of testinput5 

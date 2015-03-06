@@ -3735,4 +3735,8 @@ No match
     \x{23a}\x{23a}\x{2c65}\x{23a}
 No match
 
+/[A-`]/i,utf
+    abcdefghijklmno
+ 0: a
+
 # End of testinput4
