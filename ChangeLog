@@ -1,6 +1,12 @@
 Change Log for PCRE2
 --------------------
 
+Version 10.20 xx-xx-2015
+------------------------
+
+1. Callouts with string arguments have been added.
+
+
 Version 10.10 06-March-2015
 ---------------------------
 

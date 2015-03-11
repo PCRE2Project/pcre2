@@ -4519,9 +4519,9 @@ return capcount;
 /* Called from a PCRE2 library as a result of the (?C) item. We print out where
 we are in the match. Yield zero unless more callouts than the fail count, or
 the callout data is not zero. The only differences in the callout block for
-different code unit widths are that the pointers to the subject and the most
-recent MARK point to strings of the appropriate width. Casts can be used to
-deal with this.
+different code unit widths are that the pointers to the subject, the most
+recent MARK, and a callout argument string point to strings of the appropriate
+width. Casts can be used to deal with this.
 
 Argument:  a pointer to a callout block
 Return:
@@ -4535,11 +4535,31 @@ BOOL utf = (FLD(compiled_code, overall_options) & PCRE2_UTF) != 0;
 BOOL callout_capture = (dat_datctl.control & CTL_CALLOUT_CAPTURE) != 0;
 FILE *f = (first_callout || callout_capture)? outfile : NULL;
 
+/* For a callout with a string argument, show the string first because there 
+isn't a tidy way to fit it in the rest of the data. */
+
+if (cb->callout_string != NULL)
+  {
+  uint32_t delimiter = CODE_UNIT(cb->callout_string, -1); 
+  fprintf(f, "Callout: %c", delimiter);
+  PCHARSV(cb->callout_string, 0,
+    cb->callout_string_length, utf, outfile);
+  for (i = 0; callout_start_delims[i] != 0; i++)
+    if (delimiter == callout_start_delims[i])
+      { 
+      delimiter = callout_end_delims[i]; 
+      break;
+      }  
+  fprintf(outfile, "%c", delimiter);  
+  if (!callout_capture) fprintf(f, "\n");
+  } 
+  
+/* Show captured strings if required */ 
+
 if (callout_capture)
   {
-  fprintf(f, "Callout %d: last capture = %d\n",
-    cb->callout_number, cb->capture_last);
-
+  if (cb->callout_string == NULL) fprintf(f, "Callout %d:", cb->callout_number);
+  fprintf(f, " last capture = %d\n", cb->capture_last);
   for (i = 0; i < cb->capture_top * 2; i += 2)
     {
     fprintf(f, "%2d: ", i/2);
@@ -4553,7 +4573,7 @@ if (callout_capture)
     fprintf(f, "\n");
     }
   }
-
+  
 /* Re-print the subject in canonical form, the first time or if giving full
 datails. On subsequent calls in the same match, we use pchars just to find the
 printed lengths of the substrings. */
@@ -4572,19 +4592,22 @@ PCHARSV(cb->subject, cb->current_position,
 
 if (f != NULL) fprintf(f, "\n");
 
-/* Always print appropriate indicators, with callout number if not already
-shown. For automatic callouts, show the pattern offset. */
+/* For automatic callouts, show the pattern offset. Otherwise, for a numerical 
+callout whose number has not already been shown with captured strings, show the 
+number here. A callout with a string argument has been displayed above. */
 
 if (cb->callout_number == 255)
   {
   fprintf(outfile, "%+3d ", (int)cb->pattern_position);
   if (cb->pattern_position > 99) fprintf(outfile, "\n    ");
   }
-else
+else 
   {
-  if (callout_capture) fprintf(outfile, "    ");
+  if (callout_capture || cb->callout_string != NULL) fprintf(outfile, "    ");
     else fprintf(outfile, "%3d ", cb->callout_number);
   }
+  
+/* Now show position indicators */ 
 
 for (i = 0; i < pre_start; i++) fprintf(outfile, " ");
 fprintf(outfile, "^");

@@ -771,6 +771,9 @@ switch(*cc)
 #endif
   return cc + 1;
 
+  case OP_CALLOUT_STR:
+  return cc + GET(cc, 1 + 2*LINK_SIZE);
+
 #if defined SUPPORT_UNICODE || PCRE2_CODE_UNIT_WIDTH != 8
   case OP_XCLASS:
   return cc + GET(cc, 1);
@@ -821,7 +824,7 @@ while (cc < ccend)
     case OP_SCOND:
     /* Only AUTO_CALLOUT can insert this opcode. We do
        not intend to support this case. */
-    if (cc[1 + LINK_SIZE] == OP_CALLOUT)
+    if (cc[1 + LINK_SIZE] == OP_CALLOUT || cc[1 + LINK_SIZE] == OP_CALLOUT_STR)
       return FALSE;
     cc += 1 + LINK_SIZE;
     break;
@@ -855,12 +858,13 @@ while (cc < ccend)
     break;
 
     case OP_CALLOUT:
+    case OP_CALLOUT_STR:
     if (common->capture_last_ptr == 0)
       {
       common->capture_last_ptr = common->ovector_start;
       common->ovector_start += sizeof(sljit_sw);
       }
-    cc += 2 + 2 * LINK_SIZE;
+    cc += (*cc == OP_CALLOUT) ? PRIV(OP_lengths)[OP_CALLOUT] : GET(cc, 1 + 2*LINK_SIZE);
     break;
 
     case OP_THEN_ARG:
@@ -6296,7 +6300,7 @@ uint32_t i;
 if (arguments->callout == NULL)
   return 0;
 
-callout_block->version = 0;
+callout_block->version = 1;
 
 /* Offsets in subject. */
 callout_block->subject_length = arguments->end - arguments->begin;
@@ -6333,6 +6337,10 @@ static SLJIT_INLINE PCRE2_SPTR compile_callout_matchingpath(compiler_common *com
 DEFINE_COMPILER;
 backtrack_common *backtrack;
 sljit_si mov_opcode;
+unsigned int callout_length = (*cc == OP_CALLOUT)
+    ? PRIV(OP_lengths)[OP_CALLOUT] : GET(cc, 1 + 2 * LINK_SIZE);
+sljit_sw value1;
+sljit_sw value2;
 
 PUSH_BACKTRACK(sizeof(backtrack_common), cc, NULL);
 
@@ -6341,7 +6349,8 @@ allocate_stack(common, CALLOUT_ARG_SIZE / sizeof(sljit_sw));
 SLJIT_ASSERT(common->capture_last_ptr != 0);
 OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(SLJIT_SP), common->capture_last_ptr);
 OP1(SLJIT_MOV, TMP1, 0, ARGUMENTS, 0);
-OP1(SLJIT_MOV_UI, SLJIT_MEM1(STACK_TOP), CALLOUT_ARG_OFFSET(callout_number), SLJIT_IMM, cc[1]);
+value1 = (*cc == OP_CALLOUT) ? cc[1 + 2 * LINK_SIZE] : 0;
+OP1(SLJIT_MOV_UI, SLJIT_MEM1(STACK_TOP), CALLOUT_ARG_OFFSET(callout_number), SLJIT_IMM, value1);
 OP1(SLJIT_MOV_UI, SLJIT_MEM1(STACK_TOP), CALLOUT_ARG_OFFSET(capture_last), TMP2, 0);
 
 /* These pointer sized fields temporarly stores internal variables. */
@@ -6352,8 +6361,22 @@ OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), CALLOUT_ARG_OFFSET(subject), TMP2, 0);
 if (common->mark_ptr != 0)
   OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(TMP1), SLJIT_OFFSETOF(jit_arguments, mark_ptr));
 mov_opcode = (sizeof(PCRE2_SIZE) == 4) ? SLJIT_MOV_UI : SLJIT_MOV;
-OP1(mov_opcode, SLJIT_MEM1(STACK_TOP), CALLOUT_ARG_OFFSET(pattern_position), SLJIT_IMM, GET(cc, 2));
-OP1(mov_opcode, SLJIT_MEM1(STACK_TOP), CALLOUT_ARG_OFFSET(next_item_length), SLJIT_IMM, GET(cc, 2 + LINK_SIZE));
+OP1(mov_opcode, SLJIT_MEM1(STACK_TOP), CALLOUT_ARG_OFFSET(pattern_position), SLJIT_IMM, GET(cc, 1));
+OP1(mov_opcode, SLJIT_MEM1(STACK_TOP), CALLOUT_ARG_OFFSET(next_item_length), SLJIT_IMM, GET(cc, 1 + LINK_SIZE));
+
+if (*cc == OP_CALLOUT)
+  {
+  value1 = 0;
+  value2 = 0;
+  }
+else
+  {
+  value1 = (sljit_sw) (cc + (1 + 3*LINK_SIZE) + 1);
+  value2 = (callout_length - (1 + 3*LINK_SIZE + 2));
+  }
+
+OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), CALLOUT_ARG_OFFSET(callout_string), SLJIT_IMM, value1);
+OP1(mov_opcode, SLJIT_MEM1(STACK_TOP), CALLOUT_ARG_OFFSET(callout_string_length), SLJIT_IMM, value2);
 OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), CALLOUT_ARG_OFFSET(mark), (common->mark_ptr != 0) ? TMP2 : SLJIT_IMM, 0);
 
 /* Needed to save important temporary registers. */
@@ -6372,7 +6395,7 @@ if (common->forced_quit_label == NULL)
   add_jump(compiler, &common->forced_quit, JUMP(SLJIT_SIG_LESS));
 else
   JUMPTO(SLJIT_SIG_LESS, common->forced_quit_label);
-return cc + 2 + 2 * LINK_SIZE;
+return cc + callout_length;
 }
 
 #undef CALLOUT_ARG_SIZE
@@ -8377,6 +8400,7 @@ while (cc < ccend)
     break;
 
     case OP_CALLOUT:
+    case OP_CALLOUT_STR:
     cc = compile_callout_matchingpath(common, cc, parent);
     break;
 
@@ -9561,6 +9585,7 @@ while (current)
     break;
 
     case OP_CALLOUT:
+    case OP_CALLOUT_STR:
     case OP_FAIL:
     case OP_ACCEPT:
     case OP_ASSERT_ACCEPT:

@@ -573,7 +573,8 @@ enum { ERR0 = COMPILE_ERROR_BASE,
        ERR41, ERR42, ERR43, ERR44, ERR45, ERR46, ERR47, ERR48, ERR49, ERR50,
        ERR51, ERR52, ERR53, ERR54, ERR55, ERR56, ERR57, ERR58, ERR59, ERR60,
        ERR61, ERR62, ERR63, ERR64, ERR65, ERR66, ERR67, ERR68, ERR69, ERR70,
-       ERR71, ERR72, ERR73, ERR74, ERR75, ERR76, ERR77, ERR78, ERR79, ERR80 };
+       ERR71, ERR72, ERR73, ERR74, ERR75, ERR76, ERR77, ERR78, ERR79, ERR80,
+       ERR81, ERR82 };
 
 /* This is a table of start-of-pattern options such as (*UTF) and settings such
 as (*LIMIT_MATCH=nnnn) and (*CRLF). For completeness and backward
@@ -616,7 +617,6 @@ static pso pso_list[] = {
   { (uint8_t *)STRING_BSR_ANYCRLF_RIGHTPAR,       12, PSO_BSR, PCRE2_BSR_ANYCRLF },
   { (uint8_t *)STRING_BSR_UNICODE_RIGHTPAR,       12, PSO_BSR, PCRE2_BSR_UNICODE }
 };
-
 
 /* This table is used when converting repeating opcodes into possessified
 versions as a result of an explicit possessive quantifier such as ++. A zero
@@ -730,11 +730,11 @@ Returns:         new code pointer
 static PCRE2_UCHAR *
 auto_callout(PCRE2_UCHAR *code, PCRE2_SPTR ptr, compile_block *cb)
 {
-*code++ = OP_CALLOUT;
-*code++ = 255;
-PUT(code, 0, ptr - cb->start_pattern);  /* Pattern offset */
-PUT(code, LINK_SIZE, 0);                /* Default length */
-return code + 2 * LINK_SIZE;
+code[0] = OP_CALLOUT;
+PUT(code, 1, ptr - cb->start_pattern);  /* Pattern offset */
+PUT(code, 1 + LINK_SIZE, 0);            /* Default length */
+code[1 + 2*LINK_SIZE] = 255;
+return code + PRIV(OP_lengths)[OP_CALLOUT];
 }
 
 
@@ -759,8 +759,8 @@ static void
 complete_callout(PCRE2_UCHAR *previous_callout, PCRE2_SPTR ptr,
   compile_block *cb)
 {
-size_t length = ptr - cb->start_pattern - GET(previous_callout, 2);
-PUT(previous_callout, 2 + LINK_SIZE, length);
+size_t length = ptr - cb->start_pattern - GET(previous_callout, 1);
+PUT(previous_callout, 1 + LINK_SIZE, length);
 }
 
 
@@ -907,6 +907,10 @@ for (;;)
     case OP_THEN:
     case OP_WORD_BOUNDARY:
     cc += PRIV(OP_lengths)[*cc];
+    break;
+
+    case OP_CALLOUT_STR:
+    cc += GET(cc, 1 + 2*LINK_SIZE);
     break;
 
     /* Handle literal characters */
@@ -1155,6 +1159,10 @@ for (;;)
     case OP_FALSE:
     case OP_TRUE:
     code += PRIV(OP_lengths)[*code];
+    break;
+
+    case OP_CALLOUT_STR:
+    code += GET(code, 1 + 2*LINK_SIZE);
     break;
 
     default:
@@ -2279,11 +2287,13 @@ for (;;)
 
   if (c == OP_END) return NULL;
 
-  /* XCLASS is used for classes that cannot be represented just by a bit
-  map. This includes negated single high-valued characters. The length in
-  the table is zero; the actual length is stored in the compiled code. */
+  /* XCLASS is used for classes that cannot be represented just by a bit map.
+  This includes negated single high-valued characters. CALLOUT_STR is used for
+  callouts with string arguments. In both cases the length in the table is
+  zero; the actual length is stored in the compiled code. */
 
   if (c == OP_XCLASS) code += GET(code, 1);
+    else if (c == OP_CALLOUT_STR) code += GET(code, 1 + 2*LINK_SIZE);
 
   /* Handle recursion */
 
@@ -2442,11 +2452,13 @@ for (;;)
   if (c == OP_END) return NULL;
   if (c == OP_RECURSE) return code;
 
-  /* XCLASS is used for classes that cannot be represented just by a bit
-  map. This includes negated single high-valued characters. The length in
-  the table is zero; the actual length is stored in the compiled code. */
+  /* XCLASS is used for classes that cannot be represented just by a bit map.
+  This includes negated single high-valued characters. CALLOUT_STR is used for
+  callouts with string arguments. In both cases the length in the table is
+  zero; the actual length is stored in the compiled code. */
 
   if (c == OP_XCLASS) code += GET(code, 1);
+    else if (c == OP_CALLOUT_STR) code += GET(code, 1 + 2*LINK_SIZE);
 
   /* Otherwise, we can get the item's length from the table, except that for
   repeated character types, we have to test for \p and \P, which have an extra
@@ -5558,30 +5570,124 @@ for (;; ptr++)
 
 
         /* ------------------------------------------------------------ */
-        case CHAR_C:                 /* Callout - may be followed by digits; */
+        case CHAR_C:                 /* Callout */
         previous_callout = code;     /* Save for later completion */
         after_manual_callout = 1;    /* Skip one item before completing */
-        *code++ = OP_CALLOUT;
+        ptr++;                       /* Character after (?C */
+        
+        /* A callout may have a string argument, delimited by one of a fixed 
+        number of characters, or an undelimited numerical argument, or no
+        argument, which is the same as (?C0). Different opcodes are used for
+        the two cases. */
+        
+        if (*ptr != CHAR_RIGHT_PARENTHESIS && !IS_DIGIT(*ptr))
+          { 
+          uint32_t delimiter = 0;
+        
+          for (i = 0; PRIV(callout_start_delims)[i] != 0; i++)
+            {
+            if (*ptr == PRIV(callout_start_delims)[i])
+              {
+              delimiter = PRIV(callout_end_delims)[i];
+              break;  
+              }  
+            }
+            
+          if (delimiter == 0)
+            {
+            *errorcodeptr = ERR82;
+            goto FAILED;  
+            }  
+
+          /* During the pre-compile phase, we parse the string and update the
+          length. There is no need to generate any code. */
+           
+          if (lengthptr != NULL)     /* Only check the string */
+            {
+            PCRE2_SPTR start = ptr;
+            do
+              {
+              if (++ptr >= cb->end_pattern)
+                {
+                *errorcodeptr = ERR81;
+                ptr = start;   /* To give a more useful message */ 
+                goto FAILED;
+                }
+              if (ptr[0] == delimiter && ptr[1] == delimiter) ptr += 2;
+              }
+            while (ptr[0] != delimiter);
+                    
+            /* Start points to the opening delimiter, ptr points to the
+            closing delimiter. We must allow for including the delimiter and 
+            for the terminating zero. Any doubled delimiters within the string
+            make this an overestimate, but it is not worth bothering about. */
+             
+            (*lengthptr) += (ptr - start) + 2 + (1 + 3*LINK_SIZE);
+            }
+            
+          /* In the real compile we can copy the string, knowing that it is
+          syntactically OK. The starting delimiter is included so that the 
+          client can discover it if they want. */ 
+ 
+          else
+            {
+            PCRE2_UCHAR *callout_string = code + (1 + 3*LINK_SIZE);
+            *callout_string++ = *ptr++;
+            for(;;)
+              {
+              if (*ptr == delimiter)
+                {
+                if (ptr[1] == delimiter) ptr++; else break;
+                }   
+              *callout_string++ = *ptr++;
+              }
+            *callout_string++ = CHAR_NULL;
+            code[0] = OP_CALLOUT_STR;
+            PUT(code, 1, (int)(ptr + 2 - cb->start_pattern)); /* Next offset */
+            PUT(code, 1 + LINK_SIZE, 0);      /* Default length */
+            PUT(code, 1 + 2*LINK_SIZE,        /* Compute size */
+                (int)(callout_string - code));
+            code = callout_string;
+            }
+            
+          /* Advance to what should be the closing parenthesis, which is 
+          checked below. */
+             
+          ptr++;
+          }
+          
+        /* Handle a callout with an optional numerical argument, which must be
+        less than or equal to 255. A missing argument gives 0. */
+         
+        else
           {
           int n = 0;
-          ptr++;
-          while(IS_DIGIT(*ptr))
+          code[0] = OP_CALLOUT;     /* Numerical callout */
+          while (IS_DIGIT(*ptr))
+            {
             n = n * 10 + *ptr++ - CHAR_0;
-          if (*ptr != CHAR_RIGHT_PARENTHESIS)
-            {
-            *errorcodeptr = ERR39;
-            goto FAILED;
+            if (n > 255)
+              {
+              *errorcodeptr = ERR38;
+              goto FAILED;
+              }
             }
-          if (n > 255)
-            {
-            *errorcodeptr = ERR38;
-            goto FAILED;
-            }
-          *code++ = n;
-          PUT(code, 0, (int)(ptr - cb->start_pattern + 1)); /* Pattern offset */
-          PUT(code, LINK_SIZE, 0);                          /* Default length */
-          code += 2 * LINK_SIZE;
+          PUT(code, 1, (int)(ptr - cb->start_pattern + 1));  /* Next offset */
+          PUT(code, 1 + LINK_SIZE, 0);                    /* Default length */
+          code[1 + 2*LINK_SIZE] = n;                      /* Callout number */
+          code += PRIV(OP_lengths)[OP_CALLOUT];
           }
+          
+        /* Both formats must have a closing parenthesis */
+          
+        if (*ptr != CHAR_RIGHT_PARENTHESIS)
+          {
+          *errorcodeptr = ERR39;
+          goto FAILED;
+          }
+
+        /* Callouts cannot be quantified. */
+         
         previous = NULL;
         continue;
 
@@ -7164,7 +7270,10 @@ do {
    if (op == OP_COND)
      {
      scode += 1 + LINK_SIZE;
+
      if (*scode == OP_CALLOUT) scode += PRIV(OP_lengths)[OP_CALLOUT];
+     else if (*scode == OP_CALLOUT_STR) scode += GET(scode, 1 + 2*LINK_SIZE);
+
      switch (*scode)
        {
        case OP_CREF:

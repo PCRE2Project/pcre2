@@ -3538,7 +3538,7 @@ Subject length lower bound = 2
 Failed: error 138 at offset 6: number after (?C is greater than 255
 
 /(?Cab)xx/I
-Failed: error 139 at offset 3: closing parenthesis for (?C expected
+Failed: error 182 at offset 3: unrecognized string delimiter follows (?C
 
 /(?C12vr)x/I
 Failed: error 139 at offset 5: closing parenthesis for (?C expected
@@ -13968,5 +13968,96 @@ Matched, but too many substrings
         Ket
         End
 ------------------------------------------------------------------
+
+# Callouts with string arguments
+
+/a(?C"/
+Failed: error 181 at offset 4: missing terminating delimiter for callout with string argument
+
+/a(?C"a/
+Failed: error 181 at offset 4: missing terminating delimiter for callout with string argument
+
+/a(?C"a"/
+Failed: error 139 at offset 7: closing parenthesis for (?C expected
+
+/a(?C"a"bcde(?C"b")xyz/
+Failed: error 139 at offset 7: closing parenthesis for (?C expected
+
+/a(?C"a)b""c")/B
+------------------------------------------------------------------
+        Bra
+        a
+        CalloutStr "a)b"c" 13 0
+        Ket
+        End
+------------------------------------------------------------------
+
+/ab(?C" any text with spaces ")cde/B
+------------------------------------------------------------------
+        Bra
+        ab
+        CalloutStr " any text with spaces " 30 1
+        cde
+        Ket
+        End
+------------------------------------------------------------------
+    abcde
+Callout: " any text with spaces "
+--->abcde
+    ^ ^       c
+ 0: abcde
+    12abcde
+Callout: " any text with spaces "
+--->12abcde
+      ^ ^       c
+ 0: abcde
+
+/^a(b)c(?C1)def/
+      abcdef
+--->abcdef
+  1 ^  ^       d
+ 0: abcdef
+ 1: b
+
+/^a(b)c(?C"AB")def/
+      abcdef
+Callout: "AB"
+--->abcdef
+    ^  ^       d
+ 0: abcdef
+ 1: b
+
+/^a(b)c(?C1)def/
+      abcdef\=callout_capture
+Callout 1: last capture = 1
+ 0: <unset>
+ 1: b
+--->abcdef
+    ^  ^       d
+ 0: abcdef
+ 1: b
+
+/^a(b)c(?C{AB})def/B
+------------------------------------------------------------------
+        Bra
+        ^
+        a
+        CBra 1
+        b
+        Ket
+        c
+        CalloutStr {AB} 14 1
+        def
+        Ket
+        End
+------------------------------------------------------------------
+      abcdef\=callout_capture
+Callout: {AB} last capture = 1
+ 0: <unset>
+ 1: b
+--->abcdef
+    ^  ^       d
+ 0: abcdef
+ 1: b
 
 # End of testinput2 

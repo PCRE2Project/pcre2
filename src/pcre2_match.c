@@ -1310,13 +1310,15 @@ for (;;)
     /* Because of the way auto-callout works during compile, a callout item is
     inserted between OP_COND and an assertion condition. */
 
-    if (*ecode == OP_CALLOUT)
+    if (*ecode == OP_CALLOUT || *ecode == OP_CALLOUT_STR)
       {
+      unsigned int callout_length = (*ecode == OP_CALLOUT)
+          ? PRIV(OP_lengths)[OP_CALLOUT] : GET(ecode, 1 + 2*LINK_SIZE);
+
       if (mb->callout != NULL)
         {
         pcre2_callout_block cb;
-        cb.version          = 0;
-        cb.callout_number   = ecode[1];
+        cb.version          = 1;
         cb.capture_top      = offset_top/2;
         cb.capture_last     = mb->capture_last & CAPLMASK;
         cb.offset_vector    = mb->ovector;
@@ -1325,8 +1327,23 @@ for (;;)
         cb.subject_length   = (PCRE2_SIZE)(mb->end_subject - mb->start_subject);
         cb.start_match      = (PCRE2_SIZE)(mstart - mb->start_subject);
         cb.current_position = (PCRE2_SIZE)(eptr - mb->start_subject);
-        cb.pattern_position = GET(ecode, 2);
-        cb.next_item_length = GET(ecode, 2 + LINK_SIZE);
+        cb.pattern_position = GET(ecode, 1);
+        cb.next_item_length = GET(ecode, 1 + LINK_SIZE);
+
+        if (*ecode == OP_CALLOUT)
+          {
+          cb.callout_number = ecode[1 + 2*LINK_SIZE];
+          cb.callout_string = NULL;
+          cb.callout_string_length = 0;
+          }
+        else
+          {
+          cb.callout_number = 0;
+          cb.callout_string = ecode + (1 + 3*LINK_SIZE) + 1;
+          cb.callout_string_length =
+            callout_length - (1 + 3*LINK_SIZE) - 2;
+          }
+
         if ((rrc = mb->callout(&cb, mb->callout_data)) > 0)
           RRETURN(MATCH_NOMATCH);
         if (rrc < 0) RRETURN(rrc);
@@ -1335,8 +1352,8 @@ for (;;)
       /* Advance ecode past the callout, so it now points to the condition. We
       must adjust codelink so that the value of ecode+codelink is unchanged. */
 
-      ecode += PRIV(OP_lengths)[OP_CALLOUT];
-      codelink -= PRIV(OP_lengths)[OP_CALLOUT];
+      ecode += callout_length;
+      codelink -= callout_length;
       }
 
     /* Test the various possible conditions */
@@ -1716,26 +1733,47 @@ for (;;)
     function is able to force a failure. */
 
     case OP_CALLOUT:
-    if (mb->callout != NULL)
+    case OP_CALLOUT_STR:
       {
-      pcre2_callout_block cb;
-      cb.version          = 0;
-      cb.callout_number   = ecode[1];
-      cb.capture_top      = offset_top/2;
-      cb.capture_last     = mb->capture_last & CAPLMASK;
-      cb.offset_vector    = mb->ovector;
-      cb.mark             = mb->nomatch_mark;
-      cb.subject          = mb->start_subject;
-      cb.subject_length   = (PCRE2_SIZE)(mb->end_subject - mb->start_subject);
-      cb.start_match      = (PCRE2_SIZE)(mstart - mb->start_subject);
-      cb.current_position = (PCRE2_SIZE)(eptr - mb->start_subject);
-      cb.pattern_position = GET(ecode, 2);
-      cb.next_item_length = GET(ecode, 2 + LINK_SIZE);
-      if ((rrc = mb->callout(&cb, mb->callout_data)) > 0)
-        RRETURN(MATCH_NOMATCH);
-      if (rrc < 0) RRETURN(rrc);
+      unsigned int callout_length = (*ecode == OP_CALLOUT)
+          ? PRIV(OP_lengths)[OP_CALLOUT] : GET(ecode, 1 + 2*LINK_SIZE);
+
+      if (mb->callout != NULL)
+        {
+        pcre2_callout_block cb;
+        cb.version          = 1;
+        cb.callout_number   = ecode[LINK_SIZE + 1];
+        cb.capture_top      = offset_top/2;
+        cb.capture_last     = mb->capture_last & CAPLMASK;
+        cb.offset_vector    = mb->ovector;
+        cb.mark             = mb->nomatch_mark;
+        cb.subject          = mb->start_subject;
+        cb.subject_length   = (PCRE2_SIZE)(mb->end_subject - mb->start_subject);
+        cb.start_match      = (PCRE2_SIZE)(mstart - mb->start_subject);
+        cb.current_position = (PCRE2_SIZE)(eptr - mb->start_subject);
+        cb.pattern_position = GET(ecode, 1);
+        cb.next_item_length = GET(ecode, 1 + LINK_SIZE);
+
+        if (*ecode == OP_CALLOUT)
+          {
+          cb.callout_number = ecode[1 + 2*LINK_SIZE];
+          cb.callout_string = NULL;
+          cb.callout_string_length = 0;
+          }
+        else
+          {
+          cb.callout_number = 0;
+          cb.callout_string = ecode + (1 + 3*LINK_SIZE) + 1;
+          cb.callout_string_length =
+            callout_length - (1 + 3*LINK_SIZE) - 2;
+          }
+
+        if ((rrc = mb->callout(&cb, mb->callout_data)) > 0)
+          RRETURN(MATCH_NOMATCH);
+        if (rrc < 0) RRETURN(rrc);
+        }
+      ecode += callout_length;
       }
-    ecode += 2 + 2*LINK_SIZE;
     break;
 
     /* Recursion either matches the current regex, or some subexpression. The

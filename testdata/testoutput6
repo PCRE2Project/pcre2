@@ -7773,4 +7773,66 @@ Partial match: abc
 Copy substring 1 failed (-2): partial match
 get substring list failed (-2): partial match
 
+/ab(?C" any text with spaces ")cde/B
+------------------------------------------------------------------
+        Bra
+        ab
+        CalloutStr " any text with spaces " 30 1
+        cde
+        Ket
+        End
+------------------------------------------------------------------
+    abcde
+Callout: " any text with spaces "
+--->abcde
+    ^ ^       c
+ 0: abcde
+    12abcde
+Callout: " any text with spaces "
+--->12abcde
+      ^ ^       c
+ 0: abcde
+
+/^a(b)c(?C1)def/
+      abcdef
+--->abcdef
+  1 ^  ^       d
+ 0: abcdef
+
+/^a(b)c(?C"AB")def/
+      abcdef
+Callout: "AB"
+--->abcdef
+    ^  ^       d
+ 0: abcdef
+
+/^a(b)c(?C1)def/
+      abcdef\=callout_capture
+Callout 1: last capture = 0
+ 0: 
+--->abcdef
+    ^  ^       d
+ 0: abcdef
+
+/^a(b)c(?C{AB})def/B
+------------------------------------------------------------------
+        Bra
+        ^
+        a
+        CBra 1
+        b
+        Ket
+        c
+        CalloutStr {AB} 14 1
+        def
+        Ket
+        End
+------------------------------------------------------------------
+      abcdef\=callout_capture
+Callout: {AB} last capture = 0
+ 0: 
+--->abcdef
+    ^  ^       d
+ 0: abcdef
+
 # End of testinput6

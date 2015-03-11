@@ -4178,4 +4178,32 @@ a random value. /Ix
 
 /((?+1)(\1))/B
 
+# Callouts with string arguments
+
+/a(?C"/
+
+/a(?C"a/
+
+/a(?C"a"/
+
+/a(?C"a"bcde(?C"b")xyz/
+
+/a(?C"a)b""c")/B
+
+/ab(?C" any text with spaces ")cde/B
+    abcde
+    12abcde
+
+/^a(b)c(?C1)def/
+      abcdef
+
+/^a(b)c(?C"AB")def/
+      abcdef
+
+/^a(b)c(?C1)def/
+      abcdef\=callout_capture
+
+/^a(b)c(?C{AB})def/B
+      abcdef\=callout_capture
+
 # End of testinput2 

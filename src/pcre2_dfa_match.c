@@ -161,6 +161,7 @@ static const uint8_t coptable[] = {
   0,                             /* DNREFI                                 */
   0,                             /* RECURSE                                */
   0,                             /* CALLOUT                                */
+  0,                             /* CALLOUT_STR                            */
   0,                             /* Alt                                    */
   0,                             /* Ket                                    */
   0,                             /* KetRmax                                */
@@ -233,6 +234,7 @@ static const uint8_t poptable[] = {
   0,                             /* DNREFI                                 */
   0,                             /* RECURSE                                */
   0,                             /* CALLOUT                                */
+  0,                             /* CALLOUT_STR                            */
   0,                             /* Alt                                    */
   0,                             /* Ket                                    */
   0,                             /* KetRmax                                */
@@ -2605,14 +2607,16 @@ for (;;)
         is inserted between OP_COND and an assertion condition. This does not
         happen for the other conditions. */
 
-        if (code[LINK_SIZE+1] == OP_CALLOUT)
+        if (code[LINK_SIZE + 1] == OP_CALLOUT
+            || code[LINK_SIZE + 1] == OP_CALLOUT_STR)
           {
+          unsigned int callout_length = (code[LINK_SIZE + 1] == OP_CALLOUT)
+              ? PRIV(OP_lengths)[OP_CALLOUT] : GET(code, 2 + 3*LINK_SIZE);
           rrc = 0;
           if (mb->callout != NULL)
             {
             pcre2_callout_block cb;
-            cb.version          = 0;
-            cb.callout_number   = code[LINK_SIZE+2];
+            cb.version          = 1;
             cb.capture_top      = 1;
             cb.capture_last     = 0;
             cb.offset_vector    = offsets;
@@ -2621,13 +2625,28 @@ for (;;)
             cb.subject_length   = (PCRE2_SIZE)(end_subject - start_subject);
             cb.start_match      = (PCRE2_SIZE)(current_subject - start_subject);
             cb.current_position = (PCRE2_SIZE)(ptr - start_subject);
-            cb.pattern_position = GET(code, LINK_SIZE + 3);
-            cb.next_item_length = GET(code, 3 + 2*LINK_SIZE);
+            cb.pattern_position = GET(code, LINK_SIZE + 2);
+            cb.next_item_length = GET(code, LINK_SIZE + 2 + LINK_SIZE);
+
+            if (code[LINK_SIZE + 1] == OP_CALLOUT)
+              {
+              cb.callout_number = code[2 + 3*LINK_SIZE];
+              cb.callout_string = NULL;
+              cb.callout_string_length = 0;
+              }
+            else
+              {
+              cb.callout_number = 0;
+              cb.callout_string = code + (2 + 4*LINK_SIZE) + 1;
+              cb.callout_string_length =
+                callout_length - (1 + 3*LINK_SIZE) - 2;
+              }
+
             if ((rrc = (mb->callout)(&cb, mb->callout_data)) < 0)
               return rrc;   /* Abandon */
             }
           if (rrc > 0) break;                      /* Fail this thread */
-          code += PRIV(OP_lengths)[OP_CALLOUT];    /* Skip callout data */
+          code += callout_length;                  /* Skip callout data */
           }
 
         condcode = code[LINK_SIZE+1];
@@ -2954,27 +2973,47 @@ for (;;)
       /* Handle callouts */
 
       case OP_CALLOUT:
-      rrc = 0;
-      if (mb->callout != NULL)
+      case OP_CALLOUT_STR:
         {
-        pcre2_callout_block cb;
-        cb.version          = 0;
-        cb.callout_number   = code[1];
-        cb.capture_top      = 1;
-        cb.capture_last     = 0;
-        cb.offset_vector    = offsets;
-        cb.mark             = NULL;   /* No (*MARK) support */
-        cb.subject          = start_subject;
-        cb.subject_length   = (PCRE2_SIZE)(end_subject - start_subject);
-        cb.start_match      = (PCRE2_SIZE)(current_subject - start_subject);
-        cb.current_position = (PCRE2_SIZE)(ptr - start_subject);
-        cb.pattern_position = GET(code, 2);
-        cb.next_item_length = GET(code, 2 + LINK_SIZE);
-        if ((rrc = (mb->callout)(&cb, mb->callout_data)) < 0)
-          return rrc;   /* Abandon */
+        unsigned int callout_length = (*code == OP_CALLOUT)
+            ? PRIV(OP_lengths)[OP_CALLOUT] : GET(code, 1 + 2*LINK_SIZE);
+        rrc = 0;
+
+        if (mb->callout != NULL)
+          {
+          pcre2_callout_block cb;
+          cb.version          = 1;
+          cb.capture_top      = 1;
+          cb.capture_last     = 0;
+          cb.offset_vector    = offsets;
+          cb.mark             = NULL;   /* No (*MARK) support */
+          cb.subject          = start_subject;
+          cb.subject_length   = (PCRE2_SIZE)(end_subject - start_subject);
+          cb.start_match      = (PCRE2_SIZE)(current_subject - start_subject);
+          cb.current_position = (PCRE2_SIZE)(ptr - start_subject);
+          cb.pattern_position = GET(code, 1);
+          cb.next_item_length = GET(code, 1 + LINK_SIZE);
+
+          if (*code == OP_CALLOUT)
+            {
+            cb.callout_number = code[1 + 2*LINK_SIZE];
+            cb.callout_string = NULL;
+            cb.callout_string_length = 0;
+            }
+          else
+            {
+            cb.callout_number = 0;
+            cb.callout_string = code + (1 + 3*LINK_SIZE) + 1;
+            cb.callout_string_length =
+              callout_length - (1 + 3*LINK_SIZE) - 2;
+            }
+
+          if ((rrc = (mb->callout)(&cb, mb->callout_data)) < 0)
+            return rrc;   /* Abandon */
+          }
+        if (rrc == 0)
+          { ADD_ACTIVE(state_offset + callout_length, 0); }
         }
-      if (rrc == 0)
-        { ADD_ACTIVE(state_offset + PRIV(OP_lengths)[OP_CALLOUT], 0); }
       break;
 
 

@@ -305,6 +305,7 @@ for(;;)
   {
   PCRE2_SPTR ccode;
   uint32_t c;
+  int i; 
   const char *flag = "  ";
   unsigned int extra = 0;
 
@@ -594,8 +595,23 @@ for(;;)
     goto CLASS_REF_REPEAT;
 
     case OP_CALLOUT:
-    fprintf(f, "    %s %d %d %d", OP_names[*code], code[1], GET(code,2),
-      GET(code, 2 + LINK_SIZE));
+    fprintf(f, "    %s %d %d %d", OP_names[*code], code[1 + 2*LINK_SIZE],
+      GET(code, 1), GET(code, 1 + LINK_SIZE));
+    break;
+
+    case OP_CALLOUT_STR:
+    c = code[1 + 3*LINK_SIZE]; 
+    fprintf(f, "    %s %c", OP_names[*code], c);
+    extra = GET(code, 1 + 2*LINK_SIZE);
+    print_custring(f, code + 2 + 3*LINK_SIZE);
+    
+    for (i = 0; PRIV(callout_start_delims)[i] != 0; i++)
+      if (c == PRIV(callout_start_delims)[i])
+        { 
+        c = PRIV(callout_end_delims)[i]; 
+        break;
+        }  
+    fprintf(f, "%c %d %d", c, GET(code, 1), GET(code, 1 + LINK_SIZE));
     break;
 
     case OP_PROP:
@@ -611,7 +627,6 @@ for(;;)
     case OP_NCLASS:
     case OP_XCLASS:
       {
-      int i;
       unsigned int min, max;
       BOOL printmap;
       BOOL invertmap = FALSE;

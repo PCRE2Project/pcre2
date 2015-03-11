@@ -4811,4 +4811,20 @@
 /a(b)c(d)/
     abc\=ph,copy=0,copy=1,getall
 
+/ab(?C" any text with spaces ")cde/B
+    abcde
+    12abcde
+
+/^a(b)c(?C1)def/
+      abcdef
+
+/^a(b)c(?C"AB")def/
+      abcdef
+
+/^a(b)c(?C1)def/
+      abcdef\=callout_capture
+
+/^a(b)c(?C{AB})def/B
+      abcdef\=callout_capture
+
 # End of testinput6

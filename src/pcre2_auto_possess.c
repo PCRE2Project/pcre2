@@ -604,6 +604,12 @@ for(;;)
     continue;
     }
 
+  if (c == OP_CALLOUT_STR)
+    {
+    code += GET(code, 1 + 2*LINK_SIZE);
+    continue;
+    }
+
   if (c == OP_ALT)
     {
     do code += GET(code, 1); while (*code == OP_ALT);
@@ -1232,6 +1238,10 @@ for (;;)
     case OP_TYPEPOSUPTO:
     if (code[1 + IMM2_SIZE] == OP_PROP || code[1 + IMM2_SIZE] == OP_NOTPROP)
       code += 2;
+    break;
+
+    case OP_CALLOUT_STR:
+    code += GET(code, 1 + 2*LINK_SIZE);
     break;
 
 #ifdef SUPPORT_WIDE_CHARS

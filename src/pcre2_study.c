@@ -199,6 +199,10 @@ for (;;)
     cc += PRIV(OP_lengths)[*cc];
     break;
 
+    case OP_CALLOUT_STR:
+    cc += GET(cc, 1 + 2*LINK_SIZE);
+    break;
+
     /* Skip over a subpattern that has a {0} or {0,x} quantifier */
 
     case OP_BRAZERO:
@@ -935,7 +939,11 @@ do
       /* Skip over callout */
 
       case OP_CALLOUT:
-      tcode += 2 + 2*LINK_SIZE;
+      tcode += PRIV(OP_lengths)[OP_CALLOUT];
+      break;
+
+      case OP_CALLOUT_STR:
+      tcode += GET(tcode, 1 + 2*LINK_SIZE);
       break;
 
       /* Skip over lookbehind and negative lookahead assertions */
