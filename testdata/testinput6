@@ -4827,4 +4827,12 @@
 /^a(b)c(?C{AB})def/B
       abcdef\=callout_capture
 
+/^(?(?C25)(?=abc)abcd|xyz)/B
+    abcdefg
+    xyz123 
+
+/^(?(?C$abc$)(?=abc)abcd|xyz)/B
+    abcdefg
+    xyz123 
+
 # End of testinput6

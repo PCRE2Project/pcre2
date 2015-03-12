@@ -4210,4 +4210,12 @@ a random value. /Ix
 
 /(?:a(?C`code`)){3}/B
 
+/^(?(?C25)(?=abc)abcd|xyz)/B
+    abcdefg
+    xyz123 
+
+/^(?(?C$abc$)(?=abc)abcd|xyz)/B
+    abcdefg
+    xyz123 
+
 # End of testinput2 

@@ -7835,4 +7835,56 @@ Callout: {AB} last capture = 0
     ^  ^       d
  0: abcdef
 
+/^(?(?C25)(?=abc)abcd|xyz)/B
+------------------------------------------------------------------
+        Bra
+        ^
+        Cond
+        Callout 25 9 7
+        Assert
+        abc
+        Ket
+        abcd
+        Alt
+        xyz
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+    abcdefg
+--->abcdefg
+ 25 ^           (?=abc)
+ 0: abcd
+    xyz123 
+--->xyz123
+ 25 ^          (?=abc)
+ 0: xyz
+
+/^(?(?C$abc$)(?=abc)abcd|xyz)/B
+------------------------------------------------------------------
+        Bra
+        ^
+        Cond
+        CalloutStr $abc$ 12 7
+        Assert
+        abc
+        Ket
+        abcd
+        Alt
+        xyz
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+    abcdefg
+Callout: $abc$
+--->abcdefg
+    ^           (?=abc)
+ 0: abcd
+    xyz123 
+Callout: $abc$
+--->xyz123
+    ^          (?=abc)
+ 0: xyz
+
 # End of testinput6

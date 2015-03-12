@@ -5219,9 +5219,39 @@ for (;; ptr++)
 
         if (ptr[1] == CHAR_QUESTION_MARK && ptr[2] == CHAR_C)
           {
-          for (i = 3;; i++) if (!IS_DIGIT(ptr[i])) break;
-          if (ptr[i] == CHAR_RIGHT_PARENTHESIS)
-            tempptr += i + 1;
+          if (IS_DIGIT(ptr[3]) || ptr[3] == CHAR_RIGHT_PARENTHESIS)
+            {
+            for (i = 3;; i++) if (!IS_DIGIT(ptr[i])) break;
+            if (ptr[i] == CHAR_RIGHT_PARENTHESIS)
+              tempptr += i + 1;
+            }
+          else
+            {
+            uint32_t delimiter = 0;
+            for (i = 0; PRIV(callout_start_delims)[i] != 0; i++)
+              {
+              if (ptr[3] == PRIV(callout_start_delims)[i])
+                {
+                delimiter = PRIV(callout_end_delims)[i];
+                break;
+                }
+              }
+            if (delimiter != 0)
+              {
+              for (i = 4; ptr + i < cb->end_pattern; i++)
+                {
+                if (ptr[i] == delimiter)
+                  {
+                  if (ptr[i+1] == delimiter) i++;
+                  else
+                    {
+                    if (ptr[i+1] == CHAR_RIGHT_PARENTHESIS) tempptr += i + 2;
+                    break;
+                    }
+                  }   
+                }
+              }
+            }
           }
 
         /* For conditions that are assertions, check the syntax, and then exit
@@ -5574,34 +5604,34 @@ for (;; ptr++)
         previous_callout = code;     /* Save for later completion */
         after_manual_callout = 1;    /* Skip one item before completing */
         ptr++;                       /* Character after (?C */
-        
-        /* A callout may have a string argument, delimited by one of a fixed 
+
+        /* A callout may have a string argument, delimited by one of a fixed
         number of characters, or an undelimited numerical argument, or no
         argument, which is the same as (?C0). Different opcodes are used for
         the two cases. */
-        
+
         if (*ptr != CHAR_RIGHT_PARENTHESIS && !IS_DIGIT(*ptr))
-          { 
+          {
           uint32_t delimiter = 0;
-        
+
           for (i = 0; PRIV(callout_start_delims)[i] != 0; i++)
             {
             if (*ptr == PRIV(callout_start_delims)[i])
               {
               delimiter = PRIV(callout_end_delims)[i];
-              break;  
-              }  
+              break;
+              }
             }
-            
+
           if (delimiter == 0)
             {
             *errorcodeptr = ERR82;
-            goto FAILED;  
-            }  
+            goto FAILED;
+            }
 
           /* During the pre-compile phase, we parse the string and update the
           length. There is no need to generate any code. */
-           
+
           if (lengthptr != NULL)     /* Only check the string */
             {
             PCRE2_SPTR start = ptr;
@@ -5610,25 +5640,25 @@ for (;; ptr++)
               if (++ptr >= cb->end_pattern)
                 {
                 *errorcodeptr = ERR81;
-                ptr = start;   /* To give a more useful message */ 
+                ptr = start;   /* To give a more useful message */
                 goto FAILED;
                 }
               if (ptr[0] == delimiter && ptr[1] == delimiter) ptr += 2;
               }
             while (ptr[0] != delimiter);
-                    
+
             /* Start points to the opening delimiter, ptr points to the
-            closing delimiter. We must allow for including the delimiter and 
+            closing delimiter. We must allow for including the delimiter and
             for the terminating zero. Any doubled delimiters within the string
             make this an overestimate, but it is not worth bothering about. */
-             
+
             (*lengthptr) += (ptr - start) + 2 + (1 + 3*LINK_SIZE);
             }
-            
+
           /* In the real compile we can copy the string, knowing that it is
-          syntactically OK. The starting delimiter is included so that the 
-          client can discover it if they want. */ 
- 
+          syntactically OK. The starting delimiter is included so that the
+          client can discover it if they want. */
+
           else
             {
             PCRE2_UCHAR *callout_string = code + (1 + 3*LINK_SIZE);
@@ -5638,7 +5668,7 @@ for (;; ptr++)
               if (*ptr == delimiter)
                 {
                 if (ptr[1] == delimiter) ptr++; else break;
-                }   
+                }
               *callout_string++ = *ptr++;
               }
             *callout_string++ = CHAR_NULL;
@@ -5649,16 +5679,16 @@ for (;; ptr++)
                 (int)(callout_string - code));
             code = callout_string;
             }
-            
-          /* Advance to what should be the closing parenthesis, which is 
+
+          /* Advance to what should be the closing parenthesis, which is
           checked below. */
-             
+
           ptr++;
           }
-          
+
         /* Handle a callout with an optional numerical argument, which must be
         less than or equal to 255. A missing argument gives 0. */
-         
+
         else
           {
           int n = 0;
@@ -5677,9 +5707,9 @@ for (;; ptr++)
           code[1 + 2*LINK_SIZE] = n;                      /* Callout number */
           code += PRIV(OP_lengths)[OP_CALLOUT];
           }
-          
+
         /* Both formats must have a closing parenthesis */
-          
+
         if (*ptr != CHAR_RIGHT_PARENTHESIS)
           {
           *errorcodeptr = ERR39;
@@ -5687,7 +5717,7 @@ for (;; ptr++)
           }
 
         /* Callouts cannot be quantified. */
-         
+
         previous = NULL;
         continue;
 
