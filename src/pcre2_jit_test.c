@@ -579,6 +579,16 @@ static struct regression_test_case regression_test_cases[] = {
 	{ MU, A, 0, 0, "(?:(?=.)??[a-c])+m", "abacdcbacacdcaccam" },
 	{ MU, A, 0, 0, "((?!a)?(?!([^a]))?)+$", "acbab" },
 	{ MU, A, 0, 0, "((?!a)?\?(?!([^a]))?\?)+$", "acbab" },
+	{ MU, A, 0, 0, "a(?=(?C)\\B(?C`x`))b", "ab" },
+	{ MU, A, 0, 0, "a(?!(?C)\\B(?C`x`))bb|ab", "abb" },
+	{ MU, A, 0, 0, "a(?=\\b|(?C)\\B(?C`x`))b", "ab" },
+	{ MU, A, 0, 0, "a(?!\\b|(?C)\\B(?C`x`))bb|ab", "abb" },
+	{ MU, A, 0, 0, "c(?(?=(?C)\\B(?C`x`))ab|a)", "cab" },
+	{ MU, A, 0, 0, "c(?(?!(?C)\\B(?C`x`))ab|a)", "cab" },
+	{ MU, A, 0, 0, "c(?(?=\\b|(?C)\\B(?C`x`))ab|a)", "cab" },
+	{ MU, A, 0, 0, "c(?(?!\\b|(?C)\\B(?C`x`))ab|a)", "cab" },
+	{ MU, A, 0, 0, "a(?=)b", "ab" },
+	{ MU, A, 0, 0 | F_NOMATCH, "a(?!)b", "ab" },
 
 	/* Not empty, ACCEPT, FAIL */
 	{ MU, A, PCRE2_NOTEMPTY, 0 | F_NOMATCH, "a*", "bcx" },
