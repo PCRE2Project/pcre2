@@ -14060,4 +14060,38 @@ Callout: {AB} last capture = 1
  0: abcdef
  1: b
 
+/(?C`a``b`)(?C'a''b')(?C"a""b")(?C^a^^b^)(?C%a%%b%)(?C#a##b#)(?C$a$$b$)(?C{a}}b})/B
+------------------------------------------------------------------
+        Bra
+        CalloutStr `a`b` 10 0
+        CalloutStr 'a'b' 20 0
+        CalloutStr "a"b" 30 0
+        CalloutStr ^a^b^ 40 0
+        CalloutStr %a%b% 50 0
+        CalloutStr #a#b# 60 0
+        CalloutStr $a$b$ 70 0
+        CalloutStr {a}b} 80 0
+        Ket
+        End
+------------------------------------------------------------------
+
+/(?:a(?C`code`)){3}/B
+------------------------------------------------------------------
+        Bra
+        Bra
+        a
+        CalloutStr `code` 14 0
+        Ket
+        Bra
+        a
+        CalloutStr `code` 14 0
+        Ket
+        Bra
+        a
+        CalloutStr `code` 14 0
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+
 # End of testinput2 

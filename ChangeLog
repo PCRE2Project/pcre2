@@ -6,6 +6,8 @@ Version 10.20 xx-xx-2015
 
 1. Callouts with string arguments have been added.
 
+2. Assertion code generator in JIT has been optimized.
+
 
 Version 10.10 06-March-2015
 ---------------------------

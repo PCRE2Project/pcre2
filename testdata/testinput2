@@ -4206,4 +4206,8 @@ a random value. /Ix
 /^a(b)c(?C{AB})def/B
       abcdef\=callout_capture
 
+/(?C`a``b`)(?C'a''b')(?C"a""b")(?C^a^^b^)(?C%a%%b%)(?C#a##b#)(?C$a$$b$)(?C{a}}b})/B
+
+/(?:a(?C`code`)){3}/B
+
 # End of testinput2 
