@@ -14146,4 +14146,27 @@ Callout: $abc$
     ^          (?=abc)
  0: xyz
 
+/^ab(?C'first')cd(?C"second")ef/
+    abcdefg
+Callout: 'first'
+--->abcdefg
+    ^ ^         c
+Callout: "second"
+--->abcdefg
+    ^   ^       e
+ 0: abcdef
+
+/(?:a(?C`code`)){3}X/
+    aaaXY
+Callout: `code`
+--->aaaXY
+    ^^        )
+Callout: `code`
+--->aaaXY
+    ^ ^       )
+Callout: `code`
+--->aaaXY
+    ^  ^      )
+ 0: aaaX
+
 # End of testinput2 

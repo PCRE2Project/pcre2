@@ -4218,4 +4218,10 @@ a random value. /Ix
     abcdefg
     xyz123 
 
+/^ab(?C'first')cd(?C"second")ef/
+    abcdefg
+
+/(?:a(?C`code`)){3}X/
+    aaaXY
+
 # End of testinput2 

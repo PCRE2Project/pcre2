@@ -4533,7 +4533,12 @@ callout_function(pcre2_callout_block_8 *cb, void *callout_data_ptr)
 uint32_t i, pre_start, post_start, subject_length;
 BOOL utf = (FLD(compiled_code, overall_options) & PCRE2_UTF) != 0;
 BOOL callout_capture = (dat_datctl.control & CTL_CALLOUT_CAPTURE) != 0;
-FILE *f = (first_callout || callout_capture)? outfile : NULL;
+
+/* This FILE is used for echoing the subject. This is done only once in simple 
+cases. */
+
+FILE *f = (first_callout || callout_capture || cb->callout_string != NULL)? 
+  outfile : NULL;
 
 /* For a callout with a string argument, show the string first because there 
 isn't a tidy way to fit it in the rest of the data. */
@@ -4541,7 +4546,7 @@ isn't a tidy way to fit it in the rest of the data. */
 if (cb->callout_string != NULL)
   {
   uint32_t delimiter = CODE_UNIT(cb->callout_string, -1); 
-  fprintf(f, "Callout: %c", delimiter);
+  fprintf(outfile, "Callout: %c", delimiter);
   PCHARSV(cb->callout_string, 0,
     cb->callout_string_length, utf, outfile);
   for (i = 0; callout_start_delims[i] != 0; i++)
@@ -4551,26 +4556,27 @@ if (cb->callout_string != NULL)
       break;
       }  
   fprintf(outfile, "%c", delimiter);  
-  if (!callout_capture) fprintf(f, "\n");
+  if (!callout_capture) fprintf(outfile, "\n");
   } 
   
 /* Show captured strings if required */ 
 
 if (callout_capture)
   {
-  if (cb->callout_string == NULL) fprintf(f, "Callout %d:", cb->callout_number);
-  fprintf(f, " last capture = %d\n", cb->capture_last);
+  if (cb->callout_string == NULL) 
+    fprintf(outfile, "Callout %d:", cb->callout_number);
+  fprintf(outfile, " last capture = %d\n", cb->capture_last);
   for (i = 0; i < cb->capture_top * 2; i += 2)
     {
-    fprintf(f, "%2d: ", i/2);
+    fprintf(outfile, "%2d: ", i/2);
     if (cb->offset_vector[i] == PCRE2_UNSET)
-      fprintf(f, "<unset>");
+      fprintf(outfile, "<unset>");
     else
       {
       PCHARSV(cb->subject, cb->offset_vector[i],
         cb->offset_vector[i+1] - cb->offset_vector[i], utf, f);
       }
-    fprintf(f, "\n");
+    fprintf(outfile, "\n");
     }
   }
   
@@ -4626,7 +4632,7 @@ fprintf(outfile, "%.*s",
   pbuffer8 + cb->pattern_position);
 
 fprintf(outfile, "\n");
-first_callout = 0;
+first_callout = FALSE;
 
 if (cb->mark != last_callout_mark)
   {
