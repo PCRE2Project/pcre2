@@ -1333,15 +1333,17 @@ for (;;)
         if (*ecode == OP_CALLOUT)
           {
           cb.callout_number = ecode[1 + 2*LINK_SIZE];
+          cb.callout_string_offset = 0; 
           cb.callout_string = NULL;
           cb.callout_string_length = 0;
           }
         else
           {
           cb.callout_number = 0;
-          cb.callout_string = ecode + (1 + 3*LINK_SIZE) + 1;
+          cb.callout_string_offset = GET(ecode, 1 + 3*LINK_SIZE); 
+          cb.callout_string = ecode + (1 + 4*LINK_SIZE) + 1;
           cb.callout_string_length =
-            callout_length - (1 + 3*LINK_SIZE) - 2;
+            callout_length - (1 + 4*LINK_SIZE) - 2;
           }
 
         if ((rrc = mb->callout(&cb, mb->callout_data)) > 0)
@@ -1757,15 +1759,17 @@ for (;;)
         if (*ecode == OP_CALLOUT)
           {
           cb.callout_number = ecode[1 + 2*LINK_SIZE];
+          cb.callout_string_offset = 0; 
           cb.callout_string = NULL;
           cb.callout_string_length = 0;
           }
         else
           {
           cb.callout_number = 0;
-          cb.callout_string = ecode + (1 + 3*LINK_SIZE) + 1;
+          cb.callout_string_offset = GET(ecode, 1 + 3*LINK_SIZE); 
+          cb.callout_string = ecode + (1 + 4*LINK_SIZE) + 1;
           cb.callout_string_length =
-            callout_length - (1 + 3*LINK_SIZE) - 2;
+            callout_length - (1 + 4*LINK_SIZE) - 2;
           }
 
         if ((rrc = mb->callout(&cb, mb->callout_data)) > 0)

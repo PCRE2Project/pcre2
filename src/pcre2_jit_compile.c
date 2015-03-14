@@ -6346,6 +6346,7 @@ unsigned int callout_length = (*cc == OP_CALLOUT)
     ? PRIV(OP_lengths)[OP_CALLOUT] : GET(cc, 1 + 2 * LINK_SIZE);
 sljit_sw value1;
 sljit_sw value2;
+sljit_sw value3;
 
 PUSH_BACKTRACK(sizeof(backtrack_common), cc, NULL);
 
@@ -6373,15 +6374,18 @@ if (*cc == OP_CALLOUT)
   {
   value1 = 0;
   value2 = 0;
+  value3 = 0; 
   }
 else
   {
-  value1 = (sljit_sw) (cc + (1 + 3*LINK_SIZE) + 1);
-  value2 = (callout_length - (1 + 3*LINK_SIZE + 2));
+  value1 = (sljit_sw) (cc + (1 + 4*LINK_SIZE) + 1);
+  value2 = (callout_length - (1 + 4*LINK_SIZE + 2));
+  value3 = (sljit_sw) (GET(cc, 1 + 3*LINK_SIZE)); 
   }
 
 OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), CALLOUT_ARG_OFFSET(callout_string), SLJIT_IMM, value1);
 OP1(mov_opcode, SLJIT_MEM1(STACK_TOP), CALLOUT_ARG_OFFSET(callout_string_length), SLJIT_IMM, value2);
+OP1(mov_opcode, SLJIT_MEM1(STACK_TOP), CALLOUT_ARG_OFFSET(callout_string_offset), SLJIT_IMM, value3);
 OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), CALLOUT_ARG_OFFSET(mark), (common->mark_ptr != 0) ? TMP2 : SLJIT_IMM, 0);
 
 /* Needed to save important temporary registers. */

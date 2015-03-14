@@ -600,18 +600,18 @@ for(;;)
     break;
 
     case OP_CALLOUT_STR:
-    c = code[1 + 3*LINK_SIZE]; 
+    c = code[1 + 4*LINK_SIZE]; 
     fprintf(f, "    %s %c", OP_names[*code], c);
     extra = GET(code, 1 + 2*LINK_SIZE);
-    print_custring(f, code + 2 + 3*LINK_SIZE);
-    
+    print_custring(f, code + 2 + 4*LINK_SIZE);
     for (i = 0; PRIV(callout_start_delims)[i] != 0; i++)
       if (c == PRIV(callout_start_delims)[i])
         { 
         c = PRIV(callout_end_delims)[i]; 
         break;
         }  
-    fprintf(f, "%c %d %d", c, GET(code, 1), GET(code, 1 + LINK_SIZE));
+    fprintf(f, "%c %d %d %d", c, GET(code, 1 + 3*LINK_SIZE), GET(code, 1), 
+      GET(code, 1 + LINK_SIZE));
     break;
 
     case OP_PROP:

@@ -7777,18 +7777,18 @@ get substring list failed (-2): partial match
 ------------------------------------------------------------------
         Bra
         ab
-        CalloutStr " any text with spaces " 30 1
+        CalloutStr " any text with spaces " 6 30 1
         cde
         Ket
         End
 ------------------------------------------------------------------
     abcde
-Callout: " any text with spaces "
+Callout (6): " any text with spaces "
 --->abcde
     ^ ^       c
  0: abcde
     12abcde
-Callout: " any text with spaces "
+Callout (6): " any text with spaces "
 --->12abcde
       ^ ^       c
  0: abcde
@@ -7801,7 +7801,7 @@ Callout: " any text with spaces "
 
 /^a(b)c(?C"AB")def/
       abcdef
-Callout: "AB"
+Callout (10): "AB"
 --->abcdef
     ^  ^       d
  0: abcdef
@@ -7823,13 +7823,13 @@ Callout 1: last capture = 0
         b
         Ket
         c
-        CalloutStr {AB} 14 1
+        CalloutStr {AB} 10 14 1
         def
         Ket
         End
 ------------------------------------------------------------------
       abcdef\=callout_capture
-Callout: {AB} last capture = 0
+Callout (10): {AB} last capture = 0
  0: 
 --->abcdef
     ^  ^       d
@@ -7865,7 +7865,7 @@ Callout: {AB} last capture = 0
         Bra
         ^
         Cond
-        CalloutStr $abc$ 12 7
+        CalloutStr $abc$ 7 12 7
         Assert
         abc
         Ket
@@ -7877,35 +7877,35 @@ Callout: {AB} last capture = 0
         End
 ------------------------------------------------------------------
     abcdefg
-Callout: $abc$
+Callout (7): $abc$
 --->abcdefg
     ^           (?=abc)
  0: abcd
     xyz123 
-Callout: $abc$
+Callout (7): $abc$
 --->xyz123
     ^          (?=abc)
  0: xyz
 
 /^ab(?C'first')cd(?C"second")ef/
     abcdefg
-Callout: 'first'
+Callout (7): 'first'
 --->abcdefg
     ^ ^         c
-Callout: "second"
+Callout (20): "second"
 --->abcdefg
     ^   ^       e
  0: abcdef
 
 /(?:a(?C`code`)){3}X/
     aaaXY
-Callout: `code`
+Callout (8): `code`
 --->aaaXY
     ^^        )
-Callout: `code`
+Callout (8): `code`
 --->aaaXY
     ^ ^       )
-Callout: `code`
+Callout (8): `code`
 --->aaaXY
     ^  ^      )
  0: aaaX

@@ -5652,17 +5652,19 @@ for (;; ptr++)
             for the terminating zero. Any doubled delimiters within the string
             make this an overestimate, but it is not worth bothering about. */
 
-            (*lengthptr) += (ptr - start) + 2 + (1 + 3*LINK_SIZE);
+            (*lengthptr) += (ptr - start) + 2 + (1 + 4*LINK_SIZE);
             }
 
           /* In the real compile we can copy the string, knowing that it is
           syntactically OK. The starting delimiter is included so that the
-          client can discover it if they want. */
+          client can discover it if they want. We also pass the start offset to 
+          help a script language give better error messages. */
 
           else
             {
-            PCRE2_UCHAR *callout_string = code + (1 + 3*LINK_SIZE);
+            PCRE2_UCHAR *callout_string = code + (1 + 4*LINK_SIZE);
             *callout_string++ = *ptr++;
+            PUT(code, 1 + 3*LINK_SIZE, (int)(ptr - cb->start_pattern)); /* Start offset */
             for(;;)
               {
               if (*ptr == delimiter)
@@ -7302,7 +7304,7 @@ do {
      scode += 1 + LINK_SIZE;
 
      if (*scode == OP_CALLOUT) scode += PRIV(OP_lengths)[OP_CALLOUT];
-     else if (*scode == OP_CALLOUT_STR) scode += GET(scode, 1 + 2*LINK_SIZE);
+       else if (*scode == OP_CALLOUT_STR) scode += GET(scode, 1 + 2*LINK_SIZE);
 
      switch (*scode)
        {

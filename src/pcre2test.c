@@ -4546,7 +4546,8 @@ isn't a tidy way to fit it in the rest of the data. */
 if (cb->callout_string != NULL)
   {
   uint32_t delimiter = CODE_UNIT(cb->callout_string, -1); 
-  fprintf(outfile, "Callout: %c", delimiter);
+  fprintf(outfile, "Callout (%lu): %c", 
+    (unsigned long int)cb->callout_string_offset, delimiter);
   PCHARSV(cb->callout_string, 0,
     cb->callout_string_length, utf, outfile);
   for (i = 0; callout_start_delims[i] != 0; i++)

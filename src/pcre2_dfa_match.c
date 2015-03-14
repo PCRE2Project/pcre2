@@ -2631,15 +2631,17 @@ for (;;)
             if (code[LINK_SIZE + 1] == OP_CALLOUT)
               {
               cb.callout_number = code[2 + 3*LINK_SIZE];
+              cb.callout_string_offset = 0; 
               cb.callout_string = NULL;
               cb.callout_string_length = 0;
               }
             else
               {
               cb.callout_number = 0;
-              cb.callout_string = code + (2 + 4*LINK_SIZE) + 1;
+              cb.callout_string_offset = GET(code, 2 + 4*LINK_SIZE); 
+              cb.callout_string = code + (2 + 5*LINK_SIZE) + 1;
               cb.callout_string_length =
-                callout_length - (1 + 3*LINK_SIZE) - 2;
+                callout_length - (1 + 4*LINK_SIZE) - 2;
               }
 
             if ((rrc = (mb->callout)(&cb, mb->callout_data)) < 0)
@@ -2997,15 +2999,17 @@ for (;;)
           if (*code == OP_CALLOUT)
             {
             cb.callout_number = code[1 + 2*LINK_SIZE];
+            cb.callout_string_offset = 0; 
             cb.callout_string = NULL;
             cb.callout_string_length = 0;
             }
           else
             {
             cb.callout_number = 0;
-            cb.callout_string = code + (1 + 3*LINK_SIZE) + 1;
+            cb.callout_string_offset = GET(code, 1 + 3*LINK_SIZE); 
+            cb.callout_string = code + (1 + 4*LINK_SIZE) + 1;
             cb.callout_string_length =
-              callout_length - (1 + 3*LINK_SIZE) - 2;
+              callout_length - (1 + 4*LINK_SIZE) - 2;
             }
 
           if ((rrc = (mb->callout)(&cb, mb->callout_data)) < 0)

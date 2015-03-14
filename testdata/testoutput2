@@ -13987,7 +13987,7 @@ Failed: error 139 at offset 7: closing parenthesis for (?C expected
 ------------------------------------------------------------------
         Bra
         a
-        CalloutStr "a)b"c" 13 0
+        CalloutStr "a)b"c" 5 13 0
         Ket
         End
 ------------------------------------------------------------------
@@ -13996,18 +13996,18 @@ Failed: error 139 at offset 7: closing parenthesis for (?C expected
 ------------------------------------------------------------------
         Bra
         ab
-        CalloutStr " any text with spaces " 30 1
+        CalloutStr " any text with spaces " 6 30 1
         cde
         Ket
         End
 ------------------------------------------------------------------
     abcde
-Callout: " any text with spaces "
+Callout (6): " any text with spaces "
 --->abcde
     ^ ^       c
  0: abcde
     12abcde
-Callout: " any text with spaces "
+Callout (6): " any text with spaces "
 --->12abcde
       ^ ^       c
  0: abcde
@@ -14021,7 +14021,7 @@ Callout: " any text with spaces "
 
 /^a(b)c(?C"AB")def/
       abcdef
-Callout: "AB"
+Callout (10): "AB"
 --->abcdef
     ^  ^       d
  0: abcdef
@@ -14046,13 +14046,13 @@ Callout 1: last capture = 1
         b
         Ket
         c
-        CalloutStr {AB} 14 1
+        CalloutStr {AB} 10 14 1
         def
         Ket
         End
 ------------------------------------------------------------------
       abcdef\=callout_capture
-Callout: {AB} last capture = 1
+Callout (10): {AB} last capture = 1
  0: <unset>
  1: b
 --->abcdef
@@ -14063,14 +14063,14 @@ Callout: {AB} last capture = 1
 /(?C`a``b`)(?C'a''b')(?C"a""b")(?C^a^^b^)(?C%a%%b%)(?C#a##b#)(?C$a$$b$)(?C{a}}b})/B
 ------------------------------------------------------------------
         Bra
-        CalloutStr `a`b` 10 0
-        CalloutStr 'a'b' 20 0
-        CalloutStr "a"b" 30 0
-        CalloutStr ^a^b^ 40 0
-        CalloutStr %a%b% 50 0
-        CalloutStr #a#b# 60 0
-        CalloutStr $a$b$ 70 0
-        CalloutStr {a}b} 80 0
+        CalloutStr `a`b` 4 10 0
+        CalloutStr 'a'b' 14 20 0
+        CalloutStr "a"b" 24 30 0
+        CalloutStr ^a^b^ 34 40 0
+        CalloutStr %a%b% 44 50 0
+        CalloutStr #a#b# 54 60 0
+        CalloutStr $a$b$ 64 70 0
+        CalloutStr {a}b} 74 80 0
         Ket
         End
 ------------------------------------------------------------------
@@ -14080,15 +14080,15 @@ Callout: {AB} last capture = 1
         Bra
         Bra
         a
-        CalloutStr `code` 14 0
+        CalloutStr `code` 8 14 0
         Ket
         Bra
         a
-        CalloutStr `code` 14 0
+        CalloutStr `code` 8 14 0
         Ket
         Bra
         a
-        CalloutStr `code` 14 0
+        CalloutStr `code` 8 14 0
         Ket
         Ket
         End
@@ -14124,7 +14124,7 @@ Callout: {AB} last capture = 1
         Bra
         ^
         Cond
-        CalloutStr $abc$ 12 7
+        CalloutStr $abc$ 7 12 7
         Assert
         abc
         Ket
@@ -14136,35 +14136,35 @@ Callout: {AB} last capture = 1
         End
 ------------------------------------------------------------------
     abcdefg
-Callout: $abc$
+Callout (7): $abc$
 --->abcdefg
     ^           (?=abc)
  0: abcd
     xyz123 
-Callout: $abc$
+Callout (7): $abc$
 --->xyz123
     ^          (?=abc)
  0: xyz
 
 /^ab(?C'first')cd(?C"second")ef/
     abcdefg
-Callout: 'first'
+Callout (7): 'first'
 --->abcdefg
     ^ ^         c
-Callout: "second"
+Callout (20): "second"
 --->abcdefg
     ^   ^       e
  0: abcdef
 
 /(?:a(?C`code`)){3}X/
     aaaXY
-Callout: `code`
+Callout (8): `code`
 --->aaaXY
     ^^        )
-Callout: `code`
+Callout (8): `code`
 --->aaaXY
     ^ ^       )
-Callout: `code`
+Callout (8): `code`
 --->aaaXY
     ^  ^      )
  0: aaaX
