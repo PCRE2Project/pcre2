@@ -1,4 +1,4 @@
-.TH PCRE2TEST 1 "23 January 2015" "PCRE 10.10"
+.TH PCRE2TEST 1 "14 March 2015" "PCRE 10.20"
 .SH NAME
 pcre2test - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -875,11 +875,14 @@ set, the current captured groups are output when a callout occurs.
 The \fBcallout_fail\fP modifier can be given one or two numbers. If there is
 only one number, 1 is returned instead of 0 when a callout of that number is
 reached. If two numbers are given, 1 is returned when callout <n> is reached
-for the <m>th time.
+for the <m>th time. Note that callouts with string arguments are always given
+the number zero. See "Callouts" below for a description of the output when a
+callout it taken.
 .P
 The \fBcallout_data\fP modifier can be given an unsigned or a negative number.
-Any value other than zero is used as a return from \fBpcre2test\fP's callout
-function.
+This is set as the "user data" that is passed to the matching function, and
+passed back when the callout function is invoked. Any value other than zero is
+used as a return from \fBpcre2test\fP's callout function.
 .
 .
 .SS "Finding all matches in a string"
@@ -1231,10 +1234,31 @@ documentation.
 .rs
 .sp
 If the pattern contains any callout requests, \fBpcre2test\fP's callout
-function is called during matching. This works with both matching functions. By
-default, the called function displays the callout number, the start and current
-positions in the text at the callout time, and the next pattern item to be
-tested. For example:
+function is called during matching unless \fBcallout_none\fP is specified.
+This works with both matching functions.
+.P
+The callout function in \fBpcre2test\fP returns zero (carry on matching) by
+default, but you can use a \fBcallout_fail\fP modifier in a subject line (as
+described above) to change this and other parameters of the callout.
+.P
+Inserting callouts can be helpful when using \fBpcre2test\fP to check
+complicated regular expressions. For further information about callouts, see
+the
+.\" HREF
+\fBpcre2callout\fP
+.\"
+documentation.
+.P
+The output for callouts with numerical arguments and those with string
+arguments is slightly different.
+.
+.
+.SS "Callouts with numerical arguments"
+.rs
+.sp
+By default, the callout function displays the callout number, the start and
+current positions in the subject text at the callout time, and the next pattern
+item to be tested. For example:
 .sp
   --->pqrabcdef
     0    ^  ^     \ed
@@ -1275,18 +1299,27 @@ a change of latest mark is passed to the callout function. For example:
 The mark changes between matching "a" and "b", but stays the same for the rest
 of the match, so nothing more is output. If, as a result of backtracking, the
 mark reverts to being unset, the text "<unset>" is output.
-.P
-The callout function in \fBpcre2test\fP returns zero (carry on matching) by
-default, but you can use a \fBcallout_fail\fP modifier in a subject line (as
-described above) to change this and other parameters of the callout.
-.P
-Inserting callouts can be helpful when using \fBpcre2test\fP to check
-complicated regular expressions. For further information about callouts, see
-the
-.\" HREF
-\fBpcre2callout\fP
-.\"
-documentation.
+.
+.
+.SS "Callouts with string arguments"
+.rs
+.sp
+The output for a callout with a string argument is similar, except that instead
+of outputting a callout number before the position indicators, the callout
+string and its offset in the pattern string are output before the reflection of
+the subject string, and the subject string is reflected for each callout. For
+example:
+.sp
+    re> /^ab(?C'first')cd(?C"second")ef/
+  data> abcdefg
+  Callout (7): 'first'
+  --->abcdefg
+      ^ ^         c
+  Callout (20): "second"
+  --->abcdefg
+      ^   ^       e
+   0: abcdef
+.sp
 .
 .
 .
@@ -1398,6 +1431,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 23 January 2015
+Last updated: 14 March 2015
 Copyright (c) 1997-2015 University of Cambridge.
 .fi

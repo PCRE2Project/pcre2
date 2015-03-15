@@ -8,7 +8,7 @@ library is referred to as PCRE1 below. For information about testing PCRE2, see
 the pcre2test documentation and the comment at the head of the RunTest file.
 
 PCRE1 releases were up to 8.3x when PCRE2 was developed. The 8.xx series will
-continue for bugfixes if necessary. PCRE2 releases start at 10.0 to avoid
+continue for bugfixes if necessary. PCRE2 releases started at 10.00 to avoid
 confusion with PCRE1.
 
 
@@ -39,7 +39,7 @@ subsequently heavily modified for Perl) compiles the expression twice: once in
 a dummy mode in order to find out how much store will be needed, and then for
 real. (The Perl version probably doesn't do this any more; I'm talking about
 the original library.) The execution function operates by backtracking and
-maximizing (or, optionally, minimizing in Perl) the amount of the subject that
+maximizing (or, optionally, minimizing, in Perl) the amount of the subject that
 matches individual wild portions of the pattern. This is an "NFA algorithm" in
 Friedl's terminology.
 
@@ -63,7 +63,7 @@ modes, creating up to three different libraries. In the description that
 follows, the word "short" is used for a 16-bit data quantity, and the phrase
 "code unit" is used for a quantity that is a byte in 8-bit mode, a short in
 16-bit mode and a 32-bit word in 32-bit mode. The names of PCRE2 functions are
-given in generic form, without a _8, _16, or _32 suffix.
+given in generic form, without the _8, _16, or _32 suffix.
 
 
 Computing the memory requirement: how it was
@@ -100,8 +100,9 @@ issue, and in the event, nobody has commented on it.
 
 At release 8.34, a limit on the nesting depth of parentheses was re-introduced
 (default 250, settable at build time) so as to put a limit on the amount of
-system stack used by the compile function. This is a safety feature for
-environments with small stacks where the patterns are provided by users.
+system stack used by the compile function, which uses recursive function calls
+for nested parenthesized groups. This is a safety feature for environments with
+small stacks where the patterns are provided by users.
 
 
 Traditional matching function
@@ -158,8 +159,9 @@ default value for LINK_SIZE is 2, except for the 32-bit library, where it can
 only be 4. The 8-bit library can be compiled to used 3-byte or 4-byte values,
 and the 16-bit library can be compiled to use 4-byte values, though this
 impairs performance. Specifing a LINK_SIZE larger than 2 for these libraries is
-necessary only when patterns whose compiled length is greater than 64K are
-going to be processed.
+necessary only when patterns whose compiled length is greater than 64K code
+units are going to be processed. When a LINK_SIZE value uses more than one code
+unit, the most significant unit is first.
 
 In this description, we assume the "normal" compilation options. Data values
 that are counts (e.g. quantifiers) are always two bytes long in 8-bit mode
@@ -343,7 +345,7 @@ For classes containing characters with values greater than 255 or that contain
 code points are less than 256, followed by a list of pairs (for a range) and
 single characters. In caseless mode, both cases are explicitly listed.
 
-OP_XCLASS is followed by a LINK_SIZE item containing the total length of the
+OP_XCLASS is followed by a LINK_SIZE value containing the total length of the
 opcode and its data. This is followed by a code unit containing flag bits:
 XCL_NOT indicates that this is a negative class, and XCL_MAP indicates that a
 bit map is present. There follows the bit map, if XCL_MAP is set, and then a
@@ -356,7 +358,7 @@ sequence of items coded as follows:
   XCL_NOTPROP  a Unicode property (type, value) follows
 
 If a range starts with a code point less than 256 and ends with one greater
-than 256, it is split into two ranges, with characters less than 256 being
+than 255, it is split into two ranges, with characters less than 256 being
 indicated in the bit map, and the rest with XCL_RANGE.
 
 When XCL_NOT is set, the bit map, if present, contains bits for characters that
@@ -412,17 +414,17 @@ compile time, so alternation always happens in the context of brackets.
 myself, can be round, square, curly, or pointy. Hence this usage rather than
 "parentheses".]
 
-Non-capturing brackets use the opcode OP_BRA, capturing brackets use OP_CBRA.
-A bracket opcode is followed by LINK_SIZE bytes which give the offset to the
+Non-capturing brackets use the opcode OP_BRA, capturing brackets use OP_CBRA. A
+bracket opcode is followed by a LINK_SIZE value which gives the offset to the
 next alternative OP_ALT or, if there aren't any branches, to the matching
-OP_KET opcode. Each OP_ALT is followed by LINK_SIZE bytes giving the offset to
-the next one, or to the OP_KET opcode. For capturing brackets, the bracket
+OP_KET opcode. Each OP_ALT is followed by a LINK_SIZE value giving the offset
+to the next one, or to the OP_KET opcode. For capturing brackets, the bracket
 number is a count that immediately follows the offset.
 
 OP_KET is used for subpatterns that do not repeat indefinitely, and OP_KETRMIN
 and OP_KETRMAX are used for indefinite repetitions, minimally or maximally
 respectively (see below for possessive repetitions). All three are followed by
-LINK_SIZE bytes giving (as a positive number) the offset back to the matching
+a LINK_SIZE value giving (as a positive number) the offset back to the matching
 bracket opcode.
 
 If a subpattern is quantified such that it is permitted to match zero times, it
@@ -520,8 +522,11 @@ tests the PCRE2 version number. This compiles into one of the opcodes OP_TRUE
 or OP_FALSE.
 
 If a condition is not a back reference, recursion test, DEFINE, or VERSION, it
-must start with an assertion, whose opcode immediately follows OP_COND or
-OP_SCOND.
+must start with an assertion, whose opcode normally immediately follows OP_COND
+or OP_SCOND. However, if automatic callouts are enabled, a callout is inserted
+immediately before the assertion. It is also possible to insert a manual
+callout at this point. Only assertion conditions may have callouts preceding
+the condition.
 
 
 Recursion
@@ -529,22 +534,43 @@ Recursion
 
 Recursion either matches the current pattern, or some subexpression. The opcode
 OP_RECURSE is followed by a LINK_SIZE value that is the offset to the starting
-bracket from the start of the whole pattern. OP_RECURSE is automatically
-wrapped inside OP_ONCE brackets, because otherwise some patterns broke it.
-OP_RECURSE is also used for "subroutine" calls, even though they are not
-strictly a recursion.
+bracket from the start of the whole pattern. OP_RECURSE is also used for
+"subroutine" calls, even though they are not strictly a recursion. Repeated
+recursions are automatically wrapped inside OP_ONCE brackets, because otherwise
+some patterns broke them. A non-repeated recursion is not wrapped in OP_ONCE
+brackets, but it is nevertheless still treated as an atomic group.
 
 
 Callout
 -------
 
-OP_CALLOUT is followed by one code unit of data that holds a callout number in
-the range 0 to 254 for manual callouts, or 255 for an automatic callout. In
-both cases there follows a count giving the offset in the pattern string to the
+A callout can nowadays have either a numerical argument or a string argument.
+These use OP_CALLOUT or OP_CALLOUT_STR, respectively. In each case these are
+followed by two LINK_SIZE values giving the offset in the pattern string to the
 start of the following item, and another count giving the length of this item.
 These values make it possible for pcre2test to output useful tracing
-information using automatic callouts.
+information using callouts.
 
+In the case of a numeric callout, after these two values there is a single code
+unit containing the callout number, in the range 0-255, with 255 being used for
+callouts that are automatically inserted as a result of the PCRE2_AUTO_CALLOUT
+option. Thus, this opcode item is of fixed length:
+
+  [OP_CALLOUT] [PATTERN_OFFSET] [PATTERN_LENGTH] [NUMBER]
+
+For callouts with string arguments, OP_CALLOUT_STR has three more data items:
+a LINK_SIZE value giving the complete length of the entire opcode item, a
+LINK_SIZE item containing the offset within the pattern string to the start of
+the string argument, and the string itself, preceded by its starting delimiter
+and followed by a binary zero. When a callout function is called, a pointer to
+the actual string is passed, but the delimiter can be accessed as string[-1] if
+the application needs it. In the 8-bit library, the callout in /X(?C'abc')Y/ is
+compiled as the following bytes (decimal numbers represent binary values):
+
+  [OP_CALLOUT]  [0] [10]  [0] [1]  [0] [14]  [0] [5] ['] [a] [b] [c] [0]
+                --------  -------  --------  -------
+                   |         |        |         |
+                   ------- LINK_SIZE items ------
 
 Opcode table checking
 ---------------------
@@ -554,4 +580,4 @@ not a real opcode, but is used to check that tables indexed by opcode are the
 correct length, in order to catch updating errors.
 
 Philip Hazel
-February 2015
+March 2015

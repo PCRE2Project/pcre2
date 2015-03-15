@@ -1,4 +1,4 @@
-.TH PCRE2PATTERN 3 "28 January 2015" "PCRE2 10.00"
+.TH PCRE2PATTERN 3 "15 March 2015" "PCRE2 10.20"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION DETAILS"
@@ -2821,42 +2821,69 @@ same pair of parentheses when there is a repetition.
 PCRE2 provides a similar feature, but of course it cannot obey arbitrary Perl
 code. The feature is called "callout". The caller of PCRE2 provides an external
 function by putting its entry point in a match context using the function
-\fBpcre2_set_callout()\fP and passing the context to \fBpcre2_match()\fP or
-\fBpcre2_dfa_match()\fP. If no match context is passed, or if the callout entry
-point is set to NULL, callouts are disabled.
+\fBpcre2_set_callout()\fP, and then passing that context to \fBpcre2_match()\fP
+or \fBpcre2_dfa_match()\fP. If no match context is passed, or if the callout
+entry point is set to NULL, callouts are disabled.
 .P
-Within a regular expression, (?C) indicates the points at which the external
-function is to be called. If you want to identify different callout points, you
-can put a number less than 256 after the letter C. The default value is zero.
-For example, this pattern has two callout points:
+Within a regular expression, (?C<arg>) indicates a point at which the external
+function is to be called. There are two kinds of callout: those with a
+numerical argument and those with a string argument. (?C) on its own with no
+argument is treated as (?C0). A numerical argument allows the application to
+distinguish between different callouts. String arguments were added for release
+10.20 to make it possible for script languages that use PCRE2 to embed short
+scripts within patterns in a similar way to Perl.
+.P
+During matching, when PCRE2 reaches a callout point, the external function is
+called. It is provided with the number or string argument of the callout, the
+position in the pattern, and one item of data that is also set in the match
+block. The callout function may cause matching to proceed, to backtrack, or to
+fail.
+.P
+By default, PCRE2 implements a number of optimizations at matching time, and
+one side-effect is that sometimes callouts are skipped. If you need all
+possible callouts to happen, you need to set options that disable the relevant
+optimizations. More details, including a complete description of the
+programming interface to the callout function, are given in the
+.\" HREF
+\fBpcre2callout\fP
+.\"
+documentation.
+.
+.
+.SS "Callouts with numerical arguments"
+.rs
+.sp
+If you just want to have a means of identifying different callout points, put a
+number less than 256 after the letter C. For example, this pattern has two
+callout points:
 .sp
   (?C1)abc(?C2)def
 .sp
-If the PCRE2_AUTO_CALLOUT flag is passed to \fBpcre2_compile()\fP, callouts are
-automatically installed before each item in the pattern. They are all numbered
-255. If there is a conditional group in the pattern whose condition is an
-assertion, an additional callout is inserted just before the condition. An
-explicit callout may also be set at this position, as in this example:
+If the PCRE2_AUTO_CALLOUT flag is passed to \fBpcre2_compile()\fP, numerical
+callouts are automatically installed before each item in the pattern. They are
+all numbered 255. If there is a conditional group in the pattern whose
+condition is an assertion, an additional callout is inserted just before the
+condition. An explicit callout may also be set at this position, as in this
+example:
 .sp
   (?(?C9)(?=a)abc|def)
 .sp
 Note that this applies only to assertion conditions, not to other types of
 condition.
-.P
-During matching, when PCRE2 reaches a callout point, the external function is
-called. It is provided with the number of the callout, the position in the
-pattern, and one item of data that is also set in the match block. The callout
-function may cause matching to proceed, to backtrack, or to fail.
-.P
-By default, PCRE2 implements a number of optimizations at matching time, and
-one side-effect is that sometimes callouts are skipped. If you need all
-possible callouts to happen, you need to set options that disable the relevant
-optimizations. More details, and a complete description of the interface to the
-callout function, are given in the
-.\" HREF
-\fBpcre2callout\fP
-.\"
-documentation.
+.
+.
+.SS "Callouts with string arguments"
+.rs
+.sp
+A delimited string may be used instead of a number as a callout argument. The 
+starting delimiter must be one of ` ' " ^ % # $ { and the ending delimiter is 
+the same as the start, except for {, where the ending delimiter is }. If the 
+ending delimiter is needed within the string, it must be doubled. For 
+example:
+.sp
+  (?C'ab ''c'' d')xyz(?C{any text})pqr
+.sp   
+The doubling is removed before the string is passed to the callout function.
 .
 .
 .\" HTML <a name="backtrackcontrol"></a>
@@ -3302,6 +3329,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 28 January 2015
+Last updated: 15 March 2015
 Copyright (c) 1997-2015 University of Cambridge.
 .fi

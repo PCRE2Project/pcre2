@@ -1,4 +1,4 @@
-.TH PCRE2COMPAT 3 "28 September 2014" "PCRE2 10.0"
+.TH PCRE2COMPAT 3 "15 March 2015" "PCRE2 10.20"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "DIFFERENCES BETWEEN PCRE2 AND PERL"
@@ -69,11 +69,11 @@ the
 .\"
 documentation for details.
 .P
-8. Subpatterns that are called as subroutines (whether or not recursively) are
-always treated as atomic groups in PCRE2. This is like Python, but unlike Perl.
-Captured values that are set outside a subroutine call can be reference from
-inside in PCRE2, but not in Perl. There is a discussion that explains these
-differences in more detail in the
+8. Subroutine calls (whether recursive or not) are treated as atomic groups.
+Atomic recursion is like Python, but unlike Perl. Captured values that are set
+outside a subroutine call can be referenced from inside in PCRE2, but not in
+Perl. There is a discussion that explains these differences in more detail in
+the
 .\" HTML <a href="pcre2pattern.html#recursiondifference">
 .\" </a>
 section on recursion differences from Perl
@@ -185,6 +185,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 28 September 2014
-Copyright (c) 1997-2014 University of Cambridge.
+Last updated: 15 March 2015
+Copyright (c) 1997-2015 University of Cambridge.
 .fi

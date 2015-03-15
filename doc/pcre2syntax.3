@@ -1,4 +1,4 @@
-.TH PCRE2SYNTAX 3 "26 January 2015" "PCRE2 10.00"
+.TH PCRE2SYNTAX 3 "15 March 2015" "PCRE2 10.20"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION SYNTAX SUMMARY"
@@ -513,8 +513,13 @@ pattern is not anchored.
 .SH "CALLOUTS"
 .rs
 .sp
-  (?C)      callout
-  (?Cn)     callout with data n
+  (?C)            callout (assumed number 0)
+  (?Cn)           callout with numerical data n
+  (?C"text")      callout with string data
+.sp
+The allowed string delimiters are ` ' " ^ % # $ (which are the same for the 
+start and the end), and the starting delimiter { matched with the ending 
+delimiter }. To encode the ending delimiter within the string, double it.   
 .
 .
 .SH "SEE ALSO"
@@ -538,6 +543,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 26 January 2015
+Last updated: 15 March 2015
 Copyright (c) 1997-2015 University of Cambridge.
 .fi
