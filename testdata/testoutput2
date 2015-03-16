@@ -14169,4 +14169,13 @@ Callout (8): `code`
     ^  ^      )
  0: aaaX
 
+# Binary zero in callout string
+#  a  (  ?  C  '  x     z  '  )  b
+/ 61 28 3f 43 27 78 00 7a 27 29 62/hex
+    abcdefgh
+Callout (5): 'x\x00z'
+--->abcdefgh
+    ^^           b
+ 0: ab
+
 # End of testinput2 

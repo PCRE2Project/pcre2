@@ -4841,4 +4841,9 @@
 /(?:a(?C`code`)){3}X/
     aaaXY
 
+# Binary zero in callout string
+#  a  (  ?  C  '  x     z  '  )  b
+/ 61 28 3f 43 27 78 00 7a 27 29 62/hex
+    abcdefgh
+
 # End of testinput6

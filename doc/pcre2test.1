@@ -1,4 +1,4 @@
-.TH PCRE2TEST 1 "14 March 2015" "PCRE 10.20"
+.TH PCRE2TEST 1 "16 March 2015" "PCRE 10.20"
 .SH NAME
 pcre2test - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -61,11 +61,17 @@ names used in the libraries have a suffix _8, _16, or _32, as appropriate.
 .sp
 Input to \fBpcre2test\fP is processed line by line, either by calling the C
 library's \fBfgets()\fP function, or via the \fBlibreadline\fP library (see
-below). In Unix-like environments, \fBfgets()\fP treats any bytes other than
-newline as data characters. However, in some Windows environments character 26
-(hex 1A) causes an immediate end of file, and no further data is read. For
-maximum portability, therefore, it is safest to avoid non-printing characters
-in \fBpcre2test\fP input files.
+below). The input is processed using using C's string functions, so must not
+contain binary zeroes, even though in Unix-like environments, \fBfgets()\fP
+treats any bytes other than newline as data characters. In some Windows
+environments character 26 (hex 1A) causes an immediate end of file, and no
+further data is read. 
+.P
+For maximum portability, therefore, it is safest to avoid non-printing
+characters in \fBpcre2test\fP input files. There is a facility for specifying a
+pattern's characters as hexadecimal pairs, thus making it possible to include
+binary zeroes in a pattern for testing purposes. Subject lines are processed
+for backslash escapes, which makes it possible to include any data value.
 .
 .
 .SH "COMMAND LINE OPTIONS"
@@ -1431,6 +1437,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 14 March 2015
+Last updated: 16 March 2015
 Copyright (c) 1997-2015 University of Cambridge.
 .fi

@@ -339,8 +339,8 @@ typedef struct pcre2_callout_block { \
   PCRE2_SIZE    next_item_length;  /* Length of next item in the pattern */ \
   /* ------------------- Added for Version 1 -------------------------- */ \
   PCRE2_SIZE    callout_string_offset; /* Offset to string within pattern */ \
+  PCRE2_SIZE    callout_string_length; /* Length of string compiled into pattern */ \
   PCRE2_SPTR    callout_string;    /* String compiled into pattern */ \
-  uint32_t      callout_string_length; /* Length of string compiled into pattern */ \
   /* ------------------------------------------------------------------ */ \
 } pcre2_callout_block;
 

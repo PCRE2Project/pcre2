@@ -1,4 +1,4 @@
-.TH PCRE2CALLOUT 3 "15 March 2015" "PCRE2 10.20"
+.TH PCRE2CALLOUT 3 "16 March 2015" "PCRE2 10.20"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH SYNOPSIS
@@ -197,8 +197,8 @@ documentation). The callout block structure contains the following fields:
   PCRE2_SIZE    \fIpattern_position\fP;
   PCRE2_SIZE    \fInext_item_length\fP;
   PCRE2_SIZE    \fIcallout_string_offset\fP;
+  PCRE2_SIZE    \fIcallout_string_length\fP; 
   PCRE2_SPTR    \fIcallout_string\fP; 
-  uint32_t      \fIcallout_string_length\fP; 
  
 .sp
 The \fIversion\fP field contains the version number of the block format. The
@@ -225,11 +225,12 @@ For callouts with string arguments, \fIcallout_number\fP is always zero, and
 \fIcallout_string\fP points to the string that is contained within the compiled
 pattern. Its length is given by \fIcallout_string_length\fP. Duplicated ending
 delimiters that were present in the original pattern string have been turned
-into single characters. An additional code unit containing binary zero is
-present after the string, but is not included in the length. The delimiter that
-was used to start the string is also stored within the pattern, immediately
-before the string itself. You can therefore access this delimiter as
-\fIcallout_string\fP[-1] if you need it.
+into single characters, but there is no other processing of the callout string
+argument. An additional code unit containing binary zero is present after the
+string, but is not included in the length. The delimiter that was used to start
+the string is also stored within the pattern, immediately before the string
+itself. You can access this delimiter as \fIcallout_string\fP[-1] if you need
+it.
 .P
 The \fIcallout_string_offset\fP field is the code unit offset to the start of
 the callout argument string within the original pattern string. This is
@@ -327,6 +328,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 15 March 2015
+Last updated: 16 March 2015
 Copyright (c) 1997-2015 University of Cambridge.
 .fi
