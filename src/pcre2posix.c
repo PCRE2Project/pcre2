@@ -216,8 +216,8 @@ if ((cflags & REG_UTF) != 0)      options |= PCRE2_UTF;
 if ((cflags & REG_UCP) != 0)      options |= PCRE2_UCP;
 if ((cflags & REG_UNGREEDY) != 0) options |= PCRE2_UNGREEDY;
 
-preg->re_pcre2_code = pcre2_compile((PCRE2_SPTR)pattern, -1, options,
-  &errorcode, &erroffset, NULL);
+preg->re_pcre2_code = pcre2_compile((PCRE2_SPTR)pattern, PCRE2_ZERO_TERMINATED,
+   options, &errorcode, &erroffset, NULL);
 preg->re_erroffset = erroffset;
 
 if (preg->re_pcre2_code == NULL)

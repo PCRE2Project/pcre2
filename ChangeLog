@@ -8,6 +8,10 @@ Version 10.20 xx-xx-2015
 
 2. Assertion code generator in JIT has been optimized.
 
+3. The invalid pattern (?(?C) has a missing assertion condition at the end. The
+pcre2_compile() function read past the end of the input before diagnosing an
+error.
+
 
 Version 10.10 06-March-2015
 ---------------------------

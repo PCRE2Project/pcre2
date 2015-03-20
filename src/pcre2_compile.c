@@ -5248,9 +5248,18 @@ for (;; ptr++)
                     if (ptr[i+1] == CHAR_RIGHT_PARENTHESIS) tempptr += i + 2;
                     break;
                     }
-                  }   
+                  }
                 }
               }
+            }
+
+          /* tempptr should now be pointing to the opening parenthesis of the
+          assertion condition. */
+
+          if (*tempptr != CHAR_LEFT_PARENTHESIS)
+            {
+            *errorcodeptr = ERR28;
+            goto FAILED;
             }
           }
 
@@ -5657,7 +5666,7 @@ for (;; ptr++)
 
           /* In the real compile we can copy the string, knowing that it is
           syntactically OK. The starting delimiter is included so that the
-          client can discover it if they want. We also pass the start offset to 
+          client can discover it if they want. We also pass the start offset to
           help a script language give better error messages. */
 
           else

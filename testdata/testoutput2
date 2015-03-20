@@ -567,7 +567,7 @@ Failed: error 126 at offset 4: malformed number or name after (?(
 Failed: error 126 at offset 4: malformed number or name after (?(
 
 /(?(?i))/
-Failed: error 128 at offset 3: assertion expected after (?(
+Failed: error 128 at offset 3: assertion expected after (?( or (?(?C)
 
 /(?(abc))/
 Failed: error 115 at offset 7: reference to non-existent subpattern
@@ -7367,7 +7367,7 @@ No match
 Failed: error 126 at offset 6: malformed number or name after (?(
 
 /(?(''))/
-Failed: error 128 at offset 4: assertion expected after (?(
+Failed: error 128 at offset 4: assertion expected after (?( or (?(?C)
 
 /(?('R')stuff)/
 Failed: error 115 at offset 7: reference to non-existent subpattern
