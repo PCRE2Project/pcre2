@@ -535,9 +535,13 @@ pattern is not anchored.
 <br><a name="SEC24" href="#TOC1">CALLOUTS</a><br>
 <P>
 <pre>
-  (?C)      callout
-  (?Cn)     callout with data n
-</PRE>
+  (?C)            callout (assumed number 0)
+  (?Cn)           callout with numerical data n
+  (?C"text")      callout with string data
+</pre>
+The allowed string delimiters are ` ' " ^ % # $ (which are the same for the 
+start and the end), and the starting delimiter { matched with the ending 
+delimiter }. To encode the ending delimiter within the string, double it.   
 </P>
 <br><a name="SEC25" href="#TOC1">SEE ALSO</a><br>
 <P>
@@ -555,7 +559,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC27" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 26 January 2015
+Last updated: 15 March 2015
 <br>
 Copyright &copy; 1997-2015 University of Cambridge.
 <br>

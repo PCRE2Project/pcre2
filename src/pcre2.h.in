@@ -342,7 +342,19 @@ typedef struct pcre2_callout_block { \
   PCRE2_SIZE    callout_string_length; /* Length of string compiled into pattern */ \
   PCRE2_SPTR    callout_string;    /* String compiled into pattern */ \
   /* ------------------------------------------------------------------ */ \
-} pcre2_callout_block;
+} pcre2_callout_block; \
+\
+typedef struct pcre2_callout_enumerate_block { \
+  uint32_t      version;           /* Identifies version of block */ \
+  /* ------------------------ Version 0 ------------------------------- */ \
+  PCRE2_SIZE    pattern_position;  /* Offset to next item in the pattern */ \
+  PCRE2_SIZE    next_item_length;  /* Length of next item in the pattern */ \
+  uint32_t      callout_number;    /* Number compiled into pattern */ \
+  PCRE2_SIZE    callout_string_offset; /* Offset to string within pattern */ \
+  PCRE2_SIZE    callout_string_length; /* Length of string compiled into pattern */ \
+  PCRE2_SPTR    callout_string;    /* String compiled into pattern */ \
+  /* ------------------------------------------------------------------ */ \
+} pcre2_callout_enumerate_block;
 
 
 /* List the generic forms of all other functions in macros, which will be
@@ -410,6 +422,9 @@ PCRE2_EXP_DECL void      pcre2_code_free(pcre2_code *);
 
 #define PCRE2_PATTERN_INFO_FUNCTIONS \
 PCRE2_EXP_DECL int       pcre2_pattern_info(const pcre2_code *, uint32_t, \
+                           void *); \
+PCRE2_EXP_DECL int       pcre2_callout_enumerate(const pcre2_code *, \
+                           int (*)(pcre2_callout_enumerate_block *, void *), \
                            void *);
 
 
@@ -538,15 +553,17 @@ pcre2_compile are called by application code. */
 
 /* Data blocks */
 
-#define pcre2_callout_block         PCRE2_SUFFIX(pcre2_callout_block_)
-#define pcre2_general_context       PCRE2_SUFFIX(pcre2_general_context_)
-#define pcre2_compile_context       PCRE2_SUFFIX(pcre2_compile_context_)
-#define pcre2_match_context         PCRE2_SUFFIX(pcre2_match_context_)
-#define pcre2_match_data            PCRE2_SUFFIX(pcre2_match_data_)
+#define pcre2_callout_block            PCRE2_SUFFIX(pcre2_callout_block_)
+#define pcre2_callout_enumerate_block  PCRE2_SUFFIX(pcre2_callout_enumerate_block_)
+#define pcre2_general_context          PCRE2_SUFFIX(pcre2_general_context_)
+#define pcre2_compile_context          PCRE2_SUFFIX(pcre2_compile_context_)
+#define pcre2_match_context            PCRE2_SUFFIX(pcre2_match_context_)
+#define pcre2_match_data               PCRE2_SUFFIX(pcre2_match_data_)
 
 
 /* Functions: the complete list in alphabetical order */
 
+#define pcre2_callout_enumerate               PCRE2_SUFFIX(pcre2_callout_enumerate_)
 #define pcre2_code_free                       PCRE2_SUFFIX(pcre2_code_free_)
 #define pcre2_compile                         PCRE2_SUFFIX(pcre2_compile_)
 #define pcre2_compile_context_copy            PCRE2_SUFFIX(pcre2_compile_context_copy_)
@@ -554,7 +571,6 @@ pcre2_compile are called by application code. */
 #define pcre2_compile_context_free            PCRE2_SUFFIX(pcre2_compile_context_free_)
 #define pcre2_config                          PCRE2_SUFFIX(pcre2_config_)
 #define pcre2_dfa_match                       PCRE2_SUFFIX(pcre2_dfa_match_)
-#define pcre2_match                           PCRE2_SUFFIX(pcre2_match_)
 #define pcre2_general_context_copy            PCRE2_SUFFIX(pcre2_general_context_copy_)
 #define pcre2_general_context_create          PCRE2_SUFFIX(pcre2_general_context_create_)
 #define pcre2_general_context_free            PCRE2_SUFFIX(pcre2_general_context_free_)
@@ -570,6 +586,7 @@ pcre2_compile are called by application code. */
 #define pcre2_jit_stack_create                PCRE2_SUFFIX(pcre2_jit_stack_create_)
 #define pcre2_jit_stack_free                  PCRE2_SUFFIX(pcre2_jit_stack_free_)
 #define pcre2_maketables                      PCRE2_SUFFIX(pcre2_maketables_)
+#define pcre2_match                           PCRE2_SUFFIX(pcre2_match_)
 #define pcre2_match_context_copy              PCRE2_SUFFIX(pcre2_match_context_copy_)
 #define pcre2_match_context_create            PCRE2_SUFFIX(pcre2_match_context_create_)
 #define pcre2_match_context_free              PCRE2_SUFFIX(pcre2_match_context_free_)

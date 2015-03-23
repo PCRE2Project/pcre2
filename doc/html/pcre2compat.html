@@ -83,11 +83,11 @@ the
 documentation for details.
 </P>
 <P>
-8. Subpatterns that are called as subroutines (whether or not recursively) are
-always treated as atomic groups in PCRE2. This is like Python, but unlike Perl.
-Captured values that are set outside a subroutine call can be reference from
-inside in PCRE2, but not in Perl. There is a discussion that explains these
-differences in more detail in the
+8. Subroutine calls (whether recursive or not) are treated as atomic groups.
+Atomic recursion is like Python, but unlike Perl. Captured values that are set
+outside a subroutine call can be referenced from inside in PCRE2, but not in
+Perl. There is a discussion that explains these differences in more detail in
+the
 <a href="pcre2pattern.html#recursiondifference">section on recursion differences from Perl</a>
 in the
 <a href="pcre2pattern.html"><b>pcre2pattern</b></a>
@@ -214,9 +214,9 @@ Cambridge, England.
 REVISION
 </b><br>
 <P>
-Last updated: 28 September 2014
+Last updated: 15 March 2015
 <br>
-Copyright &copy; 1997-2014 University of Cambridge.
+Copyright &copy; 1997-2015 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE2 index page</a>.

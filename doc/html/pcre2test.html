@@ -90,11 +90,18 @@ names used in the libraries have a suffix _8, _16, or _32, as appropriate.
 <P>
 Input to <b>pcre2test</b> is processed line by line, either by calling the C
 library's <b>fgets()</b> function, or via the <b>libreadline</b> library (see
-below). In Unix-like environments, <b>fgets()</b> treats any bytes other than
-newline as data characters. However, in some Windows environments character 26
-(hex 1A) causes an immediate end of file, and no further data is read. For
-maximum portability, therefore, it is safest to avoid non-printing characters
-in <b>pcre2test</b> input files.
+below). The input is processed using using C's string functions, so must not
+contain binary zeroes, even though in Unix-like environments, <b>fgets()</b>
+treats any bytes other than newline as data characters. In some Windows
+environments character 26 (hex 1A) causes an immediate end of file, and no
+further data is read. 
+</P>
+<P>
+For maximum portability, therefore, it is safest to avoid non-printing
+characters in <b>pcre2test</b> input files. There is a facility for specifying a
+pattern's characters as hexadecimal pairs, thus making it possible to include
+binary zeroes in a pattern for testing purposes. Subject lines are processed
+for backslash escapes, which makes it possible to include any data value.
 </P>
 <br><a name="SEC4" href="#TOC1">COMMAND LINE OPTIONS</a><br>
 <P>
@@ -499,6 +506,7 @@ about the pattern:
 <pre>
       bsr=[anycrlf|unicode]     specify \R handling
   /B  bincode                   show binary code without lengths
+      callout_info              show callout information 
       debug                     same as info,fullbincode
       fullbincode               show binary code with lengths
   /I  info                      show info about compiled pattern
@@ -579,6 +587,12 @@ if there is more than one they are listed as "starting code units". "Last code
 unit" is the last literal code unit that must be present in any match. This is
 not necessarily the last character. These lines are omitted if no starting or
 ending code units are recorded.
+</P>
+<P>
+The <b>callout_info</b> modifier requests information about all the callouts in 
+the pattern. A list of them is output at the end of any other information that 
+is requested. For each callout, either its number or string is given, followed 
+by the item that follows it in the pattern.
 </P>
 <br><b>
 Specifying a pattern in hex
@@ -907,12 +921,15 @@ set, the current captured groups are output when a callout occurs.
 The <b>callout_fail</b> modifier can be given one or two numbers. If there is
 only one number, 1 is returned instead of 0 when a callout of that number is
 reached. If two numbers are given, 1 is returned when callout &#60;n&#62; is reached
-for the &#60;m&#62;th time.
+for the &#60;m&#62;th time. Note that callouts with string arguments are always given
+the number zero. See "Callouts" below for a description of the output when a
+callout it taken.
 </P>
 <P>
 The <b>callout_data</b> modifier can be given an unsigned or a negative number.
-Any value other than zero is used as a return from <b>pcre2test</b>'s callout
-function.
+This is set as the "user data" that is passed to the matching function, and
+passed back when the callout function is invoked. Any value other than zero is
+used as a return from <b>pcre2test</b>'s callout function.
 </P>
 <br><b>
 Finding all matches in a string
@@ -1262,10 +1279,32 @@ documentation.
 <br><a name="SEC16" href="#TOC1">CALLOUTS</a><br>
 <P>
 If the pattern contains any callout requests, <b>pcre2test</b>'s callout
-function is called during matching. This works with both matching functions. By
-default, the called function displays the callout number, the start and current
-positions in the text at the callout time, and the next pattern item to be
-tested. For example:
+function is called during matching unless <b>callout_none</b> is specified.
+This works with both matching functions.
+</P>
+<P>
+The callout function in <b>pcre2test</b> returns zero (carry on matching) by
+default, but you can use a <b>callout_fail</b> modifier in a subject line (as
+described above) to change this and other parameters of the callout.
+</P>
+<P>
+Inserting callouts can be helpful when using <b>pcre2test</b> to check
+complicated regular expressions. For further information about callouts, see
+the
+<a href="pcre2callout.html"><b>pcre2callout</b></a>
+documentation.
+</P>
+<P>
+The output for callouts with numerical arguments and those with string
+arguments is slightly different.
+</P>
+<br><b>
+Callouts with numerical arguments
+</b><br>
+<P>
+By default, the callout function displays the callout number, the start and
+current positions in the subject text at the callout time, and the next pattern
+item to be tested. For example:
 <pre>
   ---&#62;pqrabcdef
     0    ^  ^     \d
@@ -1308,17 +1347,27 @@ The mark changes between matching "a" and "b", but stays the same for the rest
 of the match, so nothing more is output. If, as a result of backtracking, the
 mark reverts to being unset, the text "&#60;unset&#62;" is output.
 </P>
+<br><b>
+Callouts with string arguments
+</b><br>
 <P>
-The callout function in <b>pcre2test</b> returns zero (carry on matching) by
-default, but you can use a <b>callout_fail</b> modifier in a subject line (as
-described above) to change this and other parameters of the callout.
-</P>
-<P>
-Inserting callouts can be helpful when using <b>pcre2test</b> to check
-complicated regular expressions. For further information about callouts, see
-the
-<a href="pcre2callout.html"><b>pcre2callout</b></a>
-documentation.
+The output for a callout with a string argument is similar, except that instead
+of outputting a callout number before the position indicators, the callout
+string and its offset in the pattern string are output before the reflection of
+the subject string, and the subject string is reflected for each callout. For
+example:
+<pre>
+    re&#62; /^ab(?C'first')cd(?C"second")ef/
+  data&#62; abcdefg
+  Callout (7): 'first'
+  ---&#62;abcdefg
+      ^ ^         c
+  Callout (20): "second"
+  ---&#62;abcdefg
+      ^   ^       e
+   0: abcdef
+
+</PRE>
 </P>
 <br><a name="SEC17" href="#TOC1">NON-PRINTING CHARACTERS</a><br>
 <P>
@@ -1411,7 +1460,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC21" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 23 January 2015
+Last updated: 22 March 2015
 <br>
 Copyright &copy; 1997-2015 University of Cambridge.
 <br>

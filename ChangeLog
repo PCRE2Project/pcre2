@@ -10,7 +10,9 @@ Version 10.20 xx-xx-2015
 
 3. The invalid pattern (?(?C) has a missing assertion condition at the end. The
 pcre2_compile() function read past the end of the input before diagnosing an
-error.
+error. This bug was discovered by the LLVM fuzzer.
+
+4. Implemented pcre2_callout_enumerate().
 
 
 Version 10.10 06-March-2015

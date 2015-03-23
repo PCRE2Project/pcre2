@@ -1,4 +1,4 @@
-.TH PCRE2CALLOUT 3 "16 March 2015" "PCRE2 10.20"
+.TH PCRE2CALLOUT 3 "23 March 2015" "PCRE2 10.20"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH SYNOPSIS
@@ -7,7 +7,13 @@ PCRE2 - Perl-compatible regular expressions (revised API)
 .B #include <pcre2.h>
 .PP
 .SM
+.nf
 .B int (*pcre2_callout)(pcre2_callout_block *, void *);
+.sp
+.B int pcre2_callout_enumerate(const pcre2_code *\fIcode\fP,
+.B "  int (*\fIcallback\fP)(pcre2_callout_enumerate_block *, void *),"
+.B "  void *\fIuser_data\fP);"
+.fi
 .
 .SH DESCRIPTION
 .rs
@@ -170,6 +176,7 @@ option to \fBpcre2_compile()\fP, or by starting the pattern with
 callouts such as the example above are obeyed.
 .
 .
+.\" HTML <a name="calloutinterface"></a>
 .SH "THE CALLOUT INTERFACE"
 .rs
 .sp
@@ -199,7 +206,6 @@ documentation). The callout block structure contains the following fields:
   PCRE2_SIZE    \fIcallout_string_offset\fP;
   PCRE2_SIZE    \fIcallout_string_length\fP; 
   PCRE2_SPTR    \fIcallout_string\fP; 
- 
 .sp
 The \fIversion\fP field contains the version number of the block format. The
 current version is 1; the three callout string fields were added for this 
@@ -276,8 +282,8 @@ outside the recursion, as do the values of all captured substrings. If no
 substrings have been captured, the value of \fIcapture_last\fP is 0. This is
 always the case for the DFA matching functions.
 .P
-The \fIpattern_position\fP field contains the offset to the next item to be
-matched in the pattern string.
+The \fIpattern_position\fP field contains the offset in the pattern string to
+the next item to be matched. 
 .P
 The \fInext_item_length\fP field contains the length of the next item to be
 matched in the pattern string. When the callout immediately precedes an
@@ -298,7 +304,7 @@ of (*PRUNE) or (*THEN) without a name do not obliterate a previous (*MARK). In
 callouts from the DFA matching function this field always contains NULL.
 .
 .
-.SH "RETURN VALUES"
+.SH "RETURN VALUES FROM CALLOUTS"
 .rs
 .sp
 The external callout function returns an integer to PCRE2. If the value is
@@ -312,6 +318,54 @@ Negative values should normally be chosen from the set of PCRE2_ERROR_xxx
 values. In particular, PCRE2_ERROR_NOMATCH forces a standard "no match"
 failure. The error number PCRE2_ERROR_CALLOUT is reserved for use by callout
 functions; it will never be used by PCRE2 itself.
+.
+.
+.SH "CALLOUT ENUMERATION"
+.rs
+.sp
+.nf
+.B int pcre2_callout_enumerate(const pcre2_code *\fIcode\fP,
+.B "  int (*\fIcallback\fP)(pcre2_callout_enumerate_block *, void *),"
+.B "  void *\fIuser_data\fP);"
+.fi
+.sp
+A script language that supports the use of string arguments in callouts might 
+like to scan all the callouts in a pattern before running the match. This can 
+be done by calling \fBpcre2_callout_enumerate()\fP. The first argument is a 
+pointer to a compiled pattern, the second points to a callback function, and
+the third is arbitrary user data. The callback function is called for every
+callout in the pattern in the order in which they appear. Its first argument is
+a pointer to a callout enumeration block, and its second argument is the
+\fIuser_data\fP value that was passed to \fBpcre2_callout_enumerate()\fP. The
+data block contains the following fields:
+.sp
+  \fIversion\fP                Block version number
+  \fIpattern_position\fP       Offset to next item in pattern
+  \fInext_item_length\fP       Length of next item in pattern
+  \fIcallout_number\fP         Number for numbered callouts
+  \fIcallout_string_offset\fP  Offset to string within pattern
+  \fIcallout_string_length\fP  Length of callout string
+  \fIcallout_string\fP         Points to callout string or is NULL
+.sp
+The version number is currently 0. It will increase if new fields are ever 
+added to the block. The remaining fields are the same as their namesakes in the
+\fBpcre2_callout\fP block that is used for callouts during matching, as
+described
+.\" HTML <a href="#calloutinterface">
+.\" </a>
+above.
+.\"
+.P
+Note that the value of \fIpattern_position\fP is unique for each callout.
+However, if a callout occurs inside a group that is quantified with a non-zero
+minimum or a fixed maximum, the group is replicated inside the compiled
+pattern. For example, a pattern such as /(a){2}/ is compiled as if it were
+/(a)(a)/. This means that the callout will be enumerated more than once, but
+with the same value for \fIpattern_position\fP in each case.
+.P
+The callback function should normally return zero. If it returns a non-zero 
+value, scanning the pattern stops, and that value is returned from 
+\fBpcre2_callout_enumerate()\fP.
 .
 .
 .SH AUTHOR
@@ -328,6 +382,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 16 March 2015
+Last updated: 23 March 2015
 Copyright (c) 1997-2015 University of Cambridge.
 .fi

@@ -382,28 +382,29 @@ either on a pattern or a data line, so they must all be distinct. */
 #define CTL_ALTGLOBAL          0x00000010u
 #define CTL_BINCODE            0x00000020u
 #define CTL_CALLOUT_CAPTURE    0x00000040u
-#define CTL_CALLOUT_NONE       0x00000080u
-#define CTL_DFA                0x00000100u
-#define CTL_FINDLIMITS         0x00000200u
-#define CTL_FULLBINCODE        0x00000400u
-#define CTL_GETALL             0x00000800u
-#define CTL_GLOBAL             0x00001000u
-#define CTL_HEXPAT             0x00002000u
-#define CTL_INFO               0x00004000u
-#define CTL_JITFAST            0x00008000u
-#define CTL_JITVERIFY          0x00010000u
-#define CTL_MARK               0x00020000u
-#define CTL_MEMORY             0x00040000u
-#define CTL_POSIX              0x00080000u
-#define CTL_PUSH               0x00100000u
-#define CTL_STARTCHAR          0x00200000u
-#define CTL_ZERO_TERMINATE     0x00400000u
+#define CTL_CALLOUT_INFO       0x00000080u
+#define CTL_CALLOUT_NONE       0x00000100u
+#define CTL_DFA                0x00000200u
+#define CTL_FINDLIMITS         0x00000400u
+#define CTL_FULLBINCODE        0x00000800u
+#define CTL_GETALL             0x00001000u
+#define CTL_GLOBAL             0x00002000u
+#define CTL_HEXPAT             0x00004000u
+#define CTL_INFO               0x00008000u
+#define CTL_JITFAST            0x00010000u
+#define CTL_JITVERIFY          0x00020000u
+#define CTL_MARK               0x00040000u
+#define CTL_MEMORY             0x00080000u
+#define CTL_POSIX              0x00100000u
+#define CTL_PUSH               0x00200000u
+#define CTL_STARTCHAR          0x00400000u
+#define CTL_ZERO_TERMINATE     0x00800000u
 
 #define CTL_BSR_SET          0x80000000u  /* This is informational */
 #define CTL_NL_SET           0x40000000u  /* This is informational */
 
 #define CTL_DEBUG            (CTL_FULLBINCODE|CTL_INFO)  /* For setting */
-#define CTL_ANYINFO          (CTL_DEBUG|CTL_BINCODE)     /* For testing */
+#define CTL_ANYINFO          (CTL_DEBUG|CTL_BINCODE|CTL_CALLOUT_INFO)
 #define CTL_ANYGLOB          (CTL_ALTGLOBAL|CTL_GLOBAL)
 
 /* These are all the controls that may be set either on a pattern or on a
@@ -431,7 +432,7 @@ typedef struct patctl {    /* Structure for pattern modifiers. */
   uint32_t  jit;
   uint32_t  stackguard_test;
   uint32_t  tables_id;
-  uint8_t   locale[LOCALESIZE];
+   uint8_t  locale[LOCALESIZE];
 } patctl;
 
 #define MAXCPYGET 10
@@ -494,6 +495,7 @@ static modstruct modlist[] = {
   { "callout_capture",     MOD_DAT,  MOD_CTL, CTL_CALLOUT_CAPTURE,       DO(control) },
   { "callout_data",        MOD_DAT,  MOD_INS, 0,                         DO(callout_data) },
   { "callout_fail",        MOD_DAT,  MOD_IN2, 0,                         DO(cfail) },
+  { "callout_info",        MOD_PAT,  MOD_CTL, CTL_CALLOUT_INFO,          PO(control) },
   { "callout_none",        MOD_DAT,  MOD_CTL, CTL_CALLOUT_NONE,          DO(control) },
   { "caseless",            MOD_PATP, MOD_OPT, PCRE2_CASELESS,            PO(options) },
   { "copy",                MOD_DAT,  MOD_NN,  DO(copy_numbers),          DO(copy_names) },
@@ -578,8 +580,8 @@ static modstruct modlist[] = {
 /* Control bits that are not ignored with 'push'. */
 
 #define PUSH_SUPPORTED_COMPILE_CONTROLS ( \
-  CTL_BINCODE|CTL_FULLBINCODE|CTL_HEXPAT|CTL_INFO|CTL_JITVERIFY| \
-  CTL_MEMORY|CTL_PUSH|CTL_BSR_SET|CTL_NL_SET)
+  CTL_BINCODE|CTL_CALLOUT_INFO|CTL_FULLBINCODE|CTL_HEXPAT|CTL_INFO| \
+  CTL_JITVERIFY|CTL_MEMORY|CTL_PUSH|CTL_BSR_SET|CTL_NL_SET)
 
 /* Controls that apply only at compile time with 'push'. */
 
@@ -840,6 +842,17 @@ are supported. */
     (void)pchars16((PCRE2_SPTR16)(p)+offset, len, utf, f); \
   else \
     (void)pchars8((PCRE2_SPTR8)(p)+offset, len, utf, f)
+
+#define PCRE2_CALLOUT_ENUMERATE(a,b,c) \
+  if (test_mode == PCRE8_MODE) \
+     a = pcre2_callout_enumerate_8(compiled_code8, \
+       (int (*)(struct pcre2_callout_enumerate_block_8 *, void *))b,c); \
+  else if (test_mode == PCRE16_MODE) \
+     a = pcre2_callout_enumerate_16(compiled_code16, \
+       (int(*)(struct pcre2_callout_enumerate_block_16 *, void *))b,c); \
+  else \
+     a = pcre2_callout_enumerate_32(compiled_code32, \
+       (int (*)(struct pcre2_callout_enumerate_block_32 *, void *))b,c)
 
 #define PCRE2_COMPILE(a,b,c,d,e,f,g) \
   if (test_mode == PCRE8_MODE) \
@@ -1268,6 +1281,14 @@ the three different cases. */
   else \
     (void)G(pchars,BITTWO)((G(PCRE2_SPTR,BITTWO))(p)+offset, len, utf, f)
 
+#define PCRE2_CALLOUT_ENUMERATE(a,b,c) \
+  if (test_mode == G(G(PCRE,BITONE),_MODE)) \
+     a = G(pcre2_callout_enumerate,BITONE)(G(compiled_code,BITONE), \
+       (int (*)(struct G(pcre2_callout_enumerate_block_,BITONE) *, void *))b,c); \
+  else \
+     a = G(pcre2_callout_enumerate,BITTWO)(G(compiled_code,BITTWO), \
+       (int (*)(struct G(pcre2_callout_enumerate_block_,BITTWO) *, void *))b,c)
+
 #define PCRE2_COMPILE(a,b,c,d,e,f,g) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
     G(a,BITONE) = G(pcre2_compile_,BITONE)(G(b,BITONE),c,d,e,f,G(g,BITONE)); \
@@ -1588,6 +1609,9 @@ the three different cases. */
   lv = pchars8((PCRE2_SPTR8)(p)+offset, len, utf, f)
 #define PCHARSV(p, offset, len, utf, f) \
   (void)pchars8((PCRE2_SPTR8)(p)+offset, len, utf, f)
+#define PCRE2_CALLOUT_ENUMERATE(a,b,c) \
+   a = pcre2_callout_enumerate_8(compiled_code8, \
+     (int (*)(struct pcre2_callout_enumerate_block_8 *, void *))b,c)
 #define PCRE2_COMPILE(a,b,c,d,e,f,g) \
   G(a,8) = pcre2_compile_8(G(b,8),c,d,e,f,G(g,8))
 #define PCRE2_DFA_MATCH(a,b,c,d,e,f,g,h,i,j) \
@@ -1676,6 +1700,9 @@ the three different cases. */
   lv = pchars16((PCRE2_SPTR16)(p)+offset, len, utf, f)
 #define PCHARSV(p, offset, len, utf, f) \
   (void)pchars16((PCRE2_SPTR16)(p)+offset, len, utf, f)
+#define PCRE2_CALLOUT_ENUMERATE(a,b,c) \
+   a = pcre2_callout_enumerate_16(compiled_code16, \
+     (int (*)(struct pcre2_callout_enumerate_block_16 *, void *))b,c)
 #define PCRE2_COMPILE(a,b,c,d,e,f,g) \
   G(a,16) = pcre2_compile_16(G(b,16),c,d,e,f,G(g,16))
 #define PCRE2_DFA_MATCH(a,b,c,d,e,f,g,h,i,j) \
@@ -1764,6 +1791,9 @@ the three different cases. */
   lv = pchars32((PCRE2_SPTR32)(p)+offset, len, utf, f)
 #define PCHARSV(p, offset, len, utf, f) \
   (void)pchars32((PCRE2_SPTR32)(p)+offset, len, utf, f)
+#define PCRE2_CALLOUT_ENUMERATE(a,b,c) \
+   a = pcre2_callout_enumerate_32(compiled_code32, \
+     (int (*)(struct pcre2_callout_enumerate_block_32 *, void *))b,c)
 #define PCRE2_COMPILE(a,b,c,d,e,f,g) \
   G(a,32) = pcre2_compile_32(G(b,32),c,d,e,f,G(g,32))
 #define PCRE2_DFA_MATCH(a,b,c,d,e,f,g,h,i,j) \
@@ -3381,7 +3411,7 @@ Returns:      nothing
 static void
 show_controls(uint32_t controls, const char *before)
 {
-fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
+fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
   before,
   ((controls & CTL_AFTERTEXT) != 0)? " aftertext" : "",
   ((controls & CTL_ALLAFTERTEXT) != 0)? " allaftertext" : "",
@@ -3390,6 +3420,7 @@ fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
   ((controls & CTL_ALTGLOBAL) != 0)? " altglobal" : "",
   ((controls & CTL_BINCODE) != 0)? " bincode" : "",
   ((controls & CTL_CALLOUT_CAPTURE) != 0)? " callout_capture" : "",
+  ((controls & CTL_CALLOUT_INFO) != 0)? " callout_info" : "",
   ((controls & CTL_CALLOUT_NONE) != 0)? " callout_none" : "",
   ((controls & CTL_DFA) != 0)? " dfa" : "",
   ((controls & CTL_FINDLIMITS) != 0)? " find_limits" : "",
@@ -3513,6 +3544,56 @@ if (pat_patctl.jit != 0)
   (void)pattern_info(PCRE2_INFO_JITSIZE, &size, FALSE);
   fprintf(outfile, "Memory allocation (JIT code): %d\n", (int)size);
   }
+}
+
+
+
+/*************************************************
+*     Callback function for callout enumeration  *
+*************************************************/
+
+/* The only differences in the callout emumeration block for different code
+unit widths are that the pointers to the subject, the most recent MARK, and a
+callout argument string point to strings of the appropriate width. Casts can be
+used to deal with this.
+
+Argument:   
+  cb            pointer to enumerate block
+  callout_data  user data
+
+Returns:    0 
+*/
+
+static int callout_callback(pcre2_callout_enumerate_block_8 *cb, 
+  void *callout_data)
+{
+uint32_t i;
+BOOL utf = (FLD(compiled_code, overall_options) & PCRE2_UTF) != 0;
+
+(void)callout_data;  /* Not currently displayed */
+
+fprintf(outfile, "Callout ");
+if (cb->callout_string != NULL)
+  {
+  uint32_t delimiter = CODE_UNIT(cb->callout_string, -1);
+  fprintf(outfile, "%c", delimiter);
+  PCHARSV(cb->callout_string, 0,
+    cb->callout_string_length, utf, outfile);
+  for (i = 0; callout_start_delims[i] != 0; i++)
+    if (delimiter == callout_start_delims[i])
+      {
+      delimiter = callout_end_delims[i];
+      break;
+      }
+  fprintf(outfile, "%c  ", delimiter);
+  }
+else fprintf(outfile, "%d  ", cb->callout_number); 
+
+fprintf(outfile, "%.*s\n",
+  (int)((cb->next_item_length == 0)? 1 : cb->next_item_length),
+  pbuffer8 + cb->pattern_position);
+  
+return 0; 
 }
 
 
@@ -3786,6 +3867,24 @@ if ((pat_patctl.control & CTL_INFO) != 0)
 #else
       fprintf(outfile, "JIT support is not available in this version of PCRE2\n");
 #endif
+    }
+  }
+
+if ((pat_patctl.control & CTL_CALLOUT_INFO) != 0)
+  {
+  int errorcode;
+  PCRE2_CALLOUT_ENUMERATE(errorcode, callout_callback, 0);
+  if (errorcode != 0)
+    {
+    int len;
+    fprintf(outfile, "Callout enumerate failed: error %d: ", errorcode);
+    if (errorcode < 0)
+      {  
+      PCRE2_GET_ERROR_MESSAGE(len, errorcode, pbuffer);
+      PCHARSV(CASTVAR(void *, pbuffer), 0, len, FALSE, outfile);
+      } 
+    fprintf(outfile, "\n");
+    return PR_SKIP;
     }
   }
 
@@ -4534,37 +4633,37 @@ uint32_t i, pre_start, post_start, subject_length;
 BOOL utf = (FLD(compiled_code, overall_options) & PCRE2_UTF) != 0;
 BOOL callout_capture = (dat_datctl.control & CTL_CALLOUT_CAPTURE) != 0;
 
-/* This FILE is used for echoing the subject. This is done only once in simple 
+/* This FILE is used for echoing the subject. This is done only once in simple
 cases. */
 
-FILE *f = (first_callout || callout_capture || cb->callout_string != NULL)? 
+FILE *f = (first_callout || callout_capture || cb->callout_string != NULL)?
   outfile : NULL;
 
-/* For a callout with a string argument, show the string first because there 
+/* For a callout with a string argument, show the string first because there
 isn't a tidy way to fit it in the rest of the data. */
 
 if (cb->callout_string != NULL)
   {
-  uint32_t delimiter = CODE_UNIT(cb->callout_string, -1); 
-  fprintf(outfile, "Callout (%lu): %c", 
+  uint32_t delimiter = CODE_UNIT(cb->callout_string, -1);
+  fprintf(outfile, "Callout (%lu): %c",
     (unsigned long int)cb->callout_string_offset, delimiter);
   PCHARSV(cb->callout_string, 0,
     cb->callout_string_length, utf, outfile);
   for (i = 0; callout_start_delims[i] != 0; i++)
     if (delimiter == callout_start_delims[i])
-      { 
-      delimiter = callout_end_delims[i]; 
+      {
+      delimiter = callout_end_delims[i];
       break;
-      }  
-  fprintf(outfile, "%c", delimiter);  
+      }
+  fprintf(outfile, "%c", delimiter);
   if (!callout_capture) fprintf(outfile, "\n");
-  } 
-  
-/* Show captured strings if required */ 
+  }
+
+/* Show captured strings if required */
 
 if (callout_capture)
   {
-  if (cb->callout_string == NULL) 
+  if (cb->callout_string == NULL)
     fprintf(outfile, "Callout %d:", cb->callout_number);
   fprintf(outfile, " last capture = %d\n", cb->capture_last);
   for (i = 0; i < cb->capture_top * 2; i += 2)
@@ -4580,7 +4679,7 @@ if (callout_capture)
     fprintf(outfile, "\n");
     }
   }
-  
+
 /* Re-print the subject in canonical form, the first time or if giving full
 datails. On subsequent calls in the same match, we use pchars just to find the
 printed lengths of the substrings. */
@@ -4599,8 +4698,8 @@ PCHARSV(cb->subject, cb->current_position,
 
 if (f != NULL) fprintf(f, "\n");
 
-/* For automatic callouts, show the pattern offset. Otherwise, for a numerical 
-callout whose number has not already been shown with captured strings, show the 
+/* For automatic callouts, show the pattern offset. Otherwise, for a numerical
+callout whose number has not already been shown with captured strings, show the
 number here. A callout with a string argument has been displayed above. */
 
 if (cb->callout_number == 255)
@@ -4608,13 +4707,13 @@ if (cb->callout_number == 255)
   fprintf(outfile, "%+3d ", (int)cb->pattern_position);
   if (cb->pattern_position > 99) fprintf(outfile, "\n    ");
   }
-else 
+else
   {
   if (callout_capture || cb->callout_string != NULL) fprintf(outfile, "    ");
     else fprintf(outfile, "%3d ", cb->callout_number);
   }
-  
-/* Now show position indicators */ 
+
+/* Now show position indicators */
 
 for (i = 0; i < pre_start; i++) fprintf(outfile, " ");
 fprintf(outfile, "^");

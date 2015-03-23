@@ -1,4 +1,4 @@
-.TH PCRE2TEST 1 "16 March 2015" "PCRE 10.20"
+.TH PCRE2TEST 1 "22 March 2015" "PCRE 10.20"
 .SH NAME
 pcre2test - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -473,6 +473,7 @@ about the pattern:
 .sp
       bsr=[anycrlf|unicode]     specify \eR handling
   /B  bincode                   show binary code without lengths
+      callout_info              show callout information 
       debug                     same as info,fullbincode
       fullbincode               show binary code with lengths
   /I  info                      show info about compiled pattern
@@ -549,6 +550,11 @@ if there is more than one they are listed as "starting code units". "Last code
 unit" is the last literal code unit that must be present in any match. This is
 not necessarily the last character. These lines are omitted if no starting or
 ending code units are recorded.
+.P
+The \fBcallout_info\fP modifier requests information about all the callouts in 
+the pattern. A list of them is output at the end of any other information that 
+is requested. For each callout, either its number or string is given, followed 
+by the item that follows it in the pattern.
 .
 .
 .SS "Specifying a pattern in hex"
@@ -1437,6 +1443,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 16 March 2015
+Last updated: 22 March 2015
 Copyright (c) 1997-2015 University of Cambridge.
 .fi

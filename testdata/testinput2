@@ -4206,11 +4206,11 @@ a random value. /Ix
 /^a(b)c(?C{AB})def/B
       abcdef\=callout_capture
 
-/(?C`a``b`)(?C'a''b')(?C"a""b")(?C^a^^b^)(?C%a%%b%)(?C#a##b#)(?C$a$$b$)(?C{a}}b})/B
+/(?C`a``b`)(?C'a''b')(?C"a""b")(?C^a^^b^)(?C%a%%b%)(?C#a##b#)(?C$a$$b$)(?C{a}}b})/B,callout_info
 
 /(?:a(?C`code`)){3}/B
 
-/^(?(?C25)(?=abc)abcd|xyz)/B
+/^(?(?C25)(?=abc)abcd|xyz)/B,callout_info
     abcdefg
     xyz123 
 
@@ -4226,7 +4226,7 @@ a random value. /Ix
 
 # Binary zero in callout string
 #  a  (  ?  C  '  x     z  '  )  b
-/ 61 28 3f 43 27 78 00 7a 27 29 62/hex
+/ 61 28 3f 43 27 78 00 7a 27 29 62/hex,callout_info
     abcdefgh
 
 # End of testinput2 
