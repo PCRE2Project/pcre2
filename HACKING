@@ -210,7 +210,8 @@ These items are all just one unit long
   OP_THEN                )
 
 OP_ASSERT_ACCEPT is used when (*ACCEPT) is encountered within an assertion.
-This ends the assertion, not the entire pattern match.
+This ends the assertion, not the entire pattern match. The assertion (?!) is 
+always optimized to OP_FAIL.
 
 
 Backtracking control verbs with optional data
@@ -527,6 +528,10 @@ or OP_SCOND. However, if automatic callouts are enabled, a callout is inserted
 immediately before the assertion. It is also possible to insert a manual
 callout at this point. Only assertion conditions may have callouts preceding
 the condition.
+
+A condition that is the negative assertion (?!) is optimized to OP_FAIL in all 
+parts of the pattern, so this is another opcode that may appear as a condition. 
+It is treated the same as OP_FALSE.
 
 
 Recursion

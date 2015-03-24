@@ -2660,14 +2660,15 @@ for (;;)
             condcode == OP_DNRREF)
           return PCRE2_ERROR_DFA_UCOND;
 
-        /* The DEFINE condition is always false */
-
-        if (condcode == OP_FALSE)
+        /* The DEFINE condition is always false, and the assertion (?!) is
+        converted to OP_FAIL. */
+        
+        if (condcode == OP_FALSE || condcode == OP_FAIL)
           { ADD_ACTIVE(state_offset + codelink + LINK_SIZE + 1, 0); }
 
         /* There is also an always-true condition */
 
-        if (condcode == OP_TRUE)
+        else if (condcode == OP_TRUE)
           { ADD_ACTIVE(state_offset + LINK_SIZE + 2 + IMM2_SIZE, 0); }
 
         /* The only supported version of OP_RREF is for the value RREF_ANY,

@@ -4229,4 +4229,11 @@ a random value. /Ix
 / 61 28 3f 43 27 78 00 7a 27 29 62/hex,callout_info
     abcdefgh
 
+/(?(?!)^)/
+
+/(?(?!)a|b)/
+    bbb
+    ** Failers 
+    aaa 
+
 # End of testinput2 

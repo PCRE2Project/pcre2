@@ -14188,4 +14188,14 @@ Callout (5): 'x\x00z'
     ^^           b
  0: ab
 
+/(?(?!)^)/
+
+/(?(?!)a|b)/
+    bbb
+ 0: b
+    ** Failers 
+No match
+    aaa 
+No match
+
 # End of testinput2 

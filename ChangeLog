@@ -14,8 +14,16 @@ error. This bug was discovered by the LLVM fuzzer.
 
 4. Implemented pcre2_callout_enumerate().
 
-5. Fix JIT compilation of conditional blocks whose assertion
-   is converted to (*FAIL). E.g: /(?(?!))/.
+5. Fix JIT compilation of conditional blocks whose assertion is converted to
+(*FAIL). E.g: /(?(?!))/.
+
+6. The pattern /(?(?!)^)/ caused references to random memory. This bug was
+discovered by the LLVM fuzzer.
+
+7. The assertion (?!) is optimized to (*FAIL). This was not handled correctly
+when this assertion was used as a condition, for example (?(?!)a|b). In
+pcre2_match() it worked by luck; in pcre2_dfa_match() it gave an incorrect
+error about an unsupported item.
 
 
 Version 10.10 06-March-2015
@@ -120,12 +128,13 @@ repeated outer group that has a zero minimum quantifier, caused incorrect code
 to be compiled, leading to the error "internal error: previously-checked
 referenced subpattern not found" when an incorrect memory address was read.
 This bug was reported as "heap overflow", discovered by Kai Lu of Fortinet's
-FortiGuard Labs.
+FortiGuard Labs. (Added 24-March-2015: CVE-2015-2325 was given to this.)
 
 23. A pattern such as "((?+1)(\1))/" containing a forward reference subroutine
 call within a group that also contained a recursive back reference caused
 incorrect code to be compiled. This bug was reported as "heap overflow",
-discovered by Kai Lu of Fortinet's FortiGuard Labs.
+discovered by Kai Lu of Fortinet's FortiGuard Labs. (Added 24-March-2015:
+CVE-2015-2326 was given to this.)
 
 24. Computing the size of the JIT read-only data in advance has been a source
 of various issues, and new ones are still appear unfortunately. To fix

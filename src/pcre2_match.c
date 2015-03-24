@@ -1408,6 +1408,7 @@ for (;;)
       break;
 
       case OP_FALSE:
+      case OP_FAIL:   /* The assertion (?!) becomes OP_FAIL */ 
       break;
 
       case OP_TRUE:

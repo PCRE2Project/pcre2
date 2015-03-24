@@ -7284,7 +7284,7 @@ inside atomic brackets or in a pattern that contains *PRUNE or *SKIP does not
 count, because once again the assumption no longer holds.
 
 Arguments:
-  code           points to start of the compiled pattern
+  code           points to start of the compiled pattern or a group
   bracket_map    a bitmap of which brackets we are inside while testing; this
                    handles up to substring 31; after that we just have to take
                    the less precise approach
@@ -7321,6 +7321,7 @@ do {
        case OP_DNCREF:
        case OP_RREF:
        case OP_DNRREF:
+       case OP_FAIL:
        case OP_FALSE:
        case OP_TRUE:
        return FALSE;
