@@ -7044,7 +7044,7 @@ if (SLJIT_UNLIKELY(opcode == OP_COND || opcode == OP_SCOND))
   {
   SLJIT_COMPILE_ASSERT(OP_DNRREF == OP_RREF + 1 && OP_FALSE == OP_RREF + 2 && OP_TRUE == OP_RREF + 3,
     compile_time_checks_must_be_grouped_together);
-  has_alternatives = (*matchingpath >= OP_RREF && *matchingpath <= OP_TRUE) ? FALSE : TRUE;
+  has_alternatives = ((*matchingpath >= OP_RREF && *matchingpath <= OP_TRUE) || *matchingpath == OP_FAIL) ? FALSE : TRUE;
   }
 
 if (SLJIT_UNLIKELY(opcode == OP_COND) && (*cc == OP_KETRMAX || *cc == OP_KETRMIN))
@@ -7303,7 +7303,7 @@ if (opcode == OP_COND || opcode == OP_SCOND)
     add_jump(compiler, &(BACKTRACK_AS(bracket_backtrack)->u.condfailed), JUMP(SLJIT_ZERO));
     matchingpath += 1 + 2 * IMM2_SIZE;
     }
-  else if (*matchingpath >= OP_RREF && *matchingpath <= OP_TRUE)
+  else if ((*matchingpath >= OP_RREF && *matchingpath <= OP_TRUE) || *matchingpath == OP_FAIL)
     {
     /* Never has other case. */
     BACKTRACK_AS(bracket_backtrack)->u.condfailed = NULL;
@@ -7314,7 +7314,7 @@ if (opcode == OP_COND || opcode == OP_SCOND)
       stacksize = 1;
       matchingpath++;
       }
-    else if (*matchingpath == OP_FALSE)
+    else if (*matchingpath == OP_FALSE || *matchingpath == OP_FAIL)
       stacksize = 0;
     else if (*matchingpath == OP_RREF)
       {

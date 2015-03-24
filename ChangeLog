@@ -14,6 +14,9 @@ error. This bug was discovered by the LLVM fuzzer.
 
 4. Implemented pcre2_callout_enumerate().
 
+5. Fix JIT compilation of conditional blocks whose assertion
+   is converted to (*FAIL). E.g: /(?(?!))/.
+
 
 Version 10.10 06-March-2015
 ---------------------------
