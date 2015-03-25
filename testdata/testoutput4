@@ -3739,4 +3739,6 @@ No match
     abcdefghijklmno
  0: a
 
+"[\S\V\H]"utf
+
 # End of testinput4

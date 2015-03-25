@@ -2219,4 +2219,6 @@
 /[A-`]/i,utf
     abcdefghijklmno
 
+"[\S\V\H]"utf
+
 # End of testinput4

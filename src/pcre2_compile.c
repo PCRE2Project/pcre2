@@ -3556,20 +3556,6 @@ for (;; ptr++)
         }
 #endif
 
-#ifdef SUPPORT_WIDE_CHARS
-      /* In the pre-compile phase, accumulate the length of any wide characters
-      and reset the pointer. This is so that very large classes that contain a
-      zillion wide characters no longer overwrite the work space (which is on
-      the stack). We have to remember that there was XCLASS data, however. */
-
-      if (lengthptr != NULL && class_uchardata > class_uchardata_base)
-        {
-        xclass = TRUE;
-        *lengthptr += class_uchardata - class_uchardata_base;
-        class_uchardata = class_uchardata_base;
-        }
-#endif
-
       /* Inside \Q...\E everything is literal except \E */
 
       if (inescq)
@@ -4074,20 +4060,28 @@ for (;; ptr++)
         nestptr = NULL;
         c = *(++ptr);
         }
-      if (c == CHAR_RIGHT_SQUARE_BRACKET && !inescq) break;
-      }   /* End of main class-processing loop */
-
-    /* We will need an XCLASS if data has been placed in class_uchardata. In
-    the second phase this is a sufficient test. However, in the pre-compile
-    phase, class_uchardata gets emptied to prevent workspace overflow, so it
-    only if the very last character in the class needs XCLASS will it contain
-    anything at this point. For this reason, xclass gets set TRUE above when
-    class_uchardata is emptied, and that's why this code is the way it is here
-    instead of just doing a test on class_uchardata below. */
 
 #ifdef SUPPORT_WIDE_CHARS
-    if (class_uchardata > class_uchardata_base) xclass = TRUE;
+      /* If any wide characters have been encountered, set xclass = TRUE. Then,
+      in the pre-compile phase, accumulate the length of the wide characters
+      and reset the pointer. This is so that very large classes that contain a
+      zillion wide characters do not overwrite the work space (which is on the
+      stack). */
+
+      if (class_uchardata > class_uchardata_base)
+        {
+        xclass = TRUE;
+        if (lengthptr != NULL)
+          {
+          *lengthptr += class_uchardata - class_uchardata_base;
+          class_uchardata = class_uchardata_base;
+          }
+        }
 #endif
+      /* An unescaped ] ends the class */
+
+      if (c == CHAR_RIGHT_SQUARE_BRACKET && !inescq) break;
+      }   /* End of main class-processing loop */
 
     /* If this is the first thing in the branch, there can be no first char
     setting, whatever the repeat count. Any reqcu setting must remain
@@ -4107,12 +4101,12 @@ for (;; ptr++)
     be listed) there are no characters < 256, we can omit the bitmap in the
     actual compiled code. */
 
+#ifdef SUPPORT_WIDE_CHARS
 #ifdef SUPPORT_UNICODE
     if (xclass && (!should_flip_negation || (options & PCRE2_UCP) != 0))
 #elif PCRE2_CODE_UNIT_WIDTH != 8
     if (xclass && !should_flip_negation)
 #endif
-#ifdef SUPPORT_WIDE_CHARS
       {
       *class_uchardata++ = XCL_END;    /* Marks the end of extra data */
       *code++ = OP_XCLASS;

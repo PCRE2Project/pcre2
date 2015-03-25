@@ -30,6 +30,13 @@ possessification code could take exponential time to complete. A recursion
 depth limit of 10000 has been imposed to limit the resources used by this 
 optimization. This infelicity was discovered by the LLVM fuzzer.
 
+9. A pattern such as /(*UTF)[\S\V\H]/, which contains a negated special class 
+such as \S in non-UCP mode, explicit wide characters (> 255) can be ignored 
+because \S ensures they are all in the class. The code for doing this was
+interacting badly with the code for computing the amount of space needed to
+compile the pattern, leading to a buffer overflow. This bug was discovered by
+the LLVM fuzzer.
+
 
 Version 10.10 06-March-2015
 ---------------------------
