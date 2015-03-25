@@ -25,6 +25,11 @@ when this assertion was used as a condition, for example (?(?!)a|b). In
 pcre2_match() it worked by luck; in pcre2_dfa_match() it gave an incorrect
 error about an unsupported item.
 
+8. For some types of pattern, for example /Z*(|d*){216}/, the auto-
+possessification code could take exponential time to complete. A recursion 
+depth limit of 10000 has been imposed to limit the resources used by this 
+optimization. This infelicity was discovered by the LLVM fuzzer.
+
 
 Version 10.10 06-March-2015
 ---------------------------
