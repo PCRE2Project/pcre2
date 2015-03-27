@@ -14198,4 +14198,10 @@ No match
     aaa 
 No match
 
+# JIT gives a different error message for the infinite recursion
+
+"(*NO_JIT)((?2)+)((?1)){"
+    abcd{
+Failed: error -52: nested recursion at the same subject position
+
 # End of testinput2 

@@ -4236,4 +4236,9 @@ a random value. /Ix
     ** Failers 
     aaa 
 
+# JIT gives a different error message for the infinite recursion
+
+"(*NO_JIT)((?2)+)((?1)){"
+    abcd{
+
 # End of testinput2 

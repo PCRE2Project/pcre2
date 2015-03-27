@@ -37,6 +37,10 @@ interacting badly with the code for computing the amount of space needed to
 compile the pattern, leading to a buffer overflow. This bug was discovered by
 the LLVM fuzzer.
 
+10. A pattern such as /((?2)+)((?1))/ which has mutual recursion nested inside
+other kinds of group caused stack overflow at compile time. This bug was
+discovered by the LLVM fuzzer.
+
 
 Version 10.10 06-March-2015
 ---------------------------
