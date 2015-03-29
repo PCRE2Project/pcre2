@@ -573,7 +573,7 @@ Failed: error 128 at offset 3: assertion expected after (?( or (?(?C)
 Failed: error 115 at offset 7: reference to non-existent subpattern
 
 /(?(?<ab))/
-Failed: error 142 at offset 7: syntax error in subpattern name (missing terminator)
+Failed: error 128 at offset 3: assertion expected after (?( or (?(?C)
 
 /((?s)blah)\s+\1/I
 Capturing subpattern count = 1
@@ -14203,5 +14203,10 @@ No match
 "(*NO_JIT)((?2)+)((?1)){"
     abcd{
 Failed: error -52: nested recursion at the same subject position
+
+# Perl fails to diagnose the absence of an assertion
+
+"(?(?<E>.*!.*)?)"
+Failed: error 128 at offset 3: assertion expected after (?( or (?(?C)
 
 # End of testinput2 

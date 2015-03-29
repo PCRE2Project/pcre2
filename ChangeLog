@@ -45,6 +45,11 @@ discovered by the LLVM fuzzer.
 between a subroutine call and its quantifier was incorrectly compiled, leading
 to buffer overflow or other errors. This bug was discovered by the LLVM fuzzer.
 
+12. The illegal pattern /(?(?<E>.*!.*)?)/ was not being diagnosed as missing an 
+assertion after (?(. The code was failing to check the character after (?(?< 
+for the ! or = that would indicate a lookbehind assertion. This bug was
+discovered by the LLVM fuzzer.
+
 
 Version 10.10 06-March-2015
 ---------------------------

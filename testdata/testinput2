@@ -4241,4 +4241,8 @@ a random value. /Ix
 "(*NO_JIT)((?2)+)((?1)){"
     abcd{
 
+# Perl fails to diagnose the absence of an assertion
+
+"(?(?<E>.*!.*)?)"
+
 # End of testinput2 
