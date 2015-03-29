@@ -14209,4 +14209,46 @@ Failed: error -52: nested recursion at the same subject position
 "(?(?<E>.*!.*)?)"
 Failed: error 128 at offset 3: assertion expected after (?( or (?(?C)
 
+"X((?2)()*+){2}+"B
+------------------------------------------------------------------
+        Bra
+        X
+        Once
+        CBra 1
+        Recurse
+        Braposzero
+        SCBraPos 2
+        KetRpos
+        Ket
+        CBra 1
+        Recurse
+        Braposzero
+        SCBraPos 2
+        KetRpos
+        Ket
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+
+"X((?2)()*+){2}"B
+------------------------------------------------------------------
+        Bra
+        X
+        CBra 1
+        Recurse
+        Braposzero
+        SCBraPos 2
+        KetRpos
+        Ket
+        CBra 1
+        Recurse
+        Braposzero
+        SCBraPos 2
+        KetRpos
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+
 # End of testinput2 

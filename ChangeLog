@@ -50,6 +50,11 @@ assertion after (?(. The code was failing to check the character after (?(?<
 for the ! or = that would indicate a lookbehind assertion. This bug was
 discovered by the LLVM fuzzer.
 
+13. A pattern such as /X((?2)()*+){2}+/ which has a possessive quantifier with 
+a fixed maximum following a group that contains a subroutine reference was 
+incorrectly compiled and could trigger buffer overflow. This bug was discovered 
+by the LLVM fuzzer.
+
 
 Version 10.10 06-March-2015
 ---------------------------

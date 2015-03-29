@@ -4245,4 +4245,8 @@ a random value. /Ix
 
 "(?(?<E>.*!.*)?)"
 
+"X((?2)()*+){2}+"B
+
+"X((?2)()*+){2}"B
+
 # End of testinput2 

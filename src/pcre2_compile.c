@@ -1331,7 +1331,7 @@ for (code = first_significant_code(code + PRIV(OP_lengths)[*code], TRUE);
       empty_branch = FALSE;
       do
         {
-        if (!empty_branch && could_be_empty_branch(code, endcode, utf, cb, 
+        if (!empty_branch && could_be_empty_branch(code, endcode, utf, cb,
           recurses)) empty_branch = TRUE;
         code += GET(code, 1);
         }
@@ -4520,6 +4520,7 @@ for (;; ptr++)
       {
       register int i;
       int len = (int)(code - previous);
+      size_t base_hwm_offset = save_hwm_offset;
       PCRE2_UCHAR *bralink = NULL;
       PCRE2_UCHAR *brazeroptr = NULL;
 
@@ -4668,20 +4669,20 @@ for (;; ptr++)
 
               while (cb->hwm > cb->start_workspace + cb->workspace_size -
                      WORK_SIZE_SAFETY_MARGIN -
-                     (this_hwm_offset - save_hwm_offset))
+                     (this_hwm_offset - base_hwm_offset))
                 {
                 *errorcodeptr = expand_workspace(cb);
                 if (*errorcodeptr != 0) goto FAILED;
                 }
 
-              for (hc = (PCRE2_UCHAR *)cb->start_workspace + save_hwm_offset;
+              for (hc = (PCRE2_UCHAR *)cb->start_workspace + base_hwm_offset;
                    hc < (PCRE2_UCHAR *)cb->start_workspace + this_hwm_offset;
                    hc += LINK_SIZE)
                 {
                 PUT(cb->hwm, 0, GET(hc, 0) + len);
                 cb->hwm += LINK_SIZE;
                 }
-              save_hwm_offset = this_hwm_offset;
+              base_hwm_offset = this_hwm_offset;
               code += len;
               }
             }
@@ -4749,20 +4750,20 @@ for (;; ptr++)
 
           while (cb->hwm > cb->start_workspace + cb->workspace_size -
                  WORK_SIZE_SAFETY_MARGIN -
-                 (this_hwm_offset - save_hwm_offset))
+                 (this_hwm_offset - base_hwm_offset))
             {
             *errorcodeptr = expand_workspace(cb);
             if (*errorcodeptr != 0) goto FAILED;
             }
 
-          for (hc = (PCRE2_UCHAR *)cb->start_workspace + save_hwm_offset;
+          for (hc = (PCRE2_UCHAR *)cb->start_workspace + base_hwm_offset;
                hc < (PCRE2_UCHAR *)cb->start_workspace + this_hwm_offset;
                hc += LINK_SIZE)
             {
             PUT(cb->hwm, 0, GET(hc, 0) + len + ((i != 0)? 2+LINK_SIZE : 1));
             cb->hwm += LINK_SIZE;
             }
-          save_hwm_offset = this_hwm_offset;
+          base_hwm_offset = this_hwm_offset;
           code += len;
           }
 
@@ -5029,9 +5030,9 @@ for (;; ptr++)
 
     /* First deal with comments. Putting this code right at the start ensures
     that comments have no bad side effects. */
-    
+
     if (ptr[0] == CHAR_QUESTION_MARK && ptr[1] == CHAR_NUMBER_SIGN)
-      {   
+      {
       ptr += 2;
       while (ptr < cb->end_pattern && *ptr != CHAR_RIGHT_PARENTHESIS) ptr++;
       if (*ptr != CHAR_RIGHT_PARENTHESIS)
@@ -5163,7 +5164,7 @@ for (;; ptr++)
       *errorcodeptr = ERR60;          /* Verb not recognized */
       goto FAILED;
       }
-      
+
     /* Initialization for "real" parentheses */
 
     newoptions = options;
@@ -5274,7 +5275,7 @@ for (;; ptr++)
                tempptr[2] == CHAR_EXCLAMATION_MARK ||
                  (tempptr[2] == CHAR_LESS_THAN_SIGN &&
                    (tempptr[3] == CHAR_EQUALS_SIGN ||
-                    tempptr[3] == CHAR_EXCLAMATION_MARK))))  
+                    tempptr[3] == CHAR_EXCLAMATION_MARK))))
           {
           cb->iscondassert = TRUE;
           break;
