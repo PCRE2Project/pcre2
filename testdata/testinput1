@@ -5712,4 +5712,7 @@ name)/mark
 
 "Z*(|d*){216}"
 
+"(?1)(?#?'){8}(a)"
+    baaaaaaaaac
+
 # End of testinput1 

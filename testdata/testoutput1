@@ -9422,4 +9422,9 @@ No match
 
 "Z*(|d*){216}"
 
+"(?1)(?#?'){8}(a)"
+    baaaaaaaaac
+ 0: aaaaaaaaa
+ 1: a
+
 # End of testinput1 

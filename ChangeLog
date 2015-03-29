@@ -41,6 +41,10 @@ the LLVM fuzzer.
 other kinds of group caused stack overflow at compile time. This bug was
 discovered by the LLVM fuzzer.
 
+11. A pattern such as /(?1)(?#?'){8}(a)/ which had a parenthesized comment
+between a subroutine call and its quantifier was incorrectly compiled, leading
+to buffer overflow or other errors. This bug was discovered by the LLVM fuzzer.
+
 
 Version 10.10 06-March-2015
 ---------------------------

@@ -5025,15 +5025,25 @@ for (;; ptr++)
     an offset rather than an absolute address. */
 
     case CHAR_LEFT_PARENTHESIS:
-    newoptions = options;
-    skipbytes = 0;
-    bravalue = OP_CBRA;
-    save_hwm_offset = cb->hwm - cb->start_workspace;
-    reset_bracount = FALSE;
-
-    /* First deal with various "verbs" that can be introduced by '*'. */
-
     ptr++;
+
+    /* First deal with comments. Putting this code right at the start ensures
+    that comments have no bad side effects. */
+    
+    if (ptr[0] == CHAR_QUESTION_MARK && ptr[1] == CHAR_NUMBER_SIGN)
+      {   
+      ptr += 2;
+      while (ptr < cb->end_pattern && *ptr != CHAR_RIGHT_PARENTHESIS) ptr++;
+      if (*ptr != CHAR_RIGHT_PARENTHESIS)
+        {
+        *errorcodeptr = ERR18;
+        goto FAILED;
+        }
+      continue;
+      }
+
+    /* Now deal with various "verbs" that can be introduced by '*'. */
+
     if (ptr[0] == CHAR_ASTERISK && (ptr[1] == ':'
          || (MAX_255(ptr[1]) && ((cb->ctypes[ptr[1]] & ctype_letter) != 0))))
       {
@@ -5153,11 +5163,19 @@ for (;; ptr++)
       *errorcodeptr = ERR60;          /* Verb not recognized */
       goto FAILED;
       }
+      
+    /* Initialization for "real" parentheses */
+
+    newoptions = options;
+    skipbytes = 0;
+    bravalue = OP_CBRA;
+    save_hwm_offset = cb->hwm - cb->start_workspace;
+    reset_bracount = FALSE;
 
     /* Deal with the extended parentheses; all are introduced by '?', and the
     appearance of any of them means that this is not a capturing group. */
 
-    else if (*ptr == CHAR_QUESTION_MARK)
+    if (*ptr == CHAR_QUESTION_MARK)
       {
       int i, set, unset, namelen;
       int *optset;
@@ -5166,17 +5184,6 @@ for (;; ptr++)
 
       switch (*(++ptr))
         {
-        case CHAR_NUMBER_SIGN:                 /* Comment; skip to ket */
-        ptr++;
-        while (ptr < cb->end_pattern && *ptr != CHAR_RIGHT_PARENTHESIS) ptr++;
-        if (*ptr != CHAR_RIGHT_PARENTHESIS)
-          {
-          *errorcodeptr = ERR18;
-          goto FAILED;
-          }
-        continue;
-
-
         /* ------------------------------------------------------------ */
         case CHAR_VERTICAL_LINE:  /* Reset capture count for each branch */
         reset_bracount = TRUE;
@@ -5187,7 +5194,6 @@ for (;; ptr++)
         bravalue = OP_BRA;
         ptr++;
         break;
-
 
         /* ------------------------------------------------------------ */
         case CHAR_LEFT_PARENTHESIS:
