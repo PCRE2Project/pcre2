@@ -71,13 +71,13 @@ by defining macros in order to minimize #if usage. */
 /* Function definitions to allow mutual recursion */
 
 static int
-  add_list_to_class(uint8_t *, PCRE2_UCHAR **, int, compile_block *,
+  add_list_to_class(uint8_t *, PCRE2_UCHAR **, uint32_t, compile_block *,
     const uint32_t *, unsigned int);
 
 static BOOL
-  compile_regex(uint32_t, PCRE2_UCHAR **, PCRE2_SPTR *, int *, BOOL, BOOL, int,
-    int, uint32_t *, int32_t *, uint32_t *, int32_t *, branch_chain *,
-    compile_block *, size_t *);
+  compile_regex(uint32_t, PCRE2_UCHAR **, PCRE2_SPTR *, int *, BOOL, BOOL, 
+    uint32_t, int, uint32_t *, int32_t *, uint32_t *, int32_t *, 
+    branch_chain *, compile_block *, size_t *);
 
 
 
@@ -1682,7 +1682,7 @@ Returns:         zero => a data character
 
 static int
 check_escape(PCRE2_SPTR *ptrptr, uint32_t *chptr, int *errorcodeptr,
-  int options, BOOL isclass, compile_block *cb)
+  uint32_t options, BOOL isclass, compile_block *cb)
 {
 BOOL utf = (options & PCRE2_UTF) != 0;
 PCRE2_SPTR ptr = *ptrptr + 1;
@@ -2837,7 +2837,7 @@ Returns:        the number of < 256 characters added
 */
 
 static int
-add_to_class(uint8_t *classbits, PCRE2_UCHAR **uchardptr, int options,
+add_to_class(uint8_t *classbits, PCRE2_UCHAR **uchardptr, uint32_t options,
   compile_block *cb, uint32_t start, uint32_t end)
 {
 uint32_t c;
@@ -2991,7 +2991,7 @@ Returns:        the number of < 256 characters added
 */
 
 static int
-add_list_to_class(uint8_t *classbits, PCRE2_UCHAR **uchardptr, int options,
+add_list_to_class(uint8_t *classbits, PCRE2_UCHAR **uchardptr, uint32_t options,
   compile_block *cb, const uint32_t *p, unsigned int except)
 {
 int n8 = 0;
@@ -3030,7 +3030,7 @@ Returns:        the number of < 256 characters added
 
 static int
 add_not_list_to_class(uint8_t *classbits, PCRE2_UCHAR **uchardptr,
-  int options, compile_block *cb, const uint32_t *p)
+  uint32_t options, compile_block *cb, const uint32_t *p)
 {
 BOOL utf = (options & PCRE2_UTF) != 0;
 int n8 = 0;
@@ -3085,16 +3085,16 @@ compile_branch(uint32_t *optionsptr, PCRE2_UCHAR **codeptr,
   branch_chain *bcptr, int cond_depth,
   compile_block *cb, size_t *lengthptr)
 {
-int repeat_type, op_type;
 int repeat_min = 0, repeat_max = 0;      /* To please picky compilers */
 int bravalue = 0;
-int greedy_default, greedy_non_default;
+uint32_t greedy_default, greedy_non_default;
+uint32_t repeat_type, op_type;
+uint32_t options = *optionsptr;               /* May change dynamically */
 uint32_t firstcu, reqcu;
 int32_t firstcuflags, reqcuflags;
 uint32_t zeroreqcu, zerofirstcu;
 int32_t zeroreqcuflags, zerofirstcuflags;
 int32_t req_caseopt, reqvary, tempreqvary;
-int options = *optionsptr;               /* May change dynamically */
 int after_manual_callout = 0;
 int escape;
 size_t length_prevgroup = 0;
@@ -3178,14 +3178,14 @@ for (;; ptr++)
 #ifdef SUPPORT_WIDE_CHARS
   BOOL xclass_has_prop;
 #endif
-  int newoptions;
   int recno;                               /* Must be signed */
   int refsign;                             /* Must be signed */
-  int skipbytes;
-  int terminator;
+  int terminator;                          /* Must be signed */
   unsigned int mclength;
   unsigned int tempbracount;
   uint32_t ec;
+  uint32_t newoptions;
+  uint32_t skipunits;
   uint32_t subreqcu, subfirstcu;
   int32_t subreqcuflags, subfirstcuflags;  /* Must be signed */
   PCRE2_UCHAR mcbuffer[8];
@@ -5168,7 +5168,7 @@ for (;; ptr++)
     /* Initialization for "real" parentheses */
 
     newoptions = options;
-    skipbytes = 0;
+    skipunits = 0;
     bravalue = OP_CBRA;
     save_hwm_offset = cb->hwm - cb->start_workspace;
     reset_bracount = FALSE;
@@ -5178,8 +5178,9 @@ for (;; ptr++)
 
     if (*ptr == CHAR_QUESTION_MARK)
       {
-      int i, set, unset, namelen;
-      int *optset;
+      int i;
+      int namelen;                /* Must be signed */
+      uint32_t set, unset, *optset;
       PCRE2_SPTR name;
       PCRE2_UCHAR *slot;
 
@@ -5285,7 +5286,7 @@ for (;; ptr++)
         need to skip at least 1+IMM2_SIZE bytes at the start of the group. */
 
         code[1+LINK_SIZE] = OP_CREF;
-        skipbytes = 1+IMM2_SIZE;
+        skipunits = 1+IMM2_SIZE;
         refsign = -1;     /* => not a number */
         namelen = -1;     /* => not a name; must set to avoid warning */
         name = NULL;      /* Always set to avoid warning */
@@ -5344,7 +5345,7 @@ for (;; ptr++)
               OP_TRUE : OP_FALSE;
 
           ptr++;
-          skipbytes = 1;
+          skipunits = 1;
           break;  /* End of condition processing */
           }
 
@@ -5487,7 +5488,7 @@ for (;; ptr++)
             {
             PUT2(code, 2+LINK_SIZE, offset);
             PUT2(code, 2+LINK_SIZE+IMM2_SIZE, count);
-            skipbytes += IMM2_SIZE;
+            skipunits += IMM2_SIZE;
             code[1+LINK_SIZE]++;
             }
           else  /* Not a duplicated name */
@@ -5536,7 +5537,7 @@ for (;; ptr++)
         else if (namelen == 6 && PRIV(strncmp_c8)(name, STRING_DEFINE, 6) == 0)
           {
           code[1+LINK_SIZE] = OP_DEFINE;
-          skipbytes = 1;
+          skipunits = 1;
           }
 
         /* Reference to an unidentified subpattern. */
@@ -6277,7 +6278,7 @@ for (;; ptr++)
       NUMBERED_GROUP:
       cb->bracount += 1;
       PUT2(code, 1+LINK_SIZE, cb->bracount);
-      skipbytes = IMM2_SIZE;
+      skipunits = IMM2_SIZE;
       }
 
     /* Process nested bracketed regex. First check for parentheses nested too
@@ -6319,7 +6320,7 @@ for (;; ptr++)
          (bravalue == OP_ASSERTBACK ||
           bravalue == OP_ASSERTBACK_NOT), /* TRUE if back assert */
          reset_bracount,                  /* True if (?| group */
-         skipbytes,                       /* Skip over bracket number */
+         skipunits,                       /* Skip over bracket number */
          cond_depth +
            ((bravalue == OP_COND)?1:0),   /* Depth of condition subpatterns */
          &subfirstcu,                     /* For possible first char */
@@ -6564,7 +6565,7 @@ for (;; ptr++)
         fact, because we do the check for a number below, the paths that
         would actually be in error are never taken. */
 
-        skipbytes = 0;
+        skipunits = 0;
         reset_bracount = FALSE;
 
         /* If it's not a signed or unsigned number, treat it as a name. */
@@ -6850,7 +6851,7 @@ Returns:            TRUE on success
 
 static BOOL
 compile_regex(uint32_t options, PCRE2_UCHAR **codeptr, PCRE2_SPTR *ptrptr,
-  int *errorcodeptr, BOOL lookbehind, BOOL reset_bracount, int skipunits,
+  int *errorcodeptr, BOOL lookbehind, BOOL reset_bracount, uint32_t skipunits,
   int cond_depth, uint32_t *firstcuptr, int32_t *firstcuflagsptr,
   uint32_t *reqcuptr, int32_t *reqcuflagsptr, branch_chain *bcptr,
   compile_block *cb, size_t *lengthptr)

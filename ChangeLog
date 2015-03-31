@@ -59,6 +59,10 @@ by the LLVM fuzzer.
 subpatterns were not being diagnosed and could lead to unpredictable behaviour. 
 This bug was discovered by the LLVM fuzzer.
 
+15. The bug fixed in 14 was due to an integer variable that was unsigned when 
+it should have been signed. Some other "int" variables, having been checked,
+have either been changed to uint32_t or commented as "must be signed".
+
 
 Version 10.10 06-March-2015
 ---------------------------
