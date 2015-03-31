@@ -4249,4 +4249,8 @@ a random value. /Ix
 
 "X((?2)()*+){2}"B
 
+/(?<=\bABQ(3(?-7)))/
+
+/(?<=\bABQ(3(?+7)))/
+
 # End of testinput2 

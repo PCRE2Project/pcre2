@@ -55,6 +55,10 @@ a fixed maximum following a group that contains a subroutine reference was
 incorrectly compiled and could trigger buffer overflow. This bug was discovered 
 by the LLVM fuzzer.
 
+14. Negative relative recursive references such as (?-7) to non-existent 
+subpatterns were not being diagnosed and could lead to unpredictable behaviour. 
+This bug was discovered by the LLVM fuzzer.
+
 
 Version 10.10 06-March-2015
 ---------------------------

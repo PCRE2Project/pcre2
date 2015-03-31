@@ -14251,4 +14251,10 @@ Failed: error 128 at offset 3: assertion expected after (?( or (?(?C)
         End
 ------------------------------------------------------------------
 
+/(?<=\bABQ(3(?-7)))/
+Failed: error 115 at offset 15: reference to non-existent subpattern
+
+/(?<=\bABQ(3(?+7)))/
+Failed: error 115 at offset 15: reference to non-existent subpattern
+
 # End of testinput2 

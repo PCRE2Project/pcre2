@@ -3179,15 +3179,15 @@ for (;; ptr++)
   BOOL xclass_has_prop;
 #endif
   int newoptions;
-  uint32_t recno;
-  int refsign;
+  int recno;                               /* Must be signed */
+  int refsign;                             /* Must be signed */
   int skipbytes;
-  uint32_t subreqcu, subfirstcu;
-  int32_t subreqcuflags, subfirstcuflags;
   int terminator;
   unsigned int mclength;
   unsigned int tempbracount;
   uint32_t ec;
+  uint32_t subreqcu, subfirstcu;
+  int32_t subreqcuflags, subfirstcuflags;  /* Must be signed */
   PCRE2_UCHAR mcbuffer[8];
 
   /* Get next character in the pattern */
@@ -5443,13 +5443,13 @@ for (;; ptr++)
             }
           if (refsign != 0) recno = (refsign == CHAR_MINUS)?
             cb->bracount - recno + 1 : recno + cb->bracount;
-          if (recno <= 0 || recno > cb->final_bracount)
+          if (recno <= 0 || (uint32_t)recno > cb->final_bracount)
             {
             *errorcodeptr = ERR15;
             goto FAILED;
             }
           PUT2(code, 2+LINK_SIZE, recno);
-          if (recno > cb->top_backref) cb->top_backref = recno;
+          if ((uint32_t)recno > cb->top_backref) cb->top_backref = recno;
           break;
           }
 
@@ -5475,7 +5475,7 @@ for (;; ptr++)
           for (;;)
             {
             recno = GET2(slot, 0);   /* Number for last found */
-            if (recno > cb->top_backref) cb->top_backref = recno;
+            if ((uint32_t)recno > cb->top_backref) cb->top_backref = recno;
             count++;
             if (++i >= cb->names_found) break;
             slot += cb->name_entry_size;
@@ -6000,7 +6000,7 @@ for (;; ptr++)
               open_capitem *oc;
               recno = GET2(slot, 0);
               cb->backref_map |= (recno < 32)? (1 << recno) : 1;
-              if (recno > cb->top_backref) cb->top_backref = recno;
+              if ((uint32_t)recno > cb->top_backref) cb->top_backref = recno;
 
               /* Check to see if this back reference is recursive, that it, it
               is inside the group that it references. A flag is set so that the
@@ -6121,7 +6121,7 @@ for (;; ptr++)
 
             if (called == NULL)
               {
-              if (recno > cb->final_bracount)
+              if ((uint32_t)recno > cb->final_bracount)
                 {
                 *errorcodeptr = ERR15;
                 goto FAILED;
@@ -6626,7 +6626,7 @@ for (;; ptr++)
         *code++ = ((options & PCRE2_CASELESS) != 0)? OP_REFI : OP_REF;
         PUT2INC(code, 0, recno);
         cb->backref_map |= (recno < 32)? (1 << recno) : 1;
-        if (recno > cb->top_backref) cb->top_backref = recno;
+        if ((uint32_t)recno > cb->top_backref) cb->top_backref = recno;
 
         /* Check to see if this back reference is recursive, that it, it
         is inside the group that it references. A flag is set so that the
