@@ -75,8 +75,8 @@ static int
     const uint32_t *, unsigned int);
 
 static BOOL
-  compile_regex(uint32_t, PCRE2_UCHAR **, PCRE2_SPTR *, int *, BOOL, BOOL, 
-    uint32_t, int, uint32_t *, int32_t *, uint32_t *, int32_t *, 
+  compile_regex(uint32_t, PCRE2_UCHAR **, PCRE2_SPTR *, int *, BOOL, BOOL,
+    uint32_t, int, uint32_t *, int32_t *, uint32_t *, int32_t *,
     branch_chain *, compile_block *, size_t *);
 
 
@@ -677,6 +677,15 @@ static const uint8_t opcode_possessify[] = {
 };
 
 
+/* Structure for checking for mutual recursion when scanning compiled code. */
+
+typedef struct recurse_check {
+  struct recurse_check *prev;
+  PCRE2_SPTR group;
+} recurse_check;
+
+
+
 /*************************************************
 *               Free compiled code               *
 *************************************************/
@@ -785,6 +794,7 @@ Arguments:
   utf      TRUE in UTF mode
   atend    TRUE if called when the pattern is complete
   cb       the "compile data" structure
+  recurses    chain of recurse_check to catch mutual recursion
 
 Returns:   the fixed length,
              or -1 if there is no fixed length,
@@ -794,10 +804,11 @@ Returns:   the fixed length,
 */
 
 static int
-find_fixedlength(PCRE2_UCHAR *code, BOOL utf, BOOL atend, compile_block *cb)
+find_fixedlength(PCRE2_UCHAR *code, BOOL utf, BOOL atend, compile_block *cb,
+  recurse_check *recurses)
 {
 int length = -1;
-
+recurse_check this_recurse;
 register int branchlength = 0;
 register PCRE2_UCHAR *cc = code + 1 + LINK_SIZE;
 
@@ -822,7 +833,8 @@ for (;;)
     case OP_ONCE:
     case OP_ONCE_NC:
     case OP_COND:
-    d = find_fixedlength(cc + ((op == OP_CBRA)? IMM2_SIZE : 0), utf, atend, cb);
+    d = find_fixedlength(cc + ((op == OP_CBRA)? IMM2_SIZE : 0), utf, atend, cb,
+      recurses);
     if (d < 0) return d;
     branchlength += d;
     do cc += GET(cc, 1); while (*cc == OP_ALT);
@@ -853,10 +865,18 @@ for (;;)
 
     case OP_RECURSE:
     if (!atend) return -3;
-    cs = ce = (PCRE2_UCHAR *)cb->start_code + GET(cc, 1);  /* Start subpattern */
+    cs = ce = (PCRE2_UCHAR *)cb->start_code + GET(cc, 1); /* Start subpattern */
     do ce += GET(ce, 1); while (*ce == OP_ALT);           /* End subpattern */
     if (cc > cs && cc < ce) return -1;                    /* Recursion */
-    d = find_fixedlength(cs + IMM2_SIZE, utf, atend, cb);
+    else   /* Check for mutual recursion */
+      {
+      recurse_check *r = recurses;
+      for (r = recurses; r != NULL; r = r->prev) if (r->group == cs) break;
+      if (r != NULL) return -1;   /* Mutual recursion */
+      }
+    this_recurse.prev = recurses;
+    this_recurse.group = cs;
+    d = find_fixedlength(cs + IMM2_SIZE, utf, atend, cb, &this_recurse);
     if (d < 0) return d;
     branchlength += d;
     cc += 1 + LINK_SIZE;
@@ -1195,11 +1215,6 @@ Arguments:
 
 Returns:      TRUE if what is matched could be empty
 */
-
-typedef struct recurse_check {
-  struct recurse_check *prev;
-  PCRE2_SPTR group;
-} recurse_check;
 
 static BOOL
 could_be_empty_branch(PCRE2_SPTR code, PCRE2_SPTR endcode, BOOL utf,
@@ -7037,7 +7052,7 @@ for (;;)
       int fixed_length;
       *code = OP_END;
       fixed_length = find_fixedlength(last_branch,  (options & PCRE2_UTF) != 0,
-        FALSE, cb);
+        FALSE, cb, NULL);
       if (fixed_length == -3)
         {
         cb->check_lookbehind = TRUE;
@@ -8075,7 +8090,7 @@ if (errorcode == 0 && cb.check_lookbehind)
       PCRE2_UCHAR *be = cc - 1 - LINK_SIZE + GET(cc, -LINK_SIZE);
       int end_op = *be;
       *be = OP_END;
-      fixed_length = find_fixedlength(cc, utf, TRUE, &cb);
+      fixed_length = find_fixedlength(cc, utf, TRUE, &cb, NULL);
       *be = end_op;
       if (fixed_length < 0)
         {

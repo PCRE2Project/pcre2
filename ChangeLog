@@ -63,6 +63,10 @@ This bug was discovered by the LLVM fuzzer.
 it should have been signed. Some other "int" variables, having been checked,
 have either been changed to uint32_t or commented as "must be signed".
 
+16. A mutual recursion within a lookbehind assertion such as (?<=((?2))((?1)))
+caused a stack overflow instead of the diagnosis of a non-fixed length
+lookbehind assertion. This bug was discovered by the LLVM fuzzer.
+
 
 Version 10.10 06-March-2015
 ---------------------------

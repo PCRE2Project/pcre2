@@ -14257,4 +14257,7 @@ Failed: error 115 at offset 15: reference to non-existent subpattern
 /(?<=\bABQ(3(?+7)))/
 Failed: error 115 at offset 15: reference to non-existent subpattern
 
+";(?<=()((?3))((?2)))"
+Failed: error 125 at offset 20: lookbehind assertion is not fixed length
+
 # End of testinput2 
