@@ -27,7 +27,7 @@ error about an unsupported item.
 
 8. For some types of pattern, for example /Z*(|d*){216}/, the auto-
 possessification code could take exponential time to complete. A recursion 
-depth limit of 10000 has been imposed to limit the resources used by this 
+depth limit of 1000 has been imposed to limit the resources used by this 
 optimization. This infelicity was discovered by the LLVM fuzzer.
 
 9. A pattern such as /(*UTF)[\S\V\H]/, which contains a negated special class 
@@ -66,6 +66,9 @@ have either been changed to uint32_t or commented as "must be signed".
 16. A mutual recursion within a lookbehind assertion such as (?<=((?2))((?1)))
 caused a stack overflow instead of the diagnosis of a non-fixed length
 lookbehind assertion. This bug was discovered by the LLVM fuzzer.
+
+17. The use of \K in a positive lookbehind assertion in a non-anchored pattern
+(e.g. /(?<=\Ka)/) could make pcre2grep loop.
 
 
 Version 10.10 06-March-2015

@@ -524,6 +524,11 @@ echo "---------------------------- Test 106 -----------------------------" >>tes
 (cd $srcdir; echo "a" | $valgrind $pcre2grep -M "|a" ) >>testtrygrep 2>&1
 echo "RC=$?" >>testtrygrep
 
+echo "---------------------------- Test 107 -----------------------------" >>testtrygrep
+echo "a" >testtemp1grep
+echo "aaaaa" >>testtemp1grep
+(cd $srcdir; $valgrind $pcre2grep  --line-offsets '(?<=\Ka)' testtemp1grep) >>testtrygrep 2>&1
+echo "RC=$?" >>testtrygrep
 
 # Now compare the results.
 
@@ -542,6 +547,10 @@ if [ $utf8 -ne 0 ] ; then
 
   echo "---------------------------- Test U2 ------------------------------" >>testtrygrep
   (cd $srcdir; $valgrind $pcre2grep -n -u -C 3 --newline=any "Match" ./testdata/grepinput8) >>testtrygrep
+  echo "RC=$?" >>testtrygrep
+
+  echo "---------------------------- Test U3 ------------------------------" >>testtrygrep
+  (cd $srcdir; $valgrind $pcre2grep --line-offsets -u '(?<=\K\x{17f})' ./testdata/grepinput8) >>testtrygrep
   echo "RC=$?" >>testtrygrep
 
   $cf $srcdir/testdata/grepoutput8 testtrygrep

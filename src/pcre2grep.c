@@ -1433,7 +1433,7 @@ Returns:      TRUE if there was a match
 
 static BOOL
 match_patterns(char *matchptr, size_t length, unsigned int options,
-  int startoffset, int *mrc)
+  size_t startoffset, int *mrc)
 {
 int i;
 size_t slen = length;
@@ -1581,12 +1581,12 @@ while (ptr < endptr)
   {
   int endlinelength;
   int mrc = 0;
-  int startoffset = 0;
   unsigned int options = 0;
   BOOL match;
   char *matchptr = ptr;
   char *t = ptr;
   size_t length, linelength;
+  size_t startoffset = 0;
 
   /* At this point, ptr is at the start of a line. We need to find the length
   of the subject string to pass to pcre_exec(). In multiline mode, it is the
@@ -1729,6 +1729,8 @@ while (ptr < endptr)
       {
       if (!invert)
         {
+        size_t oldstartoffset;
+
         if (printname != NULL) fprintf(stdout, "%s:", printname);
         if (number) fprintf(stdout, "%d:", linenumber);
 
@@ -1772,12 +1774,23 @@ while (ptr < endptr)
           if (printed || printname != NULL || number) fprintf(stdout, "\n");
           }
 
-        /* Prepare to repeat to find the next match */
+        /* Prepare to repeat to find the next match. If the pattern contained a
+        lookbehind that included \K, it is possible that the end of the match
+        might be at or before the actual starting offset we have just used. In
+        this case, start one character further on. */
 
         match = FALSE;
         if (line_buffered) fflush(stdout);
         rc = 0;                      /* Had some success */
         startoffset = offsets[1];    /* Restart after the match */
+        oldstartoffset = pcre2_get_startchar(match_data);
+        if (startoffset <= oldstartoffset)
+          {
+          if (startoffset >= length) goto END_ONE_MATCH;  /* Were at end */
+          startoffset = oldstartoffset + 1;
+          if (utf)
+            while ((matchptr[startoffset] & 0xc0) == 0x80) startoffset++;
+          }
         goto ONLY_MATCHING_RESTART;
         }
       }
@@ -1917,7 +1930,7 @@ while (ptr < endptr)
         for (;;)
           {
           startoffset = offsets[1];
-          if (startoffset >= (int)linelength + endlinelength ||
+          if (startoffset >= linelength + endlinelength ||
               !match_patterns(matchptr, length, options, startoffset, &mrc))
             break;
           FWRITE(matchptr + startoffset, 1, offsets[0] - startoffset, stdout);
@@ -1973,6 +1986,7 @@ while (ptr < endptr)
   /* Advance to after the newline and increment the line number. The file
   offset to the current line is maintained in filepos. */
 
+  END_ONE_MATCH:
   ptr += linelength + endlinelength;
   filepos += (int)(linelength + endlinelength);
   linenumber++;
