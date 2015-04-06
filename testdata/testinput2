@@ -4255,4 +4255,12 @@ a random value. /Ix
 
 ";(?<=()((?3))((?2)))"
 
+# Perl loops on this (PCRE2 used to!)
+
+/(?<=\Ka)/g,aftertext
+    aaaaa
+
+/(?<=\Ka)/altglobal,aftertext
+    aaaaa
+
 # End of testinput2 

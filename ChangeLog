@@ -70,6 +70,9 @@ lookbehind assertion. This bug was discovered by the LLVM fuzzer.
 17. The use of \K in a positive lookbehind assertion in a non-anchored pattern
 (e.g. /(?<=\Ka)/) could make pcre2grep loop.
 
+18. There was a similar problem to 17 in pcre2test for global matches, though
+the code there did catch the loop.
+
 
 Version 10.10 06-March-2015
 ---------------------------

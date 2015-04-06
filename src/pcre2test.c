@@ -3557,14 +3557,14 @@ unit widths are that the pointers to the subject, the most recent MARK, and a
 callout argument string point to strings of the appropriate width. Casts can be
 used to deal with this.
 
-Argument:   
+Argument:
   cb            pointer to enumerate block
   callout_data  user data
 
-Returns:    0 
+Returns:    0
 */
 
-static int callout_callback(pcre2_callout_enumerate_block_8 *cb, 
+static int callout_callback(pcre2_callout_enumerate_block_8 *cb,
   void *callout_data)
 {
 uint32_t i;
@@ -3587,13 +3587,13 @@ if (cb->callout_string != NULL)
       }
   fprintf(outfile, "%c  ", delimiter);
   }
-else fprintf(outfile, "%d  ", cb->callout_number); 
+else fprintf(outfile, "%d  ", cb->callout_number);
 
 fprintf(outfile, "%.*s\n",
   (int)((cb->next_item_length == 0)? 1 : cb->next_item_length),
   pbuffer8 + cb->pattern_position);
-  
-return 0; 
+
+return 0;
 }
 
 
@@ -3879,10 +3879,10 @@ if ((pat_patctl.control & CTL_CALLOUT_INFO) != 0)
     int len;
     fprintf(outfile, "Callout enumerate failed: error %d: ", errorcode);
     if (errorcode < 0)
-      {  
+      {
       PCRE2_GET_ERROR_MESSAGE(len, errorcode, pbuffer);
       PCHARSV(CASTVAR(void *, pbuffer), 0, len, FALSE, outfile);
-      } 
+      }
     fprintf(outfile, "\n");
     return PR_SKIP;
     }
@@ -5684,20 +5684,20 @@ else for (gmatched = 0;; gmatched++)
 
   ovector = FLD(match_data, ovector);
 
-  /* After the first time round a global loop, save the current ovector[0,1] so
-  that we can check that they do change each time. Otherwise a matching bug
-  that returns the same string causes an infinite loop. It has happened! */
+  /* After the first time round a global loop, for a normal global (/g)
+  iteration, save the current ovector[0,1] so that we can check that they do
+  change each time. Otherwise a matching bug that returns the same string
+  causes an infinite loop. It has happened! */
 
-  if (gmatched > 0)
+  if (gmatched > 0 && (dat_datctl.control & CTL_GLOBAL) != 0)
     {
     ovecsave[0] = ovector[0];
     ovecsave[1] = ovector[1];
     }
 
-  /* Set the variables on the first iteration, just to stop a compiler warning
-  when ovecsave[] is referenced below. */
+  /* For altglobal (or first time round the loop), set an "unset" value. */
 
-  else ovecsave[0] = ovecsave[1] = 0;
+  else ovecsave[0] = ovecsave[1] = PCRE2_UNSET;
 
   /* Fill the ovector with junk to detect elements that do not get set
   when they should be. */
@@ -6169,13 +6169,48 @@ else for (gmatched = 0;; gmatched++)
       if (end_offset == ulen) break;      /* End of subject */
       g_notempty = PCRE2_NOTEMPTY_ATSTART | PCRE2_ANCHORED;
       }
-    else g_notempty = 0;
 
-    /* For /g, update the start offset, leaving the rest alone */
+    /* However, even after matching a non-empty string, there is still one
+    tricky case. If a pattern contains \K within a lookbehind assertion at the
+    start, the end of the matched string can be at the offset where the match
+    started. In the case of a normal /g iteration without special action, this
+    leads to a loop that keeps on returning the same substring. The loop would
+    be caught above, but we really want to move on to the next match. */
 
-    if ((dat_datctl.control & CTL_GLOBAL) != 0) dat_datctl.offset = end_offset;
+    else
+      {
+      g_notempty = 0;   /* Set for a "normal" repeat */
+      if ((dat_datctl.control & CTL_GLOBAL) != 0)
+        {
+        PCRE2_SIZE startchar;
+        PCRE2_GET_STARTCHAR(startchar, match_data);
+        if (end_offset <= startchar)
+          {
+          if (startchar >= ulen) break;       /* End of subject */
+          end_offset = startchar + 1;
+          if (utf && test_mode != PCRE32_MODE)
+            {
+            if (test_mode == PCRE8_MODE)
+              {
+              for (; end_offset < ulen; end_offset++)
+                if ((((PCRE2_SPTR8)pp)[end_offset] & 0xc0) != 0x80) break;
+              }
+            else  /* 16-bit mode */
+              {
+              for (; end_offset < ulen; end_offset++)
+                if ((((PCRE2_SPTR16)pp)[end_offset] & 0xfc00) != 0xdc00) break;
+              }
+            }
+          }
+        }
+      }
 
-    /* For /G, update the pointer and length */
+    /* For /g (global), update the start offset, leaving the rest alone. */
+
+    if ((dat_datctl.control & CTL_GLOBAL) != 0)
+      dat_datctl.offset = end_offset;
+
+    /* For altglobal, just update the pointer and length. */
 
     else
       {

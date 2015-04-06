@@ -14260,4 +14260,32 @@ Failed: error 115 at offset 15: reference to non-existent subpattern
 ";(?<=()((?3))((?2)))"
 Failed: error 125 at offset 20: lookbehind assertion is not fixed length
 
+# Perl loops on this (PCRE2 used to!)
+
+/(?<=\Ka)/g,aftertext
+    aaaaa
+ 0: a
+ 0+ aaaa
+ 0: a
+ 0+ aaa
+ 0: a
+ 0+ aa
+ 0: a
+ 0+ a
+ 0: a
+ 0+ 
+
+/(?<=\Ka)/altglobal,aftertext
+    aaaaa
+ 0: a
+ 0+ aaaa
+ 0: a
+ 0+ aaa
+ 0: a
+ 0+ aa
+ 0: a
+ 0+ a
+ 0: a
+ 0+ 
+
 # End of testinput2 

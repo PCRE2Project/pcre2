@@ -4019,4 +4019,30 @@ Failed: error 140 at offset 11: recursion could loop indefinitely
     abcdefghijklmno
  0: a
 
+/(?<=\K\x{17f})/g,utf,aftertext
+    \x{17f}\x{17f}\x{17f}\x{17f}\x{17f}
+ 0: \x{17f}
+ 0+ \x{17f}\x{17f}\x{17f}\x{17f}
+ 0: \x{17f}
+ 0+ \x{17f}\x{17f}\x{17f}
+ 0: \x{17f}
+ 0+ \x{17f}\x{17f}
+ 0: \x{17f}
+ 0+ \x{17f}
+ 0: \x{17f}
+ 0+ 
+
+/(?<=\K\x{17f})/altglobal,utf,aftertext
+    \x{17f}\x{17f}\x{17f}\x{17f}\x{17f}
+ 0: \x{17f}
+ 0+ \x{17f}\x{17f}\x{17f}\x{17f}
+ 0: \x{17f}
+ 0+ \x{17f}\x{17f}\x{17f}
+ 0: \x{17f}
+ 0+ \x{17f}\x{17f}
+ 0: \x{17f}
+ 0+ \x{17f}
+ 0: \x{17f}
+ 0+ 
+
 # End of testinput5 
