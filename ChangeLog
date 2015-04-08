@@ -74,9 +74,10 @@ lookbehind assertion. This bug was discovered by the LLVM fuzzer.
 the code there did catch the loop.
 
 19. If a greedy quantified \X was preceded by \C in UTF mode (e.g. \C\X*), 
-and a subsequent item in the pattern caused a non-match, backtracking over the 
-repeated \X did not stop, but carried on past the start of the subject, causing 
-reference to random memory and/or a segfault.  This bug was discovered by the
+and a subsequent item in the pattern caused a non-match, backtracking over the
+repeated \X did not stop, but carried on past the start of the subject, causing
+reference to random memory and/or a segfault. There were also some other cases
+where backtracking after \C could crash. This set of bugs was discovered by the
 LLVM fuzzer.
 
 

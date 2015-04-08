@@ -3576,9 +3576,13 @@ for (;;)
             }
 
           if (possessive) continue;    /* No backtracking */
+
+          /* After \C in UTF mode, pp might be in the middle of a Unicode
+          character. Use <= pp to ensure backtracking doesn't go too far. */
+
           for(;;)
             {
-            if (eptr == pp) goto TAIL_RECURSE;
+            if (eptr <= pp) goto TAIL_RECURSE;
             RMATCH(eptr, ecode, offset_top, mb, eptrb, RM23);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
             eptr--;
@@ -3973,9 +3977,13 @@ for (;;)
             eptr += len;
             }
           if (possessive) continue;    /* No backtracking */
+
+          /* After \C in UTF mode, pp might be in the middle of a Unicode
+          character. Use <= pp to ensure backtracking doesn't go too far. */
+
           for(;;)
             {
-            if (eptr == pp) goto TAIL_RECURSE;
+            if (eptr <= pp) goto TAIL_RECURSE;
             RMATCH(eptr, ecode, offset_top, mb, eptrb, RM30);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
             eptr--;
@@ -4108,9 +4116,13 @@ for (;;)
             eptr += len;
             }
           if (possessive) continue;    /* No backtracking */
+
+          /* After \C in UTF mode, pp might be in the middle of a Unicode
+          character. Use <= pp to ensure backtracking doesn't go too far. */
+
           for(;;)
             {
-            if (eptr == pp) goto TAIL_RECURSE;
+            if (eptr <= pp) goto TAIL_RECURSE;
             RMATCH(eptr, ecode, offset_top, mb, eptrb, RM34);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
             eptr--;
@@ -5679,9 +5691,13 @@ for (;;)
         /* eptr is now past the end of the maximum run */
 
         if (possessive) continue;    /* No backtracking */
+
+        /* After \C in UTF mode, pp might be in the middle of a Unicode
+        character. Use <= pp to ensure backtracking doesn't go too far. */
+
         for(;;)
           {
-          if (eptr == pp) goto TAIL_RECURSE;
+          if (eptr <= pp) goto TAIL_RECURSE;
           RMATCH(eptr, ecode, offset_top, mb, eptrb, RM44);
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
           eptr--;
@@ -5999,9 +6015,13 @@ for (;;)
           }
 
         if (possessive) continue;    /* No backtracking */
+
+        /* After \C in UTF mode, pp might be in the middle of a Unicode
+        character. Use <= pp to ensure backtracking doesn't go too far. */
+
         for(;;)
           {
-          if (eptr == pp) goto TAIL_RECURSE;
+          if (eptr <= pp) goto TAIL_RECURSE;
           RMATCH(eptr, ecode, offset_top, mb, eptrb, RM46);
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
           eptr--;

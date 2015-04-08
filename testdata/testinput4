@@ -2226,4 +2226,7 @@
 /utf
     Ӆ\x0a
 
+/\C(\W?ſ)'?{{/utf
+    \\C(\\W?ſ)'?{{
+
 # End of testinput4

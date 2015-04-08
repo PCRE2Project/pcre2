@@ -3747,4 +3747,8 @@ No match
     Ӆ\x0a
 No match
 
+/\C(\W?ſ)'?{{/utf
+    \\C(\\W?ſ)'?{{
+No match
+
 # End of testinput4
