@@ -73,6 +73,12 @@ lookbehind assertion. This bug was discovered by the LLVM fuzzer.
 18. There was a similar problem to 17 in pcre2test for global matches, though
 the code there did catch the loop.
 
+19. If a greedy quantified \X was preceded by \C in UTF mode (e.g. \C\X*), 
+and a subsequent item in the pattern caused a non-match, backtracking over the 
+repeated \X did not stop, but carried on past the start of the subject, causing 
+reference to random memory and/or a segfault.  This bug was discovered by the
+LLVM fuzzer.
+
 
 Version 10.10 06-March-2015
 ---------------------------

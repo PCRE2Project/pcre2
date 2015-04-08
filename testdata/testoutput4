@@ -3741,4 +3741,10 @@ No match
 
 "[\S\V\H]"utf
 
+/\C\X*TӅ;
+{0,6}\v+F
+/utf
+    Ӆ\x0a
+No match
+
 # End of testinput4

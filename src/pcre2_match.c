@@ -1333,14 +1333,14 @@ for (;;)
         if (*ecode == OP_CALLOUT)
           {
           cb.callout_number = ecode[1 + 2*LINK_SIZE];
-          cb.callout_string_offset = 0; 
+          cb.callout_string_offset = 0;
           cb.callout_string = NULL;
           cb.callout_string_length = 0;
           }
         else
           {
           cb.callout_number = 0;
-          cb.callout_string_offset = GET(ecode, 1 + 3*LINK_SIZE); 
+          cb.callout_string_offset = GET(ecode, 1 + 3*LINK_SIZE);
           cb.callout_string = ecode + (1 + 4*LINK_SIZE) + 1;
           cb.callout_string_length =
             callout_length - (1 + 4*LINK_SIZE) - 2;
@@ -1408,7 +1408,7 @@ for (;;)
       break;
 
       case OP_FALSE:
-      case OP_FAIL:   /* The assertion (?!) becomes OP_FAIL */ 
+      case OP_FAIL:   /* The assertion (?!) becomes OP_FAIL */
       break;
 
       case OP_TRUE:
@@ -1760,14 +1760,14 @@ for (;;)
         if (*ecode == OP_CALLOUT)
           {
           cb.callout_number = ecode[1 + 2*LINK_SIZE];
-          cb.callout_string_offset = 0; 
+          cb.callout_string_offset = 0;
           cb.callout_string = NULL;
           cb.callout_string_length = 0;
           }
         else
           {
           cb.callout_number = 0;
-          cb.callout_string_offset = GET(ecode, 1 + 3*LINK_SIZE); 
+          cb.callout_string_offset = GET(ecode, 1 + 3*LINK_SIZE);
           cb.callout_string = ecode + (1 + 4*LINK_SIZE) + 1;
           cb.callout_string_length =
             callout_length - (1 + 4*LINK_SIZE) - 2;
@@ -5723,12 +5723,17 @@ for (;;)
 
         if (possessive) continue;    /* No backtracking */
 
+        /* We use <= pp rather than == pp to detect the start of the run while
+        backtracking because the use of \C in UTF mode can cause BACKCHAR to
+        move back past pp. This is just palliative; the use of \C in UTF mode
+        is fraught with danger. */
+
         for(;;)
           {
           int lgb, rgb;
           PCRE2_SPTR fptr;
 
-          if (eptr == pp) goto TAIL_RECURSE;   /* At start of char run */
+          if (eptr <= pp) goto TAIL_RECURSE;   /* At start of char run */
           RMATCH(eptr, ecode, offset_top, mb, eptrb, RM45);
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
 
@@ -5746,7 +5751,7 @@ for (;;)
 
           for (;;)
             {
-            if (eptr == pp) goto TAIL_RECURSE;   /* At start of char run */
+            if (eptr <= pp) goto TAIL_RECURSE;   /* At start of char run */
             fptr = eptr - 1;
             if (!utf) c = *fptr; else
               {
