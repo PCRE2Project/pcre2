@@ -640,6 +640,13 @@ typedef struct pcre2_real_match_data {
 
 #ifndef PCRE2_PCRE2TEST
 
+/* Structure for checking for mutual recursion when scanning compiled code. */
+
+typedef struct recurse_check {
+  struct recurse_check *prev;
+  PCRE2_SPTR group;
+} recurse_check;
+
 /* Structure for maintaining a chain of pointers to the currently incomplete
 branches, for testing for left recursion while compiling. */
 

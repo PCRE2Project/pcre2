@@ -73,23 +73,23 @@ Arguments:
   re              compiled pattern block
   code            pointer to start of group (the bracket)
   startcode       pointer to start of the whole pattern's code
-  recurse_depth   RECURSE and/or backreference depth
   utf             UTF flag
+  recurses        chain of recurse_check to catch mutual recursion
 
 Returns:   the minimum length
            -1 \C in UTF-8 mode
               or (*ACCEPT)
-              or too much back reference recursion
            -2 internal error (missing capturing bracket)
            -3 internal error (opcode not listed)
 */
 
 static int
 find_minlength(const pcre2_real_code *re, PCRE2_SPTR code,
-  PCRE2_SPTR startcode, int recurse_depth, BOOL utf)
+  PCRE2_SPTR startcode, BOOL utf, recurse_check *recurses)
 {
 int length = -1;
 BOOL had_recurse = FALSE;
+recurse_check this_recurse;
 register int branchlength = 0;
 register PCRE2_UCHAR *cc = (PCRE2_UCHAR *)code + 1 + LINK_SIZE;
 
@@ -134,7 +134,7 @@ for (;;)
     case OP_SBRAPOS:
     case OP_ONCE:
     case OP_ONCE_NC:
-    d = find_minlength(re, cc, startcode, recurse_depth, utf);
+    d = find_minlength(re, cc, startcode, utf, recurses);
     if (d < 0) return d;
     branchlength += d;
     do cc += GET(cc, 1); while (*cc == OP_ALT);
@@ -377,13 +377,12 @@ for (;;)
       }
     break;
 
-    /* Backreferences and subroutine calls are treated in the same way: we find
-    the minimum length for the subpattern. A recursion, however, causes an
-    a flag to be set that causes the length of this branch to be ignored. The
-    logic is that a recursion can only make sense if there is another
-    alternative that stops the recursing. That will provide the minimum length
-    (when no recursion happens). A backreference within the group that it is
-    referencing behaves in the same way.
+    /* Backreferences and subroutine calls (OP_RECURSE) are treated in the same
+    way: we find the minimum length for the subpattern. A recursion
+    (backreference or subroutine) causes an a flag to be set that causes the
+    length of this branch to be ignored. The logic is that a recursion can only
+    make sense if there is another alternative that stops the recursing. That
+    will provide the minimum length (when no recursion happens).
 
     If PCRE2_MATCH_UNSET_BACKREF is set, a backreference to an unset bracket
     matches an empty string (by default it causes a matching failure), so in
@@ -399,12 +398,15 @@ for (;;)
           GET2(cc, 1) * re->name_entry_size;
 
       d = INT_MAX;
+
+      /* Scan all groups with the same name */
+
       while (count-- > 0)
         {
         ce = cs = (PCRE2_UCHAR *)PRIV(find_bracket)(startcode, utf, GET2(slot, 0));
         if (cs == NULL) return -2;
         do ce += GET(ce, 1); while (*ce == OP_ALT);
-        if ((cc > cs && cc < ce) || recurse_depth > 10)
+        if (cc > cs && cc < ce)    /* Simple recursion */
           {
           d = 0;
           had_recurse = TRUE;
@@ -412,8 +414,22 @@ for (;;)
           }
         else
           {
-          int dd = find_minlength(re, cs, startcode, recurse_depth + 1, utf);
-          if (dd < d) d = dd;
+          recurse_check *r = recurses;
+          for (r = recurses; r != NULL; r = r->prev) if (r->group == cs) break;
+          if (r != NULL)           /* Mutual recursion */
+            {
+            d = 0;
+            had_recurse = TRUE;
+            break;
+            }
+          else
+            {
+            int dd;
+            this_recurse.prev = recurses;
+            this_recurse.group = cs;
+            dd = find_minlength(re, cs, startcode, utf, &this_recurse);
+            if (dd < d) d = dd;
+            }
           }
         slot += re->name_entry_size;
         }
@@ -429,14 +445,26 @@ for (;;)
       ce = cs = (PCRE2_UCHAR *)PRIV(find_bracket)(startcode, utf, GET2(cc, 1));
       if (cs == NULL) return -2;
       do ce += GET(ce, 1); while (*ce == OP_ALT);
-      if ((cc > cs && cc < ce) || recurse_depth > 10)
+      if (cc > cs && cc < ce)    /* Simple recursion */
         {
         d = 0;
         had_recurse = TRUE;
         }
       else
         {
-        d = find_minlength(re, cs, startcode, recurse_depth + 1, utf);
+        recurse_check *r = recurses;
+        for (r = recurses; r != NULL; r = r->prev) if (r->group == cs) break;
+        if (r != NULL)           /* Mutual recursion */
+          {
+          d = 0;
+          had_recurse = TRUE;
+          }
+        else
+          {
+          this_recurse.prev = recurses;
+          this_recurse.group = cs;
+          d = find_minlength(re, cs, startcode, utf, &this_recurse);
+          }
         }
       }
     else d = 0;
@@ -479,17 +507,23 @@ for (;;)
     branchlength += min * d;
     break;
 
-    /* We can easily detect direct recursion, but not mutual recursion. This is
-    caught by a recursion depth count. */
-
     case OP_RECURSE:
     cs = ce = (PCRE2_UCHAR *)startcode + GET(cc, 1);
     do ce += GET(ce, 1); while (*ce == OP_ALT);
-    if ((cc > cs && cc < ce) || recurse_depth > 10)
+    if (cc > cs && cc < ce)    /* Simple recursion */
       had_recurse = TRUE;
     else
       {
-      branchlength += find_minlength(re, cs, startcode, recurse_depth + 1, utf);
+      recurse_check *r = recurses;
+      for (r = recurses; r != NULL; r = r->prev) if (r->group == cs) break;
+      if (r != NULL)          /* Mutual recursion */
+        had_recurse = TRUE;
+      else
+        {
+        this_recurse.prev = recurses;
+        this_recurse.group = cs;
+        branchlength += find_minlength(re, cs, startcode, utf, &this_recurse);
+        }
       }
     cc += 1 + LINK_SIZE;
     break;
@@ -1429,9 +1463,9 @@ if ((re->overall_options & PCRE2_ANCHORED) == 0 &&
 
 /* Find the minimum length of subject string. */
 
-switch(min = find_minlength(re, code, code, 0, utf))
+switch(min = find_minlength(re, code, code, utf, NULL))
   {
-  case -1:  /* \C in UTF mode or (*ACCEPT) or too much backref recursion */
+  case -1:  /* \C in UTF mode or (*ACCEPT) */
   break;    /* Leave minlength unchanged (will be zero) */
 
   case -2:

@@ -677,14 +677,6 @@ static const uint8_t opcode_possessify[] = {
 };
 
 
-/* Structure for checking for mutual recursion when scanning compiled code. */
-
-typedef struct recurse_check {
-  struct recurse_check *prev;
-  PCRE2_SPTR group;
-} recurse_check;
-
-
 
 /*************************************************
 *               Free compiled code               *

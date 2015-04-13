@@ -80,6 +80,11 @@ reference to random memory and/or a segfault. There were also some other cases
 where backtracking after \C could crash. This set of bugs was discovered by the
 LLVM fuzzer.
 
+20. The function for finding the minimum length of a matching string could take 
+a very long time if mutual recursion was present many times in a pattern, for 
+example, /((?2){73}(?2))((?1))/. A better mutual recursion detection method has 
+been implemented. This infelicity was discovered by the LLVM fuzzer.
+
 
 Version 10.10 06-March-2015
 ---------------------------

@@ -4263,4 +4263,6 @@ a random value. /Ix
 /(?<=\Ka)/altglobal,aftertext
     aaaaa
 
+/((?2){73}(?2))((?1))/info
+
 # End of testinput2 

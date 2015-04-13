@@ -14288,4 +14288,9 @@ Failed: error 125 at offset 20: lookbehind assertion is not fixed length
  0: a
  0+ 
 
+/((?2){73}(?2))((?1))/info
+Capturing subpattern count = 2
+May match empty string
+Subject length lower bound = 0
+
 # End of testinput2 
