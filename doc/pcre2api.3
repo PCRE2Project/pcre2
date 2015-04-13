@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "23 March 2015" "PCRE2 10.20"
+.TH PCRE2API 3 "13 April 2015" "PCRE2 10.20"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -1150,23 +1150,31 @@ is equivalent to Perl's /m option, and it can be changed within a pattern by a
 (?m) option setting. If there are no newlines in a subject string, or no
 occurrences of ^ or $ in a pattern, setting PCRE2_MULTILINE has no effect.
 .sp
+  PCRE2_NEVER_BACKSLASH_C
+.sp
+This option locks out the use of \eC in the pattern that is being compiled. 
+This escape can cause unpredictable behaviour in UTF-8 or UTF-16 modes, because
+it may leave the current matching point in the middle of a multi-code-unit
+character. This option may be useful in applications that process patterns from
+external sources.
+.sp
   PCRE2_NEVER_UCP
 .sp
 This option locks out the use of Unicode properties for handling \eB, \eb, \eD,
 \ed, \eS, \es, \eW, \ew, and some of the POSIX character classes, as described
 for the PCRE2_UCP option below. In particular, it prevents the creator of the
 pattern from enabling this facility by starting the pattern with (*UCP). This
-may be useful in applications that process patterns from external sources. The
-option combination PCRE_UCP and PCRE_NEVER_UCP causes an error.
+option may be useful in applications that process patterns from external
+sources. The option combination PCRE_UCP and PCRE_NEVER_UCP causes an error.
 .sp
   PCRE2_NEVER_UTF
 .sp
 This option locks out interpretation of the pattern as UTF-8, UTF-16, or
 UTF-32, depending on which library is in use. In particular, it prevents the
 creator of the pattern from switching to UTF interpretation by starting the
-pattern with (*UTF). This may be useful in applications that process patterns
-from external sources. The combination of PCRE2_UTF and PCRE2_NEVER_UTF causes
-an error.
+pattern with (*UTF). This option may be useful in applications that process
+patterns from external sources. The combination of PCRE2_UTF and
+PCRE2_NEVER_UTF causes an error.
 .sp
   PCRE2_NO_AUTO_CAPTURE
 .sp
@@ -2919,6 +2927,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 23 March 2015
+Last updated: 13 April 2015
 Copyright (c) 1997-2015 University of Cambridge.
 .fi

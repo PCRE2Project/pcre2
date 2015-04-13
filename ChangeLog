@@ -85,6 +85,8 @@ a very long time if mutual recursion was present many times in a pattern, for
 example, /((?2){73}(?2))((?1))/. A better mutual recursion detection method has 
 been implemented. This infelicity was discovered by the LLVM fuzzer.
 
+21. Implemented PCRE2_NEVER_BACKSLASH_C.
+
 
 Version 10.10 06-March-2015
 ---------------------------

@@ -1,4 +1,4 @@
-.TH PCRE2PATTERN 3 "15 March 2015" "PCRE2 10.20"
+.TH PCRE2PATTERN 3 "13 April 2015" "PCRE2 10.20"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION DETAILS"
@@ -1200,12 +1200,15 @@ whether or not a UTF mode is set. In the 8-bit library, one code unit is one
 byte; in the 16-bit library it is a 16-bit unit; in the 32-bit library it is a
 32-bit unit. Unlike a dot, \eC always matches line-ending characters. The
 feature is provided in Perl in order to match individual bytes in UTF-8 mode,
-but it is unclear how it can usefully be used. Because \eC breaks up characters
-into individual code units, matching one unit with \eC in a UTF mode means that
-the rest of the string may start with a malformed UTF character. This has
-undefined results, because PCRE2 assumes that it is dealing with valid UTF
-strings (and by default it checks this at the start of processing unless the
-PCRE2_NO_UTF_CHECK option is used).
+but it is unclear how it can usefully be used. 
+.P
+Because \eC breaks up characters into individual code units, matching one unit
+with \eC in UTF-8 or UTF-16 mode means that the rest of the string may start
+with a malformed UTF character. This has undefined results, because PCRE2
+assumes that it is matching character by character in a valid UTF string (by
+default it checks the subject string's validity at the start of processing
+unless the PCRE2_NO_UTF_CHECK option is used). An application can lock out the 
+use of \eC by setting the PCRE2_NEVER_BACKSLASH_C option.
 .P
 PCRE2 does not allow \eC to appear in lookbehind assertions
 .\" HTML <a href="#lookbehind">
@@ -3329,6 +3332,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 15 March 2015
+Last updated: 13 April 2015
 Copyright (c) 1997-2015 University of Cambridge.
 .fi

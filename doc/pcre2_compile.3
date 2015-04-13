@@ -1,4 +1,4 @@
-.TH PCRE2_COMPILE 3 "02 January 2015" "PCRE2 10.00"
+.TH PCRE2_COMPILE 3 "13 April 2015" "PCRE2 10.20"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH SYNOPSIS
@@ -46,6 +46,7 @@ or provide an external function for stack size checking. The option bits are:
   PCRE2_FIRSTLINE          Force matching to be before newline
   PCRE2_MATCH_UNSET_BACKREF  Match unset back references
   PCRE2_MULTILINE          ^ and $ match newlines within data
+  PCRE2_NEVER_BACKSLASH_C  Lock out the use of \C in patterns 
   PCRE2_NEVER_UCP          Lock out PCRE2_UCP, e.g. via (*UCP)
   PCRE2_NEVER_UTF          Lock out PCRE2_UTF, e.g. via (*UTF)
   PCRE2_NO_AUTO_CAPTURE    Disable numbered capturing paren-

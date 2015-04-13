@@ -14293,4 +14293,7 @@ Capturing subpattern count = 2
 May match empty string
 Subject length lower bound = 0
 
+/ab\Cde/never_backslash_c
+Failed: error 183 at offset 3: using \C is disabled by the application
+
 # End of testinput2 

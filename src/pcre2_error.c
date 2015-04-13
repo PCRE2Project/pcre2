@@ -84,7 +84,7 @@ static const char compile_error_texts[] =
   /* 15 */
   "reference to non-existent subpattern\0"
   "pattern passed as NULL\0"
-  "unknown compile-time option bit(s)\0"
+  "unrecognised compile-time option bit(s)\0"
   "missing ) after (?# comment\0"
   "parentheses are too deeply nested\0"
   /* 20 */
@@ -163,6 +163,7 @@ static const char compile_error_texts[] =
   "internal error: unknown opcode in auto_possessify()\0"
   "missing terminating delimiter for callout with string argument\0"
   "unrecognized string delimiter follows (?C\0"
+  "using \\C is disabled by the application\0"
   ;
 
 /* Match-time and UTF error texts are in the same format. */

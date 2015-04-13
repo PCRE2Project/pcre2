@@ -4265,4 +4265,6 @@ a random value. /Ix
 
 /((?2){73}(?2))((?1))/info
 
+/ab\Cde/never_backslash_c
+
 # End of testinput2 

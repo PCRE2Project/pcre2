@@ -1,4 +1,4 @@
-.TH PCRE2 3 "18 November 2014" "PCRE2 10.00"
+.TH PCRE2 3 "13 April 2015" "PCRE2 10.20"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH INTRODUCTION
@@ -103,13 +103,23 @@ lose performance.
 .P
 One way of guarding against this possibility is to use the
 \fBpcre2_pattern_info()\fP function to check the compiled pattern's options for
-UTF. Alternatively, you can set the PCRE2_NEVER_UTF option at compile time.
-This causes an compile time error if a pattern contains a UTF-setting sequence.
+PCRE2_UTF. Alternatively, you can set the PCRE2_NEVER_UTF option when calling 
+\fBpcre2_compile()\fP. This causes an compile time error if a pattern contains
+a UTF-setting sequence.
+.P
+The use of Unicode properties for character types such as \ed can also be 
+enabled from within the pattern, by specifying "(*UCP)". This feature can be 
+disallowed by setting the PCRE2_NEVER_UCP option.
 .P
 If your application is one that supports UTF, be aware that validity checking
 can take time. If the same data string is to be matched many times, you can use
 the PCRE2_NO_UTF_CHECK option for the second and subsequent matches to avoid
 running redundant checks.
+.P
+The use of the \eC escape sequence in a UTF-8 or UTF-16 pattern can lead to
+problems, because it may leave the current matching point in the middle of a
+multi-code-unit character. The PCRE2_NEVER_BACKSLASH_C option can be used to
+lock out the use of \eC, causing a compile-time error if it is encountered.
 .P
 Another way that performance can be hit is by running a pattern that has a very
 large search tree against a string that will never match. Nested unlimited
@@ -177,6 +187,6 @@ use my two initials, followed by the two digits 10, at the domain cam.ac.uk.
 .rs
 .sp
 .nf
-Last updated: 18 November 2014
-Copyright (c) 1997-2014 University of Cambridge.
+Last updated: 13 April 2015
+Copyright (c) 1997-2015 University of Cambridge.
 .fi
