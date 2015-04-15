@@ -10,6 +10,7 @@
 # tests, in order to run those that are giving errors. The following options
 # do this:
 #
+# -noasan      skip the test that uses -fsanitize=address
 # -nojit       skip JIT tests
 # -nomain      skip the main set of tests
 # -notmp       skip the test in a temporary directory
@@ -22,6 +23,7 @@
 # newline recognition because they don't work. I am hoping to reduce this as
 # much as possible in due course.
 
+useasan=1
 usejit=1
 usemain=1
 usetmp=1
@@ -30,6 +32,7 @@ verbose=0
 
 while [ $# -gt 0 ] ; do
   case $1 in
+    -noasan)       useasan=0;;
     -nojit)        usejit=0;;
     -nomain)       usemain=0;;
     -notmp)        usetmp=0;;
@@ -183,7 +186,8 @@ runtest()
 
 testtotal=`expr 20 \* $usemain + \
   1 \* $usetmp + \
-  2 \* $ISGCC \* $usemain + \
+  1 \* $ISGCC \* $usemain + \
+  1 \* $ISGCC \* $usemain \* $useasan + \
   13 \* $usejit + \
   \( 3 + 2 \* $usejit \) \* $usevalgrind`
 testcount=0
@@ -221,11 +225,13 @@ if [ $ISGCC -ne 0 -a $usemain -ne 0 ]; then
   echo "CFLAGS=$CFLAGS"
   opts="--disable-shared $enable_jit --enable-pcre2-16 --enable-pcre2-32"
   runtest
-  echo "---------- Maximally configured test with -fsanitize=address ----------"
-  CFLAGS="$OFLAGS $SAVECFLAGS -fsanitize=address"
-  echo "CFLAGS=$CFLAGS"
-  opts="--disable-shared $enable_jit --disable-stack-for-recursion --enable-pcre2-16 --enable-pcre2-32"
-  runtest
+  if [ $useasan -ne 0 ]; then
+    echo "---------- Maximally configured test with -fsanitize=address ----------"
+    CFLAGS="$OFLAGS $SAVECFLAGS -fsanitize=address"
+    echo "CFLAGS=$CFLAGS"
+    opts="--disable-shared $enable_jit --disable-stack-for-recursion --enable-pcre2-16 --enable-pcre2-32"
+    runtest
+  fi
   CFLAGS="$OFLAGS $SAVECFLAGS"
 fi
 
