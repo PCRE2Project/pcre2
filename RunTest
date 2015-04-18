@@ -740,6 +740,6 @@ for bmode in "$test8" "$test16" "$test32"; do
 done
 
 # Clean up local working files
-rm -f testSinput test3input testsaved1 testsaved2 test3output test3outputA test3outputB teststdout testtry
+rm -f testSinput test3input testsaved1 testsaved2 test3output test3outputA test3outputB teststdout teststderr testtry
 
 # End
