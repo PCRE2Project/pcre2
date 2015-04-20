@@ -183,10 +183,7 @@ typedef struct jit_arguments {
   /* Everything else after. */
   sljit_ui limit_match;
   uint32_t oveccount;
-  sljit_ub notbol;
-  sljit_ub noteol;
-  sljit_ub notempty;
-  sljit_ub notempty_atstart;
+  uint32_t options;
 } jit_arguments;
 
 #define JIT_NUMBER_OF_COMPILE_MODES 3
@@ -1544,11 +1541,6 @@ while (cc < ccend)
   switch(*cc)
     {
     case OP_KET:
-    if (PRIVATE_DATA(cc) != 0)
-      private_data_length++;
-    cc += 1 + LINK_SIZE;
-    break;
-
     case OP_ASSERT:
     case OP_ASSERT_NOT:
     case OP_ASSERTBACK:
@@ -1559,7 +1551,8 @@ while (cc < ccend)
     case OP_SBRA:
     case OP_SBRAPOS:
     case OP_SCOND:
-    private_data_length++;
+    if (PRIVATE_DATA(cc) != 0)
+      private_data_length++;
     cc += 1 + LINK_SIZE;
     break;
 
@@ -1718,14 +1711,6 @@ do
     switch(*cc)
       {
       case OP_KET:
-      if (PRIVATE_DATA(cc) != 0)
-        {
-        count = 1;
-        srcw[0] = PRIVATE_DATA(cc);
-        }
-      cc += 1 + LINK_SIZE;
-      break;
-
       case OP_ASSERT:
       case OP_ASSERT_NOT:
       case OP_ASSERTBACK:
@@ -1736,9 +1721,11 @@ do
       case OP_SBRA:
       case OP_SBRAPOS:
       case OP_SCOND:
-      count = 1;
-      srcw[0] = PRIVATE_DATA(cc);
-      SLJIT_ASSERT(srcw[0] != 0);
+      if (PRIVATE_DATA(cc) != 0)
+        {
+        count = 1;
+        srcw[0] = PRIVATE_DATA(cc);
+        }
       cc += 1 + LINK_SIZE;
       break;
 
@@ -5518,16 +5505,16 @@ switch(type)
   OP1(SLJIT_MOV, TMP2, 0, ARGUMENTS, 0);
   OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(TMP2), SLJIT_OFFSETOF(jit_arguments, begin));
   add_jump(compiler, backtracks, CMP(SLJIT_GREATER, STR_PTR, 0, TMP1, 0));
-  OP1(SLJIT_MOV_UB, TMP2, 0, SLJIT_MEM1(TMP2), SLJIT_OFFSETOF(jit_arguments, notbol));
-  add_jump(compiler, backtracks, CMP(SLJIT_NOT_EQUAL, TMP2, 0, SLJIT_IMM, 0));
+  OP2(SLJIT_IAND | SLJIT_SET_E, SLJIT_UNUSED, 0, SLJIT_MEM1(TMP2), SLJIT_OFFSETOF(jit_arguments, options), SLJIT_IMM, PCRE2_NOTBOL);
+  add_jump(compiler, backtracks, JUMP(SLJIT_NOT_ZERO));
   return cc;
 
   case OP_CIRCM:
   OP1(SLJIT_MOV, TMP2, 0, ARGUMENTS, 0);
   OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(TMP2), SLJIT_OFFSETOF(jit_arguments, begin));
   jump[1] = CMP(SLJIT_GREATER, STR_PTR, 0, TMP1, 0);
-  OP1(SLJIT_MOV_UB, TMP2, 0, SLJIT_MEM1(TMP2), SLJIT_OFFSETOF(jit_arguments, notbol));
-  add_jump(compiler, backtracks, CMP(SLJIT_NOT_EQUAL, TMP2, 0, SLJIT_IMM, 0));
+  OP2(SLJIT_IAND | SLJIT_SET_E, SLJIT_UNUSED, 0, SLJIT_MEM1(TMP2), SLJIT_OFFSETOF(jit_arguments, options), SLJIT_IMM, PCRE2_NOTBOL);
+  add_jump(compiler, backtracks, JUMP(SLJIT_NOT_ZERO));
   jump[0] = JUMP(SLJIT_JUMP);
   JUMPHERE(jump[1]);
 
@@ -5552,8 +5539,8 @@ switch(type)
 
   case OP_DOLL:
   OP1(SLJIT_MOV, TMP2, 0, ARGUMENTS, 0);
-  OP1(SLJIT_MOV_UB, TMP2, 0, SLJIT_MEM1(TMP2), SLJIT_OFFSETOF(jit_arguments, noteol));
-  add_jump(compiler, backtracks, CMP(SLJIT_NOT_EQUAL, TMP2, 0, SLJIT_IMM, 0));
+  OP2(SLJIT_IAND | SLJIT_SET_E, SLJIT_UNUSED, 0, SLJIT_MEM1(TMP2), SLJIT_OFFSETOF(jit_arguments, options), SLJIT_IMM, PCRE2_NOTEOL);
+  add_jump(compiler, backtracks, JUMP(SLJIT_NOT_ZERO));
 
   if (!common->endonly)
     compile_char1_matchingpath(common, OP_EODN, cc, backtracks);
@@ -5567,8 +5554,8 @@ switch(type)
   case OP_DOLLM:
   jump[1] = CMP(SLJIT_LESS, STR_PTR, 0, STR_END, 0);
   OP1(SLJIT_MOV, TMP2, 0, ARGUMENTS, 0);
-  OP1(SLJIT_MOV_UB, TMP2, 0, SLJIT_MEM1(TMP2), SLJIT_OFFSETOF(jit_arguments, noteol));
-  add_jump(compiler, backtracks, CMP(SLJIT_NOT_EQUAL, TMP2, 0, SLJIT_IMM, 0));
+  OP2(SLJIT_IAND | SLJIT_SET_E, SLJIT_UNUSED, 0, SLJIT_MEM1(TMP2), SLJIT_OFFSETOF(jit_arguments, options), SLJIT_IMM, PCRE2_NOTEOL);
+  add_jump(compiler, backtracks, JUMP(SLJIT_NOT_ZERO));
   check_partial(common, FALSE);
   jump[0] = JUMP(SLJIT_JUMP);
   JUMPHERE(jump[1]);
@@ -8178,13 +8165,14 @@ if (common->accept_label == NULL)
 else
   CMPTO(SLJIT_NOT_EQUAL, STR_PTR, 0, SLJIT_MEM1(SLJIT_SP), OVECTOR(0), common->accept_label);
 OP1(SLJIT_MOV, TMP1, 0, ARGUMENTS, 0);
-OP1(SLJIT_MOV_UB, TMP2, 0, SLJIT_MEM1(TMP1), SLJIT_OFFSETOF(jit_arguments, notempty));
-add_jump(compiler, &backtrack->topbacktracks, CMP(SLJIT_NOT_EQUAL, TMP2, 0, SLJIT_IMM, 0));
-OP1(SLJIT_MOV_UB, TMP2, 0, SLJIT_MEM1(TMP1), SLJIT_OFFSETOF(jit_arguments, notempty_atstart));
+OP1(SLJIT_MOV_UI, TMP2, 0, SLJIT_MEM1(TMP1), SLJIT_OFFSETOF(jit_arguments, options));
+OP2(SLJIT_AND | SLJIT_SET_E, SLJIT_UNUSED, 0, TMP2, 0, SLJIT_IMM, PCRE2_NOTEMPTY);
+add_jump(compiler, &backtrack->topbacktracks, JUMP(SLJIT_NOT_ZERO));
+OP2(SLJIT_AND | SLJIT_SET_E, SLJIT_UNUSED, 0, TMP2, 0, SLJIT_IMM, PCRE2_NOTEMPTY_ATSTART);
 if (common->accept_label == NULL)
-  add_jump(compiler, &common->accept, CMP(SLJIT_EQUAL, TMP2, 0, SLJIT_IMM, 0));
+  add_jump(compiler, &common->accept, JUMP(SLJIT_ZERO));
 else
-  CMPTO(SLJIT_EQUAL, TMP2, 0, SLJIT_IMM, 0, common->accept_label);
+  JUMPTO(SLJIT_ZERO, common->accept_label);
 OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(TMP1), SLJIT_OFFSETOF(jit_arguments, str));
 if (common->accept_label == NULL)
   add_jump(compiler, &common->accept, CMP(SLJIT_NOT_EQUAL, TMP2, 0, STR_PTR, 0));
@@ -10183,10 +10171,11 @@ if (common->might_be_empty)
   {
   JUMPHERE(empty_match);
   OP1(SLJIT_MOV, TMP1, 0, ARGUMENTS, 0);
-  OP1(SLJIT_MOV_UB, TMP2, 0, SLJIT_MEM1(TMP1), SLJIT_OFFSETOF(jit_arguments, notempty));
-  CMPTO(SLJIT_NOT_EQUAL, TMP2, 0, SLJIT_IMM, 0, empty_match_backtrack_label);
-  OP1(SLJIT_MOV_UB, TMP2, 0, SLJIT_MEM1(TMP1), SLJIT_OFFSETOF(jit_arguments, notempty_atstart));
-  CMPTO(SLJIT_EQUAL, TMP2, 0, SLJIT_IMM, 0, empty_match_found_label);
+  OP1(SLJIT_MOV_UI, TMP2, 0, SLJIT_MEM1(TMP1), SLJIT_OFFSETOF(jit_arguments, options));
+  OP2(SLJIT_AND | SLJIT_SET_E, SLJIT_UNUSED, 0, TMP2, 0, SLJIT_IMM, PCRE2_NOTEMPTY);
+  JUMPTO(SLJIT_NOT_ZERO, empty_match_backtrack_label);
+  OP2(SLJIT_AND | SLJIT_SET_E, SLJIT_UNUSED, 0, TMP2, 0, SLJIT_IMM, PCRE2_NOTEMPTY_ATSTART);
+  JUMPTO(SLJIT_ZERO, empty_match_found_label);
   OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(TMP1), SLJIT_OFFSETOF(jit_arguments, str));
   CMPTO(SLJIT_NOT_EQUAL, TMP2, 0, STR_PTR, 0, empty_match_found_label);
   JUMPTO(SLJIT_JUMP, empty_match_backtrack_label);

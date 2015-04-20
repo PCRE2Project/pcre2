@@ -128,11 +128,7 @@ arguments.end = subject + length;
 arguments.match_data = match_data;
 arguments.startchar_ptr = subject;
 arguments.mark_ptr = NULL;
-/* JIT decreases this value less frequently than the interpreter. */
-arguments.notbol = (options & PCRE2_NOTBOL) != 0;
-arguments.noteol = (options & PCRE2_NOTEOL) != 0;
-arguments.notempty = (options & PCRE2_NOTEMPTY) != 0;
-arguments.notempty_atstart = (options & PCRE2_NOTEMPTY_ATSTART) != 0;
+arguments.options = options;
 if (mcontext != NULL)
   {
   arguments.callout = mcontext->callout;
