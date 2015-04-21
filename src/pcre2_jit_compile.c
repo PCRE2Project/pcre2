@@ -1541,6 +1541,15 @@ while (cc < ccend)
   switch(*cc)
     {
     case OP_KET:
+    if (PRIVATE_DATA(cc) != 0)
+      {
+      private_data_length++;
+      SLJIT_ASSERT(PRIVATE_DATA(cc + 1) != 0);
+      cc += PRIVATE_DATA(cc + 1);
+      }
+    cc += 1 + LINK_SIZE;
+    break;
+
     case OP_ASSERT:
     case OP_ASSERT_NOT:
     case OP_ASSERTBACK:
@@ -1551,8 +1560,8 @@ while (cc < ccend)
     case OP_SBRA:
     case OP_SBRAPOS:
     case OP_SCOND:
-    if (PRIVATE_DATA(cc) != 0)
-      private_data_length++;
+    private_data_length++;
+    SLJIT_ASSERT(PRIVATE_DATA(cc) != 0);
     cc += 1 + LINK_SIZE;
     break;
 
@@ -1711,6 +1720,16 @@ do
     switch(*cc)
       {
       case OP_KET:
+      if (PRIVATE_DATA(cc) != 0)
+        {
+        count = 1;
+        srcw[0] = PRIVATE_DATA(cc);
+        SLJIT_ASSERT(PRIVATE_DATA(cc + 1) != 0);
+        cc += PRIVATE_DATA(cc + 1);
+        }
+      cc += 1 + LINK_SIZE;
+      break;
+
       case OP_ASSERT:
       case OP_ASSERT_NOT:
       case OP_ASSERTBACK:
@@ -1721,11 +1740,9 @@ do
       case OP_SBRA:
       case OP_SBRAPOS:
       case OP_SCOND:
-      if (PRIVATE_DATA(cc) != 0)
-        {
-        count = 1;
-        srcw[0] = PRIVATE_DATA(cc);
-        }
+      count = 1;
+      srcw[0] = PRIVATE_DATA(cc);
+      SLJIT_ASSERT(srcw[0] != 0);
       cc += 1 + LINK_SIZE;
       break;
 
