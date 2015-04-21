@@ -14296,4 +14296,13 @@ Subject length lower bound = 0
 /ab\Cde/never_backslash_c
 Failed: error 183 at offset 3: using \C is disabled by the application
 
+/abc/
+    \[9x!xxx(]{9999}
+No match
+    
+/(abc)*/
+    \[abc]{5} 
+ 0: abcabcabcabcabc
+ 1: abc
+
 # End of testinput2 

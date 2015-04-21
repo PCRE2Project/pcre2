@@ -4267,4 +4267,10 @@ a random value. /Ix
 
 /ab\Cde/never_backslash_c
 
+/abc/
+    \[9x!xxx(]{9999}
+    
+/(abc)*/
+    \[abc]{5} 
+
 # End of testinput2 

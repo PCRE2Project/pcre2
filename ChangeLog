@@ -87,6 +87,11 @@ been implemented. This infelicity was discovered by the LLVM fuzzer.
 
 21. Implemented PCRE2_NEVER_BACKSLASH_C.
 
+22. The feature for string replication in pcre2test could read from freed 
+memory if the replication required a buffer to be extended, and it was not
+working properly in 16-bit and 32-bit modes. This issue was discovered by a 
+fuzzer: see http://lcamtuf.coredump.cx/afl/.
+
 
 Version 10.10 06-March-2015
 ---------------------------

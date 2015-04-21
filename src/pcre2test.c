@@ -1181,11 +1181,11 @@ are supported. */
 
 #define SETCASTPTR(x,y) \
   if (test_mode == PCRE8_MODE) \
-    G(x,8) = (uint8_t *)y; \
+    G(x,8) = (uint8_t *)(y); \
   else if (test_mode == PCRE16_MODE) \
-    G(x,16) = (uint16_t *)y; \
+    G(x,16) = (uint16_t *)(y); \
   else \
-    G(x,32) = (uint32_t *)y
+    G(x,32) = (uint32_t *)(y)
 
 #define STRLEN(p) ((test_mode == PCRE8_MODE)? ((int)strlen((char *)p)) : \
   (test_mode == PCRE16_MODE)? ((int)strlen16((PCRE2_SPTR16)p)) : \
@@ -1563,9 +1563,9 @@ the three different cases. */
 
 #define SETCASTPTR(x,y) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
-    G(x,BITONE) = (G(G(uint,BITONE),_t) *)y; \
+    G(x,BITONE) = (G(G(uint,BITONE),_t) *)(y); \
   else \
-    G(x,BITTWO) = (G(G(uint,BITTWO),_t) *)y
+    G(x,BITTWO) = (G(G(uint,BITTWO),_t) *)(y)
 
 #define STRLEN(p) ((test_mode == G(G(PCRE,BITONE),_MODE))? \
   G(strlen,BITONE)((G(PCRE2_SPTR,BITONE))p) : \
@@ -1680,7 +1680,7 @@ the three different cases. */
 #define SETFLD(x,y,z) G(x,8)->y = z
 #define SETFLDVEC(x,y,v,z) G(x,8)->y[v] = z
 #define SETOP(x,y,z) G(x,8) z y
-#define SETCASTPTR(x,y) G(x,8) = (uint8_t *)y
+#define SETCASTPTR(x,y) G(x,8) = (uint8_t *)(y)
 #define STRLEN(p) (int)strlen((char *)p)
 #define SUB1(a,b) G(a,8)(G(b,8))
 #define SUB2(a,b,c) G(a,8)(G(b,8),G(c,8))
@@ -1771,7 +1771,7 @@ the three different cases. */
 #define SETFLD(x,y,z) G(x,16)->y = z
 #define SETFLDVEC(x,y,v,z) G(x,16)->y[v] = z
 #define SETOP(x,y,z) G(x,16) z y
-#define SETCASTPTR(x,y) G(x,16) = (uint16_t *)y
+#define SETCASTPTR(x,y) G(x,16) = (uint16_t *)(y)
 #define STRLEN(p) (int)strlen16((PCRE2_SPTR16)p)
 #define SUB1(a,b) G(a,16)(G(b,16))
 #define SUB2(a,b,c) G(a,16)(G(b,16),G(c,16))
@@ -1862,7 +1862,7 @@ the three different cases. */
 #define SETFLD(x,y,z) G(x,32)->y = z
 #define SETFLDVEC(x,y,v,z) G(x,32)->y[v] = z
 #define SETOP(x,y,z) G(x,32) z y
-#define SETCASTPTR(x,y) G(x,32) = (uint32_t *)y
+#define SETCASTPTR(x,y) G(x,32) = (uint32_t *)(y)
 #define STRLEN(p) (int)strlen32((PCRE2_SPTR32)p)
 #define SUB1(a,b) G(a,32)(G(b,32))
 #define SUB2(a,b,c) G(a,32)(G(b,32),G(c,32))
@@ -5079,12 +5079,13 @@ if (dbuffer != NULL)
 #endif
 
 /* Allocate a buffer to hold the data line; len+1 is an upper bound on
-the number of code units that will be needed. */
+the number of code units that will be needed (though the buffer may have to be 
+extended if replication is involved). */
 
 needlen = (size_t)(len * code_unit_size);
-while (dbuffer == NULL || needlen >= dbuffer_size)
+if (dbuffer == NULL || needlen >= dbuffer_size)
   {
-  dbuffer_size *= 2;
+  while (needlen >= dbuffer_size) dbuffer_size *= 2;
   dbuffer = (uint8_t *)realloc(dbuffer, dbuffer_size);
   if (dbuffer == NULL)
     {
@@ -5095,7 +5096,7 @@ while (dbuffer == NULL || needlen >= dbuffer_size)
 SETCASTPTR(q, dbuffer);  /* Sets q8, q16, or q32, as appropriate. */
 
 /* Scan the data line, interpreting data escapes, and put the result into a
-buffer the appropriate width buffer. In UTF mode, input can be UTF-8. */
+buffer of the appropriate width. In UTF mode, input can be UTF-8. */
 
 while ((c = *p++) != 0)
   {
@@ -5106,7 +5107,8 @@ while ((c = *p++) != 0)
 
   if (c == ']' && start_rep != NULL)
     {
-    size_t qoffset = CAST8VAR(q) - (uint8_t *)dbuffer;
+    size_t qoffset = CAST8VAR(q) - dbuffer;
+    size_t rep_offset = start_rep - dbuffer;
 
     if (*p++ != '{')
       {
@@ -5126,10 +5128,11 @@ while ((c = *p++) != 0)
       }
 
     replen = CAST8VAR(q) - start_rep;
-    needlen += replen * (i - 1);
-    while (needlen >= dbuffer_size)
+    needlen += replen * i;
+    
+    if (needlen >= dbuffer_size)
       {
-      dbuffer_size *= 2;
+      while (needlen >= dbuffer_size) dbuffer_size *= 2;
       dbuffer = (uint8_t *)realloc(dbuffer, dbuffer_size);
       if (dbuffer == NULL)
         {
@@ -5137,8 +5140,9 @@ while ((c = *p++) != 0)
         exit(1);
         }
       SETCASTPTR(q, dbuffer + qoffset);
+      start_rep = dbuffer + rep_offset;
       }
-
+      
     while (i-- > 0)
       {
       memcpy(CAST8VAR(q), start_rep, replen);
