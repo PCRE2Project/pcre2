@@ -14305,4 +14305,17 @@ No match
  0: abcabcabcabcabc
  1: abc
 
+/^/gm
+    \n\n\n
+ 0: 
+ 0: 
+ 0: 
+
+/^/gm,alt_circumflex
+    \n\n\n
+ 0: 
+ 0: 
+ 0: 
+ 0: 
+
 # End of testinput2 

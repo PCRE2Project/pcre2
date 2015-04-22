@@ -119,6 +119,7 @@ D   is inspected during pcre2_dfa_match() execution
 #define PCRE2_UNGREEDY            0x00040000u  /* C       */
 #define PCRE2_UTF                 0x00080000u  /* C J M D */
 #define PCRE2_NEVER_BACKSLASH_C   0x00100000u  /* C       */
+#define PCRE2_ALT_CIRCUMFLEX      0x00200000u  /*   J M D */
 
 /* These are for pcre2_jit_compile(). */
 
@@ -126,9 +127,10 @@ D   is inspected during pcre2_dfa_match() execution
 #define PCRE2_JIT_PARTIAL_SOFT    0x00000002u
 #define PCRE2_JIT_PARTIAL_HARD    0x00000004u
 
-/* These are for pcre2_match() and pcre2_dfa_match(). Note that PCRE2_ANCHORED,
-and PCRE2_NO_UTF_CHECK can also be passed to these functions, so take care not
-to define synonyms by mistake. */
+/* These are for pcre2_match(), pcre2_dfa_match(), and pcre2_jit_match(). Note
+that PCRE2_ANCHORED and PCRE2_NO_UTF_CHECK can also be passed to these
+functions (though pcre2_jit_match() ignores the latter since it bypasses all 
+sanity checks). */
 
 #define PCRE2_NOTBOL              0x00000001u
 #define PCRE2_NOTEOL              0x00000002u

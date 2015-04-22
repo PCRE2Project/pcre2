@@ -4273,4 +4273,10 @@ a random value. /Ix
 /(abc)*/
     \[abc]{5} 
 
+/^/gm
+    \n\n\n
+
+/^/gm,alt_circumflex
+    \n\n\n
+
 # End of testinput2 

@@ -1,4 +1,4 @@
-.TH PCRE2_COMPILE 3 "13 April 2015" "PCRE2 10.20"
+.TH PCRE2_COMPILE 3 "22 April 2015" "PCRE2 10.20"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH SYNOPSIS
@@ -37,6 +37,7 @@ or provide an external function for stack size checking. The option bits are:
 .sp
   PCRE2_ANCHORED           Force pattern anchoring
   PCRE2_ALT_BSUX           Alternative handling of \eu, \eU, and \ex
+  PCRE2_ALT_CIRCUMFLEX     Alternative handling of ^ in multiline mode 
   PCRE2_AUTO_CALLOUT       Compile automatic callouts
   PCRE2_CASELESS           Do caseless matching
   PCRE2_DOLLAR_ENDONLY     $ not to match newline at end

@@ -7925,4 +7925,17 @@ Callout (5): 'x\x00z'
     aaa 
 No match
 
+/^/gm
+    \n\n\n
+ 0: 
+ 0: 
+ 0: 
+
+/^/gm,alt_circumflex
+    \n\n\n
+ 0: 
+ 0: 
+ 0: 
+ 0: 
+
 # End of testinput6

@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "13 April 2015" "PCRE2 10.20"
+.TH PCRE2API 3 "22 April 2015" "PCRE2 10.20"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -1044,6 +1044,15 @@ to match. By default, as in Perl, a hexadecimal number is always expected after
 \ex, but it may have zero, one, or two digits (so, for example, \exz matches a
 binary zero character followed by z).
 .sp
+  PCRE2_ALT_CIRCUMFLEX
+.sp   
+In multiline mode (when PCRE2_MULTILINE is set), the circumflex metacharacter
+matches at the start of the subject (unless PCRE2_NOTBOL is set), and also
+after any internal newline. However, it does not match after a newline at the
+end of the subject, for compatibility with Perl. If you want a multiline
+circumflex also to match after a terminating newline, you must set
+PCRE2_ALT_CIRCUMFLEX.
+.sp
   PCRE2_AUTO_CALLOUT
 .sp
 If this bit is set, \fBpcre2_compile()\fP automatically inserts callout items,
@@ -1147,8 +1156,12 @@ When PCRE2_MULTILINE it is set, the "start of line" and "end of line"
 constructs match immediately following or immediately before internal newlines
 in the subject string, respectively, as well as at the very start and end. This
 is equivalent to Perl's /m option, and it can be changed within a pattern by a
-(?m) option setting. If there are no newlines in a subject string, or no
-occurrences of ^ or $ in a pattern, setting PCRE2_MULTILINE has no effect.
+(?m) option setting. Note that the "start of line" metacharacter does not match
+after a newline at the end of the subject, for compatibility with Perl.
+However, you can change this by setting the PCRE2_ALT_CIRCUMFLEX option. If
+there are no newlines in a subject string, or no occurrences of ^ or $ in a
+pattern, setting PCRE2_MULTILINE has no effect.
+
 .sp
   PCRE2_NEVER_BACKSLASH_C
 .sp
@@ -2927,6 +2940,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 13 April 2015
+Last updated: 22 April 2015
 Copyright (c) 1997-2015 University of Cambridge.
 .fi

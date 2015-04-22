@@ -802,7 +802,8 @@ for (;;)
       /*-----------------------------------------------------------------*/
       case OP_CIRCM:
       if ((ptr == start_subject && (mb->moptions & PCRE2_NOTBOL) == 0) ||
-          (ptr != end_subject && WAS_NEWLINE(ptr)))
+          ((ptr != end_subject || (mb->poptions & PCRE2_ALT_CIRCUMFLEX) != 0 )
+            && WAS_NEWLINE(ptr)))
         { ADD_ACTIVE(state_offset + 1, 0); }
       break;
 

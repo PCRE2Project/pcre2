@@ -92,6 +92,8 @@ memory if the replication required a buffer to be extended, and it was not
 working properly in 16-bit and 32-bit modes. This issue was discovered by a 
 fuzzer: see http://lcamtuf.coredump.cx/afl/.
 
+23. Added the PCRE2_ALT_CIRCUMFLEX option.
+
 
 Version 10.10 06-March-2015
 ---------------------------

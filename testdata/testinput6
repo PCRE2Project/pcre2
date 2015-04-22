@@ -4850,4 +4850,10 @@
     bbb
     aaa 
 
+/^/gm
+    \n\n\n
+
+/^/gm,alt_circumflex
+    \n\n\n
+
 # End of testinput6

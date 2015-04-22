@@ -2156,13 +2156,16 @@ for (;;)
     ecode++;
     break;
 
-    /* Multiline mode: start of subject unless notbol, or after any newline. */
+    /* Multiline mode: start of subject unless notbol, or after any newline 
+    except for one at the very end, unless PCRE2_ALT_CIRCUMFLEX is set. */
 
     case OP_CIRCM:
     if ((mb->moptions & PCRE2_NOTBOL) != 0 && eptr == mb->start_subject)
       RRETURN(MATCH_NOMATCH);
     if (eptr != mb->start_subject &&
-        (eptr == mb->end_subject || !WAS_NEWLINE(eptr)))
+        ((eptr == mb->end_subject && 
+           (mb->poptions & PCRE2_ALT_CIRCUMFLEX) == 0) ||
+         !WAS_NEWLINE(eptr)))
       RRETURN(MATCH_NOMATCH);
     ecode++;
     break;

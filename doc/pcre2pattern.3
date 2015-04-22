@@ -1,4 +1,4 @@
-.TH PCRE2PATTERN 3 "13 April 2015" "PCRE2 10.20"
+.TH PCRE2PATTERN 3 "22 April 2015" "PCRE2 10.20"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION DETAILS"
@@ -351,7 +351,7 @@ than the binary character it represents:
   \eo{ddd..} character with octal code ddd..
   \exhh      character with hex code hh
   \ex{hhh..} character with hex code hhh.. (default mode)
-  \euhhhh    character with hex code hhhh (when PCRE2_ALT_BSUX is set)
+  \euhhhh    character with hex code hhhh (only when PCRE2_ALT_BSUX is set)
 .sp
 The precise effect of \ecx on ASCII characters is as follows: if x is a lower
 case letter, it is converted to upper case. Then bit 6 of the character (hex
@@ -1110,14 +1110,18 @@ regular expression.
 .sp
 The circumflex and dollar metacharacters are zero-width assertions. That is,
 they test for a particular condition being true without consuming any
-characters from the subject string.
+characters from the subject string. These two metacharacters are concerned with
+matching the starts and ends of lines. If the newline convention is set so that
+only the two-character sequence CRLF is recognized as a newline, isolated CR
+and LF characters are treated as ordinary data characters, and are not 
+recognized as newlines.
 .P
 Outside a character class, in the default matching mode, the circumflex
 character is an assertion that is true only if the current matching point is at
 the start of the subject string. If the \fIstartoffset\fP argument of
-\fBpcre2_match()\fP is non-zero, circumflex can never match if the
-PCRE2_MULTILINE option is unset. Inside a character class, circumflex has an
-entirely different meaning
+\fBpcre2_match()\fP is non-zero, or if PCRE2_NOTBOL is set, circumflex can
+never match if the PCRE2_MULTILINE option is unset. Inside a character class,
+circumflex has an entirely different meaning
 .\" HTML <a href="#characterclass">
 .\" </a>
 (see below).
@@ -1133,22 +1137,23 @@ to be anchored.)
 .P
 The dollar character is an assertion that is true only if the current matching
 point is at the end of the subject string, or immediately before a newline at
-the end of the string (by default). Note, however, that it does not actually
-match the newline. Dollar need not be the last character of the pattern if a
-number of alternatives are involved, but it should be the last item in any
-branch in which it appears. Dollar has no special meaning in a character class.
+the end of the string (by default), unless PCRE2_NOTEOL is set. Note, however,
+that it does not actually match the newline. Dollar need not be the last
+character of the pattern if a number of alternatives are involved, but it
+should be the last item in any branch in which it appears. Dollar has no
+special meaning in a character class.
 .P
 The meaning of dollar can be changed so that it matches only at the very end of
 the string, by setting the PCRE2_DOLLAR_ENDONLY option at compile time. This
 does not affect the \eZ assertion.
 .P
-The meanings of the circumflex and dollar characters are changed if the
-PCRE2_MULTILINE option is set. When this is the case, a circumflex matches
-immediately after internal newlines as well as at the start of the subject
-string. It does not match after a newline that ends the string. A dollar
-matches before any newlines in the string, as well as at the very end, when
-PCRE2_MULTILINE is set. When newline is specified as the two-character
-sequence CRLF, isolated CR and LF characters do not indicate newlines.
+The meanings of the circumflex and dollar metacharacters are changed if the
+PCRE2_MULTILINE option is set. When this is the case, a dollar character
+matches before any newlines in the string, as well as at the very end, and a
+circumflex matches immediately after internal newlines as well as at the start
+of the subject string. It does not match after a newline that ends the string,
+for compatibility with Perl. However, this can be changed by setting the
+PCRE2_ALT_CIRCUMFLEX option.
 .P
 For example, the pattern /^abc$/ matches the subject string "def\enabc" (where
 \en represents a newline) in multiline mode, but not otherwise. Consequently,
@@ -3332,6 +3337,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 13 April 2015
+Last updated: 22 April 2015
 Copyright (c) 1997-2015 University of Cambridge.
 .fi
