@@ -97,6 +97,9 @@ fuzzer: see http://lcamtuf.coredump.cx/afl/.
 24. Adjust the treatment of \8 and \9 to be the same as the current Perl 
 behaviour.
 
+25. Static linking against the PCRE2 library using the pkg-config module was
+failing on missing pthread symbols.
+
 
 Version 10.10 06-March-2015
 ---------------------------
