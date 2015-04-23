@@ -94,6 +94,9 @@ fuzzer: see http://lcamtuf.coredump.cx/afl/.
 
 23. Added the PCRE2_ALT_CIRCUMFLEX option.
 
+24. Adjust the treatment of \8 and \9 to be the same as the current Perl 
+behaviour.
+
 
 Version 10.10 06-March-2015
 ---------------------------

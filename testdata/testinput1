@@ -5715,4 +5715,10 @@ name)/mark
 "(?1)(?#?'){8}(a)"
     baaaaaaaaac
 
+/((((((((((((x))))))))))))\12/
+    xx
+
+/A[\8]B[\9]C/
+    A8B9C
+
 # End of testinput1 

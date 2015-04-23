@@ -1868,9 +1868,9 @@ else
     Outside a character class, the digits are read as a decimal number. If the
     number is less than 10, or if there are that many previous extracting left
     brackets, it is a back reference. Otherwise, up to three octal digits are
-    read to form an escaped byte. Thus \123 is likely to be octal 123 (cf
-    \0123, which is octal 012 followed by the literal 3). If the octal value is
-    greater than 377, the least significant 8 bits are taken.
+    read to form an escaped character code. Thus \123 is likely to be octal 123
+    (cf \0123, which is octal 012 followed by the literal 3). If the octal
+    value is greater than 377, the least significant 8 bits are taken.
 
     Inside a character class, \ followed by a digit is always either a literal
     8 or 9 or an octal number. */
@@ -1899,18 +1899,24 @@ else
         *errorcodeptr = ERR61;
         break;
         }
-      if (s < 10 || s <= cb->bracount)  /* Check for back reference */
+        
+      /* \1 to \9 are always back references. \8x and \9x are too, unless there 
+      are an awful lot of previous captures; \1x to \7x are octal escapes if 
+      there are not that many previous captures. */ 
+ 
+      if (s < 10 || *oldptr >= CHAR_8 || s <= cb->bracount)
         {
-        escape = -s;
+        escape = -s;     /* Indicates a back reference */
         break;
         }
       ptr = oldptr;      /* Put the pointer back and fall through */
       }
 
-    /* Handle a digit following \ when the number is not a back reference. If
-    the first digit is 8 or 9, Perl used to generate a binary zero byte and
-    then treat the digit as a following literal. At least by Perl 5.18 this
-    changed so as not to insert the binary zero. */
+    /* Handle a digit following \ when the number is not a back reference, or 
+    we are within a character class. If the first digit is 8 or 9, Perl used to
+    generate a binary zero byte and then treat the digit as a following
+    literal. At least by Perl 5.18 this changed so as not to insert the binary
+    zero. */
 
     if ((c = *ptr) >= CHAR_8) break;
 

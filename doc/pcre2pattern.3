@@ -1,4 +1,4 @@
-.TH PCRE2PATTERN 3 "22 April 2015" "PCRE2 10.20"
+.TH PCRE2PATTERN 3 "23 April 2015" "PCRE2 10.20"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION DETAILS"
@@ -387,11 +387,13 @@ numbers, and \eg{} to specify back references. The following paragraphs
 describe the old, ambiguous syntax.
 .P
 The handling of a backslash followed by a digit other than 0 is complicated,
-and Perl has changed in recent releases, causing PCRE2 also to change. Outside
-a character class, PCRE2 reads the digit and any following digits as a decimal
-number. If the number is less than 8, or if there have been at least that many
-previous capturing left parentheses in the expression, the entire sequence is
-taken as a \fIback reference\fP. A description of how this works is given
+and Perl has changed over time, causing PCRE2 also to change.
+.P
+Outside a character class, PCRE2 reads the digit and any following digits as a
+decimal number. If the number is less than 10, begins with the digit 8 or 9, or
+if there are at least that many previous capturing left parentheses in the
+expression, the entire sequence is taken as a \fIback reference\fP. A
+description of how this works is given
 .\" HTML <a href="#backreferences">
 .\" </a>
 later,
@@ -399,14 +401,14 @@ later,
 following the discussion of
 .\" HTML <a href="#subpattern">
 .\" </a>
-parenthesized subpatterns.
+parenthesized subpatterns. 
 .\"
+Otherwise, up to three octal digits are read to form a character code.
 .P
-Inside a character class, or if the decimal number following \e is greater than
-7 and there have not been that many capturing subpatterns, PCRE2 handles \e8
-and \e9 as the literal characters "8" and "9", and otherwise re-reads up to
-three octal digits following the backslash, using them to generate a data
-character. Any subsequent digits stand for themselves. For example:
+Inside a character class, PCRE2 handles \e8 and \e9 as the literal characters
+"8" and "9", and otherwise reads up to three octal digits following the
+backslash, using them to generate a data character. Any subsequent digits stand
+for themselves. For example, outside a character class:
 .sp
   \e040   is another way of writing an ASCII space
 .\" JOIN
@@ -425,8 +427,7 @@ character. Any subsequent digits stand for themselves. For example:
   \e377   might be a back reference, otherwise
             the value 255 (decimal)
 .\" JOIN
-  \e81    is either a back reference, or the two
-            characters "8" and "1"
+  \e81    is always a back reference
 .sp
 Note that octal values of 100 or greater that are specified using this syntax
 must not be introduced by a leading zero, because no more than three octal
@@ -3337,6 +3338,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 22 April 2015
+Last updated: 23 April 2015
 Copyright (c) 1997-2015 University of Cambridge.
 .fi

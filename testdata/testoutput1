@@ -9427,4 +9427,24 @@ No match
  0: aaaaaaaaa
  1: a
 
+/((((((((((((x))))))))))))\12/
+    xx
+ 0: xx
+ 1: x
+ 2: x
+ 3: x
+ 4: x
+ 5: x
+ 6: x
+ 7: x
+ 8: x
+ 9: x
+10: x
+11: x
+12: x
+
+/A[\8]B[\9]C/
+    A8B9C
+ 0: A8B9C
+
 # End of testinput1 

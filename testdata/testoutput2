@@ -14318,4 +14318,34 @@ No match
  0: 
  0: 
 
+/((((((((x))))))))\81/
+Failed: error 115 at offset 20: reference to non-existent subpattern
+    xx1
+
+/((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((x))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))\80/
+    xx
+Matched, but too many substrings
+ 0: xx
+ 1: x
+ 2: x
+ 3: x
+ 4: x
+ 5: x
+ 6: x
+ 7: x
+ 8: x
+ 9: x
+10: x
+11: x
+12: x
+13: x
+14: x
+
+/\80/
+Failed: error 115 at offset 3: reference to non-existent subpattern
+
+/A\8B\9C/
+Failed: error 115 at offset 7: reference to non-existent subpattern
+    A8B9C
+
 # End of testinput2 
