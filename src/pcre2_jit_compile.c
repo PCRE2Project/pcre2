@@ -54,7 +54,12 @@ system files. */
 #define SLJIT_CONFIG_AUTO 1
 #define SLJIT_CONFIG_STATIC 1
 #define SLJIT_VERBOSE 0
+
+#ifdef PCRE2_DEBUG
+#define SLJIT_DEBUG 1
+#else
 #define SLJIT_DEBUG 0
+#endif
 
 #define SLJIT_MALLOC(size, allocator_data) pcre2_jit_malloc(size, allocator_data)
 #define SLJIT_FREE(ptr, allocator_data) pcre2_jit_free(ptr, allocator_data)

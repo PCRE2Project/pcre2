@@ -67,6 +67,7 @@
 # 2013-10-08 PH got rid of the "source" command, which is a bash-ism (use ".")
 # 2013-11-05 PH added support for PARENS_NEST_LIMIT
 # 2014-08-29 PH converted the file for PCRE2 (which has no C++).
+# 2015-04024 PH added support for PCRE2_DEBUG
 
 PROJECT(PCRE2 C)
 
@@ -117,6 +118,8 @@ OPTION(PCRE2_BUILD_PCRE2_8 "Build 8 bit PCRE2 library" ON)
 OPTION(PCRE2_BUILD_PCRE2_16 "Build 16 bit PCRE2 library" OFF)
 
 OPTION(PCRE2_BUILD_PCRE2_32 "Build 32 bit PCRE2 library" OFF)
+
+OPTION(PCRE2_DEBUG "Include debugging code" OFF)
 
 SET(PCRE2_EBCDIC OFF CACHE BOOL
     "Use EBCDIC coding instead of ASCII. (This is rarely used outside of mainframe systems.)")

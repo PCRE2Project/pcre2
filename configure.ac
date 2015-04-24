@@ -130,12 +130,18 @@ AC_ARG_ENABLE(pcre2-32,
               , enable_pcre2_32=unset)
 AC_SUBST(enable_pcre2_32)
 
+# Handle --dnable-debug (disabled by default)
+AC_ARG_ENABLE(debug,
+              AS_HELP_STRING([--enable-debug],
+                             [enable debugging code]),
+              , enable_debug=no)                 
+
 # Handle --enable-jit (disabled by default)
 AC_ARG_ENABLE(jit,
               AS_HELP_STRING([--enable-jit],
                              [enable Just-In-Time compiling support]),
               , enable_jit=no)
-
+              
 # Handle --disable-pcre2grep-jit (enabled by default)
 AC_ARG_ENABLE(pcre2grep-jit,
               AS_HELP_STRING([--disable-pcre2grep-jit],
@@ -381,6 +387,7 @@ AC_CHECK_HEADERS([windows.h], [HAVE_WINDOWS_H=1])
 AM_CONDITIONAL(WITH_PCRE2_8, test "x$enable_pcre2_8" = "xyes")
 AM_CONDITIONAL(WITH_PCRE2_16, test "x$enable_pcre2_16" = "xyes")
 AM_CONDITIONAL(WITH_PCRE2_32, test "x$enable_pcre2_32" = "xyes")
+AM_CONDITIONAL(WITH_DEBUG, test "x$enable_debug" = "xyes")
 AM_CONDITIONAL(WITH_REBUILD_CHARTABLES, test "x$enable_rebuild_chartables" = "xyes")
 AM_CONDITIONAL(WITH_JIT, test "x$enable_jit" = "xyes")
 AM_CONDITIONAL(WITH_UNICODE, test "x$enable_unicode" = "xyes")
@@ -503,6 +510,11 @@ if test "$enable_pcre2_32" = "yes"; then
   AC_DEFINE([SUPPORT_PCRE2_32], [], [
     Define to any value to enable the 32 bit PCRE2 library.])
 fi
+
+if test "$enable_debug" = "yes"; then
+  AC_DEFINE([PCRE2_DEBUG], [], [
+    Define to any value to include debugging code.])
+fi      
 
 # Unless running under Windows, JIT support requires pthreads.
 
@@ -864,6 +876,7 @@ $PACKAGE-$VERSION configuration summary:
     Build 8-bit pcre2 library ....... : ${enable_pcre2_8}
     Build 16-bit pcre2 library ...... : ${enable_pcre2_16}
     Build 32-bit pcre2 library ...... : ${enable_pcre2_32}
+    Include debugging code .......... : ${enable_debug} 
     Enable JIT compiling support .... : ${enable_jit}
     Enable Unicode support .......... : ${enable_unicode}
     Newline char/sequence ........... : ${enable_newline}

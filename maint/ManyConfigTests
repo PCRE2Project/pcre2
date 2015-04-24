@@ -184,7 +184,7 @@ runtest()
 # Update the total count whenever a new test is added; it is used to show
 # progess as each test is run.
 
-testtotal=`expr 20 \* $usemain + \
+testtotal=`expr 21 \* $usemain + \
   1 \* $usetmp + \
   1 \* $ISGCC \* $usemain + \
   1 \* $ISGCC \* $usemain \* $useasan + \
@@ -239,6 +239,10 @@ echo "---------- CFLAGS for the remaining tests ----------"
 echo "CFLAGS=$CFLAGS"
 
 if [ $usemain -ne 0 ]; then
+  echo "---------- Maximally configured test with --enable-debug ----------"
+  opts="--disable-shared $enable_jit --enable-pcre2-16 --enable-pcre2-32 --enable-debug"
+  runtest
+
   echo "---------- Non-JIT tests in the current directory ----------"
   for opts in \
     "" \

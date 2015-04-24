@@ -1,4 +1,4 @@
-.TH PCRE2BUILD 3 "13 April 2015" "PCRE2 10.20"
+.TH PCRE2BUILD 3 "23 April 2015" "PCRE2 10.20"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .
@@ -410,6 +410,17 @@ automatically included, you may need to add something like
 immediately before the \fBconfigure\fP command.
 .
 .
+.SH "INCLUDING DEBUGGING CODE"
+.rs
+.sp
+If you add
+.sp
+  --enable-debug
+.sp
+to the \fBconfigure\fP command, additional debugging code is included in the 
+build. This feature is intended for use by the PCRE2 maintainers.   
+.
+.
 .SH "DEBUGGING WITH VALGRIND SUPPORT"
 .rs
 .sp
@@ -499,6 +510,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 13 April 2015
+Last updated: 24 April 2015
 Copyright (c) 1997-2015 University of Cambridge.
 .fi
