@@ -5,15 +5,15 @@
 # selected, depending on which build-time options were used.
 #
 # When JIT support is available, all appropriate tests are run with and without
-# JIT, unless "nojit" is given on the command line. There are also two tests
+# JIT, unless "-nojit" is given on the command line. There are also two tests
 # for JIT-specific features, one to be run when JIT support is available
-# (unless "nojit" is specified), and one when it is not.
+# (unless "-nojit" is specified), and one when it is not.
 #
 # Whichever of the 8-, 16- and 32-bit libraries exist are tested. It is also
 # possible to select which to test by giving "-8", "-16" or "-32" on the
 # command line.
 #
-# As well as "nojit", "-8", "-16", and "-32", arguments for this script are
+# As well as "-nojit", "-8", "-16", and "-32", arguments for this script are
 # individual test numbers, ranges of tests such as 3-6 or 3- (meaning 3 to the
 # end), or a number preceded by ~ to exclude a test. For example, "3-15 ~10"
 # runs tests 3 to 15, excluding test 10, and just "~10" runs all the tests
@@ -24,17 +24,21 @@
 # example, if JIT support is not compiled, test 16 is skipped, whereas if JIT
 # support is compiled, test 15 is skipped.
 #
-# Other arguments can be one of the words "valgrind", "valgrind-log", or "sim"
-# followed by an argument to run cross-compiled executables under a simulator,
-# for example:
+# Other arguments can be one of the words "-valgrind", "-valgrind-log", or 
+# "-sim" followed by an argument to run cross-compiled executables under a 
+# simulator, for example:
 #
-# RunTest 3 sim "qemu-arm -s 8388608"
+# RunTest 3 -sim "qemu-arm -s 8388608"
+#
+# For backwards compatibility, -nojit, -valgrind, -valgrind-log, and -sim may
+# be given without the leading "-" character.
 #
 # There are two special cases where only one argument is allowed:
 #
 # If the first and only argument is "ebcdic", the script runs the special
 # EBCDIC test that can be useful for checking certain EBCDIC features, even
-# when run in an ASCII environment.
+# when run in an ASCII environment. PCRE2 must be built with EBCDIC support for
+# this test to be run.
 #
 # If the script is obeyed as "RunTest list", a list of available tests is
 # output, but none of them are run.
@@ -236,10 +240,10 @@ while [ $# -gt 0 ] ; do
    -8) arg8=yes;;
   -16) arg16=yes;;
   -32) arg32=yes;;
-   nojit) nojit=yes;;
-   sim) shift; sim=$1;;
-   valgrind) valgrind="valgrind --tool=memcheck -q --smc-check=all";;
-   valgrind-log) valgrind="valgrind --tool=memcheck --num-callers=30 --leak-check=no --error-limit=no --smc-check=all --log-file=report.%p ";;
+   nojit|-nojit) nojit=yes;;
+   sim|-sim) shift; sim=$1;;
+   valgrind|-valgrind) valgrind="valgrind --tool=memcheck -q --smc-check=all";;
+   valgrind-log|-valgrind-log) valgrind="valgrind --tool=memcheck --num-callers=30 --leak-check=no --error-limit=no --smc-check=all --log-file=report.%p ";;
    ~*)
      if expr "$1" : '~[0-9][0-9]*$' >/dev/null; then
        skip="$skip `expr "$1" : '~\([0-9]*\)*$'`"
@@ -695,7 +699,7 @@ for bmode in "$test8" "$test16" "$test32"; do
   if [ $do16 = yes ] ; then
     echo $title16
     if [ $jit -eq 0 -o "$nojit" = "yes" ] ; then
-      echo "  Skipped because JIT is not available or not usable"
+      echo "  Skipped because JIT is not available or nojit was specified"
     else
       $sim $valgrind ./pcre2test -q $bmode $testdata/testinput16 testtry
       checkresult $? 16 ""
