@@ -428,6 +428,7 @@ typedef struct compiler_common {
   jump_list *caselesscmp;
   jump_list *reset_match;
   BOOL unset_backref;
+  BOOL alt_circumflex;
 #ifdef SUPPORT_UNICODE
   BOOL utf;
   BOOL use_ucp;
@@ -5540,7 +5541,9 @@ switch(type)
   jump[0] = JUMP(SLJIT_JUMP);
   JUMPHERE(jump[1]);
 
-  add_jump(compiler, backtracks, CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0));
+  if (!common->alt_circumflex)
+    add_jump(compiler, backtracks, CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0));
+
   if (common->nltype == NLTYPE_FIXED && common->newline > 255)
     {
     OP2(SLJIT_SUB, TMP2, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(2));
@@ -9877,6 +9880,7 @@ common->ctypes = (sljit_sw)(tables + ctypes_offset);
 common->name_count = re->name_count;
 common->name_entry_size = re->name_entry_size;
 common->unset_backref = (re->overall_options & PCRE2_MATCH_UNSET_BACKREF) != 0;
+common->alt_circumflex = (re->overall_options & PCRE2_ALT_CIRCUMFLEX) != 0;
 #ifdef SUPPORT_UNICODE
 /* PCRE_UTF[16|32] have the same value as PCRE_UTF8. */
 common->utf = (re->overall_options & PCRE2_UTF) != 0;
