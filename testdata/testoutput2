@@ -14348,4 +14348,47 @@ Failed: error 115 at offset 3: reference to non-existent subpattern
 Failed: error 115 at offset 7: reference to non-existent subpattern
     A8B9C
 
+/.((?2)(?R)|\1|$)()/B
+------------------------------------------------------------------
+        Bra
+        Any
+        Once
+        CBra 1
+        Recurse
+        Recurse
+        Alt
+        \1
+        Alt
+        $
+        Ket
+        Ket
+        CBra 2
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+
+/.((?3)(?R)()(?2)|\1|$)()/B
+------------------------------------------------------------------
+        Bra
+        Any
+        Once
+        CBra 1
+        Recurse
+        Recurse
+        CBra 2
+        Ket
+        Recurse
+        Alt
+        \1
+        Alt
+        $
+        Ket
+        Ket
+        CBra 3
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+
 # End of testinput2 

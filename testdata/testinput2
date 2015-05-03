@@ -4290,4 +4290,8 @@ a random value. /Ix
 /A\8B\9C/
     A8B9C
 
+/.((?2)(?R)|\1|$)()/B
+
+/.((?3)(?R)()(?2)|\1|$)()/B
+
 # End of testinput2 

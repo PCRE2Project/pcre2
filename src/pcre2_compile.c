@@ -2605,11 +2605,12 @@ have their offsets adjusted. That is one of the jobs of this function. Before
 it is called, the partially compiled regex must be temporarily terminated with
 OP_END.
 
-This function has been extended with the possibility of forward references for
-recursions and subroutine calls. It must also check the list of such references
-for the group we are dealing with. If it finds that one of the recursions in
-the current group is on this list, it adjusts the offset in the list, not the
-value in the reference (which is a group number).
+This function has been extended to cope with forward references for recursions
+and subroutine calls. It must check the list of such references for the
+group we are dealing with. If it finds that one of the recursions in the
+current group is on this list, it does not adjust the value in the reference
+(which is a group number). After the group has been scanned, all the offsets in 
+the forward reference list for the group are adjusted.
 
 Arguments:
   group             points to the start of the group
@@ -2625,29 +2626,24 @@ static void
 adjust_recurse(PCRE2_UCHAR *group, int adjust, BOOL utf, compile_block *cb,
   size_t save_hwm_offset)
 {
+uint32_t offset;
+PCRE2_UCHAR *hc;
 PCRE2_UCHAR *ptr = group;
+
+/* Scan the group for recursions. For each one found, check the forward 
+reference list. */
 
 while ((ptr = (PCRE2_UCHAR *)find_recurse(ptr, utf)) != NULL)
   {
-  int offset;
-  PCRE2_UCHAR *hc;
-
-  /* See if this recursion is on the forward reference list. If so, adjust the
-  reference. */
-
   for (hc = (PCRE2_UCHAR *)cb->start_workspace + save_hwm_offset; hc < cb->hwm;
        hc += LINK_SIZE)
     {
     offset = (int)GET(hc, 0);
-    if (cb->start_code + offset == ptr + 1)
-      {
-      PUT(hc, 0, offset + adjust);
-      break;
-      }
+    if (cb->start_code + offset == ptr + 1) break;
     }
 
-  /* Otherwise, adjust the recursion offset if it's after the start of this
-  group. */
+  /* If we have not found this recursion on the forward reference list, adjust
+  the recursion's offset if it's after the start of this group. */
 
   if (hc >= cb->hwm)
     {
@@ -2657,6 +2653,15 @@ while ((ptr = (PCRE2_UCHAR *)find_recurse(ptr, utf)) != NULL)
 
   ptr += 1 + LINK_SIZE;
   }
+  
+/* Now adjust all forward reference offsets for the group. */
+
+for (hc = (PCRE2_UCHAR *)cb->start_workspace + save_hwm_offset; hc < cb->hwm;
+     hc += LINK_SIZE)
+  {
+  offset = (int)GET(hc, 0);
+  PUT(hc, 0, offset + adjust);
+  } 
 }
 
 
@@ -7111,7 +7116,8 @@ for (;;)
     /* If it was a capturing subpattern, check to see if it contained any
     recursive back references. If so, we must wrap it in atomic brackets.
     Because we are moving code along, we must ensure that any pending recursive
-    references are updated. In any event, remove the block from the chain. */
+    or forward subroutine references are updated. In any event, remove the
+    block from the chain. */
 
     if (capnumber > 0)
       {

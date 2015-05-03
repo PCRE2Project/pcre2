@@ -100,6 +100,12 @@ behaviour.
 25. Static linking against the PCRE2 library using the pkg-config module was
 failing on missing pthread symbols.
 
+26. If a group that contained a recursive back reference also contained a 
+forward reference subroutine call followed by a non-forward-reference 
+subroutine call, for example /.((?2)(?R)\1)()/, pcre2_compile() failed to 
+compile correct code, leading to undefined behaviour or an internally detected 
+error. This bug was discovered by the LLVM fuzzer.
+
 
 Version 10.10 06-March-2015
 ---------------------------
