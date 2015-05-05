@@ -3088,6 +3088,7 @@ Arguments:
   reqcuflagsptr     place to put the last required code unit flags, or a negative number
   bcptr             points to current branch chain
   cond_depth        conditional nesting depth
+  save_hwm_offset   high water mark for the start of the group 
   cb                contains pointers to tables etc.
   lengthptr         NULL during the real compile phase
                     points to length accumulator during pre-compile phase
@@ -3102,6 +3103,7 @@ compile_branch(uint32_t *optionsptr, PCRE2_UCHAR **codeptr,
   uint32_t *firstcuptr, int32_t *firstcuflagsptr,
   uint32_t *reqcuptr, int32_t *reqcuflagsptr,
   branch_chain *bcptr, int cond_depth,
+  size_t save_hwm_offset, 
   compile_block *cb, size_t *lengthptr)
 {
 int repeat_min = 0, repeat_max = 0;      /* To please picky compilers */
@@ -3129,7 +3131,6 @@ PCRE2_SPTR tempptr;
 PCRE2_SPTR nestptr = NULL;
 PCRE2_UCHAR *previous = NULL;
 PCRE2_UCHAR *previous_callout = NULL;
-size_t save_hwm_offset = 0;
 uint8_t classbits[32];
 
 /* We can fish out the UTF setting once and for all into a BOOL, but we must
@@ -6979,7 +6980,7 @@ for (;;)
 
   if (!compile_branch(&options, &code, &ptr, errorcodeptr, &branchfirstcu,
         &branchfirstcuflags, &branchreqcu, &branchreqcuflags, &bc,
-        cond_depth, cb, (lengthptr == NULL)? NULL : &length))
+        cond_depth, save_hwm_offset, cb, (lengthptr == NULL)? NULL : &length))
     {
     *ptrptr = ptr;
     return FALSE;

@@ -14391,4 +14391,6 @@ Failed: error 115 at offset 7: reference to non-existent subpattern
         End
 ------------------------------------------------------------------
 
+/(?1)()((((((\1++))\x85)+)|))/
+
 # End of testinput2 
