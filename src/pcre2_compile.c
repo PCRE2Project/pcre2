@@ -49,6 +49,17 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #include "pcre2_internal.h"
 
+/* In rare error cases debugging might require calling pcre2_printint(). */
+
+#if 0
+#ifdef EBCDIC
+#define PRINTABLE(c) ((c) >= 64 && (c) < 255)
+#else
+#define PRINTABLE(c) ((c) >= 32 && (c) < 127)
+#endif
+#include "pcre2_printint.c"
+#define CALL_PRINTINT
+#endif
 
 /* There are a few things that vary with different code unit sizes. Handle them
 by defining macros in order to minimize #if usage. */
@@ -1899,11 +1910,11 @@ else
         *errorcodeptr = ERR61;
         break;
         }
-        
-      /* \1 to \9 are always back references. \8x and \9x are too, unless there 
-      are an awful lot of previous captures; \1x to \7x are octal escapes if 
-      there are not that many previous captures. */ 
- 
+
+      /* \1 to \9 are always back references. \8x and \9x are too, unless there
+      are an awful lot of previous captures; \1x to \7x are octal escapes if
+      there are not that many previous captures. */
+
       if (s < 10 || *oldptr >= CHAR_8 || s <= cb->bracount)
         {
         escape = -s;     /* Indicates a back reference */
@@ -1912,7 +1923,7 @@ else
       ptr = oldptr;      /* Put the pointer back and fall through */
       }
 
-    /* Handle a digit following \ when the number is not a back reference, or 
+    /* Handle a digit following \ when the number is not a back reference, or
     we are within a character class. If the first digit is 8 or 9, Perl used to
     generate a binary zero byte and then treat the digit as a following
     literal. At least by Perl 5.18 this changed so as not to insert the binary
@@ -2609,7 +2620,7 @@ This function has been extended to cope with forward references for recursions
 and subroutine calls. It must check the list of such references for the
 group we are dealing with. If it finds that one of the recursions in the
 current group is on this list, it does not adjust the value in the reference
-(which is a group number). After the group has been scanned, all the offsets in 
+(which is a group number). After the group has been scanned, all the offsets in
 the forward reference list for the group are adjusted.
 
 Arguments:
@@ -2630,7 +2641,7 @@ uint32_t offset;
 PCRE2_UCHAR *hc;
 PCRE2_UCHAR *ptr = group;
 
-/* Scan the group for recursions. For each one found, check the forward 
+/* Scan the group for recursions. For each one found, check the forward
 reference list. */
 
 while ((ptr = (PCRE2_UCHAR *)find_recurse(ptr, utf)) != NULL)
@@ -2653,7 +2664,7 @@ while ((ptr = (PCRE2_UCHAR *)find_recurse(ptr, utf)) != NULL)
 
   ptr += 1 + LINK_SIZE;
   }
-  
+
 /* Now adjust all forward reference offsets for the group. */
 
 for (hc = (PCRE2_UCHAR *)cb->start_workspace + save_hwm_offset; hc < cb->hwm;
@@ -2661,7 +2672,7 @@ for (hc = (PCRE2_UCHAR *)cb->start_workspace + save_hwm_offset; hc < cb->hwm;
   {
   offset = (int)GET(hc, 0);
   PUT(hc, 0, offset + adjust);
-  } 
+  }
 }
 
 
@@ -3088,7 +3099,6 @@ Arguments:
   reqcuflagsptr     place to put the last required code unit flags, or a negative number
   bcptr             points to current branch chain
   cond_depth        conditional nesting depth
-  save_hwm_offset   high water mark for the start of the group 
   cb                contains pointers to tables etc.
   lengthptr         NULL during the real compile phase
                     points to length accumulator during pre-compile phase
@@ -3103,7 +3113,6 @@ compile_branch(uint32_t *optionsptr, PCRE2_UCHAR **codeptr,
   uint32_t *firstcuptr, int32_t *firstcuflagsptr,
   uint32_t *reqcuptr, int32_t *reqcuflagsptr,
   branch_chain *bcptr, int cond_depth,
-  size_t save_hwm_offset, 
   compile_block *cb, size_t *lengthptr)
 {
 int repeat_min = 0, repeat_max = 0;      /* To please picky compilers */
@@ -3119,6 +3128,7 @@ int32_t req_caseopt, reqvary, tempreqvary;
 int after_manual_callout = 0;
 int escape;
 size_t length_prevgroup = 0;
+size_t item_hwm_offset = 0;
 register uint32_t c;
 register PCRE2_UCHAR *code = *codeptr;
 PCRE2_UCHAR *last_code = code;
@@ -3425,6 +3435,7 @@ for (;; ptr++)
     zeroreqcu = reqcu;
     zeroreqcuflags = reqcuflags;
     previous = code;
+    item_hwm_offset = cb->hwm - cb->start_workspace;
     *code++ = ((options & PCRE2_DOTALL) != 0)? OP_ALLANY: OP_ANY;
     break;
 
@@ -3471,6 +3482,7 @@ for (;; ptr++)
     /* Handle a real character class. */
 
     previous = code;
+    item_hwm_offset = cb->hwm - cb->start_workspace;
 
     /* PCRE supports POSIX class stuff inside a class. Perl gives an error if
     they are encountered at the top level, so we'll do that too. */
@@ -4540,7 +4552,7 @@ for (;; ptr++)
       {
       register int i;
       int len = (int)(code - previous);
-      size_t base_hwm_offset = save_hwm_offset;
+      size_t base_hwm_offset = item_hwm_offset;
       PCRE2_UCHAR *bralink = NULL;
       PCRE2_UCHAR *brazeroptr = NULL;
 
@@ -4597,7 +4609,7 @@ for (;; ptr++)
         if (repeat_max <= 1)    /* Covers 0, 1, and unlimited */
           {
           *code = OP_END;
-          adjust_recurse(previous, 1, utf, cb, save_hwm_offset);
+          adjust_recurse(previous, 1, utf, cb, item_hwm_offset);
           memmove(previous + 1, previous, CU2BYTES(len));
           code++;
           if (repeat_max == 0)
@@ -4621,7 +4633,7 @@ for (;; ptr++)
           {
           int offset;
           *code = OP_END;
-          adjust_recurse(previous, 2 + LINK_SIZE, utf, cb, save_hwm_offset);
+          adjust_recurse(previous, 2 + LINK_SIZE, utf, cb, item_hwm_offset);
           memmove(previous + 2 + LINK_SIZE, previous, CU2BYTES(len));
           code += 2 + LINK_SIZE;
           *previous++ = OP_BRAZERO + repeat_type;
@@ -4879,7 +4891,7 @@ for (;; ptr++)
               {
               int nlen = (int)(code - bracode);
               *code = OP_END;
-              adjust_recurse(bracode, 1 + LINK_SIZE, utf, cb, save_hwm_offset);
+              adjust_recurse(bracode, 1 + LINK_SIZE, utf, cb, item_hwm_offset);
               memmove(bracode + 1 + LINK_SIZE, bracode, CU2BYTES(nlen));
               code += 1 + LINK_SIZE;
               nlen += 1 + LINK_SIZE;
@@ -5014,7 +5026,7 @@ for (;; ptr++)
         else
           {
           *code = OP_END;
-          adjust_recurse(tempcode, 1 + LINK_SIZE, utf, cb, save_hwm_offset);
+          adjust_recurse(tempcode, 1 + LINK_SIZE, utf, cb, item_hwm_offset);
           memmove(tempcode + 1 + LINK_SIZE, tempcode, CU2BYTES(len));
           code += 1 + LINK_SIZE;
           len += 1 + LINK_SIZE;
@@ -5190,7 +5202,6 @@ for (;; ptr++)
     newoptions = options;
     skipunits = 0;
     bravalue = OP_CBRA;
-    save_hwm_offset = cb->hwm - cb->start_workspace;
     reset_bracount = FALSE;
 
     /* Deal with the extended parentheses; all are introduced by '?', and the
@@ -6010,6 +6021,7 @@ for (;; ptr++)
             {
             if (firstcuflags == REQ_UNSET) firstcuflags = REQ_NONE;
             previous = code;
+            item_hwm_offset = cb->hwm - cb->start_workspace;
             *code++ = ((options & PCRE2_CASELESS) != 0)? OP_DNREFI : OP_DNREF;
             PUT2INC(code, 0, index);
             PUT2INC(code, 0, count);
@@ -6123,6 +6135,7 @@ for (;; ptr++)
           HANDLE_RECURSION:
 
           previous = code;
+          item_hwm_offset = cb->hwm - cb->start_workspace;
           called = cb->start_code;
 
           /* When we are actually compiling, find the bracket that is being
@@ -6324,7 +6337,11 @@ for (;; ptr++)
       previous = NULL;
       cb->iscondassert = FALSE;
       }
-    else previous = code;
+    else
+      {
+      previous = code;
+      item_hwm_offset = cb->hwm - cb->start_workspace;
+      }
 
     *code = bravalue;
     tempcode = code;
@@ -6574,9 +6591,6 @@ for (;; ptr++)
         PCRE2_SPTR p;
         uint32_t cf;
 
-        /* Normally save_hwm_offset is set when '(' is read */
-
-        save_hwm_offset = cb->hwm - cb->start_workspace;
         terminator = (*(++ptr) == CHAR_LESS_THAN_SIGN)?
           CHAR_GREATER_THAN_SIGN : CHAR_APOSTROPHE;
 
@@ -6644,6 +6658,7 @@ for (;; ptr++)
         HANDLE_REFERENCE:
         if (firstcuflags == REQ_UNSET) firstcuflags = REQ_NONE;
         previous = code;
+        item_hwm_offset = cb->hwm - cb->start_workspace;
         *code++ = ((options & PCRE2_CASELESS) != 0)? OP_REFI : OP_REF;
         PUT2INC(code, 0, recno);
         cb->backref_map |= (recno < 32)? (1 << recno) : 1;
@@ -6673,6 +6688,7 @@ for (;; ptr++)
         if (!get_ucp(&ptr, &negated, &ptype, &pdata, errorcodeptr, cb))
           goto FAILED;
         previous = code;
+        item_hwm_offset = cb->hwm - cb->start_workspace;
         *code++ = ((escape == ESC_p) != negated)? OP_PROP : OP_NOTPROP;
         *code++ = ptype;
         *code++ = pdata;
@@ -6721,6 +6737,7 @@ for (;; ptr++)
 
           {
           previous = (escape > ESC_b && escape < ESC_Z)? code : NULL;
+          item_hwm_offset = cb->hwm - cb->start_workspace;
           *code++ = (!utf && escape == ESC_C)? OP_ALLANY : escape;
           }
         }
@@ -6755,6 +6772,7 @@ for (;; ptr++)
 
     ONE_CHAR:
     previous = code;
+    item_hwm_offset = cb->hwm - cb->start_workspace;
 
     /* For caseless UTF mode, check whether this character has more than one
     other case. If so, generate a special OP_PROP item instead of OP_CHARI. */
@@ -6980,7 +6998,7 @@ for (;;)
 
   if (!compile_branch(&options, &code, &ptr, errorcodeptr, &branchfirstcu,
         &branchfirstcuflags, &branchreqcu, &branchreqcuflags, &bc,
-        cond_depth, save_hwm_offset, cb, (lengthptr == NULL)? NULL : &length))
+        cond_depth, cb, (lengthptr == NULL)? NULL : &length))
     {
     *ptrptr = ptr;
     return FALSE;
@@ -7992,6 +8010,8 @@ if (cb.names_found > 0)
 error, errorcode will be set non-zero, so we don't need to look at the result
 of the function here. */
 
+/* fprintf(stderr, "+++\n\nPASS TWO\n"); */
+
 ptr = pattern + skipatstart;
 code = (PCRE2_UCHAR *)codestart;
 *code = OP_BRA;
@@ -8026,6 +8046,13 @@ if (usedlength > length) errorcode = ERR23; else
 #endif
   }
 
+/* In rare debugging situations we sometimes need to look at the compiled code
+at this stage. */
+
+#ifdef CALL_PRINTINT
+pcre2_printint(re, stderr, TRUE);
+#endif
+
 /* Fill in any forward references that are required. There may be repeated
 references; optimize for them, as searching a large regex takes time. The
 test of errorcode inside the loop means that nothing is done if it is already
@@ -8041,6 +8068,9 @@ if (cb.hwm > cb.start_workspace)
     cb.hwm -= LINK_SIZE;
     offset = GET(cb.hwm, 0);
     recno = GET(codestart, offset);
+
+/* fprintf(stderr, "+++offset=%d recno=%d\n", offset, recno); */
+
     if (recno != prev_recno)
       {
       groupptr = PRIV(find_bracket)(codestart, utf, recno);

@@ -14391,6 +14391,10 @@ Failed: error 115 at offset 7: reference to non-existent subpattern
         End
 ------------------------------------------------------------------
 
-/(?1)()((((((\1++))\x85)+)|))/
+/(\9*+(?2);\3++()2|)++{/
+Failed: error 115 at offset 22: reference to non-existent subpattern
+
+/\V\x85\9*+((?2)\3++()2)*:2/
+Failed: error 115 at offset 26: reference to non-existent subpattern
 
 # End of testinput2 

@@ -43,7 +43,8 @@ POSSIBILITY OF SUCH DAMAGE.
 internal form of a compiled regular expression, along with some supporting
 local functions. This source file is #included in pcre2test.c at each supported
 code unit width, with PCRE2_SUFFIX set appropriately, just like the functions
-that comprise the library. */
+that comprise the library. It can also optionally be included in
+pcre2_compile.c for detailed debugging in error situations. */
 
 
 /* Tables of operator names. The same 8-bit table is used for all code unit
@@ -138,9 +139,9 @@ if ((c & 0xc0) != 0xc0)
 else
   {
   int i;
-  int a = utf8_table4[c & 0x3f];  /* Number of additional bytes */
+  int a = PRIV(utf8_table4)[c & 0x3f];  /* Number of additional bytes */
   int s = 6*a;
-  c = (c & utf8_table3[a]) << s;
+  c = (c & PRIV(utf8_table3)[a]) << s;
   for (i = 1; i <= a; i++)
     {
     if ((ptr[i] & 0xc0) != 0x80)
@@ -223,12 +224,11 @@ get_ucpname(unsigned int ptype, unsigned int pvalue)
 {
 #ifdef SUPPORT_UNICODE
 int i;
-for (i = utt_size - 1; i >= 0; i--)
+for (i = PRIV(utt_size) - 1; i >= 0; i--)
   {
-  if (ptype == utt[i].type && pvalue == utt[i].value) break;
+  if (ptype == PRIV(utt)[i].type && pvalue == PRIV(utt)[i].value) break;
   }
-return (i >= 0)? utt_names + utt[i].name_offset : "??";
-
+return (i >= 0)? PRIV(utt_names) + PRIV(utt)[i].name_offset : "??";
 #else   /* No UTF support */
 (void)ptype;
 (void)pvalue;
@@ -266,7 +266,7 @@ if (code[1] != PT_CLIST)
 else
   {
   const char *not = (*code == OP_PROP)? "" : "not ";
-  const uint32_t *p = ucd_caseless_sets + code[2];
+  const uint32_t *p = PRIV(ucd_caseless_sets) + code[2];
   fprintf (f, "%s%sclist", before, not);
   while (*p < NOTACHAR) fprintf(f, " %04x", *p++);
   fprintf(f, "%s", after);
@@ -286,7 +286,7 @@ bytecode can be written that do not depend on the value of LINK_SIZE.
 Arguments:
   re              a compiled pattern
   f               the file to write to
-  print_lenghts   show various lengths
+  print_lengths   show various lengths
 
 Returns:          nothing
 */
@@ -305,7 +305,7 @@ for(;;)
   {
   PCRE2_SPTR ccode;
   uint32_t c;
-  int i; 
+  int i;
   const char *flag = "  ";
   unsigned int extra = 0;
 
@@ -600,17 +600,17 @@ for(;;)
     break;
 
     case OP_CALLOUT_STR:
-    c = code[1 + 4*LINK_SIZE]; 
+    c = code[1 + 4*LINK_SIZE];
     fprintf(f, "    %s %c", OP_names[*code], c);
     extra = GET(code, 1 + 2*LINK_SIZE);
     print_custring(f, code + 2 + 4*LINK_SIZE);
     for (i = 0; PRIV(callout_start_delims)[i] != 0; i++)
       if (c == PRIV(callout_start_delims)[i])
-        { 
-        c = PRIV(callout_end_delims)[i]; 
+        {
+        c = PRIV(callout_end_delims)[i];
         break;
-        }  
-    fprintf(f, "%c %d %d %d", c, GET(code, 1 + 3*LINK_SIZE), GET(code, 1), 
+        }
+    fprintf(f, "%c %d %d %d", c, GET(code, 1 + 3*LINK_SIZE), GET(code, 1),
       GET(code, 1 + LINK_SIZE));
     break;
 
