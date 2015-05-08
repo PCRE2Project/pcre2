@@ -5425,7 +5425,8 @@ for (;; ptr++)
         the referenced name is one of a number of duplicates, a different
         opcode is used and it needs more memory. Unfortunately we cannot tell
         whether this is the case in the first pass, so we have to allow for
-        more memory always. */
+        more memory always. In the second pass, the additional to skipunits
+        happens later. */
 
         else
           {
@@ -5445,7 +5446,7 @@ for (;; ptr++)
             ptr++;
             }
           namelen = (int)(ptr - name);
-          if (lengthptr != NULL) *lengthptr += IMM2_SIZE;
+          if (lengthptr != NULL) skipunits += IMM2_SIZE;
           }
 
         /* Check the terminator */
@@ -8010,8 +8011,6 @@ if (cb.names_found > 0)
 error, errorcode will be set non-zero, so we don't need to look at the result
 of the function here. */
 
-/* fprintf(stderr, "+++\n\nPASS TWO\n"); */
-
 ptr = pattern + skipatstart;
 code = (PCRE2_UCHAR *)codestart;
 *code = OP_BRA;
@@ -8068,9 +8067,6 @@ if (cb.hwm > cb.start_workspace)
     cb.hwm -= LINK_SIZE;
     offset = GET(cb.hwm, 0);
     recno = GET(codestart, offset);
-
-/* fprintf(stderr, "+++offset=%d recno=%d\n", offset, recno); */
-
     if (recno != prev_recno)
       {
       groupptr = PRIV(find_bracket)(codestart, utf, recno);
