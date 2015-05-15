@@ -26,12 +26,12 @@ pcre2_match() it worked by luck; in pcre2_dfa_match() it gave an incorrect
 error about an unsupported item.
 
 8. For some types of pattern, for example /Z*(|d*){216}/, the auto-
-possessification code could take exponential time to complete. A recursion 
-depth limit of 1000 has been imposed to limit the resources used by this 
+possessification code could take exponential time to complete. A recursion
+depth limit of 1000 has been imposed to limit the resources used by this
 optimization. This infelicity was discovered by the LLVM fuzzer.
 
-9. A pattern such as /(*UTF)[\S\V\H]/, which contains a negated special class 
-such as \S in non-UCP mode, explicit wide characters (> 255) can be ignored 
+9. A pattern such as /(*UTF)[\S\V\H]/, which contains a negated special class
+such as \S in non-UCP mode, explicit wide characters (> 255) can be ignored
 because \S ensures they are all in the class. The code for doing this was
 interacting badly with the code for computing the amount of space needed to
 compile the pattern, leading to a buffer overflow. This bug was discovered by
@@ -45,21 +45,21 @@ discovered by the LLVM fuzzer.
 between a subroutine call and its quantifier was incorrectly compiled, leading
 to buffer overflow or other errors. This bug was discovered by the LLVM fuzzer.
 
-12. The illegal pattern /(?(?<E>.*!.*)?)/ was not being diagnosed as missing an 
-assertion after (?(. The code was failing to check the character after (?(?< 
+12. The illegal pattern /(?(?<E>.*!.*)?)/ was not being diagnosed as missing an
+assertion after (?(. The code was failing to check the character after (?(?<
 for the ! or = that would indicate a lookbehind assertion. This bug was
 discovered by the LLVM fuzzer.
 
-13. A pattern such as /X((?2)()*+){2}+/ which has a possessive quantifier with 
-a fixed maximum following a group that contains a subroutine reference was 
-incorrectly compiled and could trigger buffer overflow. This bug was discovered 
+13. A pattern such as /X((?2)()*+){2}+/ which has a possessive quantifier with
+a fixed maximum following a group that contains a subroutine reference was
+incorrectly compiled and could trigger buffer overflow. This bug was discovered
 by the LLVM fuzzer.
 
-14. Negative relative recursive references such as (?-7) to non-existent 
-subpatterns were not being diagnosed and could lead to unpredictable behaviour. 
+14. Negative relative recursive references such as (?-7) to non-existent
+subpatterns were not being diagnosed and could lead to unpredictable behaviour.
 This bug was discovered by the LLVM fuzzer.
 
-15. The bug fixed in 14 was due to an integer variable that was unsigned when 
+15. The bug fixed in 14 was due to an integer variable that was unsigned when
 it should have been signed. Some other "int" variables, having been checked,
 have either been changed to uint32_t or commented as "must be signed".
 
@@ -73,47 +73,51 @@ lookbehind assertion. This bug was discovered by the LLVM fuzzer.
 18. There was a similar problem to 17 in pcre2test for global matches, though
 the code there did catch the loop.
 
-19. If a greedy quantified \X was preceded by \C in UTF mode (e.g. \C\X*), 
+19. If a greedy quantified \X was preceded by \C in UTF mode (e.g. \C\X*),
 and a subsequent item in the pattern caused a non-match, backtracking over the
 repeated \X did not stop, but carried on past the start of the subject, causing
 reference to random memory and/or a segfault. There were also some other cases
 where backtracking after \C could crash. This set of bugs was discovered by the
 LLVM fuzzer.
 
-20. The function for finding the minimum length of a matching string could take 
-a very long time if mutual recursion was present many times in a pattern, for 
-example, /((?2){73}(?2))((?1))/. A better mutual recursion detection method has 
+20. The function for finding the minimum length of a matching string could take
+a very long time if mutual recursion was present many times in a pattern, for
+example, /((?2){73}(?2))((?1))/. A better mutual recursion detection method has
 been implemented. This infelicity was discovered by the LLVM fuzzer.
 
 21. Implemented PCRE2_NEVER_BACKSLASH_C.
 
-22. The feature for string replication in pcre2test could read from freed 
+22. The feature for string replication in pcre2test could read from freed
 memory if the replication required a buffer to be extended, and it was not
-working properly in 16-bit and 32-bit modes. This issue was discovered by a 
+working properly in 16-bit and 32-bit modes. This issue was discovered by a
 fuzzer: see http://lcamtuf.coredump.cx/afl/.
 
 23. Added the PCRE2_ALT_CIRCUMFLEX option.
 
-24. Adjust the treatment of \8 and \9 to be the same as the current Perl 
+24. Adjust the treatment of \8 and \9 to be the same as the current Perl
 behaviour.
 
 25. Static linking against the PCRE2 library using the pkg-config module was
 failing on missing pthread symbols.
 
-26. If a group that contained a recursive back reference also contained a 
-forward reference subroutine call followed by a non-forward-reference 
-subroutine call, for example /.((?2)(?R)\1)()/, pcre2_compile() failed to 
-compile correct code, leading to undefined behaviour or an internally detected 
+26. If a group that contained a recursive back reference also contained a
+forward reference subroutine call followed by a non-forward-reference
+subroutine call, for example /.((?2)(?R)\1)()/, pcre2_compile() failed to
+compile correct code, leading to undefined behaviour or an internally detected
 error. This bug was discovered by the LLVM fuzzer.
 
-27. Quantification of certain items (e.g. atomic back references) could cause 
-incorrect code to be compiled when recursive forward references were involved. 
+27. Quantification of certain items (e.g. atomic back references) could cause
+incorrect code to be compiled when recursive forward references were involved.
 For example, in this pattern: /(?1)()((((((\1++))\x85)+)|))/. This bug was
 discovered by the LLVM fuzzer.
 
 28. A repeated conditional group whose condition was a reference by name caused
 a buffer overflow if there was more than one group with the given name. This
 bug was discovered by the LLVM fuzzer.
+
+29. A recursive back reference by name within a group that had the same name as
+another group caused a buffer overflow. For example: /(?J)(?'d'(?'d'\g{d}))/.
+This bug was discovered by the LLVM fuzzer.
 
 
 Version 10.10 06-March-2015

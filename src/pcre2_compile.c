@@ -5946,18 +5946,34 @@ for (;; ptr++)
             }
 
           /* The name table does not exist in the first pass; instead we must
-          scan the list of names encountered so far in order to get the
-          number. If the name is not found, set the value to 0 for a forward
-          reference. */
+          scan the list of names encountered so far in order to get a number.
+          If there are duplicates, there may be more than one number. For each
+          one, if handling a back reference, we must check to see if it is
+          recursive, that is, it is inside the group that it references. A flag
+          is set so that the group can be made atomic. If the name is not
+          found, set the value of recno to 0 for a forward reference. */
 
+          recno = 0;
           ng = cb->named_groups;
+           
           for (i = 0; i < cb->names_found; i++, ng++)
             {
             if (namelen == ng->length &&
                 PRIV(strncmp)(name, ng->name, namelen) == 0)
-              break;
+              {
+              open_capitem *oc;
+              recno = ng->number;
+              if (is_recurse) break;
+              for (oc = cb->open_caps; oc != NULL; oc = oc->next)
+                {
+                if (oc->number == recno)
+                  {
+                  oc->flag = TRUE;
+                  break;
+                  }
+                }
+              }
             }
-          recno = (i < cb->names_found)? ng->number : 0;
 
           /* If duplicate names are permitted, we have to allow for a named
           reference to a duplicated name (this cannot be determined until the
@@ -6002,8 +6018,8 @@ for (;; ptr++)
 
         if (is_recurse) goto HANDLE_RECURSION;
 
-        /* In the second pass we must see if the name is duplicated. If so, we
-        generate a different opcode. */
+        /* For back references, in the second pass we must see if the name is
+        duplicated. If so, we generate a different opcode. */
 
         if (lengthptr == NULL && cb->dupnames)
           {
@@ -6036,7 +6052,7 @@ for (;; ptr++)
               cb->backref_map |= (recno < 32)? (1 << recno) : 1;
               if ((uint32_t)recno > cb->top_backref) cb->top_backref = recno;
 
-              /* Check to see if this back reference is recursive, that it, it
+              /* Check to see if this back reference is recursive, that is, it
               is inside the group that it references. A flag is set so that the
               group can be made atomic. */
 
@@ -7138,7 +7154,7 @@ for (;;)
     Because we are moving code along, we must ensure that any pending recursive
     or forward subroutine references are updated. In any event, remove the
     block from the chain. */
-
+    
     if (capnumber > 0)
       {
       if (cb->open_caps->flag)
@@ -8050,6 +8066,7 @@ at this stage. */
 
 #ifdef CALL_PRINTINT
 pcre2_printint(re, stderr, TRUE);
+fprintf(stderr, "Length=%lu Used=%lu\n", length, usedlength);
 #endif
 
 /* Fill in any forward references that are required. There may be repeated
