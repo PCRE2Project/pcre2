@@ -9458,4 +9458,9 @@ No match
  6: 
  7: 
 
+"(?|(\k'Pm')|(?'Pm'))"
+    abcd
+ 0: 
+ 1: 
+
 # End of testinput1 

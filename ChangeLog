@@ -119,6 +119,10 @@ bug was discovered by the LLVM fuzzer.
 another group caused a buffer overflow. For example: /(?J)(?'d'(?'d'\g{d}))/.
 This bug was discovered by the LLVM fuzzer.
 
+30. A forward reference by name to a group whose number is the same as the
+current group, for example in this pattern: /(?|(\k'Pm')|(?'Pm'))/, caused a
+buffer overflow at compile time. This bug was discovered by the LLVM fuzzer.
+
 
 Version 10.10 06-March-2015
 ---------------------------

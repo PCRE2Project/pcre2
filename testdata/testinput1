@@ -5724,4 +5724,7 @@ name)/mark
 /(?1)()((((((\1++))\x85)+)|))/
     \x85\x85
 
+"(?|(\k'Pm')|(?'Pm'))"
+    abcd
+
 # End of testinput1 
