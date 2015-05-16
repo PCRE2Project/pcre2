@@ -6057,7 +6057,7 @@ for (;; ptr++)
               {
               open_capitem *oc;
               recno = GET2(slot, 0);
-              cb->backref_map |= (recno < 32)? (1 << recno) : 1;
+              cb->backref_map |= (recno < 32)? (1u << recno) : 1;
               if ((uint32_t)recno > cb->top_backref) cb->top_backref = recno;
 
               /* Check to see if this back reference is recursive, that is, it
@@ -6686,7 +6686,7 @@ for (;; ptr++)
         item_hwm_offset = cb->hwm - cb->start_workspace;
         *code++ = ((options & PCRE2_CASELESS) != 0)? OP_REFI : OP_REF;
         PUT2INC(code, 0, recno);
-        cb->backref_map |= (recno < 32)? (1 << recno) : 1;
+        cb->backref_map |= (recno < 32)? (1u << recno) : 1;
         if ((uint32_t)recno > cb->top_backref) cb->top_backref = recno;
 
         /* Check to see if this back reference is recursive, that it, it
@@ -7302,7 +7302,7 @@ do {
             op == OP_SCBRA || op == OP_SCBRAPOS)
      {
      int n = GET2(scode, 1+LINK_SIZE);
-     int new_map = bracket_map | ((n < 32)? (1 << n) : 1);
+     int new_map = bracket_map | ((n < 32)? (1u << n) : 1);
      if (!is_anchored(scode, new_map, cb, atomcount)) return FALSE;
      }
 
@@ -7426,7 +7426,7 @@ do {
             op == OP_SCBRA || op == OP_SCBRAPOS)
      {
      int n = GET2(scode, 1+LINK_SIZE);
-     int new_map = bracket_map | ((n < 32)? (1 << n) : 1);
+     int new_map = bracket_map | ((n < 32)? (1u << n) : 1);
      if (!is_startline(scode, new_map, cb, atomcount)) return FALSE;
      }
 

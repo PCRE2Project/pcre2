@@ -123,6 +123,9 @@ This bug was discovered by the LLVM fuzzer.
 current group, for example in this pattern: /(?|(\k'Pm')|(?'Pm'))/, caused a
 buffer overflow at compile time. This bug was discovered by the LLVM fuzzer.
 
+31. Fix -fsanitize=undefined warnings for left shifts of 1 by 31 (it treats 1 
+as an int; fixed by writing it as 1u).
+
 
 Version 10.10 06-March-2015
 ---------------------------
