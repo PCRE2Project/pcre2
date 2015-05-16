@@ -581,7 +581,7 @@ isdirectory(char *filename)
 struct stat statbuf;
 if (stat(filename, &statbuf) < 0)
   return 0;        /* In the expectation that opening as a file will fail */
-return (statbuf.st_mode & S_IFMT) == S_IFDIR;
+return S_ISDIR(statbuf.st_mode);
 }
 
 static directory_type *
@@ -618,7 +618,7 @@ isregfile(char *filename)
 struct stat statbuf;
 if (stat(filename, &statbuf) < 0)
   return 1;        /* In the expectation that opening as a file will fail */
-return (statbuf.st_mode & S_IFMT) == S_IFREG;
+return S_ISREG(statbuf.st_mode);
 }
 
 
