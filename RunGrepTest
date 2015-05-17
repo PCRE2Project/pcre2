@@ -527,7 +527,7 @@ echo "RC=$?" >>testtrygrep
 echo "---------------------------- Test 107 -----------------------------" >>testtrygrep
 echo "a" >testtemp1grep
 echo "aaaaa" >>testtemp1grep
-(cd $srcdir; $valgrind $pcre2grep  --line-offsets '(?<=\Ka)' testtemp1grep) >>testtrygrep 2>&1
+(cd $srcdir; $valgrind $pcre2grep  --line-offsets '(?<=\Ka)' $builddir/testtemp1grep) >>testtrygrep 2>&1
 echo "RC=$?" >>testtrygrep
 
 # Now compare the results.
@@ -550,7 +550,7 @@ if [ $utf8 -ne 0 ] ; then
   echo "RC=$?" >>testtrygrep
 
   echo "---------------------------- Test U3 ------------------------------" >>testtrygrep
-  (cd $srcdir; $valgrind $pcre2grep --line-offsets -u '(?<=\K\x{17f})' ./testdata/grepinput8) >>testtrygrep
+  (cd $srcdir; $valgrind $pcre2grep --line-offsets -u --newline=any '(?<=\K\x{17f})' ./testdata/grepinput8) >>testtrygrep
   echo "RC=$?" >>testtrygrep
 
   $cf $srcdir/testdata/grepoutput8 testtrygrep
