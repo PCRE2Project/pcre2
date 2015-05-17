@@ -11,6 +11,8 @@
 # do this:
 #
 # -noasan      skip the test that uses -fsanitize=address
+# -nousan      skip the test that uses -fsanitize=undefined
+# -nodebug     skip the test that uses --enable-debug
 # -nojit       skip JIT tests
 # -nomain      skip the main set of tests
 # -notmp       skip the test in a temporary directory
@@ -24,6 +26,8 @@
 # much as possible in due course.
 
 useasan=1
+useusan=1
+usedebug=1
 usejit=1
 usemain=1
 usetmp=1
@@ -33,6 +37,8 @@ verbose=0
 while [ $# -gt 0 ] ; do
   case $1 in
     -noasan)       useasan=0;;
+    -nousan)       useusan=0;; 
+    -nodebug)      usedebug=0;; 
     -nojit)        usejit=0;;
     -nomain)       usemain=0;;
     -notmp)        usetmp=0;;
@@ -137,7 +143,7 @@ runtest()
   pcre2_8=$?
 
   if [ $nlok -gt 0 ]; then
-    echo "Running C library tests $withvalgrind"
+    echo "Running PCRE2 library tests $withvalgrind"
     $srcdir/RunTest $valgrind >teststdout 2>teststderr
     if [ $? -ne 0 -o -s teststderr ]; then
       echo " "
@@ -147,7 +153,7 @@ runtest()
       exit 1
     fi
   else
-    echo "Skipping C library tests: newline is $nl"
+    echo "Skipping PCRE2 library tests: newline is $nl"
   fi
 
   if [ $nlok -gt 0 -a $pcre2_8 -gt 0 ]; then
@@ -184,10 +190,12 @@ runtest()
 # Update the total count whenever a new test is added; it is used to show
 # progess as each test is run.
 
-testtotal=`expr 21 \* $usemain + \
+testtotal=`expr 20 \* $usemain + \
+  1 \* $usemain \* $usedebug + \
   1 \* $usetmp + \
   1 \* $ISGCC \* $usemain + \
   1 \* $ISGCC \* $usemain \* $useasan + \
+  1 \* $ISGCC \* $usemain \* $useusan + \
   13 \* $usejit + \
   \( 3 + 2 \* $usejit \) \* $usevalgrind`
 testcount=0
@@ -210,7 +218,9 @@ export srcdir
 # -fsanitize=address, which also may throw up new warnings as well as checking
 # things at runtime. Using -fsanitize=address increases the size of stack
 # frames by a lot, so run this test with --disable-stack-for-recursion, as
-# otherwise RunTest may fail on test 2.
+# otherwise RunTest may fail on test 2. Finally, run another test using
+# -fsanitize=undefined -std-gnu99 to check for runtime actions that are not
+# well defined.
 
 if [ $usejit -ne 0 ]; then
   enable_jit=--enable-jit
@@ -232,6 +242,13 @@ if [ $ISGCC -ne 0 -a $usemain -ne 0 ]; then
     opts="--disable-shared $enable_jit --disable-stack-for-recursion --enable-pcre2-16 --enable-pcre2-32"
     runtest
   fi
+  if [ $useusan -ne 0 ]; then
+    echo "------- Maximally configured test with -fsanitize=undefined -std=gnu99 -------"
+    CFLAGS="$OFLAGS $SAVECFLAGS -fsanitize=undefined -std=gnu99"
+    echo "CFLAGS=$CFLAGS"
+    opts="--disable-shared $enable_jit --disable-stack-for-recursion --enable-pcre2-16 --enable-pcre2-32"
+    runtest
+  fi
   CFLAGS="$OFLAGS $SAVECFLAGS"
 fi
 
@@ -239,9 +256,11 @@ echo "---------- CFLAGS for the remaining tests ----------"
 echo "CFLAGS=$CFLAGS"
 
 if [ $usemain -ne 0 ]; then
-  echo "---------- Maximally configured test with --enable-debug ----------"
-  opts="--disable-shared $enable_jit --enable-pcre2-16 --enable-pcre2-32 --enable-debug"
-  runtest
+  if [ $usedebug -ne 0 ]; then
+    echo "---------- Maximally configured test with --enable-debug ----------"
+    opts="--disable-shared $enable_jit --enable-pcre2-16 --enable-pcre2-32 --enable-debug"
+    runtest
+  fi   
 
   echo "---------- Non-JIT tests in the current directory ----------"
   for opts in \
