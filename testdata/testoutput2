@@ -14405,4 +14405,7 @@ Failed: error 115 at offset 26: reference to non-existent subpattern
 
 "(?J)(?'d'(?'d'\g{d}))"
 
+"(?=!((?2)(?))({8(?<=(?1){29}8bbbb\x16\xd\xc6^($(\xa9H4){4}h}?1)B))\x15')"
+Failed: error 125 at offset 72: lookbehind assertion is not fixed length
+
 # End of testinput2 

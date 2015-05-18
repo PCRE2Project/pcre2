@@ -4306,4 +4306,6 @@ a random value. /Ix
 
 "(?J)(?'d'(?'d'\g{d}))"
 
+"(?=!((?2)(?))({8(?<=(?1){29}8bbbb\x16\xd\xc6^($(\xa9H4){4}h}?1)B))\x15')"
+
 # End of testinput2 

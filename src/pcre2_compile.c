@@ -886,14 +886,18 @@ for (;;)
     cc += 1 + LINK_SIZE;
     break;
 
-    /* Skip over assertive subpatterns */
+    /* Skip over assertive subpatterns. Note that we must increment cc by 
+    1 + LINK_SIZE at the end, not by OP_length[*cc] because in a recursive 
+    situation this assertion may be the one that is ultimately being checked 
+    for having a fixed length, in which case its terminating OP_KET will have
+    been temporarily replaced by OP_END. */
 
     case OP_ASSERT:
     case OP_ASSERT_NOT:
     case OP_ASSERTBACK:
     case OP_ASSERTBACK_NOT:
     do cc += GET(cc, 1); while (*cc == OP_ALT);
-    cc += PRIV(OP_lengths)[*cc];
+    cc += 1 + LINK_SIZE;
     break;
 
     /* Skip over things that don't match chars */
@@ -8143,7 +8147,9 @@ if (errorcode == 0 && cb.check_lookbehind)
   /* Loop, searching for OP_REVERSE items, and process those that do not have
   their length set. (Actually, it will also re-process any that have a length
   of zero, but that is a pathological case, and it does no harm.) When we find
-  one, we temporarily terminate the branch it is in while we scan it. */
+  one, we temporarily terminate the branch it is in while we scan it. Note that 
+  calling find_bracket() with a negative group number returns a pointer to the
+  OP_REVERSE item, not the actual lookbehind. */
 
   for (cc = (PCRE2_UCHAR *)PRIV(find_bracket)(codestart, utf, -1);
        cc != NULL;

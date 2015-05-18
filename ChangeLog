@@ -129,6 +129,9 @@ as an int; fixed by writing it as 1u).
 32. Fix pcre2grep compile when -std=c99 is used with gcc, though it still gives 
 a warning for "fileno" unless -std=gnu99 us used.
 
+33. A lookbehind assertion within a set of mutually recursive subpatterns could 
+provoke a buffer overflow. This bug was discovered by the LLVM fuzzer.
+
 
 Version 10.10 06-March-2015
 ---------------------------
