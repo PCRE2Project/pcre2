@@ -132,6 +132,8 @@ a warning for "fileno" unless -std=gnu99 us used.
 33. A lookbehind assertion within a set of mutually recursive subpatterns could 
 provoke a buffer overflow. This bug was discovered by the LLVM fuzzer.
 
+34. Give an error for an empty subpattern name such as (?'').
+
 
 Version 10.10 06-March-2015
 ---------------------------

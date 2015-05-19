@@ -5814,10 +5814,16 @@ for (;; ptr++)
           {
           named_group *ng;
           uint32_t number = cb->bracount + 1;
-
+          
           if (*ptr != (PCRE2_UCHAR)terminator)
             {
             *errorcodeptr = ERR42;
+            goto FAILED;
+            }
+
+          if (namelen == 0)
+            {
+            *errorcodeptr = ERR62;
             goto FAILED;
             }
 

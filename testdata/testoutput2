@@ -14397,15 +14397,18 @@ Failed: error 115 at offset 22: reference to non-existent subpattern
 /\V\x85\9*+((?2)\3++()2)*:2/
 Failed: error 115 at offset 26: reference to non-existent subpattern
 
-/(((?(R)){0,2}) (?''((?'R')((?'R')))))/dupnames
+/(((?(R)){0,2}) (?'x'((?'R')((?'R')))))/dupnames
 
-/(((?(X)){0,2}) (?''((?'X')((?'X')))))/dupnames
+/(((?(X)){0,2}) (?'x'((?'X')((?'X')))))/dupnames
 
-/(((?(R)){0,2}) (?''((?'X')((?'R')))))/
+/(((?(R)){0,2}) (?'x'((?'X')((?'R')))))/
 
 "(?J)(?'d'(?'d'\g{d}))"
 
 "(?=!((?2)(?))({8(?<=(?1){29}8bbbb\x16\xd\xc6^($(\xa9H4){4}h}?1)B))\x15')"
 Failed: error 125 at offset 72: lookbehind assertion is not fixed length
+
+/A(?'')Z/
+Failed: error 162 at offset 4: subpattern name expected
 
 # End of testinput2 
