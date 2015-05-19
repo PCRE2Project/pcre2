@@ -1,4 +1,4 @@
-.TH PCRE2PATTERN 3 "23 April 2015" "PCRE2 10.20"
+.TH PCRE2PATTERN 3 "19 May 2015" "PCRE2 10.20"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION DETAILS"
@@ -1491,7 +1491,8 @@ unset these options by preceding the letter with a hyphen, and a combined
 setting and unsetting such as (?im-sx), which sets PCRE2_CASELESS and
 PCRE2_MULTILINE while unsetting PCRE2_DOTALL and PCRE2_EXTENDED, is also
 permitted. If a letter appears both before and after the hyphen, the option is
-unset.
+unset. An empty options setting "(?)" is allowed. Needless to say, it has no 
+effect.
 .P
 The PCRE2-specific options PCRE2_DUPNAMES and PCRE2_UNGREEDY can be changed in
 the same way as the Perl-compatible options by using the characters J and U
@@ -1520,11 +1521,19 @@ branch is abandoned before the option setting. This is because the effects of
 option settings happen at compile time. There would be some very weird
 behaviour otherwise.
 .P
+As a convenient shorthand, if any option settings are required at the start of
+a non-capturing subpattern (see the next section), the option letters may
+appear between the "?" and the ":". Thus the two patterns
+.sp
+  (?i:saturday|sunday)
+  (?:(?i)saturday|sunday)
+.sp
+match exactly the same set of strings. 
+.P
 \fBNote:\fP There are other PCRE2-specific options that can be set by the
-application when the compiling function is called.
-The pattern can contain special leading sequences such as (*CRLF) to override
-what the application has set or what has been defaulted. Details are given in
-the section entitled
+application when the compiling function is called. The pattern can contain
+special leading sequences such as (*CRLF) to override what the application has
+set or what has been defaulted. Details are given in the section entitled
 .\" HTML <a href="#newlineseq">
 .\" </a>
 "Newline sequences"
@@ -3338,6 +3347,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 23 April 2015
+Last updated: 19 May 2015
 Copyright (c) 1997-2015 University of Cambridge.
 .fi
