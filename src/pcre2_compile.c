@@ -1729,8 +1729,12 @@ else if (c < ESCAPES_FIRST || c > ESCAPES_LAST) {}  /* Definitely literal */
 
 else if ((i = escapes[c - ESCAPES_FIRST]) != 0)
   {
-  if (i > 0) c = (uint32_t)i;   /* Positive is a data character */
-    else escape = -i;           /* Else return a special escape */
+  if (i > 0) c = (uint32_t)i; else  /* Positive is a data character */
+    {
+    escape = -i;                    /* Else return a special escape */
+    if (escape == ESC_P || escape == ESC_p || escape == ESC_X)
+      cb->external_flags |= PCRE2_HASBKPORX;   /* Note \P, \p, or \X */  
+    } 
   }
 
 /* Escapes that need further processing, including those that are unknown. */

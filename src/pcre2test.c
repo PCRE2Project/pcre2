@@ -4492,6 +4492,20 @@ if (TEST(compiled_code, ==, NULL))
   fprintf(outfile, "\n");
   return PR_SKIP;
   }
+  
+/* If forbid_utf is non-zero, we are running a non-UTF test. UTF and UCP are 
+locked out at compile time, but we must also check for occurrences of \P, \p, 
+and \X, which are only supported when Unicode is supported. */
+
+if (forbid_utf != 0)
+  {
+  if ((FLD(compiled_code, flags) & PCRE2_HASBKPORX) != 0)
+    {
+    fprintf(outfile, "** \\P, \\p, and \\X are not allowed after the "
+      "#forbid_utf command\n");
+    return PR_SKIP;     
+    }     
+  }  
 
 /* Remember the maximum lookbehind, for partial matching. */
 

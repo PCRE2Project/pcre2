@@ -134,6 +134,9 @@ provoke a buffer overflow. This bug was discovered by the LLVM fuzzer.
 
 34. Give an error for an empty subpattern name such as (?'').
 
+35. Make pcre2test give an error if a pattern that follows #forbud_utf contains 
+\P, \p, or \X.
+
 
 Version 10.10 06-March-2015
 ---------------------------
