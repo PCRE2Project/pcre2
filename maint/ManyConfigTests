@@ -27,7 +27,8 @@
 
 useasan=1
 useusan=1
-usedebug=1
+# Temporarily disabled.
+usedebug=0
 usejit=1
 usemain=1
 usetmp=1
@@ -200,18 +201,17 @@ testtotal=`expr 20 \* $usemain + \
   \( 3 + 2 \* $usejit \) \* $usevalgrind`
 testcount=0
 
-# This set of tests builds PCRE2 and runs the tests with a variety of configure
-# options, in the current (source) directory. The empty configuration builds
-# with all the default settings. As well as testing that these options work, we
-# use --disable-shared or --disable-static after the default test (which builds
-# both) to save a bit of time by building only one version of the library for
-# the subsequent tests.
-
 valgrind=
 cvalgrind=
 withvalgrind=
 srcdir=.
 export srcdir
+
+if [ $usejit -ne 0 ]; then
+  enable_jit=--enable-jit
+else
+  enable_jit=
+fi
 
 # If gcc is in use, run a maximally configured test with -O2, because that can
 # throw up warnings that are not detected with -O0. Then run a second test with
@@ -220,13 +220,8 @@ export srcdir
 # frames by a lot, so run this test with --disable-stack-for-recursion, as
 # otherwise RunTest may fail on test 2. Finally, run another test using
 # -fsanitize=undefined -std-gnu99 to check for runtime actions that are not
-# well defined.
-
-if [ $usejit -ne 0 ]; then
-  enable_jit=--enable-jit
-else
-  enable_jit=
-fi
+# well defined. However, we also use -fno-sanitize=shift to avoid warnings for
+# shifts of negative numbers, which occur in src/pcre2_jit_compile.c.
 
 if [ $ISGCC -ne 0 -a $usemain -ne 0 ]; then
   echo "---------- Maximally configured test with -O2 ----------"
@@ -243,14 +238,21 @@ if [ $ISGCC -ne 0 -a $usemain -ne 0 ]; then
     runtest
   fi
   if [ $useusan -ne 0 ]; then
-    echo "------- Maximally configured test with -fsanitize=undefined -std=gnu99 -------"
-    CFLAGS="$OFLAGS $SAVECFLAGS -fsanitize=undefined -std=gnu99"
+    echo "------- Maximally configured test with -fsanitize=undefined -fno-sanitize=shift -std=gnu99 -------"
+    CFLAGS="$OFLAGS $SAVECFLAGS -fsanitize=undefined -fno-sanitize=shift -std=gnu99"
     echo "CFLAGS=$CFLAGS"
     opts="--disable-shared $enable_jit --disable-stack-for-recursion --enable-pcre2-16 --enable-pcre2-32"
     runtest
   fi
   CFLAGS="$OFLAGS $SAVECFLAGS"
 fi
+
+# This set of tests builds PCRE2 and runs the tests with a variety of configure
+# options, in the current (source) directory. The empty configuration builds
+# with all the default settings. As well as testing that these options work, we
+# use --disable-shared or --disable-static except for the default test (which
+# builds both) to save a bit of time by building only one version of the
+# library for the subsequent tests.
 
 echo "---------- CFLAGS for the remaining tests ----------"
 echo "CFLAGS=$CFLAGS"
