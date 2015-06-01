@@ -7534,9 +7534,13 @@ while (*cc == OP_ALT)
   cc += GET(cc, 1);
 cc += 1 + LINK_SIZE;
 
-/* Temporarily encoding the needs_control_head in framesize. */
 if (opcode == OP_ONCE)
+  {
+  /* We temporarily encode the needs_control_head in the lowest bit.
+     Note: on the target architectures of SLJIT the ((x << 1) >> 1) returns
+     the same value for small signed numbers (including negative numbers). */
   BACKTRACK_AS(bracket_backtrack)->u.framesize = (BACKTRACK_AS(bracket_backtrack)->u.framesize << 1) | (needs_control_head ? 1 : 0);
+  }
 return cc + repeat_length;
 }
 
@@ -10371,7 +10375,7 @@ if (mode == PCRE2_JIT_COMPLETE)
 else
   mode = (mode == PCRE2_JIT_PARTIAL_SOFT) ? 1 : 2;
 
-SLJIT_ASSERT(mode >= 0 && mode < JIT_NUMBER_OF_COMPILE_MODES);
+SLJIT_ASSERT(mode < JIT_NUMBER_OF_COMPILE_MODES);
 functions->executable_funcs[mode] = executable_func;
 functions->read_only_data_heads[mode] = common->read_only_data_head;
 functions->executable_sizes[mode] = executable_size;
