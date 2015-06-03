@@ -647,6 +647,10 @@ Subject length lower bound = 1
  0: \x{11234}
 
 /(*UTF-32)\x{11234}/
+Failed: error 134 at offset 17: character code point value in \x{} or \o{} is too large
+  abcd\x{11234}pqr
+
+/(*UTF-32)\x{112}/
 Failed: error 160 at offset 5: (*VERB) not recognized or malformed
   abcd\x{11234}pqr
 

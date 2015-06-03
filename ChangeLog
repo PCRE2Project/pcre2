@@ -137,6 +137,15 @@ provoke a buffer overflow. This bug was discovered by the LLVM fuzzer.
 35. Make pcre2test give an error if a pattern that follows #forbud_utf contains 
 \P, \p, or \X.
 
+36. The way named subpatterns are handled has been refactored. There is now a 
+pre-pass over the regex which does nothing other than identify named
+subpatterns and count the total captures. This means that information about
+named patterns is known before the rest of the compile. In particular, it means 
+that forward references can be checked as they are encountered. Previously, the 
+code for handling forward references was contorted and led to several errors in 
+computing the memory requirements for some patterns, leading to buffer 
+overflows.
+
 
 Version 10.10 06-March-2015
 ---------------------------

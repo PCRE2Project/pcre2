@@ -13293,7 +13293,7 @@ Failed: error 150 at offset 4: invalid range in character class
 Failed: error 144 at offset 3: group name must start with a non-digit
 
 /(?&1abc)xx(?<1abc>y)/
-Failed: error 144 at offset 3: group name must start with a non-digit
+Failed: error 144 at offset 13: group name must start with a non-digit
 
 /(?<ab-cd>xx)/
 Failed: error 142 at offset 5: syntax error in subpattern name (missing terminator)
@@ -13320,10 +13320,10 @@ Failed: error 144 at offset 4: group name must start with a non-digit
 Failed: error 144 at offset 3: group name must start with a non-digit
 
 /(?&1abc)xx(?<1abc>y)/
-Failed: error 144 at offset 3: group name must start with a non-digit
+Failed: error 144 at offset 13: group name must start with a non-digit
 
 /(?P>1abc)xx(?<1abc>y)/
-Failed: error 144 at offset 4: group name must start with a non-digit
+Failed: error 144 at offset 14: group name must start with a non-digit
 
 /\g'3gh'/
 Failed: error 157 at offset 7: \g is not followed by a braced, angle-bracketed, or quoted name/number or by a plain number
@@ -14347,6 +14347,42 @@ Failed: error 115 at offset 3: reference to non-existent subpattern
 /A\8B\9C/
 Failed: error 115 at offset 7: reference to non-existent subpattern
     A8B9C
+    
+/(?x:((?'a')) # comment (with parentheses) and | vertical
+(?-x:#not a comment (?'b')) # this is a comment ()
+(?'c')) # not a comment (?'d')/info
+Capturing subpattern count = 5
+Named capturing subpatterns:
+  a   2
+  b   3
+  c   4
+  d   5
+First code unit = '#'
+Last code unit = ' '
+Subject length lower bound = 32
+
+/(?|(?'a')(2)(?'b')|(?'a')(?'a')(3))/I,dupnames
+Capturing subpattern count = 3
+Named capturing subpatterns:
+  a   1
+  a   2
+  b   3
+Options: dupnames
+Starting code units: 2 3 
+Subject length lower bound = 1
+    A23B
+ 0: 2
+ 1: 
+ 2: 2
+ 3: 
+    B32A 
+ 0: 3
+ 1: 
+ 2: 
+ 3: 3
+
+# These are some patterns that used to cause buffer overflows or other errors
+# while compiling. 
 
 /.((?2)(?R)|\1|$)()/B
 ------------------------------------------------------------------
@@ -14410,5 +14446,7 @@ Failed: error 125 at offset 72: lookbehind assertion is not fixed length
 
 /A(?'')Z/
 Failed: error 162 at offset 4: subpattern name expected
+
+"(?J:(?|(?'R')(\k'R')|((?'R'))))"
 
 # End of testinput2 

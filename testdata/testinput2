@@ -4289,6 +4289,17 @@ a random value. /Ix
 
 /A\8B\9C/
     A8B9C
+    
+/(?x:((?'a')) # comment (with parentheses) and | vertical
+(?-x:#not a comment (?'b')) # this is a comment ()
+(?'c')) # not a comment (?'d')/info
+
+/(?|(?'a')(2)(?'b')|(?'a')(?'a')(3))/I,dupnames
+    A23B
+    B32A 
+
+# These are some patterns that used to cause buffer overflows or other errors
+# while compiling. 
 
 /.((?2)(?R)|\1|$)()/B
 
@@ -4309,5 +4320,7 @@ a random value. /Ix
 "(?=!((?2)(?))({8(?<=(?1){29}8bbbb\x16\xd\xc6^($(\xa9H4){4}h}?1)B))\x15')"
 
 /A(?'')Z/
+
+"(?J:(?|(?'R')(\k'R')|((?'R'))))"
 
 # End of testinput2 

@@ -179,6 +179,9 @@
 /(*UTF-32)\x{11234}/
   abcd\x{11234}pqr
 
+/(*UTF-32)\x{112}/
+  abcd\x{11234}pqr
+
 /(*CRLF)(*UTF16)(*BSR_UNICODE)a\Rb/I
 
 /(*CRLF)(*UTF32)(*BSR_UNICODE)a\Rb/I

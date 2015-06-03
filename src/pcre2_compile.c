@@ -586,7 +586,7 @@ enum { ERR0 = COMPILE_ERROR_BASE,
        ERR51, ERR52, ERR53, ERR54, ERR55, ERR56, ERR57, ERR58, ERR59, ERR60,
        ERR61, ERR62, ERR63, ERR64, ERR65, ERR66, ERR67, ERR68, ERR69, ERR70,
        ERR71, ERR72, ERR73, ERR74, ERR75, ERR76, ERR77, ERR78, ERR79, ERR80,
-       ERR81, ERR82, ERR83 };
+       ERR81, ERR82, ERR83, ERR84 };
 
 /* This is a table of start-of-pattern options such as (*UTF) and settings such
 as (*LIMIT_MATCH=nnnn) and (*CRLF). For completeness and backward
@@ -886,9 +886,9 @@ for (;;)
     cc += 1 + LINK_SIZE;
     break;
 
-    /* Skip over assertive subpatterns. Note that we must increment cc by 
-    1 + LINK_SIZE at the end, not by OP_length[*cc] because in a recursive 
-    situation this assertion may be the one that is ultimately being checked 
+    /* Skip over assertive subpatterns. Note that we must increment cc by
+    1 + LINK_SIZE at the end, not by OP_length[*cc] because in a recursive
+    situation this assertion may be the one that is ultimately being checked
     for having a fixed length, in which case its terminating OP_KET will have
     been temporarily replaced by OP_END. */
 
@@ -1733,8 +1733,8 @@ else if ((i = escapes[c - ESCAPES_FIRST]) != 0)
     {
     escape = -i;                    /* Else return a special escape */
     if (escape == ESC_P || escape == ESC_p || escape == ESC_X)
-      cb->external_flags |= PCRE2_HASBKPORX;   /* Note \P, \p, or \X */  
-    } 
+      cb->external_flags |= PCRE2_HASBKPORX;   /* Note \P, \p, or \X */
+    }
   }
 
 /* Escapes that need further processing, including those that are unknown. */
@@ -3087,6 +3087,504 @@ return n8;
 
 
 /*************************************************
+*      Scan regex to identify named groups       *
+*************************************************/
+
+/* This function is called first of all, to scan for named capturing groups so
+that information about them is fully available to both the compiling scans.
+It skips over everything except parenthesized items.
+
+Arguments:
+  ptrptr   points to pointer to the start of the pattern
+  options  compiling dynamic options
+  cb       pointer to the compile data block
+
+Returns:   zero on success or a non-zero error code, with pointer updated
+*/
+
+typedef struct nest_save {
+  uint16_t  nest_depth;
+  uint16_t  reset_group;
+  uint16_t  max_group;
+  uint16_t  flags;
+} nest_save;
+
+#define NSF_RESET    0x0001u
+#define NSF_EXTENDED 0x0002u
+#define NSF_DUPNAMES 0x0004u
+
+static uint32_t scan_for_captures(PCRE2_SPTR *ptrptr, uint32_t options,
+  compile_block *cb)
+{
+uint32_t c;
+uint32_t nest_depth = 0;
+uint32_t set, unset, *optset;
+int errorcode = 0;
+int escape;
+int namelen;
+int i;
+BOOL inescq = FALSE;
+BOOL isdupname;
+BOOL utf = (options & PCRE2_UTF) != 0;
+BOOL negate_class;
+PCRE2_SPTR name;
+PCRE2_SPTR ptr = *ptrptr;
+named_group *ng;
+nest_save *top_nest = NULL;
+nest_save *end_nests = (nest_save *)(cb->start_workspace + cb->workspace_size);
+
+for (; ptr < cb->end_pattern; ptr++)
+  {
+  c = *ptr;
+
+  /* Skip over literals */
+
+  if (inescq)
+    {
+    if (c == CHAR_BACKSLASH && ptr[1] == CHAR_E)
+      {
+      inescq = FALSE;
+      ptr++;
+      }
+    continue;
+    }
+
+  /* Skip over comments and whitespace in extended mode. Need a loop to handle
+  whitespace after a comment. */
+
+  if ((options & PCRE2_EXTENDED) != 0)
+    {
+    for (;;)
+      {
+      while (MAX_255(c) && (cb->ctypes[c] & ctype_space) != 0) c = *(++ptr);
+      if (c != CHAR_NUMBER_SIGN) break;
+      ptr++;
+      while (*ptr != CHAR_NULL)
+        {
+        if (IS_NEWLINE(ptr))         /* For non-fixed-length newline cases, */
+          {                          /* IS_NEWLINE sets cb->nllen. */
+          ptr += cb->nllen;
+          break;
+          }
+        ptr++;
+#ifdef SUPPORT_UNICODE
+        if (utf) FORWARDCHAR(ptr);
+#endif
+        }
+      c = *ptr;     /* Either NULL or the char after a newline */
+      }
+    }
+
+  /* Process the next pattern item. */
+
+  switch(c)
+    {
+    default:              /* Most characters are just skipped */
+    break;
+
+    /* Skip escapes except for \Q */
+
+    case CHAR_BACKSLASH:
+    errorcode = 0;
+    escape = check_escape(&ptr, &c, &errorcode, options, FALSE, cb);
+    if (errorcode != 0) goto FAILED;
+    if (escape == ESC_Q) inescq = TRUE;
+    break;
+
+    /* Skip a character class. The syntax is complicated so we have to
+    replicate some of what happens when a class is processed for real. */
+
+    case CHAR_LEFT_SQUARE_BRACKET:
+    if (PRIV(strncmp_c8)(ptr+1, STRING_WEIRD_STARTWORD, 6) == 0 ||
+        PRIV(strncmp_c8)(ptr+1, STRING_WEIRD_ENDWORD, 6) == 0)
+      {
+      ptr += 7;
+      break;
+      }
+
+    /* If the first character is '^', set the negation flag (not actually used
+    here, except to recognize only one ^) and skip it. If the first few
+    characters (either before or after ^) are \Q\E or \E we skip them too. This
+    makes for compatibility with Perl. */
+
+    negate_class = FALSE;
+    for (;;)
+      {
+      c = *(++ptr);   /* First character in class */
+      if (c == CHAR_BACKSLASH)
+        {
+        if (ptr[1] == CHAR_E)
+          ptr++;
+        else if (PRIV(strncmp_c8)(ptr + 1, STR_Q STR_BACKSLASH STR_E, 3) == 0)
+          ptr += 3;
+        else
+          break;
+        }
+      else if (!negate_class && c == CHAR_CIRCUMFLEX_ACCENT)
+        negate_class = TRUE;
+      else break;
+      }
+
+    if (c == CHAR_RIGHT_SQUARE_BRACKET &&
+        (cb->external_options & PCRE2_ALLOW_EMPTY_CLASS) != 0)
+      break;
+
+    /* Loop for the contents of the class */
+
+    for (;;)
+      {
+      if (c == CHAR_NULL && ptr >= cb->end_pattern)
+        {
+        errorcode = ERR6;  /* Missing terminating ']' */
+        goto FAILED;
+        }
+
+#ifdef SUPPORT_UNICODE
+      if (utf && HAS_EXTRALEN(c))
+        {                           /* Braces are required because the */
+        GETCHARLEN(c, ptr, ptr);    /* macro generates multiple statements */
+        }
+#endif
+
+      /* Inside \Q...\E everything is literal except \E */
+
+      if (inescq)
+        {
+        if (c == CHAR_BACKSLASH && ptr[1] == CHAR_E)  /* If we are at \E */
+          {
+          inescq = FALSE;                   /* Reset literal state */
+          ptr++;                            /* Skip the 'E' */
+          }
+        goto CONTINUE_CLASS;
+        }
+
+      /* Skip POSIX class names. */
+
+      if (c == CHAR_LEFT_SQUARE_BRACKET &&
+          (ptr[1] == CHAR_COLON || ptr[1] == CHAR_DOT ||
+           ptr[1] == CHAR_EQUALS_SIGN) && check_posix_syntax(ptr, &ptr))
+        ptr ++;
+
+      else if (c == CHAR_BACKSLASH)
+        {
+        errorcode = 0;
+        escape = check_escape(&ptr, &c, &errorcode, options, TRUE, cb);
+        if (errorcode != 0) goto FAILED;
+        if (escape == ESC_Q) inescq = TRUE;
+        }
+
+      CONTINUE_CLASS:
+      c = *(++ptr);
+      if (c == CHAR_RIGHT_SQUARE_BRACKET && !inescq) break;
+      }     /* End of class-processing loop */
+    break;
+
+    /* This is the real work of this function - handling parentheses. */
+
+    case CHAR_LEFT_PARENTHESIS:
+    nest_depth++;
+
+    if (ptr[1] != CHAR_QUESTION_MARK)
+      {
+      if (ptr[1] != CHAR_ASTERISK &&
+          (options & PCRE2_NO_AUTO_CAPTURE) == 0)
+        cb->bracount++;  /* Capturing group */
+      else  /* (*something) - just skip to closing ket */
+        {
+        ptr += 2;
+        while (ptr < cb->end_pattern && *ptr != CHAR_RIGHT_PARENTHESIS) ptr++;
+        }
+      }
+
+    /* Handle (?...) groups */
+
+    else switch(ptr[2])
+      {
+      default:
+      ptr += 2;
+      if (ptr[0] == CHAR_R ||                                 /* (?R) */
+          ptr[0] == CHAR_C ||                                 /* (?C) */
+          IS_DIGIT(ptr[0]) ||                                 /* (?n) */
+          (ptr[0] == CHAR_MINUS && IS_DIGIT(ptr[1]))) break;  /* (?-n) */
+
+      /* Handle (?| and (?imsxJU: which are the only other valid forms. Both
+      need a new block on the nest stack. */
+
+      if (top_nest == NULL) top_nest = (nest_save *)(cb->start_workspace);
+      else if (++top_nest >= end_nests)
+        {
+        errorcode = ERR84;
+        goto FAILED;
+        }
+      top_nest->nest_depth = nest_depth;
+      top_nest->flags = 0;
+      if ((options & PCRE2_EXTENDED) != 0) top_nest->flags |= NSF_EXTENDED;
+      if ((options & PCRE2_DUPNAMES) != 0) top_nest->flags |= NSF_DUPNAMES;
+
+      if (*ptr == CHAR_VERTICAL_LINE)
+        {
+        top_nest->reset_group = cb->bracount;
+        top_nest->max_group = cb->bracount;
+        top_nest->flags |= NSF_RESET;
+        break;
+        }
+
+      /* Scan options */
+
+      top_nest->reset_group = 0;
+      top_nest->max_group = 0;
+
+      set = unset = 0;
+      optset = &set;
+
+      /* Need only track (?x: and (?J: at this stage */
+
+      while (*ptr != CHAR_RIGHT_PARENTHESIS && *ptr != CHAR_COLON)
+        {
+        switch (*ptr++)
+          {
+          case CHAR_MINUS: optset = &unset; break;
+
+          case CHAR_x: *optset |= PCRE2_EXTENDED; break;
+
+          case CHAR_J:
+          *optset |= PCRE2_DUPNAMES;
+          cb->external_flags |= PCRE2_JCHANGED;
+          break;
+
+          case CHAR_i:
+          case CHAR_m:
+          case CHAR_s:
+          case CHAR_U:
+          break;
+
+          default:  errorcode = ERR11;
+                    ptr--;    /* Correct the offset */
+                    goto FAILED;
+          }
+        }
+
+      options = (options | set) & (~unset);
+
+      /* If the options ended with ')' this is not the start of a nested
+      group with option changes, so the options change at this level. If the
+      previous level set up a nest block, discard the one we have just created.
+      Otherwise adjust it for the previous level. */
+
+      if (*ptr == CHAR_RIGHT_PARENTHESIS)
+        {
+        nest_depth--;
+        if (top_nest > (nest_save *)(cb->start_workspace) &&
+            (top_nest-1)->nest_depth == nest_depth) top_nest --;
+        else top_nest->nest_depth = nest_depth;
+        }
+      break;
+
+      case CHAR_NUMBER_SIGN:
+      ptr += 3;
+      while (ptr < cb->end_pattern && *ptr != CHAR_RIGHT_PARENTHESIS) ptr++;
+      if (*ptr != CHAR_RIGHT_PARENTHESIS)
+        {
+        errorcode = ERR18;
+        goto FAILED;
+        }
+      break;
+
+      case CHAR_LEFT_PARENTHESIS:
+      nest_depth++;
+      /* Fall through */
+
+      case CHAR_COLON:
+      case CHAR_GREATER_THAN_SIGN:
+      case CHAR_EQUALS_SIGN:
+      case CHAR_EXCLAMATION_MARK:
+      case CHAR_AMPERSAND:
+      case CHAR_PLUS:
+      ptr += 2;
+      break;
+
+      case CHAR_P:
+      if (ptr[3] != CHAR_LESS_THAN_SIGN)
+        {
+        ptr += 3;
+        break;
+        }
+      ptr++;
+      c = CHAR_GREATER_THAN_SIGN;   /* Terminator */
+      goto DEFINE_NAME;
+
+      case CHAR_LESS_THAN_SIGN:
+      if (ptr[3] == CHAR_EQUALS_SIGN || ptr[3] == CHAR_EXCLAMATION_MARK)
+        {
+        ptr += 3;
+        break;
+        }
+      c = CHAR_GREATER_THAN_SIGN;   /* Terminator */
+      goto DEFINE_NAME;
+
+      case CHAR_APOSTROPHE:
+      c = CHAR_APOSTROPHE;    /* Terminator */
+
+      DEFINE_NAME:
+      name = ptr = ptr + 3;
+
+      if (*ptr == c)          /* Empty name */
+        {
+        errorcode = ERR62;
+        goto FAILED;
+        }
+
+      if (IS_DIGIT(*ptr))
+        {
+        errorcode = ERR44;   /* Group name must start with non-digit */
+        goto FAILED;
+        }
+
+      if (MAX_255(*ptr) && (cb->ctypes[*ptr] & ctype_word) == 0)
+        {
+        errorcode = ERR24;
+        goto FAILED;
+        }
+
+      while (MAX_255(*ptr) && (cb->ctypes[*ptr] & ctype_word) != 0) ptr++;
+      namelen = (int)(ptr - name);
+
+      if (*ptr != c)
+        {
+        errorcode = ERR42;
+        goto FAILED;
+        }
+
+      if (cb->names_found >= MAX_NAME_COUNT)
+        {
+        errorcode = ERR49;
+        goto FAILED;
+        }
+
+      if (namelen + IMM2_SIZE + 1 > cb->name_entry_size)
+        {
+        cb->name_entry_size = namelen + IMM2_SIZE + 1;
+        if (namelen > MAX_NAME_SIZE)
+          {
+          errorcode = ERR48;
+          goto FAILED;
+          }
+        }
+
+      /* We have a valid name for this capturing group. */
+
+      cb->bracount++;
+
+      /* Scan the list to check for duplicates. For duplicate names, if the
+      number is the same, break the loop, which causes the name to be
+      discarded; otherwise, if DUPNAMES is not set, give an error.
+      If it is set, allow the name with a different number, but continue
+      scanning in case this is a duplicate with the same number. For
+      non-duplicate names, give an error if the number is duplicated. */
+
+      isdupname = FALSE;
+      ng = cb->named_groups;
+      for (i = 0; i < cb->names_found; i++, ng++)
+        {
+        if (namelen == ng->length &&
+            PRIV(strncmp)(name, ng->name, namelen) == 0)
+          {
+          if (ng->number == cb->bracount) break;
+          if ((options & PCRE2_DUPNAMES) == 0)
+            {
+            errorcode = ERR43;
+            goto FAILED;
+            }
+          isdupname = ng->isdup = TRUE;     /* Mark as a duplicate */
+          cb->dupnames = TRUE;              /* Duplicate names exist */
+          }
+        else if (ng->number == cb->bracount)
+          {
+          errorcode = ERR65;
+          goto FAILED;
+          }
+        }
+
+      if (i < cb->names_found) break;   /* Ignore duplicate with same number */
+
+      /* Increase the list size if necessary */
+
+      if (cb->names_found >= cb->named_group_list_size)
+        {
+        int newsize = cb->named_group_list_size * 2;
+        named_group *newspace =
+          cb->cx->memctl.malloc(newsize * sizeof(named_group),
+          cb->cx->memctl.memory_data);
+        if (newspace == NULL)
+          {
+          errorcode = ERR21;
+          goto FAILED;
+          }
+
+        memcpy(newspace, cb->named_groups,
+          cb->named_group_list_size * sizeof(named_group));
+        if (cb->named_group_list_size > NAMED_GROUP_LIST_SIZE)
+          cb->cx->memctl.free((void *)cb->named_groups,
+          cb->cx->memctl.memory_data);
+        cb->named_groups = newspace;
+        cb->named_group_list_size = newsize;
+        }
+
+      /* Add this name to the list */
+
+      cb->named_groups[cb->names_found].name = name;
+      cb->named_groups[cb->names_found].length = namelen;
+      cb->named_groups[cb->names_found].number = cb->bracount;
+      cb->named_groups[cb->names_found].isdup = isdupname;
+      cb->names_found++;
+      break;
+      }        /* End of (? switch */
+    break;     /* End of ( handling */
+
+    /* At an alternation, reset the capture count if we are in a (?| group. */
+
+    case CHAR_VERTICAL_LINE:
+    if (top_nest != NULL && top_nest->nest_depth == nest_depth &&
+        (top_nest->flags & NSF_RESET) != 0)
+      {
+      if (cb->bracount > top_nest->max_group)
+        top_nest->max_group = cb->bracount;
+      cb->bracount = top_nest->reset_group;
+      }
+    break;
+
+    /* At a right parenthesis, reset the capture count to the maximum if we
+    are in a (?| group and/or reset the extended option. */
+
+    case CHAR_RIGHT_PARENTHESIS:
+    if (top_nest != NULL && top_nest->nest_depth == nest_depth)
+      {
+      if ((top_nest->flags & NSF_RESET) != 0 &&
+          top_nest->max_group > cb->bracount)
+        cb->bracount = top_nest->max_group;
+      if ((top_nest->flags & NSF_EXTENDED) != 0) options |= PCRE2_EXTENDED;
+        else options &= ~PCRE2_EXTENDED;
+      if ((top_nest->flags & NSF_DUPNAMES) != 0) options |= PCRE2_DUPNAMES;
+        else options &= ~PCRE2_DUPNAMES;
+      if (top_nest == (nest_save *)(cb->start_workspace)) top_nest = NULL;
+        else top_nest--;
+      }
+    nest_depth--;
+    break;
+    }
+  }
+
+cb->final_bracount = cb->bracount;
+return 0;
+
+FAILED:
+*ptrptr = ptr;
+return errorcode;
+}
+
+
+
+/*************************************************
 *           Compile one branch                   *
 *************************************************/
 
@@ -3210,6 +3708,7 @@ for (;; ptr++)
   BOOL possessive_quantifier;
   BOOL is_quantifier;
   BOOL is_recurse;
+  BOOL is_dupname;
   BOOL reset_bracount;
   int class_has_8bitchar;
   int class_one_char;
@@ -5217,9 +5716,11 @@ for (;; ptr++)
 
     if (*ptr == CHAR_QUESTION_MARK)
       {
-      int i;
+      int i, count;
       int namelen;                /* Must be signed */
+      uint32_t index;
       uint32_t set, unset, *optset;
+      named_group *ng;
       PCRE2_SPTR name;
       PCRE2_UCHAR *slot;
 
@@ -5511,8 +6012,8 @@ for (;; ptr++)
         if (i < cb->names_found)
           {
           int offset = i;            /* Offset of first name found */
-          int count = 0;
 
+          count = 0;
           for (;;)
             {
             recno = GET2(slot, 0);   /* Number for last found */
@@ -5635,12 +6136,14 @@ for (;; ptr++)
           ptr += 2;
           break;
 
-          default:                /* Could be name define, else bad */
-          if (MAX_255(ptr[1]) && (cb->ctypes[ptr[1]] & ctype_word) != 0)
-            goto DEFINE_NAME;
-          ptr++;                  /* Correct offset for error */
-          *errorcodeptr = ERR24;
-          goto FAILED;
+          /* Must be a name definition - as the syntax was checked in the
+          pre-pass, we can assume here that it is valid. Skip over the name
+          and go to handle the numbered group. */
+
+          default:
+          while (*(++ptr) != CHAR_GREATER_THAN_SIGN);
+          ptr++;
+          goto NUMBERED_GROUP;
           }
         break;
 
@@ -5795,120 +6298,17 @@ for (;; ptr++)
 
 
         /* ------------------------------------------------------------ */
-        DEFINE_NAME:    /* Come here from (?< handling */
-        case CHAR_APOSTROPHE:
+        case CHAR_APOSTROPHE:   /* Define a name - note fall through above */
+
+        /* The syntax was checked and the list of names was set up in the
+        pre-pass, so there is nothing to be done now except to skip over the
+        name. */
+
         terminator = (*ptr == CHAR_LESS_THAN_SIGN)?
-          CHAR_GREATER_THAN_SIGN : CHAR_APOSTROPHE;
-        name = ++ptr;
-        if (IS_DIGIT(*ptr))
-          {
-          *errorcodeptr = ERR44;   /* Group name must start with non-digit */
-          goto FAILED;
-          }
-        while (MAX_255(*ptr) && (cb->ctypes[*ptr] & ctype_word) != 0) ptr++;
-        namelen = (int)(ptr - name);
-
-        /* In the pre-compile phase, do a syntax check, remember the longest
-        name, and then remember the group in a vector, expanding it if
-        necessary. Duplicates for the same number are skipped; other duplicates
-        are checked for validity. In the actual compile, there is nothing to
-        do. */
-
-        if (lengthptr != NULL)
-          {
-          named_group *ng;
-          uint32_t number = cb->bracount + 1;
-          
-          if (*ptr != (PCRE2_UCHAR)terminator)
-            {
-            *errorcodeptr = ERR42;
-            goto FAILED;
-            }
-
-          if (namelen == 0)
-            {
-            *errorcodeptr = ERR62;
-            goto FAILED;
-            }
-
-          if (cb->names_found >= MAX_NAME_COUNT)
-            {
-            *errorcodeptr = ERR49;
-            goto FAILED;
-            }
-
-          if (namelen + IMM2_SIZE + 1 > cb->name_entry_size)
-            {
-            cb->name_entry_size = namelen + IMM2_SIZE + 1;
-            if (namelen > MAX_NAME_SIZE)
-              {
-              *errorcodeptr = ERR48;
-              goto FAILED;
-              }
-            }
-
-          /* Scan the list to check for duplicates. For duplicate names, if the
-          number is the same, break the loop, which causes the name to be
-          discarded; otherwise, if DUPNAMES is not set, give an error.
-          If it is set, allow the name with a different number, but continue
-          scanning in case this is a duplicate with the same number. For
-          non-duplicate names, give an error if the number is duplicated. */
-
-          ng = cb->named_groups;
-          for (i = 0; i < cb->names_found; i++, ng++)
-            {
-            if (namelen == ng->length &&
-                PRIV(strncmp)(name, ng->name, namelen) == 0)
-              {
-              if (ng->number == number) break;
-              if ((options & PCRE2_DUPNAMES) == 0)
-                {
-                *errorcodeptr = ERR43;
-                goto FAILED;
-                }
-              cb->dupnames = TRUE;  /* Duplicate names exist */
-              }
-            else if (ng->number == number)
-              {
-              *errorcodeptr = ERR65;
-              goto FAILED;
-              }
-            }
-
-          if (i >= cb->names_found)     /* Not a duplicate with same number */
-            {
-            /* Increase the list size if necessary */
-
-            if (cb->names_found >= cb->named_group_list_size)
-              {
-              int newsize = cb->named_group_list_size * 2;
-              named_group *newspace =
-                cb->cx->memctl.malloc(newsize * sizeof(named_group),
-                cb->cx->memctl.memory_data);
-              if (newspace == NULL)
-                {
-                *errorcodeptr = ERR21;
-                goto FAILED;
-                }
-
-              memcpy(newspace, cb->named_groups,
-                cb->named_group_list_size * sizeof(named_group));
-              if (cb->named_group_list_size > NAMED_GROUP_LIST_SIZE)
-                cb->cx->memctl.free((void *)cb->named_groups,
-                cb->cx->memctl.memory_data);
-              cb->named_groups = newspace;
-              cb->named_group_list_size = newsize;
-              }
-
-            cb->named_groups[cb->names_found].name = name;
-            cb->named_groups[cb->names_found].length = namelen;
-            cb->named_groups[cb->names_found].number = number;
-            cb->names_found++;
-            }
-          }
-
-        ptr++;                    /* Move past > or ' in both passes. */
-        goto NUMBERED_GROUP;
+                  CHAR_GREATER_THAN_SIGN : CHAR_APOSTROPHE;
+        while (*(++ptr) != (unsigned int)terminator);
+        ptr++;
+        goto NUMBERED_GROUP;      /* Set up numbered group */
 
 
         /* ------------------------------------------------------------ */
@@ -5933,16 +6333,10 @@ for (;; ptr++)
         while (MAX_255(*ptr) && (cb->ctypes[*ptr] & ctype_word) != 0) ptr++;
         namelen = (int)(ptr - name);
 
-        /* In the pre-compile phase, do a syntax check. We used to just set
-        a dummy reference number, because it was not used in the first pass.
-        However, with the change of recursive back references to be atomic,
-        we have to look for the number so that this state can be identified, as
-        otherwise the incorrect length is computed. If it's not a backwards
-        reference, the dummy number will do. */
+        /* In the pre-compile phase, do a syntax check. */
 
         if (lengthptr != NULL)
           {
-          named_group *ng;
           if (namelen == 0)
             {
             *errorcodeptr = ERR62;
@@ -5958,143 +6352,96 @@ for (;; ptr++)
             *errorcodeptr = ERR48;
             goto FAILED;
             }
+          }
 
-          /* The name table does not exist in the first pass; instead we must
-          scan the list of names encountered so far in order to get a number.
-          If there are duplicates, there may be more than one number. For each
-          one, if handling a back reference, we must check to see if it is
-          recursive, that is, it is inside the group that it references. A flag
-          is set so that the group can be made atomic. If the name is not
-          found, set the value of recno to 0 for a forward reference. */
+        /* Scan the list of names generated in the pre-pass in order to get
+        a number and whether or not this name is duplicated. */
 
-          recno = 0;
-          ng = cb->named_groups;
-           
-          for (i = 0; i < cb->names_found; i++, ng++)
+        recno = 0;
+        is_dupname = FALSE;
+        ng = cb->named_groups;
+
+        for (i = 0; i < cb->names_found; i++, ng++)
+          {
+          if (namelen == ng->length &&
+              PRIV(strncmp)(name, ng->name, namelen) == 0)
             {
-            if (namelen == ng->length &&
-                PRIV(strncmp)(name, ng->name, namelen) == 0)
+            open_capitem *oc;
+            is_dupname = ng->isdup;
+            recno = ng->number;
+
+            /* For a recursion, that's all that is needed. We can now go to the
+            code that handles numerical recursion. */
+
+            if (is_recurse) goto HANDLE_RECURSION;
+
+            /* For a back reference, update the back reference map and the
+            maximum back reference. Then for each group we must check to see if
+            it is recursive, that is, it is inside the group that it
+            references. A flag is set so that the group can be made atomic. */
+
+            cb->backref_map |= (recno < 32)? (1u << recno) : 1;
+            if ((uint32_t)recno > cb->top_backref) cb->top_backref = recno;
+
+            for (oc = cb->open_caps; oc != NULL; oc = oc->next)
               {
-              open_capitem *oc;
-              recno = ng->number;
-              if (is_recurse) break;
-              for (oc = cb->open_caps; oc != NULL; oc = oc->next)
+              if (oc->number == recno)
                 {
-                if (oc->number == recno)
-                  {
-                  oc->flag = TRUE;
-                  break;
-                  }
+                oc->flag = TRUE;
+                break;
                 }
               }
             }
-
-          /* If duplicate names are permitted, we have to allow for a named
-          reference to a duplicated name (this cannot be determined until the
-          second pass). This needs an extra data item. Counting named back
-          references and incrementing the count at the end does not work
-          because it does not account for duplication of groups containing such
-          references. Nor does checking for PCRE2_DUPNAMES because that need
-          not be set at the point of reference. */
-
-          *lengthptr += IMM2_SIZE;
-          
-          /* If this is a forward reference and we are within a (?|...) group,
-          the reference may end up as the number of a group which we are 
-          currently inside, that is, it could be a recursive reference. In the 
-          real compile this will be picked up and the reference wrapped with 
-          OP_ONCE to make it atomic, so we must space in case this occurs. */ 
-          
-          if (recno == 0) *lengthptr += 2 + 2*LINK_SIZE;
           }
 
-        /* In the real compile, search the name table. We check the name
-        first, and then check that we have reached the end of the name in the
-        table. That way, if the name is longer than any in the table, the
-        comparison will fail without reading beyond the table entry. */
+        /* If the name was not found we have a bad reference. */
 
-        else
+        if (recno == 0)
+          {
+          *errorcodeptr = ERR15;
+          goto FAILED;
+          }
+
+        /* If a back reference name is not duplicated, we can handle it as a
+        numerical reference. */
+
+        if (!is_dupname) goto HANDLE_REFERENCE;
+
+        /* If a back reference name is duplicated, we generate a different
+        opcode to a numerical back reference. In the second pass we must search
+        for the index and count in the final name table. */
+
+        count = 0;
+        index = 0;
+
+        if (lengthptr == NULL)
           {
           slot = cb->name_table;
           for (i = 0; i < cb->names_found; i++)
             {
             if (PRIV(strncmp)(name, slot+IMM2_SIZE, namelen) == 0 &&
                 slot[IMM2_SIZE+namelen] == 0)
-              break;
+              {
+              if (count == 0) index = i;
+              count++;
+              }
             slot += cb->name_entry_size;
             }
 
-          if (i < cb->names_found)
-            {
-            recno = GET2(slot, 0);
-            }
-          else
+          if (count == 0)
             {
             *errorcodeptr = ERR15;
             goto FAILED;
             }
           }
 
-        /* In both phases, for recursions, we can now go to the code than
-        handles numerical recursion. */
-
-        if (is_recurse) goto HANDLE_RECURSION;
-
-        /* For back references, in the second pass we must see if the name is
-        duplicated. If so, we generate a different opcode. */
-
-        if (lengthptr == NULL && cb->dupnames)
-          {
-          int count = 1;
-          unsigned int index = i;
-          PCRE2_UCHAR *cslot = slot + cb->name_entry_size;
-
-          for (i++; i < cb->names_found; i++)
-            {
-            if (PRIV(strcmp)(slot + IMM2_SIZE, cslot + IMM2_SIZE) != 0) break;
-            count++;
-            cslot += cb->name_entry_size;
-            }
-
-          if (count > 1)
-            {
-            if (firstcuflags == REQ_UNSET) firstcuflags = REQ_NONE;
-            previous = code;
-            item_hwm_offset = cb->hwm - cb->start_workspace;
-            *code++ = ((options & PCRE2_CASELESS) != 0)? OP_DNREFI : OP_DNREF;
-            PUT2INC(code, 0, index);
-            PUT2INC(code, 0, count);
-
-            /* Process each potentially referenced group. */
-
-            for (; slot < cslot; slot += cb->name_entry_size)
-              {
-              open_capitem *oc;
-              recno = GET2(slot, 0);
-              cb->backref_map |= (recno < 32)? (1u << recno) : 1;
-              if ((uint32_t)recno > cb->top_backref) cb->top_backref = recno;
-
-              /* Check to see if this back reference is recursive, that is, it
-              is inside the group that it references. A flag is set so that the
-              group can be made atomic. */
-
-              for (oc = cb->open_caps; oc != NULL; oc = oc->next)
-                {
-                if (oc->number == recno)
-                  {
-                  oc->flag = TRUE;
-                  break;
-                  }
-                }
-              }
-
-            continue;  /* End of back ref handling */
-            }
-          }
-
-        /* First pass, or a non-duplicated name. */
-
-        goto HANDLE_REFERENCE;
+        if (firstcuflags == REQ_UNSET) firstcuflags = REQ_NONE;
+        previous = code;
+        item_hwm_offset = cb->hwm - cb->start_workspace;
+        *code++ = ((options & PCRE2_CASELESS) != 0)? OP_DNREFI : OP_DNREF;
+        PUT2INC(code, 0, index);
+        PUT2INC(code, 0, count);
+        continue;  /* End of back ref handling */
 
 
         /* ------------------------------------------------------------ */
@@ -6172,7 +6519,6 @@ for (;; ptr++)
           /* Come here from code above that handles a named recursion */
 
           HANDLE_RECURSION:
-
           previous = code;
           item_hwm_offset = cb->hwm - cb->start_workspace;
           called = cb->start_code;
@@ -6692,7 +7038,7 @@ for (;; ptr++)
         recno = -escape;
 
         /* Come here from named backref handling when the reference is to a
-        single group (i.e. not to a duplicated name. */
+        single group (i.e. not to a duplicated name). */
 
         HANDLE_REFERENCE:
         if (firstcuflags == REQ_UNSET) firstcuflags = REQ_NONE;
@@ -7176,7 +7522,7 @@ for (;;)
     Because we are moving code along, we must ensure that any pending recursive
     or forward subroutine references are updated. In any event, remove the
     block from the chain. */
-    
+
     if (capnumber > 0)
       {
       if (cb->open_caps->flag)
@@ -7697,8 +8043,13 @@ int errorcode = 0;                      /* Initialize to avoid compiler warn */
 
 PCRE2_UCHAR *copied_pattern = NULL;
 PCRE2_UCHAR stack_copied_pattern[COPIED_PATTERN_SIZE];
-PCRE2_UCHAR cworkspace[COMPILE_WORK_SIZE];
 named_group named_groups[NAMED_GROUP_LIST_SIZE];
+
+/* The workspace is used in different ways in the different compiling phases.
+Ensure that it is 16-bit aligned for the preliminary group scan. */
+
+uint16_t c16workspace[(COMPILE_WORK_SIZE * sizeof(PCRE2_UCHAR))/sizeof(uint16_t)];
+PCRE2_UCHAR *cworkspace = (PCRE2_UCHAR *)c16workspace;
 
 
 /* -------------- Check arguments and set up the pattern ----------------- */
@@ -7937,6 +8288,33 @@ switch(newline)
   goto HAD_ERROR;
   }
 
+/* Before we do anything else, do a pre-scan of the pattern in order to
+discover the named groups and their numerical equivalents, so that this
+information is always available for the remaining processing. */
+
+errorcode = scan_for_captures(&ptr, cb.external_options, &cb);
+if (errorcode != 0) goto HAD_ERROR;
+
+/* For obscure debugging this code can be enabled. */
+
+#if 0
+  {
+  int i;
+  named_group *ng = cb.named_groups;
+  fprintf(stderr, "+++Captures: %d\n", cb.final_bracount);
+  for (i = 0; i < cb.names_found; i++, ng++)
+    {
+    fprintf(stderr, "+++%3d %.*s\n", ng->number, ng->length, ng->name);
+    }
+  }
+#endif
+
+/* Reset current bracket count to zero and current pointer to the start of the
+pattern. */
+
+cb.bracount = 0;
+ptr = pattern + skipatstart;
+
 /* Pretend to compile the pattern while actually just accumulating the amount
 of memory required in the 'length' variable. This behaviour is triggered by
 passing a non-NULL final argument to compile_regex(). We pass a block of
@@ -8015,7 +8393,6 @@ from the pre-compile phase, as is the name_entry_size field. Reset the bracket
 count and the names_found field. Also reset the hwm field; this time it's used
 for remembering forward references to subpatterns. */
 
-cb.final_bracount = cb.bracount;  /* Save for checking forward references */
 cb.parens_depth = 0;
 cb.assert_depth = 0;
 cb.bracount = 0;
@@ -8031,8 +8408,7 @@ cb.check_lookbehind = FALSE;
 cb.open_caps = NULL;
 
 /* If any named groups were found, create the name/number table from the list
-created in the first pass. If the list was longer than the in-stack list, free
-the heap memory. */
+created in the pre-pass. */
 
 if (cb.names_found > 0)
   {
@@ -8041,8 +8417,6 @@ if (cb.names_found > 0)
   cb.names_found = 0;
   for (; i > 0; i--, ng++)
     add_name_to_table(&cb, ng->name, ng->length, ng->number);
-  if (cb.named_group_list_size > NAMED_GROUP_LIST_SIZE)
-    ccontext->memctl.free((void *)cb.named_groups, ccontext->memctl.memory_data);
   }
 
 /* Set up a starting, non-extracting bracket, then compile the expression. On
@@ -8116,13 +8490,11 @@ if (cb.hwm > cb.start_workspace)
     }
   }
 
-/* If the workspace had to be expanded, free the new memory. Set the pointer to
-NULL to indicate that forward references have been filled in. */
+/* If the workspace had to be expanded, free the new memory. */
 
 if (cb.workspace_size > COMPILE_WORK_SIZE)
   ccontext->memctl.free((void *)cb.start_workspace,
     ccontext->memctl.memory_data);
-cb.start_workspace = NULL;
 
 /* After a successful compile, give an error if there's back reference to a
 non-existent capturing subpattern. Then, unless disabled, check whether any
@@ -8157,7 +8529,7 @@ if (errorcode == 0 && cb.check_lookbehind)
   /* Loop, searching for OP_REVERSE items, and process those that do not have
   their length set. (Actually, it will also re-process any that have a length
   of zero, but that is a pathological case, and it does no harm.) When we find
-  one, we temporarily terminate the branch it is in while we scan it. Note that 
+  one, we temporarily terminate the branch it is in while we scan it. Note that
   calling find_bracket() with a negative group number returns a pointer to the
   OP_REVERSE item, not the actual lookbehind. */
 
@@ -8310,11 +8682,15 @@ if ((re->overall_options & PCRE2_NO_START_OPTIMIZE) == 0 &&
   }
 
 /* Control ends up here in all cases. If memory was obtained for a
-zero-terminated copy of the pattern, remember to free it before returning. */
+zero-terminated copy of the pattern, remember to free it before returning. Also
+free the list of named groups if a larger one had to be obtained. */
 
 EXIT:
 if (copied_pattern != stack_copied_pattern)
   ccontext->memctl.free(copied_pattern, ccontext->memctl.memory_data);
+if (cb.named_group_list_size > NAMED_GROUP_LIST_SIZE)
+  ccontext->memctl.free((void *)cb.named_groups, ccontext->memctl.memory_data);
+
 return re;    /* Will be NULL after an error */
 }
 
