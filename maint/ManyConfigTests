@@ -28,7 +28,7 @@
 useasan=1
 useusan=1
 # Temporarily disabled.
-usedebug=0
+usedebug=1
 usejit=1
 usemain=1
 usetmp=1
