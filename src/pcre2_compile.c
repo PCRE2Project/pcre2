@@ -6483,8 +6483,16 @@ for (;; ptr++)
             }
 
           recno = 0;
-          while(IS_DIGIT(*ptr))
+          while (IS_DIGIT(*ptr))
+            {
+            if (recno > INT_MAX / 10 - 1) /* Integer overflow */
+              {
+              while (IS_DIGIT(*ptr)) ptr++;
+              *errorcodeptr = ERR61;
+              goto FAILED;
+              }
             recno = recno * 10 + *ptr++ - CHAR_0;
+            } 
 
           if (*ptr != (PCRE2_UCHAR)terminator)
             {

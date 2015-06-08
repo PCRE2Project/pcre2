@@ -14449,4 +14449,7 @@ Failed: error 162 at offset 4: subpattern name expected
 
 "(?J:(?|(?'R')(\k'R')|((?'R'))))"
 
+/(?<=|(\,\$(?73591620449005828816)\xa8.{7}){6}\x09)/
+Failed: error 161 at offset 32: number is too big
+
 # End of testinput2 

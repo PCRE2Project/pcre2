@@ -146,6 +146,8 @@ code for handling forward references was contorted and led to several errors in
 computing the memory requirements for some patterns, leading to buffer 
 overflows.
 
+37. There was no check for integer overflow in subroutine calls such as (?123).
+
 
 Version 10.10 06-March-2015
 ---------------------------
