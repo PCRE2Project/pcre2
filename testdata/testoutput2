@@ -14452,4 +14452,22 @@ Failed: error 162 at offset 4: subpattern name expected
 /(?<=|(\,\$(?73591620449005828816)\xa8.{7}){6}\x09)/
 Failed: error 161 at offset 32: number is too big
 
+/^(?:(?(1)x|)+)+$()/B
+------------------------------------------------------------------
+        Bra
+        ^
+        SBra
+        SCond
+      1 Cond ref
+        x
+        Alt
+        KetRmax
+        KetRmax
+        $
+        CBra 1
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+
 # End of testinput2 

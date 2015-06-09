@@ -151,6 +151,10 @@ overflows.
 38. The table entry for \l in EBCDIC environments was incorrect, leading to its
 being treated as a literal 'l' instead of causing an error.
 
+39. If a non-capturing group containing a conditional group that could match
+an empty string was repeated, it was not identified as matching an empty string 
+itself. For example: /^(?:(?(1)x|)+)+$()/.
+
 
 Version 10.10 06-March-2015
 ---------------------------
