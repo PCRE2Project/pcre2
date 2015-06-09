@@ -148,6 +148,9 @@ overflows.
 
 37. There was no check for integer overflow in subroutine calls such as (?123).
 
+38. The table entry for \l in EBCDIC environments was incorrect, leading to its
+being treated as a literal 'l' instead of causing an error.
+
 
 Version 10.10 06-March-2015
 ---------------------------

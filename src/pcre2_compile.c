@@ -330,7 +330,7 @@ because it is defined as 'a', which of course picks up the ASCII value. */
 static const short int escapes[] = {
 /*  80 */            7, -ESC_b,       0, -ESC_d, ESC_e,  ESC_f,      0,
 /*  88 */-ESC_h,     0,      0,     '{',      0,     0,      0,      0,
-/*  90 */     0,     0, -ESC_k,     'l',      0, ESC_n,      0, -ESC_p,
+/*  90 */     0,     0, -ESC_k,       0,      0, ESC_n,      0, -ESC_p,
 /*  98 */     0, ESC_r,      0,     '}',      0,     0,      0,      0,
 /*  A0 */     0,   '~', -ESC_s, ESC_tee,      0,-ESC_v, -ESC_w,      0,
 /*  A8 */     0,-ESC_z,      0,       0,      0,   '[',      0,      0,
