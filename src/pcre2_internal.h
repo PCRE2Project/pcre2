@@ -1192,31 +1192,6 @@ only. */
 
 /* -------------------- Definitions for compiled patterns -------------------*/
 
-/* Escape items that are just an encoding of a particular data value. */
-
-#ifndef ESC_e
-#define ESC_e CHAR_ESC
-#endif
-
-#ifndef ESC_f
-#define ESC_f CHAR_FF
-#endif
-
-#ifndef ESC_n
-#define ESC_n CHAR_LF
-#endif
-
-#ifndef ESC_r
-#define ESC_r CHAR_CR
-#endif
-
-/* We can't officially use ESC_t because it is a POSIX reserved identifier
-(presumably because of all the others like size_t). */
-
-#ifndef ESC_tee
-#define ESC_tee CHAR_HT
-#endif
-
 /* Codes for different types of Unicode property */
 
 #define PT_ANY        0    /* Any property - matches all chars */
@@ -1255,13 +1230,46 @@ contain characters with values greater than 255. */
 #define XCL_PROP      3    /* Unicode property (2-byte property code follows) */
 #define XCL_NOTPROP   4    /* Unicode inverted property (ditto) */
 
+/* Escape items that are just an encoding of a particular data value. These 
+appear in the escapes[] table in pcre2_compile.c as positive numbers. */
+
+#ifndef ESC_a
+#define ESC_a CHAR_BEL
+#endif
+
+#ifndef ESC_e
+#define ESC_e CHAR_ESC
+#endif
+
+#ifndef ESC_f
+#define ESC_f CHAR_FF
+#endif
+
+#ifndef ESC_n
+#define ESC_n CHAR_LF
+#endif
+
+#ifndef ESC_r
+#define ESC_r CHAR_CR
+#endif
+
+/* We can't officially use ESC_t because it is a POSIX reserved identifier
+(presumably because of all the others like size_t). */
+
+#ifndef ESC_tee
+#define ESC_tee CHAR_HT
+#endif
+
 /* These are escaped items that aren't just an encoding of a particular data
 value such as \n. They must have non-zero values, as check_escape() returns 0
-for a data character.  Also, they must appear in the same order as in the
-opcode definitions below, up to ESC_z. There's a dummy for OP_ALLANY because it
-corresponds to "." in DOTALL mode rather than an escape sequence. It is also
-used for [^] in JavaScript compatibility mode, and for \C in non-utf mode. In
-non-DOTALL mode, "." behaves like \N.
+for a data character. In the escapes[] table in pcre2_compile.c their values 
+are negated in order to distinguish them from data values.
+
+They must appear here in the same order as in the opcode definitions below, up
+to ESC_z. There's a dummy for OP_ALLANY because it corresponds to "." in DOTALL
+mode rather than an escape sequence. It is also used for [^] in JavaScript
+compatibility mode, and for \C in non-utf mode. In non-DOTALL mode, "." behaves
+like \N.
 
 The special values ESC_DU, ESC_du, etc. are used instead of ESC_D, ESC_d, etc.
 when PCRE_UCP is set and replacement of \d etc by \p sequences is required.

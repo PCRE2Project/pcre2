@@ -296,7 +296,7 @@ static const short int escapes[] = {
      -ESC_Z,                  CHAR_LEFT_SQUARE_BRACKET,
      CHAR_BACKSLASH,          CHAR_RIGHT_SQUARE_BRACKET,
      CHAR_CIRCUMFLEX_ACCENT,  CHAR_UNDERSCORE,
-     CHAR_GRAVE_ACCENT,       7,
+     CHAR_GRAVE_ACCENT,       ESC_a,
      -ESC_b,                  0,
      -ESC_d,                  ESC_e,
      ESC_f,                   0,
@@ -328,7 +328,7 @@ because it is defined as 'a', which of course picks up the ASCII value. */
 #endif
 
 static const short int escapes[] = {
-/*  80 */            7, -ESC_b,       0, -ESC_d, ESC_e,  ESC_f,      0,
+/*  80 */        ESC_a, -ESC_b,       0, -ESC_d, ESC_e,  ESC_f,      0,
 /*  88 */-ESC_h,     0,      0,     '{',      0,     0,      0,      0,
 /*  90 */     0,     0, -ESC_k,       0,      0, ESC_n,      0, -ESC_p,
 /*  98 */     0, ESC_r,      0,     '}',      0,     0,      0,      0,

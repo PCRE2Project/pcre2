@@ -155,6 +155,12 @@ being treated as a literal 'l' instead of causing an error.
 an empty string was repeated, it was not identified as matching an empty string 
 itself. For example: /^(?:(?(1)x|)+)+$()/.
 
+40. In an EBCDIC environment, pcretest was mishandling the escape sequences
+\a and \e in test subject lines. 
+
+41. In an EBCDIC environment, \a in a pattern was converted to the ASCII
+instead of the EBCDIC value.
+
 
 Version 10.10 06-March-2015
 ---------------------------
