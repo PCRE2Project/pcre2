@@ -1,5 +1,5 @@
 # This is a specialized test for checking, when PCRE2 is compiled with the
-# EBCDIC option but in an ASCII environment, that newline and white space
+# EBCDIC option but in an ASCII environment, that newline, white space, and \c
 # functionality is working. It catches cases where explicit values such as 0x0a
 # have been used instead of names like CHAR_LF. Needless to say, it is not a
 # genuine EBCDIC test! In patterns, alphabetic characters that follow a
@@ -117,5 +117,18 @@
     A\x25B
     A\x0bB
     A\x0cB
+    
+# Test \c functionality 
+    
+/\É@\ÉA\Éb\ÉC\Éd\ÉE\Éf\ÉG\Éh\ÉI\ÉJ\ÉK\Él\Ém\ÉN\ÉO\Ép\Éq\Ér\ÉS\ÉT\Éu\ÉV\ÉW\ÉX\Éy\ÉZ/
+    \x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f
+
+/\É[\É\\É]\É^\É_/
+    \x18\x19\x1a\x1b\x1c\x1d\x1e\x1f
+    
+/\É?/
+    A\xffB
+
+/\É&/
 
 # End

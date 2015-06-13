@@ -145,7 +145,11 @@ static const char compile_error_texts[] =
   "different names for subpatterns of the same number are not allowed\0"
   "(*MARK) must have an argument\0"
   "non-hex character in \\x{} (closing brace missing?)\0"
+#ifndef EBCDIC   
   "\\c must be followed by a printable ASCII character\0"
+#else   
+  "\\c must be followed by a letter or one of [\\]^_?\0"
+#endif
   "\\k is not followed by a braced, angle-bracketed, or quoted name\0"
   /* 70 */
   "internal error: unknown opcode in find_fixedlength()\0"

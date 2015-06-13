@@ -1,4 +1,4 @@
-.TH PCRE2SYNTAX 3 "23 April 2015" "PCRE2 10.20"
+.TH PCRE2SYNTAX 3 "13 June 2015" "PCRE2 10.20"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION SYNTAX SUMMARY"
@@ -22,8 +22,10 @@ documentation. This document contains a quick-reference summary of the syntax.
 .SH "ESCAPED CHARACTERS"
 .rs
 .sp
+This table applies to ASCII and Unicode environments.
+.sp
   \ea         alarm, that is, the BEL character (hex 07)
-  \ecx        "control-x", where x is any ASCII character
+  \ecx        "control-x", where x is any ASCII printing character
   \ee         escape (hex 1B)
   \ef         form feed (hex 0C)
   \en         newline (hex 0A)
@@ -47,7 +49,8 @@ in the
 .\" HREF
 \fBpcre2pattern\fP
 .\"
-documentation.
+documentation, where details of escape processing in EBCDIC environments are 
+also given.
 .P
 When \ex is not followed by {, from zero to two hexadecimal digits are read,
 but if PCRE2_ALT_BSUX is set, \ex must be followed by two hexadecimal digits to
@@ -567,6 +570,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 23 April 2015
+Last updated: 13 June 2015
 Copyright (c) 1997-2015 University of Cambridge.
 .fi

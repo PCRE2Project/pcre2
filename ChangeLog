@@ -161,6 +161,9 @@ itself. For example: /^(?:(?(1)x|)+)+$()/.
 41. In an EBCDIC environment, \a in a pattern was converted to the ASCII
 instead of the EBCDIC value.
 
+42. The handling of \c in an EBCDIC environment has been revised so that it is
+now compatible with the specification in Perl's perlebcdic page.
+
 
 Version 10.10 06-March-2015
 ---------------------------

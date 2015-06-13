@@ -268,8 +268,9 @@ invalid. */
 in UTF-8 mode. It runs from '0' to 'z'. */
 
 #ifndef EBCDIC
-#define ESCAPES_FIRST  CHAR_0
-#define ESCAPES_LAST   CHAR_z
+#define ESCAPES_FIRST       CHAR_0
+#define ESCAPES_LAST        CHAR_z
+#define ESCAPES_UPPER_CASE  (-32)    /* Add this to upper case a letter */
 
 static const short int escapes[] = {
      0,                       0,
@@ -319,12 +320,14 @@ It runs from 'a' to '9'. For some minimal testing of EBCDIC features, the code
 is sometimes compiled on an ASCII system. In this case, we must not use CHAR_a
 because it is defined as 'a', which of course picks up the ASCII value. */
 
-#if 'a' == 0x81                 /* Check for a real EBCDIC environment */
-#define ESCAPES_FIRST  CHAR_a
-#define ESCAPES_LAST   CHAR_9
-#else                           /* Testing in an ASCII environment */
+#if 'a' == 0x81                    /* Check for a real EBCDIC environment */
+#define ESCAPES_FIRST       CHAR_a
+#define ESCAPES_LAST        CHAR_9
+#define ESCAPES_UPPER_CASE  (+64)  /* Add this to upper case a letter */
+#else                              /* Testing in an ASCII environment */
 #define ESCAPES_FIRST  ((unsigned char)'\x81')   /* EBCDIC 'a' */
 #define ESCAPES_LAST   ((unsigned char)'\xf9')   /* EBCDIC '9' */
+#define ESCAPES_UPPER_CASE  (-32)  /* Add this to upper case a letter */
 #endif
 
 static const short int escapes[] = {
@@ -345,6 +348,11 @@ static const short int escapes[] = {
 /*  F0 */     0,     0,      0,       0,      0,     0,      0,      0,
 /*  F8 */     0,     0
 };
+
+/* We also need a table of characters that may follow \c in an EBCDIC
+environment for characters 0-31. */
+
+static unsigned char ebcdic_escape_c[] = "@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_";
 
 #endif   /* EBCDIC */
 
@@ -1238,7 +1246,7 @@ for (code = first_significant_code(code + PRIV(OP_lengths)[*code], TRUE);
   PCRE2_SPTR ccode;
 
   c = *code;
-  
+
   /* Skip over forward assertions; the other assertions are skipped by
   first_significant_code() with a TRUE final argument. */
 
@@ -2076,30 +2084,62 @@ else
       }       /* End of Perl-style \x handling */
     break;
 
-    /* For \c, a following letter is upper-cased; then the 0x40 bit is flipped.
-    An error is given if the byte following \c is not a printable ASCII
-    character. This coding is ASCII-specific, but then the whole concept of \cx
-    is ASCII-specific. (However, an EBCDIC equivalent has now been added.) */
+    /* The handling of \c is different in ASCII and EBCDIC environments. In an
+    ASCII (or Unicode) environment, an error is given if the character
+    following \c is not a printable ASCII character. Otherwise, the following
+    character is upper-cased if it is a letter, and after that the 0x40 bit is
+    flipped. The result is the value of the escape.
 
+    In an EBCDIC environment the handling of \c is compatible with the
+    specification in the perlebcdic document. The following character must be
+    a letter or one of small number of special characters. These provide a
+    means of defining the character values 0-31.
+
+    For testing the EBCDIC handling of \c in an ASCII environment, recognize
+    the EBCDIC value of 'c' explicitly. */
+
+#if defined EBCDIC && 'a' != 0x81
+    case 0x83:
+#else
     case CHAR_c:
+#endif
+
     c = *(++ptr);
+    if (c >= CHAR_a && c <= CHAR_z) c += ESCAPES_UPPER_CASE;
     if (c == CHAR_NULL && ptr >= cb->end_pattern)
       {
       *errorcodeptr = ERR2;
       break;
       }
+
+    /* Handle \c in an ASCII/Unicode environment. */
+
 #ifndef EBCDIC    /* ASCII/UTF-8 coding */
     if (c < 32 || c > 126)  /* Excludes all non-printable ASCII */
       {
       *errorcodeptr = ERR68;
       break;
       }
-    if (c >= CHAR_a && c <= CHAR_z) c -= 32;
     c ^= 0x40;
-#else             /* EBCDIC coding */
-    if (c >= CHAR_a && c <= CHAR_z) c += 64;
-    c ^= 0xC0;
-#endif
+
+    /* Handle \c in an EBCDIC environment. The special case \c? is converted to
+    255 (0xff) or 95 (0x5f) if other character suggest we are using th POSIX-BC
+    encoding. (This is the way Perl indicates that it handles \c?.) The other
+    valid sequences correspond to a list of specific characters. */
+
+#else
+    if (c == CHAR_QUESTION_MARK)
+      c = ('\\' == 188 && '`' == 74)? 0x5f : 0xff;
+    else
+      {
+      for (i = 0; i < 32; i++)
+        {
+        if (c == ebcdic_escape_c[i]) break;
+        }
+      if (i < 32) c = i; else *errorcodeptr = ERR68;
+      }
+#endif  /* EBCDIC */
+
     break;
 
     /* Any other alphanumeric following \ is an error. Perl gives an error only
@@ -6492,7 +6532,7 @@ for (;; ptr++)
               goto FAILED;
               }
             recno = recno * 10 + *ptr++ - CHAR_0;
-            } 
+            }
 
           if (*ptr != (PCRE2_UCHAR)terminator)
             {
