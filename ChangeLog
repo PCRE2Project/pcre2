@@ -164,6 +164,9 @@ instead of the EBCDIC value.
 42. The handling of \c in an EBCDIC environment has been revised so that it is
 now compatible with the specification in Perl's perlebcdic page.
 
+43. Single character repetition in JIT has been improved. 20-30% speedup
+was achieved on certain patterns.
+
 
 Version 10.10 06-March-2015
 ---------------------------
