@@ -8079,11 +8079,28 @@ switch(type)
 /* Handle fixed part first. */
 if (exact > 1)
   {
-  OP1(SLJIT_MOV, tmp_base, tmp_offset, SLJIT_IMM, exact);
-  label = LABEL();
-  compile_char1_matchingpath(common, type, cc, &backtrack->topbacktracks, TRUE);
-  OP2(SLJIT_SUB | SLJIT_SET_E, tmp_base, tmp_offset, tmp_base, tmp_offset, SLJIT_IMM, 1);
-  JUMPTO(SLJIT_NOT_ZERO, label);
+  if (common->mode == PCRE2_JIT_COMPLETE
+#ifdef SUPPORT_UNICODE
+      && !common->utf
+#endif
+      )
+    {
+    OP2(SLJIT_ADD, TMP1, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(exact));
+    add_jump(compiler, &backtrack->topbacktracks, CMP(SLJIT_GREATER, TMP1, 0, STR_END, 0));
+    OP1(SLJIT_MOV, tmp_base, tmp_offset, SLJIT_IMM, exact);
+    label = LABEL();
+    compile_char1_matchingpath(common, type, cc, &backtrack->topbacktracks, FALSE);
+    OP2(SLJIT_SUB | SLJIT_SET_E, tmp_base, tmp_offset, tmp_base, tmp_offset, SLJIT_IMM, 1);
+    JUMPTO(SLJIT_NOT_ZERO, label);
+    }
+  else
+    {
+    OP1(SLJIT_MOV, tmp_base, tmp_offset, SLJIT_IMM, exact);
+    label = LABEL();
+    compile_char1_matchingpath(common, type, cc, &backtrack->topbacktracks, TRUE);
+    OP2(SLJIT_SUB | SLJIT_SET_E, tmp_base, tmp_offset, tmp_base, tmp_offset, SLJIT_IMM, 1);
+    JUMPTO(SLJIT_NOT_ZERO, label);
+    }
   }
 else if (exact == 1)
   compile_char1_matchingpath(common, type, cc, &backtrack->topbacktracks, TRUE);
