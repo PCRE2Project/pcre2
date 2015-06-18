@@ -94,7 +94,7 @@ below). The input is processed using using C's string functions, so must not
 contain binary zeroes, even though in Unix-like environments, <b>fgets()</b>
 treats any bytes other than newline as data characters. In some Windows
 environments character 26 (hex 1A) causes an immediate end of file, and no
-further data is read. 
+further data is read.
 </P>
 <P>
 For maximum portability, therefore, it is safest to avoid non-printing
@@ -284,13 +284,20 @@ following commands are recognized:
   #forbid_utf
 </pre>
 Subsequent patterns automatically have the PCRE2_NEVER_UTF and PCRE2_NEVER_UCP
-options set, which locks out the use of UTF and Unicode property features. This
-is a trigger guard that is used in test files to ensure that UTF or Unicode
-property tests are not accidentally added to files that are used when Unicode
-support is not included in the library. This effect can also be obtained by the
-use of <b>#pattern</b>; the difference is that <b>#forbid_utf</b> cannot be
-unset, and the automatic options are not displayed in pattern information, to
-avoid cluttering up test output.
+options set, which locks out the use of the PCRE2_UTF and PCRE2_UCP options and
+the use of (*UTF) and (*UCP) at the start of patterns. This command also forces
+an error if a subsequent pattern contains any occurrences of \P, \p, or \X,
+which are still supported when PCRE2_UTF is not set, but which require Unicode
+property support to be included in the library.
+</P>
+<P>
+This is a trigger guard that is used in test files to ensure that UTF or
+Unicode property tests are not accidentally added to files that are used when
+Unicode support is not included in the library. Setting PCRE2_NEVER_UTF and
+PCRE2_NEVER_UCP as a default can also be obtained by the use of <b>#pattern</b>;
+the difference is that <b>#forbid_utf</b> cannot be unset, and the automatic
+options are not displayed in pattern information, to avoid cluttering up test
+output.
 <pre>
   #load &#60;filename&#62;
 </pre>
@@ -471,6 +478,7 @@ for a description of their effects.
 <pre>
       allow_empty_class         set PCRE2_ALLOW_EMPTY_CLASS
       alt_bsux                  set PCRE2_ALT_BSUX
+      alt_circumflex            set PCRE2_ALT_CIRCUMFLEX
       anchored                  set PCRE2_ANCHORED
       auto_callout              set PCRE2_AUTO_CALLOUT
   /i  caseless                  set PCRE2_CASELESS
@@ -481,6 +489,7 @@ for a description of their effects.
       firstline                 set PCRE2_FIRSTLINE
       match_unset_backref       set PCRE2_MATCH_UNSET_BACKREF
   /m  multiline                 set PCRE2_MULTILINE
+      never_backslash_c         set PCRE2_NEVER_BACKSLASH_C
       never_ucp                 set PCRE2_NEVER_UCP
       never_utf                 set PCRE2_NEVER_UTF
       no_auto_capture           set PCRE2_NO_AUTO_CAPTURE
@@ -506,7 +515,7 @@ about the pattern:
 <pre>
       bsr=[anycrlf|unicode]     specify \R handling
   /B  bincode                   show binary code without lengths
-      callout_info              show callout information 
+      callout_info              show callout information
       debug                     same as info,fullbincode
       fullbincode               show binary code with lengths
   /I  info                      show info about compiled pattern
@@ -589,9 +598,9 @@ not necessarily the last character. These lines are omitted if no starting or
 ending code units are recorded.
 </P>
 <P>
-The <b>callout_info</b> modifier requests information about all the callouts in 
-the pattern. A list of them is output at the end of any other information that 
-is requested. For each callout, either its number or string is given, followed 
+The <b>callout_info</b> modifier requests information about all the callouts in
+the pattern. A list of them is output at the end of any other information that
+is requested. For each callout, either its number or string is given, followed
 by the item that follows it in the pattern.
 </P>
 <br><b>
@@ -1460,7 +1469,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC21" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 22 March 2015
+Last updated: 20 May 2015
 <br>
 Copyright &copy; 1997-2015 University of Cambridge.
 <br>

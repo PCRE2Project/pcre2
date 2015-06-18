@@ -337,7 +337,7 @@ A second use of backslash provides a way of encoding non-printing characters
 in patterns in a visible manner. There is no restriction on the appearance of
 non-printing characters in a pattern, but when a pattern is being prepared by
 text editing, it is often easier to use one of the following escape sequences
-than the binary character it represents. In an ASCII or Unicode environment, 
+than the binary character it represents. In an ASCII or Unicode environment,
 these escapes are as follows:
 .sp
   \ea        alarm, that is, the BEL character (hex 07)
@@ -372,15 +372,15 @@ to hex 1A); [, \e, ], ^, and _ encode characters 27-31 (hex 1B to hex 1F), and
 \e? becomes either 255 (hex FF) or 95 (hex 5F).
 .P
 Thus, apart from \e?, these escapes generate the same character code values as
-they do in an ASCII environment, though the meanings of the values mostly 
+they do in an ASCII environment, though the meanings of the values mostly
 differ. For example, \eG always generates code value 7, which is BEL in ASCII
 but DEL in EBCDIC.
 .P
 The sequence \e? generates DEL (127, hex 7F) in an ASCII environment, but
-because 127 is not a control character in EBCDIC, Perl makes it generate the 
-APC character. Unfortunately, there are several variants of EBCDIC. In most of 
-them the APC character has the value 255 (hex FF), but in the one Perl calls 
-POSIX-BC its value is 95 (hex 5F). If certain other characters have POSIX-BC 
+because 127 is not a control character in EBCDIC, Perl makes it generate the
+APC character. Unfortunately, there are several variants of EBCDIC. In most of
+them the APC character has the value 255 (hex FF), but in the one Perl calls
+POSIX-BC its value is 95 (hex 5F). If certain other characters have POSIX-BC
 values, PCRE2 makes \e? generate 95; otherwise it generates 255.
 .P
 After \e0 up to two further octal digits are read. If there are fewer than two
@@ -415,7 +415,7 @@ later,
 following the discussion of
 .\" HTML <a href="#subpattern">
 .\" </a>
-parenthesized subpatterns. 
+parenthesized subpatterns.
 .\"
 Otherwise, up to three octal digits are read to form a character code.
 .P
@@ -1128,7 +1128,7 @@ they test for a particular condition being true without consuming any
 characters from the subject string. These two metacharacters are concerned with
 matching the starts and ends of lines. If the newline convention is set so that
 only the two-character sequence CRLF is recognized as a newline, isolated CR
-and LF characters are treated as ordinary data characters, and are not 
+and LF characters are treated as ordinary data characters, and are not
 recognized as newlines.
 .P
 Outside a character class, in the default matching mode, the circumflex
@@ -1220,14 +1220,14 @@ whether or not a UTF mode is set. In the 8-bit library, one code unit is one
 byte; in the 16-bit library it is a 16-bit unit; in the 32-bit library it is a
 32-bit unit. Unlike a dot, \eC always matches line-ending characters. The
 feature is provided in Perl in order to match individual bytes in UTF-8 mode,
-but it is unclear how it can usefully be used. 
+but it is unclear how it can usefully be used.
 .P
 Because \eC breaks up characters into individual code units, matching one unit
 with \eC in UTF-8 or UTF-16 mode means that the rest of the string may start
 with a malformed UTF character. This has undefined results, because PCRE2
 assumes that it is matching character by character in a valid UTF string (by
 default it checks the subject string's validity at the start of processing
-unless the PCRE2_NO_UTF_CHECK option is used). An application can lock out the 
+unless the PCRE2_NO_UTF_CHECK option is used). An application can lock out the
 use of \eC by setting the PCRE2_NEVER_BACKSLASH_C option.
 .P
 PCRE2 does not allow \eC to appear in lookbehind assertions
@@ -1505,7 +1505,7 @@ unset these options by preceding the letter with a hyphen, and a combined
 setting and unsetting such as (?im-sx), which sets PCRE2_CASELESS and
 PCRE2_MULTILINE while unsetting PCRE2_DOTALL and PCRE2_EXTENDED, is also
 permitted. If a letter appears both before and after the hyphen, the option is
-unset. An empty options setting "(?)" is allowed. Needless to say, it has no 
+unset. An empty options setting "(?)" is allowed. Needless to say, it has no
 effect.
 .P
 The PCRE2-specific options PCRE2_DUPNAMES and PCRE2_UNGREEDY can be changed in
@@ -1542,7 +1542,7 @@ appear between the "?" and the ":". Thus the two patterns
   (?i:saturday|sunday)
   (?:(?i)saturday|sunday)
 .sp
-match exactly the same set of strings. 
+match exactly the same set of strings.
 .P
 \fBNote:\fP There are other PCRE2-specific options that can be set by the
 application when the compiling function is called. The pattern can contain
@@ -2907,14 +2907,14 @@ condition.
 .SS "Callouts with string arguments"
 .rs
 .sp
-A delimited string may be used instead of a number as a callout argument. The 
-starting delimiter must be one of ` ' " ^ % # $ { and the ending delimiter is 
-the same as the start, except for {, where the ending delimiter is }. If the 
-ending delimiter is needed within the string, it must be doubled. For 
+A delimited string may be used instead of a number as a callout argument. The
+starting delimiter must be one of ` ' " ^ % # $ { and the ending delimiter is
+the same as the start, except for {, where the ending delimiter is }. If the
+ending delimiter is needed within the string, it must be doubled. For
 example:
 .sp
   (?C'ab ''c'' d')xyz(?C{any text})pqr
-.sp   
+.sp
 The doubling is removed before the string is passed to the callout function.
 .
 .

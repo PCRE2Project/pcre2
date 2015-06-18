@@ -219,11 +219,11 @@ documentation). The callout block structure contains the following fields:
   PCRE2_SIZE    <i>pattern_position</i>;
   PCRE2_SIZE    <i>next_item_length</i>;
   PCRE2_SIZE    <i>callout_string_offset</i>;
-  PCRE2_SIZE    <i>callout_string_length</i>; 
-  PCRE2_SPTR    <i>callout_string</i>; 
+  PCRE2_SIZE    <i>callout_string_length</i>;
+  PCRE2_SPTR    <i>callout_string</i>;
 </pre>
 The <i>version</i> field contains the version number of the block format. The
-current version is 1; the three callout string fields were added for this 
+current version is 1; the three callout string fields were added for this
 version. If you are writing an application that might use an earlier release of
 PCRE2, you should check the version number before accessing any of these
 fields. The version number will increase in future if more fields are added,
@@ -263,7 +263,7 @@ need to report errors in the callout string within the pattern.
 Fields for all callouts
 </b><br>
 <P>
-The remaining fields in the callout block are the same for both kinds of 
+The remaining fields in the callout block are the same for both kinds of
 callout.
 </P>
 <P>
@@ -306,7 +306,7 @@ always the case for the DFA matching functions.
 </P>
 <P>
 The <i>pattern_position</i> field contains the offset in the pattern string to
-the next item to be matched. 
+the next item to be matched.
 </P>
 <P>
 The <i>next_item_length</i> field contains the length of the next item to be
@@ -318,8 +318,8 @@ of the entire subpattern.
 <P>
 The <i>pattern_position</i> and <i>next_item_length</i> fields are intended to
 help in distinguishing between different automatic callouts, which all have the
-same callout number. However, they are set for all callouts, and are used by 
-<b>pcre2test</b> to show the next item to be matched when displaying callout 
+same callout number. However, they are set for all callouts, and are used by
+<b>pcre2test</b> to show the next item to be matched when displaying callout
 information.
 </P>
 <P>
@@ -351,9 +351,9 @@ functions; it will never be used by PCRE2 itself.
 <b>  void *<i>user_data</i>);</b>
 <br>
 <br>
-A script language that supports the use of string arguments in callouts might 
-like to scan all the callouts in a pattern before running the match. This can 
-be done by calling <b>pcre2_callout_enumerate()</b>. The first argument is a 
+A script language that supports the use of string arguments in callouts might
+like to scan all the callouts in a pattern before running the match. This can
+be done by calling <b>pcre2_callout_enumerate()</b>. The first argument is a
 pointer to a compiled pattern, the second points to a callback function, and
 the third is arbitrary user data. The callback function is called for every
 callout in the pattern in the order in which they appear. Its first argument is
@@ -369,7 +369,7 @@ data block contains the following fields:
   <i>callout_string_length</i>  Length of callout string
   <i>callout_string</i>         Points to callout string or is NULL
 </pre>
-The version number is currently 0. It will increase if new fields are ever 
+The version number is currently 0. It will increase if new fields are ever
 added to the block. The remaining fields are the same as their namesakes in the
 <b>pcre2_callout</b> block that is used for callouts during matching, as
 described
@@ -384,8 +384,8 @@ pattern. For example, a pattern such as /(a){2}/ is compiled as if it were
 with the same value for <i>pattern_position</i> in each case.
 </P>
 <P>
-The callback function should normally return zero. If it returns a non-zero 
-value, scanning the pattern stops, and that value is returned from 
+The callback function should normally return zero. If it returns a non-zero
+value, scanning the pattern stops, and that value is returned from
 <b>pcre2_callout_enumerate()</b>.
 </P>
 <br><a name="SEC7" href="#TOC1">AUTHOR</a><br>

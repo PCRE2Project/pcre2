@@ -4492,9 +4492,9 @@ if (TEST(compiled_code, ==, NULL))
   fprintf(outfile, "\n");
   return PR_SKIP;
   }
-  
-/* If forbid_utf is non-zero, we are running a non-UTF test. UTF and UCP are 
-locked out at compile time, but we must also check for occurrences of \P, \p, 
+
+/* If forbid_utf is non-zero, we are running a non-UTF test. UTF and UCP are
+locked out at compile time, but we must also check for occurrences of \P, \p,
 and \X, which are only supported when Unicode is supported. */
 
 if (forbid_utf != 0)
@@ -4503,9 +4503,9 @@ if (forbid_utf != 0)
     {
     fprintf(outfile, "** \\P, \\p, and \\X are not allowed after the "
       "#forbid_utf command\n");
-    return PR_SKIP;     
-    }     
-  }  
+    return PR_SKIP;
+    }
+  }
 
 /* Remember the maximum lookbehind, for partial matching. */
 
@@ -5095,7 +5095,7 @@ if (dbuffer != NULL)
 #endif
 
 /* Allocate a buffer to hold the data line; len+1 is an upper bound on
-the number of code units that will be needed (though the buffer may have to be 
+the number of code units that will be needed (though the buffer may have to be
 extended if replication is involved). */
 
 needlen = (size_t)(len * code_unit_size);
@@ -5145,7 +5145,7 @@ while ((c = *p++) != 0)
 
     replen = CAST8VAR(q) - start_rep;
     needlen += replen * i;
-    
+
     if (needlen >= dbuffer_size)
       {
       while (needlen >= dbuffer_size) dbuffer_size *= 2;
@@ -5158,7 +5158,7 @@ while ((c = *p++) != 0)
       SETCASTPTR(q, dbuffer + qoffset);
       start_rep = dbuffer + rep_offset;
       }
-      
+
     while (i-- > 0)
       {
       memcpy(CAST8VAR(q), start_rep, replen);

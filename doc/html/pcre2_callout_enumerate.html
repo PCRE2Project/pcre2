@@ -33,7 +33,7 @@ for success and non-zero otherwise. The arguments are:
 <pre>
   <i>code</i>           Points to the compiled pattern
   <i>callback</i>       The callback function
-  <i>callout_data</i>   User data that is passed to the callback  
+  <i>callout_data</i>   User data that is passed to the callback
 </pre>
 The <i>callback()</i> function is passed a pointer to a data block containing
 the following fields:
@@ -46,9 +46,9 @@ the following fields:
   <i>callout_string_length</i>  Length of callout string
   <i>callout_string</i>         Points to callout string or is NULL
 </pre>
-The second argument is the callout data that was passed to 
-<b>pcre2_callout_enumerate()</b>. The <b>callback()</b> function must return zero 
-for success. Any other value causes the pattern scan to stop, with the value 
+The second argument is the callout data that was passed to
+<b>pcre2_callout_enumerate()</b>. The <b>callback()</b> function must return zero
+for success. Any other value causes the pattern scan to stop, with the value
 being passed back as the result of <b>pcre2_callout_enumerate()</b>.
 </P>
 <P>

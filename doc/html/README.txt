@@ -294,6 +294,9 @@ library. They are also documented in the pcre2build man page.
   which specifies that the code value for the EBCDIC NL character is 0x25
   instead of the default 0x15.
 
+. If you specify --enable-debug, additional debugging code is included in the
+  build. This option is intended for use by the PCRE2 maintainers.
+
 . In environments where valgrind is installed, if you specify
 
   --enable-valgrind
@@ -829,4 +832,4 @@ The distribution should contain the files listed below.
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 26 January 2015
+Last updated: 24 April 2015

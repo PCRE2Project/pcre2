@@ -239,7 +239,7 @@ Arguments:
 
 Returns:        0 when successfully completed
                 < 0 on local error
-               != 0 for callback error  
+               != 0 for callback error
 */
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
@@ -270,7 +270,7 @@ cc = (PCRE2_SPTR)((uint8_t *)re + sizeof(pcre2_real_code))
 
 while (TRUE)
   {
-  int rc; 
+  int rc;
   switch (*cc)
     {
     case OP_END:
@@ -378,7 +378,7 @@ while (TRUE)
     cb.callout_string_length = 0;
     cb.callout_string = NULL;
     rc = callback(&cb, callout_data);
-    if (rc != 0) return rc; 
+    if (rc != 0) return rc;
     cc += PRIV(OP_lengths)[*cc];
     break;
 
@@ -391,7 +391,7 @@ while (TRUE)
       GET(cc, 1 + 2*LINK_SIZE) - (1 + 4*LINK_SIZE) - 2;
     cb.callout_string = cc + (1 + 4*LINK_SIZE) + 1;
     rc = callback(&cb, callout_data);
-    if (rc != 0) return rc; 
+    if (rc != 0) return rc;
     cc += GET(cc, 1 + 2*LINK_SIZE);
     break;
 

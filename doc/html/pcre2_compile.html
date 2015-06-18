@@ -49,6 +49,7 @@ or provide an external function for stack size checking. The option bits are:
 <pre>
   PCRE2_ANCHORED           Force pattern anchoring
   PCRE2_ALT_BSUX           Alternative handling of \u, \U, and \x
+  PCRE2_ALT_CIRCUMFLEX     Alternative handling of ^ in multiline mode
   PCRE2_AUTO_CALLOUT       Compile automatic callouts
   PCRE2_CASELESS           Do caseless matching
   PCRE2_DOLLAR_ENDONLY     $ not to match newline at end
@@ -58,6 +59,7 @@ or provide an external function for stack size checking. The option bits are:
   PCRE2_FIRSTLINE          Force matching to be before newline
   PCRE2_MATCH_UNSET_BACKREF  Match unset back references
   PCRE2_MULTILINE          ^ and $ match newlines within data
+  PCRE2_NEVER_BACKSLASH_C  Lock out the use of \C in patterns
   PCRE2_NEVER_UCP          Lock out PCRE2_UCP, e.g. via (*UCP)
   PCRE2_NEVER_UTF          Lock out PCRE2_UTF, e.g. via (*UTF)
   PCRE2_NO_AUTO_CAPTURE    Disable numbered capturing paren-

@@ -562,7 +562,7 @@ Arguments:
   cb          compile data block
   base_list   the data list of the base opcode
   base_end    the end of the data list
-  rec_limit   points to recursion depth counter  
+  rec_limit   points to recursion depth counter
 
 Returns:      TRUE if the auto-possessification is possible
 */
@@ -664,7 +664,7 @@ for(;;)
 
     while (*next_code == OP_ALT)
       {
-      if (!compare_opcodes(code, utf, cb, base_list, base_end, rec_limit)) 
+      if (!compare_opcodes(code, utf, cb, base_list, base_end, rec_limit))
         return FALSE;
       code = next_code + 1 + LINK_SIZE;
       next_code += GET(next_code, 1);

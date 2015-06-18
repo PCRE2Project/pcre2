@@ -204,11 +204,11 @@ documentation). The callout block structure contains the following fields:
   PCRE2_SIZE    \fIpattern_position\fP;
   PCRE2_SIZE    \fInext_item_length\fP;
   PCRE2_SIZE    \fIcallout_string_offset\fP;
-  PCRE2_SIZE    \fIcallout_string_length\fP; 
-  PCRE2_SPTR    \fIcallout_string\fP; 
+  PCRE2_SIZE    \fIcallout_string_length\fP;
+  PCRE2_SPTR    \fIcallout_string\fP;
 .sp
 The \fIversion\fP field contains the version number of the block format. The
-current version is 1; the three callout string fields were added for this 
+current version is 1; the three callout string fields were added for this
 version. If you are writing an application that might use an earlier release of
 PCRE2, you should check the version number before accessing any of these
 fields. The version number will increase in future if more fields are added,
@@ -247,7 +247,7 @@ need to report errors in the callout string within the pattern.
 .SS "Fields for all callouts"
 .rs
 .sp
-The remaining fields in the callout block are the same for both kinds of 
+The remaining fields in the callout block are the same for both kinds of
 callout.
 .P
 The \fIoffset_vector\fP field is a pointer to the vector of capturing offsets
@@ -283,7 +283,7 @@ substrings have been captured, the value of \fIcapture_last\fP is 0. This is
 always the case for the DFA matching functions.
 .P
 The \fIpattern_position\fP field contains the offset in the pattern string to
-the next item to be matched. 
+the next item to be matched.
 .P
 The \fInext_item_length\fP field contains the length of the next item to be
 matched in the pattern string. When the callout immediately precedes an
@@ -293,8 +293,8 @@ of the entire subpattern.
 .P
 The \fIpattern_position\fP and \fInext_item_length\fP fields are intended to
 help in distinguishing between different automatic callouts, which all have the
-same callout number. However, they are set for all callouts, and are used by 
-\fBpcre2test\fP to show the next item to be matched when displaying callout 
+same callout number. However, they are set for all callouts, and are used by
+\fBpcre2test\fP to show the next item to be matched when displaying callout
 information.
 .P
 In callouts from \fBpcre2_match()\fP the \fImark\fP field contains a pointer to
@@ -329,9 +329,9 @@ functions; it will never be used by PCRE2 itself.
 .B "  void *\fIuser_data\fP);"
 .fi
 .sp
-A script language that supports the use of string arguments in callouts might 
-like to scan all the callouts in a pattern before running the match. This can 
-be done by calling \fBpcre2_callout_enumerate()\fP. The first argument is a 
+A script language that supports the use of string arguments in callouts might
+like to scan all the callouts in a pattern before running the match. This can
+be done by calling \fBpcre2_callout_enumerate()\fP. The first argument is a
 pointer to a compiled pattern, the second points to a callback function, and
 the third is arbitrary user data. The callback function is called for every
 callout in the pattern in the order in which they appear. Its first argument is
@@ -347,7 +347,7 @@ data block contains the following fields:
   \fIcallout_string_length\fP  Length of callout string
   \fIcallout_string\fP         Points to callout string or is NULL
 .sp
-The version number is currently 0. It will increase if new fields are ever 
+The version number is currently 0. It will increase if new fields are ever
 added to the block. The remaining fields are the same as their namesakes in the
 \fBpcre2_callout\fP block that is used for callouts during matching, as
 described
@@ -363,8 +363,8 @@ pattern. For example, a pattern such as /(a){2}/ is compiled as if it were
 /(a)(a)/. This means that the callout will be enumerated more than once, but
 with the same value for \fIpattern_position\fP in each case.
 .P
-The callback function should normally return zero. If it returns a non-zero 
-value, scanning the pattern stops, and that value is returned from 
+The callback function should normally return zero. If it returns a non-zero
+value, scanning the pattern stops, and that value is returned from
 \fBpcre2_callout_enumerate()\fP.
 .
 .

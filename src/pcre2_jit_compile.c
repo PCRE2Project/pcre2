@@ -6432,13 +6432,13 @@ if (*cc == OP_CALLOUT)
   {
   value1 = 0;
   value2 = 0;
-  value3 = 0; 
+  value3 = 0;
   }
 else
   {
   value1 = (sljit_sw) (cc + (1 + 4*LINK_SIZE) + 1);
   value2 = (callout_length - (1 + 4*LINK_SIZE + 2));
-  value3 = (sljit_sw) (GET(cc, 1 + 3*LINK_SIZE)); 
+  value3 = (sljit_sw) (GET(cc, 1 + 3*LINK_SIZE));
   }
 
 OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), CALLOUT_ARG_OFFSET(callout_string), SLJIT_IMM, value1);

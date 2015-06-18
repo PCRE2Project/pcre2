@@ -1230,7 +1230,7 @@ contain characters with values greater than 255. */
 #define XCL_PROP      3    /* Unicode property (2-byte property code follows) */
 #define XCL_NOTPROP   4    /* Unicode inverted property (ditto) */
 
-/* Escape items that are just an encoding of a particular data value. These 
+/* Escape items that are just an encoding of a particular data value. These
 appear in the escapes[] table in pcre2_compile.c as positive numbers. */
 
 #ifndef ESC_a
@@ -1262,7 +1262,7 @@ appear in the escapes[] table in pcre2_compile.c as positive numbers. */
 
 /* These are escaped items that aren't just an encoding of a particular data
 value such as \n. They must have non-zero values, as check_escape() returns 0
-for a data character. In the escapes[] table in pcre2_compile.c their values 
+for a data character. In the escapes[] table in pcre2_compile.c their values
 are negated in order to distinguish them from data values.
 
 They must appear here in the same order as in the opcode definitions below, up

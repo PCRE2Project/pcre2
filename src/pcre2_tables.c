@@ -67,18 +67,18 @@ const uint32_t PRIV(hspace_list)[] = { HSPACE_LIST };
 const uint32_t PRIV(vspace_list)[] = { VSPACE_LIST };
 
 /* These tables are the pairs of delimiters that are valid for callout string
-arguments. For each starting delimiter there must be a matching ending 
+arguments. For each starting delimiter there must be a matching ending
 delimiter, which in fact is different only for bracket-like delimiters. */
 
 const uint32_t PRIV(callout_start_delims)[] = {
   CHAR_GRAVE_ACCENT, CHAR_APOSTROPHE, CHAR_QUOTATION_MARK,
   CHAR_CIRCUMFLEX_ACCENT, CHAR_PERCENT_SIGN, CHAR_NUMBER_SIGN,
-  CHAR_DOLLAR_SIGN, CHAR_LEFT_CURLY_BRACKET, 0 };  
+  CHAR_DOLLAR_SIGN, CHAR_LEFT_CURLY_BRACKET, 0 };
 
 const uint32_t PRIV(callout_end_delims[]) = {
   CHAR_GRAVE_ACCENT, CHAR_APOSTROPHE, CHAR_QUOTATION_MARK,
   CHAR_CIRCUMFLEX_ACCENT, CHAR_PERCENT_SIGN, CHAR_NUMBER_SIGN,
-  CHAR_DOLLAR_SIGN, CHAR_RIGHT_CURLY_BRACKET, 0 };  
+  CHAR_DOLLAR_SIGN, CHAR_RIGHT_CURLY_BRACKET, 0 };
 
 
 /*************************************************

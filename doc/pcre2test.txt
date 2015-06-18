@@ -226,14 +226,20 @@ COMMAND LINES
          #forbid_utf
 
        Subsequent  patterns  automatically  have   the   PCRE2_NEVER_UTF   and
-       PCRE2_NEVER_UCP options set, which locks out the use of UTF and Unicode
-       property features. This is a trigger guard that is used in  test  files
-       to ensure that UTF or Unicode property tests are not accidentally added
-       to files that are used when Unicode support  is  not  included  in  the
-       library.  This  effect can also be obtained by the use of #pattern; the
-       difference is that #forbid_utf  cannot  be  unset,  and  the  automatic
-       options  are  not displayed in pattern information, to avoid cluttering
-       up test output.
+       PCRE2_NEVER_UCP  options  set, which locks out the use of the PCRE2_UTF
+       and PCRE2_UCP options and the use of (*UTF) and (*UCP) at the start  of
+       patterns.  This  command  also  forces an error if a subsequent pattern
+       contains any occurrences of \P, \p, or \X, which  are  still  supported
+       when  PCRE2_UTF  is not set, but which require Unicode property support
+       to be included in the library.
+
+       This is a trigger guard that is used in test files to ensure  that  UTF
+       or  Unicode property tests are not accidentally added to files that are
+       used when Unicode support is  not  included  in  the  library.  Setting
+       PCRE2_NEVER_UTF  and  PCRE2_NEVER_UCP as a default can also be obtained
+       by the use of #pattern; the difference is that  #forbid_utf  cannot  be
+       unset,  and the automatic options are not displayed in pattern informa-
+       tion, to avoid cluttering up test output.
 
          #load <filename>
 
@@ -417,6 +423,7 @@ PATTERN MODIFIERS
 
              allow_empty_class         set PCRE2_ALLOW_EMPTY_CLASS
              alt_bsux                  set PCRE2_ALT_BSUX
+             alt_circumflex            set PCRE2_ALT_CIRCUMFLEX
              anchored                  set PCRE2_ANCHORED
              auto_callout              set PCRE2_AUTO_CALLOUT
          /i  caseless                  set PCRE2_CASELESS
@@ -427,6 +434,7 @@ PATTERN MODIFIERS
              firstline                 set PCRE2_FIRSTLINE
              match_unset_backref       set PCRE2_MATCH_UNSET_BACKREF
          /m  multiline                 set PCRE2_MULTILINE
+             never_backslash_c         set PCRE2_NEVER_BACKSLASH_C
              never_ucp                 set PCRE2_NEVER_UCP
              never_utf                 set PCRE2_NEVER_UTF
              no_auto_capture           set PCRE2_NO_AUTO_CAPTURE
@@ -1322,5 +1330,5 @@ AUTHOR
 
 REVISION
 
-       Last updated: 22 March 2015
+       Last updated: 20 May 2015
        Copyright (c) 1997-2015 University of Cambridge.

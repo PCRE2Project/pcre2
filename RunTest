@@ -24,8 +24,8 @@
 # example, if JIT support is not compiled, test 16 is skipped, whereas if JIT
 # support is compiled, test 15 is skipped.
 #
-# Other arguments can be one of the words "-valgrind", "-valgrind-log", or 
-# "-sim" followed by an argument to run cross-compiled executables under a 
+# Other arguments can be one of the words "-valgrind", "-valgrind-log", or
+# "-sim" followed by an argument to run cross-compiled executables under a
 # simulator, for example:
 #
 # RunTest 3 -sim "qemu-arm -s 8388608"

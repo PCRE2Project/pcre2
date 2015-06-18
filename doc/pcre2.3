@@ -103,12 +103,12 @@ lose performance.
 .P
 One way of guarding against this possibility is to use the
 \fBpcre2_pattern_info()\fP function to check the compiled pattern's options for
-PCRE2_UTF. Alternatively, you can set the PCRE2_NEVER_UTF option when calling 
+PCRE2_UTF. Alternatively, you can set the PCRE2_NEVER_UTF option when calling
 \fBpcre2_compile()\fP. This causes an compile time error if a pattern contains
 a UTF-setting sequence.
 .P
-The use of Unicode properties for character types such as \ed can also be 
-enabled from within the pattern, by specifying "(*UCP)". This feature can be 
+The use of Unicode properties for character types such as \ed can also be
+enabled from within the pattern, by specifying "(*UCP)". This feature can be
 disallowed by setting the PCRE2_NEVER_UCP option.
 .P
 If your application is one that supports UTF, be aware that validity checking

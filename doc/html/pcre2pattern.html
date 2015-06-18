@@ -357,10 +357,11 @@ A second use of backslash provides a way of encoding non-printing characters
 in patterns in a visible manner. There is no restriction on the appearance of
 non-printing characters in a pattern, but when a pattern is being prepared by
 text editing, it is often easier to use one of the following escape sequences
-than the binary character it represents:
+than the binary character it represents. In an ASCII or Unicode environment,
+these escapes are as follows:
 <pre>
   \a        alarm, that is, the BEL character (hex 07)
-  \cx       "control-x", where x is any ASCII character
+  \cx       "control-x", where x is any printable ASCII character
   \e        escape (hex 1B)
   \f        form feed (hex 0C)
   \n        linefeed (hex 0A)
@@ -377,23 +378,38 @@ The precise effect of \cx on ASCII characters is as follows: if x is a lower
 case letter, it is converted to upper case. Then bit 6 of the character (hex
 40) is inverted. Thus \cA to \cZ become hex 01 to hex 1A (A is 41, Z is 5A),
 but \c{ becomes hex 3B ({ is 7B), and \c; becomes hex 7B (; is 3B). If the
-code unit following \c has a value greater than 127, a compile-time error
-occurs. This locks out non-ASCII characters in all modes.
+code unit following \c has a value less than 32 or greater than 126, a
+compile-time error occurs. This locks out non-printable ASCII characters in all
+modes.
 </P>
 <P>
-The \c facility was designed for use with ASCII characters, but with the
-extension to Unicode it is even less useful than it once was. It is, however,
-recognized when PCRE2 is compiled in EBCDIC mode, where data items are always
-bytes. In this mode, all values are valid after \c. If the next character is a
-lower case letter, it is converted to upper case. Then the 0xc0 bits of the
-byte are inverted. Thus \cA becomes hex 01, as in ASCII (A is C1), but because
-the EBCDIC letters are disjoint, \cZ becomes hex 29 (Z is E9), and other
-characters also generate different values.
+When PCRE2 is compiled in EBCDIC mode, \a, \e, \f, \n, \r, and \t
+generate the appropriate EBCDIC code values. The \c escape is processed
+as specified for Perl in the <b>perlebcdic</b> document. The only characters
+that are allowed after \c are A-Z, a-z, or one of @, [, \, ], ^, _, or ?. Any
+other character provokes a compile-time error. The sequence \@ encodes
+character code 0; the letters (in either case) encode characters 1-26 (hex 01
+to hex 1A); [, \, ], ^, and _ encode characters 27-31 (hex 1B to hex 1F), and
+\? becomes either 255 (hex FF) or 95 (hex 5F).
+</P>
+<P>
+Thus, apart from \?, these escapes generate the same character code values as
+they do in an ASCII environment, though the meanings of the values mostly
+differ. For example, \G always generates code value 7, which is BEL in ASCII
+but DEL in EBCDIC.
+</P>
+<P>
+The sequence \? generates DEL (127, hex 7F) in an ASCII environment, but
+because 127 is not a control character in EBCDIC, Perl makes it generate the
+APC character. Unfortunately, there are several variants of EBCDIC. In most of
+them the APC character has the value 255 (hex FF), but in the one Perl calls
+POSIX-BC its value is 95 (hex 5F). If certain other characters have POSIX-BC
+values, PCRE2 makes \? generate 95; otherwise it generates 255.
 </P>
 <P>
 After \0 up to two further octal digits are read. If there are fewer than two
-digits, just those that are present are used. Thus the sequence \0\x\07
-specifies two binary zeros followed by a BEL character (code value 7). Make
+digits, just those that are present are used. Thus the sequence \0\x\015
+specifies two binary zeros followed by a CR character (code value 13). Make
 sure you supply two digits after the initial zero if the pattern character that
 follows is itself an octal digit.
 </P>
@@ -412,21 +428,24 @@ describe the old, ambiguous syntax.
 </P>
 <P>
 The handling of a backslash followed by a digit other than 0 is complicated,
-and Perl has changed in recent releases, causing PCRE2 also to change. Outside
-a character class, PCRE2 reads the digit and any following digits as a decimal
-number. If the number is less than 8, or if there have been at least that many
-previous capturing left parentheses in the expression, the entire sequence is
-taken as a <i>back reference</i>. A description of how this works is given
+and Perl has changed over time, causing PCRE2 also to change.
+</P>
+<P>
+Outside a character class, PCRE2 reads the digit and any following digits as a
+decimal number. If the number is less than 10, begins with the digit 8 or 9, or
+if there are at least that many previous capturing left parentheses in the
+expression, the entire sequence is taken as a <i>back reference</i>. A
+description of how this works is given
 <a href="#backreferences">later,</a>
 following the discussion of
 <a href="#subpattern">parenthesized subpatterns.</a>
+Otherwise, up to three octal digits are read to form a character code.
 </P>
 <P>
-Inside a character class, or if the decimal number following \ is greater than
-7 and there have not been that many capturing subpatterns, PCRE2 handles \8
-and \9 as the literal characters "8" and "9", and otherwise re-reads up to
-three octal digits following the backslash, using them to generate a data
-character. Any subsequent digits stand for themselves. For example:
+Inside a character class, PCRE2 handles \8 and \9 as the literal characters
+"8" and "9", and otherwise reads up to three octal digits following the
+backslash, using them to generate a data character. Any subsequent digits stand
+for themselves. For example, outside a character class:
 <pre>
   \040   is another way of writing an ASCII space
   \40    is the same, provided there are fewer than 40 previous capturing subpatterns
@@ -436,7 +455,7 @@ character. Any subsequent digits stand for themselves. For example:
   \0113  is a tab followed by the character "3"
   \113   might be a back reference, otherwise the character with octal code 113
   \377   might be a back reference, otherwise the value 255 (decimal)
-  \81    is either a back reference, or the two characters "8" and "1"
+  \81    is always a back reference .sp
 </pre>
 Note that octal values of 100 or greater that are specified using this syntax
 must not be introduced by a leading zero, because no more than three octal
@@ -1105,15 +1124,19 @@ regular expression.
 <P>
 The circumflex and dollar metacharacters are zero-width assertions. That is,
 they test for a particular condition being true without consuming any
-characters from the subject string.
+characters from the subject string. These two metacharacters are concerned with
+matching the starts and ends of lines. If the newline convention is set so that
+only the two-character sequence CRLF is recognized as a newline, isolated CR
+and LF characters are treated as ordinary data characters, and are not
+recognized as newlines.
 </P>
 <P>
 Outside a character class, in the default matching mode, the circumflex
 character is an assertion that is true only if the current matching point is at
 the start of the subject string. If the <i>startoffset</i> argument of
-<b>pcre2_match()</b> is non-zero, circumflex can never match if the
-PCRE2_MULTILINE option is unset. Inside a character class, circumflex has an
-entirely different meaning
+<b>pcre2_match()</b> is non-zero, or if PCRE2_NOTBOL is set, circumflex can
+never match if the PCRE2_MULTILINE option is unset. Inside a character class,
+circumflex has an entirely different meaning
 <a href="#characterclass">(see below).</a>
 </P>
 <P>
@@ -1128,10 +1151,11 @@ to be anchored.)
 <P>
 The dollar character is an assertion that is true only if the current matching
 point is at the end of the subject string, or immediately before a newline at
-the end of the string (by default). Note, however, that it does not actually
-match the newline. Dollar need not be the last character of the pattern if a
-number of alternatives are involved, but it should be the last item in any
-branch in which it appears. Dollar has no special meaning in a character class.
+the end of the string (by default), unless PCRE2_NOTEOL is set. Note, however,
+that it does not actually match the newline. Dollar need not be the last
+character of the pattern if a number of alternatives are involved, but it
+should be the last item in any branch in which it appears. Dollar has no
+special meaning in a character class.
 </P>
 <P>
 The meaning of dollar can be changed so that it matches only at the very end of
@@ -1139,13 +1163,13 @@ the string, by setting the PCRE2_DOLLAR_ENDONLY option at compile time. This
 does not affect the \Z assertion.
 </P>
 <P>
-The meanings of the circumflex and dollar characters are changed if the
-PCRE2_MULTILINE option is set. When this is the case, a circumflex matches
-immediately after internal newlines as well as at the start of the subject
-string. It does not match after a newline that ends the string. A dollar
-matches before any newlines in the string, as well as at the very end, when
-PCRE2_MULTILINE is set. When newline is specified as the two-character
-sequence CRLF, isolated CR and LF characters do not indicate newlines.
+The meanings of the circumflex and dollar metacharacters are changed if the
+PCRE2_MULTILINE option is set. When this is the case, a dollar character
+matches before any newlines in the string, as well as at the very end, and a
+circumflex matches immediately after internal newlines as well as at the start
+of the subject string. It does not match after a newline that ends the string,
+for compatibility with Perl. However, this can be changed by setting the
+PCRE2_ALT_CIRCUMFLEX option.
 </P>
 <P>
 For example, the pattern /^abc$/ matches the subject string "def\nabc" (where
@@ -1198,12 +1222,16 @@ whether or not a UTF mode is set. In the 8-bit library, one code unit is one
 byte; in the 16-bit library it is a 16-bit unit; in the 32-bit library it is a
 32-bit unit. Unlike a dot, \C always matches line-ending characters. The
 feature is provided in Perl in order to match individual bytes in UTF-8 mode,
-but it is unclear how it can usefully be used. Because \C breaks up characters
-into individual code units, matching one unit with \C in a UTF mode means that
-the rest of the string may start with a malformed UTF character. This has
-undefined results, because PCRE2 assumes that it is dealing with valid UTF
-strings (and by default it checks this at the start of processing unless the
-PCRE2_NO_UTF_CHECK option is used).
+but it is unclear how it can usefully be used.
+</P>
+<P>
+Because \C breaks up characters into individual code units, matching one unit
+with \C in UTF-8 or UTF-16 mode means that the rest of the string may start
+with a malformed UTF character. This has undefined results, because PCRE2
+assumes that it is matching character by character in a valid UTF string (by
+default it checks the subject string's validity at the start of processing
+unless the PCRE2_NO_UTF_CHECK option is used). An application can lock out the
+use of \C by setting the PCRE2_NEVER_BACKSLASH_C option.
 </P>
 <P>
 PCRE2 does not allow \C to appear in lookbehind assertions
@@ -1475,7 +1503,8 @@ unset these options by preceding the letter with a hyphen, and a combined
 setting and unsetting such as (?im-sx), which sets PCRE2_CASELESS and
 PCRE2_MULTILINE while unsetting PCRE2_DOTALL and PCRE2_EXTENDED, is also
 permitted. If a letter appears both before and after the hyphen, the option is
-unset.
+unset. An empty options setting "(?)" is allowed. Needless to say, it has no
+effect.
 </P>
 <P>
 The PCRE2-specific options PCRE2_DUPNAMES and PCRE2_UNGREEDY can be changed in
@@ -1508,11 +1537,20 @@ option settings happen at compile time. There would be some very weird
 behaviour otherwise.
 </P>
 <P>
+As a convenient shorthand, if any option settings are required at the start of
+a non-capturing subpattern (see the next section), the option letters may
+appear between the "?" and the ":". Thus the two patterns
+<pre>
+  (?i:saturday|sunday)
+  (?:(?i)saturday|sunday)
+</pre>
+match exactly the same set of strings.
+</P>
+<P>
 <b>Note:</b> There are other PCRE2-specific options that can be set by the
-application when the compiling function is called.
-The pattern can contain special leading sequences such as (*CRLF) to override
-what the application has set or what has been defaulted. Details are given in
-the section entitled
+application when the compiling function is called. The pattern can contain
+special leading sequences such as (*CRLF) to override what the application has
+set or what has been defaulted. Details are given in the section entitled
 <a href="#newlineseq">"Newline sequences"</a>
 above. There are also the (*UTF) and (*UCP) leading sequences that can be used
 to set UTF and Unicode property modes; they are equivalent to setting the
@@ -2841,10 +2879,10 @@ condition.
 Callouts with string arguments
 </b><br>
 <P>
-A delimited string may be used instead of a number as a callout argument. The 
-starting delimiter must be one of ` ' " ^ % # $ { and the ending delimiter is 
-the same as the start, except for {, where the ending delimiter is }. If the 
-ending delimiter is needed within the string, it must be doubled. For 
+A delimited string may be used instead of a number as a callout argument. The
+starting delimiter must be one of ` ' " ^ % # $ { and the ending delimiter is
+the same as the start, except for {, where the ending delimiter is }. If the
+ending delimiter is needed within the string, it must be doubled. For
 example:
 <pre>
   (?C'ab ''c'' d')xyz(?C{any text})pqr
@@ -3285,7 +3323,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC30" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 15 March 2015
+Last updated: 13 June 2015
 <br>
 Copyright &copy; 1997-2015 University of Cambridge.
 <br>

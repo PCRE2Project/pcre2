@@ -662,7 +662,7 @@ typedef struct named_group {
   PCRE2_SPTR   name;          /* Points to the name in the pattern */
   uint32_t     number;        /* Group number */
   uint16_t     length;        /* Length of the name */
-  uint16_t     isdup;         /* TRUE if a duplicate */ 
+  uint16_t     isdup;         /* TRUE if a duplicate */
 } named_group;
 
 /* Structure for passing "static" information around between the functions

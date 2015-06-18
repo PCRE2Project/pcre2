@@ -104,6 +104,21 @@ system stack used by the compile function, which uses recursive function calls
 for nested parenthesized groups. This is a safety feature for environments with
 small stacks where the patterns are provided by users.
 
+History repeated itself for release 10.20. A number of bugs relating to named 
+subpatterns had been discovered by fuzzers. Most of these were related to the 
+handling of forward references when it was not known if the named pattern was
+unique. (References to non-unique names use a different opcode and more
+memory.) The use of duplicate group numbers (the (?| facility) also caused
+issues. 
+
+To get around these problems I adopted a new approach by adding a third pass,
+really a "pre-pass", over the pattern, which does nothing other than identify
+all the named subpatterns and their corresponding group numbers. This means 
+that the actual compile (both pre-pass and real compile) have full knowledge of 
+group names and numbers throughout. Several dozen lines of messy code were 
+eliminated, though the new pre-pass is not short (skipping over [] classes is 
+complicated).
+
 
 Traditional matching function
 -----------------------------
@@ -343,8 +358,9 @@ do.
 
 For classes containing characters with values greater than 255 or that contain
 \p or \P, OP_XCLASS is used. It optionally uses a bit map if any acceptable
-code points are less than 256, followed by a list of pairs (for a range) and
-single characters. In caseless mode, both cases are explicitly listed.
+code points are less than 256, followed by a list of pairs (for a range) and/or
+single characters and/or properties. In caseless mode, both cases are
+explicitly listed.
 
 OP_XCLASS is followed by a LINK_SIZE value containing the total length of the
 opcode and its data. This is followed by a code unit containing flag bits:
@@ -431,7 +447,7 @@ bracket opcode.
 If a subpattern is quantified such that it is permitted to match zero times, it
 is preceded by one of OP_BRAZERO, OP_BRAMINZERO, or OP_SKIPZERO. These are
 single-unit opcodes that tell the matcher that skipping the following
-subpattern entirely is a valid branch. In the case of the first two, not
+subpattern entirely is a valid match. In the case of the first two, not
 skipping the pattern is also valid (greedy and non-greedy). The third is used
 when a pattern has the quantifier {0,0}. It cannot be entirely discarded,
 because it may be called as a subroutine from elsewhere in the pattern.
@@ -487,9 +503,9 @@ Forward assertions are also just like other subpatterns, but starting with one
 of the opcodes OP_ASSERT or OP_ASSERT_NOT. Backward assertions use the opcodes
 OP_ASSERTBACK and OP_ASSERTBACK_NOT, and the first opcode inside the assertion
 is OP_REVERSE, followed by a count of the number of characters to move back the
-pointer in the subject string. In ASCII or UTF-32 mode, the count is a number
-of code units, but in UTF-8/16 mode each character may occupy more than one
-code unit. A separate count is present in each alternative of a lookbehind
+pointer in the subject string. In ASCII or UTF-32 mode, the count is also the
+number of code units, but in UTF-8/16 mode each character may occupy more than
+one code unit. A separate count is present in each alternative of a lookbehind
 assertion, allowing them to have different (but fixed) lengths.
 
 
@@ -585,4 +601,4 @@ not a real opcode, but is used to check that tables indexed by opcode are the
 correct length, in order to catch updating errors.
 
 Philip Hazel
-March 2015
+June 2015

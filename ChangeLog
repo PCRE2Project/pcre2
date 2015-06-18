@@ -1,8 +1,8 @@
 Change Log for PCRE2
 --------------------
 
-Version 10.20 xx-xx-2015
-------------------------
+ Version 10.20 16-June-2015
+--------------------------
 
 1. Callouts with string arguments have been added.
 
@@ -123,27 +123,27 @@ This bug was discovered by the LLVM fuzzer.
 current group, for example in this pattern: /(?|(\k'Pm')|(?'Pm'))/, caused a
 buffer overflow at compile time. This bug was discovered by the LLVM fuzzer.
 
-31. Fix -fsanitize=undefined warnings for left shifts of 1 by 31 (it treats 1 
+31. Fix -fsanitize=undefined warnings for left shifts of 1 by 31 (it treats 1
 as an int; fixed by writing it as 1u).
 
-32. Fix pcre2grep compile when -std=c99 is used with gcc, though it still gives 
+32. Fix pcre2grep compile when -std=c99 is used with gcc, though it still gives
 a warning for "fileno" unless -std=gnu99 us used.
 
-33. A lookbehind assertion within a set of mutually recursive subpatterns could 
+33. A lookbehind assertion within a set of mutually recursive subpatterns could
 provoke a buffer overflow. This bug was discovered by the LLVM fuzzer.
 
 34. Give an error for an empty subpattern name such as (?'').
 
-35. Make pcre2test give an error if a pattern that follows #forbud_utf contains 
+35. Make pcre2test give an error if a pattern that follows #forbud_utf contains
 \P, \p, or \X.
 
-36. The way named subpatterns are handled has been refactored. There is now a 
+36. The way named subpatterns are handled has been refactored. There is now a
 pre-pass over the regex which does nothing other than identify named
 subpatterns and count the total captures. This means that information about
-named patterns is known before the rest of the compile. In particular, it means 
-that forward references can be checked as they are encountered. Previously, the 
-code for handling forward references was contorted and led to several errors in 
-computing the memory requirements for some patterns, leading to buffer 
+named patterns is known before the rest of the compile. In particular, it means
+that forward references can be checked as they are encountered. Previously, the
+code for handling forward references was contorted and led to several errors in
+computing the memory requirements for some patterns, leading to buffer
 overflows.
 
 37. There was no check for integer overflow in subroutine calls such as (?123).
@@ -152,11 +152,11 @@ overflows.
 being treated as a literal 'l' instead of causing an error.
 
 39. If a non-capturing group containing a conditional group that could match
-an empty string was repeated, it was not identified as matching an empty string 
+an empty string was repeated, it was not identified as matching an empty string
 itself. For example: /^(?:(?(1)x|)+)+$()/.
 
 40. In an EBCDIC environment, pcretest was mishandling the escape sequences
-\a and \e in test subject lines. 
+\a and \e in test subject lines.
 
 41. In an EBCDIC environment, \a in a pattern was converted to the ASCII
 instead of the EBCDIC value.

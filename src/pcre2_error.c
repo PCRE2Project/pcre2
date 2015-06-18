@@ -145,9 +145,9 @@ static const char compile_error_texts[] =
   "different names for subpatterns of the same number are not allowed\0"
   "(*MARK) must have an argument\0"
   "non-hex character in \\x{} (closing brace missing?)\0"
-#ifndef EBCDIC   
+#ifndef EBCDIC
   "\\c must be followed by a printable ASCII character\0"
-#else   
+#else
   "\\c must be followed by a letter or one of [\\]^_?\0"
 #endif
   "\\k is not followed by a braced, angle-bracketed, or quoted name\0"
@@ -168,7 +168,7 @@ static const char compile_error_texts[] =
   "missing terminating delimiter for callout with string argument\0"
   "unrecognized string delimiter follows (?C\0"
   "using \\C is disabled by the application\0"
-  "(?| and/or (?J: or (?x: parentheses are too deeply nested\0" 
+  "(?| and/or (?J: or (?x: parentheses are too deeply nested\0"
   ;
 
 /* Match-time and UTF error texts are in the same format. */

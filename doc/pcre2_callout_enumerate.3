@@ -21,7 +21,7 @@ for success and non-zero otherwise. The arguments are:
 .sp
   \fIcode\fP           Points to the compiled pattern
   \fIcallback\fP       The callback function
-  \fIcallout_data\fP   User data that is passed to the callback  
+  \fIcallout_data\fP   User data that is passed to the callback
 .sp
 The \fIcallback()\fP function is passed a pointer to a data block containing
 the following fields:
@@ -34,9 +34,9 @@ the following fields:
   \fIcallout_string_length\fP  Length of callout string
   \fIcallout_string\fP         Points to callout string or is NULL
 .sp
-The second argument is the callout data that was passed to 
-\fBpcre2_callout_enumerate()\fP. The \fBcallback()\fP function must return zero 
-for success. Any other value causes the pattern scan to stop, with the value 
+The second argument is the callout data that was passed to
+\fBpcre2_callout_enumerate()\fP. The \fBcallback()\fP function must return zero
+for success. Any other value causes the pattern scan to stop, with the value
 being passed back as the result of \fBpcre2_callout_enumerate()\fP.
 .P
 There is a complete description of the PCRE2 native API in the

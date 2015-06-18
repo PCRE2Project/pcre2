@@ -11,15 +11,15 @@ dnl be defined as -RC2, for example. For real releases, it should be empty.
 m4_define(pcre2_major, [10])
 m4_define(pcre2_minor, [20])
 m4_define(pcre2_prerelease, [-RC1])
-m4_define(pcre2_date, [2015-03-11])
+m4_define(pcre2_date, [2015-06-16])
 
 # NOTE: The CMakeLists.txt file searches for the above variables in the first
 # 50 lines of this file. Please update that if the variables above are moved.
 
 # Libtool shared library interface versions (current:revision:age)
-m4_define(libpcre2_8_version,     [1:0:1])
-m4_define(libpcre2_16_version,    [1:0:1])
-m4_define(libpcre2_32_version,    [1:0:1])
+m4_define(libpcre2_8_version,     [2:0:0])
+m4_define(libpcre2_16_version,    [2:0:0])
+m4_define(libpcre2_32_version,    [2:0:0])
 m4_define(libpcre2_posix_version, [0:0:0])
 
 AC_PREREQ(2.57)
@@ -134,14 +134,14 @@ AC_SUBST(enable_pcre2_32)
 AC_ARG_ENABLE(debug,
               AS_HELP_STRING([--enable-debug],
                              [enable debugging code]),
-              , enable_debug=no)                 
+              , enable_debug=no)
 
 # Handle --enable-jit (disabled by default)
 AC_ARG_ENABLE(jit,
               AS_HELP_STRING([--enable-jit],
                              [enable Just-In-Time compiling support]),
               , enable_jit=no)
-              
+
 # Handle --disable-pcre2grep-jit (enabled by default)
 AC_ARG_ENABLE(pcre2grep-jit,
               AS_HELP_STRING([--disable-pcre2grep-jit],
@@ -514,7 +514,7 @@ fi
 if test "$enable_debug" = "yes"; then
   AC_DEFINE([PCRE2_DEBUG], [], [
     Define to any value to include debugging code.])
-fi      
+fi
 
 # Unless running under Windows, JIT support requires pthreads.
 
@@ -876,7 +876,7 @@ $PACKAGE-$VERSION configuration summary:
     Build 8-bit pcre2 library ....... : ${enable_pcre2_8}
     Build 16-bit pcre2 library ...... : ${enable_pcre2_16}
     Build 32-bit pcre2 library ...... : ${enable_pcre2_32}
-    Include debugging code .......... : ${enable_debug} 
+    Include debugging code .......... : ${enable_debug}
     Enable JIT compiling support .... : ${enable_jit}
     Enable Unicode support .......... : ${enable_unicode}
     Newline char/sequence ........... : ${enable_newline}
