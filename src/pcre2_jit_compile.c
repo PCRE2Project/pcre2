@@ -923,6 +923,8 @@ return TRUE;
 
 static int get_class_iterator_size(PCRE2_SPTR cc)
 {
+sljit_ui min;
+sljit_ui max;
 switch(*cc)
   {
   case OP_CRSTAR:
@@ -937,9 +939,14 @@ switch(*cc)
 
   case OP_CRRANGE:
   case OP_CRMINRANGE:
-  if (GET2(cc, 1) == GET2(cc, 1 + IMM2_SIZE))
-    return 0;
-  return 2;
+  min = GET2(cc, 1);
+  max = GET2(cc, 1 + IMM2_SIZE);
+  if (max == 0)
+    return (*cc == OP_CRRANGE) ? 2 : 1;
+  max -= min;
+  if (max > 2)
+    max = 2;
+  return max;
 
   default:
   return 0;
@@ -954,7 +961,7 @@ PCRE2_SPTR next_end;
 PCRE2_SPTR max_end;
 PCRE2_UCHAR type;
 sljit_sw length = end - begin;
-int min, max, i;
+sljit_si min, max, i;
 
 /* Detect fixed iterations first. */
 if (end[-(1 + LINK_SIZE)] != OP_KET)
@@ -1188,15 +1195,20 @@ while (cc < ccend)
     size = 1;
     break;
 
-    CASE_ITERATOR_TYPE_PRIVATE_DATA_2B
+    case OP_TYPEUPTO:
     if (cc[1 + IMM2_SIZE] != OP_ANYNL && cc[1 + IMM2_SIZE] != OP_EXTUNI)
       space = 2;
     size = 1 + IMM2_SIZE;
     break;
 
+    case OP_TYPEMINUPTO:
+    space = 2;
+    size = 1 + IMM2_SIZE;
+    break;
+
     case OP_CLASS:
     case OP_NCLASS:
-    size += 1 + 32 / sizeof(PCRE2_UCHAR);
+    size = 1 + 32 / sizeof(PCRE2_UCHAR);
     space = get_class_iterator_size(cc + size);
     break;
 
@@ -7868,7 +7880,7 @@ count_match(common);
 return cc + 1 + LINK_SIZE;
 }
 
-static SLJIT_INLINE PCRE2_SPTR get_iterator_parameters(compiler_common *common, PCRE2_SPTR cc, PCRE2_UCHAR *opcode, PCRE2_UCHAR *type, int *max, int *exact, PCRE2_SPTR *end)
+static SLJIT_INLINE PCRE2_SPTR get_iterator_parameters(compiler_common *common, PCRE2_SPTR cc, PCRE2_UCHAR *opcode, PCRE2_UCHAR *type, sljit_ui *max, sljit_ui *exact, PCRE2_SPTR *end)
 {
 int class_len;
 
@@ -8019,7 +8031,7 @@ DEFINE_COMPILER;
 backtrack_common *backtrack;
 PCRE2_UCHAR opcode;
 PCRE2_UCHAR type;
-int max = -1, exact = -1;
+sljit_ui max = 0, exact;
 BOOL charpos_enabled;
 PCRE2_UCHAR charpos_char;
 unsigned int charpos_othercasebit;
@@ -8794,7 +8806,7 @@ DEFINE_COMPILER;
 PCRE2_SPTR cc = current->cc;
 PCRE2_UCHAR opcode;
 PCRE2_UCHAR type;
-int max = -1, exact = -1;
+sljit_ui max = 0, exact;
 struct sljit_label *label = NULL;
 struct sljit_jump *jump = NULL;
 jump_list *jumplist = NULL;
