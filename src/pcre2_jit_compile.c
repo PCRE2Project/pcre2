@@ -4232,6 +4232,7 @@ sljit_emit_fast_return(compiler, SLJIT_MEM1(SLJIT_SP), LOCALS0);
 
 static BOOL check_class_ranges(compiler_common *common, const sljit_ub *bits, BOOL nclass, BOOL invert, jump_list **backtracks)
 {
+/* May destroy TMP1. */
 DEFINE_COMPILER;
 int ranges[MAX_RANGE_SIZE];
 sljit_ub bit, cbit, all;
@@ -4585,6 +4586,8 @@ return src2;
 
 #endif /* SUPPORT_UNICODE */
 
+static PCRE2_SPTR compile_char1_matchingpath(compiler_common *common, PCRE2_UCHAR type, PCRE2_SPTR cc, jump_list **backtracks, BOOL check_str_ptr);
+
 static PCRE2_SPTR byte_sequence_compare(compiler_common *common, BOOL caseless, PCRE2_SPTR cc,
     compare_context *context, jump_list **backtracks)
 {
@@ -4776,7 +4779,7 @@ BOOL utf = common->utf;
 #ifdef SUPPORT_UNICODE
 BOOL needstype = FALSE, needsscript = FALSE, needschar = FALSE;
 BOOL charsaved = FALSE;
-int typereg = TMP1, scriptreg = TMP1;
+int typereg = TMP1;
 const sljit_ui *other_cases;
 sljit_uw typeoffset;
 #endif
@@ -4839,6 +4842,15 @@ while (*cc != XCL_END)
     switch(*cc)
       {
       case PT_ANY:
+      /* Any either accepts everything or ignored. */
+      if (cc[-1] == XCL_PROP)
+        {
+        if (list != backtracks)
+          compile_char1_matchingpath(common, OP_ALLANY, cc, backtracks, FALSE);
+        else
+          add_jump(compiler, backtracks, JUMP(SLJIT_JUMP));
+        return;
+        }
       break;
 
       case PT_LAMP:
@@ -4875,6 +4887,7 @@ while (*cc != XCL_END)
     }
 #endif
   }
+SLJIT_ASSERT(compares > 0);
 
 /* We are not necessary in utf mode even in 8 bit mode. */
 cc = ccbegin;
@@ -4908,7 +4921,7 @@ if ((cc[-1] & XCL_HASPROP) == 0)
   }
 else if ((cc[-1] & XCL_MAP) != 0)
   {
-  OP1(SLJIT_MOV, TMP3, 0, TMP1, 0);
+  OP1(SLJIT_MOV, RETURN_ADDR, 0, TMP1, 0);
 #ifdef SUPPORT_UNICODE
   charsaved = TRUE;
 #endif
@@ -4929,45 +4942,82 @@ else if ((cc[-1] & XCL_MAP) != 0)
     JUMPHERE(jump);
     }
 
-  OP1(SLJIT_MOV, TMP1, 0, TMP3, 0);
+  OP1(SLJIT_MOV, TMP1, 0, RETURN_ADDR, 0);
   cc += 32 / sizeof(PCRE2_UCHAR);
   }
 
 #ifdef SUPPORT_UNICODE
-/* Simple register allocation. TMP1 is preferred if possible. */
 if (needstype || needsscript)
   {
   if (needschar && !charsaved)
-    OP1(SLJIT_MOV, TMP3, 0, TMP1, 0);
-  add_jump(compiler, &common->getucd, JUMP(SLJIT_FAST_CALL));
-  if (needschar)
-    {
-    if (needstype)
-      {
-      OP1(SLJIT_MOV, RETURN_ADDR, 0, TMP1, 0);
-      typereg = RETURN_ADDR;
-      }
+    OP1(SLJIT_MOV, RETURN_ADDR, 0, TMP1, 0);
 
-    if (needsscript)
-      scriptreg = TMP3;
-    OP1(SLJIT_MOV, TMP1, 0, TMP3, 0);
-    }
-  else if (needstype && needsscript)
-    scriptreg = TMP3;
-  /* In all other cases only one of them was specified, and that can goes to TMP1. */
+  OP2(SLJIT_LSHR, TMP2, 0, TMP1, 0, SLJIT_IMM, UCD_BLOCK_SHIFT);
+  OP1(SLJIT_MOV_UB, TMP2, 0, SLJIT_MEM1(TMP2), (sljit_sw)PRIV(ucd_stage1));
+  OP2(SLJIT_AND, TMP1, 0, TMP1, 0, SLJIT_IMM, UCD_BLOCK_MASK);
+  OP2(SLJIT_SHL, TMP2, 0, TMP2, 0, SLJIT_IMM, UCD_BLOCK_SHIFT);
+  OP2(SLJIT_ADD, TMP1, 0, TMP1, 0, TMP2, 0);
+  OP1(SLJIT_MOV, TMP2, 0, SLJIT_IMM, (sljit_sw)PRIV(ucd_stage2));
+  OP1(SLJIT_MOV_UH, TMP2, 0, SLJIT_MEM2(TMP2, TMP1), 1);
 
+  /* Before anything else, we deal with scripts. */
   if (needsscript)
     {
-    if (scriptreg == TMP1)
+    OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, (sljit_sw)PRIV(ucd_records) + SLJIT_OFFSETOF(ucd_record, script));
+    OP1(SLJIT_MOV_UB, TMP1, 0, SLJIT_MEM2(TMP1, TMP2), 3);
+
+    ccbegin = cc;
+
+    while (*cc != XCL_END)
       {
-      OP1(SLJIT_MOV, scriptreg, 0, SLJIT_IMM, (sljit_sw)PRIV(ucd_records) + SLJIT_OFFSETOF(ucd_record, script));
-      OP1(SLJIT_MOV_UB, scriptreg, 0, SLJIT_MEM2(scriptreg, TMP2), 3);
+      if (*cc == XCL_SINGLE)
+        {
+        cc ++;
+        GETCHARINCTEST(c, cc);
+        }
+      else if (*cc == XCL_RANGE)
+        {
+        cc ++;
+        GETCHARINCTEST(c, cc);
+        GETCHARINCTEST(c, cc);
+        }
+      else
+        {
+        SLJIT_ASSERT(*cc == XCL_PROP || *cc == XCL_NOTPROP);
+        cc++;
+        if (*cc == PT_SC)
+          {
+          compares--;
+          invertcmp = (compares == 0 && list != backtracks);
+          if (cc[-1] == XCL_NOTPROP)
+            invertcmp ^= 0x1;
+          jump = CMP(SLJIT_EQUAL ^ invertcmp, TMP1, 0, SLJIT_IMM, (int)cc[1]);
+          add_jump(compiler, compares > 0 ? list : backtracks, jump);
+          }
+        cc += 2;
+        }
+      }
+
+    cc = ccbegin;
+    }
+
+  if (needschar)
+    {
+    OP1(SLJIT_MOV, TMP1, 0, RETURN_ADDR, 0);
+    }
+
+  if (needstype)
+    {
+    if (!needschar)
+      {
+      OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, (sljit_sw)PRIV(ucd_records) + SLJIT_OFFSETOF(ucd_record, chartype));
+      OP1(SLJIT_MOV_UB, TMP1, 0, SLJIT_MEM2(TMP1, TMP2), 3);
       }
     else
       {
       OP2(SLJIT_SHL, TMP2, 0, TMP2, 0, SLJIT_IMM, 3);
-      OP2(SLJIT_ADD, TMP2, 0, TMP2, 0, SLJIT_IMM, (sljit_sw)PRIV(ucd_records) + SLJIT_OFFSETOF(ucd_record, script));
-      OP1(SLJIT_MOV_UB, scriptreg, 0, SLJIT_MEM1(TMP2), 0);
+      OP1(SLJIT_MOV_UB, RETURN_ADDR, 0, SLJIT_MEM1(TMP2), (sljit_sw)PRIV(ucd_records) + SLJIT_OFFSETOF(ucd_record, chartype));
+      typereg = RETURN_ADDR;
       }
     }
   }
@@ -5039,20 +5089,15 @@ while (*cc != XCL_END)
 #ifdef SUPPORT_UNICODE
   else
     {
+    SLJIT_ASSERT(*cc == XCL_PROP || *cc == XCL_NOTPROP);
     if (*cc == XCL_NOTPROP)
       invertcmp ^= 0x1;
     cc++;
     switch(*cc)
       {
       case PT_ANY:
-      if (list != backtracks)
-        {
-        if ((cc[-1] == XCL_NOTPROP && compares > 0) || (cc[-1] == XCL_PROP && compares == 0))
-          continue;
-        }
-      else if (cc[-1] == XCL_NOTPROP)
-        continue;
-      jump = JUMP(SLJIT_JUMP);
+      if (!invertcmp)
+        jump = JUMP(SLJIT_JUMP);
       break;
 
       case PT_LAMP:
@@ -5076,7 +5121,8 @@ while (*cc != XCL_END)
       break;
 
       case PT_SC:
-      jump = CMP(SLJIT_EQUAL ^ invertcmp, scriptreg, 0, SLJIT_IMM, (int)cc[1]);
+      compares++;
+      /* Do nothing. */
       break;
 
       case PT_SPACE:
@@ -5241,6 +5287,10 @@ while (*cc != XCL_END)
       OP2(SLJIT_SUB | SLJIT_SET_U, SLJIT_UNUSED, 0, typereg, 0, SLJIT_IMM, ucp_Ps - ucp_Pc);
       OP_FLAGS(SLJIT_OR | SLJIT_SET_E, TMP2, 0, TMP2, 0, SLJIT_LESS_EQUAL);
       jump = JUMP(SLJIT_NOT_ZERO ^ invertcmp);
+      break;
+
+      default:
+      SLJIT_ASSERT_STOP();
       break;
       }
     cc += 2;
@@ -8049,43 +8099,15 @@ PUSH_BACKTRACK(sizeof(char_iterator_backtrack), cc, NULL);
 
 cc = get_iterator_parameters(common, cc, &opcode, &type, &max, &exact, &end);
 
-switch(type)
+if (type != OP_EXTUNI)
   {
-  case OP_NOT_DIGIT:
-  case OP_DIGIT:
-  case OP_NOT_WHITESPACE:
-  case OP_WHITESPACE:
-  case OP_NOT_WORDCHAR:
-  case OP_WORDCHAR:
-  case OP_ANY:
-  case OP_ALLANY:
-  case OP_ANYBYTE:
-  case OP_ANYNL:
-  case OP_NOT_HSPACE:
-  case OP_HSPACE:
-  case OP_NOT_VSPACE:
-  case OP_VSPACE:
-  case OP_CHAR:
-  case OP_CHARI:
-  case OP_NOT:
-  case OP_NOTI:
-  case OP_CLASS:
-  case OP_NCLASS:
   tmp_base = TMP3;
   tmp_offset = 0;
-  break;
-
-  default:
-  SLJIT_ASSERT_STOP();
-  /* Fall through. */
-
-  case OP_EXTUNI:
-  case OP_XCLASS:
-  case OP_NOTPROP:
-  case OP_PROP:
+  }
+else
+  {
   tmp_base = SLJIT_MEM1(SLJIT_SP);
   tmp_offset = POSSESSIVE0;
-  break;
   }
 
 /* Handle fixed part first. */
