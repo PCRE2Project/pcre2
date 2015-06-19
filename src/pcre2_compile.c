@@ -4397,9 +4397,9 @@ for (;; ptr++)
               cb, PRIV(vspace_list));
             break;
 
-#ifdef SUPPORT_UNICODE
             case ESC_p:
             case ESC_P:
+#ifdef SUPPORT_UNICODE
               {
               BOOL negated;
               unsigned int ptype = 0, pdata = 0;
@@ -4413,6 +4413,9 @@ for (;; ptr++)
               class_has_8bitchar--;                /* Undo! */
               }
             break;
+#else
+            *errorcodeptr = ERR45;
+            goto FAILED;              
 #endif
             /* Unrecognized escapes are faulted. */
 

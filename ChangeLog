@@ -1,7 +1,7 @@
 Change Log for PCRE2
 --------------------
 
- Version 10.20 16-June-2015
+Version 10.20 16-June-2015
 --------------------------
 
 1. Callouts with string arguments have been added.
@@ -166,6 +166,14 @@ now compatible with the specification in Perl's perlebcdic page.
 
 43. Single character repetition in JIT has been improved. 20-30% speedup
 was achieved on certain patterns.
+
+44. The EBCDIC character 0x41 is a non-breaking space, equivalent to 0xa0 in
+ASCII/Unicode. This has now been added to the list of characters that are
+recognized as white space in EBCDIC.
+    
+45. When PCRE2 was compiled without Unicode support, the use of \p and \P gave
+an error (correctly) when used outside a class, but did not give an error
+within a class.
 
 
 Version 10.10 06-March-2015
