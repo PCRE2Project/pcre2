@@ -5615,7 +5615,7 @@ switch(type)
   case OP_ALLANY:
   if (check_str_ptr)
     detect_partial_match(common, backtracks);
-#ifdef SUPPORT_UNICODE
+#if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
   if (common->utf)
     {
     OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), 0);
