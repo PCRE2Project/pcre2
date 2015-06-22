@@ -17,9 +17,9 @@ m4_define(pcre2_date, [2015-06-16])
 # 50 lines of this file. Please update that if the variables above are moved.
 
 # Libtool shared library interface versions (current:revision:age)
-m4_define(libpcre2_8_version,     [2:0:0])
-m4_define(libpcre2_16_version,    [2:0:0])
-m4_define(libpcre2_32_version,    [2:0:0])
+m4_define(libpcre2_8_version,     [2:0:2])
+m4_define(libpcre2_16_version,    [2:0:2])
+m4_define(libpcre2_32_version,    [2:0:2])
 m4_define(libpcre2_posix_version, [0:0:0])
 
 AC_PREREQ(2.57)
