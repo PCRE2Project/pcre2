@@ -175,6 +175,8 @@ recognized as white space in EBCDIC.
 an error (correctly) when used outside a class, but did not give an error
 within a class.
 
+46. \h within a class was incorrectly compiled in EBCDIC environments. 
+
 
 Version 10.10 06-March-2015
 ---------------------------

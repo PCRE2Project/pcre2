@@ -435,7 +435,7 @@ PCRE for a long time. */
 /* -------------- EBCDIC environments -------------- */
 
 #else
-#define HSPACE_LIST CHAR_HT, CHAR_SPACE, CHAR_NBSP
+#define HSPACE_LIST CHAR_HT, CHAR_SPACE, CHAR_NBSP, NOTACHAR
 
 #define HSPACE_BYTE_CASES \
   case CHAR_HT: \
