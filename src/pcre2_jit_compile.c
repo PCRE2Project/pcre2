@@ -1104,7 +1104,7 @@ while (cc < ccend)
   size = 0;
   bracketlen = 0;
   if (private_data_ptr > SLJIT_MAX_LOCAL_SIZE)
-    return;
+    break;
 
   if (*cc == OP_ONCE || *cc == OP_ONCE_NC || *cc == OP_BRA || *cc == OP_CBRA || *cc == OP_COND)
     if (detect_repeat(common, cc))
