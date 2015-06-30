@@ -1,7 +1,7 @@
 Change Log for PCRE2
 --------------------
 
-Version 10.20 16-June-2015
+Version 10.20 30-June-2015
 --------------------------
 
 1. Callouts with string arguments have been added.
@@ -179,6 +179,8 @@ within a class.
 
 47. JIT should return with error when the compiled pattern requires
 more stack space than the maximum.
+
+48. Fixed a memory leak in pcre2grep when a locale is set.
 
 
 Version 10.10 06-March-2015

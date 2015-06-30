@@ -171,6 +171,8 @@ static BOOL use_jit = TRUE;
 static BOOL use_jit = FALSE;
 #endif
 
+static const uint8_t *character_tables = NULL;
+
 static uint32_t pcre2_options = 0;
 static uint32_t process_options = 0;
 static uint32_t match_limit = 0;
@@ -2984,7 +2986,8 @@ if (locale == NULL)
   locale_from = "LC_CTYPE";
   }
 
-/* If a locale is set, use it to generate the tables the PCRE needs. */
+/* If a locale is set, use it to generate the tables the PCRE needs. Passing
+NULL to pcre2_maketables() means that malloc() is used to get the memory. */
 
 if (locale != NULL)
   {
@@ -2994,7 +2997,8 @@ if (locale != NULL)
       locale, locale_from);
     goto EXIT2;
     }
-  pcre2_set_character_tables(compile_context, pcre2_maketables(NULL));
+  character_tables = pcre2_maketables(NULL);
+  pcre2_set_character_tables(compile_context, character_tables);
   }
 
 /* Sort out colouring */
@@ -3232,6 +3236,8 @@ if (jit_stack != NULL) pcre2_jit_stack_free(jit_stack);
 #endif
 
 free(main_buffer);
+free((void *)character_tables);
+
 pcre2_compile_context_free(compile_context);
 pcre2_match_context_free(match_context);
 pcre2_match_data_free(match_data);
