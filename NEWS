@@ -1,7 +1,7 @@
 News about PCRE2 releases
 -------------------------
 
-Version 10.20 16-June-2015
+Version 10.20 30-June-2015
 --------------------------
 
 1. Callouts with string arguments and the pcre2_callout_enumerate() function

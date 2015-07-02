@@ -170,12 +170,12 @@ was achieved on certain patterns.
 44. The EBCDIC character 0x41 is a non-breaking space, equivalent to 0xa0 in
 ASCII/Unicode. This has now been added to the list of characters that are
 recognized as white space in EBCDIC.
-    
+
 45. When PCRE2 was compiled without Unicode support, the use of \p and \P gave
 an error (correctly) when used outside a class, but did not give an error
 within a class.
 
-46. \h within a class was incorrectly compiled in EBCDIC environments. 
+46. \h within a class was incorrectly compiled in EBCDIC environments.
 
 47. JIT should return with error when the compiled pattern requires
 more stack space than the maximum.

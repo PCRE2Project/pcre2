@@ -238,8 +238,8 @@ if [ $ISGCC -ne 0 -a $usemain -ne 0 ]; then
     runtest
   fi
   if [ $useusan -ne 0 ]; then
-    echo "------- Maximally configured test with -fsanitize=undefined -fno-sanitize=shift -std=gnu99 -------"
-    CFLAGS="$OFLAGS $SAVECFLAGS -fsanitize=undefined -fno-sanitize=shift -std=gnu99"
+    echo "------- Maximally configured test with -fsanitize=undefined -fno-sanitize=shift -fno-sanitize=alignment -std=gnu99 -------"
+    CFLAGS="$OFLAGS $SAVECFLAGS -fsanitize=undefined -fno-sanitize=shift -fno-sanitize=alignment -std=gnu99"
     echo "CFLAGS=$CFLAGS"
     opts="--disable-shared $enable_jit --disable-stack-for-recursion --enable-pcre2-16 --enable-pcre2-32"
     runtest

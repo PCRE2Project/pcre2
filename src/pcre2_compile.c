@@ -4415,7 +4415,7 @@ for (;; ptr++)
             break;
 #else
             *errorcodeptr = ERR45;
-            goto FAILED;              
+            goto FAILED;
 #endif
             /* Unrecognized escapes are faulted. */
 
