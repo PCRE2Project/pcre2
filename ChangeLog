@@ -1,6 +1,12 @@
 Change Log for PCRE2
 --------------------
 
+Version 10.21 xx-xxx-xxxx
+-------------------------
+
+1. Improve matching speed of patterns starting with + or * in JIT.
+
+
 Version 10.20 30-June-2015
 --------------------------
 
