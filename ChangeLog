@@ -9,6 +9,9 @@ Version 10.21 xx-xxx-xxxx
 2. Use memchr() to find the first character in an unanchored match in 8-bit
 mode in the interpreter. This gives a significant speed improvement.
 
+3. Removed a redundant copy of the opcode_possessify table in the 
+pcre2_auto_possessify.c source.
+
 
 Version 10.20 30-June-2015
 --------------------------
