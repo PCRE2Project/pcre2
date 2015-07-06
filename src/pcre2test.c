@@ -66,6 +66,14 @@ it references only the enabled library functions. */
 #include <locale.h>
 #include <errno.h>
 
+#if defined NATIVE_ZOS
+#include "pcrzosfs.h"
+/* That header is not included in the main PCRE2 distribution because other
+apparatus is needed to compile pcre2test for z/OS. The header can be found in
+the special z/OS distribution, which is available from www.zaconsultants.net or
+from www.cbttape.org. */
+#endif
+
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -6454,6 +6462,9 @@ printf("Compiled with\n");
 
 #ifdef EBCDIC
 printf("  EBCDIC code support: LF is 0x%02x\n", CHAR_LF);
+#if defined NATIVE_ZOS
+printf("  EBCDIC code page %s or similar\n", pcrz_cpversion());
+#endif
 #endif
 
 #ifdef SUPPORT_PCRE2_8
