@@ -6783,7 +6783,8 @@ for(;;)
       end_subject = t;
       }
 
-    /* Advance to a unique first code unit if there is one. */
+    /* Advance to a unique first code unit if there is one. In 8-bit mode, the 
+    use of memchr() gives a big speed up. */
 
     if (has_first_cu)
       {
@@ -6793,8 +6794,15 @@ for(;;)
           (smc = UCHAR21TEST(start_match)) != first_cu && smc != first_cu2)
           start_match++;
       else
+        {
+#if PCRE2_CODE_UNIT_WIDTH != 8
         while (start_match < end_subject && UCHAR21TEST(start_match) != first_cu)
           start_match++;
+#else
+        start_match = memchr(start_match, first_cu, end_subject - start_match);
+        if (start_match == NULL) start_match = end_subject;
+#endif          
+        }   
       }
 
     /* Or to just after a linebreak for a multiline match */

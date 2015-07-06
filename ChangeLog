@@ -6,6 +6,9 @@ Version 10.21 xx-xxx-xxxx
 
 1. Improve matching speed of patterns starting with + or * in JIT.
 
+2. Use memchr() to find the first character in an unanchored match in 8-bit
+mode in the interpreter. This gives a significant speed improvement.
+
 
 Version 10.20 30-June-2015
 --------------------------
