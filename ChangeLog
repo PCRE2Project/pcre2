@@ -12,6 +12,8 @@ mode in the interpreter. This gives a significant speed improvement.
 3. Removed a redundant copy of the opcode_possessify table in the 
 pcre2_auto_possessify.c source.
 
+4. Fix typos in dftables.c for z/OS.
+
 
 Version 10.20 30-June-2015
 --------------------------
