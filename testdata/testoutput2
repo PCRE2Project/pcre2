@@ -14473,4 +14473,7 @@ Failed: error 161 at offset 32: number is too big
 /[[:>:]](?<)/
 Failed: error 124 at offset 10: unrecognized character after (?<
 
+/((?x)(*:0))#(?'/
+Failed: error 124 at offset 15: unrecognized character after (?<
+
 # End of testinput2 

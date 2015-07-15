@@ -3334,6 +3334,7 @@ for (; ptr < cb->end_pattern; ptr++)
         {
         ptr += 2;
         while (ptr < cb->end_pattern && *ptr != CHAR_RIGHT_PARENTHESIS) ptr++;
+        nest_depth--;
         }
       }
 

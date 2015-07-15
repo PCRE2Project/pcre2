@@ -4329,4 +4329,6 @@ a random value. /Ix
 
 /[[:>:]](?<)/
 
+/((?x)(*:0))#(?'/
+
 # End of testinput2 
