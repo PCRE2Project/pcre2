@@ -14,6 +14,10 @@ pcre2_auto_possessify.c source.
 
 4. Fix typos in dftables.c for z/OS.
 
+5. Change 36 for 10.20 broke the handling of [[:>:]] and [[:<:]] in that 
+processing them could involve a buffer overflow if the following character was 
+an opening parenthesis.
+
 
 Version 10.20 30-June-2015
 --------------------------

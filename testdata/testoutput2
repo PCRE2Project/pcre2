@@ -14470,4 +14470,7 @@ Failed: error 161 at offset 32: number is too big
         End
 ------------------------------------------------------------------
 
+/[[:>:]](?<)/
+Failed: error 124 at offset 10: unrecognized character after (?<
+
 # End of testinput2 

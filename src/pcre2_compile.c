@@ -3238,7 +3238,7 @@ for (; ptr < cb->end_pattern; ptr++)
     if (PRIV(strncmp_c8)(ptr+1, STRING_WEIRD_STARTWORD, 6) == 0 ||
         PRIV(strncmp_c8)(ptr+1, STRING_WEIRD_ENDWORD, 6) == 0)
       {
-      ptr += 7;
+      ptr += 6;
       break;
       }
 
@@ -3303,8 +3303,9 @@ for (; ptr < cb->end_pattern; ptr++)
       if (c == CHAR_LEFT_SQUARE_BRACKET &&
           (ptr[1] == CHAR_COLON || ptr[1] == CHAR_DOT ||
            ptr[1] == CHAR_EQUALS_SIGN) && check_posix_syntax(ptr, &ptr))
-        ptr ++;
-
+        {
+        ptr++;
+        }
       else if (c == CHAR_BACKSLASH)
         {
         errorcode = 0;
