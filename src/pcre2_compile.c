@@ -2988,6 +2988,7 @@ static uint32_t scan_for_captures(PCRE2_SPTR *ptrptr, uint32_t options,
   compile_block *cb)
 {
 uint32_t c;
+uint32_t delimiter;
 uint32_t nest_depth = 0;
 uint32_t set, unset, *optset;
 int errorcode = 0;
@@ -2999,6 +3000,7 @@ BOOL isdupname;
 BOOL utf = (options & PCRE2_UTF) != 0;
 BOOL negate_class;
 PCRE2_SPTR name;
+PCRE2_SPTR start;
 PCRE2_SPTR ptr = *ptrptr;
 named_group *ng;
 nest_save *top_nest = NULL;
@@ -3176,7 +3178,6 @@ for (; ptr < cb->end_pattern; ptr++)
       default:
       ptr += 2;
       if (ptr[0] == CHAR_R ||                                 /* (?R) */
-          ptr[0] == CHAR_C ||                                 /* (?C) */
           IS_DIGIT(ptr[0]) ||                                 /* (?n) */
           (ptr[0] == CHAR_MINUS && IS_DIGIT(ptr[1]))) break;  /* (?-n) */
 
@@ -3252,7 +3253,57 @@ for (; ptr < cb->end_pattern; ptr++)
         else top_nest->nest_depth = nest_depth;
         }
       break;
+      
+      /* Skip over a numerical or string argument for a callout. */
+      
+      case CHAR_C:
+      ptr += 2; 
+      if (ptr[1] == CHAR_RIGHT_PARENTHESIS) break;
+      if (IS_DIGIT(ptr[1]))
+        {
+        while (IS_DIGIT(ptr[1])) ptr++;
+        if (ptr[1] != CHAR_RIGHT_PARENTHESIS)
+          {
+          errorcode = ERR39;
+          ptr++; 
+          goto FAILED;
+          }    
+        break;
+        } 
 
+      /* Handle a string argument */
+       
+      ptr++;
+      delimiter = 0;
+      for (i = 0; PRIV(callout_start_delims)[i] != 0; i++)
+        {
+        if (*ptr == PRIV(callout_start_delims)[i])
+          {
+          delimiter = PRIV(callout_end_delims)[i];
+          break;
+          }
+        }
+
+      if (delimiter == 0)
+        {
+        errorcode = ERR82;
+        goto FAILED;
+        }
+
+      start = ptr;
+      do
+        {
+        if (++ptr >= cb->end_pattern)
+          {
+          errorcode = ERR81;
+          ptr = start;   /* To give a more useful message */
+          goto FAILED;
+          }
+        if (ptr[0] == delimiter && ptr[1] == delimiter) ptr += 2;
+        }
+      while (ptr[0] != delimiter);
+      break; 
+ 
       case CHAR_NUMBER_SIGN:
       ptr += 3;
       while (ptr < cb->end_pattern && *ptr != CHAR_RIGHT_PARENTHESIS) ptr++;
@@ -6062,7 +6113,9 @@ for (;; ptr++)
             }
 
           /* During the pre-compile phase, we parse the string and update the
-          length. There is no need to generate any code. */
+          length. There is no need to generate any code. (In fact, the string 
+          has already been parsed in the pre-pass that looks for named 
+          parentheses, but it does no harm to leave this code in.) */
 
           if (lengthptr != NULL)     /* Only check the string */
             {

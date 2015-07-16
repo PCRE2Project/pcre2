@@ -4331,4 +4331,8 @@ a random value. /Ix
 
 /((?x)(*:0))#(?'/
 
+/(?C$[$)(?<]/
+
+/(?C$)$)(?<]/
+
 # End of testinput2 

@@ -14476,4 +14476,10 @@ Failed: error 124 at offset 10: unrecognized character after (?<
 /((?x)(*:0))#(?'/
 Failed: error 124 at offset 15: unrecognized character after (?<
 
+/(?C$[$)(?<]/
+Failed: error 124 at offset 10: unrecognized character after (?<
+
+/(?C$)$)(?<]/
+Failed: error 124 at offset 10: unrecognized character after (?<
+
 # End of testinput2 

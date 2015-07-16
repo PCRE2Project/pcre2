@@ -30,6 +30,13 @@ discovered by Karl Skomski with the LLVM fuzzer.
 own source module to avoid a circular dependency between src/pcre2_compile.c 
 and src/pcre2_study.c
 
+8. A callout with a string argument containing an opening square bracket, for
+example /(?C$[$)(?<]/, was incorrectly processed and could provoke a buffer
+overflow. This bug was discovered by Karl Skomski with the LLVM fuzzer.
+
+9. The handling of callouts during the pre-pass for named group identification 
+has been tightened up.
+
 
 Version 10.20 30-June-2015
 --------------------------
