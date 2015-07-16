@@ -67,7 +67,8 @@
 # 2013-10-08 PH got rid of the "source" command, which is a bash-ism (use ".")
 # 2013-11-05 PH added support for PARENS_NEST_LIMIT
 # 2014-08-29 PH converted the file for PCRE2 (which has no C++).
-# 2015-04024 PH added support for PCRE2_DEBUG
+# 2015-04-24 PH added support for PCRE2_DEBUG
+# 2015-07-16 PH updated for new pcre2_find_bracket source module
 
 PROJECT(PCRE2 C)
 
@@ -390,6 +391,7 @@ SET(PCRE2_SOURCES
   src/pcre2_context.c
   src/pcre2_dfa_match.c
   src/pcre2_error.c
+  src/pcre2_find_bracket.c 
   src/pcre2_jit_compile.c
   src/pcre2_maketables.c
   src/pcre2_match.c

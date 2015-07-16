@@ -25,6 +25,10 @@ during the scan for named groups, and hence the external # was incorrectly
 treated as a comment and the invalid (?' at the end of the pattern was not 
 diagnosed. This caused a buffer overflow during the real compile.
 
+7. Moved the pcre2_find_bracket() function from src/pcre2_compile.c into its 
+own source module to avoid a circular dependency between src/pcre2_compile.c 
+and src/pcre2_study.c
+
 
 Version 10.20 30-June-2015
 --------------------------

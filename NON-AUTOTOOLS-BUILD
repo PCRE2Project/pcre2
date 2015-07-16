@@ -97,6 +97,7 @@ can skip ahead to the CMake section.
        pcre2_context.c
        pcre2_dfa_match.c
        pcre2_error.c
+       pcre2_find_bracket.c 
        pcre2_jit_compile.c
        pcre2_maketables.c
        pcre2_match.c
@@ -388,4 +389,4 @@ and executable, is in EBCDIC and native z/OS file formats and this is the
 recommended download site.
 
 =============================
-Last Updated: 15 June 2015
+Last Updated: 16 July 2015
