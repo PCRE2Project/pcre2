@@ -22,8 +22,9 @@ an opening parenthesis.
 /((?x)(*:0))#(?'/. Specifically: if a setting of (?x) was followed by a (*MARK) 
 setting (which (*:0) is), then (?x) did not get unset at the end of its group 
 during the scan for named groups, and hence the external # was incorrectly
-treated as a comment and the invalid (?' at the end of the pattern was not 
-diagnosed. This caused a buffer overflow during the real compile.
+treated as a comment and the invalid (?' at the end of the pattern was not
+diagnosed. This caused a buffer overflow during the real compile. This bug was
+discovered by Karl Skomski with the LLVM fuzzer.
 
 7. Moved the pcre2_find_bracket() function from src/pcre2_compile.c into its 
 own source module to avoid a circular dependency between src/pcre2_compile.c 
