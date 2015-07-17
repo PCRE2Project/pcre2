@@ -4340,5 +4340,6 @@ a random value. /Ix
 /(?C$)$)(?<]/
 
 /(?(R))*+/B
+    abcd
 
 # End of testinput2 

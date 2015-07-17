@@ -14511,5 +14511,7 @@ Failed: error 124 at offset 10: unrecognized character after (?<
         Ket
         End
 ------------------------------------------------------------------
+    abcd
+ 0: 
 
 # End of testinput2 
