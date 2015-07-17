@@ -37,6 +37,9 @@ overflow. This bug was discovered by Karl Skomski with the LLVM fuzzer.
 9. The handling of callouts during the pre-pass for named group identification 
 has been tightened up.
 
+10. The quantifier {1} can be ignored, whether greedy, non-greedy, or 
+possessive. This is a very minor optimization.
+
 
 Version 10.20 30-June-2015
 --------------------------

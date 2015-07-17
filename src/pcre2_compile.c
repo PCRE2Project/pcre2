@@ -3253,11 +3253,11 @@ for (; ptr < cb->end_pattern; ptr++)
         else top_nest->nest_depth = nest_depth;
         }
       break;
-      
+
       /* Skip over a numerical or string argument for a callout. */
-      
+
       case CHAR_C:
-      ptr += 2; 
+      ptr += 2;
       if (ptr[1] == CHAR_RIGHT_PARENTHESIS) break;
       if (IS_DIGIT(ptr[1]))
         {
@@ -3265,14 +3265,14 @@ for (; ptr < cb->end_pattern; ptr++)
         if (ptr[1] != CHAR_RIGHT_PARENTHESIS)
           {
           errorcode = ERR39;
-          ptr++; 
+          ptr++;
           goto FAILED;
-          }    
+          }
         break;
-        } 
+        }
 
       /* Handle a string argument */
-       
+
       ptr++;
       delimiter = 0;
       for (i = 0; PRIV(callout_start_delims)[i] != 0; i++)
@@ -3302,8 +3302,8 @@ for (; ptr < cb->end_pattern; ptr++)
         if (ptr[0] == delimiter && ptr[1] == delimiter) ptr += 2;
         }
       while (ptr[0] != delimiter);
-      break; 
- 
+      break;
+
       case CHAR_NUMBER_SIGN:
       ptr += 3;
       while (ptr < cb->end_pattern && *ptr != CHAR_RIGHT_PARENTHESIS) ptr++;
@@ -4719,6 +4719,10 @@ for (;; ptr++)
       }
     else repeat_type = greedy_default;
 
+    /* If the repeat is {1} we can ignore it. */
+
+    if (repeat_max == 1 && repeat_min == 1) goto END_REPEAT;
+
     /* If previous was a recursion call, wrap it in atomic brackets so that
     previous becomes the atomic group. All recursions were so wrapped in the
     past, but it no longer happens for non-repeated recursions. In fact, the
@@ -6113,8 +6117,8 @@ for (;; ptr++)
             }
 
           /* During the pre-compile phase, we parse the string and update the
-          length. There is no need to generate any code. (In fact, the string 
-          has already been parsed in the pre-pass that looks for named 
+          length. There is no need to generate any code. (In fact, the string
+          has already been parsed in the pre-pass that looks for named
           parentheses, but it does no harm to leave this code in.) */
 
           if (lengthptr != NULL)     /* Only check the string */

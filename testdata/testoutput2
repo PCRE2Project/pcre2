@@ -4533,16 +4533,33 @@ Capturing subpattern count = 2
 May match empty string
 Subject length lower bound = 0
 
-/[ab]{1}+/IB
+/[ab]{1}+/B
 ------------------------------------------------------------------
         Bra
-        [ab]{1,1}+
+        [ab]
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
-Starting code units: a b 
-Subject length lower bound = 1
+
+/()(?1){1}/B
+------------------------------------------------------------------
+        Bra
+        CBra 1
+        Ket
+        Recurse
+        Ket
+        End
+------------------------------------------------------------------
+
+/()(?1)/B
+------------------------------------------------------------------
+        Bra
+        CBra 1
+        Ket
+        Recurse
+        Ket
+        End
+------------------------------------------------------------------
 
 /((w\/|-|with)*(free|immediate)*.*?shipping\s*[!.-]*)/Ii
 Capturing subpattern count = 3
