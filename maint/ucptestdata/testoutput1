@@ -362,3 +362,10 @@ findprop 118a0 11ac7 16ad0
 118a0 Letter: Upper case letter, Warang_Citi, Other, 118c0
 11ac7 Letter: Other letter, Pau_Cin_Hau, Other
 16ad0 Letter: Other letter, Bassa_Vah, Other
+
+findprop 11700 14400 108e0 11280 1d800
+11700 Letter: Other letter, Ahom, Other
+14400 Letter: Other letter, Anatolian_Hieroglyphs, Other
+108e0 Letter: Other letter, Hatran, Other
+11280 Letter: Other letter, Multani, Other
+1d800 Symbol: Other symbol, SignWriting, Other

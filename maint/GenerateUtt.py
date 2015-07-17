@@ -22,6 +22,7 @@
 # Comment modified by PH 13-May-2014 to update to PCRE2 file names.
 # Script updated to Python 3 by running it through the 2to3 converter.
 # Added script names for Unicode 7.0.0, 20-June-2014.
+# Added script names for Unicode 8.0.0, 19-June-2015.
 
 script_names = ['Arabic', 'Armenian', 'Bengali', 'Bopomofo', 'Braille', 'Buginese', 'Buhid', 'Canadian_Aboriginal', \
  'Cherokee', 'Common', 'Coptic', 'Cypriot', 'Cyrillic', 'Deseret', 'Devanagari', 'Ethiopic', 'Georgian', \
@@ -47,7 +48,10 @@ script_names = ['Arabic', 'Armenian', 'Bengali', 'Bopomofo', 'Braille', 'Bugines
  'Bassa_Vah', 'Caucasian_Albanian', 'Duployan', 'Elbasan', 'Grantha', 'Khojki', 'Khudawadi',
  'Linear_A', 'Mahajani', 'Manichaean', 'Mende_Kikakui', 'Modi', 'Mro', 'Nabataean',
  'Old_North_Arabian', 'Old_Permic', 'Pahawh_Hmong', 'Palmyrene', 'Psalter_Pahlavi',
- 'Pau_Cin_Hau', 'Siddham', 'Tirhuta', 'Warang_Citi'
+ 'Pau_Cin_Hau', 'Siddham', 'Tirhuta', 'Warang_Citi',
+# New for Unicode 8.0.0
+ 'Ahom', 'Anatolian_Hieroglyphs', 'Hatran', 'Multani', 'Old_Hungarian',
+ 'SignWriting'
  ]
 
 category_names = ['Cc', 'Cf', 'Cn', 'Co', 'Cs', 'Ll', 'Lm', 'Lo', 'Lt', 'Lu',

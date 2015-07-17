@@ -43,6 +43,9 @@ possessive. This is a very minor optimization.
 11. A possessively repeated conditional group that could match an empty string,
 for example, /(?(R))*+/, was incorrectly compiled.
 
+12. The Unicode tables have been updated to Unicode 8.0.0 (thanks to Christian 
+Persch).
+
 
 Version 10.20 30-June-2015
 --------------------------

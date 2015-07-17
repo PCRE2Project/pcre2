@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "22 April 2015" "PCRE2 10.20"
+.TH PCRE2API 3 "17 July 2015" "PCRE2 10.21"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -905,7 +905,7 @@ The \fIwhere\fP argument should point to a buffer that is at least 24 code
 units long. (The exact length required can be found by calling
 \fBpcre2_config()\fP with \fBwhere\fP set to NULL.) If PCRE2 has been compiled
 without Unicode support, the buffer is filled with the text "Unicode not
-supported". Otherwise, the Unicode version string (for example, "7.0.0") is
+supported". Otherwise, the Unicode version string (for example, "8.0.0") is
 inserted. The number of code units used is returned. This is the length of the
 string plus one unit for the terminating zero.
 .sp
@@ -2939,6 +2939,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 22 April 2015
+Last updated: 17 July 2015
 Copyright (c) 1997-2015 University of Cambridge.
 .fi

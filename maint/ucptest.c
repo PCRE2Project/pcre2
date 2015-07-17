@@ -260,6 +260,14 @@ switch(script)
   case ucp_Siddham:            scriptname = US"Siddham"; break;
   case ucp_Tirhuta:            scriptname = US"Tirhuta"; break;
   case ucp_Warang_Citi:        scriptname = US"Warang_Citi"; break;
+
+  /* New for Unicode 8.0.0 */
+  case ucp_Ahom:                  scriptname = US"Ahom"; break;
+  case ucp_Anatolian_Hieroglyphs: scriptname = US"Anatolian_Hieroglyphs"; break;
+  case ucp_Hatran:                scriptname = US"Hatran"; break;
+  case ucp_Multani:               scriptname = US"Multani"; break;
+  case ucp_Old_Hungarian:         scriptname = US"Old_Hungarian"; break;
+  case ucp_SignWriting:           scriptname = US"SignWriting"; break;
   }
 
 printf("%04x %s: %s, %s, %s", c, typename, fulltypename, scriptname, graphbreak);

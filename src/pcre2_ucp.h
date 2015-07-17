@@ -253,7 +253,14 @@ enum {
   ucp_Pau_Cin_Hau,
   ucp_Siddham,
   ucp_Tirhuta,
-  ucp_Warang_Citi
+  ucp_Warang_Citi,
+  /* New for Unicode 8.0.0: */
+  ucp_Ahom,
+  ucp_Anatolian_Hieroglyphs,
+  ucp_Hatran,
+  ucp_Multani,
+  ucp_Old_Hungarian,
+  ucp_SignWriting
 };
 
 #endif

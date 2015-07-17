@@ -121,6 +121,7 @@
 # 03-June-2014:      Updated for Python 3
 # 20-June-2014:      Updated for Unicode 7.0.0
 # 12-August-2014:    Updated to put Unicode version into the file
+# 19-June-2015:      Updated for Unicode 8.0.0
 ##############################################################################
 
 
@@ -330,7 +331,10 @@ script_names = ['Arabic', 'Armenian', 'Bengali', 'Bopomofo', 'Braille', 'Bugines
  'Bassa_Vah', 'Caucasian_Albanian', 'Duployan', 'Elbasan', 'Grantha', 'Khojki', 'Khudawadi',
  'Linear_A', 'Mahajani', 'Manichaean', 'Mende_Kikakui', 'Modi', 'Mro', 'Nabataean',
  'Old_North_Arabian', 'Old_Permic', 'Pahawh_Hmong', 'Palmyrene', 'Psalter_Pahlavi',
- 'Pau_Cin_Hau', 'Siddham', 'Tirhuta', 'Warang_Citi'
+ 'Pau_Cin_Hau', 'Siddham', 'Tirhuta', 'Warang_Citi',
+# New for Unicode 8.0.0
+ 'Ahom', 'Anatolian_Hieroglyphs', 'Hatran', 'Multani', 'Old_Hungarian',
+ 'SignWriting'
  ]
  
 category_names = ['Cc', 'Cf', 'Cn', 'Co', 'Cs', 'Ll', 'Lm', 'Lo', 'Lt', 'Lu',
