@@ -14514,4 +14514,14 @@ Failed: error 124 at offset 10: unrecognized character after (?<
     abcd
  0: 
 
+/((?x)(?#))#(?'/
+Failed: error 124 at offset 14: unrecognized character after (?<
+
+/((?x)(?#))#(?'abc')/I
+Capturing subpattern count = 2
+Named capturing subpatterns:
+  abc   2
+First code unit = '#'
+Subject length lower bound = 1
+
 # End of testinput2 

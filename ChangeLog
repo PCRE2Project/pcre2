@@ -46,6 +46,10 @@ for example, /(?(R))*+/, was incorrectly compiled.
 12. The Unicode tables have been updated to Unicode 8.0.0 (thanks to Christian 
 Persch).
 
+13. An empty comment (?#) in a pattern was incorrectly processed and could
+provoke a buffer overflow. This bug was discovered by Karl Skomski with the
+LLVM fuzzer.
+
 
 Version 10.20 30-June-2015
 --------------------------

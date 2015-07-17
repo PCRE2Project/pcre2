@@ -4342,4 +4342,8 @@ a random value. /Ix
 /(?(R))*+/B
     abcd
 
+/((?x)(?#))#(?'/
+
+/((?x)(?#))#(?'abc')/I
+
 # End of testinput2 

@@ -2997,6 +2997,7 @@ int namelen;
 int i;
 BOOL inescq = FALSE;
 BOOL isdupname;
+BOOL skiptoket = FALSE;
 BOOL utf = (options & PCRE2_UTF) != 0;
 BOOL negate_class;
 PCRE2_SPTR name;
@@ -3009,6 +3010,16 @@ nest_save *end_nests = (nest_save *)(cb->start_workspace + cb->workspace_size);
 for (; ptr < cb->end_pattern; ptr++)
   {
   c = *ptr;
+  
+  /* Parenthesized groups set skiptoket when all following characters up to the 
+  next closing parenthesis must be ignored. The parenthesis itself must be 
+  processed (to end the nested parenthesized item). */ 
+  
+  if (skiptoket)
+    {
+    if (c != CHAR_RIGHT_PARENTHESIS) continue;
+    skiptoket = FALSE;
+    }  
 
   /* Skip over literals */
 
@@ -3177,9 +3188,14 @@ for (; ptr < cb->end_pattern; ptr++)
       {
       default:
       ptr += 2;
-      if (ptr[0] == CHAR_R ||                                 /* (?R) */
-          IS_DIGIT(ptr[0]) ||                                 /* (?n) */
-          (ptr[0] == CHAR_MINUS && IS_DIGIT(ptr[1]))) break;  /* (?-n) */
+      if (ptr[0] == CHAR_R ||                           /* (?R) */
+          ptr[0] == CHAR_NUMBER_SIGN ||                 /* (?#) */ 
+          IS_DIGIT(ptr[0]) ||                           /* (?n) */
+          (ptr[0] == CHAR_MINUS && IS_DIGIT(ptr[1])))   /* (?-n) */
+        {
+        skiptoket = TRUE;
+        break;
+        }      
 
       /* Handle (?| and (?imsxJU: which are the only other valid forms. Both
       need a new block on the nest stack. */
@@ -3302,16 +3318,6 @@ for (; ptr < cb->end_pattern; ptr++)
         if (ptr[0] == delimiter && ptr[1] == delimiter) ptr += 2;
         }
       while (ptr[0] != delimiter);
-      break;
-
-      case CHAR_NUMBER_SIGN:
-      ptr += 3;
-      while (ptr < cb->end_pattern && *ptr != CHAR_RIGHT_PARENTHESIS) ptr++;
-      if (*ptr != CHAR_RIGHT_PARENTHESIS)
-        {
-        errorcode = ERR18;
-        goto FAILED;
-        }
       break;
 
       case CHAR_LEFT_PARENTHESIS:
