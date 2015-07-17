@@ -40,6 +40,9 @@ has been tightened up.
 10. The quantifier {1} can be ignored, whether greedy, non-greedy, or 
 possessive. This is a very minor optimization.
 
+11. A possessively repeated conditional group that could match an empty string,
+for example, /(?(R))*+/, was incorrectly compiled.
+
 
 Version 10.20 30-June-2015
 --------------------------

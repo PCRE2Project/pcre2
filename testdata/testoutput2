@@ -14499,4 +14499,17 @@ Failed: error 124 at offset 10: unrecognized character after (?<
 /(?C$)$)(?<]/
 Failed: error 124 at offset 10: unrecognized character after (?<
 
+/(?(R))*+/B
+------------------------------------------------------------------
+        Bra
+        Braposzero
+        SBraPos
+        SCond
+        Cond recurse any
+        Ket
+        KetRpos
+        Ket
+        End
+------------------------------------------------------------------
+
 # End of testinput2 

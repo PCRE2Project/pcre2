@@ -5269,7 +5269,7 @@ for (;; ptr++)
       conditional, we convert the BRA code to the POS form, and the KET code to
       KETRPOS. (It turns out to be convenient at runtime to detect this kind of
       subpattern at both the start and at the end.) The use of special opcodes
-      makes it possible to reduce greatly the stack usage in pcre_exec(). If
+      makes it possible to reduce greatly the stack usage in pcre2_match(). If
       the group is preceded by OP_BRAZERO, convert this to OP_BRAPOSZERO.
 
       Then, if the minimum number of matches is 1 or 0, cancel the possessive
@@ -5333,7 +5333,7 @@ for (;; ptr++)
               memmove(bracode + 1 + LINK_SIZE, bracode, CU2BYTES(nlen));
               code += 1 + LINK_SIZE;
               nlen += 1 + LINK_SIZE;
-              *bracode = OP_BRAPOS;
+              *bracode = (*bracode == OP_COND)? OP_BRAPOS : OP_SBRAPOS;
               *code++ = OP_KETRPOS;
               PUTINC(code, 0, nlen);
               PUT(bracode, 1, nlen);
