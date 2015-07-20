@@ -53,6 +53,12 @@ LLVM fuzzer.
 14. Fix infinite recursion in the JIT compiler when certain patterns such as
 /(?:|a|){100}x/ are analysed.
 
+15. Some patterns with character classes involving [: and \\ were incorrectly
+compiled and could cause reading from uninitialized memory or an incorrect
+error diagnosis. Examples are: /[[:\\](?<[::]/ and /[[:\\](?'abc')[a:]. The
+first of these bugs was discovered by Karl Skomski with the LLVM fuzzer.
+
+
 
 Version 10.20 30-June-2015
 --------------------------

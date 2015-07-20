@@ -4346,4 +4346,8 @@ a random value. /Ix
 
 /((?x)(?#))#(?'abc')/I
 
+/[[:\\](?<[::]/
+
+/[[:\\](?'abc')[a:]/I
+
 # End of testinput2 

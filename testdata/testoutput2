@@ -14524,4 +14524,14 @@ Named capturing subpatterns:
 First code unit = '#'
 Subject length lower bound = 1
 
+/[[:\\](?<[::]/
+Failed: error 124 at offset 9: unrecognized character after (?<
+
+/[[:\\](?'abc')[a:]/I
+Capturing subpattern count = 1
+Named capturing subpatterns:
+  abc   1
+Starting code units: : [ \ 
+Subject length lower bound = 2
+
 # End of testinput2 

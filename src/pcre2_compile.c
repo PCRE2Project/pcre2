@@ -2574,11 +2574,11 @@ didn't consider this to be a POSIX class. Likewise for [:1234:].
 The problem in trying to be exactly like Perl is in the handling of escapes. We
 have to be sure that [abc[:x\]pqr] is *not* treated as containing a POSIX
 class, but [abc[:x\]pqr:]] is (so that an error can be generated). The code
-below handles the special case of \], but does not try to do any other escape
-processing. This makes it different from Perl for cases such as [:l\ower:]
-where Perl recognizes it as the POSIX class "lower" but PCRE does not recognize
-"l\ower". This is a lesser evil than not diagnosing bad classes when Perl does,
-I think.
+below handles the special cases \\ and \], but does not try to do any other
+escape processing. This makes it different from Perl for cases such as
+[:l\ower:] where Perl recognizes it as the POSIX class "lower" but PCRE does
+not recognize "l\ower". This is a lesser evil than not diagnosing bad classes
+when Perl does, I think.
 
 A user pointed out that PCRE was rejecting [:a[:digit:]] whereas Perl was not.
 It seems that the appearance of a nested POSIX class supersedes an apparent
@@ -2606,7 +2606,9 @@ terminator = *(++ptr);   /* compiler warns about "non-constant" initializer. */
 
 for (++ptr; *ptr != CHAR_NULL; ptr++)
   {
-  if (*ptr == CHAR_BACKSLASH && ptr[1] == CHAR_RIGHT_SQUARE_BRACKET) ptr++;
+  if (*ptr == CHAR_BACKSLASH &&
+      (ptr[1] == CHAR_RIGHT_SQUARE_BRACKET || ptr[1] == CHAR_BACKSLASH))
+    ptr++;
   else if (*ptr == CHAR_RIGHT_SQUARE_BRACKET) return FALSE;
   else
     {
@@ -3010,16 +3012,16 @@ nest_save *end_nests = (nest_save *)(cb->start_workspace + cb->workspace_size);
 for (; ptr < cb->end_pattern; ptr++)
   {
   c = *ptr;
-  
-  /* Parenthesized groups set skiptoket when all following characters up to the 
-  next closing parenthesis must be ignored. The parenthesis itself must be 
-  processed (to end the nested parenthesized item). */ 
-  
+
+  /* Parenthesized groups set skiptoket when all following characters up to the
+  next closing parenthesis must be ignored. The parenthesis itself must be
+  processed (to end the nested parenthesized item). */
+
   if (skiptoket)
     {
     if (c != CHAR_RIGHT_PARENTHESIS) continue;
     skiptoket = FALSE;
-    }  
+    }
 
   /* Skip over literals */
 
@@ -3117,6 +3119,8 @@ for (; ptr < cb->end_pattern; ptr++)
 
     for (;;)
       {
+      PCRE2_SPTR tempptr;
+
       if (c == CHAR_NULL && ptr >= cb->end_pattern)
         {
         errorcode = ERR6;  /* Missing terminating ']' */
@@ -3143,12 +3147,11 @@ for (; ptr < cb->end_pattern; ptr++)
         }
 
       /* Skip POSIX class names. */
-
       if (c == CHAR_LEFT_SQUARE_BRACKET &&
           (ptr[1] == CHAR_COLON || ptr[1] == CHAR_DOT ||
-           ptr[1] == CHAR_EQUALS_SIGN) && check_posix_syntax(ptr, &ptr))
+           ptr[1] == CHAR_EQUALS_SIGN) && check_posix_syntax(ptr, &tempptr))
         {
-        ptr++;
+        ptr = tempptr + 1;
         }
       else if (c == CHAR_BACKSLASH)
         {
@@ -3189,13 +3192,13 @@ for (; ptr < cb->end_pattern; ptr++)
       default:
       ptr += 2;
       if (ptr[0] == CHAR_R ||                           /* (?R) */
-          ptr[0] == CHAR_NUMBER_SIGN ||                 /* (?#) */ 
+          ptr[0] == CHAR_NUMBER_SIGN ||                 /* (?#) */
           IS_DIGIT(ptr[0]) ||                           /* (?n) */
           (ptr[0] == CHAR_MINUS && IS_DIGIT(ptr[1])))   /* (?-n) */
         {
         skiptoket = TRUE;
         break;
-        }      
+        }
 
       /* Handle (?| and (?imsxJU: which are the only other valid forms. Both
       need a new block on the nest stack. */
