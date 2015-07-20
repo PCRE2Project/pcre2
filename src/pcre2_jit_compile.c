@@ -3340,7 +3340,7 @@ bytes[len] = byte;
 bytes[0] = len;
 }
 
-static int scan_prefix(compiler_common *common, PCRE2_SPTR cc, sljit_ui *chars, sljit_ub *bytes, int max_chars)
+static int scan_prefix(compiler_common *common, PCRE2_SPTR cc, sljit_ui *chars, sljit_ub *bytes, int max_chars, uint32_t *rec_count)
 {
 /* Recursive function, which scans prefix literals. */
 BOOL last, any, caseless;
@@ -3358,9 +3358,14 @@ PCRE2_UCHAR othercase[1];
 repeat = 1;
 while (TRUE)
   {
+  if (*rec_count == 0)
+    return 0;
+  rec_count--;
+
   last = TRUE;
   any = FALSE;
   caseless = FALSE;
+
   switch (*cc)
     {
     case OP_CHARI:
@@ -3422,7 +3427,7 @@ while (TRUE)
 #ifdef SUPPORT_UNICODE
     if (common->utf && HAS_EXTRALEN(*cc)) len += GET_EXTRALEN(*cc);
 #endif
-    max_chars = scan_prefix(common, cc + len, chars, bytes, max_chars);
+    max_chars = scan_prefix(common, cc + len, chars, bytes, max_chars, rec_count);
     if (max_chars == 0)
       return consumed;
     last = FALSE;
@@ -3445,7 +3450,7 @@ while (TRUE)
     alternative = cc + GET(cc, 1);
     while (*alternative == OP_ALT)
       {
-      max_chars = scan_prefix(common, alternative + 1 + LINK_SIZE, chars, bytes, max_chars);
+      max_chars = scan_prefix(common, alternative + 1 + LINK_SIZE, chars, bytes, max_chars, rec_count);
       if (max_chars == 0)
         return consumed;
       alternative += GET(alternative, 1);
@@ -3690,6 +3695,7 @@ int i, max, from;
 int range_right = -1, range_len = 3 - 1;
 sljit_ub *update_table = NULL;
 BOOL in_range;
+uint32_t rec_count;
 
 for (i = 0; i < MAX_N_CHARS; i++)
   {
@@ -3698,7 +3704,8 @@ for (i = 0; i < MAX_N_CHARS; i++)
   bytes[i * MAX_N_BYTES] = 0;
   }
 
-max = scan_prefix(common, common->start, chars, bytes, MAX_N_CHARS);
+rec_count = 10000;
+max = scan_prefix(common, common->start, chars, bytes, MAX_N_CHARS, &rec_count);
 
 if (max <= 1)
   return FALSE;

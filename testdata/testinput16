@@ -202,4 +202,6 @@
 
 /(a(?:a|b|c|d|e)b){8,16}/jit=1
 
+/(?:|a|){100}x/jit=1
+
 # End of testinput16
