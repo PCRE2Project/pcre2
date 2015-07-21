@@ -62,6 +62,9 @@ first of these bugs was discovered by Karl Skomski with the LLVM fuzzer.
 pcre2_compile() to run for a very long time. This bug was found by the LLVM 
 fuzzer.
 
+17. A missing closing parenthesis for a callout with a string argument was not
+being diagnosed, possibly leading to a buffer overflow. This bug was found by
+the LLVM fuzzer.
 
 
 Version 10.20 30-June-2015

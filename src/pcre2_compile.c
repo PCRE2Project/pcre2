@@ -3277,46 +3277,51 @@ for (; ptr < cb->end_pattern; ptr++)
       if (IS_DIGIT(ptr[1]))
         {
         while (IS_DIGIT(ptr[1])) ptr++;
-        if (ptr[1] != CHAR_RIGHT_PARENTHESIS)
-          {
-          errorcode = ERR39;
-          ptr++;
-          goto FAILED;
-          }
-        break;
         }
 
       /* Handle a string argument */
 
-      ptr++;
-      delimiter = 0;
-      for (i = 0; PRIV(callout_start_delims)[i] != 0; i++)
-        {
-        if (*ptr == PRIV(callout_start_delims)[i])
+      else
+        { 
+        ptr++;
+        delimiter = 0;
+        for (i = 0; PRIV(callout_start_delims)[i] != 0; i++)
           {
-          delimiter = PRIV(callout_end_delims)[i];
-          break;
+          if (*ptr == PRIV(callout_start_delims)[i])
+            {
+            delimiter = PRIV(callout_end_delims)[i];
+            break;
+            }
           }
-        }
-
-      if (delimiter == 0)
-        {
-        errorcode = ERR82;
-        goto FAILED;
-        }
-
-      start = ptr;
-      do
-        {
-        if (++ptr >= cb->end_pattern)
+        
+        if (delimiter == 0)
           {
-          errorcode = ERR81;
-          ptr = start;   /* To give a more useful message */
+          errorcode = ERR82;
           goto FAILED;
           }
-        if (ptr[0] == delimiter && ptr[1] == delimiter) ptr += 2;
+        
+        start = ptr;
+        do
+          {
+          if (++ptr >= cb->end_pattern)
+            {
+            errorcode = ERR81;
+            ptr = start;   /* To give a more useful message */
+            goto FAILED;
+            }
+          if (ptr[0] == delimiter && ptr[1] == delimiter) ptr += 2;
+          }
+        while (ptr[0] != delimiter);
+        } 
+        
+      /* Check terminating ) */
+
+      if (ptr[1] != CHAR_RIGHT_PARENTHESIS)
+        {
+        errorcode = ERR39;
+        ptr++;
+        goto FAILED;
         }
-      while (ptr[0] != delimiter);
       break;
 
       case CHAR_LEFT_PARENTHESIS:
