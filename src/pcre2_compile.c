@@ -2583,7 +2583,9 @@ when Perl does, I think.
 A user pointed out that PCRE was rejecting [:a[:digit:]] whereas Perl was not.
 It seems that the appearance of a nested POSIX class supersedes an apparent
 external class. For example, [:a[:digit:]b:] matches "a", "b", ":", or
-a digit.
+a digit. This is handled by returning FALSE if the start of a new group with 
+the same terminator is encountered, since the next closing sequence must close 
+the nested group, not the outer one.
 
 In Perl, unescaped square brackets may also appear as part of class names. For
 example, [:a[:abc]b:] gives unknown POSIX class "[:abc]b:]". However, for
@@ -2609,21 +2611,15 @@ for (++ptr; *ptr != CHAR_NULL; ptr++)
   if (*ptr == CHAR_BACKSLASH &&
       (ptr[1] == CHAR_RIGHT_SQUARE_BRACKET || ptr[1] == CHAR_BACKSLASH))
     ptr++;
-  else if (*ptr == CHAR_RIGHT_SQUARE_BRACKET) return FALSE;
-  else
+  else if ((*ptr == CHAR_LEFT_SQUARE_BRACKET && ptr[1] == terminator) ||
+            *ptr == CHAR_RIGHT_SQUARE_BRACKET) return FALSE;
+  else if (*ptr == terminator && ptr[1] == CHAR_RIGHT_SQUARE_BRACKET)
     {
-    if (*ptr == terminator && ptr[1] == CHAR_RIGHT_SQUARE_BRACKET)
-      {
-      *endptr = ptr;
-      return TRUE;
-      }
-    if (*ptr == CHAR_LEFT_SQUARE_BRACKET &&
-         (ptr[1] == CHAR_COLON || ptr[1] == CHAR_DOT ||
-          ptr[1] == CHAR_EQUALS_SIGN) &&
-        check_posix_syntax(ptr, endptr))
-      return FALSE;
+    *endptr = ptr;
+    return TRUE;
     }
   }
+
 return FALSE;
 }
 

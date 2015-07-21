@@ -58,6 +58,10 @@ compiled and could cause reading from uninitialized memory or an incorrect
 error diagnosis. Examples are: /[[:\\](?<[::]/ and /[[:\\](?'abc')[a:]. The
 first of these bugs was discovered by Karl Skomski with the LLVM fuzzer.
 
+16. Pathological patterns containing many nested occurrences of [: caused 
+pcre2_compile() to run for a very long time. This bug was found by the LLVM 
+fuzzer.
+
 
 
 Version 10.20 30-June-2015
