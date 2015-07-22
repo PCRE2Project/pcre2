@@ -69,6 +69,9 @@ the LLVM fuzzer.
 18. A conditional group with only one branch has an implicit empty alternative 
 branch and must therefore be treated as potentially matching an empty string.
 
+19. If (?R was followed by - or + incorrect behaviour happened instead of a
+diagnostic. This bug was discovered by Karl Skomski with the LLVM fuzzer.
+
 
 Version 10.20 30-June-2015
 --------------------------

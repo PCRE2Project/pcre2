@@ -4354,4 +4354,6 @@ a random value. /Ix
 
 /()(?(R)0)*+/B
 
+/(?R-:(?</
+
 # End of testinput2 

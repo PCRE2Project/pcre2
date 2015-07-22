@@ -14553,4 +14553,7 @@ Failed: error 106 at offset 353: missing terminating ] for character class
         End
 ------------------------------------------------------------------
 
+/(?R-:(?</
+Failed: error 129 at offset 3: (?R or (?[+-]digits must be followed by )
+
 # End of testinput2 

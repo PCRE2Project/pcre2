@@ -2583,8 +2583,8 @@ when Perl does, I think.
 A user pointed out that PCRE was rejecting [:a[:digit:]] whereas Perl was not.
 It seems that the appearance of a nested POSIX class supersedes an apparent
 external class. For example, [:a[:digit:]b:] matches "a", "b", ":", or
-a digit. This is handled by returning FALSE if the start of a new group with 
-the same terminator is encountered, since the next closing sequence must close 
+a digit. This is handled by returning FALSE if the start of a new group with
+the same terminator is encountered, since the next closing sequence must close
 the nested group, not the outer one.
 
 In Perl, unescaped square brackets may also appear as part of class names. For
@@ -3282,7 +3282,7 @@ for (; ptr < cb->end_pattern; ptr++)
       /* Handle a string argument */
 
       else
-        { 
+        {
         ptr++;
         delimiter = 0;
         for (i = 0; PRIV(callout_start_delims)[i] != 0; i++)
@@ -3293,13 +3293,13 @@ for (; ptr < cb->end_pattern; ptr++)
             break;
             }
           }
-        
+
         if (delimiter == 0)
           {
           errorcode = ERR82;
           goto FAILED;
           }
-        
+
         start = ptr;
         do
           {
@@ -3312,8 +3312,8 @@ for (; ptr < cb->end_pattern; ptr++)
           if (ptr[0] == delimiter && ptr[1] == delimiter) ptr += 2;
           }
         while (ptr[0] != delimiter);
-        } 
-        
+        }
+
       /* Check terminating ) */
 
       if (ptr[1] != CHAR_RIGHT_PARENTHESIS)
@@ -5324,12 +5324,12 @@ for (;; ptr++)
               scode += GET(scode, 1);
               }
             while (*scode == OP_ALT);
-            
-            /* A conditional group with only one branch has an implicit empty 
+
+            /* A conditional group with only one branch has an implicit empty
             alternative branch. */
 
             if (*bracode == OP_COND && bracode[GET(bracode,1)] != OP_ALT)
-              *bracode = OP_SCOND; 
+              *bracode = OP_SCOND;
             }
 
           /* Handle possessive quantifiers. */
@@ -6394,9 +6394,14 @@ for (;; ptr++)
 
 
         /* ------------------------------------------------------------ */
-        case CHAR_R:              /* Recursion */
-        ptr++;                    /* Same as (?0)      */
-        /* Fall through */
+        case CHAR_R:              /* Recursion, same as (?0) */
+        recno = 0;
+        if (*(++ptr) != CHAR_RIGHT_PARENTHESIS)
+          {
+          *errorcodeptr = ERR29;
+          goto FAILED;
+          }
+        goto HANDLE_RECURSION;
 
 
         /* ------------------------------------------------------------ */
