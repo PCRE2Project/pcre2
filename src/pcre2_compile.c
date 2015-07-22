@@ -3323,10 +3323,39 @@ for (; ptr < cb->end_pattern; ptr++)
         goto FAILED;
         }
       break;
+      
+      /* Conditional group */
 
       case CHAR_LEFT_PARENTHESIS:
-      nest_depth++;
-      /* Fall through */
+      if (ptr[3] != CHAR_QUESTION_MARK)   /* Not assertion or callout */
+        {  
+        nest_depth++;
+        ptr += 2;
+        break; 
+        }
+        
+      /* Must be an assertion or a callout */
+ 
+      switch(ptr[4])
+       {
+       case CHAR_LESS_THAN_SIGN:
+       if (ptr[5] != CHAR_EXCLAMATION_MARK && ptr[5] != CHAR_EQUALS_SIGN) 
+         goto MISSING_ASSERTION;
+       /* Fall through */       
+
+       case CHAR_C:
+       case CHAR_EXCLAMATION_MARK:
+       case CHAR_EQUALS_SIGN:
+       ptr++;
+       break;
+       
+       default:
+       MISSING_ASSERTION: 
+       ptr += 3;            /* To improve error message */         
+       errorcode = ERR28;
+       goto FAILED; 
+       }      
+      break;
 
       case CHAR_COLON:
       case CHAR_GREATER_THAN_SIGN:

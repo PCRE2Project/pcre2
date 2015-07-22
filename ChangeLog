@@ -72,6 +72,11 @@ branch and must therefore be treated as potentially matching an empty string.
 19. If (?R was followed by - or + incorrect behaviour happened instead of a
 diagnostic. This bug was discovered by Karl Skomski with the LLVM fuzzer.
 
+20. Another bug that was introduced by change 36 for 10.20: conditional groups 
+whose condition was an assertion preceded by an explicit callout with a string 
+argument might be incorrectly processed, especially if the string contained \Q.
+This bug was discovered by Karl Skomski with the LLVM fuzzer.
+
 
 Version 10.20 30-June-2015
 --------------------------

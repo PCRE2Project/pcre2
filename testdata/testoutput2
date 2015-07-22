@@ -940,7 +940,7 @@ Failed: error 122 at offset 0: unmatched closing parenthesis
 Failed: error 114 at offset 4: missing closing parenthesis
 
 /(?<%)b/
-Failed: error 124 at offset 3: unrecognized character after (?<
+Failed: error 124 at offset 3: letter or underscore expected after (?< or (?'
 
 /a(?{)b/
 Failed: error 111 at offset 3: unrecognized character after (? or (?-
@@ -14488,16 +14488,16 @@ Failed: error 161 at offset 32: number is too big
 ------------------------------------------------------------------
 
 /[[:>:]](?<)/
-Failed: error 124 at offset 10: unrecognized character after (?<
+Failed: error 124 at offset 10: letter or underscore expected after (?< or (?'
 
 /((?x)(*:0))#(?'/
-Failed: error 124 at offset 15: unrecognized character after (?<
+Failed: error 124 at offset 15: letter or underscore expected after (?< or (?'
 
 /(?C$[$)(?<]/
-Failed: error 124 at offset 10: unrecognized character after (?<
+Failed: error 124 at offset 10: letter or underscore expected after (?< or (?'
 
 /(?C$)$)(?<]/
-Failed: error 124 at offset 10: unrecognized character after (?<
+Failed: error 124 at offset 10: letter or underscore expected after (?< or (?'
 
 /(?(R))*+/B
 ------------------------------------------------------------------
@@ -14515,7 +14515,7 @@ Failed: error 124 at offset 10: unrecognized character after (?<
  0: 
 
 /((?x)(?#))#(?'/
-Failed: error 124 at offset 14: unrecognized character after (?<
+Failed: error 124 at offset 14: letter or underscore expected after (?< or (?'
 
 /((?x)(?#))#(?'abc')/I
 Capturing subpattern count = 2
@@ -14525,7 +14525,7 @@ First code unit = '#'
 Subject length lower bound = 1
 
 /[[:\\](?<[::]/
-Failed: error 124 at offset 9: unrecognized character after (?<
+Failed: error 124 at offset 9: letter or underscore expected after (?< or (?'
 
 /[[:\\](?'abc')[a:]/I
 Capturing subpattern count = 1
@@ -14555,5 +14555,15 @@ Failed: error 106 at offset 353: missing terminating ] for character class
 
 /(?R-:(?</
 Failed: error 129 at offset 3: (?R or (?[+-]digits must be followed by )
+
+/(?(?C{\Q})(?!(?'/
+Failed: error 124 at offset 16: letter or underscore expected after (?< or (?'
+
+/(?(?C{\Q})(?!(?'abc')))/I
+Capturing subpattern count = 1
+Named capturing subpatterns:
+  abc   1
+May match empty string
+Subject length lower bound = 0
 
 # End of testinput2 

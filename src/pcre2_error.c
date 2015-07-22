@@ -92,7 +92,7 @@ static const char compile_error_texts[] =
   "failed to allocate heap memory\0"
   "unmatched closing parenthesis\0"
   "internal error: code overflow\0"
-  "unrecognized character after (?<\0"
+  "letter or underscore expected after (?< or (?'\0"
   /* 25 */
   "lookbehind assertion is not fixed length\0"
   "malformed number or name after (?(\0"

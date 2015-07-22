@@ -4356,4 +4356,8 @@ a random value. /Ix
 
 /(?R-:(?</
 
+/(?(?C{\Q})(?!(?'/
+
+/(?(?C{\Q})(?!(?'abc')))/I
+
 # End of testinput2 
