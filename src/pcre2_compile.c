@@ -5324,6 +5324,12 @@ for (;; ptr++)
               scode += GET(scode, 1);
               }
             while (*scode == OP_ALT);
+            
+            /* A conditional group with only one branch has an implicit empty 
+            alternative branch. */
+
+            if (*bracode == OP_COND && bracode[GET(bracode,1)] != OP_ALT)
+              *bracode = OP_SCOND; 
             }
 
           /* Handle possessive quantifiers. */
