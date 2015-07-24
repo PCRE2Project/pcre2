@@ -270,7 +270,7 @@ in UTF-8 mode. It runs from '0' to 'z'. */
 #ifndef EBCDIC
 #define ESCAPES_FIRST       CHAR_0
 #define ESCAPES_LAST        CHAR_z
-#define ESCAPES_UPPER_CASE  (-32)    /* Add this to upper case a letter */
+#define UPPER_CASE(c)       (c-32)
 
 static const short int escapes[] = {
      0,                       0,
@@ -323,11 +323,11 @@ because it is defined as 'a', which of course picks up the ASCII value. */
 #if 'a' == 0x81                    /* Check for a real EBCDIC environment */
 #define ESCAPES_FIRST       CHAR_a
 #define ESCAPES_LAST        CHAR_9
-#define ESCAPES_UPPER_CASE  (+64)  /* Add this to upper case a letter */
+#define UPPER_CASE(c)       (c+64)
 #else                              /* Testing in an ASCII environment */
 #define ESCAPES_FIRST  ((unsigned char)'\x81')   /* EBCDIC 'a' */
 #define ESCAPES_LAST   ((unsigned char)'\xf9')   /* EBCDIC '9' */
-#define ESCAPES_UPPER_CASE  (-32)  /* Add this to upper case a letter */
+#define UPPER_CASE(c)  (c-32)
 #endif
 
 static const short int escapes[] = {
@@ -1884,7 +1884,7 @@ else
       s = cb->bracount - (s - 1);
       }
 
-    escape = -s;
+    escape = -(int)s;
     break;
 
     /* The handling of escape sequences consisting of a string of digits
@@ -1909,7 +1909,7 @@ else
       {
       oldptr = ptr;
       /* The integer range is limited by the machine's int representation. */
-      s = (int)(c - CHAR_0);
+      s = c - CHAR_0;
       overflow = FALSE;
       while (IS_DIGIT(ptr[1]))
         {
@@ -1933,7 +1933,7 @@ else
 
       if (s < 10 || *oldptr >= CHAR_8 || s <= cb->bracount)
         {
-        escape = -s;     /* Indicates a back reference */
+        escape = -(int)s;     /* Indicates a back reference */
         break;
         }
       ptr = oldptr;      /* Put the pointer back and fall through */
@@ -1981,7 +1981,7 @@ else
 #if PCRE2_CODE_UNIT_WIDTH == 32
         if (c >= 0x20000000l) { overflow = TRUE; break; }
 #endif
-        c = (c << 3) + cc - CHAR_0 ;
+        c = (c << 3) + (cc - CHAR_0);
 #if PCRE2_CODE_UNIT_WIDTH == 8
         if (c > (utf ? 0x10ffffU : 0xffU)) { overflow = TRUE; break; }
 #elif PCRE2_CODE_UNIT_WIDTH == 16
@@ -2105,7 +2105,7 @@ else
 #endif
 
     c = *(++ptr);
-    if (c >= CHAR_a && c <= CHAR_z) c += ESCAPES_UPPER_CASE;
+    if (c >= CHAR_a && c <= CHAR_z) c = UPPER_CASE(c);
     if (c == CHAR_NULL && ptr >= cb->end_pattern)
       {
       *errorcodeptr = ERR2;
@@ -3532,7 +3532,7 @@ for (; ptr < cb->end_pattern; ptr++)
       if (top_nest == (nest_save *)(cb->start_workspace)) top_nest = NULL;
         else top_nest--;
       }
-    nest_depth--;
+    if (nest_depth > 0) nest_depth--;  /* Can be 0 for unmatched ) */
     break;
     }
   }
@@ -3938,14 +3938,16 @@ for (;; ptr++)
     if (PRIV(strncmp_c8)(ptr+1, STRING_WEIRD_STARTWORD, 6) == 0)
       {
       nestptr = ptr + 7;
-      ptr = sub_start_of_word - 1;
+      ptr = sub_start_of_word;  /* Do not combine these statements; clang's */
+      ptr--;                    /* sanitizer moans about a negative index. */ 
       continue;
       }
 
     if (PRIV(strncmp_c8)(ptr+1, STRING_WEIRD_ENDWORD, 6) == 0)
       {
       nestptr = ptr + 7;
-      ptr = sub_end_of_word - 1;
+      ptr = sub_end_of_word;    /* Do not combine these statements; clang's */
+      ptr--;                    /* sanitizer moans about a negative index. */ 
       continue;
       }
 
@@ -5960,7 +5962,7 @@ for (;; ptr++)
             goto FAILED;
             }
           if (refsign != 0) recno = (refsign == CHAR_MINUS)?
-            cb->bracount - recno + 1 : recno + cb->bracount;
+            (cb->bracount + 1) - recno : recno + cb->bracount;
           if (recno <= 0 || (uint32_t)recno > cb->final_bracount)
             {
             *errorcodeptr = ERR15;
@@ -6490,7 +6492,7 @@ for (;; ptr++)
               *errorcodeptr = ERR58;
               goto FAILED;
               }
-            recno = cb->bracount - recno + 1;
+            recno = (int)(cb->bracount + 1) - recno;
             if (recno <= 0)
               {
               *errorcodeptr = ERR15;
@@ -8183,7 +8185,7 @@ while (ptr[skipatstart] == CHAR_LEFT_PARENTHESIS &&
         while (IS_DIGIT(ptr[pp]))
           {
           if (c > UINT32_MAX / 10 - 1) break;   /* Integer overflow */
-          c = c*10 + ptr[pp++] - CHAR_0;
+          c = c*10 + (ptr[pp++] - CHAR_0);
           }
         if (ptr[pp++] != CHAR_RIGHT_PARENTHESIS)
           {

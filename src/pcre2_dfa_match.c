@@ -3172,7 +3172,7 @@ occur. */
 
 #define FF (PCRE2_NOTEMPTY_SET|PCRE2_NE_ATST_SET)
 #define OO (PCRE2_NOTEMPTY|PCRE2_NOTEMPTY_ATSTART)
-options |= (re->flags & FF) / ((FF & -FF) / (OO & -OO));
+options |= (re->flags & FF) / ((FF & (~FF+1)) / (OO & (~OO+1)));
 #undef FF
 #undef OO
 

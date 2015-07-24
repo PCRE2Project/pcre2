@@ -194,7 +194,7 @@ if (caseless)
       GETCHARINC(c, eptr);
       GETCHARINC(d, p);
       ur = GET_UCD(d);
-      if (c != d && c != d + ur->other_case)
+      if (c != d && c != (uint32_t)((int)d + ur->other_case))
         {
         const uint32_t *pp = PRIV(ucd_caseless_sets) + ur->caseset;
         for (;;)
@@ -211,7 +211,7 @@ if (caseless)
     /* Not in UTF mode */
 
     {
-    while (length-- > 0)
+    for (; length > 0; length--)
       {
       uint32_t cc, cp;
       if (eptr >= mb->end_subject) return 1;   /* Partial match */
@@ -226,11 +226,11 @@ if (caseless)
   }
 
 /* In the caseful case, we can just compare the code units, whether or not we
-are in UT mode. */
+are in UTF mode. */
 
 else
   {
-  while (length-- > 0)
+  for (; length > 0; length--)
     {
     if (eptr >= mb->end_subject) return 1;   /* Partial match */
     if (UCHAR21INCTEST(p) != UCHAR21INCTEST(eptr)) return -1;  /*No match */
@@ -3342,7 +3342,10 @@ for (;;)
         CHECK_PARTIAL();             /* Not SCHECK_PARTIAL() */
         RRETURN(MATCH_NOMATCH);
         }
-      while (length-- > 0) if (*ecode++ != UCHAR21INC(eptr)) RRETURN(MATCH_NOMATCH);
+      for (; length > 0; length--)
+        {
+        if (*ecode++ != UCHAR21INC(eptr)) RRETURN(MATCH_NOMATCH);
+        }
       }
     else
 #endif
@@ -6513,7 +6516,7 @@ occur. */
 
 #define FF (PCRE2_NOTEMPTY_SET|PCRE2_NE_ATST_SET)
 #define OO (PCRE2_NOTEMPTY|PCRE2_NOTEMPTY_ATSTART)
-options |= (re->flags & FF) / ((FF & -FF) / (OO & -OO));
+options |= (re->flags & FF) / ((FF & (~FF+1)) / (OO & (~OO+1)));
 #undef FF
 #undef OO
 
@@ -6783,7 +6786,7 @@ for(;;)
       end_subject = t;
       }
 
-    /* Advance to a unique first code unit if there is one. In 8-bit mode, the 
+    /* Advance to a unique first code unit if there is one. In 8-bit mode, the
     use of memchr() gives a big speed up. */
 
     if (has_first_cu)
@@ -6801,8 +6804,8 @@ for(;;)
 #else
         start_match = memchr(start_match, first_cu, end_subject - start_match);
         if (start_match == NULL) start_match = end_subject;
-#endif          
-        }   
+#endif
+        }
       }
 
     /* Or to just after a linebreak for a multiline match */

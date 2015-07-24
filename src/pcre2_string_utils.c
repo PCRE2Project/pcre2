@@ -121,7 +121,7 @@ int
 PRIV(strncmp)(PCRE2_SPTR str1, PCRE2_SPTR str2, size_t len)
 {
 PCRE2_UCHAR c1, c2;
-while (len-- > 0)
+for (; len > 0; len--)
   {
   c1 = *str1++;
   c2 = *str2++;
@@ -150,7 +150,7 @@ int
 PRIV(strncmp_c8)(PCRE2_SPTR str1, const char *str2, size_t len)
 {
 PCRE2_UCHAR c1, c2;
-while (len-- > 0)
+for (; len > 0; len--)
   {
   c1 = *str1++;
   c2 = *str2++;

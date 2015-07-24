@@ -77,6 +77,10 @@ whose condition was an assertion preceded by an explicit callout with a string
 argument might be incorrectly processed, especially if the string contained \Q.
 This bug was discovered by Karl Skomski with the LLVM fuzzer.
 
+21. Compiling PCRE2 with the sanitize options of clang showed up a number of 
+very pedantic coding infelicities and a buffer overflow while checking a UTF-8 
+string if the final multi-byte UTF-8 character was truncated.
+
 
 Version 10.20 30-June-2015
 --------------------------

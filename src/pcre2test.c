@@ -2606,7 +2606,7 @@ if (pbuffer16_size < 2*len + 2)
 pp = pbuffer16;
 if (!utf)
   {
-  while (len-- > 0) *pp++ = *p++;
+  for (; len > 0; len--) *pp++ = *p++;
   }
 else while (len > 0)
   {
@@ -2683,7 +2683,7 @@ if (pbuffer32_size < 4*len + 4)
 pp = pbuffer32;
 if (!utf)
   {
-  while (len-- > 0) *pp++ = *p++;
+  for (; len > 0; len--) *pp++ = *p++;
   }
 else while (len > 0)
   {
@@ -2723,9 +2723,8 @@ Returns:   a possibly changed offset
 static PCRE2_SIZE
 backchars(uint8_t *subject, PCRE2_SIZE offset, uint32_t count, BOOL utf)
 {
-long int yield;
-
-if (!utf || test_mode == PCRE32_MODE) yield = offset - count;
+if (!utf || test_mode == PCRE32_MODE)
+  return (count >= offset)? 0 : (offset - count);
 
 else if (test_mode == PCRE8_MODE)
   {
@@ -2735,7 +2734,7 @@ else if (test_mode == PCRE8_MODE)
     pp--;
     while ((*pp & 0xc0) == 0x80) pp--;
     }
-  yield = pp - (PCRE2_SPTR8)subject;
+  return pp - (PCRE2_SPTR8)subject;
   }
 
 else  /* 16-bit mode */
@@ -2746,10 +2745,8 @@ else  /* 16-bit mode */
     pp--;
     if ((*pp & 0xfc00) == 0xdc00) pp--;
     }
-  yield = pp - (PCRE2_SPTR16)subject;
+  return pp - (PCRE2_SPTR16)subject;
   }
-
-return (yield >= 0)? yield : 0;
 }
 
 
@@ -2936,7 +2933,7 @@ while (top > bot)
   if (c == 0)
     {
     if (len == mlen) return mid;
-    c = len - mlen;
+    c = (int)len - (int)mlen;
     }
   if (c > 0) bot = mid + 1; else top = mid;
   }
@@ -3712,7 +3709,7 @@ if ((pat_patctl.control & CTL_INFO) != 0)
   if (namecount > 0)
     {
     fprintf(outfile, "Named capturing subpatterns:\n");
-    while (namecount-- > 0)
+    for (; namecount > 0; namecount--)
       {
       int imm2_size = test_mode == PCRE8_MODE ? 2 : 1;
       uint32_t length = (uint32_t)STRLEN(nametable + imm2_size);
@@ -5378,7 +5375,7 @@ if (p[-1] != 0 && !decode_modifiers(p, CTX_DAT, NULL, &dat_datctl))
 /* Check for mutually exclusive modifiers. */
 
 c = dat_datctl.control & EXCLUSIVE_DAT_CONTROLS;
-if (c - (c & -c) != 0)
+if (c != 0 && c != (c & (~c+1)))
   {
   show_controls(c, "** Not allowed together:");
   fprintf(outfile, "\n");

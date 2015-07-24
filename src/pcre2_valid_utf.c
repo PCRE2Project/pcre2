@@ -131,11 +131,13 @@ PCRE2_ERROR_UTF8_ERR20  Isolated 0x80 byte (not within UTF-8 character)
 PCRE2_ERROR_UTF8_ERR21  Byte with the illegal value 0xfe or 0xff
 */
 
-for (p = string; length-- > 0; p++)
+for (p = string; length > 0; p++)
   {
   register uint32_t ab, d;
 
   c = *p;
+  length--; 
+
   if (c < 128) continue;                /* ASCII character */
 
   if (c < 0xc0)                         /* Isolated 10xx xxxx byte */
@@ -324,9 +326,10 @@ PCRE2_ERROR_UTF16_ERR2  Invalid low surrogate
 PCRE2_ERROR_UTF16_ERR3  Isolated low surrogate
 */
 
-for (p = string; length-- > 0; p++)
+for (p = string; length > 0; p++)
   {
   c = *p;
+  length--; 
 
   if ((c & 0xf800) != 0xd800)
     {
@@ -368,7 +371,7 @@ PCRE2_ERROR_UTF32_ERR1  Surrogate character
 PCRE2_ERROR_UTF32_ERR2  Character > 0x10ffff
 */
 
-for (p = string; length-- > 0; p++)
+for (p = string; length > 0; length--, p++)
   {
   c = *p;
   if ((c & 0xfffff800u) != 0xd800u)
