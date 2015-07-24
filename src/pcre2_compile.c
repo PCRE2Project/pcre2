@@ -3323,38 +3323,38 @@ for (; ptr < cb->end_pattern; ptr++)
         goto FAILED;
         }
       break;
-      
+
       /* Conditional group */
 
       case CHAR_LEFT_PARENTHESIS:
       if (ptr[3] != CHAR_QUESTION_MARK)   /* Not assertion or callout */
-        {  
+        {
         nest_depth++;
         ptr += 2;
-        break; 
+        break;
         }
-        
+
       /* Must be an assertion or a callout */
- 
+
       switch(ptr[4])
        {
        case CHAR_LESS_THAN_SIGN:
-       if (ptr[5] != CHAR_EXCLAMATION_MARK && ptr[5] != CHAR_EQUALS_SIGN) 
+       if (ptr[5] != CHAR_EXCLAMATION_MARK && ptr[5] != CHAR_EQUALS_SIGN)
          goto MISSING_ASSERTION;
-       /* Fall through */       
+       /* Fall through */
 
        case CHAR_C:
        case CHAR_EXCLAMATION_MARK:
        case CHAR_EQUALS_SIGN:
        ptr++;
        break;
-       
+
        default:
-       MISSING_ASSERTION: 
-       ptr += 3;            /* To improve error message */         
+       MISSING_ASSERTION:
+       ptr += 3;            /* To improve error message */
        errorcode = ERR28;
-       goto FAILED; 
-       }      
+       goto FAILED;
+       }
       break;
 
       case CHAR_COLON:
@@ -3939,7 +3939,7 @@ for (;; ptr++)
       {
       nestptr = ptr + 7;
       ptr = sub_start_of_word;  /* Do not combine these statements; clang's */
-      ptr--;                    /* sanitizer moans about a negative index. */ 
+      ptr--;                    /* sanitizer moans about a negative index. */
       continue;
       }
 
@@ -3947,7 +3947,7 @@ for (;; ptr++)
       {
       nestptr = ptr + 7;
       ptr = sub_end_of_word;    /* Do not combine these statements; clang's */
-      ptr--;                    /* sanitizer moans about a negative index. */ 
+      ptr--;                    /* sanitizer moans about a negative index. */
       continue;
       }
 
@@ -4046,6 +4046,9 @@ for (;; ptr++)
     for(;;)
       {
       PCRE2_SPTR oldptr;
+#ifdef EBCDIC
+      BOOL range_is_literal = TRUE;
+#endif
 
       if (c == CHAR_NULL && ptr >= cb->end_pattern)
         {
@@ -4226,7 +4229,13 @@ for (;; ptr++)
         {
         escape = check_escape(&ptr, &ec, errorcodeptr, options, TRUE, cb);
         if (*errorcodeptr != 0) goto FAILED;
-        if (escape == 0) c = ec;               /* Escaped single char */
+        if (escape == 0)    /* Escaped single char */
+          {
+          c = ec;
+#ifdef EBCDIC
+          range_is_literal = FALSE;
+#endif
+          }
         else if (escape == ESC_b) c = CHAR_BS; /* \b is backspace in a class */
         else if (escape == ESC_N)          /* \N is not supported in a class */
           {
@@ -4430,7 +4439,9 @@ for (;; ptr++)
             int descape;
             descape = check_escape(&ptr, &d, errorcodeptr, options, TRUE, cb);
             if (*errorcodeptr != 0) goto FAILED;
-
+#ifdef EBCDIC
+            range_is_literal = FALSE;
+#endif
             /* 0 means a character was put into d; \b is backspace; any other
             special causes an error. */
 
@@ -4476,9 +4487,48 @@ for (;; ptr++)
 
         if (d == CHAR_CR || d == CHAR_NL) cb->external_flags |= PCRE2_HASCRORLF;
 
+        /* In an EBCDIC environment, Perl treats alphabetic ranges specially
+        because there are holes in the encoding, and simply using the range A-Z
+        (for example) would include the characters in the holes. This applies
+        only to literal ranges; [\xC1-\xE9] is different to [A-Z]. */
+
+#ifdef EBCDIC
+        if (range_is_literal &&
+             (cb->ctypes[c] & ctype_letter) != 0 &&
+             (cb->ctypes[d] & ctype_letter) != 0 &&
+             (c <= CHAR_z) == (d <= CHAR_z))
+          {
+          uint32_t uc = (c <= CHAR_z)? 0 : 64;
+          uint32_t C = c - uc;
+          uint32_t D = d - uc;
+
+          if (C <= CHAR_i)
+            {
+            class_has_8bitchar +=
+              add_to_class(classbits, &class_uchardata, options, cb, C + uc,
+                ((D < CHAR_i)? D : CHAR_i) + uc);
+            C = CHAR_j;
+            }
+
+          if (C <= D && C <= CHAR_r)
+            {
+            class_has_8bitchar +=
+              add_to_class(classbits, &class_uchardata, options, cb, C + uc,
+                ((D < CHAR_r)? D : CHAR_r) + uc);
+            C = CHAR_s;
+            }
+
+          if (C <= D)
+            {
+            class_has_8bitchar +=
+              add_to_class(classbits, &class_uchardata, options, cb, C + uc,
+                D + uc);
+            }
+          }
+        else
+#endif
         class_has_8bitchar +=
           add_to_class(classbits, &class_uchardata, options, cb, c, d);
-
         goto CONTINUE_CLASS;   /* Go get the next char in the class */
         }
 

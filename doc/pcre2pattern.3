@@ -1,4 +1,4 @@
-.TH PCRE2PATTERN 3 "17 July 2015" "PCRE2 10.21"
+.TH PCRE2PATTERN 3 "24 July 2015" "PCRE2 10.21"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION DETAILS"
@@ -1324,9 +1324,18 @@ sequence other than one that defines a single character appears at a point
 where a range ending character is expected. For example, [z-\exff] is valid,
 but [A-\ed] and [A-[:digit:]] are not.
 .P
-Ranges operate in the collating sequence of character values. They can also be
-used for characters specified numerically, for example [\e000-\e037]. Ranges
-can include any characters that are valid for the current mode.
+Ranges normally include all code points between the start and end characters,
+inclusive. They can also be used for code points specified numerically, for
+example [\e000-\e037]. Ranges can include any characters that are valid for the
+current mode.
+.P
+There is a special case in EBCDIC environments for ranges whose end points are 
+both specified as literal letters in the same case. For compatibility with 
+Perl, EBCDIC code points within the range that are not letters are omitted. For 
+example, [h-k] matches only four characters, even though the codes for h and k 
+are 0x88 and 0x92, a range of 11 code points. However, if the range is 
+specified numerically, for example, [\ex88-\ex92] or [h-\x92], all code points
+are included.
 .P
 If a range that includes letters is used when caseless matching is set, it
 matches the letters in either case. For example, [W-c] is equivalent to
@@ -3367,6 +3376,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 17 July 2015
+Last updated: 24 July 2015
 Copyright (c) 1997-2015 University of Cambridge.
 .fi

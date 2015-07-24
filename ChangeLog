@@ -81,6 +81,10 @@ This bug was discovered by Karl Skomski with the LLVM fuzzer.
 very pedantic coding infelicities and a buffer overflow while checking a UTF-8 
 string if the final multi-byte UTF-8 character was truncated.
 
+22. For Perl compatibility in EBCDIC environments, ranges such as a-z in a
+class, where both values are literal letters in the same case, omit the 
+non-letter EBCDIC code points within the range.
+
 
 Version 10.20 30-June-2015
 --------------------------
