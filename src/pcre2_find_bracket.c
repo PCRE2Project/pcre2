@@ -83,7 +83,7 @@ for (;;)
   if (c == OP_XCLASS) code += GET(code, 1);
     else if (c == OP_CALLOUT_STR) code += GET(code, 1 + 2*LINK_SIZE);
 
-  /* Handle recursion */
+  /* Handle lookbehind */
 
   else if (c == OP_REVERSE)
     {

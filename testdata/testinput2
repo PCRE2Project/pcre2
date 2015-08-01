@@ -4360,4 +4360,6 @@ a random value. /Ix
 
 /(?(?C{\Q})(?!(?'abc')))/I
 
+/(?1){3918}(((((0(\k'R'))))(?J)(?'R'(?'R'\3){99})))/I
+
 # End of testinput2 

@@ -59,7 +59,6 @@ collecting data (e.g. minimum matching length). */
 enum { SSB_FAIL, SSB_DONE, SSB_CONTINUE, SSB_UNKNOWN };
 
 
-
 /*************************************************
 *   Find the minimum subject length for a group  *
 *************************************************/
@@ -75,23 +74,34 @@ Arguments:
   startcode       pointer to start of the whole pattern's code
   utf             UTF flag
   recurses        chain of recurse_check to catch mutual recursion
+  countptr        pointer to call count (to catch over complexity) 
 
 Returns:   the minimum length
            -1 \C in UTF-8 mode
               or (*ACCEPT)
+              or pattern too complicated 
            -2 internal error (missing capturing bracket)
            -3 internal error (opcode not listed)
 */
 
 static int
 find_minlength(const pcre2_real_code *re, PCRE2_SPTR code,
-  PCRE2_SPTR startcode, BOOL utf, recurse_check *recurses)
+  PCRE2_SPTR startcode, BOOL utf, recurse_check *recurses, int *countptr)
 {
 int length = -1;
+int prev_recno = -1;
+int prev_d = 0;
+uint32_t once_fudge = 0;
 BOOL had_recurse = FALSE;
 recurse_check this_recurse;
 register int branchlength = 0;
 register PCRE2_UCHAR *cc = (PCRE2_UCHAR *)code + 1 + LINK_SIZE;
+
+/* A large and/or complex regex can take too long to process. */
+
+if ((*countptr)++ > 1000) return -1;
+
+/* Skip over capturing bracket number */
 
 if (*code == OP_CBRA || *code == OP_SCBRA ||
     *code == OP_CBRAPOS || *code == OP_SCBRAPOS) cc += IMM2_SIZE;
@@ -101,10 +111,10 @@ branch, check the length against that of the other branches. */
 
 for (;;)
   {
-  int d, min;
+  int d, min, recno;
   PCRE2_UCHAR *cs, *ce;
   register PCRE2_UCHAR op = *cc;
-
+  
   switch (op)
     {
     case OP_COND:
@@ -112,7 +122,8 @@ for (;;)
 
     /* If there is only one branch in a condition, the implied branch has zero
     length, so we don't add anything. This covers the DEFINE "condition"
-    automatically. */
+    automatically. If there are two branches we can treat it the same as any
+    other non-capturing subpattern. */
 
     cs = cc + GET(cc, 1);
     if (*cs != OP_ALT)
@@ -120,27 +131,55 @@ for (;;)
       cc = cs + 1 + LINK_SIZE;
       break;
       }
+    goto PROCESS_NON_CAPTURE;
 
-    /* Otherwise we can fall through and treat it the same as any other
-    subpattern. */
-
-    case OP_CBRA:
-    case OP_SCBRA:
+    /* There's a special case of OP_ONCE, when it is wrapped round an 
+    OP_RECURSE. We'd like to process the latter at this level so that 
+    remembering the value works for repeated cases. So we do nothing, but
+    set a fudge value to skip over the OP_KET after the recurse. */
+       
+    case OP_ONCE:
+    if (cc[1+LINK_SIZE] == OP_RECURSE && cc[2*(1+LINK_SIZE)] == OP_KET)
+      {
+      once_fudge = 1 + LINK_SIZE;
+      cc += 1 + LINK_SIZE;
+      break;   
+      }   
+    /* Fall through */
+ 
+    case OP_ONCE_NC:
     case OP_BRA:
     case OP_SBRA:
-    case OP_CBRAPOS:
-    case OP_SCBRAPOS:
     case OP_BRAPOS:
     case OP_SBRAPOS:
-    case OP_ONCE:
-    case OP_ONCE_NC:
-    d = find_minlength(re, cc, startcode, utf, recurses);
+    PROCESS_NON_CAPTURE: 
+    d = find_minlength(re, cc, startcode, utf, recurses, countptr);
     if (d < 0) return d;
     branchlength += d;
     do cc += GET(cc, 1); while (*cc == OP_ALT);
     cc += 1 + LINK_SIZE;
     break;
 
+    /* To save time for repeated capturing subpatterns, we remember the
+    length of the previous one. Unfortunately we can't do the same for
+    the unnumbered ones above. */ 
+
+    case OP_CBRA:
+    case OP_SCBRA:
+    case OP_CBRAPOS:
+    case OP_SCBRAPOS:
+    recno = GET2(cc, 1+LINK_SIZE); 
+    if (recno != prev_recno)
+      {
+      prev_recno = recno; 
+      prev_d = find_minlength(re, cc, startcode, utf, recurses, countptr);
+      if (prev_d < 0) return prev_d;
+      }
+    branchlength += prev_d;
+    do cc += GET(cc, 1); while (*cc == OP_ALT);
+    cc += 1 + LINK_SIZE;
+    break;
+     
     /* ACCEPT makes things far too complicated; we have to give up. */
 
     case OP_ACCEPT:
@@ -427,7 +466,7 @@ for (;;)
             int dd;
             this_recurse.prev = recurses;
             this_recurse.group = cs;
-            dd = find_minlength(re, cs, startcode, utf, &this_recurse);
+            dd = find_minlength(re, cs, startcode, utf, &this_recurse, countptr);
             if (dd < d) d = dd;
             }
           }
@@ -463,7 +502,7 @@ for (;;)
           {
           this_recurse.prev = recurses;
           this_recurse.group = cs;
-          d = find_minlength(re, cs, startcode, utf, &this_recurse);
+          d = find_minlength(re, cs, startcode, utf, &this_recurse, countptr);
           }
         }
       }
@@ -509,23 +548,36 @@ for (;;)
 
     case OP_RECURSE:
     cs = ce = (PCRE2_UCHAR *)startcode + GET(cc, 1);
-    do ce += GET(ce, 1); while (*ce == OP_ALT);
-    if (cc > cs && cc < ce)    /* Simple recursion */
-      had_recurse = TRUE;
-    else
+    recno = GET2(cs, 1+LINK_SIZE); 
+    if (recno == prev_recno)
       {
-      recurse_check *r = recurses;
-      for (r = recurses; r != NULL; r = r->prev) if (r->group == cs) break;
-      if (r != NULL)          /* Mutual recursion */
+      branchlength += prev_d;
+      }   
+    else
+      { 
+      do ce += GET(ce, 1); while (*ce == OP_ALT);
+      if (cc > cs && cc < ce)    /* Simple recursion */
         had_recurse = TRUE;
       else
         {
-        this_recurse.prev = recurses;
-        this_recurse.group = cs;
-        branchlength += find_minlength(re, cs, startcode, utf, &this_recurse);
+        recurse_check *r = recurses;
+        for (r = recurses; r != NULL; r = r->prev) if (r->group == cs) break;
+        if (r != NULL)          /* Mutual recursion */
+          had_recurse = TRUE;
+        else
+          {
+          this_recurse.prev = recurses;
+          this_recurse.group = cs;
+          prev_d = find_minlength(re, cs, startcode, utf, &this_recurse,
+            countptr);
+          if (prev_d < 0) return prev_d;   
+          prev_recno = recno; 
+          branchlength += prev_d;   
+          }
         }
-      }
-    cc += 1 + LINK_SIZE;
+      }   
+    cc += 1 + LINK_SIZE + once_fudge;
+    once_fudge = 0; 
     break;
 
     /* Anything else does not or need not match a character. We can get the
@@ -1441,6 +1493,7 @@ int
 PRIV(study)(pcre2_real_code *re)
 {
 int min;
+int count = 0;
 PCRE2_UCHAR *code;
 BOOL utf = (re->overall_options & PCRE2_UTF) != 0;
 
@@ -1463,9 +1516,9 @@ if ((re->overall_options & PCRE2_ANCHORED) == 0 &&
 
 /* Find the minimum length of subject string. */
 
-switch(min = find_minlength(re, code, code, utf, NULL))
+switch(min = find_minlength(re, code, code, utf, NULL, &count))
   {
-  case -1:  /* \C in UTF mode or (*ACCEPT) */
+  case -1:  /* \C in UTF mode or (*ACCEPT) or over-complex regex */
   break;    /* Leave minlength unchanged (will be zero) */
 
   case -2:
@@ -1475,6 +1528,7 @@ switch(min = find_minlength(re, code, code, utf, NULL))
   return 3; /* unrecognized opcode */
 
   default:
+  if (min > UINT16_MAX) min = UINT16_MAX;
   re->minlength = min;
   break;
   }

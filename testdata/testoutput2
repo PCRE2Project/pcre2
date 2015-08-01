@@ -3942,7 +3942,7 @@ No match
 Capturing subpattern count = 2
 Compile options: <none>
 Overall options: anchored
-Subject length lower bound = 2
+Subject length lower bound = 3
     xyz
  0: xyz
  1: xyz
@@ -14565,5 +14565,15 @@ Named capturing subpatterns:
   abc   1
 May match empty string
 Subject length lower bound = 0
+
+/(?1){3918}(((((0(\k'R'))))(?J)(?'R'(?'R'\3){99})))/I
+Capturing subpattern count = 8
+Max back reference = 8
+Named capturing subpatterns:
+  R   7
+  R   8
+Duplicate name status changes
+Last code unit = '0'
+Subject length lower bound = 65535
 
 # End of testinput2 

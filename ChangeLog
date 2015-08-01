@@ -85,6 +85,13 @@ string if the final multi-byte UTF-8 character was truncated.
 class, where both values are literal letters in the same case, omit the 
 non-letter EBCDIC code points within the range.
 
+23. Finding the minimum matching length of complex patterns with back 
+references and/or recursions can take a long time. There is now a cut-off that 
+gives up trying to find a minimum length when things get too complex. 
+
+24. An optimization has been added that speeds up finding the minimum matching 
+length for patterns containing repeated capturing groups or recursions.
+
 
 Version 10.20 30-June-2015
 --------------------------
