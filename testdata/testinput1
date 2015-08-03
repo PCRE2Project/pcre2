@@ -5727,4 +5727,26 @@ name)/mark
 "(?|(\k'Pm')|(?'Pm'))"
     abcd
 
+/(?|(aaa)|(b))\g{1}/
+    aaaaaa
+    bb 
+
+/(?|(aaa)|(b))(?1)/
+    aaaaaa
+    baaa 
+    ** Failers 
+    bb 
+
+/(?|(aaa)|(b))/
+    xaaa
+    xbc 
+
+/(?|(?'a'aaa)|(?'a'b))\k'a'/
+    aaaaaa
+    bb 
+
+/(?|(?'a'aaa)|(?'a'b))(?'a'cccc)\k'a'/dupnames
+    aaaccccaaa
+    bccccb 
+
 # End of testinput1 

@@ -92,6 +92,12 @@ gives up trying to find a minimum length when things get too complex.
 24. An optimization has been added that speeds up finding the minimum matching 
 length for patterns containing repeated capturing groups or recursions.
 
+25. If a pattern contained a back reference to a group whose number was 
+duplicated as a result of appearing in a (?|...) group, the computation of the 
+minimum matching length gave a wrong result, which could cause incorrect "no
+match" errors. For such patterns, a minimum matching length cannot at present 
+be computed.
+
 
 Version 10.20 30-June-2015
 --------------------------

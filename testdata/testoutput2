@@ -14576,4 +14576,39 @@ Duplicate name status changes
 Last code unit = '0'
 Subject length lower bound = 65535
 
+/(?|(aaa)|(b))\g{1}/I
+Capturing subpattern count = 1
+Max back reference = 1
+Starting code units: a b 
+Subject length lower bound = 0
+
+/(?|(aaa)|(b))(?1)/I
+Capturing subpattern count = 1
+Starting code units: a b 
+Subject length lower bound = 4
+
+/(?|(aaa)|(b))/I
+Capturing subpattern count = 1
+Starting code units: a b 
+Subject length lower bound = 1
+
+/(?|(?'a'aaa)|(?'a'b))\k'a'/I
+Capturing subpattern count = 1
+Max back reference = 1
+Named capturing subpatterns:
+  a   1
+Starting code units: a b 
+Subject length lower bound = 0
+
+/(?|(?'a'aaa)|(?'a'b))(?'a'cccc)\k'a'/I,dupnames
+Capturing subpattern count = 2
+Max back reference = 2
+Named capturing subpatterns:
+  a   1
+  a   2
+Options: dupnames
+Starting code units: a b 
+Last code unit = 'c'
+Subject length lower bound = 0
+
 # End of testinput2 

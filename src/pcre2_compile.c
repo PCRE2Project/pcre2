@@ -3215,6 +3215,7 @@ for (; ptr < cb->end_pattern; ptr++)
         top_nest->reset_group = cb->bracount;
         top_nest->max_group = cb->bracount;
         top_nest->flags |= NSF_RESET;
+        cb->external_flags |= PCRE2_DUPCAPUSED; 
         break;
         }
 

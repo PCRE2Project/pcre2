@@ -74,12 +74,13 @@ Arguments:
   startcode       pointer to start of the whole pattern's code
   utf             UTF flag
   recurses        chain of recurse_check to catch mutual recursion
-  countptr        pointer to call count (to catch over complexity) 
+  countptr        pointer to call count (to catch over complexity)
 
 Returns:   the minimum length
            -1 \C in UTF-8 mode
               or (*ACCEPT)
-              or pattern too complicated 
+              or pattern too complicated
+              or back reference to duplicate name/number
            -2 internal error (missing capturing bracket)
            -3 internal error (opcode not listed)
 */
@@ -89,10 +90,13 @@ find_minlength(const pcre2_real_code *re, PCRE2_SPTR code,
   PCRE2_SPTR startcode, BOOL utf, recurse_check *recurses, int *countptr)
 {
 int length = -1;
-int prev_recno = -1;
-int prev_d = 0;
+int prev_cap_recno = -1;
+int prev_cap_d = 0;
+int prev_recurse_recno = -1;
+int prev_recurse_d = 0;
 uint32_t once_fudge = 0;
 BOOL had_recurse = FALSE;
+BOOL dupcapused = (re->flags & PCRE2_DUPCAPUSED) != 0;
 recurse_check this_recurse;
 register int branchlength = 0;
 register PCRE2_UCHAR *cc = (PCRE2_UCHAR *)code + 1 + LINK_SIZE;
@@ -114,7 +118,7 @@ for (;;)
   int d, min, recno;
   PCRE2_UCHAR *cs, *ce;
   register PCRE2_UCHAR op = *cc;
-  
+
   switch (op)
     {
     case OP_COND:
@@ -133,26 +137,26 @@ for (;;)
       }
     goto PROCESS_NON_CAPTURE;
 
-    /* There's a special case of OP_ONCE, when it is wrapped round an 
-    OP_RECURSE. We'd like to process the latter at this level so that 
+    /* There's a special case of OP_ONCE, when it is wrapped round an
+    OP_RECURSE. We'd like to process the latter at this level so that
     remembering the value works for repeated cases. So we do nothing, but
     set a fudge value to skip over the OP_KET after the recurse. */
-       
+
     case OP_ONCE:
     if (cc[1+LINK_SIZE] == OP_RECURSE && cc[2*(1+LINK_SIZE)] == OP_KET)
       {
       once_fudge = 1 + LINK_SIZE;
       cc += 1 + LINK_SIZE;
-      break;   
-      }   
+      break;
+      }
     /* Fall through */
- 
+
     case OP_ONCE_NC:
     case OP_BRA:
     case OP_SBRA:
     case OP_BRAPOS:
     case OP_SBRAPOS:
-    PROCESS_NON_CAPTURE: 
+    PROCESS_NON_CAPTURE:
     d = find_minlength(re, cc, startcode, utf, recurses, countptr);
     if (d < 0) return d;
     branchlength += d;
@@ -162,24 +166,25 @@ for (;;)
 
     /* To save time for repeated capturing subpatterns, we remember the
     length of the previous one. Unfortunately we can't do the same for
-    the unnumbered ones above. */ 
+    the unnumbered ones above. Nor can we do this if (?| is present in the
+    pattern because captures with the same number are not then identical. */
 
     case OP_CBRA:
     case OP_SCBRA:
     case OP_CBRAPOS:
     case OP_SCBRAPOS:
-    recno = GET2(cc, 1+LINK_SIZE); 
-    if (recno != prev_recno)
+    recno = dupcapused? prev_cap_recno - 1 : (int)GET2(cc, 1+LINK_SIZE);
+    if (recno != prev_cap_recno)
       {
-      prev_recno = recno; 
-      prev_d = find_minlength(re, cc, startcode, utf, recurses, countptr);
-      if (prev_d < 0) return prev_d;
+      prev_cap_recno = recno;
+      prev_cap_d = find_minlength(re, cc, startcode, utf, recurses, countptr);
+      if (prev_cap_d < 0) return prev_cap_d;
       }
-    branchlength += prev_d;
+    branchlength += prev_cap_d;
     do cc += GET(cc, 1); while (*cc == OP_ALT);
     cc += 1 + LINK_SIZE;
     break;
-     
+
     /* ACCEPT makes things far too complicated; we have to give up. */
 
     case OP_ACCEPT:
@@ -427,8 +432,12 @@ for (;;)
     matches an empty string (by default it causes a matching failure), so in
     that case we must set the minimum length to zero. */
 
-    case OP_DNREF:     /* Duplicate named pattern back reference */
+    /* Duplicate named pattern back reference. We cannot reliably find a length
+    for this if duplicate numbers are present in the pattern. */
+
+    case OP_DNREF:
     case OP_DNREFI:
+    if (dupcapused) return -1;
     if ((re->overall_options & PCRE2_MATCH_UNSET_BACKREF) == 0)
       {
       int count = GET2(cc, 1+IMM2_SIZE);
@@ -477,8 +486,12 @@ for (;;)
     cc += 1 + 2*IMM2_SIZE;
     goto REPEAT_BACK_REFERENCE;
 
-    case OP_REF:      /* Single back reference */
+    /* Single back reference. We cannot find a length for this if duplicate
+    numbers are present in the pattern. */
+
+    case OP_REF:
     case OP_REFI:
+    if (dupcapused) return -1;
     if ((re->overall_options & PCRE2_MATCH_UNSET_BACKREF) == 0)
       {
       ce = cs = (PCRE2_UCHAR *)PRIV(find_bracket)(startcode, utf, GET2(cc, 1));
@@ -546,15 +559,19 @@ for (;;)
     branchlength += min * d;
     break;
 
+    /* Recursion always refers to the first occurrence of a subpattern with a
+    given number. Therefore, we can always make use of caching, even when the
+    pattern contains multiple subpatterns with the same number. */
+
     case OP_RECURSE:
     cs = ce = (PCRE2_UCHAR *)startcode + GET(cc, 1);
-    recno = GET2(cs, 1+LINK_SIZE); 
-    if (recno == prev_recno)
+    recno = GET2(cs, 1+LINK_SIZE);
+    if (recno == prev_recurse_recno)
       {
-      branchlength += prev_d;
-      }   
+      branchlength += prev_recurse_d;
+      }
     else
-      { 
+      {
       do ce += GET(ce, 1); while (*ce == OP_ALT);
       if (cc > cs && cc < ce)    /* Simple recursion */
         had_recurse = TRUE;
@@ -568,16 +585,16 @@ for (;;)
           {
           this_recurse.prev = recurses;
           this_recurse.group = cs;
-          prev_d = find_minlength(re, cs, startcode, utf, &this_recurse,
+          prev_recurse_d = find_minlength(re, cs, startcode, utf, &this_recurse,
             countptr);
-          if (prev_d < 0) return prev_d;   
-          prev_recno = recno; 
-          branchlength += prev_d;   
+          if (prev_recurse_d < 0) return prev_recurse_d;
+          prev_recurse_recno = recno;
+          branchlength += prev_recurse_d;
           }
         }
-      }   
+      }
     cc += 1 + LINK_SIZE + once_fudge;
-    once_fudge = 0; 
+    once_fudge = 0;
     break;
 
     /* Anything else does not or need not match a character. We can get the

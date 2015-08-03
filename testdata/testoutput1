@@ -9463,4 +9463,50 @@ No match
  0: 
  1: 
 
+/(?|(aaa)|(b))\g{1}/
+    aaaaaa
+ 0: aaaaaa
+ 1: aaa
+    bb 
+ 0: bb
+ 1: b
+
+/(?|(aaa)|(b))(?1)/
+    aaaaaa
+ 0: aaaaaa
+ 1: aaa
+    baaa 
+ 0: baaa
+ 1: b
+    ** Failers 
+No match
+    bb 
+No match
+
+/(?|(aaa)|(b))/
+    xaaa
+ 0: aaa
+ 1: aaa
+    xbc 
+ 0: b
+ 1: b
+
+/(?|(?'a'aaa)|(?'a'b))\k'a'/
+    aaaaaa
+ 0: aaaaaa
+ 1: aaa
+    bb 
+ 0: bb
+ 1: b
+
+/(?|(?'a'aaa)|(?'a'b))(?'a'cccc)\k'a'/dupnames
+    aaaccccaaa
+ 0: aaaccccaaa
+ 1: aaa
+ 2: cccc
+    bccccb 
+ 0: bccccb
+ 1: b
+ 2: cccc
+
 # End of testinput1 

@@ -4362,4 +4362,14 @@ a random value. /Ix
 
 /(?1){3918}(((((0(\k'R'))))(?J)(?'R'(?'R'\3){99})))/I
 
+/(?|(aaa)|(b))\g{1}/I
+
+/(?|(aaa)|(b))(?1)/I
+
+/(?|(aaa)|(b))/I
+
+/(?|(?'a'aaa)|(?'a'b))\k'a'/I
+
+/(?|(?'a'aaa)|(?'a'b))(?'a'cccc)\k'a'/I,dupnames
+
 # End of testinput2 

@@ -524,9 +524,10 @@ bytes in a code unit in that mode. */
 #define PCRE2_NL_SET        0x00008000  /* newline was set in the pattern */
 #define PCRE2_NOTEMPTY_SET  0x00010000  /* (*NOTEMPTY) used        ) keep */
 #define PCRE2_NE_ATST_SET   0x00020000  /* (*NOTEMPTY_ATSTART) used) together */
-#define PCRE2_DEREF_TABLES  0x00040000  /* Release character tables. */
+#define PCRE2_DEREF_TABLES  0x00040000  /* release character tables */
 #define PCRE2_NOJIT         0x00080000  /* (*NOJIT) used */
 #define PCRE2_HASBKPORX     0x00100000  /* contains \P, \p, or \X */
+#define PCRE2_DUPCAPUSED    0x00200000  /* contains (?| */
 
 #define PCRE2_MODE_MASK     (PCRE2_MODE8 | PCRE2_MODE16 | PCRE2_MODE32)
 
