@@ -4372,4 +4372,40 @@ a random value. /Ix
 
 /(?|(?'a'aaa)|(?'a'b))(?'a'cccc)\k'a'/I,dupnames
 
+/ab{3cd/
+    ab{3cd
+
+/ab{3,cd/
+    ab{3,cd
+
+/ab{3,4a}cd/
+    ab{3,4a}cd
+
+/{4,5a}bc/
+    {4,5a}bc
+
+/\x0{ab}/
+    \0{ab} 
+
+/ab\Cde/
+    abXde
+    
+/(?<=ab\Cde)X/
+    abZdeX
+
+/^(a(b))\1\g1\g{1}\g-1\g{-1}\g{-02}Z/
+    ababababbbabZXXXX
+
+/.*?a(*PRUNE)b/
+    aab
+
+/.*?a(*PRUNE)b/s
+    aab
+
+/^a(*PRUNE)b/s
+    aab
+
+/.*?a(*SKIP)b/
+    aab
+
 # End of testinput2 

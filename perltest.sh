@@ -204,7 +204,7 @@ for (;;)
     printf "data> " if $interact;
     last NEXT_RE if ! ($_ = <$infile>);
     chomp;
-    printf $outfile "$_\n" if ! $interact;
+    printf $outfile "%s", "$_\n" if ! $interact;
 
     s/\s+$//;  # Remove trailing space
     s/^\s+//;  # Remove leading space

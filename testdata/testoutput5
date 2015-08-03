@@ -4053,4 +4053,14 @@ Failed: error 122 at offset 1227: unmatched closing parenthesis
 "(*UTF)(*UCP)(.UTF).+X(\V+;\^(\D|)!999}(?(?C{7(?C')\H*\S*/^\x5\xa\\xd3\x85n?(;\D*(?m).[^mH+((*UCP)(*U:F)})(?!^)(?'"
 Failed: error 124 at offset 113: letter or underscore expected after (?< or (?'
 
+/\C\X*TӅ;
+{0,6}\v+F
+/utf
+    Ӆ\x0a
+No match
+
+/\C(\W?ſ)'?{{/utf
+    \\C(\\W?ſ)'?{{
+No match
+
 # End of testinput5 

@@ -1448,18 +1448,6 @@
     ABCabc
     abcABC
 
-/ab{3cd/
-    ab{3cd
-
-/ab{3,cd/
-    ab{3,cd
-
-/ab{3,4a}cd/
-    ab{3,4a}cd
-
-/{4,5a}bc/
-    {4,5a}bc
-
 /abc$/
     abc
     abc\n
@@ -1931,9 +1919,6 @@
     x\nb\n
     a\bx\n  
     
-/\x0{ab}/
-    \0{ab} 
-
 /(A|B)*?CD/
     CD 
     
@@ -4290,12 +4275,6 @@
     ** Failers
     aaaaaa
 
-/ab\Cde/
-    abXde
-    
-/(?<=ab\Cde)X/
-    abZdeX
-
 /\H\h\V\v/
     X X\x0a
     X\x09X\x0b
@@ -4351,7 +4330,7 @@
     ** Failers
     defabcxyz   
 
-/^(a(b))\1\g1\g{1}\g-1\g{-1}\g{-02}Z/
+/^(a(b))\1\g1\g{1}\g-1\g{-1}\g{-2}Z/
     ababababbbabZXXXX
 
 /(?<A>tom|bon)-\g{A}/
@@ -5215,18 +5194,6 @@ name)/mark
 
 /(?:.*?a)(?<=ba)/
     aba
-
-/.*?a(*PRUNE)b/
-    aab
-
-/.*?a(*PRUNE)b/s
-    aab
-
-/^a(*PRUNE)b/s
-    aab
-
-/.*?a(*SKIP)b/
-    aab
 
 /(?>.*?a)b/s
     aab

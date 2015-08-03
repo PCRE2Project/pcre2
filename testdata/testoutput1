@@ -2084,22 +2084,6 @@ No match
  0: abcABC
  1: abc
 
-/ab{3cd/
-    ab{3cd
- 0: ab{3cd
-
-/ab{3,cd/
-    ab{3,cd
- 0: ab{3,cd
-
-/ab{3,4a}cd/
-    ab{3,4a}cd
- 0: ab{3,4a}cd
-
-/{4,5a}bc/
-    {4,5a}bc
- 0: {4,5a}bc
-
 /abc$/
     abc
  0: abc
@@ -2994,10 +2978,6 @@ No match
     a\bx\n  
  0: x
     
-/\x0{ab}/
-    \0{ab} 
- 0: \x00{ab}
-
 /(A|B)*?CD/
     CD 
  0: CD
@@ -7017,14 +6997,6 @@ No match
     aaaaaa
 No match
 
-/ab\Cde/
-    abXde
- 0: abXde
-    
-/(?<=ab\Cde)X/
-    abZdeX
- 0: X
-
 /\H\h\V\v/
     X X\x0a
  0: X X\x0a
@@ -7125,7 +7097,7 @@ No match
     defabcxyz   
 No match
 
-/^(a(b))\1\g1\g{1}\g-1\g{-1}\g{-02}Z/
+/^(a(b))\1\g1\g{1}\g-1\g{-1}\g{-2}Z/
     ababababbbabZXXXX
  0: ababababbbabZ
  1: ab
@@ -8674,22 +8646,6 @@ No match
 /(?:.*?a)(?<=ba)/
     aba
  0: aba
-
-/.*?a(*PRUNE)b/
-    aab
- 0: ab
-
-/.*?a(*PRUNE)b/s
-    aab
- 0: ab
-
-/^a(*PRUNE)b/s
-    aab
-No match
-
-/.*?a(*SKIP)b/
-    aab
- 0: ab
 
 /(?>.*?a)b/s
     aab
