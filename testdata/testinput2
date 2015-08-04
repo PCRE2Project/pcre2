@@ -4408,4 +4408,8 @@ a random value. /Ix
 /.*?a(*SKIP)b/
     aab
 
+/(?(8000000000/
+
+/((?(R8000000000)))/
+
 # End of testinput2 

@@ -98,6 +98,10 @@ minimum matching length gave a wrong result, which could cause incorrect "no
 match" errors. For such patterns, a minimum matching length cannot at present 
 be computed.
 
+26. Added a check for integer overflow in conditions (?(<digits>) and 
+(?(R<digits>). This omission was discovered by Karl Skomski with the LLVM
+fuzzer.
+
 
 Version 10.20 30-June-2015
 --------------------------
