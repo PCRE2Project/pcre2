@@ -1691,9 +1691,13 @@ while (ptr < endptr)
 
     if (filenames == FN_NOMATCH_ONLY) return 1;
 
+    /* If all we want is a yes/no answer, we can return immediately. */
+
+    if (quiet) return 0;
+
     /* Just count if just counting is wanted. */
 
-    if (count_only) count++;
+    else if (count_only) count++;
 
     /* When handling a binary file and binary-files==binary, the "binary"
     variable will be set true (it's false in all other cases). In this
@@ -1705,18 +1709,14 @@ while (ptr < endptr)
       return 0;
       }
 
-    /* If all we want is a file name, there is no need to scan any more lines
-    in the file. */
+    /* Likewise, if all we want is a file name, there is no need to scan any
+    more lines in the file. */
 
     else if (filenames == FN_MATCH_ONLY)
       {
       fprintf(stdout, "%s\n", printname);
       return 0;
       }
-
-    /* Likewise, if all we want is a yes/no answer. */
-
-    else if (quiet) return 0;
 
     /* The --only-matching option prints just the substring that matched,
     and/or one or more captured portions of it, as long as these strings are
@@ -2069,7 +2069,7 @@ if (filenames == FN_NOMATCH_ONLY)
 
 /* Print the match count if wanted */
 
-if (count_only)
+if (count_only && !quiet)
   {
   if (count > 0 || !omit_zero_count)
     {

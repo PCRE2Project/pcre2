@@ -105,6 +105,9 @@ fuzzer.
 27. Fixed an issue when \p{Any} inside an xclass did not read the current
 character.
 
+28. If pcre2grep was given the -q option with -c or -l, or when handling a 
+binary file, it incorrectly wrote output to stdout.
+
 
 Version 10.20 30-June-2015
 --------------------------

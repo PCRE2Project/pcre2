@@ -530,6 +530,14 @@ echo "aaaaa" >>testtemp1grep
 (cd $srcdir; $valgrind $pcre2grep  --line-offsets '(?<=\Ka)' $builddir/testtemp1grep) >>testtrygrep 2>&1
 echo "RC=$?" >>testtrygrep
 
+echo "---------------------------- Test 108 ------------------------------" >>testtrygrep
+(cd $srcdir; $valgrind $pcre2grep -lq PATTERN ./testdata/grepinput ./testdata/grepinputx) >>testtrygrep
+echo "RC=$?" >>testtrygrep
+
+echo "---------------------------- Test 109 -----------------------------" >>testtrygrep
+(cd $srcdir; $valgrind $pcre2grep -cq lazy ./testdata/grepinput*) >>testtrygrep
+echo "RC=$?" >>testtrygrep
+
 # Now compare the results.
 
 $cf $srcdir/testdata/grepoutput testtrygrep
