@@ -4970,9 +4970,8 @@ while (*cc != XCL_END)
       /* Any either accepts everything or ignored. */
       if (cc[-1] == XCL_PROP)
         {
-        if (list != backtracks)
-          compile_char1_matchingpath(common, OP_ALLANY, cc, backtracks, FALSE);
-        else
+        compile_char1_matchingpath(common, OP_ALLANY, cc, backtracks, FALSE);
+        if (list == backtracks)
           add_jump(compiler, backtracks, JUMP(SLJIT_JUMP));
         return;
         }

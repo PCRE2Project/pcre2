@@ -3741,4 +3741,8 @@ No match
 
 "[\S\V\H]"utf
 
+/[^\p{Any}]*+x/utf
+    x
+ 0: x
+
 # End of testinput4

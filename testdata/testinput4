@@ -2221,4 +2221,7 @@
 
 "[\S\V\H]"utf
 
+/[^\p{Any}]*+x/utf
+    x
+
 # End of testinput4

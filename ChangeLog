@@ -102,6 +102,9 @@ be computed.
 (?(R<digits>). This omission was discovered by Karl Skomski with the LLVM
 fuzzer.
 
+27. Fixed an issue when \p{Any} inside an xclass did not read the current
+character.
+
 
 Version 10.20 30-June-2015
 --------------------------
