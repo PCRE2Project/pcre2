@@ -14667,4 +14667,8 @@ Failed: error 161 at offset 13: number is too big
 /((?(R8000000000)))/
 Failed: error 161 at offset 16: number is too big
 
+/0(?0)|(1)(*THEN)(*SKIP:0)(*FAIL)/
+    01
+No match
+
 # End of testinput2 

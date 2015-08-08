@@ -4412,4 +4412,7 @@ a random value. /Ix
 
 /((?(R8000000000)))/
 
+/0(?0)|(1)(*THEN)(*SKIP:0)(*FAIL)/
+    01
+
 # End of testinput2 

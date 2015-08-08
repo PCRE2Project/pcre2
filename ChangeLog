@@ -108,6 +108,9 @@ character.
 28. If pcre2grep was given the -q option with -c or -l, or when handling a 
 binary file, it incorrectly wrote output to stdout.
 
+29. The JIT compiler did not restore the control verb head in case of *THEN
+control verbs. This issue was found by Karl Skomski with a custom LLVM fuzzer.
+
 
 Version 10.20 30-June-2015
 --------------------------
