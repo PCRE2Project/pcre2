@@ -1841,9 +1841,8 @@ else
         break;
         }
 
-      /* \1 to \9 are always back references. \8x and \9x are too, unless there
-      are an awful lot of previous captures; \1x to \7x are octal escapes if
-      there are not that many previous captures. */
+      /* \1 to \9 are always back references. \8x and \9x are too; \1x to \7x
+      are octal escapes if there are not that many previous captures. */
 
       if (s < 10 || *oldptr >= CHAR_8 || s <= cb->bracount)
         {
@@ -6764,7 +6763,7 @@ for (;; ptr++)
         if (*p != (PCRE2_UCHAR)terminator)
           {
           *errorcodeptr = ERR57;
-          break;
+          goto FAILED;
           }
         ptr++;
         goto HANDLE_NUMERICAL_RECURSION;
@@ -6779,7 +6778,7 @@ for (;; ptr++)
           ptr[1] != CHAR_APOSTROPHE && ptr[1] != CHAR_LEFT_CURLY_BRACKET))
           {
           *errorcodeptr = ERR69;
-          break;
+          goto FAILED;
           }
         is_recurse = FALSE;
         terminator = (*(++ptr) == CHAR_LESS_THAN_SIGN)?
@@ -6801,6 +6800,11 @@ for (;; ptr++)
         single group (i.e. not to a duplicated name). */
 
         HANDLE_REFERENCE:
+        if (recno > (int)cb->final_bracount)
+          {
+          *errorcodeptr = ERR15;
+          goto FAILED;
+          }
         if (firstcuflags == REQ_UNSET) firstcuflags = REQ_NONE;
         previous = code;
         *code++ = ((options & PCRE2_CASELESS) != 0)? OP_REFI : OP_REF;

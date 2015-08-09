@@ -119,6 +119,13 @@ recursions is postponed till match time. In the past, some easy ones were
 detected at compile time. This re-writing was done in response to yet another 
 bug found by the LLVM fuzzer.
 
+31. A test for a back reference to a non-existent group was missing for items
+such as \987. This caused incorrect code to be compiled. This issue was found 
+by Karl Skomski with a custom LLVM fuzzer.
+
+32. Error messages for syntax errors following \g and \k were giving inaccurate 
+offsets in the pattern.
+
 
 Version 10.20 30-June-2015
 --------------------------

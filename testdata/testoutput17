@@ -71,7 +71,7 @@ No match: POSIX code 17: match failed
  0: abc
 
 /(abc)\2/
-Failed: POSIX code 15: bad back reference at offset 7     
+Failed: POSIX code 15: bad back reference at offset 6     
 
 /(abc\1)/
     abc

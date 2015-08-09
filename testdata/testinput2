@@ -4397,4 +4397,6 @@ a random value. /Ix
 /0(?0)|(1)(*THEN)(*SKIP:0)(*FAIL)/
     01
 
+/(?(1)()\983040\2)/
+
 # End of testinput2 
