@@ -1634,9 +1634,7 @@
     123ábc123
 
 /(?<=abc)(|def)/g,utf,replace=<$0>
-      123abcáyzabcdef789abcሴqr
-
-/[^\xff]((?1))/utf,debug
+    123abcáyzabcdef789abcሴqr
 
 /[A-`]/iB,utf
     abcdefghijklmno

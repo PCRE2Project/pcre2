@@ -101,21 +101,9 @@ pre-compile phase when determining how much memory is required. The regex is
 partly compiled into this space, but the compiled parts are discarded as soon
 as they can be, so that hopefully there will never be an overrun. The code
 does, however, check for an overrun. The largest amount I've seen used is 218,
-so this number is very generous.
-
-The same workspace is used during the second, actual compile phase for
-remembering forward references to groups so that they can be filled in at the
-end. Each entry in this list occupies LINK_SIZE bytes, so even when LINK_SIZE
-is 4 there is plenty of room for most patterns. However, the memory can get
-filled up by repetitions of forward references, for example patterns like
-/(?1){0,1999}(b)/, and one user did hit the limit. The code has been changed so
-that the workspace is expanded in this situation. The value below is therefore
-a minimum, and we put a maximum on it for safety. The minimum is now also
-defined in terms of LINK_SIZE so that the size increase kicks in at the same
-number of forward references in all cases. */
+so this number is very generous. */
 
 #define COMPILE_WORK_SIZE (2048*LINK_SIZE)
-#define COMPILE_WORK_SIZE_MAX (100*COMPILE_WORK_SIZE)
 
 /* The overrun tests check for a slightly smaller size so that they detect the
 overrun before it actually does run off the end of the data block. */
@@ -1215,18 +1203,23 @@ for (;;)
 *************************************************/
 
 /* This function scans through a branch of a compiled pattern to see whether it
-can match the empty string. It is called from could_be_empty() below and from
-compile_branch() when checking for an unlimited repeat of a group that can
-match nothing. Note that first_significant_code() skips over backward and
-negative forward assertions when its final argument is TRUE. If we hit an
-unclosed bracket, we return "empty" - this means we've struck an inner bracket
-whose current branch will already have been scanned.
+can match the empty string. It is called at the end of compiling to check the
+entire pattern, and from compile_branch() when checking for an unlimited repeat
+of a group that can match nothing. In the latter case it is called only when
+doing the real compile, not during the pre-compile that measures the size of
+the compiled pattern.
+
+Note that first_significant_code() skips over backward and negative forward
+assertions when its final argument is TRUE. If we hit an unclosed bracket, we
+return "empty" - this means we've struck an inner bracket whose current branch
+will already have been scanned.
 
 Arguments:
   code        points to start of search
   endcode     points to where to stop
   utf         TRUE if in UTF mode
   cb          compile data
+  atend       TRUE if being called to check an entire pattern
   recurses    chain of recurse_check to catch mutual recursion
 
 Returns:      TRUE if what is matched could be empty
@@ -1234,7 +1227,7 @@ Returns:      TRUE if what is matched could be empty
 
 static BOOL
 could_be_empty_branch(PCRE2_SPTR code, PCRE2_SPTR endcode, BOOL utf,
-  compile_block *cb, recurse_check *recurses)
+  compile_block *cb, BOOL atend, recurse_check *recurses)
 {
 register PCRE2_UCHAR c;
 recurse_check this_recurse;
@@ -1257,35 +1250,27 @@ for (code = first_significant_code(code + PRIV(OP_lengths)[*code], TRUE);
     continue;
     }
 
-  /* For a recursion/subroutine call, if its end has been reached, which
-  implies a backward reference subroutine call, we can scan it. If it's a
-  forward reference subroutine call, we can't. To detect forward reference
-  we have to scan up the list that is kept in the workspace. This function is
-  called only when doing the real compile, not during the pre-compile that
-  measures the size of the compiled pattern. */
+  /* For a recursion/subroutine call we can scan the recursion when this
+  function is called at the end, to check a complete pattern. Before then,
+  recursions just have the group number as their argument and in any case may
+  be forward references. In that situation, we return TRUE, just in case. It
+  means that unlimited repeats of groups that contain recursions are always
+  treated as "could be empty" - which just adds a bit more processing time
+  because of the runtime check. */
 
   if (c == OP_RECURSE)
     {
-    PCRE2_SPTR scode = cb->start_code + GET(code, 1);
-    PCRE2_SPTR endgroup = scode;
+    PCRE2_SPTR scode, endgroup;
     BOOL empty_branch;
 
-    /* Test for forward reference or uncompleted reference. This is disabled
-    when called to scan a completed pattern by setting cb->start_workspace to
-    NULL. */
+    if (!atend) return TRUE;
+    scode = cb->start_code + GET(code, 1);
+    endgroup = scode;
 
-    if (cb->start_workspace != NULL)
-      {
-      PCRE2_SPTR tcode;
-      for (tcode = cb->start_workspace; tcode < cb->hwm; tcode += LINK_SIZE)
-        if ((int)GET(tcode, 0) == (int)(code + 1 - cb->start_code)) return TRUE;
-      if (GET(scode, 1) == 0) return TRUE;    /* Unclosed */
-      }
-
-    /* If the reference is to a completed group, we need to detect whether this
-    is a recursive call, as otherwise there will be an infinite loop. If it is
-    a recursion, just skip over it. Simple recursions are easily detected. For
-    mutual recursions we keep a chain on the stack. */
+    /* We need to detect whether this is a recursive call, as otherwise there
+    will be an infinite loop. If it is a recursion, just skip over it. Simple
+    recursions are easily detected. For mutual recursions we keep a chain on
+    the stack. */
 
     do endgroup += GET(endgroup, 1); while (*endgroup == OP_ALT);
     if (code >= scode && code <= endgroup) continue;  /* Simple recursion */
@@ -1297,8 +1282,8 @@ for (code = first_significant_code(code + PRIV(OP_lengths)[*code], TRUE);
       if (r != NULL) continue;   /* Mutual recursion */
       }
 
-    /* Completed reference; scan the referenced group, remembering it on the
-    stack chain to detect mutual recursions. */
+    /* Scan the referenced group, remembering it on the stack chain to detect
+    mutual recursions. */
 
     empty_branch = FALSE;
     this_recurse.prev = recurses;
@@ -1306,7 +1291,7 @@ for (code = first_significant_code(code + PRIV(OP_lengths)[*code], TRUE);
 
     do
       {
-      if (could_be_empty_branch(scode, endcode, utf, cb, &this_recurse))
+      if (could_be_empty_branch(scode, endcode, utf, cb, atend, &this_recurse))
         {
         empty_branch = TRUE;
         break;
@@ -1363,7 +1348,7 @@ for (code = first_significant_code(code + PRIV(OP_lengths)[*code], TRUE);
       do
         {
         if (!empty_branch && could_be_empty_branch(code, endcode, utf, cb,
-          recurses)) empty_branch = TRUE;
+          atend, recurses)) empty_branch = TRUE;
         code += GET(code, 1);
         }
       while (*code == OP_ALT);
@@ -1580,77 +1565,6 @@ for (code = first_significant_code(code + PRIV(OP_lengths)[*code], TRUE);
   }
 
 return TRUE;
-}
-
-
-
-/*************************************************
-*    Scan compiled regex for non-emptiness       *
-*************************************************/
-
-/* This function is called to check for left recursive calls. We want to check
-the current branch of the current pattern to see if it could match the empty
-string. If it could, we must look outwards for branches at other levels,
-stopping when we pass beyond the bracket which is the subject of the recursion.
-This function is called only during the real compile, not during the
-pre-compile.
-
-Arguments:
-  code        points to start of the recursion
-  endcode     points to where to stop (current RECURSE item)
-  bcptr       points to the chain of current (unclosed) branch starts
-  utf         TRUE if in UTF mode
-  cb          compile data
-
-Returns:      TRUE if what is matched could be empty
-*/
-
-static BOOL
-could_be_empty(PCRE2_SPTR code, PCRE2_SPTR endcode, branch_chain *bcptr,
-  BOOL utf, compile_block *cb)
-{
-while (bcptr != NULL && bcptr->current_branch >= code)
-  {
-  if (!could_be_empty_branch(bcptr->current_branch, endcode, utf, cb, NULL))
-    return FALSE;
-  bcptr = bcptr->outer;
-  }
-return TRUE;
-}
-
-
-
-/*************************************************
-*           Expand the workspace                 *
-*************************************************/
-
-/* This function is called during the second compiling phase, if the number of
-forward references fills the existing workspace, which is originally a block on
-the stack. A larger block is obtained from the heap unless the ultimate limit
-has been reached or the increase will be rather small.
-
-Argument: pointer to the compile data block
-Returns:  0 if all went well, else an error number
-*/
-
-static int
-expand_workspace(compile_block *cb)
-{
-PCRE2_UCHAR *newspace;
-int newsize = cb->workspace_size * 2;
-if (newsize > COMPILE_WORK_SIZE_MAX) newsize = COMPILE_WORK_SIZE_MAX;
-if (cb->workspace_size >= COMPILE_WORK_SIZE_MAX ||
-    newsize - cb->workspace_size < WORK_SIZE_SAFETY_MARGIN)
- return ERR72;
-newspace = cb->cx->memctl.malloc(CU2BYTES(newsize), cb->cx->memctl.memory_data);
-if (newspace == NULL) return ERR21;
-memcpy(newspace, cb->start_workspace, cb->workspace_size * sizeof(PCRE2_UCHAR));
-cb->hwm = (PCRE2_UCHAR *)newspace + (cb->hwm - cb->start_workspace);
-if (cb->workspace_size > COMPILE_WORK_SIZE)
-  cb->cx->memctl.free((void *)cb->start_workspace, cb->cx->memctl.memory_data);
-cb->start_workspace = newspace;
-cb->workspace_size = newsize;
-return 0;
 }
 
 
@@ -2481,82 +2395,6 @@ for (;;)
 
 
 /*************************************************
-*    Adjust OP_RECURSE items in repeated group   *
-*************************************************/
-
-/* OP_RECURSE items contain an offset from the start of the regex to the group
-that is referenced. This means that groups can be replicated for fixed
-repetition simply by copying (because the recursion is allowed to refer to
-earlier groups that are outside the current group). However, when a group is
-optional (i.e. the minimum quantifier is zero), OP_BRAZERO or OP_SKIPZERO is
-inserted before it, after it has been compiled. This means that any OP_RECURSE
-items within it that refer to the group itself or any contained groups have to
-have their offsets adjusted. That is one of the jobs of this function. Before
-it is called, the partially compiled regex must be temporarily terminated with
-OP_END.
-
-This function has been extended to cope with forward references for recursions
-and subroutine calls. It must check the list of such references for the
-group we are dealing with. If it finds that one of the recursions in the
-current group is on this list, it does not adjust the value in the reference
-(which is a group number). After the group has been scanned, all the offsets in
-the forward reference list for the group are adjusted.
-
-Arguments:
-  group             points to the start of the group
-  adjust            the amount by which the group is to be moved
-  utf               TRUE in UTF mode
-  cb                compile data
-  save_hwm_offset   the hwm forward reference offset at the start of the group
-
-Returns:     nothing
-*/
-
-static void
-adjust_recurse(PCRE2_UCHAR *group, int adjust, BOOL utf, compile_block *cb,
-  size_t save_hwm_offset)
-{
-uint32_t offset;
-PCRE2_UCHAR *hc;
-PCRE2_UCHAR *ptr = group;
-
-/* Scan the group for recursions. For each one found, check the forward
-reference list. */
-
-while ((ptr = (PCRE2_UCHAR *)find_recurse(ptr, utf)) != NULL)
-  {
-  for (hc = (PCRE2_UCHAR *)cb->start_workspace + save_hwm_offset; hc < cb->hwm;
-       hc += LINK_SIZE)
-    {
-    offset = (int)GET(hc, 0);
-    if (cb->start_code + offset == ptr + 1) break;
-    }
-
-  /* If we have not found this recursion on the forward reference list, adjust
-  the recursion's offset if it's after the start of this group. */
-
-  if (hc >= cb->hwm)
-    {
-    offset = (int)GET(ptr, 1);
-    if (cb->start_code + offset >= group) PUT(ptr, 1, offset + adjust);
-    }
-
-  ptr += 1 + LINK_SIZE;
-  }
-
-/* Now adjust all forward reference offsets for the group. */
-
-for (hc = (PCRE2_UCHAR *)cb->start_workspace + save_hwm_offset; hc < cb->hwm;
-     hc += LINK_SIZE)
-  {
-  offset = (int)GET(hc, 0);
-  PUT(hc, 0, offset + adjust);
-  }
-}
-
-
-
-/*************************************************
 *           Check for POSIX class syntax         *
 *************************************************/
 
@@ -3215,7 +3053,7 @@ for (; ptr < cb->end_pattern; ptr++)
         top_nest->reset_group = cb->bracount;
         top_nest->max_group = cb->bracount;
         top_nest->flags |= NSF_RESET;
-        cb->external_flags |= PCRE2_DUPCAPUSED; 
+        cb->external_flags |= PCRE2_DUPCAPUSED;
         break;
         }
 
@@ -3598,7 +3436,6 @@ int32_t req_caseopt, reqvary, tempreqvary;
 int after_manual_callout = 0;
 int escape;
 size_t length_prevgroup = 0;
-size_t item_hwm_offset = 0;
 register uint32_t c;
 register PCRE2_UCHAR *code = *codeptr;
 PCRE2_UCHAR *last_code = code;
@@ -3755,16 +3592,6 @@ for (;; ptr++)
     last_code = code;
     }
 
-  /* In the real compile phase, just check the workspace used by the forward
-  reference list. */
-
-  else if (cb->hwm > cb->start_workspace + cb->workspace_size -
-           WORK_SIZE_SAFETY_MARGIN)
-    {
-    *errorcodeptr = ERR52;
-    goto FAILED;
-    }
-
   /* If in \Q...\E, check for the end; if not, we have a literal */
 
   if (inescq && (c != CHAR_NULL || ptr < cb->end_pattern))
@@ -3906,7 +3733,6 @@ for (;; ptr++)
     zeroreqcu = reqcu;
     zeroreqcuflags = reqcuflags;
     previous = code;
-    item_hwm_offset = cb->hwm - cb->start_workspace;
     *code++ = ((options & PCRE2_DOTALL) != 0)? OP_ALLANY: OP_ANY;
     break;
 
@@ -3955,7 +3781,6 @@ for (;; ptr++)
     /* Handle a real character class. */
 
     previous = code;
-    item_hwm_offset = cb->hwm - cb->start_workspace;
 
     /* PCRE supports POSIX class stuff inside a class. Perl gives an error if
     they are encountered at the top level, so we'll do that too. */
@@ -4830,16 +4655,6 @@ for (;; ptr++)
       PUT(previous, 3 + 2*LINK_SIZE, 2 + 2*LINK_SIZE);
       code += 2 + 2 * LINK_SIZE;
       length_prevgroup = 3 + 3*LINK_SIZE;
-
-      /* When actually compiling, we need to check whether this was a forward
-      reference, and if so, adjust the offset. */
-
-      if (lengthptr == NULL && cb->hwm >= cb->start_workspace + LINK_SIZE)
-        {
-        int offset = GET(cb->hwm, -LINK_SIZE);
-        if (offset == previous + 1 - cb->start_code)
-          PUT(cb->hwm, -LINK_SIZE, offset + 1 + LINK_SIZE);
-        }
       }
 
     /* Now handle repetition for the different types of item. */
@@ -5082,7 +4897,6 @@ for (;; ptr++)
       {
       register int i;
       int len = (int)(code - previous);
-      size_t base_hwm_offset = item_hwm_offset;
       PCRE2_UCHAR *bralink = NULL;
       PCRE2_UCHAR *brazeroptr = NULL;
 
@@ -5130,16 +4944,10 @@ for (;; ptr++)
         selectively.
 
         If the maximum is 1 or unlimited, we just have to stick in the BRAZERO
-        and do no more at this point. However, we do need to adjust any
-        OP_RECURSE calls inside the group that refer to the group itself or any
-        internal or forward referenced group, because the offset is from the
-        start of the whole regex. Temporarily terminate the pattern while doing
-        this. */
+        and do no more at this point. */
 
         if (repeat_max <= 1)    /* Covers 0, 1, and unlimited */
           {
-          *code = OP_END;
-          adjust_recurse(previous, 1, utf, cb, item_hwm_offset);
           memmove(previous + 1, previous, CU2BYTES(len));
           code++;
           if (repeat_max == 0)
@@ -5156,14 +4964,11 @@ for (;; ptr++)
         The first one has to be handled carefully because it's the original
         copy, which has to be moved up. The remainder can be handled by code
         that is common with the non-zero minimum case below. We have to
-        adjust the value or repeat_max, since one less copy is required. Once
-        again, we may have to adjust any OP_RECURSE calls inside the group. */
+        adjust the value or repeat_max, since one less copy is required. */
 
         else
           {
           int offset;
-          *code = OP_END;
-          adjust_recurse(previous, 2 + LINK_SIZE, utf, cb, item_hwm_offset);
           memmove(previous + 2 + LINK_SIZE, previous, CU2BYTES(len));
           code += 2 + LINK_SIZE;
           *previous++ = OP_BRAZERO + repeat_type;
@@ -5211,9 +5016,7 @@ for (;; ptr++)
             }
 
           /* This is compiling for real. If there is a set first byte for
-          the group, and we have not yet set a "required byte", set it. Make
-          sure there is enough workspace for copying forward references before
-          doing the copy. */
+          the group, and we have not yet set a "required byte", set it. */
 
           else
             {
@@ -5222,29 +5025,9 @@ for (;; ptr++)
               reqcu = firstcu;
               reqcuflags = firstcuflags;
               }
-
             for (i = 1; i < repeat_min; i++)
               {
-              PCRE2_UCHAR *hc;
-              size_t this_hwm_offset = cb->hwm - cb->start_workspace;
               memcpy(code, previous, CU2BYTES(len));
-
-              while (cb->hwm > cb->start_workspace + cb->workspace_size -
-                     WORK_SIZE_SAFETY_MARGIN -
-                     (this_hwm_offset - base_hwm_offset))
-                {
-                *errorcodeptr = expand_workspace(cb);
-                if (*errorcodeptr != 0) goto FAILED;
-                }
-
-              for (hc = (PCRE2_UCHAR *)cb->start_workspace + base_hwm_offset;
-                   hc < (PCRE2_UCHAR *)cb->start_workspace + this_hwm_offset;
-                   hc += LINK_SIZE)
-                {
-                PUT(cb->hwm, 0, GET(hc, 0) + len);
-                cb->hwm += LINK_SIZE;
-                }
-              base_hwm_offset = this_hwm_offset;
               code += len;
               }
             }
@@ -5288,9 +5071,6 @@ for (;; ptr++)
 
         else for (i = repeat_max - 1; i >= 0; i--)
           {
-          PCRE2_UCHAR *hc;
-          size_t this_hwm_offset = cb->hwm - cb->start_workspace;
-
           *code++ = OP_BRAZERO + repeat_type;
 
           /* All but the final copy start a new nesting, maintaining the
@@ -5306,26 +5086,6 @@ for (;; ptr++)
             }
 
           memcpy(code, previous, CU2BYTES(len));
-
-          /* Ensure there is enough workspace for forward references before
-          copying them. */
-
-          while (cb->hwm > cb->start_workspace + cb->workspace_size -
-                 WORK_SIZE_SAFETY_MARGIN -
-                 (this_hwm_offset - base_hwm_offset))
-            {
-            *errorcodeptr = expand_workspace(cb);
-            if (*errorcodeptr != 0) goto FAILED;
-            }
-
-          for (hc = (PCRE2_UCHAR *)cb->start_workspace + base_hwm_offset;
-               hc < (PCRE2_UCHAR *)cb->start_workspace + this_hwm_offset;
-               hc += LINK_SIZE)
-            {
-            PUT(cb->hwm, 0, GET(hc, 0) + len + ((i != 0)? 2+LINK_SIZE : 1));
-            cb->hwm += LINK_SIZE;
-            }
-          base_hwm_offset = this_hwm_offset;
           code += len;
           }
 
@@ -5391,14 +5151,15 @@ for (;; ptr++)
 
         else
           {
-          /* In the compile phase, check for empty string matching. */
+          /* In the compile phase, check whether the group could match an empty
+          string. */
 
           if (lengthptr == NULL)
             {
             PCRE2_UCHAR *scode = bracode;
             do
               {
-              if (could_be_empty_branch(scode, ketcode, utf, cb, NULL))
+              if (could_be_empty_branch(scode, ketcode, utf, cb, FALSE, NULL))
                 {
                 *bracode += OP_SBRA - OP_BRA;
                 break;
@@ -5420,14 +5181,11 @@ for (;; ptr++)
             {
             /* For COND brackets, we wrap the whole thing in a possessively
             repeated non-capturing bracket, because we have not invented POS
-            versions of the COND opcodes. Because we are moving code along, we
-            must ensure that any pending recursive references are updated. */
+            versions of the COND opcodes. */
 
             if (*bracode == OP_COND || *bracode == OP_SCOND)
               {
               int nlen = (int)(code - bracode);
-              *code = OP_END;
-              adjust_recurse(bracode, 1 + LINK_SIZE, utf, cb, item_hwm_offset);
               memmove(bracode + 1 + LINK_SIZE, bracode, CU2BYTES(nlen));
               code += 1 + LINK_SIZE;
               nlen += 1 + LINK_SIZE;
@@ -5556,13 +5314,10 @@ for (;; ptr++)
           *tempcode = opcode_possessify[repcode];
 
         /* For opcode without a special possessified version, wrap the item in
-        ONCE brackets. Because we are moving code along, we must ensure that
-        any pending recursive references are updated. */
+        ONCE brackets. */
 
         else
           {
-          *code = OP_END;
-          adjust_recurse(tempcode, 1 + LINK_SIZE, utf, cb, item_hwm_offset);
           memmove(tempcode + 1 + LINK_SIZE, tempcode, CU2BYTES(len));
           code += 1 + LINK_SIZE;
           len += 1 + LINK_SIZE;
@@ -5958,8 +5713,8 @@ for (;; ptr++)
               {
               while (IS_DIGIT(*ptr)) ptr++;
               *errorcodeptr = ERR61;
-              goto FAILED;   
-              }   
+              goto FAILED;
+              }
             recno = recno * 10 + (int)(*ptr - CHAR_0);
             ptr++;
             }
@@ -6101,8 +5856,8 @@ for (;; ptr++)
             if (recno > INT_MAX / 10 - 1)   /* Integer overflow */
               {
               *errorcodeptr = ERR61;
-              goto FAILED;   
-              }     
+              goto FAILED;
+              }
             recno = recno * 10 + name[i] - CHAR_0;
             }
           if (recno == 0) recno = RREF_ANY;
@@ -6479,7 +6234,6 @@ for (;; ptr++)
 
         if (firstcuflags == REQ_UNSET) firstcuflags = REQ_NONE;
         previous = code;
-        item_hwm_offset = cb->hwm - cb->start_workspace;
         *code++ = ((options & PCRE2_CASELESS) != 0)? OP_DNREFI : OP_DNREF;
         PUT2INC(code, 0, index);
         PUT2INC(code, 0, count);
@@ -6502,7 +6256,6 @@ for (;; ptr++)
         case CHAR_0: case CHAR_1: case CHAR_2: case CHAR_3: case CHAR_4:
         case CHAR_5: case CHAR_6: case CHAR_7: case CHAR_8: case CHAR_9:
           {
-          PCRE2_SPTR called;
           terminator = CHAR_RIGHT_PARENTHESIS;
 
           /* Come here from the \g<...> and \g'...' code (Oniguruma
@@ -6570,77 +6323,30 @@ for (;; ptr++)
               }
             recno += cb->bracount;
             }
+            
+          if ((uint32_t)recno > cb->final_bracount)
+            {
+            *errorcodeptr = ERR15;
+            goto FAILED;
+            }      
 
-          /* Come here from code above that handles a named recursion */
+          /* Come here from code above that handles a named recursion.
+          We insert the number of the called group after OP_RECURSE. At the
+          end of compiling the pattern is scanned and these numbers are
+          replaced by offsets within the pattern. It is done like this to avoid
+          problems with forward references and adjusting offsets when groups
+          are duplicated and moved (as discovered in previous implementations).
+          Note that a recursion does not have a set first character (relevant
+          if it is repeated, because it will then be wrapped with ONCE
+          brackets). */
 
           HANDLE_RECURSION:
           previous = code;
-          item_hwm_offset = cb->hwm - cb->start_workspace;
-          called = cb->start_code;
-
-          /* When we are actually compiling, find the bracket that is being
-          referenced. Temporarily end the regex in case it doesn't exist before
-          this point. If we end up with a forward reference, first check that
-          the bracket does occur later so we can give the error (and position)
-          now. Then remember this forward reference in the workspace so it can
-          be filled in at the end. */
-
-          if (lengthptr == NULL)
-            {
-            *code = OP_END;
-            if (recno != 0)
-              called = PRIV(find_bracket)(cb->start_code, utf, recno);
-
-            /* Forward reference */
-
-            if (called == NULL)
-              {
-              if ((uint32_t)recno > cb->final_bracount)
-                {
-                *errorcodeptr = ERR15;
-                goto FAILED;
-                }
-
-              /* Fudge the value of "called" so that when it is inserted as an
-              offset below, what it actually inserted is the reference number
-              of the group. Then remember the forward reference, expanding the
-              working space where the list is kept if necessary. */
-
-              called = cb->start_code + recno;
-              if (cb->hwm >= cb->start_workspace + cb->workspace_size -
-                  WORK_SIZE_SAFETY_MARGIN)
-                {
-                *errorcodeptr = expand_workspace(cb);
-                if (*errorcodeptr != 0) goto FAILED;
-                }
-              PUTINC(cb->hwm, 0, (int)(code + 1 - cb->start_code));
-              }
-
-            /* If not a forward reference, and the subpattern is still open,
-            this is a recursive call. We check to see if this is a left
-            recursion that could loop for ever, and diagnose that case. We
-            must not, however, do this check if we are in a conditional
-            subpattern because the condition might be testing for recursion in
-            a pattern such as /(?(R)a+|(?R)b)/, which is perfectly valid.
-            Forever loops are also detected at runtime, so those that occur in
-            conditional subpatterns will be picked up then. */
-
-            else if (GET(called, 1) == 0 && cond_depth <= 0 &&
-                     could_be_empty(called, code, bcptr, utf, cb))
-              {
-              *errorcodeptr = ERR40;
-              goto FAILED;
-              }
-            }
-
-          /* Insert the recursion/subroutine item. It does not have a set first
-          character (relevant if it is repeated, because it will then be
-          wrapped with ONCE brackets). */
-
           *code = OP_RECURSE;
-          PUT(code, 1, (int)(called - cb->start_code));
+          PUT(code, 1, recno);
           code += 1 + LINK_SIZE;
           groupsetfirstcu = FALSE;
+          cb->had_recurse = TRUE;
           }
 
         /* Can't determine a first byte now */
@@ -6780,7 +6486,6 @@ for (;; ptr++)
     else
       {
       previous = code;
-      item_hwm_offset = cb->hwm - cb->start_workspace;
       }
 
     *code = bravalue;
@@ -7098,7 +6803,6 @@ for (;; ptr++)
         HANDLE_REFERENCE:
         if (firstcuflags == REQ_UNSET) firstcuflags = REQ_NONE;
         previous = code;
-        item_hwm_offset = cb->hwm - cb->start_workspace;
         *code++ = ((options & PCRE2_CASELESS) != 0)? OP_REFI : OP_REF;
         PUT2INC(code, 0, recno);
         cb->backref_map |= (recno < 32)? (1u << recno) : 1;
@@ -7128,7 +6832,6 @@ for (;; ptr++)
         if (!get_ucp(&ptr, &negated, &ptype, &pdata, errorcodeptr, cb))
           goto FAILED;
         previous = code;
-        item_hwm_offset = cb->hwm - cb->start_workspace;
         *code++ = ((escape == ESC_p) != negated)? OP_PROP : OP_NOTPROP;
         *code++ = ptype;
         *code++ = pdata;
@@ -7177,7 +6880,6 @@ for (;; ptr++)
 
           {
           previous = (escape > ESC_b && escape < ESC_Z)? code : NULL;
-          item_hwm_offset = cb->hwm - cb->start_workspace;
           *code++ = (!utf && escape == ESC_C)? OP_ALLANY : escape;
           }
         }
@@ -7212,7 +6914,6 @@ for (;; ptr++)
 
     ONE_CHAR:
     previous = code;
-    item_hwm_offset = cb->hwm - cb->start_workspace;
 
     /* For caseless UTF mode, check whether this character has more than one
     other case. If so, generate a special OP_PROP item instead of OP_CHARI. */
@@ -7354,7 +7055,6 @@ int32_t firstcuflags, reqcuflags;
 uint32_t branchfirstcu, branchreqcu;
 int32_t branchfirstcuflags, branchreqcuflags;
 size_t length;
-size_t save_hwm_offset;
 unsigned int orig_bracount;
 unsigned int max_bracount;
 branch_chain bc;
@@ -7375,8 +7075,6 @@ bc.current_branch = code;
 
 firstcu = reqcu = 0;
 firstcuflags = reqcuflags = REQ_UNSET;
-
-save_hwm_offset = cb->hwm - cb->start_workspace;  /* hwm at start of group */
 
 /* Accumulate the length for use in the pre-compile phase. Start with the
 length of the BRA and KET and any extra code units that are required at the
@@ -7573,18 +7271,13 @@ for (;;)
     code += 1 + LINK_SIZE;
 
     /* If it was a capturing subpattern, check to see if it contained any
-    recursive back references. If so, we must wrap it in atomic brackets.
-    Because we are moving code along, we must ensure that any pending recursive
-    or forward subroutine references are updated. In any event, remove the
-    block from the chain. */
+    recursive back references. If so, we must wrap it in atomic brackets. In
+    any event, remove the block from the chain. */
 
     if (capnumber > 0)
       {
       if (cb->open_caps->flag)
         {
-        *code = OP_END;
-        adjust_recurse(start_bracket, 1 + LINK_SIZE,
-          (options & PCRE2_UTF) != 0, cb, save_hwm_offset);
         memmove(start_bracket + 1 + LINK_SIZE, start_bracket,
           CU2BYTES(code - start_bracket));
         *start_bracket = OP_ONCE;
@@ -8176,7 +7869,7 @@ cb.dupnames = FALSE;
 cb.end_pattern = pattern + patlen;
 cb.external_flags = 0;
 cb.external_options = options;
-cb.hwm = cworkspace;
+cb.had_recurse = FALSE;
 cb.iscondassert = FALSE;
 cb.max_lookbehind = 0;
 cb.name_entry_size = 0;
@@ -8445,8 +8138,7 @@ codestart = (PCRE2_SPTR)((uint8_t *)re + sizeof(pcre2_real_code)) +
 the name/number translation table and of the code are passed around in the
 compile data block. The start/end pattern and initial options are already set
 from the pre-compile phase, as is the name_entry_size field. Reset the bracket
-count and the names_found field. Also reset the hwm field; this time it's used
-for remembering forward references to subpatterns. */
+count and the names_found field. */
 
 cb.parens_depth = 0;
 cb.assert_depth = 0;
@@ -8454,7 +8146,6 @@ cb.bracount = 0;
 cb.max_lookbehind = 0;
 cb.name_table = (PCRE2_UCHAR *)((uint8_t *)re + sizeof(pcre2_real_code));
 cb.start_code = codestart;
-cb.hwm = (PCRE2_UCHAR *)(cb.start_workspace);
 cb.iscondassert = FALSE;
 cb.req_varyopt = 0;
 cb.had_accept = FALSE;
@@ -8512,6 +8203,65 @@ if (usedlength > length) errorcode = ERR23; else
 #endif
   }
 
+/* Scan the pattern for recursion/subroutine calls and convert the group
+numbers into offsets. Maintain a small cache so that repeated groups containing
+recursions are efficiently handled. */
+
+#define RSCAN_CACHE_SIZE 8
+
+if (errorcode == 0 && cb.had_recurse)
+  {
+  PCRE2_UCHAR *rcode;
+  PCRE2_SPTR rgroup;
+  int ccount = 0;
+  int start = RSCAN_CACHE_SIZE;
+  recurse_cache rc[RSCAN_CACHE_SIZE];
+
+  for (rcode = (PCRE2_UCHAR *)find_recurse(codestart, utf);
+       rcode != NULL;
+       rcode = (PCRE2_UCHAR *)find_recurse(rcode + 1 + LINK_SIZE, utf))
+    {
+    int i, p, recno;
+
+    recno = (int)GET(rcode, 1);
+    if (recno == 0) rgroup = codestart; else
+      {
+      PCRE2_SPTR search_from = codestart; 
+      rgroup = NULL;
+      for (i = 0, p = start; i < ccount; i++, p = (p + 1) & 7)
+        {
+        if (recno == rc[p].recno)
+          {
+          rgroup = rc[p].group;
+          break;
+          }
+          
+        /* Group n+1 must always start to the right of group n, so we can save 
+        search time below when the new group number is greater than any of the 
+        previously found groups. */
+          
+        if (recno > rc[p].recno) search_from = rc[p].group;
+        }
+
+      if (rgroup == NULL)
+        {
+        rgroup = PRIV(find_bracket)(search_from, utf, recno);
+        if (rgroup == NULL)
+          {
+          errorcode = ERR53;
+          break;
+          }
+        if (--start < 0) start = RSCAN_CACHE_SIZE - 1;
+        rc[start].recno = recno;
+        rc[start].group = rgroup;
+        if (ccount < RSCAN_CACHE_SIZE) ccount++;
+        }
+      }
+
+    PUT(rcode, 1, rgroup - codestart);
+    }
+  }
+
 /* In rare debugging situations we sometimes need to look at the compiled code
 at this stage. */
 
@@ -8519,37 +8269,6 @@ at this stage. */
 pcre2_printint(re, stderr, TRUE);
 fprintf(stderr, "Length=%lu Used=%lu\n", length, usedlength);
 #endif
-
-/* Fill in any forward references that are required. There may be repeated
-references; optimize for them, as searching a large regex takes time. The
-test of errorcode inside the loop means that nothing is done if it is already
-non-zero. */
-
-if (cb.hwm > cb.start_workspace)
-  {
-  int prev_recno = -1;
-  PCRE2_SPTR groupptr = NULL;
-  while (errorcode == 0 && cb.hwm > cb.start_workspace)
-    {
-    int offset, recno;
-    cb.hwm -= LINK_SIZE;
-    offset = GET(cb.hwm, 0);
-    recno = GET(codestart, offset);
-    if (recno != prev_recno)
-      {
-      groupptr = PRIV(find_bracket)(codestart, utf, recno);
-      prev_recno = recno;
-      }
-    if (groupptr == NULL) errorcode = ERR53;
-      else PUT(((PCRE2_UCHAR *)codestart), offset, (int)(groupptr - codestart));
-    }
-  }
-
-/* If the workspace had to be expanded, free the new memory. */
-
-if (cb.workspace_size > COMPILE_WORK_SIZE)
-  ccontext->memctl.free((void *)cb.start_workspace,
-    ccontext->memctl.memory_data);
 
 /* After a successful compile, give an error if there's back reference to a
 non-existent capturing subpattern. Then, unless disabled, check whether any
@@ -8716,7 +8435,7 @@ can be provided to applications. */
 
 do
   {
-  if (could_be_empty_branch(codestart, code, utf, &cb, NULL))
+  if (could_be_empty_branch(codestart, code, utf, &cb, TRUE, NULL))
     {
     re->flags |= PCRE2_MATCH_EMPTY;
     break;

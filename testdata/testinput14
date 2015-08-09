@@ -108,5 +108,48 @@
 
 /abc(?=abcde)(?=ab)/allusedtext
     abcabcdefg
+    
+# These tests provoke recursion loops, which give a different error message
+# when JIT is used.
+
+/(?R)/I
+    abcd
+
+/(a|(?R))/I
+    abcd
+    defg 
+
+/(ab|(bc|(de|(?R))))/I
+    abcd
+    fghi 
+
+/(ab|(bc|(de|(?1))))/I
+    abcd
+    fghi 
+
+/x(ab|(bc|(de|(?1)x)x)x)/I
+    xab123
+    xfghi 
+
+/(?!\w)(?R)/
+    abcd
+    =abc 
+
+/(?=\w)(?R)/
+    =abc 
+    abcd
+
+/(?<!\w)(?R)/
+    abcd
+
+/(?<=\w)(?R)/
+    abcd
+
+/(a+|(?R)b)/
+    aaa
+    bbb 
+
+/[^\xff]((?1))/BI
+    abcd
 
 # End of testinput14

@@ -383,4 +383,102 @@ JIT compilation was successful
 
 /(?:|a|){100}x/jit=1
 
+# These tests provoke recursion loops, which give a different error message
+# when JIT is used.
+
+/(?R)/I
+Capturing subpattern count = 0
+May match empty string
+Subject length lower bound = 0
+JIT compilation was successful
+    abcd
+Failed: error -46: JIT stack limit reached
+
+/(a|(?R))/I
+Capturing subpattern count = 1
+May match empty string
+Subject length lower bound = 1
+JIT compilation was successful
+    abcd
+ 0: a (JIT)
+ 1: a
+    defg 
+Failed: error -46: JIT stack limit reached
+
+/(ab|(bc|(de|(?R))))/I
+Capturing subpattern count = 3
+May match empty string
+Subject length lower bound = 2
+JIT compilation was successful
+    abcd
+ 0: ab (JIT)
+ 1: ab
+    fghi 
+Failed: error -46: JIT stack limit reached
+
+/(ab|(bc|(de|(?1))))/I
+Capturing subpattern count = 3
+May match empty string
+Subject length lower bound = 2
+JIT compilation was successful
+    abcd
+ 0: ab (JIT)
+ 1: ab
+    fghi 
+Failed: error -46: JIT stack limit reached
+
+/x(ab|(bc|(de|(?1)x)x)x)/I
+Capturing subpattern count = 3
+First code unit = 'x'
+Subject length lower bound = 3
+JIT compilation was successful
+    xab123
+ 0: xab (JIT)
+ 1: ab
+    xfghi 
+Failed: error -46: JIT stack limit reached
+
+/(?!\w)(?R)/
+    abcd
+Failed: error -46: JIT stack limit reached
+    =abc 
+Failed: error -46: JIT stack limit reached
+
+/(?=\w)(?R)/
+    =abc 
+Failed: error -46: JIT stack limit reached
+    abcd
+Failed: error -46: JIT stack limit reached
+
+/(?<!\w)(?R)/
+    abcd
+Failed: error -46: JIT stack limit reached
+
+/(?<=\w)(?R)/
+    abcd
+Failed: error -46: JIT stack limit reached
+
+/(a+|(?R)b)/
+    aaa
+ 0: aaa (JIT)
+ 1: aaa
+    bbb 
+Failed: error -46: JIT stack limit reached
+
+/[^\xff]((?1))/BI
+------------------------------------------------------------------
+        Bra
+        [^\x{ff}]
+        CBra 1
+        Recurse
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+Capturing subpattern count = 1
+Subject length lower bound = 1
+JIT compilation was successful
+    abcd
+Failed: error -46: JIT stack limit reached
+
 # End of testinput16

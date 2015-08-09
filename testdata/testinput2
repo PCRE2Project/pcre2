@@ -1094,12 +1094,6 @@
 
 /(?C)a|b/I
 
-/(?R)/I
-
-/(a|(?R))/I
-
-/(ab|(bc|(de|(?R))))/I
-
 /x(ab|(bc|(de|(?R))))/I
     xab
     xbc
@@ -1108,10 +1102,6 @@
     xxxab
     *** Failers
     xyab
-
-/(ab|(bc|(de|(?1))))/I
-
-/x(ab|(bc|(de|(?1)x)x)x)/I
 
 /^([^()]|\((?1)*\))*$/I
     abc
@@ -2347,14 +2337,6 @@ a random value. /Ix
 
 /(?P>)/
 
-/(?!\w)(?R)/
-
-/(?=\w)(?R)/
-
-/(?<!\w)(?R)/
-
-/(?<=\w)(?R)/
-
 /[[:foo:]]/
 
 /[[:1234:]]/
@@ -2930,6 +2912,8 @@ a random value. /Ix
     ab\=startchar 
 
 /(?P<L1>(?P<L2>0|)|(?P>L2)(?P>L1))/
+    abcd
+    0abc 
 
 /abc(*MARK:)pqr/
 
@@ -3305,8 +3289,6 @@ a random value. /Ix
 /(?<=(abc))?xyz/B
 
 /[:a[:abc]b:]/B
-
-/(a+|(?R)b)/
 
 /^(a(*:A)(d|e(*:B))z|aeq)/auto_callout
     adz

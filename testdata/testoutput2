@@ -3802,15 +3802,6 @@ Capturing subpattern count = 0
 Starting code units: a b 
 Subject length lower bound = 1
 
-/(?R)/I
-Failed: error 140 at offset 3: recursion could loop indefinitely
-
-/(a|(?R))/I
-Failed: error 140 at offset 6: recursion could loop indefinitely
-
-/(ab|(bc|(de|(?R))))/I
-Failed: error 140 at offset 15: recursion could loop indefinitely
-
 /x(ab|(bc|(de|(?R))))/I
 Capturing subpattern count = 3
 First code unit = 'x'
@@ -3841,12 +3832,6 @@ Subject length lower bound = 3
 No match
     xyab
 No match
-
-/(ab|(bc|(de|(?1))))/I
-Failed: error 140 at offset 15: recursion could loop indefinitely
-
-/x(ab|(bc|(de|(?1)x)x)x)/I
-Failed: error 140 at offset 16: recursion could loop indefinitely
 
 /^([^()]|\((?1)*\))*$/I
 Capturing subpattern count = 1
@@ -8654,18 +8639,6 @@ Failed: error 162 at offset 4: subpattern name expected
 /(?P>)/
 Failed: error 162 at offset 4: subpattern name expected
 
-/(?!\w)(?R)/
-Failed: error 140 at offset 9: recursion could loop indefinitely
-
-/(?=\w)(?R)/
-Failed: error 140 at offset 9: recursion could loop indefinitely
-
-/(?<!\w)(?R)/
-Failed: error 140 at offset 10: recursion could loop indefinitely
-
-/(?<=\w)(?R)/
-Failed: error 140 at offset 10: recursion could loop indefinitely
-
 /[[:foo:]]/
 Failed: error 130 at offset 3: unknown POSIX class name
 
@@ -10131,7 +10104,14 @@ No match
  1: ab
 
 /(?P<L1>(?P<L2>0|)|(?P>L2)(?P>L1))/
-Failed: error 140 at offset 31: recursion could loop indefinitely
+    abcd
+ 0: 
+ 1: 
+ 2: 
+    0abc 
+ 0: 0
+ 1: 0
+ 2: 0
 
 /abc(*MARK:)pqr/
 Failed: error 166 at offset 10: (*MARK) must have an argument
@@ -11103,9 +11083,6 @@ Matched, but too many substrings
         Ket
         End
 ------------------------------------------------------------------
-
-/(a+|(?R)b)/
-Failed: error 140 at offset 7: recursion could loop indefinitely
 
 /^(a(*:A)(d|e(*:B))z|aeq)/auto_callout
     adz

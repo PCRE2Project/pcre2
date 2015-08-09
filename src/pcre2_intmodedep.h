@@ -647,6 +647,13 @@ typedef struct recurse_check {
   PCRE2_SPTR group;
 } recurse_check;
 
+/* Structure for building a cache when filling in recursion offsets. */
+
+typedef struct recurse_cache {
+  PCRE2_SPTR group;
+  int recno;
+} recurse_cache;    
+
 /* Structure for maintaining a chain of pointers to the currently incomplete
 branches, for testing for left recursion while compiling. */
 
@@ -678,7 +685,6 @@ typedef struct compile_block {
   PCRE2_SPTR start_code;           /* The start of the compiled code */
   PCRE2_SPTR start_pattern;        /* The start of the pattern */
   PCRE2_SPTR end_pattern;          /* The end of the pattern */
-  PCRE2_UCHAR *hwm;                /* High watermark of workspace */
   PCRE2_UCHAR *name_table;         /* The name/number table */
   size_t workspace_size;           /* Size of workspace */
   uint16_t names_found;            /* Number of entries so far */
@@ -701,6 +707,7 @@ typedef struct compile_block {
   int  req_varyopt;                /* "After variable item" flag for reqbyte */
   BOOL had_accept;                 /* (*ACCEPT) encountered */
   BOOL had_pruneorskip;            /* (*PRUNE) or (*SKIP) encountered */
+  BOOL had_recurse;                /* Had a recursion or subroutine call */ 
   BOOL check_lookbehind;           /* Lookbehinds need later checking */
   BOOL dupnames;                   /* Duplicate names exist */
   BOOL iscondassert;               /* Next assert is a condition */

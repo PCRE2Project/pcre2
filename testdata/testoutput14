@@ -238,5 +238,97 @@ Failed: error -52: nested recursion at the same subject position
     abcabcdefg
  0: abcabcde
        >>>>>
+    
+# These tests provoke recursion loops, which give a different error message
+# when JIT is used.
+
+/(?R)/I
+Capturing subpattern count = 0
+May match empty string
+Subject length lower bound = 0
+    abcd
+Failed: error -52: nested recursion at the same subject position
+
+/(a|(?R))/I
+Capturing subpattern count = 1
+May match empty string
+Subject length lower bound = 1
+    abcd
+ 0: a
+ 1: a
+    defg 
+Failed: error -52: nested recursion at the same subject position
+
+/(ab|(bc|(de|(?R))))/I
+Capturing subpattern count = 3
+May match empty string
+Subject length lower bound = 2
+    abcd
+ 0: ab
+ 1: ab
+    fghi 
+Failed: error -52: nested recursion at the same subject position
+
+/(ab|(bc|(de|(?1))))/I
+Capturing subpattern count = 3
+May match empty string
+Subject length lower bound = 2
+    abcd
+ 0: ab
+ 1: ab
+    fghi 
+Failed: error -52: nested recursion at the same subject position
+
+/x(ab|(bc|(de|(?1)x)x)x)/I
+Capturing subpattern count = 3
+First code unit = 'x'
+Subject length lower bound = 3
+    xab123
+ 0: xab
+ 1: ab
+    xfghi 
+Failed: error -52: nested recursion at the same subject position
+
+/(?!\w)(?R)/
+    abcd
+Failed: error -52: nested recursion at the same subject position
+    =abc 
+Failed: error -52: nested recursion at the same subject position
+
+/(?=\w)(?R)/
+    =abc 
+Failed: error -52: nested recursion at the same subject position
+    abcd
+Failed: error -52: nested recursion at the same subject position
+
+/(?<!\w)(?R)/
+    abcd
+Failed: error -52: nested recursion at the same subject position
+
+/(?<=\w)(?R)/
+    abcd
+Failed: error -52: nested recursion at the same subject position
+
+/(a+|(?R)b)/
+    aaa
+ 0: aaa
+ 1: aaa
+    bbb 
+Failed: error -52: nested recursion at the same subject position
+
+/[^\xff]((?1))/BI
+------------------------------------------------------------------
+        Bra
+        [^\x{ff}]
+        CBra 1
+        Recurse
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+Capturing subpattern count = 1
+Subject length lower bound = 1
+    abcd
+Failed: error -52: nested recursion at the same subject position
 
 # End of testinput14
