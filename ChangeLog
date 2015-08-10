@@ -126,6 +126,8 @@ by Karl Skomski with a custom LLVM fuzzer.
 32. Error messages for syntax errors following \g and \k were giving inaccurate 
 offsets in the pattern.
 
+33. Improve the performance of starting single character repetitions in JIT.
+
 
 Version 10.20 30-June-2015
 --------------------------

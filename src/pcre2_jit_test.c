@@ -323,6 +323,11 @@ static struct regression_test_case regression_test_cases[] = {
 	{ CMU, A, 0, 0, "[^\xe1\xbd\xb8][^\xc3\xa9]", "\xe1\xbd\xb8\xe1\xbf\xb8\xc3\xa9\xc3\x89#" },
 	{ MU, A, 0, 0, "[^\xe1\xbd\xb8][^\xc3\xa9]", "\xe1\xbd\xb8\xe1\xbf\xb8\xc3\xa9\xc3\x89#" },
 	{ MU, A, 0, 0, "[^\xe1\xbd\xb8]{3,}?", "##\xe1\xbd\xb8#\xe1\xbd\xb8#\xc3\x89#\xe1\xbd\xb8" },
+	{ MU, A, 0, 0, "\\d+123", "987654321,01234" },
+	{ MU, A, 0, 0, "abcd*|\\w+xy", "aaaaa,abxyz" },
+	{ MU, A, 0, 0, "(?:abc|((?:amc|\\b\\w*xy)))", "aaaaa,abxyz" },
+	{ MU, A, 0, 0, "a(?R)|([a-z]++)#", ".abcd.abcd#."},
+	{ MU, A, 0, 0, "a(?R)|([a-z]++)#", ".abcd.mbcd#."},
 
 	/* Bracket repeats with limit. */
 	{ MU, A, 0, 0, "(?:(ab){2}){5}M", "abababababababababababM" },
@@ -813,6 +818,8 @@ static struct regression_test_case regression_test_cases[] = {
 
 	/* (*SKIP) verb. */
 	{ MU, A, 0, 0 | F_NOMATCH, "(?=a(*SKIP)b)ab|ad", "ad" },
+	{ MU, A, 0, 0, "(\\w+(*SKIP)#)", "abcd,xyz#," },
+	{ MU, A, 0, 0, "\\w+(*SKIP)#|mm", "abcd,xyz#," },
 
 	/* (*THEN) verb. */
 	{ MU, A, 0, 0, "((?:a(*THEN)|aab)(*THEN)c|a+)+m", "aabcaabcaabcaabcnacm" },
