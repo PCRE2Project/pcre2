@@ -51,11 +51,10 @@ POSSIBILITY OF SUCH DAMAGE.
 /* The texts of compile-time error messages. Compile-time error numbers start
 at COMPILE_ERROR_BASE (100).
 
-Do not ever re-use any error number, because they are documented. Always add a
-new error instead. This used to be a table of strings, but in order to reduce
-the number of relocations needed when a shared library is loaded dynamically,
-it is now one long string. We cannot use a table of offsets, because the
-lengths of inserts such as XSTRING(MAX_NAME_SIZE) are not known. Instead,
+This used to be a table of strings, but in order to reduce the number of
+relocations needed when a shared library is loaded dynamically, it is now one
+long string. We cannot use a table of offsets, because the lengths of inserts
+such as XSTRING(MAX_NAME_SIZE) are not known. Instead,
 pcre2_get_error_message() counts through to the one it wants - this isn't a
 performance issue because these strings are used only when there is an error.
 
@@ -154,7 +153,7 @@ static const char compile_error_texts[] =
   /* 70 */
   "internal error: unknown opcode in find_fixedlength()\0"
   "\\N is not supported in a class\0"
-  "too many forward references\0"
+  "SPARE ERROR\0"
   "disallowed Unicode code point (>= 0xd800 && <= 0xdfff)\0"
   "using UTF is disabled by the application\0"
   /* 75 */
