@@ -98,10 +98,10 @@ Minimum recursion limit = 10
  3: ee
 
 /(*LIMIT_MATCH=12bc)abc/
-Failed: error 160 at offset 0: (*VERB) not recognized or malformed
+Failed: error 160 at offset 17: (*VERB) not recognized or malformed
 
 /(*LIMIT_MATCH=4294967290)abc/
-Failed: error 160 at offset 0: (*VERB) not recognized or malformed
+Failed: error 160 at offset 24: (*VERB) not recognized or malformed
 
 /(*LIMIT_RECURSION=4294967280)abc/I
 Capturing subpattern count = 0

@@ -4399,4 +4399,8 @@ a random value. /Ix
 
 /(?(1)()\983040\2)/
 
+/(*LIMIT_MATCH=)abc/
+
+/(*CRLF)(*LIMIT_MATCH=)abc/
+
 # End of testinput2 

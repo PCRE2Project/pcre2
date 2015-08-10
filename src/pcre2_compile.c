@@ -7941,6 +7941,12 @@ while (ptr[skipatstart] == CHAR_LEFT_PARENTHESIS &&
         case PSO_LIMR:
         c = 0;
         pp = skipatstart;
+        if (!IS_DIGIT(ptr[pp]))
+          {
+          errorcode = ERR60;
+          ptr += pp; 
+          goto HAD_ERROR;
+          }    
         while (IS_DIGIT(ptr[pp]))
           {
           if (c > UINT32_MAX / 10 - 1) break;   /* Integer overflow */
@@ -7949,6 +7955,7 @@ while (ptr[skipatstart] == CHAR_LEFT_PARENTHESIS &&
         if (ptr[pp++] != CHAR_RIGHT_PARENTHESIS)
           {
           errorcode = ERR60;
+          ptr += pp; 
           goto HAD_ERROR;
           }
         if (p->type == PSO_LIMM) limit_match = c;

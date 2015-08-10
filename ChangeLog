@@ -128,6 +128,11 @@ offsets in the pattern.
 
 33. Improve the performance of starting single character repetitions in JIT.
 
+34. (*LIMIT_MATCH=) now gives an error instead of setting the value to 0.
+
+35. Error messages for syntax errors in *LIMIT_MATCH and *LIMIT_RECURSION now
+give the right offset instead of zero.
+
 
 Version 10.20 30-June-2015
 --------------------------

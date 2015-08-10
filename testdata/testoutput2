@@ -14651,4 +14651,10 @@ No match
 /(?(1)()\983040\2)/
 Failed: error 115 at offset 13: reference to non-existent subpattern
 
+/(*LIMIT_MATCH=)abc/
+Failed: error 160 at offset 14: (*VERB) not recognized or malformed
+
+/(*CRLF)(*LIMIT_MATCH=)abc/
+Failed: error 160 at offset 21: (*VERB) not recognized or malformed
+
 # End of testinput2 
