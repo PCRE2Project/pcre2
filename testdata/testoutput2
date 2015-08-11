@@ -14658,5 +14658,15 @@ Failed: error 160 at offset 14: (*VERB) not recognized or malformed
 Failed: error 160 at offset 21: (*VERB) not recognized or malformed
 
 /(?:ab)?(?:ab)(?:ab)/
+    abab
+ 0: abab
+    ababab
+ 0: ababab
+    aba
+No match
+
+/((*MARK:A))++a(*SKIP:B)b/
+    aacb
+No match
 
 # End of testinput2 

@@ -136,6 +136,9 @@ give the right offset instead of zero.
 36. The JIT compiler should not check repeats after a {0,1} repeat byte code.
 This issue was found by Karl Skomski with a custom LLVM fuzzer.
 
+37. The JIT compiler should restore the control chain for empty possessive
+repeats. This issue was found by Karl Skomski with a custom LLVM fuzzer.
+
 
 Version 10.20 30-June-2015
 --------------------------

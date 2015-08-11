@@ -8055,6 +8055,10 @@ while (*cc != OP_KETRPOS)
       OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(0), STR_PTR, 0);
       }
 
+    /* Even if the match is empty, we need to reset the control head. */
+    if (needs_control_head)
+      OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), common->control_head_ptr, SLJIT_MEM1(STACK_TOP), STACK(stack));
+
     if (opcode == OP_SBRAPOS || opcode == OP_SCBRAPOS)
       add_jump(compiler, &emptymatch, CMP(SLJIT_EQUAL, TMP1, 0, STR_PTR, 0));
 
@@ -8082,6 +8086,10 @@ while (*cc != OP_KETRPOS)
       OP1(SLJIT_MOV, SLJIT_MEM1(TMP2), (framesize + 1) * sizeof(sljit_sw), STR_PTR, 0);
       }
 
+    /* Even if the match is empty, we need to reset the control head. */
+    if (needs_control_head)
+      OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), common->control_head_ptr, SLJIT_MEM1(STACK_TOP), STACK(stack));
+
     if (opcode == OP_SBRAPOS || opcode == OP_SCBRAPOS)
       add_jump(compiler, &emptymatch, CMP(SLJIT_EQUAL, TMP1, 0, STR_PTR, 0));
 
@@ -8093,9 +8101,6 @@ while (*cc != OP_KETRPOS)
         OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(0), SLJIT_IMM, 0);
       }
     }
-
-  if (needs_control_head)
-    OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), common->control_head_ptr, SLJIT_MEM1(STACK_TOP), STACK(stack));
 
   JUMPTO(SLJIT_JUMP, loop);
   flush_stubs(common);

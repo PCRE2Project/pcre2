@@ -4404,5 +4404,11 @@ a random value. /Ix
 /(*CRLF)(*LIMIT_MATCH=)abc/
 
 /(?:ab)?(?:ab)(?:ab)/
+    abab
+    ababab
+    aba
+
+/((*MARK:A))++a(*SKIP:B)b/
+    aacb
 
 # End of testinput2 
