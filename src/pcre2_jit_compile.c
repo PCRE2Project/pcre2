@@ -1281,6 +1281,7 @@ PCRE2_SPTR alternative;
 PCRE2_SPTR end = NULL;
 int private_data_ptr = *private_data_start;
 int space, size, bracketlen;
+BOOL repeat_check = TRUE;
 
 while (cc < ccend)
   {
@@ -1290,7 +1291,8 @@ while (cc < ccend)
   if (private_data_ptr > SLJIT_MAX_LOCAL_SIZE)
     break;
 
-  if (*cc == OP_ONCE || *cc == OP_ONCE_NC || *cc == OP_BRA || *cc == OP_CBRA || *cc == OP_COND)
+  if (repeat_check && (*cc == OP_ONCE || *cc == OP_ONCE_NC || *cc == OP_BRA || *cc == OP_CBRA || *cc == OP_COND))
+    {
     if (detect_repeat(common, cc))
       {
       /* These brackets are converted to repeats, so no global
@@ -1298,6 +1300,8 @@ while (cc < ccend)
       if (cc >= end)
         end = bracketend(cc);
       }
+    }
+  repeat_check = TRUE;
 
   switch(*cc)
     {
@@ -1351,6 +1355,13 @@ while (cc < ccend)
     case OP_CBRA:
     case OP_SCBRA:
     bracketlen = 1 + LINK_SIZE + IMM2_SIZE;
+    break;
+
+    case OP_BRAZERO:
+    case OP_BRAMINZERO:
+    case OP_BRAPOSZERO:
+    repeat_check = FALSE;
+    size = 1;
     break;
 
     CASE_ITERATOR_PRIVATE_DATA_1

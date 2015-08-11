@@ -133,6 +133,9 @@ offsets in the pattern.
 35. Error messages for syntax errors in *LIMIT_MATCH and *LIMIT_RECURSION now
 give the right offset instead of zero.
 
+36. The JIT compiler should not check repeats after a {0,1} repeat byte code.
+This issue was found by Karl Skomski with a custom LLVM fuzzer.
+
 
 Version 10.20 30-June-2015
 --------------------------
