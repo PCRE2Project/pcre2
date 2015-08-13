@@ -820,6 +820,7 @@ static struct regression_test_case regression_test_cases[] = {
 	{ MU, A, 0, 0 | F_NOMATCH, "(?=a(*SKIP)b)ab|ad", "ad" },
 	{ MU, A, 0, 0, "(\\w+(*SKIP)#)", "abcd,xyz#," },
 	{ MU, A, 0, 0, "\\w+(*SKIP)#|mm", "abcd,xyz#," },
+	{ MU, A, 0, 0 | F_NOMATCH, "b+(?<=(*SKIP)#c)|b+", "#bbb" },
 
 	/* (*THEN) verb. */
 	{ MU, A, 0, 0, "((?:a(*THEN)|aab)(*THEN)c|a+)+m", "aabcaabcaabcaabcnacm" },

@@ -400,6 +400,8 @@ typedef struct compiler_common {
   BOOL has_skip_arg;
   /* (*THEN) is found in the pattern. */
   BOOL has_then;
+  /* (*SKIP) or (*SKIP:arg) is found in lookbehind assertion. */
+  BOOL has_skip_in_assert_back;
   /* Currently in recurse or negative assert. */
   BOOL local_exit;
   /* Currently in a positive assert. */
@@ -818,6 +820,7 @@ static BOOL check_opcode_types(compiler_common *common, PCRE2_SPTR cc, PCRE2_SPT
 {
 int count;
 PCRE2_SPTR slot;
+PCRE2_SPTR assert_back_end = cc - 1;
 
 /* Calculate important variables (like stack size) and checks whether all opcodes are supported. */
 while (cc < ccend)
@@ -889,6 +892,13 @@ while (cc < ccend)
     cc += (*cc == OP_CALLOUT) ? PRIV(OP_lengths)[OP_CALLOUT] : GET(cc, 1 + 2*LINK_SIZE);
     break;
 
+    case OP_ASSERTBACK:
+    slot = bracketend(cc);
+    if (slot > assert_back_end)
+      assert_back_end = slot;
+    cc += 1 + LINK_SIZE;
+    break;
+
     case OP_THEN_ARG:
     common->has_then = TRUE;
     common->control_head_ptr = 1;
@@ -910,9 +920,17 @@ while (cc < ccend)
     cc += 1;
     break;
 
+    case OP_SKIP:
+    if (cc < assert_back_end)
+      common->has_skip_in_assert_back = TRUE;
+    cc += 1;
+    break;
+
     case OP_SKIP_ARG:
     common->control_head_ptr = 1;
     common->has_skip_arg = TRUE;
+    if (cc < assert_back_end)
+      common->has_skip_in_assert_back = TRUE;
     cc += 1 + 2 + cc[1];
     break;
 
@@ -1042,7 +1060,7 @@ if (is_accelerated_repeat(cc))
 return FALSE;
 }
 
-static SLJIT_INLINE void detect_fast_fail(compiler_common *common, PCRE2_SPTR cc, int *private_data_start)
+static SLJIT_INLINE void detect_fast_fail(compiler_common *common, PCRE2_SPTR cc, int *private_data_start, sljit_si depth)
 {
   PCRE2_SPTR next_alt;
 
@@ -1083,8 +1101,8 @@ static SLJIT_INLINE void detect_fast_fail(compiler_common *common, PCRE2_SPTR cc
       break;
       }
 
-    if (*cc == OP_BRA || *cc == OP_CBRA)
-      detect_fast_fail(common, cc, private_data_start);
+    if (depth > 0 && (*cc == OP_BRA || *cc == OP_CBRA))
+      detect_fast_fail(common, cc, private_data_start, depth - 1);
 
     if (is_accelerated_repeat(cc))
       {
@@ -2405,8 +2423,9 @@ sljit_si i;
 
 SLJIT_ASSERT(common->fast_fail_start_ptr < common->fast_fail_end_ptr);
 
+OP2(SLJIT_SUB, TMP1, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
 for (i = common->fast_fail_start_ptr; i < common->fast_fail_end_ptr; i += sizeof(sljit_sw))
-  OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), i, STR_PTR, 0);
+  OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), i, TMP1, 0);
 }
 
 static SLJIT_INLINE void do_reset_match(compiler_common *common, int length)
@@ -8352,7 +8371,7 @@ else
   }
 
 if (fast_fail && fast_str_ptr != 0)
-  add_jump(compiler, &backtrack->topbacktracks, CMP(SLJIT_LESS, STR_PTR, 0, SLJIT_MEM1(SLJIT_SP), fast_str_ptr));
+  add_jump(compiler, &backtrack->topbacktracks, CMP(SLJIT_LESS_EQUAL, STR_PTR, 0, SLJIT_MEM1(SLJIT_SP), fast_str_ptr));
 
 /* Handle fixed part first. */
 if (exact > 1)
@@ -10518,8 +10537,8 @@ private_data_size = common->cbra_ptr + (re->top_bracket + 1) * sizeof(sljit_sw);
 set_private_data_ptrs(common, &private_data_size, ccend);
 if ((re->overall_options & PCRE2_ANCHORED) == 0 && (re->overall_options & PCRE2_NO_START_OPTIMIZE) == 0)
   {
-  if (!detect_fast_forward_skip(common, &private_data_size))
-    detect_fast_fail(common, common->start, &private_data_size);
+  if (!detect_fast_forward_skip(common, &private_data_size) && !common->has_skip_in_assert_back)
+    detect_fast_fail(common, common->start, &private_data_size, 4);
   }
 
 SLJIT_ASSERT(common->fast_fail_start_ptr <= common->fast_fail_end_ptr);

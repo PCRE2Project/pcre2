@@ -185,11 +185,11 @@ Last code unit = 'z'
 Subject length lower bound = 2
 JIT compilation was successful
   aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaazzbbbbbb\=find_limits
-Minimum match limit = 3
+Minimum match limit = 2
  0: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaazz (JIT)
  1: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
   aaaaaaaaaaaaaz\=find_limits
-Minimum match limit = 16384
+Minimum match limit = 16383
 No match (JIT)
 
 !((?:\s|//.*\\n|/[*](?:\\n|.)*?[*]/)*)!I
@@ -198,25 +198,25 @@ May match empty string
 Subject length lower bound = 0
 JIT compilation was successful
    /* this is a C style comment */\=find_limits
-Minimum match limit = 2
+Minimum match limit = 1
  0: /* this is a C style comment */ (JIT)
  1: /* this is a C style comment */
 
 /^(?>a)++/
     aa\=find_limits
-Minimum match limit = 2
+Minimum match limit = 1
  0: aa (JIT)
     aaaaaaaaa\=find_limits
-Minimum match limit = 2
+Minimum match limit = 1
  0: aaaaaaaaa (JIT)
     
 /(a)(?1)++/
     aa\=find_limits
-Minimum match limit = 2
+Minimum match limit = 1
  0: aa (JIT)
  1: a
     aaaaaaaaa\=find_limits
-Minimum match limit = 2
+Minimum match limit = 1
  0: aaaaaaaaa (JIT)
  1: a
 
@@ -237,12 +237,12 @@ Minimum match limit = 1
 
 /^(?>a+)(?>b+)(?>c+)(?>d+)(?>e+)/
      aabbccddee\=find_limits
-Minimum match limit = 6
+Minimum match limit = 5
  0: aabbccddee (JIT)
 
 /^(?>(a+))(?>(b+))(?>(c+))(?>(d+))(?>(e+))/
      aabbccddee\=find_limits
-Minimum match limit = 6
+Minimum match limit = 5
  0: aabbccddee (JIT)
  1: aa
  2: bb
@@ -252,7 +252,7 @@ Minimum match limit = 6
 
 /^(?>(a+))(?>b+)(?>(c+))(?>d+)(?>(e+))/
      aabbccddee\=find_limits
-Minimum match limit = 6
+Minimum match limit = 5
  0: aabbccddee (JIT)
  1: aa
  2: cc
@@ -260,7 +260,7 @@ Minimum match limit = 6
 
 /^(?>(a+))(?>b+)(?>(c+))(?>d+)(?>(e+))/jitfast
      aabbccddee\=find_limits
-Minimum match limit = 6
+Minimum match limit = 5
  0: aabbccddee (JIT)
  1: aa
  2: cc

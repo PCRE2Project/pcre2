@@ -139,6 +139,9 @@ This issue was found by Karl Skomski with a custom LLVM fuzzer.
 37. The JIT compiler should restore the control chain for empty possessive
 repeats. This issue was found by Karl Skomski with a custom LLVM fuzzer.
 
+38. A bug which was introduced by the single character repetition optimization
+was fixed.
+
 
 Version 10.20 30-June-2015
 --------------------------
