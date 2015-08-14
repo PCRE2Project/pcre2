@@ -10251,6 +10251,7 @@ common->currententry->entry = LABEL();
 set_jumps(common->currententry->calls, common->currententry->entry);
 
 sljit_emit_fast_enter(compiler, TMP2, 0);
+count_match(common);
 allocate_stack(common, private_data_size + framesize + alternativesize);
 OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(private_data_size + framesize + alternativesize - 1), TMP2, 0);
 copy_private_data(common, ccbegin, ccend, TRUE, private_data_size + framesize + alternativesize, framesize + alternativesize, needs_control_head);
