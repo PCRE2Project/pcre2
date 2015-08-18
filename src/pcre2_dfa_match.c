@@ -2774,7 +2774,7 @@ for (;;)
               {
               PCRE2_SPTR p = start_subject + local_offsets[rc];
               PCRE2_SPTR pp = start_subject + local_offsets[rc+1];
-              while (p < pp) if (NOT_FIRSTCHAR(*p++)) charcount--;
+              while (p < pp) if (NOT_FIRSTCU(*p++)) charcount--;
               }
 #endif
             if (charcount > 0)
@@ -2874,7 +2874,7 @@ for (;;)
             PCRE2_SPTR pp = local_ptr;
             charcount = (int)(pp - p);
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
-            if (utf) while (p < pp) if (NOT_FIRSTCHAR(*p++)) charcount--;
+            if (utf) while (p < pp) if (NOT_FIRSTCU(*p++)) charcount--;
 #endif
             ADD_NEW_DATA(-next_state_offset, 0, (charcount - 1));
             }
@@ -2960,7 +2960,7 @@ for (;;)
               {
               PCRE2_SPTR p = start_subject + local_offsets[0];
               PCRE2_SPTR pp = start_subject + local_offsets[1];
-              while (p < pp) if (NOT_FIRSTCHAR(*p++)) charcount--;
+              while (p < pp) if (NOT_FIRSTCU(*p++)) charcount--;
               }
 #endif
             ADD_NEW_DATA(-next_state_offset, 0, (charcount - 1));
@@ -3264,18 +3264,50 @@ switch(re->newline_convention)
 
 /* Check a UTF string for validity if required. For 8-bit and 16-bit strings,
 we must also check that a starting offset does not point into the middle of a
-multiunit character. */
+multiunit character. We check only the portion of the subject that is going to 
+be inspected during matching - from the offset minus the maximum back reference 
+to the given length. This saves time when a small part of a large subject is 
+being matched by the use of a starting offset. Note that the maximum lookbehind 
+is a number of characters, not code units. */
 
 #ifdef SUPPORT_UNICODE
 if (utf && (options & PCRE2_NO_UTF_CHECK) == 0)
   {
-  match_data->rc = PRIV(valid_utf)(subject, length, &(match_data->startchar));
-  if (match_data->rc != 0) return match_data->rc;
+  PCRE2_SPTR check_subject = start_match;  /* start_match includes offset */
+
+  if (start_offset > 0)
+    { 
 #if PCRE2_CODE_UNIT_WIDTH != 32
-  if (start_offset > 0 && start_offset < length &&
-      NOT_FIRSTCHAR(subject[start_offset]))
-    return PCRE2_ERROR_BADUTFOFFSET;
+    unsigned int i; 
+    if (start_match < end_subject && NOT_FIRSTCU(*start_match))
+      return PCRE2_ERROR_BADUTFOFFSET;
+    for (i = re->max_lookbehind; i > 0 && check_subject > subject; i--)
+      {
+      check_subject--;
+      while (check_subject > subject &&
+#if PCRE2_CODE_UNIT_WIDTH == 8
+      (*check_subject & 0xc0) == 0x80)
+#else  /* 16-bit */
+      (*check_subject & 0xfc00) == 0xdc00)
+#endif /* PCRE2_CODE_UNIT_WIDTH == 8 */
+        check_subject--; 
+      }  
+#else   /* In the 32-bit library, one code unit equals one character. */
+    check_subject -= re->max_lookbehind;
+    if (check_subject < subject) check_subject = subject; 
 #endif  /* PCRE2_CODE_UNIT_WIDTH != 32 */
+    }
+  
+  /* Validate the relevant portion of the subject. After an error, adjust the
+  offset to be an absolute offset in the whole string. */
+    
+  match_data->rc = PRIV(valid_utf)(check_subject, 
+    length - (check_subject - subject), &(match_data->startchar));
+  if (match_data->rc != 0) 
+    {
+    match_data->startchar += check_subject - subject;
+    return match_data->rc;
+    } 
   }
 #endif  /* SUPPORT_UNICODE */
 

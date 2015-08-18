@@ -68,12 +68,13 @@ title10="Test 10: Specials for the 8-bit library with UTF-8 and UCP support"
 title11="Test 11: Specials for the basic 16-bit and 32-bit libraries"
 title12="Test 12: Specials for the 16-bit and 32-bit libraries UTF and UCP support"
 title13="Test 13: DFA specials for the basic 16-bit and 32-bit libraries"
-title14="Test 14: Non-JIT limits and other non-JIT tests"
-title15="Test 15: JIT-specific features when JIT is not available"
-title16="Test 16: JIT-specific features when JIT is available"
-title17="Test 17: Tests of the POSIX interface, excluding UTF/UCP"
-title18="Test 18: Tests of the POSIX interface with UTF/UCP"
-title19="Test 19: Serialization tests"
+title14="Test 14: DFA specials for UTF and UCP support"
+title15="Test 15: Non-JIT limits and other non-JIT tests"
+title16="Test 16: JIT-specific features when JIT is not available"
+title17="Test 17: JIT-specific features when JIT is available"
+title18="Test 18: Tests of the POSIX interface, excluding UTF/UCP"
+title19="Test 19: Tests of the POSIX interface with UTF/UCP"
+title20="Test 20: Serialization tests"
 maxtest=18
 
 if [ $# -eq 1 -a "$1" = "list" ]; then
@@ -97,6 +98,7 @@ if [ $# -eq 1 -a "$1" = "list" ]; then
   echo $title17
   echo $title18
   echo $title19
+  echo $title20
   exit 0
 fi
 
@@ -219,6 +221,7 @@ do16=no
 do17=no
 do18=no
 do19=no
+do20=no
 
 while [ $# -gt 0 ] ; do
   case $1 in
@@ -242,10 +245,11 @@ while [ $# -gt 0 ] ; do
    17) do17=yes;;
    18) do18=yes;;
    19) do19=yes;;
+   20) do20=yes;;
    -8) arg8=yes;;
   -16) arg16=yes;;
   -32) arg32=yes;;
-   bigstack|-bigstack) bigstack=yes;; 
+   bigstack|-bigstack) bigstack=yes;;
    nojit|-nojit) nojit=yes;;
    sim|-sim) shift; sim=$1;;
    valgrind|-valgrind) valgrind="valgrind --tool=memcheck -q --smc-check=all";;
@@ -305,10 +309,10 @@ if [ $? -eq 0 ] ; then
   else
     test2stack="-S 1024"
     defaultstack="-S 64"
-  fi         
+  fi
 else
   test2stack=""
-  defaultstack="" 
+  defaultstack=""
 fi
 
 # All of 8-bit, 16-bit, and 32-bit character strings may be supported, but only
@@ -387,7 +391,8 @@ if [ $do0  = no -a $do1  = no -a $do2  = no -a $do3  = no -a \
      $do4  = no -a $do5  = no -a $do6  = no -a $do7  = no -a \
      $do8  = no -a $do9  = no -a $do10 = no -a $do11 = no -a \
      $do12 = no -a $do13 = no -a $do14 = no -a $do15 = no -a \
-     $do16 = no -a $do17 = no -a $do18 = no -a $do19 = no \
+     $do16 = no -a $do17 = no -a $do18 = no -a $do19 = no -a \
+     $do20 = no \
    ]; then
   do0=yes
   do1=yes
@@ -409,6 +414,7 @@ if [ $do0  = no -a $do1  = no -a $do2  = no -a $do3  = no -a \
   do17=yes
   do18=yes
   do19=yes
+  do20=yes 
 fi
 
 # Handle any explicit skips at this stage, so that an argument list may consist
@@ -688,71 +694,79 @@ for bmode in "$test8" "$test16" "$test32"; do
       checkresult $? 13 ""
     fi
   fi
-
-  # Test non-JIT match and recursion limits
+  
+  # Tests for DFA UTF and UCP features. Output is different for the different widths.
 
   if [ $do14 = yes ] ; then
     echo $title14
-    $sim $valgrind ./pcre2test -q $defaultstack $bmode $testdata/testinput14 testtry
-    checkresult $? 14 ""
+    $sim $valgrind ./pcre2test -q $defaultstack $bmode $opt $testdata/testinput14 testtry
+    checkresult $? 14-$bits "$opt"
+  fi
+
+  # Test non-JIT match and recursion limits
+
+  if [ $do15 = yes ] ; then
+    echo $title15
+    $sim $valgrind ./pcre2test -q $defaultstack $bmode $testdata/testinput15 testtry
+    checkresult $? 15 ""
   fi
 
   # Test JIT-specific features when JIT is not available
 
-  if [ $do15 = yes ] ; then
-    echo $title15
-    if [ $jit -ne 0 ] ; then
-      echo "  Skipped because JIT is available"
-    else
-      $sim $valgrind ./pcre2test -q $defaultstack $bmode $testdata/testinput15 testtry
-      checkresult $? 15 ""
-    fi
-  fi
-
-  # Test JIT-specific features when JIT is available
-
   if [ $do16 = yes ] ; then
     echo $title16
-    if [ $jit -eq 0 -o "$nojit" = "yes" ] ; then
-      echo "  Skipped because JIT is not available or nojit was specified"
+    if [ $jit -ne 0 ] ; then
+      echo "  Skipped because JIT is available"
     else
       $sim $valgrind ./pcre2test -q $defaultstack $bmode $testdata/testinput16 testtry
       checkresult $? 16 ""
     fi
   fi
 
-  # Tests for the POSIX interface without UTF/UCP (8-bit only)
+  # Test JIT-specific features when JIT is available
 
   if [ $do17 = yes ] ; then
     echo $title17
-    if [ "$bits" = "16" -o "$bits" = "32" ] ; then
-      echo "  Skipped when running 16/32-bit tests"
+    if [ $jit -eq 0 -o "$nojit" = "yes" ] ; then
+      echo "  Skipped because JIT is not available or nojit was specified"
     else
       $sim $valgrind ./pcre2test -q $defaultstack $bmode $testdata/testinput17 testtry
       checkresult $? 17 ""
     fi
   fi
 
-  # Tests for the POSIX interface with UTF/UCP (8-bit only)
+  # Tests for the POSIX interface without UTF/UCP (8-bit only)
 
   if [ $do18 = yes ] ; then
     echo $title18
     if [ "$bits" = "16" -o "$bits" = "32" ] ; then
       echo "  Skipped when running 16/32-bit tests"
-    elif [ $utf -eq 0 ] ; then
-      echo "  Skipped because UTF-$bits support is not available"
     else
       $sim $valgrind ./pcre2test -q $defaultstack $bmode $testdata/testinput18 testtry
       checkresult $? 18 ""
     fi
   fi
 
-  # Serialization tests
+  # Tests for the POSIX interface with UTF/UCP (8-bit only)
 
   if [ $do19 = yes ] ; then
     echo $title19
-    $sim $valgrind ./pcre2test -q $defaultstack $bmode $testdata/testinput19 testtry
-    checkresult $? 19 ""
+    if [ "$bits" = "16" -o "$bits" = "32" ] ; then
+      echo "  Skipped when running 16/32-bit tests"
+    elif [ $utf -eq 0 ] ; then
+      echo "  Skipped because UTF-$bits support is not available"
+    else
+      $sim $valgrind ./pcre2test -q $defaultstack $bmode $testdata/testinput19 testtry
+      checkresult $? 19 ""
+    fi
+  fi
+
+  # Serialization tests
+
+  if [ $do20 = yes ] ; then
+    echo $title20
+    $sim $valgrind ./pcre2test -q $defaultstack $bmode $testdata/testinput20 testtry
+    checkresult $? 20 ""
   fi
 
 # End of loop for 8/16/32-bit tests

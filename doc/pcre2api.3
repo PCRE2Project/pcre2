@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "29 July 2015" "PCRE2 10.21"
+.TH PCRE2API 3 "18 August 2015" "PCRE2 10.21"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -2022,12 +2022,19 @@ If the pattern is anchored, such a match can occur only if the pattern contains
 .sp
 When PCRE2_UTF is set at compile time, the validity of the subject as a UTF
 string is checked by default when \fBpcre2_match()\fP is subsequently called.
-The entire string is checked before any other processing takes place, and a
+If a non-zero starting offset is given, the check is applied only to that part
+of the subject that could be inspected during matching, and there is a check
+that the starting offset points to the first code unit of a character or to the
+end of the subject. If there are no lookbehind assertions in the pattern, the
+check starts at the starting offset. Otherwise, it starts at the length of the
+longest lookbehind before the starting offset, or at the start of the subject
+if there are not that many characters before the starting offset. Note that the
+sequences \eb and \eB are one-character lookbehinds.
+.P
+The check is carried out before any other processing takes place, and a
 negative error code is returned if the check fails. There are several UTF error
 codes for each code unit width, corresponding to different problems with the
-code unit sequence. The value of \fIstartoffset\fP is also checked, to ensure
-that it points to the start of a character or to the end of the subject. There
-are discussions about the validity of
+code unit sequence. There are discussions about the validity of
 .\" HTML <a href="pcre2unicode.html#utf8strings">
 .\" </a>
 UTF-8 strings,
@@ -2939,6 +2946,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 29 July 2015
+Last updated: 18 August 2015
 Copyright (c) 1997-2015 University of Cambridge.
 .fi

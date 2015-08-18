@@ -602,6 +602,8 @@ Failed: error 106 at offset 13: missing terminating ] for character class
 /X/utf
     XX\x{d800}
 Failed: error -27: UTF-32 error: code points 0xd800-0xdfff are not defined at offset 2
+    XX\x{d800}\=offset=3
+No match
     XX\x{d800}\=no_utf_check
  0: X
     XX\x{da00}
@@ -623,6 +625,10 @@ Failed: error -27: UTF-32 error: code points 0xd800-0xdfff are not defined at of
     XX\x{110000}
 Failed: error -28: UTF-32 error: code points greater than 0x10ffff are not defined at offset 2
     XX\x{d800}\x{1234}
+Failed: error -27: UTF-32 error: code points 0xd800-0xdfff are not defined at offset 2
+    
+/(?<=.)X/utf
+    XX\x{d800}\=offset=3
 Failed: error -27: UTF-32 error: code points 0xd800-0xdfff are not defined at offset 2
 
 /(*UTF16)\x{11234}/

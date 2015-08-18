@@ -132,7 +132,36 @@
     \xf9\x87\x80\x80\x80\=no_utf_check
     \xfc\x84\x80\x80\x80\x80\=no_utf_check
     \xfd\x83\x80\x80\x80\x80\=no_utf_check
+    
+# Similar tests with offsets
 
+/badutf/utf
+    X\xdfabcd
+    X\xdfabcd\=offset=1
+    X\xdfabcd\=offset=2
+
+/(?<=x)badutf/utf
+    X\xdfabcd
+    X\xdfabcd\=offset=1
+    X\xdfabcd\=offset=2
+    X\xdfabcd\=offset=3
+    X\xdfabcd\xdf\=offset=3
+
+/(?<=xx)badutf/utf
+    X\xdfabcd
+    X\xdfabcd\=offset=1
+    X\xdfabcd\=offset=2
+    X\xdfabcd\=offset=3
+
+/(?<=xxxx)badutf/utf
+    X\xdfabcd
+    X\xdfabcd\=offset=1
+    X\xdfabcd\=offset=2
+    X\xdfabcd\=offset=3
+    X\xdfabcd\=offset=6
+    X\xdfabc\xdf\=offset=6
+    X\xdfabc\xdf\=offset=7
+ 
 /\x{100}/IB,utf
 
 /\x{1000}/IB,utf

@@ -609,6 +609,8 @@ Failed: error 106 at offset 13: missing terminating ] for character class
 /X/utf
     XX\x{d800}
 Failed: error -24: UTF-16 error: missing low surrogate at end at offset 2
+    XX\x{d800}\=offset=3
+No match
     XX\x{d800}\=no_utf_check
  0: X
     XX\x{da00}
@@ -631,6 +633,10 @@ Failed: error -26: UTF-16 error: isolated low surrogate at offset 2
 ** Failed: character \x{110000} is greater than 0x10ffff and so cannot be converted to UTF-16
     XX\x{d800}\x{1234}
 Failed: error -25: UTF-16 error: invalid low surrogate at offset 3
+    
+/(?<=.)X/utf
+    XX\x{d800}\=offset=3
+Failed: error -24: UTF-16 error: missing low surrogate at end at offset 2
 
 /(*UTF16)\x{11234}/
   abcd\x{11234}pqr

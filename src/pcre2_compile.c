@@ -4682,7 +4682,7 @@ for (;; ptr++)
       that it's a length rather than a small character. */
 
 #ifdef MAYBE_UTF_MULTI
-      if (utf && NOT_FIRSTCHAR(code[-1]))
+      if (utf && NOT_FIRSTCU(code[-1]))
         {
         PCRE2_UCHAR *lastchar = code - 1;
         BACKCHAR(lastchar);

@@ -235,7 +235,55 @@ No match
 No match
     \xfd\x83\x80\x80\x80\x80\=no_utf_check
 No match
+    
+# Similar tests with offsets
 
+/badutf/utf
+    X\xdfabcd
+Failed: error -8: UTF-8 error: byte 2 top bits not 0x80 at offset 1
+    X\xdfabcd\=offset=1
+Failed: error -8: UTF-8 error: byte 2 top bits not 0x80 at offset 1
+    X\xdfabcd\=offset=2
+No match
+
+/(?<=x)badutf/utf
+    X\xdfabcd
+Failed: error -8: UTF-8 error: byte 2 top bits not 0x80 at offset 1
+    X\xdfabcd\=offset=1
+Failed: error -8: UTF-8 error: byte 2 top bits not 0x80 at offset 1
+    X\xdfabcd\=offset=2
+Failed: error -8: UTF-8 error: byte 2 top bits not 0x80 at offset 1
+    X\xdfabcd\=offset=3
+No match
+    X\xdfabcd\xdf\=offset=3
+Failed: error -3: UTF-8 error: 1 byte missing at end at offset 6
+
+/(?<=xx)badutf/utf
+    X\xdfabcd
+Failed: error -8: UTF-8 error: byte 2 top bits not 0x80 at offset 1
+    X\xdfabcd\=offset=1
+Failed: error -8: UTF-8 error: byte 2 top bits not 0x80 at offset 1
+    X\xdfabcd\=offset=2
+Failed: error -8: UTF-8 error: byte 2 top bits not 0x80 at offset 1
+    X\xdfabcd\=offset=3
+Failed: error -8: UTF-8 error: byte 2 top bits not 0x80 at offset 1
+
+/(?<=xxxx)badutf/utf
+    X\xdfabcd
+Failed: error -8: UTF-8 error: byte 2 top bits not 0x80 at offset 1
+    X\xdfabcd\=offset=1
+Failed: error -8: UTF-8 error: byte 2 top bits not 0x80 at offset 1
+    X\xdfabcd\=offset=2
+Failed: error -8: UTF-8 error: byte 2 top bits not 0x80 at offset 1
+    X\xdfabcd\=offset=3
+Failed: error -8: UTF-8 error: byte 2 top bits not 0x80 at offset 1
+    X\xdfabcd\=offset=6
+No match
+    X\xdfabc\xdf\=offset=6
+Failed: error -3: UTF-8 error: 1 byte missing at end at offset 5
+    X\xdfabc\xdf\=offset=7
+Failed: error -33: bad offset value
+ 
 /\x{100}/IB,utf
 ------------------------------------------------------------------
         Bra

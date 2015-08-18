@@ -145,6 +145,10 @@ was fixed.
 39. Match limit check added to recursion. This issue was found by Karl Skomski
 with a custom LLVM fuzzer.
 
+40. Arrange for the UTF check in pcre2_match() and pcre2_dfa_match() to look 
+only at the part of the subject that is relevant when the starting offset is 
+non-zero.
+
 
 Version 10.20 30-June-2015
 --------------------------

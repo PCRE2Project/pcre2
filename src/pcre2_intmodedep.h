@@ -72,7 +72,7 @@ just to undefine them all. */
 #undef MAX_MARK
 #undef MAX_PATTERN_SIZE
 #undef MAX_UTF_SINGLE_CU
-#undef NOT_FIRSTCHAR
+#undef NOT_FIRSTCU
 #undef PUT
 #undef PUT2
 #undef PUT2INC
@@ -252,7 +252,7 @@ UTF support is omitted, we don't even define them. */
 /* #define MAX_UTF_SINGLE_CU */
 /* #define HAS_EXTRALEN(c) */
 /* #define GET_EXTRALEN(c) */
-/* #define NOT_FIRSTCHAR(c) */
+/* #define NOT_FIRSTCU(c) */
 #define GETCHAR(c, eptr) c = *eptr;
 #define GETCHARTEST(c, eptr) c = *eptr;
 #define GETCHARINC(c, eptr) c = *eptr++;
@@ -285,10 +285,10 @@ Otherwise it has an undefined behaviour. */
 
 #define GET_EXTRALEN(c) (PRIV(utf8_table4)[(c) & 0x3f])
 
-/* Returns TRUE, if the given character is not the first character
-of a UTF sequence. */
+/* Returns TRUE, if the given value is not the first code unit of a UTF
+sequence. */
 
-#define NOT_FIRSTCHAR(c) (((c) & 0xc0) == 0x80)
+#define NOT_FIRSTCU(c) (((c) & 0xc0) == 0x80)
 
 /* Get the next UTF-8 character, not advancing the pointer. This is called when
 we know we are in UTF-8 mode. */
@@ -371,10 +371,10 @@ Otherwise it has an undefined behaviour. */
 
 #define GET_EXTRALEN(c) 1
 
-/* Returns TRUE, if the given character is not the first character
-of a UTF sequence. */
+/* Returns TRUE, if the given value is not the first code unit of a UTF
+sequence. */
 
-#define NOT_FIRSTCHAR(c) (((c) & 0xfc00) == 0xdc00)
+#define NOT_FIRSTCU(c) (((c) & 0xfc00) == 0xdc00)
 
 /* Base macro to pick up the low surrogate of a UTF-16 character, not
 advancing the pointer. */
@@ -469,7 +469,7 @@ into one PCRE2_UCHAR unit. */
 #define MAX_UTF_SINGLE_CU (0x10ffffu)
 #define HAS_EXTRALEN(c) (0)
 #define GET_EXTRALEN(c) (0)
-#define NOT_FIRSTCHAR(c) (0)
+#define NOT_FIRSTCU(c) (0)
 
 /* Get the next UTF-32 character, not advancing the pointer. This is called when
 we know we are in UTF-32 mode. */

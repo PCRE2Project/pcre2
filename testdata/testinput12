@@ -158,6 +158,7 @@
 
 /X/utf
     XX\x{d800}
+    XX\x{d800}\=offset=3
     XX\x{d800}\=no_utf_check
     XX\x{da00}
     XX\x{da00}\=no_utf_check
@@ -169,6 +170,9 @@
     XX\x{dfff}\=no_utf_check
     XX\x{110000}
     XX\x{d800}\x{1234}
+    
+/(?<=.)X/utf
+    XX\x{d800}\=offset=3
 
 /(*UTF16)\x{11234}/
   abcd\x{11234}pqr
