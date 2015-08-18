@@ -700,7 +700,7 @@ for bmode in "$test8" "$test16" "$test32"; do
   if [ $do14 = yes ] ; then
     echo $title14
     $sim $valgrind ./pcre2test -q $defaultstack $bmode $opt $testdata/testinput14 testtry
-    checkresult $? 14-$bits "$opt"
+    checkresult $? 14-$bits ""
   fi
 
   # Test non-JIT match and recursion limits
