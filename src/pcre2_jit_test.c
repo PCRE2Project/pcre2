@@ -247,13 +247,17 @@ static struct regression_test_case regression_test_cases[] = {
 	{ M, A, 0, 0, "a\\z", "aaa" },
 	{ M, A, 0, 0 | F_NOMATCH, "a\\z", "aab" },
 
-	/* Brackets. */
+	/* Brackets and alternatives. */
 	{ MU, A, 0, 0, "(ab|bb|cd)", "bacde" },
 	{ MU, A, 0, 0, "(?:ab|a)(bc|c)", "ababc" },
 	{ MU, A, 0, 0, "((ab|(cc))|(bb)|(?:cd|efg))", "abac" },
 	{ CMU, A, 0, 0, "((aB|(Cc))|(bB)|(?:cd|EFg))", "AcCe" },
 	{ MU, A, 0, 0, "((ab|(cc))|(bb)|(?:cd|ebg))", "acebebg" },
 	{ MU, A, 0, 0, "(?:(a)|(?:b))(cc|(?:d|e))(a|b)k", "accabdbbccbk" },
+	{ MU, A, 0, 0, "\xc7\x82|\xc6\x82", "\xf1\x83\x82\x82\xc7\x82\xc7\x83" },
+	{ MU, A, 0, 0, "=\xc7\x82|#\xc6\x82", "\xf1\x83\x82\x82=\xc7\x82\xc7\x83" },
+	{ MU, A, 0, 0, "\xc7\x82\xc7\x83|\xc6\x82\xc6\x82", "\xf1\x83\x82\x82\xc7\x82\xc7\x83" },
+	{ MU, A, 0, 0, "\xc6\x82\xc6\x82|\xc7\x83\xc7\x83|\xc8\x84\xc8\x84", "\xf1\x83\x82\x82\xc8\x84\xc8\x84" },
 
 	/* Greedy and non-greedy ? operators. */
 	{ MU, A, 0, 0, "(?:a)?a", "laab" },

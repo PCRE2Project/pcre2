@@ -149,6 +149,8 @@ with a custom LLVM fuzzer.
 only at the part of the subject that is relevant when the starting offset is 
 non-zero.
 
+41. Improve first character match in JIT with SSE2 on x86.
+
 
 Version 10.20 30-June-2015
 --------------------------
