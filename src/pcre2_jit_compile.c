@@ -3453,9 +3453,10 @@ chars[0] = len;
 static int scan_prefix(compiler_common *common, PCRE2_SPTR cc, PCRE2_UCHAR *chars, int max_chars, uint32_t *rec_count)
 {
 /* Recursive function, which scans prefix literals. */
-BOOL last, any, caseless;
+BOOL last, any, class, caseless;
 int len, repeat, len_save, consumed = 0;
 sljit_ui chr; /* Any unicode character. */
+sljit_ub *bytes, *bytes_end, byte;
 PCRE2_SPTR alternative, cc_save, oc;
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH == 8
 PCRE2_UCHAR othercase[8];
@@ -3474,6 +3475,7 @@ while (TRUE)
 
   last = TRUE;
   any = FALSE;
+  class = FALSE;
   caseless = FALSE;
 
   switch (*cc)
@@ -3575,16 +3577,14 @@ while (TRUE)
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH == 8
     if (common->utf && !is_char7_bitset((const sljit_ub *)(cc + 1), FALSE)) return consumed;
 #endif
-    any = TRUE;
-    cc += 1 + 32 / sizeof(PCRE2_UCHAR);
+    class = TRUE;
     break;
 
     case OP_NCLASS:
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
     if (common->utf) return consumed;
 #endif
-    any = TRUE;
-    cc += 1 + 32 / sizeof(PCRE2_UCHAR);
+    class = TRUE;
     break;
 
 #if defined SUPPORT_UNICODE || PCRE2_CODE_UNIT_WIDTH != 8
@@ -3687,6 +3687,102 @@ while (TRUE)
     continue;
     }
 
+  if (class)
+    {
+    bytes = (sljit_ub*) (cc + 1);
+    cc += 1 + 32 / sizeof(PCRE2_UCHAR);
+
+    switch (*cc)
+      {
+      case OP_CRSTAR:
+      case OP_CRMINSTAR:
+      case OP_CRPOSSTAR:
+      case OP_CRQUERY:
+      case OP_CRMINQUERY:
+      case OP_CRPOSQUERY:
+      max_chars = scan_prefix(common, cc + 1, chars, max_chars, rec_count);
+      if (max_chars == 0)
+        return consumed;
+      break;
+
+      default:
+      case OP_CRPLUS:
+      case OP_CRMINPLUS:
+      case OP_CRPOSPLUS:
+      break;
+
+      case OP_CRRANGE:
+      case OP_CRMINRANGE:
+      case OP_CRPOSRANGE:
+      repeat = GET2(cc, 1);
+      if (repeat <= 0)
+        return consumed;
+      break;
+      }
+
+    do
+      {
+      if (bytes[31] & 0x80)
+        chars[0] = 255;
+      else if (chars[0] != 255)
+        {
+        bytes_end = bytes + 32;
+        chr = 0;
+        do
+          {
+          byte = *bytes++;
+          SLJIT_ASSERT((chr & 0x7) == 0);
+          if (byte == 0)
+            chr += 8;
+          else
+            {
+            do
+              {
+              if ((byte & 0x1) != 0)
+                add_prefix_char(chr, chars);
+              byte >>= 1;
+              chr++;
+              }
+            while (byte != 0);
+            chr = (chr + 7) & ~7;
+            }
+          }
+        while (chars[0] != 255 && bytes < bytes_end);
+        }
+
+      consumed++;
+      if (--max_chars == 0)
+        return consumed;
+      chars += MAX_DIFF_CHARS;
+      }
+    while (--repeat > 0);
+
+    switch (*cc)
+      {
+      case OP_CRSTAR:
+      case OP_CRMINSTAR:
+      case OP_CRPOSSTAR:
+      return consumed;
+
+      case OP_CRQUERY:
+      case OP_CRMINQUERY:
+      case OP_CRPOSQUERY:
+      cc++;
+      break;
+
+      case OP_CRRANGE:
+      case OP_CRMINRANGE:
+      case OP_CRPOSRANGE:
+      if (GET2(cc, 1) != GET2(cc, 1 + IMM2_SIZE))
+        return consumed;
+      cc += 1 + 2 * IMM2_SIZE;
+      break;
+      }
+
+    repeat = 1;
+    continue;
+    }
+
   len = 1;
 #ifdef SUPPORT_UNICODE
   if (common->utf && HAS_EXTRALEN(*cc)) len += GET_EXTRALEN(*cc);
@@ -3769,12 +3865,11 @@ return value;
 #endif
 }
 
-static SLJIT_INLINE void fast_forward_first_char2_sse2(compiler_common *common, PCRE2_UCHAR char1, PCRE2_UCHAR char2, jump_list **found)
+static SLJIT_INLINE void fast_forward_first_char2_sse2(compiler_common *common, PCRE2_UCHAR char1, PCRE2_UCHAR char2)
 {
 DEFINE_COMPILER;
 struct sljit_label *start;
-struct sljit_jump *quit;
-struct sljit_jump *aligned;
+struct sljit_jump *quit[3];
 struct sljit_jump *nomatch;
 sljit_ub instruction[8];
 sljit_si tmp1_ind = sljit_get_register_index(TMP1);
@@ -3790,8 +3885,9 @@ if (!is_powerof2(bit))
 if ((char1 != char2) && bit == 0)
   load_twice = TRUE;
 
-OP2(SLJIT_ADD, TMP1, 0, STR_PTR, 0, SLJIT_IMM, 32 /* bytes */);
-quit = CMP(SLJIT_GREATER, TMP1, 0, STR_END, 0);
+quit[0] = CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0);
+
+/* First part (unaligned start) */
 
 OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, character_to_int32(char1 | bit));
 
@@ -3827,9 +3923,7 @@ if (char1 != char2)
   sljit_emit_op_custom(compiler, instruction, 5);
   }
 
-OP2(SLJIT_AND | SLJIT_SET_E, TMP2, 0, STR_PTR, 0, SLJIT_IMM, 0xf);
-aligned = JUMP(SLJIT_ZERO);
-
+OP2(SLJIT_AND, TMP2, 0, STR_PTR, 0, SLJIT_IMM, 0xf);
 OP2(SLJIT_AND, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, ~0xf);
 
 /* MOVDQA xmm1, xmm2/m128 */
@@ -3913,29 +4007,25 @@ if (load_twice)
 
 OP2(SLJIT_ASHR, TMP1, 0, TMP1, 0, TMP2, 0);
 
-nomatch = CMP(SLJIT_EQUAL, TMP1, 0, SLJIT_IMM, 0);
-
 /* BSF r32, r/m32 */
-
 instruction[0] = 0x0f;
 instruction[1] = 0xbc;
 instruction[2] = 0xc0 | (tmp1_ind << 3) | tmp1_ind;
 sljit_emit_op_custom(compiler, instruction, 3);
 
+nomatch = JUMP(SLJIT_ZERO);
+
 OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, TMP2, 0);
 OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, TMP1, 0);
-add_jump(compiler, found, JUMP(SLJIT_JUMP));
+quit[1] = JUMP(SLJIT_JUMP);
 
 JUMPHERE(nomatch);
-OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, 16);
-
-JUMPHERE(aligned);
-
-/* SSE2 part */
-
-OP2(SLJIT_SUB, STR_END, 0, STR_END, 0, SLJIT_IMM, 16);
 
 start = LABEL();
+OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, 16);
+quit[2] = CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0);
+
+/* Second part (aligned) */
 
 instruction[0] = 0x66;
 instruction[1] = 0x0f;
@@ -4017,26 +4107,20 @@ if (load_twice)
   OP2(SLJIT_OR, TMP1, 0, TMP1, 0, TMP2, 0);
   }
 
-nomatch = CMP(SLJIT_EQUAL, TMP1, 0, SLJIT_IMM, 0);
-
 /* BSF r32, r/m32 */
-
 instruction[0] = 0x0f;
 instruction[1] = 0xbc;
 instruction[2] = 0xc0 | (tmp1_ind << 3) | tmp1_ind;
 sljit_emit_op_custom(compiler, instruction, 3);
 
-OP2(SLJIT_ADD, STR_END, 0, STR_END, 0, SLJIT_IMM, 16);
+JUMPTO(SLJIT_ZERO, start);
+
 OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, TMP1, 0);
-add_jump(compiler, found, JUMP(SLJIT_JUMP));
 
-JUMPHERE(nomatch);
-
-OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, 16);
-CMPTO(SLJIT_LESS_EQUAL, STR_PTR, 0, STR_END, 0, start);
-
-OP2(SLJIT_ADD, STR_END, 0, STR_END, 0, SLJIT_IMM, 16);
-JUMPHERE(quit);
+start = LABEL();
+SET_LABEL(quit[0], start);
+SET_LABEL(quit[1], start);
+SET_LABEL(quit[2], start);
 }
 
 #undef SSE2_COMPARE_TYPE_INDEX
@@ -4054,9 +4138,6 @@ PCRE2_UCHAR mask;
 struct sljit_label *utf_start = NULL;
 struct sljit_jump *utf_quit = NULL;
 #endif
-#if (defined SLJIT_CONFIG_X86 && SLJIT_CONFIG_X86)
-jump_list *found_list = NULL;
-#endif
 
 if (offset > 0)
   OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(offset));
@@ -4066,6 +4147,11 @@ if (firstline)
   SLJIT_ASSERT(common->first_line_end != 0);
   OP1(SLJIT_MOV, TMP3, 0, STR_END, 0);
   OP1(SLJIT_MOV, STR_END, 0, SLJIT_MEM1(SLJIT_SP), common->first_line_end);
+
+  OP2(SLJIT_ADD, STR_END, 0, STR_END, 0, SLJIT_IMM, IN_UCHARS(offset + 1));
+  quit = CMP(SLJIT_LESS_EQUAL, STR_END, 0, TMP3, 0);
+  OP1(SLJIT_MOV, STR_END, 0, TMP3, 0);
+  JUMPHERE(quit);
   }
 
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
@@ -4078,7 +4164,50 @@ if (common->utf && offset > 0)
 /* SSE2 accelerated first character search. */
 
 if (sljit_is_fpu_available())
-  fast_forward_first_char2_sse2(common, char1, char2, &found_list);
+  {
+  fast_forward_first_char2_sse2(common, char1, char2);
+
+  quit = CMP(SLJIT_LESS, STR_PTR, 0, STR_END, 0);
+  if (firstline)
+    OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(SLJIT_SP), common->first_line_end);
+  else
+    OP1(SLJIT_MOV, STR_PTR, 0, STR_END, 0);
+
+  if (offset > 0)
+    OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(offset));
+
+#if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
+  if (common->utf && offset > 0)
+    {
+    utf_quit = JUMP(SLJIT_JUMP);
+
+    JUMPHERE(quit);
+    OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(-offset));
+    OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
+#if PCRE2_CODE_UNIT_WIDTH == 8
+    OP2(SLJIT_AND, TMP1, 0, TMP1, 0, SLJIT_IMM, 0xc0);
+    CMPTO(SLJIT_EQUAL, TMP1, 0, SLJIT_IMM, 0x80, utf_start);
+#elif PCRE2_CODE_UNIT_WIDTH == 16
+    OP2(SLJIT_AND, TMP1, 0, TMP1, 0, SLJIT_IMM, 0xfc00);
+    CMPTO(SLJIT_EQUAL, TMP1, 0, SLJIT_IMM, 0xdc00, utf_start);
+#else
+#error "Unknown code width"
+#endif
+    OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
+    JUMPHERE(utf_quit);
+    }
+  else
+#endif
+    JUMPHERE(quit);
+
+  if (offset > 0)
+    OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(offset));
+
+  if (firstline)
+    OP1(SLJIT_MOV, STR_END, 0, TMP3, 0);
+
+  return;
+  }
 
 #endif
 
@@ -4117,10 +4246,6 @@ if (common->utf && offset > 0)
 
 JUMPHERE(found);
 
-#if (defined SLJIT_CONFIG_X86 && SLJIT_CONFIG_X86)
-set_jumps(found_list, LABEL());
-#endif
-
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
 if (common->utf && offset > 0)
   {
@@ -4142,11 +4267,18 @@ if (common->utf && offset > 0)
 
 JUMPHERE(quit);
 
+if (firstline)
+  {
+  quit = CMP(SLJIT_LESS, STR_PTR, 0, STR_END, 0);
+  OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(SLJIT_SP), common->first_line_end);
+  if (offset > 0)
+    OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(offset));
+  JUMPHERE(quit);
+  OP1(SLJIT_MOV, STR_END, 0, TMP3, 0);
+  }
+
 if (offset > 0)
   OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(offset));
-
-if (firstline)
-  OP1(SLJIT_MOV, STR_END, 0, TMP3, 0);
 }
 
 static SLJIT_INLINE BOOL fast_forward_first_n_chars(compiler_common *common, BOOL firstline)
@@ -4173,7 +4305,7 @@ for (i = 0; i < MAX_N_CHARS; i++)
 rec_count = 10000;
 max = scan_prefix(common, common->start, chars, MAX_N_CHARS, &rec_count);
 
-if (max <= 1)
+if (max < 1)
   return FALSE;
 
 in_range = FALSE;
@@ -4253,6 +4385,8 @@ if (range_right < 0)
   {
   if (offset < 0)
     return FALSE;
+  SLJIT_ASSERT(chars[offset * MAX_DIFF_CHARS] >= 1 && chars[offset * MAX_DIFF_CHARS] <= 2);
+  /* Works regardless the value is 1 or 2. */
   mask = chars[offset * MAX_DIFF_CHARS + chars[offset * MAX_DIFF_CHARS]];
   fast_forward_first_char2(common, chars[offset * MAX_DIFF_CHARS + 1], mask, offset, firstline);
   return TRUE;
