@@ -154,6 +154,9 @@ non-zero.
 42. Fix two assertion fails in JIT. These issues were found by Karl Skomski
 with a custom LLVM fuzzer.
 
+43. Correct the setting of CMAKE_C_FLAGS in CMakeLists.txt (patch from Roy Ivy 
+III).
+
 
 Version 10.20 30-June-2015
 --------------------------

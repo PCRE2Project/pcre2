@@ -69,6 +69,7 @@
 # 2014-08-29 PH converted the file for PCRE2 (which has no C++).
 # 2015-04-24 PH added support for PCRE2_DEBUG
 # 2015-07-16 PH updated for new pcre2_find_bracket source module
+# 2015-08-24 PH correct C_FLAGS setting (patch from Roy Ivy III)
 
 PROJECT(PCRE2 C)
 
@@ -80,7 +81,7 @@ CMAKE_POLICY(SET CMP0026 OLD)
 
 SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake) # for FindReadline.cmake
 
-SET(CMAKE_C_FLAGS -I${PROJECT_SOURCE_DIR}/src)
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -I${PROJECT_SOURCE_DIR}/src")
 
 # external packages
 FIND_PACKAGE( BZip2 )
