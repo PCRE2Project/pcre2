@@ -157,6 +157,8 @@ with a custom LLVM fuzzer.
 43. Correct the setting of CMAKE_C_FLAGS in CMakeLists.txt (patch from Roy Ivy 
 III).
 
+44. Fix bug in RunTest.bat for new test 14.
+
 
 Version 10.20 30-June-2015
 --------------------------

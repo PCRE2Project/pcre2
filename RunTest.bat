@@ -253,6 +253,9 @@ if [%1]==[11] (
 if [%1]==[12] (
   set type=-%bits%
 )
+if [%1]==[14] (
+  set type=-%bits%
+)
 
 fc /n %srcdir%\testdata\%testoutput%%type% %2%bits%\%testoutput% >NUL
 
