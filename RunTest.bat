@@ -24,6 +24,7 @@
 @rem -------------------------------------------------------------------
 @rem
 @rem The file was converted for PCRE2 by PH, February 2015.
+@rem Updated for new test 14 (moving others up a number), August 2015.
 
 
 setlocal enabledelayedexpansion
@@ -99,18 +100,19 @@ set do16=no
 set do17=no
 set do18=no
 set do19=no
+set do20=no
 set all=yes
 
 for %%a in (%*) do (
   set valid=no
-  for %%v in (1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19) do if %%v == %%a set valid=yes
+  for %%v in (1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20) do if %%v == %%a set valid=yes
   if "!valid!" == "yes" (
     set do%%a=yes
     set all=no
 ) else (
     echo Invalid test number - %%a!
         echo Usage %0 [ test_number ] ...
-        echo Where test_number is one or more optional test numbers 1 through 19, default is all tests.
+        echo Where test_number is one or more optional test numbers 1 through 20, default is all tests.
         exit /b 1
 )
 )
@@ -136,6 +138,7 @@ if "%all%" == "yes" (
   set do17=yes
   set do18=yes
   set do19=yes
+  set do20=yes
 )
 
 @echo RunTest.bat's pcre2test output is written to newly created subfolders
@@ -183,6 +186,7 @@ if "%do16%" == "yes" call :do16
 if "%do17%" == "yes" call :do17
 if "%do18%" == "yes" call :do18
 if "%do19%" == "yes" call :do19
+if "%do20%" == "yes" call :do20
 :modeSkip
 if "%mode%" == "" (
   set mode=-16
@@ -395,35 +399,27 @@ if %bits% EQU 8 (
 goto :eof
 
 :do14
-call :runsub 14 testout "Non-JIT limits and other non_JIT tests" -q
+call :runsub 14 testout "DFA specials for UTF and UCP support" -q
 goto :eof
 
 :do15
-if %jit% EQU 1 (
-  echo Test 15 Skipped due to presence of JIT support.
-  goto :eof
-)
-  call :runsub 15 testout "JIT-specific features when JIT is not available" -q
+call :runsub 15 testout "Non-JIT limits and other non_JIT tests" -q
 goto :eof
 
 :do16
-if %jit% EQU 0 (
-  echo Test 16 Skipped due to absence of JIT support.
+if %jit% EQU 1 (
+  echo Test 16 Skipped due to presence of JIT support.
   goto :eof
 )
-  call :runsub 16 testout "JIT-specific features when JIT is available" -q
+  call :runsub 16 testout "JIT-specific features when JIT is not available" -q
 goto :eof
 
 :do17
-if %bits% EQU 16 (
-  echo Test 17 Skipped when running 16-bit tests.
+if %jit% EQU 0 (
+  echo Test 17 Skipped due to absence of JIT support.
   goto :eof
 )
-if %bits% EQU 32 (
-  echo Test 17 Skipped when running 32-bit tests.
-  goto :eof
-)
-  call :runsub 17 testout "POSIX interface, excluding UTF-8 and UCP" -q
+  call :runsub 17 testout "JIT-specific features when JIT is available" -q
 goto :eof
 
 :do18
@@ -435,11 +431,23 @@ if %bits% EQU 32 (
   echo Test 18 Skipped when running 32-bit tests.
   goto :eof
 )
-  call :runsub 1 testout "POSIX interface with UTF-8 and UCP" -q
+  call :runsub 18 testout "POSIX interface, excluding UTF-8 and UCP" -q
 goto :eof
 
 :do19
-call :runsub 1 testout "Serialization tests" -q
+if %bits% EQU 16 (
+  echo Test 19 Skipped when running 16-bit tests.
+  goto :eof
+)
+if %bits% EQU 32 (
+  echo Test 19 Skipped when running 32-bit tests.
+  goto :eof
+)
+  call :runsub 19 testout "POSIX interface with UTF-8 and UCP" -q
+goto :eof
+
+:do20
+call :runsub 20 testout "Serialization tests" -q
 goto :eof
 
 :conferror
