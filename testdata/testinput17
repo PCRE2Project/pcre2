@@ -247,4 +247,6 @@
 /[^\xff]((?1))/BI
     abcd
 
+/(x(?1)){4}/
+
 # End of testinput17

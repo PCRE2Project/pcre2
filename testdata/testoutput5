@@ -4060,4 +4060,8 @@ No match
     \\C(\\W?ſ)'?{{
 No match
 
+/[\pS#moq]/
+    =
+ 0: =
+
 # End of testinput5 

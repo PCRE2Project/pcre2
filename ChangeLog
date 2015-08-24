@@ -151,6 +151,9 @@ non-zero.
 
 41. Improve first character match in JIT with SSE2 on x86.
 
+42. Fix two assertion fails in JIT. These issues were found by Karl Skomski
+with a custom LLVM fuzzer.
+
 
 Version 10.20 30-June-2015
 --------------------------

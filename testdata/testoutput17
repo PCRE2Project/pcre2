@@ -481,4 +481,6 @@ JIT compilation was successful
     abcd
 Failed: error -46: JIT stack limit reached
 
+/(x(?1)){4}/
+
 # End of testinput17

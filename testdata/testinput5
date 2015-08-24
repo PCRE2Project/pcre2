@@ -1659,4 +1659,7 @@
 /\C(\W?ſ)'?{{/utf
     \\C(\\W?ſ)'?{{
 
+/[\pS#moq]/
+    =
+
 # End of testinput5 
