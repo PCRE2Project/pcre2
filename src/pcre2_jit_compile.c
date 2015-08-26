@@ -4997,8 +4997,10 @@ switch(length)
   case 4:
   if ((ranges[1] - ranges[0]) == (ranges[3] - ranges[2])
       && (ranges[0] | (ranges[2] - ranges[0])) == ranges[2]
+      && (ranges[1] & (ranges[2] - ranges[0])) == 0
       && is_powerof2(ranges[2] - ranges[0]))
     {
+    SLJIT_ASSERT((ranges[0] & (ranges[2] - ranges[0])) == 0 && (ranges[2] & ranges[3] & (ranges[2] - ranges[0])) != 0);
     OP2(SLJIT_OR, TMP1, 0, TMP1, 0, SLJIT_IMM, ranges[2] - ranges[0]);
     if (ranges[2] + 1 != ranges[3])
       {

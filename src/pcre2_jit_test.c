@@ -188,6 +188,7 @@ static struct regression_test_case regression_test_cases[] = {
 	{ CMUP, A, 0, 0, "\xf0\x90\x90\x80{2}", "\xf0\x90\x90\x80#\xf0\x90\x90\xa8\xf0\x90\x90\x80" },
 	{ CMUP, A, 0, 0, "\xf0\x90\x90\xa8{2}", "\xf0\x90\x90\x80#\xf0\x90\x90\xa8\xf0\x90\x90\x80" },
 	{ CMUP, A, 0, 0, "\xe1\xbd\xb8\xe1\xbf\xb8", "\xe1\xbf\xb8\xe1\xbd\xb8" },
+	{ M, A, 0, 0, "[3-57-9]", "5" },
 
 	/* Assertions. */
 	{ MU, A, 0, 0, "\\b[^A]", "A_B#" },

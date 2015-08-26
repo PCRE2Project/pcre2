@@ -160,6 +160,8 @@ III).
 44. Fix bug in RunTest.bat for new test 14, and adjust the script for the added 
 test (there are now 20 in total).
 
+45. Fixed a corner case of range optimization in JIT.
+
 
 Version 10.20 30-June-2015
 --------------------------
