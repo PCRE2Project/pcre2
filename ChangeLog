@@ -162,6 +162,8 @@ test (there are now 20 in total).
 
 45. Fixed a corner case of range optimization in JIT.
 
+46. Add the ${*MARK} facility to pcre2_substitute().
+
 
 Version 10.20 30-June-2015
 --------------------------

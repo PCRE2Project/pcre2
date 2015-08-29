@@ -4073,6 +4073,37 @@ a random value. /Ix
     
 /(.)(.)/g,replace=$2$1
     abcdefgh  
+    
+/(*:pear)apple|(*:orange)lemon|(*:strawberry)blackberry/g,replace=${*MARK}
+    apple lemon blackberry
+    apple strudel
+    fruitless  
+
+/(*:pear)apple|(*:orange)lemon|(*:strawberry)blackberry/replace=${*MARK}
+    apple lemon blackberry
+
+/(*:pear)apple|(*:orange)lemon|(*:strawberry)blackberry/g,replace=<$*MARK>
+    apple lemon blackberry
+    apple strudel
+    fruitless  
+    
+/(*:pear)apple/g,replace=${*MARKING} 
+    apple lemon blackberry
+
+/(*:pear)apple/g,replace=${*MARK-time
+    apple lemon blackberry
+
+/(*:pear)apple/g,replace=${*mark} 
+    apple lemon blackberry
+
+/(*:pear)apple|(*:orange)lemon|(*:strawberry)blackberry/g,replace=<$*MARKET>
+    apple lemon blackberry
+
+/(*:pear)apple|(*:orange)lemon|(*:strawberry)blackberry/g,replace=[22]${*MARK}
+    apple lemon blackberry
+
+/(*:pear)apple|(*:orange)lemon|(*:strawberry)blackberry/g,replace=[23]${*MARK}
+    apple lemon blackberry
 
 # End of substitute tests 
 

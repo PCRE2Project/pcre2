@@ -13731,6 +13731,50 @@ Failed: error -34: bad option value
 /(.)(.)/g,replace=$2$1
     abcdefgh  
  4: badcfehg
+    
+/(*:pear)apple|(*:orange)lemon|(*:strawberry)blackberry/g,replace=${*MARK}
+    apple lemon blackberry
+ 3: pear orange strawberry
+    apple strudel
+ 1: pear strudel
+    fruitless  
+ 0: fruitless
+
+/(*:pear)apple|(*:orange)lemon|(*:strawberry)blackberry/replace=${*MARK}
+    apple lemon blackberry
+ 1: pear lemon blackberry
+
+/(*:pear)apple|(*:orange)lemon|(*:strawberry)blackberry/g,replace=<$*MARK>
+    apple lemon blackberry
+ 3: <pear> <orange> <strawberry>
+    apple strudel
+ 1: <pear> strudel
+    fruitless  
+ 0: fruitless
+    
+/(*:pear)apple/g,replace=${*MARKING} 
+    apple lemon blackberry
+Failed: error -35: invalid replacement string
+
+/(*:pear)apple/g,replace=${*MARK-time
+    apple lemon blackberry
+Failed: error -35: invalid replacement string
+
+/(*:pear)apple/g,replace=${*mark} 
+    apple lemon blackberry
+Failed: error -35: invalid replacement string
+
+/(*:pear)apple|(*:orange)lemon|(*:strawberry)blackberry/g,replace=<$*MARKET>
+    apple lemon blackberry
+Failed: error -35: invalid replacement string
+
+/(*:pear)apple|(*:orange)lemon|(*:strawberry)blackberry/g,replace=[22]${*MARK}
+    apple lemon blackberry
+Failed: error -48: no more memory
+
+/(*:pear)apple|(*:orange)lemon|(*:strawberry)blackberry/g,replace=[23]${*MARK}
+    apple lemon blackberry
+ 3: pear orange strawberry
 
 # End of substitute tests 
 

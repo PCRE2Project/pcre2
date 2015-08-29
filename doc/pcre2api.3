@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "18 August 2015" "PCRE2 10.21"
+.TH PCRE2API 3 "29 August 2015" "PCRE2 10.21"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -2614,12 +2614,12 @@ be given as PCRE2_ZERO_TERMINATED for a zero-terminated string.
 In the replacement string, which is interpreted as a UTF string in UTF mode,
 and is checked for UTF validity unless the PCRE2_NO_UTF_CHECK option is set, a
 dollar character is an escape character that can specify the insertion of
-characters from capturing groups in the pattern. The following forms are
-recognized:
+characters from capturing groups or (*MARK) items in the pattern. The following
+forms are recognized:
 .sp
-  $$      insert a dollar character
-  $<n>    insert the contents of group <n>
-  ${<n>}  insert the contents of group <n>
+  $$                  insert a dollar character
+  $<n> or ${<n>}      insert the contents of group <n>
+  $*MARK or ${*MARK}  insert the name of the last (*MARK) encountered 
 .sp
 Either a group number or a group name can be given for <n>. Curly brackets are
 required only if the following character would be interpreted as part of the
@@ -2628,6 +2628,13 @@ For example, if the pattern a(b)c is matched with "=abc=" and the replacement
 string "+$1$0$1+", the result is "=+babcb+=". Group insertion is done by
 calling \fBpcre2_copy_byname()\fP or \fBpcre2_copy_bynumber()\fP as
 appropriate.
+.P
+The facility for inserting a (*MARK) name can be used to perform simple 
+simultaneous substitutions, as this \fBpcre2test\fP example shows:
+.sp
+  /(*:pear)apple|(*:orange)lemon/g,replace=${*MARK}
+      apple lemon
+   2: pear orange
 .P
 The first seven arguments of \fBpcre2_substitute()\fP are the same as for
 \fBpcre2_match()\fP, except that the partial matching options are not
@@ -2946,6 +2953,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 18 August 2015
+Last updated: 29 August 2015
 Copyright (c) 1997-2015 University of Cambridge.
 .fi

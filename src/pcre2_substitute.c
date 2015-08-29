@@ -205,6 +205,7 @@ do
       {
       int group, n;
       BOOL inparens;
+      BOOL star;
       PCRE2_SIZE sublength;
       PCRE2_UCHAR next;
       PCRE2_UCHAR name[33];
@@ -215,6 +216,7 @@ do
       group = -1;
       n = 0;
       inparens = FALSE;
+      star = FALSE;
 
       if (next == CHAR_LEFT_CURLY_BRACKET)
         {
@@ -223,7 +225,14 @@ do
         inparens = TRUE;
         }
 
-      if (next >= CHAR_0 && next <= CHAR_9)
+      if (next == CHAR_ASTERISK)
+        {
+        if (++i == rlength) goto BAD;
+        next = replacement[i];
+        star = TRUE;
+        }
+
+      if (!star && next >= CHAR_0 && next <= CHAR_9)
         {
         group = next - CHAR_0;
         while (++i < rlength)
@@ -253,19 +262,42 @@ do
         }
       else i--;   /* Last code unit of name/number */
 
-      /* Have found a syntactically correct group number or name. */
+      /* Have found a syntactically correct group number or name, or
+      *name. Only *MARK is currently recognized. */
 
-      sublength = lengthleft;
-      if (group < 0)
-        rc = pcre2_substring_copy_byname(match_data, name,
-          buffer + buff_offset, &sublength);
+      if (star)
+        {
+        if (PRIV(strcmp_c8)(name, STRING_MARK) == 0)
+          {
+          PCRE2_SPTR mark = pcre2_get_mark(match_data);
+          if (mark != NULL)
+            {
+            while (*mark != 0)
+              {
+              if (lengthleft-- < 1) goto NOROOM;
+              buffer[buff_offset++] = *mark++;
+              }
+            }
+          }
+        else goto BAD;
+        }
+
+      /* Substitute the contents of a group. */
+
       else
-        rc = pcre2_substring_copy_bynumber(match_data, group,
-          buffer + buff_offset, &sublength);
+        {
+        sublength = lengthleft;
+        if (group < 0)
+          rc = pcre2_substring_copy_byname(match_data, name,
+            buffer + buff_offset, &sublength);
+        else
+          rc = pcre2_substring_copy_bynumber(match_data, group,
+            buffer + buff_offset, &sublength);
+        if (rc < 0) goto EXIT;
 
-      if (rc < 0) goto EXIT;
-      buff_offset += sublength;
-      lengthleft -= sublength;
+        buff_offset += sublength;
+        lengthleft -= sublength;
+        }
       }
 
    /* Handle a literal code unit */
