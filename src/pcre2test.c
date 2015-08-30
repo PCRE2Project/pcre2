@@ -496,6 +496,7 @@ static modstruct modlist[] = {
   { "allusedtext",         MOD_PNDP, MOD_CTL, CTL_ALLUSEDTEXT,           PO(control) },
   { "alt_bsux",            MOD_PAT,  MOD_OPT, PCRE2_ALT_BSUX,            PO(options) },
   { "alt_circumflex",      MOD_PAT,  MOD_OPT, PCRE2_ALT_CIRCUMFLEX,      PO(options) },
+  { "alt_verbnames",       MOD_PAT,  MOD_OPT, PCRE2_ALT_VERBNAMES,       PO(options) },
   { "altglobal",           MOD_PND,  MOD_CTL, CTL_ALTGLOBAL,             PO(control) },
   { "anchored",            MOD_PD,   MOD_OPT, PCRE2_ANCHORED,            PD(options) },
   { "auto_callout",        MOD_PAT,  MOD_OPT, PCRE2_AUTO_CALLOUT,        PO(options) },
@@ -3467,10 +3468,11 @@ static void
 show_compile_options(uint32_t options, const char *before, const char *after)
 {
 if (options == 0) fprintf(outfile, "%s <none>%s", before, after);
-else fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
+else fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
   before,
   ((options & PCRE2_ALT_BSUX) != 0)? " alt_bsux" : "",
   ((options & PCRE2_ALT_CIRCUMFLEX) != 0)? " alt_circumflex" : "",
+  ((options & PCRE2_ALT_VERBNAMES) != 0)? " alt_verbnames" : "", 
   ((options & PCRE2_ALLOW_EMPTY_CLASS) != 0)? " allow_empty_class" : "",
   ((options & PCRE2_ANCHORED) != 0)? " anchored" : "",
   ((options & PCRE2_AUTO_CALLOUT) != 0)? " auto_callout" : "",

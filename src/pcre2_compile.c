@@ -561,12 +561,12 @@ static PCRE2_SPTR posix_substitutes[] = {
 
 #define PUBLIC_COMPILE_OPTIONS \
   (PCRE2_ANCHORED|PCRE2_ALLOW_EMPTY_CLASS|PCRE2_ALT_BSUX|PCRE2_ALT_CIRCUMFLEX| \
-   PCRE2_AUTO_CALLOUT|PCRE2_CASELESS|PCRE2_DOLLAR_ENDONLY|PCRE2_DOTALL| \
-   PCRE2_DUPNAMES|PCRE2_EXTENDED|PCRE2_FIRSTLINE|PCRE2_MATCH_UNSET_BACKREF| \
-   PCRE2_MULTILINE|PCRE2_NEVER_BACKSLASH_C|PCRE2_NEVER_UCP| \
-   PCRE2_NEVER_UTF|PCRE2_NO_AUTO_CAPTURE|PCRE2_NO_AUTO_POSSESS| \
-   PCRE2_NO_DOTSTAR_ANCHOR|PCRE2_NO_START_OPTIMIZE|PCRE2_NO_UTF_CHECK| \
-   PCRE2_UCP|PCRE2_UNGREEDY|PCRE2_UTF)
+   PCRE2_ALT_VERBNAMES|PCRE2_AUTO_CALLOUT|PCRE2_CASELESS|PCRE2_DOLLAR_ENDONLY| \
+   PCRE2_DOTALL|PCRE2_DUPNAMES|PCRE2_EXTENDED|PCRE2_FIRSTLINE| \
+   PCRE2_MATCH_UNSET_BACKREF|PCRE2_MULTILINE|PCRE2_NEVER_BACKSLASH_C| \
+   PCRE2_NEVER_UCP|PCRE2_NEVER_UTF|PCRE2_NO_AUTO_CAPTURE| \
+   PCRE2_NO_AUTO_POSSESS|PCRE2_NO_DOTSTAR_ANCHOR|PCRE2_NO_START_OPTIMIZE| \
+   PCRE2_NO_UTF_CHECK|PCRE2_UCP|PCRE2_UNGREEDY|PCRE2_UTF)
 
 /* Compile time error code numbers. They are given names so that they can more
 easily be tracked. When a new number is added, the tables called eint1 and
@@ -5382,13 +5382,52 @@ for (;; ptr++)
 
       /* It appears that Perl allows any characters whatsoever, other than
       a closing parenthesis, to appear in arguments, so we no longer insist on
-      letters, digits, and underscores. */
+      letters, digits, and underscores. Perl does not, however, do any
+      interpretation within arguments, and has no means of including a closing
+      parenthesis. PCRE supports escape processing but only when it is
+      requested by an option. Note that check_escape() will not return values
+      greater than the code unit maximum when not in UTF mode. */
 
       if (*ptr == CHAR_COLON)
         {
         arg = ++ptr;
-        while (*ptr != CHAR_NULL && *ptr != CHAR_RIGHT_PARENTHESIS) ptr++;
-        arglen = (int)(ptr - arg);
+
+        if ((options & PCRE2_ALT_VERBNAMES) == 0)
+          {
+          while (*ptr != CHAR_NULL && *ptr != CHAR_RIGHT_PARENTHESIS) ptr++;
+          arglen = (int)(ptr - arg);
+          }
+        else
+          {
+          arglen = 0;
+          while (*ptr != CHAR_NULL && *ptr != CHAR_RIGHT_PARENTHESIS)
+            {
+            if (*ptr == '\\')
+              {
+              uint32_t x;
+              *errorcodeptr = 0;
+              i = check_escape(&ptr, &x, errorcodeptr, options, FALSE, cb);
+              if (*errorcodeptr != 0) goto FAILED;
+              if (i != 0)
+                {
+                *errorcodeptr = ERR40;
+                goto FAILED;
+                }
+#ifdef SUPPORT_UNICODE
+#if PCRE2_CODE_UNIT_WIDTH == 8
+              for (i = 0; i < PRIV(utf8_table1_size); i++)
+                if ((int)x <= PRIV(utf8_table1)[i]) break;
+              arglen += i;
+#elif PCRE2_CODE_UNIT_WIDTH == 16
+              if (x > 0xffff) arglen++;
+#endif
+#endif
+              }
+            arglen++;
+            ptr++;
+            }
+          }
+
         if ((unsigned int)arglen > MAX_MARK)
           {
           *errorcodeptr = ERR76;
@@ -5456,8 +5495,42 @@ for (;; ptr++)
               }
             setverb = *code++ = verbs[i].op_arg;
             *code++ = arglen;
-            memcpy(code, arg, CU2BYTES(arglen));
-            code += arglen;
+
+            /* If we are processing the argument for escapes, we don't need
+            to apply checks here because it was all checked above when
+            computing the length. */
+
+            if ((options & PCRE2_ALT_VERBNAMES) != 0)
+              {
+              for (; arg != ptr; arg++)
+                {
+                if (*arg == '\\')
+                  {
+                  uint32_t x;
+                  *errorcodeptr = 0;
+                  (void)check_escape(&arg, &x, errorcodeptr, options, FALSE,
+                    cb);
+#ifdef SUPPORT_UNICODE
+                  if (utf)
+                    {
+                    PCRE2_UCHAR cbuff[8];
+                    x = PRIV(ord2utf)(x, cbuff);
+                    memcpy(code, cbuff, CU2BYTES(x));
+                    code += x;
+                    }
+                  else
+#endif
+                  *code++ = x;
+                  }
+                else *code++ = *arg;
+                }
+              }
+            else   /* No argument processing */
+              {
+              memcpy(code, arg, CU2BYTES(arglen));
+              code += arglen;
+              }
+
             *code++ = 0;
             }
 
@@ -6322,12 +6395,12 @@ for (;; ptr++)
               }
             recno += cb->bracount;
             }
-            
+
           if ((uint32_t)recno > cb->final_bracount)
             {
             *errorcodeptr = ERR15;
             goto FAILED;
-            }      
+            }
 
           /* Come here from code above that handles a named recursion.
           We insert the number of the called group after OP_RECURSE. At the
@@ -7944,9 +8017,9 @@ while (ptr[skipatstart] == CHAR_LEFT_PARENTHESIS &&
         if (!IS_DIGIT(ptr[pp]))
           {
           errorcode = ERR60;
-          ptr += pp; 
+          ptr += pp;
           goto HAD_ERROR;
-          }    
+          }
         while (IS_DIGIT(ptr[pp]))
           {
           if (c > UINT32_MAX / 10 - 1) break;   /* Integer overflow */
@@ -7955,7 +8028,7 @@ while (ptr[skipatstart] == CHAR_LEFT_PARENTHESIS &&
         if (ptr[pp++] != CHAR_RIGHT_PARENTHESIS)
           {
           errorcode = ERR60;
-          ptr += pp; 
+          ptr += pp;
           goto HAD_ERROR;
           }
         if (p->type == PSO_LIMM) limit_match = c;
@@ -8237,7 +8310,7 @@ if (errorcode == 0 && cb.had_recurse)
     recno = (int)GET(rcode, 1);
     if (recno == 0) rgroup = codestart; else
       {
-      PCRE2_SPTR search_from = codestart; 
+      PCRE2_SPTR search_from = codestart;
       rgroup = NULL;
       for (i = 0, p = start; i < ccount; i++, p = (p + 1) & 7)
         {
@@ -8246,11 +8319,11 @@ if (errorcode == 0 && cb.had_recurse)
           rgroup = rc[p].group;
           break;
           }
-          
-        /* Group n+1 must always start to the right of group n, so we can save 
-        search time below when the new group number is greater than any of the 
+
+        /* Group n+1 must always start to the right of group n, so we can save
+        search time below when the new group number is greater than any of the
         previously found groups. */
-          
+
         if (recno > rc[p].recno) search_from = rc[p].group;
         }
 

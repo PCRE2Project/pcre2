@@ -1,4 +1,4 @@
-.TH PCRE2PATTERN 3 "24 July 2015" "PCRE2 10.21"
+.TH PCRE2PATTERN 3 "30 August 2015" "PCRE2 10.21"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION DETAILS"
@@ -1334,7 +1334,7 @@ both specified as literal letters in the same case. For compatibility with
 Perl, EBCDIC code points within the range that are not letters are omitted. For 
 example, [h-k] matches only four characters, even though the codes for h and k 
 are 0x88 and 0x92, a range of 11 code points. However, if the range is 
-specified numerically, for example, [\ex88-\ex92] or [h-\x92], all code points
+specified numerically, for example, [\ex88-\ex92] or [h-\ex92], all code points
 are included.
 .P
 If a range that includes letters is used when caseless matching is set, it
@@ -2944,14 +2944,21 @@ in production code should be noted to avoid problems during upgrades." The same
 remarks apply to the PCRE2 features described in this section.
 .P
 The new verbs make use of what was previously invalid syntax: an opening
-parenthesis followed by an asterisk. They are generally of the form
-(*VERB) or (*VERB:NAME). Some may take either form, possibly behaving
-differently depending on whether or not a name is present. A name is any
-sequence of characters that does not include a closing parenthesis. The maximum
-length of name is 255 in the 8-bit library and 65535 in the 16-bit and 32-bit
-libraries. If the name is empty, that is, if the closing parenthesis
-immediately follows the colon, the effect is as if the colon were not there.
-Any number of these verbs may occur in a pattern.
+parenthesis followed by an asterisk. They are generally of the form (*VERB) or
+(*VERB:NAME). Some verbs take either form, possibly behaving differently
+depending on whether or not a name is present.
+.P
+By default, for compatibility with Perl, a name is any sequence of characters
+that does not include a closing parenthesis. The name is not processed in 
+any way, and it is not possible to include a closing parenthesis in the name.
+However, if the PCRE2_ALT_VERBNAMES option is set, normal backslash processing 
+is applied to verb names and only an unescaped closing parenthesis terminates 
+the name.
+.P
+The maximum length of a name is 255 in the 8-bit library and 65535 in the
+16-bit and 32-bit libraries. If the name is empty, that is, if the closing
+parenthesis immediately follows the colon, the effect is as if the colon were
+not there. Any number of these verbs may occur in a pattern.
 .P
 Since these verbs are specifically related to backtracking, most of them can be
 used only when the pattern is to be matched using the traditional matching
@@ -3376,6 +3383,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 24 July 2015
+Last updated: 30 August 2015
 Copyright (c) 1997-2015 University of Cambridge.
 .fi

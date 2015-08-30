@@ -126,11 +126,22 @@ as a byte-order mark (BOM). The PCRE2 functions do not handle this, expecting
 strings to be in host byte order.
 </P>
 <P>
-The entire string is checked before any other processing takes place. In
-addition to checking the format of the string, there is a check to ensure that
-all code points lie in the range U+0 to U+10FFFF, excluding the surrogate area.
-The so-called "non-character" code points are not excluded because Unicode
-corrigendum #9 makes it clear that they should not be.
+A UTF string is checked before any other processing takes place. In the case of 
+<b>pcre2_match()</b> and <b>pcre2_dfa_match()</b> calls with a non-zero starting 
+offset, the check is applied only to that part of the subject that could be
+inspected during matching, and there is a check that the starting offset points
+to the first code unit of a character or to the end of the subject. If there
+are no lookbehind assertions in the pattern, the check starts at the starting
+offset. Otherwise, it starts at the length of the longest lookbehind before the
+starting offset, or at the start of the subject if there are not that many
+characters before the starting offset. Note that the sequences \b and \B are
+one-character lookbehinds.
+</P>
+<P>
+In addition to checking the format of the string, there is a check to ensure
+that all code points lie in the range U+0 to U+10FFFF, excluding the surrogate
+area. The so-called "non-character" code points are not excluded because
+Unicode corrigendum #9 makes it clear that they should not be.
 </P>
 <P>
 Characters in the "Surrogate Area" of Unicode are reserved for use by UTF-16,
@@ -264,9 +275,9 @@ Cambridge, England.
 REVISION
 </b><br>
 <P>
-Last updated: 23 November 2014
+Last updated: 18 August 2015
 <br>
-Copyright &copy; 1997-2014 University of Cambridge.
+Copyright &copy; 1997-2015 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE2 index page</a>.

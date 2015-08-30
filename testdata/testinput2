@@ -4442,4 +4442,11 @@ a random value. /Ix
 /((*MARK:A))++a(*SKIP:B)b/
     aacb
 
+/(*MARK:a\zb)z/alt_verbnames 
+    
+/(*:ab\t(d\)c)xxx/
+
+/(*:ab\t(d\)c)xxx/alt_verbnames,mark
+    cxxxz
+
 # End of testinput2 

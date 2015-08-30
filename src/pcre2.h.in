@@ -120,6 +120,7 @@ D   is inspected during pcre2_dfa_match() execution
 #define PCRE2_UTF                 0x00080000u  /* C J M D */
 #define PCRE2_NEVER_BACKSLASH_C   0x00100000u  /* C       */
 #define PCRE2_ALT_CIRCUMFLEX      0x00200000u  /*   J M D */
+#define PCRE2_ALT_VERBNAMES       0x00400000u  /* C       */
 
 /* These are for pcre2_jit_compile(). */
 

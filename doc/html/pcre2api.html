@@ -70,15 +70,15 @@ document for an overview of all the PCRE2 documentation.
 <b>  pcre2_compile_context *<i>ccontext</i>);</b>
 <br>
 <br>
-<b>pcre2_code_free(pcre2_code *<i>code</i>);</b>
+<b>void pcre2_code_free(pcre2_code *<i>code</i>);</b>
 <br>
 <br>
-<b>pcre2_match_data_create(uint32_t <i>ovecsize</i>,</b>
+<b>pcre2_match_data *pcre2_match_data_create(uint32_t <i>ovecsize</i>,</b>
 <b>  pcre2_general_context *<i>gcontext</i>);</b>
 <br>
 <br>
-<b>pcre2_match_data_create_from_pattern(const pcre2_code *<i>code</i>,</b>
-<b>  pcre2_general_context *<i>gcontext</i>);</b>
+<b>pcre2_match_data *pcre2_match_data_create_from_pattern(</b>
+<b>  const pcre2_code *<i>code</i>, pcre2_general_context *<i>gcontext</i>);</b>
 <br>
 <br>
 <b>int pcre2_match(const pcre2_code *<i>code</i>, PCRE2_SPTR <i>subject</i>,</b>
@@ -936,7 +936,7 @@ The <i>where</i> argument should point to a buffer that is at least 24 code
 units long. (The exact length required can be found by calling
 <b>pcre2_config()</b> with <b>where</b> set to NULL.) If PCRE2 has been compiled
 without Unicode support, the buffer is filled with the text "Unicode not
-supported". Otherwise, the Unicode version string (for example, "7.0.0") is
+supported". Otherwise, the Unicode version string (for example, "8.0.0") is
 inserted. The number of code units used is returned. This is the length of the
 string plus one unit for the terminating zero.
 <pre>
@@ -961,7 +961,7 @@ zero.
 <b>  pcre2_compile_context *<i>ccontext</i>);</b>
 <br>
 <br>
-<b>pcre2_code_free(pcre2_code *<i>code</i>);</b>
+<b>void pcre2_code_free(pcre2_code *<i>code</i>);</b>
 </P>
 <P>
 The <b>pcre2_compile()</b> function compiles a pattern into an internal form.
@@ -1083,6 +1083,15 @@ after any internal newline. However, it does not match after a newline at the
 end of the subject, for compatibility with Perl. If you want a multiline
 circumflex also to match after a terminating newline, you must set
 PCRE2_ALT_CIRCUMFLEX.
+<pre>
+  PCRE2_ALT_VERBNAMES
+</pre>
+By default, for compatibility with Perl, the name in any verb sequence such as
+(*MARK:NAME) is any sequence of characters that does not include a closing
+parenthesis. The name is not processed in any way, and it is not possible to
+include a closing parenthesis in the name. However, if the PCRE2_ALT_VERBNAMES
+option is set, normal backslash processing is applied to verb names and only an
+unescaped closing parenthesis terminates the name.
 <pre>
   PCRE2_AUTO_CALLOUT
 </pre>
@@ -1778,12 +1787,12 @@ documentation.
 <a name="matchdatablock"></a></P>
 <br><a name="SEC25" href="#TOC1">THE MATCH DATA BLOCK</a><br>
 <P>
-<b>pcre2_match_data_create(uint32_t <i>ovecsize</i>,</b>
+<b>pcre2_match_data *pcre2_match_data_create(uint32_t <i>ovecsize</i>,</b>
 <b>  pcre2_general_context *<i>gcontext</i>);</b>
 <br>
 <br>
-<b>pcre2_match_data_create_from_pattern(const pcre2_code *<i>code</i>,</b>
-<b>  pcre2_general_context *<i>gcontext</i>);</b>
+<b>pcre2_match_data *pcre2_match_data_create_from_pattern(</b>
+<b>  const pcre2_code *<i>code</i>, pcre2_general_context *<i>gcontext</i>);</b>
 <br>
 <br>
 <b>void pcre2_match_data_free(pcre2_match_data *<i>match_data</i>);</b>
@@ -2010,12 +2019,20 @@ If the pattern is anchored, such a match can occur only if the pattern contains
 </pre>
 When PCRE2_UTF is set at compile time, the validity of the subject as a UTF
 string is checked by default when <b>pcre2_match()</b> is subsequently called.
-The entire string is checked before any other processing takes place, and a
+If a non-zero starting offset is given, the check is applied only to that part
+of the subject that could be inspected during matching, and there is a check
+that the starting offset points to the first code unit of a character or to the
+end of the subject. If there are no lookbehind assertions in the pattern, the
+check starts at the starting offset. Otherwise, it starts at the length of the
+longest lookbehind before the starting offset, or at the start of the subject
+if there are not that many characters before the starting offset. Note that the
+sequences \b and \B are one-character lookbehinds.
+</P>
+<P>
+The check is carried out before any other processing takes place, and a
 negative error code is returned if the check fails. There are several UTF error
 codes for each code unit width, corresponding to different problems with the
-code unit sequence. The value of <i>startoffset</i> is also checked, to ensure
-that it points to the start of a character or to the end of the subject. There
-are discussions about the validity of
+code unit sequence. There are discussions about the validity of
 <a href="pcre2unicode.html#utf8strings">UTF-8 strings,</a>
 <a href="pcre2unicode.html#utf16strings">UTF-16 strings,</a>
 and
@@ -2564,12 +2581,12 @@ be given as PCRE2_ZERO_TERMINATED for a zero-terminated string.
 In the replacement string, which is interpreted as a UTF string in UTF mode,
 and is checked for UTF validity unless the PCRE2_NO_UTF_CHECK option is set, a
 dollar character is an escape character that can specify the insertion of
-characters from capturing groups in the pattern. The following forms are
-recognized:
+characters from capturing groups or (*MARK) items in the pattern. The following
+forms are recognized:
 <pre>
-  $$      insert a dollar character
-  $&#60;n&#62;    insert the contents of group &#60;n&#62;
-  ${&#60;n&#62;}  insert the contents of group &#60;n&#62;
+  $$                  insert a dollar character
+  $&#60;n&#62; or ${&#60;n&#62;}      insert the contents of group &#60;n&#62;
+  $*MARK or ${*MARK}  insert the name of the last (*MARK) encountered 
 </pre>
 Either a group number or a group name can be given for &#60;n&#62;. Curly brackets are
 required only if the following character would be interpreted as part of the
@@ -2578,6 +2595,15 @@ For example, if the pattern a(b)c is matched with "=abc=" and the replacement
 string "+$1$0$1+", the result is "=+babcb+=". Group insertion is done by
 calling <b>pcre2_copy_byname()</b> or <b>pcre2_copy_bynumber()</b> as
 appropriate.
+</P>
+<P>
+The facility for inserting a (*MARK) name can be used to perform simple 
+simultaneous substitutions, as this <b>pcre2test</b> example shows:
+<pre>
+  /(*:pear)apple|(*:orange)lemon/g,replace=${*MARK}
+      apple lemon
+   2: pear orange
+</PRE>
 </P>
 <P>
 The first seven arguments of <b>pcre2_substitute()</b> are the same as for
@@ -2883,7 +2909,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC40" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 22 April 2015
+Last updated: 30 August 2015
 <br>
 Copyright &copy; 1997-2015 University of Cambridge.
 <br>

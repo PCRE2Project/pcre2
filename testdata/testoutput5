@@ -4064,4 +4064,11 @@ No match
     =
  0: =
 
+# UTF tests 
+
+/(*:a\x{12345}b\t(d\)c)xxx/utf,alt_verbnames,mark
+    cxxxz
+ 0: xxx
+MK: a\x{12345}b\x{09}(d)c
+
 # End of testinput5 

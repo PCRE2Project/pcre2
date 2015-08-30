@@ -14713,4 +14713,15 @@ No match
     aacb
 No match
 
+/(*MARK:a\zb)z/alt_verbnames 
+Failed: error 140 at offset 9: invalid escape sequence in (*VERB) name
+    
+/(*:ab\t(d\)c)xxx/
+Failed: error 122 at offset 12: unmatched closing parenthesis
+
+/(*:ab\t(d\)c)xxx/alt_verbnames,mark
+    cxxxz
+ 0: xxx
+MK: ab\x09(d)c
+
 # End of testinput2 

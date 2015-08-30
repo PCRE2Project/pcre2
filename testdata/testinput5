@@ -1662,4 +1662,9 @@
 /[\pS#moq]/
     =
 
+# UTF tests 
+
+/(*:a\x{12345}b\t(d\)c)xxx/utf,alt_verbnames,mark
+    cxxxz
+
 # End of testinput5 

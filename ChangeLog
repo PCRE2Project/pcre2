@@ -167,6 +167,8 @@ test (there are now 20 in total).
 47. Modifier lists in pcre2test were splitting at spaces without the required 
 commas.
 
+48. Implemented PCRE2_ALT_VERBNAMES.
+
 
 Version 10.20 30-June-2015
 --------------------------

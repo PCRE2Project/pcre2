@@ -251,4 +251,6 @@
 
 /[^\s]*\s* [^\W]+\W+ [^\d]*?\d0 [^\d\w]{4,6}?\w*A/B
 
+/(*MARK:a\x{100}b)z/alt_verbnames 
+
 # End of testinput9

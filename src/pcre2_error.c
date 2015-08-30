@@ -111,7 +111,7 @@ static const char compile_error_texts[] =
   "number after (?C is greater than 255\0"
   "closing parenthesis for (?C expected\0"
   /* 40 */
-  "SPARE ERROR\0"
+  "invalid escape sequence in (*VERB) name\0"
   "unrecognized character after (?P\0"
   "syntax error in subpattern name (missing terminator)\0"
   "two named subpatterns have the same name (PCRE2_DUPNAMES not set)\0"

@@ -724,6 +724,7 @@ The distribution should contain the files listed below.
   src/pcre2_context.c      )
   src/pcre2_dfa_match.c    )
   src/pcre2_error.c        )
+  src/pcre2_find_bracket.c ) 
   src/pcre2_jit_compile.c  )
   src/pcre2_jit_match.c    ) sources for the functions in the library,
   src/pcre2_jit_misc.c     )   and some internal functions that they use
@@ -832,4 +833,4 @@ The distribution should contain the files listed below.
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 24 April 2015
+Last updated: 16 July 2015

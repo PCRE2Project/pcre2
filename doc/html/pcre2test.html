@@ -340,12 +340,13 @@ subject lines. Modifiers on a subject line can change these settings.
 <br><a name="SEC7" href="#TOC1">MODIFIER SYNTAX</a><br>
 <P>
 Modifier lists are used with both pattern and subject lines. Items in a list
-are separated by commas and optional white space. Some modifiers may be given
-for both patterns and subject lines, whereas others are valid for one or the
-other only. Each modifier has a long name, for example "anchored", and some of
-them must be followed by an equals sign and a value, for example, "offset=12".
-Modifiers that do not take values may be preceded by a minus sign to turn off a
-previous setting.
+are separated by commas followed by optional white space. Trailing whitespace
+in a modifier list is ignored. Some modifiers may be given for both patterns
+and subject lines, whereas others are valid only for one or the other. Each
+modifier has a long name, for example "anchored", and some of them must be
+followed by an equals sign and a value, for example, "offset=12". Values cannot
+contain comma characters, but may contain spaces. Modifiers that do not take
+values may be preceded by a minus sign to turn off a previous setting.
 </P>
 <P>
 A few of the more common modifiers can also be specified as single letters, for
@@ -479,6 +480,7 @@ for a description of their effects.
       allow_empty_class         set PCRE2_ALLOW_EMPTY_CLASS
       alt_bsux                  set PCRE2_ALT_BSUX
       alt_circumflex            set PCRE2_ALT_CIRCUMFLEX
+      alt_verbnames             set PCRE2_ALT_VERBNAMES 
       anchored                  set PCRE2_ANCHORED
       auto_callout              set PCRE2_AUTO_CALLOUT
   /i  caseless                  set PCRE2_CASELESS
@@ -1469,7 +1471,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC21" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 20 May 2015
+Last updated: 30 August 2015
 <br>
 Copyright &copy; 1997-2015 University of Cambridge.
 <br>

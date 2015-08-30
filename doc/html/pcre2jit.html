@@ -224,8 +224,14 @@ whether a match operation was executed by JIT or by the interpreter.
 </P>
 <P>
 You may safely use the same JIT stack for more than one pattern (either by
-assigning directly or by callback), as long as the patterns are all matched
-sequentially in the same thread. In a multithread application, if you do not
+assigning directly or by callback), as long as the patterns are matched
+sequentially in the same thread. Currently, the only way to set up
+non-sequential matches in one thread is to use callouts: if a callout function
+starts another match, that match must use a different JIT stack to the one used
+for currently suspended match(es).
+</P>
+<P>
+In a multithread application, if you do not
 specify a JIT stack, or if you assign or pass back NULL from a callback, that
 is thread-safe, because each thread has its own machine stack. However, if you
 assign or pass back a non-NULL JIT stack, this must be a different stack for
@@ -419,9 +425,9 @@ Cambridge, England.
 </P>
 <br><a name="SEC13" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 27 November 2014
+Last updated: 28 July 2015
 <br>
-Copyright &copy; 1997-2014 University of Cambridge.
+Copyright &copy; 1997-2015 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE2 index page</a>.
