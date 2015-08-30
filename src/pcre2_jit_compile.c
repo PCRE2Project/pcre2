@@ -4146,12 +4146,20 @@ if (firstline)
   {
   SLJIT_ASSERT(common->first_line_end != 0);
   OP1(SLJIT_MOV, TMP3, 0, STR_END, 0);
-  OP1(SLJIT_MOV, STR_END, 0, SLJIT_MEM1(SLJIT_SP), common->first_line_end);
 
-  OP2(SLJIT_ADD, STR_END, 0, STR_END, 0, SLJIT_IMM, IN_UCHARS(offset + 1));
-  quit = CMP(SLJIT_LESS_EQUAL, STR_END, 0, TMP3, 0);
-  OP1(SLJIT_MOV, STR_END, 0, TMP3, 0);
-  JUMPHERE(quit);
+  OP2(SLJIT_ADD, STR_END, 0, SLJIT_MEM1(SLJIT_SP), common->first_line_end, SLJIT_IMM, IN_UCHARS(offset + 1));
+#if (defined SLJIT_CONFIG_X86 && SLJIT_CONFIG_X86)
+  if (sljit_x86_is_cmov_available())
+    {
+    OP2(SLJIT_SUB | SLJIT_SET_U, SLJIT_UNUSED, 0, STR_END, 0, TMP3, 0);
+    sljit_x86_emit_cmov(compiler, SLJIT_GREATER, STR_END, TMP3, 0);
+    }
+#endif
+    {
+    quit = CMP(SLJIT_LESS_EQUAL, STR_END, 0, TMP3, 0);
+    OP1(SLJIT_MOV, STR_END, 0, TMP3, 0);
+    JUMPHERE(quit);
+    }
   }
 
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
@@ -4163,49 +4171,55 @@ if (common->utf && offset > 0)
 
 /* SSE2 accelerated first character search. */
 
-if (sljit_is_fpu_available())
+if (sljit_x86_is_sse2_available())
   {
   fast_forward_first_char2_sse2(common, char1, char2);
 
-  quit = CMP(SLJIT_LESS, STR_PTR, 0, STR_END, 0);
-  if (firstline)
-    OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(SLJIT_SP), common->first_line_end);
-  else
-    OP1(SLJIT_MOV, STR_PTR, 0, STR_END, 0);
-
-  if (offset > 0)
-    OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(offset));
+  SLJIT_ASSERT(common->mode == PCRE2_JIT_COMPLETE || offset == 0);
+  if (common->mode == PCRE2_JIT_COMPLETE)
+    {
+    /* In complete mode, we don't need to run a match when STR_PTR == STR_END. */
+    SLJIT_ASSERT(common->forced_quit_label == NULL);
+    OP1(SLJIT_MOV, SLJIT_RETURN_REG, 0, SLJIT_IMM, PCRE2_ERROR_NOMATCH);
+    add_jump(compiler, &common->forced_quit, CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0));
 
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
-  if (common->utf && offset > 0)
-    {
-    utf_quit = JUMP(SLJIT_JUMP);
+    if (common->utf && offset > 0)
+      {
+      SLJIT_ASSERT(common->mode == PCRE2_JIT_COMPLETE);
 
-    JUMPHERE(quit);
-    OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(-offset));
-    OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
+      OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(-offset));
+      OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
 #if PCRE2_CODE_UNIT_WIDTH == 8
-    OP2(SLJIT_AND, TMP1, 0, TMP1, 0, SLJIT_IMM, 0xc0);
-    CMPTO(SLJIT_EQUAL, TMP1, 0, SLJIT_IMM, 0x80, utf_start);
+      OP2(SLJIT_AND, TMP1, 0, TMP1, 0, SLJIT_IMM, 0xc0);
+      CMPTO(SLJIT_EQUAL, TMP1, 0, SLJIT_IMM, 0x80, utf_start);
 #elif PCRE2_CODE_UNIT_WIDTH == 16
-    OP2(SLJIT_AND, TMP1, 0, TMP1, 0, SLJIT_IMM, 0xfc00);
-    CMPTO(SLJIT_EQUAL, TMP1, 0, SLJIT_IMM, 0xdc00, utf_start);
+      OP2(SLJIT_AND, TMP1, 0, TMP1, 0, SLJIT_IMM, 0xfc00);
+      CMPTO(SLJIT_EQUAL, TMP1, 0, SLJIT_IMM, 0xdc00, utf_start);
 #else
 #error "Unknown code width"
 #endif
-    OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
-    JUMPHERE(utf_quit);
+      OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
+      }
+#endif
+
+    if (offset > 0)
+      OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(offset));
+    }
+  else if (sljit_x86_is_cmov_available())
+    {
+    OP2(SLJIT_SUB | SLJIT_SET_U, SLJIT_UNUSED, 0, STR_PTR, 0, STR_END, 0);
+    sljit_x86_emit_cmov(compiler, SLJIT_GREATER_EQUAL, STR_PTR, firstline ? SLJIT_MEM1(SLJIT_SP) : STR_END, firstline ? common->first_line_end : 0);
     }
   else
-#endif
+    {
+    quit = CMP(SLJIT_LESS, STR_PTR, 0, STR_END, 0);
+    OP1(SLJIT_MOV, STR_PTR, 0, firstline ? SLJIT_MEM1(SLJIT_SP) : STR_END, firstline ? common->first_line_end : 0);
     JUMPHERE(quit);
-
-  if (offset > 0)
-    OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(offset));
+    }
 
   if (firstline)
     OP1(SLJIT_MOV, STR_END, 0, TMP3, 0);
-
   return;
   }
 
