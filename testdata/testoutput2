@@ -13740,9 +13740,9 @@ Failed: error -34: bad option value
     fruitless  
  0: fruitless
 
-/(*:pear)apple|(*:orange)lemon|(*:strawberry)blackberry/replace=${*MARK}
+/(*:pear)apple|(*:orange)lemon|(*:strawberry)blackberry/replace=${*MARK} sauce,
     apple lemon blackberry
- 1: pear lemon blackberry
+ 1: pear sauce lemon blackberry
 
 /(*:pear)apple|(*:orange)lemon|(*:strawberry)blackberry/g,replace=<$*MARK>
     apple lemon blackberry

@@ -4079,7 +4079,7 @@ a random value. /Ix
     apple strudel
     fruitless  
 
-/(*:pear)apple|(*:orange)lemon|(*:strawberry)blackberry/replace=${*MARK}
+/(*:pear)apple|(*:orange)lemon|(*:strawberry)blackberry/replace=${*MARK} sauce,
     apple lemon blackberry
 
 /(*:pear)apple|(*:orange)lemon|(*:strawberry)blackberry/g,replace=<$*MARK>

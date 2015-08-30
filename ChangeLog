@@ -164,6 +164,9 @@ test (there are now 20 in total).
 
 46. Add the ${*MARK} facility to pcre2_substitute().
 
+47. Modifier lists in pcre2test were splitting at spaces without the required 
+commas.
+
 
 Version 10.20 30-June-2015
 --------------------------

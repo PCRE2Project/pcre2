@@ -3071,9 +3071,10 @@ for (;;)
   while (isspace(*p) || *p == ',') p++;
   if (*p == 0) break;
 
-  /* Find the end of the item. */
+  /* Find the end of the item; lose trailing whitespace at end of line. */
 
-  for (ep = p; *ep != 0 && *ep != ',' && !isspace(*ep); ep++);
+  for (ep = p; *ep != 0 && *ep != ','; ep++);
+  if (*ep == 0) while (ep > p && isspace(ep[-1])) ep--;
 
   /* Remember if the first character is '-'. */
 

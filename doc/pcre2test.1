@@ -1,4 +1,4 @@
-.TH PCRE2TEST 1 "20 May 2015" "PCRE 10.20"
+.TH PCRE2TEST 1 "30 August 2015" "PCRE 10.21"
 .SH NAME
 pcre2test - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -303,12 +303,13 @@ subject lines. Modifiers on a subject line can change these settings.
 .rs
 .sp
 Modifier lists are used with both pattern and subject lines. Items in a list
-are separated by commas and optional white space. Some modifiers may be given
-for both patterns and subject lines, whereas others are valid for one or the
-other only. Each modifier has a long name, for example "anchored", and some of
-them must be followed by an equals sign and a value, for example, "offset=12".
-Modifiers that do not take values may be preceded by a minus sign to turn off a
-previous setting.
+are separated by commas followed by optional white space. Trailing whitespace
+in a modifier list is ignored. Some modifiers may be given for both patterns
+and subject lines, whereas others are valid only for one or the other. Each
+modifier has a long name, for example "anchored", and some of them must be
+followed by an equals sign and a value, for example, "offset=12". Values cannot
+contain comma characters, but may contain spaces. Modifiers that do not take
+values may be preceded by a minus sign to turn off a previous setting.
 .P
 A few of the more common modifiers can also be specified as single letters, for
 example "i" for "caseless". In documentation, following the Perl convention,
@@ -1451,6 +1452,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 20 May 2015
+Last updated: 30 August 2015
 Copyright (c) 1997-2015 University of Cambridge.
 .fi
