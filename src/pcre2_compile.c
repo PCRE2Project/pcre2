@@ -2793,6 +2793,148 @@ return n8;
 
 
 /*************************************************
+*       Process (*VERB) name for escapes         *
+*************************************************/
+
+/* This function is called when the PCRE2_ALT_VERBNAMES option is set, to
+process the characters in a verb's name argument. It is called twice, once with 
+codeptr == NULL, to find out the length of the processed name, and again to put 
+the name into memory.
+
+Arguments:
+  ptrptr        pointer to the input pointer
+  codeptr       pointer to the compiled code pointer
+  errorcodeptr  pointer to the error code
+  utf           TRUE if processing UTF
+  cb            compile data block
+
+Returns:        length of the processed name, or < 0 on error
+*/
+
+static int
+process_verb_name(PCRE2_SPTR *ptrptr, PCRE2_UCHAR **codeptr, int *errorcodeptr,
+  uint32_t options, BOOL utf, compile_block *cb)
+{
+int arglen = 0;
+BOOL inescq = FALSE;
+PCRE2_SPTR ptr = *ptrptr;
+PCRE2_UCHAR *code = (codeptr == NULL)? NULL : *codeptr;
+
+for (; ptr < cb->end_pattern; ptr++)
+  {
+  uint32_t x = *ptr;
+
+  /* Skip over literals */
+
+  if (inescq)
+    {
+    if (x == CHAR_BACKSLASH && ptr[1] == CHAR_E)
+      {
+      inescq = FALSE;
+      ptr++;;
+      continue;
+      }
+    }
+
+  else  /* Not a literal character */
+    { 
+    if (x == CHAR_RIGHT_PARENTHESIS) break;
+ 
+    /* Skip over comments and whitespace in extended mode. Need a loop to handle
+    whitespace after a comment. */
+  
+    if ((options & PCRE2_EXTENDED) != 0)
+      {
+      for (;;)
+        {
+        while (MAX_255(x) && (cb->ctypes[x] & ctype_space) != 0) x = *(++ptr);
+        if (x != CHAR_NUMBER_SIGN) break;
+        ptr++;
+        while (*ptr != CHAR_NULL)
+          {
+          if (IS_NEWLINE(ptr))         /* For non-fixed-length newline cases, */
+            {                          /* IS_NEWLINE sets cb->nllen. */
+            ptr += cb->nllen;
+            break;
+            }
+          ptr++;
+#ifdef SUPPORT_UNICODE
+          if (utf) FORWARDCHAR(ptr);
+#endif
+          }
+        x = *ptr;     /* Either NULL or the char after a newline */
+        }
+      if (ptr >= cb->end_pattern) break;   
+      }
+  
+    /* Process escapes */
+  
+    if (x == '\\')
+      {
+      int rc;
+      *errorcodeptr = 0;
+      rc = check_escape(&ptr, &x, errorcodeptr, options, FALSE, cb);
+      *ptrptr = ptr;   /* For possible error */ 
+      if (*errorcodeptr != 0) return -1;
+      if (rc != 0)
+        {
+        if (rc == ESC_Q) 
+          {
+          inescq = TRUE;
+          continue;
+          }
+        if (rc == ESC_E) continue;
+        *errorcodeptr = ERR40;
+        return -1;
+        }
+      }
+    }   
+    
+  /* We have the next character in the name. */
+
+#ifdef SUPPORT_UNICODE
+  if (utf)
+    {
+    if (code == NULL)   /* Just want the length */
+      {
+#if PCRE2_CODE_UNIT_WIDTH == 8
+      int i;
+      for (i = 0; i < PRIV(utf8_table1_size); i++)
+        if ((int)x <= PRIV(utf8_table1)[i]) break;
+      arglen += i;
+#elif PCRE2_CODE_UNIT_WIDTH == 16
+      if (x > 0xffff) arglen++;
+#endif
+      }
+    else
+      {
+      PCRE2_UCHAR cbuff[8];
+      x = PRIV(ord2utf)(x, cbuff);
+      memcpy(code, cbuff, CU2BYTES(x));
+      code += x;
+      }
+    }
+  else
+#endif  /* SUPPORT_UNICODE */
+
+  /* Not UTF */
+    {
+    if (code != NULL) *code++ = x;
+    }
+
+  arglen++;
+  }
+
+/* Update the pointers before returning. */
+
+*ptrptr = ptr;
+if (codeptr != NULL) *codeptr = code;
+return arglen;
+}
+
+
+
+/*************************************************
 *      Scan regex to identify named groups       *
 *************************************************/
 
@@ -5399,33 +5541,9 @@ for (;; ptr++)
           }
         else
           {
-          arglen = 0;
-          while (*ptr != CHAR_NULL && *ptr != CHAR_RIGHT_PARENTHESIS)
-            {
-            if (*ptr == '\\')
-              {
-              uint32_t x;
-              *errorcodeptr = 0;
-              i = check_escape(&ptr, &x, errorcodeptr, options, FALSE, cb);
-              if (*errorcodeptr != 0) goto FAILED;
-              if (i != 0)
-                {
-                *errorcodeptr = ERR40;
-                goto FAILED;
-                }
-#ifdef SUPPORT_UNICODE
-#if PCRE2_CODE_UNIT_WIDTH == 8
-              for (i = 0; i < PRIV(utf8_table1_size); i++)
-                if ((int)x <= PRIV(utf8_table1)[i]) break;
-              arglen += i;
-#elif PCRE2_CODE_UNIT_WIDTH == 16
-              if (x > 0xffff) arglen++;
-#endif
-#endif
-              }
-            arglen++;
-            ptr++;
-            }
+          arglen = process_verb_name(&ptr, NULL, errorcodeptr, options, 
+            utf, cb);
+          if (arglen < 0) goto FAILED;
           }
 
         if ((unsigned int)arglen > MAX_MARK)
@@ -5495,35 +5613,12 @@ for (;; ptr++)
               }
             setverb = *code++ = verbs[i].op_arg;
             *code++ = arglen;
-
-            /* If we are processing the argument for escapes, we don't need
-            to apply checks here because it was all checked above when
-            computing the length. */
-
             if ((options & PCRE2_ALT_VERBNAMES) != 0)
               {
-              for (; arg != ptr; arg++)
-                {
-                if (*arg == '\\')
-                  {
-                  uint32_t x;
-                  *errorcodeptr = 0;
-                  (void)check_escape(&arg, &x, errorcodeptr, options, FALSE,
-                    cb);
-#ifdef SUPPORT_UNICODE
-                  if (utf)
-                    {
-                    PCRE2_UCHAR cbuff[8];
-                    x = PRIV(ord2utf)(x, cbuff);
-                    memcpy(code, cbuff, CU2BYTES(x));
-                    code += x;
-                    }
-                  else
-#endif
-                  *code++ = x;
-                  }
-                else *code++ = *arg;
-                }
+              PCRE2_UCHAR *memcode = code;  /* code is "register" */
+              (void)process_verb_name(&arg, &memcode, errorcodeptr, options, 
+                utf, cb);
+              code = memcode;  
               }
             else   /* No argument processing */
               {

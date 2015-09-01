@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "30 August 2015" "PCRE2 10.21"
+.TH PCRE2API 3 "01 September 2015" "PCRE2 10.21"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -1060,7 +1060,10 @@ By default, for compatibility with Perl, the name in any verb sequence such as
 parenthesis. The name is not processed in any way, and it is not possible to
 include a closing parenthesis in the name. However, if the PCRE2_ALT_VERBNAMES
 option is set, normal backslash processing is applied to verb names and only an
-unescaped closing parenthesis terminates the name.
+unescaped closing parenthesis terminates the name. A closing parenthesis can be
+included in a name either as \e) or between \eQ and \eE. If the PCRE2_EXTENDED
+option is set, unescaped whitespace in verb names is skipped and #-comments are
+recognized, exactly as in the rest of the pattern.
 .sp
   PCRE2_AUTO_CALLOUT
 .sp
@@ -2962,6 +2965,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 30 August 2015
+Last updated: 01 September 2015
 Copyright (c) 1997-2015 University of Cambridge.
 .fi

@@ -4449,4 +4449,20 @@ a random value. /Ix
 /(*:ab\t(d\)c)xxx/alt_verbnames,mark
     cxxxz
 
+/(*:A\Qxx)x\EB)x/alt_verbnames,mark
+    x
+    
+/(*:A\ExxxB)x/alt_verbnames,mark
+    x 
+    
+/(*: A \ and #comment
+     \ B)x/x,alt_verbnames,mark
+    x  
+    
+/(*:A
+B)x/alt_verbnames,mark 
+    x
+
+/(*:abc\Qpqr)/alt_verbnames
+
 # End of testinput2 

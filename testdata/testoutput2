@@ -14724,4 +14724,29 @@ Failed: error 122 at offset 12: unmatched closing parenthesis
  0: xxx
 MK: ab\x09(d)c
 
+/(*:A\Qxx)x\EB)x/alt_verbnames,mark
+    x
+ 0: x
+MK: Axx)xB
+    
+/(*:A\ExxxB)x/alt_verbnames,mark
+    x 
+ 0: x
+MK: AxxxB
+    
+/(*: A \ and #comment
+     \ B)x/x,alt_verbnames,mark
+    x  
+ 0: x
+MK: A and B
+    
+/(*:A
+B)x/alt_verbnames,mark 
+    x
+ 0: x
+MK: A\x0aB
+
+/(*:abc\Qpqr)/alt_verbnames
+Failed: error 160 at offset 12: (*VERB) not recognized or malformed
+
 # End of testinput2 
