@@ -249,4 +249,9 @@
 
 /(x(?1)){4}/
 
+/[axm]{7}/
+
+/(.|.)*?bx/
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabax
+
 # End of testinput17

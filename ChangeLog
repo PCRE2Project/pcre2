@@ -169,6 +169,9 @@ commas.
 
 48. Implemented PCRE2_ALT_VERBNAMES.
 
+49. Fixed two issues in JIT. These were found by Karl Skomski with a custom
+LLVM fuzzer.
+
 
 Version 10.20 30-June-2015
 --------------------------

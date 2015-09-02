@@ -3748,6 +3748,7 @@ while (TRUE)
             }
           }
         while (chars[0] != 255 && bytes < bytes_end);
+        bytes = bytes_end - 32;
         }
 
       consumed++;
@@ -9508,8 +9509,7 @@ while (cc < ccend)
       OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(1), STR_PTR, 0);
       }
     BACKTRACK_AS(braminzero_backtrack)->matchingpath = LABEL();
-    if (cc[1] > OP_ASSERTBACK_NOT)
-      count_match(common);
+    count_match(common);
     break;
 
     case OP_ONCE:

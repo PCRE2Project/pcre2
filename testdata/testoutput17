@@ -198,7 +198,7 @@ May match empty string
 Subject length lower bound = 0
 JIT compilation was successful
    /* this is a C style comment */\=find_limits
-Minimum match limit = 1
+Minimum match limit = 29
  0: /* this is a C style comment */ (JIT)
  1: /* this is a C style comment */
 
@@ -222,17 +222,17 @@ Minimum match limit = 1
 
 /a(?:.)*?a/ims
     abbbbbbbbbbbbbbbbbbbbba\=find_limits
-Minimum match limit = 1
+Minimum match limit = 22
  0: abbbbbbbbbbbbbbbbbbbbba (JIT)
     
 /a(?:.(*THEN))*?a/ims
     abbbbbbbbbbbbbbbbbbbbba\=find_limits
-Minimum match limit = 1
+Minimum match limit = 22
  0: abbbbbbbbbbbbbbbbbbbbba (JIT)
 
 /a(?:.(*THEN:ABC))*?a/ims
     abbbbbbbbbbbbbbbbbbbbba\=find_limits
-Minimum match limit = 1
+Minimum match limit = 22
  0: abbbbbbbbbbbbbbbbbbbbba (JIT)
 
 /^(?>a+)(?>b+)(?>c+)(?>d+)(?>e+)/
@@ -482,5 +482,11 @@ JIT compilation was successful
 Failed: error -46: JIT stack limit reached
 
 /(x(?1)){4}/
+
+/[axm]{7}/
+
+/(.|.)*?bx/
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabax
+Failed: error -47: match limit exceeded
 
 # End of testinput17
