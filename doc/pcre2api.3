@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "01 September 2015" "PCRE2 10.21"
+.TH PCRE2API 3 "02 September 2015" "PCRE2 10.21"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -210,11 +210,11 @@ document for an overview of all the PCRE2 documentation.
 .sp
 .nf
 .B int32_t pcre2_serialize_decode(pcre2_code **\fIcodes\fP,
-.B "  int32_t \fInumber_of_codes\fP, const uint32_t *\fIbytes\fP,"
+.B "  int32_t \fInumber_of_codes\fP, const uint8_t *\fIbytes\fP,"
 .B "  pcre2_general_context *\fIgcontext\fP);"
 .sp
-.B int32_t pcre2_serialize_encode(pcre2_code **\fIcodes\fP,
-.B "  int32_t \fInumber_of_codes\fP, uint32_t **\fIserialized_bytes\fP,"
+.B int32_t pcre2_serialize_encode(const pcre2_code **\fIcodes\fP,
+.B "  int32_t \fInumber_of_codes\fP, uint8_t **\fIserialized_bytes\fP,"
 .B "  PCRE2_SIZE *\fIserialized_size\fP, pcre2_general_context *\fIgcontext\fP);"
 .sp
 .B void pcre2_serialize_free(uint8_t *\fIbytes\fP);
@@ -2965,6 +2965,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 01 September 2015
+Last updated: 02 September 2015
 Copyright (c) 1997-2015 University of Cambridge.
 .fi
