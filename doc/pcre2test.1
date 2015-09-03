@@ -1,4 +1,4 @@
-.TH PCRE2TEST 1 "30 August 2015" "PCRE 10.21"
+.TH PCRE2TEST 1 "03 September 2015" "PCRE 10.21"
 .SH NAME
 pcre2test - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -667,8 +667,12 @@ suite.
 .sp
 The \fB/posix\fP modifier causes \fBpcre2test\fP to call PCRE2 via the POSIX
 wrapper API rather than its native API. This supports only the 8-bit library.
-When the POSIX API is being used, the following pattern modifiers set options
-for the \fBregcomp()\fP function:
+Note that it does not imply POSIX matching semantics; for more detail see the
+.\" HREF
+\fBpcre2posix\fP
+.\"
+documentation. When the POSIX API is being used, the following pattern
+modifiers set options for the \fBregcomp()\fP function:
 .sp
   caseless           REG_ICASE
   multiline          REG_NEWLINE
@@ -1453,6 +1457,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 30 August 2015
+Last updated: 03 September 2015
 Copyright (c) 1997-2015 University of Cambridge.
 .fi
