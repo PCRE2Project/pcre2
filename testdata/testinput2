@@ -9,6 +9,7 @@
 # test 5. 
 
 #forbid_utf
+#newline_default lf any anycrlf
 
 # Test binary zeroes in the pattern
 

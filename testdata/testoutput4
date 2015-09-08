@@ -3,6 +3,7 @@
 # some of the property tests may differ because of different versions of
 # Unicode in use by PCRE2 and Perl.
 
+#newline_default lf anycrlf any
 #perltest
 
 /a.b/utf

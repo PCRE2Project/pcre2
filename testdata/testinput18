@@ -38,11 +38,11 @@
     the quick brown fox
     The Quick Brown Fox
 
-/abc.def/
+/(*LF)abc.def/
     *** Failers
     abc\ndef
 
-/abc$/
+/(*LF)abc$/
     abc
     abc\n
 
@@ -57,7 +57,7 @@
     aaaabbbbzzzz\=ovector=1
     aaaabbbbzzzz\=ovector=2
 
-/ab.cd/
+/(*ANY)ab.cd/
     ab-cd
     ab=cd
     ** Failers

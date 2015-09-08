@@ -2,6 +2,7 @@
 # UTF-8 or Unicode property support. */
     
 #forbid_utf
+#newline_default lf any anycrlf
 
 /a\Cb/
     aXb

@@ -1,4 +1,4 @@
-.TH PCRE2TEST 1 "03 September 2015" "PCRE 10.21"
+.TH PCRE2TEST 1 "08 September 2015" "PCRE 10.21"
 .SH NAME
 pcre2test - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -259,6 +259,34 @@ described in the section entitled "Saving and restoring compiled patterns"
 .\" </a>
 below.
 .\"
+.sp
+  #newline_default [<newline-list>]
+.sp
+When PCRE2 is built, a default newline convention can be specified. This 
+determines which characters and/or character pairs are recognized as indicating
+a newline in a pattern or subject string. The default can be overridden when a
+pattern is compiled. The standard test files contain tests of various newline
+conventions, but the majority of the tests expect a single linefeed to be
+recognized as a newline by default. Without special action the tests would fail
+when PCRE2 is compiled with either CR or CRLF as the default newline.
+.P
+The #newline_default command specifies a list of newline types that are
+acceptable as the default. The types must be one of CR, LF, CRLF, ANYCRLF, or
+ANY (in upper or lower case), for example:
+.sp
+  #newline_default LF Any anyCRLF
+.sp
+If the default newline is in the list, this command has no effect. Otherwise,
+except when testing the POSIX API, a \fBnewline\fP modifier that specifies the
+first newline convention in the list (LF in the above example) is added to any
+pattern that does not already have a \fBnewline\fP modifier. If the newline
+list is empty, the feature is turned off. This command is present in a number
+of the standard test input files.
+.P
+When the POSIX API is being tested there is no way to override the default
+newline convention, though it is possible to set the newline convention from
+within the pattern. A warning is given if the \fBposix\fP modifier is used when
+\fB#newline_default\fP would set a default for the non-POSIX API.
 .sp
   #pattern <modifier-list>
 .sp
@@ -1457,6 +1485,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 03 September 2015
+Last updated: 08 September 2015
 Copyright (c) 1997-2015 University of Cambridge.
 .fi

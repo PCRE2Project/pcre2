@@ -336,17 +336,18 @@ typedef struct cmdstruct {
   int  value;
 } cmdstruct;
 
-enum { CMD_FORBID_UTF, CMD_LOAD, CMD_PATTERN, CMD_PERLTEST, CMD_POP, CMD_SAVE,
-  CMD_SUBJECT, CMD_UNKNOWN };
+enum { CMD_FORBID_UTF, CMD_LOAD, CMD_NEWLINE_DEFAULT, CMD_PATTERN,
+  CMD_PERLTEST, CMD_POP, CMD_SAVE, CMD_SUBJECT, CMD_UNKNOWN };
 
 static cmdstruct cmdlist[] = {
-  { "forbid_utf",  CMD_FORBID_UTF },
-  { "load",        CMD_LOAD },
-  { "pattern",     CMD_PATTERN },
-  { "perltest",    CMD_PERLTEST },
-  { "pop",         CMD_POP },
-  { "save",        CMD_SAVE },
-  { "subject",     CMD_SUBJECT }};
+  { "forbid_utf",      CMD_FORBID_UTF },
+  { "load",            CMD_LOAD },
+  { "newline_default", CMD_NEWLINE_DEFAULT },
+  { "pattern",         CMD_PATTERN },
+  { "perltest",        CMD_PERLTEST },
+  { "pop",             CMD_POP },
+  { "save",            CMD_SAVE },
+  { "subject",         CMD_SUBJECT }};
 
 #define cmdlistcount sizeof(cmdlist)/sizeof(cmdstruct)
 
@@ -719,6 +720,8 @@ static uint32_t forbid_utf = 0;
 static uint32_t maxlookbehind;
 static uint32_t max_oveccount;
 static uint32_t callout_count;
+
+static uint16_t local_newline_default = 0;
 
 static VERSION_TYPE jittarget[VERSION_SIZE];
 static VERSION_TYPE version[VERSION_SIZE];
@@ -3420,7 +3423,7 @@ Returns:      nothing
 static void
 show_controls(uint32_t controls, const char *before)
 {
-fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
+fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
   before,
   ((controls & CTL_AFTERTEXT) != 0)? " aftertext" : "",
   ((controls & CTL_ALLAFTERTEXT) != 0)? " allaftertext" : "",
@@ -3428,6 +3431,7 @@ fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
   ((controls & CTL_ALLUSEDTEXT) != 0)? " allusedtext" : "",
   ((controls & CTL_ALTGLOBAL) != 0)? " altglobal" : "",
   ((controls & CTL_BINCODE) != 0)? " bincode" : "",
+  ((controls & CTL_BSR_SET) != 0)? " bsr" : "", 
   ((controls & CTL_CALLOUT_CAPTURE) != 0)? " callout_capture" : "",
   ((controls & CTL_CALLOUT_INFO) != 0)? " callout_info" : "",
   ((controls & CTL_CALLOUT_NONE) != 0)? " callout_none" : "",
@@ -3442,6 +3446,7 @@ fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
   ((controls & CTL_JITVERIFY) != 0)? " jitverify" : "",
   ((controls & CTL_MARK) != 0)? " mark" : "",
   ((controls & CTL_MEMORY) != 0)? " memory" : "",
+  ((controls & CTL_NL_SET) != 0)? " newline" : "", 
   ((controls & CTL_POSIX) != 0)? " posix" : "",
   ((controls & CTL_PUSH) != 0)? " push" : "",
   ((controls & CTL_STARTCHAR) != 0)? " startchar" : "",
@@ -3472,7 +3477,7 @@ else fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
   before,
   ((options & PCRE2_ALT_BSUX) != 0)? " alt_bsux" : "",
   ((options & PCRE2_ALT_CIRCUMFLEX) != 0)? " alt_circumflex" : "",
-  ((options & PCRE2_ALT_VERBNAMES) != 0)? " alt_verbnames" : "", 
+  ((options & PCRE2_ALT_VERBNAMES) != 0)? " alt_verbnames" : "",
   ((options & PCRE2_ALLOW_EMPTY_CLASS) != 0)? " allow_empty_class" : "",
   ((options & PCRE2_ANCHORED) != 0)? " anchored" : "",
   ((options & PCRE2_AUTO_CALLOUT) != 0)? " auto_callout" : "",
@@ -3775,8 +3780,7 @@ if ((pat_patctl.control & CTL_INFO) != 0)
     fprintf(outfile, "\\R matches %s\n", (bsr_convention == PCRE2_BSR_UNICODE)?
       "any Unicode newline" : "CR, LF, or CRLF");
 
-  if ((pat_patctl.control & CTL_NL_SET) != 0 ||
-      (FLD(compiled_code, flags) & PCRE2_NL_SET) != 0)
+  if ((FLD(compiled_code, flags) & PCRE2_NL_SET) != 0)
     {
     switch (newline_convention)
       {
@@ -3993,6 +3997,7 @@ FILE *f;
 PCRE2_SIZE serial_size;
 size_t i;
 int rc, cmd, cmdlen;
+uint16_t first_listed_newline;
 const char *cmdname;
 uint8_t *argptr, *serial;
 
@@ -4045,6 +4050,31 @@ switch(cmd)
 
   case CMD_SUBJECT:
   (void)decode_modifiers(argptr, CTX_DEFDAT, NULL, &def_datctl);
+  break;
+
+  /* Check the default newline, and if not one of those listed, set up the
+  first one to be forced. An empty list unsets. */
+
+  case CMD_NEWLINE_DEFAULT:
+  local_newline_default = 0;   /* Unset */
+  first_listed_newline = 0;
+  for (;;)
+    {
+    while (isspace(*argptr)) argptr++;
+    if (*argptr == 0) break;
+    for (i = 1; i < sizeof(newlines)/sizeof(char *); i++)
+      {
+      size_t nlen = strlen(newlines[i]);
+      if (strncmpic(argptr, (const uint8_t *)newlines[i], nlen) == 0 &&
+          isspace(argptr[nlen]))
+        {
+        if (i == NEWLINE_DEFAULT) return PR_OK;  /* Default is valid */
+        if (first_listed_newline == 0) first_listed_newline = i;
+        }
+      }
+    while (*argptr != 0 && !isspace(*argptr)) argptr++;
+    }
+  local_newline_default = first_listed_newline;
   break;
 
   /* Pop a compiled pattern off the stack. Modifiers that do not affect the
@@ -4371,6 +4401,8 @@ if ((pat_patctl.control & CTL_POSIX) != 0)
     show_controls(pat_patctl.control & ~POSIX_SUPPORTED_COMPILE_CONTROLS, msg);
     msg = "";
     }
+    
+  if (local_newline_default != 0) prmsg(&msg, "#newline_default");
 
   if (msg[0] == 0) fprintf(outfile, "\n");
 
@@ -4461,6 +4493,15 @@ if we had a hex pattern. */
 
 if ((pat_patctl.control & CTL_HEXPAT) == 0) patlen = PCRE2_ZERO_TERMINATED;
 
+/* If #newline_default has been used and the library was not compiled with an
+appropriate default newline setting, local_newline_default will be non-zero. We
+use this if there is no explicit newline modifier. */
+
+if ((pat_patctl.control & CTL_NL_SET) == 0 && local_newline_default != 0)
+  {
+  SETFLD(pat_context, newline_convention, local_newline_default);
+  }
+
 /* Compile many times when timing. */
 
 if (timeit > 0)
@@ -4549,6 +4590,14 @@ if (pat_patctl.jit != 0)
     {
     PCRE2_JIT_COMPILE(compiled_code, pat_patctl.jit);
     }
+  }
+
+/* If an explicit newline modifier was given, set the information flag in the
+pattern so that it is preserved over push/pop. */
+
+if ((pat_patctl.control & CTL_NL_SET) != 0)
+  {
+  SETFLD(compiled_code, flags, FLD(compiled_code, flags) | PCRE2_NL_SET);
   }
 
 /* Output code size and other information if requested. */

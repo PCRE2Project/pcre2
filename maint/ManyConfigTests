@@ -131,33 +131,22 @@ runtest()
     ./pcre2test -C
   fi
 
-  nl=`./pcre2test -C newline`
-  if [ "$nl" = "LF" -o "$nl" = "ANY" -o "$nl" = "ANYCRLF" ]; then
-    nlok=1
-  else
-    nlok=0
-  fi
-
   ./pcre2test -C jit >/dev/null
   jit=$?
   ./pcre2test -C pcre2-8 >/dev/null
   pcre2_8=$?
 
-  if [ $nlok -gt 0 ]; then
-    echo "Running PCRE2 library tests $withvalgrind"
-    $srcdir/RunTest $valgrind >teststdout 2>teststderr
-    if [ $? -ne 0 -o -s teststderr ]; then
-      echo " "
-      echo "**** Test failed ****"
-      cat teststderr
-      if [ -s teststdout ] ; then cat teststdout; fi
-      exit 1
-    fi
-  else
-    echo "Skipping PCRE2 library tests: newline is $nl"
+  echo "Running PCRE2 library tests $withvalgrind"
+  $srcdir/RunTest $valgrind >teststdout 2>teststderr
+  if [ $? -ne 0 -o -s teststderr ]; then
+    echo " "
+    echo "**** Test failed ****"
+    cat teststderr
+    if [ -s teststdout ] ; then cat teststdout; fi
+    exit 1
   fi
 
-  if [ $nlok -gt 0 -a $pcre2_8 -gt 0 ]; then
+  if [ $pcre2_8 -gt 0 ]; then
     echo "Running pcre2grep tests $withvalgrind"
     $srcdir/RunGrepTest $valgrind >teststdout 2>teststderr
     if [ $? -ne 0 -o -s teststderr ]; then
@@ -167,10 +156,8 @@ runtest()
       cat teststdout
       exit 1
     fi
-  elif [ $nlok -gt 0 ]; then
-    echo "Skipping pcre2grep tests: 8-bit library not compiled"
   else
-    echo "Skipping pcre2grep tests: newline is $nl"
+    echo "Skipping pcre2grep tests: 8-bit library not compiled"
   fi
 
   if [ "$jit" -gt 0 ]; then

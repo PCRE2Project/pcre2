@@ -3,6 +3,7 @@
 # 32-bit PCRE libraries, and also using the perltest.pl script.
     
 #forbid_utf
+#newline_default lf any anycrlf
 #perltest
 
 /the quick brown fox/

@@ -19,9 +19,15 @@ unset cp ls mv rm
 
 builddir=`pwd`
 pcre2grep=$builddir/pcre2grep
+pcre2test=$builddir/pcre2test
 
 if [ ! -x $pcre2grep ] ; then
   echo "** $pcre2grep does not exist or is not execuatble."
+  exit 1
+fi
+
+if [ ! -x $pcre2test ] ; then
+  echo "** $pcre2test does not exist or is not execuatble."
   exit 1
 fi
 
@@ -34,7 +40,6 @@ while [ $# -gt 0 ] ; do
   shift
 done
 
-echo " "
 pcre2grep_version=`$pcre2grep -V`
 if [ "$valgrind" = "" ] ; then
   echo "Testing $pcre2grep_version"
@@ -69,14 +74,22 @@ fi
 
 # Check for the availability of UTF-8 support
 
-./pcre2test -C unicode >/dev/null
+$pcre2test -C unicode >/dev/null
 utf8=$?
+
+# Check default newline convention. If it does not include LF, force LF.
+
+nl=`$pcre2test -C newline`
+if [ "$nl" != "LF" -a "$nl" != "ANY" -a "$nl" != "ANYCRLF" ]; then
+  pcre2grep="$pcre2grep -N LF"
+  echo "Default newline setting forced to LF" 
+fi
 
 # ------ Function to run and check a special pcre2grep arguments test -------
 
 checkspecial()
   {
-  $valgrind ./pcre2grep $1 >>testtrygrep 2>&1
+  $valgrind $pcre2grep $1 >>testtrygrep 2>&1
   if [ $? -ne $2 ] ; then
     echo "** pcre2grep $1 failed - check testtrygrep"
     exit 1

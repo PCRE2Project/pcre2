@@ -75,7 +75,7 @@ title17="Test 17: JIT-specific features when JIT is available"
 title18="Test 18: Tests of the POSIX interface, excluding UTF/UCP"
 title19="Test 19: Tests of the POSIX interface with UTF/UCP"
 title20="Test 20: Serialization tests"
-maxtest=18
+maxtest=20
 
 if [ $# -eq 1 -a "$1" = "list" ]; then
   echo $title0
@@ -699,8 +699,12 @@ for bmode in "$test8" "$test16" "$test32"; do
 
   if [ $do14 = yes ] ; then
     echo $title14
-    $sim $valgrind ./pcre2test -q $defaultstack $bmode $opt $testdata/testinput14 testtry
-    checkresult $? 14-$bits ""
+    if [ $utf -eq 0 ] ; then
+      echo "  Skipped because UTF-$bits support is not available"
+    else
+      $sim $valgrind ./pcre2test -q $defaultstack $bmode $opt $testdata/testinput14 testtry
+      checkresult $? 14-$bits ""
+    fi   
   fi
 
   # Test non-JIT match and recursion limits

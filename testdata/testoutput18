@@ -58,13 +58,13 @@ No match: POSIX code 17: match failed
     The Quick Brown Fox
  0: The Quick Brown Fox
 
-/abc.def/
+/(*LF)abc.def/
     *** Failers
 No match: POSIX code 17: match failed
     abc\ndef
 No match: POSIX code 17: match failed
 
-/abc$/
+/(*LF)abc$/
     abc
  0: abc
     abc\n
@@ -91,7 +91,7 @@ Matched without capture
  0: aaaabbbbzz
  1: bbbb
 
-/ab.cd/
+/(*ANY)ab.cd/
     ab-cd
  0: ab-cd
     ab=cd

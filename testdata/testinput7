@@ -3,6 +3,7 @@
 # used to force DFA matching for all tests.
 
 #subject dfa
+#newline_default LF any anyCRLF
 
 /\x{100}ab/utf
   \x{100}ab

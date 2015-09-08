@@ -4,6 +4,7 @@
     
 #forbid_utf
 #subject dfa
+#newline_default lf anycrlf any
      
 /abc/
     abc

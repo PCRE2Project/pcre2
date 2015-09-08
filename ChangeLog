@@ -172,6 +172,13 @@ commas.
 49. Fixed two issues in JIT. These were found by Karl Skomski with a custom
 LLVM fuzzer.
 
+50. The pcre2test program has been extended by adding the #newline_default 
+command. This has made it possible to run the standard tests when PCRE2 is 
+compiled with either CR or CRLF as the default newline convention. As part of 
+this work, the new command was added to several test files and the testing 
+scripts were modified. The pcre2grep tests can now also be run when there is no 
+LF in the default newline convention.
+
 
 Version 10.20 30-June-2015
 --------------------------

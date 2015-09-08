@@ -4,6 +4,7 @@
 # different, so they have separate output files.
     
 #forbid_utf
+#newline_default LF ANY ANYCRLF
 
 /a\Cb/
     aXb
