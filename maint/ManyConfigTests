@@ -21,13 +21,8 @@
 # The -v option causes a call to 'pcre2test -C' to happen for each
 # configuration.
 
-# Some of the tests are automatically skipped when PCRE2 is built with non-Unix
-# newline recognition because they don't work. I am hoping to reduce this as
-# much as possible in due course.
-
 useasan=1
 useusan=1
-# Temporarily disabled.
 usedebug=1
 usejit=1
 usemain=1
