@@ -10,13 +10,16 @@
 # tests, in order to run those that are giving errors. The following options
 # do this:
 #
-# -noasan      skip the test that uses -fsanitize=address
-# -nousan      skip the test that uses -fsanitize=undefined
-# -nodebug     skip the test that uses --enable-debug
-# -nojit       skip JIT tests
-# -nomain      skip the main set of tests
-# -notmp       skip the test in a temporary directory
-# -novalgrind  skip the valgrind tests
+# -noasan         skip the test that uses -fsanitize=address
+# -nousan         skip the test that uses -fsanitize=undefined
+# -nodebug        skip the test that uses --enable-debug
+# -nojit          skip all JIT tests
+# -nojitmain      skip non-valgrind JIT tests
+# -nojitvalgrind  skip JIT tests with valgrind
+# -nomain         skip the main set of tests
+# -nomainvalgrind skip the non-JIT valgrind tests
+# -notmp          skip the test in a temporary directory
+# -novalgrind     skip the valgrind tests
 
 # The -v option causes a call to 'pcre2test -C' to happen for each
 # configuration.
@@ -25,25 +28,34 @@ useasan=1
 useusan=1
 usedebug=1
 usejit=1
+usejitvalgrind=1
 usemain=1
+usemainvalgrind=1
 usetmp=1
 usevalgrind=1
 verbose=0
 
 while [ $# -gt 0 ] ; do
   case $1 in
-    -noasan)       useasan=0;;
-    -nousan)       useusan=0;; 
-    -nodebug)      usedebug=0;; 
-    -nojit)        usejit=0;;
-    -nomain)       usemain=0;;
-    -notmp)        usetmp=0;;
-    -novalgrind)   usevalgrind=0;;
-    -v)            verbose=1;;
-    *)             echo "Unknown option '$1'"; exit 1;;
+    -noasan)         useasan=0;;
+    -nousan)         useusan=0;;
+    -nodebug)        usedebug=0;;
+    -nojit)          usejit=0; usejitvalgrind=0;;
+    -nojitmain)      usejit=0;;
+    -nojitvalgrind)  usejitvalgrind=0;;
+    -nomain)         usemain=0; usemainvalgrind=0;;
+    -nomainvalgrind) usemainvalgrind=0;;
+    -notmp)          usetmp=0;;
+    -novalgrind)     usevalgrind=0;;
+    -v)              verbose=1;;
+    *)               echo "Unknown option '$1'"; exit 1;;
   esac
   shift
 done
+
+if [ $usejitvalgrind -eq 0 -a $usemainvalgrind -eq 0 ] ; then
+  usevalgrind=0
+fi
 
 # This is in case the caller has set aliases (as I do - PH)
 
@@ -103,22 +115,21 @@ runtest()
   fi
 
   CFLAGS="$CFLAGS" \
-    $srcdir/configure $opts >/dev/null 2>teststderr
-
+    $srcdir/configure $opts >/dev/null 2>teststderrM
   if [ $? -ne 0 ]; then
     echo " "
     echo "******** Error while configuring ********"
-    cat teststderr
+    cat teststderrM
     exit 1
   fi
 
   echo "Making"
-  make -j >/dev/null 2>teststderr
-  if [ $? -ne 0 -o -s teststderr ]; then
+  make -j >/dev/null 2>teststderrM
+  if [ $? -ne 0 -o -s teststderrM ]; then
     echo " "
     echo "******** Errors or warnings while making ********"
     echo " "
-    cat teststderr
+    cat teststderrM
     exit 1
   fi
 
@@ -132,23 +143,27 @@ runtest()
   pcre2_8=$?
 
   echo "Running PCRE2 library tests $withvalgrind"
-  $srcdir/RunTest $valgrind >teststdout 2>teststderr
-  if [ $? -ne 0 -o -s teststderr ]; then
+  $srcdir/RunTest $valgrind >teststdoutM 2>teststderrM
+
+  if [ $? -ne 0 -o -s teststderrM ]; then
     echo " "
     echo "**** Test failed ****"
-    cat teststderr
-    if [ -s teststdout ] ; then cat teststdout; fi
+    if [ -s teststderrM ] ; then
+      cat teststderrM
+    else
+      cat teststdoutM
+    fi
     exit 1
   fi
 
   if [ $pcre2_8 -gt 0 ]; then
     echo "Running pcre2grep tests $withvalgrind"
-    $srcdir/RunGrepTest $valgrind >teststdout 2>teststderr
-    if [ $? -ne 0 -o -s teststderr ]; then
+    $srcdir/RunGrepTest $valgrind >teststdoutM 2>teststderrM
+    if [ $? -ne 0 -o -s teststderrM ]; then
       echo " "
       echo "**** Test failed ****"
-      cat teststderr
-      cat teststdout
+      cat teststderrM
+      cat teststdoutM
       exit 1
     fi
   else
@@ -157,12 +172,12 @@ runtest()
 
   if [ "$jit" -gt 0 ]; then
     echo "Running JIT regression tests $withvalgrind"
-    $cvalgrind $srcdir/pcre2_jit_test >teststdout 2>teststderr
-    if [ $? -ne 0 -o -s teststderr ]; then
+    $cvalgrind $srcdir/pcre2_jit_test >teststdoutM 2>teststderrM
+    if [ $? -ne 0 -o -s teststderrM ]; then
       echo " "
       echo "**** Test failed ****"
-      cat teststderr
-      cat teststdout
+      cat teststderrM
+      cat teststdoutM
       exit 1
     fi
   else
@@ -180,8 +195,15 @@ testtotal=`expr 20 \* $usemain + \
   1 \* $ISGCC \* $usemain \* $useasan + \
   1 \* $ISGCC \* $usemain \* $useusan + \
   13 \* $usejit + \
-  \( 3 + 2 \* $usejit \) \* $usevalgrind`
+  3 \* $usemainvalgrind + \
+  2 \* $usejitvalgrind`
+
 testcount=0
+
+if [ $testtotal -eq 0 ] ; then
+  echo "** No tests selected"
+  exit 1
+fi
 
 valgrind=
 cvalgrind=
@@ -244,7 +266,7 @@ if [ $usemain -ne 0 ]; then
     echo "---------- Maximally configured test with --enable-debug ----------"
     opts="--disable-shared $enable_jit --enable-pcre2-16 --enable-pcre2-32 --enable-debug"
     runtest
-  fi   
+  fi
 
   echo "---------- Non-JIT tests in the current directory ----------"
   for opts in \
@@ -304,16 +326,18 @@ if [ $usevalgrind -ne 0 ]; then
   cvalgrind="valgrind -q --smc-check=all"
   withvalgrind="with valgrind"
 
-  for opts in \
-    "--disable-stack-for-recursion --disable-shared" \
-    "--with-link-size=3 --enable-pcre2-16 --enable-pcre2-32 --disable-shared" \
-    "--disable-unicode --disable-shared"
-  do
-    opts="--enable-valgrind $opts"
-    runtest
-  done
+  if [ $usemainvalgrind -ne 0 ]; then
+    for opts in \
+      "--disable-stack-for-recursion --disable-shared" \
+      "--with-link-size=3 --enable-pcre2-16 --enable-pcre2-32 --disable-shared" \
+      "--disable-unicode --disable-shared"
+    do
+      opts="--enable-valgrind $opts"
+      runtest
+    done
+  fi
 
-  if [ $usejit -ne 0 ]; then
+  if [ $usejitvalgrind -ne 0 ]; then
     for opts in \
       "--enable-jit --disable-shared" \
       "--enable-jit --enable-pcre2-16 --enable-pcre2-32"
@@ -341,26 +365,26 @@ if [ -f Makefile ]; then
   fi
 fi
 
-echo "---------- Tests in the $tmp directory ----------"
-srcdir=`pwd`
-export srcdir
-
-if [ ! -e $tmp ]; then
-  mkdir $tmp
-fi
-
-if [ ! -d $tmp ]; then
-  echo "** Failed to create $tmp or it is not a directory"
-  exit 1
-fi
-
-cd $tmp
-if [ $? -ne 0 ]; then
-  echo "** Failed to cd to $tmp"
-  exit 1
-fi
-
 if [ $usetmp -ne 0 ]; then
+  echo "---------- Tests in the $tmp directory ----------"
+  srcdir=`pwd`
+  export srcdir
+
+  if [ ! -e $tmp ]; then
+    mkdir $tmp
+  fi
+
+  if [ ! -d $tmp ]; then
+    echo "** Failed to create $tmp or it is not a directory"
+    exit 1
+  fi
+
+  cd $tmp
+  if [ $? -ne 0 ]; then
+    echo "** Failed to cd to $tmp"
+    exit 1
+  fi
+
   for opts in \
     "--disable-shared"
   do
@@ -369,8 +393,8 @@ if [ $usetmp -ne 0 ]; then
 fi
 
 echo "Removing $tmp"
-
 rm -rf $tmp
+rm -rf teststdoutM teststderrM
 
 echo "All done"
 

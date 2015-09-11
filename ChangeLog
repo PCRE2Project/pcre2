@@ -179,6 +179,11 @@ this work, the new command was added to several test files and the testing
 scripts were modified. The pcre2grep tests can now also be run when there is no 
 LF in the default newline convention.
 
+51. The RunTest script has been modified so that, when JIT is used and valgrind
+is specified, a valgrind suppressions file is set up to ignore "Invalid read of
+size 16" errors because these are false positives when the hardware supports
+the SSE2 instruction set.
+
 
 Version 10.20 30-June-2015
 --------------------------
