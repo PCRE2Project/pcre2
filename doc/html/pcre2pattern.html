@@ -2925,7 +2925,10 @@ that does not include a closing parenthesis. The name is not processed in
 any way, and it is not possible to include a closing parenthesis in the name.
 However, if the PCRE2_ALT_VERBNAMES option is set, normal backslash processing 
 is applied to verb names and only an unescaped closing parenthesis terminates 
-the name.
+the name. A closing parenthesis can be included in a name either as \) or 
+between \Q and \E. If the PCRE2_EXTENDED option is set, unescaped whitespace 
+in verb names is skipped and #-comments are recognized, exactly as in the rest 
+of the pattern.
 </P>
 <P>
 The maximum length of a name is 255 in the 8-bit library and 65535 in the
@@ -3348,7 +3351,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC30" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 30 August 2015
+Last updated: 01 September 2015
 <br>
 Copyright &copy; 1997-2015 University of Cambridge.
 <br>

@@ -170,7 +170,7 @@ use the contents of the <i>preg</i> structure. If, for example, you pass it to
 This area is not simple, because POSIX and Perl take different views of things.
 It is not possible to get PCRE2 to obey POSIX semantics, but then PCRE2 was
 never intended to be a POSIX engine. The following table lists the different
-possibilities for matching newline characters in PCRE2:
+possibilities for matching newline characters in Perl and PCRE2:
 <pre>
                           Default   Change with
 
@@ -180,7 +180,7 @@ possibilities for matching newline characters in PCRE2:
   $ matches \n in middle     no     PCRE2_MULTILINE
   ^ matches \n in middle     no     PCRE2_MULTILINE
 </pre>
-This is the equivalent table for POSIX:
+This is the equivalent table for a POSIX-compatible pattern matcher:
 <pre>
                           Default   Change with
 
@@ -190,14 +190,18 @@ This is the equivalent table for POSIX:
   $ matches \n in middle     no     REG_NEWLINE
   ^ matches \n in middle     no     REG_NEWLINE
 </pre>
-PCRE2's behaviour is the same as Perl's, except that there is no equivalent for
-PCRE2_DOLLAR_ENDONLY in Perl. In both PCRE2 and Perl, there is no way to stop
-newline from matching [^a].
+This behaviour is not what happens when PCRE2 is called via its POSIX
+API. By default, PCRE2's behaviour is the same as Perl's, except that there is
+no equivalent for PCRE2_DOLLAR_ENDONLY in Perl. In both PCRE2 and Perl, there
+is no way to stop newline from matching [^a].
 </P>
 <P>
-The default POSIX newline handling can be obtained by setting PCRE2_DOTALL and
-PCRE2_DOLLAR_ENDONLY, but there is no way to make PCRE2 behave exactly as for
-the REG_NEWLINE action.
+Default POSIX newline handling can be obtained by setting PCRE2_DOTALL and
+PCRE2_DOLLAR_ENDONLY when calling <b>pcre2_compile()</b> directly, but there is
+no way to make PCRE2 behave exactly as for the REG_NEWLINE action. When using
+the POSIX API, passing REG_NEWLINE to PCRE2's <b>regcomp()</b> function
+causes PCRE2_MULTILINE to be passed to <b>pcre2_compile()</b>, and REG_DOTALL 
+passes PCRE2_DOTALL. There is no way to pass PCRE2_DOLLAR_ENDONLY.
 </P>
 <br><a name="SEC5" href="#TOC1">MATCHING A PATTERN</a><br>
 <P>
@@ -283,9 +287,9 @@ Cambridge, England.
 </P>
 <br><a name="SEC9" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 20 October 2014
+Last updated: 03 September 2015
 <br>
-Copyright &copy; 1997-2014 University of Cambridge.
+Copyright &copy; 1997-2015 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE2 index page</a>.

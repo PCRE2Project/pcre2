@@ -247,6 +247,36 @@ COMMAND LINES
        as  described  in  the  section entitled "Saving and restoring compiled
        patterns" below.
 
+         #newline_default [<newline-list>]
+
+       When PCRE2 is built, a default newline  convention  can  be  specified.
+       This  determines which characters and/or character pairs are recognized
+       as indicating a newline in a pattern or subject string. The default can
+       be  overridden when a pattern is compiled. The standard test files con-
+       tain tests of various newline conventions,  but  the  majority  of  the
+       tests  expect  a  single  linefeed  to  be  recognized  as a newline by
+       default. Without special action the tests would fail when PCRE2 is com-
+       piled with either CR or CRLF as the default newline.
+
+       The #newline_default command specifies a list of newline types that are
+       acceptable as the default. The types must be one of CR, LF, CRLF,  ANY-
+       CRLF, or ANY (in upper or lower case), for example:
+
+         #newline_default LF Any anyCRLF
+
+       If the default newline is in the list, this command has no effect. Oth-
+       erwise, except when testing the POSIX  API,  a  newline  modifier  that
+       specifies  the  first  newline  convention in the list (LF in the above
+       example) is added to any pattern that does not already have  a  newline
+       modifier. If the newline list is empty, the feature is turned off. This
+       command is present in a number of the standard test input files.
+
+       When the POSIX API is being tested there is  no  way  to  override  the
+       default  newline  convention,  though it is possible to set the newline
+       convention from within the pattern. A warning is  given  if  the  posix
+       modifier is used when #newline_default would set a default for the non-
+       POSIX API.
+
          #pattern <modifier-list>
 
        This command sets a default modifier list that applies  to  all  subse-
@@ -558,23 +588,49 @@ PATTERN MODIFIERS
 
    JIT compilation
 
-       The  /jit  modifier  may optionally be followed by an equals sign and a
-       number in the range 0 to 7:
+       Just-in-time  (JIT)  compiling  is  a heavyweight optimization that can
+       greatly speed up pattern matching. See the pcre2jit  documentation  for
+       details.  JIT  compiling  happens, optionally, after a pattern has been
+       successfully compiled into an internal form. The JIT compiler  converts
+       this to optimized machine code. It needs to know whether the match-time
+       options PCRE2_PARTIAL_HARD and PCRE2_PARTIAL_SOFT are going to be used,
+       because  different  code  is generated for the different cases. See the
+       partial modifier in "Subject Modifiers" below for details of how  these
+       options are specified for each match attempt.
+
+       JIT  compilation  is  requested by the /jit pattern modifier, which may
+       optionally be followed by an equals sign and a number in the range 0 to
+       7.   The  three bits that make up the number specify which of the three
+       JIT operating modes are to be compiled:
+
+         1  compile JIT code for non-partial matching
+         2  compile JIT code for soft partial matching
+         4  compile JIT code for hard partial matching
+
+       The possible values for the /jit modifier are therefore:
 
          0  disable JIT
-         1  use JIT for normal match only
-         2  use JIT for soft partial match only
-         3  use JIT for normal match and soft partial match
-         4  use JIT for hard partial match only
-         6  use JIT for soft and hard partial match
+         1  normal matching only
+         2  soft partial matching only
+         3  normal and soft partial matching
+         4  hard partial matching only
+         6  soft and hard partial matching only
          7  all three modes
 
-       If no number is given, 7 is assumed. If JIT compilation is  successful,
-       the  compiled JIT code will automatically be used when pcre2_match() is
-       run for the appropriate type of match, except  when  incompatible  run-
-       time options are specified. For more details, see the pcre2jit documen-
-       tation. See also the jitstack modifier below for a way of  setting  the
-       size of the JIT stack.
+       If no number is given, 7 is  assumed.  The  phrase  "partial  matching"
+       means a call to pcre2_match() with either the PCRE2_PARTIAL_SOFT or the
+       PCRE2_PARTIAL_HARD option set. Note that such a call may return a  com-
+       plete match; the options enable the possibility of a partial match, but
+       do not require it. Note also that if you request JIT  compilation  only
+       for  partial  matching (for example, /jit=2) but do not set the partial
+       modifier on a subject line, that match will not use  JIT  code  because
+       none was compiled for non-partial matching.
+
+       If  JIT compilation is successful, the compiled JIT code will automati-
+       cally be used when an appropriate type of match  is  run,  except  when
+       incompatible  run-time options are specified. For more details, see the
+       pcre2jit documentation. See also the jitstack modifier below for a  way
+       of setting the size of the JIT stack.
 
        If  the  jitfast  modifier is specified, matching is done using the JIT
        "fast path" interface, pcre2_jit_match(), which skips some of the  san-
@@ -628,8 +684,10 @@ PATTERN MODIFIERS
 
        The /posix modifier causes pcre2test to call PCRE2 via the POSIX  wrap-
        per  API  rather  than  its  native  API.  This supports only the 8-bit
-       library.  When the POSIX API is being used, the following pattern modi-
-       fiers set options for the regcomp() function:
+       library.  Note that it does not imply  POSIX  matching  semantics;  for
+       more  detail  see  the  pcre2posix documentation. When the POSIX API is
+       being used, the following pattern modifiers set options  for  the  reg-
+       comp() function:
 
          caseless           REG_ICASE
          multiline          REG_NEWLINE
@@ -1333,5 +1391,5 @@ AUTHOR
 
 REVISION
 
-       Last updated: 30 August 2015
+       Last updated: 12 September 2015
        Copyright (c) 1997-2015 University of Cambridge.
