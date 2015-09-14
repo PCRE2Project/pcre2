@@ -1,4 +1,4 @@
-.TH PCRE2TEST 1 "12 September 2015" "PCRE 10.21"
+.TH PCRE2TEST 1 "14 September 2015" "PCRE 10.21"
 .SH NAME
 pcre2test - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -443,6 +443,12 @@ the start of a modifier list. For example:
 .sp
   abc\e=notbol,notempty
 .sp
+If the subject string is empty and \e= is followed by whitespace, the line is 
+treated as a comment line, and is not used for matching. For example:
+.sp
+  \e= This is a comment.
+  abc\e= This is an invalid modifier list.
+.sp    
 A backslash followed by any other non-alphanumeric character just escapes that
 character. A backslash followed by anything else causes an error. However, if
 the very last character in the line is a backslash (and there is no modifier
@@ -654,9 +660,9 @@ If no number is given, 7 is assumed. The phrase "partial matching" means a call
 to \fBpcre2_match()\fP with either the PCRE2_PARTIAL_SOFT or the
 PCRE2_PARTIAL_HARD option set. Note that such a call may return a complete
 match; the options enable the possibility of a partial match, but do not
-require it. Note also that if you request JIT compilation only for partial 
-matching (for example, /jit=2) but do not set the \fBpartial\fP modifier on a 
-subject line, that match will not use JIT code because none was compiled for 
+require it. Note also that if you request JIT compilation only for partial
+matching (for example, /jit=2) but do not set the \fBpartial\fP modifier on a
+subject line, that match will not use JIT code because none was compiled for
 non-partial matching.
 .P
 If JIT compilation is successful, the compiled JIT code will automatically be
@@ -1519,6 +1525,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 12 September 2015
+Last updated: 14 September 2015
 Copyright (c) 1997-2015 University of Cambridge.
 .fi

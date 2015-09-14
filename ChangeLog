@@ -184,6 +184,9 @@ is specified, a valgrind suppressions file is set up to ignore "Invalid read of
 size 16" errors because these are false positives when the hardware supports
 the SSE2 instruction set.
 
+52. It is now possible to have comment lines amid the subject strings in 
+pcre2test (and perltest.sh) input.
+
 
 Version 10.20 30-June-2015
 --------------------------

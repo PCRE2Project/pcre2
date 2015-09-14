@@ -6975,7 +6975,8 @@ while (notdone)
       skipping = FALSE;
       setlocale(LC_CTYPE, "C");
       }
-    else if (!skipping) rc = process_data();
+    else if (!skipping && !(p[0] == '\\' && p[1] == '=' && isspace(p[2]))) 
+      rc = process_data();
     }
 
   /* We do not have a pattern set up for testing. Lines starting with # are
