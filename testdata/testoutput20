@@ -53,6 +53,7 @@ Subject length lower bound = 6
  0: C
  1: C
 MK: A
+\= Expect no match     
     D 
 No match, mark = A
     

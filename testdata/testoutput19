@@ -10,6 +10,7 @@
  0: a\x{1234}b
 
 /\w/
+\= Expect no match
     +++\x{c2}
 No match: POSIX code 17: match failed
 

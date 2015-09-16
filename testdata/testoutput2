@@ -62,8 +62,7 @@ Subject length lower bound = 3
  0: abc
     abc\=anchored
  0: abc
-    *** Failers
-No match
+\= Expect no match
     defabc\=anchored
 No match
     ABC
@@ -78,8 +77,7 @@ Subject length lower bound = 3
  0: abc
     abc\=anchored
  0: abc
-    *** Failers
-No match
+\= Expect no match
     defabc
 No match
     defabc\=anchored
@@ -115,8 +113,7 @@ Overall options: anchored
 Subject length lower bound = 3
     abc
  0: abc
-    *** Failers
-No match
+\= Expect no match
     def\nabc
 No match
 
@@ -320,8 +317,7 @@ Last code unit = 'c'
 Subject length lower bound = 3
     abc
  0: abc
-    *** Failers
-No match
+\= Expect no match
     abc\n
 No match
     abc\ndef
@@ -346,8 +342,7 @@ Options: anchored
 Subject length lower bound = 19
     the quick brown fox
  0: the quick brown fox
-    *** Failers
-No match
+\= Expect no match
     this is a line with the quick brown fox
 No match
 
@@ -475,8 +470,7 @@ Subject length lower bound = 3
  0: foo
     catfoo
  0: foo
-    *** Failers
-No match
+\= Expect no match
     the barfoo
 No match
     and cattlefoo
@@ -616,8 +610,7 @@ Subject length lower bound = 1
  0: a
     a\n
  0: a
-    *** Failers
-No match
+\= Expect no match
     a\=noteol
 No match
     a\n\=noteol
@@ -634,8 +627,7 @@ Subject length lower bound = 1
  0: a
     a\n\=noteol
  0: a
-    *** Failers
-No match
+\= Expect no match
     a\=noteol
 No match
 
@@ -693,8 +685,7 @@ Last code unit = 'r'
 Subject length lower bound = 3
     foo\nbarbar
  0: bar
-    ***Failers
-No match
+\= Expect no match
     rhubarb
 No match
     barbell
@@ -712,8 +703,7 @@ Last code unit = 'r'
 Subject length lower bound = 3
     foo\nbarbar
  0: bar
-    ***Failers
-No match
+\= Expect no match
     rhubarb
 No match
     barbell
@@ -731,8 +721,7 @@ Subject length lower bound = 3
  0: abc
     def\nabc
  0: abc
-    *** Failers
-No match
+\= Expect no match
     defabc
 No match
 
@@ -757,8 +746,7 @@ Subject length lower bound = 5
  0: -cart
     a donkey-cart race
  0: -cart
-    *** Failers
-No match
+\= Expect no match
     cart
 No match
     horse-and-cart
@@ -801,8 +789,7 @@ Subject length lower bound = 2
  0: ZZ
     BZZ
  0: ZZ
-    *** Failers
-No match
+\= Expect no match
     ZZ
 No match
     abXYZZ
@@ -822,16 +809,11 @@ Subject length lower bound = 3
  0: bar
     foobbar
  0: bar
-    *** Failers
-No match
+\= Expect no match
     fooabar
 No match
 
-/This one is here because Perl behaves differently; see also the following/I
-Capturing subpattern count = 0
-First code unit = 'T'
-Last code unit = 'g'
-Subject length lower bound = 73
+# This one is here because Perl behaves differently; see also the following.
 
 /^(a\1?){4}$/I
 Capturing subpattern count = 1
@@ -839,23 +821,21 @@ Max back reference = 1
 Compile options: <none>
 Overall options: anchored
 Subject length lower bound = 4
+\= Expect no match
     aaaa
 No match
     aaaaaa
 No match
     
-/Perl does not fail these two for the final subjects. Neither did PCRE until/
-/release 8.01. The problem is in backtracking into a subpattern that contains/
-No match
-/a recursive reference to itself. PCRE has now made these into atomic patterns./
-No match
+# Perl does not fail these two for the final subjects. Neither did PCRE until
+# release 8.01. The problem is in backtracking into a subpattern that contains
+# a recursive reference to itself. PCRE has now made these into atomic patterns.
 
 /^(xa|=?\1a){2}$/
     xa=xaa
  0: xa=xaa
  1: =xaa
-    ** Failers
-No match
+\= Expect no match
     xa=xaaa
 No match
 
@@ -863,16 +843,11 @@ No match
     xa=xaa
  0: xa=xaa
  1: =xaa
-    ** Failers
-No match
+\= Expect no match
     xa=xaaa
 No match
 
-/These are syntax tests from Perl 5.005/I
-Capturing subpattern count = 0
-First code unit = 'T'
-Last code unit = '5'
-Subject length lower bound = 38
+# These are syntax tests from Perl 5.005
 
 /a[b-a]/
 Failed: error 108 at offset 4: range out of order in character class
@@ -1234,8 +1209,7 @@ Subject length lower bound = 3
  0+ issippi
  0: iss
  0+ ippi
-    *** Failers
-No match
+\= Expect no match
     Mississippi\=anchored
 No match
 
@@ -1585,8 +1559,7 @@ Subject length lower bound = 0
  0: ab
     \
  0: 
-    *** Failers
- 0: 
+\= Expect no match
     \=notempty
 No match
 
@@ -1600,8 +1573,7 @@ Subject length lower bound = 0
  0: 
     ab-c\=notempty
  0: -
-    *** Failers
- 0: 
+\= Expect no match
     abc\=notempty
 No match
 
@@ -1639,8 +1611,7 @@ Subject length lower bound = 2
  0: ()
     12(abcde(fsh)xyz(foo(bar))lmno)89
  0: (abcde(fsh)xyz(foo(bar))lmno)
-    *** Failers
-No match
+\= Expect no match
     abcd
 No match
     abcd)
@@ -1677,8 +1648,7 @@ Subject length lower bound = 3
  0: (c)
     ((ab))
  0: ((ab))
-    *** Failers
-No match
+\= Expect no match
     ()
 No match
 
@@ -2135,9 +2105,7 @@ Subject length lower bound = 2
     aB
  0: aB
  1: a
-    *** Failers
- 0: ai
- 1: a
+\= Expect no match
     Ab
 No match
     AB
@@ -2660,8 +2628,7 @@ Subject length lower bound = 2
  0: ab
     aB
  0: aB
-    *** Failers
-No match
+\= Expect no match
     AB
 No match
 
@@ -2685,8 +2652,7 @@ Subject length lower bound = 2
     aB
  0: aB
  1: aB
-    *** Failers
-No match
+\= Expect no match
     AB
 No match
 
@@ -2832,8 +2798,7 @@ Capturing subpattern count = 0
 Starting code units: 0 1 2 3 4 5 6 7 8 9 A B C D E F G H I J K L M N O P 
   Q R S T U V W X Y Z _ a b c d e f g h i j k l m n o p q r s t u v w x y z 
 Subject length lower bound = 1
-    *** Failers
- 0: F
+\= Expect no match
     xxxxx
 No match
 
@@ -2918,8 +2883,7 @@ Subject length lower bound = 0
     now is the time for all good men to come to the aid of the party
  0: now is the time for all good men to come to the aid of the party
  1: party
-    *** Failers
-No match
+\= Expect no match
     this is not a line with only words and spaces!
 No match
 
@@ -2931,8 +2895,7 @@ Subject length lower bound = 2
  0: 12345a
  1: 12345
  2: a
-    *** Failers
-No match
+\= Expect no match
     12345+
 No match
 
@@ -2994,8 +2957,7 @@ Subject length lower bound = 3
     (abc(def)xyz)
  0: (abc(def)xyz)
  1: xyz
-    *** Failers
-No match
+\= Expect no match
     ((()aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 No match
 
@@ -3219,8 +3181,7 @@ Subject length lower bound = 2
  0: <abc<>def>
     <abc<>
  0: <>
-    *** Failers
-No match
+\= Expect no match
     <abc
 No match
 
@@ -3436,8 +3397,7 @@ Subject length lower bound = 1
  0: a
   xy\nabc
  0: a
-  *** Failers
-No match
+\= Expect no match
   xyabc
 No match
 
@@ -3473,8 +3433,7 @@ Subject length lower bound = 6
 --->1234abcdef
   0     ^  ^       d
  0: abcdef
-    *** Failers
-No match
+\= Expect no match
     abcxyz
 No match
     abcxyzf
@@ -3506,8 +3465,7 @@ Subject length lower bound = 7
   1    ^           \d
   2    ^   ^       d
  0: 4abcdef
-    *** Failers
-No match
+\= Expect no match
     abcdef
 No match
 
@@ -3524,8 +3482,7 @@ Subject length lower bound = 7
   1    ^           \d
   2    ^   ^       d
  0: 4abcdef
-    *** Failers
-No match
+\= Expect no match
     abcdef
 No match
 
@@ -3549,8 +3506,6 @@ Capturing subpattern count = 0
 First code unit = 'a'
 Last code unit = 'f'
 Subject length lower bound = 6
-    *** Failers
-No match
     \x83\x0\x61bcdef
 --->\x83\x00abcdef
   0         ^  ^       d
@@ -3583,8 +3538,7 @@ Callout 1: last capture = 1
     123abcdefC-\=callout_none
  0: abcdef
  1: abc
-    *** Failers
-No match
+\= Expect no match
     123abcdef\=callout_fail=1
 --->123abcdef
   0    ^  ^       d
@@ -3610,10 +3564,6 @@ Subject length lower bound = 0
   1 ^     ^    )
  0: abcabc
  1: abc
-    *** Failers
---->*** Failers
-  0 ^               (abc(?C1))*
- 0: 
     abcabcabc\=callout_fail=1:3
 --->abcabcabc
   0 ^             (abc(?C1))*
@@ -3755,6 +3705,7 @@ Capturing subpattern count = 2
 First code unit = 'a'
 Last code unit = 'b'
 Subject length lower bound = 2
+\= Expect no match
     abbbbbccc\=callout_data=1
 --->abbbbbccc
   1 ^        ^    
@@ -3766,6 +3717,7 @@ Capturing subpattern count = 2
 First code unit = 'a'
 Last code unit = 'b'
 Subject length lower bound = 2
+\= Expect no match
     abbbbbccc\=callout_data=1
 --->abbbbbccc
   1 ^ ^           
@@ -3829,8 +3781,7 @@ Subject length lower bound = 3
  1: xxab
  2: xxab
  3: xxab
-    *** Failers
-No match
+\= Expect no match
     xyab
 No match
 
@@ -3849,8 +3800,7 @@ Subject length lower bound = 0
     a(b(c))d
  0: a(b(c))d
  1: d
-    *** Failers)
-No match
+\= Expect no match)
     a(b(c)d
 No match
 
@@ -3919,8 +3869,7 @@ Subject length lower bound = 1
     -12
  0: -12
  1: -12
-    *** Failers
-No match
+\= Expect no match
     ((2+2)*-3)-7)
 No match
 
@@ -3937,8 +3886,7 @@ Subject length lower bound = 3
  0: xxyzxyzz
  1: xxyzxyzz
  2: xyzxyz
-    *** Failers
-No match
+\= Expect no match
     xxyzz
 No match
     xxyzxyzxyzz
@@ -3974,8 +3922,7 @@ Subject length lower bound = 2
  0: <>
  1: <>
  2: <>
-    *** Failers
-No match
+\= Expect no match
     <abc
 No match
 
@@ -4144,8 +4091,7 @@ Subject length lower bound = 0
  2: <unset>
  3: Able was I ere I saw Elba
  4: A
-    *** Failers
-No match
+\= Expect no match
     The quick brown fox
 No match
 
@@ -4323,6 +4269,7 @@ Subject length lower bound = 2
 Callout data = 1
  0: ab
  1: ab
+\= Expect no match    
    aaabbb\=callout_data=-1
 --->aaabbb
   1 ^  ^       b
@@ -4431,8 +4378,7 @@ Subject length lower bound = 3
  1: 10,20,30,5,5,4,4,2,43,23,4234
  2: 10
  3: ,4234
-    *** Failers
-No match
+\= Expect no match
     []
 No match
 
@@ -4643,6 +4589,7 @@ Subject length lower bound = 5
  +4 ^   ^     e
  +5 ^    ^    
  0: abcde
+\= Expect no match
   abcdfe
 --->abcdfe
  +0 ^          a
@@ -4766,6 +4713,7 @@ Subject length lower bound = 2
  +2 ^   ^     b
  +3 ^    ^    
  0: aaaab
+\= Expect no match 
   aaaacb
 --->aaaacb
  +0 ^          a+
@@ -4833,8 +4781,7 @@ Subject length lower bound = 4
 +10 ^   ^    
  0: defx
  1: def
-  ** Failers 
-No match
+\= Expect no match 
   abcdefzx
 --->abcdefzx
  +0 ^            (abc|def)
@@ -4908,8 +4855,7 @@ Subject length lower bound = 4
 +10 ^   ^    
  0: defx
  1: def
-  ** Failers 
-No match
+\= Expect no match 
   abcdefzx
 --->abcdefzx
  +0 ^            (abc|def)
@@ -5025,6 +4971,7 @@ Capturing subpattern count = 1
 Options: auto_callout
 Starting code units: a b x 
 Subject length lower bound = 2
+\= Expect no match 
     Note: that { does NOT introduce a quantifier
 --->Note: that { does NOT introduce a quantifier
  +0         ^                                        ([ab]{,4}c|xy)
@@ -5074,6 +5021,7 @@ Capturing subpattern count = 1
 Options: auto_callout
 Starting code units: a b x 
 Subject length lower bound = 2
+\= Expect no match 
     Note: that { does NOT introduce a quantifier
 --->Note: that { does NOT introduce a quantifier
  +0         ^                                        ([ab]{,4}c|xy)
@@ -5240,8 +5188,7 @@ Partial match: abcd
  0: abcde
     the quick brown abc\=ps
 Partial match: abc
-    ** Failers\=ps
-No match
+\= Expect no match\=ps
     the quick brown abxyz fox\=ps
 No match
 
@@ -5282,8 +5229,7 @@ Partial match: 02/
 Partial match: 02/0
     02/1\=ps
 Partial match: 02/1
-    ** Failers\=ps
-No match
+\= Expect no match\=ps
     \=ps
 No match
     123\=ps
@@ -5363,8 +5309,7 @@ Partial match: 1234
 Partial match: 12345
     12345X
  0: 12345X
-    *** Failers
-No match
+\= Expect no match
     1X
 No match
     123456\=ps
@@ -5403,8 +5348,7 @@ Last code unit = 'k'
 Subject length lower bound = 10
     this is a line\nbreak
  0: line\x0abreak
-    ** Failers
-No match
+\= Expect no match
     line one\nthis is a line\nbreak in the second line
 No match
 
@@ -5417,8 +5361,7 @@ Last code unit = 'k'
 Subject length lower bound = 10
     this is a line\nbreak
  0: line\x0abreak
-    ** Failers
-No match
+\= Expect no match
     line one\nthis is a line\nbreak in the second line
 No match
 
@@ -5429,8 +5372,7 @@ Last code unit = 'd'
 Subject length lower bound = 4
     AbCd
  0: AbCd
-    ** Failers
-No match
+\= Expect no match
     abcd
 No match
 
@@ -5736,8 +5678,6 @@ Subject length lower bound = 2
  2: <unset>
  3: a2
   C a2 (2) A (non-unique)
-    ** Failers
-No match
     a1b\=copy=Z,copy=A
  0: a1
  1: a1
@@ -5822,8 +5762,6 @@ Subject length lower bound = 2
  2: <unset>
  3: a2
   G a2 (2) A (non-unique)
-    ** Failers
-No match
     a1b\=get=Z,get=A
  0: a1
  1: a1
@@ -5903,14 +5841,9 @@ Subject length lower bound = 2
 /^(?P<A>a) (?J:(?P<B>b)(?P<B>c)) (?P<A>d)/I
 Failed: error 143 at offset 37: two named subpatterns have the same name (PCRE2_DUPNAMES not set)
 
-/ In this next test, J is not set at the outer level; consequently it isn't
-set in the pattern's options; consequently pcre_get_named_substring() produces
-a random value. /Ix
-Capturing subpattern count = 1
-Options: extended
-First code unit = 'I'
-Last code unit = 'e'
-Subject length lower bound = 141
+# In this next test, J is not set at the outer level; consequently it isn't set
+# in the pattern's options; consequently pcre2_substring_get_byname() produces
+# a random value.
 
 /^(?P<A>a) (?J:(?P<B>b)(?P<B>c)) (?P<C>d)/I
 Capturing subpattern count = 4
@@ -5946,8 +5879,7 @@ Subject length lower bound = 1
  1: a
     bc
  0: b
-    ** Failers
-No match
+\= Expect no match
     abc
 No match
 
@@ -6046,8 +5978,7 @@ Subject length lower bound = 3
  0: abc
     xyz\r\nabc
  0: abc
-    ** Failers
-No match
+\= Expect no match
     xyz\rabc
 No match
     xyzabc\r
@@ -6068,8 +5999,7 @@ Last code unit = 'c'
 Subject length lower bound = 3
     xyz\r\nabclf>
  0: abc
-    ** Failers
-No match
+\= Expect no match
     xyz\nabclf
 No match
     xyz\rabclf
@@ -6084,8 +6014,7 @@ Last code unit = 'c'
 Subject length lower bound = 3
     xyz\rabc
  0: abc
-    ** Failers
-No match
+\= Expect no match
     xyz\nabc
 No match
     xyz\r\nabc
@@ -6379,8 +6308,7 @@ Last code unit = 'A'
 Subject length lower bound = 3
     aaaA5
  0: aaaA5
-    ** Failers
-No match
+\= Expect no match
     aaaa5
 No match
 
@@ -7094,8 +7022,7 @@ Failed: error 141 at offset 3: unrecognized character after (?P
     bXbX
  0: bX
  1: X
-    ** Failers
-No match
+\= Expect no match
     aXaX
 No match
     aXbX
@@ -7141,8 +7068,7 @@ Failed: error 115 at offset 8: reference to non-existent subpattern
  0: bx
  1: bx
  2: x
-    ** Failers
-No match
+\= Expect no match
     axby
 No match
 
@@ -7162,8 +7088,7 @@ No match
  1: Xy
  2: X
  3: y
-    ** Failers
-No match
+\= Expect no match
     x
 No match
 
@@ -7311,8 +7236,7 @@ Subject length lower bound = 0
  2: <unset>
  3: Able was I ere I saw Elba
  4: A
-    *** Failers
-No match
+\= Expect no match
     The quick brown fox
 No match
 
@@ -7345,8 +7269,7 @@ Subject length lower bound = 2
  0: adaa
  1: a
  2: d
-    ** Failers
-No match
+\= Expect no match
     addd
 No match
     adbb
@@ -7361,8 +7284,7 @@ No match
  0: bdab
  1: b
  2: d
-    ** Failers
-No match
+\= Expect no match
     bddd
 No match
 
@@ -7401,39 +7323,36 @@ Last code unit = 'z'
 Subject length lower bound = 3
 
 /(a|)*\d/
-  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\=ovector=0
-No match
   aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa4\=ovector=0
  0: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa4
  1: 
+\= Expect no match
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\=ovector=0
+No match
 
 /^a.b/newline=lf
     a\rb
  0: a\x0db
-    ** Failers
-No match
+\= Expect no match
     a\nb
 No match
 
 /^a.b/newline=cr
     a\nb
  0: a\x0ab
-    ** Failers
-No match
+\= Expect no match
     a\rb
 No match
 
 /^a.b/newline=anycrlf
     a\x85b
  0: a\x85b
-    ** Failers
-No match
+\= Expect no match
     a\rb
 No match
 
 /^a.b/newline=any
-    ** Failers
-No match
+\= Expect no match
     a\nb
 No match
     a\rb
@@ -7474,8 +7393,7 @@ No match
  0: a\x0cb
     a\x85b
  0: a\x85b
-    ** Failers
-No match
+\= Expect no match
     a\n\rb
 No match
 
@@ -7516,8 +7434,7 @@ No match
  0: a\x0a\x0db
     a\n\r\x85\x0cb
  0: a\x0a\x0d\x85\x0cb
-    ** Failers
-No match
+\= Expect no match
     ab
 No match
 
@@ -7536,8 +7453,7 @@ No match
  0: a\x0a\x0d\x0a\x0db
     a\n\n\r\nb
  0: a\x0a\x0a\x0d\x0ab
-    ** Failers
-No match
+\= Expect no match
     a\n\n\n\rb
 No match
     a\r
@@ -7587,17 +7503,19 @@ Subject length lower bound = 3
  1: x
 
 /(abc)(?i:(?1))/
-   defabcabcxyz
+    defabcabcxyz
  0: abcabc
  1: abc
-   DEFabcABCXYZ
+\= Expect no match
+    DEFabcABCXYZ
 No match
 
 /(abc)(?:(?i)(?1))/
-   defabcabcxyz
+    defabcabcxyz
  0: abcabc
  1: abc
-   DEFabcABCXYZ
+\= Expect no match
+    DEFabcABCXYZ
 No match
 
 /^(a)\g-2/
@@ -7618,16 +7536,14 @@ Failed: error 115 at offset 9: reference to non-existent subpattern
 /^a.b/newline=lf
     a\rb
  0: a\x0db
-    *** Failers
-No match
+\= Expect no match
     a\nb
 No match
 
 /.+foo/
     afoo
  0: afoo
-    ** Failers
-No match
+\= Expect no match
     \r\nfoo
 No match
     \nfoo
@@ -7638,16 +7554,14 @@ No match
  0: afoo
     \nfoo
  0: \x0afoo
-    ** Failers
-No match
+\= Expect no match
     \r\nfoo
 No match
 
 /.+foo/newline=any
     afoo
  0: afoo
-    ** Failers
-No match
+\= Expect no match
     \nfoo
 No match
     \r\nfoo
@@ -7666,8 +7580,7 @@ No match
  0: 
     abc\n\rxyz  
  0: 
-    ** Failers 
-No match
+\= Expect no match 
     abc\r\nxyz
 No match
 
@@ -7702,8 +7615,7 @@ No match
 /^X/m
     XABC
  0: X
-    ** Failers 
-No match
+\= Expect no match 
     XABC\=notbol
 No match
 
@@ -7737,8 +7649,7 @@ No match
     xyabcabc
  0: xyabcabc
  1: abc
-    ** Failers
-No match
+\= Expect no match
     xyabc  
 No match
     
@@ -7776,8 +7687,7 @@ Failed: error 115 at offset 5: reference to non-existent subpattern
  1: abc
     Y
  0: Y
-    ** Failers
-No match
+\= Expect no match
     abcY   
 No match
     
@@ -7807,8 +7717,7 @@ No match
  0: YabcXabcXabc
  1: Xabc
  2: abc
-    ** Failers
-No match
+\= Expect no match
     XabcXabc  
 No match
 
@@ -7858,8 +7767,7 @@ Failed: error 115 at offset 7: reference to non-existent subpattern
     bon-bon 
  0: bon-bon
  1: bon
-    ** Failers
-No match
+\= Expect no match
     tom-bon  
 No match
 
@@ -7965,8 +7873,7 @@ Failed: error 142 at offset 4: syntax error in subpattern name (missing terminat
         Ket
         End
 ------------------------------------------------------------------
-    ** Failers
-No match
+\= Expect no match
     XXXX
 No match
     
@@ -8194,6 +8101,7 @@ Failed: error 106 at offset 10: missing terminating ] for character class
 ------------------------------------------------------------------
 
 /^a+(*FAIL)/auto_callout
+\= Expect no match
     aaaaaa
 --->aaaaaa
  +0 ^          ^
@@ -8207,6 +8115,7 @@ Failed: error 106 at offset 10: missing terminating ] for character class
 No match
     
 /a+b?c+(*FAIL)/auto_callout
+\= Expect no match
     aaabccc
 --->aaabccc
  +0 ^           a+
@@ -8230,6 +8139,7 @@ No match
 No match
 
 /a+b?(*PRUNE)c+(*FAIL)/auto_callout
+\= Expect no match
     aaabccc
 --->aaabccc
  +0 ^           a+
@@ -8256,6 +8166,7 @@ No match
 No match
 
 /a+b?(*COMMIT)c+(*FAIL)/auto_callout
+\= Expect no match
     aaabccc
 --->aaabccc
  +0 ^           a+
@@ -8268,6 +8179,7 @@ No match
 No match
     
 /a+b?(*SKIP)c+(*FAIL)/auto_callout
+\= Expect no match
     aaabcccaaabccc
 --->aaabcccaaabccc
  +0 ^                  a+
@@ -8287,6 +8199,7 @@ No match
 No match
 
 /a+b?(*THEN)c+(*FAIL)/auto_callout
+\= Expect no match
     aaabccc
 --->aaabccc
  +0 ^           a+
@@ -8333,6 +8246,7 @@ Failed: error 161 at offset 11: number is too big
 Failed: error 115 at offset 3: reference to non-existent subpattern
 
 /.+A/newline=crlf
+\= Expect no match
     \r\nA
 No match
     
@@ -8355,24 +8269,21 @@ Failed: error 160 at offset 5: (*VERB) not recognized or malformed
 /(*CR)a.b/
     a\nb
  0: a\x0ab
-    ** Failers
-No match
+\= Expect no match
     a\rb  
 No match
 
 /(*CR)a.b/newline=lf
     a\nb
  0: a\x0ab
-    ** Failers
-No match
+\= Expect no match
     a\rb  
 No match
 
 /(*LF)a.b/newline=CRLF
     a\rb
  0: a\x0db
-    ** Failers
-No match
+\= Expect no match
     a\nb  
 No match
 
@@ -8381,14 +8292,12 @@ No match
  0: a\x0db
     a\nb  
  0: a\x0ab
-    ** Failers
-No match
+\= Expect no match
     a\r\nb  
 No match
 
 /(*ANYCRLF)a.b/newline=CR
-    ** Failers
-No match
+\= Expect no match
     a\rb
 No match
     a\nb  
@@ -8397,8 +8306,7 @@ No match
 No match
 
 /(*ANY)a.b/newline=cr
-    ** Failers
-No match
+\= Expect no match
     a\rb
 No match
     a\nb  
@@ -8441,8 +8349,7 @@ Subject length lower bound = 3
  0: a\x0ab
     a\r\nb
  0: a\x0d\x0ab
-    ** Failers
-No match
+\= Expect no match
     a\x85b
 No match
     a\x0bb     
@@ -8477,8 +8384,7 @@ Subject length lower bound = 2
  0: a\x0ab
     a\r\nb
  0: a\x0d\x0ab
-    ** Failers
-No match
+\= Expect no match
     a\x85b
 No match
     a\x0bb     
@@ -8513,8 +8419,7 @@ Subject length lower bound = 4
  0: a\x0a\x0d\x0db
     a\r\n\r\n\r\n\r\nb
  0: a\x0d\x0a\x0d\x0a\x0d\x0a\x0d\x0ab
-    ** Failers
-No match
+\= Expect no match
     a\x85\x85b
 No match
     a\x0b\x0bb     
@@ -8536,8 +8441,7 @@ Subject length lower bound = 4
  0: a\x85\x85b
     a\x0b\x0bb     
  0: a\x0b\x0bb
-    ** Failers 
-No match
+\= Expect no match 
     a\r\r\r\r\rb 
 No match
  
@@ -8675,12 +8579,12 @@ Failed: error 157 at offset 8: \g is not followed by a braced, angle-bracketed, 
  0: xz
     yzyy 
  0: yz
-    ** Failers
-No match
+\= Expect no match
     xxz  
 No match
 
 /(\3)(\1)(a)/
+\= Expect no match
     cat
 No match
 
@@ -8711,8 +8615,7 @@ Failed: error 115 at offset 3: reference to non-existent subpattern
     abcbabc
  0: abcbabc
  1: abc
-    ** Failers 
-No match
+\= Expect no match 
     abcXabc
 No match
 
@@ -8720,8 +8623,7 @@ No match
     abcXabc
  0: abcXabc
  1: abc
-    ** Failers 
-No match
+\= Expect no match 
     abcbabc
 No match
 
@@ -8746,20 +8648,17 @@ Failed: error 106 at offset 4: missing terminating ] for character class
 Failed: error 106 at offset 5: missing terminating ] for character class
 
 /a[]b/alt_bsux,allow_empty_class,match_unset_backref,dupnames
-    ** Failers
-No match
+\= Expect no match
     ab
 No match
 
 /a[]+b/alt_bsux,allow_empty_class,match_unset_backref,dupnames
-    ** Failers
-No match
+\= Expect no match
     ab 
 No match
 
 /a[]*+b/alt_bsux,allow_empty_class,match_unset_backref,dupnames
-    ** Failers
-No match
+\= Expect no match
     ab 
 No match
 
@@ -8768,8 +8667,7 @@ No match
  0: aXb
     a\nb 
  0: a\x0ab
-    ** Failers
-No match
+\= Expect no match
     ab  
 No match
     
@@ -8778,8 +8676,7 @@ No match
  0: aXb
     a\nX\nXb 
  0: a\x0aX\x0aXb
-    ** Failers
-No match
+\= Expect no match
     ab  
 No match
 
@@ -8878,8 +8775,7 @@ Subject length lower bound = 1
  +2    ^ ^     z
  +3    ^  ^    
  0: xyz
-  ** Failers 
-No match
+\= Expect no match 
   abc
 No match
   abcxypqr  
@@ -8896,20 +8792,7 @@ No match
  +2    ^ ^     z
  +3    ^  ^    
  0: xyz
-  ** Failers 
---->** Failers
- +0 ^              x
- +0  ^             x
- +0   ^            x
- +0    ^           x
- +0     ^          x
- +0      ^         x
- +0       ^        x
- +0        ^       x
- +0         ^      x
- +0          ^     x
- +0           ^    x
-No match
+\= Expect no match 
   abc
 --->abc
  +0 ^       x
@@ -9239,12 +9122,14 @@ Partial match: 123999
     ^^^^
 
 /Z(*F)/
+\= Expect no match
     Z\=ps
 No match
     ZA\=ps
 No match
     
 /Z(?!)/
+\= Expect no match
     Z\=ps
 No match
     ZA\=ps
@@ -9396,8 +9281,7 @@ Partial match: +ab
  0: abc
     ^^^
  0+ def
-    ** Failers
-No match
+\= Expect no match
     abcdef\=notempty
 No match
     xyzabcdef\=notempty
@@ -9411,8 +9295,7 @@ No match
  0: abc
     ^^^
  0+ def
-    ** Failers 
-No match
+\= Expect no match 
     abcdef\=notempty
 No match
 
@@ -9432,9 +9315,7 @@ No match
     xyz\=notempty_atstart
  0: 
  0+ yz
-    ** Failers 
- 0: 
- 0+ ** Failers
+\= Expect no match 
     xyz\=notempty
 No match
 
@@ -9445,9 +9326,7 @@ No match
     xyzabc
  0: 
  0+ xyzabc
-    ** Failers 
- 0: 
- 0+ ** Failers
+\= Expect no match 
     xyzabc\=notempty
 No match
     xyzabc\=notempty_atstart
@@ -9557,8 +9436,7 @@ No match
     XaaX
  0: aa
  1: a
-    ** Failers 
-No match
+\= Expect no match 
     XAAX 
 No match
 
@@ -9769,8 +9647,7 @@ Subject length lower bound = 3
  4: "
  5: <unset>
  6: "
-    ** Failers 
-No match
+\= Expect no match 
     b"11111
 No match
     a"11111 
@@ -9824,8 +9701,7 @@ Subject length lower bound = 2
     eX
  0: eX
  1: e
-    ** Failers
-No match
+\= Expect no match
     abcdY
 No match
     ey     
@@ -9870,8 +9746,7 @@ Subject length lower bound = 4
  2: b
  3: c
  4: dd
-    ** Failers
-No match
+\= Expect no match
     abcdde  
 No match
 
@@ -9927,8 +9802,7 @@ Partial match: abcde
     ABXABD  
  0: ABD
  1: B
-    ** Failers 
-No match
+\= Expect no match 
     ABX 
 No match
     BAXBAD  
@@ -9958,6 +9832,7 @@ Capturing subpattern count = 3
 Max back reference = 3
 Last code unit = 'a'
 Subject length lower bound = 3
+\= Expect no match
     cat
 No match
 
@@ -9995,8 +9870,7 @@ Subject length lower bound = 1
  0: Ab
     CcC 
  0: c
-    ** Failers
-No match
+\= Expect no match
     XABX   
 No match
 
@@ -10096,8 +9970,8 @@ No match
         End
 ------------------------------------------------------------------
 
-/ -- This one is here because Perl gives the match as "b" rather than "ab". I
-     believe this to be a Perl bug. --/
+# This one is here because Perl gives the match as "b" rather than "ab". I
+# believe this to be a Perl bug.
       
 /(?>a\Kb)z|(ab)/
     ab\=startchar 
@@ -10127,6 +10001,7 @@ Failed: error 159 at offset 13: an argument is not allowed for (*ACCEPT), (*FAIL
 # bug because replacing the B in the pattern by (B|D) does make it fail.
 
 /A(*COMMIT)B/aftertext,mark
+\= Expect no match
     ACABX
 No match
 
@@ -10138,6 +10013,7 @@ No match
  0: AC
 
 /A(*PRUNE)B|A(*PRUNE)C/mark
+\= Expect no match
     AC
 No match
     
@@ -10145,8 +10021,7 @@ No match
 # though PCRE2 does.
 
 /^A(*:A)B|^X(*:A)Y/mark
-    ** Failers
-No match
+\= Expect no match
     XAQQ
 No match, mark = A
     
@@ -10159,20 +10034,22 @@ No match, mark = A
  0: ABC
     
 /(*COMMIT)ABC/no_start_optimize
-    ** Failers
-No match
+\= Expect no match
     DEFGABC
 No match
     
 /^(ab (c+(*THEN)cd) | xyz)/x
+\= Expect no match
     abcccd  
 No match
 
 /^(ab (c+(*PRUNE)cd) | xyz)/x
+\= Expect no match
     abcccd  
 No match
 
 /^(ab (c+(*FAIL)cd) | xyz)/x
+\= Expect no match
     abcccd  
 No match
     
@@ -10209,8 +10086,7 @@ No match
 ------------------------------------------------------------------
     ACBD
  0: ACBD
-    *** Failers
-No match
+\= Expect no match
     A\nB
 No match
     ACB\n   
@@ -10230,8 +10106,7 @@ No match
  0: ACBD
     ACB\n 
  0: ACB\x0a
-    *** Failers
-No match
+\= Expect no match
     A\nB  
 No match
   
@@ -10240,8 +10115,7 @@ No match
  0: A\x0aB
     A\rB
  0: A\x0dB
-    ** Failers
-No match
+\= Expect no match
     A\r\nB    
 No match
 
@@ -10352,6 +10226,7 @@ No match
         Ket
         End
 ------------------------------------------------------------------
+\= Expect no match
     X\x0d\x0a
 No match
 
@@ -10407,26 +10282,30 @@ Partial match: abc
 Partial match: abc
 
 /abc\B/
-    abc
-No match
     abc\=ps
 Partial match: abc
     abc\=ph
 Partial match: abc
+\= Expect no match
+    abc
+No match
 
 /.+/
+\= Bad offsets
+    abc\=offset=4
+Failed: error -33: bad offset value
+    abc\=offset=-4 
+** Invalid value in 'offset=-4'
+\= Valid data
     abc\=offset=0
  0: abc
     abc\=offset=1
  0: bc
     abc\=offset=2
  0: c
+\= Expect no match
     abc\=offset=3
 No match
-    abc\=offset=4
-Failed: error -33: bad offset value
-    abc\=offset=-4 
-** Invalid value in 'offset=-4'
 
 /^\cģ/
 Failed: error 168 at offset 3: \c must be followed by a printable ASCII character
@@ -10549,8 +10428,7 @@ Failed: error 115 at offset 15: reference to non-existent subpattern
  0: aaaaX
  1: a
  2: X
-    ** Failers 
-No match
+\= Expect no match 
     aaaa
 No match
 
@@ -10558,8 +10436,7 @@ No match
     aaaaX
  0: aaaaX
  1: X
-    ** Failers 
-No match
+\= Expect no match 
     aaaa
 No match
 
@@ -10743,8 +10620,7 @@ Subject length lower bound = 1
 /(?1)(?:(b(*ACCEPT))){0}c/
     bc
  0: bc
-    ** Failers 
-No match
+\= Expect no match 
     b 
 No match
 
@@ -10755,6 +10631,7 @@ No match
  0: c
 
 /^.*?(?(?=a)a|b(*THEN)c)/
+\= Expect no match 
     ba
 No match
 
@@ -10763,14 +10640,17 @@ No match
  0: ba
 
 /^.*?(?(?=a)a(*THEN)b|c)/
+\= Expect no match 
     ac
 No match
 
 /^.*?(?(?=a)a(*THEN)b)c/
+\= Expect no match 
     ac
 No match
 
 /^.*?(a(*THEN)b)c/
+\= Expect no match 
     aabc
 No match
     
@@ -10796,10 +10676,12 @@ No match
  0: C
  1: C
 MK: A
+\= Expect no match 
     D
 No match, mark = A
      
 /(*:A)A+(*SKIP:A)(B|Z)/mark
+\= Expect no match 
     AAAC
 No match, mark = A
 
@@ -10820,6 +10702,7 @@ No match, mark = A
 /(?>(*ACCEPT)b)c/
     c
  0: 
+\= Expect no match 
     c\=notempty
 No match
 
@@ -11144,6 +11027,7 @@ Latest Mark: B
  1: aeq
 
 /.(*F)/
+\= Expect no match
     abc\=ph
 No match
 
@@ -11176,14 +11060,15 @@ Subject length lower bound = 0
  0: x
 
 'a*(*ACCEPT)b'aftertext
-    \=notempty_atstart
-No match
     abc\=notempty_atstart
  0: a
  0+ bc
     bbb\=notempty_atstart
  0: 
  0+ bb
+\= Expect no match
+    \=notempty_atstart
+No match
 
 /(*ACCEPT)a/I,aftertext
 Capturing subpattern count = 0
@@ -11219,8 +11104,7 @@ Subject length lower bound = 0
     aaaazzzzb
  0: aaaazzzzb
  1: zzzz
-    ** Failers
-No match
+\= Expect no match
     aazz  
 No match
 
@@ -11236,6 +11120,7 @@ No match
  1: c
     
 /(.)((?(1)c|a)|a(?2))/
+\= Expect no match
     baa  
 No match
 
@@ -11269,8 +11154,7 @@ No match
 /^a\x41z/alt_bsux,allow_empty_class,match_unset_backref,dupnames
     aAz
  0: aAz
-    *** Failers
-No match
+\= Expect no match
     ax41z
 No match
 
@@ -11285,8 +11169,7 @@ No match
 /^a\u0041z/alt_bsux,allow_empty_class,match_unset_backref,dupnames
     aAz
  0: aAz
-    *** Failers
-No match
+\= Expect no match
     au0041z
 No match
 
@@ -11297,16 +11180,14 @@ No match
 /^a\u041z/alt_bsux,allow_empty_class,match_unset_backref,dupnames
     au041z
  0: au041z
-    *** Failers
-No match
+\= Expect no match
     aAz
 No match
 
 /^a\U0041z/alt_bsux,allow_empty_class,match_unset_backref,dupnames
     aU0041z
  0: aU0041z
-    *** Failers
-No match
+\= Expect no match
     aAz
 No match
 
@@ -11379,8 +11260,7 @@ MK: A
  4: X
  5: Y
 MK: B
-    ** Failers
-No match
+\= Expect no match
     XAQQ  
 No match, mark = A
     XAQQXZZ  
@@ -11397,8 +11277,7 @@ No match, mark = B
     aw 
  0: aw
 MK: n
-    ** Failers 
-No match, mark = n
+\= Expect no match 
     abc
 No match, mark = m
 
@@ -11406,8 +11285,7 @@ No match, mark = m
     aw 
  0: aw
 MK: n
-    ** Failers 
-No match, mark = n
+\= Expect no match 
     abc
 No match, mark = m
 
@@ -11964,10 +11842,11 @@ Partial match: 123a
  0: ad
 
 /^(?!a(*THEN)b|ac)../
-     ac
-No match
      ad 
  0: ad
+\= Expect no match
+     ac
+No match
 
 /^(?=a(*THEN)b|ac)/
     ac
@@ -12004,6 +11883,7 @@ No match
  0: bn
 
 /(?(?=b(*SKIP)a)bn|bnn)/
+\= Expect no match
     bnn
 No match
 
@@ -13388,8 +13268,7 @@ Failed: error 144 at offset 5: group name must start with a non-digit
  0: red
     put it all on red  
  0: red
-    ** Failers
-No match
+\= Expect no match
     no reduction
 No match
     Alfred Winifred
@@ -13405,6 +13284,7 @@ Start of matched string is beyond its end - displaying from end to start.
  0+ abcd
 
 /abcd/newline=lf,firstline
+\= Expect no match
     xx\nxabcd
 No match
     
@@ -13469,8 +13349,7 @@ Failed: error 115 at offset 2: reference to non-existent subpattern
  0: abc:
     12
  0: 12
-    *** Failers
-No match
+\= Expect no match
     123
 No match
     xyz    
@@ -13546,8 +13425,7 @@ Capturing subpattern count = 0
 Subject length lower bound = 6
     yesnononoyes
  0: nonono
-    ** Failers
-No match
+\= Expect no match
     yesno   
 No match
 
@@ -13563,8 +13441,7 @@ Subject length lower bound = 5
  1: abc
     xyzno
  0: xyzno
-    ** Failers
-No match
+\= Expect no match
     abcno
 No match
     xyzyes    
@@ -13786,6 +13663,7 @@ Failed: error -48: no more memory
  2: 
 
 "(?(?=)==)(((((((((?=)))))))))"
+\= Expect no match
     a
 No match
 
@@ -13860,6 +13738,7 @@ Capturing subpattern count = 0
 Options: auto_callout
 First code unit at start or follows newline
 Subject length lower bound = 1
+\= Expect no match
     aaa
 --->aaa
  +0 ^       .*
@@ -13873,6 +13752,7 @@ No match
 Capturing subpattern count = 0
 Options: auto_callout no_dotstar_anchor
 Subject length lower bound = 1
+\= Expect no match
     aaa
 --->aaa
  +0 ^       .*
@@ -13967,8 +13847,7 @@ Failed: error 109 at offset 7: quantifier does not follow a repeatable item
  0: 00765
      456
  0: 456
-     ** Failers
-No match
+\= Expect no match
      356   
 No match
 
@@ -14232,8 +14111,7 @@ Callout (5): 'x\x00z'
 /(?(?!)a|b)/
     bbb
  0: b
-    ** Failers 
-No match
+\= Expect no match 
     aaa 
 No match
 
@@ -14336,6 +14214,7 @@ Subject length lower bound = 0
 Failed: error 183 at offset 3: using \C is disabled by the application
 
 /abc/
+\= Expect no match
     \[9x!xxx(]{9999}
 No match
     
@@ -14676,6 +14555,7 @@ Subject length lower bound = 0
  0: ab
 
 /^a(*PRUNE)b/s
+\= Expect no match
     aab
 No match
 
@@ -14690,6 +14570,7 @@ Failed: error 161 at offset 13: number is too big
 Failed: error 161 at offset 16: number is too big
 
 /0(?0)|(1)(*THEN)(*SKIP:0)(*FAIL)/
+\= Expect no match
     01
 No match
 
@@ -14707,10 +14588,12 @@ Failed: error 160 at offset 21: (*VERB) not recognized or malformed
  0: abab
     ababab
  0: ababab
+\= Expect no match
     aba
 No match
 
 /((*MARK:A))++a(*SKIP:B)b/
+\= Expect no match
     aacb
 No match
 

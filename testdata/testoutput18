@@ -25,8 +25,6 @@
 /abc/
     abc
  0: abc
-    *** Failers
-No match: POSIX code 17: match failed
 
 /^abc|def/
     abcdef
@@ -47,8 +45,7 @@ No match: POSIX code 17: match failed
 /the quick brown fox/
     the quick brown fox
  0: the quick brown fox
-    *** Failers
-No match: POSIX code 17: match failed
+\= Expect no match
     The Quick Brown Fox
 No match: POSIX code 17: match failed
 
@@ -59,8 +56,7 @@ No match: POSIX code 17: match failed
  0: The Quick Brown Fox
 
 /(*LF)abc.def/
-    *** Failers
-No match: POSIX code 17: match failed
+\= Expect no match
     abc\ndef
 No match: POSIX code 17: match failed
 
@@ -74,6 +70,7 @@ No match: POSIX code 17: match failed
 Failed: POSIX code 15: bad back reference at offset 6     
 
 /(abc\1)/
+\= Expect no match
     abc
 No match: POSIX code 17: match failed
 
@@ -96,8 +93,7 @@ Matched without capture
  0: ab-cd
     ab=cd
  0: ab=cd
-    ** Failers
-No match: POSIX code 17: match failed
+\= Expect no match
     ab\ncd
 No match: POSIX code 17: match failed
 
@@ -120,8 +116,7 @@ Matched with REG_NOSUB
 /a?|b?/
     abc
  0: a
-    ** Failers
- 0: 
+\= Expect no match
     ddd\=notempty
 No match: POSIX code 17: match failed
 

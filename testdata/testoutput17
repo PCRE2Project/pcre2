@@ -33,6 +33,7 @@ Subject length lower bound = 4
 JIT compilation was successful
     abcd
  0: abcd (JIT)
+\= Expect no match
     xyz
 No match (JIT)
 
@@ -44,6 +45,7 @@ Subject length lower bound = 4
 JIT compilation was not successful
     abcd
  0: abcd
+\= Expect no match
     xyz
 No match
 
@@ -54,6 +56,7 @@ No match
 Partial match: ab (JIT)
     ab\=ph
 Partial match: ab (JIT)
+\= Expect no match
     xyz
 No match (JIT)
 
@@ -64,6 +67,7 @@ No match (JIT)
 Partial match: ab (JIT)
     ab\=ph
 Partial match: ab (JIT)
+\= Expect no match
     xyz
 No match (JIT)
 
@@ -74,6 +78,7 @@ No match (JIT)
 Partial match: ab
     ab\=ph
 Partial match: ab
+\= Expect no match
     xyz
 No match (JIT)
     xyz\=ps
@@ -86,10 +91,11 @@ No match
 Failed: error -45: bad JIT option
     ab\=ph
 Failed: error -45: bad JIT option
-    xyz
-No match (JIT)
     xyz\=ps
 Failed: error -45: bad JIT option
+\= Expect no match
+    xyz
+No match (JIT)
 
 /abcd/jit=2
     abcd
@@ -98,6 +104,7 @@ Failed: error -45: bad JIT option
 Partial match: ab (JIT)
     ab\=ph
 Partial match: ab
+\= Expect no match
     xyz
 No match
 
@@ -118,6 +125,7 @@ Failed: error -45: bad JIT option
 Partial match: ab (JIT)
     ab\=ph
 Partial match: ab
+\= Expect no match
     xyz
 No match (JIT)
 
@@ -128,6 +136,7 @@ No match (JIT)
 Partial match: ab
     ab\=ph
 Partial match: ab (JIT)
+\= Expect no match
     xyz
 No match
 
@@ -138,6 +147,7 @@ No match
 Partial match: ab
     ab\=ph
 Partial match: ab (JIT)
+\= Expect no match
     xyz
 No match (JIT)
 
@@ -148,6 +158,7 @@ No match (JIT)
 Partial match: ab (JIT)
     ab\=ph
 Partial match: ab (JIT)
+\= Expect no match
     xyz
 No match
 
@@ -158,6 +169,7 @@ No match
 Partial match: ab (JIT)
     ab\=ph
 Partial match: ab (JIT)
+\= Expect no match
     xyz
 No match (JIT)
 
@@ -169,6 +181,7 @@ Subject length lower bound = 4
 JIT compilation was successful
 
 /(*NO_START_OPT)a(*:m)b/mark
+\= Expect no match
     a
 No match, mark = m (JIT)
 
@@ -188,6 +201,7 @@ JIT compilation was successful
 Minimum match limit = 2
  0: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaazz (JIT)
  1: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+\= Expect no match
   aaaaaaaaaaaaaz\=find_limits
 Minimum match limit = 16383
 No match (JIT)
@@ -272,8 +286,10 @@ Minimum match limit = 5
  3: ee
 
 /(a+)*zz/
+\= Expect no match
     aaaaaaaaaaaaaz
 No match (JIT)
+\= Expect limit exceeded
     aaaaaaaaaaaaaz\=match_limit=3000
 Failed: error -47: match limit exceeded
 
@@ -306,8 +322,10 @@ Starting code units: a z
 Last code unit = 'z'
 Subject length lower bound = 2
 JIT compilation was successful
+\= Expect no match
     aaaaaaaaaaaaaz
 No match (JIT)
+\= Expect limit exceeded
     aaaaaaaaaaaaaz\=match_limit=3000
 Failed: error -47: match limit exceeded
 
@@ -332,6 +350,7 @@ Failed: error -46: JIT stack limit reached
 /abcd/
     abcd\=anchored
  0: abcd
+\= Expect no match
     fail abcd\=anchored 
 No match
     

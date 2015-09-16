@@ -58,10 +58,11 @@
 /a\C\Cb/utf
     a\x{100}b
  0: a\x{100}b
-    ** Failers
-No match
+\= Expect no match
     a\x{12257}b
 No match
+
+# The next 3 patterns have UTF-8 errors
 
 /[√]/utf
 Failed: error -8 at offset 0: UTF-8 error: byte 2 top bits not 0x80
@@ -72,7 +73,10 @@ Failed: error -3 at offset 0: UTF-8 error: 1 byte missing at end
 /√√√xxx/utf
 Failed: error -8 at offset 0: UTF-8 error: byte 2 top bits not 0x80
 
+# Now test subjects
+
 /badutf/utf
+\= Expect UTF-8 errors
     X\xdf
 Failed: error -3: UTF-8 error: 1 byte missing at end at offset 1
     XX\xef
@@ -153,6 +157,7 @@ Failed: error -23: UTF-8 error: illegal byte (0xfe or 0xff) at offset 0
 Failed: error -23: UTF-8 error: illegal byte (0xfe or 0xff) at offset 0
 
 /badutf/utf
+\= Expect UTF-8 errors
     XX\xfb\x80\x80\x80\x80
 Failed: error -13: UTF-8 error: 5-byte character is not allowed (RFC 3629) at offset 2
     XX\xfd\x80\x80\x80\x80\x80
@@ -161,6 +166,7 @@ Failed: error -14: UTF-8 error: 6-byte character is not allowed (RFC 3629) at of
 Failed: error -15: UTF-8 error: code points greater than 0x10ffff are not defined at offset 2
 
 /shortutf/utf
+\= Expect UTF-8 errors
     XX\xdf\=ph
 Failed: error -3: UTF-8 error: 1 byte missing at end at offset 2
     XX\xef\=ph
@@ -193,6 +199,7 @@ Failed: error -4: UTF-8 error: 2 bytes missing at end at offset 0
 Failed: error -3: UTF-8 error: 1 byte missing at end at offset 0
 
 /anything/utf
+\= Expect UTF-8 errors
     X\xc0\x80
 Failed: error -17: UTF-8 error: overlong 2-byte sequence at offset 1
     XX\xc1\x8f
@@ -209,6 +216,15 @@ Failed: error -21: UTF-8 error: overlong 6-byte sequence at offset 0
 Failed: error -23: UTF-8 error: illegal byte (0xfe or 0xff) at offset 0
     \xff\x80\x80\x80\x80\x80
 Failed: error -23: UTF-8 error: illegal byte (0xfe or 0xff) at offset 0
+    \xf8\x88\x80\x80\x80
+Failed: error -13: UTF-8 error: 5-byte character is not allowed (RFC 3629) at offset 0
+    \xf9\x87\x80\x80\x80
+Failed: error -13: UTF-8 error: 5-byte character is not allowed (RFC 3629) at offset 0
+    \xfc\x84\x80\x80\x80\x80
+Failed: error -14: UTF-8 error: 6-byte character is not allowed (RFC 3629) at offset 0
+    \xfd\x83\x80\x80\x80\x80
+Failed: error -14: UTF-8 error: 6-byte character is not allowed (RFC 3629) at offset 0
+\= Expect no match
     \xc3\x8f
 No match
     \xe0\xaf\x80
@@ -219,14 +235,6 @@ No match
 No match
     \xf1\x8f\x80\x80
 No match
-    \xf8\x88\x80\x80\x80
-Failed: error -13: UTF-8 error: 5-byte character is not allowed (RFC 3629) at offset 0
-    \xf9\x87\x80\x80\x80
-Failed: error -13: UTF-8 error: 5-byte character is not allowed (RFC 3629) at offset 0
-    \xfc\x84\x80\x80\x80\x80
-Failed: error -14: UTF-8 error: 6-byte character is not allowed (RFC 3629) at offset 0
-    \xfd\x83\x80\x80\x80\x80
-Failed: error -14: UTF-8 error: 6-byte character is not allowed (RFC 3629) at offset 0
     \xf8\x88\x80\x80\x80\=no_utf_check
 No match
     \xf9\x87\x80\x80\x80\=no_utf_check
@@ -239,26 +247,31 @@ No match
 # Similar tests with offsets
 
 /badutf/utf
+\= Expect UTF-8 errors
     X\xdfabcd
 Failed: error -8: UTF-8 error: byte 2 top bits not 0x80 at offset 1
     X\xdfabcd\=offset=1
 Failed: error -8: UTF-8 error: byte 2 top bits not 0x80 at offset 1
+\= Expect no match
     X\xdfabcd\=offset=2
 No match
 
 /(?<=x)badutf/utf
+\= Expect UTF-8 errors
     X\xdfabcd
 Failed: error -8: UTF-8 error: byte 2 top bits not 0x80 at offset 1
     X\xdfabcd\=offset=1
 Failed: error -8: UTF-8 error: byte 2 top bits not 0x80 at offset 1
     X\xdfabcd\=offset=2
 Failed: error -8: UTF-8 error: byte 2 top bits not 0x80 at offset 1
-    X\xdfabcd\=offset=3
-No match
     X\xdfabcd\xdf\=offset=3
 Failed: error -3: UTF-8 error: 1 byte missing at end at offset 6
+\= Expect no match
+    X\xdfabcd\=offset=3
+No match
 
 /(?<=xx)badutf/utf
+\= Expect UTF-8 errors
     X\xdfabcd
 Failed: error -8: UTF-8 error: byte 2 top bits not 0x80 at offset 1
     X\xdfabcd\=offset=1
@@ -269,6 +282,7 @@ Failed: error -8: UTF-8 error: byte 2 top bits not 0x80 at offset 1
 Failed: error -8: UTF-8 error: byte 2 top bits not 0x80 at offset 1
 
 /(?<=xxxx)badutf/utf
+\= Expect UTF-8 errors
     X\xdfabcd
 Failed: error -8: UTF-8 error: byte 2 top bits not 0x80 at offset 1
     X\xdfabcd\=offset=1
@@ -277,12 +291,13 @@ Failed: error -8: UTF-8 error: byte 2 top bits not 0x80 at offset 1
 Failed: error -8: UTF-8 error: byte 2 top bits not 0x80 at offset 1
     X\xdfabcd\=offset=3
 Failed: error -8: UTF-8 error: byte 2 top bits not 0x80 at offset 1
-    X\xdfabcd\=offset=6
-No match
     X\xdfabc\xdf\=offset=6
 Failed: error -3: UTF-8 error: 1 byte missing at end at offset 5
     X\xdfabc\xdf\=offset=7
 Failed: error -33: bad offset value
+\= Expect no match
+    X\xdfabcd\=offset=6
+No match
  
 /\x{100}/IB,utf
 ------------------------------------------------------------------
@@ -514,8 +529,7 @@ Subject length lower bound = 1
 # correctly, but that messes up comparisons).
 
 /a\Cb/utf
-    *** Failers
-No match
+\= Expect no match
     a\x{100}b
 No match
 
@@ -547,8 +561,7 @@ Subject length lower bound = 1
  0: \x{100}
     \x{1000}
  0: \x{1000}
-    *** Failers
- 0: *
+\= Expect no match
     \x{c0}
 No match
     \x{f0}
@@ -707,8 +720,6 @@ Subject length lower bound = 1
  0: \x{100}
     \x{100}Z
  0: \x{100}
-    *** Failers
-No match
 
 /[\xff]/IB,utf
 ------------------------------------------------------------------
@@ -798,33 +809,35 @@ Failed: error 106 at offset 15: missing terminating ] for character class
 # This tests the stricter UTF-8 check according to RFC 3629.
 
 /X/utf
+\= Expect UTF-8 errors
     \x{d800}
 Failed: error -16: UTF-8 error: code points 0xd800-0xdfff are not defined at offset 0
-    \x{d800}\=no_utf_check
-No match
     \x{da00}
 Failed: error -16: UTF-8 error: code points 0xd800-0xdfff are not defined at offset 0
-    \x{da00}\=no_utf_check
-No match
     \x{dfff}
 Failed: error -16: UTF-8 error: code points 0xd800-0xdfff are not defined at offset 0
-    \x{dfff}\=no_utf_check
-No match
     \x{110000}
 Failed: error -15: UTF-8 error: code points greater than 0x10ffff are not defined at offset 0
-    \x{110000}\=no_utf_check
-No match
     \x{2000000}
 Failed: error -13: UTF-8 error: 5-byte character is not allowed (RFC 3629) at offset 0
-    \x{2000000}\=no_utf_check
-No match
     \x{7fffffff}
 Failed: error -14: UTF-8 error: 6-byte character is not allowed (RFC 3629) at offset 0
+\= Expect no match
+    \x{d800}\=no_utf_check
+No match
+    \x{da00}\=no_utf_check
+No match
+    \x{dfff}\=no_utf_check
+No match
+    \x{110000}\=no_utf_check
+No match
+    \x{2000000}\=no_utf_check
+No match
     \x{7fffffff}\=no_utf_check
 No match
 
 /(*UTF8)\x{1234}/
-  abcd\x{1234}pqr
+    abcd\x{1234}pqr
  0: \x{1234}
 
 /(*CRLF)(*UTF)(*BSR_UNICODE)a\Rb/I
@@ -935,16 +948,19 @@ Subject length lower bound = 3
 /a+/utf
     a\x{123}aa\=offset=1
  0: aa
-    a\x{123}aa\=offset=2
-Error -36 (bad UTF-8 offset)
     a\x{123}aa\=offset=3
  0: aa
     a\x{123}aa\=offset=4
  0: a
-    a\x{123}aa\=offset=5
-No match
+\= Expect bad offset value
     a\x{123}aa\=offset=6
 Failed: error -33: bad offset value
+\= Expect bad UTF-8 offset     
+    a\x{123}aa\=offset=2
+Error -36 (bad UTF-8 offset)
+\= Expect no match
+    a\x{123}aa\=offset=5
+No match
 
 /\x{1234}+/Ii,utf
 Capturing subpattern count = 0
@@ -1329,8 +1345,6 @@ Subject length lower bound = 1
  0: \x{100}
     \x{100}Z
  0: \x{100}
-    *** Failers 
-No match
 
 /[z-\x{100}]/IB,utf
 ------------------------------------------------------------------
@@ -1515,8 +1529,7 @@ Subject length lower bound = 1
  0: \x{105}
     \x{109}  
  0: \x{109}
-    ** Failers
-No match
+\= Expect no match
     \x{100}
 No match
     \x{10a} 
@@ -1555,8 +1568,7 @@ Subject length lower bound = 1
  0: \x{100}
     \x{101} 
  0: \x{101}
-    ** Failers
-No match
+\= Expect no match
     \x{102}
 No match
     Y
@@ -1595,7 +1607,7 @@ Last code unit = 'B' (caseless)
 Subject length lower bound = 2
 
 /abc/utf,replace=√
-   abc
+    abc
 Failed: error -3: UTF-8 error: 1 byte missing at end
 
 # End of testinput10

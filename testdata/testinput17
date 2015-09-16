@@ -18,28 +18,33 @@
 
 /abcd/I
     abcd
+\= Expect no match
     xyz
 
 /(*NO_JIT)abcd/I
     abcd
+\= Expect no match
     xyz
 
 /abcd/
     abcd
     ab\=ps
     ab\=ph
+\= Expect no match
     xyz
 
 /abcd/jitfast
     abcd
     ab\=ps
     ab\=ph
+\= Expect no match
     xyz
 
 /abcd/jit=1
     abcd
     ab\=ps
     ab\=ph
+\= Expect no match
     xyz
     xyz\=ps
 
@@ -47,13 +52,15 @@
     abcd
     ab\=ps
     ab\=ph
-    xyz
     xyz\=ps
+\= Expect no match
+    xyz
 
 /abcd/jit=2
     abcd
     ab\=ps
     ab\=ph
+\= Expect no match
     xyz
 
 /abcd/jit=2,jitfast
@@ -66,35 +73,41 @@
     abcd
     ab\=ps
     ab\=ph
+\= Expect no match
     xyz
 
 /abcd/jit=4
     abcd
     ab\=ps
     ab\=ph
+\= Expect no match
     xyz
 
 /abcd/jit=5
     abcd
     ab\=ps
     ab\=ph
+\= Expect no match
     xyz
 
 /abcd/jit=6
     abcd
     ab\=ps
     ab\=ph
+\= Expect no match
     xyz
 
 /abcd/jit=7
     abcd
     ab\=ps
     ab\=ph
+\= Expect no match
     xyz
 
 /abcd/I,jit=2
 
 /(*NO_START_OPT)a(*:m)b/mark
+\= Expect no match
     a
 
 /^12345678abcd/m
@@ -104,6 +117,7 @@
 
 /(a+)*zz/I
   aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaazzbbbbbb\=find_limits
+\= Expect no match
   aaaaaaaaaaaaaz\=find_limits
 
 !((?:\s|//.*\\n|/[*](?:\\n|.)*?[*]/)*)!I
@@ -140,7 +154,9 @@
      aabbccddee\=jitstack=1
 
 /(a+)*zz/
+\= Expect no match
     aaaaaaaaaaaaaz
+\= Expect limit exceeded
     aaaaaaaaaaaaaz\=match_limit=3000
 
 /(*LIMIT_MATCH=3000)(a+)*zz/I
@@ -151,7 +167,9 @@
     aaaaaaaaaaaaaz
 
 /(*LIMIT_MATCH=60000)(a+)*zz/I
+\= Expect no match
     aaaaaaaaaaaaaz
+\= Expect limit exceeded
     aaaaaaaaaaaaaz\=match_limit=3000
 
 # These three have infinitely nested recursions. 
@@ -171,6 +189,7 @@
 
 /abcd/
     abcd\=anchored
+\= Expect no match
     fail abcd\=anchored 
     
 /abcd/jitfast

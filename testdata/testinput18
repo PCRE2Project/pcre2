@@ -19,7 +19,6 @@
 
 /abc/
     abc
-    *** Failers
 
 /^abc|def/
     abcdef
@@ -31,7 +30,7 @@
 
 /the quick brown fox/
     the quick brown fox
-    *** Failers
+\= Expect no match
     The Quick Brown Fox
 
 /the quick brown fox/i
@@ -39,7 +38,7 @@
     The Quick Brown Fox
 
 /(*LF)abc.def/
-    *** Failers
+\= Expect no match
     abc\ndef
 
 /(*LF)abc$/
@@ -49,6 +48,7 @@
 /(abc)\2/
 
 /(abc\1)/
+\= Expect no match
     abc
 
 /a*(b+)(z)(z)/
@@ -60,7 +60,7 @@
 /(*ANY)ab.cd/
     ab-cd
     ab=cd
-    ** Failers
+\= Expect no match
     ab\ncd
 
 /ab.cd/s
@@ -76,7 +76,7 @@
 
 /a?|b?/
     abc
-    ** Failers
+\= Expect no match
     ddd\=notempty
 
 /\w+A/

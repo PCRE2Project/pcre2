@@ -9,8 +9,7 @@
  0: aXb
     a\nb
  0: a\x0ab
-    ** Failers (too big char)
-No match
+\= Expect no match and error message (too big char)
     A\x{123}B
 ** Character \x{123} is greater than 255 and UTF-8 mode is not enabled.
 ** Truncation will probably give the wrong result.

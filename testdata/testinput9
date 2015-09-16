@@ -7,7 +7,7 @@
 /a\Cb/
     aXb
     a\nb
-    ** Failers (too big char)
+\= Expect no match and error message (too big char)
     A\x{123}B
     A\o{443}B
   
