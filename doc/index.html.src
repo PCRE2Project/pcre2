@@ -210,6 +210,9 @@ in the library.
 <tr><td><a href="pcre2_set_match_limit.html">pcre2_set_match_limit</a></td>
     <td>&nbsp;&nbsp;Set the match limit</td></tr>
 
+<tr><td><a href="pcre2_set_offset_limit.html">pcre2_set_offset_limit</a></td>
+    <td>&nbsp;&nbsp;Set the offset limit</td></tr>
+
 <tr><td><a href="pcre2_set_newline.html">pcre2_set_newline</a></td>
     <td>&nbsp;&nbsp;Set the newline convention</td></tr>
 

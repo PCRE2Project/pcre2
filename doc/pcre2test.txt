@@ -432,6 +432,13 @@ SUBJECT LINE SYNTAX
 
          abc\=notbol,notempty
 
+       If the subject string is empty and \= is followed  by  whitespace,  the
+       line  is  treated  as a comment line, and is not used for matching. For
+       example:
+
+         \= This is a comment.
+         abc\= This is an invalid modifier list.
+
        A backslash followed  by  any  other  non-alphanumeric  character  just
        escapes that character. A backslash followed by anything else causes an
        error. However, if the very last character in the line is  a  backslash
@@ -1391,5 +1398,5 @@ AUTHOR
 
 REVISION
 
-       Last updated: 12 September 2015
+       Last updated: 14 September 2015
        Copyright (c) 1997-2015 University of Cambridge.

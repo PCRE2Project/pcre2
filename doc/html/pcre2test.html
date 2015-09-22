@@ -485,6 +485,12 @@ the start of a modifier list. For example:
 <pre>
   abc\=notbol,notempty
 </pre>
+If the subject string is empty and \= is followed by whitespace, the line is 
+treated as a comment line, and is not used for matching. For example:
+<pre>
+  \= This is a comment.
+  abc\= This is an invalid modifier list.
+</pre>
 A backslash followed by any other non-alphanumeric character just escapes that
 character. A backslash followed by anything else causes an error. However, if
 the very last character in the line is a backslash (and there is no modifier
@@ -691,9 +697,9 @@ If no number is given, 7 is assumed. The phrase "partial matching" means a call
 to <b>pcre2_match()</b> with either the PCRE2_PARTIAL_SOFT or the
 PCRE2_PARTIAL_HARD option set. Note that such a call may return a complete
 match; the options enable the possibility of a partial match, but do not
-require it. Note also that if you request JIT compilation only for partial 
-matching (for example, /jit=2) but do not set the <b>partial</b> modifier on a 
-subject line, that match will not use JIT code because none was compiled for 
+require it. Note also that if you request JIT compilation only for partial
+matching (for example, /jit=2) but do not set the <b>partial</b> modifier on a
+subject line, that match will not use JIT code because none was compiled for
 non-partial matching.
 </P>
 <P>
@@ -1533,7 +1539,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC21" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 12 September 2015
+Last updated: 14 September 2015
 <br>
 Copyright &copy; 1997-2015 University of Cambridge.
 <br>

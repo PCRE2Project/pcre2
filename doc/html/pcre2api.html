@@ -176,6 +176,10 @@ document for an overview of all the PCRE2 documentation.
 <b>  uint32_t <i>value</i>);</b>
 <br>
 <br>
+<b>int pcre2_set_offset_limit(pcre2_match_context *<i>mcontext</i>,</b>
+<b>  PCRE2_SIZE <i>value</i>);</b>
+<br>
+<br>
 <b>int pcre2_set_recursion_limit(pcre2_match_context *<i>mcontext</i>,</b>
 <b>  uint32_t <i>value</i>);</b>
 <br>
@@ -697,6 +701,7 @@ A match context is required if you want to change the default values of any
 of the following match-time parameters:
 <pre>
   A callout function
+  The offset limit for matching an unanchored pattern
   The limit for calling <i>match()</i>
   The limit for calling <i>match()</i> recursively
 </pre>
@@ -729,6 +734,30 @@ This sets up a "callout" function, which PCRE2 will call at specified points
 during a matching operation. Details are given in the
 <a href="pcre2callout.html"><b>pcre2callout</b></a>
 documentation.
+<b>int pcre2_set_offset_limit(pcre2_match_context *<i>mcontext</i>,</b>
+<b>  PCRE2_SIZE <i>value</i>);</b>
+<br>
+<br>
+The <i>offset_limit</i> parameter limits how far an unanchored search can
+advance in the subject string. The default value is PCRE2_UNSET. The
+<b>pcre2_match()</b> and <b>pcre2_dfa_match()</b> functions return
+PCRE2_ERROR_NOMATCH if a match with a starting point before or at the given
+offset is not found. For example, if the pattern /abc/ is matched against
+"123abc" with an offset limit less than 3, the result is PCRE2_ERROR_NO_MATCH.
+A match can never be found if the <i>startoffset</i> argument of
+<b>pcre2_match()</b> or <b>pcre2_dfa_match()</b> is greater than the offset
+limit.
+</P>
+<P>
+When using this facility, you must set PCRE2_USE_OFFSET_LIMIT when calling
+<b>pcre2_compile()</b> so that when JIT is in use, different code can be
+compiled. If a match is started with a non-default match limit when
+PCRE2_USE_OFFSET_LIMIT is not set, an error is generated.
+</P>
+<P>
+The offset limit facility can be used to track progress when searching large
+subject strings. See also the PCRE2_FIRSTLINE option, which requires a match to
+start within the first line of the subject.
 <b>int pcre2_set_match_limit(pcre2_match_context *<i>mcontext</i>,</b>
 <b>  uint32_t <i>value</i>);</b>
 <br>
@@ -1168,7 +1197,8 @@ built.
 </pre>
 If this option is set, an unanchored pattern is required to match before or at
 the first newline in the subject string, though the matched text may continue
-over the newline.
+over the newline. See also PCRE2_USE_OFFSET_LIMIT, which provides a more 
+general limiting facility.
 <pre>
   PCRE2_MATCH_UNSET_BACKREF
 </pre>
@@ -1350,6 +1380,17 @@ support.
 This option inverts the "greediness" of the quantifiers so that they are not
 greedy by default, but become greedy if followed by "?". It is not compatible
 with Perl. It can also be set by a (?U) option setting within the pattern.
+<pre>
+  PCRE2_USE_OFFSET_LIMIT
+</pre>
+This option must be set for <b>pcre2_compile()</b> if 
+<b>pcre2_set_offset_limit()</b> is going to be used to set a non-default offset 
+limit in a match context for matches that use this pattern. An error is
+generated if an offset limit is set without this option. For more details, see
+the description of <b>pcre2_set_offset_limit()</b> in the
+<a href="#matchcontext">section</a>
+that describes match contexts. See also the PCRE2_FIRSTLINE
+option above.
 <pre>
   PCRE2_UTF
 </pre>
@@ -2912,7 +2953,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC40" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 02 September 2015
+Last updated: 22 September 2015
 <br>
 Copyright &copy; 1997-2015 University of Cambridge.
 <br>
