@@ -65,13 +65,9 @@ End
 
 echo "Making pcre2.txt"
 for file in pcre2 pcre2api pcre2build pcre2callout pcre2compat pcre2jit \
-            pcre2limits pcre2matching pcre2partial pcre2unicode ; do
-
-#for file in  \
-#            pcre2syntax \
-#            pcre2precompile pcre2perform pcre2posix pcre2sample \
-#            pcre2stack ; do
-
+            pcre2limits pcre2matching pcre2partial pcre2pattern pcre2perform \
+            pcre2posix pcre2sample pcre2serialize pcre2stack pcre2syntax \
+            pcre2unicode ; do
   echo "  Processing $file.3"
   nroff -c -man $file.3 >$file.rawtxt
   perl ../CleanTxt <$file.rawtxt >>pcre2.txt
