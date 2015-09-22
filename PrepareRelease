@@ -149,7 +149,6 @@ for file in *.3 ; do
      [ "$base" = "pcre2stack" ]   || \
      [ "$base" = "pcre2compat" ]  || \
      [ "$base" = "pcre2limits" ]  || \
-     [ "$base" = "pcre2perform" ] || \
      [ "$base" = "pcre2unicode" ] ; then
     toc=""
   fi
