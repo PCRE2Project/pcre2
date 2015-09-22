@@ -7655,4 +7655,26 @@ No match
  0: 
  0: 
 
+/abc/use_offset_limit
+    1234abcde\=offset_limit=100
+ 0: abc
+    1234abcde\=offset_limit=9
+ 0: abc
+    1234abcde\=offset_limit=4
+ 0: abc
+    1234abcde\=offset_limit=4,offset=4
+ 0: abc
+\= Expect no match
+    1234abcde\=offset_limit=4,offset=5
+No match
+    1234abcde\=offset_limit=3
+No match
+
+/(?<=abc)/use_offset_limit
+    1234abc\=offset_limit=7
+ 0: 
+\= Expect no match
+    1234abc\=offset_limit=6
+No match
+
 # End of testinput6

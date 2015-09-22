@@ -14633,4 +14633,31 @@ MK: A\x0aB
 /(*:abc\Qpqr)/alt_verbnames
 Failed: error 160 at offset 12: (*VERB) not recognized or malformed
 
+/abc/use_offset_limit
+    1234abcde\=offset_limit=100
+ 0: abc
+    1234abcde\=offset_limit=9
+ 0: abc
+    1234abcde\=offset_limit=4
+ 0: abc
+    1234abcde\=offset_limit=4,offset=4
+ 0: abc
+\= Expect no match
+    1234abcde\=offset_limit=4,offset=5
+No match
+    1234abcde\=offset_limit=3
+No match
+
+/(?<=abc)/use_offset_limit
+    1234abc\=offset_limit=7
+ 0: 
+\= Expect no match
+    1234abc\=offset_limit=6
+No match
+
+/abc/
+\= Expect error
+    1234abcde\=offset_limit=4
+Failed: error -56: offset limit set without PCRE2_USE_OFFSET_LIMIT
+
 # End of testinput2 

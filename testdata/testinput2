@@ -4515,4 +4515,22 @@ B)x/alt_verbnames,mark
 
 /(*:abc\Qpqr)/alt_verbnames
 
+/abc/use_offset_limit
+    1234abcde\=offset_limit=100
+    1234abcde\=offset_limit=9
+    1234abcde\=offset_limit=4
+    1234abcde\=offset_limit=4,offset=4
+\= Expect no match
+    1234abcde\=offset_limit=4,offset=5
+    1234abcde\=offset_limit=3
+
+/(?<=abc)/use_offset_limit
+    1234abc\=offset_limit=7
+\= Expect no match
+    1234abc\=offset_limit=6
+
+/abc/
+\= Expect error
+    1234abcde\=offset_limit=4
+
 # End of testinput2 

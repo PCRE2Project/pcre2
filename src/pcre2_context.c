@@ -169,6 +169,7 @@ const pcre2_match_context PRIV(default_match_context) = {
 #endif
   NULL,
   NULL,
+  PCRE2_UNSET,   /* Offset limit */ 
   MATCH_LIMIT,
   MATCH_LIMIT_RECURSION };
 
@@ -344,6 +345,13 @@ PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_set_match_limit(pcre2_match_context *mcontext, uint32_t limit)
 {
 mcontext->match_limit = limit;
+return 0;
+}
+
+PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
+pcre2_set_offset_limit(pcre2_match_context *mcontext, PCRE2_SIZE limit)
+{
+mcontext->offset_limit = limit;
 return 0;
 }
 

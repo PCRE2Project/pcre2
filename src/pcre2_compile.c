@@ -566,7 +566,8 @@ static PCRE2_SPTR posix_substitutes[] = {
    PCRE2_MATCH_UNSET_BACKREF|PCRE2_MULTILINE|PCRE2_NEVER_BACKSLASH_C| \
    PCRE2_NEVER_UCP|PCRE2_NEVER_UTF|PCRE2_NO_AUTO_CAPTURE| \
    PCRE2_NO_AUTO_POSSESS|PCRE2_NO_DOTSTAR_ANCHOR|PCRE2_NO_START_OPTIMIZE| \
-   PCRE2_NO_UTF_CHECK|PCRE2_UCP|PCRE2_UNGREEDY|PCRE2_UTF)
+   PCRE2_NO_UTF_CHECK|PCRE2_UCP|PCRE2_UNGREEDY|PCRE2_USE_OFFSET_LIMIT| \
+   PCRE2_UTF)
 
 /* Compile time error code numbers. They are given names so that they can more
 easily be tracked. When a new number is added, the tables called eint1 and
@@ -2797,8 +2798,8 @@ return n8;
 *************************************************/
 
 /* This function is called when the PCRE2_ALT_VERBNAMES option is set, to
-process the characters in a verb's name argument. It is called twice, once with 
-codeptr == NULL, to find out the length of the processed name, and again to put 
+process the characters in a verb's name argument. It is called twice, once with
+codeptr == NULL, to find out the length of the processed name, and again to put
 the name into memory.
 
 Arguments:
@@ -2837,12 +2838,12 @@ for (; ptr < cb->end_pattern; ptr++)
     }
 
   else  /* Not a literal character */
-    { 
+    {
     if (x == CHAR_RIGHT_PARENTHESIS) break;
- 
+
     /* Skip over comments and whitespace in extended mode. Need a loop to handle
     whitespace after a comment. */
-  
+
     if ((options & PCRE2_EXTENDED) != 0)
       {
       for (;;)
@@ -2864,21 +2865,21 @@ for (; ptr < cb->end_pattern; ptr++)
           }
         x = *ptr;     /* Either NULL or the char after a newline */
         }
-      if (ptr >= cb->end_pattern) break;   
+      if (ptr >= cb->end_pattern) break;
       }
-  
+
     /* Process escapes */
-  
+
     if (x == '\\')
       {
       int rc;
       *errorcodeptr = 0;
       rc = check_escape(&ptr, &x, errorcodeptr, options, FALSE, cb);
-      *ptrptr = ptr;   /* For possible error */ 
+      *ptrptr = ptr;   /* For possible error */
       if (*errorcodeptr != 0) return -1;
       if (rc != 0)
         {
-        if (rc == ESC_Q) 
+        if (rc == ESC_Q)
           {
           inescq = TRUE;
           continue;
@@ -2888,8 +2889,8 @@ for (; ptr < cb->end_pattern; ptr++)
         return -1;
         }
       }
-    }   
-    
+    }
+
   /* We have the next character in the name. */
 
 #ifdef SUPPORT_UNICODE
@@ -5541,7 +5542,7 @@ for (;; ptr++)
           }
         else
           {
-          arglen = process_verb_name(&ptr, NULL, errorcodeptr, options, 
+          arglen = process_verb_name(&ptr, NULL, errorcodeptr, options,
             utf, cb);
           if (arglen < 0) goto FAILED;
           }
@@ -5616,9 +5617,9 @@ for (;; ptr++)
             if ((options & PCRE2_ALT_VERBNAMES) != 0)
               {
               PCRE2_UCHAR *memcode = code;  /* code is "register" */
-              (void)process_verb_name(&arg, &memcode, errorcodeptr, options, 
+              (void)process_verb_name(&arg, &memcode, errorcodeptr, options,
                 utf, cb);
-              code = memcode;  
+              code = memcode;
               }
             else   /* No argument processing */
               {

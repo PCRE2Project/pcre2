@@ -379,6 +379,7 @@ enum { MOD_CTC,    /* Applies to a compile context */
        MOD_NL,     /* Is a newline value */
        MOD_NN,     /* Is a number or a name; more than one may occur */
        MOD_OPT,    /* Is an option bit */
+       MOD_SIZ,    /* Is a PCRE2_SIZE value */ 
        MOD_STR };  /* Is a string */
 
 /* Control bits. Some apply to compiling, some to matching, but some can be set
@@ -550,6 +551,7 @@ static modstruct modlist[] = {
   { "notempty_atstart",    MOD_DAT,  MOD_OPT, PCRE2_NOTEMPTY_ATSTART,    DO(options) },
   { "noteol",              MOD_DAT,  MOD_OPT, PCRE2_NOTEOL,              DO(options) },
   { "offset",              MOD_DAT,  MOD_INT, 0,                         DO(offset) },
+  { "offset_limit",        MOD_CTM,  MOD_SIZ, 0,                         MO(offset_limit)},
   { "ovector",             MOD_DAT,  MOD_INT, 0,                         DO(oveccount) },
   { "parens_nest_limit",   MOD_CTC,  MOD_INT, 0,                         CO(parens_nest_limit) },
   { "partial_hard",        MOD_DAT,  MOD_OPT, PCRE2_PARTIAL_HARD,        DO(options) },
@@ -565,6 +567,7 @@ static modstruct modlist[] = {
   { "tables",              MOD_PAT,  MOD_INT, 0,                         PO(tables_id) },
   { "ucp",                 MOD_PATP, MOD_OPT, PCRE2_UCP,                 PO(options) },
   { "ungreedy",            MOD_PAT,  MOD_OPT, PCRE2_UNGREEDY,            PO(options) },
+  { "use_offset_limit",    MOD_PAT,  MOD_OPT, PCRE2_USE_OFFSET_LIMIT,    PO(options) },
   { "utf",                 MOD_PATP, MOD_OPT, PCRE2_UTF,                 PO(options) },
   { "zero_terminate",      MOD_DAT,  MOD_CTL, CTL_ZERO_TERMINATE,        DO(control) }
 };
@@ -1067,6 +1070,14 @@ are supported. */
   else \
     pcre2_set_match_limit_32(G(a,32),b)
 
+#define PCRE2_SET_OFFSET_LIMIT(a,b) \
+  if (test_mode == PCRE8_MODE) \
+    pcre2_set_offset_limit_8(G(a,8),b); \
+  else if (test_mode == PCRE16_MODE) \
+    pcre2_set_offset_limit_16(G(a,16),b); \
+  else \
+    pcre2_set_offset_limit_32(G(a,32),b)
+
 #define PCRE2_SET_PARENS_NEST_LIMIT(a,b) \
   if (test_mode == PCRE8_MODE) \
     pcre2_set_parens_nest_limit_8(G(a,8),b); \
@@ -1467,6 +1478,12 @@ the three different cases. */
   else \
     G(pcre2_set_match_limit_,BITTWO)(G(a,BITTWO),b)
 
+#define PCRE2_SET_OFFSET_LIMIT(a,b) \
+  if (test_mode == G(G(PCRE,BITONE),_MODE)) \
+    G(pcre2_set_offset_limit_,BITONE)(G(a,BITONE),b); \
+  else \
+    G(pcre2_set_offset_limit_,BITTWO)(G(a,BITTWO),b)
+
 #define PCRE2_SET_PARENS_NEST_LIMIT(a,b) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
     G(pcre2_set_parens_nest_limit_,BITONE)(G(a,BITONE),b); \
@@ -1665,6 +1682,7 @@ the three different cases. */
 #define PCRE2_SET_COMPILE_RECURSION_GUARD(a,b,c) \
   pcre2_set_compile_recursion_guard_8(G(a,8),b,c)
 #define PCRE2_SET_MATCH_LIMIT(a,b) pcre2_set_match_limit_8(G(a,8),b)
+#define PCRE2_SET_OFFSET_LIMIT(a,b) pcre2_set_offset_limit_8(G(a,8),b)
 #define PCRE2_SET_PARENS_NEST_LIMIT(a,b) pcre2_set_parens_nest_limit_8(G(a,8),b)
 #define PCRE2_SET_RECURSION_LIMIT(a,b) pcre2_set_recursion_limit_8(G(a,8),b)
 #define PCRE2_SUBSTITUTE(a,b,c,d,e,f,g,h,i,j,k,l) \
@@ -1756,6 +1774,7 @@ the three different cases. */
 #define PCRE2_SET_COMPILE_RECURSION_GUARD(a,b,c) \
   pcre2_set_compile_recursion_guard_16(G(a,16),b,c)
 #define PCRE2_SET_MATCH_LIMIT(a,b) pcre2_set_match_limit_16(G(a,16),b)
+#define PCRE2_SET_OFFSET_LIMIT(a,b) pcre2_set_offset_limit_16(G(a,16),b)
 #define PCRE2_SET_PARENS_NEST_LIMIT(a,b) pcre2_set_parens_nest_limit_16(G(a,16),b)
 #define PCRE2_SET_RECURSION_LIMIT(a,b) pcre2_set_recursion_limit_16(G(a,16),b)
 #define PCRE2_SUBSTITUTE(a,b,c,d,e,f,g,h,i,j,k,l) \
@@ -1847,6 +1866,7 @@ the three different cases. */
 #define PCRE2_SET_COMPILE_RECURSION_GUARD(a,b,c) \
   pcre2_set_compile_recursion_guard_32(G(a,32),b,c)
 #define PCRE2_SET_MATCH_LIMIT(a,b) pcre2_set_match_limit_32(G(a,32),b)
+#define PCRE2_SET_OFFSET_LIMIT(a,b) pcre2_set_offset_limit_32(G(a,32),b)
 #define PCRE2_SET_PARENS_NEST_LIMIT(a,b) pcre2_set_parens_nest_limit_32(G(a,32),b)
 #define PCRE2_SET_RECURSION_LIMIT(a,b) pcre2_set_recursion_limit_32(G(a,32),b)
 #define PCRE2_SUBSTITUTE(a,b,c,d,e,f,g,h,i,j,k,l) \
@@ -3235,6 +3255,12 @@ for (;;)
       }
     /* Fall through */
 
+    case MOD_SIZ:    /* PCRE2_SIZE value */
+    if (!isdigit(*pp)) goto INVALID_VALUE;
+    *((PCRE2_SIZE *)field) = (PCRE2_SIZE)strtoul((const char *)pp, &endptr, 10);
+    pp = (uint8_t *)endptr;
+    break;
+
     case MOD_INT:    /* Unsigned integer */
     if (!isdigit(*pp)) goto INVALID_VALUE;
     *((uint32_t *)field) = (uint32_t)strtoul((const char *)pp, &endptr, 10);
@@ -3431,7 +3457,7 @@ fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
   ((controls & CTL_ALLUSEDTEXT) != 0)? " allusedtext" : "",
   ((controls & CTL_ALTGLOBAL) != 0)? " altglobal" : "",
   ((controls & CTL_BINCODE) != 0)? " bincode" : "",
-  ((controls & CTL_BSR_SET) != 0)? " bsr" : "", 
+  ((controls & CTL_BSR_SET) != 0)? " bsr" : "",
   ((controls & CTL_CALLOUT_CAPTURE) != 0)? " callout_capture" : "",
   ((controls & CTL_CALLOUT_INFO) != 0)? " callout_info" : "",
   ((controls & CTL_CALLOUT_NONE) != 0)? " callout_none" : "",
@@ -3446,7 +3472,7 @@ fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
   ((controls & CTL_JITVERIFY) != 0)? " jitverify" : "",
   ((controls & CTL_MARK) != 0)? " mark" : "",
   ((controls & CTL_MEMORY) != 0)? " memory" : "",
-  ((controls & CTL_NL_SET) != 0)? " newline" : "", 
+  ((controls & CTL_NL_SET) != 0)? " newline" : "",
   ((controls & CTL_POSIX) != 0)? " posix" : "",
   ((controls & CTL_PUSH) != 0)? " push" : "",
   ((controls & CTL_STARTCHAR) != 0)? " startchar" : "",
@@ -3473,7 +3499,7 @@ static void
 show_compile_options(uint32_t options, const char *before, const char *after)
 {
 if (options == 0) fprintf(outfile, "%s <none>%s", before, after);
-else fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
+else fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
   before,
   ((options & PCRE2_ALT_BSUX) != 0)? " alt_bsux" : "",
   ((options & PCRE2_ALT_CIRCUMFLEX) != 0)? " alt_circumflex" : "",
@@ -3499,6 +3525,7 @@ else fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
   ((options & PCRE2_NO_START_OPTIMIZE) != 0)? " no_start_optimize" : "",
   ((options & PCRE2_UCP) != 0)? " ucp" : "",
   ((options & PCRE2_UNGREEDY) != 0)? " ungreedy" : "",
+  ((options & PCRE2_USE_OFFSET_LIMIT) != 0)? " use_offset_limit" : "",
   ((options & PCRE2_UTF) != 0)? " utf" : "",
   after);
 }
@@ -4401,7 +4428,7 @@ if ((pat_patctl.control & CTL_POSIX) != 0)
     show_controls(pat_patctl.control & ~POSIX_SUPPORTED_COMPILE_CONTROLS, msg);
     msg = "";
     }
-    
+
   if (local_newline_default != 0) prmsg(&msg, "#newline_default");
 
   if (msg[0] == 0) fprintf(outfile, "\n");
@@ -6975,7 +7002,7 @@ while (notdone)
       skipping = FALSE;
       setlocale(LC_CTYPE, "C");
       }
-    else if (!skipping && !(p[0] == '\\' && p[1] == '=' && isspace(p[2]))) 
+    else if (!skipping && !(p[0] == '\\' && p[1] == '=' && isspace(p[2])))
       rc = process_data();
     }
 

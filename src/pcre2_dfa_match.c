@@ -3116,6 +3116,7 @@ const pcre2_real_code *re = (const pcre2_real_code *)code;
 
 PCRE2_SPTR start_match;
 PCRE2_SPTR end_subject;
+PCRE2_SPTR bumpalong_limit;
 PCRE2_SPTR req_cu_ptr;
 
 BOOL utf, anchored, startline, firstline;
@@ -3176,11 +3177,6 @@ options |= (re->flags & FF) / ((FF & (~FF+1)) / (OO & (~OO+1)));
 #undef FF
 #undef OO
 
-/* A NULL match context means "use a default context" */
-
-if (mcontext == NULL)
-  mcontext = (pcre2_match_context *)(&PRIV(default_match_context));
-
 /* If restarting after a partial match, do some sanity checks on the contents
 of the workspace. */
 
@@ -3205,8 +3201,11 @@ where to start. */
 
 startline = (re->flags & PCRE2_STARTLINE) != 0;
 firstline = (re->overall_options & PCRE2_FIRSTLINE) != 0;
+bumpalong_limit = end_subject;
 
-/* Fill in the fields in the match block. */
+/* Get data from the match context, if present, and fill in the fields in the
+match block. It is an error to set an offset limit without setting the flag at
+compile time. */
 
 if (mcontext == NULL)
   {
@@ -3215,6 +3214,12 @@ if (mcontext == NULL)
   }
 else
   {
+  if (mcontext->offset_limit != PCRE2_UNSET)
+    {
+    if ((re->overall_options & PCRE2_USE_OFFSET_LIMIT) == 0)
+      return PCRE2_ERROR_BADOFFSETLIMIT;
+    bumpalong_limit = subject + mcontext->offset_limit;
+    } 
   mb->callout = mcontext->callout;
   mb->callout_data = mcontext->callout_data;
   mb->memctl = mcontext->memctl;
@@ -3538,6 +3543,10 @@ for (;;)
     }
 
   /* ------------ End of start of match optimizations ------------ */
+
+  /* Give no match if we have passed the bumpalong limit. */
+  
+  if (start_match > bumpalong_limit) break;
 
   /* OK, now we can do the business */
 

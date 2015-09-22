@@ -121,6 +121,7 @@ D   is inspected during pcre2_dfa_match() execution
 #define PCRE2_NEVER_BACKSLASH_C   0x00100000u  /* C       */
 #define PCRE2_ALT_CIRCUMFLEX      0x00200000u  /*   J M D */
 #define PCRE2_ALT_VERBNAMES       0x00400000u  /* C       */
+#define PCRE2_USE_OFFSET_LIMIT    0x00800000u  /*   J M D */
 
 /* These are for pcre2_jit_compile(). */
 
@@ -234,6 +235,7 @@ numbers must not be changed. */
 #define PCRE2_ERROR_RECURSIONLIMIT    (-53)
 #define PCRE2_ERROR_UNAVAILABLE       (-54)
 #define PCRE2_ERROR_UNSET             (-55)
+#define PCRE2_ERROR_BADOFFSETLIMIT    (-56)
 
 /* Request types for pcre2_pattern_info() */
 
@@ -406,6 +408,8 @@ PCRE2_EXP_DECL int       pcre2_set_callout(pcre2_match_context *, \
                            int (*)(pcre2_callout_block *, void *), void *); \
 PCRE2_EXP_DECL int       pcre2_set_match_limit(pcre2_match_context *, \
                            uint32_t); \
+PCRE2_EXP_DECL int       pcre2_set_offset_limit(pcre2_match_context *, \
+                           PCRE2_SIZE); \
 PCRE2_EXP_DECL int       pcre2_set_recursion_limit(pcre2_match_context *, \
                            uint32_t); \
 PCRE2_EXP_DECL int       pcre2_set_recursion_memory_management( \
@@ -609,6 +613,7 @@ pcre2_compile are called by application code. */
 #define pcre2_set_match_limit                 PCRE2_SUFFIX(pcre2_set_match_limit_)
 #define pcre2_set_newline                     PCRE2_SUFFIX(pcre2_set_newline_)
 #define pcre2_set_parens_nest_limit           PCRE2_SUFFIX(pcre2_set_parens_nest_limit_)
+#define pcre2_set_offset_limit                PCRE2_SUFFIX(pcre2_set_offset_limit_)
 #define pcre2_set_recursion_limit             PCRE2_SUFFIX(pcre2_set_recursion_limit_)
 #define pcre2_set_recursion_memory_management PCRE2_SUFFIX(pcre2_set_recursion_memory_management_)
 #define pcre2_substitute                      PCRE2_SUFFIX(pcre2_substitute_)

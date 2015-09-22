@@ -187,6 +187,8 @@ the SSE2 instruction set.
 52. It is now possible to have comment lines amid the subject strings in 
 pcre2test (and perltest.sh) input.
 
+53. Implemented PCRE2_USE_OFFSET_LIMIT and pcre2_set_offset_limit().
+
 
 Version 10.20 30-June-2015
 --------------------------
