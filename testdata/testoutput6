@@ -7677,4 +7677,8 @@ No match
     1234abc\=offset_limit=6
 No match
 
+/abcd/null_context
+    abcd\=null_context
+ 0: abcd
+
 # End of testinput6

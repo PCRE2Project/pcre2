@@ -4882,4 +4882,7 @@
 \= Expect no match
     1234abc\=offset_limit=6
 
+/abcd/null_context
+    abcd\=null_context
+
 # End of testinput6

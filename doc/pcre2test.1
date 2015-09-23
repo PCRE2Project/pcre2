@@ -1,4 +1,4 @@
-.TH PCRE2TEST 1 "22 September 2015" "PCRE 10.21"
+.TH PCRE2TEST 1 "23 September 2015" "PCRE 10.21"
 .SH NAME
 pcre2test - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -529,6 +529,7 @@ about the pattern:
       locale=<name>             use this locale
       memory                    show memory used
       newline=<type>            set newline type
+      null_context              compile with a NULL context
       parens_nest_limit=<n>     set maximum parentheses depth
       posix                     use the POSIX API
       push                      push compiled pattern onto the stack
@@ -600,6 +601,15 @@ The \fBcallout_info\fP modifier requests information about all the callouts in
 the pattern. A list of them is output at the end of any other information that
 is requested. For each callout, either its number or string is given, followed
 by the item that follows it in the pattern.
+.
+.
+.SS "Passing a NULL context"
+.rs
+.sp
+Normally, \fBpcre2test\fP passes a context block to \fBpcre2_compile()\fP. If 
+the \fBnull_context\fP modifier is set, however, NULL is passed. This is for 
+testing that \fBpcre2_compile()\fP behaves correctly in this case (it uses 
+default values).
 .
 .
 .SS "Specifying a pattern in hex"
@@ -895,6 +905,7 @@ pattern.
       mark                      show mark values
       match_limit=<n>           set a match limit
       memory                    show memory usage
+      null_context              match with a NULL context 
       offset=<n>                set starting offset
       offset_limit=<n>          set offset limit
       ovector=<n>               set size of output vector
@@ -1173,6 +1184,17 @@ this modifier has no effect, as there is no facility for passing a length.)
 .P
 When testing \fBpcre2_substitute()\fP, this modifier also has the effect of
 passing the replacement string as zero-terminated.
+.
+.
+.SS "Passing a NULL context"
+.rs
+.sp
+Normally, \fBpcre2test\fP passes a context block to \fBpcre2_match()\fP,
+\fBpcre2_dfa_match()\fP or \fBpcre2_jit_match()\fP. If the \fBnull_context\fP
+modifier is set, however, NULL is passed. This is for testing that the matching
+functions behave correctly in this case (they use default values). This 
+modifier cannot be used with the \fBfind_limits\fP modifier or when testing the 
+substitution function.
 .
 .
 .SH "THE ALTERNATIVE MATCHING FUNCTION"
@@ -1537,6 +1559,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 22 September 2015
+Last updated: 23 September 2015
 Copyright (c) 1997-2015 University of Cambridge.
 .fi

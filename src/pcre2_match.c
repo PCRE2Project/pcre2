@@ -6588,7 +6588,7 @@ if (utf && (options & PCRE2_NO_UTF_CHECK) == 0)
 /* It is an error to set an offset limit without setting the flag at compile
 time. */
 
-if (mcontext != NULL && mcontext->offset_limit != PCRE2_UNSET &&
+if (mcontext->offset_limit != PCRE2_UNSET &&
      (re->overall_options & PCRE2_USE_OFFSET_LIMIT) == 0)
   return PCRE2_ERROR_BADOFFSETLIMIT;
 
@@ -6602,7 +6602,7 @@ selected normal or partial matching mode was not compiled). */
 
 /* +++ TEMPORARY: JIT does not yet support offset_limit. */
 
-if (mcontext == NULL || mcontext->offset_limit == PCRE2_UNSET)
+if (mcontext->offset_limit == PCRE2_UNSET)
 
 /* +++ */
 
@@ -6619,30 +6619,17 @@ if (re->executable_jit != NULL && (options & ~PUBLIC_JIT_MATCH_OPTIONS) == 0)
 anchored = ((re->overall_options | options) & PCRE2_ANCHORED) != 0;
 firstline = (re->overall_options & PCRE2_FIRSTLINE) != 0;
 startline = (re->flags & PCRE2_STARTLINE) != 0;
-bumpalong_limit = end_subject;
+bumpalong_limit =  (mcontext->offset_limit == PCRE2_UNSET)?
+  end_subject : subject + mcontext->offset_limit;
 
-/* Get data from the match context, if it exists, and fill in the fields in the
-match block. */
+/* Fill in the fields in the match block. */
 
-if (mcontext == NULL)
-  {
-  mb->callout = NULL;
-  mb->memctl = re->memctl;
+mb->callout = mcontext->callout;
+mb->callout_data = mcontext->callout_data;
+mb->memctl = mcontext->memctl;
 #ifdef HEAP_MATCH_RECURSE
-  mb->stack_memctl = re->memctl;
+mb->stack_memctl = mcontext->stack_memctl;
 #endif
-  }
-else
-  {
-  if (mcontext->offset_limit != PCRE2_UNSET)
-    bumpalong_limit = subject + mcontext->offset_limit;
-  mb->callout = mcontext->callout;
-  mb->callout_data = mcontext->callout_data;
-  mb->memctl = mcontext->memctl;
-#ifdef HEAP_MATCH_RECURSE
-  mb->stack_memctl = mcontext->stack_memctl;
-#endif
-  }
 
 mb->start_subject = subject;
 mb->start_offset = start_offset;
@@ -6990,7 +6977,7 @@ for(;;)
   /* ------------ End of start of match optimizations ------------ */
 
   /* Give no match if we have passed the bumpalong limit. */
-  
+
   if (start_match > bumpalong_limit)
     {
     rc = MATCH_NOMATCH;

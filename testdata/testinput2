@@ -4533,4 +4533,10 @@ B)x/alt_verbnames,mark
 \= Expect error
     1234abcde\=offset_limit=4
 
+/abcd/null_context
+    abcd\=null_context
+\= Expect error     
+    abcd\=null_context,find_limits
+    abcd\=allusedtext,startchar 
+
 # End of testinput2 

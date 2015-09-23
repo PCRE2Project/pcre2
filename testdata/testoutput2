@@ -14660,4 +14660,13 @@ No match
     1234abcde\=offset_limit=4
 Failed: error -56: offset limit set without PCRE2_USE_OFFSET_LIMIT
 
+/abcd/null_context
+    abcd\=null_context
+ 0: abcd
+\= Expect error     
+    abcd\=null_context,find_limits
+** Not allowed together: find_limits null_context
+    abcd\=allusedtext,startchar 
+** Not allowed together: allusedtext startchar
+
 # End of testinput2 

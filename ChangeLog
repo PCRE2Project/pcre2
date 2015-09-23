@@ -189,6 +189,9 @@ pcre2test (and perltest.sh) input.
 
 53. Implemented PCRE2_USE_OFFSET_LIMIT and pcre2_set_offset_limit().
 
+54. Add the null_context modifier to pcre2test so that calling pcre2_compile() 
+and the matching functions with NULL contexts can be tested.
+
 
 Version 10.20 30-June-2015
 --------------------------
