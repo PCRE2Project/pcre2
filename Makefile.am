@@ -589,6 +589,7 @@ EXTRA_DIST += \
   testdata/testinput17 \
   testdata/testinput18 \
   testdata/testinput19 \
+  testdata/testinput20 \
   testdata/testinputEBC \
   testdata/testoutput1 \
   testdata/testoutput2 \
@@ -609,13 +610,17 @@ EXTRA_DIST += \
   testdata/testoutput12-16 \
   testdata/testoutput12-32 \
   testdata/testoutput13 \
-  testdata/testoutput14 \
+  testdata/testoutput14-16 \
+  testdata/testoutput14-32 \
+  testdata/testoutput14-8 \
   testdata/testoutput15 \
   testdata/testoutput16 \
   testdata/testoutput17 \
   testdata/testoutput18 \
   testdata/testoutput19 \
+  testdata/testoutput20 \
   testdata/testoutputEBC \
+  testdata/valgrind-jit.supp \
   testdata/wintestinput3 \
   testdata/wintestoutput3 \
   perltest.sh
