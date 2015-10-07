@@ -146,9 +146,10 @@ sanity checks). */
 #define PCRE2_DFA_RESTART         0x00000040u
 #define PCRE2_DFA_SHORTEST        0x00000080u
 
-/* This is an additional option for pcre2_substitute(). */
+/* These are additional options for pcre2_substitute(). */
 
 #define PCRE2_SUBSTITUTE_GLOBAL   0x00000100u
+#define PCRE2_SUBSTITUTE_EXTENDED 0x00000200u
 
 /* Newline and \R settings, for use in compile contexts. The newline values
 must be kept in step with values set in config.h and both sets must all be
@@ -236,6 +237,9 @@ numbers must not be changed. */
 #define PCRE2_ERROR_UNAVAILABLE       (-54)
 #define PCRE2_ERROR_UNSET             (-55)
 #define PCRE2_ERROR_BADOFFSETLIMIT    (-56)
+#define PCRE2_ERROR_BADREPESCAPE      (-57)
+#define PCRE2_ERROR_REPMISSINGBRACE   (-58)
+#define PCRE2_ERROR_BADSUBSTITUTION   (-59)
 
 /* Request types for pcre2_pattern_info() */
 

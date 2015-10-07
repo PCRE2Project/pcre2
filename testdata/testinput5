@@ -1678,9 +1678,16 @@
 /[\pS#moq]/
     =
 
-# UTF tests 
-
 /(*:a\x{12345}b\t(d\)c)xxx/utf,alt_verbnames,mark
     cxxxz
+
+/abcd/utf,replace=x\x{824}y\o{3333}z(\Q12\$34$$\x34\E5$$),substitute_extended
+    abcd
+
+/a(\x{e0}\x{101})(\x{c0}\x{102})/utf,replace=a\u$1\U$1\E$1\l$2\L$2\Eab\U\x{e0}\x{101}\L\x{d0}\x{160}\EDone,substitute_extended
+    a\x{e0}\x{101}\x{c0}\x{102}
+
+/((?<digit>\d)|(?<letter>\p{L}))/g,substitute_extended,replace=<${digit:+digit; :not digit; }${letter:+letter:not a letter}>
+    ab12cde
 
 # End of testinput5 

@@ -192,6 +192,8 @@ pcre2test (and perltest.sh) input.
 54. Add the null_context modifier to pcre2test so that calling pcre2_compile() 
 and the matching functions with NULL contexts can be tested.
 
+55. Implemented PCRE2_SUBSTITUTE_EXTENDED.
+
 
 Version 10.20 30-June-2015
 --------------------------

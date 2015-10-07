@@ -1612,8 +1612,15 @@ is placed in chptr. A backreference to group n is returned as negative n. On
 entry, ptr is pointing at the \. On exit, it points the final code unit of the
 escape sequence.
 
+This function is also called from pcre2_substitute() to handle escape sequences
+in replacement strings. In this case, the cb argument is NULL, and only
+sequences that define a data character are recognised. The isclass argument is
+not relevant, but the options argument is the final value of the compiled
+pattern's options.
+
 Arguments:
-  ptrptr         points to the pattern position pointer
+  ptrptr         points to the input position pointer
+  ptrend         points to the end of the input
   chptr          points to a returned data character
   errorcodeptr   points to the errorcode variable (containing zero)
   options        the current options bits
@@ -1626,9 +1633,9 @@ Returns:         zero => a data character
                  on error, errorcodeptr is set non-zero
 */
 
-static int
-check_escape(PCRE2_SPTR *ptrptr, uint32_t *chptr, int *errorcodeptr,
-  uint32_t options, BOOL isclass, compile_block *cb)
+int
+PRIV(check_escape)(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *chptr,
+  int *errorcodeptr, uint32_t options, BOOL isclass, compile_block *cb)
 {
 BOOL utf = (options & PCRE2_UTF) != 0;
 PCRE2_SPTR ptr = *ptrptr + 1;
@@ -1636,19 +1643,23 @@ register uint32_t c, cc;
 int escape = 0;
 int i;
 
-GETCHARINCTEST(c, ptr);         /* Get character value, increment pointer */
-ptr--;                          /* Set pointer back to the last code unit */
-
 /* If backslash is at the end of the pattern, it's an error. */
 
-if (c == CHAR_NULL && ptr >= cb->end_pattern) *errorcodeptr = ERR1;
+if (ptr >= ptrend) 
+  {
+  *errorcodeptr = ERR1;
+  return 0;
+  }  
+
+GETCHARINCTEST(c, ptr);         /* Get character value, increment pointer */
+ptr--;                          /* Set pointer back to the last code unit */
 
 /* Non-alphanumerics are literals, so we just leave the value in c. An initial
 value test saves a memory lookup for code points outside the alphanumeric
 range. Otherwise, do a table lookup. A non-zero result is something that can be
 returned immediately. Otherwise further processing is required. */
 
-else if (c < ESCAPES_FIRST || c > ESCAPES_LAST) {}  /* Definitely literal */
+if (c < ESCAPES_FIRST || c > ESCAPES_LAST) {}  /* Definitely literal */
 
 else if ((i = escapes[c - ESCAPES_FIRST]) != 0)
   {
@@ -1660,13 +1671,24 @@ else if ((i = escapes[c - ESCAPES_FIRST]) != 0)
     }
   }
 
-/* Escapes that need further processing, including those that are unknown. */
+/* Escapes that need further processing, including those that are unknown. 
+When called from pcre2_substitute(), only \c, \o, and \x are recognized (and \u 
+when BSUX is set). */
 
 else
   {
   PCRE2_SPTR oldptr;
   BOOL braced, negated, overflow;
   unsigned int s;
+  
+  /* Filter calls from pcre2_substitute(). */
+
+  if (cb == NULL && c != CHAR_c && c != CHAR_o && c != CHAR_x &&
+      (c != CHAR_u || (options & PCRE2_ALT_BSUX) != 0))
+    {
+    *errorcodeptr = ERR3;
+    return 0;
+    }  
 
   switch (c)
     {
@@ -2020,7 +2042,7 @@ else
 
     c = *(++ptr);
     if (c >= CHAR_a && c <= CHAR_z) c = UPPER_CASE(c);
-    if (c == CHAR_NULL && ptr >= cb->end_pattern)
+    if (c == CHAR_NULL && ptr >= ptrend)
       {
       *errorcodeptr = ERR2;
       break;
@@ -2874,7 +2896,8 @@ for (; ptr < cb->end_pattern; ptr++)
       {
       int rc;
       *errorcodeptr = 0;
-      rc = check_escape(&ptr, &x, errorcodeptr, options, FALSE, cb);
+      rc = PRIV(check_escape)(&ptr, cb->end_pattern, &x, errorcodeptr, options,
+        FALSE, cb);
       *ptrptr = ptr;   /* For possible error */
       if (*errorcodeptr != 0) return -1;
       if (rc != 0)
@@ -3048,7 +3071,8 @@ for (; ptr < cb->end_pattern; ptr++)
 
     case CHAR_BACKSLASH:
     errorcode = 0;
-    escape = check_escape(&ptr, &c, &errorcode, options, FALSE, cb);
+    escape = PRIV(check_escape)(&ptr, cb->end_pattern, &c, &errorcode, options,
+      FALSE, cb);
     if (errorcode != 0) goto FAILED;
     if (escape == ESC_Q) inescq = TRUE;
     break;
@@ -3132,7 +3156,8 @@ for (; ptr < cb->end_pattern; ptr++)
       else if (c == CHAR_BACKSLASH)
         {
         errorcode = 0;
-        escape = check_escape(&ptr, &c, &errorcode, options, TRUE, cb);
+        escape = PRIV(check_escape)(&ptr, cb->end_pattern, &c, &errorcode,
+          options, TRUE, cb);
         if (errorcode != 0) goto FAILED;
         if (escape == ESC_Q) inescq = TRUE;
         }
@@ -4195,7 +4220,8 @@ for (;; ptr++)
 
       if (c == CHAR_BACKSLASH)
         {
-        escape = check_escape(&ptr, &ec, errorcodeptr, options, TRUE, cb);
+        escape = PRIV(check_escape)(&ptr, cb->end_pattern, &ec, errorcodeptr,
+          options, TRUE, cb);
         if (*errorcodeptr != 0) goto FAILED;
         if (escape == 0)    /* Escaped single char */
           {
@@ -4405,7 +4431,8 @@ for (;; ptr++)
           if (d == CHAR_BACKSLASH)
             {
             int descape;
-            descape = check_escape(&ptr, &d, errorcodeptr, options, TRUE, cb);
+            descape = PRIV(check_escape)(&ptr, cb->end_pattern, &d,
+              errorcodeptr, options, TRUE, cb);
             if (*errorcodeptr != 0) goto FAILED;
 #ifdef EBCDIC
             range_is_literal = FALSE;
@@ -6862,7 +6889,8 @@ for (;; ptr++)
 
     case CHAR_BACKSLASH:
     tempptr = ptr;
-    escape = check_escape(&ptr, &ec, errorcodeptr, options, FALSE, cb);
+    escape = PRIV(check_escape)(&ptr, cb->end_pattern, &ec, errorcodeptr,
+      options, FALSE, cb);
     if (*errorcodeptr != 0) goto FAILED;
 
     if (escape == 0)                  /* The escape coded a single character */

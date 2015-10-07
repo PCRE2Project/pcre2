@@ -946,10 +946,10 @@ Failed: error 125 at offset 6: lookbehind assertion is not fixed length
 Failed: error 104 at offset 7: numbers out of order in {} quantifier
 
 /abc/\
-Failed: error 101 at offset 4: \ at end of pattern
+Failed: error 101 at offset 3: \ at end of pattern
 
 /abc/\i
-Failed: error 101 at offset 4: \ at end of pattern
+Failed: error 101 at offset 3: \ at end of pattern
 
 /(a)bc(d)/I
 Capturing subpattern count = 2
@@ -13546,27 +13546,27 @@ Failed: error 119 at offset 3: parentheses are too deeply nested
 
 /abc/replace=a$++
     123abc
-Failed: error -35: invalid replacement string
+Failed: error -35 at offset 2 in replacement: invalid replacement string
 
 /abc/replace=a$bad
     123abc
-Failed: error -49: unknown substring
+Failed: error -49 at offset 5 in replacement: unknown substring
 
 /abc/replace=a${A234567890123456789_123456789012}z
     123abc
-Failed: error -49: unknown substring
+Failed: error -49 at offset 36 in replacement: unknown substring
 
 /abc/replace=a${A23456789012345678901234567890123}z
     123abc
-Failed: error -35: invalid replacement string
+Failed: error -35 at offset 35 in replacement: invalid replacement string
 
 /abc/replace=a${bcd
     123abc
-Failed: error -35: invalid replacement string
+Failed: error -58 at offset 6 in replacement: expected closing curly bracket in replacement string
 
 /abc/replace=a${b+d}z
     123abc
-Failed: error -35: invalid replacement string
+Failed: error -58 at offset 4 in replacement: expected closing curly bracket in replacement string
 
 /abc/replace=[10]XYZ
     123abc123
@@ -13632,19 +13632,19 @@ Failed: error -34: bad option value
     
 /(*:pear)apple/g,replace=${*MARKING} 
     apple lemon blackberry
-Failed: error -35: invalid replacement string
+Failed: error -35 at offset 11 in replacement: invalid replacement string
 
 /(*:pear)apple/g,replace=${*MARK-time
     apple lemon blackberry
-Failed: error -35: invalid replacement string
+Failed: error -58 at offset 7 in replacement: expected closing curly bracket in replacement string
 
 /(*:pear)apple/g,replace=${*mark} 
     apple lemon blackberry
-Failed: error -35: invalid replacement string
+Failed: error -35 at offset 8 in replacement: invalid replacement string
 
 /(*:pear)apple|(*:orange)lemon|(*:strawberry)blackberry/g,replace=<$*MARKET>
     apple lemon blackberry
-Failed: error -35: invalid replacement string
+Failed: error -35 at offset 9 in replacement: invalid replacement string
 
 /(*:pear)apple|(*:orange)lemon|(*:strawberry)blackberry/g,replace=[22]${*MARK}
     apple lemon blackberry
@@ -14668,5 +14668,77 @@ Failed: error -56: offset limit set without PCRE2_USE_OFFSET_LIMIT
 ** Not allowed together: find_limits null_context
     abcd\=allusedtext,startchar 
 ** Not allowed together: allusedtext startchar
+
+/abcd/replace=w\rx\x82y\o{333}z(\Q12\$34$$\x34\E5$$),substitute_extended
+    abcd
+ 1: w\x0dx\x82y\xdbz(12\$34$$\x345$)
+    
+/a(bc)(DE)/replace=a\u$1\U$1\E$1\l$2\L$2\Eab\Uab\LYZ\EDone,substitute_extended
+    abcDE
+ 1: aBcBCbcdEdeabAByzDone
+ 
+/abcd/replace=xy\kz,substitute_extended
+    abcd
+Failed: error -57 at offset 4 in replacement: bad escape sequence in replacement string
+
+/a(?:(b)|(c))/substitute_extended,replace=X${1:+1:-1}X${2:+2:-2}
+    ab
+ 1: X1X-2
+    ac
+ 1: X-1X2
+    ab\=replace=${1:+$1\:$1:$2}
+ 1: b:b
+    ac\=replace=${1:+$1\:$1:$2}
+ 1: c
+
+/a(?:(b)|(c))/substitute_extended,replace=X${1:-1:-1}X${2:-2:-2}
+    ab
+ 1: XbX2:-2
+    ac
+ 1: X1:-1Xc
+
+/(a)/substitute_extended,replace=>${1:+\Q$1:{}$$\E+\U$1}<
+    a
+ 1: >$1:{}$$+A<
+
+/X(b)Y/substitute_extended
+    XbY\=replace=x${1:+$1\U$1}y
+ 1: xbBY
+    XbY\=replace=\Ux${1:+$1$1}y
+ 1: XBBY
+
+/a/substitute_extended,replace=${*MARK:+a:b}
+    a
+Failed: error -58 at offset 7 in replacement: expected closing curly bracket in replacement string
+
+/(abcd)/replace=${1:+xy\kz},substitute_extended
+    abcd
+Failed: error -57 at offset 8 in replacement: bad escape sequence in replacement string
+
+/abcd/substitute_extended,replace=>$1<
+    abcd
+Failed: error -49 at offset 3 in replacement: unknown substring
+
+/abcd/substitute_extended,replace=>xxx${xyz}<<<
+    abcd
+Failed: error -49 at offset 10 in replacement: unknown substring
+
+/(?J)(?:(?<A>a)|(?<A>b))/replace=<$A>
+    [a]
+ 1: [<a>]
+    [b] 
+ 1: [<b>]
+\= Expect error     
+    (a)\=ovector=1
+Failed: error -54 at offset 3 in replacement: requested value is not available
+
+/(a)|(b)/replace=<$1>
+\= Expect error
+    b
+Failed: error -55 at offset 3 in replacement: requested value is not set
+
+/(aa)(BB)/substitute_extended,replace=\U$1\L$2\E$1..\U$1\l$2$1
+    aaBB
+ 1: AAbbaa..AAbBaa
 
 # End of testinput2 

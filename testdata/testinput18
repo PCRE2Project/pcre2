@@ -92,4 +92,6 @@
 
 "(?(?C)"
 
+/abcd/substitute_extended
+
 # End of testdata/testinput18

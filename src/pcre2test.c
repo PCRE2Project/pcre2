@@ -182,13 +182,13 @@ void vms_setsymbol( char *, char *, int );
 #define LOCALESIZE 32           /* Size of locale name */
 #define LOOPREPEAT 500000       /* Default loop count for timing */
 #define PATSTACKSIZE 20         /* Pattern stack for save/restore testing */
-#define REPLACE_MODSIZE 96      /* Field for reading 8-bit replacement */
+#define REPLACE_MODSIZE 100     /* Field for reading 8-bit replacement */
 #define VERSION_SIZE 64         /* Size of buffer for the version strings */
 
 /* Make sure the buffer into which replacement strings are copied is big enough
 to hold them as 32-bit code units. */
 
-#define REPLACE_BUFFSIZE (4*REPLACE_MODSIZE)
+#define REPLACE_BUFFSIZE 1024   /* This is a byte value */
 
 /* Execution modes */
 
@@ -385,31 +385,32 @@ enum { MOD_CTC,    /* Applies to a compile context */
 /* Control bits. Some apply to compiling, some to matching, but some can be set
 either on a pattern or a data line, so they must all be distinct. */
 
-#define CTL_AFTERTEXT          0x00000001u
-#define CTL_ALLAFTERTEXT       0x00000002u
-#define CTL_ALLCAPTURES        0x00000004u
-#define CTL_ALLUSEDTEXT        0x00000008u
-#define CTL_ALTGLOBAL          0x00000010u
-#define CTL_BINCODE            0x00000020u
-#define CTL_CALLOUT_CAPTURE    0x00000040u
-#define CTL_CALLOUT_INFO       0x00000080u
-#define CTL_CALLOUT_NONE       0x00000100u
-#define CTL_DFA                0x00000200u
-#define CTL_FINDLIMITS         0x00000400u
-#define CTL_FULLBINCODE        0x00000800u
-#define CTL_GETALL             0x00001000u
-#define CTL_GLOBAL             0x00002000u
-#define CTL_HEXPAT             0x00004000u
-#define CTL_INFO               0x00008000u
-#define CTL_JITFAST            0x00010000u
-#define CTL_JITVERIFY          0x00020000u
-#define CTL_MARK               0x00040000u
-#define CTL_MEMORY             0x00080000u
-#define CTL_NULLCONTEXT        0x00100000u
-#define CTL_POSIX              0x00200000u
-#define CTL_PUSH               0x00400000u
-#define CTL_STARTCHAR          0x00800000u
-#define CTL_ZERO_TERMINATE     0x01000000u
+#define CTL_AFTERTEXT            0x00000001u
+#define CTL_ALLAFTERTEXT         0x00000002u
+#define CTL_ALLCAPTURES          0x00000004u
+#define CTL_ALLUSEDTEXT          0x00000008u
+#define CTL_ALTGLOBAL            0x00000010u
+#define CTL_BINCODE              0x00000020u
+#define CTL_CALLOUT_CAPTURE      0x00000040u
+#define CTL_CALLOUT_INFO         0x00000080u
+#define CTL_CALLOUT_NONE         0x00000100u
+#define CTL_DFA                  0x00000200u
+#define CTL_FINDLIMITS           0x00000400u
+#define CTL_FULLBINCODE          0x00000800u
+#define CTL_GETALL               0x00001000u
+#define CTL_GLOBAL               0x00002000u
+#define CTL_HEXPAT               0x00004000u
+#define CTL_INFO                 0x00008000u
+#define CTL_JITFAST              0x00010000u
+#define CTL_JITVERIFY            0x00020000u
+#define CTL_MARK                 0x00040000u
+#define CTL_MEMORY               0x00080000u
+#define CTL_NULLCONTEXT          0x00100000u
+#define CTL_POSIX                0x00200000u
+#define CTL_PUSH                 0x00400000u
+#define CTL_STARTCHAR            0x00800000u
+#define CTL_SUBSTITUTE_EXTENDED  0x01000000u
+#define CTL_ZERO_TERMINATE       0x02000000u
 
 #define CTL_BSR_SET          0x80000000u  /* This is informational */
 #define CTL_NL_SET           0x40000000u  /* This is informational */
@@ -566,6 +567,7 @@ static modstruct modlist[] = {
   { "replace",             MOD_PND,  MOD_STR, REPLACE_MODSIZE,           PO(replacement) },
   { "stackguard",          MOD_PAT,  MOD_INT, 0,                         PO(stackguard_test) },
   { "startchar",           MOD_PND,  MOD_CTL, CTL_STARTCHAR,             PO(control) },
+  { "substitute_extended", MOD_PAT,  MOD_CTL, CTL_SUBSTITUTE_EXTENDED,   PO(control) },
   { "tables",              MOD_PAT,  MOD_INT, 0,                         PO(tables_id) },
   { "ucp",                 MOD_PATP, MOD_OPT, PCRE2_UCP,                 PO(options) },
   { "ungreedy",            MOD_PAT,  MOD_OPT, PCRE2_UNGREEDY,            PO(options) },
@@ -3453,7 +3455,7 @@ Returns:      nothing
 static void
 show_controls(uint32_t controls, const char *before)
 {
-fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
+fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
   before,
   ((controls & CTL_AFTERTEXT) != 0)? " aftertext" : "",
   ((controls & CTL_ALLAFTERTEXT) != 0)? " allaftertext" : "",
@@ -3481,6 +3483,7 @@ fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
   ((controls & CTL_POSIX) != 0)? " posix" : "",
   ((controls & CTL_PUSH) != 0)? " push" : "",
   ((controls & CTL_STARTCHAR) != 0)? " startchar" : "",
+  ((controls & CTL_SUBSTITUTE_EXTENDED) != 0)? " substitute_extended" : "",
   ((controls & CTL_ZERO_TERMINATE) != 0)? " zero_terminate" : "");
 }
 
@@ -5685,7 +5688,7 @@ if (dat_datctl.replacement[0] != 0)
   uint8_t *pr;
   uint8_t rbuffer[REPLACE_BUFFSIZE];
   uint8_t nbuffer[REPLACE_BUFFSIZE];
-  uint32_t goption;
+  uint32_t xoptions;
   PCRE2_SIZE rlen, nsize, erroroffset;
   BOOL badutf = FALSE;
 
@@ -5702,8 +5705,11 @@ if (dat_datctl.replacement[0] != 0)
   if (timeitm)
     fprintf(outfile, "** Timing is not supported with replace: ignored\n");
 
-  goption = ((dat_datctl.control & CTL_GLOBAL) == 0)? 0 :
-    PCRE2_SUBSTITUTE_GLOBAL;
+  xoptions = (((dat_datctl.control & CTL_GLOBAL) == 0)? 0 :
+                PCRE2_SUBSTITUTE_GLOBAL) |
+             (((pat_patctl.control & CTL_SUBSTITUTE_EXTENDED) == 0)? 0 :
+                PCRE2_SUBSTITUTE_EXTENDED);     
+ 
   SETCASTPTR(r, rbuffer);  /* Sets r8, r16, or r32, as appropriate. */
   pr = dat_datctl.replacement;
 
@@ -5790,12 +5796,15 @@ if (dat_datctl.replacement[0] != 0)
   else
     rlen = (CASTVAR(uint8_t *, r) - rbuffer)/code_unit_size;
   PCRE2_SUBSTITUTE(rc, compiled_code, pp, ulen, dat_datctl.offset,
-    dat_datctl.options|goption, match_data, dat_context,
+    dat_datctl.options|xoptions, match_data, dat_context,
     rbuffer, rlen, nbuffer, &nsize);
 
   if (rc < 0)
     {
-    fprintf(outfile, "Failed: error %d: ", rc);
+    fprintf(outfile, "Failed: error %d", rc);
+    if (nsize != PCRE2_UNSET)
+      fprintf(outfile, " at offset %ld in replacement", nsize);  
+    fprintf(outfile, ": ");
     PCRE2_GET_ERROR_MESSAGE(nsize, rc, pbuffer);
     PCHARSV(CASTVAR(void *, pbuffer), 0, nsize, FALSE, outfile);
     }

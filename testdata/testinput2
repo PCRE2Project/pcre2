@@ -4539,4 +4539,55 @@ B)x/alt_verbnames,mark
     abcd\=null_context,find_limits
     abcd\=allusedtext,startchar 
 
+/abcd/replace=w\rx\x82y\o{333}z(\Q12\$34$$\x34\E5$$),substitute_extended
+    abcd
+    
+/a(bc)(DE)/replace=a\u$1\U$1\E$1\l$2\L$2\Eab\Uab\LYZ\EDone,substitute_extended
+    abcDE
+ 
+/abcd/replace=xy\kz,substitute_extended
+    abcd
+
+/a(?:(b)|(c))/substitute_extended,replace=X${1:+1:-1}X${2:+2:-2}
+    ab
+    ac
+    ab\=replace=${1:+$1\:$1:$2}
+    ac\=replace=${1:+$1\:$1:$2}
+
+/a(?:(b)|(c))/substitute_extended,replace=X${1:-1:-1}X${2:-2:-2}
+    ab
+    ac
+
+/(a)/substitute_extended,replace=>${1:+\Q$1:{}$$\E+\U$1}<
+    a
+
+/X(b)Y/substitute_extended
+    XbY\=replace=x${1:+$1\U$1}y
+    XbY\=replace=\Ux${1:+$1$1}y
+
+/a/substitute_extended,replace=${*MARK:+a:b}
+    a
+
+/(abcd)/replace=${1:+xy\kz},substitute_extended
+    abcd
+
+/abcd/substitute_extended,replace=>$1<
+    abcd
+
+/abcd/substitute_extended,replace=>xxx${xyz}<<<
+    abcd
+
+/(?J)(?:(?<A>a)|(?<A>b))/replace=<$A>
+    [a]
+    [b] 
+\= Expect error     
+    (a)\=ovector=1
+
+/(a)|(b)/replace=<$1>
+\= Expect error
+    b
+
+/(aa)(BB)/substitute_extended,replace=\U$1\L$2\E$1..\U$1\l$2$1
+    aaBB
+
 # End of testinput2 

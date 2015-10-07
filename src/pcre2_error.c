@@ -238,9 +238,12 @@ static const char match_error_texts[] =
   "nested recursion at the same subject position\0"
   "recursion limit exceeded\0"
   "requested value is not available\0"
-  /* 55 */ 
+  /* 55 */
   "requested value is not set\0"
-  "offset limit set without PCRE2_USE_OFFSET_LIMIT\0" 
+  "offset limit set without PCRE2_USE_OFFSET_LIMIT\0"
+  "bad escape sequence in replacement string\0"
+  "expected closing curly bracket in replacement string\0"
+  "bad substitution in replacement string\0" 
   ;
 
 
