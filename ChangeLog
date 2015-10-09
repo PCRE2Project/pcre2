@@ -194,6 +194,10 @@ and the matching functions with NULL contexts can be tested.
 
 55. Implemented PCRE2_SUBSTITUTE_EXTENDED.
 
+56. In a character class such as [\W\p{Any}] where both a negative-type escape 
+("not a word character") and a property escape were present, the property 
+escape was being ignored.
+
 
 Version 10.20 30-June-2015
 --------------------------

@@ -1690,4 +1690,13 @@
 /((?<digit>\d)|(?<letter>\p{L}))/g,substitute_extended,replace=<${digit:+digit; :not digit; }${letter:+letter:not a letter}>
     ab12cde
 
+/[\W\p{Any}]/B
+    abc
+    123 
+
+/[\W\pL]/B
+    abc
+\= Expect no match
+    123     
+
 # End of testinput5 

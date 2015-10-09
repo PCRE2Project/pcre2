@@ -4043,4 +4043,29 @@ MK: a\x{12345}b\x{09}(d)c
     ab12cde
  7: <not digit; letter><not digit; letter><digit; not a letter><digit; not a letter><not digit; letter><not digit; letter><not digit; letter>
 
+/[\W\p{Any}]/B
+------------------------------------------------------------------
+        Bra
+        [\x00-/:-@[-^`{-\xff\p{Any}]
+        Ket
+        End
+------------------------------------------------------------------
+    abc
+ 0: a
+    123 
+ 0: 1
+
+/[\W\pL]/B
+------------------------------------------------------------------
+        Bra
+        [\x00-/:-@[-^`{-\xff\p{L}]
+        Ket
+        End
+------------------------------------------------------------------
+    abc
+ 0: a
+\= Expect no match
+    123     
+No match
+
 # End of testinput5 

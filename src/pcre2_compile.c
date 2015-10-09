@@ -1645,11 +1645,11 @@ int i;
 
 /* If backslash is at the end of the pattern, it's an error. */
 
-if (ptr >= ptrend) 
+if (ptr >= ptrend)
   {
   *errorcodeptr = ERR1;
   return 0;
-  }  
+  }
 
 GETCHARINCTEST(c, ptr);         /* Get character value, increment pointer */
 ptr--;                          /* Set pointer back to the last code unit */
@@ -1671,8 +1671,8 @@ else if ((i = escapes[c - ESCAPES_FIRST]) != 0)
     }
   }
 
-/* Escapes that need further processing, including those that are unknown. 
-When called from pcre2_substitute(), only \c, \o, and \x are recognized (and \u 
+/* Escapes that need further processing, including those that are unknown.
+When called from pcre2_substitute(), only \c, \o, and \x are recognized (and \u
 when BSUX is set). */
 
 else
@@ -1680,7 +1680,7 @@ else
   PCRE2_SPTR oldptr;
   BOOL braced, negated, overflow;
   unsigned int s;
-  
+
   /* Filter calls from pcre2_substitute(). */
 
   if (cb == NULL && c != CHAR_c && c != CHAR_o && c != CHAR_x &&
@@ -1688,7 +1688,7 @@ else
     {
     *errorcodeptr = ERR3;
     return 0;
-    }  
+    }
 
   switch (c)
     {
@@ -4645,19 +4645,21 @@ for (;; ptr++)
     zeroreqcu = reqcu;
     zeroreqcuflags = reqcuflags;
 
-    /* If there are characters with values > 255, we have to compile an
-    extended class, with its own opcode, unless there was a negated special
-    such as \S in the class, and PCRE2_UCP is not set, because in that case all
+    /* If there are characters with values > 255, or Unicode property settings
+    (\p or \P), we have to compile an extended class, with its own opcode,
+    unless there were no property settings and there was a negated special such
+    as \S in the class, and PCRE2_UCP is not set, because in that case all
     characters > 255 are in the class, so any that were explicitly given as
-    well can be ignored. If (when there are explicit characters > 255 that must
-    be listed) there are no characters < 256, we can omit the bitmap in the
-    actual compiled code. */
+    well can be ignored. If (when there are explicit characters > 255 or
+    property settings that must be listed) there are no characters < 256, we
+    can omit the bitmap in the actual compiled code. */
 
 #ifdef SUPPORT_WIDE_CHARS
 #ifdef SUPPORT_UNICODE
-    if (xclass && (!should_flip_negation || (options & PCRE2_UCP) != 0))
+    if (xclass && (xclass_has_prop || !should_flip_negation ||
+         (options & PCRE2_UCP) != 0))
 #elif PCRE2_CODE_UNIT_WIDTH != 8
-    if (xclass && !should_flip_negation)
+    if (xclass && (xclass_has_prop || !should_flip_negation))
 #endif
       {
       *class_uchardata++ = XCL_END;    /* Marks the end of extra data */
