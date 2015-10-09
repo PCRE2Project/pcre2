@@ -198,6 +198,9 @@ and the matching functions with NULL contexts can be tested.
 ("not a word character") and a property escape were present, the property 
 escape was being ignored.
 
+57. Fixed integer overflow for patterns whose minimum matching length is very, 
+very large.
+
 
 Version 10.20 30-June-2015
 --------------------------

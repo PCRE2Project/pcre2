@@ -14741,4 +14741,12 @@ Failed: error -55 at offset 3 in replacement: requested value is not set
     aaBB
  1: AAbbaa..AAbBaa
 
+/^(o(\1{72}{\"{\\{00000059079}\d*){74}}){19}/I
+Capturing subpattern count = 2
+Max back reference = 1
+Compile options: <none>
+Overall options: anchored
+Last code unit = '}'
+Subject length lower bound = 65535
+
 # End of testinput2 

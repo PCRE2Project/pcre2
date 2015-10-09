@@ -65,8 +65,11 @@ enum { SSB_FAIL, SSB_DONE, SSB_CONTINUE, SSB_UNKNOWN };
 
 /* Scan a parenthesized group and compute the minimum length of subject that
 is needed to match it. This is a lower bound; it does not mean there is a
-string of that length that matches. In UTF8 mode, the result is in characters
-rather than bytes.
+string of that length that matches. In UTF mode, the result is in characters
+rather than code units. The field in a compiled pattern for storing the minimum
+length is 16-bits long (on the grounds that anything longer than that is
+pathological), so we give up when we reach that amount. This also means that
+integer overflow for really crazy patterns cannot happen.
 
 Arguments:
   re              compiled pattern block
@@ -111,13 +114,16 @@ if (*code == OP_CBRA || *code == OP_SCBRA ||
     *code == OP_CBRAPOS || *code == OP_SCBRAPOS) cc += IMM2_SIZE;
 
 /* Scan along the opcodes for this branch. If we get to the end of the
-branch, check the length against that of the other branches. */
+branch, check the length against that of the other branches. If the accumulated
+length passes 16-bits, stop and return it. */
 
 for (;;)
   {
   int d, min, recno;
   PCRE2_UCHAR *cs, *ce;
   register PCRE2_UCHAR op = *cc;
+
+  if (branchlength > UINT16_MAX) return branchlength;
 
   switch (op)
     {
