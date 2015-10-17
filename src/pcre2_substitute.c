@@ -197,7 +197,9 @@ BOOL match_data_created = FALSE;
 BOOL global = FALSE;
 BOOL extended = FALSE;
 BOOL literal = FALSE;
+#ifdef SUPPORT_UNICODE
 BOOL utf = (code->overall_options & PCRE2_UTF) != 0;
+#endif
 PCRE2_SPTR ptr;
 PCRE2_SPTR repend;
 PCRE2_SIZE buff_offset, buff_length, lengthleft, fraglength;

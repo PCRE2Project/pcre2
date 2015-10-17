@@ -203,6 +203,9 @@ very large.
 
 58. Implemented --never-backslash-C.
 
+59. Change 55 above introduced a bug by which certain patterns provoked the 
+erroneous error "\ at end of pattern".
+
 
 Version 10.20 30-June-2015
 --------------------------

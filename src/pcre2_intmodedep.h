@@ -686,6 +686,7 @@ typedef struct compile_block {
   PCRE2_SPTR start_code;           /* The start of the compiled code */
   PCRE2_SPTR start_pattern;        /* The start of the pattern */
   PCRE2_SPTR end_pattern;          /* The end of the pattern */
+  PCRE2_SPTR nestptr;              /* Pointer saved for string substitution */ 
   PCRE2_UCHAR *name_table;         /* The name/number table */
   size_t workspace_size;           /* Size of workspace */
   uint16_t names_found;            /* Number of entries so far */

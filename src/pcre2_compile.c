@@ -1643,9 +1643,10 @@ register uint32_t c, cc;
 int escape = 0;
 int i;
 
-/* If backslash is at the end of the pattern, it's an error. */
+/* If backslash is at the end of the string, it's an error. The check must be
+skipped when processing a nested insertion string during compilation. */
 
-if (ptr >= ptrend)
+if ((cb == NULL || cb->nestptr == NULL) && ptr >= ptrend)
   {
   *errorcodeptr = ERR1;
   return 0;
@@ -3612,7 +3613,6 @@ BOOL inescq = FALSE;
 BOOL groupsetfirstcu = FALSE;
 PCRE2_SPTR ptr = *ptrptr;
 PCRE2_SPTR tempptr;
-PCRE2_SPTR nestptr = NULL;
 PCRE2_UCHAR *previous = NULL;
 PCRE2_UCHAR *previous_callout = NULL;
 uint8_t classbits[32];
@@ -3700,12 +3700,13 @@ for (;; ptr++)
   c = *ptr;
 
   /* If we are at the end of a nested substitution, revert to the outer level
-  string. Nesting only happens one level deep. */
+  string. Nesting only happens one level deep, and the inserted string is 
+  always zero terminated. */
 
-  if (c == CHAR_NULL && nestptr != NULL)
+  if (c == CHAR_NULL && cb->nestptr != NULL)
     {
-    ptr = nestptr;
-    nestptr = NULL;
+    ptr = cb->nestptr;
+    cb->nestptr = NULL;
     c = *ptr;
     }
 
@@ -3822,7 +3823,7 @@ for (;; ptr++)
   /* Fill in length of a previous callout, except when the next thing is a
   quantifier or when processing a property substitution string in UCP mode. */
 
-  if (!is_quantifier && previous_callout != NULL && nestptr == NULL &&
+  if (!is_quantifier && previous_callout != NULL && cb->nestptr == NULL &&
        after_manual_callout-- <= 0)
     {
     if (lengthptr == NULL)      /* Don't attempt in pre-compile phase */
@@ -3833,7 +3834,7 @@ for (;; ptr++)
   /* Create auto callout, except for quantifiers, or while processing property
   strings that are substituted for \w etc in UCP mode. */
 
-  if ((options & PCRE2_AUTO_CALLOUT) != 0 && !is_quantifier && nestptr == NULL)
+  if ((options & PCRE2_AUTO_CALLOUT) != 0 && !is_quantifier && cb->nestptr == NULL)
     {
     previous_callout = code;
     code = auto_callout(code, ptr, cb);
@@ -3931,7 +3932,7 @@ for (;; ptr++)
     case CHAR_LEFT_SQUARE_BRACKET:
     if (PRIV(strncmp_c8)(ptr+1, STRING_WEIRD_STARTWORD, 6) == 0)
       {
-      nestptr = ptr + 7;
+      cb->nestptr = ptr + 7;
       ptr = sub_start_of_word;  /* Do not combine these statements; clang's */
       ptr--;                    /* sanitizer moans about a negative index. */
       continue;
@@ -3939,7 +3940,7 @@ for (;; ptr++)
 
     if (PRIV(strncmp_c8)(ptr+1, STRING_WEIRD_ENDWORD, 6) == 0)
       {
-      nestptr = ptr + 7;
+      cb->nestptr = ptr + 7;
       ptr = sub_end_of_word;    /* Do not combine these statements; clang's */
       ptr--;                    /* sanitizer moans about a negative index. */
       continue;
@@ -4128,7 +4129,7 @@ for (;; ptr++)
 
           if (posix_substitutes[pc] != NULL)
             {
-            nestptr = tempptr + 1;
+            cb->nestptr = tempptr + 1;
             ptr = posix_substitutes[pc] - 1;
             goto CONTINUE_CLASS;
             }
@@ -4264,7 +4265,7 @@ for (;; ptr++)
             case ESC_WU:     /* or \P to test Unicode properties instead */
             case ESC_su:     /* of the default ASCII testing. */
             case ESC_SU:
-            nestptr = ptr;
+            cb->nestptr = ptr;
             ptr = substitutes[escape - ESC_DU] - 1;  /* Just before substitute */
             class_has_8bitchar--;                /* Undo! */
             break;
@@ -4606,10 +4607,10 @@ for (;; ptr++)
 
       CONTINUE_CLASS:
       c = *(++ptr);
-      if (c == 0 && nestptr != NULL)
+      if (c == 0 && cb->nestptr != NULL)
         {
-        ptr = nestptr;
-        nestptr = NULL;
+        ptr = cb->nestptr;
+        cb->nestptr = NULL;
         c = *(++ptr);
         }
 
@@ -7081,7 +7082,7 @@ for (;; ptr++)
 #ifdef SUPPORT_UNICODE
         if (escape >= ESC_DU && escape <= ESC_wu)
           {
-          nestptr = ptr + 1;                   /* Where to resume */
+          cb->nestptr = ptr + 1;                   /* Where to resume */
           ptr = substitutes[escape - ESC_DU] - 1;  /* Just before substitute */
           }
         else
@@ -8078,6 +8079,7 @@ cb.bracount = cb.final_bracount = 0;
 cb.cx = ccontext;
 cb.dupnames = FALSE;
 cb.end_pattern = pattern + patlen;
+cb.nestptr = NULL;
 cb.external_flags = 0;
 cb.external_options = options;
 cb.had_recurse = FALSE;
