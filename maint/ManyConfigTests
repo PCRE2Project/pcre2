@@ -123,8 +123,24 @@ runtest()
     exit 1
   fi
 
+# There is an infelicity in the Autotools world (as of October 2015) which
+# causes the message
+#
+# ar: `u' modifier ignored since `D' is the default (see `U')
+# 
+# to be output while linking. This triggers an unwanted error report from this
+# script, because it expects no stderr output while making. To get round this
+# we filter the stderr output through sed, removing all occurrences of the
+# above lines. Just for paranoia, check that sed is available before doing
+# this.
+  
   echo "Making"
   make -j >/dev/null 2>teststderrM
+  if command -v sed >/dev/null 2>&1 ; then
+    sed "/\`u' modifier ignored since \`D' is the default/ d" \
+      teststderrM > teststderrMM
+    mv -f teststderrMM teststderrM   
+  fi
   if [ $? -ne 0 -o -s teststderrM ]; then
     echo " "
     echo "******** Errors or warnings while making ********"
@@ -274,7 +290,7 @@ if [ $usemain -ne 0 ]; then
     "--disable-static" \
     "--disable-shared" \
     "--disable-unicode --disable-stack-for-recursion --disable-shared" \
-    "--disable-stack-for-recursion --disable-shared" \
+    "--disable-stack-for-recursion --disable-shared --enable-never-backslash-C" \
     "--with-link-size=3 --disable-shared" \
     "--disable-unicode --enable-rebuild-chartables --disable-shared" \
     "--disable-unicode --enable-newline-is-any --disable-shared" \
