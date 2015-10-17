@@ -9,76 +9,6 @@
     Ã]
 ** Failed: invalid UTF-8 string cannot be used as input in UTF mode
 
-/X(\C{3})/utf
-    X\x{11234}Y
- 0: X\x{11234}Y
- 1: \x{11234}Y
-    X\x{11234}YZ
- 0: X\x{11234}Y
- 1: \x{11234}Y
-
-/X(\C{4})/utf
-    X\x{11234}YZ
- 0: X\x{11234}YZ
- 1: \x{11234}YZ
-    X\x{11234}YZW
- 0: X\x{11234}YZ
- 1: \x{11234}YZ
-
-/X\C*/utf
-    XYZabcdce
- 0: XYZabcdce
-
-/X\C*?/utf
-    XYZabcde
- 0: X
-
-/X\C{3,5}/utf
-    Xabcdefg
- 0: Xabcde
-    X\x{11234}Y
- 0: X\x{11234}Y
-    X\x{11234}YZ
- 0: X\x{11234}YZ
-    X\x{11234}\x{512}
- 0: X\x{11234}\x{512}
-    X\x{11234}\x{512}YZ
- 0: X\x{11234}\x{512}YZ
-    X\x{11234}\x{512}\x{11234}Z
- 0: X\x{11234}\x{512}\x{11234}
-
-/X\C{3,5}?/utf
-    Xabcdefg
- 0: Xabc
-    X\x{11234}Y
- 0: X\x{11234}Y
-    X\x{11234}YZ
- 0: X\x{11234}Y
-    X\x{11234}\x{512}YZ
- 0: X\x{11234}\x{512}
-\= Expect no match
-    X\x{11234}
-No match
-
-/a\Cb/utf
-    aXb
- 0: aXb
-    a\nb
- 0: a\x{0a}b
-
-/a\C\Cb/utf
-    a\x{12257}b
- 0: a\x{12257}b
-\= Expect no match
-    a\x{12257}\x{11234}b
-No match
-    a\x{100}b
-No match
-
-/ab\Cde/utf
-    abXde
- 0: abXde
-
 # Check maximum character size 
 
 /\x{ffff}/IB,utf
@@ -307,23 +237,6 @@ Options: utf
 First code unit = \x{d844}
 Last code unit = \x{deab}
 Subject length lower bound = 1
-
-# These two \C tests, copied from the UTF-8 input file, do not have any
-# problems in 16 or 32 bits.
-
-/X(\C)(.*)/utf
-    X\x{1234}
- 0: X\x{1234}
- 1: \x{1234}
- 2: 
-    X\nabc
- 0: X\x{0a}abc
- 1: \x{0a}
- 2: abc
-
-/a\Cb/utf
-    a\x{100}b
- 0: a\x{100}b
 
 /[^ab\xC0-\xF0]/IB,utf
 ------------------------------------------------------------------
@@ -1127,10 +1040,6 @@ Failed: error 134 at offset 9: character code point value in \x{} or \o{} is too
 /\o{4200000}/utf
 Failed: error 134 at offset 10: character code point value in \x{} or \o{} is too large
 
-/\C/utf
-    \x{110000}
-** Failed: character \x{110000} is greater than 0x10ffff and so cannot be converted to UTF-16
-
 /\x{100}*A/IB,utf
 ------------------------------------------------------------------
         Bra
@@ -1453,5 +1362,9 @@ Options: caseless utf
 Starting code units: \xff 
 Last code unit = 'B' (caseless)
 Subject length lower bound = 2
+
+/./utf
+    \x{110000}
+** Failed: character \x{110000} is greater than 0x10ffff and so cannot be converted to UTF-16
 
 # End of testinput12

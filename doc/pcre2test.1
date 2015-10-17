@@ -1,4 +1,4 @@
-.TH PCRE2TEST 1 "23 September 2015" "PCRE 10.21"
+.TH PCRE2TEST 1 "17 October 2015" "PCRE 10.21"
 .SH NAME
 pcre2test - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -122,12 +122,13 @@ following options output the value and set the exit code as indicated:
 The following options output 1 for true or 0 for false, and set the exit code
 to the same value:
 .sp
-  ebcdic     compiled for an EBCDIC environment
-  jit        just-in-time support is available
-  pcre2-16   the 16-bit library was built
-  pcre2-32   the 32-bit library was built
-  pcre2-8    the 8-bit library was built
-  unicode    Unicode support is available
+  backslash-C  \eC is supported (not locked out)
+  ebcdic       compiled for an EBCDIC environment
+  jit          just-in-time support is available
+  pcre2-16     the 16-bit library was built
+  pcre2-32     the 32-bit library was built
+  pcre2-8      the 8-bit library was built
+  unicode      Unicode support is available
 .sp
 If an unknown option is given, an error message is output; the exit code is 0.
 .TP 10
@@ -1559,6 +1560,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 23 September 2015
+Last updated: 17 October 2015
 Copyright (c) 1997-2015 University of Cambridge.
 .fi

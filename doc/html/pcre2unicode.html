@@ -71,11 +71,12 @@ The escape sequence \C can be used to match a single code unit, in a UTF mode,
 but its use can lead to some strange effects because it breaks up multi-unit
 characters (see the description of \C in the
 <a href="pcre2pattern.html"><b>pcre2pattern</b></a>
-documentation). The use of \C is not supported in the alternative matching
-function <b>pcre2_dfa_match()</b>, nor is it supported in UTF mode by the JIT
-optimization. If JIT optimization is requested for a UTF pattern that contains
-\C, it will not succeed, and so the matching will be carried out by the normal
-interpretive function.
+documentation). The use of \C is not supported by the alternative matching
+function <b>pcre2_dfa_match()</b> when in UTF mode. Its use provokes a
+match-time error. The JIT optimization also does not support \C in UTF mode.
+If JIT optimization is requested for a UTF pattern that contains \C, it will
+not succeed, and so the matching will be carried out by the normal interpretive
+function.
 </P>
 <P>
 The character escapes \b, \B, \d, \D, \s, \S, \w, and \W correctly test
@@ -275,7 +276,7 @@ Cambridge, England.
 REVISION
 </b><br>
 <P>
-Last updated: 18 August 2015
+Last updated: 16 October 2015
 <br>
 Copyright &copy; 1997-2015 University of Cambridge.
 <br>

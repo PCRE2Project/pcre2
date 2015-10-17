@@ -3739,41 +3739,40 @@
 
 /[bcd]*a/B
 
-# A complete set of tests for auto-possessification of character types.
+# A complete set of tests for auto-possessification of character types, but
+# omitting \C because it might be disabled (it has its own tests).
 
-/\D+\D \D+\d \D+\S \D+\s \D+\W \D+\w \D+. \D+\C \D+\R \D+\H \D+\h \D+\V \D+\v \D+\Z \D+\z \D+$/Bx
+/\D+\D \D+\d \D+\S \D+\s \D+\W \D+\w \D+. \D+\R \D+\H \D+\h \D+\V \D+\v \D+\Z \D+\z \D+$/Bx
 
-/\d+\D \d+\d \d+\S \d+\s \d+\W \d+\w \d+. \d+\C \d+\R \d+\H \d+\h \d+\V \d+\v \d+\Z \d+\z \d+$/Bx
+/\d+\D \d+\d \d+\S \d+\s \d+\W \d+\w \d+. \d+\R \d+\H \d+\h \d+\V \d+\v \d+\Z \d+\z \d+$/Bx
 
-/\S+\D \S+\d \S+\S \S+\s \S+\W \S+\w \S+. \S+\C \S+\R \S+\H \S+\h \S+\V \S+\v \S+\Z \S+\z \S+$/Bx
+/\S+\D \S+\d \S+\S \S+\s \S+\W \S+\w \S+. \S+\R \S+\H \S+\h \S+\V \S+\v \S+\Z \S+\z \S+$/Bx
 
-/\s+\D \s+\d \s+\S \s+\s \s+\W \s+\w \s+. \s+\C \s+\R \s+\H \s+\h \s+\V \s+\v \s+\Z \s+\z \s+$/Bx
+/\s+\D \s+\d \s+\S \s+\s \s+\W \s+\w \s+. \s+\R \s+\H \s+\h \s+\V \s+\v \s+\Z \s+\z \s+$/Bx
 
-/\W+\D \W+\d \W+\S \W+\s \W+\W \W+\w \W+. \W+\C \W+\R \W+\H \W+\h \W+\V \W+\v \W+\Z \W+\z \W+$/Bx
+/\W+\D \W+\d \W+\S \W+\s \W+\W \W+\w \W+. \W+\R \W+\H \W+\h \W+\V \W+\v \W+\Z \W+\z \W+$/Bx
 
-/\w+\D \w+\d \w+\S \w+\s \w+\W \w+\w \w+. \w+\C \w+\R \w+\H \w+\h \w+\V \w+\v \w+\Z \w+\z \w+$/Bx
+/\w+\D \w+\d \w+\S \w+\s \w+\W \w+\w \w+. \w+\R \w+\H \w+\h \w+\V \w+\v \w+\Z \w+\z \w+$/Bx
 
-/\C+\D \C+\d \C+\S \C+\s \C+\W \C+\w \C+. \C+\C \C+\R \C+\H \C+\h \C+\V \C+\v \C+\Z \C+\z \C+$/Bx
+/\R+\D \R+\d \R+\S \R+\s \R+\W \R+\w \R+. \R+\R \R+\H \R+\h \R+\V \R+\v \R+\Z \R+\z \R+$/Bx
 
-/\R+\D \R+\d \R+\S \R+\s \R+\W \R+\w \R+. \R+\C \R+\R \R+\H \R+\h \R+\V \R+\v \R+\Z \R+\z \R+$/Bx
+/\H+\D \H+\d \H+\S \H+\s \H+\W \H+\w \H+. \H+\R \H+\H \H+\h \H+\V \H+\v \H+\Z \H+\z \H+$/Bx
 
-/\H+\D \H+\d \H+\S \H+\s \H+\W \H+\w \H+. \H+\C \H+\R \H+\H \H+\h \H+\V \H+\v \H+\Z \H+\z \H+$/Bx
+/\h+\D \h+\d \h+\S \h+\s \h+\W \h+\w \h+. \h+\R \h+\H \h+\h \h+\V \h+\v \h+\Z \h+\z \h+$/Bx
 
-/\h+\D \h+\d \h+\S \h+\s \h+\W \h+\w \h+. \h+\C \h+\R \h+\H \h+\h \h+\V \h+\v \h+\Z \h+\z \h+$/Bx
+/\V+\D \V+\d \V+\S \V+\s \V+\W \V+\w \V+. \V+\R \V+\H \V+\h \V+\V \V+\v \V+\Z \V+\z \V+$/Bx
 
-/\V+\D \V+\d \V+\S \V+\s \V+\W \V+\w \V+. \V+\C \V+\R \V+\H \V+\h \V+\V \V+\v \V+\Z \V+\z \V+$/Bx
+/\v+\D \v+\d \v+\S \v+\s \v+\W \v+\w \v+. \v+\R \v+\H \v+\h \v+\V \v+\v \v+\Z \v+\z \v+$/Bx
 
-/\v+\D \v+\d \v+\S \v+\s \v+\W \v+\w \v+. \v+\C \v+\R \v+\H \v+\h \v+\V \v+\v \v+\Z \v+\z \v+$/Bx
+/ a+\D  a+\d  a+\S  a+\s  a+\W  a+\w  a+.  a+\R  a+\H  a+\h  a+\V  a+\v  a+\Z  a+\z  a+$/Bx
 
-/ a+\D  a+\d  a+\S  a+\s  a+\W  a+\w  a+.  a+\C  a+\R  a+\H  a+\h  a+\V  a+\v  a+\Z  a+\z  a+$/Bx
+/\n+\D \n+\d \n+\S \n+\s \n+\W \n+\w \n+. \n+\R \n+\H \n+\h \n+\V \n+\v \n+\Z \n+\z \n+$/Bx
 
-/\n+\D \n+\d \n+\S \n+\s \n+\W \n+\w \n+. \n+\C \n+\R \n+\H \n+\h \n+\V \n+\v \n+\Z \n+\z \n+$/Bx
+/ .+\D  .+\d  .+\S  .+\s  .+\W  .+\w  .+.  .+\R  .+\H  .+\h  .+\V  .+\v  .+\Z  .+\z  .+$/Bx
 
-/ .+\D  .+\d  .+\S  .+\s  .+\W  .+\w  .+.  .+\C  .+\R  .+\H  .+\h  .+\V  .+\v  .+\Z  .+\z  .+$/Bx
+/ .+\D  .+\d  .+\S  .+\s  .+\W  .+\w  .+.  .+\R  .+\H  .+\h  .+\V  .+\v  .+\Z  .+\z  .+$/Bsx
 
-/ .+\D  .+\d  .+\S  .+\s  .+\W  .+\w  .+.  .+\C  .+\R  .+\H  .+\h  .+\V  .+\v  .+\Z  .+\z  .+$/Bsx
-
-/\D+$  \d+$  \S+$  \s+$  \W+$  \w+$  \C+$  \R+$  \H+$  \h+$  \V+$  \v+$   a+$  \n+$   .+$  .+$/Bmx
+/ \D+$  \d+$  \S+$  \s+$  \W+$  \w+$  \R+$  \H+$  \h+$  \V+$ \v+$  a+$   \n+$  .+$  .+$/Bmx
 
 /(?=a+)a(a+)++a/B
 
@@ -4327,8 +4326,6 @@
 
 /((?2){73}(?2))((?1))/info
 
-/ab\Cde/never_backslash_c
-
 /abc/
 \= Expect no match
     \[9x!xxx(]{9999}
@@ -4445,12 +4442,6 @@
 
 /\x0{ab}/
     \0{ab} 
-
-/ab\Cde/
-    abXde
-    
-/(?<=ab\Cde)X/
-    abZdeX
 
 /^(a(b))\1\g1\g{1}\g-1\g{-1}\g{-02}Z/
     ababababbbabZXXXX

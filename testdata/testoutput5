@@ -181,10 +181,6 @@ Subject length lower bound = 3
     \x{212ab}\x{212ab}\x{212ab}\x{861}
  0: \x{212ab}\x{212ab}\x{212ab}
 
-/(?<=\C)X/utf
-Failed: error 136 at offset 6: \C is not allowed in a lookbehind assertion
-    Should produce an error diagnostic
-    
 /^[ab]/IB,utf
 ------------------------------------------------------------------
         Bra
@@ -2905,9 +2901,6 @@ No match
     aAz
 No match
 
-/(?<=ab\Cde)X/utf
-Failed: error 136 at offset 10: \C is not allowed in a lookbehind assertion
-
 /\X/
     a\=ps
  0: a
@@ -3803,7 +3796,7 @@ No match
         End
 ------------------------------------------------------------------
 
-/\D+\X \d+\X \S+\X \s+\X \W+\X \w+\X \C+\X \R+\X \H+\X \h+\X \V+\X \v+\X a+\X \n+\X .+\X/Bx
+/\D+\X \d+\X \S+\X \s+\X \W+\X \w+\X \R+\X \H+\X \h+\X \V+\X \v+\X a+\X \n+\X .+\X/Bx
 ------------------------------------------------------------------
         Bra
         \D+
@@ -3817,8 +3810,6 @@ No match
         \W+
         extuni
         \w+
-        extuni
-        AllAny+
         extuni
         \R+
         extuni
@@ -3858,7 +3849,7 @@ No match
         End
 ------------------------------------------------------------------
 
-/\X+\D \X+\d \X+\S \X+\s \X+\W \X+\w \X+. \X+\C \X+\R \X+\H \X+\h \X+\V \X+\v \X+\X \X+\Z \X+\z \X+$/Bx
+/\X+\D \X+\d \X+\S \X+\s \X+\W \X+\w \X+. \X+\R \X+\H \X+\h \X+\V \X+\v \X+\X \X+\Z \X+\z \X+$/Bx
 ------------------------------------------------------------------
         Bra
         extuni+
@@ -3875,8 +3866,6 @@ No match
         \w
         extuni+
         Any
-        extuni+
-        AllAny
         extuni+
         \R
         extuni+
@@ -4009,18 +3998,6 @@ Failed: error 122 at offset 1227: unmatched closing parenthesis
 
 "(*UTF)(*UCP)(.UTF).+X(\V+;\^(\D|)!999}(?(?C{7(?C')\H*\S*/^\x5\xa\\xd3\x85n?(;\D*(?m).[^mH+((*UCP)(*U:F)})(?!^)(?'"
 Failed: error 124 at offset 113: letter or underscore expected after (?< or (?'
-
-/\C\X*TӅ;
-{0,6}\v+F
-/utf
-\= Expect no match
-    Ӆ\x0a
-No match
-
-/\C(\W?ſ)'?{{/utf
-\= Expect no match
-    \\C(\\W?ſ)'?{{
-No match
 
 /[\pS#moq]/
     =

@@ -7174,14 +7174,6 @@ Matched, but offsets vector is too small to show all matches
  2: aa
  3: a
 
-/ab\Cde/
-    abXde
- 0: abXde
-    
-/(?<=ab\Cde)X/
-    abZdeX
- 0: X
-
 /^\R/
     \r\=ps
  0: \x0d

@@ -671,11 +671,6 @@
     the cat\=ps
     the cat\=ph
 
-/ab\Cde/utf
-    abXde
-
-/(?<=ab\Cde)X/utf
-
 /./newline=crlf,utf
     \r\=ps
     \r\=ph

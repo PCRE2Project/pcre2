@@ -189,6 +189,12 @@ AC_ARG_ENABLE(bsr-anycrlf,
               AS_HELP_STRING([--enable-bsr-anycrlf],
                              [\R matches only CR, LF, CRLF by default]),
               , enable_bsr_anycrlf=no)
+              
+# Handle --enable-never-backslash-C
+AC_ARG_ENABLE(never-backslash-C,
+              AS_HELP_STRING([--enable-never-backslash-C],
+                             [use of \C causes an error]),
+              , enable_never_backslash_C=no)                  
 
 # Handle --enable-ebcdic
 AC_ARG_ENABLE(ebcdic,
@@ -604,6 +610,11 @@ if test "$enable_bsr_anycrlf" = "yes"; then
     The build-time default can be overridden by the user of PCRE2 at runtime.])
 fi
 
+if test "$enable_never_backslash_C" = "yes"; then
+  AC_DEFINE([NEVER_BACKSLASH_C], [], [
+    Defining NEVER_BACKSLASH_C locks out the use of \C in all patterns.])
+fi      
+
 AC_DEFINE_UNQUOTED([LINK_SIZE], [$with_link_size], [
   The value of LINK_SIZE determines the number of bytes used to store
   links as offsets within the compiled regex. The default is 2, which
@@ -881,6 +892,7 @@ $PACKAGE-$VERSION configuration summary:
     Enable Unicode support .......... : ${enable_unicode}
     Newline char/sequence ........... : ${enable_newline}
     \R matches only ANYCRLF ......... : ${enable_bsr_anycrlf}
+    \C is disabled .................. : ${enable_never_backslash_C} 
     EBCDIC coding ................... : ${enable_ebcdic}
     EBCDIC code for NL .............. : ${ebcdic_nl_code}
     Rebuild char tables ............. : ${enable_rebuild_chartables}

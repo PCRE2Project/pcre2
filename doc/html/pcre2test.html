@@ -155,12 +155,13 @@ following options output the value and set the exit code as indicated:
 The following options output 1 for true or 0 for false, and set the exit code
 to the same value:
 <pre>
-  ebcdic     compiled for an EBCDIC environment
-  jit        just-in-time support is available
-  pcre2-16   the 16-bit library was built
-  pcre2-32   the 32-bit library was built
-  pcre2-8    the 8-bit library was built
-  unicode    Unicode support is available
+  backslash-C  \C is supported (not locked out)
+  ebcdic       compiled for an EBCDIC environment
+  jit          just-in-time support is available
+  pcre2-16     the 16-bit library was built
+  pcre2-32     the 32-bit library was built
+  pcre2-8      the 8-bit library was built
+  unicode      Unicode support is available
 </pre>
 If an unknown option is given, an error message is output; the exit code is 0.
 </P>
@@ -510,7 +511,7 @@ Setting compilation options
 <P>
 The following modifiers set options for <b>pcre2_compile()</b>. The most common
 ones have single-letter abbreviations. See
-<a href="pcreapi.html"><b>pcreapi</b></a>
+<a href="pcre2api.html"><b>pcre2api</b></a>
 for a description of their effects.
 <pre>
       allow_empty_class         set PCRE2_ALLOW_EMPTY_CLASS
@@ -537,6 +538,7 @@ for a description of their effects.
       no_utf_check              set PCRE2_NO_UTF_CHECK
       ucp                       set PCRE2_UCP
       ungreedy                  set PCRE2_UNGREEDY
+      use_offset_limit          set PCRE2_USE_OFFSET_LIMIT 
       utf                       set PCRE2_UTF
 </pre>
 As well as turning on the PCRE2_UTF option, the <b>utf</b> modifier causes all
@@ -564,6 +566,7 @@ about the pattern:
       locale=&#60;name&#62;             use this locale
       memory                    show memory used
       newline=&#60;type&#62;            set newline type
+      null_context              compile with a NULL context
       parens_nest_limit=&#60;n&#62;     set maximum parentheses depth
       posix                     use the POSIX API
       push                      push compiled pattern onto the stack
@@ -640,6 +643,15 @@ The <b>callout_info</b> modifier requests information about all the callouts in
 the pattern. A list of them is output at the end of any other information that
 is requested. For each callout, either its number or string is given, followed
 by the item that follows it in the pattern.
+</P>
+<br><b>
+Passing a NULL context
+</b><br>
+<P>
+Normally, <b>pcre2test</b> passes a context block to <b>pcre2_compile()</b>. If 
+the <b>null_context</b> modifier is set, however, NULL is passed. This is for 
+testing that <b>pcre2_compile()</b> behaves correctly in this case (it uses 
+default values).
 </P>
 <br><b>
 Specifying a pattern in hex
@@ -920,9 +932,11 @@ pattern.
   /g  global                    global matching
       jitstack=&#60;n&#62;              set size of JIT stack
       mark                      show mark values
-      match_limit=&#62;n&#62;           set a match limit
+      match_limit=&#60;n&#62;           set a match limit
       memory                    show memory usage
+      null_context              match with a NULL context 
       offset=&#60;n&#62;                set starting offset
+      offset_limit=&#60;n&#62;          set offset limit
       ovector=&#60;n&#62;               set size of output vector
       recursion_limit=&#60;n&#62;       set a recursion limit
       replace=&#60;string&#62;          specify a replacement string
@@ -1170,6 +1184,16 @@ The <b>offset</b> modifier sets an offset in the subject string at which
 matching starts. Its value is a number of code units, not characters.
 </P>
 <br><b>
+Setting an offset limit
+</b><br>
+<P>
+The <b>offset_limit</b> modifier sets a limit for unanchored matches. If a match 
+cannot be found starting at or before this offset in the subject, a "no match" 
+return is given. The data value is a number of code units, not characters. When 
+this modifier is used, the <b>use_offset_limit</b> modifier must have been set 
+for the pattern; if not, an error is generated.
+</P>
+<br><b>
 Setting the size of the output vector
 </b><br>
 <P>
@@ -1200,6 +1224,17 @@ this modifier has no effect, as there is no facility for passing a length.)
 <P>
 When testing <b>pcre2_substitute()</b>, this modifier also has the effect of
 passing the replacement string as zero-terminated.
+</P>
+<br><b>
+Passing a NULL context
+</b><br>
+<P>
+Normally, <b>pcre2test</b> passes a context block to <b>pcre2_match()</b>,
+<b>pcre2_dfa_match()</b> or <b>pcre2_jit_match()</b>. If the <b>null_context</b>
+modifier is set, however, NULL is passed. This is for testing that the matching
+functions behave correctly in this case (they use default values). This 
+modifier cannot be used with the <b>find_limits</b> modifier or when testing the 
+substitution function.
 </P>
 <br><a name="SEC12" href="#TOC1">THE ALTERNATIVE MATCHING FUNCTION</a><br>
 <P>
@@ -1539,7 +1574,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC21" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 14 September 2015
+Last updated: 17 October 2015
 <br>
 Copyright &copy; 1997-2015 University of Cambridge.
 <br>

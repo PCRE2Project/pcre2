@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "07 October 2015" "PCRE2 10.21"
+.TH PCRE2API 3 "16 October 2015" "PCRE2 10.21"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -1209,7 +1209,8 @@ This option locks out the use of \eC in the pattern that is being compiled.
 This escape can cause unpredictable behaviour in UTF-8 or UTF-16 modes, because
 it may leave the current matching point in the middle of a multi-code-unit
 character. This option may be useful in applications that process patterns from
-external sources.
+external sources. Note that there is also a build-time option that permanently 
+locks out the use of \eC.
 .sp
   PCRE2_NEVER_UCP
 .sp
@@ -3014,8 +3015,8 @@ There are in addition the following errors that are specific to
   PCRE2_ERROR_DFA_UITEM
 .sp
 This return is given if \fBpcre2_dfa_match()\fP encounters an item in the
-pattern that it does not support, for instance, the use of \eC or a back
-reference.
+pattern that it does not support, for instance, the use of \eC in a UTF mode or
+a back reference.
 .sp
   PCRE2_ERROR_DFA_UCOND
 .sp
@@ -3065,6 +3066,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 07 October 2015
+Last updated: 16 October 2015
 Copyright (c) 1997-2015 University of Cambridge.
 .fi

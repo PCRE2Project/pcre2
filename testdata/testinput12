@@ -7,49 +7,6 @@
 /abc/utf
     Ã]
 
-/X(\C{3})/utf
-    X\x{11234}Y
-    X\x{11234}YZ
-
-/X(\C{4})/utf
-    X\x{11234}YZ
-    X\x{11234}YZW
-
-/X\C*/utf
-    XYZabcdce
-
-/X\C*?/utf
-    XYZabcde
-
-/X\C{3,5}/utf
-    Xabcdefg
-    X\x{11234}Y
-    X\x{11234}YZ
-    X\x{11234}\x{512}
-    X\x{11234}\x{512}YZ
-    X\x{11234}\x{512}\x{11234}Z
-
-/X\C{3,5}?/utf
-    Xabcdefg
-    X\x{11234}Y
-    X\x{11234}YZ
-    X\x{11234}\x{512}YZ
-\= Expect no match
-    X\x{11234}
-
-/a\Cb/utf
-    aXb
-    a\nb
-
-/a\C\Cb/utf
-    a\x{12257}b
-\= Expect no match
-    a\x{12257}\x{11234}b
-    a\x{100}b
-
-/ab\Cde/utf
-    abXde
-
 # Check maximum character size 
 
 /\x{ffff}/IB,utf
@@ -89,16 +46,6 @@
 /\x{861}/IB,utf
 
 /\x{212ab}/IB,utf
-
-# These two \C tests, copied from the UTF-8 input file, do not have any
-# problems in 16 or 32 bits.
-
-/X(\C)(.*)/utf
-    X\x{1234}
-    X\nabc
-
-/a\Cb/utf
-    a\x{100}b
 
 /[^ab\xC0-\xF0]/IB,utf
     \x{f1}
@@ -336,9 +283,6 @@
 
 /\o{4200000}/utf
 
-/\C/utf
-    \x{110000}
-
 /\x{100}*A/IB,utf
     A
 
@@ -395,5 +339,8 @@
 /[z-\x{100}]/IBi,utf
 
 /\x{3a3}B/IBi,utf
+
+/./utf
+    \x{110000}
 
 # End of testinput12

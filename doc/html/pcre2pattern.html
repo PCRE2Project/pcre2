@@ -1236,14 +1236,21 @@ with \C in UTF-8 or UTF-16 mode means that the rest of the string may start
 with a malformed UTF character. This has undefined results, because PCRE2
 assumes that it is matching character by character in a valid UTF string (by
 default it checks the subject string's validity at the start of processing
-unless the PCRE2_NO_UTF_CHECK option is used). An application can lock out the
-use of \C by setting the PCRE2_NEVER_BACKSLASH_C option.
+unless the PCRE2_NO_UTF_CHECK option is used). 
+</P>
+<P>
+An application can lock out the use of \C by setting the
+PCRE2_NEVER_BACKSLASH_C option when compiling a pattern. It is also possible to
+build PCRE2 with the use of \C permanently disabled.
 </P>
 <P>
 PCRE2 does not allow \C to appear in lookbehind assertions
 <a href="#lookbehind">(described below)</a>
 in a UTF mode, because this would make it impossible to calculate the length of
-the lookbehind.
+the lookbehind. Neither the alternative matching function 
+<b>pcre2_dfa_match()</b> not the JIT optimizer support \C in a UTF mode. The 
+former gives a match-time error; the latter fails to optimize and so the match 
+is always run using the interpreter.
 </P>
 <P>
 In general, the \C escape sequence is best avoided. However, one way of using
@@ -3351,7 +3358,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC30" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 01 September 2015
+Last updated: 16 October 2015
 <br>
 Copyright &copy; 1997-2015 University of Cambridge.
 <br>

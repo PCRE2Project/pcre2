@@ -4,12 +4,8 @@
 #forbid_utf
 #newline_default lf any anycrlf
 
-/a\Cb/
-    aXb
- 0: aXb
-    a\nb
- 0: a\x0ab
-\= Expect no match and error message (too big char)
+/ab/
+\= Expect error message (too big char) and no match
     A\x{123}B
 ** Character \x{123} is greater than 255 and UTF-8 mode is not enabled.
 ** Truncation will probably give the wrong result.

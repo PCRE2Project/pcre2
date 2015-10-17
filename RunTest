@@ -75,7 +75,10 @@ title17="Test 17: JIT-specific features when JIT is available"
 title18="Test 18: Tests of the POSIX interface, excluding UTF/UCP"
 title19="Test 19: Tests of the POSIX interface with UTF/UCP"
 title20="Test 20: Serialization tests"
-maxtest=20
+title21="Test 21: \C tests without UTF (supported for DFA matching)"
+title22="Test 22: \C tests with UTF (not supported for DFA matching)"
+title23="Test 23: \C disabled test"
+maxtest=23
 
 if [ $# -eq 1 -a "$1" = "list" ]; then
   echo $title0
@@ -99,6 +102,9 @@ if [ $# -eq 1 -a "$1" = "list" ]; then
   echo $title18
   echo $title19
   echo $title20
+  echo $title21
+  echo $title22
+  echo $title23
   exit 0
 fi
 
@@ -223,6 +229,9 @@ do17=no
 do18=no
 do19=no
 do20=no
+do21=no
+do22=no
+do23=no
 
 while [ $# -gt 0 ] ; do
   case $1 in
@@ -247,6 +256,9 @@ while [ $# -gt 0 ] ; do
    18) do18=yes;;
    19) do19=yes;;
    20) do20=yes;;
+   21) do21=yes;;
+   22) do22=yes;;
+   23) do23=yes;;
    -8) arg8=yes;;
   -16) arg16=yes;;
   -32) arg32=yes;;
@@ -326,6 +338,11 @@ support16=$?
 $sim ./pcre2test -C pcre2-32 >/dev/null
 support32=$?
 
+# \C may be disabled
+
+$sim ./pcre2test -C backslash-C >/dev/null
+supportBSC=$?
+
 # Initialize all bitsizes skipped
 
 test8=skip
@@ -400,7 +417,7 @@ if [ $do0  = no -a $do1  = no -a $do2  = no -a $do3  = no -a \
      $do8  = no -a $do9  = no -a $do10 = no -a $do11 = no -a \
      $do12 = no -a $do13 = no -a $do14 = no -a $do15 = no -a \
      $do16 = no -a $do17 = no -a $do18 = no -a $do19 = no -a \
-     $do20 = no \
+     $do20 = no -a $do21 = no -a $do22 = no -a $do23 = no \
    ]; then
   do0=yes
   do1=yes
@@ -423,6 +440,9 @@ if [ $do0  = no -a $do1  = no -a $do2  = no -a $do3  = no -a \
   do18=yes
   do19=yes
   do20=yes 
+  do21=yes 
+  do22=yes 
+  do23=yes 
 fi
 
 # Handle any explicit skips at this stage, so that an argument list may consist
@@ -779,6 +799,46 @@ for bmode in "$test8" "$test16" "$test32"; do
     echo $title20
     $sim $valgrind ./pcre2test -q $defaultstack $bmode $testdata/testinput20 testtry
     checkresult $? 20 ""
+  fi
+  
+  # \C tests without UTF - DFA matching is supported
+
+  if [ "$do21" = yes ] ; then
+    echo $title21
+    if [ $supportBSC -eq 0 ] ; then
+      echo "  Skipped because \C is disabled"
+    else
+      for opt in "" $jitopt -dfa; do
+        $sim $valgrind ${opt:+$vjs} ./pcre2test -q $defaultstack $bmode $opt $testdata/testinput21 testtry
+        checkresult $? 21 "$opt"
+      done
+    fi
+  fi
+
+  # \C tests with UTF - DFA matching is not supported for \C in UTF mode
+   
+  if [ "$do22" = yes ] ; then
+    echo $title22
+    if [ $supportBSC -eq 0 ] ; then
+      echo "  Skipped because \C is disabled"
+    else
+      for opt in "" $jitopt; do
+        $sim $valgrind ${opt:+$vjs} ./pcre2test -q $defaultstack $bmode $opt $testdata/testinput22 testtry
+        checkresult $? 22-$bits "$opt"
+      done
+    fi
+  fi
+
+  # Test when \C is disabled
+   
+  if [ "$do23" = yes ] ; then
+    echo $title23
+    if [ $supportBSC -ne 0 ] ; then
+      echo "  Skipped because \C is not disabled"
+    else
+      $sim $valgrind ${opt:+$vjs} ./pcre2test -q $defaultstack $bmode $opt $testdata/testinput23 testtry
+      checkresult $? 23 ""
+    fi
   fi
 
 # End of loop for 8/16/32-bit tests

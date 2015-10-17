@@ -6,12 +6,6 @@
 #forbid_utf
 #newline_default LF ANY ANYCRLF
 
-/a\Cb/
-    aXb
- 0: aXb
-    a\nb
- 0: a\x0ab
-  
 /[^\x{c4}]/IB
 ------------------------------------------------------------------
         Bra
@@ -583,7 +577,7 @@ Subject length lower bound = 2
 
 # Non-UTF characters 
 
-/\C{2,3}/
+/.{2,3}/
     \x{400000}\x{400001}\x{400002}\x{400003}
  0: \x{400000}\x{400001}\x{400002}
 

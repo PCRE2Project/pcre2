@@ -4645,12 +4645,6 @@
     aaaa\=ovector=3
     aaaa\=ovector=4
 
-/ab\Cde/
-    abXde
-    
-/(?<=ab\Cde)X/
-    abZdeX
-
 /^\R/
     \r\=ps
     \r\=ph

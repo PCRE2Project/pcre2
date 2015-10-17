@@ -111,9 +111,6 @@
 /.{3,5}?/IB,utf
     \x{212ab}\x{212ab}\x{212ab}\x{861}
 
-/(?<=\C)X/utf
-    Should produce an error diagnostic
-    
 /^[ab]/IB,utf
     bar
 \= Expect no match
@@ -1367,8 +1364,6 @@
 \= Expect no match
     aAz
 
-/(?<=ab\Cde)X/utf
-
 /\X/
     a\=ps
     a\=ph
@@ -1617,13 +1612,13 @@
 
 /[\p{L}ab]{2,3}+/B,no_auto_possess
 
-/\D+\X \d+\X \S+\X \s+\X \W+\X \w+\X \C+\X \R+\X \H+\X \h+\X \V+\X \v+\X a+\X \n+\X .+\X/Bx
+/\D+\X \d+\X \S+\X \s+\X \W+\X \w+\X \R+\X \H+\X \h+\X \V+\X \v+\X a+\X \n+\X .+\X/Bx
 
 /.+\X/Bsx
 
 /\X+$/Bmx
 
-/\X+\D \X+\d \X+\S \X+\s \X+\W \X+\w \X+. \X+\C \X+\R \X+\H \X+\h \X+\V \X+\v \X+\X \X+\Z \X+\z \X+$/Bx
+/\X+\D \X+\d \X+\S \X+\s \X+\W \X+\w \X+. \X+\R \X+\H \X+\h \X+\V \X+\v \X+\X \X+\Z \X+\z \X+$/Bx
 
 /\d+\s{0,5}=\s*\S?=\w{0,4}\W*/B,utf,ucp
 
@@ -1664,16 +1659,6 @@
 /$(&.+[\p{Me}].\s\xdcC*?(?(<y>))(?<!^)$C((;*?(R))+(?(R)){0,6}?|){12\x8a\X*?\x8a\x0b\xd1^9\3*+(\xc1,\k'P'\xb4)\xcc(z\z(?JJ)(?'X'8};(\x0b\xd1^9\?'3*+(\xc1.]k+\x0b'Pm'\xb4\xcc4'\xd1'(?'X'))?-%--\x95$9*\4'|\xd1(''%\x95*$9)#(?'R')3\x07?('P\xed')\\x16:;()\x1e\x10*:(?<y>)\xd1+!~:(?)''(d'E:yD!\s(?'R'\x1e;\x10:U))|')g!\xb0*){29+))#(?'P'})*?/
 
 "(*UTF)(*UCP)(.UTF).+X(\V+;\^(\D|)!999}(?(?C{7(?C')\H*\S*/^\x5\xa\\xd3\x85n?(;\D*(?m).[^mH+((*UCP)(*U:F)})(?!^)(?'"
-
-/\C\X*TӅ;
-{0,6}\v+F
-/utf
-\= Expect no match
-    Ӆ\x0a
-
-/\C(\W?ſ)'?{{/utf
-\= Expect no match
-    \\C(\\W?ſ)'?{{
 
 /[\pS#moq]/
     =

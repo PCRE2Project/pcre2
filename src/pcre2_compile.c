@@ -583,7 +583,7 @@ enum { ERR0 = COMPILE_ERROR_BASE,
        ERR51, ERR52, ERR53, ERR54, ERR55, ERR56, ERR57, ERR58, ERR59, ERR60,
        ERR61, ERR62, ERR63, ERR64, ERR65, ERR66, ERR67, ERR68, ERR69, ERR70,
        ERR71, ERR72, ERR73, ERR74, ERR75, ERR76, ERR77, ERR78, ERR79, ERR80,
-       ERR81, ERR82, ERR83, ERR84 };
+       ERR81, ERR82, ERR83, ERR84, ERR85 };
 
 /* This is a table of start-of-pattern options such as (*UTF) and settings such
 as (*LIMIT_MATCH=nnnn) and (*CRLF). For completeness and backward
@@ -7052,12 +7052,20 @@ for (;; ptr++)
 #endif
 
       /* The use of \C can be locked out. */
-
+      
+#ifdef NEVER_BACKSLASH_C
+      else if (escape == ESC_C)
+        {
+        *errorcodeptr = ERR85;
+        goto FAILED;
+        }
+#else
       else if (escape == ESC_C && (options & PCRE2_NEVER_BACKSLASH_C) != 0)
         {
         *errorcodeptr = ERR83;
         goto FAILED;
         }
+#endif         
 
       /* For the rest (including \X when Unicode properties are supported), we
       can obtain the OP value by negating the escape value in the default

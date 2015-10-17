@@ -667,6 +667,12 @@ table itself easier to read. */
 #define EBCDIC_NL 0
 #endif
 
+#ifdef NEVER_BACKSLASH_C
+#define BACKSLASH_C 0
+#else
+#define BACKSLASH_C 1
+#endif
+
 typedef struct coptstruct {
   const char *name;
   uint32_t    type;
@@ -681,16 +687,17 @@ enum { CONF_BSR,
 };
 
 static coptstruct coptlist[] = {
-  { "bsr",       CONF_BSR, PCRE2_CONFIG_BSR },
-  { "ebcdic",    CONF_FIX, SUPPORT_EBCDIC },
-  { "ebcdic-nl", CONF_FIZ, EBCDIC_NL },
-  { "jit",       CONF_INT, PCRE2_CONFIG_JIT },
-  { "linksize",  CONF_INT, PCRE2_CONFIG_LINKSIZE },
-  { "newline",   CONF_NL,  PCRE2_CONFIG_NEWLINE },
-  { "pcre2-16",  CONF_FIX, SUPPORT_16 },
-  { "pcre2-32",  CONF_FIX, SUPPORT_32 },
-  { "pcre2-8",   CONF_FIX, SUPPORT_8 },
-  { "unicode",   CONF_INT, PCRE2_CONFIG_UNICODE }
+  { "backslash-C", CONF_FIX, BACKSLASH_C },
+  { "bsr",         CONF_BSR, PCRE2_CONFIG_BSR },
+  { "ebcdic",      CONF_FIX, SUPPORT_EBCDIC },
+  { "ebcdic-nl",   CONF_FIZ, EBCDIC_NL },
+  { "jit",         CONF_INT, PCRE2_CONFIG_JIT },
+  { "linksize",    CONF_INT, PCRE2_CONFIG_LINKSIZE },
+  { "newline",     CONF_NL,  PCRE2_CONFIG_NEWLINE },
+  { "pcre2-16",    CONF_FIX, SUPPORT_16 },
+  { "pcre2-32",    CONF_FIX, SUPPORT_32 },
+  { "pcre2-8",     CONF_FIX, SUPPORT_8 },
+  { "unicode",     CONF_INT, PCRE2_CONFIG_UNICODE }
 };
 
 #define COPTLISTCOUNT sizeof(coptlist)/sizeof(coptstruct)
@@ -6467,6 +6474,7 @@ printf("  -b            set default pattern control 'fullbincode'\n");
 printf("  -C            show PCRE2 compile-time options and exit\n");
 printf("  -C arg        show a specific compile-time option and exit with its\n");
 printf("                  value if numeric (else 0). The arg can be:\n");
+printf("     backslash-C    use of \\C is enabled [0, 1]\n");
 printf("     bsr            \\R type [ANYCRLF, ANY]\n");
 printf("     ebcdic         compiled for EBCDIC character code [0,1]\n");
 printf("     ebcdic-nl      NL code if compiled for EBCDIC\n");
@@ -6618,6 +6626,11 @@ print_newline_config(optval, FALSE);
 (void)PCRE2_CONFIG(PCRE2_CONFIG_BSR, &optval);
 printf("  \\R matches %s\n", optval? "CR, LF, or CRLF only" :
                                  "all Unicode newlines");
+#ifdef NEVER_BACKSLASH_C
+printf("  \\C is not supported\n");
+#else
+printf("  \\C is supported\n");
+#endif
 (void)PCRE2_CONFIG(PCRE2_CONFIG_LINKSIZE, &optval);
 printf("  Internal link size = %d\n", optval);
 (void)PCRE2_CONFIG(PCRE2_CONFIG_PARENSLIMIT, &optval);

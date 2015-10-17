@@ -106,7 +106,7 @@ static const int eint1[] = {
 
 static const int eint2[] = {
   30, REG_ECTYPE,  /* unknown POSIX class name */
-  32, REG_INVARG,  /* this version of PCRE does not have UTF or UCP support */
+  32, REG_INVARG,  /* this version of PCRE2 does not have Unicode support */
   37, REG_EESCAPE, /* PCRE2 does not support \L, \l, \N{name}, \U, or \u */
   56, REG_INVARG,  /* internal error: unknown newline setting */
 };

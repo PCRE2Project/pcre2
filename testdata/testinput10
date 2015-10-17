@@ -1,46 +1,6 @@
 # This set of tests is for UTF-8 support and Unicode property support, with
 # relevance only for the 8-bit library.
 
-/X(\C{3})/utf
-    X\x{1234}
-
-/X(\C{4})/utf
-    X\x{1234}YZ
-
-/X\C*/utf
-    XYZabcdce
-
-/X\C*?/utf
-    XYZabcde
-
-/X\C{3,5}/utf
-    Xabcdefg
-    X\x{1234}
-    X\x{1234}YZ
-    X\x{1234}\x{512}
-    X\x{1234}\x{512}YZ
-
-/X\C{3,5}?/utf
-    Xabcdefg
-    X\x{1234}
-    X\x{1234}YZ
-    X\x{1234}\x{512}
-
-/a\Cb/utf
-    aXb
-    a\nb
-
-/a\C\Cb/utf
-    a\x{100}b
-
-/ab\Cde/utf
-    abXde
-
-/a\C\Cb/utf
-    a\x{100}b
-\= Expect no match
-    a\x{12257}b
-
 # The next 3 patterns have UTF-8 errors
 
 /[Ã]/utf
@@ -211,21 +171,6 @@
 /\x{861}/IB,utf
 
 /\x{212ab}/IB,utf
-
-# This one is here not because it's different to Perl, but because the way
-# the captured single-byte is displayed. (In Perl it becomes a character, and you
-# can't tell the difference.)
-
-/X(\C)(.*)/utf
-    X\x{1234}
-    X\nabc
-
-# This one is here because Perl gives out a grumbly error message (quite
-# correctly, but that messes up comparisons).
-
-/a\Cb/utf
-\= Expect no match
-    a\x{100}b
 
 /[^ab\xC0-\xF0]/IB,utf
     \x{f1}

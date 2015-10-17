@@ -201,6 +201,8 @@ escape was being ignored.
 57. Fixed integer overflow for patterns whose minimum matching length is very, 
 very large.
 
+58. Implemented --never-backslash-C.
+
 
 Version 10.20 30-June-2015
 --------------------------

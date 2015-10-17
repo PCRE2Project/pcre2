@@ -70,6 +70,7 @@
 # 2015-04-24 PH added support for PCRE2_DEBUG
 # 2015-07-16 PH updated for new pcre2_find_bracket source module
 # 2015-08-24 PH correct C_FLAGS setting (patch from Roy Ivy III)
+# 2015-10=16 PH added support for never-backslash-C
 
 PROJECT(PCRE2 C)
 
@@ -162,6 +163,9 @@ SET(PCRE2_SUPPORT_UNICODE ON CACHE BOOL
 SET(PCRE2_SUPPORT_BSR_ANYCRLF OFF CACHE BOOL
     "ON=Backslash-R matches only LF CR and CRLF, OFF=Backslash-R matches all Unicode Linebreaks")
 
+SET(PCRE2_NEVER_BACKSLASH_C OFF CACHE BOOL
+    "If ON, backslash-C (upper case C) is locked out.")
+
 SET(PCRE2_SUPPORT_VALGRIND OFF CACHE BOOL
     "Enable Valgrind support.")
 
@@ -251,6 +255,10 @@ ENDIF(PCRE2_SUPPORT_LIBREADLINE AND PCRE2_SUPPORT_LIBEDIT)
 IF(PCRE2_SUPPORT_BSR_ANYCRLF)
         SET(BSR_ANYCRLF 1)
 ENDIF(PCRE2_SUPPORT_BSR_ANYCRLF)
+
+IF(PCRE2_NEVER_BACKSLASH_C)
+        SET(NEVER_BACKSLASH_C 1)
+ENDIF(PCRE2_NEVER_BACKSLASH_C)         
 
 IF(PCRE2_SUPPORT_UNICODE)
         SET(SUPPORT_UNICODE 1)
@@ -719,6 +727,7 @@ IF(PCRE2_SHOW_REPORT)
   MESSAGE(STATUS "  Enable Unicode support .......... : ${PCRE2_SUPPORT_UNICODE}")
   MESSAGE(STATUS "  Newline char/sequence ........... : ${PCRE2_NEWLINE}")
   MESSAGE(STATUS "  \\R matches only ANYCRLF ......... : ${PCRE2_SUPPORT_BSR_ANYCRLF}")
+  MESSAGE(STATUS "  \\C is disabled .................. : ${PCRE2_NEVER_BACKSLASH_C}")
   MESSAGE(STATUS "  EBCDIC coding ................... : ${PCRE2_EBCDIC}")
   MESSAGE(STATUS "  EBCDIC coding with NL=0x25 ...... : ${PCRE2_EBCDIC_NL25}")
   MESSAGE(STATUS "  Rebuild char tables ............. : ${PCRE2_REBUILD_CHARTABLES}")

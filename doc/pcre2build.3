@@ -1,4 +1,4 @@
-.TH PCRE2BUILD 3 "23 April 2015" "PCRE2 10.20"
+.TH PCRE2BUILD 3 "16 October 2015" "PCRE2 10.21"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .
@@ -132,11 +132,20 @@ Pattern escapes such as \ed and \ew do not by default make use of Unicode
 properties. The application can request that they do by setting the PCRE2_UCP
 option. Unless the application has set PCRE2_NEVER_UCP, a pattern may also
 request this by starting with (*UCP).
-.P
+.
+.
+.SH "DISABLING THE USE OF \eC"
+.rs
+.sp
 The \eC escape sequence, which matches a single code unit, even in a UTF mode,
 can cause unpredictable behaviour because it may leave the current matching
-point in the middle of a multi-code-unit character. It can be locked out by
-setting the PCRE2_NEVER_BACKSLASH_C option.
+point in the middle of a multi-code-unit character. The application can lock it
+out by setting the PCRE2_NEVER_BACKSLASH_C option when calling
+\fBpcre2_compile()\fP. There is also a build-time option
+.sp
+  --enable-never-backslash-C
+.sp
+(note the upper case C) which locks out the use of \eC entirely.
 .
 .
 .SH "JUST-IN-TIME COMPILER SUPPORT"
@@ -510,6 +519,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 24 April 2015
+Last updated: 16 October 2015
 Copyright (c) 1997-2015 University of Cambridge.
 .fi

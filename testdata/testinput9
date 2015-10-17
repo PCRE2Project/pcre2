@@ -4,10 +4,8 @@
 #forbid_utf
 #newline_default lf any anycrlf
 
-/a\Cb/
-    aXb
-    a\nb
-\= Expect no match and error message (too big char)
+/ab/
+\= Expect error message (too big char) and no match
     A\x{123}B
     A\o{443}B
   

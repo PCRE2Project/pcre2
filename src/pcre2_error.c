@@ -168,6 +168,8 @@ static const char compile_error_texts[] =
   "unrecognized string delimiter follows (?C\0"
   "using \\C is disabled by the application\0"
   "(?| and/or (?J: or (?x: parentheses are too deeply nested\0"
+  /* 85 */
+  "using \\C is disabled in this PCRE2 library\0"
   ;
 
 /* Match-time and UTF error texts are in the same format. */

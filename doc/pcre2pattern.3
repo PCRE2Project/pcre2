@@ -1,4 +1,4 @@
-.TH PCRE2PATTERN 3 "01 September 2015" "PCRE2 10.21"
+.TH PCRE2PATTERN 3 "16 October 2015" "PCRE2 10.21"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION DETAILS"
@@ -1233,8 +1233,11 @@ with \eC in UTF-8 or UTF-16 mode means that the rest of the string may start
 with a malformed UTF character. This has undefined results, because PCRE2
 assumes that it is matching character by character in a valid UTF string (by
 default it checks the subject string's validity at the start of processing
-unless the PCRE2_NO_UTF_CHECK option is used). An application can lock out the
-use of \eC by setting the PCRE2_NEVER_BACKSLASH_C option.
+unless the PCRE2_NO_UTF_CHECK option is used). 
+.P
+An application can lock out the use of \eC by setting the
+PCRE2_NEVER_BACKSLASH_C option when compiling a pattern. It is also possible to
+build PCRE2 with the use of \eC permanently disabled.
 .P
 PCRE2 does not allow \eC to appear in lookbehind assertions
 .\" HTML <a href="#lookbehind">
@@ -1242,7 +1245,10 @@ PCRE2 does not allow \eC to appear in lookbehind assertions
 (described below)
 .\"
 in a UTF mode, because this would make it impossible to calculate the length of
-the lookbehind.
+the lookbehind. Neither the alternative matching function 
+\fBpcre2_dfa_match()\fP not the JIT optimizer support \eC in a UTF mode. The 
+former gives a match-time error; the latter fails to optimize and so the match 
+is always run using the interpreter.
 .P
 In general, the \eC escape sequence is best avoided. However, one way of using
 it that avoids the problem of malformed UTF characters is to use a lookahead to
@@ -3386,6 +3392,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 01 September 2015
+Last updated: 16 October 2015
 Copyright (c) 1997-2015 University of Cambridge.
 .fi

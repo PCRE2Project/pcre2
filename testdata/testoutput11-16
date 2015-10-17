@@ -6,12 +6,6 @@
 #forbid_utf
 #newline_default LF ANY ANYCRLF
 
-/a\Cb/
-    aXb
- 0: aXb
-    a\nb
- 0: a\x0ab
-  
 /[^\x{c4}]/IB
 ------------------------------------------------------------------
         Bra
@@ -582,7 +576,7 @@ Failed: error 134 at offset 11: character code point value in \x{} or \o{} is to
 
 # Non-UTF characters 
 
-/\C{2,3}/
+/.{2,3}/
     \x{400000}\x{400001}\x{400002}\x{400003}
 ** Character \x{400000} is greater than 0xffff and UTF-16 mode is not enabled.
 ** Truncation will probably give the wrong result.

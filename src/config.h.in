@@ -169,6 +169,9 @@ sure both macros are undefined; an emulation function will then be used. */
    overflow caused by enormously large patterns. */
 #undef MAX_NAME_SIZE
 
+/* Defining NEVER_BACKSLASH_C locks out the use of \C in all patterns. */
+#undef NEVER_BACKSLASH_C
+
 /* The value of NEWLINE_DEFAULT determines the default newline character
    sequence. PCRE2 client programs can override this by selecting other values
    at run time. The valid values are 1 (CR), 2 (LF), 3 (CRLF), 4 (ANY), and 5
