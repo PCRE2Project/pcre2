@@ -206,8 +206,9 @@ very large.
 59. Change 55 above introduced a bug by which certain patterns provoked the 
 erroneous error "\ at end of pattern".
 
-60. The special sequences [[:<:]] and [[:>:]] gave rise to incorrect compiling 
-errors or other strange effects if compiled in UCP mode.
+60. The special sequences [[:<:]] and [[:>:]] gave rise to incorrect compiling
+errors or other strange effects if compiled in UCP mode. Found with libFuzzer
+and AddressSanitizer.
 
 
 Version 10.20 30-June-2015
