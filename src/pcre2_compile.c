@@ -1618,6 +1618,13 @@ sequences that define a data character are recognised. The isclass argument is
 not relevant, but the options argument is the final value of the compiled
 pattern's options.
 
+There is one "trick" case: when a sequence such as [[:>:]] or \s in UCP mode is
+processed, it is replaced by a nested alternative sequence. If this contains a
+backslash (which is usually does), ptrend does not point to its end - it still
+points to the end of the whole pattern. However, we can detect this case 
+because cb->nestptr[0] will be non-NULL. The nested sequences are all zero-
+terminated and there are only ever two levels of nesting.
+
 Arguments:
   ptrptr         points to the input position pointer
   ptrend         points to the end of the input
@@ -1643,10 +1650,14 @@ register uint32_t c, cc;
 int escape = 0;
 int i;
 
-/* If backslash is at the end of the string, it's an error. The check must be
-skipped when processing a nested insertion string during compilation. */
+/* Find the end of a nested insert. */
 
-if ((cb == NULL || cb->nestptr == NULL) && ptr >= ptrend)
+if (cb != NULL && cb->nestptr[0] != NULL)
+  ptrend = ptr + PRIV(strlen)(ptr);
+
+/* If backslash is at the end of the string, it's an error. */
+
+if (ptr >= ptrend)
   {
   *errorcodeptr = ERR1;
   return 0;
@@ -3700,13 +3711,14 @@ for (;; ptr++)
   c = *ptr;
 
   /* If we are at the end of a nested substitution, revert to the outer level
-  string. Nesting only happens one level deep, and the inserted string is 
-  always zero terminated. */
+  string. Nesting only happens one or two levels deep, and the inserted string
+  is always zero terminated. */
 
-  if (c == CHAR_NULL && cb->nestptr != NULL)
+  if (c == CHAR_NULL && cb->nestptr[0] != NULL)
     {
-    ptr = cb->nestptr;
-    cb->nestptr = NULL;
+    ptr = cb->nestptr[0];
+    cb->nestptr[0] = cb->nestptr[1]; 
+    cb->nestptr[1] = NULL;
     c = *ptr;
     }
 
@@ -3823,7 +3835,7 @@ for (;; ptr++)
   /* Fill in length of a previous callout, except when the next thing is a
   quantifier or when processing a property substitution string in UCP mode. */
 
-  if (!is_quantifier && previous_callout != NULL && cb->nestptr == NULL &&
+  if (!is_quantifier && previous_callout != NULL && cb->nestptr[0] == NULL &&
        after_manual_callout-- <= 0)
     {
     if (lengthptr == NULL)      /* Don't attempt in pre-compile phase */
@@ -3834,7 +3846,8 @@ for (;; ptr++)
   /* Create auto callout, except for quantifiers, or while processing property
   strings that are substituted for \w etc in UCP mode. */
 
-  if ((options & PCRE2_AUTO_CALLOUT) != 0 && !is_quantifier && cb->nestptr == NULL)
+  if ((options & PCRE2_AUTO_CALLOUT) != 0 && !is_quantifier && 
+       cb->nestptr[0] == NULL)
     {
     previous_callout = code;
     code = auto_callout(code, ptr, cb);
@@ -3926,13 +3939,15 @@ for (;; ptr++)
     In another (POSIX) regex library, the ugly syntax [[:<:]] and [[:>:]] is
     used for "start of word" and "end of word". As these are otherwise illegal
     sequences, we don't break anything by recognizing them. They are replaced
-    by \b(?=\w) and \b(?<=\w) respectively. Sequences like [a[:<:]] are
-    erroneous and are handled by the normal code below. */
+    by \b(?=\w) and \b(?<=\w) respectively. This can only happen at the top
+    nesting level, as no other inserted sequences will contains these oddities.
+    Sequences like [a[:<:]] are erroneous and are handled by the normal code
+    below. */
 
     case CHAR_LEFT_SQUARE_BRACKET:
     if (PRIV(strncmp_c8)(ptr+1, STRING_WEIRD_STARTWORD, 6) == 0)
       {
-      cb->nestptr = ptr + 7;
+      cb->nestptr[0] = ptr + 7;
       ptr = sub_start_of_word;  /* Do not combine these statements; clang's */
       ptr--;                    /* sanitizer moans about a negative index. */
       continue;
@@ -3940,7 +3955,7 @@ for (;; ptr++)
 
     if (PRIV(strncmp_c8)(ptr+1, STRING_WEIRD_ENDWORD, 6) == 0)
       {
-      cb->nestptr = ptr + 7;
+      cb->nestptr[0] = ptr + 7;
       ptr = sub_end_of_word;    /* Do not combine these statements; clang's */
       ptr--;                    /* sanitizer moans about a negative index. */
       continue;
@@ -4125,11 +4140,13 @@ for (;; ptr++)
           int pc = posix_class + ((local_negate)? POSIX_SUBSIZE/2 : 0);
 
           /* The posix_substitutes table specifies which POSIX classes can be
-          converted to \p or \P items. */
+          converted to \p or \P items. This can only happen at top nestling 
+          level, as there will never be a POSIX class in a string that is 
+          substituted for something else. */
 
           if (posix_substitutes[pc] != NULL)
             {
-            cb->nestptr = tempptr + 1;
+            cb->nestptr[0] = tempptr + 1;
             ptr = posix_substitutes[pc] - 1;
             goto CONTINUE_CLASS;
             }
@@ -4263,9 +4280,10 @@ for (;; ptr++)
             case ESC_DU:     /* when PCRE2_UCP is set. We replace the */
             case ESC_wu:     /* escape sequence with an appropriate \p */
             case ESC_WU:     /* or \P to test Unicode properties instead */
-            case ESC_su:     /* of the default ASCII testing. */
-            case ESC_SU:
-            cb->nestptr = ptr;
+            case ESC_su:     /* of the default ASCII testing. This might be */
+            case ESC_SU:     /* a 2nd-level nesting for [[:<:]] or [[:>:]]. */
+            cb->nestptr[1] = cb->nestptr[0]; 
+            cb->nestptr[0] = ptr;
             ptr = substitutes[escape - ESC_DU] - 1;  /* Just before substitute */
             class_has_8bitchar--;                /* Undo! */
             break;
@@ -4607,10 +4625,11 @@ for (;; ptr++)
 
       CONTINUE_CLASS:
       c = *(++ptr);
-      if (c == 0 && cb->nestptr != NULL)
+      if (c == CHAR_NULL && cb->nestptr[0] != NULL)
         {
-        ptr = cb->nestptr;
-        cb->nestptr = NULL;
+        ptr = cb->nestptr[0];
+        cb->nestptr[0] = cb->nestptr[1]; 
+        cb->nestptr[1] = NULL;
         c = *(++ptr);
         }
 
@@ -7082,7 +7101,8 @@ for (;; ptr++)
 #ifdef SUPPORT_UNICODE
         if (escape >= ESC_DU && escape <= ESC_wu)
           {
-          cb->nestptr = ptr + 1;                   /* Where to resume */
+          cb->nestptr[1] = cb->nestptr[0];         /* Back up if at 2nd level */
+          cb->nestptr[0] = ptr + 1;                /* Where to resume */
           ptr = substitutes[escape - ESC_DU] - 1;  /* Just before substitute */
           }
         else
@@ -8079,7 +8099,7 @@ cb.bracount = cb.final_bracount = 0;
 cb.cx = ccontext;
 cb.dupnames = FALSE;
 cb.end_pattern = pattern + patlen;
-cb.nestptr = NULL;
+cb.nestptr[0] = cb.nestptr[1] = NULL;
 cb.external_flags = 0;
 cb.external_options = options;
 cb.had_recurse = FALSE;

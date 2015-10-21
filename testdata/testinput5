@@ -1684,4 +1684,6 @@
 \= Expect no match
     123     
 
+/(*UCP)(*UTF)[[:>:]]X/B
+
 # End of testinput5 
