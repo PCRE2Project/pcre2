@@ -210,6 +210,9 @@ erroneous error "\ at end of pattern".
 errors or other strange effects if compiled in UCP mode. Found with libFuzzer
 and AddressSanitizer.
 
+61. Whitespace at the end of a pcre2test pattern line caused a spurious error 
+message if there were only single-character modifiers. It should be ignored.
+
 
 Version 10.20 30-June-2015
 --------------------------

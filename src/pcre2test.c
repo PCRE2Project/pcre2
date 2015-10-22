@@ -3111,7 +3111,11 @@ for (;;)
   /* Find the end of the item; lose trailing whitespace at end of line. */
 
   for (ep = p; *ep != 0 && *ep != ','; ep++);
-  if (*ep == 0) while (ep > p && isspace(ep[-1])) ep--;
+  if (*ep == 0) 
+    {
+    while (ep > p && isspace(ep[-1])) ep--;
+    *ep = 0;
+    }  
 
   /* Remember if the first character is '-'. */
 
