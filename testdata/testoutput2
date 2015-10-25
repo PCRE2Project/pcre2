@@ -14668,4 +14668,10 @@ Overall options: anchored
 Last code unit = '}'
 Subject length lower bound = 65535
 
+/((p(?'K/
+Failed: error 142 at offset 7: syntax error in subpattern name (missing terminator)
+
+/((p(?'K/no_auto_capture
+Failed: error 142 at offset 7: syntax error in subpattern name (missing terminator)
+
 # End of testinput2 

@@ -4583,4 +4583,8 @@ B)x/alt_verbnames,mark
 
 /^(o(\1{72}{\"{\\{00000059079}\d*){74}}){19}/I
 
+/((p(?'K/
+
+/((p(?'K/no_auto_capture
+
 # End of testinput2 

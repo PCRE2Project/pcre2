@@ -1621,7 +1621,7 @@ pattern's options.
 There is one "trick" case: when a sequence such as [[:>:]] or \s in UCP mode is
 processed, it is replaced by a nested alternative sequence. If this contains a
 backslash (which is usually does), ptrend does not point to its end - it still
-points to the end of the whole pattern. However, we can detect this case 
+points to the end of the whole pattern. However, we can detect this case
 because cb->nestptr[0] will be non-NULL. The nested sequences are all zero-
 terminated and there are only ever two levels of nesting.
 
@@ -3187,9 +3187,10 @@ for (; ptr < cb->end_pattern; ptr++)
 
     if (ptr[1] != CHAR_QUESTION_MARK)
       {
-      if (ptr[1] != CHAR_ASTERISK &&
-          (options & PCRE2_NO_AUTO_CAPTURE) == 0)
-        cb->bracount++;  /* Capturing group */
+      if (ptr[1] != CHAR_ASTERISK)
+        {
+        if ((options & PCRE2_NO_AUTO_CAPTURE) == 0) cb->bracount++;
+        }
       else  /* (*something) - just skip to closing ket */
         {
         ptr += 2;
@@ -3717,7 +3718,7 @@ for (;; ptr++)
   if (c == CHAR_NULL && cb->nestptr[0] != NULL)
     {
     ptr = cb->nestptr[0];
-    cb->nestptr[0] = cb->nestptr[1]; 
+    cb->nestptr[0] = cb->nestptr[1];
     cb->nestptr[1] = NULL;
     c = *ptr;
     }
@@ -3846,7 +3847,7 @@ for (;; ptr++)
   /* Create auto callout, except for quantifiers, or while processing property
   strings that are substituted for \w etc in UCP mode. */
 
-  if ((options & PCRE2_AUTO_CALLOUT) != 0 && !is_quantifier && 
+  if ((options & PCRE2_AUTO_CALLOUT) != 0 && !is_quantifier &&
        cb->nestptr[0] == NULL)
     {
     previous_callout = code;
@@ -4140,8 +4141,8 @@ for (;; ptr++)
           int pc = posix_class + ((local_negate)? POSIX_SUBSIZE/2 : 0);
 
           /* The posix_substitutes table specifies which POSIX classes can be
-          converted to \p or \P items. This can only happen at top nestling 
-          level, as there will never be a POSIX class in a string that is 
+          converted to \p or \P items. This can only happen at top nestling
+          level, as there will never be a POSIX class in a string that is
           substituted for something else. */
 
           if (posix_substitutes[pc] != NULL)
@@ -4282,7 +4283,7 @@ for (;; ptr++)
             case ESC_WU:     /* or \P to test Unicode properties instead */
             case ESC_su:     /* of the default ASCII testing. This might be */
             case ESC_SU:     /* a 2nd-level nesting for [[:<:]] or [[:>:]]. */
-            cb->nestptr[1] = cb->nestptr[0]; 
+            cb->nestptr[1] = cb->nestptr[0];
             cb->nestptr[0] = ptr;
             ptr = substitutes[escape - ESC_DU] - 1;  /* Just before substitute */
             class_has_8bitchar--;                /* Undo! */
@@ -4628,7 +4629,7 @@ for (;; ptr++)
       if (c == CHAR_NULL && cb->nestptr[0] != NULL)
         {
         ptr = cb->nestptr[0];
-        cb->nestptr[0] = cb->nestptr[1]; 
+        cb->nestptr[0] = cb->nestptr[1];
         cb->nestptr[1] = NULL;
         c = *(++ptr);
         }
@@ -7072,7 +7073,7 @@ for (;; ptr++)
 #endif
 
       /* The use of \C can be locked out. */
-      
+
 #ifdef NEVER_BACKSLASH_C
       else if (escape == ESC_C)
         {
@@ -7085,7 +7086,7 @@ for (;; ptr++)
         *errorcodeptr = ERR83;
         goto FAILED;
         }
-#endif         
+#endif
 
       /* For the rest (including \X when Unicode properties are supported), we
       can obtain the OP value by negating the escape value in the default

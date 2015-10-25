@@ -213,6 +213,10 @@ and AddressSanitizer.
 61. Whitespace at the end of a pcre2test pattern line caused a spurious error 
 message if there were only single-character modifiers. It should be ignored.
 
+62. The use of PCRE2_NO_AUTO_CAPTURE could cause incorrect compilation results
+or segmentation errors for some patterns. Found with libFuzzer and
+AddressSanitizer.
+
 
 Version 10.20 30-June-2015
 --------------------------
