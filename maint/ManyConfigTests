@@ -136,12 +136,13 @@ runtest()
   
   echo "Making"
   make -j >/dev/null 2>teststderrM
+  makeRC=$? 
   if command -v sed >/dev/null 2>&1 ; then
     sed "/\`u' modifier ignored since \`D' is the default/ d" \
       teststderrM > teststderrMM
     mv -f teststderrMM teststderrM   
   fi
-  if [ $? -ne 0 -o -s teststderrM ]; then
+  if [ $makeRC -ne 0 -o -s teststderrM ]; then
     echo " "
     echo "******** Errors or warnings while making ********"
     echo " "
