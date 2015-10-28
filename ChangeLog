@@ -217,6 +217,9 @@ message if there were only single-character modifiers. It should be ignored.
 or segmentation errors for some patterns. Found with libFuzzer and
 AddressSanitizer.
 
+63. Very long names in (*MARK) or (*THEN) items could provoke a buffer 
+overflow.
+
 
 Version 10.20 30-June-2015
 --------------------------

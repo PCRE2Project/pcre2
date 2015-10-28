@@ -5645,7 +5645,7 @@ for (;; ptr++)
 
           /* Handle other cases with/without an argument */
 
-          else if (arglen == 0)
+          else if (arglen == 0)    /* There is no argument */
             {
             if (verbs[i].op < 0)   /* Argument is mandatory */
               {
@@ -5655,26 +5655,40 @@ for (;; ptr++)
             setverb = *code++ = verbs[i].op;
             }
 
-          else
+          else                        /* An argument is present */
             {
-            if (verbs[i].op_arg < 0)   /* Argument is forbidden */
+            if (verbs[i].op_arg < 0)  /* Argument is forbidden */
               {
               *errorcodeptr = ERR59;
               goto FAILED;
               }
             setverb = *code++ = verbs[i].op_arg;
-            *code++ = arglen;
-            if ((options & PCRE2_ALT_VERBNAMES) != 0)
+
+            /* Arguments can be very long, especially in 16- and 32-bit modes,
+            and can overflow the workspace in the first pass. Instead of
+            putting the argument into memory, we just update the length counter
+            and set up an empty argument. */
+
+            if (lengthptr != NULL)
               {
-              PCRE2_UCHAR *memcode = code;  /* code is "register" */
-              (void)process_verb_name(&arg, &memcode, errorcodeptr, options,
-                utf, cb);
-              code = memcode;
+              *lengthptr += arglen;
+              *code++ = 0;
               }
-            else   /* No argument processing */
+            else
               {
-              memcpy(code, arg, CU2BYTES(arglen));
-              code += arglen;
+              *code++ = arglen;
+              if ((options & PCRE2_ALT_VERBNAMES) != 0)
+                {
+                PCRE2_UCHAR *memcode = code;  /* code is "register" */
+                (void)process_verb_name(&arg, &memcode, errorcodeptr, options,
+                  utf, cb);
+                code = memcode;
+                }
+              else   /* No argument processing */
+                {
+                memcpy(code, arg, CU2BYTES(arglen));
+                code += arglen;
+                }
               }
 
             *code++ = 0;
