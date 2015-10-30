@@ -14674,4 +14674,8 @@ Failed: error 142 at offset 7: syntax error in subpattern name (missing terminat
 /((p(?'K/no_auto_capture
 Failed: error 142 at offset 7: syntax error in subpattern name (missing terminator)
 
+/abc/replace=A$3123456789Z
+    abc
+Failed: error -49 at offset 3 in replacement: unknown substring
+
 # End of testinput2 

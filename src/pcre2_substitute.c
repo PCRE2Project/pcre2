@@ -409,6 +409,15 @@ do
           next = *ptr;
           if (next < CHAR_0 || next > CHAR_9) break;
           group = group * 10 + next - CHAR_0;
+          
+          /* A check for a number greater than the hightest captured group
+          is sufficient here; no need for a separate overflow check. */
+            
+          if (group > code->top_bracket)
+            {
+            rc = PCRE2_ERROR_NOSUBSTRING;
+            goto PTREXIT;   
+            }
           }
         }
       else

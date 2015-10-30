@@ -236,6 +236,10 @@ string was zero-terminated.
 68. In pcre2_substitute() in UTF mode, PCRE2_NO_UTF_CHECK can be set for the 
 second and subsequent calls to pcre2_match().
 
+69. There was no check for integer overflow for a replacement group number in 
+pcre2_substitute(). An added check for a number greater than the largest group 
+number in the pattern means this is not now needed.
+
 
 Version 10.20 30-June-2015
 --------------------------

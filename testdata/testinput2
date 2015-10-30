@@ -4587,4 +4587,7 @@ B)x/alt_verbnames,mark
 
 /((p(?'K/no_auto_capture
 
+/abc/replace=A$3123456789Z
+    abc
+
 # End of testinput2 
