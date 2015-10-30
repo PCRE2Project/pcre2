@@ -233,6 +233,9 @@ misbehave.
 replacement string was happening before the length setting when the replacement
 string was zero-terminated.
 
+68. In pcre2_substitute() in UTF mode, PCRE2_NO_UTF_CHECK can be set for the 
+second and subsequent calls to pcre2_match().
+
 
 Version 10.20 30-June-2015
 --------------------------

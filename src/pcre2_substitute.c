@@ -279,6 +279,10 @@ do
 
   rc = pcre2_match(code, subject, length, start_offset, options|goptions,
     match_data, mcontext);
+    
+#ifdef SUPPORT_UNICODE
+  if (utf) options |= PCRE2_NO_UTF_CHECK;  /* Only need to check once */
+#endif   
 
   /* Any error other than no match returns the error code. No match when not
   doing the special after-empty-match global rematch, or when at the end of the
