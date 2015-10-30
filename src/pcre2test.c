@@ -445,6 +445,7 @@ typedef struct patctl {    /* Structure for pattern modifiers. */
   uint32_t  jit;
   uint32_t  stackguard_test;
   uint32_t  tables_id;
+  uint32_t  regerror_buffsize; 
    uint8_t  locale[LOCALESIZE];
 } patctl;
 
@@ -566,6 +567,7 @@ static modstruct modlist[] = {
   { "ps",                  MOD_DAT,  MOD_OPT, PCRE2_PARTIAL_SOFT,        DO(options) },
   { "push",                MOD_PAT,  MOD_CTL, CTL_PUSH,                  PO(control) },
   { "recursion_limit",     MOD_CTM,  MOD_INT, 0,                         MO(recursion_limit) },
+  { "regerror_buffsize",   MOD_PAT,  MOD_INT, 0,                         PO(regerror_buffsize) },
   { "replace",             MOD_PND,  MOD_STR, REPLACE_MODSIZE,           PO(replacement) },
   { "stackguard",          MOD_PAT,  MOD_INT, 0,                         PO(stackguard_test) },
   { "startchar",           MOD_PND,  MOD_CTL, CTL_STARTCHAR,             PO(control) },
@@ -774,7 +776,7 @@ buffer is where all input lines are read. Its size is the same as pbuffer8.
 Pattern lines are always copied to pbuffer8 for use in callouts, even if they
 are actually compiled from pbuffer16 or pbuffer32. */
 
-static int       pbuffer8_size  = 50000;        /* Initial size, bytes */
+static size_t    pbuffer8_size  = 50000;        /* Initial size, bytes */
 static uint8_t  *pbuffer8 = NULL;
 static uint8_t  *buffer = NULL;
 
@@ -4575,8 +4577,21 @@ if ((pat_patctl.control & CTL_POSIX) != 0)
   rc = regcomp(&preg, (char *)pbuffer8, cflags);
   if (rc != 0)   /* Failure */
     {
-    (void)regerror(rc, &preg, (char *)pbuffer8, pbuffer8_size);
+    size_t bsize, usize;
+     
+    bsize = (pat_patctl.regerror_buffsize != 0)?
+      pat_patctl.regerror_buffsize : pbuffer8_size; 
+    if (bsize + 8 < pbuffer8_size)
+      memcpy(pbuffer8 + bsize, "DEADBEEF", 8);
+    usize = regerror(rc, &preg, (char *)pbuffer8, bsize);
+     
     fprintf(outfile, "Failed: POSIX code %d: %s\n", rc, pbuffer8);
+    if (usize > bsize)
+      {
+      fprintf(outfile, "** regerror() message truncated\n");
+      if (memcmp(pbuffer8 + bsize, "DEADBEEF", 8) != 0)
+        fprintf(outfile, "** regerror() buffer overflow\n");  
+      }    
     return PR_SKIP;
     }
   return PR_OK;

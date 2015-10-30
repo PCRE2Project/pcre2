@@ -94,4 +94,8 @@
 
 /abcd/substitute_extended
 
+/\[A]{1000000}**/expand,regerror_buffsize=31
+
+/\[A]{1000000}**/expand,regerror_buffsize=32
+
 # End of testdata/testinput18

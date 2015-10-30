@@ -226,6 +226,9 @@ overflow.
 make it easier to test long repetitive patterns. The tests for 63 above are 
 converted to use the new feature.
 
+66. In the POSIX wrapper, if regerror() was given too small a buffer, it could 
+misbehave.
+
 
 Version 10.20 30-June-2015
 --------------------------

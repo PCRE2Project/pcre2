@@ -143,4 +143,11 @@ Failed: POSIX code 3: pattern error at offset 2
 /abcd/substitute_extended
 ** Ignored with POSIX interface: substitute_extended
 
+/\[A]{1000000}**/expand,regerror_buffsize=31
+Failed: POSIX code 4: ? * + invalid at offset 100000
+** regerror() message truncated
+
+/\[A]{1000000}**/expand,regerror_buffsize=32
+Failed: POSIX code 4: ? * + invalid at offset 1000001
+
 # End of testdata/testinput18

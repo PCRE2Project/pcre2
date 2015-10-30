@@ -1,4 +1,4 @@
-.TH PCRE2POSIX 3 "03 September 2015" "PCRE2 10.21"
+.TH PCRE2POSIX 3 "30 October 2015" "PCRE2 10.21"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "SYNOPSIS"
@@ -240,9 +240,11 @@ header file, of which REG_NOMATCH is the "expected" failure code.
 The \fBregerror()\fP function maps a non-zero errorcode from either
 \fBregcomp()\fP or \fBregexec()\fP to a printable message. If \fIpreg\fP is not
 NULL, the error should have arisen from the use of that structure. A message
-terminated by a binary zero is placed in \fIerrbuf\fP. The length of the
-message, including the zero, is limited to \fIerrbuf_size\fP. The yield of the
-function is the size of buffer needed to hold the whole message.
+terminated by a binary zero is placed in \fIerrbuf\fP. If the buffer is too
+short, only the first \fIerrbuf_size\fP - 1 characters of the error message are
+used. The yield of the function is the size of buffer needed to hold the whole
+message, including the terminating zero. This value is greater than
+\fIerrbuf_size\fP if the message was truncated.
 .
 .
 .SH MEMORY USAGE
@@ -267,6 +269,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 03 September 2015
+Last updated: 30 October 2015
 Copyright (c) 1997-2015 University of Cambridge.
 .fi
