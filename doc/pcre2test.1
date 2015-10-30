@@ -1,4 +1,4 @@
-.TH PCRE2TEST 1 "17 October 2015" "PCRE 10.21"
+.TH PCRE2TEST 1 "30 October 2015" "PCRE 10.21"
 .SH NAME
 pcre2test - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -218,9 +218,9 @@ Each subject line is matched separately and independently. If you want to do
 multi-line matches, you have to use the \en escape sequence (or \er or \er\en,
 etc., depending on the newline setting) in a single line of input to encode the
 newline sequences. There is no limit on the length of subject lines; the input
-buffer is automatically extended if it is too small. There is a replication
-feature that makes it possible to generate long subject lines without having to
-supply them explicitly.
+buffer is automatically extended if it is too small. There are replication
+features that makes it possible to generate long repetitive pattern or subject
+lines without having to supply them explicitly.
 .P
 An empty line or the end of the file signals the end of the subject lines for a
 test, at which point a new pattern or command line is expected if there is
@@ -460,10 +460,10 @@ a real empty line terminates the data input.
 .SH "PATTERN MODIFIERS"
 .rs
 .sp
-There are three types of modifier that can appear in pattern lines, two of
-which may also be used in a \fB#pattern\fP command. A pattern's modifier list
-can add to or override default modifiers that were set by a previous
-\fB#pattern\fP command.
+There are several types of modifier that can appear in pattern lines. Except
+where noted below, they may also be used in \fB#pattern\fP commands. A
+pattern's modifier list can add to or override default modifiers that were set
+by a previous \fB#pattern\fP command.
 .
 .
 .\" HTML <a name="optionmodifiers"></a>
@@ -627,6 +627,32 @@ and other non-printing characters. By default, \fBpcre2test\fP passes patterns
 as zero-terminated strings to \fBpcre2_compile()\fP, giving the length as
 PCRE2_ZERO_TERMINATED. However, for patterns specified in hexadecimal, the
 actual length of the pattern is passed.
+.
+.
+.SS "Generating long repetitive patterns"
+.rs
+.sp
+Some tests use long patterns that are very repetitive. Instead of creating a
+very long input line for such a pattern, you can use a special repetition 
+feature, similar to the one described for subject lines above. If the 
+\fBexpand\fP modifier is present on a pattern, parts of the pattern that have 
+the form
+.sp
+  \e[<characters>]{<count>}
+.sp
+are expanded before the pattern is passed to \fBpcre2_compile()\fP. For
+example, \e[AB]{6000} is expanded to "ABAB..." 6000 times. This construction
+cannot be nested. An initial "\e[" sequence is recognized only if "]{" followed
+by decimal digits and "}" is found later in the pattern. If not, the characters
+remain in the pattern unaltered.
+.P
+If part of an expanded pattern looks like an expansion, but is really part of 
+the actual pattern, unwanted expansion can be avoided by giving two values in 
+the quantifier. For example, \e[AB]{6000,6000} is not recognized as an 
+expansion item.
+.P
+If the \fBinfo\fP modifier is set on an expanded pattern, the result of the 
+expansion is included in the information that is output.
 .
 .
 .SS "JIT compilation"
@@ -805,8 +831,9 @@ are mutually exclusive.
 .sp
 The following modifiers are really subject modifiers, and are described below.
 However, they may be included in a pattern's modifier list, in which case they
-are applied to every subject line that is processed with that pattern. They do
-not affect the compilation process.
+are applied to every subject line that is processed with that pattern. They may
+not appear in \fB#pattern\fP commands. These modifiers do not affect the
+compilation process.
 .sp
       aftertext           show text after match
       allaftertext        show text after captures
@@ -1560,6 +1587,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 17 October 2015
+Last updated: 30 October 2015
 Copyright (c) 1997-2015 University of Cambridge.
 .fi

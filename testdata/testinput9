@@ -252,8 +252,10 @@
 
 /(*MARK:a\x{100}b)z/alt_verbnames 
 
-/(?'ABC'[bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar](*THEN:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))/
+# Use "expand" to create some very long patterns
 
-/(?'ABC'[bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))/
+/(?'ABC'\[[bar](]{105}*THEN:\[A]{255}\[)]{106}/expand
+
+/(?'ABC'\[[bar](]{106}*THEN:\[A]{255}\[)]{107}/expand
 
 # End of testinput9

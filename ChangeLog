@@ -222,6 +222,10 @@ overflow.
 
 64. Improve error message for overly-complicated patterns.
 
+65. Implemented an optional replication feature for patterns in pcre2test, to 
+make it easier to test long repetitive patterns. The tests for 63 above are 
+converted to use the new feature.
+
 
 Version 10.20 30-June-2015
 --------------------------

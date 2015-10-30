@@ -355,9 +355,11 @@ Failed: error 177 at offset 6: character code point value in \u.... sequence is 
 /(*MARK:a\x{100}b)z/alt_verbnames 
 Failed: error 134 at offset 14: character code point value in \x{} or \o{} is too large
 
-/(?'ABC'[bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar](*THEN:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))/
+# Use "expand" to create some very long patterns
 
-/(?'ABC'[bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))/
+/(?'ABC'\[[bar](]{105}*THEN:\[A]{255}\[)]{106}/expand
+
+/(?'ABC'\[[bar](]{106}*THEN:\[A]{255}\[)]{107}/expand
 Failed: error 186 at offset 637: regular expression is too complicated
 
 # End of testinput9

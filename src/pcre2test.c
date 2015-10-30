@@ -379,7 +379,7 @@ enum { MOD_CTC,    /* Applies to a compile context */
        MOD_NL,     /* Is a newline value */
        MOD_NN,     /* Is a number or a name; more than one may occur */
        MOD_OPT,    /* Is an option bit */
-       MOD_SIZ,    /* Is a PCRE2_SIZE value */ 
+       MOD_SIZ,    /* Is a PCRE2_SIZE value */
        MOD_STR };  /* Is a string */
 
 /* Control bits. Some apply to compiling, some to matching, but some can be set
@@ -395,22 +395,23 @@ either on a pattern or a data line, so they must all be distinct. */
 #define CTL_CALLOUT_INFO         0x00000080u
 #define CTL_CALLOUT_NONE         0x00000100u
 #define CTL_DFA                  0x00000200u
-#define CTL_FINDLIMITS           0x00000400u
-#define CTL_FULLBINCODE          0x00000800u
-#define CTL_GETALL               0x00001000u
-#define CTL_GLOBAL               0x00002000u
-#define CTL_HEXPAT               0x00004000u
-#define CTL_INFO                 0x00008000u
-#define CTL_JITFAST              0x00010000u
-#define CTL_JITVERIFY            0x00020000u
-#define CTL_MARK                 0x00040000u
-#define CTL_MEMORY               0x00080000u
-#define CTL_NULLCONTEXT          0x00100000u
-#define CTL_POSIX                0x00200000u
-#define CTL_PUSH                 0x00400000u
-#define CTL_STARTCHAR            0x00800000u
-#define CTL_SUBSTITUTE_EXTENDED  0x01000000u
-#define CTL_ZERO_TERMINATE       0x02000000u
+#define CTL_EXPAND               0x00000400u
+#define CTL_FINDLIMITS           0x00000800u
+#define CTL_FULLBINCODE          0x00001000u
+#define CTL_GETALL               0x00002000u
+#define CTL_GLOBAL               0x00004000u
+#define CTL_HEXPAT               0x00008000u
+#define CTL_INFO                 0x00010000u
+#define CTL_JITFAST              0x00020000u
+#define CTL_JITVERIFY            0x00040000u
+#define CTL_MARK                 0x00080000u
+#define CTL_MEMORY               0x00100000u
+#define CTL_NULLCONTEXT          0x00200000u
+#define CTL_POSIX                0x00400000u
+#define CTL_PUSH                 0x00800000u
+#define CTL_STARTCHAR            0x01000000u
+#define CTL_SUBSTITUTE_EXTENDED  0x02000000u
+#define CTL_ZERO_TERMINATE       0x04000000u
 
 #define CTL_BSR_SET          0x80000000u  /* This is informational */
 #define CTL_NL_SET           0x40000000u  /* This is informational */
@@ -520,6 +521,7 @@ static modstruct modlist[] = {
   { "dollar_endonly",      MOD_PAT,  MOD_OPT, PCRE2_DOLLAR_ENDONLY,      PO(options) },
   { "dotall",              MOD_PATP, MOD_OPT, PCRE2_DOTALL,              PO(options) },
   { "dupnames",            MOD_PATP, MOD_OPT, PCRE2_DUPNAMES,            PO(options) },
+  { "expand",              MOD_PAT,  MOD_CTL, CTL_EXPAND,                PO(control) },
   { "extended",            MOD_PATP, MOD_OPT, PCRE2_EXTENDED,            PO(options) },
   { "find_limits",         MOD_DAT,  MOD_CTL, CTL_FINDLIMITS,            DO(control) },
   { "firstline",           MOD_PAT,  MOD_OPT, PCRE2_FIRSTLINE,           PO(options) },
@@ -606,11 +608,18 @@ static modstruct modlist[] = {
 
 #define NOTPOP_CONTROLS (CTL_HEXPAT|CTL_POSIX|CTL_PUSH)
 
-/* Controls that are mutually exclusive. */
+/* Pattern controls that are mutually exclusive. */
+
+static uint32_t exclusive_pat_controls[] = {
+  CTL_POSIX  | CTL_HEXPAT,
+  CTL_POSIX  | CTL_PUSH,
+  CTL_EXPAND | CTL_HEXPAT };
+
+/* Data controls that are mutually exclusive. */
 
 static uint32_t exclusive_dat_controls[] = {
   CTL_ALLUSEDTEXT | CTL_STARTCHAR,
-  CTL_FINDLIMITS  | CTL_NULLCONTEXT }; 
+  CTL_FINDLIMITS  | CTL_NULLCONTEXT };
 
 /* Table of single-character abbreviated modifiers. The index field is
 initialized to -1, but the first time the modifier is encountered, it is filled
@@ -2787,6 +2796,46 @@ else  /* 16-bit mode */
 }
 
 
+
+/*************************************************
+*           Expand input buffers                 *
+*************************************************/
+
+/* This function doubles the size of the input buffer and the buffer for
+keeping an 8-bit copy of patterns (pbuffer8), and copies the current buffers to
+the new ones.
+
+Arguments: none
+Returns:   nothing (aborts if malloc() fails)
+*/
+
+static void
+expand_input_buffers(void)
+{
+int new_pbuffer8_size = 2*pbuffer8_size;
+uint8_t *new_buffer = (uint8_t *)malloc(new_pbuffer8_size);
+uint8_t *new_pbuffer8 = (uint8_t *)malloc(new_pbuffer8_size);
+
+if (new_buffer == NULL || new_pbuffer8 == NULL)
+  {
+  fprintf(stderr, "pcre2test: malloc(%d) failed\n", new_pbuffer8_size);
+  exit(1);
+  }
+
+memcpy(new_buffer, buffer, pbuffer8_size);
+memcpy(new_pbuffer8, pbuffer8, pbuffer8_size);
+
+pbuffer8_size = new_pbuffer8_size;
+
+free(buffer);
+free(pbuffer8);
+
+buffer = new_buffer;
+pbuffer8 = new_pbuffer8;
+}
+
+
+
 /*************************************************
 *        Read or extend an input line            *
 *************************************************/
@@ -2859,29 +2908,11 @@ for (;;)
 
   else
     {
-    int new_pbuffer8_size = 2*pbuffer8_size;
-    uint8_t *new_buffer = (uint8_t *)malloc(new_pbuffer8_size);
-    uint8_t *new_pbuffer8 = (uint8_t *)malloc(new_pbuffer8_size);
-
-    if (new_buffer == NULL || new_pbuffer8 == NULL)
-      {
-      fprintf(stderr, "pcre2test: malloc(%d) failed\n", new_pbuffer8_size);
-      exit(1);
-      }
-
-    memcpy(new_buffer, buffer, pbuffer8_size);
-    memcpy(new_pbuffer8, pbuffer8, pbuffer8_size);
-
-    pbuffer8_size = new_pbuffer8_size;
-
-    start = new_buffer + (start - buffer);
-    here = new_buffer + (here - buffer);
-
-    free(buffer);
-    free(pbuffer8);
-
-    buffer = new_buffer;
-    pbuffer8 = new_pbuffer8;
+    size_t start_offset = start - buffer;
+    size_t here_offset = here - buffer;
+    expand_input_buffers();
+    start = buffer + start_offset;
+    here = buffer + here_offset;
     }
   }
 
@@ -3111,11 +3142,11 @@ for (;;)
   /* Find the end of the item; lose trailing whitespace at end of line. */
 
   for (ep = p; *ep != 0 && *ep != ','; ep++);
-  if (*ep == 0) 
+  if (*ep == 0)
     {
     while (ep > p && isspace(ep[-1])) ep--;
     *ep = 0;
-    }  
+    }
 
   /* Remember if the first character is '-'. */
 
@@ -3466,7 +3497,7 @@ Returns:      nothing
 static void
 show_controls(uint32_t controls, const char *before)
 {
-fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
+fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
   before,
   ((controls & CTL_AFTERTEXT) != 0)? " aftertext" : "",
   ((controls & CTL_ALLAFTERTEXT) != 0)? " allaftertext" : "",
@@ -3479,6 +3510,7 @@ fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
   ((controls & CTL_CALLOUT_INFO) != 0)? " callout_info" : "",
   ((controls & CTL_CALLOUT_NONE) != 0)? " callout_none" : "",
   ((controls & CTL_DFA) != 0)? " dfa" : "",
+  ((controls & CTL_EXPAND) != 0)? " expand" : "",
   ((controls & CTL_FINDLIMITS) != 0)? " find_limits" : "",
   ((controls & CTL_FULLBINCODE) != 0)? " fullbincode" : "",
   ((controls & CTL_GETALL) != 0)? " getall" : "",
@@ -3490,7 +3522,7 @@ fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
   ((controls & CTL_MARK) != 0)? " mark" : "",
   ((controls & CTL_MEMORY) != 0)? " memory" : "",
   ((controls & CTL_NL_SET) != 0)? " newline" : "",
-  ((controls & CTL_NULLCONTEXT) != 0)? " null_context" : "", 
+  ((controls & CTL_NULLCONTEXT) != 0)? " null_context" : "",
   ((controls & CTL_POSIX) != 0)? " posix" : "",
   ((controls & CTL_PUSH) != 0)? " push" : "",
   ((controls & CTL_STARTCHAR) != 0)? " startchar" : "",
@@ -4262,6 +4294,7 @@ static int
 process_pattern(void)
 {
 BOOL utf;
+uint32_t k;
 uint8_t *p = buffer;
 const uint8_t *use_tables;
 unsigned int delimiter = *p++;
@@ -4311,6 +4344,19 @@ patlen = p - buffer - 2;
 if (!decode_modifiers(p, CTX_PAT, &pat_patctl, NULL)) return PR_SKIP;
 utf = (pat_patctl.options & PCRE2_UTF) != 0;
 
+/* Check for mutually exclusive modifiers. */
+
+for (k = 0; k < sizeof(exclusive_pat_controls)/sizeof(uint32_t); k++)
+  {
+  uint32_t c = pat_patctl.control & exclusive_pat_controls[k];
+  if (c != 0 && c != (c & (~c+1)))
+    {
+    show_controls(c, "** Not allowed together:");
+    fprintf(outfile, "\n");
+    return PR_SKIP;
+    }
+  }
+
 /* Assume full JIT compile for jitverify and/or jitfast if nothing else was
 specified. */
 
@@ -4318,27 +4364,15 @@ if (pat_patctl.jit == 0 &&
     (pat_patctl.control & (CTL_JITVERIFY|CTL_JITFAST)) != 0)
   pat_patctl.jit = 7;
 
-/* POSIX and 'push' do not play together. */
-
-if ((pat_patctl.control & (CTL_POSIX|CTL_PUSH)) == (CTL_POSIX|CTL_PUSH))
-  {
-  fprintf(outfile, "** The POSIX interface is incompatible with 'push'\n");
-  return PR_ABEND;
-  }
-
 /* Now copy the pattern to pbuffer8 for use in 8-bit testing and for reflecting
-in callouts. Convert to binary if required. */
+in callouts. Convert from hex if required; this must necessarily be fewer
+characters so will always fit in pbuffer8. Alternatively, process for
+repetition if requested. */
 
 if ((pat_patctl.control & CTL_HEXPAT) != 0)
   {
   uint8_t *pp, *pt;
   uint32_t c, d;
-
-  if ((pat_patctl.control & CTL_POSIX) != 0)
-    {
-    fprintf(outfile, "** Hex patterns are not supported for the POSIX API\n");
-    return PR_SKIP;
-    }
 
   pt = pbuffer8;
   for (pp = buffer + 1; *pp != 0; pp++)
@@ -4362,6 +4396,80 @@ if ((pat_patctl.control & CTL_HEXPAT) != 0)
   *pt = 0;
   patlen = pt - pbuffer8;
   }
+
+else if ((pat_patctl.control & CTL_EXPAND) != 0)
+  {
+  uint8_t *pp, *pt;
+
+  pt = pbuffer8;
+  for (pp = buffer + 1; *pp != 0; pp++)
+    {
+    uint8_t *pc = pp;
+    uint32_t count = 1;
+    size_t length = 1;
+    
+    /* Check for replication syntax; if not found, the defaults just set will
+    prevail and one character will be copied. */
+
+    if (pp[0] == '\\' && pp[1] == '[')
+      {
+      uint8_t *pe;
+      for (pe = pp + 2; *pe != 0; pe++)
+        {
+        if (pe[0] == ']' && pe[1] == '{')
+          {
+          uint32_t clen = pe - pc - 2;
+          uint32_t i = 0;
+          pe += 2;
+          while (isdigit(*pe)) i = i * 10 + *pe++ - '0';
+          if (*pe == '}')
+            {
+            if (i == 0)
+              {
+              fprintf(outfile, "** Zero repeat not allowed\n");
+              return PR_SKIP;
+              }
+            pc += 2;
+            count = i;
+            length = clen;
+            pp = pe;
+            break; 
+            }
+          }
+        }
+      }
+
+    /* Add to output. If the buffer is too small expand it. The function for 
+    expanding buffers always keeps buffer and pbuffer8 in step as far as their 
+    size goes. */
+
+    while (pt + count * length > pbuffer8 + pbuffer8_size)
+      {
+      size_t pc_offset = pc - buffer; 
+      size_t pp_offset = pp - buffer;
+      size_t pt_offset = pt - pbuffer8;
+      expand_input_buffers();
+      pc = buffer + pc_offset; 
+      pp = buffer + pp_offset;
+      pt = pbuffer8 + pt_offset;
+      }
+
+    while (count-- > 0)
+      {
+      memcpy(pt, pc, length);
+      pt += length;
+      }
+    }
+
+  *pt = 0;
+  patlen = pt - pbuffer8;
+  
+  if ((pat_patctl.control & CTL_INFO) != 0)
+    fprintf(outfile, "Expanded: %s\n", pbuffer8); 
+  }
+
+/* Neither hex nor expanded, just copy the input verbatim. */
+
 else
   {
   strncpy((char *)pbuffer8, (char *)(buffer+1), patlen + 1);
@@ -4548,11 +4656,11 @@ if ((pat_patctl.control & CTL_NL_SET) == 0 && local_newline_default != 0)
   {
   SETFLD(pat_context, newline_convention, local_newline_default);
   }
-  
+
 /* The nullcontext modifier is used to test calling pcre2_compile() with a NULL
 context. */
 
-use_pat_context = ((pat_patctl.control & CTL_NULLCONTEXT) != 0)? 
+use_pat_context = ((pat_patctl.control & CTL_NULLCONTEXT) != 0)?
   NULL : PTR(pat_context);
 
 /* Compile many times when timing. */
@@ -4629,7 +4737,7 @@ if (pat_patctl.jit != 0)
       clock_t start_time;
       SUB1(pcre2_code_free, compiled_code);
       PCRE2_COMPILE(compiled_code, pbuffer, patlen,
-        pat_patctl.options|forbid_utf, &errorcode, &erroroffset, 
+        pat_patctl.options|forbid_utf, &errorcode, &erroroffset,
         use_pat_context);
       start_time = clock();
       PCRE2_JIT_COMPILE(compiled_code, pat_patctl.jit);
@@ -5490,9 +5598,9 @@ for (k = 0; k < sizeof(exclusive_dat_controls)/sizeof(uint32_t); k++)
     fprintf(outfile, "\n");
     return PR_OK;
     }
-  }   
+  }
 
-if (pat_patctl.replacement[0] != 0 && 
+if (pat_patctl.replacement[0] != 0 &&
     (dat_datctl.control & CTL_NULLCONTEXT) != 0)
   {
   fprintf(outfile, "** Replacement text is not supported with null_context.\n");
@@ -5623,7 +5731,7 @@ if ((dat_datctl.control & CTL_ZERO_TERMINATE) != 0)
 /* The nullcontext modifier is used to test calling pcre2_[jit_]match() with a
 NULL context. */
 
-use_dat_context = ((dat_datctl.control & CTL_NULLCONTEXT) != 0)? 
+use_dat_context = ((dat_datctl.control & CTL_NULLCONTEXT) != 0)?
   NULL : PTR(dat_context);
 
 /* Enable display of malloc/free if wanted. */
@@ -5719,8 +5827,8 @@ if (dat_datctl.replacement[0] != 0)
   xoptions = (((dat_datctl.control & CTL_GLOBAL) == 0)? 0 :
                 PCRE2_SUBSTITUTE_GLOBAL) |
              (((pat_patctl.control & CTL_SUBSTITUTE_EXTENDED) == 0)? 0 :
-                PCRE2_SUBSTITUTE_EXTENDED);     
- 
+                PCRE2_SUBSTITUTE_EXTENDED);
+
   SETCASTPTR(r, rbuffer);  /* Sets r8, r16, or r32, as appropriate. */
   pr = dat_datctl.replacement;
 
@@ -5814,7 +5922,7 @@ if (dat_datctl.replacement[0] != 0)
     {
     fprintf(outfile, "Failed: error %d", rc);
     if (nsize != PCRE2_UNSET)
-      fprintf(outfile, " at offset %ld in replacement", nsize);  
+      fprintf(outfile, " at offset %ld in replacement", nsize);
     fprintf(outfile, ": ");
     PCRE2_GET_ERROR_MESSAGE(nsize, rc, pbuffer);
     PCHARSV(CASTVAR(void *, pbuffer), 0, nsize, FALSE, outfile);
