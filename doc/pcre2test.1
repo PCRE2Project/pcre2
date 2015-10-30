@@ -787,6 +787,15 @@ modifiers set options for the \fBregcomp()\fP function:
   ucp                REG_UCP        )   the POSIX standard
   utf                REG_UTF8       )
 .sp
+The \fBregerror_buffsize\fP modifier specifies a size for the error buffer that 
+is passed to \fBregerror()\fP in the event of a compilation error. For example:
+.sp
+  /abc/posix,regerror_buffsize=20
+.sp
+This provides a means of testing the behaviour of \fBregerror()\fP when the 
+buffer is too small for the error message. If this modifier has not been set, a 
+large buffer is used.
+.P
 The \fBaftertext\fP and \fBallaftertext\fP subject modifiers work as described
 below. All other modifiers cause an error.
 .
