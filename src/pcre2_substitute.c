@@ -227,6 +227,12 @@ if (match_data == NULL)
 ovector = pcre2_get_ovector_pointer(match_data);
 ovector_count = pcre2_get_ovector_count(match_data);
 
+/* Find lengths of zero-terminated strings and the end of the replacement. */
+
+if (length == PCRE2_ZERO_TERMINATED) length = PRIV(strlen)(subject);
+if (rlength == PCRE2_ZERO_TERMINATED) rlength = PRIV(strlen)(replacement);
+repend = replacement + rlength;
+
 /* Check UTF replacement string if necessary. */
 
 #ifdef SUPPORT_UNICODE
@@ -255,12 +261,6 @@ if ((options & PCRE2_SUBSTITUTE_EXTENDED) != 0)
   options &= ~PCRE2_SUBSTITUTE_EXTENDED;
   extended = TRUE;
   }
-
-/* Find lengths of zero-terminated strings and the end of the replacement. */
-
-if (length == PCRE2_ZERO_TERMINATED) length = PRIV(strlen)(subject);
-if (rlength == PCRE2_ZERO_TERMINATED) rlength = PRIV(strlen)(replacement);
-repend = replacement + rlength;
 
 /* Copy up to the start offset */
 

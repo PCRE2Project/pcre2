@@ -4058,4 +4058,8 @@ No match
         End
 ------------------------------------------------------------------
 
+/abc/utf,replace=xyz
+    abc\=zero_terminate
+ 1: xyz
+
 # End of testinput5 

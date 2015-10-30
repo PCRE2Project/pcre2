@@ -229,6 +229,10 @@ converted to use the new feature.
 66. In the POSIX wrapper, if regerror() was given too small a buffer, it could 
 misbehave.
 
+67. In pcre2_substitute() in UTF mode, the UTF validity check on the
+replacement string was happening before the length setting when the replacement
+string was zero-terminated.
+
 
 Version 10.20 30-June-2015
 --------------------------

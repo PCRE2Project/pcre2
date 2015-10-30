@@ -1686,4 +1686,7 @@
 
 /(*UCP)(*UTF)[[:>:]]X/B
 
+/abc/utf,replace=xyz
+    abc\=zero_terminate
+
 # End of testinput5 
