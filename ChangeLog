@@ -252,6 +252,9 @@ beyond the end of the replacement string.
 lookbehind involved an out-of-bounds pointer, which could potentially cause 
 trouble in some environments.
 
+73. The maximum lookbehind length was incorrectly calculated for patterns such
+as /(?<=(a)(?-1))x/ which have a recursion within a backreference.
+
 
 Version 10.20 30-June-2015
 --------------------------

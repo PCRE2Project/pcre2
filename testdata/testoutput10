@@ -1527,4 +1527,13 @@ Subject length lower bound = 2
     abc
 Failed: error -3: UTF-8 error: 1 byte missing at end
 
+/(?<=(a)(?-1))x/I,utf
+Capturing subpattern count = 1
+Max lookbehind = 2
+Options: utf
+First code unit = 'x'
+Subject length lower bound = 1
+    a\x80zx\=offset=3
+Failed: error -22: UTF-8 error: isolated 0x80 byte at offset 1
+
 # End of testinput10

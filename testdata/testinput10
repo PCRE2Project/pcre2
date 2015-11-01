@@ -440,4 +440,7 @@
 /abc/utf,replace=Ã
     abc
 
+/(?<=(a)(?-1))x/I,utf
+    a\x80zx\=offset=3
+
 # End of testinput10

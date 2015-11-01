@@ -8378,7 +8378,7 @@ re->first_codeunit = 0;
 re->last_codeunit = 0;
 re->bsr_convention = bsr;
 re->newline_convention = newline;
-re->max_lookbehind =
+re->max_lookbehind = 0;
 re->minlength = 0;
 re->top_bracket = 0;
 re->top_backref = 0;
@@ -8587,6 +8587,13 @@ if (errorcode == 0 && cb.check_lookbehind)
       }
     cc += 1 + LINK_SIZE;
     }
+
+  /* The previous value of the maximum lookbehind was transferred to the
+  compiled regex block above. We could have updated this value in the loop
+  above, but keep the two values in step, just in case some later code below
+  uses the cb value. */
+
+  re->max_lookbehind = cb.max_lookbehind;
   }
 
 /* Failed to compile, or error while post-processing. Earlier errors get here
