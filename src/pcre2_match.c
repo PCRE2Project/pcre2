@@ -6566,9 +6566,15 @@ if (utf && (options & PCRE2_NO_UTF_CHECK) == 0)
 #endif /* PCRE2_CODE_UNIT_WIDTH == 8 */
         check_subject--;
       }
-#else   /* In the 32-bit library, one code unit equals one character. */
-    check_subject -= re->max_lookbehind;
-    if (check_subject < subject) check_subject = subject;
+#else
+    /* In the 32-bit library, one code unit equals one character. However,
+    we cannot just subtract the lookbehind and then compare pointers, because
+    a very large lookbehind could create an invalid pointer. */
+
+    if (start_offset >= re->max_lookbehind)
+      check_subject -= re->max_lookbehind;
+    else
+      check_subject = subject;
 #endif  /* PCRE2_CODE_UNIT_WIDTH != 32 */
     }
 

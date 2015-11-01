@@ -248,6 +248,10 @@ given.
 71. In pcre2_substitute() there was the possibility of reading one code unit 
 beyond the end of the replacement string.
 
+72. The code for checking a subject's UTF-32 validity for a pattern with a
+lookbehind involved an out-of-bounds pointer, which could potentially cause 
+trouble in some environments.
+
 
 Version 10.20 30-June-2015
 --------------------------
