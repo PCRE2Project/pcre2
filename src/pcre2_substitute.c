@@ -427,8 +427,8 @@ do
           {
           name[n++] = next;
           if (n > 32) goto BAD;
-          if (ptr >= repend) break;
-          next = *(++ptr);
+          if (++ptr >= repend) break;
+          next = *ptr;
           }
         if (n == 0) goto BAD;
         name[n] = 0;

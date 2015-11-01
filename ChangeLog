@@ -245,6 +245,9 @@ digit was given after the decimal point, or if more than two digits were given.
 It now works with one or two digits, and gives a compile time error if more are 
 given.
 
+71. In pcre2_substitute() there was the possibility of reading one code unit 
+beyond the end of the replacement string.
+
 
 Version 10.20 30-June-2015
 --------------------------
