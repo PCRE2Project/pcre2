@@ -240,6 +240,11 @@ second and subsequent calls to pcre2_match().
 pcre2_substitute(). An added check for a number greater than the largest group 
 number in the pattern means this is not now needed.
 
+70. The PCRE2-specific VERSION condition didn't work correctly if only one 
+digit was given after the decimal point, or if more than two digits were given. 
+It now works with one or two digits, and gives a compile time error if more are 
+given.
+
 
 Version 10.20 30-June-2015
 --------------------------

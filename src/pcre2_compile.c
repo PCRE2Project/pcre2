@@ -3731,7 +3731,7 @@ for (;; ptr++)
     if (code > cb->start_workspace + cb->workspace_size -
         WORK_SIZE_SAFETY_MARGIN)                       /* Check for overrun */
       {
-      *errorcodeptr = (code >= cb->start_workspace + cb->workspace_size)? 
+      *errorcodeptr = (code >= cb->start_workspace + cb->workspace_size)?
         ERR52 : ERR86;
       goto FAILED;
       }
@@ -5885,9 +5885,10 @@ for (;; ptr++)
             {
             ptr++;
             while (IS_DIGIT(*ptr)) minor = minor * 10 + *ptr++ - '0';
+            if (minor < 10) minor *= 10;
             }
 
-          if (*ptr != CHAR_RIGHT_PARENTHESIS)
+          if (*ptr != CHAR_RIGHT_PARENTHESIS || minor > 99)
             {
             *errorcodeptr = ERR79;
             goto FAILED;

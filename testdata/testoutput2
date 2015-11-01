@@ -13386,6 +13386,9 @@ Failed: error 179 at offset 11: syntax error in (?(VERSION condition
 /(?(VERSION>=10.0.0)yes|no)/
 Failed: error 179 at offset 16: syntax error in (?(VERSION condition
 
+/(?(VERSION=10.101)yes|no)/
+Failed: error 179 at offset 17: syntax error in (?(VERSION condition
+
 /abcd/I
 Capturing subpattern count = 0
 First code unit = 'a'
