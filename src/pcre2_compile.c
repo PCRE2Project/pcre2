@@ -584,19 +584,19 @@ enum { ERR0 = COMPILE_ERROR_BASE,
        ERR61, ERR62, ERR63, ERR64, ERR65, ERR66, ERR67, ERR68, ERR69, ERR70,
        ERR71, ERR72, ERR73, ERR74, ERR75, ERR76, ERR77, ERR78, ERR79, ERR80,
        ERR81, ERR82, ERR83, ERR84, ERR85, ERR86, ERR87 };
-       
+
 /* Error codes that correspond to negative error codes returned by
 find_fixedlength(). */
 
-static int fixed_length_errors[] =  
+static int fixed_length_errors[] =
   {
   ERR0,    /* Not an error */
   ERR0,    /* Not an error; -1 is used for "process later" */
   ERR25,   /* Lookbehind is not fixed length */
-  ERR36,   /* \C in lookbehind is not allowed */    
+  ERR36,   /* \C in lookbehind is not allowed */
   ERR87,   /* Lookbehind is too long */
-  ERR70    /* Internal error: unknown opcode encountered */  
-  }; 
+  ERR70    /* Internal error: unknown opcode encountered */
+  };
 
 /* This is a table of start-of-pattern options such as (*UTF) and settings such
 as (*LIMIT_MATCH=nnnn) and (*CRLF). For completeness and backward
@@ -803,7 +803,7 @@ However, we cannot do this when the assertion contains subroutine calls,
 because they can be forward references. We solve this by remembering this case
 and doing the check at the end; a flag specifies which mode we are running in.
 
-Lookbehind lengths are held in 16-bit fields and the maximum value is defined 
+Lookbehind lengths are held in 16-bit fields and the maximum value is defined
 as LOOKBEHIND_MAX.
 
 Arguments:
@@ -817,7 +817,7 @@ Returns:   if non-negative, the fixed length,
              or -1 if an OP_RECURSE item was encountered and atend is FALSE
              or -2 if there is no fixed length,
              or -3 if \C was encountered (in UTF-8 mode only)
-             or -4 length is too long 
+             or -4 length is too long
              or -5 if an unknown opcode was encountered (internal error)
 */
 
@@ -844,8 +844,8 @@ for (;;)
   int d;
   PCRE2_UCHAR *ce, *cs;
   register PCRE2_UCHAR op = *cc;
-  
-  if (branchlength > LOOKBEHIND_MAX) return FFL_TOOLONG; 
+
+  if (branchlength > LOOKBEHIND_MAX) return FFL_TOOLONG;
 
   switch (op)
     {
@@ -2875,7 +2875,7 @@ static int
 process_verb_name(PCRE2_SPTR *ptrptr, PCRE2_UCHAR **codeptr, int *errorcodeptr,
   uint32_t options, BOOL utf, compile_block *cb)
 {
-int arglen = 0;
+int32_t arglen = 0;
 BOOL inescq = FALSE;
 PCRE2_SPTR ptr = *ptrptr;
 PCRE2_UCHAR *code = (codeptr == NULL)? NULL : *codeptr;
@@ -2900,8 +2900,8 @@ for (; ptr < cb->end_pattern; ptr++)
     {
     if (x == CHAR_RIGHT_PARENTHESIS) break;
 
-    /* Skip over comments and whitespace in extended mode. Need a loop to handle
-    whitespace after a comment. */
+    /* Skip over comments and whitespace in extended mode. Need a loop to
+    handle whitespace after a comment. */
 
     if ((options & PCRE2_EXTENDED) != 0)
       {
@@ -2912,8 +2912,8 @@ for (; ptr < cb->end_pattern; ptr++)
         ptr++;
         while (*ptr != CHAR_NULL)
           {
-          if (IS_NEWLINE(ptr))         /* For non-fixed-length newline cases, */
-            {                          /* IS_NEWLINE sets cb->nllen. */
+          if (IS_NEWLINE(ptr))       /* For non-fixed-length newline cases, */
+            {                        /* IS_NEWLINE sets cb->nllen. */
             ptr += cb->nllen;
             break;
             }
@@ -2984,6 +2984,12 @@ for (; ptr < cb->end_pattern; ptr++)
     }
 
   arglen++;
+
+  if ((unsigned int)arglen > MAX_MARK)
+    {
+    *errorcodeptr = ERR76;
+    return -1;
+    }
   }
 
 /* Update the pointers before returning. */
@@ -5613,20 +5619,24 @@ for (;; ptr++)
 
         if ((options & PCRE2_ALT_VERBNAMES) == 0)
           {
-          while (*ptr != CHAR_NULL && *ptr != CHAR_RIGHT_PARENTHESIS) ptr++;
-          arglen = (int)(ptr - arg);
+          arglen = 0;
+          while (*ptr != CHAR_NULL && *ptr != CHAR_RIGHT_PARENTHESIS)
+            {
+            ptr++;                                /* Check length as we go */
+            arglen++;                             /* along, to avoid the   */
+            if ((unsigned int)arglen > MAX_MARK)  /* possibility of overflow. */
+              {
+              *errorcodeptr = ERR76;
+              goto FAILED;
+              }
+            }
           }
         else
           {
+          /* The length check is in process_verb_names() */
           arglen = process_verb_name(&ptr, NULL, errorcodeptr, options,
             utf, cb);
           if (arglen < 0) goto FAILED;
-          }
-
-        if ((unsigned int)arglen > MAX_MARK)
-          {
-          *errorcodeptr = ERR76;
-          goto FAILED;
           }
         }
 
@@ -7484,7 +7494,7 @@ for (;;)
 
     /* If lookbehind, check that this branch matches a fixed-length string, and
     put the length into the OP_REVERSE item. Temporarily mark the end of the
-    branch with OP_END. If the branch contains OP_RECURSE, the result is 
+    branch with OP_END. If the branch contains OP_RECURSE, the result is
     FFL_LATER (a negative value) because there may be forward references that
     we can't check here. Set a flag to cause another lookbehind check at the
     end. Why not do it all at the end? Because common errors can be picked up

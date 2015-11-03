@@ -9,41 +9,41 @@ Version 10.21 xx-xxx-xxxx
 2. Use memchr() to find the first character in an unanchored match in 8-bit
 mode in the interpreter. This gives a significant speed improvement.
 
-3. Removed a redundant copy of the opcode_possessify table in the 
+3. Removed a redundant copy of the opcode_possessify table in the
 pcre2_auto_possessify.c source.
 
 4. Fix typos in dftables.c for z/OS.
 
-5. Change 36 for 10.20 broke the handling of [[:>:]] and [[:<:]] in that 
-processing them could involve a buffer overflow if the following character was 
+5. Change 36 for 10.20 broke the handling of [[:>:]] and [[:<:]] in that
+processing them could involve a buffer overflow if the following character was
 an opening parenthesis.
 
 6. Change 36 for 10.20 also introduced a bug in processing this pattern:
-/((?x)(*:0))#(?'/. Specifically: if a setting of (?x) was followed by a (*MARK) 
-setting (which (*:0) is), then (?x) did not get unset at the end of its group 
+/((?x)(*:0))#(?'/. Specifically: if a setting of (?x) was followed by a (*MARK)
+setting (which (*:0) is), then (?x) did not get unset at the end of its group
 during the scan for named groups, and hence the external # was incorrectly
 treated as a comment and the invalid (?' at the end of the pattern was not
 diagnosed. This caused a buffer overflow during the real compile. This bug was
 discovered by Karl Skomski with the LLVM fuzzer.
 
-7. Moved the pcre2_find_bracket() function from src/pcre2_compile.c into its 
-own source module to avoid a circular dependency between src/pcre2_compile.c 
+7. Moved the pcre2_find_bracket() function from src/pcre2_compile.c into its
+own source module to avoid a circular dependency between src/pcre2_compile.c
 and src/pcre2_study.c
 
 8. A callout with a string argument containing an opening square bracket, for
 example /(?C$[$)(?<]/, was incorrectly processed and could provoke a buffer
 overflow. This bug was discovered by Karl Skomski with the LLVM fuzzer.
 
-9. The handling of callouts during the pre-pass for named group identification 
+9. The handling of callouts during the pre-pass for named group identification
 has been tightened up.
 
-10. The quantifier {1} can be ignored, whether greedy, non-greedy, or 
+10. The quantifier {1} can be ignored, whether greedy, non-greedy, or
 possessive. This is a very minor optimization.
 
 11. A possessively repeated conditional group that could match an empty string,
 for example, /(?(R))*+/, was incorrectly compiled.
 
-12. The Unicode tables have been updated to Unicode 8.0.0 (thanks to Christian 
+12. The Unicode tables have been updated to Unicode 8.0.0 (thanks to Christian
 Persch).
 
 13. An empty comment (?#) in a pattern was incorrectly processed and could
@@ -58,72 +58,72 @@ compiled and could cause reading from uninitialized memory or an incorrect
 error diagnosis. Examples are: /[[:\\](?<[::]/ and /[[:\\](?'abc')[a:]. The
 first of these bugs was discovered by Karl Skomski with the LLVM fuzzer.
 
-16. Pathological patterns containing many nested occurrences of [: caused 
-pcre2_compile() to run for a very long time. This bug was found by the LLVM 
+16. Pathological patterns containing many nested occurrences of [: caused
+pcre2_compile() to run for a very long time. This bug was found by the LLVM
 fuzzer.
 
 17. A missing closing parenthesis for a callout with a string argument was not
 being diagnosed, possibly leading to a buffer overflow. This bug was found by
 the LLVM fuzzer.
 
-18. A conditional group with only one branch has an implicit empty alternative 
+18. A conditional group with only one branch has an implicit empty alternative
 branch and must therefore be treated as potentially matching an empty string.
 
 19. If (?R was followed by - or + incorrect behaviour happened instead of a
 diagnostic. This bug was discovered by Karl Skomski with the LLVM fuzzer.
 
-20. Another bug that was introduced by change 36 for 10.20: conditional groups 
-whose condition was an assertion preceded by an explicit callout with a string 
+20. Another bug that was introduced by change 36 for 10.20: conditional groups
+whose condition was an assertion preceded by an explicit callout with a string
 argument might be incorrectly processed, especially if the string contained \Q.
 This bug was discovered by Karl Skomski with the LLVM fuzzer.
 
-21. Compiling PCRE2 with the sanitize options of clang showed up a number of 
-very pedantic coding infelicities and a buffer overflow while checking a UTF-8 
+21. Compiling PCRE2 with the sanitize options of clang showed up a number of
+very pedantic coding infelicities and a buffer overflow while checking a UTF-8
 string if the final multi-byte UTF-8 character was truncated.
 
 22. For Perl compatibility in EBCDIC environments, ranges such as a-z in a
-class, where both values are literal letters in the same case, omit the 
+class, where both values are literal letters in the same case, omit the
 non-letter EBCDIC code points within the range.
 
-23. Finding the minimum matching length of complex patterns with back 
-references and/or recursions can take a long time. There is now a cut-off that 
-gives up trying to find a minimum length when things get too complex. 
+23. Finding the minimum matching length of complex patterns with back
+references and/or recursions can take a long time. There is now a cut-off that
+gives up trying to find a minimum length when things get too complex.
 
-24. An optimization has been added that speeds up finding the minimum matching 
+24. An optimization has been added that speeds up finding the minimum matching
 length for patterns containing repeated capturing groups or recursions.
 
-25. If a pattern contained a back reference to a group whose number was 
-duplicated as a result of appearing in a (?|...) group, the computation of the 
+25. If a pattern contained a back reference to a group whose number was
+duplicated as a result of appearing in a (?|...) group, the computation of the
 minimum matching length gave a wrong result, which could cause incorrect "no
-match" errors. For such patterns, a minimum matching length cannot at present 
+match" errors. For such patterns, a minimum matching length cannot at present
 be computed.
 
-26. Added a check for integer overflow in conditions (?(<digits>) and 
+26. Added a check for integer overflow in conditions (?(<digits>) and
 (?(R<digits>). This omission was discovered by Karl Skomski with the LLVM
 fuzzer.
 
 27. Fixed an issue when \p{Any} inside an xclass did not read the current
 character.
 
-28. If pcre2grep was given the -q option with -c or -l, or when handling a 
+28. If pcre2grep was given the -q option with -c or -l, or when handling a
 binary file, it incorrectly wrote output to stdout.
 
 29. The JIT compiler did not restore the control verb head in case of *THEN
 control verbs. This issue was found by Karl Skomski with a custom LLVM fuzzer.
 
-30. The way recursive references such as (?3) are compiled has been re-written 
-because the old way was the cause of many issues. Now, conversion of the group 
-number into a pattern offset does not happen until the pattern has been 
+30. The way recursive references such as (?3) are compiled has been re-written
+because the old way was the cause of many issues. Now, conversion of the group
+number into a pattern offset does not happen until the pattern has been
 completely compiled. This does mean that detection of all infinitely looping
-recursions is postponed till match time. In the past, some easy ones were 
-detected at compile time. This re-writing was done in response to yet another 
+recursions is postponed till match time. In the past, some easy ones were
+detected at compile time. This re-writing was done in response to yet another
 bug found by the LLVM fuzzer.
 
 31. A test for a back reference to a non-existent group was missing for items
-such as \987. This caused incorrect code to be compiled. This issue was found 
+such as \987. This caused incorrect code to be compiled. This issue was found
 by Karl Skomski with a custom LLVM fuzzer.
 
-32. Error messages for syntax errors following \g and \k were giving inaccurate 
+32. Error messages for syntax errors following \g and \k were giving inaccurate
 offsets in the pattern.
 
 33. Improve the performance of starting single character repetitions in JIT.
@@ -145,8 +145,8 @@ was fixed.
 39. Match limit check added to recursion. This issue was found by Karl Skomski
 with a custom LLVM fuzzer.
 
-40. Arrange for the UTF check in pcre2_match() and pcre2_dfa_match() to look 
-only at the part of the subject that is relevant when the starting offset is 
+40. Arrange for the UTF check in pcre2_match() and pcre2_dfa_match() to look
+only at the part of the subject that is relevant when the starting offset is
 non-zero.
 
 41. Improve first character match in JIT with SSE2 on x86.
@@ -154,17 +154,17 @@ non-zero.
 42. Fix two assertion fails in JIT. These issues were found by Karl Skomski
 with a custom LLVM fuzzer.
 
-43. Correct the setting of CMAKE_C_FLAGS in CMakeLists.txt (patch from Roy Ivy 
+43. Correct the setting of CMAKE_C_FLAGS in CMakeLists.txt (patch from Roy Ivy
 III).
 
-44. Fix bug in RunTest.bat for new test 14, and adjust the script for the added 
+44. Fix bug in RunTest.bat for new test 14, and adjust the script for the added
 test (there are now 20 in total).
 
 45. Fixed a corner case of range optimization in JIT.
 
 46. Add the ${*MARK} facility to pcre2_substitute().
 
-47. Modifier lists in pcre2test were splitting at spaces without the required 
+47. Modifier lists in pcre2test were splitting at spaces without the required
 commas.
 
 48. Implemented PCRE2_ALT_VERBNAMES.
@@ -172,11 +172,11 @@ commas.
 49. Fixed two issues in JIT. These were found by Karl Skomski with a custom
 LLVM fuzzer.
 
-50. The pcre2test program has been extended by adding the #newline_default 
-command. This has made it possible to run the standard tests when PCRE2 is 
-compiled with either CR or CRLF as the default newline convention. As part of 
-this work, the new command was added to several test files and the testing 
-scripts were modified. The pcre2grep tests can now also be run when there is no 
+50. The pcre2test program has been extended by adding the #newline_default
+command. This has made it possible to run the standard tests when PCRE2 is
+compiled with either CR or CRLF as the default newline convention. As part of
+this work, the new command was added to several test files and the testing
+scripts were modified. The pcre2grep tests can now also be run when there is no
 LF in the default newline convention.
 
 51. The RunTest script has been modified so that, when JIT is used and valgrind
@@ -184,72 +184,72 @@ is specified, a valgrind suppressions file is set up to ignore "Invalid read of
 size 16" errors because these are false positives when the hardware supports
 the SSE2 instruction set.
 
-52. It is now possible to have comment lines amid the subject strings in 
+52. It is now possible to have comment lines amid the subject strings in
 pcre2test (and perltest.sh) input.
 
 53. Implemented PCRE2_USE_OFFSET_LIMIT and pcre2_set_offset_limit().
 
-54. Add the null_context modifier to pcre2test so that calling pcre2_compile() 
+54. Add the null_context modifier to pcre2test so that calling pcre2_compile()
 and the matching functions with NULL contexts can be tested.
 
 55. Implemented PCRE2_SUBSTITUTE_EXTENDED.
 
-56. In a character class such as [\W\p{Any}] where both a negative-type escape 
-("not a word character") and a property escape were present, the property 
+56. In a character class such as [\W\p{Any}] where both a negative-type escape
+("not a word character") and a property escape were present, the property
 escape was being ignored.
 
-57. Fixed integer overflow for patterns whose minimum matching length is very, 
+57. Fixed integer overflow for patterns whose minimum matching length is very,
 very large.
 
 58. Implemented --never-backslash-C.
 
-59. Change 55 above introduced a bug by which certain patterns provoked the 
+59. Change 55 above introduced a bug by which certain patterns provoked the
 erroneous error "\ at end of pattern".
 
 60. The special sequences [[:<:]] and [[:>:]] gave rise to incorrect compiling
 errors or other strange effects if compiled in UCP mode. Found with libFuzzer
 and AddressSanitizer.
 
-61. Whitespace at the end of a pcre2test pattern line caused a spurious error 
+61. Whitespace at the end of a pcre2test pattern line caused a spurious error
 message if there were only single-character modifiers. It should be ignored.
 
 62. The use of PCRE2_NO_AUTO_CAPTURE could cause incorrect compilation results
 or segmentation errors for some patterns. Found with libFuzzer and
 AddressSanitizer.
 
-63. Very long names in (*MARK) or (*THEN) etc. items could provoke a buffer 
+63. Very long names in (*MARK) or (*THEN) etc. items could provoke a buffer
 overflow.
 
 64. Improve error message for overly-complicated patterns.
 
-65. Implemented an optional replication feature for patterns in pcre2test, to 
-make it easier to test long repetitive patterns. The tests for 63 above are 
+65. Implemented an optional replication feature for patterns in pcre2test, to
+make it easier to test long repetitive patterns. The tests for 63 above are
 converted to use the new feature.
 
-66. In the POSIX wrapper, if regerror() was given too small a buffer, it could 
+66. In the POSIX wrapper, if regerror() was given too small a buffer, it could
 misbehave.
 
 67. In pcre2_substitute() in UTF mode, the UTF validity check on the
 replacement string was happening before the length setting when the replacement
 string was zero-terminated.
 
-68. In pcre2_substitute() in UTF mode, PCRE2_NO_UTF_CHECK can be set for the 
+68. In pcre2_substitute() in UTF mode, PCRE2_NO_UTF_CHECK can be set for the
 second and subsequent calls to pcre2_match().
 
-69. There was no check for integer overflow for a replacement group number in 
-pcre2_substitute(). An added check for a number greater than the largest group 
+69. There was no check for integer overflow for a replacement group number in
+pcre2_substitute(). An added check for a number greater than the largest group
 number in the pattern means this is not now needed.
 
-70. The PCRE2-specific VERSION condition didn't work correctly if only one 
-digit was given after the decimal point, or if more than two digits were given. 
-It now works with one or two digits, and gives a compile time error if more are 
+70. The PCRE2-specific VERSION condition didn't work correctly if only one
+digit was given after the decimal point, or if more than two digits were given.
+It now works with one or two digits, and gives a compile time error if more are
 given.
 
-71. In pcre2_substitute() there was the possibility of reading one code unit 
+71. In pcre2_substitute() there was the possibility of reading one code unit
 beyond the end of the replacement string.
 
 72. The code for checking a subject's UTF-32 validity for a pattern with a
-lookbehind involved an out-of-bounds pointer, which could potentially cause 
+lookbehind involved an out-of-bounds pointer, which could potentially cause
 trouble in some environments.
 
 73. The maximum lookbehind length was incorrectly calculated for patterns such
@@ -259,6 +259,9 @@ as /(?<=(a)(?-1))x/ which have a recursion within a backreference.
 
 75. Give an error in pcre2_substitute() if a match ends before it starts (as a
 result of the use of \K).
+
+76. Check the length of the name in (*MARK:xx) etc. dynamically to avoid the
+possibility of integer overflow.
 
 
 Version 10.20 30-June-2015
