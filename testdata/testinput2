@@ -4598,5 +4598,9 @@ B)x/alt_verbnames,mark
 
 /(?=a\K)/replace=z
     BaCaD
+    
+/(?'abcdefghijklmnopqrstuvwxyzABCDEFG'toolong)/
+ 
+/(?'abcdefghijklmnopqrstuvwxyzABCDEF'justright)/ 
 
 # End of testinput2 

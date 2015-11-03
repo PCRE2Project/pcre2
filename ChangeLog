@@ -260,8 +260,8 @@ as /(?<=(a)(?-1))x/ which have a recursion within a backreference.
 75. Give an error in pcre2_substitute() if a match ends before it starts (as a
 result of the use of \K).
 
-76. Check the length of the name in (*MARK:xx) etc. dynamically to avoid the
-possibility of integer overflow.
+76. Check the length of subpattern names and the names in (*MARK:xx) etc.
+dynamically to avoid the possibility of integer overflow.
 
 
 Version 10.20 30-June-2015

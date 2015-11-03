@@ -3002,6 +3002,31 @@ return arglen;
 
 
 /*************************************************
+*          Macro for the next two functions      *
+*************************************************/
+
+/* Both scan_for_captures() and compile_branch() use this macro to generate a
+fragment of code that reads the characters of a name and sets its length
+(checking for not being too long). Count the characters dynamically, to avoid
+the possibility of integer overflow. The same macro is used for reading *VERB
+names. */
+
+#define READ_NAME(ctype, errno, errset)                      \
+  namelen = 0;                                               \
+  while (MAX_255(*ptr) && (cb->ctypes[*ptr] & ctype) != 0)   \
+    {                                                        \
+    ptr++;                                                   \
+    namelen++;                                               \
+    if (namelen > MAX_NAME_SIZE)                             \
+      {                                                      \
+      errset = errno;                                        \
+      goto FAILED;                                           \
+      }                                                      \
+    }
+
+
+
+/*************************************************
 *      Scan regex to identify named groups       *
 *************************************************/
 
@@ -3459,8 +3484,8 @@ for (; ptr < cb->end_pattern; ptr++)
         goto FAILED;
         }
 
-      while (MAX_255(*ptr) && (cb->ctypes[*ptr] & ctype_word) != 0) ptr++;
-      namelen = (int)(ptr - name);
+      /* Advance ptr, set namelen and check its length. */
+      READ_NAME(ctype_word, ERR48, errorcode);
 
       if (*ptr != c)
         {
@@ -3475,14 +3500,7 @@ for (; ptr < cb->end_pattern; ptr++)
         }
 
       if (namelen + IMM2_SIZE + 1 > cb->name_entry_size)
-        {
         cb->name_entry_size = namelen + IMM2_SIZE + 1;
-        if (namelen > MAX_NAME_SIZE)
-          {
-          errorcode = ERR48;
-          goto FAILED;
-          }
-        }
 
       /* We have a valid name for this capturing group. */
 
@@ -5602,8 +5620,10 @@ for (;; ptr++)
       PCRE2_SPTR arg = NULL;
       previous = NULL;
       ptr++;
-      while (MAX_255(*ptr) && (cb->ctypes[*ptr] & ctype_letter) != 0) ptr++;
-      namelen = (int)(ptr - name);
+
+      /* Increment ptr, set namelen, check length */
+
+      READ_NAME(ctype_letter, ERR60, *errorcodeptr);
 
       /* It appears that Perl allows any characters whatsoever, other than
       a closing parenthesis, to appear in arguments, so we no longer insist on
@@ -6008,12 +6028,9 @@ for (;; ptr++)
             *errorcodeptr = ERR28;   /* Assertion expected */
             goto FAILED;
             }
-          name = ptr++;
-          while (MAX_255(*ptr) && (cb->ctypes[*ptr] & ctype_word) != 0)
-            {
-            ptr++;
-            }
-          namelen = (int)(ptr - name);
+          name = ptr;
+          /* Increment ptr, set namelen, check length */
+          READ_NAME(ctype_word, ERR48, *errorcodeptr);
           if (lengthptr != NULL) skipunits += IMM2_SIZE;
           }
 
@@ -6396,8 +6413,8 @@ for (;; ptr++)
           *errorcodeptr = ERR44;   /* Group name must start with non-digit */
           goto FAILED;
           }
-        while (MAX_255(*ptr) && (cb->ctypes[*ptr] & ctype_word) != 0) ptr++;
-        namelen = (int)(ptr - name);
+        /* Increment ptr, set namelen, check length */
+        READ_NAME(ctype_word, ERR48, *errorcodeptr);
 
         /* In the pre-compile phase, do a syntax check. */
 
@@ -6411,11 +6428,6 @@ for (;; ptr++)
           if (*ptr != (PCRE2_UCHAR)terminator)
             {
             *errorcodeptr = ERR42;
-            goto FAILED;
-            }
-          if (namelen > MAX_NAME_SIZE)
-            {
-            *errorcodeptr = ERR48;
             goto FAILED;
             }
           }
