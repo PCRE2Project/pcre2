@@ -2988,6 +2988,7 @@ for (; ptr < cb->end_pattern; ptr++)
   if ((unsigned int)arglen > MAX_MARK)
     {
     *errorcodeptr = ERR76;
+    *ptrptr = ptr;  
     return -1;
     }
   }
