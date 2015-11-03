@@ -257,6 +257,9 @@ as /(?<=(a)(?-1))x/ which have a recursion within a backreference.
 
 74. Give an error if a lookbehind assertion is longer than 65535 code units.
 
+75. Give an error in pcre2_substitute() if a match ends before it starts (as a
+result of the use of \K).
+
 
 Version 10.20 30-June-2015
 --------------------------

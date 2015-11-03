@@ -170,8 +170,8 @@ static const char compile_error_texts[] =
   "(?| and/or (?J: or (?x: parentheses are too deeply nested\0"
   /* 85 */
   "using \\C is disabled in this PCRE2 library\0"
-  "regular expression is too complicated\0" 
-  "lookbehind assertion is too long\0" 
+  "regular expression is too complicated\0"
+  "lookbehind assertion is too long\0"
   ;
 
 /* Match-time and UTF error texts are in the same format. */
@@ -247,7 +247,9 @@ static const char match_error_texts[] =
   "offset limit set without PCRE2_USE_OFFSET_LIMIT\0"
   "bad escape sequence in replacement string\0"
   "expected closing curly bracket in replacement string\0"
-  "bad substitution in replacement string\0" 
+  "bad substitution in replacement string\0"
+  /* 60 */
+  "match with end before start is not supported\0"
   ;
 
 

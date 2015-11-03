@@ -55,7 +55,7 @@ POSSIBILITY OF SUCH DAMAGE.
 /* In extended mode, we recognize ${name:+set text:unset text} and similar
 constructions. This requires the identification of unescaped : and }
 characters. This function scans for such. It must deal with nested ${
-constructions. The pointer to the text is updated, either to the required end 
+constructions. The pointer to the text is updated, either to the required end
 character, or to where an error was detected.
 
 Arguments:
@@ -107,7 +107,7 @@ for (; ptr < ptrend; ptr++)
 
   else if (*ptr == CHAR_BACKSLASH)
     {
-    int erc; 
+    int erc;
     int errorcode = 0;
     uint32_t ch;
 
@@ -279,10 +279,10 @@ do
 
   rc = pcre2_match(code, subject, length, start_offset, options|goptions,
     match_data, mcontext);
-    
+
 #ifdef SUPPORT_UNICODE
   if (utf) options |= PCRE2_NO_UTF_CHECK;  /* Only need to check once */
-#endif   
+#endif
 
   /* Any error other than no match returns the error code. No match when not
   doing the special after-empty-match global rematch, or when at the end of the
@@ -320,7 +320,14 @@ do
     continue;
     }
 
-  /* Handle a successful match. */
+  /* Handle a successful match. Matches that use \K to end before they start
+  are not supported. */
+
+  if (ovector[1] < ovector[0])
+    {
+    rc = PCRE2_ERROR_BADSUBSPATTERN;
+    goto EXIT;
+    }
 
   subs++;
   if (rc == 0) rc = ovector_count;
@@ -409,14 +416,14 @@ do
           next = *ptr;
           if (next < CHAR_0 || next > CHAR_9) break;
           group = group * 10 + next - CHAR_0;
-          
+
           /* A check for a number greater than the hightest captured group
           is sufficient here; no need for a separate overflow check. */
-            
+
           if (group > code->top_bracket)
             {
             rc = PCRE2_ERROR_NOSUBSTRING;
-            goto PTREXIT;   
+            goto PTREXIT;
             }
           }
         }
@@ -439,7 +446,7 @@ do
 
       if (inparens)
         {
-        
+
         if (extended && !star && ptr < repend - 2 && next == CHAR_COLON)
           {
           special = *(++ptr);
@@ -501,8 +508,8 @@ do
       else
         {
         PCRE2_SPTR subptr, subptrend;
-        
-        /* Find a number for a named group. In case there are duplicate names, 
+
+        /* Find a number for a named group. In case there are duplicate names,
         search for the first one that is set. */
 
         if (group < 0)
@@ -516,18 +523,18 @@ do
             if (ng < ovector_count)
               {
               if (group < 0) group = ng;          /* First in ovector */
-              if (ovector[ng*2] != PCRE2_UNSET) 
+              if (ovector[ng*2] != PCRE2_UNSET)
                 {
                 group = ng;                       /* First that is set */
                 break;
-                } 
+                }
               }
             }
-            
-          /* If group is still negative, it means we did not find a group that 
+
+          /* If group is still negative, it means we did not find a group that
           is in the ovector. Just set the first group. */
-          
-          if (group < 0) group = GET2(first, 0); 
+
+          if (group < 0) group = GET2(first, 0);
           }
 
         rc = pcre2_substring_length_bynumber(match_data, group, &sublength);

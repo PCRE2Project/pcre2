@@ -14690,4 +14690,8 @@ Max lookbehind = 65535
 First code unit = 'x'
 Subject length lower bound = 1
 
+/(?=a\K)/replace=z
+    BaCaD
+Failed: error -60: match with end before start is not supported
+
 # End of testinput2 

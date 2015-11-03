@@ -4596,4 +4596,7 @@ B)x/alt_verbnames,mark
 
 /(?<!a{65535})x/I
 
+/(?=a\K)/replace=z
+    BaCaD
+
 # End of testinput2 
