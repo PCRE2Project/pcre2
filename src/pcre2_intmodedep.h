@@ -589,10 +589,16 @@ typedef struct pcre2_real_match_context {
 defined specially because it is required in pcre2_serialize_decode() when
 copying the size from possibly unaligned memory into a variable of the same
 type. Use a macro rather than a typedef to avoid compiler warnings when this
-file is included multiple times by pcre2test. */
+file is included multiple times by pcre2test. LOOKBEHIND_MAX specifies the
+largest lookbehind that is supported. (OP_REVERSE in a pattern has a 16-bit
+argument in 8-bit and 16-bit modes, so we need no more than a 16-bit field 
+here.) */
 
 #undef  CODE_BLOCKSIZE_TYPE
 #define CODE_BLOCKSIZE_TYPE size_t
+
+#undef  LOOKBEHIND_MAX
+#define LOOKBEHIND_MAX UINT16_MAX
 
 typedef struct pcre2_real_code {
   pcre2_memctl memctl;            /* Memory control fields */

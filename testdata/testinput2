@@ -4592,4 +4592,8 @@ B)x/alt_verbnames,mark
 /abc/replace=A$3123456789Z
     abc
 
+/(?<!a{65535}a{5})x/I
+
+/(?<!a{65535})x/I
+
 # End of testinput2 

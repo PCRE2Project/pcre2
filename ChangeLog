@@ -255,6 +255,8 @@ trouble in some environments.
 73. The maximum lookbehind length was incorrectly calculated for patterns such
 as /(?<=(a)(?-1))x/ which have a recursion within a backreference.
 
+74. Give an error if a lookbehind assertion is longer than 65535 code units.
+
 
 Version 10.20 30-June-2015
 --------------------------

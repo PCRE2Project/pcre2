@@ -1,4 +1,4 @@
-.TH PCRE2LIMITS 3 "25 November 2014" "PCRE2 10.00"
+.TH PCRE2LIMITS 3 "03 November 2015" "PCRE2 10.21"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "SIZE AND OTHER LIMITATIONS"
@@ -37,6 +37,8 @@ documentation.
 .P
 All values in repeating quantifiers must be less than 65536.
 .P
+The maximum length of a lookbehind assertion is 65535 characters.
+.P
 There is no limit to the number of parenthesized subpatterns, but there can be
 no more than 65535 capturing subpatterns. There is, however, a limit to the
 depth of nesting of parenthesized subpatterns of all kinds. This is imposed in
@@ -69,6 +71,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 25 November 2014
-Copyright (c) 1997-2014 University of Cambridge.
+Last updated: 03 November 2015
+Copyright (c) 1997-2015 University of Cambridge.
 .fi

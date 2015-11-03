@@ -14681,4 +14681,13 @@ Failed: error 142 at offset 7: syntax error in subpattern name (missing terminat
     abc
 Failed: error -49 at offset 3 in replacement: unknown substring
 
+/(?<!a{65535}a{5})x/I
+Failed: error 187 at offset 16: lookbehind assertion is too long
+
+/(?<!a{65535})x/I
+Capturing subpattern count = 0
+Max lookbehind = 65535
+First code unit = 'x'
+Subject length lower bound = 1
+
 # End of testinput2 

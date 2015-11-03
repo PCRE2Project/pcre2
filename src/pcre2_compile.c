@@ -571,8 +571,8 @@ static PCRE2_SPTR posix_substitutes[] = {
 
 /* Compile time error code numbers. They are given names so that they can more
 easily be tracked. When a new number is added, the tables called eint1 and
-eint2 in pcre2posix.c must be updated, and a new error text must be added to
-compile_error_texts in pcre2_error.c. */
+eint2 in pcre2posix.c may need to be updated, and a new error text must be
+added to compile_error_texts in pcre2_error.c. */
 
 enum { ERR0 = COMPILE_ERROR_BASE,
        ERR1,  ERR2,  ERR3,  ERR4,  ERR5,  ERR6,  ERR7,  ERR8,  ERR9,  ERR10,
@@ -583,7 +583,20 @@ enum { ERR0 = COMPILE_ERROR_BASE,
        ERR51, ERR52, ERR53, ERR54, ERR55, ERR56, ERR57, ERR58, ERR59, ERR60,
        ERR61, ERR62, ERR63, ERR64, ERR65, ERR66, ERR67, ERR68, ERR69, ERR70,
        ERR71, ERR72, ERR73, ERR74, ERR75, ERR76, ERR77, ERR78, ERR79, ERR80,
-       ERR81, ERR82, ERR83, ERR84, ERR85, ERR86 };
+       ERR81, ERR82, ERR83, ERR84, ERR85, ERR86, ERR87 };
+       
+/* Error codes that correspond to negative error codes returned by
+find_fixedlength(). */
+
+static int fixed_length_errors[] =  
+  {
+  ERR0,    /* Not an error */
+  ERR0,    /* Not an error; -1 is used for "process later" */
+  ERR25,   /* Lookbehind is not fixed length */
+  ERR36,   /* \C in lookbehind is not allowed */    
+  ERR87,   /* Lookbehind is too long */
+  ERR70    /* Internal error: unknown opcode encountered */  
+  }; 
 
 /* This is a table of start-of-pattern options such as (*UTF) and settings such
 as (*LIMIT_MATCH=nnnn) and (*CRLF). For completeness and backward
@@ -780,15 +793,18 @@ PUT(previous_callout, 1 + LINK_SIZE, length);
 *************************************************/
 
 /* Scan a branch and compute the fixed length of subject that will match it, if
-the length is fixed. This is needed for dealing with backward assertions. In
+the length is fixed. This is needed for dealing with lookbehind assertions. In
 UTF mode, the result is in code units rather than bytes. The branch is
 temporarily terminated with OP_END when this function is called.
 
-This function is called when a backward assertion is encountered, so that if it
-fails, the error message can point to the correct place in the pattern.
+This function is called when a lookbehind assertion is encountered, so that if
+it fails, the error message can point to the correct place in the pattern.
 However, we cannot do this when the assertion contains subroutine calls,
 because they can be forward references. We solve this by remembering this case
 and doing the check at the end; a flag specifies which mode we are running in.
+
+Lookbehind lengths are held in 16-bit fields and the maximum value is defined 
+as LOOKBEHIND_MAX.
 
 Arguments:
   code     points to the start of the pattern (the bracket)
@@ -797,12 +813,19 @@ Arguments:
   cb       the "compile data" structure
   recurses    chain of recurse_check to catch mutual recursion
 
-Returns:   the fixed length,
-             or -1 if there is no fixed length,
-             or -2 if \C was encountered (in UTF-8 mode only)
-             or -3 if an OP_RECURSE item was encountered and atend is FALSE
-             or -4 if an unknown opcode was encountered (internal error)
+Returns:   if non-negative, the fixed length,
+             or -1 if an OP_RECURSE item was encountered and atend is FALSE
+             or -2 if there is no fixed length,
+             or -3 if \C was encountered (in UTF-8 mode only)
+             or -4 length is too long 
+             or -5 if an unknown opcode was encountered (internal error)
 */
+
+#define FFL_LATER      (-1)
+#define FFL_NOTFIXED   (-2)
+#define FFL_BACKSLASHC (-3)
+#define FFL_TOOLONG    (-4)
+#define FFL_UNKNOWNOP  (-5)
 
 static int
 find_fixedlength(PCRE2_UCHAR *code, BOOL utf, BOOL atend, compile_block *cb,
@@ -821,6 +844,8 @@ for (;;)
   int d;
   PCRE2_UCHAR *ce, *cs;
   register PCRE2_UCHAR op = *cc;
+  
+  if (branchlength > LOOKBEHIND_MAX) return FFL_TOOLONG; 
 
   switch (op)
     {
@@ -854,7 +879,7 @@ for (;;)
     case OP_ACCEPT:
     case OP_ASSERT_ACCEPT:
     if (length < 0) length = branchlength;
-      else if (length != branchlength) return -1;
+      else if (length != branchlength) return FFL_NOTFIXED;
     if (*cc != OP_ALT) return length;
     cc += 1 + LINK_SIZE;
     branchlength = 0;
@@ -862,18 +887,18 @@ for (;;)
 
     /* A true recursion implies not fixed length, but a subroutine call may
     be OK. If the subroutine is a forward reference, we can't deal with
-    it until the end of the pattern, so return -3. */
+    it until the end of the pattern, so return FFL_LATER. */
 
     case OP_RECURSE:
-    if (!atend) return -3;
+    if (!atend) return FFL_LATER;
     cs = ce = (PCRE2_UCHAR *)cb->start_code + GET(cc, 1); /* Start subpattern */
     do ce += GET(ce, 1); while (*ce == OP_ALT);           /* End subpattern */
-    if (cc > cs && cc < ce) return -1;                    /* Recursion */
+    if (cc > cs && cc < ce) return FFL_NOTFIXED;          /* Recursion */
     else   /* Check for mutual recursion */
       {
       recurse_check *r = recurses;
       for (r = recurses; r != NULL; r = r->prev) if (r->group == cs) break;
-      if (r != NULL) return -1;   /* Mutual recursion */
+      if (r != NULL) return FFL_NOTFIXED;   /* Mutual recursion */
       }
     this_recurse.prev = recurses;
     this_recurse.group = cs;
@@ -999,7 +1024,7 @@ for (;;)
     otherwise \C is coded as OP_ALLANY. */
 
     case OP_ANYBYTE:
-    return -2;
+    return FFL_BACKSLASHC;
 
     /* Check a class for variable quantification */
 
@@ -1028,12 +1053,12 @@ for (;;)
       case OP_CRPOSSTAR:
       case OP_CRPOSPLUS:
       case OP_CRPOSQUERY:
-      return -1;
+      return FFL_NOTFIXED;
 
       case OP_CRRANGE:
       case OP_CRMINRANGE:
       case OP_CRPOSRANGE:
-      if (GET2(cc,1) != GET2(cc,1+IMM2_SIZE)) return -1;
+      if (GET2(cc,1) != GET2(cc,1+IMM2_SIZE)) return FFL_NOTFIXED;
       branchlength += (int)GET2(cc,1);
       cc += 1 + 2 * IMM2_SIZE;
       break;
@@ -1125,13 +1150,13 @@ for (;;)
     case OP_TYPEUPTO:
     case OP_UPTO:
     case OP_UPTOI:
-    return -1;
+    return FFL_NOTFIXED;
 
     /* Catch unrecognized opcodes so that when new ones are added they
     are not forgotten, as has happened in the past. */
 
     default:
-    return -4;
+    return FFL_UNKNOWNOP;
     }
   }
 /* Control never gets here */
@@ -7459,11 +7484,11 @@ for (;;)
 
     /* If lookbehind, check that this branch matches a fixed-length string, and
     put the length into the OP_REVERSE item. Temporarily mark the end of the
-    branch with OP_END. If the branch contains OP_RECURSE, the result is -3
-    because there may be forward references that we can't check here. Set a
-    flag to cause another lookbehind check at the end. Why not do it all at the
-    end? Because common, erroneous checks are picked up here and the offset of
-    the problem can be shown. */
+    branch with OP_END. If the branch contains OP_RECURSE, the result is 
+    FFL_LATER (a negative value) because there may be forward references that
+    we can't check here. Set a flag to cause another lookbehind check at the
+    end. Why not do it all at the end? Because common errors can be picked up
+    here and the offset of the problem can be shown. */
 
     if (lookbehind)
       {
@@ -7471,14 +7496,13 @@ for (;;)
       *code = OP_END;
       fixed_length = find_fixedlength(last_branch,  (options & PCRE2_UTF) != 0,
         FALSE, cb, NULL);
-      if (fixed_length == -3)
+      if (fixed_length == FFL_LATER)
         {
         cb->check_lookbehind = TRUE;
         }
       else if (fixed_length < 0)
         {
-        *errorcodeptr = (fixed_length == -2)? ERR36 :
-                        (fixed_length == -4)? ERR70: ERR25;
+        *errorcodeptr = fixed_length_errors[-fixed_length];
         *ptrptr = ptr;
         return FALSE;
         }
@@ -8578,8 +8602,7 @@ if (errorcode == 0 && cb.check_lookbehind)
       *be = end_op;
       if (fixed_length < 0)
         {
-        errorcode = (fixed_length == -2)? ERR36 :
-                    (fixed_length == -4)? ERR70 : ERR25;
+        errorcode = fixed_length_errors[-fixed_length];
         break;
         }
       if (fixed_length > cb.max_lookbehind) cb.max_lookbehind = fixed_length;
