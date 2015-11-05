@@ -8599,7 +8599,7 @@ compiler gives a warning about loss of "const" attribute if the cast
 if (errorcode == 0)
   {
   if (re->top_backref > re->top_bracket) errorcode = ERR15;
-  else if ((options & PCRE2_NO_AUTO_POSSESS) == 0)
+  else if ((re->overall_options & PCRE2_NO_AUTO_POSSESS) == 0)
     {
     PCRE2_UCHAR *temp = (PCRE2_UCHAR *)codestart;
     if (PRIV(auto_possessify)(temp, utf, &cb) != 0) errorcode = ERR80;

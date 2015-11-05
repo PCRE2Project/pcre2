@@ -330,5 +330,54 @@ Capturing subpattern count = 1
 Subject length lower bound = 1
     abcd
 Failed: error -52: nested recursion at the same subject position
+    
+# These tests don't behave the same with JIT 
+
+/\w+(?C1)/BI,no_auto_possess
+------------------------------------------------------------------
+        Bra
+        \w+
+        Callout 1 8 0
+        Ket
+        End
+------------------------------------------------------------------
+Capturing subpattern count = 0
+Options: no_auto_possess
+Starting code units: 0 1 2 3 4 5 6 7 8 9 A B C D E F G H I J K L M N O P 
+  Q R S T U V W X Y Z _ a b c d e f g h i j k l m n o p q r s t u v w x y z 
+Subject length lower bound = 1
+    abc\=callout_fail=1
+--->abc
+  1 ^  ^    
+  1 ^ ^     
+  1 ^^      
+  1  ^ ^    
+  1  ^^     
+  1   ^^    
+No match
+
+/(*NO_AUTO_POSSESS)\w+(?C1)/BI
+------------------------------------------------------------------
+        Bra
+        \w+
+        Callout 1 26 0
+        Ket
+        End
+------------------------------------------------------------------
+Capturing subpattern count = 0
+Compile options: <none>
+Overall options: no_auto_possess
+Starting code units: 0 1 2 3 4 5 6 7 8 9 A B C D E F G H I J K L M N O P 
+  Q R S T U V W X Y Z _ a b c d e f g h i j k l m n o p q r s t u v w x y z 
+Subject length lower bound = 1
+    abc\=callout_fail=1
+--->abc
+  1 ^  ^    
+  1 ^ ^     
+  1 ^^      
+  1  ^ ^    
+  1  ^^     
+  1   ^^    
+No match
 
 # End of testinput15

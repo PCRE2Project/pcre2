@@ -266,6 +266,8 @@ dynamically to avoid the possibility of integer overflow.
 77. Implement pcre2_set_max_pattern_length() so that programs can restrict the
 size of patterns that they are prepared to handle.
 
+78. (*NO_AUTO_POSSESS) was not working.
+
 
 Version 10.20 30-June-2015
 --------------------------

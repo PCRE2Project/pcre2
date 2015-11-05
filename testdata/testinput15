@@ -151,5 +151,13 @@
 
 /[^\xff]((?1))/BI
     abcd
+    
+# These tests don't behave the same with JIT 
+
+/\w+(?C1)/BI,no_auto_possess
+    abc\=callout_fail=1
+
+/(*NO_AUTO_POSSESS)\w+(?C1)/BI
+    abc\=callout_fail=1
 
 # End of testinput15
