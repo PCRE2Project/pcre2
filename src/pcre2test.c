@@ -540,6 +540,7 @@ static modstruct modlist[] = {
   { "mark",                MOD_PNDP, MOD_CTL, CTL_MARK,                  PO(control) },
   { "match_limit",         MOD_CTM,  MOD_INT, 0,                         MO(match_limit) },
   { "match_unset_backref", MOD_PAT,  MOD_OPT, PCRE2_MATCH_UNSET_BACKREF, PO(options) },
+  { "max_pattern_length",  MOD_CTC,  MOD_SIZ, 0,                         CO(max_pattern_length) },
   { "memory",              MOD_PD,   MOD_CTL, CTL_MEMORY,                PD(control) },
   { "multiline",           MOD_PATP, MOD_OPT, PCRE2_MULTILINE,           PO(options) },
   { "never_backslash_c",   MOD_PAT,  MOD_OPT, PCRE2_NEVER_BACKSLASH_C,   PO(options) },
@@ -1094,6 +1095,14 @@ are supported. */
   else \
     pcre2_set_match_limit_32(G(a,32),b)
 
+#define PCRE2_SET_MAX_PATTERN_LENGTH(a,b) \
+  if (test_mode == PCRE8_MODE) \
+    pcre2_set_max_pattern_length_8(G(a,8),b); \
+  else if (test_mode == PCRE16_MODE) \
+    pcre2_set_max_pattern_length_16(G(a,16),b); \
+  else \
+    pcre2_set_max_pattern_length_32(G(a,32),b)
+
 #define PCRE2_SET_OFFSET_LIMIT(a,b) \
   if (test_mode == PCRE8_MODE) \
     pcre2_set_offset_limit_8(G(a,8),b); \
@@ -1502,6 +1511,12 @@ the three different cases. */
   else \
     G(pcre2_set_match_limit_,BITTWO)(G(a,BITTWO),b)
 
+#define PCRE2_SET_MAX_PATTERN_LENGTH(a,b) \
+  if (test_mode == G(G(PCRE,BITONE),_MODE)) \
+    G(pcre2_set_max_pattern_length_,BITONE)(G(a,BITONE),b); \
+  else \
+    G(pcre2_set_max_pattern_length_,BITTWO)(G(a,BITTWO),b)
+
 #define PCRE2_SET_OFFSET_LIMIT(a,b) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
     G(pcre2_set_offset_limit_,BITONE)(G(a,BITONE),b); \
@@ -1706,6 +1721,7 @@ the three different cases. */
 #define PCRE2_SET_COMPILE_RECURSION_GUARD(a,b,c) \
   pcre2_set_compile_recursion_guard_8(G(a,8),b,c)
 #define PCRE2_SET_MATCH_LIMIT(a,b) pcre2_set_match_limit_8(G(a,8),b)
+#define PCRE2_SET_MAX_PATTERN_LENGTH(a,b) pcre2_set_max_pattern_length_8(G(a,8),b)
 #define PCRE2_SET_OFFSET_LIMIT(a,b) pcre2_set_offset_limit_8(G(a,8),b)
 #define PCRE2_SET_PARENS_NEST_LIMIT(a,b) pcre2_set_parens_nest_limit_8(G(a,8),b)
 #define PCRE2_SET_RECURSION_LIMIT(a,b) pcre2_set_recursion_limit_8(G(a,8),b)
@@ -1798,6 +1814,7 @@ the three different cases. */
 #define PCRE2_SET_COMPILE_RECURSION_GUARD(a,b,c) \
   pcre2_set_compile_recursion_guard_16(G(a,16),b,c)
 #define PCRE2_SET_MATCH_LIMIT(a,b) pcre2_set_match_limit_16(G(a,16),b)
+#define PCRE2_SET_MAX_PATTERN_LENGTH(a,b) pcre2_set_max_pattern_length_16(G(a,16),b)
 #define PCRE2_SET_OFFSET_LIMIT(a,b) pcre2_set_offset_limit_16(G(a,16),b)
 #define PCRE2_SET_PARENS_NEST_LIMIT(a,b) pcre2_set_parens_nest_limit_16(G(a,16),b)
 #define PCRE2_SET_RECURSION_LIMIT(a,b) pcre2_set_recursion_limit_16(G(a,16),b)
@@ -1890,6 +1907,7 @@ the three different cases. */
 #define PCRE2_SET_COMPILE_RECURSION_GUARD(a,b,c) \
   pcre2_set_compile_recursion_guard_32(G(a,32),b,c)
 #define PCRE2_SET_MATCH_LIMIT(a,b) pcre2_set_match_limit_32(G(a,32),b)
+#define PCRE2_SET_MAX_PATTERN_LENGTH(a,b) pcre2_set_max_pattern_length_32(G(a,32),b)
 #define PCRE2_SET_OFFSET_LIMIT(a,b) pcre2_set_offset_limit_32(G(a,32),b)
 #define PCRE2_SET_PARENS_NEST_LIMIT(a,b) pcre2_set_parens_nest_limit_32(G(a,32),b)
 #define PCRE2_SET_RECURSION_LIMIT(a,b) pcre2_set_recursion_limit_32(G(a,32),b)

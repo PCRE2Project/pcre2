@@ -4603,4 +4603,14 @@ B)x/alt_verbnames,mark
  
 /(?'abcdefghijklmnopqrstuvwxyzABCDEF'justright)/ 
 
+# These two use zero-termination
+/abcd/max_pattern_length=3
+
+/abc/max_pattern_length=3
+
+# These two, being hex, pass the length
+/abcdefab/hex,max_pattern_length=3
+
+/abcdef/hex,max_pattern_length=3
+
 # End of testinput2 

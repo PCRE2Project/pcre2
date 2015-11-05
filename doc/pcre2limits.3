@@ -1,4 +1,4 @@
-.TH PCRE2LIMITS 3 "03 November 2015" "PCRE2 10.21"
+.TH PCRE2LIMITS 3 "05 November 2015" "PCRE2 10.21"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "SIZE AND OTHER LIMITATIONS"
@@ -19,6 +19,10 @@ up to 4). See the \fBREADME\fP file in the source distribution and the
 documentation for details. In these cases the limit is substantially larger.
 However, the speed of execution is slower. In the 32-bit library, the internal
 linkage size is always 4.
+.P
+The maximum length of a source pattern string is essentially unlimited; it is 
+the largest number a PCRE2_SIZE variable can hold. However, the program that 
+calls \fBpcre2_compile()\fP can specify a smaller limit.
 .P
 The maximum length (in code units) of a subject string is one less than the
 largest number a PCRE2_SIZE variable can hold. PCRE2_SIZE is an unsigned
@@ -71,6 +75,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 03 November 2015
+Last updated: 05 November 2015
 Copyright (c) 1997-2015 University of Cambridge.
 .fi

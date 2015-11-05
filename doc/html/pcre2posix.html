@@ -266,9 +266,11 @@ header file, of which REG_NOMATCH is the "expected" failure code.
 The <b>regerror()</b> function maps a non-zero errorcode from either
 <b>regcomp()</b> or <b>regexec()</b> to a printable message. If <i>preg</i> is not
 NULL, the error should have arisen from the use of that structure. A message
-terminated by a binary zero is placed in <i>errbuf</i>. The length of the
-message, including the zero, is limited to <i>errbuf_size</i>. The yield of the
-function is the size of buffer needed to hold the whole message.
+terminated by a binary zero is placed in <i>errbuf</i>. If the buffer is too
+short, only the first <i>errbuf_size</i> - 1 characters of the error message are
+used. The yield of the function is the size of buffer needed to hold the whole
+message, including the terminating zero. This value is greater than
+<i>errbuf_size</i> if the message was truncated.
 </P>
 <br><a name="SEC7" href="#TOC1">MEMORY USAGE</a><br>
 <P>
@@ -287,7 +289,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC9" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 03 September 2015
+Last updated: 30 October 2015
 <br>
 Copyright &copy; 1997-2015 University of Cambridge.
 <br>

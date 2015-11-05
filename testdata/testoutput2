@@ -14699,4 +14699,16 @@ Failed: error 148 at offset 36: subpattern name is too long (maximum 32 characte
  
 /(?'abcdefghijklmnopqrstuvwxyzABCDEF'justright)/ 
 
+# These two use zero-termination
+/abcd/max_pattern_length=3
+Failed: error 188 at offset 0: pattern string is longer than the limit set by the application
+
+/abc/max_pattern_length=3
+
+# These two, being hex, pass the length
+/abcdefab/hex,max_pattern_length=3
+Failed: error 188 at offset 0: pattern string is longer than the limit set by the application
+
+/abcdef/hex,max_pattern_length=3
+
 # End of testinput2 

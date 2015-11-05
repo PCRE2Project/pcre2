@@ -1,4 +1,4 @@
-.TH PCRE2TEST 1 "30 October 2015" "PCRE 10.21"
+.TH PCRE2TEST 1 "05 November 2015" "PCRE 10.21"
 .SH NAME
 pcre2test - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -528,6 +528,7 @@ about the pattern:
       jitfast                   use JIT fast path
       jitverify                 verify JIT use
       locale=<name>             use this locale
+      max_pattern_length=<n>    set the maximum pattern length 
       memory                    show memory used
       newline=<type>            set newline type
       null_context              compile with a NULL context
@@ -765,6 +766,15 @@ parentheses in a pattern. Breaching the limit causes a compilation error.
 The default for the library is set when PCRE2 is built, but \fBpcre2test\fP
 sets its own default of 220, which is required for running the standard test
 suite.
+.
+.
+.SS "Limiting the pattern length"
+.rs
+.sp
+The \fBmax_pattern_length\fP modifier sets a limit, in code units, to the 
+length of pattern that \fBpcre2_compile()\fP will accept. Breaching the limit 
+causes a compilation error. The default is the largest number a PCRE2_SIZE 
+variable can hold (essentially unlimited).
 .
 .
 .SS "Using the POSIX wrapper API"
@@ -1596,6 +1606,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 30 October 2015
+Last updated: 05 November 2015
 Copyright (c) 1997-2015 University of Cambridge.
 .fi

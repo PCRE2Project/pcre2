@@ -562,6 +562,7 @@ typedef struct pcre2_real_compile_context {
   int (*stack_guard)(uint32_t, void *);
   void *stack_guard_data;
   const uint8_t *tables;
+  PCRE2_SIZE max_pattern_length; 
   uint16_t bsr_convention;
   uint16_t newline_convention;
   uint32_t parens_nest_limit;

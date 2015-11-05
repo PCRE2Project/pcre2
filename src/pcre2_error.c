@@ -172,6 +172,7 @@ static const char compile_error_texts[] =
   "using \\C is disabled in this PCRE2 library\0"
   "regular expression is too complicated\0"
   "lookbehind assertion is too long\0"
+  "pattern string is longer than the limit set by the application\0"
   ;
 
 /* Match-time and UTF error texts are in the same format. */

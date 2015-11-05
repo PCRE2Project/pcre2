@@ -266,9 +266,9 @@ Each subject line is matched separately and independently. If you want to do
 multi-line matches, you have to use the \n escape sequence (or \r or \r\n,
 etc., depending on the newline setting) in a single line of input to encode the
 newline sequences. There is no limit on the length of subject lines; the input
-buffer is automatically extended if it is too small. There is a replication
-feature that makes it possible to generate long subject lines without having to
-supply them explicitly.
+buffer is automatically extended if it is too small. There are replication
+features that makes it possible to generate long repetitive pattern or subject
+lines without having to supply them explicitly.
 </P>
 <P>
 An empty line or the end of the file signals the end of the subject lines for a
@@ -500,10 +500,10 @@ a real empty line terminates the data input.
 </P>
 <br><a name="SEC10" href="#TOC1">PATTERN MODIFIERS</a><br>
 <P>
-There are three types of modifier that can appear in pattern lines, two of
-which may also be used in a <b>#pattern</b> command. A pattern's modifier list
-can add to or override default modifiers that were set by a previous
-<b>#pattern</b> command.
+There are several types of modifier that can appear in pattern lines. Except
+where noted below, they may also be used in <b>#pattern</b> commands. A
+pattern's modifier list can add to or override default modifiers that were set
+by a previous <b>#pattern</b> command.
 <a name="optionmodifiers"></a></P>
 <br><b>
 Setting compilation options
@@ -564,6 +564,7 @@ about the pattern:
       jitfast                   use JIT fast path
       jitverify                 verify JIT use
       locale=&#60;name&#62;             use this locale
+      max_pattern_length=&#60;n&#62;    set the maximum pattern length 
       memory                    show memory used
       newline=&#60;type&#62;            set newline type
       null_context              compile with a NULL context
@@ -668,6 +669,34 @@ and other non-printing characters. By default, <b>pcre2test</b> passes patterns
 as zero-terminated strings to <b>pcre2_compile()</b>, giving the length as
 PCRE2_ZERO_TERMINATED. However, for patterns specified in hexadecimal, the
 actual length of the pattern is passed.
+</P>
+<br><b>
+Generating long repetitive patterns
+</b><br>
+<P>
+Some tests use long patterns that are very repetitive. Instead of creating a
+very long input line for such a pattern, you can use a special repetition 
+feature, similar to the one described for subject lines above. If the 
+<b>expand</b> modifier is present on a pattern, parts of the pattern that have 
+the form
+<pre>
+  \[&#60;characters&#62;]{&#60;count&#62;}
+</pre>
+are expanded before the pattern is passed to <b>pcre2_compile()</b>. For
+example, \[AB]{6000} is expanded to "ABAB..." 6000 times. This construction
+cannot be nested. An initial "\[" sequence is recognized only if "]{" followed
+by decimal digits and "}" is found later in the pattern. If not, the characters
+remain in the pattern unaltered.
+</P>
+<P>
+If part of an expanded pattern looks like an expansion, but is really part of 
+the actual pattern, unwanted expansion can be avoided by giving two values in 
+the quantifier. For example, \[AB]{6000,6000} is not recognized as an 
+expansion item.
+</P>
+<P>
+If the <b>info</b> modifier is set on an expanded pattern, the result of the 
+expansion is included in the information that is output.
 </P>
 <br><b>
 JIT compilation
@@ -780,6 +809,15 @@ sets its own default of 220, which is required for running the standard test
 suite.
 </P>
 <br><b>
+Limiting the pattern length
+</b><br>
+<P>
+The <b>max_pattern_length</b> modifier sets a limit, in code units, to the 
+length of pattern that <b>pcre2_compile()</b> will accept. Breaching the limit 
+causes a compilation error. The default is the largest number a PCRE2_SIZE 
+variable can hold (essentially unlimited).
+</P>
+<br><b>
 Using the POSIX wrapper API
 </b><br>
 <P>
@@ -798,6 +836,16 @@ modifiers set options for the <b>regcomp()</b> function:
   ucp                REG_UCP        )   the POSIX standard
   utf                REG_UTF8       )
 </pre>
+The <b>regerror_buffsize</b> modifier specifies a size for the error buffer that 
+is passed to <b>regerror()</b> in the event of a compilation error. For example:
+<pre>
+  /abc/posix,regerror_buffsize=20
+</pre>
+This provides a means of testing the behaviour of <b>regerror()</b> when the 
+buffer is too small for the error message. If this modifier has not been set, a 
+large buffer is used.
+</P>
+<P>
 The <b>aftertext</b> and <b>allaftertext</b> subject modifiers work as described
 below. All other modifiers cause an error.
 </P>
@@ -840,8 +888,9 @@ Setting certain match controls
 <P>
 The following modifiers are really subject modifiers, and are described below.
 However, they may be included in a pattern's modifier list, in which case they
-are applied to every subject line that is processed with that pattern. They do
-not affect the compilation process.
+are applied to every subject line that is processed with that pattern. They may
+not appear in <b>#pattern</b> commands. These modifiers do not affect the
+compilation process.
 <pre>
       aftertext           show text after match
       allaftertext        show text after captures
@@ -1574,7 +1623,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC21" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 17 October 2015
+Last updated: 05 November 2015
 <br>
 Copyright &copy; 1997-2015 University of Cambridge.
 <br>

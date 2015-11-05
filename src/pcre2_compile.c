@@ -583,7 +583,7 @@ enum { ERR0 = COMPILE_ERROR_BASE,
        ERR51, ERR52, ERR53, ERR54, ERR55, ERR56, ERR57, ERR58, ERR59, ERR60,
        ERR61, ERR62, ERR63, ERR64, ERR65, ERR66, ERR67, ERR68, ERR69, ERR70,
        ERR71, ERR72, ERR73, ERR74, ERR75, ERR76, ERR77, ERR78, ERR79, ERR80,
-       ERR81, ERR82, ERR83, ERR84, ERR85, ERR86, ERR87 };
+       ERR81, ERR82, ERR83, ERR84, ERR85, ERR86, ERR87, ERR88 };
 
 /* Error codes that correspond to negative error codes returned by
 find_fixedlength(). */
@@ -2988,7 +2988,7 @@ for (; ptr < cb->end_pattern; ptr++)
   if ((unsigned int)arglen > MAX_MARK)
     {
     *errorcodeptr = ERR76;
-    *ptrptr = ptr;  
+    *ptrptr = ptr;
     return -1;
     }
   }
@@ -8128,10 +8128,24 @@ if (ccontext == NULL)
 /* A zero-terminated pattern is indicated by the special length value
 PCRE2_ZERO_TERMINATED. Otherwise, we make a copy of the pattern and add a zero,
 to ensure that it is always possible to look one code unit beyond the end of
-the pattern's characters. */
+the pattern's characters. In both cases, check that the pattern is overlong. */
 
-if (patlen == PCRE2_ZERO_TERMINATED) patlen = PRIV(strlen)(pattern); else
+if (patlen == PCRE2_ZERO_TERMINATED)
   {
+  patlen = PRIV(strlen)(pattern);
+  if (patlen > ccontext->max_pattern_length)
+    {
+    *errorptr = ERR88;
+    return NULL;
+    }
+  }
+else
+  {
+  if (patlen > ccontext->max_pattern_length)
+    {
+    *errorptr = ERR88;
+    return NULL;
+    }
   if (patlen < COPIED_PATTERN_SIZE)
     copied_pattern = stack_copied_pattern;
   else

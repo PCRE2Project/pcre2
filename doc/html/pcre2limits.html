@@ -32,6 +32,11 @@ However, the speed of execution is slower. In the 32-bit library, the internal
 linkage size is always 4.
 </P>
 <P>
+The maximum length of a source pattern string is essentially unlimited; it is 
+the largest number a PCRE2_SIZE variable can hold. However, the program that 
+calls <b>pcre2_compile()</b> can specify a smaller limit.
+</P>
+<P>
 The maximum length (in code units) of a subject string is one less than the
 largest number a PCRE2_SIZE variable can hold. PCRE2_SIZE is an unsigned
 integer type, usually defined as size_t. Its maximum value (that is
@@ -48,6 +53,9 @@ documentation.
 </P>
 <P>
 All values in repeating quantifiers must be less than 65536.
+</P>
+<P>
+The maximum length of a lookbehind assertion is 65535 characters.
 </P>
 <P>
 There is no limit to the number of parenthesized subpatterns, but there can be
@@ -85,9 +93,9 @@ Cambridge, England.
 REVISION
 </b><br>
 <P>
-Last updated: 25 November 2014
+Last updated: 05 November 2015
 <br>
-Copyright &copy; 1997-2014 University of Cambridge.
+Copyright &copy; 1997-2015 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE2 index page</a>.

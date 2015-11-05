@@ -263,6 +263,9 @@ result of the use of \K).
 76. Check the length of subpattern names and the names in (*MARK:xx) etc.
 dynamically to avoid the possibility of integer overflow.
 
+77. Implement pcre2_set_max_pattern_length() so that programs can restrict the
+size of patterns that they are prepared to handle.
+
 
 Version 10.20 30-June-2015
 --------------------------

@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "03 November 2015" "PCRE2 10.21"
+.TH PCRE2API 3 "05 November 2015" "PCRE2 10.21"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -89,6 +89,9 @@ document for an overview of all the PCRE2 documentation.
 .sp
 .B int pcre2_set_character_tables(pcre2_compile_context *\fIccontext\fP,
 .B "  const unsigned char *\fItables\fP);"
+.sp
+.B int pcre2_set_max_pattern_length(pcre2_compile_context *\fIccontext\fP,
+.B "  PCRE2_SIZE \fIvalue\fP);"
 .sp
 .B int pcre2_set_newline(pcre2_compile_context *\fIccontext\fP,
 .B "  uint32_t \fIvalue\fP);"
@@ -567,6 +570,7 @@ of the following compile-time parameters:
   PCRE2's character tables
   The newline character sequence
   The compile time nested parentheses limit
+  The maximum length of the pattern string 
   An external function for stack checking
 .sp
 A compile context is also required if you are using custom memory management.
@@ -608,6 +612,17 @@ interpreted matching functions, \fIpcre2_match()\fP and
 The value must be the result of a call to \fIpcre2_maketables()\fP, whose only
 argument is a general context. This function builds a set of character tables
 in the current locale.
+.sp
+.nf
+.B int pcre2_set_max_pattern_length(pcre2_compile_context *\fIccontext\fP,
+.B "  PCRE2_SIZE \fIvalue\fP);"
+.fi
+.sp
+This sets a maximum length, in code units, for the pattern string that is to be 
+compiled. If the pattern is longer, an error is generated. This facility is 
+provided so that applications that accept patterns from external sources can 
+limit their size. The default is the largest number that a PCRE2_SIZE variable 
+can hold, which is effectively unlimited.
 .sp
 .nf
 .B int pcre2_set_newline(pcre2_compile_context *\fIccontext\fP,
@@ -3069,6 +3084,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 03 November 2015
+Last updated: 05 November 2015
 Copyright (c) 1997-2015 University of Cambridge.
 .fi

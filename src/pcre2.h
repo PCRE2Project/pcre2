@@ -396,6 +396,8 @@ PCRE2_EXP_DECL void      pcre2_compile_context_free(pcre2_compile_context *); \
 PCRE2_EXP_DECL int       pcre2_set_bsr(pcre2_compile_context *, uint32_t); \
 PCRE2_EXP_DECL int       pcre2_set_character_tables(pcre2_compile_context *, \
                            const unsigned char *); \
+PCRE2_EXP_DECL int       pcre2_set_max_pattern_length(pcre2_compile_context *, \
+                           PCRE2_SIZE); \
 PCRE2_EXP_DECL int       pcre2_set_newline(pcre2_compile_context *, uint32_t); \
 PCRE2_EXP_DECL int       pcre2_set_parens_nest_limit(pcre2_compile_context *, \
                            uint32_t); \
@@ -616,6 +618,7 @@ pcre2_compile are called by application code. */
 #define pcre2_set_character_tables            PCRE2_SUFFIX(pcre2_set_character_tables_)
 #define pcre2_set_compile_recursion_guard     PCRE2_SUFFIX(pcre2_set_compile_recursion_guard_)
 #define pcre2_set_match_limit                 PCRE2_SUFFIX(pcre2_set_match_limit_)
+#define pcre2_set_max_pattern_length          PCRE2_SUFFIX(pcre2_set_max_pattern_length_)
 #define pcre2_set_newline                     PCRE2_SUFFIX(pcre2_set_newline_)
 #define pcre2_set_parens_nest_limit           PCRE2_SUFFIX(pcre2_set_parens_nest_limit_)
 #define pcre2_set_offset_limit                PCRE2_SUFFIX(pcre2_set_offset_limit_)
