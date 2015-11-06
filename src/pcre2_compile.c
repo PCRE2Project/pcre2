@@ -5230,10 +5230,7 @@ for (;; ptr++)
 
       /* If the minimum is greater than zero, replicate the group as many
       times as necessary, and adjust the maximum to the number of subsequent
-      copies that we need. If we set a first char from the group, and didn't
-      set a required char, copy the latter from the former. If there are any
-      forward reference subroutine calls in the group, there will be entries on
-      the workspace list; replicate these with an appropriate increment. */
+      copies that we need. */
 
       else
         {
