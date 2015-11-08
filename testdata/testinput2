@@ -4613,4 +4613,22 @@ B)x/alt_verbnames,mark
 
 /abcdef/hex,max_pattern_length=3
 
+# These two patterns used to take a long time to compile
+
+"(.*)
+((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))
+((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))
+((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))"xI
+
+"(?<=a()
+((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))
+((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))
+((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))
+a)"xI
+
+# Test the use of malloc for caching group information when there are more
+# groups than fit into the on-stack workspace.
+
+/\[()]{1024}/I,expand
+
 # End of testinput2 

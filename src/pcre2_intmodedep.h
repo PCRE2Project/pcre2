@@ -705,6 +705,7 @@ typedef struct compile_block {
   uint32_t external_flags;         /* External flag bits to be set */
   uint32_t bracount;               /* Count of capturing parens as we compile */
   uint32_t final_bracount;         /* Saved value after first pass */
+  uint32_t *groupinfo;             /* Group info vector */
   uint32_t top_backref;            /* Maximum back reference */
   uint32_t backref_map;            /* Bitmap of low back refs */
   uint32_t nltype;                 /* Newline type */

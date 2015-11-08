@@ -96,14 +96,21 @@ static BOOL
 *      Code parameters and static tables         *
 *************************************************/
 
-/* This value specifies the size of stack workspace, which is used during the
-pre-compile phase when determining how much memory is required. The regex is
-partly compiled into this space, but the compiled parts are discarded as soon
-as they can be, so that hopefully there will never be an overrun. The code
-does, however, check for an overrun. The largest amount I've seen used is 218,
-so this number is very generous. */
+/* This value specifies the size of stack workspace, which is used in different
+ways in the different pattern scans. The group-identifying pre-scan uses it to
+handle nesting, and needs it to be 16-bit aligned. During the first compiling
+phase, when determining how much memory is required, the regex is partly
+compiled into this space, but the compiled parts are discarded as soon as they
+can be, so that hopefully there will never be an overrun. The code does,
+however, check for an overrun. In the real compile phase the workspace is used
+for remembering data about numbered groups, provided there are not too many of
+them (if there are, extra memory is acquired). For this phase the memory must
+be 32-bit aligned. */
 
-#define COMPILE_WORK_SIZE (2048*LINK_SIZE)
+#define COMPILE_WORK_SIZE (2048*LINK_SIZE)   /* Size in code units */
+
+#define C32_WORK_SIZE \
+  ((COMPILE_WORK_SIZE * sizeof(PCRE2_UCHAR))/sizeof(uint32_t))
 
 /* The overrun tests check for a slightly smaller size so that they detect the
 overrun before it actually does run off the end of the data block. */
@@ -147,6 +154,14 @@ have to check them every time. */
 /* Negative values for the firstcu and reqcu flags */
 #define REQ_UNSET       (-2)            /* Not yet found anything */
 #define REQ_NONE        (-1)            /* Found not fixed char */
+
+/* These flags are used in the groupinfo vector. */
+
+#define GI_SET_COULD_BE_EMPTY  0x80000000u
+#define GI_COULD_BE_EMPTY      0x40000000u
+#define GI_NOT_FIXED_LENGTH    0x20000000u
+#define GI_SET_FIXED_LENGTH    0x10000000u
+#define GI_FIXED_LENGTH_MASK   0x0000ffffu
 
 /* This bit (which is greater than any UTF value) is used to indicate that a
 variable contains a number of code units instead of an actual code point. */
@@ -832,9 +847,24 @@ find_fixedlength(PCRE2_UCHAR *code, BOOL utf, BOOL atend, compile_block *cb,
   recurse_check *recurses)
 {
 int length = -1;
+uint32_t group = 0;
+uint32_t groupinfo = 0;
 recurse_check this_recurse;
 register int branchlength = 0;
 register PCRE2_UCHAR *cc = code + 1 + LINK_SIZE;
+
+/* If this is a capturing group, we may have the answer cached. */
+
+if (*code == OP_CBRA || *code == OP_CBRAPOS || *code == OP_SCBRA ||
+    *code == OP_SCBRAPOS)
+  {
+  group = GET2(cc, 0);
+  cc += IMM2_SIZE;
+  groupinfo = cb->groupinfo[group]; 
+  if ((groupinfo & GI_NOT_FIXED_LENGTH) != 0) return FFL_NOTFIXED;
+  if ((groupinfo & GI_SET_FIXED_LENGTH) != 0)
+    return groupinfo & GI_FIXED_LENGTH_MASK;
+  }
 
 /* Scan along the opcodes for this branch. If we get to the end of the
 branch, check the length against that of the other branches. */
@@ -859,8 +889,7 @@ for (;;)
     case OP_ONCE:
     case OP_ONCE_NC:
     case OP_COND:
-    d = find_fixedlength(cc + ((op == OP_CBRA)? IMM2_SIZE : 0), utf, atend, cb,
-      recurses);
+    d = find_fixedlength(cc, utf, atend, cb, recurses);
     if (d < 0) return d;
     branchlength += d;
     do cc += GET(cc, 1); while (*cc == OP_ALT);
@@ -879,8 +908,16 @@ for (;;)
     case OP_ACCEPT:
     case OP_ASSERT_ACCEPT:
     if (length < 0) length = branchlength;
-      else if (length != branchlength) return FFL_NOTFIXED;
-    if (*cc != OP_ALT) return length;
+      else if (length != branchlength) goto ISNOTFIXED;
+    if (*cc != OP_ALT) 
+      {
+      if (group > 0)
+        {
+        groupinfo |= (GI_SET_FIXED_LENGTH | length);
+        cb->groupinfo[group] = groupinfo;
+        }  
+      return length;
+      } 
     cc += 1 + LINK_SIZE;
     branchlength = 0;
     break;
@@ -893,16 +930,16 @@ for (;;)
     if (!atend) return FFL_LATER;
     cs = ce = (PCRE2_UCHAR *)cb->start_code + GET(cc, 1); /* Start subpattern */
     do ce += GET(ce, 1); while (*ce == OP_ALT);           /* End subpattern */
-    if (cc > cs && cc < ce) return FFL_NOTFIXED;          /* Recursion */
+    if (cc > cs && cc < ce) goto ISNOTFIXED;          /* Recursion */
     else   /* Check for mutual recursion */
       {
       recurse_check *r = recurses;
       for (r = recurses; r != NULL; r = r->prev) if (r->group == cs) break;
-      if (r != NULL) return FFL_NOTFIXED;   /* Mutual recursion */
+      if (r != NULL) goto ISNOTFIXED;   /* Mutual recursion */
       }
     this_recurse.prev = recurses;
     this_recurse.group = cs;
-    d = find_fixedlength(cs + IMM2_SIZE, utf, atend, cb, &this_recurse);
+    d = find_fixedlength(cs, utf, atend, cb, &this_recurse);
     if (d < 0) return d;
     branchlength += d;
     cc += 1 + LINK_SIZE;
@@ -1053,12 +1090,12 @@ for (;;)
       case OP_CRPOSSTAR:
       case OP_CRPOSPLUS:
       case OP_CRPOSQUERY:
-      return FFL_NOTFIXED;
+      goto ISNOTFIXED;
 
       case OP_CRRANGE:
       case OP_CRMINRANGE:
       case OP_CRPOSRANGE:
-      if (GET2(cc,1) != GET2(cc,1+IMM2_SIZE)) return FFL_NOTFIXED;
+      if (GET2(cc,1) != GET2(cc,1+IMM2_SIZE)) goto ISNOTFIXED;
       branchlength += (int)GET2(cc,1);
       cc += 1 + 2 * IMM2_SIZE;
       break;
@@ -1150,7 +1187,7 @@ for (;;)
     case OP_TYPEUPTO:
     case OP_UPTO:
     case OP_UPTOI:
-    return FFL_NOTFIXED;
+    goto ISNOTFIXED;
 
     /* Catch unrecognized opcodes so that when new ones are added they
     are not forgotten, as has happened in the past. */
@@ -1159,7 +1196,15 @@ for (;;)
     return FFL_UNKNOWNOP;
     }
   }
-/* Control never gets here */
+/* Control never gets here except by goto. */
+
+ISNOTFIXED:
+if (group > 0)
+  {
+  groupinfo |= GI_NOT_FIXED_LENGTH;
+  cb->groupinfo[group] = groupinfo;
+  }   
+return FFL_NOTFIXED;
 }
 
 
@@ -1255,8 +1300,25 @@ static BOOL
 could_be_empty_branch(PCRE2_SPTR code, PCRE2_SPTR endcode, BOOL utf,
   compile_block *cb, BOOL atend, recurse_check *recurses)
 {
+uint32_t group = 0;
+uint32_t groupinfo = 0;
 register PCRE2_UCHAR c;
 recurse_check this_recurse;
+
+/* If what we are checking has already been set as "could be empty", we know
+the answer. */
+
+if (*code >= OP_SBRA && *code <= OP_SCOND) return TRUE;
+
+/* If this is a capturing group, we may have the answer cached. */
+
+if (*code == OP_CBRA || *code == OP_CBRAPOS)
+  {
+  group = GET2(code, 1 + LINK_SIZE);
+  groupinfo = cb->groupinfo[group];
+  if ((groupinfo & GI_SET_COULD_BE_EMPTY) != 0)
+    return (groupinfo & GI_COULD_BE_EMPTY) != 0;
+  }
 
 for (code = first_significant_code(code + PRIV(OP_lengths)[*code], TRUE);
      code < endcode;
@@ -1289,7 +1351,7 @@ for (code = first_significant_code(code + PRIV(OP_lengths)[*code], TRUE);
     PCRE2_SPTR scode, endgroup;
     BOOL empty_branch;
 
-    if (!atend) return TRUE;
+    if (!atend) goto ISTRUE;
     scode = cb->start_code + GET(code, 1);
     endgroup = scode;
 
@@ -1326,7 +1388,7 @@ for (code = first_significant_code(code + PRIV(OP_lengths)[*code], TRUE);
       }
     while (*scode == OP_ALT);
 
-    if (!empty_branch) return FALSE;  /* All branches are non-empty */
+    if (!empty_branch) goto ISFALSE;  /* All branches are non-empty */
     continue;
     }
 
@@ -1360,7 +1422,7 @@ for (code = first_significant_code(code + PRIV(OP_lengths)[*code], TRUE);
       c == OP_COND || c == OP_SCOND)
     {
     BOOL empty_branch;
-    if (GET(code, 1) == 0) return TRUE;    /* Hit unclosed bracket */
+    if (GET(code, 1) == 0) goto ISTRUE;    /* Hit unclosed bracket */
 
     /* If a conditional group has only one branch, there is a second, implied,
     empty branch, so just skip over the conditional, because it could be empty.
@@ -1378,7 +1440,7 @@ for (code = first_significant_code(code + PRIV(OP_lengths)[*code], TRUE);
         code += GET(code, 1);
         }
       while (*code == OP_ALT);
-      if (!empty_branch) return FALSE;   /* All branches are non-empty */
+      if (!empty_branch) goto ISFALSE;   /* All branches are non-empty */
       }
 
     c = *code;
@@ -1423,12 +1485,12 @@ for (code = first_significant_code(code + PRIV(OP_lengths)[*code], TRUE);
       case OP_CRPLUS:            /* These repeats aren't empty */
       case OP_CRMINPLUS:
       case OP_CRPOSPLUS:
-      return FALSE;
+      goto ISFALSE;
 
       case OP_CRRANGE:
       case OP_CRMINRANGE:
       case OP_CRPOSRANGE:
-      if (GET2(ccode, 1) > 0) return FALSE;  /* Minimum > 0 */
+      if (GET2(ccode, 1) > 0) goto ISFALSE;  /* Minimum > 0 */
       break;
       }
     break;
@@ -1485,8 +1547,7 @@ for (code = first_significant_code(code + PRIV(OP_lengths)[*code], TRUE);
     case OP_TYPEMINPLUS:
     case OP_TYPEPOSPLUS:
     case OP_TYPEEXACT:
-
-    return FALSE;
+    goto ISFALSE;
 
     /* These are going to continue, as they may be empty, but we have to
     fudge the length for the \p and \P cases. */
@@ -1516,7 +1577,7 @@ for (code = first_significant_code(code + PRIV(OP_lengths)[*code], TRUE);
     case OP_KETRMIN:
     case OP_KETRPOS:
     case OP_ALT:
-    return TRUE;
+    goto ISTRUE;
 
     /* In UTF-8 or UTF-16 mode, STAR, MINSTAR, POSSTAR, QUERY, MINQUERY,
     POSQUERY, UPTO, MINUPTO, and POSUPTO and their caseless and negative
@@ -1590,7 +1651,13 @@ for (code = first_significant_code(code + PRIV(OP_lengths)[*code], TRUE);
     }
   }
 
-return TRUE;
+ISTRUE:
+groupinfo |= GI_COULD_BE_EMPTY;
+
+ISFALSE:
+if (group > 0) cb->groupinfo[group] = groupinfo | GI_SET_COULD_BE_EMPTY;
+
+return (groupinfo & GI_COULD_BE_EMPTY) != 0;
 }
 
 
@@ -8087,10 +8154,11 @@ PCRE2_UCHAR stack_copied_pattern[COPIED_PATTERN_SIZE];
 named_group named_groups[NAMED_GROUP_LIST_SIZE];
 
 /* The workspace is used in different ways in the different compiling phases.
-Ensure that it is 16-bit aligned for the preliminary group scan. */
+It needs to be 16-bit aligned for the preliminary group scan, and 32-bit
+aligned for the group information cache. */
 
-uint16_t c16workspace[(COMPILE_WORK_SIZE * sizeof(PCRE2_UCHAR))/sizeof(uint16_t)];
-PCRE2_UCHAR *cworkspace = (PCRE2_UCHAR *)c16workspace;
+uint32_t c32workspace[C32_WORK_SIZE];
+PCRE2_UCHAR *cworkspace = (PCRE2_UCHAR *)c32workspace;
 
 
 /* -------------- Check arguments and set up the pattern ----------------- */
@@ -8177,6 +8245,7 @@ cb.end_pattern = pattern + patlen;
 cb.nestptr[0] = cb.nestptr[1] = NULL;
 cb.external_flags = 0;
 cb.external_options = options;
+cb.groupinfo = c32workspace;
 cb.had_recurse = FALSE;
 cb.iscondassert = FALSE;
 cb.max_lookbehind = 0;
@@ -8448,6 +8517,27 @@ code follows after that. */
 
 codestart = (PCRE2_SPTR)((uint8_t *)re + sizeof(pcre2_real_code)) +
   re->name_entry_size * re->name_count;
+
+/* Workspace is needed to remember information about numbered groups: whether a
+group can match an empty string and what its fixed length is. This is done to
+avoid the possibility of recursive references causing very long compile times
+when checking these features. Unnumbered groups do not have this exposure since
+they cannot be referenced. We use an indexed vector for this purpose. If there
+are sufficiently few groups, it can be the c32workspace vector, as set up
+above. Otherwise we have to get/free a special vector. The vector must be
+initialized to zero. */
+
+if (cb.final_bracount >= C32_WORK_SIZE)
+  {
+  cb.groupinfo = ccontext->memctl.malloc(
+    (cb.final_bracount + 1)*sizeof(uint32_t), ccontext->memctl.memory_data);
+  if (cb.groupinfo == NULL)
+    {
+    errorcode = ERR21;
+    goto HAD_ERROR;
+    }
+  }
+memset(cb.groupinfo, 0, (cb.final_bracount + 1) * sizeof(uint32_t));
 
 /* Update the compile data block for the actual compile. The starting points of
 the name/number translation table and of the code are passed around in the
@@ -8778,13 +8868,16 @@ if ((re->overall_options & PCRE2_NO_START_OPTIMIZE) == 0 &&
 
 /* Control ends up here in all cases. If memory was obtained for a
 zero-terminated copy of the pattern, remember to free it before returning. Also
-free the list of named groups if a larger one had to be obtained. */
+free the list of named groups if a larger one had to be obtained, and likewise
+the group information vector. */
 
 EXIT:
 if (copied_pattern != stack_copied_pattern)
   ccontext->memctl.free(copied_pattern, ccontext->memctl.memory_data);
 if (cb.named_group_list_size > NAMED_GROUP_LIST_SIZE)
   ccontext->memctl.free((void *)cb.named_groups, ccontext->memctl.memory_data);
+if (cb.groupinfo != c32workspace)
+  ccontext->memctl.free((void *)cb.groupinfo, ccontext->memctl.memory_data);
 
 return re;    /* Will be NULL after an error */
 }

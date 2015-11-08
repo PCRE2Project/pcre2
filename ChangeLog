@@ -268,6 +268,10 @@ size of patterns that they are prepared to handle.
 
 78. (*NO_AUTO_POSSESS) was not working.
 
+79. Adding group information caching improves the speed of compiling when 
+checking whether a group has a fixed length and/or could match an empty string, 
+especially when recursion or subroutine calls are involved.
+
 
 Version 10.20 30-June-2015
 --------------------------
