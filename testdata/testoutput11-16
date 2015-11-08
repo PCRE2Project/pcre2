@@ -643,7 +643,4 @@ Subject length lower bound = 1
 
 /(*THEN:\[A]{65501})/expand
 
-/(?'ABC'\[[bar](]{106}*THEN:\[A]{255}\[)]{107}/expand
-Failed: error 186 at offset 594: regular expression is too complicated
-
 # End of testinput11

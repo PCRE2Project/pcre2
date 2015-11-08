@@ -98,14 +98,20 @@ static BOOL
 
 /* This value specifies the size of stack workspace, which is used in different
 ways in the different pattern scans. The group-identifying pre-scan uses it to
-handle nesting, and needs it to be 16-bit aligned. During the first compiling
-phase, when determining how much memory is required, the regex is partly
-compiled into this space, but the compiled parts are discarded as soon as they
-can be, so that hopefully there will never be an overrun. The code does,
-however, check for an overrun. In the real compile phase the workspace is used
-for remembering data about numbered groups, provided there are not too many of
-them (if there are, extra memory is acquired). For this phase the memory must
-be 32-bit aligned. */
+handle nesting, and needs it to be 16-bit aligned.
+
+During the first compiling phase, when determining how much memory is required,
+the regex is partly compiled into this space, but the compiled parts are
+discarded as soon as they can be, so that hopefully there will never be an
+overrun. The code does, however, check for an overrun, which can occur for
+pathological patterns. The size of the workspace depends on LINK_SIZE because
+the length of compiled items varies with this.
+
+In the real compile phase, the workspace is used for remembering data about
+numbered groups, provided there are not too many of them (if there are, extra
+memory is acquired). For this phase the memory must be 32-bit aligned. Having
+defined the size in code units, we set up C32_WORK_SIZE as the number of
+elements in the 32-bit vector. */
 
 #define COMPILE_WORK_SIZE (2048*LINK_SIZE)   /* Size in code units */
 
@@ -860,7 +866,7 @@ if (*code == OP_CBRA || *code == OP_CBRAPOS || *code == OP_SCBRA ||
   {
   group = GET2(cc, 0);
   cc += IMM2_SIZE;
-  groupinfo = cb->groupinfo[group]; 
+  groupinfo = cb->groupinfo[group];
   if ((groupinfo & GI_NOT_FIXED_LENGTH) != 0) return FFL_NOTFIXED;
   if ((groupinfo & GI_SET_FIXED_LENGTH) != 0)
     return groupinfo & GI_FIXED_LENGTH_MASK;
@@ -909,15 +915,15 @@ for (;;)
     case OP_ASSERT_ACCEPT:
     if (length < 0) length = branchlength;
       else if (length != branchlength) goto ISNOTFIXED;
-    if (*cc != OP_ALT) 
+    if (*cc != OP_ALT)
       {
       if (group > 0)
         {
         groupinfo |= (GI_SET_FIXED_LENGTH | length);
         cb->groupinfo[group] = groupinfo;
-        }  
+        }
       return length;
-      } 
+      }
     cc += 1 + LINK_SIZE;
     branchlength = 0;
     break;
@@ -1203,7 +1209,7 @@ if (group > 0)
   {
   groupinfo |= GI_NOT_FIXED_LENGTH;
   cb->groupinfo[group] = groupinfo;
-  }   
+  }
 return FFL_NOTFIXED;
 }
 
