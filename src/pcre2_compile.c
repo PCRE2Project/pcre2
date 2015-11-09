@@ -1943,8 +1943,7 @@ else
     number is less than 10, or if there are that many previous extracting left
     brackets, it is a back reference. Otherwise, up to three octal digits are
     read to form an escaped character code. Thus \123 is likely to be octal 123
-    (cf \0123, which is octal 012 followed by the literal 3). If the octal
-    value is greater than 377, the least significant 8 bits are taken.
+    (cf \0123, which is octal 012 followed by the literal 3).
 
     Inside a character class, \ followed by a digit is always either a literal
     8 or 9 or an octal number. */
@@ -8114,7 +8113,7 @@ a pointer to a block of store holding a compiled version of the expression.
 
 Arguments:
   pattern       the regular expression
-  patlen        the length of the pattern, or < 0 for zero-terminated
+  patlen        the length of the pattern, or PCRE2_ZERO_TERMINATED
   options       option bits
   errorptr      pointer to errorcode
   erroroffset   pointer to error offset
