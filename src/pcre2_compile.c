@@ -3149,6 +3149,15 @@ named_group *ng;
 nest_save *top_nest = NULL;
 nest_save *end_nests = (nest_save *)(cb->start_workspace + cb->workspace_size);
 
+/* The size of the nest_save structure might not be a factor of the size of the
+workspace. Therefore we must round down end_nests so as to correctly avoid
+creating a nest_save that spans the end of the workspace. */
+
+end_nests = (nest_save *)((char *)end_nests -
+  ((cb->workspace_size * sizeof(PCRE2_UCHAR)) % sizeof(nest_save)));
+
+/* Now scan the pattern */
+
 for (; ptr < cb->end_pattern; ptr++)
   {
   c = *ptr;

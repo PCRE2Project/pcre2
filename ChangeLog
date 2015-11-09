@@ -272,6 +272,9 @@ size of patterns that they are prepared to handle.
 checking whether a group has a fixed length and/or could match an empty string, 
 especially when recursion or subroutine calls are involved.
 
+80. Allow for the possibility of the size of the nest_save structure not being
+a factor of the size of the compiling workspace (it currently is).
+
 
 Version 10.20 30-June-2015
 --------------------------
