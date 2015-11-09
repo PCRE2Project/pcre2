@@ -275,6 +275,9 @@ especially when recursion or subroutine calls are involved.
 80. Allow for the possibility of the size of the nest_save structure not being
 a factor of the size of the compiling workspace (it currently is).
 
+81. Check for integer overflow in minimum length calculation and cap it at 
+65535.
+
 
 Version 10.20 30-June-2015
 --------------------------

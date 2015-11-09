@@ -4631,4 +4631,8 @@ a)"xI
 
 /\[()]{1024}/I,expand
 
+# Test minlength capped at 65535
+
+/(A{65000})\1{65000}/I
+
 # End of testinput2 

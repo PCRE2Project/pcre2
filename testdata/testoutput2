@@ -14743,4 +14743,13 @@ Capturing subpattern count = 1024
 May match empty string
 Subject length lower bound = 0
 
+# Test minlength capped at 65535
+
+/(A{65000})\1{65000}/I
+Capturing subpattern count = 1
+Max back reference = 1
+First code unit = 'A'
+Last code unit = 'A'
+Subject length lower bound = 65535
+
 # End of testinput2 

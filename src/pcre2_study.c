@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-         New API code Copyright (c) 2014 University of Cambridge
+         New API code Copyright (c) 2015 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -123,7 +123,7 @@ for (;;)
   PCRE2_UCHAR *cs, *ce;
   register PCRE2_UCHAR op = *cc;
 
-  if (branchlength > UINT16_MAX) return branchlength;
+  if (branchlength >= UINT16_MAX) return UINT16_MAX;
 
   switch (op)
     {
@@ -562,7 +562,13 @@ for (;;)
       break;
       }
 
-    branchlength += min * d;
+     /* Take care not to overflow: (1) min and d are ints, so check that their
+     product is not greater than INT_MAX. (2) branchlength is limited to
+     UINT16_MAX (checked at the top of the loop). */
+
+    if ((d > 0 && (INT_MAX/d) < min) || UINT16_MAX - branchlength < min*d)
+      branchlength = UINT16_MAX;
+    else branchlength += min * d;
     break;
 
     /* Recursion always refers to the first occurrence of a subpattern with a
