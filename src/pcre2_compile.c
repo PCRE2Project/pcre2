@@ -616,6 +616,7 @@ static int fixed_length_errors[] =
   ERR25,   /* Lookbehind is not fixed length */
   ERR36,   /* \C in lookbehind is not allowed */
   ERR87,   /* Lookbehind is too long */
+  ERR86,   /* Pattern too complicated */
   ERR70    /* Internal error: unknown opcode encountered */
   };
 
@@ -828,11 +829,12 @@ Lookbehind lengths are held in 16-bit fields and the maximum value is defined
 as LOOKBEHIND_MAX.
 
 Arguments:
-  code     points to the start of the pattern (the bracket)
-  utf      TRUE in UTF mode
-  atend    TRUE if called when the pattern is complete
-  cb       the "compile data" structure
+  code        points to the start of the pattern (the bracket)
+  utf         TRUE in UTF mode
+  atend       TRUE if called when the pattern is complete
+  cb          the "compile data" structure
   recurses    chain of recurse_check to catch mutual recursion
+  countptr    pointer to counter, to catch over-complexity
 
 Returns:   if non-negative, the fixed length,
              or -1 if an OP_RECURSE item was encountered and atend is FALSE
@@ -842,15 +844,16 @@ Returns:   if non-negative, the fixed length,
              or -5 if an unknown opcode was encountered (internal error)
 */
 
-#define FFL_LATER      (-1)
-#define FFL_NOTFIXED   (-2)
-#define FFL_BACKSLASHC (-3)
-#define FFL_TOOLONG    (-4)
-#define FFL_UNKNOWNOP  (-5)
+#define FFL_LATER           (-1)
+#define FFL_NOTFIXED        (-2)
+#define FFL_BACKSLASHC      (-3)
+#define FFL_TOOLONG         (-4)
+#define FFL_TOOCOMPLICATED  (-5)
+#define FFL_UNKNOWNOP       (-6)
 
 static int
 find_fixedlength(PCRE2_UCHAR *code, BOOL utf, BOOL atend, compile_block *cb,
-  recurse_check *recurses)
+  recurse_check *recurses, int *countptr)
 {
 int length = -1;
 uint32_t group = 0;
@@ -859,7 +862,9 @@ recurse_check this_recurse;
 register int branchlength = 0;
 register PCRE2_UCHAR *cc = code + 1 + LINK_SIZE;
 
-/* If this is a capturing group, we may have the answer cached. */
+/* If this is a capturing group, we may have the answer cached, but we can only
+use this information if there are no (?| groups in the pattern, because
+otherwise group numbers are not unique. */
 
 if (*code == OP_CBRA || *code == OP_CBRAPOS || *code == OP_SCBRA ||
     *code == OP_SCBRAPOS)
@@ -867,10 +872,18 @@ if (*code == OP_CBRA || *code == OP_CBRAPOS || *code == OP_SCBRA ||
   group = GET2(cc, 0);
   cc += IMM2_SIZE;
   groupinfo = cb->groupinfo[group];
-  if ((groupinfo & GI_NOT_FIXED_LENGTH) != 0) return FFL_NOTFIXED;
-  if ((groupinfo & GI_SET_FIXED_LENGTH) != 0)
-    return groupinfo & GI_FIXED_LENGTH_MASK;
+  if ((cb->external_flags & PCRE2_DUPCAPUSED) == 0)
+    {
+    if ((groupinfo & GI_NOT_FIXED_LENGTH) != 0) return FFL_NOTFIXED;
+    if ((groupinfo & GI_SET_FIXED_LENGTH) != 0)
+      return groupinfo & GI_FIXED_LENGTH_MASK;
+    }
   }
+
+/* A large and/or complex regex can take too long to process. This can happen
+more often when (?| groups are present in the pattern. */
+
+if ((*countptr)++ > 2000) return FFL_TOOCOMPLICATED;
 
 /* Scan along the opcodes for this branch. If we get to the end of the
 branch, check the length against that of the other branches. */
@@ -895,7 +908,7 @@ for (;;)
     case OP_ONCE:
     case OP_ONCE_NC:
     case OP_COND:
-    d = find_fixedlength(cc, utf, atend, cb, recurses);
+    d = find_fixedlength(cc, utf, atend, cb, recurses, countptr);
     if (d < 0) return d;
     branchlength += d;
     do cc += GET(cc, 1); while (*cc == OP_ALT);
@@ -945,7 +958,7 @@ for (;;)
       }
     this_recurse.prev = recurses;
     this_recurse.group = cs;
-    d = find_fixedlength(cs, utf, atend, cb, &this_recurse);
+    d = find_fixedlength(cs, utf, atend, cb, &this_recurse, countptr);
     if (d < 0) return d;
     branchlength += d;
     cc += 1 + LINK_SIZE;
@@ -1298,13 +1311,21 @@ Arguments:
   cb          compile data
   atend       TRUE if being called to check an entire pattern
   recurses    chain of recurse_check to catch mutual recursion
+  countptr    pointer to count to catch over-complicated pattern
 
-Returns:      TRUE if what is matched could be empty
+Returns:      0 if what is matched cannot be empty
+              1 if what is matched could be empty
+             -1 if the pattern is too complicated
 */
 
-static BOOL
+#define CBE_NOTEMPTY          0
+#define CBE_EMPTY             1
+#define CBE_TOOCOMPLICATED  (-1)
+
+
+static int
 could_be_empty_branch(PCRE2_SPTR code, PCRE2_SPTR endcode, BOOL utf,
-  compile_block *cb, BOOL atend, recurse_check *recurses)
+  compile_block *cb, BOOL atend, recurse_check *recurses, int *countptr)
 {
 uint32_t group = 0;
 uint32_t groupinfo = 0;
@@ -1314,17 +1335,29 @@ recurse_check this_recurse;
 /* If what we are checking has already been set as "could be empty", we know
 the answer. */
 
-if (*code >= OP_SBRA && *code <= OP_SCOND) return TRUE;
+if (*code >= OP_SBRA && *code <= OP_SCOND) return CBE_EMPTY;
 
-/* If this is a capturing group, we may have the answer cached. */
+/* If this is a capturing group, we may have the answer cached, but we can only
+use this information if there are no (?| groups in the pattern, because
+otherwise group numbers are not unique. */
 
-if (*code == OP_CBRA || *code == OP_CBRAPOS)
+if ((cb->external_flags & PCRE2_DUPCAPUSED) == 0 &&
+    (*code == OP_CBRA || *code == OP_CBRAPOS))
   {
   group = GET2(code, 1 + LINK_SIZE);
   groupinfo = cb->groupinfo[group];
   if ((groupinfo & GI_SET_COULD_BE_EMPTY) != 0)
-    return (groupinfo & GI_COULD_BE_EMPTY) != 0;
+    return ((groupinfo & GI_COULD_BE_EMPTY) != 0)? CBE_EMPTY : CBE_NOTEMPTY;
   }
+
+/* A large and/or complex regex can take too long to process. We have to assume
+it can match an empty string. This can happen more often when (?| groups are
+present in the pattern and the caching is disabled. Setting the cap at 1100 
+allows the test for more than 1023 capturing patterns to work. */
+
+if ((*countptr)++ > 1100) return CBE_TOOCOMPLICATED;
+
+/* Scan the opcodes for this branch. */
 
 for (code = first_significant_code(code + PRIV(OP_lengths)[*code], TRUE);
      code < endcode;
@@ -1347,8 +1380,8 @@ for (code = first_significant_code(code + PRIV(OP_lengths)[*code], TRUE);
   /* For a recursion/subroutine call we can scan the recursion when this
   function is called at the end, to check a complete pattern. Before then,
   recursions just have the group number as their argument and in any case may
-  be forward references. In that situation, we return TRUE, just in case. It
-  means that unlimited repeats of groups that contain recursions are always
+  be forward references. In that situation, we return CBE_EMPTY, just in case.
+  It means that unlimited repeats of groups that contain recursions are always
   treated as "could be empty" - which just adds a bit more processing time
   because of the runtime check. */
 
@@ -1385,7 +1418,10 @@ for (code = first_significant_code(code + PRIV(OP_lengths)[*code], TRUE);
 
     do
       {
-      if (could_be_empty_branch(scode, endcode, utf, cb, atend, &this_recurse))
+      int rc = could_be_empty_branch(scode, endcode, utf, cb, atend,
+        &this_recurse, countptr);
+      if (rc < 0) return rc;
+      if (rc > 0)
         {
         empty_branch = TRUE;
         break;
@@ -1441,8 +1477,13 @@ for (code = first_significant_code(code + PRIV(OP_lengths)[*code], TRUE);
       empty_branch = FALSE;
       do
         {
-        if (!empty_branch && could_be_empty_branch(code, endcode, utf, cb,
-          atend, recurses)) empty_branch = TRUE;
+        if (!empty_branch)
+          {
+          int rc = could_be_empty_branch(code, endcode, utf, cb, atend,
+            recurses, countptr);
+          if (rc < 0) return rc;
+          if (rc > 0) empty_branch = TRUE;
+          }
         code += GET(code, 1);
         }
       while (*code == OP_ALT);
@@ -1663,7 +1704,7 @@ groupinfo |= GI_COULD_BE_EMPTY;
 ISFALSE:
 if (group > 0) cb->groupinfo[group] = groupinfo | GI_SET_COULD_BE_EMPTY;
 
-return (groupinfo & GI_COULD_BE_EMPTY) != 0;
+return ((groupinfo & GI_COULD_BE_EMPTY) != 0)? CBE_EMPTY : CBE_NOTEMPTY;
 }
 
 
@@ -5480,7 +5521,15 @@ for (;; ptr++)
             PCRE2_UCHAR *scode = bracode;
             do
               {
-              if (could_be_empty_branch(scode, ketcode, utf, cb, FALSE, NULL))
+              int count = 0;
+              int rc = could_be_empty_branch(scode, ketcode, utf, cb, FALSE,
+                NULL, &count);
+              if (rc < 0)
+                {
+                *errorcodeptr = ERR86;
+                goto FAILED;
+                }
+              if (rc > 0)
                 {
                 *bracode += OP_SBRA - OP_BRA;
                 break;
@@ -7594,9 +7643,10 @@ for (;;)
     if (lookbehind)
       {
       int fixed_length;
+      int count = 0;
       *code = OP_END;
       fixed_length = find_fixedlength(last_branch,  (options & PCRE2_UTF) != 0,
-        FALSE, cb, NULL);
+        FALSE, cb, NULL, &count);
       if (fixed_length == FFL_LATER)
         {
         cb->check_lookbehind = TRUE;
@@ -8733,10 +8783,11 @@ if (errorcode == 0 && cb.check_lookbehind)
     if (GET(cc, 1) == 0)
       {
       int fixed_length;
+      int count = 0;
       PCRE2_UCHAR *be = cc - 1 - LINK_SIZE + GET(cc, -LINK_SIZE);
       int end_op = *be;
       *be = OP_END;
-      fixed_length = find_fixedlength(cc, utf, TRUE, &cb, NULL);
+      fixed_length = find_fixedlength(cc, utf, TRUE, &cb, NULL, &count);
       *be = end_op;
       if (fixed_length < 0)
         {
@@ -8860,7 +8911,14 @@ can be provided to applications. */
 
 do
   {
-  if (could_be_empty_branch(codestart, code, utf, &cb, TRUE, NULL))
+  int count = 0;
+  int rc = could_be_empty_branch(codestart, code, utf, &cb, TRUE, NULL, &count);
+  if (rc < 0)
+    {
+    errorcode = ERR86;
+    goto HAD_ERROR;
+    }
+  if (rc > 0)
     {
     re->flags |= PCRE2_MATCH_EMPTY;
     break;

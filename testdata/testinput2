@@ -4626,6 +4626,20 @@ B)x/alt_verbnames,mark
 ((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))
 a)"xI
 
+# When (?| is used and groups of the same number may be different,
+# we have to rely on a count to catch overly complicated patterns.
+
+"(?|()|())(.*)
+((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))
+((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))
+((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))"xI
+
+"(?|()|())(?<=a()
+((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))
+((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))
+((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))
+a)"xI
+
 # Test the use of malloc for caching group information when there are more
 # groups than fit into the on-stack workspace.
 
@@ -4634,5 +4648,15 @@ a)"xI
 # Test minlength capped at 65535
 
 /(A{65000})\1{65000}/I
+
+# Test group scans when numbers are not unique
+
+/(?|()+|(a)+)/BI
+
+/(?|(a)+|()+)/BI
+
+/(?|()|(a))/BI
+
+/(?|(a)|())/BI
 
 # End of testinput2 

@@ -14734,6 +14734,22 @@ May match empty string
 Options: extended
 Subject length lower bound = 0
 
+# When (?| is used and groups of the same number may be different,
+# we have to rely on a count to catch overly complicated patterns.
+
+"(?|()|())(.*)
+((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))
+((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))
+((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))"xI
+Failed: error 186 at offset 148: regular expression is too complicated
+
+"(?|()|())(?<=a()
+((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))
+((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))
+((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))
+a)"xI
+Failed: error 186 at offset 154: regular expression is too complicated
+
 # Test the use of malloc for caching group information when there are more
 # groups than fit into the on-stack workspace.
 
@@ -14751,5 +14767,79 @@ Max back reference = 1
 First code unit = 'A'
 Last code unit = 'A'
 Subject length lower bound = 65535
+
+# Test group scans when numbers are not unique
+
+/(?|()+|(a)+)/BI
+------------------------------------------------------------------
+        Bra
+        Bra
+        SCBra 1
+        KetRmax
+        Alt
+        CBra 1
+        a
+        KetRmax
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+Capturing subpattern count = 1
+May match empty string
+Subject length lower bound = 0
+
+/(?|(a)+|()+)/BI
+------------------------------------------------------------------
+        Bra
+        Bra
+        CBra 1
+        a
+        KetRmax
+        Alt
+        SCBra 1
+        KetRmax
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+Capturing subpattern count = 1
+May match empty string
+Subject length lower bound = 0
+
+/(?|()|(a))/BI
+------------------------------------------------------------------
+        Bra
+        Bra
+        CBra 1
+        Ket
+        Alt
+        CBra 1
+        a
+        Ket
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+Capturing subpattern count = 1
+May match empty string
+Subject length lower bound = 0
+
+/(?|(a)|())/BI
+------------------------------------------------------------------
+        Bra
+        Bra
+        CBra 1
+        a
+        Ket
+        Alt
+        CBra 1
+        Ket
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+Capturing subpattern count = 1
+May match empty string
+Subject length lower bound = 0
 
 # End of testinput2 

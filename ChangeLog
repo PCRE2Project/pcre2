@@ -270,7 +270,11 @@ size of patterns that they are prepared to handle.
 
 79. Adding group information caching improves the speed of compiling when 
 checking whether a group has a fixed length and/or could match an empty string, 
-especially when recursion or subroutine calls are involved.
+especially when recursion or subroutine calls are involved. However, this 
+cannot be used when (?| is present in the pattern because the same number may 
+be used for groups of different sizes. To catch runaway patterns in this 
+situation, counts have been introduced to the functions that scan for empty 
+branches or compute fixed lengths.
 
 80. Allow for the possibility of the size of the nest_save structure not being
 a factor of the size of the compiling workspace (it currently is).
