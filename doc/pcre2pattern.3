@@ -1,4 +1,4 @@
-.TH PCRE2PATTERN 3 "01 November 2015" "PCRE2 10.21"
+.TH PCRE2PATTERN 3 "10 November 2015" "PCRE2 10.21"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION DETAILS"
@@ -1671,6 +1671,9 @@ first one in the pattern with the given number. The following pattern matches
 .sp
   /(?|(abc)|(def))(?1)/
 .sp
+A relative reference such as (?-1) is no different: it is just a convenient way 
+of computing an absolute group number.
+.P
 If a
 .\" HTML <a href="#conditions">
 .\" </a>
@@ -2652,6 +2655,23 @@ pattern above you can write (?-2) to refer to the second most recently opened
 parentheses preceding the recursion. In other words, a negative number counts
 capturing parentheses leftwards from the point at which it is encountered.
 .P
+Be aware however, that if 
+.\" HTML <a href="#dupsubpatternnumber">
+.\" </a>
+duplicate subpattern numbers
+.\"
+are in use, relative references refer to the earliest subpattern with the 
+appropriate number. Consider, for example:
+.sp
+  (?|(a)|(b)) (c) (?-2)
+.sp
+The first two capturing groups (a) and (b) are both numbered 1, and group (c)
+is number 2. When the reference (?-2) is encountered, the second most recently
+opened parentheses has the number 1, but it is the first such group (the (a) 
+group) to which the recursion refers. This would be the same if an absolute 
+reference (?1) was used. In other words, relative references are just a 
+shorthand for computing a group number.
+.P
 It is also possible to refer to subsequently opened parentheses, by writing
 references such as (?+2). However, these cannot be recursive because the
 reference is not inside the parentheses that are referenced. They are always
@@ -3393,6 +3413,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 01 November 2015
+Last updated: 10 November 2015
 Copyright (c) 1997-2015 University of Cambridge.
 .fi
