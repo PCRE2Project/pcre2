@@ -282,6 +282,8 @@ a factor of the size of the compiling workspace (it currently is).
 81. Check for integer overflow in minimum length calculation and cap it at 
 65535.
 
+82. Small optimizations in code for finding the minimum matching length.
+
 
 Version 10.20 30-June-2015
 --------------------------

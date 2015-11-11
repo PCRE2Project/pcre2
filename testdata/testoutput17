@@ -416,7 +416,7 @@ Failed: error -46: JIT stack limit reached
 /(a|(?R))/I
 Capturing subpattern count = 1
 May match empty string
-Subject length lower bound = 1
+Subject length lower bound = 0
 JIT compilation was successful
     abcd
  0: a (JIT)
@@ -427,7 +427,7 @@ Failed: error -46: JIT stack limit reached
 /(ab|(bc|(de|(?R))))/I
 Capturing subpattern count = 3
 May match empty string
-Subject length lower bound = 2
+Subject length lower bound = 0
 JIT compilation was successful
     abcd
  0: ab (JIT)
@@ -438,7 +438,7 @@ Failed: error -46: JIT stack limit reached
 /(ab|(bc|(de|(?1))))/I
 Capturing subpattern count = 3
 May match empty string
-Subject length lower bound = 2
+Subject length lower bound = 0
 JIT compilation was successful
     abcd
  0: ab (JIT)

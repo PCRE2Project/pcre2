@@ -3960,7 +3960,7 @@ Subject length lower bound = 3
 Capturing subpattern count = 2
 Compile options: <none>
 Overall options: anchored
-Subject length lower bound = 3
+Subject length lower bound = 2
     a=a
  0: a=a
  1: a

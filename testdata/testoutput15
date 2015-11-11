@@ -252,7 +252,7 @@ Failed: error -52: nested recursion at the same subject position
 /(a|(?R))/I
 Capturing subpattern count = 1
 May match empty string
-Subject length lower bound = 1
+Subject length lower bound = 0
     abcd
  0: a
  1: a
@@ -262,7 +262,7 @@ Failed: error -52: nested recursion at the same subject position
 /(ab|(bc|(de|(?R))))/I
 Capturing subpattern count = 3
 May match empty string
-Subject length lower bound = 2
+Subject length lower bound = 0
     abcd
  0: ab
  1: ab
@@ -272,7 +272,7 @@ Failed: error -52: nested recursion at the same subject position
 /(ab|(bc|(de|(?1))))/I
 Capturing subpattern count = 3
 May match empty string
-Subject length lower bound = 2
+Subject length lower bound = 0
     abcd
  0: ab
  1: ab

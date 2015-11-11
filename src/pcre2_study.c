@@ -104,18 +104,21 @@ recurse_check this_recurse;
 register int branchlength = 0;
 register PCRE2_UCHAR *cc = (PCRE2_UCHAR *)code + 1 + LINK_SIZE;
 
+/* If this is a "could be empty" group, its minimum length is 0. */
+
+if (*code >= OP_SBRA && *code <= OP_SCOND) return 0;
+
+/* Skip over capturing bracket number */
+
+if (*code == OP_CBRA || *code == OP_CBRAPOS) cc += IMM2_SIZE;
+
 /* A large and/or complex regex can take too long to process. */
 
 if ((*countptr)++ > 1000) return -1;
 
-/* Skip over capturing bracket number */
-
-if (*code == OP_CBRA || *code == OP_SCBRA ||
-    *code == OP_CBRAPOS || *code == OP_SCBRAPOS) cc += IMM2_SIZE;
-
-/* Scan along the opcodes for this branch. If we get to the end of the
-branch, check the length against that of the other branches. If the accumulated
-length passes 16-bits, stop and return it. */
+/* Scan along the opcodes for this branch. If we get to the end of the branch,
+check the length against that of the other branches. If the accumulated length
+passes 16-bits, stop. */
 
 for (;;)
   {
@@ -1543,24 +1546,28 @@ if ((re->overall_options & PCRE2_ANCHORED) == 0 &&
   if (rc == SSB_DONE) re->flags |= PCRE2_FIRSTMAPSET;
   }
 
-/* Find the minimum length of subject string. */
+/* Find the minimum length of subject string. If it can match an empty string, 
+the minimum length is already known. */
 
-switch(min = find_minlength(re, code, code, utf, NULL, &count))
+if ((re->flags & PCRE2_MATCH_EMPTY) == 0)
   {
-  case -1:  /* \C in UTF mode or (*ACCEPT) or over-complex regex */
-  break;    /* Leave minlength unchanged (will be zero) */
-
-  case -2:
-  return 2; /* missing capturing bracket */
-
-  case -3:
-  return 3; /* unrecognized opcode */
-
-  default:
-  if (min > UINT16_MAX) min = UINT16_MAX;
-  re->minlength = min;
-  break;
-  }
+  switch(min = find_minlength(re, code, code, utf, NULL, &count))
+    {
+    case -1:  /* \C in UTF mode or (*ACCEPT) or over-complex regex */
+    break;    /* Leave minlength unchanged (will be zero) */
+  
+    case -2:
+    return 2; /* missing capturing bracket */
+  
+    case -3:
+    return 3; /* unrecognized opcode */
+  
+    default:
+    if (min > UINT16_MAX) min = UINT16_MAX;
+    re->minlength = min;
+    break;
+    }
+  }   
 
 return 0;
 }

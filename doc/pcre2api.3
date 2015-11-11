@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "05 November 2015" "PCRE2 10.21"
+.TH PCRE2API 3 "10 November 2015" "PCRE2 10.21"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -1684,8 +1684,11 @@ value, 0 is returned.
 .sp
   PCRE2_INFO_MATCHEMPTY
 .sp
-Return 1 if the pattern can match an empty string, otherwise 0. The third
-argument should point to an \fBuint32_t\fP variable.
+Return 1 if the pattern might match an empty string, otherwise 0. The third
+argument should point to an \fBuint32_t\fP variable. When a pattern contains 
+recursive subroutine calls it is not always possible to determine whether or 
+not it can match an empty string. PCRE2 takes a cautious approach and returns 1 
+in such cases.
 .sp
   PCRE2_INFO_MATCHLIMIT
 .sp
@@ -3084,6 +3087,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 05 November 2015
+Last updated: 10 November 2015
 Copyright (c) 1997-2015 University of Cambridge.
 .fi
