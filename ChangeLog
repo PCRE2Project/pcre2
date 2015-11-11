@@ -286,6 +286,8 @@ a factor of the size of the compiling workspace (it currently is).
 
 83. Lock out configuring for EBCDIC with non-8-bit libraries.
 
+84. Test for error code <= 0 in regerror().
+
 
 Version 10.20 30-June-2015
 --------------------------

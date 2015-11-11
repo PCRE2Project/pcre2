@@ -147,7 +147,7 @@ regerror(int errcode, const regex_t *preg, char *errbuf, size_t errbuf_size)
 int used;
 const char *message;
 
-message = (errcode >= (int)(sizeof(pstring)/sizeof(char *)))?
+message = (errcode <= 0 || errcode >= (int)(sizeof(pstring)/sizeof(char *)))?
   "unknown error code" : pstring[errcode];
 
 if (preg != NULL && (int)preg->re_erroffset != -1)
