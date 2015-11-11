@@ -329,6 +329,17 @@ do
     goto EXIT;
     }
 
+  /* Paranoid check for integer overflow; surely no real call to this function
+  would ever hit this! */
+
+  if (subs == INT_MAX)
+    {
+    rc = PCRE2_ERROR_TOOMANYREPLACE;
+    goto EXIT;
+    }
+
+  /* Count substitutions and proceed */
+
   subs++;
   if (rc == 0) rc = ovector_count;
   fraglength = ovector[0] - start_offset;

@@ -288,6 +288,8 @@ a factor of the size of the compiling workspace (it currently is).
 
 84. Test for error code <= 0 in regerror().
 
+85. Check for too many replacements (more than INT_MAX) in pcre2_substitute().
+
 
 Version 10.20 30-June-2015
 --------------------------
