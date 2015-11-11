@@ -339,12 +339,16 @@ fi
 # Make sure that if enable_ebcdic is set, rebuild_chartables is also enabled.
 # Also check that UTF support is not requested, because PCRE2 cannot handle
 # EBCDIC and UTF in the same build. To do so it would need to use different
-# character constants depending on the mode.
+# character constants depending on the mode. Also, EBCDIC cannot be used with
+# 16-bit and 32-bit libraries.
 #
 if test "x$enable_ebcdic" = "xyes"; then
   enable_rebuild_chartables=yes
   if test "x$enable_unicode" = "xyes"; then
     AC_MSG_ERROR([support for EBCDIC and Unicode cannot be enabled at the same time])
+  fi
+  if test "x$enable_pcre2_16" = "xyes" -o "x$enable_pcre2_32" = "xyes"; then
+    AC_MSG_ERROR([EBCDIC support is available only for the 8-bit library]) 
   fi
 fi
 

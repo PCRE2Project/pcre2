@@ -284,6 +284,8 @@ a factor of the size of the compiling workspace (it currently is).
 
 82. Small optimizations in code for finding the minimum matching length.
 
+83. Lock out configuring for EBCDIC with non-8-bit libraries.
+
 
 Version 10.20 30-June-2015
 --------------------------

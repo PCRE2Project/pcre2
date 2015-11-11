@@ -39,7 +39,10 @@ POSSIBILITY OF SUCH DAMAGE.
 */
 
 /* We do not support both EBCDIC and Unicode at the same time. The "configure"
-script prevents both being selected, but not everybody uses "configure". */
+script prevents both being selected, but not everybody uses "configure". EBCDIC
+is only supported for the 8-bit library, but the check for this has to be later
+in this file, because the first part is not width-dependent, and is included by
+pcre2test.c with CODE_UNIT_WIDTH == 0. */
 
 #if defined EBCDIC && defined SUPPORT_UNICODE
 #error The use of both EBCDIC and SUPPORT_UNICODE is not supported.
@@ -1803,10 +1806,15 @@ typedef struct pcre2_serialized_data {
 
 #if defined PCRE2_CODE_UNIT_WIDTH && PCRE2_CODE_UNIT_WIDTH != 0
 
+/* EBCDIC is supported only for the 8-bit library. */
+
+#if defined EBCDIC && PCRE2_CODE_UNIT_WIDTH != 8
+#error EBCDIC is not supported for the 16-bit or 32-bit libraries
+#endif
+
 /* This is the largest non-UTF code point. */
 
 #define MAX_NON_UTF_CHAR (0xffffffffU >> (32 - PCRE2_CODE_UNIT_WIDTH))
-
 
 /* Internal shared data tables and variables. These are used by more than one
 of the exported public functions. They have to be "external" in the C sense,
