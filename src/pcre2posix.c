@@ -152,15 +152,15 @@ message = (errcode <= 0 || errcode >= (int)(sizeof(pstring)/sizeof(char *)))?
 
 if (preg != NULL && (int)preg->re_erroffset != -1)
   {
-  used = snprintf(errbuf, errbuf_size, "%s at offset %-6d", message, 
+  used = snprintf(errbuf, errbuf_size, "%s at offset %-6d", message,
     (int)preg->re_erroffset);
   }
 else
   {
   used = snprintf(errbuf, errbuf_size, "%s", message);
   }
-  
-return used + 1;      
+
+return used + 1;
 }
 
 
@@ -231,6 +231,13 @@ if (preg->re_pcre2_code == NULL)
 preg->re_nsub = (size_t)re_nsub;
 if ((options & PCRE2_NO_AUTO_CAPTURE) != 0) re_nsub = -1;
 preg->re_match_data = pcre2_match_data_create(re_nsub + 1, NULL);
+
+if (preg->re_match_data == NULL)
+  {
+  pcre2_code_free(preg->re_pcre2_code);
+  return REG_ESPACE;
+  }
+
 return 0;
 }
 

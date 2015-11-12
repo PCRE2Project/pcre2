@@ -445,7 +445,7 @@ typedef struct patctl {    /* Structure for pattern modifiers. */
   uint32_t  jit;
   uint32_t  stackguard_test;
   uint32_t  tables_id;
-  uint32_t  regerror_buffsize; 
+  uint32_t  regerror_buffsize;
    uint8_t  locale[LOCALESIZE];
 } patctl;
 
@@ -4427,7 +4427,7 @@ else if ((pat_patctl.control & CTL_EXPAND) != 0)
     uint8_t *pc = pp;
     uint32_t count = 1;
     size_t length = 1;
-    
+
     /* Check for replication syntax; if not found, the defaults just set will
     prevail and one character will be copied. */
 
@@ -4453,23 +4453,23 @@ else if ((pat_patctl.control & CTL_EXPAND) != 0)
             count = i;
             length = clen;
             pp = pe;
-            break; 
+            break;
             }
           }
         }
       }
 
-    /* Add to output. If the buffer is too small expand it. The function for 
-    expanding buffers always keeps buffer and pbuffer8 in step as far as their 
+    /* Add to output. If the buffer is too small expand it. The function for
+    expanding buffers always keeps buffer and pbuffer8 in step as far as their
     size goes. */
 
     while (pt + count * length > pbuffer8 + pbuffer8_size)
       {
-      size_t pc_offset = pc - buffer; 
+      size_t pc_offset = pc - buffer;
       size_t pp_offset = pp - buffer;
       size_t pt_offset = pt - pbuffer8;
       expand_input_buffers();
-      pc = buffer + pc_offset; 
+      pc = buffer + pc_offset;
       pp = buffer + pp_offset;
       pt = pbuffer8 + pt_offset;
       }
@@ -4483,9 +4483,9 @@ else if ((pat_patctl.control & CTL_EXPAND) != 0)
 
   *pt = 0;
   patlen = pt - pbuffer8;
-  
+
   if ((pat_patctl.control & CTL_INFO) != 0)
-    fprintf(outfile, "Expanded: %s\n", pbuffer8); 
+    fprintf(outfile, "Expanded: %s\n", pbuffer8);
   }
 
 /* Neither hex nor expanded, just copy the input verbatim. */
@@ -4596,20 +4596,23 @@ if ((pat_patctl.control & CTL_POSIX) != 0)
   if (rc != 0)   /* Failure */
     {
     size_t bsize, usize;
-     
+
+    preg.re_pcre2_code = NULL;     /* In case something was left in there */
+    preg.re_match_data = NULL;
+
     bsize = (pat_patctl.regerror_buffsize != 0)?
-      pat_patctl.regerror_buffsize : pbuffer8_size; 
+      pat_patctl.regerror_buffsize : pbuffer8_size;
     if (bsize + 8 < pbuffer8_size)
       memcpy(pbuffer8 + bsize, "DEADBEEF", 8);
     usize = regerror(rc, &preg, (char *)pbuffer8, bsize);
-     
+
     fprintf(outfile, "Failed: POSIX code %d: %s\n", rc, pbuffer8);
     if (usize > bsize)
       {
       fprintf(outfile, "** regerror() message truncated\n");
       if (memcmp(pbuffer8 + bsize, "DEADBEEF", 8) != 0)
-        fprintf(outfile, "** regerror() buffer overflow\n");  
-      }    
+        fprintf(outfile, "** regerror() buffer overflow\n");
+      }
     return PR_SKIP;
     }
   return PR_OK;

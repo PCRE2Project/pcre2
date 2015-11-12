@@ -293,6 +293,9 @@ a factor of the size of the compiling workspace (it currently is).
 86. Avoid the possibility of computing with an out-of-bounds pointer (though 
 not dereferencing it) while handling lookbehind assertions.
 
+87. Failure to get memory for the match data in regcomp() is now given as a 
+regcomp() error instead of waiting for regexec() to pick it up.
+
 
 Version 10.20 30-June-2015
 --------------------------
