@@ -1704,14 +1704,14 @@ for (;;)
     back a number of characters, not bytes. */
 
     case OP_REVERSE:
+    i = GET(ecode, 1);
 #ifdef SUPPORT_UNICODE
     if (utf)
       {
-      i = GET(ecode, 1);
       while (i-- > 0)
         {
+        if (eptr <= mb->start_subject) RRETURN(MATCH_NOMATCH);
         eptr--;
-        if (eptr < mb->start_subject) RRETURN(MATCH_NOMATCH);
         BACKCHAR(eptr);
         }
       }
@@ -1721,8 +1721,8 @@ for (;;)
     /* No UTF-8 support, or not in UTF-8 mode: count is byte count */
 
       {
-      eptr -= GET(ecode, 1);
-      if (eptr < mb->start_subject) RRETURN(MATCH_NOMATCH);
+      if (i > eptr - mb->start_subject) RRETURN(MATCH_NOMATCH);
+      eptr -= i;
       }
 
     /* Save the earliest consulted character, then skip to next op code */

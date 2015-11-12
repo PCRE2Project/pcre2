@@ -290,6 +290,9 @@ a factor of the size of the compiling workspace (it currently is).
 
 85. Check for too many replacements (more than INT_MAX) in pcre2_substitute().
 
+86. Avoid the possibility of computing with an out-of-bounds pointer (though 
+not dereferencing it) while handling lookbehind assertions.
+
 
 Version 10.20 30-June-2015
 --------------------------

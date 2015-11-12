@@ -433,13 +433,13 @@ move back, and set up each alternative appropriately. */
 
 if (*first_op == OP_REVERSE)
   {
-  int max_back = 0;
-  int gone_back;
+  size_t max_back = 0;
+  size_t gone_back;
 
   end_code = this_start_code;
   do
     {
-    int back = GET(end_code, 2+LINK_SIZE);
+    size_t back = GET(end_code, 2+LINK_SIZE);
     if (back > max_back) max_back = back;
     end_code += GET(end_code, 1);
     }
@@ -466,8 +466,8 @@ if (*first_op == OP_REVERSE)
   /* In byte-mode we can do this quickly. */
 
     {
-    gone_back = (current_subject - max_back < start_subject)?
-      (int)(current_subject - start_subject) : max_back;
+    size_t current_offset = (size_t)(current_subject - start_subject); 
+    gone_back = (current_offset < max_back)? current_offset : max_back;
     current_subject -= gone_back;
     }
 
@@ -481,7 +481,7 @@ if (*first_op == OP_REVERSE)
   end_code = this_start_code;
   do
     {
-    int back = GET(end_code, 2+LINK_SIZE);
+    size_t back = GET(end_code, 2+LINK_SIZE);
     if (back <= gone_back)
       {
       int bstate = (int)(end_code - start_code + 2 + 2*LINK_SIZE);
@@ -3219,7 +3219,7 @@ else
     if ((re->overall_options & PCRE2_USE_OFFSET_LIMIT) == 0)
       return PCRE2_ERROR_BADOFFSETLIMIT;
     bumpalong_limit = subject + mcontext->offset_limit;
-    } 
+    }
   mb->callout = mcontext->callout;
   mb->callout_data = mcontext->callout_data;
   mb->memctl = mcontext->memctl;
@@ -3269,10 +3269,10 @@ switch(re->newline_convention)
 
 /* Check a UTF string for validity if required. For 8-bit and 16-bit strings,
 we must also check that a starting offset does not point into the middle of a
-multiunit character. We check only the portion of the subject that is going to 
-be inspected during matching - from the offset minus the maximum back reference 
-to the given length. This saves time when a small part of a large subject is 
-being matched by the use of a starting offset. Note that the maximum lookbehind 
+multiunit character. We check only the portion of the subject that is going to
+be inspected during matching - from the offset minus the maximum back reference
+to the given length. This saves time when a small part of a large subject is
+being matched by the use of a starting offset. Note that the maximum lookbehind
 is a number of characters, not code units. */
 
 #ifdef SUPPORT_UNICODE
@@ -3281,9 +3281,9 @@ if (utf && (options & PCRE2_NO_UTF_CHECK) == 0)
   PCRE2_SPTR check_subject = start_match;  /* start_match includes offset */
 
   if (start_offset > 0)
-    { 
+    {
 #if PCRE2_CODE_UNIT_WIDTH != 32
-    unsigned int i; 
+    unsigned int i;
     if (start_match < end_subject && NOT_FIRSTCU(*start_match))
       return PCRE2_ERROR_BADUTFOFFSET;
     for (i = re->max_lookbehind; i > 0 && check_subject > subject; i--)
@@ -3295,24 +3295,24 @@ if (utf && (options & PCRE2_NO_UTF_CHECK) == 0)
 #else  /* 16-bit */
       (*check_subject & 0xfc00) == 0xdc00)
 #endif /* PCRE2_CODE_UNIT_WIDTH == 8 */
-        check_subject--; 
-      }  
+        check_subject--;
+      }
 #else   /* In the 32-bit library, one code unit equals one character. */
     check_subject -= re->max_lookbehind;
-    if (check_subject < subject) check_subject = subject; 
+    if (check_subject < subject) check_subject = subject;
 #endif  /* PCRE2_CODE_UNIT_WIDTH != 32 */
     }
-  
+
   /* Validate the relevant portion of the subject. After an error, adjust the
   offset to be an absolute offset in the whole string. */
-    
-  match_data->rc = PRIV(valid_utf)(check_subject, 
+
+  match_data->rc = PRIV(valid_utf)(check_subject,
     length - (check_subject - subject), &(match_data->startchar));
-  if (match_data->rc != 0) 
+  if (match_data->rc != 0)
     {
     match_data->startchar += check_subject - subject;
     return match_data->rc;
-    } 
+    }
   }
 #endif  /* SUPPORT_UNICODE */
 
@@ -3545,7 +3545,7 @@ for (;;)
   /* ------------ End of start of match optimizations ------------ */
 
   /* Give no match if we have passed the bumpalong limit. */
-  
+
   if (start_match > bumpalong_limit) break;
 
   /* OK, now we can do the business */
