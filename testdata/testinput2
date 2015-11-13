@@ -498,6 +498,9 @@
 /^ab\n/Igm,aftertext
     ab\nab\ncd
 
+/^/gm,newline=any
+    a\rb\nc\r\nxyz\=aftertext
+
 /abc/I
 
 /abc|bac/I
@@ -4658,5 +4661,19 @@ a)"xI
 /(?|()|(a))/BI
 
 /(?|(a)|())/BI
+
+# Test CRLF handling in empty string substitutions
+
+/^$/gm,newline=anycrlf,replace=-
+    X\r\n\r\nY
+
+/^$/gm,newline=crlf,replace=-
+    X\r\n\r\nY
+
+/^$/gm,newline=any,replace=-
+    X\r\n\r\nY
+
+"(*ANYCRLF)(?m)^(.*[^0-9\r\n].*|)$"g,replace=NaN
+    15\r\nfoo\r\n20\r\nbar\r\nbaz\r\n\r\n20
 
 # End of testinput2 

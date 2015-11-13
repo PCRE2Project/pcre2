@@ -1,4 +1,4 @@
-.TH PCRE2PATTERN 3 "10 November 2015" "PCRE2 10.21"
+.TH PCRE2PATTERN 3 "13 November 2015" "PCRE2 10.21"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION DETAILS"
@@ -671,8 +671,8 @@ below.
 This particular group matches either the two-character sequence CR followed by
 LF, or one of the single characters LF (linefeed, U+000A), VT (vertical tab,
 U+000B), FF (form feed, U+000C), CR (carriage return, U+000D), or NEL (next
-line, U+0085). The two-character sequence is treated as a single unit that
-cannot be split.
+line, U+0085). Because this is an atomic group, the two-character sequence is
+treated as a single unit that cannot be split.
 .P
 In other modes, two additional characters whose codepoints are greater than 255
 are added: LS (line separator, U+2028) and PS (paragraph separator, U+2029).
@@ -1182,6 +1182,18 @@ patterns that are anchored in single line mode because all branches start with
 ^ are not anchored in multiline mode, and a match for circumflex is possible
 when the \fIstartoffset\fP argument of \fBpcre2_match()\fP is non-zero. The
 PCRE2_DOLLAR_ENDONLY option is ignored if PCRE2_MULTILINE is set.
+.P
+When the newline convention (see
+.\" HTML <a href="#newlines">
+.\" </a>
+"Newline conventions"
+.\"
+below) recognizes the two-character sequence CRLF as a newline, this is 
+preferred, even if the single characters CR and LF are also recognized as 
+newlines. For example, if the newline convention is "any", a multiline mode
+circumflex matches before "xyz" in the string "abc\er\enxyz" rather than after
+CR, even though CR on its own is a valid newline. (It also matches at the very 
+start of the string, of course.)
 .P
 Note that the sequences \eA, \eZ, and \ez can be used to match the start and
 end of the subject in both modes, and if all branches of a pattern start with
@@ -3413,6 +3425,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 10 November 2015
+Last updated: 13 November 2015
 Copyright (c) 1997-2015 University of Cambridge.
 .fi

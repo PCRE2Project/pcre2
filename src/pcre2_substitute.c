@@ -296,8 +296,22 @@ do
     if (rc != PCRE2_ERROR_NOMATCH) goto EXIT;
     if (goptions == 0 || start_offset >= length) break;
 
+    /* Advance by one code point. Then, if CRLF is a valid newline sequence and
+    we have advanced into the middle of it, advance one more code point. In
+    other words, do not start in the middle of CRLF, even if CR and LF on their
+    own are valid newlines. */
+
     save_start = start_offset++;
-    if ((code->overall_options & PCRE2_UTF) != 0)
+    if (subject[start_offset-1] == CHAR_CR &&
+        code->newline_convention != PCRE2_NEWLINE_CR &&
+        code->newline_convention != PCRE2_NEWLINE_LF &&
+        start_offset < length &&
+        subject[start_offset] == CHAR_LF)
+      start_offset++;
+
+    /* Otherwise, in UTF mode, advance past any secondary code points. */
+
+    else if ((code->overall_options & PCRE2_UTF) != 0)
       {
 #if PCRE2_CODE_UNIT_WIDTH == 8
       while (start_offset < length && (subject[start_offset] & 0xc0) == 0x80)

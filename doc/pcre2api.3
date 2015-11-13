@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "10 November 2015" "PCRE2 10.21"
+.TH PCRE2API 3 "13 November 2015" "PCRE2 10.21"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -2729,6 +2729,11 @@ simultaneous substitutions, as this \fBpcre2test\fP example shows:
 There is an additional option, PCRE2_SUBSTITUTE_GLOBAL, which causes the
 function to iterate over the subject string, replacing every matching
 substring. If this is not set, only the first matching substring is replaced.
+If any matched substring has zero length, after the substitution has happened,
+an attempt to find a non-empty match at the same position is performed. If this 
+is not successful, the current position is advanced by one character except 
+when CRLF is a valid newline sequence and the next two characters are CR, LF.
+In this case, the current position is advanced by two characters.
 .P
 A second additional option, PCRE2_SUBSTITUTE_EXTENDED, causes extra processing
 to be applied to the replacement string. Without this option, only the dollar
@@ -3087,6 +3092,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 10 November 2015
+Last updated: 13 November 2015
 Copyright (c) 1997-2015 University of Cambridge.
 .fi
