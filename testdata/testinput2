@@ -4524,6 +4524,9 @@ B)x/alt_verbnames,mark
     1234abc\=offset_limit=7
 \= Expect no match
     1234abc\=offset_limit=6
+    
+/A/g,replace=-,use_offset_limit
+    XAXAXAXAXA\=offset_limit=4
 
 /abc/
 \= Expect error

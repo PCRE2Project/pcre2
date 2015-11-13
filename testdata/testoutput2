@@ -14587,6 +14587,10 @@ No match
 \= Expect no match
     1234abc\=offset_limit=6
 No match
+    
+/A/g,replace=-,use_offset_limit
+    XAXAXAXAXA\=offset_limit=4
+ 2: X-X-XAXAXA
 
 /abc/
 \= Expect error
