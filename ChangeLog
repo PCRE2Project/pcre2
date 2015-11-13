@@ -299,6 +299,8 @@ regcomp() error instead of waiting for regexec() to pick it up.
 88. In pcre2_substitute(), ensure that CRLF is not split when it is a valid 
 newline sequence.
 
+89. Paranoid check in regcomp() for bad error code from pcre2_compile().
+
 
 Version 10.20 30-June-2015
 --------------------------

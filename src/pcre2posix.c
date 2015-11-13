@@ -217,8 +217,13 @@ preg->re_erroffset = erroffset;
 if (preg->re_pcre2_code == NULL)
   {
   unsigned int i;
-  if (errorcode < 0) return REG_BADPAT;   /* UTF error */
+
+  /* A negative value is a UTF error; otherwise all error codes are greater
+  than COMPILE_ERROR_BASE, but check, just in case. */
+
+  if (errorcode < COMPILE_ERROR_BASE) return REG_BADPAT;
   errorcode -= COMPILE_ERROR_BASE;
+
   if (errorcode < (int)(sizeof(eint1)/sizeof(const int)))
     return eint1[errorcode];
   for (i = 0; i < sizeof(eint2)/(2*sizeof(const int)); i += 2)
