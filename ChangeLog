@@ -301,6 +301,9 @@ newline sequence.
 
 89. Paranoid check in regcomp() for bad error code from pcre2_compile().
 
+90. Run test 8 (internal offsets and code sizes) for link sizes 3 and 4 as well 
+as for link size 2.
+
 
 Version 10.20 30-June-2015
 --------------------------

@@ -631,22 +631,20 @@ for bmode in "$test8" "$test16" "$test32"; do
   fi
 
   # Test of internal offsets and code sizes. This test is run only when there
-  # is UTF/UCP support and the link size is 2. The actual tests are
-  # mostly the same as in some of the above, but in this test we inspect some
-  # offsets and sizes that require a known link size. This is a doublecheck for
-  # the maintainer, just in case something changes unexpectely. The output from
-  # this test is different in 8-bit, 16-bit, and 32-bit modes, so there are
-  # mode-specific output files.
+  # is UTF/UCP support. The actual tests are mostly the same as in some of the
+  # above, but in this test we inspect some offsets and sizes. This is a
+  # doublecheck for the maintainer, just in case something changes unexpectely.
+  # The output from this test is different in 8-bit, 16-bit, and 32-bit modes
+  # and for different link sizes, so there are different output files for each
+  # mode and link size.
 
   if [ $do8 = yes ] ; then
     echo $title8
-    if [ $link_size -ne 2 ] ; then
-      echo "  Skipped because link size is not 2"
-    elif [ $utf -eq 0 ] ; then
+    if [ $utf -eq 0 ] ; then
       echo "  Skipped because UTF-$bits support is not available"
     else
       $sim $valgrind ./pcre2test -q $defaultstack $bmode $testdata/testinput8 testtry
-      checkresult $? 8-$bits ""
+      checkresult $? 8-$bits-$link_size ""
     fi
   fi
 
