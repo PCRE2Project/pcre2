@@ -735,6 +735,7 @@ static BOOL restrict_for_perl_test = FALSE;
 static BOOL show_memory = FALSE;
 
 static int code_unit_size;                    /* Bytes */
+static int jitrc;                             /* Return from JIT compile */
 static int test_mode = DEFAULT_TEST_MODE;
 static int timeit = 0;
 static int timeitm = 0;
@@ -936,10 +937,10 @@ are supported. */
   else \
     a = pcre2_get_startchar_32(G(b,32))
 
-#define PCRE2_JIT_COMPILE(a,b) \
-  if (test_mode == PCRE8_MODE) pcre2_jit_compile_8(G(a,8),b); \
-  else if (test_mode == PCRE16_MODE) pcre2_jit_compile_16(G(a,16),b); \
-  else pcre2_jit_compile_32(G(a,32),b)
+#define PCRE2_JIT_COMPILE(r,a,b) \
+  if (test_mode == PCRE8_MODE) r = pcre2_jit_compile_8(G(a,8),b); \
+  else if (test_mode == PCRE16_MODE) r = pcre2_jit_compile_16(G(a,16),b); \
+  else r = pcre2_jit_compile_32(G(a,32),b)
 
 #define PCRE2_JIT_FREE_UNUSED_MEMORY(a) \
   if (test_mode == PCRE8_MODE) pcre2_jit_free_unused_memory_8(G(a,8)); \
@@ -1379,11 +1380,11 @@ the three different cases. */
   else \
     a = G(pcre2_get_startchar_,BITTWO)(G(b,BITTWO))
 
-#define PCRE2_JIT_COMPILE(a,b) \
+#define PCRE2_JIT_COMPILE(r,a,b) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
-    G(pcre2_jit_compile_,BITONE)(G(a,BITONE),b); \
+    r = G(pcre2_jit_compile_,BITONE)(G(a,BITONE),b); \
   else \
-    G(pcre2_jit_compile_,BITTWO)(G(a,BITTWO),b)
+    r = G(pcre2_jit_compile_,BITTWO)(G(a,BITTWO),b)
 
 #define PCRE2_JIT_FREE_UNUSED_MEMORY(a) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
@@ -1690,7 +1691,7 @@ the three different cases. */
   r = pcre2_get_error_message_8(a,G(b,8),G(G(b,8),_size))
 #define PCRE2_GET_OVECTOR_COUNT(a,b) a = pcre2_get_ovector_count_8(G(b,8))
 #define PCRE2_GET_STARTCHAR(a,b) a = pcre2_get_startchar_8(G(b,8))
-#define PCRE2_JIT_COMPILE(a,b) pcre2_jit_compile_8(G(a,8),b)
+#define PCRE2_JIT_COMPILE(r,a,b) r = pcre2_jit_compile_8(G(a,8),b)
 #define PCRE2_JIT_FREE_UNUSED_MEMORY(a) pcre2_jit_free_unused_memory_8(G(a,8))
 #define PCRE2_JIT_MATCH(a,b,c,d,e,f,g,h) \
   a = pcre2_jit_match_8(G(b,8),(PCRE2_SPTR8)c,d,e,f,G(g,8),h)
@@ -1783,7 +1784,7 @@ the three different cases. */
   r = pcre2_get_error_message_16(a,G(b,16),G(G(b,16),_size))
 #define PCRE2_GET_OVECTOR_COUNT(a,b) a = pcre2_get_ovector_count_16(G(b,16))
 #define PCRE2_GET_STARTCHAR(a,b) a = pcre2_get_startchar_16(G(b,16))
-#define PCRE2_JIT_COMPILE(a,b) pcre2_jit_compile_16(G(a,16),b)
+#define PCRE2_JIT_COMPILE(r,a,b) r = pcre2_jit_compile_16(G(a,16),b)
 #define PCRE2_JIT_FREE_UNUSED_MEMORY(a) pcre2_jit_free_unused_memory_16(G(a,16))
 #define PCRE2_JIT_MATCH(a,b,c,d,e,f,g,h) \
   a = pcre2_jit_match_16(G(b,16),(PCRE2_SPTR16)c,d,e,f,G(g,16),h)
@@ -1876,7 +1877,7 @@ the three different cases. */
   r = pcre2_get_error_message_32(a,G(b,32),G(G(b,32),_size))
 #define PCRE2_GET_OVECTOR_COUNT(a,b) a = pcre2_get_ovector_count_32(G(b,32))
 #define PCRE2_GET_STARTCHAR(a,b) a = pcre2_get_startchar_32(G(b,32))
-#define PCRE2_JIT_COMPILE(a,b) pcre2_jit_compile_32(G(a,32),b)
+#define PCRE2_JIT_COMPILE(r,a,b) r = pcre2_jit_compile_32(G(a,32),b)
 #define PCRE2_JIT_FREE_UNUSED_MEMORY(a) pcre2_jit_free_unused_memory_32(G(a,32))
 #define PCRE2_JIT_MATCH(a,b,c,d,e,f,g,h) \
   a = pcre2_jit_match_32(G(b,32),(PCRE2_SPTR32)c,d,e,f,G(g,32),h)
@@ -3976,11 +3977,22 @@ if ((pat_patctl.control & CTL_INFO) != 0)
     if (FLD(compiled_code, executable_jit) != NULL)
       fprintf(outfile, "JIT compilation was successful\n");
     else
+      {
 #ifdef SUPPORT_JIT
-      fprintf(outfile, "JIT compilation was not successful\n");
+      int len;
+      fprintf(outfile, "JIT compilation was not successful");
+      if (jitrc != 0)
+        {
+        fprintf(outfile, " (");
+        PCRE2_GET_ERROR_MESSAGE(len, jitrc, pbuffer);
+        PCHARSV(CASTVAR(void *, pbuffer), 0, len, FALSE, outfile);
+        fprintf(outfile, ")");
+        }
+      fprintf(outfile, "\n");
 #else
       fprintf(outfile, "JIT support is not available in this version of PCRE2\n");
 #endif
+      }
     }
   }
 
@@ -4191,7 +4203,7 @@ switch(cmd)
   SET(compiled_code, patstack[--patstacknext]);
   if (pat_patctl.jit != 0)
     {
-    PCRE2_JIT_COMPILE(compiled_code, pat_patctl.jit);
+    PCRE2_JIT_COMPILE(jitrc, compiled_code, pat_patctl.jit);
     }
   if ((pat_patctl.control & CTL_MEMORY) != 0) show_memory_info();
   if ((pat_patctl.control & CTL_ANYINFO) != 0)
@@ -4776,7 +4788,7 @@ if (pat_patctl.jit != 0)
         pat_patctl.options|forbid_utf, &errorcode, &erroroffset,
         use_pat_context);
       start_time = clock();
-      PCRE2_JIT_COMPILE(compiled_code, pat_patctl.jit);
+      PCRE2_JIT_COMPILE(jitrc,compiled_code, pat_patctl.jit);
       time_taken += clock() - start_time;
       }
     total_jit_compile_time += time_taken;
@@ -4786,7 +4798,7 @@ if (pat_patctl.jit != 0)
     }
   else
     {
-    PCRE2_JIT_COMPILE(compiled_code, pat_patctl.jit);
+    PCRE2_JIT_COMPILE(jitrc, compiled_code, pat_patctl.jit);
     }
   }
 
