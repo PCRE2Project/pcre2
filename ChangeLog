@@ -307,6 +307,8 @@ as for link size 2.
 91. Document that JIT has a limit on pattern size, and give more information 
 about JIT compile failures in pcre2test.
 
+92. Implement PCRE2_INFO_HASBACKSLASHC.
+
 
 Version 10.20 30-June-2015
 --------------------------

@@ -268,6 +268,7 @@ numbers must not be changed. */
 #define PCRE2_INFO_NEWLINE              20
 #define PCRE2_INFO_RECURSIONLIMIT       21
 #define PCRE2_INFO_SIZE                 22
+#define PCRE2_INFO_HASBACKSLASHC        23
 
 /* Request types for pcre2_config(). */
 

@@ -4062,4 +4062,12 @@ No match
     abc\=zero_terminate
  1: xyz
 
+/abc\Cdef/info,utf
+Capturing subpattern count = 0
+Contains \C
+Options: utf
+First code unit = 'a'
+Last code unit = 'f'
+Subject length lower bound = 0
+
 # End of testinput5 

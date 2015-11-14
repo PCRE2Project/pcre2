@@ -531,6 +531,7 @@ bytes in a code unit in that mode. */
 #define PCRE2_NOJIT         0x00080000  /* (*NOJIT) used */
 #define PCRE2_HASBKPORX     0x00100000  /* contains \P, \p, or \X */
 #define PCRE2_DUPCAPUSED    0x00200000  /* contains (?| */
+#define PCRE2_HASBKC        0x00400000  /* contains \C */
 
 #define PCRE2_MODE_MASK     (PCRE2_MODE8 | PCRE2_MODE16 | PCRE2_MODE32)
 

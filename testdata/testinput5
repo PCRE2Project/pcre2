@@ -1689,4 +1689,6 @@
 /abc/utf,replace=xyz
     abc\=zero_terminate
 
+/abc\Cdef/info,utf
+
 # End of testinput5 

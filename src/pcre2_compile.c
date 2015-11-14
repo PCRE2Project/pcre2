@@ -7287,6 +7287,7 @@ for (;; ptr++)
 
       else
         {
+        if (escape == ESC_C) cb->external_flags |= PCRE2_HASBKC; /* Record */ 
         if ((escape == ESC_b || escape == ESC_B || escape == ESC_A) &&
              cb->max_lookbehind == 0)
           cb->max_lookbehind = 1;

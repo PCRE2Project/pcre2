@@ -3745,8 +3745,9 @@ if ((pat_patctl.control & CTL_INFO) != 0)
   const uint8_t *start_bits;
   BOOL match_limit_set, recursion_limit_set;
   uint32_t backrefmax, bsr_convention, capture_count, first_ctype, first_cunit,
-    hascrorlf, jchanged, last_ctype, last_cunit, match_empty, match_limit,
-    minlength, nameentrysize, namecount, newline_convention, recursion_limit;
+    hasbackslashc, hascrorlf, jchanged, last_ctype, last_cunit, match_empty, 
+    match_limit, minlength, nameentrysize, namecount, newline_convention, 
+    recursion_limit;
 
   /* These info requests may return PCRE2_ERROR_UNSET. */
 
@@ -3786,6 +3787,7 @@ if ((pat_patctl.control & CTL_INFO) != 0)
       pattern_info(PCRE2_INFO_FIRSTBITMAP, &start_bits, FALSE) +
       pattern_info(PCRE2_INFO_FIRSTCODEUNIT, &first_cunit, FALSE) +
       pattern_info(PCRE2_INFO_FIRSTCODETYPE, &first_ctype, FALSE) +
+      pattern_info(PCRE2_INFO_HASBACKSLASHC, &hasbackslashc, FALSE) +
       pattern_info(PCRE2_INFO_HASCRORLF, &hascrorlf, FALSE) +
       pattern_info(PCRE2_INFO_JCHANGED, &jchanged, FALSE) +
       pattern_info(PCRE2_INFO_LASTCODEUNIT, &last_cunit, FALSE) +
@@ -3840,8 +3842,9 @@ if ((pat_patctl.control & CTL_INFO) != 0)
       }
     }
 
-  if (hascrorlf)   fprintf(outfile, "Contains explicit CR or LF match\n");
-  if (match_empty) fprintf(outfile, "May match empty string\n");
+  if (hascrorlf)     fprintf(outfile, "Contains explicit CR or LF match\n");
+  if (hasbackslashc) fprintf(outfile, "Contains \\C\n");
+  if (match_empty)   fprintf(outfile, "May match empty string\n");
 
   pattern_info(PCRE2_INFO_ARGOPTIONS, &compile_options, FALSE);
   pattern_info(PCRE2_INFO_ALLOPTIONS, &overall_options, FALSE);
