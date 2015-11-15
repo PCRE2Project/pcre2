@@ -6605,13 +6605,6 @@ an unsupported option is set or if JIT returns BADOPTION (which means that the
 selected normal or partial matching mode was not compiled). */
 
 #ifdef SUPPORT_JIT
-
-/* +++ TEMPORARY: JIT does not yet support offset_limit. */
-
-if (mcontext->offset_limit == PCRE2_UNSET)
-
-/* +++ */
-
 if (re->executable_jit != NULL && (options & ~PUBLIC_JIT_MATCH_OPTIONS) == 0)
   {
   rc = pcre2_jit_match(code, subject, length, start_offset, options,
