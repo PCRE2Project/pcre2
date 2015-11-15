@@ -5369,7 +5369,7 @@ if (dbuffer != NULL)
 the number of code units that will be needed (though the buffer may have to be
 extended if replication is involved). */
 
-needlen = (size_t)(len * code_unit_size);
+needlen = (size_t)((len+1) * code_unit_size);
 if (dbuffer == NULL || needlen >= dbuffer_size)
   {
   while (needlen >= dbuffer_size) dbuffer_size *= 2;
@@ -5658,28 +5658,23 @@ if (pat_patctl.replacement[0] != 0 &&
   return PR_OK;
   }
 
-/* If we have explicit valgrind support, mark the data from after its end to
-the end of the buffer as unaddressable, so that a read over the end of the
-buffer will be seen by valgrind, even if it doesn't cause a crash. If we're not
-building with valgrind support, at least move the data to the end of the buffer
-so that it might at least cause a crash. If we are using the POSIX interface,
-or testing zero-termination, we must include the terminating zero. */
+/* We now have the subject in dbuffer, with len containing the byte length, and
+ulen containing the code unit length. Move the data to the end of the buffer so
+that a read over the end can be caught by valgrind or other means. If we have
+explicit valgrind support, mark the unused start of the buffer unaddressable.
+If we are using the POSIX interface, or testing zero-termination, we must
+include the terminating zero in the usable data. */
 
-pp = dbuffer;
 c = code_unit_size * (((pat_patctl.control & CTL_POSIX) +
                        (dat_datctl.control & CTL_ZERO_TERMINATE) != 0)? 1:0);
-
+pp = memmove(dbuffer + dbuffer_size - len - c, dbuffer, len + c);
 #ifdef SUPPORT_VALGRIND
-  VALGRIND_MAKE_MEM_NOACCESS(dbuffer + len + c, dbuffer_size - (len + c));
-#else
-  pp = memmove(pp + dbuffer_size - len - c, pp, len + c);
+  VALGRIND_MAKE_MEM_NOACCESS(dbuffer, dbuffer_size - (len + c));
 #endif
 
-/* We now have len containing the byte length, ulen containing the code unit
-length, and pp pointing to the subject string. POSIX matching is only possible
-in 8-bit mode, and it does not support timing or other fancy features. Some
-were checked at compile time, but we need to check the match-time settings
-here. */
+/* Now pp points to the subject string. POSIX matching is only possible in
+8-bit mode, and it does not support timing or other fancy features. Some were
+checked at compile time, but we need to check the match-time settings here. */
 
 #ifdef SUPPORT_PCRE2_8
 if ((pat_patctl.control & CTL_POSIX) != 0)
@@ -5736,14 +5731,14 @@ if ((pat_patctl.control & CTL_POSIX) != 0)
       if (pmatch[i].rm_so >= 0)
         {
         fprintf(outfile, "%2d: ", (int)i);
-        PCHARSV(dbuffer, pmatch[i].rm_so,
+        PCHARSV(pp, pmatch[i].rm_so,
           pmatch[i].rm_eo - pmatch[i].rm_so, utf, outfile);
         fprintf(outfile, "\n");
         if ((i == 0 && (dat_datctl.control & CTL_AFTERTEXT) != 0) ||
             (dat_datctl.control & CTL_ALLAFTERTEXT) != 0)
           {
           fprintf(outfile, "%2d+ ", (int)i);
-          PCHARSV(dbuffer, pmatch[i].rm_eo, len - pmatch[i].rm_eo,
+          PCHARSV(pp, pmatch[i].rm_eo, len - pmatch[i].rm_eo,
             utf, outfile);
           fprintf(outfile, "\n");
           }

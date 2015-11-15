@@ -309,6 +309,9 @@ about JIT compile failures in pcre2test.
 
 92. Implement PCRE2_INFO_HASBACKSLASHC.
 
+93. Re-arrange valgrind support code in pcre2test to avoid spurious reports 
+with JIT (possibly caused by SSE2?).
+
 
 Version 10.20 30-June-2015
 --------------------------
