@@ -14604,6 +14604,12 @@ No match
     1234abcde\=offset_limit=4
 Failed: error -56: offset limit set without PCRE2_USE_OFFSET_LIMIT
 
+/^\w/m,use_offset_limit
+    \n..\naa\=offset_limit=3
+No match
+    \n..\naa\=offset_limit=4
+ 0: a
+
 /abcd/null_context
     abcd\=null_context
  0: abcd

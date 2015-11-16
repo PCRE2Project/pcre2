@@ -3318,6 +3318,8 @@ if (!(hascrorlf || (overall_options & PCRE2_FIRSTLINE) != 0)
     && (common->nltype == NLTYPE_ANY || common->nltype == NLTYPE_ANYCRLF || common->newline > 255))
   newlinecheck = TRUE;
 
+SLJIT_ASSERT(common->forced_quit_label == NULL);
+
 if ((overall_options & PCRE2_FIRSTLINE) != 0)
   {
   /* Search for the end of the first line. */
@@ -3357,23 +3359,25 @@ else if ((overall_options & PCRE2_USE_OFFSET_LIMIT) != 0)
   /* Check whether offset limit is set and valid. */
   SLJIT_ASSERT(common->match_end_ptr != 0);
 
-  OP1(SLJIT_MOV, TMP2, 0, ARGUMENTS, 0);
-  OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(TMP2), SLJIT_OFFSETOF(jit_arguments, offset_limit));
-  OP1(SLJIT_MOV, TMP1, 0, STR_END, 0);
-  end = CMP(SLJIT_EQUAL, TMP2, 0, SLJIT_IMM, (sljit_sw) PCRE2_UNSET);
-#if PCRE2_CODE_UNIT_WIDTH == 16
-  OP2(SLJIT_SHL, TMP2, 0, TMP2, 0, SLJIT_IMM, 1);
-#elif PCRE2_CODE_UNIT_WIDTH == 32
-  OP2(SLJIT_SHL, TMP2, 0, TMP2, 0, SLJIT_IMM, 2);
-#endif
   OP1(SLJIT_MOV, TMP1, 0, ARGUMENTS, 0);
-  OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(TMP1), SLJIT_OFFSETOF(jit_arguments, begin));
-  OP2(SLJIT_ADD, TMP1, 0, TMP1, 0, TMP2, 0);
-  end2 = CMP(SLJIT_LESS_EQUAL, TMP1, 0, STR_END, 0);
-  OP1(SLJIT_MOV, TMP1, 0, STR_END, 0);
+  OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(TMP1), SLJIT_OFFSETOF(jit_arguments, offset_limit));
+  OP1(SLJIT_MOV, TMP2, 0, STR_END, 0);
+  end = CMP(SLJIT_EQUAL, TMP1, 0, SLJIT_IMM, (sljit_sw) PCRE2_UNSET);
+  OP1(SLJIT_MOV, TMP2, 0, ARGUMENTS, 0);
+#if PCRE2_CODE_UNIT_WIDTH == 16
+  OP2(SLJIT_SHL, TMP1, 0, TMP1, 0, SLJIT_IMM, 1);
+#elif PCRE2_CODE_UNIT_WIDTH == 32
+  OP2(SLJIT_SHL, TMP1, 0, TMP1, 0, SLJIT_IMM, 2);
+#endif
+  OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(TMP2), SLJIT_OFFSETOF(jit_arguments, begin));
+  OP2(SLJIT_ADD, TMP2, 0, TMP2, 0, TMP1, 0);
+  end2 = CMP(SLJIT_LESS_EQUAL, TMP2, 0, STR_END, 0);
+  OP1(SLJIT_MOV, TMP2, 0, STR_END, 0);
   JUMPHERE(end2);
+  OP1(SLJIT_MOV, SLJIT_RETURN_REG, 0, SLJIT_IMM, PCRE2_ERROR_NOMATCH);
+  add_jump(compiler, &common->forced_quit, CMP(SLJIT_LESS, TMP2, 0, STR_PTR, 0));
   JUMPHERE(end);
-  OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), common->match_end_ptr, TMP1, 0);
+  OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), common->match_end_ptr, TMP2, 0);
   }
 
 start = JUMP(SLJIT_JUMP);
@@ -11200,7 +11204,15 @@ if ((re->overall_options & PCRE2_ANCHORED) == 0)
     /* There cannot be more newlines if PCRE2_FIRSTLINE is set. */
     if ((re->overall_options & PCRE2_FIRSTLINE) == 0)
       {
-      CMPTO(SLJIT_LESS, STR_PTR, 0, (common->match_end_ptr == 0) ? STR_END : TMP1, 0, common->ff_newline_shortcut);
+      if (common->match_end_ptr != 0)
+        {
+        OP1(SLJIT_MOV, TMP3, 0, STR_END, 0);
+        OP1(SLJIT_MOV, STR_END, 0, TMP1, 0);
+        CMPTO(SLJIT_LESS, STR_PTR, 0, TMP1, 0, common->ff_newline_shortcut);
+        OP1(SLJIT_MOV, STR_END, 0, TMP3, 0);
+        }
+      else
+        CMPTO(SLJIT_LESS, STR_PTR, 0, STR_END, 0, common->ff_newline_shortcut);
       }
     }
   else

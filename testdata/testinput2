@@ -4534,6 +4534,10 @@ B)x/alt_verbnames,mark
 \= Expect error
     1234abcde\=offset_limit=4
 
+/^\w/m,use_offset_limit
+    \n..\naa\=offset_limit=3
+    \n..\naa\=offset_limit=4
+
 /abcd/null_context
     abcd\=null_context
 \= Expect error     
