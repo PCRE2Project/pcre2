@@ -318,6 +318,9 @@ with JIT (possibly caused by SSE2?).
 by a single ASCII character in a class item, was incorrectly compiled in UCP 
 mode. The POSIX class got lost, but only if the single character followed it.
 
+96. [:punct:] in UCP mode was matching some characters in the range 128-255 
+that should not have been matched.
+
 
 Version 10.20 30-June-2015
 --------------------------

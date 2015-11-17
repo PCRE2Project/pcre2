@@ -3620,4 +3620,8 @@ No match
     x
  0: x
 
+/[[:punct:]]/utf,ucp
+    \x{b4} 
+No match
+
 # End of testinput4

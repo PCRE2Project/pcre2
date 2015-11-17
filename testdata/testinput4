@@ -2233,4 +2233,7 @@
 /[^\p{Any}]*+x/utf
     x
 
+/[[:punct:]]/utf,ucp
+    \x{b4} 
+
 # End of testinput4
