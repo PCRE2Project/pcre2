@@ -1691,4 +1691,10 @@
 
 /abc\Cdef/info,utf
 
+/a[[:punct:]b]/ucp,bincode
+
+/a[[:punct:]b]/utf,ucp,bincode
+
+/a[b[:punct:]]/utf,ucp,bincode
+
 # End of testinput5 

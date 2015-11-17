@@ -314,6 +314,10 @@ with JIT (possibly caused by SSE2?).
 
 94. Support offset_limit in JIT.
 
+95. A sequence such as [[:punct:]b] that is, a POSIX character class followed 
+by a single ASCII character in a class item, was incorrectly compiled in UCP 
+mode. The POSIX class got lost, but only if the single character followed it.
+
 
 Version 10.20 30-June-2015
 --------------------------

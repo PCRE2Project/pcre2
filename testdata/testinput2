@@ -4685,4 +4685,8 @@ a)"xI
 "(*ANYCRLF)(?m)^(.*[^0-9\r\n].*|)$"g,replace=NaN
     15\r\nfoo\r\n20\r\nbar\r\nbaz\r\n\r\n20
 
+/a[[:punct:]b]/bincode
+
+/a[b[:punct:]]/bincode
+
 # End of testinput2 
