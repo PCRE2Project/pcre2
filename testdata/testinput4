@@ -2236,4 +2236,40 @@
 /[[:punct:]]/utf,ucp
     \x{b4} 
 
+/[[:^ascii:]]/utf,ucp
+    \x{100}
+    \x{200}
+    \x{300}
+    \x{37e}
+\= Expect no match     
+    aa
+    99
+    
+/[[:^ascii:]\w]/utf,ucp
+    aa
+    99
+    gg
+    \x{100}
+    \x{200}
+    \x{300}
+    \x{37e}
+
+/[\w[:^ascii:]]/utf,ucp
+    aa
+    99
+    gg
+    \x{100}
+    \x{200}
+    \x{300}
+    \x{37e}
+
+/[^[:ascii:]\W]/utf,ucp
+    \x{100}
+    \x{200}
+\= Expect no match     
+    aa
+    99
+    gg
+    \x{37e}
+
 # End of testinput4

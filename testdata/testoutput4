@@ -3624,4 +3624,66 @@ No match
     \x{b4} 
 No match
 
+/[[:^ascii:]]/utf,ucp
+    \x{100}
+ 0: \x{100}
+    \x{200}
+ 0: \x{200}
+    \x{300}
+ 0: \x{300}
+    \x{37e}
+ 0: \x{37e}
+\= Expect no match     
+    aa
+No match
+    99
+No match
+    
+/[[:^ascii:]\w]/utf,ucp
+    aa
+ 0: a
+    99
+ 0: 9
+    gg
+ 0: g
+    \x{100}
+ 0: \x{100}
+    \x{200}
+ 0: \x{200}
+    \x{300}
+ 0: \x{300}
+    \x{37e}
+ 0: \x{37e}
+
+/[\w[:^ascii:]]/utf,ucp
+    aa
+ 0: a
+    99
+ 0: 9
+    gg
+ 0: g
+    \x{100}
+ 0: \x{100}
+    \x{200}
+ 0: \x{200}
+    \x{300}
+ 0: \x{300}
+    \x{37e}
+ 0: \x{37e}
+
+/[^[:ascii:]\W]/utf,ucp
+    \x{100}
+ 0: \x{100}
+    \x{200}
+ 0: \x{200}
+\= Expect no match     
+    aa
+No match
+    99
+No match
+    gg
+No match
+    \x{37e}
+No match
+
 # End of testinput4

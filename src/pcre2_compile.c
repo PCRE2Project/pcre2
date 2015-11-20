@@ -3857,6 +3857,7 @@ for (;; ptr++)
   {
   BOOL negate_class;
   BOOL should_flip_negation;
+  BOOL match_all_wide_chars;
   BOOL possessive_quantifier;
   BOOL is_quantifier;
   BOOL is_recurse;
@@ -4187,11 +4188,12 @@ for (;; ptr++)
       break;
       }
 
-    /* If a class contains a negative special such as \S, we need to flip the
-    negation flag at the end, so that support for characters > 255 works
-    correctly (they are all included in the class). */
+    /* If a non-extended class contains a negative special such as \S, we need
+    to flip the negation flag at the end, so that support for characters > 255
+    works correctly (they are all included in the class). An extended class may
+    need to insert specific matching code for wide characters. */
 
-    should_flip_negation = FALSE;
+    should_flip_negation = match_all_wide_chars = FALSE;
 
     /* Extended class (xclass) will be used when characters > 255
     might match. */
@@ -4345,10 +4347,23 @@ for (;; ptr++)
             ptr = tempptr + 1;
             goto CONTINUE_CLASS;
 
-            /* For all other POSIX classes, no special action is taken in UCP
-            mode. Fall through to the non_UCP case. */
+            /* For the other POSIX classes (ascii, xdigit) we are going to fall
+            through to the non-UCP case and build a bit map for characters with
+            code points less than 256. If we are in a negated POSIX class
+            within a non-negated overall class, characters with code points
+            greater than 255 must all match. In the special case where we have
+            not yet generated any xclass data, and this is the final item in
+            the overall class, we need do nothing: later on, the opcode
+            OP_NCLASS will be used to indicate that characters greater than 255
+            are acceptable. If we have already seen an xclass item or one may
+            follow (we have to assume that it might if this is not the end of
+            the class), set a flag to cause the generation of an explicit range
+            for all wide codepoints. */
 
             default:
+            if (!negate_class && local_negate &&
+                (xclass || tempptr[2] != CHAR_RIGHT_SQUARE_BRACKET))
+              match_all_wide_chars = TRUE;
             break;
             }
           }
@@ -4848,9 +4863,15 @@ for (;; ptr++)
     unless there were no property settings and there was a negated special such
     as \S in the class, and PCRE2_UCP is not set, because in that case all
     characters > 255 are in the class, so any that were explicitly given as
-    well can be ignored. If (when there are explicit characters > 255 or
-    property settings that must be listed) there are no characters < 256, we
-    can omit the bitmap in the actual compiled code. */
+    well can be ignored.
+
+    In the UCP case, if certain negated POSIX classes ([:^ascii:] or
+    {^:xdigit:]) were present in a non-negative class, we again have to match
+    all wide characters, indicated by match_all_wide_chars being true. We do
+    this by including an explicit range.
+
+    If, when generating an xclass, there are no characters < 256, we can omit
+    the bitmap in the actual compiled code. */
 
 #ifdef SUPPORT_WIDE_CHARS
 #ifdef SUPPORT_UNICODE
@@ -4860,6 +4881,13 @@ for (;; ptr++)
     if (xclass && (xclass_has_prop || !should_flip_negation))
 #endif
       {
+      if (match_all_wide_chars)
+        {
+        *class_uchardata++ = XCL_RANGE;
+        class_uchardata += PRIV(ord2utf)(0x100, class_uchardata);
+        class_uchardata += PRIV(ord2utf)(MAX_UTF_CODE_POINT,
+          class_uchardata);
+        }
       *class_uchardata++ = XCL_END;    /* Marks the end of extra data */
       *code++ = OP_XCLASS;
       code += LINK_SIZE;

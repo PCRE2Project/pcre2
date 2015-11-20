@@ -1697,4 +1697,19 @@
 
 /a[b[:punct:]]/utf,ucp,bincode
 
+/[[:^ascii:]]/utf,ucp,bincode
+
+/[[:^ascii:]\w]/utf,ucp,bincode
+
+/[\w[:^ascii:]]/utf,ucp,bincode
+
+/[^[:ascii:]\W]/utf,ucp,bincode
+    \x{de}
+    \x{200}
+\= Expect no match     
+    \x{300}
+    \x{37e}
+
+/[[:^ascii:]a]/utf,ucp,bincode
+
 # End of testinput5 

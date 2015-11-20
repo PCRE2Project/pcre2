@@ -321,6 +321,12 @@ mode. The POSIX class got lost, but only if the single character followed it.
 96. [:punct:] in UCP mode was matching some characters in the range 128-255 
 that should not have been matched.
 
+97. If [:^ascii:] or [:^xdigit:] are present in a non-negated class, all 
+characters with code points greater than 255 are in the class. When a Unicode 
+property was also in the class (if PCRE2_UCP is set, escapes such as \w are 
+turned into Unicode properties), wide characters were not correctly handled, 
+and could fail to match.
+
 
 Version 10.20 30-June-2015
 --------------------------
