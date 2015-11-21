@@ -327,6 +327,9 @@ property was also in the class (if PCRE2_UCP is set, escapes such as \w are
 turned into Unicode properties), wide characters were not correctly handled, 
 and could fail to match.
 
+98. In pcre2test, make the "startoffset" modifier a synonym of "offset", 
+because it sets the "startoffset" parameter for pcre2_match().
+
 
 Version 10.20 30-June-2015
 --------------------------

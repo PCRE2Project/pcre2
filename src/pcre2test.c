@@ -572,6 +572,7 @@ static modstruct modlist[] = {
   { "replace",             MOD_PND,  MOD_STR, REPLACE_MODSIZE,           PO(replacement) },
   { "stackguard",          MOD_PAT,  MOD_INT, 0,                         PO(stackguard_test) },
   { "startchar",           MOD_PND,  MOD_CTL, CTL_STARTCHAR,             PO(control) },
+  { "startoffset",         MOD_DAT,  MOD_INT, 0,                         DO(offset) },
   { "substitute_extended", MOD_PAT,  MOD_CTL, CTL_SUBSTITUTE_EXTENDED,   PO(control) },
   { "tables",              MOD_PAT,  MOD_INT, 0,                         PO(tables_id) },
   { "ucp",                 MOD_PATP, MOD_OPT, PCRE2_UCP,                 PO(options) },

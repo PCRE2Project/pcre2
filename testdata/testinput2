@@ -1328,7 +1328,7 @@
   ab cd\=offset=1
 
 /\b.*/Is
-  ab cd\=offset=1
+  ab cd\=startoffset=1
 
 /(?!.bcd).*/I
   Xbcd12345

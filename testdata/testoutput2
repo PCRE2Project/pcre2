@@ -5181,7 +5181,7 @@ Max lookbehind = 1
 May match empty string
 Options: dotall
 Subject length lower bound = 0
-  ab cd\=offset=1
+  ab cd\=startoffset=1
  0:  cd
 
 /(?!.bcd).*/I
