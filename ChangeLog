@@ -330,6 +330,10 @@ and could fail to match.
 98. In pcre2test, make the "startoffset" modifier a synonym of "offset", 
 because it sets the "startoffset" parameter for pcre2_match().
 
+99. If PCRE2_AUTO_CALLOUT was set on a pattern that had a (?# comment between 
+an item and its qualifier (for example, A(?#comment)?B) pcre2_compile() 
+misbehaved.
+
 
 Version 10.20 30-June-2015
 --------------------------

@@ -4001,31 +4001,47 @@ for (;; ptr++)
       }
     }
 
+  /* Skip over (?# comments. We need to do this here because we want to know if
+  the next thing is a quantifier, and these comments may come between an item
+  and its quantifier. */
+
+  if (c == CHAR_LEFT_PARENTHESIS && ptr[1] == CHAR_QUESTION_MARK &&
+      ptr[2] == CHAR_NUMBER_SIGN)
+    {
+    ptr += 3;
+    while (ptr < cb->end_pattern && *ptr != CHAR_RIGHT_PARENTHESIS) ptr++;
+    if (*ptr != CHAR_RIGHT_PARENTHESIS)
+      {
+      *errorcodeptr = ERR18;
+      goto FAILED;
+      }
+    continue;
+    }
+
   /* See if the next thing is a quantifier. */
 
   is_quantifier =
     c == CHAR_ASTERISK || c == CHAR_PLUS || c == CHAR_QUESTION_MARK ||
      (c == CHAR_LEFT_CURLY_BRACKET && is_counted_repeat(ptr+1));
 
-  /* Fill in length of a previous callout, except when the next thing is a
-  quantifier or when processing a property substitution string in UCP mode. */
+  /* Fill in length of a previous callout and create an auto callout if
+  required, except when the next thing is a quantifier or when processing a
+  property substitution string for \w etc in UCP mode. */
 
-  if (!is_quantifier && previous_callout != NULL && cb->nestptr[0] == NULL &&
-       after_manual_callout-- <= 0)
+  if (!is_quantifier && cb->nestptr[0] == NULL)
     {
-    if (lengthptr == NULL)      /* Don't attempt in pre-compile phase */
-      complete_callout(previous_callout, ptr, cb);
-    previous_callout = NULL;
-    }
+    if (previous_callout != NULL && after_manual_callout-- <= 0)
+      {
+      if (lengthptr == NULL)      /* Don't attempt in pre-compile phase */
+        complete_callout(previous_callout, ptr, cb);
+      previous_callout = NULL;
+      }
 
-  /* Create auto callout, except for quantifiers, or while processing property
-  strings that are substituted for \w etc in UCP mode. */
-
-  if ((options & PCRE2_AUTO_CALLOUT) != 0 && !is_quantifier &&
-       cb->nestptr[0] == NULL)
-    {
-    previous_callout = code;
-    code = auto_callout(code, ptr, cb);
+    if ((options & PCRE2_AUTO_CALLOUT) != 0)
+      {
+      previous_callout = code;
+      code = auto_callout(code, ptr, cb);
+      }
     }
 
   /* Process the next pattern item. */
@@ -5742,33 +5758,19 @@ for (;; ptr++)
 
 
     /* ===================================================================*/
-    /* Start of nested parenthesized sub-expression, or comment or lookahead or
-    lookbehind or option setting or condition or all the other extended
-    parenthesis forms.  We must save the current high-water-mark for the
-    forward reference list so that we know where they start for this group.
-    However, because the list may be extended when there are very many forward
-    references (usually the result of a replicated inner group), we must use
-    an offset rather than an absolute address. */
+    /* Start of nested parenthesized sub-expression, or lookahead or lookbehind
+    or option setting or condition or all the other extended parenthesis forms.
+    We must save the current high-water-mark for the forward reference list so
+    that we know where they start for this group. However, because the list may
+    be extended when there are very many forward references (usually the result
+    of a replicated inner group), we must use an offset rather than an absolute
+    address. Note that (?# comments are dealt with at the top of the loop;
+    they do not get this far. */
 
     case CHAR_LEFT_PARENTHESIS:
     ptr++;
 
-    /* First deal with comments. Putting this code right at the start ensures
-    that comments have no bad side effects. */
-
-    if (ptr[0] == CHAR_QUESTION_MARK && ptr[1] == CHAR_NUMBER_SIGN)
-      {
-      ptr += 2;
-      while (ptr < cb->end_pattern && *ptr != CHAR_RIGHT_PARENTHESIS) ptr++;
-      if (*ptr != CHAR_RIGHT_PARENTHESIS)
-        {
-        *errorcodeptr = ERR18;
-        goto FAILED;
-        }
-      continue;
-      }
-
-    /* Now deal with various "verbs" that can be introduced by '*'. */
+    /* Deal with various "verbs" that can be introduced by '*'. */
 
     if (ptr[0] == CHAR_ASTERISK && (ptr[1] == ':'
          || (MAX_255(ptr[1]) && ((cb->ctypes[ptr[1]] & ctype_letter) != 0))))

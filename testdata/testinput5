@@ -1712,4 +1712,8 @@
 
 /[[:^ascii:]a]/utf,ucp,bincode
 
+/L(?#(|++<!(2)?/B,utf,no_auto_possess,auto_callout
+
+/L(?#(|++<!(2)?/B,utf,ucp,auto_callout
+
 # End of testinput5 

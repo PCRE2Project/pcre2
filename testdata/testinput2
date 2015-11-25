@@ -4689,4 +4689,12 @@ a)"xI
 
 /a[b[:punct:]]/bincode
 
+/L(?#(|++<!(2)?/B
+
+/L(?#(|++<!(2)?/B,no_auto_possess
+
+/L(?#(|++<!(2)?/B,auto_callout
+
+/L(?#(|++<!(2)?/B,no_auto_possess,auto_callout
+
 # End of testinput2 
