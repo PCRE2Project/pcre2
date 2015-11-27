@@ -3686,4 +3686,21 @@ No match
     \x{37e}
 No match
 
+/[^[:^ascii:]\d]/utf,ucp
+    a
+ 0: a
+    ~
+ 0: ~
+    \a
+ 0: \x{07}
+    \x{7f}
+ 0: \x{7f}
+\= Expect no match
+    0
+No match
+    \x{389}
+No match
+    \x{20ac}
+No match
+
 # End of testinput4

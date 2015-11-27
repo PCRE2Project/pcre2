@@ -2272,4 +2272,14 @@
     gg
     \x{37e}
 
+/[^[:^ascii:]\d]/utf,ucp
+    a
+    ~
+    \a
+    \x{7f}
+\= Expect no match
+    0
+    \x{389}
+    \x{20ac}
+
 # End of testinput4
