@@ -1,13 +1,15 @@
 # This set of tests is for UTF-8 support and Unicode property support, with
 # relevance only for the 8-bit library.
 
-# The next 3 patterns have UTF-8 errors
+# The next 4 patterns have UTF-8 errors
 
 /[√]/utf
 
 /√/utf
 
 /√√√xxx/utf
+
+/√ÇÇÇÇÇÇÇÇ√/utf
 
 # Now test subjects
 

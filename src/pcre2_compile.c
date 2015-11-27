@@ -8468,7 +8468,7 @@ if (utf)
     }
   if ((options & PCRE2_NO_UTF_CHECK) == 0 &&
        (errorcode = PRIV(valid_utf)(pattern, patlen, erroroffset)) != 0)
-    goto HAD_ERROR;
+    goto HAD_UTF_ERROR;
   }
 
 /* Check UCP lockout. */
@@ -8849,10 +8849,11 @@ via the dreaded goto. */
 if (errorcode != 0)
   {
   HAD_ERROR:
+  *erroroffset = (int)(ptr - pattern);
+  HAD_UTF_ERROR:
+  *errorptr = errorcode;
   pcre2_code_free(re);
   re = NULL;
-  *errorptr = errorcode;
-  *erroroffset = (int)(ptr - pattern);
   goto EXIT;
   }
 

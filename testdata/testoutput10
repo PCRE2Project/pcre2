@@ -1,16 +1,19 @@
 # This set of tests is for UTF-8 support and Unicode property support, with
 # relevance only for the 8-bit library.
 
-# The next 3 patterns have UTF-8 errors
+# The next 4 patterns have UTF-8 errors
 
 /[√]/utf
-Failed: error -8 at offset 0: UTF-8 error: byte 2 top bits not 0x80
+Failed: error -8 at offset 1: UTF-8 error: byte 2 top bits not 0x80
 
 /√/utf
 Failed: error -3 at offset 0: UTF-8 error: 1 byte missing at end
 
 /√√√xxx/utf
 Failed: error -8 at offset 0: UTF-8 error: byte 2 top bits not 0x80
+
+/√ÇÇÇÇÇÇÇÇ√/utf
+Failed: error -22 at offset 2: UTF-8 error: isolated byte with 0x80 bit set
 
 # Now test subjects
 
@@ -89,7 +92,7 @@ Failed: error -20: UTF-8 error: overlong 5-byte sequence at offset 0
     \xfc\x80\x80\x80\x80\x8f
 Failed: error -21: UTF-8 error: overlong 6-byte sequence at offset 0
     \x80
-Failed: error -22: UTF-8 error: isolated 0x80 byte at offset 0
+Failed: error -22: UTF-8 error: isolated byte with 0x80 bit set at offset 0
     \xfe
 Failed: error -23: UTF-8 error: illegal byte (0xfe or 0xff) at offset 0
     \xff
@@ -1534,6 +1537,6 @@ Options: utf
 First code unit = 'x'
 Subject length lower bound = 1
     a\x80zx\=offset=3
-Failed: error -22: UTF-8 error: isolated 0x80 byte at offset 1
+Failed: error -22: UTF-8 error: isolated byte with 0x80 bit set at offset 1
 
 # End of testinput10

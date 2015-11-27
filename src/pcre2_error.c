@@ -204,7 +204,7 @@ static const char match_error_texts[] =
   /* 20 */
   "UTF-8 error: overlong 5-byte sequence\0"
   "UTF-8 error: overlong 6-byte sequence\0"
-  "UTF-8 error: isolated 0x80 byte\0"
+  "UTF-8 error: isolated byte with 0x80 bit set\0"
   "UTF-8 error: illegal byte (0xfe or 0xff)\0"
   "UTF-16 error: missing low surrogate at end\0"
   /* 25 */
