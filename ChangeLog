@@ -337,6 +337,9 @@ misbehaved. This bug was found by the LLVM fuzzer.
 100. The error for an invalid UTF pattern string always gave the code unit 
 offset as zero instead of where the invalidity was found.
 
+101. Further to 97 above, negated classes such as [^[:^ascii:]\d] were also not 
+working correctly in UCP mode.
+
 
 Version 10.20 30-June-2015
 --------------------------
