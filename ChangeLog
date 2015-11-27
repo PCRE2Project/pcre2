@@ -340,6 +340,10 @@ offset as zero instead of where the invalidity was found.
 101. Further to 97 above, negated classes such as [^[:^ascii:]\d] were also not 
 working correctly in UCP mode.
 
+102. Similar to 99 above, if an isolated \E was present between an item and its 
+qualifier when PCRE2_AUTO_CALLOUT was set, pcre2_compile() misbehaved. This bug
+was found by the LLVM fuzzer.
+
 
 Version 10.20 30-June-2015
 --------------------------

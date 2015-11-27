@@ -4697,4 +4697,6 @@ a)"xI
 
 /L(?#(|++<!(2)?/B,no_auto_possess,auto_callout
 
+/(A*)\E+/B,auto_callout
+
 # End of testinput2 
