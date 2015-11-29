@@ -1,4 +1,4 @@
-.TH PCRE2POSIX 3 "30 October 2015" "PCRE2 10.21"
+.TH PCRE2POSIX 3 "29 November 2015" "PCRE2 10.21"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "SYNOPSIS"
@@ -211,7 +211,8 @@ to have a terminating NUL located at \fIstring\fP + \fIpmatch[0].rm_eo\fP
 IEEE Standard 1003.2 (POSIX.2), and should be used with caution in software
 intended to be portable to other systems. Note that a non-zero \fIrm_so\fP does
 not imply REG_NOTBOL; REG_STARTEND affects only the location of the string, not
-how it is matched.
+how it is matched. Setting REG_STARTEND and passing \fIpmatch\fP as NULL are 
+mutually exclusive; the error REG_INVARG is returned.
 .P
 If the pattern was compiled with the REG_NOSUB flag, no data about any matched
 strings is returned. The \fInmatch\fP and \fIpmatch\fP arguments of
@@ -269,6 +270,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 30 October 2015
+Last updated: 29 November 2015
 Copyright (c) 1997-2015 University of Cambridge.
 .fi

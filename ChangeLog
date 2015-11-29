@@ -344,6 +344,9 @@ working correctly in UCP mode.
 qualifier when PCRE2_AUTO_CALLOUT was set, pcre2_compile() misbehaved. This bug
 was found by the LLVM fuzzer.
 
+103. The POSIX wrapper function regexec() crashed if the option REG_STARTEND 
+was set when the pmatch argument was NULL. It now returns REG_INVARG.
+
 
 Version 10.20 30-June-2015
 --------------------------
