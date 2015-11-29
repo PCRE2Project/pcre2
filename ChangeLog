@@ -347,6 +347,8 @@ was found by the LLVM fuzzer.
 103. The POSIX wrapper function regexec() crashed if the option REG_STARTEND 
 was set when the pmatch argument was NULL. It now returns REG_INVARG.
 
+104. Allow for up to 32-bit numbers in the ordin() function in pcre2grep.
+
 
 Version 10.20 30-June-2015
 --------------------------
