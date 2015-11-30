@@ -4699,4 +4699,7 @@ a)"xI
 
 /(A*)\E+/B,auto_callout
 
+/()\Q\E*]/B,auto_callout
+    a[bc]d
+
 # End of testinput2 

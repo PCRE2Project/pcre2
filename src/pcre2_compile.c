@@ -3947,8 +3947,16 @@ for (;; ptr++)
     last_code = code;
     }
 
-  /* If in \Q...\E, check for the end; if not, we have a literal. If not in
-  \Q...\E, an isolated \E is ignored. */
+  /* Before doing anything else we must handle all the special items that do
+  nothing, and which may come between an item and its quantifier. Otherwise,
+  when auto-callouts are enabled, a callout gets incorrectly inserted before
+  the quantifier is recognized. After recognizing a "do nothing" item, restart
+  the loop in case another one follows. */
+
+  /* If c is not NULL we are not at the end of the pattern. If it is NULL, we
+  may still be in the pattern with a NULL data item. In these cases, if we are
+  in \Q...\E, check for the \E that ends the literal string; if not, we have a
+  literal character. If not in \Q...\E, an isolated \E is ignored. */
 
   if (c != CHAR_NULL || ptr < cb->end_pattern)
     {
@@ -3958,7 +3966,7 @@ for (;; ptr++)
       ptr++;
       continue;
       }
-    else if (inescq)
+    else if (inescq)   /* Literal character */
       {
       if (previous_callout != NULL)
         {
@@ -3973,17 +3981,27 @@ for (;; ptr++)
         }
       goto NORMAL_CHAR;
       }
+
+    /* Check for the start of a \Q...\E sequence. We must do this here rather
+    than later in case it is immediately followed by \E, which turns it into a
+    "do nothing" sequence. */
+
+    if (c == CHAR_BACKSLASH && ptr[1] == CHAR_Q)
+      {
+      inescq = TRUE;
+      ptr++;
+      continue;
+      }
     }
 
-  /* In extended mode, skip white space and comments. We need a loop in order
-  to check for more white space and more comments after a comment. */
+  /* In extended mode, skip white space and #-comments that end at newline. */
 
   if ((options & PCRE2_EXTENDED) != 0)
     {
-    for (;;)
+    PCRE2_SPTR wscptr = ptr;
+    while (MAX_255(c) && (cb->ctypes[c] & ctype_space) != 0) c = *(++ptr);
+    if (c == CHAR_NUMBER_SIGN)
       {
-      while (MAX_255(c) && (cb->ctypes[c] & ctype_space) != 0) c = *(++ptr);
-      if (c != CHAR_NUMBER_SIGN) break;
       ptr++;
       while (*ptr != CHAR_NULL)
         {
@@ -3997,13 +4015,19 @@ for (;; ptr++)
         if (utf) FORWARDCHAR(ptr);
 #endif
         }
-      c = *ptr;     /* Either NULL or the char after a newline */
+      }
+
+    /* If we skipped any characters, restart the loop. Otherwise, we didn't see
+    a comment. */
+
+    if (ptr > wscptr)
+      {
+      ptr--;
+      continue;
       }
     }
 
-  /* Skip over (?# comments. We need to do this here because we want to know if
-  the next thing is a quantifier, and these comments may come between an item
-  and its quantifier. */
+  /* Skip over (?# comments. */
 
   if (c == CHAR_LEFT_PARENTHESIS && ptr[1] == CHAR_QUESTION_MARK &&
       ptr[2] == CHAR_NUMBER_SIGN)
@@ -4018,7 +4042,8 @@ for (;; ptr++)
     continue;
     }
 
-  /* See if the next thing is a quantifier. */
+  /* End of processing "do nothing" items. See if the next thing is a
+  quantifier. */
 
   is_quantifier =
     c == CHAR_ASTERISK || c == CHAR_PLUS || c == CHAR_QUESTION_MARK ||
@@ -7133,7 +7158,10 @@ for (;; ptr++)
     are negative the reference number. Only back references and those types
     that consume a character may be repeated. We can test for values between
     ESC_b and ESC_Z for the latter; this may have to change if any new ones are
-    ever created. */
+    ever created.
+
+    Note: \Q and \E are handled at the start of the character-processing loop,
+    not here. */
 
     case CHAR_BACKSLASH:
     tempptr = ptr;
@@ -7145,16 +7173,6 @@ for (;; ptr++)
       c = ec;
     else
       {
-      if (escape == ESC_Q)            /* Handle start of quoted string */
-        {
-        if (ptr[1] == CHAR_BACKSLASH && ptr[2] == CHAR_E)
-          ptr += 2;               /* avoid empty string */
-            else inescq = TRUE;
-        continue;
-        }
-
-      if (escape == ESC_E) continue;  /* Perl ignores an orphan \E */
-
       /* For metasequences that actually match a character, we disable the
       setting of a first character if it hasn't already been set. */
 

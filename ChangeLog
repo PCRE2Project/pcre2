@@ -349,6 +349,10 @@ was set when the pmatch argument was NULL. It now returns REG_INVARG.
 
 104. Allow for up to 32-bit numbers in the ordin() function in pcre2grep.
 
+105. An empty \Q\E sequence between an item and its qualifier caused 
+pcre2_compile() to misbehave when auto callouts were enabled. This bug
+was found by the LLVM fuzzer.
+
 
 Version 10.20 30-June-2015
 --------------------------
