@@ -3013,15 +3013,14 @@ for (; ptr < cb->end_pattern; ptr++)
     {
     if (x == CHAR_RIGHT_PARENTHESIS) break;
 
-    /* Skip over comments and whitespace in extended mode. Need a loop to
-    handle whitespace after a comment. */
+    /* Skip over comments and whitespace in extended mode. */
 
     if ((options & PCRE2_EXTENDED) != 0)
       {
-      for (;;)
-        {
-        while (MAX_255(x) && (cb->ctypes[x] & ctype_space) != 0) x = *(++ptr);
-        if (x != CHAR_NUMBER_SIGN) break;
+      PCRE2_SPTR wscptr = ptr; 
+      while (MAX_255(x) && (cb->ctypes[x] & ctype_space) != 0) x = *(++ptr);
+      if (x == CHAR_NUMBER_SIGN)
+        { 
         ptr++;
         while (*ptr != CHAR_NULL)
           {
@@ -3035,9 +3034,15 @@ for (; ptr < cb->end_pattern; ptr++)
           if (utf) FORWARDCHAR(ptr);
 #endif
           }
-        x = *ptr;     /* Either NULL or the char after a newline */
+        }   
+      
+      /* If we have skipped any characters, restart the loop. */
+       
+      if (ptr > wscptr)
+        {
+        ptr--;
+        continue;
         }
-      if (ptr >= cb->end_pattern) break;
       }
 
     /* Process escapes */

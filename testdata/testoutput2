@@ -14979,4 +14979,23 @@ Subject length lower bound = 0
  0: ]
  1: 
 
+/\x8a+f|;T?(*:;.'?`(\xeap ){![^()!y*''C*(?';]{1;(\x08)/B,alt_verbnames,dupnames,extended
+------------------------------------------------------------------
+        Bra
+        \x{8a}++
+        f
+        Alt
+        ;
+        T?
+        *MARK ;.'?`(\x{ea}p
+        {!
+        [\x00- "-&+-:<->@-BD-xz-\xff] (neg)
+        {1;
+        CBra 1
+        \x08
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+
 # End of testinput2 

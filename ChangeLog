@@ -353,6 +353,11 @@ was set when the pmatch argument was NULL. It now returns REG_INVARG.
 pcre2_compile() to misbehave when auto callouts were enabled. This bug
 was found by the LLVM fuzzer.
 
+106. If both PCRE2_ALT_VERBNAMES and PCRE2_EXTENDED were set, and a (*MARK) or 
+other verb "name" ended with whitespace immediately before the closing 
+parenthesis, pcre2_compile() misbehaved. Example: /(*:abc )/, but only when 
+both those options were set.
+
 
 Version 10.20 30-June-2015
 --------------------------
