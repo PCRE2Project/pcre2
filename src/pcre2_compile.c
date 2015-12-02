@@ -3017,12 +3017,12 @@ for (; ptr < cb->end_pattern; ptr++)
 
     if ((options & PCRE2_EXTENDED) != 0)
       {
-      PCRE2_SPTR wscptr = ptr; 
+      PCRE2_SPTR wscptr = ptr;
       while (MAX_255(x) && (cb->ctypes[x] & ctype_space) != 0) x = *(++ptr);
       if (x == CHAR_NUMBER_SIGN)
-        { 
+        {
         ptr++;
-        while (*ptr != CHAR_NULL)
+        while (*ptr != CHAR_NULL || ptr < cb->end_pattern)
           {
           if (IS_NEWLINE(ptr))       /* For non-fixed-length newline cases, */
             {                        /* IS_NEWLINE sets cb->nllen. */
@@ -3034,10 +3034,10 @@ for (; ptr < cb->end_pattern; ptr++)
           if (utf) FORWARDCHAR(ptr);
 #endif
           }
-        }   
-      
+        }
+
       /* If we have skipped any characters, restart the loop. */
-       
+
       if (ptr > wscptr)
         {
         ptr--;
@@ -4008,7 +4008,7 @@ for (;; ptr++)
     if (c == CHAR_NUMBER_SIGN)
       {
       ptr++;
-      while (*ptr != CHAR_NULL)
+      while (ptr < cb->end_pattern)
         {
         if (IS_NEWLINE(ptr))         /* For non-fixed-length newline cases, */
           {                          /* IS_NEWLINE sets cb->nllen. */
@@ -5044,7 +5044,7 @@ for (;; ptr++)
         while (MAX_255(*p) && (cb->ctypes[*p] & ctype_space) != 0) p++;
         if (*p != CHAR_NUMBER_SIGN) break;
         p++;
-        while (*p != CHAR_NULL)
+        while (ptr < cb->end_pattern)
           {
           if (IS_NEWLINE(p))         /* For non-fixed-length newline cases, */
             {                        /* IS_NEWLINE sets cb->nllen. */
@@ -5832,7 +5832,7 @@ for (;; ptr++)
         if ((options & PCRE2_ALT_VERBNAMES) == 0)
           {
           arglen = 0;
-          while (*ptr != CHAR_NULL && *ptr != CHAR_RIGHT_PARENTHESIS)
+          while (ptr < cb->end_pattern && *ptr != CHAR_RIGHT_PARENTHESIS)
             {
             ptr++;                                /* Check length as we go */
             arglen++;                             /* along, to avoid the   */

@@ -358,6 +358,14 @@ other verb "name" ended with whitespace immediately before the closing
 parenthesis, pcre2_compile() misbehaved. Example: /(*:abc )/, but only when 
 both those options were set.
 
+107. In a number of places pcre2_compile() was not handling NULL characters
+correctly, and pcre2test with the "bincode" modifier was not always correctly
+displaying fields containing NULLS:
+
+   (a) Within /x extended #-comments
+   (b) Within the "name" part of (*MARK) and other *verbs 
+   (c) Within the text argument of a callout 
+
 
 Version 10.20 30-June-2015
 --------------------------

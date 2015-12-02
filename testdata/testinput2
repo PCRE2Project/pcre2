@@ -4704,4 +4704,24 @@ a)"xI
 
 /\x8a+f|;T?(*:;.'?`(\xeap ){![^()!y*''C*(?';]{1;(\x08)/B,alt_verbnames,dupnames,extended
 
+# Tests for NULL characters in comments and verb "names" and callouts
+
+# /A#B\x00C\x0aZ/
+/41 23 42 00 43 0a 5a/Bx,hex
+
+# /A+#B\x00C\x0a+/
+/41 2b 23 42 00 43 0a 2b/Bx,hex
+
+# /A(*:B\x00W#X\00Y\x0aC)Z/
+/41 28 2a 3a 42 00 57 23 58 00 59 0a 43 29 5a/Bx,hex,alt_verbnames
+
+# /A(*:B\x00W#X\00Y\x0aC)Z/
+/41 28 2a 3a 42 00 57 23 58 00 59 0a 43 29 5a/Bx,hex
+
+# /A(?C{X\x00Y})B/
+/41 28 3f 43 7b 58 00 59 7d 29 42/B,hex
+
+# /A(?#X\x00Y)B/
+/41 28 3f 23 7b 00 7d 29 42/B,hex
+
 # End of testinput2 
