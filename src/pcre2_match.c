@@ -2408,8 +2408,9 @@ for (;;)
     ecode++;
     break;
 
-    /* Match a single byte, even in UTF-8 mode. This opcode really does match
-    any byte, even newline, independent of the setting of PCRE2_DOTALL. */
+    /* Match a single code unit, even in UTF-8 mode. This opcode really does
+    match any code unit, even newline. (It really should be called ANYCODEUNIT, 
+    of course - the byte name is from pre-16 bit days.) */
 
     case OP_ANYBYTE:
     if (eptr >= mb->end_subject)   /* DO NOT merge the eptr++ here; it must */
