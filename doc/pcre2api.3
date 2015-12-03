@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "21 November 2015" "PCRE2 10.21"
+.TH PCRE2API 3 "03 December 2015" "PCRE2 10.21"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -1565,11 +1565,10 @@ are as follows:
 Return a copy of the pattern's options. The third argument should point to a
 \fBuint32_t\fP variable. PCRE2_INFO_ARGOPTIONS returns exactly the options that
 were passed to \fBpcre2_compile()\fP, whereas PCRE2_INFO_ALLOPTIONS returns
-the compile options as modified by any top-level option settings at the start
-of the pattern itself. In other words, they are the options that will be in
-force when matching starts. For example, if the pattern /(?im)abc(?-i)d/ is
-compiled with the PCRE2_EXTENDED option, the result is PCRE2_CASELESS,
-PCRE2_MULTILINE, and PCRE2_EXTENDED.
+the compile options as modified by any top-level option settings such as (*UTF) 
+at the start of the pattern itself. For example, if the pattern /(*UTF)abc/ is
+compiled with the PCRE2_EXTENDED option, the result is PCRE2_EXTENDED and
+PCRE2_UTF.
 .P
 A pattern compiled without PCRE2_ANCHORED is automatically anchored by PCRE2 if
 the first significant item in every top-level branch is one of the following:
@@ -3101,6 +3100,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 21 November 2015
+Last updated: 03 December 2015
 Copyright (c) 1997-2015 University of Cambridge.
 .fi

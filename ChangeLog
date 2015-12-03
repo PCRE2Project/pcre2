@@ -370,7 +370,11 @@ displaying fields containing NULLS:
 space or a #-type comment that was followed by (?-x), which turns off 
 PCRE2_EXTENDED, and there was no subsequent (?x) to turn it on again,
 pcre2_compile() assumed that (?-x) applied to the whole pattern and
-consequently mis-compiled it. This bug was found by the LLVM fuzzer.
+consequently mis-compiled it. This bug was found by the LLVM fuzzer. The fix 
+for this bug means that a setting of any of the (?imsxU) options at the start 
+of a pattern is no longer transferred to the options that are returned by 
+PCRE2_INFO_ALLOPTIONS. In fact, this was an anachronism that should have 
+changed when the effects of those options were all moved to compile time.
 
 
 Version 10.20 30-June-2015
