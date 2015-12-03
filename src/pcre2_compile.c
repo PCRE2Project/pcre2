@@ -6862,44 +6862,16 @@ for (;; ptr++)
         newoptions = (options | set) & (~unset);
 
         /* If the options ended with ')' this is not the start of a nested
-        group with option changes, so the options change at this level. If this
-        item is right at the start of the pattern, the options can be
-        abstracted and made external in the pre-compile phase, and ignored in
-        the compile phase. This can be helpful when matching -- for instance in
-        caseless checking of required bytes.
-
-        If the code pointer is not (cb->start_code + 1 + LINK_SIZE), we are
-        definitely *not* at the start of the pattern because something has been
-        compiled. In the pre-compile phase, however, the code pointer can have
-        that value after the start, because it gets reset as code is discarded
-        during the pre-compile. However, this can happen only at top level - if
-        we are within parentheses, the starting BRA will still be present. At
-        any parenthesis level, the length value can be used to test if anything
-        has been compiled at that level. Thus, a test for both these conditions
-        is necessary to ensure we correctly detect the start of the pattern in
-        both phases.
-
-        If we are not at the pattern start, reset the greedy defaults and the
-        case value for firstcu and reqcu. */
+        group with option changes, so the options change at this level. They
+        must also be passed back for use in subsequent branches. Reset the
+        greedy defaults and the case value for firstcu and reqcu. */
 
         if (*ptr == CHAR_RIGHT_PARENTHESIS)
           {
-          if (code == cb->start_code + 1 + LINK_SIZE &&
-               (lengthptr == NULL || *lengthptr == 2 + 2*LINK_SIZE))
-            {
-            cb->external_options = newoptions;
-            }
-          else
-            {
-            greedy_default = ((newoptions & PCRE2_UNGREEDY) != 0);
-            greedy_non_default = greedy_default ^ 1;
-            req_caseopt = ((newoptions & PCRE2_CASELESS) != 0)? REQ_CASELESS:0;
-            }
-
-          /* Change options at this level, and pass them back for use
-          in subsequent branches. */
-
           *optionsptr = options = newoptions;
+          greedy_default = ((newoptions & PCRE2_UNGREEDY) != 0);
+          greedy_non_default = greedy_default ^ 1;
+          req_caseopt = ((newoptions & PCRE2_CASELESS) != 0)? REQ_CASELESS:0;
           previous = NULL;       /* This item can't be repeated */
           continue;              /* It is complete */
           }

@@ -431,8 +431,6 @@ Subject length lower bound = 2
 
 /(?U)<.*>/I
 Capturing subpattern count = 0
-Compile options: <none>
-Overall options: ungreedy
 First code unit = '<'
 Last code unit = '>'
 Subject length lower bound = 2
@@ -459,8 +457,6 @@ Subject length lower bound = 3
 
 /(?U)={3,}?/I
 Capturing subpattern count = 0
-Compile options: <none>
-Overall options: ungreedy
 First code unit = '='
 Last code unit = '='
 Subject length lower bound = 3
@@ -494,8 +490,6 @@ Failed: error 125 at offset 12: lookbehind assertion is not fixed length
 
 /(?i)abc/I
 Capturing subpattern count = 0
-Compile options: <none>
-Overall options: caseless
 First code unit = 'a' (caseless)
 Last code unit = 'c' (caseless)
 Subject length lower bound = 3
@@ -508,7 +502,7 @@ Subject length lower bound = 1
 /(?i)^1234/I
 Capturing subpattern count = 0
 Compile options: <none>
-Overall options: anchored caseless
+Overall options: anchored
 Subject length lower bound = 4
 
 /(^b|(?i)^d)/I
@@ -521,7 +515,7 @@ Subject length lower bound = 1
 Capturing subpattern count = 0
 May match empty string
 Compile options: <none>
-Overall options: anchored dotall
+Overall options: anchored
 Subject length lower bound = 0
 
 /[abcd]/I
@@ -531,15 +525,11 @@ Subject length lower bound = 1
 
 /(?i)[abcd]/I
 Capturing subpattern count = 0
-Compile options: <none>
-Overall options: caseless
 Starting code units: A B C D a b c d 
 Subject length lower bound = 1
 
 /(?m)[xy]|(b|c)/I
 Capturing subpattern count = 1
-Compile options: <none>
-Overall options: multiline
 Starting code units: b c x y 
 Subject length lower bound = 1
 
@@ -551,8 +541,7 @@ Subject length lower bound = 1
 
 /(?i)(^a|^b)/Im
 Capturing subpattern count = 1
-Compile options: multiline
-Overall options: caseless multiline
+Options: multiline
 First code unit at start or follows newline
 Subject length lower bound = 1
 
@@ -1153,7 +1142,7 @@ Subject length lower bound = 1
 ------------------------------------------------------------------
 Capturing subpattern count = 1
 Compile options: <none>
-Overall options: anchored dotall
+Overall options: anchored
 Subject length lower bound = 1
 
 /(?s:.*X|^B)/IB
@@ -2682,8 +2671,7 @@ No match
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
-Compile options: extended
-Overall options: caseless extended
+Options: extended
 First code unit = 'a' (caseless)
 Last code unit = 'c' (caseless)
 Subject length lower bound = 3
@@ -2697,8 +2685,7 @@ Subject length lower bound = 3
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
-Compile options: extended
-Overall options: caseless extended
+Options: extended
 First code unit = 'a' (caseless)
 Last code unit = 'c' (caseless)
 Subject length lower bound = 3
@@ -3043,8 +3030,6 @@ Subject length lower bound = 3
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
-Compile options: <none>
-Overall options: ungreedy
 First code unit = 'x'
 Last code unit = 'b'
 Subject length lower bound = 3
@@ -3427,8 +3412,6 @@ Subject length lower bound = 1
 
 /(?i)[ab]/I
 Capturing subpattern count = 0
-Compile options: <none>
-Overall options: caseless
 Starting code units: A B a b 
 Subject length lower bound = 1
 
@@ -5841,7 +5824,7 @@ Named capturing subpatterns:
   A   2
   A   3
 Compile options: <none>
-Overall options: anchored dupnames
+Overall options: anchored
 Duplicate name status changes
 Subject length lower bound = 2
     a1b\=copy=A
@@ -13734,7 +13717,7 @@ Subject length lower bound = 1
 /(*NO_DOTSTAR_ANCHOR)(?s).*\d/info
 Capturing subpattern count = 0
 Compile options: <none>
-Overall options: dotall no_dotstar_anchor
+Overall options: no_dotstar_anchor
 Subject length lower bound = 1
 
 '^(?:(a)|b)(?(1)A|B)'
@@ -15059,5 +15042,16 @@ Subject length lower bound = 0
         Ket
         End
 ------------------------------------------------------------------
+
+# Tests for leading comment in extended patterns
+
+/ (?-x):?/extended
+
+/(?-x):?/extended
+
+/0b 28 3f 2d 78 29 3a/hex,extended
+
+/#comment
+(?-x):?/extended
 
 # End of testinput2 

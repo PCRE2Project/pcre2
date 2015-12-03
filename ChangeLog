@@ -365,6 +365,12 @@ displaying fields containing NULLS:
    (a) Within /x extended #-comments
    (b) Within the "name" part of (*MARK) and other *verbs 
    (c) Within the text argument of a callout 
+   
+108. If a pattern that was compiled with PCRE2_EXTENDED started with white 
+space or a #-type comment that was followed by (?-x), which turns off 
+PCRE2_EXTENDED, and there was no subsequent (?x) to turn it on again,
+pcre2_compile() assumed that (?-x) applied to the whole pattern and
+consequently mis-compiled it. This bug was found by the LLVM fuzzer.
 
 
 Version 10.20 30-June-2015

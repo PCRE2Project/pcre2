@@ -4724,4 +4724,15 @@ a)"xI
 # /A(?#X\x00Y)B/
 /41 28 3f 23 7b 00 7d 29 42/B,hex
 
+# Tests for leading comment in extended patterns
+
+/ (?-x):?/extended
+
+/(?-x):?/extended
+
+/0b 28 3f 2d 78 29 3a/hex,extended
+
+/#comment
+(?-x):?/extended
+
 # End of testinput2 
