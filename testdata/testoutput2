@@ -15054,4 +15054,7 @@ Subject length lower bound = 0
 /#comment
 (?-x):?/extended
 
+/(8(*:6^\x09x\xa6l\)6!|\xd0:[^:|)\x09d\Z\d{85*m(?'(?<1!)*\W[*\xff]!!h\w]*\xbe;/alt_bsux,alt_verbnames,allow_empty_class,dollar_endonly,extended,multiline,never_utf,no_dotstar_anchor,no_start_optimize
+Failed: error 124 at offset 49: letter or underscore expected after (?< or (?'
+
 # End of testinput2 

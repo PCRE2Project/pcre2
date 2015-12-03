@@ -376,6 +376,10 @@ of a pattern is no longer transferred to the options that are returned by
 PCRE2_INFO_ALLOPTIONS. In fact, this was an anachronism that should have 
 changed when the effects of those options were all moved to compile time.
 
+109. An escaped closing parenthesis in the "name" part of a (*verb) when 
+PCRE2_ALT_VERBNAMES was set caused pcre2_compile() to malfunction. This bug
+was found by the LLVM fuzzer.
+
 
 Version 10.20 30-June-2015
 --------------------------

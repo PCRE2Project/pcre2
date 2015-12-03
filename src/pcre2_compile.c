@@ -2978,6 +2978,7 @@ Arguments:
   ptrptr        pointer to the input pointer
   codeptr       pointer to the compiled code pointer
   errorcodeptr  pointer to the error code
+  options       the options bits
   utf           TRUE if processing UTF
   cb            compile data block
 
@@ -3375,10 +3376,29 @@ for (; ptr < cb->end_pattern; ptr++)
         {
         if ((options & PCRE2_NO_AUTO_CAPTURE) == 0) cb->bracount++;
         }
-      else  /* (*something) - just skip to closing ket */
+
+      /* (*something) - just skip to closing ket unless PCRE2_ALT_VERBNAMES is
+      set, in which case we have to process escapes in the string after the
+      name. */
+
+      else
         {
         ptr += 2;
-        while (ptr < cb->end_pattern && *ptr != CHAR_RIGHT_PARENTHESIS) ptr++;
+        while (MAX_255(*ptr) && (cb->ctypes[*ptr] & ctype_word) != 0) ptr++;
+        if (*ptr == CHAR_COLON)
+          {
+          ptr++;
+          if ((options & PCRE2_ALT_VERBNAMES) != 0)
+            {
+            if (process_verb_name(&ptr, NULL, &errorcode, options, utf, cb) < 0)
+              goto FAILED;
+            }
+          else
+            {
+            while (ptr < cb->end_pattern && *ptr != CHAR_RIGHT_PARENTHESIS)
+              ptr++;
+            }
+          }
         nest_depth--;
         }
       }
