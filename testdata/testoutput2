@@ -14648,6 +14648,10 @@ Failed: error -58 at offset 7 in replacement: expected closing curly bracket in 
     abcd
 Failed: error -57 at offset 8 in replacement: bad escape sequence in replacement string
 
+/(abcd)/
+    abcd\=replace=${1:+xy\kz},substitute_extended
+Failed: error -57 at offset 8 in replacement: bad escape sequence in replacement string
+
 /abcd/substitute_extended,replace=>$1<
     abcd
 Failed: error -49 at offset 3 in replacement: unknown substring
@@ -15056,5 +15060,29 @@ Subject length lower bound = 0
 
 /(8(*:6^\x09x\xa6l\)6!|\xd0:[^:|)\x09d\Z\d{85*m(?'(?<1!)*\W[*\xff]!!h\w]*\xbe;/alt_bsux,alt_verbnames,allow_empty_class,dollar_endonly,extended,multiline,never_utf,no_dotstar_anchor,no_start_optimize
 Failed: error 124 at offset 49: letter or underscore expected after (?< or (?'
+
+/a|(b)c/replace=>$1<,substitute_unset_empty
+    cat
+ 1: c><t
+    xbcom 
+ 1: x>b<om
+
+/a|(b)c/
+    cat\=replace=>$1<
+Failed: error -55 at offset 3 in replacement: requested value is not set
+    cat\=replace=>$1<,substitute_unset_empty
+ 1: c><t
+    xbcom\=replace=>$1<,substitute_unset_empty
+ 1: x>b<om
+
+/a|(?'X'b)c/replace=>$X<,substitute_unset_empty
+    cat
+ 1: c><t
+    xbcom 
+ 1: x>b<om
+
+/a|(b)c/replace=>$2<,substitute_unset_empty
+    cat
+Failed: error -49 at offset 3 in replacement: unknown substring
 
 # End of testinput2 

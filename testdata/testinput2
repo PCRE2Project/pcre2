@@ -4576,6 +4576,9 @@ B)x/alt_verbnames,mark
 /(abcd)/replace=${1:+xy\kz},substitute_extended
     abcd
 
+/(abcd)/
+    abcd\=replace=${1:+xy\kz},substitute_extended
+
 /abcd/substitute_extended,replace=>$1<
     abcd
 
@@ -4736,5 +4739,21 @@ a)"xI
 (?-x):?/extended
 
 /(8(*:6^\x09x\xa6l\)6!|\xd0:[^:|)\x09d\Z\d{85*m(?'(?<1!)*\W[*\xff]!!h\w]*\xbe;/alt_bsux,alt_verbnames,allow_empty_class,dollar_endonly,extended,multiline,never_utf,no_dotstar_anchor,no_start_optimize
+
+/a|(b)c/replace=>$1<,substitute_unset_empty
+    cat
+    xbcom 
+
+/a|(b)c/
+    cat\=replace=>$1<
+    cat\=replace=>$1<,substitute_unset_empty
+    xbcom\=replace=>$1<,substitute_unset_empty
+
+/a|(?'X'b)c/replace=>$X<,substitute_unset_empty
+    cat
+    xbcom 
+
+/a|(b)c/replace=>$2<,substitute_unset_empty
+    cat
 
 # End of testinput2 

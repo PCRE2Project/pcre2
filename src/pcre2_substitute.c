@@ -197,6 +197,7 @@ BOOL match_data_created = FALSE;
 BOOL global = FALSE;
 BOOL extended = FALSE;
 BOOL literal = FALSE;
+BOOL uempty = FALSE;    /* Unset/unknown groups => empty string */
 #ifdef SUPPORT_UNICODE
 BOOL utf = (code->overall_options & PCRE2_UTF) != 0;
 #endif
@@ -260,6 +261,12 @@ if ((options & PCRE2_SUBSTITUTE_EXTENDED) != 0)
   {
   options &= ~PCRE2_SUBSTITUTE_EXTENDED;
   extended = TRUE;
+  }
+
+if ((options & PCRE2_SUBSTITUTE_UNSET_EMPTY) != 0)
+  {
+  options &= ~PCRE2_SUBSTITUTE_UNSET_EMPTY;
+  uempty = TRUE;
   }
 
 /* Copy up to the start offset */
@@ -471,7 +478,6 @@ do
 
       if (inparens)
         {
-
         if (extended && !star && ptr < repend - 2 && next == CHAR_COLON)
           {
           special = *(++ptr);
@@ -562,8 +568,20 @@ do
           if (group < 0) group = GET2(first, 0);
           }
 
+        /* We now have a group that is identified by number. Find the length of
+        the captured string. If a group in a non-special substitution is unset
+        when PCRE2_SUBSTITUTE_UNSET_EMPTY is set, substitute nothing. */
+
         rc = pcre2_substring_length_bynumber(match_data, group, &sublength);
-        if (rc < 0 && (special == 0 || rc != PCRE2_ERROR_UNSET)) goto PTREXIT;
+        if (rc < 0)
+          {
+          if (rc != PCRE2_ERROR_UNSET) goto PTREXIT;  /* Non-unset errors */
+          if (special == 0)                           /* Plain substitution */
+            {
+            if (uempty) continue;                     /* Treat as empty */
+            goto PTREXIT;                             /* Else error */
+            }
+          }
 
         /* If special is '+' we have a 'set' and possibly an 'unset' text,
         both of which are reprocessed when used. If special is '-' we have a

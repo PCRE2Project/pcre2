@@ -380,6 +380,9 @@ changed when the effects of those options were all moved to compile time.
 PCRE2_ALT_VERBNAMES was set caused pcre2_compile() to malfunction. This bug
 was found by the LLVM fuzzer.
 
+110. Implemented PCRE2_SUBSTITUTE_UNSET_EMPTY, and updated pcre2test to make it 
+possible to test it.
+
 
 Version 10.20 30-June-2015
 --------------------------

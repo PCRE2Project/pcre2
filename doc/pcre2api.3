@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "03 December 2015" "PCRE2 10.21"
+.TH PCRE2API 3 "04 December 2015" "PCRE2 10.21"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -2734,19 +2734,26 @@ simultaneous substitutions, as this \fBpcre2test\fP example shows:
       apple lemon
    2: pear orange
 .sp
-There is an additional option, PCRE2_SUBSTITUTE_GLOBAL, which causes the
-function to iterate over the subject string, replacing every matching
-substring. If this is not set, only the first matching substring is replaced.
-If any matched substring has zero length, after the substitution has happened,
-an attempt to find a non-empty match at the same position is performed. If this 
-is not successful, the current position is advanced by one character except 
-when CRLF is a valid newline sequence and the next two characters are CR, LF.
-In this case, the current position is advanced by two characters.
+Three additional options are available:
 .P
-A second additional option, PCRE2_SUBSTITUTE_EXTENDED, causes extra processing
-to be applied to the replacement string. Without this option, only the dollar
-character is special, and only the group insertion forms listed above are
-valid. When PCRE2_SUBSTITUTE_EXTENDED is set, two things change:
+PCRE2_SUBSTITUTE_GLOBAL causes the function to iterate over the subject string,
+replacing every matching substring. If this is not set, only the first matching
+substring is replaced. If any matched substring has zero length, after the
+substitution has happened, an attempt to find a non-empty match at the same
+position is performed. If this is not successful, the current position is
+advanced by one character except when CRLF is a valid newline sequence and the
+next two characters are CR, LF. In this case, the current position is advanced
+by two characters.
+.P
+PCRE2_SUBSTITUTE_UNSET_EMPTY causes unset capturing groups to be treated as 
+empty strings when inserted as described above. If this option is not set, an 
+attempt to insert an unset group causes the PCRE2_ERROR_UNSET error. This 
+option does not influence the extended substitution syntax described below.
+.P
+PCRE2_SUBSTITUTE_EXTENDED causes extra processing to be applied to the
+replacement string. Without this option, only the dollar character is special,
+and only the group insertion forms listed above are valid. When
+PCRE2_SUBSTITUTE_EXTENDED is set, two things change:
 .P
 Firstly, backslash in a replacement string is interpreted as an escape
 character. The usual forms such as \en or \ex{ddd} can be used to specify
@@ -2792,16 +2799,22 @@ string remains in force afterwards, as shown in this \fBpcre2test\fP example:
       somebody
    1: HELLO
 .sp
+The PCRE2_SUBSTITUTE_UNSET_EMPTY option does not affect these extended 
+substitutions.
+.P
 If successful, the function returns the number of replacements that were made.
 This may be zero if no matches were found, and is never greater than 1 unless
 PCRE2_SUBSTITUTE_GLOBAL is set.
 .P
 In the event of an error, a negative error code is returned. Except for
 PCRE2_ERROR_NOMATCH (which is never returned), errors from \fBpcre2_match()\fP
-are passed straight back. PCRE2_ERROR_NOMEMORY is returned if the output buffer
-is not big enough. PCRE2_ERROR_BADREPLACEMENT is used for miscellaneous syntax
-errors in the replacement string, with more particular errors being
-PCRE2_ERROR_BADREPESCAPE (invalid escape sequence),
+are passed straight back. PCRE2_ERROR_NOSUBSTRING is returned for a 
+non-existent substring insertion, and PCRE2_ERROR_UNSET is returned for an
+unset substring insertion when the simple (non-extended) syntax is used and
+PCRE2_SUBSTITUTE_UNSET_EMPTY is not set. PCRE2_ERROR_NOMEMORY is returned if
+the output buffer is not big enough. PCRE2_ERROR_BADREPLACEMENT is used for
+miscellaneous syntax errors in the replacement string, with more particular
+errors being PCRE2_ERROR_BADREPESCAPE (invalid escape sequence),
 PCRE2_ERROR_REPMISSING_BRACE (closing curly bracket not found),
 PCRE2_BADSUBSTITUTION (syntax error in extended group substitution), and
 PCRE2_BADSUBPATTERN (the pattern match ended before it started). As for all
@@ -3100,6 +3113,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 03 December 2015
+Last updated: 04 December 2015
 Copyright (c) 1997-2015 University of Cambridge.
 .fi

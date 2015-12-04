@@ -1,4 +1,4 @@
-.TH PCRE2TEST 1 "21 November 2015" "PCRE 10.21"
+.TH PCRE2TEST 1 "04 December 2015" "PCRE 10.21"
 .SH NAME
 pcre2test - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -854,14 +854,16 @@ are applied to every subject line that is processed with that pattern. They may
 not appear in \fB#pattern\fP commands. These modifiers do not affect the
 compilation process.
 .sp
-      aftertext           show text after match
-      allaftertext        show text after captures
-      allcaptures         show all captures
-      allusedtext         show all consulted text
-  /g  global              global matching
-      mark                show mark values
-      replace=<string>    specify a replacement string
-      startchar           show starting character when relevant
+      aftertext               show text after match
+      allaftertext            show text after captures
+      allcaptures             show all captures
+      allusedtext             show all consulted text
+  /g  global                  global matching
+      mark                    show mark values
+      replace=<string>        specify a replacement string
+      startchar               show starting character when relevant
+      substitute_extended     use PCRE2_SUBSTITUTE_EXTENDED
+      substitute_unset_empty  use PCRE2_SUBSTITUTE_UNSET_EMPTY  
 .sp
 These modifiers may not appear in a \fB#pattern\fP command. If you want them as
 defaults, set them in a \fB#subject\fP command.
@@ -960,6 +962,8 @@ pattern.
       replace=<string>          specify a replacement string
       startchar                 show startchar when relevant
       startoffset=<n>           same as offset=<n>
+      substitute_extedded       use PCRE2_SUBSTITUTE_EXTENDED
+      substitute_unset_empty    use PCRE2_SUBSTITUTE_UNSET_EMPTY  
       zero_terminate            pass the subject as zero-terminated
 .sp
 The effects of these modifiers are described in the following sections.
@@ -1104,9 +1108,13 @@ individual code units are copied directly. This provides a means of passing an
 invalid UTF-8 string for testing purposes.
 .P
 If the \fBglobal\fP modifier is set, PCRE2_SUBSTITUTE_GLOBAL is passed to
-\fBpcre2_substitute()\fP. After a successful substitution, the modified string
-is output, preceded by the number of replacements. This may be zero if there
-were no matches. Here is a simple example of a substitution test:
+\fBpcre2_substitute()\fP. The \fBsubstitute_extended\fP and 
+\fBsubstitute_unset_empty\fP modifiers set PCRE2_SUBSTITUTE_EXTENDED and 
+PCRE2_SUBSTITUTE_UNSET_EMPTY, respectively.
+.P
+After a successful substitution, the modified string is output, preceded by the
+number of replacements. This may be zero if there were no matches. Here is a
+simple example of a substitution test:
 .sp
   /abc/replace=xxx
       =abc=abc=
@@ -1610,6 +1618,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 21 November 2015
+Last updated: 04 December 2015
 Copyright (c) 1997-2015 University of Cambridge.
 .fi
