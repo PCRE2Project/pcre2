@@ -4166,4 +4166,7 @@ No match
         End
 ------------------------------------------------------------------
 
+/(*UTF)C\x09((?<!'(?x)!*H? #\xcc\x9a[^$]/
+Failed: error 114 at offset 39: missing closing parenthesis
+
 # End of testinput5 

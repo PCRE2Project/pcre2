@@ -5058,26 +5058,26 @@ for (;; ptr++)
 
     if ((options & PCRE2_EXTENDED) != 0)
       {
-      PCRE2_SPTR p = ptr + 1;
+      ptr++;
       for (;;)
         {
-        while (MAX_255(*p) && (cb->ctypes[*p] & ctype_space) != 0) p++;
-        if (*p != CHAR_NUMBER_SIGN) break;
-        p++;
+        while (MAX_255(*ptr) && (cb->ctypes[*ptr] & ctype_space) != 0) ptr++;
+        if (*ptr != CHAR_NUMBER_SIGN) break;
+        ptr++;
         while (ptr < cb->end_pattern)
           {
-          if (IS_NEWLINE(p))         /* For non-fixed-length newline cases, */
+          if (IS_NEWLINE(ptr))         /* For non-fixed-length newline cases, */
             {                        /* IS_NEWLINE sets cb->nllen. */
-            p += cb->nllen;
+            ptr += cb->nllen;
             break;
             }
-          p++;
+          ptr++;
 #ifdef SUPPORT_UNICODE
-          if (utf) FORWARDCHAR(p);
+          if (utf) FORWARDCHAR(ptr);
 #endif
           }           /* Loop for comment characters */
         }             /* Loop for multiple comments */
-      ptr = p - 1;    /* Character before the next significant one. */
+      ptr--;          /* Last code unit of previous character. */
       }
 
     /* If the next character is '+', we have a possessive quantifier. This

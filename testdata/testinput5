@@ -1716,4 +1716,6 @@
 
 /L(?#(|++<!(2)?/B,utf,ucp,auto_callout
 
+/(*UTF)C\x09((?<!'(?x)!*H? #\xcc\x9a[^$]/
+
 # End of testinput5 
