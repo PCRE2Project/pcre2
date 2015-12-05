@@ -15085,4 +15085,20 @@ Failed: error -55 at offset 3 in replacement: requested value is not set
     cat
 Failed: error -49 at offset 3 in replacement: unknown substring
 
+/()()()/use_offset_limit
+    \=ovector=11000000000
+** Invalid value in 'ovector=11000000000'
+    \=callout_fail=11000000000
+** Invalid value in 'callout_fail=11000000000'
+    \=callout_fail=1:11000000000
+** Invalid value in 'callout_fail=1:11000000000'
+    \=callout_data=11000000000 
+** Invalid value in 'callout_data=11000000000'
+    \=callout_data=-11000000000 
+** Invalid value in 'callout_data=-11000000000'
+    \=offset_limit=1100000000000000000000 
+** Invalid value in 'offset_limit=1100000000000000000000'
+    \=copy=11000000000 
+** Invalid value in 'copy=11000000000'
+
 # End of testinput2 

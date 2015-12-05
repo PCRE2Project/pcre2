@@ -2974,33 +2974,6 @@ return 0;
 
 
 /*************************************************
-*          Read number from string               *
-*************************************************/
-
-/* We don't use strtoul() because SunOS4 doesn't have it. Rather than mess
-around with conditional compilation, just do the job by hand. It is only used
-for unpicking arguments, so just keep it simple.
-
-Arguments:
-  str           string to be converted
-  endptr        where to put the end pointer
-
-Returns:        the unsigned long
-*/
-
-static int
-get_value(const char *str, const char **endptr)
-{
-int result = 0;
-while(*str != 0 && isspace(*str)) str++;
-while (isdigit(*str)) result = result * 10 + (int)(*str++ - '0');
-*endptr = str;
-return(result);
-}
-
-
-
-/*************************************************
 *          Scan the main modifier list           *
 *************************************************/
 
@@ -3149,6 +3122,8 @@ static BOOL
 decode_modifiers(uint8_t *p, int ctx, patctl *pctl, datctl *dctl)
 {
 uint8_t *ep, *pp;
+long li;
+unsigned long uli;
 BOOL first = TRUE;
 
 for (;;)
@@ -3314,9 +3289,15 @@ for (;;)
 
     case MOD_IN2:    /* One or two unsigned integers */
     if (!isdigit(*pp)) goto INVALID_VALUE;
-    ((uint32_t *)field)[0] = (uint32_t)strtoul((const char *)pp, &endptr, 10);
+    uli = strtoul((const char *)pp, &endptr, 10);
+    if (uli > UINT32_MAX) goto INVALID_VALUE;
+    ((uint32_t *)field)[0] = (uint32_t)uli;
     if (*endptr == ':')
-      ((uint32_t *)field)[1] = (uint32_t)strtoul((const char *)endptr+1, &endptr, 10);
+      {
+      uli = strtoul((const char *)endptr+1, &endptr, 10);
+      if (uli > UINT32_MAX) goto INVALID_VALUE;
+      ((uint32_t *)field)[1] = (uint32_t)uli;
+      }
     else ((uint32_t *)field)[1] = 0;
     pp = (uint8_t *)endptr;
     break;
@@ -3331,19 +3312,25 @@ for (;;)
 
     case MOD_SIZ:    /* PCRE2_SIZE value */
     if (!isdigit(*pp)) goto INVALID_VALUE;
-    *((PCRE2_SIZE *)field) = (PCRE2_SIZE)strtoul((const char *)pp, &endptr, 10);
+    uli = strtoul((const char *)pp, &endptr, 10);
+    if (uli == ULONG_MAX) goto INVALID_VALUE;
+    *((PCRE2_SIZE *)field) = (PCRE2_SIZE)uli;
     pp = (uint8_t *)endptr;
     break;
 
     case MOD_INT:    /* Unsigned integer */
     if (!isdigit(*pp)) goto INVALID_VALUE;
-    *((uint32_t *)field) = (uint32_t)strtoul((const char *)pp, &endptr, 10);
+    uli = strtoul((const char *)pp, &endptr, 10);
+    if (uli > UINT32_MAX) goto INVALID_VALUE;
+    *((uint32_t *)field) = (uint32_t)uli;
     pp = (uint8_t *)endptr;
     break;
 
     case MOD_INS:   /* Signed integer */
     if (!isdigit(*pp) && *pp != '-') goto INVALID_VALUE;
-    *((int32_t *)field) = (int32_t)strtol((const char *)pp, &endptr, 10);
+    li = strtol((const char *)pp, &endptr, 10);
+    if (li > INT32_MAX || li < INT32_MIN) goto INVALID_VALUE;
+    *((int32_t *)field) = (int32_t)li;
     pp = (uint8_t *)endptr;
     break;
 
@@ -3371,7 +3358,10 @@ for (;;)
     if (isdigit(*pp) || *pp == '-')
       {
       int ct = MAXCPYGET - 1;
-      int32_t value = (int32_t)strtol((const char *)pp, &endptr, 10);
+      int32_t value;
+      li = strtol((const char *)pp, &endptr, 10);
+      if (li > INT32_MAX || li < INT32_MIN) goto INVALID_VALUE;
+      value = (int32_t)li;
       field = (char *)field - m->offset + m->value;      /* Adjust field ptr */
       if (value >= 0)                                    /* Add new number */
         {
@@ -6894,8 +6884,9 @@ def_datctl.cfail[0] = def_datctl.cfail[1] = CFAIL_UNSET;
 
 while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
   {
-  const char *endptr;
+  char *endptr;
   char *arg = argv[op];
+  unsigned long uli;
 
   /* Display and/or set return code for configuration options. */
 
@@ -6945,7 +6936,7 @@ while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
   /* Set system stack size */
 
   else if (strcmp(arg, "-S") == 0 && argc > 2 &&
-      ((stack_size = get_value(argv[op+1], &endptr)), *endptr == 0))
+      ((uli = strtoul(argv[op+1], &endptr, 10)), *endptr == 0))
     {
 #if defined(_WIN32) || defined(WIN32) || defined(__minix) || defined(NATIVE_ZOS) || defined(__VMS)
     fprintf(stderr, "pcre2test: -S is not supported on this OS\n");
@@ -6953,6 +6944,12 @@ while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
 #else
     int rc;
     struct rlimit rlim;
+    if (uli > UINT32_MAX)
+      {
+      fprintf(stderr, "+++ Argument for -S is too big\n");
+      exit(1);
+      }
+    stack_size = (uint32_t)uli;
     getrlimit(RLIMIT_STACK, &rlim);
     rlim.rlim_cur = stack_size * 1024 * 1024;
     if (rlim.rlim_cur > rlim.rlim_max)
@@ -6995,12 +6992,16 @@ while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
   else if (strcmp(arg, "-t") == 0 || strcmp(arg, "-tm") == 0 ||
            strcmp(arg, "-T") == 0 || strcmp(arg, "-TM") == 0)
     {
-    int temp;
     int both = arg[2] == 0;
     showtotaltimes = arg[1] == 'T';
-    if (argc > 2 && (temp = get_value(argv[op+1], &endptr), *endptr == 0))
+    if (argc > 2 && (uli = strtoul(argv[op+1], &endptr, 10), *endptr == 0))
       {
-      timeitm = temp;
+      if (uli > INT32_MAX)
+        {
+        fprintf(stderr, "+++ Argument for %s is too big\n", arg);
+        exit(1);
+        }
+      timeitm = (int)uli;
       op++;
       argc--;
       }

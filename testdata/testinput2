@@ -4756,4 +4756,13 @@ a)"xI
 /a|(b)c/replace=>$2<,substitute_unset_empty
     cat
 
+/()()()/use_offset_limit
+    \=ovector=11000000000
+    \=callout_fail=11000000000
+    \=callout_fail=1:11000000000
+    \=callout_data=11000000000 
+    \=callout_data=-11000000000 
+    \=offset_limit=1100000000000000000000 
+    \=copy=11000000000 
+
 # End of testinput2 

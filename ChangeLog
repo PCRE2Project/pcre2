@@ -383,6 +383,9 @@ was found by the LLVM fuzzer.
 110. Implemented PCRE2_SUBSTITUTE_UNSET_EMPTY, and updated pcre2test to make it 
 possible to test it.
 
+111. "Harden" pcre2test against ridiculously large values in modifiers and 
+command line arguments.
+
 
 Version 10.20 30-June-2015
 --------------------------
