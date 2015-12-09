@@ -302,6 +302,7 @@ define special values to indicate zero-terminated strings and unset offsets in
 the offset vector (ovector). */
 
 #define PCRE2_SIZE            size_t
+#define PCRE2_SIZE_MAX        SIZE_MAX
 #define PCRE2_ZERO_TERMINATED (~(PCRE2_SIZE)0)
 #define PCRE2_UNSET           (~(PCRE2_SIZE)0)
 

@@ -239,6 +239,22 @@ of PRIV avoids name clashes. */
 #include "pcre2_tables.c"
 #include "pcre2_ucd.c"
 
+/* 32-bit integer values in the input are read by strtoul() or strtol(). The
+check needed for overflow depends on whether long ints are in fact longer than
+ints. They are defined not to be shorter. */
+
+#if ULONG_MAX > UINT32_MAX
+#define U32OVERFLOW(x) (x > UINT32_MAX)
+#else
+#define U32OVERFLOW(x) (x == UINT32_MAX)
+#endif
+
+#if LONG_MAX > INT32_MAX
+#define S32OVERFLOW(x) (x > INT32_MAX || x < INT32_MIN)
+#else
+#define S32OVERFLOW(x) (x == INT32_MAX || x == INT32_MIN)
+#endif
+
 /* When PCRE2_CODE_UNIT_WIDTH is zero, pcre2_internal.h does not include
 pcre2_intmodedep.h, which is where mode-dependent macros and structures are
 defined. We can now include it for each supported code unit width. Because
@@ -3290,15 +3306,30 @@ for (;;)
     case MOD_IN2:    /* One or two unsigned integers */
     if (!isdigit(*pp)) goto INVALID_VALUE;
     uli = strtoul((const char *)pp, &endptr, 10);
-    if (uli > UINT32_MAX) goto INVALID_VALUE;
+    if (U32OVERFLOW(uli)) goto INVALID_VALUE;
     ((uint32_t *)field)[0] = (uint32_t)uli;
     if (*endptr == ':')
       {
       uli = strtoul((const char *)endptr+1, &endptr, 10);
-      if (uli > UINT32_MAX) goto INVALID_VALUE;
+      if (U32OVERFLOW(uli)) goto INVALID_VALUE;
       ((uint32_t *)field)[1] = (uint32_t)uli;
       }
     else ((uint32_t *)field)[1] = 0;
+    pp = (uint8_t *)endptr;
+    break;
+
+    /* PCRE2_SIZE_MAX is usually SIZE_MAX, which may be greater, equal to, or
+    less than ULONG_MAX. So first test for overflowing the long int, and then
+    test for overflowing PCRE2_SIZE_MAX if it is smaller than ULONG_MAX. */
+
+    case MOD_SIZ:    /* PCRE2_SIZE value */
+    if (!isdigit(*pp)) goto INVALID_VALUE;
+    uli = strtoul((const char *)pp, &endptr, 10);
+    if (uli == ULONG_MAX) goto INVALID_VALUE;
+#if ULONG_MAX > PCRE2_SIZE_MAX
+    if (uli > PCRE2_SIZE_MAX) goto INVALID_VALUE;
+#endif
+    *((PCRE2_SIZE *)field) = (PCRE2_SIZE)uli;
     pp = (uint8_t *)endptr;
     break;
 
@@ -3310,18 +3341,10 @@ for (;;)
       }
     /* Fall through */
 
-    case MOD_SIZ:    /* PCRE2_SIZE value */
-    if (!isdigit(*pp)) goto INVALID_VALUE;
-    uli = strtoul((const char *)pp, &endptr, 10);
-    if (uli == ULONG_MAX) goto INVALID_VALUE;
-    *((PCRE2_SIZE *)field) = (PCRE2_SIZE)uli;
-    pp = (uint8_t *)endptr;
-    break;
-
     case MOD_INT:    /* Unsigned integer */
     if (!isdigit(*pp)) goto INVALID_VALUE;
     uli = strtoul((const char *)pp, &endptr, 10);
-    if (uli > UINT32_MAX) goto INVALID_VALUE;
+    if (U32OVERFLOW(uli)) goto INVALID_VALUE;
     *((uint32_t *)field) = (uint32_t)uli;
     pp = (uint8_t *)endptr;
     break;
@@ -3329,7 +3352,7 @@ for (;;)
     case MOD_INS:   /* Signed integer */
     if (!isdigit(*pp) && *pp != '-') goto INVALID_VALUE;
     li = strtol((const char *)pp, &endptr, 10);
-    if (li > INT32_MAX || li < INT32_MIN) goto INVALID_VALUE;
+    if (S32OVERFLOW(li)) goto INVALID_VALUE;
     *((int32_t *)field) = (int32_t)li;
     pp = (uint8_t *)endptr;
     break;
@@ -3360,7 +3383,7 @@ for (;;)
       int ct = MAXCPYGET - 1;
       int32_t value;
       li = strtol((const char *)pp, &endptr, 10);
-      if (li > INT32_MAX || li < INT32_MIN) goto INVALID_VALUE;
+      if (S32OVERFLOW(li)) goto INVALID_VALUE;
       value = (int32_t)li;
       field = (char *)field - m->offset + m->value;      /* Adjust field ptr */
       if (value >= 0)                                    /* Add new number */
@@ -6944,7 +6967,7 @@ while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
 #else
     int rc;
     struct rlimit rlim;
-    if (uli > UINT32_MAX)
+    if (U32OVERFLOW(uli))
       {
       fprintf(stderr, "+++ Argument for -S is too big\n");
       exit(1);
@@ -6996,7 +7019,7 @@ while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
     showtotaltimes = arg[1] == 'T';
     if (argc > 2 && (uli = strtoul(argv[op+1], &endptr, 10), *endptr == 0))
       {
-      if (uli > INT32_MAX)
+      if (U32OVERFLOW(uli))
         {
         fprintf(stderr, "+++ Argument for %s is too big\n", arg);
         exit(1);
