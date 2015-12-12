@@ -47,6 +47,12 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #define PTR_STACK_SIZE 20
 
+#define SUBSTITUTE_OPTIONS \
+  (PCRE2_SUBSTITUTE_EXTENDED|PCRE2_SUBSTITUTE_GLOBAL| \
+   PCRE2_SUBSTITUTE_OVERFLOW_LENGTH|PCRE2_SUBSTITUTE_UNKNOWN_UNSET| \
+   PCRE2_SUBSTITUTE_UNSET_EMPTY)
+
+
 
 /*************************************************
 *           Find end of substitute text          *
@@ -181,6 +187,30 @@ Returns:          >= 0 number of substitutions made
                   PCRE2_ERROR_BADREPLACEMENT means invalid use of $
 */
 
+/* This macro checks for space in the buffer before copying into it. On
+overflow, either give an error immediately, or keep on, accumulating the
+length. */
+
+#define CHECKMEMCPY(from,length) \
+  if (!overflowed && lengthleft < length) \
+    { \
+    if ((suboptions & PCRE2_SUBSTITUTE_OVERFLOW_LENGTH) == 0) goto NOROOM; \
+    overflowed = TRUE; \
+    extra_needed = length - lengthleft; \
+    } \
+  else if (overflowed) \
+    { \
+    extra_needed += length; \
+    }  \
+  else \
+    {  \
+    memcpy(buffer + buff_offset, from, CU2BYTES(length)); \
+    buff_offset += length; \
+    lengthleft -= length; \
+    }
+
+/* Here's the function */
+
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
   PCRE2_SIZE start_offset, uint32_t options, pcre2_match_data *match_data,
@@ -193,20 +223,22 @@ int forcecase = 0;
 int forcecasereset = 0;
 uint32_t ovector_count;
 uint32_t goptions = 0;
+uint32_t suboptions;
 BOOL match_data_created = FALSE;
-BOOL global = FALSE;
-BOOL extended = FALSE;
 BOOL literal = FALSE;
-BOOL uempty = FALSE;    /* Unset/unknown groups => empty string */
+BOOL overflowed = FALSE;
 #ifdef SUPPORT_UNICODE
 BOOL utf = (code->overall_options & PCRE2_UTF) != 0;
 #endif
+PCRE2_UCHAR temp[6];
 PCRE2_SPTR ptr;
 PCRE2_SPTR repend;
+PCRE2_SIZE extra_needed = 0;
 PCRE2_SIZE buff_offset, buff_length, lengthleft, fraglength;
 PCRE2_SIZE *ovector;
 
-buff_length = *blength;
+buff_offset = 0;
+lengthleft = buff_length = *blength;
 *blength = PCRE2_UNSET;
 
 /* Partial matching is not valid. */
@@ -248,33 +280,14 @@ if (utf && (options & PCRE2_NO_UTF_CHECK) == 0)
   }
 #endif  /* SUPPORT_UNICODE */
 
-/* Notice the global and extended options and remove them from the options that
-are passed to pcre2_match(). */
+/* Save the substitute options and remove them from the match options. */
 
-if ((options & PCRE2_SUBSTITUTE_GLOBAL) != 0)
-  {
-  options &= ~PCRE2_SUBSTITUTE_GLOBAL;
-  global = TRUE;
-  }
-
-if ((options & PCRE2_SUBSTITUTE_EXTENDED) != 0)
-  {
-  options &= ~PCRE2_SUBSTITUTE_EXTENDED;
-  extended = TRUE;
-  }
-
-if ((options & PCRE2_SUBSTITUTE_UNSET_EMPTY) != 0)
-  {
-  options &= ~PCRE2_SUBSTITUTE_UNSET_EMPTY;
-  uempty = TRUE;
-  }
+suboptions = options & SUBSTITUTE_OPTIONS;
+options &= ~SUBSTITUTE_OPTIONS;
 
 /* Copy up to the start offset */
 
-if (start_offset > buff_length) goto NOROOM;
-memcpy(buffer, subject, start_offset * (PCRE2_CODE_UNIT_WIDTH/8));
-buff_offset = start_offset;
-lengthleft = buff_length - start_offset;
+CHECKMEMCPY(subject, start_offset);
 
 /* Loop for global substituting. */
 
@@ -330,13 +343,11 @@ do
 #endif
       }
 
-    fraglength = start_offset - save_start;
-    if (lengthleft < fraglength) goto NOROOM;
-    memcpy(buffer + buff_offset, subject + save_start,
-      fraglength*(PCRE2_CODE_UNIT_WIDTH/8));
-    buff_offset += fraglength;
-    lengthleft -= fraglength;
+    /* Copy what we have advanced past, reset the special global options, and
+    continue to the next match. */
 
+    fraglength = start_offset - save_start;
+    CHECKMEMCPY(subject + save_start, fraglength);
     goptions = 0;
     continue;
     }
@@ -350,25 +361,21 @@ do
     goto EXIT;
     }
 
-  /* Paranoid check for integer overflow; surely no real call to this function
-  would ever hit this! */
+  /* Count substitutions with a paranoid check for integer overflow; surely no
+  real call to this function would ever hit this! */
 
   if (subs == INT_MAX)
     {
     rc = PCRE2_ERROR_TOOMANYREPLACE;
     goto EXIT;
     }
-
-  /* Count substitutions and proceed */
-
   subs++;
+
+  /* Copy the text leading up to the match. */
+
   if (rc == 0) rc = ovector_count;
   fraglength = ovector[0] - start_offset;
-  if (fraglength >= lengthleft) goto NOROOM;
-  memcpy(buffer + buff_offset, subject + start_offset,
-    fraglength*(PCRE2_CODE_UNIT_WIDTH/8));
-  buff_offset += fraglength;
-  lengthleft -= fraglength;
+  CHECKMEMCPY(subject + start_offset, fraglength);
 
   /* Process the replacement string. Literal mode is set by \Q, but only in
   extended mode when backslashes are being interpreted. In extended mode we
@@ -378,12 +385,13 @@ do
   for (;;)
     {
     uint32_t ch;
+    unsigned int chlen;
 
     /* If at the end of a nested substring, pop the stack. */
 
     if (ptr >= repend)
       {
-      if (ptrstackptr <= 0) break;
+      if (ptrstackptr <= 0) break;       /* End of replacement string */
       repend = ptrstack[--ptrstackptr];
       ptr = ptrstack[--ptrstackptr];
       continue;
@@ -450,12 +458,22 @@ do
           group = group * 10 + next - CHAR_0;
 
           /* A check for a number greater than the hightest captured group
-          is sufficient here; no need for a separate overflow check. */
+          is sufficient here; no need for a separate overflow check. If unknown
+          groups are to be treated as unset, just skip over any remaining
+          digits and carry on. */
 
           if (group > code->top_bracket)
             {
-            rc = PCRE2_ERROR_NOSUBSTRING;
-            goto PTREXIT;
+            if ((suboptions & PCRE2_SUBSTITUTE_UNKNOWN_UNSET) != 0)
+              {
+              while (++ptr < repend && *ptr >= CHAR_0 && *ptr <= CHAR_9);
+              break;
+              }
+            else
+              {
+              rc = PCRE2_ERROR_NOSUBSTRING;
+              goto PTREXIT;
+              }
             }
           }
         }
@@ -478,7 +496,8 @@ do
 
       if (inparens)
         {
-        if (extended && !star && ptr < repend - 2 && next == CHAR_COLON)
+        if ((suboptions & PCRE2_SUBSTITUTE_EXTENDED) != 0 &&
+             !star && ptr < repend - 2 && next == CHAR_COLON)
           {
           special = *(++ptr);
           if (special != CHAR_PLUS && special != CHAR_MINUS)
@@ -513,8 +532,8 @@ do
         ptr++;
         }
 
-      /* Have found a syntactically correct group number or name, or
-      *name. Only *MARK is currently recognized. */
+      /* Have found a syntactically correct group number or name, or *name.
+      Only *MARK is currently recognized. */
 
       if (star)
         {
@@ -523,11 +542,10 @@ do
           PCRE2_SPTR mark = pcre2_get_mark(match_data);
           if (mark != NULL)
             {
-            while (*mark != 0)
-              {
-              if (lengthleft-- < 1) goto NOROOM;
-              buffer[buff_offset++] = *mark++;
-              }
+            PCRE2_SPTR mark_start = mark;
+            while (*mark != 0) mark++;
+            fraglength = mark - mark_start;
+            CHECKMEMCPY(mark_start, fraglength);
             }
           }
         else goto BAD;
@@ -541,31 +559,41 @@ do
         PCRE2_SPTR subptr, subptrend;
 
         /* Find a number for a named group. In case there are duplicate names,
-        search for the first one that is set. */
+        search for the first one that is set. If the name is not found when
+        PCRE2_SUBSTITUTE_UNKNOWN_EMPTY is set, set the group number to a
+        non-existent group. */
 
         if (group < 0)
           {
           PCRE2_SPTR first, last, entry;
           rc = pcre2_substring_nametable_scan(code, name, &first, &last);
-          if (rc < 0) goto PTREXIT;
-          for (entry = first; entry <= last; entry += rc)
+          if (rc == PCRE2_ERROR_NOSUBSTRING &&
+              (suboptions & PCRE2_SUBSTITUTE_UNKNOWN_UNSET) != 0)
             {
-            uint32_t ng = GET2(entry, 0);
-            if (ng < ovector_count)
+            group = code->top_bracket + 1;
+            }
+          else
+            {
+            if (rc < 0) goto PTREXIT;
+            for (entry = first; entry <= last; entry += rc)
               {
-              if (group < 0) group = ng;          /* First in ovector */
-              if (ovector[ng*2] != PCRE2_UNSET)
+              uint32_t ng = GET2(entry, 0);
+              if (ng < ovector_count)
                 {
-                group = ng;                       /* First that is set */
-                break;
+                if (group < 0) group = ng;          /* First in ovector */
+                if (ovector[ng*2] != PCRE2_UNSET)
+                  {
+                  group = ng;                       /* First that is set */
+                  break;
+                  }
                 }
               }
+
+            /* If group is still negative, it means we did not find a group
+            that is in the ovector. Just set the first group. */
+
+            if (group < 0) group = GET2(first, 0);
             }
-
-          /* If group is still negative, it means we did not find a group that
-          is in the ovector. Just set the first group. */
-
-          if (group < 0) group = GET2(first, 0);
           }
 
         /* We now have a group that is identified by number. Find the length of
@@ -575,10 +603,15 @@ do
         rc = pcre2_substring_length_bynumber(match_data, group, &sublength);
         if (rc < 0)
           {
+          if (rc == PCRE2_ERROR_NOSUBSTRING &&
+              (suboptions & PCRE2_SUBSTITUTE_UNKNOWN_UNSET) != 0)
+            {
+            rc = PCRE2_ERROR_UNSET;
+            }
           if (rc != PCRE2_ERROR_UNSET) goto PTREXIT;  /* Non-unset errors */
           if (special == 0)                           /* Plain substitution */
             {
-            if (uempty) continue;                     /* Treat as empty */
+            if ((suboptions & PCRE2_SUBSTITUTE_UNSET_EMPTY) != 0) continue;
             goto PTREXIT;                             /* Else error */
             }
           }
@@ -646,26 +679,13 @@ do
             }
 
 #ifdef SUPPORT_UNICODE
-          if (utf)
-            {
-            unsigned int chlen;
-#if PCRE2_CODE_UNIT_WIDTH == 8
-            if (lengthleft < 6) goto NOROOM;
-#elif PCRE2_CODE_UNIT_WIDTH == 16
-            if (lengthleft < 2) goto NOROOM;
-#else
-            if (lengthleft < 1) goto NOROOM;
-#endif
-            chlen = PRIV(ord2utf)(ch, buffer + buff_offset);
-            buff_offset += chlen;
-            lengthleft -= chlen;
-            }
-          else
+          if (utf) chlen = PRIV(ord2utf)(ch, temp); else
 #endif
             {
-            if (lengthleft-- < 1) goto NOROOM;
-            buffer[buff_offset++] = ch;
+            temp[0] = ch;
+            chlen = 1;
             }
+          CHECKMEMCPY(temp, chlen);
           }
         }
       }
@@ -675,7 +695,8 @@ do
     the case-forcing escapes are not supported in pcre2_compile() so must be
     recognized here. */
 
-    else if (extended && *ptr == CHAR_BACKSLASH)
+    else if ((suboptions & PCRE2_SUBSTITUTE_EXTENDED) != 0 &&
+              *ptr == CHAR_BACKSLASH)
       {
       int errorcode = 0;
 
@@ -756,33 +777,19 @@ do
               )[ch/8] & (1 << (ch%8))) == 0)
             ch = (code->tables + fcc_offset)[ch];
           }
-
         forcecase = forcecasereset;
         }
 
 #ifdef SUPPORT_UNICODE
-      if (utf)
-        {
-        unsigned int chlen;
-#if PCRE2_CODE_UNIT_WIDTH == 8
-        if (lengthleft < 6) goto NOROOM;
-#elif PCRE2_CODE_UNIT_WIDTH == 16
-        if (lengthleft < 2) goto NOROOM;
-#else
-        if (lengthleft < 1) goto NOROOM;
-#endif
-        chlen = PRIV(ord2utf)(ch, buffer + buff_offset);
-        buff_offset += chlen;
-        lengthleft -= chlen;
-        }
-      else
+      if (utf) chlen = PRIV(ord2utf)(ch, temp); else
 #endif
         {
-        if (lengthleft-- < 1) goto NOROOM;
-        buffer[buff_offset++] = ch;
+        temp[0] = ch;
+        chlen = 1;
         }
-      }
-    }
+      CHECKMEMCPY(temp, chlen);
+      } /* End handling a literal code unit */
+    }   /* End of loop for scanning the replacement. */
 
   /* The replacement has been copied to the output. Update the start offset to
   point to the rest of the subject string. If we matched an empty string,
@@ -791,18 +798,33 @@ do
   start_offset = ovector[1];
   goptions = (ovector[0] != ovector[1])? 0 :
     PCRE2_ANCHORED|PCRE2_NOTEMPTY_ATSTART;
-  } while (global);  /* Repeat "do" loop */
+  } while ((suboptions & PCRE2_SUBSTITUTE_GLOBAL) != 0);  /* Repeat "do" loop */
 
-/* Copy the rest of the subject and return the number of substitutions. */
+/* Copy the rest of the subject. */
 
-rc = subs;
 fraglength = length - start_offset;
-if (fraglength + 1 > lengthleft) goto NOROOM;
-memcpy(buffer + buff_offset, subject + start_offset,
-  fraglength*(PCRE2_CODE_UNIT_WIDTH/8));
-buff_offset += fraglength;
-buffer[buff_offset] = 0;
-*blength = buff_offset;
+CHECKMEMCPY(subject + start_offset, fraglength);
+temp[0] = 0;
+CHECKMEMCPY(temp , 1);
+
+/* If overflowed is set it means the PCRE2_SUBSTITUTE_OVERFLOW_LENGTH is set,
+and matching has carried on after a full buffer, in order to compute the length
+needed. Otherwise, an overflow generates an immediate error return. */
+
+if (overflowed)
+  {
+  rc = PCRE2_ERROR_NOMEMORY;
+  *blength = buff_length + extra_needed;
+  }
+
+/* After a successful execution, return the number of substitutions and set the
+length of buffer used, excluding the trailing zero. */
+
+else
+  {
+  rc = subs;
+  *blength = buff_offset - 1;
+  }
 
 EXIT:
 if (match_data_created) pcre2_match_data_free(match_data);

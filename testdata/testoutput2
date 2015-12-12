@@ -13432,8 +13432,6 @@ Subject length lower bound = 0
 /(((((a)))))/parens_nest_limit=2
 Failed: error 119 at offset 3: parentheses are too deeply nested
 
-# Tests for pcre2_substitute()
-
 /abc/replace=XYZ
     123123
  0: 123123
@@ -13583,12 +13581,36 @@ Failed: error -35 at offset 9 in replacement: invalid replacement string
 /(*:pear)apple|(*:orange)lemon|(*:strawberry)blackberry/g,replace=[22]${*MARK}
     apple lemon blackberry
 Failed: error -48: no more memory
+    apple lemon blackberry\=substitute_overflow_length
+Failed: error -48: no more memory: 23 code units are needed
 
 /(*:pear)apple|(*:orange)lemon|(*:strawberry)blackberry/g,replace=[23]${*MARK}
     apple lemon blackberry
  3: pear orange strawberry
 
-# End of substitute tests 
+/abc/
+    123abc123\=replace=[9]XYZ
+Failed: error -48: no more memory
+    123abc123\=substitute_overflow_length,replace=[9]XYZ
+Failed: error -48: no more memory: 10 code units are needed
+    123abc123\=substitute_overflow_length,replace=[6]XYZ
+Failed: error -48: no more memory: 10 code units are needed
+    123abc123\=substitute_overflow_length,replace=[1]XYZ
+Failed: error -48: no more memory: 10 code units are needed
+    123abc123\=substitute_overflow_length,replace=[0]XYZ
+Failed: error -48: no more memory: 10 code units are needed
+
+/a(b)c/
+    123abc123\=replace=[9]x$1z
+Failed: error -48: no more memory
+    123abc123\=substitute_overflow_length,replace=[9]x$1z
+Failed: error -48: no more memory: 10 code units are needed
+    123abc123\=substitute_overflow_length,replace=[6]x$1z
+Failed: error -48: no more memory: 10 code units are needed
+    123abc123\=substitute_overflow_length,replace=[1]x$1z
+Failed: error -48: no more memory: 10 code units are needed
+    123abc123\=substitute_overflow_length,replace=[0]x$1z
+Failed: error -48: no more memory: 10 code units are needed
 
 "((?=(?(?=(?(?=(?(?=()))))))))"
     a
@@ -15075,15 +15097,35 @@ Failed: error -55 at offset 3 in replacement: requested value is not set
     xbcom\=replace=>$1<,substitute_unset_empty
  1: x>b<om
 
+/a|(b)c/substitute_extended
+    cat\=replace=>${2:-xx}<
+Failed: error -49 at offset 9 in replacement: unknown substring
+    cat\=replace=>${2:-xx}<,substitute_unknown_unset
+ 1: c>xx<t
+    cat\=replace=>${X:-xx}<,substitute_unknown_unset
+ 1: c>xx<t
+
 /a|(?'X'b)c/replace=>$X<,substitute_unset_empty
     cat
  1: c><t
     xbcom 
  1: x>b<om
 
+/a|(?'X'b)c/replace=>$Y<,substitute_unset_empty
+    cat
+Failed: error -49 at offset 3 in replacement: unknown substring
+    cat\=substitute_unknown_unset 
+ 1: c><t
+    cat\=substitute_unknown_unset,-substitute_unset_empty 
+Failed: error -55 at offset 3 in replacement: requested value is not set
+
 /a|(b)c/replace=>$2<,substitute_unset_empty
     cat
 Failed: error -49 at offset 3 in replacement: unknown substring
+    cat\=substitute_unknown_unset 
+ 1: c><t
+    cat\=substitute_unknown_unset,-substitute_unset_empty 
+Failed: error -55 at offset 3 in replacement: requested value is not set
 
 /()()()/use_offset_limit
     \=ovector=11000000000

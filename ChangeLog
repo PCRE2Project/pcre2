@@ -386,6 +386,9 @@ possible to test it.
 111. "Harden" pcre2test against ridiculously large values in modifiers and 
 command line arguments.
 
+112. Implemented PCRE2_SUBSTITUTE_UNKNOWN_UNSET and PCRE2_SUBSTITUTE_OVERFLOW_
+LENGTH.
+
 
 Version 10.20 30-June-2015
 --------------------------

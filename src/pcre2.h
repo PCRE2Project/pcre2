@@ -148,9 +148,11 @@ sanity checks). */
 
 /* These are additional options for pcre2_substitute(). */
 
-#define PCRE2_SUBSTITUTE_GLOBAL       0x00000100u
-#define PCRE2_SUBSTITUTE_EXTENDED     0x00000200u
-#define PCRE2_SUBSTITUTE_UNSET_EMPTY  0x00000400u
+#define PCRE2_SUBSTITUTE_GLOBAL           0x00000100u
+#define PCRE2_SUBSTITUTE_EXTENDED         0x00000200u
+#define PCRE2_SUBSTITUTE_UNSET_EMPTY      0x00000400u
+#define PCRE2_SUBSTITUTE_UNKNOWN_UNSET    0x00000800u
+#define PCRE2_SUBSTITUTE_OVERFLOW_LENGTH  0x00001000u
 
 /* Newline and \R settings, for use in compile contexts. The newline values
 must be kept in step with values set in config.h and both sets must all be

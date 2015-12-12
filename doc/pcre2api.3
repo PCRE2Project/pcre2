@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "04 December 2015" "PCRE2 10.21"
+.TH PCRE2API 3 "12 December 2015" "PCRE2 10.21"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -2704,12 +2704,20 @@ functions from the match context, if provided, or else those that were used to
 allocate memory for the compiled code.
 .P
 The \fIoutlengthptr\fP argument must point to a variable that contains the
-length, in code units, of the output buffer. If the function is successful,
-the value is updated to contain the length of the new string, excluding the
-trailing zero that is automatically added. If the function is not successful,
-the value is set to PCRE2_UNSET for general errors (such as output buffer too
-small). For syntax errors in the replacement string, the value is set to the
-offset in the replacement string where the error was detected.
+length, in code units, of the output buffer. If the function is successful, the
+value is updated to contain the length of the new string, excluding the
+trailing zero that is automatically added. 
+.P
+If the function is not successful, the value set via \fIoutlengthptr\fP depends
+on the type of error. For syntax errors in the replacement string, the value is
+the offset in the replacement string where the error was detected. For other
+errors, the value is PCRE2_UNSET by default. This includes the case of the
+output buffer being too small, unless PCRE2_SUBSTITUTE_OVERFLOW_LENGTH is set
+(see below), in which case the value is the minimum length needed, including
+space for the trailing zero. Note that in order to compute the required length,
+\fBpcre2_substitute()\fP has to simulate all the matching and copying, instead
+of giving an error return as soon as the buffer overflows. Note also that the
+length is in code units, not bytes.
 .P
 In the replacement string, which is interpreted as a UTF string in UTF mode,
 and is checked for UTF validity unless the PCRE2_NO_UTF_CHECK option is set, a
@@ -2734,7 +2742,8 @@ simultaneous substitutions, as this \fBpcre2test\fP example shows:
       apple lemon
    2: pear orange
 .sp
-Three additional options are available:
+As well as the usual options for \fBpcre2_match()\fP, a number of additional
+options can be set in the \fIoptions\fP argument.
 .P
 PCRE2_SUBSTITUTE_GLOBAL causes the function to iterate over the subject string,
 replacing every matching substring. If this is not set, only the first matching
@@ -2745,10 +2754,30 @@ advanced by one character except when CRLF is a valid newline sequence and the
 next two characters are CR, LF. In this case, the current position is advanced
 by two characters.
 .P
-PCRE2_SUBSTITUTE_UNSET_EMPTY causes unset capturing groups to be treated as 
-empty strings when inserted as described above. If this option is not set, an 
-attempt to insert an unset group causes the PCRE2_ERROR_UNSET error. This 
-option does not influence the extended substitution syntax described below.
+PCRE2_SUBSTITUTE_OVERFLOW_LENGTH changes what happens when the output buffer is 
+too small. The default action is to return PCRE2_ERROR_NOMEMORY immediately. If
+this option is set, however, \fBpcre2_substitute()\fP continues to go through
+the motions of matching and substituting (without, of course, writing anything)
+in order to compute the size of buffer that is needed. This value is passed
+back via the \fIoutlengthptr\fP variable, with the result of the function still
+being PCRE2_ERROR_NOMEMORY.
+.P
+Passing a buffer size of zero is a permitted way of finding out how much memory 
+is needed for given substitution. However, this does mean that the entire 
+operation is carried out twice. Depending on the application, it may be more 
+efficient to allocate a large buffer and free the excess afterwards, instead of 
+using PCRE2_SUBSTITUTE_OVERFLOW_LENGTH.
+.P
+PCRE2_SUBSTITUTE_UNKNOWN_UNSET causes references to capturing groups that do 
+not appear in the pattern to be treated as unset groups. This option should be 
+used with care, because it means that a typo in a group name or number no 
+longer causes the PCRE2_ERROR_NOSUBSTRING error.
+.P
+PCRE2_SUBSTITUTE_UNSET_EMPTY causes unset capturing groups (including unknown
+groups when PCRE2_SUBSTITUTE_UNKNOWN_UNSET is set) to be treated as empty
+strings when inserted as described above. If this option is not set, an attempt
+to insert an unset group causes the PCRE2_ERROR_UNSET error. This option does
+not influence the extended substitution syntax described below.
 .P
 PCRE2_SUBSTITUTE_EXTENDED causes extra processing to be applied to the
 replacement string. Without this option, only the dollar character is special,
@@ -2800,26 +2829,38 @@ string remains in force afterwards, as shown in this \fBpcre2test\fP example:
    1: HELLO
 .sp
 The PCRE2_SUBSTITUTE_UNSET_EMPTY option does not affect these extended 
-substitutions.
+substitutions. However, PCRE2_SUBSTITUTE_UNKNOWN_UNSET does cause unknown 
+groups in the extended syntax forms to be treated as unset.
 .P
-If successful, the function returns the number of replacements that were made.
-This may be zero if no matches were found, and is never greater than 1 unless
-PCRE2_SUBSTITUTE_GLOBAL is set.
+If successful, \fBpcre2_substitute()\fP returns the number of replacements that
+were made. This may be zero if no matches were found, and is never greater than
+1 unless PCRE2_SUBSTITUTE_GLOBAL is set.
 .P
 In the event of an error, a negative error code is returned. Except for
 PCRE2_ERROR_NOMATCH (which is never returned), errors from \fBpcre2_match()\fP
-are passed straight back. PCRE2_ERROR_NOSUBSTRING is returned for a 
-non-existent substring insertion, and PCRE2_ERROR_UNSET is returned for an
-unset substring insertion when the simple (non-extended) syntax is used and
-PCRE2_SUBSTITUTE_UNSET_EMPTY is not set. PCRE2_ERROR_NOMEMORY is returned if
-the output buffer is not big enough. PCRE2_ERROR_BADREPLACEMENT is used for
-miscellaneous syntax errors in the replacement string, with more particular
-errors being PCRE2_ERROR_BADREPESCAPE (invalid escape sequence),
-PCRE2_ERROR_REPMISSING_BRACE (closing curly bracket not found),
-PCRE2_BADSUBSTITUTION (syntax error in extended group substitution), and
-PCRE2_BADSUBPATTERN (the pattern match ended before it started). As for all
-PCRE2 errors, a text message that describes the error can be obtained by
-calling \fBpcre2_get_error_message()\fP.
+are passed straight back. 
+.P
+PCRE2_ERROR_NOSUBSTRING is returned for a non-existent substring insertion,
+unless PCRE2_SUBSTITUTE_UNKNOWN_UNSET is set.
+.P
+PCRE2_ERROR_UNSET is returned for an unset substring insertion (including an
+unknown substring when PCRE2_SUBSTITUTE_UNKNOWN_UNSET is set) when the simple
+(non-extended) syntax is used and PCRE2_SUBSTITUTE_UNSET_EMPTY is not set.
+.P
+PCRE2_ERROR_NOMEMORY is returned if the output buffer is not big enough. If the
+PCRE2_SUBSTITUTE_OVERFLOW_LENGTH option is set, the size of buffer that is
+needed is returned via \fIoutlengthptr\fP. Note that this does not happen by 
+default.
+.P
+PCRE2_ERROR_BADREPLACEMENT is used for miscellaneous syntax errors in the
+replacement string, with more particular errors being PCRE2_ERROR_BADREPESCAPE
+(invalid escape sequence), PCRE2_ERROR_REPMISSING_BRACE (closing curly bracket
+not found), PCRE2_BADSUBSTITUTION (syntax error in extended group
+substitution), and PCRE2_BADSUBPATTERN (the pattern match ended before it
+started, which can happen if \eK is used in an assertion). 
+.P
+As for all PCRE2 errors, a text message that describes the error can be
+obtained by calling \fBpcre2_get_error_message()\fP.
 .
 .
 .SH "DUPLICATE SUBPATTERN NAMES"
@@ -3113,6 +3154,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 04 December 2015
+Last updated: 21 December 2015
 Copyright (c) 1997-2015 University of Cambridge.
 .fi

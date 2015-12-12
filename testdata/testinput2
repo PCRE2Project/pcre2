@@ -4042,8 +4042,6 @@
 
 /(((((a)))))/parens_nest_limit=2
 
-# Tests for pcre2_substitute()
-
 /abc/replace=XYZ
     123123
     123abc123
@@ -4149,11 +4147,24 @@
 
 /(*:pear)apple|(*:orange)lemon|(*:strawberry)blackberry/g,replace=[22]${*MARK}
     apple lemon blackberry
+    apple lemon blackberry\=substitute_overflow_length
 
 /(*:pear)apple|(*:orange)lemon|(*:strawberry)blackberry/g,replace=[23]${*MARK}
     apple lemon blackberry
 
-# End of substitute tests 
+/abc/
+    123abc123\=replace=[9]XYZ
+    123abc123\=substitute_overflow_length,replace=[9]XYZ
+    123abc123\=substitute_overflow_length,replace=[6]XYZ
+    123abc123\=substitute_overflow_length,replace=[1]XYZ
+    123abc123\=substitute_overflow_length,replace=[0]XYZ
+
+/a(b)c/
+    123abc123\=replace=[9]x$1z
+    123abc123\=substitute_overflow_length,replace=[9]x$1z
+    123abc123\=substitute_overflow_length,replace=[6]x$1z
+    123abc123\=substitute_overflow_length,replace=[1]x$1z
+    123abc123\=substitute_overflow_length,replace=[0]x$1z
 
 "((?=(?(?=(?(?=(?(?=()))))))))"
     a
@@ -4749,12 +4760,24 @@ a)"xI
     cat\=replace=>$1<,substitute_unset_empty
     xbcom\=replace=>$1<,substitute_unset_empty
 
+/a|(b)c/substitute_extended
+    cat\=replace=>${2:-xx}<
+    cat\=replace=>${2:-xx}<,substitute_unknown_unset
+    cat\=replace=>${X:-xx}<,substitute_unknown_unset
+
 /a|(?'X'b)c/replace=>$X<,substitute_unset_empty
     cat
     xbcom 
 
+/a|(?'X'b)c/replace=>$Y<,substitute_unset_empty
+    cat
+    cat\=substitute_unknown_unset 
+    cat\=substitute_unknown_unset,-substitute_unset_empty 
+
 /a|(b)c/replace=>$2<,substitute_unset_empty
     cat
+    cat\=substitute_unknown_unset 
+    cat\=substitute_unknown_unset,-substitute_unset_empty 
 
 /()()()/use_offset_limit
     \=ovector=11000000000

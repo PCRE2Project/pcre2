@@ -1,4 +1,4 @@
-.TH PCRE2TEST 1 "04 December 2015" "PCRE 10.21"
+.TH PCRE2TEST 1 "12 December 2015" "PCRE 10.21"
 .SH NAME
 pcre2test - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -854,16 +854,18 @@ are applied to every subject line that is processed with that pattern. They may
 not appear in \fB#pattern\fP commands. These modifiers do not affect the
 compilation process.
 .sp
-      aftertext               show text after match
-      allaftertext            show text after captures
-      allcaptures             show all captures
-      allusedtext             show all consulted text
-  /g  global                  global matching
-      mark                    show mark values
-      replace=<string>        specify a replacement string
-      startchar               show starting character when relevant
-      substitute_extended     use PCRE2_SUBSTITUTE_EXTENDED
-      substitute_unset_empty  use PCRE2_SUBSTITUTE_UNSET_EMPTY  
+      aftertext                  show text after match
+      allaftertext               show text after captures
+      allcaptures                show all captures
+      allusedtext                show all consulted text
+  /g  global                     global matching
+      mark                       show mark values
+      replace=<string>           specify a replacement string
+      startchar                  show starting character when relevant
+      substitute_extended        use PCRE2_SUBSTITUTE_EXTENDED
+      substitute_overflow_length use PCRE2_SUBSTITUTE_OVERFLOW_LENGTH 
+      substitute_unknown_unset   use PCRE2_SUBSTITUTE_UNKNOWN_UNSET 
+      substitute_unset_empty     use PCRE2_SUBSTITUTE_UNSET_EMPTY  
 .sp
 These modifiers may not appear in a \fB#pattern\fP command. If you want them as
 defaults, set them in a \fB#subject\fP command.
@@ -935,36 +937,38 @@ information. Some of them may also be specified on a pattern line (see above),
 in which case they apply to every subject line that is matched against that
 pattern.
 .sp
-      aftertext                 show text after match
-      allaftertext              show text after captures
-      allcaptures               show all captures
-      allusedtext               show all consulted text (non-JIT only)
-      altglobal                 alternative global matching
-      callout_capture           show captures at callout time
-      callout_data=<n>          set a value to pass via callouts
-      callout_fail=<n>[:<m>]    control callout failure
-      callout_none              do not supply a callout function
-      copy=<number or name>     copy captured substring
-      dfa                       use \fBpcre2_dfa_match()\fP
-      find_limits               find match and recursion limits
-      get=<number or name>      extract captured substring
-      getall                    extract all captured substrings
-  /g  global                    global matching
-      jitstack=<n>              set size of JIT stack
-      mark                      show mark values
-      match_limit=<n>           set a match limit
-      memory                    show memory usage
-      null_context              match with a NULL context 
-      offset=<n>                set starting offset
-      offset_limit=<n>          set offset limit
-      ovector=<n>               set size of output vector
-      recursion_limit=<n>       set a recursion limit
-      replace=<string>          specify a replacement string
-      startchar                 show startchar when relevant
-      startoffset=<n>           same as offset=<n>
-      substitute_extedded       use PCRE2_SUBSTITUTE_EXTENDED
-      substitute_unset_empty    use PCRE2_SUBSTITUTE_UNSET_EMPTY  
-      zero_terminate            pass the subject as zero-terminated
+      aftertext                  show text after match
+      allaftertext               show text after captures
+      allcaptures                show all captures
+      allusedtext                show all consulted text (non-JIT only)
+      altglobal                  alternative global matching
+      callout_capture            show captures at callout time
+      callout_data=<n>           set a value to pass via callouts
+      callout_fail=<n>[:<m>]     control callout failure
+      callout_none               do not supply a callout function
+      copy=<number or name>      copy captured substring
+      dfa                        use \fBpcre2_dfa_match()\fP
+      find_limits                find match and recursion limits
+      get=<number or name>       extract captured substring
+      getall                     extract all captured substrings
+  /g  global                     global matching
+      jitstack=<n>               set size of JIT stack
+      mark                       show mark values
+      match_limit=<n>            set a match limit
+      memory                     show memory usage
+      null_context               match with a NULL context 
+      offset=<n>                 set starting offset
+      offset_limit=<n>           set offset limit
+      ovector=<n>                set size of output vector
+      recursion_limit=<n>        set a recursion limit
+      replace=<string>           specify a replacement string
+      startchar                  show startchar when relevant
+      startoffset=<n>            same as offset=<n>
+      substitute_extedded        use PCRE2_SUBSTITUTE_EXTENDED
+      substitute_overflow_length use PCRE2_SUBSTITUTE_OVERFLOW_LENGTH 
+      substitute_unknown_unset   use PCRE2_SUBSTITUTE_UNKNOWN_UNSET 
+      substitute_unset_empty     use PCRE2_SUBSTITUTE_UNSET_EMPTY  
+      zero_terminate             pass the subject as zero-terminated
 .sp
 The effects of these modifiers are described in the following sections.
 .
@@ -1107,10 +1111,15 @@ the appropriate code unit width. If it is not a valid UTF-8 string, the
 individual code units are copied directly. This provides a means of passing an
 invalid UTF-8 string for testing purposes.
 .P
-If the \fBglobal\fP modifier is set, PCRE2_SUBSTITUTE_GLOBAL is passed to
-\fBpcre2_substitute()\fP. The \fBsubstitute_extended\fP and 
-\fBsubstitute_unset_empty\fP modifiers set PCRE2_SUBSTITUTE_EXTENDED and 
-PCRE2_SUBSTITUTE_UNSET_EMPTY, respectively.
+The following modifiers set options (in additional to the normal match options)
+for \fBpcre2_substitute()\fP:
+.sp
+  global                      PCRE2_SUBSTITUTE_GLOBAL
+  substitute_extended         PCRE2_SUBSTITUTE_EXTENDED
+  substitute_overflow_length  PCRE2_SUBSTITUTE_OVERFLOW_LENGTH
+  substitute_unknown_unset    PCRE2_SUBSTITUTE_UNKNOWN_UNSET
+  substitute_unset_empty      PCRE2_SUBSTITUTE_UNSET_EMPTY
+.sp       
 .P
 After a successful substitution, the modified string is output, preceded by the
 number of replacements. This may be zero if there were no matches. Here is a
@@ -1134,6 +1143,19 @@ character. Here is an example that tests the edge case:
    1: 123XYZ123
       123abc123\e=replace=[9]XYZ
   Failed: error -47: no more memory
+.sp
+The default action of \fBpcre2_substitute()\fP is to return
+PCRE2_ERROR_NOMEMORY when the output buffer is too small. However, if the
+PCRE2_SUBSTITUTE_OVERFLOW_LENGTH option is set (by using the
+\fBsubstitute_overflow_length\fP modifier), \fBpcre2_substitute()\fP continues
+to go through the motions of matching and substituting, in order to compute the
+size of buffer that is required. When this happens, \fBpcre2test\fP shows the
+required buffer length (which includes space for the trailing zero) as part of
+the error message. For example:
+.sp
+  /abc/substitute_overflow_length
+      123abc123\e=replace=[9]XYZ
+  Failed: error -47: no more memory: 10 code units are needed
 .sp
 A replacement string is ignored with POSIX and DFA matching. Specifying partial
 matching provokes an error return ("bad option value") from
@@ -1618,6 +1640,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 04 December 2015
+Last updated: 12 December 2015
 Copyright (c) 1997-2015 University of Cambridge.
 .fi
