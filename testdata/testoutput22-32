@@ -3,7 +3,13 @@
 # of this test is different in 8-, 16-, and 32-bit modes. Some tests may match
 # in some widths and not in others.
 
-/ab\Cde/utf
+/ab\Cde/utf,info
+Capturing subpattern count = 0
+Contains \C
+Options: utf
+First code unit = 'a'
+Last code unit = 'e'
+Subject length lower bound = 0
     abXde
  0: abXde
 

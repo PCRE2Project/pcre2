@@ -78,7 +78,12 @@
 /ab\Cde/never_backslash_c
 Failed: error 183 at offset 3: using \C is disabled by the application
 
-/ab\Cde/
+/ab\Cde/info
+Capturing subpattern count = 0
+Contains \C
+First code unit = 'a'
+Last code unit = 'e'
+Subject length lower bound = 5
     abXde
  0: abXde
     

@@ -3,7 +3,7 @@
 # of this test is different in 8-, 16-, and 32-bit modes. Some tests may match
 # in some widths and not in others.
 
-/ab\Cde/utf
+/ab\Cde/utf,info
     abXde
 
 # This should produce an error diagnostic (\C in UTF lookbehind)

@@ -1689,8 +1689,6 @@
 /abc/utf,replace=xyz
     abc\=zero_terminate
 
-/abc\Cdef/info,utf
-
 /a[[:punct:]b]/ucp,bincode
 
 /a[[:punct:]b]/utf,ucp,bincode

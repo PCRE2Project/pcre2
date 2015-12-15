@@ -11,8 +11,6 @@
 #forbid_utf
 #newline_default lf any anycrlf
 
-/abc\Cdef/info
-
 # Test binary zeroes in the pattern
 
 # /a\0B/ where 0 is a binary zero

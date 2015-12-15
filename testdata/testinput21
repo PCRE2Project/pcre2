@@ -7,7 +7,7 @@
 
 /ab\Cde/never_backslash_c
 
-/ab\Cde/
+/ab\Cde/info
     abXde
     
 /(?<=ab\Cde)X/
