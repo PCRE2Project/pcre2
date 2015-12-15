@@ -127,20 +127,20 @@ runtest()
 # causes the message
 #
 # ar: `u' modifier ignored since `D' is the default (see `U')
-# 
+#
 # to be output while linking. This triggers an unwanted error report from this
 # script, because it expects no stderr output while making. To get round this
 # we filter the stderr output through sed, removing all occurrences of the
 # above lines. Just for paranoia, check that sed is available before doing
 # this.
-  
+
   echo "Making"
   make -j >/dev/null 2>teststderrM
-  makeRC=$? 
+  makeRC=$?
   if command -v sed >/dev/null 2>&1 ; then
     sed "/\`u' modifier ignored since \`D' is the default/ d" \
       teststderrM > teststderrMM
-    mv -f teststderrMM teststderrM   
+    mv -f teststderrMM teststderrM
   fi
   if [ $makeRC -ne 0 -o -s teststderrM ]; then
     echo " "
@@ -382,6 +382,10 @@ if [ -f Makefile ]; then
   fi
 fi
 
+echo "---------- End of tests in the source directory ----------"
+echo "Removing teststdoutM and teststderrM"
+rm -rf teststdoutM teststderrM
+
 if [ $usetmp -ne 0 ]; then
   echo "---------- Tests in the $tmp directory ----------"
   srcdir=`pwd`
@@ -407,12 +411,11 @@ if [ $usetmp -ne 0 ]; then
   do
     runtest
   done
+
+  echo "Removing $tmp"
+  rm -rf $tmp
 fi
 
-echo "Removing $tmp"
-rm -rf $tmp
-rm -rf teststdoutM teststderrM
-
-echo "All done"
+echo "---------- All done ----------"
 
 # End
