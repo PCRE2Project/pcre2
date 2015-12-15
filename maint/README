@@ -98,10 +98,10 @@ distribution for a new release.
 . Update the library version numbers in configure.ac according to the rules
   given below.
 
-. If new build options have been added, ensure that they are added to the CMake
-  files as well as to the autoconf files. The relevant files are CMakeLists.txt
-  and config-cmake.h.in. After making a release tarball, test it out with CMake
-  if there have been changes here.
+. If new build options or new source files have been added, ensure that they
+  are added to the CMake files as well as to the autoconf files. The relevant
+  files are CMakeLists.txt and config-cmake.h.in. After making a release
+  tarball, test it out with CMake if there have been changes here.
 
 . Run ./autogen.sh to ensure everything is up-to-date.
 
@@ -111,6 +111,12 @@ distribution for a new release.
   maint/ManyConfigTests now encapsulates this testing. It runs tests with
   different configurations, and it also runs some of them with valgrind, all of
   which can take quite some time.
+
+. Run tests in both 32-bit and 64-bit environments if possible.
+
+. Run tests with two different compilers if possible (e.g. clang and gcc).
+
+. Do a test build using CMake.
 
 . Run perltest.sh on the test data for tests 1 and 4. The output should match
   the PCRE2 test output, apart from the version identification at the start of
@@ -127,12 +133,11 @@ distribution for a new release.
   won't need changing, but over the long term things do change.
 
 . I used to test new releases myself on a number of different operating
-  systems, using different compilers as well. For example, on Solaris it is
-  helpful to test using Sun's cc compiler as a change from gcc. Adding
-  -xarch=v9 to the cc options does a 64-bit test, but it also needs -S 64 for
-  pcre2test to increase the stack size for test 2. Since I retired I can no
-  longer do this, but instead I rely on putting out release candidates for
-  folks on the pcre-dev list to test.
+  systems. For example, on Solaris it is helpful to test using Sun's cc
+  compiler as a change from gcc. Adding -xarch=v9 to the cc options does a
+  64-bit test, but it also needs -S 64 for pcre2test to increase the stack size
+  for test 2. Since I retired I can no longer do this, but instead I rely on
+  putting out release candidates for folks on the pcre-dev list to test.
 
 . The buildbots at http://buildfarm.opencsw.org/ do some automated testing
   of PCRE2 and should be checked before putting out a release.
@@ -197,8 +202,8 @@ copy:
            svn://vcs.exim.org/pcre2/code/tags/pcre2-10.xx
 
 When the new release is out, don't forget to tell webmaster@pcre.org and the
-mailing list. Also, update the list of version numbers in Bugzilla (edit
-products).
+mailing list. Also, update the list of version numbers in Bugzilla
+(administration > products > PCRE > Edit versions).
 
 
 Future ideas (wish list)
@@ -278,9 +283,8 @@ very sensible; some are rather wacky. Some have been on this list for years.
 . A user suggested a parameter to limit the length of string matched, for
   example if the parameter is N, the current match should fail if the matched
   substring exceeds N. This could apply to both match functions. The value
-  could be a new field in the match context.
-
-. Callouts with arguments: (?Cn:ARG) for instance.
+  could be a new field in the match context. Compare the offset_limit feature,
+  which limits where a match must start.
 
 . Write a function that generates random matching strings for a compiled
   pattern.
@@ -308,7 +312,46 @@ very sensible; some are rather wacky. Some have been on this list for years.
 . If Perl ever supports the POSIX notation [[.something.]] PCRE2 should try
   to follow.
 
+. Bugzilla #554 requested support for invalid UTF-8 strings.
+
+. A user wanted a way of ignoring all Unicode "mark" characters so that, for
+  example "a" followed by an accent would, together, match "a".
+
+. Perl supports [\N{x}-\N{y}] as a Unicode range, even in EBCDIC.
+
+. Unicode stuff from Perl:
+
+    \b{gcb} or \b{g}    grapheme cluster boundary
+    \b{sb}              sentence boundary
+    \b{wb}              word boundary
+
+  See Unicode TR 29.
+
+. (?[...]) extended classes: big project.
+
+. Bugzilla #1694 requests backwards searching.
+
+. A callout from pcre2_substitute() that happens after (before?) each
+  substitution (value = 256?).
+
+. Allow a callout to specify a number of characters to skip. This can be done
+  compatibly via an extra callout field.
+
+. Allow callouts to return *PRUNE, *COMMIT, *THEN, *SKIP, with and without
+  continuing (that is, with and without an implied *FAIL). A new option,
+  PCRE2_CALLOUT_EXTENDED say, would be needed. This is unlikely ever to be
+  implemented by JIT, so this could be an option for pcre2_match().
+
+. A limit on substitutions: a user suggested somehow finding a way of making
+  match_limit apply to the whole operation instead of each match separately.
+
+. The (relatively new) initial pre-pass in pcre2_compile() that identifies all
+  captures could be upgraded to do more parsing, saving the results in a new
+  vector (on-stack if the pattern is small enough). All comment removal and
+  escape processing could be done at this stage (so only done once). The code
+  for the other two passes would then be simpler.
+
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 26 November 2014
+Last updated: 15 December 2015
