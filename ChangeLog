@@ -1,8 +1,8 @@
 Change Log for PCRE2
 --------------------
 
-Version 10.21 xx-xxx-xxxx
--------------------------
+Version 10.21-RC1 15-December-2015
+----------------------------------
 
 1. Improve matching speed of patterns starting with + or * in JIT.
 
@@ -388,6 +388,8 @@ command line arguments.
 
 112. Implemented PCRE2_SUBSTITUTE_UNKNOWN_UNSET and PCRE2_SUBSTITUTE_OVERFLOW_
 LENGTH.
+
+113. Fix printing of *MARK names that contain binary zeroes in pcre2test.
 
 
 Version 10.20 30-June-2015

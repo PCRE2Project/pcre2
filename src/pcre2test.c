@@ -2545,13 +2545,14 @@ return (int)(pp - p);
 *************************************************/
 
 /* Must handle UTF-8 strings in utf8 mode. Yields number of characters printed.
-If handed a NULL file, just counts chars without printing. */
+For printing *MARK strings, a negative length is given. If handed a NULL file,
+just counts chars without printing. */
 
 static int pchars8(PCRE2_SPTR8 p, int length, BOOL utf, FILE *f)
 {
 uint32_t c = 0;
 int yield = 0;
-if (length < 0) length = strlen((char *)p);
+if (length < 0) length = p[-1];
 while (length-- > 0)
   {
   if (utf)
@@ -2579,12 +2580,13 @@ return yield;
 *************************************************/
 
 /* Must handle UTF-16 strings in utf mode. Yields number of characters printed.
-If handed a NULL file, just counts chars without printing. */
+For printing *MARK strings, a negative length is given. If handed a NULL file,
+just counts chars without printing. */
 
 static int pchars16(PCRE2_SPTR16 p, int length, BOOL utf, FILE *f)
 {
 int yield = 0;
-if (length < 0) length = strlen16(p);
+if (length < 0) length = p[-1];
 while (length-- > 0)
   {
   uint32_t c = *p++ & 0xffff;
@@ -2612,13 +2614,14 @@ return yield;
 *************************************************/
 
 /* Must handle UTF-32 strings in utf mode. Yields number of characters printed.
-If handed a NULL file, just counts chars without printing. */
+For printing *MARK strings, a negative length is given.If handed a NULL file,
+just counts chars without printing. */
 
 static int pchars32(PCRE2_SPTR32 p, int length, BOOL utf, FILE *f)
 {
 int yield = 0;
 (void)(utf);  /* Avoid compiler warning */
-if (length < 0) length = strlen32(p);
+if (length < 0) length = p[-1];
 while (length-- > 0)
   {
   uint32_t c = *p++;
@@ -6402,7 +6405,8 @@ else for (gmatched = 0;; gmatched++)
          TESTFLD(match_data, mark, !=, NULL))
       {
       fprintf(outfile, ", mark=");
-      PCHARS(rubriclength, CASTFLD(void *, match_data, mark), 0, -1, utf, outfile);
+      PCHARS(rubriclength, CASTFLD(void *, match_data, mark), 0, -1, utf, 
+        outfile);
       rubriclength += 7;
       }
     fprintf(outfile, ": ");

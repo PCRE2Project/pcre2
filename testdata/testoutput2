@@ -15136,4 +15136,26 @@ Failed: error -55 at offset 3 in replacement: requested value is not set
     \=copy=11000000000 
 ** Invalid value in 'copy=11000000000'
 
+/(*MARK:A\x00b)/mark
+    abc
+ 0: 
+MK: A\x00b
+
+/(*MARK:A\x00b)/mark,alt_verbnames
+    abc
+ 0: 
+MK: A\x00b
+
+# /(*MARK:A\x00b)/
+/28 2a 4d 41 52 4b 3a 41 00 62 29/mark,hex
+    abc
+ 0: 
+MK: A\x00b
+
+# /(*MARK:A\x00b)/
+/28 2a 4d 41 52 4b 3a 41 00 62 29/mark,hex,alt_verbnames
+    abc
+ 0: 
+MK: A\x00b
+
 # End of testinput2 
