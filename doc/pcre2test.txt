@@ -797,14 +797,18 @@ PATTERN MODIFIERS
        with that pattern. They may not appear in #pattern commands. These mod-
        ifiers do not affect the compilation process.
 
-             aftertext           show text after match
-             allaftertext        show text after captures
-             allcaptures         show all captures
-             allusedtext         show all consulted text
-         /g  global              global matching
-             mark                show mark values
-             replace=<string>    specify a replacement string
-             startchar           show starting character when relevant
+             aftertext                  show text after match
+             allaftertext               show text after captures
+             allcaptures                show all captures
+             allusedtext                show all consulted text
+         /g  global                     global matching
+             mark                       show mark values
+             replace=<string>           specify a replacement string
+             startchar                  show starting character when relevant
+             substitute_extended        use PCRE2_SUBSTITUTE_EXTENDED
+             substitute_overflow_length use PCRE2_SUBSTITUTE_OVERFLOW_LENGTH
+             substitute_unknown_unset   use PCRE2_SUBSTITUTE_UNKNOWN_UNSET
+             substitute_unset_empty     use PCRE2_SUBSTITUTE_UNSET_EMPTY
 
        These  modifiers may not appear in a #pattern command. If you want them
        as defaults, set them in a #subject command.
@@ -860,33 +864,38 @@ SUBJECT MODIFIERS
        line (see above), in which case they apply to every subject  line  that
        is matched against that pattern.
 
-             aftertext                 show text after match
-             allaftertext              show text after captures
-             allcaptures               show all captures
-             allusedtext               show all consulted text (non-JIT only)
-             altglobal                 alternative global matching
-             callout_capture           show captures at callout time
-             callout_data=<n>          set a value to pass via callouts
-             callout_fail=<n>[:<m>]    control callout failure
-             callout_none              do not supply a callout function
-             copy=<number or name>     copy captured substring
-             dfa                       use pcre2_dfa_match()
-             find_limits               find match and recursion limits
-             get=<number or name>      extract captured substring
-             getall                    extract all captured substrings
-         /g  global                    global matching
-             jitstack=<n>              set size of JIT stack
-             mark                      show mark values
-             match_limit=<n>           set a match limit
-             memory                    show memory usage
-             null_context              match with a NULL context
-             offset=<n>                set starting offset
-             offset_limit=<n>          set offset limit
-             ovector=<n>               set size of output vector
-             recursion_limit=<n>       set a recursion limit
-             replace=<string>          specify a replacement string
-             startchar                 show startchar when relevant
-             zero_terminate            pass the subject as zero-terminated
+             aftertext                  show text after match
+             allaftertext               show text after captures
+             allcaptures                show all captures
+             allusedtext                show all consulted text (non-JIT only)
+             altglobal                  alternative global matching
+             callout_capture            show captures at callout time
+             callout_data=<n>           set a value to pass via callouts
+             callout_fail=<n>[:<m>]     control callout failure
+             callout_none               do not supply a callout function
+             copy=<number or name>      copy captured substring
+             dfa                        use pcre2_dfa_match()
+             find_limits                find match and recursion limits
+             get=<number or name>       extract captured substring
+             getall                     extract all captured substrings
+         /g  global                     global matching
+             jitstack=<n>               set size of JIT stack
+             mark                       show mark values
+             match_limit=<n>            set a match limit
+             memory                     show memory usage
+             null_context               match with a NULL context
+             offset=<n>                 set starting offset
+             offset_limit=<n>           set offset limit
+             ovector=<n>                set size of output vector
+             recursion_limit=<n>        set a recursion limit
+             replace=<string>           specify a replacement string
+             startchar                  show startchar when relevant
+             startoffset=<n>            same as offset=<n>
+             substitute_extedded        use PCRE2_SUBSTITUTE_EXTENDED
+             substitute_overflow_length use PCRE2_SUBSTITUTE_OVERFLOW_LENGTH
+             substitute_unknown_unset   use PCRE2_SUBSTITUTE_UNKNOWN_UNSET
+             substitute_unset_empty     use PCRE2_SUBSTITUTE_UNSET_EMPTY
+             zero_terminate             pass the subject as zero-terminated
 
        The effects of these modifiers are described in the following sections.
 
@@ -1011,19 +1020,30 @@ SUBJECT MODIFIERS
    Testing the substitution function
 
        If  the  replace  modifier  is  set, the pcre2_substitute() function is
-       called instead  of  one  of  the  matching  functions.  Unlike  subject
-       strings,  pcre2test  does  not  process  replacement strings for escape
-       sequences. In UTF mode, a replacement string is checked to see if it is
-       a valid UTF-8 string.  If so, it is correctly converted to a UTF string
-       of the appropriate code unit width. If it is not a valid UTF-8  string,
-       the individual code units are copied directly. This provides a means of
-       passing an invalid UTF-8 string for testing purposes.
+       called instead of one of the matching functions. Note that  replacement
+       strings  cannot  contain commas, because a comma signifies the end of a
+       modifier. This is not thought to be an issue in a test program.
 
-       If the global modifier is set,  PCRE2_SUBSTITUTE_GLOBAL  is  passed  to
-       pcre2_substitute().  After  a  successful  substitution,  the  modified
-       string is output, preceded by the number of replacements. This  may  be
-       zero  if there were no matches. Here is a simple example of a substitu-
-       tion test:
+       Unlike subject strings, pcre2test does not process replacement  strings
+       for  escape  sequences. In UTF mode, a replacement string is checked to
+       see if it is a valid UTF-8 string. If so, it is correctly converted  to
+       a  UTF  string of the appropriate code unit width. If it is not a valid
+       UTF-8 string, the individual code units are copied directly. This  pro-
+       vides a means of passing an invalid UTF-8 string for testing purposes.
+
+       The  following modifiers set options (in additional to the normal match
+       options) for pcre2_substitute():
+
+         global                      PCRE2_SUBSTITUTE_GLOBAL
+         substitute_extended         PCRE2_SUBSTITUTE_EXTENDED
+         substitute_overflow_length  PCRE2_SUBSTITUTE_OVERFLOW_LENGTH
+         substitute_unknown_unset    PCRE2_SUBSTITUTE_UNKNOWN_UNSET
+         substitute_unset_empty      PCRE2_SUBSTITUTE_UNSET_EMPTY
+
+
+       After a successful substitution, the modified string  is  output,  pre-
+       ceded  by the number of replacements. This may be zero if there were no
+       matches. Here is a simple example of a substitution test:
 
          /abc/replace=xxx
              =abc=abc=
@@ -1031,18 +1051,32 @@ SUBJECT MODIFIERS
              =abc=abc=\=global
           2: =xxx=xxx=
 
-       Subject and replacement strings should be  kept  relatively  short  for
-       substitution  tests, as fixed-size buffers are used. To make it easy to
-       test for buffer overflow, if the replacement string starts with a  num-
-       ber  in square brackets, that number is passed to pcre2_substitute() as
-       the size of the output buffer, with the replacement string starting  at
-       the next character. Here is an example that tests the edge case:
+       Subject and replacement strings should be kept relatively short  (fewer
+       than  256 characters) for substitution tests, as fixed-size buffers are
+       used. To make it easy to test for buffer overflow, if  the  replacement
+       string  starts  with a number in square brackets, that number is passed
+       to pcre2_substitute() as the  size  of  the  output  buffer,  with  the
+       replacement  string  starting at the next character. Here is an example
+       that tests the edge case:
 
          /abc/
              123abc123\=replace=[10]XYZ
           1: 123XYZ123
              123abc123\=replace=[9]XYZ
          Failed: error -47: no more memory
+
+       The   default   action   of    pcre2_substitute()    is    to    return
+       PCRE2_ERROR_NOMEMORY  when  the output buffer is too small. However, if
+       the PCRE2_SUBSTITUTE_OVERFLOW_LENGTH option is set (by using  the  sub-
+       stitute_overflow_length  modifier),  pcre2_substitute() continues to go
+       through the motions of matching and substituting, in order  to  compute
+       the size of buffer that is required. When this happens, pcre2test shows
+       the required buffer length (which includes space for the trailing zero)
+       as part of the error message. For example:
+
+         /abc/substitute_overflow_length
+             123abc123\=replace=[9]XYZ
+         Failed: error -47: no more memory: 10 code units are needed
 
        A replacement string is ignored with POSIX and DFA matching. Specifying
        partial matching provokes an error return  ("bad  option  value")  from
@@ -1471,5 +1505,5 @@ AUTHOR
 
 REVISION
 
-       Last updated: 05 November 2015
+       Last updated: 12 December 2015
        Copyright (c) 1997-2015 University of Cambridge.

@@ -136,7 +136,7 @@ for (p = string; length > 0; p++)
   register uint32_t ab, d;
 
   c = *p;
-  length--; 
+  length--;
 
   if (c < 128) continue;                /* ASCII character */
 
@@ -329,7 +329,7 @@ PCRE2_ERROR_UTF16_ERR3  Isolated low surrogate
 for (p = string; length > 0; p++)
   {
   c = *p;
-  length--; 
+  length--;
 
   if ((c & 0xf800) != 0xd800)
     {

@@ -211,7 +211,7 @@ for (;;)
 
     last if ($_ eq "");
     next if $_ =~ /^\\=(?:\s|$)/;   # Comment line
- 
+
     $x = eval "\"$_\"";   # To get escapes processed
 
     # Empty array for holding results, ensure $REGERROR and $REGMARK are

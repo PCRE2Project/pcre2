@@ -2409,7 +2409,7 @@ for (;;)
     break;
 
     /* Match a single code unit, even in UTF-8 mode. This opcode really does
-    match any code unit, even newline. (It really should be called ANYCODEUNIT, 
+    match any code unit, even newline. (It really should be called ANYCODEUNIT,
     of course - the byte name is from pre-16 bit days.) */
 
     case OP_ANYBYTE:

@@ -86,6 +86,13 @@ results. The returned value from <b>pcre2_jit_compile()</b> is zero on success,
 or a negative error code.
 </P>
 <P>
+There is a limit to the size of pattern that JIT supports, imposed by the size
+of machine stack that it uses. The exact rules are not documented because they
+may change at any time, in particular, when new optimizations are introduced.
+If a pattern is too big, a call to \fBpcre2_jit_compile()\fB returns
+PCRE2_ERROR_NOMEMORY.
+</P>
+<P>
 PCRE2_JIT_COMPLETE requests the JIT compiler to generate code for complete
 matches. If you want to run partial matches using the PCRE2_PARTIAL_HARD or
 PCRE2_PARTIAL_SOFT options of <b>pcre2_match()</b>, you should set one or both
@@ -425,7 +432,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC13" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 28 July 2015
+Last updated: 14 November 2015
 <br>
 Copyright &copy; 1997-2015 University of Cambridge.
 <br>

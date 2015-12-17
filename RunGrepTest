@@ -82,7 +82,7 @@ utf8=$?
 nl=`$pcre2test -C newline`
 if [ "$nl" != "LF" -a "$nl" != "ANY" -a "$nl" != "ANYCRLF" ]; then
   pcre2grep="$pcre2grep -N LF"
-  echo "Default newline setting forced to LF" 
+  echo "Default newline setting forced to LF"
 fi
 
 # ------ Function to run and check a special pcre2grep arguments test -------

@@ -140,13 +140,13 @@ on a system with different endianness.
 .P
 Decoded patterns can be used for matching in the usual way, and must be freed
 by calling \fBpcre2_code_free()\fP. However, be aware that there is a potential
-race issue if you are using multiple patterns that were decoded from a single 
+race issue if you are using multiple patterns that were decoded from a single
 byte stream in a multithreaded application. A single copy of the character
 tables is used by all the decoded patterns and a reference count is used to
 arrange for its memory to be automatically freed when the last pattern is
 freed, but there is no locking on this reference count. Therefore, if you want
 to call \fBpcre2_code_free()\fP for these patterns in different threads, you
-must arrange your own locking, and ensure that \fBpcre2_code_free()\fP cannot 
+must arrange your own locking, and ensure that \fBpcre2_code_free()\fP cannot
 be called by two threads at the same time.
 .P
 If a pattern was processed by \fBpcre2_jit_compile()\fP before being

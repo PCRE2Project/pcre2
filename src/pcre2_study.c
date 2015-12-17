@@ -1546,7 +1546,7 @@ if ((re->overall_options & PCRE2_ANCHORED) == 0 &&
   if (rc == SSB_DONE) re->flags |= PCRE2_FIRSTMAPSET;
   }
 
-/* Find the minimum length of subject string. If it can match an empty string, 
+/* Find the minimum length of subject string. If it can match an empty string,
 the minimum length is already known. */
 
 if ((re->flags & PCRE2_MATCH_EMPTY) == 0)
@@ -1555,19 +1555,19 @@ if ((re->flags & PCRE2_MATCH_EMPTY) == 0)
     {
     case -1:  /* \C in UTF mode or (*ACCEPT) or over-complex regex */
     break;    /* Leave minlength unchanged (will be zero) */
-  
+
     case -2:
     return 2; /* missing capturing bracket */
-  
+
     case -3:
     return 3; /* unrecognized opcode */
-  
+
     default:
     if (min > UINT16_MAX) min = UINT16_MAX;
     re->minlength = min;
     break;
     }
-  }   
+  }
 
 return 0;
 }

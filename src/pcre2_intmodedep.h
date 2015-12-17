@@ -562,7 +562,7 @@ typedef struct pcre2_real_compile_context {
   int (*stack_guard)(uint32_t, void *);
   void *stack_guard_data;
   const uint8_t *tables;
-  PCRE2_SIZE max_pattern_length; 
+  PCRE2_SIZE max_pattern_length;
   uint16_t bsr_convention;
   uint16_t newline_convention;
   uint32_t parens_nest_limit;
@@ -581,7 +581,7 @@ typedef struct pcre2_real_match_context {
 #endif
   int    (*callout)(pcre2_callout_block *, void *);
   void    *callout_data;
-  PCRE2_SIZE offset_limit; 
+  PCRE2_SIZE offset_limit;
   uint32_t match_limit;
   uint32_t recursion_limit;
 } pcre2_real_match_context;
@@ -592,7 +592,7 @@ copying the size from possibly unaligned memory into a variable of the same
 type. Use a macro rather than a typedef to avoid compiler warnings when this
 file is included multiple times by pcre2test. LOOKBEHIND_MAX specifies the
 largest lookbehind that is supported. (OP_REVERSE in a pattern has a 16-bit
-argument in 8-bit and 16-bit modes, so we need no more than a 16-bit field 
+argument in 8-bit and 16-bit modes, so we need no more than a 16-bit field
 here.) */
 
 #undef  CODE_BLOCKSIZE_TYPE
@@ -660,7 +660,7 @@ typedef struct recurse_check {
 typedef struct recurse_cache {
   PCRE2_SPTR group;
   int recno;
-} recurse_cache;    
+} recurse_cache;
 
 /* Structure for maintaining a chain of pointers to the currently incomplete
 branches, for testing for left recursion while compiling. */
@@ -693,7 +693,7 @@ typedef struct compile_block {
   PCRE2_SPTR start_code;           /* The start of the compiled code */
   PCRE2_SPTR start_pattern;        /* The start of the pattern */
   PCRE2_SPTR end_pattern;          /* The end of the pattern */
-  PCRE2_SPTR nestptr[2];           /* Pointer(s) saved for string substitution */ 
+  PCRE2_SPTR nestptr[2];           /* Pointer(s) saved for string substitution */
   PCRE2_UCHAR *name_table;         /* The name/number table */
   size_t workspace_size;           /* Size of workspace */
   uint16_t names_found;            /* Number of entries so far */
@@ -717,7 +717,7 @@ typedef struct compile_block {
   int  req_varyopt;                /* "After variable item" flag for reqbyte */
   BOOL had_accept;                 /* (*ACCEPT) encountered */
   BOOL had_pruneorskip;            /* (*PRUNE) or (*SKIP) encountered */
-  BOOL had_recurse;                /* Had a recursion or subroutine call */ 
+  BOOL had_recurse;                /* Had a recursion or subroutine call */
   BOOL check_lookbehind;           /* Lookbehinds need later checking */
   BOOL dupnames;                   /* Duplicate names exist */
   BOOL iscondassert;               /* Next assert is a condition */

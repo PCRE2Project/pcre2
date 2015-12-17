@@ -258,7 +258,7 @@ ENDIF(PCRE2_SUPPORT_BSR_ANYCRLF)
 
 IF(PCRE2_NEVER_BACKSLASH_C)
         SET(NEVER_BACKSLASH_C 1)
-ENDIF(PCRE2_NEVER_BACKSLASH_C)         
+ENDIF(PCRE2_NEVER_BACKSLASH_C)
 
 IF(PCRE2_SUPPORT_UNICODE)
         SET(SUPPORT_UNICODE 1)
@@ -400,7 +400,7 @@ SET(PCRE2_SOURCES
   src/pcre2_context.c
   src/pcre2_dfa_match.c
   src/pcre2_error.c
-  src/pcre2_find_bracket.c 
+  src/pcre2_find_bracket.c
   src/pcre2_jit_compile.c
   src/pcre2_maketables.c
   src/pcre2_match.c

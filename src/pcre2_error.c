@@ -251,7 +251,7 @@ static const char match_error_texts[] =
   "bad substitution in replacement string\0"
   /* 60 */
   "match with end before start is not supported\0"
-  "too many replacements (more than INT_MAX)\0" 
+  "too many replacements (more than INT_MAX)\0"
   ;
 
 

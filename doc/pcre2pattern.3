@@ -1188,11 +1188,11 @@ When the newline convention (see
 .\" </a>
 "Newline conventions"
 .\"
-below) recognizes the two-character sequence CRLF as a newline, this is 
-preferred, even if the single characters CR and LF are also recognized as 
+below) recognizes the two-character sequence CRLF as a newline, this is
+preferred, even if the single characters CR and LF are also recognized as
 newlines. For example, if the newline convention is "any", a multiline mode
 circumflex matches before "xyz" in the string "abc\er\enxyz" rather than after
-CR, even though CR on its own is a valid newline. (It also matches at the very 
+CR, even though CR on its own is a valid newline. (It also matches at the very
 start of the string, of course.)
 .P
 Note that the sequences \eA, \eZ, and \ez can be used to match the start and
@@ -1245,7 +1245,7 @@ with \eC in UTF-8 or UTF-16 mode means that the rest of the string may start
 with a malformed UTF character. This has undefined results, because PCRE2
 assumes that it is matching character by character in a valid UTF string (by
 default it checks the subject string's validity at the start of processing
-unless the PCRE2_NO_UTF_CHECK option is used). 
+unless the PCRE2_NO_UTF_CHECK option is used).
 .P
 An application can lock out the use of \eC by setting the
 PCRE2_NEVER_BACKSLASH_C option when compiling a pattern. It is also possible to
@@ -1257,9 +1257,9 @@ PCRE2 does not allow \eC to appear in lookbehind assertions
 (described below)
 .\"
 in a UTF mode, because this would make it impossible to calculate the length of
-the lookbehind. Neither the alternative matching function 
-\fBpcre2_dfa_match()\fP not the JIT optimizer support \eC in a UTF mode. The 
-former gives a match-time error; the latter fails to optimize and so the match 
+the lookbehind. Neither the alternative matching function
+\fBpcre2_dfa_match()\fP not the JIT optimizer support \eC in a UTF mode. The
+former gives a match-time error; the latter fails to optimize and so the match
 is always run using the interpreter.
 .P
 In general, the \eC escape sequence is best avoided. However, one way of using
@@ -1347,11 +1347,11 @@ inclusive. They can also be used for code points specified numerically, for
 example [\e000-\e037]. Ranges can include any characters that are valid for the
 current mode.
 .P
-There is a special case in EBCDIC environments for ranges whose end points are 
-both specified as literal letters in the same case. For compatibility with 
-Perl, EBCDIC code points within the range that are not letters are omitted. For 
-example, [h-k] matches only four characters, even though the codes for h and k 
-are 0x88 and 0x92, a range of 11 code points. However, if the range is 
+There is a special case in EBCDIC environments for ranges whose end points are
+both specified as literal letters in the same case. For compatibility with
+Perl, EBCDIC code points within the range that are not letters are omitted. For
+example, [h-k] matches only four characters, even though the codes for h and k
+are 0x88 and 0x92, a range of 11 code points. However, if the range is
 specified numerically, for example, [\ex88-\ex92] or [h-\ex92], all code points
 are included.
 .P
@@ -1683,7 +1683,7 @@ first one in the pattern with the given number. The following pattern matches
 .sp
   /(?|(abc)|(def))(?1)/
 .sp
-A relative reference such as (?-1) is no different: it is just a convenient way 
+A relative reference such as (?-1) is no different: it is just a convenient way
 of computing an absolute group number.
 .P
 If a
@@ -2549,7 +2549,7 @@ For example:
   (?(VERSION>=10.4)yes|no)
 .sp
 This pattern matches "yes" if the PCRE2 version is greater or equal to 10.4, or
-"no" otherwise. The fractional part of the version number may not contain more 
+"no" otherwise. The fractional part of the version number may not contain more
 than two digits.
 .
 .
@@ -2667,21 +2667,21 @@ pattern above you can write (?-2) to refer to the second most recently opened
 parentheses preceding the recursion. In other words, a negative number counts
 capturing parentheses leftwards from the point at which it is encountered.
 .P
-Be aware however, that if 
+Be aware however, that if
 .\" HTML <a href="#dupsubpatternnumber">
 .\" </a>
 duplicate subpattern numbers
 .\"
-are in use, relative references refer to the earliest subpattern with the 
+are in use, relative references refer to the earliest subpattern with the
 appropriate number. Consider, for example:
 .sp
   (?|(a)|(b)) (c) (?-2)
 .sp
 The first two capturing groups (a) and (b) are both numbered 1, and group (c)
 is number 2. When the reference (?-2) is encountered, the second most recently
-opened parentheses has the number 1, but it is the first such group (the (a) 
-group) to which the recursion refers. This would be the same if an absolute 
-reference (?1) was used. In other words, relative references are just a 
+opened parentheses has the number 1, but it is the first such group (the (a)
+group) to which the recursion refers. This would be the same if an absolute
+reference (?1) was used. In other words, relative references are just a
 shorthand for computing a group number.
 .P
 It is also possible to refer to subsequently opened parentheses, by writing
@@ -2988,13 +2988,13 @@ parenthesis followed by an asterisk. They are generally of the form (*VERB) or
 depending on whether or not a name is present.
 .P
 By default, for compatibility with Perl, a name is any sequence of characters
-that does not include a closing parenthesis. The name is not processed in 
+that does not include a closing parenthesis. The name is not processed in
 any way, and it is not possible to include a closing parenthesis in the name.
-However, if the PCRE2_ALT_VERBNAMES option is set, normal backslash processing 
-is applied to verb names and only an unescaped closing parenthesis terminates 
-the name. A closing parenthesis can be included in a name either as \e) or 
-between \eQ and \eE. If the PCRE2_EXTENDED option is set, unescaped whitespace 
-in verb names is skipped and #-comments are recognized, exactly as in the rest 
+However, if the PCRE2_ALT_VERBNAMES option is set, normal backslash processing
+is applied to verb names and only an unescaped closing parenthesis terminates
+the name. A closing parenthesis can be included in a name either as \e) or
+between \eQ and \eE. If the PCRE2_EXTENDED option is set, unescaped whitespace
+in verb names is skipped and #-comments are recognized, exactly as in the rest
 of the pattern.
 .P
 The maximum length of a name is 255 in the 8-bit library and 65535 in the

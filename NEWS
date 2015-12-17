@@ -1,6 +1,47 @@
 News about PCRE2 releases
 -------------------------
 
+Version 10.21 15-December-2015
+------------------------------
+
+1. Many bugs have been fixed. A large number of them were provoked only by very
+strange pattern input, and were discovered by fuzzers. Some others were
+discovered by code auditing. See ChangeLog for details.
+
+2. The Unicode tables have been updated to Unicode version 8.0.0.
+
+3. For Perl compatibility in EBCDIC environments, ranges such as a-z in a
+class, where both values are literal letters in the same case, omit the
+non-letter EBCDIC code points within the range.
+
+4. There have been a number of enhancements to the pcre2_substitute() function,
+giving more flexibility to replacement facilities. It is now also possible to
+cause the function to return the needed buffer size if the one given is too
+small.
+
+5. The PCRE2_ALT_VERBNAMES option causes the "name" parts of special verbs such
+as (*THEN:name) to be processed for backslashes and to take note of
+PCRE2_EXTENDED.
+
+6. PCRE2_INFO_HASBACKSLASHC makes it possible for a client to find out if a
+pattern uses \C, and --never-backslash-C makes it possible to compile a version
+PCRE2 in which the use of \C is always forbidden.
+
+7. A limit to the length of pattern that can be handled can now be set by
+calling pcre2_set_max_pattern_length().
+
+8. When matching an unanchored pattern, a match can be required to begin within
+a given number of code units after the start of the subject by calling
+pcre2_set_offset_limit().
+
+9. The pcre2test program has been extended to test new facilities, and it can
+now run the tests when LF on its own is not a valid newline sequence.
+
+10. The RunTest script has also been updated to enable more tests to be run.
+
+11. There have been some minor performance enhancements.
+
+
 Version 10.20 30-June-2015
 --------------------------
 

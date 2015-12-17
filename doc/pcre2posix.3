@@ -174,7 +174,7 @@ Default POSIX newline handling can be obtained by setting PCRE2_DOTALL and
 PCRE2_DOLLAR_ENDONLY when calling \fBpcre2_compile()\fP directly, but there is
 no way to make PCRE2 behave exactly as for the REG_NEWLINE action. When using
 the POSIX API, passing REG_NEWLINE to PCRE2's \fBregcomp()\fP function
-causes PCRE2_MULTILINE to be passed to \fBpcre2_compile()\fP, and REG_DOTALL 
+causes PCRE2_MULTILINE to be passed to \fBpcre2_compile()\fP, and REG_DOTALL
 passes PCRE2_DOTALL. There is no way to pass PCRE2_DOLLAR_ENDONLY.
 .
 .
@@ -211,7 +211,7 @@ to have a terminating NUL located at \fIstring\fP + \fIpmatch[0].rm_eo\fP
 IEEE Standard 1003.2 (POSIX.2), and should be used with caution in software
 intended to be portable to other systems. Note that a non-zero \fIrm_so\fP does
 not imply REG_NOTBOL; REG_STARTEND affects only the location of the string, not
-how it is matched. Setting REG_STARTEND and passing \fIpmatch\fP as NULL are 
+how it is matched. Setting REG_STARTEND and passing \fIpmatch\fP as NULL are
 mutually exclusive; the error REG_INVARG is returned.
 .P
 If the pattern was compiled with the REG_NOSUB flag, no data about any matched

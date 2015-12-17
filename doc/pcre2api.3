@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "12 December 2015" "PCRE2 10.21"
+.TH PCRE2API 3 "16 December 2015" "PCRE2 10.21"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -570,7 +570,7 @@ of the following compile-time parameters:
   PCRE2's character tables
   The newline character sequence
   The compile time nested parentheses limit
-  The maximum length of the pattern string 
+  The maximum length of the pattern string
   An external function for stack checking
 .sp
 A compile context is also required if you are using custom memory management.
@@ -618,10 +618,10 @@ in the current locale.
 .B "  PCRE2_SIZE \fIvalue\fP);"
 .fi
 .sp
-This sets a maximum length, in code units, for the pattern string that is to be 
-compiled. If the pattern is longer, an error is generated. This facility is 
-provided so that applications that accept patterns from external sources can 
-limit their size. The default is the largest number that a PCRE2_SIZE variable 
+This sets a maximum length, in code units, for the pattern string that is to be
+compiled. If the pattern is longer, an error is generated. This facility is
+provided so that applications that accept patterns from external sources can
+limit their size. The default is the largest number that a PCRE2_SIZE variable
 can hold, which is effectively unlimited.
 .sp
 .nf
@@ -678,8 +678,8 @@ of the following match-time parameters:
 .sp
   A callout function
   The offset limit for matching an unanchored pattern
-  The limit for calling \fImatch()\fP
-  The limit for calling \fImatch()\fP recursively
+  The limit for calling \fBmatch()\fP (see below)
+  The limit for calling \fBmatch()\fP recursively
 .sp
 A match context is also required if you are using custom memory management.
 If none of these apply, just pass NULL as the context argument of
@@ -736,7 +736,7 @@ PCRE2_USE_OFFSET_LIMIT is not set, an error is generated.
 .P
 The offset limit facility can be used to track progress when searching large
 subject strings. See also the PCRE2_FIRSTLINE option, which requires a match to
-start within the first line of the subject. If this is set with an offset 
+start within the first line of the subject. If this is set with an offset
 limit, a match must occur in the first line and also within the offset limit.
 In other words, whichever limit comes first is used.
 .sp
@@ -1228,7 +1228,7 @@ This option locks out the use of \eC in the pattern that is being compiled.
 This escape can cause unpredictable behaviour in UTF-8 or UTF-16 modes, because
 it may leave the current matching point in the middle of a multi-code-unit
 character. This option may be useful in applications that process patterns from
-external sources. Note that there is also a build-time option that permanently 
+external sources. Note that there is also a build-time option that permanently
 locks out the use of \eC.
 .sp
   PCRE2_NEVER_UCP
@@ -1565,7 +1565,7 @@ are as follows:
 Return a copy of the pattern's options. The third argument should point to a
 \fBuint32_t\fP variable. PCRE2_INFO_ARGOPTIONS returns exactly the options that
 were passed to \fBpcre2_compile()\fP, whereas PCRE2_INFO_ALLOPTIONS returns
-the compile options as modified by any top-level option settings such as (*UTF) 
+the compile options as modified by any top-level option settings such as (*UTF)
 at the start of the pattern itself. For example, if the pattern /(*UTF)abc/ is
 compiled with the PCRE2_EXTENDED option, the result is PCRE2_EXTENDED and
 PCRE2_UTF.
@@ -1611,8 +1611,9 @@ matches only CR, LF, or CRLF.
 .sp
   PCRE2_INFO_CAPTURECOUNT
 .sp
-Return the number of capturing subpatterns in the pattern. The third argument
-should point to an \fBuint32_t\fP variable.
+Return the highest capturing subpattern number in the pattern. In patterns
+where (?| is not used, this is also the total number of capturing subpatterns.
+The third argument should point to an \fBuint32_t\fP variable.
 .sp
   PCRE2_INFO_FIRSTBITMAP
 .sp
@@ -1629,10 +1630,8 @@ returned. Otherwise NULL is returned. The third argument should point to an
 .sp
 Return information about the first code unit of any matched string, for a
 non-anchored pattern. The third argument should point to an \fBuint32_t\fP
-variable.
-.P
-If there is a fixed first value, for example, the letter "c" from a pattern
-such as (cat|cow|coyote), 1 is returned, and the character value can be
+variable. If there is a fixed first value, for example, the letter "c" from a
+pattern such as (cat|cow|coyote), 1 is returned, and the character value can be
 retrieved using PCRE2_INFO_FIRSTCODEUNIT. If there is no fixed first value, but
 it is known that a match can occur only at the start of the subject or
 following a newline in the subject, 2 is returned. Otherwise, and for anchored
@@ -1676,12 +1675,10 @@ Returns 1 if there is a rightmost literal code unit that must exist in any
 matched string, other than at its start. The third argument should  point to an
 \fBuint32_t\fP variable. If there is no such value, 0 is returned. When 1 is
 returned, the code unit value itself can be retrieved using
-PCRE2_INFO_LASTCODEUNIT.
-.P
-For anchored patterns, a last literal value is recorded only if it follows
-something of variable length. For example, for the pattern /^a\ed+z\ed+/ the
-returned value is 1 (with "z" returned from PCRE2_INFO_LASTCODEUNIT), but for
-/^a\edz\ed/ the returned value is 0.
+PCRE2_INFO_LASTCODEUNIT. For anchored patterns, a last literal value is
+recorded only if it follows something of variable length. For example, for the
+pattern /^a\ed+z\ed+/ the returned value is 1 (with "z" returned from
+PCRE2_INFO_LASTCODEUNIT), but for /^a\edz\ed/ the returned value is 0.
 .sp
   PCRE2_INFO_LASTCODEUNIT
 .sp
@@ -1693,9 +1690,9 @@ value, 0 is returned.
   PCRE2_INFO_MATCHEMPTY
 .sp
 Return 1 if the pattern might match an empty string, otherwise 0. The third
-argument should point to an \fBuint32_t\fP variable. When a pattern contains 
-recursive subroutine calls it is not always possible to determine whether or 
-not it can match an empty string. PCRE2 takes a cautious approach and returns 1 
+argument should point to an \fBuint32_t\fP variable. When a pattern contains
+recursive subroutine calls it is not always possible to determine whether or
+not it can match an empty string. PCRE2 takes a cautious approach and returns 1
 in such cases.
 .sp
   PCRE2_INFO_MATCHLIMIT
@@ -2181,9 +2178,19 @@ standard convention for the operating system. The default can be overridden in
 a
 .\" HTML <a href="#compilecontext">
 .\" </a>
-compile context.
+compile context
 .\"
-During matching, the newline choice affects the behaviour of the dot,
+by calling \fBpcre2_set_newline()\fP. It can also be overridden by starting a
+pattern string with, for example, (*CRLF), as described in the
+.\" HTML <a href="pcre2pattern.html#newlines">
+.\" </a>
+section on newline conventions
+.\"
+in the
+.\" HREF
+\fBpcre2pattern\fP
+.\"
+page. During matching, the newline choice affects the behaviour of the dot,
 circumflex, and dollar metacharacters. It may also alter the way the match
 starting position is advanced after a match failure for an unanchored pattern.
 .P
@@ -2229,18 +2236,7 @@ that do not cause substrings to be captured. The \fBpcre2_pattern_info()\fP
 function can be used to find out how many capturing subpatterns there are in a
 compiled pattern.
 .P
-A successful match returns the overall matched string and any captured
-substrings to the caller via a vector of PCRE2_SIZE values. This is called the
-\fBovector\fP, and is contained within the
-.\" HTML <a href="#matchdatablock">
-.\" </a>
-match data block.
-.\"
-You can obtain direct access to the ovector by calling
-\fBpcre2_get_ovector_pointer()\fP to find its address, and
-\fBpcre2_get_ovector_count()\fP to find the number of pairs of values it
-contains. Alternatively, you can use the auxiliary functions for accessing
-captured substrings
+You can use auxiliary functions for accessing captured substrings
 .\" HTML <a href="#extractbynumber">
 .\" </a>
 by number
@@ -2248,9 +2244,20 @@ by number
 or
 .\" HTML <a href="#extractbyname">
 .\" </a>
-by name
+by name,
 .\"
-(see below).
+as described in sections below.
+.P
+Alternatively, you can make direct use of the vector of PCRE2_SIZE values,
+called the \fBovector\fP, which contains the offsets of captured strings. It is
+part of the
+.\" HTML <a href="#matchdatablock">
+.\" </a>
+match data block.
+.\"
+The function \fBpcre2_get_ovector_pointer()\fP returns the address of the
+ovector, and \fBpcre2_get_ovector_count()\fP returns the number of pairs of
+values it contains.
 .P
 Within the ovector, the first in each pair of values is set to the offset of
 the first code unit of a substring, and the second is set to the offset of the
@@ -2334,7 +2341,12 @@ After a successful match, a partial match (PCRE2_ERROR_PARTIAL), or a failure
 to match (PCRE2_ERROR_NOMATCH), a (*MARK) name may be available, and
 \fBpcre2_get_mark()\fP can be called. It returns a pointer to the
 zero-terminated name, which is within the compiled pattern. Otherwise NULL is
-returned. After a successful match, the (*MARK) name that is returned is the
+returned. The length of the (*MARK) name (excluding the terminating zero) is
+stored in the code unit that preceeds the name. You should use this instead of
+relying on the terminating zero if the (*MARK) name might contain a binary
+zero.
+.P
+After a successful match, the (*MARK) name that is returned is the
 last one encountered on the matching path through the pattern. After a "no
 match" or a partial match, the last encountered (*MARK) name is returned. For
 example, consider this pattern:
@@ -2353,7 +2365,7 @@ different to the value of \fIovector[0]\fP if the pattern contains the \eK
 escape sequence. After a partial match, however, this value is always the same
 as \fIovector[0]\fP because \eK does not affect the result of a partial match.
 .P
-After a UTF check failure, \fBpcre2_get_startchar()\fB can be used to obtain
+After a UTF check failure, \fBpcre2_get_startchar()\fP can be used to obtain
 the code unit offset of the invalid UTF character. Details are given in the
 .\" HREF
 \fBpcre2unicode\fP
@@ -2692,7 +2704,7 @@ same number causes an error at compile time.
 This function calls \fBpcre2_match()\fP and then makes a copy of the subject
 string in \fIoutputbuffer\fP, replacing the part that was matched with the
 \fIreplacement\fP string, whose length is supplied in \fBrlength\fP. This can
-be given as PCRE2_ZERO_TERMINATED for a zero-terminated string. Matches in 
+be given as PCRE2_ZERO_TERMINATED for a zero-terminated string. Matches in
 which a \eK item in a lookahead in the pattern causes the match to end before
 it starts are not supported, and give rise to an error return.
 .P
@@ -2706,7 +2718,7 @@ allocate memory for the compiled code.
 The \fIoutlengthptr\fP argument must point to a variable that contains the
 length, in code units, of the output buffer. If the function is successful, the
 value is updated to contain the length of the new string, excluding the
-trailing zero that is automatically added. 
+trailing zero that is automatically added.
 .P
 If the function is not successful, the value set via \fIoutlengthptr\fP depends
 on the type of error. For syntax errors in the replacement string, the value is
@@ -2754,7 +2766,7 @@ advanced by one character except when CRLF is a valid newline sequence and the
 next two characters are CR, LF. In this case, the current position is advanced
 by two characters.
 .P
-PCRE2_SUBSTITUTE_OVERFLOW_LENGTH changes what happens when the output buffer is 
+PCRE2_SUBSTITUTE_OVERFLOW_LENGTH changes what happens when the output buffer is
 too small. The default action is to return PCRE2_ERROR_NOMEMORY immediately. If
 this option is set, however, \fBpcre2_substitute()\fP continues to go through
 the motions of matching and substituting (without, of course, writing anything)
@@ -2762,15 +2774,15 @@ in order to compute the size of buffer that is needed. This value is passed
 back via the \fIoutlengthptr\fP variable, with the result of the function still
 being PCRE2_ERROR_NOMEMORY.
 .P
-Passing a buffer size of zero is a permitted way of finding out how much memory 
-is needed for given substitution. However, this does mean that the entire 
-operation is carried out twice. Depending on the application, it may be more 
-efficient to allocate a large buffer and free the excess afterwards, instead of 
+Passing a buffer size of zero is a permitted way of finding out how much memory
+is needed for given substitution. However, this does mean that the entire
+operation is carried out twice. Depending on the application, it may be more
+efficient to allocate a large buffer and free the excess afterwards, instead of
 using PCRE2_SUBSTITUTE_OVERFLOW_LENGTH.
 .P
-PCRE2_SUBSTITUTE_UNKNOWN_UNSET causes references to capturing groups that do 
-not appear in the pattern to be treated as unset groups. This option should be 
-used with care, because it means that a typo in a group name or number no 
+PCRE2_SUBSTITUTE_UNKNOWN_UNSET causes references to capturing groups that do
+not appear in the pattern to be treated as unset groups. This option should be
+used with care, because it means that a typo in a group name or number no
 longer causes the PCRE2_ERROR_NOSUBSTRING error.
 .P
 PCRE2_SUBSTITUTE_UNSET_EMPTY causes unset capturing groups (including unknown
@@ -2828,8 +2840,8 @@ string remains in force afterwards, as shown in this \fBpcre2test\fP example:
       somebody
    1: HELLO
 .sp
-The PCRE2_SUBSTITUTE_UNSET_EMPTY option does not affect these extended 
-substitutions. However, PCRE2_SUBSTITUTE_UNKNOWN_UNSET does cause unknown 
+The PCRE2_SUBSTITUTE_UNSET_EMPTY option does not affect these extended
+substitutions. However, PCRE2_SUBSTITUTE_UNKNOWN_UNSET does cause unknown
 groups in the extended syntax forms to be treated as unset.
 .P
 If successful, \fBpcre2_substitute()\fP returns the number of replacements that
@@ -2838,7 +2850,7 @@ were made. This may be zero if no matches were found, and is never greater than
 .P
 In the event of an error, a negative error code is returned. Except for
 PCRE2_ERROR_NOMATCH (which is never returned), errors from \fBpcre2_match()\fP
-are passed straight back. 
+are passed straight back.
 .P
 PCRE2_ERROR_NOSUBSTRING is returned for a non-existent substring insertion,
 unless PCRE2_SUBSTITUTE_UNKNOWN_UNSET is set.
@@ -2849,7 +2861,7 @@ unknown substring when PCRE2_SUBSTITUTE_UNKNOWN_UNSET is set) when the simple
 .P
 PCRE2_ERROR_NOMEMORY is returned if the output buffer is not big enough. If the
 PCRE2_SUBSTITUTE_OVERFLOW_LENGTH option is set, the size of buffer that is
-needed is returned via \fIoutlengthptr\fP. Note that this does not happen by 
+needed is returned via \fIoutlengthptr\fP. Note that this does not happen by
 default.
 .P
 PCRE2_ERROR_BADREPLACEMENT is used for miscellaneous syntax errors in the
@@ -2857,7 +2869,7 @@ replacement string, with more particular errors being PCRE2_ERROR_BADREPESCAPE
 (invalid escape sequence), PCRE2_ERROR_REPMISSING_BRACE (closing curly bracket
 not found), PCRE2_BADSUBSTITUTION (syntax error in extended group
 substitution), and PCRE2_BADSUBPATTERN (the pattern match ended before it
-started, which can happen if \eK is used in an assertion). 
+started, which can happen if \eK is used in an assertion).
 .P
 As for all PCRE2 errors, a text message that describes the error can be
 obtained by calling \fBpcre2_get_error_message()\fP.
@@ -2901,14 +2913,14 @@ first and last entries in the name-to-number table for the given name, and the
 function returns the length of each entry in code units. In both cases,
 PCRE2_ERROR_NOSUBSTRING is returned if there are no entries for the given name.
 .P
-The format of the name table is described above in the section entitled
-\fIInformation about a pattern\fP
+The format of the name table is described
 .\" HTML <a href="#infoaboutpattern">
 .\" </a>
-above.
+above
 .\"
-Given all the relevant entries for the name, you can extract each of their
-numbers, and hence the captured data.
+in the section entitled \fIInformation about a pattern\fP. Given all the
+relevant entries for the name, you can extract each of their numbers, and hence
+the captured data.
 .
 .
 .SH "FINDING ALL POSSIBLE MATCHES AT ONE POSITION"
@@ -3154,6 +3166,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 21 December 2015
+Last updated: 16 December 2015
 Copyright (c) 1997-2015 University of Cambridge.
 .fi

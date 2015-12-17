@@ -406,7 +406,7 @@ if [ $jit -ne 0 -a "$nojit" != "yes" ] ; then
   jitopt=-jit
   if [ "$valgrind" != "" ] ; then
     vjs="--suppressions=$testdata/valgrind-jit.supp"
-  fi   
+  fi
 fi
 
 # If no specific tests were requested, select all. Those that are not
@@ -439,10 +439,10 @@ if [ $do0  = no -a $do1  = no -a $do2  = no -a $do3  = no -a \
   do17=yes
   do18=yes
   do19=yes
-  do20=yes 
-  do21=yes 
-  do22=yes 
-  do23=yes 
+  do20=yes
+  do21=yes
+  do22=yes
+  do23=yes
 fi
 
 # Handle any explicit skips at this stage, so that an argument list may consist
@@ -720,7 +720,7 @@ for bmode in "$test8" "$test16" "$test32"; do
       checkresult $? 13 ""
     fi
   fi
-  
+
   # Tests for DFA UTF and UCP features. Output is different for the different widths.
 
   if [ $do14 = yes ] ; then
@@ -730,7 +730,7 @@ for bmode in "$test8" "$test16" "$test32"; do
     else
       $sim $valgrind ./pcre2test -q $defaultstack $bmode $opt $testdata/testinput14 testtry
       checkresult $? 14-$bits ""
-    fi   
+    fi
   fi
 
   # Test non-JIT match and recursion limits
@@ -798,7 +798,7 @@ for bmode in "$test8" "$test16" "$test32"; do
     $sim $valgrind ./pcre2test -q $defaultstack $bmode $testdata/testinput20 testtry
     checkresult $? 20 ""
   fi
-  
+
   # \C tests without UTF - DFA matching is supported
 
   if [ "$do21" = yes ] ; then
@@ -814,7 +814,7 @@ for bmode in "$test8" "$test16" "$test32"; do
   fi
 
   # \C tests with UTF - DFA matching is not supported for \C in UTF mode
-   
+
   if [ "$do22" = yes ] ; then
     echo $title22
     if [ $supportBSC -eq 0 ] ; then
@@ -830,7 +830,7 @@ for bmode in "$test8" "$test16" "$test32"; do
   fi
 
   # Test when \C is disabled
-   
+
   if [ "$do23" = yes ] ; then
     echo $title23
     if [ $supportBSC -ne 0 ] ; then

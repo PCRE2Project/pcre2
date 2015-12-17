@@ -444,12 +444,12 @@ the start of a modifier list. For example:
 .sp
   abc\e=notbol,notempty
 .sp
-If the subject string is empty and \e= is followed by whitespace, the line is 
+If the subject string is empty and \e= is followed by whitespace, the line is
 treated as a comment line, and is not used for matching. For example:
 .sp
   \e= This is a comment.
   abc\e= This is an invalid modifier list.
-.sp    
+.sp
 A backslash followed by any other non-alphanumeric character just escapes that
 character. A backslash followed by anything else causes an error. However, if
 the very last character in the line is a backslash (and there is no modifier
@@ -501,7 +501,7 @@ for a description of their effects.
       no_utf_check              set PCRE2_NO_UTF_CHECK
       ucp                       set PCRE2_UCP
       ungreedy                  set PCRE2_UNGREEDY
-      use_offset_limit          set PCRE2_USE_OFFSET_LIMIT 
+      use_offset_limit          set PCRE2_USE_OFFSET_LIMIT
       utf                       set PCRE2_UTF
 .sp
 As well as turning on the PCRE2_UTF option, the \fButf\fP modifier causes all
@@ -528,7 +528,7 @@ about the pattern:
       jitfast                   use JIT fast path
       jitverify                 verify JIT use
       locale=<name>             use this locale
-      max_pattern_length=<n>    set the maximum pattern length 
+      max_pattern_length=<n>    set the maximum pattern length
       memory                    show memory used
       newline=<type>            set newline type
       null_context              compile with a NULL context
@@ -608,9 +608,9 @@ by the item that follows it in the pattern.
 .SS "Passing a NULL context"
 .rs
 .sp
-Normally, \fBpcre2test\fP passes a context block to \fBpcre2_compile()\fP. If 
-the \fBnull_context\fP modifier is set, however, NULL is passed. This is for 
-testing that \fBpcre2_compile()\fP behaves correctly in this case (it uses 
+Normally, \fBpcre2test\fP passes a context block to \fBpcre2_compile()\fP. If
+the \fBnull_context\fP modifier is set, however, NULL is passed. This is for
+testing that \fBpcre2_compile()\fP behaves correctly in this case (it uses
 default values).
 .
 .
@@ -634,9 +634,9 @@ actual length of the pattern is passed.
 .rs
 .sp
 Some tests use long patterns that are very repetitive. Instead of creating a
-very long input line for such a pattern, you can use a special repetition 
-feature, similar to the one described for subject lines above. If the 
-\fBexpand\fP modifier is present on a pattern, parts of the pattern that have 
+very long input line for such a pattern, you can use a special repetition
+feature, similar to the one described for subject lines above. If the
+\fBexpand\fP modifier is present on a pattern, parts of the pattern that have
 the form
 .sp
   \e[<characters>]{<count>}
@@ -647,12 +647,12 @@ cannot be nested. An initial "\e[" sequence is recognized only if "]{" followed
 by decimal digits and "}" is found later in the pattern. If not, the characters
 remain in the pattern unaltered.
 .P
-If part of an expanded pattern looks like an expansion, but is really part of 
-the actual pattern, unwanted expansion can be avoided by giving two values in 
-the quantifier. For example, \e[AB]{6000,6000} is not recognized as an 
+If part of an expanded pattern looks like an expansion, but is really part of
+the actual pattern, unwanted expansion can be avoided by giving two values in
+the quantifier. For example, \e[AB]{6000,6000} is not recognized as an
 expansion item.
 .P
-If the \fBinfo\fP modifier is set on an expanded pattern, the result of the 
+If the \fBinfo\fP modifier is set on an expanded pattern, the result of the
 expansion is included in the information that is output.
 .
 .
@@ -771,9 +771,9 @@ suite.
 .SS "Limiting the pattern length"
 .rs
 .sp
-The \fBmax_pattern_length\fP modifier sets a limit, in code units, to the 
-length of pattern that \fBpcre2_compile()\fP will accept. Breaching the limit 
-causes a compilation error. The default is the largest number a PCRE2_SIZE 
+The \fBmax_pattern_length\fP modifier sets a limit, in code units, to the
+length of pattern that \fBpcre2_compile()\fP will accept. Breaching the limit
+causes a compilation error. The default is the largest number a PCRE2_SIZE
 variable can hold (essentially unlimited).
 .
 .
@@ -797,13 +797,13 @@ modifiers set options for the \fBregcomp()\fP function:
   ucp                REG_UCP        )   the POSIX standard
   utf                REG_UTF8       )
 .sp
-The \fBregerror_buffsize\fP modifier specifies a size for the error buffer that 
+The \fBregerror_buffsize\fP modifier specifies a size for the error buffer that
 is passed to \fBregerror()\fP in the event of a compilation error. For example:
 .sp
   /abc/posix,regerror_buffsize=20
 .sp
-This provides a means of testing the behaviour of \fBregerror()\fP when the 
-buffer is too small for the error message. If this modifier has not been set, a 
+This provides a means of testing the behaviour of \fBregerror()\fP when the
+buffer is too small for the error message. If this modifier has not been set, a
 large buffer is used.
 .P
 The \fBaftertext\fP and \fBallaftertext\fP subject modifiers work as described
@@ -863,9 +863,9 @@ compilation process.
       replace=<string>           specify a replacement string
       startchar                  show starting character when relevant
       substitute_extended        use PCRE2_SUBSTITUTE_EXTENDED
-      substitute_overflow_length use PCRE2_SUBSTITUTE_OVERFLOW_LENGTH 
-      substitute_unknown_unset   use PCRE2_SUBSTITUTE_UNKNOWN_UNSET 
-      substitute_unset_empty     use PCRE2_SUBSTITUTE_UNSET_EMPTY  
+      substitute_overflow_length use PCRE2_SUBSTITUTE_OVERFLOW_LENGTH
+      substitute_unknown_unset   use PCRE2_SUBSTITUTE_UNKNOWN_UNSET
+      substitute_unset_empty     use PCRE2_SUBSTITUTE_UNSET_EMPTY
 .sp
 These modifiers may not appear in a \fB#pattern\fP command. If you want them as
 defaults, set them in a \fB#subject\fP command.
@@ -956,7 +956,7 @@ pattern.
       mark                       show mark values
       match_limit=<n>            set a match limit
       memory                     show memory usage
-      null_context               match with a NULL context 
+      null_context               match with a NULL context
       offset=<n>                 set starting offset
       offset_limit=<n>           set offset limit
       ovector=<n>                set size of output vector
@@ -965,9 +965,9 @@ pattern.
       startchar                  show startchar when relevant
       startoffset=<n>            same as offset=<n>
       substitute_extedded        use PCRE2_SUBSTITUTE_EXTENDED
-      substitute_overflow_length use PCRE2_SUBSTITUTE_OVERFLOW_LENGTH 
-      substitute_unknown_unset   use PCRE2_SUBSTITUTE_UNKNOWN_UNSET 
-      substitute_unset_empty     use PCRE2_SUBSTITUTE_UNSET_EMPTY  
+      substitute_overflow_length use PCRE2_SUBSTITUTE_OVERFLOW_LENGTH
+      substitute_unknown_unset   use PCRE2_SUBSTITUTE_UNKNOWN_UNSET
+      substitute_unset_empty     use PCRE2_SUBSTITUTE_UNSET_EMPTY
       zero_terminate             pass the subject as zero-terminated
 .sp
 The effects of these modifiers are described in the following sections.
@@ -1102,7 +1102,7 @@ by name.
 If the \fBreplace\fP modifier is set, the \fBpcre2_substitute()\fP function is
 called instead of one of the matching functions. Note that replacement strings
 cannot contain commas, because a comma signifies the end of a modifier. This is
-not thought to be an issue in a test program. 
+not thought to be an issue in a test program.
 .P
 Unlike subject strings, \fBpcre2test\fP does not process replacement strings
 for escape sequences. In UTF mode, a replacement string is checked to see if it
@@ -1119,7 +1119,7 @@ for \fBpcre2_substitute()\fP:
   substitute_overflow_length  PCRE2_SUBSTITUTE_OVERFLOW_LENGTH
   substitute_unknown_unset    PCRE2_SUBSTITUTE_UNKNOWN_UNSET
   substitute_unset_empty      PCRE2_SUBSTITUTE_UNSET_EMPTY
-.sp       
+.sp
 .P
 After a successful substitution, the modified string is output, preceded by the
 number of replacements. This may be zero if there were no matches. Here is a
@@ -1230,10 +1230,10 @@ matching starts. Its value is a number of code units, not characters.
 .SS "Setting an offset limit"
 .rs
 .sp
-The \fBoffset_limit\fP modifier sets a limit for unanchored matches. If a match 
-cannot be found starting at or before this offset in the subject, a "no match" 
-return is given. The data value is a number of code units, not characters. When 
-this modifier is used, the \fBuse_offset_limit\fP modifier must have been set 
+The \fBoffset_limit\fP modifier sets a limit for unanchored matches. If a match
+cannot be found starting at or before this offset in the subject, a "no match"
+return is given. The data value is a number of code units, not characters. When
+this modifier is used, the \fBuse_offset_limit\fP modifier must have been set
 for the pattern; if not, an error is generated.
 .
 .
@@ -1273,8 +1273,8 @@ passing the replacement string as zero-terminated.
 Normally, \fBpcre2test\fP passes a context block to \fBpcre2_match()\fP,
 \fBpcre2_dfa_match()\fP or \fBpcre2_jit_match()\fP. If the \fBnull_context\fP
 modifier is set, however, NULL is passed. This is for testing that the matching
-functions behave correctly in this case (they use default values). This 
-modifier cannot be used with the \fBfind_limits\fP modifier or when testing the 
+functions behave correctly in this case (they use default values). This
+modifier cannot be used with the \fBfind_limits\fP modifier or when testing the
 substitution function.
 .
 .

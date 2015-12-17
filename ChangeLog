@@ -268,18 +268,18 @@ size of patterns that they are prepared to handle.
 
 78. (*NO_AUTO_POSSESS) was not working.
 
-79. Adding group information caching improves the speed of compiling when 
-checking whether a group has a fixed length and/or could match an empty string, 
-especially when recursion or subroutine calls are involved. However, this 
-cannot be used when (?| is present in the pattern because the same number may 
-be used for groups of different sizes. To catch runaway patterns in this 
-situation, counts have been introduced to the functions that scan for empty 
+79. Adding group information caching improves the speed of compiling when
+checking whether a group has a fixed length and/or could match an empty string,
+especially when recursion or subroutine calls are involved. However, this
+cannot be used when (?| is present in the pattern because the same number may
+be used for groups of different sizes. To catch runaway patterns in this
+situation, counts have been introduced to the functions that scan for empty
 branches or compute fixed lengths.
 
 80. Allow for the possibility of the size of the nest_save structure not being
 a factor of the size of the compiling workspace (it currently is).
 
-81. Check for integer overflow in minimum length calculation and cap it at 
+81. Check for integer overflow in minimum length calculation and cap it at
 65535.
 
 82. Small optimizations in code for finding the minimum matching length.
@@ -290,72 +290,72 @@ a factor of the size of the compiling workspace (it currently is).
 
 85. Check for too many replacements (more than INT_MAX) in pcre2_substitute().
 
-86. Avoid the possibility of computing with an out-of-bounds pointer (though 
+86. Avoid the possibility of computing with an out-of-bounds pointer (though
 not dereferencing it) while handling lookbehind assertions.
 
-87. Failure to get memory for the match data in regcomp() is now given as a 
+87. Failure to get memory for the match data in regcomp() is now given as a
 regcomp() error instead of waiting for regexec() to pick it up.
 
-88. In pcre2_substitute(), ensure that CRLF is not split when it is a valid 
+88. In pcre2_substitute(), ensure that CRLF is not split when it is a valid
 newline sequence.
 
 89. Paranoid check in regcomp() for bad error code from pcre2_compile().
 
-90. Run test 8 (internal offsets and code sizes) for link sizes 3 and 4 as well 
+90. Run test 8 (internal offsets and code sizes) for link sizes 3 and 4 as well
 as for link size 2.
 
-91. Document that JIT has a limit on pattern size, and give more information 
+91. Document that JIT has a limit on pattern size, and give more information
 about JIT compile failures in pcre2test.
 
 92. Implement PCRE2_INFO_HASBACKSLASHC.
 
-93. Re-arrange valgrind support code in pcre2test to avoid spurious reports 
+93. Re-arrange valgrind support code in pcre2test to avoid spurious reports
 with JIT (possibly caused by SSE2?).
 
 94. Support offset_limit in JIT.
 
-95. A sequence such as [[:punct:]b] that is, a POSIX character class followed 
-by a single ASCII character in a class item, was incorrectly compiled in UCP 
+95. A sequence such as [[:punct:]b] that is, a POSIX character class followed
+by a single ASCII character in a class item, was incorrectly compiled in UCP
 mode. The POSIX class got lost, but only if the single character followed it.
 
-96. [:punct:] in UCP mode was matching some characters in the range 128-255 
+96. [:punct:] in UCP mode was matching some characters in the range 128-255
 that should not have been matched.
 
-97. If [:^ascii:] or [:^xdigit:] are present in a non-negated class, all 
-characters with code points greater than 255 are in the class. When a Unicode 
-property was also in the class (if PCRE2_UCP is set, escapes such as \w are 
-turned into Unicode properties), wide characters were not correctly handled, 
+97. If [:^ascii:] or [:^xdigit:] are present in a non-negated class, all
+characters with code points greater than 255 are in the class. When a Unicode
+property was also in the class (if PCRE2_UCP is set, escapes such as \w are
+turned into Unicode properties), wide characters were not correctly handled,
 and could fail to match.
 
-98. In pcre2test, make the "startoffset" modifier a synonym of "offset", 
+98. In pcre2test, make the "startoffset" modifier a synonym of "offset",
 because it sets the "startoffset" parameter for pcre2_match().
 
-99. If PCRE2_AUTO_CALLOUT was set on a pattern that had a (?# comment between 
-an item and its qualifier (for example, A(?#comment)?B) pcre2_compile() 
+99. If PCRE2_AUTO_CALLOUT was set on a pattern that had a (?# comment between
+an item and its qualifier (for example, A(?#comment)?B) pcre2_compile()
 misbehaved. This bug was found by the LLVM fuzzer.
 
-100. The error for an invalid UTF pattern string always gave the code unit 
+100. The error for an invalid UTF pattern string always gave the code unit
 offset as zero instead of where the invalidity was found.
 
-101. Further to 97 above, negated classes such as [^[:^ascii:]\d] were also not 
+101. Further to 97 above, negated classes such as [^[:^ascii:]\d] were also not
 working correctly in UCP mode.
 
-102. Similar to 99 above, if an isolated \E was present between an item and its 
+102. Similar to 99 above, if an isolated \E was present between an item and its
 qualifier when PCRE2_AUTO_CALLOUT was set, pcre2_compile() misbehaved. This bug
 was found by the LLVM fuzzer.
 
-103. The POSIX wrapper function regexec() crashed if the option REG_STARTEND 
+103. The POSIX wrapper function regexec() crashed if the option REG_STARTEND
 was set when the pmatch argument was NULL. It now returns REG_INVARG.
 
 104. Allow for up to 32-bit numbers in the ordin() function in pcre2grep.
 
-105. An empty \Q\E sequence between an item and its qualifier caused 
+105. An empty \Q\E sequence between an item and its qualifier caused
 pcre2_compile() to misbehave when auto callouts were enabled. This bug
 was found by the LLVM fuzzer.
 
-106. If both PCRE2_ALT_VERBNAMES and PCRE2_EXTENDED were set, and a (*MARK) or 
-other verb "name" ended with whitespace immediately before the closing 
-parenthesis, pcre2_compile() misbehaved. Example: /(*:abc )/, but only when 
+106. If both PCRE2_ALT_VERBNAMES and PCRE2_EXTENDED were set, and a (*MARK) or
+other verb "name" ended with whitespace immediately before the closing
+parenthesis, pcre2_compile() misbehaved. Example: /(*:abc )/, but only when
 both those options were set.
 
 107. In a number of places pcre2_compile() was not handling NULL characters
@@ -363,27 +363,27 @@ correctly, and pcre2test with the "bincode" modifier was not always correctly
 displaying fields containing NULLS:
 
    (a) Within /x extended #-comments
-   (b) Within the "name" part of (*MARK) and other *verbs 
-   (c) Within the text argument of a callout 
-   
-108. If a pattern that was compiled with PCRE2_EXTENDED started with white 
-space or a #-type comment that was followed by (?-x), which turns off 
+   (b) Within the "name" part of (*MARK) and other *verbs
+   (c) Within the text argument of a callout
+
+108. If a pattern that was compiled with PCRE2_EXTENDED started with white
+space or a #-type comment that was followed by (?-x), which turns off
 PCRE2_EXTENDED, and there was no subsequent (?x) to turn it on again,
 pcre2_compile() assumed that (?-x) applied to the whole pattern and
-consequently mis-compiled it. This bug was found by the LLVM fuzzer. The fix 
-for this bug means that a setting of any of the (?imsxU) options at the start 
-of a pattern is no longer transferred to the options that are returned by 
-PCRE2_INFO_ALLOPTIONS. In fact, this was an anachronism that should have 
+consequently mis-compiled it. This bug was found by the LLVM fuzzer. The fix
+for this bug means that a setting of any of the (?imsxU) options at the start
+of a pattern is no longer transferred to the options that are returned by
+PCRE2_INFO_ALLOPTIONS. In fact, this was an anachronism that should have
 changed when the effects of those options were all moved to compile time.
 
-109. An escaped closing parenthesis in the "name" part of a (*verb) when 
+109. An escaped closing parenthesis in the "name" part of a (*verb) when
 PCRE2_ALT_VERBNAMES was set caused pcre2_compile() to malfunction. This bug
 was found by the LLVM fuzzer.
 
-110. Implemented PCRE2_SUBSTITUTE_UNSET_EMPTY, and updated pcre2test to make it 
+110. Implemented PCRE2_SUBSTITUTE_UNSET_EMPTY, and updated pcre2test to make it
 possible to test it.
 
-111. "Harden" pcre2test against ridiculously large values in modifiers and 
+111. "Harden" pcre2test against ridiculously large values in modifiers and
 command line arguments.
 
 112. Implemented PCRE2_SUBSTITUTE_UNKNOWN_UNSET and PCRE2_SUBSTITUTE_OVERFLOW_

@@ -154,13 +154,13 @@ on a system with different endianness.
 <P>
 Decoded patterns can be used for matching in the usual way, and must be freed
 by calling <b>pcre2_code_free()</b>. However, be aware that there is a potential
-race issue if you are using multiple patterns that were decoded from a single 
+race issue if you are using multiple patterns that were decoded from a single
 byte stream in a multithreaded application. A single copy of the character
 tables is used by all the decoded patterns and a reference count is used to
 arrange for its memory to be automatically freed when the last pattern is
 freed, but there is no locking on this reference count. Therefore, if you want
 to call <b>pcre2_code_free()</b> for these patterns in different threads, you
-must arrange your own locking, and ensure that <b>pcre2_code_free()</b> cannot 
+must arrange your own locking, and ensure that <b>pcre2_code_free()</b> cannot
 be called by two threads at the same time.
 </P>
 <P>

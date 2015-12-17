@@ -190,13 +190,13 @@ return 0;
 *************************************************/
 
 /* These take no account of UTF as they always print each individual code unit.
-The string is zero-terminated for print_custring(); the length is given for 
+The string is zero-terminated for print_custring(); the length is given for
 print_custring_bylen().
 
 Arguments:
   f          file to write to
   ptr        point to the string
-  len        length for print_custring_bylen() 
+  len        length for print_custring_bylen()
 
 Returns:     nothing
 */

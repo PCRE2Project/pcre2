@@ -486,7 +486,7 @@ the start of a modifier list. For example:
 <pre>
   abc\=notbol,notempty
 </pre>
-If the subject string is empty and \= is followed by whitespace, the line is 
+If the subject string is empty and \= is followed by whitespace, the line is
 treated as a comment line, and is not used for matching. For example:
 <pre>
   \= This is a comment.
@@ -538,7 +538,7 @@ for a description of their effects.
       no_utf_check              set PCRE2_NO_UTF_CHECK
       ucp                       set PCRE2_UCP
       ungreedy                  set PCRE2_UNGREEDY
-      use_offset_limit          set PCRE2_USE_OFFSET_LIMIT 
+      use_offset_limit          set PCRE2_USE_OFFSET_LIMIT
       utf                       set PCRE2_UTF
 </pre>
 As well as turning on the PCRE2_UTF option, the <b>utf</b> modifier causes all
@@ -564,7 +564,7 @@ about the pattern:
       jitfast                   use JIT fast path
       jitverify                 verify JIT use
       locale=&#60;name&#62;             use this locale
-      max_pattern_length=&#60;n&#62;    set the maximum pattern length 
+      max_pattern_length=&#60;n&#62;    set the maximum pattern length
       memory                    show memory used
       newline=&#60;type&#62;            set newline type
       null_context              compile with a NULL context
@@ -649,9 +649,9 @@ by the item that follows it in the pattern.
 Passing a NULL context
 </b><br>
 <P>
-Normally, <b>pcre2test</b> passes a context block to <b>pcre2_compile()</b>. If 
-the <b>null_context</b> modifier is set, however, NULL is passed. This is for 
-testing that <b>pcre2_compile()</b> behaves correctly in this case (it uses 
+Normally, <b>pcre2test</b> passes a context block to <b>pcre2_compile()</b>. If
+the <b>null_context</b> modifier is set, however, NULL is passed. This is for
+testing that <b>pcre2_compile()</b> behaves correctly in this case (it uses
 default values).
 </P>
 <br><b>
@@ -675,9 +675,9 @@ Generating long repetitive patterns
 </b><br>
 <P>
 Some tests use long patterns that are very repetitive. Instead of creating a
-very long input line for such a pattern, you can use a special repetition 
-feature, similar to the one described for subject lines above. If the 
-<b>expand</b> modifier is present on a pattern, parts of the pattern that have 
+very long input line for such a pattern, you can use a special repetition
+feature, similar to the one described for subject lines above. If the
+<b>expand</b> modifier is present on a pattern, parts of the pattern that have
 the form
 <pre>
   \[&#60;characters&#62;]{&#60;count&#62;}
@@ -689,13 +689,13 @@ by decimal digits and "}" is found later in the pattern. If not, the characters
 remain in the pattern unaltered.
 </P>
 <P>
-If part of an expanded pattern looks like an expansion, but is really part of 
-the actual pattern, unwanted expansion can be avoided by giving two values in 
-the quantifier. For example, \[AB]{6000,6000} is not recognized as an 
+If part of an expanded pattern looks like an expansion, but is really part of
+the actual pattern, unwanted expansion can be avoided by giving two values in
+the quantifier. For example, \[AB]{6000,6000} is not recognized as an
 expansion item.
 </P>
 <P>
-If the <b>info</b> modifier is set on an expanded pattern, the result of the 
+If the <b>info</b> modifier is set on an expanded pattern, the result of the
 expansion is included in the information that is output.
 </P>
 <br><b>
@@ -812,9 +812,9 @@ suite.
 Limiting the pattern length
 </b><br>
 <P>
-The <b>max_pattern_length</b> modifier sets a limit, in code units, to the 
-length of pattern that <b>pcre2_compile()</b> will accept. Breaching the limit 
-causes a compilation error. The default is the largest number a PCRE2_SIZE 
+The <b>max_pattern_length</b> modifier sets a limit, in code units, to the
+length of pattern that <b>pcre2_compile()</b> will accept. Breaching the limit
+causes a compilation error. The default is the largest number a PCRE2_SIZE
 variable can hold (essentially unlimited).
 </P>
 <br><b>
@@ -836,13 +836,13 @@ modifiers set options for the <b>regcomp()</b> function:
   ucp                REG_UCP        )   the POSIX standard
   utf                REG_UTF8       )
 </pre>
-The <b>regerror_buffsize</b> modifier specifies a size for the error buffer that 
+The <b>regerror_buffsize</b> modifier specifies a size for the error buffer that
 is passed to <b>regerror()</b> in the event of a compilation error. For example:
 <pre>
   /abc/posix,regerror_buffsize=20
 </pre>
-This provides a means of testing the behaviour of <b>regerror()</b> when the 
-buffer is too small for the error message. If this modifier has not been set, a 
+This provides a means of testing the behaviour of <b>regerror()</b> when the
+buffer is too small for the error message. If this modifier has not been set, a
 large buffer is used.
 </P>
 <P>
@@ -892,14 +892,18 @@ are applied to every subject line that is processed with that pattern. They may
 not appear in <b>#pattern</b> commands. These modifiers do not affect the
 compilation process.
 <pre>
-      aftertext           show text after match
-      allaftertext        show text after captures
-      allcaptures         show all captures
-      allusedtext         show all consulted text
-  /g  global              global matching
-      mark                show mark values
-      replace=&#60;string&#62;    specify a replacement string
-      startchar           show starting character when relevant
+      aftertext                  show text after match
+      allaftertext               show text after captures
+      allcaptures                show all captures
+      allusedtext                show all consulted text
+  /g  global                     global matching
+      mark                       show mark values
+      replace=&#60;string&#62;           specify a replacement string
+      startchar                  show starting character when relevant
+      substitute_extended        use PCRE2_SUBSTITUTE_EXTENDED
+      substitute_overflow_length use PCRE2_SUBSTITUTE_OVERFLOW_LENGTH
+      substitute_unknown_unset   use PCRE2_SUBSTITUTE_UNKNOWN_UNSET
+      substitute_unset_empty     use PCRE2_SUBSTITUTE_UNSET_EMPTY
 </pre>
 These modifiers may not appear in a <b>#pattern</b> command. If you want them as
 defaults, set them in a <b>#subject</b> command.
@@ -964,33 +968,38 @@ information. Some of them may also be specified on a pattern line (see above),
 in which case they apply to every subject line that is matched against that
 pattern.
 <pre>
-      aftertext                 show text after match
-      allaftertext              show text after captures
-      allcaptures               show all captures
-      allusedtext               show all consulted text (non-JIT only)
-      altglobal                 alternative global matching
-      callout_capture           show captures at callout time
-      callout_data=&#60;n&#62;          set a value to pass via callouts
-      callout_fail=&#60;n&#62;[:&#60;m&#62;]    control callout failure
-      callout_none              do not supply a callout function
-      copy=&#60;number or name&#62;     copy captured substring
-      dfa                       use <b>pcre2_dfa_match()</b>
-      find_limits               find match and recursion limits
-      get=&#60;number or name&#62;      extract captured substring
-      getall                    extract all captured substrings
-  /g  global                    global matching
-      jitstack=&#60;n&#62;              set size of JIT stack
-      mark                      show mark values
-      match_limit=&#60;n&#62;           set a match limit
-      memory                    show memory usage
-      null_context              match with a NULL context 
-      offset=&#60;n&#62;                set starting offset
-      offset_limit=&#60;n&#62;          set offset limit
-      ovector=&#60;n&#62;               set size of output vector
-      recursion_limit=&#60;n&#62;       set a recursion limit
-      replace=&#60;string&#62;          specify a replacement string
-      startchar                 show startchar when relevant
-      zero_terminate            pass the subject as zero-terminated
+      aftertext                  show text after match
+      allaftertext               show text after captures
+      allcaptures                show all captures
+      allusedtext                show all consulted text (non-JIT only)
+      altglobal                  alternative global matching
+      callout_capture            show captures at callout time
+      callout_data=&#60;n&#62;           set a value to pass via callouts
+      callout_fail=&#60;n&#62;[:&#60;m&#62;]     control callout failure
+      callout_none               do not supply a callout function
+      copy=&#60;number or name&#62;      copy captured substring
+      dfa                        use <b>pcre2_dfa_match()</b>
+      find_limits                find match and recursion limits
+      get=&#60;number or name&#62;       extract captured substring
+      getall                     extract all captured substrings
+  /g  global                     global matching
+      jitstack=&#60;n&#62;               set size of JIT stack
+      mark                       show mark values
+      match_limit=&#60;n&#62;            set a match limit
+      memory                     show memory usage
+      null_context               match with a NULL context
+      offset=&#60;n&#62;                 set starting offset
+      offset_limit=&#60;n&#62;           set offset limit
+      ovector=&#60;n&#62;                set size of output vector
+      recursion_limit=&#60;n&#62;        set a recursion limit
+      replace=&#60;string&#62;           specify a replacement string
+      startchar                  show startchar when relevant
+      startoffset=&#60;n&#62;            same as offset=&#60;n&#62;
+      substitute_extedded        use PCRE2_SUBSTITUTE_EXTENDED
+      substitute_overflow_length use PCRE2_SUBSTITUTE_OVERFLOW_LENGTH
+      substitute_unknown_unset   use PCRE2_SUBSTITUTE_UNKNOWN_UNSET
+      substitute_unset_empty     use PCRE2_SUBSTITUTE_UNSET_EMPTY
+      zero_terminate             pass the subject as zero-terminated
 </pre>
 The effects of these modifiers are described in the following sections.
 </P>
@@ -1129,19 +1138,34 @@ Testing the substitution function
 </b><br>
 <P>
 If the <b>replace</b> modifier is set, the <b>pcre2_substitute()</b> function is
-called instead of one of the matching functions. Unlike subject strings,
-<b>pcre2test</b> does not process replacement strings for escape sequences. In
-UTF mode, a replacement string is checked to see if it is a valid UTF-8 string.
-If so, it is correctly converted to a UTF string of the appropriate code unit
-width. If it is not a valid UTF-8 string, the individual code units are copied
-directly. This provides a means of passing an invalid UTF-8 string for testing
-purposes.
+called instead of one of the matching functions. Note that replacement strings
+cannot contain commas, because a comma signifies the end of a modifier. This is
+not thought to be an issue in a test program.
 </P>
 <P>
-If the <b>global</b> modifier is set, PCRE2_SUBSTITUTE_GLOBAL is passed to
-<b>pcre2_substitute()</b>. After a successful substitution, the modified string
-is output, preceded by the number of replacements. This may be zero if there
-were no matches. Here is a simple example of a substitution test:
+Unlike subject strings, <b>pcre2test</b> does not process replacement strings
+for escape sequences. In UTF mode, a replacement string is checked to see if it
+is a valid UTF-8 string. If so, it is correctly converted to a UTF string of
+the appropriate code unit width. If it is not a valid UTF-8 string, the
+individual code units are copied directly. This provides a means of passing an
+invalid UTF-8 string for testing purposes.
+</P>
+<P>
+The following modifiers set options (in additional to the normal match options)
+for <b>pcre2_substitute()</b>:
+<pre>
+  global                      PCRE2_SUBSTITUTE_GLOBAL
+  substitute_extended         PCRE2_SUBSTITUTE_EXTENDED
+  substitute_overflow_length  PCRE2_SUBSTITUTE_OVERFLOW_LENGTH
+  substitute_unknown_unset    PCRE2_SUBSTITUTE_UNKNOWN_UNSET
+  substitute_unset_empty      PCRE2_SUBSTITUTE_UNSET_EMPTY
+
+</PRE>
+</P>
+<P>
+After a successful substitution, the modified string is output, preceded by the
+number of replacements. This may be zero if there were no matches. Here is a
+simple example of a substitution test:
 <pre>
   /abc/replace=xxx
       =abc=abc=
@@ -1149,18 +1173,31 @@ were no matches. Here is a simple example of a substitution test:
       =abc=abc=\=global
    2: =xxx=xxx=
 </pre>
-Subject and replacement strings should be kept relatively short for
-substitution tests, as fixed-size buffers are used. To make it easy to test for
-buffer overflow, if the replacement string starts with a number in square
-brackets, that number is passed to <b>pcre2_substitute()</b> as the size of the
-output buffer, with the replacement string starting at the next character. Here
-is an example that tests the edge case:
+Subject and replacement strings should be kept relatively short (fewer than 256
+characters) for substitution tests, as fixed-size buffers are used. To make it
+easy to test for buffer overflow, if the replacement string starts with a
+number in square brackets, that number is passed to <b>pcre2_substitute()</b> as
+the size of the output buffer, with the replacement string starting at the next
+character. Here is an example that tests the edge case:
 <pre>
   /abc/
       123abc123\=replace=[10]XYZ
    1: 123XYZ123
       123abc123\=replace=[9]XYZ
   Failed: error -47: no more memory
+</pre>
+The default action of <b>pcre2_substitute()</b> is to return
+PCRE2_ERROR_NOMEMORY when the output buffer is too small. However, if the
+PCRE2_SUBSTITUTE_OVERFLOW_LENGTH option is set (by using the
+<b>substitute_overflow_length</b> modifier), <b>pcre2_substitute()</b> continues
+to go through the motions of matching and substituting, in order to compute the
+size of buffer that is required. When this happens, <b>pcre2test</b> shows the
+required buffer length (which includes space for the trailing zero) as part of
+the error message. For example:
+<pre>
+  /abc/substitute_overflow_length
+      123abc123\=replace=[9]XYZ
+  Failed: error -47: no more memory: 10 code units are needed
 </pre>
 A replacement string is ignored with POSIX and DFA matching. Specifying partial
 matching provokes an error return ("bad option value") from
@@ -1236,10 +1273,10 @@ matching starts. Its value is a number of code units, not characters.
 Setting an offset limit
 </b><br>
 <P>
-The <b>offset_limit</b> modifier sets a limit for unanchored matches. If a match 
-cannot be found starting at or before this offset in the subject, a "no match" 
-return is given. The data value is a number of code units, not characters. When 
-this modifier is used, the <b>use_offset_limit</b> modifier must have been set 
+The <b>offset_limit</b> modifier sets a limit for unanchored matches. If a match
+cannot be found starting at or before this offset in the subject, a "no match"
+return is given. The data value is a number of code units, not characters. When
+this modifier is used, the <b>use_offset_limit</b> modifier must have been set
 for the pattern; if not, an error is generated.
 </P>
 <br><b>
@@ -1281,8 +1318,8 @@ Passing a NULL context
 Normally, <b>pcre2test</b> passes a context block to <b>pcre2_match()</b>,
 <b>pcre2_dfa_match()</b> or <b>pcre2_jit_match()</b>. If the <b>null_context</b>
 modifier is set, however, NULL is passed. This is for testing that the matching
-functions behave correctly in this case (they use default values). This 
-modifier cannot be used with the <b>find_limits</b> modifier or when testing the 
+functions behave correctly in this case (they use default values). This
+modifier cannot be used with the <b>find_limits</b> modifier or when testing the
 substitution function.
 </P>
 <br><a name="SEC12" href="#TOC1">THE ALTERNATIVE MATCHING FUNCTION</a><br>
@@ -1623,7 +1660,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC21" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 05 November 2015
+Last updated: 12 December 2015
 <br>
 Copyright &copy; 1997-2015 University of Cambridge.
 <br>

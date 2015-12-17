@@ -127,8 +127,8 @@ as a byte-order mark (BOM). The PCRE2 functions do not handle this, expecting
 strings to be in host byte order.
 </P>
 <P>
-A UTF string is checked before any other processing takes place. In the case of 
-<b>pcre2_match()</b> and <b>pcre2_dfa_match()</b> calls with a non-zero starting 
+A UTF string is checked before any other processing takes place. In the case of
+<b>pcre2_match()</b> and <b>pcre2_dfa_match()</b> calls with a non-zero starting
 offset, the check is applied only to that part of the subject that could be
 inspected during matching, and there is a check that the starting offset points
 to the first code unit of a character or to the end of the subject. If there

@@ -285,7 +285,7 @@ start location rather than being passed as a PCRE2 "starting offset". */
 
 if ((eflags & REG_STARTEND) != 0)
   {
-  if (pmatch == NULL) return REG_INVARG; 
+  if (pmatch == NULL) return REG_INVARG;
   so = pmatch[0].rm_so;
   eo = pmatch[0].rm_eo;
   }

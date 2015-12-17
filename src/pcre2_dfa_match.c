@@ -466,7 +466,7 @@ if (*first_op == OP_REVERSE)
   /* In byte-mode we can do this quickly. */
 
     {
-    size_t current_offset = (size_t)(current_subject - start_subject); 
+    size_t current_offset = (size_t)(current_subject - start_subject);
     gone_back = (current_offset < max_back)? current_offset : max_back;
     current_subject -= gone_back;
     }
