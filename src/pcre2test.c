@@ -6036,13 +6036,13 @@ if (dat_datctl.replacement[0] != 0)
     PCRE2_SIZE msize; 
     fprintf(outfile, "Failed: error %d", rc);
     if (rc != PCRE2_ERROR_NOMEMORY && nsize != PCRE2_UNSET)
-      fprintf(outfile, " at offset %ld in replacement", nsize);
+      fprintf(outfile, " at offset %ld in replacement", (long int)nsize);
     fprintf(outfile, ": ");
     PCRE2_GET_ERROR_MESSAGE(msize, rc, pbuffer);
     PCHARSV(CASTVAR(void *, pbuffer), 0, msize, FALSE, outfile);
     if (rc == PCRE2_ERROR_NOMEMORY && 
         (xoptions & PCRE2_SUBSTITUTE_OVERFLOW_LENGTH) != 0)
-      fprintf(outfile, ": %ld code units are needed", nsize);
+      fprintf(outfile, ": %ld code units are needed", (long int)nsize);
     }
   else
     {
