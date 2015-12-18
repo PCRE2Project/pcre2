@@ -590,6 +590,9 @@ EXTRA_DIST += \
   testdata/testinput18 \
   testdata/testinput19 \
   testdata/testinput20 \
+  testdata/testinput21 \
+  testdata/testinput22 \
+  testdata/testinput23 \
   testdata/testinputEBC \
   testdata/testoutput1 \
   testdata/testoutput2 \
@@ -600,9 +603,15 @@ EXTRA_DIST += \
   testdata/testoutput5 \
   testdata/testoutput6 \
   testdata/testoutput7 \
-  testdata/testoutput8-16 \
-  testdata/testoutput8-32 \
-  testdata/testoutput8-8 \
+  testdata/testoutput8-16-2 \
+  testdata/testoutput8-16-3 \
+  testdata/testoutput8-16-3 \
+  testdata/testoutput8-32-2 \
+  testdata/testoutput8-32-3 \
+  testdata/testoutput8-32-4 \
+  testdata/testoutput8-8-2 \
+  testdata/testoutput8-8-3 \
+  testdata/testoutput8-8-4 \
   testdata/testoutput9 \
   testdata/testoutput10 \
   testdata/testoutput11-16 \
@@ -619,6 +628,11 @@ EXTRA_DIST += \
   testdata/testoutput18 \
   testdata/testoutput19 \
   testdata/testoutput20 \
+  testdata/testoutput21 \
+  testdata/testoutput22-16 \
+  testdata/testoutput22-32 \
+  testdata/testoutput22-8 \
+  testdata/testoutput23 \
   testdata/testoutputEBC \
   testdata/valgrind-jit.supp \
   testdata/wintestinput3 \
