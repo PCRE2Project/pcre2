@@ -104,7 +104,7 @@ Subject length lower bound = 1
 /^[\xc8-\xc9]/
     École
  0: É
-\= Expect no match 
+\= Expect no match
     école
 No match
 

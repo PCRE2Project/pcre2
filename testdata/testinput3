@@ -72,7 +72,7 @@
 
 /^[\xc8-\xc9]/
     École
-\= Expect no match 
+\= Expect no match
     école
 
 /\W+/
