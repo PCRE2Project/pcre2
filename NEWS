@@ -1,8 +1,8 @@
 News about PCRE2 releases
 -------------------------
 
-Version 10.21 15-December-2015
-------------------------------
+Version 10.21 12-January-2016
+-----------------------------
 
 1. Many bugs have been fixed. A large number of them were provoked only by very
 strange pattern input, and were discovered by fuzzers. Some others were

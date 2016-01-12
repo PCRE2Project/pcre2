@@ -5,7 +5,7 @@
 /* This is the public header file for the PCRE library, second API, to be
 #included by applications that call PCRE2 functions.
 
-           Copyright (c) 2015 University of Cambridge
+           Copyright (c) 2016 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -43,8 +43,8 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #define PCRE2_MAJOR          10
 #define PCRE2_MINOR          21
-#define PCRE2_PRERELEASE     -RC1
-#define PCRE2_DATE           2015-12-15
+#define PCRE2_PRERELEASE     
+#define PCRE2_DATE           2016-01-12
 
 /* When an application links to a PCRE DLL in Windows, the symbols that are
 imported have to be identified as such. When building PCRE2, the appropriate
