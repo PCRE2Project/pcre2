@@ -15146,16 +15146,23 @@ MK: A\x00b
  0: 
 MK: A\x00b
 
-# /(*MARK:A\x00b)/
-/28 2a 4d 41 52 4b 3a 41 00 62 29/mark,hex
+/"(*MARK:A" 00 "b)"/mark,hex
     abc
  0: 
 MK: A\x00b
 
-# /(*MARK:A\x00b)/
-/28 2a 4d 41 52 4b 3a 41 00 62 29/mark,hex,alt_verbnames
+/"(*MARK:A" 00 "b)"/mark,hex,alt_verbnames
     abc
  0: 
 MK: A\x00b
+
+/efg/hex
+** Unexpected non-hex-digit 'g' in hex pattern: quote missing?
+
+/eff/hex
+** Odd number of digits in hex pattern
+
+/effg/hex
+** Unexpected non-hex-digit 'g' in hex pattern: quote missing?
 
 # End of testinput2 

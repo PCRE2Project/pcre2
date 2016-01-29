@@ -2913,10 +2913,11 @@ pbuffer8 = new_pbuffer8;
 /* Input lines are read into buffer, but both patterns and data lines can be
 continued over multiple input lines. In addition, if the buffer fills up, we
 want to automatically expand it so as to be able to handle extremely large
-lines that are needed for certain stress tests. When the input buffer is
-expanded, the other two buffers must also be expanded likewise, and the
-contents of pbuffer, which are a copy of the input for callouts, must be
-preserved (for when expansion happens for a data line). This is not the most
+lines that are needed for certain stress tests, although this is less likely
+now that there are repetition features for both patterns and data. When the
+input buffer is expanded, the other two buffers must also be expanded likewise,
+and the contents of pbuffer, which are a copy of the input for callouts, must
+be preserved (for when expansion happens for a data line). This is not the most
 optimal way of handling this, but hey, this is just a test program!
 
 Arguments:
@@ -2940,7 +2941,7 @@ for (;;)
 
   if (rlen > 1000)
     {
-    int dlen;
+    size_t dlen;
 
     /* If libreadline or libedit support is required, use readline() to read a
     line if the input is a terminal. Note that readline() removes the trailing
@@ -2971,9 +2972,23 @@ for (;;)
         return (here == start)? NULL : start;
       }
 
-    dlen = (int)strlen((char *)here);
-    if (dlen > 0 && here[dlen - 1] == '\n') return start;
+    dlen = strlen((char *)here);
+    if (here[dlen - 1] == '\n') return start;     /* End of line reached */
     here += dlen;
+
+    /* If we have not read a newline when reading a file, we have either filled
+    the buffer or reached the end of the file. We can detect the former by
+    checking that the string fills the buffer, and the latter by feof(). If
+    neither of these is true, it means we read a binary zero which has caused
+    strlen() to give a short length. This is a hard error because pcre2test 
+    expects to work with C strings. */
+
+    if (!INTERACTIVE(f) && dlen < rlen - 1 && !feof(f))
+      {
+      fprintf(outfile, "** Binary zero encountered in input\n");
+      fprintf(outfile, "** pcre2test run abandoned\n");
+      exit(1);
+      }
     }
 
   else
@@ -4451,9 +4466,9 @@ if (pat_patctl.jit == 0 &&
   pat_patctl.jit = 7;
 
 /* Now copy the pattern to pbuffer8 for use in 8-bit testing and for reflecting
-in callouts. Convert from hex if required; this must necessarily be fewer
-characters so will always fit in pbuffer8. Alternatively, process for
-repetition if requested. */
+in callouts. Convert from hex if requested (literal strings in quotes may be
+present within the hexadecimal pairs). The result must necessarily be fewer
+characters so will always fit in pbuffer8. */
 
 if ((pat_patctl.control & CTL_HEXPAT) != 0)
   {
@@ -4464,24 +4479,58 @@ if ((pat_patctl.control & CTL_HEXPAT) != 0)
   for (pp = buffer + 1; *pp != 0; pp++)
     {
     if (isspace(*pp)) continue;
-    c = toupper(*pp++);
-    if (*pp == 0)
+    c = *pp++;
+
+    /* Handle a literal substring */
+
+    if (c == '\'' || c == '"')
       {
-      fprintf(outfile, "** Odd number of digits in hex pattern.\n");
-      return PR_SKIP;
+      for (;; pp++)
+        {
+        d = *pp;
+        if (d == 0)
+          {
+          fprintf(outfile, "** Missing closing quote in hex pattern\n");
+          return PR_SKIP;
+          }
+        if (d == c) break;
+        *pt++ = d;
+        }
       }
-    d = toupper(*pp);
-    if (!isxdigit(c) || !isxdigit(d))
+
+    /* Expect a hex pair */
+
+    else
       {
-      fprintf(outfile, "** Non-hex-digit in hex pattern.\n");
-      return PR_SKIP;
+      if (!isxdigit(c))
+        {
+        fprintf(outfile, "** Unexpected non-hex-digit '%c' in hex pattern: "
+          "quote missing?\n", c);
+        return PR_SKIP;
+        }
+      if (*pp == 0)
+        {
+        fprintf(outfile, "** Odd number of digits in hex pattern\n");
+        return PR_SKIP;
+        }
+      d = *pp;
+      if (!isxdigit(d))
+        {
+        fprintf(outfile, "** Unexpected non-hex-digit '%c' in hex pattern: "
+          "quote missing?\n", d);
+        return PR_SKIP;
+        }
+      c = toupper(c);
+      d = toupper(d);
+      *pt++ = ((isdigit(c)? (c - '0') : (c - 'A' + 10)) << 4) +
+               (isdigit(d)? (d - '0') : (d - 'A' + 10));
       }
-    *pt++ = ((isdigit(c)? (c - '0') : (c - 'A' + 10)) << 4) +
-             (isdigit(d)? (d - '0') : (d - 'A' + 10));
     }
   *pt = 0;
   patlen = pt - pbuffer8;
   }
+
+/* If not a hex string, process for repetition expansion if requested. */
 
 else if ((pat_patctl.control & CTL_EXPAND) != 0)
   {
@@ -4567,7 +4616,7 @@ if (pat_patctl.locale[0] != 0)
   {
   if (pat_patctl.tables_id != 0)
     {
-    fprintf(outfile, "** 'Locale' and 'tables' must not both be set.\n");
+    fprintf(outfile, "** 'Locale' and 'tables' must not both be set\n");
     return PR_SKIP;
     }
   if (setlocale(LC_CTYPE, (const char *)pat_patctl.locale) == NULL)

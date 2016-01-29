@@ -1,4 +1,4 @@
-.TH PCRE2TEST 1 "12 December 2015" "PCRE 10.21"
+.TH PCRE2TEST 1 "29 January 2016" "PCRE 10.22"
 .SH NAME
 pcre2test - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -68,10 +68,11 @@ environments character 26 (hex 1A) causes an immediate end of file, and no
 further data is read.
 .P
 For maximum portability, therefore, it is safest to avoid non-printing
-characters in \fBpcre2test\fP input files. There is a facility for specifying a
-pattern's characters as hexadecimal pairs, thus making it possible to include
-binary zeroes in a pattern for testing purposes. Subject lines are processed
-for backslash escapes, which makes it possible to include any data value.
+characters in \fBpcre2test\fP input files. There is a facility for specifying 
+some or all of a pattern's characters as hexadecimal pairs, thus making it
+possible to include binary zeroes in a pattern for testing purposes. Subject
+lines are processed for backslash escapes, which makes it possible to include
+any data value.
 .
 .
 .SH "COMMAND LINE OPTIONS"
@@ -523,7 +524,7 @@ about the pattern:
       debug                     same as info,fullbincode
       fullbincode               show binary code with lengths
   /I  info                      show info about compiled pattern
-      hex                       pattern is coded in hexadecimal
+      hex                       unquoted characters are hexadecimal
       jit[=<number>]            use JIT
       jitfast                   use JIT fast path
       jitverify                 verify JIT use
@@ -614,20 +615,30 @@ testing that \fBpcre2_compile()\fP behaves correctly in this case (it uses
 default values).
 .
 .
-.SS "Specifying a pattern in hex"
+.SS "Specifying pattern characters in hexadecimal"
 .rs
 .sp
-The \fBhex\fP modifier specifies that the characters of the pattern are to be
-interpreted as pairs of hexadecimal digits. White space is permitted between
-pairs. For example:
+The \fBhex\fP modifier specifies that the characters of the pattern, except for 
+substrings enclosed in single or double quotes, are to be interpreted as pairs
+of hexadecimal digits. This feature is provided as a way of creating patterns
+that contain binary zeros and other non-printing characters. White space is
+permitted between pairs of digits. For example, this pattern contains three 
+characters:
 .sp
   /ab 32 59/hex
 .sp
-This feature is provided as a way of creating patterns that contain binary zero
-and other non-printing characters. By default, \fBpcre2test\fP passes patterns
-as zero-terminated strings to \fBpcre2_compile()\fP, giving the length as
-PCRE2_ZERO_TERMINATED. However, for patterns specified in hexadecimal, the
-actual length of the pattern is passed.
+Parts of such a pattern are taken literally if quoted. This pattern contains 
+nine characters, only two of which are specified in hexadecimal:
+.sp
+  /ab "literal" 32/hex
+.sp   
+Either single or double quotes may be used. There is no way of including
+the delimiter within a substring. 
+.P
+By default, \fBpcre2test\fP passes patterns as zero-terminated strings to
+\fBpcre2_compile()\fP, giving the length as PCRE2_ZERO_TERMINATED. However, for
+patterns specified with the \fBhex\fP modifier, the actual length of the
+pattern is passed.
 .
 .
 .SS "Generating long repetitive patterns"
@@ -1640,6 +1651,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 12 December 2015
-Copyright (c) 1997-2015 University of Cambridge.
+Last updated: 29 January 2016
+Copyright (c) 1997-2016 University of Cambridge.
 .fi

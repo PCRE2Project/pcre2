@@ -8,6 +8,13 @@ Version 10.22 29-January-2016
 1. Applied Jason Hood's patches to RunTest.bat and testdata/wintestoutput3 
 to fix problems with running the tests under Windows.
 
+2. Implemented a facility for quoting literal characters within hexadecimal 
+patterns in pcre2test, to make it easier to create patterns with just a few 
+non-printing characters.
+
+3. Binary zeros are not supported in pcre2test input files. It now detects them
+and gives an error.
+
 
 Version 10.21 12-January-2016
 -----------------------------
