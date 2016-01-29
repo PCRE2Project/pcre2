@@ -242,11 +242,18 @@ if [%3] == [] (
   exit /b 1
 )
 
+if %1 == 8 (
+  set outnum=8-%bits%-%link_size%
+) else if %1 == 22 (
+  set outnum=22-%bits%
+) else (
+  set outnum=%1
+)
 set testinput=testinput%1
-set testoutput=testoutput%1
+set testoutput=testoutput%outnum%
 if exist %srcdir%\testdata\win%testinput% (
   set testinput=wintestinput%1
-  set testoutput=wintestoutput%1
+  set testoutput=wintestoutput%outnum%
 )
 
 echo Test %1: %3
@@ -259,9 +266,6 @@ if errorlevel 1 (
 )
 
 set type=
-if [%1]==[8] (
-  set type=-%bits%
-)
 if [%1]==[11] (
   set type=-%bits%
 )

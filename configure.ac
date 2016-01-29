@@ -9,9 +9,9 @@ dnl The PCRE2_PRERELEASE feature is for identifying release candidates. It might
 dnl be defined as -RC2, for example. For real releases, it should be empty.
 
 m4_define(pcre2_major, [10])
-m4_define(pcre2_minor, [21])
-m4_define(pcre2_prerelease, [])
-m4_define(pcre2_date, [2016-01-12])
+m4_define(pcre2_minor, [22])
+m4_define(pcre2_prerelease, [-RC1])
+m4_define(pcre2_date, [2016-01-29])
 
 # NOTE: The CMakeLists.txt file searches for the above variables in the first
 # 50 lines of this file. Please update that if the variables above are moved.
