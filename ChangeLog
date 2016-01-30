@@ -15,6 +15,10 @@ non-printing characters.
 3. Binary zeros are not supported in pcre2test input files. It now detects them
 and gives an error.
 
+4. Updated the valgrind parameters in RunTest: (a) changed smc-check=all to 
+smc-check=sll-non-file; (b) changed obj:* in the suppression file to obj:??? so 
+that it matches only unknown objects.
+
 
 Version 10.21 12-January-2016
 -----------------------------

@@ -1,7 +1,7 @@
 {
    name
    Memcheck:Addr16
-   obj:*
-   obj:*
-   obj:*
+   obj:???
+   obj:???
+   obj:???
 }
