@@ -19,6 +19,9 @@ and gives an error.
 smc-check=sll-non-file; (b) changed obj:* in the suppression file to obj:??? so 
 that it matches only unknown objects.
 
+5. Updated the maintenance script maint/ManyConfigTests to make it easier to 
+select individual groups of tests.
+
 
 Version 10.21 12-January-2016
 -----------------------------

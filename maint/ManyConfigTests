@@ -16,10 +16,14 @@
 # -nojit          skip all JIT tests
 # -nojitmain      skip non-valgrind JIT tests
 # -nojitvalgrind  skip JIT tests with valgrind
-# -nomain         skip the main set of tests
-# -nomainvalgrind skip the non-JIT valgrind tests
+# -nomain         skip all the main (non-JIT) set of tests
+# -nomainvalgrind skip the main (non-JIT) valgrind tests
 # -notmp          skip the test in a temporary directory
-# -novalgrind     skip the valgrind tests
+# -novalgrind     skip all the valgrind tests
+
+# Alternatively, if any of those names are given with '+' instead of '-no',
+# only those groups named with '+' are run (e.g. +jit). If -dummy is given,
+# no tests are actually run - this provides a means of testing the selectors.
 
 # The -v option causes a call to 'pcre2test -C' to happen for each
 # configuration.
@@ -33,10 +37,29 @@ usemain=1
 usemainvalgrind=1
 usetmp=1
 usevalgrind=1
+
+dummy=0
+seenplus=0
 verbose=0
 
 while [ $# -gt 0 ] ; do
   case $1 in
+    +*) if [ $seenplus -eq 0 ]; then
+          useasan=0
+          useusan=0
+          usedebug=0
+          usejit=0
+          usejitvalgrind=0
+          usemain=0
+          usemainvalgrind=0
+          usetmp=0
+          seenplus=1
+        fi;;
+  esac
+
+  case $1 in
+    -dummy)          dummy=1;;
+    -v)              verbose=1;;
     -noasan)         useasan=0;;
     -nousan)         useusan=0;;
     -nodebug)        usedebug=0;;
@@ -47,7 +70,16 @@ while [ $# -gt 0 ] ; do
     -nomainvalgrind) usemainvalgrind=0;;
     -notmp)          usetmp=0;;
     -novalgrind)     usevalgrind=0;;
-    -v)              verbose=1;;
+    +asan)           useasan=1;;
+    +usan)           useusan=1;;
+    +debug)          usedebug=1;;
+    +jit)            usejit=1; usejitvalgrind=1;;
+    +jitmain)        usejit=1;;
+    +jitvalgrind)    usejitvalgrind=1;;
+    +main)           usemain=1; usemainvalgrind=1;;
+    +mainvalgrind)   usemainvalgrind=1;;
+    +tmp)            usetmp=1;;
+    +valgrind)       usevalgrind=1;;
     *)               echo "Unknown option '$1'"; exit 1;;
   esac
   shift
@@ -113,6 +145,8 @@ runtest()
     echo "[$testcount/$testtotal] Configuring with:"
     echo "  $opts"
   fi
+
+  if [ $dummy -eq 1 ]; then return; fi
 
   CFLAGS="$CFLAGS" \
     $srcdir/configure $opts >/dev/null 2>teststderrM
