@@ -1258,7 +1258,7 @@ PCRE2 does not allow \eC to appear in lookbehind assertions
 .\"
 in a UTF mode, because this would make it impossible to calculate the length of
 the lookbehind. Neither the alternative matching function
-\fBpcre2_dfa_match()\fP not the JIT optimizer support \eC in a UTF mode. The
+\fBpcre2_dfa_match()\fP nor the JIT optimizer support \eC in a UTF mode. The
 former gives a match-time error; the latter fails to optimize and so the match
 is always run using the interpreter.
 .P
