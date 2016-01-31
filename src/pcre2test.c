@@ -425,10 +425,10 @@ so many of them that they are split into two fields. */
 #define CTL_MEMORY                       0x00100000u
 #define CTL_NULLCONTEXT                  0x00200000u
 #define CTL_POSIX                        0x00400000u
-#define CTL_PUSH                         0x00800000u
-#define CTL_STARTCHAR                    0x01000000u
-#define CTL_ZERO_TERMINATE               0x02000000u
-/* Spare                                 0x04000000u  */
+#define CTL_POSIX_NOSUB                  0x00800000u
+#define CTL_PUSH                         0x01000000u
+#define CTL_STARTCHAR                    0x02000000u
+#define CTL_ZERO_TERMINATE               0x04000000u
 /* Spare                                 0x08000000u  */
 /* Spare                                 0x10000000u  */
 /* Spare                                 0x20000000u  */
@@ -600,6 +600,7 @@ static modstruct modlist[] = {
   { "partial_soft",               MOD_DAT,  MOD_OPT, PCRE2_PARTIAL_SOFT,         DO(options) },
   { "ph",                         MOD_DAT,  MOD_OPT, PCRE2_PARTIAL_HARD,         DO(options) },
   { "posix",                      MOD_PAT,  MOD_CTL, CTL_POSIX,                  PO(control) },
+  { "posix_nosub",                MOD_PAT,  MOD_CTL, CTL_POSIX|CTL_POSIX_NOSUB,  PO(control) },
   { "ps",                         MOD_DAT,  MOD_OPT, PCRE2_PARTIAL_SOFT,         DO(options) },
   { "push",                       MOD_PAT,  MOD_CTL, CTL_PUSH,                   PO(control) },
   { "recursion_limit",            MOD_CTM,  MOD_INT, 0,                          MO(recursion_limit) },
@@ -625,11 +626,11 @@ static modstruct modlist[] = {
 /* Controls and options that are supported for use with the POSIX interface. */
 
 #define POSIX_SUPPORTED_COMPILE_OPTIONS ( \
-  PCRE2_CASELESS|PCRE2_DOTALL|PCRE2_MULTILINE|PCRE2_NO_AUTO_CAPTURE| \
-  PCRE2_UCP|PCRE2_UTF|PCRE2_UNGREEDY)
+  PCRE2_CASELESS|PCRE2_DOTALL|PCRE2_MULTILINE|PCRE2_UCP|PCRE2_UTF| \
+  PCRE2_UNGREEDY)
 
 #define POSIX_SUPPORTED_COMPILE_CONTROLS ( \
-  CTL_AFTERTEXT|CTL_ALLAFTERTEXT|CTL_EXPAND|CTL_POSIX)
+  CTL_AFTERTEXT|CTL_ALLAFTERTEXT|CTL_EXPAND|CTL_POSIX|CTL_POSIX_NOSUB)
 
 #define POSIX_SUPPORTED_COMPILE_CONTROLS2 (0)
 
@@ -654,10 +655,11 @@ static modstruct modlist[] = {
 
 /* Controls that are forbidden with #pop. */
 
-#define NOTPOP_CONTROLS (CTL_HEXPAT|CTL_POSIX|CTL_PUSH)
+#define NOTPOP_CONTROLS (CTL_HEXPAT|CTL_POSIX|CTL_POSIX_NOSUB|CTL_PUSH)
 
 /* Pattern controls that are mutually exclusive. At present these are all in
-the first control word. */
+the first control word. Note that CTL_POSIX_NOSUB is always accompanied by
+CTL_POSIX, so it doesn't need its own entries. */
 
 static uint32_t exclusive_pat_controls[] = {
   CTL_POSIX  | CTL_HEXPAT,
@@ -811,7 +813,7 @@ static void *patstack[PATSTACKSIZE];
 static int patstacknext = 0;
 
 #ifdef SUPPORT_PCRE2_8
-static regex_t preg = { NULL, NULL, 0, 0 };
+static regex_t preg = { NULL, NULL, 0, 0, 0 };
 #endif
 
 static int *dfa_workspace = NULL;
@@ -3580,7 +3582,7 @@ Returns:      nothing
 static void
 show_controls(uint32_t controls, uint32_t controls2, const char *before)
 {
-fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
+fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
   before,
   ((controls & CTL_AFTERTEXT) != 0)? " aftertext" : "",
   ((controls & CTL_ALLAFTERTEXT) != 0)? " allaftertext" : "",
@@ -3607,6 +3609,7 @@ fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s
   ((controls & CTL_NL_SET) != 0)? " newline" : "",
   ((controls & CTL_NULLCONTEXT) != 0)? " null_context" : "",
   ((controls & CTL_POSIX) != 0)? " posix" : "",
+  ((controls & CTL_POSIX_NOSUB) != 0)? " posix_nosub" : "",
   ((controls & CTL_PUSH) != 0)? " push" : "",
   ((controls & CTL_STARTCHAR) != 0)? " startchar" : "",
   ((controls2 & CTL2_SUBSTITUTE_EXTENDED) != 0)? " substitute_extended" : "",
@@ -4702,11 +4705,11 @@ if ((pat_patctl.control & CTL_POSIX) != 0)
   up a match_data block to be used for all matches. */
 
   if (utf) cflags |= REG_UTF;
+  if ((pat_patctl.control & CTL_POSIX_NOSUB) != 0) cflags |= REG_NOSUB;
   if ((pat_patctl.options & PCRE2_UCP) != 0) cflags |= REG_UCP;
   if ((pat_patctl.options & PCRE2_CASELESS) != 0) cflags |= REG_ICASE;
   if ((pat_patctl.options & PCRE2_MULTILINE) != 0) cflags |= REG_NEWLINE;
   if ((pat_patctl.options & PCRE2_DOTALL) != 0) cflags |= REG_DOTALL;
-  if ((pat_patctl.options & PCRE2_NO_AUTO_CAPTURE) != 0) cflags |= REG_NOSUB;
   if ((pat_patctl.options & PCRE2_UNGREEDY) != 0) cflags |= REG_UNGREEDY;
 
   rc = regcomp(&preg, (char *)pbuffer8, cflags);
@@ -5829,7 +5832,7 @@ if ((pat_patctl.control & CTL_POSIX) != 0)
     (void)regerror(rc, &preg, (char *)pbuffer8, pbuffer8_size);
     fprintf(outfile, "No match: POSIX code %d: %s\n", rc, pbuffer8);
     }
-  else if ((pat_patctl.options & PCRE2_NO_AUTO_CAPTURE) != 0)
+  else if ((pat_patctl.control & CTL_POSIX_NOSUB) != 0)
     fprintf(outfile, "Matched with REG_NOSUB\n");
   else if (dat_datctl.oveccount == 0)
     fprintf(outfile, "Matched without capture\n");

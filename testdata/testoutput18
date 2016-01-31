@@ -105,12 +105,16 @@ No match: POSIX code 17: match failed
     ab\ncd
  0: ab\x0acd
 
-/a(b)c/no_auto_capture
+/a(b)c/posix_nosub
     abc
 Matched with REG_NOSUB
 
-/a(?P<name>b)c/no_auto_capture
+/a(?P<name>b)c/posix_nosub
     abc
+Matched with REG_NOSUB
+
+/(a)\1/posix_nosub
+    zaay
 Matched with REG_NOSUB
 
 /a?|b?/

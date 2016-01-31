@@ -68,11 +68,14 @@
     ab=cd
     ab\ncd
 
-/a(b)c/no_auto_capture
+/a(b)c/posix_nosub
     abc
 
-/a(?P<name>b)c/no_auto_capture
+/a(?P<name>b)c/posix_nosub
     abc
+
+/(a)\1/posix_nosub
+    zaay
 
 /a?|b?/
     abc

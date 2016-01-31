@@ -1,4 +1,4 @@
-.TH PCRE2POSIX 3 "29 November 2015" "PCRE2 10.21"
+.TH PCRE2POSIX 3 "31 January 2016" "PCRE2 10.22"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "SYNOPSIS"
@@ -28,7 +28,7 @@ expression 8-bit library. See the
 \fBpcre2api\fP
 .\"
 documentation for a description of PCRE2's native API, which contains much
-additional functionality. There is no POSIX-style wrapper for PCRE2's 16-bit
+additional functionality. There are no POSIX-style wrappers for PCRE2's 16-bit
 and 32-bit libraries.
 .P
 The functions described here are just wrapper functions that ultimately call
@@ -44,9 +44,9 @@ value zero. This has no effect, but since programs that are written to the
 POSIX interface often use it, this makes it easier to slot in PCRE2 as a
 replacement library. Other POSIX options are not even defined.
 .P
-There are also some other options that are not defined by POSIX. These have
-been added at the request of users who want to make use of certain
-PCRE2-specific features via the POSIX calling interface.
+There are also some options that are not defined by POSIX. These have been
+added at the request of users who want to make use of certain PCRE2-specific
+features via the POSIX calling interface.
 .P
 When PCRE2 is called via these functions, it is only the API that is POSIX-like
 in style. The syntax and semantics of the regular expressions themselves are
@@ -95,11 +95,11 @@ defined POSIX behaviour for REG_NEWLINE (see the following section).
 .sp
   REG_NOSUB
 .sp
-The PCRE2_NO_AUTO_CAPTURE option is set when the regular expression is passed
-for compilation to the native function. In addition, when a pattern that is
-compiled with this flag is passed to \fBregexec()\fP for matching, the
-\fInmatch\fP and \fIpmatch\fP arguments are ignored, and no captured strings
-are returned.
+When a pattern that is compiled with this flag is passed to \fBregexec()\fP for
+matching, the \fInmatch\fP and \fIpmatch\fP arguments are ignored, and no
+captured strings are returned. Versions of the PCRE library prior to 10.22 used 
+to set the PCRE2_NO_AUTO_CAPTURE compile option, but this no longer happens 
+because it disables the use of back references.
 .sp
   REG_UCP
 .sp
@@ -216,12 +216,13 @@ mutually exclusive; the error REG_INVARG is returned.
 .P
 If the pattern was compiled with the REG_NOSUB flag, no data about any matched
 strings is returned. The \fInmatch\fP and \fIpmatch\fP arguments of
-\fBregexec()\fP are ignored.
+\fBregexec()\fP are ignored (except possibly as input for REG_STARTEND).
 .P
-If the value of \fInmatch\fP is zero, or if the value \fIpmatch\fP is NULL,
-no data about any matched strings is returned.
+The value of \fInmatch\fP may be zero, and the value \fIpmatch\fP may be NULL
+(unless REG_STARTEND is set); in both these cases no data about any matched
+strings is returned.
 .P
-Otherwise,the portion of the string that was matched, and also any captured
+Otherwise, the portion of the string that was matched, and also any captured
 substrings, are returned via the \fIpmatch\fP argument, which points to an
 array of \fInmatch\fP structures of type \fIregmatch_t\fP, containing the
 members \fIrm_so\fP and \fIrm_eo\fP. These contain the byte offset to the first
@@ -270,6 +271,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 29 November 2015
-Copyright (c) 1997-2015 University of Cambridge.
+Last updated: 31 January 2016
+Copyright (c) 1997-2016 University of Cambridge.
 .fi

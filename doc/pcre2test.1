@@ -1,4 +1,4 @@
-.TH PCRE2TEST 1 "29 January 2016" "PCRE 10.22"
+.TH PCRE2TEST 1 "31 January 2016" "PCRE 10.22"
 .SH NAME
 pcre2test - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -535,6 +535,7 @@ about the pattern:
       null_context              compile with a NULL context
       parens_nest_limit=<n>     set maximum parentheses depth
       posix                     use the POSIX API
+      posix_nosub               use the POSIX API with REG_NOSUB 
       push                      push compiled pattern onto the stack
       stackguard=<number>       test the stackguard feature
       tables=[0|1|2]            select internal tables
@@ -791,18 +792,19 @@ variable can hold (essentially unlimited).
 .SS "Using the POSIX wrapper API"
 .rs
 .sp
-The \fB/posix\fP modifier causes \fBpcre2test\fP to call PCRE2 via the POSIX
-wrapper API rather than its native API. This supports only the 8-bit library.
-Note that it does not imply POSIX matching semantics; for more detail see the
+The \fB/posix\fP and \fBposix_nosub\fP modifiers cause \fBpcre2test\fP to call
+PCRE2 via the POSIX wrapper API rather than its native API. When
+\fBposix_nosub\fP is used, the POSIX option REG_NOSUB is passed to
+\fBregcomp()\fP. The POSIX wrapper supports only the 8-bit library. Note that
+it does not imply POSIX matching semantics; for more detail see the
 .\" HREF
 \fBpcre2posix\fP
 .\"
-documentation. When the POSIX API is being used, the following pattern
-modifiers set options for the \fBregcomp()\fP function:
+documentation. The following pattern modifiers set options for the
+\fBregcomp()\fP function:
 .sp
   caseless           REG_ICASE
   multiline          REG_NEWLINE
-  no_auto_capture    REG_NOSUB
   dotall             REG_DOTALL     )
   ungreedy           REG_UNGREEDY   ) These options are not part of
   ucp                REG_UCP        )   the POSIX standard
@@ -818,7 +820,8 @@ buffer is too small for the error message. If this modifier has not been set, a
 large buffer is used.
 .P
 The \fBaftertext\fP and \fBallaftertext\fP subject modifiers work as described
-below. All other modifiers cause an error.
+below. All other modifiers are either ignored, with a warning message, or cause
+an error.
 .
 .
 .SS "Testing the stack guard feature"
@@ -937,7 +940,7 @@ If the \fB/posix\fP modifier was present on the pattern, causing the POSIX
 wrapper API to be used, the only option-setting modifiers that have any effect
 are \fBnotbol\fP, \fBnotempty\fP, and \fBnoteol\fP, causing REG_NOTBOL,
 REG_NOTEMPTY, and REG_NOTEOL, respectively, to be passed to \fBregexec()\fP.
-Any other modifiers cause an error.
+The other modifiers are ignored, with a warning message.
 .
 .
 .SS "Setting match controls"
@@ -981,7 +984,10 @@ pattern.
       substitute_unset_empty     use PCRE2_SUBSTITUTE_UNSET_EMPTY
       zero_terminate             pass the subject as zero-terminated
 .sp
-The effects of these modifiers are described in the following sections.
+The effects of these modifiers are described in the following sections. When 
+matching via the POSIX wrapper API, the \fBaftertext\fP, \fBallaftertext\fP,
+and \fBovector\fP subject modifiers work as described below. All other
+modifiers are either ignored, with a warning message, or cause an error.
 .
 .
 .SS "Showing more text"
@@ -1606,7 +1612,7 @@ modifier list containing only
 control modifiers
 .\"
 that act after a pattern has been compiled. In particular, \fBhex\fP,
-\fBposix\fP, and \fBpush\fP are not allowed, nor are any
+\fBposix\fP, \fBposix_nosub\fP, and \fBpush\fP are not allowed, nor are any
 .\" HTML <a href="#optionmodifiers">
 .\" </a>
 option-setting modifiers.
@@ -1651,6 +1657,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 29 January 2016
+Last updated: 31 January 2016
 Copyright (c) 1997-2016 University of Cambridge.
 .fi

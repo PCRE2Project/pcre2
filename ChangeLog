@@ -22,6 +22,18 @@ that it matches only unknown objects.
 5. Updated the maintenance script maint/ManyConfigTests to make it easier to 
 select individual groups of tests.
 
+6. When the POSIX wrapper function regcomp() is called, the REG_NOSUB option 
+used to set PCRE2_NO_AUTO_CAPTURE when calling pcre2_compile(). However, this
+disables the use of back references (and subroutine calls), which are supported
+by other implementations of regcomp() with RE_NOSUB. Therefore, REG_NOSUB no
+longer causes PCRE2_NO_AUTO_CAPTURE to be set, though it still ignores nmatch 
+and pmatch when regexec() is called.
+
+7. Because of 6 above, pcre2test has been modified with a new modifier called 
+posix_nosub, to call regcomp() with REG_NOSUB. Previously the no_auto_capture 
+modifier had this effect. That option is now ignored when the POSIX API is in 
+use.
+
 
 Version 10.21 12-January-2016
 -----------------------------
