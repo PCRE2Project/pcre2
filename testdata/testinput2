@@ -4804,4 +4804,6 @@ a)"xI
 
 /effg/hex
 
+/(?J)(?'a'))(?'a')/
+
 # End of testinput2 

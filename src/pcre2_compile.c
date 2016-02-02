@@ -3377,27 +3377,24 @@ for (; ptr < cb->end_pattern; ptr++)
         if ((options & PCRE2_NO_AUTO_CAPTURE) == 0) cb->bracount++;
         }
 
-      /* (*something) - just skip to closing ket unless PCRE2_ALT_VERBNAMES is
-      set, in which case we have to process escapes in the string after the
-      name. */
+      /* (*something) - skip over a name, and then just skip to closing ket
+      unless PCRE2_ALT_VERBNAMES is set, in which case we have to process
+      escapes in the string after a verb name terminated by a colon. */
 
       else
         {
         ptr += 2;
         while (MAX_255(*ptr) && (cb->ctypes[*ptr] & ctype_word) != 0) ptr++;
-        if (*ptr == CHAR_COLON)
+        if (*ptr == CHAR_COLON && (options & PCRE2_ALT_VERBNAMES) != 0)
           {
           ptr++;
-          if ((options & PCRE2_ALT_VERBNAMES) != 0)
-            {
-            if (process_verb_name(&ptr, NULL, &errorcode, options, utf, cb) < 0)
-              goto FAILED;
-            }
-          else
-            {
-            while (ptr < cb->end_pattern && *ptr != CHAR_RIGHT_PARENTHESIS)
-              ptr++;
-            }
+          if (process_verb_name(&ptr, NULL, &errorcode, options, utf, cb) < 0)
+            goto FAILED;
+          }
+        else
+          {
+          while (ptr < cb->end_pattern && *ptr != CHAR_RIGHT_PARENTHESIS)
+            ptr++;
           }
         nest_depth--;
         }
@@ -3748,7 +3745,12 @@ for (; ptr < cb->end_pattern; ptr++)
       if (top_nest == (nest_save *)(cb->start_workspace)) top_nest = NULL;
         else top_nest--;
       }
-    if (nest_depth > 0) nest_depth--;  /* Can be 0 for unmatched ) */
+    if (nest_depth == 0)    /* Unmatched closing parenthesis */
+      {
+      errorcode = ERR22;
+      goto FAILED;
+      }
+    nest_depth--;
     break;
     }
   }
@@ -8704,14 +8706,11 @@ if (cb.had_accept)
   reqcuflags = REQ_NONE;
   }
 
-/* If we have not reached end of pattern after a successful compile, there's an
-excess bracket. Fill in the final opcode and check for disastrous overflow.
-If no overflow, but the estimated length exceeds the really used length, adjust
-the value of re->blocksize, and if valgrind support is configured, mark the
-extra allocated memory as unaddressable, so that any out-of-bound reads can be
-detected. */
+/* Fill in the final opcode and check for disastrous overflow. If no overflow,
+but the estimated length exceeds the really used length, adjust the value of
+re->blocksize, and if valgrind support is configured, mark the extra allocated
+memory as unaddressable, so that any out-of-bound reads can be detected. */
 
-if (errorcode == 0 && ptr < cb.end_pattern) errorcode = ERR22;
 *code++ = OP_END;
 usedlength = code - codestart;
 if (usedlength > length) errorcode = ERR23; else

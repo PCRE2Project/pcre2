@@ -37,6 +37,11 @@ use.
 8. Minor tidies to the pcre2demo.c sample program, including more comments 
 about its 8-bit-ness.
 
+9. Detect unmatched closing parentheses and give the error in the pre-scan
+instead of later. Previously the pre-scan carried on and could give a
+misleading incorrect error message. For example, /(?J)(?'a'))(?'a')/ gave a
+message about invalid duplicate group names.
+
 
 Version 10.21 12-January-2016
 -----------------------------
