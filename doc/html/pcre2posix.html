@@ -48,7 +48,7 @@ This set of functions provides a POSIX-style API for the PCRE2 regular
 expression 8-bit library. See the
 <a href="pcre2api.html"><b>pcre2api</b></a>
 documentation for a description of PCRE2's native API, which contains much
-additional functionality. There is no POSIX-style wrapper for PCRE2's 16-bit
+additional functionality. There are no POSIX-style wrappers for PCRE2's 16-bit
 and 32-bit libraries.
 </P>
 <P>
@@ -67,9 +67,9 @@ POSIX interface often use it, this makes it easier to slot in PCRE2 as a
 replacement library. Other POSIX options are not even defined.
 </P>
 <P>
-There are also some other options that are not defined by POSIX. These have
-been added at the request of users who want to make use of certain
-PCRE2-specific features via the POSIX calling interface.
+There are also some options that are not defined by POSIX. These have been
+added at the request of users who want to make use of certain PCRE2-specific
+features via the POSIX calling interface.
 </P>
 <P>
 When PCRE2 is called via these functions, it is only the API that is POSIX-like
@@ -119,11 +119,11 @@ defined POSIX behaviour for REG_NEWLINE (see the following section).
 <pre>
   REG_NOSUB
 </pre>
-The PCRE2_NO_AUTO_CAPTURE option is set when the regular expression is passed
-for compilation to the native function. In addition, when a pattern that is
-compiled with this flag is passed to <b>regexec()</b> for matching, the
-<i>nmatch</i> and <i>pmatch</i> arguments are ignored, and no captured strings
-are returned.
+When a pattern that is compiled with this flag is passed to <b>regexec()</b> for
+matching, the <i>nmatch</i> and <i>pmatch</i> arguments are ignored, and no
+captured strings are returned. Versions of the PCRE library prior to 10.22 used 
+to set the PCRE2_NO_AUTO_CAPTURE compile option, but this no longer happens 
+because it disables the use of back references.
 <pre>
   REG_UCP
 </pre>
@@ -241,14 +241,15 @@ mutually exclusive; the error REG_INVARG is returned.
 <P>
 If the pattern was compiled with the REG_NOSUB flag, no data about any matched
 strings is returned. The <i>nmatch</i> and <i>pmatch</i> arguments of
-<b>regexec()</b> are ignored.
+<b>regexec()</b> are ignored (except possibly as input for REG_STARTEND).
 </P>
 <P>
-If the value of <i>nmatch</i> is zero, or if the value <i>pmatch</i> is NULL,
-no data about any matched strings is returned.
+The value of <i>nmatch</i> may be zero, and the value <i>pmatch</i> may be NULL
+(unless REG_STARTEND is set); in both these cases no data about any matched
+strings is returned.
 </P>
 <P>
-Otherwise,the portion of the string that was matched, and also any captured
+Otherwise, the portion of the string that was matched, and also any captured
 substrings, are returned via the <i>pmatch</i> argument, which points to an
 array of <i>nmatch</i> structures of type <i>regmatch_t</i>, containing the
 members <i>rm_so</i> and <i>rm_eo</i>. These contain the byte offset to the first
@@ -290,9 +291,9 @@ Cambridge, England.
 </P>
 <br><a name="SEC9" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 29 November 2015
+Last updated: 31 January 2016
 <br>
-Copyright &copy; 1997-2015 University of Cambridge.
+Copyright &copy; 1997-2016 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE2 index page</a>.

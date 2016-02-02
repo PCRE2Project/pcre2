@@ -67,10 +67,10 @@ INPUT ENCODING
 
        For  maximum portability, therefore, it is safest to avoid non-printing
        characters in pcre2test input files. There is a facility for specifying
-       a pattern's characters as hexadecimal pairs, thus making it possible to
-       include binary zeroes in a pattern for testing purposes. Subject  lines
-       are processed for backslash escapes, which makes it possible to include
-       any data value.
+       some or all of a pattern's characters as hexadecimal pairs, thus making
+       it possible to include binary zeroes in a pattern for testing purposes.
+       Subject  lines are processed for backslash escapes, which makes it pos-
+       sible to include any data value.
 
 
 COMMAND LINE OPTIONS
@@ -505,7 +505,7 @@ PATTERN MODIFIERS
              debug                     same as info,fullbincode
              fullbincode               show binary code with lengths
          /I  info                      show info about compiled pattern
-             hex                       pattern is coded in hexadecimal
+             hex                       unquoted characters are hexadecimal
              jit[=<number>]            use JIT
              jitfast                   use JIT fast path
              jitverify                 verify JIT use
@@ -516,6 +516,7 @@ PATTERN MODIFIERS
              null_context              compile with a NULL context
              parens_nest_limit=<n>     set maximum parentheses depth
              posix                     use the POSIX API
+             posix_nosub               use the POSIX API with REG_NOSUB
              push                      push compiled pattern onto the stack
              stackguard=<number>       test the stackguard feature
              tables=[0|1|2]            select internal tables
@@ -591,59 +592,70 @@ PATTERN MODIFIERS
        testing that pcre2_compile() behaves correctly in this  case  (it  uses
        default values).
 
-   Specifying a pattern in hex
+   Specifying pattern characters in hexadecimal
 
-       The hex modifier specifies that the characters of the pattern are to be
-       interpreted as pairs of hexadecimal digits. White  space  is  permitted
-       between pairs. For example:
+       The  hex  modifier specifies that the characters of the pattern, except
+       for substrings enclosed in single or double quotes, are  to  be  inter-
+       preted  as  pairs  of hexadecimal digits. This feature is provided as a
+       way of creating patterns that contain binary zeros and other non-print-
+       ing  characters.  White space is permitted between pairs of digits. For
+       example, this pattern contains three characters:
 
          /ab 32 59/hex
 
-       This  feature  is  provided  as a way of creating patterns that contain
-       binary zero and other non-printing characters.  By  default,  pcre2test
-       passes  patterns  as zero-terminated strings to pcre2_compile(), giving
-       the length as PCRE2_ZERO_TERMINATED. However, for patterns specified in
-       hexadecimal, the actual length of the pattern is passed.
+       Parts of such a pattern are taken literally  if  quoted.  This  pattern
+       contains  nine characters, only two of which are specified in hexadeci-
+       mal:
+
+         /ab "literal" 32/hex
+
+       Either single or double quotes may be used. There is no way of  includ-
+       ing the delimiter within a substring.
+
+       By  default,  pcre2test  passes  patterns as zero-terminated strings to
+       pcre2_compile(), giving the length as  PCRE2_ZERO_TERMINATED.  However,
+       for  patterns specified with the hex modifier, the actual length of the
+       pattern is passed.
 
    Generating long repetitive patterns
 
-       Some  tests use long patterns that are very repetitive. Instead of cre-
-       ating a very long input line for such a pattern, you can use a  special
-       repetition  feature,  similar  to  the  one described for subject lines
-       above. If the expand modifier is present on a  pattern,  parts  of  the
+       Some tests use long patterns that are very repetitive. Instead of  cre-
+       ating  a very long input line for such a pattern, you can use a special
+       repetition feature, similar to the  one  described  for  subject  lines
+       above.  If  the  expand  modifier is present on a pattern, parts of the
        pattern that have the form
 
          \[<characters>]{<count>}
 
        are expanded before the pattern is passed to pcre2_compile(). For exam-
        ple, \[AB]{6000} is expanded to "ABAB..." 6000 times. This construction
-       cannot  be  nested. An initial "\[" sequence is recognized only if "]{"
-       followed by decimal digits and "}" is found later in  the  pattern.  If
+       cannot be nested. An initial "\[" sequence is recognized only  if  "]{"
+       followed  by  decimal  digits and "}" is found later in the pattern. If
        not, the characters remain in the pattern unaltered.
 
-       If  part  of an expanded pattern looks like an expansion, but is really
+       If part of an expanded pattern looks like an expansion, but  is  really
        part of the actual pattern, unwanted expansion can be avoided by giving
        two values in the quantifier. For example, \[AB]{6000,6000} is not rec-
        ognized as an expansion item.
 
-       If the info modifier is set on an expanded pattern, the result  of  the
+       If  the  info modifier is set on an expanded pattern, the result of the
        expansion is included in the information that is output.
 
    JIT compilation
 
-       Just-in-time  (JIT)  compiling  is  a heavyweight optimization that can
-       greatly speed up pattern matching. See the pcre2jit  documentation  for
-       details.  JIT  compiling  happens, optionally, after a pattern has been
-       successfully compiled into an internal form. The JIT compiler  converts
+       Just-in-time (JIT) compiling is a  heavyweight  optimization  that  can
+       greatly  speed  up pattern matching. See the pcre2jit documentation for
+       details. JIT compiling happens, optionally, after a  pattern  has  been
+       successfully  compiled into an internal form. The JIT compiler converts
        this to optimized machine code. It needs to know whether the match-time
        options PCRE2_PARTIAL_HARD and PCRE2_PARTIAL_SOFT are going to be used,
-       because  different  code  is generated for the different cases. See the
-       partial modifier in "Subject Modifiers" below for details of how  these
+       because different code is generated for the different  cases.  See  the
+       partial  modifier in "Subject Modifiers" below for details of how these
        options are specified for each match attempt.
 
-       JIT  compilation  is  requested by the /jit pattern modifier, which may
+       JIT compilation is requested by the /jit pattern  modifier,  which  may
        optionally be followed by an equals sign and a number in the range 0 to
-       7.   The  three bits that make up the number specify which of the three
+       7.  The three bits that make up the number specify which of  the  three
        JIT operating modes are to be compiled:
 
          1  compile JIT code for non-partial matching
@@ -660,31 +672,31 @@ PATTERN MODIFIERS
          6  soft and hard partial matching only
          7  all three modes
 
-       If no number is given, 7 is  assumed.  The  phrase  "partial  matching"
+       If  no  number  is  given,  7 is assumed. The phrase "partial matching"
        means a call to pcre2_match() with either the PCRE2_PARTIAL_SOFT or the
-       PCRE2_PARTIAL_HARD option set. Note that such a call may return a  com-
+       PCRE2_PARTIAL_HARD  option set. Note that such a call may return a com-
        plete match; the options enable the possibility of a partial match, but
-       do not require it. Note also that if you request JIT  compilation  only
-       for  partial  matching (for example, /jit=2) but do not set the partial
-       modifier on a subject line, that match will not use  JIT  code  because
+       do  not  require it. Note also that if you request JIT compilation only
+       for partial matching (for example, /jit=2) but do not set  the  partial
+       modifier  on  a  subject line, that match will not use JIT code because
        none was compiled for non-partial matching.
 
-       If  JIT compilation is successful, the compiled JIT code will automati-
-       cally be used when an appropriate type of match  is  run,  except  when
-       incompatible  run-time options are specified. For more details, see the
-       pcre2jit documentation. See also the jitstack modifier below for a  way
+       If JIT compilation is successful, the compiled JIT code will  automati-
+       cally  be  used  when  an appropriate type of match is run, except when
+       incompatible run-time options are specified. For more details, see  the
+       pcre2jit  documentation. See also the jitstack modifier below for a way
        of setting the size of the JIT stack.
 
-       If  the  jitfast  modifier is specified, matching is done using the JIT
-       "fast path" interface, pcre2_jit_match(), which skips some of the  san-
-       ity  checks that are done by pcre2_match(), and of course does not work
-       when JIT is not supported. If jitfast is specified without  jit,  jit=7
+       If the jitfast modifier is specified, matching is done  using  the  JIT
+       "fast  path" interface, pcre2_jit_match(), which skips some of the san-
+       ity checks that are done by pcre2_match(), and of course does not  work
+       when  JIT  is not supported. If jitfast is specified without jit, jit=7
        is assumed.
 
-       If  the jitverify modifier is specified, information about the compiled
-       pattern shows whether JIT compilation was or  was  not  successful.  If
-       jitverify  is  specified without jit, jit=7 is assumed. If JIT compila-
-       tion is successful when jitverify is set, the text "(JIT)" is added  to
+       If the jitverify modifier is specified, information about the  compiled
+       pattern  shows  whether  JIT  compilation was or was not successful. If
+       jitverify is specified without jit, jit=7 is assumed. If  JIT  compila-
+       tion  is successful when jitverify is set, the text "(JIT)" is added to
        the first output line after a match or non match when JIT-compiled code
        was actually used in the match.
 
@@ -695,18 +707,18 @@ PATTERN MODIFIERS
          /pattern/locale=fr_FR
 
        The given locale is set, pcre2_maketables() is called to build a set of
-       character  tables for the locale, and this is then passed to pcre2_com-
-       pile() when compiling the regular expression. The same tables are  used
+       character tables for the locale, and this is then passed to  pcre2_com-
+       pile()  when compiling the regular expression. The same tables are used
        when matching the following subject lines. The /locale modifier applies
        only to the pattern on which it appears, but can be given in a #pattern
-       command  if a default is needed. Setting a locale and alternate charac-
+       command if a default is needed. Setting a locale and alternate  charac-
        ter tables are mutually exclusive.
 
    Showing pattern memory
 
-       The /memory modifier causes the size in bytes of  the  memory  used  to
-       hold  the compiled pattern to be output. This does not include the size
-       of the pcre2_code block; it is just the actual compiled  data.  If  the
+       The  /memory  modifier  causes  the size in bytes of the memory used to
+       hold the compiled pattern to be output. This does not include the  size
+       of  the  pcre2_code  block; it is just the actual compiled data. If the
        pattern is subsequently passed to the JIT compiler, the size of the JIT
        compiled code is also output. Here is an example:
 
@@ -717,31 +729,31 @@ PATTERN MODIFIERS
 
    Limiting nested parentheses
 
-       The parens_nest_limit modifier sets a limit  on  the  depth  of  nested
-       parentheses  in  a  pattern.  Breaching  the limit causes a compilation
-       error.  The default for the library is set when  PCRE2  is  built,  but
-       pcre2test  sets  its  own default of 220, which is required for running
+       The  parens_nest_limit  modifier  sets  a  limit on the depth of nested
+       parentheses in a pattern. Breaching  the  limit  causes  a  compilation
+       error.   The  default  for  the library is set when PCRE2 is built, but
+       pcre2test sets its own default of 220, which is  required  for  running
        the standard test suite.
 
    Limiting the pattern length
 
-       The max_pattern_length modifier sets a limit, in  code  units,  to  the
+       The  max_pattern_length  modifier  sets  a limit, in code units, to the
        length of pattern that pcre2_compile() will accept. Breaching the limit
-       causes a compilation  error.  The  default  is  the  largest  number  a
+       causes  a  compilation  error.  The  default  is  the  largest number a
        PCRE2_SIZE variable can hold (essentially unlimited).
 
    Using the POSIX wrapper API
 
-       The  /posix modifier causes pcre2test to call PCRE2 via the POSIX wrap-
-       per API rather than its  native  API.  This  supports  only  the  8-bit
-       library.   Note  that  it  does not imply POSIX matching semantics; for
-       more detail see the pcre2posix documentation. When  the  POSIX  API  is
-       being  used,  the  following pattern modifiers set options for the reg-
-       comp() function:
+       The /posix and posix_nosub modifiers cause pcre2test to call PCRE2  via
+       the  POSIX  wrapper API rather than its native API. When posix_nosub is
+       used, the POSIX option REG_NOSUB is  passed  to  regcomp().  The  POSIX
+       wrapper  supports  only  the 8-bit library. Note that it does not imply
+       POSIX matching semantics; for more detail see the pcre2posix documenta-
+       tion.  The  following  pattern  modifiers set options for the regcomp()
+       function:
 
          caseless           REG_ICASE
          multiline          REG_NEWLINE
-         no_auto_capture    REG_NOSUB
          dotall             REG_DOTALL     )
          ungreedy           REG_UNGREEDY   ) These options are not part of
          ucp                REG_UCP        )   the POSIX standard
@@ -758,23 +770,24 @@ PATTERN MODIFIERS
        been set, a large buffer is used.
 
        The aftertext and allaftertext  subject  modifiers  work  as  described
-       below. All other modifiers cause an error.
+       below.  All other modifiers are either ignored, with a warning message,
+       or cause an error.
 
    Testing the stack guard feature
 
-       The  /stackguard  modifier  is  used  to test the use of pcre2_set_com-
-       pile_recursion_guard(), a function that is  provided  to  enable  stack
-       availability  to  be checked during compilation (see the pcre2api docu-
-       mentation for details). If the number  specified  by  the  modifier  is
+       The /stackguard modifier is used to  test  the  use  of  pcre2_set_com-
+       pile_recursion_guard(),  a  function  that  is provided to enable stack
+       availability to be checked during compilation (see the  pcre2api  docu-
+       mentation  for  details).  If  the  number specified by the modifier is
        greater than zero, pcre2_set_compile_recursion_guard() is called to set
-       up callback from pcre2_compile() to a local function. The  argument  it
-       receives  is  the current nesting parenthesis depth; if this is greater
+       up  callback  from pcre2_compile() to a local function. The argument it
+       receives is the current nesting parenthesis depth; if this  is  greater
        than the value given by the modifier, non-zero is returned, causing the
        compilation to be aborted.
 
    Using alternative character tables
 
-       The  value specified for the /tables modifier must be one of the digits
+       The value specified for the /tables modifier must be one of the  digits
        0, 1, or 2. It causes a specific set of built-in character tables to be
        passed to pcre2_compile(). This is used in the PCRE2 tests to check be-
        haviour with different character tables. The digit specifies the tables
@@ -785,15 +798,15 @@ PATTERN MODIFIERS
                pcre2_chartables.c.dist
          2   a set of tables defining ISO 8859 characters
 
-       In  table 2, some characters whose codes are greater than 128 are iden-
-       tified as letters, digits, spaces,  etc.  Setting  alternate  character
+       In table 2, some characters whose codes are greater than 128 are  iden-
+       tified  as  letters,  digits,  spaces, etc. Setting alternate character
        tables and a locale are mutually exclusive.
 
    Setting certain match controls
 
        The following modifiers are really subject modifiers, and are described
-       below.  However, they may be included in a pattern's modifier list,  in
-       which  case  they  are  applied to every subject line that is processed
+       below.   However, they may be included in a pattern's modifier list, in
+       which case they are applied to every subject  line  that  is  processed
        with that pattern. They may not appear in #pattern commands. These mod-
        ifiers do not affect the compilation process.
 
@@ -810,20 +823,20 @@ PATTERN MODIFIERS
              substitute_unknown_unset   use PCRE2_SUBSTITUTE_UNKNOWN_UNSET
              substitute_unset_empty     use PCRE2_SUBSTITUTE_UNSET_EMPTY
 
-       These  modifiers may not appear in a #pattern command. If you want them
+       These modifiers may not appear in a #pattern command. If you want  them
        as defaults, set them in a #subject command.
 
    Saving a compiled pattern
 
-       When a pattern with the push modifier is successfully compiled,  it  is
-       pushed  onto  a  stack  of compiled patterns, and pcre2test expects the
-       next line to contain a new pattern (or a command) instead of a  subject
+       When  a  pattern with the push modifier is successfully compiled, it is
+       pushed onto a stack of compiled patterns,  and  pcre2test  expects  the
+       next  line to contain a new pattern (or a command) instead of a subject
        line. This facility is used when saving compiled patterns to a file, as
-       described in the section entitled "Saving and restoring  compiled  pat-
+       described  in  the section entitled "Saving and restoring compiled pat-
        terns" below.  The push modifier is incompatible with compilation modi-
        fiers such as global that act at match time. Any that are specified are
-       ignored,  with  a  warning message, except for replace, which causes an
-       error. Note that, jitverify, which is allowed, does not  carry  through
+       ignored, with a warning message, except for replace,  which  causes  an
+       error.  Note  that, jitverify, which is allowed, does not carry through
        to any subsequent matching that uses this pattern.
 
 
@@ -834,7 +847,7 @@ SUBJECT MODIFIERS
 
    Setting match options
 
-       The   following   modifiers   set   options   for   pcre2_match()    or
+       The    following   modifiers   set   options   for   pcre2_match()   or
        pcre2_dfa_match(). See pcreapi for a description of their effects.
 
              anchored                  set PCRE2_ANCHORED
@@ -848,20 +861,20 @@ SUBJECT MODIFIERS
              partial_hard (or ph)      set PCRE2_PARTIAL_HARD
              partial_soft (or ps)      set PCRE2_PARTIAL_SOFT
 
-       The  partial matching modifiers are provided with abbreviations because
+       The partial matching modifiers are provided with abbreviations  because
        they appear frequently in tests.
 
-       If the /posix modifier was present on the pattern,  causing  the  POSIX
+       If  the  /posix  modifier was present on the pattern, causing the POSIX
        wrapper API to be used, the only option-setting modifiers that have any
-       effect  are  notbol,  notempty,   and   noteol,   causing   REG_NOTBOL,
-       REG_NOTEMPTY,  and REG_NOTEOL, respectively, to be passed to regexec().
-       Any other modifiers cause an error.
+       effect   are   notbol,   notempty,   and  noteol,  causing  REG_NOTBOL,
+       REG_NOTEMPTY, and REG_NOTEOL, respectively, to be passed to  regexec().
+       The other modifiers are ignored, with a warning message.
 
    Setting match controls
 
-       The following modifiers affect the matching process  or  request  addi-
-       tional  information.  Some  of  them may also be specified on a pattern
-       line (see above), in which case they apply to every subject  line  that
+       The  following  modifiers  affect the matching process or request addi-
+       tional information. Some of them may also be  specified  on  a  pattern
+       line  (see  above), in which case they apply to every subject line that
        is matched against that pattern.
 
              aftertext                  show text after match
@@ -898,6 +911,9 @@ SUBJECT MODIFIERS
              zero_terminate             pass the subject as zero-terminated
 
        The effects of these modifiers are described in the following sections.
+       When  matching  via the POSIX wrapper API, the aftertext, allaftertext,
+       and ovector subject modifiers work as described below. All other  modi-
+       fiers are either ignored, with a warning message, or cause an error.
 
    Showing more text
 
@@ -1472,9 +1488,9 @@ SAVING AND RESTORING COMPILED PATTERNS
        matched  with  the pattern, terminated as usual by an empty line or end
        of file. This command may be followed by  a  modifier  list  containing
        only  control  modifiers that act after a pattern has been compiled. In
-       particular, hex, posix, and push are not allowed, nor are  any  option-
-       setting  modifiers.   The JIT modifiers are, however permitted. Here is
-       an example that saves and reloads two patterns.
+       particular, hex, posix, posix_nosub, and push are not allowed, nor  are
+       any  option-setting  modifiers.  The JIT modifiers are, however permit-
+       ted. Here is an example that saves and reloads two patterns.
 
          /abc/push
          /xyz/push
@@ -1505,5 +1521,5 @@ AUTHOR
 
 REVISION
 
-       Last updated: 12 December 2015
-       Copyright (c) 1997-2015 University of Cambridge.
+       Last updated: 31 January 2016
+       Copyright (c) 1997-2016 University of Cambridge.

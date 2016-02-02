@@ -98,10 +98,11 @@ further data is read.
 </P>
 <P>
 For maximum portability, therefore, it is safest to avoid non-printing
-characters in <b>pcre2test</b> input files. There is a facility for specifying a
-pattern's characters as hexadecimal pairs, thus making it possible to include
-binary zeroes in a pattern for testing purposes. Subject lines are processed
-for backslash escapes, which makes it possible to include any data value.
+characters in <b>pcre2test</b> input files. There is a facility for specifying 
+some or all of a pattern's characters as hexadecimal pairs, thus making it
+possible to include binary zeroes in a pattern for testing purposes. Subject
+lines are processed for backslash escapes, which makes it possible to include
+any data value.
 </P>
 <br><a name="SEC4" href="#TOC1">COMMAND LINE OPTIONS</a><br>
 <P>
@@ -559,7 +560,7 @@ about the pattern:
       debug                     same as info,fullbincode
       fullbincode               show binary code with lengths
   /I  info                      show info about compiled pattern
-      hex                       pattern is coded in hexadecimal
+      hex                       unquoted characters are hexadecimal
       jit[=&#60;number&#62;]            use JIT
       jitfast                   use JIT fast path
       jitverify                 verify JIT use
@@ -570,6 +571,7 @@ about the pattern:
       null_context              compile with a NULL context
       parens_nest_limit=&#60;n&#62;     set maximum parentheses depth
       posix                     use the POSIX API
+      posix_nosub               use the POSIX API with REG_NOSUB 
       push                      push compiled pattern onto the stack
       stackguard=&#60;number&#62;       test the stackguard feature
       tables=[0|1|2]            select internal tables
@@ -655,20 +657,31 @@ testing that <b>pcre2_compile()</b> behaves correctly in this case (it uses
 default values).
 </P>
 <br><b>
-Specifying a pattern in hex
+Specifying pattern characters in hexadecimal
 </b><br>
 <P>
-The <b>hex</b> modifier specifies that the characters of the pattern are to be
-interpreted as pairs of hexadecimal digits. White space is permitted between
-pairs. For example:
+The <b>hex</b> modifier specifies that the characters of the pattern, except for 
+substrings enclosed in single or double quotes, are to be interpreted as pairs
+of hexadecimal digits. This feature is provided as a way of creating patterns
+that contain binary zeros and other non-printing characters. White space is
+permitted between pairs of digits. For example, this pattern contains three 
+characters:
 <pre>
   /ab 32 59/hex
 </pre>
-This feature is provided as a way of creating patterns that contain binary zero
-and other non-printing characters. By default, <b>pcre2test</b> passes patterns
-as zero-terminated strings to <b>pcre2_compile()</b>, giving the length as
-PCRE2_ZERO_TERMINATED. However, for patterns specified in hexadecimal, the
-actual length of the pattern is passed.
+Parts of such a pattern are taken literally if quoted. This pattern contains 
+nine characters, only two of which are specified in hexadecimal:
+<pre>
+  /ab "literal" 32/hex
+</pre>
+Either single or double quotes may be used. There is no way of including
+the delimiter within a substring. 
+</P>
+<P>
+By default, <b>pcre2test</b> passes patterns as zero-terminated strings to
+<b>pcre2_compile()</b>, giving the length as PCRE2_ZERO_TERMINATED. However, for
+patterns specified with the <b>hex</b> modifier, the actual length of the
+pattern is passed.
 </P>
 <br><b>
 Generating long repetitive patterns
@@ -821,16 +834,17 @@ variable can hold (essentially unlimited).
 Using the POSIX wrapper API
 </b><br>
 <P>
-The <b>/posix</b> modifier causes <b>pcre2test</b> to call PCRE2 via the POSIX
-wrapper API rather than its native API. This supports only the 8-bit library.
-Note that it does not imply POSIX matching semantics; for more detail see the
+The <b>/posix</b> and <b>posix_nosub</b> modifiers cause <b>pcre2test</b> to call
+PCRE2 via the POSIX wrapper API rather than its native API. When
+<b>posix_nosub</b> is used, the POSIX option REG_NOSUB is passed to
+<b>regcomp()</b>. The POSIX wrapper supports only the 8-bit library. Note that
+it does not imply POSIX matching semantics; for more detail see the
 <a href="pcre2posix.html"><b>pcre2posix</b></a>
-documentation. When the POSIX API is being used, the following pattern
-modifiers set options for the <b>regcomp()</b> function:
+documentation. The following pattern modifiers set options for the
+<b>regcomp()</b> function:
 <pre>
   caseless           REG_ICASE
   multiline          REG_NEWLINE
-  no_auto_capture    REG_NOSUB
   dotall             REG_DOTALL     )
   ungreedy           REG_UNGREEDY   ) These options are not part of
   ucp                REG_UCP        )   the POSIX standard
@@ -847,7 +861,8 @@ large buffer is used.
 </P>
 <P>
 The <b>aftertext</b> and <b>allaftertext</b> subject modifiers work as described
-below. All other modifiers cause an error.
+below. All other modifiers are either ignored, with a warning message, or cause
+an error.
 </P>
 <br><b>
 Testing the stack guard feature
@@ -957,7 +972,7 @@ If the <b>/posix</b> modifier was present on the pattern, causing the POSIX
 wrapper API to be used, the only option-setting modifiers that have any effect
 are <b>notbol</b>, <b>notempty</b>, and <b>noteol</b>, causing REG_NOTBOL,
 REG_NOTEMPTY, and REG_NOTEOL, respectively, to be passed to <b>regexec()</b>.
-Any other modifiers cause an error.
+The other modifiers are ignored, with a warning message.
 </P>
 <br><b>
 Setting match controls
@@ -1001,7 +1016,10 @@ pattern.
       substitute_unset_empty     use PCRE2_SUBSTITUTE_UNSET_EMPTY
       zero_terminate             pass the subject as zero-terminated
 </pre>
-The effects of these modifiers are described in the following sections.
+The effects of these modifiers are described in the following sections. When 
+matching via the POSIX wrapper API, the <b>aftertext</b>, <b>allaftertext</b>,
+and <b>ovector</b> subject modifiers work as described below. All other
+modifiers are either ignored, with a warning message, or cause an error.
 </P>
 <br><b>
 Showing more text
@@ -1625,7 +1643,7 @@ usual by an empty line or end of file. This command may be followed by a
 modifier list containing only
 <a href="#controlmodifiers">control modifiers</a>
 that act after a pattern has been compiled. In particular, <b>hex</b>,
-<b>posix</b>, and <b>push</b> are not allowed, nor are any
+<b>posix</b>, <b>posix_nosub</b>, and <b>push</b> are not allowed, nor are any
 <a href="#optionmodifiers">option-setting modifiers.</a>
 The JIT modifiers are, however permitted. Here is an example that saves and
 reloads two patterns.
@@ -1660,9 +1678,9 @@ Cambridge, England.
 </P>
 <br><a name="SEC21" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 12 December 2015
+Last updated: 31 January 2016
 <br>
-Copyright &copy; 1997-2015 University of Cambridge.
+Copyright &copy; 1997-2016 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE2 index page</a>.

@@ -34,6 +34,9 @@ posix_nosub, to call regcomp() with REG_NOSUB. Previously the no_auto_capture
 modifier had this effect. That option is now ignored when the POSIX API is in 
 use.
 
+8. Minor tidies to the pcre2demo.c sample program, including more comments 
+about its 8-bit-ness.
+
 
 Version 10.21 12-January-2016
 -----------------------------

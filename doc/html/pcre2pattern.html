@@ -1258,7 +1258,7 @@ PCRE2 does not allow \C to appear in lookbehind assertions
 <a href="#lookbehind">(described below)</a>
 in a UTF mode, because this would make it impossible to calculate the length of
 the lookbehind. Neither the alternative matching function
-<b>pcre2_dfa_match()</b> not the JIT optimizer support \C in a UTF mode. The
+<b>pcre2_dfa_match()</b> nor the JIT optimizer support \C in a UTF mode. The
 former gives a match-time error; the latter fails to optimize and so the match
 is always run using the interpreter.
 </P>

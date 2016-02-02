@@ -1282,7 +1282,9 @@ If this option is set, it disables the use of numbered capturing parentheses in
 the pattern. Any opening parenthesis that is not followed by ? behaves as if it
 were followed by ?: but named parentheses can still be used for capturing (and
 they acquire numbers in the usual way). There is no equivalent of this option
-in Perl.
+in Perl. Note that, if this option is set, references to capturing groups (back 
+references or recursion/subroutine calls) may only refer to named groups, 
+though the reference can be by name or by number.
 <pre>
   PCRE2_NO_AUTO_POSSESS
 </pre>
@@ -3121,9 +3123,9 @@ Cambridge, England.
 </P>
 <br><a name="SEC40" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 16 December 2015
+Last updated: 31 January 2016
 <br>
-Copyright &copy; 1997-2015 University of Cambridge.
+Copyright &copy; 1997-2016 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE2 index page</a>.
