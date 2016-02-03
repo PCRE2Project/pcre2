@@ -209,7 +209,7 @@ if ((cflags & REG_UTF) != 0)      options |= PCRE2_UTF;
 if ((cflags & REG_UCP) != 0)      options |= PCRE2_UCP;
 if ((cflags & REG_UNGREEDY) != 0) options |= PCRE2_UNGREEDY;
 
-preg->cflags = cflags;
+preg->re_cflags = cflags;
 preg->re_pcre2_code = pcre2_compile((PCRE2_SPTR)pattern, PCRE2_ZERO_TERMINATED,
    options, &errorcode, &erroffset, NULL);
 preg->re_erroffset = erroffset;
@@ -275,7 +275,7 @@ if ((eflags & REG_NOTEMPTY) != 0) options |= PCRE2_NOTEMPTY;
 put captured strings, ensure that nmatch is zero. This will stop any attempt to
 write to pmatch. */
 
-if ((preg->cflags & REG_NOSUB) != 0 || pmatch == NULL) nmatch = 0;
+if ((preg->re_cflags & REG_NOSUB) != 0 || pmatch == NULL) nmatch = 0;
 
 /* REG_STARTEND is a BSD extension, to allow for non-NUL-terminated strings.
 The man page from OS X says "REG_STARTEND affects only the location of the

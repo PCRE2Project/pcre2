@@ -2982,7 +2982,7 @@ for (;;)
     the buffer or reached the end of the file. We can detect the former by
     checking that the string fills the buffer, and the latter by feof(). If
     neither of these is true, it means we read a binary zero which has caused
-    strlen() to give a short length. This is a hard error because pcre2test 
+    strlen() to give a short length. This is a hard error because pcre2test
     expects to work with C strings. */
 
     if (!INTERACTIVE(f) && dlen < rlen - 1 && !feof(f))
@@ -4701,8 +4701,7 @@ if ((pat_patctl.control & CTL_POSIX) != 0)
 
   if (msg[0] == 0) fprintf(outfile, "\n");
 
-  /* Translate PCRE2 options to POSIX options and then compile. On success, set
-  up a match_data block to be used for all matches. */
+  /* Translate PCRE2 options to POSIX options and then compile. */
 
   if (utf) cflags |= REG_UTF;
   if ((pat_patctl.control & CTL_POSIX_NOSUB) != 0) cflags |= REG_NOSUB;
@@ -4713,7 +4712,10 @@ if ((pat_patctl.control & CTL_POSIX) != 0)
   if ((pat_patctl.options & PCRE2_UNGREEDY) != 0) cflags |= REG_UNGREEDY;
 
   rc = regcomp(&preg, (char *)pbuffer8, cflags);
-  if (rc != 0)   /* Failure */
+
+  /* Compiling failed */
+
+  if (rc != 0)
     {
     size_t bsize, usize;
 
@@ -4735,6 +4737,29 @@ if ((pat_patctl.control & CTL_POSIX) != 0)
       }
     return PR_SKIP;
     }
+
+  /* Compiling succeeded. Check that the values in the preg block are sensible.
+  It can happen that pcre2test is accidentally linked with a different POSIX
+  library which succeeds, but of course puts different things into preg. In
+  this situation, calling regfree() may cause a segfault (or invalid free() in
+  valgrind), so ensure that preg.re_pcre2_code is NULL, which suppresses the
+  calling of regfree() on exit. */
+
+  if (preg.re_pcre2_code == NULL ||
+      ((pcre2_real_code_8 *)preg.re_pcre2_code)->magic_number != MAGIC_NUMBER ||
+      ((pcre2_real_code_8 *)preg.re_pcre2_code)->top_bracket != preg.re_nsub ||
+      preg.re_match_data == NULL ||
+      preg.re_cflags != cflags)
+    {
+    fprintf(outfile,
+      "** The regcomp() function returned zero (success), but the values set\n"
+      "** in the preg block are not valid for PCRE2. Check that pcre2test is\n"
+      "** linked with PCRE2's pcre2posix module (-lpcre2-posix) and not with\n"
+      "** some other POSIX regex library.\n**\n");
+    preg.re_pcre2_code = NULL;
+    return PR_ABEND;
+    }
+
   return PR_OK;
 #endif  /* SUPPORT_PCRE2_8 */
   }
@@ -7450,7 +7475,7 @@ if (jit_stack != NULL)
 #ifdef SUPPORT_PCRE2_8
 #undef BITS
 #define BITS 8
-regfree(&preg);
+if (preg.re_pcre2_code != NULL) regfree(&preg);
 FREECONTEXTS;
 #endif
 

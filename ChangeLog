@@ -42,6 +42,18 @@ instead of later. Previously the pre-scan carried on and could give a
 misleading incorrect error message. For example, /(?J)(?'a'))(?'a')/ gave a
 message about invalid duplicate group names.
 
+10. It has happened that pcre2test was accidentally linked with another POSIX
+regex library instead of libpcre2-posix. In this situation, a call to regcomp()
+(in the other library) may succeed, returning zero, but of course putting its
+own data into the regex_t block. In one example the re_pcre2_code field was
+left as NULL, which made pcre2test think it had not got a compiled POSIX regex,
+so it treated the next line as another pattern line, resulting in a confusing
+error message. A check has been added to pcre2test to see if the data returned 
+from a successful call of regcomp() are valid for PCRE2's regcomp(). If they 
+are not, an error message is output and the pcre2test run is abandoned. The 
+message points out the possibility of a mis-linking. Hopefully this will avoid 
+some head-scratching the next time this happens.
+
 
 Version 10.21 12-January-2016
 -----------------------------

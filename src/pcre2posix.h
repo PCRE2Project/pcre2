@@ -98,7 +98,7 @@ typedef struct {
   void *re_match_data;
   size_t re_nsub;
   size_t re_erroffset;
-  int cflags;
+  int re_cflags;
 } regex_t;
 
 /* The structure in which a captured offset is returned. */
