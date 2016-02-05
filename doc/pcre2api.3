@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "31 January 2016" "PCRE2 10.22"
+.TH PCRE2API 3 "05 February 2016" "PCRE2 10.22"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -461,21 +461,63 @@ time ensuring that multithreaded applications can use it.
 .P
 There are several different blocks of data that are used to pass information
 between the application and the PCRE2 libraries.
-.P
-(1) A pointer to the compiled form of a pattern is returned to the user when
+.
+.
+.SS "The compiled pattern"
+.rs
+.sp
+A pointer to the compiled form of a pattern is returned to the user when
 \fBpcre2_compile()\fP is successful. The data in the compiled pattern is fixed,
 and does not change when the pattern is matched. Therefore, it is thread-safe,
 that is, the same compiled pattern can be used by more than one thread
-simultaneously. An application can compile all its patterns at the start,
-before forking off multiple threads that use them. However, if the just-in-time
-optimization feature is being used, it needs separate memory stack areas for
-each thread. See the
+simultaneously. For example, an application can compile all its patterns at the
+start, before forking off multiple threads that use them. However, if the
+just-in-time optimization feature is being used, it needs separate memory stack
+areas for each thread. See the
 .\" HREF
 \fBpcre2jit\fP
 .\"
 documentation for more details.
 .P
-(2) The next section below introduces the idea of "contexts" in which PCRE2
+In a more complicated situation, where patterns are compiled only when they are
+first needed, but are still shared between threads, pointers to compiled
+patterns must be protected from simultaneous access by multiple threads, at
+least until a pattern has been compiled. The logic can be something like this:
+.sp
+  if (pointer == NULL)
+    {
+    Get exclusive access to pointer
+    if (pointer == NULL) pointer = pcre2_compile(...
+    Release exclusive access to pointer
+    }
+  Use pointer in pcre2_match()
+.sp
+Of course, testing for compilation errors should also be included in the code.
+.P
+If JIT is being used, but the JIT compilation is not being done immediately,
+(perhaps waiting to see if the pattern is used often enough) similar logic is
+required. The PCRE2_INFO_JITSIZE information call can detect whether there has
+been a successful call to \fBpcre2_jit_compile()\fP, but there is no way to
+tell whether JIT has been called and failed (a very few pattern features are
+not supported by JIT). Therefore, a separate flag is needed:
+.sp
+  if (!jit_tried)
+    {
+    Get exclusive access to jit_tried
+    (if !jit_tried) pcre2_jit_compile(pointer, ...
+    jit_tried = TRUE
+    Release exclusive access to jit_tried
+    }
+  Use pointer in pcre2_match()
+.sp
+Other threads can use pointer for non-JIT matching while JIT compilation is in
+progress.
+.
+.
+.SS "Context blocks"
+.rs
+.sp
+The next main section below introduces the idea of "contexts" in which PCRE2
 functions are called. A context is nothing more than a collection of parameters
 that control the way PCRE2 operates. Grouping a number of parameters together
 in a context is a convenient way of passing them to a PCRE2 function without
@@ -487,11 +529,15 @@ In a multithreaded application, if the parameters in a context are values that
 are never changed, the same context can be used by all the threads. However, if
 any thread needs to change any value in a context, it must make its own
 thread-specific copy.
-.P
-(3) The matching functions need a block of memory for working space and for
-storing the results of a match. This includes details of what was matched, as
-well as additional information such as the name of a (*MARK) setting. Each
-thread must provide its own version of this memory.
+.
+.
+.SS "Match blocks"
+.rs
+.sp
+The matching functions need a block of memory for working space and for storing
+the results of a match. This includes details of what was matched, as well as
+additional information such as the name of a (*MARK) setting. Each thread must
+provide its own copy of this memory.
 .
 .
 .SH "PCRE2 CONTEXTS"
@@ -1255,8 +1301,8 @@ If this option is set, it disables the use of numbered capturing parentheses in
 the pattern. Any opening parenthesis that is not followed by ? behaves as if it
 were followed by ?: but named parentheses can still be used for capturing (and
 they acquire numbers in the usual way). There is no equivalent of this option
-in Perl. Note that, if this option is set, references to capturing groups (back 
-references or recursion/subroutine calls) may only refer to named groups, 
+in Perl. Note that, if this option is set, references to capturing groups (back
+references or recursion/subroutine calls) may only refer to named groups,
 though the reference can be by name or by number.
 .sp
   PCRE2_NO_AUTO_POSSESS
@@ -3168,6 +3214,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 31 January 2016
+Last updated: 05 February 2016
 Copyright (c) 1997-2016 University of Cambridge.
 .fi
