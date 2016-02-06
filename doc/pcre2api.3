@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "05 February 2016" "PCRE2 10.22"
+.TH PCRE2API 3 "06 February 2016" "PCRE2 10.22"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -393,9 +393,16 @@ The function \fBpcre2_substitute()\fP can be called to match a pattern and
 return a copy of the subject string with substitutions for parts that were
 matched.
 .P
+Functions whose names begin with \fBpcre2_serialize_\fP are used for saving
+compiled patterns on disc or elsewhere, and reloading them later.
+.P
 Finally, there are functions for finding out information about a compiled
 pattern (\fBpcre2_pattern_info()\fP) and about the configuration with which
 PCRE2 was built (\fBpcre2_config()\fP).
+.P
+Functions with names ending with \fB_free()\fP are used for freeing memory
+blocks of various sorts. In all cases, if one of these functions is called with
+a NULL argument, it does nothing.
 .
 .
 .SH "STRING LENGTHS AND OFFSETS"
@@ -3214,6 +3221,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 05 February 2016
+Last updated: 06 February 2016
 Copyright (c) 1997-2016 University of Cambridge.
 .fi
