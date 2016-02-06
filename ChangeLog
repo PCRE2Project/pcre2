@@ -54,6 +54,10 @@ are not, an error message is output and the pcre2test run is abandoned. The
 message points out the possibility of a mis-linking. Hopefully this will avoid 
 some head-scratching the next time this happens.
 
+11. A pattern such as /(?<=((?C)0))/, which has a callout inside a lookbehind 
+assertion, caused pcre2test to output a very large number of spaces when the 
+callout was taken, making the program appearing to loop.
+
 
 Version 10.21 12-January-2016
 -----------------------------

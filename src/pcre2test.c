@@ -2548,12 +2548,13 @@ return (int)(pp - p);
 
 /* Must handle UTF-8 strings in utf8 mode. Yields number of characters printed.
 For printing *MARK strings, a negative length is given. If handed a NULL file,
-just counts chars without printing. */
+just counts chars without printing (because pchar() does that). */
 
 static int pchars8(PCRE2_SPTR8 p, int length, BOOL utf, FILE *f)
 {
 uint32_t c = 0;
 int yield = 0;
+
 if (length < 0) length = p[-1];
 while (length-- > 0)
   {
@@ -2571,6 +2572,7 @@ while (length-- > 0)
   c = *p++;
   yield += pchar(c, utf, f);
   }
+
 return yield;
 }
 #endif
@@ -5052,6 +5054,7 @@ static int
 callout_function(pcre2_callout_block_8 *cb, void *callout_data_ptr)
 {
 uint32_t i, pre_start, post_start, subject_length;
+PCRE2_SIZE current_position;
 BOOL utf = (FLD(compiled_code, overall_options) & PCRE2_UTF) != 0;
 BOOL callout_capture = (dat_datctl.control & CTL_CALLOUT_CAPTURE) != 0;
 
@@ -5102,21 +5105,36 @@ if (callout_capture)
     }
   }
 
-/* Re-print the subject in canonical form, the first time or if giving full
-datails. On subsequent calls in the same match, we use pchars just to find the
-printed lengths of the substrings. */
+/* Re-print the subject in canonical form (with escapes for non-printing
+characters), the first time, or if giving full details. On subsequent calls in
+the same match, we use PCHARS() just to find the printed lengths of the
+substrings. */
 
 if (f != NULL) fprintf(f, "--->");
 
+/* The subject before the match start. */
+
 PCHARS(pre_start, cb->subject, 0, cb->start_match, utf, f);
 
+/* If a lookbehind is involved, the current position may be earlier than the 
+match start. If so, use the match start instead. */
+
+current_position = (cb->current_position >= cb->start_match)? 
+  cb->current_position : cb->start_match;
+
+/* The subject between the match start and the current position. */
+
 PCHARS(post_start, cb->subject, cb->start_match,
-  cb->current_position - cb->start_match, utf, f);
+  current_position - cb->start_match, utf, f);
+
+/* Print from the current position to the end. */
+
+PCHARSV(cb->subject, current_position, cb->subject_length - current_position, 
+  utf, f);
+
+/* Calculate the total subject printed length (no print). */
 
 PCHARS(subject_length, cb->subject, 0, cb->subject_length, utf, NULL);
-
-PCHARSV(cb->subject, cb->current_position,
-  cb->subject_length - cb->current_position, utf, f);
 
 if (f != NULL) fprintf(f, "\n");
 
@@ -7098,7 +7116,7 @@ while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
     struct rlimit rlim;
     if (U32OVERFLOW(uli))
       {
-      fprintf(stderr, "+++ Argument for -S is too big\n");
+      fprintf(stderr, "** Argument for -S is too big\n");
       exit(1);
       }
     stack_size = (uint32_t)uli;
@@ -7150,7 +7168,7 @@ while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
       {
       if (U32OVERFLOW(uli))
         {
-        fprintf(stderr, "+++ Argument for %s is too big\n", arg);
+        fprintf(stderr, "** Argument for %s is too big\n", arg);
         exit(1);
         }
       timeitm = (int)uli;

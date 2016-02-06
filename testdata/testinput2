@@ -4806,4 +4806,9 @@ a)"xI
 
 /(?J)(?'a'))(?'a')/
 
+/(?<=((?C)0))/
+    9010
+\= Expect no match
+    abc
+
 # End of testinput2 

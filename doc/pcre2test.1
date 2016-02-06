@@ -1,4 +1,4 @@
-.TH PCRE2TEST 1 "31 January 2016" "PCRE 10.22"
+.TH PCRE2TEST 1 "06 February 2016" "PCRE 10.22"
 .SH NAME
 pcre2test - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -1492,7 +1492,9 @@ item to be tested. For example:
 This output indicates that callout number 0 occurred for a match attempt
 starting at the fourth character of the subject string, when the pointer was at
 the seventh character, and when the next pattern item was \ed. Just
-one circumflex is output if the start and current positions are the same.
+one circumflex is output if the start and current positions are the same, or if 
+the current position precedes the start position, which can happen if the 
+callout is in a lookbehind assertion.
 .P
 Callouts numbered 255 are assumed to be automatic callouts, inserted as a
 result of the \fB/auto_callout\fP pattern modifier. In this case, instead of
@@ -1657,6 +1659,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 31 January 2016
+Last updated: 06 February 2016
 Copyright (c) 1997-2016 University of Cambridge.
 .fi
