@@ -58,6 +58,10 @@ some head-scratching the next time this happens.
 assertion, caused pcre2test to output a very large number of spaces when the 
 callout was taken, making the program appearing to loop.
 
+12. A pattern that included (*ACCEPT) in the middle of a sufficiently deeply 
+nested set of parentheses of sufficient size caused an overflow of the 
+compiling workspace (which was diagnosed, but of course is not desirable).
+
 
 Version 10.21 12-January-2016
 -----------------------------

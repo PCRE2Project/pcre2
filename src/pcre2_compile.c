@@ -5901,10 +5901,22 @@ for (;; ptr++)
               goto FAILED;
               }
             cb->had_accept = TRUE;
+            
+            /* In the first pass, just accumulate the length required;
+            otherwise hitting (*ACCEPT) inside many nested parentheses can
+            cause workspace overflow. */
+              
             for (oc = cb->open_caps; oc != NULL; oc = oc->next)
               {
-              *code++ = OP_CLOSE;
-              PUT2INC(code, 0, oc->number);
+              if (lengthptr != NULL)
+                {
+                *lengthptr += CU2BYTES(1) + IMM2_SIZE; 
+                }
+              else
+                {       
+                *code++ = OP_CLOSE;
+                PUT2INC(code, 0, oc->number);
+                } 
               }
             setverb = *code++ =
               (cb->assert_depth > 0)? OP_ASSERT_ACCEPT : OP_ACCEPT;
