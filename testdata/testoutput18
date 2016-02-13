@@ -142,6 +142,9 @@ No match: POSIX code 17: match failed
 Failed: POSIX code 9: bad escape sequence at offset 3     
 
 "(?(?C)"
+Failed: POSIX code 11: unbalanced () at offset 6     
+
+"(?(?C))"
 Failed: POSIX code 3: pattern error at offset 2     
 
 /abcd/substitute_extended

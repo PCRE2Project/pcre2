@@ -95,6 +95,8 @@
 
 "(?(?C)"
 
+"(?(?C))"
+
 /abcd/substitute_extended
 
 /\[A]{1000000}**/expand,regerror_buffsize=31

@@ -62,6 +62,9 @@ callout was taken, making the program appearing to loop.
 nested set of parentheses of sufficient size caused an overflow of the 
 compiling workspace (which was diagnosed, but of course is not desirable).
 
+13. Detect missing closing parentheses during the pre-pass for group 
+identification.
+
 
 Version 10.21 12-January-2016
 -----------------------------

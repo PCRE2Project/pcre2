@@ -3180,13 +3180,13 @@ uint32_t c;
 uint32_t delimiter;
 uint32_t nest_depth = 0;
 uint32_t set, unset, *optset;
+uint32_t skiptoket = 0;
 int errorcode = 0;
 int escape;
 int namelen;
 int i;
 BOOL inescq = FALSE;
 BOOL isdupname;
-BOOL skiptoket = FALSE;
 BOOL utf = (options & PCRE2_UTF) != 0;
 BOOL negate_class;
 PCRE2_SPTR name;
@@ -3213,10 +3213,10 @@ for (; ptr < cb->end_pattern; ptr++)
   next closing parenthesis must be ignored. The parenthesis itself must be
   processed (to end the nested parenthesized item). */
 
-  if (skiptoket)
+  if (skiptoket != 0)
     {
     if (c != CHAR_RIGHT_PARENTHESIS) continue;
-    skiptoket = FALSE;
+    skiptoket = 0;
     }
 
   /* Skip over literals */
@@ -3231,17 +3231,16 @@ for (; ptr < cb->end_pattern; ptr++)
     continue;
     }
 
-  /* Skip over comments and whitespace in extended mode. Need a loop to handle
-  whitespace after a comment. */
+  /* Skip over # comments and whitespace in extended mode. */
 
   if ((options & PCRE2_EXTENDED) != 0)
     {
-    for (;;)
+    PCRE2_SPTR wscptr = ptr;
+    while (MAX_255(c) && (cb->ctypes[c] & ctype_space) != 0) c = *(++ptr);
+    if (c == CHAR_NUMBER_SIGN)
       {
-      while (MAX_255(c) && (cb->ctypes[c] & ctype_space) != 0) c = *(++ptr);
-      if (c != CHAR_NUMBER_SIGN) break;
       ptr++;
-      while (*ptr != CHAR_NULL)
+      while (ptr < cb->end_pattern)
         {
         if (IS_NEWLINE(ptr))         /* For non-fixed-length newline cases, */
           {                          /* IS_NEWLINE sets cb->nllen. */
@@ -3253,7 +3252,15 @@ for (; ptr < cb->end_pattern; ptr++)
         if (utf) FORWARDCHAR(ptr);
 #endif
         }
-      c = *ptr;     /* Either NULL or the char after a newline */
+      }
+
+    /* If we skipped any characters, restart the loop. Otherwise, we didn't see
+    a comment. */
+
+    if (ptr > wscptr)
+      {
+      ptr--;
+      continue;
       }
     }
 
@@ -3411,7 +3418,7 @@ for (; ptr < cb->end_pattern; ptr++)
           IS_DIGIT(ptr[0]) ||                           /* (?n) */
           (ptr[0] == CHAR_MINUS && IS_DIGIT(ptr[1])))   /* (?-n) */
         {
-        skiptoket = TRUE;
+        skiptoket = ptr[0];
         break;
         }
 
@@ -3755,8 +3762,16 @@ for (; ptr < cb->end_pattern; ptr++)
     }
   }
 
-cb->final_bracount = cb->bracount;
-return 0;
+if (nest_depth == 0)
+  {
+  cb->final_bracount = cb->bracount;
+  return 0;
+  }
+
+/* We give a special error for a missing closing parentheses after (?# because 
+it might otherwise be hard to see where the missing character is. */
+
+errorcode = (skiptoket == CHAR_NUMBER_SIGN)? ERR18 : ERR14;
 
 FAILED:
 *ptrptr = ptr;
@@ -5901,22 +5916,22 @@ for (;; ptr++)
               goto FAILED;
               }
             cb->had_accept = TRUE;
-            
+
             /* In the first pass, just accumulate the length required;
             otherwise hitting (*ACCEPT) inside many nested parentheses can
             cause workspace overflow. */
-              
+
             for (oc = cb->open_caps; oc != NULL; oc = oc->next)
               {
               if (lengthptr != NULL)
                 {
-                *lengthptr += CU2BYTES(1) + IMM2_SIZE; 
+                *lengthptr += CU2BYTES(1) + IMM2_SIZE;
                 }
               else
-                {       
+                {
                 *code++ = OP_CLOSE;
                 PUT2INC(code, 0, oc->number);
-                } 
+                }
               }
             setverb = *code++ =
               (cb->assert_depth > 0)? OP_ASSERT_ACCEPT : OP_ACCEPT;
@@ -7056,7 +7071,9 @@ for (;; ptr++)
         }
       }
 
-    /* Error if hit end of pattern */
+    /* At the end of a group, it's an error if we hit end of pattern or
+    any non-closing parenthesis. This check also happens in the pre-scan,
+    so should not trigger here, but leave this code as an insurance. */
 
     if (*ptr != CHAR_RIGHT_PARENTHESIS)
       {
