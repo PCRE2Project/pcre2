@@ -38,7 +38,6 @@ POSSIBILITY OF SUCH DAMAGE.
 -----------------------------------------------------------------------------
 */
 
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -2362,6 +2361,7 @@ add_stub(common, CMP(SLJIT_GREATER, STACK_TOP, 0, STACK_LIMIT, 0));
 static SLJIT_INLINE void free_stack(compiler_common *common, int size)
 {
 DEFINE_COMPILER;
+
 SLJIT_ASSERT(size > 0);
 OP2(SLJIT_SUB, STACK_TOP, 0, STACK_TOP, 0, SLJIT_IMM, size * sizeof(sljit_sw));
 }
@@ -6127,44 +6127,6 @@ switch(type)
   check_partial(common, FALSE);
   return cc;
 
-  case OP_CIRC:
-  OP1(SLJIT_MOV, TMP2, 0, ARGUMENTS, 0);
-  OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(TMP2), SLJIT_OFFSETOF(jit_arguments, begin));
-  add_jump(compiler, backtracks, CMP(SLJIT_GREATER, STR_PTR, 0, TMP1, 0));
-  OP2(SLJIT_IAND | SLJIT_SET_E, SLJIT_UNUSED, 0, SLJIT_MEM1(TMP2), SLJIT_OFFSETOF(jit_arguments, options), SLJIT_IMM, PCRE2_NOTBOL);
-  add_jump(compiler, backtracks, JUMP(SLJIT_NOT_ZERO));
-  return cc;
-
-  case OP_CIRCM:
-  OP1(SLJIT_MOV, TMP2, 0, ARGUMENTS, 0);
-  OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(TMP2), SLJIT_OFFSETOF(jit_arguments, begin));
-  jump[1] = CMP(SLJIT_GREATER, STR_PTR, 0, TMP1, 0);
-  OP2(SLJIT_IAND | SLJIT_SET_E, SLJIT_UNUSED, 0, SLJIT_MEM1(TMP2), SLJIT_OFFSETOF(jit_arguments, options), SLJIT_IMM, PCRE2_NOTBOL);
-  add_jump(compiler, backtracks, JUMP(SLJIT_NOT_ZERO));
-  jump[0] = JUMP(SLJIT_JUMP);
-  JUMPHERE(jump[1]);
-
-  if (!common->alt_circumflex)
-    add_jump(compiler, backtracks, CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0));
-
-  if (common->nltype == NLTYPE_FIXED && common->newline > 255)
-    {
-    OP2(SLJIT_SUB, TMP2, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(2));
-    add_jump(compiler, backtracks, CMP(SLJIT_LESS, TMP2, 0, TMP1, 0));
-    OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(-2));
-    OP1(MOV_UCHAR, TMP2, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(-1));
-    add_jump(compiler, backtracks, CMP(SLJIT_NOT_EQUAL, TMP1, 0, SLJIT_IMM, (common->newline >> 8) & 0xff));
-    add_jump(compiler, backtracks, CMP(SLJIT_NOT_EQUAL, TMP2, 0, SLJIT_IMM, common->newline & 0xff));
-    }
-  else
-    {
-    skip_char_back(common);
-    read_char_range(common, common->nlmin, common->nlmax, TRUE);
-    check_newlinechar(common, common->nltype, backtracks, FALSE);
-    }
-  JUMPHERE(jump[0]);
-  return cc;
-
   case OP_DOLL:
   OP1(SLJIT_MOV, TMP2, 0, ARGUMENTS, 0);
   OP2(SLJIT_IAND | SLJIT_SET_E, SLJIT_UNUSED, 0, SLJIT_MEM1(TMP2), SLJIT_OFFSETOF(jit_arguments, options), SLJIT_IMM, PCRE2_NOTEOL);
@@ -6211,6 +6173,44 @@ switch(type)
   else
     {
     peek_char(common, common->nlmax);
+    check_newlinechar(common, common->nltype, backtracks, FALSE);
+    }
+  JUMPHERE(jump[0]);
+  return cc;
+
+  case OP_CIRC:
+  OP1(SLJIT_MOV, TMP2, 0, ARGUMENTS, 0);
+  OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(TMP2), SLJIT_OFFSETOF(jit_arguments, begin));
+  add_jump(compiler, backtracks, CMP(SLJIT_GREATER, STR_PTR, 0, TMP1, 0));
+  OP2(SLJIT_IAND | SLJIT_SET_E, SLJIT_UNUSED, 0, SLJIT_MEM1(TMP2), SLJIT_OFFSETOF(jit_arguments, options), SLJIT_IMM, PCRE2_NOTBOL);
+  add_jump(compiler, backtracks, JUMP(SLJIT_NOT_ZERO));
+  return cc;
+
+  case OP_CIRCM:
+  OP1(SLJIT_MOV, TMP2, 0, ARGUMENTS, 0);
+  OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(TMP2), SLJIT_OFFSETOF(jit_arguments, begin));
+  jump[1] = CMP(SLJIT_GREATER, STR_PTR, 0, TMP1, 0);
+  OP2(SLJIT_IAND | SLJIT_SET_E, SLJIT_UNUSED, 0, SLJIT_MEM1(TMP2), SLJIT_OFFSETOF(jit_arguments, options), SLJIT_IMM, PCRE2_NOTBOL);
+  add_jump(compiler, backtracks, JUMP(SLJIT_NOT_ZERO));
+  jump[0] = JUMP(SLJIT_JUMP);
+  JUMPHERE(jump[1]);
+
+  if (!common->alt_circumflex)
+    add_jump(compiler, backtracks, CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0));
+
+  if (common->nltype == NLTYPE_FIXED && common->newline > 255)
+    {
+    OP2(SLJIT_SUB, TMP2, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(2));
+    add_jump(compiler, backtracks, CMP(SLJIT_LESS, TMP2, 0, TMP1, 0));
+    OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(-2));
+    OP1(MOV_UCHAR, TMP2, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(-1));
+    add_jump(compiler, backtracks, CMP(SLJIT_NOT_EQUAL, TMP1, 0, SLJIT_IMM, (common->newline >> 8) & 0xff));
+    add_jump(compiler, backtracks, CMP(SLJIT_NOT_EQUAL, TMP2, 0, SLJIT_IMM, common->newline & 0xff));
+    }
+  else
+    {
+    skip_char_back(common);
+    read_char_range(common, common->nlmin, common->nlmax, TRUE);
     check_newlinechar(common, common->nltype, backtracks, FALSE);
     }
   JUMPHERE(jump[0]);
@@ -7257,6 +7257,10 @@ while (TRUE)
 
     case OP_NOT_WORD_BOUNDARY:
     case OP_WORD_BOUNDARY:
+    case OP_CIRC:
+    case OP_CIRCM:
+    case OP_DOLL:
+    case OP_DOLLM:
     case OP_CALLOUT:
     case OP_ALT:
     cc += PRIV(OP_lengths)[*cc];
@@ -8943,9 +8947,7 @@ switch(opcode)
 #elif PCRE2_CODE_UNIT_WIDTH == 16 || PCRE2_CODE_UNIT_WIDTH == 32
         SLJIT_ASSERT((charpos_othercasebit >> 9) == 0);
         if ((charpos_othercasebit & 0x100) != 0)
-          {
           charpos_othercasebit = (charpos_othercasebit & 0xff) << 8;
-          }
 #endif
         if (charpos_othercasebit != 0)
           charpos_char |= charpos_othercasebit;
@@ -9347,10 +9349,10 @@ while (cc < ccend)
     case OP_WORD_BOUNDARY:
     case OP_EODN:
     case OP_EOD:
-    case OP_CIRC:
-    case OP_CIRCM:
     case OP_DOLL:
     case OP_DOLLM:
+    case OP_CIRC:
+    case OP_CIRCM:
     case OP_REVERSE:
     cc = compile_simple_assertion_matchingpath(common, *cc, cc + 1, parent->top != NULL ? &parent->top->nextbacktracks : &parent->topbacktracks);
     break;
@@ -9771,7 +9773,7 @@ switch(opcode)
   break;
   }
 
-  set_jumps(current->topbacktracks, LABEL());
+set_jumps(current->topbacktracks, LABEL());
 }
 
 static SLJIT_INLINE void compile_ref_iterator_backtrackingpath(compiler_common *common, struct backtrack_common *current)
