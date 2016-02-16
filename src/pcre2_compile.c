@@ -81,7 +81,7 @@ by defining macros in order to minimize #if usage. */
 
 /* Function definitions to allow mutual recursion */
 
-static int
+static unsigned int
   add_list_to_class(uint8_t *, PCRE2_UCHAR **, uint32_t, compile_block *,
     const uint32_t *, unsigned int);
 
@@ -149,9 +149,16 @@ have to check them every time. */
 
 #define OFLOW_MAX (INT_MAX - 20)
 
-/* Macro for setting individual bits in class bitmaps. */
+/* Macro for setting individual bits in class bitmaps. It took some 
+experimenting to figure out how to stop gcc 5.3.0 from warning with 
+-Wconversion. This version gets a warning:
 
-#define SETBIT(a,b) a[(b)/8] |= (1 << ((b)&7))
+  #define SETBIT(a,b) a[(b)/8] |= (uint8_t)(1 << ((b)&7)) 
+  
+Let's hope the apparently less efficient version isn't actually so bad if the 
+compiler is clever with identical subexpressions. */
+
+#define SETBIT(a,b) a[(b)/8] = (uint8_t)(a[(b)/8] | (1 << ((b)&7)))
 
 /* Private flags added to firstcu and reqcu. */
 
@@ -804,7 +811,7 @@ static void
 complete_callout(PCRE2_UCHAR *previous_callout, PCRE2_SPTR ptr,
   compile_block *cb)
 {
-size_t length = ptr - cb->start_pattern - GET(previous_callout, 1);
+size_t length = (size_t)(ptr - cb->start_pattern - GET(previous_callout, 1));
 PUT(previous_callout, 1 + LINK_SIZE, length);
 }
 
@@ -855,11 +862,11 @@ static int
 find_fixedlength(PCRE2_UCHAR *code, BOOL utf, BOOL atend, compile_block *cb,
   recurse_check *recurses, int *countptr)
 {
-int length = -1;
+uint32_t length = 0xffffffffu;   /* Unset */
 uint32_t group = 0;
 uint32_t groupinfo = 0;
 recurse_check this_recurse;
-register int branchlength = 0;
+register uint32_t branchlength = 0;
 register PCRE2_UCHAR *cc = code + 1 + LINK_SIZE;
 
 /* If this is a capturing group, we may have the answer cached, but we can only
@@ -910,7 +917,7 @@ for (;;)
     case OP_COND:
     d = find_fixedlength(cc, utf, atend, cb, recurses, countptr);
     if (d < 0) return d;
-    branchlength += d;
+    branchlength += (uint32_t)d;
     do cc += GET(cc, 1); while (*cc == OP_ALT);
     cc += 1 + LINK_SIZE;
     break;
@@ -926,16 +933,16 @@ for (;;)
     case OP_END:
     case OP_ACCEPT:
     case OP_ASSERT_ACCEPT:
-    if (length < 0) length = branchlength;
+    if (length == 0xffffffffu) length = branchlength;
       else if (length != branchlength) goto ISNOTFIXED;
     if (*cc != OP_ALT)
       {
       if (group > 0)
         {
-        groupinfo |= (GI_SET_FIXED_LENGTH | length);
+        groupinfo |= (uint32_t)(GI_SET_FIXED_LENGTH | length);
         cb->groupinfo[group] = groupinfo;
         }
-      return length;
+      return (int)length;
       }
     cc += 1 + LINK_SIZE;
     branchlength = 0;
@@ -960,7 +967,7 @@ for (;;)
     this_recurse.group = cs;
     d = find_fixedlength(cs, utf, atend, cb, &this_recurse, countptr);
     if (d < 0) return d;
-    branchlength += d;
+    branchlength += (uint32_t)d;
     cc += 1 + LINK_SIZE;
     break;
 
@@ -1039,7 +1046,7 @@ for (;;)
     case OP_EXACTI:
     case OP_NOTEXACT:
     case OP_NOTEXACTI:
-    branchlength += (int)GET2(cc,1);
+    branchlength += GET2(cc,1);
     cc += 2 + IMM2_SIZE;
 #ifdef SUPPORT_UNICODE
     if (utf && HAS_EXTRALEN(cc[-1])) cc += GET_EXTRALEN(cc[-1]);
@@ -1115,7 +1122,7 @@ for (;;)
       case OP_CRMINRANGE:
       case OP_CRPOSRANGE:
       if (GET2(cc,1) != GET2(cc,1+IMM2_SIZE)) goto ISNOTFIXED;
-      branchlength += (int)GET2(cc,1);
+      branchlength += GET2(cc,1);
       cc += 1 + 2 * IMM2_SIZE;
       break;
 
@@ -1941,7 +1948,7 @@ else
         overflow = TRUE;
         break;
         }
-      s = s * 10 + (int)(*(++ptr) - CHAR_0);
+      s = s * 10 + (unsigned int)(*(++ptr) - CHAR_0);
       }
     if (overflow) /* Integer overflow */
       {
@@ -2005,7 +2012,7 @@ else
           overflow = TRUE;
           break;
           }
-        s = s * 10 + (int)(*(++ptr) - CHAR_0);
+        s = s * 10 + (unsigned int)(*(++ptr) - CHAR_0);
         }
       if (overflow) /* Integer overflow */
         {
@@ -2285,7 +2292,7 @@ get_ucp(PCRE2_SPTR *ptrptr, BOOL *negptr, unsigned int *ptypeptr,
   unsigned int *pdataptr, int *errorcodeptr, compile_block *cb)
 {
 register PCRE2_UCHAR c;
-int i, bot, top;
+size_t i, bot, top;
 PCRE2_SPTR ptr = *ptrptr;
 PCRE2_UCHAR name[32];
 
@@ -2753,13 +2760,13 @@ Returns:        the number of < 256 characters added
                 the pointer to extra data is updated
 */
 
-static int
+static unsigned int
 add_to_class(uint8_t *classbits, PCRE2_UCHAR **uchardptr, uint32_t options,
   compile_block *cb, uint32_t start, uint32_t end)
 {
 uint32_t c;
 uint32_t classbits_end = (end <= 0xff ? end : 0xff);
-int n8 = 0;
+unsigned int n8 = 0;
 
 /* If caseless matching is required, scan the range and process alternate
 cases. In Unicode, there are 8-bit characters that have alternate cases that
@@ -2907,14 +2914,14 @@ Returns:        the number of < 256 characters added
                 the pointer to extra data is updated
 */
 
-static int
+static unsigned int
 add_list_to_class(uint8_t *classbits, PCRE2_UCHAR **uchardptr, uint32_t options,
   compile_block *cb, const uint32_t *p, unsigned int except)
 {
-int n8 = 0;
+unsigned int n8 = 0;
 while (p[0] < NOTACHAR)
   {
-  int n = 0;
+  unsigned int n = 0;
   if (p[0] != except)
     {
     while(p[n+1] == p[0] + n + 1) n++;
@@ -2945,12 +2952,12 @@ Returns:        the number of < 256 characters added
                 the pointer to extra data is updated
 */
 
-static int
+static unsigned int
 add_not_list_to_class(uint8_t *classbits, PCRE2_UCHAR **uchardptr,
   uint32_t options, compile_block *cb, const uint32_t *p)
 {
 BOOL utf = (options & PCRE2_UTF) != 0;
-int n8 = 0;
+unsigned int n8 = 0;
 if (p[0] > 0)
   n8 += add_to_class(classbits, uchardptr, options, cb, 0, p[0] - 1);
 while (p[0] < NOTACHAR)
@@ -3099,7 +3106,7 @@ for (; ptr < cb->end_pattern; ptr++)
 
   /* Not UTF */
     {
-    if (code != NULL) *code++ = x;
+    if (code != NULL) *code++ = (PCRE2_UCHAR)x;
     }
 
   arglen++;
@@ -3173,14 +3180,14 @@ typedef struct nest_save {
 #define NSF_EXTENDED 0x0002u
 #define NSF_DUPNAMES 0x0004u
 
-static uint32_t scan_for_captures(PCRE2_SPTR *ptrptr, uint32_t options,
+static int scan_for_captures(PCRE2_SPTR *ptrptr, uint32_t options,
   compile_block *cb)
 {
 uint32_t c;
 uint32_t delimiter;
-uint32_t nest_depth = 0;
 uint32_t set, unset, *optset;
 uint32_t skiptoket = 0;
+uint16_t nest_depth = 0;
 int errorcode = 0;
 int escape;
 int namelen;
@@ -3438,8 +3445,8 @@ for (; ptr < cb->end_pattern; ptr++)
 
       if (*ptr == CHAR_VERTICAL_LINE)
         {
-        top_nest->reset_group = cb->bracount;
-        top_nest->max_group = cb->bracount;
+        top_nest->reset_group = (uint16_t)cb->bracount;
+        top_nest->max_group = (uint16_t)cb->bracount;
         top_nest->flags |= NSF_RESET;
         cb->external_flags |= PCRE2_DUPCAPUSED;
         break;
@@ -3474,9 +3481,10 @@ for (; ptr < cb->end_pattern; ptr++)
           case CHAR_U:
           break;
 
-          default:  errorcode = ERR11;
-                    ptr--;    /* Correct the offset */
-                    goto FAILED;
+          default:  
+          errorcode = ERR11;
+          ptr--;    /* Correct the offset */
+          goto FAILED;
           }
         }
 
@@ -3652,7 +3660,7 @@ for (; ptr < cb->end_pattern; ptr++)
         }
 
       if (namelen + IMM2_SIZE + 1 > cb->name_entry_size)
-        cb->name_entry_size = namelen + IMM2_SIZE + 1;
+        cb->name_entry_size = (uint16_t)(namelen + IMM2_SIZE + 1);
 
       /* We have a valid name for this capturing group. */
 
@@ -3670,7 +3678,7 @@ for (; ptr < cb->end_pattern; ptr++)
       for (i = 0; i < cb->names_found; i++, ng++)
         {
         if (namelen == ng->length &&
-            PRIV(strncmp)(name, ng->name, namelen) == 0)
+            PRIV(strncmp)(name, ng->name, (size_t)namelen) == 0)
           {
           if (ng->number == cb->bracount) break;
           if ((options & PCRE2_DUPNAMES) == 0)
@@ -3694,7 +3702,7 @@ for (; ptr < cb->end_pattern; ptr++)
 
       if (cb->names_found >= cb->named_group_list_size)
         {
-        int newsize = cb->named_group_list_size * 2;
+        uint32_t newsize = cb->named_group_list_size * 2;
         named_group *newspace =
           cb->cx->memctl.malloc(newsize * sizeof(named_group),
           cb->cx->memctl.memory_data);
@@ -3716,9 +3724,9 @@ for (; ptr < cb->end_pattern; ptr++)
       /* Add this name to the list */
 
       cb->named_groups[cb->names_found].name = name;
-      cb->named_groups[cb->names_found].length = namelen;
+      cb->named_groups[cb->names_found].length = (uint16_t)namelen;
       cb->named_groups[cb->names_found].number = cb->bracount;
-      cb->named_groups[cb->names_found].isdup = isdupname;
+      cb->named_groups[cb->names_found].isdup = (uint16_t)isdupname;
       cb->names_found++;
       break;
       }        /* End of (? switch */
@@ -3731,7 +3739,7 @@ for (; ptr < cb->end_pattern; ptr++)
         (top_nest->flags & NSF_RESET) != 0)
       {
       if (cb->bracount > top_nest->max_group)
-        top_nest->max_group = cb->bracount;
+        top_nest->max_group = (uint16_t)cb->bracount;
       cb->bracount = top_nest->reset_group;
       }
     break;
@@ -3966,7 +3974,7 @@ for (;; ptr++)
       *errorcodeptr = ERR20;
       goto FAILED;
       }
-    *lengthptr += code - last_code;
+    *lengthptr += (size_t)(code - last_code);
 
     /* If "previous" is set and it is not at the start of the work space, move
     it back to there, in order to avoid filling up the work space. Otherwise,
@@ -3976,7 +3984,7 @@ for (;; ptr++)
       {
       if (previous > orig_code)
         {
-        memmove(orig_code, previous, CU2BYTES(code - previous));
+        memmove(orig_code, previous, (size_t)CU2BYTES(code - previous));
         code -= previous - orig_code;
         previous = orig_code;
         }
@@ -4137,7 +4145,7 @@ for (;; ptr++)
         *errorcodeptr = ERR20;
         goto FAILED;
         }
-      *lengthptr += code - last_code;   /* To include callout length */
+      *lengthptr += (size_t)(code - last_code);  /* To include callout length */
       }
     return TRUE;
 
@@ -4425,7 +4433,7 @@ for (;; ptr++)
             case PC_PUNCT:
             if (ptype == 0) ptype = PT_PXPUNCT;
             *class_uchardata++ = local_negate? XCL_NOTPROP : XCL_PROP;
-            *class_uchardata++ = ptype;
+            *class_uchardata++ = (PCRE2_UCHAR)ptype;
             *class_uchardata++ = 0;
             xclass_has_prop = TRUE;
             ptr = tempptr + 1;
@@ -4473,9 +4481,9 @@ for (;; ptr++)
         if (taboffset >= 0)
           {
           if (tabopt >= 0)
-            for (c = 0; c < 32; c++) pbits[c] |= cbits[c + taboffset];
+            for (c = 0; c < 32; c++) pbits[c] |= cbits[(int)c + taboffset];
           else
-            for (c = 0; c < 32; c++) pbits[c] &= ~cbits[c + taboffset];
+            for (c = 0; c < 32; c++) pbits[c] &= ~cbits[(int)c + taboffset];
           }
 
         /* Now see if we need to remove any special characters. An option

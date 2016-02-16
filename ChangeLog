@@ -65,6 +65,10 @@ compiling workspace (which was diagnosed, but of course is not desirable).
 13. Detect missing closing parentheses during the pre-pass for group 
 identification.
 
+14. Changed some integer variable types and put in a number of casts, following 
+a report of compiler warnings from Visual Studio 2013 and a few tests with 
+gcc's -Wconversion (which still throws up a lot).
+
 
 Version 10.21 12-January-2016
 -----------------------------

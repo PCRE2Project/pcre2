@@ -269,21 +269,21 @@ advancing the pointer. */
 
 #define GETUTF8(c, eptr) \
     { \
-    if ((c & 0x20) == 0) \
-      c = ((c & 0x1f) << 6) | (eptr[1] & 0x3f); \
-    else if ((c & 0x10) == 0) \
-      c = ((c & 0x0f) << 12) | ((eptr[1] & 0x3f) << 6) | (eptr[2] & 0x3f); \
-    else if ((c & 0x08) == 0) \
-      c = ((c & 0x07) << 18) | ((eptr[1] & 0x3f) << 12) | \
-      ((eptr[2] & 0x3f) << 6) | (eptr[3] & 0x3f); \
-    else if ((c & 0x04) == 0) \
-      c = ((c & 0x03) << 24) | ((eptr[1] & 0x3f) << 18) | \
-          ((eptr[2] & 0x3f) << 12) | ((eptr[3] & 0x3f) << 6) | \
-          (eptr[4] & 0x3f); \
+    if ((c & 0x20u) == 0) \
+      c = ((c & 0x1fu) << 6) | (eptr[1] & 0x3fu); \
+    else if ((c & 0x10u) == 0) \
+      c = ((c & 0x0fu) << 12) | ((eptr[1] & 0x3fu) << 6) | (eptr[2] & 0x3fu); \
+    else if ((c & 0x08u) == 0) \
+      c = ((c & 0x07u) << 18) | ((eptr[1] & 0x3fu) << 12) | \
+      ((eptr[2] & 0x3fu) << 6) | (eptr[3] & 0x3fu); \
+    else if ((c & 0x04u) == 0) \
+      c = ((c & 0x03u) << 24) | ((eptr[1] & 0x3fu) << 18) | \
+          ((eptr[2] & 0x3fu) << 12) | ((eptr[3] & 0x3fu) << 6) | \
+          (eptr[4] & 0x3fu); \
     else \
-      c = ((c & 0x01) << 30) | ((eptr[1] & 0x3f) << 24) | \
-          ((eptr[2] & 0x3f) << 18) | ((eptr[3] & 0x3f) << 12) | \
-          ((eptr[4] & 0x3f) << 6) | (eptr[5] & 0x3f); \
+      c = ((c & 0x01u) << 30) | ((eptr[1] & 0x3fu) << 24) | \
+          ((eptr[2] & 0x3fu) << 18) | ((eptr[3] & 0x3fu) << 12) | \
+          ((eptr[4] & 0x3fu) << 6) | (eptr[5] & 0x3fu); \
     }
 
 /* Base macro to pick up the remaining bytes of a UTF-8 character, advancing
@@ -291,31 +291,31 @@ the pointer. */
 
 #define GETUTF8INC(c, eptr) \
     { \
-    if ((c & 0x20) == 0) \
-      c = ((c & 0x1f) << 6) | (*eptr++ & 0x3f); \
-    else if ((c & 0x10) == 0) \
+    if ((c & 0x20u) == 0) \
+      c = ((c & 0x1fu) << 6) | (*eptr++ & 0x3fu); \
+    else if ((c & 0x10u) == 0) \
       { \
-      c = ((c & 0x0f) << 12) | ((*eptr & 0x3f) << 6) | (eptr[1] & 0x3f); \
+      c = ((c & 0x0fu) << 12) | ((*eptr & 0x3fu) << 6) | (eptr[1] & 0x3fu); \
       eptr += 2; \
       } \
-    else if ((c & 0x08) == 0) \
+    else if ((c & 0x08u) == 0) \
       { \
-      c = ((c & 0x07) << 18) | ((*eptr & 0x3f) << 12) | \
-          ((eptr[1] & 0x3f) << 6) | (eptr[2] & 0x3f); \
+      c = ((c & 0x07u) << 18) | ((*eptr & 0x3fu) << 12) | \
+          ((eptr[1] & 0x3fu) << 6) | (eptr[2] & 0x3fu); \
       eptr += 3; \
       } \
-    else if ((c & 0x04) == 0) \
+    else if ((c & 0x04u) == 0) \
       { \
-      c = ((c & 0x03) << 24) | ((*eptr & 0x3f) << 18) | \
-          ((eptr[1] & 0x3f) << 12) | ((eptr[2] & 0x3f) << 6) | \
-          (eptr[3] & 0x3f); \
+      c = ((c & 0x03u) << 24) | ((*eptr & 0x3fu) << 18) | \
+          ((eptr[1] & 0x3fu) << 12) | ((eptr[2] & 0x3fu) << 6) | \
+          (eptr[3] & 0x3fu); \
       eptr += 4; \
       } \
     else \
       { \
-      c = ((c & 0x01) << 30) | ((*eptr & 0x3f) << 24) | \
-          ((eptr[1] & 0x3f) << 18) | ((eptr[2] & 0x3f) << 12) | \
-          ((eptr[3] & 0x3f) << 6) | (eptr[4] & 0x3f); \
+      c = ((c & 0x01u) << 30) | ((*eptr & 0x3fu) << 24) | \
+          ((eptr[1] & 0x3fu) << 18) | ((eptr[2] & 0x3fu) << 12) | \
+          ((eptr[3] & 0x3fu) << 6) | (eptr[4] & 0x3fu); \
       eptr += 5; \
       } \
     }
@@ -325,34 +325,34 @@ advancing the pointer, incrementing the length. */
 
 #define GETUTF8LEN(c, eptr, len) \
     { \
-    if ((c & 0x20) == 0) \
+    if ((c & 0x20u) == 0) \
       { \
-      c = ((c & 0x1f) << 6) | (eptr[1] & 0x3f); \
+      c = ((c & 0x1fu) << 6) | (eptr[1] & 0x3fu); \
       len++; \
       } \
-    else if ((c & 0x10)  == 0) \
+    else if ((c & 0x10u)  == 0) \
       { \
-      c = ((c & 0x0f) << 12) | ((eptr[1] & 0x3f) << 6) | (eptr[2] & 0x3f); \
+      c = ((c & 0x0fu) << 12) | ((eptr[1] & 0x3fu) << 6) | (eptr[2] & 0x3fu); \
       len += 2; \
       } \
-    else if ((c & 0x08)  == 0) \
+    else if ((c & 0x08u)  == 0) \
       {\
-      c = ((c & 0x07) << 18) | ((eptr[1] & 0x3f) << 12) | \
-          ((eptr[2] & 0x3f) << 6) | (eptr[3] & 0x3f); \
+      c = ((c & 0x07u) << 18) | ((eptr[1] & 0x3fu) << 12) | \
+          ((eptr[2] & 0x3fu) << 6) | (eptr[3] & 0x3fu); \
       len += 3; \
       } \
-    else if ((c & 0x04)  == 0) \
+    else if ((c & 0x04u)  == 0) \
       { \
-      c = ((c & 0x03) << 24) | ((eptr[1] & 0x3f) << 18) | \
-          ((eptr[2] & 0x3f) << 12) | ((eptr[3] & 0x3f) << 6) | \
-          (eptr[4] & 0x3f); \
+      c = ((c & 0x03u) << 24) | ((eptr[1] & 0x3fu) << 18) | \
+          ((eptr[2] & 0x3fu) << 12) | ((eptr[3] & 0x3fu) << 6) | \
+          (eptr[4] & 0x3fu); \
       len += 4; \
       } \
     else \
       {\
-      c = ((c & 0x01) << 30) | ((eptr[1] & 0x3f) << 24) | \
-          ((eptr[2] & 0x3f) << 18) | ((eptr[3] & 0x3f) << 12) | \
-          ((eptr[4] & 0x3f) << 6) | (eptr[5] & 0x3f); \
+      c = ((c & 0x01u) << 30) | ((eptr[1] & 0x3fu) << 24) | \
+          ((eptr[2] & 0x3fu) << 18) | ((eptr[3] & 0x3fu) << 12) | \
+          ((eptr[4] & 0x3fu) << 6) | (eptr[5] & 0x3fu); \
       len += 5; \
       } \
     }
