@@ -140,7 +140,6 @@ int main(void)
 #define F_DIFF		0x080000
 #define F_FORCECONV	0x100000
 #define F_PROPERTY	0x200000
-#define F_STUDY		0x400000
 
 struct regression_test_case {
 	int compile_options;
@@ -779,11 +778,11 @@ static struct regression_test_case regression_test_cases[] = {
 	{ MU, A, 0, 0, "(?(DEFINE)(a(*:aa)))a(?1)b|aac", "aac" },
 	{ MU, A, 0, 0, "(a(*:aa)){0}(?:b(?1)b|c)+c", "babbab cc" },
 	{ MU, A, 0, 0, "(a(*:aa)){0}(?:b(?1)b)+", "babba" },
-	{ MU, A, 0, 0 | F_NOMATCH | F_STUDY, "(a(*:aa)){0}(?:b(?1)b)+", "ba" },
+	{ MU, A, 0, 0 | F_NOMATCH, "(a(*:aa)){0}(?:b(?1)b)+", "ba" },
 	{ MU, A, 0, 0, "(a\\K(*:aa)){0}(?:b(?1)b|c)+c", "babbab cc" },
 	{ MU, A, 0, 0, "(a\\K(*:aa)){0}(?:b(?1)b)+", "babba" },
-	{ MU, A, 0, 0 | F_NOMATCH | F_STUDY, "(a\\K(*:aa)){0}(?:b(?1)b)+", "ba" },
-	{ MU, A, 0, 0 | F_NOMATCH | F_STUDY, "(*:mark)m", "a" },
+	{ MU, A, 0, 0 | F_NOMATCH, "(a\\K(*:aa)){0}(?:b(?1)b)+", "ba" },
+	{ MU, A, 0, 0 | F_NOMATCH, "(*:mark)m", "a" },
 
 	/* (*COMMIT) verb. */
 	{ MU, A, 0, 0 | F_NOMATCH, "a(*COMMIT)b", "ac" },

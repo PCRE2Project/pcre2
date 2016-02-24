@@ -3603,7 +3603,8 @@ while (TRUE)
 
     case OP_CLASS:
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH == 8
-    if (common->utf && !is_char7_bitset((const sljit_ub *)(cc + 1), FALSE)) return consumed;
+    if (common->utf && !is_char7_bitset((const sljit_ub *)(cc + 1), FALSE))
+      return consumed;
 #endif
     class = TRUE;
     break;
@@ -4548,7 +4549,6 @@ return TRUE;
 }
 
 #undef MAX_N_CHARS
-#undef MAX_N_BYTES
 
 static SLJIT_INLINE void fast_forward_first_char(compiler_common *common, PCRE2_UCHAR first_char, BOOL caseless)
 {
@@ -11194,10 +11194,8 @@ if ((re->overall_options & PCRE2_ANCHORED) == 0 && common->match_end_ptr != 0)
   OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_SP), common->match_end_ptr);
   }
 
-if (common->fast_forward_bc_ptr != NULL)
-  OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(SLJIT_SP), PRIVATE_DATA(common->fast_forward_bc_ptr + 1));
-else
-  OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(SLJIT_SP), common->start_ptr);
+OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(SLJIT_SP),
+    (common->fast_forward_bc_ptr != NULL) ? (PRIVATE_DATA(common->fast_forward_bc_ptr + 1)) : common->start_ptr);
 
 if ((re->overall_options & PCRE2_ANCHORED) == 0)
   {
@@ -11218,9 +11216,7 @@ if ((re->overall_options & PCRE2_ANCHORED) == 0)
       }
     }
   else
-    {
     CMPTO(SLJIT_LESS, STR_PTR, 0, (common->match_end_ptr == 0) ? STR_END : TMP1, 0, mainloop_label);
-    }
   }
 
 /* No more remaining characters. */
