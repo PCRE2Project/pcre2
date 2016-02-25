@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "06 February 2016" "PCRE2 10.22"
+.TH PCRE2API 3 "25 February 2016" "PCRE2 10.22"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -488,37 +488,25 @@ documentation for more details.
 .P
 In a more complicated situation, where patterns are compiled only when they are
 first needed, but are still shared between threads, pointers to compiled
-patterns must be protected from simultaneous access by multiple threads, at
+patterns must be protected from simultaneous writing by multiple threads, at
 least until a pattern has been compiled. The logic can be something like this:
 .sp
+  Get a read-only (shared) lock (mutex) for pointer
   if (pointer == NULL)
     {
-    Get exclusive access to pointer
-    if (pointer == NULL) pointer = pcre2_compile(...
-    Release exclusive access to pointer
+    Get a write (unique) lock for pointer
+    pointer = pcre2_compile(...
     }
+  Release the lock   
   Use pointer in pcre2_match()
 .sp
 Of course, testing for compilation errors should also be included in the code.
 .P
 If JIT is being used, but the JIT compilation is not being done immediately,
 (perhaps waiting to see if the pattern is used often enough) similar logic is
-required. The PCRE2_INFO_JITSIZE information call can detect whether there has
-been a successful call to \fBpcre2_jit_compile()\fP, but there is no way to
-tell whether JIT has been called and failed (a very few pattern features are
-not supported by JIT). Therefore, a separate flag is needed:
-.sp
-  if (!jit_tried)
-    {
-    Get exclusive access to jit_tried
-    (if !jit_tried) pcre2_jit_compile(pointer, ...
-    jit_tried = TRUE
-    Release exclusive access to jit_tried
-    }
-  Use pointer in pcre2_match()
-.sp
-Other threads can use pointer for non-JIT matching while JIT compilation is in
-progress.
+required. JIT compilation updates a pointer within the compiled code block, so 
+a thread must gain unique write access to the pointer before calling 
+\fBpcre2_jit_compile()\fP.
 .
 .
 .SS "Context blocks"
@@ -3221,6 +3209,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 06 February 2016
+Last updated: 25 February 2016
 Copyright (c) 1997-2016 University of Cambridge.
 .fi
