@@ -290,6 +290,9 @@ document for an overview of all the PCRE2 documentation.
 </P>
 <br><a name="SEC10" href="#TOC1">PCRE2 NATIVE API AUXILIARY FUNCTIONS</a><br>
 <P>
+<b>pcre2_code *pcre2_code_copy(const pcre2_code *<i>code</i>);</b>
+<br>
+<br>
 <b>int pcre2_get_error_message(int <i>errorcode</i>, PCRE2_UCHAR *<i>buffer</i>,</b>
 <b>  PCRE2_SIZE <i>bufflen</i>);</b>
 <br>
@@ -455,9 +458,18 @@ return a copy of the subject string with substitutions for parts that were
 matched.
 </P>
 <P>
+Functions whose names begin with <b>pcre2_serialize_</b> are used for saving
+compiled patterns on disc or elsewhere, and reloading them later.
+</P>
+<P>
 Finally, there are functions for finding out information about a compiled
 pattern (<b>pcre2_pattern_info()</b>) and about the configuration with which
 PCRE2 was built (<b>pcre2_config()</b>).
+</P>
+<P>
+Functions with names ending with <b>_free()</b> are used for freeing memory
+blocks of various sorts. In all cases, if one of these functions is called with
+a NULL argument, it does nothing.
 </P>
 <br><a name="SEC13" href="#TOC1">STRING LENGTHS AND OFFSETS</a><br>
 <P>
@@ -516,20 +528,51 @@ time ensuring that multithreaded applications can use it.
 There are several different blocks of data that are used to pass information
 between the application and the PCRE2 libraries.
 </P>
+<br><b>
+The compiled pattern
+</b><br>
 <P>
-(1) A pointer to the compiled form of a pattern is returned to the user when
+A pointer to the compiled form of a pattern is returned to the user when
 <b>pcre2_compile()</b> is successful. The data in the compiled pattern is fixed,
 and does not change when the pattern is matched. Therefore, it is thread-safe,
 that is, the same compiled pattern can be used by more than one thread
-simultaneously. An application can compile all its patterns at the start,
-before forking off multiple threads that use them. However, if the just-in-time
-optimization feature is being used, it needs separate memory stack areas for
-each thread. See the
+simultaneously. For example, an application can compile all its patterns at the
+start, before forking off multiple threads that use them. However, if the
+just-in-time optimization feature is being used, it needs separate memory stack
+areas for each thread. See the
 <a href="pcre2jit.html"><b>pcre2jit</b></a>
 documentation for more details.
 </P>
 <P>
-(2) The next section below introduces the idea of "contexts" in which PCRE2
+In a more complicated situation, where patterns are compiled only when they are
+first needed, but are still shared between threads, pointers to compiled
+patterns must be protected from simultaneous writing by multiple threads, at
+least until a pattern has been compiled. The logic can be something like this:
+<pre>
+  Get a read-only (shared) lock (mutex) for pointer
+  if (pointer == NULL)
+    {
+    Get a write (unique) lock for pointer
+    pointer = pcre2_compile(...
+    }
+  Release the lock   
+  Use pointer in pcre2_match()
+</pre>
+Of course, testing for compilation errors should also be included in the code.
+</P>
+<P>
+If JIT is being used, but the JIT compilation is not being done immediately,
+(perhaps waiting to see if the pattern is used often enough) similar logic is
+required. JIT compilation updates a pointer within the compiled code block, so 
+a thread must gain unique write access to the pointer before calling 
+<b>pcre2_jit_compile()</b>. Alternatively, <b>pcre2_code_copy()</b> can be used 
+to obtain a private copy of the compiled code.
+</P>
+<br><b>
+Context blocks
+</b><br>
+<P>
+The next main section below introduces the idea of "contexts" in which PCRE2
 functions are called. A context is nothing more than a collection of parameters
 that control the way PCRE2 operates. Grouping a number of parameters together
 in a context is a convenient way of passing them to a PCRE2 function without
@@ -543,11 +586,14 @@ are never changed, the same context can be used by all the threads. However, if
 any thread needs to change any value in a context, it must make its own
 thread-specific copy.
 </P>
+<br><b>
+Match blocks
+</b><br>
 <P>
-(3) The matching functions need a block of memory for working space and for
-storing the results of a match. This includes details of what was matched, as
-well as additional information such as the name of a (*MARK) setting. Each
-thread must provide its own version of this memory.
+The matching functions need a block of memory for working space and for storing
+the results of a match. This includes details of what was matched, as well as
+additional information such as the name of a (*MARK) setting. Each thread must
+provide its own copy of this memory.
 </P>
 <br><a name="SEC16" href="#TOC1">PCRE2 CONTEXTS</a><br>
 <P>
@@ -1007,14 +1053,33 @@ zero.
 <br>
 <br>
 <b>void pcre2_code_free(pcre2_code *<i>code</i>);</b>
+<br>
+<br>
+<b>pcre2_code *pcre2_code_copy(const pcre2_code *<i>code</i>);</b>
 </P>
 <P>
 The <b>pcre2_compile()</b> function compiles a pattern into an internal form.
-The pattern is defined by a pointer to a string of code units and a length, If
+The pattern is defined by a pointer to a string of code units and a length. If
 the pattern is zero-terminated, the length can be specified as
 PCRE2_ZERO_TERMINATED. The function returns a pointer to a block of memory that
-contains the compiled pattern and related data. The caller must free the memory
-by calling <b>pcre2_code_free()</b> when it is no longer needed.
+contains the compiled pattern and related data. 
+</P>
+<P>
+If the compile context argument <i>ccontext</i> is NULL, memory for the compiled
+pattern is obtained by calling <b>malloc()</b>. Otherwise, it is obtained from
+the same memory function that was used for the compile context. The caller must
+free the memory by calling <b>pcre2_code_free()</b> when it is no longer needed.
+</P>
+<P>
+The function <b>pcre2_code_copy()</b> makes a copy of the compiled code in new 
+memory, using the same memory allocator as was used for the original. However, 
+if the code has been processed by the JIT compiler (see
+<a href="#jitcompiling">below),</a>
+the JIT information cannot be copied (because it is position-dependent). 
+The new copy can initially be used only for non-JIT matching, though it can be 
+passed to <b>pcre2_jit_compile()</b> if required. The <b>pcre2_code_copy()</b>
+function provides a way for individual threads in a multithreaded application
+to acquire a private copy of shared compiled code.
 </P>
 <P>
 NOTE: When one of the matching functions is called, pointers to the compiled
@@ -1025,16 +1090,12 @@ free a compiled pattern (or a subject string) until after all operations on the
 have taken place.
 </P>
 <P>
-If the compile context argument <i>ccontext</i> is NULL, memory for the compiled
-pattern is obtained by calling <b>malloc()</b>. Otherwise, it is obtained from
-the same memory function that was used for the compile context.
-</P>
-<P>
-The <i>options</i> argument contains various bit settings that affect the
-compilation. It should be zero if no options are required. The available
-options are described below. Some of them (in particular, those that are
-compatible with Perl, but some others as well) can also be set and unset from
-within the pattern (see the detailed description in the
+The <i>options</i> argument for <b>pcre2_compile()</b> contains various bit
+settings that affect the compilation. It should be zero if no options are
+required. The available options are described below. Some of them (in
+particular, those that are compatible with Perl, but some others as well) can
+also be set and unset from within the pattern (see the detailed description in
+the
 <a href="pcre2pattern.html"><b>pcre2pattern</b></a>
 documentation).
 </P>
@@ -1282,8 +1343,8 @@ If this option is set, it disables the use of numbered capturing parentheses in
 the pattern. Any opening parenthesis that is not followed by ? behaves as if it
 were followed by ?: but named parentheses can still be used for capturing (and
 they acquire numbers in the usual way). There is no equivalent of this option
-in Perl. Note that, if this option is set, references to capturing groups (back 
-references or recursion/subroutine calls) may only refer to named groups, 
+in Perl. Note that, if this option is set, references to capturing groups (back
+references or recursion/subroutine calls) may only refer to named groups,
 though the reference can be by name or by number.
 <pre>
   PCRE2_NO_AUTO_POSSESS
@@ -1433,7 +1494,7 @@ are used for invalid UTF strings. These are the same as given by
 <a href="pcre2unicode.html"><b>pcre2unicode</b></a>
 page. The <b>pcre2_get_error_message()</b> function can be called to obtain a
 textual error message from any error code.
-</P>
+<a name="jitcompiling"></a></P>
 <br><a name="SEC20" href="#TOC1">JUST-IN-TIME (JIT) COMPILATION</a><br>
 <P>
 <b>int pcre2_jit_compile(pcre2_code *<i>code</i>, uint32_t <i>options</i>);</b>
@@ -3123,7 +3184,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC40" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 31 January 2016
+Last updated: 26 February 2016
 <br>
 Copyright &copy; 1997-2016 University of Cambridge.
 <br>

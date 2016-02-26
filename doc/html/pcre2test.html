@@ -353,9 +353,10 @@ test files that are also processed by <b>perltest.sh</b>. The <b>#perltest</b>
 command helps detect tests that are accidentally put in the wrong file.
 <pre>
   #pop [&#60;modifiers&#62;]
+  #popcopy [&#60;modifiers&#62;]
 </pre>
-This command is used to manipulate the stack of compiled patterns, as described
-in the section entitled "Saving and restoring compiled patterns"
+These commands are used to manipulate the stack of compiled patterns, as
+described in the section entitled "Saving and restoring compiled patterns"
 <a href="#saverestore">below.</a>
 <pre>
   #save &#60;filename&#62;
@@ -573,6 +574,7 @@ about the pattern:
       posix                     use the POSIX API
       posix_nosub               use the POSIX API with REG_NOSUB 
       push                      push compiled pattern onto the stack
+      pushcopy                  push a copy onto the stack
       stackguard=&#60;number&#62;       test the stackguard feature
       tables=[0|1|2]            select internal tables
 </pre>
@@ -932,12 +934,16 @@ pushed onto a stack of compiled patterns, and <b>pcre2test</b> expects the next
 line to contain a new pattern (or a command) instead of a subject line. This
 facility is used when saving compiled patterns to a file, as described in the
 section entitled "Saving and restoring compiled patterns"
-<a href="#saverestore">below.</a>
-The <b>push</b> modifier is incompatible with compilation modifiers such as
-<b>global</b> that act at match time. Any that are specified are ignored, with a
-warning message, except for <b>replace</b>, which causes an error. Note that,
-<b>jitverify</b>, which is allowed, does not carry through to any subsequent
-matching that uses this pattern.
+<a href="#saverestore">below. If <b>pushcopy</b> is used instead of <b>push</b>, a copy of the compiled</a>
+pattern is stacked, leaving the original as current, ready to match the 
+following input lines. This provides a way of testing the 
+<b>pcre2_code_copy()</b> function.
+The <b>push</b> and <b>pushcopy </b> modifiers are incompatible with compilation
+modifiers such as <b>global</b> that act at match time. Any that are specified
+are ignored (for the stacked copy), with a warning message, except for
+<b>replace</b>, which causes an error. Note that <b>jitverify</b>, which is
+allowed, does not carry through to any subsequent matching that uses a stacked
+pattern.
 <a name="subjectmodifiers"></a></P>
 <br><a name="SEC11" href="#TOC1">SUBJECT MODIFIERS</a><br>
 <P>
@@ -1530,7 +1536,9 @@ item to be tested. For example:
 This output indicates that callout number 0 occurred for a match attempt
 starting at the fourth character of the subject string, when the pointer was at
 the seventh character, and when the next pattern item was \d. Just
-one circumflex is output if the start and current positions are the same.
+one circumflex is output if the start and current positions are the same, or if 
+the current position precedes the start position, which can happen if the 
+callout is in a lookbehind assertion.
 </P>
 <P>
 Callouts numbered 255 are assumed to be automatic callouts, inserted as a
@@ -1622,11 +1630,16 @@ can be used to test these functions.
 <P>
 When a pattern with <b>push</b> modifier is successfully compiled, it is pushed
 onto a stack of compiled patterns, and <b>pcre2test</b> expects the next line to
-contain a new pattern (or command) instead of a subject line. By this means, a
-number of patterns can be compiled and retained. The <b>push</b> modifier is
-incompatible with <b>posix</b>, and control modifiers that act at match time are
-ignored (with a message). The <b>jitverify</b> modifier applies only at compile
-time. The command
+contain a new pattern (or command) instead of a subject line. By contrast,
+the <b>pushcopy</b> modifier causes a copy of the compiled pattern to be
+stacked, leaving the original available for immediate matching. By using
+<b>push</b> and/or <b>pushcopy</b>, a number of patterns can be compiled and
+retained. These modifiers are incompatible with <b>posix</b>, and control
+modifiers that act at match time are ignored (with a message) for the stacked 
+patterns. The <b>jitverify</b> modifier applies only at compile time.
+</P>
+<P>
+The command
 <pre>
   #save &#60;filename&#62;
 </pre>
@@ -1643,7 +1656,8 @@ usual by an empty line or end of file. This command may be followed by a
 modifier list containing only
 <a href="#controlmodifiers">control modifiers</a>
 that act after a pattern has been compiled. In particular, <b>hex</b>,
-<b>posix</b>, <b>posix_nosub</b>, and <b>push</b> are not allowed, nor are any
+<b>posix</b>, <b>posix_nosub</b>, <b>push</b>, and <b>pushcopy</b> are not allowed,
+nor are any
 <a href="#optionmodifiers">option-setting modifiers.</a>
 The JIT modifiers are, however permitted. Here is an example that saves and
 reloads two patterns.
@@ -1660,6 +1674,11 @@ reloads two patterns.
 </pre>
 If <b>jitverify</b> is used with #pop, it does not automatically imply
 <b>jit</b>, which is different behaviour from when it is used on a pattern.
+</P>
+<P>
+The #popcopy command is analagous to the <b>pushcopy</b> modifier in that it 
+makes current a copy of the topmost stack pattern, leaving the original still 
+on the stack.
 </P>
 <br><a name="SEC19" href="#TOC1">SEE ALSO</a><br>
 <P>
@@ -1678,7 +1697,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC21" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 31 January 2016
+Last updated: 06 February 2016
 <br>
 Copyright &copy; 1997-2016 University of Cambridge.
 <br>

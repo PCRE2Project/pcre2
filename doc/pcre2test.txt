@@ -296,10 +296,11 @@ COMMAND LINES
        wrong file.
 
          #pop [<modifiers>]
+         #popcopy [<modifiers>]
 
-       This  command  is used to manipulate the stack of compiled patterns, as
-       described in the section entitled "Saving and restoring  compiled  pat-
-       terns" below.
+       These  commands  are used to manipulate the stack of compiled patterns,
+       as described in the section entitled  "Saving  and  restoring  compiled
+       patterns" below.
 
          #save <filename>
 
@@ -518,6 +519,7 @@ PATTERN MODIFIERS
              posix                     use the POSIX API
              posix_nosub               use the POSIX API with REG_NOSUB
              push                      push compiled pattern onto the stack
+             pushcopy                  push a copy onto the stack
              stackguard=<number>       test the stackguard feature
              tables=[0|1|2]            select internal tables
 
@@ -833,11 +835,15 @@ PATTERN MODIFIERS
        next  line to contain a new pattern (or a command) instead of a subject
        line. This facility is used when saving compiled patterns to a file, as
        described  in  the section entitled "Saving and restoring compiled pat-
-       terns" below.  The push modifier is incompatible with compilation modi-
-       fiers such as global that act at match time. Any that are specified are
-       ignored, with a warning message, except for replace,  which  causes  an
-       error.  Note  that, jitverify, which is allowed, does not carry through
-       to any subsequent matching that uses this pattern.
+       terns" below. If pushcopy is used instead of push, a copy of  the  com-
+       piled  pattern  is  stacked,  leaving the original as current, ready to
+       match the following input lines. This provides a  way  of  testing  the
+       pcre2_code_copy()  function.   The  push  and  pushcopy   modifiers are
+       incompatible with compilation modifiers such  as  global  that  act  at
+       match  time. Any that are specified are ignored (for the stacked copy),
+       with a warning message, except for replace, which causes an error. Note
+       that  jitverify, which is allowed, does not carry through to any subse-
+       quent matching that uses a stacked pattern.
 
 
 SUBJECT MODIFIERS
@@ -1379,10 +1385,11 @@ CALLOUTS
        attempt starting at the fourth character of the  subject  string,  when
        the  pointer  was  at  the seventh character, and when the next pattern
        item was \d. Just one circumflex is output if  the  start  and  current
-       positions are the same.
+       positions  are  the same, or if the current position precedes the start
+       position, which can happen if the callout is in a lookbehind assertion.
 
        Callouts numbered 255 are assumed to be automatic callouts, inserted as
-       a result of the /auto_callout pattern modifier. In this  case,  instead
+       a  result  of the /auto_callout pattern modifier. In this case, instead
        of showing the callout number, the offset in the pattern, preceded by a
        plus, is output. For example:
 
@@ -1396,7 +1403,7 @@ CALLOUTS
           0: E*
 
        If a pattern contains (*MARK) items, an additional line is output when-
-       ever  a  change  of  latest mark is passed to the callout function. For
+       ever a change of latest mark is passed to  the  callout  function.  For
        example:
 
            re> /a(*MARK:X)bc/auto_callout
@@ -1410,17 +1417,17 @@ CALLOUTS
          +12 ^  ^
           0: abc
 
-       The mark changes between matching "a" and "b", but stays the  same  for
-       the  rest  of  the match, so nothing more is output. If, as a result of
-       backtracking, the mark reverts to being unset, the  text  "<unset>"  is
+       The  mark  changes between matching "a" and "b", but stays the same for
+       the rest of the match, so nothing more is output. If, as  a  result  of
+       backtracking,  the  mark  reverts to being unset, the text "<unset>" is
        output.
 
    Callouts with string arguments
 
        The output for a callout with a string argument is similar, except that
-       instead of outputting a callout number before the position  indicators,
-       the  callout  string  and  its  offset in the pattern string are output
-       before the reflection of the subject string, and the subject string  is
+       instead  of outputting a callout number before the position indicators,
+       the callout string and its offset in  the  pattern  string  are  output
+       before  the reflection of the subject string, and the subject string is
        reflected for each callout. For example:
 
            re> /^ab(?C'first')cd(?C"second")ef/
@@ -1437,41 +1444,46 @@ CALLOUTS
 NON-PRINTING CHARACTERS
 
        When pcre2test is outputting text in the compiled version of a pattern,
-       bytes other than 32-126 are always treated as  non-printing  characters
+       bytes  other  than 32-126 are always treated as non-printing characters
        and are therefore shown as hex escapes.
 
-       When  pcre2test  is outputting text that is a matched part of a subject
-       string, it behaves in the same way, unless a different locale has  been
-       set  for  the  pattern  (using the /locale modifier). In this case, the
-       isprint() function is used to  distinguish  printing  and  non-printing
+       When pcre2test is outputting text that is a matched part of  a  subject
+       string,  it behaves in the same way, unless a different locale has been
+       set for the pattern (using the /locale modifier).  In  this  case,  the
+       isprint()  function  is  used  to distinguish printing and non-printing
        characters.
 
 
 SAVING AND RESTORING COMPILED PATTERNS
 
-       It  is  possible  to  save  compiled patterns on disc or elsewhere, and
+       It is possible to save compiled patterns  on  disc  or  elsewhere,  and
        reload them later, subject to a number of restrictions. JIT data cannot
-       be  saved.  The host on which the patterns are reloaded must be running
+       be saved. The host on which the patterns are reloaded must  be  running
        the same version of PCRE2, with the same code unit width, and must also
-       have  the  same  endianness,  pointer width and PCRE2_SIZE type. Before
-       compiled patterns can be saved they must be serialized, that  is,  con-
-       verted  to a stream of bytes. A single byte stream may contain any num-
-       ber of compiled patterns, but they must  all  use  the  same  character
+       have the same endianness, pointer width  and  PCRE2_SIZE  type.  Before
+       compiled  patterns  can be saved they must be serialized, that is, con-
+       verted to a stream of bytes. A single byte stream may contain any  num-
+       ber  of  compiled  patterns,  but  they must all use the same character
        tables. A single copy of the tables is included in the byte stream (its
        size is 1088 bytes).
 
-       The functions whose names begin  with  pcre2_serialize_  are  used  for
-       serializing  and de-serializing. They are described in the pcre2serial-
+       The  functions  whose  names  begin  with pcre2_serialize_ are used for
+       serializing and de-serializing. They are described in the  pcre2serial-
        ize  documentation.  In  this  section  we  describe  the  features  of
        pcre2test that can be used to test these functions.
 
-       When  a  pattern  with  push  modifier  is successfully compiled, it is
-       pushed onto a stack of compiled patterns,  and  pcre2test  expects  the
-       next  line  to  contain a new pattern (or command) instead of a subject
-       line. By this means, a number of patterns can be compiled and retained.
-       The  push  modifier  is  incompatible with posix, and control modifiers
-       that act at match time are ignored (with a message). The jitverify mod-
-       ifier applies only at compile time. The command
+       When a pattern with push  modifier  is  successfully  compiled,  it  is
+       pushed  onto  a  stack  of compiled patterns, and pcre2test expects the
+       next line to contain a new pattern (or command) instead  of  a  subject
+       line.  By contrast, the pushcopy modifier causes a copy of the compiled
+       pattern to be stacked, leaving the  original  available  for  immediate
+       matching.  By  using  push and/or pushcopy, a number of patterns can be
+       compiled and retained. These modifiers are incompatible with posix, and
+       control  modifiers  that act at match time are ignored (with a message)
+       for the stacked patterns. The jitverify modifier applies only  at  com-
+       pile time.
+
+       The command
 
          #save <filename>
 
@@ -1488,9 +1500,10 @@ SAVING AND RESTORING COMPILED PATTERNS
        matched  with  the pattern, terminated as usual by an empty line or end
        of file. This command may be followed by  a  modifier  list  containing
        only  control  modifiers that act after a pattern has been compiled. In
-       particular, hex, posix, posix_nosub, and push are not allowed, nor  are
-       any  option-setting  modifiers.  The JIT modifiers are, however permit-
-       ted. Here is an example that saves and reloads two patterns.
+       particular,  hex,  posix,  posix_nosub,  push,  and  pushcopy  are  not
+       allowed,  nor are any option-setting modifiers.  The JIT modifiers are,
+       however permitted. Here is an example that saves and reloads  two  pat-
+       terns.
 
          /abc/push
          /xyz/push
@@ -1502,8 +1515,12 @@ SAVING AND RESTORING COMPILED PATTERNS
          #pop jit,bincode
          abc
 
-       If jitverify is used with #pop, it does not  automatically  imply  jit,
+       If  jitverify  is  used with #pop, it does not automatically imply jit,
        which is different behaviour from when it is used on a pattern.
+
+       The #popcopy command is analagous to the pushcopy modifier in  that  it
+       makes current a copy of the topmost stack pattern, leaving the original
+       still on the stack.
 
 
 SEE ALSO
@@ -1521,5 +1538,5 @@ AUTHOR
 
 REVISION
 
-       Last updated: 31 January 2016
+       Last updated: 06 February 2016
        Copyright (c) 1997-2016 University of Cambridge.
