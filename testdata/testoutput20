@@ -1,5 +1,5 @@
-# This set of tests exercises the serialization/deserialization functions in
-# the library. It does not use UTF or JIT.
+# This set of tests exercises the serialization/deserialization and code copy
+# functions in the library. It does not use UTF or JIT.
 
 #forbid_utf
 
@@ -97,5 +97,42 @@ Serialization failed: error -30: patterns do not all use the same character tabl
 #pop should give an error
 ** Can't pop off an empty stack
     pqr
+    
+/abcd/pushcopy
+    abcd
+ 0: abcd
+    
+#pop
+    abcd 
+ 0: abcd
+
+#pop should give an error
+** Can't pop off an empty stack
+
+/abcd/push
+#popcopy
+    abcd
+ 0: abcd
+    
+#pop
+    abcd 
+ 0: abcd
+    
+/abcd/push
+#save testsaved1
+#pop should give an error
+** Can't pop off an empty stack
+
+#load testsaved1
+#popcopy 
+    abcd
+ 0: abcd
+    
+#pop
+    abcd
+ 0: abcd
+
+#pop should give an error
+** Can't pop off an empty stack
 
 # End of testinput20

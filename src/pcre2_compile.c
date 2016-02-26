@@ -730,6 +730,39 @@ static const uint8_t opcode_possessify[] = {
 
 
 /*************************************************
+*               Copy compiled code               *
+*************************************************/
+
+/* Compiled JIT code cannot be copied, so the new compiled block has no 
+associated JIT data. */
+
+PCRE2_EXP_DEFN pcre2_code * PCRE2_CALL_CONVENTION
+pcre2_code_copy(const pcre2_code *code)
+{
+PCRE2_SIZE* ref_count;
+pcre2_code *newcode;
+
+if (code == NULL) return NULL;
+newcode = code->memctl.malloc(code->blocksize, code->memctl.memory_data);
+if (newcode == NULL) return NULL;
+memcpy(newcode, code, code->blocksize);
+newcode->executable_jit = NULL;
+
+/* If the code is one that has been deserialized, increment the reference count 
+in the decoded tables. */
+
+if ((code->flags & PCRE2_DEREF_TABLES) != 0)
+  {
+  ref_count = (PCRE2_SIZE *)(code->tables + tables_length);
+  (*ref_count)++;
+  }  
+
+return newcode;
+}
+
+
+
+/*************************************************
 *               Free compiled code               *
 *************************************************/
 

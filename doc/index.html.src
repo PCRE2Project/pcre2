@@ -91,6 +91,9 @@ in the library.
 <tr><td><a href="pcre2_callout_enumerate.html">pcre2_callout_enumerate</a></td>
     <td>&nbsp;&nbsp;Enumerate callouts in a compiled pattern</td></tr>
 
+<tr><td><a href="pcre2_code_copy.html">pcre2_code_copy</a></td>
+    <td>&nbsp;&nbsp;Copy a compiled pattern</td></tr>
+
 <tr><td><a href="pcre2_code_free.html">pcre2_code_free</a></td>
     <td>&nbsp;&nbsp;Free a compiled pattern</td></tr>
 

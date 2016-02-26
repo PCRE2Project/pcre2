@@ -392,6 +392,15 @@ JIT compilation was successful
     abcdef
  0: def (JIT)
     
+/abcd/pushcopy,jitverify
+** Applies only to compile when pattern is stacked with 'push': jitverify
+    abcd
+ 0: abcd (JIT)
+    
+#pop jitverify
+    abcd
+ 0: abcd
+    
 # Test pattern compilation
 
 /(?:a|b|c|d|e)(?R)/jit=1

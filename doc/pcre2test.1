@@ -1,4 +1,4 @@
-.TH PCRE2TEST 1 "06 February 2016" "PCRE 10.22"
+.TH PCRE2TEST 1 "26 February 2016" "PCRE 10.22"
 .SH NAME
 pcre2test - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -306,9 +306,10 @@ test files that are also processed by \fBperltest.sh\fP. The \fB#perltest\fP
 command helps detect tests that are accidentally put in the wrong file.
 .sp
   #pop [<modifiers>]
+  #popcopy [<modifiers>]
 .sp
-This command is used to manipulate the stack of compiled patterns, as described
-in the section entitled "Saving and restoring compiled patterns"
+These commands are used to manipulate the stack of compiled patterns, as
+described in the section entitled "Saving and restoring compiled patterns"
 .\" HTML <a href="#saverestore">
 .\" </a>
 below.
@@ -537,6 +538,7 @@ about the pattern:
       posix                     use the POSIX API
       posix_nosub               use the POSIX API with REG_NOSUB 
       push                      push compiled pattern onto the stack
+      pushcopy                  push a copy onto the stack
       stackguard=<number>       test the stackguard feature
       tables=[0|1|2]            select internal tables
 .sp
@@ -895,13 +897,17 @@ facility is used when saving compiled patterns to a file, as described in the
 section entitled "Saving and restoring compiled patterns"
 .\" HTML <a href="#saverestore">
 .\" </a>
-below.
+below. If \fBpushcopy\fP is used instead of \fBpush\fP, a copy of the compiled 
+pattern is stacked, leaving the original as current, ready to match the 
+following input lines. This provides a way of testing the 
+\fBpcre2_code_copy()\fP function.
 .\"
-The \fBpush\fP modifier is incompatible with compilation modifiers such as
-\fBglobal\fP that act at match time. Any that are specified are ignored, with a
-warning message, except for \fBreplace\fP, which causes an error. Note that,
-\fBjitverify\fP, which is allowed, does not carry through to any subsequent
-matching that uses this pattern.
+The \fBpush\fP and \fBpushcopy \fP modifiers are incompatible with compilation
+modifiers such as \fBglobal\fP that act at match time. Any that are specified
+are ignored (for the stacked copy), with a warning message, except for
+\fBreplace\fP, which causes an error. Note that \fBjitverify\fP, which is
+allowed, does not carry through to any subsequent matching that uses a stacked
+pattern.
 .
 .
 .\" HTML <a name="subjectmodifiers"></a>
@@ -1590,11 +1596,15 @@ can be used to test these functions.
 .P
 When a pattern with \fBpush\fP modifier is successfully compiled, it is pushed
 onto a stack of compiled patterns, and \fBpcre2test\fP expects the next line to
-contain a new pattern (or command) instead of a subject line. By this means, a
-number of patterns can be compiled and retained. The \fBpush\fP modifier is
-incompatible with \fBposix\fP, and control modifiers that act at match time are
-ignored (with a message). The \fBjitverify\fP modifier applies only at compile
-time. The command
+contain a new pattern (or command) instead of a subject line. By contrast,
+the \fBpushcopy\fP modifier causes a copy of the compiled pattern to be
+stacked, leaving the original available for immediate matching. By using
+\fBpush\fP and/or \fBpushcopy\fP, a number of patterns can be compiled and
+retained. These modifiers are incompatible with \fBposix\fP, and control
+modifiers that act at match time are ignored (with a message) for the stacked 
+patterns. The \fBjitverify\fP modifier applies only at compile time.
+.P
+The command
 .sp
   #save <filename>
 .sp
@@ -1614,7 +1624,8 @@ modifier list containing only
 control modifiers
 .\"
 that act after a pattern has been compiled. In particular, \fBhex\fP,
-\fBposix\fP, \fBposix_nosub\fP, and \fBpush\fP are not allowed, nor are any
+\fBposix\fP, \fBposix_nosub\fP, \fBpush\fP, and \fBpushcopy\fP are not allowed,
+nor are any
 .\" HTML <a href="#optionmodifiers">
 .\" </a>
 option-setting modifiers.
@@ -1634,6 +1645,10 @@ reloads two patterns.
 .sp
 If \fBjitverify\fP is used with #pop, it does not automatically imply
 \fBjit\fP, which is different behaviour from when it is used on a pattern.
+.P
+The #popcopy command is analagous to the \fBpushcopy\fP modifier in that it 
+makes current a copy of the topmost stack pattern, leaving the original still 
+on the stack.
 .
 .
 .

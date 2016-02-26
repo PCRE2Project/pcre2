@@ -353,7 +353,7 @@ typedef struct cmdstruct {
 } cmdstruct;
 
 enum { CMD_FORBID_UTF, CMD_LOAD, CMD_NEWLINE_DEFAULT, CMD_PATTERN,
-  CMD_PERLTEST, CMD_POP, CMD_SAVE, CMD_SUBJECT, CMD_UNKNOWN };
+  CMD_PERLTEST, CMD_POP, CMD_POPCOPY, CMD_SAVE, CMD_SUBJECT, CMD_UNKNOWN };
 
 static cmdstruct cmdlist[] = {
   { "forbid_utf",      CMD_FORBID_UTF },
@@ -362,6 +362,7 @@ static cmdstruct cmdlist[] = {
   { "pattern",         CMD_PATTERN },
   { "perltest",        CMD_PERLTEST },
   { "pop",             CMD_POP },
+  { "popcopy",         CMD_POPCOPY },
   { "save",            CMD_SAVE },
   { "subject",         CMD_SUBJECT }};
 
@@ -427,9 +428,9 @@ so many of them that they are split into two fields. */
 #define CTL_POSIX                        0x00400000u
 #define CTL_POSIX_NOSUB                  0x00800000u
 #define CTL_PUSH                         0x01000000u
-#define CTL_STARTCHAR                    0x02000000u
-#define CTL_ZERO_TERMINATE               0x04000000u
-/* Spare                                 0x08000000u  */
+#define CTL_PUSHCOPY                     0x02000000u
+#define CTL_STARTCHAR                    0x04000000u
+#define CTL_ZERO_TERMINATE               0x08000000u
 /* Spare                                 0x10000000u  */
 /* Spare                                 0x20000000u  */
 #define CTL_NL_SET                       0x40000000u  /* Informational */
@@ -603,6 +604,7 @@ static modstruct modlist[] = {
   { "posix_nosub",                MOD_PAT,  MOD_CTL, CTL_POSIX|CTL_POSIX_NOSUB,  PO(control) },
   { "ps",                         MOD_DAT,  MOD_OPT, PCRE2_PARTIAL_SOFT,         DO(options) },
   { "push",                       MOD_PAT,  MOD_CTL, CTL_PUSH,                   PO(control) },
+  { "pushcopy",                   MOD_PAT,  MOD_CTL, CTL_PUSHCOPY,              PO(control) },
   { "recursion_limit",            MOD_CTM,  MOD_INT, 0,                          MO(recursion_limit) },
   { "regerror_buffsize",          MOD_PAT,  MOD_INT, 0,                          PO(regerror_buffsize) },
   { "replace",                    MOD_PND,  MOD_STR, REPLACE_MODSIZE,            PO(replacement) },
@@ -644,7 +646,7 @@ static modstruct modlist[] = {
 
 #define PUSH_SUPPORTED_COMPILE_CONTROLS ( \
   CTL_BINCODE|CTL_CALLOUT_INFO|CTL_FULLBINCODE|CTL_HEXPAT|CTL_INFO| \
-  CTL_JITVERIFY|CTL_MEMORY|CTL_PUSH|CTL_BSR_SET|CTL_NL_SET)
+  CTL_JITVERIFY|CTL_MEMORY|CTL_PUSH|CTL_PUSHCOPY|CTL_BSR_SET|CTL_NL_SET)
 
 #define PUSH_SUPPORTED_COMPILE_CONTROLS2 (0)
 
@@ -653,9 +655,10 @@ static modstruct modlist[] = {
 #define PUSH_COMPILE_ONLY_CONTROLS   CTL_JITVERIFY
 #define PUSH_COMPILE_ONLY_CONTROLS2  (0)
 
-/* Controls that are forbidden with #pop. */
+/* Controls that are forbidden with #pop or #popcopy. */
 
-#define NOTPOP_CONTROLS (CTL_HEXPAT|CTL_POSIX|CTL_POSIX_NOSUB|CTL_PUSH)
+#define NOTPOP_CONTROLS (CTL_HEXPAT|CTL_POSIX|CTL_POSIX_NOSUB|CTL_PUSH| \
+  CTL_PUSHCOPY)
 
 /* Pattern controls that are mutually exclusive. At present these are all in
 the first control word. Note that CTL_POSIX_NOSUB is always accompanied by
@@ -664,6 +667,7 @@ CTL_POSIX, so it doesn't need its own entries. */
 static uint32_t exclusive_pat_controls[] = {
   CTL_POSIX  | CTL_HEXPAT,
   CTL_POSIX  | CTL_PUSH,
+  CTL_POSIX  | CTL_PUSHCOPY,
   CTL_EXPAND | CTL_HEXPAT };
 
 /* Data controls that are mutually exclusive. At present these are all in the
@@ -944,6 +948,22 @@ are supported. */
   else \
      a = pcre2_callout_enumerate_32(compiled_code32, \
        (int (*)(struct pcre2_callout_enumerate_block_32 *, void *))b,c)
+
+#define PCRE2_CODE_COPY_FROM_VOID(a,b) \
+  if (test_mode == PCRE8_MODE) \
+    G(a,8) = pcre2_code_copy_8(b); \
+  else if (test_mode == PCRE16_MODE) \
+    G(a,16) = pcre2_code_copy_16(b); \
+  else \
+    G(a,32) = pcre2_code_copy_32(b)
+
+#define PCRE2_CODE_COPY_TO_VOID(a,b) \
+  if (test_mode == PCRE8_MODE) \
+    a = (void *)pcre2_code_copy_8(G(b,8)); \
+  else if (test_mode == PCRE16_MODE) \
+    a = (void *)pcre2_code_copy_16(G(b,16)); \
+  else \
+    a = (void *)pcre2_code_copy_32(G(b,32))
 
 #define PCRE2_COMPILE(a,b,c,d,e,f,g) \
   if (test_mode == PCRE8_MODE) \
@@ -1396,6 +1416,18 @@ the three different cases. */
      a = G(pcre2_callout_enumerate,BITTWO)(G(compiled_code,BITTWO), \
        (int (*)(struct G(pcre2_callout_enumerate_block_,BITTWO) *, void *))b,c)
 
+#define PCRE2_CODE_COPY_FROM_VOID(a,b) \
+  if (test_mode == G(G(PCRE,BITONE),_MODE)) \
+    G(a,BITONE) = G(pcre2_code_copy_,BITONE)(b); \
+  else \
+    G(a,BITTWO) = G(pcre2_code_copy_,BITTWO)(b)
+
+#define PCRE2_CODE_COPY_TO_VOID(a,b) \
+  if (test_mode == G(G(PCRE,BITONE),_MODE)) \
+    a = (void *)G(pcre2_code_copy_,BITONE)(G(b,BITONE)); \
+  else \
+    a = (void *)G(pcre2_code_copy_,BITTWO)(G(b,BITTWO))
+
 #define PCRE2_COMPILE(a,b,c,d,e,f,g) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
     G(a,BITONE) = G(pcre2_compile_,BITONE)(G(b,BITONE),c,d,e,f,g); \
@@ -1731,6 +1763,8 @@ the three different cases. */
 #define PCRE2_CALLOUT_ENUMERATE(a,b,c) \
    a = pcre2_callout_enumerate_8(compiled_code8, \
      (int (*)(struct pcre2_callout_enumerate_block_8 *, void *))b,c)
+#define PCRE2_CODE_COPY_FROM_VOID(a,b) G(a,8) = pcre2_code_copy_8(b)
+#define PCRE2_CODE_COPY_TO_VOID(a,b) a = (void *)pcre2_code_copy_8(G(b,8))
 #define PCRE2_COMPILE(a,b,c,d,e,f,g) \
   G(a,8) = pcre2_compile_8(G(b,8),c,d,e,f,g)
 #define PCRE2_DFA_MATCH(a,b,c,d,e,f,g,h,i,j) \
@@ -1824,6 +1858,8 @@ the three different cases. */
 #define PCRE2_CALLOUT_ENUMERATE(a,b,c) \
    a = pcre2_callout_enumerate_16(compiled_code16, \
      (int (*)(struct pcre2_callout_enumerate_block_16 *, void *))b,c)
+#define PCRE2_CODE_COPY_FROM_VOID(a,b) G(a,16) = pcre2_code_copy_16(b)
+#define PCRE2_CODE_COPY_TO_VOID(a,b) a = (void *)pcre2_code_copy_16(G(b,16))
 #define PCRE2_COMPILE(a,b,c,d,e,f,g) \
   G(a,16) = pcre2_compile_16(G(b,16),c,d,e,f,g)
 #define PCRE2_DFA_MATCH(a,b,c,d,e,f,g,h,i,j) \
@@ -1917,6 +1953,8 @@ the three different cases. */
 #define PCRE2_CALLOUT_ENUMERATE(a,b,c) \
    a = pcre2_callout_enumerate_32(compiled_code32, \
      (int (*)(struct pcre2_callout_enumerate_block_32 *, void *))b,c)
+#define PCRE2_CODE_COPY_FROM_VOID(a,b) G(a,32) = pcre2_code_copy_32(b)
+#define PCRE2_CODE_COPY_TO_VOID(a,b) a = (void *)pcre2_code_copy_32(G(b,32))
 #define PCRE2_COMPILE(a,b,c,d,e,f,g) \
   G(a,32) = pcre2_compile_32(G(b,32),c,d,e,f,g)
 #define PCRE2_DFA_MATCH(a,b,c,d,e,f,g,h,i,j) \
@@ -3584,7 +3622,7 @@ Returns:      nothing
 static void
 show_controls(uint32_t controls, uint32_t controls2, const char *before)
 {
-fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
+fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
   before,
   ((controls & CTL_AFTERTEXT) != 0)? " aftertext" : "",
   ((controls & CTL_ALLAFTERTEXT) != 0)? " allaftertext" : "",
@@ -3613,6 +3651,7 @@ fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s
   ((controls & CTL_POSIX) != 0)? " posix" : "",
   ((controls & CTL_POSIX_NOSUB) != 0)? " posix_nosub" : "",
   ((controls & CTL_PUSH) != 0)? " push" : "",
+  ((controls & CTL_PUSHCOPY) != 0)? " pushcopy" : "",
   ((controls & CTL_STARTCHAR) != 0)? " startchar" : "",
   ((controls2 & CTL2_SUBSTITUTE_EXTENDED) != 0)? " substitute_extended" : "",
   ((controls2 & CTL2_SUBSTITUTE_OVERFLOW_LENGTH) != 0)? " substitute_overflow_length" : "",
@@ -4260,11 +4299,12 @@ switch(cmd)
   local_newline_default = first_listed_newline;
   break;
 
-  /* Pop a compiled pattern off the stack. Modifiers that do not affect the
-  compiled pattern (e.g. to give information) are permitted. The default
+  /* Pop or copy a compiled pattern off the stack. Modifiers that do not affect
+  the compiled pattern (e.g. to give information) are permitted. The default
   pattern modifiers are ignored. */
 
   case CMD_POP:
+  case CMD_POPCOPY:
   if (patstacknext <= 0)
     {
     fprintf(outfile, "** Can't pop off an empty stack\n");
@@ -4273,7 +4313,16 @@ switch(cmd)
   memset(&pat_patctl, 0, sizeof(patctl));   /* Completely unset */
   if (!decode_modifiers(argptr, CTX_POPPAT, &pat_patctl, NULL))
     return PR_SKIP;
-  SET(compiled_code, patstack[--patstacknext]);
+
+  if (cmd == CMD_POP)
+    {
+    SET(compiled_code, patstack[--patstacknext]);
+    }
+  else
+    {
+    PCRE2_CODE_COPY_FROM_VOID(compiled_code, patstack[patstacknext - 1]);
+    }
+
   if (pat_patctl.jit != 0)
     {
     PCRE2_JIT_COMPILE(jitrc, compiled_code, pat_patctl.jit);
@@ -4769,7 +4818,7 @@ if ((pat_patctl.control & CTL_POSIX) != 0)
 /* Handle compiling via the native interface. Controls that act later are
 ignored with "push". Replacements are locked out. */
 
-if ((pat_patctl.control & CTL_PUSH) != 0)
+if ((pat_patctl.control & (CTL_PUSH|CTL_PUSHCOPY)) != 0)
   {
   if (pat_patctl.replacement[0] != 0)
     {
@@ -4972,6 +5021,19 @@ if ((pat_patctl.control & CTL_PUSH) != 0)
   SET(compiled_code, NULL);
   }
 
+/* The "pushcopy" control is similar, but pushes a copy of the pattern. This
+tests the pcre2_code_copy() function. */
+
+if ((pat_patctl.control & CTL_PUSHCOPY) != 0)
+  {
+  if (patstacknext >= PATSTACKSIZE)
+    {
+    fprintf(outfile, "** Too many pushed patterns (max %d)\n", PATSTACKSIZE);
+    return PR_ABEND;
+    }
+  PCRE2_CODE_COPY_TO_VOID(patstack[patstacknext++], compiled_code);
+  }
+
 return PR_OK;
 }
 
@@ -5116,10 +5178,10 @@ if (f != NULL) fprintf(f, "--->");
 
 PCHARS(pre_start, cb->subject, 0, cb->start_match, utf, f);
 
-/* If a lookbehind is involved, the current position may be earlier than the 
+/* If a lookbehind is involved, the current position may be earlier than the
 match start. If so, use the match start instead. */
 
-current_position = (cb->current_position >= cb->start_match)? 
+current_position = (cb->current_position >= cb->start_match)?
   cb->current_position : cb->start_match;
 
 /* The subject between the match start and the current position. */
@@ -5129,7 +5191,7 @@ PCHARS(post_start, cb->subject, cb->start_match,
 
 /* Print from the current position to the end. */
 
-PCHARSV(cb->subject, current_position, cb->subject_length - current_position, 
+PCHARSV(cb->subject, current_position, cb->subject_length - current_position,
   utf, f);
 
 /* Calculate the total subject printed length (no print). */

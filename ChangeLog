@@ -69,6 +69,9 @@ identification.
 a report of compiler warnings from Visual Studio 2013 and a few tests with 
 gcc's -Wconversion (which still throws up a lot).
 
+15. Implemented pcre2_code_copy(), and added pushcopy and #popcopy to pcre2test 
+for testing it.
+
 
 Version 10.21 12-January-2016
 -----------------------------

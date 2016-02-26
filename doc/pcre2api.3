@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "25 February 2016" "PCRE2 10.22"
+.TH PCRE2API 3 "26 February 2016" "PCRE2 10.22"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -233,6 +233,8 @@ document for an overview of all the PCRE2 documentation.
 .rs
 .sp
 .nf
+.B pcre2_code *pcre2_code_copy(const pcre2_code *\fIcode\fP);
+.sp
 .B int pcre2_get_error_message(int \fIerrorcode\fP, PCRE2_UCHAR *\fIbuffer\fP,
 .B "  PCRE2_SIZE \fIbufflen\fP);"
 .sp
@@ -506,7 +508,8 @@ If JIT is being used, but the JIT compilation is not being done immediately,
 (perhaps waiting to see if the pattern is used often enough) similar logic is
 required. JIT compilation updates a pointer within the compiled code block, so 
 a thread must gain unique write access to the pointer before calling 
-\fBpcre2_jit_compile()\fP.
+\fBpcre2_jit_compile()\fP. Alternatively, \fBpcre2_code_copy()\fP can be used 
+to obtain a private copy of the compiled code.
 .
 .
 .SS "Context blocks"
@@ -1020,14 +1023,33 @@ zero.
 .B "  pcre2_compile_context *\fIccontext\fP);"
 .sp
 .B void pcre2_code_free(pcre2_code *\fIcode\fP);
+.sp
+.B pcre2_code *pcre2_code_copy(const pcre2_code *\fIcode\fP);
 .fi
 .P
 The \fBpcre2_compile()\fP function compiles a pattern into an internal form.
-The pattern is defined by a pointer to a string of code units and a length, If
+The pattern is defined by a pointer to a string of code units and a length. If
 the pattern is zero-terminated, the length can be specified as
 PCRE2_ZERO_TERMINATED. The function returns a pointer to a block of memory that
-contains the compiled pattern and related data. The caller must free the memory
-by calling \fBpcre2_code_free()\fP when it is no longer needed.
+contains the compiled pattern and related data. 
+.P
+If the compile context argument \fIccontext\fP is NULL, memory for the compiled
+pattern is obtained by calling \fBmalloc()\fP. Otherwise, it is obtained from
+the same memory function that was used for the compile context. The caller must
+free the memory by calling \fBpcre2_code_free()\fP when it is no longer needed.
+.P
+The function \fBpcre2_code_copy()\fP makes a copy of the compiled code in new 
+memory, using the same memory allocator as was used for the original. However, 
+if the code has been processed by the JIT compiler (see
+.\" HTML <a href="#jitcompiling">
+.\" </a>
+below),
+.\"
+the JIT information cannot be copied (because it is position-dependent). 
+The new copy can initially be used only for non-JIT matching, though it can be 
+passed to \fBpcre2_jit_compile()\fP if required. The \fBpcre2_code_copy()\fP
+function provides a way for individual threads in a multithreaded application
+to acquire a private copy of shared compiled code.
 .P
 NOTE: When one of the matching functions is called, pointers to the compiled
 pattern and the subject string are set in the match data block so that they can
@@ -1039,15 +1061,12 @@ match data block
 .\"
 have taken place.
 .P
-If the compile context argument \fIccontext\fP is NULL, memory for the compiled
-pattern is obtained by calling \fBmalloc()\fP. Otherwise, it is obtained from
-the same memory function that was used for the compile context.
-.P
-The \fIoptions\fP argument contains various bit settings that affect the
-compilation. It should be zero if no options are required. The available
-options are described below. Some of them (in particular, those that are
-compatible with Perl, but some others as well) can also be set and unset from
-within the pattern (see the detailed description in the
+The \fIoptions\fP argument for \fBpcre2_compile()\fP contains various bit
+settings that affect the compilation. It should be zero if no options are
+required. The available options are described below. Some of them (in
+particular, those that are compatible with Perl, but some others as well) can
+also be set and unset from within the pattern (see the detailed description in
+the
 .\" HREF
 \fBpcre2pattern\fP
 .\"
@@ -1470,6 +1489,7 @@ page. The \fBpcre2_get_error_message()\fP function can be called to obtain a
 textual error message from any error code.
 .
 .
+.\" HTML <a name="jitcompiling"></a>
 .SH "JUST-IN-TIME (JIT) COMPILATION"
 .rs
 .sp
@@ -3209,6 +3229,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 25 February 2016
+Last updated: 26 February 2016
 Copyright (c) 1997-2016 University of Cambridge.
 .fi

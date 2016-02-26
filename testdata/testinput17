@@ -213,6 +213,12 @@
 #pop jit,jitverify
     abcdef
     
+/abcd/pushcopy,jitverify
+    abcd
+    
+#pop jitverify
+    abcd
+    
 # Test pattern compilation
 
 /(?:a|b|c|d|e)(?R)/jit=1

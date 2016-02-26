@@ -436,7 +436,9 @@ PCRE2_EXP_DECL int       pcre2_set_recursion_memory_management( \
 PCRE2_EXP_DECL \
   pcre2_code            *pcre2_compile(PCRE2_SPTR, PCRE2_SIZE, uint32_t, \
                            int *, PCRE2_SIZE *, pcre2_compile_context *); \
-PCRE2_EXP_DECL void      pcre2_code_free(pcre2_code *);
+PCRE2_EXP_DECL void      pcre2_code_free(pcre2_code *); \
+PCRE2_EXP_DECL \
+  pcre2_code            *pcre2_code_copy(const pcre2_code *);
 
 
 /* Functions that give information about a compiled pattern. */
@@ -585,6 +587,7 @@ pcre2_compile are called by application code. */
 /* Functions: the complete list in alphabetical order */
 
 #define pcre2_callout_enumerate               PCRE2_SUFFIX(pcre2_callout_enumerate_)
+#define pcre2_code_copy                       PCRE2_SUFFIX(pcre2_code_copy_)
 #define pcre2_code_free                       PCRE2_SUFFIX(pcre2_code_free_)
 #define pcre2_compile                         PCRE2_SUFFIX(pcre2_compile_)
 #define pcre2_compile_context_copy            PCRE2_SUFFIX(pcre2_compile_context_copy_)
