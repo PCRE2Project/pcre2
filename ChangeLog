@@ -72,6 +72,13 @@ gcc's -Wconversion (which still throws up a lot).
 15. Implemented pcre2_code_copy(), and added pushcopy and #popcopy to pcre2test 
 for testing it.
 
+16. Change 66 for 10.21 introduced the use of snprintf() in PCRE2's version of 
+regerror(). When the error buffer is too small, my version of snprintf() puts a 
+binary zero in the final byte. Bug #1801 seems to show that other versions do 
+not do this, leading to bad output from pcre2test when it was checking for 
+buffer overflow. It no longer assumes a binary zero at the end of a too-small 
+regerror() buffer.
+
 
 Version 10.21 12-January-2016
 -----------------------------
@@ -443,7 +450,7 @@ space or a #-type comment that was followed by (?-x), which turns off
 PCRE2_EXTENDED, and there was no subsequent (?x) to turn it on again,
 pcre2_compile() assumed that (?-x) applied to the whole pattern and
 consequently mis-compiled it. This bug was found by the LLVM fuzzer. The fix
-for this bug means that a setting of any of the (?imsxU) options at the start
+for this bug means that a setting of any of the (?imsxJU) options at the start
 of a pattern is no longer transferred to the options that are returned by
 PCRE2_INFO_ALLOPTIONS. In fact, this was an anachronism that should have
 changed when the effects of those options were all moved to compile time.

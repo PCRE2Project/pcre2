@@ -4769,6 +4769,7 @@ if ((pat_patctl.control & CTL_POSIX) != 0)
   if (rc != 0)
     {
     size_t bsize, usize;
+    int psize; 
 
     preg.re_pcre2_code = NULL;     /* In case something was left in there */
     preg.re_match_data = NULL;
@@ -4779,7 +4780,8 @@ if ((pat_patctl.control & CTL_POSIX) != 0)
       memcpy(pbuffer8 + bsize, "DEADBEEF", 8);
     usize = regerror(rc, &preg, (char *)pbuffer8, bsize);
 
-    fprintf(outfile, "Failed: POSIX code %d: %s\n", rc, pbuffer8);
+    psize = (int)bsize;
+    fprintf(outfile, "Failed: POSIX code %d: %.*s\n", rc, psize, pbuffer8);
     if (usize > bsize)
       {
       fprintf(outfile, "** regerror() message truncated\n");
