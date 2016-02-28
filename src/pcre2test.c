@@ -4779,8 +4779,12 @@ if ((pat_patctl.control & CTL_POSIX) != 0)
     if (bsize + 8 < pbuffer8_size)
       memcpy(pbuffer8 + bsize, "DEADBEEF", 8);
     usize = regerror(rc, &preg, (char *)pbuffer8, bsize);
+    
+    /* Inside regerror(), snprintf() is used. If the buffer is too small, some 
+    versions of snprintf() put a zero byte at the end, but others do not. 
+    Therefore, we print a maximum of one less than the size of the buffer. */
 
-    psize = (int)bsize;
+    psize = (int)bsize - 1;
     fprintf(outfile, "Failed: POSIX code %d: %.*s\n", rc, psize, pbuffer8);
     if (usize > bsize)
       {
