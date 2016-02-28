@@ -79,6 +79,9 @@ not do this, leading to bad output from pcre2test when it was checking for
 buffer overflow. It no longer assumes a binary zero at the end of a too-small 
 regerror() buffer.
 
+17. Fixed typo ("&&" for "&") in pcre2_study(). Fortunately, this could not 
+actually affect anything, by sheer luck.
+
 
 Version 10.21 12-January-2016
 -----------------------------
