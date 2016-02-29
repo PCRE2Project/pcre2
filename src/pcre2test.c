@@ -3850,8 +3850,8 @@ if ((pat_patctl.control & (CTL_BINCODE|CTL_FULLBINCODE)) != 0)
 
 if ((pat_patctl.control & CTL_INFO) != 0)
   {
-  const void *nametable;
-  const uint8_t *start_bits;
+  void *nametable;
+  uint8_t *start_bits;
   BOOL match_limit_set, recursion_limit_set;
   uint32_t backrefmax, bsr_convention, capture_count, first_ctype, first_cunit,
     hasbackslashc, hascrorlf, jchanged, last_ctype, last_cunit, match_empty,
