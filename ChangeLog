@@ -82,6 +82,10 @@ regerror() buffer.
 17. Fixed typo ("&&" for "&") in pcre2_study(). Fortunately, this could not 
 actually affect anything, by sheer luck.
 
+18. Two minor fixes for MSVC compilation: (a) removal of apparently incorrect 
+"const" qualifiers in pcre2test and (b) defining snprintf as _snprintf for 
+older MSVC compilers.
+
 
 Version 10.21 12-January-2016
 -----------------------------

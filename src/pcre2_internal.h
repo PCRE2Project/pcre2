@@ -73,6 +73,14 @@ typedef int BOOL;
 #include <valgrind/memcheck.h>
 #endif
 
+/* Older versions of MSVC lack snprintf(). This define allows for
+warning/error-free compilation and testing with MSVC compilers back to at least
+MSVC 10/2010. Except for VC6 (which is missing some fundamentals and fails). */
+
+#if defined(_MSC_VER) && (_MSC_VER < 1900)
+#define snprintf _snprintf
+#endif
+
 /* When compiling a DLL for Windows, the exported symbols have to be declared
 using some MS magic. I found some useful information on this web page:
 http://msdn2.microsoft.com/en-us/library/y4h7bcy6(VS.80).aspx. According to the
