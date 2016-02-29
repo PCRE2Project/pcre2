@@ -31,9 +31,9 @@
    SLJIT defines the following architecture dependent types and macros:
 
    Types:
-     sljit_sb, sljit_ub : signed and unsigned 8 bit byte
-     sljit_sh, sljit_uh : signed and unsigned 16 bit half-word (short) type
-     sljit_si, sljit_ui : signed and unsigned 32 bit integer type
+     sljit_s8, sljit_u8   : signed and unsigned 8 bit integer type
+     sljit_s16, sljit_u16 : signed and unsigned 16 bit integer type
+     sljit_s32, sljit_u32 : signed and unsigned 32 bit integer type
      sljit_sw, sljit_uw : signed and unsigned machine word, enough to store a pointer
      sljit_p : unsgined pointer value (usually the same as sljit_uw, but
                some 64 bit ABIs may use 32 bit pointers)
@@ -252,11 +252,6 @@
 #endif
 #endif /* !SLJIT_INLINE */
 
-#ifndef SLJIT_CONST
-/* Const variables. */
-#define SLJIT_CONST const
-#endif
-
 #ifndef SLJIT_UNUSED_ARG
 /* Unused arguments. */
 #define SLJIT_UNUSED_ARG(arg) (void)arg
@@ -334,16 +329,16 @@
 /******************************************************/
 
 /* 8 bit byte type. */
-typedef unsigned char sljit_ub;
-typedef signed char sljit_sb;
+typedef unsigned char sljit_u8;
+typedef signed char sljit_s8;
 
 /* 16 bit half-word type. */
-typedef unsigned short int sljit_uh;
-typedef signed short int sljit_sh;
+typedef unsigned short int sljit_u16;
+typedef signed short int sljit_s16;
 
 /* 32 bit integer type. */
-typedef unsigned int sljit_ui;
-typedef signed int sljit_si;
+typedef unsigned int sljit_u32;
+typedef signed int sljit_s32;
 
 /* Machine word type. Enough for storing a pointer.
      32 bit for 32 bit machines.
