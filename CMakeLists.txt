@@ -71,6 +71,7 @@
 # 2015-07-16 PH updated for new pcre2_find_bracket source module
 # 2015-08-24 PH correct C_FLAGS setting (patch from Roy Ivy III)
 # 2015-10=16 PH added support for never-backslash-C
+# 2016-03-01 PH appliced Chris Wilson's patch for MSVC static
 
 PROJECT(PCRE2 C)
 
@@ -455,6 +456,18 @@ SET(PCRE2POSIX_SOURCES
   ${PCRE2POSIX_SOURCES} pcre2posix.rc)
 ENDIF (EXISTS ${PROJECT_SOURCE_DIR}/pcre2posix.rc)
 ENDIF(MSVC AND NOT PCRE2_STATIC)
+
+# Fix static compilation with MSVC: https://bugs.exim.org/show_bug.cgi?id=1681
+# This code was taken from the CMake wiki, not from WebM.
+
+IF(MSVC AND PCRE2_STATIC)
+  MESSAGE(STATUS "** MSVC and PCRE2_STATIC: modifying compiler flags to use static runtime library")
+  foreach(flag_var
+          CMAKE_C_FLAGS CMAKE_C_FLAGS_DEBUG CMAKE_C_FLAGS_RELEASE
+          CMAKE_C_FLAGS_MINSIZEREL CMAKE_C_FLAGS_RELWITHDEBINFO)
+    string(REGEX REPLACE "/MD" "/MT" ${flag_var} "${${flag_var}}")
+  endforeach()
+ENDIF(MSVC AND PCRE2_STATIC)
 
 # Build setup
 

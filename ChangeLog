@@ -86,6 +86,9 @@ actually affect anything, by sheer luck.
 "const" qualifiers in pcre2test and (b) defining snprintf as _snprintf for 
 older MSVC compilers.
 
+19. Applied Chris Wilson's patch (Bugzilla #1681) to CMakeLists.txt for MSVC 
+static compilation.
+
 
 Version 10.21 12-January-2016
 -----------------------------
