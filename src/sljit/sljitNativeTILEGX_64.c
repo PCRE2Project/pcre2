@@ -2180,10 +2180,12 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op0(struct sljit_compiler *compile
 	case SLJIT_BREAKPOINT:
 		return PI(BPT);
 
-	case SLJIT_LUMUL:
-	case SLJIT_LSMUL:
-	case SLJIT_UDIVI:
-	case SLJIT_SDIVI:
+	case SLJIT_LMUL_UW:
+	case SLJIT_LMUL_SW:
+	case SLJIT_DIVMOD_UW:
+	case SLJIT_DIVMOD_SW:
+	case SLJIT_DIV_UW:
+	case SLJIT_DIV_SW:
 		SLJIT_ASSERT_STOP();
 	}
 

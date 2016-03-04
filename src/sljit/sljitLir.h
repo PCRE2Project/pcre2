@@ -226,7 +226,7 @@ of sljitConfigInternal.h */
 /*  Floating point registers                                             */
 /* --------------------------------------------------------------------- */
 
-/* Each floating point register can store a double or single precision
+/* Each floating point register can store a 32 or a 64 bit precision
    value. The FR and FS register sets are overlap in the same way as R
    and S register sets. See above. */
 
@@ -624,31 +624,29 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_fast_return(struct sljit_compiler 
 #define SLJIT_MEM2(r1, r2)	(SLJIT_MEM | (r1) | ((r2) << 8))
 #define SLJIT_IMM		0x40
 
-/* Set 32 bit operation mode (I) on 64 bit CPUs. The flag is totally ignored on
-   32 bit CPUs. If this flag is set for an arithmetic operation, it uses only the
-   lower 32 bit of the input register(s), and set the CPU status flags according
-   to the 32 bit result. The higher 32 bits are undefined for both the input and
-   output. However, the CPU might not ignore those higher 32 bits, like MIPS, which
-   expects it to be the sign extension of the lower 32 bit. All 32 bit operations
-   are undefined, if this condition is not fulfilled. Therefore, when SLJIT_I32_OP
-   is specified, all register arguments must be the result of other operations with
-   the same SLJIT_I32_OP flag. In other words, although a register can hold either
-   a 64 or 32 bit value, these values cannot be mixed. The only exceptions are
-   SLJIT_IMOV and SLJIT_IMOVU (SLJIT_MOV_S32/SLJIT_MOVU_S32 with SLJIT_I32_OP flag)
-   which can convert any source argument to SLJIT_I32_OP compatible result. This
-   conversion might be unnecessary on some CPUs like x86-64, since the upper 32
-   bit is always ignored. In this case SLJIT is clever enough to not generate any
-   instructions if the source and destination operands are the same registers.
-   Affects sljit_emit_op0, sljit_emit_op1 and sljit_emit_op2. */
+/* Set 32 bit operation mode (I) on 64 bit CPUs. This flag is ignored on 32
+   bit CPUs. When this flag is set for an arithmetic operation, only the
+   lower 32 bit of the input register(s) are used, and the CPU status flags
+   are set according to the 32 bit result. Although the higher 32 bit of
+   the input and the result registers are not defined by SLJIT, it might be
+   defined by the CPU architecture (e.g. MIPS). To satisfy these requirements
+   all source registers must be computed by operations where this flag is
+   also set. In other words 32 and 64 bit arithmetic operations cannot be
+   mixed. The only exception is SLJIT_IMOV and SLJIT_IMOVU whose source
+   register can hold any 32 or 64 bit value. This source register is
+   converted to a 32 bit compatible format. SLJIT does not generate any
+   instructions on certain CPUs (e.g. on x86 and ARM) if the source and
+   destination operands are the same registers. Affects sljit_emit_op0,
+   sljit_emit_op1 and sljit_emit_op2. */
 #define SLJIT_I32_OP		0x100
 
-/* Single precision mode (SP). This flag is similar to SLJIT_I32_OP, just
+/* F32 precision mode (SP). This flag is similar to SLJIT_I32_OP, just
    it applies to floating point registers (it is even the same bit). When
-   this flag is passed, the CPU performs single precision floating point
-   operations. Similar to SLJIT_I32_OP, all register arguments must be the
-   result of other floating point operations with this flag. Affects
+   this flag is passed, the CPU performs 32 bit floating point operations.
+   Similar to SLJIT_I32_OP, all register arguments must be computed by
+   floating point operations where this flag is also set. Affects
    sljit_emit_fop1, sljit_emit_fop2 and sljit_emit_fcmp. */
-#define SLJIT_SINGLE_OP		0x100
+#define SLJIT_F32_OP		0x100
 
 /* Common CPU status flags for all architectures (x86, ARM, PPC)
     - carry flag
@@ -697,41 +695,39 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_fast_return(struct sljit_compiler 
 /* Flags: - (may destroy flags)
    Unsigned multiplication of SLJIT_R0 and SLJIT_R1.
    Result is placed into SLJIT_R1:SLJIT_R0 (high:low) word */
-#define SLJIT_LUMUL			(SLJIT_OP0_BASE + 2)
+#define SLJIT_LMUL_UW			(SLJIT_OP0_BASE + 2)
 /* Flags: - (may destroy flags)
    Signed multiplication of SLJIT_R0 and SLJIT_R1.
    Result is placed into SLJIT_R1:SLJIT_R0 (high:low) word */
-#define SLJIT_LSMUL			(SLJIT_OP0_BASE + 3)
+#define SLJIT_LMUL_SW			(SLJIT_OP0_BASE + 3)
 /* Flags: I - (may destroy flags)
    Unsigned divide of the value in SLJIT_R0 by the value in SLJIT_R1.
    The result is placed into SLJIT_R0 and the remainder into SLJIT_R1.
    Note: if SLJIT_R1 is 0, the behaviour is undefined. */
-#define SLJIT_UDIVMOD			(SLJIT_OP0_BASE + 4)
-#define SLJIT_IUDIVMOD			(SLJIT_UDIVMOD | SLJIT_I32_OP)
+#define SLJIT_DIVMOD_UW			(SLJIT_OP0_BASE + 4)
+#define SLJIT_DIVMOD_U32		(SLJIT_DIVMOD_UW | SLJIT_I32_OP)
 /* Flags: I - (may destroy flags)
    Signed divide of the value in SLJIT_R0 by the value in SLJIT_R1.
    The result is placed into SLJIT_R0 and the remainder into SLJIT_R1.
    Note: if SLJIT_R1 is 0, the behaviour is undefined.
    Note: if SLJIT_R1 is -1 and SLJIT_R0 is integer min (0x800..00),
          the behaviour is undefined. */
-#define SLJIT_SDIVMOD			(SLJIT_OP0_BASE + 5)
-#define SLJIT_ISDIVMOD			(SLJIT_SDIVMOD | SLJIT_I32_OP)
+#define SLJIT_DIVMOD_SW			(SLJIT_OP0_BASE + 5)
+#define SLJIT_DIVMOD_S32		(SLJIT_DIVMOD_SW | SLJIT_I32_OP)
 /* Flags: I - (may destroy flags)
    Unsigned divide of the value in SLJIT_R0 by the value in SLJIT_R1.
    The result is placed into SLJIT_R0. SLJIT_R1 preserves its value.
-   Note: if SLJIT_R1 is 0, the behaviour is undefined.
-   Note: SLJIT_SDIV is single precision divide. */
-#define SLJIT_UDIVI			(SLJIT_OP0_BASE + 6)
-#define SLJIT_IUDIVI			(SLJIT_UDIVI | SLJIT_I32_OP)
+   Note: if SLJIT_R1 is 0, the behaviour is undefined. */
+#define SLJIT_DIV_UW			(SLJIT_OP0_BASE + 6)
+#define SLJIT_DIV_U32			(SLJIT_DIV_UW | SLJIT_I32_OP)
 /* Flags: I - (may destroy flags)
    Signed divide of the value in SLJIT_R0 by the value in SLJIT_R1.
    The result is placed into SLJIT_R0. SLJIT_R1 preserves its value.
    Note: if SLJIT_R1 is 0, the behaviour is undefined.
    Note: if SLJIT_R1 is -1 and SLJIT_R0 is integer min (0x800..00),
-         the behaviour is undefined.
-   Note: SLJIT_SDIV is single precision divide. */
-#define SLJIT_SDIVI			(SLJIT_OP0_BASE + 7)
-#define SLJIT_ISDIVI			(SLJIT_SDIVI | SLJIT_I32_OP)
+         the behaviour is undefined. */
+#define SLJIT_DIV_SW			(SLJIT_OP0_BASE + 7)
+#define SLJIT_DIV_S32			(SLJIT_DIV_SW | SLJIT_I32_OP)
 
 SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op0(struct sljit_compiler *compiler, sljit_s32 op);
 
@@ -753,62 +749,62 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op0(struct sljit_compiler *compile
 #define SLJIT_MOV			(SLJIT_OP1_BASE + 0)
 /* Flags: I - (never set any flags) */
 #define SLJIT_MOV_U8			(SLJIT_OP1_BASE + 1)
-#define SLJIT_IMOV_U8			(SLJIT_MOV_U8 | SLJIT_I32_OP)
+#define SLJIT_MOV32_U8			(SLJIT_MOV_U8 | SLJIT_I32_OP)
 /* Flags: I - (never set any flags) */
 #define SLJIT_MOV_S8			(SLJIT_OP1_BASE + 2)
-#define SLJIT_IMOV_S8			(SLJIT_MOV_S8 | SLJIT_I32_OP)
+#define SLJIT_MOV32_S8			(SLJIT_MOV_S8 | SLJIT_I32_OP)
 /* Flags: I - (never set any flags) */
 #define SLJIT_MOV_U16			(SLJIT_OP1_BASE + 3)
-#define SLJIT_IMOV_U16			(SLJIT_MOV_U16 | SLJIT_I32_OP)
+#define SLJIT_MOV32_U16			(SLJIT_MOV_U16 | SLJIT_I32_OP)
 /* Flags: I - (never set any flags) */
 #define SLJIT_MOV_S16			(SLJIT_OP1_BASE + 4)
-#define SLJIT_IMOV_S16			(SLJIT_MOV_S16 | SLJIT_I32_OP)
+#define SLJIT_MOV32_S16			(SLJIT_MOV_S16 | SLJIT_I32_OP)
 /* Flags: I - (never set any flags)
-   Note: see SLJIT_I32_OP for further details. */
+   Note: no SLJIT_MOV32_U32 form, since it is the same as SLJIT_MOV32 */
 #define SLJIT_MOV_U32			(SLJIT_OP1_BASE + 5)
-/* No SLJIT_I32_OP form, since it is the same as SLJIT_IMOV. */
 /* Flags: I - (never set any flags)
-   Note: see SLJIT_I32_OP for further details. */
+   Note: no SLJIT_MOV32_S32 form, since it is the same as SLJIT_MOV32 */
 #define SLJIT_MOV_S32			(SLJIT_OP1_BASE + 6)
-#define SLJIT_IMOV			(SLJIT_MOV_S32 | SLJIT_I32_OP)
+/* Flags: I - (never set any flags) */
+#define SLJIT_MOV32			(SLJIT_MOV_S32 | SLJIT_I32_OP)
 /* Flags: - (never set any flags) */
 #define SLJIT_MOV_P			(SLJIT_OP1_BASE + 7)
 /* Flags: - (never set any flags) */
 #define SLJIT_MOVU			(SLJIT_OP1_BASE + 8)
 /* Flags: I - (never set any flags) */
 #define SLJIT_MOVU_U8			(SLJIT_OP1_BASE + 9)
-#define SLJIT_IMOVU_U8			(SLJIT_MOVU_U8 | SLJIT_I32_OP)
+#define SLJIT_MOVU32_U8			(SLJIT_MOVU_U8 | SLJIT_I32_OP)
 /* Flags: I - (never set any flags) */
 #define SLJIT_MOVU_S8			(SLJIT_OP1_BASE + 10)
-#define SLJIT_IMOVU_S8			(SLJIT_MOVU_S8 | SLJIT_I32_OP)
+#define SLJIT_MOVU32_S8			(SLJIT_MOVU_S8 | SLJIT_I32_OP)
 /* Flags: I - (never set any flags) */
 #define SLJIT_MOVU_U16			(SLJIT_OP1_BASE + 11)
-#define SLJIT_IMOVU_U16			(SLJIT_MOVU_U16 | SLJIT_I32_OP)
+#define SLJIT_MOVU32_U16			(SLJIT_MOVU_U16 | SLJIT_I32_OP)
 /* Flags: I - (never set any flags) */
 #define SLJIT_MOVU_S16			(SLJIT_OP1_BASE + 12)
-#define SLJIT_IMOVU_S16			(SLJIT_MOVU_S16 | SLJIT_I32_OP)
+#define SLJIT_MOVU32_S16		(SLJIT_MOVU_S16 | SLJIT_I32_OP)
 /* Flags: I - (never set any flags)
-   Note: see SLJIT_I32_OP for further details. */
+   Note: no SLJIT_MOVU32_U32 form, since it is the same as SLJIT_MOVU32 */
 #define SLJIT_MOVU_U32			(SLJIT_OP1_BASE + 13)
-/* No SLJIT_I32_OP form, since it is the same as SLJIT_IMOVU. */
 /* Flags: I - (never set any flags)
-   Note: see SLJIT_I32_OP for further details. */
+   Note: no SLJIT_MOVU32_S32 form, since it is the same as SLJIT_MOVU32 */
 #define SLJIT_MOVU_S32			(SLJIT_OP1_BASE + 14)
-#define SLJIT_IMOVU			(SLJIT_MOVU_S32 | SLJIT_I32_OP)
+/* Flags: I - (never set any flags) */
+#define SLJIT_MOVU32			(SLJIT_MOVU_S32 | SLJIT_I32_OP)
 /* Flags: - (never set any flags) */
 #define SLJIT_MOVU_P			(SLJIT_OP1_BASE + 15)
 /* Flags: I | E | K */
 #define SLJIT_NOT			(SLJIT_OP1_BASE + 16)
-#define SLJIT_INOT			(SLJIT_NOT | SLJIT_I32_OP)
+#define SLJIT_NOT32			(SLJIT_NOT | SLJIT_I32_OP)
 /* Flags: I | E | O | K */
 #define SLJIT_NEG			(SLJIT_OP1_BASE + 17)
-#define SLJIT_INEG			(SLJIT_NEG | SLJIT_I32_OP)
+#define SLJIT_NEG32			(SLJIT_NEG | SLJIT_I32_OP)
 /* Count leading zeroes
    Flags: I | E | K
    Important note! Sparc 32 does not support K flag, since
    the required popc instruction is introduced only in sparc 64. */
 #define SLJIT_CLZ			(SLJIT_OP1_BASE + 18)
-#define SLJIT_ICLZ			(SLJIT_CLZ | SLJIT_I32_OP)
+#define SLJIT_CLZ32			(SLJIT_CLZ | SLJIT_I32_OP)
 
 SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op1(struct sljit_compiler *compiler, sljit_s32 op,
 	sljit_s32 dst, sljit_sw dstw,
@@ -819,50 +815,50 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op1(struct sljit_compiler *compile
 
 /* Flags: I | E | O | C | K */
 #define SLJIT_ADD			(SLJIT_OP2_BASE + 0)
-#define SLJIT_IADD			(SLJIT_ADD | SLJIT_I32_OP)
+#define SLJIT_ADD32			(SLJIT_ADD | SLJIT_I32_OP)
 /* Flags: I | C | K */
 #define SLJIT_ADDC			(SLJIT_OP2_BASE + 1)
-#define SLJIT_IADDC			(SLJIT_ADDC | SLJIT_I32_OP)
+#define SLJIT_ADDC32			(SLJIT_ADDC | SLJIT_I32_OP)
 /* Flags: I | E | U | S | O | C | K */
 #define SLJIT_SUB			(SLJIT_OP2_BASE + 2)
-#define SLJIT_ISUB			(SLJIT_SUB | SLJIT_I32_OP)
+#define SLJIT_SUB32			(SLJIT_SUB | SLJIT_I32_OP)
 /* Flags: I | C | K */
 #define SLJIT_SUBC			(SLJIT_OP2_BASE + 3)
-#define SLJIT_ISUBC			(SLJIT_SUBC | SLJIT_I32_OP)
+#define SLJIT_SUBC32			(SLJIT_SUBC | SLJIT_I32_OP)
 /* Note: integer mul
    Flags: I | O (see SLJIT_C_MUL_*) | K */
 #define SLJIT_MUL			(SLJIT_OP2_BASE + 4)
-#define SLJIT_IMUL			(SLJIT_MUL | SLJIT_I32_OP)
+#define SLJIT_MUL32			(SLJIT_MUL | SLJIT_I32_OP)
 /* Flags: I | E | K */
 #define SLJIT_AND			(SLJIT_OP2_BASE + 5)
-#define SLJIT_IAND			(SLJIT_AND | SLJIT_I32_OP)
+#define SLJIT_AND32			(SLJIT_AND | SLJIT_I32_OP)
 /* Flags: I | E | K */
 #define SLJIT_OR			(SLJIT_OP2_BASE + 6)
-#define SLJIT_IOR			(SLJIT_OR | SLJIT_I32_OP)
+#define SLJIT_OR32			(SLJIT_OR | SLJIT_I32_OP)
 /* Flags: I | E | K */
 #define SLJIT_XOR			(SLJIT_OP2_BASE + 7)
-#define SLJIT_IXOR			(SLJIT_XOR | SLJIT_I32_OP)
+#define SLJIT_XOR32			(SLJIT_XOR | SLJIT_I32_OP)
 /* Flags: I | E | K
    Let bit_length be the length of the shift operation: 32 or 64.
    If src2 is immediate, src2w is masked by (bit_length - 1).
    Otherwise, if the content of src2 is outside the range from 0
    to bit_length - 1, the result is undefined. */
 #define SLJIT_SHL			(SLJIT_OP2_BASE + 8)
-#define SLJIT_ISHL			(SLJIT_SHL | SLJIT_I32_OP)
+#define SLJIT_SHL32			(SLJIT_SHL | SLJIT_I32_OP)
 /* Flags: I | E | K
    Let bit_length be the length of the shift operation: 32 or 64.
    If src2 is immediate, src2w is masked by (bit_length - 1).
    Otherwise, if the content of src2 is outside the range from 0
    to bit_length - 1, the result is undefined. */
 #define SLJIT_LSHR			(SLJIT_OP2_BASE + 9)
-#define SLJIT_ILSHR			(SLJIT_LSHR | SLJIT_I32_OP)
+#define SLJIT_LSHR32			(SLJIT_LSHR | SLJIT_I32_OP)
 /* Flags: I | E | K
    Let bit_length be the length of the shift operation: 32 or 64.
    If src2 is immediate, src2w is masked by (bit_length - 1).
    Otherwise, if the content of src2 is outside the range from 0
    to bit_length - 1, the result is undefined. */
 #define SLJIT_ASHR			(SLJIT_OP2_BASE + 10)
-#define SLJIT_IASHR			(SLJIT_ASHR | SLJIT_I32_OP)
+#define SLJIT_ASHR32			(SLJIT_ASHR | SLJIT_I32_OP)
 
 SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op2(struct sljit_compiler *compiler, sljit_s32 op,
 	sljit_s32 dst, sljit_sw dstw,
@@ -877,38 +873,38 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_is_fpu_available(void);
 #define SLJIT_FOP1_BASE			128
 
 /* Flags: SP - (never set any flags) */
-#define SLJIT_DMOV			(SLJIT_FOP1_BASE + 0)
-#define SLJIT_SMOV			(SLJIT_DMOV | SLJIT_SINGLE_OP)
+#define SLJIT_MOV_F64			(SLJIT_FOP1_BASE + 0)
+#define SLJIT_MOV_F32			(SLJIT_MOV_F64 | SLJIT_F32_OP)
 /* Convert opcodes: CONV[DST_TYPE].FROM[SRC_TYPE]
    SRC/DST TYPE can be: D - double, S - single, W - signed word, I - signed int
    Rounding mode when the destination is W or I: round towards zero. */
 /* Flags: SP - (never set any flags) */
-#define SLJIT_CONVD_FROMS		(SLJIT_FOP1_BASE + 1)
-#define SLJIT_CONVS_FROMD		(SLJIT_CONVD_FROMS | SLJIT_SINGLE_OP)
+#define SLJIT_CONV_F64_FROM_F32		(SLJIT_FOP1_BASE + 1)
+#define SLJIT_CONV_F32_FROM_F64		(SLJIT_CONV_F64_FROM_F32 | SLJIT_F32_OP)
 /* Flags: SP - (never set any flags) */
-#define SLJIT_CONVW_FROMD		(SLJIT_FOP1_BASE + 2)
-#define SLJIT_CONVW_FROMS		(SLJIT_CONVW_FROMD | SLJIT_SINGLE_OP)
+#define SLJIT_CONV_SW_FROM_F64		(SLJIT_FOP1_BASE + 2)
+#define SLJIT_CONV_SW_FROM_F32		(SLJIT_CONV_SW_FROM_F64 | SLJIT_F32_OP)
 /* Flags: SP - (never set any flags) */
-#define SLJIT_CONVI_FROMD		(SLJIT_FOP1_BASE + 3)
-#define SLJIT_CONVI_FROMS		(SLJIT_CONVI_FROMD | SLJIT_SINGLE_OP)
+#define SLJIT_CONV_S32_FROM_F64		(SLJIT_FOP1_BASE + 3)
+#define SLJIT_CONV_S32_FROM_F32		(SLJIT_CONV_S32_FROM_F64 | SLJIT_F32_OP)
 /* Flags: SP - (never set any flags) */
-#define SLJIT_CONVD_FROMW		(SLJIT_FOP1_BASE + 4)
-#define SLJIT_CONVS_FROMW		(SLJIT_CONVD_FROMW | SLJIT_SINGLE_OP)
+#define SLJIT_CONV_F64_FROM_SW		(SLJIT_FOP1_BASE + 4)
+#define SLJIT_CONV_F32_FROM_SW		(SLJIT_CONV_F64_FROM_SW | SLJIT_F32_OP)
 /* Flags: SP - (never set any flags) */
-#define SLJIT_CONVD_FROMI		(SLJIT_FOP1_BASE + 5)
-#define SLJIT_CONVS_FROMI		(SLJIT_CONVD_FROMI | SLJIT_SINGLE_OP)
+#define SLJIT_CONV_F64_FROM_S32		(SLJIT_FOP1_BASE + 5)
+#define SLJIT_CONV_F32_FROM_S32		(SLJIT_CONV_F64_FROM_S32 | SLJIT_F32_OP)
 /* Note: dst is the left and src is the right operand for SLJIT_CMPD.
    Note: NaN check is always performed. If SLJIT_C_FLOAT_UNORDERED flag
          is set, the comparison result is unpredictable.
    Flags: SP | E | S (see SLJIT_C_FLOAT_*) */
-#define SLJIT_DCMP			(SLJIT_FOP1_BASE + 6)
-#define SLJIT_SCMP			(SLJIT_DCMP | SLJIT_SINGLE_OP)
+#define SLJIT_CMP_F64			(SLJIT_FOP1_BASE + 6)
+#define SLJIT_CMP_F32			(SLJIT_CMP_F64 | SLJIT_F32_OP)
 /* Flags: SP - (never set any flags) */
-#define SLJIT_DNEG			(SLJIT_FOP1_BASE + 7)
-#define SLJIT_SNEG			(SLJIT_DNEG | SLJIT_SINGLE_OP)
+#define SLJIT_NEG_F64			(SLJIT_FOP1_BASE + 7)
+#define SLJIT_NEG_F32			(SLJIT_NEG_F64 | SLJIT_F32_OP)
 /* Flags: SP - (never set any flags) */
-#define SLJIT_DABS			(SLJIT_FOP1_BASE + 8)
-#define SLJIT_SABS			(SLJIT_DABS | SLJIT_SINGLE_OP)
+#define SLJIT_ABS_F64			(SLJIT_FOP1_BASE + 8)
+#define SLJIT_ABS_F32			(SLJIT_ABS_F64 | SLJIT_F32_OP)
 
 SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_fop1(struct sljit_compiler *compiler, sljit_s32 op,
 	sljit_s32 dst, sljit_sw dstw,
@@ -918,17 +914,17 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_fop1(struct sljit_compiler *compil
 #define SLJIT_FOP2_BASE			160
 
 /* Flags: SP - (never set any flags) */
-#define SLJIT_DADD			(SLJIT_FOP2_BASE + 0)
-#define SLJIT_SADD			(SLJIT_DADD | SLJIT_SINGLE_OP)
+#define SLJIT_ADD_F64			(SLJIT_FOP2_BASE + 0)
+#define SLJIT_ADD_F32			(SLJIT_ADD_F64 | SLJIT_F32_OP)
 /* Flags: SP - (never set any flags) */
-#define SLJIT_DSUB			(SLJIT_FOP2_BASE + 1)
-#define SLJIT_SSUB			(SLJIT_DSUB | SLJIT_SINGLE_OP)
+#define SLJIT_SUB_F64			(SLJIT_FOP2_BASE + 1)
+#define SLJIT_SUB_F32			(SLJIT_SUB_F64 | SLJIT_F32_OP)
 /* Flags: SP - (never set any flags) */
-#define SLJIT_DMUL			(SLJIT_FOP2_BASE + 2)
-#define SLJIT_SMUL			(SLJIT_DMUL | SLJIT_SINGLE_OP)
+#define SLJIT_MUL_F64			(SLJIT_FOP2_BASE + 2)
+#define SLJIT_MUL_F32			(SLJIT_MUL_F64 | SLJIT_F32_OP)
 /* Flags: SP - (never set any flags) */
-#define SLJIT_DDIV			(SLJIT_FOP2_BASE + 3)
-#define SLJIT_SDIV			(SLJIT_DDIV | SLJIT_SINGLE_OP)
+#define SLJIT_DIV_F64			(SLJIT_FOP2_BASE + 3)
+#define SLJIT_DIV_F32			(SLJIT_DIV_F64 | SLJIT_F32_OP)
 
 SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_fop2(struct sljit_compiler *compiler, sljit_s32 op,
 	sljit_s32 dst, sljit_sw dstw,
@@ -943,58 +939,58 @@ SLJIT_API_FUNC_ATTRIBUTE struct sljit_label* sljit_emit_label(struct sljit_compi
 
 /* Integer comparison types. */
 #define SLJIT_EQUAL			0
-#define SLJIT_I_EQUAL			(SLJIT_EQUAL | SLJIT_I32_OP)
+#define SLJIT_EQUAL32			(SLJIT_EQUAL | SLJIT_I32_OP)
 #define SLJIT_ZERO			0
-#define SLJIT_I_ZERO			(SLJIT_ZERO | SLJIT_I32_OP)
+#define SLJIT_ZERO32			(SLJIT_ZERO | SLJIT_I32_OP)
 #define SLJIT_NOT_EQUAL			1
-#define SLJIT_I_NOT_EQUAL		(SLJIT_NOT_EQUAL | SLJIT_I32_OP)
+#define SLJIT_NOT_EQUAL32		(SLJIT_NOT_EQUAL | SLJIT_I32_OP)
 #define SLJIT_NOT_ZERO			1
-#define SLJIT_I_NOT_ZERO		(SLJIT_NOT_ZERO | SLJIT_I32_OP)
+#define SLJIT_NOT_ZERO32		(SLJIT_NOT_ZERO | SLJIT_I32_OP)
 
 #define SLJIT_LESS			2
-#define SLJIT_I_LESS			(SLJIT_LESS | SLJIT_I32_OP)
+#define SLJIT_LESS32			(SLJIT_LESS | SLJIT_I32_OP)
 #define SLJIT_GREATER_EQUAL		3
-#define SLJIT_I_GREATER_EQUAL		(SLJIT_GREATER_EQUAL | SLJIT_I32_OP)
+#define SLJIT_GREATER_EQUAL32		(SLJIT_GREATER_EQUAL | SLJIT_I32_OP)
 #define SLJIT_GREATER			4
-#define SLJIT_I_GREATER			(SLJIT_GREATER | SLJIT_I32_OP)
+#define SLJIT_GREATER32			(SLJIT_GREATER | SLJIT_I32_OP)
 #define SLJIT_LESS_EQUAL		5
-#define SLJIT_I_LESS_EQUAL		(SLJIT_LESS_EQUAL | SLJIT_I32_OP)
+#define SLJIT_LESS_EQUAL32		(SLJIT_LESS_EQUAL | SLJIT_I32_OP)
 #define SLJIT_SIG_LESS			6
-#define SLJIT_I_SIG_LESS		(SLJIT_SIG_LESS | SLJIT_I32_OP)
+#define SLJIT_SIG_LESS32		(SLJIT_SIG_LESS | SLJIT_I32_OP)
 #define SLJIT_SIG_GREATER_EQUAL		7
-#define SLJIT_I_SIG_GREATER_EQUAL	(SLJIT_SIG_GREATER_EQUAL | SLJIT_I32_OP)
+#define SLJIT_SIG_GREATER_EQUAL32	(SLJIT_SIG_GREATER_EQUAL | SLJIT_I32_OP)
 #define SLJIT_SIG_GREATER		8
-#define SLJIT_I_SIG_GREATER		(SLJIT_SIG_GREATER | SLJIT_I32_OP)
+#define SLJIT_SIG_GREATER32		(SLJIT_SIG_GREATER | SLJIT_I32_OP)
 #define SLJIT_SIG_LESS_EQUAL		9
-#define SLJIT_I_SIG_LESS_EQUAL		(SLJIT_SIG_LESS_EQUAL | SLJIT_I32_OP)
+#define SLJIT_SIG_LESS_EQUAL32		(SLJIT_SIG_LESS_EQUAL | SLJIT_I32_OP)
 
 #define SLJIT_OVERFLOW			10
-#define SLJIT_I_OVERFLOW		(SLJIT_OVERFLOW | SLJIT_I32_OP)
+#define SLJIT_OVERFLOW32		(SLJIT_OVERFLOW | SLJIT_I32_OP)
 #define SLJIT_NOT_OVERFLOW		11
-#define SLJIT_I_NOT_OVERFLOW		(SLJIT_NOT_OVERFLOW | SLJIT_I32_OP)
+#define SLJIT_NOT_OVERFLOW32		(SLJIT_NOT_OVERFLOW | SLJIT_I32_OP)
 
 #define SLJIT_MUL_OVERFLOW		12
-#define SLJIT_I_MUL_OVERFLOW		(SLJIT_MUL_OVERFLOW | SLJIT_I32_OP)
+#define SLJIT_MUL_OVERFLOW32		(SLJIT_MUL_OVERFLOW | SLJIT_I32_OP)
 #define SLJIT_MUL_NOT_OVERFLOW		13
-#define SLJIT_I_MUL_NOT_OVERFLOW	(SLJIT_MUL_NOT_OVERFLOW | SLJIT_I32_OP)
+#define SLJIT_MUL_NOT_OVERFLOW32	(SLJIT_MUL_NOT_OVERFLOW | SLJIT_I32_OP)
 
 /* Floating point comparison types. */
-#define SLJIT_D_EQUAL			14
-#define SLJIT_S_EQUAL			(SLJIT_D_EQUAL | SLJIT_SINGLE_OP)
-#define SLJIT_D_NOT_EQUAL		15
-#define SLJIT_S_NOT_EQUAL		(SLJIT_D_NOT_EQUAL | SLJIT_SINGLE_OP)
-#define SLJIT_D_LESS			16
-#define SLJIT_S_LESS			(SLJIT_D_LESS | SLJIT_SINGLE_OP)
-#define SLJIT_D_GREATER_EQUAL		17
-#define SLJIT_S_GREATER_EQUAL		(SLJIT_D_GREATER_EQUAL | SLJIT_SINGLE_OP)
-#define SLJIT_D_GREATER			18
-#define SLJIT_S_GREATER			(SLJIT_D_GREATER | SLJIT_SINGLE_OP)
-#define SLJIT_D_LESS_EQUAL		19
-#define SLJIT_S_LESS_EQUAL		(SLJIT_D_LESS_EQUAL | SLJIT_SINGLE_OP)
-#define SLJIT_D_UNORDERED		20
-#define SLJIT_S_UNORDERED		(SLJIT_D_UNORDERED | SLJIT_SINGLE_OP)
-#define SLJIT_D_ORDERED			21
-#define SLJIT_S_ORDERED			(SLJIT_D_ORDERED | SLJIT_SINGLE_OP)
+#define SLJIT_EQUAL_F64			14
+#define SLJIT_EQUAL_F32			(SLJIT_EQUAL_F64 | SLJIT_F32_OP)
+#define SLJIT_NOT_EQUAL_F64		15
+#define SLJIT_NOT_EQUAL_F32		(SLJIT_NOT_EQUAL_F64 | SLJIT_F32_OP)
+#define SLJIT_LESS_F64			16
+#define SLJIT_LESS_F32			(SLJIT_LESS_F64 | SLJIT_F32_OP)
+#define SLJIT_GREATER_EQUAL_F64		17
+#define SLJIT_GREATER_EQUAL_F32		(SLJIT_GREATER_EQUAL_F64 | SLJIT_F32_OP)
+#define SLJIT_GREATER_F64		18
+#define SLJIT_GREATER_F32		(SLJIT_GREATER_F64 | SLJIT_F32_OP)
+#define SLJIT_LESS_EQUAL_F64		19
+#define SLJIT_LESS_EQUAL_F32		(SLJIT_LESS_EQUAL_F64 | SLJIT_F32_OP)
+#define SLJIT_UNORDERED_F64		20
+#define SLJIT_UNORDERED_F32		(SLJIT_UNORDERED_F64 | SLJIT_F32_OP)
+#define SLJIT_ORDERED_F64		21
+#define SLJIT_ORDERED_F32		(SLJIT_ORDERED_F64 | SLJIT_F32_OP)
 
 /* Unconditional jump types. */
 #define SLJIT_JUMP			22
@@ -1033,7 +1029,7 @@ SLJIT_API_FUNC_ATTRIBUTE struct sljit_jump* sljit_emit_cmp(struct sljit_compiler
    sljit_emit_jump. However some architectures (i.e: MIPS) may employ
    special optimizations here. It is suggested to use this comparison form
    when appropriate.
-    type must be between SLJIT_D_EQUAL and SLJIT_S_ORDERED
+    type must be between SLJIT_EQUAL_F64 and SLJIT_ORDERED_F32
     type can be combined (or'ed) with SLJIT_REWRITABLE_JUMP
    Flags: destroy flags.
    Note: if either operand is NaN, the behaviour is undefined for

@@ -34,11 +34,11 @@
      sljit_s8, sljit_u8   : signed and unsigned 8 bit integer type
      sljit_s16, sljit_u16 : signed and unsigned 16 bit integer type
      sljit_s32, sljit_u32 : signed and unsigned 32 bit integer type
-     sljit_sw, sljit_uw : signed and unsigned machine word, enough to store a pointer
-     sljit_p : unsgined pointer value (usually the same as sljit_uw, but
-               some 64 bit ABIs may use 32 bit pointers)
-     sljit_s : single precision floating point value
-     sljit_d : double precision floating point value
+     sljit_sw, sljit_uw   : signed and unsigned machine word, enough to store a pointer
+     sljit_p              : unsgined pointer value (usually the same as sljit_uw, but
+                            some 64 bit ABIs may use 32 bit pointers)
+     sljit_f32            : 32 bit single precision floating point value
+     sljit_f64            : 64 bit double precision floating point value
 
    Macros for feature detection (boolean):
      SLJIT_32BIT_ARCHITECTURE : 32 bit architecture
@@ -56,10 +56,10 @@
      SLJIT_NUMBER_OF_SCRATCH_FLOAT_REGISTERS : number of available floating point scratch registers
      SLJIT_NUMBER_OF_SAVED_FLOAT_REGISTERS : number of available floating point saved registers
      SLJIT_WORD_SHIFT : the shift required to apply when accessing a sljit_sw/sljit_uw array by index
-     SLJIT_DOUBLE_SHIFT : the shift required to apply when accessing
-                          a double precision floating point array by index
-     SLJIT_SINGLE_SHIFT : the shift required to apply when accessing
-                          a single precision floating point array by index
+     SLJIT_F32_SHIFT : the shift required to apply when accessing
+                       a single precision floating point array by index
+     SLJIT_F64_SHIFT : the shift required to apply when accessing
+                       a double precision floating point array by index
      SLJIT_LOCALS_OFFSET : local space starting offset (SLJIT_SP + SLJIT_LOCALS_OFFSET)
      SLJIT_RETURN_ADDRESS_OFFSET : a return instruction always adds this offset to the return address
 
@@ -325,7 +325,7 @@
 #endif /* !SLJIT_CACHE_FLUSH */
 
 /******************************************************/
-/* Byte/half/int/word/single/double type definitions. */
+/*    Integer and floating point type definitions.    */
 /******************************************************/
 
 /* 8 bit byte type. */
@@ -372,15 +372,15 @@ typedef long int sljit_sw;
 typedef sljit_uw sljit_p;
 
 /* Floating point types. */
-typedef float sljit_s;
-typedef double sljit_d;
+typedef float sljit_f32;
+typedef double sljit_f64;
 
 /* Shift for pointer sized data. */
 #define SLJIT_POINTER_SHIFT SLJIT_WORD_SHIFT
 
 /* Shift for double precision sized data. */
-#define SLJIT_DOUBLE_SHIFT 3
-#define SLJIT_SINGLE_SHIFT 2
+#define SLJIT_F32_SHIFT 2
+#define SLJIT_F64_SHIFT 3
 
 #ifndef SLJIT_W
 
