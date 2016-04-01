@@ -89,6 +89,14 @@ older MSVC compilers.
 19. Applied Chris Wilson's patch (Bugzilla #1681) to CMakeLists.txt for MSVC 
 static compilation.
 
+20. Updated pcre2grep to set stdout as binary when run under Windows, so as not
+to convert \r\n at the ends of reflected lines into \r\r\n. This required 
+ensuring that other output that is written to stdout (e.g. file names) uses the 
+appropriate line terminator: \r\n for Windows, \n otherwise.
+
+21. When a line is too long for pcre2grep's internal buffer, show the maximum 
+length in the error message.
+
 
 Version 10.21 12-January-2016
 -----------------------------
