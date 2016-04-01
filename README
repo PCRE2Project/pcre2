@@ -168,14 +168,11 @@ library. They are also documented in the pcre2build man page.
   built. If you want only the 16-bit or 32-bit library, use --disable-pcre2-8
   to disable building the 8-bit library.
 
-. If you want to include support for just-in-time compiling, which can give
-  large performance improvements on certain platforms, add --enable-jit to the
-  "configure" command. This support is available only for certain hardware
+. If you want to include support for just-in-time (JIT) compiling, which can 
+  give large performance improvements on certain platforms, add --enable-jit to
+  the "configure" command. This support is available only for certain hardware
   architectures. If you try to enable it on an unsupported architecture, there
   will be a compile time error.
-
-. When JIT support is enabled, pcre2grep automatically makes use of it, unless
-  you add --disable-pcre2grep-jit to the "configure" command.
 
 . If you do not want to make use of the support for UTF-8 Unicode character
   strings in the 8-bit library, UTF-16 Unicode character strings in the 16-bit
@@ -323,6 +320,14 @@ library. They are also documented in the pcre2build man page.
   You can do this by setting the environment variable CCACHE_DISABLE=1 before
   running "make" to build PCRE2. There is more information about coverage
   reporting in the "pcre2build" documentation.
+
+. When JIT support is enabled, pcre2grep automatically makes use of it, unless
+  you add --disable-pcre2grep-jit to the "configure" command.
+  
+. On non-Windows sytems there is support for calling external scripts during 
+  matching in the pcre2grep command via PCRE2's callout facility with string
+  arguments. This support can be disabled by adding --disable-pcre2grep-callout
+  to the "configure" command.
 
 . The pcre2grep program currently supports only 8-bit data files, and so
   requires the 8-bit PCRE2 library. It is possible to compile pcre2grep to use
@@ -840,4 +845,4 @@ The distribution should contain the files listed below.
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 16 October 2015
+Last updated: 01 April 2016

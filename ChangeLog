@@ -97,6 +97,9 @@ appropriate line terminator: \r\n for Windows, \n otherwise.
 21. When a line is too long for pcre2grep's internal buffer, show the maximum 
 length in the error message.
 
+22. Added support for string callouts to pcre2grep (Zoltan's patch with PH 
+additions).
+
 
 Version 10.21 12-January-2016
 -----------------------------

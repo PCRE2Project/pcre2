@@ -1,4 +1,4 @@
-.TH PCRE2BUILD 3 "16 October 2015" "PCRE2 10.21"
+.TH PCRE2BUILD 3 "01 April 2016" "PCRE2 10.22"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .
@@ -352,6 +352,19 @@ and equivalent run-time options, refer to these character values in an EBCDIC
 environment.
 .
 .
+.SH "PCRE2GREP SUPPORT FOR EXTERNAL SCRIPTS"
+.rs
+.sp
+By default, on non-Windows systems, \fBpcre2grep\fP supports the use of 
+callouts with string arguments within the patterns it is matching, in order to 
+run external scripts. For details, see the
+.\" HREF
+\fBpcre2grep\fP
+.\"
+documentation. This support can be disabled by adding 
+--disable-pcre2grep-callout to the \fBconfigure\fP command. 
+.
+.
 .SH "PCRE2GREP OPTIONS FOR COMPRESSED FILE SUPPORT"
 .rs
 .sp
@@ -381,7 +394,7 @@ parameter value by adding, for example,
   --with-pcre2grep-bufsize=50K
 .sp
 to the \fBconfigure\fP command. The caller of \fPpcre2grep\fP can override this
-value by using --buffer-size on the command line..
+value by using --buffer-size on the command line.
 .
 .
 .SH "PCRE2TEST OPTION FOR LIBREADLINE SUPPORT"
@@ -519,6 +532,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 16 October 2015
-Copyright (c) 1997-2015 University of Cambridge.
+Last updated: 01 April 2016
+Copyright (c) 1997-2016 University of Cambridge.
 .fi

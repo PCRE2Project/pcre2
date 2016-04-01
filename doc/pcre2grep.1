@@ -1,4 +1,4 @@
-.TH PCRE2GREP 1 "03 January 2015" "PCRE2 10.00"
+.TH PCRE2GREP 1 "01 April 2016" "PCRE2 10.22"
 .SH NAME
 pcre2grep - a grep with Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -653,6 +653,54 @@ options does have data, it must be given in the first form, using an equals
 character. Otherwise \fBpcre2grep\fP will assume that it has no data.
 .
 .
+.SH "CALLING EXTERNAL SCRIPTS"
+.rs
+.sp
+On non-Windows systems, \fBpcre2grep\fP has, by default, support for calling
+external programs or scripts during matching by making use of PCRE2's callout
+facility. However, this support can be disabled when \fBpcre2grep\fP is built.
+You can find out whether your binary has support for callouts by running it
+with the \fB--help\fP option. If the support is not enabled, all callouts in
+patterns are ignored by \fBpcre2grep\fP.
+.P
+A callout in a PCRE2 pattern is of the form (?C<arg>) where the argument is 
+either a number or a quoted string (see the
+.\" HREF
+\fBpcre2callout\fP
+.\"
+documentation for details). Numbered callouts are ignored by \fBpcre2grep\fP.
+String arguments are parsed as a list of substrings separated by pipe (vertical
+bar) characters. The first substring must be an executable name, with the
+following substrings specifying arguments:
+.sp
+  executable_name|arg1|arg2|...
+.sp
+Any substirng (including the executable name) may contain escape sequences
+started by a dollar character: $<digits> or ${<digits>} is replaced by the
+captured substring of the given decimal number, which must be greater than
+zero. If the number is greater than the number of capturing substrings, or if
+the capture is unset, the replacement is empty.
+.P
+Any other character is substituted by itself. In particular, $$ is replaced by
+a single dollar and $| is replaced by a pipe character. Here is an example:
+.sp
+  echo -e "abcde\en12345" | pcre2grep \e
+    '(?x)(.)(..(.))
+    (?C"/bin/echo|Arg1: [$1] [$2] [$3]|Arg2: $|${1}$| ($4)")()' -
+
+  Output:
+
+    Arg1: [a] [bcd] [d] Arg2: |a| ()
+    abcde
+    Arg1: [1] [234] [4] Arg2: |1| ()
+    12345
+.sp
+Any syntax errors in the string (for example, a dollar not followed by another 
+character) cause the callout to be ignored. If running the program fails for 
+any reason (including the non-existence of the executable), a local matching 
+failure occurs and the matcher backtracks in the normal way.
+.
+.
 .SH "MATCHING ERRORS"
 .rs
 .sp
@@ -683,7 +731,7 @@ affect the return code.
 .SH "SEE ALSO"
 .rs
 .sp
-\fBpcre2pattern\fP(3), \fBpcre2syntax\fP(3).
+\fBpcre2pattern\fP(3), \fBpcre2syntax\fP(3), \fBpcre2callout\fP(3).
 .
 .
 .SH AUTHOR
@@ -700,6 +748,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 03 January 2015
-Copyright (c) 1997-2015 University of Cambridge.
+Last updated: 01 April 2016
+Copyright (c) 1997-2016 University of Cambridge.
 .fi

@@ -570,6 +570,7 @@ EXTRA_DIST += \
   testdata/greplist \
   testdata/grepoutput \
   testdata/grepoutput8 \
+  testdata/grepoutputC \
   testdata/grepoutputN \
   testdata/greppatN4 \
   testdata/testinput1 \

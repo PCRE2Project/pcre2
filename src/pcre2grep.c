@@ -58,6 +58,10 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <sys/types.h>
 #include <sys/stat.h>
 
+#ifdef SUPPORT_PCRE2GREP_CALLOUT
+#include <sys/wait.h>
+#endif
+
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -121,9 +125,9 @@ apply to fprintf(). */
 
 #define FWRITE(a,b,c,d) if (fwrite(a,b,c,d)) {}
 
-/* Under Windows, we have to set stdout to be binary, so that it does not 
-convert \r\n at the ends of output lines to \r\r\n. However, that means that 
-any messages written to stdout must have \r\n as their line terminator. This is 
+/* Under Windows, we have to set stdout to be binary, so that it does not
+convert \r\n at the ends of output lines to \r\r\n. However, that means that
+any messages written to stdout must have \r\n as their line terminator. This is
 handled by using STDOUT_NL as the newline string. */
 
 #if defined(_WIN32) || defined(WIN32)
@@ -899,6 +903,13 @@ option_item *op;
 printf("Usage: pcre2grep [OPTION]... [PATTERN] [FILE1 FILE2 ...]" STDOUT_NL);
 printf("Search for PATTERN in each FILE or standard input." STDOUT_NL);
 printf("PATTERN must be present if neither -e nor -f is used." STDOUT_NL);
+
+#ifdef SUPPORT_PCRE2GREP_CALLOUT
+printf("Callout scripts in patterns are supported." STDOUT_NL);
+#else
+printf("Callout scripts are not supported in this pcre2grep." STDOUT_NL);
+#endif
+
 printf("\"-\" can be used as a file name to mean STDIN." STDOUT_NL);
 
 #ifdef SUPPORT_LIBZ
@@ -1484,6 +1495,274 @@ return FALSE;  /* No match, no errors */
 }
 
 
+#ifdef SUPPORT_PCRE2GREP_CALLOUT
+
+/*************************************************
+*        Parse and execute callout scripts       *
+*************************************************/
+
+/* This function parses a callout string block and executes the
+program specified by the string. The string is a list of substrings
+separated by pipe characters. The first substring represents the
+executable name, and the following substrings specify the arguments:
+
+  program_name|param1|param2|...
+
+Any substirng (including the program name) can contain escape sequences
+started by the dollar character. The escape sequences are substituted as
+follows:
+
+  $<digits> or ${<digits>} is replaced by the captured substring of the given
+  decimal number, which must be greater than zero. If the number is greater
+  than the number of capturing substrings, or if the capture is unset, the
+  replacement is empty.
+
+  Any other character is substituted by itself. E.g: $$ is replaced by a single
+  dollar or $| replaced by a pipe character.
+
+Example:
+
+  echo -e "abcde\n12345" | pcre2grep \
+    '(.)(..(.))(?C"/bin/echo|Arg1: [$1] [$2] [$3]|Arg2: $|${1}$| ($4)")()' -
+
+  Output:
+
+    Arg1: [a] [bcd] [d] Arg2: |a| ()
+    abcde
+    Arg1: [1] [234] [4] Arg2: |1| ()
+    12345
+
+Arguments:
+  blockptr     the callout block
+
+Returns:       currently it always returns with 0
+*/
+
+static int
+pcre2grep_callout(pcre2_callout_block *calloutptr, void *unused)
+{
+PCRE2_SIZE length = calloutptr->callout_string_length;
+PCRE2_SPTR string = calloutptr->callout_string;
+PCRE2_SPTR subject = calloutptr->subject;
+PCRE2_SIZE *ovector = calloutptr->offset_vector;
+PCRE2_SIZE capture_top = calloutptr->capture_top;
+PCRE2_SIZE argsvectorlen = 2;
+PCRE2_SIZE argslen = 1;
+char *args;
+char *argsptr;
+char **argsvector;
+char **argsvectorptr;
+pid_t pid;
+int result = 0;
+
+(void)unused;   /* Avoid compiler warning */
+
+/* Only callout with strings are supported. */
+if (string == NULL || length == 0) return 0;
+
+/* Checking syntax and compute the number of string fragments. Callout strings
+are ignored in case of a syntax error. */
+
+while (length > 0)
+  {
+  if (*string == '|')
+    {
+    argsvectorlen++;
+
+    /* Maximum 10000 arguments allowed. */
+    if (argsvectorlen > 10000) return 0;
+    }
+  else if (*string == '$')
+    {
+    PCRE2_SIZE capture_id = 0;
+
+    string++;
+    length--;
+
+    /* Syntax error: a character must be present after $. */
+    if (length == 0) return 0;
+
+    if (*string >= '1' && *string <= '9')
+      {
+      do
+        {
+        /* Maximum capture id is 65535. */
+        if (capture_id <= 65535)
+          capture_id = capture_id * 10 + (*string - '0');
+
+        string++;
+        length--;
+        }
+      while (length > 0 && *string >= '0' && *string <= '9');
+
+      /* To negate the effect of string++ below. */
+      string--;
+      length++;
+      }
+    else if (*string == '{')
+      {
+      /* Must be a decimal number in parenthesis, e.g: (5) or (38) */
+      string++;
+      length--;
+
+      /* Syntax error: a decimal number required. */
+      if (length == 0) return 0;
+      if (*string < '1' || *string > '9') return 0;
+
+      do
+        {
+        /* Maximum capture id is 65535. */
+        if (capture_id <= 65535)
+          capture_id = capture_id * 10 + (*string - '0');
+
+        string++;
+        length--;
+
+        /* Syntax error: no more characters */
+        if (length == 0) return 0;
+        }
+      while (*string >= '0' && *string <= '9');
+
+      /* Syntax error: close paren is missing. */
+      if (*string != '}') return 0;
+      }
+
+    if (capture_id > 0)
+      {
+      if (capture_id < capture_top)
+        {
+        capture_id *= 2;
+        argslen += ovector[capture_id + 1] - ovector[capture_id];
+        }
+
+      /* To negate the effect of argslen++ below. */
+      argslen--;
+      }
+    }
+
+  string++;
+  length--;
+  argslen++;
+  }
+
+args = (char*)malloc(argslen);
+if (args == NULL) return 0;
+
+argsvector = (char**)malloc(argsvectorlen * sizeof(char*));
+if (argsvector == NULL)
+  {
+  free(args);
+  return 0;
+  }
+
+argsptr = args;
+argsvectorptr = argsvector;
+
+*argsvectorptr++ = argsptr;
+
+length = calloutptr->callout_string_length;
+string = calloutptr->callout_string;
+
+while (length > 0)
+  {
+  if (*string == '|')
+    {
+    *argsptr++ = '\0';
+    *argsvectorptr++ = argsptr;
+    }
+  else if (*string == '$')
+    {
+    string++;
+    length--;
+
+    if ((*string >= '1' && *string <= '9') || *string == '{')
+      {
+      PCRE2_SIZE capture_id = 0;
+
+      if (*string != '{')
+        {
+        do
+          {
+          /* Maximum capture id is 65535. */
+          if (capture_id <= 65535)
+            capture_id = capture_id * 10 + (*string - '0');
+
+          string++;
+          length--;
+          }
+        while (length > 0 && *string >= '0' && *string <= '9');
+
+        /* To negate the effect of string++ below. */
+        string--;
+        length++;
+        }
+      else
+        {
+        string++;
+        length--;
+
+        do
+          {
+          /* Maximum capture id is 65535. */
+          if (capture_id <= 65535)
+            capture_id = capture_id * 10 + (*string - '0');
+
+          string++;
+          length--;
+          }
+        while (*string != '}');
+        }
+
+        if (capture_id < capture_top)
+          {
+          PCRE2_SIZE capturesize;
+          capture_id *= 2;
+
+          capturesize = ovector[capture_id + 1] - ovector[capture_id];
+          memcpy(argsptr, subject + ovector[capture_id], capturesize);
+          argsptr += capturesize;
+          }
+      }
+    else
+      {
+      *argsptr++ = *string;
+      }
+    }
+  else
+    {
+    *argsptr++ = *string;
+    }
+
+  string++;
+  length--;
+  }
+
+*argsptr++ = '\0';
+*argsvectorptr = NULL;
+
+pid = fork();
+
+if (pid == 0)
+  {
+  (void)execv(argsvector[0], argsvector);
+  /* Control gets here if there is an error, e.g. a non-existent program */
+  exit(1);
+  }
+else if (pid > 0)
+  (void)waitpid(pid, &result, 0);
+
+free(args);
+free(argsvector);
+
+/* Currently negative return values are not supported, only zero (match
+continues) or non-zero (match fails). */
+
+return result != 0;
+}
+
+#endif
+
+
 
 /*************************************************
 *            Grep an individual file             *
@@ -1786,7 +2065,7 @@ while (ptr < endptr)
               }
             }
 
-          if (printed || printname != NULL || number) 
+          if (printed || printname != NULL || number)
             fprintf(stdout, STDOUT_NL);
           }
 
@@ -2637,10 +2916,10 @@ const char *locale_from = "--locale";
 pcre2_jit_stack *jit_stack = NULL;
 #endif
 
-/* In Windows, stdout is set up as a text stream, which means that \n is 
-converted to \r\n. This causes output lines that are copied from the input to 
-change from ....\r\n to ....\r\r\n, which is not right. We therefore ensure 
-that stdout is a binary stream. Note that this means all other output to stdout 
+/* In Windows, stdout is set up as a text stream, which means that \n is
+converted to \r\n. This causes output lines that are copied from the input to
+change from ....\r\n to ....\r\r\n, which is not right. We therefore ensure
+that stdout is a binary stream. Note that this means all other output to stdout
 must use STDOUT_NL to terminate lines. */
 
 #if defined(_WIN32) || defined(WIN32)
@@ -2653,6 +2932,13 @@ compile_context = pcre2_compile_context_create(NULL);
 match_context = pcre2_match_context_create(NULL);
 match_data = pcre2_match_data_create(OFFSET_SIZE, NULL);
 offsets = pcre2_get_ovector_pointer(match_data);
+
+/* If string (script) callouts are supported, set up the callout processing
+function. */
+
+#ifdef SUPPORT_PCRE2GREP_CALLOUT
+pcre2_set_callout(match_context, pcre2grep_callout, NULL);
+#endif
 
 /* Process the options */
 

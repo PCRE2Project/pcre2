@@ -158,6 +158,9 @@ SET(PCRE2_SUPPORT_JIT OFF CACHE BOOL
 SET(PCRE2_SUPPORT_PCRE2GREP_JIT ON CACHE BOOL
     "Enable use of Just-in-time compiling in pcre2grep.")
 
+SET(PCRE2_SUPPORT_PCRE2GREP_CALLOUT ON CACHE BOOL
+    "Enable callout string support in pcre2grep.")
+
 SET(PCRE2_SUPPORT_UNICODE ON CACHE BOOL
     "Enable support for Unicode and UTF-8/UTF-16/UTF-32 encoding.")
 
@@ -272,6 +275,10 @@ ENDIF(PCRE2_SUPPORT_JIT)
 IF(PCRE2_SUPPORT_PCRE2GREP_JIT)
         SET(SUPPORT_PCRE2GREP_JIT 1)
 ENDIF(PCRE2_SUPPORT_PCRE2GREP_JIT)
+
+IF(PCRE2_SUPPORT_PCRE2GREP_CALLOUT)
+        SET(SUPPORT_PCRE2GREP_CALLOUT 1)
+ENDIF(PCRE2_SUPPORT_PCRE2GREP_CALLOUT)
 
 IF(PCRE2_SUPPORT_VALGRIND)
         SET(SUPPORT_VALGRIND 1)
@@ -753,6 +760,7 @@ IF(PCRE2_SHOW_REPORT)
   MESSAGE(STATUS "  Build static libs ............... : ${BUILD_STATIC_LIBS}")
   MESSAGE(STATUS "  Build pcre2grep ................. : ${PCRE2_BUILD_PCRE2GREP}")
   MESSAGE(STATUS "  Enable JIT in pcre2grep ......... : ${PCRE2_SUPPORT_PCRE2GREP_JIT}")
+  MESSAGE(STATUS "  Enable callouts in pcre2grep .... : ${PCRE2_SUPPORT_PCRE2GREP_CALLOUT}")
   MESSAGE(STATUS "  Buffer size for pcre2grep ....... : ${PCRE2GREP_BUFSIZE}")
   MESSAGE(STATUS "  Build tests (implies pcre2test  . : ${PCRE2_BUILD_TESTS}")
   MESSAGE(STATUS "               and pcre2grep)")

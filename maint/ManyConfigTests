@@ -326,7 +326,7 @@ if [ $usemain -ne 0 ]; then
     "--disable-shared" \
     "--disable-unicode --disable-stack-for-recursion --disable-shared" \
     "--disable-stack-for-recursion --disable-shared --enable-never-backslash-C" \
-    "--with-link-size=3 --disable-shared" \
+    "--with-link-size=3 --disable-shared --disable-pcre2grep-callout" \
     "--disable-unicode --enable-rebuild-chartables --disable-shared" \
     "--disable-unicode --enable-newline-is-any --disable-shared" \
     "--disable-unicode --enable-newline-is-cr --disable-shared" \
