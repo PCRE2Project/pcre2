@@ -46,6 +46,8 @@ typedef sljit_u32 sljit_ins;
 #define SLJIT_PASS_ENTRY_ADDR_TO_CALL 1
 #endif
 
+#if (defined SLJIT_CACHE_FLUSH_OWN_IMPL && SLJIT_CACHE_FLUSH_OWN_IMPL)
+
 static void ppc_cache_flush(sljit_ins *from, sljit_ins *to)
 {
 #ifdef _AIX
@@ -86,6 +88,8 @@ static void ppc_cache_flush(sljit_ins *from, sljit_ins *to)
 #error "This platform requires a cache flush implementation."
 #endif /* _AIX */
 }
+
+#endif /* (defined SLJIT_CACHE_FLUSH_OWN_IMPL && SLJIT_CACHE_FLUSH_OWN_IMPL) */
 
 #define TMP_REG1	(SLJIT_NUMBER_OF_REGISTERS + 2)
 #define TMP_REG2	(SLJIT_NUMBER_OF_REGISTERS + 3)

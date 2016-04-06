@@ -33,6 +33,8 @@ SLJIT_API_FUNC_ATTRIBUTE const char* sljit_get_platform_name(void)
    Both for sparc-32 and sparc-64 */
 typedef sljit_u32 sljit_ins;
 
+#if (defined SLJIT_CACHE_FLUSH_OWN_IMPL && SLJIT_CACHE_FLUSH_OWN_IMPL)
+
 static void sparc_cache_flush(sljit_ins *from, sljit_ins *to)
 {
 #if defined(__SUNPRO_C) && __SUNPRO_C < 0x590
@@ -81,6 +83,8 @@ static void sparc_cache_flush(sljit_ins *from, sljit_ins *to)
 	}
 #endif
 }
+
+#endif /* (defined SLJIT_CACHE_FLUSH_OWN_IMPL && SLJIT_CACHE_FLUSH_OWN_IMPL) */
 
 /* TMP_REG2 is not used by getput_arg */
 #define TMP_REG1	(SLJIT_NUMBER_OF_REGISTERS + 2)

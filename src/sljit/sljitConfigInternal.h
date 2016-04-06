@@ -279,6 +279,15 @@
 /* Instruction cache flush. */
 /****************************/
 
+#if (!defined SLJIT_CACHE_FLUSH && defined __has_builtin)
+#if __has_builtin(__builtin___clear_cache)
+
+#define SLJIT_CACHE_FLUSH(from, to) \
+	__builtin___clear_cache((char*)from, (char*)to)
+
+#endif /* __has_builtin(__builtin___clear_cache) */
+#endif /* (!defined SLJIT_CACHE_FLUSH && defined __has_builtin) */
+
 #ifndef SLJIT_CACHE_FLUSH
 
 #if (defined SLJIT_CONFIG_X86 && SLJIT_CONFIG_X86)
@@ -295,6 +304,11 @@
 #define SLJIT_CACHE_FLUSH(from, to) \
 	sys_icache_invalidate((char*)(from), (char*)(to) - (char*)(from))
 
+#elif (defined(__GNUC__) && (__GNUC__ >= 5 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 3)))
+
+#define SLJIT_CACHE_FLUSH(from, to) \
+	__builtin___clear_cache((char*)from, (char*)to)
+
 #elif defined __ANDROID__
 
 /* Android lacks __clear_cache; instead, cacheflush should be used. */
@@ -307,12 +321,14 @@
 /* The __clear_cache() implementation of GCC is a dummy function on PowerPC. */
 #define SLJIT_CACHE_FLUSH(from, to) \
 	ppc_cache_flush((from), (to))
+#define SLJIT_CACHE_FLUSH_OWN_IMPL 1
 
 #elif (defined SLJIT_CONFIG_SPARC_32 && SLJIT_CONFIG_SPARC_32)
 
 /* The __clear_cache() implementation of GCC is a dummy function on Sparc. */
 #define SLJIT_CACHE_FLUSH(from, to) \
 	sparc_cache_flush((from), (to))
+#define SLJIT_CACHE_FLUSH_OWN_IMPL 1
 
 #else
 
