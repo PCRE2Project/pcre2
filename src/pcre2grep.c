@@ -58,6 +58,11 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <sys/types.h>
 #include <sys/stat.h>
 
+#if defined(_WIN32) || defined(WIN32)
+#include <io.h>                /* For _setmode() */
+#include <fcntl.h>             /* For _O_BINARY */
+#endif
+
 #ifdef SUPPORT_PCRE2GREP_CALLOUT
 #include <sys/wait.h>
 #endif
@@ -2923,7 +2928,7 @@ that stdout is a binary stream. Note that this means all other output to stdout
 must use STDOUT_NL to terminate lines. */
 
 #if defined(_WIN32) || defined(WIN32)
-setmode(fileno(stdout), O_BINARY);
+_setmode( _fileno(stdout), _O_BINARY);
 #endif
 
 /* Set up a default compile and match contexts and a match data block. */
