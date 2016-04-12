@@ -187,8 +187,8 @@ typedef struct jit_arguments {
   /* Everything else after. */
   sljit_uw offset_limit;
   sljit_u32 limit_match;
-  uint32_t oveccount;
-  uint32_t options;
+  sljit_u32 oveccount;
+  sljit_u32 options;
 } jit_arguments;
 
 #define JIT_NUMBER_OF_COMPILE_MODES 3
@@ -1416,14 +1416,14 @@ while (cc < ccend)
 
     case OP_CLASS:
     case OP_NCLASS:
-    size = 1 + 32 / sizeof(PCRE2_UCHAR);
     space = get_class_iterator_size(cc + size);
+    size = 1 + 32 / sizeof(PCRE2_UCHAR);
     break;
 
 #if defined SUPPORT_UNICODE || PCRE2_CODE_UNIT_WIDTH != 8
     case OP_XCLASS:
-    size = GET(cc, 1);
     space = get_class_iterator_size(cc + size);
+    size = GET(cc, 1);
     break;
 #endif
 
@@ -3299,7 +3299,7 @@ sljit_emit_fast_return(compiler, RETURN_ADDR, 0);
 
 #endif /* SUPPORT_UNICODE */
 
-static SLJIT_INLINE struct sljit_label *mainloop_entry(compiler_common *common, BOOL hascrorlf, uint32_t overall_options)
+static SLJIT_INLINE struct sljit_label *mainloop_entry(compiler_common *common, BOOL hascrorlf, sljit_u32 overall_options)
 {
 DEFINE_COMPILER;
 struct sljit_label *mainloop;
@@ -3478,7 +3478,7 @@ chars[len] = chr;
 chars[0] = len;
 }
 
-static int scan_prefix(compiler_common *common, PCRE2_SPTR cc, PCRE2_UCHAR *chars, int max_chars, uint32_t *rec_count)
+static int scan_prefix(compiler_common *common, PCRE2_SPTR cc, PCRE2_UCHAR *chars, int max_chars, sljit_u32 *rec_count)
 {
 /* Recursive function, which scans prefix literals. */
 BOOL last, any, class, caseless;
@@ -4341,7 +4341,7 @@ int i, max, from;
 int range_right = -1, range_len;
 sljit_u8 *update_table = NULL;
 BOOL in_range;
-uint32_t rec_count;
+sljit_u32 rec_count;
 
 for (i = 0; i < MAX_N_CHARS; i++)
   chars[i * MAX_DIFF_CHARS] = 0;
@@ -5297,8 +5297,6 @@ return src2;
 
 #endif /* SUPPORT_UNICODE */
 
-static PCRE2_SPTR compile_char1_matchingpath(compiler_common *common, PCRE2_UCHAR type, PCRE2_SPTR cc, jump_list **backtracks, BOOL check_str_ptr);
-
 static PCRE2_SPTR byte_sequence_compare(compiler_common *common, BOOL caseless, PCRE2_SPTR cc,
     compare_context *context, jump_list **backtracks)
 {
@@ -5473,6 +5471,8 @@ return cc;
       OP2(SLJIT_SUB, TMP1, 0, TMP1, 0, SLJIT_IMM, (sljit_sw)((value) - charoffset)); \
     } \
   charoffset = (value);
+
+static PCRE2_SPTR compile_char1_matchingpath(compiler_common *common, PCRE2_UCHAR type, PCRE2_SPTR cc, jump_list **backtracks, BOOL check_str_ptr);
 
 static void compile_xclass_matchingpath(compiler_common *common, PCRE2_SPTR cc, jump_list **backtracks)
 {
@@ -7134,8 +7134,8 @@ static int SLJIT_CALL do_callout(struct jit_arguments *arguments, pcre2_callout_
 {
 PCRE2_SPTR begin = arguments->begin;
 PCRE2_SIZE *ovector = arguments->match_data->ovector;
-uint32_t oveccount = arguments->oveccount;
-uint32_t i;
+sljit_u32 oveccount = arguments->oveccount;
+sljit_u32 i;
 
 if (arguments->callout == NULL)
   return 0;
@@ -10828,7 +10828,7 @@ sljit_emit_fast_return(compiler, SLJIT_MEM1(STACK_TOP), 0);
 #undef COMPILE_BACKTRACKINGPATH
 #undef CURRENT_AS
 
-static int jit_compile(pcre2_code *code, uint32_t mode)
+static int jit_compile(pcre2_code *code, sljit_u32 mode)
 {
 pcre2_real_code *re = (pcre2_real_code *)code;
 struct sljit_compiler *compiler;
@@ -11440,7 +11440,7 @@ Returns:        0: success or (*NOJIT) was used
   (PCRE2_JIT_COMPLETE|PCRE2_JIT_PARTIAL_SOFT|PCRE2_JIT_PARTIAL_HARD)
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
-pcre2_jit_compile(pcre2_code *code, uint32_t options)
+pcre2_jit_compile(pcre2_code *code, sljit_u32 options)
 {
 #ifndef SUPPORT_JIT
 
