@@ -100,6 +100,8 @@ length in the error message.
 22. Added support for string callouts to pcre2grep (Zoltan's patch with PH 
 additions).
 
+23. RunTest.bat was missing a "set type" line for test 22.
+
 
 Version 10.21 12-January-2016
 -----------------------------

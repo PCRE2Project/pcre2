@@ -25,6 +25,7 @@
 @rem The file was converted for PCRE2 by PH, February 2015.
 @rem Updated for new test 14 (moving others up a number), August 2015.
 @rem Tidied and updated for new tests 21, 22, 23 by PH, October 2015.
+@rem PH added missing "set type" for test 22, April 2016.
 
 
 setlocal enabledelayedexpansion
@@ -273,6 +274,9 @@ if [%1]==[12] (
   set type=-%bits%
 )
 if [%1]==[14] (
+  set type=-%bits%
+)
+if [%1]==[22] (
   set type=-%bits%
 )
 
