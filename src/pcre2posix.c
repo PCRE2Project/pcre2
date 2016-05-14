@@ -58,15 +58,40 @@ previously been set. */
 #  define PCRE2POSIX_EXP_DEFN __declspec(dllexport)
 #endif
 
-/* We include pcre2.h before pcre2_internal.h so that the PCRE2 library
-functions are declared as "import" for Windows by defining PCRE2_EXP_DECL as
-"import". This is needed even though pcre2_internal.h itself includes pcre2.h,
-because it does so after it has set PCRE2_EXP_DECL to "export" if it is not
-already set. */
+
+/* Compile-time error numbers start at this value. It should probably never be
+changed. This #define is a copy of the one in pcre2_internal.h. */
+
+#define COMPILE_ERROR_BASE 100
+
+
+/* Standard C headers */
+
+#include <ctype.h>
+#include <limits.h>
+#include <stddef.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+/* PCRE2 headers */
 
 #include "pcre2.h"
-#include "pcre2_internal.h"
 #include "pcre2posix.h"
+
+/* When compiling with the MSVC compiler, it is sometimes necessary to include
+a "calling convention" before exported function names. (This is secondhand
+information; I know nothing about MSVC myself). For example, something like
+
+  void __cdecl function(....)
+
+might be needed. In order so make this easy, all the exported functions have
+PCRE2_CALL_CONVENTION just before their names. It is rarely needed; if not
+set, we ensure here that it has no effect. */
+
+#ifndef PCRE2_CALL_CONVENTION
+#define PCRE2_CALL_CONVENTION
+#endif
 
 /* Table to translate PCRE2 compile time error codes into POSIX error codes.
 Only a few PCRE2 errors with a value greater than 23 turn into special POSIX
@@ -302,11 +327,12 @@ rc = pcre2_match((const pcre2_code *)preg->re_pcre2_code,
 if (rc >= 0)
   {
   size_t i;
+  PCRE2_SIZE *ovector = pcre2_get_ovector_pointer(md);
   if ((size_t)rc > nmatch) rc = (int)nmatch;
   for (i = 0; i < (size_t)rc; i++)
     {
-    pmatch[i].rm_so = md->ovector[i*2];
-    pmatch[i].rm_eo = md->ovector[i*2+1];
+    pmatch[i].rm_so = ovector[i*2];
+    pmatch[i].rm_eo = ovector[i*2+1];
     }
   for (; i < nmatch; i++) pmatch[i].rm_so = pmatch[i].rm_eo = -1;
   return 0;

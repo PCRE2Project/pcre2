@@ -242,8 +242,15 @@ Unicode doesn't go beyond 0x0010ffff. */
 
 #define MAX_UTF_CODE_POINT 0x10ffff
 
-/* Compile-time errors are added to this value. As they are documented, it
-should probably never be changed. */
+/* Compile-time positive error numbers (all except UTF errors, which are
+negative) start at this value. It should probably never be changed, in case
+some application is checking for specific numbers. There is a copy of this
+#define in pcre2posix.c (which now no longer includes this file). Ideally, a
+way of having a single definition should be found, but as the number is
+unlikely to change, this is not a pressing issue. The original reason for
+having a base other than 0 was to keep the absolute values of compile-time and
+run-time error numbers numerically different, but in the event the code does
+not rely on this. */
 
 #define COMPILE_ERROR_BASE 100
 

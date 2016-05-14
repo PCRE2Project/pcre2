@@ -102,6 +102,10 @@ additions).
 
 23. RunTest.bat was missing a "set type" line for test 22.
 
+24. The pcre2posix.c file was including pcre2_internal.h, and using some 
+"private" knowledge of the data structures. This is unnecessary; the code has 
+been re-factored and no longer includes pcre2_internal.h.
+
 
 Version 10.21 12-January-2016
 -----------------------------
