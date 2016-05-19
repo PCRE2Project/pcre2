@@ -106,6 +106,8 @@ additions).
 "private" knowledge of the data structures. This is unnecessary; the code has 
 been re-factored and no longer includes pcre2_internal.h.
 
+25. A racing condition is fixed in JIT reported by Mozilla.
+
 
 Version 10.21 12-January-2016
 -----------------------------

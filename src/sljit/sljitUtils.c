@@ -182,7 +182,10 @@ static pthread_mutex_t dev_zero_mutex = PTHREAD_MUTEX_INITIALIZER;
 static SLJIT_INLINE sljit_s32 open_dev_zero(void)
 {
 	pthread_mutex_lock(&dev_zero_mutex);
-	dev_zero = open("/dev/zero", O_RDWR);
+	/* The dev_zero might be initialized by another thread during the waiting. */
+	if (dev_zero < 0) {
+		dev_zero = open("/dev/zero", O_RDWR);
+	}
 	pthread_mutex_unlock(&dev_zero_mutex);
 	return dev_zero < 0;
 }
