@@ -108,6 +108,10 @@ been re-factored and no longer includes pcre2_internal.h.
 
 25. A racing condition is fixed in JIT reported by Mozilla.
 
+26. Minor code refactor to avoid "array subscript is below array bounds" 
+compiler warning.
+
+
 
 Version 10.21 12-January-2016
 -----------------------------

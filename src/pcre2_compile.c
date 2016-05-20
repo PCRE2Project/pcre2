@@ -3962,6 +3962,10 @@ for (;; ptr++)
   uint32_t subreqcu, subfirstcu;
   int32_t subreqcuflags, subfirstcuflags;  /* Must be signed */
   PCRE2_UCHAR mcbuffer[8];
+  
+  /* Come here to restart the loop. */
+  
+  REDO_LOOP: 
 
   /* Get next character in the pattern */
 
@@ -4103,11 +4107,7 @@ for (;; ptr++)
     /* If we skipped any characters, restart the loop. Otherwise, we didn't see
     a comment. */
 
-    if (ptr > wscptr)
-      {
-      ptr--;
-      continue;
-      }
+    if (ptr > wscptr) goto REDO_LOOP;
     }
 
   /* Skip over (?# comments. */
@@ -4247,17 +4247,15 @@ for (;; ptr++)
     if (PRIV(strncmp_c8)(ptr+1, STRING_WEIRD_STARTWORD, 6) == 0)
       {
       cb->nestptr[0] = ptr + 7;
-      ptr = sub_start_of_word;  /* Do not combine these statements; clang's */
-      ptr--;                    /* sanitizer moans about a negative index. */
-      continue;
+      ptr = sub_start_of_word;
+      goto REDO_LOOP; 
       }
 
     if (PRIV(strncmp_c8)(ptr+1, STRING_WEIRD_ENDWORD, 6) == 0)
       {
       cb->nestptr[0] = ptr + 7;
-      ptr = sub_end_of_word;    /* Do not combine these statements; clang's */
-      ptr--;                    /* sanitizer moans about a negative index. */
-      continue;
+      ptr = sub_end_of_word;
+      goto REDO_LOOP; 
       }
 
     /* Handle a real character class. */
