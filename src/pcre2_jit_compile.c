@@ -539,12 +539,12 @@ the start pointers when the end of the capturing group has not yet reached. */
 #define MOV_UCHAR  SLJIT_MOV_U16
 #define MOVU_UCHAR SLJIT_MOVU_U16
 #define UCHAR_SHIFT (1)
-#define IN_UCHARS(x) ((x) << UCHAR_SHIFT)
+#define IN_UCHARS(x) ((x) * 2)
 #elif PCRE2_CODE_UNIT_WIDTH == 32
 #define MOV_UCHAR  SLJIT_MOV_U32
 #define MOVU_UCHAR SLJIT_MOVU_U32
 #define UCHAR_SHIFT (2)
-#define IN_UCHARS(x) ((x) << UCHAR_SHIFT)
+#define IN_UCHARS(x) ((x) * 4)
 #else
 #error Unsupported compiling mode
 #endif

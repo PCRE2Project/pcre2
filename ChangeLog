@@ -111,6 +111,7 @@ been re-factored and no longer includes pcre2_internal.h.
 26. Minor code refactor to avoid "array subscript is below array bounds" 
 compiler warning.
 
+27. Minor code refactor to avoid "left shift of negative number" warning. 
 
 
 Version 10.21 12-January-2016
