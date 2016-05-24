@@ -113,6 +113,9 @@ compiler warning.
 
 27. Minor code refactor to avoid "left shift of negative number" warning. 
 
+28. Add a bit more sanity checking to pcre2_serialize_decode() and document 
+that it expects trusted data.
+
 
 Version 10.21 12-January-2016
 -----------------------------

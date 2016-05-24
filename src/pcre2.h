@@ -245,6 +245,7 @@ numbers must not be changed. */
 #define PCRE2_ERROR_BADSUBSTITUTION   (-59)
 #define PCRE2_ERROR_BADSUBSPATTERN    (-60)
 #define PCRE2_ERROR_TOOMANYREPLACE    (-61)
+#define PCRE2_ERROR_BADSERIALIZEDDATA (-62)
 
 /* Request types for pcre2_pattern_info() */
 
