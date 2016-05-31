@@ -16,7 +16,7 @@ non-printing characters.
 and gives an error.
 
 4. Updated the valgrind parameters in RunTest: (a) changed smc-check=all to 
-smc-check=sll-non-file; (b) changed obj:* in the suppression file to obj:??? so 
+smc-check=all-non-file; (b) changed obj:* in the suppression file to obj:??? so 
 that it matches only unknown objects.
 
 5. Updated the maintenance script maint/ManyConfigTests to make it easier to 
@@ -120,6 +120,13 @@ that it expects trusted data.
 
 30. Due to an oversight, pcre2grep was not making use of JIT when available. 
 This is now fixed.
+
+31. The RunGrepTest script is updated to use the valgrind suppressions file
+when testing with JIT under valgrind (compare 10.21/51 below). The suppressions 
+file is updated so that is now the same as for PCRE1: it suppresses the
+Memcheck warnings Addr16 and Cond in unknown objects (that is, JIT-compiled
+code). Also changed smc-check=all to smc-check=all-non-file as was done for 
+RunTest (see 4 above).
 
 
 Version 10.21 12-January-2016
