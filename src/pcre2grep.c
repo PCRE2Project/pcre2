@@ -2788,9 +2788,24 @@ if ((popts & PO_FIXED_STRINGS) != 0)
 sprintf((char *)buffer, "%s%.*s%s", prefix[popts], patlen, ps, suffix[popts]);
 p->compiled = pcre2_compile(buffer, -1, options, &errcode, &erroffset,
   compile_context);
-if (p->compiled != NULL) return TRUE;
+  
+/* Handle successful compile */
+ 
+if (p->compiled != NULL) 
+  {
+#ifdef SUPPORT_PCRE2GREP_JIT
+  if (use_jit)
+    {
+    errcode = pcre2_jit_compile(p->compiled, PCRE2_JIT_COMPLETE);
+    if (errcode == 0) return TRUE;
+    erroffset = PCRE2_SIZE_MAX;     /* Will get reduced to patlen below */ 
+    }
+  else     
+#endif
+  return TRUE;
+  } 
 
-/* Handle compile errors */
+/* Handle compile and JIT compile errors */
 
 erroffset -= (int)strlen(prefix[popts]);
 if (erroffset > patlen) erroffset = patlen;

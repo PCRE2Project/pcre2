@@ -118,6 +118,9 @@ that it expects trusted data.
 
 29. Fix typo in pcre2_jit_test.c
 
+30. Due to an oversight, pcre2grep was not making use of JIT when available. 
+This is now fixed.
+
 
 Version 10.21 12-January-2016
 -----------------------------
