@@ -22,11 +22,12 @@ please consult the man page, in case the conversion went wrong.
 <li><a name="TOC7" href="#SEC7">NEWLINES</a>
 <li><a name="TOC8" href="#SEC8">OPTIONS COMPATIBILITY</a>
 <li><a name="TOC9" href="#SEC9">OPTIONS WITH DATA</a>
-<li><a name="TOC10" href="#SEC10">MATCHING ERRORS</a>
-<li><a name="TOC11" href="#SEC11">DIAGNOSTICS</a>
-<li><a name="TOC12" href="#SEC12">SEE ALSO</a>
-<li><a name="TOC13" href="#SEC13">AUTHOR</a>
-<li><a name="TOC14" href="#SEC14">REVISION</a>
+<li><a name="TOC10" href="#SEC10">CALLING EXTERNAL SCRIPTS</a>
+<li><a name="TOC11" href="#SEC11">MATCHING ERRORS</a>
+<li><a name="TOC12" href="#SEC12">DIAGNOSTICS</a>
+<li><a name="TOC13" href="#SEC13">SEE ALSO</a>
+<li><a name="TOC14" href="#SEC14">AUTHOR</a>
+<li><a name="TOC15" href="#SEC15">REVISION</a>
 </ul>
 <br><a name="SEC1" href="#TOC1">SYNOPSIS</a><br>
 <P>
@@ -735,7 +736,57 @@ The exceptions to the above are the <b>--colour</b> (or <b>--color</b>) and
 options does have data, it must be given in the first form, using an equals
 character. Otherwise <b>pcre2grep</b> will assume that it has no data.
 </P>
-<br><a name="SEC10" href="#TOC1">MATCHING ERRORS</a><br>
+<br><a name="SEC10" href="#TOC1">CALLING EXTERNAL SCRIPTS</a><br>
+<P>
+On non-Windows systems, <b>pcre2grep</b> has, by default, support for calling
+external programs or scripts during matching by making use of PCRE2's callout
+facility. However, this support can be disabled when <b>pcre2grep</b> is built.
+You can find out whether your binary has support for callouts by running it
+with the <b>--help</b> option. If the support is not enabled, all callouts in
+patterns are ignored by <b>pcre2grep</b>.
+</P>
+<P>
+A callout in a PCRE2 pattern is of the form (?C&#60;arg&#62;) where the argument is 
+either a number or a quoted string (see the
+<a href="pcre2callout.html"><b>pcre2callout</b></a>
+documentation for details). Numbered callouts are ignored by <b>pcre2grep</b>.
+String arguments are parsed as a list of substrings separated by pipe (vertical
+bar) characters. The first substring must be an executable name, with the
+following substrings specifying arguments:
+<pre>
+  executable_name|arg1|arg2|...
+</pre>
+Any substring (including the executable name) may contain escape sequences
+started by a dollar character: $&#60;digits&#62; or ${&#60;digits&#62;} is replaced by the
+captured substring of the given decimal number, which must be greater than
+zero. If the number is greater than the number of capturing substrings, or if
+the capture is unset, the replacement is empty.
+</P>
+<P>
+Any other character is substituted by itself. In particular, $$ is replaced by
+a single dollar and $| is replaced by a pipe character. Here is an example:
+<pre>
+  echo -e "abcde\n12345" | pcre2grep \
+    '(?x)(.)(..(.))
+    (?C"/bin/echo|Arg1: [$1] [$2] [$3]|Arg2: $|${1}$| ($4)")()' -
+
+  Output:
+
+    Arg1: [a] [bcd] [d] Arg2: |a| ()
+    abcde
+    Arg1: [1] [234] [4] Arg2: |1| ()
+    12345
+</pre>
+The parameters for the <b>execv()</b> system call that is used to run the
+program or script are zero-terminated strings. This means that binary zero
+characters in the callout argument will cause premature termination of their
+substrings, and therefore should not be present. Any syntax errors in the
+string (for example, a dollar not followed by another character) cause the
+callout to be ignored. If running the program fails for any reason (including
+the non-existence of the executable), a local matching failure occurs and the
+matcher backtracks in the normal way.
+</P>
+<br><a name="SEC11" href="#TOC1">MATCHING ERRORS</a><br>
 <P>
 It is possible to supply a regular expression that takes a very long time to
 fail to match certain lines. Such patterns normally involve nested indefinite
@@ -751,7 +802,7 @@ overall resource limit; there is a second option called <b>--recursion-limit</b>
 that sets a limit on the amount of memory (usually stack) that is used (see the
 discussion of these options above).
 </P>
-<br><a name="SEC11" href="#TOC1">DIAGNOSTICS</a><br>
+<br><a name="SEC12" href="#TOC1">DIAGNOSTICS</a><br>
 <P>
 Exit status is 0 if any matches were found, 1 if no matches were found, and 2
 for syntax errors, overlong lines, non-existent or inaccessible files (even if
@@ -759,11 +810,11 @@ matches were found in other files) or too many matching errors. Using the
 <b>-s</b> option to suppress error messages about inaccessible files does not
 affect the return code.
 </P>
-<br><a name="SEC12" href="#TOC1">SEE ALSO</a><br>
+<br><a name="SEC13" href="#TOC1">SEE ALSO</a><br>
 <P>
-<b>pcre2pattern</b>(3), <b>pcre2syntax</b>(3).
+<b>pcre2pattern</b>(3), <b>pcre2syntax</b>(3), <b>pcre2callout</b>(3).
 </P>
-<br><a name="SEC13" href="#TOC1">AUTHOR</a><br>
+<br><a name="SEC14" href="#TOC1">AUTHOR</a><br>
 <P>
 Philip Hazel
 <br>
@@ -772,11 +823,11 @@ University Computing Service
 Cambridge, England.
 <br>
 </P>
-<br><a name="SEC14" href="#TOC1">REVISION</a><br>
+<br><a name="SEC15" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 03 January 2015
+Last updated: 06 April 2016
 <br>
-Copyright &copy; 1997-2015 University of Cambridge.
+Copyright &copy; 1997-2016 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE2 index page</a>.

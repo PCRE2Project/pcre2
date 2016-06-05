@@ -687,9 +687,9 @@ a single dollar and $| is replaced by a pipe character. Here is an example:
   echo -e "abcde\en12345" | pcre2grep \e
     '(?x)(.)(..(.))
     (?C"/bin/echo|Arg1: [$1] [$2] [$3]|Arg2: $|${1}$| ($4)")()' -
-
+.sp
   Output:
-
+.sp
     Arg1: [a] [bcd] [d] Arg2: |a| ()
     abcde
     Arg1: [1] [234] [4] Arg2: |1| ()
