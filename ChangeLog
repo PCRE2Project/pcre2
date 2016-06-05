@@ -128,6 +128,8 @@ Memcheck warnings Addr16 and Cond in unknown objects (that is, JIT-compiled
 code). Also changed smc-check=all to smc-check=all-non-file as was done for 
 RunTest (see 4 above).
 
+32. Implemented the PCRE2_NO_JIT option for pcre2_match().
+
 
 Version 10.21 12-January-2016
 -----------------------------

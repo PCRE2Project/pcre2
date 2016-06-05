@@ -516,5 +516,19 @@ Failed: error -46: JIT stack limit reached
 /(.|.)*?bx/
     aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabax
 Failed: error -47: match limit exceeded
+    
+# Test JIT disable 
+
+/abc/
+    abc
+ 0: abc (JIT)
+    abc\=no_jit 
+ 0: abc
+    
+/abc/jitfast
+    abc
+ 0: abc (JIT)
+    abc\=no_jit 
+ 0: abc (JIT)
 
 # End of testinput17

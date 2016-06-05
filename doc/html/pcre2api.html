@@ -417,9 +417,10 @@ More complicated programs might need to make use of the specialist functions
 <b>pcre2_jit_stack_assign()</b> in order to control the JIT code's memory usage.
 </P>
 <P>
-JIT matching is automatically used by <b>pcre2_match()</b> if it is available.
-There is also a direct interface for JIT matching, which gives improved
-performance. The JIT-specific functions are discussed in the
+JIT matching is automatically used by <b>pcre2_match()</b> if it is available,
+unless the PCRE2_NO_JIT option is set. There is also a direct interface for JIT
+matching, which gives improved performance. The JIT-specific functions are
+discussed in the
 <a href="pcre2jit.html"><b>pcre2jit</b></a>
 documentation.
 </P>
@@ -555,7 +556,7 @@ least until a pattern has been compiled. The logic can be something like this:
     Get a write (unique) lock for pointer
     pointer = pcre2_compile(...
     }
-  Release the lock   
+  Release the lock
   Use pointer in pcre2_match()
 </pre>
 Of course, testing for compilation errors should also be included in the code.
@@ -563,9 +564,9 @@ Of course, testing for compilation errors should also be included in the code.
 <P>
 If JIT is being used, but the JIT compilation is not being done immediately,
 (perhaps waiting to see if the pattern is used often enough) similar logic is
-required. JIT compilation updates a pointer within the compiled code block, so 
-a thread must gain unique write access to the pointer before calling 
-<b>pcre2_jit_compile()</b>. Alternatively, <b>pcre2_code_copy()</b> can be used 
+required. JIT compilation updates a pointer within the compiled code block, so
+a thread must gain unique write access to the pointer before calling
+<b>pcre2_jit_compile()</b>. Alternatively, <b>pcre2_code_copy()</b> can be used
 to obtain a private copy of the compiled code.
 </P>
 <br><b>
@@ -1062,7 +1063,7 @@ The <b>pcre2_compile()</b> function compiles a pattern into an internal form.
 The pattern is defined by a pointer to a string of code units and a length. If
 the pattern is zero-terminated, the length can be specified as
 PCRE2_ZERO_TERMINATED. The function returns a pointer to a block of memory that
-contains the compiled pattern and related data. 
+contains the compiled pattern and related data.
 </P>
 <P>
 If the compile context argument <i>ccontext</i> is NULL, memory for the compiled
@@ -1071,12 +1072,12 @@ the same memory function that was used for the compile context. The caller must
 free the memory by calling <b>pcre2_code_free()</b> when it is no longer needed.
 </P>
 <P>
-The function <b>pcre2_code_copy()</b> makes a copy of the compiled code in new 
-memory, using the same memory allocator as was used for the original. However, 
+The function <b>pcre2_code_copy()</b> makes a copy of the compiled code in new
+memory, using the same memory allocator as was used for the original. However,
 if the code has been processed by the JIT compiler (see
 <a href="#jitcompiling">below),</a>
-the JIT information cannot be copied (because it is position-dependent). 
-The new copy can initially be used only for non-JIT matching, though it can be 
+the JIT information cannot be copied (because it is position-dependent).
+The new copy can initially be used only for non-JIT matching, though it can be
 passed to <b>pcre2_jit_compile()</b> if required. The <b>pcre2_code_copy()</b>
 function provides a way for individual threads in a multithreaded application
 to acquire a private copy of shared compiled code.
@@ -1630,10 +1631,15 @@ are as follows:
 Return a copy of the pattern's options. The third argument should point to a
 <b>uint32_t</b> variable. PCRE2_INFO_ARGOPTIONS returns exactly the options that
 were passed to <b>pcre2_compile()</b>, whereas PCRE2_INFO_ALLOPTIONS returns
-the compile options as modified by any top-level option settings such as (*UTF)
-at the start of the pattern itself. For example, if the pattern /(*UTF)abc/ is
-compiled with the PCRE2_EXTENDED option, the result is PCRE2_EXTENDED and
-PCRE2_UTF.
+the compile options as modified by any top-level (*XXX) option settings such as
+(*UTF) at the start of the pattern itself.
+</P>
+<P>
+For example, if the pattern /(*UTF)abc/ is compiled with the PCRE2_EXTENDED
+option, the result for PCRE2_INFO_ALLOPTIONS is PCRE2_EXTENDED and PCRE2_UTF.
+Option settings such as (?i) that can change within a pattern do not affect the
+result of PCRE2_INFO_ALLOPTIONS, even if they appear right at the start of the
+pattern. (This was different in some earlier releases.)
 </P>
 <P>
 A pattern compiled without PCRE2_ANCHORED is automatically anchored by PCRE2 if
@@ -2088,14 +2094,15 @@ Option bits for <b>pcre2_match()</b>
 <P>
 The unused bits of the <i>options</i> argument for <b>pcre2_match()</b> must be
 zero. The only bits that may be set are PCRE2_ANCHORED, PCRE2_NOTBOL,
-PCRE2_NOTEOL, PCRE2_NOTEMPTY, PCRE2_NOTEMPTY_ATSTART, PCRE2_NO_UTF_CHECK,
-PCRE2_PARTIAL_HARD, and PCRE2_PARTIAL_SOFT. Their action is described below.
+PCRE2_NOTEOL, PCRE2_NOTEMPTY, PCRE2_NOTEMPTY_ATSTART, PCRE2_NO_JIT,
+PCRE2_NO_UTF_CHECK, PCRE2_PARTIAL_HARD, and PCRE2_PARTIAL_SOFT. Their action is
+described below.
 </P>
 <P>
 Setting PCRE2_ANCHORED at match time is not supported by the just-in-time (JIT)
 compiler. If it is set, JIT matching is disabled and the normal interpretive
-code in <b>pcre2_match()</b> is run. The remaining options are supported for JIT
-matching.
+code in <b>pcre2_match()</b> is run. Apart from PCRE2_NO_JIT (obviously), the
+remaining options are supported for JIT matching.
 <pre>
   PCRE2_ANCHORED
 </pre>
@@ -2142,6 +2149,13 @@ only at the first matching position, that is, at the start of the subject plus
 the starting offset. An empty string match later in the subject is permitted.
 If the pattern is anchored, such a match can occur only if the pattern contains
 \K.
+<pre>
+  PCRE2_NO_JIT
+</pre>
+By default, if a pattern has been successfully processed by
+<b>pcre2_jit_compile()</b>, JIT is automatically used when <b>pcre2_match()</b>
+is called with options that JIT supports. Setting PCRE2_NO_JIT disables the use
+of JIT; it forces matching to be done by the interpreter.
 <pre>
   PCRE2_NO_UTF_CHECK
 </pre>
@@ -3184,7 +3198,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC40" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 26 February 2016
+Last updated: 05 June 2016
 <br>
 Copyright &copy; 1997-2016 University of Cambridge.
 <br>

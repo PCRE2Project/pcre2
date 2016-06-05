@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "27 February 2016" "PCRE2 10.22"
+.TH PCRE2API 3 "05 June 2016" "PCRE2 10.22"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -354,9 +354,10 @@ More complicated programs might need to make use of the specialist functions
 \fBpcre2_jit_stack_create()\fP, \fBpcre2_jit_stack_free()\fP, and
 \fBpcre2_jit_stack_assign()\fP in order to control the JIT code's memory usage.
 .P
-JIT matching is automatically used by \fBpcre2_match()\fP if it is available.
-There is also a direct interface for JIT matching, which gives improved
-performance. The JIT-specific functions are discussed in the
+JIT matching is automatically used by \fBpcre2_match()\fP if it is available,
+unless the PCRE2_NO_JIT option is set. There is also a direct interface for JIT
+matching, which gives improved performance. The JIT-specific functions are
+discussed in the
 .\" HREF
 \fBpcre2jit\fP
 .\"
@@ -499,16 +500,16 @@ least until a pattern has been compiled. The logic can be something like this:
     Get a write (unique) lock for pointer
     pointer = pcre2_compile(...
     }
-  Release the lock   
+  Release the lock
   Use pointer in pcre2_match()
 .sp
 Of course, testing for compilation errors should also be included in the code.
 .P
 If JIT is being used, but the JIT compilation is not being done immediately,
 (perhaps waiting to see if the pattern is used often enough) similar logic is
-required. JIT compilation updates a pointer within the compiled code block, so 
-a thread must gain unique write access to the pointer before calling 
-\fBpcre2_jit_compile()\fP. Alternatively, \fBpcre2_code_copy()\fP can be used 
+required. JIT compilation updates a pointer within the compiled code block, so
+a thread must gain unique write access to the pointer before calling
+\fBpcre2_jit_compile()\fP. Alternatively, \fBpcre2_code_copy()\fP can be used
 to obtain a private copy of the compiled code.
 .
 .
@@ -1031,22 +1032,22 @@ The \fBpcre2_compile()\fP function compiles a pattern into an internal form.
 The pattern is defined by a pointer to a string of code units and a length. If
 the pattern is zero-terminated, the length can be specified as
 PCRE2_ZERO_TERMINATED. The function returns a pointer to a block of memory that
-contains the compiled pattern and related data. 
+contains the compiled pattern and related data.
 .P
 If the compile context argument \fIccontext\fP is NULL, memory for the compiled
 pattern is obtained by calling \fBmalloc()\fP. Otherwise, it is obtained from
 the same memory function that was used for the compile context. The caller must
 free the memory by calling \fBpcre2_code_free()\fP when it is no longer needed.
 .P
-The function \fBpcre2_code_copy()\fP makes a copy of the compiled code in new 
-memory, using the same memory allocator as was used for the original. However, 
+The function \fBpcre2_code_copy()\fP makes a copy of the compiled code in new
+memory, using the same memory allocator as was used for the original. However,
 if the code has been processed by the JIT compiler (see
 .\" HTML <a href="#jitcompiling">
 .\" </a>
 below),
 .\"
-the JIT information cannot be copied (because it is position-dependent). 
-The new copy can initially be used only for non-JIT matching, though it can be 
+the JIT information cannot be copied (because it is position-dependent).
+The new copy can initially be used only for non-JIT matching, though it can be
 passed to \fBpcre2_jit_compile()\fP if required. The \fBpcre2_code_copy()\fP
 function provides a way for individual threads in a multithreaded application
 to acquire a private copy of shared compiled code.
@@ -1629,7 +1630,7 @@ Return a copy of the pattern's options. The third argument should point to a
 \fBuint32_t\fP variable. PCRE2_INFO_ARGOPTIONS returns exactly the options that
 were passed to \fBpcre2_compile()\fP, whereas PCRE2_INFO_ALLOPTIONS returns
 the compile options as modified by any top-level (*XXX) option settings such as
-(*UTF) at the start of the pattern itself. 
+(*UTF) at the start of the pattern itself.
 .P
 For example, if the pattern /(*UTF)abc/ is compiled with the PCRE2_EXTENDED
 option, the result for PCRE2_INFO_ALLOPTIONS is PCRE2_EXTENDED and PCRE2_UTF.
@@ -2110,13 +2111,14 @@ pattern does not require the match to be at the start of the subject.
 .sp
 The unused bits of the \fIoptions\fP argument for \fBpcre2_match()\fP must be
 zero. The only bits that may be set are PCRE2_ANCHORED, PCRE2_NOTBOL,
-PCRE2_NOTEOL, PCRE2_NOTEMPTY, PCRE2_NOTEMPTY_ATSTART, PCRE2_NO_UTF_CHECK,
-PCRE2_PARTIAL_HARD, and PCRE2_PARTIAL_SOFT. Their action is described below.
+PCRE2_NOTEOL, PCRE2_NOTEMPTY, PCRE2_NOTEMPTY_ATSTART, PCRE2_NO_JIT,
+PCRE2_NO_UTF_CHECK, PCRE2_PARTIAL_HARD, and PCRE2_PARTIAL_SOFT. Their action is
+described below.
 .P
 Setting PCRE2_ANCHORED at match time is not supported by the just-in-time (JIT)
 compiler. If it is set, JIT matching is disabled and the normal interpretive
-code in \fBpcre2_match()\fP is run. The remaining options are supported for JIT
-matching.
+code in \fBpcre2_match()\fP is run. Apart from PCRE2_NO_JIT (obviously), the
+remaining options are supported for JIT matching.
 .sp
   PCRE2_ANCHORED
 .sp
@@ -2163,6 +2165,13 @@ only at the first matching position, that is, at the start of the subject plus
 the starting offset. An empty string match later in the subject is permitted.
 If the pattern is anchored, such a match can occur only if the pattern contains
 \eK.
+.sp
+  PCRE2_NO_JIT
+.sp
+By default, if a pattern has been successfully processed by
+\fBpcre2_jit_compile()\fP, JIT is automatically used when \fBpcre2_match()\fP
+is called with options that JIT supports. Setting PCRE2_NO_JIT disables the use
+of JIT; it forces matching to be done by the interpreter.
 .sp
   PCRE2_NO_UTF_CHECK
 .sp
@@ -3233,6 +3242,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 27 February 2016
+Last updated: 05 June 2016
 Copyright (c) 1997-2016 University of Cambridge.
 .fi

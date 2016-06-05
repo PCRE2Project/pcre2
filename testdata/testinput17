@@ -278,5 +278,15 @@
 
 /(.|.)*?bx/
     aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabax
+    
+# Test JIT disable 
+
+/abc/
+    abc
+    abc\=no_jit 
+    
+/abc/jitfast
+    abc
+    abc\=no_jit 
 
 # End of testinput17

@@ -859,6 +859,7 @@ SUBJECT MODIFIERS
              anchored                  set PCRE2_ANCHORED
              dfa_restart               set PCRE2_DFA_RESTART
              dfa_shortest              set PCRE2_DFA_SHORTEST
+             no_jit                    set PCRE2_NO_JIT
              no_utf_check              set PCRE2_NO_UTF_CHECK
              notbol                    set PCRE2_NOTBOL
              notempty                  set PCRE2_NOTEMPTY
@@ -1538,5 +1539,5 @@ AUTHOR
 
 REVISION
 
-       Last updated: 06 February 2016
+       Last updated: 05 June 2016
        Copyright (c) 1997-2016 University of Cambridge.
