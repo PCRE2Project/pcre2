@@ -134,6 +134,8 @@ RunTest (see 4 above).
 
 34. Fix comment describing the returns from find_fixedlength().
 
+35. Fix potential negative index in pcre2test.
+
 
 Version 10.21 12-January-2016
 -----------------------------

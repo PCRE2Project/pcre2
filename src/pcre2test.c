@@ -3016,8 +3016,12 @@ for (;;)
       }
 
     dlen = strlen((char *)here);
-    if (here[dlen - 1] == '\n') return start;     /* End of line reached */
     here += dlen;
+
+    /* Check for end of line reached. Take care not to read data from before 
+    start (dlen will be zero for a file starting with a binary zero). */
+      
+    if (here > start && here[-1] == '\n') return start;
 
     /* If we have not read a newline when reading a file, we have either filled
     the buffer or reached the end of the file. We can detect the former by
