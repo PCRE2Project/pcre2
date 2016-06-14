@@ -879,9 +879,10 @@ Arguments:
 Returns:   if non-negative, the fixed length,
              or -1 if an OP_RECURSE item was encountered and atend is FALSE
              or -2 if there is no fixed length,
-             or -3 if \C was encountered (in UTF-8 mode only)
-             or -4 length is too long
-             or -5 if an unknown opcode was encountered (internal error)
+             or -3 if \C was encountered (in UTF mode only)
+             or -4 if length is too long
+             or -5 if regex is too complicated 
+             or -6 if an unknown opcode was encountered (internal error)
 */
 
 #define FFL_LATER           (-1)
@@ -1116,7 +1117,7 @@ for (;;)
     cc++;
     break;
 
-    /* The single-byte matcher isn't allowed. This only happens in UTF-8 mode;
+    /* The single-byte matcher isn't allowed. This only happens in UTF mode;
     otherwise \C is coded as OP_ALLANY. */
 
     case OP_ANYBYTE:

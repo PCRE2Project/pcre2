@@ -132,6 +132,8 @@ RunTest (see 4 above).
 
 33. Fix typo that gave a compiler error when JIT not supported.
 
+34. Fix comment describing the returns from find_fixedlength().
+
 
 Version 10.21 12-January-2016
 -----------------------------
