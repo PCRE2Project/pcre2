@@ -11440,7 +11440,7 @@ Returns:        0: success or (*NOJIT) was used
   (PCRE2_JIT_COMPLETE|PCRE2_JIT_PARTIAL_SOFT|PCRE2_JIT_PARTIAL_HARD)
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
-pcre2_jit_compile(pcre2_code *code, sljit_u32 options)
+pcre2_jit_compile(pcre2_code *code, uint32_t options)
 {
 #ifndef SUPPORT_JIT
 
