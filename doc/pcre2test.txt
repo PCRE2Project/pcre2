@@ -138,6 +138,13 @@ COMMAND LINE OPTIONS
                  is  done  using the pcre2_dfa_match() function instead of the
                  default pcre2_match().
 
+       -error number[,number,...]
+                 Call pcre2_get_error_message() for each of the error  numbers
+                 in  the  comma-separated list, display the resulting messages
+                 on the standard output, then exit with zero  exit  code.  The
+                 numbers  may  be  positive or negative. This is a convenience
+                 facility for PCRE2 maintainers.
+
        -help     Output a brief summary these options and then exit.
 
        -i        Behave as if each pattern has the /info modifier; information
@@ -1539,5 +1546,5 @@ AUTHOR
 
 REVISION
 
-       Last updated: 05 June 2016
+       Last updated: 17 June 2016
        Copyright (c) 1997-2016 University of Cambridge.

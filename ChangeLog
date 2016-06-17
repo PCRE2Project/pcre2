@@ -136,6 +136,13 @@ RunTest (see 4 above).
 
 35. Fix potential negative index in pcre2test.
 
+36. Calls to pcre2_get_error_message() with error numbers that are never 
+returned by PCRE2 functions were returning empty strings. Now the error code
+PCRE2_ERROR_BADDATA is returned. A facility has been added to pcre2test to 
+show the texts for given error numbers (i.e. to call pcre2_get_error_message() 
+and display what it returns) and a few representative error codes are now 
+checked in RunTest.
+
 
 Version 10.21 12-January-2016
 -----------------------------

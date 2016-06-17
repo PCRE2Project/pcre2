@@ -3018,9 +3018,9 @@ for (;;)
     dlen = strlen((char *)here);
     here += dlen;
 
-    /* Check for end of line reached. Take care not to read data from before 
+    /* Check for end of line reached. Take care not to read data from before
     start (dlen will be zero for a file starting with a binary zero). */
-      
+
     if (here > start && here[-1] == '\n') return start;
 
     /* If we have not read a newline when reading a file, we have either filled
@@ -4774,7 +4774,7 @@ if ((pat_patctl.control & CTL_POSIX) != 0)
   if (rc != 0)
     {
     size_t bsize, usize;
-    int psize; 
+    int psize;
 
     preg.re_pcre2_code = NULL;     /* In case something was left in there */
     preg.re_match_data = NULL;
@@ -4784,9 +4784,9 @@ if ((pat_patctl.control & CTL_POSIX) != 0)
     if (bsize + 8 < pbuffer8_size)
       memcpy(pbuffer8 + bsize, "DEADBEEF", 8);
     usize = regerror(rc, &preg, (char *)pbuffer8, bsize);
-    
-    /* Inside regerror(), snprintf() is used. If the buffer is too small, some 
-    versions of snprintf() put a zero byte at the end, but others do not. 
+
+    /* Inside regerror(), snprintf() is used. If the buffer is too small, some
+    versions of snprintf() put a zero byte at the end, but others do not.
     Therefore, we print a maximum of one less than the size of the buffer. */
 
     psize = (int)bsize - 1;
@@ -6885,6 +6885,7 @@ printf("     pcre2-32       32 bit library support enabled [0, 1]\n");
 printf("     unicode        Unicode and UTF support enabled [0, 1]\n");
 printf("  -d            set default pattern control 'debug'\n");
 printf("  -dfa          set default subject control 'dfa'\n");
+printf("  -error <n,m,..>  show messages for error numbers, then exit\n");
 printf("  -help         show usage information\n");
 printf("  -i            set default pattern control 'info'\n");
 printf("  -jit          set default pattern control 'jit'\n");
@@ -7062,6 +7063,7 @@ BOOL showtotaltimes = FALSE;
 BOOL skipping = FALSE;
 char *arg_subject = NULL;
 char *arg_pattern = NULL;
+char *arg_error = NULL;
 
 /* The offsets to the options and control bits fields of the pattern and data
 control blocks must be the same so that common options and controls such as
@@ -7273,6 +7275,12 @@ while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
   /* The following options save their data for processing once we know what
   the running mode is. */
 
+  else if (strcmp(arg, "-error") == 0)
+    {
+    arg_error = argv[op+1];
+    goto CHECK_VALUE_EXISTS;
+    }
+
   else if (strcmp(arg, "-subject") == 0)
     {
     arg_subject = argv[op+1];
@@ -7305,6 +7313,88 @@ while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
   op++;
   argc--;
   }
+
+/* If -error was present, get the error numbers, show the messages, and exit.
+We wait to do this until we know which mode we are in. */
+
+if (arg_error != NULL)
+  {
+  int len;
+  int errcode;
+  char *endptr;
+
+/* Ensure the relevant non-8-bit buffer is available. */
+
+#ifdef SUPPORT_PCRE2_16
+  if (test_mode == PCRE16_MODE)
+    {
+    pbuffer16_size = 256;
+    pbuffer16 = (uint16_t *)malloc(pbuffer16_size);
+    if (pbuffer16 == NULL)
+      {
+      fprintf(stderr, "pcre2test: malloc(%lu) failed for pbuffer16\n",
+        (unsigned long int)pbuffer16_size);
+      yield = 1;
+      goto EXIT;
+      }
+    }
+#endif
+
+#ifdef SUPPORT_PCRE2_32
+  if (test_mode == PCRE32_MODE)
+    {
+    pbuffer32_size = 256;
+    pbuffer32 = (uint32_t *)malloc(pbuffer32_size);
+    if (pbuffer32 == NULL)
+      {
+      fprintf(stderr, "pcre2test: malloc(%lu) failed for pbuffer32\n",
+        (unsigned long int)pbuffer32_size);
+      yield = 1;
+      goto EXIT;
+      }
+    }
+#endif
+
+  /* Loop along a list of error numbers. */
+
+  for (;;)
+    {
+    errcode = strtol(arg_error, &endptr, 10);
+    if (*endptr != 0 && *endptr != CHAR_COMMA)
+      {
+      fprintf(stderr, "** '%s' is not a valid error number list\n", arg_error);
+      yield = 1;
+      goto EXIT;
+      }
+    printf("Error %d: ", errcode);
+    PCRE2_GET_ERROR_MESSAGE(len, errcode, pbuffer);
+    if (len < 0)
+      {
+      switch (len)
+        {
+        case PCRE2_ERROR_BADDATA:
+        printf("PCRE2_ERROR_BADDATA (unknown error number)");
+        break;
+
+        case PCRE2_ERROR_NOMEMORY:
+        printf("PCRE2_ERROR_NOMEMORY (buffer too small)");
+        break;
+
+        default:
+        printf("Unexpected return (%d) from pcre2_get_error_message()", len);
+        break;
+        } 
+      }
+    else
+      {
+      PCHARSV(CASTVAR(void *, pbuffer), 0, len, FALSE, stdout);
+      }
+    printf("\n");
+    if (*endptr == 0) goto EXIT;
+    arg_error = endptr + 1;
+    }
+  /* Control never reaches here */
+  }  /* End of -error handling */
 
 /* Initialize things that cannot be done until we know which test mode we are
 running in. When HEAP_MATCH_RECURSE is undefined, calling pcre2_set_recursion_

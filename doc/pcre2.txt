@@ -1106,63 +1106,68 @@ COMPILING A PATTERN
        The  pattern  is  defined  by a pointer to a string of code units and a
        length. If the pattern is zero-terminated, the length can be  specified
        as  PCRE2_ZERO_TERMINATED. The function returns a pointer to a block of
-       memory that contains the compiled pattern and related data.
+       memory that contains the compiled pattern and related data, or NULL  if
+       an error occurred.
 
-       If the compile context argument ccontext is NULL, memory for  the  com-
-       piled  pattern  is  obtained  by  calling  malloc().  Otherwise,  it is
-       obtained from the same memory function that was used  for  the  compile
-       context.  The  caller must free the memory by calling pcre2_code_free()
+       If  the  compile context argument ccontext is NULL, memory for the com-
+       piled pattern  is  obtained  by  calling  malloc().  Otherwise,  it  is
+       obtained  from  the  same memory function that was used for the compile
+       context. The caller must free the memory by  calling  pcre2_code_free()
        when it is no longer needed.
 
        The function pcre2_code_copy() makes a copy of the compiled code in new
-       memory,  using  the same memory allocator as was used for the original.
-       However, if the code has  been  processed  by  the  JIT  compiler  (see
-       below),  the  JIT information cannot be copied (because it is position-
+       memory, using the same memory allocator as was used for  the  original.
+       However,  if  the  code  has  been  processed  by the JIT compiler (see
+       below), the JIT information cannot be copied (because it  is  position-
        dependent).  The new copy can initially be used only for non-JIT match-
-       ing,  though  it  can be passed to pcre2_jit_compile() if required. The
-       pcre2_code_copy() function provides a way for individual threads  in  a
-       multithreaded  application to acquire a private copy of shared compiled
+       ing, though it can be passed to pcre2_jit_compile()  if  required.  The
+       pcre2_code_copy()  function  provides a way for individual threads in a
+       multithreaded application to acquire a private copy of shared  compiled
        code.
 
-       NOTE: When one of the matching functions is  called,  pointers  to  the
+       NOTE:  When  one  of  the matching functions is called, pointers to the
        compiled pattern and the subject string are set in the match data block
-       so that they can be referenced by the extraction functions. After  run-
-       ning  a  match,  you  must  not  free  a compiled pattern (or a subject
-       string) until after all operations on the match data block  have  taken
-       place.
+       so  that  they can be referenced by the substring extraction functions.
+       After running a match, you must not free a compiled pattern (or a  sub-
+       ject  string)  until  after all operations on the match data block have
+       taken place.
 
-       The  options argument for pcre2_compile() contains various bit settings
-       that affect the compilation. It  should  be  zero  if  no  options  are
-       required.  The  available options are described below. Some of them (in
-       particular, those that are compatible with Perl,  but  some  others  as
-       well)  can  also  be  set  and  unset  from within the pattern (see the
+       The options argument for pcre2_compile() contains various bit  settings
+       that  affect  the  compilation.  It  should  be  zero if no options are
+       required. The available options are described below. Some of  them  (in
+       particular,  those  that  are  compatible with Perl, but some others as
+       well) can also be set and  unset  from  within  the  pattern  (see  the
        detailed description in the pcre2pattern documentation).
 
-       For those options that can be different in different parts of the  pat-
-       tern,  the contents of the options argument specifies their settings at
-       the start of compilation.  The  PCRE2_ANCHORED  and  PCRE2_NO_UTF_CHECK
+       For  those options that can be different in different parts of the pat-
+       tern, the contents of the options argument specifies their settings  at
+       the  start  of  compilation.  The PCRE2_ANCHORED and PCRE2_NO_UTF_CHECK
        options can be set at the time of matching as well as at compile time.
 
-       Other,  less  frequently required compile-time parameters (for example,
+       Other, less frequently required compile-time parameters  (for  example,
        the newline setting) can be provided in a compile context (as described
        above).
 
        If errorcode or erroroffset is NULL, pcre2_compile() returns NULL imme-
-       diately. Otherwise, if compilation of a pattern fails,  pcre2_compile()
-       returns NULL, having set these variables to an error code and an offset
-       (number  of  code  units)  within  the   pattern,   respectively.   The
-       pcre2_get_error_message()  function provides a textual message for each
-       error code. Compilation errors are positive numbers, but UTF formatting
-       errors are negative numbers. For an invalid UTF-8 or UTF-16 string, the
-       offset is that of the first code unit of the failing character.
+       diately.  Otherwise,  the  variables to which these point are set to an
+       error code and an offset (number of code  units)  within  the  pattern,
+       respectively,  when  pcre2_compile() returns NULL because a compilation
+       error has occurred. The values are not defined when compilation is suc-
+       cessful and pcre2_compile() returns a non-NULL value.
 
-       Some errors are not detected until the whole pattern has been  scanned;
-       in  these  cases,  the offset passed back is the length of the pattern.
-       Note that the offset is in code units, not characters, even  in  a  UTF
+       The  pcre2_get_error_message() function (see "Obtaining a textual error
+       message" below) provides a textual message for each error code.  Compi-
+       lation errors have positive error codes; UTF formatting error codes are
+       negative. For an invalid UTF-8 or UTF-16 string, the offset is that  of
+       the first code unit of the failing character.
+
+       Some  errors are not detected until the whole pattern has been scanned;
+       in these cases, the offset passed back is the length  of  the  pattern.
+       Note  that  the  offset is in code units, not characters, even in a UTF
        mode. It may sometimes point into the middle of a UTF-8 or UTF-16 char-
        acter.
 
-       This code fragment shows a typical straightforward call  to  pcre2_com-
+       This  code  fragment shows a typical straightforward call to pcre2_com-
        pile():
 
          pcre2_code *re;
@@ -1176,350 +1181,351 @@ COMPILING A PATTERN
            &erroffset,             /* for error offset */
            NULL);                  /* no compile context */
 
-       The  following  names for option bits are defined in the pcre2.h header
+       The following names for option bits are defined in the  pcre2.h  header
        file:
 
          PCRE2_ANCHORED
 
        If this bit is set, the pattern is forced to be "anchored", that is, it
-       is  constrained to match only at the first matching point in the string
-       that is being searched (the "subject string"). This effect can also  be
-       achieved  by appropriate constructs in the pattern itself, which is the
+       is constrained to match only at the first matching point in the  string
+       that  is being searched (the "subject string"). This effect can also be
+       achieved by appropriate constructs in the pattern itself, which is  the
        only way to do it in Perl.
 
          PCRE2_ALLOW_EMPTY_CLASS
 
-       By default, for compatibility with Perl, a closing square bracket  that
-       immediately  follows  an opening one is treated as a data character for
-       the class. When  PCRE2_ALLOW_EMPTY_CLASS  is  set,  it  terminates  the
+       By  default, for compatibility with Perl, a closing square bracket that
+       immediately follows an opening one is treated as a data  character  for
+       the  class.  When  PCRE2_ALLOW_EMPTY_CLASS  is  set,  it terminates the
        class, which therefore contains no characters and so can never match.
 
          PCRE2_ALT_BSUX
 
-       This  option  request  alternative  handling of three escape sequences,
-       which makes PCRE2's behaviour more like  ECMAscript  (aka  JavaScript).
+       This option request alternative handling  of  three  escape  sequences,
+       which  makes  PCRE2's  behaviour more like ECMAscript (aka JavaScript).
        When it is set:
 
        (1) \U matches an upper case "U" character; by default \U causes a com-
        pile time error (Perl uses \U to upper case subsequent characters).
 
        (2) \u matches a lower case "u" character unless it is followed by four
-       hexadecimal  digits,  in  which case the hexadecimal number defines the
-       code point to match. By default, \u causes a compile time  error  (Perl
+       hexadecimal digits, in which case the hexadecimal  number  defines  the
+       code  point  to match. By default, \u causes a compile time error (Perl
        uses it to upper case the following character).
 
-       (3)  \x matches a lower case "x" character unless it is followed by two
-       hexadecimal digits, in which case the hexadecimal  number  defines  the
-       code  point  to  match. By default, as in Perl, a hexadecimal number is
+       (3) \x matches a lower case "x" character unless it is followed by  two
+       hexadecimal  digits,  in  which case the hexadecimal number defines the
+       code point to match. By default, as in Perl, a  hexadecimal  number  is
        always expected after \x, but it may have zero, one, or two digits (so,
        for example, \xz matches a binary zero character followed by z).
 
          PCRE2_ALT_CIRCUMFLEX
 
        In  multiline  mode  (when  PCRE2_MULTILINE  is  set),  the  circumflex
-       metacharacter matches at the start of the subject (unless  PCRE2_NOTBOL
-       is  set),  and  also  after  any internal newline. However, it does not
+       metacharacter  matches at the start of the subject (unless PCRE2_NOTBOL
+       is set), and also after any internal  newline.  However,  it  does  not
        match after a newline at the end of the subject, for compatibility with
-       Perl.  If  you want a multiline circumflex also to match after a termi-
+       Perl. If you want a multiline circumflex also to match after  a  termi-
        nating newline, you must set PCRE2_ALT_CIRCUMFLEX.
 
          PCRE2_ALT_VERBNAMES
 
-       By default, for compatibility with Perl, the name in any verb  sequence
-       such  as  (*MARK:NAME)  is  any  sequence  of  characters that does not
-       include a closing parenthesis. The name is not processed  in  any  way,
-       and  it  is  not possible to include a closing parenthesis in the name.
-       However, if the PCRE2_ALT_VERBNAMES option  is  set,  normal  backslash
-       processing  is  applied  to  verb  names  and only an unescaped closing
-       parenthesis terminates the name. A closing parenthesis can be  included
-       in  a  name  either  as  \) or between \Q and \E. If the PCRE2_EXTENDED
+       By  default, for compatibility with Perl, the name in any verb sequence
+       such as (*MARK:NAME) is  any  sequence  of  characters  that  does  not
+       include  a  closing  parenthesis. The name is not processed in any way,
+       and it is not possible to include a closing parenthesis  in  the  name.
+       However,  if  the  PCRE2_ALT_VERBNAMES  option is set, normal backslash
+       processing is applied to verb  names  and  only  an  unescaped  closing
+       parenthesis  terminates the name. A closing parenthesis can be included
+       in a name either as \) or between \Q  and  \E.  If  the  PCRE2_EXTENDED
        option is set, unescaped whitespace in verb names is skipped and #-com-
        ments are recognized, exactly as in the rest of the pattern.
 
          PCRE2_AUTO_CALLOUT
 
-       If  this  bit  is  set,  pcre2_compile()  automatically inserts callout
+       If this bit  is  set,  pcre2_compile()  automatically  inserts  callout
        items, all with number 255, before each pattern item. For discussion of
        the callout facility, see the pcre2callout documentation.
 
          PCRE2_CASELESS
 
-       If  this  bit is set, letters in the pattern match both upper and lower
-       case letters in the subject. It is equivalent to Perl's /i option,  and
+       If this bit is set, letters in the pattern match both upper  and  lower
+       case  letters in the subject. It is equivalent to Perl's /i option, and
        it can be changed within a pattern by a (?i) option setting.
 
          PCRE2_DOLLAR_ENDONLY
 
-       If  this bit is set, a dollar metacharacter in the pattern matches only
-       at the end of the subject string. Without this option,  a  dollar  also
-       matches  immediately before a newline at the end of the string (but not
-       before any other newlines). The PCRE2_DOLLAR_ENDONLY option is  ignored
-       if  PCRE2_MULTILINE  is  set.  There is no equivalent to this option in
+       If this bit is set, a dollar metacharacter in the pattern matches  only
+       at  the  end  of the subject string. Without this option, a dollar also
+       matches immediately before a newline at the end of the string (but  not
+       before  any other newlines). The PCRE2_DOLLAR_ENDONLY option is ignored
+       if PCRE2_MULTILINE is set. There is no equivalent  to  this  option  in
        Perl, and no way to set it within a pattern.
 
          PCRE2_DOTALL
 
-       If this bit is set, a dot metacharacter  in  the  pattern  matches  any
-       character,  including  one  that  indicates a newline. However, it only
+       If  this  bit  is  set,  a dot metacharacter in the pattern matches any
+       character, including one that indicates a  newline.  However,  it  only
        ever matches one character, even if newlines are coded as CRLF. Without
        this option, a dot does not match when the current position in the sub-
-       ject is at a newline. This option is equivalent to  Perl's  /s  option,
+       ject  is  at  a newline. This option is equivalent to Perl's /s option,
        and it can be changed within a pattern by a (?s) option setting. A neg-
        ative class such as [^a] always matches newline characters, independent
        of the setting of this option.
 
          PCRE2_DUPNAMES
 
-       If  this  bit is set, names used to identify capturing subpatterns need
+       If this bit is set, names used to identify capturing  subpatterns  need
        not be unique. This can be helpful for certain types of pattern when it
-       is  known  that  only  one instance of the named subpattern can ever be
-       matched. There are more details of named subpatterns  below;  see  also
+       is known that only one instance of the named  subpattern  can  ever  be
+       matched.  There  are  more details of named subpatterns below; see also
        the pcre2pattern documentation.
 
          PCRE2_EXTENDED
 
-       If  this  bit  is  set,  most white space characters in the pattern are
-       totally ignored except when escaped or inside a character  class.  How-
-       ever,  white  space  is  not  allowed within sequences such as (?> that
+       If this bit is set, most white space  characters  in  the  pattern  are
+       totally  ignored  except when escaped or inside a character class. How-
+       ever, white space is not allowed within  sequences  such  as  (?>  that
        introduce various parenthesized subpatterns, nor within numerical quan-
-       tifiers  such  as {1,3}.  Ignorable white space is permitted between an
-       item and a following quantifier and between a quantifier and a  follow-
+       tifiers such as {1,3}.  Ignorable white space is permitted  between  an
+       item  and a following quantifier and between a quantifier and a follow-
        ing + that indicates possessiveness.
 
-       PCRE2_EXTENDED  also causes characters between an unescaped # outside a
-       character class and the next newline, inclusive, to be  ignored,  which
+       PCRE2_EXTENDED also causes characters between an unescaped # outside  a
+       character  class  and the next newline, inclusive, to be ignored, which
        makes it possible to include comments inside complicated patterns. Note
-       that the end of this type of comment is a literal newline  sequence  in
+       that  the  end of this type of comment is a literal newline sequence in
        the pattern; escape sequences that happen to represent a newline do not
-       count. PCRE2_EXTENDED is equivalent to Perl's /x option, and it can  be
+       count.  PCRE2_EXTENDED is equivalent to Perl's /x option, and it can be
        changed within a pattern by a (?x) option setting.
 
        Which characters are interpreted as newlines can be specified by a set-
-       ting in the compile context that is passed to pcre2_compile() or  by  a
-       special  sequence at the start of the pattern, as described in the sec-
-       tion entitled "Newline conventions" in the pcre2pattern  documentation.
+       ting  in  the compile context that is passed to pcre2_compile() or by a
+       special sequence at the start of the pattern, as described in the  sec-
+       tion  entitled "Newline conventions" in the pcre2pattern documentation.
        A default is defined when PCRE2 is built.
 
          PCRE2_FIRSTLINE
 
-       If  this  option  is  set,  an  unanchored pattern is required to match
-       before or at the first  newline  in  the  subject  string,  though  the
-       matched  text  may  continue  over the newline. See also PCRE2_USE_OFF-
-       SET_LIMIT,  which  provides  a  more  general  limiting  facility.   If
-       PCRE2_FIRSTLINE  is set with an offset limit, a match must occur in the
-       first line and also within the offset limit. In other words,  whichever
+       If this option is set, an  unanchored  pattern  is  required  to  match
+       before  or  at  the  first  newline  in  the subject string, though the
+       matched text may continue over the  newline.  See  also  PCRE2_USE_OFF-
+       SET_LIMIT,   which  provides  a  more  general  limiting  facility.  If
+       PCRE2_FIRSTLINE is set with an offset limit, a match must occur in  the
+       first  line and also within the offset limit. In other words, whichever
        limit comes first is used.
 
          PCRE2_MATCH_UNSET_BACKREF
 
-       If  this  option  is set, a back reference to an unset subpattern group
-       matches an empty string (by default this causes  the  current  matching
-       alternative  to  fail).   A  pattern such as (\1)(a) succeeds when this
-       option is set (assuming it can find an "a" in the subject), whereas  it
-       fails  by  default,  for  Perl compatibility. Setting this option makes
+       If this option is set, a back reference to an  unset  subpattern  group
+       matches  an  empty  string (by default this causes the current matching
+       alternative to fail).  A pattern such as  (\1)(a)  succeeds  when  this
+       option  is set (assuming it can find an "a" in the subject), whereas it
+       fails by default, for Perl compatibility.  Setting  this  option  makes
        PCRE2 behave more like ECMAscript (aka JavaScript).
 
          PCRE2_MULTILINE
 
-       By default, for the purposes of matching "start of line"  and  "end  of
-       line",  PCRE2  treats the subject string as consisting of a single line
-       of characters, even if it actually contains  newlines.  The  "start  of
-       line"  metacharacter  (^)  matches only at the start of the string, and
-       the "end of line" metacharacter ($) matches only  at  the  end  of  the
+       By  default,  for  the purposes of matching "start of line" and "end of
+       line", PCRE2 treats the subject string as consisting of a  single  line
+       of  characters,  even  if  it actually contains newlines. The "start of
+       line" metacharacter (^) matches only at the start of  the  string,  and
+       the  "end  of  line"  metacharacter  ($) matches only at the end of the
        string,  or  before  a  terminating  newline  (except  when  PCRE2_DOL-
-       LAR_ENDONLY is set). Note, however, that unless  PCRE2_DOTALL  is  set,
+       LAR_ENDONLY  is  set).  Note, however, that unless PCRE2_DOTALL is set,
        the "any character" metacharacter (.) does not match at a newline. This
        behaviour (for ^, $, and dot) is the same as Perl.
 
-       When PCRE2_MULTILINE it is set, the "start of line" and "end  of  line"
-       constructs  match  immediately following or immediately before internal
-       newlines in the subject string, respectively, as well as  at  the  very
-       start  and  end.  This is equivalent to Perl's /m option, and it can be
+       When  PCRE2_MULTILINE  it is set, the "start of line" and "end of line"
+       constructs match immediately following or immediately  before  internal
+       newlines  in  the  subject string, respectively, as well as at the very
+       start and end. This is equivalent to Perl's /m option, and  it  can  be
        changed within a pattern by a (?m) option setting. Note that the "start
        of line" metacharacter does not match after a newline at the end of the
-       subject, for compatibility with Perl.  However, you can change this  by
-       setting  the PCRE2_ALT_CIRCUMFLEX option. If there are no newlines in a
-       subject string, or no occurrences of ^  or  $  in  a  pattern,  setting
+       subject,  for compatibility with Perl.  However, you can change this by
+       setting the PCRE2_ALT_CIRCUMFLEX option. If there are no newlines in  a
+       subject  string,  or  no  occurrences  of  ^ or $ in a pattern, setting
        PCRE2_MULTILINE has no effect.
 
          PCRE2_NEVER_BACKSLASH_C
 
-       This  option  locks out the use of \C in the pattern that is being com-
-       piled.  This escape can  cause  unpredictable  behaviour  in  UTF-8  or
-       UTF-16  modes,  because  it may leave the current matching point in the
-       middle of a multi-code-unit character. This option  may  be  useful  in
-       applications  that  process  patterns  from external sources. Note that
+       This option locks out the use of \C in the pattern that is  being  com-
+       piled.   This  escape  can  cause  unpredictable  behaviour in UTF-8 or
+       UTF-16 modes, because it may leave the current matching  point  in  the
+       middle  of  a  multi-code-unit  character. This option may be useful in
+       applications that process patterns from  external  sources.  Note  that
        there is also a build-time option that permanently locks out the use of
        \C.
 
          PCRE2_NEVER_UCP
 
-       This  option  locks  out the use of Unicode properties for handling \B,
+       This option locks out the use of Unicode properties  for  handling  \B,
        \b, \D, \d, \S, \s, \W, \w, and some of the POSIX character classes, as
-       described  for  the  PCRE2_UCP option below. In particular, it prevents
-       the creator of the pattern from enabling this facility by starting  the
-       pattern  with  (*UCP).  This  option may be useful in applications that
+       described for the PCRE2_UCP option below. In  particular,  it  prevents
+       the  creator of the pattern from enabling this facility by starting the
+       pattern with (*UCP). This option may be  useful  in  applications  that
        process patterns from external sources. The option combination PCRE_UCP
        and PCRE_NEVER_UCP causes an error.
 
          PCRE2_NEVER_UTF
 
-       This  option  locks out interpretation of the pattern as UTF-8, UTF-16,
+       This option locks out interpretation of the pattern as  UTF-8,  UTF-16,
        or UTF-32, depending on which library is in use. In particular, it pre-
-       vents  the  creator of the pattern from switching to UTF interpretation
-       by starting the pattern with (*UTF).  This  option  may  be  useful  in
-       applications  that process patterns from external sources. The combina-
+       vents the creator of the pattern from switching to  UTF  interpretation
+       by  starting  the  pattern  with  (*UTF).  This option may be useful in
+       applications that process patterns from external sources. The  combina-
        tion of PCRE2_UTF and PCRE2_NEVER_UTF causes an error.
 
          PCRE2_NO_AUTO_CAPTURE
 
        If this option is set, it disables the use of numbered capturing paren-
-       theses  in the pattern. Any opening parenthesis that is not followed by
-       ? behaves as if it were followed by ?: but named parentheses can  still
-       be  used  for  capturing  (and  they acquire numbers in the usual way).
-       There is no equivalent of this option  in  Perl.  Note  that,  if  this
-       option  is  set,  references  to  capturing  groups (back references or
-       recursion/subroutine calls) may only refer to named groups, though  the
+       theses in the pattern. Any opening parenthesis that is not followed  by
+       ?  behaves as if it were followed by ?: but named parentheses can still
+       be used for capturing (and they acquire  numbers  in  the  usual  way).
+       There  is  no  equivalent  of  this  option in Perl. Note that, if this
+       option is set, references  to  capturing  groups  (back  references  or
+       recursion/subroutine  calls) may only refer to named groups, though the
        reference can be by name or by number.
 
          PCRE2_NO_AUTO_POSSESS
 
        If this option is set, it disables "auto-possessification", which is an
-       optimization that, for example, turns a+b into a++b in order  to  avoid
-       backtracks  into  a+ that can never be successful. However, if callouts
-       are in use, auto-possessification means that some  callouts  are  never
+       optimization  that,  for example, turns a+b into a++b in order to avoid
+       backtracks into a+ that can never be successful. However,  if  callouts
+       are  in  use,  auto-possessification means that some callouts are never
        taken. You can set this option if you want the matching functions to do
-       a full unoptimized search and run all the callouts, but  it  is  mainly
+       a  full  unoptimized  search and run all the callouts, but it is mainly
        provided for testing purposes.
 
          PCRE2_NO_DOTSTAR_ANCHOR
 
        If this option is set, it disables an optimization that is applied when
-       .* is the first significant item in a top-level branch  of  a  pattern,
-       and  all  the  other branches also start with .* or with \A or \G or ^.
-       The optimization is automatically disabled for .* if it  is  inside  an
-       atomic  group or a capturing group that is the subject of a back refer-
-       ence, or if the pattern contains (*PRUNE) or (*SKIP).  When  the  opti-
-       mization  is  not disabled, such a pattern is automatically anchored if
+       .*  is  the  first significant item in a top-level branch of a pattern,
+       and all the other branches also start with .* or with \A or  \G  or  ^.
+       The  optimization  is  automatically disabled for .* if it is inside an
+       atomic group or a capturing group that is the subject of a back  refer-
+       ence,  or  if  the pattern contains (*PRUNE) or (*SKIP). When the opti-
+       mization is not disabled, such a pattern is automatically  anchored  if
        PCRE2_DOTALL is set for all the .* items and PCRE2_MULTILINE is not set
-       for  any  ^ items. Otherwise, the fact that any match must start either
-       at the start of the subject or following a newline is remembered.  Like
+       for any ^ items. Otherwise, the fact that any match must  start  either
+       at  the start of the subject or following a newline is remembered. Like
        other optimizations, this can cause callouts to be skipped.
 
          PCRE2_NO_START_OPTIMIZE
 
-       This  is  an  option whose main effect is at matching time. It does not
+       This is an option whose main effect is at matching time.  It  does  not
        change what pcre2_compile() generates, but it does affect the output of
        the JIT compiler.
 
-       There  are  a  number of optimizations that may occur at the start of a
-       match, in order to speed up the process. For example, if  it  is  known
-       that  an  unanchored  match  must  start with a specific character, the
-       matching code searches the subject for that character, and fails  imme-
-       diately  if it cannot find it, without actually running the main match-
-       ing function. This means that a special item such as (*COMMIT)  at  the
-       start  of  a  pattern is not considered until after a suitable starting
-       point for the match has been found.  Also,  when  callouts  or  (*MARK)
-       items  are  in use, these "start-up" optimizations can cause them to be
-       skipped if the pattern is never actually used. The  start-up  optimiza-
-       tions  are  in effect a pre-scan of the subject that takes place before
+       There are a number of optimizations that may occur at the  start  of  a
+       match,  in  order  to speed up the process. For example, if it is known
+       that an unanchored match must start  with  a  specific  character,  the
+       matching  code searches the subject for that character, and fails imme-
+       diately if it cannot find it, without actually running the main  match-
+       ing  function.  This means that a special item such as (*COMMIT) at the
+       start of a pattern is not considered until after  a  suitable  starting
+       point  for  the  match  has  been found. Also, when callouts or (*MARK)
+       items are in use, these "start-up" optimizations can cause them  to  be
+       skipped  if  the pattern is never actually used. The start-up optimiza-
+       tions are in effect a pre-scan of the subject that takes  place  before
        the pattern is run.
 
        The PCRE2_NO_START_OPTIMIZE option disables the start-up optimizations,
-       possibly  causing  performance  to  suffer,  but ensuring that in cases
-       where the result is "no match", the callouts do occur, and  that  items
+       possibly causing performance to suffer,  but  ensuring  that  in  cases
+       where  the  result is "no match", the callouts do occur, and that items
        such as (*COMMIT) and (*MARK) are considered at every possible starting
        position in the subject string.
 
-       Setting PCRE2_NO_START_OPTIMIZE may change the outcome  of  a  matching
+       Setting  PCRE2_NO_START_OPTIMIZE  may  change the outcome of a matching
        operation.  Consider the pattern
 
          (*COMMIT)ABC
 
-       When  this  is compiled, PCRE2 records the fact that a match must start
-       with the character "A". Suppose the subject  string  is  "DEFABC".  The
-       start-up  optimization  scans along the subject, finds "A" and runs the
-       first match attempt from there. The (*COMMIT) item means that the  pat-
-       tern  must  match the current starting position, which in this case, it
-       does. However, if the same match is  run  with  PCRE2_NO_START_OPTIMIZE
-       set,  the  initial  scan  along the subject string does not happen. The
-       first match attempt is run starting  from  "D"  and  when  this  fails,
-       (*COMMIT)  prevents  any  further  matches  being tried, so the overall
+       When this is compiled, PCRE2 records the fact that a match  must  start
+       with  the  character  "A".  Suppose the subject string is "DEFABC". The
+       start-up optimization scans along the subject, finds "A" and  runs  the
+       first  match attempt from there. The (*COMMIT) item means that the pat-
+       tern must match the current starting position, which in this  case,  it
+       does.  However,  if  the same match is run with PCRE2_NO_START_OPTIMIZE
+       set, the initial scan along the subject string  does  not  happen.  The
+       first  match  attempt  is  run  starting  from "D" and when this fails,
+       (*COMMIT) prevents any further matches  being  tried,  so  the  overall
        result is "no match". There are also other start-up optimizations.  For
        example, a minimum length for the subject may be recorded. Consider the
        pattern
 
          (*MARK:A)(X|Y)
 
-       The minimum length for a match is one  character.  If  the  subject  is
+       The  minimum  length  for  a  match is one character. If the subject is
        "ABC", there will be attempts to match "ABC", "BC", and "C". An attempt
        to match an empty string at the end of the subject does not take place,
-       because  PCRE2  knows  that  the  subject  is now too short, and so the
-       (*MARK) is never encountered. In this case, the optimization  does  not
+       because PCRE2 knows that the subject is  now  too  short,  and  so  the
+       (*MARK)  is  never encountered. In this case, the optimization does not
        affect the overall match result, which is still "no match", but it does
        affect the auxiliary information that is returned.
 
          PCRE2_NO_UTF_CHECK
 
-       When PCRE2_UTF is set, the validity of the pattern as a UTF  string  is
-       automatically  checked.  There  are  discussions  about the validity of
-       UTF-8 strings, UTF-16 strings, and UTF-32 strings in  the  pcre2unicode
+       When  PCRE2_UTF  is set, the validity of the pattern as a UTF string is
+       automatically checked. There are  discussions  about  the  validity  of
+       UTF-8  strings,  UTF-16 strings, and UTF-32 strings in the pcre2unicode
        document.  If an invalid UTF sequence is found, pcre2_compile() returns
        a negative error code.
 
        If you know that your pattern is valid, and you want to skip this check
-       for  performance  reasons,  you  can set the PCRE2_NO_UTF_CHECK option.
-       When it is set, the effect of passing an invalid UTF string as  a  pat-
-       tern  is  undefined.  It  may cause your program to crash or loop. Note
-       that  this  option  can   also   be   passed   to   pcre2_match()   and
+       for performance reasons, you can  set  the  PCRE2_NO_UTF_CHECK  option.
+       When  it  is set, the effect of passing an invalid UTF string as a pat-
+       tern is undefined. It may cause your program to  crash  or  loop.  Note
+       that   this   option   can   also   be   passed  to  pcre2_match()  and
        pcre_dfa_match(), to suppress validity checking of the subject string.
 
          PCRE2_UCP
 
        This option changes the way PCRE2 processes \B, \b, \D, \d, \S, \s, \W,
-       \w, and some of the POSIX character classes.  By  default,  only  ASCII
-       characters  are recognized, but if PCRE2_UCP is set, Unicode properties
-       are used instead to classify characters. More details are given in  the
+       \w,  and  some  of  the POSIX character classes. By default, only ASCII
+       characters are recognized, but if PCRE2_UCP is set, Unicode  properties
+       are  used instead to classify characters. More details are given in the
        section on generic character types in the pcre2pattern page. If you set
-       PCRE2_UCP, matching one of the items it affects takes much longer.  The
-       option  is  available only if PCRE2 has been compiled with Unicode sup-
+       PCRE2_UCP,  matching one of the items it affects takes much longer. The
+       option is available only if PCRE2 has been compiled with  Unicode  sup-
        port.
 
          PCRE2_UNGREEDY
 
-       This option inverts the "greediness" of the quantifiers  so  that  they
-       are  not greedy by default, but become greedy if followed by "?". It is
-       not compatible with Perl. It can also be set by a (?U)  option  setting
+       This  option  inverts  the "greediness" of the quantifiers so that they
+       are not greedy by default, but become greedy if followed by "?". It  is
+       not  compatible  with Perl. It can also be set by a (?U) option setting
        within the pattern.
 
          PCRE2_USE_OFFSET_LIMIT
 
        This option must be set for pcre2_compile() if pcre2_set_offset_limit()
-       is going to be used to set a non-default offset limit in a  match  con-
-       text  for  matches  that  use this pattern. An error is generated if an
-       offset limit is set without this option.  For  more  details,  see  the
-       description  of  pcre2_set_offset_limit() in the section that describes
+       is  going  to be used to set a non-default offset limit in a match con-
+       text for matches that use this pattern. An error  is  generated  if  an
+       offset  limit  is  set  without  this option. For more details, see the
+       description of pcre2_set_offset_limit() in the section  that  describes
        match contexts. See also the PCRE2_FIRSTLINE option above.
 
          PCRE2_UTF
 
-       This option causes PCRE2 to regard both the  pattern  and  the  subject
-       strings  that  are  subsequently processed as strings of UTF characters
-       instead of single-code-unit strings. It  is  available  when  PCRE2  is
-       built  to  include  Unicode  support (which is the default). If Unicode
-       support is not available, the use of this  option  provokes  an  error.
-       Details  of how this option changes the behaviour of PCRE2 are given in
+       This  option  causes  PCRE2  to regard both the pattern and the subject
+       strings that are subsequently processed as strings  of  UTF  characters
+       instead  of  single-code-unit  strings.  It  is available when PCRE2 is
+       built to include Unicode support (which is  the  default).  If  Unicode
+       support  is  not  available,  the use of this option provokes an error.
+       Details of how this option changes the behaviour of PCRE2 are given  in
        the pcre2unicode page.
 
 
 COMPILATION ERROR CODES
 
-       There are over 80 positive error codes that pcre2_compile() may  return
-       if it finds an error in the pattern. There are also some negative error
-       codes that are used for invalid UTF strings.  These  are  the  same  as
-       given  by pcre2_match() and pcre2_dfa_match(), and are described in the
-       pcre2unicode page. The pcre2_get_error_message() function can be called
-       to obtain a textual error message from any error code.
+       There  are over 80 positive error codes that pcre2_compile() may return
+       (via errorcode) if it finds an error in the  pattern.  There  are  also
+       some  negative error codes that are used for invalid UTF strings. These
+       are the same as given by pcre2_match() and pcre2_dfa_match(),  and  are
+       described in the pcre2unicode page. The pcre2_get_error_message() func-
+       tion (see "Obtaining a textual error message" below) can be  called  to
+       obtain a textual error message from any error code.
 
 
 JUST-IN-TIME (JIT) COMPILATION
@@ -2389,13 +2395,14 @@ OTHER INFORMATION ABOUT A MATCH
 ERROR RETURNS FROM pcre2_match()
 
        If  pcre2_match() fails, it returns a negative number. This can be con-
-       verted to a text string by calling pcre2_get_error_message().  Negative
-       error  codes  are  also returned by other functions, and are documented
-       with them.  The codes are given names in the header file. If UTF check-
-       ing is in force and an invalid UTF subject string is detected, one of a
-       number of UTF-specific negative error codes is  returned.  Details  are
-       given in the pcre2unicode page. The following are the other errors that
-       may be returned by pcre2_match():
+       verted to a text string by calling the pcre2_get_error_message()  func-
+       tion  (see  "Obtaining a textual error message" below).  Negative error
+       codes are also returned by other functions,  and  are  documented  with
+       them.  The codes are given names in the header file. If UTF checking is
+       in force and an invalid UTF subject string is detected, one of a number
+       of  UTF-specific negative error codes is returned. Details are given in
+       the pcre2unicode page. The following are the other errors that  may  be
+       returned by pcre2_match():
 
          PCRE2_ERROR_NOMATCH
 
@@ -2403,19 +2410,19 @@ ERROR RETURNS FROM pcre2_match()
 
          PCRE2_ERROR_PARTIAL
 
-       The subject string did not match, but it did match partially.  See  the
+       The  subject  string did not match, but it did match partially. See the
        pcre2partial documentation for details of partial matching.
 
          PCRE2_ERROR_BADMAGIC
 
        PCRE2 stores a 4-byte "magic number" at the start of the compiled code,
-       to catch the case when it is passed a junk pointer. This is  the  error
+       to  catch  the case when it is passed a junk pointer. This is the error
        that is returned when the magic number is not present.
 
          PCRE2_ERROR_BADMODE
 
-       This  error  is  given  when  a  pattern that was compiled by the 8-bit
-       library is passed to a 16-bit  or  32-bit  library  function,  or  vice
+       This error is given when a pattern  that  was  compiled  by  the  8-bit
+       library  is  passed  to  a  16-bit  or 32-bit library function, or vice
        versa.
 
          PCRE2_ERROR_BADOFFSET
@@ -2429,35 +2436,35 @@ ERROR RETURNS FROM pcre2_match()
          PCRE2_ERROR_BADUTFOFFSET
 
        The UTF code unit sequence that was passed as a subject was checked and
-       found to be valid (the PCRE2_NO_UTF_CHECK option was not set), but  the
-       value  of startoffset did not point to the beginning of a UTF character
+       found  to be valid (the PCRE2_NO_UTF_CHECK option was not set), but the
+       value of startoffset did not point to the beginning of a UTF  character
        or the end of the subject.
 
          PCRE2_ERROR_CALLOUT
 
-       This error is never generated by pcre2_match() itself. It  is  provided
-       for  use  by  callout  functions  that  want  to cause pcre2_match() or
-       pcre2_callout_enumerate() to return a distinctive error code.  See  the
+       This  error  is never generated by pcre2_match() itself. It is provided
+       for use by callout  functions  that  want  to  cause  pcre2_match()  or
+       pcre2_callout_enumerate()  to  return a distinctive error code. See the
        pcre2callout documentation for details.
 
          PCRE2_ERROR_INTERNAL
 
-       An  unexpected  internal error has occurred. This error could be caused
+       An unexpected internal error has occurred. This error could  be  caused
        by a bug in PCRE2 or by overwriting of the compiled pattern.
 
          PCRE2_ERROR_JIT_BADOPTION
 
-       This error is returned when a pattern  that  was  successfully  studied
-       using  JIT is being matched, but the matching mode (partial or complete
-       match) does not correspond to any JIT compilation mode.  When  the  JIT
-       fast  path  function  is used, this error may be also given for invalid
+       This  error  is  returned  when a pattern that was successfully studied
+       using JIT is being matched, but the matching mode (partial or  complete
+       match)  does  not  correspond to any JIT compilation mode. When the JIT
+       fast path function is used, this error may be also  given  for  invalid
        options. See the pcre2jit documentation for more details.
 
          PCRE2_ERROR_JIT_STACKLIMIT
 
-       This error is returned when a pattern  that  was  successfully  studied
-       using  JIT  is being matched, but the memory available for the just-in-
-       time processing stack is not large enough. See the pcre2jit  documenta-
+       This  error  is  returned  when a pattern that was successfully studied
+       using JIT is being matched, but the memory available for  the  just-in-
+       time  processing stack is not large enough. See the pcre2jit documenta-
        tion for more details.
 
          PCRE2_ERROR_MATCHLIMIT
@@ -2466,10 +2473,10 @@ ERROR RETURNS FROM pcre2_match()
 
          PCRE2_ERROR_NOMEMORY
 
-       If  a  pattern  contains  back  references,  but the ovector is not big
-       enough to remember the referenced substrings, PCRE2  gets  a  block  of
+       If a pattern contains back references,  but  the  ovector  is  not  big
+       enough  to  remember  the  referenced substrings, PCRE2 gets a block of
        memory at the start of matching to use for this purpose. There are some
-       other special cases where extra memory is needed during matching.  This
+       other  special cases where extra memory is needed during matching. This
        error is given when memory cannot be obtained.
 
          PCRE2_ERROR_NULL
@@ -2478,17 +2485,38 @@ ERROR RETURNS FROM pcre2_match()
 
          PCRE2_ERROR_RECURSELOOP
 
-       This  error  is  returned  when  pcre2_match() detects a recursion loop
-       within the pattern. Specifically, it means that either the  whole  pat-
+       This error is returned when  pcre2_match()  detects  a  recursion  loop
+       within  the  pattern. Specifically, it means that either the whole pat-
        tern or a subpattern has been called recursively for the second time at
-       the same position in the subject  string.  Some  simple  patterns  that
-       might  do  this are detected and faulted at compile time, but more com-
-       plicated cases, in particular mutual recursions between  two  different
+       the  same  position  in  the  subject string. Some simple patterns that
+       might do this are detected and faulted at compile time, but  more  com-
+       plicated  cases,  in particular mutual recursions between two different
        subpatterns, cannot be detected until matching is attempted.
 
          PCRE2_ERROR_RECURSIONLIMIT
 
        The internal recursion limit was reached.
+
+
+OBTAINING A TEXTUAL ERROR MESSAGE
+
+       int pcre2_get_error_message(int errorcode, PCRE2_UCHAR *buffer,
+         PCRE2_SIZE bufflen);
+
+       A text message for an error code  from  any  PCRE2  function  (compile,
+       match,  or  auxiliary)  can be obtained by calling pcre2_get_error_mes-
+       sage(). The code is passed as the first argument,  with  the  remaining
+       two  arguments specifying a code unit buffer and its length, into which
+       the text message is placed. Note that the message is returned  in  code
+       units of the appropriate width for the library that is being used.
+
+       The  returned message is terminated with a trailing zero, and the func-
+       tion returns the number of code  units  used,  excluding  the  trailing
+       zero.  If  the  error  number  is  unknown,  the  negative  error  code
+       PCRE2_ERROR_BADDATA is returned. If the buffer is too small,  the  mes-
+       sage  is  truncated  (but still with a trailing zero), and the negative
+       error code PCRE2_ERROR_NOMEMORY is returned.  None of the messages  are
+       very long; a buffer size of 120 code units is ample.
 
 
 EXTRACTING CAPTURED SUBSTRINGS BY NUMBER
@@ -2861,7 +2889,8 @@ CREATING A NEW STRING WITH SUBSTITUTIONS
        used in an assertion).
 
        As for all PCRE2 errors, a text message that describes the error can be
-       obtained by calling pcre2_get_error_message().
+       obtained  by  calling  the  pcre2_get_error_message()   function   (see
+       "Obtaining a textual error message" above).
 
 
 DUPLICATE SUBPATTERN NAMES
@@ -2869,56 +2898,56 @@ DUPLICATE SUBPATTERN NAMES
        int pcre2_substring_nametable_scan(const pcre2_code *code,
          PCRE2_SPTR name, PCRE2_SPTR *first, PCRE2_SPTR *last);
 
-       When a pattern is compiled with the PCRE2_DUPNAMES  option,  names  for
-       subpatterns  are  not required to be unique. Duplicate names are always
-       allowed for subpatterns with the same number, created by using the  (?|
-       feature.  Indeed,  if  such subpatterns are named, they are required to
+       When  a  pattern  is compiled with the PCRE2_DUPNAMES option, names for
+       subpatterns are not required to be unique. Duplicate names  are  always
+       allowed  for subpatterns with the same number, created by using the (?|
+       feature. Indeed, if such subpatterns are named, they  are  required  to
        use the same names.
 
        Normally, patterns with duplicate names are such that in any one match,
-       only  one of the named subpatterns participates. An example is shown in
+       only one of the named subpatterns participates. An example is shown  in
        the pcre2pattern documentation.
 
-       When  duplicates   are   present,   pcre2_substring_copy_byname()   and
-       pcre2_substring_get_byname()  return  the first substring corresponding
-       to  the  given  name  that  is  set.  Only   if   none   are   set   is
-       PCRE2_ERROR_UNSET  is  returned. The pcre2_substring_number_from_name()
+       When   duplicates   are   present,   pcre2_substring_copy_byname()  and
+       pcre2_substring_get_byname() return the first  substring  corresponding
+       to   the   given   name   that   is  set.  Only  if  none  are  set  is
+       PCRE2_ERROR_UNSET is returned.  The  pcre2_substring_number_from_name()
        function returns the error PCRE2_ERROR_NOUNIQUESUBSTRING when there are
        duplicate names.
 
-       If  you want to get full details of all captured substrings for a given
-       name, you must use the pcre2_substring_nametable_scan()  function.  The
-       first  argument is the compiled pattern, and the second is the name. If
-       the third and fourth arguments are NULL, the function returns  a  group
+       If you want to get full details of all captured substrings for a  given
+       name,  you  must use the pcre2_substring_nametable_scan() function. The
+       first argument is the compiled pattern, and the second is the name.  If
+       the  third  and fourth arguments are NULL, the function returns a group
        number for a unique name, or PCRE2_ERROR_NOUNIQUESUBSTRING otherwise.
 
        When the third and fourth arguments are not NULL, they must be pointers
-       to variables that are updated by the function. After it has  run,  they
+       to  variables  that are updated by the function. After it has run, they
        point to the first and last entries in the name-to-number table for the
-       given name, and the function returns the length of each entry  in  code
-       units.  In both cases, PCRE2_ERROR_NOSUBSTRING is returned if there are
+       given  name,  and the function returns the length of each entry in code
+       units. In both cases, PCRE2_ERROR_NOSUBSTRING is returned if there  are
        no entries for the given name.
 
        The format of the name table is described above in the section entitled
-       Information  about  a  pattern.  Given all the relevant entries for the
-       name, you can extract each of their numbers,  and  hence  the  captured
+       Information about a pattern. Given all the  relevant  entries  for  the
+       name,  you  can  extract  each of their numbers, and hence the captured
        data.
 
 
 FINDING ALL POSSIBLE MATCHES AT ONE POSITION
 
-       The  traditional  matching  function  uses a similar algorithm to Perl,
-       which stops when it finds the first match at a given point in the  sub-
+       The traditional matching function uses a  similar  algorithm  to  Perl,
+       which  stops when it finds the first match at a given point in the sub-
        ject. If you want to find all possible matches, or the longest possible
-       match at a given position,  consider  using  the  alternative  matching
-       function  (see  below) instead. If you cannot use the alternative func-
+       match  at  a  given  position,  consider using the alternative matching
+       function (see below) instead. If you cannot use the  alternative  func-
        tion, you can kludge it up by making use of the callout facility, which
        is described in the pcre2callout documentation.
 
        What you have to do is to insert a callout right at the end of the pat-
-       tern.  When your callout function is called, extract and save the  cur-
-       rent  matched  substring.  Then return 1, which forces pcre2_match() to
-       backtrack and try other alternatives. Ultimately, when it runs  out  of
+       tern.   When your callout function is called, extract and save the cur-
+       rent matched substring. Then return 1, which  forces  pcre2_match()  to
+       backtrack  and  try other alternatives. Ultimately, when it runs out of
        matches, pcre2_match() will yield PCRE2_ERROR_NOMATCH.
 
 
@@ -2930,26 +2959,26 @@ MATCHING A PATTERN: THE ALTERNATIVE FUNCTION
          pcre2_match_context *mcontext,
          int *workspace, PCRE2_SIZE wscount);
 
-       The  function  pcre2_dfa_match()  is  called  to match a subject string
-       against a compiled pattern, using a matching algorithm that  scans  the
-       subject  string  just  once, and does not backtrack. This has different
-       characteristics to the normal algorithm, and  is  not  compatible  with
-       Perl.  Some of the features of PCRE2 patterns are not supported. Never-
-       theless, there are times when this kind of matching can be useful.  For
-       a  discussion  of  the  two matching algorithms, and a list of features
+       The function pcre2_dfa_match() is called  to  match  a  subject  string
+       against  a  compiled pattern, using a matching algorithm that scans the
+       subject string just once, and does not backtrack.  This  has  different
+       characteristics  to  the  normal  algorithm, and is not compatible with
+       Perl. Some of the features of PCRE2 patterns are not supported.  Never-
+       theless,  there are times when this kind of matching can be useful. For
+       a discussion of the two matching algorithms, and  a  list  of  features
        that pcre2_dfa_match() does not support, see the pcre2matching documen-
        tation.
 
-       The  arguments  for  the pcre2_dfa_match() function are the same as for
+       The arguments for the pcre2_dfa_match() function are the  same  as  for
        pcre2_match(), plus two extras. The ovector within the match data block
        is used in a different way, and this is described below. The other com-
-       mon arguments are used in the same way as for pcre2_match(),  so  their
+       mon  arguments  are used in the same way as for pcre2_match(), so their
        description is not repeated here.
 
-       The  two  additional  arguments provide workspace for the function. The
-       workspace vector should contain at least 20 elements. It  is  used  for
+       The two additional arguments provide workspace for  the  function.  The
+       workspace  vector  should  contain at least 20 elements. It is used for
        keeping  track  of  multiple  paths  through  the  pattern  tree.  More
-       workspace is needed for patterns and subjects where there are a lot  of
+       workspace  is needed for patterns and subjects where there are a lot of
        potential matches.
 
        Here is an example of a simple call to pcre2_dfa_match():
@@ -2969,45 +2998,45 @@ MATCHING A PATTERN: THE ALTERNATIVE FUNCTION
 
    Option bits for pcre_dfa_match()
 
-       The  unused  bits of the options argument for pcre2_dfa_match() must be
-       zero. The only bits that may be set are  PCRE2_ANCHORED,  PCRE2_NOTBOL,
+       The unused bits of the options argument for pcre2_dfa_match()  must  be
+       zero.  The  only bits that may be set are PCRE2_ANCHORED, PCRE2_NOTBOL,
        PCRE2_NOTEOL,          PCRE2_NOTEMPTY,          PCRE2_NOTEMPTY_ATSTART,
        PCRE2_NO_UTF_CHECK,       PCRE2_PARTIAL_HARD,       PCRE2_PARTIAL_SOFT,
-       PCRE2_DFA_SHORTEST,  and  PCRE2_DFA_RESTART.  All  but the last four of
-       these are exactly the same as for pcre2_match(), so  their  description
+       PCRE2_DFA_SHORTEST, and PCRE2_DFA_RESTART. All but  the  last  four  of
+       these  are  exactly the same as for pcre2_match(), so their description
        is not repeated here.
 
          PCRE2_PARTIAL_HARD
          PCRE2_PARTIAL_SOFT
 
-       These  have  the  same general effect as they do for pcre2_match(), but
-       the details are slightly different. When PCRE2_PARTIAL_HARD is set  for
-       pcre2_dfa_match(),  it  returns  PCRE2_ERROR_PARTIAL  if the end of the
+       These have the same general effect as they do  for  pcre2_match(),  but
+       the  details are slightly different. When PCRE2_PARTIAL_HARD is set for
+       pcre2_dfa_match(), it returns PCRE2_ERROR_PARTIAL if  the  end  of  the
        subject is reached and there is still at least one matching possibility
        that requires additional characters. This happens even if some complete
-       matches have already been found. When PCRE2_PARTIAL_SOFT  is  set,  the
-       return  code  PCRE2_ERROR_NOMATCH is converted into PCRE2_ERROR_PARTIAL
-       if the end of the subject is  reached,  there  have  been  no  complete
+       matches  have  already  been found. When PCRE2_PARTIAL_SOFT is set, the
+       return code PCRE2_ERROR_NOMATCH is converted  into  PCRE2_ERROR_PARTIAL
+       if  the  end  of  the  subject  is reached, there have been no complete
        matches, but there is still at least one matching possibility. The por-
-       tion of the string that was inspected when the  longest  partial  match
+       tion  of  the  string that was inspected when the longest partial match
        was found is set as the first matching string in both cases. There is a
-       more detailed discussion of partial and  multi-segment  matching,  with
+       more  detailed  discussion  of partial and multi-segment matching, with
        examples, in the pcre2partial documentation.
 
          PCRE2_DFA_SHORTEST
 
-       Setting  the PCRE2_DFA_SHORTEST option causes the matching algorithm to
+       Setting the PCRE2_DFA_SHORTEST option causes the matching algorithm  to
        stop as soon as it has found one match. Because of the way the alterna-
-       tive  algorithm  works, this is necessarily the shortest possible match
+       tive algorithm works, this is necessarily the shortest  possible  match
        at the first possible matching point in the subject string.
 
          PCRE2_DFA_RESTART
 
-       When pcre2_dfa_match() returns a partial match, it is possible to  call
+       When  pcre2_dfa_match() returns a partial match, it is possible to call
        it again, with additional subject characters, and have it continue with
        the same match. The PCRE2_DFA_RESTART option requests this action; when
-       it  is  set,  the workspace and wscount options must reference the same
-       vector as before because data about the match so far is  left  in  them
+       it is set, the workspace and wscount options must  reference  the  same
+       vector  as  before  because data about the match so far is left in them
        after a partial match. There is more discussion of this facility in the
        pcre2partial documentation.
 
@@ -3015,8 +3044,8 @@ MATCHING A PATTERN: THE ALTERNATIVE FUNCTION
 
        When pcre2_dfa_match() succeeds, it may have matched more than one sub-
        string in the subject. Note, however, that all the matches from one run
-       of the function start at the same point in  the  subject.  The  shorter
-       matches  are all initial substrings of the longer matches. For example,
+       of  the  function  start  at the same point in the subject. The shorter
+       matches are all initial substrings of the longer matches. For  example,
        if the pattern
 
          <.*>
@@ -3031,17 +3060,17 @@ MATCHING A PATTERN: THE ALTERNATIVE FUNCTION
          <something> <something else>
          <something>
 
-       On success, the yield of the function is a number  greater  than  zero,
-       which  is  the  number  of  matched substrings. The offsets of the sub-
-       strings are returned in the ovector, and can be extracted by number  in
-       the  same way as for pcre2_match(), but the numbers bear no relation to
-       any capturing groups that may exist in the pattern, because DFA  match-
+       On  success,  the  yield of the function is a number greater than zero,
+       which is the number of matched substrings.  The  offsets  of  the  sub-
+       strings  are returned in the ovector, and can be extracted by number in
+       the same way as for pcre2_match(), but the numbers bear no relation  to
+       any  capturing groups that may exist in the pattern, because DFA match-
        ing does not support group capture.
 
-       Calls  to  the  convenience  functions  that extract substrings by name
-       return the error PCRE2_ERROR_DFA_UFUNC (unsupported function)  if  used
+       Calls to the convenience functions  that  extract  substrings  by  name
+       return  the  error PCRE2_ERROR_DFA_UFUNC (unsupported function) if used
        after a DFA match. The convenience functions that extract substrings by
-       number never return PCRE2_ERROR_NOSUBSTRING, and the meanings  of  some
+       number  never  return PCRE2_ERROR_NOSUBSTRING, and the meanings of some
        other errors are slightly different:
 
          PCRE2_ERROR_UNAVAILABLE
@@ -3051,64 +3080,64 @@ MATCHING A PATTERN: THE ALTERNATIVE FUNCTION
 
          PCRE2_ERROR_UNSET
 
-       There is a slot in the ovector  for  this  substring,  but  there  were
+       There  is  a  slot  in  the  ovector for this substring, but there were
        insufficient matches to fill it.
 
-       The  matched  strings  are  stored  in  the ovector in reverse order of
-       length; that is, the longest matching string is first.  If  there  were
-       too  many matches to fit into the ovector, the yield of the function is
+       The matched strings are stored in  the  ovector  in  reverse  order  of
+       length;  that  is,  the longest matching string is first. If there were
+       too many matches to fit into the ovector, the yield of the function  is
        zero, and the vector is filled with the longest matches.
 
-       NOTE: PCRE2's "auto-possessification" optimization usually  applies  to
-       character  repeats at the end of a pattern (as well as internally). For
-       example, the pattern "a\d+" is compiled as if it were "a\d++". For  DFA
-       matching,  this  means  that  only  one possible match is found. If you
-       really do want multiple matches in such cases, either use  an  ungreedy
-       repeat  auch  as  "a\d+?"  or set the PCRE2_NO_AUTO_POSSESS option when
+       NOTE:  PCRE2's  "auto-possessification" optimization usually applies to
+       character repeats at the end of a pattern (as well as internally).  For
+       example,  the pattern "a\d+" is compiled as if it were "a\d++". For DFA
+       matching, this means that only one possible  match  is  found.  If  you
+       really  do  want multiple matches in such cases, either use an ungreedy
+       repeat auch as "a\d+?" or set  the  PCRE2_NO_AUTO_POSSESS  option  when
        compiling.
 
    Error returns from pcre2_dfa_match()
 
        The pcre2_dfa_match() function returns a negative number when it fails.
-       Many  of  the  errors  are  the same as for pcre2_match(), as described
+       Many of the errors are the same  as  for  pcre2_match(),  as  described
        above.  There are in addition the following errors that are specific to
        pcre2_dfa_match():
 
          PCRE2_ERROR_DFA_UITEM
 
-       This  return  is  given  if pcre2_dfa_match() encounters an item in the
-       pattern that it does not support, for instance, the use of \C in a  UTF
+       This return is given if pcre2_dfa_match() encounters  an  item  in  the
+       pattern  that it does not support, for instance, the use of \C in a UTF
        mode or a back reference.
 
          PCRE2_ERROR_DFA_UCOND
 
-       This  return  is given if pcre2_dfa_match() encounters a condition item
-       that uses a back reference for the condition, or a test  for  recursion
+       This return is given if pcre2_dfa_match() encounters a  condition  item
+       that  uses  a back reference for the condition, or a test for recursion
        in a specific group. These are not supported.
 
          PCRE2_ERROR_DFA_WSSIZE
 
-       This  return  is  given  if  pcre2_dfa_match() runs out of space in the
+       This return is given if pcre2_dfa_match() runs  out  of  space  in  the
        workspace vector.
 
          PCRE2_ERROR_DFA_RECURSE
 
-       When a recursive subpattern is processed, the matching  function  calls
+       When  a  recursive subpattern is processed, the matching function calls
        itself recursively, using private memory for the ovector and workspace.
-       This error is given if the internal ovector is not large  enough.  This
+       This  error  is given if the internal ovector is not large enough. This
        should be extremely rare, as a vector of size 1000 is used.
 
          PCRE2_ERROR_DFA_BADRESTART
 
-       When  pcre2_dfa_match()  is  called  with the PCRE2_DFA_RESTART option,
-       some plausibility checks are made on the  contents  of  the  workspace,
-       which  should  contain data about the previous partial match. If any of
+       When pcre2_dfa_match() is called  with  the  PCRE2_DFA_RESTART  option,
+       some  plausibility  checks  are  made on the contents of the workspace,
+       which should contain data about the previous partial match. If  any  of
        these checks fail, this error is given.
 
 
 SEE ALSO
 
-       pcre2build(3),   pcre2callout(3),    pcre2demo(3),    pcre2matching(3),
+       pcre2build(3),    pcre2callout(3),    pcre2demo(3),   pcre2matching(3),
        pcre2partial(3),    pcre2posix(3),    pcre2sample(3),    pcre2stack(3),
        pcre2unicode(3).
 
@@ -3122,7 +3151,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 05 June 2016
+       Last updated: 17 June 2016
        Copyright (c) 1997-2016 University of Cambridge.
 ------------------------------------------------------------------------------
  

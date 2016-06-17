@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "05 June 2016" "PCRE2 10.22"
+.TH PCRE2API 3 "17 June 2016" "PCRE2 10.22"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -1032,7 +1032,7 @@ The \fBpcre2_compile()\fP function compiles a pattern into an internal form.
 The pattern is defined by a pointer to a string of code units and a length. If
 the pattern is zero-terminated, the length can be specified as
 PCRE2_ZERO_TERMINATED. The function returns a pointer to a block of memory that
-contains the compiled pattern and related data.
+contains the compiled pattern and related data, or NULL if an error occurred.
 .P
 If the compile context argument \fIccontext\fP is NULL, memory for the compiled
 pattern is obtained by calling \fBmalloc()\fP. Otherwise, it is obtained from
@@ -1054,8 +1054,9 @@ to acquire a private copy of shared compiled code.
 .P
 NOTE: When one of the matching functions is called, pointers to the compiled
 pattern and the subject string are set in the match data block so that they can
-be referenced by the extraction functions. After running a match, you must not
-free a compiled pattern (or a subject string) until after all operations on the
+be referenced by the substring extraction functions. After running a match, you
+must not free a compiled pattern (or a subject string) until after all
+operations on the
 .\" HTML <a href="#matchdatablock">
 .\" </a>
 match data block
@@ -1086,13 +1087,22 @@ above).
 .\"
 .P
 If \fIerrorcode\fP or \fIerroroffset\fP is NULL, \fBpcre2_compile()\fP returns
-NULL immediately. Otherwise, if compilation of a pattern fails,
-\fBpcre2_compile()\fP returns NULL, having set these variables to an error code
-and an offset (number of code units) within the pattern, respectively. The
-\fBpcre2_get_error_message()\fP function provides a textual message for each
-error code. Compilation errors are positive numbers, but UTF formatting errors
-are negative numbers. For an invalid UTF-8 or UTF-16 string, the offset is that
-of the first code unit of the failing character.
+NULL immediately. Otherwise, the variables to which these point are set to an
+error code and an offset (number of code units) within the pattern,
+respectively, when \fBpcre2_compile()\fP returns NULL because a compilation
+error has occurred. The values are not defined when compilation is successful
+and \fBpcre2_compile()\fP returns a non-NULL value.
+.P
+The \fBpcre2_get_error_message()\fP function (see "Obtaining a textual error
+message"
+.\" HTML <a href="#geterrormessage">
+.\" </a>
+below)
+.\"
+provides a textual message for each error code. Compilation errors have
+positive error codes; UTF formatting error codes are negative. For an invalid
+UTF-8 or UTF-16 string, the offset is that of the first code unit of the
+failing character.
 .P
 Some errors are not detected until the whole pattern has been scanned; in these
 cases, the offset passed back is the length of the pattern. Note that the
@@ -1479,15 +1489,21 @@ page.
 .SH "COMPILATION ERROR CODES"
 .rs
 .sp
-There are over 80 positive error codes that \fBpcre2_compile()\fP may return if
-it finds an error in the pattern. There are also some negative error codes that
-are used for invalid UTF strings. These are the same as given by
-\fBpcre2_match()\fP and \fBpcre2_dfa_match()\fP, and are described in the
+There are over 80 positive error codes that \fBpcre2_compile()\fP may return
+(via \fIerrorcode\fP) if it finds an error in the pattern. There are also some
+negative error codes that are used for invalid UTF strings. These are the same
+as given by \fBpcre2_match()\fP and \fBpcre2_dfa_match()\fP, and are described
+in the
 .\" HREF
 \fBpcre2unicode\fP
 .\"
-page. The \fBpcre2_get_error_message()\fP function can be called to obtain a
-textual error message from any error code.
+page. The \fBpcre2_get_error_message()\fP function (see "Obtaining a textual
+error message"
+.\" HTML <a href="#geterrormessage">
+.\" </a>
+below)
+.\"
+can be called to obtain a textual error message from any error code.
 .
 .
 .\" HTML <a name="jitcompiling"></a>
@@ -2454,11 +2470,16 @@ page.
 .rs
 .sp
 If \fBpcre2_match()\fP fails, it returns a negative number. This can be
-converted to a text string by calling \fBpcre2_get_error_message()\fP. Negative
-error codes are also returned by other functions, and are documented with them.
-The codes are given names in the header file. If UTF checking is in force and
-an invalid UTF subject string is detected, one of a number of UTF-specific
-negative error codes is returned. Details are given in the
+converted to a text string by calling the \fBpcre2_get_error_message()\fP
+function (see "Obtaining a textual error message"
+.\" HTML <a href="#geterrormessage">
+.\" </a>
+below).
+.\"
+Negative error codes are also returned by other functions, and are documented
+with them. The codes are given names in the header file. If UTF checking is in
+force and an invalid UTF subject string is detected, one of a number of
+UTF-specific negative error codes is returned. Details are given in the
 .\" HREF
 \fBpcre2unicode\fP
 .\"
@@ -2569,6 +2590,30 @@ is attempted.
   PCRE2_ERROR_RECURSIONLIMIT
 .sp
 The internal recursion limit was reached.
+.
+.
+.\" HTML <a name="geterrormessage"></a>
+.SH "OBTAINING A TEXTUAL ERROR MESSAGE"
+.rs
+.sp
+.nf
+.B int pcre2_get_error_message(int \fIerrorcode\fP, PCRE2_UCHAR *\fIbuffer\fP,
+.B "  PCRE2_SIZE \fIbufflen\fP);"
+.fi
+.P
+A text message for an error code from any PCRE2 function (compile, match, or 
+auxiliary) can be obtained by calling \fBpcre2_get_error_message()\fP. The code 
+is passed as the first argument, with the remaining two arguments specifying a 
+code unit buffer and its length, into which the text message is placed. Note 
+that the message is returned in code units of the appropriate width for the 
+library that is being used. 
+.P
+The returned message is terminated with a trailing zero, and the function
+returns the number of code units used, excluding the trailing zero. If the
+error number is unknown, the negative error code PCRE2_ERROR_BADDATA is
+returned. If the buffer is too small, the message is truncated (but still with
+a trailing zero), and the negative error code PCRE2_ERROR_NOMEMORY is returned.
+None of the messages are very long; a buffer size of 120 code units is ample.
 .
 .
 .\" HTML <a name="extractbynumber"></a>
@@ -2948,7 +2993,12 @@ substitution), and PCRE2_BADSUBPATTERN (the pattern match ended before it
 started, which can happen if \eK is used in an assertion).
 .P
 As for all PCRE2 errors, a text message that describes the error can be
-obtained by calling \fBpcre2_get_error_message()\fP.
+obtained by calling the \fBpcre2_get_error_message()\fP function (see
+"Obtaining a textual error message"
+.\" HTML <a href="#geterrormessage">
+.\" </a>
+above).
+.\"
 .
 .
 .SH "DUPLICATE SUBPATTERN NAMES"
@@ -3242,6 +3292,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 05 June 2016
+Last updated: 17 June 2016
 Copyright (c) 1997-2016 University of Cambridge.
 .fi

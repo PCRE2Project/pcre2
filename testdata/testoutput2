@@ -15187,3 +15187,11 @@ Failed: error 122 at offset 10: unmatched closing parenthesis
 No match
 
 # End of testinput2 
+Error -63: PCRE2_ERROR_BADDATA (unknown error number)
+Error -62: bad serialized data
+Error -2: partial match
+Error -1: no match
+Error 0: PCRE2_ERROR_BADDATA (unknown error number)
+Error 100: no error
+Error 188: pattern string is longer than the limit set by the application
+Error 189: PCRE2_ERROR_BADDATA (unknown error number)

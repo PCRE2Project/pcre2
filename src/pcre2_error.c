@@ -252,7 +252,7 @@ static const unsigned char match_error_texts[] =
   /* 60 */
   "match with end before start is not supported\0"
   "too many replacements (more than INT_MAX)\0"
-  "bad serialized data\0" 
+  "bad serialized data\0"
   ;
 
 
@@ -277,32 +277,32 @@ Returns:        length of message if all is well
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_get_error_message(int enumber, PCRE2_UCHAR *buffer, size_t size)
 {
-char xbuff[128];
 const unsigned char *message;
 size_t i;
 int n;
 
 if (size == 0) return PCRE2_ERROR_NOMEMORY;
 
-if (enumber > COMPILE_ERROR_BASE)  /* Compile error */
+if (enumber >= COMPILE_ERROR_BASE)  /* Compile error */
   {
   message = compile_error_texts;
   n = enumber - COMPILE_ERROR_BASE;
   }
-else                               /* Match or UTF error */
+else if (enumber < 0)               /* Match or UTF error */
   {
   message = match_error_texts;
   n = -enumber;
+  }
+else                                /* Invalid error number */
+  {
+  message = (unsigned char *)"\0";  /* Empty message list */
+  n = 1;
   }
 
 for (; n > 0; n--)
   {
   while (*message++ != CHAR_NULL) {};
-  if (*message == CHAR_NULL)
-    {
-    sprintf(xbuff, "No text for error %d", enumber);
-    break;
-    }
+  if (*message == CHAR_NULL) return PCRE2_ERROR_BADDATA;
   }
 
 for (i = 0; *message != 0; i++)

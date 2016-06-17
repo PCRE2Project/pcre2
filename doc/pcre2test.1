@@ -1,4 +1,4 @@
-.TH PCRE2TEST 1 "05 June 2016" "PCRE 10.22"
+.TH PCRE2TEST 1 "17 June 2016" "PCRE 10.22"
 .SH NAME
 pcre2test - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -68,7 +68,7 @@ environments character 26 (hex 1A) causes an immediate end of file, and no
 further data is read.
 .P
 For maximum portability, therefore, it is safest to avoid non-printing
-characters in \fBpcre2test\fP input files. There is a facility for specifying 
+characters in \fBpcre2test\fP input files. There is a facility for specifying
 some or all of a pattern's characters as hexadecimal pairs, thus making it
 possible to include binary zeroes in a pattern for testing purposes. Subject
 lines are processed for backslash escapes, which makes it possible to include
@@ -142,6 +142,12 @@ form and information about the compiled pattern is output after compilation;
 Behave as if each subject line has the \fBdfa\fP modifier; matching is done
 using the \fBpcre2_dfa_match()\fP function instead of the default
 \fBpcre2_match()\fP.
+.TP 10
+\fB-error\fP \fInumber[,number,...]\fP
+Call \fBpcre2_get_error_message()\fP for each of the error numbers in the
+comma-separated list, display the resulting messages on the standard output,
+then exit with zero exit code. The numbers may be positive or negative. This is
+a convenience facility for PCRE2 maintainers.
 .TP 10
 \fB-help\fP
 Output a brief summary these options and then exit.
@@ -536,7 +542,7 @@ about the pattern:
       null_context              compile with a NULL context
       parens_nest_limit=<n>     set maximum parentheses depth
       posix                     use the POSIX API
-      posix_nosub               use the POSIX API with REG_NOSUB 
+      posix_nosub               use the POSIX API with REG_NOSUB
       push                      push compiled pattern onto the stack
       pushcopy                  push a copy onto the stack
       stackguard=<number>       test the stackguard feature
@@ -621,22 +627,22 @@ default values).
 .SS "Specifying pattern characters in hexadecimal"
 .rs
 .sp
-The \fBhex\fP modifier specifies that the characters of the pattern, except for 
+The \fBhex\fP modifier specifies that the characters of the pattern, except for
 substrings enclosed in single or double quotes, are to be interpreted as pairs
 of hexadecimal digits. This feature is provided as a way of creating patterns
 that contain binary zeros and other non-printing characters. White space is
-permitted between pairs of digits. For example, this pattern contains three 
+permitted between pairs of digits. For example, this pattern contains three
 characters:
 .sp
   /ab 32 59/hex
 .sp
-Parts of such a pattern are taken literally if quoted. This pattern contains 
+Parts of such a pattern are taken literally if quoted. This pattern contains
 nine characters, only two of which are specified in hexadecimal:
 .sp
   /ab "literal" 32/hex
-.sp   
+.sp
 Either single or double quotes may be used. There is no way of including
-the delimiter within a substring. 
+the delimiter within a substring.
 .P
 By default, \fBpcre2test\fP passes patterns as zero-terminated strings to
 \fBpcre2_compile()\fP, giving the length as PCRE2_ZERO_TERMINATED. However, for
@@ -897,9 +903,9 @@ facility is used when saving compiled patterns to a file, as described in the
 section entitled "Saving and restoring compiled patterns"
 .\" HTML <a href="#saverestore">
 .\" </a>
-below. If \fBpushcopy\fP is used instead of \fBpush\fP, a copy of the compiled 
-pattern is stacked, leaving the original as current, ready to match the 
-following input lines. This provides a way of testing the 
+below. If \fBpushcopy\fP is used instead of \fBpush\fP, a copy of the compiled
+pattern is stacked, leaving the original as current, ready to match the
+following input lines. This provides a way of testing the
 \fBpcre2_code_copy()\fP function.
 .\"
 The \fBpush\fP and \fBpushcopy \fP modifiers are incompatible with compilation
@@ -931,7 +937,7 @@ for a description of their effects.
       anchored                  set PCRE2_ANCHORED
       dfa_restart               set PCRE2_DFA_RESTART
       dfa_shortest              set PCRE2_DFA_SHORTEST
-      no_jit                    set PCRE2_NO_JIT 
+      no_jit                    set PCRE2_NO_JIT
       no_utf_check              set PCRE2_NO_UTF_CHECK
       notbol                    set PCRE2_NOTBOL
       notempty                  set PCRE2_NOTEMPTY
@@ -991,7 +997,7 @@ pattern.
       substitute_unset_empty     use PCRE2_SUBSTITUTE_UNSET_EMPTY
       zero_terminate             pass the subject as zero-terminated
 .sp
-The effects of these modifiers are described in the following sections. When 
+The effects of these modifiers are described in the following sections. When
 matching via the POSIX wrapper API, the \fBaftertext\fP, \fBallaftertext\fP,
 and \fBovector\fP subject modifiers work as described below. All other
 modifiers are either ignored, with a warning message, or cause an error.
@@ -1499,8 +1505,8 @@ item to be tested. For example:
 This output indicates that callout number 0 occurred for a match attempt
 starting at the fourth character of the subject string, when the pointer was at
 the seventh character, and when the next pattern item was \ed. Just
-one circumflex is output if the start and current positions are the same, or if 
-the current position precedes the start position, which can happen if the 
+one circumflex is output if the start and current positions are the same, or if
+the current position precedes the start position, which can happen if the
 callout is in a lookbehind assertion.
 .P
 Callouts numbered 255 are assumed to be automatic callouts, inserted as a
@@ -1602,7 +1608,7 @@ the \fBpushcopy\fP modifier causes a copy of the compiled pattern to be
 stacked, leaving the original available for immediate matching. By using
 \fBpush\fP and/or \fBpushcopy\fP, a number of patterns can be compiled and
 retained. These modifiers are incompatible with \fBposix\fP, and control
-modifiers that act at match time are ignored (with a message) for the stacked 
+modifiers that act at match time are ignored (with a message) for the stacked
 patterns. The \fBjitverify\fP modifier applies only at compile time.
 .P
 The command
@@ -1647,8 +1653,8 @@ reloads two patterns.
 If \fBjitverify\fP is used with #pop, it does not automatically imply
 \fBjit\fP, which is different behaviour from when it is used on a pattern.
 .P
-The #popcopy command is analagous to the \fBpushcopy\fP modifier in that it 
-makes current a copy of the topmost stack pattern, leaving the original still 
+The #popcopy command is analagous to the \fBpushcopy\fP modifier in that it
+makes current a copy of the topmost stack pattern, leaving the original still
 on the stack.
 .
 .
@@ -1675,6 +1681,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 05 June 2016
+Last updated: 17 June 2016
 Copyright (c) 1997-2016 University of Cambridge.
 .fi
