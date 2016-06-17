@@ -556,6 +556,18 @@ echo "---------------------------- Test 109 -----------------------------" >>tes
 (cd $srcdir; $valgrind $vjs $pcre2grep -cq lazy ./testdata/grepinput*) >>testtrygrep
 echo "RC=$?" >>testtrygrep
 
+echo "---------------------------- Test 110 -----------------------------" >>testtrygrep
+(cd $srcdir; $valgrind $vjs $pcre2grep --om-separator / -Mo0 -o1 -o2 'match (\d+):\n (.)\n' testdata/grepinput) >>testtrygrep
+echo "RC=$?" >>testtrygrep
+
+echo "---------------------------- Test 111 -----------------------------" >>testtrygrep
+(cd $srcdir; $valgrind $vjs $pcre2grep --line-offsets -M 'match (\d+):\n (.)\n' testdata/grepinput) >>testtrygrep
+echo "RC=$?" >>testtrygrep
+
+echo "---------------------------- Test 112 -----------------------------" >>testtrygrep
+(cd $srcdir; $valgrind $vjs $pcre2grep --file-offsets -M 'match (\d+):\n (.)\n' testdata/grepinput) >>testtrygrep
+echo "RC=$?" >>testtrygrep
+
 # Now compare the results.
 
 $cf $srcdir/testdata/grepoutput testtrygrep

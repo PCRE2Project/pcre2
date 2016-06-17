@@ -147,6 +147,10 @@ checked in RunTest.
 pcre2_match.c, in anticipation that this is needed for the same reason it was 
 recently added to pcrecpp.cc in PCRE1.
 
+38. Using -o with -M in pcre2grep could cause unnecessary repeated output when 
+the match extended over a line boundary, as it tried to find more matches "on 
+the same line" - but it was already over the end.
+
 
 Version 10.21 12-January-2016
 -----------------------------

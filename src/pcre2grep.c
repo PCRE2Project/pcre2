@@ -1886,7 +1886,7 @@ while (ptr < endptr)
   size_t startoffset = 0;
 
   /* At this point, ptr is at the start of a line. We need to find the length
-  of the subject string to pass to pcre_exec(). In multiline mode, it is the
+  of the subject string to pass to pcre2_match(). In multiline mode, it is the
   length remainder of the data in the buffer. Otherwise, it is the length of
   the next line, excluding the terminating newline. After matching, we always
   advance by the length of the next line. In multiline mode the PCRE2_FIRSTLINE
@@ -1977,7 +1977,7 @@ while (ptr < endptr)
 
   match = match_patterns(matchptr, length, options, startoffset, &mrc);
   options = PCRE2_NOTEMPTY;
-
+  
   /* If it's a match or a not-match (as required), do what's wanted. */
 
   if (match != invert)
@@ -2074,14 +2074,22 @@ while (ptr < endptr)
             fprintf(stdout, STDOUT_NL);
           }
 
-        /* Prepare to repeat to find the next match. If the pattern contained a
-        lookbehind that included \K, it is possible that the end of the match
-        might be at or before the actual starting offset we have just used. In
-        this case, start one character further on. */
+        /* Prepare to repeat to find the next match in the line. */
 
         match = FALSE;
         if (line_buffered) fflush(stdout);
         rc = 0;                      /* Had some success */
+
+        /* If the current match ended past the end of the line (only possible
+        in multiline mode), we are done with this line. */
+
+        if (offsets[1] > linelength) goto END_ONE_MATCH;
+
+        /* If the pattern contained a lookbehind that included \K, it is
+        possible that the end of the match might be at or before the actual
+        starting offset we have just used. In this case, start one character
+        further on. */
+
         startoffset = offsets[1];    /* Restart after the match */
         oldstartoffset = pcre2_get_startchar(match_data);
         if (startoffset <= oldstartoffset)
@@ -2786,24 +2794,24 @@ if ((popts & PO_FIXED_STRINGS) != 0)
   }
 
 sprintf((char *)buffer, "%s%.*s%s", prefix[popts], patlen, ps, suffix[popts]);
-p->compiled = pcre2_compile(buffer, -1, options, &errcode, &erroffset,
-  compile_context);
-  
+p->compiled = pcre2_compile(buffer, PCRE2_ZERO_TERMINATED, options, &errcode, 
+  &erroffset, compile_context);
+
 /* Handle successful compile */
- 
-if (p->compiled != NULL) 
+
+if (p->compiled != NULL)
   {
 #ifdef SUPPORT_PCRE2GREP_JIT
   if (use_jit)
     {
     errcode = pcre2_jit_compile(p->compiled, PCRE2_JIT_COMPLETE);
     if (errcode == 0) return TRUE;
-    erroffset = PCRE2_SIZE_MAX;     /* Will get reduced to patlen below */ 
+    erroffset = PCRE2_SIZE_MAX;     /* Will get reduced to patlen below */
     }
-  else     
+  else
 #endif
   return TRUE;
-  } 
+  }
 
 /* Handle compile and JIT compile errors */
 
