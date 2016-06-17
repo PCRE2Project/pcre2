@@ -143,6 +143,10 @@ show the texts for given error numbers (i.e. to call pcre2_get_error_message()
 and display what it returns) and a few representative error codes are now 
 checked in RunTest.
 
+37. Added "&& !defined(__INTEL_COMPILER)" to the test for __GNUC__ in 
+pcre2_match.c, in anticipation that this is needed for the same reason it was 
+recently added to pcrecpp.cc in PCRE1.
+
 
 Version 10.21 12-January-2016
 -----------------------------

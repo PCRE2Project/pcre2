@@ -465,7 +465,7 @@ Returns:      a match() return code
 */
 
 static int
-#ifdef __GNUC__
+#if defined(__GNUC__) && !defined(__INTEL_COMPILER)
 __attribute__ ((noinline))
 #endif
 op_recurse_ovecsave(REGISTER PCRE2_SPTR eptr, PCRE2_SPTR callpat,
