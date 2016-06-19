@@ -1,4 +1,4 @@
-.TH PCRE2GREP 1 "06 April 2016" "PCRE2 10.22"
+.TH PCRE2GREP 1 "19 June 2016" "PCRE2 10.22"
 .SH NAME
 pcre2grep - a grep with Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -440,10 +440,15 @@ one line. The first is the line in which the match started, and the last is the
 line in which the match ended. If the matched string ends with a newline
 sequence the output ends at the end of that line.
 .sp
-When this option is set, the PCRE2 library is called in "multiline" mode.
-However, \fBpcre2grep\fP still processes the input line by line. The difference
-is that a matched string may extend past the end of a line and continue on
-one or more subsequent lines. The newline sequence must be matched as part of
+When this option is set, the PCRE2 library is called in "multiline" mode. This
+allows a matched string to extend past the end of a line and continue on one or
+more subsequent lines. However, \fBpcre2grep\fP still processes the input line
+by line. Once a match has been handled, scanning restarts at the beginning of
+the next line, just as it does when \fB-M\fP is not present. This means that it 
+is possible for the second or subsequent lines in a multiline match to be
+output again as part of another match.
+.sp
+The newline sequence that separates multiple lines must be matched as part of
 the pattern. For example, to find the phrase "regular expression" in a file
 where "regular" might be at the end of a line and "expression" at the start of
 the next line, you could use this command:
@@ -752,6 +757,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 06 April 2016
+Last updated: 19 June 2016
 Copyright (c) 1997-2016 University of Cambridge.
 .fi
