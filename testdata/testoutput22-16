@@ -13,10 +13,12 @@ Subject length lower bound = 0
     abXde
  0: abXde
 
-# This should produce an error diagnostic (\C in UTF lookbehind)
+# This should produce an error diagnostic (\C in UTF lookbehind) in 8-bit and
+# 16-bit modes, but not in 32-bit mode.
 
 /(?<=ab\Cde)X/utf
-Failed: error 136 at offset 10: \C is not allowed in a lookbehind assertion
+Failed: error 136 at offset 10: \C is not allowed in a lookbehind assertion in UTF-16 mode
+    ab!deXYZ
 
 # Autopossessification tests
 

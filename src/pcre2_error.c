@@ -106,7 +106,7 @@ static const unsigned char compile_error_texts[] =
   "character code point value in \\x{} or \\o{} is too large\0"
   /* 35 */
   "invalid condition (?(0)\0"
-  "\\C is not allowed in a lookbehind assertion\0"
+  "\\C is not allowed in a lookbehind assertion in UTF-" XSTRING(PCRE2_CODE_UNIT_WIDTH) " mode\0"
   "PCRE does not support \\L, \\l, \\N{name}, \\U, or \\u\0"
   "number after (?C is greater than 255\0"
   "closing parenthesis for (?C expected\0"

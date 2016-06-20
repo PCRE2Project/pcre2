@@ -9,14 +9,16 @@ Contains \C
 Options: utf
 First code unit = 'a'
 Last code unit = 'e'
-Subject length lower bound = 0
+Subject length lower bound = 5
     abXde
  0: abXde
 
-# This should produce an error diagnostic (\C in UTF lookbehind)
+# This should produce an error diagnostic (\C in UTF lookbehind) in 8-bit and
+# 16-bit modes, but not in 32-bit mode.
 
 /(?<=ab\Cde)X/utf
-Failed: error 136 at offset 10: \C is not allowed in a lookbehind assertion
+    ab!deXYZ
+ 0: X
 
 # Autopossessification tests
 
@@ -34,10 +36,10 @@ Failed: error 136 at offset 10: \C is not allowed in a lookbehind assertion
 /\C+\X \X+\C/Bx,utf
 ------------------------------------------------------------------
         Bra
-        Anybyte+
+        AllAny+
         extuni
         extuni+
-        Anybyte
+        AllAny
         Ket
         End
 ------------------------------------------------------------------

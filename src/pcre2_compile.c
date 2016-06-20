@@ -1117,8 +1117,8 @@ for (;;)
     cc++;
     break;
 
-    /* The single-byte matcher isn't allowed. This only happens in UTF mode;
-    otherwise \C is coded as OP_ALLANY. */
+    /* The single-byte matcher isn't allowed. This only happens in UTF-8 or 
+    UTF-16 mode; otherwise \C is coded as OP_ALLANY. */
 
     case OP_ANYBYTE:
     return FFL_BACKSLASHC;
@@ -7420,12 +7420,17 @@ for (;; ptr++)
           }
         else
 #endif
-        /* In non-UTF mode, we turn \C into OP_ALLANY instead of OP_ANYBYTE
-        so that it works in DFA mode and in lookbehinds. */
+        /* In non-UTF mode, and for both 32-bit modes, we turn \C into
+        OP_ALLANY instead of OP_ANYBYTE so that it works in DFA mode and in
+        lookbehinds. */
 
           {
           previous = (escape > ESC_b && escape < ESC_Z)? code : NULL;
+#if PCRE2_CODE_UNIT_WIDTH == 32
+          *code++ = (escape == ESC_C)? OP_ALLANY : escape;
+#else
           *code++ = (!utf && escape == ESC_C)? OP_ALLANY : escape;
+#endif          
           }
         }
       continue;

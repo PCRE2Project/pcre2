@@ -6,9 +6,11 @@
 /ab\Cde/utf,info
     abXde
 
-# This should produce an error diagnostic (\C in UTF lookbehind)
+# This should produce an error diagnostic (\C in UTF lookbehind) in 8-bit and
+# 16-bit modes, but not in 32-bit mode.
 
 /(?<=ab\Cde)X/utf
+    ab!deXYZ
 
 # Autopossessification tests
 

@@ -151,6 +151,9 @@ recently added to pcrecpp.cc in PCRE1.
 the match extended over a line boundary, as it tried to find more matches "on 
 the same line" - but it was already over the end.
 
+39. Allow \C in lookbehinds and DFA matching in UTF-32 mode (by converting it 
+to the same code as '.' when PCRE2_DOTALL is set).
+
 
 Version 10.21 12-January-2016
 -----------------------------

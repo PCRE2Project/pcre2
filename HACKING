@@ -228,6 +228,11 @@ OP_ASSERT_ACCEPT is used when (*ACCEPT) is encountered within an assertion.
 This ends the assertion, not the entire pattern match. The assertion (?!) is 
 always optimized to OP_FAIL.
 
+OP_ALLANY is used for '.' when PCRE2_DOTALL is set. It is also used for \C in
+non-UTF modes and in UTF-32 mode (since one code unit still equals one 
+character). Another use is for [^] when empty classes are permitted
+(PCRE2_ALLOW_EMPTY_CLASS is set).
+
 
 Backtracking control verbs with optional data
 ---------------------------------------------
@@ -601,4 +606,4 @@ not a real opcode, but is used to check that tables indexed by opcode are the
 correct length, in order to catch updating errors.
 
 Philip Hazel
-June 2015
+June 2016

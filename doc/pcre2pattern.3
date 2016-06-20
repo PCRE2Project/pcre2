@@ -1,4 +1,4 @@
-.TH PCRE2PATTERN 3 "13 November 2015" "PCRE2 10.21"
+.TH PCRE2PATTERN 3 "20 June 2016" "PCRE2 10.22"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION DETAILS"
@@ -1256,16 +1256,20 @@ PCRE2 does not allow \eC to appear in lookbehind assertions
 .\" </a>
 (described below)
 .\"
-in a UTF mode, because this would make it impossible to calculate the length of
-the lookbehind. Neither the alternative matching function
-\fBpcre2_dfa_match()\fP nor the JIT optimizer support \eC in a UTF mode. The
-former gives a match-time error; the latter fails to optimize and so the match
-is always run using the interpreter.
+in UTF-8 or UTF-16 modes, because this would make it impossible to calculate
+the length of the lookbehind. Neither the alternative matching function
+\fBpcre2_dfa_match()\fP nor the JIT optimizer support \eC in these UTF modes.
+The former gives a match-time error; the latter fails to optimize and so the
+match is always run using the interpreter.
+.P
+In the 32-bit library, however, \eC is always supported (when not explicitly 
+locked out) because it always matches a single code unit, whether or not UTF-32
+is specified.
 .P
 In general, the \eC escape sequence is best avoided. However, one way of using
-it that avoids the problem of malformed UTF characters is to use a lookahead to
-check the length of the next character, as in this pattern, which could be used
-with a UTF-8 string (ignore white space and line breaks):
+it that avoids the problem of malformed UTF-8 or UTF-16 characters is to use a
+lookahead to check the length of the next character, as in this pattern, which
+could be used with a UTF-8 string (ignore white space and line breaks):
 .sp
   (?| (?=[\ex00-\ex7f])(\eC) |
       (?=[\ex80-\ex{7ff}])(\eC)(\eC) |
@@ -3425,6 +3429,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 13 November 2015
-Copyright (c) 1997-2015 University of Cambridge.
+Last updated: 20 June 2016
+Copyright (c) 1997-2016 University of Cambridge.
 .fi
