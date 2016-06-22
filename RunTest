@@ -53,7 +53,7 @@
 
 title0="Test 0: Unchecked pcre2test argument tests (to improve coverage)"
 title1="Test 1: Main non-UTF, non-UCP functionality (compatible with Perl >= 5.10)"
-title2="Test 2: API, errors, internals, and non-Perl stuff"
+title2="Test 2: API, errors, internals and non-Perl stuff"
 title3="Test 3: Locale-specific features"
 title4A="Test 4: UTF"
 title4B=" and Unicode property support (compatible with Perl >= 5.10)"
@@ -310,9 +310,12 @@ fi
 
 # If it is possible to set the system stack size, arrange to set a value for
 # test 2, which needs more than the even the Linux default when PCRE2 has been
-# compiled by gcc with -fsanitize=address. When the compiler is clang, sanitize
-# options require an even bigger stack for test 2, and an increased stack for
-# some of the other tests.
+# compiled by gcc with -fsanitize=address. If "bigstack" is on the command
+# line, set even bigger numbers. When the compiler is clang, sanitize options
+# require an even bigger stack for test 2, and an increased stack for some of
+# the other tests. Test 2 now has code to automatically try again with a 64M
+# stack if it crashes when test2stack is "-S 16" when matching with the 
+# interpreter.
 
 $sim ./pcre2test -S 1 /dev/null /dev/null
 if [ $? -eq 0 ] ; then
@@ -503,12 +506,28 @@ for bmode in "$test8" "$test16" "$test32"; do
         checkresult $? 2 "$opt"
       else
         echo " "
-        echo "** Test 2 requires a lot of stack. If it has crashed with a"
-        echo "** segmentation fault, it may be that you do not have enough"
-        echo "** stack available by default. Please see the 'pcre2stack' man"
-        echo "** page for a discussion of PCRE2's stack usage."
+        echo "** Test 2, when run under the interpreter, requires a lot of stack."
+        echo "** If it has crashed with a segmentation fault, it may be that you"
+        echo "** do not have enough stack available by default. Please see the"
+        echo "** 'pcre2stack' man page for a discussion of PCRE2's stack usage."
+        if [ "$test2stack" != "-S 16" -o "$opt" != "" ]; then
+          echo " "
+          exit 1
+        fi
         echo " "
-        exit 1
+        echo "** Trying again with an increased stack size."
+        echo " "
+        echo $title2 "(excluding UTF-$bits) (64M stack)"
+        $sim $valgrind ${opt:+$vjs} ./pcre2test -q -S 64 $bmode $opt $testdata/testinput2 testtry
+        if [ $? = 0 ] ; then
+          $sim $valgrind ${opt:+$vjs} ./pcre2test -q $bmode $opt -error -63,-62,-2,-1,0,100,188,189 >>testtry 
+          checkresult $? 2 "$opt"
+        else
+          echo " "
+          echo "** Failed with an increased stack size. Tests abandoned."  
+          echo " "
+          exit 1
+        fi   
       fi
     done
   fi

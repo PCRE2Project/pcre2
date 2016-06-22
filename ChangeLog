@@ -157,6 +157,11 @@ to the same code as '.' when PCRE2_DOTALL is set).
 40. Fix two clang compiler warnings in pcre2test when only one code unit width 
 is supported.
 
+41. Upgrade RunTest to automatically re-run test 2 with a large (64M) stack if 
+it fails when running the interpreter with a 16M stack (and if changing the 
+stack size via pcre2test is possible). This avoids having to manually set a 
+large stack size when testing with clang.
+
 
 Version 10.21 12-January-2016
 -----------------------------
