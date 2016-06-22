@@ -154,6 +154,9 @@ the same line" - but it was already over the end.
 39. Allow \C in lookbehinds and DFA matching in UTF-32 mode (by converting it 
 to the same code as '.' when PCRE2_DOTALL is set).
 
+40. Fix two clang compiler warnings in pcre2test when only one code unit width 
+is supported.
+
 
 Version 10.21 12-January-2016
 -----------------------------

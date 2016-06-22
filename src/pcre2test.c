@@ -3754,6 +3754,10 @@ show_memory_info(void)
 uint32_t name_count, name_entry_size;
 size_t size, cblock_size;
 
+/* One of the test_mode values will always be true, but to stop a compiler
+warning we must initialize cblock_size. */
+
+cblock_size = 0;
 #ifdef SUPPORT_PCRE2_8
 if (test_mode == 8) cblock_size = sizeof(pcre2_real_code_8);
 #endif
@@ -4856,9 +4860,7 @@ if ((pat_patctl.control & (CTL_PUSH|CTL_PUSHCOPY)) != 0)
 
 /* Convert the input in non-8-bit modes. */
 
-#ifdef SUPPORT_PCRE2_8
-if (test_mode == PCRE8_MODE) errorcode = 0;
-#endif
+errorcode = 0;
 
 #ifdef SUPPORT_PCRE2_16
 if (test_mode == PCRE16_MODE) errorcode = to16(pbuffer8, utf, &patlen);
@@ -7383,7 +7385,7 @@ if (arg_error != NULL)
         default:
         printf("Unexpected return (%d) from pcre2_get_error_message()", len);
         break;
-        } 
+        }
       }
     else
       {
