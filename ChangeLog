@@ -86,8 +86,10 @@ actually affect anything, by sheer luck.
 "const" qualifiers in pcre2test and (b) defining snprintf as _snprintf for 
 older MSVC compilers.
 
-19. Applied Chris Wilson's patch (Bugzilla #1681) to CMakeLists.txt for MSVC 
-static compilation.
+19. Applied Chris Wilson's patch (Bugzilla #1681) to CMakeLists.txt for MSVC
+static compilation. Subsequently applied Chris Wilson's second patch, putting
+the first patch under a new option instead of being unconditional when 
+PCRE_STATIC is set.
 
 20. Updated pcre2grep to set stdout as binary when run under Windows, so as not
 to convert \r\n at the ends of reflected lines into \r\r\n. This required 
