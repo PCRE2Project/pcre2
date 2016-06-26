@@ -84,7 +84,9 @@ actually affect anything, by sheer luck.
 
 18. Two minor fixes for MSVC compilation: (a) removal of apparently incorrect 
 "const" qualifiers in pcre2test and (b) defining snprintf as _snprintf for 
-older MSVC compilers.
+older MSVC compilers. This has been done both in src/pcre2_internal.h for most 
+of the library, and also in src/pcre2posix.c, which no longer includes 
+pcre2_internal.h (see 24 below).
 
 19. Applied Chris Wilson's patch (Bugzilla #1681) to CMakeLists.txt for MSVC
 static compilation. Subsequently applied Chris Wilson's second patch, putting
