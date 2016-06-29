@@ -5,36 +5,36 @@ Change Log for PCRE2
 Version 10.22 29-June-2016
 --------------------------
 
-1. Applied Jason Hood's patches to RunTest.bat and testdata/wintestoutput3 
+1. Applied Jason Hood's patches to RunTest.bat and testdata/wintestoutput3
 to fix problems with running the tests under Windows.
 
-2. Implemented a facility for quoting literal characters within hexadecimal 
-patterns in pcre2test, to make it easier to create patterns with just a few 
+2. Implemented a facility for quoting literal characters within hexadecimal
+patterns in pcre2test, to make it easier to create patterns with just a few
 non-printing characters.
 
 3. Binary zeros are not supported in pcre2test input files. It now detects them
 and gives an error.
 
-4. Updated the valgrind parameters in RunTest: (a) changed smc-check=all to 
-smc-check=all-non-file; (b) changed obj:* in the suppression file to obj:??? so 
+4. Updated the valgrind parameters in RunTest: (a) changed smc-check=all to
+smc-check=all-non-file; (b) changed obj:* in the suppression file to obj:??? so
 that it matches only unknown objects.
 
-5. Updated the maintenance script maint/ManyConfigTests to make it easier to 
+5. Updated the maintenance script maint/ManyConfigTests to make it easier to
 select individual groups of tests.
 
-6. When the POSIX wrapper function regcomp() is called, the REG_NOSUB option 
+6. When the POSIX wrapper function regcomp() is called, the REG_NOSUB option
 used to set PCRE2_NO_AUTO_CAPTURE when calling pcre2_compile(). However, this
 disables the use of back references (and subroutine calls), which are supported
 by other implementations of regcomp() with RE_NOSUB. Therefore, REG_NOSUB no
-longer causes PCRE2_NO_AUTO_CAPTURE to be set, though it still ignores nmatch 
+longer causes PCRE2_NO_AUTO_CAPTURE to be set, though it still ignores nmatch
 and pmatch when regexec() is called.
 
-7. Because of 6 above, pcre2test has been modified with a new modifier called 
-posix_nosub, to call regcomp() with REG_NOSUB. Previously the no_auto_capture 
-modifier had this effect. That option is now ignored when the POSIX API is in 
+7. Because of 6 above, pcre2test has been modified with a new modifier called
+posix_nosub, to call regcomp() with REG_NOSUB. Previously the no_auto_capture
+modifier had this effect. That option is now ignored when the POSIX API is in
 use.
 
-8. Minor tidies to the pcre2demo.c sample program, including more comments 
+8. Minor tidies to the pcre2demo.c sample program, including more comments
 about its 8-bit-ness.
 
 9. Detect unmatched closing parentheses and give the error in the pre-scan
@@ -48,88 +48,88 @@ regex library instead of libpcre2-posix. In this situation, a call to regcomp()
 own data into the regex_t block. In one example the re_pcre2_code field was
 left as NULL, which made pcre2test think it had not got a compiled POSIX regex,
 so it treated the next line as another pattern line, resulting in a confusing
-error message. A check has been added to pcre2test to see if the data returned 
-from a successful call of regcomp() are valid for PCRE2's regcomp(). If they 
-are not, an error message is output and the pcre2test run is abandoned. The 
-message points out the possibility of a mis-linking. Hopefully this will avoid 
+error message. A check has been added to pcre2test to see if the data returned
+from a successful call of regcomp() are valid for PCRE2's regcomp(). If they
+are not, an error message is output and the pcre2test run is abandoned. The
+message points out the possibility of a mis-linking. Hopefully this will avoid
 some head-scratching the next time this happens.
 
-11. A pattern such as /(?<=((?C)0))/, which has a callout inside a lookbehind 
-assertion, caused pcre2test to output a very large number of spaces when the 
+11. A pattern such as /(?<=((?C)0))/, which has a callout inside a lookbehind
+assertion, caused pcre2test to output a very large number of spaces when the
 callout was taken, making the program appearing to loop.
 
-12. A pattern that included (*ACCEPT) in the middle of a sufficiently deeply 
-nested set of parentheses of sufficient size caused an overflow of the 
+12. A pattern that included (*ACCEPT) in the middle of a sufficiently deeply
+nested set of parentheses of sufficient size caused an overflow of the
 compiling workspace (which was diagnosed, but of course is not desirable).
 
-13. Detect missing closing parentheses during the pre-pass for group 
+13. Detect missing closing parentheses during the pre-pass for group
 identification.
 
-14. Changed some integer variable types and put in a number of casts, following 
-a report of compiler warnings from Visual Studio 2013 and a few tests with 
+14. Changed some integer variable types and put in a number of casts, following
+a report of compiler warnings from Visual Studio 2013 and a few tests with
 gcc's -Wconversion (which still throws up a lot).
 
-15. Implemented pcre2_code_copy(), and added pushcopy and #popcopy to pcre2test 
+15. Implemented pcre2_code_copy(), and added pushcopy and #popcopy to pcre2test
 for testing it.
 
-16. Change 66 for 10.21 introduced the use of snprintf() in PCRE2's version of 
-regerror(). When the error buffer is too small, my version of snprintf() puts a 
-binary zero in the final byte. Bug #1801 seems to show that other versions do 
-not do this, leading to bad output from pcre2test when it was checking for 
-buffer overflow. It no longer assumes a binary zero at the end of a too-small 
+16. Change 66 for 10.21 introduced the use of snprintf() in PCRE2's version of
+regerror(). When the error buffer is too small, my version of snprintf() puts a
+binary zero in the final byte. Bug #1801 seems to show that other versions do
+not do this, leading to bad output from pcre2test when it was checking for
+buffer overflow. It no longer assumes a binary zero at the end of a too-small
 regerror() buffer.
 
-17. Fixed typo ("&&" for "&") in pcre2_study(). Fortunately, this could not 
+17. Fixed typo ("&&" for "&") in pcre2_study(). Fortunately, this could not
 actually affect anything, by sheer luck.
 
-18. Two minor fixes for MSVC compilation: (a) removal of apparently incorrect 
-"const" qualifiers in pcre2test and (b) defining snprintf as _snprintf for 
-older MSVC compilers. This has been done both in src/pcre2_internal.h for most 
-of the library, and also in src/pcre2posix.c, which no longer includes 
+18. Two minor fixes for MSVC compilation: (a) removal of apparently incorrect
+"const" qualifiers in pcre2test and (b) defining snprintf as _snprintf for
+older MSVC compilers. This has been done both in src/pcre2_internal.h for most
+of the library, and also in src/pcre2posix.c, which no longer includes
 pcre2_internal.h (see 24 below).
 
 19. Applied Chris Wilson's patch (Bugzilla #1681) to CMakeLists.txt for MSVC
 static compilation. Subsequently applied Chris Wilson's second patch, putting
-the first patch under a new option instead of being unconditional when 
+the first patch under a new option instead of being unconditional when
 PCRE_STATIC is set.
 
 20. Updated pcre2grep to set stdout as binary when run under Windows, so as not
-to convert \r\n at the ends of reflected lines into \r\r\n. This required 
-ensuring that other output that is written to stdout (e.g. file names) uses the 
+to convert \r\n at the ends of reflected lines into \r\r\n. This required
+ensuring that other output that is written to stdout (e.g. file names) uses the
 appropriate line terminator: \r\n for Windows, \n otherwise.
 
-21. When a line is too long for pcre2grep's internal buffer, show the maximum 
+21. When a line is too long for pcre2grep's internal buffer, show the maximum
 length in the error message.
 
-22. Added support for string callouts to pcre2grep (Zoltan's patch with PH 
+22. Added support for string callouts to pcre2grep (Zoltan's patch with PH
 additions).
 
 23. RunTest.bat was missing a "set type" line for test 22.
 
-24. The pcre2posix.c file was including pcre2_internal.h, and using some 
-"private" knowledge of the data structures. This is unnecessary; the code has 
+24. The pcre2posix.c file was including pcre2_internal.h, and using some
+"private" knowledge of the data structures. This is unnecessary; the code has
 been re-factored and no longer includes pcre2_internal.h.
 
 25. A racing condition is fixed in JIT reported by Mozilla.
 
-26. Minor code refactor to avoid "array subscript is below array bounds" 
+26. Minor code refactor to avoid "array subscript is below array bounds"
 compiler warning.
 
-27. Minor code refactor to avoid "left shift of negative number" warning. 
+27. Minor code refactor to avoid "left shift of negative number" warning.
 
-28. Add a bit more sanity checking to pcre2_serialize_decode() and document 
+28. Add a bit more sanity checking to pcre2_serialize_decode() and document
 that it expects trusted data.
 
 29. Fix typo in pcre2_jit_test.c
 
-30. Due to an oversight, pcre2grep was not making use of JIT when available. 
+30. Due to an oversight, pcre2grep was not making use of JIT when available.
 This is now fixed.
 
 31. The RunGrepTest script is updated to use the valgrind suppressions file
-when testing with JIT under valgrind (compare 10.21/51 below). The suppressions 
+when testing with JIT under valgrind (compare 10.21/51 below). The suppressions
 file is updated so that is now the same as for PCRE1: it suppresses the
 Memcheck warnings Addr16 and Cond in unknown objects (that is, JIT-compiled
-code). Also changed smc-check=all to smc-check=all-non-file as was done for 
+code). Also changed smc-check=all to smc-check=all-non-file as was done for
 RunTest (see 4 above).
 
 32. Implemented the PCRE2_NO_JIT option for pcre2_match().
@@ -140,30 +140,30 @@ RunTest (see 4 above).
 
 35. Fix potential negative index in pcre2test.
 
-36. Calls to pcre2_get_error_message() with error numbers that are never 
+36. Calls to pcre2_get_error_message() with error numbers that are never
 returned by PCRE2 functions were returning empty strings. Now the error code
-PCRE2_ERROR_BADDATA is returned. A facility has been added to pcre2test to 
-show the texts for given error numbers (i.e. to call pcre2_get_error_message() 
-and display what it returns) and a few representative error codes are now 
+PCRE2_ERROR_BADDATA is returned. A facility has been added to pcre2test to
+show the texts for given error numbers (i.e. to call pcre2_get_error_message()
+and display what it returns) and a few representative error codes are now
 checked in RunTest.
 
-37. Added "&& !defined(__INTEL_COMPILER)" to the test for __GNUC__ in 
-pcre2_match.c, in anticipation that this is needed for the same reason it was 
+37. Added "&& !defined(__INTEL_COMPILER)" to the test for __GNUC__ in
+pcre2_match.c, in anticipation that this is needed for the same reason it was
 recently added to pcrecpp.cc in PCRE1.
 
-38. Using -o with -M in pcre2grep could cause unnecessary repeated output when 
-the match extended over a line boundary, as it tried to find more matches "on 
+38. Using -o with -M in pcre2grep could cause unnecessary repeated output when
+the match extended over a line boundary, as it tried to find more matches "on
 the same line" - but it was already over the end.
 
-39. Allow \C in lookbehinds and DFA matching in UTF-32 mode (by converting it 
+39. Allow \C in lookbehinds and DFA matching in UTF-32 mode (by converting it
 to the same code as '.' when PCRE2_DOTALL is set).
 
-40. Fix two clang compiler warnings in pcre2test when only one code unit width 
+40. Fix two clang compiler warnings in pcre2test when only one code unit width
 is supported.
 
-41. Upgrade RunTest to automatically re-run test 2 with a large (64M) stack if 
-it fails when running the interpreter with a 16M stack (and if changing the 
-stack size via pcre2test is possible). This avoids having to manually set a 
+41. Upgrade RunTest to automatically re-run test 2 with a large (64M) stack if
+it fails when running the interpreter with a 16M stack (and if changing the
+stack size via pcre2test is possible). This avoids having to manually set a
 large stack size when testing with clang.
 
 

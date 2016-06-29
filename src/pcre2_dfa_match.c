@@ -2783,7 +2783,7 @@ for (;;)
 #endif
             if (charcount > 0)
               {
-              ADD_NEW_DATA(-(state_offset + LINK_SIZE + 1), 0, 
+              ADD_NEW_DATA(-(state_offset + LINK_SIZE + 1), 0,
                 (int)(charcount - 1));
               }
             else
@@ -3337,7 +3337,7 @@ if (!anchored)
       {
       first_cu2 = TABLE_GET(first_cu, mb->tables + fcc_offset, first_cu);
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 8
-      if (utf && first_cu > 127) 
+      if (utf && first_cu > 127)
         first_cu2 = (PCRE2_UCHAR)UCD_OTHERCASE(first_cu);
 #endif
       }

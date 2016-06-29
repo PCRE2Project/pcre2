@@ -156,8 +156,8 @@ if test "$HAVE_WINDOWS_H" != "1"; then
                                [disable callout script support in pcre2grep]),
                 , enable_pcre2grep_callout=yes)
 else
-  enable_pcre2grep_callout=no                 
-fi                 
+  enable_pcre2grep_callout=no
+fi
 
 # Handle --enable-rebuild-chartables
 AC_ARG_ENABLE(rebuild-chartables,
@@ -564,12 +564,12 @@ if test "$enable_pcre2grep_callout" = "yes"; then
   if test "$HAVE_WINDOWS_H" != "1"; then
     if test "$HAVE_SYS_WAIT_H" != "1"; then
       AC_MSG_ERROR([Callout script support needs sys/wait.h.])
-    fi    
+    fi
     AC_DEFINE([SUPPORT_PCRE2GREP_CALLOUT], [], [
       Define to any value to enable callout script support in pcre2grep.])
   else
     AC_MSG_WARN([Callout script support is not available for Windows: disabled])
-    enable_pcre2grep_callout=no 
+    enable_pcre2grep_callout=no
   fi
 fi
 

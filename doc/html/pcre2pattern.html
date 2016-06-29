@@ -1256,17 +1256,22 @@ build PCRE2 with the use of \C permanently disabled.
 <P>
 PCRE2 does not allow \C to appear in lookbehind assertions
 <a href="#lookbehind">(described below)</a>
-in a UTF mode, because this would make it impossible to calculate the length of
-the lookbehind. Neither the alternative matching function
-<b>pcre2_dfa_match()</b> nor the JIT optimizer support \C in a UTF mode. The
-former gives a match-time error; the latter fails to optimize and so the match
-is always run using the interpreter.
+in UTF-8 or UTF-16 modes, because this would make it impossible to calculate
+the length of the lookbehind. Neither the alternative matching function
+<b>pcre2_dfa_match()</b> nor the JIT optimizer support \C in these UTF modes.
+The former gives a match-time error; the latter fails to optimize and so the
+match is always run using the interpreter.
+</P>
+<P>
+In the 32-bit library, however, \C is always supported (when not explicitly
+locked out) because it always matches a single code unit, whether or not UTF-32
+is specified.
 </P>
 <P>
 In general, the \C escape sequence is best avoided. However, one way of using
-it that avoids the problem of malformed UTF characters is to use a lookahead to
-check the length of the next character, as in this pattern, which could be used
-with a UTF-8 string (ignore white space and line breaks):
+it that avoids the problem of malformed UTF-8 or UTF-16 characters is to use a
+lookahead to check the length of the next character, as in this pattern, which
+could be used with a UTF-8 string (ignore white space and line breaks):
 <pre>
   (?| (?=[\x00-\x7f])(\C) |
       (?=[\x80-\x{7ff}])(\C)(\C) |
@@ -3388,9 +3393,9 @@ Cambridge, England.
 </P>
 <br><a name="SEC30" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 13 November 2015
+Last updated: 20 June 2016
 <br>
-Copyright &copy; 1997-2015 University of Cambridge.
+Copyright &copy; 1997-2016 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE2 index page</a>.

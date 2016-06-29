@@ -149,13 +149,13 @@ have to check them every time. */
 
 #define OFLOW_MAX (INT_MAX - 20)
 
-/* Macro for setting individual bits in class bitmaps. It took some 
-experimenting to figure out how to stop gcc 5.3.0 from warning with 
+/* Macro for setting individual bits in class bitmaps. It took some
+experimenting to figure out how to stop gcc 5.3.0 from warning with
 -Wconversion. This version gets a warning:
 
-  #define SETBIT(a,b) a[(b)/8] |= (uint8_t)(1 << ((b)&7)) 
-  
-Let's hope the apparently less efficient version isn't actually so bad if the 
+  #define SETBIT(a,b) a[(b)/8] |= (uint8_t)(1 << ((b)&7))
+
+Let's hope the apparently less efficient version isn't actually so bad if the
 compiler is clever with identical subexpressions. */
 
 #define SETBIT(a,b) a[(b)/8] = (uint8_t)(a[(b)/8] | (1 << ((b)&7)))
@@ -733,7 +733,7 @@ static const uint8_t opcode_possessify[] = {
 *               Copy compiled code               *
 *************************************************/
 
-/* Compiled JIT code cannot be copied, so the new compiled block has no 
+/* Compiled JIT code cannot be copied, so the new compiled block has no
 associated JIT data. */
 
 PCRE2_EXP_DEFN pcre2_code * PCRE2_CALL_CONVENTION
@@ -748,14 +748,14 @@ if (newcode == NULL) return NULL;
 memcpy(newcode, code, code->blocksize);
 newcode->executable_jit = NULL;
 
-/* If the code is one that has been deserialized, increment the reference count 
+/* If the code is one that has been deserialized, increment the reference count
 in the decoded tables. */
 
 if ((code->flags & PCRE2_DEREF_TABLES) != 0)
   {
   ref_count = (PCRE2_SIZE *)(code->tables + tables_length);
   (*ref_count)++;
-  }  
+  }
 
 return newcode;
 }
@@ -881,7 +881,7 @@ Returns:   if non-negative, the fixed length,
              or -2 if there is no fixed length,
              or -3 if \C was encountered (in UTF mode only)
              or -4 if length is too long
-             or -5 if regex is too complicated 
+             or -5 if regex is too complicated
              or -6 if an unknown opcode was encountered (internal error)
 */
 
@@ -1117,7 +1117,7 @@ for (;;)
     cc++;
     break;
 
-    /* The single-byte matcher isn't allowed. This only happens in UTF-8 or 
+    /* The single-byte matcher isn't allowed. This only happens in UTF-8 or
     UTF-16 mode; otherwise \C is coded as OP_ALLANY. */
 
     case OP_ANYBYTE:
@@ -3515,7 +3515,7 @@ for (; ptr < cb->end_pattern; ptr++)
           case CHAR_U:
           break;
 
-          default:  
+          default:
           errorcode = ERR11;
           ptr--;    /* Correct the offset */
           goto FAILED;
@@ -3810,7 +3810,7 @@ if (nest_depth == 0)
   return 0;
   }
 
-/* We give a special error for a missing closing parentheses after (?# because 
+/* We give a special error for a missing closing parentheses after (?# because
 it might otherwise be hard to see where the missing character is. */
 
 errorcode = (skiptoket == CHAR_NUMBER_SIGN)? ERR18 : ERR14;
@@ -3963,10 +3963,10 @@ for (;; ptr++)
   uint32_t subreqcu, subfirstcu;
   int32_t subreqcuflags, subfirstcuflags;  /* Must be signed */
   PCRE2_UCHAR mcbuffer[8];
-  
+
   /* Come here to restart the loop. */
-  
-  REDO_LOOP: 
+
+  REDO_LOOP:
 
   /* Get next character in the pattern */
 
@@ -4249,14 +4249,14 @@ for (;; ptr++)
       {
       cb->nestptr[0] = ptr + 7;
       ptr = sub_start_of_word;
-      goto REDO_LOOP; 
+      goto REDO_LOOP;
       }
 
     if (PRIV(strncmp_c8)(ptr+1, STRING_WEIRD_ENDWORD, 6) == 0)
       {
       cb->nestptr[0] = ptr + 7;
       ptr = sub_end_of_word;
-      goto REDO_LOOP; 
+      goto REDO_LOOP;
       }
 
     /* Handle a real character class. */
@@ -7430,7 +7430,7 @@ for (;; ptr++)
           *code++ = (escape == ESC_C)? OP_ALLANY : escape;
 #else
           *code++ = (!utf && escape == ESC_C)? OP_ALLANY : escape;
-#endif          
+#endif
           }
         }
       continue;

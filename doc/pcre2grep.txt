@@ -493,14 +493,20 @@ OPTIONS
                  end of that line.
 
                  When this option is set, the PCRE2 library is called in "mul-
-                 tiline"  mode.   However, pcre2grep still processes the input
-                 line by line. The difference is that  a  matched  string  may
-                 extend  past  the  end  of a line and continue on one or more
-                 subsequent lines. The newline sequence  must  be  matched  as
-                 part of the pattern. For example, to find the phrase "regular
-                 expression" in a file where "regular" might be at the end  of
-                 a  line  and  "expression" at the start of the next line, you
-                 could use this command:
+                 tiline" mode. This allows a matched string to extend past the
+                 end of a line and continue on one or more  subsequent  lines.
+                 However,  pcre2grep  still  processes the input line by line.
+                 Once a match has  been  handled,  scanning  restarts  at  the
+                 beginning  of  the  next line, just as it does when -M is not
+                 present. This means that it is possible  for  the  second  or
+                 subsequent  lines  in a multiline match to be output again as
+                 part of another match.
+
+                 The newline sequence that separates multiple  lines  must  be
+                 matched  as  part  of  the  pattern. For example, to find the
+                 phrase "regular expression" in a file where  "regular"  might
+                 be  at the end of a line and "expression" at the start of the
+                 next line, you could use this command:
 
                    pcre2grep -M 'regular\s+expression' <file>
 
@@ -816,5 +822,5 @@ AUTHOR
 
 REVISION
 
-       Last updated: 06 April 2016
+       Last updated: 19 June 2016
        Copyright (c) 1997-2016 University of Cambridge.

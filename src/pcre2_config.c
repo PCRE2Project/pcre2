@@ -68,7 +68,7 @@ Arguments:
   where            where to put the information
 
 Returns:           0 if a numerical value is returned
-                   >= 0 if a string value 
+                   >= 0 if a string value
                    PCRE2_ERROR_BADOPTION if "where" not recognized
                      or JIT target requested when JIT not enabled
 */

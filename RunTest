@@ -314,7 +314,7 @@ fi
 # line, set even bigger numbers. When the compiler is clang, sanitize options
 # require an even bigger stack for test 2, and an increased stack for some of
 # the other tests. Test 2 now has code to automatically try again with a 64M
-# stack if it crashes when test2stack is "-S 16" when matching with the 
+# stack if it crashes when test2stack is "-S 16" when matching with the
 # interpreter.
 
 $sim ./pcre2test -S 1 /dev/null /dev/null
@@ -502,7 +502,7 @@ for bmode in "$test8" "$test16" "$test32"; do
     for opt in "" $jitopt; do
       $sim $valgrind ${opt:+$vjs} ./pcre2test -q $test2stack $bmode $opt $testdata/testinput2 testtry
       if [ $? = 0 ] ; then
-        $sim $valgrind ${opt:+$vjs} ./pcre2test -q $bmode $opt -error -63,-62,-2,-1,0,100,188,189 >>testtry 
+        $sim $valgrind ${opt:+$vjs} ./pcre2test -q $bmode $opt -error -63,-62,-2,-1,0,100,188,189 >>testtry
         checkresult $? 2 "$opt"
       else
         echo " "
@@ -520,14 +520,14 @@ for bmode in "$test8" "$test16" "$test32"; do
         echo $title2 "(excluding UTF-$bits) (64M stack)"
         $sim $valgrind ${opt:+$vjs} ./pcre2test -q -S 64 $bmode $opt $testdata/testinput2 testtry
         if [ $? = 0 ] ; then
-          $sim $valgrind ${opt:+$vjs} ./pcre2test -q $bmode $opt -error -63,-62,-2,-1,0,100,188,189 >>testtry 
+          $sim $valgrind ${opt:+$vjs} ./pcre2test -q $bmode $opt -error -63,-62,-2,-1,0,100,188,189 >>testtry
           checkresult $? 2 "$opt"
         else
           echo " "
-          echo "** Failed with an increased stack size. Tests abandoned."  
+          echo "** Failed with an increased stack size. Tests abandoned."
           echo " "
           exit 1
-        fi   
+        fi
       fi
     done
   fi

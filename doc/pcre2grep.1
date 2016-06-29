@@ -444,7 +444,7 @@ When this option is set, the PCRE2 library is called in "multiline" mode. This
 allows a matched string to extend past the end of a line and continue on one or
 more subsequent lines. However, \fBpcre2grep\fP still processes the input line
 by line. Once a match has been handled, scanning restarts at the beginning of
-the next line, just as it does when \fB-M\fP is not present. This means that it 
+the next line, just as it does when \fB-M\fP is not present. This means that it
 is possible for the second or subsequent lines in a multiline match to be
 output again as part of another match.
 .sp
@@ -668,7 +668,7 @@ You can find out whether your binary has support for callouts by running it
 with the \fB--help\fP option. If the support is not enabled, all callouts in
 patterns are ignored by \fBpcre2grep\fP.
 .P
-A callout in a PCRE2 pattern is of the form (?C<arg>) where the argument is 
+A callout in a PCRE2 pattern is of the form (?C<arg>) where the argument is
 either a number or a quoted string (see the
 .\" HREF
 \fBpcre2callout\fP

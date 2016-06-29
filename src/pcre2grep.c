@@ -1977,7 +1977,7 @@ while (ptr < endptr)
 
   match = match_patterns(matchptr, length, options, startoffset, &mrc);
   options = PCRE2_NOTEMPTY;
-  
+
   /* If it's a match or a not-match (as required), do what's wanted. */
 
   if (match != invert)
@@ -2794,7 +2794,7 @@ if ((popts & PO_FIXED_STRINGS) != 0)
   }
 
 sprintf((char *)buffer, "%s%.*s%s", prefix[popts], patlen, ps, suffix[popts]);
-p->compiled = pcre2_compile(buffer, PCRE2_ZERO_TERMINATED, options, &errcode, 
+p->compiled = pcre2_compile(buffer, PCRE2_ZERO_TERMINATED, options, &errcode,
   &erroffset, compile_context);
 
 /* Handle successful compile */

@@ -168,7 +168,7 @@ library. They are also documented in the pcre2build man page.
   built. If you want only the 16-bit or 32-bit library, use --disable-pcre2-8
   to disable building the 8-bit library.
 
-. If you want to include support for just-in-time (JIT) compiling, which can 
+. If you want to include support for just-in-time (JIT) compiling, which can
   give large performance improvements on certain platforms, add --enable-jit to
   the "configure" command. This support is available only for certain hardware
   architectures. If you try to enable it on an unsupported architecture, there
@@ -323,8 +323,8 @@ library. They are also documented in the pcre2build man page.
 
 . When JIT support is enabled, pcre2grep automatically makes use of it, unless
   you add --disable-pcre2grep-jit to the "configure" command.
-  
-. On non-Windows sytems there is support for calling external scripts during 
+
+. On non-Windows sytems there is support for calling external scripts during
   matching in the pcre2grep command via PCRE2's callout facility with string
   arguments. This support can be disabled by adding --disable-pcre2grep-callout
   to the "configure" command.

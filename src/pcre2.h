@@ -155,7 +155,7 @@ through to pcre2_match(). */
 #define PCRE2_SUBSTITUTE_UNKNOWN_UNSET    0x00000800u
 #define PCRE2_SUBSTITUTE_OVERFLOW_LENGTH  0x00001000u
 
-/* A further option for pcre2_match(), not allowed for pcre2_dfa_match(), 
+/* A further option for pcre2_match(), not allowed for pcre2_dfa_match(),
 ignored for pcre2_jit_match(). */
 
 #define PCRE2_NO_JIT              0x00002000u

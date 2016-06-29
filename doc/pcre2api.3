@@ -2601,12 +2601,12 @@ The internal recursion limit was reached.
 .B "  PCRE2_SIZE \fIbufflen\fP);"
 .fi
 .P
-A text message for an error code from any PCRE2 function (compile, match, or 
-auxiliary) can be obtained by calling \fBpcre2_get_error_message()\fP. The code 
-is passed as the first argument, with the remaining two arguments specifying a 
-code unit buffer and its length, into which the text message is placed. Note 
-that the message is returned in code units of the appropriate width for the 
-library that is being used. 
+A text message for an error code from any PCRE2 function (compile, match, or
+auxiliary) can be obtained by calling \fBpcre2_get_error_message()\fP. The code
+is passed as the first argument, with the remaining two arguments specifying a
+code unit buffer and its length, into which the text message is placed. Note
+that the message is returned in code units of the appropriate width for the
+library that is being used.
 .P
 The returned message is terminated with a trailing zero, and the function
 returns the number of code units used, excluding the trailing zero. If the
