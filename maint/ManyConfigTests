@@ -79,7 +79,7 @@ while [ $# -gt 0 ] ; do
     +main)           usemain=1; usemainvalgrind=1;;
     +mainvalgrind)   usemainvalgrind=1;;
     +tmp)            usetmp=1;;
-    +valgrind)       usevalgrind=1;;
+    +valgrind)       usevalgrind=1; usejitvalgrind=1; usemainvalgrind=1;;
     *)               echo "Unknown option '$1'"; exit 1;;
   esac
   shift
@@ -223,7 +223,7 @@ runtest()
 
   if [ "$jit" -gt 0 ]; then
     echo "Running JIT regression tests $withvalgrind"
-    $cvalgrind $srcdir/pcre2_jit_test >teststdoutM 2>teststderrM
+    $jrvalgrind $srcdir/pcre2_jit_test >teststdoutM 2>teststderrM
     if [ $? -ne 0 -o -s teststderrM ]; then
       echo " "
       echo "**** Test failed ****"
@@ -257,7 +257,7 @@ if [ $testtotal -eq 0 ] ; then
 fi
 
 valgrind=
-cvalgrind=
+jrvalgrind=
 withvalgrind=
 srcdir=.
 export srcdir
@@ -374,7 +374,6 @@ fi
 if [ $usevalgrind -ne 0 ]; then
   echo "---------- Tests in the current directory using valgrind ----------"
   valgrind=valgrind
-  cvalgrind="valgrind -q --smc-check=all"
   withvalgrind="with valgrind"
 
   if [ $usemainvalgrind -ne 0 ]; then
@@ -389,6 +388,7 @@ if [ $usevalgrind -ne 0 ]; then
   fi
 
   if [ $usejitvalgrind -ne 0 ]; then
+    jrvalgrind="valgrind --tool=memcheck -q --smc-check=all-non-file --suppressions=$srcdir/testdata/valgrind-jit.supp" 
     for opts in \
       "--enable-jit --disable-shared" \
       "--enable-jit --enable-pcre2-16 --enable-pcre2-32"
@@ -400,7 +400,7 @@ if [ $usevalgrind -ne 0 ]; then
 fi
 
 valgrind=
-cvalgrind=
+jrvalgrind=
 withvalgrind=
 
 # Clean up the distribution and then do at least one build and test in a
