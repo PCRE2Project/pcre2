@@ -2,8 +2,8 @@ Change Log for PCRE2
 --------------------
 
 
-Version 10.22 29-January-2016
------------------------------
+Version 10.22 29-June-2016
+--------------------------
 
 1. Applied Jason Hood's patches to RunTest.bat and testdata/wintestoutput3 
 to fix problems with running the tests under Windows.
