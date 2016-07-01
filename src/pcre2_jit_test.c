@@ -692,6 +692,7 @@ static struct regression_test_case regression_test_cases[] = {
 	{ PCRE2_FIRSTLINE | PCRE2_DOTALL, PCRE2_NEWLINE_LF, 0, 0 | F_NOMATCH, "ab.", "ab" },
 	{ MU | PCRE2_FIRSTLINE, A, 0, 1 | F_NOMATCH, "^[a-d0-9]", "\nxx\nd" },
 	{ PCRE2_FIRSTLINE | PCRE2_DOTALL, PCRE2_NEWLINE_ANY, 0, 0, "....a", "012\n0a" },
+	{ MU | PCRE2_FIRSTLINE, A, 0, 0, "[aC]", "a" },
 
 	/* Recurse. */
 	{ MU, A, 0, 0, "(a)(?1)", "aa" },

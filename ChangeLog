@@ -166,6 +166,8 @@ it fails when running the interpreter with a 16M stack (and if changing the
 stack size via pcre2test is possible). This avoids having to manually set a
 large stack size when testing with clang.
 
+42. Fix register overwite in JIT when SSE2 acceleration is enabled.
+
 
 Version 10.21 12-January-2016
 -----------------------------
