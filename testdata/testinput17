@@ -288,5 +288,13 @@
 /abc/jitfast
     abc
     abc\=no_jit 
+    
+# ---- 
+
+/[aC]/mg,firstline
+match\nmatch
+
+/[aCz]/mg,firstline
+match\nmatch
 
 # End of testinput17
