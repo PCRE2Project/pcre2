@@ -20,7 +20,7 @@ m4_define(pcre2_date, [2016-06-29])
 m4_define(libpcre2_8_version,     [4:0:4])
 m4_define(libpcre2_16_version,    [4:0:4])
 m4_define(libpcre2_32_version,    [4:0:4])
-m4_define(libpcre2_posix_version, [0:2:0])
+m4_define(libpcre2_posix_version, [1:0:0])
 
 AC_PREREQ(2.57)
 AC_INIT(PCRE2, pcre2_major.pcre2_minor[]pcre2_prerelease, , pcre2)
