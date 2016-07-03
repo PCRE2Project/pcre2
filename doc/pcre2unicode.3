@@ -1,4 +1,4 @@
-.TH PCRE2UNICODE 3 "02 July 2016" "PCRE2 10.22"
+.TH PCRE2UNICODE 3 "03 July 2016" "PCRE2 10.22"
 .SH NAME
 PCRE - Perl-compatible regular expressions (revised API)
 .SH "UNICODE AND UTF SUPPORT"
@@ -63,7 +63,7 @@ characters (see the description of \eC in the
 .\" HREF
 \fBpcre2pattern\fP
 .\"
-documentation). 
+documentation).
 .P
 The use of \eC is not supported by the alternative matching function
 \fBpcre2_dfa_match()\fP when in UTF-8 or UTF-16 mode, that is, when a character
@@ -235,9 +235,9 @@ never occur in a valid UTF-8 string.
 .sp
 The following negative error codes are given for invalid UTF-16 strings:
 .sp
-  PCRE2_UTF16_ERR1  Missing low surrogate at end of string
-  PCRE2_UTF16_ERR2  Invalid low surrogate follows high surrogate
-  PCRE2_UTF16_ERR3  Isolated low surrogate
+  PCRE2_ERROR_UTF16_ERR1  Missing low surrogate at end of string
+  PCRE2_ERROR_UTF16_ERR2  Invalid low surrogate follows high surrogate
+  PCRE2_ERROR_UTF16_ERR3  Isolated low surrogate
 .sp
 .
 .
@@ -247,8 +247,8 @@ The following negative error codes are given for invalid UTF-16 strings:
 .sp
 The following negative error codes are given for invalid UTF-32 strings:
 .sp
-  PCRE2_UTF32_ERR1  Surrogate character (range from 0xd800 to 0xdfff)
-  PCRE2_UTF32_ERR2  Code point is greater than 0x10ffff
+  PCRE2_ERROR_UTF32_ERR1  Surrogate character (0xd800 to 0xdfff)
+  PCRE2_ERROR_UTF32_ERR2  Code point is greater than 0x10ffff
 .sp
 .
 .
@@ -266,6 +266,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 02 July 2016
+Last updated: 03 July 2016
 Copyright (c) 1997-2016 University of Cambridge.
 .fi
