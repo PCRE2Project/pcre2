@@ -7672,4 +7672,14 @@ No match
     abcd\=null_context
  0: abcd
 
+/()()a+/no_auto_possess
+    aaa\=dfa,allcaptures
+** Ignored after DFA matching: allcaptures
+ 0: aaa
+ 1: aa
+ 2: a
+    a\=dfa,allcaptures
+** Ignored after DFA matching: allcaptures
+ 0: a
+
 # End of testinput6

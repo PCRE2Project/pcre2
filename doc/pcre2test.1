@@ -1,4 +1,4 @@
-.TH PCRE2TEST 1 "17 June 2016" "PCRE 10.22"
+.TH PCRE2TEST 1 "06 July 2016" "PCRE 10.22"
 .SH NAME
 pcre2test - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -1055,7 +1055,8 @@ The \fBallcaptures\fP modifier requests that the values of all potential
 captured parentheses be output after a match. By default, only those up to the
 highest one actually used in the match are output (corresponding to the return
 code from \fBpcre2_match()\fP). Groups that did not take part in the match
-are output as "<unset>".
+are output as "<unset>". This modifier is not relevant for DFA matching (which 
+does no capturing); it is ignored, with a warning message, if present.
 .
 .
 .SS "Testing callouts"
@@ -1681,6 +1682,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 17 June 2016
+Last updated: 06 July 2016
 Copyright (c) 1997-2016 University of Cambridge.
 .fi

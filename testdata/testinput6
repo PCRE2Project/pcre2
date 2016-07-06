@@ -4878,4 +4878,8 @@
 /abcd/null_context
     abcd\=null_context
 
+/()()a+/no_auto_possess
+    aaa\=dfa,allcaptures
+    a\=dfa,allcaptures
+
 # End of testinput6

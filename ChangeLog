@@ -170,6 +170,8 @@ large stack size when testing with clang.
 
 43. Detect integer overflow in pcre2test pattern and data repetition counts.
 
+44. In pcre2test, ignore "allcaptures" after DFA matching.
+
 
 Version 10.21 12-January-2016
 -----------------------------

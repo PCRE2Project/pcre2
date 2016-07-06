@@ -6436,15 +6436,23 @@ else for (gmatched = 0;; gmatched++)
 
     /* "allcaptures" requests showing of all captures in the pattern, to check
     unset ones at the end. It may be set on the pattern or the data. Implement
-    by setting capcount to the maximum. */
+    by setting capcount to the maximum. This is not relevant for DFA matching,
+    so ignore it. */
 
     if ((dat_datctl.control & CTL_ALLCAPTURES) != 0)
       {
       uint32_t maxcapcount;
-      if (pattern_info(PCRE2_INFO_CAPTURECOUNT, &maxcapcount, FALSE) < 0)
-        return PR_SKIP;
-      capcount = maxcapcount + 1;   /* Allow for full match */
-      if (capcount > (int)oveccount) capcount = oveccount;
+      if ((dat_datctl.control & CTL_DFA) != 0)
+        {
+        fprintf(outfile, "** Ignored after DFA matching: allcaptures\n");
+        }
+      else
+        {
+        if (pattern_info(PCRE2_INFO_CAPTURECOUNT, &maxcapcount, FALSE) < 0)
+          return PR_SKIP;
+        capcount = maxcapcount + 1;   /* Allow for full match */
+        if (capcount > (int)oveccount) capcount = oveccount;
+        }
       }
 
     /* Output the captured substrings. Note that, for the matched string,
