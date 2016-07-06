@@ -15186,6 +15186,15 @@ Failed: error 122 at offset 10: unmatched closing parenthesis
   0    ^    0
 No match
 
+/aaa/
+\[abc]{10000000000000000000000000000}
+** Repeat count too large
+\[a]{3}
+ 0: aaa
+
+/\[AB]{6000000000000000000000}/expand
+** Pattern repeat count too large
+
 # End of testinput2 
 Error -63: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

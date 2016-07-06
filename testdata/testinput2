@@ -4813,4 +4813,10 @@ a)"xI
 \= Expect no match
     abc
 
+/aaa/
+\[abc]{10000000000000000000000000000}
+\[a]{3}
+
+/\[AB]{6000000000000000000000}/expand
+
 # End of testinput2 

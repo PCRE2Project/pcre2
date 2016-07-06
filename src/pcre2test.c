@@ -4618,8 +4618,19 @@ else if ((pat_patctl.control & CTL_EXPAND) != 0)
           {
           uint32_t clen = pe - pc - 2;
           uint32_t i = 0;
+          unsigned long uli;
+          char *endptr;
+
           pe += 2;
-          while (isdigit(*pe)) i = i * 10 + *pe++ - '0';
+          uli = strtoul((const char *)pe, &endptr, 10);
+          if (U32OVERFLOW(uli))
+            {
+            fprintf(outfile, "** Pattern repeat count too large\n");
+            return PR_SKIP;
+            }
+
+          i = (uint32_t)uli;
+          pe = (uint8_t *)endptr;
           if (*pe == '}')
             {
             if (i == 0)
@@ -5615,13 +5626,15 @@ buffer of the appropriate width. In UTF mode, input can be UTF-8. */
 
 while ((c = *p++) != 0)
   {
-  int i = 0;
+  int32_t i = 0;
   size_t replen;
 
   /* ] may mark the end of a replicated sequence */
 
   if (c == ']' && start_rep != NULL)
     {
+    long li;
+    char *endptr;
     size_t qoffset = CAST8VAR(q) - dbuffer;
     size_t rep_offset = start_rep - dbuffer;
 
@@ -5630,12 +5643,22 @@ while ((c = *p++) != 0)
       fprintf(outfile, "** Expected '{' after \\[....]\n");
       return PR_OK;
       }
-    while (isdigit(*p)) i = i * 10 + *p++ - '0';
+
+    li = strtol((const char *)p, &endptr, 10);
+    if (S32OVERFLOW(li))
+      {
+      fprintf(outfile, "** Repeat count too large\n");
+      return PR_OK;
+      }
+
+    p = (uint8_t *)endptr;
     if (*p++ != '}')
       {
       fprintf(outfile, "** Expected '}' after \\[...]{...\n");
       return PR_OK;
       }
+
+    i = (int32_t)li;
     if (i-- == 0)
       {
       fprintf(outfile, "** Zero repeat not allowed\n");

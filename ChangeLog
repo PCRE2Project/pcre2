@@ -168,6 +168,8 @@ large stack size when testing with clang.
 
 42. Fix register overwite in JIT when SSE2 acceleration is enabled.
 
+43. Detect integer overflow in pcre2test pattern and data repetition counts.
+
 
 Version 10.21 12-January-2016
 -----------------------------
