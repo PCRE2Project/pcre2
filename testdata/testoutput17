@@ -533,11 +533,11 @@ Failed: error -47: match limit exceeded
     
 # ---- 
 
-/[aC]/mg,firstline
+/[aC]/mg,firstline,newline=lf
 match\nmatch
  0: a (JIT)
 
-/[aCz]/mg,firstline
+/[aCz]/mg,firstline,newline=lf
 match\nmatch
  0: a (JIT)
 

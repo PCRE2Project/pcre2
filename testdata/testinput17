@@ -291,10 +291,10 @@
     
 # ---- 
 
-/[aC]/mg,firstline
+/[aC]/mg,firstline,newline=lf
 match\nmatch
 
-/[aCz]/mg,firstline
+/[aCz]/mg,firstline,newline=lf
 match\nmatch
 
 # End of testinput17
