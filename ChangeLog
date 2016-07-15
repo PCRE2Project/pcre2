@@ -172,6 +172,8 @@ large stack size when testing with clang.
 
 44. In pcre2test, ignore "allcaptures" after DFA matching.
 
+45. Fix unaligned accesses on x86. Patch by Marc Mutz.
+
 
 Version 10.21 12-January-2016
 -----------------------------
