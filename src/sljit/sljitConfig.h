@@ -82,7 +82,7 @@
 /* --------------------------------------------------------------------- */
 
 /* If SLJIT_STD_MACROS_DEFINED is not defined, the application should
-   define SLJIT_MALLOC, SLJIT_FREE, SLJIT_MEMMOVE, and NULL. */
+   define SLJIT_MALLOC, SLJIT_FREE, SLJIT_MEMCPY, and NULL. */
 #ifndef SLJIT_STD_MACROS_DEFINED
 /* Disabled by default. */
 #define SLJIT_STD_MACROS_DEFINED 0

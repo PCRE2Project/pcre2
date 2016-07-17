@@ -298,11 +298,6 @@ static SLJIT_INLINE void sljit_unaligned_store_sw(void *addr, sljit_sw value)
 	SLJIT_MEMCPY(addr, &value, sizeof(value));
 }
 
-static SLJIT_INLINE void sljit_unaligned_store_uw(void *addr, sljit_uw value)
-{
-	SLJIT_MEMCPY(addr, &value, sizeof(value));
-}
-
 /******************************************************/
 /*    Utility functions                               */
 /******************************************************/
@@ -506,7 +501,7 @@ SLJIT_API_FUNC_ATTRIBUTE void* sljit_generate_code(struct sljit_compiler *compil
 			len = *buf_ptr++;
 			if (len > 0) {
 				/* The code is already generated. */
-				SLJIT_MEMMOVE(code_ptr, buf_ptr, len);
+				SLJIT_MEMCPY(code_ptr, buf_ptr, len);
 				code_ptr += len;
 				buf_ptr += len;
 			}
@@ -2276,7 +2271,7 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op_custom(struct sljit_compiler *c
 	inst = (sljit_u8*)ensure_buf(compiler, 1 + size);
 	FAIL_IF(!inst);
 	INC_SIZE(size);
-	SLJIT_MEMMOVE(inst, instruction, size);
+	SLJIT_MEMCPY(inst, instruction, size);
 	return SLJIT_SUCCESS;
 }
 
@@ -2956,7 +2951,7 @@ SLJIT_API_FUNC_ATTRIBUTE void sljit_set_jump_addr(sljit_uw addr, sljit_uw new_ad
 #if (defined SLJIT_CONFIG_X86_32 && SLJIT_CONFIG_X86_32)
 	sljit_unaligned_store_sw((void*)addr, new_addr - (addr + 4));
 #else
-	sljit_unaligned_store_uw((void*)addr, new_addr);
+	sljit_unaligned_store_sw((void*)addr, (sljit_sw) new_addr);
 #endif
 }
 
