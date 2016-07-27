@@ -2,7 +2,7 @@
 *      Perl-Compatible Regular Expressions       *
 *************************************************/
 
-/* PCRE is a library of functions to support regular expressions whose syntax
+/* PCRE2 is a library of functions to support regular expressions whose syntax
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
@@ -177,7 +177,7 @@ by "configure". */
 #endif
 
 /* When compiling for use with the Virtual Pascal compiler, these functions
-need to have their names changed. PCRE must be compiled with the -DVPCOMPAT
+need to have their names changed. PCRE2 must be compiled with the -DVPCOMPAT
 option on the command line. */
 
 #ifdef VPCOMPAT
@@ -200,7 +200,7 @@ neither (there some non-Unix environments where this is the case). */
 #define memmove(a, b, c) bcopy(b, a, c)
 #else  /* HAVE_BCOPY */
 static void *
-pcre_memmove(void *d, const void *s, size_t n)
+pcre2_memmove(void *d, const void *s, size_t n)
 {
 size_t i;
 unsigned char *dest = (unsigned char *)d;
@@ -218,7 +218,7 @@ else
   return (void *)(dest - n);
   }
 }
-#define memmove(a, b, c) pcre_memmove(a, b, c)
+#define memmove(a, b, c) pcre2_memmove(a, b, c)
 #endif   /* not HAVE_BCOPY */
 #endif   /* not HAVE_MEMMOVE */
 #endif   /* not VPCOMPAT */
@@ -397,7 +397,7 @@ other. NOTE: The values also appear in pcre2_jit_compile.c. */
 /* Character U+180E (Mongolian Vowel Separator) is not included in the list of
 spaces in the Unicode file PropList.txt, and Perl does not recognize it as a
 space. However, in many other sources it is listed as a space and has been in
-PCRE for a long time. */
+PCRE (both APIs) for a long time. */
 
 #define HSPACE_LIST \
   CHAR_HT, CHAR_SPACE, CHAR_NBSP, \
@@ -565,17 +565,9 @@ req_unit match. */
 
 #define REQ_CU_MAX 1000
 
-/* Bit definitions for entries in the pcre_ctypes table. */
-
-#define ctype_space   0x01
-#define ctype_letter  0x02
-#define ctype_digit   0x04
-#define ctype_xdigit  0x08
-#define ctype_word    0x10    /* alphanumeric or '_' */
-#define ctype_meta    0x80    /* regexp meta char or zero (end pattern) */
-
-/* Offsets for the bitmap tables in pcre_cbits. Each table contains a set
-of bits for a class map. Some classes are built by combining these tables. */
+/* Offsets for the bitmap tables in the cbits set of tables. Each table
+contains a set of bits for a class map. Some classes are built by combining
+these tables. */
 
 #define cbit_space     0      /* [:space:] or \s */
 #define cbit_xdigit   32      /* [:xdigit:] */
@@ -589,19 +581,28 @@ of bits for a class map. Some classes are built by combining these tables. */
 #define cbit_cntrl   288      /* [:cntrl:] */
 #define cbit_length  320      /* Length of the cbits table */
 
-/* Offsets of the various tables from the base tables pointer, and
-total length. */
+/* Bit definitions for entries in the ctypes table. */
 
-#define lcc_offset      0
-#define fcc_offset    256
-#define cbits_offset  512
-#define ctypes_offset (cbits_offset + cbit_length)
+#define ctype_space   0x01
+#define ctype_letter  0x02
+#define ctype_digit   0x04
+#define ctype_xdigit  0x08
+#define ctype_word    0x10    /* alphanumeric or '_' */
+#define ctype_meta    0x80    /* regexp meta char or zero (end pattern) */
+
+/* Offsets of the various tables from the base tables pointer, and
+total length of the tables. */
+
+#define lcc_offset      0                           /* Lower case */
+#define fcc_offset    256                           /* Flip case */
+#define cbits_offset  512                           /* Character classes */
+#define ctypes_offset (cbits_offset + cbit_length)  /* Character types */
 #define tables_length (ctypes_offset + 256)
 
 
 /* -------------------- Character and string names ------------------------ */
 
-/* If PCRE is to support UTF-8 on EBCDIC platforms, we cannot use normal
+/* If PCRE2 is to support UTF-8 on EBCDIC platforms, we cannot use normal
 character constants like '*' because the compiler would emit their EBCDIC code,
 which is different from their ASCII/UTF-8 code. Instead we define macros for
 the characters so that they always use the ASCII/UTF-8 code when UTF-8 support
@@ -609,7 +610,7 @@ is enabled. When UTF-8 support is not enabled, the definitions use character
 literals. Both character and string versions of each character are needed, and
 there are some longer strings as well.
 
-This means that, on EBCDIC platforms, the PCRE library can handle either
+This means that, on EBCDIC platforms, the PCRE2 library can handle either
 EBCDIC, or UTF-8, but not both. To support both in the same compiled library
 would need different lookups depending on whether PCRE2_UTF was set or not.
 This would make it impossible to use characters in switch/case statements,
@@ -621,7 +622,7 @@ macros to give the functions distinct names. */
 #ifndef SUPPORT_UNICODE
 
 /* UTF-8 support is not enabled; use the platform-dependent character literals
-so that PCRE works in both ASCII and EBCDIC environments, but only in non-UTF
+so that PCRE2 works in both ASCII and EBCDIC environments, but only in non-UTF
 mode. Newline characters are problematic in EBCDIC. Though it has CR and LF
 characters, a common practice has been to use its NL (0x15) character as the
 line terminator in C-like processing environments. However, sometimes the LF
@@ -629,7 +630,7 @@ line terminator in C-like processing environments. However, sometimes the LF
 
 http://unicode.org/standard/reports/tr13/tr13-5.html
 
-PCRE defaults EBCDIC NL to 0x15, but has a build-time option to select 0x25
+PCRE2 defaults EBCDIC NL to 0x15, but has a build-time option to select 0x25
 instead. Whichever is *not* chosen is defined as NEL.
 
 In both ASCII and EBCDIC environments, CHAR_NL and CHAR_LF are synonyms for the
@@ -1234,7 +1235,7 @@ only. */
 #define PT_TABSIZE   11    /* Size of square table for autopossessify tests */
 
 /* The following special properties are used only in XCLASS items, when POSIX
-classes are specified and PCRE_UCP is set - in other words, for Unicode
+classes are specified and PCRE2_UCP is set - in other words, for Unicode
 handling of these classes. They are not available via the \p or \P escapes like
 those in the above list, and so they do not take part in the autopossessifying
 table. */
@@ -1298,7 +1299,7 @@ compatibility mode, and for \C in non-utf mode. In non-DOTALL mode, "." behaves
 like \N.
 
 The special values ESC_DU, ESC_du, etc. are used instead of ESC_D, ESC_d, etc.
-when PCRE_UCP is set and replacement of \d etc by \p sequences is required.
+when PCRE2_UCP is set and replacement of \d etc by \p sequences is required.
 They must be contiguous, and remain in order so that the replacements can be
 looked up from a table.
 
@@ -1323,12 +1324,12 @@ enum { ESC_A = 1, ESC_G, ESC_K, ESC_B, ESC_b, ESC_D, ESC_d, ESC_S, ESC_s,
 Starting from 1 (i.e. after OP_END), the values up to OP_EOD must correspond in
 order to the list of escapes immediately above. Furthermore, values up to
 OP_DOLLM must not be changed without adjusting the table called autoposstab in
-pcre_compile.c
+pcre2_auto_possess.c
 
 Whenever this list is updated, the two macro definitions that follow must be
 updated to match. The possessification table called "opcode_possessify" in
-pcre_compile.c must also be updated, and also the tables called "coptable"
-and "poptable" in pcre_dfa_exec.c.
+pcre2_compile.c must also be updated, and also the tables called "coptable"
+and "poptable" in pcre2_dfa_match.c.
 
 ****** NOTE NOTE NOTE ******/
 
@@ -1905,7 +1906,7 @@ private structures. */
 
 /* Private "external" functions. These are internal functions that are called
 from modules other than the one in which they are defined. They have to be
-"external" in the C sense, but are not part of the PCRE public API. They are
+"external" in the C sense, but are not part of the PCRE2 public API. They are
 not referenced from pcre2test, and must not be defined when no code unit width
 is available. */
 
