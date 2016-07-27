@@ -4663,7 +4663,7 @@ else if ((pat_patctl.control & CTL_EXPAND) != 0)
       pt = pbuffer8 + pt_offset;
       }
 
-    while (count-- > 0)
+    for (; count > 0; count--)
       {
       memcpy(pt, pc, length);
       pt += length;

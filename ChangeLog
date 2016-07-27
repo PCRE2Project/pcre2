@@ -2,7 +2,7 @@ Change Log for PCRE2
 --------------------
 
 
-Version 10.22 29-June-2016
+Version 10.22 29-July-2016
 --------------------------
 
 1. Applied Jason Hood's patches to RunTest.bat and testdata/wintestoutput3
@@ -173,6 +173,8 @@ large stack size when testing with clang.
 44. In pcre2test, ignore "allcaptures" after DFA matching.
 
 45. Fix unaligned accesses on x86. Patch by Marc Mutz.
+
+46. Fix some more clang compiler warnings.
 
 
 Version 10.21 12-January-2016
