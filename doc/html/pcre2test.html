@@ -1090,7 +1090,8 @@ The <b>allcaptures</b> modifier requests that the values of all potential
 captured parentheses be output after a match. By default, only those up to the
 highest one actually used in the match are output (corresponding to the return
 code from <b>pcre2_match()</b>). Groups that did not take part in the match
-are output as "&#60;unset&#62;".
+are output as "&#60;unset&#62;". This modifier is not relevant for DFA matching (which
+does no capturing); it is ignored, with a warning message, if present.
 </P>
 <br><b>
 Testing callouts
@@ -1705,7 +1706,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC21" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 17 June 2016
+Last updated: 06 July 2016
 <br>
 Copyright &copy; 1997-2016 University of Cambridge.
 <br>

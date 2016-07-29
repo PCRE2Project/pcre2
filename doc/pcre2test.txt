@@ -981,7 +981,9 @@ SUBJECT MODIFIERS
        tured parentheses be output after a match. By default, only those up to
        the highest one actually used in the match are output (corresponding to
        the return code from pcre2_match()). Groups that did not take  part  in
-       the match are output as "<unset>".
+       the  match  are  output as "<unset>". This modifier is not relevant for
+       DFA matching (which does no capturing); it is ignored, with  a  warning
+       message, if present.
 
    Testing callouts
 
@@ -1546,5 +1548,5 @@ AUTHOR
 
 REVISION
 
-       Last updated: 17 June 2016
+       Last updated: 06 July 2016
        Copyright (c) 1997-2016 University of Cambridge.
