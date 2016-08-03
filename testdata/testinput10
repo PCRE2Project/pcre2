@@ -445,4 +445,13 @@
 /(?<=(a)(?-1))x/I,utf
     a\x80zx\=offset=3
 
+/[\W\p{Any}]/B
+    abc
+    123 
+
+/[\W\pL]/B
+    abc
+\= Expect no match
+    123     
+
 # End of testinput10

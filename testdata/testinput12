@@ -347,4 +347,15 @@
 
 /abý¿¿¿¿¿z/utf
 
+/[\W\p{Any}]/B
+    abc
+    123 
+
+/[\W\pL]/B
+    abc
+    \x{100}
+    \x{308}  
+\= Expect no match
+    123     
+
 # End of testinput12

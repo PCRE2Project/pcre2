@@ -1675,15 +1675,6 @@
 /((?<digit>\d)|(?<letter>\p{L}))/g,substitute_extended,replace=<${digit:+digit; :not digit; }${letter:+letter:not a letter}>
     ab12cde
 
-/[\W\p{Any}]/B
-    abc
-    123 
-
-/[\W\pL]/B
-    abc
-\= Expect no match
-    123     
-
 /(*UCP)(*UTF)[[:>:]]X/B
 
 /abc/utf,replace=xyz
@@ -1715,5 +1706,22 @@
 /L(?#(|++<!(2)?/B,utf,ucp,auto_callout
 
 /(*UTF)C\x09((?<!'(?x)!*H? #\xcc\x9a[^$]/
+
+/[\D]/utf
+    \x{1d7cf}
+
+/[\D\P{Nd}]/utf
+    \x{1d7cf}
+
+/[^\D]/utf
+    a9b
+\= Expect no match
+    \x{1d7cf}
+
+/[^\D\P{Nd}]/utf
+    a9b
+    \x{1d7cf}
+\= Expect no match
+    \x{10000}
 
 # End of testinput5 

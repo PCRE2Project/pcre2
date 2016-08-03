@@ -4020,31 +4020,6 @@ MK: a\x{12345}b\x{09}(d)c
     ab12cde
  7: <not digit; letter><not digit; letter><digit; not a letter><digit; not a letter><not digit; letter><not digit; letter><not digit; letter>
 
-/[\W\p{Any}]/B
-------------------------------------------------------------------
-        Bra
-        [\x00-/:-@[-^`{-\xff\p{Any}]
-        Ket
-        End
-------------------------------------------------------------------
-    abc
- 0: a
-    123 
- 0: 1
-
-/[\W\pL]/B
-------------------------------------------------------------------
-        Bra
-        [\x00-/:-@[-^`{-\xff\p{L}]
-        Ket
-        End
-------------------------------------------------------------------
-    abc
- 0: a
-\= Expect no match
-    123     
-No match
-
 /(*UCP)(*UTF)[[:>:]]X/B
 ------------------------------------------------------------------
         Bra
@@ -4160,5 +4135,29 @@ No match
 
 /(*UTF)C\x09((?<!'(?x)!*H? #\xcc\x9a[^$]/
 Failed: error 114 at offset 39: missing closing parenthesis
+
+/[\D]/utf
+    \x{1d7cf}
+ 0: \x{1d7cf}
+
+/[\D\P{Nd}]/utf
+    \x{1d7cf}
+ 0: \x{1d7cf}
+
+/[^\D]/utf
+    a9b
+ 0: 9
+\= Expect no match
+    \x{1d7cf}
+No match
+
+/[^\D\P{Nd}]/utf
+    a9b
+ 0: 9
+    \x{1d7cf}
+ 0: \x{1d7cf}
+\= Expect no match
+    \x{10000}
+No match
 
 # End of testinput5 

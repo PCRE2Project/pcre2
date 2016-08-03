@@ -4950,11 +4950,11 @@ for (;; ptr++)
         }
 
 #ifdef SUPPORT_WIDE_CHARS
-      /* If any wide characters have been encountered, set xclass = TRUE. Then,
-      in the pre-compile phase, accumulate the length of the wide characters
-      and reset the pointer. This is so that very large classes that contain a
-      zillion wide characters do not overwrite the work space (which is on the
-      stack). */
+      /* If any wide characters or Unicode properties have been encountered,
+      set xclass = TRUE. Then, in the pre-compile phase, accumulate the length
+      of the wide characters etc. and reset the pointer. This is so that very
+      large classes that contain a zillion wide characters do not overwrite the
+      work space (which is on the stack). */
 
       if (class_uchardata > class_uchardata_base)
         {
@@ -4994,22 +4994,43 @@ for (;; ptr++)
     negated). This requirement is indicated by match_all_or_no_wide_chars being
     true. We do this by including an explicit range, which works in both cases.
 
+    When there *are* properties in a positive UTF-8 or any 16-bit or 32_bit
+    class where \S etc is present without PCRE2_UCP, causing an extended class
+    to be compiled, we make sure that all characters > 255 are included by
+    forcing match_all_or_no_wide_chars to be true.
+
     If, when generating an xclass, there are no characters < 256, we can omit
     the bitmap in the actual compiled code. */
 
-#ifdef SUPPORT_WIDE_CHARS
+#ifdef SUPPORT_WIDE_CHARS  /* Defined for 16/32 bits, or 8-bit with Unicode */
+    if (xclass && (
 #ifdef SUPPORT_UNICODE
-    if (xclass && (xclass_has_prop || !should_flip_negation ||
-         (options & PCRE2_UCP) != 0))
-#elif PCRE2_CODE_UNIT_WIDTH != 8
-    if (xclass && (xclass_has_prop || !should_flip_negation))
+        (options & PCRE2_UCP) != 0 ||
 #endif
+        xclass_has_prop || !should_flip_negation))
       {
-      if (match_all_or_no_wide_chars)
+      if (match_all_or_no_wide_chars || (
+#if PCRE2_CODE_UNIT_WIDTH == 8
+           utf &&
+#endif
+           should_flip_negation && !negate_class && (options & PCRE2_UCP) == 0))
         {
         *class_uchardata++ = XCL_RANGE;
-        class_uchardata += PRIV(ord2utf)(0x100, class_uchardata);
-        class_uchardata += PRIV(ord2utf)(MAX_UTF_CODE_POINT, class_uchardata);
+        if (utf)   /* Will always be utf in the 8-bit library */
+          {
+          class_uchardata += PRIV(ord2utf)(0x100, class_uchardata);
+          class_uchardata += PRIV(ord2utf)(MAX_UTF_CODE_POINT, class_uchardata);
+          }
+        else       /* Can only happen for the 16-bit & 32-bit libraries */
+          {
+#if PCRE2_CODE_UNIT_WIDTH == 16
+          *class_uchardata++ = 0x100;
+          *class_uchardata++ = 0xffffu;
+#elif PCRE2_CODE_UNIT_WIDTH == 32
+          *class_uchardata++ = 0x100;
+          *class_uchardata++ = 0xffffffffu;
+#endif
+          }
         }
       *class_uchardata++ = XCL_END;    /* Marks the end of extra data */
       *code++ = OP_XCLASS;
@@ -5037,7 +5058,7 @@ for (;; ptr++)
       PUT(previous, 1, (int)(code - previous));
       break;   /* End of class handling */
       }
-#endif
+#endif  /* SUPPORT_WIDE_CHARS */
 
     /* If there are no characters > 255, or they are all to be included or
     excluded, set the opcode to OP_CLASS or OP_NCLASS, depending on whether the

@@ -1372,4 +1372,33 @@ Failed: error -28: UTF-32 error: code points greater than 0x10ffff are not defin
 /abý¿¿¿¿¿z/utf
 ** Failed: character value greater than 0x10ffff cannot be converted to UTF
 
+/[\W\p{Any}]/B
+------------------------------------------------------------------
+        Bra
+        [\x00-/:-@[-^`{-\xff\p{Any}\x{100}-\x{ffffffff}]
+        Ket
+        End
+------------------------------------------------------------------
+    abc
+ 0: a
+    123 
+ 0: 1
+
+/[\W\pL]/B
+------------------------------------------------------------------
+        Bra
+        [\x00-/:-@[-^`{-\xff\p{L}\x{100}-\x{ffffffff}]
+        Ket
+        End
+------------------------------------------------------------------
+    abc
+ 0: a
+    \x{100}
+ 0: \x{100}
+    \x{308}  
+ 0: \x{308}
+\= Expect no match
+    123     
+No match
+
 # End of testinput12

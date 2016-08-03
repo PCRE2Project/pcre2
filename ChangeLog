@@ -8,6 +8,12 @@ Version 10.23 xx-xxxxxx-2016
 1. Extended pcre2test with the utf8_input modifier so that it is able to
 generate all possible 16-bit and 32-bit code unit values in non-UTF modes.
 
+2. In any wide-character mode (8-bit UTF or any 16-bit or 32-bit mode), without 
+PCRE2_UCP set, a negative character type such as \D in a positive class should 
+cause all characters greater than 255 to match, whatever else is in the class.
+There was a bug that caused this not to happen if a Unicode property item was
+added to such a class, for example [\D\P{Nd}] or [\W\pL].
+
 
 Version 10.22 29-July-2016
 --------------------------
