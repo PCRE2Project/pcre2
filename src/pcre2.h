@@ -42,9 +42,9 @@ POSSIBILITY OF SUCH DAMAGE.
 /* The current PCRE version information. */
 
 #define PCRE2_MAJOR          10
-#define PCRE2_MINOR          22
-#define PCRE2_PRERELEASE     
-#define PCRE2_DATE           2016-07-29
+#define PCRE2_MINOR          23
+#define PCRE2_PRERELEASE     -RC1
+#define PCRE2_DATE           2016-08-01
 
 /* When an application links to a PCRE DLL in Windows, the symbols that are
 imported have to be identified as such. When building PCRE2, the appropriate

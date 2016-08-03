@@ -1361,4 +1361,15 @@ Subject length lower bound = 2
     \x{110000}
 Failed: error -28: UTF-32 error: code points greater than 0x10ffff are not defined at offset 0
 
+/(*UTF)abý¿¿¿¿¿z/B
+------------------------------------------------------------------
+        Bra
+        ab\x{fd}\x{bf}\x{bf}\x{bf}\x{bf}\x{bf}z
+        Ket
+        End
+------------------------------------------------------------------
+
+/abý¿¿¿¿¿z/utf
+** Failed: character value greater than 0x10ffff cannot be converted to UTF
+
 # End of testinput12

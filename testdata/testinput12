@@ -343,4 +343,8 @@
 /./utf
     \x{110000}
 
+/(*UTF)abý¿¿¿¿¿z/B
+
+/abý¿¿¿¿¿z/utf
+
 # End of testinput12

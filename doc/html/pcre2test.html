@@ -61,7 +61,7 @@ subject is processed, and what output is produced.
 <P>
 As the original fairly simple PCRE library evolved, it acquired many different
 features, and as a result, the original <b>pcretest</b> program ended up with a
-lot of options in a messy, arcane syntax, for testing all the features. The
+lot of options in a messy, arcane syntax for testing all the features. The
 move to the new PCRE2 API provided an opportunity to re-implement the test
 program as <b>pcre2test</b>, with a cleaner modifier syntax. Nevertheless, there
 are still many obscure modifiers, some of which are specifically designed for
@@ -77,32 +77,61 @@ strings that are encoded in 8-bit, 16-bit, or 32-bit code units. One, two, or
 all three of these libraries may be simultaneously installed. The
 <b>pcre2test</b> program can be used to test all the libraries. However, its own
 input and output are always in 8-bit format. When testing the 16-bit or 32-bit
-libraries, patterns and subject strings are converted to 16- or 32-bit format
-before being passed to the library functions. Results are converted back to
-8-bit code units for output.
+libraries, patterns and subject strings are converted to 16-bit or 32-bit
+format before being passed to the library functions. Results are converted back
+to 8-bit code units for output.
 </P>
 <P>
 In the rest of this document, the names of library functions and structures
 are given in generic form, for example, <b>pcre_compile()</b>. The actual
 names used in the libraries have a suffix _8, _16, or _32, as appropriate.
-</P>
+<a name="inputencoding"></a></P>
 <br><a name="SEC3" href="#TOC1">INPUT ENCODING</a><br>
 <P>
 Input to <b>pcre2test</b> is processed line by line, either by calling the C
-library's <b>fgets()</b> function, or via the <b>libreadline</b> library (see
-below). The input is processed using using C's string functions, so must not
-contain binary zeroes, even though in Unix-like environments, <b>fgets()</b>
-treats any bytes other than newline as data characters. In some Windows
-environments character 26 (hex 1A) causes an immediate end of file, and no
-further data is read.
+library's <b>fgets()</b> function, or via the <b>libreadline</b> library. In some
+Windows environments character 26 (hex 1A) causes an immediate end of file, and
+no further data is read, so this character should be avoided unless you really
+want that action.
 </P>
 <P>
-For maximum portability, therefore, it is safest to avoid non-printing
-characters in <b>pcre2test</b> input files. There is a facility for specifying
-some or all of a pattern's characters as hexadecimal pairs, thus making it
-possible to include binary zeroes in a pattern for testing purposes. Subject
-lines are processed for backslash escapes, which makes it possible to include
-any data value.
+The input is processed using using C's string functions, so must not
+contain binary zeroes, even though in Unix-like environments, <b>fgets()</b>
+treats any bytes other than newline as data characters. An error is generated
+if a binary zero is encountered. Subject lines are processed for backslash
+escapes, which makes it possible to include any data value in strings that are
+passed to the library for matching. For patterns, there is a facility for
+specifying some or all of the 8-bit input characters as hexadecimal pairs,
+which makes it possible to include binary zeros.
+</P>
+<br><b>
+Input for the 16-bit and 32-bit libraries
+</b><br>
+<P>
+When testing the 16-bit or 32-bit libraries, there is a need to be able to
+generate character code points greater than 255 in the strings that are passed
+to the library. For subject lines, backslash escapes can be used. In addition,
+when the <b>utf</b> modifier (see
+<a href="#optionmodifiers">"Setting compilation options"</a>
+below) is set, the pattern and any following subject lines are interpreted as
+UTF-8 strings and translated to UTF-16 or UTF-32 as appropriate. 
+</P>
+<P>
+For non-UTF testing of wide characters, the <b>utf8_input</b> modifier can be
+used. This is mutually exclusive with <b>utf</b>, and is allowed only in 16-bit
+or 32-bit mode. It causes the pattern and following subject lines to be treated
+as UTF-8 according to the original definition (RFC 2279), which allows for
+character values up to 0x7fffffff. Each character is placed in one 16-bit or
+32-bit code unit (in the 16-bit case, values greater than 0xffff cause an error
+to occur).
+</P>
+<P>
+UTF-8 is not capable of encoding values greater than 0x7fffffff, but such
+values can be handled by the 32-bit library. When testing this library in
+non-UTF mode with <b>utf8_input</b> set, if any character is preceded by the
+byte 0xff (which is an illegal byte in UTF-8) 0x80000000 is added to the
+character's value. This is the only way of passing such code points in a
+pattern string. For subject strings, using an escape sequence is preferable.
 </P>
 <br><a name="SEC4" href="#TOC1">COMMAND LINE OPTIONS</a><br>
 <P>
@@ -553,7 +582,9 @@ for a description of their effects.
 As well as turning on the PCRE2_UTF option, the <b>utf</b> modifier causes all
 non-printing characters in output strings to be printed using the \x{hh...}
 notation. Otherwise, those less than 0x100 are output in hex without the curly
-brackets.
+brackets. Setting <b>utf</b> in 16-bit or 32-bit mode also causes pattern and 
+subject strings to be translated to UTF-16 or UTF-32, respectively, before
+being passed to library functions.
 <a name="controlmodifiers"></a></P>
 <br><b>
 Setting compilation controls
@@ -584,6 +615,7 @@ about the pattern:
       pushcopy                  push a copy onto the stack
       stackguard=&#60;number&#62;       test the stackguard feature
       tables=[0|1|2]            select internal tables
+      utf8_input                treat input as UTF-8 
 </pre>
 The effects of these modifiers are described in the following sections.
 </P>
@@ -684,13 +716,27 @@ nine characters, only two of which are specified in hexadecimal:
   /ab "literal" 32/hex
 </pre>
 Either single or double quotes may be used. There is no way of including
-the delimiter within a substring.
+the delimiter within a substring. The <b>hex</b> and <b>expand</b> modifiers are
+mutually exclusive.
 </P>
 <P>
 By default, <b>pcre2test</b> passes patterns as zero-terminated strings to
 <b>pcre2_compile()</b>, giving the length as PCRE2_ZERO_TERMINATED. However, for
 patterns specified with the <b>hex</b> modifier, the actual length of the
 pattern is passed.
+</P>
+<br><b>
+Specifying wide characters in 16-bit and 32-bit modes
+</b><br>
+<P>
+In 16-bit and 32-bit modes, all input is automatically treated as UTF-8 and 
+translated to UTF-16 or UTF-32 when the <b>utf</b> modifier is set. For testing 
+the 16-bit and 32-bit libraries in non-UTF mode, the <b>utf8_input</b> modifier
+can be used. It is mutually exclusive with <b>utf</b>. Input lines are
+interpreted as UTF-8 as a means of specifying wide characters. More details are
+given in
+<a href="#inputencoding">"Input encoding"</a>
+above.
 </P>
 <br><b>
 Generating long repetitive patterns
@@ -708,7 +754,8 @@ are expanded before the pattern is passed to <b>pcre2_compile()</b>. For
 example, \[AB]{6000} is expanded to "ABAB..." 6000 times. This construction
 cannot be nested. An initial "\[" sequence is recognized only if "]{" followed
 by decimal digits and "}" is found later in the pattern. If not, the characters
-remain in the pattern unaltered.
+remain in the pattern unaltered. The <b>expand</b> and <b>hex</b> modifiers are
+mutually exclusive.
 </P>
 <P>
 If part of an expanded pattern looks like an expansion, but is really part of
@@ -1706,7 +1753,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC21" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 06 July 2016
+Last updated: 02 August 2016
 <br>
 Copyright &copy; 1997-2016 University of Cambridge.
 <br>

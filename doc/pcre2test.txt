@@ -26,7 +26,7 @@ SYNOPSIS
 
        As the original fairly simple PCRE library evolved,  it  acquired  many
        different  features,  and  as  a  result, the original pcretest program
-       ended up with a lot of options in a messy, arcane syntax,  for  testing
+       ended up with a lot of options in a messy, arcane  syntax  for  testing
        all the features. The move to the new PCRE2 API provided an opportunity
        to re-implement the test program as pcre2test, with a cleaner  modifier
        syntax.  Nevertheless,  there are still many obscure modifiers, some of
@@ -45,7 +45,7 @@ PCRE2's 8-BIT, 16-BIT AND 32-BIT LIBRARIES
        installed. The pcre2test program can be used to test all the libraries.
        However, its own input and output are  always  in  8-bit  format.  When
        testing  the  16-bit  or 32-bit libraries, patterns and subject strings
-       are converted to 16- or  32-bit  format  before  being  passed  to  the
+       are converted to 16-bit or 32-bit format before  being  passed  to  the
        library  functions.  Results are converted back to 8-bit code units for
        output.
 
@@ -58,49 +58,76 @@ PCRE2's 8-BIT, 16-BIT AND 32-BIT LIBRARIES
 INPUT ENCODING
 
        Input  to  pcre2test is processed line by line, either by calling the C
-       library's fgets() function, or via the libreadline library (see below).
+       library's fgets() function, or via the  libreadline  library.  In  some
+       Windows  environments  character 26 (hex 1A) causes an immediate end of
+       file, and no further data is read, so this character should be  avoided
+       unless you really want that action.
+
        The  input  is  processed using using C's string functions, so must not
        contain binary zeroes, even though in Unix-like  environments,  fgets()
-       treats any bytes other than newline as data characters. In some Windows
-       environments character 26 (hex 1A) causes an immediate end of file, and
-       no further data is read.
+       treats  any  bytes  other  than newline as data characters. An error is
+       generated if a binary zero is encountered. Subject lines are  processed
+       for  backslash  escapes,  which  makes  it possible to include any data
+       value in strings that are passed to the library for matching. For  pat-
+       terns,  there  is  a  facility  for specifying some or all of the 8-bit
+       input characters as hexadecimal  pairs,  which  makes  it  possible  to
+       include binary zeros.
 
-       For  maximum portability, therefore, it is safest to avoid non-printing
-       characters in pcre2test input files. There is a facility for specifying
-       some or all of a pattern's characters as hexadecimal pairs, thus making
-       it possible to include binary zeroes in a pattern for testing purposes.
-       Subject  lines are processed for backslash escapes, which makes it pos-
-       sible to include any data value.
+   Input for the 16-bit and 32-bit libraries
+
+       When testing the 16-bit or 32-bit libraries, there is a need to be able
+       to generate character code points greater than 255 in the strings  that
+       are  passed to the library. For subject lines, backslash escapes can be
+       used. In addition, when the  utf  modifier  (see  "Setting  compilation
+       options" below) is set, the pattern and any following subject lines are
+       interpreted as UTF-8 strings and translated  to  UTF-16  or  UTF-32  as
+       appropriate.
+
+       For  non-UTF testing of wide characters, the utf8_input modifier can be
+       used. This is mutually exclusive with  utf,  and  is  allowed  only  in
+       16-bit  or  32-bit  mode.  It  causes the pattern and following subject
+       lines to be treated as UTF-8 according to the original definition  (RFC
+       2279), which allows for character values up to 0x7fffffff. Each charac-
+       ter is placed in one 16-bit or 32-bit code unit (in  the  16-bit  case,
+       values greater than 0xffff cause an error to occur).
+
+       UTF-8  is  not  capable of encoding values greater than 0x7fffffff, but
+       such values can be handled by the 32-bit  library.  When  testing  this
+       library  in  non-UTF mode with utf8_input set, if any character is pre-
+       ceded by the byte 0xff (which is an illegal byte in  UTF-8)  0x80000000
+       is added to the character's value. This is the only way of passing such
+       code points in a pattern string. For subject strings, using  an  escape
+       sequence is preferable.
 
 
 COMMAND LINE OPTIONS
 
        -8        If the 8-bit library has been built, this option causes it to
-                 be  used  (this is the default). If the 8-bit library has not
+                 be used (this is the default). If the 8-bit library  has  not
                  been built, this option causes an error.
 
-       -16       If the 16-bit library has been built, this option  causes  it
-                 to  be  used. If only the 16-bit library has been built, this
-                 is the default. If the 16-bit library  has  not  been  built,
+       -16       If  the  16-bit library has been built, this option causes it
+                 to be used. If only the 16-bit library has been  built,  this
+                 is  the  default.  If  the 16-bit library has not been built,
                  this option causes an error.
 
-       -32       If  the  32-bit library has been built, this option causes it
-                 to be used. If only the 32-bit library has been  built,  this
-                 is  the  default.  If  the 32-bit library has not been built,
+       -32       If the 32-bit library has been built, this option  causes  it
+                 to  be  used. If only the 32-bit library has been built, this
+                 is the default. If the 32-bit library  has  not  been  built,
                  this option causes an error.
 
-       -b        Behave as if each pattern has the /fullbincode modifier;  the
+       -b        Behave  as if each pattern has the /fullbincode modifier; the
                  full internal binary form of the pattern is output after com-
                  pilation.
 
-       -C        Output the version number  of  the  PCRE2  library,  and  all
-                 available  information  about  the optional features that are
-                 included, and then  exit  with  zero  exit  code.  All  other
+       -C        Output  the  version  number  of  the  PCRE2 library, and all
+                 available information about the optional  features  that  are
+                 included,  and  then  exit  with  zero  exit  code. All other
                  options are ignored.
 
-       -C option Output  information  about a specific build-time option, then
-                 exit. This functionality is intended for use in scripts  such
-                 as  RunTest.  The  following options output the value and set
+       -C option Output information about a specific build-time  option,  then
+                 exit.  This functionality is intended for use in scripts such
+                 as RunTest. The following options output the  value  and  set
                  the exit code as indicated:
 
                    ebcdic-nl  the code for LF (= NL) in an EBCDIC environment:
@@ -116,7 +143,7 @@ COMMAND LINE OPTIONS
                                 ANYCRLF or ANY
                                 exit code is always 0
 
-                 The following options output 1 for true or 0 for  false,  and
+                 The  following  options output 1 for true or 0 for false, and
                  set the exit code to the same value:
 
                    backslash-C  \C is supported (not locked out)
@@ -127,22 +154,22 @@ COMMAND LINE OPTIONS
                    pcre2-8      the 8-bit library was built
                    unicode      Unicode support is available
 
-                 If  an  unknown  option is given, an error message is output;
+                 If an unknown option is given, an error  message  is  output;
                  the exit code is 0.
 
-       -d        Behave as if each pattern has the debug modifier; the  inter-
+       -d        Behave  as if each pattern has the debug modifier; the inter-
                  nal form and information about the compiled pattern is output
                  after compilation; -d is equivalent to -b -i.
 
        -dfa      Behave as if each subject line has the dfa modifier; matching
-                 is  done  using the pcre2_dfa_match() function instead of the
+                 is done using the pcre2_dfa_match() function instead  of  the
                  default pcre2_match().
 
        -error number[,number,...]
-                 Call pcre2_get_error_message() for each of the error  numbers
-                 in  the  comma-separated list, display the resulting messages
-                 on the standard output, then exit with zero  exit  code.  The
-                 numbers  may  be  positive or negative. This is a convenience
+                 Call  pcre2_get_error_message() for each of the error numbers
+                 in the comma-separated list, display the  resulting  messages
+                 on  the  standard  output, then exit with zero exit code. The
+                 numbers may be positive or negative. This  is  a  convenience
                  facility for PCRE2 maintainers.
 
        -help     Output a brief summary these options and then exit.
@@ -150,8 +177,8 @@ COMMAND LINE OPTIONS
        -i        Behave as if each pattern has the /info modifier; information
                  about the compiled pattern is given after compilation.
 
-       -jit      Behave  as  if  each pattern line has the jit modifier; after
-                 successful compilation, each pattern is passed to  the  just-
+       -jit      Behave as if each pattern line has the  jit  modifier;  after
+                 successful  compilation,  each pattern is passed to the just-
                  in-time compiler, if available.
 
        -pattern modifier-list
@@ -160,25 +187,25 @@ COMMAND LINE OPTIONS
        -q        Do not output the version number of pcre2test at the start of
                  execution.
 
-       -S size   On Unix-like systems, set the size of the run-time  stack  to
+       -S size   On  Unix-like  systems, set the size of the run-time stack to
                  size megabytes.
 
        -subject modifier-list
                  Behave as if each subject line contains the given modifiers.
 
-       -t        Run  each compile and match many times with a timer, and out-
-                 put the resulting times per compile or  match.  When  JIT  is
-                 used,  separate  times  are given for the initial compile and
-                 the JIT compile. You can control  the  number  of  iterations
-                 that  are used for timing by following -t with a number (as a
-                 separate item on the command line). For  example,  "-t  1000"
+       -t        Run each compile and match many times with a timer, and  out-
+                 put  the  resulting  times  per compile or match. When JIT is
+                 used, separate times are given for the  initial  compile  and
+                 the  JIT  compile.  You  can control the number of iterations
+                 that are used for timing by following -t with a number (as  a
+                 separate  item  on  the command line). For example, "-t 1000"
                  iterates 1000 times. The default is to iterate 500,000 times.
 
        -tm       This is like -t except that it times only the matching phase,
                  not the compile phase.
 
-       -T -TM    These behave like -t and -tm, but in addition, at the end  of
-                 a  run, the total times for all compiles and matches are out-
+       -T -TM    These  behave like -t and -tm, but in addition, at the end of
+                 a run, the total times for all compiles and matches are  out-
                  put.
 
        -version  Output the PCRE2 version number and then exit.
@@ -186,139 +213,139 @@ COMMAND LINE OPTIONS
 
 DESCRIPTION
 
-       If pcre2test is given two filename arguments, it reads from  the  first
+       If  pcre2test  is given two filename arguments, it reads from the first
        and writes to the second. If the first name is "-", input is taken from
-       the standard input. If pcre2test is given only one argument,  it  reads
+       the  standard  input. If pcre2test is given only one argument, it reads
        from that file and writes to stdout. Otherwise, it reads from stdin and
        writes to stdout.
 
-       When pcre2test is built, a configuration option  can  specify  that  it
-       should  be linked with the libreadline or libedit library. When this is
-       done, if the input is from a terminal, it is read using the  readline()
+       When  pcre2test  is  built,  a configuration option can specify that it
+       should be linked with the libreadline or libedit library. When this  is
+       done,  if the input is from a terminal, it is read using the readline()
        function. This provides line-editing and history facilities. The output
        from the -help option states whether or not readline() will be used.
 
-       The program handles any number of tests, each of which  consists  of  a
-       set  of input lines. Each set starts with a regular expression pattern,
+       The  program  handles  any number of tests, each of which consists of a
+       set of input lines. Each set starts with a regular expression  pattern,
        followed by any number of subject lines to be matched against that pat-
        tern. In between sets of test data, command lines that begin with # may
        appear. This file format, with some restrictions, can also be processed
-       by  the perltest.sh script that is distributed with PCRE2 as a means of
+       by the perltest.sh script that is distributed with PCRE2 as a means  of
        checking that the behaviour of PCRE2 and Perl is the same.
 
        When the input is a terminal, pcre2test prompts for each line of input,
-       using  "re>"  to prompt for regular expression patterns, and "data>" to
-       prompt for subject lines. Command lines starting with # can be  entered
+       using "re>" to prompt for regular expression patterns, and  "data>"  to
+       prompt  for subject lines. Command lines starting with # can be entered
        only in response to the "re>" prompt.
 
-       Each  subject line is matched separately and independently. If you want
+       Each subject line is matched separately and independently. If you  want
        to do multi-line matches, you have to use the \n escape sequence (or \r
-       or  \r\n,  etc.,  depending on the newline setting) in a single line of
-       input to encode the newline sequences. There is no limit on the  length
-       of  subject  lines; the input buffer is automatically extended if it is
-       too small. There are replication features that  makes  it  possible  to
-       generate  long  repetitive  pattern  or subject lines without having to
+       or \r\n, etc., depending on the newline setting) in a  single  line  of
+       input  to encode the newline sequences. There is no limit on the length
+       of subject lines; the input buffer is automatically extended if  it  is
+       too  small.  There  are  replication features that makes it possible to
+       generate long repetitive pattern or subject  lines  without  having  to
        supply them explicitly.
 
-       An empty line or the end of the file signals the  end  of  the  subject
-       lines  for  a  test,  at  which  point a new pattern or command line is
+       An  empty  line  or  the end of the file signals the end of the subject
+       lines for a test, at which point a  new  pattern  or  command  line  is
        expected if there is still input to be read.
 
 
 COMMAND LINES
 
-       In between sets of test data, a line that begins with # is  interpreted
+       In  between sets of test data, a line that begins with # is interpreted
        as a command line. If the first character is followed by white space or
-       an exclamation mark, the line is treated as  a  comment,  and  ignored.
+       an  exclamation  mark,  the  line is treated as a comment, and ignored.
        Otherwise, the following commands are recognized:
 
          #forbid_utf
 
-       Subsequent   patterns   automatically   have  the  PCRE2_NEVER_UTF  and
-       PCRE2_NEVER_UCP options set, which locks out the use of  the  PCRE2_UTF
-       and  PCRE2_UCP options and the use of (*UTF) and (*UCP) at the start of
-       patterns. This command also forces an error  if  a  subsequent  pattern
-       contains  any  occurrences  of \P, \p, or \X, which are still supported
-       when PCRE2_UTF is not set, but which require Unicode  property  support
+       Subsequent  patterns  automatically  have   the   PCRE2_NEVER_UTF   and
+       PCRE2_NEVER_UCP  options  set, which locks out the use of the PCRE2_UTF
+       and PCRE2_UCP options and the use of (*UTF) and (*UCP) at the start  of
+       patterns.  This  command  also  forces an error if a subsequent pattern
+       contains any occurrences of \P, \p, or \X, which  are  still  supported
+       when  PCRE2_UTF  is not set, but which require Unicode property support
        to be included in the library.
 
-       This  is  a trigger guard that is used in test files to ensure that UTF
-       or Unicode property tests are not accidentally added to files that  are
-       used  when  Unicode  support  is  not  included in the library. Setting
-       PCRE2_NEVER_UTF and PCRE2_NEVER_UCP as a default can also  be  obtained
-       by  the  use  of #pattern; the difference is that #forbid_utf cannot be
-       unset, and the automatic options are not displayed in pattern  informa-
+       This is a trigger guard that is used in test files to ensure  that  UTF
+       or  Unicode property tests are not accidentally added to files that are
+       used when Unicode support is  not  included  in  the  library.  Setting
+       PCRE2_NEVER_UTF  and  PCRE2_NEVER_UCP as a default can also be obtained
+       by the use of #pattern; the difference is that  #forbid_utf  cannot  be
+       unset,  and the automatic options are not displayed in pattern informa-
        tion, to avoid cluttering up test output.
 
          #load <filename>
 
        This command is used to load a set of precompiled patterns from a file,
-       as described in the section entitled  "Saving  and  restoring  compiled
+       as  described  in  the  section entitled "Saving and restoring compiled
        patterns" below.
 
          #newline_default [<newline-list>]
 
-       When  PCRE2  is  built,  a default newline convention can be specified.
-       This determines which characters and/or character pairs are  recognized
+       When PCRE2 is built, a default newline  convention  can  be  specified.
+       This  determines which characters and/or character pairs are recognized
        as indicating a newline in a pattern or subject string. The default can
-       be overridden when a pattern is compiled. The standard test files  con-
-       tain  tests  of  various  newline  conventions, but the majority of the
-       tests expect a single  linefeed  to  be  recognized  as  a  newline  by
+       be  overridden when a pattern is compiled. The standard test files con-
+       tain tests of various newline conventions,  but  the  majority  of  the
+       tests  expect  a  single  linefeed  to  be  recognized  as a newline by
        default. Without special action the tests would fail when PCRE2 is com-
        piled with either CR or CRLF as the default newline.
 
        The #newline_default command specifies a list of newline types that are
-       acceptable  as the default. The types must be one of CR, LF, CRLF, ANY-
+       acceptable as the default. The types must be one of CR, LF, CRLF,  ANY-
        CRLF, or ANY (in upper or lower case), for example:
 
          #newline_default LF Any anyCRLF
 
        If the default newline is in the list, this command has no effect. Oth-
-       erwise,  except  when  testing  the  POSIX API, a newline modifier that
-       specifies the first newline convention in the list  (LF  in  the  above
-       example)  is  added to any pattern that does not already have a newline
+       erwise, except when testing the POSIX  API,  a  newline  modifier  that
+       specifies  the  first  newline  convention in the list (LF in the above
+       example) is added to any pattern that does not already have  a  newline
        modifier. If the newline list is empty, the feature is turned off. This
        command is present in a number of the standard test input files.
 
-       When  the  POSIX  API  is  being tested there is no way to override the
-       default newline convention, though it is possible to  set  the  newline
-       convention  from  within  the  pattern. A warning is given if the posix
+       When the POSIX API is being tested there is  no  way  to  override  the
+       default  newline  convention,  though it is possible to set the newline
+       convention from within the pattern. A warning is  given  if  the  posix
        modifier is used when #newline_default would set a default for the non-
        POSIX API.
 
          #pattern <modifier-list>
 
-       This  command  sets  a default modifier list that applies to all subse-
+       This command sets a default modifier list that applies  to  all  subse-
        quent patterns. Modifiers on a pattern can change these settings.
 
          #perltest
 
-       The appearance of this line causes all subsequent modifier settings  to
+       The  appearance of this line causes all subsequent modifier settings to
        be checked for compatibility with the perltest.sh script, which is used
-       to confirm that Perl gives the same results as PCRE2. Also, apart  from
-       comment  lines,  none of the other command lines are permitted, because
-       they and many of the modifiers are specific to  pcre2test,  and  should
-       not  be  used in test files that are also processed by perltest.sh. The
-       #perltest command helps detect tests that are accidentally put  in  the
+       to  confirm that Perl gives the same results as PCRE2. Also, apart from
+       comment lines, none of the other command lines are  permitted,  because
+       they  and  many  of the modifiers are specific to pcre2test, and should
+       not be used in test files that are also processed by  perltest.sh.  The
+       #perltest  command  helps detect tests that are accidentally put in the
        wrong file.
 
          #pop [<modifiers>]
          #popcopy [<modifiers>]
 
-       These  commands  are used to manipulate the stack of compiled patterns,
-       as described in the section entitled  "Saving  and  restoring  compiled
+       These commands are used to manipulate the stack of  compiled  patterns,
+       as  described  in  the  section entitled "Saving and restoring compiled
        patterns" below.
 
          #save <filename>
 
-       This  command  is used to save a set of compiled patterns to a file, as
-       described in the section entitled "Saving and restoring  compiled  pat-
+       This command is used to save a set of compiled patterns to a  file,  as
+       described  in  the section entitled "Saving and restoring compiled pat-
        terns" below.
 
          #subject <modifier-list>
 
-       This  command  sets  a default modifier list that applies to all subse-
-       quent subject lines. Modifiers on a subject line can change these  set-
+       This command sets a default modifier list that applies  to  all  subse-
+       quent  subject lines. Modifiers on a subject line can change these set-
        tings.
 
 
@@ -326,58 +353,58 @@ MODIFIER SYNTAX
 
        Modifier lists are used with both pattern and subject lines. Items in a
        list are separated by commas followed by optional white space. Trailing
-       whitespace  in  a modifier list is ignored. Some modifiers may be given
-       for both patterns and subject lines, whereas others are valid only  for
+       whitespace in a modifier list is ignored. Some modifiers may  be  given
+       for  both patterns and subject lines, whereas others are valid only for
        one  or  the  other.  Each  modifier  has  a  long  name,  for  example
-       "anchored", and some of them must be followed by an equals sign  and  a
-       value,  for  example,  "offset=12". Values cannot contain comma charac-
-       ters, but may contain spaces. Modifiers that do not take values may  be
+       "anchored",  and  some of them must be followed by an equals sign and a
+       value, for example, "offset=12". Values cannot  contain  comma  charac-
+       ters,  but may contain spaces. Modifiers that do not take values may be
        preceded by a minus sign to turn off a previous setting.
 
        A few of the more common modifiers can also be specified as single let-
-       ters, for example "i" for "caseless". In documentation,  following  the
+       ters,  for  example "i" for "caseless". In documentation, following the
        Perl convention, these are written with a slash ("the /i modifier") for
-       clarity. Abbreviated modifiers must all be concatenated  in  the  first
-       item  of a modifier list. If the first item is not recognized as a long
-       modifier name, it is interpreted as a sequence of these  abbreviations.
+       clarity.  Abbreviated  modifiers  must all be concatenated in the first
+       item of a modifier list. If the first item is not recognized as a  long
+       modifier  name, it is interpreted as a sequence of these abbreviations.
        For example:
 
          /abc/ig,newline=cr,jit=3
 
-       This  is  a pattern line whose modifier list starts with two one-letter
-       modifiers (/i and /g). The lower-case  abbreviated  modifiers  are  the
+       This is a pattern line whose modifier list starts with  two  one-letter
+       modifiers  (/i  and  /g).  The lower-case abbreviated modifiers are the
        same as used in Perl.
 
 
 PATTERN SYNTAX
 
-       A  pattern line must start with one of the following characters (common
+       A pattern line must start with one of the following characters  (common
        symbols, excluding pattern meta-characters):
 
          / ! " ' ` - = _ : ; , % & @ ~
 
-       This is interpreted as the pattern's delimiter.  A  regular  expression
-       may  be  continued  over several input lines, in which case the newline
+       This  is  interpreted  as the pattern's delimiter. A regular expression
+       may be continued over several input lines, in which  case  the  newline
        characters are included within it. It is possible to include the delim-
        iter within the pattern by escaping it with a backslash, for example
 
          /abc\/def/
 
-       If  you do this, the escape and the delimiter form part of the pattern,
+       If you do this, the escape and the delimiter form part of the  pattern,
        but since the delimiters are all non-alphanumeric, this does not affect
-       its  interpretation.  If  the terminating delimiter is immediately fol-
+       its interpretation. If the terminating delimiter  is  immediately  fol-
        lowed by a backslash, for example,
 
          /abc/\
 
-       then a backslash is added to the end of the pattern. This  is  done  to
-       provide  a  way of testing the error condition that arises if a pattern
+       then  a  backslash  is added to the end of the pattern. This is done to
+       provide a way of testing the error condition that arises if  a  pattern
        finishes with a backslash, because
 
          /abc\/
 
-       is interpreted as the first line of a pattern that starts with  "abc/",
-       causing  pcre2test to read the next line as a continuation of the regu-
+       is  interpreted as the first line of a pattern that starts with "abc/",
+       causing pcre2test to read the next line as a continuation of the  regu-
        lar expression.
 
        A pattern can be followed by a modifier list (details below).
@@ -385,7 +412,7 @@ PATTERN SYNTAX
 
 SUBJECT LINE SYNTAX
 
-       Before   each   subject   line   is   passed   to   pcre2_match()    or
+       Before    each   subject   line   is   passed   to   pcre2_match()   or
        pcre2_dfa_match(), leading and trailing white space is removed, and the
        line is scanned for backslash escapes. The following provide a means of
        encoding non-printing characters in a visible way:
@@ -405,23 +432,23 @@ SUBJECT LINE SYNTAX
          \x{hh...}  hexadecimal character (any number of hex digits)
 
        The use of \x{hh...} is not dependent on the use of the utf modifier on
-       the pattern. It is recognized always. There may be any number of  hexa-
-       decimal  digits  inside  the  braces; invalid values provoke error mes-
+       the  pattern. It is recognized always. There may be any number of hexa-
+       decimal digits inside the braces; invalid  values  provoke  error  mes-
        sages.
 
-       Note that \xhh specifies one byte rather than one  character  in  UTF-8
-       mode;  this  makes it possible to construct invalid UTF-8 sequences for
-       testing purposes. On the other hand, \x{hh} is interpreted as  a  UTF-8
-       character  in UTF-8 mode, generating more than one byte if the value is
-       greater than 127.  When testing the 8-bit library not  in  UTF-8  mode,
+       Note  that  \xhh  specifies one byte rather than one character in UTF-8
+       mode; this makes it possible to construct invalid UTF-8  sequences  for
+       testing  purposes.  On the other hand, \x{hh} is interpreted as a UTF-8
+       character in UTF-8 mode, generating more than one byte if the value  is
+       greater  than  127.   When testing the 8-bit library not in UTF-8 mode,
        \x{hh} generates one byte for values less than 256, and causes an error
        for greater values.
 
        In UTF-16 mode, all 4-digit \x{hhhh} values are accepted. This makes it
        possible to construct invalid UTF-16 sequences for testing purposes.
 
-       In  UTF-32  mode,  all  4- to 8-digit \x{...} values are accepted. This
-       makes it possible to construct invalid  UTF-32  sequences  for  testing
+       In UTF-32 mode, all 4- to 8-digit \x{...}  values  are  accepted.  This
+       makes  it  possible  to  construct invalid UTF-32 sequences for testing
        purposes.
 
        There is a special backslash sequence that specifies replication of one
@@ -429,45 +456,45 @@ SUBJECT LINE SYNTAX
 
          \[<characters>]{<count>}
 
-       This makes it possible to test long strings without having  to  provide
+       This  makes  it possible to test long strings without having to provide
        them as part of the file. For example:
 
          \[abc]{4}
 
-       is  converted to "abcabcabcabc". This feature does not support nesting.
+       is converted to "abcabcabcabc". This feature does not support  nesting.
        To include a closing square bracket in the characters, code it as \x5D.
 
-       A backslash followed by an equals sign marks the  end  of  the  subject
+       A  backslash  followed  by  an equals sign marks the end of the subject
        string and the start of a modifier list. For example:
 
          abc\=notbol,notempty
 
-       If  the  subject  string is empty and \= is followed by whitespace, the
-       line is treated as a comment line, and is not used  for  matching.  For
+       If the subject string is empty and \= is followed  by  whitespace,  the
+       line  is  treated  as a comment line, and is not used for matching. For
        example:
 
          \= This is a comment.
          abc\= This is an invalid modifier list.
 
-       A  backslash  followed  by  any  other  non-alphanumeric character just
+       A backslash followed  by  any  other  non-alphanumeric  character  just
        escapes that character. A backslash followed by anything else causes an
-       error.  However,  if the very last character in the line is a backslash
-       (and there is no modifier list), it is ignored. This  gives  a  way  of
-       passing  an  empty line as data, since a real empty line terminates the
+       error. However, if the very last character in the line is  a  backslash
+       (and  there  is  no  modifier list), it is ignored. This gives a way of
+       passing an empty line as data, since a real empty line  terminates  the
        data input.
 
 
 PATTERN MODIFIERS
 
-       There are several types of modifier that can appear in  pattern  lines.
+       There  are  several types of modifier that can appear in pattern lines.
        Except where noted below, they may also be used in #pattern commands. A
-       pattern's modifier list can add to or override default  modifiers  that
+       pattern's  modifier  list can add to or override default modifiers that
        were set by a previous #pattern command.
 
    Setting compilation options
 
-       The  following modifiers set options for pcre2_compile(). The most com-
-       mon ones have single-letter abbreviations. See pcre2api for a  descrip-
+       The following modifiers set options for pcre2_compile(). The most  com-
+       mon  ones have single-letter abbreviations. See pcre2api for a descrip-
        tion of their effects.
 
              allow_empty_class         set PCRE2_ALLOW_EMPTY_CLASS
@@ -498,13 +525,15 @@ PATTERN MODIFIERS
              utf                       set PCRE2_UTF
 
        As well as turning on the PCRE2_UTF option, the utf modifier causes all
-       non-printing characters in output  strings  to  be  printed  using  the
-       \x{hh...}  notation. Otherwise, those less than 0x100 are output in hex
-       without the curly brackets.
+       non-printing  characters  in  output  strings  to  be printed using the
+       \x{hh...} notation. Otherwise, those less than 0x100 are output in  hex
+       without  the  curly brackets. Setting utf in 16-bit or 32-bit mode also
+       causes pattern and subject  strings  to  be  translated  to  UTF-16  or
+       UTF-32, respectively, before being passed to library functions.
 
    Setting compilation controls
 
-       The following modifiers  affect  the  compilation  process  or  request
+       The  following  modifiers  affect  the  compilation  process or request
        information about the pattern:
 
              bsr=[anycrlf|unicode]     specify \R handling
@@ -529,39 +558,40 @@ PATTERN MODIFIERS
              pushcopy                  push a copy onto the stack
              stackguard=<number>       test the stackguard feature
              tables=[0|1|2]            select internal tables
+             utf8_input                treat input as UTF-8
 
        The effects of these modifiers are described in the following sections.
 
    Newline and \R handling
 
-       The  bsr modifier specifies what \R in a pattern should match. If it is
-       set to "anycrlf", \R matches CR, LF, or CRLF only.  If  it  is  set  to
-       "unicode",  \R  matches  any  Unicode  newline sequence. The default is
+       The bsr modifier specifies what \R in a pattern should match. If it  is
+       set  to  "anycrlf",  \R  matches  CR, LF, or CRLF only. If it is set to
+       "unicode", \R matches any Unicode  newline  sequence.  The  default  is
        specified when PCRE2 is built, with the default default being Unicode.
 
-       The newline modifier specifies which characters are to  be  interpreted
+       The  newline  modifier specifies which characters are to be interpreted
        as newlines, both in the pattern and in subject lines. The type must be
        one of CR, LF, CRLF, ANYCRLF, or ANY (in upper or lower case).
 
    Information about a pattern
 
-       The debug modifier is a shorthand for info,fullbincode, requesting  all
+       The  debug modifier is a shorthand for info,fullbincode, requesting all
        available information.
 
        The bincode modifier causes a representation of the compiled code to be
-       output after compilation. This information does not contain length  and
+       output  after compilation. This information does not contain length and
        offset values, which ensures that the same output is generated for dif-
-       ferent internal link sizes and different code  unit  widths.  By  using
-       bincode,  the  same  regression tests can be used in different environ-
+       ferent  internal  link  sizes  and different code unit widths. By using
+       bincode, the same regression tests can be used  in  different  environ-
        ments.
 
-       The fullbincode modifier, by contrast, does include length  and  offset
-       values.  This is used in a few special tests that run only for specific
+       The  fullbincode  modifier, by contrast, does include length and offset
+       values. This is used in a few special tests that run only for  specific
        code unit widths and link sizes, and is also useful for one-off tests.
 
-       The info modifier  requests  information  about  the  compiled  pattern
-       (whether  it  is anchored, has a fixed first character, and so on). The
-       information is obtained from the  pcre2_pattern_info()  function.  Here
+       The  info  modifier  requests  information  about  the compiled pattern
+       (whether it is anchored, has a fixed first character, and so  on).  The
+       information  is  obtained  from the pcre2_pattern_info() function. Here
        are some typical examples:
 
            re> /(?i)(^a|^b)/m,info
@@ -579,68 +609,79 @@ PATTERN MODIFIERS
          Last code unit = 'c' (caseless)
          Subject length lower bound = 3
 
-       "Compile  options"  are those specified by modifiers; "overall options"
-       have added options that are taken or deduced from the pattern. If  both
-       sets  of  options are the same, just a single "options" line is output;
-       if there are no options, the line is  omitted.  "First  code  unit"  is
-       where  any  match must start; if there is more than one they are listed
-       as "starting code units". "Last code unit" is  the  last  literal  code
-       unit  that  must  be  present in any match. This is not necessarily the
-       last character. These lines are omitted if no starting or  ending  code
+       "Compile options" are those specified by modifiers;  "overall  options"
+       have  added options that are taken or deduced from the pattern. If both
+       sets of options are the same, just a single "options" line  is  output;
+       if  there  are  no  options,  the line is omitted. "First code unit" is
+       where any match must start; if there is more than one they  are  listed
+       as  "starting  code  units".  "Last code unit" is the last literal code
+       unit that must be present in any match. This  is  not  necessarily  the
+       last  character.  These lines are omitted if no starting or ending code
        units are recorded.
 
-       The  callout_info  modifier requests information about all the callouts
+       The callout_info modifier requests information about all  the  callouts
        in the pattern. A list of them is output at the end of any other infor-
        mation that is requested. For each callout, either its number or string
        is given, followed by the item that follows it in the pattern.
 
    Passing a NULL context
 
-       Normally, pcre2test passes a context block to pcre2_compile().  If  the
-       null_context  modifier  is  set,  however,  NULL is passed. This is for
-       testing that pcre2_compile() behaves correctly in this  case  (it  uses
+       Normally,  pcre2test  passes a context block to pcre2_compile(). If the
+       null_context modifier is set, however, NULL  is  passed.  This  is  for
+       testing  that  pcre2_compile()  behaves correctly in this case (it uses
        default values).
 
    Specifying pattern characters in hexadecimal
 
-       The  hex  modifier specifies that the characters of the pattern, except
-       for substrings enclosed in single or double quotes, are  to  be  inter-
-       preted  as  pairs  of hexadecimal digits. This feature is provided as a
+       The hex modifier specifies that the characters of the  pattern,  except
+       for  substrings  enclosed  in single or double quotes, are to be inter-
+       preted as pairs of hexadecimal digits. This feature is  provided  as  a
        way of creating patterns that contain binary zeros and other non-print-
-       ing  characters.  White space is permitted between pairs of digits. For
+       ing characters. White space is permitted between pairs of  digits.  For
        example, this pattern contains three characters:
 
          /ab 32 59/hex
 
-       Parts of such a pattern are taken literally  if  quoted.  This  pattern
-       contains  nine characters, only two of which are specified in hexadeci-
+       Parts  of  such  a  pattern are taken literally if quoted. This pattern
+       contains nine characters, only two of which are specified in  hexadeci-
        mal:
 
          /ab "literal" 32/hex
 
-       Either single or double quotes may be used. There is no way of  includ-
-       ing the delimiter within a substring.
+       Either  single or double quotes may be used. There is no way of includ-
+       ing the delimiter within a substring. The hex and expand modifiers  are
+       mutually exclusive.
 
        By  default,  pcre2test  passes  patterns as zero-terminated strings to
        pcre2_compile(), giving the length as  PCRE2_ZERO_TERMINATED.  However,
        for  patterns specified with the hex modifier, the actual length of the
        pattern is passed.
 
+   Specifying wide characters in 16-bit and 32-bit modes
+
+       In 16-bit and 32-bit modes, all input is automatically treated as UTF-8
+       and  translated  to  UTF-16 or UTF-32 when the utf modifier is set. For
+       testing the 16-bit and 32-bit libraries in non-UTF mode, the utf8_input
+       modifier  can  be  used. It is mutually exclusive with utf. Input lines
+       are interpreted as UTF-8 as a means of specifying wide characters. More
+       details are given in "Input encoding" above.
+
    Generating long repetitive patterns
 
-       Some tests use long patterns that are very repetitive. Instead of  cre-
-       ating  a very long input line for such a pattern, you can use a special
-       repetition feature, similar to the  one  described  for  subject  lines
-       above.  If  the  expand  modifier is present on a pattern, parts of the
+       Some  tests use long patterns that are very repetitive. Instead of cre-
+       ating a very long input line for such a pattern, you can use a  special
+       repetition  feature,  similar  to  the  one described for subject lines
+       above. If the expand modifier is present on a  pattern,  parts  of  the
        pattern that have the form
 
          \[<characters>]{<count>}
 
        are expanded before the pattern is passed to pcre2_compile(). For exam-
        ple, \[AB]{6000} is expanded to "ABAB..." 6000 times. This construction
-       cannot be nested. An initial "\[" sequence is recognized only  if  "]{"
-       followed  by  decimal  digits and "}" is found later in the pattern. If
-       not, the characters remain in the pattern unaltered.
+       cannot  be  nested. An initial "\[" sequence is recognized only if "]{"
+       followed by decimal digits and "}" is found later in  the  pattern.  If
+       not, the characters remain in the pattern unaltered. The expand and hex
+       modifiers are mutually exclusive.
 
        If part of an expanded pattern looks like an expansion, but  is  really
        part of the actual pattern, unwanted expansion can be avoided by giving
@@ -1548,5 +1589,5 @@ AUTHOR
 
 REVISION
 
-       Last updated: 06 July 2016
+       Last updated: 02 August 2016
        Copyright (c) 1997-2016 University of Cambridge.

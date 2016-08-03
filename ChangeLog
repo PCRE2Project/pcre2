@@ -2,6 +2,13 @@ Change Log for PCRE2
 --------------------
 
 
+Version 10.23 xx-xxxxxx-2016
+----------------------------
+
+1. Extended pcre2test with the utf8_input modifier so that it is able to
+generate all possible 16-bit and 32-bit code unit values in non-UTF modes.
+
+
 Version 10.22 29-July-2016
 --------------------------
 

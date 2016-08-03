@@ -430,8 +430,8 @@ so many of them that they are split into two fields. */
 #define CTL_PUSH                         0x01000000u
 #define CTL_PUSHCOPY                     0x02000000u
 #define CTL_STARTCHAR                    0x04000000u
-#define CTL_ZERO_TERMINATE               0x08000000u
-/* Spare                                 0x10000000u  */
+#define CTL_UTF8_INPUT                   0x08000000u
+#define CTL_ZERO_TERMINATE               0x10000000u
 /* Spare                                 0x20000000u  */
 #define CTL_NL_SET                       0x40000000u  /* Informational */
 #define CTL_BSR_SET                      0x80000000u  /* Informational */
@@ -460,7 +460,8 @@ data line. */
                     CTL_GLOBAL|\
                     CTL_MARK|\
                     CTL_MEMORY|\
-                    CTL_STARTCHAR)
+                    CTL_STARTCHAR|\
+                    CTL_UTF8_INPUT)
 
 #define CTL2_ALLPD (CTL2_SUBSTITUTE_EXTENDED|\
                     CTL2_SUBSTITUTE_OVERFLOW_LENGTH|\
@@ -621,6 +622,7 @@ static modstruct modlist[] = {
   { "ungreedy",                   MOD_PAT,  MOD_OPT, PCRE2_UNGREEDY,             PO(options) },
   { "use_offset_limit",           MOD_PAT,  MOD_OPT, PCRE2_USE_OFFSET_LIMIT,     PO(options) },
   { "utf",                        MOD_PATP, MOD_OPT, PCRE2_UTF,                  PO(options) },
+  { "utf8_input",                 MOD_PAT,  MOD_CTL, CTL_UTF8_INPUT,             PO(control) },
   { "zero_terminate",             MOD_DAT,  MOD_CTL, CTL_ZERO_TERMINATE,         DO(control) }
 };
 
@@ -673,6 +675,7 @@ static uint32_t exclusive_pat_controls[] = {
 
 /* Data controls that are mutually exclusive. At present these are all in the
 first control word. */
+
 static uint32_t exclusive_dat_controls[] = {
   CTL_ALLUSEDTEXT | CTL_STARTCHAR,
   CTL_FINDLIMITS  | CTL_NULLCONTEXT };
@@ -2715,16 +2718,22 @@ return i + 1;
 
 #ifdef SUPPORT_PCRE2_16
 /*************************************************
-*          Convert pattern to 16-bit             *
+*           Convert string to 16-bit             *
 *************************************************/
 
-/* In UTF mode the input is always interpreted as a string of UTF-8 bytes. If
-all the input bytes are ASCII, the space needed for a 16-bit string is exactly
-double the 8-bit size. Otherwise, the size needed for a 16-bit string is no
-more than double, because up to 0xffff uses no more than 3 bytes in UTF-8 but
-possibly 4 in UTF-16. Higher values use 4 bytes in UTF-8 and up to 4 bytes in
-UTF-16. The result is always left in pbuffer16. Impose a minimum size to save
-repeated re-sizing.
+/* In UTF mode the input is always interpreted as a string of UTF-8 bytes using
+the original UTF-8 definition of RFC 2279, which allows for up to 6 bytes, and
+code values from 0 to 0x7fffffff. However, values greater than the later UTF
+limit of 0x10ffff cause an error. In non-UTF mode the input is interpreted as
+UTF-8 if the utf8_input modifier is set, but an error is generated for values
+greater than 0xffff.
+
+If all the input bytes are ASCII, the space needed for a 16-bit string is
+exactly double the 8-bit size. Otherwise, the size needed for a 16-bit string
+is no more than double, because up to 0xffff uses no more than 3 bytes in UTF-8
+but possibly 4 in UTF-16. Higher values use 4 bytes in UTF-8 and up to 4 bytes
+in UTF-16. The result is always left in pbuffer16. Impose a minimum size to
+save repeated re-sizing.
 
 Note that this function does not object to surrogate values. This is
 deliberate; it makes it possible to construct UTF-16 strings that are invalid,
@@ -2732,7 +2741,7 @@ for the purpose of testing that they are correctly faulted.
 
 Arguments:
   p          points to a byte string
-  utf        non-zero if converting to UTF-16
+  utf        true in UTF mode
   lenptr     points to number of bytes in the string (excluding trailing zero)
 
 Returns:     0 on success, with the length updated to the number of 16-bit
@@ -2763,7 +2772,7 @@ if (pbuffer16_size < 2*len + 2)
   }
 
 pp = pbuffer16;
-if (!utf)
+if (!utf && (pat_patctl.control & CTL_UTF8_INPUT) == 0)
   {
   for (; len > 0; len--) *pp++ = *p++;
   }
@@ -2772,12 +2781,12 @@ else while (len > 0)
   uint32_t c;
   int chlen = utf82ord(p, &c);
   if (chlen <= 0) return -1;
+  if (!utf && c > 0xffff) return -3;
   if (c > 0x10ffff) return -2;
   p += chlen;
   len -= chlen;
   if (c < 0x10000) *pp++ = c; else
     {
-    if (!utf) return -3;
     c -= 0x10000;
     *pp++ = 0xD800 | (c >> 10);
     *pp++ = 0xDC00 | (c & 0x3ff);
@@ -2794,15 +2803,25 @@ return 0;
 
 #ifdef SUPPORT_PCRE2_32
 /*************************************************
-*          Convert pattern to 32-bit             *
+*           Convert string to 32-bit             *
 *************************************************/
 
-/* In UTF mode the input is always interpreted as a string of UTF-8 bytes. If
-all the input bytes are ASCII, the space needed for a 32-bit string is exactly
-four times the 8-bit size. Otherwise, the size needed for a 32-bit string is no
-more than four times, because the number of characters must be less than the
-number of bytes. The result is always left in pbuffer32. Impose a minimum size
-to save repeated re-sizing.
+/* In UTF mode the input is always interpreted as a string of UTF-8 bytes using
+the original UTF-8 definition of RFC 2279, which allows for up to 6 bytes, and
+code values from 0 to 0x7fffffff. However, values greater than the later UTF 
+limit of 0x10ffff cause an error.
+
+In non-UTF mode the input is interpreted as UTF-8 if the utf8_input modifier
+is set, and no limit is imposed. There is special interpretation of the 0xff
+byte (which is illegal in UTF-8) in this case: it causes the top bit of the
+next character to be set. This provides a way of generating 32-bit characters
+greater than 0x7fffffff.
+
+If all the input bytes are ASCII, the space needed for a 32-bit string is
+exactly four times the 8-bit size. Otherwise, the size needed for a 32-bit
+string is no more than four times, because the number of characters must be
+less than the number of bytes. The result is always left in pbuffer32. Impose a
+minimum size to save repeated re-sizing.
 
 Note that this function does not object to surrogate values. This is
 deliberate; it makes it possible to construct UTF-32 strings that are invalid,
@@ -2810,7 +2829,7 @@ for the purpose of testing that they are correctly faulted.
 
 Arguments:
   p          points to a byte string
-  utf        true if UTF-8 (to be converted to UTF-32)
+  utf        true in UTF mode
   lenptr     points to number of bytes in the string (excluding trailing zero)
 
 Returns:     0 on success, with the length updated to the number of 32-bit
@@ -2840,19 +2859,29 @@ if (pbuffer32_size < 4*len + 4)
   }
 
 pp = pbuffer32;
-if (!utf)
+
+if (!utf && (pat_patctl.control & CTL_UTF8_INPUT) == 0)
   {
   for (; len > 0; len--) *pp++ = *p++;
   }
+
 else while (len > 0)
   {
+  int chlen; 
   uint32_t c;
-  int chlen = utf82ord(p, &c);
+  uint32_t topbit = 0;
+  if (!utf && *p == 0xff && len > 1)
+    {
+    topbit = 0x80000000u;
+    p++;
+    len--;
+    }     
+  chlen = utf82ord(p, &c);
   if (chlen <= 0) return -1;
   if (utf && c > 0x10ffff) return -2;
   p += chlen;
   len -= chlen;
-  *pp++ = c;
+  *pp++ = c | topbit;
   }
 
 *pp = 0;
@@ -3627,7 +3656,7 @@ Returns:      nothing
 static void
 show_controls(uint32_t controls, uint32_t controls2, const char *before)
 {
-fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
+fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
   before,
   ((controls & CTL_AFTERTEXT) != 0)? " aftertext" : "",
   ((controls & CTL_ALLAFTERTEXT) != 0)? " allaftertext" : "",
@@ -3662,6 +3691,7 @@ fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s
   ((controls2 & CTL2_SUBSTITUTE_OVERFLOW_LENGTH) != 0)? " substitute_overflow_length" : "",
   ((controls2 & CTL2_SUBSTITUTE_UNKNOWN_UNSET) != 0)? " substitute_unknown_unset" : "",
   ((controls2 & CTL2_SUBSTITUTE_UNSET_EMPTY) != 0)? " substitute_unset_empty" : "",
+  ((controls & CTL_UTF8_INPUT) != 0)? " utf8_input" : "",
   ((controls & CTL_ZERO_TERMINATE) != 0)? " zero_terminate" : "");
 }
 
@@ -3759,13 +3789,13 @@ warning we must initialize cblock_size. */
 
 cblock_size = 0;
 #ifdef SUPPORT_PCRE2_8
-if (test_mode == 8) cblock_size = sizeof(pcre2_real_code_8);
+if (test_mode == PCRE8_MODE) cblock_size = sizeof(pcre2_real_code_8);
 #endif
 #ifdef SUPPORT_PCRE2_16
-if (test_mode == 16) cblock_size = sizeof(pcre2_real_code_16);
+if (test_mode == PCRE16_MODE) cblock_size = sizeof(pcre2_real_code_16);
 #endif
 #ifdef SUPPORT_PCRE2_32
-if (test_mode == 32) cblock_size = sizeof(pcre2_real_code_32);
+if (test_mode == PCRE32_MODE) cblock_size = sizeof(pcre2_real_code_32);
 #endif
 
 (void)pattern_info(PCRE2_INFO_SIZE, &size, FALSE);
@@ -4507,6 +4537,23 @@ patlen = p - buffer - 2;
 if (!decode_modifiers(p, CTX_PAT, &pat_patctl, NULL)) return PR_SKIP;
 utf = (pat_patctl.options & PCRE2_UTF) != 0;
 
+/* The utf8_input modifier is not allowed in 8-bit mode, and is mutually 
+exclusive with the utf modifier. */
+
+if ((pat_patctl.control & CTL_UTF8_INPUT) != 0)
+  {
+  if (test_mode == PCRE8_MODE)
+    {
+    fprintf(outfile, "** The utf8_input modifier is not allowed in 8-bit mode\n");
+    return PR_SKIP;
+    }
+  if (utf)
+    {
+    fprintf(outfile, "** The utf and utf8_input modifiers are mutually exclusive\n");
+    return PR_SKIP; 
+    }   
+  }
+
 /* Check for mutually exclusive modifiers. At present, these are all in the
 first control word. */
 
@@ -4738,7 +4785,7 @@ if ((pat_patctl.control & CTL_POSIX) != 0)
   const char *msg = "** Ignored with POSIX interface:";
 #endif
 
-  if (test_mode != 8)
+  if (test_mode != PCRE8_MODE)
     {
     fprintf(outfile, "** The POSIX interface is available only in 8-bit mode\n");
     return PR_SKIP;
@@ -5622,7 +5669,9 @@ if (dbuffer == NULL || needlen >= dbuffer_size)
 SETCASTPTR(q, dbuffer);  /* Sets q8, q16, or q32, as appropriate. */
 
 /* Scan the data line, interpreting data escapes, and put the result into a
-buffer of the appropriate width. In UTF mode, input can be UTF-8. */
+buffer of the appropriate width. In UTF mode, input is always UTF-8; otherwise,
+in 16- and 32-bit modes, it can be forced to UTF-8 by the utf8_input modifier.
+*/
 
 while ((c = *p++) != 0)
   {
@@ -5691,11 +5740,20 @@ while ((c = *p++) != 0)
     continue;
     }
 
-  /* Handle a non-escaped character */
+  /* Handle a non-escaped character. In non-UTF 32-bit mode with utf8_input 
+  set, do the fudge for setting the top bit. */
 
   if (c != '\\')
     {
-    if (utf && HASUTF8EXTRALEN(c)) { GETUTF8INC(c, p); }
+    uint32_t topbit = 0;
+    if (test_mode == PCRE32_MODE && c == 0xff && *p != 0) 
+      {
+      topbit = 0x80000000;
+      c = *p++;
+      }  
+    if ((utf || (pat_patctl.control & CTL_UTF8_INPUT) != 0) && 
+      HASUTF8EXTRALEN(c)) { GETUTF8INC(c, p); }
+    c |= topbit;
     }
 
   /* Handle backslash escapes */
