@@ -9257,4 +9257,24 @@ No match
  1: b
  2: cccc
 
+# /x does not apply to MARK labels 
+
+/x (*MARK:ab cd # comment
+ef) x/x,mark
+    axxz
+ 0: xx
+MK: ab cd # comment\x0aef
+
+/(?<=a(B){0}c)X/
+    acX
+ 0: X
+
+/(?<DEFINE>b)(?(DEFINE)(a+))(?&DEFINE)/          
+    bbbb 
+ 0: bb
+ 1: b
+\= Expect no match     
+    baaab
+No match
+
 # End of testinput1 

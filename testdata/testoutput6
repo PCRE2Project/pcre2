@@ -713,7 +713,7 @@ No match
 /(ab|cd){3,4}/auto_callout
   ababab
 --->ababab
- +0 ^          (ab|cd){3,4}
+ +0 ^          (
  +1 ^          a
  +4 ^          c
  +2 ^^         b
@@ -732,7 +732,7 @@ No match
  0: ababab
   abcdabcd
 --->abcdabcd
- +0 ^            (ab|cd){3,4}
+ +0 ^            (
  +1 ^            a
  +4 ^            c
  +2 ^^           b
@@ -740,7 +740,7 @@ No match
  +1 ^ ^          a
  +4 ^ ^          c
  +5 ^  ^         d
- +6 ^   ^        )
+ +6 ^   ^        ){3,4}
  +1 ^   ^        a
  +4 ^   ^        c
  +2 ^    ^       b
@@ -749,13 +749,13 @@ No match
  +1 ^     ^      a
  +4 ^     ^      c
  +5 ^      ^     d
- +6 ^       ^    )
+ +6 ^       ^    ){3,4}
 +12 ^       ^    
  0: abcdabcd
  1: abcdab
   abcdcdcdcdcd  
 --->abcdcdcdcdcd
- +0 ^                (ab|cd){3,4}
+ +0 ^                (
  +1 ^                a
  +4 ^                c
  +2 ^^               b
@@ -763,16 +763,16 @@ No match
  +1 ^ ^              a
  +4 ^ ^              c
  +5 ^  ^             d
- +6 ^   ^            )
+ +6 ^   ^            ){3,4}
  +1 ^   ^            a
  +4 ^   ^            c
  +5 ^    ^           d
- +6 ^     ^          )
+ +6 ^     ^          ){3,4}
 +12 ^     ^          
  +1 ^     ^          a
  +4 ^     ^          c
  +5 ^      ^         d
- +6 ^       ^        )
+ +6 ^       ^        ){3,4}
 +12 ^       ^        
  0: abcdcdcd
  1: abcdcd
@@ -6712,26 +6712,26 @@ No match
 --->"ab"
  +0 ^        ^
  +1 ^        "
- +2 ^^       ((?(?=[a])[^"])|b)*
+ +2 ^^       (
 +21 ^^       "
- +3 ^^       (?(?=[a])[^"])
+ +3 ^^       (?
 +18 ^^       b
- +5 ^^       (?=[a])
+ +5 ^^       (?=
  +8  ^       [a]
 +11  ^^      )
 +12 ^^       [^"]
 +16 ^ ^      )
 +17 ^ ^      |
 +21 ^ ^      "
- +3 ^ ^      (?(?=[a])[^"])
+ +3 ^ ^      (?
 +18 ^ ^      b
- +5 ^ ^      (?=[a])
+ +5 ^ ^      (?=
  +8   ^      [a]
-+19 ^  ^     )
++19 ^  ^     )*
 +21 ^  ^     "
- +3 ^  ^     (?(?=[a])[^"])
+ +3 ^  ^     (?
 +18 ^  ^     b
- +5 ^  ^     (?=[a])
+ +5 ^  ^     (?=
  +8    ^     [a]
 +17 ^  ^     |
 +22 ^   ^    $
@@ -7154,7 +7154,7 @@ Failed: error -52: nested recursion at the same subject position
     aaaabcde
  0: aaaab
 
-/((?(R2)a+|(?1)b))/
+/((?(R2)a+|(?1)b))()/
     aaaabcde
 Failed: error -40: backreference condition or recursion test is not supported for DFA matching
 
@@ -7548,7 +7548,7 @@ Callout (10): {AB} last capture = 0
         Bra
         ^
         Cond
-        Callout 25 9 7
+        Callout 25 9 3
         Assert
         abc
         Ket
@@ -7561,11 +7561,11 @@ Callout (10): {AB} last capture = 0
 ------------------------------------------------------------------
     abcdefg
 --->abcdefg
- 25 ^           (?=abc)
+ 25 ^           (?=
  0: abcd
     xyz123 
 --->xyz123
- 25 ^          (?=abc)
+ 25 ^          (?=
  0: xyz
 
 /^(?(?C$abc$)(?=abc)abcd|xyz)/B
@@ -7573,7 +7573,7 @@ Callout (10): {AB} last capture = 0
         Bra
         ^
         Cond
-        CalloutStr $abc$ 7 12 7
+        CalloutStr $abc$ 7 12 3
         Assert
         abc
         Ket
@@ -7587,12 +7587,12 @@ Callout (10): {AB} last capture = 0
     abcdefg
 Callout (7): $abc$
 --->abcdefg
-    ^           (?=abc)
+    ^           (?=
  0: abcd
     xyz123 
 Callout (7): $abc$
 --->xyz123
-    ^          (?=abc)
+    ^          (?=
  0: xyz
 
 /^ab(?C'first')cd(?C"second")ef/
@@ -7609,13 +7609,13 @@ Callout (20): "second"
     aaaXY
 Callout (8): `code`
 --->aaaXY
-    ^^        )
+    ^^        ){3}
 Callout (8): `code`
 --->aaaXY
-    ^ ^       )
+    ^ ^       ){3}
 Callout (8): `code`
 --->aaaXY
-    ^  ^      )
+    ^  ^      ){3}
  0: aaaX
 
 # Binary zero in callout string

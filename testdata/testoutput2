@@ -472,14 +472,13 @@ No match
     and cattlefoo
 No match
 
-/(?<=a+)b/
-Failed: error 125 at offset 6: lookbehind assertion is not fixed length
+/abc(?<=a+)b/
+Failed: error 125 at offset 3: lookbehind assertion is not fixed length
 
-/(?<=aaa|b{0,3})b/
-Failed: error 125 at offset 14: lookbehind assertion is not fixed length
+/12345(?<=aaa|b{0,3})b/
+Failed: error 125 at offset 5: lookbehind assertion is not fixed length
 
 /(?<!(foo)a\1)bar/
-Failed: error 125 at offset 12: lookbehind assertion is not fixed length
 
 /(?i)abc/I
 Capturing subpattern count = 0
@@ -539,25 +538,25 @@ First code unit at start or follows newline
 Subject length lower bound = 1
 
 /(a)(?(1)a|b|c)/
-Failed: error 127 at offset 13: conditional group contains more than two branches
+Failed: error 127 at offset 3: conditional group contains more than two branches
 
 /(?(?=a)a|b|c)/
-Failed: error 127 at offset 12: conditional group contains more than two branches
+Failed: error 127 at offset 0: conditional group contains more than two branches
 
 /(?(1a)/
-Failed: error 114 at offset 6: missing closing parenthesis
+Failed: error 124 at offset 4: missing closing parenthesis for condition
 
 /(?(1a))/
-Failed: error 126 at offset 4: malformed number or name after (?(
+Failed: error 124 at offset 4: missing closing parenthesis for condition
 
 /(?(?i))/
-Failed: error 128 at offset 3: assertion expected after (?( or (?(?C)
+Failed: error 128 at offset 2: assertion expected after (?( or (?(?C)
 
 /(?(abc))/
-Failed: error 115 at offset 7: reference to non-existent subpattern
+Failed: error 115 at offset 3: reference to non-existent subpattern
 
 /(?(?<ab))/
-Failed: error 128 at offset 3: assertion expected after (?( or (?(?C)
+Failed: error 142 at offset 7: syntax error in subpattern name (missing terminator)
 
 /((?s)blah)\s+\1/I
 Capturing subpattern count = 1
@@ -715,13 +714,13 @@ Subject length lower bound = 3
 No match
 
 /(?<=ab(c+)d)ef/
-Failed: error 125 at offset 11: lookbehind assertion is not fixed length
+Failed: error 125 at offset 0: lookbehind assertion is not fixed length
 
 /(?<=ab(?<=c+)d)ef/
-Failed: error 125 at offset 12: lookbehind assertion is not fixed length
+Failed: error 125 at offset 6: lookbehind assertion is not fixed length
 
 /(?<=ab(c|de)f)g/
-Failed: error 125 at offset 13: lookbehind assertion is not fixed length
+Failed: error 125 at offset 0: lookbehind assertion is not fixed length
 
 /The next three are in testinput2 because they have variable length branches/
 
@@ -905,7 +904,7 @@ Failed: error 122 at offset 0: unmatched closing parenthesis
 Failed: error 114 at offset 4: missing closing parenthesis
 
 /(?<%)b/
-Failed: error 124 at offset 3: letter or underscore expected after (?< or (?'
+Failed: error 162 at offset 3: subpattern name expected
 
 /a(?{)b/
 Failed: error 111 at offset 3: unrecognized character after (? or (?-
@@ -923,22 +922,22 @@ Failed: error 111 at offset 3: unrecognized character after (? or (?-
 Failed: error 111 at offset 3: unrecognized character after (? or (?-
 
 /(?(1?)a|b)/
-Failed: error 126 at offset 4: malformed number or name after (?(
+Failed: error 124 at offset 4: missing closing parenthesis for condition
 
 /[a[:xyz:/
 Failed: error 106 at offset 8: missing terminating ] for character class
 
 /(?<=x+)y/
-Failed: error 125 at offset 6: lookbehind assertion is not fixed length
+Failed: error 125 at offset 0: lookbehind assertion is not fixed length
 
 /a{37,17}/
 Failed: error 104 at offset 7: numbers out of order in {} quantifier
 
 /abc/\
-Failed: error 101 at offset 3: \ at end of pattern
+Failed: error 101 at offset 4: \ at end of pattern
 
 /abc/\i
-Failed: error 101 at offset 3: \ at end of pattern
+Failed: error 101 at offset 4: \ at end of pattern
 
 /(a)bc(d)/I
 Capturing subpattern count = 2
@@ -2115,7 +2114,7 @@ No match
 Failed: error 108 at offset 9: range out of order in character class
 
 /^(?(0)f|b)oo/I
-Failed: error 135 at offset 6: invalid condition (?(0)
+Failed: error 115 at offset 5: reference to non-existent subpattern
 
 # This one's here because of the large output vector needed
 
@@ -3099,19 +3098,19 @@ Failed: error 113 at offset 0: POSIX collating elements are not supported
 Failed: error 112 at offset 0: POSIX named classes are supported only within a class
 
 /\l/I
-Failed: error 137 at offset 1: PCRE does not support \L, \l, \N{name}, \U, or \u
+Failed: error 137 at offset 2: PCRE does not support \L, \l, \N{name}, \U, or \u
 
 /\L/I
-Failed: error 137 at offset 1: PCRE does not support \L, \l, \N{name}, \U, or \u
+Failed: error 137 at offset 2: PCRE does not support \L, \l, \N{name}, \U, or \u
 
 /\N{name}/I
-Failed: error 137 at offset 1: PCRE does not support \L, \l, \N{name}, \U, or \u
+Failed: error 137 at offset 2: PCRE does not support \L, \l, \N{name}, \U, or \u
 
 /\u/I
-Failed: error 137 at offset 1: PCRE does not support \L, \l, \N{name}, \U, or \u
+Failed: error 137 at offset 2: PCRE does not support \L, \l, \N{name}, \U, or \u
 
 /\U/I
-Failed: error 137 at offset 1: PCRE does not support \L, \l, \N{name}, \U, or \u
+Failed: error 137 at offset 2: PCRE does not support \L, \l, \N{name}, \U, or \u
 
 /a{1,3}b/ungreedy
     ab
@@ -3545,25 +3544,25 @@ May match empty string
 Subject length lower bound = 0
     abcabcabc
 --->abcabcabc
-  0 ^             (abc(?C1))*
-  1 ^  ^          )
-  1 ^     ^       )
-  1 ^        ^    )
+  0 ^             (
+  1 ^  ^          )*
+  1 ^     ^       )*
+  1 ^        ^    )*
  0: abcabcabc
  1: abc
     abcabc\=callout_fail=1:3
 --->abcabc
-  0 ^          (abc(?C1))*
-  1 ^  ^       )
-  1 ^     ^    )
+  0 ^          (
+  1 ^  ^       )*
+  1 ^     ^    )*
  0: abcabc
  1: abc
     abcabcabc\=callout_fail=1:3
 --->abcabcabc
-  0 ^             (abc(?C1))*
-  1 ^  ^          )
-  1 ^     ^       )
-  1 ^        ^    )
+  0 ^             (
+  1 ^  ^          )*
+  1 ^     ^       )*
+  1 ^        ^    )*
  0: abcabc
  1: abc
 
@@ -3575,36 +3574,36 @@ Subject length lower bound = 0
 Callout 0: last capture = 0
  0: <unset>
 --->123
-    ^  ^    )
+    ^  ^    )*
  0: 123
  1: 123
     123456\=callout_capture
 Callout 0: last capture = 0
  0: <unset>
 --->123456
-    ^  ^       )
+    ^  ^       )*
 Callout 0: last capture = 1
  0: <unset>
  1: 123
 --->123456
-    ^     ^    )
+    ^     ^    )*
  0: 123456
  1: 456
     123456789\=callout_capture
 Callout 0: last capture = 0
  0: <unset>
 --->123456789
-    ^  ^          )
+    ^  ^          )*
 Callout 0: last capture = 1
  0: <unset>
  1: 123
 --->123456789
-    ^     ^       )
+    ^     ^       )*
 Callout 0: last capture = 1
  0: <unset>
  1: 456
 --->123456789
-    ^        ^    )
+    ^        ^    )*
  0: 123456789
  1: 789
 
@@ -4355,10 +4354,10 @@ Subject length lower bound = 4
   C aa (2) A (group 2)
 
 /(?P<x>eks)(?P<x>eccs)/I
-Failed: error 143 at offset 15: two named subpatterns have the same name (PCRE2_DUPNAMES not set)
+Failed: error 143 at offset 16: two named subpatterns have the same name (PCRE2_DUPNAMES not set)
 
 /(?P<abc>abc(?P<def>def)(?P<abc>xyz))/I
-Failed: error 143 at offset 30: two named subpatterns have the same name (PCRE2_DUPNAMES not set)
+Failed: error 143 at offset 31: two named subpatterns have the same name (PCRE2_DUPNAMES not set)
 
 "\[((?P<elem>\d+)(,(?P>elem))*)\]"I
 Capturing subpattern count = 3
@@ -4723,7 +4722,7 @@ No match
 /(abc|def)x/IB,auto_callout
 ------------------------------------------------------------------
         Bra
-        Callout 255 0 9
+        Callout 255 0 1
         CBra 1
         Callout 255 1 1
         a
@@ -4731,7 +4730,7 @@ No match
         b
         Callout 255 3 1
         c
-        Callout 255 4 0
+        Callout 255 4 1
         Alt
         Callout 255 5 1
         d
@@ -4739,7 +4738,7 @@ No match
         e
         Callout 255 7 1
         f
-        Callout 255 8 0
+        Callout 255 8 1
         Ket
         Callout 255 9 1
         x
@@ -4754,7 +4753,7 @@ Last code unit = 'x'
 Subject length lower bound = 4
   abcx
 --->abcx
- +0 ^        (abc|def)
+ +0 ^        (
  +1 ^        a
  +2 ^^       b
  +3 ^ ^      c
@@ -4765,7 +4764,7 @@ Subject length lower bound = 4
  1: abc
   defx
 --->defx
- +0 ^        (abc|def)
+ +0 ^        (
  +1 ^        a
  +5 ^        d
  +6 ^^       e
@@ -4778,14 +4777,14 @@ Subject length lower bound = 4
 \= Expect no match 
   abcdefzx
 --->abcdefzx
- +0 ^            (abc|def)
+ +0 ^            (
  +1 ^            a
  +2 ^^           b
  +3 ^ ^          c
  +4 ^  ^         |
  +9 ^  ^         x
  +5 ^            d
- +0    ^         (abc|def)
+ +0    ^         (
  +1    ^         a
  +5    ^         d
  +6    ^^        e
@@ -4797,7 +4796,7 @@ No match
 /(abc|def)x/IB,auto_callout
 ------------------------------------------------------------------
         Bra
-        Callout 255 0 9
+        Callout 255 0 1
         CBra 1
         Callout 255 1 1
         a
@@ -4805,7 +4804,7 @@ No match
         b
         Callout 255 3 1
         c
-        Callout 255 4 0
+        Callout 255 4 1
         Alt
         Callout 255 5 1
         d
@@ -4813,7 +4812,7 @@ No match
         e
         Callout 255 7 1
         f
-        Callout 255 8 0
+        Callout 255 8 1
         Ket
         Callout 255 9 1
         x
@@ -4828,7 +4827,7 @@ Last code unit = 'x'
 Subject length lower bound = 4
   abcx
 --->abcx
- +0 ^        (abc|def)
+ +0 ^        (
  +1 ^        a
  +2 ^^       b
  +3 ^ ^      c
@@ -4839,7 +4838,7 @@ Subject length lower bound = 4
  1: abc
   defx
 --->defx
- +0 ^        (abc|def)
+ +0 ^        (
  +1 ^        a
  +5 ^        d
  +6 ^^       e
@@ -4852,14 +4851,14 @@ Subject length lower bound = 4
 \= Expect no match 
   abcdefzx
 --->abcdefzx
- +0 ^            (abc|def)
+ +0 ^            (
  +1 ^            a
  +2 ^^           b
  +3 ^ ^          c
  +4 ^  ^         |
  +9 ^  ^         x
  +5 ^            d
- +0    ^         (abc|def)
+ +0    ^         (
  +1    ^         a
  +5    ^         d
  +6    ^^        e
@@ -4875,7 +4874,7 @@ Starting code units: a c
 Subject length lower bound = 6
   ababab
 --->ababab
- +0 ^          (ab|cd){3,4}
+ +0 ^          (
  +1 ^          a
  +2 ^^         b
  +3 ^ ^        |
@@ -4892,42 +4891,42 @@ Subject length lower bound = 6
  1: ab
   abcdabcd
 --->abcdabcd
- +0 ^            (ab|cd){3,4}
+ +0 ^            (
  +1 ^            a
  +2 ^^           b
  +3 ^ ^          |
  +1 ^ ^          a
  +4 ^ ^          c
  +5 ^  ^         d
- +6 ^   ^        )
+ +6 ^   ^        ){3,4}
  +1 ^   ^        a
  +2 ^    ^       b
  +3 ^     ^      |
  +1 ^     ^      a
  +4 ^     ^      c
  +5 ^      ^     d
- +6 ^       ^    )
+ +6 ^       ^    ){3,4}
 +12 ^       ^    
  0: abcdabcd
  1: cd
   abcdcdcdcdcd
 --->abcdcdcdcdcd
- +0 ^                (ab|cd){3,4}
+ +0 ^                (
  +1 ^                a
  +2 ^^               b
  +3 ^ ^              |
  +1 ^ ^              a
  +4 ^ ^              c
  +5 ^  ^             d
- +6 ^   ^            )
+ +6 ^   ^            ){3,4}
  +1 ^   ^            a
  +4 ^   ^            c
  +5 ^    ^           d
- +6 ^     ^          )
+ +6 ^     ^          ){3,4}
  +1 ^     ^          a
  +4 ^     ^          c
  +5 ^      ^         d
- +6 ^       ^        )
+ +6 ^       ^        ){3,4}
 +12 ^       ^        
  0: abcdcdcd
  1: cd
@@ -4935,7 +4934,7 @@ Subject length lower bound = 6
 /([ab]{,4}c|xy)/IB,auto_callout
 ------------------------------------------------------------------
         Bra
-        Callout 255 0 14
+        Callout 255 0 1
         CBra 1
         Callout 255 1 4
         [ab]
@@ -4949,13 +4948,13 @@ Subject length lower bound = 6
         }
         Callout 255 9 1
         c
-        Callout 255 10 0
+        Callout 255 10 1
         Alt
         Callout 255 11 1
         x
         Callout 255 12 1
         y
-        Callout 255 13 0
+        Callout 255 13 1
         Ket
         Callout 255 14 0
         Ket
@@ -4968,15 +4967,15 @@ Subject length lower bound = 2
 \= Expect no match 
     Note: that { does NOT introduce a quantifier
 --->Note: that { does NOT introduce a quantifier
- +0         ^                                        ([ab]{,4}c|xy)
+ +0         ^                                        (
  +1         ^                                        [ab]
  +5         ^^                                       {
 +11         ^                                        x
- +0                                 ^                ([ab]{,4}c|xy)
+ +0                                 ^                (
  +1                                 ^                [ab]
  +5                                 ^^               {
 +11                                 ^                x
- +0                                     ^            ([ab]{,4}c|xy)
+ +0                                     ^            (
  +1                                     ^            [ab]
  +5                                     ^^           {
 +11                                     ^            x
@@ -4985,7 +4984,7 @@ No match
 /([ab]{,4}c|xy)/IB,auto_callout
 ------------------------------------------------------------------
         Bra
-        Callout 255 0 14
+        Callout 255 0 1
         CBra 1
         Callout 255 1 4
         [ab]
@@ -4999,13 +4998,13 @@ No match
         }
         Callout 255 9 1
         c
-        Callout 255 10 0
+        Callout 255 10 1
         Alt
         Callout 255 11 1
         x
         Callout 255 12 1
         y
-        Callout 255 13 0
+        Callout 255 13 1
         Ket
         Callout 255 14 0
         Ket
@@ -5018,15 +5017,15 @@ Subject length lower bound = 2
 \= Expect no match 
     Note: that { does NOT introduce a quantifier
 --->Note: that { does NOT introduce a quantifier
- +0         ^                                        ([ab]{,4}c|xy)
+ +0         ^                                        (
  +1         ^                                        [ab]
  +5         ^^                                       {
 +11         ^                                        x
- +0                                 ^                ([ab]{,4}c|xy)
+ +0                                 ^                (
  +1                                 ^                [ab]
  +5                                 ^^               {
 +11                                 ^                x
- +0                                     ^            ([ab]{,4}c|xy)
+ +0                                     ^            (
  +1                                     ^            [ab]
  +5                                     ^^           {
 +11                                     ^            x
@@ -5035,58 +5034,58 @@ No match
 /([ab]{1,4}c|xy){4,5}?123/IB,auto_callout
 ------------------------------------------------------------------
         Bra
-        Callout 255 0 21
+        Callout 255 0 1
         CBra 1
         Callout 255 1 9
         [ab]{1,4}+
         Callout 255 10 1
         c
-        Callout 255 11 0
+        Callout 255 11 1
         Alt
         Callout 255 12 1
         x
         Callout 255 13 1
         y
-        Callout 255 14 0
+        Callout 255 14 7
         Ket
         CBra 1
         Callout 255 1 9
         [ab]{1,4}+
         Callout 255 10 1
         c
-        Callout 255 11 0
+        Callout 255 11 1
         Alt
         Callout 255 12 1
         x
         Callout 255 13 1
         y
-        Callout 255 14 0
+        Callout 255 14 7
         Ket
         CBra 1
         Callout 255 1 9
         [ab]{1,4}+
         Callout 255 10 1
         c
-        Callout 255 11 0
+        Callout 255 11 1
         Alt
         Callout 255 12 1
         x
         Callout 255 13 1
         y
-        Callout 255 14 0
+        Callout 255 14 7
         Ket
         CBra 1
         Callout 255 1 9
         [ab]{1,4}+
         Callout 255 10 1
         c
-        Callout 255 11 0
+        Callout 255 11 1
         Alt
         Callout 255 12 1
         x
         Callout 255 13 1
         y
-        Callout 255 14 0
+        Callout 255 14 7
         Ket
         Braminzero
         CBra 1
@@ -5094,13 +5093,13 @@ No match
         [ab]{1,4}+
         Callout 255 10 1
         c
-        Callout 255 11 0
+        Callout 255 11 1
         Alt
         Callout 255 12 1
         x
         Callout 255 13 1
         y
-        Callout 255 14 0
+        Callout 255 14 7
         Ket
         Callout 255 21 1
         1
@@ -5119,7 +5118,7 @@ Last code unit = '3'
 Subject length lower bound = 11
     aacaacaacaacaac123
 --->aacaacaacaacaac123
- +0 ^                      ([ab]{1,4}c|xy){4,5}?
+ +0 ^                      (
  +1 ^                      [ab]{1,4}
 +10 ^ ^                    c
 +11 ^  ^                   |
@@ -5651,7 +5650,7 @@ First code unit = \xff
 Subject length lower bound = 1
 
 /^((?P<A>a1)|(?P<A>a2)b)/I
-Failed: error 143 at offset 17: two named subpatterns have the same name (PCRE2_DUPNAMES not set)
+Failed: error 143 at offset 18: two named subpatterns have the same name (PCRE2_DUPNAMES not set)
 
 /^((?P<A>a1)|(?P<A>a2)b)/I,dupnames
 Capturing subpattern count = 3
@@ -5833,7 +5832,7 @@ Subject length lower bound = 2
   C a2 (2) A (non-unique)
 
 /^(?P<A>a) (?J:(?P<B>b)(?P<B>c)) (?P<A>d)/I
-Failed: error 143 at offset 37: two named subpatterns have the same name (PCRE2_DUPNAMES not set)
+Failed: error 143 at offset 38: two named subpatterns have the same name (PCRE2_DUPNAMES not set)
 
 # In this next test, J is not set at the outer level; consequently it isn't set
 # in the pattern's options; consequently pcre2_substring_get_byname() produces
@@ -5889,10 +5888,10 @@ Subject length lower bound = 2
  1: X
 
 /(?:(?(2y)a|b)(X))+/I
-Failed: error 126 at offset 7: malformed number or name after (?(
+Failed: error 124 at offset 7: missing closing parenthesis for condition
 
 /(?:(?(ZA)a|b)(?P<ZZ>X))+/I
-Failed: error 115 at offset 9: reference to non-existent subpattern
+Failed: error 115 at offset 6: reference to non-existent subpattern
 
 /(?:(?(ZZ)a|b)(?(ZZ)a|b)(?P<ZZ>X))+/I
 Capturing subpattern count = 1
@@ -7023,7 +7022,7 @@ No match
 No match
 
 /^(?P>abc)(?<abcd>xxx)/
-Failed: error 115 at offset 8: reference to non-existent subpattern
+Failed: error 115 at offset 5: reference to non-existent subpattern
 
 /^(?P>abc)(?<abc>x|y)/
     xx
@@ -7283,13 +7282,13 @@ No match
 No match
 
 /(?(<bc))/
-Failed: error 126 at offset 6: malformed number or name after (?(
+Failed: error 142 at offset 6: syntax error in subpattern name (missing terminator)
 
 /(?(''))/
-Failed: error 128 at offset 4: assertion expected after (?( or (?(?C)
+Failed: error 162 at offset 4: subpattern name expected
 
 /(?('R')stuff)/
-Failed: error 115 at offset 7: reference to non-existent subpattern
+Failed: error 115 at offset 4: reference to non-existent subpattern
 
 /((abc (?(R) (?(R1)1) (?(R2)2) X  |  (?1)  (?2)   (?R) ))) /x
     abcabc1Xabc2XabcXabcabc
@@ -7304,10 +7303,10 @@ Failed: error 115 at offset 7: reference to non-existent subpattern
  2: abcabc1Xabc2XabcX
 
 /(?<A> (?'B' abc (?(R) (?(R&C)1) (?(R&B)2) X  |  (?1)  (?2)   (?R) ))) /x
-Failed: error 115 at offset 29: reference to non-existent subpattern
+Failed: error 115 at offset 27: reference to non-existent subpattern
 
 /^(?(DEFINE) abc | xyz ) /x
-Failed: error 154 at offset 22: DEFINE group contains more than one branch
+Failed: error 154 at offset 4: DEFINE group contains more than one branch
 
 /(?(DEFINE) abc) xyz/Ix
 Capturing subpattern count = 0
@@ -7513,19 +7512,19 @@ No match
 No match
 
 /^(a)\g-2/
-Failed: error 115 at offset 7: reference to non-existent subpattern
+Failed: error 115 at offset 8: reference to non-existent subpattern
 
 /^(a)\g/
-Failed: error 158 at offset 5: a numbered reference must not be zero
+Failed: error 157 at offset 6: \g is not followed by a braced, angle-bracketed, or quoted name/number or by a plain number
 
 /^(a)\g{0}/
-Failed: error 158 at offset 8: a numbered reference must not be zero
+Failed: error 115 at offset 9: reference to non-existent subpattern
 
 /^(a)\g{3/
-Failed: error 157 at offset 8: \g is not followed by a braced, angle-bracketed, or quoted name/number or by a plain number
+Failed: error 157 at offset 6: \g is not followed by a braced, angle-bracketed, or quoted name/number or by a plain number
 
 /^(a)\g{aa}/
-Failed: error 115 at offset 9: reference to non-existent subpattern
+Failed: error 115 at offset 7: reference to non-existent subpattern
 
 /^a.b/newline=lf
     a\rb
@@ -7648,13 +7647,13 @@ No match
 No match
     
 /x(?-0)y/
-Failed: error 158 at offset 5: a numbered reference must not be zero
+Failed: error 126 at offset 5: a relative value of zero is not allowed
 
 /x(?-1)y/
 Failed: error 115 at offset 5: reference to non-existent subpattern
 
 /x(?+0)y/
-Failed: error 158 at offset 5: a numbered reference must not be zero
+Failed: error 126 at offset 5: a relative value of zero is not allowed
 
 /x(?+1)y/
 Failed: error 115 at offset 5: reference to non-existent subpattern
@@ -7716,7 +7715,7 @@ No match
 No match
 
 /(?(-1)a)/B
-Failed: error 115 at offset 6: reference to non-existent subpattern
+Failed: error 115 at offset 5: reference to non-existent subpattern
 
 /((?(-1)a))/B
 ------------------------------------------------------------------
@@ -7732,7 +7731,7 @@ Failed: error 115 at offset 6: reference to non-existent subpattern
 ------------------------------------------------------------------
 
 /((?(-2)a))/B
-Failed: error 115 at offset 7: reference to non-existent subpattern
+Failed: error 115 at offset 6: reference to non-existent subpattern
 
 /^(?(+1)X|Y)(.)/B
 ------------------------------------------------------------------
@@ -8223,10 +8222,10 @@ No match
 Failed: error 166 at offset 7: (*MARK) must have an argument
 
 /(?i:A{1,}\6666666666)/
-Failed: error 161 at offset 19: number is too big
+Failed: error 161 at offset 19: group number is too big
 
 /\g6666666666/
-Failed: error 161 at offset 11: number is too big
+Failed: error 161 at offset 7: group number is too big
 
 /[\g6666666666]/B
 ------------------------------------------------------------------
@@ -8493,25 +8492,25 @@ Subject length lower bound = 2
 Failed: error 162 at offset 9: subpattern name expected
 
 /(?<abc>)(?&a)/
-Failed: error 115 at offset 12: reference to non-existent subpattern
+Failed: error 115 at offset 11: reference to non-existent subpattern
 
 /(?<a>)(?&aaaaaaaaaaaaaaaaaaaaaaa)/
-Failed: error 115 at offset 32: reference to non-existent subpattern
+Failed: error 115 at offset 9: reference to non-existent subpattern
 
 /(?+-a)/
-Failed: error 163 at offset 3: digit expected after (?+
+Failed: error 129 at offset 2: digit expected after (?+ or (?-
 
 /(?-+a)/
 Failed: error 111 at offset 3: unrecognized character after (? or (?-
 
 /(?(-1))/
-Failed: error 115 at offset 6: reference to non-existent subpattern
+Failed: error 115 at offset 5: reference to non-existent subpattern
 
 /(?(+10))/
-Failed: error 115 at offset 7: reference to non-existent subpattern
+Failed: error 115 at offset 4: reference to non-existent subpattern
 
 /(?(10))/
-Failed: error 115 at offset 6: reference to non-existent subpattern
+Failed: error 115 at offset 3: reference to non-existent subpattern
 
 /(?(+2))()()/
 
@@ -8527,10 +8526,10 @@ Failed: error 162 at offset 3: subpattern name expected
 Failed: error 162 at offset 3: subpattern name expected
 
 /\k/
-Failed: error 169 at offset 1: \k is not followed by a braced, angle-bracketed, or quoted name
+Failed: error 169 at offset 2: \k is not followed by a braced, angle-bracketed, or quoted name
 
 /\kabc/
-Failed: error 169 at offset 1: \k is not followed by a braced, angle-bracketed, or quoted name
+Failed: error 169 at offset 2: \k is not followed by a braced, angle-bracketed, or quoted name
 
 /(?P=)/
 Failed: error 162 at offset 4: subpattern name expected
@@ -8628,11 +8627,11 @@ No match
  2: xyz
 
 /(?&N)[]a(?<N>)](?<M>abc)/
-Failed: error 115 at offset 4: reference to non-existent subpattern
+Failed: error 115 at offset 3: reference to non-existent subpattern
    abc<abc
 
 /(?&N)[]a(?<N>)](abc)/
-Failed: error 115 at offset 4: reference to non-existent subpattern
+Failed: error 115 at offset 3: reference to non-existent subpattern
    abc<abc
 
 /a[]b/
@@ -8712,8 +8711,8 @@ Options: auto_callout
 Subject length lower bound = 0
    adc
 --->adc
- +0 ^       (?(?=.*b)b|^)
- +2 ^       (?=.*b)
+ +0 ^       (?
+ +2 ^       (?=
  +5 ^       .*
  +7 ^  ^    b
  +7 ^ ^     b
@@ -8725,16 +8724,16 @@ Subject length lower bound = 0
  0: 
    abc 
 --->abc
- +0 ^       (?(?=.*b)b|^)
- +2 ^       (?=.*b)
+ +0 ^       (?
+ +2 ^       (?=
  +5 ^       .*
  +7 ^  ^    b
  +7 ^ ^     b
  +7 ^^      b
  +8 ^ ^     )
  +9 ^       b
- +0  ^      (?(?=.*b)b|^)
- +2  ^      (?=.*b)
+ +0  ^      (?
+ +2  ^      (?=
  +5  ^      .*
  +7  ^ ^    b
  +7  ^^     b
@@ -8847,23 +8846,23 @@ No match
 --->"ab"
  +0 ^        ^
  +1 ^        "
- +2 ^^       ((?(?=[a])[^"])|b)*
- +3 ^^       (?(?=[a])[^"])
- +5 ^^       (?=[a])
+ +2 ^^       (
+ +3 ^^       (?
+ +5 ^^       (?=
  +8 ^^       [a]
 +11 ^ ^      )
 +12 ^^       [^"]
 +16 ^ ^      )
 +17 ^ ^      |
- +3 ^ ^      (?(?=[a])[^"])
- +5 ^ ^      (?=[a])
+ +3 ^ ^      (?
+ +5 ^ ^      (?=
  +8 ^ ^      [a]
 +17 ^ ^      |
 +21 ^ ^      "
 +18 ^ ^      b
-+19 ^  ^     )
- +3 ^  ^     (?(?=[a])[^"])
- +5 ^  ^     (?=[a])
++19 ^  ^     )*
+ +3 ^  ^     (?
+ +5 ^  ^     (?=
  +8 ^  ^     [a]
 +17 ^  ^     |
 +21 ^  ^     "
@@ -9472,22 +9471,21 @@ No match
  1: a
 
 /(a)(?<=b\1)/
-Failed: error 125 at offset 10: lookbehind assertion is not fixed length
 
 /(a)(?<=b+(?1))/
-Failed: error 125 at offset 13: lookbehind assertion is not fixed length
+Failed: error 125 at offset 3: lookbehind assertion is not fixed length
 
 /(a+)(?<=b(?1))/
-Failed: error 125 at offset 14: lookbehind assertion is not fixed length
+Failed: error 125 at offset 4: lookbehind assertion is not fixed length
 
 /(a(?<=b(?1)))/
-Failed: error 125 at offset 13: lookbehind assertion is not fixed length
+Failed: error 125 at offset 2: lookbehind assertion is not fixed length
 
 /(?<=b(?1))xyz/
 Failed: error 115 at offset 8: reference to non-existent subpattern
 
 /(?<=b(?1))xyz(b+)pqrstuvew/
-Failed: error 125 at offset 26: lookbehind assertion is not fixed length
+Failed: error 125 at offset 0: lookbehind assertion is not fixed length
 
 /(a|bc)\1/I
 Capturing subpattern count = 1
@@ -9611,7 +9609,7 @@ Subject length lower bound = 1
   C B (1) a (group 1)
 
 /(?|(?<a>A)|(?<b>B))/
-Failed: error 165 at offset 15: different names for subpatterns of the same number are not allowed
+Failed: error 165 at offset 16: different names for subpatterns of the same number are not allowed
 
 /(?:a(?<quote> (?<apostrophe>')|(?<realquote>")) |
     b(?<quote> (?<apostrophe>')|(?<realquote>")) ) 
@@ -9989,7 +9987,7 @@ Failed: error 166 at offset 10: (*MARK) must have an argument
 Failed: error 166 at offset 6: (*MARK) must have an argument
 
 /abc(*FAIL:123)xyz/
-Failed: error 159 at offset 13: an argument is not allowed for (*ACCEPT), (*FAIL), or (*COMMIT)
+Failed: error 159 at offset 10: an argument is not allowed for (*ACCEPT), (*FAIL), or (*COMMIT)
 
 # This should, and does, fail. In Perl, it does not, which I think is a 
 # bug because replacing the B in the pattern by (B|D) does make it fail.
@@ -10335,7 +10333,7 @@ Failed: error 168 at offset 3: \c must be followed by a printable ASCII characte
 Failed: error 142 at offset 29: syntax error in subpattern name (missing terminator)
 
 /(?P<abn>(?P=axn)xxx)/B
-Failed: error 115 at offset 15: reference to non-existent subpattern
+Failed: error 115 at offset 12: reference to non-existent subpattern
 
 /(?P<abn>(?P=axn)xxx)(?<axn>yy)/B
 ------------------------------------------------------------------
@@ -10456,7 +10454,7 @@ Last code unit = '4'
 Subject length lower bound = 5
 
 /(?<=(abc)+)X/
-Failed: error 125 at offset 10: lookbehind assertion is not fixed length
+Failed: error 125 at offset 0: lookbehind assertion is not fixed length
 
 /(^ab)/I
 Capturing subpattern count = 1
@@ -10966,10 +10964,10 @@ Matched, but too many substrings
     adz
 --->adz
  +0 ^       ^
- +1 ^       (a(*:A)(d|e(*:B))z|aeq)
+ +1 ^       (
  +2 ^       a
  +3 ^^      (*:A)
- +8 ^^      (d|e(*:B))
+ +8 ^^      (
 Latest Mark: A
  +9 ^^      d
 +10 ^ ^     |
@@ -10982,10 +10980,10 @@ Latest Mark: A
     aez
 --->aez
  +0 ^       ^
- +1 ^       (a(*:A)(d|e(*:B))z|aeq)
+ +1 ^       (
  +2 ^       a
  +3 ^^      (*:A)
- +8 ^^      (d|e(*:B))
+ +8 ^^      (
 Latest Mark: A
  +9 ^^      d
 +11 ^^      e
@@ -11001,10 +10999,10 @@ Latest Mark: B
     aeqwerty
 --->aeqwerty
  +0 ^            ^
- +1 ^            (a(*:A)(d|e(*:B))z|aeq)
+ +1 ^            (
  +2 ^            a
  +3 ^^           (*:A)
- +8 ^^           (d|e(*:B))
+ +8 ^^           (
 Latest Mark: A
  +9 ^^           d
 +11 ^^           e
@@ -11223,14 +11221,14 @@ No match
 ------------------------------------------------------------------
 
 /a[\NB]c/
-Failed: error 171 at offset 3: \N is not supported in a class
+Failed: error 171 at offset 4: \N is not supported in a class
     aNc
     
 /a[B-\Nc]/
-Failed: error 150 at offset 5: invalid range in character class
+Failed: error 150 at offset 6: invalid range in character class
 
 /a[B\Nc]/
-Failed: error 171 at offset 4: \N is not supported in a class
+Failed: error 171 at offset 5: \N is not supported in a class
 
 /(a)(?2){0,1999}?(b)/
 
@@ -11735,11 +11733,11 @@ Callout 2: last capture = 2
  1: <unset>
  2: a
 --->aab
-    ^^      )
+    ^^      ){0}
 Callout 1: last capture = 0
  0: <unset>
 --->aab
-    ^^      ((a)(?C2)){0}
+    ^^      (
  0: a
 
 /(?:(a)+(?C1)bb|aa(?C2)b)++/
@@ -11798,8 +11796,8 @@ Partial match: 123a
     bb
 --->bb
  +0 ^      ^
- +1 ^      (?(?=a)aa|bb)
- +3 ^      (?=a)
+ +1 ^      (?
+ +3 ^      (?=
  +6 ^      a
 +11 ^      b
 +12 ^^     b
@@ -11811,8 +11809,8 @@ Partial match: 123a
     bb
 --->bb
   1 ^      ^
-  2 ^      (?(?C99)(?=(?C3)a(?C4))(?C5)a(?C6)a(?C7)|(?C8)b(?C9)b(?C10))
- 99 ^      (?=(?C3)a(?C4))
+  2 ^      (?
+ 99 ^      (?=
   3 ^      a
   8 ^      b
   9 ^^     b
@@ -13023,7 +13021,7 @@ Failed: error 164 at offset 8: non-octal character in \o{} (closing brace missin
     A\123B
 
 /^A\oB/
-Failed: error 155 at offset 3: missing opening brace after \o
+Failed: error 155 at offset 4: missing opening brace after \o
     
 /^A\x{zz}B/
 Failed: error 167 at offset 5: non-hex character in \x{} (closing brace missing?)
@@ -13032,7 +13030,7 @@ Failed: error 167 at offset 5: non-hex character in \x{} (closing brace missing?
 Failed: error 167 at offset 7: non-hex character in \x{} (closing brace missing?)
 
 /^A\x{/
-Failed: error 167 at offset 5: non-hex character in \x{} (closing brace missing?)
+Failed: error 178 at offset 5: digits missing in \x{} or \o{}
 
 /[ab]++/B,no_auto_possess
 ------------------------------------------------------------------
@@ -13067,16 +13065,16 @@ Failed: error 167 at offset 5: non-hex character in \x{} (closing brace missing?
 ------------------------------------------------------------------
 
 /[a-[:digit:]]+/
-Failed: error 150 at offset 3: invalid range in character class
+Failed: error 150 at offset 4: invalid range in character class
 
 /[A-[:digit:]]+/
-Failed: error 150 at offset 3: invalid range in character class
+Failed: error 150 at offset 4: invalid range in character class
 
 /[a-[.xxx.]]+/
-Failed: error 150 at offset 3: invalid range in character class
+Failed: error 150 at offset 4: invalid range in character class
 
 /[a-[=xxx=]]+/
-Failed: error 150 at offset 3: invalid range in character class
+Failed: error 150 at offset 4: invalid range in character class
 
 /[a-[!xxx!]]+/
 Failed: error 108 at offset 3: range out of order in character class
@@ -13086,13 +13084,13 @@ Failed: error 108 at offset 3: range out of order in character class
  0: A]]]
 
 /[a-\d]+/
-Failed: error 150 at offset 4: invalid range in character class
+Failed: error 150 at offset 5: invalid range in character class
 
 /(?<0abc>xx)/
 Failed: error 144 at offset 3: group name must start with a non-digit
 
 /(?&1abc)xx(?<1abc>y)/
-Failed: error 144 at offset 13: group name must start with a non-digit
+Failed: error 144 at offset 3: group name must start with a non-digit
 
 /(?<ab-cd>xx)/
 Failed: error 142 at offset 5: syntax error in subpattern name (missing terminator)
@@ -13116,13 +13114,13 @@ Failed: error 144 at offset 3: group name must start with a non-digit
 Failed: error 144 at offset 4: group name must start with a non-digit
 
 /\g{4df}/
-Failed: error 144 at offset 3: group name must start with a non-digit
+Failed: error 157 at offset 2: \g is not followed by a braced, angle-bracketed, or quoted name/number or by a plain number
 
 /(?&1abc)xx(?<1abc>y)/
-Failed: error 144 at offset 13: group name must start with a non-digit
+Failed: error 144 at offset 3: group name must start with a non-digit
 
 /(?P>1abc)xx(?<1abc>y)/
-Failed: error 144 at offset 14: group name must start with a non-digit
+Failed: error 144 at offset 4: group name must start with a non-digit
 
 /\g'3gh'/
 Failed: error 157 at offset 2: \g is not followed by a braced, angle-bracketed, or quoted name/number or by a plain number
@@ -13137,7 +13135,7 @@ Failed: error 144 at offset 4: group name must start with a non-digit
 Failed: error 144 at offset 4: group name must start with a non-digit
 
 /(?(4gh)abc)/
-Failed: error 126 at offset 4: malformed number or name after (?(
+Failed: error 124 at offset 4: missing closing parenthesis for condition
 
 /(?(R&6yh)abc)/
 Failed: error 144 at offset 5: group name must start with a non-digit
@@ -13215,10 +13213,10 @@ No match
 # Test stack guard external calls.
 
 /(((a)))/stackguard=1
-Failed: error 133 at offset 2: parentheses are too deeply nested (stack check)
+Failed: error 133 at offset 7: parentheses are too deeply nested (stack check)
 
 /(((a)))/stackguard=2
-Failed: error 133 at offset 3: parentheses are too deeply nested (stack check)
+Failed: error 133 at offset 7: parentheses are too deeply nested (stack check)
 
 /(((a)))/stackguard=3
 
@@ -13243,10 +13241,10 @@ Failed: error 133 at offset 3: parentheses are too deeply nested (stack check)
 ------------------------------------------------------------------
 
 /\othing/
-Failed: error 155 at offset 1: missing opening brace after \o
+Failed: error 155 at offset 2: missing opening brace after \o
 
 /\o{}/
-Failed: error 178 at offset 1: digits missing in \x{} or \o{}
+Failed: error 178 at offset 3: digits missing in \x{} or \o{}
 
 /\o{whatever}/
 Failed: error 164 at offset 3: non-octal character in \o{} (closing brace missing?)
@@ -13372,16 +13370,16 @@ No match
 No match
 
 /(?(VERSION<10)yes|no)/
-Failed: error 179 at offset 10: syntax error in (?(VERSION condition
+Failed: error 179 at offset 10: syntax error or number too big in (?(VERSION condition
 
 /(?(VERSION>10)yes|no)/
-Failed: error 179 at offset 11: syntax error in (?(VERSION condition
+Failed: error 179 at offset 11: syntax error or number too big in (?(VERSION condition
 
 /(?(VERSION>=10.0.0)yes|no)/
-Failed: error 179 at offset 16: syntax error in (?(VERSION condition
+Failed: error 179 at offset 16: syntax error or number too big in (?(VERSION condition
 
 /(?(VERSION=10.101)yes|no)/
-Failed: error 179 at offset 17: syntax error in (?(VERSION condition
+Failed: error 179 at offset 17: syntax error or number too big in (?(VERSION condition
 
 /abcd/I
 Capturing subpattern count = 0
@@ -13955,15 +13953,15 @@ Callout {a}b}
         Bra
         Bra
         a
-        CalloutStr `code` 8 14 0
+        CalloutStr `code` 8 14 4
         Ket
         Bra
         a
-        CalloutStr `code` 8 14 0
+        CalloutStr `code` 8 14 4
         Ket
         Bra
         a
-        CalloutStr `code` 8 14 0
+        CalloutStr `code` 8 14 4
         Ket
         Ket
         End
@@ -13974,7 +13972,7 @@ Callout {a}b}
         Bra
         ^
         Cond
-        Callout 25 9 7
+        Callout 25 9 3
         Assert
         abc
         Ket
@@ -13985,14 +13983,14 @@ Callout {a}b}
         Ket
         End
 ------------------------------------------------------------------
-Callout 25  (?=abc)
+Callout 25  (?=
     abcdefg
 --->abcdefg
- 25 ^           (?=abc)
+ 25 ^           (?=
  0: abcd
     xyz123 
 --->xyz123
- 25 ^          (?=abc)
+ 25 ^          (?=
  0: xyz
 
 /^(?(?C$abc$)(?=abc)abcd|xyz)/B
@@ -14000,7 +13998,7 @@ Callout 25  (?=abc)
         Bra
         ^
         Cond
-        CalloutStr $abc$ 7 12 7
+        CalloutStr $abc$ 7 12 3
         Assert
         abc
         Ket
@@ -14014,12 +14012,12 @@ Callout 25  (?=abc)
     abcdefg
 Callout (7): $abc$
 --->abcdefg
-    ^           (?=abc)
+    ^           (?=
  0: abcd
     xyz123 
 Callout (7): $abc$
 --->xyz123
-    ^          (?=abc)
+    ^          (?=
  0: xyz
 
 /^ab(?C'first')cd(?C"second")ef/
@@ -14036,13 +14034,13 @@ Callout (20): "second"
     aaaXY
 Callout (8): `code`
 --->aaaXY
-    ^^        )
+    ^^        ){3}
 Callout (8): `code`
 --->aaaXY
-    ^ ^       )
+    ^ ^       ){3}
 Callout (8): `code`
 --->aaaXY
-    ^  ^      )
+    ^  ^      ){3}
  0: aaaX
 
 # Binary zero in callout string
@@ -14073,7 +14071,7 @@ Failed: error -52: nested recursion at the same subject position
 # Perl fails to diagnose the absence of an assertion
 
 "(?(?<E>.*!.*)?)"
-Failed: error 128 at offset 3: assertion expected after (?( or (?(?C)
+Failed: error 128 at offset 2: assertion expected after (?( or (?(?C)
 
 "X((?2)()*+){2}+"B
 ------------------------------------------------------------------
@@ -14124,7 +14122,7 @@ Failed: error 115 at offset 15: reference to non-existent subpattern
 Failed: error 115 at offset 15: reference to non-existent subpattern
 
 ";(?<=()((?3))((?2)))"
-Failed: error 125 at offset 20: lookbehind assertion is not fixed length
+Failed: error 125 at offset 1: lookbehind assertion is not fixed length
 
 # Perl loops on this (PCRE2 used to!)
 
@@ -14306,7 +14304,7 @@ Failed: error 115 at offset 7: reference to non-existent subpattern
 "(?J)(?'d'(?'d'\g{d}))"
 
 "(?=!((?2)(?))({8(?<=(?1){29}8bbbb\x16\xd\xc6^($(\xa9H4){4}h}?1)B))\x15')"
-Failed: error 125 at offset 72: lookbehind assertion is not fixed length
+Failed: error 125 at offset 16: lookbehind assertion is not fixed length
 
 /A(?'')Z/
 Failed: error 162 at offset 4: subpattern name expected
@@ -14314,7 +14312,7 @@ Failed: error 162 at offset 4: subpattern name expected
 "(?J:(?|(?'R')(\k'R')|((?'R'))))"
 
 /(?<=|(\,\$(?73591620449005828816)\xa8.{7}){6}\x09)/
-Failed: error 161 at offset 32: number is too big
+Failed: error 161 at offset 17: group number is too big
 
 /^(?:(?(1)x|)+)+$()/B
 ------------------------------------------------------------------
@@ -14335,16 +14333,16 @@ Failed: error 161 at offset 32: number is too big
 ------------------------------------------------------------------
 
 /[[:>:]](?<)/
-Failed: error 124 at offset 10: letter or underscore expected after (?< or (?'
+Failed: error 162 at offset 10: subpattern name expected
 
 /((?x)(*:0))#(?'/
-Failed: error 124 at offset 15: letter or underscore expected after (?< or (?'
+Failed: error 162 at offset 15: subpattern name expected
 
 /(?C$[$)(?<]/
-Failed: error 124 at offset 10: letter or underscore expected after (?< or (?'
+Failed: error 162 at offset 10: subpattern name expected
 
 /(?C$)$)(?<]/
-Failed: error 124 at offset 10: letter or underscore expected after (?< or (?'
+Failed: error 162 at offset 10: subpattern name expected
 
 /(?(R))*+/B
 ------------------------------------------------------------------
@@ -14362,7 +14360,7 @@ Failed: error 124 at offset 10: letter or underscore expected after (?< or (?'
  0: 
 
 /((?x)(?#))#(?'/
-Failed: error 124 at offset 14: letter or underscore expected after (?< or (?'
+Failed: error 162 at offset 14: subpattern name expected
 
 /((?x)(?#))#(?'abc')/I
 Capturing subpattern count = 2
@@ -14372,7 +14370,7 @@ First code unit = '#'
 Subject length lower bound = 1
 
 /[[:\\](?<[::]/
-Failed: error 124 at offset 9: letter or underscore expected after (?< or (?'
+Failed: error 162 at offset 9: subpattern name expected
 
 /[[:\\](?'abc')[a:]/I
 Capturing subpattern count = 1
@@ -14401,13 +14399,13 @@ Failed: error 106 at offset 353: missing terminating ] for character class
 ------------------------------------------------------------------
 
 /(?R-:(?</
-Failed: error 114 at offset 8: missing closing parenthesis
+Failed: error 158 at offset 3: (?R (recursive pattern call) must be followed by a closing parenthesis
 
 /(?R-:(?<)/
-Failed: error 129 at offset 3: (?R or (?[+-]digits must be followed by )
+Failed: error 158 at offset 3: (?R (recursive pattern call) must be followed by a closing parenthesis
 
 /(?(?C{\Q})(?!(?'/
-Failed: error 124 at offset 16: letter or underscore expected after (?< or (?'
+Failed: error 162 at offset 16: subpattern name expected
 
 /(?(?C{\Q})(?!(?'abc')))/I
 Capturing subpattern count = 1
@@ -14505,10 +14503,10 @@ No match
  0: ab
 
 /(?(8000000000/
-Failed: error 114 at offset 13: missing closing parenthesis
+Failed: error 161 at offset 8: group number is too big
 
 /((?(R8000000000)))/
-Failed: error 161 at offset 16: number is too big
+Failed: error 161 at offset 9: group number is too big
 
 /0(?0)|(1)(*THEN)(*SKIP:0)(*FAIL)/
 \= Expect no match
@@ -14516,7 +14514,7 @@ Failed: error 161 at offset 16: number is too big
 No match
 
 /(?(1)()\983040\2)/
-Failed: error 115 at offset 13: reference to non-existent subpattern
+Failed: error 161 at offset 14: group number is too big
 
 /(*LIMIT_MATCH=)abc/
 Failed: error 160 at offset 14: (*VERB) not recognized or malformed
@@ -14539,7 +14537,7 @@ No match
 No match
 
 /(*MARK:a\zb)z/alt_verbnames 
-Failed: error 140 at offset 9: invalid escape sequence in (*VERB) name
+Failed: error 140 at offset 10: invalid escape sequence in (*VERB) name
     
 /(*:ab\t(d\)c)xxx/
 Failed: error 122 at offset 12: unmatched closing parenthesis
@@ -14564,6 +14562,24 @@ MK: AxxxB
     x  
  0: x
 MK: A and B
+    
+/(*: A \ and #comment
+     \ B)x/alt_verbnames,mark
+    x  
+ 0: x
+MK:  A  and #comment\x0a      B
+    
+/(*: A \ and #comment
+     \ B)x/x,mark
+    x  
+ 0: x
+MK:  A \ and #comment\x0a     \ B
+    
+/(*: A \ and #comment
+     \ B)x/mark
+    x  
+ 0: x
+MK:  A \ and #comment\x0a     \ B
     
 /(*:A
 B)x/alt_verbnames,mark 
@@ -14715,7 +14731,7 @@ Failed: error 142 at offset 7: syntax error in subpattern name (missing terminat
 Failed: error -49 at offset 3 in replacement: unknown substring
 
 /(?<!a{65535}a{5})x/I
-Failed: error 187 at offset 16: lookbehind assertion is too long
+Failed: error 187 at offset 0: lookbehind assertion is too long
 
 /(?<!a{65535})x/I
 Capturing subpattern count = 0
@@ -14781,7 +14797,7 @@ Failed: error 186 at offset 148: regular expression is too complicated
 ((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))
 ((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))
 a)"xI
-Failed: error 186 at offset 154: regular expression is too complicated
+Failed: error 135 at offset 9: lookbehind is too complicated
 
 # Test the use of malloc for caching group information when there are more
 # groups than fit into the on-stack workspace.
@@ -14950,11 +14966,11 @@ Subject length lower bound = 0
 /(A*)\E+/B,auto_callout
 ------------------------------------------------------------------
         Bra
-        Callout 255 0 7
+        Callout 255 0 1
         SCBra 1
         Callout 255 1 2
         A*
-        Callout 255 3 0
+        Callout 255 3 4
         KetRmax
         Callout 255 7 0
         Ket
@@ -14964,10 +14980,10 @@ Subject length lower bound = 0
 /()\Q\E*]/B,auto_callout
 ------------------------------------------------------------------
         Bra
-        Callout 255 0 7
+        Callout 255 0 1
         Brazero
         SCBra 1
-        Callout 255 1 0
+        Callout 255 1 6
         KetRmax
         Callout 255 7 1
         ]
@@ -14977,8 +14993,8 @@ Subject length lower bound = 0
 ------------------------------------------------------------------
     a[bc]d
 --->a[bc]d
- +0     ^      ()\Q\E*
- +1     ^      )
+ +0     ^      (
+ +1     ^      )\Q\E*
  +7     ^      ]
  +8     ^^     
  0: ]
@@ -15077,7 +15093,7 @@ Subject length lower bound = 0
 (?-x):?/extended
 
 /(8(*:6^\x09x\xa6l\)6!|\xd0:[^:|)\x09d\Z\d{85*m(?'(?<1!)*\W[*\xff]!!h\w]*\xbe;/alt_bsux,alt_verbnames,allow_empty_class,dollar_endonly,extended,multiline,never_utf,no_dotstar_anchor,no_start_optimize
-Failed: error 124 at offset 49: letter or underscore expected after (?< or (?'
+Failed: error 162 at offset 49: subpattern name expected
 
 /a|(b)c/replace=>$1<,substitute_unset_empty
     cat
@@ -15195,6 +15211,101 @@ No match
 /\[AB]{6000000000000000000000}/expand
 ** Pattern repeat count too large
 
+# Hex uses pattern length, not zero-terminated. This tests for overrunning
+# the given length of a pattern.
+
+/'(*U'/hex
+Failed: error 160 at offset 3: (*VERB) not recognized or malformed
+
+/'(*'/hex
+Failed: error 109 at offset 1: quantifier does not follow a repeatable item
+
+/'('/hex
+Failed: error 114 at offset 1: missing closing parenthesis
+
+//hex
+
+# These tests are here because Perl never allows a back reference in a
+# lookbehind. PCRE2 supports some limited cases.
+
+/([ab])...(?<=\1)z/
+    a11az
+ 0: a11az
+ 1: a
+    b11bz 
+ 0: b11bz
+ 1: b
+\= Expect no match
+    b11az 
+No match
+    
+/(?|([ab]))...(?<=\1)z/
+Failed: error 125 at offset 13: lookbehind assertion is not fixed length
+
+/([ab])(\1)...(?<=\2)z/
+    aa11az
+ 0: aa11az
+ 1: a
+ 2: a
+    
+/(a\2)(b\1)(?<=\2)/ 
+Failed: error 125 at offset 10: lookbehind assertion is not fixed length
+ 
+/(?<A>[ab])...(?<=\k'A')z/
+    a11az
+ 0: a11az
+ 1: a
+    b11bz 
+ 0: b11bz
+ 1: b
+\= Expect no match
+    b11az 
+No match
+
+/(?<A>[ab])...(?<=\k'A')(?<A>)z/dupnames
+Failed: error 125 at offset 13: lookbehind assertion is not fixed length
+
+# Perl does not support \g+n
+
+/((\g+1X)?([ab]))+/
+    aaXbbXa
+ 0: aaXbbXa
+ 1: bXa
+ 2: bX
+ 3: a
+
+/ab(?C1)c/auto_callout
+    abc
+--->abc
+ +0 ^       a
+ +1 ^^      b
+  1 ^ ^     c
+ +8 ^  ^    
+ 0: abc
+
+/'ab(?C1)c'/hex,auto_callout
+    abc
+--->abc
+ +0 ^       a
+ +1 ^^      b
+  1 ^ ^     c
+ +8 ^  ^    
+ 0: abc
+    
+# Perl accepts these, but gives a warning. We can't warn, so give an error. 
+
+/[a-[:digit:]]+/
+Failed: error 150 at offset 4: invalid range in character class
+    a-a9-a
+
+/[A-[:digit:]]+/
+Failed: error 150 at offset 4: invalid range in character class
+    A-A9-A
+
+/[a-\d]+/
+Failed: error 150 at offset 5: invalid range in character class
+    a-a9-a
+
 # End of testinput2 
 Error -63: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data
@@ -15203,4 +15314,5 @@ Error -1: no match
 Error 0: PCRE2_ERROR_BADDATA (unknown error number)
 Error 100: no error
 Error 188: pattern string is longer than the limit set by the application
-Error 189: PCRE2_ERROR_BADDATA (unknown error number)
+Error 189: internal error: unknown code in parsed pattern
+Error 190: PCRE2_ERROR_BADDATA (unknown error number)

@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "17 June 2016" "PCRE2 10.22"
+.TH PCRE2API 3 "30 September 2016" "PCRE2 10.23"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -693,7 +693,8 @@ functions, \fIpcre2_match()\fP and \fIpcre2_dfa_match()\fP.
 .sp
 This parameter ajusts the limit, set when PCRE2 is built (default 250), on the
 depth of parenthesis nesting in a pattern. This limit stops rogue patterns
-using up too much system stack when being compiled.
+using up too much system stack when being compiled. The limit applies to 
+parentheses of all kinds, not just capturing parentheses.
 .sp
 .nf
 .B int pcre2_set_compile_recursion_guard(pcre2_compile_context *\fIccontext\fP,
@@ -1091,7 +1092,13 @@ NULL immediately. Otherwise, the variables to which these point are set to an
 error code and an offset (number of code units) within the pattern,
 respectively, when \fBpcre2_compile()\fP returns NULL because a compilation
 error has occurred. The values are not defined when compilation is successful
-and \fBpcre2_compile()\fP returns a non-NULL value.
+and \fBpcre2_compile()\fP returns a non-NULL value. 
+.P
+The value returned in \fIerroroffset\fP is an indication of where in the
+pattern the error occurred. It is not necessarily the furthest point in the
+pattern that was read. For example, after the error "lookbehind assertion is
+not fixed length", the error offset points to the start of the failing
+assertion.
 .P
 The \fBpcre2_get_error_message()\fP function (see "Obtaining a textual error
 message"
@@ -1184,8 +1191,8 @@ recognized, exactly as in the rest of the pattern.
   PCRE2_AUTO_CALLOUT
 .sp
 If this bit is set, \fBpcre2_compile()\fP automatically inserts callout items,
-all with number 255, before each pattern item. For discussion of the callout
-facility, see the
+all with number 255, before each pattern item, except immediately before or
+after a callout in the pattern. For discussion of the callout facility, see the
 .\" HREF
 \fBpcre2callout\fP
 .\"
@@ -3292,6 +3299,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 17 June 2016
+Last updated: 30 September 2016
 Copyright (c) 1997-2016 University of Cambridge.
 .fi

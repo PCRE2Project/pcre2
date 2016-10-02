@@ -3,6 +3,6 @@
 # correct error message.
 
 /a\Cb/
-Failed: error 185 at offset 2: using \C is disabled in this PCRE2 library
+Failed: error 185 at offset 3: using \C is disabled in this PCRE2 library
 
 # End of testinput23

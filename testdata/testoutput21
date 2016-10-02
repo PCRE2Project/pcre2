@@ -76,7 +76,7 @@
 ------------------------------------------------------------------
 
 /ab\Cde/never_backslash_c
-Failed: error 183 at offset 3: using \C is disabled by the application
+Failed: error 183 at offset 4: using \C is disabled by the application
 
 /ab\Cde/info
 Capturing subpattern count = 0

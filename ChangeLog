@@ -14,6 +14,46 @@ cause all characters greater than 255 to match, whatever else is in the class.
 There was a bug that caused this not to happen if a Unicode property item was
 added to such a class, for example [\D\P{Nd}] or [\W\pL].
 
+3. There has been a major re-factoring of the pcre2_compile.c file. Most syntax 
+checking is now done in the pre-pass that identifies capturing groups. This has 
+reduced the amount of duplication and made the code tidier. While doing this, 
+some minor bugs and Perl incompatibilities were fixed, including:
+
+  (a) \Q\E in the middle of a quantifier such as A+\Q\E+ is now ignored instead
+      of giving an invalid quantifier error.
+  (b) {0} can now be used after a group in a lookbehind assertion; previously
+      this caused an "assertion is not fixed length" error.
+  (c) Perl always treats (?(DEFINE) as a "define" group, even if a group with 
+      the name "DEFINE" exists. PCRE2 now does likewise.
+  (d) A recursion condition test such as (?(R2)...) must now refer to an 
+      existing subpattern.
+
+One effect of the refactoring is that some error numbers and messages have 
+changed, and the pattern offset given for compiling errors is not always the
+right-most character that has been read. In particular, for a variable-length
+lookbehind assertion it now points to the start of the assertion. Another
+change is that when a callout appears before a group, the "length of next
+pattern item" that is passed now just gives the length of the opening
+parenthesis item, not the length of the whole group. A length of zero is now
+given only for a callout at the end of the pattern. Automatic callouts are no 
+longer inserted before and after explicit callouts in the pattern.
+
+4. Back references are now permitted in lookbehind assertions when there are 
+no duplicated group numbers (that is, (?| has not been used), and, if the 
+reference is by name, there is only one group of that name. The referenced
+group must, of course be of fixed length.
+
+5. pcre2test has been upgraded so that, when run under valgrind with valgrind 
+support enabled, reading past the end of the pattern is detected, both when 
+compiling and during callout processing.
+
+6. \g{+<number>} (e.g. \g{+2)} ) is now supported. It is a "forward back 
+reference" and can be useful in repetitions (compare \g{-<number>}). Perl does 
+not recognize this syntax.
+
+7. Automatic callouts are no longer generated before and after callouts in the 
+pattern.
+
 
 Version 10.22 29-July-2016
 --------------------------

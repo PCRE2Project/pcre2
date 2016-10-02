@@ -188,7 +188,7 @@ Failed: error -53: recursion limit exceeded
     abc
 Failed: error -52: nested recursion at the same subject position
 
-/((?(R2)a+|(?1)b))/
+/((?(R2)a+|(?1)b))()/
     aaaabcde
 Failed: error -52: nested recursion at the same subject position
 

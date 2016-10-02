@@ -1723,5 +1723,14 @@
     \x{1d7cf}
 \= Expect no match
     \x{10000}
+    
+# Hex uses pattern length, not zero-terminated. This tests for overrunning
+# the given length of a pattern.
+
+/'(*UTF)'/hex 
+
+/a(?<=A\XB)/utf
+
+/ab(?<=A\RB)/utf
 
 # End of testinput5 

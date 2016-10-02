@@ -2808,7 +2808,7 @@ return 0;
 
 /* In UTF mode the input is always interpreted as a string of UTF-8 bytes using
 the original UTF-8 definition of RFC 2279, which allows for up to 6 bytes, and
-code values from 0 to 0x7fffffff. However, values greater than the later UTF 
+code values from 0 to 0x7fffffff. However, values greater than the later UTF
 limit of 0x10ffff cause an error.
 
 In non-UTF mode the input is interpreted as UTF-8 if the utf8_input modifier
@@ -2867,7 +2867,7 @@ if (!utf && (pat_patctl.control & CTL_UTF8_INPUT) == 0)
 
 else while (len > 0)
   {
-  int chlen; 
+  int chlen;
   uint32_t c;
   uint32_t topbit = 0;
   if (!utf && *p == 0xff && len > 1)
@@ -2875,7 +2875,7 @@ else while (len > 0)
     topbit = 0x80000000u;
     p++;
     len--;
-    }     
+    }
   chlen = utf82ord(p, &c);
   if (chlen <= 0) return -1;
   if (utf && c > 0x10ffff) return -2;
@@ -4494,6 +4494,7 @@ unsigned int delimiter = *p++;
 int errorcode;
 void *use_pat_context;
 PCRE2_SIZE patlen;
+PCRE2_SIZE valgrind_access_length;
 PCRE2_SIZE erroroffset;
 
 /* Initialize the context and pattern/data controls for this test from the
@@ -4537,7 +4538,7 @@ patlen = p - buffer - 2;
 if (!decode_modifiers(p, CTX_PAT, &pat_patctl, NULL)) return PR_SKIP;
 utf = (pat_patctl.options & PCRE2_UTF) != 0;
 
-/* The utf8_input modifier is not allowed in 8-bit mode, and is mutually 
+/* The utf8_input modifier is not allowed in 8-bit mode, and is mutually
 exclusive with the utf modifier. */
 
 if ((pat_patctl.control & CTL_UTF8_INPUT) != 0)
@@ -4550,8 +4551,8 @@ if ((pat_patctl.control & CTL_UTF8_INPUT) != 0)
   if (utf)
     {
     fprintf(outfile, "** The utf and utf8_input modifiers are mutually exclusive\n");
-    return PR_SKIP; 
-    }   
+    return PR_SKIP;
+    }
   }
 
 /* Check for mutually exclusive modifiers. At present, these are all in the
@@ -4949,11 +4950,43 @@ switch(errorcode)
   break;
   }
 
-/* The pattern is now in pbuffer[8|16|32], with the length in patlen. By
-default, however, we pass a zero-terminated pattern. The length is passed only
-if we had a hex pattern. */
+/* The pattern is now in pbuffer[8|16|32], with the length in code units in
+patlen. By default, however, we pass a zero-terminated pattern. The length is
+passed only if we had a hex pattern. When valgrind is supported, arrange for
+the unused part of the buffer to be marked as no access. */
 
-if ((pat_patctl.control & CTL_HEXPAT) == 0) patlen = PCRE2_ZERO_TERMINATED;
+valgrind_access_length = patlen;
+if ((pat_patctl.control & CTL_HEXPAT) == 0)
+  {
+  patlen = PCRE2_ZERO_TERMINATED;
+  valgrind_access_length += 1;  /* For the terminating zero */
+  }
+
+#ifdef SUPPORT_VALGRIND
+#ifdef SUPPORT_PCRE2_8
+if (test_mode == PCRE8_MODE && pbuffer8 != NULL)
+  {
+  VALGRIND_MAKE_MEM_NOACCESS(pbuffer8 + valgrind_access_length,
+    pbuffer8_size - valgrind_access_length);
+  }
+#endif
+#ifdef SUPPORT_PCRE2_16
+if (test_mode == PCRE16_MODE && pbuffer16 != NULL)
+  {
+  VALGRIND_MAKE_MEM_NOACCESS(pbuffer16 + valgrind_access_length,
+    pbuffer16_size - valgrind_access_length*sizeof(uint16_t));
+  }
+#endif
+#ifdef SUPPORT_PCRE2_32
+if (test_mode == PCRE32_MODE && pbuffer32 != NULL)
+  {
+  VALGRIND_MAKE_MEM_NOACCESS(pbuffer32 + valgrind_access_length,
+    pbuffer32_size - valgrind_access_length*sizeof(uint32_t));
+  }
+#endif
+#else  /* Valgrind not supported */
+(void)valgrind_access_length;  /* Avoid compiler warning */
+#endif
 
 /* If #newline_default has been used and the library was not compiled with an
 appropriate default newline setting, local_newline_default will be non-zero. We
@@ -4996,6 +5029,65 @@ if (timeit > 0)
 PCRE2_COMPILE(compiled_code, pbuffer, patlen, pat_patctl.options|forbid_utf,
   &errorcode, &erroroffset, use_pat_context);
 
+/* Call the JIT compiler if requested. When timing, we must free and recompile
+the pattern each time because that is the only way to free the JIT compiled
+code. We know that compilation will always succeed. */
+
+if (TEST(compiled_code, !=, NULL) && pat_patctl.jit != 0)
+  {
+  if (timeit > 0)
+    {
+    register int i;
+    clock_t time_taken = 0;
+    for (i = 0; i < timeit; i++)
+      {
+      clock_t start_time;
+      SUB1(pcre2_code_free, compiled_code);
+      PCRE2_COMPILE(compiled_code, pbuffer, patlen,
+        pat_patctl.options|forbid_utf, &errorcode, &erroroffset,
+        use_pat_context);
+      start_time = clock();
+      PCRE2_JIT_COMPILE(jitrc,compiled_code, pat_patctl.jit);
+      time_taken += clock() - start_time;
+      }
+    total_jit_compile_time += time_taken;
+    fprintf(outfile, "JIT compile  %.4f milliseconds\n",
+      (((double)time_taken * 1000.0) / (double)timeit) /
+        (double)CLOCKS_PER_SEC);
+    }
+  else
+    {
+    PCRE2_JIT_COMPILE(jitrc, compiled_code, pat_patctl.jit);
+    }
+  }
+
+/* If valgrind is supported, mark the pbuffer as accessible again. The 16-bit
+and 32-bit buffers can be marked completely undefined, but we must leave the
+pattern in the 8-bit buffer defined because it may be read from a callout
+during matching. */
+
+#ifdef SUPPORT_VALGRIND
+#ifdef SUPPORT_PCRE2_8
+if (test_mode == PCRE8_MODE)
+  {
+  VALGRIND_MAKE_MEM_UNDEFINED(pbuffer8 + valgrind_access_length, 
+    pbuffer8_size - valgrind_access_length);
+  }
+#endif
+#ifdef SUPPORT_PCRE2_16
+if (test_mode == PCRE16_MODE)
+  {
+  VALGRIND_MAKE_MEM_UNDEFINED(pbuffer16, pbuffer16_size);
+  }
+#endif
+#ifdef SUPPORT_PCRE2_32
+if (test_mode == PCRE32_MODE)
+  {
+  VALGRIND_MAKE_MEM_UNDEFINED(pbuffer32, pbuffer32_size);
+  }
+#endif
+#endif
+
 /* Compilation failed; go back for another re, skipping to blank line
 if non-interactive. */
 
@@ -5028,38 +5120,6 @@ if (forbid_utf != 0)
 
 if (pattern_info(PCRE2_INFO_MAXLOOKBEHIND, &maxlookbehind, FALSE) != 0)
   return PR_ABEND;
-
-/* Call the JIT compiler if requested. When timing, we must free and recompile
-the pattern each time because that is the only way to free the JIT compiled
-code. We know that compilation will always succeed. */
-
-if (pat_patctl.jit != 0)
-  {
-  if (timeit > 0)
-    {
-    register int i;
-    clock_t time_taken = 0;
-    for (i = 0; i < timeit; i++)
-      {
-      clock_t start_time;
-      SUB1(pcre2_code_free, compiled_code);
-      PCRE2_COMPILE(compiled_code, pbuffer, patlen,
-        pat_patctl.options|forbid_utf, &errorcode, &erroroffset,
-        use_pat_context);
-      start_time = clock();
-      PCRE2_JIT_COMPILE(jitrc,compiled_code, pat_patctl.jit);
-      time_taken += clock() - start_time;
-      }
-    total_jit_compile_time += time_taken;
-    fprintf(outfile, "JIT compile  %.4f milliseconds\n",
-      (((double)time_taken * 1000.0) / (double)timeit) /
-        (double)CLOCKS_PER_SEC);
-    }
-  else
-    {
-    PCRE2_JIT_COMPILE(jitrc, compiled_code, pat_patctl.jit);
-    }
-  }
 
 /* If an explicit newline modifier was given, set the information flag in the
 pattern so that it is preserved over push/pop. */
@@ -5300,10 +5360,10 @@ if (post_start > 0)
 for (i = 0; i < subject_length - pre_start - post_start + 4; i++)
   fprintf(outfile, " ");
 
-fprintf(outfile, "%.*s",
-  (int)((cb->next_item_length == 0)? 1 : cb->next_item_length),
-  pbuffer8 + cb->pattern_position);
-
+if (cb->next_item_length != 0)  
+  fprintf(outfile, "%.*s", (int)(cb->next_item_length),
+    pbuffer8 + cb->pattern_position);
+    
 fprintf(outfile, "\n");
 first_callout = FALSE;
 
@@ -5740,18 +5800,18 @@ while ((c = *p++) != 0)
     continue;
     }
 
-  /* Handle a non-escaped character. In non-UTF 32-bit mode with utf8_input 
+  /* Handle a non-escaped character. In non-UTF 32-bit mode with utf8_input
   set, do the fudge for setting the top bit. */
 
   if (c != '\\')
     {
     uint32_t topbit = 0;
-    if (test_mode == PCRE32_MODE && c == 0xff && *p != 0) 
+    if (test_mode == PCRE32_MODE && c == 0xff && *p != 0)
       {
       topbit = 0x80000000;
       c = *p++;
-      }  
-    if ((utf || (pat_patctl.control & CTL_UTF8_INPUT) != 0) && 
+      }
+    if ((utf || (pat_patctl.control & CTL_UTF8_INPUT) != 0) &&
       HASUTF8EXTRALEN(c)) { GETUTF8INC(c, p); }
     c |= topbit;
     }
@@ -6405,7 +6465,7 @@ else for (gmatched = 0;; gmatched++)
     }
 
   /* Otherwise just run a single match, setting up a callout if required (the
-  default). */
+  default). There is a copy of the pattern in pbuffer8 for use by callouts. */
 
   else
     {
@@ -7583,6 +7643,10 @@ if (argc > 1 && strcmp(argv[op], "-") != 0)
     }
   }
 
+#if defined(SUPPORT_LIBREADLINE) || defined(SUPPORT_LIBEDIT)
+if (INTERACTIVE(infile)) using_history();
+#endif
+
 if (argc > 2)
   {
   outfile = fopen(argv[op+1], OUTPUT_MODE);
@@ -7621,8 +7685,7 @@ while (notdone)
   p = buffer;
 
   /* If we have a pattern set up for testing, or we are skipping after a
-  compile failure, a blank line terminates this test; otherwise process the
-  line as a data line. */
+  compile failure, a blank line terminates this test. */
 
   if (expectdata || skipping)
     {
@@ -7645,14 +7708,21 @@ while (notdone)
       skipping = FALSE;
       setlocale(LC_CTYPE, "C");
       }
+      
+    /* Otherwise, if we are not skipping, and the line is not a data comment 
+    line starting with "\=", process a data line. */
+     
     else if (!skipping && !(p[0] == '\\' && p[1] == '=' && isspace(p[2])))
+      { 
       rc = process_data();
+      } 
     }
 
   /* We do not have a pattern set up for testing. Lines starting with # are
   either comments or special commands. Blank lines are ignored. Otherwise, the
   line must start with a valid delimiter. It is then processed as a pattern
-  line. */
+  line. A copy of the pattern is left in pbuffer8 for use by callouts. Under
+  valgrind, make the unused part of the buffer undefined, to catch overruns. */
 
   else if (*p == '#')
     {
@@ -7712,6 +7782,10 @@ if (showtotaltimes)
 
 
 EXIT:
+
+#if defined(SUPPORT_LIBREADLINE) || defined(SUPPORT_LIBEDIT)
+if (infile != NULL && INTERACTIVE(infile)) clear_history();
+#endif
 
 if (infile != NULL && infile != stdin) fclose(infile);
 if (outfile != NULL && outfile != stdout) fclose(outfile);

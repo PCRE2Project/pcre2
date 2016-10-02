@@ -5792,4 +5792,18 @@ name)/mark
     aaaccccaaa
     bccccb 
 
+# /x does not apply to MARK labels 
+
+/x (*MARK:ab cd # comment
+ef) x/x,mark
+    axxz
+
+/(?<=a(B){0}c)X/
+    acX
+
+/(?<DEFINE>b)(?(DEFINE)(a+))(?&DEFINE)/          
+    bbbb 
+\= Expect no match     
+    baaab
+
 # End of testinput1 

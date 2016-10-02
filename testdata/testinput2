@@ -189,9 +189,9 @@
     the barfoo
     and cattlefoo
 
-/(?<=a+)b/
+/abc(?<=a+)b/
 
-/(?<=aaa|b{0,3})b/
+/12345(?<=aaa|b{0,3})b/
 
 /(?<!(foo)a\1)bar/
 
@@ -4518,6 +4518,18 @@
      \ B)x/x,alt_verbnames,mark
     x  
     
+/(*: A \ and #comment
+     \ B)x/alt_verbnames,mark
+    x  
+    
+/(*: A \ and #comment
+     \ B)x/x,mark
+    x  
+    
+/(*: A \ and #comment
+     \ B)x/mark
+    x  
+    
 /(*:A
 B)x/alt_verbnames,mark 
     x
@@ -4818,5 +4830,62 @@ a)"xI
 \[a]{3}
 
 /\[AB]{6000000000000000000000}/expand
+
+# Hex uses pattern length, not zero-terminated. This tests for overrunning
+# the given length of a pattern.
+
+/'(*U'/hex
+
+/'(*'/hex
+
+/'('/hex
+
+//hex
+
+# These tests are here because Perl never allows a back reference in a
+# lookbehind. PCRE2 supports some limited cases.
+
+/([ab])...(?<=\1)z/
+    a11az
+    b11bz 
+\= Expect no match
+    b11az 
+    
+/(?|([ab]))...(?<=\1)z/
+
+/([ab])(\1)...(?<=\2)z/
+    aa11az
+    
+/(a\2)(b\1)(?<=\2)/ 
+ 
+/(?<A>[ab])...(?<=\k'A')z/
+    a11az
+    b11bz 
+\= Expect no match
+    b11az 
+
+/(?<A>[ab])...(?<=\k'A')(?<A>)z/dupnames
+
+# Perl does not support \g+n
+
+/((\g+1X)?([ab]))+/
+    aaXbbXa
+
+/ab(?C1)c/auto_callout
+    abc
+
+/'ab(?C1)c'/hex,auto_callout
+    abc
+    
+# Perl accepts these, but gives a warning. We can't warn, so give an error. 
+
+/[a-[:digit:]]+/
+    a-a9-a
+
+/[A-[:digit:]]+/
+    A-A9-A
+
+/[a-\d]+/
+    a-a9-a
 
 # End of testinput2 

@@ -1746,7 +1746,7 @@ No match
 ------------------------------------------------------------------
 
 /\ud800/utf,alt_bsux,allow_empty_class,match_unset_backref
-Failed: error 173 at offset 5: disallowed Unicode code point (>= 0xd800 && <= 0xdfff)
+Failed: error 173 at offset 6: disallowed Unicode code point (>= 0xd800 && <= 0xdfff)
 
 /^a+[a\x{200}]/B,utf
 ------------------------------------------------------------------
@@ -3997,7 +3997,7 @@ Failed: error 122 at offset 1227: unmatched closing parenthesis
 /$(&.+[\p{Me}].\s\xdcC*?(?(<y>))(?<!^)$C((;*?(R))+(?(R)){0,6}?|){12\x8a\X*?\x8a\x0b\xd1^9\3*+(\xc1,\k'P'\xb4)\xcc(z\z(?JJ)(?'X'8};(\x0b\xd1^9\?'3*+(\xc1.]k+\x0b'Pm'\xb4\xcc4'\xd1'(?'X'))?-%--\x95$9*\4'|\xd1(''%\x95*$9)#(?'R')3\x07?('P\xed')\\x16:;()\x1e\x10*:(?<y>)\xd1+!~:(?)''(d'E:yD!\s(?'R'\x1e;\x10:U))|')g!\xb0*){29+))#(?'P'})*?/
 
 "(*UTF)(*UCP)(.UTF).+X(\V+;\^(\D|)!999}(?(?C{7(?C')\H*\S*/^\x5\xa\\xd3\x85n?(;\D*(?m).[^mH+((*UCP)(*U:F)})(?!^)(?'"
-Failed: error 124 at offset 113: letter or underscore expected after (?< or (?'
+Failed: error 162 at offset 113: subpattern name expected
 
 /[\pS#moq]/
     =
@@ -4159,5 +4159,16 @@ No match
 \= Expect no match
     \x{10000}
 No match
+    
+# Hex uses pattern length, not zero-terminated. This tests for overrunning
+# the given length of a pattern.
+
+/'(*UTF)'/hex 
+
+/a(?<=A\XB)/utf
+Failed: error 125 at offset 1: lookbehind assertion is not fixed length
+
+/ab(?<=A\RB)/utf
+Failed: error 125 at offset 2: lookbehind assertion is not fixed length
 
 # End of testinput5 

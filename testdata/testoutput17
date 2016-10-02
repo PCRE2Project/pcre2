@@ -335,7 +335,7 @@ Failed: error -47: match limit exceeded
     abc
 Failed: error -46: JIT stack limit reached
 
-/((?(R2)a+|(?1)b))/
+/((?(R2)a+|(?1)b))()/
     aaaabcde
 Failed: error -46: JIT stack limit reached
 
