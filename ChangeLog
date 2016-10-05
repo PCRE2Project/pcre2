@@ -58,6 +58,9 @@ pattern.
 for the current position in the subject line was incorrect if it was after an
 escape sequence for a character whose code point was greater than \x{ff}.
 
+9. Change 19 for 10.22 had a typo (PCRE_STATIC_RUNTIME should be
+PCRE2_STATIC_RUNTIME). Fix from David Gaussmann.
+
 
 Version 10.22 29-July-2016
 --------------------------

@@ -74,6 +74,8 @@
 # 2016-03-01 PH applied Chris Wilson's patch for MSVC static
 # 2016-06-24 PH applied Chris Wilson's second patch, putting the first under
 #            a new option instead of being unconditional.
+# 2016-10-05 PH fixed a typo (PCRE should be PCRE2) in above patch
+#            fix by David Gaussmann
 
 PROJECT(PCRE2 C)
 
@@ -190,7 +192,7 @@ IF (MINGW)
 ENDIF(MINGW)
 
 IF(MSVC)
-  OPTION(PCRE_STATIC_RUNTIME OFF CACHE BOOL
+  OPTION(PCRE2_STATIC_RUNTIME
 	"ON=Compile against the static runtime (/MT)."
 	OFF)
   OPTION(INSTALL_MSVC_PDB
