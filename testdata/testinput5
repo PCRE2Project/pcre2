@@ -1733,4 +1733,7 @@
 
 /ab(?<=A\RB)/utf
 
+/../utf,auto_callout
+    \n\x{123}\x{123}\x{123}\x{123}
+
 # End of testinput5 

@@ -4171,4 +4171,13 @@ Failed: error 125 at offset 1: lookbehind assertion is not fixed length
 /ab(?<=A\RB)/utf
 Failed: error 125 at offset 2: lookbehind assertion is not fixed length
 
+/../utf,auto_callout
+    \n\x{123}\x{123}\x{123}\x{123}
+--->\x{0a}\x{123}\x{123}\x{123}\x{123}
+ +0 ^                                      .
+ +0       ^                                .
+ +1       ^      ^                         .
+ +2       ^             ^                  
+ 0: \x{123}\x{123}
+
 # End of testinput5 

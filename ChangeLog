@@ -54,6 +54,10 @@ not recognize this syntax.
 7. Automatic callouts are no longer generated before and after callouts in the 
 pattern.
 
+8. When pcre2test was outputing information from a callout, the caret indicator
+for the current position in the subject line was incorrect if it was after an
+escape sequence for a character whose code point was greater than \x{ff}.
+
 
 Version 10.22 29-July-2016
 --------------------------

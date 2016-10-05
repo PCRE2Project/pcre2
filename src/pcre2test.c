@@ -2528,6 +2528,8 @@ static int
 pchar(uint32_t c, BOOL utf, FILE *f)
 {
 int n = 0;
+char tempbuffer[16];
+
 if (PRINTOK(c))
   {
   if (f != NULL) fprintf(f, "%c", c);
@@ -2549,6 +2551,8 @@ if (c < 0x100)
   }
 
 if (f != NULL) n = fprintf(f, "\\x{%02x}", c);
+  else n = sprintf(tempbuffer, "\\x{%02x}", c);
+
 return n >= 0 ? n : 0;
 }
 
@@ -5070,7 +5074,7 @@ during matching. */
 #ifdef SUPPORT_PCRE2_8
 if (test_mode == PCRE8_MODE)
   {
-  VALGRIND_MAKE_MEM_UNDEFINED(pbuffer8 + valgrind_access_length, 
+  VALGRIND_MAKE_MEM_UNDEFINED(pbuffer8 + valgrind_access_length,
     pbuffer8_size - valgrind_access_length);
   }
 #endif
@@ -5360,10 +5364,10 @@ if (post_start > 0)
 for (i = 0; i < subject_length - pre_start - post_start + 4; i++)
   fprintf(outfile, " ");
 
-if (cb->next_item_length != 0)  
+if (cb->next_item_length != 0)
   fprintf(outfile, "%.*s", (int)(cb->next_item_length),
     pbuffer8 + cb->pattern_position);
-    
+
 fprintf(outfile, "\n");
 first_callout = FALSE;
 
@@ -7708,14 +7712,14 @@ while (notdone)
       skipping = FALSE;
       setlocale(LC_CTYPE, "C");
       }
-      
-    /* Otherwise, if we are not skipping, and the line is not a data comment 
+
+    /* Otherwise, if we are not skipping, and the line is not a data comment
     line starting with "\=", process a data line. */
-     
+
     else if (!skipping && !(p[0] == '\\' && p[1] == '=' && isspace(p[2])))
-      { 
+      {
       rc = process_data();
-      } 
+      }
     }
 
   /* We do not have a pattern set up for testing. Lines starting with # are
