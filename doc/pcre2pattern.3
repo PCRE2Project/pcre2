@@ -1,4 +1,4 @@
-.TH PCRE2PATTERN 3 "30 September 2016" "PCRE2 10.23"
+.TH PCRE2PATTERN 3 "06 October 2016" "PCRE2 10.23"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION DETAILS"
@@ -359,8 +359,7 @@ case letter, it is converted to upper case. Then bit 6 of the character (hex
 40) is inverted. Thus \ecA to \ecZ become hex 01 to hex 1A (A is 41, Z is 5A),
 but \ec{ becomes hex 3B ({ is 7B), and \ec; becomes hex 7B (; is 3B). If the
 code unit following \ec has a value less than 32 or greater than 126, a
-compile-time error occurs. This locks out non-printable ASCII characters in all
-modes.
+compile-time error occurs.
 .P
 When PCRE2 is compiled in EBCDIC mode, \ea, \ee, \ef, \en, \er, and \et
 generate the appropriate EBCDIC code values. The \ec escape is processed
@@ -369,19 +368,19 @@ that are allowed after \ec are A-Z, a-z, or one of @, [, \e, ], ^, _, or ?. Any
 other character provokes a compile-time error. The sequence \e@ encodes
 character code 0; the letters (in either case) encode characters 1-26 (hex 01
 to hex 1A); [, \e, ], ^, and _ encode characters 27-31 (hex 1B to hex 1F), and
-\e? becomes either 255 (hex FF) or 95 (hex 5F).
+\ec? becomes either 255 (hex FF) or 95 (hex 5F).
 .P
-Thus, apart from \e?, these escapes generate the same character code values as
+Thus, apart from \ec?, these escapes generate the same character code values as
 they do in an ASCII environment, though the meanings of the values mostly
-differ. For example, \eG always generates code value 7, which is BEL in ASCII
+differ. For example, \ecG always generates code value 7, which is BEL in ASCII
 but DEL in EBCDIC.
 .P
-The sequence \e? generates DEL (127, hex 7F) in an ASCII environment, but
+The sequence \ec? generates DEL (127, hex 7F) in an ASCII environment, but
 because 127 is not a control character in EBCDIC, Perl makes it generate the
 APC character. Unfortunately, there are several variants of EBCDIC. In most of
 them the APC character has the value 255 (hex FF), but in the one Perl calls
 POSIX-BC its value is 95 (hex 5F). If certain other characters have POSIX-BC
-values, PCRE2 makes \e? generate 95; otherwise it generates 255.
+values, PCRE2 makes \ec? generate 95; otherwise it generates 255.
 .P
 After \e0 up to two further octal digits are read. If there are fewer than two
 digits, just those that are present are used. Thus the sequence \e0\ex\e015
@@ -3475,6 +3474,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 30 September 2016
+Last updated: 06 October 2016
 Copyright (c) 1997-2016 University of Cambridge.
 .fi
