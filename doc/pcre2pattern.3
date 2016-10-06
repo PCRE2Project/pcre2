@@ -365,10 +365,10 @@ When PCRE2 is compiled in EBCDIC mode, \ea, \ee, \ef, \en, \er, and \et
 generate the appropriate EBCDIC code values. The \ec escape is processed
 as specified for Perl in the \fBperlebcdic\fP document. The only characters
 that are allowed after \ec are A-Z, a-z, or one of @, [, \e, ], ^, _, or ?. Any
-other character provokes a compile-time error. The sequence \e@ encodes
-character code 0; the letters (in either case) encode characters 1-26 (hex 01
-to hex 1A); [, \e, ], ^, and _ encode characters 27-31 (hex 1B to hex 1F), and
-\ec? becomes either 255 (hex FF) or 95 (hex 5F).
+other character provokes a compile-time error. The sequence \ec@ encodes
+character code 0; after \ec the letters (in either case) encode characters 1-26
+(hex 01 to hex 1A); [, \e, ], ^, and _ encode characters 27-31 (hex 1B to hex
+1F), and \ec? becomes either 255 (hex FF) or 95 (hex 5F).
 .P
 Thus, apart from \ec?, these escapes generate the same character code values as
 they do in an ASCII environment, though the meanings of the values mostly
