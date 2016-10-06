@@ -1319,7 +1319,7 @@ for (;;)
         {
         pcre2_callout_block cb;
         cb.version          = 1;
-        cb.capture_top      = offset_top/2;
+        cb.capture_top      = (uint32_t)offset_top/2;
         cb.capture_last     = mb->capture_last & CAPLMASK;
         cb.offset_vector    = mb->ovector;
         cb.mark             = mb->nomatch_mark;
@@ -1746,7 +1746,7 @@ for (;;)
         pcre2_callout_block cb;
         cb.version          = 1;
         cb.callout_number   = ecode[LINK_SIZE + 1];
-        cb.capture_top      = offset_top/2;
+        cb.capture_top      = (uint32_t)offset_top/2;
         cb.capture_last     = mb->capture_last & CAPLMASK;
         cb.offset_vector    = mb->ovector;
         cb.mark             = mb->nomatch_mark;
@@ -7162,7 +7162,7 @@ if (rc == MATCH_MATCH || rc == MATCH_ACCEPT)
   too many to fit into the ovector. */
 
   match_data->rc = ((mb->capture_last & OVFLBIT) != 0)?
-    0 : mb->end_offset_top/2;
+    0 : (int)mb->end_offset_top/2;
 
   /* If there is space in the offset vector, set any pairs that follow the
   highest-numbered captured string but are less than the number of capturing

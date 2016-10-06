@@ -140,7 +140,7 @@ values of 3 or 4 are also supported. */
 #undef LINK_SIZE
 #define LINK_SIZE 1
 #define PUT(a,n,d)   \
-  (a[n] = (d))
+  (a[n] = (PCRE2_UCHAR)(d))
 #define GET(a,n) \
   (a[n])
 #define MAX_PATTERN_SIZE (1 << 16)
