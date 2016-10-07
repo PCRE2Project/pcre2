@@ -3,6 +3,8 @@
 # results in 8-bit, 16-bit, and 32-bit modes are excluded (see tests 10 and
 # 12).
 
+#newline_default lf any anycrlf
+
 # PCRE2 and Perl disagree about the characteristics of certain Unicode
 # characters. For example, 061C is considered by Perl to be Arabic, though
 # is it not listed as such in the Unicode Scripts.txt file, and 2066-2069 are
