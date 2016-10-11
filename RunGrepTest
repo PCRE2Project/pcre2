@@ -440,7 +440,7 @@ echo "---------------------------- Test 82 -----------------------------" >>test
 echo "RC=$?" >>testtrygrep
 
 echo "---------------------------- Test 83 -----------------------------" >>testtrygrep
-(cd $srcdir; $valgrind $vjs $pcre2grep --buffer-size=100 "^a" ./testdata/grepinput3) >>testtrygrep 2>&1
+(cd $srcdir; $valgrind $vjs $pcre2grep --buffer-size=10 --max-buffer-size=100 "^a" ./testdata/grepinput3) >>testtrygrep 2>&1
 echo "RC=$?" >>testtrygrep
 
 echo "---------------------------- Test 84 -----------------------------" >>testtrygrep

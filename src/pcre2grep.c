@@ -173,6 +173,7 @@ static int before_context = 0;
 static int binary_files = BIN_BINARY;
 static int both_context = 0;
 static int bufthird = PCRE2GREP_BUFSIZE;
+static int max_bufthird = PCRE2GREP_MAX_BUFSIZE;
 static int bufsize = 3*PCRE2GREP_BUFSIZE;
 static int endlinetype;
 
@@ -344,6 +345,7 @@ used to identify them. */
 #define N_EXCLUDE_FROM (-19)
 #define N_INCLUDE_FROM (-20)
 #define N_OM_SEPARATOR (-21)
+#define N_MAX_BUFSIZE  (-22)
 
 static option_item optionlist[] = {
   { OP_NODATA,     N_NULL,   NULL,              "",              "terminate options" },
@@ -352,7 +354,8 @@ static option_item optionlist[] = {
   { OP_NODATA,     'a',      NULL,              "text",          "treat binary files as text" },
   { OP_NUMBER,     'B',      &before_context,   "before-context=number", "set number of prior context lines" },
   { OP_BINFILES,   N_BINARY_FILES, NULL,        "binary-files=word", "set treatment of binary files" },
-  { OP_NUMBER,     N_BUFSIZE,&bufthird,         "buffer-size=number", "set processing buffer size parameter" },
+  { OP_NUMBER,     N_BUFSIZE,&bufthird,         "buffer-size=number", "set processing buffer starting size" },
+  { OP_NUMBER,     N_MAX_BUFSIZE,&max_bufthird, "max-buffer-size=number",  "set processing buffer maximum size" },
   { OP_OP_STRING,  N_COLOUR, &colour_option,    "color=option",  "matched text color option" },
   { OP_OP_STRING,  N_COLOUR, &colour_option,    "colour=option", "matched text colour option" },
   { OP_NUMBER,     'C',      &both_context,     "context=number", "set number of context lines, before & after" },
@@ -952,8 +955,9 @@ for (op = optionlist; op->one_char != 0; op++)
   printf("%.*s%s" STDOUT_NL, n, "                           ", op->help_text);
   }
 
-printf(STDOUT_NL "Numbers may be followed by K or M, e.g. --buffer-size=100K." STDOUT_NL);
+printf(STDOUT_NL "Numbers may be followed by K or M, e.g. --max-buffer-size=100K." STDOUT_NL);
 printf("The default value for --buffer-size is %d." STDOUT_NL, PCRE2GREP_BUFSIZE);
+printf("The default value for --max-buffer-size is %d." STDOUT_NL, PCRE2GREP_MAX_BUFSIZE);
 printf("When reading patterns or file names from a file, trailing white" STDOUT_NL);
 printf("space is removed and blank lines are ignored." STDOUT_NL);
 printf("The maximum size of any pattern is %d bytes." STDOUT_NL, MAXPATLEN);
@@ -1100,12 +1104,12 @@ return om;
 *            Read one line of input              *
 *************************************************/
 
-/* Normally, input is read using fread() into a large buffer, so many lines may
-be read at once. However, doing this for tty input means that no output appears
-until a lot of input has been typed. Instead, tty input is handled line by
-line. We cannot use fgets() for this, because it does not stop at a binary
-zero, and therefore there is no way of telling how many characters it has read,
-because there may be binary zeros embedded in the data.
+/* Normally, input is read using fread() (or gzread, or BZ2_read) into a large
+buffer, so many lines may be read at once. However, doing this for tty input
+means that no output appears until a lot of input has been typed. Instead, tty
+input is handled line by line. We cannot use fgets() for this, because it does
+not stop at a binary zero, and therefore there is no way of telling how many
+characters it has read, because there may be binary zeros embedded in the data.
 
 Arguments:
   buffer     the buffer to read into
@@ -1424,17 +1428,18 @@ do_after_lines(int lastmatchnumber, char *lastmatchrestart, char *endptr,
 if (after_context > 0 && lastmatchnumber > 0)
   {
   int count = 0;
-  while (lastmatchrestart < endptr && count++ < after_context)
+  while (lastmatchrestart < endptr && count < after_context)
     {
     int ellength;
-    char *pp = lastmatchrestart;
+    char *pp = end_of_line(lastmatchrestart, endptr, &ellength);
+    if (ellength == 0 && pp == main_buffer + bufsize) break;
     if (printname != NULL) fprintf(stdout, "%s-", printname);
     if (number) fprintf(stdout, "%d-", lastmatchnumber++);
-    pp = end_of_line(pp, endptr, &ellength);
     FWRITE(lastmatchrestart, 1, pp - lastmatchrestart, stdout);
     lastmatchrestart = pp;
+    count++;
     }
-  hyphenpending = TRUE;
+  if (count > 0) hyphenpending = TRUE;
   }
 }
 
@@ -1770,6 +1775,33 @@ return result != 0;
 
 
 /*************************************************
+*     Read a portion of the file into buffer     *
+*************************************************/
+
+static int
+fill_buffer(void *handle, int frtype, char *buffer, int length,
+  BOOL input_line_buffered)
+{
+#ifdef SUPPORT_LIBZ
+if (frtype == FR_LIBZ)
+  return gzread((gzFile)handle, buffer, length);
+else
+#endif
+
+#ifdef SUPPORT_LIBBZ2
+if (frtype == FR_LIBBZ2)
+  return BZ2_bzread((BZFILE *)handle, buffer, length);
+else
+#endif
+
+return (input_line_buffered ?
+  read_one_line(buffer, length, (FILE *)handle) :
+  fread(buffer, 1, length, (FILE *)handle));
+}
+
+
+
+/*************************************************
 *            Grep an individual file             *
 *************************************************/
 
@@ -1813,48 +1845,23 @@ BOOL endhyphenpending = FALSE;
 BOOL input_line_buffered = line_buffered;
 FILE *in = NULL;                    /* Ensure initialized */
 
-#ifdef SUPPORT_LIBZ
-gzFile ingz = NULL;
-#endif
-
-#ifdef SUPPORT_LIBBZ2
-BZFILE *inbz2 = NULL;
-#endif
-
-
 /* Do the first read into the start of the buffer and set up the pointer to end
 of what we have. In the case of libz, a non-zipped .gz file will be read as a
 plain file. However, if a .bz2 file isn't actually bzipped, the first read will
 fail. */
 
-(void)frtype;
-
-#ifdef SUPPORT_LIBZ
-if (frtype == FR_LIBZ)
-  {
-  ingz = (gzFile)handle;
-  bufflength = gzread (ingz, main_buffer, bufsize);
-  }
-else
-#endif
-
-#ifdef SUPPORT_LIBBZ2
-if (frtype == FR_LIBBZ2)
-  {
-  inbz2 = (BZFILE *)handle;
-  bufflength = BZ2_bzread(inbz2, main_buffer, bufsize);
-  if ((int)bufflength < 0) return 2;   /* Gotcha: bufflength is size_t; */
-  }                                    /* without the cast it is unsigned. */
-else
-#endif
-
+if (frtype != FR_LIBZ && frtype != FR_LIBBZ2)
   {
   in = (FILE *)handle;
   if (is_file_tty(in)) input_line_buffered = TRUE;
-  bufflength = input_line_buffered?
-    read_one_line(main_buffer, bufsize, in) :
-    fread(main_buffer, 1, bufsize, in);
   }
+
+bufflength = fill_buffer(handle, frtype, main_buffer, bufsize,
+  input_line_buffered);
+
+#ifdef SUPPORT_LIBBZ2
+if (frtype == FR_LIBBZ2 && (int)bufflength < 0) return 2;   /* Gotcha: bufflength is size_t; */
+#endif
 
 endptr = main_buffer + bufflength;
 
@@ -1899,18 +1906,61 @@ while (ptr < endptr)
 
   /* Check to see if the line we are looking at extends right to the very end
   of the buffer without a line terminator. This means the line is too long to
-  handle. */
+  handle at the current buffer size. Until the buffer reaches its maximum size,
+  try doubling it and reading more data. */
 
   if (endlinelength == 0 && t == main_buffer + bufsize)
     {
-    fprintf(stderr, "pcre2grep: line %d%s%s is too long for the internal buffer\n"
-                    "pcre2grep: the buffer size is %d\n"
-                    "pcre2grep: use the --buffer-size option to change it\n",
-                    linenumber,
-                    (filename == NULL)? "" : " of file ",
-                    (filename == NULL)? "" : filename,
-                    bufthird);
-    return 2;
+    if (bufthird < max_bufthird)
+      {
+      char *new_buffer;
+      int new_bufthird = 2*bufthird;
+
+      if (new_bufthird > max_bufthird) new_bufthird = max_bufthird;
+      new_buffer = (char *)malloc(3*new_bufthird);
+
+      if (new_buffer == NULL)
+        {
+        fprintf(stderr,
+          "pcre2grep: line %d%s%s is too long for the internal buffer\n"
+          "pcre2grep: not enough memory to increase the buffer size to %d\n",
+          linenumber,
+          (filename == NULL)? "" : " of file ",
+          (filename == NULL)? "" : filename,
+          new_bufthird);
+        return 2;
+        }
+
+      /* Copy the data and adjust pointers to the new buffer location. */
+
+      memcpy(new_buffer, main_buffer, bufsize);
+      bufthird = new_bufthird;
+      bufsize = 3*bufthird;
+      ptr = new_buffer + (ptr - main_buffer);
+      lastmatchrestart = new_buffer + (lastmatchrestart - main_buffer);
+      free(main_buffer);
+      main_buffer = new_buffer;
+
+      /* Read more data into the buffer and then try to find the line ending
+      again. */
+
+      bufflength += fill_buffer(handle, frtype, main_buffer + bufflength,
+        bufsize - bufflength, input_line_buffered);
+      endptr = main_buffer + bufflength;
+      continue;
+      }
+    else
+      {
+      fprintf(stderr,
+        "pcre2grep: line %d%s%s is too long for the internal buffer\n"
+        "pcre2grep: the maximum buffer size is %d\n"
+        "pcre2grep: use the --max-buffer-size option to change it\n",
+        linenumber,
+        (filename == NULL)? "" : " of file ",
+        (filename == NULL)? "" : filename,
+        bufthird);
+      return 2;
+      }
     }
 
   /* Extra processing for Jeffrey Friedl's debugging. */
@@ -2320,8 +2370,9 @@ while (ptr < endptr)
         lastmatchnumber > 0 &&
         lastmatchrestart < main_buffer + bufthird)
       {
+
       do_after_lines(lastmatchnumber, lastmatchrestart, endptr, printname);
-      lastmatchnumber = 0;
+      lastmatchnumber = 0;  /* Indicates no after lines pending */
       }
 
     /* Now do the shuffle */
@@ -2329,24 +2380,8 @@ while (ptr < endptr)
     memmove(main_buffer, main_buffer + bufthird, 2*bufthird);
     ptr -= bufthird;
 
-#ifdef SUPPORT_LIBZ
-    if (frtype == FR_LIBZ)
-      bufflength = 2*bufthird +
-        gzread (ingz, main_buffer + 2*bufthird, bufthird);
-    else
-#endif
-
-#ifdef SUPPORT_LIBBZ2
-    if (frtype == FR_LIBBZ2)
-      bufflength = 2*bufthird +
-        BZ2_bzread(inbz2, main_buffer + 2*bufthird, bufthird);
-    else
-#endif
-
-    bufflength = 2*bufthird +
-      (input_line_buffered?
-       read_one_line(main_buffer + 2*bufthird, bufthird, in) :
-       fread(main_buffer + 2*bufthird, 1, bufthird, in));
+    bufflength = 2*bufthird + fill_buffer(handle, frtype,
+      main_buffer + 2*bufthird, bufthird, input_line_buffered);
     endptr = main_buffer + bufflength;
 
     /* Adjust any last match point */
@@ -3426,6 +3461,12 @@ if (jfriedl_XT != 0 || jfriedl_XR != 0)
 #endif
 
 /* Get memory for the main buffer. */
+
+if (bufthird <= 0)
+  {
+  fprintf(stderr, "pcre2grep: --buffer-size must be greater than zero\n");
+  goto EXIT2;
+  }
 
 bufsize = 3*bufthird;
 main_buffer = (char *)malloc(bufsize);

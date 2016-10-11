@@ -1,4 +1,4 @@
-.TH PCRE2BUILD 3 "01 April 2016" "PCRE2 10.22"
+.TH PCRE2BUILD 3 "07 October 2016" "PCRE2 10.23"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .
@@ -385,16 +385,19 @@ they are not.
 .sp
 \fBpcre2grep\fP uses an internal buffer to hold a "window" on the file it is
 scanning, in order to be able to output "before" and "after" lines when it
-finds a match. The size of the buffer is controlled by a parameter whose
-default value is 20K. The buffer itself is three times this size, but because
-of the way it is used for holding "before" lines, the longest line that is
-guaranteed to be processable is the parameter size. You can change the default
-parameter value by adding, for example,
+finds a match. The starting size of the buffer is controlled by a parameter
+whose default value is 20K. The buffer itself is three times this size, but
+because of the way it is used for holding "before" lines, the longest line that
+is guaranteed to be processable is the parameter size. If a longer line is 
+encountered, \fBpcre2grep\fP automatically expands the buffer, up to a
+specified maximum size, whose default is 1M or the starting size, whichever is
+the larger. You can change the default parameter values by adding, for example,
 .sp
-  --with-pcre2grep-bufsize=50K
+  --with-pcre2grep-bufsize=51200
+  --with-pcre2grep-max-bufsize=2097152 
 .sp
-to the \fBconfigure\fP command. The caller of \fPpcre2grep\fP can override this
-value by using --buffer-size on the command line.
+to the \fBconfigure\fP command. The caller of \fPpcre2grep\fP can override 
+these values by using --buffer-size and --max-buffer-size on the command line.
 .
 .
 .SH "PCRE2TEST OPTION FOR LIBREADLINE SUPPORT"
@@ -532,6 +535,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 01 April 2016
+Last updated: 07 October 2016
 Copyright (c) 1997-2016 University of Cambridge.
 .fi

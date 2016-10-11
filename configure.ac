@@ -240,8 +240,14 @@ AC_ARG_ENABLE(pcre2grep-libbz2,
 # Handle --with-pcre2grep-bufsize=N
 AC_ARG_WITH(pcre2grep-bufsize,
               AS_HELP_STRING([--with-pcre2grep-bufsize=N],
-                             [pcre2grep buffer size (default=20480, minimum=8192)]),
+                             [pcre2grep initial buffer size (default=20480, minimum=8192)]),
               , with_pcre2grep_bufsize=20480)
+
+# Handle --with-pcre2grep-max-bufsize=N
+AC_ARG_WITH(pcre2grep-max-bufsize,
+              AS_HELP_STRING([--with-pcre2grep-max-bufsize=N],
+                             [pcre2grep maximum buffer size (default=1048576, minimum=8192)]),
+              , with_pcre2grep_max_bufsize=1048576)
 
 # Handle --enable-pcre2test-libedit
 AC_ARG_ENABLE(pcre2test-libedit,
@@ -608,15 +614,30 @@ if test $with_pcre2grep_bufsize -lt 8192 ; then
   with_pcre2grep_bufsize="8192"
 else
   if test $? -gt 1 ; then
-  AC_MSG_ERROR([Bad value for  --with-pcre2grep-bufsize])
+  AC_MSG_ERROR([Bad value for --with-pcre2grep-bufsize])
+  fi
+fi
+
+if test $with_pcre2grep_max_bufsize -lt $with_pcre2grep_bufsize ; then
+  with_pcre2grep_max_bufsize="$with_pcre2grep_bufsize"
+else
+  if test $? -gt 1 ; then
+  AC_MSG_ERROR([Bad value for --with-pcre2grep-max-bufsize])
   fi
 fi
 
 AC_DEFINE_UNQUOTED([PCRE2GREP_BUFSIZE], [$with_pcre2grep_bufsize], [
-  The value of PCRE2GREP_BUFSIZE determines the size of buffer used by pcre2grep
-  to hold parts of the file it is searching. This is also the minimum value.
-  The actual amount of memory used by pcre2grep is three times this number,
-  because it allows for the buffering of "before" and "after" lines.])
+  The value of PCRE2GREP_BUFSIZE is the starting size of the buffer used by
+  pcre2grep to hold parts of the file it is searching. The buffer will be
+  expanded up to PCRE2GREP_MAX_BUFSIZE if necessary, for files containing very 
+  long lines. The actual amount of memory used by pcre2grep is three times this
+  number, because it allows for the buffering of "before" and "after" lines.])
+
+AC_DEFINE_UNQUOTED([PCRE2GREP_MAX_BUFSIZE], [$with_pcre2grep_max_bufsize], [
+  The value of PCRE2GREP_MAX_BUFSIZE specifies the maximum size of the buffer
+  used by pcre2grep to hold parts of the file it is searching. The actual
+  amount of memory used by pcre2grep is three times this number, because it
+  allows for the buffering of "before" and "after" lines.])
 
 if test "$enable_pcre2test_libedit" = "yes"; then
   AC_DEFINE([SUPPORT_LIBEDIT], [], [
@@ -906,43 +927,44 @@ cat <<EOF
 
 $PACKAGE-$VERSION configuration summary:
 
-    Install prefix .................. : ${prefix}
-    C preprocessor .................. : ${CPP}
-    C compiler ...................... : ${CC}
-    Linker .......................... : ${LD}
-    C preprocessor flags ............ : ${CPPFLAGS}
-    C compiler flags ................ : ${CFLAGS} ${VISIBILITY_CFLAGS}
-    Linker flags .................... : ${LDFLAGS}
-    Extra libraries ................. : ${LIBS}
-
-    Build 8-bit pcre2 library ....... : ${enable_pcre2_8}
-    Build 16-bit pcre2 library ...... : ${enable_pcre2_16}
-    Build 32-bit pcre2 library ...... : ${enable_pcre2_32}
-    Include debugging code .......... : ${enable_debug}
-    Enable JIT compiling support .... : ${enable_jit}
-    Enable Unicode support .......... : ${enable_unicode}
-    Newline char/sequence ........... : ${enable_newline}
-    \R matches only ANYCRLF ......... : ${enable_bsr_anycrlf}
-    \C is disabled .................. : ${enable_never_backslash_C}
-    EBCDIC coding ................... : ${enable_ebcdic}
-    EBCDIC code for NL .............. : ${ebcdic_nl_code}
-    Rebuild char tables ............. : ${enable_rebuild_chartables}
-    Use stack recursion ............. : ${enable_stack_for_recursion}
-    Internal link size .............. : ${with_link_size}
-    Nested parentheses limit ........ : ${with_parens_nest_limit}
-    Match limit ..................... : ${with_match_limit}
-    Match limit recursion ........... : ${with_match_limit_recursion}
-    Build shared libs ............... : ${enable_shared}
-    Build static libs ............... : ${enable_static}
-    Use JIT in pcre2grep ............ : ${enable_pcre2grep_jit}
-    Enable callouts in pcre2grep .... : ${enable_pcre2grep_callout}
-    Buffer size for pcre2grep ....... : ${with_pcre2grep_bufsize}
-    Link pcre2grep with libz ........ : ${enable_pcre2grep_libz}
-    Link pcre2grep with libbz2 ...... : ${enable_pcre2grep_libbz2}
-    Link pcre2test with libedit ..... : ${enable_pcre2test_libedit}
-    Link pcre2test with libreadline . : ${enable_pcre2test_libreadline}
-    Valgrind support ................ : ${enable_valgrind}
-    Code coverage ................... : ${enable_coverage}
+    Install prefix ..................... : ${prefix}
+    C preprocessor ..................... : ${CPP}
+    C compiler ......................... : ${CC}
+    Linker ............................. : ${LD}
+    C preprocessor flags ............... : ${CPPFLAGS}
+    C compiler flags ................... : ${CFLAGS} ${VISIBILITY_CFLAGS}
+    Linker flags ....................... : ${LDFLAGS}
+    Extra libraries .................... : ${LIBS}
+                                        
+    Build 8-bit pcre2 library .......... : ${enable_pcre2_8}
+    Build 16-bit pcre2 library ......... : ${enable_pcre2_16}
+    Build 32-bit pcre2 library ......... : ${enable_pcre2_32}
+    Include debugging code ............. : ${enable_debug}
+    Enable JIT compiling support ....... : ${enable_jit}
+    Enable Unicode support ............. : ${enable_unicode}
+    Newline char/sequence .............. : ${enable_newline}
+    \R matches only ANYCRLF ............ : ${enable_bsr_anycrlf}
+    \C is disabled ..................... : ${enable_never_backslash_C}
+    EBCDIC coding ...................... : ${enable_ebcdic}
+    EBCDIC code for NL ................. : ${ebcdic_nl_code}
+    Rebuild char tables ................ : ${enable_rebuild_chartables}
+    Use stack recursion ................ : ${enable_stack_for_recursion}
+    Internal link size ................. : ${with_link_size}
+    Nested parentheses limit ........... : ${with_parens_nest_limit}
+    Match limit ........................ : ${with_match_limit}
+    Match limit recursion .............. : ${with_match_limit_recursion}
+    Build shared libs .................. : ${enable_shared}
+    Build static libs .................. : ${enable_static}
+    Use JIT in pcre2grep ............... : ${enable_pcre2grep_jit}
+    Enable callouts in pcre2grep ....... : ${enable_pcre2grep_callout}
+    Initial buffer size for pcre2grep .. : ${with_pcre2grep_bufsize}
+    Maximum buffer size for pcre2grep .. : ${with_pcre2grep_max_bufsize}
+    Link pcre2grep with libz ........... : ${enable_pcre2grep_libz}
+    Link pcre2grep with libbz2 ......... : ${enable_pcre2grep_libbz2}
+    Link pcre2test with libedit ........ : ${enable_pcre2test_libedit}
+    Link pcre2test with libreadline .... : ${enable_pcre2test_libreadline}
+    Valgrind support ................... : ${enable_valgrind}
+    Code coverage ...................... : ${enable_coverage}
 
 EOF
 

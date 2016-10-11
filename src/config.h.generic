@@ -206,7 +206,7 @@ sure both macros are undefined; an emulation function will then be used. */
 #define PACKAGE_NAME "PCRE2"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "PCRE2 10.22"
+#define PACKAGE_STRING "PCRE2 10.23-RC1"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "pcre2"
@@ -215,7 +215,7 @@ sure both macros are undefined; an emulation function will then be used. */
 #define PACKAGE_URL ""
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "10.22"
+#define PACKAGE_VERSION "10.23-RC1"
 
 /* The value of PARENS_NEST_LIMIT specifies the maximum depth of nested
    parentheses (of any kind) in a pattern. This limits the amount of system
@@ -224,13 +224,22 @@ sure both macros are undefined; an emulation function will then be used. */
 #define PARENS_NEST_LIMIT 250
 #endif
 
-/* The value of PCRE2GREP_BUFSIZE determines the size of buffer used by
-   pcre2grep to hold parts of the file it is searching. This is also the
-   minimum value. The actual amount of memory used by pcre2grep is three times
-   this number, because it allows for the buffering of "before" and "after"
-   lines. */
+/* The value of PCRE2GREP_BUFSIZE is the starting size of the buffer used by
+   pcre2grep to hold parts of the file it is searching. The buffer will be
+   expanded up to PCRE2GREP_MAX_BUFSIZE if necessary, for files containing
+   very long lines. The actual amount of memory used by pcre2grep is three
+   times this number, because it allows for the buffering of "before" and
+   "after" lines. */
 #ifndef PCRE2GREP_BUFSIZE
 #define PCRE2GREP_BUFSIZE 20480
+#endif
+
+/* The value of PCRE2GREP_MAX_BUFSIZE specifies the maximum size of the buffer
+   used by pcre2grep to hold parts of the file it is searching. The actual
+   amount of memory used by pcre2grep is three times this number, because it
+   allows for the buffering of "before" and "after" lines. */
+#ifndef PCRE2GREP_MAX_BUFSIZE
+#define PCRE2GREP_MAX_BUFSIZE 1048576
 #endif
 
 /* Define to any value to include debugging code. */
@@ -299,7 +308,7 @@ sure both macros are undefined; an emulation function will then be used. */
 /* #undef SUPPORT_VALGRIND */
 
 /* Version number of package */
-#define VERSION "10.22"
+#define VERSION "10.23-RC1"
 
 /* Define to empty if `const' does not conform to ANSI C. */
 /* #undef const */

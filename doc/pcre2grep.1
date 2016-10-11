@@ -1,4 +1,4 @@
-.TH PCRE2GREP 1 "19 June 2016" "PCRE2 10.22"
+.TH PCRE2GREP 1 "11 October 2016" "PCRE2 10.23"
 .SH NAME
 pcre2grep - a grep with Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -52,11 +52,18 @@ span line boundaries. What defines a line boundary is controlled by the
 \fB-N\fP (\fB--newline\fP) option.
 .P
 The amount of memory used for buffering files that are being scanned is
-controlled by a parameter that can be set by the \fB--buffer-size\fP option.
-The default value for this parameter is specified when \fBpcre2grep\fP is
-built, with the default default being 20K. A block of memory three times this
-size is used (to allow for buffering "before" and "after" lines). An error
-occurs if a line overflows the buffer.
+controlled by parameters that can be set by the \fB--buffer-size\fP and
+\fB--max-buffer-size\fP options. The first of these sets the size of buffer
+that is obtained at the start of processing. If an input file contains very
+long lines, a larger buffer may be needed; this is handled by automatically
+extending the buffer, up to the limit specified by \fB--max-buffer-size\fP. The
+default values for these parameters are specified when \fBpcre2grep\fP is
+built, with the default defaults being 20K and 1M respectively. An error occurs
+if a line is too long and the buffer can no longer be expanded.
+.P
+The block of memory that is actually used is three times the "buffer size", to
+allow for buffering "before" and "after" lines. If the buffer size is too 
+small, fewer than requested "before" and "after" lines may be output.
 .P
 Patterns can be no longer than 8K or BUFSIZ bytes, whichever is the greater.
 BUFSIZ is defined in \fB<stdio.h>\fP. When there is more than one pattern
@@ -126,24 +133,29 @@ command line starts with a hyphen but is not an option. This allows for the
 processing of patterns and file names that start with hyphens.
 .TP
 \fB-A\fP \fInumber\fP, \fB--after-context=\fP\fInumber\fP
-Output \fInumber\fP lines of context after each matching line. If file names
-and/or line numbers are being output, a hyphen separator is used instead of a
-colon for the context lines. A line containing "--" is output between each
-group of lines, unless they are in fact contiguous in the input file. The value
-of \fInumber\fP is expected to be relatively small. However, \fBpcre2grep\fP
-guarantees to have up to 8K of following text available for context output.
+Output up to \fInumber\fP lines of context after each matching line. Fewer
+lines are output if the next match or the end of the file is reached, or if the
+processing buffer size has been set too small. If file names and/or line
+numbers are being output, a hyphen separator is used instead of a colon for the
+context lines. A line containing "--" is output between each group of lines,
+unless they are in fact contiguous in the input file. The value of \fInumber\fP
+is expected to be relatively small. However, \fBpcre2grep\fP guarantees to have
+up to 8K of following text available for context output.
 .TP
 \fB-a\fP, \fB--text\fP
 Treat binary files as text. This is equivalent to
 \fB--binary-files\fP=\fItext\fP.
 .TP
 \fB-B\fP \fInumber\fP, \fB--before-context=\fP\fInumber\fP
-Output \fInumber\fP lines of context before each matching line. If file names
-and/or line numbers are being output, a hyphen separator is used instead of a
-colon for the context lines. A line containing "--" is output between each
-group of lines, unless they are in fact contiguous in the input file. The value
-of \fInumber\fP is expected to be relatively small. However, \fBpcre2grep\fP
-guarantees to have up to 8K of preceding text available for context output.
+Output up to \fInumber\fP lines of context before each matching line. Fewer 
+lines are output if the previous match or the start of the file is within 
+\fInumber\fP lines, or if the processing buffer size has been set too small. If
+file names and/or line numbers are being output, a hyphen separator is used
+instead of a colon for the context lines. A line containing "--" is output
+between each group of lines, unless they are in fact contiguous in the input
+file. The value of \fInumber\fP is expected to be relatively small. However,
+\fBpcre2grep\fP guarantees to have up to 8K of preceding text available for
+context output.
 .TP
 \fB--binary-files=\fP\fIword\fP
 Specify how binary files are to be processed. If the word is "binary" (the
@@ -158,8 +170,9 @@ be of interest and are skipped without causing any output or affecting the
 return code.
 .TP
 \fB--buffer-size=\fP\fInumber\fP
-Set the parameter that controls how much memory is used for buffering files
-that are being scanned.
+Set the parameter that controls how much memory is obtained at the start of 
+processing for buffering files that are being scanned. See also 
+\fB--max-buffer-size\fP below.
 .TP
 \fB-C\fP \fInumber\fP, \fB--context=\fP\fInumber\fP
 Output \fInumber\fP lines of context both before and after each matching line.
@@ -431,6 +444,11 @@ of use only if it is set smaller than \fB--match-limit\fP.
 .sp
 There are no short forms for these options. The default settings are specified
 when the PCRE2 library is compiled, with the default default being 10 million.
+.TP
+\fB--max-buffer-size=\fInumber\fP
+This limits the expansion of the processing buffer, whose initial size can be 
+set by \fB--buffer-size\fP. The maximum buffer size is silently forced to be no 
+smaller than the starting buffer size.
 .TP
 \fB-M\fP, \fB--multiline\fP
 Allow patterns to match more than one line. When this option is given, patterns
@@ -757,6 +775,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 19 June 2016
+Last updated: 11 October 2016
 Copyright (c) 1997-2016 University of Cambridge.
 .fi

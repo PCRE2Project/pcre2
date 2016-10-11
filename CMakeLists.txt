@@ -76,6 +76,7 @@
 #            a new option instead of being unconditional.
 # 2016-10-05 PH fixed a typo (PCRE should be PCRE2) in above patch
 #            fix by David Gaussmann
+# 2016-10-07 PH added PCREGREP_MAX_BUFSIZE
 
 PROJECT(PCRE2 C)
 
@@ -148,7 +149,10 @@ SET(PCRE2_MATCH_LIMIT_RECURSION "MATCH_LIMIT" CACHE STRING
     "Default limit on internal recursion. See MATCH_LIMIT_RECURSION in config.h.in for details.")
 
 SET(PCRE2GREP_BUFSIZE "20480" CACHE STRING
-    "Buffer size parameter for pcre2grep. See PCRE2GREP_BUFSIZE in config.h.in for details.")
+    "Buffer starting size parameter for pcre2grep. See PCRE2GREP_BUFSIZE in config.h.in for details.")
+
+SET(PCRE2GREP_MAX_BUFSIZE "1048576" CACHE STRING
+    "Buffer maximum size parameter for pcre2grep. See PCRE2GREP_MAX_BUFSIZE in config.h.in for details.")
 
 SET(PCRE2_NEWLINE "LF" CACHE STRING
     "What to recognize as a newline (one of CR, LF, CRLF, ANY, ANYCRLF).")

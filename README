@@ -339,12 +339,22 @@ library. They are also documented in the pcre2build man page.
 
   Of course, the relevant libraries must be installed on your system.
 
-. The default size (in bytes) of the internal buffer used by pcre2grep can be
-  set by, for example:
+. The default starting size (in bytes) of the internal buffer used by pcre2grep
+  can be set by, for example:
 
   --with-pcre2grep-bufsize=51200
 
-  The value must be a plain integer. The default is 20480.
+  The value must be a plain integer. The default is 20480. The amount of memory 
+  used by pcre2grep is actually three times this number, to allow for "before" 
+  and "after" lines.
+  
+. The default maximum size of pcre2grep's internal buffer can be set by, for 
+  example:
+  
+  --with-pcre2grep-max-bufsize=2097152
+  
+  The default is either 1048576 or the value of --with-pcre2grep-bufsize, 
+  whichever is the larger.  
 
 . It is possible to compile pcre2test so that it links with the libreadline
   or libedit libraries, by specifying, respectively,
@@ -845,4 +855,4 @@ The distribution should contain the files listed below.
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 01 April 2016
+Last updated: 07 October 2016

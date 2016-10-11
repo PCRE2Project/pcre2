@@ -61,6 +61,10 @@ escape sequence for a character whose code point was greater than \x{ff}.
 9. Change 19 for 10.22 had a typo (PCRE_STATIC_RUNTIME should be
 PCRE2_STATIC_RUNTIME). Fix from David Gaussmann.
 
+10. Added --max-buffer-size to pcre2grep, to allow for automatic buffer 
+expansion when long lines are encountered. Original patch by Dmitry 
+Cherniachenko.
+
 
 Version 10.22 29-July-2016
 --------------------------

@@ -637,8 +637,8 @@ RC=0
 RC=0
 ---------------------------- Test 83 -----------------------------
 pcre2grep: line 4 of file ./testdata/grepinput3 is too long for the internal buffer
-pcre2grep: the buffer size is 100
-pcre2grep: use the --buffer-size option to change it
+pcre2grep: the maximum buffer size is 100
+pcre2grep: use the --max-buffer-size option to change it
 RC=2
 ---------------------------- Test 84 -----------------------------
 testdata/grepinputv:fox jumps
