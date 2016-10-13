@@ -3460,6 +3460,16 @@ if (jfriedl_XT != 0 || jfriedl_XR != 0)
   }
 #endif
 
+/* If use_jit is set, check whether JIT is available. If not, do not try
+to use JIT. */
+
+if (use_jit)
+  {
+  uint32_t answer; 
+  (void)pcre2_config(PCRE2_CONFIG_JIT, &answer);
+  if (!answer) use_jit = FALSE; 
+  } 
+
 /* Get memory for the main buffer. */
 
 if (bufthird <= 0)

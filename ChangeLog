@@ -67,6 +67,11 @@ PCRE2_STATIC_RUNTIME). Fix from David Gaussmann.
 expansion when long lines are encountered. Original patch by Dmitry 
 Cherniachenko.
 
+11. If pcre2grep was compiled with JIT support, but the library was compiled 
+without it (something that neither ./configure nor CMake allow, but it can be
+done by editing config.h), pcre2grep was giving a JIT error. Now it detects
+this situation and does not try to use JIT.
+
 
 Version 10.22 29-July-2016
 --------------------------
