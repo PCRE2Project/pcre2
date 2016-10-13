@@ -27,6 +27,8 @@ some minor bugs and Perl incompatibilities were fixed, including:
       the name "DEFINE" exists. PCRE2 now does likewise.
   (d) A recursion condition test such as (?(R2)...) must now refer to an 
       existing subpattern.
+  (e) A conditional recursion test such as (?(R)...) misbehaved if there was a 
+      group whose name began with "R".
 
 One effect of the refactoring is that some error numbers and messages have 
 changed, and the pattern offset given for compiling errors is not always the

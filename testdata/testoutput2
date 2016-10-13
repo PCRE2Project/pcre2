@@ -15306,6 +15306,34 @@ Failed: error 150 at offset 4: invalid range in character class
 Failed: error 150 at offset 5: invalid range in character class
     a-a9-a
 
+/(?<RA>abc)(?(R)xyz)/B
+------------------------------------------------------------------
+        Bra
+        CBra 1
+        abc
+        Ket
+        Cond
+        Cond recurse any
+        xyz
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+
+/(?<R>abc)(?(R)xyz)/B
+------------------------------------------------------------------
+        Bra
+        CBra 1
+        abc
+        Ket
+        Cond
+      1 Cond ref
+        xyz
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+
 # End of testinput2 
 Error -63: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

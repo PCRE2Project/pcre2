@@ -4888,4 +4888,8 @@ a)"xI
 /[a-\d]+/
     a-a9-a
 
+/(?<RA>abc)(?(R)xyz)/B
+
+/(?<R>abc)(?(R)xyz)/B
+
 # End of testinput2 
