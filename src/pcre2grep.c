@@ -681,6 +681,17 @@ return isatty(fileno(f));
 }
 #endif
 
+
+/************* Print optionally coloured match Unix-style and z/OS **********/
+
+static void
+print_match(const char* buf, int length)
+{
+if (do_colour) fprintf(stdout, "%c[%sm", 0x1b, colour_string);
+FWRITE(buf, 1, length, stdout);
+if (do_colour) fprintf(stdout, "%c[00m", 0x1b);
+}
+
 /* End of Unix-style or native z/OS environment functions. */
 
 
@@ -812,6 +823,65 @@ static BOOL
 is_file_tty(FILE *f)
 {
 return FALSE;
+}
+
+
+/************* Print optionally coloured match in Windows **********/
+
+static HANDLE hstdout;
+static CONSOLE_SCREEN_BUFFER_INFO csbi;
+static WORD match_colour;
+
+static void
+print_match(const char* buf, int length)
+{
+if (do_colour) SetConsoleTextAttribute(hstdout, match_colour);
+FWRITE(buf, 1, length, stdout);
+if (do_colour) SetConsoleTextAttribute(hstdout, csbi.wAttributes);
+}
+
+/* Convert ANSI BGR format to RGB used by Windows */
+#define BGR_RGB(x) ((x & 1 ? 4 : 0) | (x & 2) | (x & 4 ? 1 : 0))
+
+static WORD
+decode_ANSI_colour(char *cs)
+{
+WORD result = 0;
+while (*cs)
+  {
+  if (isdigit(*cs))
+    {
+    int code = atoi(cs);
+    if (code == 1) result |= 0x08;
+    else if (code >= 30 && code <= 37) result = (result & 0xF8) | BGR_RGB(code - 30);
+    else if (code == 39) result = (result & 0xF0) | (csbi.wAttributes & 0x0F);
+    else if (code >= 40 && code <= 47) result = (result & 0x8F) | (BGR_RGB(code - 40) << 4);
+    else if (code == 49) result = (result & 0x0F) | (csbi.wAttributes & 0xF0);
+    /* aixterm high intensity colour codes */
+    else if (code >= 90 && code <= 97) result = (result & 0xF0) | BGR_RGB(code - 90) | 0x08;
+    else if (code >= 100 && code <= 107) result = (result & 0x0F) | (BGR_RGB(code - 100) << 4) | 0x80;
+
+    while (isdigit(*cs)) cs++;
+    }
+
+  if (*cs) cs++;
+  }
+
+return result;
+}
+
+static void
+init_colour_output()
+{
+if (do_colour)
+  {
+  hstdout = GetStdHandle(STD_OUTPUT_HANDLE);
+  GetConsoleScreenBufferInfo(hstdout, &csbi);
+
+  match_colour = decode_ANSI_colour(colour_string);
+  /* No valid colour found - turn off colouring */
+  if (!match_colour) do_colour = FALSE;
+  }
 }
 
 /* End of Windows functions */
@@ -2113,9 +2183,7 @@ while (ptr < endptr)
               if (plen > 0)
                 {
                 if (printed) fprintf(stdout, "%s", om_separator);
-                if (do_colour) fprintf(stdout, "%c[%sm", 0x1b, colour_string);
-                FWRITE(matchptr + offsets[n*2], 1, plen, stdout);
-                if (do_colour) fprintf(stdout, "%c[00m", 0x1b);
+                print_match(matchptr + offsets[n*2], plen);
                 printed = TRUE;
                 }
               }
@@ -2283,9 +2351,7 @@ while (ptr < endptr)
         {
         int plength;
         FWRITE(ptr, 1, offsets[0], stdout);
-        fprintf(stdout, "%c[%sm", 0x1b, colour_string);
-        FWRITE(ptr + offsets[0], 1, offsets[1] - offsets[0], stdout);
-        fprintf(stdout, "%c[00m", 0x1b);
+        print_match(ptr + offsets[0], offsets[1] - offsets[0]);
         for (;;)
           {
           startoffset = offsets[1];
@@ -2293,9 +2359,7 @@ while (ptr < endptr)
               !match_patterns(matchptr, length, options, startoffset, &mrc))
             break;
           FWRITE(matchptr + startoffset, 1, offsets[0] - startoffset, stdout);
-          fprintf(stdout, "%c[%sm", 0x1b, colour_string);
-          FWRITE(matchptr + offsets[0], 1, offsets[1] - offsets[0], stdout);
-          fprintf(stdout, "%c[00m", 0x1b);
+          print_match(matchptr + offsets[0], offsets[1] - offsets[0]);
           }
 
         /* In multiline mode, we may have already printed the complete line
@@ -3391,7 +3455,12 @@ if (colour_option != NULL && strcmp(colour_option, "never") != 0)
     {
     char *cs = getenv("PCRE2GREP_COLOUR");
     if (cs == NULL) cs = getenv("PCRE2GREP_COLOR");
+    if (cs == NULL) cs = getenv("GREP_COLOUR"); 
+    if (cs == NULL) cs = getenv("GREP_COLOR"); 
     if (cs != NULL) colour_string = cs;
+#if defined HAVE_WINDOWS_H && HAVE_WINDOWS_H
+    init_colour_output();
+#endif 
     }
   }
 

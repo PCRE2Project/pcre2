@@ -1,4 +1,4 @@
-.TH PCRE2GREP 1 "11 October 2016" "PCRE2 10.23"
+.TH PCRE2GREP 1 "14 October 2016" "PCRE2 10.23"
 .SH NAME
 pcre2grep - a grep with Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -206,11 +206,12 @@ because \fBpcre2grep\fP has to search for all possible matches in a line, not
 just one, in order to colour them all.
 .sp
 The colour that is used can be specified by setting the environment variable
-PCRE2GREP_COLOUR or PCRE2GREP_COLOR. The value of this variable should be a
-string of two numbers, separated by a semicolon. They are copied directly into
-the control string for setting colour on a terminal, so it is your
-responsibility to ensure that they make sense. If neither of the environment
-variables is set, the default is "1;31", which gives red.
+PCRE2GREP_COLOUR or PCRE2GREP_COLOR. If neither of these are set,
+\fBpcre2grep\fP looks for GREP_COLOUR or GREP_COLOR. The value of the variable
+should be a string of two numbers, separated by a semicolon. They are copied
+directly into the control string for setting colour on a terminal, so it is
+your responsibility to ensure that they make sense. If neither of the
+environment variables is set, the default is "1;31", which gives red.
 .TP
 \fB-D\fP \fIaction\fP, \fB--devices=\fP\fIaction\fP
 If an input path is not a regular file or a directory, "action" specifies how
@@ -525,12 +526,13 @@ It should never be needed in normal use.
 Show only the part of the line that matched a pattern instead of the whole
 line. In this mode, no context is shown. That is, the \fB-A\fP, \fB-B\fP, and
 \fB-C\fP options are ignored. If there is more than one match in a line, each
-of them is shown separately. If \fB-o\fP is combined with \fB-v\fP (invert the
-sense of the match to find non-matching lines), no output is generated, but the
-return code is set appropriately. If the matched portion of the line is empty,
-nothing is output unless the file name or line number are being printed, in
-which case they are shown on an otherwise empty line. This option is mutually
-exclusive with \fB--file-offsets\fP and \fB--line-offsets\fP.
+of them is shown separately, on a separate line of output. If \fB-o\fP is
+combined with \fB-v\fP (invert the sense of the match to find non-matching
+lines), no output is generated, but the return code is set appropriately. If
+the matched portion of the line is empty, nothing is output unless the file
+name or line number are being printed, in which case they are shown on an
+otherwise empty line. This option is mutually exclusive with
+\fB--file-offsets\fP and \fB--line-offsets\fP.
 .TP
 \fB-o\fP\fInumber\fP, \fB--only-matching\fP=\fInumber\fP
 Show only the part of the line that matched the capturing parentheses of the
@@ -542,10 +544,11 @@ for the non-argument case above also apply to this case. If the specified
 capturing parentheses do not exist in the pattern, or were not set in the
 match, nothing is output unless the file name or line number are being output.
 .sp
-If this option is given multiple times, multiple substrings are output, in the
-order the options are given. For example, -o3 -o1 -o3 causes the substrings
-matched by capturing parentheses 3 and 1 and then 3 again to be output. By
-default, there is no separator (but see the next option).
+If this option is given multiple times, multiple substrings are output for each 
+match, in the order the options are given, and all on one line. For example,
+-o3 -o1 -o3 causes the substrings matched by capturing parentheses 3 and 1 and
+then 3 again to be output. By default, there is no separator (but see the next
+option).
 .TP
 \fB--om-separator\fP=\fItext\fP
 Specify a separating string for multiple occurrences of \fB-o\fP. The default
@@ -775,6 +778,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 11 October 2016
+Last updated: 14 October 2016
 Copyright (c) 1997-2016 University of Cambridge.
 .fi

@@ -74,6 +74,10 @@ this situation and does not try to use JIT.
 
 12. Added some "const" qualifiers to variables in pcre2grep.
 
+13. Added Dmitry Cherniachenko's patch for colouring output in Windows 
+(untested by me). Also, look for GREP_COLOUR or GREP_COLOR if the environment 
+variables PCRE2GREP_COLOUR and PCRE2GREP_COLOR are not found.
+
 
 Version 10.22 29-July-2016
 --------------------------
