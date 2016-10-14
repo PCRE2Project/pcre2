@@ -561,7 +561,8 @@ fi
 
 if test "$enable_pcre2grep_jit" = "yes"; then
   AC_DEFINE([SUPPORT_PCRE2GREP_JIT], [], [
-    Define to any value to enable JIT support in pcre2grep.])
+    Define to any value to enable JIT support in pcre2grep. Note that this will
+    have no effect unless SUPPORT_JIT is also defined.])
 fi
 
 # Currently pcre2grep callout string is not supported under Windows.
