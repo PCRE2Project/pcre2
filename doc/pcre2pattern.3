@@ -1,4 +1,4 @@
-.TH PCRE2PATTERN 3 "06 October 2016" "PCRE2 10.23"
+.TH PCRE2PATTERN 3 "14 October 2016" "PCRE2 10.23"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION DETAILS"
@@ -1550,12 +1550,8 @@ respectively.
 .P
 When one of these option changes occurs at top level (that is, not inside
 subpattern parentheses), the change applies to the remainder of the pattern
-that follows. If the change is placed right at the start of a pattern, PCRE2
-extracts it into the global options (and it will therefore show up in data
-extracted by the \fBpcre2_pattern_info()\fP function).
-.P
-An option change within a subpattern (see below for a description of
-subpatterns) affects only that part of the subpattern that follows it, so
+that follows. An option change within a subpattern (see below for a description
+of subpatterns) affects only that part of the subpattern that follows it, so
 .sp
   (a(?i)b)c
 .sp
@@ -3474,6 +3470,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 06 October 2016
+Last updated: 14 October 2016
 Copyright (c) 1997-2016 University of Cambridge.
 .fi
