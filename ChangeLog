@@ -72,6 +72,8 @@ without it (something that neither ./configure nor CMake allow, but it can be
 done by editing config.h), pcre2grep was giving a JIT error. Now it detects
 this situation and does not try to use JIT.
 
+12. Added some "const" qualifiers to variables in pcre2grep.
+
 
 Version 10.22 29-July-2016
 --------------------------

@@ -158,15 +158,16 @@ static const char *jfriedl_prefix = "";
 static const char *jfriedl_postfix = "";
 #endif
 
-static char *colour_string = (char *)"1;31";
-static char *colour_option = NULL;
-static char *dee_option = NULL;
-static char *DEE_option = NULL;
-static char *locale = NULL;
+static const char *colour_string = (char *)"1;31";
+static const char *colour_option = NULL;
+static const char *dee_option = NULL;
+static const char *DEE_option = NULL;
+static const char *locale = NULL;
+static const char *newline_arg = NULL;
+static const char *om_separator = (char *)"";
+static const char *stdin_name = (char *)"(standard input)";
+
 static char *main_buffer = NULL;
-static char *newline_arg = NULL;
-static char *om_separator = (char *)"";
-static char *stdin_name = (char *)"(standard input)";
 
 static int after_context = 0;
 static int before_context = 0;
@@ -1423,7 +1424,7 @@ Returns:            nothing
 
 static void
 do_after_lines(int lastmatchnumber, char *lastmatchrestart, char *endptr,
-  char *printname)
+  const char *printname)
 {
 if (after_context > 0 && lastmatchnumber > 0)
   {
@@ -1829,7 +1830,7 @@ Returns:       0 if there was at least one match
 */
 
 static int
-pcre2grep(void *handle, int frtype, char *filename, char *printname)
+pcre2grep(void *handle, int frtype, const char *filename, const char *printname)
 {
 int rc = 1;
 int linenumber = 1;
@@ -2894,7 +2895,7 @@ read_pattern_file(char *name, patstr **patptr, patstr **patlastptr, int popts)
 {
 int linenumber = 0;
 FILE *f;
-char *filename;
+const char *filename;
 char buffer[PATBUFSIZE];
 
 if (strcmp(name, "-") == 0)
