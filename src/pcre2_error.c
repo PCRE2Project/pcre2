@@ -277,10 +277,10 @@ Returns:        length of message if all is well
 */
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
-pcre2_get_error_message(int enumber, PCRE2_UCHAR *buffer, size_t size)
+pcre2_get_error_message(int enumber, PCRE2_UCHAR *buffer, PCRE2_SIZE size)
 {
 const unsigned char *message;
-size_t i;
+PCRE2_SIZE i;
 int n;
 
 if (size == 0) return PCRE2_ERROR_NOMEMORY;
