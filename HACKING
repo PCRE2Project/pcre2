@@ -778,10 +778,10 @@ the actual string is passed, but the delimiter can be accessed as string[-1] if
 the application needs it. In the 8-bit library, the callout in /X(?C'abc')Y/ is
 compiled as the following bytes (decimal numbers represent binary values):
 
-  [OP_CALLOUT]  [0] [10]  [0] [1]  [0] [14]  [0] [5] ['] [a] [b] [c] [0]
-                --------  -------  --------  -------
-                   |         |        |         |
-                   ------- LINK_SIZE items ------
+  [OP_CALLOUT_STR]  [0] [10]  [0] [1]  [0] [14]  [0] [5] ['] [a] [b] [c] [0]
+                    --------  -------  --------  -------
+                       |         |        |         |
+                       ------- LINK_SIZE items ------
 
 Opcode table checking
 ---------------------
@@ -791,4 +791,4 @@ not a real opcode, but is used to check that tables indexed by opcode are the
 correct length, in order to catch updating errors.
 
 Philip Hazel
-September 2016
+October 2016
