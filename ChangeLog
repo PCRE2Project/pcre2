@@ -78,6 +78,8 @@ this situation and does not try to use JIT.
 (untested by me). Also, look for GREP_COLOUR or GREP_COLOR if the environment 
 variables PCRE2GREP_COLOUR and PCRE2GREP_COLOR are not found.
 
+14. Add the -t (grand total) option to pcre2grep.
+
 
 Version 10.22 29-July-2016
 --------------------------

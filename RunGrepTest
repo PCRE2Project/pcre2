@@ -568,6 +568,30 @@ echo "---------------------------- Test 112 -----------------------------" >>tes
 (cd $srcdir; $valgrind $vjs $pcre2grep --file-offsets -M 'match (\d+):\n (.)\n' testdata/grepinput) >>testtrygrep
 echo "RC=$?" >>testtrygrep
 
+echo "---------------------------- Test 113 -----------------------------" >>testtrygrep
+(cd $srcdir; $valgrind $vjs $pcre2grep --total-count 'the' testdata/grepinput*) >>testtrygrep
+echo "RC=$?" >>testtrygrep
+
+echo "---------------------------- Test 114 -----------------------------" >>testtrygrep
+(cd $srcdir; $valgrind $vjs $pcre2grep -tc 'the' testdata/grepinput*) >>testtrygrep
+echo "RC=$?" >>testtrygrep
+
+echo "---------------------------- Test 115 -----------------------------" >>testtrygrep
+(cd $srcdir; $valgrind $vjs $pcre2grep -tlc 'the' testdata/grepinput*) >>testtrygrep
+echo "RC=$?" >>testtrygrep
+
+echo "---------------------------- Test 116 -----------------------------" >>testtrygrep
+(cd $srcdir; $valgrind $vjs $pcre2grep -th 'the' testdata/grepinput*) >>testtrygrep
+echo "RC=$?" >>testtrygrep
+
+echo "---------------------------- Test 117 -----------------------------" >>testtrygrep
+(cd $srcdir; $valgrind $vjs $pcre2grep -tch 'the' testdata/grepinput*) >>testtrygrep
+echo "RC=$?" >>testtrygrep
+
+echo "---------------------------- Test 118 -----------------------------" >>testtrygrep
+(cd $srcdir; $valgrind $vjs $pcre2grep -tL 'the' testdata/grepinput*) >>testtrygrep
+echo "RC=$?" >>testtrygrep
+
 # Now compare the results.
 
 $cf $srcdir/testdata/grepoutput testtrygrep

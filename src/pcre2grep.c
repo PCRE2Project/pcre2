@@ -177,6 +177,8 @@ static int bufthird = PCRE2GREP_BUFSIZE;
 static int max_bufthird = PCRE2GREP_MAX_BUFSIZE;
 static int bufsize = 3*PCRE2GREP_BUFSIZE;
 static int endlinetype;
+static int total_count = 0;
+static int counts_printed = 0;
 
 #if defined HAVE_WINDOWS_H && HAVE_WINDOWS_H
 static int dee_action = dee_SKIP;
@@ -218,6 +220,7 @@ static BOOL omit_zero_count = FALSE;
 static BOOL resource_error = FALSE;
 static BOOL quiet = FALSE;
 static BOOL show_only_matching = FALSE;
+static BOOL show_total_count = FALSE;
 static BOOL silent = FALSE;
 static BOOL utf = FALSE;
 
@@ -402,6 +405,7 @@ static option_item optionlist[] = {
   { OP_OP_NUMBER, 'S',      &S_arg,            "jeffS",         "replace matched (sub)string with X" },
 #endif
   { OP_NODATA,    's',      NULL,              "no-messages",   "suppress error messages" },
+  { OP_NODATA,    't',      NULL,              "total-count",   "print total count of matching lines" },
   { OP_NODATA,    'u',      NULL,              "utf",           "use UTF mode" },
   { OP_NODATA,    'V',      NULL,              "version",       "print version information and exit" },
   { OP_NODATA,    'v',      NULL,              "invert-match",  "select non-matching lines" },
@@ -2115,7 +2119,7 @@ while (ptr < endptr)
 
     /* Just count if just counting is wanted. */
 
-    else if (count_only) count++;
+    else if (count_only || show_total_count) count++;
 
     /* When handling a binary file and binary-files==binary, the "binary"
     variable will be set true (it's false in all other cases). In this
@@ -2458,7 +2462,7 @@ while (ptr < endptr)
 /* End of file; print final "after" lines if wanted; do_after_lines sets
 hyphenpending if it prints something. */
 
-if (!show_only_matching && !count_only)
+if (!show_only_matching && !(count_only|show_total_count))
   {
   do_after_lines(lastmatchnumber, lastmatchrestart, endptr, printname);
   hyphenpending |= endhyphenpending;
@@ -2482,9 +2486,11 @@ if (count_only && !quiet)
     if (printname != NULL && filenames != FN_NONE)
       fprintf(stdout, "%s:", printname);
     fprintf(stdout, "%d" STDOUT_NL, count);
+    counts_printed++; 
     }
   }
 
+total_count += count;   /* Can be set without count_only */
 return rc;
 }
 
@@ -2793,6 +2799,7 @@ switch(letter)
   case 'q': quiet = TRUE; break;
   case 'r': dee_action = dee_RECURSE; break;
   case 's': silent = TRUE; break;
+  case 't': show_total_count = TRUE; break; 
   case 'u': options |= PCRE2_UTF; utf = TRUE; break;
   case 'v': invert = TRUE; break;
   case 'w': process_options |= PO_WORD_MATCH; break;
@@ -3688,6 +3695,16 @@ for (; i < argc; i++)
   if (frc > 1) rc = frc;
     else if (frc == 0 && rc == 1) rc = 0;
   }
+  
+/* Show the total number of matches if requested, but not if only one file's 
+count was printed. */
+
+if (show_total_count && counts_printed != 1 && filenames != FN_NOMATCH_ONLY)
+  {
+  if (counts_printed != 0 && filenames >= FN_DEFAULT) 
+    fprintf(stdout, "TOTAL:");
+  fprintf(stdout, "%d" STDOUT_NL, total_count);
+  } 
 
 EXIT:
 #ifdef SUPPORT_PCRE2GREP_JIT

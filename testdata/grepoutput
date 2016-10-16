@@ -787,3 +787,35 @@ RC=0
 37204,12
 37216,12
 RC=0
+---------------------------- Test 113 -----------------------------
+476
+RC=0
+---------------------------- Test 114 -----------------------------
+testdata/grepinput:469
+testdata/grepinput3:0
+testdata/grepinput8:0
+testdata/grepinputv:1
+testdata/grepinputx:6
+TOTAL:476
+RC=0
+---------------------------- Test 115 -----------------------------
+testdata/grepinput:469
+testdata/grepinputv:1
+testdata/grepinputx:6
+TOTAL:476
+RC=0
+---------------------------- Test 116 -----------------------------
+476
+RC=0
+---------------------------- Test 117 -----------------------------
+469
+0
+0
+1
+6
+476
+RC=0
+---------------------------- Test 118 -----------------------------
+testdata/grepinput3
+testdata/grepinput8
+RC=0
