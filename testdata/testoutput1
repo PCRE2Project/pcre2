@@ -9277,4 +9277,12 @@ MK: ab cd # comment\x0aef
     baaab
 No match
 
+/(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[,;:])(?=.{8,16})(?!.*[\s])/
+    \   Fred:099
+ 0: 
+
+/(?=.*X)X$/ 
+    \  X
+ 0: X
+
 # End of testinput1 

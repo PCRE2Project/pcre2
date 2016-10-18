@@ -4892,4 +4892,6 @@ a)"xI
 
 /(?<R>abc)(?(R)xyz)/B
 
+/(?=.*[A-Z])/I
+
 # End of testinput2 

@@ -8750,7 +8750,6 @@ Subject length lower bound = 1
 
 /(?(?=.*b).*b|^d)/I
 Capturing subpattern count = 0
-First code unit at start or follows newline
 Subject length lower bound = 1
 
 /xyz/auto_callout
@@ -15333,6 +15332,11 @@ Failed: error 150 at offset 5: invalid range in character class
         Ket
         End
 ------------------------------------------------------------------
+
+/(?=.*[A-Z])/I
+Capturing subpattern count = 0
+May match empty string
+Subject length lower bound = 0
 
 # End of testinput2 
 Error -63: PCRE2_ERROR_BADDATA (unknown error number)

@@ -80,6 +80,19 @@ variables PCRE2GREP_COLOUR and PCRE2GREP_COLOR are not found.
 
 14. Add the -t (grand total) option to pcre2grep.
 
+15. A number of bugs have been mended relating to match start-up optimizations
+when the first thing in a pattern is a positive lookahead. These all applied
+only when PCRE2_NO_START_OPTIMIZE was *not* set:
+
+    (a) A pattern such as (?=.*X)X$ was incorrectly optimized as if it needed
+        both an initial 'X' and a following 'X'.
+    (b) Some patterns starting with an assertion that started with .* were
+        incorrectly optimized as having to match at the start of the subject or
+        after a newline. There are cases where this is not true, for example,
+        (?=.*[A-Z])(?=.{8,16})(?!.*[\s]) matches after the start in lines that
+        start with spaces. Starting .* in an assertion is no longer taken as an 
+        indication of matching at the start (or after a newline).  
+
 
 Version 10.22 29-July-2016
 --------------------------

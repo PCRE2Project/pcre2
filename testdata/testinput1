@@ -5806,4 +5806,10 @@ ef) x/x,mark
 \= Expect no match     
     baaab
 
+/(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[,;:])(?=.{8,16})(?!.*[\s])/
+    \   Fred:099
+
+/(?=.*X)X$/ 
+    \  X
+
 # End of testinput1 

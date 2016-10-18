@@ -3312,8 +3312,8 @@ while (ptr < ptrend)
       if (ptr >= ptrend || *ptr != CHAR_RIGHT_PARENTHESIS)
         {
         errorcode = ERR58;
-        goto FAILED;  
-        }  
+        goto FAILED;
+        }
       goto SET_RECURSION;
 
       /* An item starting (?- followed by a digit comes here via the "default"
@@ -5994,7 +5994,7 @@ for (;; pptr++)
     zerofirstcuflags = firstcuflags;
     groupsetfirstcu = FALSE;
 
-    if (bravalue >= OP_ONCE)
+    if (bravalue >= OP_ONCE)  /* Not an assertion */
       {
       /* If we have not yet set a firstcu in this branch, take it from the
       subpattern, remembering that it was set here so that a repeat of more
@@ -6034,15 +6034,19 @@ for (;; pptr++)
         }
       }
 
-    /* For a forward assertion, we take the reqcu, if set. This can be
-    helpful if the pattern that follows the assertion doesn't set a different
-    char. For example, it's useful for /(?=abcde).+/. We can't set firstcu
-    for an assertion, however because it leads to incorrect effect for patterns
-    such as /(?=a)a.+/ when the "real" "a" would then become a reqcu instead
-    of a firstcu. This is overcome by a scan at the end if there's no
-    firstcu, looking for an asserted first char. */
+    /* For a forward assertion, we take the reqcu, if set, provided that the
+    group has also set a firstcu. This can be helpful if the pattern that
+    follows the assertion doesn't set a different char. For example, it's
+    useful for /(?=abcde).+/. We can't set firstcu for an assertion, however
+    because it leads to incorrect effect for patterns such as /(?=a)a.+/ when
+    the "real" "a" would then become a reqcu instead of a firstcu. This is
+    overcome by a scan at the end if there's no firstcu, looking for an
+    asserted first char. A similar effect for patterns like /(?=.*X)X$/ means
+    we must only take the reqcu when the group also set a firstcu. Otherwise,
+    in that example, 'X' ends up set for both. */
 
-    else if (bravalue == OP_ASSERT && subreqcuflags >= 0)
+    else if (bravalue == OP_ASSERT && subreqcuflags >= 0 &&
+             subfirstcuflags >= 0)
       {
       reqcu = subreqcu;
       reqcuflags = subreqcuflags;
@@ -6542,8 +6546,9 @@ for (;; pptr++)
               *lengthptr += delta;
               }
 
-            /* This is compiling for real. If there is a set first code unit for
-            the group, and we have not yet set a "required code unit", set it. */
+            /* This is compiling for real. If there is a set first code unit
+            for the group, and we have not yet set a "required code unit", set
+            it. */
 
             else
               {
@@ -7701,8 +7706,8 @@ matching and for non-DOTALL patterns that start with .* (which must start at
 the beginning or after \n). As in the case of is_anchored() (see above), we
 have to take account of back references to capturing brackets that contain .*
 because in that case we can't make the assumption. Also, the appearance of .*
-inside atomic brackets or in a pattern that contains *PRUNE or *SKIP does not
-count, because once again the assumption no longer holds.
+inside atomic brackets or in an assertion, or in a pattern that contains *PRUNE
+or *SKIP does not count, because once again the assumption no longer holds.
 
 Arguments:
   code           points to start of the compiled pattern or a group
@@ -7711,13 +7716,14 @@ Arguments:
                    the less precise approach
   cb             points to the compile data
   atomcount      atomic group level
+  inassert       TRUE if in an assertion
 
 Returns:         TRUE or FALSE
 */
 
 static BOOL
 is_startline(PCRE2_SPTR code, unsigned int bracket_map, compile_block *cb,
-  int atomcount)
+  int atomcount, BOOL inassert)
 {
 do {
    PCRE2_SPTR scode = first_significant_code(
@@ -7748,7 +7754,7 @@ do {
        return FALSE;
 
        default:     /* Assertion */
-       if (!is_startline(scode, bracket_map, cb, atomcount)) return FALSE;
+       if (!is_startline(scode, bracket_map, cb, atomcount, TRUE)) return FALSE;
        do scode += GET(scode, 1); while (*scode == OP_ALT);
        scode += 1 + LINK_SIZE;
        break;
@@ -7762,7 +7768,8 @@ do {
    if (op == OP_BRA  || op == OP_BRAPOS ||
        op == OP_SBRA || op == OP_SBRAPOS)
      {
-     if (!is_startline(scode, bracket_map, cb, atomcount)) return FALSE;
+     if (!is_startline(scode, bracket_map, cb, atomcount, inassert))
+       return FALSE;
      }
 
    /* Capturing brackets */
@@ -7772,33 +7779,36 @@ do {
      {
      int n = GET2(scode, 1+LINK_SIZE);
      int new_map = bracket_map | ((n < 32)? (1u << n) : 1);
-     if (!is_startline(scode, new_map, cb, atomcount)) return FALSE;
+     if (!is_startline(scode, new_map, cb, atomcount, inassert)) return FALSE;
      }
 
    /* Positive forward assertions */
 
    else if (op == OP_ASSERT)
      {
-     if (!is_startline(scode, bracket_map, cb, atomcount)) return FALSE;
+     if (!is_startline(scode, bracket_map, cb, atomcount, TRUE))
+       return FALSE;
      }
 
    /* Atomic brackets */
 
    else if (op == OP_ONCE || op == OP_ONCE_NC)
      {
-     if (!is_startline(scode, bracket_map, cb, atomcount + 1)) return FALSE;
+     if (!is_startline(scode, bracket_map, cb, atomcount + 1, inassert))
+       return FALSE;
      }
 
    /* .* means "start at start or after \n" if it isn't in atomic brackets or
-   brackets that may be referenced, as long as the pattern does not contain
-   *PRUNE or *SKIP, because these break the feature. Consider, for example,
-   /.*?a(*PRUNE)b/ with the subject "aab", which matches "ab", i.e. not at the
-   start of a line. There is also an option that disables this optimization. */
+   brackets that may be referenced or an assertion, and as long as the pattern
+   does not contain *PRUNE or *SKIP, because these break the feature. Consider,
+   for example, /.*?a(*PRUNE)b/ with the subject "aab", which matches "ab",
+   i.e. not at the start of a line. There is also an option that disables this
+   optimization. */
 
    else if (op == OP_TYPESTAR || op == OP_TYPEMINSTAR || op == OP_TYPEPOSSTAR)
      {
      if (scode[1] != OP_ANY || (bracket_map & cb->backref_map) != 0 ||
-         atomcount > 0 || cb->had_pruneorskip ||
+         atomcount > 0 || cb->had_pruneorskip || inassert ||
          (cb->external_options & PCRE2_NO_DOTSTAR_ANCHOR) != 0)
        return FALSE;
      }
@@ -9452,7 +9462,8 @@ if ((re->overall_options & (PCRE2_ANCHORED|PCRE2_NO_START_OPTIMIZE)) == 0)
   when *PRUNE and SKIP are not present. (There is an option that disables this
   case.) */
 
-  else if (is_startline(codestart, 0, &cb, 0)) re->flags |= PCRE2_STARTLINE;
+  else if (is_startline(codestart, 0, &cb, 0, FALSE))
+    re->flags |= PCRE2_STARTLINE;
   }
 
 /* Handle the "required code unit", if one is set. In the case of an anchored
