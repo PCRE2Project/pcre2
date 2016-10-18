@@ -1,4 +1,4 @@
-.TH PCRE2COMPAT 3 "30 September 2016" "PCRE2 10.23"
+.TH PCRE2COMPAT 3 "18 October 2016" "PCRE2 10.23"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "DIFFERENCES BETWEEN PCRE2 AND PERL"
@@ -109,7 +109,7 @@ the pattern /^(a(b)?)+$/ in Perl leaves $2 unset, but in PCRE2 it is set to
 13. PCRE2's handling of duplicate subpattern numbers and duplicate subpattern
 names is not as general as Perl's. This is a consequence of the fact the PCRE2
 works internally just with numbers, using an external table to translate
-between numbers and names. In particular, a pattern such as (?|(?<a>A)|(?<b)B),
+between numbers and names. In particular, a pattern such as (?|(?<a>A)|(?<b>B),
 where the two capturing parentheses have the same number but different names,
 is not supported, and causes an error at compile time. If it were allowed, it
 would not be possible to distinguish which parentheses matched, because both
@@ -190,6 +190,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 30 September 2016
+Last updated: 18 October 2016
 Copyright (c) 1997-2016 University of Cambridge.
 .fi
