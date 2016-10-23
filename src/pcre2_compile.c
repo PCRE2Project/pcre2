@@ -8497,12 +8497,13 @@ for (;; pptr++)
       *errcodeptr = ERR15;  /* Non-existent subpattern */
       return -1;
       }
-
+    if (group == 0) goto ISNOTFIXED;  /* Local recursion */
     for (gptr = cb->parsed_pattern; *gptr != META_END; gptr++)
       {
       if (META_CODE(*gptr) == META_BIGVALUE) gptr++;
         else if (*gptr == (META_CAPTURE | group)) break;
       }
+     
     gptrend = parsed_skip(gptr, PSKIP_KET);
     if (pptr > gptr && pptr < gptrend) goto ISNOTFIXED;  /* Local recursion */
     for (r = recurses; r != NULL; r = r->prev) if (r->groupptr == gptr) break;

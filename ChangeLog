@@ -96,6 +96,9 @@ only when PCRE2_NO_START_OPTIMIZE was *not* set:
 16. The "offset" modifier in pcre2test was not being ignored (as documented)
 when the POSIX API was in use.
 
+17. An overall recursion such as (?0) inside a lookbehind assertion was not 
+being diagnosed as an error.
+
 
 Version 10.22 29-July-2016
 --------------------------
