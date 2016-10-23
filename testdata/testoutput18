@@ -157,4 +157,9 @@ Failed: POSIX code 4: ? * + invalid at offset 100000
 /\[A]{1000000}**/expand,regerror_buffsize=32
 Failed: POSIX code 4: ? * + invalid at offset 1000001
 
+//posix_nosub
+    \=offset=70000
+** Ignored with POSIX interface: offset
+Matched with REG_NOSUB
+
 # End of testdata/testinput18

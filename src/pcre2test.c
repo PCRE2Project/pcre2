@@ -6065,6 +6065,7 @@ if ((pat_patctl.control & CTL_POSIX) != 0)
   if (dat_datctl.get_numbers[0] >= 0 || dat_datctl.get_names[0] != 0)
     prmsg(&msg, "get");
   if (dat_datctl.jitstack != 0) prmsg(&msg, "jitstack");
+  if (dat_datctl.offset != 0) prmsg(&msg, "offset");
 
   if ((dat_datctl.options & ~POSIX_SUPPORTED_MATCH_OPTIONS) != 0)
     {
@@ -6087,9 +6088,8 @@ if ((pat_patctl.control & CTL_POSIX) != 0)
   if ((dat_datctl.options & PCRE2_NOTBOL) != 0) eflags |= REG_NOTBOL;
   if ((dat_datctl.options & PCRE2_NOTEOL) != 0) eflags |= REG_NOTEOL;
   if ((dat_datctl.options & PCRE2_NOTEMPTY) != 0) eflags |= REG_NOTEMPTY;
-
-  rc = regexec(&preg, (const char *)pp + dat_datctl.offset,
-    dat_datctl.oveccount, pmatch, eflags);
+  
+  rc = regexec(&preg, (const char *)pp, dat_datctl.oveccount, pmatch, eflags);
   if (rc != 0)
     {
     (void)regerror(rc, &preg, (char *)pbuffer8, pbuffer8_size);

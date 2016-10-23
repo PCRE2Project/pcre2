@@ -92,6 +92,9 @@ only when PCRE2_NO_START_OPTIMIZE was *not* set:
         (?=.*[A-Z])(?=.{8,16})(?!.*[\s]) matches after the start in lines that
         start with spaces. Starting .* in an assertion is no longer taken as an 
         indication of matching at the start (or after a newline).  
+        
+16. The "offset" modifier in pcre2test was not being ignored (as documented)
+when the POSIX API was in use.
 
 
 Version 10.22 29-July-2016

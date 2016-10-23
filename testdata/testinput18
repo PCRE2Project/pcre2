@@ -103,4 +103,7 @@
 
 /\[A]{1000000}**/expand,regerror_buffsize=32
 
+//posix_nosub
+    \=offset=70000
+
 # End of testdata/testinput18
