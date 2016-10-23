@@ -1,4 +1,4 @@
-.TH PCRE2PATTERN 3 "14 October 2016" "PCRE2 10.23"
+.TH PCRE2PATTERN 3 "23 October 2016" "PCRE2 10.23"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION DETAILS"
@@ -2222,6 +2222,13 @@ numbering the capturing subpatterns in the whole pattern. However, substring
 capturing is carried out only for positive assertions. (Perl sometimes, but not
 always, does do capturing in negative assertions.)
 .P
+WARNING: If a positive assertion containing one or more capturing subpatterns 
+succeeds, but failure to match later in the pattern causes backtracking over 
+this assertion, the captures within the assertion are reset only if no higher 
+numbered captures are already set. This is, unfortunately, a fundamental 
+limitation of the current implementation; it may get removed in a future 
+reworking.
+.P
 For compatibility with Perl, most assertion subpatterns may be repeated; though
 it makes no sense to assert the same thing several times, the side effect of
 capturing parentheses may occasionally be useful. However, an assertion that
@@ -3470,6 +3477,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 14 October 2016
+Last updated: 23 October 2016
 Copyright (c) 1997-2016 University of Cambridge.
 .fi
