@@ -40,6 +40,15 @@ parenthesis item, not the length of the whole group. A length of zero is now
 given only for a callout at the end of the pattern. Automatic callouts are no 
 longer inserted before and after explicit callouts in the pattern.
 
+Some bugs in the refactored code were subsequently fixed before release:
+
+  (a) An overall recursion such as (?0) inside a lookbehind assertion was not
+      being diagnosed as an error.
+
+  (b) In utf mode, the length of a *MARK (or other verb) name was being checked
+      in characters instead of code units, which could lead to bad code being 
+      compiled, leading to unpredictable behaviour. 
+
 4. Back references are now permitted in lookbehind assertions when there are 
 no duplicated group numbers (that is, (?| has not been used), and, if the 
 reference is by name, there is only one group of that name. The referenced
@@ -95,9 +104,6 @@ only when PCRE2_NO_START_OPTIMIZE was *not* set:
         
 16. The "offset" modifier in pcre2test was not being ignored (as documented)
 when the POSIX API was in use.
-
-17. An overall recursion such as (?0) inside a lookbehind assertion was not 
-being diagnosed as an error.
 
 
 Version 10.22 29-July-2016

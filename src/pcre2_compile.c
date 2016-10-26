@@ -2161,6 +2161,7 @@ BOOL negate_class;
 BOOL okquantifier = FALSE;
 PCRE2_SPTR name;
 PCRE2_SPTR ptrend = cb->end_pattern;
+PCRE2_SPTR verbnamestart = NULL;    /* Value avoids compiler warning */
 named_group *ng;
 nest_save *top_nest = NULL;
 nest_save *end_nests = (nest_save *)(cb->start_workspace + cb->workspace_size);
@@ -2248,8 +2249,10 @@ while (ptr < ptrend)
 
       case CHAR_RIGHT_PARENTHESIS:
       inverbname = FALSE;
+      /* This is the length in characters */
       verbnamelength = (PCRE2_SIZE)(parsed_pattern - verblengthptr - 1);
-      if (verbnamelength > MAX_MARK)
+      /* But the limit on the length is in code units */
+      if (ptr - verbnamestart - 1 > MAX_MARK)
         {
         ptr--;
         errorcode = ERR76;
@@ -3149,6 +3152,7 @@ while (ptr < ptrend)
           *parsed_pattern++ = verbs[i].meta +
             ((verbs[i].meta != META_MARK)? 0x00010000u:0);
           verblengthptr = parsed_pattern++;
+          verbnamestart = ptr;
           inverbname = TRUE;
           }
         else  /* No verb "name" argument */
@@ -8503,7 +8507,7 @@ for (;; pptr++)
       if (META_CODE(*gptr) == META_BIGVALUE) gptr++;
         else if (*gptr == (META_CAPTURE | group)) break;
       }
-     
+
     gptrend = parsed_skip(gptr, PSKIP_KET);
     if (pptr > gptr && pptr < gptrend) goto ISNOTFIXED;  /* Local recursion */
     for (r = recurses; r != NULL; r = r->prev) if (r->groupptr == gptr) break;
@@ -8862,7 +8866,7 @@ if (pattern == NULL)
   *errorptr = ERR16;
   return NULL;
   }
-
+  
 /* Check that all undefined public option bits are zero. */
 
 if ((options & ~PUBLIC_COMPILE_OPTIONS) != 0)

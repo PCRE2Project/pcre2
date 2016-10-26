@@ -364,4 +364,7 @@ Failed: error 177 at offset 7: character code point value in \u.... sequence is 
 /(*MARK:a\x{100}b)z/alt_verbnames 
 Failed: error 134 at offset 14: character code point value in \x{} or \o{} is too large
 
+/(*:*++++++++++++''''''''''''''''''''+''+++'+++x+++++++++++++++++++++++++++++++++++(++++++++++++++++++++:++++++%++:''''''''''''''''''''''''+++++++++++++++++++++++++++++++++++++++++++++++++++++-++++++++k+++++++''''+++'+++++++++++++++++++++++''''++++++++++++':ƿ)/
+Failed: error 176 at offset 259: name is too long in (*MARK), (*PRUNE), (*SKIP), or (*THEN)
+
 # End of testinput9
