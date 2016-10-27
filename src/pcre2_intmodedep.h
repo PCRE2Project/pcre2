@@ -200,11 +200,11 @@ arithmetic results in a signed value. Hence the cast. */
 #endif
 
 /* Other macros that are different for 8-bit mode. The MAX_255 macro checks
-whether its argument is less than 256. The maximum length of a MARK name must
-fit in one code unit; currently it is set to 255 or 65535. The TABLE_GET macro
-is used to access elements of tables containing exactly 256 items. When code
-points can be greater than 255, a check is needed before accessing these
-tables. */
+whether its argument, which is assumed to be one code unit, is less than 256.
+The maximum length of a MARK name must fit in one code unit; currently it is
+set to 255 or 65535. The TABLE_GET macro is used to access elements of tables
+containing exactly 256 items. When code points can be greater than 255, a check
+is needed before accessing these tables. */
 
 #if PCRE2_CODE_UNIT_WIDTH == 8
 #define MAX_255(c) TRUE

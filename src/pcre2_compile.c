@@ -2226,7 +2226,9 @@ while (ptr < ptrend)
   and \E and escaped characters are allowed (no character types such as \d). If
   PCRE2_EXTENDED is also set, we must ignore white space and # comments. Do
   this by not entering the special (*VERB:NAME) processing - they are then
-  picked up below. */
+  picked up below. Note that c is a character, not a code unit, so we must not
+  use MAX_255 to test its size because MAX_255 tests code units and is assumed
+  TRUE in 8-bit mode. */
 
   if (inverbname &&
        (
@@ -2234,7 +2236,7 @@ while (ptr < ptrend)
         ((options & (PCRE2_EXTENDED | PCRE2_ALT_VERBNAMES)) !=
                     (PCRE2_EXTENDED | PCRE2_ALT_VERBNAMES)) ||
         /* OR: character > 255 */
-        !MAX_255(c) ||
+        c > 255 ||
         /* OR: not a # comment or white space */
         (c != CHAR_NUMBER_SIGN && (cb->ctypes[c] & ctype_space) == 0)
        ))
@@ -2306,11 +2308,13 @@ while (ptr < ptrend)
       }
     }
 
-  /* Skip over whitespace and # comments in extended mode. */
+  /* Skip over whitespace and # comments in extended mode. Note that c is a
+  character, not a code unit, so we must not use MAX_255 to test its size
+  because MAX_255 tests code units and is assumed TRUE in 8-bit mode. */
 
   if ((options & PCRE2_EXTENDED) != 0)
     {
-    if (MAX_255(c) && (cb->ctypes[c] & ctype_space) != 0) continue;
+    if (c < 256 && (cb->ctypes[c] & ctype_space) != 0) continue;
     if (c == CHAR_NUMBER_SIGN)
       {
       while (ptr < ptrend)
@@ -8866,7 +8870,7 @@ if (pattern == NULL)
   *errorptr = ERR16;
   return NULL;
   }
-  
+
 /* Check that all undefined public option bits are zero. */
 
 if ((options & ~PUBLIC_COMPILE_OPTIONS) != 0)

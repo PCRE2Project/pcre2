@@ -48,6 +48,10 @@ Some bugs in the refactored code were subsequently fixed before release:
   (b) In utf mode, the length of a *MARK (or other verb) name was being checked
       in characters instead of code units, which could lead to bad code being 
       compiled, leading to unpredictable behaviour. 
+      
+  (c) In extended /x mode, characters whose code was greater than 255 caused
+      a lookup outside one of the global tables. A similar bug existed for wide 
+      characters in *VERB names.  
 
 4. Back references are now permitted in lookbehind assertions when there are 
 no duplicated group numbers (that is, (?| has not been used), and, if the 

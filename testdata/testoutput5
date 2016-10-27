@@ -4182,4 +4182,8 @@ Failed: error 125 at offset 2: lookbehind assertion is not fixed length
  +2       ^             ^                  
  0: \x{123}\x{123}
 
+# This tests processing wide characters in extended mode.
+
+/XȀ/x,utf
+
 # End of testinput5 
