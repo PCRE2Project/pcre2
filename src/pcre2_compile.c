@@ -7584,11 +7584,12 @@ for (;;)
     PUT(code, 1, (int)(code - last_branch));
     bc.current_branch = last_branch = code;
     code += 1 + LINK_SIZE;
-    lookbehindlength = META_DATA(*pptr);
     }
 
-  /* Advance past the vertical bar */
+  /* Set the lookbehind length (if not in a lookbehind the value will be zero)
+  and then advance past the vertical bar. */
 
+  lookbehindlength = META_DATA(*pptr);
   pptr++;
   }
 /* Control never reaches here */

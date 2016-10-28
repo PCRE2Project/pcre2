@@ -29,6 +29,9 @@ some minor bugs and Perl incompatibilities were fixed, including:
       existing subpattern.
   (e) A conditional recursion test such as (?(R)...) misbehaved if there was a 
       group whose name began with "R".
+  (f) The amount of memory needed for a compiled pattern was miscalculated if a 
+      lookbehind contained more than one toplevel branch and the first branch 
+      was of length zero.      
 
 One effect of the refactoring is that some error numbers and messages have 
 changed, and the pattern offset given for compiling errors is not always the
