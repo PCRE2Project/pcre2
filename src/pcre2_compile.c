@@ -2326,7 +2326,7 @@ while (ptr < ptrend)
           }
         ptr++;
 #ifdef SUPPORT_UNICODE
-        if (utf) FORWARDCHAR(ptr);
+        if (utf) FORWARDCHARTEST(ptr, ptrend);
 #endif
         }
       continue;  /* Next character in pattern */

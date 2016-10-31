@@ -1731,6 +1731,8 @@
 
 /'(*UTF)'/hex 
 
+/'#('/hex,extended,utf
+
 /a(?<=A\XB)/utf
 
 /ab(?<=A\RB)/utf

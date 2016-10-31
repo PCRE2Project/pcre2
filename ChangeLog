@@ -113,9 +113,13 @@ only when PCRE2_NO_START_OPTIMIZE was *not* set:
 when the POSIX API was in use.
 
 17. Added --enable-fuzz-support to "configure", causing an non-installed
-    library containing a test function that can be called by fuzzers to be 
-    compiled. A non-installed  binary to run the test function locally, called 
-    pcre2fuzzcheck is also compiled.
+library containing a test function that can be called by fuzzers to be
+compiled. A non-installed  binary to run the test function locally, called
+pcre2fuzzcheck is also compiled.
+
+18. In UTF-8 or UTF-16 modes with PCRE2_EXTENDED (/x) set and a non-zero-
+terminated pattern, if a # comment ran on to the end of the pattern, one or 
+more code units past the end were being read.
 
 
 Version 10.22 29-July-2016

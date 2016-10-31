@@ -4167,6 +4167,8 @@ No match
 
 /'(*UTF)'/hex 
 
+/'#('/hex,extended,utf
+
 /a(?<=A\XB)/utf
 Failed: error 125 at offset 1: lookbehind assertion is not fixed length
 
