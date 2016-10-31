@@ -1,4 +1,4 @@
-.TH PCRE2GREP 1 "16 October 2016" "PCRE2 10.23"
+.TH PCRE2GREP 1 "31 October 2016" "PCRE2 10.23"
 .SH NAME
 pcre2grep - a grep with Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -139,8 +139,7 @@ processing buffer size has been set too small. If file names and/or line
 numbers are being output, a hyphen separator is used instead of a colon for the
 context lines. A line containing "--" is output between each group of lines,
 unless they are in fact contiguous in the input file. The value of \fInumber\fP
-is expected to be relatively small. However, \fBpcre2grep\fP guarantees to have
-up to 8K of following text available for context output.
+is expected to be relatively small. When \fB-c\fP is used, \fB-A\fP is ignored.
 .TP
 \fB-a\fP, \fB--text\fP
 Treat binary files as text. This is equivalent to
@@ -153,9 +152,8 @@ lines are output if the previous match or the start of the file is within
 file names and/or line numbers are being output, a hyphen separator is used
 instead of a colon for the context lines. A line containing "--" is output
 between each group of lines, unless they are in fact contiguous in the input
-file. The value of \fInumber\fP is expected to be relatively small. However,
-\fBpcre2grep\fP guarantees to have up to 8K of preceding text available for
-context output.
+file. The value of \fInumber\fP is expected to be relatively small. When
+\fB-c\fP is used, \fB-B\fP is ignored.
 .TP
 \fB--binary-files=\fP\fIword\fP
 Specify how binary files are to be processed. If the word is "binary" (the
@@ -182,9 +180,9 @@ This is equivalent to setting both \fB-A\fP and \fB-B\fP to the same value.
 Do not output lines from the files that are being scanned; instead output the
 number of lines that would have been shown, either because they matched, or, if
 \fB-v\fP is set, because they failed to match. By default, this count is
-exactly the same as the number of suppressed lines, but if the \fB-M\fP
-(multiline) option is used (without \fB-v\fP), there may be more suppressed
-lines than the number of matches.
+exactly the same as the number of lines that would have been output, but if the
+\fB-M\fP (multiline) option is used (without \fB-v\fP), there may be more
+suppressed lines than the count (that is, the number of matches).
 .sp
 If no lines are selected, the number zero is output. If several files are are
 being scanned, a count is output for each of them and the \fB-t\fP option can 
@@ -289,22 +287,22 @@ files; it does not apply to patterns specified by any of the \fB--include\fP or
 \fB--exclude\fP options.
 .TP
 \fB-f\fP \fIfilename\fP, \fB--file=\fP\fIfilename\fP
-Read patterns from the file, one per line, and match them against
-each line of input. What constitutes a newline when reading the file is the
-operating system's default. The \fB--newline\fP option has no effect on this
-option. Trailing white space is removed from each line, and blank lines are
-ignored. An empty file contains no patterns and therefore matches nothing. See
-also the comments about multiple patterns versus a single pattern with
-alternatives in the description of \fB-e\fP above.
+Read patterns from the file, one per line, and match them against each line of
+input. What constitutes a newline when reading the file is the operating
+system's default. The \fB--newline\fP option has no effect on this option.
+Trailing white space is removed from each line, and blank lines are ignored. An
+empty file contains no patterns and therefore matches nothing. See also the
+comments about multiple patterns versus a single pattern with alternatives in
+the description of \fB-e\fP above.
 .sp
-If this option is given more than once, all the specified files are
-read. A data line is output if any of the patterns match it. A file name can
-be given as "-" to refer to the standard input. When \fB-f\fP is used, patterns
+If this option is given more than once, all the specified files are read. A
+data line is output if any of the patterns match it. A file name can be given
+as "-" to refer to the standard input. When \fB-f\fP is used, patterns
 specified on the command line using \fB-e\fP may also be present; they are
 tested before the file's patterns. However, no other pattern is taken from the
 command line; all arguments are treated as the names of paths to be searched.
 .TP
-\fB--file-list\fP=\fIfilename\fP
+\fB--file-list\fP=\fIfilename\fP 
 Read a list of files and/or directories that are to be scanned from the given
 file, one per line. Trailing white space is removed from each line, and blank
 lines are ignored. These paths are processed before any that are listed on the
@@ -454,20 +452,17 @@ set by \fB--buffer-size\fP. The maximum buffer size is silently forced to be no
 smaller than the starting buffer size.
 .TP
 \fB-M\fP, \fB--multiline\fP
-Allow patterns to match more than one line. When this option is given, patterns
-may usefully contain literal newline characters and internal occurrences of ^
-and $ characters. The output for a successful match may consist of more than
-one line. The first is the line in which the match started, and the last is the
-line in which the match ended. If the matched string ends with a newline
-sequence the output ends at the end of that line.
-.sp
-When this option is set, the PCRE2 library is called in "multiline" mode. This
-allows a matched string to extend past the end of a line and continue on one or
-more subsequent lines. However, \fBpcre2grep\fP still processes the input line
-by line. Once a match has been handled, scanning restarts at the beginning of
-the next line, just as it does when \fB-M\fP is not present. This means that it
-is possible for the second or subsequent lines in a multiline match to be
-output again as part of another match.
+Allow patterns to match more than one line. When this option is set, the PCRE2
+library is called in "multiline" mode. This allows a matched string to extend
+past the end of a line and continue on one or more subsequent lines. Patterns
+used with \fB-M\fP may usefully contain literal newline characters and internal
+occurrences of ^ and $ characters. The output for a successful match may
+consist of more than one line. The first line is the line in which the match
+started, and the last line is the line in which the match ended. If the matched
+string ends with a newline sequence, the output ends at the end of that line.
+If \fB-v\fP is set, none of the lines in a multi-line match are output. Once a
+match has been handled, scanning restarts at the beginning of the line after
+the one in which the match ended.
 .sp
 The newline sequence that separates multiple lines must be matched as part of
 the pattern. For example, to find the phrase "regular expression" in a file
@@ -481,11 +476,8 @@ and is followed by + so as to match trailing white space on the first line as
 well as possibly handling a two-character newline sequence.
 .sp
 There is a limit to the number of lines that can be matched, imposed by the way
-that \fBpcre2grep\fP buffers the input file as it scans it. However,
-\fBpcre2grep\fP ensures that at least 8K characters or the rest of the file
-(whichever is the shorter) are available for forward matching, and similarly
-the previous 8K characters (or all the previous characters, if fewer than 8K)
-are guaranteed to be available for lookbehind assertions. The \fB-M\fP option
+that \fBpcre2grep\fP buffers the input file as it scans it. With a sufficiently
+large processing buffer, this should not be a problem, but the \fB-M\fP option
 does not work when input is read line by line (see \fP--line-buffered\fP.)
 .TP
 \fB-N\fP \fInewline-type\fP, \fB--newline\fP=\fInewline-type\fP
@@ -609,11 +601,12 @@ specified by any of the \fB--include\fP or \fB--exclude\fP options.
 .TP
 \fB-x\fP, \fB--line-regex\fP, \fB--line-regexp\fP
 Force the patterns to be anchored (each must start matching at the beginning of
-a line) and in addition, require them to match entire lines. This is equivalent
-to having ^ and $ characters at the start and end of each alternative top-level
-branch in every pattern. This option applies only to the patterns that are
-matched against the contents of files; it does not apply to patterns specified
-by any of the \fB--include\fP or \fB--exclude\fP options.
+a line) and in addition, require them to match entire lines. In multiline mode 
+the match may be more than one line. This is equivalent to having \eA and \eZ
+characters at the start and end of each alternative top-level branch in every
+pattern. This option applies only to the patterns that are matched against the
+contents of files; it does not apply to patterns specified by any of the
+\fB--include\fP or \fB--exclude\fP options.
 .
 .
 .SH "ENVIRONMENT VARIABLES"
@@ -791,6 +784,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 16 October 2016
+Last updated: 31 October 2016
 Copyright (c) 1997-2016 University of Cambridge.
 .fi
