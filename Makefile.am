@@ -2,7 +2,6 @@
 
 AUTOMAKE_OPTIONS = subdir-objects
 ACLOCAL_AMFLAGS = -I m4
-AM_CPPFLAGS = -I$(builddir)/src -I$(srcdir)/src
 
 ## Specify the documentation files that are distributed.
 
@@ -473,7 +472,7 @@ libpcre2_posix_la_CFLAGS += $(GCOV_CFLAGS)
 endif # WITH_GCOV
 endif # WITH_PCRE2_8
 
-## Build pcre2grep if the 8-bit library is enabled
+## Build pcre2grep and optional fuzzer stuff if the 8-bit library is enabled
 
 if WITH_PCRE2_8
 bin_PROGRAMS += pcre2grep
@@ -485,6 +484,22 @@ if WITH_GCOV
 pcre2grep_CFLAGS += $(GCOV_CFLAGS)
 pcre2grep_LDADD += $(GCOV_LIBS)
 endif # WITH_GCOV
+
+## If fuzzer support is enabled, build a non-distributed library containing the
+## fuzzing function. Also build the standalone checking binary from the same
+## source but using -DSTANDALONE.
+
+if WITH_FUZZ_SUPPORT
+noinst_LIBRARIES = .libs/libpcre2-fuzzsupport.a
+_libs_libpcre2_fuzzsupport_a_SOURCES = src/pcre2_fuzzsupport.c
+_libs_libpcre2_fuzzsupport_a_CFLAGS = $(AM_CFLAGS)
+_libs_libpcre2_fuzzsupport_a_LIBADD =
+
+noinst_PROGRAMS += pcre2fuzzcheck
+pcre2fuzzcheck_SOURCES = src/pcre2_fuzzsupport.c
+pcre2fuzzcheck_CFLAGS = -DSTANDALONE $(AM_CFLAGS)
+pcre2fuzzcheck_LDADD = libpcre2-8.la
+endif # WITH FUZZ_SUPPORT
 endif # WITH_PCRE2_8
 
 ## -------- Testing ----------

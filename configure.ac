@@ -295,7 +295,7 @@ AC_ARG_WITH(match-limit-recursion,
 # Handle --enable-valgrind
 AC_ARG_ENABLE(valgrind,
               AS_HELP_STRING([--enable-valgrind],
-                             [valgrind support]),
+                             [enable valgrind support]),
               , enable_valgrind=no)
 
 # Enable code coverage reports using gcov
@@ -303,6 +303,12 @@ AC_ARG_ENABLE(coverage,
               AS_HELP_STRING([--enable-coverage],
                              [enable code coverage reports using gcov]),
               , enable_coverage=no)
+
+# Handle --enable-fuzz-support
+AC_ARG_ENABLE(fuzz_support,
+              AS_HELP_STRING([--enable-fuzz-support],
+                             [enable fuzzer support]),
+              , enable_fuzz_support=no)
 
 # Set the default value for pcre2-8
 if test "x$enable_pcre2_8" = "xunset"
@@ -420,6 +426,12 @@ AM_CONDITIONAL(WITH_REBUILD_CHARTABLES, test "x$enable_rebuild_chartables" = "xy
 AM_CONDITIONAL(WITH_JIT, test "x$enable_jit" = "xyes")
 AM_CONDITIONAL(WITH_UNICODE, test "x$enable_unicode" = "xyes")
 AM_CONDITIONAL(WITH_VALGRIND, test "x$enable_valgrind" = "xyes")
+AM_CONDITIONAL(WITH_FUZZ_SUPPORT, test "x$enable_fuzz_support" = "xyes")
+
+if test "$enable_fuzz_support" = "yes" -a "$enable_pcre2_8" = "no"; then
+  echo "** ERROR: Fuzzer support requires the 8-bit library"
+  exit 1
+fi
 
 # Checks for typedefs, structures, and compiler characteristics.
 
@@ -966,6 +978,7 @@ $PACKAGE-$VERSION configuration summary:
     Link pcre2test with libreadline .... : ${enable_pcre2test_libreadline}
     Valgrind support ................... : ${enable_valgrind}
     Code coverage ...................... : ${enable_coverage}
+    Fuzzer support ..................... : ${enable_fuzz_support} 
 
 EOF
 
