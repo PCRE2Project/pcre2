@@ -3436,7 +3436,8 @@ while (ptr < ptrend)
             ptr = startptr;   /* To give a more useful message */
             goto FAILED;
             }
-          if (*ptr == delimiter && (++ptr > ptrend || *ptr != delimiter)) break;
+          if (*ptr == delimiter && (++ptr >= ptrend || *ptr != delimiter)) 
+            break;
           }
 
         calloutlength = (PCRE2_SIZE)(ptr - startptr);
@@ -7653,7 +7654,7 @@ do {
    if (op == OP_BRA  || op == OP_BRAPOS ||
        op == OP_SBRA || op == OP_SBRAPOS)
      {
-     if (!is_anchored(scode, bracket_map, cb, atomcount, inassert)) 
+     if (!is_anchored(scode, bracket_map, cb, atomcount, inassert))
        return FALSE;
      }
 
@@ -7678,7 +7679,7 @@ do {
 
    else if (op == OP_COND)
      {
-     if (!is_anchored(scode, bracket_map, cb, atomcount, inassert)) 
+     if (!is_anchored(scode, bracket_map, cb, atomcount, inassert))
        return FALSE;
      }
 
@@ -8825,36 +8826,37 @@ PCRE2_EXP_DEFN pcre2_code * PCRE2_CALL_CONVENTION
 pcre2_compile(PCRE2_SPTR pattern, PCRE2_SIZE patlen, uint32_t options,
    int *errorptr, PCRE2_SIZE *erroroffset, pcre2_compile_context *ccontext)
 {
-BOOL utf;                               /* Set TRUE for UTF mode */
-BOOL has_lookbehind;                    /* Set TRUE if a lookbehind is found */
-pcre2_real_code *re = NULL;             /* What we will return */
-compile_block cb;                       /* "Static" compile-time data */
-const uint8_t *tables;                  /* Char tables base pointer */
+BOOL utf;                             /* Set TRUE for UTF mode */
+BOOL has_lookbehind;                  /* Set TRUE if a lookbehind is found */
+BOOL zero_terminated;                 /* Set TRUE for zero-terminated pattern */
+pcre2_real_code *re = NULL;           /* What we will return */
+compile_block cb;                     /* "Static" compile-time data */
+const uint8_t *tables;                /* Char tables base pointer */
 
-PCRE2_UCHAR *code;                      /* Current pointer in compiled code */
-PCRE2_SPTR codestart;                   /* Start of compiled code */
-PCRE2_SPTR ptr;                         /* Current pointer in pattern */
-uint32_t *pptr;                         /* Current pointer in parsed pattern */
+PCRE2_UCHAR *code;                    /* Current pointer in compiled code */
+PCRE2_SPTR codestart;                 /* Start of compiled code */
+PCRE2_SPTR ptr;                       /* Current pointer in pattern */
+uint32_t *pptr;                       /* Current pointer in parsed pattern */
 
-PCRE2_SIZE length = 1;                  /* Allow for final END opcode */
-PCRE2_SIZE usedlength;                  /* Actual length used */
-PCRE2_SIZE re_blocksize;                /* Size of memory block */
-PCRE2_SIZE big32count = 0;              /* 32-bit literals >= 0x80000000 */
-PCRE2_SIZE parsed_size_needed;          /* Needed for parsed pattern */
+PCRE2_SIZE length = 1;                /* Allow for final END opcode */
+PCRE2_SIZE usedlength;                /* Actual length used */
+PCRE2_SIZE re_blocksize;              /* Size of memory block */
+PCRE2_SIZE big32count = 0;            /* 32-bit literals >= 0x80000000 */
+PCRE2_SIZE parsed_size_needed;        /* Needed for parsed pattern */
 
-int32_t firstcuflags, reqcuflags;       /* Type of first/req code unit */
-uint32_t firstcu, reqcu;                /* Value of first/req code unit */
-uint32_t setflags = 0;                  /* NL and BSR set flags */
+int32_t firstcuflags, reqcuflags;     /* Type of first/req code unit */
+uint32_t firstcu, reqcu;              /* Value of first/req code unit */
+uint32_t setflags = 0;                /* NL and BSR set flags */
 
-uint32_t skipatstart;                   /* When checking (*UTF) etc */
-uint32_t limit_match = UINT32_MAX;      /* Unset match limits */
+uint32_t skipatstart;                 /* When checking (*UTF) etc */
+uint32_t limit_match = UINT32_MAX;    /* Unset match limits */
 uint32_t limit_recursion = UINT32_MAX;
 
-int newline = 0;                        /* Unset; can be set by the pattern */
-int bsr = 0;                            /* Unset; can be set by the pattern */
-int errorcode = 0;                      /* Initialize to avoid compiler warn */
+int newline = 0;                      /* Unset; can be set by the pattern */
+int bsr = 0;                          /* Unset; can be set by the pattern */
+int errorcode = 0;                    /* Initialize to avoid compiler warn */
 
-uint32_t i;                             /* Local loop counter */
+uint32_t i;                           /* Local loop counter */
 
 /* Comments at the head of this file explain about these variables. */
 
@@ -8901,12 +8903,18 @@ if (ccontext == NULL)
 /* A zero-terminated pattern is indicated by the special length value
 PCRE2_ZERO_TERMINATED. Check for an overlong pattern. */
 
-if (patlen == PCRE2_ZERO_TERMINATED) patlen = PRIV(strlen)(pattern);
+if ((zero_terminated = (patlen == PCRE2_ZERO_TERMINATED)))
+  patlen = PRIV(strlen)(pattern);
+
 if (patlen > ccontext->max_pattern_length)
   {
   *errorptr = ERR88;
   return NULL;
   }
+
+/* From here on, all returns from this function should end up going via the
+EXIT label. */
+
 
 /* ------------ Initialize the "static" compile data -------------- */
 
@@ -8966,7 +8974,13 @@ for (i = 0; i < 10; i++) cb.small_ref_offset[i] = PCRE2_UNSET;
 /* --------------- Start looking at the pattern --------------- */
 
 /* Check for global one-time option settings at the start of the pattern, and
-remember the offset to the actual regex. */
+remember the offset to the actual regex. With valgrind support, make the
+terminator of a zero-terminated pattern inaccessible. This catches bugs that
+would otherwise only show up for non-zero-terminated patterns. */
+
+#ifdef SUPPORT_VALGRIND
+if (zero_terminated) VALGRIND_MAKE_MEM_NOACCESS(pattern + patlen, CU2BYTES(1));
+#endif
 
 ptr = pattern;
 skipatstart = 0;
@@ -9148,14 +9162,14 @@ if ((options & PCRE2_AUTO_CALLOUT) != 0)
 
 if (parsed_size_needed >= PARSED_PATTERN_DEFAULT_SIZE)
   {
-  cb.parsed_pattern = ccontext->memctl.malloc(
-    (parsed_size_needed + 1) * sizeof(uint32_t),
-      ccontext->memctl.memory_data);
-  if (cb.parsed_pattern == NULL)
+  uint32_t *heap_parsed_pattern = ccontext->memctl.malloc(
+    (parsed_size_needed + 1) * sizeof(uint32_t), ccontext->memctl.memory_data);
+  if (heap_parsed_pattern == NULL)
     {
     *errorptr = ERR21;
-    return NULL;
+    goto EXIT;
     }
+  cb.parsed_pattern = heap_parsed_pattern;
   }
 
 /* Do the parsing scan. */
@@ -9547,12 +9561,16 @@ if ((re->overall_options & PCRE2_NO_START_OPTIMIZE) == 0 &&
   goto HAD_CB_ERROR;
   }
 
-/* Control ends up here in all cases. If memory was obtained for the parsed
+/* Control ends up here in all cases. When running under valgrind, make a 
+pattern's terminating zero defined again. If memory was obtained for the parsed
 version of the pattern, free it before returning. Also free the list of named
 groups if a larger one had to be obtained, and likewise the group information
 vector. */
 
 EXIT:
+#ifdef SUPPORT_VALGRIND
+if (zero_terminated) VALGRIND_MAKE_MEM_DEFINED(pattern + patlen, CU2BYTES(1));
+#endif
 if (cb.parsed_pattern != stack_parsed_pattern)
   ccontext->memctl.free(cb.parsed_pattern, ccontext->memctl.memory_data);
 if (cb.named_group_list_size > NAMED_GROUP_LIST_SIZE)

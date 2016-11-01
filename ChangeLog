@@ -21,14 +21,22 @@ some minor bugs and Perl incompatibilities were fixed, including:
 
   (a) \Q\E in the middle of a quantifier such as A+\Q\E+ is now ignored instead
       of giving an invalid quantifier error.
+
   (b) {0} can now be used after a group in a lookbehind assertion; previously
       this caused an "assertion is not fixed length" error.
+
   (c) Perl always treats (?(DEFINE) as a "define" group, even if a group with 
       the name "DEFINE" exists. PCRE2 now does likewise.
+
   (d) A recursion condition test such as (?(R2)...) must now refer to an 
       existing subpattern.
+
   (e) A conditional recursion test such as (?(R)...) misbehaved if there was a 
       group whose name began with "R".
+
+  (f) When testing zero-terminated patterns under valgrind, the terminating 
+      zero is now marked "no access". This catches bugs that would otherwise
+      show up only with non-zero-terminated patterns.
        
 One effect of the refactoring is that some error numbers and messages have 
 changed, and the pattern offset given for compiling errors is not always the
@@ -63,6 +71,9 @@ Some bugs in the refactored code were subsequently fixed before release:
 
   (f) An unterminated repeat at the end of a non-zero-terminated pattern (e.g.
       "{2,2") could cause reading beyond the pattern.
+      
+  (g) When reading a callout string, if the end delimiter was at the end of the 
+      pattern one further code unit was read.
 
 4. Back references are now permitted in lookbehind assertions when there are 
 no duplicated group numbers (that is, (?| has not been used), and, if the 
