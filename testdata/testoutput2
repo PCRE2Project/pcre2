@@ -15345,6 +15345,10 @@ Failed: error 125 at offset 2: lookbehind assertion is not fixed length
 
 /(?<!|!|!||||||(?<!)||(?<!)!|!||(?<!)!|!(?<!)!|!|!|!||||!!|<!)!|!||||!|/
 
+# /hex uses length, not zero-terminate
+
+/'{2,2{2,2'/hex
+
 # End of testinput2 
 Error -63: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

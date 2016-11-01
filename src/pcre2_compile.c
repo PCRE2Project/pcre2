@@ -1187,7 +1187,7 @@ read_repeat_counts(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *minp,
 PCRE2_SPTR p = *ptrptr;
 BOOL yield = FALSE;
 int32_t min = 0;
-int32_t max = REPEAT_UNLIMITED;  /* This value is larger than MAX_REPAT_COUNT */
+int32_t max = REPEAT_UNLIMITED; /* This value is larger than MAX_REPEAT_COUNT */
 
 /* NB read_number() initializes the error code to zero. The only error is for a
 number that is too big. */
@@ -1209,7 +1209,7 @@ else
   if (*p != CHAR_RIGHT_CURLY_BRACKET)
     {
     if (!read_number(&p, ptrend, -1, MAX_REPEAT_COUNT, ERR5, &max,
-        errorcodeptr) || *p != CHAR_RIGHT_CURLY_BRACKET)
+        errorcodeptr) || p >= ptrend ||  *p != CHAR_RIGHT_CURLY_BRACKET)
       goto EXIT;
     if (max < min)
       {
