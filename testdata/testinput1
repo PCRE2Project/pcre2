@@ -5812,4 +5812,7 @@ ef) x/x,mark
 /(?=.*X)X$/ 
     \  X
 
+/(?s)(?=.*?)b/
+    aabc
+
 # End of testinput1 

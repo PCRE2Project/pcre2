@@ -29,15 +29,7 @@ some minor bugs and Perl incompatibilities were fixed, including:
       existing subpattern.
   (e) A conditional recursion test such as (?(R)...) misbehaved if there was a 
       group whose name began with "R".
-  (f) The amount of memory needed for a compiled pattern was miscalculated if a 
-      lookbehind contained more than one toplevel branch and the first branch 
-      was of length zero.
-  (g) In UTF-8 or UTF-16 modes with PCRE2_EXTENDED (/x) set and a non-zero-
-      terminated pattern, if a # comment ran on to the end of the pattern, one
-      or more code units past the end were being read.
-  (h) An unterminated repeat at the end of a non-zero-terminated pattern (e.g.
-      "{2,2") could cause reading beyond the pattern.
-
+       
 One effect of the refactoring is that some error numbers and messages have 
 changed, and the pattern offset given for compiling errors is not always the
 right-most character that has been read. In particular, for a variable-length
@@ -60,6 +52,17 @@ Some bugs in the refactored code were subsequently fixed before release:
   (c) In extended /x mode, characters whose code was greater than 255 caused
       a lookup outside one of the global tables. A similar bug existed for wide 
       characters in *VERB names.  
+
+  (d) The amount of memory needed for a compiled pattern was miscalculated if a 
+      lookbehind contained more than one toplevel branch and the first branch 
+      was of length zero.
+
+  (e) In UTF-8 or UTF-16 modes with PCRE2_EXTENDED (/x) set and a non-zero-
+      terminated pattern, if a # comment ran on to the end of the pattern, one
+      or more code units past the end were being read.
+
+  (f) An unterminated repeat at the end of a non-zero-terminated pattern (e.g.
+      "{2,2") could cause reading beyond the pattern.
 
 4. Back references are now permitted in lookbehind assertions when there are 
 no duplicated group numbers (that is, (?| has not been used), and, if the 
@@ -121,6 +124,10 @@ when the POSIX API was in use.
 library containing a test function that can be called by fuzzers to be
 compiled. A non-installed  binary to run the test function locally, called
 pcre2fuzzcheck is also compiled.
+
+18. A pattern with PCRE2_DOTALL (/s) set but not PCRE2_NO_DOTSTAR_ANCHOR, and
+which started with .* inside a positive lookahead was incorrectly being
+compiled as implicitly anchored.
 
 
 Version 10.22 29-July-2016

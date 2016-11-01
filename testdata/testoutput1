@@ -9285,4 +9285,8 @@ No match
     \  X
  0: X
 
+/(?s)(?=.*?)b/
+    aabc
+ 0: b
+
 # End of testinput1 

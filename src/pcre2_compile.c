@@ -7634,13 +7634,14 @@ Arguments:
                    the less precise approach
   cb             points to the compile data block
   atomcount      atomic group level
+  inassert       TRUE if in an assertion
 
 Returns:     TRUE or FALSE
 */
 
 static BOOL
 is_anchored(PCRE2_SPTR code, unsigned int bracket_map, compile_block *cb,
-  int atomcount)
+  int atomcount, BOOL inassert)
 {
 do {
    PCRE2_SPTR scode = first_significant_code(
@@ -7652,7 +7653,8 @@ do {
    if (op == OP_BRA  || op == OP_BRAPOS ||
        op == OP_SBRA || op == OP_SBRAPOS)
      {
-     if (!is_anchored(scode, bracket_map, cb, atomcount)) return FALSE;
+     if (!is_anchored(scode, bracket_map, cb, atomcount, inassert)) 
+       return FALSE;
      }
 
    /* Capturing brackets */
@@ -7662,33 +7664,44 @@ do {
      {
      int n = GET2(scode, 1+LINK_SIZE);
      int new_map = bracket_map | ((n < 32)? (1u << n) : 1);
-     if (!is_anchored(scode, new_map, cb, atomcount)) return FALSE;
+     if (!is_anchored(scode, new_map, cb, atomcount, inassert)) return FALSE;
      }
 
-   /* Positive forward assertions and conditions */
+   /* Positive forward assertion */
 
-   else if (op == OP_ASSERT || op == OP_COND)
+   else if (op == OP_ASSERT)
      {
-     if (!is_anchored(scode, bracket_map, cb, atomcount)) return FALSE;
+     if (!is_anchored(scode, bracket_map, cb, atomcount, TRUE)) return FALSE;
+     }
+
+   /* Condition */
+
+   else if (op == OP_COND)
+     {
+     if (!is_anchored(scode, bracket_map, cb, atomcount, inassert)) 
+       return FALSE;
      }
 
    /* Atomic groups */
 
    else if (op == OP_ONCE || op == OP_ONCE_NC)
      {
-     if (!is_anchored(scode, bracket_map, cb, atomcount + 1))
+     if (!is_anchored(scode, bracket_map, cb, atomcount + 1, inassert))
        return FALSE;
      }
 
    /* .* is not anchored unless DOTALL is set (which generates OP_ALLANY) and
    it isn't in brackets that are or may be referenced or inside an atomic
-   group. There is also an option that disables auto-anchoring. */
+   group or an assertion. Also the pattern must not contain *PRUNE or *SKIP,
+   because these break the feature. Consider, for example, /(?s).*?(*PRUNE)b/
+   with the subject "aab", which matches "b", i.e. not at the start of a line.
+   There is also an option that disables auto-anchoring. */
 
    else if ((op == OP_TYPESTAR || op == OP_TYPEMINSTAR ||
              op == OP_TYPEPOSSTAR))
      {
      if (scode[1] != OP_ALLANY || (bracket_map & cb->backref_map) != 0 ||
-         atomcount > 0 || cb->had_pruneorskip ||
+         atomcount > 0 || cb->had_pruneorskip || inassert ||
          (cb->external_options & PCRE2_NO_DOTSTAR_ANCHOR) != 0)
        return FALSE;
      }
@@ -9423,7 +9436,7 @@ there are no occurrences of *PRUNE or *SKIP (though there is an option to
 disable this case). */
 
 if ((re->overall_options & PCRE2_ANCHORED) == 0 &&
-     is_anchored(codestart, 0, &cb, 0))
+     is_anchored(codestart, 0, &cb, 0, FALSE))
   re->overall_options |= PCRE2_ANCHORED;
 
 /* If the pattern is still not anchored and we do not have a first code unit,
