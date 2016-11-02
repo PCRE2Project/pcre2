@@ -286,8 +286,7 @@ return 0;
 
 /* A suitable match_data block, large enough to hold all possible captures, was
 obtained when the pattern was compiled, to save having to allocate and free it
-for each match. If REG_NOSUB was specified at compile time, the
-PCRE_NO_AUTO_CAPTURE flag will be set. When this is the case, the nmatch and
+for each match. If REG_NOSUB was specified at compile time, the nmatch and
 pmatch arguments are ignored, and the only result is yes/no/error. */
 
 PCRE2POSIX_EXP_DEFN int PCRE2_CALL_CONVENTION
