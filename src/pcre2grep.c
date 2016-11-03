@@ -1272,7 +1272,7 @@ switch(endlinetype)
   while (p < endptr)
     {
     int extra = 0;
-    register int c = *((unsigned char *)p);
+    int c = *((unsigned char *)p);
 
     if (utf && c >= 0xc0)
       {
@@ -1316,7 +1316,7 @@ switch(endlinetype)
   while (p < endptr)
     {
     int extra = 0;
-    register int c = *((unsigned char *)p);
+    int c = *((unsigned char *)p);
 
     if (utf && c >= 0xc0)
       {
@@ -1418,7 +1418,7 @@ switch(endlinetype)
 
   while (p > startptr)
     {
-    register unsigned int c;
+    unsigned int c;
     char *pp = p - 1;
 
     if (utf)

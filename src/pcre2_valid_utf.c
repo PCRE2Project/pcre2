@@ -93,8 +93,8 @@ Returns:       == 0    if the string is a valid UTF string
 int
 PRIV(valid_utf)(PCRE2_SPTR string, PCRE2_SIZE length, PCRE2_SIZE *erroroffset)
 {
-register PCRE2_SPTR p;
-register uint32_t c;
+PCRE2_SPTR p;
+uint32_t c;
 
 /* ----------------- Check a UTF-8 string ----------------- */
 
@@ -133,7 +133,7 @@ PCRE2_ERROR_UTF8_ERR21  Byte with the illegal value 0xfe or 0xff
 
 for (p = string; length > 0; p++)
   {
-  register uint32_t ab, d;
+  uint32_t ab, d;
 
   c = *p;
   length--;

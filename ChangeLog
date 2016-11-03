@@ -140,6 +140,9 @@ pcre2fuzzcheck is also compiled.
 which started with .* inside a positive lookahead was incorrectly being
 compiled as implicitly anchored.
 
+19. Removed all instances of "register" declarations, as they are considered 
+obsolete these days and in any case had become very haphazard.
+
 
 Version 10.22 29-July-2016
 --------------------------

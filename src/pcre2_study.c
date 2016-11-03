@@ -101,8 +101,8 @@ uint32_t once_fudge = 0;
 BOOL had_recurse = FALSE;
 BOOL dupcapused = (re->flags & PCRE2_DUPCAPUSED) != 0;
 recurse_check this_recurse;
-register int branchlength = 0;
-register PCRE2_UCHAR *cc = (PCRE2_UCHAR *)code + 1 + LINK_SIZE;
+int branchlength = 0;
+PCRE2_UCHAR *cc = (PCRE2_UCHAR *)code + 1 + LINK_SIZE;
 
 /* If this is a "could be empty" group, its minimum length is 0. */
 
@@ -124,7 +124,7 @@ for (;;)
   {
   int d, min, recno;
   PCRE2_UCHAR *cs, *ce;
-  register PCRE2_UCHAR op = *cc;
+  PCRE2_UCHAR op = *cc;
 
   if (branchlength >= UINT16_MAX) return UINT16_MAX;
 
@@ -792,7 +792,7 @@ Returns:         nothing
 static void
 set_type_bits(pcre2_real_code *re, int cbit_type, unsigned int table_limit)
 {
-register uint32_t c;
+uint32_t c;
 for (c = 0; c < table_limit; c++)
   re->start_bitmap[c] |= re->tables[c+cbits_offset+cbit_type];
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH == 8
@@ -833,7 +833,7 @@ Returns:         nothing
 static void
 set_nottype_bits(pcre2_real_code *re, int cbit_type, unsigned int table_limit)
 {
-register uint32_t c;
+uint32_t c;
 for (c = 0; c < table_limit; c++)
   re->start_bitmap[c] |= ~(re->tables[c+cbits_offset+cbit_type]);
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH == 8
@@ -873,7 +873,7 @@ Returns:       SSB_FAIL     => Failed to find any starting code units
 static int
 set_start_bits(pcre2_real_code *re, PCRE2_SPTR code, BOOL utf)
 {
-register uint32_t c;
+uint32_t c;
 int yield = SSB_DONE;
 
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH == 8

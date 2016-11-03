@@ -2702,7 +2702,7 @@ Returns:     number of characters placed in the buffer
 static int
 ord2utf8(uint32_t cvalue, uint8_t *utf8bytes)
 {
-register int i, j;
+int i, j;
 if (cvalue > 0x7fffffffu)
   return -1;
 for (i = 0; i < utf8_table1_size; i++)
@@ -5011,7 +5011,7 @@ use_pat_context = ((pat_patctl.control & CTL_NULLCONTEXT) != 0)?
 
 if (timeit > 0)
   {
-  register int i;
+  int i;
   clock_t time_taken = 0;
   for (i = 0; i < timeit; i++)
     {
@@ -5041,7 +5041,7 @@ if (TEST(compiled_code, !=, NULL) && pat_patctl.jit != 0)
   {
   if (timeit > 0)
     {
-    register int i;
+    int i;
     clock_t time_taken = 0;
     for (i = 0; i < timeit; i++)
       {
@@ -6409,7 +6409,7 @@ else for (gmatched = 0;; gmatched++)
 
   if (timeitm > 0)
     {
-    register int i;
+    int i;
     clock_t start_time, time_taken;
 
     if ((dat_datctl.control & CTL_DFA) != 0)

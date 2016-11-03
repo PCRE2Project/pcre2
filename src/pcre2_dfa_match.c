@@ -3470,7 +3470,7 @@ for (;;)
       {
       while (start_match < end_subject)
         {
-        register uint32_t c = UCHAR21TEST(start_match);
+        uint32_t c = UCHAR21TEST(start_match);
 #if PCRE2_CODE_UNIT_WIDTH != 8
         if (c > 255) c = 255;
 #endif
@@ -3510,7 +3510,7 @@ for (;;)
 
       if (has_req_cu && end_subject - start_match < REQ_CU_MAX)
         {
-        register PCRE2_SPTR p = start_match + (has_first_cu? 1:0);
+        PCRE2_SPTR p = start_match + (has_first_cu? 1:0);
 
         /* We don't need to repeat the search if we haven't yet reached the
         place we found it at last time. */
@@ -3521,7 +3521,7 @@ for (;;)
             {
             while (p < end_subject)
               {
-              register uint32_t pp = UCHAR21INCTEST(p);
+              uint32_t pp = UCHAR21INCTEST(p);
               if (pp == req_cu || pp == req_cu2) { p--; break; }
               }
             }

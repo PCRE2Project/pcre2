@@ -1061,7 +1061,7 @@ Returns:      0 for success
 int
 PRIV(auto_possessify)(PCRE2_UCHAR *code, BOOL utf, const compile_block *cb)
 {
-register PCRE2_UCHAR c;
+PCRE2_UCHAR c;
 PCRE2_SPTR end;
 PCRE2_UCHAR *repeat_opcode;
 uint32_t list[8];
