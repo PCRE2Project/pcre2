@@ -2368,6 +2368,27 @@ static const uint8_t tables2[] = {
 };
 
 
+#ifndef HAVE_STRERROR
+/*************************************************
+*     Provide strerror() for non-ANSI libraries  *
+*************************************************/
+
+/* Some old-fashioned systems (e.g. SunOS4) didn't have strerror() in their
+libraries. They may no longer be around, but just in case, we can try to
+provide the same facility by this simple alternative function. */
+
+extern int   sys_nerr;
+extern char *sys_errlist[];
+
+char *
+strerror(int n)
+{
+if (n < 0 || n >= sys_nerr) return "unknown error number";
+return sys_errlist[n];
+}
+#endif /* HAVE_STRERROR */
+
+
 
 /*************************************************
 *            Local memory functions              *
@@ -4231,7 +4252,7 @@ if (endf == filename)
 *fptr = fopen((const char *)filename, mode);
 if (*fptr == NULL)
   {
-  fprintf(outfile, "** Failed to open '%s'\n", filename);
+  fprintf(outfile, "** Failed to open '%s': %s\n", filename, strerror(errno));
   return PR_ABEND;
   }
 
@@ -6088,7 +6109,7 @@ if ((pat_patctl.control & CTL_POSIX) != 0)
   if ((dat_datctl.options & PCRE2_NOTBOL) != 0) eflags |= REG_NOTBOL;
   if ((dat_datctl.options & PCRE2_NOTEOL) != 0) eflags |= REG_NOTEOL;
   if ((dat_datctl.options & PCRE2_NOTEMPTY) != 0) eflags |= REG_NOTEMPTY;
-  
+
   rc = regexec(&preg, (const char *)pp, dat_datctl.oveccount, pmatch, eflags);
   if (rc != 0)
     {
@@ -7641,7 +7662,7 @@ if (argc > 1 && strcmp(argv[op], "-") != 0)
   infile = fopen(argv[op], INPUT_MODE);
   if (infile == NULL)
     {
-    printf("** Failed to open '%s'\n", argv[op]);
+    printf("** Failed to open '%s': %s\n", argv[op], strerror(errno));
     yield = 1;
     goto EXIT;
     }
@@ -7656,7 +7677,7 @@ if (argc > 2)
   outfile = fopen(argv[op+1], OUTPUT_MODE);
   if (outfile == NULL)
     {
-    printf("** Failed to open '%s'\n", argv[op+1]);
+    printf("** Failed to open '%s': %s\n", argv[op+1], strerror(errno));
     yield = 1;
     goto EXIT;
     }

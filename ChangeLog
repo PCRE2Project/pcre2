@@ -143,6 +143,8 @@ compiled as implicitly anchored.
 19. Removed all instances of "register" declarations, as they are considered 
 obsolete these days and in any case had become very haphazard.
 
+20. Add strerror() to pcre2test for failed file opening.
+
 
 Version 10.22 29-July-2016
 --------------------------
