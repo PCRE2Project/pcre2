@@ -2486,7 +2486,7 @@ if (count_only && !quiet)
     if (printname != NULL && filenames != FN_NONE)
       fprintf(stdout, "%s:", printname);
     fprintf(stdout, "%d" STDOUT_NL, count);
-    counts_printed++; 
+    counts_printed++;
     }
   }
 
@@ -2799,7 +2799,7 @@ switch(letter)
   case 'q': quiet = TRUE; break;
   case 'r': dee_action = dee_RECURSE; break;
   case 's': silent = TRUE; break;
-  case 't': show_total_count = TRUE; break; 
+  case 't': show_total_count = TRUE; break;
   case 'u': options |= PCRE2_UTF; utf = TRUE; break;
   case 'v': invert = TRUE; break;
   case 'w': process_options |= PO_WORD_MATCH; break;
@@ -3446,12 +3446,17 @@ if (locale != NULL)
   pcre2_set_character_tables(compile_context, character_tables);
   }
 
-/* Sort out colouring */
+/* Sort out colouring. On non-Windows systems "auto" causes colouring only if
+the output is a terminal. On Windows systems "auto" is the same as "always". */
 
 if (colour_option != NULL && strcmp(colour_option, "never") != 0)
   {
   if (strcmp(colour_option, "always") == 0) do_colour = TRUE;
+#if defined(_WIN32) || defined(WIN32)
+  else if (strcmp(colour_option, "auto") == 0) do_colour = TRUE;
+#else
   else if (strcmp(colour_option, "auto") == 0) do_colour = is_stdout_tty();
+#endif
   else
     {
     fprintf(stderr, "pcre2grep: Unknown colour setting \"%s\"\n",
@@ -3462,12 +3467,12 @@ if (colour_option != NULL && strcmp(colour_option, "never") != 0)
     {
     char *cs = getenv("PCRE2GREP_COLOUR");
     if (cs == NULL) cs = getenv("PCRE2GREP_COLOR");
-    if (cs == NULL) cs = getenv("GREP_COLOUR"); 
-    if (cs == NULL) cs = getenv("GREP_COLOR"); 
+    if (cs == NULL) cs = getenv("GREP_COLOUR");
+    if (cs == NULL) cs = getenv("GREP_COLOR");
     if (cs != NULL) colour_string = cs;
 #if defined HAVE_WINDOWS_H && HAVE_WINDOWS_H
     init_colour_output();
-#endif 
+#endif
     }
   }
 
@@ -3542,10 +3547,10 @@ to use JIT. */
 
 if (use_jit)
   {
-  uint32_t answer; 
+  uint32_t answer;
   (void)pcre2_config(PCRE2_CONFIG_JIT, &answer);
-  if (!answer) use_jit = FALSE; 
-  } 
+  if (!answer) use_jit = FALSE;
+  }
 
 /* Get memory for the main buffer. */
 
@@ -3695,16 +3700,16 @@ for (; i < argc; i++)
   if (frc > 1) rc = frc;
     else if (frc == 0 && rc == 1) rc = 0;
   }
-  
-/* Show the total number of matches if requested, but not if only one file's 
+
+/* Show the total number of matches if requested, but not if only one file's
 count was printed. */
 
 if (show_total_count && counts_printed != 1 && filenames != FN_NOMATCH_ONLY)
   {
-  if (counts_printed != 0 && filenames >= FN_DEFAULT) 
+  if (counts_printed != 0 && filenames >= FN_DEFAULT)
     fprintf(stdout, "TOTAL:");
   fprintf(stdout, "%d" STDOUT_NL, total_count);
-  } 
+  }
 
 EXIT:
 #ifdef SUPPORT_PCRE2GREP_JIT
