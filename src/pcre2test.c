@@ -7174,6 +7174,9 @@ printf("  16-bit support\n");
 #ifdef SUPPORT_PCRE2_32
 printf("  32-bit support\n");
 #endif
+#ifdef SUPPORT_VALGRIND
+printf("  Valgrind support\n");
+#endif
 
 (void)PCRE2_CONFIG(PCRE2_CONFIG_UNICODE, &optval);
 if (optval != 0)

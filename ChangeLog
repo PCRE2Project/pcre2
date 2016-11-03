@@ -145,6 +145,8 @@ obsolete these days and in any case had become very haphazard.
 
 20. Add strerror() to pcre2test for failed file opening.
 
+21. Make pcre2test -C list valgrind support when it is enabled.
+
 
 Version 10.22 29-July-2016
 --------------------------
