@@ -15345,9 +15345,13 @@ Failed: error 125 at offset 2: lookbehind assertion is not fixed length
 
 /(?<!|!|!||||||(?<!)||(?<!)!|!||(?<!)!|!(?<!)!|!|!|!||||!!|<!)!|!||||!|/
 
-# /hex uses length, not zero-terminate
+/{2,2{2,2/use_length
 
-/'{2,2{2,2'/hex
+/.>*?\g'0/use_length
+Failed: error 157 at offset 6: \g is not followed by a braced, angle-bracketed, or quoted name/number or by a plain number
+
+/.>*?\g'0/
+Failed: error 157 at offset 6: \g is not followed by a braced, angle-bracketed, or quoted name/number or by a plain number
 
 # End of testinput2 
 Error -63: PCRE2_ERROR_BADDATA (unknown error number)

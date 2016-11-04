@@ -48,7 +48,10 @@ parenthesis item, not the length of the whole group. A length of zero is now
 given only for a callout at the end of the pattern. Automatic callouts are no 
 longer inserted before and after explicit callouts in the pattern.
 
-Some bugs in the refactored code were subsequently fixed before release:
+Some bugs in the refactored code were subsequently fixed before release. 
+Several of them were related to the change from assuming a zero-terminated 
+pattern (which previously had required non-zero terminated strings to be 
+copied).
 
   (a) An overall recursion such as (?0) inside a lookbehind assertion was not
       being diagnosed as an error.
@@ -74,6 +77,8 @@ Some bugs in the refactored code were subsequently fixed before release:
       
   (g) When reading a callout string, if the end delimiter was at the end of the 
       pattern one further code unit was read.
+      
+  (h) An unterminated number after \g' could cause reading beyond the pattern. 
 
 4. Back references are now permitted in lookbehind assertions when there are 
 no duplicated group numbers (that is, (?| has not been used), and, if the 

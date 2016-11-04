@@ -2577,7 +2577,7 @@ while (ptr < ptrend)
         if (read_number(&p, ptrend, cb->bracount, MAX_GROUP_NUMBER, ERR61, &i,
             &errorcode))
           {
-          if (*p != terminator)
+          if (p >= ptrend || *p != terminator)
             {
             errorcode = ERR57;
             goto FAILED;
