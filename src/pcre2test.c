@@ -418,7 +418,7 @@ so many of them that they are split into two fields. */
 #define CTL_FULLBINCODE                  0x00001000u
 #define CTL_GETALL                       0x00002000u
 #define CTL_GLOBAL                       0x00004000u
-#define CTL_HEXPAT                       0x00008000u
+#define CTL_HEXPAT                       0x00008000u  /* Same word as USE_LENGTH */
 #define CTL_INFO                         0x00010000u
 #define CTL_JITFAST                      0x00020000u
 #define CTL_JITVERIFY                    0x00040000u
@@ -430,9 +430,10 @@ so many of them that they are split into two fields. */
 #define CTL_PUSH                         0x01000000u
 #define CTL_PUSHCOPY                     0x02000000u
 #define CTL_STARTCHAR                    0x04000000u
-#define CTL_UTF8_INPUT                   0x08000000u
-#define CTL_ZERO_TERMINATE               0x10000000u
-/* Spare                                 0x20000000u  */
+#define CTL_USE_LENGTH                   0x08000000u  /* Same word as HEXPAT */
+#define CTL_UTF8_INPUT                   0x10000000u
+#define CTL_ZERO_TERMINATE               0x20000000u
+
 #define CTL_NL_SET                       0x40000000u  /* Informational */
 #define CTL_BSR_SET                      0x80000000u  /* Informational */
 
@@ -620,6 +621,7 @@ static modstruct modlist[] = {
   { "tables",                     MOD_PAT,  MOD_INT, 0,                          PO(tables_id) },
   { "ucp",                        MOD_PATP, MOD_OPT, PCRE2_UCP,                  PO(options) },
   { "ungreedy",                   MOD_PAT,  MOD_OPT, PCRE2_UNGREEDY,             PO(options) },
+  { "use_length",                 MOD_PAT,  MOD_CTL, CTL_USE_LENGTH,             PO(control) },
   { "use_offset_limit",           MOD_PAT,  MOD_OPT, PCRE2_USE_OFFSET_LIMIT,     PO(options) },
   { "utf",                        MOD_PATP, MOD_OPT, PCRE2_UTF,                  PO(options) },
   { "utf8_input",                 MOD_PAT,  MOD_CTL, CTL_UTF8_INPUT,             PO(control) },
@@ -649,7 +651,8 @@ static modstruct modlist[] = {
 
 #define PUSH_SUPPORTED_COMPILE_CONTROLS ( \
   CTL_BINCODE|CTL_CALLOUT_INFO|CTL_FULLBINCODE|CTL_HEXPAT|CTL_INFO| \
-  CTL_JITVERIFY|CTL_MEMORY|CTL_PUSH|CTL_PUSHCOPY|CTL_BSR_SET|CTL_NL_SET)
+  CTL_JITVERIFY|CTL_MEMORY|CTL_PUSH|CTL_PUSHCOPY|CTL_BSR_SET|CTL_NL_SET| \
+  CTL_USE_LENGTH)
 
 #define PUSH_SUPPORTED_COMPILE_CONTROLS2 (0)
 
@@ -661,7 +664,7 @@ static modstruct modlist[] = {
 /* Controls that are forbidden with #pop or #popcopy. */
 
 #define NOTPOP_CONTROLS (CTL_HEXPAT|CTL_POSIX|CTL_POSIX_NOSUB|CTL_PUSH| \
-  CTL_PUSHCOPY)
+  CTL_PUSHCOPY|CTL_USE_LENGTH)
 
 /* Pattern controls that are mutually exclusive. At present these are all in
 the first control word. Note that CTL_POSIX_NOSUB is always accompanied by
@@ -671,6 +674,7 @@ static uint32_t exclusive_pat_controls[] = {
   CTL_POSIX  | CTL_HEXPAT,
   CTL_POSIX  | CTL_PUSH,
   CTL_POSIX  | CTL_PUSHCOPY,
+  CTL_POSIX  | CTL_USE_LENGTH, 
   CTL_EXPAND | CTL_HEXPAT };
 
 /* Data controls that are mutually exclusive. At present these are all in the
@@ -3681,7 +3685,7 @@ Returns:      nothing
 static void
 show_controls(uint32_t controls, uint32_t controls2, const char *before)
 {
-fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
+fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
   before,
   ((controls & CTL_AFTERTEXT) != 0)? " aftertext" : "",
   ((controls & CTL_ALLAFTERTEXT) != 0)? " allaftertext" : "",
@@ -3716,6 +3720,7 @@ fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s
   ((controls2 & CTL2_SUBSTITUTE_OVERFLOW_LENGTH) != 0)? " substitute_overflow_length" : "",
   ((controls2 & CTL2_SUBSTITUTE_UNKNOWN_UNSET) != 0)? " substitute_unknown_unset" : "",
   ((controls2 & CTL2_SUBSTITUTE_UNSET_EMPTY) != 0)? " substitute_unset_empty" : "",
+  ((controls & CTL_USE_LENGTH) != 0)? " use_length" : "",
   ((controls & CTL_UTF8_INPUT) != 0)? " utf8_input" : "",
   ((controls & CTL_ZERO_TERMINATE) != 0)? " zero_terminate" : "");
 }
@@ -4976,12 +4981,13 @@ switch(errorcode)
   }
 
 /* The pattern is now in pbuffer[8|16|32], with the length in code units in
-patlen. By default, however, we pass a zero-terminated pattern. The length is
-passed only if we had a hex pattern. When valgrind is supported, arrange for
-the unused part of the buffer to be marked as no access. */
+patlen. By default we pass a zero-terminated pattern, but a length is passed if
+"use_length" was specified or this is a hex pattern (which might contain binary
+zeros). When valgrind is supported, arrange for the unused part of the buffer
+to be marked as no access. */
 
 valgrind_access_length = patlen;
-if ((pat_patctl.control & CTL_HEXPAT) == 0)
+if ((pat_patctl.control & (CTL_HEXPAT|CTL_USE_LENGTH)) == 0)
   {
   patlen = PCRE2_ZERO_TERMINATED;
   valgrind_access_length += 1;  /* For the terminating zero */

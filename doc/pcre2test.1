@@ -1,4 +1,4 @@
-.TH PCRE2TEST 1 "02 August 2016" "PCRE 10.23"
+.TH PCRE2TEST 1 "04 November 2016" "PCRE 10.23"
 .SH NAME
 pcre2test - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -580,6 +580,7 @@ about the pattern:
       pushcopy                  push a copy onto the stack
       stackguard=<number>       test the stackguard feature
       tables=[0|1|2]            select internal tables
+      use_length                do not zero-terminate the pattern 
       utf8_input                treat input as UTF-8 
 .sp
 The effects of these modifiers are described in the following sections.
@@ -658,6 +659,18 @@ testing that \fBpcre2_compile()\fP behaves correctly in this case (it uses
 default values).
 .
 .
+.SS "Specifying the pattern's length"
+.rs
+.sp
+By default, patterns are passed to the compiling functions as zero-terminated
+strings. When using the POSIX wrapper API, there is no other option. However,
+when using PCRE2's native API, patterns can be passed by length instead of
+being zero-terminated. The \fBuse_length\fP modifier causes this to happen. 
+Using a length happens automatically (whether or not \fBuse_length\fP is set)
+when \fBhex\fP is set, because patterns specified in hexadecimal may contain
+binary zeros.
+.
+.
 .SS "Specifying pattern characters in hexadecimal"
 .rs
 .sp
@@ -679,10 +692,10 @@ Either single or double quotes may be used. There is no way of including
 the delimiter within a substring. The \fBhex\fP and \fBexpand\fP modifiers are
 mutually exclusive.
 .P
-By default, \fBpcre2test\fP passes patterns as zero-terminated strings to
-\fBpcre2_compile()\fP, giving the length as PCRE2_ZERO_TERMINATED. However, for
-patterns specified with the \fBhex\fP modifier, the actual length of the
-pattern is passed.
+The POSIX API cannot be used with patterns specified in hexadecimal because 
+they may contain binary zeros, which conflicts with \fBregcomp()\fP's 
+requirement for a zero-terminated string. Such patterns are always passed to 
+\fBpcre2_compile()\fP as a string with a length, not as zero-terminated.
 .
 .
 .SS "Specifying wide characters in 16-bit and 32-bit modes"
@@ -1734,6 +1747,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 02 August 2016
+Last updated: 04 November 2016
 Copyright (c) 1997-2016 University of Cambridge.
 .fi

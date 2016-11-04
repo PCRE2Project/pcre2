@@ -147,6 +147,8 @@ obsolete these days and in any case had become very haphazard.
 
 21. Make pcre2test -C list valgrind support when it is enabled.
 
+22. Add the use_length modifier to pcre2test.
+
 
 Version 10.22 29-July-2016
 --------------------------
