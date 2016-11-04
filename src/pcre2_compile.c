@@ -2146,6 +2146,7 @@ uint32_t class_range_state;
 uint32_t *verblengthptr = NULL;     /* Value avoids compiler warning */
 uint32_t *previous_callout = NULL;
 uint32_t *parsed_pattern = cb->parsed_pattern;
+uint32_t *parsed_pattern_end = cb->parsed_pattern_end;
 uint32_t meta_quantifier = 0;
 uint16_t nest_depth = 0;
 int after_manual_callout = 0;
@@ -2188,6 +2189,12 @@ while (ptr < ptrend)
   PCRE2_SPTR tempptr;
   PCRE2_SPTR thisptr;
   PCRE2_SIZE offset;
+  
+  if (parsed_pattern >= parsed_pattern_end)
+    {
+    errorcode = ERR63;  /* Internal error (parsed pattern overflow) */
+    goto FAILED; 
+    }   
 
   if (nest_depth > cb->cx->parens_nest_limit)
     {
@@ -9158,7 +9165,7 @@ used. */
 
 parsed_size_needed = patlen - skipatstart + big32count;
 if ((options & PCRE2_AUTO_CALLOUT) != 0)
-  parsed_size_needed = (parsed_size_needed + 1) * 4;
+  parsed_size_needed = (parsed_size_needed + 1) * 5;
 
 if (parsed_size_needed >= PARSED_PATTERN_DEFAULT_SIZE)
   {
@@ -9171,7 +9178,8 @@ if (parsed_size_needed >= PARSED_PATTERN_DEFAULT_SIZE)
     }
   cb.parsed_pattern = heap_parsed_pattern;
   }
-
+cb.parsed_pattern_end = cb.parsed_pattern + parsed_size_needed + 1; 
+  
 /* Do the parsing scan. */
 
 errorcode = parse_regex(ptr, cb.external_options, &has_lookbehind, &cb);

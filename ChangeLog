@@ -79,6 +79,9 @@ copied).
       pattern one further code unit was read.
       
   (h) An unterminated number after \g' could cause reading beyond the pattern. 
+  
+  (i) An insufficient memory size was being computed for compiling with 
+      PCRE2_AUTO_CALLOUT. 
 
 4. Back references are now permitted in lookbehind assertions when there are 
 no duplicated group numbers (that is, (?| has not been used), and, if the 

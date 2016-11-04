@@ -713,6 +713,7 @@ typedef struct compile_block {
   uint32_t bracount;               /* Count of capturing parentheses */
   uint32_t lastcapture;            /* Last capture encountered */ 
   uint32_t *parsed_pattern;        /* Parsed pattern buffer */ 
+  uint32_t *parsed_pattern_end;    /* Parsed pattern should not get here */ 
   uint32_t *groupinfo;             /* Group info vector */
   uint32_t top_backref;            /* Maximum back reference */
   uint32_t backref_map;            /* Bitmap of low back refs */

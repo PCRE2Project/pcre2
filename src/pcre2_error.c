@@ -138,7 +138,7 @@ static const unsigned char compile_error_texts[] =
   "(*VERB) not recognized or malformed\0"
   "group number is too big\0"
   "subpattern name expected\0"
-  "SPARE ERROR\0"
+  "internal error: parsed pattern overflow\0"
   "non-octal character in \\o{} (closing brace missing?)\0"
   /* 65 */
   "different names for subpatterns of the same number are not allowed\0"

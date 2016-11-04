@@ -65,11 +65,11 @@ reason to disallow UTF and UCP. Force PCRE2_NEVER_BACKSLASH_C to be set because
 \C in random patterns is highly likely to cause a crash.  */
 
 compile_options =
-  ((uint32_t)((r1 << 16) | (r2 & 0xffff)) & ALLOWED_COMPILE_OPTIONS) |
+  ((((uint32_t)r1 << 16) | ((uint32_t)r2 & 0xffff)) & ALLOWED_COMPILE_OPTIONS) |
   PCRE2_NEVER_BACKSLASH_C;
 
 match_options =
-  ((uint32_t)((r1 << 16) | (r2 & 0xffff)) & ALLOWED_MATCH_OPTIONS);
+  ((((uint32_t)r1 << 16) | ((uint32_t)r2 & 0xffff)) & ALLOWED_MATCH_OPTIONS);
 
 /* Do the compile with and without the options, and after a successful compile,
 likewise do the match with and without the options. */
