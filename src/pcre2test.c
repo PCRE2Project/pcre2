@@ -3556,10 +3556,16 @@ for (;;)
       char *nn = (char *)field;
       if (len > 0)                    /* Add new name */
         {
-        while (*nn != 0) nn += strlen(nn) + 1;
-        if (nn + len + 1 - (char *)field > LENCPYGET)
+        if (len > MAX_NAME_SIZE)
           {
-          fprintf(outfile, "** Too many named '%s' modifiers\n", m->name);
+          fprintf(outfile, "** Group name in '%s' is too long\n", m->name);
+          return FALSE;  
+          }   
+        while (*nn != 0) nn += strlen(nn) + 1;
+        if (nn + len + 2 - (char *)field > LENCPYGET)
+          {
+          fprintf(outfile, "** Too many characters in named '%s' modifiers\n", 
+            m->name);
           return FALSE;
           }
         memcpy(nn, pp, len);

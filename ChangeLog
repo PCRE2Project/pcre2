@@ -157,6 +157,9 @@ obsolete these days and in any case had become very haphazard.
 
 22. Add the use_length modifier to pcre2test.
 
+23. Fix an off-by-one bug in pcre2test for the list of names for 'get' and 
+'copy' modifiers.
+
 
 Version 10.22 29-July-2016
 --------------------------

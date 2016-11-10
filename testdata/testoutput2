@@ -15355,6 +15355,12 @@ Failed: error 157 at offset 6: \g is not followed by a braced, angle-bracketed, 
 
 /{„Í„ÍÍ„Í{'{22{2{{2{'{22{{22{2{'{22{2{{2{{222{{2{'{22{2{22{2{'{22{2{{2{'{22{2{22{2{'{'{22{2{22{2{'{22{2{{2{'{22{2{22{2{'{222{2Ä„Í„ÍÍ„Í{'{22{2{{2{'{22{{11{2{'{22{2{{2{{'{22{2{{2{'{22{{22{1{'{22{2{{2{{222{{2{'{22{2{22{2{'{/auto_callout
 
+//
+\=get=i00000000000000000000000000000000
+** Group name in 'get' is too long
+\=get=i2345678901234567890123456789012,get=i1245678901234567890123456789012
+** Too many characters in named 'get' modifiers
+
 # End of testinput2 
 Error -63: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data
