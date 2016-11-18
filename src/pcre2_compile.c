@@ -856,6 +856,7 @@ for (;;)
 
     case META_BIGVALUE: fprintf(stderr, "META_BIGVALUE %.8x", *pptr++); break;
     case META_CIRCUMFLEX: fprintf(stderr, "META_CIRCUMFLEX"); break;
+    case META_COND_ASSERT: fprintf(stderr, "META_COND_ASSERT"); break;
     case META_DOLLAR: fprintf(stderr, "META_DOLLAR"); break;
     case META_DOT: fprintf(stderr, "META_DOT"); break;
     case META_ASTERISK: fprintf(stderr, "META *"); break;
@@ -945,12 +946,6 @@ for (;;)
 
     case META_COND_DEFINE:
     fprintf(stderr, "META (?(DEFINE) offset=");
-    GETOFFSET(offset, pptr);
-    fprintf(stderr, "%zd", offset);
-    break;
-
-    case META_COND_ASSERT:
-    fprintf(stderr, "META_COND_ASSERT offset=");
     GETOFFSET(offset, pptr);
     fprintf(stderr, "%zd", offset);
     break;
@@ -2189,12 +2184,12 @@ while (ptr < ptrend)
   PCRE2_SPTR tempptr;
   PCRE2_SPTR thisptr;
   PCRE2_SIZE offset;
-  
+
   if (parsed_pattern >= parsed_pattern_end)
     {
     errorcode = ERR63;  /* Internal error (parsed pattern overflow) */
-    goto FAILED; 
-    }   
+    goto FAILED;
+    }
 
   if (nest_depth > cb->cx->parens_nest_limit)
     {
@@ -2366,6 +2361,42 @@ while (ptr < ptrend)
     if (after_manual_callout-- <= 0)
       parsed_pattern = manage_callouts(thisptr, &previous_callout, options,
         parsed_pattern, cb);
+    }
+
+  /* If expect_cond_assert is 2, we have just passed (?( and are expecting an
+  assertion, possibly preceded by a callout. If the value is 1, we have just
+  had the callout and expect an assertion. There must be at least 3 more
+  characters in all cases. We know that the current character is an opening
+  parenthesis, as otherwise we wouldn't be here. Note that expect_cond_assert 
+  may be negative, since all callouts just decrement it. */
+
+  if (expect_cond_assert > 0)
+    {
+    BOOL ok = ptrend - ptr >= 3 && ptr[0] == CHAR_QUESTION_MARK;
+    if (ok) switch(ptr[1])
+      {
+      case CHAR_C:
+      ok = expect_cond_assert == 2;
+      break;  
+ 
+      case CHAR_EQUALS_SIGN:
+      case CHAR_EXCLAMATION_MARK:
+      break;
+      
+      case CHAR_LESS_THAN_SIGN:
+      ok = ptr[2] == CHAR_EQUALS_SIGN || ptr[2] == CHAR_EXCLAMATION_MARK;
+      break;
+      
+      default:
+      ok = FALSE;       
+      }   
+
+    if (!ok)
+      {
+      ptr--;   /* Adjust error offset */ 
+      errorcode = ERR28;
+      goto FAILED;
+      }
     }
 
   /* Remember whether we are expecting a conditional assertion, and set the
@@ -3443,7 +3474,7 @@ while (ptr < ptrend)
             ptr = startptr;   /* To give a more useful message */
             goto FAILED;
             }
-          if (*ptr == delimiter && (++ptr >= ptrend || *ptr != delimiter)) 
+          if (*ptr == delimiter && (++ptr >= ptrend || *ptr != delimiter))
             break;
           }
 
@@ -3519,18 +3550,16 @@ while (ptr < ptrend)
       nest_depth++;
 
       /* If the next character is ? there must be an assertion next (optionally
-      preceded by a callout). We do not check this here, but instead we just
-      preserve the offset so that the later check can give a sensible error
-      message. Pull back the pointer to the start of the assertion (or
-      callout), and set expect_cond_assert to 2. If this is still greater than
-      zero (callouts decrement it) when the next assertion is read, it will be
-      marked as a condition that must not be repeated. */
+      preceded by a callout). We do not check this here, but instead we set
+      expect_cond_assert to 2. If this is still greater than zero (callouts
+      decrement it) when the next assertion is read, it will be marked as a
+      condition that must not be repeated. A value greater than zero also
+      causes checking that an assertion (possibly with callout) follows. */
 
       if (*ptr == CHAR_QUESTION_MARK)
         {
         *parsed_pattern++ = META_COND_ASSERT;
-        offset = (PCRE2_SIZE)(--ptr - cb->start_pattern - 2);
-        PUTOFFSET(offset, parsed_pattern);
+        ptr--;   /* Pull pointer back to the opening parenthesis. */ 
         expect_cond_assert = 2;
         break;  /* End of conditional */
         }
@@ -3902,6 +3931,11 @@ parsed_pattern = manage_callouts(ptr, &previous_callout, options,
 /* Terminate the parsed pattern, then return success if all groups are closed.
 Otherwise we have unclosed parentheses. */
 
+if (parsed_pattern >= parsed_pattern_end)
+  {
+  errorcode = ERR63;  /* Internal error (parsed pattern overflow) */
+  goto FAILED;
+  }
 *parsed_pattern = META_END;
 if (nest_depth == 0) return 0;
 
@@ -5806,23 +5840,10 @@ for (;; pptr++)
     pptr += 3;
     goto GROUP_PROCESS;
 
-    /* The condition is alleged to be an assertion, possibly preceded by a
-    callout, because it's not one of the others, and began with (?(?. This is
-    where the check for the next thing being an assertion (with optional
-    callout) is done. */
+    /* The condition is an assertion, possibly preceded by a callout. */
 
     case META_COND_ASSERT:
     bravalue = OP_COND;
-    GETPLUSOFFSET(offset, pptr);
-    i = (pptr[1] == META_CALLOUT_NUMBER)? 5 :
-        (pptr[1] == META_CALLOUT_STRING)? (5 + SIZEOFFSET) : 1;
-    if (META_CODE(pptr[i]) < META_LOOKAHEAD ||
-        META_CODE(pptr[i]) > META_LOOKBEHINDNOT)
-      {
-      *errorcodeptr = ERR28;         /* Assertion expected */
-      cb->erroroffset = offset + 2;  /* Point after initial (? */
-      return FALSE;
-      }
     goto GROUP_PROCESS;
 
 
@@ -8563,7 +8584,7 @@ for (;; pptr++)
     goto CHECK_GROUP;
 
     case META_COND_ASSERT:
-    pptr += 1 + SIZEOFFSET;
+    pptr += 1;
     goto CHECK_GROUP;
 
     case META_COND_VERSION:
@@ -8733,6 +8754,7 @@ for (pptr = cb->parsed_pattern; *pptr != META_END; pptr++)
     case META_CLASS_END:
     case META_CLASS_NOT:
     case META_COMMIT:
+    case META_COND_ASSERT:
     case META_DOLLAR:
     case META_DOT:
     case META_FAIL:
@@ -8753,7 +8775,6 @@ for (pptr = cb->parsed_pattern; *pptr != META_END; pptr++)
     case META_THEN:
     break;
 
-    case META_COND_ASSERT:
     case META_RECURSE:
     pptr += SIZEOFFSET;
     break;
@@ -9178,8 +9199,8 @@ if (parsed_size_needed >= PARSED_PATTERN_DEFAULT_SIZE)
     }
   cb.parsed_pattern = heap_parsed_pattern;
   }
-cb.parsed_pattern_end = cb.parsed_pattern + parsed_size_needed + 1; 
-  
+cb.parsed_pattern_end = cb.parsed_pattern + parsed_size_needed + 1;
+
 /* Do the parsing scan. */
 
 errorcode = parse_regex(ptr, cb.external_options, &has_lookbehind, &cb);
@@ -9569,7 +9590,7 @@ if ((re->overall_options & PCRE2_NO_START_OPTIMIZE) == 0 &&
   goto HAD_CB_ERROR;
   }
 
-/* Control ends up here in all cases. When running under valgrind, make a 
+/* Control ends up here in all cases. When running under valgrind, make a
 pattern's terminating zero defined again. If memory was obtained for the parsed
 version of the pattern, free it before returning. Also free the list of named
 groups if a larger one had to be obtained, and likewise the group information

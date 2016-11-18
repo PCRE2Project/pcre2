@@ -556,7 +556,7 @@ Failed: error 128 at offset 2: assertion expected after (?( or (?(?C)
 Failed: error 115 at offset 3: reference to non-existent subpattern
 
 /(?(?<ab))/
-Failed: error 142 at offset 7: syntax error in subpattern name (missing terminator)
+Failed: error 128 at offset 2: assertion expected after (?( or (?(?C)
 
 /((?s)blah)\s+\1/I
 Capturing subpattern count = 1
@@ -15360,6 +15360,12 @@ Failed: error 157 at offset 6: \g is not followed by a braced, angle-bracketed, 
 ** Group name in 'get' is too long
 \=get=i2345678901234567890123456789012,get=i1245678901234567890123456789012
 ** Too many characters in named 'get' modifiers
+
+"(?(?C))"
+Failed: error 128 at offset 6: assertion expected after (?( or (?(?C)
+
+/(?(?(?(?(?(?))))))/
+Failed: error 128 at offset 2: assertion expected after (?( or (?(?C)
 
 # End of testinput2 
 Error -63: PCRE2_ERROR_BADDATA (unknown error number)

@@ -186,6 +186,7 @@ META_CLASS_EMPTY_NOT  [^] negative empty class - ditto
 META_CLASS_END        ] end of non-empty class
 META_CLASS_NOT        [^ start non-empty negative class
 META_COMMIT           (*COMMIT)
+META_COND_ASSERT      (?(?assertion)
 META_DOLLAR           $ metacharacter
 META_DOT              . metacharacter
 META_END              End of pattern (this value is 0x80000000)
@@ -274,9 +275,8 @@ This one is followed by an offset, for use in error messages, then a number:
 
 META_COND_NUMBER       (?([+-]digits)
 
-The following are followed just by an offset, for use in error messages:
+The following is followed just by an offset, for use in error messages:
 
-META_COND_ASSERT      (?(?assertion)
 META_COND_DEFINE      (?(DEFINE)
 
 In fact, META_COND_ASSERT is used for any group starting (?( that does not

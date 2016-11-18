@@ -82,6 +82,13 @@ copied).
   
   (i) An insufficient memory size was being computed for compiling with 
       PCRE2_AUTO_CALLOUT. 
+      
+  (j) A conditional group with an assertion condition used more memory than was 
+      allowed for it during parsing, so too many of them could therefore 
+      overrun a buffer.
+      
+  (k) If parsing a pattern exactly filled the buffer, the internal test for 
+      overrun did not check when the final META_END item was added.
 
 4. Back references are now permitted in lookbehind assertions when there are 
 no duplicated group numbers (that is, (?| has not been used), and, if the 
