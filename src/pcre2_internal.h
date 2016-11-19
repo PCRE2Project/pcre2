@@ -142,20 +142,6 @@ pcre2_match() because of the way it backtracks. */
 #define PCRE2_SPTR CUSTOM_SUBJECT_PTR
 #endif
 
-/* When compiling with the MSVC compiler, it is sometimes necessary to include
-a "calling convention" before exported function names. (This is secondhand
-information; I know nothing about MSVC myself). For example, something like
-
-  void __cdecl function(....)
-
-might be needed. In order so make this easy, all the exported functions have
-PCRE2_CALL_CONVENTION just before their names. It is rarely needed; if not
-set, we ensure here that it has no effect. */
-
-#ifndef PCRE2_CALL_CONVENTION
-#define PCRE2_CALL_CONVENTION
-#endif
-
 /* When checking for integer overflow in pcre2_compile(), we need to handle
 large integers. If a 64-bit integer type is available, we can use that.
 Otherwise we have to cast to double, which of course requires floating point

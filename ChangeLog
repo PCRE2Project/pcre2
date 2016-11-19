@@ -167,6 +167,10 @@ obsolete these days and in any case had become very haphazard.
 23. Fix an off-by-one bug in pcre2test for the list of names for 'get' and 
 'copy' modifiers.
 
+24. Add PCRE2_CALL_CONVENTION into the prototype declarations in pcre2.h as it 
+is apparently needed there as well as in the function definitions. (Why did 
+nobody ask for this in PCRE1?)
+
 
 Version 10.22 29-July-2016
 --------------------------
