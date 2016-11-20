@@ -171,6 +171,10 @@ obsolete these days and in any case had become very haphazard.
 is apparently needed there as well as in the function definitions. (Why did 
 nobody ask for this in PCRE1?)
 
+25. Change the _PCRE2_H and _PCRE2_UCP_H guard macros in the header files to 
+PCRE2_H_IDEMPOTENT_GUARD and PCRE2_UCP_H_IDEMPOTENT_GUARD to be more standard 
+compliant and unique.
+
 
 Version 10.22 29-July-2016
 --------------------------

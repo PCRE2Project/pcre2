@@ -36,8 +36,8 @@ POSSIBILITY OF SUCH DAMAGE.
 -----------------------------------------------------------------------------
 */
 
-#ifndef _PCRE2_H
-#define _PCRE2_H
+#ifndef PCRE2_H_IDEMPOTENT_GUARD
+#define PCRE2_H_IDEMPOTENT_GUARD
 
 /* The current PCRE version information. */
 
@@ -763,4 +763,6 @@ PCRE2_SUFFIX a no-op. Otherwise, generate an error. */
 }  /* extern "C" */
 #endif
 
-#endif /* End of pcre2.h */
+#endif  /* PCRE2_H_IDEMPOTENT_GUARD */
+
+/* End of pcre2.h */
