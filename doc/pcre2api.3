@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "30 September 2016" "PCRE2 10.23"
+.TH PCRE2API 3 "22 November 2016" "PCRE2 10.23"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -234,6 +234,8 @@ document for an overview of all the PCRE2 documentation.
 .sp
 .nf
 .B pcre2_code *pcre2_code_copy(const pcre2_code *\fIcode\fP);
+.sp
+.B pcre2_code *pcre2_code_copy_with_tables(const pcre2_code *\fIcode\fP);
 .sp
 .B int pcre2_get_error_message(int \fIerrorcode\fP, PCRE2_UCHAR *\fIbuffer\fP,
 .B "  PCRE2_SIZE \fIbufflen\fP);"
@@ -509,8 +511,9 @@ If JIT is being used, but the JIT compilation is not being done immediately,
 (perhaps waiting to see if the pattern is used often enough) similar logic is
 required. JIT compilation updates a pointer within the compiled code block, so
 a thread must gain unique write access to the pointer before calling
-\fBpcre2_jit_compile()\fP. Alternatively, \fBpcre2_code_copy()\fP can be used
-to obtain a private copy of the compiled code.
+\fBpcre2_jit_compile()\fP. Alternatively, \fBpcre2_code_copy()\fP or 
+\fBpcre2_code_copy_with_tables()\fP can be used to obtain a private copy of the
+compiled code.
 .
 .
 .SS "Context blocks"
@@ -1027,6 +1030,8 @@ zero.
 .B void pcre2_code_free(pcre2_code *\fIcode\fP);
 .sp
 .B pcre2_code *pcre2_code_copy(const pcre2_code *\fIcode\fP);
+.sp
+.B pcre2_code *pcre2_code_copy_with_tables(const pcre2_code *\fIcode\fP);
 .fi
 .P
 The \fBpcre2_compile()\fP function compiles a pattern into an internal form.
@@ -1049,9 +1054,24 @@ below),
 .\"
 the JIT information cannot be copied (because it is position-dependent).
 The new copy can initially be used only for non-JIT matching, though it can be
-passed to \fBpcre2_jit_compile()\fP if required. The \fBpcre2_code_copy()\fP
-function provides a way for individual threads in a multithreaded application
-to acquire a private copy of shared compiled code.
+passed to \fBpcre2_jit_compile()\fP if required. 
+.P
+The \fBpcre2_code_copy()\fP function provides a way for individual threads in a
+multithreaded application to acquire a private copy of shared compiled code. 
+However, it does not make a copy of the character tables used by the compiled 
+pattern; the new pattern code points to the same tables as the original code.
+(See
+.\" HTML <a href="#jitcompiling">
+.\" </a>
+"Locale Support"
+.\"
+below for details of these character tables.) In many applications the same
+tables are used throughout, so this behaviour is appropriate. Nevertheless, 
+there are occasions when a copy of a compiled pattern and the relevant tables 
+are needed. The \fBpcre2_code_copy_with_tables()\fP provides this facility. 
+Copies of both the code and the tables are made, with the new code pointing to 
+the new tables. The memory for the new tables is automatically freed when
+\fBpcre2_code_free()\fP is called for the new copy of the compiled code.
 .P
 NOTE: When one of the matching functions is called, pointers to the compiled
 pattern and the subject string are set in the match data block so that they can
@@ -3299,6 +3319,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 30 September 2016
+Last updated: 22 November 2016
 Copyright (c) 1997-2016 University of Cambridge.
 .fi

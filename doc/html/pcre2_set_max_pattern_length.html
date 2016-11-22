@@ -26,8 +26,11 @@ SYNOPSIS
 DESCRIPTION
 </b><br>
 <P>
-This function sets, in a compile context, the maximum length (in code units) of
-the pattern that can be compiled. The result is always zero.
+This function sets, in a compile context, the maximum text length (in code
+units) of the pattern that can be compiled. The result is always zero. If a
+longer pattern is passed to <b>pcre2_compile()</b> there is an immediate error
+return. The default is effectively unlimited, being the largest value a
+PCRE2_SIZE variable can hold.
 </P>
 <P>
 There is a complete description of the PCRE2 native API in the

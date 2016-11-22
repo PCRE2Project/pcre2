@@ -615,6 +615,7 @@ about the pattern:
       pushcopy                  push a copy onto the stack
       stackguard=&#60;number&#62;       test the stackguard feature
       tables=[0|1|2]            select internal tables
+      use_length                do not zero-terminate the pattern 
       utf8_input                treat input as UTF-8 
 </pre>
 The effects of these modifiers are described in the following sections.
@@ -698,6 +699,18 @@ testing that <b>pcre2_compile()</b> behaves correctly in this case (it uses
 default values).
 </P>
 <br><b>
+Specifying the pattern's length
+</b><br>
+<P>
+By default, patterns are passed to the compiling functions as zero-terminated
+strings. When using the POSIX wrapper API, there is no other option. However,
+when using PCRE2's native API, patterns can be passed by length instead of
+being zero-terminated. The <b>use_length</b> modifier causes this to happen. 
+Using a length happens automatically (whether or not <b>use_length</b> is set)
+when <b>hex</b> is set, because patterns specified in hexadecimal may contain
+binary zeros.
+</P>
+<br><b>
 Specifying pattern characters in hexadecimal
 </b><br>
 <P>
@@ -720,10 +733,10 @@ the delimiter within a substring. The <b>hex</b> and <b>expand</b> modifiers are
 mutually exclusive.
 </P>
 <P>
-By default, <b>pcre2test</b> passes patterns as zero-terminated strings to
-<b>pcre2_compile()</b>, giving the length as PCRE2_ZERO_TERMINATED. However, for
-patterns specified with the <b>hex</b> modifier, the actual length of the
-pattern is passed.
+The POSIX API cannot be used with patterns specified in hexadecimal because 
+they may contain binary zeros, which conflicts with <b>regcomp()</b>'s 
+requirement for a zero-terminated string. Such patterns are always passed to 
+<b>pcre2_compile()</b> as a string with a length, not as zero-terminated.
 </P>
 <br><b>
 Specifying wide characters in 16-bit and 32-bit modes
@@ -1753,7 +1766,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC21" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 02 August 2016
+Last updated: 04 November 2016
 <br>
 Copyright &copy; 1997-2016 University of Cambridge.
 <br>

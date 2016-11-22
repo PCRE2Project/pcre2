@@ -135,4 +135,16 @@ Serialization failed: error -30: patterns do not all use the same character tabl
 #pop should give an error
 ** Can't pop off an empty stack
 
+/abcd/pushtablescopy
+    abcd
+ 0: abcd
+
+#popcopy 
+    abcd
+ 0: abcd
+    
+#pop
+    abcd 
+ 0: abcd
+
 # End of testinput20

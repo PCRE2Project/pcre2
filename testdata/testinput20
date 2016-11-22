@@ -88,4 +88,13 @@
 
 #pop should give an error
 
+/abcd/pushtablescopy
+    abcd
+
+#popcopy 
+    abcd
+    
+#pop
+    abcd 
+
 # End of testinput20

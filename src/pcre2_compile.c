@@ -1036,7 +1036,46 @@ if ((code->flags & PCRE2_DEREF_TABLES) != 0)
   ref_count = (PCRE2_SIZE *)(code->tables + tables_length);
   (*ref_count)++;
   }
+  
+return newcode;
+}
 
+
+
+/*************************************************
+*     Copy compiled code and character tables    *
+*************************************************/
+
+/* Compiled JIT code cannot be copied, so the new compiled block has no
+associated JIT data. This version of code_copy also makes a separate copy of
+the character tables. */
+
+PCRE2_EXP_DEFN pcre2_code * PCRE2_CALL_CONVENTION
+pcre2_code_copy_with_tables(const pcre2_code *code)
+{
+PCRE2_SIZE* ref_count;
+pcre2_code *newcode;
+uint8_t *newtables;
+
+if (code == NULL) return NULL;
+newcode = code->memctl.malloc(code->blocksize, code->memctl.memory_data);
+if (newcode == NULL) return NULL;
+memcpy(newcode, code, code->blocksize);
+newcode->executable_jit = NULL;
+
+newtables = code->memctl.malloc(tables_length + sizeof(PCRE2_SIZE),
+  code->memctl.memory_data);
+if (newtables == NULL)
+  {
+  code->memctl.free((void *)newcode, code->memctl.memory_data);
+  return NULL;
+  }
+memcpy(newtables, code->tables, tables_length);
+ref_count = (PCRE2_SIZE *)(newtables + tables_length);
+*ref_count = 1;
+
+newcode->tables = newtables;
+newcode->flags |= PCRE2_DEREF_TABLES;
 return newcode;
 }
 
@@ -2367,7 +2406,7 @@ while (ptr < ptrend)
   assertion, possibly preceded by a callout. If the value is 1, we have just
   had the callout and expect an assertion. There must be at least 3 more
   characters in all cases. We know that the current character is an opening
-  parenthesis, as otherwise we wouldn't be here. Note that expect_cond_assert 
+  parenthesis, as otherwise we wouldn't be here. Note that expect_cond_assert
   may be negative, since all callouts just decrement it. */
 
   if (expect_cond_assert > 0)
@@ -2377,23 +2416,23 @@ while (ptr < ptrend)
       {
       case CHAR_C:
       ok = expect_cond_assert == 2;
-      break;  
- 
+      break;
+
       case CHAR_EQUALS_SIGN:
       case CHAR_EXCLAMATION_MARK:
       break;
-      
+
       case CHAR_LESS_THAN_SIGN:
       ok = ptr[2] == CHAR_EQUALS_SIGN || ptr[2] == CHAR_EXCLAMATION_MARK;
       break;
-      
+
       default:
-      ok = FALSE;       
-      }   
+      ok = FALSE;
+      }
 
     if (!ok)
       {
-      ptr--;   /* Adjust error offset */ 
+      ptr--;   /* Adjust error offset */
       errorcode = ERR28;
       goto FAILED;
       }
@@ -3559,7 +3598,7 @@ while (ptr < ptrend)
       if (*ptr == CHAR_QUESTION_MARK)
         {
         *parsed_pattern++ = META_COND_ASSERT;
-        ptr--;   /* Pull pointer back to the opening parenthesis. */ 
+        ptr--;   /* Pull pointer back to the opening parenthesis. */
         expect_cond_assert = 2;
         break;  /* End of conditional */
         }

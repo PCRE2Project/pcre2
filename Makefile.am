@@ -25,6 +25,7 @@ dist_html_DATA = \
   doc/html/pcre2.html \
   doc/html/pcre2_callout_enumerate.html \
   doc/html/pcre2_code_copy.html \
+  doc/html/pcre2_code_copy_with_tables.html \
   doc/html/pcre2_code_free.html \
   doc/html/pcre2_compile.html \
   doc/html/pcre2_compile_context_copy.html \
@@ -107,6 +108,7 @@ dist_man_MANS = \
   doc/pcre2.3 \
   doc/pcre2_callout_enumerate.3 \
   doc/pcre2_code_copy.3 \
+  doc/pcre2_code_copy_with_tables.3 \
   doc/pcre2_code_free.3 \
   doc/pcre2_compile.3 \
   doc/pcre2_compile_context_copy.3 \

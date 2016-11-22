@@ -427,15 +427,13 @@ so many of them that they are split into two fields. */
 #define CTL_NULLCONTEXT                  0x00200000u
 #define CTL_POSIX                        0x00400000u
 #define CTL_POSIX_NOSUB                  0x00800000u
-#define CTL_PUSH                         0x01000000u
-#define CTL_PUSHCOPY                     0x02000000u
-#define CTL_STARTCHAR                    0x04000000u
-#define CTL_USE_LENGTH                   0x08000000u  /* Same word as HEXPAT */
-#define CTL_UTF8_INPUT                   0x10000000u
-#define CTL_ZERO_TERMINATE               0x20000000u
-
-#define CTL_NL_SET                       0x40000000u  /* Informational */
-#define CTL_BSR_SET                      0x80000000u  /* Informational */
+#define CTL_PUSH                         0x01000000u  /* These three must be */
+#define CTL_PUSHCOPY                     0x02000000u  /*   all in the same */
+#define CTL_PUSHTABLESCOPY               0x04000000u  /*     word. */          
+#define CTL_STARTCHAR                    0x08000000u
+#define CTL_USE_LENGTH                   0x10000000u  /* Same word as HEXPAT */
+#define CTL_UTF8_INPUT                   0x20000000u
+#define CTL_ZERO_TERMINATE               0x40000000u
 
 /* Second control word */
 
@@ -443,6 +441,9 @@ so many of them that they are split into two fields. */
 #define CTL2_SUBSTITUTE_OVERFLOW_LENGTH  0x00000002u
 #define CTL2_SUBSTITUTE_UNKNOWN_UNSET    0x00000004u
 #define CTL2_SUBSTITUTE_UNSET_EMPTY      0x00000008u
+
+#define CTL_NL_SET                       0x40000000u  /* Informational */
+#define CTL_BSR_SET                      0x80000000u  /* Informational */
 
 /* Combinations */
 
@@ -607,7 +608,8 @@ static modstruct modlist[] = {
   { "posix_nosub",                MOD_PAT,  MOD_CTL, CTL_POSIX|CTL_POSIX_NOSUB,  PO(control) },
   { "ps",                         MOD_DAT,  MOD_OPT, PCRE2_PARTIAL_SOFT,         DO(options) },
   { "push",                       MOD_PAT,  MOD_CTL, CTL_PUSH,                   PO(control) },
-  { "pushcopy",                   MOD_PAT,  MOD_CTL, CTL_PUSHCOPY,              PO(control) },
+  { "pushcopy",                   MOD_PAT,  MOD_CTL, CTL_PUSHCOPY,               PO(control) },
+  { "pushtablescopy",             MOD_PAT,  MOD_CTL, CTL_PUSHTABLESCOPY,         PO(control) },
   { "recursion_limit",            MOD_CTM,  MOD_INT, 0,                          MO(recursion_limit) },
   { "regerror_buffsize",          MOD_PAT,  MOD_INT, 0,                          PO(regerror_buffsize) },
   { "replace",                    MOD_PND,  MOD_STR, REPLACE_MODSIZE,            PO(replacement) },
@@ -651,10 +653,10 @@ static modstruct modlist[] = {
 
 #define PUSH_SUPPORTED_COMPILE_CONTROLS ( \
   CTL_BINCODE|CTL_CALLOUT_INFO|CTL_FULLBINCODE|CTL_HEXPAT|CTL_INFO| \
-  CTL_JITVERIFY|CTL_MEMORY|CTL_PUSH|CTL_PUSHCOPY|CTL_BSR_SET|CTL_NL_SET| \
+  CTL_JITVERIFY|CTL_MEMORY|CTL_PUSH|CTL_PUSHCOPY|CTL_PUSHTABLESCOPY| \
   CTL_USE_LENGTH)
 
-#define PUSH_SUPPORTED_COMPILE_CONTROLS2 (0)
+#define PUSH_SUPPORTED_COMPILE_CONTROLS2 (CTL_BSR_SET|CTL_NL_SET)
 
 /* Controls that apply only at compile time with 'push'. */
 
@@ -664,7 +666,7 @@ static modstruct modlist[] = {
 /* Controls that are forbidden with #pop or #popcopy. */
 
 #define NOTPOP_CONTROLS (CTL_HEXPAT|CTL_POSIX|CTL_POSIX_NOSUB|CTL_PUSH| \
-  CTL_PUSHCOPY|CTL_USE_LENGTH)
+  CTL_PUSHCOPY|CTL_PUSHTABLESCOPY|CTL_USE_LENGTH)
 
 /* Pattern controls that are mutually exclusive. At present these are all in
 the first control word. Note that CTL_POSIX_NOSUB is always accompanied by
@@ -674,6 +676,7 @@ static uint32_t exclusive_pat_controls[] = {
   CTL_POSIX  | CTL_HEXPAT,
   CTL_POSIX  | CTL_PUSH,
   CTL_POSIX  | CTL_PUSHCOPY,
+  CTL_POSIX  | CTL_PUSHTABLESCOPY,
   CTL_POSIX  | CTL_USE_LENGTH,
   CTL_EXPAND | CTL_HEXPAT };
 
@@ -972,6 +975,14 @@ are supported. */
     a = (void *)pcre2_code_copy_16(G(b,16)); \
   else \
     a = (void *)pcre2_code_copy_32(G(b,32))
+
+#define PCRE2_CODE_COPY_WITH_TABLES_TO_VOID(a,b) \
+  if (test_mode == PCRE8_MODE) \
+    a = (void *)pcre2_code_copy_with_tables_8(G(b,8)); \
+  else if (test_mode == PCRE16_MODE) \
+    a = (void *)pcre2_code_copy_with_tables_16(G(b,16)); \
+  else \
+    a = (void *)pcre2_code_copy_with_tables_32(G(b,32))
 
 #define PCRE2_COMPILE(a,b,c,d,e,f,g) \
   if (test_mode == PCRE8_MODE) \
@@ -1436,6 +1447,12 @@ the three different cases. */
   else \
     a = (void *)G(pcre2_code_copy_,BITTWO)(G(b,BITTWO))
 
+#define PCRE2_CODE_COPY_WITH_TABLES_TO_VOID(a,b) \
+  if (test_mode == G(G(PCRE,BITONE),_MODE)) \
+    a = (void *)G(pcre2_code_copy_with_tables_,BITONE)(G(b,BITONE)); \
+  else \
+    a = (void *)G(pcre2_code_copy_with_tables_,BITTWO)(G(b,BITTWO))
+
 #define PCRE2_COMPILE(a,b,c,d,e,f,g) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
     G(a,BITONE) = G(pcre2_compile_,BITONE)(G(b,BITONE),c,d,e,f,g); \
@@ -1773,6 +1790,7 @@ the three different cases. */
      (int (*)(struct pcre2_callout_enumerate_block_8 *, void *))b,c)
 #define PCRE2_CODE_COPY_FROM_VOID(a,b) G(a,8) = pcre2_code_copy_8(b)
 #define PCRE2_CODE_COPY_TO_VOID(a,b) a = (void *)pcre2_code_copy_8(G(b,8))
+#define PCRE2_CODE_COPY_WITH_TABLES_TO_VOID(a,b) a = (void *)pcre2_code_copy_with_tables_8(G(b,8))
 #define PCRE2_COMPILE(a,b,c,d,e,f,g) \
   G(a,8) = pcre2_compile_8(G(b,8),c,d,e,f,g)
 #define PCRE2_DFA_MATCH(a,b,c,d,e,f,g,h,i,j) \
@@ -1868,6 +1886,7 @@ the three different cases. */
      (int (*)(struct pcre2_callout_enumerate_block_16 *, void *))b,c)
 #define PCRE2_CODE_COPY_FROM_VOID(a,b) G(a,16) = pcre2_code_copy_16(b)
 #define PCRE2_CODE_COPY_TO_VOID(a,b) a = (void *)pcre2_code_copy_16(G(b,16))
+#define PCRE2_CODE_COPY_WITH_TABLES_TO_VOID(a,b) a = (void *)pcre2_code_copy_with_tables_16(G(b,16))
 #define PCRE2_COMPILE(a,b,c,d,e,f,g) \
   G(a,16) = pcre2_compile_16(G(b,16),c,d,e,f,g)
 #define PCRE2_DFA_MATCH(a,b,c,d,e,f,g,h,i,j) \
@@ -1963,6 +1982,7 @@ the three different cases. */
      (int (*)(struct pcre2_callout_enumerate_block_32 *, void *))b,c)
 #define PCRE2_CODE_COPY_FROM_VOID(a,b) G(a,32) = pcre2_code_copy_32(b)
 #define PCRE2_CODE_COPY_TO_VOID(a,b) a = (void *)pcre2_code_copy_32(G(b,32))
+#define PCRE2_CODE_COPY_WITH_TABLES_TO_VOID(a,b) a = (void *)pcre2_code_copy_with_tables_32(G(b,32))
 #define PCRE2_COMPILE(a,b,c,d,e,f,g) \
   G(a,32) = pcre2_compile_32(G(b,32),c,d,e,f,g)
 #define PCRE2_DFA_MATCH(a,b,c,d,e,f,g,h,i,j) \
@@ -3435,8 +3455,8 @@ for (;;)
 #else
       *((uint16_t *)field) = PCRE2_BSR_UNICODE;
 #endif
-      if (ctx == CTX_PAT || ctx == CTX_DEFPAT) pctl->control &= ~CTL_BSR_SET;
-        else dctl->control &= ~CTL_BSR_SET;
+      if (ctx == CTX_PAT || ctx == CTX_DEFPAT) pctl->control2 &= ~CTL_BSR_SET;
+        else dctl->control2 &= ~CTL_BSR_SET;
       }
     else
       {
@@ -3445,8 +3465,8 @@ for (;;)
       else if (len == 7 && strncmpic(pp, (const uint8_t *)"unicode", 7) == 0)
         *((uint16_t *)field) = PCRE2_BSR_UNICODE;
       else goto INVALID_VALUE;
-      if (ctx == CTX_PAT || ctx == CTX_DEFPAT) pctl->control |= CTL_BSR_SET;
-        else dctl->control |= CTL_BSR_SET;
+      if (ctx == CTX_PAT || ctx == CTX_DEFPAT) pctl->control2 |= CTL_BSR_SET;
+        else dctl->control2 |= CTL_BSR_SET;
       }
     pp = ep;
     break;
@@ -3513,14 +3533,14 @@ for (;;)
     if (i == 0)
       {
       *((uint16_t *)field) = NEWLINE_DEFAULT;
-      if (ctx == CTX_PAT || ctx == CTX_DEFPAT) pctl->control &= ~CTL_NL_SET;
-        else dctl->control &= ~CTL_NL_SET;
+      if (ctx == CTX_PAT || ctx == CTX_DEFPAT) pctl->control2 &= ~CTL_NL_SET;
+        else dctl->control2 &= ~CTL_NL_SET;
       }
     else
       {
       *((uint16_t *)field) = i;
-      if (ctx == CTX_PAT || ctx == CTX_DEFPAT) pctl->control |= CTL_NL_SET;
-        else dctl->control |= CTL_NL_SET;
+      if (ctx == CTX_PAT || ctx == CTX_DEFPAT) pctl->control2 |= CTL_NL_SET;
+        else dctl->control2 |= CTL_NL_SET;
       }
     pp = ep;
     break;
@@ -3691,7 +3711,7 @@ Returns:      nothing
 static void
 show_controls(uint32_t controls, uint32_t controls2, const char *before)
 {
-fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
+fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
   before,
   ((controls & CTL_AFTERTEXT) != 0)? " aftertext" : "",
   ((controls & CTL_ALLAFTERTEXT) != 0)? " allaftertext" : "",
@@ -3699,7 +3719,7 @@ fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s
   ((controls & CTL_ALLUSEDTEXT) != 0)? " allusedtext" : "",
   ((controls & CTL_ALTGLOBAL) != 0)? " altglobal" : "",
   ((controls & CTL_BINCODE) != 0)? " bincode" : "",
-  ((controls & CTL_BSR_SET) != 0)? " bsr" : "",
+  ((controls2 & CTL_BSR_SET) != 0)? " bsr" : "",
   ((controls & CTL_CALLOUT_CAPTURE) != 0)? " callout_capture" : "",
   ((controls & CTL_CALLOUT_INFO) != 0)? " callout_info" : "",
   ((controls & CTL_CALLOUT_NONE) != 0)? " callout_none" : "",
@@ -3715,12 +3735,13 @@ fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s
   ((controls & CTL_JITVERIFY) != 0)? " jitverify" : "",
   ((controls & CTL_MARK) != 0)? " mark" : "",
   ((controls & CTL_MEMORY) != 0)? " memory" : "",
-  ((controls & CTL_NL_SET) != 0)? " newline" : "",
+  ((controls2 & CTL_NL_SET) != 0)? " newline" : "",
   ((controls & CTL_NULLCONTEXT) != 0)? " null_context" : "",
   ((controls & CTL_POSIX) != 0)? " posix" : "",
   ((controls & CTL_POSIX_NOSUB) != 0)? " posix_nosub" : "",
   ((controls & CTL_PUSH) != 0)? " push" : "",
   ((controls & CTL_PUSHCOPY) != 0)? " pushcopy" : "",
+  ((controls & CTL_PUSHTABLESCOPY) != 0)? " pushtablescopy" : "",
   ((controls & CTL_STARTCHAR) != 0)? " startchar" : "",
   ((controls2 & CTL2_SUBSTITUTE_EXTENDED) != 0)? " substitute_extended" : "",
   ((controls2 & CTL2_SUBSTITUTE_OVERFLOW_LENGTH) != 0)? " substitute_overflow_length" : "",
@@ -4061,7 +4082,7 @@ if ((pat_patctl.control & CTL_INFO) != 0)
 
   if (jchanged) fprintf(outfile, "Duplicate name status changes\n");
 
-  if ((pat_patctl.control & CTL_BSR_SET) != 0 ||
+  if ((pat_patctl.control2 & CTL_BSR_SET) != 0 ||
       (FLD(compiled_code, flags) & PCRE2_BSR_SET) != 0)
     fprintf(outfile, "\\R matches %s\n", (bsr_convention == PCRE2_BSR_UNICODE)?
       "any Unicode newline" : "CR, LF, or CRLF");
@@ -4930,7 +4951,7 @@ if ((pat_patctl.control & CTL_POSIX) != 0)
 /* Handle compiling via the native interface. Controls that act later are
 ignored with "push". Replacements are locked out. */
 
-if ((pat_patctl.control & (CTL_PUSH|CTL_PUSHCOPY)) != 0)
+if ((pat_patctl.control & (CTL_PUSH|CTL_PUSHCOPY|CTL_PUSHTABLESCOPY)) != 0)
   {
   if (pat_patctl.replacement[0] != 0)
     {
@@ -5031,7 +5052,7 @@ if (test_mode == PCRE32_MODE && pbuffer32 != NULL)
 appropriate default newline setting, local_newline_default will be non-zero. We
 use this if there is no explicit newline modifier. */
 
-if ((pat_patctl.control & CTL_NL_SET) == 0 && local_newline_default != 0)
+if ((pat_patctl.control2 & CTL_NL_SET) == 0 && local_newline_default != 0)
   {
   SETFLD(pat_context, newline_convention, local_newline_default);
   }
@@ -5163,7 +5184,7 @@ if (pattern_info(PCRE2_INFO_MAXLOOKBEHIND, &maxlookbehind, FALSE) != 0)
 /* If an explicit newline modifier was given, set the information flag in the
 pattern so that it is preserved over push/pop. */
 
-if ((pat_patctl.control & CTL_NL_SET) != 0)
+if ((pat_patctl.control2 & CTL_NL_SET) != 0)
   {
   SETFLD(compiled_code, flags, FLD(compiled_code, flags) | PCRE2_NL_SET);
   }
@@ -5191,17 +5212,25 @@ if ((pat_patctl.control & CTL_PUSH) != 0)
   SET(compiled_code, NULL);
   }
 
-/* The "pushcopy" control is similar, but pushes a copy of the pattern. This
-tests the pcre2_code_copy() function. */
+/* The "pushcopy" and "pushtablescopy" controls are similar, but push a
+copy of the pattern, the latter with a copy of its character tables. This tests
+the pcre2_code_copy() and pcre2_code_copy_with_tables() functions. */
 
-if ((pat_patctl.control & CTL_PUSHCOPY) != 0)
+if ((pat_patctl.control & (CTL_PUSHCOPY|CTL_PUSHTABLESCOPY)) != 0)
   {
   if (patstacknext >= PATSTACKSIZE)
     {
     fprintf(outfile, "** Too many pushed patterns (max %d)\n", PATSTACKSIZE);
     return PR_ABEND;
     }
-  PCRE2_CODE_COPY_TO_VOID(patstack[patstacknext++], compiled_code);
+  if ((pat_patctl.control & CTL_PUSHCOPY) != 0)
+    {
+    PCRE2_CODE_COPY_TO_VOID(patstack[patstacknext++], compiled_code);
+    }
+  else
+    {     
+    PCRE2_CODE_COPY_WITH_TABLES_TO_VOID(patstack[patstacknext++],
+      compiled_code); }
   }
 
 return PR_OK;

@@ -181,6 +181,9 @@ wrong name.
 
 27. In pcre2test, give some offset information for errors in hex patterns.
 
+28. Implemented pcre2_code_copy_with_tables(), and added pushtablescopy to
+pcre2test for testing it.
+
 
 Version 10.22 29-July-2016
 --------------------------
@@ -250,7 +253,7 @@ a report of compiler warnings from Visual Studio 2013 and a few tests with
 gcc's -Wconversion (which still throws up a lot).
 
 15. Implemented pcre2_code_copy(), and added pushcopy and #popcopy to pcre2test
-for testing it.
+for testing it. 
 
 16. Change 66 for 10.21 introduced the use of snprintf() in PCRE2's version of
 regerror(). When the error buffer is too small, my version of snprintf() puts a

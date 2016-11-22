@@ -294,6 +294,9 @@ document for an overview of all the PCRE2 documentation.
 <b>pcre2_code *pcre2_code_copy(const pcre2_code *<i>code</i>);</b>
 <br>
 <br>
+<b>pcre2_code *pcre2_code_copy_with_tables(const pcre2_code *<i>code</i>);</b>
+<br>
+<br>
 <b>int pcre2_get_error_message(int <i>errorcode</i>, PCRE2_UCHAR *<i>buffer</i>,</b>
 <b>  PCRE2_SIZE <i>bufflen</i>);</b>
 <br>
@@ -567,8 +570,9 @@ If JIT is being used, but the JIT compilation is not being done immediately,
 (perhaps waiting to see if the pattern is used often enough) similar logic is
 required. JIT compilation updates a pointer within the compiled code block, so
 a thread must gain unique write access to the pointer before calling
-<b>pcre2_jit_compile()</b>. Alternatively, <b>pcre2_code_copy()</b> can be used
-to obtain a private copy of the compiled code.
+<b>pcre2_jit_compile()</b>. Alternatively, <b>pcre2_code_copy()</b> or 
+<b>pcre2_code_copy_with_tables()</b> can be used to obtain a private copy of the
+compiled code.
 </P>
 <br><b>
 Context blocks
@@ -736,7 +740,8 @@ functions, <i>pcre2_match()</i> and <i>pcre2_dfa_match()</i>.
 <br>
 This parameter ajusts the limit, set when PCRE2 is built (default 250), on the
 depth of parenthesis nesting in a pattern. This limit stops rogue patterns
-using up too much system stack when being compiled.
+using up too much system stack when being compiled. The limit applies to 
+parentheses of all kinds, not just capturing parentheses.
 <b>int pcre2_set_compile_recursion_guard(pcre2_compile_context *<i>ccontext</i>,</b>
 <b>  int (*<i>guard_function</i>)(uint32_t, void *), void *<i>user_data</i>);</b>
 <br>
@@ -1058,6 +1063,9 @@ zero.
 <br>
 <br>
 <b>pcre2_code *pcre2_code_copy(const pcre2_code *<i>code</i>);</b>
+<br>
+<br>
+<b>pcre2_code *pcre2_code_copy_with_tables(const pcre2_code *<i>code</i>);</b>
 </P>
 <P>
 The <b>pcre2_compile()</b> function compiles a pattern into an internal form.
@@ -1079,9 +1087,22 @@ if the code has been processed by the JIT compiler (see
 <a href="#jitcompiling">below),</a>
 the JIT information cannot be copied (because it is position-dependent).
 The new copy can initially be used only for non-JIT matching, though it can be
-passed to <b>pcre2_jit_compile()</b> if required. The <b>pcre2_code_copy()</b>
-function provides a way for individual threads in a multithreaded application
-to acquire a private copy of shared compiled code.
+passed to <b>pcre2_jit_compile()</b> if required. 
+</P>
+<P>
+The <b>pcre2_code_copy()</b> function provides a way for individual threads in a
+multithreaded application to acquire a private copy of shared compiled code. 
+However, it does not make a copy of the character tables used by the compiled 
+pattern; the new pattern code points to the same tables as the original code.
+(See
+<a href="#jitcompiling">"Locale Support"</a>
+below for details of these character tables.) In many applications the same
+tables are used throughout, so this behaviour is appropriate. Nevertheless, 
+there are occasions when a copy of a compiled pattern and the relevant tables 
+are needed. The <b>pcre2_code_copy_with_tables()</b> provides this facility. 
+Copies of both the code and the tables are made, with the new code pointing to 
+the new tables. The memory for the new tables is automatically freed when
+<b>pcre2_code_free()</b> is called for the new copy of the compiled code.
 </P>
 <P>
 NOTE: When one of the matching functions is called, pointers to the compiled
@@ -1119,7 +1140,14 @@ NULL immediately. Otherwise, the variables to which these point are set to an
 error code and an offset (number of code units) within the pattern,
 respectively, when <b>pcre2_compile()</b> returns NULL because a compilation
 error has occurred. The values are not defined when compilation is successful
-and <b>pcre2_compile()</b> returns a non-NULL value.
+and <b>pcre2_compile()</b> returns a non-NULL value. 
+</P>
+<P>
+The value returned in <i>erroroffset</i> is an indication of where in the
+pattern the error occurred. It is not necessarily the furthest point in the
+pattern that was read. For example, after the error "lookbehind assertion is
+not fixed length", the error offset points to the start of the failing
+assertion.
 </P>
 <P>
 The <b>pcre2_get_error_message()</b> function (see "Obtaining a textual error
@@ -1215,8 +1243,8 @@ recognized, exactly as in the rest of the pattern.
   PCRE2_AUTO_CALLOUT
 </pre>
 If this bit is set, <b>pcre2_compile()</b> automatically inserts callout items,
-all with number 255, before each pattern item. For discussion of the callout
-facility, see the
+all with number 255, before each pattern item, except immediately before or
+after a callout in the pattern. For discussion of the callout facility, see the
 <a href="pcre2callout.html"><b>pcre2callout</b></a>
 documentation.
 <pre>
@@ -3235,7 +3263,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC41" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 17 June 2016
+Last updated: 22 November 2016
 <br>
 Copyright &copy; 1997-2016 University of Cambridge.
 <br>
