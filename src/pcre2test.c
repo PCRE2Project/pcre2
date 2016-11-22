@@ -674,7 +674,7 @@ static uint32_t exclusive_pat_controls[] = {
   CTL_POSIX  | CTL_HEXPAT,
   CTL_POSIX  | CTL_PUSH,
   CTL_POSIX  | CTL_PUSHCOPY,
-  CTL_POSIX  | CTL_USE_LENGTH, 
+  CTL_POSIX  | CTL_USE_LENGTH,
   CTL_EXPAND | CTL_HEXPAT };
 
 /* Data controls that are mutually exclusive. At present these are all in the
@@ -3559,12 +3559,12 @@ for (;;)
         if (len > MAX_NAME_SIZE)
           {
           fprintf(outfile, "** Group name in '%s' is too long\n", m->name);
-          return FALSE;  
-          }   
+          return FALSE;
+          }
         while (*nn != 0) nn += strlen(nn) + 1;
         if (nn + len + 2 - (char *)field > LENCPYGET)
           {
-          fprintf(outfile, "** Too many characters in named '%s' modifiers\n", 
+          fprintf(outfile, "** Too many characters in named '%s' modifiers\n",
             m->name);
           return FALSE;
           }
@@ -4632,12 +4632,14 @@ if ((pat_patctl.control & CTL_HEXPAT) != 0)
 
     if (c == '\'' || c == '"')
       {
+      uint8_t *pq = pp;
       for (;; pp++)
         {
         d = *pp;
         if (d == 0)
           {
-          fprintf(outfile, "** Missing closing quote in hex pattern\n");
+          fprintf(outfile, "** Missing closing quote in hex pattern: "
+            "opening quote is at offset %lu.\n", pq - buffer - 2);
           return PR_SKIP;
           }
         if (d == c) break;
@@ -4651,8 +4653,8 @@ if ((pat_patctl.control & CTL_HEXPAT) != 0)
       {
       if (!isxdigit(c))
         {
-        fprintf(outfile, "** Unexpected non-hex-digit '%c' in hex pattern: "
-          "quote missing?\n", c);
+        fprintf(outfile, "** Unexpected non-hex-digit '%c' at offset %lu "
+          "in hex pattern: quote missing?\n", c, pp - buffer - 2);
         return PR_SKIP;
         }
       if (*pp == 0)
@@ -4663,8 +4665,8 @@ if ((pat_patctl.control & CTL_HEXPAT) != 0)
       d = *pp;
       if (!isxdigit(d))
         {
-        fprintf(outfile, "** Unexpected non-hex-digit '%c' in hex pattern: "
-          "quote missing?\n", d);
+        fprintf(outfile, "** Unexpected non-hex-digit '%c' at offset %lu "
+          "in hex pattern: quote missing?\n", d, pp - buffer - 1);
         return PR_SKIP;
         }
       c = toupper(c);

@@ -179,6 +179,8 @@ compliant and unique.
 -lpcre2-posix. Also, the CMake build process was building the library with the 
 wrong name.
 
+27. In pcre2test, give some offset information for errors in hex patterns.
+
 
 Version 10.22 29-July-2016
 --------------------------
