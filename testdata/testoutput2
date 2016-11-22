@@ -15175,13 +15175,13 @@ MK: A\x00b
 MK: A\x00b
 
 /efg/hex
-** Unexpected non-hex-digit 'g' in hex pattern: quote missing?
+** Unexpected non-hex-digit 'g' at offset 2 in hex pattern: quote missing?
 
 /eff/hex
 ** Odd number of digits in hex pattern
 
 /effg/hex
-** Unexpected non-hex-digit 'g' in hex pattern: quote missing?
+** Unexpected non-hex-digit 'g' at offset 3 in hex pattern: quote missing?
 
 /(?J)(?'a'))(?'a')/
 Failed: error 122 at offset 10: unmatched closing parenthesis
