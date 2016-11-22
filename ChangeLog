@@ -175,6 +175,10 @@ nobody ask for this in PCRE1?)
 PCRE2_H_IDEMPOTENT_GUARD and PCRE2_UCP_H_IDEMPOTENT_GUARD to be more standard 
 compliant and unique.
 
+26. pcre2-config --libs-posix was listing -lpcre2posix instead of 
+-lpcre2-posix. Also, the CMake build process was building the library with the 
+wrong name.
+
 
 Version 10.22 29-July-2016
 --------------------------
