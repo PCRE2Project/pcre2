@@ -198,7 +198,10 @@ don't have to check them every time. */
 unsigned ints. Values less than META_END are literal data values. The coding
 for identifying the item is in the top 16-bits, leaving 16 bits for the
 additional data that some of them need. The META_CODE, META_DATA, and META_DIFF
-macros are used to manipulate parsed pattern elements. */
+macros are used to manipulate parsed pattern elements.
+
+NOTE: When these definitions are changed, the table of extra lengths for each
+code (meta_extra_lengths, just below) must be updated to remain in step. */
 
 #define META_END              0x80000000u  /* End of pattern */
 
@@ -277,6 +280,73 @@ versions. */
 #define META_FIRST_QUANTIFIER META_ASTERISK
 #define META_LAST_QUANTIFIER  META_MINMAX_QUERY
 
+/* Table of extra lengths for each of the meta codes. Must be kept in step with
+the definitions above. For some items these values are a basic length to which
+a variable amount has to be added. */
+
+static unsigned char meta_extra_lengths[] = {
+  0,             /* META_END */
+  0,             /* META_ALT */
+  0,             /* META_ATOMIC */
+  0,             /* META_BACKREF - more if group is >= 10 */
+  1+SIZEOFFSET,  /* META_BACKREF_BYNAME */
+  1,             /* META_BIGVALUE */
+  3,             /* META_CALLOUT_NUMBER */
+  3+SIZEOFFSET,  /* META_CALLOUT_STRING */
+  0,             /* META_CAPTURE */
+  0,             /* META_CIRCUMFLEX */
+  0,             /* META_CLASS */
+  0,             /* META_CLASS_EMPTY */
+  0,             /* META_CLASS_EMPTY_NOT */
+  0,             /* META_CLASS_END */
+  0,             /* META_CLASS_NOT */
+  0,             /* META_COND_ASSERT */
+  SIZEOFFSET,    /* META_COND_DEFINE */
+  1+SIZEOFFSET,  /* META_COND_NAME */
+  1+SIZEOFFSET,  /* META_COND_NUMBER */
+  1+SIZEOFFSET,  /* META_COND_RNAME */
+  1+SIZEOFFSET,  /* META_COND_RNUMBER */
+  3,             /* META_COND_VERSION */
+  0,             /* META_DOLLAR */
+  0,             /* META_DOT */
+  0,             /* META_ESCAPE - more for ESC_P, ESC_p, ESC_g, ESC_k */
+  0,             /* META_KET */
+  0,             /* META_NOCAPTURE */
+  1,             /* META_OPTIONS */
+  1,             /* META_POSIX */
+  1,             /* META_POSIX_NEG */
+  0,             /* META_RANGE_ESCAPED */
+  0,             /* META_RANGE_LITERAL */
+  SIZEOFFSET,    /* META_RECURSE */
+  1+SIZEOFFSET,  /* META_RECURSE_BYNAME */
+  0,             /* META_LOOKAHEAD */
+  0,             /* META_LOOKAHEADNOT */
+  SIZEOFFSET,    /* META_LOOKBEHIND */
+  SIZEOFFSET,    /* META_LOOKBEHINDNOT */
+  1,             /* META_MARK - plus the string length */
+  0,             /* META_ACCEPT */
+  0,             /* META_COMMIT */
+  0,             /* META_FAIL */
+  0,             /* META_PRUNE */
+  1,             /* META_PRUNE_ARG - plus the string length */
+  0,             /* META_SKIP */
+  1,             /* META_SKIP_ARG - plus the string length */
+  0,             /* META_THEN */
+  1,             /* META_THEN_ARG - plus the string length */
+  0,             /* META_ASTERISK */
+  0,             /* META_ASTERISK_PLUS */
+  0,             /* META_ASTERISK_QUERY */
+  0,             /* META_PLUS */
+  0,             /* META_PLUS_PLUS */
+  0,             /* META_PLUS_QUERY */
+  0,             /* META_QUERY */
+  0,             /* META_QUERY_PLUS */
+  0,             /* META_QUERY_QUERY */
+  2,             /* META_MINMAX */
+  2,             /* META_MINMAX_PLUS */
+  2              /* META_MINMAX_QUERY */
+};
+
 /* Types for skipping parts of a parsed pattern. */
 
 enum { PSKIP_ALT, PSKIP_CLASS, PSKIP_KET };
@@ -318,8 +388,8 @@ comparison). */
 locale, and may mark arbitrary characters as digits. We want to recognize only
 0-9, a-z, and A-Z as hex digits, which is why we have a private table here. It
 costs 256 bytes, but it is a lot faster than doing character value tests (at
-least in some simple cases I timed), and in some applications one wants PCRE to
-compile efficiently as well as match efficiently. The value in the table is
+least in some simple cases I timed), and in some applications one wants PCRE2
+to compile efficiently as well as match efficiently. The value in the table is
 the binary hex digit value, or 0xff for non-hex digits. */
 
 /* This is the "normal" case, for ASCII systems, and EBCDIC systems running in
@@ -646,7 +716,7 @@ enum { ERR0 = COMPILE_ERROR_BASE,
        ERR51, ERR52, ERR53, ERR54, ERR55, ERR56, ERR57, ERR58, ERR59, ERR60,
        ERR61, ERR62, ERR63, ERR64, ERR65, ERR66, ERR67, ERR68, ERR69, ERR70,
        ERR71, ERR72, ERR73, ERR74, ERR75, ERR76, ERR77, ERR78, ERR79, ERR80,
-       ERR81, ERR82, ERR83, ERR84, ERR85, ERR86, ERR87, ERR88, ERR89 };
+       ERR81, ERR82, ERR83, ERR84, ERR85, ERR86, ERR87, ERR88, ERR89, ERR90 };
 
 /* This is a table of start-of-pattern options such as (*UTF) and settings such
 as (*LIMIT_MATCH=nnnn) and (*CRLF). For completeness and backward
@@ -1036,7 +1106,7 @@ if ((code->flags & PCRE2_DEREF_TABLES) != 0)
   ref_count = (PCRE2_SIZE *)(code->tables + tables_length);
   (*ref_count)++;
   }
-  
+
 return newcode;
 }
 
@@ -5325,7 +5395,7 @@ for (;; pptr++)
 
       /* Any other non-literal must be an escape */
 
-      if (meta > META_END)
+      if (meta >= META_END)
         {
         if (META_CODE(meta) != META_ESCAPE)
           {
@@ -8240,6 +8310,7 @@ Arguments:
              PSKIP_KET when only META_KET ends the skip
 
 Returns:     new value of pptr
+             NULL if META_END is reached - should never occur
 */
 
 static uint32_t *
@@ -8249,11 +8320,46 @@ uint32_t nestlevel = 0;
 
 for (pptr += 1;; pptr++)
   {
-  switch(META_CODE(*pptr))
+  uint32_t meta = META_CODE(*pptr);
+  switch(meta)
     {
-    case META_BIGVALUE:
-    pptr += 1;
+    default:  /* Just skip over most items */
     break;
+
+    /* This should never occur. */
+
+    case META_END:
+    return NULL;
+
+    /* The data for these items is variable in length. */
+
+    case META_BACKREF:  /* Offset is present only if group >= 10 */
+    if (META_DATA(*pptr) >= 10) pptr += SIZEOFFSET;
+    break;
+
+    case META_ESCAPE:   /* A few escapes are followed by data items. */
+    switch (META_DATA(*pptr))
+      {
+      case ESC_P:
+      case ESC_p:
+      pptr += 1;
+      break;
+
+      case ESC_g:
+      case ESC_k:
+      pptr += 1 + SIZEOFFSET;
+      break;
+      }
+    break;
+
+    case META_MARK:     /* Add the length of the name. */
+    case META_PRUNE_ARG:
+    case META_SKIP_ARG:
+    case META_THEN_ARG:
+    pptr += pptr[1];
+    break;
+
+    /* These are the "active" items in this loop. */
 
     case META_CLASS_END:
     if (skiptype == PSKIP_CLASS) return pptr;
@@ -8284,10 +8390,13 @@ for (pptr += 1;; pptr++)
     if (nestlevel == 0) return pptr;
     nestlevel--;
     break;
-
-    default:
-    break;
     }
+
+  /* The extra data item length for each meta is in a table. */
+
+  meta = (meta & 0x0fff0000u) >> 16;
+  if (meta >= sizeof(meta_extra_lengths)) return NULL;
+  pptr += meta_extra_lengths[meta];
   }
 /* Control never reaches here */
 return pptr;
@@ -8427,6 +8536,7 @@ for (;; pptr++)
     case META_ACCEPT:
     case META_FAIL:
     pptr = parsed_skip(pptr, PSKIP_ALT);
+    if (pptr == NULL) goto PARSED_SKIP_FAILED;
     goto EXIT;
 
     case META_MARK:
@@ -8457,6 +8567,7 @@ for (;; pptr++)
     case META_CLASS_NOT:
     itemlength = 1;
     pptr = parsed_skip(pptr, PSKIP_CLASS);
+    if (pptr == NULL) goto PARSED_SKIP_FAILED;
     break;
 
     case META_CLASS_EMPTY_NOT:
@@ -8498,6 +8609,7 @@ for (;; pptr++)
     case META_LOOKAHEAD:
     case META_LOOKAHEADNOT:
     pptr = parsed_skip(pptr, PSKIP_KET);
+    if (pptr == NULL) goto PARSED_SKIP_FAILED;
     break;
 
     /* Lookbehinds can be ignored, but must themselves be checked. */
@@ -8595,6 +8707,7 @@ for (;; pptr++)
       }
 
     gptrend = parsed_skip(gptr, PSKIP_KET);
+    if (gptrend == NULL) goto PARSED_SKIP_FAILED;
     if (pptr > gptr && pptr < gptrend) goto ISNOTFIXED;  /* Local recursion */
     for (r = recurses; r != NULL; r = r->prev) if (r->groupptr == gptr) break;
     if (r != NULL) goto ISNOTFIXED;   /* Mutual recursion */
@@ -8685,6 +8798,10 @@ EXIT:
 *pptrptr = pptr;
 if (branchlength > cb->max_lookbehind) cb->max_lookbehind = branchlength;
 return branchlength;
+
+PARSED_SKIP_FAILED:
+*errcodeptr = ERR90;
+return -1;
 }
 
 

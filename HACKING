@@ -240,8 +240,8 @@ META_RECURSE is always followed by an offset, for use in error messages.
 META_ESCAPE has an ESC_xxx value as its data. For ESC_P and ESC_p, the next
 element contains the 16-bit type and data property values, packed together.
 ESC_g and ESC_k are used only for named references - numerical ones are turned
-into META_RECURSE or META_BACKREF as appropriate. They are followed by a length
-and an offset into the pattern to specify the name.
+into META_RECURSE or META_BACKREF as appropriate. ESC_g and ESC_k are followed
+by a length and an offset into the pattern to specify the name.
 
 The following have one data item that follows in the next vector element:
 
@@ -278,10 +278,6 @@ META_COND_NUMBER       (?([+-]digits)
 The following is followed just by an offset, for use in error messages:
 
 META_COND_DEFINE      (?(DEFINE)
-
-In fact, META_COND_ASSERT is used for any group starting (?( that does not
-match any of the other META_COND cases. The check that this group is an
-assertion (optionally preceded by a callout) happens at compile time.
 
 The following are also followed just by an offset, but also the lower 16 bits
 of the main word contain the length of the first branch of the lookbehind
@@ -799,4 +795,4 @@ not a real opcode, but is used to check that tables indexed by opcode are the
 correct length, in order to catch updating errors.
 
 Philip Hazel
-October 2016
+November 2016

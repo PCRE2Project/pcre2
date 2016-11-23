@@ -502,7 +502,7 @@ for bmode in "$test8" "$test16" "$test32"; do
     for opt in "" $jitopt; do
       $sim $valgrind ${opt:+$vjs} ./pcre2test -q $test2stack $bmode $opt $testdata/testinput2 testtry
       if [ $? = 0 ] ; then
-        $sim $valgrind ${opt:+$vjs} ./pcre2test -q $bmode $opt -error -63,-62,-2,-1,0,100,188,189,190 >>testtry
+        $sim $valgrind ${opt:+$vjs} ./pcre2test -q $bmode $opt -error -63,-62,-2,-1,0,100,188,189,190,191 >>testtry
         checkresult $? 2 "$opt"
       else
         echo " "

@@ -89,6 +89,12 @@ copied).
       
   (k) If parsing a pattern exactly filled the buffer, the internal test for 
       overrun did not check when the final META_END item was added.
+      
+  (l) If a lookbehind contained a subroutine call, and the called group 
+      contained an option setting such as (?s), and the PCRE2_ANCHORED option 
+      was set, unpredictable behaviour could occur. The underlying bug was 
+      incorrect code and insufficient checking while searching for the end of 
+      the called subroutine in the parsed pattern.
 
 4. Back references are now permitted in lookbehind assertions when there are 
 no duplicated group numbers (that is, (?| has not been used), and, if the 
