@@ -81,8 +81,8 @@ for (i = 0; i < 2; i++)
   pcre2_code *code;
 
 #ifdef STANDALONE
-  printf("Compile with options %.8x", compile_options);
-  printf("%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s\n",
+  printf("Compile options %.8x never_backslash_c", compile_options);
+  printf("%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s\n",
     ((compile_options & PCRE2_ALT_BSUX) != 0)? ",alt_bsux" : "",
     ((compile_options & PCRE2_ALT_CIRCUMFLEX) != 0)? ",alt_circumflex" : "",
     ((compile_options & PCRE2_ALT_VERBNAMES) != 0)? ",alt_verbnames" : "",
@@ -97,7 +97,6 @@ for (i = 0; i < 2; i++)
     ((compile_options & PCRE2_FIRSTLINE) != 0)? ",firstline" : "",
     ((compile_options & PCRE2_MATCH_UNSET_BACKREF) != 0)? ",match_unset_backref" : "",
     ((compile_options & PCRE2_MULTILINE) != 0)? ",multiline" : "",
-    ((compile_options & PCRE2_NEVER_BACKSLASH_C) != 0)? ",never_backslash_c" : "",
     ((compile_options & PCRE2_NEVER_UCP) != 0)? ",never_ucp" : "",
     ((compile_options & PCRE2_NEVER_UTF) != 0)? ",never_utf" : "",
     ((compile_options & PCRE2_NO_AUTO_CAPTURE) != 0)? ",no_auto_capture" : "",
@@ -113,6 +112,8 @@ for (i = 0; i < 2; i++)
 
   code = pcre2_compile((PCRE2_SPTR)data, (PCRE2_SIZE)size, compile_options,
     &errorcode, &erroroffset, NULL);
+    
+  /* Compilation succeeded */
 
   if (code != NULL)
     {
@@ -168,16 +169,19 @@ for (i = 0; i < 2; i++)
     match_options = save_match_options;  /* Reset for the second compile */
     pcre2_code_free(code);
     }
+    
+  /* Compilation failed */
 
-#ifdef STANDALONE
   else
     {
     unsigned char buffer[256];
     pcre2_get_error_message(errorcode, buffer, 256);
-    printf("Compile failed: error %d at offset %lu: %s\n", errorcode,
-      erroroffset, buffer);
-    }
+#ifdef STANDALONE
+    printf("Error %d at offset %lu: %s\n", errorcode, erroroffset, buffer);
+#else
+    if (strstr((const char *)buffer, "internal error") != NULL) abort();
 #endif
+    }
 
   compile_options = PCRE2_NEVER_BACKSLASH_C;  /* For second time */
   }
