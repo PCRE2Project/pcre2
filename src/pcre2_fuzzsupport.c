@@ -139,7 +139,7 @@ for (i = 0; i < 2; i++)
     for (j = 0; j < 2; j++)
       {
 #ifdef STANDALONE
-      printf("Match with options %.8x", match_options);
+      printf("Match options %.8x", match_options);
       printf("%s%s%s%s%s%s%s%s\n",
         ((match_options & PCRE2_ANCHORED) != 0)? ",anchored" : "",
         ((match_options & PCRE2_NO_UTF_CHECK) != 0)? ",no_utf_check" : "",
