@@ -95,6 +95,8 @@ copied).
       was set, unpredictable behaviour could occur. The underlying bug was 
       incorrect code and insufficient checking while searching for the end of 
       the called subroutine in the parsed pattern.
+      
+  (m) Quantifiers following (*VERB)s were not being diagnosed as errors.
 
 4. Back references are now permitted in lookbehind assertions when there are 
 no duplicated group numbers (that is, (?| has not been used), and, if the 

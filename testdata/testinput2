@@ -4918,4 +4918,6 @@ a)"xI
 
 /(?<=(?1))((?s))/anchored
 
+/(*:ab)*/
+
 # End of testinput2 

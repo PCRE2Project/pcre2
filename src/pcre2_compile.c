@@ -2362,6 +2362,7 @@ while (ptr < ptrend)
 
       case CHAR_RIGHT_PARENTHESIS:
       inverbname = FALSE;
+      okquantifier = FALSE;   /* Was probably set by literals */ 
       /* This is the length in characters */
       verbnamelength = (PCRE2_SIZE)(parsed_pattern - verblengthptr - 1);
       /* But the limit on the length is in code units */
