@@ -2312,7 +2312,7 @@ while (ptr < ptrend)
   GETCHARINCTEST(c, ptr);
 
   /* Copy quoted literals until \E, allowing for the possibility of automatic
-  callouts. */
+  callouts, except when processing a (*VERB) "name".  */
 
   if (inescq)
     {
@@ -2323,7 +2323,7 @@ while (ptr < ptrend)
       }
     else
       {
-      if (after_manual_callout-- <= 0)
+      if (!inverbname && after_manual_callout-- <= 0)
         parsed_pattern = manage_callouts(thisptr, &previous_callout, options,
           parsed_pattern, cb);
       PARSED_LITERAL(c, parsed_pattern);

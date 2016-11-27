@@ -51,7 +51,8 @@ longer inserted before and after explicit callouts in the pattern.
 Some bugs in the refactored code were subsequently fixed before release. 
 Several of them were related to the change from assuming a zero-terminated 
 pattern (which previously had required non-zero terminated strings to be 
-copied).
+copied). These bugs were never in released code, but are noted here for the 
+record, once the code was made available in the repository.
 
   (a) An overall recursion such as (?0) inside a lookbehind assertion was not
       being diagnosed as an error.
@@ -97,6 +98,9 @@ copied).
       the called subroutine in the parsed pattern.
       
   (m) Quantifiers following (*VERB)s were not being diagnosed as errors.
+  
+  (n) The use of \Q...\E in a (*VERB) name when PCRE2_ALT_VERBNAMES and 
+      PCRE2_AUTO_CALLOUT were both specified caused undetermined behaviour.
 
 4. Back references are now permitted in lookbehind assertions when there are 
 no duplicated group numbers (that is, (?| has not been used), and, if the 
