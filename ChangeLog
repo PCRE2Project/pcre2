@@ -198,6 +198,9 @@ pcre2test for testing it.
 
 29. Fix small memory leak in pcre2test.
 
+30. Fix out-of-bounds read for partial matching of /./ against an empty string 
+when the newline type is CRLF.
+
 
 Version 10.22 29-July-2016
 --------------------------

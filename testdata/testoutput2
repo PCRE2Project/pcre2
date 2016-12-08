@@ -15374,6 +15374,10 @@ Failed: error 109 at offset 6: quantifier does not follow a repeatable item
 
 %(*:(:(svvvvvvvvvv:]*[   Z!*;[]*[^[]*!^[+.+{{2,7}'      _\\\\\\\\\\\\\)?.:..    *w////\\\Q\\\\\\\\\\\\\\\T\\\\\+/?/////'+\\\EEE?/////'+/*+/[^K]?]//(w)%never_backslash_c,alt_verbnames,auto_callout
 
+/./newline=crlf
+\=ph
+No match
+
 # End of testinput2 
 Error -63: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

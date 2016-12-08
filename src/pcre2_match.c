@@ -2379,7 +2379,7 @@ for (;;)
     case OP_ANY:
     if (IS_NEWLINE(eptr)) RRETURN(MATCH_NOMATCH);
     if (mb->partial != 0 &&
-        eptr + 1 >= mb->end_subject &&
+        eptr == mb->end_subject - 1 &&
         NLBLOCK->nltype == NLTYPE_FIXED &&
         NLBLOCK->nllen == 2 &&
         UCHAR21TEST(eptr) == NLBLOCK->nl[0])
