@@ -211,7 +211,7 @@ systems that differ in their output from isprint() even in the "C" locale. */
 #define PRINTABLE(c) ((c) >= 32 && (c) < 127)
 #endif
 
-#define PRINTOK(c) ((locale_tables != NULL)? isprint(c) : PRINTABLE(c))
+#define PRINTOK(c) ((use_tables != NULL && c < 256)? isprint(c) : PRINTABLE(c))
 
 /* We have to include some of the library source files because we need
 to use some of the macros, internal structure definitions, and other internal
@@ -833,6 +833,7 @@ static regex_t preg = { NULL, NULL, 0, 0, 0 };
 
 static int *dfa_workspace = NULL;
 static const uint8_t *locale_tables = NULL;
+static const uint8_t *use_tables = NULL;
 static uint8_t locale_name[32];
 
 /* We need buffers for building 16/32-bit strings; 8-bit strings don't need
@@ -4547,7 +4548,6 @@ process_pattern(void)
 BOOL utf;
 uint32_t k;
 uint8_t *p = buffer;
-const uint8_t *use_tables;
 unsigned int delimiter = *p++;
 int errorcode;
 void *use_pat_context;
@@ -5058,8 +5058,8 @@ if ((pat_patctl.control2 & CTL_NL_SET) == 0 && local_newline_default != 0)
   SETFLD(pat_context, newline_convention, local_newline_default);
   }
 
-/* The nullcontext modifier is used to test calling pcre2_compile() with a NULL
-context. */
+/* The null_context modifier is used to test calling pcre2_compile() with a
+NULL context. */
 
 use_pat_context = ((pat_patctl.control & CTL_NULLCONTEXT) != 0)?
   NULL : PTR(pat_context);

@@ -1744,4 +1744,15 @@
 
 /XȀ/x,utf
 
+# These three test a bug fix that was not clearing up after a locale setting
+# when the test or a subsequent one matched a wide character.
+
+//locale=C
+
+/[\P{Yi}]/utf
+\x{2f000}
+
+/[\P{Yi}]/utf,locale=C
+\x{2f000}
+
 # End of testinput5 

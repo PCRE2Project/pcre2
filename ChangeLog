@@ -201,6 +201,9 @@ pcre2test for testing it.
 30. Fix out-of-bounds read for partial matching of /./ against an empty string 
 when the newline type is CRLF.
 
+31. Fix a bug in pcre2test that caused a crash when a locale was set either in 
+the current pattern or a previous one and a wide character was matched.
+
 
 Version 10.22 29-July-2016
 --------------------------
