@@ -196,6 +196,8 @@ wrong name.
 28. Implemented pcre2_code_copy_with_tables(), and added pushtablescopy to
 pcre2test for testing it.
 
+29. Fix small memory leak in pcre2test.
+
 
 Version 10.22 29-July-2016
 --------------------------

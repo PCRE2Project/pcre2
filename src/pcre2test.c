@@ -4494,6 +4494,7 @@ switch(cmd)
   if (fread(serial, 1, serial_size, f) != serial_size)
     {
     fprintf(outfile, "** Wrong return from fread()\n");
+    free(serial);
     return PR_ABEND;
     }
   fclose(f);
