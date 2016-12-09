@@ -90,10 +90,20 @@
 
 /* Executable code allocation:
    If SLJIT_EXECUTABLE_ALLOCATOR is not defined, the application should
-   define both SLJIT_MALLOC_EXEC and SLJIT_FREE_EXEC. */
+   define SLJIT_MALLOC_EXEC, SLJIT_FREE_EXEC, and SLJIT_ENABLE_EXEC. */
 #ifndef SLJIT_EXECUTABLE_ALLOCATOR
 /* Enabled by default. */
 #define SLJIT_EXECUTABLE_ALLOCATOR 1
+
+/* When SLJIT_PROT_EXECUTABLE_ALLOCATOR is enabled SLJIT uses
+   an allocator which does not set writable and executable
+   permission flags at the same time. The trade-of is increased
+   memory consumption and disabled dynamic code modifications. */
+#ifndef SLJIT_PROT_EXECUTABLE_ALLOCATOR
+/* Disabled by default. */
+#define SLJIT_PROT_EXECUTABLE_ALLOCATOR 0
+#endif
+
 #endif
 
 /* Force cdecl calling convention even if a better calling
