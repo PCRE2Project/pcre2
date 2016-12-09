@@ -204,6 +204,10 @@ when the newline type is CRLF.
 31. Fix a bug in pcre2test that caused a crash when a locale was set either in 
 the current pattern or a previous one and a wide character was matched.
 
+32. The appearance of \p, \P, or \X in a substitution string when 
+PCRE2_SUBSTITUTE_EXTENDED was set caused a segmentation fault (NULL 
+dereference).
+
 
 Version 10.22 29-July-2016
 --------------------------

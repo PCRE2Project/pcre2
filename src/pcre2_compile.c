@@ -1352,10 +1352,10 @@ entry, ptr is pointing at the character after \. On exit, it points after the
 final code unit of the escape sequence.
 
 This function is also called from pcre2_substitute() to handle escape sequences
-in replacement strings. In this case, the cb argument is NULL, and only
-sequences that define a data character are recognised. The isclass argument is
-not relevant, but the options argument is the final value of the compiled
-pattern's options.
+in replacement strings. In this case, the cb argument is NULL, and in the case 
+of escapes that have further processing, only sequences that define a data
+character are recognised. The isclass argument is not relevant; the options
+argument is the final value of the compiled pattern's options.
 
 Arguments:
   ptrptr         points to the input position pointer
@@ -1405,7 +1405,7 @@ else if ((i = escapes[c - ESCAPES_FIRST]) != 0)
   if (i > 0) c = (uint32_t)i; else  /* Positive is a data character */
     {
     escape = -i;                    /* Else return a special escape */
-    if (escape == ESC_P || escape == ESC_p || escape == ESC_X)
+    if (cb != NULL && (escape == ESC_P || escape == ESC_p || escape == ESC_X))
       cb->external_flags |= PCRE2_HASBKPORX;   /* Note \P, \p, or \X */
     }
   }

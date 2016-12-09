@@ -4925,4 +4925,7 @@ a)"xI
 /./newline=crlf
 \=ph
 
+/(\x0e00\000000\xc)/replace=\P,substitute_extended
+\x0e00\000000\xc
+
 # End of testinput2 
