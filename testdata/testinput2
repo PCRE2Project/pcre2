@@ -4928,4 +4928,7 @@ a)"xI
 /(\x0e00\000000\xc)/replace=\P,substitute_extended
 \x0e00\000000\xc
 
+//replace=0
+\=offset=7
+
 # End of testinput2 

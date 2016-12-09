@@ -15382,6 +15382,10 @@ No match
 \x0e00\000000\xc
 Failed: error -57 at offset 2 in replacement: bad escape sequence in replacement string
 
+//replace=0
+\=offset=7
+Failed: error -33: bad offset value
+
 # End of testinput2 
 Error -63: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

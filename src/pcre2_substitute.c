@@ -130,7 +130,7 @@ for (; ptr < ptrend; ptr++)
     ptr += 1;  /* Must point after \ */
     erc = PRIV(check_escape)(&ptr, ptrend, &ch, &errorcode,
       code->overall_options, FALSE, NULL);
-    ptr -= 1;  /* Back to last code unit of escape */ 
+    ptr -= 1;  /* Back to last code unit of escape */
     if (errorcode != 0)
       {
       rc = errorcode;
@@ -289,6 +289,12 @@ options &= ~SUBSTITUTE_OPTIONS;
 
 /* Copy up to the start offset */
 
+if (start_offset > length)
+  {
+  match_data->leftchar = 0;
+  rc = PCRE2_ERROR_BADOFFSET;
+  goto EXIT;
+  }
 CHECKMEMCPY(subject, start_offset);
 
 /* Loop for global substituting. */

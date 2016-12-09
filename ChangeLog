@@ -208,6 +208,9 @@ the current pattern or a previous one and a wide character was matched.
 PCRE2_SUBSTITUTE_EXTENDED was set caused a segmentation fault (NULL 
 dereference).
 
+33. If the starting offset was specified as greater than the subject length in 
+a call to pcre2_substitute() an out-of-bounds memory reference could occur.
+
 
 Version 10.22 29-July-2016
 --------------------------
