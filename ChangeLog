@@ -211,6 +211,13 @@ dereference).
 33. If the starting offset was specified as greater than the subject length in 
 a call to pcre2_substitute() an out-of-bounds memory reference could occur.
 
+34. When PCRE2 was compiled to use the heap instead of the stack for recursive 
+calls to match(), a repeated minimizing caseless back reference, or a 
+maximizing one where the two cases had different numbers of code units, 
+followed by a caseful back reference, could lose the caselessness of the first 
+repeated back reference (example: /(Z)(a)\2{1,2}?(?-i)\1X/i should match ZaAAZX 
+but didn't).
+
 
 Version 10.22 29-July-2016
 --------------------------

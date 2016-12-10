@@ -5815,4 +5815,7 @@ ef) x/x,mark
 /(?s)(?=.*?)b/
     aabc
 
+/(Z)(a)\2{1,2}?(?-i)\1X/i
+    ZaAAZX
+
 # End of testinput1 

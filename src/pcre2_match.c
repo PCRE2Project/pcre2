@@ -586,7 +586,6 @@ uint32_t c;       /* Character values not kept over RMATCH() calls */
 BOOL utf;         /* Local copy of UTF flag for speed */
 
 BOOL minimize, possessive; /* Quantifier options */
-BOOL caseless;
 int condcode;
 
 /* When recursion is not being used, all "local" variables that have to be
@@ -724,6 +723,7 @@ still need to be preserved over recursive calls of match(). These macros define
 the alternative names that are used. */
 
 #define allow_zero      cur_is_word
+#define caseless        cur_is_word
 #define cbegroup        condition
 #define code_offset     codelink
 #define condassert      condition

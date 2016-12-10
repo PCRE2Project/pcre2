@@ -9289,4 +9289,10 @@ No match
     aabc
  0: b
 
+/(Z)(a)\2{1,2}?(?-i)\1X/i
+    ZaAAZX
+ 0: ZaAAZX
+ 1: Z
+ 2: a
+
 # End of testinput1 
