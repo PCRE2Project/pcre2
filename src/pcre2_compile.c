@@ -1352,7 +1352,7 @@ entry, ptr is pointing at the character after \. On exit, it points after the
 final code unit of the escape sequence.
 
 This function is also called from pcre2_substitute() to handle escape sequences
-in replacement strings. In this case, the cb argument is NULL, and in the case 
+in replacement strings. In this case, the cb argument is NULL, and in the case
 of escapes that have further processing, only sequences that define a data
 character are recognised. The isclass argument is not relevant; the options
 argument is the final value of the compiled pattern's options.
@@ -2327,6 +2327,7 @@ while (ptr < ptrend)
         parsed_pattern = manage_callouts(thisptr, &previous_callout, options,
           parsed_pattern, cb);
       PARSED_LITERAL(c, parsed_pattern);
+      meta_quantifier = 0; 
       }
     continue;  /* Next character */
     }
@@ -2362,7 +2363,7 @@ while (ptr < ptrend)
 
       case CHAR_RIGHT_PARENTHESIS:
       inverbname = FALSE;
-      okquantifier = FALSE;   /* Was probably set by literals */ 
+      okquantifier = FALSE;   /* Was probably set by literals */
       /* This is the length in characters */
       verbnamelength = (PCRE2_SIZE)(parsed_pattern - verblengthptr - 1);
       /* But the limit on the length is in code units */
@@ -2405,10 +2406,10 @@ while (ptr < ptrend)
     continue;   /* Next character in pattern */
     }
 
-  /* At the point we must process everything that must not change the
-  qualification state. This is mainly comments, but we handle \Q and \E here as
-  well, so that an item such as A\Q\E+ is treated as A+, as in Perl. An
-  isolated \E is ignored. */
+  /* Not a verb name character. At this point we must process everything that
+  must not change the quantification state. This is mainly comments, but we
+  handle \Q and \E here as well, so that an item such as A\Q\E+ is treated as
+  A+, as in Perl. An isolated \E is ignored. */
 
   if (c == CHAR_BACKSLASH && ptr < ptrend)
     {

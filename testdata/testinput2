@@ -4923,12 +4923,16 @@ a)"xI
 %(*:(:(svvvvvvvvvv:]*[   Z!*;[]*[^[]*!^[+.+{{2,7}'      _\\\\\\\\\\\\\)?.:..    *w////\\\Q\\\\\\\\\\\\\\\T\\\\\+/?/////'+\\\EEE?/////'+/*+/[^K]?]//(w)%never_backslash_c,alt_verbnames,auto_callout
 
 /./newline=crlf
-\=ph
+    \=ph
 
 /(\x0e00\000000\xc)/replace=\P,substitute_extended
-\x0e00\000000\xc
+    \x0e00\000000\xc
 
 //replace=0
-\=offset=7
+    \=offset=7
+
+".+\QX\E+"B,no_auto_possess
+
+".+\QX\E+"B,auto_callout,no_auto_possess
 
 # End of testinput2 

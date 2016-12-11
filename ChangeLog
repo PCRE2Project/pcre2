@@ -218,6 +218,10 @@ followed by a caseful back reference, could lose the caselessness of the first
 repeated back reference (example: /(Z)(a)\2{1,2}?(?-i)\1X/i should match ZaAAZX 
 but didn't).
 
+35. If \Q was preceded by a quantified item, and the following \E was followed 
+by '?' or '+', and there was at least one literal character between them, an 
+internal error "unexpected repeat" occurred (example: /.+\QX\E+/).
+
 
 Version 10.22 29-July-2016
 --------------------------

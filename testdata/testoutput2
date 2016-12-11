@@ -15375,16 +15375,37 @@ Failed: error 109 at offset 6: quantifier does not follow a repeatable item
 %(*:(:(svvvvvvvvvv:]*[   Z!*;[]*[^[]*!^[+.+{{2,7}'      _\\\\\\\\\\\\\)?.:..    *w////\\\Q\\\\\\\\\\\\\\\T\\\\\+/?/////'+\\\EEE?/////'+/*+/[^K]?]//(w)%never_backslash_c,alt_verbnames,auto_callout
 
 /./newline=crlf
-\=ph
+    \=ph
 No match
 
 /(\x0e00\000000\xc)/replace=\P,substitute_extended
-\x0e00\000000\xc
+    \x0e00\000000\xc
 Failed: error -57 at offset 2 in replacement: bad escape sequence in replacement string
 
 //replace=0
-\=offset=7
+    \=offset=7
 Failed: error -33: bad offset value
+
+".+\QX\E+"B,no_auto_possess
+------------------------------------------------------------------
+        Bra
+        Any+
+        X+
+        Ket
+        End
+------------------------------------------------------------------
+
+".+\QX\E+"B,auto_callout,no_auto_possess
+------------------------------------------------------------------
+        Bra
+        Callout 255 0 4
+        Any+
+        Callout 255 4 4
+        X+
+        Callout 255 8 0
+        Ket
+        End
+------------------------------------------------------------------
 
 # End of testinput2 
 Error -63: PCRE2_ERROR_BADDATA (unknown error number)
