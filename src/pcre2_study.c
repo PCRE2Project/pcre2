@@ -485,6 +485,7 @@ for (;;)
             this_recurse.prev = recurses;
             this_recurse.group = cs;
             dd = find_minlength(re, cs, startcode, utf, &this_recurse, countptr);
+            if (dd < 0) return dd;
             if (dd < d) d = dd;
             }
           }
@@ -525,6 +526,7 @@ for (;;)
           this_recurse.prev = recurses;
           this_recurse.group = cs;
           d = find_minlength(re, cs, startcode, utf, &this_recurse, countptr);
+          if (d < 0) return d;
           }
         }
       }
@@ -1551,7 +1553,8 @@ the minimum length is already known. */
 
 if ((re->flags & PCRE2_MATCH_EMPTY) == 0)
   {
-  switch(min = find_minlength(re, code, code, utf, NULL, &count))
+  min = find_minlength(re, code, code, utf, NULL, &count);
+  switch(min)
     {
     case -1:  /* \C in UTF mode or (*ACCEPT) or over-complex regex */
     break;    /* Leave minlength unchanged (will be zero) */

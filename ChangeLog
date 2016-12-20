@@ -223,6 +223,12 @@ followed by a caseful back reference, could lose the caselessness of the first
 repeated back reference (example: /(Z)(a)\2{1,2}?(?-i)\1X/i should match ZaAAZX
 but didn't).
 
+35. When a pattern is too complicated, PCRE2 gives up trying to find a minimum 
+matching length and just records zero. Typically this happens when there are
+too many nested or recursive back references. If the limit was reached in
+certain recursive cases it failed to be triggered and an internal error could 
+be the result.
+
 
 Version 10.22 29-July-2016
 --------------------------

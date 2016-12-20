@@ -4935,4 +4935,10 @@ a)"xI
 
 ".+\QX\E+"B,auto_callout,no_auto_possess
 
+# This one is here because Perl gives an 'unmatched )' error which goes away
+# if one of the \) sequences is removed - which is weird. PCRE finds it too
+# complicated to find a minimum matching length.
+
+"()X|((((((((()))))))((((())))))\2())((((((\2\2)))\2)(\22((((\2\2)2))\2)))(2\ZZZ)+:)Z^|91ZiZZnter(ZZ |91Z(ZZ ZZ(\r2Z( or#(\Z2(Z\Z(\2\2)2))\2Z)Z(\22Z((\Z2(Z\Z(\2\2)2))\2Z+:)Z|91Z(ZZ ZZ(\r2Z( or#(\Z2(Z\Z((Z*(\2(Z\':))\0)i|||||||||||||||loZ\2\2)2))\2Z)Z(\22Z((\Z2(Z\Z(\2\2)2))\2Z)))int \)\0nte!rnal errpr\2\\21r(2\ZZZ)+:)Z!|91Z(ZZ ZZ(\r2Z( or#(\Z2(Z\Z(\2\2)2))\2Z)Z(\22Z((\Z2(Z\Z(\2\2)2))\2Z)))int \)\0(2\ZZZ)+:)Z^|91ZiZZnter(ZZ |91Z(ZZ ZZ(\r2Z( or#(\Z2(Z\Z(\2\2)2))\2Z)Z(\22Z((\Z2(Z\Z(\2\2)2))\2Z)))int \)\0(2\ZZZ)+:)Z^)))int \)\0(2\ZZZ)+:)Z^|91ZiZZnter(ZZernZal ZZ(\r2Z( or#(\Z2(Z\Z(\2\2)2))\2Z)Z(\22Z((\Z2(Z\Z(\2\2)2))\2Z)))int \))\ZZ(\r2Z( or#(\Z2(Z\Z(\2\2)2))\2Z)Z(\22Z((\Z2(Z\Z(\2\2)))\2))))((((((\2\2))))))"I
+
 # End of testinput2 
