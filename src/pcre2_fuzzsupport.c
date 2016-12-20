@@ -44,6 +44,7 @@ int LLVMFuzzerTestOneInput(const unsigned char *data, size_t size)
 uint32_t compile_options;
 uint32_t match_options;
 pcre2_match_data *match_data = NULL;
+pcre2_match_context *match_context = NULL;
 int r1, r2;
 int i;
 
@@ -120,7 +121,9 @@ for (i = 0; i < 2; i++)
     int j;
     uint32_t save_match_options = match_options;
 
-    /* Create a match data block only when we first need it. */
+    /* Create match data and context blocks only when we first need them. Set 
+    low match and recursion limits to avoid wasting too much searching large 
+    pattern trees. Almost all matches are going to fail. */
 
     if (match_data == NULL)
       {
@@ -132,6 +135,20 @@ for (i = 0; i < 2; i++)
 #endif
         return 0;
         }
+      }
+
+    if (match_context == NULL)
+      {
+      match_context = pcre2_match_context_create(NULL);
+      if (match_context == NULL)
+        {
+#ifdef STANDALONE
+        printf("** Failed to create match context block\n");
+#endif
+        return 0;
+        }
+      pcre2_set_match_limit(match_context, 100);
+      pcre2_set_recursion_limit(match_context, 100); 
       }
 
     /* Match twice, with and without options */
@@ -152,7 +169,7 @@ for (i = 0; i < 2; i++)
 #endif
 
       errorcode = pcre2_match(code, (PCRE2_SPTR)data, (PCRE2_SIZE)size, 0,
-        match_options, match_data, NULL);
+        match_options, match_data, match_context);
 
 #ifdef STANDALONE
       if (errorcode >= 0) printf("Match returned %d\n", errorcode); else
@@ -187,6 +204,8 @@ for (i = 0; i < 2; i++)
   }
 
 if (match_data != NULL) pcre2_match_data_free(match_data);
+if (match_context != NULL) pcre2_match_context_free(match_context);
+
 return 0;
 }
 
