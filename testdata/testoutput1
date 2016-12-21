@@ -9295,4 +9295,6 @@ No match
  1: Z
  2: a
 
+/(?'c')XX(?'YYYYYYYYYYYYYYYYYYYYYYYCl')/
+
 # End of testinput1 

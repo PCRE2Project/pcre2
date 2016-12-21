@@ -5818,4 +5818,6 @@ ef) x/x,mark
 /(Z)(a)\2{1,2}?(?-i)\1X/i
     ZaAAZX
 
+/(?'c')XX(?'YYYYYYYYYYYYYYYYYYYYYYYCl')/
+
 # End of testinput1 

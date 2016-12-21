@@ -8273,7 +8273,7 @@ for (i = 0; i < tablecount; i++)
   if (crc < 0)
     {
     memmove(slot + cb->name_entry_size, slot,
-      CU2BYTES((cb->names_found - i) * cb->name_entry_size));
+      CU2BYTES((tablecount - i) * cb->name_entry_size));
     break;
     }
 

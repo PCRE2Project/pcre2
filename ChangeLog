@@ -48,11 +48,12 @@ parenthesis item, not the length of the whole group. A length of zero is now
 given only for a callout at the end of the pattern. Automatic callouts are no
 longer inserted before and after explicit callouts in the pattern.
 
-Some bugs in the refactored code were subsequently fixed before release.
-Several of them were related to the change from assuming a zero-terminated
-pattern (which previously had required non-zero terminated strings to be
-copied). These bugs were never in released code, but are noted here for the
-record, once the code was made available in the repository.
+A number of bugs in the refactored code were subsequently fixed before release,
+but after the code was made available in the repository. Many of the bugs were
+discovered by fuzzing testing. Several of them were related to the change from
+assuming a zero-terminated pattern (which previously had required non-zero
+terminated strings to be copied). These bugs were never in released code, but
+are noted here for the record.
 
   (a) An overall recursion such as (?0) inside a lookbehind assertion was not
       being diagnosed as an error.
@@ -106,6 +107,9 @@ record, once the code was made available in the repository.
       followed by '?' or '+', and there was at least one literal character
       between them, an internal error "unexpected repeat" occurred (example:
       /.+\QX\E+/).
+      
+  (p) A buffer overflow could occur while sorting the names in the group name 
+      list (depending on the order in which the names were seen). 
 
 4. Back references are now permitted in lookbehind assertions when there are
 no duplicated group numbers (that is, (?| has not been used), and, if the
