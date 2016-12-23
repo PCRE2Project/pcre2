@@ -237,6 +237,13 @@ be the result.
 the internal recursive calls that are used for lookrounds and recursions within 
 the pattern.
 
+37. More refactoring has got rid of the internal could_be_empty_branch()
+function (around 400 lines of code, including comments) by keeping track of
+could-be-emptiness as the pattern is compiled instead of scanning compiled 
+groups. (This would have been much harder before the refactoring of #3 above.)
+This lifts a restriction on the number of branches in a group (more than about 
+1100 would give "pattern is too complicated").
+
 
 Version 10.22 29-July-2016
 --------------------------

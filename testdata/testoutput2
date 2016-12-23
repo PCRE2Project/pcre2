@@ -10741,7 +10741,8 @@ Matched, but too many substrings
 
 /(?(DEFINE)(a(?2)|b)(b(?1)|a))(?:(?1)|(?2))/I
 Capturing subpattern count = 2
-Subject length lower bound = 1
+May match empty string
+Subject length lower bound = 0
 
 /(a(?2)|b)(b(?1)|a)(?:(?1)|(?2))/I
 Capturing subpattern count = 2
@@ -14759,7 +14760,7 @@ Failed: error 188 at offset 0: pattern string is longer than the limit set by th
 
 /abcdef/hex,max_pattern_length=3
 
-# These two patterns used to take a long time to compile
+# These patterns used to take a long time to compile
 
 "(.*)
 ((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))
@@ -14782,14 +14783,14 @@ May match empty string
 Options: extended
 Subject length lower bound = 0
 
-# When (?| is used and groups of the same number may be different,
-# we have to rely on a count to catch overly complicated patterns.
-
 "(?|()|())(.*)
 ((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))
 ((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))
 ((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))"xI
-Failed: error 186 at offset 148: regular expression is too complicated
+Capturing subpattern count = 13
+May match empty string
+Options: extended
+Subject length lower bound = 0
 
 "(?|()|())(?<=a()
 ((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))
@@ -15416,6 +15417,12 @@ Capturing subpattern count = 108
 Max back reference = 22
 Contains explicit CR or LF match
 Subject length lower bound = 0
+
+# This checks that new code for handling groups that may match an empty string
+# works on a very large number of alternatives. This pattern used to provoke a 
+# complaint that it was too complicated.
+
+/(?:\[A|B|C|D|E|F|G|H|I|J|]{200}Z)/expand
 
 # End of testinput2 
 Error -63: PCRE2_ERROR_BADDATA (unknown error number)

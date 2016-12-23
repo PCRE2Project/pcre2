@@ -4651,7 +4651,7 @@ B)x/alt_verbnames,mark
 
 /abcdef/hex,max_pattern_length=3
 
-# These two patterns used to take a long time to compile
+# These patterns used to take a long time to compile
 
 "(.*)
 ((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))
@@ -4663,9 +4663,6 @@ B)x/alt_verbnames,mark
 ((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))
 ((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))
 a)"xI
-
-# When (?| is used and groups of the same number may be different,
-# we have to rely on a count to catch overly complicated patterns.
 
 "(?|()|())(.*)
 ((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))
@@ -4940,5 +4937,11 @@ a)"xI
 # complicated to find a minimum matching length.
 
 "()X|((((((((()))))))((((())))))\2())((((((\2\2)))\2)(\22((((\2\2)2))\2)))(2\ZZZ)+:)Z^|91ZiZZnter(ZZ |91Z(ZZ ZZ(\r2Z( or#(\Z2(Z\Z(\2\2)2))\2Z)Z(\22Z((\Z2(Z\Z(\2\2)2))\2Z+:)Z|91Z(ZZ ZZ(\r2Z( or#(\Z2(Z\Z((Z*(\2(Z\':))\0)i|||||||||||||||loZ\2\2)2))\2Z)Z(\22Z((\Z2(Z\Z(\2\2)2))\2Z)))int \)\0nte!rnal errpr\2\\21r(2\ZZZ)+:)Z!|91Z(ZZ ZZ(\r2Z( or#(\Z2(Z\Z(\2\2)2))\2Z)Z(\22Z((\Z2(Z\Z(\2\2)2))\2Z)))int \)\0(2\ZZZ)+:)Z^|91ZiZZnter(ZZ |91Z(ZZ ZZ(\r2Z( or#(\Z2(Z\Z(\2\2)2))\2Z)Z(\22Z((\Z2(Z\Z(\2\2)2))\2Z)))int \)\0(2\ZZZ)+:)Z^)))int \)\0(2\ZZZ)+:)Z^|91ZiZZnter(ZZernZal ZZ(\r2Z( or#(\Z2(Z\Z(\2\2)2))\2Z)Z(\22Z((\Z2(Z\Z(\2\2)2))\2Z)))int \))\ZZ(\r2Z( or#(\Z2(Z\Z(\2\2)2))\2Z)Z(\22Z((\Z2(Z\Z(\2\2)))\2))))((((((\2\2))))))"I
+
+# This checks that new code for handling groups that may match an empty string
+# works on a very large number of alternatives. This pattern used to provoke a 
+# complaint that it was too complicated.
+
+/(?:\[A|B|C|D|E|F|G|H|I|J|]{200}Z)/expand
 
 # End of testinput2 
