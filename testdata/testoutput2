@@ -15424,6 +15424,13 @@ Subject length lower bound = 0
 
 /(?:\[A|B|C|D|E|F|G|H|I|J|]{200}Z)/expand
 
+# This one used to compile rubbish instead of a compile error, and then
+# behave unpredictably at match time.
+
+/.+(?(?C'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'))?!XXXX.=X/
+Failed: error 128 at offset 63: assertion expected after (?( or (?(?C)
+    .+(?(?C'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'))?!XXXX.=X
+
 # End of testinput2 
 Error -63: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

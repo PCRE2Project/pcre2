@@ -110,6 +110,10 @@ are noted here for the record.
       
   (p) A buffer overflow could occur while sorting the names in the group name 
       list (depending on the order in which the names were seen). 
+      
+  (q) A conditional group that started with a callout was not doing the right
+      check for a following assertion, leading to compiling bad code. Example:
+      /(?(C'XX))?!XX/   
 
 4. Back references are now permitted in lookbehind assertions when there are
 no duplicated group numbers (that is, (?| has not been used), and, if the

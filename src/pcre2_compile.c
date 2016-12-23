@@ -2325,7 +2325,7 @@ while (ptr < ptrend)
         parsed_pattern = manage_callouts(thisptr, &previous_callout, options,
           parsed_pattern, cb);
       PARSED_LITERAL(c, parsed_pattern);
-      meta_quantifier = 0; 
+      meta_quantifier = 0;
       }
     continue;  /* Next character */
     }
@@ -2475,13 +2475,16 @@ while (ptr < ptrend)
   /* If expect_cond_assert is 2, we have just passed (?( and are expecting an
   assertion, possibly preceded by a callout. If the value is 1, we have just
   had the callout and expect an assertion. There must be at least 3 more
-  characters in all cases. We know that the current character is an opening
-  parenthesis, as otherwise we wouldn't be here. Note that expect_cond_assert
-  may be negative, since all callouts just decrement it. */
+  characters in all cases. When expect_cond_assert is 2, we know that the
+  current character is an opening parenthesis, as otherwise we wouldn't be
+  here. However, when it is 1, we need to check, and it's easiest just to check
+  always. Note that expect_cond_assert may be negative, since all callouts just
+  decrement it. */
 
   if (expect_cond_assert > 0)
     {
-    BOOL ok = ptrend - ptr >= 3 && ptr[0] == CHAR_QUESTION_MARK;
+    BOOL ok = c == CHAR_LEFT_PARENTHESIS && ptrend - ptr >= 3 &&
+              ptr[0] == CHAR_QUESTION_MARK;
     if (ok) switch(ptr[1])
       {
       case CHAR_C:
@@ -4527,7 +4530,7 @@ Arguments:
 
 Returns:            0 There's been an error, *errorcodeptr is non-zero
                    +1 Success, this branch must match at least one character
-                   -1 Success, this branch may match an empty string 
+                   -1 Success, this branch may match an empty string
 */
 
 static int
@@ -4538,7 +4541,7 @@ compile_branch(uint32_t *optionsptr, PCRE2_UCHAR **codeptr, uint32_t **pptrptr,
 {
 int bravalue = 0;
 int okreturn = -1;
-int group_return = 0; 
+int group_return = 0;
 uint32_t repeat_min = 0, repeat_max = 0;      /* To please picky compilers */
 uint32_t greedy_default, greedy_non_default;
 uint32_t repeat_type, op_type;
@@ -4622,7 +4625,7 @@ for (;; pptr++)
   BOOL should_flip_negation;
   BOOL match_all_or_no_wide_chars;
   BOOL possessive_quantifier;
-  BOOL note_group_empty; 
+  BOOL note_group_empty;
   int class_has_8bitchar;
   int i;
   uint32_t mclength;
@@ -4687,15 +4690,15 @@ for (;; pptr++)
   Checking for the legality of quantifiers happens in parse_regex(), except for
   a quantifier after an assertion that is a condition. */
 
-  if (meta < META_ASTERISK || meta > META_MINMAX_QUERY) 
+  if (meta < META_ASTERISK || meta > META_MINMAX_QUERY)
     {
     previous = code;
     if (matched_char) okreturn = 1;
-    } 
+    }
 
   previous_matched_char = matched_char;
   matched_char = FALSE;
-  note_group_empty = FALSE; 
+  note_group_empty = FALSE;
   skipunits = 0;         /* Default value for most subgroups */
 
   switch(meta)
@@ -4737,7 +4740,7 @@ for (;; pptr++)
     repeats. The value of reqcu doesn't change either. */
 
     case META_DOT:
-    matched_char = TRUE; 
+    matched_char = TRUE;
     if (firstcuflags == REQ_UNSET) firstcuflags = REQ_NONE;
     zerofirstcu = firstcu;
     zerofirstcuflags = firstcuflags;
@@ -4755,7 +4758,7 @@ for (;; pptr++)
 
     case META_CLASS_EMPTY:
     case META_CLASS_EMPTY_NOT:
-    matched_char = TRUE; 
+    matched_char = TRUE;
     *code++ = (meta == META_CLASS_EMPTY_NOT)? OP_ALLANY : OP_FAIL;
     if (firstcuflags == REQ_UNSET) firstcuflags = REQ_NONE;
     zerofirstcu = firstcu;
@@ -4778,7 +4781,7 @@ for (;; pptr++)
 
     case META_CLASS_NOT:
     case META_CLASS:
-    matched_char = TRUE; 
+    matched_char = TRUE;
     negate_class = meta == META_CLASS_NOT;
 
     /* We can optimize the case of a single character in a class by generating
@@ -5502,7 +5505,7 @@ for (;; pptr++)
     goto GROUP_PROCESS_NOTE_EMPTY;
 
     /* The DEFINE condition is always false. It's internal groups may never
-    be called, so matched_char must remain false, hence the jump to 
+    be called, so matched_char must remain false, hence the jump to
     GROUP_PROCESS rather than GROUP_PROCESS_NOTE_EMPTY. */
 
     case META_COND_DEFINE:
@@ -5603,12 +5606,12 @@ for (;; pptr++)
 
     /* Process nested bracketed regex. The nesting depth is maintained for the
     benefit of the stackguard function. The test for too deep nesting is now
-    done in parse_regex(). Assertion and DEFINE groups come to GROUP_PROCESS; 
-    others come to GROUP_PROCESS_NOTE_EMPTY, to indicate that we need to take 
+    done in parse_regex(). Assertion and DEFINE groups come to GROUP_PROCESS;
+    others come to GROUP_PROCESS_NOTE_EMPTY, to indicate that we need to take
     note of whether or not they may match an empty string. */
-    
+
     GROUP_PROCESS_NOTE_EMPTY:
-    note_group_empty = TRUE; 
+    note_group_empty = TRUE;
 
     GROUP_PROCESS:
     cb->parens_depth += 1;
@@ -5619,7 +5622,7 @@ for (;; pptr++)
     templastcapture = cb->lastcapture;    /* Save value before group */
     length_prevgroup = 0;                 /* Initialize for pre-compile phase */
 
-    if ((group_return = 
+    if ((group_return =
          compile_regex(
          options,                         /* The option state */
          &tempcode,                       /* Where to put code (updated) */
@@ -5636,14 +5639,14 @@ for (;; pptr++)
            &length_prevgroup              /* Pre-compile phase */
          )) == 0)
       return 0;  /* Error */
-       
+
     cb->parens_depth -= 1;
 
-    /* If that was a non-conditional significant group (not an assertion, not a 
+    /* If that was a non-conditional significant group (not an assertion, not a
     DEFINE) that matches at least one character, then the current item matches
     a character. Conditionals are handled below. */
 
-    if (note_group_empty && bravalue != OP_COND && group_return > 0) 
+    if (note_group_empty && bravalue != OP_COND && group_return > 0)
       matched_char = TRUE;
 
     /* If that was an atomic group and there are no capturing groups within it,
@@ -5676,7 +5679,7 @@ for (;; pptr++)
          tc += GET(tc,1);
          }
       while (*tc != OP_KET);
-      
+
       /* A DEFINE group is never obeyed inline (the "condition" is always
       false). It must have only one branch. Having checked this, change the
       opcode to OP_FALSE. */
@@ -5695,7 +5698,7 @@ for (;; pptr++)
 
       /* A "normal" conditional group. If there is just one branch, we must not
       make use of its firstcu or reqcu, because this is equivalent to an
-      empty second branch. Also, it may match an empty string. If there are two 
+      empty second branch. Also, it may match an empty string. If there are two
       branches, this item must match a character if the group must. */
 
       else
@@ -6018,7 +6021,7 @@ for (;; pptr++)
     repeat_max = 1;
 
     REPEAT:
-    if (previous_matched_char && repeat_min > 0) matched_char = TRUE; 
+    if (previous_matched_char && repeat_min > 0) matched_char = TRUE;
 
     /* Remember whether this is a variable length repeat, and default to
     single-char opcodes. */
@@ -6087,7 +6090,7 @@ for (;; pptr++)
       PUT(previous, 3 + 2*LINK_SIZE, 2 + 2*LINK_SIZE);
       code += 2 + 2 * LINK_SIZE;
       length_prevgroup = 3 + 3*LINK_SIZE;
-      group_return = -1;  /* Set "may match empty string" */ 
+      group_return = -1;  /* Set "may match empty string" */
       }
 
     /* Now handle repetition for the different types of item. */
@@ -6444,9 +6447,9 @@ for (;; pptr++)
 
           else
             {
-            /* In the compile phase, adjust the opcode if the group can match 
+            /* In the compile phase, adjust the opcode if the group can match
             an empty string. For a conditional group with only one branch, the
-            value of group_return will not show "could be empty", so we must 
+            value of group_return will not show "could be empty", so we must
             check that separately. */
 
             if (lengthptr == NULL)
@@ -6877,10 +6880,10 @@ for (;; pptr++)
     character if it hasn't already been set. */
 
     if (meta_arg > ESC_b && meta_arg < ESC_Z)
-      { 
-      matched_char = TRUE; 
+      {
+      matched_char = TRUE;
       if (firstcuflags == REQ_UNSET) firstcuflags = REQ_NONE;
-      } 
+      }
 
     /* Set values to reset to if this is followed by a zero repeat. */
 
@@ -6946,7 +6949,7 @@ for (;; pptr++)
     NORMAL_CHAR:
     meta = *pptr;     /* Get the full 32 bits */
     NORMAL_CHAR_SET:  /* Character is already in meta */
-    matched_char = TRUE; 
+    matched_char = TRUE;
 
     /* For caseless UTF mode, check whether this character has more than one
     other case. If so, generate a special OP_PROP item instead of OP_CHARI. */
@@ -7071,7 +7074,7 @@ Arguments:
 Returns:            0 There has been an error
                    +1 Success, this group must match at least one character
                    -1 Success, this group may match an empty string
-*/                    
+*/
 
 static int
 compile_regex(uint32_t options, PCRE2_UCHAR **codeptr, uint32_t **pptrptr,
@@ -7156,7 +7159,7 @@ code += 1 + LINK_SIZE + skipunits;
 for (;;)
   {
   int branch_return;
-    
+
   /* Insert OP_REVERSE if this is as lookbehind assertion. */
 
   if (lookbehind && lookbehindlength > 0)
@@ -7169,14 +7172,14 @@ for (;;)
   /* Now compile the branch; in the pre-compile phase its length gets added
   into the length. */
 
-  if ((branch_return = 
+  if ((branch_return =
         compile_branch(&options, &code, &pptr, errorcodeptr, &branchfirstcu,
           &branchfirstcuflags, &branchreqcu, &branchreqcuflags, &bc,
           cb, (lengthptr == NULL)? NULL : &length)) == 0)
     return 0;
-    
+
   /* If a branch can match an empty string, so can the whole group. */
-    
+
   if (branch_return < 0) okreturn = -1;
 
   /* In the real compile phase, there is some post-processing to be done. */
@@ -7308,7 +7311,7 @@ for (;;)
         }
       *lengthptr += length;
       }
-// if (lengthptr == NULL) fprintf(stderr, "~~group returns %d\n", okreturn);       
+// if (lengthptr == NULL) fprintf(stderr, "~~group returns %d\n", okreturn);
     return okreturn;
     }
 
@@ -9127,7 +9130,7 @@ of the function here. */
 pptr = cb.parsed_pattern;
 code = (PCRE2_UCHAR *)codestart;
 *code = OP_BRA;
-regexrc = compile_regex(re->overall_options, &code, &pptr, &errorcode, 0, 
+regexrc = compile_regex(re->overall_options, &code, &pptr, &errorcode, 0,
   &firstcu, &firstcuflags, &reqcu, &reqcuflags, NULL, &cb, NULL);
 if (regexrc < 0) re->flags |= PCRE2_MATCH_EMPTY;
 re->top_bracket = cb.bracount;
