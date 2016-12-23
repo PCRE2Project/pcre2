@@ -371,7 +371,7 @@ internal_dfa_match(
   uint32_t offsetcount,
   int *workspace,
   int wscount,
-  int  rlevel)
+  uint32_t  rlevel)
 {
 stateblock *active_states, *new_states, *temp_states;
 stateblock *next_active_state, *next_new_state;
@@ -400,7 +400,7 @@ BOOL utf = FALSE;
 
 BOOL reset_could_continue = FALSE;
 
-rlevel++;
+if (rlevel++ > mb->match_limit_recursion) return PCRE2_ERROR_RECURSIONLIMIT;
 offsetcount &= (uint32_t)(-2);  /* Round down */
 
 wscount -= 2;
@@ -2591,7 +2591,7 @@ for (;;)
           sizeof(local_workspace)/sizeof(int),  /* size of same */
           rlevel);                              /* function recursion level */
 
-        if (rc == PCRE2_ERROR_DFA_UITEM) return rc;
+        if (rc < 0 && rc != PCRE2_ERROR_NOMATCH) return rc;
         if ((rc >= 0) == (codevalue == OP_ASSERT || codevalue == OP_ASSERTBACK))
             { ADD_ACTIVE((int)(endasscode + LINK_SIZE + 1 - start_code), 0); }
         }
@@ -2710,7 +2710,7 @@ for (;;)
             sizeof(local_workspace)/sizeof(int),  /* size of same */
             rlevel);                              /* function recursion level */
 
-          if (rc == PCRE2_ERROR_DFA_UITEM) return rc;
+          if (rc < 0 && rc != PCRE2_ERROR_NOMATCH) return rc;
           if ((rc >= 0) ==
                 (condcode == OP_ASSERT || condcode == OP_ASSERTBACK))
             { ADD_ACTIVE((int)(endasscode + LINK_SIZE + 1 - start_code), 0); }
@@ -3216,6 +3216,7 @@ if (mcontext == NULL)
   {
   mb->callout = NULL;
   mb->memctl = re->memctl;
+  mb->match_limit_recursion = PRIV(default_match_context).recursion_limit; 
   }
 else
   {
@@ -3228,7 +3229,10 @@ else
   mb->callout = mcontext->callout;
   mb->callout_data = mcontext->callout_data;
   mb->memctl = mcontext->memctl;
+  mb->match_limit_recursion = mcontext->recursion_limit; 
   }
+if (mb->match_limit_recursion > re->limit_recursion)
+  mb->match_limit_recursion = re->limit_recursion;
 
 mb->start_code = (PCRE2_UCHAR *)((uint8_t *)re + sizeof(pcre2_real_code)) +
   re->name_count * re->name_entry_size;

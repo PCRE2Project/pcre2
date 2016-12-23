@@ -1,4 +1,4 @@
-.TH PCRE2SYNTAX 3 "28 September 2016" "PCRE2 10.23"
+.TH PCRE2SYNTAX 3 "23 December 2016" "PCRE2 10.23"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION SYNTAX SUMMARY"
@@ -428,9 +428,10 @@ appear.
   (*UCP)          set PCRE2_UCP (use Unicode properties for \ed etc)
 .sp
 Note that LIMIT_MATCH and LIMIT_RECURSION can only reduce the value of the
-limits set by the caller of pcre2_match(), not increase them. The application
-can lock out the use of (*UTF) and (*UCP) by setting the PCRE2_NEVER_UTF or
-PCRE2_NEVER_UCP options, respectively, at compile time.
+limits set by the caller of \fBpcre2_match()\fP or \fBpcre2_dfa_match()\fP, not
+increase them. The application can lock out the use of (*UTF) and (*UCP) by
+setting the PCRE2_NEVER_UTF or PCRE2_NEVER_UCP options, respectively, at
+compile time.
 .
 .
 .SH "NEWLINE CONVENTION"
@@ -584,6 +585,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 28 September 2016
+Last updated: 23 December 2016
 Copyright (c) 1997-2016 University of Cambridge.
 .fi

@@ -1,4 +1,4 @@
-.TH PCRE2PATTERN 3 "23 October 2016" "PCRE2 10.23"
+.TH PCRE2PATTERN 3 "23 December 2016" "PCRE2 10.23"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION DETAILS"
@@ -158,6 +158,11 @@ be less than the value set (or defaulted) by the caller of \fBpcre2_match()\fP
 for it to have any effect. In other words, the pattern writer can lower the
 limits set by the programmer, but not raise them. If there is more than one
 setting of one of these limits, the lower value is used.
+.P
+The match limit is used (but in a different way) when JIT is being used, but it 
+is not relevant, and is ignored, when matching with \fBpcre2_dfa_match()\fP. 
+However, the recursion limit is relevant for DFA matching, which does use some 
+function recursion, in particular, for recursions within the pattern.
 .
 .
 .\" HTML <a name="newlines"></a>
@@ -3477,6 +3482,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 23 October 2016
+Last updated: 23 December 2016
 Copyright (c) 1997-2016 University of Cambridge.
 .fi

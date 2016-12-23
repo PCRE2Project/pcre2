@@ -233,6 +233,10 @@ too many nested or recursive back references. If the limit was reached in
 certain recursive cases it failed to be triggered and an internal error could 
 be the result.
 
+36. The pcre2_dfa_match() function now takes note of the recursion limit for 
+the internal recursive calls that are used for lookrounds and recursions within 
+the pattern.
+
 
 Version 10.22 29-July-2016
 --------------------------
