@@ -7088,7 +7088,8 @@ printf("  -16           use the 16-bit library\n");
 #ifdef SUPPORT_PCRE2_32
 printf("  -32           use the 32-bit library\n");
 #endif
-printf("  -b            set default pattern control 'fullbincode'\n");
+printf("  -ac           set default pattern option PCRE2_AUTO_CALLOUT\n");
+printf("  -b            set default pattern modifier 'fullbincode'\n");
 printf("  -C            show PCRE2 compile-time options and exit\n");
 printf("  -C arg        show a specific compile-time option and exit with its\n");
 printf("                  value if numeric (else 0). The arg can be:\n");
@@ -7103,15 +7104,15 @@ printf("     pcre2-8        8 bit library support enabled [0, 1]\n");
 printf("     pcre2-16       16 bit library support enabled [0, 1]\n");
 printf("     pcre2-32       32 bit library support enabled [0, 1]\n");
 printf("     unicode        Unicode and UTF support enabled [0, 1]\n");
-printf("  -d            set default pattern control 'debug'\n");
-printf("  -dfa          set default subject control 'dfa'\n");
+printf("  -d            set default pattern modifier 'debug'\n");
+printf("  -dfa          set default subject modifier 'dfa'\n");
 printf("  -error <n,m,..>  show messages for error numbers, then exit\n");
 printf("  -help         show usage information\n");
-printf("  -i            set default pattern control 'info'\n");
-printf("  -jit          set default pattern control 'jit'\n");
+printf("  -i            set default pattern modifier 'info'\n");
+printf("  -jit          set default pattern modifier 'jit'\n");
 printf("  -q            quiet: do not output PCRE2 version number at start\n");
-printf("  -pattern <s>  set default pattern control fields\n");
-printf("  -subject <s>  set default subject control fields\n");
+printf("  -pattern <s>  set default pattern modifier fields\n");
+printf("  -subject <s>  set default subject modifier fields\n");
 printf("  -S <n>        set stack size to <n> megabytes\n");
 printf("  -t [<n>]      time compilation and execution, repeating <n> times\n");
 printf("  -tm [<n>]     time execution (matching) only, repeating <n> times\n");
@@ -7442,10 +7443,11 @@ while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
 
   /* Set some common pattern and subject controls */
 
+  else if (strcmp(arg, "-ac") == 0)  def_patctl.options |= PCRE2_AUTO_CALLOUT;
+  else if (strcmp(arg, "-b") == 0)   def_patctl.control |= CTL_FULLBINCODE;
+  else if (strcmp(arg, "-d") == 0)   def_patctl.control |= CTL_DEBUG;
   else if (strcmp(arg, "-dfa") == 0) def_datctl.control |= CTL_DFA;
-  else if (strcmp(arg, "-b") == 0) def_patctl.control |= CTL_FULLBINCODE;
-  else if (strcmp(arg, "-d") == 0) def_patctl.control |= CTL_DEBUG;
-  else if (strcmp(arg, "-i") == 0) def_patctl.control |= CTL_INFO;
+  else if (strcmp(arg, "-i") == 0)   def_patctl.control |= CTL_INFO;
   else if (strcmp(arg, "-jit") == 0)
     {
     def_patctl.jit = 7;  /* full & partial */

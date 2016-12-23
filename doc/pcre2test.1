@@ -1,4 +1,4 @@
-.TH PCRE2TEST 1 "04 November 2016" "PCRE 10.23"
+.TH PCRE2TEST 1 "23 December 2016" "PCRE 10.23"
 .SH NAME
 pcre2test - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -124,8 +124,12 @@ If the 32-bit library has been built, this option causes it to be used. If only
 the 32-bit library has been built, this is the default. If the 32-bit library
 has not been built, this option causes an error.
 .TP 10
+\fB-ac\fP
+Behave as if each pattern has the \fBauto_callout\fP modifier, that is, insert 
+automatic callouts into every pattern that is compiled.
+.TP 10
 \fB-b\fP
-Behave as if each pattern has the \fB/fullbincode\fP modifier; the full
+Behave as if each pattern has the \fBfullbincode\fP modifier; the full
 internal binary form of the pattern is output after compilation.
 .TP 10
 \fB-C\fP
@@ -184,7 +188,7 @@ a convenience facility for PCRE2 maintainers.
 Output a brief summary these options and then exit.
 .TP 10
 \fB-i\fP
-Behave as if each pattern has the \fB/info\fP modifier; information about the
+Behave as if each pattern has the \fBinfo\fP modifier; information about the
 compiled pattern is given after compilation.
 .TP 10
 \fB-jit\fP
@@ -770,7 +774,7 @@ modes are to be compiled:
   2  compile JIT code for soft partial matching
   4  compile JIT code for hard partial matching
 .sp
-The possible values for the \fB/jit\fP modifier are therefore:
+The possible values for the \fBjit\fP modifier are therefore:
 .sp
   0  disable JIT
   1  normal matching only
@@ -815,14 +819,14 @@ code was actually used in the match.
 .SS "Setting a locale"
 .rs
 .sp
-The \fB/locale\fP modifier must specify the name of a locale, for example:
+The \fBlocale\fP modifier must specify the name of a locale, for example:
 .sp
   /pattern/locale=fr_FR
 .sp
 The given locale is set, \fBpcre2_maketables()\fP is called to build a set of
 character tables for the locale, and this is then passed to
 \fBpcre2_compile()\fP when compiling the regular expression. The same tables
-are used when matching the following subject lines. The \fB/locale\fP modifier
+are used when matching the following subject lines. The \fBlocale\fP modifier
 applies only to the pattern on which it appears, but can be given in a
 \fB#pattern\fP command if a default is needed. Setting a locale and alternate
 character tables are mutually exclusive.
@@ -831,7 +835,7 @@ character tables are mutually exclusive.
 .SS "Showing pattern memory"
 .rs
 .sp
-The \fB/memory\fP modifier causes the size in bytes of the memory used to hold
+The \fBmemory\fP modifier causes the size in bytes of the memory used to hold
 the compiled pattern to be output. This does not include the size of the
 \fBpcre2_code\fP block; it is just the actual compiled data. If the pattern is
 subsequently passed to the JIT compiler, the size of the JIT compiled code is
@@ -900,7 +904,7 @@ an error.
 .SS "Testing the stack guard feature"
 .rs
 .sp
-The \fB/stackguard\fP modifier is used to test the use of
+The \fBstackguard\fP modifier is used to test the use of
 \fBpcre2_set_compile_recursion_guard()\fP, a function that is provided to
 enable stack availability to be checked during compilation (see the
 .\" HREF
@@ -917,7 +921,7 @@ be aborted.
 .SS "Using alternative character tables"
 .rs
 .sp
-The value specified for the \fB/tables\fP modifier must be one of the digits 0,
+The value specified for the \fBtables\fP modifier must be one of the digits 0,
 1, or 2. It causes a specific set of built-in character tables to be passed to
 \fBpcre2_compile()\fP. This is used in the PCRE2 tests to check behaviour with
 different character tables. The digit specifies the tables as follows:
@@ -1014,7 +1018,7 @@ for a description of their effects.
 The partial matching modifiers are provided with abbreviations because they
 appear frequently in tests.
 .P
-If the \fB/posix\fP modifier was present on the pattern, causing the POSIX
+If the \fBposix\fP modifier was present on the pattern, causing the POSIX
 wrapper API to be used, the only option-setting modifiers that have any effect
 are \fBnotbol\fP, \fBnotempty\fP, and \fBnoteol\fP, causing REG_NOTBOL,
 REG_NOTEMPTY, and REG_NOTEOL, respectively, to be passed to \fBregexec()\fP.
@@ -1148,7 +1152,7 @@ used as a return from \fBpcre2test\fP's callout function.
 .rs
 .sp
 Searching for all possible matches within a subject can be requested by the
-\fBglobal\fP or \fB/altglobal\fP modifier. After finding a match, the matching
+\fBglobal\fP or \fBaltglobal\fP modifier. After finding a match, the matching
 function is called again to search the remainder of the subject. The difference
 between \fBglobal\fP and \fBaltglobal\fP is that the former uses the
 \fIstart_offset\fP argument to \fBpcre2_match()\fP or \fBpcre2_dfa_match()\fP
@@ -1441,7 +1445,7 @@ unset substring is shown as "<unset>", as for the second data line.
 If the strings contain any non-printing characters, they are output as \exhh
 escapes if the value is less than 256 and UTF mode is not set. Otherwise they
 are output as \ex{hh...} escapes. See below for the definition of non-printing
-characters. If the \fB/aftertext\fP modifier is set, the output for substring
+characters. If the \fBaftertext\fP modifier is set, the output for substring
 0 is followed by the the rest of the subject string, identified by "0+" like
 this:
 .sp
@@ -1639,7 +1643,7 @@ therefore shown as hex escapes.
 .P
 When \fBpcre2test\fP is outputting text that is a matched part of a subject
 string, it behaves in the same way, unless a different locale has been set for
-the pattern (using the \fB/locale\fP modifier). In this case, the
+the pattern (using the \fBlocale\fP modifier). In this case, the
 \fBisprint()\fP function is used to distinguish printing and non-printing
 characters.
 .
@@ -1747,6 +1751,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 04 November 2016
+Last updated: 23 December 2016
 Copyright (c) 1997-2016 University of Cambridge.
 .fi

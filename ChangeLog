@@ -244,6 +244,9 @@ groups. (This would have been much harder before the refactoring of #3 above.)
 This lifts a restriction on the number of branches in a group (more than about 
 1100 would give "pattern is too complicated").
 
+38. Add the "-ac" command line option to pcre2test as a synonym for "-pattern 
+auto_callout".
+
 
 Version 10.22 29-July-2016
 --------------------------
