@@ -1755,4 +1755,6 @@
 /[\P{Yi}]/utf,locale=C
 \x{2f000}
 
+/^(?<!(?=􃡜))/B,utf
+
 # End of testinput5 

@@ -7924,6 +7924,7 @@ Arguments:
 
 Returns:     new value of pptr
              NULL if META_END is reached - should never occur
+               or for an unknown meta value - likewise 
 */
 
 static uint32_t *
@@ -7934,9 +7935,11 @@ uint32_t nestlevel = 0;
 for (pptr += 1;; pptr++)
   {
   uint32_t meta = META_CODE(*pptr);
+  
   switch(meta)
     {
     default:  /* Just skip over most items */
+    if (meta < META_END) continue;  /* Literal */
     break;
 
     /* This should never occur. */
@@ -8007,7 +8010,7 @@ for (pptr += 1;; pptr++)
 
   /* The extra data item length for each meta is in a table. */
 
-  meta = (meta & 0x0fff0000u) >> 16;
+  meta = (meta >> 16) & 0x7fff;
   if (meta >= sizeof(meta_extra_lengths)) return NULL;
   pptr += meta_extra_lengths[meta];
   }
@@ -8497,7 +8500,7 @@ cb->erroroffset = PCRE2_UNSET;
 for (pptr = cb->parsed_pattern; *pptr != META_END; pptr++)
   {
   if (*pptr < META_END) continue;  /* Literal */
-
+  
   switch (META_CODE(*pptr))
     {
     default:

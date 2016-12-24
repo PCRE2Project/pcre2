@@ -4201,4 +4201,17 @@ Failed: error 125 at offset 2: lookbehind assertion is not fixed length
 \x{2f000}
  0: \x{2f000}
 
+/^(?<!(?=􃡜))/B,utf
+------------------------------------------------------------------
+        Bra
+        ^
+        AssertB not
+        Assert
+        \x{10385c}
+        Ket
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+
 # End of testinput5 

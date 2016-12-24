@@ -48,12 +48,12 @@ parenthesis item, not the length of the whole group. A length of zero is now
 given only for a callout at the end of the pattern. Automatic callouts are no
 longer inserted before and after explicit callouts in the pattern.
 
-A number of bugs in the refactored code were subsequently fixed before release,
-but after the code was made available in the repository. Many of the bugs were
-discovered by fuzzing testing. Several of them were related to the change from
-assuming a zero-terminated pattern (which previously had required non-zero
-terminated strings to be copied). These bugs were never in released code, but
-are noted here for the record.
+A number of bugs in the refactored code were subsequently fixed during testing
+before release, but after the code was made available in the repository. Many
+of the bugs were discovered by fuzzing testing. Several of them were related to
+the change from assuming a zero-terminated pattern (which previously had
+required non-zero terminated strings to be copied). These bugs were never in
+fully released code, but are noted here for the record.
 
   (a) An overall recursion such as (?0) inside a lookbehind assertion was not
       being diagnosed as an error.
@@ -107,13 +107,17 @@ are noted here for the record.
       followed by '?' or '+', and there was at least one literal character
       between them, an internal error "unexpected repeat" occurred (example:
       /.+\QX\E+/).
-      
-  (p) A buffer overflow could occur while sorting the names in the group name 
-      list (depending on the order in which the names were seen). 
-      
+
+  (p) A buffer overflow could occur while sorting the names in the group name
+      list (depending on the order in which the names were seen).
+
   (q) A conditional group that started with a callout was not doing the right
       check for a following assertion, leading to compiling bad code. Example:
-      /(?(C'XX))?!XX/   
+      /(?(C'XX))?!XX/
+
+  (r) If a character whose code point was greater than 0xffff appeared within
+      a lookbehind that was within another lookbehind, the calculation of the
+      lookbehind length went wrong and could provoke an internal error.
 
 4. Back references are now permitted in lookbehind assertions when there are
 no duplicated group numbers (that is, (?| has not been used), and, if the
@@ -231,24 +235,24 @@ followed by a caseful back reference, could lose the caselessness of the first
 repeated back reference (example: /(Z)(a)\2{1,2}?(?-i)\1X/i should match ZaAAZX
 but didn't).
 
-35. When a pattern is too complicated, PCRE2 gives up trying to find a minimum 
+35. When a pattern is too complicated, PCRE2 gives up trying to find a minimum
 matching length and just records zero. Typically this happens when there are
 too many nested or recursive back references. If the limit was reached in
-certain recursive cases it failed to be triggered and an internal error could 
+certain recursive cases it failed to be triggered and an internal error could
 be the result.
 
-36. The pcre2_dfa_match() function now takes note of the recursion limit for 
-the internal recursive calls that are used for lookrounds and recursions within 
+36. The pcre2_dfa_match() function now takes note of the recursion limit for
+the internal recursive calls that are used for lookrounds and recursions within
 the pattern.
 
 37. More refactoring has got rid of the internal could_be_empty_branch()
 function (around 400 lines of code, including comments) by keeping track of
-could-be-emptiness as the pattern is compiled instead of scanning compiled 
+could-be-emptiness as the pattern is compiled instead of scanning compiled
 groups. (This would have been much harder before the refactoring of #3 above.)
-This lifts a restriction on the number of branches in a group (more than about 
+This lifts a restriction on the number of branches in a group (more than about
 1100 would give "pattern is too complicated").
 
-38. Add the "-ac" command line option to pcre2test as a synonym for "-pattern 
+38. Add the "-ac" command line option to pcre2test as a synonym for "-pattern
 auto_callout".
 
 
