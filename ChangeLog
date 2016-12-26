@@ -255,6 +255,10 @@ This lifts a restriction on the number of branches in a group (more than about
 38. Add the "-ac" command line option to pcre2test as a synonym for "-pattern
 auto_callout".
 
+39. In a library with Unicode support, incorrect data was compiled for a
+pattern with PCRE2_UCP set without PCRE2_UTF if a class required all wide
+characters to match (for example, /[\s[:^ascii:]]/).
+
 
 Version 10.22 29-July-2016
 --------------------------

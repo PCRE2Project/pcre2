@@ -1401,4 +1401,12 @@ Failed: error -28: UTF-32 error: code points greater than 0x10ffff are not defin
     123     
 No match
 
+/[\s[:^ascii:]]/B,ucp
+------------------------------------------------------------------
+        Bra
+        [\x80-\xff\p{Xsp}\x{100}-\x{ffffffff}]
+        Ket
+        End
+------------------------------------------------------------------
+
 # End of testinput12

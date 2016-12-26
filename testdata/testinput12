@@ -358,4 +358,6 @@
 \= Expect no match
     123     
 
+/[\s[:^ascii:]]/B,ucp
+
 # End of testinput12

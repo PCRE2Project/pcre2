@@ -4927,9 +4927,13 @@ for (;; pptr++)
           automatically handled by the use of OP_CLASS or OP_NCLASS, but an
           explicit range is needed for OP_XCLASS. Setting a flag here
           causes the range to be generated later when it is known that
-          OP_XCLASS is required. */
+          OP_XCLASS is required. In the 8-bit library this is relevant only in 
+          utf mode, since no wide characters can exist otherwise. */
 
           default:
+#if PCRE2_CODE_UNIT_WIDTH == 8
+          if (utf)
+#endif 
           match_all_or_no_wide_chars |= local_negate;
           break;
           }
@@ -5217,6 +5221,8 @@ for (;; pptr++)
     all wide characters (depending on whether the whole class is or is not
     negated). This requirement is indicated by match_all_or_no_wide_chars being
     true. We do this by including an explicit range, which works in both cases.
+    This applies only in UTF and 16-bit and 32-bit non-UTF modes, since there
+    cannot be any wide characters in 8-bit non-UTF mode.
 
     When there *are* properties in a positive UTF-8 or any 16-bit or 32_bit
     class where \S etc is present without PCRE2_UCP, causing an extended class
