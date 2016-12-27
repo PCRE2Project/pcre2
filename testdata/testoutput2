@@ -15431,6 +15431,9 @@ Subject length lower bound = 0
 Failed: error 128 at offset 63: assertion expected after (?( or (?(?C)
     .+(?(?C'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'))?!XXXX.=X
 
+/[:[:alnum:]-[[a:lnum:]+/
+Failed: error 150 at offset 11: invalid range in character class
+
 # End of testinput2 
 Error -63: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

@@ -37,6 +37,10 @@ some minor bugs and Perl incompatibilities were fixed, including:
   (f) When testing zero-terminated patterns under valgrind, the terminating
       zero is now marked "no access". This catches bugs that would otherwise
       show up only with non-zero-terminated patterns.
+      
+  (g) A hyphen appearing immediately after a POSIX character class (for example 
+      /[[:ascii:]-z]/) now generates an error. Perl does accept this as a 
+      literal, but gives a warning, so it seems best to fail it in PCRE. 
 
 One effect of the refactoring is that some error numbers and messages have
 changed, and the pattern offset given for compiling errors is not always the

@@ -1,4 +1,4 @@
-.TH PCRE2PATTERN 3 "23 December 2016" "PCRE2 10.23"
+.TH PCRE2PATTERN 3 "27 December 2016" "PCRE2 10.23"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION DETAILS"
@@ -1352,10 +1352,10 @@ indicating a range, typically as the first or last character in the class,
 or immediately after a range. For example, [b-d-z] matches letters in the range
 b to d, a hyphen character, or z.
 .P
-Perl treats a hyphen as a literal if it appears before a POSIX class (see
-below) or a character type escape such as as \ed, but gives a warning in its 
-warning mode, as this is most likely a user error. As PCRE2 has no facility for
-warning, an error is given in these cases.
+Perl treats a hyphen as a literal if it appears before or after a POSIX class
+(see below) or a character type escape such as as \ed, but gives a warning in
+its warning mode, as this is most likely a user error. As PCRE2 has no facility
+for warning, an error is given in these cases.
 .P
 It is not possible to have the literal character "]" as the end character of a
 range. A pattern such as [W-]46] is interpreted as a class of two characters
@@ -3482,6 +3482,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 23 December 2016
+Last updated: 27 December 2016
 Copyright (c) 1997-2016 University of Cambridge.
 .fi

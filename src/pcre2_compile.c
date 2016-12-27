@@ -2992,6 +2992,17 @@ while (ptr < ptrend)
           goto FAILED;
           }
         ptr = tempptr + 2;
+        
+        /* Perl treats a hyphen after a POSIX class as a literal, not the
+        start of a range. However, it gives a warning in its warning mode. PCRE
+        does not have a warning mode, so we give an error, because this is
+        likely an error on the user's part. */
+        
+        if (ptr < ptrend && *ptr == CHAR_MINUS)
+          {
+          errorcode = ERR50;
+          goto FAILED;
+          }     
 
         /* When PCRE2_UCP is set, some of the POSIX classes are converted to
         use Unicode properties \p or \P or, in one case, \h or \H. The
@@ -5003,7 +5014,7 @@ for (;; pptr++)
           {
 #ifdef DEBUG_SHOW_PARSED
           fprintf(stderr, "** Unrecognized parsed pattern item 0x%.8x "
-                          "in character class", meta);
+                          "in character class\n", meta);
 #endif
           *errorcodeptr = ERR89;  /* Internal error - unrecognized. */
           return 0;
