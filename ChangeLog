@@ -266,6 +266,9 @@ auto_callout".
 pattern with PCRE2_UCP set without PCRE2_UTF if a class required all wide
 characters to match (for example, /[\s[:^ascii:]]/).
 
+40. The callout_error modifier has been added to pcre2test to make it possible 
+to return PCRE2_ERROR_CALLOUT from a callout.
+
 
 Version 10.22 29-July-2016
 --------------------------

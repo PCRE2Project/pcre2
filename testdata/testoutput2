@@ -3550,14 +3550,14 @@ Subject length lower bound = 0
   1 ^        ^    )*
  0: abcabcabc
  1: abc
-    abcabc\=callout_fail=1:3
+    abcabc\=callout_fail=1:4
 --->abcabc
   0 ^          (
   1 ^  ^       )*
   1 ^     ^    )*
  0: abcabc
  1: abc
-    abcabcabc\=callout_fail=1:3
+    abcabcabc\=callout_fail=1:4
 --->abcabcabc
   0 ^             (
   1 ^  ^          )*
@@ -15438,6 +15438,13 @@ Failed: error 150 at offset 11: invalid range in character class
 Failed: error 128 at offset 11: assertion expected after (?( or (?(?C)
 
 /((?(?C'')\Q\E(?!((?(?C'')(?!X=X));=)r*X=X));=)/
+
+/abcd/auto_callout
+    abcd\=callout_error=255:2
+--->abcd
+ +0 ^        a
+ +1 ^^       b
+Failed: error -37: callout error code
 
 # End of testinput2 
 Error -63: PCRE2_ERROR_BADDATA (unknown error number)

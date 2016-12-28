@@ -1,4 +1,4 @@
-.TH PCRE2TEST 1 "23 December 2016" "PCRE 10.23"
+.TH PCRE2TEST 1 "28 December 2016" "PCRE 10.23"
 .SH NAME
 pcre2test - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -1040,6 +1040,7 @@ pattern.
       altglobal                  alternative global matching
       callout_capture            show captures at callout time
       callout_data=<n>           set a value to pass via callouts
+      callout_error=<n>[:<m>]    control callout error
       callout_fail=<n>[:<m>]     control callout failure
       callout_none               do not supply a callout function
       copy=<number or name>      copy captured substring
@@ -1133,14 +1134,20 @@ does no capturing); it is ignored, with a warning message, if present.
 .sp
 A callout function is supplied when \fBpcre2test\fP calls the library matching
 functions, unless \fBcallout_none\fP is specified. If \fBcallout_capture\fP is
-set, the current captured groups are output when a callout occurs.
+set, the current captured groups are output when a callout occurs. The default 
+return from the callout function is zero, which allows matching to continue.
 .P
 The \fBcallout_fail\fP modifier can be given one or two numbers. If there is
-only one number, 1 is returned instead of 0 when a callout of that number is
-reached. If two numbers are given, 1 is returned when callout <n> is reached
-for the <m>th time. Note that callouts with string arguments are always given
-the number zero. See "Callouts" below for a description of the output when a
-callout it taken.
+only one number, 1 is returned instead of 0 (causing matching to backtrack)
+when a callout of that number is reached. If two numbers (<n>:<m>) are given, 1
+is returned when callout <n> is reached and there have been at least <m>
+callouts. The \fBcallout_error\fP modifier is similar, except that 
+PCRE2_ERROR_CALLOUT is returned, causing the entire matching process to be 
+aborted. If both these modifiers are set for the same callout number,
+\fBcallout_error\fP takes precedence.
+.P
+Note that callouts with string arguments are always given the number zero. See
+"Callouts" below for a description of the output when a callout it taken.
 .P
 The \fBcallout_data\fP modifier can be given an unsigned or a negative number.
 This is set as the "user data" that is passed to the matching function, and
@@ -1751,6 +1758,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 23 December 2016
+Last updated: 28 December 2016
 Copyright (c) 1997-2016 University of Cambridge.
 .fi

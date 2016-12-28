@@ -1062,8 +1062,8 @@
 
 /(?C0)(abc(?C1))*/I
     abcabcabc
-    abcabc\=callout_fail=1:3
-    abcabcabc\=callout_fail=1:3
+    abcabc\=callout_fail=1:4
+    abcabcabc\=callout_fail=1:4
 
 /(\d{3}(?C))*/I
     123\=callout_capture
@@ -4955,5 +4955,8 @@ a)"xI
 /((?(?C'')\QX\E(?!((?(?C'')(?!X=X));=)r*X=X));=)/
 
 /((?(?C'')\Q\E(?!((?(?C'')(?!X=X));=)r*X=X));=)/
+
+/abcd/auto_callout
+    abcd\=callout_error=255:2
 
 # End of testinput2 

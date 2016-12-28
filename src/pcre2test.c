@@ -175,7 +175,7 @@ void vms_setsymbol( char *, char *, int );
 #endif
 #endif
 
-#define CFAIL_UNSET UINT32_MAX  /* Unset value for cfail fields */
+#define CFORE_UNSET UINT32_MAX  /* Unset value for cfail/cerror fields */
 #define DFA_WS_DIMENSION 1000   /* Size of DFA workspace */
 #define DEFAULT_OVECCOUNT 15    /* Default ovector count */
 #define JUNK_OFFSET 0xdeadbeef  /* For initializing ovector */
@@ -429,7 +429,7 @@ so many of them that they are split into two fields. */
 #define CTL_POSIX_NOSUB                  0x00800000u
 #define CTL_PUSH                         0x01000000u  /* These three must be */
 #define CTL_PUSHCOPY                     0x02000000u  /*   all in the same */
-#define CTL_PUSHTABLESCOPY               0x04000000u  /*     word. */          
+#define CTL_PUSHTABLESCOPY               0x04000000u  /*     word. */
 #define CTL_STARTCHAR                    0x08000000u
 #define CTL_USE_LENGTH                   0x10000000u  /* Same word as HEXPAT */
 #define CTL_UTF8_INPUT                   0x20000000u
@@ -495,6 +495,7 @@ typedef struct datctl {    /* Structure for data line modifiers. */
   uint32_t  control;       /* Must be in same position as patctl */
   uint32_t  control2;      /* Must be in same position as patctl */
    uint8_t  replacement[REPLACE_MODSIZE];  /* So must this */
+  uint32_t  cerror[2];
   uint32_t  cfail[2];
    int32_t  callout_data;
    int32_t  copy_numbers[MAXCPYGET];
@@ -549,6 +550,7 @@ static modstruct modlist[] = {
   { "bsr",                        MOD_CTC,  MOD_BSR, 0,                          CO(bsr_convention) },
   { "callout_capture",            MOD_DAT,  MOD_CTL, CTL_CALLOUT_CAPTURE,        DO(control) },
   { "callout_data",               MOD_DAT,  MOD_INS, 0,                          DO(callout_data) },
+  { "callout_error",              MOD_DAT,  MOD_IN2, 0,                          DO(cerror) },
   { "callout_fail",               MOD_DAT,  MOD_IN2, 0,                          DO(cfail) },
   { "callout_info",               MOD_PAT,  MOD_CTL, CTL_CALLOUT_INFO,           PO(control) },
   { "callout_none",               MOD_DAT,  MOD_CTL, CTL_CALLOUT_NONE,           DO(control) },
@@ -5229,7 +5231,7 @@ if ((pat_patctl.control & (CTL_PUSHCOPY|CTL_PUSHTABLESCOPY)) != 0)
     PCRE2_CODE_COPY_TO_VOID(patstack[patstacknext++], compiled_code);
     }
   else
-    {     
+    {
     PCRE2_CODE_COPY_WITH_TABLES_TO_VOID(patstack[patstacknext++],
       compiled_code); }
   }
@@ -5459,8 +5461,17 @@ if (callout_data_ptr != NULL)
     }
   }
 
-return (cb->callout_number != dat_datctl.cfail[0])? 0 :
-       (++callout_count >= dat_datctl.cfail[1])? 1 : 0;
+callout_count++;
+
+if (cb->callout_number == dat_datctl.cerror[0] &&
+    callout_count >= dat_datctl.cerror[1])
+  return PCRE2_ERROR_CALLOUT;
+
+if (cb->callout_number == dat_datctl.cfail[0] &&
+    callout_count >= dat_datctl.cfail[1])
+  return 1;
+
+return 0;
 }
 
 
@@ -6123,7 +6134,9 @@ if ((pat_patctl.control & CTL_POSIX) != 0)
   regmatch_t *pmatch = NULL;
   const char *msg = "** Ignored with POSIX interface:";
 
-  if (dat_datctl.cfail[0] != CFAIL_UNSET || dat_datctl.cfail[1] != CFAIL_UNSET)
+  if (dat_datctl.cerror[0] != CFORE_UNSET || dat_datctl.cerror[1] != CFORE_UNSET)
+    prmsg(&msg, "callout_error");
+  if (dat_datctl.cfail[0] != CFORE_UNSET || dat_datctl.cfail[1] != CFORE_UNSET)
     prmsg(&msg, "callout_fail");
   if (dat_datctl.copy_numbers[0] >= 0 || dat_datctl.copy_names[0] != 0)
     prmsg(&msg, "copy");
@@ -7347,7 +7360,8 @@ memset(&def_datctl, 0, sizeof(datctl));
 def_datctl.oveccount = DEFAULT_OVECCOUNT;
 def_datctl.copy_numbers[0] = -1;
 def_datctl.get_numbers[0] = -1;
-def_datctl.cfail[0] = def_datctl.cfail[1] = CFAIL_UNSET;
+def_datctl.cerror[0] = def_datctl.cerror[1] = CFORE_UNSET;
+def_datctl.cfail[0] = def_datctl.cfail[1] = CFORE_UNSET;
 
 /* Scan command line options. */
 

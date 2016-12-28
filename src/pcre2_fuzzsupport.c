@@ -32,6 +32,17 @@ Written by Philip Hazel, October 2016
    PCRE2_NOTEMPTY_ATSTART|PCRE2_PARTIAL_HARD| \
    PCRE2_PARTIAL_SOFT|PCRE2_NO_JIT)
    
+/* This is the callout function. Its only purpose is to halt matching if there 
+are more than 100 callouts, as one way of stopping too much time being spent on 
+fruitless matches. The callout data is a pointer to the counter. */
+
+static int callout_function(pcre2_callout_block *cb, void *callout_data)
+{
+(void)cb;  /* Avoid unused parameter warning */
+*((uint32_t *)callout_data) += 1;
+return (*((uint32_t *)callout_data) > 100)? PCRE2_ERROR_CALLOUT : 0;
+}
+   
 /* Putting in this apparently unnecessary prototype prevents gcc from giving a 
 "no previous prototype" warning when compiling at high warning level. */ 
 
@@ -77,6 +88,7 @@ likewise do the match with and without the options. */
 
 for (i = 0; i < 2; i++)
   {
+  uint32_t callout_count;
   int errorcode;
   PCRE2_SIZE erroroffset;
   pcre2_code *code;
@@ -147,8 +159,9 @@ for (i = 0; i < 2; i++)
 #endif
         return 0;
         }
-      pcre2_set_match_limit(match_context, 100);
-      pcre2_set_recursion_limit(match_context, 100); 
+      (void)pcre2_set_match_limit(match_context, 100);
+      (void)pcre2_set_recursion_limit(match_context, 100); 
+      (void)pcre2_set_callout(match_context, callout_function, &callout_count); 
       }
 
     /* Match twice, with and without options */
@@ -168,6 +181,7 @@ for (i = 0; i < 2; i++)
         ((match_options & PCRE2_PARTIAL_SOFT) != 0)? ",partial_soft" : "");
 #endif
 
+      callout_count = 0;
       errorcode = pcre2_match(code, (PCRE2_SPTR)data, (PCRE2_SIZE)size, 0,
         match_options, match_data, match_context);
 
