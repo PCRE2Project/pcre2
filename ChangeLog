@@ -41,6 +41,9 @@ some minor bugs and Perl incompatibilities were fixed, including:
   (g) A hyphen appearing immediately after a POSIX character class (for example 
       /[[:ascii:]-z]/) now generates an error. Perl does accept this as a 
       literal, but gives a warning, so it seems best to fail it in PCRE. 
+      
+  (h) An empty \Q\E sequence may appear after a callout that precedes an 
+      assertion condition (it is, of course, ignored).
 
 One effect of the refactoring is that some error numbers and messages have
 changed, and the pattern offset given for compiling errors is not always the

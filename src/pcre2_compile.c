@@ -2321,6 +2321,12 @@ while (ptr < ptrend)
       }
     else
       {
+      if (expect_cond_assert > 0)   /* A literal is not allowed if we are */
+        {                           /* expecting a conditional assertion, */
+        ptr--;                      /* but an empty \Q\E sequence is OK.  */
+        errorcode = ERR28;
+        goto FAILED;
+        }
       if (!inverbname && after_manual_callout-- <= 0)
         parsed_pattern = manage_callouts(thisptr, &previous_callout, options,
           parsed_pattern, cb);
@@ -2992,17 +2998,17 @@ while (ptr < ptrend)
           goto FAILED;
           }
         ptr = tempptr + 2;
-        
+
         /* Perl treats a hyphen after a POSIX class as a literal, not the
         start of a range. However, it gives a warning in its warning mode. PCRE
         does not have a warning mode, so we give an error, because this is
         likely an error on the user's part. */
-        
+
         if (ptr < ptrend && *ptr == CHAR_MINUS)
           {
           errorcode = ERR50;
           goto FAILED;
-          }     
+          }
 
         /* When PCRE2_UCP is set, some of the POSIX classes are converted to
         use Unicode properties \p or \P or, in one case, \h or \H. The
@@ -4938,13 +4944,13 @@ for (;; pptr++)
           automatically handled by the use of OP_CLASS or OP_NCLASS, but an
           explicit range is needed for OP_XCLASS. Setting a flag here
           causes the range to be generated later when it is known that
-          OP_XCLASS is required. In the 8-bit library this is relevant only in 
+          OP_XCLASS is required. In the 8-bit library this is relevant only in
           utf mode, since no wide characters can exist otherwise. */
 
           default:
 #if PCRE2_CODE_UNIT_WIDTH == 8
           if (utf)
-#endif 
+#endif
           match_all_or_no_wide_chars |= local_negate;
           break;
           }
@@ -7941,7 +7947,7 @@ Arguments:
 
 Returns:     new value of pptr
              NULL if META_END is reached - should never occur
-               or for an unknown meta value - likewise 
+               or for an unknown meta value - likewise
 */
 
 static uint32_t *
@@ -7952,7 +7958,7 @@ uint32_t nestlevel = 0;
 for (pptr += 1;; pptr++)
   {
   uint32_t meta = META_CODE(*pptr);
-  
+
   switch(meta)
     {
     default:  /* Just skip over most items */
@@ -8517,7 +8523,7 @@ cb->erroroffset = PCRE2_UNSET;
 for (pptr = cb->parsed_pattern; *pptr != META_END; pptr++)
   {
   if (*pptr < META_END) continue;  /* Literal */
-  
+
   switch (META_CODE(*pptr))
     {
     default:

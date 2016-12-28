@@ -15434,6 +15434,11 @@ Failed: error 128 at offset 63: assertion expected after (?( or (?(?C)
 /[:[:alnum:]-[[a:lnum:]+/
 Failed: error 150 at offset 11: invalid range in character class
 
+/((?(?C'')\QX\E(?!((?(?C'')(?!X=X));=)r*X=X));=)/
+Failed: error 128 at offset 11: assertion expected after (?( or (?(?C)
+
+/((?(?C'')\Q\E(?!((?(?C'')(?!X=X));=)r*X=X));=)/
+
 # End of testinput2 
 Error -63: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data
