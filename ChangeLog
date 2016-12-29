@@ -135,8 +135,8 @@ group must, of course be of fixed length.
 support enabled, reading past the end of the pattern is detected, both when
 compiling and during callout processing.
 
-6. \g{+<number>} (e.g. \g{+2)} ) is now supported. It is a "forward back
-reference" and can be useful in repetitions (compare \g{-<number>}). Perl does
+6. \g{+<number>} (e.g. \g{+2} ) is now supported. It is a "forward back
+reference" and can be useful in repetitions (compare \g{-<number>} ). Perl does
 not recognize this syntax.
 
 7. Automatic callouts are no longer generated before and after callouts in the
