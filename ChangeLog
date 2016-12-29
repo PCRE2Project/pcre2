@@ -269,6 +269,9 @@ characters to match (for example, /[\s[:^ascii:]]/).
 40. The callout_error modifier has been added to pcre2test to make it possible 
 to return PCRE2_ERROR_CALLOUT from a callout.
 
+41. A minor change to pcre2grep: colour reset is now "<esc>[0m" instead of 
+"<esc>[00m".
+
 
 Version 10.22 29-July-2016
 --------------------------

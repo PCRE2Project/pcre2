@@ -693,7 +693,7 @@ print_match(const char* buf, int length)
 {
 if (do_colour) fprintf(stdout, "%c[%sm", 0x1b, colour_string);
 FWRITE(buf, 1, length, stdout);
-if (do_colour) fprintf(stdout, "%c[00m", 0x1b);
+if (do_colour) fprintf(stdout, "%c[0m", 0x1b);
 }
 
 /* End of Unix-style or native z/OS environment functions. */
@@ -1686,7 +1686,7 @@ while (length > 0)
       }
     else if (*string == '{')
       {
-      /* Must be a decimal number in parenthesis, e.g: (5) or (38) */
+      /* Must be a decimal number in braces, e.g: {5} or {38} */
       string++;
       length--;
 
@@ -1708,7 +1708,7 @@ while (length > 0)
         }
       while (*string >= '0' && *string <= '9');
 
-      /* Syntax error: close paren is missing. */
+      /* Syntax error: closing brace is missing. */
       if (*string != '}') return 0;
       }
 

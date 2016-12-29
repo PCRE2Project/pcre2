@@ -456,8 +456,8 @@ over the lazy dog.
 This time it jumps and jumps and jumps.
 RC=0
 ---------------------------- Test 52 ------------------------------
-fox [1;31mjumps[00m
-This time it [1;31mjumps[00m and [1;31mjumps[00m and [1;31mjumps[00m.
+fox [1;31mjumps[0m
+This time it [1;31mjumps[0m and [1;31mjumps[0m and [1;31mjumps[0m.
 RC=0
 ---------------------------- Test 53 ------------------------------
 36972,6
@@ -474,9 +474,9 @@ RC=0
 597:32,4
 RC=0
 ---------------------------- Test 55 -----------------------------
-Here is the [1;31mpattern[00m again.
-That time it was on a [1;31mline by itself[00m.
-This line contains [1;31mpattern[00m not on a [1;31mline by itself[00m.
+Here is the [1;31mpattern[0m again.
+That time it was on a [1;31mline by itself[0m.
+This line contains [1;31mpattern[0m not on a [1;31mline by itself[0m.
 RC=0
 ---------------------------- Test 56 -----------------------------
 ./testdata/grepinput:456
@@ -588,52 +588,52 @@ RC=0
 ---------------------------- Test 70 -----------------------------
 [1;31mtriple:	t1_txt	s1_tag	s_txt	p_tag	p_txt	o_tag	o_txt
 
-[00m[1;31mtriple:	t3_txt	s2_tag	s_txt	p_tag	p_txt	o_tag	o_txt
+[0m[1;31mtriple:	t3_txt	s2_tag	s_txt	p_tag	p_txt	o_tag	o_txt
 
-[00m[1;31mtriple:	t4_txt	s1_tag	s_txt	p_tag	p_txt	o_tag	o_txt
+[0m[1;31mtriple:	t4_txt	s1_tag	s_txt	p_tag	p_txt	o_tag	o_txt
 
-[00m[1;31mtriple:	t6_txt	s2_tag	s_txt	p_tag	p_txt	o_tag	o_txt
+[0m[1;31mtriple:	t6_txt	s2_tag	s_txt	p_tag	p_txt	o_tag	o_txt
 
-[00mRC=0
+[0mRC=0
 ---------------------------- Test 71 -----------------------------
 01
 RC=0
 ---------------------------- Test 72 -----------------------------
-[1;31m01[00m0203040506
+[1;31m01[0m0203040506
 RC=0
 ---------------------------- Test 73 -----------------------------
-[1;31m01[00m
+[1;31m01[0m
 RC=0
 ---------------------------- Test 74 -----------------------------
 01
 02
 RC=0
 ---------------------------- Test 75 -----------------------------
-[1;31m01[00m[1;31m02[00m03040506
+[1;31m01[0m[1;31m02[0m03040506
 RC=0
 ---------------------------- Test 76 -----------------------------
-[1;31m01[00m
-[1;31m02[00m
+[1;31m01[0m
+[1;31m02[0m
 RC=0
 ---------------------------- Test 77 -----------------------------
 01
 03
 RC=0
 ---------------------------- Test 78 -----------------------------
-[1;31m01[00m02[1;31m03[00m040506
+[1;31m01[0m02[1;31m03[0m040506
 RC=0
 ---------------------------- Test 79 -----------------------------
-[1;31m01[00m
-[1;31m03[00m
+[1;31m01[0m
+[1;31m03[0m
 RC=0
 ---------------------------- Test 80 -----------------------------
 01
 RC=0
 ---------------------------- Test 81 -----------------------------
-[1;31m01[00m0203040506
+[1;31m01[0m0203040506
 RC=0
 ---------------------------- Test 82 -----------------------------
-[1;31m01[00m
+[1;31m01[0m
 RC=0
 ---------------------------- Test 83 -----------------------------
 pcre2grep: line 4 of file ./testdata/grepinput3 is too long for the internal buffer
@@ -702,9 +702,9 @@ RC=0
 ./testdata/grepinput:zerothe.
 RC=0
 ---------------------------- Test 101 ------------------------------
-./testdata/grepinput:[1;31m.[00m|[1;31mzero[00m|[1;31mthe[00m|[1;31m.[00m
-./testdata/grepinput:[1;31mzero[00m|[1;31ma[00m
-./testdata/grepinput:[1;31m.[00m|[1;31mzero[00m|[1;31mthe[00m|[1;31m.[00m
+./testdata/grepinput:[1;31m.[0m|[1;31mzero[0m|[1;31mthe[0m|[1;31m.[0m
+./testdata/grepinput:[1;31mzero[0m|[1;31ma[0m
+./testdata/grepinput:[1;31m.[0m|[1;31mzero[0m|[1;31mthe[0m|[1;31m.[0m
 RC=0
 ---------------------------- Test 102 -----------------------------
 2:
@@ -725,21 +725,21 @@ RC=0
 14:
 RC=0
 ---------------------------- Test 105 -----------------------------
-[1;31m[00mtriple:	t1_txt	s1_tag	s_txt	p_tag	p_txt	o_tag	o_txt
-[1;31m[00m
-[1;31m[00mtriple:	t2_txt	s1_tag	s_txt	p_tag	p_txt	o_tag	
-[1;31m[00mLorem [1;31mipsum[00m dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-[1;31m[00m
-[1;31m[00mtriple:	t3_txt	s2_tag	s_txt	p_tag	p_txt	o_tag	o_txt
-[1;31m[00m
-[1;31m[00mtriple:	t4_txt	s1_tag	s_txt	p_tag	p_txt	o_tag	o_txt
-[1;31m[00m
-[1;31m[00mtriple:	t5_txt	s1_tag	s_txt	p_tag	p_txt	o_tag	
-[1;31m[00mo_txt
-[1;31m[00m
-[1;31m[00mtriple:	t6_txt	s2_tag	s_txt	p_tag	p_txt	o_tag	o_txt
-[1;31m[00m
-[1;31m[00mtriple:	t7_txt	s1_tag	s_txt	p_tag	p_txt	o_tag	o_txt
+[1;31m[0mtriple:	t1_txt	s1_tag	s_txt	p_tag	p_txt	o_tag	o_txt
+[1;31m[0m
+[1;31m[0mtriple:	t2_txt	s1_tag	s_txt	p_tag	p_txt	o_tag	
+[1;31m[0mLorem [1;31mipsum[0m dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+[1;31m[0m
+[1;31m[0mtriple:	t3_txt	s2_tag	s_txt	p_tag	p_txt	o_tag	o_txt
+[1;31m[0m
+[1;31m[0mtriple:	t4_txt	s1_tag	s_txt	p_tag	p_txt	o_tag	o_txt
+[1;31m[0m
+[1;31m[0mtriple:	t5_txt	s1_tag	s_txt	p_tag	p_txt	o_tag	
+[1;31m[0mo_txt
+[1;31m[0m
+[1;31m[0mtriple:	t6_txt	s2_tag	s_txt	p_tag	p_txt	o_tag	o_txt
+[1;31m[0m
+[1;31m[0mtriple:	t7_txt	s1_tag	s_txt	p_tag	p_txt	o_tag	o_txt
 RC=0
 ---------------------------- Test 106 -----------------------------
 a
