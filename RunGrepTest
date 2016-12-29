@@ -11,7 +11,7 @@ export LC_ALL
 
 # Remove any non-default colouring and aliases that the caller may have set.
 
-unset PCRE2GREP_COLOUR PCRE2GREP_COLOR
+unset PCRE2GREP_COLOUR PCRE2GREP_COLOR GREP_COLOUR GREP_COLOR
 unset cp ls mv rm
 
 # Remember the current (build) directory, set the program to be tested, and
@@ -22,12 +22,12 @@ pcre2grep=$builddir/pcre2grep
 pcre2test=$builddir/pcre2test
 
 if [ ! -x $pcre2grep ] ; then
-  echo "** $pcre2grep does not exist or is not execuatble."
+  echo "** $pcre2grep does not exist or is not executable."
   exit 1
 fi
 
 if [ ! -x $pcre2test ] ; then
-  echo "** $pcre2test does not exist or is not execuatble."
+  echo "** $pcre2test does not exist or is not executable."
   exit 1
 fi
 
