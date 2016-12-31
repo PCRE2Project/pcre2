@@ -17,6 +17,8 @@ Written by Philip Hazel, October 2016
 #define PCRE2_CODE_UNIT_WIDTH 8
 #include "pcre2.h"
 
+#define MAX_MATCH_SIZE 1000
+
 #define ALLOWED_COMPILE_OPTIONS \
   (PCRE2_ANCHORED|PCRE2_ALLOW_EMPTY_CLASS|PCRE2_ALT_BSUX|PCRE2_ALT_CIRCUMFLEX| \
    PCRE2_ALT_VERBNAMES|PCRE2_AUTO_CALLOUT|PCRE2_CASELESS|PCRE2_DOLLAR_ENDONLY| \
@@ -56,10 +58,16 @@ uint32_t compile_options;
 uint32_t match_options;
 pcre2_match_data *match_data = NULL;
 pcre2_match_context *match_context = NULL;
+size_t match_size;
 int r1, r2;
 int i;
 
 if (size < 1) return 0;
+
+/* Limiting the length of the subject for matching stops fruitless searches 
+in large trees taking too much time. */
+
+match_size = (size > MAX_MATCH_SIZE)? MAX_MATCH_SIZE : size;
 
 /* Figure out some options to use. Initialize the random number to ensure
 repeatability. Ensure that we get a 32-bit unsigned random number for testing
@@ -182,7 +190,7 @@ for (i = 0; i < 2; i++)
 #endif
 
       callout_count = 0;
-      errorcode = pcre2_match(code, (PCRE2_SPTR)data, (PCRE2_SIZE)size, 0,
+      errorcode = pcre2_match(code, (PCRE2_SPTR)data, (PCRE2_SIZE)match_size, 0,
         match_options, match_data, match_context);
 
 #ifdef STANDALONE
