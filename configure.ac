@@ -148,16 +148,11 @@ AC_ARG_ENABLE(pcre2grep-jit,
                              [disable JIT support in pcre2grep]),
               , enable_pcre2grep_jit=yes)
 
-# Handle --disable-pcre2grep-callout (enabled by default) but not supported
-# for Windows.
-if test "$HAVE_WINDOWS_H" != "1"; then
-  AC_ARG_ENABLE(pcre2grep-callout,
-                AS_HELP_STRING([--disable-pcre2grep-callout],
-                               [disable callout script support in pcre2grep]),
-                , enable_pcre2grep_callout=yes)
-else
-  enable_pcre2grep_callout=no
-fi
+# Handle --disable-pcre2grep-callout (enabled by default)
+AC_ARG_ENABLE(pcre2grep-callout,
+              AS_HELP_STRING([--disable-pcre2grep-callout],
+                             [disable callout script support in pcre2grep]),
+              , enable_pcre2grep_callout=yes)
 
 # Handle --enable-rebuild-chartables
 AC_ARG_ENABLE(rebuild-chartables,
@@ -577,19 +572,14 @@ if test "$enable_pcre2grep_jit" = "yes"; then
     have no effect unless SUPPORT_JIT is also defined.])
 fi
 
-# Currently pcre2grep callout string is not supported under Windows.
-
 if test "$enable_pcre2grep_callout" = "yes"; then
   if test "$HAVE_WINDOWS_H" != "1"; then
     if test "$HAVE_SYS_WAIT_H" != "1"; then
       AC_MSG_ERROR([Callout script support needs sys/wait.h.])
     fi
-    AC_DEFINE([SUPPORT_PCRE2GREP_CALLOUT], [], [
-      Define to any value to enable callout script support in pcre2grep.])
-  else
-    AC_MSG_WARN([Callout script support is not available for Windows: disabled])
-    enable_pcre2grep_callout=no
   fi
+  AC_DEFINE([SUPPORT_PCRE2GREP_CALLOUT], [], [
+    Define to any value to enable callout script support in pcre2grep.])
 fi
 
 if test "$enable_unicode" = "yes"; then

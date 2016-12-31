@@ -284,6 +284,28 @@ Now such patterns are no longer completely auto-possessified.
 45. Minor cosmetic fix to pcre2test: move a variable that is not used under 
 Windows into the "not Windows" code.
 
+46. Applied Jason Hood's patches to upgrade pcre2grep under Windows and tidy 
+some of the code:
+
+  * normalised the Windows condition by ensuring WIN32 is defined;
+  * enables the callout feature under Windows;
+  * adds globbing (Microsoft's implementation expands quoted args),
+    using a tweaked opendirectory;
+  * implements the is_*_tty functions for Windows;
+  * --color=always will write the ANSI sequences to file;
+  * add sequences 4 (underline works on Win10) and 5 (blink as bright
+    background, relatively standard on DOS/Win);
+  * remove the (char *) casts for the now-const strings;
+  * remove GREP_COLOUR (grep's command line allowed the 'u', but not
+    the environment), parsing GREP_COLORS instead;
+  * uses the current colour if not set, rather than black;
+  * add print_match for the undefined case;
+  * fixes a typo.
+
+In addition, colour settings containing anything other than digits and
+semicolon are ignored, and the colour controls are no longer output for empty 
+strings.
+
 
 Version 10.22 29-July-2016
 --------------------------

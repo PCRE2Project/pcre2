@@ -1,4 +1,4 @@
-.TH PCRE2GREP 1 "31 October 2016" "PCRE2 10.23"
+.TH PCRE2GREP 1 "31 December 2016" "PCRE2 10.23"
 .SH NAME
 pcre2grep - a grep with Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -205,13 +205,22 @@ connected to a terminal. More resources are used when colouring is enabled,
 because \fBpcre2grep\fP has to search for all possible matches in a line, not
 just one, in order to colour them all.
 .sp
-The colour that is used can be specified by setting the environment variable
-PCRE2GREP_COLOUR or PCRE2GREP_COLOR. If neither of these are set,
-\fBpcre2grep\fP looks for GREP_COLOUR or GREP_COLOR. The value of the variable
-should be a string of two numbers, separated by a semicolon. They are copied
-directly into the control string for setting colour on a terminal, so it is
-your responsibility to ensure that they make sense. If neither of the
-environment variables is set, the default is "1;31", which gives red.
+The colour that is used can be specified by setting one of the environment
+variables PCRE2GREP_COLOUR, PCRE2GREP_COLOR, PCREGREP_COLOUR, or
+PCREGREP_COLOR, which are checked in that order. If none of these are set,
+\fBpcre2grep\fP looks for GREP_COLORS or GREP_COLOR (in that order). The value
+of the variable should be a string of two numbers, separated by a semicolon, 
+except in the case of GREP_COLORS, which must start with "ms=" or "mt="
+followed by two semicolon-separated colours, terminated by the end of the
+string or by a colon. If GREP_COLORS does not start with "ms=" or "mt=" it is 
+ignored, and GREP_COLOR is checked.
+.sp
+If the string obtained from one of the above variables contains any characters
+other than semicolon or digits, the setting is ignored and the default colour 
+is used. The string is copied directly into the control string for setting
+colour on a terminal, so it is your responsibility to ensure that the values
+make sense. If no relevant environment variable is set, the default is "1;31",
+which gives red.
 .TP
 \fB-D\fP \fIaction\fP, \fB--devices=\fP\fIaction\fP
 If an input path is not a regular file or a directory, "action" specifies how
@@ -688,12 +697,12 @@ character. Otherwise \fBpcre2grep\fP will assume that it has no data.
 .SH "CALLING EXTERNAL SCRIPTS"
 .rs
 .sp
-On non-Windows systems, \fBpcre2grep\fP has, by default, support for calling
-external programs or scripts during matching by making use of PCRE2's callout
-facility. However, this support can be disabled when \fBpcre2grep\fP is built.
-You can find out whether your binary has support for callouts by running it
-with the \fB--help\fP option. If the support is not enabled, all callouts in
-patterns are ignored by \fBpcre2grep\fP.
+\fBpcre2grep\fP has, by default, support for calling external programs or
+scripts during matching by making use of PCRE2's callout facility. However,
+this support can be disabled when \fBpcre2grep\fP is built. You can find out
+whether your binary has support for callouts by running it with the \fB--help\fP
+option. If the support is not enabled, all callouts in patterns are ignored by
+\fBpcre2grep\fP.
 .P
 A callout in a PCRE2 pattern is of the form (?C<arg>) where the argument is
 either a number or a quoted string (see the
@@ -784,6 +793,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 31 October 2016
+Last updated: 31 December 2016
 Copyright (c) 1997-2016 University of Cambridge.
 .fi

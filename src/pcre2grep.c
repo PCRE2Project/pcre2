@@ -58,13 +58,21 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#if defined(_WIN32) || defined(WIN32)
+#if (defined _WIN32 || (defined HAVE_WINDOWS_H && HAVE_WINDOWS_H)) && !defined WIN32
+#define WIN32
+#endif
+
+#ifdef WIN32
 #include <io.h>                /* For _setmode() */
 #include <fcntl.h>             /* For _O_BINARY */
 #endif
 
 #ifdef SUPPORT_PCRE2GREP_CALLOUT
+#ifdef WIN32
+#include <process.h>
+#else
 #include <sys/wait.h>
+#endif
 #endif
 
 #ifdef HAVE_UNISTD_H
@@ -135,7 +143,7 @@ convert \r\n at the ends of output lines to \r\r\n. However, that means that
 any messages written to stdout must have \r\n as their line terminator. This is
 handled by using STDOUT_NL as the newline string. */
 
-#if defined(_WIN32) || defined(WIN32)
+#ifdef WIN32
 #define STDOUT_NL  "\r\n"
 #else
 #define STDOUT_NL  "\n"
@@ -158,14 +166,14 @@ static const char *jfriedl_prefix = "";
 static const char *jfriedl_postfix = "";
 #endif
 
-static const char *colour_string = (char *)"1;31";
+static const char *colour_string = "1;31";
 static const char *colour_option = NULL;
 static const char *dee_option = NULL;
 static const char *DEE_option = NULL;
 static const char *locale = NULL;
 static const char *newline_arg = NULL;
-static const char *om_separator = (char *)"";
-static const char *stdin_name = (char *)"(standard input)";
+static const char *om_separator = "";
+static const char *stdin_name = "(standard input)";
 
 static char *main_buffer = NULL;
 
@@ -180,7 +188,7 @@ static int endlinetype;
 static int total_count = 0;
 static int counts_printed = 0;
 
-#if defined HAVE_WINDOWS_H && HAVE_WINDOWS_H
+#ifdef WIN32
 static int dee_action = dee_SKIP;
 #else
 static int dee_action = dee_READ;
@@ -209,6 +217,9 @@ static PCRE2_SIZE *offsets;
 
 static BOOL count_only = FALSE;
 static BOOL do_colour = FALSE;
+#ifdef WIN32
+static BOOL do_ansi = FALSE;
+#endif
 static BOOL file_offsets = FALSE;
 static BOOL hyphenpending = FALSE;
 static BOOL invert = FALSE;
@@ -463,6 +474,34 @@ return 0;
 }
 
 
+/*************************************************
+*         Parse GREP_COLORS                      *
+*************************************************/
+
+/* Extract ms or mt from GREP_COLORS.
+
+Argument:  the string, possibly NULL
+Returns:   the value of ms or mt, or NULL if neither present
+*/
+
+static char *
+parse_grep_colors(const char *gc)
+{
+static char seq[16];
+char *col;
+uint32_t len;
+if (gc == NULL) return NULL;
+col = strstr(gc, "ms=");
+if (col == NULL) col = strstr(gc, "mt=");
+if (col == NULL) return NULL;
+len = 0;
+col += 3;
+while (*col != ':' && *col != 0 && len < sizeof(seq)-1)
+  seq[len++] = *col++;
+seq[len] = 0;
+return seq;
+}
+
 
 /*************************************************
 *         Exit from the program                  *
@@ -691,6 +730,7 @@ return isatty(fileno(f));
 static void
 print_match(const char* buf, int length)
 {
+if (length == 0) return;
 if (do_colour) fprintf(stdout, "%c[%sm", 0x1b, colour_string);
 FWRITE(buf, 1, length, stdout);
 if (do_colour) fprintf(stdout, "%c[0m", 0x1b);
@@ -704,11 +744,9 @@ if (do_colour) fprintf(stdout, "%c[0m", 0x1b);
 /* I (Philip Hazel) have no means of testing this code. It was contributed by
 Lionel Fourquaux. David Burgess added a patch to define INVALID_FILE_ATTRIBUTES
 when it did not exist. David Byron added a patch that moved the #include of
-<windows.h> to before the INVALID_FILE_ATTRIBUTES definition rather than after.
-The double test below stops gcc 4.4.4 grumbling that HAVE_WINDOWS_H is
-undefined when it is indeed undefined. */
+<windows.h> to before the INVALID_FILE_ATTRIBUTES definition rather than after. */
 
-#elif defined HAVE_WINDOWS_H && HAVE_WINDOWS_H
+#elif defined WIN32
 
 #ifndef STRICT
 # define STRICT
@@ -722,6 +760,11 @@ undefined when it is indeed undefined. */
 #ifndef INVALID_FILE_ATTRIBUTES
 #define INVALID_FILE_ATTRIBUTES 0xFFFFFFFF
 #endif
+
+/* Allow opendirectory to provide globbing, since Microsoft started doing it
+wrong (expanding quoted arguments). */
+
+#define iswild(name) (strpbrk(name, "*?") != NULL)
 
 typedef struct directory_type
 {
@@ -757,7 +800,10 @@ if ((pattern == NULL) || (dir == NULL))
   pcre2grep_exit(2);
   }
 memcpy(pattern, filename, len);
-memcpy(&(pattern[len]), "\\*", 3);
+if (iswild(filename))
+  pattern[len] = 0;
+else
+  memcpy(&(pattern[len]), "\\*", 3);
 dir->handle = FindFirstFile(pattern, &(dir->data));
 if (dir->handle != INVALID_HANDLE_VALUE)
   {
@@ -815,18 +861,16 @@ return !isdirectory(filename);
 
 /************* Test for a terminal in Windows **********/
 
-/* I don't know how to do this; assume never */
-
 static BOOL
 is_stdout_tty(void)
 {
-return FALSE;
+return _isatty(_fileno(stdout));
 }
 
 static BOOL
 is_file_tty(FILE *f)
 {
-return FALSE;
+return _isatty(_fileno(f));
 }
 
 
@@ -839,24 +883,35 @@ static WORD match_colour;
 static void
 print_match(const char* buf, int length)
 {
-if (do_colour) SetConsoleTextAttribute(hstdout, match_colour);
+if (length == 0) return;
+if (do_colour)
+  {
+  if (do_ansi) fprintf(stdout, "%c[%sm", 0x1b, colour_string);
+    else SetConsoleTextAttribute(hstdout, match_colour);
+  }
 FWRITE(buf, 1, length, stdout);
-if (do_colour) SetConsoleTextAttribute(hstdout, csbi.wAttributes);
+if (do_colour)
+  {
+  if (do_ansi) fprintf(stdout, "%c[00m", 0x1b);
+    else SetConsoleTextAttribute(hstdout, csbi.wAttributes);
+  }
 }
 
 /* Convert ANSI BGR format to RGB used by Windows */
 #define BGR_RGB(x) ((x & 1 ? 4 : 0) | (x & 2) | (x & 4 ? 1 : 0))
 
 static WORD
-decode_ANSI_colour(char *cs)
+decode_ANSI_colour(const char *cs)
 {
-WORD result = 0;
+WORD result = csbi.wAttributes;
 while (*cs)
   {
   if (isdigit(*cs))
     {
     int code = atoi(cs);
     if (code == 1) result |= 0x08;
+    else if (code == 4) result |= 0x8000;
+    else if (code == 5) result |= 0x80;
     else if (code >= 30 && code <= 37) result = (result & 0xF8) | BGR_RGB(code - 30);
     else if (code == 39) result = (result & 0xF0) | (csbi.wAttributes & 0x0F);
     else if (code >= 40 && code <= 47) result = (result & 0x8F) | (BGR_RGB(code - 40) << 4);
@@ -880,8 +935,14 @@ init_colour_output()
 if (do_colour)
   {
   hstdout = GetStdHandle(STD_OUTPUT_HANDLE);
-  GetConsoleScreenBufferInfo(hstdout, &csbi);
-
+  /* This fails when redirected to con; try again if so. */
+  if (!GetConsoleScreenBufferInfo(hstdout, &csbi) && !do_ansi)
+    {
+    HANDLE hcon = CreateFile("CONOUT$", GENERIC_READ | GENERIC_WRITE,
+      FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL);
+    GetConsoleScreenBufferInfo(hcon, &csbi);
+    CloseHandle(hcon);
+    }
   match_colour = decode_ANSI_colour(colour_string);
   /* No valid colour found - turn off colouring */
   if (!match_colour) do_colour = FALSE;
@@ -925,6 +986,16 @@ static BOOL
 is_file_tty(FILE *f)
 {
 return FALSE;
+}
+
+
+/************* Print optionally coloured match when we can't do it **********/
+
+static void
+print_match(const char* buf, int length)
+{
+if (length == 0) return;
+FWRITE(buf, 1, length, stdout);
 }
 
 #endif  /* End of system-specific functions */
@@ -1637,7 +1708,9 @@ char *args;
 char *argsptr;
 char **argsvector;
 char **argsvectorptr;
+#ifndef WIN32
 pid_t pid;
+#endif
 int result = 0;
 
 (void)unused;   /* Avoid compiler warning */
@@ -1825,6 +1898,9 @@ while (length > 0)
 *argsptr++ = '\0';
 *argsvectorptr = NULL;
 
+#ifdef WIN32
+result = _spawnvp(_P_WAIT, argsvector[0], (const char * const *)argsvector);
+#else
 pid = fork();
 
 if (pid == 0)
@@ -1835,6 +1911,7 @@ if (pid == 0)
   }
 else if (pid > 0)
   (void)waitpid(pid, &result, 0);
+#endif
 
 free(args);
 free(argsvector);
@@ -2635,6 +2712,36 @@ if (isdirectory(pathname))
     }
   }
 
+#ifdef WIN32
+if (iswild(pathname))
+  {
+  char buffer[1024];
+  char *nextfile;
+  char *name;
+  directory_type *dir = opendirectory(pathname);
+
+  if (dir == NULL)
+    return 0;
+
+  for (nextfile = name = pathname; *nextfile != 0; nextfile++)
+    if (*nextfile == '/' || *nextfile == '\\')
+      name = nextfile + 1;
+  *name = 0;
+
+  while ((nextfile = readdirectory(dir)) != NULL)
+    {
+    int frc;
+    sprintf(buffer, "%.512s%.128s", pathname, nextfile);
+    frc = grep_or_recurse(buffer, dir_recurse, FALSE);
+    if (frc > 1) rc = frc;
+     else if (frc == 0 && rc == 1) rc = 0;
+    }
+
+  closedirectory(dir);
+  return rc;
+  }
+#endif
+
 #if defined NATIVE_ZOS
  }
 #endif
@@ -3057,7 +3164,7 @@ change from ....\r\n to ....\r\r\n, which is not right. We therefore ensure
 that stdout is a binary stream. Note that this means all other output to stdout
 must use STDOUT_NL to terminate lines. */
 
-#if defined(_WIN32) || defined(WIN32)
+#ifdef WIN32
 _setmode( _fileno(stdout), _O_BINARY);
 #endif
 
@@ -3281,7 +3388,7 @@ for (i = 1; i < argc; i++)
     switch (op->one_char)
       {
       case N_COLOUR:
-      colour_option = (char *)"auto";
+      colour_option = "auto";
       break;
 
       case 'o':
@@ -3446,17 +3553,16 @@ if (locale != NULL)
   pcre2_set_character_tables(compile_context, character_tables);
   }
 
-/* Sort out colouring. On non-Windows systems "auto" causes colouring only if
-the output is a terminal. On Windows systems "auto" is the same as "always". */
+/* Sort out colouring */
 
 if (colour_option != NULL && strcmp(colour_option, "never") != 0)
   {
-  if (strcmp(colour_option, "always") == 0) do_colour = TRUE;
-#if defined(_WIN32) || defined(WIN32)
-  else if (strcmp(colour_option, "auto") == 0) do_colour = TRUE;
-#else
-  else if (strcmp(colour_option, "auto") == 0) do_colour = is_stdout_tty();
+  if (strcmp(colour_option, "always") == 0)
+#ifdef WIN32
+    do_ansi = !is_stdout_tty(),
 #endif
+    do_colour = TRUE;
+  else if (strcmp(colour_option, "auto") == 0) do_colour = is_stdout_tty();
   else
     {
     fprintf(stderr, "pcre2grep: Unknown colour setting \"%s\"\n",
@@ -3467,10 +3573,15 @@ if (colour_option != NULL && strcmp(colour_option, "never") != 0)
     {
     char *cs = getenv("PCRE2GREP_COLOUR");
     if (cs == NULL) cs = getenv("PCRE2GREP_COLOR");
-    if (cs == NULL) cs = getenv("GREP_COLOUR");
+    if (cs == NULL) cs = getenv("PCREGREP_COLOUR");
+    if (cs == NULL) cs = getenv("PCREGREP_COLOR");
+    if (cs == NULL) cs = parse_grep_colors(getenv("GREP_COLORS"));
     if (cs == NULL) cs = getenv("GREP_COLOR");
-    if (cs != NULL) colour_string = cs;
-#if defined HAVE_WINDOWS_H && HAVE_WINDOWS_H
+    if (cs != NULL) 
+      {
+      if (strspn(cs, ";0123456789") == strlen(cs)) colour_string = cs;
+      } 
+#ifdef WIN32
     init_colour_output();
 #endif
     }
