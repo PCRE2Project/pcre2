@@ -281,6 +281,9 @@ Now such patterns are no longer completely auto-possessified.
 
 44. Added a new Windows script RunGrepTest.bat, courtesy of Jason Hood.
 
+45. Minor cosmetic fix to pcre2test: move a variable that is not used under 
+Windows into the "not Windows" code.
+
 
 Version 10.22 29-July-2016
 --------------------------

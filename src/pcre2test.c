@@ -7293,7 +7293,6 @@ main(int argc, char **argv)
 {
 uint32_t yield = 0;
 uint32_t op = 1;
-uint32_t stack_size;
 BOOL notdone = TRUE;
 BOOL quiet = FALSE;
 BOOL showtotaltimes = FALSE;
@@ -7426,6 +7425,7 @@ while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
     exit(1);
 #else
     int rc;
+    uint32_t stack_size;
     struct rlimit rlim;
     if (U32OVERFLOW(uli))
       {
