@@ -277,6 +277,8 @@ overly-complicated patterns and not spend too much time auto-possessifying was
 being reset too often, resulting in very long compile times for some patterns.
 Now such patterns are no longer completely auto-possessified.
 
+43. Applied Jason Hood's revised patch for RunTest.bat.
+
 
 Version 10.22 29-July-2016
 --------------------------

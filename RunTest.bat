@@ -245,8 +245,6 @@ if [%3] == [] (
 
 if %1 == 8 (
   set outnum=8-%bits%-%link_size%
-) else if %1 == 22 (
-  set outnum=22-%bits%
 ) else (
   set outnum=%1
 )
@@ -264,6 +262,8 @@ if errorlevel 1 (
   echo.            %pcre2test% %mode% %4 %5 %6 %7 %8 %9 %srcdir%\testdata\%testinput% ^>%2%bits%\%testoutput%
   set failed="yes"
   goto :eof
+) else if [%1]==[2] (
+  %pcre2test% %mode% %4 %5 %6 %7 %8 %9 -error -63,-62,-2,-1,0,100,188,189,190,191 >>%2%bits%\%testoutput%
 )
 
 set type=
