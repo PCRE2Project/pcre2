@@ -562,17 +562,17 @@ endif # WITH_GCOV
 
 ## The main library tests. Each test is a binary plus a script that runs that
 ## binary in various ways. We install these test binaries in case folks find it
-## helpful.
+## helpful. The two .bat files are for running the tests under Windows.
 
 TESTS += RunTest
-dist_noinst_SCRIPTS += RunTest
-
 EXTRA_DIST += RunTest.bat
+dist_noinst_SCRIPTS += RunTest
 
 ## When the 8-bit library is configured, pcre2grep will have been built.
 
 if WITH_PCRE2_8
 TESTS += RunGrepTest
+EXTRA_DIST += RunGrepTest.bat
 dist_noinst_SCRIPTS += RunGrepTest
 endif # WITH_PCRE2_8
 

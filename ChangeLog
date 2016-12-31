@@ -279,6 +279,8 @@ Now such patterns are no longer completely auto-possessified.
 
 43. Applied Jason Hood's revised patch for RunTest.bat.
 
+44. Added a new Windows script RunGrepTest.bat, courtesy of Jason Hood.
+
 
 Version 10.22 29-July-2016
 --------------------------
