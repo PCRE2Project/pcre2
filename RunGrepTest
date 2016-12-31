@@ -11,7 +11,8 @@ export LC_ALL
 
 # Remove any non-default colouring and aliases that the caller may have set.
 
-unset PCRE2GREP_COLOUR PCRE2GREP_COLOR GREP_COLOUR GREP_COLOR
+unset PCRE2GREP_COLOUR PCRE2GREP_COLOR PCREGREP_COLOUR PCREGREP_COLOR
+unset GREP_COLOR GREP_COLORS
 unset cp ls mv rm
 
 # Remember the current (build) directory, set the program to be tested, and
