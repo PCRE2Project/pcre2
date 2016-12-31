@@ -272,6 +272,11 @@ to return PCRE2_ERROR_CALLOUT from a callout.
 41. A minor change to pcre2grep: colour reset is now "<esc>[0m" instead of 
 "<esc>[00m".
 
+42. The limit in the auto-possessification code that was intended to catch 
+overly-complicated patterns and not spend too much time auto-possessifying was 
+being reset too often, resulting in very long compile times for some patterns.
+Now such patterns are no longer completely auto-possessified.
+
 
 Version 10.22 29-July-2016
 --------------------------

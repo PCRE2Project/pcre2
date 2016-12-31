@@ -380,4 +380,11 @@ Subject length lower bound = 1
   1   ^^    
 No match
 
+# This test breaks the JIT stack limit 
+
+/(|]+){2,2452}/
+    (|]+){2,2452}
+ 0: 
+ 1: 
+
 # End of testinput15

@@ -1046,8 +1046,10 @@ but some compilers complain about an unreachable statement. */
 
 /* Replaces single character iterations with their possessive alternatives
 if appropriate. This function modifies the compiled opcode! Hitting a
-non-existant opcode may indicate a bug in PCRE2, but it can also be caused if a
-bad UTF string was compiled with PCRE2_NO_UTF_CHECK.
+non-existent opcode may indicate a bug in PCRE2, but it can also be caused if a
+bad UTF string was compiled with PCRE2_NO_UTF_CHECK. The rec_limit catches 
+overly complicated or large patterns. In these cases, the check just stops, 
+leaving the remainder of the pattern unpossessified.
 
 Arguments:
   code        points to start of the byte code
@@ -1065,7 +1067,7 @@ PCRE2_UCHAR c;
 PCRE2_SPTR end;
 PCRE2_UCHAR *repeat_opcode;
 uint32_t list[8];
-int rec_limit;
+int rec_limit = 10000;
 
 for (;;)
   {
@@ -1080,7 +1082,6 @@ for (;;)
       get_chr_property_list(code, utf, cb->fcc, list) : NULL;
     list[1] = c == OP_STAR || c == OP_PLUS || c == OP_QUERY || c == OP_UPTO;
 
-    rec_limit = 1000;
     if (end != NULL && compare_opcodes(end, utf, cb, list, end, &rec_limit))
       {
       switch(c)
@@ -1137,7 +1138,6 @@ for (;;)
 
       list[1] = (c & 1) == 0;
 
-      rec_limit = 1000;
       if (compare_opcodes(end, utf, cb, list, end, &rec_limit))
         {
         switch (c)
