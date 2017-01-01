@@ -892,7 +892,7 @@ if (do_colour)
 FWRITE(buf, 1, length, stdout);
 if (do_colour)
   {
-  if (do_ansi) fprintf(stdout, "%c[00m", 0x1b);
+  if (do_ansi) fprintf(stdout, "%c[0m", 0x1b);
     else SetConsoleTextAttribute(hstdout, csbi.wAttributes);
   }
 }
