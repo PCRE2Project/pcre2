@@ -65,28 +65,6 @@ static sljit_u8* generate_far_jump_code(struct sljit_jump *jump, sljit_u8 *code_
 	return code_ptr;
 }
 
-static sljit_u8* generate_fixed_jump(sljit_u8 *code_ptr, sljit_sw addr, sljit_s32 type)
-{
-	sljit_sw delta = addr - ((sljit_sw)code_ptr + 1 + sizeof(sljit_s32));
-
-	if (delta <= HALFWORD_MAX && delta >= HALFWORD_MIN) {
-		*code_ptr++ = (type == 2) ? CALL_i32 : JMP_i32;
-		sljit_unaligned_store_sw(code_ptr, delta);
-	}
-	else {
-		SLJIT_COMPILE_ASSERT(reg_map[TMP_REG3] == 9, tmp3_is_9_second);
-		*code_ptr++ = REX_W | REX_B;
-		*code_ptr++ = MOV_r_i32 + 1;
-		sljit_unaligned_store_sw(code_ptr, addr);
-		code_ptr += sizeof(sljit_sw);
-		*code_ptr++ = REX_B;
-		*code_ptr++ = GROUP_FF;
-		*code_ptr++ = (type == 2) ? (MOD_REG | CALL_rm | 1) : (MOD_REG | JMP_rm | 1);
-	}
-
-	return code_ptr;
-}
-
 SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_enter(struct sljit_compiler *compiler,
 	sljit_s32 options, sljit_s32 args, sljit_s32 scratches, sljit_s32 saveds,
 	sljit_s32 fscratches, sljit_s32 fsaveds, sljit_s32 local_size)

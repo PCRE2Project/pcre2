@@ -415,7 +415,6 @@ SLJIT_API_FUNC_ATTRIBUTE void* sljit_generate_code(struct sljit_compiler *compil
 
 	compiler->error = SLJIT_ERR_COMPILED;
 	compiler->executable_size = (code_ptr - code) * sizeof(sljit_u16);
-	SLJIT_ENABLE_EXEC(code, code_ptr);
 	SLJIT_CACHE_FLUSH(code, code_ptr);
 	/* Set thumb mode flag. */
 	return (void*)((sljit_uw)code | 0x1);

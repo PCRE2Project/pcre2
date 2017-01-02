@@ -547,10 +547,10 @@ SLJIT_API_FUNC_ATTRIBUTE void sljit_free_unused_memory_exec(void);
 #define SLJIT_FREE_EXEC(ptr) sljit_free_exec(ptr)
 
 #if (defined SLJIT_PROT_EXECUTABLE_ALLOCATOR && SLJIT_PROT_EXECUTABLE_ALLOCATOR)
-SLJIT_API_FUNC_ATTRIBUTE void sljit_enable_exec(void* from, void *to);
-#define SLJIT_ENABLE_EXEC(from, to) sljit_enable_exec((from), (to))
+SLJIT_API_FUNC_ATTRIBUTE sljit_sw sljit_exec_offset(void* ptr);
+#define SLJIT_EXEC_OFFSET(ptr) sljit_exec_offset(ptr)
 #else
-#define SLJIT_ENABLE_EXEC(from, to)
+#define SLJIT_EXEC_OFFSET(ptr) 0
 #endif
 
 #endif
