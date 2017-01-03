@@ -4659,7 +4659,7 @@ for (;; pptr++)
 
   meta = META_CODE(*pptr);
   meta_arg = META_DATA(*pptr);
-
+  
   /* If we are in the pre-compile phase, accumulate the length used for the
   previous cycle of this loop, unless the next item is a quantifier. */
 
@@ -4693,6 +4693,11 @@ for (;; pptr++)
         return 0;
         }
       *lengthptr += (PCRE2_SIZE)(code - orig_code);
+      if (*lengthptr > MAX_PATTERN_SIZE)
+        {
+        *errorcodeptr = ERR20;   /* Pattern is too large */
+        return 0;
+        }
       code = orig_code;
       }
 
@@ -7334,7 +7339,6 @@ for (;;)
         }
       *lengthptr += length;
       }
-// if (lengthptr == NULL) fprintf(stderr, "~~group returns %d\n", okreturn);
     return okreturn;
     }
 
@@ -9074,6 +9078,8 @@ code = cworkspace;
    &firstcuflags, &reqcu, &reqcuflags, NULL, &cb, &length);
 
 if (errorcode != 0) goto HAD_CB_ERROR;  /* Offset is in cb.erroroffset */
+
+/* This should be caught in compile_regex(), but just in case... */
 
 if (length > MAX_PATTERN_SIZE)
   {

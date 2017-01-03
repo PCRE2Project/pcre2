@@ -306,6 +306,9 @@ In addition, colour settings containing anything other than digits and
 semicolon are ignored, and the colour controls are no longer output for empty 
 strings.
 
+47. Detecting patterns that are too large inside the length-measuring loop
+saves processing ridiculously long patterns to their end.
+
 
 Version 10.22 29-July-2016
 --------------------------
