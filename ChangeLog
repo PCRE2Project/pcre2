@@ -309,6 +309,11 @@ strings.
 47. Detecting patterns that are too large inside the length-measuring loop
 saves processing ridiculously long patterns to their end.
 
+48. Ignore PCRE2_CASELESS when processing \h, \H, \v, and \V in classes as it 
+just wastes time. In the UTF case it can also produce redundant entries in
+XCLASS lists caused by characters with multiple other cases and pairs of
+characters in the same "not-x" sublists.
+
 
 Version 10.22 29-July-2016
 --------------------------

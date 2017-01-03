@@ -117,7 +117,7 @@ them will be able to (i.e. assume a 64-bit world). */
 /* Function definitions to allow mutual recursion */
 
 static unsigned int
-  add_list_to_class(uint8_t *, PCRE2_UCHAR **, uint32_t, compile_block *,
+  add_list_to_class_internal(uint8_t *, PCRE2_UCHAR **, uint32_t, compile_block *,
     const uint32_t *, unsigned int);
 
 static int
@@ -4219,13 +4219,15 @@ return 0;
 
 
 /*************************************************
-*        Add a character or range to a class     *
+* Add a character or range to a class (internal) *
 *************************************************/
 
 /* This function packages up the logic of adding a character or range of
 characters to a class. The character values in the arguments will be within the
-valid values for the current mode (8-bit, 16-bit, UTF, etc). This function is
-mutually recursive with the function immediately below.
+valid values for the current mode (8-bit, 16-bit, UTF, etc). This function is 
+called only from within the "add to class" group of functions, some of which 
+are recursive and mutually recursive. The external entry point is 
+add_to_class(). 
 
 Arguments:
   classbits     the bit map for characters < 256
@@ -4240,8 +4242,8 @@ Returns:        the number of < 256 characters added
 */
 
 static unsigned int
-add_to_class(uint8_t *classbits, PCRE2_UCHAR **uchardptr, uint32_t options,
-  compile_block *cb, uint32_t start, uint32_t end)
+add_to_class_internal(uint8_t *classbits, PCRE2_UCHAR **uchardptr, 
+  uint32_t options, compile_block *cb, uint32_t start, uint32_t end)
 {
 uint32_t c;
 uint32_t classbits_end = (end <= 0xff ? end : 0xff);
@@ -4267,12 +4269,12 @@ if ((options & PCRE2_CASELESS) != 0)
       {
       /* Handle a single character that has more than one other case. */
 
-      if (rc > 0) n8 += add_list_to_class(classbits, uchardptr, options, cb,
+      if (rc > 0) n8 += add_list_to_class_internal(classbits, uchardptr, options, cb,
         PRIV(ucd_caseless_sets) + rc, oc);
 
       /* Do nothing if the other case range is within the original range. */
 
-      else if (oc >= start && od <= end) continue;
+      else if (oc >= cb->class_range_start && od <= cb->class_range_end) continue;
 
       /* Extend the original range if there is overlap, noting that if oc < c, we
       can't have od > end because a subrange is always shorter than the basic
@@ -4284,7 +4286,7 @@ if ((options & PCRE2_CASELESS) != 0)
         end = od;       /* Extend upwards */
         if (end > classbits_end) classbits_end = (end <= 0xff ? end : 0xff);
         }
-      else n8 += add_to_class(classbits, uchardptr, options, cb, oc, od);
+      else n8 += add_to_class_internal(classbits, uchardptr, options, cb, oc, od);
       }
     }
   else
@@ -4299,12 +4301,14 @@ if ((options & PCRE2_CASELESS) != 0)
     }
   }
 
-/* Now handle the original range. Adjust the final value according to the bit
-length - this means that the same lists of (e.g.) horizontal spaces can be used
-in all cases. */
+/* Now handle the originally supplied range. Adjust the final value according
+to the bit length - this means that the same lists of (e.g.) horizontal spaces
+can be used in all cases. */
 
 if ((options & PCRE2_UTF) == 0 && end > MAX_NON_UTF_CHAR)
   end = MAX_NON_UTF_CHAR;
+  
+if (start > cb->class_range_start && end < cb->class_range_end) return n8;
 
 /* Use the bitmap for characters < 256. Otherwise use extra data.*/
 
@@ -4357,10 +4361,10 @@ if (end >= start)
     *uchardata++ = XCL_SINGLE;
     *uchardata++ = start;
     }
-#endif
+#endif  /* PCRE2_CODE_UNIT_WIDTH == 8 */
   *uchardptr = uchardata;   /* Updata extra data pointer */
   }
-#else
+#else  /* SUPPORT_WIDE_CHARS */
   (void)uchardptr;          /* Avoid compiler warning */
 #endif /* SUPPORT_WIDE_CHARS */
 
@@ -4370,14 +4374,85 @@ return n8;    /* Number of 8-bit characters */
 
 
 /*************************************************
-*        Add a list of characters to a class     *
+* Add a list of characters to a class (internal) *
 *************************************************/
 
 /* This function is used for adding a list of case-equivalent characters to a
 class, and also for adding a list of horizontal or vertical whitespace. If the
 list is in order (which it should be), ranges of characters are detected and
-handled appropriately. This function is mutually recursive with the function
-above.
+handled appropriately. This function is called (sometimes recursively) only 
+from within the "add to class" set of functions. The external entry point is 
+add_list_to_class().
+
+Arguments:
+  classbits     the bit map for characters < 256
+  uchardptr     points to the pointer for extra data
+  options       the options word
+  cb            contains pointers to tables etc.
+  p             points to row of 32-bit values, terminated by NOTACHAR
+  except        character to omit; this is used when adding lists of
+                  case-equivalent characters to avoid including the one we
+                  already know about
+
+Returns:        the number of < 256 characters added
+                the pointer to extra data is updated
+*/
+
+static unsigned int
+add_list_to_class_internal(uint8_t *classbits, PCRE2_UCHAR **uchardptr, 
+  uint32_t options, compile_block *cb, const uint32_t *p, unsigned int except)
+{
+unsigned int n8 = 0;
+while (p[0] < NOTACHAR)
+  {
+  unsigned int n = 0;
+  if (p[0] != except)
+    {
+    while(p[n+1] == p[0] + n + 1) n++;
+    n8 += add_to_class_internal(classbits, uchardptr, options, cb, p[0], p[n]);
+    }
+  p += n + 1;
+  }
+return n8;
+}
+
+
+
+/*************************************************
+*   External entry point for add range to class  *
+*************************************************/
+
+/* This function sets the overall range so that the internal functions can try 
+to avoid duplication when handling case-independence.
+
+Arguments:
+  classbits     the bit map for characters < 256
+  uchardptr     points to the pointer for extra data
+  options       the options word
+  cb            compile data
+  start         start of range character
+  end           end of range character
+
+Returns:        the number of < 256 characters added
+                the pointer to extra data is updated
+*/
+
+static unsigned int
+add_to_class(uint8_t *classbits, PCRE2_UCHAR **uchardptr, uint32_t options,
+  compile_block *cb, uint32_t start, uint32_t end)
+{
+cb->class_range_start = start;
+cb->class_range_end = end;
+return add_to_class_internal(classbits, uchardptr, options, cb, start, end);
+}
+
+
+/*************************************************
+*   External entry point for add list to class   *
+*************************************************/
+
+/* This function sets the overall range so that the internal functions can try 
+to avoid duplication when handling case-independence.
 
 Arguments:
   classbits     the bit map for characters < 256
@@ -4404,7 +4479,9 @@ while (p[0] < NOTACHAR)
   if (p[0] != except)
     {
     while(p[n+1] == p[0] + n + 1) n++;
-    n8 += add_to_class(classbits, uchardptr, options, cb, p[0], p[n]);
+    cb->class_range_start = p[0];
+    cb->class_range_end = p[n];  
+    n8 += add_to_class_internal(classbits, uchardptr, options, cb, p[0], p[n]);
     }
   p += n + 1;
   }
@@ -5071,25 +5148,31 @@ for (;; pptr++)
           should_flip_negation = TRUE;
           for (i = 0; i < 32; i++) classbits[i] |= ~cbits[i+cbit_space];
           break;
+          
+          /* When adding the horizontal or vertical space lists to a class, or 
+          their complements, disable PCRE2_CASELESS, because it justs wastes 
+          time, and in the "not-x" UTF cases can create unwanted duplicates in 
+          the XCLASS list (provoked by characters that have more than one other 
+          case and by both cases being in the same "not-x" sublist). */
 
           case ESC_h:
-          (void)add_list_to_class(classbits, &class_uchardata, options, cb,
-            PRIV(hspace_list), NOTACHAR);
+          (void)add_list_to_class(classbits, &class_uchardata, 
+            options & ~PCRE2_CASELESS, cb, PRIV(hspace_list), NOTACHAR);
           break;
 
           case ESC_H:
-          (void)add_not_list_to_class(classbits, &class_uchardata, options,
-            cb, PRIV(hspace_list));
+          (void)add_not_list_to_class(classbits, &class_uchardata, 
+            options & ~PCRE2_CASELESS, cb, PRIV(hspace_list));
           break;
 
           case ESC_v:
-          (void)add_list_to_class(classbits, &class_uchardata, options, cb,
-            PRIV(vspace_list), NOTACHAR);
+          (void)add_list_to_class(classbits, &class_uchardata, 
+            options & ~PCRE2_CASELESS, cb, PRIV(vspace_list), NOTACHAR);
           break;
 
           case ESC_V:
-          (void)add_not_list_to_class(classbits, &class_uchardata, options,
-            cb, PRIV(vspace_list));
+          (void)add_not_list_to_class(classbits, &class_uchardata, 
+            options & ~PCRE2_CASELESS, cb, PRIV(vspace_list));
           break;
 
           case ESC_p:

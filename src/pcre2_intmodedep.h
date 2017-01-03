@@ -719,6 +719,8 @@ typedef struct compile_block {
   uint32_t backref_map;            /* Bitmap of low back refs */
   uint32_t nltype;                 /* Newline type */
   uint32_t nllen;                  /* Newline string length */
+  uint32_t class_range_start;      /* Overall class range start */
+  uint32_t class_range_end;        /* Overall class range end */  
   PCRE2_UCHAR nl[4];               /* Newline string when fixed length */
   int  max_lookbehind;             /* Maximum lookbehind (characters) */
   int  parens_depth;               /* Depth of nested parentheses */
