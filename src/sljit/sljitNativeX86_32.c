@@ -38,7 +38,7 @@ static sljit_s32 emit_do_imm(struct sljit_compiler *compiler, sljit_u8 opcode, s
 	return SLJIT_SUCCESS;
 }
 
-static sljit_u8* generate_far_jump_code(struct sljit_jump *jump, sljit_u8 *code_ptr, sljit_s32 type)
+static sljit_u8* generate_far_jump_code(struct sljit_jump *jump, sljit_u8 *code_ptr, sljit_s32 type, sljit_sw executable_offset)
 {
 	if (type == SLJIT_JUMP) {
 		*code_ptr++ = JMP_i32;
@@ -57,7 +57,7 @@ static sljit_u8* generate_far_jump_code(struct sljit_jump *jump, sljit_u8 *code_
 	if (jump->flags & JUMP_LABEL)
 		jump->flags |= PATCH_MW;
 	else
-		sljit_unaligned_store_sw(code_ptr, jump->u.target - (jump->addr + 4));
+		sljit_unaligned_store_sw(code_ptr, jump->u.target - (jump->addr + 4) - (sljit_uw)executable_offset);
 	code_ptr += 4;
 
 	return code_ptr;

@@ -389,7 +389,7 @@ static SLJIT_INLINE sljit_s32 emit_imm(struct sljit_compiler *compiler, sljit_s3
 
 #endif
 
-static SLJIT_INLINE sljit_s32 detect_jump_type(struct sljit_jump *jump, sljit_uw *code_ptr, sljit_uw *code)
+static SLJIT_INLINE sljit_s32 detect_jump_type(struct sljit_jump *jump, sljit_uw *code_ptr, sljit_uw *code, sljit_sw executable_offset)
 {
 	sljit_sw diff;
 
@@ -401,7 +401,7 @@ static SLJIT_INLINE sljit_s32 detect_jump_type(struct sljit_jump *jump, sljit_uw
 		code_ptr--;
 
 	if (jump->flags & JUMP_ADDR)
-		diff = ((sljit_sw)jump->u.target - (sljit_sw)(code_ptr + 2));
+		diff = ((sljit_sw)jump->u.target - (sljit_sw)(code_ptr + 2) - executable_offset);
 	else {
 		SLJIT_ASSERT(jump->flags & JUMP_LABEL);
 		diff = ((sljit_sw)(code + jump->u.label->size) - (sljit_sw)(code_ptr + 2));
@@ -426,7 +426,7 @@ static SLJIT_INLINE sljit_s32 detect_jump_type(struct sljit_jump *jump, sljit_uw
 	}
 #else
 	if (jump->flags & JUMP_ADDR)
-		diff = ((sljit_sw)jump->u.target - (sljit_sw)code_ptr);
+		diff = ((sljit_sw)jump->u.target - (sljit_sw)code_ptr - executable_offset);
 	else {
 		SLJIT_ASSERT(jump->flags & JUMP_LABEL);
 		diff = ((sljit_sw)(code + jump->u.label->size) - (sljit_sw)code_ptr);
@@ -446,26 +446,28 @@ static SLJIT_INLINE sljit_s32 detect_jump_type(struct sljit_jump *jump, sljit_uw
 	return 0;
 }
 
-static SLJIT_INLINE void inline_set_jump_addr(sljit_uw addr, sljit_uw new_addr, sljit_s32 flush)
+static SLJIT_INLINE void inline_set_jump_addr(sljit_uw jump_ptr, sljit_sw executable_offset, sljit_uw new_addr, sljit_s32 flush_cache)
 {
 #if (defined SLJIT_CONFIG_ARM_V5 && SLJIT_CONFIG_ARM_V5)
-	sljit_uw *ptr = (sljit_uw*)addr;
-	sljit_uw *inst = (sljit_uw*)ptr[0];
+	sljit_uw *ptr = (sljit_uw *)jump_ptr;
+	sljit_uw *inst = (sljit_uw *)ptr[0];
 	sljit_uw mov_pc = ptr[1];
 	sljit_s32 bl = (mov_pc & 0x0000f000) != RD(TMP_PC);
-	sljit_sw diff = (sljit_sw)(((sljit_sw)new_addr - (sljit_sw)(inst + 2)) >> 2);
+	sljit_sw diff = (sljit_sw)(((sljit_sw)new_addr - (sljit_sw)(inst + 2) - executable_offset) >> 2);
 
 	if (diff <= 0x7fffff && diff >= -0x800000) {
 		/* Turn to branch. */
 		if (!bl) {
 			inst[0] = (mov_pc & COND_MASK) | (B - CONDITIONAL) | (diff & 0xffffff);
-			if (flush) {
+			if (flush_cache) {
+				inst = (sljit_uw *)SLJIT_ADD_EXEC_OFFSET(inst, executable_offset);
 				SLJIT_CACHE_FLUSH(inst, inst + 1);
 			}
 		} else {
 			inst[0] = (mov_pc & COND_MASK) | (BL - CONDITIONAL) | (diff & 0xffffff);
 			inst[1] = NOP;
-			if (flush) {
+			if (flush_cache) {
+				inst = (sljit_uw *)SLJIT_ADD_EXEC_OFFSET(inst, executable_offset);
 				SLJIT_CACHE_FLUSH(inst, inst + 2);
 			}
 		}
@@ -479,12 +481,14 @@ static SLJIT_INLINE void inline_set_jump_addr(sljit_uw addr, sljit_uw new_addr, 
 		if (*inst != mov_pc) {
 			inst[0] = mov_pc;
 			if (!bl) {
-				if (flush) {
+				if (flush_cache) {
+					inst = (sljit_uw *)SLJIT_ADD_EXEC_OFFSET(inst, executable_offset);
 					SLJIT_CACHE_FLUSH(inst, inst + 1);
 				}
 			} else {
 				inst[1] = BLX | RM(TMP_REG1);
-				if (flush) {
+				if (flush_cache) {
+					inst = (sljit_uw *)SLJIT_ADD_EXEC_OFFSET(inst, executable_offset);
 					SLJIT_CACHE_FLUSH(inst, inst + 2);
 				}
 			}
@@ -492,11 +496,12 @@ static SLJIT_INLINE void inline_set_jump_addr(sljit_uw addr, sljit_uw new_addr, 
 		*ptr = new_addr;
 	}
 #else
-	sljit_uw *inst = (sljit_uw*)addr;
+	sljit_uw *inst = (sljit_uw*)jump_ptr;
 	SLJIT_ASSERT((inst[0] & 0xfff00000) == MOVW && (inst[1] & 0xfff00000) == MOVT);
 	inst[0] = MOVW | (inst[0] & 0xf000) | ((new_addr << 4) & 0xf0000) | (new_addr & 0xfff);
 	inst[1] = MOVT | (inst[1] & 0xf000) | ((new_addr >> 12) & 0xf0000) | ((new_addr >> 16) & 0xfff);
-	if (flush) {
+	if (flush_cache) {
+		inst = (sljit_uw *)SLJIT_ADD_EXEC_OFFSET(inst, executable_offset);
 		SLJIT_CACHE_FLUSH(inst, inst + 2);
 	}
 #endif
@@ -504,7 +509,7 @@ static SLJIT_INLINE void inline_set_jump_addr(sljit_uw addr, sljit_uw new_addr, 
 
 static sljit_uw get_imm(sljit_uw imm);
 
-static SLJIT_INLINE void inline_set_const(sljit_uw addr, sljit_sw new_constant, sljit_s32 flush)
+static SLJIT_INLINE void inline_set_const(sljit_uw addr, sljit_sw executable_offset, sljit_sw new_constant, sljit_s32 flush_cache)
 {
 #if (defined SLJIT_CONFIG_ARM_V5 && SLJIT_CONFIG_ARM_V5)
 	sljit_uw *ptr = (sljit_uw*)addr;
@@ -515,7 +520,8 @@ static SLJIT_INLINE void inline_set_const(sljit_uw addr, sljit_sw new_constant, 
 	src2 = get_imm(new_constant);
 	if (src2) {
 		*inst = 0xe3a00000 | (ldr_literal & 0xf000) | src2;
-		if (flush) {
+		if (flush_cache) {
+			inst = (sljit_uw *)SLJIT_ADD_EXEC_OFFSET(inst, executable_offset);
 			SLJIT_CACHE_FLUSH(inst, inst + 1);
 		}
 		return;
@@ -524,7 +530,8 @@ static SLJIT_INLINE void inline_set_const(sljit_uw addr, sljit_sw new_constant, 
 	src2 = get_imm(~new_constant);
 	if (src2) {
 		*inst = 0xe3e00000 | (ldr_literal & 0xf000) | src2;
-		if (flush) {
+		if (flush_cache) {
+			inst = (sljit_uw *)SLJIT_ADD_EXEC_OFFSET(inst, executable_offset);
 			SLJIT_CACHE_FLUSH(inst, inst + 1);
 		}
 		return;
@@ -537,7 +544,8 @@ static SLJIT_INLINE void inline_set_const(sljit_uw addr, sljit_sw new_constant, 
 
 	if (*inst != ldr_literal) {
 		*inst = ldr_literal;
-		if (flush) {
+		if (flush_cache) {
+			inst = (sljit_uw *)SLJIT_ADD_EXEC_OFFSET(inst, executable_offset);
 			SLJIT_CACHE_FLUSH(inst, inst + 1);
 		}
 	}
@@ -547,7 +555,8 @@ static SLJIT_INLINE void inline_set_const(sljit_uw addr, sljit_sw new_constant, 
 	SLJIT_ASSERT((inst[0] & 0xfff00000) == MOVW && (inst[1] & 0xfff00000) == MOVT);
 	inst[0] = MOVW | (inst[0] & 0xf000) | ((new_constant << 4) & 0xf0000) | (new_constant & 0xfff);
 	inst[1] = MOVT | (inst[1] & 0xf000) | ((new_constant >> 12) & 0xf0000) | ((new_constant >> 16) & 0xfff);
-	if (flush) {
+	if (flush_cache) {
+		inst = (sljit_uw *)SLJIT_ADD_EXEC_OFFSET(inst, executable_offset);
 		SLJIT_CACHE_FLUSH(inst, inst + 2);
 	}
 #endif
@@ -562,6 +571,8 @@ SLJIT_API_FUNC_ATTRIBUTE void* sljit_generate_code(struct sljit_compiler *compil
 	sljit_uw *buf_end;
 	sljit_uw size;
 	sljit_uw word_count;
+	sljit_sw executable_offset;
+	sljit_sw jump_addr;
 #if (defined SLJIT_CONFIG_ARM_V5 && SLJIT_CONFIG_ARM_V5)
 	sljit_uw cpool_size;
 	sljit_uw cpool_skip_alignment;
@@ -602,14 +613,14 @@ SLJIT_API_FUNC_ATTRIBUTE void* sljit_generate_code(struct sljit_compiler *compil
 
 	code_ptr = code;
 	word_count = 0;
+	executable_offset = SLJIT_EXEC_OFFSET(code);
 
 	label = compiler->labels;
 	jump = compiler->jumps;
 	const_ = compiler->consts;
 
 	if (label && label->size == 0) {
-		label->addr = (sljit_uw)code;
-		label->size = 0;
+		label->addr = (sljit_uw)SLJIT_ADD_EXEC_OFFSET(code, executable_offset);
 		label = label->next;
 	}
 
@@ -636,7 +647,7 @@ SLJIT_API_FUNC_ATTRIBUTE void* sljit_generate_code(struct sljit_compiler *compil
 						cpool_size = 0;
 						if (label && label->size == word_count) {
 							/* Points after the current instruction. */
-							label->addr = (sljit_uw)code_ptr;
+							label->addr = (sljit_uw)SLJIT_ADD_EXEC_OFFSET(code_ptr, executable_offset);
 							label->size = code_ptr - code;
 							label = label->next;
 						}
@@ -652,19 +663,19 @@ SLJIT_API_FUNC_ATTRIBUTE void* sljit_generate_code(struct sljit_compiler *compil
 				SLJIT_ASSERT(!const_ || const_->addr >= word_count);
 				if (jump && jump->addr == word_count) {
 #if (defined SLJIT_CONFIG_ARM_V5 && SLJIT_CONFIG_ARM_V5)
-					if (detect_jump_type(jump, code_ptr, code))
+					if (detect_jump_type(jump, code_ptr, code, executable_offset))
 						code_ptr--;
 					jump->addr = (sljit_uw)code_ptr;
 #else
 					jump->addr = (sljit_uw)(code_ptr - 2);
-					if (detect_jump_type(jump, code_ptr, code))
+					if (detect_jump_type(jump, code_ptr, code, executable_offset))
 						code_ptr -= 2;
 #endif
 					jump = jump->next;
 				}
 				if (label && label->size == word_count) {
 					/* code_ptr can be affected above. */
-					label->addr = (sljit_uw)(code_ptr + 1);
+					label->addr = (sljit_uw)SLJIT_ADD_EXEC_OFFSET(code_ptr + 1, executable_offset);
 					label->size = (code_ptr + 1) - code;
 					label = label->next;
 				}
@@ -729,17 +740,18 @@ SLJIT_API_FUNC_ATTRIBUTE void* sljit_generate_code(struct sljit_compiler *compil
 
 	jump = compiler->jumps;
 	while (jump) {
-		buf_ptr = (sljit_uw*)jump->addr;
+		buf_ptr = (sljit_uw *)jump->addr;
 
 		if (jump->flags & PATCH_B) {
+			jump_addr = (sljit_sw)SLJIT_ADD_EXEC_OFFSET(buf_ptr + 2, executable_offset);
 			if (!(jump->flags & JUMP_ADDR)) {
 				SLJIT_ASSERT(jump->flags & JUMP_LABEL);
-				SLJIT_ASSERT(((sljit_sw)jump->u.label->addr - (sljit_sw)(buf_ptr + 2)) <= 0x01ffffff && ((sljit_sw)jump->u.label->addr - (sljit_sw)(buf_ptr + 2)) >= -0x02000000);
-				*buf_ptr |= (((sljit_sw)jump->u.label->addr - (sljit_sw)(buf_ptr + 2)) >> 2) & 0x00ffffff;
+				SLJIT_ASSERT(((sljit_sw)jump->u.label->addr - jump_addr) <= 0x01ffffff && ((sljit_sw)jump->u.label->addr - jump_addr) >= -0x02000000);
+				*buf_ptr |= (((sljit_sw)jump->u.label->addr - jump_addr) >> 2) & 0x00ffffff;
 			}
 			else {
-				SLJIT_ASSERT(((sljit_sw)jump->u.target - (sljit_sw)(buf_ptr + 2)) <= 0x01ffffff && ((sljit_sw)jump->u.target - (sljit_sw)(buf_ptr + 2)) >= -0x02000000);
-				*buf_ptr |= (((sljit_sw)jump->u.target - (sljit_sw)(buf_ptr + 2)) >> 2) & 0x00ffffff;
+				SLJIT_ASSERT(((sljit_sw)jump->u.target - jump_addr) <= 0x01ffffff && ((sljit_sw)jump->u.target - jump_addr) >= -0x02000000);
+				*buf_ptr |= (((sljit_sw)jump->u.target - jump_addr) >> 2) & 0x00ffffff;
 			}
 		}
 		else if (jump->flags & SLJIT_REWRITABLE_JUMP) {
@@ -747,10 +759,10 @@ SLJIT_API_FUNC_ATTRIBUTE void* sljit_generate_code(struct sljit_compiler *compil
 			jump->addr = (sljit_uw)code_ptr;
 			code_ptr[0] = (sljit_uw)buf_ptr;
 			code_ptr[1] = *buf_ptr;
-			inline_set_jump_addr((sljit_uw)code_ptr, (jump->flags & JUMP_LABEL) ? jump->u.label->addr : jump->u.target, 0);
+			inline_set_jump_addr((sljit_uw)code_ptr, executable_offset, (jump->flags & JUMP_LABEL) ? jump->u.label->addr : jump->u.target, 0);
 			code_ptr += 2;
 #else
-			inline_set_jump_addr((sljit_uw)buf_ptr, (jump->flags & JUMP_LABEL) ? jump->u.label->addr : jump->u.target, 0);
+			inline_set_jump_addr((sljit_uw)buf_ptr, executable_offset, (jump->flags & JUMP_LABEL) ? jump->u.label->addr : jump->u.target, 0);
 #endif
 		}
 		else {
@@ -763,7 +775,7 @@ SLJIT_API_FUNC_ATTRIBUTE void* sljit_generate_code(struct sljit_compiler *compil
 				buf_ptr += 1;
 			*buf_ptr = (jump->flags & JUMP_LABEL) ? jump->u.label->addr : jump->u.target;
 #else
-			inline_set_jump_addr((sljit_uw)buf_ptr, (jump->flags & JUMP_LABEL) ? jump->u.label->addr : jump->u.target, 0);
+			inline_set_jump_addr((sljit_uw)buf_ptr, executable_offset, (jump->flags & JUMP_LABEL) ? jump->u.label->addr : jump->u.target, 0);
 #endif
 		}
 		jump = jump->next;
@@ -782,7 +794,7 @@ SLJIT_API_FUNC_ATTRIBUTE void* sljit_generate_code(struct sljit_compiler *compil
 		else
 			buf_ptr += 1;
 		/* Set the value again (can be a simple constant). */
-		inline_set_const((sljit_uw)code_ptr, *buf_ptr, 0);
+		inline_set_const((sljit_uw)code_ptr, executable_offset, *buf_ptr, 0);
 		code_ptr += 2;
 
 		const_ = const_->next;
@@ -792,7 +804,12 @@ SLJIT_API_FUNC_ATTRIBUTE void* sljit_generate_code(struct sljit_compiler *compil
 	SLJIT_ASSERT(code_ptr - code <= (sljit_s32)size);
 
 	compiler->error = SLJIT_ERR_COMPILED;
+	compiler->executable_offset = executable_offset;
 	compiler->executable_size = (code_ptr - code) * sizeof(sljit_uw);
+
+	code = (sljit_uw *)SLJIT_ADD_EXEC_OFFSET(code, executable_offset);
+	code_ptr = (sljit_uw *)SLJIT_ADD_EXEC_OFFSET(code_ptr, executable_offset);
+
 	SLJIT_CACHE_FLUSH(code, code_ptr);
 	return code;
 }
@@ -2402,7 +2419,6 @@ SLJIT_API_FUNC_ATTRIBUTE struct sljit_jump* sljit_emit_jump(struct sljit_compile
 	struct sljit_jump *jump;
 
 	CHECK_ERROR_PTR();
-	CHECK_DYN_CODE_MOD(type & SLJIT_REWRITABLE_JUMP);
 	CHECK_PTR(check_sljit_emit_jump(compiler, type));
 
 	jump = (struct sljit_jump*)ensure_abuf(compiler, sizeof(struct sljit_jump));
@@ -2535,7 +2551,6 @@ SLJIT_API_FUNC_ATTRIBUTE struct sljit_const* sljit_emit_const(struct sljit_compi
 	sljit_s32 reg;
 
 	CHECK_ERROR_PTR();
-	CHECK_DYN_CODE_MOD(1);
 	CHECK_PTR(check_sljit_emit_const(compiler, dst, dstw, init_value));
 	ADJUST_LOCAL_OFFSET(dst, dstw);
 
@@ -2557,12 +2572,12 @@ SLJIT_API_FUNC_ATTRIBUTE struct sljit_const* sljit_emit_const(struct sljit_compi
 	return const_;
 }
 
-SLJIT_API_FUNC_ATTRIBUTE void sljit_set_jump_addr(sljit_uw addr, sljit_uw new_addr)
+SLJIT_API_FUNC_ATTRIBUTE void sljit_set_jump_addr(sljit_uw addr, sljit_uw new_target, sljit_sw executable_offset)
 {
-	inline_set_jump_addr(addr, new_addr, 1);
+	inline_set_jump_addr(addr, executable_offset, new_target, 1);
 }
 
-SLJIT_API_FUNC_ATTRIBUTE void sljit_set_const(sljit_uw addr, sljit_sw new_constant)
+SLJIT_API_FUNC_ATTRIBUTE void sljit_set_const(sljit_uw addr, sljit_sw new_constant, sljit_sw executable_offset)
 {
-	inline_set_const(addr, new_constant, 1);
+	inline_set_const(addr, executable_offset, new_constant, 1);
 }

@@ -325,7 +325,9 @@ struct sljit_compiler {
 	sljit_s32 local_size;
 	/* Code size. */
 	sljit_uw size;
-	/* For statistical purposes. */
+	/* Relative offset of the executable mapping from the writable mapping. */
+	sljit_uw executable_offset;
+	/* Executable size for statistical purposes. */
 	sljit_uw executable_size;
 
 #if (defined SLJIT_CONFIG_X86_32 && SLJIT_CONFIG_X86_32)
@@ -457,10 +459,6 @@ SLJIT_API_FUNC_ATTRIBUTE void* sljit_alloc_memory(struct sljit_compiler *compile
 SLJIT_API_FUNC_ATTRIBUTE void sljit_compiler_verbose(struct sljit_compiler *compiler, FILE* verbose);
 #endif
 
-/* Returns with non-zero if dynamic code modification is enabled. */
-
-SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_is_dyn_code_modification_enabled(void);
-
 /*
    Create executable code from the sljit instruction stream. This is the final step
    of the code generation so no more instructions can be added after this call.
@@ -473,10 +471,21 @@ SLJIT_API_FUNC_ATTRIBUTE void* sljit_generate_code(struct sljit_compiler *compil
 SLJIT_API_FUNC_ATTRIBUTE void sljit_free_code(void* code);
 
 /*
-   After the machine code generation is finished we can retrieve the allocated
-   executable memory size, although this area may not be fully filled with
-   instructions depending on some optimizations. This function is useful only
-   for statistical purposes.
+   When the protected executable allocator is used the JIT code is mapped
+   twice. The first mapping has read/write and the second mapping has read/exec
+   permissions. This function returns with the relative offset of the executable
+   mapping using the writable mapping as the base after the machine code is
+   successfully generated. The returned value is always 0 for the normal executable
+   allocator, since it uses only one mapping with read/write/exec permissions.
+   Dynamic code modifications requires this value.
+
+   Before a successful code generation, this function returns with 0.
+*/
+static SLJIT_INLINE sljit_sw sljit_get_executable_offset(struct sljit_compiler *compiler) { return compiler->executable_offset; }
+
+/*
+   The executable memory consumption of the generated code can be retrieved by
+   this function. The returned value can be used for statistical purposes.
 
    Before a successful code generation, this function returns with 0.
 */
@@ -1100,9 +1109,10 @@ static SLJIT_INLINE sljit_uw sljit_get_label_addr(struct sljit_label *label) { r
 static SLJIT_INLINE sljit_uw sljit_get_jump_addr(struct sljit_jump *jump) { return jump->addr; }
 static SLJIT_INLINE sljit_uw sljit_get_const_addr(struct sljit_const *const_) { return const_->addr; }
 
-/* Only the address is required to rewrite the code. */
-SLJIT_API_FUNC_ATTRIBUTE void sljit_set_jump_addr(sljit_uw addr, sljit_uw new_addr);
-SLJIT_API_FUNC_ATTRIBUTE void sljit_set_const(sljit_uw addr, sljit_sw new_constant);
+/* Only the address and executable offset are required to perform dynamic
+   code modifications. See sljit_get_executable_offset function. */
+SLJIT_API_FUNC_ATTRIBUTE void sljit_set_jump_addr(sljit_uw addr, sljit_uw new_target, sljit_sw executable_offset);
+SLJIT_API_FUNC_ATTRIBUTE void sljit_set_const(sljit_uw addr, sljit_sw new_constant, sljit_sw executable_offset);
 
 /* --------------------------------------------------------------------- */
 /*  Miscellaneous utility functions                                      */
