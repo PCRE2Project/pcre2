@@ -386,11 +386,6 @@ static option_item optionlist[] = {
   { OP_NODATA,     'h',      NULL,              "no-filename",   "suppress the prefixing filename on output" },
   { OP_NODATA,     'I',      NULL,              "",              "treat binary files as not matching (ignore)" },
   { OP_NODATA,     'i',      NULL,              "ignore-case",   "ignore case distinctions" },
-#ifdef SUPPORT_PCRE2GREP_JIT
-  { OP_NODATA,     N_NOJIT,  NULL,              "no-jit",        "do not use just-in-time compiler optimization" },
-#else
-  { OP_NODATA,     N_NOJIT,  NULL,              "no-jit",        "ignored: this pcre2grep does not support JIT" },
-#endif
   { OP_NODATA,     'l',      NULL,              "files-with-matches", "print only FILE names containing matches" },
   { OP_NODATA,     'L',      NULL,              "files-without-match","print only FILE names not containing matches" },
   { OP_STRING,     N_LABEL,  &stdin_name,       "label=name",    "set name for standard input" },
@@ -402,6 +397,11 @@ static option_item optionlist[] = {
   { OP_NODATA,     'M',      NULL,              "multiline",     "run in multiline mode" },
   { OP_STRING,     'N',      &newline_arg,      "newline=type",  "set newline type (CR, LF, CRLF, ANYCRLF or ANY)" },
   { OP_NODATA,     'n',      NULL,              "line-number",   "print line number with output lines" },
+#ifdef SUPPORT_PCRE2GREP_JIT
+  { OP_NODATA,     N_NOJIT,  NULL,              "no-jit",        "do not use just-in-time compiler optimization" },
+#else
+  { OP_NODATA,     N_NOJIT,  NULL,              "no-jit",        "ignored: this pcre2grep does not support JIT" },
+#endif
   { OP_OP_NUMBERS, 'o',      &only_matching_data, "only-matching=n", "show only the part of the line that matched" },
   { OP_STRING,     N_OM_SEPARATOR, &om_separator, "om-separator=text", "set separator for multiple -o output" },
   { OP_NODATA,     'q',      NULL,              "quiet",         "suppress output, just set return code" },
@@ -3011,23 +3011,19 @@ sprintf((char *)buffer, "%s%.*s%s", prefix[popts], patlen, ps, suffix[popts]);
 p->compiled = pcre2_compile(buffer, PCRE2_ZERO_TERMINATED, options, &errcode,
   &erroffset, compile_context);
 
-/* Handle successful compile */
+/* Handle successful compile. Try JIT-compiling if supported and enabled. We 
+ignore any JIT compiler errors, relying falling back to interpreting if 
+anything goes wrong with JIT. */
 
 if (p->compiled != NULL)
   {
 #ifdef SUPPORT_PCRE2GREP_JIT
-  if (use_jit)
-    {
-    errcode = pcre2_jit_compile(p->compiled, PCRE2_JIT_COMPLETE);
-    if (errcode == 0) return TRUE;
-    erroffset = PCRE2_SIZE_MAX;     /* Will get reduced to patlen below */
-    }
-  else
+  if (use_jit) (void)pcre2_jit_compile(p->compiled, PCRE2_JIT_COMPLETE);
 #endif
   return TRUE;
   }
 
-/* Handle compile and JIT compile errors */
+/* Handle compile errors */
 
 erroffset -= (int)strlen(prefix[popts]);
 if (erroffset > patlen) erroffset = patlen;

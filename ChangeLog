@@ -321,6 +321,10 @@ characters in the same "not-x" sublists.
 its start; pcre2test was not handling this correctly when using the POSIX 
 interface (it was OK with the native interface).
 
+50. In pcre2grep, ignore all JIT compile errors. This means that pcre2grep will 
+continue to work, falling back to interpretation if anything goes wrong with 
+JIT.
+
 
 Version 10.22 29-July-2016
 --------------------------
