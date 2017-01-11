@@ -317,6 +317,10 @@ just wastes time. In the UTF case it can also produce redundant entries in
 XCLASS lists caused by characters with multiple other cases and pairs of
 characters in the same "not-x" sublists.
 
+49. A pattern such as /(?=(a\K))/ can report the end of the match being before 
+its start; pcre2test was not handling this correctly when using the POSIX 
+interface (it was OK with the native interface).
+
 
 Version 10.22 29-July-2016
 --------------------------

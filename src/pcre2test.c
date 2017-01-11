@@ -6184,18 +6184,27 @@ if ((pat_patctl.control & CTL_POSIX) != 0)
       {
       if (pmatch[i].rm_so >= 0)
         {
+        PCRE2_SIZE start = pmatch[i].rm_so;
+        PCRE2_SIZE end = pmatch[i].rm_eo;
+        if (start > end)
+          {
+          start = pmatch[i].rm_eo;
+          end = pmatch[i].rm_so;
+          fprintf(outfile, "Start of matched string is beyond its end - "
+            "displaying from end to start.\n");
+          }
         fprintf(outfile, "%2d: ", (int)i);
-        PCHARSV(pp, pmatch[i].rm_so,
-          pmatch[i].rm_eo - pmatch[i].rm_so, utf, outfile);
+        PCHARSV(pp, start, end - start, utf, outfile);
         fprintf(outfile, "\n");
+
         if ((i == 0 && (dat_datctl.control & CTL_AFTERTEXT) != 0) ||
             (dat_datctl.control & CTL_ALLAFTERTEXT) != 0)
           {
           fprintf(outfile, "%2d+ ", (int)i);
-          PCHARSV(pp, pmatch[i].rm_eo, len - pmatch[i].rm_eo,
-            utf, outfile);
-          fprintf(outfile, "\n");
-          }
+          /* Note: don't use the start/end variables here because we want to
+          show the text from what is reported as the end. */
+          PCHARSV(pp, pmatch[i].rm_eo, len - pmatch[i].rm_eo, utf, outfile);
+          fprintf(outfile, "\n"); }
         }
       }
     }

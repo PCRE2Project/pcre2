@@ -106,4 +106,7 @@
 //posix_nosub
     \=offset=70000
 
+/(?=(a\K))/
+    a
+     
 # End of testdata/testinput18
