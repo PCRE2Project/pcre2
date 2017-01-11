@@ -125,6 +125,9 @@ fully released code, but are noted here for the record.
   (r) If a character whose code point was greater than 0xffff appeared within
       a lookbehind that was within another lookbehind, the calculation of the
       lookbehind length went wrong and could provoke an internal error.
+      
+  (t) The sequence \E- or \Q\E- after a POSIX class in a character class caused
+      an internal error. Now the hyphen is treated as a literal.  
 
 4. Back references are now permitted in lookbehind assertions when there are
 no duplicated group numbers (that is, (?| has not been used), and, if the

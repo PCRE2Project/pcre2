@@ -5820,4 +5820,10 @@ ef) x/x,mark
 
 /(?'c')XX(?'YYYYYYYYYYYYYYYYYYYYYYYCl')/
 
+/[s[:digit:]\E-H]+/
+    s09-H
+
+/[s[:digit:]\Q\E-H]+/
+    s09-H
+
 # End of testinput1 
