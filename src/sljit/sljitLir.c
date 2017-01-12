@@ -26,6 +26,14 @@
 
 #include "sljitLir.h"
 
+#if !(defined SLJIT_STD_MACROS_DEFINED && SLJIT_STD_MACROS_DEFINED)
+
+/* These libraries are needed for the macros below. */
+#include <stdlib.h>
+#include <string.h>
+
+#endif /* SLJIT_STD_MACROS_DEFINED */
+
 #define CHECK_ERROR() \
 	do { \
 		if (SLJIT_UNLIKELY(compiler->error)) \

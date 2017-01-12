@@ -187,14 +187,6 @@
 /* External function definitions. */
 /**********************************/
 
-#if !(defined SLJIT_STD_MACROS_DEFINED && SLJIT_STD_MACROS_DEFINED)
-
-/* These libraries are needed for the macros below. */
-#include <stdlib.h>
-#include <string.h>
-
-#endif /* SLJIT_STD_MACROS_DEFINED */
-
 /* General macros:
    Note: SLJIT is designed to be independent from them as possible.
 

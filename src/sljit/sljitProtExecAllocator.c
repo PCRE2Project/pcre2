@@ -84,25 +84,95 @@ struct chunk_header {
        as it only uses local variables
 */
 
-#ifndef _XOPEN_SOURCE
-#define _XOPEN_SOURCE 500 /* for mkstemp() and truncate() */
+#include <fcntl.h>
+
+#ifndef O_NOATIME
+#define O_NOATIME 0
 #endif
+
+#ifdef __O_TMPFILE
+#ifndef O_TMPFILE
+#define O_TMPFILE	(__O_TMPFILE | O_DIRECTORY)
+#endif
+#endif
+
+int mkostemp(char *template, int flags);
+char *secure_getenv(const char *name);
+
+static SLJIT_INLINE int create_tempfile(void)
+{
+	int fd;
+
+	char tmp_name[256];
+	size_t tmp_name_len;
+	char *dir;
+	size_t len;
+
+#ifdef P_tmpdir
+	len = (P_tmpdir != NULL) ? strlen(P_tmpdir) : 0;
+
+	if (len > 0 && len < sizeof(tmp_name)) {
+		strcpy(tmp_name, P_tmpdir);
+		tmp_name_len = len;
+	}
+	else {
+		strcpy(tmp_name, "/tmp");
+		tmp_name_len = 4;
+	}
+#else
+	strcpy(tmp_name, "/tmp");
+	tmp_name_len = 4;
+#endif
+
+	dir = secure_getenv("TMPDIR");
+	if (dir) {
+		len = strlen(dir);
+		if (len > 0 && len < sizeof(tmp_name)) {
+			strcpy(tmp_name, dir);
+			tmp_name_len = len;
+		}
+	}
+
+	SLJIT_ASSERT(tmp_name_len > 0 && tmp_name_len < sizeof(tmp_name));
+
+	while (tmp_name_len > 0 && tmp_name[tmp_name_len - 1] == '/') {
+		tmp_name_len--;
+		tmp_name[tmp_name_len] = '\0';
+	}
+
+#ifdef O_TMPFILE
+	fd = open(tmp_name, O_TMPFILE | O_EXCL | O_RDWR | O_NOATIME | O_CLOEXEC, S_IRUSR | S_IWUSR);
+	if (fd != -1)
+		return fd;
+#endif
+
+	if (tmp_name_len + 7 >= sizeof(tmp_name))
+	{
+		return -1;
+	}
+
+	strcpy(tmp_name + tmp_name_len, "/XXXXXX");
+	fd = mkostemp(tmp_name, O_CLOEXEC | O_NOATIME);
+
+	if (fd == -1)
+		return fd;
+
+	if (unlink(tmp_name)) {
+		close(fd);
+		return -1;
+	}
+
+	return fd;
+}
 
 static SLJIT_INLINE struct chunk_header* alloc_chunk(sljit_uw size)
 {
 	struct chunk_header *retval;
-	char template[] = "/tmp/XXXXXX";
 	int fd;
 
-	fd = mkstemp(template);
-	if (fd == -1) {
+	fd = create_tempfile();
+	if (fd == -1)
 		return NULL;
-	}
-
-	if (unlink(template)) {
-		close(fd);
-		return NULL;
-	}
 
 	if (ftruncate(fd, size)) {
 		close(fd);
