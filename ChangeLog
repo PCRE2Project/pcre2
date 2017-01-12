@@ -325,6 +325,10 @@ interface (it was OK with the native interface).
 continue to work, falling back to interpretation if anything goes wrong with 
 JIT.
 
+51. Applied patches from Christian Persch to configure.ac to make use of the 
+AC_USE_SYSTEM_EXTENSIONS macro and to test for functions used by the JIT 
+modules.
+
 
 Version 10.22 29-July-2016
 --------------------------

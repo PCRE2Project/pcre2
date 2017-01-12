@@ -29,9 +29,6 @@ AM_INIT_AUTOMAKE([dist-bzip2 dist-zip])
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 AC_CONFIG_HEADERS(src/config.h)
 
-# This is a new thing required to stop a warning from automake 1.12
-m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
-
 # This was added at the suggestion of libtoolize (03-Jan-10)
 AC_CONFIG_MACRO_DIR([m4])
 
@@ -47,6 +44,7 @@ remember_set_CFLAGS="$CFLAGS"
 
 AC_PROG_CC
 AM_PROG_CC_C_O
+AC_USE_SYSTEM_EXTENSIONS
 
 if test "x$remember_set_CFLAGS" = "x"
 then
@@ -58,6 +56,9 @@ then
     CFLAGS=""
   fi
 fi
+
+# This is a new thing required to stop a warning from automake 1.12
+m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 
 # Check for a 64-bit integer type
 AC_TYPE_INT64_T
@@ -435,7 +436,7 @@ AC_TYPE_SIZE_T
 
 # Checks for library functions.
 
-AC_CHECK_FUNCS(bcopy memmove strerror)
+AC_CHECK_FUNCS(bcopy memmove strerror mkostemp secure_getenv)
 
 # Check for the availability of libz (aka zlib)
 
@@ -517,9 +518,6 @@ if test "$enable_pcre2test_libedit" = "yes"; then
       [AC_CHECK_HEADERS([readline/readline.h], [HAVE_READLINE_READLINE_H=1])])])
   AC_CHECK_LIB([edit], [readline], [LIBEDIT="-ledit"])
 fi
-
-# This facilitates -ansi builds under Linux
-dnl AC_DEFINE([_GNU_SOURCE], [], [Enable GNU extensions in glibc])
 
 PCRE2_STATIC_CFLAG=""
 if test "x$enable_shared" = "xno" ; then
