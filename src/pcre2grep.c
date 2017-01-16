@@ -141,12 +141,15 @@ apply to fprintf(). */
 /* Under Windows, we have to set stdout to be binary, so that it does not
 convert \r\n at the ends of output lines to \r\r\n. However, that means that
 any messages written to stdout must have \r\n as their line terminator. This is
-handled by using STDOUT_NL as the newline string. */
+handled by using STDOUT_NL as the newline string. We also use a normal double
+quote for the example, as single quotes aren't usually available. */
 
 #ifdef WIN32
 #define STDOUT_NL  "\r\n"
+#define QUOT       "\""
 #else
 #define STDOUT_NL  "\n"
+#define QUOT       "'"
 #endif
 
 
@@ -1038,7 +1041,7 @@ for (op = optionlist; op->one_char != 0; op++)
   if (op->one_char > 0) fprintf(stderr, "%c", op->one_char);
   }
 fprintf(stderr, "] [long options] [pattern] [files]\n");
-fprintf(stderr, "Type `pcre2grep --help' for more information and the long "
+fprintf(stderr, "Type \"pcre2grep --help\" for more information and the long "
   "options.\n");
 return rc;
 }
@@ -1080,7 +1083,7 @@ printf("Other files and the standard input are read as plain files." STDOUT_NL S
 printf("All files are read as plain files, without any interpretation." STDOUT_NL STDOUT_NL);
 #endif
 
-printf("Example: pcre2grep -i 'hello.*world' menu.h main.c" STDOUT_NL STDOUT_NL);
+printf("Example: pcre2grep -i " QUOT "hello.*world" QUOT " menu.h main.c" STDOUT_NL STDOUT_NL);
 printf("Options:" STDOUT_NL);
 
 for (op = optionlist; op->one_char != 0; op++)
@@ -2516,7 +2519,6 @@ while (ptr < endptr)
         lastmatchnumber > 0 &&
         lastmatchrestart < main_buffer + bufthird)
       {
-
       do_after_lines(lastmatchnumber, lastmatchrestart, endptr, printname);
       lastmatchnumber = 0;  /* Indicates no after lines pending */
       }
@@ -2945,6 +2947,8 @@ static char buffer[14];
 char *p = buffer;
 sprintf(p, "%d", n);
 while (*p != 0) p++;
+n %= 100;
+if (n >= 11 && n <= 13) n = 0;
 switch (n%10)
   {
   case 1: strcpy(p, "st"); break;
@@ -3161,7 +3165,7 @@ that stdout is a binary stream. Note that this means all other output to stdout
 must use STDOUT_NL to terminate lines. */
 
 #ifdef WIN32
-_setmode( _fileno(stdout), _O_BINARY);
+_setmode(_fileno(stdout), _O_BINARY);
 #endif
 
 /* Set up a default compile and match contexts and a match data block. */
@@ -3525,7 +3529,7 @@ LC_ALL environment variable is set, and if so, use it. */
 if (locale == NULL)
   {
   locale = getenv("LC_ALL");
-  locale_from = "LCC_ALL";
+  locale_from = "LC_ALL";
   }
 
 if (locale == NULL)
