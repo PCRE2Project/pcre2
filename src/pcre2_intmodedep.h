@@ -648,7 +648,7 @@ typedef struct pcre2_real_match_data {
 
 #ifndef PCRE2_PCRE2TEST
 
-/* Structures for checking for mutual recursion when scanning compiled or 
+/* Structures for checking for mutual recursion when scanning compiled or
 parsed code. */
 
 typedef struct recurse_check {
@@ -702,7 +702,7 @@ typedef struct compile_block {
   PCRE2_UCHAR *name_table;         /* The name/number table */
   PCRE2_SIZE workspace_size;       /* Size of workspace */
   PCRE2_SIZE small_ref_offset[10]; /* Offsets for \1 to \9 */
-  PCRE2_SIZE erroroffset;          /* Offset of error in pattern */ 
+  PCRE2_SIZE erroroffset;          /* Offset of error in pattern */
   uint16_t names_found;            /* Number of entries so far */
   uint16_t name_entry_size;        /* Size of each entry */
   open_capitem *open_caps;         /* Chain of open capture items */
@@ -711,16 +711,16 @@ typedef struct compile_block {
   uint32_t external_options;       /* External (initial) options */
   uint32_t external_flags;         /* External flag bits to be set */
   uint32_t bracount;               /* Count of capturing parentheses */
-  uint32_t lastcapture;            /* Last capture encountered */ 
-  uint32_t *parsed_pattern;        /* Parsed pattern buffer */ 
-  uint32_t *parsed_pattern_end;    /* Parsed pattern should not get here */ 
+  uint32_t lastcapture;            /* Last capture encountered */
+  uint32_t *parsed_pattern;        /* Parsed pattern buffer */
+  uint32_t *parsed_pattern_end;    /* Parsed pattern should not get here */
   uint32_t *groupinfo;             /* Group info vector */
   uint32_t top_backref;            /* Maximum back reference */
   uint32_t backref_map;            /* Bitmap of low back refs */
   uint32_t nltype;                 /* Newline type */
   uint32_t nllen;                  /* Newline string length */
   uint32_t class_range_start;      /* Overall class range start */
-  uint32_t class_range_end;        /* Overall class range end */  
+  uint32_t class_range_end;        /* Overall class range end */
   PCRE2_UCHAR nl[4];               /* Newline string when fixed length */
   int  max_lookbehind;             /* Maximum lookbehind (characters) */
   int  parens_depth;               /* Depth of nested parentheses */

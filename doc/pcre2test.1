@@ -88,7 +88,7 @@ when the \fButf\fP modifier (see
 "Setting compilation options"
 .\"
 below) is set, the pattern and any following subject lines are interpreted as
-UTF-8 strings and translated to UTF-16 or UTF-32 as appropriate. 
+UTF-8 strings and translated to UTF-16 or UTF-32 as appropriate.
 .P
 For non-UTF testing of wide characters, the \fButf8_input\fP modifier can be
 used. This is mutually exclusive with \fButf\fP, and is allowed only in 16-bit
@@ -125,7 +125,7 @@ the 32-bit library has been built, this is the default. If the 32-bit library
 has not been built, this option causes an error.
 .TP 10
 \fB-ac\fP
-Behave as if each pattern has the \fBauto_callout\fP modifier, that is, insert 
+Behave as if each pattern has the \fBauto_callout\fP modifier, that is, insert
 automatic callouts into every pattern that is compiled.
 .TP 10
 \fB-b\fP
@@ -550,7 +550,7 @@ for a description of their effects.
 As well as turning on the PCRE2_UTF option, the \fButf\fP modifier causes all
 non-printing characters in output strings to be printed using the \ex{hh...}
 notation. Otherwise, those less than 0x100 are output in hex without the curly
-brackets. Setting \fButf\fP in 16-bit or 32-bit mode also causes pattern and 
+brackets. Setting \fButf\fP in 16-bit or 32-bit mode also causes pattern and
 subject strings to be translated to UTF-16 or UTF-32, respectively, before
 being passed to library functions.
 .
@@ -584,8 +584,8 @@ about the pattern:
       pushcopy                  push a copy onto the stack
       stackguard=<number>       test the stackguard feature
       tables=[0|1|2]            select internal tables
-      use_length                do not zero-terminate the pattern 
-      utf8_input                treat input as UTF-8 
+      use_length                do not zero-terminate the pattern
+      utf8_input                treat input as UTF-8
 .sp
 The effects of these modifiers are described in the following sections.
 .
@@ -669,7 +669,7 @@ default values).
 By default, patterns are passed to the compiling functions as zero-terminated
 strings. When using the POSIX wrapper API, there is no other option. However,
 when using PCRE2's native API, patterns can be passed by length instead of
-being zero-terminated. The \fBuse_length\fP modifier causes this to happen. 
+being zero-terminated. The \fBuse_length\fP modifier causes this to happen.
 Using a length happens automatically (whether or not \fBuse_length\fP is set)
 when \fBhex\fP is set, because patterns specified in hexadecimal may contain
 binary zeros.
@@ -696,17 +696,17 @@ Either single or double quotes may be used. There is no way of including
 the delimiter within a substring. The \fBhex\fP and \fBexpand\fP modifiers are
 mutually exclusive.
 .P
-The POSIX API cannot be used with patterns specified in hexadecimal because 
-they may contain binary zeros, which conflicts with \fBregcomp()\fP's 
-requirement for a zero-terminated string. Such patterns are always passed to 
+The POSIX API cannot be used with patterns specified in hexadecimal because
+they may contain binary zeros, which conflicts with \fBregcomp()\fP's
+requirement for a zero-terminated string. Such patterns are always passed to
 \fBpcre2_compile()\fP as a string with a length, not as zero-terminated.
 .
 .
 .SS "Specifying wide characters in 16-bit and 32-bit modes"
 .rs
 .sp
-In 16-bit and 32-bit modes, all input is automatically treated as UTF-8 and 
-translated to UTF-16 or UTF-32 when the \fButf\fP modifier is set. For testing 
+In 16-bit and 32-bit modes, all input is automatically treated as UTF-8 and
+translated to UTF-16 or UTF-32 when the \fButf\fP modifier is set. For testing
 the 16-bit and 32-bit libraries in non-UTF mode, the \fButf8_input\fP modifier
 can be used. It is mutually exclusive with \fButf\fP. Input lines are
 interpreted as UTF-8 as a means of specifying wide characters. More details are
@@ -1134,15 +1134,15 @@ does no capturing); it is ignored, with a warning message, if present.
 .sp
 A callout function is supplied when \fBpcre2test\fP calls the library matching
 functions, unless \fBcallout_none\fP is specified. If \fBcallout_capture\fP is
-set, the current captured groups are output when a callout occurs. The default 
+set, the current captured groups are output when a callout occurs. The default
 return from the callout function is zero, which allows matching to continue.
 .P
 The \fBcallout_fail\fP modifier can be given one or two numbers. If there is
 only one number, 1 is returned instead of 0 (causing matching to backtrack)
 when a callout of that number is reached. If two numbers (<n>:<m>) are given, 1
 is returned when callout <n> is reached and there have been at least <m>
-callouts. The \fBcallout_error\fP modifier is similar, except that 
-PCRE2_ERROR_CALLOUT is returned, causing the entire matching process to be 
+callouts. The \fBcallout_error\fP modifier is similar, except that
+PCRE2_ERROR_CALLOUT is returned, causing the entire matching process to be
 aborted. If both these modifiers are set for the same callout number,
 \fBcallout_error\fP takes precedence.
 .P

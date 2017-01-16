@@ -3,6 +3,10 @@
 AUTOMAKE_OPTIONS = subdir-objects
 ACLOCAL_AMFLAGS = -I m4
 
+## This seems to have become necessary for building in non-source directory.
+
+AM_CPPFLAGS="-I$(srcdir)/src"
+
 ## Specify the documentation files that are distributed.
 
 dist_doc_DATA = \

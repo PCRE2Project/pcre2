@@ -388,15 +388,15 @@ scanning, in order to be able to output "before" and "after" lines when it
 finds a match. The starting size of the buffer is controlled by a parameter
 whose default value is 20K. The buffer itself is three times this size, but
 because of the way it is used for holding "before" lines, the longest line that
-is guaranteed to be processable is the parameter size. If a longer line is 
+is guaranteed to be processable is the parameter size. If a longer line is
 encountered, \fBpcre2grep\fP automatically expands the buffer, up to a
 specified maximum size, whose default is 1M or the starting size, whichever is
 the larger. You can change the default parameter values by adding, for example,
 .sp
   --with-pcre2grep-bufsize=51200
-  --with-pcre2grep-max-bufsize=2097152 
+  --with-pcre2grep-max-bufsize=2097152
 .sp
-to the \fBconfigure\fP command. The caller of \fPpcre2grep\fP can override 
+to the \fBconfigure\fP command. The caller of \fPpcre2grep\fP can override
 these values by using --buffer-size and --max-buffer-size on the command line.
 .
 .
@@ -522,7 +522,7 @@ There is a special option for use by people who want to run fuzzing tests on
 PCRE2:
 .sp
   --enable-fuzz-support
-.sp    
+.sp
 At present this applies only to the 8-bit library. If set, it causes an extra
 library called libpcre2-fuzzsupport.a to be built, but not installed. This
 contains a single function called LLVMFuzzerTestOneInput() whose arguments are

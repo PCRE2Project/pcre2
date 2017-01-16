@@ -219,15 +219,25 @@ OPTIONS
                  possible matches in a line, not just one, in order to  colour
                  them all.
 
-                 The colour that is used can be specified by setting the envi-
-                 ronment variable PCRE2GREP_COLOUR or PCRE2GREP_COLOR. If nei-
-                 ther  of  these  are  set, pcre2grep looks for GREP_COLOUR or
-                 GREP_COLOR. The value of the variable should be a  string  of
-                 two  numbers,  separated  by  a  semicolon.  They  are copied
-                 directly into the control string for setting colour on a ter-
-                 minal,  so it is your responsibility to ensure that they make
-                 sense. If neither of the environment variables  is  set,  the
-                 default is "1;31", which gives red.
+                 The  colour  that  is used can be specified by setting one of
+                 the environment variables PCRE2GREP_COLOUR,  PCRE2GREP_COLOR,
+                 PCREGREP_COLOUR, or PCREGREP_COLOR, which are checked in that
+                 order.  If  none  of  these  are  set,  pcre2grep  looks  for
+                 GREP_COLORS  or  GREP_COLOR (in that order). The value of the
+                 variable should be a string of two numbers,  separated  by  a
+                 semicolon,  except  in  the  case  of GREP_COLORS, which must
+                 start with "ms=" or "mt=" followed by two semicolon-separated
+                 colours,  terminated  by the end of the string or by a colon.
+                 If GREP_COLORS does not start  with  "ms="  or  "mt="  it  is
+                 ignored, and GREP_COLOR is checked.
+
+                 If  the  string obtained from one of the above variables con-
+                 tains any characters other than semicolon or digits, the set-
+                 ting is ignored and the default colour is used. The string is
+                 copied directly into the control string for setting colour on
+                 a  terminal,  so it is your responsibility to ensure that the
+                 values make sense. If no  relevant  environment  variable  is
+                 set, the default is "1;31", which gives red.
 
        -D action, --devices=action
                  If  an  input  path  is  not  a  regular file or a directory,
@@ -763,12 +773,12 @@ OPTIONS WITH DATA
 
 CALLING EXTERNAL SCRIPTS
 
-       On non-Windows systems, pcre2grep has, by default, support for  calling
-       external  programs  or scripts during matching by making use of PCRE2's
-       callout facility. However, this support can be disabled when  pcre2grep
-       is  built.   You can find out whether your binary has support for call-
-       outs by running it with the  --help  option.  If  the  support  is  not
-       enabled, all callouts in patterns are ignored by pcre2grep.
+       pcre2grep has, by default, support for  calling  external  programs  or
+       scripts during matching by making use of PCRE2's callout facility. How-
+       ever, this support can be disabled when pcre2grep  is  built.  You  can
+       find  out  whether  your  binary has support for callouts by running it
+       with the --help option. If the support is not enabled, all callouts  in
+       patterns are ignored by pcre2grep.
 
        A  callout  in a PCRE2 pattern is of the form (?C<arg>) where the argu-
        ment is either a number or a quoted string (see the pcre2callout  docu-
@@ -852,5 +862,5 @@ AUTHOR
 
 REVISION
 
-       Last updated: 31 October 2016
+       Last updated: 31 December 2016
        Copyright (c) 1997-2016 University of Cambridge.

@@ -114,7 +114,7 @@ to the library. For subject lines, backslash escapes can be used. In addition,
 when the <b>utf</b> modifier (see
 <a href="#optionmodifiers">"Setting compilation options"</a>
 below) is set, the pattern and any following subject lines are interpreted as
-UTF-8 strings and translated to UTF-16 or UTF-32 as appropriate. 
+UTF-8 strings and translated to UTF-16 or UTF-32 as appropriate.
 </P>
 <P>
 For non-UTF testing of wide characters, the <b>utf8_input</b> modifier can be
@@ -153,8 +153,13 @@ the 32-bit library has been built, this is the default. If the 32-bit library
 has not been built, this option causes an error.
 </P>
 <P>
+<b>-ac</b>
+Behave as if each pattern has the <b>auto_callout</b> modifier, that is, insert
+automatic callouts into every pattern that is compiled.
+</P>
+<P>
 <b>-b</b>
-Behave as if each pattern has the <b>/fullbincode</b> modifier; the full
+Behave as if each pattern has the <b>fullbincode</b> modifier; the full
 internal binary form of the pattern is output after compilation.
 </P>
 <P>
@@ -220,7 +225,7 @@ Output a brief summary these options and then exit.
 </P>
 <P>
 <b>-i</b>
-Behave as if each pattern has the <b>/info</b> modifier; information about the
+Behave as if each pattern has the <b>info</b> modifier; information about the
 compiled pattern is given after compilation.
 </P>
 <P>
@@ -582,7 +587,7 @@ for a description of their effects.
 As well as turning on the PCRE2_UTF option, the <b>utf</b> modifier causes all
 non-printing characters in output strings to be printed using the \x{hh...}
 notation. Otherwise, those less than 0x100 are output in hex without the curly
-brackets. Setting <b>utf</b> in 16-bit or 32-bit mode also causes pattern and 
+brackets. Setting <b>utf</b> in 16-bit or 32-bit mode also causes pattern and
 subject strings to be translated to UTF-16 or UTF-32, respectively, before
 being passed to library functions.
 <a name="controlmodifiers"></a></P>
@@ -615,8 +620,8 @@ about the pattern:
       pushcopy                  push a copy onto the stack
       stackguard=&#60;number&#62;       test the stackguard feature
       tables=[0|1|2]            select internal tables
-      use_length                do not zero-terminate the pattern 
-      utf8_input                treat input as UTF-8 
+      use_length                do not zero-terminate the pattern
+      utf8_input                treat input as UTF-8
 </pre>
 The effects of these modifiers are described in the following sections.
 </P>
@@ -705,7 +710,7 @@ Specifying the pattern's length
 By default, patterns are passed to the compiling functions as zero-terminated
 strings. When using the POSIX wrapper API, there is no other option. However,
 when using PCRE2's native API, patterns can be passed by length instead of
-being zero-terminated. The <b>use_length</b> modifier causes this to happen. 
+being zero-terminated. The <b>use_length</b> modifier causes this to happen.
 Using a length happens automatically (whether or not <b>use_length</b> is set)
 when <b>hex</b> is set, because patterns specified in hexadecimal may contain
 binary zeros.
@@ -733,17 +738,17 @@ the delimiter within a substring. The <b>hex</b> and <b>expand</b> modifiers are
 mutually exclusive.
 </P>
 <P>
-The POSIX API cannot be used with patterns specified in hexadecimal because 
-they may contain binary zeros, which conflicts with <b>regcomp()</b>'s 
-requirement for a zero-terminated string. Such patterns are always passed to 
+The POSIX API cannot be used with patterns specified in hexadecimal because
+they may contain binary zeros, which conflicts with <b>regcomp()</b>'s
+requirement for a zero-terminated string. Such patterns are always passed to
 <b>pcre2_compile()</b> as a string with a length, not as zero-terminated.
 </P>
 <br><b>
 Specifying wide characters in 16-bit and 32-bit modes
 </b><br>
 <P>
-In 16-bit and 32-bit modes, all input is automatically treated as UTF-8 and 
-translated to UTF-16 or UTF-32 when the <b>utf</b> modifier is set. For testing 
+In 16-bit and 32-bit modes, all input is automatically treated as UTF-8 and
+translated to UTF-16 or UTF-32 when the <b>utf</b> modifier is set. For testing
 the 16-bit and 32-bit libraries in non-UTF mode, the <b>utf8_input</b> modifier
 can be used. It is mutually exclusive with <b>utf</b>. Input lines are
 interpreted as UTF-8 as a means of specifying wide characters. More details are
@@ -806,7 +811,7 @@ modes are to be compiled:
   2  compile JIT code for soft partial matching
   4  compile JIT code for hard partial matching
 </pre>
-The possible values for the <b>/jit</b> modifier are therefore:
+The possible values for the <b>jit</b> modifier are therefore:
 <pre>
   0  disable JIT
   1  normal matching only
@@ -852,14 +857,14 @@ code was actually used in the match.
 Setting a locale
 </b><br>
 <P>
-The <b>/locale</b> modifier must specify the name of a locale, for example:
+The <b>locale</b> modifier must specify the name of a locale, for example:
 <pre>
   /pattern/locale=fr_FR
 </pre>
 The given locale is set, <b>pcre2_maketables()</b> is called to build a set of
 character tables for the locale, and this is then passed to
 <b>pcre2_compile()</b> when compiling the regular expression. The same tables
-are used when matching the following subject lines. The <b>/locale</b> modifier
+are used when matching the following subject lines. The <b>locale</b> modifier
 applies only to the pattern on which it appears, but can be given in a
 <b>#pattern</b> command if a default is needed. Setting a locale and alternate
 character tables are mutually exclusive.
@@ -868,7 +873,7 @@ character tables are mutually exclusive.
 Showing pattern memory
 </b><br>
 <P>
-The <b>/memory</b> modifier causes the size in bytes of the memory used to hold
+The <b>memory</b> modifier causes the size in bytes of the memory used to hold
 the compiled pattern to be output. This does not include the size of the
 <b>pcre2_code</b> block; it is just the actual compiled data. If the pattern is
 subsequently passed to the JIT compiler, the size of the JIT compiled code is
@@ -937,7 +942,7 @@ an error.
 Testing the stack guard feature
 </b><br>
 <P>
-The <b>/stackguard</b> modifier is used to test the use of
+The <b>stackguard</b> modifier is used to test the use of
 <b>pcre2_set_compile_recursion_guard()</b>, a function that is provided to
 enable stack availability to be checked during compilation (see the
 <a href="pcre2api.html"><b>pcre2api</b></a>
@@ -952,7 +957,7 @@ be aborted.
 Using alternative character tables
 </b><br>
 <P>
-The value specified for the <b>/tables</b> modifier must be one of the digits 0,
+The value specified for the <b>tables</b> modifier must be one of the digits 0,
 1, or 2. It causes a specific set of built-in character tables to be passed to
 <b>pcre2_compile()</b>. This is used in the PCRE2 tests to check behaviour with
 different character tables. The digit specifies the tables as follows:
@@ -1042,7 +1047,7 @@ The partial matching modifiers are provided with abbreviations because they
 appear frequently in tests.
 </P>
 <P>
-If the <b>/posix</b> modifier was present on the pattern, causing the POSIX
+If the <b>posix</b> modifier was present on the pattern, causing the POSIX
 wrapper API to be used, the only option-setting modifiers that have any effect
 are <b>notbol</b>, <b>notempty</b>, and <b>noteol</b>, causing REG_NOTBOL,
 REG_NOTEMPTY, and REG_NOTEOL, respectively, to be passed to <b>regexec()</b>.
@@ -1064,6 +1069,7 @@ pattern.
       altglobal                  alternative global matching
       callout_capture            show captures at callout time
       callout_data=&#60;n&#62;           set a value to pass via callouts
+      callout_error=&#60;n&#62;[:&#60;m&#62;]    control callout error
       callout_fail=&#60;n&#62;[:&#60;m&#62;]     control callout failure
       callout_none               do not supply a callout function
       copy=&#60;number or name&#62;      copy captured substring
@@ -1159,15 +1165,22 @@ Testing callouts
 <P>
 A callout function is supplied when <b>pcre2test</b> calls the library matching
 functions, unless <b>callout_none</b> is specified. If <b>callout_capture</b> is
-set, the current captured groups are output when a callout occurs.
+set, the current captured groups are output when a callout occurs. The default
+return from the callout function is zero, which allows matching to continue.
 </P>
 <P>
 The <b>callout_fail</b> modifier can be given one or two numbers. If there is
-only one number, 1 is returned instead of 0 when a callout of that number is
-reached. If two numbers are given, 1 is returned when callout &#60;n&#62; is reached
-for the &#60;m&#62;th time. Note that callouts with string arguments are always given
-the number zero. See "Callouts" below for a description of the output when a
-callout it taken.
+only one number, 1 is returned instead of 0 (causing matching to backtrack)
+when a callout of that number is reached. If two numbers (&#60;n&#62;:&#60;m&#62;) are given, 1
+is returned when callout &#60;n&#62; is reached and there have been at least &#60;m&#62;
+callouts. The <b>callout_error</b> modifier is similar, except that
+PCRE2_ERROR_CALLOUT is returned, causing the entire matching process to be
+aborted. If both these modifiers are set for the same callout number,
+<b>callout_error</b> takes precedence.
+</P>
+<P>
+Note that callouts with string arguments are always given the number zero. See
+"Callouts" below for a description of the output when a callout it taken.
 </P>
 <P>
 The <b>callout_data</b> modifier can be given an unsigned or a negative number.
@@ -1180,7 +1193,7 @@ Finding all matches in a string
 </b><br>
 <P>
 Searching for all possible matches within a subject can be requested by the
-<b>global</b> or <b>/altglobal</b> modifier. After finding a match, the matching
+<b>global</b> or <b>altglobal</b> modifier. After finding a match, the matching
 function is called again to search the remainder of the subject. The difference
 between <b>global</b> and <b>altglobal</b> is that the former uses the
 <i>start_offset</i> argument to <b>pcre2_match()</b> or <b>pcre2_dfa_match()</b>
@@ -1480,7 +1493,7 @@ unset substring is shown as "&#60;unset&#62;", as for the second data line.
 If the strings contain any non-printing characters, they are output as \xhh
 escapes if the value is less than 256 and UTF mode is not set. Otherwise they
 are output as \x{hh...} escapes. See below for the definition of non-printing
-characters. If the <b>/aftertext</b> modifier is set, the output for substring
+characters. If the <b>aftertext</b> modifier is set, the output for substring
 0 is followed by the the rest of the subject string, identified by "0+" like
 this:
 <pre>
@@ -1673,7 +1686,7 @@ therefore shown as hex escapes.
 <P>
 When <b>pcre2test</b> is outputting text that is a matched part of a subject
 string, it behaves in the same way, unless a different locale has been set for
-the pattern (using the <b>/locale</b> modifier). In this case, the
+the pattern (using the <b>locale</b> modifier). In this case, the
 <b>isprint()</b> function is used to distinguish printing and non-printing
 characters.
 <a name="saverestore"></a></P>
@@ -1766,7 +1779,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC21" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 04 November 2016
+Last updated: 28 December 2016
 <br>
 Copyright &copy; 1997-2016 University of Cambridge.
 <br>

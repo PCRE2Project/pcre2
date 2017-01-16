@@ -11,16 +11,16 @@ dnl be defined as -RC2, for example. For real releases, it should be empty.
 m4_define(pcre2_major, [10])
 m4_define(pcre2_minor, [23])
 m4_define(pcre2_prerelease, [-RC1])
-m4_define(pcre2_date, [2016-08-01])
+m4_define(pcre2_date, [2017-01-16])
 
 # NOTE: The CMakeLists.txt file searches for the above variables in the first
 # 50 lines of this file. Please update that if the variables above are moved.
 
 # Libtool shared library interface versions (current:revision:age)
-m4_define(libpcre2_8_version,     [4:0:4])
-m4_define(libpcre2_16_version,    [4:0:4])
-m4_define(libpcre2_32_version,    [4:0:4])
-m4_define(libpcre2_posix_version, [1:0:0])
+m4_define(libpcre2_8_version,     [5:0:5])
+m4_define(libpcre2_16_version,    [5:0:5])
+m4_define(libpcre2_32_version,    [5:0:5])
+m4_define(libpcre2_posix_version, [1:1:0])
 
 AC_PREREQ(2.57)
 AC_INIT(PCRE2, pcre2_major.pcre2_minor[]pcre2_prerelease, , pcre2)
@@ -630,7 +630,7 @@ fi
 AC_DEFINE_UNQUOTED([PCRE2GREP_BUFSIZE], [$with_pcre2grep_bufsize], [
   The value of PCRE2GREP_BUFSIZE is the starting size of the buffer used by
   pcre2grep to hold parts of the file it is searching. The buffer will be
-  expanded up to PCRE2GREP_MAX_BUFSIZE if necessary, for files containing very 
+  expanded up to PCRE2GREP_MAX_BUFSIZE if necessary, for files containing very
   long lines. The actual amount of memory used by pcre2grep is three times this
   number, because it allows for the buffering of "before" and "after" lines.])
 
@@ -936,7 +936,7 @@ $PACKAGE-$VERSION configuration summary:
     C compiler flags ................... : ${CFLAGS} ${VISIBILITY_CFLAGS}
     Linker flags ....................... : ${LDFLAGS}
     Extra libraries .................... : ${LIBS}
-                                        
+
     Build 8-bit pcre2 library .......... : ${enable_pcre2_8}
     Build 16-bit pcre2 library ......... : ${enable_pcre2_16}
     Build 32-bit pcre2 library ......... : ${enable_pcre2_32}
@@ -966,7 +966,7 @@ $PACKAGE-$VERSION configuration summary:
     Link pcre2test with libreadline .... : ${enable_pcre2test_libreadline}
     Valgrind support ................... : ${enable_valgrind}
     Code coverage ...................... : ${enable_coverage}
-    Fuzzer support ..................... : ${enable_fuzz_support} 
+    Fuzzer support ..................... : ${enable_fuzz_support}
 
 EOF
 

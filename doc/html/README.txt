@@ -337,18 +337,18 @@ library. They are also documented in the pcre2build man page.
 
   --with-pcre2grep-bufsize=51200
 
-  The value must be a plain integer. The default is 20480. The amount of memory 
-  used by pcre2grep is actually three times this number, to allow for "before" 
-  and "after" lines. If very long lines are encountered, the buffer is 
+  The value must be a plain integer. The default is 20480. The amount of memory
+  used by pcre2grep is actually three times this number, to allow for "before"
+  and "after" lines. If very long lines are encountered, the buffer is
   automatically enlarged, up to a fixed maximum size.
-  
-. The default maximum size of pcre2grep's internal buffer can be set by, for 
+
+. The default maximum size of pcre2grep's internal buffer can be set by, for
   example:
-  
+
   --with-pcre2grep-max-bufsize=2097152
-  
-  The default is either 1048576 or the value of --with-pcre2grep-bufsize, 
-  whichever is the larger.  
+
+  The default is either 1048576 or the value of --with-pcre2grep-bufsize,
+  whichever is the larger.
 
 . It is possible to compile pcre2test so that it links with the libreadline
   or libedit libraries, by specifying, respectively,
@@ -372,21 +372,21 @@ library. They are also documented in the pcre2build man page.
   If you get error messages about missing functions tgetstr, tgetent, tputs,
   tgetflag, or tgoto, this is the problem, and linking with the ncurses library
   should fix it.
-  
-. There is a special option called --enable-fuzz-support for use by people who 
-  want to run fuzzing tests on PCRE2. At present this applies only to the 8-bit 
-  library. If set, it causes an extra library called libpcre2-fuzzsupport.a to 
+
+. There is a special option called --enable-fuzz-support for use by people who
+  want to run fuzzing tests on PCRE2. At present this applies only to the 8-bit
+  library. If set, it causes an extra library called libpcre2-fuzzsupport.a to
   be built, but not installed. This contains a single function called
-  LLVMFuzzerTestOneInput() whose arguments are a pointer to a string and the 
-  length of the string. When called, this function tries to compile the string 
-  as a pattern, and if that succeeds, to match it. This is done both with no 
+  LLVMFuzzerTestOneInput() whose arguments are a pointer to a string and the
+  length of the string. When called, this function tries to compile the string
+  as a pattern, and if that succeeds, to match it. This is done both with no
   options and with some random options bits that are generated from the string.
   Setting --enable-fuzz-support also causes a binary called pcre2fuzzcheck to
   be created. This is normally run under valgrind or used when PCRE2 is
   compiled with address sanitizing enabled. It calls the fuzzing function and
-  outputs information about it is doing. The input strings are specified by 
-  arguments: if an argument starts with "=" the rest of it is a literal input 
-  string. Otherwise, it is assumed to be a file name, and the contents of the 
+  outputs information about it is doing. The input strings are specified by
+  arguments: if an argument starts with "=" the rest of it is a literal input
+  string. Otherwise, it is assumed to be a file name, and the contents of the
   file are the test string.
 
 The "configure" script builds the following files for the basic C library:
@@ -777,7 +777,7 @@ The distribution should contain the files listed below.
   src/pcre2_xclass.c       )
 
   src/pcre2_printint.c     debugging function that is used by pcre2test,
-  src/pcre2_fuzzsupport.c  function for (optional) fuzzing support 
+  src/pcre2_fuzzsupport.c  function for (optional) fuzzing support
 
   src/config.h.in          template for config.h, when built by "configure"
   src/pcre2.h.in           template for pcre2.h when built by "configure"

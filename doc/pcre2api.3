@@ -511,7 +511,7 @@ If JIT is being used, but the JIT compilation is not being done immediately,
 (perhaps waiting to see if the pattern is used often enough) similar logic is
 required. JIT compilation updates a pointer within the compiled code block, so
 a thread must gain unique write access to the pointer before calling
-\fBpcre2_jit_compile()\fP. Alternatively, \fBpcre2_code_copy()\fP or 
+\fBpcre2_jit_compile()\fP. Alternatively, \fBpcre2_code_copy()\fP or
 \fBpcre2_code_copy_with_tables()\fP can be used to obtain a private copy of the
 compiled code.
 .
@@ -696,7 +696,7 @@ functions, \fIpcre2_match()\fP and \fIpcre2_dfa_match()\fP.
 .sp
 This parameter ajusts the limit, set when PCRE2 is built (default 250), on the
 depth of parenthesis nesting in a pattern. This limit stops rogue patterns
-using up too much system stack when being compiled. The limit applies to 
+using up too much system stack when being compiled. The limit applies to
 parentheses of all kinds, not just capturing parentheses.
 .sp
 .nf
@@ -840,9 +840,9 @@ This limit is of use only if it is set smaller than \fImatch_limit\fP.
 Limiting the recursion depth limits the amount of system stack that can be
 used, or, when PCRE2 has been compiled to use memory on the heap instead of the
 stack, the amount of heap memory that can be used. This limit is not relevant,
-and is ignored, when matching is done using JIT compiled code. However, it is 
+and is ignored, when matching is done using JIT compiled code. However, it is
 supported by \fBpcre2_dfa_match()\fP, which uses recursive function calls less
-frequently than \fBpcre2_match()\fP, but which can be caused to use a lot of 
+frequently than \fBpcre2_match()\fP, but which can be caused to use a lot of
 stack by a recursive pattern such as /(.)(?1)/ matched to a very long string.
 .P
 The default value for \fIrecursion_limit\fP can be set when PCRE2 is built; the
@@ -1056,11 +1056,11 @@ below),
 .\"
 the JIT information cannot be copied (because it is position-dependent).
 The new copy can initially be used only for non-JIT matching, though it can be
-passed to \fBpcre2_jit_compile()\fP if required. 
+passed to \fBpcre2_jit_compile()\fP if required.
 .P
 The \fBpcre2_code_copy()\fP function provides a way for individual threads in a
-multithreaded application to acquire a private copy of shared compiled code. 
-However, it does not make a copy of the character tables used by the compiled 
+multithreaded application to acquire a private copy of shared compiled code.
+However, it does not make a copy of the character tables used by the compiled
 pattern; the new pattern code points to the same tables as the original code.
 (See
 .\" HTML <a href="#jitcompiling">
@@ -1068,10 +1068,10 @@ pattern; the new pattern code points to the same tables as the original code.
 "Locale Support"
 .\"
 below for details of these character tables.) In many applications the same
-tables are used throughout, so this behaviour is appropriate. Nevertheless, 
-there are occasions when a copy of a compiled pattern and the relevant tables 
-are needed. The \fBpcre2_code_copy_with_tables()\fP provides this facility. 
-Copies of both the code and the tables are made, with the new code pointing to 
+tables are used throughout, so this behaviour is appropriate. Nevertheless,
+there are occasions when a copy of a compiled pattern and the relevant tables
+are needed. The \fBpcre2_code_copy_with_tables()\fP provides this facility.
+Copies of both the code and the tables are made, with the new code pointing to
 the new tables. The memory for the new tables is automatically freed when
 \fBpcre2_code_free()\fP is called for the new copy of the compiled code.
 .P
@@ -1114,7 +1114,7 @@ NULL immediately. Otherwise, the variables to which these point are set to an
 error code and an offset (number of code units) within the pattern,
 respectively, when \fBpcre2_compile()\fP returns NULL because a compilation
 error has occurred. The values are not defined when compilation is successful
-and \fBpcre2_compile()\fP returns a non-NULL value. 
+and \fBpcre2_compile()\fP returns a non-NULL value.
 .P
 The value returned in \fIerroroffset\fP is an indication of where in the
 pattern the error occurred. It is not necessarily the furthest point in the

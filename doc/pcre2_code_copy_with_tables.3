@@ -15,7 +15,7 @@ PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
 This function makes a copy of the memory used for a compiled pattern, excluding
 any memory used by the JIT compiler. Without a subsequent call to
-\fBpcre2_jit_compile()\fP, the copy can be used only for non-JIT matching. 
+\fBpcre2_jit_compile()\fP, the copy can be used only for non-JIT matching.
 Unlike \fBpcre2_code_copy()\fP, a separate copy of the character tables is also
 made, with the new code pointing to it. This memory will be automatically freed
 when \fBpcre2_code_free()\fP is called. The yield of the function is NULL if

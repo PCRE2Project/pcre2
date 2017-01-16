@@ -91,7 +91,7 @@ if a line is too long and the buffer can no longer be expanded.
 </P>
 <P>
 The block of memory that is actually used is three times the "buffer size", to
-allow for buffering "before" and "after" lines. If the buffer size is too 
+allow for buffering "before" and "after" lines. If the buffer size is too
 small, fewer than requested "before" and "after" lines may be output.
 </P>
 <P>
@@ -178,8 +178,8 @@ Treat binary files as text. This is equivalent to
 </P>
 <P>
 <b>-B</b> <i>number</i>, <b>--before-context=</b><i>number</i>
-Output up to <i>number</i> lines of context before each matching line. Fewer 
-lines are output if the previous match or the start of the file is within 
+Output up to <i>number</i> lines of context before each matching line. Fewer
+lines are output if the previous match or the start of the file is within
 <i>number</i> lines, or if the processing buffer size has been set too small. If
 file names and/or line numbers are being output, a hyphen separator is used
 instead of a colon for the context lines. A line containing "--" is output
@@ -202,8 +202,8 @@ return code.
 </P>
 <P>
 <b>--buffer-size=</b><i>number</i>
-Set the parameter that controls how much memory is obtained at the start of 
-processing for buffering files that are being scanned. See also 
+Set the parameter that controls how much memory is obtained at the start of
+processing for buffering files that are being scanned. See also
 <b>--max-buffer-size</b> below.
 </P>
 <P>
@@ -222,7 +222,7 @@ suppressed lines than the count (that is, the number of matches).
 <br>
 <br>
 If no lines are selected, the number zero is output. If several files are are
-being scanned, a count is output for each of them and the <b>-t</b> option can 
+being scanned, a count is output for each of them and the <b>-t</b> option can
 be used to cause a total to be output at the end. However, if the
 <b>--files-with-matches</b> option is also used, only those files whose counts
 are greater than zero are listed. When <b>-c</b> is used, the <b>-A</b>,
@@ -245,13 +245,23 @@ because <b>pcre2grep</b> has to search for all possible matches in a line, not
 just one, in order to colour them all.
 <br>
 <br>
-The colour that is used can be specified by setting the environment variable
-PCRE2GREP_COLOUR or PCRE2GREP_COLOR. If neither of these are set,
-<b>pcre2grep</b> looks for GREP_COLOUR or GREP_COLOR. The value of the variable
-should be a string of two numbers, separated by a semicolon. They are copied
-directly into the control string for setting colour on a terminal, so it is
-your responsibility to ensure that they make sense. If neither of the
-environment variables is set, the default is "1;31", which gives red.
+The colour that is used can be specified by setting one of the environment
+variables PCRE2GREP_COLOUR, PCRE2GREP_COLOR, PCREGREP_COLOUR, or
+PCREGREP_COLOR, which are checked in that order. If none of these are set,
+<b>pcre2grep</b> looks for GREP_COLORS or GREP_COLOR (in that order). The value
+of the variable should be a string of two numbers, separated by a semicolon,
+except in the case of GREP_COLORS, which must start with "ms=" or "mt="
+followed by two semicolon-separated colours, terminated by the end of the
+string or by a colon. If GREP_COLORS does not start with "ms=" or "mt=" it is
+ignored, and GREP_COLOR is checked.
+<br>
+<br>
+If the string obtained from one of the above variables contains any characters
+other than semicolon or digits, the setting is ignored and the default colour
+is used. The string is copied directly into the control string for setting
+colour on a terminal, so it is your responsibility to ensure that the values
+make sense. If no relevant environment variable is set, the default is "1;31",
+which gives red.
 </P>
 <P>
 <b>-D</b> <i>action</i>, <b>--devices=</b><i>action</i>
@@ -353,7 +363,7 @@ tested before the file's patterns. However, no other pattern is taken from the
 command line; all arguments are treated as the names of paths to be searched.
 </P>
 <P>
-<b>--file-list</b>=<i>filename</i> 
+<b>--file-list</b>=<i>filename</i>
 Read a list of files and/or directories that are to be scanned from the given
 file, one per line. Trailing white space is removed from each line, and blank
 lines are ignored. These paths are processed before any that are listed on the
@@ -518,8 +528,8 @@ when the PCRE2 library is compiled, with the default default being 10 million.
 </P>
 <P>
 \fB--max-buffer-size=<i>number</i>
-This limits the expansion of the processing buffer, whose initial size can be 
-set by <b>--buffer-size</b>. The maximum buffer size is silently forced to be no 
+This limits the expansion of the processing buffer, whose initial size can be
+set by <b>--buffer-size</b>. The maximum buffer size is silently forced to be no
 smaller than the starting buffer size.
 </P>
 <P>
@@ -619,7 +629,7 @@ capturing parentheses do not exist in the pattern, or were not set in the
 match, nothing is output unless the file name or line number are being output.
 <br>
 <br>
-If this option is given multiple times, multiple substrings are output for each 
+If this option is given multiple times, multiple substrings are output for each
 match, in the order the options are given, and all on one line. For example,
 -o3 -o1 -o3 causes the substrings matched by capturing parentheses 3 and 1 and
 then 3 again to be output. By default, there is no separator (but see the next
@@ -693,7 +703,7 @@ specified by any of the <b>--include</b> or <b>--exclude</b> options.
 <P>
 <b>-x</b>, <b>--line-regex</b>, <b>--line-regexp</b>
 Force the patterns to be anchored (each must start matching at the beginning of
-a line) and in addition, require them to match entire lines. In multiline mode 
+a line) and in addition, require them to match entire lines. In multiline mode
 the match may be more than one line. This is equivalent to having \A and \Z
 characters at the start and end of each alternative top-level branch in every
 pattern. This option applies only to the patterns that are matched against the
@@ -773,12 +783,12 @@ character. Otherwise <b>pcre2grep</b> will assume that it has no data.
 </P>
 <br><a name="SEC10" href="#TOC1">CALLING EXTERNAL SCRIPTS</a><br>
 <P>
-On non-Windows systems, <b>pcre2grep</b> has, by default, support for calling
-external programs or scripts during matching by making use of PCRE2's callout
-facility. However, this support can be disabled when <b>pcre2grep</b> is built.
-You can find out whether your binary has support for callouts by running it
-with the <b>--help</b> option. If the support is not enabled, all callouts in
-patterns are ignored by <b>pcre2grep</b>.
+<b>pcre2grep</b> has, by default, support for calling external programs or
+scripts during matching by making use of PCRE2's callout facility. However,
+this support can be disabled when <b>pcre2grep</b> is built. You can find out
+whether your binary has support for callouts by running it with the <b>--help</b>
+option. If the support is not enabled, all callouts in patterns are ignored by
+<b>pcre2grep</b>.
 </P>
 <P>
 A callout in a PCRE2 pattern is of the form (?C&#60;arg&#62;) where the argument is
@@ -860,7 +870,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC15" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 31 October 2016
+Last updated: 31 December 2016
 <br>
 Copyright &copy; 1997-2016 University of Cambridge.
 <br>

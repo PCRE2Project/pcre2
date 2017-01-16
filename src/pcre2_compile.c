@@ -116,9 +116,11 @@ them will be able to (i.e. assume a 64-bit world). */
 
 /* Function definitions to allow mutual recursion */
 
+#ifdef SUPPORT_UNICODE
 static unsigned int
-  add_list_to_class_internal(uint8_t *, PCRE2_UCHAR **, uint32_t, compile_block *,
-    const uint32_t *, unsigned int);
+  add_list_to_class_internal(uint8_t *, PCRE2_UCHAR **, uint32_t,
+    compile_block *, const uint32_t *, unsigned int);
+#endif
 
 static int
   compile_regex(uint32_t, PCRE2_UCHAR **, uint32_t **, int *, uint32_t,
@@ -4381,16 +4383,14 @@ return n8;    /* Number of 8-bit characters */
 
 
 
+#ifdef SUPPORT_UNICODE
 /*************************************************
 * Add a list of characters to a class (internal) *
 *************************************************/
 
 /* This function is used for adding a list of case-equivalent characters to a
-class, and also for adding a list of horizontal or vertical whitespace. If the
-list is in order (which it should be), ranges of characters are detected and
-handled appropriately. This function is called (sometimes recursively) only
-from within the "add to class" set of functions. The external entry point is
-add_list_to_class().
+class when in UTF mode. This function is called only from within
+add_to_class_internal(), with which it is mutually recursive.
 
 Arguments:
   classbits     the bit map for characters < 256
@@ -4423,6 +4423,7 @@ while (p[0] < NOTACHAR)
   }
 return n8;
 }
+#endif
 
 
 
@@ -4459,8 +4460,11 @@ return add_to_class_internal(classbits, uchardptr, options, cb, start, end);
 *   External entry point for add list to class   *
 *************************************************/
 
-/* This function sets the overall range so that the internal functions can try
-to avoid duplication when handling case-independence.
+/* This function is used for adding a list of horizontal or vertical whitespace
+characters to a class. The list must be in order so that ranges of characters
+can be detected and handled appropriately. This function sets the overall range
+so that the internal functions can try to avoid duplication when handling
+case-independence.
 
 Arguments:
   classbits     the bit map for characters < 256

@@ -1937,6 +1937,8 @@ static int
 fill_buffer(void *handle, int frtype, char *buffer, int length,
   BOOL input_line_buffered)
 {
+(void)frtype;  /* Avoid warning when not used */
+
 #ifdef SUPPORT_LIBZ
 if (frtype == FR_LIBZ)
   return gzread((gzFile)handle, buffer, length);
@@ -3015,8 +3017,8 @@ sprintf((char *)buffer, "%s%.*s%s", prefix[popts], patlen, ps, suffix[popts]);
 p->compiled = pcre2_compile(buffer, PCRE2_ZERO_TERMINATED, options, &errcode,
   &erroffset, compile_context);
 
-/* Handle successful compile. Try JIT-compiling if supported and enabled. We 
-ignore any JIT compiler errors, relying falling back to interpreting if 
+/* Handle successful compile. Try JIT-compiling if supported and enabled. We
+ignore any JIT compiler errors, relying falling back to interpreting if
 anything goes wrong with JIT. */
 
 if (p->compiled != NULL)
@@ -3577,10 +3579,10 @@ if (colour_option != NULL && strcmp(colour_option, "never") != 0)
     if (cs == NULL) cs = getenv("PCREGREP_COLOR");
     if (cs == NULL) cs = parse_grep_colors(getenv("GREP_COLORS"));
     if (cs == NULL) cs = getenv("GREP_COLOR");
-    if (cs != NULL) 
+    if (cs != NULL)
       {
       if (strspn(cs, ";0123456789") == strlen(cs)) colour_string = cs;
-      } 
+      }
 #ifdef WIN32
     init_colour_output();
 #endif

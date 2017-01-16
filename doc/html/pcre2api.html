@@ -570,7 +570,7 @@ If JIT is being used, but the JIT compilation is not being done immediately,
 (perhaps waiting to see if the pattern is used often enough) similar logic is
 required. JIT compilation updates a pointer within the compiled code block, so
 a thread must gain unique write access to the pointer before calling
-<b>pcre2_jit_compile()</b>. Alternatively, <b>pcre2_code_copy()</b> or 
+<b>pcre2_jit_compile()</b>. Alternatively, <b>pcre2_code_copy()</b> or
 <b>pcre2_code_copy_with_tables()</b> can be used to obtain a private copy of the
 compiled code.
 </P>
@@ -740,7 +740,7 @@ functions, <i>pcre2_match()</i> and <i>pcre2_dfa_match()</i>.
 <br>
 This parameter ajusts the limit, set when PCRE2 is built (default 250), on the
 depth of parenthesis nesting in a pattern. This limit stops rogue patterns
-using up too much system stack when being compiled. The limit applies to 
+using up too much system stack when being compiled. The limit applies to
 parentheses of all kinds, not just capturing parentheses.
 <b>int pcre2_set_compile_recursion_guard(pcre2_compile_context *<i>ccontext</i>,</b>
 <b>  int (*<i>guard_function</i>)(uint32_t, void *), void *<i>user_data</i>);</b>
@@ -879,21 +879,23 @@ This limit is of use only if it is set smaller than <i>match_limit</i>.
 Limiting the recursion depth limits the amount of system stack that can be
 used, or, when PCRE2 has been compiled to use memory on the heap instead of the
 stack, the amount of heap memory that can be used. This limit is not relevant,
-and is ignored, when matching is done using JIT compiled code or by the
-<b>pcre2_dfa_match()</b> function.
+and is ignored, when matching is done using JIT compiled code. However, it is
+supported by <b>pcre2_dfa_match()</b>, which uses recursive function calls less
+frequently than <b>pcre2_match()</b>, but which can be caused to use a lot of
+stack by a recursive pattern such as /(.)(?1)/ matched to a very long string.
 </P>
 <P>
 The default value for <i>recursion_limit</i> can be set when PCRE2 is built; the
 default default is the same value as the default for <i>match_limit</i>. If the
-limit is exceeded, <b>pcre2_match()</b> returns PCRE2_ERROR_RECURSIONLIMIT. A
-value for the recursion limit may also be supplied by an item at the start of a
-pattern of the form
+limit is exceeded, <b>pcre2_match()</b> and <b>pcre2_dfa_match()</b> return
+PCRE2_ERROR_RECURSIONLIMIT. A value for the recursion limit may also be
+supplied by an item at the start of a pattern of the form
 <pre>
   (*LIMIT_RECURSION=ddd)
 </pre>
 where ddd is a decimal number. However, such a setting is ignored unless ddd is
-less than the limit set by the caller of <b>pcre2_match()</b> or, if no such
-limit is set, less than the default.
+less than the limit set by the caller of <b>pcre2_match()</b> or
+<b>pcre2_dfa_match()</b> or, if no such limit is set, less than the default.
 <b>int pcre2_set_recursion_memory_management(</b>
 <b>  pcre2_match_context *<i>mcontext</i>,</b>
 <b>  void *(*<i>private_malloc</i>)(PCRE2_SIZE, void *),</b>
@@ -1087,20 +1089,20 @@ if the code has been processed by the JIT compiler (see
 <a href="#jitcompiling">below),</a>
 the JIT information cannot be copied (because it is position-dependent).
 The new copy can initially be used only for non-JIT matching, though it can be
-passed to <b>pcre2_jit_compile()</b> if required. 
+passed to <b>pcre2_jit_compile()</b> if required.
 </P>
 <P>
 The <b>pcre2_code_copy()</b> function provides a way for individual threads in a
-multithreaded application to acquire a private copy of shared compiled code. 
-However, it does not make a copy of the character tables used by the compiled 
+multithreaded application to acquire a private copy of shared compiled code.
+However, it does not make a copy of the character tables used by the compiled
 pattern; the new pattern code points to the same tables as the original code.
 (See
 <a href="#jitcompiling">"Locale Support"</a>
 below for details of these character tables.) In many applications the same
-tables are used throughout, so this behaviour is appropriate. Nevertheless, 
-there are occasions when a copy of a compiled pattern and the relevant tables 
-are needed. The <b>pcre2_code_copy_with_tables()</b> provides this facility. 
-Copies of both the code and the tables are made, with the new code pointing to 
+tables are used throughout, so this behaviour is appropriate. Nevertheless,
+there are occasions when a copy of a compiled pattern and the relevant tables
+are needed. The <b>pcre2_code_copy_with_tables()</b> provides this facility.
+Copies of both the code and the tables are made, with the new code pointing to
 the new tables. The memory for the new tables is automatically freed when
 <b>pcre2_code_free()</b> is called for the new copy of the compiled code.
 </P>
@@ -1140,7 +1142,7 @@ NULL immediately. Otherwise, the variables to which these point are set to an
 error code and an offset (number of code units) within the pattern,
 respectively, when <b>pcre2_compile()</b> returns NULL because a compilation
 error has occurred. The values are not defined when compilation is successful
-and <b>pcre2_compile()</b> returns a non-NULL value. 
+and <b>pcre2_compile()</b> returns a non-NULL value.
 </P>
 <P>
 The value returned in <i>erroroffset</i> is an indication of where in the
@@ -1976,7 +1978,7 @@ Information about a successful or unsuccessful match is placed in a match
 data block, which is an opaque structure that is accessed by function calls. In
 particular, the match data block contains a vector of offsets into the subject
 string that define the matched part of the subject and any substrings that were
-captured. This is know as the <i>ovector</i>.
+captured. This is known as the <i>ovector</i>.
 </P>
 <P>
 Before calling <b>pcre2_match()</b>, <b>pcre2_dfa_match()</b>, or
@@ -3263,7 +3265,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC41" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 22 November 2016
+Last updated: 23 December 2016
 <br>
 Copyright &copy; 1997-2016 University of Cambridge.
 <br>

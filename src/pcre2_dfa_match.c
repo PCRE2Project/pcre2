@@ -3216,7 +3216,7 @@ if (mcontext == NULL)
   {
   mb->callout = NULL;
   mb->memctl = re->memctl;
-  mb->match_limit_recursion = PRIV(default_match_context).recursion_limit; 
+  mb->match_limit_recursion = PRIV(default_match_context).recursion_limit;
   }
 else
   {
@@ -3229,7 +3229,7 @@ else
   mb->callout = mcontext->callout;
   mb->callout_data = mcontext->callout_data;
   mb->memctl = mcontext->memctl;
-  mb->match_limit_recursion = mcontext->recursion_limit; 
+  mb->match_limit_recursion = mcontext->recursion_limit;
   }
 if (mb->match_limit_recursion > re->limit_recursion)
   mb->match_limit_recursion = re->limit_recursion;

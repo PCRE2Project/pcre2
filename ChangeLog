@@ -2,8 +2,8 @@ Change Log for PCRE2
 --------------------
 
 
-Version 10.23 xx-xxxxxx-2016
-----------------------------
+Version 10.23 16-January-2017
+-----------------------------
 
 1. Extended pcre2test with the utf8_input modifier so that it is able to
 generate all possible 16-bit and 32-bit code unit values in non-UTF modes.
@@ -37,12 +37,12 @@ some minor bugs and Perl incompatibilities were fixed, including:
   (f) When testing zero-terminated patterns under valgrind, the terminating
       zero is now marked "no access". This catches bugs that would otherwise
       show up only with non-zero-terminated patterns.
-      
-  (g) A hyphen appearing immediately after a POSIX character class (for example 
-      /[[:ascii:]-z]/) now generates an error. Perl does accept this as a 
-      literal, but gives a warning, so it seems best to fail it in PCRE. 
-      
-  (h) An empty \Q\E sequence may appear after a callout that precedes an 
+
+  (g) A hyphen appearing immediately after a POSIX character class (for example
+      /[[:ascii:]-z]/) now generates an error. Perl does accept this as a
+      literal, but gives a warning, so it seems best to fail it in PCRE.
+
+  (h) An empty \Q\E sequence may appear after a callout that precedes an
       assertion condition (it is, of course, ignored).
 
 One effect of the refactoring is that some error numbers and messages have
@@ -125,9 +125,9 @@ fully released code, but are noted here for the record.
   (r) If a character whose code point was greater than 0xffff appeared within
       a lookbehind that was within another lookbehind, the calculation of the
       lookbehind length went wrong and could provoke an internal error.
-      
+
   (t) The sequence \E- or \Q\E- after a POSIX class in a character class caused
-      an internal error. Now the hyphen is treated as a literal.  
+      an internal error. Now the hyphen is treated as a literal.
 
 4. Back references are now permitted in lookbehind assertions when there are
 no duplicated group numbers (that is, (?| has not been used), and, if the
@@ -269,14 +269,14 @@ auto_callout".
 pattern with PCRE2_UCP set without PCRE2_UTF if a class required all wide
 characters to match (for example, /[\s[:^ascii:]]/).
 
-40. The callout_error modifier has been added to pcre2test to make it possible 
+40. The callout_error modifier has been added to pcre2test to make it possible
 to return PCRE2_ERROR_CALLOUT from a callout.
 
-41. A minor change to pcre2grep: colour reset is now "<esc>[0m" instead of 
+41. A minor change to pcre2grep: colour reset is now "<esc>[0m" instead of
 "<esc>[00m".
 
-42. The limit in the auto-possessification code that was intended to catch 
-overly-complicated patterns and not spend too much time auto-possessifying was 
+42. The limit in the auto-possessification code that was intended to catch
+overly-complicated patterns and not spend too much time auto-possessifying was
 being reset too often, resulting in very long compile times for some patterns.
 Now such patterns are no longer completely auto-possessified.
 
@@ -284,10 +284,10 @@ Now such patterns are no longer completely auto-possessified.
 
 44. Added a new Windows script RunGrepTest.bat, courtesy of Jason Hood.
 
-45. Minor cosmetic fix to pcre2test: move a variable that is not used under 
+45. Minor cosmetic fix to pcre2test: move a variable that is not used under
 Windows into the "not Windows" code.
 
-46. Applied Jason Hood's patches to upgrade pcre2grep under Windows and tidy 
+46. Applied Jason Hood's patches to upgrade pcre2grep under Windows and tidy
 some of the code:
 
   * normalised the Windows condition by ensuring WIN32 is defined;
@@ -306,27 +306,27 @@ some of the code:
   * fixes a typo.
 
 In addition, colour settings containing anything other than digits and
-semicolon are ignored, and the colour controls are no longer output for empty 
+semicolon are ignored, and the colour controls are no longer output for empty
 strings.
 
 47. Detecting patterns that are too large inside the length-measuring loop
 saves processing ridiculously long patterns to their end.
 
-48. Ignore PCRE2_CASELESS when processing \h, \H, \v, and \V in classes as it 
+48. Ignore PCRE2_CASELESS when processing \h, \H, \v, and \V in classes as it
 just wastes time. In the UTF case it can also produce redundant entries in
 XCLASS lists caused by characters with multiple other cases and pairs of
 characters in the same "not-x" sublists.
 
-49. A pattern such as /(?=(a\K))/ can report the end of the match being before 
-its start; pcre2test was not handling this correctly when using the POSIX 
+49. A pattern such as /(?=(a\K))/ can report the end of the match being before
+its start; pcre2test was not handling this correctly when using the POSIX
 interface (it was OK with the native interface).
 
-50. In pcre2grep, ignore all JIT compile errors. This means that pcre2grep will 
-continue to work, falling back to interpretation if anything goes wrong with 
+50. In pcre2grep, ignore all JIT compile errors. This means that pcre2grep will
+continue to work, falling back to interpretation if anything goes wrong with
 JIT.
 
-51. Applied patches from Christian Persch to configure.ac to make use of the 
-AC_USE_SYSTEM_EXTENSIONS macro and to test for functions used by the JIT 
+51. Applied patches from Christian Persch to configure.ac to make use of the
+AC_USE_SYSTEM_EXTENSIONS macro and to test for functions used by the JIT
 modules.
 
 52. Minor fixed to pcre2grep from Jason Hood:
@@ -335,7 +335,7 @@ modules.
       to use appropriate quotes [in an example];
     * LC_ALL was displayed as "LCC_ALL";
     * numbers 11, 12 & 13 should end in "th".
-    * use double quotes in usage message 
+    * use double quotes in usage message
 
 
 Version 10.22 29-July-2016

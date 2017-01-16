@@ -116,7 +116,11 @@ COMMAND LINE OPTIONS
                  is the default. If the 32-bit library  has  not  been  built,
                  this option causes an error.
 
-       -b        Behave  as if each pattern has the /fullbincode modifier; the
+       -ac       Behave as if each pattern has the auto_callout modifier, that
+                 is, insert automatic callouts into every pattern that is com-
+                 piled.
+
+       -b        Behave  as  if each pattern has the fullbincode modifier; the
                  full internal binary form of the pattern is output after com-
                  pilation.
 
@@ -174,7 +178,7 @@ COMMAND LINE OPTIONS
 
        -help     Output a brief summary these options and then exit.
 
-       -i        Behave as if each pattern has the /info modifier; information
+       -i        Behave  as if each pattern has the info modifier; information
                  about the compiled pattern is given after compilation.
 
        -jit      Behave as if each pattern line has the  jit  modifier;  after
@@ -724,7 +728,7 @@ PATTERN MODIFIERS
          2  compile JIT code for soft partial matching
          4  compile JIT code for hard partial matching
 
-       The possible values for the /jit modifier are therefore:
+       The possible values for the jit modifier are therefore:
 
          0  disable JIT
          1  normal matching only
@@ -764,24 +768,24 @@ PATTERN MODIFIERS
 
    Setting a locale
 
-       The /locale modifier must specify the name of a locale, for example:
+       The locale modifier must specify the name of a locale, for example:
 
          /pattern/locale=fr_FR
 
        The given locale is set, pcre2_maketables() is called to build a set of
        character  tables for the locale, and this is then passed to pcre2_com-
        pile() when compiling the regular expression. The same tables are  used
-       when matching the following subject lines. The /locale modifier applies
+       when  matching the following subject lines. The locale modifier applies
        only to the pattern on which it appears, but can be given in a #pattern
        command  if a default is needed. Setting a locale and alternate charac-
        ter tables are mutually exclusive.
 
    Showing pattern memory
 
-       The /memory modifier causes the size in bytes of  the  memory  used  to
-       hold  the compiled pattern to be output. This does not include the size
-       of the pcre2_code block; it is just the actual compiled  data.  If  the
-       pattern is subsequently passed to the JIT compiler, the size of the JIT
+       The memory modifier causes the size in bytes of the memory used to hold
+       the  compiled  pattern  to be output. This does not include the size of
+       the pcre2_code block; it is just the actual compiled data. If the  pat-
+       tern  is  subsequently  passed to the JIT compiler, the size of the JIT
        compiled code is also output. Here is an example:
 
            re> /a(b)c/jit,memory
@@ -837,7 +841,7 @@ PATTERN MODIFIERS
 
    Testing the stack guard feature
 
-       The  /stackguard  modifier  is  used  to test the use of pcre2_set_com-
+       The  stackguard  modifier  is  used  to  test the use of pcre2_set_com-
        pile_recursion_guard(), a function that is  provided  to  enable  stack
        availability  to  be checked during compilation (see the pcre2api docu-
        mentation for details). If the number  specified  by  the  modifier  is
@@ -849,7 +853,7 @@ PATTERN MODIFIERS
 
    Using alternative character tables
 
-       The  value specified for the /tables modifier must be one of the digits
+       The  value  specified for the tables modifier must be one of the digits
        0, 1, or 2. It causes a specific set of built-in character tables to be
        passed to pcre2_compile(). This is used in the PCRE2 tests to check be-
        haviour with different character tables. The digit specifies the tables
@@ -931,7 +935,7 @@ SUBJECT MODIFIERS
        The  partial matching modifiers are provided with abbreviations because
        they appear frequently in tests.
 
-       If the /posix modifier was present on the pattern,  causing  the  POSIX
+       If the posix modifier was present on the  pattern,  causing  the  POSIX
        wrapper API to be used, the only option-setting modifiers that have any
        effect  are  notbol,  notempty,   and   noteol,   causing   REG_NOTBOL,
        REG_NOTEMPTY,  and REG_NOTEOL, respectively, to be passed to regexec().
@@ -951,6 +955,7 @@ SUBJECT MODIFIERS
              altglobal                  alternative global matching
              callout_capture            show captures at callout time
              callout_data=<n>           set a value to pass via callouts
+             callout_error=<n>[:<m>]    control callout error
              callout_fail=<n>[:<m>]     control callout failure
              callout_none               do not supply a callout function
              copy=<number or name>      copy captured substring
@@ -1042,14 +1047,22 @@ SUBJECT MODIFIERS
 
        A callout function is supplied when pcre2test calls the library  match-
        ing  functions, unless callout_none is specified. If callout_capture is
-       set, the current captured groups are output when a callout occurs.
+       set, the current captured groups are output when a callout occurs.  The
+       default return from the callout function is zero, which allows matching
+       to continue.
 
        The callout_fail modifier can be given one or two numbers. If there  is
-       only one number, 1 is returned instead of 0 when a callout of that num-
-       ber is reached. If two numbers are given, 1 is  returned  when  callout
-       <n> is reached for the <m>th time. Note that callouts with string argu-
-       ments are always given the number zero.  See  "Callouts"  below  for  a
-       description of the output when a callout it taken.
+       only  one number, 1 is returned instead of 0 (causing matching to back-
+       track) when a callout  of  that  number  is  reached.  If  two  numbers
+       (<n>:<m>)  are  given,  1  is  returned when callout <n> is reached and
+       there have been at least <m> callouts. The  callout_error  modifier  is
+       similar,  except  that  PCRE2_ERROR_CALLOUT  is  returned,  causing the
+       entire matching process to be aborted. If both these modifiers are  set
+       for the same callout number, callout_error takes precedence.
+
+       Note  that  callouts  with string arguments are always given the number
+       zero. See "Callouts" below for a description of the output when a call-
+       out it taken.
 
        The  callout_data  modifier can be given an unsigned or a negative num-
        ber.  This is set as the "user data" that is  passed  to  the  matching
@@ -1060,7 +1073,7 @@ SUBJECT MODIFIERS
    Finding all matches in a string
 
        Searching for all possible matches within a subject can be requested by
-       the global or /altglobal modifier. After finding a match, the  matching
+       the global or altglobal modifier. After finding a match,  the  matching
        function  is  called  again to search the remainder of the subject. The
        difference between global and altglobal is that  the  former  uses  the
        start_offset  argument  to  pcre2_match() or pcre2_dfa_match() to start
@@ -1329,7 +1342,7 @@ DEFAULT OUTPUT FROM pcre2test
        If  the strings contain any non-printing characters, they are output as
        \xhh escapes if the value is less than 256 and UTF  mode  is  not  set.
        Otherwise they are output as \x{hh...} escapes. See below for the defi-
-       nition of non-printing characters. If the /aftertext modifier  is  set,
+       nition of non-printing characters. If the aftertext  modifier  is  set,
        the  output  for substring 0 is followed by the the rest of the subject
        string, identified by "0+" like this:
 
@@ -1512,7 +1525,7 @@ NON-PRINTING CHARACTERS
 
        When  pcre2test  is outputting text that is a matched part of a subject
        string, it behaves in the same way, unless a different locale has  been
-       set  for  the  pattern  (using the /locale modifier). In this case, the
+       set  for  the  pattern  (using  the locale modifier). In this case, the
        isprint() function is used to  distinguish  printing  and  non-printing
        characters.
 
@@ -1601,5 +1614,5 @@ AUTHOR
 
 REVISION
 
-       Last updated: 04 November 2016
+       Last updated: 28 December 2016
        Copyright (c) 1997-2016 University of Cambridge.

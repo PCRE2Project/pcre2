@@ -380,15 +380,15 @@ scanning, in order to be able to output "before" and "after" lines when it
 finds a match. The starting size of the buffer is controlled by a parameter
 whose default value is 20K. The buffer itself is three times this size, but
 because of the way it is used for holding "before" lines, the longest line that
-is guaranteed to be processable is the parameter size. If a longer line is 
+is guaranteed to be processable is the parameter size. If a longer line is
 encountered, <b>pcre2grep</b> automatically expands the buffer, up to a
 specified maximum size, whose default is 1M or the starting size, whichever is
 the larger. You can change the default parameter values by adding, for example,
 <pre>
   --with-pcre2grep-bufsize=51200
-  --with-pcre2grep-max-bufsize=2097152 
+  --with-pcre2grep-max-bufsize=2097152
 </pre>
-to the <b>configure</b> command. The caller of \fPpcre2grep\fP can override 
+to the <b>configure</b> command. The caller of \fPpcre2grep\fP can override
 these values by using --buffer-size and --max-buffer-size on the command line.
 </P>
 <br><a name="SEC18" href="#TOC1">PCRE2TEST OPTION FOR LIBREADLINE SUPPORT</a><br>

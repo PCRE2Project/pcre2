@@ -173,9 +173,9 @@ static const unsigned char compile_error_texts[] =
   "regular expression is too complicated\0"
   "lookbehind assertion is too long\0"
   "pattern string is longer than the limit set by the application\0"
-  "internal error: unknown code in parsed pattern\0" 
+  "internal error: unknown code in parsed pattern\0"
   /* 90 */
-  "internal error: bad code value in parsed_skip()\0" 
+  "internal error: bad code value in parsed_skip()\0"
   ;
 
 /* Match-time and UTF error texts are in the same format. */

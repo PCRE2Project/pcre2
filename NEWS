@@ -1,6 +1,42 @@
 News about PCRE2 releases
 -------------------------
 
+Version 10.23 16-January-2017
+-----------------------------
+
+1. ChangeLog has the details of a lot of bug fixes and tidies.
+
+2. There has been a major re-factoring of the pcre2_compile.c file. Most syntax
+checking is now done in the pre-pass that identifies capturing groups. This has
+reduced the amount of duplication and made the code tidier. While doing this,
+some minor bugs and Perl incompatibilities were fixed (see ChangeLog for
+details.)
+
+3. Back references are now permitted in lookbehind assertions when there are
+no duplicated group numbers (that is, (?| has not been used), and, if the
+reference is by name, there is only one group of that name. The referenced
+group must, of course be of fixed length.
+
+4. \g{+<number>} (e.g. \g{+2} ) is now supported. It is a "forward back
+reference" and can be useful in repetitions (compare \g{-<number>} ). Perl does
+not recognize this syntax.
+
+5. pcre2grep now automatically expands its buffer up to a maximum set by
+--max-buffer-size.
+
+6. The -t option (grand total) has been added to pcre2grep.
+
+7. A new function called pcre2_code_copy_with_tables() exists to copy a
+compiled pattern along with a private copy of the character tables that is
+uses.
+
+8. A user supplied a number of patches to upgrade pcre2grep under Windows and
+tidy the code.
+
+9. Several updates have been made to pcre2test and test scripts (see
+ChangeLog).
+
+
 Version 10.22 29-July-2016
 --------------------------
 
