@@ -4663,7 +4663,7 @@ if ((pat_patctl.control & CTL_HEXPAT) != 0)
         if (d == 0)
           {
           fprintf(outfile, "** Missing closing quote in hex pattern: "
-            "opening quote is at offset %lu.\n", pq - buffer - 2);
+            "opening quote is at offset %td.\n", pq - buffer - 2);
           return PR_SKIP;
           }
         if (d == c) break;
@@ -4677,7 +4677,7 @@ if ((pat_patctl.control & CTL_HEXPAT) != 0)
       {
       if (!isxdigit(c))
         {
-        fprintf(outfile, "** Unexpected non-hex-digit '%c' at offset %lu "
+        fprintf(outfile, "** Unexpected non-hex-digit '%c' at offset %td "
           "in hex pattern: quote missing?\n", c, pp - buffer - 2);
         return PR_SKIP;
         }
@@ -4689,7 +4689,7 @@ if ((pat_patctl.control & CTL_HEXPAT) != 0)
       d = *pp;
       if (!isxdigit(d))
         {
-        fprintf(outfile, "** Unexpected non-hex-digit '%c' at offset %lu "
+        fprintf(outfile, "** Unexpected non-hex-digit '%c' at offset %td "
           "in hex pattern: quote missing?\n", d, pp - buffer - 1);
         return PR_SKIP;
         }
