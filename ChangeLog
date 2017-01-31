@@ -330,7 +330,7 @@ AC_USE_SYSTEM_EXTENSIONS macro and to test for functions used by the JIT
 modules.
 
 52. Minor fixed to pcre2grep from Jason Hood:
-    * fixes some spacing;
+    * fixed some spacing;
     * Windows doesn't usually use single quotes, so I've added a define
       to use appropriate quotes [in an example];
     * LC_ALL was displayed as "LCC_ALL";

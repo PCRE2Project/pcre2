@@ -1220,9 +1220,20 @@ BOOL yield = FALSE;
 
 *errorcodeptr = 0;
 
-if (allow_sign >= 0 && ptr < ptrend &&
-    (*ptr == CHAR_PLUS || *ptr == CHAR_MINUS))
-  sign = (*ptr++ == CHAR_MINUS)? -1 : +1;
+if (allow_sign >= 0 && ptr < ptrend)
+  {
+  if (*ptr == CHAR_PLUS)
+    {
+    sign = +1;
+    max_value -= allow_sign;
+    ptr++; 
+    }
+  else if (*ptr == CHAR_MINUS)
+    { 
+    sign = -1;        
+    ptr++; 
+    } 
+  } 
 
 if (ptr >= ptrend || !IS_DIGIT(*ptr)) return FALSE;
 while (ptr < ptrend && IS_DIGIT(*ptr))

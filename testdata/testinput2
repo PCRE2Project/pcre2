@@ -4959,4 +4959,8 @@ a)"xI
 /abcd/auto_callout
     abcd\=callout_error=255:2
 
+/()(\g+65534)/
+
+/()(\g+65533)/
+
 # End of testinput2 
