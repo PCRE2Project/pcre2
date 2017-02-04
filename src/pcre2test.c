@@ -158,6 +158,13 @@ patterns. */
 void vms_setsymbol( char *, char *, int );
 #endif
 
+/* VC doesn't support "%td". */
+#ifdef _MSC_VER
+#define PTR_SPEC "%lu"
+#else
+#define PTR_SPEC "%td"
+#endif
+
 /* ------------------End of system-specific definitions -------------------- */
 
 /* Glueing macros that are used in several places below. */
@@ -4663,7 +4670,7 @@ if ((pat_patctl.control & CTL_HEXPAT) != 0)
         if (d == 0)
           {
           fprintf(outfile, "** Missing closing quote in hex pattern: "
-            "opening quote is at offset %td.\n", pq - buffer - 2);
+            "opening quote is at offset " PTR_SPEC ".\n", pq - buffer - 2);
           return PR_SKIP;
           }
         if (d == c) break;
@@ -4677,8 +4684,8 @@ if ((pat_patctl.control & CTL_HEXPAT) != 0)
       {
       if (!isxdigit(c))
         {
-        fprintf(outfile, "** Unexpected non-hex-digit '%c' at offset %td "
-          "in hex pattern: quote missing?\n", c, pp - buffer - 2);
+        fprintf(outfile, "** Unexpected non-hex-digit '%c' at offset "
+          PTR_SPEC " in hex pattern: quote missing?\n", c, pp - buffer - 2);
         return PR_SKIP;
         }
       if (*pp == 0)
@@ -4689,8 +4696,8 @@ if ((pat_patctl.control & CTL_HEXPAT) != 0)
       d = *pp;
       if (!isxdigit(d))
         {
-        fprintf(outfile, "** Unexpected non-hex-digit '%c' at offset %td "
-          "in hex pattern: quote missing?\n", d, pp - buffer - 1);
+        fprintf(outfile, "** Unexpected non-hex-digit '%c' at offset "
+          PTR_SPEC " in hex pattern: quote missing?\n", d, pp - buffer - 1);
         return PR_SKIP;
         }
       c = toupper(c);
