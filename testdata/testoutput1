@@ -9305,4 +9305,10 @@ No match
     s09-H
  0: s09-H
 
+/a+(?:|b)a/
+    aaaa
+ 0: aaaa
+
+/X?(R||){3335}/
+
 # End of testinput1 

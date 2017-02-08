@@ -5826,4 +5826,9 @@ ef) x/x,mark
 /[s[:digit:]\Q\E-H]+/
     s09-H
 
+/a+(?:|b)a/
+    aaaa
+
+/X?(R||){3335}/
+
 # End of testinput1 

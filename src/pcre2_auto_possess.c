@@ -589,6 +589,7 @@ for(;;)
       case OP_ASSERTBACK_NOT:
       case OP_ONCE:
       case OP_ONCE_NC:
+
       /* Atomic sub-patterns and assertions can always auto-possessify their
       last iterator. However, if the group was entered as a result of checking
       a previous iterator, this is not possible. */
@@ -605,6 +606,9 @@ for(;;)
     case OP_CBRA:
     next_code = code + GET(code, 1);
     code += PRIV(OP_lengths)[c];
+
+    /* Check each branch. We have to recurse a level for all but the last
+    branch. */
 
     while (*next_code == OP_ALT)
       {
@@ -1067,7 +1071,7 @@ PCRE2_UCHAR c;
 PCRE2_SPTR end;
 PCRE2_UCHAR *repeat_opcode;
 uint32_t list[8];
-int rec_limit = 10000;
+int rec_limit = 1000;  /* Was 10,000 but clang+ASAN uses a lot of stack. */
 
 for (;;)
   {

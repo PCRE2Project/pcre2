@@ -338,6 +338,10 @@ modules.
     * LC_ALL was displayed as "LCC_ALL";
     * numbers 11, 12 & 13 should end in "th";
     * use double quotes in usage message.
+    
+53. When autopossessifying, skip empty branches without recursion, to reduce 
+stack usage for the benefit of clang with -fsanitize-address, which uses huge 
+stack frames. Example pattern: /X?(R||){3335}/. Fixes oss-fuzz issue 553. 
 
 
 Version 10.22 29-July-2016
