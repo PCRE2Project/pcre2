@@ -195,8 +195,8 @@ for (;;)
     case OP_SCBRA:
     case OP_CBRAPOS:
     case OP_SCBRAPOS:
-    recno = dupcapused? prev_cap_recno - 1 : (int)GET2(cc, 1+LINK_SIZE);
-    if (recno != prev_cap_recno)
+    recno = (int)GET2(cc, 1+LINK_SIZE);
+    if (dupcapused || recno != prev_cap_recno)
       {
       prev_cap_recno = recno;
       prev_cap_d = find_minlength(re, cc, startcode, utf, recurses, countptr,
