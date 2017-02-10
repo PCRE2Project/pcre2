@@ -343,6 +343,15 @@ modules.
 stack usage for the benefit of clang with -fsanitize-address, which uses huge 
 stack frames. Example pattern: /X?(R||){3335}/. Fixes oss-fuzz issue 553. 
 
+54. A pattern with very many explicit back references to a group that is a long 
+way from the start of the pattern could take a long time to compile because 
+searching for the referenced group in order to find the minimum length was 
+being done repeatedly. Now up to 128 group minimum lengths are cached and the 
+attempt to find a minimum length is abandoned if there is a back reference to a 
+group whose number is greater than 128. (In that case, the pattern is so 
+complicated that this optimization probably isn't worth it.) This fixes 
+oss-fuzz issue 557.
+
 
 Version 10.22 29-July-2016
 --------------------------
