@@ -593,6 +593,11 @@ echo "---------------------------- Test 118 -----------------------------" >>tes
 (cd $srcdir; $valgrind $vjs $pcre2grep -tL 'the' testdata/grepinput*) >>testtrygrep
 echo "RC=$?" >>testtrygrep
 
+echo "---------------------------- Test 119 -----------------------------" >>testtrygrep
+printf "123\n456\n789\n---abc\ndef\nxyz\n---\n" >testNinputgrep
+(cd $srcdir; $valgrind $vjs $pcre2grep -Mo '(\n|[^-])*---' testNinputgrep) >>testtrygrep
+echo "RC=$?" >>testtrygrep
+
 # Now compare the results.
 
 $cf $srcdir/testdata/grepoutput testtrygrep

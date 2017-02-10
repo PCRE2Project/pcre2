@@ -2285,11 +2285,6 @@ while (ptr < endptr)
         if (line_buffered) fflush(stdout);
         rc = 0;                      /* Had some success */
 
-        /* If the current match ended past the end of the line (only possible
-        in multiline mode), we are done with this line. */
-
-        if (offsets[1] > linelength) goto END_ONE_MATCH;
-
         /* If the pattern contained a lookbehind that included \K, it is
         possible that the end of the match might be at or before the actual
         starting offset we have just used. In this case, start one character
@@ -2301,9 +2296,23 @@ while (ptr < endptr)
           {
           if (startoffset >= length) goto END_ONE_MATCH;  /* Were at end */
           startoffset = oldstartoffset + 1;
-          if (utf)
-            while ((matchptr[startoffset] & 0xc0) == 0x80) startoffset++;
+          if (utf) while ((matchptr[startoffset] & 0xc0) == 0x80) startoffset++;
           }
+
+        /* If the current match ended past the end of the line (only possible
+        in multiline mode), we must move on to the line in which it did end
+        before searching for more matches. */
+
+        while (startoffset > linelength)
+          {
+          matchptr = ptr += linelength + endlinelength;
+          filepos += (int)(linelength + endlinelength);
+          linenumber++;
+          startoffset -= (int)(linelength + endlinelength);
+          t = end_of_line(ptr, endptr, &endlinelength);
+          linelength = t - ptr - endlinelength;
+          }
+
         goto ONLY_MATCHING_RESTART;
         }
       }

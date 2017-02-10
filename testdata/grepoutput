@@ -819,3 +819,13 @@ RC=0
 testdata/grepinput3
 testdata/grepinput8
 RC=0
+---------------------------- Test 119 -----------------------------
+123
+456
+789
+---
+abc
+def
+xyz
+---
+RC=0

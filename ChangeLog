@@ -352,6 +352,11 @@ group whose number is greater than 128. (In that case, the pattern is so
 complicated that this optimization probably isn't worth it.) This fixes 
 oss-fuzz issue 557.
 
+55. Issue 32 for 10.22 below was not correctly fixed. If pcre2grep in multiline 
+mode with --only-matching matched several lines, it restarted scanning at the 
+next line instead of moving on to the end of the matched string, which can be 
+several lines after the start.
+
 
 Version 10.22 29-July-2016
 --------------------------
