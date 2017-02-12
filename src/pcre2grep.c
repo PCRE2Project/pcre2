@@ -2311,6 +2311,7 @@ while (ptr < endptr)
           startoffset -= (int)(linelength + endlinelength);
           t = end_of_line(ptr, endptr, &endlinelength);
           linelength = t - ptr - endlinelength;
+          length = (size_t)(endptr - ptr);
           }
 
         goto ONLY_MATCHING_RESTART;
