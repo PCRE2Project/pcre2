@@ -595,7 +595,7 @@ echo "RC=$?" >>testtrygrep
 
 echo "---------------------------- Test 119 -----------------------------" >>testtrygrep
 printf "123\n456\n789\n---abc\ndef\nxyz\n---\n" >testNinputgrep
-(cd $srcdir; $valgrind $vjs $pcre2grep -Mo '(\n|[^-])*---' testNinputgrep) >>testtrygrep
+$valgrind $vjs $pcre2grep -Mo '(\n|[^-])*---' testNinputgrep >>testtrygrep
 echo "RC=$?" >>testtrygrep
 
 # Now compare the results.
