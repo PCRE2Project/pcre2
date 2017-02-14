@@ -1226,14 +1226,14 @@ if (allow_sign >= 0 && ptr < ptrend)
     {
     sign = +1;
     max_value -= allow_sign;
-    ptr++; 
+    ptr++;
     }
   else if (*ptr == CHAR_MINUS)
-    { 
-    sign = -1;        
-    ptr++; 
-    } 
-  } 
+    {
+    sign = -1;
+    ptr++;
+    }
+  }
 
 if (ptr >= ptrend || !IS_DIGIT(*ptr)) return FALSE;
 while (ptr < ptrend && IS_DIGIT(*ptr))
@@ -2384,7 +2384,7 @@ while (ptr < ptrend)
       /* This is the length in characters */
       verbnamelength = (PCRE2_SIZE)(parsed_pattern - verblengthptr - 1);
       /* But the limit on the length is in code units */
-      if (ptr - verbnamestart - 1 > MAX_MARK)
+      if (ptr - verbnamestart - 1 > (int)MAX_MARK)
         {
         ptr--;
         errorcode = ERR76;

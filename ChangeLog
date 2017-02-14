@@ -219,7 +219,7 @@ compliant and unique.
 wrong name.
 
 27. In pcre2test, give some offset information for errors in hex patterns.
-This uses the C99 formatting sequence %td, except for MSVC which doesn't 
+This uses the C99 formatting sequence %td, except for MSVC which doesn't
 support it - %lu is used instead.
 
 28. Implemented pcre2_code_copy_with_tables(), and added pushtablescopy to
@@ -338,23 +338,23 @@ modules.
     * LC_ALL was displayed as "LCC_ALL";
     * numbers 11, 12 & 13 should end in "th";
     * use double quotes in usage message.
-    
-53. When autopossessifying, skip empty branches without recursion, to reduce 
-stack usage for the benefit of clang with -fsanitize-address, which uses huge 
-stack frames. Example pattern: /X?(R||){3335}/. Fixes oss-fuzz issue 553. 
 
-54. A pattern with very many explicit back references to a group that is a long 
-way from the start of the pattern could take a long time to compile because 
-searching for the referenced group in order to find the minimum length was 
-being done repeatedly. Now up to 128 group minimum lengths are cached and the 
-attempt to find a minimum length is abandoned if there is a back reference to a 
-group whose number is greater than 128. (In that case, the pattern is so 
-complicated that this optimization probably isn't worth it.) This fixes 
+53. When autopossessifying, skip empty branches without recursion, to reduce
+stack usage for the benefit of clang with -fsanitize-address, which uses huge
+stack frames. Example pattern: /X?(R||){3335}/. Fixes oss-fuzz issue 553.
+
+54. A pattern with very many explicit back references to a group that is a long
+way from the start of the pattern could take a long time to compile because
+searching for the referenced group in order to find the minimum length was
+being done repeatedly. Now up to 128 group minimum lengths are cached and the
+attempt to find a minimum length is abandoned if there is a back reference to a
+group whose number is greater than 128. (In that case, the pattern is so
+complicated that this optimization probably isn't worth it.) This fixes
 oss-fuzz issue 557.
 
-55. Issue 32 for 10.22 below was not correctly fixed. If pcre2grep in multiline 
-mode with --only-matching matched several lines, it restarted scanning at the 
-next line instead of moving on to the end of the matched string, which can be 
+55. Issue 32 for 10.22 below was not correctly fixed. If pcre2grep in multiline
+mode with --only-matching matched several lines, it restarted scanning at the
+next line instead of moving on to the end of the matched string, which can be
 several lines after the start.
 
 56. Applied Jason Hood's new patch for RunGrepTest.bat that updates it in line
