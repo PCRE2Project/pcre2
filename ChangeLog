@@ -2,8 +2,8 @@ Change Log for PCRE2
 --------------------
 
 
-Version 10.23 16-January-2017
------------------------------
+Version 10.23 14-February-2017
+------------------------------
 
 1. Extended pcre2test with the utf8_input modifier so that it is able to
 generate all possible 16-bit and 32-bit code unit values in non-UTF modes.
@@ -356,6 +356,10 @@ oss-fuzz issue 557.
 mode with --only-matching matched several lines, it restarted scanning at the 
 next line instead of moving on to the end of the matched string, which can be 
 several lines after the start.
+
+56. Applied Jason Hood's new patch for RunGrepTest.bat that updates it in line
+with updates to the non-Windows version.
+
 
 
 Version 10.22 29-July-2016

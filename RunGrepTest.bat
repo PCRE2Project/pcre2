@@ -11,6 +11,8 @@ setlocal enabledelayedexpansion
 
 set PCRE2GREP_COLOUR=
 set PCRE2GREP_COLOR=
+set PCREGREP_COLOUR=
+set PCREGREP_COLOR=
 set GREP_COLORS=
 set GREP_COLOR=
 
@@ -77,6 +79,12 @@ if NOT "%nl%" == "LF" if NOT "%nl%" == "ANY" if NOT "%nl%" == "ANYCRLF" (
   set pcre2grep=%pcre2grep% -N LF
   echo Default newline setting forced to LF
 )
+
+:: Create a simple printf via cscript/JScript (an actual printf may translate
+:: LF to CRLF, which this one does not).
+
+echo WScript.StdOut.Write(WScript.Arguments(0).replace(/\\r/g, "\r").replace(/\\n/g, "\n")) >printf.js
+set printf=cscript //nologo printf.js
 
 :: ------ Normal tests ------
 
@@ -572,6 +580,11 @@ echo ---------------------------- Test 118 ----------------------------->>testtr
 (pushd %srcdir% & %pcre2grep% -tL "the" testdata/grepinput* & popd) >>testtrygrep
 echo RC=^%ERRORLEVEL%>>testtrygrep
 
+echo ---------------------------- Test 119 ----------------------------->>testtrygrep
+%printf% "123\n456\n789\n---abc\ndef\nxyz\n---\n" >testNinputgrep
+%pcre2grep% -Mo "(\n|[^-])*---" testNinputgrep >>testtrygrep
+echo RC=^%ERRORLEVEL%>>testtrygrep
+
 :: Now compare the results.
 
 %cf% %srcdir%\testdata\grepoutput testtrygrep %cfout%
@@ -607,12 +620,10 @@ if %utf8% neq 0 (
 :: newline settings will work in environments where the normal newline sequence
 :: is not \n. Do not use exported files, whose line endings might be changed.
 :: Instead, create an input file so that its contents are exactly what we want.
-:: Note the messy fudge to create the input file. These tests are run in the
-:: build directory.
+:: These tests are run in the build directory.
 
 echo Testing pcre2grep newline settings
-echo WScript.StdOut.Write(WScript.Arguments(0).replace(/\\r/g, "\r").replace(/\\n/g, "\n")) >testprint.js
-cscript //nologo testprint.js "abc\rdef\r\nghi\njkl" >testNinputgrep
+%printf% "abc\rdef\r\nghi\njkl" >testNinputgrep
 
 echo ---------------------------- Test N1 ------------------------------>testtrygrep
 %pcre2grep% -n -N CR "^(abc|def|ghi|jkl)" testNinputgrep >>testtrygrep
@@ -621,7 +632,7 @@ echo ---------------------------- Test N2 ------------------------------>>testtr
 %pcre2grep% -n --newline=crlf "^(abc|def|ghi|jkl)" testNinputgrep >>testtrygrep
 
 echo ---------------------------- Test N3 ------------------------------>>testtrygrep
-for /f %%a in ('cscript //nologo testprint.js "def\rjkl"') do set pattern=%%a
+for /f %%a in ('%printf% "def\rjkl"') do set pattern=%%a
 %pcre2grep% -n --newline=cr -F "!pattern!" testNinputgrep >>testtrygrep
 
 echo ---------------------------- Test N4 ------------------------------>>testtrygrep
@@ -654,13 +665,13 @@ if %ERRORLEVEL% equ 0 (
 :: is not checked.
 
 echo Testing miscellaneous pcre2grep arguments (unchecked)
-cscript //nologo testprint.js "" >testtrygrep
+%printf% "" >testtrygrep
 call :checkspecial "-xxxxx" 2 || exit /b 1
 call :checkspecial "--help" 0 || exit /b 1
 call :checkspecial "--line-buffered --colour=auto abc nul" 1 || exit /b 1
 
 :: Clean up local working files
-del testcf testprint.js testNinputgrep teststderrgrep testtrygrep testtemp1grep testtemp2grep
+del testcf printf.js testNinputgrep teststderrgrep testtrygrep testtemp1grep testtemp2grep
 
 exit /b 0
 
