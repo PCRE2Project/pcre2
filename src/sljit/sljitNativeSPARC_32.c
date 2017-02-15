@@ -1,7 +1,7 @@
 /*
  *    Stack-less Just-In-Time compiler
  *
- *    Copyright 2009-2012 Zoltan Herczeg (hzmester@freemail.hu). All rights reserved.
+ *    Copyright Zoltan Herczeg (hzmester@freemail.hu). All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification, are
  * permitted provided that the following conditions are met:
@@ -60,7 +60,7 @@ static SLJIT_INLINE sljit_s32 emit_single_op(struct sljit_compiler *compiler, sl
 			return push_inst(compiler, SRA | D(dst) | S1(dst) | IMM(24), DR(dst));
 		}
 		else if (dst != src2)
-			SLJIT_ASSERT_STOP();
+			SLJIT_UNREACHABLE();
 		return SLJIT_SUCCESS;
 
 	case SLJIT_MOV_U16:
@@ -71,7 +71,7 @@ static SLJIT_INLINE sljit_s32 emit_single_op(struct sljit_compiler *compiler, sl
 			return push_inst(compiler, (op == SLJIT_MOV_S16 ? SRA : SRL) | D(dst) | S1(dst) | IMM(16), DR(dst));
 		}
 		else if (dst != src2)
-			SLJIT_ASSERT_STOP();
+			SLJIT_UNREACHABLE();
 		return SLJIT_SUCCESS;
 
 	case SLJIT_NOT:
@@ -135,7 +135,7 @@ static SLJIT_INLINE sljit_s32 emit_single_op(struct sljit_compiler *compiler, sl
 		return !(flags & SET_FLAGS) ? SLJIT_SUCCESS : push_inst(compiler, SUB | SET_FLAGS | D(0) | S1(dst) | S2(0), SET_FLAGS);
 	}
 
-	SLJIT_ASSERT_STOP();
+	SLJIT_UNREACHABLE();
 	return SLJIT_SUCCESS;
 }
 

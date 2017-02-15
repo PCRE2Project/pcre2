@@ -1,7 +1,7 @@
 /*
  *    Stack-less Just-In-Time compiler
  *
- *    Copyright 2009-2012 Zoltan Herczeg (hzmester@freemail.hu). All rights reserved.
+ *    Copyright Zoltan Herczeg (hzmester@freemail.hu). All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification, are
  * permitted provided that the following conditions are met:
@@ -553,13 +553,13 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_sw sljit_exec_offset(void* ptr);
 
 #if (defined SLJIT_CONFIG_X86_32 && SLJIT_CONFIG_X86_32)
 
-#define SLJIT_NUMBER_OF_REGISTERS 10
-#define SLJIT_NUMBER_OF_SAVED_REGISTERS 7
+#define SLJIT_NUMBER_OF_REGISTERS 12
+#define SLJIT_NUMBER_OF_SAVED_REGISTERS 9
 #if (defined SLJIT_X86_32_FASTCALL && SLJIT_X86_32_FASTCALL)
-#define SLJIT_LOCALS_OFFSET_BASE ((2 + 4) * sizeof(sljit_sw))
+#define SLJIT_LOCALS_OFFSET_BASE ((2 + 6) * sizeof(sljit_sw))
 #else
 /* Maximum 3 arguments are passed on the stack, +1 for double alignment. */
-#define SLJIT_LOCALS_OFFSET_BASE ((3 + 1 + 4) * sizeof(sljit_sw))
+#define SLJIT_LOCALS_OFFSET_BASE ((3 + 1 + 6) * sizeof(sljit_sw))
 #endif /* SLJIT_X86_32_FASTCALL */
 
 #elif (defined SLJIT_CONFIG_X86_64 && SLJIT_CONFIG_X86_64)
@@ -576,14 +576,14 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_sw sljit_exec_offset(void* ptr);
 
 #elif (defined SLJIT_CONFIG_ARM_V5 && SLJIT_CONFIG_ARM_V5) || (defined SLJIT_CONFIG_ARM_V7 && SLJIT_CONFIG_ARM_V7)
 
-#define SLJIT_NUMBER_OF_REGISTERS 11
+#define SLJIT_NUMBER_OF_REGISTERS 12
 #define SLJIT_NUMBER_OF_SAVED_REGISTERS 8
 #define SLJIT_LOCALS_OFFSET_BASE 0
 
 #elif (defined SLJIT_CONFIG_ARM_THUMB2 && SLJIT_CONFIG_ARM_THUMB2)
 
-#define SLJIT_NUMBER_OF_REGISTERS 11
-#define SLJIT_NUMBER_OF_SAVED_REGISTERS 7
+#define SLJIT_NUMBER_OF_REGISTERS 12
+#define SLJIT_NUMBER_OF_SAVED_REGISTERS 8
 #define SLJIT_LOCALS_OFFSET_BASE 0
 
 #elif (defined SLJIT_CONFIG_ARM_64 && SLJIT_CONFIG_ARM_64)
@@ -607,7 +607,7 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_sw sljit_exec_offset(void* ptr);
 
 #elif (defined SLJIT_CONFIG_MIPS && SLJIT_CONFIG_MIPS)
 
-#define SLJIT_NUMBER_OF_REGISTERS 17
+#define SLJIT_NUMBER_OF_REGISTERS 21
 #define SLJIT_NUMBER_OF_SAVED_REGISTERS 8
 #if (defined SLJIT_CONFIG_MIPS_32 && SLJIT_CONFIG_MIPS_32)
 #define SLJIT_LOCALS_OFFSET_BASE (4 * sizeof(sljit_sw))
@@ -663,7 +663,7 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_sw sljit_exec_offset(void* ptr);
 
 #if (defined SLJIT_DEBUG && SLJIT_DEBUG)
 
-#if !defined(SLJIT_ASSERT) || !defined(SLJIT_ASSERT_STOP)
+#if !defined(SLJIT_ASSERT) || !defined(SLJIT_UNREACHABLE)
 
 /* SLJIT_HALT_PROCESS must halt the process. */
 #ifndef SLJIT_HALT_PROCESS
@@ -675,7 +675,7 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_sw sljit_exec_offset(void* ptr);
 
 #include <stdio.h>
 
-#endif /* !SLJIT_ASSERT || !SLJIT_ASSERT_STOP */
+#endif /* !SLJIT_ASSERT || !SLJIT_UNREACHABLE */
 
 /* Feel free to redefine these two macros. */
 #ifndef SLJIT_ASSERT
@@ -690,34 +690,33 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_sw sljit_exec_offset(void* ptr);
 
 #endif /* !SLJIT_ASSERT */
 
-#ifndef SLJIT_ASSERT_STOP
+#ifndef SLJIT_UNREACHABLE
 
-#define SLJIT_ASSERT_STOP() \
+#define SLJIT_UNREACHABLE() \
 	do { \
 		printf("Should never been reached " __FILE__ ":%d\n", __LINE__); \
 		SLJIT_HALT_PROCESS(); \
 	} while (0)
 
-#endif /* !SLJIT_ASSERT_STOP */
+#endif /* !SLJIT_UNREACHABLE */
 
 #else /* (defined SLJIT_DEBUG && SLJIT_DEBUG) */
 
 /* Forcing empty, but valid statements. */
 #undef SLJIT_ASSERT
-#undef SLJIT_ASSERT_STOP
+#undef SLJIT_UNREACHABLE
 
 #define SLJIT_ASSERT(x) \
 	do { } while (0)
-#define SLJIT_ASSERT_STOP() \
+#define SLJIT_UNREACHABLE() \
 	do { } while (0)
 
 #endif /* (defined SLJIT_DEBUG && SLJIT_DEBUG) */
 
 #ifndef SLJIT_COMPILE_ASSERT
 
-/* Should be improved eventually. */
 #define SLJIT_COMPILE_ASSERT(x, description) \
-	SLJIT_ASSERT(x)
+	switch(0) { case 0: case ((x) ? 1 : 0): break; }
 
 #endif /* !SLJIT_COMPILE_ASSERT */
 

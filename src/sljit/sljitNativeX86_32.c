@@ -1,7 +1,7 @@
 /*
  *    Stack-less Just-In-Time compiler
  *
- *    Copyright 2009-2012 Zoltan Herczeg (hzmester@freemail.hu). All rights reserved.
+ *    Copyright Zoltan Herczeg (hzmester@freemail.hu). All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification, are
  * permitted provided that the following conditions are met:
@@ -75,9 +75,8 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_enter(struct sljit_compiler *compi
 	set_emit_enter(compiler, options, args, scratches, saveds, fscratches, fsaveds, local_size);
 
 	compiler->args = args;
-	compiler->flags_saved = 0;
 
-	size = 1 + (scratches > 7 ? (scratches - 7) : 0) + (saveds <= 3 ? saveds : 3);
+	size = 1 + (scratches > 9 ? (scratches - 9) : 0) + (saveds <= 3 ? saveds : 3);
 #if (defined SLJIT_X86_32_FASTCALL && SLJIT_X86_32_FASTCALL)
 	size += (args > 0 ? (args * 2) : 0) + (args > 2 ? 2 : 0);
 #else
@@ -94,11 +93,11 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_enter(struct sljit_compiler *compi
 		*inst++ = MOD_REG | (reg_map[TMP_REG1] << 3) | 0x4 /* esp */;
 	}
 #endif
-	if (saveds > 2 || scratches > 7)
+	if (saveds > 2 || scratches > 9)
 		PUSH_REG(reg_map[SLJIT_S2]);
-	if (saveds > 1 || scratches > 8)
+	if (saveds > 1 || scratches > 10)
 		PUSH_REG(reg_map[SLJIT_S1]);
-	if (saveds > 0 || scratches > 9)
+	if (saveds > 0 || scratches > 11)
 		PUSH_REG(reg_map[SLJIT_S0]);
 
 #if (defined SLJIT_X86_32_FASTCALL && SLJIT_X86_32_FASTCALL)
@@ -137,7 +136,7 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_enter(struct sljit_compiler *compi
 	SLJIT_COMPILE_ASSERT(SLJIT_LOCALS_OFFSET >= (2 + 4) * sizeof(sljit_uw), require_at_least_two_words);
 #if defined(__APPLE__)
 	/* Ignore pushed registers and SLJIT_LOCALS_OFFSET when computing the aligned local size. */
-	saveds = (2 + (scratches > 7 ? (scratches - 7) : 0) + (saveds <= 3 ? saveds : 3)) * sizeof(sljit_uw);
+	saveds = (2 + (scratches > 9 ? (scratches - 9) : 0) + (saveds <= 3 ? saveds : 3)) * sizeof(sljit_uw);
 	local_size = ((SLJIT_LOCALS_OFFSET + saveds + local_size + 15) & ~15) - saveds;
 #else
 	if (options & SLJIT_DOUBLE_ALIGNMENT) {
@@ -194,7 +193,7 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_set_context(struct sljit_compiler *comp
 	compiler->args = args;
 
 #if defined(__APPLE__)
-	saveds = (2 + (scratches > 7 ? (scratches - 7) : 0) + (saveds <= 3 ? saveds : 3)) * sizeof(sljit_uw);
+	saveds = (2 + (scratches > 9 ? (scratches - 9) : 0) + (saveds <= 3 ? saveds : 3)) * sizeof(sljit_uw);
 	compiler->local_size = ((SLJIT_LOCALS_OFFSET + saveds + local_size + 15) & ~15) - saveds;
 #else
 	if (options & SLJIT_DOUBLE_ALIGNMENT)
@@ -214,7 +213,6 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_return(struct sljit_compiler *comp
 	CHECK(check_sljit_emit_return(compiler, op, src, srcw));
 	SLJIT_ASSERT(compiler->args >= 0);
 
-	compiler->flags_saved = 0;
 	FAIL_IF(emit_mov_before_return(compiler, op, src, srcw));
 
 	SLJIT_ASSERT(compiler->local_size > 0);
@@ -247,11 +245,11 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_return(struct sljit_compiler *comp
 
 	INC_SIZE(size);
 
-	if (compiler->saveds > 0 || compiler->scratches > 9)
+	if (compiler->saveds > 0 || compiler->scratches > 11)
 		POP_REG(reg_map[SLJIT_S0]);
-	if (compiler->saveds > 1 || compiler->scratches > 8)
+	if (compiler->saveds > 1 || compiler->scratches > 10)
 		POP_REG(reg_map[SLJIT_S1]);
-	if (compiler->saveds > 2 || compiler->scratches > 7)
+	if (compiler->saveds > 2 || compiler->scratches > 9)
 		POP_REG(reg_map[SLJIT_S2]);
 	POP_REG(reg_map[TMP_REG1]);
 #if (defined SLJIT_X86_32_FASTCALL && SLJIT_X86_32_FASTCALL)

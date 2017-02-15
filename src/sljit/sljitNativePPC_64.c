@@ -1,7 +1,7 @@
 /*
  *    Stack-less Just-In-Time compiler
  *
- *    Copyright 2009-2012 Zoltan Herczeg (hzmester@freemail.hu). All rights reserved.
+ *    Copyright Zoltan Herczeg (hzmester@freemail.hu). All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification, are
  * permitted provided that the following conditions are met:
@@ -240,11 +240,6 @@ static SLJIT_INLINE sljit_s32 emit_single_op(struct sljit_compiler *compiler, sl
 		return push_inst(compiler, ADDC | OERC(ALT_SET_FLAGS) | D(dst) | A(src1) | B(src2));
 
 	case SLJIT_ADDC:
-		if (flags & ALT_FORM1) {
-			FAIL_IF(push_inst(compiler, MFXER | D(0)));
-			FAIL_IF(push_inst(compiler, ADDE | D(dst) | A(src1) | B(src2)));
-			return push_inst(compiler, MTXER | S(0));
-		}
 		BIN_EXTS();
 		return push_inst(compiler, ADDE | D(dst) | A(src1) | B(src2));
 
@@ -256,32 +251,26 @@ static SLJIT_INLINE sljit_s32 emit_single_op(struct sljit_compiler *compiler, sl
 		}
 		if (flags & (ALT_FORM2 | ALT_FORM3)) {
 			SLJIT_ASSERT(src2 == TMP_REG2);
-			if (flags & ALT_FORM2)
-				FAIL_IF(push_inst(compiler, CMPI | CRD(0 | ((flags & ALT_SIGN_EXT) ? 0 : 1)) | A(src1) | compiler->imm));
-			if (flags & ALT_FORM3)
-				return push_inst(compiler, CMPLI | CRD(4 | ((flags & ALT_SIGN_EXT) ? 0 : 1)) | A(src1) | compiler->imm);
-			return SLJIT_SUCCESS;
+			return push_inst(compiler, ((flags & ALT_FORM2) ? CMPI : CMPLI) | CRD(0 | ((flags & ALT_SIGN_EXT) ? 0 : 1)) | A(src1) | compiler->imm);
 		}
 		if (flags & (ALT_FORM4 | ALT_FORM5)) {
-			if (flags & ALT_FORM4)
-				FAIL_IF(push_inst(compiler, CMPL | CRD(4 | ((flags & ALT_SIGN_EXT) ? 0 : 1)) | A(src1) | B(src2)));
-			if (flags & ALT_FORM5)
-				return push_inst(compiler, CMP | CRD(0 | ((flags & ALT_SIGN_EXT) ? 0 : 1)) | A(src1) | B(src2));
-			return SLJIT_SUCCESS;
+			return push_inst(compiler, ((flags & ALT_FORM4) ? CMP : CMPL) | CRD(0 | ((flags & ALT_SIGN_EXT) ? 0 : 1)) | A(src1) | B(src2));
+		}
+		if (flags & ALT_FORM6) {
+			SLJIT_ASSERT(src2 == TMP_REG2);
+			FAIL_IF(push_inst(compiler, CMPLI | CRD(0 | ((flags & ALT_SIGN_EXT) ? 0 : 1)) | A(src1) | compiler->imm));
+			return push_inst(compiler, ADDI | D(dst) | A(src1) | (-compiler->imm & 0xffff));
+		}
+		if (flags & ALT_FORM7) {
+			FAIL_IF(push_inst(compiler, CMPL | CRD(0 | ((flags & ALT_SIGN_EXT) ? 0 : 1)) | A(src1) | B(src2)));
+			return push_inst(compiler, SUBF | D(dst) | A(src2) | B(src1));
 		}
 		if (!(flags & ALT_SET_FLAGS))
 			return push_inst(compiler, SUBF | D(dst) | A(src2) | B(src1));
 		BIN_EXTS();
-		if (flags & ALT_FORM6)
-			FAIL_IF(push_inst(compiler, CMPL | CRD(4 | ((flags & ALT_SIGN_EXT) ? 0 : 1)) | A(src1) | B(src2)));
 		return push_inst(compiler, SUBFC | OERC(ALT_SET_FLAGS) | D(dst) | A(src2) | B(src1));
 
 	case SLJIT_SUBC:
-		if (flags & ALT_FORM1) {
-			FAIL_IF(push_inst(compiler, MFXER | D(0)));
-			FAIL_IF(push_inst(compiler, SUBFE | D(dst) | A(src2) | B(src1)));
-			return push_inst(compiler, MTXER | S(0));
-		}
 		BIN_EXTS();
 		return push_inst(compiler, SUBFE | D(dst) | A(src2) | B(src1));
 
@@ -345,10 +334,8 @@ static SLJIT_INLINE sljit_s32 emit_single_op(struct sljit_compiler *compiler, sl
 				compiler->imm &= 0x1f;
 				return push_inst(compiler, RLWINM | RC(flags) | S(src1) | A(dst) | (compiler->imm << 11) | ((31 - compiler->imm) << 1));
 			}
-			else {
-				compiler->imm &= 0x3f;
-				return push_inst(compiler, RLDI(dst, src1, compiler->imm, 63 - compiler->imm, 1) | RC(flags));
-			}
+			compiler->imm &= 0x3f;
+			return push_inst(compiler, RLDI(dst, src1, compiler->imm, 63 - compiler->imm, 1) | RC(flags));
 		}
 		return push_inst(compiler, ((flags & ALT_FORM2) ? SLW : SLD) | RC(flags) | S(src1) | A(dst) | B(src2));
 
@@ -359,33 +346,25 @@ static SLJIT_INLINE sljit_s32 emit_single_op(struct sljit_compiler *compiler, sl
 				compiler->imm &= 0x1f;
 				return push_inst(compiler, RLWINM | RC(flags) | S(src1) | A(dst) | (((32 - compiler->imm) & 0x1f) << 11) | (compiler->imm << 6) | (31 << 1));
 			}
-			else {
-				compiler->imm &= 0x3f;
-				return push_inst(compiler, RLDI(dst, src1, 64 - compiler->imm, compiler->imm, 0) | RC(flags));
-			}
+			compiler->imm &= 0x3f;
+			return push_inst(compiler, RLDI(dst, src1, 64 - compiler->imm, compiler->imm, 0) | RC(flags));
 		}
 		return push_inst(compiler, ((flags & ALT_FORM2) ? SRW : SRD) | RC(flags) | S(src1) | A(dst) | B(src2));
 
 	case SLJIT_ASHR:
-		if (flags & ALT_FORM3)
-			FAIL_IF(push_inst(compiler, MFXER | D(0)));
 		if (flags & ALT_FORM1) {
 			SLJIT_ASSERT(src2 == TMP_REG2);
 			if (flags & ALT_FORM2) {
 				compiler->imm &= 0x1f;
-				FAIL_IF(push_inst(compiler, SRAWI | RC(flags) | S(src1) | A(dst) | (compiler->imm << 11)));
+				return push_inst(compiler, SRAWI | RC(flags) | S(src1) | A(dst) | (compiler->imm << 11));
 			}
-			else {
-				compiler->imm &= 0x3f;
-				FAIL_IF(push_inst(compiler, SRADI | RC(flags) | S(src1) | A(dst) | ((compiler->imm & 0x1f) << 11) | ((compiler->imm & 0x20) >> 4)));
-			}
+			compiler->imm &= 0x3f;
+			return push_inst(compiler, SRADI | RC(flags) | S(src1) | A(dst) | ((compiler->imm & 0x1f) << 11) | ((compiler->imm & 0x20) >> 4));
 		}
-		else
-			FAIL_IF(push_inst(compiler, ((flags & ALT_FORM2) ? SRAW : SRAD) | RC(flags) | S(src1) | A(dst) | B(src2)));
-		return (flags & ALT_FORM3) ? push_inst(compiler, MTXER | S(0)) : SLJIT_SUCCESS;
+		return push_inst(compiler, ((flags & ALT_FORM2) ? SRAW : SRAD) | RC(flags) | S(src1) | A(dst) | B(src2));
 	}
 
-	SLJIT_ASSERT_STOP();
+	SLJIT_UNREACHABLE();
 	return SLJIT_SUCCESS;
 }
 

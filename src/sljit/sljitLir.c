@@ -1,7 +1,7 @@
 /*
  *    Stack-less Just-In-Time compiler
  *
- *    Copyright 2009-2012 Zoltan Herczeg (hzmester@freemail.hu). All rights reserved.
+ *    Copyright Zoltan Herczeg (hzmester@freemail.hu). All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification, are
  * permitted provided that the following conditions are met:
@@ -84,14 +84,18 @@
 
 #if !(defined SLJIT_CONFIG_UNSUPPORTED && SLJIT_CONFIG_UNSUPPORTED)
 
-#define GET_OPCODE(op) \
-	((op) & ~(SLJIT_I32_OP | SLJIT_SET_E | SLJIT_SET_U | SLJIT_SET_S | SLJIT_SET_O | SLJIT_SET_C | SLJIT_KEEP_FLAGS))
+#define VARIABLE_FLAG_SHIFT (10)
+#define VARIABLE_FLAG_MASK (0x3f << VARIABLE_FLAG_SHIFT)
+#define GET_FLAG_TYPE(op) ((op) >> VARIABLE_FLAG_SHIFT)
 
-#define GET_FLAGS(op) \
-	((op) & (SLJIT_SET_E | SLJIT_SET_U | SLJIT_SET_S | SLJIT_SET_O | SLJIT_SET_C))
+#define GET_OPCODE(op) \
+	((op) & ~(SLJIT_I32_OP | SLJIT_SET_Z | VARIABLE_FLAG_MASK))
+
+#define HAS_FLAGS(op) \
+	((op) & (SLJIT_SET_Z | VARIABLE_FLAG_MASK))
 
 #define GET_ALL_FLAGS(op) \
-	((op) & (SLJIT_I32_OP | SLJIT_SET_E | SLJIT_SET_U | SLJIT_SET_S | SLJIT_SET_O | SLJIT_SET_C | SLJIT_KEEP_FLAGS))
+	((op) & (SLJIT_I32_OP | SLJIT_SET_Z | VARIABLE_FLAG_MASK))
 
 #define TYPE_CAST_NEEDED(op) \
 	(((op) >= SLJIT_MOV_U8 && (op) <= SLJIT_MOV_S16) || ((op) >= SLJIT_MOVU_U8 && (op) <= SLJIT_MOVU_S16))
@@ -365,6 +369,8 @@ SLJIT_API_FUNC_ATTRIBUTE struct sljit_compiler* sljit_create_compiler(void *allo
 		int_op_and_single_op_must_be_the_same);
 	SLJIT_COMPILE_ASSERT(SLJIT_REWRITABLE_JUMP != SLJIT_F32_OP,
 		rewritable_jump_and_single_op_must_not_be_the_same);
+	SLJIT_COMPILE_ASSERT(!(SLJIT_EQUAL & 0x1) && !(SLJIT_LESS & 0x1) && !(SLJIT_EQUAL_F64 & 0x1) && !(SLJIT_JUMP & 0x1),
+		conditional_flags_must_be_even_numbers);
 
 	/* Only the non-zero members must be set. */
 	compiler->error = SLJIT_SUCCESS;
@@ -497,6 +503,18 @@ SLJIT_API_FUNC_ATTRIBUTE void sljit_set_target(struct sljit_jump *jump, sljit_uw
 		jump->flags |= JUMP_ADDR;
 		jump->u.target = target;
 	}
+}
+
+SLJIT_API_FUNC_ATTRIBUTE void sljit_set_current_flags(struct sljit_compiler *compiler, sljit_s32 current_flags)
+{
+	SLJIT_UNUSED_ARG(compiler);
+	SLJIT_UNUSED_ARG(current_flags);
+
+#if (defined SLJIT_ARGUMENT_CHECKS && SLJIT_ARGUMENT_CHECKS)
+	if ((current_flags & ~(VARIABLE_FLAG_MASK | SLJIT_I32_OP | SLJIT_SET_Z)) == 0) {
+		compiler->last_flags = GET_FLAG_TYPE(current_flags) | (current_flags & (SLJIT_I32_OP | SLJIT_SET_Z));
+	}
+#endif
 }
 
 /* --------------------------------------------------------------------- */
@@ -644,65 +662,6 @@ static SLJIT_INLINE void set_const(struct sljit_const *const_, struct sljit_comp
 	(((exp) & SLJIT_MEM) && (((exp) & REG_MASK) == reg || OFFS_REG(exp) == reg))
 
 #if (defined SLJIT_ARGUMENT_CHECKS && SLJIT_ARGUMENT_CHECKS)
-#define FUNCTION_CHECK_OP() \
-	CHECK_ARGUMENT(!GET_FLAGS(op) || !(op & SLJIT_KEEP_FLAGS)); \
-	switch (GET_OPCODE(op)) { \
-	case SLJIT_NOT: \
-	case SLJIT_CLZ: \
-	case SLJIT_AND: \
-	case SLJIT_OR: \
-	case SLJIT_XOR: \
-	case SLJIT_SHL: \
-	case SLJIT_LSHR: \
-	case SLJIT_ASHR: \
-		CHECK_ARGUMENT(!(op & (SLJIT_SET_U | SLJIT_SET_S | SLJIT_SET_O | SLJIT_SET_C))); \
-		break; \
-	case SLJIT_NEG: \
-		CHECK_ARGUMENT(!(op & (SLJIT_SET_U | SLJIT_SET_S | SLJIT_SET_C))); \
-		break; \
-	case SLJIT_MUL: \
-		CHECK_ARGUMENT(!(op & (SLJIT_SET_E | SLJIT_SET_U | SLJIT_SET_S | SLJIT_SET_C))); \
-		break; \
-	case SLJIT_ADD: \
-		CHECK_ARGUMENT(!(op & (SLJIT_SET_U | SLJIT_SET_S))); \
-		break; \
-	case SLJIT_SUB: \
-		break; \
-	case SLJIT_ADDC: \
-	case SLJIT_SUBC: \
-		CHECK_ARGUMENT(!(op & (SLJIT_SET_E | SLJIT_SET_U | SLJIT_SET_S | SLJIT_SET_O))); \
-		break; \
-	case SLJIT_BREAKPOINT: \
-	case SLJIT_NOP: \
-	case SLJIT_LMUL_UW: \
-	case SLJIT_LMUL_SW: \
-	case SLJIT_MOV: \
-	case SLJIT_MOV_U32: \
-	case SLJIT_MOV_P: \
-	case SLJIT_MOVU: \
-	case SLJIT_MOVU_U32: \
-	case SLJIT_MOVU_P: \
-		/* Nothing allowed */ \
-		CHECK_ARGUMENT(!(op & (SLJIT_I32_OP | SLJIT_SET_E | SLJIT_SET_U | SLJIT_SET_S | SLJIT_SET_O | SLJIT_SET_C | SLJIT_KEEP_FLAGS))); \
-		break; \
-	default: \
-		/* Only SLJIT_I32_OP or SLJIT_F32_OP is allowed. */ \
-		CHECK_ARGUMENT(!(op & (SLJIT_SET_E | SLJIT_SET_U | SLJIT_SET_S | SLJIT_SET_O | SLJIT_SET_C | SLJIT_KEEP_FLAGS))); \
-		break; \
-	}
-
-#define FUNCTION_CHECK_FOP() \
-	CHECK_ARGUMENT(!GET_FLAGS(op) || !(op & SLJIT_KEEP_FLAGS)); \
-	switch (GET_OPCODE(op)) { \
-	case SLJIT_CMP_F64: \
-		CHECK_ARGUMENT(!(op & (SLJIT_SET_U | SLJIT_SET_O | SLJIT_SET_C | SLJIT_KEEP_FLAGS))); \
-		CHECK_ARGUMENT((op & (SLJIT_SET_E | SLJIT_SET_S))); \
-		break; \
-	default: \
-		/* Only SLJIT_I32_OP or SLJIT_F32_OP is allowed. */ \
-		CHECK_ARGUMENT(!(op & (SLJIT_SET_E | SLJIT_SET_U | SLJIT_SET_S | SLJIT_SET_O | SLJIT_SET_C | SLJIT_KEEP_FLAGS))); \
-		break; \
-	}
 
 #define FUNCTION_CHECK_IS_REG(r) \
 	(((r) >= SLJIT_R0 && (r) < (SLJIT_R0 + compiler->scratches)) || \
@@ -780,14 +739,6 @@ static SLJIT_INLINE void set_const(struct sljit_const *const_, struct sljit_comp
 		CHECK_ARGUMENT(!((p) & ~(SLJIT_MEM | SLJIT_IMM | REG_MASK | OFFS_REG_MASK))); \
 	}
 
-#define FUNCTION_CHECK_OP1() \
-	if (GET_OPCODE(op) >= SLJIT_MOVU && GET_OPCODE(op) <= SLJIT_MOVU_P) { \
-		CHECK_ARGUMENT(!(src & SLJIT_MEM) || (src & REG_MASK) != SLJIT_SP); \
-		CHECK_ARGUMENT(!(dst & SLJIT_MEM) || (dst & REG_MASK) != SLJIT_SP); \
-		if ((src & SLJIT_MEM) && (src & REG_MASK)) \
-			CHECK_ARGUMENT((dst & REG_MASK) != (src & REG_MASK) && OFFS_REG(dst) != (src & REG_MASK)); \
-	}
-
 #endif /* SLJIT_ARGUMENT_CHECKS */
 
 #if (defined SLJIT_VERBOSE && SLJIT_VERBOSE)
@@ -811,8 +762,10 @@ SLJIT_API_FUNC_ATTRIBUTE void sljit_compiler_verbose(struct sljit_compiler *comp
 	do { \
 		if ((r) < (SLJIT_R0 + compiler->scratches)) \
 			fprintf(compiler->verbose, "r%d", (r) - SLJIT_R0); \
-		else \
+		else if ((r) != SLJIT_SP) \
 			fprintf(compiler->verbose, "s%d", SLJIT_NUMBER_OF_REGISTERS - (r)); \
+		else \
+			fprintf(compiler->verbose, "sp"); \
 	} while (0)
 
 #define sljit_verbose_param(compiler, p, i) \
@@ -905,6 +858,7 @@ static char* jump_names[] = {
 	(char*)"sig_greater", (char*)"sig_less_equal",
 	(char*)"overflow", (char*)"not_overflow",
 	(char*)"mul_overflow", (char*)"mul_not_overflow",
+	(char*)"carry", (char*)"",
 	(char*)"equal", (char*)"not_equal",
 	(char*)"less", (char*)"greater_equal",
 	(char*)"greater", (char*)"less_equal",
@@ -959,6 +913,7 @@ static SLJIT_INLINE CHECK_RETURN_TYPE check_sljit_emit_enter(struct sljit_compil
 	CHECK_ARGUMENT(fsaveds >= 0 && fsaveds <= SLJIT_NUMBER_OF_FLOAT_REGISTERS);
 	CHECK_ARGUMENT(fscratches + fsaveds <= SLJIT_NUMBER_OF_FLOAT_REGISTERS);
 	CHECK_ARGUMENT(local_size >= 0 && local_size <= SLJIT_MAX_LOCAL_SIZE);
+	compiler->last_flags = 0;
 #endif
 #if (defined SLJIT_VERBOSE && SLJIT_VERBOSE)
 	if (SLJIT_UNLIKELY(!!compiler->verbose))
@@ -972,11 +927,6 @@ static SLJIT_INLINE CHECK_RETURN_TYPE check_sljit_set_context(struct sljit_compi
 	sljit_s32 options, sljit_s32 args, sljit_s32 scratches, sljit_s32 saveds,
 	sljit_s32 fscratches, sljit_s32 fsaveds, sljit_s32 local_size)
 {
-	if (SLJIT_UNLIKELY(compiler->skip_checks)) {
-		compiler->skip_checks = 0;
-		CHECK_RETURN_OK;
-	}
-
 #if (defined SLJIT_ARGUMENT_CHECKS && SLJIT_ARGUMENT_CHECKS)
 	CHECK_ARGUMENT(!(options & ~SLJIT_DOUBLE_ALIGNMENT));
 	CHECK_ARGUMENT(args >= 0 && args <= 3);
@@ -988,6 +938,7 @@ static SLJIT_INLINE CHECK_RETURN_TYPE check_sljit_set_context(struct sljit_compi
 	CHECK_ARGUMENT(fsaveds >= 0 && fsaveds <= SLJIT_NUMBER_OF_FLOAT_REGISTERS);
 	CHECK_ARGUMENT(fscratches + fsaveds <= SLJIT_NUMBER_OF_FLOAT_REGISTERS);
 	CHECK_ARGUMENT(local_size >= 0 && local_size <= SLJIT_MAX_LOCAL_SIZE);
+	compiler->last_flags = 0;
 #endif
 #if (defined SLJIT_VERBOSE && SLJIT_VERBOSE)
 	if (SLJIT_UNLIKELY(!!compiler->verbose))
@@ -1007,6 +958,7 @@ static SLJIT_INLINE CHECK_RETURN_TYPE check_sljit_emit_return(struct sljit_compi
 	}
 	else
 		CHECK_ARGUMENT(src == 0 && srcw == 0);
+	compiler->last_flags = 0;
 #endif
 #if (defined SLJIT_VERBOSE && SLJIT_VERBOSE)
 	if (SLJIT_UNLIKELY(!!compiler->verbose)) {
@@ -1026,6 +978,7 @@ static SLJIT_INLINE CHECK_RETURN_TYPE check_sljit_emit_fast_enter(struct sljit_c
 {
 #if (defined SLJIT_ARGUMENT_CHECKS && SLJIT_ARGUMENT_CHECKS)
 	FUNCTION_CHECK_DST(dst, dstw);
+	compiler->last_flags = 0;
 #endif
 #if (defined SLJIT_VERBOSE && SLJIT_VERBOSE)
 	if (SLJIT_UNLIKELY(!!compiler->verbose)) {
@@ -1041,6 +994,7 @@ static SLJIT_INLINE CHECK_RETURN_TYPE check_sljit_emit_fast_return(struct sljit_
 {
 #if (defined SLJIT_ARGUMENT_CHECKS && SLJIT_ARGUMENT_CHECKS)
 	FUNCTION_CHECK_SRC(src, srcw);
+	compiler->last_flags = 0;
 #endif
 #if (defined SLJIT_VERBOSE && SLJIT_VERBOSE)
 	if (SLJIT_UNLIKELY(!!compiler->verbose)) {
@@ -1058,6 +1012,8 @@ static SLJIT_INLINE CHECK_RETURN_TYPE check_sljit_emit_op0(struct sljit_compiler
 	CHECK_ARGUMENT((op >= SLJIT_BREAKPOINT && op <= SLJIT_LMUL_SW)
 		|| ((op & ~SLJIT_I32_OP) >= SLJIT_DIVMOD_UW && (op & ~SLJIT_I32_OP) <= SLJIT_DIV_SW));
 	CHECK_ARGUMENT(op < SLJIT_LMUL_UW || compiler->scratches >= 2);
+	if (op >= SLJIT_LMUL_UW)
+		compiler->last_flags = 0;
 #endif
 #if (defined SLJIT_VERBOSE && SLJIT_VERBOSE)
 	if (SLJIT_UNLIKELY(!!compiler->verbose))
@@ -1083,10 +1039,50 @@ static SLJIT_INLINE CHECK_RETURN_TYPE check_sljit_emit_op1(struct sljit_compiler
 
 #if (defined SLJIT_ARGUMENT_CHECKS && SLJIT_ARGUMENT_CHECKS)
 	CHECK_ARGUMENT(GET_OPCODE(op) >= SLJIT_MOV && GET_OPCODE(op) <= SLJIT_CLZ);
-	FUNCTION_CHECK_OP();
+
+	switch (GET_OPCODE(op)) {
+	case SLJIT_NOT:
+	case SLJIT_CLZ:
+		CHECK_ARGUMENT(!(op & VARIABLE_FLAG_MASK));
+		break;
+	case SLJIT_NEG:
+		CHECK_ARGUMENT(!(op & VARIABLE_FLAG_MASK)
+			|| GET_FLAG_TYPE(op) == SLJIT_OVERFLOW
+			|| GET_FLAG_TYPE(op) == SLJIT_NOT_OVERFLOW);
+		break;
+	case SLJIT_MOV:
+	case SLJIT_MOV_U32:
+	case SLJIT_MOV_P:
+	case SLJIT_MOVU:
+	case SLJIT_MOVU_U32:
+	case SLJIT_MOVU_P:
+		/* Nothing allowed */
+		CHECK_ARGUMENT(!(op & (SLJIT_I32_OP | SLJIT_SET_Z | VARIABLE_FLAG_MASK)));
+		break;
+	default:
+		/* Only SLJIT_I32_OP or SLJIT_F32_OP is allowed. */
+		CHECK_ARGUMENT(!(op & (SLJIT_SET_Z | VARIABLE_FLAG_MASK)));
+		break;
+	}
+
 	FUNCTION_CHECK_SRC(src, srcw);
 	FUNCTION_CHECK_DST(dst, dstw);
-	FUNCTION_CHECK_OP1();
+
+	if (GET_OPCODE(op) >= SLJIT_NOT)
+		compiler->last_flags = GET_FLAG_TYPE(op) | (op & (SLJIT_I32_OP | SLJIT_SET_Z));
+	else if (GET_OPCODE(op) >= SLJIT_MOVU) {
+		CHECK_ARGUMENT(!(src & SLJIT_MEM) || (src & REG_MASK) != SLJIT_SP);
+		CHECK_ARGUMENT(!(dst & SLJIT_MEM) || (dst & REG_MASK) != SLJIT_SP);
+		if ((src & REG_MASK) != SLJIT_UNUSED) {
+			CHECK_ARGUMENT((src & REG_MASK) != (dst & REG_MASK) && (src & REG_MASK) != OFFS_REG(dst));
+			CHECK_ARGUMENT((src & OFFS_REG_MASK) == SLJIT_UNUSED || srcw == 0);
+		}
+		if ((dst & REG_MASK) != SLJIT_UNUSED) {
+			CHECK_ARGUMENT((dst & REG_MASK) != OFFS_REG(src));
+			CHECK_ARGUMENT((dst & OFFS_REG_MASK) == SLJIT_UNUSED || dstw == 0);
+		}
+		compiler->last_flags = 0;
+	}
 #endif
 #if (defined SLJIT_VERBOSE && SLJIT_VERBOSE)
 	if (SLJIT_UNLIKELY(!!compiler->verbose)) {
@@ -1097,9 +1093,9 @@ static SLJIT_INLINE CHECK_RETURN_TYPE check_sljit_emit_op1(struct sljit_compiler
 		}
 		else
 		{
-			fprintf(compiler->verbose, "  %s%s%s%s%s%s%s%s ", op1_names[GET_OPCODE(op) - SLJIT_OP1_BASE], !(op & SLJIT_I32_OP) ? "" : "32",
-				!(op & SLJIT_SET_E) ? "" : ".e", !(op & SLJIT_SET_U) ? "" : ".u", !(op & SLJIT_SET_S) ? "" : ".s",
-				!(op & SLJIT_SET_O) ? "" : ".o", !(op & SLJIT_SET_C) ? "" : ".c", !(op & SLJIT_KEEP_FLAGS) ? "" : ".k");
+			fprintf(compiler->verbose, "  %s%s%s%s%s ", op1_names[GET_OPCODE(op) - SLJIT_OP1_BASE], !(op & SLJIT_I32_OP) ? "" : "32",
+				!(op & SLJIT_SET_Z) ? "" : ".z", !(op & VARIABLE_FLAG_MASK) ? "" : ".",
+				!(op & VARIABLE_FLAG_MASK) ? "" : jump_names[GET_FLAG_TYPE(op)]);
 		}
 
 		sljit_verbose_param(compiler, dst, dstw);
@@ -1123,16 +1119,55 @@ static SLJIT_INLINE CHECK_RETURN_TYPE check_sljit_emit_op2(struct sljit_compiler
 
 #if (defined SLJIT_ARGUMENT_CHECKS && SLJIT_ARGUMENT_CHECKS)
 	CHECK_ARGUMENT(GET_OPCODE(op) >= SLJIT_ADD && GET_OPCODE(op) <= SLJIT_ASHR);
-	FUNCTION_CHECK_OP();
+
+	switch (GET_OPCODE(op)) {
+	case SLJIT_AND:
+	case SLJIT_OR:
+	case SLJIT_XOR:
+	case SLJIT_SHL:
+	case SLJIT_LSHR:
+	case SLJIT_ASHR:
+		CHECK_ARGUMENT(!(op & VARIABLE_FLAG_MASK));
+		break;
+	case SLJIT_MUL:
+		CHECK_ARGUMENT(!(op & SLJIT_SET_Z));
+		CHECK_ARGUMENT(!(op & VARIABLE_FLAG_MASK)
+			|| GET_FLAG_TYPE(op) == SLJIT_MUL_OVERFLOW
+			|| GET_FLAG_TYPE(op) == SLJIT_MUL_NOT_OVERFLOW);
+		break;
+	case SLJIT_ADD:
+		CHECK_ARGUMENT(!(op & VARIABLE_FLAG_MASK)
+			|| GET_FLAG_TYPE(op) == GET_FLAG_TYPE(SLJIT_SET_CARRY)
+			|| GET_FLAG_TYPE(op) == SLJIT_OVERFLOW
+			|| GET_FLAG_TYPE(op) == SLJIT_NOT_OVERFLOW);
+		break;
+	case SLJIT_SUB:
+		CHECK_ARGUMENT(!(op & VARIABLE_FLAG_MASK)
+			|| (GET_FLAG_TYPE(op) >= SLJIT_LESS && GET_FLAG_TYPE(op) <= SLJIT_NOT_OVERFLOW)
+			|| GET_FLAG_TYPE(op) == GET_FLAG_TYPE(SLJIT_SET_CARRY));
+		break;
+	case SLJIT_ADDC:
+	case SLJIT_SUBC:
+		CHECK_ARGUMENT(!(op & VARIABLE_FLAG_MASK)
+			|| GET_FLAG_TYPE(op) == GET_FLAG_TYPE(SLJIT_SET_CARRY));
+		CHECK_ARGUMENT((compiler->last_flags & 0xff) == GET_FLAG_TYPE(SLJIT_SET_CARRY));
+		CHECK_ARGUMENT((op & SLJIT_I32_OP) == (compiler->last_flags & SLJIT_I32_OP));
+		break;
+	default:
+		SLJIT_UNREACHABLE();
+		break;
+	}
+
 	FUNCTION_CHECK_SRC(src1, src1w);
 	FUNCTION_CHECK_SRC(src2, src2w);
 	FUNCTION_CHECK_DST(dst, dstw);
+	compiler->last_flags = GET_FLAG_TYPE(op) | (op & (SLJIT_I32_OP | SLJIT_SET_Z));
 #endif
 #if (defined SLJIT_VERBOSE && SLJIT_VERBOSE)
 	if (SLJIT_UNLIKELY(!!compiler->verbose)) {
-		fprintf(compiler->verbose, "  %s%s%s%s%s%s%s%s ", op2_names[GET_OPCODE(op) - SLJIT_OP2_BASE], !(op & SLJIT_I32_OP) ? "" : "32",
-			!(op & SLJIT_SET_E) ? "" : ".e", !(op & SLJIT_SET_U) ? "" : ".u", !(op & SLJIT_SET_S) ? "" : ".s",
-			!(op & SLJIT_SET_O) ? "" : ".o", !(op & SLJIT_SET_C) ? "" : ".c", !(op & SLJIT_KEEP_FLAGS) ? "" : ".k");
+		fprintf(compiler->verbose, "  %s%s%s%s%s ", op2_names[GET_OPCODE(op) - SLJIT_OP2_BASE], !(op & SLJIT_I32_OP) ? "" : "32",
+			!(op & SLJIT_SET_Z) ? "" : ".z", !(op & VARIABLE_FLAG_MASK) ? "" : ".",
+			!(op & VARIABLE_FLAG_MASK) ? "" : jump_names[GET_FLAG_TYPE(op)]);
 		sljit_verbose_param(compiler, dst, dstw);
 		fprintf(compiler->verbose, ", ");
 		sljit_verbose_param(compiler, src1, src1w);
@@ -1173,6 +1208,7 @@ static SLJIT_INLINE CHECK_RETURN_TYPE check_sljit_emit_op_custom(struct sljit_co
 
 #if (defined SLJIT_ARGUMENT_CHECKS && SLJIT_ARGUMENT_CHECKS)
 	CHECK_ARGUMENT(instruction);
+
 #if (defined SLJIT_CONFIG_X86 && SLJIT_CONFIG_X86)
 	CHECK_ARGUMENT(size > 0 && size < 16);
 #elif (defined SLJIT_CONFIG_ARM_THUMB2 && SLJIT_CONFIG_ARM_THUMB2)
@@ -1182,6 +1218,7 @@ static SLJIT_INLINE CHECK_RETURN_TYPE check_sljit_emit_op_custom(struct sljit_co
 	CHECK_ARGUMENT(size == 4 && (((sljit_sw)instruction) & 0x3) == 0);
 #endif
 
+	compiler->last_flags = 0;
 #endif
 #if (defined SLJIT_VERBOSE && SLJIT_VERBOSE)
 	if (SLJIT_UNLIKELY(!!compiler->verbose)) {
@@ -1206,7 +1243,7 @@ static SLJIT_INLINE CHECK_RETURN_TYPE check_sljit_emit_fop1(struct sljit_compile
 #if (defined SLJIT_ARGUMENT_CHECKS && SLJIT_ARGUMENT_CHECKS)
 	CHECK_ARGUMENT(sljit_is_fpu_available());
 	CHECK_ARGUMENT(GET_OPCODE(op) >= SLJIT_MOV_F64 && GET_OPCODE(op) <= SLJIT_ABS_F64);
-	FUNCTION_CHECK_FOP();
+	CHECK_ARGUMENT(!(op & (SLJIT_SET_Z | VARIABLE_FLAG_MASK)));
 	FUNCTION_FCHECK(src, srcw);
 	FUNCTION_FCHECK(dst, dstw);
 #endif
@@ -1232,6 +1269,10 @@ static SLJIT_INLINE CHECK_RETURN_TYPE check_sljit_emit_fop1_cmp(struct sljit_com
 	sljit_s32 src1, sljit_sw src1w,
 	sljit_s32 src2, sljit_sw src2w)
 {
+#if (defined SLJIT_ARGUMENT_CHECKS && SLJIT_ARGUMENT_CHECKS)
+	compiler->last_flags = GET_FLAG_TYPE(op) | (op & (SLJIT_I32_OP | SLJIT_SET_Z));
+#endif
+
 	if (SLJIT_UNLIKELY(compiler->skip_checks)) {
 		compiler->skip_checks = 0;
 		CHECK_RETURN_OK;
@@ -1240,14 +1281,19 @@ static SLJIT_INLINE CHECK_RETURN_TYPE check_sljit_emit_fop1_cmp(struct sljit_com
 #if (defined SLJIT_ARGUMENT_CHECKS && SLJIT_ARGUMENT_CHECKS)
 	CHECK_ARGUMENT(sljit_is_fpu_available());
 	CHECK_ARGUMENT(GET_OPCODE(op) == SLJIT_CMP_F64);
-	FUNCTION_CHECK_FOP();
+	CHECK_ARGUMENT(!(op & SLJIT_SET_Z));
+	CHECK_ARGUMENT((op & VARIABLE_FLAG_MASK)
+		|| (GET_FLAG_TYPE(op) >= SLJIT_EQUAL_F64 && GET_FLAG_TYPE(op) <= SLJIT_ORDERED_F64));
 	FUNCTION_FCHECK(src1, src1w);
 	FUNCTION_FCHECK(src2, src2w);
 #endif
 #if (defined SLJIT_VERBOSE && SLJIT_VERBOSE)
 	if (SLJIT_UNLIKELY(!!compiler->verbose)) {
-		fprintf(compiler->verbose, "  %s%s%s%s ", fop1_names[SLJIT_CMP_F64 - SLJIT_FOP1_BASE], (op & SLJIT_F32_OP) ? ".f32" : ".f64",
-			(op & SLJIT_SET_E) ? ".e" : "", (op & SLJIT_SET_S) ? ".s" : "");
+		fprintf(compiler->verbose, "  %s%s", fop1_names[SLJIT_CMP_F64 - SLJIT_FOP1_BASE], (op & SLJIT_F32_OP) ? ".f32" : ".f64");
+		if (op & VARIABLE_FLAG_MASK) {
+			fprintf(compiler->verbose, ".%s_f", jump_names[GET_FLAG_TYPE(op)]);
+		}
+		fprintf(compiler->verbose, " ");
 		sljit_verbose_fparam(compiler, src1, src1w);
 		fprintf(compiler->verbose, ", ");
 		sljit_verbose_fparam(compiler, src2, src2w);
@@ -1269,7 +1315,7 @@ static SLJIT_INLINE CHECK_RETURN_TYPE check_sljit_emit_fop1_conv_sw_from_f64(str
 #if (defined SLJIT_ARGUMENT_CHECKS && SLJIT_ARGUMENT_CHECKS)
 	CHECK_ARGUMENT(sljit_is_fpu_available());
 	CHECK_ARGUMENT(GET_OPCODE(op) >= SLJIT_CONV_SW_FROM_F64 && GET_OPCODE(op) <= SLJIT_CONV_S32_FROM_F64);
-	FUNCTION_CHECK_FOP();
+	CHECK_ARGUMENT(!(op & (SLJIT_SET_Z | VARIABLE_FLAG_MASK)));
 	FUNCTION_FCHECK(src, srcw);
 	FUNCTION_CHECK_DST(dst, dstw);
 #endif
@@ -1299,7 +1345,7 @@ static SLJIT_INLINE CHECK_RETURN_TYPE check_sljit_emit_fop1_conv_f64_from_sw(str
 #if (defined SLJIT_ARGUMENT_CHECKS && SLJIT_ARGUMENT_CHECKS)
 	CHECK_ARGUMENT(sljit_is_fpu_available());
 	CHECK_ARGUMENT(GET_OPCODE(op) >= SLJIT_CONV_F64_FROM_SW && GET_OPCODE(op) <= SLJIT_CONV_F64_FROM_S32);
-	FUNCTION_CHECK_FOP();
+	CHECK_ARGUMENT(!(op & (SLJIT_SET_Z | VARIABLE_FLAG_MASK)));
 	FUNCTION_CHECK_SRC(src, srcw);
 	FUNCTION_FCHECK(dst, dstw);
 #endif
@@ -1325,7 +1371,7 @@ static SLJIT_INLINE CHECK_RETURN_TYPE check_sljit_emit_fop2(struct sljit_compile
 #if (defined SLJIT_ARGUMENT_CHECKS && SLJIT_ARGUMENT_CHECKS)
 	CHECK_ARGUMENT(sljit_is_fpu_available());
 	CHECK_ARGUMENT(GET_OPCODE(op) >= SLJIT_ADD_F64 && GET_OPCODE(op) <= SLJIT_DIV_F64);
-	FUNCTION_CHECK_FOP();
+	CHECK_ARGUMENT(!(op & (SLJIT_SET_Z | VARIABLE_FLAG_MASK)));
 	FUNCTION_FCHECK(src1, src1w);
 	FUNCTION_FCHECK(src2, src2w);
 	FUNCTION_FCHECK(dst, dstw);
@@ -1348,6 +1394,10 @@ static SLJIT_INLINE CHECK_RETURN_TYPE check_sljit_emit_label(struct sljit_compil
 {
 	SLJIT_UNUSED_ARG(compiler);
 
+#if (defined SLJIT_ARGUMENT_CHECKS && SLJIT_ARGUMENT_CHECKS)
+	compiler->last_flags = 0;
+#endif
+
 #if (defined SLJIT_VERBOSE && SLJIT_VERBOSE)
 	if (SLJIT_UNLIKELY(!!compiler->verbose))
 		fprintf(compiler->verbose, "label:\n");
@@ -1364,9 +1414,18 @@ static SLJIT_INLINE CHECK_RETURN_TYPE check_sljit_emit_jump(struct sljit_compile
 
 #if (defined SLJIT_ARGUMENT_CHECKS && SLJIT_ARGUMENT_CHECKS)
 	CHECK_ARGUMENT(!(type & ~(0xff | SLJIT_REWRITABLE_JUMP | SLJIT_I32_OP)));
+	CHECK_ARGUMENT((type & 0xff) != GET_FLAG_TYPE(SLJIT_SET_CARRY) && (type & 0xff) != (GET_FLAG_TYPE(SLJIT_SET_CARRY) + 1));
 	CHECK_ARGUMENT((type & 0xff) >= SLJIT_EQUAL && (type & 0xff) <= SLJIT_CALL3);
 	CHECK_ARGUMENT((type & 0xff) < SLJIT_JUMP || !(type & SLJIT_I32_OP));
 	CHECK_ARGUMENT((type & 0xff) <= SLJIT_CALL0 || ((type & 0xff) - SLJIT_CALL0) <= compiler->scratches);
+
+	if ((type & 0xff) < SLJIT_JUMP) {
+		if ((type & 0xff) <= SLJIT_NOT_ZERO)
+			CHECK_ARGUMENT(compiler->last_flags & SLJIT_SET_Z);
+		else
+			CHECK_ARGUMENT((type & 0xff) == (compiler->last_flags & 0xff));
+		CHECK_ARGUMENT((type & SLJIT_I32_OP) == (compiler->last_flags & SLJIT_I32_OP));
+	}
 #endif
 #if (defined SLJIT_VERBOSE && SLJIT_VERBOSE)
 	if (SLJIT_UNLIKELY(!!compiler->verbose))
@@ -1385,6 +1444,7 @@ static SLJIT_INLINE CHECK_RETURN_TYPE check_sljit_emit_cmp(struct sljit_compiler
 	CHECK_ARGUMENT((type & 0xff) >= SLJIT_EQUAL && (type & 0xff) <= SLJIT_SIG_LESS_EQUAL);
 	FUNCTION_CHECK_SRC(src1, src1w);
 	FUNCTION_CHECK_SRC(src2, src2w);
+	compiler->last_flags = 0;
 #endif
 #if (defined SLJIT_VERBOSE && SLJIT_VERBOSE)
 	if (SLJIT_UNLIKELY(!!compiler->verbose)) {
@@ -1409,6 +1469,7 @@ static SLJIT_INLINE CHECK_RETURN_TYPE check_sljit_emit_fcmp(struct sljit_compile
 	CHECK_ARGUMENT((type & 0xff) >= SLJIT_EQUAL_F64 && (type & 0xff) <= SLJIT_ORDERED_F64);
 	FUNCTION_FCHECK(src1, src1w);
 	FUNCTION_FCHECK(src2, src2w);
+	compiler->last_flags = 0;
 #endif
 #if (defined SLJIT_VERBOSE && SLJIT_VERBOSE)
 	if (SLJIT_UNLIKELY(!!compiler->verbose)) {
@@ -1425,6 +1486,10 @@ static SLJIT_INLINE CHECK_RETURN_TYPE check_sljit_emit_fcmp(struct sljit_compile
 
 static SLJIT_INLINE CHECK_RETURN_TYPE check_sljit_emit_ijump(struct sljit_compiler *compiler, sljit_s32 type, sljit_s32 src, sljit_sw srcw)
 {
+#if (defined SLJIT_ARGUMENT_CHECKS && SLJIT_ARGUMENT_CHECKS)
+	compiler->last_flags = 0;
+#endif
+
 	if (SLJIT_UNLIKELY(compiler->skip_checks)) {
 		compiler->skip_checks = 0;
 		CHECK_RETURN_OK;
@@ -1453,21 +1518,28 @@ static SLJIT_INLINE CHECK_RETURN_TYPE check_sljit_emit_op_flags(struct sljit_com
 #if (defined SLJIT_ARGUMENT_CHECKS && SLJIT_ARGUMENT_CHECKS)
 	CHECK_ARGUMENT(!(type & ~(0xff | SLJIT_I32_OP)));
 	CHECK_ARGUMENT((type & 0xff) >= SLJIT_EQUAL && (type & 0xff) <= SLJIT_ORDERED_F64);
+	CHECK_ARGUMENT((type & 0xff) != GET_FLAG_TYPE(SLJIT_SET_CARRY) && (type & 0xff) != (GET_FLAG_TYPE(SLJIT_SET_CARRY) + 1));
 	CHECK_ARGUMENT(op == SLJIT_MOV || GET_OPCODE(op) == SLJIT_MOV_U32 || GET_OPCODE(op) == SLJIT_MOV_S32
 		|| (GET_OPCODE(op) >= SLJIT_AND && GET_OPCODE(op) <= SLJIT_XOR));
-	CHECK_ARGUMENT((op & (SLJIT_SET_U | SLJIT_SET_S | SLJIT_SET_O | SLJIT_SET_C)) == 0);
-	CHECK_ARGUMENT((op & (SLJIT_SET_E | SLJIT_KEEP_FLAGS)) != (SLJIT_SET_E | SLJIT_KEEP_FLAGS));
+	CHECK_ARGUMENT(!(op & VARIABLE_FLAG_MASK));
+
+	if ((type & 0xff) <= SLJIT_NOT_ZERO)
+		CHECK_ARGUMENT(compiler->last_flags & SLJIT_SET_Z);
+	else
+		CHECK_ARGUMENT((type & 0xff) == (compiler->last_flags & 0xff));
+
 	if (GET_OPCODE(op) < SLJIT_ADD) {
 		CHECK_ARGUMENT(src == SLJIT_UNUSED && srcw == 0);
 	} else {
 		CHECK_ARGUMENT(src == dst && srcw == dstw);
+		compiler->last_flags = GET_FLAG_TYPE(op) | (op & (SLJIT_I32_OP | SLJIT_SET_Z));
 	}
 	FUNCTION_CHECK_DST(dst, dstw);
 #endif
 #if (defined SLJIT_VERBOSE && SLJIT_VERBOSE)
 	if (SLJIT_UNLIKELY(!!compiler->verbose)) {
-		fprintf(compiler->verbose, "  flags %s%s%s%s, ",
-			!(op & SLJIT_SET_E) ? "" : ".e", !(op & SLJIT_KEEP_FLAGS) ? "" : ".k",
+		fprintf(compiler->verbose, "  flags%s %s%s, ",
+			!(op & SLJIT_SET_Z) ? "" : ".z",
 			GET_OPCODE(op) < SLJIT_OP2_BASE ? "mov" : op2_names[GET_OPCODE(op) - SLJIT_OP2_BASE],
 			GET_OPCODE(op) < SLJIT_OP2_BASE ? op1_names[GET_OPCODE(op) - SLJIT_OP1_BASE] : ((op & SLJIT_I32_OP) ? "32" : ""));
 		sljit_verbose_param(compiler, dst, dstw);
@@ -1665,6 +1737,7 @@ SLJIT_API_FUNC_ATTRIBUTE struct sljit_jump* sljit_emit_cmp(struct sljit_compiler
 			condition = SLJIT_SIG_GREATER_EQUAL;
 			break;
 		}
+
 		type = condition | (type & (SLJIT_I32_OP | SLJIT_REWRITABLE_JUMP));
 		tmp_src = src1;
 		src1 = src2;
@@ -1675,11 +1748,9 @@ SLJIT_API_FUNC_ATTRIBUTE struct sljit_jump* sljit_emit_cmp(struct sljit_compiler
 	}
 
 	if (condition <= SLJIT_NOT_ZERO)
-		flags = SLJIT_SET_E;
-	else if (condition <= SLJIT_LESS_EQUAL)
-		flags = SLJIT_SET_U;
+		flags = SLJIT_SET_Z;
 	else
-		flags = SLJIT_SET_S;
+		flags = condition << VARIABLE_FLAG_SHIFT;
 
 #if (defined SLJIT_VERBOSE && SLJIT_VERBOSE) \
 		|| (defined SLJIT_ARGUMENT_CHECKS && SLJIT_ARGUMENT_CHECKS)
@@ -1691,37 +1762,30 @@ SLJIT_API_FUNC_ATTRIBUTE struct sljit_jump* sljit_emit_cmp(struct sljit_compiler
 		|| (defined SLJIT_ARGUMENT_CHECKS && SLJIT_ARGUMENT_CHECKS)
 	compiler->skip_checks = 1;
 #endif
-	return sljit_emit_jump(compiler, condition | (type & SLJIT_REWRITABLE_JUMP));
+	return sljit_emit_jump(compiler, condition | (type & (SLJIT_REWRITABLE_JUMP | SLJIT_I32_OP)));
 }
+
+#endif
 
 SLJIT_API_FUNC_ATTRIBUTE struct sljit_jump* sljit_emit_fcmp(struct sljit_compiler *compiler, sljit_s32 type,
 	sljit_s32 src1, sljit_sw src1w,
 	sljit_s32 src2, sljit_sw src2w)
 {
-	sljit_s32 flags, condition;
-
 	CHECK_ERROR_PTR();
 	CHECK_PTR(check_sljit_emit_fcmp(compiler, type, src1, src1w, src2, src2w));
 
-	condition = type & 0xff;
-	flags = (condition <= SLJIT_NOT_EQUAL_F64) ? SLJIT_SET_E : SLJIT_SET_S;
-	if (type & SLJIT_F32_OP)
-		flags |= SLJIT_F32_OP;
+#if (defined SLJIT_VERBOSE && SLJIT_VERBOSE) \
+		|| (defined SLJIT_ARGUMENT_CHECKS && SLJIT_ARGUMENT_CHECKS)
+	compiler->skip_checks = 1;
+#endif
+	sljit_emit_fop1(compiler, SLJIT_CMP_F64 | ((type & 0xff) << VARIABLE_FLAG_SHIFT) | (type & SLJIT_I32_OP), src1, src1w, src2, src2w);
 
 #if (defined SLJIT_VERBOSE && SLJIT_VERBOSE) \
 		|| (defined SLJIT_ARGUMENT_CHECKS && SLJIT_ARGUMENT_CHECKS)
 	compiler->skip_checks = 1;
 #endif
-	sljit_emit_fop1(compiler, SLJIT_CMP_F64 | flags, src1, src1w, src2, src2w);
-
-#if (defined SLJIT_VERBOSE && SLJIT_VERBOSE) \
-		|| (defined SLJIT_ARGUMENT_CHECKS && SLJIT_ARGUMENT_CHECKS)
-	compiler->skip_checks = 1;
-#endif
-	return sljit_emit_jump(compiler, condition | (type & SLJIT_REWRITABLE_JUMP));
+	return sljit_emit_jump(compiler, type);
 }
-
-#endif
 
 #if !(defined SLJIT_CONFIG_X86 && SLJIT_CONFIG_X86)
 
@@ -1736,7 +1800,7 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_get_local_base(struct sljit_compiler *c
 	compiler->skip_checks = 1;
 #endif
 	if (offset != 0)
-		return sljit_emit_op2(compiler, SLJIT_ADD | SLJIT_KEEP_FLAGS, dst, dstw, SLJIT_SP, 0, SLJIT_IMM, offset);
+		return sljit_emit_op2(compiler, SLJIT_ADD, dst, dstw, SLJIT_SP, 0, SLJIT_IMM, offset);
 	return sljit_emit_op1(compiler, SLJIT_MOV, dst, dstw, SLJIT_SP, 0);
 }
 
@@ -1751,23 +1815,30 @@ SLJIT_API_FUNC_ATTRIBUTE const char* sljit_get_platform_name(void)
 	return "unsupported";
 }
 
-SLJIT_API_FUNC_ATTRIBUTE struct sljit_compiler* sljit_create_compiler(void)
+SLJIT_API_FUNC_ATTRIBUTE struct sljit_compiler* sljit_create_compiler(void *allocator_data)
 {
-	SLJIT_ASSERT_STOP();
+	SLJIT_UNUSED_ARG(allocator_data);
+	SLJIT_UNREACHABLE();
 	return NULL;
 }
 
 SLJIT_API_FUNC_ATTRIBUTE void sljit_free_compiler(struct sljit_compiler *compiler)
 {
 	SLJIT_UNUSED_ARG(compiler);
-	SLJIT_ASSERT_STOP();
+	SLJIT_UNREACHABLE();
+}
+
+SLJIT_API_FUNC_ATTRIBUTE void sljit_set_compiler_memory_error(struct sljit_compiler *compiler)
+{
+	SLJIT_UNUSED_ARG(compiler);
+	SLJIT_UNREACHABLE();
 }
 
 SLJIT_API_FUNC_ATTRIBUTE void* sljit_alloc_memory(struct sljit_compiler *compiler, sljit_s32 size)
 {
 	SLJIT_UNUSED_ARG(compiler);
 	SLJIT_UNUSED_ARG(size);
-	SLJIT_ASSERT_STOP();
+	SLJIT_UNREACHABLE();
 	return NULL;
 }
 
@@ -1776,21 +1847,21 @@ SLJIT_API_FUNC_ATTRIBUTE void sljit_compiler_verbose(struct sljit_compiler *comp
 {
 	SLJIT_UNUSED_ARG(compiler);
 	SLJIT_UNUSED_ARG(verbose);
-	SLJIT_ASSERT_STOP();
+	SLJIT_UNREACHABLE();
 }
 #endif
 
 SLJIT_API_FUNC_ATTRIBUTE void* sljit_generate_code(struct sljit_compiler *compiler)
 {
 	SLJIT_UNUSED_ARG(compiler);
-	SLJIT_ASSERT_STOP();
+	SLJIT_UNREACHABLE();
 	return NULL;
 }
 
 SLJIT_API_FUNC_ATTRIBUTE void sljit_free_code(void* code)
 {
 	SLJIT_UNUSED_ARG(code);
-	SLJIT_ASSERT_STOP();
+	SLJIT_UNREACHABLE();
 }
 
 SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_enter(struct sljit_compiler *compiler,
@@ -1805,7 +1876,7 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_enter(struct sljit_compiler *compi
 	SLJIT_UNUSED_ARG(fscratches);
 	SLJIT_UNUSED_ARG(fsaveds);
 	SLJIT_UNUSED_ARG(local_size);
-	SLJIT_ASSERT_STOP();
+	SLJIT_UNREACHABLE();
 	return SLJIT_ERR_UNSUPPORTED;
 }
 
@@ -1821,7 +1892,7 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_set_context(struct sljit_compiler *comp
 	SLJIT_UNUSED_ARG(fscratches);
 	SLJIT_UNUSED_ARG(fsaveds);
 	SLJIT_UNUSED_ARG(local_size);
-	SLJIT_ASSERT_STOP();
+	SLJIT_UNREACHABLE();
 	return SLJIT_ERR_UNSUPPORTED;
 }
 
@@ -1831,7 +1902,7 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_return(struct sljit_compiler *comp
 	SLJIT_UNUSED_ARG(op);
 	SLJIT_UNUSED_ARG(src);
 	SLJIT_UNUSED_ARG(srcw);
-	SLJIT_ASSERT_STOP();
+	SLJIT_UNREACHABLE();
 	return SLJIT_ERR_UNSUPPORTED;
 }
 
@@ -1840,7 +1911,7 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_fast_enter(struct sljit_compiler *
 	SLJIT_UNUSED_ARG(compiler);
 	SLJIT_UNUSED_ARG(dst);
 	SLJIT_UNUSED_ARG(dstw);
-	SLJIT_ASSERT_STOP();
+	SLJIT_UNREACHABLE();
 	return SLJIT_ERR_UNSUPPORTED;
 }
 
@@ -1849,7 +1920,7 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_fast_return(struct sljit_compiler 
 	SLJIT_UNUSED_ARG(compiler);
 	SLJIT_UNUSED_ARG(src);
 	SLJIT_UNUSED_ARG(srcw);
-	SLJIT_ASSERT_STOP();
+	SLJIT_UNREACHABLE();
 	return SLJIT_ERR_UNSUPPORTED;
 }
 
@@ -1857,7 +1928,7 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op0(struct sljit_compiler *compile
 {
 	SLJIT_UNUSED_ARG(compiler);
 	SLJIT_UNUSED_ARG(op);
-	SLJIT_ASSERT_STOP();
+	SLJIT_UNREACHABLE();
 	return SLJIT_ERR_UNSUPPORTED;
 }
 
@@ -1871,7 +1942,7 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op1(struct sljit_compiler *compile
 	SLJIT_UNUSED_ARG(dstw);
 	SLJIT_UNUSED_ARG(src);
 	SLJIT_UNUSED_ARG(srcw);
-	SLJIT_ASSERT_STOP();
+	SLJIT_UNREACHABLE();
 	return SLJIT_ERR_UNSUPPORTED;
 }
 
@@ -1888,13 +1959,13 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op2(struct sljit_compiler *compile
 	SLJIT_UNUSED_ARG(src1w);
 	SLJIT_UNUSED_ARG(src2);
 	SLJIT_UNUSED_ARG(src2w);
-	SLJIT_ASSERT_STOP();
+	SLJIT_UNREACHABLE();
 	return SLJIT_ERR_UNSUPPORTED;
 }
 
 SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_get_register_index(sljit_s32 reg)
 {
-	SLJIT_ASSERT_STOP();
+	SLJIT_UNREACHABLE();
 	return reg;
 }
 
@@ -1904,13 +1975,19 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op_custom(struct sljit_compiler *c
 	SLJIT_UNUSED_ARG(compiler);
 	SLJIT_UNUSED_ARG(instruction);
 	SLJIT_UNUSED_ARG(size);
-	SLJIT_ASSERT_STOP();
+	SLJIT_UNREACHABLE();
 	return SLJIT_ERR_UNSUPPORTED;
+}
+
+SLJIT_API_FUNC_ATTRIBUTE void sljit_set_current_flags(struct sljit_compiler *compiler, sljit_s32 current_flags)
+{
+	SLJIT_UNUSED_ARG(compiler);
+	SLJIT_UNUSED_ARG(current_flags);
 }
 
 SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_is_fpu_available(void)
 {
-	SLJIT_ASSERT_STOP();
+	SLJIT_UNREACHABLE();
 	return 0;
 }
 
@@ -1924,7 +2001,7 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_fop1(struct sljit_compiler *compil
 	SLJIT_UNUSED_ARG(dstw);
 	SLJIT_UNUSED_ARG(src);
 	SLJIT_UNUSED_ARG(srcw);
-	SLJIT_ASSERT_STOP();
+	SLJIT_UNREACHABLE();
 	return SLJIT_ERR_UNSUPPORTED;
 }
 
@@ -1941,14 +2018,14 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_fop2(struct sljit_compiler *compil
 	SLJIT_UNUSED_ARG(src1w);
 	SLJIT_UNUSED_ARG(src2);
 	SLJIT_UNUSED_ARG(src2w);
-	SLJIT_ASSERT_STOP();
+	SLJIT_UNREACHABLE();
 	return SLJIT_ERR_UNSUPPORTED;
 }
 
 SLJIT_API_FUNC_ATTRIBUTE struct sljit_label* sljit_emit_label(struct sljit_compiler *compiler)
 {
 	SLJIT_UNUSED_ARG(compiler);
-	SLJIT_ASSERT_STOP();
+	SLJIT_UNREACHABLE();
 	return NULL;
 }
 
@@ -1956,7 +2033,7 @@ SLJIT_API_FUNC_ATTRIBUTE struct sljit_jump* sljit_emit_jump(struct sljit_compile
 {
 	SLJIT_UNUSED_ARG(compiler);
 	SLJIT_UNUSED_ARG(type);
-	SLJIT_ASSERT_STOP();
+	SLJIT_UNREACHABLE();
 	return NULL;
 }
 
@@ -1970,7 +2047,7 @@ SLJIT_API_FUNC_ATTRIBUTE struct sljit_jump* sljit_emit_cmp(struct sljit_compiler
 	SLJIT_UNUSED_ARG(src1w);
 	SLJIT_UNUSED_ARG(src2);
 	SLJIT_UNUSED_ARG(src2w);
-	SLJIT_ASSERT_STOP();
+	SLJIT_UNREACHABLE();
 	return NULL;
 }
 
@@ -1984,7 +2061,7 @@ SLJIT_API_FUNC_ATTRIBUTE struct sljit_jump* sljit_emit_fcmp(struct sljit_compile
 	SLJIT_UNUSED_ARG(src1w);
 	SLJIT_UNUSED_ARG(src2);
 	SLJIT_UNUSED_ARG(src2w);
-	SLJIT_ASSERT_STOP();
+	SLJIT_UNREACHABLE();
 	return NULL;
 }
 
@@ -1992,14 +2069,14 @@ SLJIT_API_FUNC_ATTRIBUTE void sljit_set_label(struct sljit_jump *jump, struct sl
 {
 	SLJIT_UNUSED_ARG(jump);
 	SLJIT_UNUSED_ARG(label);
-	SLJIT_ASSERT_STOP();
+	SLJIT_UNREACHABLE();
 }
 
 SLJIT_API_FUNC_ATTRIBUTE void sljit_set_target(struct sljit_jump *jump, sljit_uw target)
 {
 	SLJIT_UNUSED_ARG(jump);
 	SLJIT_UNUSED_ARG(target);
-	SLJIT_ASSERT_STOP();
+	SLJIT_UNREACHABLE();
 }
 
 SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_ijump(struct sljit_compiler *compiler, sljit_s32 type, sljit_s32 src, sljit_sw srcw)
@@ -2008,7 +2085,7 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_ijump(struct sljit_compiler *compi
 	SLJIT_UNUSED_ARG(type);
 	SLJIT_UNUSED_ARG(src);
 	SLJIT_UNUSED_ARG(srcw);
-	SLJIT_ASSERT_STOP();
+	SLJIT_UNREACHABLE();
 	return SLJIT_ERR_UNSUPPORTED;
 }
 
@@ -2024,7 +2101,7 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op_flags(struct sljit_compiler *co
 	SLJIT_UNUSED_ARG(src);
 	SLJIT_UNUSED_ARG(srcw);
 	SLJIT_UNUSED_ARG(type);
-	SLJIT_ASSERT_STOP();
+	SLJIT_UNREACHABLE();
 	return SLJIT_ERR_UNSUPPORTED;
 }
 
@@ -2034,7 +2111,7 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_get_local_base(struct sljit_compiler *c
 	SLJIT_UNUSED_ARG(dst);
 	SLJIT_UNUSED_ARG(dstw);
 	SLJIT_UNUSED_ARG(offset);
-	SLJIT_ASSERT_STOP();
+	SLJIT_UNREACHABLE();
 	return SLJIT_ERR_UNSUPPORTED;
 }
 
@@ -2044,7 +2121,7 @@ SLJIT_API_FUNC_ATTRIBUTE struct sljit_const* sljit_emit_const(struct sljit_compi
 	SLJIT_UNUSED_ARG(dst);
 	SLJIT_UNUSED_ARG(dstw);
 	SLJIT_UNUSED_ARG(initval);
-	SLJIT_ASSERT_STOP();
+	SLJIT_UNREACHABLE();
 	return NULL;
 }
 
@@ -2053,7 +2130,7 @@ SLJIT_API_FUNC_ATTRIBUTE void sljit_set_jump_addr(sljit_uw addr, sljit_uw new_ta
 	SLJIT_UNUSED_ARG(addr);
 	SLJIT_UNUSED_ARG(new_target);
 	SLJIT_UNUSED_ARG(executable_offset);
-	SLJIT_ASSERT_STOP();
+	SLJIT_UNREACHABLE();
 }
 
 SLJIT_API_FUNC_ATTRIBUTE void sljit_set_const(sljit_uw addr, sljit_sw new_constant, sljit_sw executable_offset)
@@ -2061,7 +2138,7 @@ SLJIT_API_FUNC_ATTRIBUTE void sljit_set_const(sljit_uw addr, sljit_sw new_consta
 	SLJIT_UNUSED_ARG(addr);
 	SLJIT_UNUSED_ARG(new_constant);
 	SLJIT_UNUSED_ARG(executable_offset);
-	SLJIT_ASSERT_STOP();
+	SLJIT_UNREACHABLE();
 }
 
 #endif

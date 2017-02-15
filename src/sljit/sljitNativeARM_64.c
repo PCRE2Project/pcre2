@@ -1,7 +1,7 @@
 /*
  *    Stack-less Just-In-Time compiler
  *
- *    Copyright 2009-2012 Zoltan Herczeg (hzmester@freemail.hu). All rights reserved.
+ *    Copyright Zoltan Herczeg (hzmester@freemail.hu). All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification, are
  * permitted provided that the following conditions are met:
@@ -375,7 +375,7 @@ static sljit_ins logical_imm(sljit_sw imm, sljit_s32 len)
 	uimm = (sljit_uw)imm;
 	while (1) {
 		if (len <= 0) {
-			SLJIT_ASSERT_STOP();
+			SLJIT_UNREACHABLE();
 			return 0;
 		}
 		mask = ((sljit_uw)1 << len) - 1;
@@ -645,7 +645,7 @@ static sljit_s32 emit_op_imm(struct sljit_compiler *compiler, sljit_s32 flags, s
 			}
 			goto set_flags;
 		default:
-			SLJIT_ASSERT_STOP();
+			SLJIT_UNREACHABLE();
 			break;
 		}
 
@@ -765,7 +765,7 @@ static sljit_s32 emit_op_imm(struct sljit_compiler *compiler, sljit_s32 flags, s
 		goto set_flags;
 	}
 
-	SLJIT_ASSERT_STOP();
+	SLJIT_UNREACHABLE();
 	return SLJIT_SUCCESS;
 
 set_flags:
@@ -936,14 +936,16 @@ static sljit_s32 getput_arg(struct sljit_compiler *compiler, sljit_s32 flags, sl
 		other_r = OFFS_REG(arg);
 		if (!other_r) {
 			other_r = arg & REG_MASK;
-			if (other_r != reg && argw >= 0 && argw <= 0xffffff) {
+			SLJIT_ASSERT(other_r != reg);
+
+			if (argw >= 0 && argw <= 0xffffff) {
 				if ((argw & 0xfff) != 0)
 					FAIL_IF(push_inst(compiler, ADDI | RD(other_r) | RN(other_r) | ((argw & 0xfff) << 10)));
 				if (argw >> 12)
 					FAIL_IF(push_inst(compiler, ADDI | (1 << 22) | RD(other_r) | RN(other_r) | ((argw >> 12) << 10)));
 				return push_inst(compiler, sljit_mem_imm[flags & 0x3] | (shift << 30) | RT(reg) | RN(other_r));
 			}
-			else if (other_r != reg && argw < 0 && argw >= -0xffffff) {
+			else if (argw < 0 && argw >= -0xffffff) {
 				argw = -argw;
 				if ((argw & 0xfff) != 0)
 					FAIL_IF(push_inst(compiler, SUBI | RD(other_r) | RN(other_r) | ((argw & 0xfff) << 10)));
@@ -976,18 +978,8 @@ static sljit_s32 getput_arg(struct sljit_compiler *compiler, sljit_s32 flags, sl
 
 		/* No caching here. */
 		arg &= REG_MASK;
-		argw &= 0x3;
-		if (!argw || argw == shift) {
-			FAIL_IF(push_inst(compiler, sljit_mem_reg[flags & 0x3] | (shift << 30) | RT(reg) | RN(arg) | RM(other_r) | (argw ? (1 << 12) : 0)));
-			return push_inst(compiler, ADD | RD(arg) | RN(arg) | RM(other_r) | (argw << 10));
-		}
-		if (arg != reg) {
-			FAIL_IF(push_inst(compiler, ADD | RD(arg) | RN(arg) | RM(other_r) | (argw << 10)));
-			return push_inst(compiler, sljit_mem_imm[flags & 0x3] | (shift << 30) | RT(reg) | RN(arg));
-		}
-		FAIL_IF(push_inst(compiler, ADD | RD(TMP_LR) | RN(arg) | RM(other_r) | (argw << 10)));
-		FAIL_IF(push_inst(compiler, sljit_mem_imm[flags & 0x3] | (shift << 30) | RT(reg) | RN(TMP_LR)));
-		return push_inst(compiler, ORR | RD(arg) | RN(TMP_ZERO) | RM(TMP_LR));
+		FAIL_IF(push_inst(compiler, sljit_mem_reg[flags & 0x3] | (shift << 30) | RT(reg) | RN(arg) | RM(other_r)));
+		return push_inst(compiler, ADD | RD(arg) | RN(arg) | RM(other_r));
 	}
 
 	if (arg & OFFS_REG_MASK) {
@@ -1374,7 +1366,7 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op1(struct sljit_compiler *compile
 				srcw = (sljit_s32)srcw;
 			break;
 		default:
-			SLJIT_ASSERT_STOP();
+			SLJIT_UNREACHABLE();
 			flags = 0;
 			break;
 		}
@@ -1401,7 +1393,7 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op1(struct sljit_compiler *compile
 		return SLJIT_SUCCESS;
 	}
 
-	flags = GET_FLAGS(op_flags) ? SET_FLAGS : 0;
+	flags = HAS_FLAGS(op_flags) ? SET_FLAGS : 0;
 	mem_flags = WORD_SIZE;
 	if (op_flags & SLJIT_I32_OP) {
 		flags |= INT_OP;
@@ -1454,7 +1446,7 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op2(struct sljit_compiler *compile
 	compiler->cache_argw = 0;
 
 	dst_r = SLOW_IS_REG(dst) ? dst : TMP_REG1;
-	flags = GET_FLAGS(op) ? SET_FLAGS : 0;
+	flags = HAS_FLAGS(op) ? SET_FLAGS : 0;
 	mem_flags = WORD_SIZE;
 	if (op & SLJIT_I32_OP) {
 		flags |= INT_OP;
@@ -1866,7 +1858,7 @@ static sljit_uw get_cc(sljit_s32 type)
 		return 0x6;
 
 	default:
-		SLJIT_ASSERT_STOP();
+		SLJIT_UNREACHABLE();
 		return 0xe;
 	}
 }
@@ -2002,7 +1994,7 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op_flags(struct sljit_compiler *co
 
 	compiler->cache_arg = 0;
 	compiler->cache_argw = 0;
-	flags = GET_FLAGS(op) ? SET_FLAGS : 0;
+	flags = HAS_FLAGS(op) ? SET_FLAGS : 0;
 	mem_flags = WORD_SIZE;
 	if (op & SLJIT_I32_OP) {
 		flags |= INT_OP;

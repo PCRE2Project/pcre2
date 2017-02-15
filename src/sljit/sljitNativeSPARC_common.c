@@ -1,7 +1,7 @@
 /*
  *    Stack-less Just-In-Time compiler
  *
- *    Copyright 2009-2012 Zoltan Herczeg (hzmester@freemail.hu). All rights reserved.
+ *    Copyright Zoltan Herczeg (hzmester@freemail.hu). All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification, are
  * permitted provided that the following conditions are met:
@@ -578,7 +578,6 @@ static sljit_s32 getput_arg(struct sljit_compiler *compiler, sljit_s32 flags, sl
 	base = arg & REG_MASK;
 	if (SLJIT_UNLIKELY(arg & OFFS_REG_MASK)) {
 		argw &= 0x3;
-		SLJIT_ASSERT(argw != 0);
 
 		/* Using the cache. */
 		if (((SLJIT_MEM | (arg & OFFS_REG_MASK)) == compiler->cache_arg) && (argw == compiler->cache_argw))
@@ -823,7 +822,7 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op1(struct sljit_compiler *compile
 	sljit_s32 dst, sljit_sw dstw,
 	sljit_s32 src, sljit_sw srcw)
 {
-	sljit_s32 flags = GET_FLAGS(op) ? SET_FLAGS : 0;
+	sljit_s32 flags = HAS_FLAGS(op) ? SET_FLAGS : 0;
 
 	CHECK_ERROR();
 	CHECK(check_sljit_emit_op1(compiler, op, dst, dstw, src, srcw));
@@ -892,7 +891,7 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op2(struct sljit_compiler *compile
 	sljit_s32 src1, sljit_sw src1w,
 	sljit_s32 src2, sljit_sw src2w)
 {
-	sljit_s32 flags = GET_FLAGS(op) ? SET_FLAGS : 0;
+	sljit_s32 flags = HAS_FLAGS(op) ? SET_FLAGS : 0;
 
 	CHECK_ERROR();
 	CHECK(check_sljit_emit_op2(compiler, op, dst, dstw, src1, src1w, src2, src2w));
@@ -921,7 +920,7 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op2(struct sljit_compiler *compile
 		if (src2 & SLJIT_IMM)
 			src2w &= 0x1f;
 #else
-		SLJIT_ASSERT_STOP();
+		SLJIT_UNREACHABLE();
 #endif
 		return emit_op(compiler, op, flags | IMM_OP, dst, dstw, src1, src1w, src2, src2w);
 	}
@@ -1296,7 +1295,7 @@ static sljit_ins get_cc(sljit_s32 type)
 		return DA(0xf);
 
 	default:
-		SLJIT_ASSERT_STOP();
+		SLJIT_UNREACHABLE();
 		return DA(0x8);
 	}
 }
@@ -1387,7 +1386,7 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op_flags(struct sljit_compiler *co
 	sljit_s32 src, sljit_sw srcw,
 	sljit_s32 type)
 {
-	sljit_s32 reg, flags = (GET_FLAGS(op) ? SET_FLAGS : 0);
+	sljit_s32 reg, flags = HAS_FLAGS(op) ? SET_FLAGS : 0;
 
 	CHECK_ERROR();
 	CHECK(check_sljit_emit_op_flags(compiler, op, dst, dstw, src, srcw, type));
