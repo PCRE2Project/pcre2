@@ -2,6 +2,15 @@ Change Log for PCRE2
 --------------------
 
 
+Version 10.24 14-February-2017
+------------------------------
+
+1. Hardened pcre2test so as to reduce the number of bugs reported by fuzzers:
+
+   (a) Check for malloc failures when getting memory for the ovector (POSIX) or 
+       the match data block (non-POSIX). 
+
+
 Version 10.23 14-February-2017
 ------------------------------
 

@@ -1365,8 +1365,7 @@ are supported. */
   (test_mode == PCRE8_MODE && G(x,8)->f r (y)) || \
   (test_mode == PCRE16_MODE && G(x,16)->f r (y)) || \
   (test_mode == PCRE32_MODE && G(x,32)->f r (y)))
-
-
+  
 
 /* ----- Two out of three modes are supported ----- */
 
@@ -1775,7 +1774,7 @@ the three different cases. */
 #define TESTFLD(x,f,r,y) ( \
   (test_mode == G(G(PCRE,BITONE),_MODE) && G(x,BITONE)->f r (y)) || \
   (test_mode == G(G(PCRE,BITTWO),_MODE) && G(x,BITTWO)->f r (y)))
-
+  
 
 #endif  /* Two out of three modes */
 
@@ -6169,7 +6168,16 @@ if ((pat_patctl.control & CTL_POSIX) != 0)
   if (msg[0] == 0) fprintf(outfile, "\n");
 
   if (dat_datctl.oveccount > 0)
+    { 
     pmatch = (regmatch_t *)malloc(sizeof(regmatch_t) * dat_datctl.oveccount);
+    if (pmatch == NULL)
+      {
+      fprintf(outfile, "** Failed to get memory for recording matching "
+        "information (size set = %du)\n", dat_datctl.oveccount);
+      return PR_OK;     
+      }     
+    }   
+ 
   if ((dat_datctl.options & PCRE2_NOTBOL) != 0) eflags |= REG_NOTBOL;
   if ((dat_datctl.options & PCRE2_NOTEOL) != 0) eflags |= REG_NOTEOL;
   if ((dat_datctl.options & PCRE2_NOTEMPTY) != 0) eflags |= REG_NOTEMPTY;
@@ -6304,6 +6312,14 @@ else
   PCRE2_MATCH_DATA_FREE(match_data);
   PCRE2_MATCH_DATA_CREATE(match_data, max_oveccount, NULL);
   }
+
+if (CASTVAR(void *, match_data) == NULL)
+  {
+  fprintf(outfile, "** Failed to get memory for recording matching "
+    "information (size requested: %d)\n", dat_datctl.oveccount);
+  max_oveccount = 0;   
+  return PR_OK;     
+  }     
 
 /* Replacement processing is ignored for DFA matching. */
 

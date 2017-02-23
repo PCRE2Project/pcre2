@@ -15479,6 +15479,10 @@ First code unit = 'a'
 Last code unit = 'z'
 Subject length lower bound = 11
 
+//
+    \=ovector=7777777777
+** Invalid value in 'ovector=7777777777'
+
 # End of testinput2 
 Error -63: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

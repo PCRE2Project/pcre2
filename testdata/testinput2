@@ -4969,4 +4969,7 @@ a)"xI
 
 /(?<a>a)(?<b>b)\g{b}\g{a}\g{a}\g{a}\g{a}(?<a>xx)(?<b>zz)/I,dupnames
 
+//
+    \=ovector=7777777777
+
 # End of testinput2 
