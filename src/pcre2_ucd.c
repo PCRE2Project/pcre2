@@ -41,6 +41,20 @@ const uint32_t PRIV(ucd_caseless_sets)[] = {0};
 
 const char *PRIV(unicode_version) = "8.0.0";
 
+/* If the 32-bit library is run in non-32-bit mode, character values
+greater than 0x10ffff may be encountered. For these we set up a
+special record. */
+
+#if PCRE2_CODE_UNIT_WIDTH == 32
+const ucd_record PRIV(dummy_ucd_record)[] = {{
+  ucp_Common,    /* script */
+  ucp_Cn,        /* type unassigned */
+  ucp_gbOther,   /* grapheme break property */
+  0,             /* case set */
+  0,             /* other case */
+  }};
+#endif
+
 /* When recompiling tables with a new Unicode version, please check the
 types in this structure definition from pcre2_internal.h (the actual
 field names will be different):

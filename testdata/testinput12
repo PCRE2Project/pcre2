@@ -360,4 +360,7 @@
 
 /[\s[:^ascii:]]/B,ucp
 
+/\pP/ucp
+    \x{7fffffff}\=no_jit
+
 # End of testinput12

@@ -1415,4 +1415,10 @@ No match
         End
 ------------------------------------------------------------------
 
+/\pP/ucp
+    \x{7fffffff}\=no_jit
+** Character \x{7fffffff} is greater than 0xffff and UTF-16 mode is not enabled.
+** Truncation will probably give the wrong result.
+No match
+
 # End of testinput12

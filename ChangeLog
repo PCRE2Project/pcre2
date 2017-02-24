@@ -9,6 +9,10 @@ Version 10.24 14-February-2017
 
    (a) Check for malloc failures when getting memory for the ovector (POSIX) or 
        the match data block (non-POSIX). 
+       
+2. In the 32-bit library in non-UTF mode, an attempt to find a Unicode property
+for a character with a code point greater than 0x10ffff (the Unicode maximum)
+caused a crash.
 
 
 Version 10.23 14-February-2017
