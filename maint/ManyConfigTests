@@ -239,14 +239,14 @@ runtest()
 # Update the total count whenever a new test is added; it is used to show
 # progess as each test is run.
 
-testtotal=`expr 20 \* $usemain + \
+testtotal=`expr 17 \* $usemain + \
   1 \* $usemain \* $usedebug + \
   1 \* $usetmp + \
   1 \* $ISGCC \* $usemain + \
   1 \* $ISGCC \* $usemain \* $useasan + \
   1 \* $ISGCC \* $usemain \* $useusan + \
   13 \* $usejit + \
-  3 \* $usemainvalgrind + \
+  2 \* $usemainvalgrind + \
   2 \* $usejitvalgrind`
 
 testcount=0
@@ -271,12 +271,10 @@ fi
 # If gcc is in use, run a maximally configured test with -O2, because that can
 # throw up warnings that are not detected with -O0. Then run a second test with
 # -fsanitize=address, which also may throw up new warnings as well as checking
-# things at runtime. Using -fsanitize=address increases the size of stack
-# frames by a lot, so run this test with --disable-stack-for-recursion, as
-# otherwise RunTest may fail on test 2. Finally, run another test using
-# -fsanitize=undefined -std-gnu99 to check for runtime actions that are not
-# well defined. However, we also use -fno-sanitize=shift to avoid warnings for
-# shifts of negative numbers, which occur in src/pcre2_jit_compile.c.
+# things at runtime. Finally, run another test using -fsanitize=undefined
+# -std-gnu99 to check for runtime actions that are not well defined. However,
+# we also use -fno-sanitize=shift to avoid warnings for shifts of negative
+# numbers, which occur in src/pcre2_jit_compile.c.
 
 if [ $ISGCC -ne 0 -a $usemain -ne 0 ]; then
   echo "---------- Maximally configured test with -O2 ----------"
@@ -289,14 +287,14 @@ if [ $ISGCC -ne 0 -a $usemain -ne 0 ]; then
     echo "---------- Maximally configured test with -fsanitize=address ----------"
     CFLAGS="$OFLAGS $SAVECFLAGS -fsanitize=address"
     echo "CFLAGS=$CFLAGS"
-    opts="--disable-shared $enable_jit --disable-stack-for-recursion --enable-pcre2-16 --enable-pcre2-32"
+    opts="--disable-shared $enable_jit --enable-pcre2-16 --enable-pcre2-32"
     runtest
   fi
   if [ $useusan -ne 0 ]; then
     echo "------- Maximally configured test with -fsanitize=undefined -fno-sanitize=shift -fno-sanitize=alignment -std=gnu99 -------"
     CFLAGS="$OFLAGS $SAVECFLAGS -fsanitize=undefined -fno-sanitize=shift -fno-sanitize=alignment -std=gnu99"
     echo "CFLAGS=$CFLAGS"
-    opts="--disable-shared $enable_jit --disable-stack-for-recursion --enable-pcre2-16 --enable-pcre2-32"
+    opts="--disable-shared $enable_jit --enable-pcre2-16 --enable-pcre2-32"
     runtest
   fi
   CFLAGS="$OFLAGS $SAVECFLAGS"
@@ -324,21 +322,18 @@ if [ $usemain -ne 0 ]; then
     "" \
     "--disable-static" \
     "--disable-shared" \
-    "--disable-unicode --disable-stack-for-recursion --disable-shared" \
-    "--disable-stack-for-recursion --disable-shared --enable-never-backslash-C" \
+    "--disable-unicode --disable-shared --enable-never-backslash-C" \
     "--with-link-size=3 --disable-shared --disable-pcre2grep-callout" \
     "--disable-unicode --enable-rebuild-chartables --disable-shared" \
     "--disable-unicode --enable-newline-is-any --disable-shared" \
     "--disable-unicode --enable-newline-is-cr --disable-shared" \
     "--disable-unicode --enable-newline-is-crlf --disable-shared" \
     "--disable-unicode --enable-newline-is-anycrlf --enable-bsr-anycrlf --disable-shared" \
-    "--enable-newline-is-any --disable-stack-for-recursion --disable-static" \
+    "--enable-newline-is-any --disable-static" \
     "--disable-unicode --enable-pcre2-16" \
-    "--disable-unicode --enable-pcre2-16 --disable-stack-for-recursion --disable-shared" \
-    "--enable-pcre2-16 --disable-stack-for-recursion --disable-shared" \
+    "--enable-pcre2-16 --disable-shared" \
     "--disable-unicode --enable-pcre2-32" \
-    "--disable-unicode --enable-pcre2-32 --disable-stack-for-recursion --disable-shared" \
-    "--enable-pcre2-32 --disable-stack-for-recursion --disable-shared" \
+    "--enable-pcre2-32 --disable-shared" \
     "--disable-unicode --enable-pcre2-32 --enable-pcre2-16 --disable-shared" \
     "--disable-unicode --enable-pcre2-32 --enable-pcre2-16 --disable-pcre2-8 --disable-shared"
   do
@@ -378,9 +373,8 @@ if [ $usevalgrind -ne 0 ]; then
 
   if [ $usemainvalgrind -ne 0 ]; then
     for opts in \
-      "--disable-stack-for-recursion --disable-shared" \
-      "--with-link-size=3 --enable-pcre2-16 --enable-pcre2-32 --disable-shared" \
-      "--disable-unicode --disable-shared"
+      "--disable-shared" \
+      "--with-link-size=3 --enable-pcre2-16 --enable-pcre2-32 --disable-shared"
     do
       opts="--enable-valgrind $opts"
       runtest
