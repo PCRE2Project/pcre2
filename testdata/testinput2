@@ -2880,19 +2880,6 @@
     xxxxabcde\=ps
     xxxxabcde\=ph
 
-# This is not in the Perl-compatible test because Perl seems currently to be
-# broken and not behaving as specified in that it *does* bumpalong after
-# hitting (*COMMIT). 
-
-/(?1)(A(*COMMIT)|B)D/
-    ABD
-    XABD
-    BAD
-    ABXABD  
-\= Expect no match 
-    ABX 
-    BAXBAD  
-
 /(\3)(\1)(a)/alt_bsux,allow_empty_class,match_unset_backref,dupnames
     cat
 
@@ -3661,7 +3648,7 @@
 
 /(?:(a)+(?C1)bb|aa(?C2)b)++/
     aab\=callout_capture
-    aab\=callout_capture,ovector=1
+    aab\=callout_capture,ovector=1,no_jit
 
 /(ab)x|ab/
     ab\=ovector=0
@@ -3723,8 +3710,7 @@
     bnn
 
 /(?(?=b(*SKIP)a)bn|bnn)/
-\= Expect no match
-    bnn
+    bnn\=no_jit
 
 /(?=b(*THEN)a|)bn|bnn/
     bnn
@@ -4972,4 +4958,55 @@ a)"xI
 //
     \=ovector=7777777777
 
+/(?1)(A(*COMMIT)|B)D/
+    BAXBAD\=no_jit  
+    
+"(?1){2}(a)"B
+
+"(?1){2,4}(a)"B
+
+# This test differs from Perl for the first subject. Perl ends up with
+# $1 set to 'B'; PCRE2 has it unset (which I think is right). 
+
+/^(?:
+(?:A| (?:B|B(*ACCEPT)) (?<=(.)) D)    
+(Z)
+)+$/x
+    AZB
+    AZBDZ 
+    
+# These four are temporarily here instead of test 1 while waiting for a JIT 
+# update. They require backtracking into recursions.
+
+/^(.|(.)(?1)\2)$/
+    a\=no_jit
+    aba\=no_jit
+    abcba\=no_jit
+    ababa\=no_jit
+    abcdcba\=no_jit
+
+/^((.)(?1)\2|.?)$/
+    a\=no_jit
+    aba\=no_jit
+    abba\=no_jit
+    abcba\=no_jit
+    ababa\=no_jit
+    abccba\=no_jit
+    abcdcba\=no_jit
+    abcddcba\=no_jit
+
+/^(.)(\1|a(?2))/
+    bab\=no_jit
+
+/^(.|(.)(?1)?\2)$/
+    abcba\=no_jit
+    
+# The first of these, when run by Perl, give the mark 'aa', which is wrong. 
+
+'(?>a(*:aa))b|ac' mark
+    ac
+
+'(?:a(*:aa))b|ac' mark
+    ac
+     
 # End of testinput2 

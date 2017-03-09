@@ -7517,7 +7517,6 @@ Callout (10): "AB"
 /^a(b)c(?C1)def/
       abcdef\=callout_capture
 Callout 1: last capture = 0
- 0: 
 --->abcdef
     ^  ^       d
  0: abcdef
@@ -7538,7 +7537,6 @@ Callout 1: last capture = 0
 ------------------------------------------------------------------
       abcdef\=callout_capture
 Callout (10): {AB} last capture = 0
- 0: 
 --->abcdef
     ^  ^       d
  0: abcdef

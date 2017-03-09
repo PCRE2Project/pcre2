@@ -5361,7 +5361,7 @@ if (callout_capture)
   if (cb->callout_string == NULL)
     fprintf(outfile, "Callout %d:", cb->callout_number);
   fprintf(outfile, " last capture = %d\n", cb->capture_last);
-  for (i = 0; i < cb->capture_top * 2; i += 2)
+  for (i = 2; i < cb->capture_top * 2; i += 2)
     {
     fprintf(outfile, "%2d: ", i/2);
     if (cb->offset_vector[i] == PCRE2_UNSET)

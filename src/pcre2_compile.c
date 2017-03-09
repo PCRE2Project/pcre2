@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-         New API code Copyright (c) 2016 University of Cambridge
+          New API code Copyright (c) 2016-2017 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -6209,24 +6209,6 @@ for (;; pptr++)
     tempcode = previous;
     op_previous = *previous;
 
-    /* If previous was a recursion call, wrap it in atomic brackets so that
-    previous becomes the atomic group. All recursions were so wrapped in the
-    past, but it no longer happens for non-repeated recursions. In fact, the
-    repeated ones could be re-implemented independently so as not to need this,
-    but for the moment we rely on the code for repeating groups. */
-
-    if (op_previous == OP_RECURSE)
-      {
-      memmove(previous + 1 + LINK_SIZE, previous, CU2BYTES(1 + LINK_SIZE));
-      op_previous = *previous = OP_ONCE;
-      PUT(previous, 1, 2 + 2*LINK_SIZE);
-      previous[2 + 2*LINK_SIZE] = OP_KET;
-      PUT(previous, 3 + 2*LINK_SIZE, 2 + 2*LINK_SIZE);
-      code += 2 + 2 * LINK_SIZE;
-      length_prevgroup = 3 + 3*LINK_SIZE;
-      group_return = -1;  /* Set "may match empty string" */
-      }
-
     /* Now handle repetition for the different types of item. */
 
     switch (op_previous)
@@ -6311,6 +6293,77 @@ for (;; pptr++)
       case OP_FAIL:
       goto END_REPEAT;
 
+      /* Prior to 10.30, repeated recursions were wrapped in OP_ONCE brackets
+      because pcre2_match() could not handle backtracking into recursively
+      called groups. Now that this backtracking is available, we no longer need
+      to do this. However, we still need to replicate recursions as we do for
+      groups so as to have independent backtracking points. We can replicate
+      for the minimum number of repeats directly. For optional repeats we now
+      wrap the recursion in OP_BRA brackets and make use of the bracket
+      repetition. */
+
+      case OP_RECURSE:
+
+      /* Generate unwrapped repeats for a non-zero minimum, except when the
+      minimum is 1 and the maximum unlimited, because that can be handled with
+      OP_BRA terminated by OP_KETRMAX/MIN. When the maximum is equal to the
+      minimum, we just need to generate the appropriate additional copies.
+      Otherwise we need to generate one more, to simulate the situation when
+      the minimum is zero. */
+
+      if (repeat_min > 0 && (repeat_min != 1 || repeat_max != REPEAT_UNLIMITED))
+        {
+        int replicate = repeat_min;
+        if (repeat_min == repeat_max) replicate--;
+
+        /* In the pre-compile phase, we don't actually do the replication. We
+        just adjust the length as if we had. Do some paranoid checks for
+        potential integer overflow. The INT64_OR_DOUBLE type is a 64-bit
+        integer type when available, otherwise double. */
+
+        if (lengthptr != NULL)
+          {
+          PCRE2_SIZE delta = replicate*(1 + LINK_SIZE);
+          if ((INT64_OR_DOUBLE)replicate*
+                (INT64_OR_DOUBLE)(1 + LINK_SIZE) >
+                  (INT64_OR_DOUBLE)INT_MAX ||
+              OFLOW_MAX - *lengthptr < delta)
+            {
+            *errorcodeptr = ERR20;
+            return 0;
+            }
+          *lengthptr += delta;
+          }
+
+        else for (i = 0; i < replicate; i++)
+          {
+          memcpy(code, previous, CU2BYTES(1 + LINK_SIZE));
+          previous = code;
+          code += 1 + LINK_SIZE;
+          }
+
+        /* If the number of repeats is fixed, we are done. Otherwise, adjust
+        the counts and fall through. */
+
+        if (repeat_min == repeat_max) break;
+        if (repeat_max != REPEAT_UNLIMITED) repeat_max -= repeat_min;
+        repeat_min = 0;
+        }
+
+      /* Wrap the recursion call in OP_BRA brackets. */
+
+      memmove(previous + 1 + LINK_SIZE, previous, CU2BYTES(1 + LINK_SIZE));
+      op_previous = *previous = OP_BRA;
+      PUT(previous, 1, 2 + 2*LINK_SIZE);
+      previous[2 + 2*LINK_SIZE] = OP_KET;
+      PUT(previous, 3 + 2*LINK_SIZE, 2 + 2*LINK_SIZE);
+      code += 2 + 2 * LINK_SIZE;
+      length_prevgroup = 3 + 3*LINK_SIZE;
+      group_return = -1;  /* Set "may match empty string" */
+
+      /* Now fall through and treat as a repeated OP_BRA. */
+      /* VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV */
+
       /* If previous was a bracket group, we may have to replicate it in
       certain cases. Note that at this point we can encounter only the "basic"
       bracket opcodes such as BRA and CBRA, as this is the place where they get
@@ -6340,10 +6393,10 @@ for (;; pptr++)
             previous[GET(previous, 1)] != OP_ALT)
           goto END_REPEAT;
 
-        /* There is no sense in actually repeating assertions. The only potential
-        use of repetition is in cases when the assertion is optional. Therefore,
-        if the minimum is greater than zero, just ignore the repeat. If the
-        maximum is not zero or one, set it to 1. */
+        /* There is no sense in actually repeating assertions. The only
+        potential use of repetition is in cases when the assertion is optional.
+        Therefore, if the minimum is greater than zero, just ignore the repeat.
+        If the maximum is not zero or one, set it to 1. */
 
         if (op_previous < OP_ONCE)    /* Assertion */
           {

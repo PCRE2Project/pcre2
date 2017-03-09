@@ -2,15 +2,24 @@ Change Log for PCRE2
 --------------------
 
 
-Version 10.24 14-February-2017
-------------------------------
+Version 10.30-DEV 09-March-2017
+-------------------------------
 
-1. Hardened pcre2test so as to reduce the number of bugs reported by fuzzers:
+1. The main interpreter, pcre2_match(), has been refactored into a new version 
+that does not use recursive function calls (and therefore the stack) for 
+remembering backtracking positions. This makes --disable-stack-for-recursion a 
+NOOP. The new implementation allows backtracking into recursive group calls in
+patterns, making it more compatible with Perl, and also fixes some other 
+hard-to-do issues such as #1887 in Bugzilla. The code is also cleaner because 
+the old code had a number of fudges to try to reduce stack usage. It seems to 
+run no slower than the old code.
+
+2. Hardened pcre2test so as to reduce the number of bugs reported by fuzzers:
 
    (a) Check for malloc failures when getting memory for the ovector (POSIX) or 
        the match data block (non-POSIX). 
        
-2. In the 32-bit library in non-UTF mode, an attempt to find a Unicode property
+3. In the 32-bit library in non-UTF mode, an attempt to find a Unicode property
 for a character with a code point greater than 0x10ffff (the Unicode maximum)
 caused a crash.
 

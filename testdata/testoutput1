@@ -9311,4 +9311,94 @@ No match
 
 /X?(R||){3335}/
 
+/(?1)(A(*COMMIT)|B)D/
+    ABD
+ 0: ABD
+ 1: B
+    XABD
+ 0: ABD
+ 1: B
+    BAD
+ 0: BAD
+ 1: A
+    ABXABD  
+ 0: ABD
+ 1: B
+\= Expect no match 
+    ABX 
+No match
+
+/(?(DEFINE)(?<m> 1? (?=(?<cond>2)?) 1 2 (?('cond')|3)))
+    \A
+    ()
+    (?&m)
+    \Z/x
+    123
+ 0: 123
+ 1: <unset>
+ 2: <unset>
+ 3: 
+
+/^(?: 
+(?: A| (1? (?=(?<cond>2)?) (1) 2 (?('cond')|3)) )
+(Z)
+)+$/x
+    AZ123Z
+ 0: AZ123Z
+ 1: 123
+ 2: <unset>
+ 3: 1
+ 4: Z
+\= Expect no match     
+    AZ12Z 
+No match
+    
+/^ (?(DEFINE) ( (?!(a)\2b)..) )   ()(?1)  /x
+    acb
+ 0: ac
+ 1: <unset>
+ 2: <unset>
+ 3: 
+\= Expect no match     
+    aab
+No match
+    
+'(?>ab|abab){1,5}?M'
+    abababababababababababM
+ 0: abababababM
+
+'(?>ab|abab){2}?M'
+    abababM
+ 0: ababM
+
+'((?(?=(a))a)+k)'
+    bbak
+ 0: ak
+ 1: ak
+ 2: a
+
+'((?(?=(a))a|)+k)'
+    bbak
+ 0: ak
+ 1: ak
+ 2: a
+
+'(?(?!(b))a|b)+k'
+    ababbalbbadabak
+ 0: abak
+ 1: b
+
+/(?!(b))c|b/
+    Ab
+ 0: b
+    Ac 
+ 0: c
+
+/(?=(b))b|c/
+    Ab
+ 0: b
+ 1: b
+    Ac 
+ 0: c
+
 # End of testinput1 

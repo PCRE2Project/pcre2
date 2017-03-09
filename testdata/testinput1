@@ -5831,4 +5831,55 @@ ef) x/x,mark
 
 /X?(R||){3335}/
 
+/(?1)(A(*COMMIT)|B)D/
+    ABD
+    XABD
+    BAD
+    ABXABD  
+\= Expect no match 
+    ABX 
+
+/(?(DEFINE)(?<m> 1? (?=(?<cond>2)?) 1 2 (?('cond')|3)))
+    \A
+    ()
+    (?&m)
+    \Z/x
+    123
+
+/^(?: 
+(?: A| (1? (?=(?<cond>2)?) (1) 2 (?('cond')|3)) )
+(Z)
+)+$/x
+    AZ123Z
+\= Expect no match     
+    AZ12Z 
+    
+/^ (?(DEFINE) ( (?!(a)\2b)..) )   ()(?1)  /x
+    acb
+\= Expect no match     
+    aab
+    
+'(?>ab|abab){1,5}?M'
+    abababababababababababM
+
+'(?>ab|abab){2}?M'
+    abababM
+
+'((?(?=(a))a)+k)'
+    bbak
+
+'((?(?=(a))a|)+k)'
+    bbak
+
+'(?(?!(b))a|b)+k'
+    ababbalbbadabak
+
+/(?!(b))c|b/
+    Ab
+    Ac 
+
+/(?=(b))b|c/
+    Ab
+    Ac 
+
 # End of testinput1 

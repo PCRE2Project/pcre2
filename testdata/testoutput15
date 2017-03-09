@@ -12,13 +12,13 @@ Starting code units: a z
 Last code unit = 'z'
 Subject length lower bound = 2
   aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaazzbbbbbb\=find_limits
-Minimum match limit = 8
-Minimum recursion limit = 6
+Minimum match limit = 7
+Minimum recursion limit = 7
  0: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaazz
  1: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
   aaaaaaaaaaaaaz\=find_limits
-Minimum match limit = 32768
-Minimum recursion limit = 29
+Minimum match limit = 20481
+Minimum recursion limit = 30
 No match
 
 !((?:\s|//.*\\n|/[*](?:\\n|.)*?[*]/)*)!I
@@ -26,61 +26,61 @@ Capturing subpattern count = 1
 May match empty string
 Subject length lower bound = 0
    /* this is a C style comment */\=find_limits
-Minimum match limit = 120
-Minimum recursion limit = 6
+Minimum match limit = 64
+Minimum recursion limit = 7
  0: /* this is a C style comment */
  1: /* this is a C style comment */
 
 /^(?>a)++/
     aa\=find_limits
 Minimum match limit = 5
-Minimum recursion limit = 2
+Minimum recursion limit = 3
  0: aa
     aaaaaaaaa\=find_limits
 Minimum match limit = 12
-Minimum recursion limit = 2
+Minimum recursion limit = 3
  0: aaaaaaaaa
     
 /(a)(?1)++/
     aa\=find_limits
 Minimum match limit = 7
-Minimum recursion limit = 4
+Minimum recursion limit = 5
  0: aa
  1: a
     aaaaaaaaa\=find_limits
 Minimum match limit = 21
-Minimum recursion limit = 4
+Minimum recursion limit = 5
  0: aaaaaaaaa
  1: a
 
 /a(?:.)*?a/ims
     abbbbbbbbbbbbbbbbbbbbba\=find_limits
-Minimum match limit = 65
-Minimum recursion limit = 2
+Minimum match limit = 24
+Minimum recursion limit = 3
  0: abbbbbbbbbbbbbbbbbbbbba
     
 /a(?:.(*THEN))*?a/ims
     abbbbbbbbbbbbbbbbbbbbba\=find_limits
-Minimum match limit = 86
+Minimum match limit = 66
 Minimum recursion limit = 45
  0: abbbbbbbbbbbbbbbbbbbbba
 
 /a(?:.(*THEN:ABC))*?a/ims
     abbbbbbbbbbbbbbbbbbbbba\=find_limits
-Minimum match limit = 86
+Minimum match limit = 66
 Minimum recursion limit = 45
  0: abbbbbbbbbbbbbbbbbbbbba
 
 /^(?>a+)(?>b+)(?>c+)(?>d+)(?>e+)/
      aabbccddee\=find_limits
 Minimum match limit = 7
-Minimum recursion limit = 2
+Minimum recursion limit = 7
  0: aabbccddee
 
 /^(?>(a+))(?>(b+))(?>(c+))(?>(d+))(?>(e+))/
      aabbccddee\=find_limits
-Minimum match limit = 17
-Minimum recursion limit = 16
+Minimum match limit = 12
+Minimum recursion limit = 12
  0: aabbccddee
  1: aa
  2: bb
@@ -90,7 +90,7 @@ Minimum recursion limit = 16
 
 /^(?>(a+))(?>b+)(?>(c+))(?>d+)(?>(e+))/
      aabbccddee\=find_limits
-Minimum match limit = 13
+Minimum match limit = 10
 Minimum recursion limit = 10
  0: aabbccddee
  1: aa

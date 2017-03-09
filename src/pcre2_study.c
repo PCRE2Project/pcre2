@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-         New API code Copyright (c) 2016 University of Cambridge
+          New API code Copyright (c) 2016-2017 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -46,9 +46,7 @@ collecting data (e.g. minimum matching length). */
 #include "config.h"
 #endif
 
-
 #include "pcre2_internal.h"
-
 
 /* The maximum remembered capturing brackets minimum. */
 
@@ -158,12 +156,12 @@ for (;;)
       }
     goto PROCESS_NON_CAPTURE;
 
-    /* There's a special case of OP_ONCE, when it is wrapped round an
+    case OP_BRA:
+    /* There's a special case of OP_BRA, when it is wrapped round a repeated
     OP_RECURSE. We'd like to process the latter at this level so that
     remembering the value works for repeated cases. So we do nothing, but
     set a fudge value to skip over the OP_KET after the recurse. */
 
-    case OP_ONCE:
     if (cc[1+LINK_SIZE] == OP_RECURSE && cc[2*(1+LINK_SIZE)] == OP_KET)
       {
       once_fudge = 1 + LINK_SIZE;
@@ -172,8 +170,8 @@ for (;;)
       }
     /* Fall through */
 
+    case OP_ONCE:
     case OP_ONCE_NC:
-    case OP_BRA:
     case OP_SBRA:
     case OP_BRAPOS:
     case OP_SBRAPOS:
@@ -789,6 +787,7 @@ if (utf)
 
 if (caseless)
   {
+#ifdef SUPPORT_UNICODE
   if (utf)
     {
 #if PCRE2_CODE_UNIT_WIDTH == 8
@@ -801,10 +800,12 @@ if (caseless)
     if (c > 0xff) SET_BIT(0xff); else SET_BIT(c);
 #endif
     }
+  else 
+#endif  /* SUPPORT_UNICODE */
 
   /* Not UTF */
 
-  else if (MAX_255(c)) SET_BIT(re->tables[fcc_offset + c]);
+  if (MAX_255(c)) SET_BIT(re->tables[fcc_offset + c]);
   }
 
 return p;

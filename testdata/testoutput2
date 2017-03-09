@@ -3517,12 +3517,10 @@ Subject length lower bound = 6
  1: abc
     123abcdef\=callout_capture
 Callout 0: last capture = 1
- 0: <unset>
  1: abc
 --->123abcdef
        ^  ^       d
 Callout 1: last capture = 1
- 0: <unset>
  1: abc
 --->123abcdef
        ^    ^     f
@@ -3572,18 +3570,15 @@ May match empty string
 Subject length lower bound = 0
     123\=callout_capture
 Callout 0: last capture = 0
- 0: <unset>
 --->123
     ^  ^    )*
  0: 123
  1: 123
     123456\=callout_capture
 Callout 0: last capture = 0
- 0: <unset>
 --->123456
     ^  ^       )*
 Callout 0: last capture = 1
- 0: <unset>
  1: 123
 --->123456
     ^     ^    )*
@@ -3591,16 +3586,13 @@ Callout 0: last capture = 1
  1: 456
     123456789\=callout_capture
 Callout 0: last capture = 0
- 0: <unset>
 --->123456789
     ^  ^          )*
 Callout 0: last capture = 1
- 0: <unset>
  1: 123
 --->123456789
     ^     ^       )*
 Callout 0: last capture = 1
- 0: <unset>
  1: 456
 --->123456789
     ^        ^    )*
@@ -3613,13 +3605,11 @@ First code unit = 'x'
 Subject length lower bound = 4
     xyzabc\=callout_capture
 Callout 0: last capture = 2
- 0: <unset>
  1: <unset>
  2: xyz
 --->xyzabc
     ^  ^       p
 Callout 1: last capture = 0
- 0: <unset>
 --->xyzabc
     ^          x
  0: xyzabc
@@ -3632,14 +3622,12 @@ Last code unit = 'x'
 Subject length lower bound = 5
     Xxyzabc\=callout_capture
 Callout 0: last capture = 3
- 0: <unset>
  1: X
  2: <unset>
  3: xyz
 --->Xxyzabc
     ^   ^       p
 Callout 1: last capture = 1
- 0: <unset>
  1: X
 --->Xxyzabc
     ^^          x
@@ -3654,7 +3642,6 @@ Last code unit = 'f'
 Subject length lower bound = 6
     abcdef\=callout_capture
 Callout 0: last capture = 1
- 0: <unset>
  1: abc
 --->abcdef
     ^          a
@@ -3668,12 +3655,10 @@ Last code unit = 'z'
 Subject length lower bound = 6
     abcxyz\=callout_capture
 Callout 1: last capture = 1
- 0: <unset>
  1: abc
 --->abcxyz
     ^  ^       d
 Callout 2: last capture = 0
- 0: <unset>
 --->abcxyz
     ^          a
  0: abcxyz
@@ -3686,7 +3671,6 @@ Last code unit = 'z'
 Subject length lower bound = 3
    abcxyz\=callout_capture
 Callout 0: last capture = 1
- 0: <unset>
  1: abc
 --->abcxyz
        ^       )
@@ -3834,7 +3818,7 @@ Subject length lower bound = 2
         Bra
         CBra 1
         a
-        Once
+        SBra
         Recurse
         KetRmax
         b
@@ -3938,7 +3922,7 @@ Subject length lower bound = 9
 Capturing subpattern count = 1
 Compile options: <none>
 Overall options: anchored
-Subject length lower bound = 3
+Subject length lower bound = 2
     a=a
  0: a=a
  1: a
@@ -9776,29 +9760,6 @@ Partial match: abca
     xxxxabcde\=ph
 Partial match: abcde
 
-# This is not in the Perl-compatible test because Perl seems currently to be
-# broken and not behaving as specified in that it *does* bumpalong after
-# hitting (*COMMIT). 
-
-/(?1)(A(*COMMIT)|B)D/
-    ABD
- 0: ABD
- 1: B
-    XABD
- 0: ABD
- 1: B
-    BAD
- 0: BAD
- 1: A
-    ABXABD  
- 0: ABD
- 1: B
-\= Expect no match 
-    ABX 
-No match
-    BAXBAD  
-No match
-
 /(\3)(\1)(a)/alt_bsux,allow_empty_class,match_unset_backref,dupnames
     cat
  0: a
@@ -9947,7 +9908,7 @@ No match
         Bra
         ^
         Brazero
-        Once
+        SBra
         Recurse
         KetRmax
         Cond
@@ -11669,17 +11630,14 @@ Subject length lower bound = 3
 /(?:(a)+(?C1)bb|aa(?C2)b)/
     aab\=callout_capture
 Callout 1: last capture = 1
- 0: <unset>
  1: a
 --->aab
     ^ ^     b
 Callout 1: last capture = 1
- 0: <unset>
  1: a
 --->aab
     ^^      b
 Callout 2: last capture = 0
- 0: <unset>
 --->aab
     ^ ^     b
  0: aab
@@ -11687,12 +11645,10 @@ Callout 2: last capture = 0
 /(?:(a)++(?C1)bb|aa(?C2)b)/
     aab\=callout_capture
 Callout 1: last capture = 1
- 0: <unset>
  1: a
 --->aab
     ^ ^     b
 Callout 2: last capture = 0
- 0: <unset>
 --->aab
     ^ ^     b
  0: aab
@@ -11700,12 +11656,10 @@ Callout 2: last capture = 0
 /(?:(?>(a))(?C1)bb|aa(?C2)b)/
     aab\=callout_capture
 Callout 1: last capture = 1
- 0: <unset>
  1: a
 --->aab
     ^^      b
 Callout 2: last capture = 0
- 0: <unset>
 --->aab
     ^ ^     b
  0: aab
@@ -11713,15 +11667,12 @@ Callout 2: last capture = 0
 /(?:(?1)(?C1)x|ab(?C2))((a)){0}/
     aab\=callout_capture
 Callout 1: last capture = 0
- 0: <unset>
 --->aab
     ^^      x
 Callout 1: last capture = 0
- 0: <unset>
 --->aab
      ^^     x
 Callout 2: last capture = 0
- 0: <unset>
 --->aab
      ^ ^    )
  0: ab
@@ -11729,13 +11680,11 @@ Callout 2: last capture = 0
 /(?1)(?C1)((a)(?C2)){0}/
     aab\=callout_capture
 Callout 2: last capture = 2
- 0: <unset>
  1: <unset>
  2: a
 --->aab
     ^^      ){0}
 Callout 1: last capture = 0
- 0: <unset>
 --->aab
     ^^      (
  0: a
@@ -11743,31 +11692,27 @@ Callout 1: last capture = 0
 /(?:(a)+(?C1)bb|aa(?C2)b)++/
     aab\=callout_capture
 Callout 1: last capture = 1
- 0: <unset>
  1: a
 --->aab
     ^ ^     b
 Callout 1: last capture = 1
- 0: <unset>
  1: a
 --->aab
     ^^      b
 Callout 2: last capture = 0
- 0: <unset>
 --->aab
     ^ ^     b
  0: aab
-    aab\=callout_capture,ovector=1
+    aab\=callout_capture,ovector=1,no_jit
 Callout 1: last capture = 1
- 0: <unset>
+ 1: a
 --->aab
     ^ ^     b
 Callout 1: last capture = 1
- 0: <unset>
+ 1: a
 --->aab
     ^^      b
 Callout 2: last capture = 0
- 0: <unset>
 --->aab
     ^ ^     b
  0: aab
@@ -11875,9 +11820,8 @@ No match
  0: bn
 
 /(?(?=b(*SKIP)a)bn|bnn)/
-\= Expect no match
-    bnn
-No match
+    bnn\=no_jit
+ 0: bnn
 
 /(?=b(*THEN)a|)bn|bnn/
     bnn
@@ -13895,7 +13839,6 @@ Callout (10): "AB"
 /^a(b)c(?C1)def/
       abcdef\=callout_capture
 Callout 1: last capture = 1
- 0: <unset>
  1: b
 --->abcdef
     ^  ^       d
@@ -13918,7 +13861,6 @@ Callout 1: last capture = 1
 ------------------------------------------------------------------
       abcdef\=callout_capture
 Callout (10): {AB} last capture = 1
- 0: <unset>
  1: b
 --->abcdef
     ^  ^       d
@@ -15483,6 +15425,140 @@ Subject length lower bound = 11
     \=ovector=7777777777
 ** Invalid value in 'ovector=7777777777'
 
+/(?1)(A(*COMMIT)|B)D/
+    BAXBAD\=no_jit  
+ 0: BAD
+ 1: A
+    
+"(?1){2}(a)"B
+------------------------------------------------------------------
+        Bra
+        Recurse
+        Recurse
+        CBra 1
+        a
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+
+"(?1){2,4}(a)"B
+------------------------------------------------------------------
+        Bra
+        Recurse
+        Recurse
+        Brazero
+        Bra
+        Bra
+        Recurse
+        Ket
+        Brazero
+        Bra
+        Recurse
+        Ket
+        Ket
+        CBra 1
+        a
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+
+# This test differs from Perl for the first subject. Perl ends up with
+# $1 set to 'B'; PCRE2 has it unset (which I think is right). 
+
+/^(?:
+(?:A| (?:B|B(*ACCEPT)) (?<=(.)) D)    
+(Z)
+)+$/x
+    AZB
+ 0: AZB
+ 1: <unset>
+ 2: Z
+    AZBDZ 
+ 0: AZBDZ
+ 1: B
+ 2: Z
+    
+# These four are temporarily here instead of test 1 while waiting for a JIT 
+# update. They require backtracking into recursions.
+
+/^(.|(.)(?1)\2)$/
+    a\=no_jit
+ 0: a
+ 1: a
+    aba\=no_jit
+ 0: aba
+ 1: aba
+ 2: a
+    abcba\=no_jit
+ 0: abcba
+ 1: abcba
+ 2: a
+    ababa\=no_jit
+ 0: ababa
+ 1: ababa
+ 2: a
+    abcdcba\=no_jit
+ 0: abcdcba
+ 1: abcdcba
+ 2: a
+
+/^((.)(?1)\2|.?)$/
+    a\=no_jit
+ 0: a
+ 1: a
+    aba\=no_jit
+ 0: aba
+ 1: aba
+ 2: a
+    abba\=no_jit
+ 0: abba
+ 1: abba
+ 2: a
+    abcba\=no_jit
+ 0: abcba
+ 1: abcba
+ 2: a
+    ababa\=no_jit
+ 0: ababa
+ 1: ababa
+ 2: a
+    abccba\=no_jit
+ 0: abccba
+ 1: abccba
+ 2: a
+    abcdcba\=no_jit
+ 0: abcdcba
+ 1: abcdcba
+ 2: a
+    abcddcba\=no_jit
+ 0: abcddcba
+ 1: abcddcba
+ 2: a
+
+/^(.)(\1|a(?2))/
+    bab\=no_jit
+ 0: bab
+ 1: b
+ 2: ab
+
+/^(.|(.)(?1)?\2)$/
+    abcba\=no_jit
+ 0: abcba
+ 1: abcba
+ 2: a
+    
+# The first of these, when run by Perl, give the mark 'aa', which is wrong. 
+
+'(?>a(*:aa))b|ac' mark
+    ac
+ 0: ac
+
+'(?:a(*:aa))b|ac' mark
+    ac
+ 0: ac
+     
 # End of testinput2 
 Error -63: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

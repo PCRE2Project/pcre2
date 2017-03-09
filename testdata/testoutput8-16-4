@@ -187,7 +187,7 @@ Memory allocation (code space): 54
   0  23 Bra
   3  17 CBra 1
   7     a
-  9   6 Once
+  9   6 SBra
  12   3 Recurse
  15   6 KetRmax
  18     b
@@ -759,18 +759,14 @@ Memory allocation (code space): 18
 
 "(?1)(?#?'){2}(a)"
 ------------------------------------------------------------------
-  0  30 Bra
-  3   6 Once
-  6  21 Recurse
-  9   6 Ket
- 12   6 Once
- 15  21 Recurse
- 18   6 Ket
- 21   6 CBra 1
- 25     a
- 27   6 Ket
- 30  30 Ket
- 33     End
+  0  18 Bra
+  3   9 Recurse
+  6   9 Recurse
+  9   6 CBra 1
+ 13     a
+ 15   6 Ket
+ 18  18 Ket
+ 21     End
 ------------------------------------------------------------------
 
 /.((?2)(?R)|\1|$)()/
