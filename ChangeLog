@@ -24,11 +24,17 @@ released code, but are noted here for the record.
       a match, because the external block was being set from non-existent
       internal ovector fields. Fixes oss-fuzz issue 781.
 
+  (b) A pattern with very many capturing parentheses (when the internal frame 
+      size was greater than the initial frame vector on the stack) caused a 
+      crash. A vector on the heap is now set up at the start of matching if the 
+      vector on the stack is not big enough to handle at least 10 frames. 
+      Fixes oss-fuzz issue 783. 
+       
 2. Hardened pcre2test so as to reduce the number of bugs reported by fuzzers:
 
   (a) Check for malloc failures when getting memory for the ovector (POSIX) or 
       the match data block (non-POSIX). 
-       
+      
 3. In the 32-bit library in non-UTF mode, an attempt to find a Unicode property
 for a character with a code point greater than 0x10ffff (the Unicode maximum)
 caused a crash.

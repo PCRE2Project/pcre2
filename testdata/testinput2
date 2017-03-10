@@ -5009,4 +5009,10 @@ a)"xI
 '(?:a(*:aa))b|ac' mark
     ac
      
+/(R?){65}/
+    (R?){65}
+
+/\[(a)]{60}/expand
+    aaaa
+
 # End of testinput2 

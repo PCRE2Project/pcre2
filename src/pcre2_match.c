@@ -816,9 +816,9 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
 
     ovector[0] = Fstart_match - mb->start_subject;
     ovector[1] = Feptr - mb->start_subject;
-    
+
     /* Set i to the smaller of the sizes of the external and frame ovectors. */
-    
+
     i = 2 * ((top_bracket + 1 > oveccount)? oveccount : top_bracket + 1);
     memcpy(ovector + 2, Fovector, (i - 2) * sizeof(PCRE2_SIZE));
     while (--i >= Foffset_top + 2) ovector[i] = PCRE2_UNSET;
@@ -5231,7 +5231,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
     /* The variable Flength will be added to Fecode when the condition is
     false, to get to the second branch. Setting it to the offset to the ALT or
     KET, then incrementing Fecode achieves this effect. However, if the second
-    branch is non-existent, we must point to the KET so that the end of the 
+    branch is non-existent, we must point to the KET so that the end of the
     group is correctly processed. We now have Fecode pointing to the condition
     or callout. */
 
@@ -5478,8 +5478,8 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
 
       /* If we are at the end of an assertion that is a condition, return a
       match, discarding any intermediate backtracking points. Copy back the
-      captures into the frame before N so that they are set on return. Doing 
-      this for all assertions, both positive and negative, seems to match what 
+      captures into the frame before N so that they are set on return. Doing
+      this for all assertions, both positive and negative, seems to match what
       Perl does. */
 
       if (GF_IDMASK(N->group_frame_type) == GF_CONDASSERT)
@@ -5545,7 +5545,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
       case OP_SCBRA:
       case OP_SCBRAPOS:
       number = GET2(bracode, 1+LINK_SIZE);
-      
+
       /* Handle a recursively called group. We reinstate the previous set of
       captures and then carry on. */
 
@@ -6197,45 +6197,6 @@ mb->name_count = re->name_count;
 mb->name_entry_size = re->name_entry_size;
 mb->start_code = mb->name_table + re->name_count * re->name_entry_size;
 
-/* The backtracking frames have fixed data at the front, and a PCRE2_SIZE
-vector at the end, whose size depends on the number of capturing parentheses in
-the pattern. It is not used at all if there are no capturing parentheses.
-
-  frame_size             is the total size of each frame
-  mb->frame_vector_size  is the total usable size of the vector (rounded down
-                           to a whole number of frames)
-
-The last of these may be changed if the frame vector has to be expanded. We
-therefore put it into the match block so that it is correct when calling
-match() more than once for non-anchored patterns. */
-
-frame_size = sizeof(heapframe) + ((re->top_bracket - 1) * 2 * sizeof(PCRE2_SIZE));
-mb->frame_vector_size = ((START_FRAMES_SIZE/frame_size) * frame_size);
-
-/* Set up the initial frame set. Write to the ovector within the first frame to
-mark every capture unset and to avoid uninitialized memory read errors when it
-is copied to a new frame. */
-
-memset((char *)(mb->stack_frames) + offsetof(heapframe,ovector), 0xff,
-  re->top_bracket * 2 * sizeof(PCRE2_SIZE));
-mb->match_frames = mb->stack_frames;
-mb->match_frames_top =
-  (heapframe *)((char *)mb->match_frames + mb->frame_vector_size);
-
-/* Limits set in the pattern override the match context only if they are
-smaller. */
-
-mb->match_limit = (mcontext->match_limit < re->limit_match)?
-                  mcontext->match_limit : re->limit_match;
-mb->match_limit_recursion = (mcontext->recursion_limit < re->limit_recursion)?
-                            mcontext->recursion_limit : re->limit_recursion;
-
-/* Pointers to the individual character tables */
-
-mb->lcc = re->tables + lcc_offset;
-mb->fcc = re->tables + fcc_offset;
-mb->ctypes = re->tables + ctypes_offset;
-
 /* Process the \R and newline settings. */
 
 mb->bsr_convention = re->bsr_convention;
@@ -6268,6 +6229,60 @@ switch(re->newline_convention)
 
   default: return PCRE2_ERROR_INTERNAL;
   }
+
+/* The backtracking frames have fixed data at the front, and a PCRE2_SIZE
+vector at the end, whose size depends on the number of capturing parentheses in
+the pattern. It is not used at all if there are no capturing parentheses.
+
+  frame_size             is the total size of each frame
+  mb->frame_vector_size  is the total usable size of the vector (rounded down
+                           to a whole number of frames)
+
+The last of these is changed within the match() function if the frame vector
+has to be expanded. We therefore put it into the match block so that it is
+correct when calling match() more than once for non-anchored patterns. */
+
+frame_size = sizeof(heapframe) + ((re->top_bracket - 1) * 2 * sizeof(PCRE2_SIZE));
+
+/* If a pattern has very many capturing parentheses, the frame size may be very
+large. Ensure that there are at least 10 available frames by getting an initial 
+vector on the heap if necessary. */
+
+if (frame_size <= START_FRAMES_SIZE/10)
+  {
+  mb->match_frames = mb->stack_frames;   /* Initial frame vector on the stack */
+  mb->frame_vector_size = ((START_FRAMES_SIZE/frame_size) * frame_size);
+  }
+else
+  {
+  mb->frame_vector_size = frame_size * 10;
+  mb->match_frames = mb->memctl.malloc(mb->frame_vector_size,
+    mb->memctl.memory_data);
+  if (mb->match_frames == NULL) return PCRE2_ERROR_NOMEMORY;
+  }
+
+mb->match_frames_top =
+  (heapframe *)((char *)mb->match_frames + mb->frame_vector_size);
+
+/* Write to the ovector within the first frame to mark every capture unset and
+to avoid uninitialized memory read errors when it is copied to a new frame. */
+
+memset((char *)(mb->match_frames) + offsetof(heapframe, ovector), 0xff,
+  re->top_bracket * 2 * sizeof(PCRE2_SIZE));
+
+/* Limits set in the pattern override the match context only if they are
+smaller. */
+
+mb->match_limit = (mcontext->match_limit < re->limit_match)?
+                  mcontext->match_limit : re->limit_match;
+mb->match_limit_recursion = (mcontext->recursion_limit < re->limit_recursion)?
+                            mcontext->recursion_limit : re->limit_recursion;
+
+/* Pointers to the individual character tables */
+
+mb->lcc = re->tables + lcc_offset;
+mb->fcc = re->tables + fcc_offset;
+mb->ctypes = re->tables + ctypes_offset;
 
 /* Set up the first code unit to match, if available. The first_codeunit value
 is never set for an anchored regular expression, but the anchoring may be
