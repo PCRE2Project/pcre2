@@ -14,10 +14,20 @@ hard-to-do issues such as #1887 in Bugzilla. The code is also cleaner because
 the old code had a number of fudges to try to reduce stack usage. It seems to 
 run no slower than the old code.
 
+A number of bugs in the refactored code were subsequently fixed during testing
+before release, but after the code was made available in the repository. Many
+of the bugs were discovered by fuzzing testing. These bugs were never in fully
+released code, but are noted here for the record.
+
+  (a) If a pattern had fewer capturing parentheses than the ovector supplied in 
+      the match data block, a memory error (detectable by ASAN) occurred after
+      a match, because the external block was being set from non-existent
+      internal ovector fields. Fixes oss-fuzz issue 781.
+
 2. Hardened pcre2test so as to reduce the number of bugs reported by fuzzers:
 
-   (a) Check for malloc failures when getting memory for the ovector (POSIX) or 
-       the match data block (non-POSIX). 
+  (a) Check for malloc failures when getting memory for the ovector (POSIX) or 
+      the match data block (non-POSIX). 
        
 3. In the 32-bit library in non-UTF mode, an attempt to find a Unicode property
 for a character with a code point greater than 0x10ffff (the Unicode maximum)

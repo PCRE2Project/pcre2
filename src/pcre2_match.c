@@ -816,9 +816,11 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
 
     ovector[0] = Fstart_match - mb->start_subject;
     ovector[1] = Feptr - mb->start_subject;
-    memcpy(ovector+2, Fovector, (oveccount - 1) * 2 * sizeof(PCRE2_SIZE));
-
+    
+    /* Set i to the smaller of the sizes of the external and frame ovectors. */
+    
     i = 2 * ((top_bracket + 1 > oveccount)? oveccount : top_bracket + 1);
+    memcpy(ovector + 2, Fovector, (i - 2) * sizeof(PCRE2_SIZE));
     while (--i >= Foffset_top + 2) ovector[i] = PCRE2_UNSET;
     return MATCH_MATCH;  /* Note: NOT RRETURN */
 
