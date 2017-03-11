@@ -2446,26 +2446,6 @@ if (show_memory)
 free(block);
 }
 
-/* For recursion malloc/free, to test stacking calls */
-
-#ifdef HEAP_MATCH_RECURSE
-static void *my_stack_malloc(size_t size, void *data)
-{
-void *block = malloc(size);
-(void)data;
-if (show_memory)
-  fprintf(outfile, "stack_malloc %3d %p\n", (int)size, block);
-return block;
-}
-
-static void my_stack_free(void *block, void *data)
-{
-(void)data;
-if (show_memory)
-  fprintf(outfile, "stack_free       %p\n", block);
-free(block);
-}
-#endif  /* HEAP_MATCH_RECURSE */
 
 
 /*************************************************
@@ -7307,10 +7287,6 @@ printf("  Parentheses nest limit = %d\n", optval);
 printf("  Default match limit = %d\n", optval);
 (void)PCRE2_CONFIG(PCRE2_CONFIG_RECURSIONLIMIT, &optval);
 printf("  Default recursion depth limit = %d\n", optval);
-(void)PCRE2_CONFIG(PCRE2_CONFIG_STACKRECURSE, &optval);
-printf("  Match recursion uses %s", optval? "stack" : "heap");
-
-printf("\n");
 return 0;
 }
 
@@ -7668,9 +7644,8 @@ if (arg_error != NULL)
   }  /* End of -error handling */
 
 /* Initialize things that cannot be done until we know which test mode we are
-running in. When HEAP_MATCH_RECURSE is undefined, calling pcre2_set_recursion_
-memory_management() is a no-op, but we call it in order to exercise it. Also
-exercise the general context copying function, which is not otherwise used. */
+running in. Exercise the general context copying function, which is not
+otherwise used. */
 
 code_unit_size = test_mode/8;
 max_oveccount = DEFAULT_OVECCOUNT;
@@ -7686,16 +7661,6 @@ max_oveccount = DEFAULT_OVECCOUNT;
   G(dat_context,BITS) = G(pcre2_match_context_copy_,BITS)(G(default_dat_context,BITS)); \
   G(match_data,BITS) = G(pcre2_match_data_create_,BITS)(max_oveccount, G(general_context,BITS))
 
-#ifdef HEAP_MATCH_RECURSE
-#define SETRECURSEMEMMAN \
-  (void)G(pcre2_set_recursion_memory_management_,BITS) \
-    (G(default_dat_context,BITS), \
-    &my_stack_malloc, &my_stack_free, NULL)
-#else
-#define SETRECURSEMEMMAN \
-  (void)G(pcre2_set_recursion_memory_management_,BITS)(NULL, NULL, NULL, NULL)
-#endif
-
 /* Call the appropriate functions for the current mode. */
 
 #ifdef SUPPORT_PCRE2_8
@@ -7704,7 +7669,6 @@ max_oveccount = DEFAULT_OVECCOUNT;
 if (test_mode == PCRE8_MODE)
   {
   CREATECONTEXTS;
-  SETRECURSEMEMMAN;
   }
 #endif
 
@@ -7714,7 +7678,6 @@ if (test_mode == PCRE8_MODE)
 if (test_mode == PCRE16_MODE)
   {
   CREATECONTEXTS;
-  SETRECURSEMEMMAN;
   }
 #endif
 
@@ -7724,7 +7687,6 @@ if (test_mode == PCRE16_MODE)
 if (test_mode == PCRE32_MODE)
   {
   CREATECONTEXTS;
-  SETRECURSEMEMMAN;
   }
 #endif
 

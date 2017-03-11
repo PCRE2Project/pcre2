@@ -161,9 +161,6 @@ when no context is supplied to a match function. */
 
 const pcre2_match_context PRIV(default_match_context) = {
   { default_malloc, default_free, NULL },
-#ifdef HEAP_MATCH_RECURSE
-  { default_malloc, default_free, NULL },
-#endif
 #ifdef SUPPORT_JIT
   NULL,
   NULL,
@@ -370,21 +367,18 @@ mcontext->recursion_limit = limit;
 return 0;
 }
 
+/* This function became obsolete at release 10.30. It is kept as a no-op for 
+backwards compatibility. */
+
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_set_recursion_memory_management(pcre2_match_context *mcontext,
   void *(*mymalloc)(size_t, void *), void (*myfree)(void *, void *),
   void *mydata)
 {
-#ifdef HEAP_MATCH_RECURSE
-mcontext->stack_memctl.malloc = mymalloc;
-mcontext->stack_memctl.free = myfree;
-mcontext->stack_memctl.memory_data = mydata;
-#else
 (void)mcontext;
 (void)mymalloc;
 (void)myfree;
 (void)mydata;
-#endif
 return 0;
 }
 

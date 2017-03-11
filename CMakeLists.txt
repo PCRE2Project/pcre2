@@ -77,6 +77,7 @@
 # 2016-10-05 PH fixed a typo (PCRE should be PCRE2) in above patch
 #            fix by David Gaussmann
 # 2016-10-07 PH added PCREGREP_MAX_BUFSIZE
+# 2017-03-11 PH turned HEAP_MATCH_RECURSE into a NO-OP for 10.30
 
 PROJECT(PCRE2 C)
 
@@ -158,7 +159,7 @@ SET(PCRE2_NEWLINE "LF" CACHE STRING
     "What to recognize as a newline (one of CR, LF, CRLF, ANY, ANYCRLF).")
 
 SET(PCRE2_HEAP_MATCH_RECURSE OFF CACHE BOOL
-    "If ON, then don't use stack recursion when matching. See HEAP_MATCH_RECURSE in config.h.in for details.")
+    "Obsolete option: do not use")
 
 SET(PCRE2_SUPPORT_JIT OFF CACHE BOOL
     "Enable support for Just-in-time compiling.")
@@ -352,10 +353,6 @@ IF(PCRE2_EBCDIC_NL25)
         SET(EBCDIC 1)
         SET(EBCDIC_NL25 1)
 ENDIF(PCRE2_EBCDIC_NL25)
-
-IF(PCRE2_HEAP_MATCH_RECURSE)
-        SET(HEAP_MATCH_RECURSE 1)
-ENDIF(PCRE2_HEAP_MATCH_RECURSE)
 
 # Output files
 
@@ -738,6 +735,10 @@ ELSE(BUILD_SHARED_LIBS)
   SET(BUILD_STATIC_LIBS ON)
 ENDIF(BUILD_SHARED_LIBS)
 
+IF(PCRE2_HEAP_MATCH_RECURSE)
+  MESSAGE(WARNING "HEAP_MATCH_RECURSE is obsolete and does nothing.")
+ENDIF(PCRE2_HEAP_MATCH_RECURSE)
+
 IF(PCRE2_SHOW_REPORT)
   STRING(TOUPPER "${CMAKE_BUILD_TYPE}" buildtype)
   IF (CMAKE_C_FLAGS)
@@ -762,7 +763,6 @@ IF(PCRE2_SHOW_REPORT)
   MESSAGE(STATUS "  EBCDIC coding ................... : ${PCRE2_EBCDIC}")
   MESSAGE(STATUS "  EBCDIC coding with NL=0x25 ...... : ${PCRE2_EBCDIC_NL25}")
   MESSAGE(STATUS "  Rebuild char tables ............. : ${PCRE2_REBUILD_CHARTABLES}")
-  MESSAGE(STATUS "  Use heap recursion .............. : ${PCRE2_HEAP_MATCH_RECURSE}")
   MESSAGE(STATUS "  Internal link size .............. : ${PCRE2_LINK_SIZE}")
   MESSAGE(STATUS "  Parentheses nest limit .......... : ${PCRE2_PARENS_NEST_LIMIT}")
   MESSAGE(STATUS "  Match limit ..................... : ${PCRE2_MATCH_LIMIT}")

@@ -578,9 +578,6 @@ typedef struct pcre2_real_compile_context {
 
 typedef struct pcre2_real_match_context {
   pcre2_memctl memctl;
-#ifdef HEAP_MATCH_RECURSE
-  pcre2_memctl stack_memctl;
-#endif
 #ifdef SUPPORT_JIT
   pcre2_jit_callback jit_callback;
   void *jit_callback_data;

@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-         New API code Copyright (c) 2016 University of Cambridge
+          New API code Copyright (c) 2016-2017 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -90,7 +90,7 @@ if (where == NULL)  /* Requests a length */
     case PCRE2_CONFIG_NEWLINE:
     case PCRE2_CONFIG_PARENSLIMIT:
     case PCRE2_CONFIG_RECURSIONLIMIT:
-    case PCRE2_CONFIG_STACKRECURSE:
+    case PCRE2_CONFIG_STACKRECURSE:    /* Obsolete */
     case PCRE2_CONFIG_UNICODE:
     return sizeof(uint32_t);
 
@@ -154,13 +154,12 @@ switch (what)
   case PCRE2_CONFIG_RECURSIONLIMIT:
   *((uint32_t *)where) = MATCH_LIMIT_RECURSION;
   break;
+  
+  /* This is now obsolete. The stack is no longer used via recursion for 
+  handling backtracking in pcre2_match(). */
 
   case PCRE2_CONFIG_STACKRECURSE:
-#ifdef HEAP_MATCH_RECURSE
   *((uint32_t *)where) = 0;
-#else
-  *((uint32_t *)where) = 1;
-#endif
   break;
 
   case PCRE2_CONFIG_UNICODE_VERSION:

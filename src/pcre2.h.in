@@ -304,7 +304,7 @@ numbers must not be changed. */
 #define PCRE2_CONFIG_NEWLINE                 5
 #define PCRE2_CONFIG_PARENSLIMIT             6
 #define PCRE2_CONFIG_RECURSIONLIMIT          7
-#define PCRE2_CONFIG_STACKRECURSE            8
+#define PCRE2_CONFIG_STACKRECURSE            8  /* Obsolete */
 #define PCRE2_CONFIG_UNICODE                 9
 #define PCRE2_CONFIG_UNICODE_VERSION        10
 #define PCRE2_CONFIG_VERSION                11

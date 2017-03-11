@@ -215,12 +215,6 @@ AC_ARG_ENABLE(ebcdic-nl25,
                              [set EBCDIC code for NL to 0x25 instead of 0x15; it implies --enable-ebcdic]),
               , enable_ebcdic_nl25=no)
 
-# Handle --disable-stack-for-recursion
-AC_ARG_ENABLE(stack-for-recursion,
-              AS_HELP_STRING([--disable-stack-for-recursion],
-                             [don't use stack recursion when matching]),
-              , enable_stack_for_recursion=yes)
-
 # Handle --enable-pcre2grep-libz
 AC_ARG_ENABLE(pcre2grep-libz,
               AS_HELP_STRING([--enable-pcre2grep-libz],
@@ -305,6 +299,17 @@ AC_ARG_ENABLE(fuzz_support,
               AS_HELP_STRING([--enable-fuzz-support],
                              [enable fuzzer support]),
               , enable_fuzz_support=no)
+              
+# Handle --disable-stack-for-recursion
+# This option became obsolete at release 10.30.
+AC_ARG_ENABLE(stack-for-recursion,,
+              , enable_stack_for_recursion=yes)
+
+# Original code
+# AC_ARG_ENABLE(stack-for-recursion,
+#               AS_HELP_STRING([--disable-stack-for-recursion],
+#                              [don't use stack recursion when matching]),
+#               , enable_stack_for_recursion=yes)
 
 # Set the default value for pcre2-8
 if test "x$enable_pcre2_8" = "xunset"
@@ -588,16 +593,6 @@ if test "$enable_unicode" = "yes"; then
     code *or* ASCII/Unicode, but not both at once.])
 fi
 
-if test "$enable_stack_for_recursion" = "no"; then
-  AC_DEFINE([HEAP_MATCH_RECURSE], [], [
-    PCRE2 uses recursive function calls to handle backtracking while
-    matching. This can sometimes be a problem on systems that have
-    stacks of limited size. Define HEAP_MATCH_RECURSE to any value to get a
-    version that doesn't use recursion in the match() function; instead
-    it creates its own stack by steam using memory from the heap. For more
-    detail, see the comments and other stuff just above the match() function.])
-fi
-
 if test "$enable_pcre2grep_libz" = "yes"; then
   AC_DEFINE([SUPPORT_LIBZ], [], [
     Define to any value to allow pcre2grep to be linked with libz, so that it is
@@ -681,24 +676,21 @@ AC_DEFINE_UNQUOTED([PARENS_NEST_LIMIT], [$with_parens_nest_limit], [
   stack that is used while compiling a pattern.])
 
 AC_DEFINE_UNQUOTED([MATCH_LIMIT], [$with_match_limit], [
-  The value of MATCH_LIMIT determines the default number of times the
-  internal match() function can be called during a single execution of
-  pcre2_match(). There is a runtime interface for setting a different
-  limit. The limit exists in order to catch runaway regular
-  expressions that take for ever to determine that they do not match.
-  The default is set very large so that it does not accidentally catch
-  legitimate cases.])
+  The value of MATCH_LIMIT determines the default number of times the internal
+  match() function can record a backtrack position during a single matching
+  attempt. There is a runtime interface for setting a different limit. The
+  limit exists in order to catch runaway regular expressions that take for ever
+  to determine that they do not match. The default is set very large so that it
+  does not accidentally catch legitimate cases.])
 
 AC_DEFINE_UNQUOTED([MATCH_LIMIT_RECURSION], [$with_match_limit_recursion], [
-  The above limit applies to all calls of match(), whether or not they
-  increase the recursion depth. In some environments it is desirable
-  to limit the depth of recursive calls of match() more strictly, in
-  order to restrict the maximum amount of stack (or heap, if
-  HEAP_MATCH_RECURSE is defined) that is used. The value of
-  MATCH_LIMIT_RECURSION applies only to recursive calls of match(). To
-  have any useful effect, it must be less than the value of
-  MATCH_LIMIT. The default is to use the same value as MATCH_LIMIT.
-  There is a runtime method for setting a different limit.])
+  The above limit applies to all backtracks, whether or not they are nested. In
+  some environments it is desirable to limit the nesting of backtracking more
+  strictly, in order to restrict the maximum amount of heap memory that is
+  used. The value of MATCH_LIMIT_RECURSION provides this facility. To have any
+  useful effect, it must be less than the value of MATCH_LIMIT. The default is
+  to use the same value as MATCH_LIMIT. There is a runtime method for setting a
+  different limit.])
 
 AC_DEFINE([MAX_NAME_SIZE], [32], [
   This limit is parameterized just in case anybody ever wants to
@@ -914,6 +906,15 @@ AC_CONFIG_COMMANDS([delete-old-chartables], [rm -f pcre2_chartables.c])
 
 AC_OUTPUT
 
+# --disable-stack-for-recursion is obsolete and has no effect.
+
+if test "$enable_stack_for_recursion" = "no"; then
+cat <<EOF
+
+WARNING: --disable-stack-for-recursion is obsolete and has no effect.
+EOF
+fi
+
 # Print out a nice little message after configure is run displaying the
 # chosen options.
 
@@ -949,7 +950,6 @@ $PACKAGE-$VERSION configuration summary:
     EBCDIC coding ...................... : ${enable_ebcdic}
     EBCDIC code for NL ................. : ${ebcdic_nl_code}
     Rebuild char tables ................ : ${enable_rebuild_chartables}
-    Use stack recursion ................ : ${enable_stack_for_recursion}
     Internal link size ................. : ${with_link_size}
     Nested parentheses limit ........... : ${with_parens_nest_limit}
     Match limit ........................ : ${with_match_limit}
