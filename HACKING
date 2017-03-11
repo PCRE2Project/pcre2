@@ -677,17 +677,9 @@ repetition is zero, the group is preceded by OP_BRAPOSZERO.
 Once-only (atomic) groups
 -------------------------
 
-These are just like other subpatterns, but they start with the opcode
-OP_ONCE or OP_ONCE_NC. The former is used when there are no capturing brackets
-within the atomic group; the latter when there are. The distinction is needed
-for when there is a backtrack to before the group - any captures within the
-group must be reset, so it is necessary to retain backtracking points inside
-the group, even after it is complete, in order to do this. When there are no
-captures in an atomic group, all the backtracking can be discarded when it is
-complete. This is more efficient, and also uses less stack.
-
+These are just like other subpatterns, but they start with the opcode OP_ONCE.
 The check for matching an empty string in an unbounded repeat is handled
-entirely at runtime, so there are just these two opcodes for atomic groups.
+entirely at runtime, so there are just this one opcode for atomic groups.
 
 
 Assertions
@@ -795,4 +787,4 @@ not a real opcode, but is used to check that tables indexed by opcode are the
 correct length, in order to catch updating errors.
 
 Philip Hazel
-November 2016
+March 2017

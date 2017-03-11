@@ -4746,7 +4746,6 @@ for (;; pptr++)
   int class_has_8bitchar;
   int i;
   uint32_t mclength;
-  uint32_t templastcapture;
   uint32_t skipunits;
   uint32_t subreqcu, subfirstcu;
   uint32_t groupnumber;
@@ -5753,7 +5752,6 @@ for (;; pptr++)
     pptr++;
     tempcode = code;
     tempreqvary = cb->req_varyopt;        /* Save value before group */
-    templastcapture = cb->lastcapture;    /* Save value before group */
     length_prevgroup = 0;                 /* Initialize for pre-compile phase */
 
     if ((group_return =
@@ -5782,12 +5780,6 @@ for (;; pptr++)
 
     if (note_group_empty && bravalue != OP_COND && group_return > 0)
       matched_char = TRUE;
-
-    /* If that was an atomic group and there are no capturing groups within it,
-    generate OP_ONCE_NC instead of OP_ONCE. */
-
-    if (bravalue == OP_ONCE && cb->lastcapture <= templastcapture)
-      *code = OP_ONCE_NC;
 
     /* If we've just compiled an assertion, pop the assert depth. */
 
@@ -6376,7 +6368,6 @@ for (;; pptr++)
       case OP_ASSERTBACK:
       case OP_ASSERTBACK_NOT:
       case OP_ONCE:
-      case OP_ONCE_NC:
       case OP_BRA:
       case OP_CBRA:
       case OP_COND:
@@ -6620,14 +6611,12 @@ for (;; pptr++)
 
           /* Convert possessive ONCE brackets to non-capturing */
 
-          if ((*bracode == OP_ONCE || *bracode == OP_ONCE_NC) &&
-              possessive_quantifier) *bracode = OP_BRA;
+          if (*bracode == OP_ONCE && possessive_quantifier) *bracode = OP_BRA;
 
           /* For non-possessive ONCE brackets, all we need to do is to
           set the KET. */
 
-          if (*bracode == OP_ONCE || *bracode == OP_ONCE_NC)
-            *ketcode = OP_KETRMAX + repeat_type;
+          if (*bracode == OP_ONCE) *ketcode = OP_KETRMAX + repeat_type;
 
           /* Handle non-ONCE brackets and possessive ONCEs (which have been
           converted to non-capturing above). */
@@ -7621,7 +7610,7 @@ do {
 
    /* Atomic groups */
 
-   else if (op == OP_ONCE || op == OP_ONCE_NC)
+   else if (op == OP_ONCE)
      {
      if (!is_anchored(scode, bracket_map, cb, atomcount + 1, inassert))
        return FALSE;
@@ -7751,7 +7740,7 @@ do {
 
    /* Atomic brackets */
 
-   else if (op == OP_ONCE || op == OP_ONCE_NC)
+   else if (op == OP_ONCE)
      {
      if (!is_startline(scode, bracket_map, cb, atomcount + 1, inassert))
        return FALSE;
@@ -7773,9 +7762,8 @@ do {
      }
 
    /* Check for explicit circumflex; anything else gives a FALSE result. Note
-   in particular that this includes atomic brackets OP_ONCE and OP_ONCE_NC
-   because the number of characters matched by .* cannot be adjusted inside
-   them. */
+   in particular that this includes atomic brackets OP_ONCE because the number
+   of characters matched by .* cannot be adjusted inside them. */
 
    else if (op != OP_CIRC && op != OP_CIRCM) return FALSE;
 
@@ -7986,7 +7974,6 @@ do {
      case OP_SCBRAPOS:
      case OP_ASSERT:
      case OP_ONCE:
-     case OP_ONCE_NC:
      d = find_firstassertedcu(scode, &dflags, op == OP_ASSERT);
      if (dflags < 0)
        return 0;

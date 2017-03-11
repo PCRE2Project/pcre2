@@ -11042,7 +11042,7 @@ Subject length lower bound = 0
 ------------------------------------------------------------------
         Bra
         ^
-        Once_NC
+        Once
         a++
         Ket
         Once
@@ -12510,7 +12510,7 @@ Subject length lower bound = 5
         cc
         Ket
         a++
-        Once_NC
+        Once
         bb
         Alt
         cc
@@ -12859,7 +12859,7 @@ Subject length lower bound = 5
 ------------------------------------------------------------------
         Bra
         [a-f]*+
-        Once_NC
+        Once
         gg
         Alt
         hh
@@ -12867,7 +12867,7 @@ Subject length lower bound = 5
         #
         [a-f]*+
         Brazero
-        Once_NC
+        Once
         gg
         Alt
         hh
@@ -12875,7 +12875,7 @@ Subject length lower bound = 5
         #
         [a-f]*
         Brazero
-        Once_NC
+        Once
         gg
         Alt
         hh
@@ -12883,7 +12883,7 @@ Subject length lower bound = 5
         a#
         [a-f]*+
         Brazero
-        Once_NC
+        Once
         gg
         Alt
         hh
@@ -13173,7 +13173,7 @@ Failed: error 133 at offset 7: parentheses are too deeply nested (stack check)
         Bra
         ^
         \w+
-        Once_NC
+        Once
         \s*+
         Ket
         AssertB

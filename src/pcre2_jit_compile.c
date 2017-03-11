@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-         New API code Copyright (c) 2016 University of Cambridge
+          New API code Copyright (c) 2016-2017 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -675,7 +675,6 @@ switch(*cc)
   case OP_ASSERTBACK:
   case OP_ASSERTBACK_NOT:
   case OP_ONCE:
-  case OP_ONCE_NC:
   case OP_BRA:
   case OP_BRAPOS:
   case OP_CBRA:
@@ -1304,7 +1303,7 @@ while (cc < ccend)
   if (private_data_ptr > SLJIT_MAX_LOCAL_SIZE)
     break;
 
-  if (repeat_check && (*cc == OP_ONCE || *cc == OP_ONCE_NC || *cc == OP_BRA || *cc == OP_CBRA || *cc == OP_COND))
+  if (repeat_check && (*cc == OP_ONCE || *cc == OP_BRA || *cc == OP_CBRA || *cc == OP_COND))
     {
     if (detect_repeat(common, cc))
       {
@@ -1333,7 +1332,6 @@ while (cc < ccend)
     case OP_ASSERTBACK:
     case OP_ASSERTBACK_NOT:
     case OP_ONCE:
-    case OP_ONCE_NC:
     case OP_BRAPOS:
     case OP_SBRA:
     case OP_SBRAPOS:
@@ -1802,7 +1800,6 @@ while (cc < ccend)
     case OP_ASSERTBACK:
     case OP_ASSERTBACK_NOT:
     case OP_ONCE:
-    case OP_ONCE_NC:
     case OP_BRAPOS:
     case OP_SBRA:
     case OP_SBRAPOS:
@@ -1982,7 +1979,6 @@ do
       case OP_ASSERTBACK:
       case OP_ASSERTBACK_NOT:
       case OP_ONCE:
-      case OP_ONCE_NC:
       case OP_BRAPOS:
       case OP_SBRA:
       case OP_SBRAPOS:
@@ -3583,7 +3579,6 @@ while (TRUE)
     continue;
 
     case OP_ONCE:
-    case OP_ONCE_NC:
     case OP_BRA:
     case OP_BRAPOS:
     case OP_CBRA:
@@ -7826,7 +7821,6 @@ return stacksize;
   (|)     OP_*BRA    | OP_ALT ...         M A
   (?()|)  OP_*COND   | OP_ALT             M A
   (?>|)   OP_ONCE    | OP_ALT ...         [stack trace] M A
-  (?>|)   OP_ONCE_NC | OP_ALT ...         [stack trace] M A
                                           Or nothing, if trace is unnecessary
 */
 
@@ -7894,8 +7888,6 @@ if (SLJIT_UNLIKELY(opcode == OP_COND || opcode == OP_SCOND))
 
 if (SLJIT_UNLIKELY(opcode == OP_COND) && (*cc == OP_KETRMAX || *cc == OP_KETRMIN))
   opcode = OP_SCOND;
-if (SLJIT_UNLIKELY(opcode == OP_ONCE_NC))
-  opcode = OP_ONCE;
 
 if (opcode == OP_CBRA || opcode == OP_SCBRA)
   {
@@ -9546,7 +9538,6 @@ while (cc < ccend)
     break;
 
     case OP_ONCE:
-    case OP_ONCE_NC:
     case OP_BRA:
     case OP_CBRA:
     case OP_COND:
@@ -9953,8 +9944,6 @@ if (opcode == OP_CBRA || opcode == OP_SCBRA)
   offset = (GET2(ccbegin, 1 + LINK_SIZE)) << 1;
 if (SLJIT_UNLIKELY(opcode == OP_COND) && (*cc == OP_KETRMAX || *cc == OP_KETRMIN))
   opcode = OP_SCOND;
-if (SLJIT_UNLIKELY(opcode == OP_ONCE_NC))
-  opcode = OP_ONCE;
 
 alt_max = has_alternatives ? no_alternatives(ccbegin) : 0;
 
@@ -10627,7 +10616,6 @@ while (current)
     break;
 
     case OP_ONCE:
-    case OP_ONCE_NC:
     case OP_BRA:
     case OP_CBRA:
     case OP_COND:

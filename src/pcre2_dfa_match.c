@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-         New API code Copyright (c) 2016 University of Cambridge
+          New API code Copyright (c) 2016-2017 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -172,7 +172,7 @@ static const uint8_t coptable[] = {
   0,                             /* Assert not                             */
   0,                             /* Assert behind                          */
   0,                             /* Assert behind not                      */
-  0, 0,                          /* ONCE, ONCE_NC                          */
+  0,                             /* ONCE                                   */
   0, 0, 0, 0, 0,                 /* BRA, BRAPOS, CBRA, CBRAPOS, COND       */
   0, 0, 0, 0, 0,                 /* SBRA, SBRAPOS, SCBRA, SCBRAPOS, SCOND  */
   0, 0,                          /* CREF, DNCREF                           */
@@ -245,7 +245,7 @@ static const uint8_t poptable[] = {
   0,                             /* Assert not                             */
   0,                             /* Assert behind                          */
   0,                             /* Assert behind not                      */
-  0, 0,                          /* ONCE, ONCE_NC                          */
+  0,                             /* ONCE                                   */
   0, 0, 0, 0, 0,                 /* BRA, BRAPOS, CBRA, CBRAPOS, COND       */
   0, 0, 0, 0, 0,                 /* SBRA, SBRAPOS, SCBRA, SCBRAPOS, SCOND  */
   0, 0,                          /* CREF, DNCREF                           */
@@ -2889,7 +2889,6 @@ for (;;)
 
       /*-----------------------------------------------------------------*/
       case OP_ONCE:
-      case OP_ONCE_NC:
         {
         PCRE2_SIZE local_offsets[2];
         int local_workspace[1000];

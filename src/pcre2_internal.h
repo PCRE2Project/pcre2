@@ -1510,68 +1510,67 @@ enum {
   OP_ASSERTBACK,     /* 128 Positive lookbehind */
   OP_ASSERTBACK_NOT, /* 129 Negative lookbehind */
 
-  /* ONCE, ONCE_NC, BRA, BRAPOS, CBRA, CBRAPOS, and COND must come immediately
-  after the assertions, with ONCE first, as there's a test for >= ONCE for a
-  subpattern that isn't an assertion. The POS versions must immediately follow
-  the non-POS versions in each case. */
+  /* ONCE, BRA, BRAPOS, CBRA, CBRAPOS, and COND must come immediately after the
+  assertions, with ONCE first, as there's a test for >= ONCE for a subpattern
+  that isn't an assertion. The POS versions must immediately follow the non-POS
+  versions in each case. */
 
   OP_ONCE,           /* 130 Atomic group, contains captures */
-  OP_ONCE_NC,        /* 131 Atomic group containing no captures */
-  OP_BRA,            /* 132 Start of non-capturing bracket */
-  OP_BRAPOS,         /* 133 Ditto, with unlimited, possessive repeat */
-  OP_CBRA,           /* 134 Start of capturing bracket */
-  OP_CBRAPOS,        /* 135 Ditto, with unlimited, possessive repeat */
-  OP_COND,           /* 136 Conditional group */
+  OP_BRA,            /* 131 Start of non-capturing bracket */
+  OP_BRAPOS,         /* 132 Ditto, with unlimited, possessive repeat */
+  OP_CBRA,           /* 133 Start of capturing bracket */
+  OP_CBRAPOS,        /* 134 Ditto, with unlimited, possessive repeat */
+  OP_COND,           /* 135 Conditional group */
 
   /* These five must follow the previous five, in the same order. There's a
   check for >= SBRA to distinguish the two sets. */
 
-  OP_SBRA,           /* 137 Start of non-capturing bracket, check empty  */
-  OP_SBRAPOS,        /* 138 Ditto, with unlimited, possessive repeat */
-  OP_SCBRA,          /* 139 Start of capturing bracket, check empty */
-  OP_SCBRAPOS,       /* 140 Ditto, with unlimited, possessive repeat */
-  OP_SCOND,          /* 141 Conditional group, check empty */
+  OP_SBRA,           /* 136 Start of non-capturing bracket, check empty  */
+  OP_SBRAPOS,        /* 137 Ditto, with unlimited, possessive repeat */
+  OP_SCBRA,          /* 138 Start of capturing bracket, check empty */
+  OP_SCBRAPOS,       /* 139 Ditto, with unlimited, possessive repeat */
+  OP_SCOND,          /* 140 Conditional group, check empty */
 
   /* The next two pairs must (respectively) be kept together. */
 
-  OP_CREF,           /* 142 Used to hold a capture number as condition */
-  OP_DNCREF,         /* 143 Used to point to duplicate names as a condition */
-  OP_RREF,           /* 144 Used to hold a recursion number as condition */
-  OP_DNRREF,         /* 145 Used to point to duplicate names as a condition */
-  OP_FALSE,          /* 146 Always false (used by DEFINE and VERSION) */
-  OP_TRUE,           /* 147 Always true (used by VERSION) */
+  OP_CREF,           /* 141 Used to hold a capture number as condition */
+  OP_DNCREF,         /* 142 Used to point to duplicate names as a condition */
+  OP_RREF,           /* 143 Used to hold a recursion number as condition */
+  OP_DNRREF,         /* 144 Used to point to duplicate names as a condition */
+  OP_FALSE,          /* 145 Always false (used by DEFINE and VERSION) */
+  OP_TRUE,           /* 146 Always true (used by VERSION) */
 
-  OP_BRAZERO,        /* 148 These two must remain together and in this */
-  OP_BRAMINZERO,     /* 149 order. */
-  OP_BRAPOSZERO,     /* 150 */
+  OP_BRAZERO,        /* 147 These two must remain together and in this */
+  OP_BRAMINZERO,     /* 148 order. */
+  OP_BRAPOSZERO,     /* 149 */
 
   /* These are backtracking control verbs */
 
-  OP_MARK,           /* 151 always has an argument */
-  OP_PRUNE,          /* 152 */
-  OP_PRUNE_ARG,      /* 153 same, but with argument */
-  OP_SKIP,           /* 154 */
-  OP_SKIP_ARG,       /* 155 same, but with argument */
-  OP_THEN,           /* 156 */
-  OP_THEN_ARG,       /* 157 same, but with argument */
-  OP_COMMIT,         /* 158 */
+  OP_MARK,           /* 150 always has an argument */
+  OP_PRUNE,          /* 151 */
+  OP_PRUNE_ARG,      /* 152 same, but with argument */
+  OP_SKIP,           /* 153 */
+  OP_SKIP_ARG,       /* 154 same, but with argument */
+  OP_THEN,           /* 155 */
+  OP_THEN_ARG,       /* 156 same, but with argument */
+  OP_COMMIT,         /* 157 */
 
   /* These are forced failure and success verbs */
 
-  OP_FAIL,           /* 159 */
-  OP_ACCEPT,         /* 160 */
-  OP_ASSERT_ACCEPT,  /* 161 Used inside assertions */
-  OP_CLOSE,          /* 162 Used before OP_ACCEPT to close open captures */
+  OP_FAIL,           /* 158 */
+  OP_ACCEPT,         /* 159 */
+  OP_ASSERT_ACCEPT,  /* 160 Used inside assertions */
+  OP_CLOSE,          /* 161 Used before OP_ACCEPT to close open captures */
 
   /* This is used to skip a subpattern with a {0} quantifier */
 
-  OP_SKIPZERO,       /* 163 */
+  OP_SKIPZERO,       /* 162 */
 
   /* This is used to identify a DEFINE group during compilation so that it can
   be checked for having only one branch. It is changed to OP_FALSE before
   compilation finishes. */
 
-  OP_DEFINE,         /* 164 */
+  OP_DEFINE,         /* 163 */
 
   /* This is not an opcode, but is used to check that tables indexed by opcode
   are the correct length, in order to catch updating errors - there have been
@@ -1618,7 +1617,7 @@ some cases doesn't actually use these names at all). */
   "Recurse", "Callout", "CalloutStr",                             \
   "Alt", "Ket", "KetRmax", "KetRmin", "KetRpos",                  \
   "Reverse", "Assert", "Assert not", "AssertB", "AssertB not",    \
-  "Once", "Once_NC",                                              \
+  "Once",                                                         \
   "Bra", "BraPos", "CBra", "CBraPos",                             \
   "Cond",                                                         \
   "SBra", "SBraPos", "SCBra", "SCBraPos",                         \
@@ -1702,7 +1701,6 @@ in UTF-8 mode. The code that uses this table must know about such things. */
   1+LINK_SIZE,                   /* Assert behind                          */ \
   1+LINK_SIZE,                   /* Assert behind not                      */ \
   1+LINK_SIZE,                   /* ONCE                                   */ \
-  1+LINK_SIZE,                   /* ONCE_NC                                */ \
   1+LINK_SIZE,                   /* BRA                                    */ \
   1+LINK_SIZE,                   /* BRAPOS                                 */ \
   1+LINK_SIZE+IMM2_SIZE,         /* CBRA                                   */ \

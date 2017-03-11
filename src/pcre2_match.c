@@ -5021,7 +5021,6 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
     /* Atomic groups and non-capturing brackets that can match an empty string
     must record a backtracking point and also set up a chained frame. */
 
-    case OP_ONCE_NC:  /* Obsolete */
     case OP_ONCE:
     case OP_SBRA:
     Lframe_type = GF_NOCAPTURE | Fop;
@@ -5518,7 +5517,6 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
       frame so that it points to the final branch. */
 
       case OP_ONCE:
-      case OP_ONCE_NC:  /* Obsolete */
       Fback_frame = ((char *)F - (char *)P) + frame_size;
       for (;;)
         {
