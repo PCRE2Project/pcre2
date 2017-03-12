@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-         New API code Copyright (c) 2016 University of Cambridge
+          New API code Copyright (c) 2016-2017 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -75,6 +75,7 @@ if (where == NULL)   /* Requests field length */
     case PCRE2_INFO_BACKREFMAX:
     case PCRE2_INFO_BSR:
     case PCRE2_INFO_CAPTURECOUNT:
+    case PCRE2_INFO_DEPTHLIMIT:
     case PCRE2_INFO_FIRSTCODETYPE:
     case PCRE2_INFO_FIRSTCODEUNIT:
     case PCRE2_INFO_HASBACKSLASHC:
@@ -89,7 +90,6 @@ if (where == NULL)   /* Requests field length */
     case PCRE2_INFO_NAMEENTRYSIZE:
     case PCRE2_INFO_NAMECOUNT:
     case PCRE2_INFO_NEWLINE:
-    case PCRE2_INFO_RECURSIONLIMIT:
     return sizeof(uint32_t);
 
     case PCRE2_INFO_FIRSTBITMAP:
@@ -135,6 +135,11 @@ switch(what)
 
   case PCRE2_INFO_CAPTURECOUNT:
   *((uint32_t *)where) = re->top_bracket;
+  break;
+
+  case PCRE2_INFO_DEPTHLIMIT:
+  *((uint32_t *)where) = re->limit_depth;
+  if (re->limit_depth == UINT32_MAX) return PCRE2_ERROR_UNSET;
   break;
 
   case PCRE2_INFO_FIRSTCODETYPE:
@@ -213,11 +218,6 @@ switch(what)
 
   case PCRE2_INFO_NEWLINE:
   *((uint32_t *)where) = re->newline_convention;
-  break;
-
-  case PCRE2_INFO_RECURSIONLIMIT:
-  *((uint32_t *)where) = re->limit_recursion;
-  if (re->limit_recursion == UINT32_MAX) return PCRE2_ERROR_UNSET;
   break;
 
   case PCRE2_INFO_SIZE:

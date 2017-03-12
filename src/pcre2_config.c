@@ -87,9 +87,9 @@ if (where == NULL)  /* Requests a length */
     case PCRE2_CONFIG_JIT:
     case PCRE2_CONFIG_LINKSIZE:
     case PCRE2_CONFIG_MATCHLIMIT:
+    case PCRE2_CONFIG_DEPTHLIMIT:
     case PCRE2_CONFIG_NEWLINE:
     case PCRE2_CONFIG_PARENSLIMIT:
-    case PCRE2_CONFIG_RECURSIONLIMIT:
     case PCRE2_CONFIG_STACKRECURSE:    /* Obsolete */
     case PCRE2_CONFIG_UNICODE:
     return sizeof(uint32_t);
@@ -143,6 +143,10 @@ switch (what)
   *((uint32_t *)where) = MATCH_LIMIT;
   break;
 
+  case PCRE2_CONFIG_DEPTHLIMIT:
+  *((uint32_t *)where) = MATCH_LIMIT_DEPTH;
+  break;
+  
   case PCRE2_CONFIG_NEWLINE:
   *((uint32_t *)where) = NEWLINE_DEFAULT;
   break;
@@ -151,10 +155,6 @@ switch (what)
   *((uint32_t *)where) = PARENS_NEST_LIMIT;
   break;
 
-  case PCRE2_CONFIG_RECURSIONLIMIT:
-  *((uint32_t *)where) = MATCH_LIMIT_RECURSION;
-  break;
-  
   /* This is now obsolete. The stack is no longer used via recursion for 
   handling backtracking in pcre2_match(). */
 

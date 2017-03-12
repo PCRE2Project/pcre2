@@ -5,7 +5,7 @@
 /* This is the public header file for the PCRE library, second API, to be
 #included by applications that call PCRE2 functions.
 
-           Copyright (c) 2016 University of Cambridge
+           Copyright (c) 2016-2017 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -256,7 +256,8 @@ numbers must not be changed. */
 #define PCRE2_ERROR_NOUNIQUESUBSTRING (-50)
 #define PCRE2_ERROR_NULL              (-51)
 #define PCRE2_ERROR_RECURSELOOP       (-52)
-#define PCRE2_ERROR_RECURSIONLIMIT    (-53)
+#define PCRE2_ERROR_DEPTHLIMIT        (-53)
+#define PCRE2_ERROR_RECURSIONLIMIT    (-53)  /* Obsolete synonym */
 #define PCRE2_ERROR_UNAVAILABLE       (-54)
 #define PCRE2_ERROR_UNSET             (-55)
 #define PCRE2_ERROR_BADOFFSETLIMIT    (-56)
@@ -290,7 +291,8 @@ numbers must not be changed. */
 #define PCRE2_INFO_NAMEENTRYSIZE        18
 #define PCRE2_INFO_NAMETABLE            19
 #define PCRE2_INFO_NEWLINE              20
-#define PCRE2_INFO_RECURSIONLIMIT       21
+#define PCRE2_INFO_DEPTHLIMIT           21
+#define PCRE2_INFO_RECURSIONLIMIT       21  /* Obsolete synonym */
 #define PCRE2_INFO_SIZE                 22
 #define PCRE2_INFO_HASBACKSLASHC        23
 
@@ -303,7 +305,8 @@ numbers must not be changed. */
 #define PCRE2_CONFIG_MATCHLIMIT              4
 #define PCRE2_CONFIG_NEWLINE                 5
 #define PCRE2_CONFIG_PARENSLIMIT             6
-#define PCRE2_CONFIG_RECURSIONLIMIT          7
+#define PCRE2_CONFIG_DEPTHLIMIT              7
+#define PCRE2_CONFIG_RECURSIONLIMIT          7  /* Obsolete synonym */
 #define PCRE2_CONFIG_STACKRECURSE            8  /* Obsolete */
 #define PCRE2_CONFIG_UNICODE                 9
 #define PCRE2_CONFIG_UNICODE_VERSION        10
@@ -446,11 +449,11 @@ PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION \
   pcre2_set_callout(pcre2_match_context *, \
     int (*)(pcre2_callout_block *, void *), void *); \
 PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION \
+  pcre2_set_depth_limit(pcre2_match_context *, uint32_t); \
+PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION \
   pcre2_set_match_limit(pcre2_match_context *, uint32_t); \
 PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION \
   pcre2_set_offset_limit(pcre2_match_context *, PCRE2_SIZE); \
-PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION \
-  pcre2_set_recursion_limit(pcre2_match_context *, uint32_t); \
 PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION \
   pcre2_set_recursion_memory_management(pcre2_match_context *, \
     void *(*)(PCRE2_SIZE, void *), void (*)(void *, void *), void *);
@@ -670,13 +673,12 @@ pcre2_compile are called by application code. */
 #define pcre2_set_callout                     PCRE2_SUFFIX(pcre2_set_callout_)
 #define pcre2_set_character_tables            PCRE2_SUFFIX(pcre2_set_character_tables_)
 #define pcre2_set_compile_recursion_guard     PCRE2_SUFFIX(pcre2_set_compile_recursion_guard_)
+#define pcre2_set_depth_limit                 PCRE2_SUFFIX(pcre2_set_depth_limit_)
 #define pcre2_set_match_limit                 PCRE2_SUFFIX(pcre2_set_match_limit_)
 #define pcre2_set_max_pattern_length          PCRE2_SUFFIX(pcre2_set_max_pattern_length_)
 #define pcre2_set_newline                     PCRE2_SUFFIX(pcre2_set_newline_)
 #define pcre2_set_parens_nest_limit           PCRE2_SUFFIX(pcre2_set_parens_nest_limit_)
 #define pcre2_set_offset_limit                PCRE2_SUFFIX(pcre2_set_offset_limit_)
-#define pcre2_set_recursion_limit             PCRE2_SUFFIX(pcre2_set_recursion_limit_)
-#define pcre2_set_recursion_memory_management PCRE2_SUFFIX(pcre2_set_recursion_memory_management_)
 #define pcre2_substitute                      PCRE2_SUFFIX(pcre2_substitute_)
 #define pcre2_substring_copy_byname           PCRE2_SUFFIX(pcre2_substring_copy_byname_)
 #define pcre2_substring_copy_bynumber         PCRE2_SUFFIX(pcre2_substring_copy_bynumber_)
@@ -690,6 +692,11 @@ pcre2_compile are called by application code. */
 #define pcre2_substring_nametable_scan        PCRE2_SUFFIX(pcre2_substring_nametable_scan_)
 #define pcre2_substring_number_from_name      PCRE2_SUFFIX(pcre2_substring_number_from_name_)
 
+/* Keep this old function name for backwards compatibility */
+#define pcre2_set_recursion_limit pcre2_set_depth_limit
+
+/* Keep this obsolete function for backwards compatibility: it is now a noop. */
+#define pcre2_set_recursion_memory_management PCRE2_SUFFIX(pcre2_set_recursion_memory_management_)
 
 /* Now generate all three sets of width-specific structures and function
 prototypes. */

@@ -4882,8 +4882,8 @@
     aaa\=allcaptures
     a\=allcaptures
 
-/(*LIMIT_RECURSION=100)^((.)(?1)|.)$/
-\= Expect recursion limit exceeded
+/(*LIMIT_DEPTH=100)^((.)(?1)|.)$/
+\= Expect depth limit exceeded
     a[00]([00]([00]([00]([00]([00]([00]([00]([00]([00]([00]([00]([00]([00]([00]([00]([00]([00]([00]([00]([00]([00]([00]([00]
 
 # End of testinput6

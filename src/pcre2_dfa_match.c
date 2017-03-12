@@ -400,7 +400,7 @@ BOOL utf = FALSE;
 
 BOOL reset_could_continue = FALSE;
 
-if (rlevel++ > mb->match_limit_recursion) return PCRE2_ERROR_RECURSIONLIMIT;
+if (rlevel++ > mb->match_limit_depth) return PCRE2_ERROR_DEPTHLIMIT;
 offsetcount &= (uint32_t)(-2);  /* Round down */
 
 wscount -= 2;
@@ -3215,7 +3215,7 @@ if (mcontext == NULL)
   {
   mb->callout = NULL;
   mb->memctl = re->memctl;
-  mb->match_limit_recursion = PRIV(default_match_context).recursion_limit;
+  mb->match_limit_depth = PRIV(default_match_context).depth_limit;
   }
 else
   {
@@ -3228,10 +3228,10 @@ else
   mb->callout = mcontext->callout;
   mb->callout_data = mcontext->callout_data;
   mb->memctl = mcontext->memctl;
-  mb->match_limit_recursion = mcontext->recursion_limit;
+  mb->match_limit_depth = mcontext->depth_limit;
   }
-if (mb->match_limit_recursion > re->limit_recursion)
-  mb->match_limit_recursion = re->limit_recursion;
+if (mb->match_limit_depth > re->limit_depth)
+  mb->match_limit_depth = re->limit_depth;
 
 mb->start_code = (PCRE2_UCHAR *)((uint8_t *)re + sizeof(pcre2_real_code)) +
   re->name_count * re->name_entry_size;

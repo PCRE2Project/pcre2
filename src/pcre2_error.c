@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-         New API code Copyright (c) 2016 University of Cambridge
+          New API code Copyright (c) 2016-2017 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -244,7 +244,7 @@ static const unsigned char match_error_texts[] =
   "non-unique substring name\0"
   "NULL argument passed\0"
   "nested recursion at the same subject position\0"
-  "recursion limit exceeded\0"
+  "matching depth limit exceeded\0"
   "requested value is not available\0"
   /* 55 */
   "requested value is not set\0"

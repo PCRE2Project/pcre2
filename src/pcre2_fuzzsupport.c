@@ -141,8 +141,8 @@ for (i = 0; i < 2; i++)
     int j;
     uint32_t save_match_options = match_options;
 
-    /* Create match data and context blocks only when we first need them. Set 
-    low match and recursion limits to avoid wasting too much searching large 
+    /* Create match data and context blocks only when we first need them. Set
+    low match and depth limits to avoid wasting too much searching large
     pattern trees. Almost all matches are going to fail. */
 
     if (match_data == NULL)
@@ -168,7 +168,7 @@ for (i = 0; i < 2; i++)
         return 0;
         }
       (void)pcre2_set_match_limit(match_context, 100);
-      (void)pcre2_set_recursion_limit(match_context, 100); 
+      (void)pcre2_set_depth_limit(match_context, 100); 
       (void)pcre2_set_callout(match_context, callout_function, &callout_count); 
       }
 

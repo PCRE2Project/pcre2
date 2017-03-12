@@ -146,8 +146,8 @@ SET(PCRE2_PARENS_NEST_LIMIT "250" CACHE STRING
 SET(PCRE2_MATCH_LIMIT "10000000" CACHE STRING
     "Default limit on internal looping. See MATCH_LIMIT in config.h.in for details.")
 
-SET(PCRE2_MATCH_LIMIT_RECURSION "MATCH_LIMIT" CACHE STRING
-    "Default limit on internal recursion. See MATCH_LIMIT_RECURSION in config.h.in for details.")
+SET(PCRE2_MATCH_LIMIT_DEPTH "MATCH_LIMIT" CACHE STRING
+    "Default limit on internal depth of search. See MATCH_LIMIT_DEPTH in config.h.in for details.")
 
 SET(PCRE2GREP_BUFSIZE "20480" CACHE STRING
     "Buffer starting size parameter for pcre2grep. See PCRE2GREP_BUFSIZE in config.h.in for details.")
@@ -766,7 +766,7 @@ IF(PCRE2_SHOW_REPORT)
   MESSAGE(STATUS "  Internal link size .............. : ${PCRE2_LINK_SIZE}")
   MESSAGE(STATUS "  Parentheses nest limit .......... : ${PCRE2_PARENS_NEST_LIMIT}")
   MESSAGE(STATUS "  Match limit ..................... : ${PCRE2_MATCH_LIMIT}")
-  MESSAGE(STATUS "  Match limit recursion ........... : ${PCRE2_MATCH_LIMIT_RECURSION}")
+  MESSAGE(STATUS "  Match depth limit ............... : ${PCRE2_MATCH_LIMIT_DEPTH}")
   MESSAGE(STATUS "  Build shared libs ............... : ${BUILD_SHARED_LIBS}")
   MESSAGE(STATUS "  Build static libs ............... : ${BUILD_STATIC_LIBS}")
   MESSAGE(STATUS "  Build pcre2grep ................. : ${PCRE2_BUILD_PCRE2GREP}")

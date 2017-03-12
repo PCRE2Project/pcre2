@@ -29,13 +29,20 @@ released code, but are noted here for the record.
       crash. A vector on the heap is now set up at the start of matching if the 
       vector on the stack is not big enough to handle at least 10 frames. 
       Fixes oss-fuzz issue 783. 
+      
+2. Now that pcre2_match() no longer uses recursive function calls (see above),
+the "match limit recursion" value seems misnamed. It still exists, and limits 
+the depth of tree that is searched. To avoid future confusion, it has been 
+renamed as "depth limit" in all relevant places (--with-depth-limit, 
+(*LIMIT_DEPTH), pcre2_set_depth_limit(), etc) but the old names are still 
+available for backwards compatibility. 
        
-2. Hardened pcre2test so as to reduce the number of bugs reported by fuzzers:
+3. Hardened pcre2test so as to reduce the number of bugs reported by fuzzers:
 
   (a) Check for malloc failures when getting memory for the ovector (POSIX) or 
       the match data block (non-POSIX). 
       
-3. In the 32-bit library in non-UTF mode, an attempt to find a Unicode property
+4. In the 32-bit library in non-UTF mode, an attempt to find a Unicode property
 for a character with a code point greater than 0x10ffff (the Unicode maximum)
 caused a crash.
 

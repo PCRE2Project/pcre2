@@ -13,7 +13,7 @@ distribution because other apparatus is needed to compile pcre2grep for z/OS.
 The header can be found in the special z/OS distribution, which is available
 from www.zaconsultants.net or from www.cbttape.org.
 
-           Copyright (c) 1997-2016 University of Cambridge
+           Copyright (c) 1997-2017 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -211,7 +211,7 @@ static const uint8_t *character_tables = NULL;
 static uint32_t pcre2_options = 0;
 static uint32_t process_options = 0;
 static uint32_t match_limit = 0;
-static uint32_t recursion_limit = 0;
+static uint32_t depth_limit = 0;
 
 static pcre2_compile_context *compile_context;
 static pcre2_match_context *match_context;
@@ -355,7 +355,7 @@ used to identify them. */
 #define N_FOFFSETS     (-11)
 #define N_LBUFFER      (-12)
 #define N_M_LIMIT      (-13)
-#define N_M_LIMIT_REC  (-14)
+#define N_M_LIMIT_DEP  (-14)
 #define N_BUFSIZE      (-15)
 #define N_NOJIT        (-16)
 #define N_FILE_LIST    (-17)
@@ -395,8 +395,9 @@ static option_item optionlist[] = {
   { OP_NODATA,     N_LBUFFER, NULL,             "line-buffered", "use line buffering" },
   { OP_NODATA,     N_LOFFSETS, NULL,            "line-offsets",  "output line numbers and offsets, not text" },
   { OP_STRING,     N_LOCALE, &locale,           "locale=locale", "use the named locale" },
-  { OP_U32NUMBER,  N_M_LIMIT, &match_limit,     "match-limit=number", "set PCRE match limit option" },
-  { OP_U32NUMBER,  N_M_LIMIT_REC, &recursion_limit, "recursion-limit=number", "set PCRE match recursion limit option" },
+  { OP_U32NUMBER,  N_M_LIMIT, &match_limit,     "match-limit=number", "set PCRE2 match limit option" },
+  { OP_U32NUMBER,  N_M_LIMIT_DEP, &depth_limit, "depth-limit=number", "set PCRE2 depth limit option" },
+  { OP_U32NUMBER,  N_M_LIMIT_DEP, &depth_limit, "recursion-limit=number", "obsolete synonym for depth-limit" },
   { OP_NODATA,     'M',      NULL,              "multiline",     "run in multiline mode" },
   { OP_STRING,     'N',      &newline_arg,      "newline=type",  "set newline type (CR, LF, CRLF, ANYCRLF or ANY)" },
   { OP_NODATA,     'n',      NULL,              "line-number",   "print line number with output lines" },
@@ -523,7 +524,7 @@ if (resource_error)
   {
   fprintf(stderr, "pcre2grep: Error %d, %d or %d means that a resource limit "
     "was exceeded.\n", PCRE2_ERROR_JIT_STACKLIMIT, PCRE2_ERROR_MATCHLIMIT,
-    PCRE2_ERROR_RECURSIONLIMIT);
+    PCRE2_ERROR_DEPTHLIMIT);
   fprintf(stderr, "pcre2grep: Check your regex for nested unlimited loops.\n");
   }
 exit(rc);
@@ -1639,7 +1640,7 @@ for (i = 1; p != NULL; p = p->next, i++)
   fprintf(stderr, "%s", msg);
   FWRITE(matchptr, 1, slen, stderr);   /* In case binary zero included */
   fprintf(stderr, "\n\n");
-  if (*mrc == PCRE2_ERROR_MATCHLIMIT || *mrc == PCRE2_ERROR_RECURSIONLIMIT ||
+  if (*mrc == PCRE2_ERROR_MATCHLIMIT || *mrc == PCRE2_ERROR_DEPTHLIMIT ||
       *mrc == PCRE2_ERROR_JIT_STACKLIMIT)
     resource_error = TRUE;
   if (error_count++ > 20)
@@ -3530,7 +3531,7 @@ if ((only_matching != NULL && (file_offsets || line_offsets)) ||
 /* Put limits into the match data block. */
 
 if (match_limit > 0) pcre2_set_match_limit(match_context, match_limit);
-if (recursion_limit > 0) pcre2_set_recursion_limit(match_context, recursion_limit);
+if (depth_limit > 0) pcre2_set_depth_limit(match_context, depth_limit);
 
 if (only_matching != NULL || file_offsets || line_offsets)
   show_only_matching = TRUE;

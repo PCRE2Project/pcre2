@@ -269,18 +269,22 @@ AC_ARG_WITH(match-limit,
                            [default limit on internal looping (default=10000000)]),
             , with_match_limit=10000000)
 
-# Handle --with-match-limit_recursion=N
+# Handle --with-match-limit-depth=N
+# Recognize old synonym --with-match-limit-recursion
 #
-# Note: In config.h, the default is to define MATCH_LIMIT_RECURSION
-# symbolically as MATCH_LIMIT, which in turn is defined to be some numeric
-# value (e.g. 10000000). MATCH_LIMIT_RECURSION can otherwise be set to some
-# different numeric value (or even the same numeric value as MATCH_LIMIT,
-# though no longer defined in terms of the latter).
+# Note: In config.h, the default is to define MATCH_LIMIT_DEPTH symbolically as
+# MATCH_LIMIT, which in turn is defined to be some numeric value (e.g.
+# 10000000). MATCH_LIMIT_DEPTH can otherwise be set to some different numeric
+# value (or even the same numeric value as MATCH_LIMIT, though no longer
+# defined in terms of the latter).
 #
-AC_ARG_WITH(match-limit-recursion,
-            AS_HELP_STRING([--with-match-limit-recursion=N],
-                           [default limit on internal recursion (default=MATCH_LIMIT)]),
-            , with_match_limit_recursion=MATCH_LIMIT)
+AC_ARG_WITH(match-limit-depth,
+            AS_HELP_STRING([--with-match-limit-depth=N],
+                           [default limit on match tree depth (default=MATCH_LIMIT)]),
+            , with_match_limit_depth=MATCH_LIMIT)
+
+AC_ARG_WITH(match-limit-recursion,,
+            , with_match_limit_recursion=UNSET)
 
 # Handle --enable-valgrind
 AC_ARG_ENABLE(valgrind,
@@ -299,7 +303,7 @@ AC_ARG_ENABLE(fuzz_support,
               AS_HELP_STRING([--enable-fuzz-support],
                              [enable fuzzer support]),
               , enable_fuzz_support=no)
-              
+
 # Handle --disable-stack-for-recursion
 # This option became obsolete at release 10.30.
 AC_ARG_ENABLE(stack-for-recursion,,
@@ -683,14 +687,29 @@ AC_DEFINE_UNQUOTED([MATCH_LIMIT], [$with_match_limit], [
   to determine that they do not match. The default is set very large so that it
   does not accidentally catch legitimate cases.])
 
-AC_DEFINE_UNQUOTED([MATCH_LIMIT_RECURSION], [$with_match_limit_recursion], [
+# --with-match-limit-recursion is an obsolete synonym for --with-match-limit-depth
+
+if test "$with_match_limit_recursion" != "UNSET"; then
+cat <<EOF
+
+WARNING: --with-match-limit-recursion is an obsolete option. Please use
+  --with-match-limit-depth in future. If both are set, --with-match-limit-depth
+  will be used.
+
+EOF
+if test "$with_match_limit_depth" = "MATCH_LIMIT"; then
+  with_match_limit_depth=$with_match_limit_recursion
+fi
+fi
+
+AC_DEFINE_UNQUOTED([MATCH_LIMIT_DEPTH], [$with_match_limit_depth], [
   The above limit applies to all backtracks, whether or not they are nested. In
-  some environments it is desirable to limit the nesting of backtracking more
-  strictly, in order to restrict the maximum amount of heap memory that is
-  used. The value of MATCH_LIMIT_RECURSION provides this facility. To have any
-  useful effect, it must be less than the value of MATCH_LIMIT. The default is
-  to use the same value as MATCH_LIMIT. There is a runtime method for setting a
-  different limit.])
+  some environments it is desirable to limit the nesting of backtracking (that
+  is, the depth of tree that is searched) more strictly, in order to restrict
+  the maximum amount of heap memory that is used. The value of
+  MATCH_LIMIT_DEPTH provides this facility. To have any useful effect, it must
+  be less than the value of MATCH_LIMIT. The default is to use the same value
+  as MATCH_LIMIT. There is a runtime method for setting a different limit.])
 
 AC_DEFINE([MAX_NAME_SIZE], [32], [
   This limit is parameterized just in case anybody ever wants to
@@ -953,7 +972,7 @@ $PACKAGE-$VERSION configuration summary:
     Internal link size ................. : ${with_link_size}
     Nested parentheses limit ........... : ${with_parens_nest_limit}
     Match limit ........................ : ${with_match_limit}
-    Match limit recursion .............. : ${with_match_limit_recursion}
+    Match depth limit .................. : ${with_match_limit_depth}
     Build shared libs .................. : ${enable_shared}
     Build static libs .................. : ${enable_static}
     Use JIT in pcre2grep ............... : ${enable_pcre2grep_jit}

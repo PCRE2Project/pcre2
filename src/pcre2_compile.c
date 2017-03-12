@@ -728,7 +728,7 @@ enum { PSO_OPT,     /* Value is an option bit */
        PSO_NL,      /* Value is a newline type */
        PSO_BSR,     /* Value is a \R type */
        PSO_LIMM,    /* Read integer value for match limit */
-       PSO_LIMR };  /* Read integer value for recursion limit */
+       PSO_LIMD };  /* Read integer value for depth limit */
 
 typedef struct pso {
   const uint8_t *name;
@@ -750,7 +750,8 @@ static pso pso_list[] = {
   { (uint8_t *)STRING_NO_JIT_RIGHTPAR,             7, PSO_FLG, PCRE2_NOJIT },
   { (uint8_t *)STRING_NO_START_OPT_RIGHTPAR,      13, PSO_OPT, PCRE2_NO_START_OPTIMIZE },
   { (uint8_t *)STRING_LIMIT_MATCH_EQ,             12, PSO_LIMM, 0 },
-  { (uint8_t *)STRING_LIMIT_RECURSION_EQ,         16, PSO_LIMR, 0 },
+  { (uint8_t *)STRING_LIMIT_DEPTH_EQ,             12, PSO_LIMD, 0 },
+  { (uint8_t *)STRING_LIMIT_RECURSION_EQ,         16, PSO_LIMD, 0 },
   { (uint8_t *)STRING_CR_RIGHTPAR,                 3, PSO_NL,  PCRE2_NEWLINE_CR },
   { (uint8_t *)STRING_LF_RIGHTPAR,                 3, PSO_NL,  PCRE2_NEWLINE_LF },
   { (uint8_t *)STRING_CRLF_RIGHTPAR,               5, PSO_NL,  PCRE2_NEWLINE_CRLF },
@@ -8823,7 +8824,7 @@ uint32_t setflags = 0;                /* NL and BSR set flags */
 
 uint32_t skipatstart;                 /* When checking (*UTF) etc */
 uint32_t limit_match = UINT32_MAX;    /* Unset match limits */
-uint32_t limit_recursion = UINT32_MAX;
+uint32_t limit_depth = UINT32_MAX;
 
 int newline = 0;                      /* Unset; can be set by the pattern */
 int bsr = 0;                          /* Unset; can be set by the pattern */
@@ -8994,7 +8995,7 @@ while (patlen - skipatstart >= 2 &&
         break;
 
         case PSO_LIMM:
-        case PSO_LIMR:
+        case PSO_LIMD:
         c = 0;
         pp = skipatstart;
         if (!IS_DIGIT(ptr[pp]))
@@ -9015,7 +9016,7 @@ while (patlen - skipatstart >= 2 &&
           goto HAD_EARLY_ERROR;
           }
         if (p->type == PSO_LIMM) limit_match = c;
-          else limit_recursion = c;
+          else limit_depth = c;
         skipatstart += pp - skipatstart;
         break;
         }
@@ -9258,7 +9259,7 @@ re->compile_options = options;
 re->overall_options = cb.external_options;
 re->flags = PCRE2_CODE_UNIT_WIDTH/8 | cb.external_flags | setflags;
 re->limit_match = limit_match;
-re->limit_recursion = limit_recursion;
+re->limit_depth = limit_depth;
 re->first_codeunit = 0;
 re->last_codeunit = 0;
 re->bsr_convention = bsr;

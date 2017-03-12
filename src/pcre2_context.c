@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-         New API code Copyright (c) 2016 University of Cambridge
+          New API code Copyright (c) 2016-2017 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -169,7 +169,7 @@ const pcre2_match_context PRIV(default_match_context) = {
   NULL,
   PCRE2_UNSET,   /* Offset limit */
   MATCH_LIMIT,
-  MATCH_LIMIT_RECURSION };
+  MATCH_LIMIT_DEPTH };
 
 /* The create function copies the default into the new memory, but must
 override the default memory handling functions if a gcontext was provided. */
@@ -354,16 +354,16 @@ return 0;
 }
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
-pcre2_set_offset_limit(pcre2_match_context *mcontext, PCRE2_SIZE limit)
+pcre2_set_depth_limit(pcre2_match_context *mcontext, uint32_t limit)
 {
-mcontext->offset_limit = limit;
+mcontext->depth_limit = limit;
 return 0;
 }
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
-pcre2_set_recursion_limit(pcre2_match_context *mcontext, uint32_t limit)
+pcre2_set_offset_limit(pcre2_match_context *mcontext, PCRE2_SIZE limit)
 {
-mcontext->recursion_limit = limit;
+mcontext->offset_limit = limit;
 return 0;
 }
 

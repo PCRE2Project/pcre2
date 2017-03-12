@@ -11,7 +11,7 @@ hacked-up (non-) design had also run out of steam.
 
                        Written by Philip Hazel
      Original code Copyright (c) 1997-2012 University of Cambridge
-         Rewritten code Copyright (c) 2016 University of Cambridge
+    Rewritten code Copyright (c) 2016-2017 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -564,6 +564,7 @@ static modstruct modlist[] = {
   { "caseless",                   MOD_PATP, MOD_OPT, PCRE2_CASELESS,             PO(options) },
   { "copy",                       MOD_DAT,  MOD_NN,  DO(copy_numbers),           DO(copy_names) },
   { "debug",                      MOD_PAT,  MOD_CTL, CTL_DEBUG,                  PO(control) },
+  { "depth_limit",                MOD_CTM,  MOD_INT, 0,                          MO(depth_limit) },
   { "dfa",                        MOD_DAT,  MOD_CTL, CTL_DFA,                    DO(control) },
   { "dfa_restart",                MOD_DAT,  MOD_OPT, PCRE2_DFA_RESTART,          DO(options) },
   { "dfa_shortest",               MOD_DAT,  MOD_OPT, PCRE2_DFA_SHORTEST,         DO(options) },
@@ -619,7 +620,7 @@ static modstruct modlist[] = {
   { "push",                       MOD_PAT,  MOD_CTL, CTL_PUSH,                   PO(control) },
   { "pushcopy",                   MOD_PAT,  MOD_CTL, CTL_PUSHCOPY,               PO(control) },
   { "pushtablescopy",             MOD_PAT,  MOD_CTL, CTL_PUSHTABLESCOPY,         PO(control) },
-  { "recursion_limit",            MOD_CTM,  MOD_INT, 0,                          MO(recursion_limit) },
+  { "recursion_limit",            MOD_CTM,  MOD_INT, 0,                          MO(depth_limit) },  /* Obsolete synonym */
   { "regerror_buffsize",          MOD_PAT,  MOD_INT, 0,                          PO(regerror_buffsize) },
   { "replace",                    MOD_PND,  MOD_STR, REPLACE_MODSIZE,            PO(replacement) },
   { "stackguard",                 MOD_PAT,  MOD_INT, 0,                          PO(stackguard_test) },
@@ -1185,6 +1186,14 @@ are supported. */
   else \
     pcre2_set_compile_recursion_guard_32(G(a,32),b,c)
 
+#define PCRE2_SET_DEPTH_LIMIT(a,b) \
+  if (test_mode == PCRE8_MODE) \
+    pcre2_set_depth_limit_8(G(a,8),b); \
+  else if (test_mode == PCRE16_MODE) \
+    pcre2_set_depth_limit_16(G(a,16),b); \
+  else \
+    pcre2_set_depth_limit_32(G(a,32),b)
+
 #define PCRE2_SET_MATCH_LIMIT(a,b) \
   if (test_mode == PCRE8_MODE) \
     pcre2_set_match_limit_8(G(a,8),b); \
@@ -1216,14 +1225,6 @@ are supported. */
     pcre2_set_parens_nest_limit_16(G(a,16),b); \
   else \
     pcre2_set_parens_nest_limit_32(G(a,32),b)
-
-#define PCRE2_SET_RECURSION_LIMIT(a,b) \
-  if (test_mode == PCRE8_MODE) \
-    pcre2_set_recursion_limit_8(G(a,8),b); \
-  else if (test_mode == PCRE16_MODE) \
-    pcre2_set_recursion_limit_16(G(a,16),b); \
-  else \
-    pcre2_set_recursion_limit_32(G(a,32),b)
 
 #define PCRE2_SUBSTITUTE(a,b,c,d,e,f,g,h,i,j,k,l) \
   if (test_mode == PCRE8_MODE) \
@@ -1620,6 +1621,12 @@ the three different cases. */
   else \
     G(pcre2_set_compile_recursion_guard_,BITTWO)(G(a,BITTWO),b,c)
 
+#define PCRE2_SET_DEPTH_LIMIT(a,b) \
+  if (test_mode == G(G(PCRE,BITONE),_MODE)) \
+    G(pcre2_set_depth_limit_,BITONE)(G(a,BITONE),b); \
+  else \
+    G(pcre2_set_depth_limit_,BITTWO)(G(a,BITTWO),b)
+
 #define PCRE2_SET_MATCH_LIMIT(a,b) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
     G(pcre2_set_match_limit_,BITONE)(G(a,BITONE),b); \
@@ -1643,12 +1650,6 @@ the three different cases. */
     G(pcre2_set_parens_nest_limit_,BITONE)(G(a,BITONE),b); \
   else \
     G(pcre2_set_parens_nest_limit_,BITTWO)(G(a,BITTWO),b)
-
-#define PCRE2_SET_RECURSION_LIMIT(a,b) \
-  if (test_mode == G(G(PCRE,BITONE),_MODE)) \
-    G(pcre2_set_recursion_limit_,BITONE)(G(a,BITONE),b); \
-  else \
-    G(pcre2_set_recursion_limit_,BITTWO)(G(a,BITTWO),b)
 
 #define PCRE2_SUBSTITUTE(a,b,c,d,e,f,g,h,i,j,k,l) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
@@ -1838,11 +1839,11 @@ the three different cases. */
 #define PCRE2_SET_CHARACTER_TABLES(a,b) pcre2_set_character_tables_8(G(a,8),b)
 #define PCRE2_SET_COMPILE_RECURSION_GUARD(a,b,c) \
   pcre2_set_compile_recursion_guard_8(G(a,8),b,c)
+#define PCRE2_SET_DEPTH_LIMIT(a,b) pcre2_set_depth_limit_8(G(a,8),b)
 #define PCRE2_SET_MATCH_LIMIT(a,b) pcre2_set_match_limit_8(G(a,8),b)
 #define PCRE2_SET_MAX_PATTERN_LENGTH(a,b) pcre2_set_max_pattern_length_8(G(a,8),b)
 #define PCRE2_SET_OFFSET_LIMIT(a,b) pcre2_set_offset_limit_8(G(a,8),b)
 #define PCRE2_SET_PARENS_NEST_LIMIT(a,b) pcre2_set_parens_nest_limit_8(G(a,8),b)
-#define PCRE2_SET_RECURSION_LIMIT(a,b) pcre2_set_recursion_limit_8(G(a,8),b)
 #define PCRE2_SUBSTITUTE(a,b,c,d,e,f,g,h,i,j,k,l) \
   a = pcre2_substitute_8(G(b,8),(PCRE2_SPTR8)c,d,e,f,G(g,8),G(h,8), \
     (PCRE2_SPTR8)i,j,(PCRE2_UCHAR8 *)k,l)
@@ -1934,11 +1935,11 @@ the three different cases. */
 #define PCRE2_SET_CHARACTER_TABLES(a,b) pcre2_set_character_tables_16(G(a,16),b)
 #define PCRE2_SET_COMPILE_RECURSION_GUARD(a,b,c) \
   pcre2_set_compile_recursion_guard_16(G(a,16),b,c)
+#define PCRE2_SET_DEPTH_LIMIT(a,b) pcre2_set_depth_limit_16(G(a,16),b)
 #define PCRE2_SET_MATCH_LIMIT(a,b) pcre2_set_match_limit_16(G(a,16),b)
 #define PCRE2_SET_MAX_PATTERN_LENGTH(a,b) pcre2_set_max_pattern_length_16(G(a,16),b)
 #define PCRE2_SET_OFFSET_LIMIT(a,b) pcre2_set_offset_limit_16(G(a,16),b)
 #define PCRE2_SET_PARENS_NEST_LIMIT(a,b) pcre2_set_parens_nest_limit_16(G(a,16),b)
-#define PCRE2_SET_RECURSION_LIMIT(a,b) pcre2_set_recursion_limit_16(G(a,16),b)
 #define PCRE2_SUBSTITUTE(a,b,c,d,e,f,g,h,i,j,k,l) \
   a = pcre2_substitute_16(G(b,16),(PCRE2_SPTR16)c,d,e,f,G(g,16),G(h,16), \
     (PCRE2_SPTR16)i,j,(PCRE2_UCHAR16 *)k,l)
@@ -2030,11 +2031,11 @@ the three different cases. */
 #define PCRE2_SET_CHARACTER_TABLES(a,b) pcre2_set_character_tables_32(G(a,32),b)
 #define PCRE2_SET_COMPILE_RECURSION_GUARD(a,b,c) \
   pcre2_set_compile_recursion_guard_32(G(a,32),b,c)
+#define PCRE2_SET_DEPTH_LIMIT(a,b) pcre2_set_depth_limit_32(G(a,32),b)
 #define PCRE2_SET_MATCH_LIMIT(a,b) pcre2_set_match_limit_32(G(a,32),b)
 #define PCRE2_SET_MAX_PATTERN_LENGTH(a,b) pcre2_set_max_pattern_length_32(G(a,32),b)
 #define PCRE2_SET_OFFSET_LIMIT(a,b) pcre2_set_offset_limit_32(G(a,32),b)
 #define PCRE2_SET_PARENS_NEST_LIMIT(a,b) pcre2_set_parens_nest_limit_32(G(a,32),b)
-#define PCRE2_SET_RECURSION_LIMIT(a,b) pcre2_set_recursion_limit_32(G(a,32),b)
 #define PCRE2_SUBSTITUTE(a,b,c,d,e,f,g,h,i,j,k,l) \
   a = pcre2_substitute_32(G(b,32),(PCRE2_SPTR32)c,d,e,f,G(g,32),G(h,32), \
     (PCRE2_SPTR32)i,j,(PCRE2_UCHAR32 *)k,l)
@@ -3937,11 +3938,11 @@ if ((pat_patctl.control & CTL_INFO) != 0)
   {
   void *nametable;
   uint8_t *start_bits;
-  BOOL match_limit_set, recursion_limit_set;
+  BOOL match_limit_set, depth_limit_set;
   uint32_t backrefmax, bsr_convention, capture_count, first_ctype, first_cunit,
     hasbackslashc, hascrorlf, jchanged, last_ctype, last_cunit, match_empty,
     match_limit, minlength, nameentrysize, namecount, newline_convention,
-    recursion_limit;
+    depth_limit;
 
   /* These info requests may return PCRE2_ERROR_UNSET. */
 
@@ -3959,14 +3960,14 @@ if ((pat_patctl.control & CTL_INFO) != 0)
     return PR_ABEND;
     }
 
-  switch(pattern_info(PCRE2_INFO_RECURSIONLIMIT, &recursion_limit, TRUE))
+  switch(pattern_info(PCRE2_INFO_DEPTHLIMIT, &depth_limit, TRUE))
     {
     case 0:
-    recursion_limit_set = TRUE;
+    depth_limit_set = TRUE;
     break;
 
     case PCRE2_ERROR_UNSET:
-    recursion_limit_set = FALSE;
+    depth_limit_set = FALSE;
     break;
 
     default:
@@ -4006,8 +4007,8 @@ if ((pat_patctl.control & CTL_INFO) != 0)
   if (match_limit_set)
     fprintf(outfile, "Match limit = %u\n", match_limit);
 
-  if (recursion_limit_set)
-    fprintf(outfile, "Recursion limit = %u\n", recursion_limit);
+  if (depth_limit_set)
+    fprintf(outfile, "Depth limit = %u\n", depth_limit);
 
   if (namecount > 0)
     {
@@ -5228,7 +5229,7 @@ return PR_OK;
 
 
 /*************************************************
-*        Check match or recursion limit          *
+*          Check match or depth limit            *
 *************************************************/
 
 static int
@@ -5240,7 +5241,7 @@ uint32_t mid = 64;
 uint32_t max = UINT32_MAX;
 
 PCRE2_SET_MATCH_LIMIT(dat_context, max);
-PCRE2_SET_RECURSION_LIMIT(dat_context, max);
+PCRE2_SET_DEPTH_LIMIT(dat_context, max);
 
 for (;;)
   {
@@ -5250,7 +5251,7 @@ for (;;)
     }
   else
     {
-    PCRE2_SET_RECURSION_LIMIT(dat_context, mid);
+    PCRE2_SET_DEPTH_LIMIT(dat_context, mid);
     }
 
   if ((pat_patctl.control & CTL_JITFAST) != 0)
@@ -6547,15 +6548,15 @@ else for (gmatched = 0;; gmatched++)
         (double)CLOCKS_PER_SEC);
     }
 
-  /* Find the match and recursion limits if requested. The recursion limit
+  /* Find the match and depth limits if requested. The depth limit
   is not relevant for JIT. */
 
   if ((dat_datctl.control & CTL_FINDLIMITS) != 0)
     {
     capcount = check_match_limit(pp, ulen, PCRE2_ERROR_MATCHLIMIT, "match");
     if (FLD(compiled_code, executable_jit) == NULL)
-      (void)check_match_limit(pp, ulen, PCRE2_ERROR_RECURSIONLIMIT,
-        "recursion");
+      (void)check_match_limit(pp, ulen, PCRE2_ERROR_DEPTHLIMIT,
+        "depth");
     }
 
   /* Otherwise just run a single match, setting up a callout if required (the
@@ -7285,8 +7286,8 @@ printf("  Internal link size = %d\n", optval);
 printf("  Parentheses nest limit = %d\n", optval);
 (void)PCRE2_CONFIG(PCRE2_CONFIG_MATCHLIMIT, &optval);
 printf("  Default match limit = %d\n", optval);
-(void)PCRE2_CONFIG(PCRE2_CONFIG_RECURSIONLIMIT, &optval);
-printf("  Default recursion depth limit = %d\n", optval);
+(void)PCRE2_CONFIG(PCRE2_CONFIG_DEPTHLIMIT, &optval);
+printf("  Default depth limit = %d\n", optval);
 return 0;
 }
 

@@ -43,14 +43,14 @@
 
 /(*LIMIT_MATCH=4294967290)abc/
 
-/(*LIMIT_RECURSION=4294967280)abc/I
+/(*LIMIT_DEPTH=4294967280)abc/I
 
 /(a+)*zz/
     aaaaaaaaaaaaaz
     aaaaaaaaaaaaaz\=match_limit=3000
 
 /(a+)*zz/
-    aaaaaaaaaaaaaz\=recursion_limit=10
+    aaaaaaaaaaaaaz\=depth_limit=10
 
 /(*LIMIT_MATCH=3000)(a+)*zz/I
     aaaaaaaaaaaaaz
@@ -63,16 +63,16 @@
     aaaaaaaaaaaaaz
     aaaaaaaaaaaaaz\=match_limit=3000
 
-/(*LIMIT_RECURSION=10)(a+)*zz/I
+/(*LIMIT_DEPTH=10)(a+)*zz/I
     aaaaaaaaaaaaaz
-    aaaaaaaaaaaaaz\=recursion_limit=1000
+    aaaaaaaaaaaaaz\=depth_limit=1000
 
-/(*LIMIT_RECURSION=10)(*LIMIT_RECURSION=1000)(a+)*zz/I
+/(*LIMIT_DEPTH=10)(*LIMIT_DEPTH=1000)(a+)*zz/I
     aaaaaaaaaaaaaz
 
-/(*LIMIT_RECURSION=1000)(a+)*zz/I
+/(*LIMIT_DEPTH=1000)(a+)*zz/I
     aaaaaaaaaaaaaz
-    aaaaaaaaaaaaaz\=recursion_limit=10
+    aaaaaaaaaaaaaz\=depth_limit=10
     
 # These three have infinitely nested recursions. 
     

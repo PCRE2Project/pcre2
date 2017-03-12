@@ -152,12 +152,13 @@ sure both macros are undefined; an emulation function will then be used. */
 
 /* The above limit applies to all backtracks, whether or not they are nested.
    In some environments it is desirable to limit the nesting of backtracking
-   more strictly, in order to restrict the maximum amount of heap memory that
-   is used. The value of MATCH_LIMIT_RECURSION provides this facility. To have
-   any useful effect, it must be less than the value of MATCH_LIMIT. The
-   default is to use the same value as MATCH_LIMIT. There is a runtime method
-   for setting a different limit. */
-#undef MATCH_LIMIT_RECURSION
+   (that is, the depth of tree that is searched) more strictly, in order to
+   restrict the maximum amount of heap memory that is used. The value of
+   MATCH_LIMIT_DEPTH provides this facility. To have any useful effect, it
+   must be less than the value of MATCH_LIMIT. The default is to use the same
+   value as MATCH_LIMIT. There is a runtime method for setting a different
+   limit. */
+#undef MATCH_LIMIT_DEPTH
 
 /* This limit is parameterized just in case anybody ever wants to change it.
    Care must be taken if it is increased, because it guards against integer

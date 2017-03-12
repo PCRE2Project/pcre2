@@ -548,7 +548,7 @@ Returns:        MATCH_MATCH if matched            )  these values are >= 0
                 MATCH_NOMATCH if failed to match  )
                 negative MATCH_xxx value for PRUNE, SKIP, etc
                 negative PCRE2_ERROR_xxx value if aborted by an error condition
-                (e.g. stopped by repeated call or recursion limit)
+                (e.g. stopped by repeated call or depth limit)
 */
 
 static int
@@ -708,7 +708,7 @@ recursive depth limit (used too many backtracking frames). If not, process the
 opcodes. */
 
 if (mb->match_call_count++ >= mb->match_limit) return PCRE2_ERROR_MATCHLIMIT;
-if (Frdepth >= mb->match_limit_recursion) return PCRE2_ERROR_RECURSIONLIMIT;
+if (Frdepth >= mb->match_limit_depth) return PCRE2_ERROR_DEPTHLIMIT;
 
 for (;;)
   {
@@ -6272,9 +6272,9 @@ memset((char *)(mb->match_frames) + offsetof(heapframe, ovector), 0xff,
 smaller. */
 
 mb->match_limit = (mcontext->match_limit < re->limit_match)?
-                  mcontext->match_limit : re->limit_match;
-mb->match_limit_recursion = (mcontext->recursion_limit < re->limit_recursion)?
-                            mcontext->recursion_limit : re->limit_recursion;
+  mcontext->match_limit : re->limit_match;
+mb->match_limit_depth = (mcontext->depth_limit < re->limit_depth)?
+  mcontext->depth_limit : re->limit_depth;
 
 /* Pointers to the individual character tables */
 

@@ -586,7 +586,7 @@ typedef struct pcre2_real_match_context {
   void    *callout_data;
   PCRE2_SIZE offset_limit;
   uint32_t match_limit;
-  uint32_t recursion_limit;
+  uint32_t depth_limit;
 } pcre2_real_match_context;
 
 /* The real compiled code structure. The type for the blocksize field is
@@ -615,7 +615,7 @@ typedef struct pcre2_real_code {
   uint32_t overall_options;       /* Options after processing the pattern */
   uint32_t flags;                 /* Various state flags */
   uint32_t limit_match;           /* Limit set in the pattern */
-  uint32_t limit_recursion;       /* Limit set in the pattern */
+  uint32_t limit_depth;           /* Limit set in the pattern */
   uint32_t first_codeunit;        /* Starting code unit */
   uint32_t last_codeunit;         /* This codeunit must be seen */
   uint16_t bsr_convention;        /* What \R matches */
@@ -810,7 +810,7 @@ typedef struct match_block {
   heapframe *stack_frames;        /* The original vector on the stack */ 
   uint32_t match_call_count;      /* Number of times a new frame is created */
   uint32_t match_limit;           /* As it says */
-  uint32_t match_limit_recursion; /* As it says */
+  uint32_t match_limit_depth;     /* As it says */
   BOOL hitend;                    /* Hit the end of the subject at some point */
   BOOL hasthen;                   /* Pattern contains (*THEN) */
   const uint8_t *lcc;             /* Points to lower casing table */
@@ -856,7 +856,7 @@ typedef struct dfa_match_block {
   PCRE2_SPTR last_used_ptr;       /* Latest consulted character */
   const uint8_t *tables;          /* Character tables */
   PCRE2_SIZE start_offset;        /* The start offset value */
-  uint32_t match_limit_recursion; /* As it says */
+  uint32_t match_limit_depth;     /* As it says */
   uint32_t moptions;              /* Match options */
   uint32_t poptions;              /* Pattern options */
   uint32_t nltype;                /* Newline type */
