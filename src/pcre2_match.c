@@ -5428,7 +5428,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
     /* No UTF-8 support, or not in UTF-8 mode: count is byte count */
 
       {
-      if (number > Feptr - mb->start_subject) RRETURN(MATCH_NOMATCH);
+      if ((ptrdiff_t)number > Feptr - mb->start_subject) RRETURN(MATCH_NOMATCH);
       Feptr -= number;
       }
 
