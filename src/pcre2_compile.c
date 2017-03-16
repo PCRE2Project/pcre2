@@ -8090,6 +8090,10 @@ the end of the branch, it is called to skip over an internal lookaround, and it
 is also called to skip to the end of a class, during which it will never
 encounter nested groups (but there's no need to have special code for that).
 
+When called to find the end of a branch or group, pptr must point to the first
+meta code inside the branch, not the branch-starting code. In other cases it
+can point to the item that causes the function to be called.
+
 Arguments:
   pptr       current pointer to skip from
   skiptype   PSKIP_CLASS when skipping to end of class
@@ -8106,10 +8110,10 @@ parsed_skip(uint32_t *pptr, uint32_t skiptype)
 {
 uint32_t nestlevel = 0;
 
-for (pptr += 1;; pptr++)
+for (;; pptr++)
   {
   uint32_t meta = META_CODE(*pptr);
-
+  
   switch(meta)
     {
     default:  /* Just skip over most items */
@@ -8201,11 +8205,12 @@ return pptr;
 /* This is called for nested groups within a branch of a lookbehind whose
 length is being computed. If all the branches in the nested group have the same
 length, that is OK. On entry, the pointer must be at the first element after
-the group initializing code. Caching is used to improve processing speed when
-the same capturing group occurs many times.
+the group initializing code. On exit it points to OP_KET. Caching is used to
+improve processing speed when the same capturing group occurs many times.
 
 Arguments:
   pptrptr     pointer to pointer in the parsed pattern
+  isinline    FALSE if a reference or recursion; TRUE for inline group
   errcodeptr  pointer to the errorcode
   lcptr       pointer to the loop counter
   group       number of captured group or -1 for a non-capturing group
@@ -8216,27 +8221,29 @@ Returns:      the group length or a negative number
 */
 
 static int
-get_grouplength(uint32_t **pptrptr, int *errcodeptr, int *lcptr,
+get_grouplength(uint32_t **pptrptr, BOOL isinline, int *errcodeptr, int *lcptr,
   int group, parsed_recurse_check *recurses, compile_block *cb)
 {
 int branchlength;
 int grouplength = -1;
 
 /* The cache can be used only if there is no possibility of there being two
-groups with the same number. */
+groups with the same number. We do not need to set the end pointer for a group 
+that is being processed as a back reference or recursion, but we must do so for 
+an inline group. */
 
-if (group > 0)
+if (group > 0 && (cb->external_flags & PCRE2_DUPCAPUSED) == 0)
   {
   uint32_t groupinfo = cb->groupinfo[group];
-  if ((cb->external_flags & PCRE2_DUPCAPUSED) == 0)
+  if ((groupinfo & GI_NOT_FIXED_LENGTH) != 0) return -1;
+  if ((groupinfo & GI_SET_FIXED_LENGTH) != 0)
     {
-    if ((groupinfo & GI_NOT_FIXED_LENGTH) != 0) return -1;
-    if ((groupinfo & GI_SET_FIXED_LENGTH) != 0)
-      return groupinfo & GI_FIXED_LENGTH_MASK;
+    if (isinline) *pptrptr = parsed_skip(*pptrptr, PSKIP_KET);
+    return groupinfo & GI_FIXED_LENGTH_MASK;
     }
   }
 
-/* Scan the group */
+/* Scan the group. In this case we find the end pointer of necessity. */
 
 for(;;)
   {
@@ -8394,11 +8401,12 @@ for (;; pptr++)
       }
     break;
 
-    /* Lookaheads can be ignored. */
+    /* Lookaheads can be ignored, but we must start the skip inside the group 
+    so that it isn't treated as a group within the branch. */
 
     case META_LOOKAHEAD:
     case META_LOOKAHEADNOT:
-    pptr = parsed_skip(pptr, PSKIP_KET);
+    pptr = parsed_skip(pptr + 1, PSKIP_KET);
     if (pptr == NULL) goto PARSED_SKIP_FAILED;
     break;
 
@@ -8496,15 +8504,24 @@ for (;; pptr++)
         else if (*gptr == (META_CAPTURE | group)) break;
       }
 
-    gptrend = parsed_skip(gptr, PSKIP_KET);
+    /* We must start the search for the end of the group at the first meta code 
+    inside the group. Otherwise it will be treated as an enclosed group. */
+
+    gptrend = parsed_skip(gptr + 1, PSKIP_KET);
     if (gptrend == NULL) goto PARSED_SKIP_FAILED;
     if (pptr > gptr && pptr < gptrend) goto ISNOTFIXED;  /* Local recursion */
     for (r = recurses; r != NULL; r = r->prev) if (r->groupptr == gptr) break;
     if (r != NULL) goto ISNOTFIXED;   /* Mutual recursion */
     this_recurse.prev = recurses;
     this_recurse.groupptr = gptr;
+    
+    /* We do not need to know the position of the end of the group, that is,
+    gptr is not used after the call to get_grouplength(). Setting the second 
+    argument FALSE stops it scanning for the end when the length can be found 
+    in the cache. */ 
+     
     gptr++;
-    grouplength = get_grouplength(&gptr, errcodeptr, lcptr, group,
+    grouplength = get_grouplength(&gptr, FALSE, errcodeptr, lcptr, group,
       &this_recurse, cb);
     if (grouplength < 0)
       {
@@ -8541,7 +8558,8 @@ for (;; pptr++)
     case META_NOCAPTURE:
     pptr++;
     CHECK_GROUP:
-    grouplength = get_grouplength(&pptr, errcodeptr, lcptr, group, recurses, cb);
+    grouplength = get_grouplength(&pptr, TRUE, errcodeptr, lcptr, group, 
+      recurses, cb);
     if (grouplength < 0) return -1;
     itemlength = grouplength;
     break;

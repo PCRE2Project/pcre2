@@ -46,6 +46,12 @@ available for backwards compatibility.
 for a character with a code point greater than 0x10ffff (the Unicode maximum)
 caused a crash.
 
+5. If a lookbehind assertion that contained a back reference to a group 
+appearing later in the pattern was compiled with the PCRE2_ANCHORED option,
+undefined actions (often a segmentation fault) could occur, depending on what 
+other options were set. An example assertion is (?<!\1(abc)) where the 
+reference \1 precedes the group (abc). This fixes oss-fuzz issue 865.
+
 
 Version 10.23 14-February-2017
 ------------------------------

@@ -5015,4 +5015,6 @@ a)"xI
 /\[(a)]{60}/expand
     aaaa
 
+/(?<!\1((?U)1((?U))))(*F)/never_backslash_c,alt_bsux,anchored,extended
+
 # End of testinput2 
