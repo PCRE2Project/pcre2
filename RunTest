@@ -463,7 +463,7 @@ for bmode in "$test8" "$test16" "$test32"; do
 
   if [ $do0 = yes ] ; then
     echo $title0
-    echo '/abc/jit,memory' >testSinput
+    echo '/abc/jit,memory,framesize' >testSinput
     echo '   abc' >>testSinput
     echo '' >testtry
     checkspecial '-C'

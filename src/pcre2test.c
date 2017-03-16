@@ -422,25 +422,26 @@ so many of them that they are split into two fields. */
 #define CTL_DFA                          0x00000200u
 #define CTL_EXPAND                       0x00000400u
 #define CTL_FINDLIMITS                   0x00000800u
-#define CTL_FULLBINCODE                  0x00001000u
-#define CTL_GETALL                       0x00002000u
-#define CTL_GLOBAL                       0x00004000u
-#define CTL_HEXPAT                       0x00008000u  /* Same word as USE_LENGTH */
-#define CTL_INFO                         0x00010000u
-#define CTL_JITFAST                      0x00020000u
-#define CTL_JITVERIFY                    0x00040000u
-#define CTL_MARK                         0x00080000u
-#define CTL_MEMORY                       0x00100000u
-#define CTL_NULLCONTEXT                  0x00200000u
-#define CTL_POSIX                        0x00400000u
-#define CTL_POSIX_NOSUB                  0x00800000u
-#define CTL_PUSH                         0x01000000u  /* These three must be */
-#define CTL_PUSHCOPY                     0x02000000u  /*   all in the same */
-#define CTL_PUSHTABLESCOPY               0x04000000u  /*     word. */
-#define CTL_STARTCHAR                    0x08000000u
-#define CTL_USE_LENGTH                   0x10000000u  /* Same word as HEXPAT */
-#define CTL_UTF8_INPUT                   0x20000000u
-#define CTL_ZERO_TERMINATE               0x40000000u
+#define CTL_FRAMESIZE                    0x00001000u
+#define CTL_FULLBINCODE                  0x00002000u
+#define CTL_GETALL                       0x00004000u
+#define CTL_GLOBAL                       0x00008000u
+#define CTL_HEXPAT                       0x00010000u  /* Same word as USE_LENGTH */
+#define CTL_INFO                         0x00020000u
+#define CTL_JITFAST                      0x00040000u
+#define CTL_JITVERIFY                    0x00080000u
+#define CTL_MARK                         0x00100000u
+#define CTL_MEMORY                       0x00200000u
+#define CTL_NULLCONTEXT                  0x00400000u
+#define CTL_POSIX                        0x00800000u
+#define CTL_POSIX_NOSUB                  0x01000000u
+#define CTL_PUSH                         0x02000000u  /* These three must be */
+#define CTL_PUSHCOPY                     0x04000000u  /*   all in the same */
+#define CTL_PUSHTABLESCOPY               0x08000000u  /*     word. */
+#define CTL_STARTCHAR                    0x10000000u
+#define CTL_USE_LENGTH                   0x20000000u  /* Same word as HEXPAT */
+#define CTL_UTF8_INPUT                   0x40000000u
+#define CTL_ZERO_TERMINATE               0x80000000u
 
 /* Second control word */
 
@@ -466,6 +467,7 @@ data line. */
                     CTL_ALLCAPTURES|\
                     CTL_ALLUSEDTEXT|\
                     CTL_ALTGLOBAL|\
+                    CTL_FRAMESIZE|\
                     CTL_GLOBAL|\
                     CTL_MARK|\
                     CTL_MEMORY|\
@@ -575,6 +577,7 @@ static modstruct modlist[] = {
   { "extended",                   MOD_PATP, MOD_OPT, PCRE2_EXTENDED,             PO(options) },
   { "find_limits",                MOD_DAT,  MOD_CTL, CTL_FINDLIMITS,             DO(control) },
   { "firstline",                  MOD_PAT,  MOD_OPT, PCRE2_FIRSTLINE,            PO(options) },
+  { "framesize",                  MOD_PD,   MOD_CTL, CTL_FRAMESIZE,              PD(control) },
   { "fullbincode",                MOD_PAT,  MOD_CTL, CTL_FULLBINCODE,            PO(control) },
   { "get",                        MOD_DAT,  MOD_NN,  DO(get_numbers),            DO(get_names) },
   { "getall",                     MOD_DAT,  MOD_CTL, CTL_GETALL,                 DO(control) },
@@ -663,8 +666,8 @@ static modstruct modlist[] = {
 
 #define PUSH_SUPPORTED_COMPILE_CONTROLS ( \
   CTL_BINCODE|CTL_CALLOUT_INFO|CTL_FULLBINCODE|CTL_HEXPAT|CTL_INFO| \
-  CTL_JITVERIFY|CTL_MEMORY|CTL_PUSH|CTL_PUSHCOPY|CTL_PUSHTABLESCOPY| \
-  CTL_USE_LENGTH)
+  CTL_JITVERIFY|CTL_MEMORY|CTL_FRAMESIZE|CTL_PUSH|CTL_PUSHCOPY| \
+  CTL_PUSHTABLESCOPY|CTL_USE_LENGTH)
 
 #define PUSH_SUPPORTED_COMPILE_CONTROLS2 (CTL_BSR_SET|CTL_NL_SET)
 
@@ -1366,7 +1369,7 @@ are supported. */
   (test_mode == PCRE8_MODE && G(x,8)->f r (y)) || \
   (test_mode == PCRE16_MODE && G(x,16)->f r (y)) || \
   (test_mode == PCRE32_MODE && G(x,32)->f r (y)))
-  
+
 
 /* ----- Two out of three modes are supported ----- */
 
@@ -1775,7 +1778,7 @@ the three different cases. */
 #define TESTFLD(x,f,r,y) ( \
   (test_mode == G(G(PCRE,BITONE),_MODE) && G(x,BITONE)->f r (y)) || \
   (test_mode == G(G(PCRE,BITTWO),_MODE) && G(x,BITTWO)->f r (y)))
-  
+
 
 #endif  /* Two out of three modes */
 
@@ -3701,7 +3704,7 @@ Returns:      nothing
 static void
 show_controls(uint32_t controls, uint32_t controls2, const char *before)
 {
-fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
+fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
   before,
   ((controls & CTL_AFTERTEXT) != 0)? " aftertext" : "",
   ((controls & CTL_ALLAFTERTEXT) != 0)? " allaftertext" : "",
@@ -3716,6 +3719,7 @@ fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s
   ((controls & CTL_DFA) != 0)? " dfa" : "",
   ((controls & CTL_EXPAND) != 0)? " expand" : "",
   ((controls & CTL_FINDLIMITS) != 0)? " find_limits" : "",
+  ((controls & CTL_FRAMESIZE) != 0)? " framesize" : "",
   ((controls & CTL_FULLBINCODE) != 0)? " fullbincode" : "",
   ((controls & CTL_GETALL) != 0)? " getall" : "",
   ((controls & CTL_GLOBAL) != 0)? " global" : "",
@@ -3855,6 +3859,20 @@ if (pat_patctl.jit != 0)
   (void)pattern_info(PCRE2_INFO_JITSIZE, &size, FALSE);
   fprintf(outfile, "Memory allocation (JIT code): %d\n", (int)size);
   }
+}
+
+
+
+/*************************************************
+*       Show frame size info for a pattern       *
+*************************************************/
+
+static void
+show_framesize(void)
+{
+size_t frame_size;
+(void)pattern_info(PCRE2_INFO_FRAMESIZE, &frame_size, FALSE);
+fprintf(outfile, "Frame size for pcre2_match(): %d\n", (int)frame_size);
 }
 
 
@@ -4414,6 +4432,7 @@ switch(cmd)
     PCRE2_JIT_COMPILE(jitrc, compiled_code, pat_patctl.jit);
     }
   if ((pat_patctl.control & CTL_MEMORY) != 0) show_memory_info();
+  if ((pat_patctl.control & CTL_FRAMESIZE) != 0) show_framesize();
   if ((pat_patctl.control & CTL_ANYINFO) != 0)
     {
     rc = show_pattern_info();
@@ -5182,6 +5201,7 @@ if ((pat_patctl.control2 & CTL_NL_SET) != 0)
 /* Output code size and other information if requested. */
 
 if ((pat_patctl.control & CTL_MEMORY) != 0) show_memory_info();
+if ((pat_patctl.control & CTL_FRAMESIZE) != 0) show_framesize();
 if ((pat_patctl.control & CTL_ANYINFO) != 0)
   {
   int rc = show_pattern_info();
@@ -6149,16 +6169,16 @@ if ((pat_patctl.control & CTL_POSIX) != 0)
   if (msg[0] == 0) fprintf(outfile, "\n");
 
   if (dat_datctl.oveccount > 0)
-    { 
+    {
     pmatch = (regmatch_t *)malloc(sizeof(regmatch_t) * dat_datctl.oveccount);
     if (pmatch == NULL)
       {
       fprintf(outfile, "** Failed to get memory for recording matching "
         "information (size set = %du)\n", dat_datctl.oveccount);
-      return PR_OK;     
-      }     
-    }   
- 
+      return PR_OK;
+      }
+    }
+
   if ((dat_datctl.options & PCRE2_NOTBOL) != 0) eflags |= REG_NOTBOL;
   if ((dat_datctl.options & PCRE2_NOTEOL) != 0) eflags |= REG_NOTEOL;
   if ((dat_datctl.options & PCRE2_NOTEMPTY) != 0) eflags |= REG_NOTEMPTY;
@@ -6298,9 +6318,9 @@ if (CASTVAR(void *, match_data) == NULL)
   {
   fprintf(outfile, "** Failed to get memory for recording matching "
     "information (size requested: %d)\n", dat_datctl.oveccount);
-  max_oveccount = 0;   
-  return PR_OK;     
-  }     
+  max_oveccount = 0;
+  return PR_OK;
+  }
 
 /* Replacement processing is ignored for DFA matching. */
 

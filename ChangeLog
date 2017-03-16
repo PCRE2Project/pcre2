@@ -52,6 +52,10 @@ undefined actions (often a segmentation fault) could occur, depending on what
 other options were set. An example assertion is (?<!\1(abc)) where the 
 reference \1 precedes the group (abc). This fixes oss-fuzz issue 865.
 
+6. Added the PCRE2_INFO_FRAMESIZE item to pcre2_pattern_info() and arranged for 
+pcre2test to use it to output the frame size when the "framesize" modifier is
+given.
+
 
 Version 10.23 14-February-2017
 ------------------------------

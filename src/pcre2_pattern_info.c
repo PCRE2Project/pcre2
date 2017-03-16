@@ -97,6 +97,7 @@ if (where == NULL)   /* Requests field length */
 
     case PCRE2_INFO_JITSIZE:
     case PCRE2_INFO_SIZE:
+    case PCRE2_INFO_FRAMESIZE:
     return sizeof(size_t);
 
     case PCRE2_INFO_NAMETABLE:
@@ -155,6 +156,11 @@ switch(what)
   case PCRE2_INFO_FIRSTBITMAP:
   *((const uint8_t **)where) = ((re->flags & PCRE2_FIRSTMAPSET) != 0)?
     &(re->start_bitmap[0]) : NULL;
+  break;
+
+  case PCRE2_INFO_FRAMESIZE:
+  *((size_t *)where) = sizeof(heapframe) +
+    ((re->top_bracket - 1) * 2 * sizeof(PCRE2_SIZE));
   break;
 
   case PCRE2_INFO_HASBACKSLASHC:
