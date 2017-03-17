@@ -88,10 +88,10 @@ I had a flash of inspiration as to how I could run the real compile function in
 a "fake" mode that enables it to compute how much memory it would need, while
 in most cases only ever using a small amount of working memory, and without too
 many tests of the mode that might slow it down. So I refactored the compiling
-functions to work this way. This got rid of about 600 lines of source. It
-should make future maintenance and development easier. As this was such a major
-change, I never released 6.8, instead upping the number to 7.0 (other quite
-major changes were also present in the 7.0 release).
+functions to work this way. This got rid of about 600 lines of source and made
+further maintenance and development easier. As this was such a major change, I
+never released 6.8, instead upping the number to 7.0 (other quite major changes
+were also present in the 7.0 release).
 
 A side effect of this work was that the previous limit of 200 on the nesting
 depth of parentheses was removed. However, there was a downside: compiling ran
@@ -122,7 +122,7 @@ all the named subpatterns and their corresponding group numbers. This means
 that the actual compile (both the memory-computing dummy run and the real
 compile) has full knowledge of group names and numbers throughout. Several
 dozen lines of messy code were eliminated, though the new pre-pass was not
-short. In particular, parsing and skipping over [] classes is complicated.
+short. In particular, parsing and skipping over [] classes was complicated.
 
 While working on 10.22 I realized that I could simplify yet again by moving
 more of the parsing into the pre-pass, thus avoiding doing it in two places, so
@@ -162,7 +162,7 @@ simpler than before.
 Most errors can be diagnosed during the parsing scan. For those that cannot
 (for example, "lookbehind assertion is not fixed length"), the parsed code
 contains offsets into the pattern so that the actual compiling code can
-identify where errors occur.
+report where errors are.
 
 
 The elements of the parsed pattern vector
@@ -217,10 +217,10 @@ The following have data in the lower 16 bits, and may be followed by other data
 elements:
 
 META_ALT              | alternation
-META_BACKREF
-META_CAPTURE
-META_ESCAPE
-META_RECURSE
+META_BACKREF          back reference
+META_CAPTURE          start of capturing group
+META_ESCAPE           non-literal escape sequence
+META_RECURSE          recursion call
 
 If the data for META_ALT is non-zero, it is inside a lookbehind, and the data
 is the length of its branch, for which OP_REVERSE must be generated.
@@ -232,8 +232,8 @@ META_BACKREF is followed by an offset if the back reference group number is 10
 or more. The offsets of the first ocurrences of references to groups whose
 numbers are less than 10 are put in cb->small_ref_offset[] (only the first
 occurrence is useful). On 64-bit systems this avoids using more than two parsed
-pattern elements for items such as \3. The offset is used when an error is
-given for a reference to a non-existent group.
+pattern elements for items such as \3. The offset is used when an error occurs
+because the reference is to a non-existent group.
 
 META_RECURSE is always followed by an offset, for use in error messages.
 
@@ -286,7 +286,7 @@ group; this is used when generating OP_REVERSE for that branch.
 META_LOOKBEHIND       (?<=
 META_LOOKBEHINDNOT    (?<!
 
-The following are followed by two values, the minimum and maximum. Repeat
+The following are followed by two elements, the minimum and maximum. Repeat
 values are limited to 65535 (MAX_REPEAT). A maximum value of "unlimited" is
 represented by UNLIMITED_REPEAT, which is bigger than MAX_REPEAT:
 
@@ -369,7 +369,7 @@ unit, the most significant unit is first.
 
 In this description, we assume the "normal" compilation options. Data values
 that are counts (e.g. quantifiers) are always two bytes long in 8-bit mode
-(most significant byte first), or one code unit in 16-bit and 32-bit modes.
+(most significant byte first), and one code unit in 16-bit and 32-bit modes.
 
 
 Opcodes with no following data
@@ -409,7 +409,7 @@ These items are all just one unit long
   OP_ACCEPT              ) These are Perl 5.10's "backtracking control
   OP_COMMIT              ) verbs". If OP_ACCEPT is inside capturing
   OP_FAIL                ) parentheses, it may be preceded by one or more
-  OP_PRUNE               ) OP_CLOSE, each followed by a count that
+  OP_PRUNE               ) OP_CLOSE, each followed by a number that
   OP_SKIP                ) indicates which parentheses must be closed.
   OP_THEN                )
 
@@ -679,7 +679,7 @@ Once-only (atomic) groups
 
 These are just like other subpatterns, but they start with the opcode OP_ONCE.
 The check for matching an empty string in an unbounded repeat is handled
-entirely at runtime, so there are just this one opcode for atomic groups.
+entirely at runtime, so there is just this one opcode for atomic groups.
 
 
 Assertions
@@ -742,14 +742,21 @@ Recursion
 Recursion either matches the current pattern, or some subexpression. The opcode
 OP_RECURSE is followed by a LINK_SIZE value that is the offset to the starting
 bracket from the start of the whole pattern. OP_RECURSE is also used for
-"subroutine" calls, even though they are not strictly a recursion. Repeated
-recursions are automatically wrapped inside OP_ONCE brackets, because otherwise
-some patterns broke them. A non-repeated recursion is not wrapped in OP_ONCE
-brackets, but it is nevertheless still treated as an atomic group.
+"subroutine" calls, even though they are not strictly a recursion. Up till
+release 10.30 recursions were treated as atomic groups, making them
+incompatible with Perl (but PCRE had then well before Perl did). From 10.30,
+backtracking into recursions is supported.
+
+Repeated recursions used to be wrapped inside OP_ONCE brackets, which not only
+forced no backtracking, but also allowed repetition to be handled as for other
+bracketed groups. From 10.30 onwards, repeated recursions are duplicated for
+their minimum repetitions, and then wrapped in non-capturing brackets for the
+remainder. For example, (?1){3} is treated as (?1)(?1)(?1), and (?1){2,4} is
+treated as (?1)(?1)(?:(?1)){0,2}.
 
 
-Callout
--------
+Callouts
+--------
 
 A callout can nowadays have either a numerical argument or a string argument.
 These use OP_CALLOUT or OP_CALLOUT_STR, respectively. In each case these are
@@ -787,4 +794,4 @@ not a real opcode, but is used to check that tables indexed by opcode are the
 correct length, in order to catch updating errors.
 
 Philip Hazel
-March 2017
+17 March 2017

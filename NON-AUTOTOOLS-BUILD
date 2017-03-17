@@ -1,10 +1,6 @@
 Building PCRE2 without using autotools
 --------------------------------------
 
-This document has been converted from the PCRE1 document. I have removed a
-number of sections about building in various environments, as they applied only
-to PCRE1 and are probably out of date.
-
 This document contains the following sections:
 
   General
@@ -183,21 +179,9 @@ can skip ahead to the CMake section.
 
 STACK SIZE IN WINDOWS ENVIRONMENTS
 
-The default processor stack size of 1Mb in some Windows environments is too
-small for matching patterns that need much recursion. In particular, test 2 may
-fail because of this. Normally, running out of stack causes a crash, but there
-have been cases where the test program has just died silently. See your linker
-documentation for how to increase stack size if you experience problems. If you
-are using CMake (see "BUILDING PCRE2 ON WINDOWS WITH CMAKE" below) and the gcc
-compiler, you can increase the stack size for pcre2test and pcre2grep by
-setting the CMAKE_EXE_LINKER_FLAGS variable to "-Wl,--stack,8388608" (for
-example). The Linux default of 8Mb is a reasonable choice for the stack, though
-even that can be too small for some pattern/subject combinations.
-
-PCRE2 has a compile configuration option to disable the use of stack for
-recursion so that heap is used instead. However, pattern matching is
-significantly slower when this is done. There is more about stack usage in the
-"pcre2stack" documentation.
+Prior to release 10.30 the default system stack size of 1Mb in some Windows 
+environments caused issues with some tests. This should no longer be the case 
+for 10.30 and later releases.
 
 
 LINKING PROGRAMS IN WINDOWS ENVIRONMENTS
@@ -393,4 +377,4 @@ and executable, is in EBCDIC and native z/OS file formats and this is the
 recommended download site.
 
 =============================
-Last Updated: 13 October 2016
+Last Updated: 17 March 2017
