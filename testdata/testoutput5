@@ -4232,4 +4232,8 @@ Failed: error 125 at offset 2: lookbehind assertion is not fixed length
         End
 ------------------------------------------------------------------
 
+//g,utf
+    \=zero_terminate
+ 0: 
+
 # End of testinput5 

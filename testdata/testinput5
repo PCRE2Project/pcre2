@@ -1763,4 +1763,7 @@
 
 /[^\HH]/Bi,utf
 
+//g,utf
+    \=zero_terminate
+
 # End of testinput5 

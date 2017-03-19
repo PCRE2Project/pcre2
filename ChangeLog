@@ -59,6 +59,11 @@ given.
 7. Reworked the recursive pattern matching in the JIT compiler to follow the
 interpreter changes.
 
+8. When the zero_terminate modifier was specified on a pcre2test subject line 
+for global matching, unpredictable things could happen. For example, in UTF-8 
+mode, the pattern //g,zero_terminate read random memory when matched against an 
+empty string with zero_terminate. This was a bug in pcre2test, not the library.
+
 
 Version 10.23 14-February-2017
 ------------------------------

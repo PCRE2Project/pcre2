@@ -5725,7 +5725,7 @@ Returns:    PR_OK     continue processing next line
 static int
 process_data(void)
 {
-PCRE2_SIZE len, ulen;
+PCRE2_SIZE len, ulen, arg_ulen;
 uint32_t gmatched;
 uint32_t c, k;
 uint32_t g_notempty = 0;
@@ -6088,6 +6088,7 @@ ENDSTRING:
 SET(*q, 0);
 len = CASTVAR(uint8_t *, q) - dbuffer;    /* Length in bytes */
 ulen = len/code_unit_size;                /* Length in code units */
+arg_ulen = ulen;                          /* Value to use in match arg */
 
 /* If the string was terminated by \= we must now interpret modifiers. */
 
@@ -6116,11 +6117,15 @@ if (pat_patctl.replacement[0] != 0 &&
   }
 
 /* We now have the subject in dbuffer, with len containing the byte length, and
-ulen containing the code unit length. Move the data to the end of the buffer so
-that a read over the end can be caught by valgrind or other means. If we have
-explicit valgrind support, mark the unused start of the buffer unaddressable.
-If we are using the POSIX interface, or testing zero-termination, we must
-include the terminating zero in the usable data. */
+ulen containing the code unit length, with a copy in arg_ulen for use in match
+function arguments (this gets changed to PCRE2_ZERO_TERMINATED when the
+zero_terminate modifier is present).
+
+Move the data to the end of the buffer so that a read over the end can be
+caught by valgrind or other means. If we have explicit valgrind support, mark
+the unused start of the buffer unaddressable. If we are using the POSIX
+interface, or testing zero-termination, we must include the terminating zero in
+the usable data. */
 
 c = code_unit_size * (((pat_patctl.control & CTL_POSIX) +
                        (dat_datctl.control & CTL_ZERO_TERMINATE) != 0)? 1:0);
@@ -6251,7 +6256,7 @@ if ((dat_datctl.control & (CTL_ALLUSEDTEXT|CTL_DFA)) == CTL_ALLUSEDTEXT &&
 /* Handle passing the subject as zero-terminated. */
 
 if ((dat_datctl.control & CTL_ZERO_TERMINATE) != 0)
-  ulen = PCRE2_ZERO_TERMINATED;
+  arg_ulen = PCRE2_ZERO_TERMINATED;
 
 /* The nullcontext modifier is used to test calling pcre2_[jit_]match() with a
 NULL context. */
@@ -6453,7 +6458,7 @@ if (dat_datctl.replacement[0] != 0)
     rlen = PCRE2_ZERO_TERMINATED;
   else
     rlen = (CASTVAR(uint8_t *, r) - rbuffer)/code_unit_size;
-  PCRE2_SUBSTITUTE(rc, compiled_code, pp, ulen, dat_datctl.offset,
+  PCRE2_SUBSTITUTE(rc, compiled_code, pp, arg_ulen, dat_datctl.offset,
     dat_datctl.options|xoptions, match_data, dat_context,
     rbuffer, rlen, nbuffer, &nsize);
 
@@ -6535,7 +6540,7 @@ else for (gmatched = 0;; gmatched++)
       start_time = clock();
       for (i = 0; i < timeitm; i++)
         {
-        PCRE2_DFA_MATCH(capcount, compiled_code, pp, ulen,
+        PCRE2_DFA_MATCH(capcount, compiled_code, pp, arg_ulen,
           dat_datctl.offset, dat_datctl.options | g_notempty, match_data,
           use_dat_context, dfa_workspace, DFA_WS_DIMENSION);
         }
@@ -6546,7 +6551,7 @@ else for (gmatched = 0;; gmatched++)
       start_time = clock();
       for (i = 0; i < timeitm; i++)
         {
-        PCRE2_JIT_MATCH(capcount, compiled_code, pp, ulen,
+        PCRE2_JIT_MATCH(capcount, compiled_code, pp, arg_ulen,
           dat_datctl.offset, dat_datctl.options | g_notempty, match_data,
           use_dat_context);
         }
@@ -6557,7 +6562,7 @@ else for (gmatched = 0;; gmatched++)
       start_time = clock();
       for (i = 0; i < timeitm; i++)
         {
-        PCRE2_MATCH(capcount, compiled_code, pp, ulen,
+        PCRE2_MATCH(capcount, compiled_code, pp, arg_ulen,
           dat_datctl.offset, dat_datctl.options | g_notempty, match_data,
           use_dat_context);
         }
@@ -6573,9 +6578,9 @@ else for (gmatched = 0;; gmatched++)
 
   if ((dat_datctl.control & CTL_FINDLIMITS) != 0)
     {
-    capcount = check_match_limit(pp, ulen, PCRE2_ERROR_MATCHLIMIT, "match");
+    capcount = check_match_limit(pp, arg_ulen, PCRE2_ERROR_MATCHLIMIT, "match");
     if (FLD(compiled_code, executable_jit) == NULL)
-      (void)check_match_limit(pp, ulen, PCRE2_ERROR_DEPTHLIMIT,
+      (void)check_match_limit(pp, arg_ulen, PCRE2_ERROR_DEPTHLIMIT,
         "depth");
     }
 
@@ -6605,7 +6610,7 @@ else for (gmatched = 0;; gmatched++)
         dfa_workspace = (int *)malloc(DFA_WS_DIMENSION*sizeof(int));
       if (dfa_matched++ == 0)
         dfa_workspace[0] = -1;  /* To catch bad restart */
-      PCRE2_DFA_MATCH(capcount, compiled_code, pp, ulen,
+      PCRE2_DFA_MATCH(capcount, compiled_code, pp, arg_ulen,
         dat_datctl.offset, dat_datctl.options | g_notempty, match_data,
         use_dat_context, dfa_workspace, DFA_WS_DIMENSION);
       if (capcount == 0)
@@ -6617,10 +6622,10 @@ else for (gmatched = 0;; gmatched++)
     else
       {
       if ((pat_patctl.control & CTL_JITFAST) != 0)
-        PCRE2_JIT_MATCH(capcount, compiled_code, pp, ulen, dat_datctl.offset,
+        PCRE2_JIT_MATCH(capcount, compiled_code, pp, arg_ulen, dat_datctl.offset,
           dat_datctl.options | g_notempty, match_data, use_dat_context);
       else
-        PCRE2_MATCH(capcount, compiled_code, pp, ulen, dat_datctl.offset,
+        PCRE2_MATCH(capcount, compiled_code, pp, arg_ulen, dat_datctl.offset,
           dat_datctl.options | g_notempty, match_data, use_dat_context);
       if (capcount == 0)
         {
@@ -7033,6 +7038,7 @@ else for (gmatched = 0;; gmatched++)
       pp += end_offset * code_unit_size;
       len -= end_offset * code_unit_size;
       ulen -= end_offset;
+      if (arg_ulen != PCRE2_ZERO_TERMINATED) arg_ulen -= end_offset;
       }
     }
   }  /* End of global loop */
