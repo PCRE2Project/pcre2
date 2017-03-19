@@ -4959,7 +4959,7 @@ a)"xI
     \=ovector=7777777777
 
 /(?1)(A(*COMMIT)|B)D/
-    BAXBAD\=no_jit  
+    BAXBAD\=no_jit
     
 "(?1){2}(a)"B
 
@@ -4979,27 +4979,27 @@ a)"xI
 # update. They require backtracking into recursions.
 
 /^(.|(.)(?1)\2)$/
-    a\=no_jit
-    aba\=no_jit
-    abcba\=no_jit
-    ababa\=no_jit
-    abcdcba\=no_jit
+    a
+    aba
+    abcba
+    ababa
+    abcdcba
 
 /^((.)(?1)\2|.?)$/
-    a\=no_jit
-    aba\=no_jit
-    abba\=no_jit
-    abcba\=no_jit
-    ababa\=no_jit
-    abccba\=no_jit
-    abcdcba\=no_jit
-    abcddcba\=no_jit
+    a
+    aba
+    abba
+    abcba
+    ababa
+    abccba
+    abcdcba
+    abcddcba
 
 /^(.)(\1|a(?2))/
-    bab\=no_jit
+    bab
 
 /^(.|(.)(?1)?\2)$/
-    abcba\=no_jit
+    abcba
     
 # The first of these, when run by Perl, give the mark 'aa', which is wrong. 
 

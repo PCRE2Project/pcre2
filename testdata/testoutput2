@@ -15426,7 +15426,7 @@ Subject length lower bound = 11
 ** Invalid value in 'ovector=7777777777'
 
 /(?1)(A(*COMMIT)|B)D/
-    BAXBAD\=no_jit  
+    BAXBAD\=no_jit
  0: BAD
  1: A
     
@@ -15484,67 +15484,67 @@ Subject length lower bound = 11
 # update. They require backtracking into recursions.
 
 /^(.|(.)(?1)\2)$/
-    a\=no_jit
+    a
  0: a
  1: a
-    aba\=no_jit
+    aba
  0: aba
  1: aba
  2: a
-    abcba\=no_jit
+    abcba
  0: abcba
  1: abcba
  2: a
-    ababa\=no_jit
+    ababa
  0: ababa
  1: ababa
  2: a
-    abcdcba\=no_jit
+    abcdcba
  0: abcdcba
  1: abcdcba
  2: a
 
 /^((.)(?1)\2|.?)$/
-    a\=no_jit
+    a
  0: a
  1: a
-    aba\=no_jit
+    aba
  0: aba
  1: aba
  2: a
-    abba\=no_jit
+    abba
  0: abba
  1: abba
  2: a
-    abcba\=no_jit
+    abcba
  0: abcba
  1: abcba
  2: a
-    ababa\=no_jit
+    ababa
  0: ababa
  1: ababa
  2: a
-    abccba\=no_jit
+    abccba
  0: abccba
  1: abccba
  2: a
-    abcdcba\=no_jit
+    abcdcba
  0: abcdcba
  1: abcdcba
  2: a
-    abcddcba\=no_jit
+    abcddcba
  0: abcddcba
  1: abcddcba
  2: a
 
 /^(.)(\1|a(?2))/
-    bab\=no_jit
+    bab
  0: bab
  1: b
  2: ab
 
 /^(.|(.)(?1)?\2)$/
-    abcba\=no_jit
+    abcba
  0: abcba
  1: abcba
  2: a

@@ -707,7 +707,7 @@ static struct regression_test_case regression_test_cases[] = {
 	{ MU, A, 0, 0, "(?1)(((a(*ACCEPT)))b)", "axaa" },
 	{ MU, A, 0, 0, "(?1)(?(DEFINE) (((ac(*ACCEPT)))b) )", "akaac" },
 	{ MU, A, 0, 0, "(a+)b(?1)b\\1", "abaaabaaaaa" },
-//	  { MU, A, 0, 0 | F_NOMATCH, "(?(DEFINE)(aa|a))(?1)ab", "aab" },
+	{ MU, A, 0, 0, "(?(DEFINE)(aa|a))(?1)ab", "aab" },
 	{ MU, A, 0, 0, "(?(DEFINE)(a\\Kb))(?1)+ababc", "abababxabababc" },
 	{ MU, A, 0, 0, "(a\\Kb)(?1)+ababc", "abababxababababc" },
 	{ MU, A, 0, 0 | F_NOMATCH, "(a\\Kb)(?1)+ababc", "abababxababababxc" },
@@ -722,7 +722,7 @@ static struct regression_test_case regression_test_cases[] = {
 	{ MU, A, 0, 0, "(?P<Name>a(?(R&Name)a|b))(?1)", "aab abb abaa" },
 	{ MU, A, 0, 0, "((?(R)a|(?1)){3})", "XaaaaaaaaaX" },
 	{ MU, A, 0, 0, "((?:(?(R)a|(?1))){3})", "XaaaaaaaaaX" },
-//	  { MU, A, 0, 0, "((?(R)a|(?1)){1,3})aaaaaa", "aaaaaaaaXaaaaaaaaa" },
+	{ MU, A, 0, 0, "((?(R)a|(?1)){1,3})aaaaaa", "aaaaaaaaXaaaaaaaaa" },
 	{ MU, A, 0, 0, "((?(R)a|(?1)){1,3}?)M", "aaaM" },
 
 	/* 16 bit specific tests. */
@@ -848,7 +848,6 @@ static struct regression_test_case regression_test_cases[] = {
 	{ MU, A, 0, 0, "((a?)+)+b", "aaaaaaaaaaaa b" },
 
 	/* Deep recursion: Stack limit reached. */
-//	  { M, A, 0, 0 | F_NOMATCH, "a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?aaaaaaaaaaaaaaaaaaaaaaa", "aaaaaaaaaaaaaaaaaaaaaaa" },
 	{ M, A, 0, 0 | F_NOMATCH, "a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?aaaaaaaaaaaaaaaaaaaaaaa", "aaaaaaaaaaaaaaaaaaaaaaa" },
 	{ M, A, 0, 0 | F_NOMATCH, "(?:a+)+b", "aaaaaaaaaaaaaaaaaaaaaaaa b" },
 	{ M, A, 0, 0 | F_NOMATCH, "(?:a+?)+?b", "aaaaaaaaaaaaaaaaaaaaaaaa b" },
