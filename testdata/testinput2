@@ -3710,7 +3710,7 @@
     bnn
 
 /(?(?=b(*SKIP)a)bn|bnn)/
-    bnn\=no_jit
+    bnn
 
 /(?=b(*THEN)a|)bn|bnn/
     bnn

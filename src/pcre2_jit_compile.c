@@ -411,10 +411,10 @@ typedef struct compiler_common {
   BOOL has_then;
   /* (*SKIP) or (*SKIP:arg) is found in lookbehind assertion. */
   BOOL has_skip_in_assert_back;
-  /* Currently in recurse or negative assert. */
-  BOOL local_exit;
-  /* Currently in a positive assert. */
-  BOOL positive_assert;
+  /* Quit is redirected by recurse, negative assertion, or positive assertion in conditional block. */
+  BOOL local_quit_available;
+  /* Currently in a positive assertion. */
+  BOOL in_positive_assertion;
   /* Newline control. */
   int nltype;
   sljit_u32 nlmax;
@@ -444,7 +444,7 @@ typedef struct compiler_common {
   recurse_entry *currententry;
   jump_list *partialmatch;
   jump_list *quit;
-  jump_list *positive_assert_quit;
+  jump_list *positive_assertion_quit;
   jump_list *forced_quit;
   jump_list *accept;
   jump_list *calllimit;
@@ -1661,11 +1661,11 @@ if (length > 0)
 return stack_restore ? no_frame : no_stack;
 }
 
-static void init_frame(compiler_common *common, PCRE2_SPTR cc, PCRE2_SPTR ccend, int stackpos, int stacktop, BOOL recursive)
+static void init_frame(compiler_common *common, PCRE2_SPTR cc, PCRE2_SPTR ccend, int stackpos, int stacktop)
 {
 DEFINE_COMPILER;
-BOOL setsom_found = recursive;
-BOOL setmark_found = recursive;
+BOOL setsom_found = FALSE;
+BOOL setmark_found = FALSE;
 /* The last capture is a local variable even for recursions. */
 BOOL capture_last_found = FALSE;
 int offset;
@@ -1678,7 +1678,7 @@ stackpos = STACK(stackpos);
 if (ccend == NULL)
   {
   ccend = bracketend(cc) - (1 + LINK_SIZE);
-  if (recursive || (*cc != OP_CBRAPOS && *cc != OP_SCBRAPOS))
+  if (*cc != OP_CBRAPOS && *cc != OP_SCBRAPOS)
     cc = next_opcode(common, cc);
   }
 
@@ -2104,7 +2104,8 @@ switch (type)
   base_reg = STACK_TOP;
   break;
 
-  case recurse_swap_global:
+  default:
+  SLJIT_ASSERT(type == recurse_swap_global);
   from_sp = FALSE;
   base_reg = TMP1;
   break;
@@ -7525,6 +7526,7 @@ static PCRE2_SPTR compile_assert_matchingpath(compiler_common *common, PCRE2_SPT
 DEFINE_COMPILER;
 int framesize;
 int extrasize;
+BOOL local_quit_available = FALSE;
 BOOL needs_control_head;
 int private_data_ptr;
 backtrack_common altbacktrack;
@@ -7535,13 +7537,13 @@ jump_list *tmp = NULL;
 jump_list **target = (conditional) ? &backtrack->condfailed : &backtrack->common.topbacktracks;
 jump_list **found;
 /* Saving previous accept variables. */
-BOOL save_local_exit = common->local_exit;
-BOOL save_positive_assert = common->positive_assert;
+BOOL save_local_quit_available = common->local_quit_available;
+BOOL save_in_positive_assertion = common->in_positive_assertion;
 then_trap_backtrack *save_then_trap = common->then_trap;
 struct sljit_label *save_quit_label = common->quit_label;
 struct sljit_label *save_accept_label = common->accept_label;
 jump_list *save_quit = common->quit;
-jump_list *save_positive_assert_quit = common->positive_assert_quit;
+jump_list *save_positive_assertion_quit = common->positive_assertion_quit;
 jump_list *save_accept = common->accept;
 struct sljit_jump *jump;
 struct sljit_jump *brajump = NULL;
@@ -7623,21 +7625,21 @@ else
   else
     OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(1), TMP1, 0);
 
-  init_frame(common, ccbegin, NULL, framesize + extrasize - 1, extrasize, FALSE);
+  init_frame(common, ccbegin, NULL, framesize + extrasize - 1, extrasize);
   }
 
 memset(&altbacktrack, 0, sizeof(backtrack_common));
-if (opcode == OP_ASSERT_NOT || opcode == OP_ASSERTBACK_NOT)
+if (conditional || (opcode == OP_ASSERT_NOT || opcode == OP_ASSERTBACK_NOT))
   {
-  /* Negative assert is stronger than positive assert. */
-  common->local_exit = TRUE;
+  /* Control verbs cannot escape from these asserts. */
+  local_quit_available = TRUE;
+  common->local_quit_available = TRUE;
   common->quit_label = NULL;
   common->quit = NULL;
-  common->positive_assert = FALSE;
   }
-else
-  common->positive_assert = TRUE;
-common->positive_assert_quit = NULL;
+
+common->in_positive_assertion = (opcode == OP_ASSERT || opcode == OP_ASSERTBACK);
+common->positive_assertion_quit = NULL;
 
 while (1)
   {
@@ -7653,16 +7655,16 @@ while (1)
   compile_matchingpath(common, ccbegin + 1 + LINK_SIZE, cc, &altbacktrack);
   if (SLJIT_UNLIKELY(sljit_get_compiler_error(compiler)))
     {
-    if (opcode == OP_ASSERT_NOT || opcode == OP_ASSERTBACK_NOT)
+    if (local_quit_available)
       {
-      common->local_exit = save_local_exit;
+      common->local_quit_available = save_local_quit_available;
       common->quit_label = save_quit_label;
       common->quit = save_quit;
       }
-    common->positive_assert = save_positive_assert;
+    common->in_positive_assertion = save_in_positive_assertion;
     common->then_trap = save_then_trap;
     common->accept_label = save_accept_label;
-    common->positive_assert_quit = save_positive_assert_quit;
+    common->positive_assertion_quit = save_positive_assertion_quit;
     common->accept = save_accept;
     return NULL;
     }
@@ -7731,16 +7733,16 @@ while (1)
   compile_backtrackingpath(common, altbacktrack.top);
   if (SLJIT_UNLIKELY(sljit_get_compiler_error(compiler)))
     {
-    if (opcode == OP_ASSERT_NOT || opcode == OP_ASSERTBACK_NOT)
+    if (local_quit_available)
       {
-      common->local_exit = save_local_exit;
+      common->local_quit_available = save_local_quit_available;
       common->quit_label = save_quit_label;
       common->quit = save_quit;
       }
-    common->positive_assert = save_positive_assert;
+    common->in_positive_assertion = save_in_positive_assertion;
     common->then_trap = save_then_trap;
     common->accept_label = save_accept_label;
-    common->positive_assert_quit = save_positive_assert_quit;
+    common->positive_assertion_quit = save_positive_assertion_quit;
     common->accept = save_accept;
     return NULL;
     }
@@ -7753,18 +7755,18 @@ while (1)
   cc += GET(cc, 1);
   }
 
-if (opcode == OP_ASSERT_NOT || opcode == OP_ASSERTBACK_NOT)
+if (local_quit_available)
   {
-  SLJIT_ASSERT(common->positive_assert_quit == NULL);
+  SLJIT_ASSERT(common->positive_assertion_quit == NULL);
   /* Makes the check less complicated below. */
-  common->positive_assert_quit = common->quit;
+  common->positive_assertion_quit = common->quit;
   }
 
 /* None of them matched. */
-if (common->positive_assert_quit != NULL)
+if (common->positive_assertion_quit != NULL)
   {
   jump = JUMP(SLJIT_JUMP);
-  set_jumps(common->positive_assert_quit, LABEL());
+  set_jumps(common->positive_assertion_quit, LABEL());
   SLJIT_ASSERT(framesize != no_stack);
   if (framesize < 0)
     OP2(SLJIT_ADD, STACK_TOP, 0, SLJIT_MEM1(SLJIT_SP), private_data_ptr, SLJIT_IMM, extrasize * sizeof(sljit_sw));
@@ -7928,16 +7930,16 @@ else
     }
   }
 
-if (opcode == OP_ASSERT_NOT || opcode == OP_ASSERTBACK_NOT)
+if (local_quit_available)
   {
-  common->local_exit = save_local_exit;
+  common->local_quit_available = save_local_quit_available;
   common->quit_label = save_quit_label;
   common->quit = save_quit;
   }
-common->positive_assert = save_positive_assert;
+common->in_positive_assertion = save_in_positive_assertion;
 common->then_trap = save_then_trap;
 common->accept_label = save_accept_label;
-common->positive_assert_quit = save_positive_assert_quit;
+common->positive_assertion_quit = save_positive_assertion_quit;
 common->accept = save_accept;
 return cc + 1 + LINK_SIZE;
 }
@@ -8314,7 +8316,7 @@ if (opcode == OP_ONCE)
       OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), private_data_ptr, TMP2, 0);
       OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(stacksize), TMP1, 0);
       }
-    init_frame(common, ccbegin, NULL, BACKTRACK_AS(bracket_backtrack)->u.framesize + stacksize, stacksize + 1, FALSE);
+    init_frame(common, ccbegin, NULL, BACKTRACK_AS(bracket_backtrack)->u.framesize + stacksize, stacksize + 1);
     }
   }
 else if (opcode == OP_CBRA || opcode == OP_SCBRA)
@@ -8757,7 +8759,7 @@ else
     stack++;
     }
   OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(stack), TMP1, 0);
-  init_frame(common, cc, NULL, stacksize - 1, stacksize - framesize, FALSE);
+  init_frame(common, cc, NULL, stacksize - 1, stacksize - framesize);
   stack -= 1 + (offset == 0);
   }
 
@@ -9560,7 +9562,7 @@ OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(size - 3), TMP2, 0);
 
 size = BACKTRACK_AS(then_trap_backtrack)->framesize;
 if (size >= 0)
-  init_frame(common, cc, ccend, size - 1, 0, FALSE);
+  init_frame(common, cc, ccend, size - 1, 0);
 }
 
 static void compile_matchingpath(compiler_common *common, PCRE2_SPTR cc, PCRE2_SPTR ccend, backtrack_common *parent)
@@ -10678,15 +10680,16 @@ if (opcode == OP_THEN || opcode == OP_THEN_ARG)
     add_jump(compiler, &common->then_trap->quit, JUMP(SLJIT_JUMP));
     return;
     }
-  else if (common->positive_assert)
+  else if (!common->local_quit_available && common->in_positive_assertion)
     {
-    add_jump(compiler, &common->positive_assert_quit, JUMP(SLJIT_JUMP));
+    add_jump(compiler, &common->positive_assertion_quit, JUMP(SLJIT_JUMP));
     return;
     }
   }
 
-if (common->local_exit)
+if (common->local_quit_available)
   {
+  /* Abort match with a fail. */
   if (common->quit_label == NULL)
     add_jump(compiler, &common->quit, JUMP(SLJIT_JUMP));
   else
@@ -10902,7 +10905,7 @@ while (current)
     break;
 
     case OP_COMMIT:
-    if (!common->local_exit)
+    if (!common->local_quit_available)
       OP1(SLJIT_MOV, SLJIT_RETURN_REG, 0, SLJIT_IMM, PCRE2_ERROR_NOMATCH);
     if (common->quit_label == NULL)
       add_jump(compiler, &common->quit, JUMP(SLJIT_JUMP));
@@ -11539,7 +11542,7 @@ common->fast_forward_bc_ptr = NULL;
 common->fast_fail_start_ptr = 0;
 common->fast_fail_end_ptr = 0;
 common->currententry = common->entries;
-common->local_exit = TRUE;
+common->local_quit_available = TRUE;
 quit_label = common->quit_label;
 while (common->currententry != NULL)
   {
@@ -11556,7 +11559,7 @@ while (common->currententry != NULL)
   flush_stubs(common);
   common->currententry = common->currententry->next;
   }
-common->local_exit = FALSE;
+common->local_quit_available = FALSE;
 common->quit_label = quit_label;
 
 /* Allocating stack, returns with PCRE_ERROR_JIT_STACKLIMIT if fails. */

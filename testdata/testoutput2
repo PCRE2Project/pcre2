@@ -11820,7 +11820,7 @@ No match
  0: bn
 
 /(?(?=b(*SKIP)a)bn|bnn)/
-    bnn\=no_jit
+    bnn
  0: bnn
 
 /(?=b(*THEN)a|)bn|bnn/
