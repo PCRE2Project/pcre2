@@ -467,7 +467,6 @@ data line. */
                     CTL_ALLCAPTURES|\
                     CTL_ALLUSEDTEXT|\
                     CTL_ALTGLOBAL|\
-                    CTL_FRAMESIZE|\
                     CTL_GLOBAL|\
                     CTL_MARK|\
                     CTL_MEMORY|\
@@ -577,7 +576,7 @@ static modstruct modlist[] = {
   { "extended",                   MOD_PATP, MOD_OPT, PCRE2_EXTENDED,             PO(options) },
   { "find_limits",                MOD_DAT,  MOD_CTL, CTL_FINDLIMITS,             DO(control) },
   { "firstline",                  MOD_PAT,  MOD_OPT, PCRE2_FIRSTLINE,            PO(options) },
-  { "framesize",                  MOD_PD,   MOD_CTL, CTL_FRAMESIZE,              PD(control) },
+  { "framesize",                  MOD_PAT,  MOD_CTL, CTL_FRAMESIZE,              PO(control) },
   { "fullbincode",                MOD_PAT,  MOD_CTL, CTL_FULLBINCODE,            PO(control) },
   { "get",                        MOD_DAT,  MOD_NN,  DO(get_numbers),            DO(get_names) },
   { "getall",                     MOD_DAT,  MOD_CTL, CTL_GETALL,                 DO(control) },

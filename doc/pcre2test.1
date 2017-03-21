@@ -1,4 +1,4 @@
-.TH PCRE2TEST 1 "28 December 2016" "PCRE 10.23"
+.TH PCRE2TEST 1 "21 March 2017" "PCRE 10.30"
 .SH NAME
 pcre2test - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -98,12 +98,13 @@ character values up to 0x7fffffff. Each character is placed in one 16-bit or
 32-bit code unit (in the 16-bit case, values greater than 0xffff cause an error
 to occur).
 .P
-UTF-8 is not capable of encoding values greater than 0x7fffffff, but such
-values can be handled by the 32-bit library. When testing this library in
-non-UTF mode with \fButf8_input\fP set, if any character is preceded by the
-byte 0xff (which is an illegal byte in UTF-8) 0x80000000 is added to the
-character's value. This is the only way of passing such code points in a
-pattern string. For subject strings, using an escape sequence is preferable.
+UTF-8 (in its original definition) is not capable of encoding values greater
+than 0x7fffffff, but such values can be handled by the 32-bit library. When
+testing this library in non-UTF mode with \fButf8_input\fP set, if any
+character is preceded by the byte 0xff (which is an illegal byte in UTF-8)
+0x80000000 is added to the character's value. This is the only way of passing
+such code points in a pattern string. For subject strings, using an escape
+sequence is preferable.
 .
 .
 .SH "COMMAND LINE OPTIONS"
@@ -566,6 +567,7 @@ about the pattern:
   /B  bincode                   show binary code without lengths
       callout_info              show callout information
       debug                     same as info,fullbincode
+      framesize                 show matching frame size 
       fullbincode               show binary code with lengths
   /I  info                      show info about compiled pattern
       hex                       unquoted characters are hexadecimal
@@ -647,6 +649,10 @@ if there is more than one they are listed as "starting code units". "Last code
 unit" is the last literal code unit that must be present in any match. This is
 not necessarily the last character. These lines are omitted if no starting or
 ending code units are recorded.
+.P
+The \fBframesize\fP modifier shows the size, in bytes, of the storage frames 
+used by \fBpcre2_match()\fP for handling backtracking. The size depends on the
+number of capturing parentheses in the pattern.
 .P
 The \fBcallout_info\fP modifier requests information about all the callouts in
 the pattern. A list of them is output at the end of any other information that
@@ -1044,6 +1050,7 @@ pattern.
       callout_fail=<n>[:<m>]     control callout failure
       callout_none               do not supply a callout function
       copy=<number or name>      copy captured substring
+      depth_limit=<n>            set a depth limit
       dfa                        use \fBpcre2_dfa_match()\fP
       find_limits                find match and recursion limits
       get=<number or name>       extract captured substring
@@ -1057,7 +1064,7 @@ pattern.
       offset=<n>                 set starting offset
       offset_limit=<n>           set offset limit
       ovector=<n>                set size of output vector
-      recursion_limit=<n>        set a recursion limit
+      recursion_limit=<n>        obsolete synonym for depth_limit
       replace=<string>           specify a replacement string
       startchar                  show startchar when relevant
       startoffset=<n>            same as offset=<n>
@@ -1279,10 +1286,10 @@ stack that is larger than the default 32K is necessary only for very
 complicated patterns.
 .
 .
-.SS "Setting match and recursion limits"
+.SS "Setting match and depth limits"
 .rs
 .sp
-The \fBmatch_limit\fP and \fBrecursion_limit\fP modifiers set the appropriate
+The \fBmatch_limit\fP and \fBdepth_limit\fP modifiers set the appropriate
 limits in the match context. These values are ignored when the
 \fBfind_limits\fP modifier is specified.
 .
@@ -1292,21 +1299,21 @@ limits in the match context. These values are ignored when the
 .sp
 If the \fBfind_limits\fP modifier is present, \fBpcre2test\fP calls
 \fBpcre2_match()\fP several times, setting different values in the match
-context via \fBpcre2_set_match_limit()\fP and \fBpcre2_set_recursion_limit()\fP
+context via \fBpcre2_set_match_limit()\fP and \fBpcre2_set_depth_limit()\fP
 until it finds the minimum values for each parameter that allow
 \fBpcre2_match()\fP to complete without error.
 .P
 If JIT is being used, only the match limit is relevant. If DFA matching is
-being used, neither limit is relevant, and this modifier is ignored (with a
-warning message).
+being used, only the depth limit is relevant, but at present this modifier is
+ignored (with a warning message).
 .P
 The \fImatch_limit\fP number is a measure of the amount of backtracking
 that takes place, and learning the minimum value can be instructive. For most
 simple matches, the number is quite small, but for patterns with very large
 numbers of matching possibilities, it can become large very quickly with
-increasing length of subject string. The \fImatch_limit_recursion\fP number is
-a measure of how much stack (or, if PCRE2 is compiled with NO_RECURSE, how much
-heap) memory is needed to complete the match attempt.
+increasing length of subject string. The \fIdepth_limit\fP number is
+a measure of how much memory for recording backtracking points is needed to
+complete the match attempt.
 .
 .
 .SS "Showing MARK names"
@@ -1425,7 +1432,7 @@ code unit offset of the start of the failing character is also output. Here is
 an example of an interactive \fBpcre2test\fP run.
 .sp
   $ pcre2test
-  PCRE2 version 9.00 2014-05-10
+  PCRE2 version 10.22 2016-07-29
 .sp
     re> /^abc(\ed+)/
   data> abc123
@@ -1758,6 +1765,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 28 December 2016
-Copyright (c) 1997-2016 University of Cambridge.
+Last updated: 21 March 2017
+Copyright (c) 1997-2017 University of Cambridge.
 .fi
