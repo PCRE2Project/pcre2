@@ -5017,4 +5017,6 @@ a)"xI
 
 /(?<!\1((?U)1((?U))))(*F)/never_backslash_c,alt_bsux,anchored,extended
 
+/\g{3/
+
 # End of testinput2 

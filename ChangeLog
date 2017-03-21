@@ -76,6 +76,10 @@ or deserialization (the "load" or "save" commands).
 12. Fix potential NULL dereference in pcre2_callout_enumerate() if called with 
 a NULL pattern pointer when Unicode support is available.
 
+13. When the 32-bit library was being tested by pcre2test, error messages that 
+were longer than 64 code units could cause a buffer overflow. This was a bug in 
+pcre2test.
+
 
 Version 10.23 14-February-2017
 ------------------------------

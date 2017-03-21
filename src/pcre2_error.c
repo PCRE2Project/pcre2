@@ -271,7 +271,7 @@ distinct.
 Arguments:
   enumber       error number
   buffer        where to put the message (zero terminated)
-  size          size of the buffer
+  size          size of the buffer in code units
 
 Returns:        length of message if all is well
                 negative on error

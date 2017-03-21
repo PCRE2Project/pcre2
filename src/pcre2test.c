@@ -2889,7 +2889,7 @@ if (pbuffer32_size < 4*len + 4)
   {
   if (pbuffer32 != NULL) free(pbuffer32);
   pbuffer32_size = 4*len + 4;
-  if (pbuffer32_size < 256) pbuffer32_size = 256;
+  if (pbuffer32_size < 512) pbuffer32_size = 512;
   pbuffer32 = (uint32_t *)malloc(pbuffer32_size);
   if (pbuffer32 == NULL)
     {
@@ -7600,7 +7600,8 @@ if (arg_error != NULL)
   int errcode;
   char *endptr;
 
-/* Ensure the relevant non-8-bit buffer is available. */
+/* Ensure the relevant non-8-bit buffer is available. Ensure that it is at 
+least 128 code units, because it is used for retrieving error messages. */
 
 #ifdef SUPPORT_PCRE2_16
   if (test_mode == PCRE16_MODE)
@@ -7620,7 +7621,7 @@ if (arg_error != NULL)
 #ifdef SUPPORT_PCRE2_32
   if (test_mode == PCRE32_MODE)
     {
-    pbuffer32_size = 256;
+    pbuffer32_size = 512;
     pbuffer32 = (uint32_t *)malloc(pbuffer32_size);
     if (pbuffer32 == NULL)
       {

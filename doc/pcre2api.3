@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "24 December 2016" "PCRE2 10.23"
+.TH PCRE2API 3 "21 March 2017" "PCRE2 10.30"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -2633,8 +2633,8 @@ The internal recursion limit was reached.
 A text message for an error code from any PCRE2 function (compile, match, or
 auxiliary) can be obtained by calling \fBpcre2_get_error_message()\fP. The code
 is passed as the first argument, with the remaining two arguments specifying a
-code unit buffer and its length, into which the text message is placed. Note
-that the message is returned in code units of the appropriate width for the
+code unit buffer and its length in code units, into which the text message is
+placed. The message is returned in code units of the appropriate width for the
 library that is being used.
 .P
 The returned message is terminated with a trailing zero, and the function
@@ -3321,6 +3321,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 23 December 2016
-Copyright (c) 1997-2016 University of Cambridge.
+Last updated: 21 March 2017
+Copyright (c) 1997-2017 University of Cambridge.
 .fi
