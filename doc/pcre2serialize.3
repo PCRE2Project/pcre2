@@ -1,4 +1,4 @@
-.TH PCRE2SERIALIZE 3 "24 May 2016" "PCRE2 10.22"
+.TH PCRE2SERIALIZE 3 "21 March 2017" "PCRE2 10.30"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "SAVING AND RE-USING PRECOMPILED PCRE2 PATTERNS"
@@ -37,7 +37,10 @@ The facility for saving and restoring compiled patterns is intended for use
 within individual applications. As such, the data supplied to
 \fBpcre2_serialize_decode()\fP is expected to be trusted data, not data from
 arbitrary external sources. There is only some simple consistency checking, not
-complete validation of what is being re-loaded.
+complete validation of what is being re-loaded. Corrupted data may cause
+undefined results. For example, if the length field of a pattern in the
+serialized data is corrupted, the deserializing code may read beyond the end of
+the byte stream that is passed to it.
 .
 .
 .SH "SAVING COMPILED PATTERNS"
@@ -181,6 +184,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 24 May 2016
-Copyright (c) 1997-2016 University of Cambridge.
+Last updated: 21 March 2017
+Copyright (c) 1997-2017 University of Cambridge.
 .fi
