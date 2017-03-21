@@ -4456,6 +4456,7 @@ switch(cmd)
   if (rc < 0)
     {
     serial_error(rc, "Serialization");
+    fclose(f); 
     break;
     }
 
@@ -4469,6 +4470,7 @@ switch(cmd)
   if (fwrite(serial, 1, serial_size, f) != serial_size)
     {
     fprintf(outfile, "** Wrong return from fwrite()\n");
+    fclose(f); 
     return PR_ABEND;
     }
 
@@ -4496,6 +4498,7 @@ switch(cmd)
     {
     fprintf(outfile, "** Failed to get memory (size %lu) for #load\n",
       (unsigned long int)serial_size);
+    fclose(f);   
     return PR_ABEND;
     }
 
@@ -4503,6 +4506,7 @@ switch(cmd)
     {
     fprintf(outfile, "** Wrong return from fread()\n");
     free(serial);
+    fclose(f); 
     return PR_ABEND;
     }
   fclose(f);

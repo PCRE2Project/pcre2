@@ -68,6 +68,9 @@ empty string with zero_terminate. This was a bug in pcre2test, not the library.
 of the section that is compiled when Unix-style directory scanning is
 available, and into a new section that is always compiled for Windows.
 
+10. In pcre2test, explicitly close the file after an error during serialization 
+or deserialization (the "load" or "save" commands).
+
 
 Version 10.23 14-February-2017
 ------------------------------
