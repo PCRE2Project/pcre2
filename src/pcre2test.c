@@ -1017,9 +1017,9 @@ are supported. */
   if (test_mode == PCRE8_MODE) \
     r = pcre2_get_error_message_8(a,G(b,8),G(G(b,8),_size)); \
   else if (test_mode == PCRE16_MODE) \
-    r = pcre2_get_error_message_16(a,G(b,16),G(G(b,16),_size)); \
+    r = pcre2_get_error_message_16(a,G(b,16),G(G(b,16),_size/2)); \
   else \
-    r = pcre2_get_error_message_32(a,G(b,32),G(G(b,32),_size))
+    r = pcre2_get_error_message_32(a,G(b,32),G(G(b,32),_size/4))
 
 #define PCRE2_GET_OVECTOR_COUNT(a,b) \
   if (test_mode == PCRE8_MODE) \
@@ -1399,6 +1399,9 @@ the three different cases. */
 
 /* ----- Common macros for two-mode cases ----- */
 
+#define BYTEONE (BITONE/8)
+#define BYTETWO (BITTWO/8)
+
 #define CASTFLD(t,a,b) \
   ((test_mode == G(G(PCRE,BITONE),_MODE))? (t)(G(a,BITONE)->b) : \
     (t)(G(a,BITTWO)->b))
@@ -1481,9 +1484,9 @@ the three different cases. */
 
 #define PCRE2_GET_ERROR_MESSAGE(r,a,b) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
-    r = G(pcre2_get_error_message_,BITONE)(a,G(b,BITONE),G(G(b,BITONE),_size)); \
+    r = G(pcre2_get_error_message_,BITONE)(a,G(b,BITONE),G(G(b,BITONE),_size/BYTEONE)); \
   else \
-    r = G(pcre2_get_error_message_,BITTWO)(a,G(b,BITTWO),G(G(b,BITTWO),_size))
+    r = G(pcre2_get_error_message_,BITTWO)(a,G(b,BITTWO),G(G(b,BITTWO),_size/BYTETWO))
 
 #define PCRE2_GET_OVECTOR_COUNT(a,b) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
@@ -1904,7 +1907,7 @@ the three different cases. */
 #define PCRE2_DFA_MATCH(a,b,c,d,e,f,g,h,i,j) \
   a = pcre2_dfa_match_16(G(b,16),(PCRE2_SPTR16)c,d,e,f,G(g,16),h,i,j)
 #define PCRE2_GET_ERROR_MESSAGE(r,a,b) \
-  r = pcre2_get_error_message_16(a,G(b,16),G(G(b,16),_size))
+  r = pcre2_get_error_message_16(a,G(b,16),G(G(b,16),_size/2))
 #define PCRE2_GET_OVECTOR_COUNT(a,b) a = pcre2_get_ovector_count_16(G(b,16))
 #define PCRE2_GET_STARTCHAR(a,b) a = pcre2_get_startchar_16(G(b,16))
 #define PCRE2_JIT_COMPILE(r,a,b) r = pcre2_jit_compile_16(G(a,16),b)
@@ -2000,7 +2003,7 @@ the three different cases. */
 #define PCRE2_DFA_MATCH(a,b,c,d,e,f,g,h,i,j) \
   a = pcre2_dfa_match_32(G(b,32),(PCRE2_SPTR32)c,d,e,f,G(g,32),h,i,j)
 #define PCRE2_GET_ERROR_MESSAGE(r,a,b) \
-  r = pcre2_get_error_message_32(a,G(b,32),G(G(b,32),_size))
+  r = pcre2_get_error_message_32(a,G(b,32),G(G(b,32),_size/4))
 #define PCRE2_GET_OVECTOR_COUNT(a,b) a = pcre2_get_ovector_count_32(G(b,32))
 #define PCRE2_GET_STARTCHAR(a,b) a = pcre2_get_startchar_32(G(b,32))
 #define PCRE2_JIT_COMPILE(r,a,b) r = pcre2_jit_compile_32(G(a,32),b)
