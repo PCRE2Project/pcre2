@@ -71,6 +71,8 @@ available, and into a new section that is always compiled for Windows.
 10. In pcre2test, explicitly close the file after an error during serialization 
 or deserialization (the "load" or "save" commands).
 
+11. Fix memory leak in pcre2_serialize_decode() when the input is invalid.
+
 
 Version 10.23 14-February-2017
 ------------------------------
