@@ -261,10 +261,14 @@ pcre2_real_code *re = (pcre2_real_code *)code;
 pcre2_callout_enumerate_block cb;
 PCRE2_SPTR cc;
 #ifdef SUPPORT_UNICODE
-BOOL utf = (re->overall_options & PCRE2_UTF) != 0;
+BOOL utf;
 #endif
 
 if (re == NULL) return PCRE2_ERROR_NULL;
+
+#ifdef SUPPORT_UNICODE
+utf = (re->overall_options & PCRE2_UTF) != 0;
+#endif
 
 /* Check that the first field in the block is the magic number. If it is not,
 return with PCRE2_ERROR_BADMAGIC. */

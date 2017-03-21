@@ -73,6 +73,9 @@ or deserialization (the "load" or "save" commands).
 
 11. Fix memory leak in pcre2_serialize_decode() when the input is invalid.
 
+12. Fix potential NULL dereference in pcre2_callout_enumerate() if called with 
+a NULL pattern pointer when Unicode support is available.
+
 
 Version 10.23 14-February-2017
 ------------------------------
