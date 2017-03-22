@@ -544,7 +544,7 @@ for (;;)
   BOOL partial_newline = FALSE;
   BOOL could_continue = reset_could_continue;
   reset_could_continue = FALSE;
-
+  
   if (ptr > mb->last_used_ptr) mb->last_used_ptr = ptr;
 
   /* Make the new state list into the active state list and empty the
@@ -597,7 +597,7 @@ for (;;)
     int state_offset = current_state->offset;
     int rrc;
     int count;
-
+    
     /* A negative offset is a special case meaning "hold off going to this
     (negated) state until the number of characters in the data field have
     been skipped". If the could_continue flag was passed over from a previous
@@ -633,7 +633,7 @@ for (;;)
 
     code = start_code + state_offset;
     codevalue = *code;
-
+    
     /* If this opcode inspects a character, but we are at the end of the
     subject, remember the fact for use when testing for a partial match. */
 
@@ -2539,11 +2539,13 @@ for (;;)
           if (isinclass)
             {
             int max = (int)GET2(ecode, 1 + IMM2_SIZE);
-            if (*ecode == OP_CRPOSRANGE)
+
+            if (*ecode == OP_CRPOSRANGE && count >= (int)GET2(ecode, 1))
               {
               active_count--;           /* Remove non-match possibility */
               next_active_state--;
               }
+
             if (++count >= max && max != 0)   /* Max 0 => no limit */
               { ADD_NEW(next_state_offset + 1 + 2 * IMM2_SIZE, 0); }
             else
