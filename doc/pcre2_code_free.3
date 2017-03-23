@@ -1,4 +1,4 @@
-.TH PCRE2_CODE_FREE 3 "29 July 2015" "PCRE2 10.21"
+.TH PCRE2_CODE_FREE 3 "23 March 2017" "PCRE2 10.30"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH SYNOPSIS
@@ -14,7 +14,9 @@ PCRE2 - Perl-compatible regular expressions (revised API)
 .rs
 .sp
 This function frees the memory used for a compiled pattern, including any
-memory used by the JIT compiler.
+memory used by the JIT compiler. If the compiled pattern was created by a call 
+to \fBpcre2_code_copy_with_tables()\fP, the memory for the character tables is 
+also freed.
 .P
 There is a complete description of the PCRE2 native API in the
 .\" HREF
