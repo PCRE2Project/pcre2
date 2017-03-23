@@ -15424,11 +15424,13 @@ Subject length lower bound = 11
 //
     \=ovector=7777777777
 ** Invalid value in 'ovector=7777777777'
+    
+# This is here because Perl matches, even though a COMMIT is encountered 
+# outside of the recursion. 
 
 /(?1)(A(*COMMIT)|B)D/
-    BAXBAD\=no_jit
- 0: BAD
- 1: A
+    BAXBAD
+No match
     
 "(?1){2}(a)"B
 ------------------------------------------------------------------
@@ -15549,7 +15551,7 @@ Subject length lower bound = 11
  1: abcba
  2: a
     
-# The first of these, when run by Perl, give the mark 'aa', which is wrong. 
+# The first of these, when run by Perl, gives the mark 'aa', which is wrong. 
 
 '(?>a(*:aa))b|ac' mark
     ac
@@ -15572,6 +15574,14 @@ No match
 
 /\g{3/
 Failed: error 157 at offset 2: \g is not followed by a braced, angle-bracketed, or quoted name/number or by a plain number
+
+# Perl matches this one, but PCRE does not because (*ACCEPT) clears out any
+# pending backtracks in the recursion.
+
+/^ (?(DEFINE) (..(*ACCEPT)|...) ) (?1)$/x
+\= Expect no match
+    abc
+No match
 
 # End of testinput2 
 Error -63: PCRE2_ERROR_BADDATA (unknown error number)

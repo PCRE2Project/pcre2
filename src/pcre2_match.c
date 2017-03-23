@@ -5051,8 +5051,8 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
     offset data is the offset to the starting bracket from the start of the
     whole pattern. (This is so that it works from duplicated subpatterns.) */
 
-#define Lframe_type   F->temp_32[0]
-#define Lstart_group  F->temp_sptr[0]
+#define Lframe_type F->temp_32[0]
+#define Lstart_branch F->temp_sptr[0]
 
     case OP_RECURSE:
     bracode = mb->start_code + GET(Fecode, 1);
@@ -5083,42 +5083,47 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
     bracket. We must leave Fecode unchanged so that the ending code can find
     out where to continue. */
 
-    Lstart_group = bracode;
+    Lstart_branch = bracode;
     Lframe_type = GF_RECURSE | number;
 
     for (;;)
       {
+      PCRE2_SPTR next_ecode;
+
       group_frame_type = Lframe_type;
-      RMATCH(Lstart_group + PRIV(OP_lengths)[*Lstart_group], RM11);
+      RMATCH(Lstart_branch + PRIV(OP_lengths)[*Lstart_branch], RM11);
+      next_ecode = Lstart_branch + GET(Lstart_branch,1);
 
-      /* See comment above about handling THEN. */
+      /* Handle backtracking verbs, which are defined in a range that can
+      easily be tested for. PCRE does not allow THEN, SKIP, PRUNE or COMMIT to
+      escape beyond a recursion; they cause a NOMATCH for the entire recursion.
 
-      if (rrc == MATCH_THEN)
+      When one of these verbs triggers, the current recursion group number is
+      recorded. If it matches the recursion we are processing, the verb
+      happened within the recursion and we must deal with it. Otherwise it must
+      have happened after the recursion completed, and so has to be passed
+      back. See comment above about handling THEN. */
+
+      if (rrc >= MATCH_BACKTRACK_MIN && rrc <= MATCH_BACKTRACK_MAX &&
+          mb->verb_current_recurse == (Lframe_type ^ GF_RECURSE))
         {
-        PCRE2_SPTR next_ecode = Lstart_group + GET(Lstart_group,1);
-        if (mb->verb_ecode_ptr < next_ecode &&
-            (*Lstart_group == OP_ALT || *next_ecode == OP_ALT))
+        if (rrc == MATCH_THEN && mb->verb_ecode_ptr < next_ecode &&
+            (*Lstart_branch == OP_ALT || *next_ecode == OP_ALT))
           rrc = MATCH_NOMATCH;
+        else RRETURN(MATCH_NOMATCH);
         }
-
-      /* PCRE does not allow THEN, SKIP, PRUNE or COMMIT to escape beyond a
-      recursion; they cause a NOMATCH for the entire recursion. These codes are
-      defined in a range that can be tested for. */
-
-      if (rrc >= MATCH_BACKTRACK_MIN && rrc <= MATCH_BACKTRACK_MAX)
-        RRETURN(MATCH_NOMATCH);
 
       /* Note that carrying on after (*ACCEPT) in a recursion is handled in the
       OP_ACCEPT code. Nothing needs to be done here. */
 
       if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-      Lstart_group += GET(Lstart_group, 1);
-      if (*Lstart_group != OP_ALT) RRETURN(MATCH_NOMATCH);
+      Lstart_branch = next_ecode;
+      if (*Lstart_branch != OP_ALT) RRETURN(MATCH_NOMATCH);
       }
     /* Control never reaches here. */
 
 #undef Lframe_type
-#undef Lstart_group
+#undef Lstart_branch
 
 
     /* ===================================================================== */
@@ -5535,8 +5540,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
 
       /* Whole-pattern recursion is coded as a recurse into group 0, so it
       won't be picked up here. Instead, we catch it when the OP_END is reached.
-      Other recursion is handled here. We just have to record the current
-      subject position and start match pointer and give a MATCH return. */
+      Other recursion is handled here. */
 
       case OP_CBRA:
       case OP_CBRAPOS:
@@ -5545,7 +5549,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
       number = GET2(bracode, 1+LINK_SIZE);
 
       /* Handle a recursively called group. We reinstate the previous set of
-      captures and then carry on. */
+      captures and then carry on after the recursion call. */
 
       if (Fcurrent_recurse == number)
         {
@@ -5837,26 +5841,34 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
     case OP_FAIL:
     RRETURN(MATCH_NOMATCH);
 
+    /* Record the current recursing group number in mb->verb_current_recurse
+    when a backtracking return such as MATCH_COMMIT is given. This enables the
+    recurse processing to catch verbs from within the recursion. */
+
     case OP_COMMIT:
     RMATCH(Fecode + PRIV(OP_lengths)[*Fecode], RM13);
     if (rrc != MATCH_NOMATCH) RRETURN(rrc);
+    mb->verb_current_recurse = Fcurrent_recurse;
     RRETURN(MATCH_COMMIT);
 
     case OP_PRUNE:
     RMATCH(Fecode + PRIV(OP_lengths)[*Fecode], RM14);
     if (rrc != MATCH_NOMATCH) RRETURN(rrc);
+    mb->verb_current_recurse = Fcurrent_recurse;
     RRETURN(MATCH_PRUNE);
 
     case OP_PRUNE_ARG:
     Fmark = mb->nomatch_mark = Fecode + 2;
     RMATCH(Fecode + PRIV(OP_lengths)[*Fecode] + Fecode[1], RM15);
     if (rrc != MATCH_NOMATCH) RRETURN(rrc);
+    mb->verb_current_recurse = Fcurrent_recurse;
     RRETURN(MATCH_PRUNE);
 
     case OP_SKIP:
     RMATCH(Fecode + PRIV(OP_lengths)[*Fecode], RM16);
     if (rrc != MATCH_NOMATCH) RRETURN(rrc);
     mb->verb_skip_ptr = Feptr;   /* Pass back current position */
+    mb->verb_current_recurse = Fcurrent_recurse;
     RRETURN(MATCH_SKIP);
 
     /* Note that, for Perl compatibility, SKIP with an argument does NOT set
@@ -5883,6 +5895,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
     mb->skip_arg_count. */
 
     mb->verb_skip_ptr = Fecode + 2;
+    mb->verb_current_recurse = Fcurrent_recurse;
     RRETURN(MATCH_SKIP_ARG);
 
     /* For THEN (and THEN_ARG) we pass back the address of the opcode, so that
@@ -5892,14 +5905,15 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
     RMATCH(Fecode + PRIV(OP_lengths)[*Fecode], RM18);
     if (rrc != MATCH_NOMATCH) RRETURN(rrc);
     mb->verb_ecode_ptr = Fecode;
+    mb->verb_current_recurse = Fcurrent_recurse;
     RRETURN(MATCH_THEN);
 
     case OP_THEN_ARG:
     Fmark = mb->nomatch_mark = Fecode + 2;
     RMATCH(Fecode + PRIV(OP_lengths)[*Fecode] + Fecode[1], RM19);
-
     if (rrc != MATCH_NOMATCH) RRETURN(rrc);
     mb->verb_ecode_ptr = Fecode;
+    mb->verb_current_recurse = Fcurrent_recurse;
     RRETURN(MATCH_THEN);
 
 
@@ -6243,7 +6257,7 @@ correct when calling match() more than once for non-anchored patterns. */
 frame_size = sizeof(heapframe) + ((re->top_bracket - 1) * 2 * sizeof(PCRE2_SIZE));
 
 /* If a pattern has very many capturing parentheses, the frame size may be very
-large. Ensure that there are at least 10 available frames by getting an initial 
+large. Ensure that there are at least 10 available frames by getting an initial
 vector on the heap if necessary. */
 
 if (frame_size <= START_FRAMES_SIZE/10)

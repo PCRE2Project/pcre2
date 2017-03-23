@@ -15,9 +15,8 @@ the old code had a number of fudges to try to reduce stack usage. It seems to
 run no slower than the old code.
 
 A number of bugs in the refactored code were subsequently fixed during testing
-before release, but after the code was made available in the repository. Many
-of the bugs were discovered by fuzzing testing. These bugs were never in fully
-released code, but are noted here for the record.
+before release, but after the code was made available in the repository. These
+bugs were never in fully released code, but are noted here for the record.
 
   (a) If a pattern had fewer capturing parentheses than the ovector supplied in 
       the match data block, a memory error (detectable by ASAN) occurred after
@@ -29,6 +28,8 @@ released code, but are noted here for the record.
       crash. A vector on the heap is now set up at the start of matching if the 
       vector on the stack is not big enough to handle at least 10 frames. 
       Fixes oss-fuzz issue 783. 
+      
+  (c) Handling of (*VERB)s in recursions was wrong in some cases. 
       
 2. Now that pcre2_match() no longer uses recursive function calls (see above),
 the "match limit recursion" value seems misnamed. It still exists, and limits 

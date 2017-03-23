@@ -4957,9 +4957,12 @@ a)"xI
 
 //
     \=ovector=7777777777
+    
+# This is here because Perl matches, even though a COMMIT is encountered 
+# outside of the recursion. 
 
 /(?1)(A(*COMMIT)|B)D/
-    BAXBAD\=no_jit
+    BAXBAD
     
 "(?1){2}(a)"B
 
@@ -5001,7 +5004,7 @@ a)"xI
 /^(.|(.)(?1)?\2)$/
     abcba
     
-# The first of these, when run by Perl, give the mark 'aa', which is wrong. 
+# The first of these, when run by Perl, gives the mark 'aa', which is wrong. 
 
 '(?>a(*:aa))b|ac' mark
     ac
@@ -5018,5 +5021,12 @@ a)"xI
 /(?<!\1((?U)1((?U))))(*F)/never_backslash_c,alt_bsux,anchored,extended
 
 /\g{3/
+
+# Perl matches this one, but PCRE does not because (*ACCEPT) clears out any
+# pending backtracks in the recursion.
+
+/^ (?(DEFINE) (..(*ACCEPT)|...) ) (?1)$/x
+\= Expect no match
+    abc
 
 # End of testinput2 
