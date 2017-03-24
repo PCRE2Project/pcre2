@@ -55,7 +55,10 @@ The facility for saving and restoring compiled patterns is intended for use
 within individual applications. As such, the data supplied to
 <b>pcre2_serialize_decode()</b> is expected to be trusted data, not data from
 arbitrary external sources. There is only some simple consistency checking, not
-complete validation of what is being re-loaded.
+complete validation of what is being re-loaded. Corrupted data may cause
+undefined results. For example, if the length field of a pattern in the
+serialized data is corrupted, the deserializing code may read beyond the end of
+the byte stream that is passed to it.
 </P>
 <br><a name="SEC3" href="#TOC1">SAVING COMPILED PATTERNS</a><br>
 <P>
@@ -190,9 +193,9 @@ Cambridge, England.
 </P>
 <br><a name="SEC6" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 24 May 2016
+Last updated: 21 March 2017
 <br>
-Copyright &copy; 1997-2016 University of Cambridge.
+Copyright &copy; 1997-2017 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE2 index page</a>.

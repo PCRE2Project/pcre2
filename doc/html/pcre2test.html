@@ -126,12 +126,13 @@ character values up to 0x7fffffff. Each character is placed in one 16-bit or
 to occur).
 </P>
 <P>
-UTF-8 is not capable of encoding values greater than 0x7fffffff, but such
-values can be handled by the 32-bit library. When testing this library in
-non-UTF mode with <b>utf8_input</b> set, if any character is preceded by the
-byte 0xff (which is an illegal byte in UTF-8) 0x80000000 is added to the
-character's value. This is the only way of passing such code points in a
-pattern string. For subject strings, using an escape sequence is preferable.
+UTF-8 (in its original definition) is not capable of encoding values greater
+than 0x7fffffff, but such values can be handled by the 32-bit library. When
+testing this library in non-UTF mode with <b>utf8_input</b> set, if any
+character is preceded by the byte 0xff (which is an illegal byte in UTF-8)
+0x80000000 is added to the character's value. This is the only way of passing
+such code points in a pattern string. For subject strings, using an escape
+sequence is preferable.
 </P>
 <br><a name="SEC4" href="#TOC1">COMMAND LINE OPTIONS</a><br>
 <P>
@@ -602,6 +603,7 @@ about the pattern:
   /B  bincode                   show binary code without lengths
       callout_info              show callout information
       debug                     same as info,fullbincode
+      framesize                 show matching frame size 
       fullbincode               show binary code with lengths
   /I  info                      show info about compiled pattern
       hex                       unquoted characters are hexadecimal
@@ -687,6 +689,11 @@ if there is more than one they are listed as "starting code units". "Last code
 unit" is the last literal code unit that must be present in any match. This is
 not necessarily the last character. These lines are omitted if no starting or
 ending code units are recorded.
+</P>
+<P>
+The <b>framesize</b> modifier shows the size, in bytes, of the storage frames 
+used by <b>pcre2_match()</b> for handling backtracking. The size depends on the
+number of capturing parentheses in the pattern.
 </P>
 <P>
 The <b>callout_info</b> modifier requests information about all the callouts in
@@ -1073,6 +1080,7 @@ pattern.
       callout_fail=&#60;n&#62;[:&#60;m&#62;]     control callout failure
       callout_none               do not supply a callout function
       copy=&#60;number or name&#62;      copy captured substring
+      depth_limit=&#60;n&#62;            set a depth limit
       dfa                        use <b>pcre2_dfa_match()</b>
       find_limits                find match and recursion limits
       get=&#60;number or name&#62;       extract captured substring
@@ -1086,7 +1094,7 @@ pattern.
       offset=&#60;n&#62;                 set starting offset
       offset_limit=&#60;n&#62;           set offset limit
       ovector=&#60;n&#62;                set size of output vector
-      recursion_limit=&#60;n&#62;        set a recursion limit
+      recursion_limit=&#60;n&#62;        obsolete synonym for depth_limit
       replace=&#60;string&#62;           specify a replacement string
       startchar                  show startchar when relevant
       startoffset=&#60;n&#62;            same as offset=&#60;n&#62;
@@ -1320,10 +1328,10 @@ stack that is larger than the default 32K is necessary only for very
 complicated patterns.
 </P>
 <br><b>
-Setting match and recursion limits
+Setting match and depth limits
 </b><br>
 <P>
-The <b>match_limit</b> and <b>recursion_limit</b> modifiers set the appropriate
+The <b>match_limit</b> and <b>depth_limit</b> modifiers set the appropriate
 limits in the match context. These values are ignored when the
 <b>find_limits</b> modifier is specified.
 </P>
@@ -1333,23 +1341,23 @@ Finding minimum limits
 <P>
 If the <b>find_limits</b> modifier is present, <b>pcre2test</b> calls
 <b>pcre2_match()</b> several times, setting different values in the match
-context via <b>pcre2_set_match_limit()</b> and <b>pcre2_set_recursion_limit()</b>
+context via <b>pcre2_set_match_limit()</b> and <b>pcre2_set_depth_limit()</b>
 until it finds the minimum values for each parameter that allow
 <b>pcre2_match()</b> to complete without error.
 </P>
 <P>
 If JIT is being used, only the match limit is relevant. If DFA matching is
-being used, neither limit is relevant, and this modifier is ignored (with a
-warning message).
+being used, only the depth limit is relevant, but at present this modifier is
+ignored (with a warning message).
 </P>
 <P>
 The <i>match_limit</i> number is a measure of the amount of backtracking
 that takes place, and learning the minimum value can be instructive. For most
 simple matches, the number is quite small, but for patterns with very large
 numbers of matching possibilities, it can become large very quickly with
-increasing length of subject string. The <i>match_limit_recursion</i> number is
-a measure of how much stack (or, if PCRE2 is compiled with NO_RECURSE, how much
-heap) memory is needed to complete the match attempt.
+increasing length of subject string. The <i>depth_limit</i> number is
+a measure of how much memory for recording backtracking points is needed to
+complete the match attempt.
 </P>
 <br><b>
 Showing MARK names
@@ -1466,7 +1474,7 @@ code unit offset of the start of the failing character is also output. Here is
 an example of an interactive <b>pcre2test</b> run.
 <pre>
   $ pcre2test
-  PCRE2 version 9.00 2014-05-10
+  PCRE2 version 10.22 2016-07-29
 
     re&#62; /^abc(\d+)/
   data&#62; abc123
@@ -1779,9 +1787,9 @@ Cambridge, England.
 </P>
 <br><a name="SEC21" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 28 December 2016
+Last updated: 21 March 2017
 <br>
-Copyright &copy; 1997-2016 University of Cambridge.
+Copyright &copy; 1997-2017 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE2 index page</a>.

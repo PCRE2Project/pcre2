@@ -2575,8 +2575,8 @@ The internal recursion limit was reached.
 A text message for an error code from any PCRE2 function (compile, match, or
 auxiliary) can be obtained by calling <b>pcre2_get_error_message()</b>. The code
 is passed as the first argument, with the remaining two arguments specifying a
-code unit buffer and its length, into which the text message is placed. Note
-that the message is returned in code units of the appropriate width for the
+code unit buffer and its length in code units, into which the text message is
+placed. The message is returned in code units of the appropriate width for the
 library that is being used.
 </P>
 <P>
@@ -3265,9 +3265,9 @@ Cambridge, England.
 </P>
 <br><a name="SEC41" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 23 December 2016
+Last updated: 21 March 2017
 <br>
-Copyright &copy; 1997-2016 University of Cambridge.
+Copyright &copy; 1997-2017 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE2 index page</a>.

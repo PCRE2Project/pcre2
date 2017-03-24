@@ -26,7 +26,9 @@ DESCRIPTION
 </b><br>
 <P>
 This function frees the memory used for a compiled pattern, including any
-memory used by the JIT compiler.
+memory used by the JIT compiler. If the compiled pattern was created by a call 
+to <b>pcre2_code_copy_with_tables()</b>, the memory for the character tables is 
+also freed.
 </P>
 <P>
 There is a complete description of the PCRE2 native API in the

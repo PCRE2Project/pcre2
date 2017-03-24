@@ -255,6 +255,9 @@ OPTIONS
                  directory like this is an immediate end-of-file; in others it
                  may provoke an error.
 
+       --depth-limit=number
+                 See --match-limit below.
+
        -e pattern, --regex=pattern, --regexp=pattern
                  Specify a pattern to be matched. This option can be used mul-
                  tiple times in order to specify several patterns. It can also
@@ -477,32 +480,24 @@ OPTIONS
                  no short form for this option.
 
        --match-limit=number
-                 Processing some regular expression  patterns  can  require  a
-                 very  large amount of memory, leading in some cases to a pro-
-                 gram crash if not enough is available.   Other  patterns  may
-                 take  a  very  long  time to search for all possible matching
-                 strings.  The  pcre2_match()  function  that  is  called   by
-                 pcre2grep  to  do  the  matching  has two parameters that can
-                 limit the resources that it uses.
+                 Processing some regular expression patterns may take  a  very
+                 long time to search for all possible matching strings. Others
+                 may require a very large amount  of  memory.  There  are  two
+                 options that set resource limits for matching.
 
-                 The  --match-limit  option  provides  a  means  of   limiting
-                 resource usage when processing patterns that are not going to
-                 match, but which have a very large number of possibilities in
-                 their  search  trees.  The  classic example is a pattern that
-                 uses nested unlimited repeats. Internally, PCRE2 uses a func-
-                 tion  called  match()  which  it  calls repeatedly (sometimes
-                 recursively). The limit set by --match-limit  is  imposed  on
-                 the  number  of times this function is called during a match,
-                 which has the effect of limiting the amount  of  backtracking
-                 that can take place.
+                 The --match-limit option provides a means of limiting comput-
+                 ing resource usage when  processing  patterns  that  are  not
+                 going  to match, but which have a very large number of possi-
+                 bilities in their search trees. The classic example is a pat-
+                 tern  that  uses  nested unlimited repeats. Internally, PCRE2
+                 has a counter that is incremented each time around  its  main
+                 processing  loop.  If  the  value  set  by  --match-limit  is
+                 reached, an error occurs.
 
-                 The --recursion-limit option is similar to --match-limit, but
-                 instead of limiting the total number of times that match() is
-                 called, it limits the depth of recursive calls, which in turn
-                 limits the amount of memory that can be used.  The  recursion
-                 depth  is  a  smaller  number than the total number of calls,
-                 because not all calls to match() are recursive. This limit is
-                 of use only if it is set smaller than --match-limit.
+                 The --depth-limit option limits the  depth  of  nested  back-
+                 tracking  points,  which  in turn limits the amount of memory
+                 that is used. This limit is of use only if it is set  smaller
+                 than --match-limit.
 
                  There  are no short forms for these options. The default set-
                  tings are specified when the PCRE2 library is compiled,  with
@@ -834,9 +829,9 @@ MATCHING ERRORS
        such errors, pcre2grep gives up.
 
        The --match-limit option of pcre2grep can be used to  set  the  overall
-       resource  limit; there is a second option called --recursion-limit that
-       sets a limit on the amount of memory (usually stack) that is used  (see
-       the discussion of these options above).
+       resource limit; there is a second option called --depth-limit that sets
+       a limit on the amount of memory that is used  (see  the  discussion  of
+       these options above).
 
 
 DIAGNOSTICS
@@ -862,5 +857,5 @@ AUTHOR
 
 REVISION
 
-       Last updated: 31 December 2016
-       Copyright (c) 1997-2016 University of Cambridge.
+       Last updated: 21 March 2017
+       Copyright (c) 1997-2017 University of Cambridge.
