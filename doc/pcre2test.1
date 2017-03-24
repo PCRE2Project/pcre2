@@ -1059,7 +1059,7 @@ pattern.
       jitstack=<n>               set size of JIT stack
       mark                       show mark values
       match_limit=<n>            set a match limit
-      memory                     show memory usage
+      memory                     show heap memory usage
       null_context               match with a NULL context
       offset=<n>                 set starting offset
       offset_limit=<n>           set offset limit
@@ -1333,8 +1333,11 @@ is added to the non-match message.
 .SS "Showing memory usage"
 .rs
 .sp
-The \fBmemory\fP modifier causes \fBpcre2test\fP to log all memory allocation
-and freeing calls that occur during a match operation.
+The \fBmemory\fP modifier causes \fBpcre2test\fP to log all heap memory
+allocation and freeing calls that occur during a call to \fBpcre2_match()\fP.
+These occur only when a match requires a bigger vector than the default for
+remembering backtracking points. In many cases there will be none. No heap
+memory is allocated during matching with \fBpcre2_dfa_match\fP or with JIT.
 .
 .
 .SS "Setting a starting offset"
