@@ -4978,32 +4978,6 @@ a)"xI
     AZB
     AZBDZ 
     
-# These four are temporarily here instead of test 1 while waiting for a JIT 
-# update. They require backtracking into recursions.
-
-/^(.|(.)(?1)\2)$/
-    a
-    aba
-    abcba
-    ababa
-    abcdcba
-
-/^((.)(?1)\2|.?)$/
-    a
-    aba
-    abba
-    abcba
-    ababa
-    abccba
-    abcdcba
-    abcddcba
-
-/^(.)(\1|a(?2))/
-    bab
-
-/^(.|(.)(?1)?\2)$/
-    abcba
-    
 # The first of these, when run by Perl, gives the mark 'aa', which is wrong. 
 
 '(?>a(*:aa))b|ac' mark

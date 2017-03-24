@@ -5882,4 +5882,27 @@ ef) x/x,mark
     Ab
     Ac 
 
+/^(.|(.)(?1)\2)$/
+    a
+    aba
+    abcba
+    ababa
+    abcdcba
+
+/^((.)(?1)\2|.?)$/
+    a
+    aba
+    abba
+    abcba
+    ababa
+    abccba
+    abcdcba
+    abcddcba
+
+/^(.)(\1|a(?2))/
+    bab
+
+/^(.|(.)(?1)?\2)$/
+    abcba
+    
 # End of testinput1 

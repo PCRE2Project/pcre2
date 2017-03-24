@@ -9401,4 +9401,70 @@ No match
     Ac 
  0: c
 
+/^(.|(.)(?1)\2)$/
+    a
+ 0: a
+ 1: a
+    aba
+ 0: aba
+ 1: aba
+ 2: a
+    abcba
+ 0: abcba
+ 1: abcba
+ 2: a
+    ababa
+ 0: ababa
+ 1: ababa
+ 2: a
+    abcdcba
+ 0: abcdcba
+ 1: abcdcba
+ 2: a
+
+/^((.)(?1)\2|.?)$/
+    a
+ 0: a
+ 1: a
+    aba
+ 0: aba
+ 1: aba
+ 2: a
+    abba
+ 0: abba
+ 1: abba
+ 2: a
+    abcba
+ 0: abcba
+ 1: abcba
+ 2: a
+    ababa
+ 0: ababa
+ 1: ababa
+ 2: a
+    abccba
+ 0: abccba
+ 1: abccba
+ 2: a
+    abcdcba
+ 0: abcdcba
+ 1: abcdcba
+ 2: a
+    abcddcba
+ 0: abcddcba
+ 1: abcddcba
+ 2: a
+
+/^(.)(\1|a(?2))/
+    bab
+ 0: bab
+ 1: b
+ 2: ab
+
+/^(.|(.)(?1)?\2)$/
+    abcba
+ 0: abcba
+ 1: abcba
+ 2: a
+    
 # End of testinput1 
