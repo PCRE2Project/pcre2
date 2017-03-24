@@ -7689,4 +7689,9 @@ Failed: error -53: matching depth limit exceeded
     02-123-123
  0: 02-123-123
 
+/^(a(?2))(b)(?1)/
+    abbab\=find_limits 
+Minimum depth limit = 2
+ 0: abbab
+
 # End of testinput6

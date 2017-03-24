@@ -5258,8 +5258,20 @@ return PR_OK;
 *          Check match or depth limit            *
 *************************************************/
 
+/* This is used for DFA, normal, and JIT fast matching. For DFA matching it 
+should only called with the third argument set to PCRE2_ERROR_DEPTHLIMIT.
+
+Arguments:
+  pp        the subject string
+  ulen      length of subject or PCRE2_ZERO_TERMINATED
+  errnumber defines which limit to test
+  msg       string to include in final message
+  
+Returns:    the return from the final match function call
+*/    
+
 static int
-check_match_limit(uint8_t *pp, size_t ulen, int errnumber, const char *msg)
+check_match_limit(uint8_t *pp, PCRE2_SIZE ulen, int errnumber, const char *msg)
 {
 int capcount;
 uint32_t min = 0;
@@ -5279,10 +5291,22 @@ for (;;)
     {
     PCRE2_SET_DEPTH_LIMIT(dat_context, mid);
     }
-
-  if ((pat_patctl.control & CTL_JITFAST) != 0)
+    
+  if ((dat_datctl.control & CTL_DFA) != 0)
+    {
+    if (dfa_workspace == NULL)
+      dfa_workspace = (int *)malloc(DFA_WS_DIMENSION*sizeof(int));
+    if (dfa_matched++ == 0)
+      dfa_workspace[0] = -1;  /* To catch bad restart */
+    PCRE2_DFA_MATCH(capcount, compiled_code, pp, ulen, dat_datctl.offset, 
+      dat_datctl.options, match_data,
+      PTR(dat_context), dfa_workspace, DFA_WS_DIMENSION);
+    }
+        
+  else if ((pat_patctl.control & CTL_JITFAST) != 0)
     PCRE2_JIT_MATCH(capcount, compiled_code, pp, ulen, dat_datctl.offset,
       dat_datctl.options, match_data, PTR(dat_context));
+       
   else
     PCRE2_MATCH(capcount, compiled_code, pp, ulen, dat_datctl.offset,
       dat_datctl.options, match_data, PTR(dat_context));
@@ -6243,12 +6267,6 @@ if ((pat_patctl.control & CTL_POSIX) != 0)
  /* Handle matching via the native interface. Check for consistency of
 modifiers. */
 
-if ((dat_datctl.control & (CTL_DFA|CTL_FINDLIMITS)) == (CTL_DFA|CTL_FINDLIMITS))
-  {
-  fprintf(outfile, "** Finding match limits is not relevant for DFA matching: ignored\n");
-  dat_datctl.control &= ~CTL_FINDLIMITS;
-  }
-
 /* ALLUSEDTEXT is not supported with JIT, but JIT is not used with DFA
 matching, even if the JIT compiler was used. */
 
@@ -6579,14 +6597,19 @@ else for (gmatched = 0;; gmatched++)
         (double)CLOCKS_PER_SEC);
     }
 
-  /* Find the match and depth limits if requested. The depth limit
-  is not relevant for JIT. */
+  /* Find the match and depth limits if requested. The match limit is not 
+  relevant for DFA matching and the depth limit is not relevant for JIT. */
 
   if ((dat_datctl.control & CTL_FINDLIMITS) != 0)
     {
-    capcount = check_match_limit(pp, arg_ulen, PCRE2_ERROR_MATCHLIMIT, "match");
-    if (FLD(compiled_code, executable_jit) == NULL)
-      (void)check_match_limit(pp, arg_ulen, PCRE2_ERROR_DEPTHLIMIT,
+    if ((dat_datctl.control & CTL_DFA) == 0)
+      capcount = check_match_limit(pp, arg_ulen, PCRE2_ERROR_MATCHLIMIT, 
+        "match");
+    else capcount = 0;     
+    if (FLD(compiled_code, executable_jit) == NULL || 
+        (dat_datctl.options & PCRE2_NO_JIT) != 0 ||
+        (dat_datctl.control & CTL_DFA) != 0)
+      capcount = check_match_limit(pp, arg_ulen, PCRE2_ERROR_DEPTHLIMIT,
         "depth");
     }
 
