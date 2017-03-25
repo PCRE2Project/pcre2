@@ -3648,7 +3648,7 @@
 
 /(?:(a)+(?C1)bb|aa(?C2)b)++/
     aab\=callout_capture
-    aab\=callout_capture,ovector=1,no_jit
+    aab\=callout_capture,ovector=1
 
 /(ab)x|ab/
     ab\=ovector=0
@@ -4995,6 +4995,9 @@ a)"xI
 /(?<!\1((?U)1((?U))))(*F)/never_backslash_c,alt_bsux,anchored,extended
 
 /\g{3/
+
+/(a(?C1)(b)(c)d)+/
+  abcdabcd\=callout_capture
 
 # Perl matches this one, but PCRE does not because (*ACCEPT) clears out any
 # pending backtracks in the recursion.

@@ -355,6 +355,8 @@ typedef struct then_trap_backtrack {
 typedef struct compiler_common {
   /* The sljit ceneric compiler. */
   struct sljit_compiler *compiler;
+  /* Compiled regular expression. */
+  pcre2_real_code *re;
   /* First byte code. */
   PCRE2_SPTR start;
   /* Maps private data offset to each opcode. */
@@ -3551,7 +3553,7 @@ sljit_emit_fast_return(compiler, RETURN_ADDR, 0);
 
 #endif /* SUPPORT_UNICODE */
 
-static SLJIT_INLINE struct sljit_label *mainloop_entry(compiler_common *common, BOOL hascrorlf, sljit_u32 overall_options)
+static SLJIT_INLINE struct sljit_label *mainloop_entry(compiler_common *common)
 {
 DEFINE_COMPILER;
 struct sljit_label *mainloop;
@@ -3563,6 +3565,8 @@ struct sljit_jump *end2 = NULL;
 struct sljit_jump *singlechar;
 #endif
 jump_list *newline = NULL;
+sljit_u32 overall_options = common->re->overall_options;
+BOOL hascrorlf = (common->re->flags & PCRE2_HASCRORLF) != 0;
 BOOL newlinecheck = FALSE;
 BOOL readuchar = FALSE;
 
@@ -4803,8 +4807,10 @@ return TRUE;
 
 #undef MAX_N_CHARS
 
-static SLJIT_INLINE void fast_forward_first_char(compiler_common *common, PCRE2_UCHAR first_char, BOOL caseless)
+static SLJIT_INLINE void fast_forward_first_char(compiler_common *common)
 {
+PCRE2_UCHAR first_char = (PCRE2_UCHAR)(common->re->first_codeunit);
+BOOL caseless = (common->re->flags & PCRE2_FIRSTCASELESS) != 0;
 PCRE2_UCHAR oc;
 
 oc = first_char;
@@ -4909,9 +4915,10 @@ if (common->match_end_ptr != 0)
 
 static BOOL check_class_ranges(compiler_common *common, const sljit_u8 *bits, BOOL nclass, BOOL invert, jump_list **backtracks);
 
-static SLJIT_INLINE void fast_forward_start_bits(compiler_common *common, const sljit_u8 *start_bits)
+static SLJIT_INLINE void fast_forward_start_bits(compiler_common *common)
 {
 DEFINE_COMPILER;
+const sljit_u8 *start_bits = common->re->start_bitmap;
 struct sljit_label *start;
 struct sljit_jump *quit;
 struct sljit_jump *found = NULL;
@@ -7378,37 +7385,70 @@ return cc + 1 + LINK_SIZE;
 
 static int SLJIT_CALL do_callout(struct jit_arguments *arguments, pcre2_callout_block *callout_block, PCRE2_SPTR *jit_ovector)
 {
-PCRE2_SPTR begin = arguments->begin;
-PCRE2_SIZE *ovector = arguments->match_data->ovector;
-sljit_u32 oveccount = arguments->oveccount;
-sljit_u32 i;
+PCRE2_SPTR begin;
+PCRE2_SIZE *ovector_ptr;
+PCRE2_SPTR *jit_ovector_ptr;
+PCRE2_SPTR saved_ovector0;
+sljit_u32 oveccount, i, retval;
 
 if (arguments->callout == NULL)
   return 0;
+
+SLJIT_COMPILE_ASSERT(sizeof (PCRE2_SIZE) <= sizeof (sljit_sw), pcre2_size_must_be_lower_than_sljit_sw_size);
+
+begin = arguments->begin;
+ovector_ptr = (PCRE2_SIZE*)jit_ovector;
+jit_ovector_ptr = jit_ovector;
+oveccount = callout_block->capture_top;
+
+saved_ovector0 = jit_ovector_ptr[0];
+jit_ovector_ptr[0] = begin - 1;
+SLJIT_ASSERT(jit_ovector_ptr[1] == begin - 1);
 
 callout_block->version = 1;
 
 /* Offsets in subject. */
 callout_block->subject_length = arguments->end - arguments->begin;
-callout_block->start_match = (PCRE2_SPTR)callout_block->subject - arguments->begin;
-callout_block->current_position = (PCRE2_SPTR)callout_block->offset_vector - arguments->begin;
+callout_block->start_match = saved_ovector0 - begin;
+callout_block->current_position = (PCRE2_SPTR)callout_block->offset_vector - begin;
 callout_block->subject = begin;
 
 /* Convert and copy the JIT offset vector to the ovector array. */
 callout_block->capture_top = 0;
-callout_block->offset_vector = ovector;
-for (i = 2; i < oveccount; i += 2)
+callout_block->offset_vector = ovector_ptr;
+
+/* Convert pointers to sizes. */
+for (i = 0; i < oveccount; i++)
   {
-  ovector[i] = jit_ovector[i] - begin;
-  ovector[i + 1] = jit_ovector[i + 1] - begin;
-  if (jit_ovector[i] >= begin)
+  ovector_ptr[0] = (PCRE2_SIZE)(jit_ovector_ptr[0] - begin);
+  ovector_ptr[1] = (PCRE2_SIZE)(jit_ovector_ptr[1] - begin);
+
+  if (ovector_ptr[0] != PCRE2_UNSET)
     callout_block->capture_top = i;
+
+  ovector_ptr += 2;
+  jit_ovector_ptr += 2;
   }
 
-callout_block->capture_top = (callout_block->capture_top >> 1) + 1;
-ovector[0] = PCRE2_UNSET;
-ovector[1] = PCRE2_UNSET;
-return (arguments->callout)(callout_block, arguments->callout_data);
+callout_block->capture_top++;
+
+retval = (arguments->callout)(callout_block, arguments->callout_data);
+
+ovector_ptr = ((PCRE2_SIZE*)jit_ovector) + oveccount * 2;
+jit_ovector_ptr = jit_ovector + oveccount * 2;
+
+/* Reverse conversion. */
+for (i = 0; i < oveccount; i++)
+  {
+  ovector_ptr -= 2;
+  jit_ovector_ptr -= 2;
+
+  jit_ovector_ptr[0] = begin + ovector_ptr[0];
+  jit_ovector_ptr[1] = begin + ovector_ptr[1];
+  }
+
+jit_ovector_ptr[0] = saved_ovector0;
+return retval;
 }
 
 /* Aligning to 8 byte. */
@@ -7439,11 +7479,10 @@ OP1(SLJIT_MOV, TMP1, 0, ARGUMENTS, 0);
 value1 = (*cc == OP_CALLOUT) ? cc[1 + 2 * LINK_SIZE] : 0;
 OP1(SLJIT_MOV_U32, SLJIT_MEM1(STACK_TOP), CALLOUT_ARG_OFFSET(callout_number), SLJIT_IMM, value1);
 OP1(SLJIT_MOV_U32, SLJIT_MEM1(STACK_TOP), CALLOUT_ARG_OFFSET(capture_last), TMP2, 0);
+OP1(SLJIT_MOV_U32, SLJIT_MEM1(STACK_TOP), CALLOUT_ARG_OFFSET(capture_top), SLJIT_IMM, common->re->top_bracket + 1);
 
 /* These pointer sized fields temporarly stores internal variables. */
-OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(SLJIT_SP), OVECTOR(0));
 OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), CALLOUT_ARG_OFFSET(offset_vector), STR_PTR, 0);
-OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), CALLOUT_ARG_OFFSET(subject), TMP2, 0);
 
 if (common->mark_ptr != 0)
   OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(TMP1), SLJIT_OFFSETOF(jit_arguments, mark_ptr));
@@ -11152,6 +11191,7 @@ SLJIT_ASSERT(tables);
 
 memset(&rootbacktrack, 0, sizeof(backtrack_common));
 memset(common, 0, sizeof(compiler_common));
+common->re = re;
 common->name_table = (PCRE2_SPTR)((uint8_t *)re + sizeof(pcre2_real_code));
 rootbacktrack.cc = common->name_table + re->name_count * re->name_entry_size;
 
@@ -11369,7 +11409,7 @@ if (common->control_head_ptr != 0)
 /* Main part of the matching */
 if ((re->overall_options & PCRE2_ANCHORED) == 0)
   {
-  mainloop_label = mainloop_entry(common, (re->flags & PCRE2_HASCRORLF) != 0, re->overall_options);
+  mainloop_label = mainloop_entry(common);
   continue_match_label = LABEL();
   /* Forward search if possible. */
   if ((re->overall_options & PCRE2_NO_START_OPTIMIZE) == 0)
@@ -11377,11 +11417,11 @@ if ((re->overall_options & PCRE2_ANCHORED) == 0)
     if (mode == PCRE2_JIT_COMPLETE && fast_forward_first_n_chars(common))
       ;
     else if ((re->flags & PCRE2_FIRSTSET) != 0)
-      fast_forward_first_char(common, (PCRE2_UCHAR)(re->first_codeunit), (re->flags & PCRE2_FIRSTCASELESS) != 0);
+      fast_forward_first_char(common);
     else if ((re->flags & PCRE2_STARTLINE) != 0)
       fast_forward_newline(common);
     else if ((re->flags & PCRE2_FIRSTMAPSET) != 0)
-      fast_forward_start_bits(common, re->start_bitmap);
+      fast_forward_start_bits(common);
     }
   }
 else

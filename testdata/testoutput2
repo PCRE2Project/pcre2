@@ -11703,7 +11703,7 @@ Callout 2: last capture = 0
 --->aab
     ^ ^     b
  0: aab
-    aab\=callout_capture,ovector=1,no_jit
+    aab\=callout_capture,ovector=1
 Callout 1: last capture = 1
  1: a
 --->aab
@@ -15505,6 +15505,22 @@ No match
 
 /\g{3/
 Failed: error 157 at offset 2: \g is not followed by a braced, angle-bracketed, or quoted name/number or by a plain number
+
+/(a(?C1)(b)(c)d)+/
+  abcdabcd\=callout_capture
+Callout 1: last capture = 0
+--->abcdabcd
+    ^^           (
+Callout 1: last capture = 1
+ 1: abcd
+ 2: b
+ 3: c
+--->abcdabcd
+    ^    ^       (
+ 0: abcdabcd
+ 1: abcd
+ 2: b
+ 3: c
 
 # Perl matches this one, but PCRE does not because (*ACCEPT) clears out any
 # pending backtracks in the recursion.
