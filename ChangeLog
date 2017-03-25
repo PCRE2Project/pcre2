@@ -92,6 +92,17 @@ matching to find the minimum value for this limit.
 memory allocation functions were used instead of whatever was used when the 
 pattern was compiled.
 
+17. Changes to the pcre2test "memory" modifier on a subject line. These apply
+only to pcre2_match():
+
+  (a) Warn if null_context is set on both pattern and subject, because the
+      memory details cannot then be shown.
+      
+  (b) Remember (up to a certain number of) memory allocations and their
+      lengths, and list only the lengths, so as to be system-independent.
+      (In practice, the new interpreter never has more than 2 blocks allocated 
+      simultaneously.) 
+
 
 Version 10.23 14-February-2017
 ------------------------------

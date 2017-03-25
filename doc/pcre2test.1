@@ -1,4 +1,4 @@
-.TH PCRE2TEST 1 "24 March 2017" "PCRE 10.30"
+.TH PCRE2TEST 1 "25 March 2017" "PCRE 10.30"
 .SH NAME
 pcre2test - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -1333,11 +1333,15 @@ is added to the non-match message.
 .SS "Showing memory usage"
 .rs
 .sp
-The \fBmemory\fP modifier causes \fBpcre2test\fP to log all heap memory
-allocation and freeing calls that occur during a call to \fBpcre2_match()\fP.
-These occur only when a match requires a bigger vector than the default for
-remembering backtracking points. In many cases there will be none. No heap
-memory is allocated during matching with \fBpcre2_dfa_match\fP or with JIT.
+The \fBmemory\fP modifier causes \fBpcre2test\fP to log the sizes of all heap
+memory allocation and freeing calls that occur during a call to
+\fBpcre2_match()\fP. These occur only when a match requires a bigger vector
+than the default for remembering backtracking points. In many cases there will
+be no heap memory used and therefore no additional output. No heap memory is
+allocated during matching with \fBpcre2_dfa_match\fP or with JIT, so in those
+cases the \fBmemory\fP modifier never has any effect. For this modifier to
+work, the \fBnull_context\fP modifier must not be set on both the pattern and
+the subject, though it can be set on one or the other.
 .
 .
 .SS "Setting a starting offset"
@@ -1771,6 +1775,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 24 March 2017
+Last updated: 25 March 2017
 Copyright (c) 1997-2017 University of Cambridge.
 .fi

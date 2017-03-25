@@ -78,6 +78,10 @@ from www.cbttape.org. */
 #include <unistd.h>
 #endif
 
+/* Debugging code enabler */
+
+// #define DEBUG_SHOW_MALLOC_ADDRESSES
+
 /* Both libreadline and libedit are optionally supported. The user-supplied
 original patch uses readline/readline.h for libedit, but in at least one system
 it is installed as editline/readline.h, so the configuration code now looks for
@@ -188,6 +192,7 @@ void vms_setsymbol( char *, char *, int );
 #define JUNK_OFFSET 0xdeadbeef  /* For initializing ovector */
 #define LOCALESIZE 32           /* Size of locale name */
 #define LOOPREPEAT 500000       /* Default loop count for timing */
+#define MALLOCLISTSIZE 20       /* For remembering mallocs */
 #define PATSTACKSIZE 20         /* Pattern stack for save/restore testing */
 #define REPLACE_MODSIZE 100     /* Field for reading 8-bit replacement */
 #define VERSION_SIZE 64         /* Size of buffer for the version strings */
@@ -838,6 +843,10 @@ static datctl dat_datctl;
 
 static void *patstack[PATSTACKSIZE];
 static int patstacknext = 0;
+
+static void *malloclist[MALLOCLISTSIZE];
+static PCRE2_SIZE malloclistlength[MALLOCLISTSIZE];
+static uint32_t malloclistptr = 0;
 
 #ifdef SUPPORT_PCRE2_8
 static regex_t preg = { NULL, NULL, 0, 0, 0 };
@@ -2435,12 +2444,32 @@ return sys_errlist[n];
 
 /* Alternative memory functions, to test functionality. */
 
-static void *my_malloc(size_t size, void *data)
+static void *my_malloc(PCRE2_SIZE size, void *data)
 {
 void *block = malloc(size);
 (void)data;
 if (show_memory)
-  fprintf(outfile, "malloc       %3d %p\n", (int)size, block);
+  {
+  if (block == NULL)
+    {
+    fprintf(outfile, "** malloc() failed for %zd\n", size);
+    }
+  else
+    {       
+    fprintf(outfile, "malloc  %5zd", size);
+#ifdef DEBUG_SHOW_MALLOC_ADDRESSES
+    fprintf(outfile, " %p", block);   /* Not portable */
+#endif     
+    if (malloclistptr < MALLOCLISTSIZE)
+      {
+      malloclist[malloclistptr] = block;
+      malloclistlength[malloclistptr++] = size;
+      }    
+    else 
+      fprintf(outfile, " (not remembered)");
+    fprintf(outfile, "\n"); 
+    }   
+  } 
 return block;
 }
 
@@ -2448,7 +2477,32 @@ static void my_free(void *block, void *data)
 {
 (void)data;
 if (show_memory)
-  fprintf(outfile, "free             %p\n", block);
+  {
+  uint32_t i, j; 
+  BOOL found = FALSE;
+  
+  fprintf(outfile, "free");
+  for (i = 0; i < malloclistptr; i++)
+    {
+    if (block == malloclist[i])
+      {
+      fprintf(outfile, "    %5zd", malloclistlength[i]);
+      malloclistptr--; 
+      for (j = i; j < malloclistptr; j++)
+        {
+        malloclist[j] = malloclist[j+1];
+        malloclistlength[j] = malloclistlength[j+1];
+        }
+      found = TRUE;   
+      break;       
+      }    
+    }
+  if (!found) fprintf(outfile, " unremembered block");
+#ifdef DEBUG_SHOW_MALLOC_ADDRESSES   
+  fprintf(outfile, " %p", block);  /* Not portable */
+#endif   
+  fprintf(outfile, "\n");
+  } 
 free(block);
 }
 
@@ -6145,7 +6199,7 @@ if (pat_patctl.replacement[0] != 0 &&
   fprintf(outfile, "** Replacement text is not supported with null_context.\n");
   return PR_OK;
   }
-
+  
 /* We now have the subject in dbuffer, with len containing the byte length, and
 ulen containing the code unit length, with a copy in arg_ulen for use in match
 function arguments (this gets changed to PCRE2_ZERO_TERMINATED when the
@@ -6288,9 +6342,15 @@ NULL context. */
 use_dat_context = ((dat_datctl.control & CTL_NULLCONTEXT) != 0)?
   NULL : PTR(dat_context);
 
-/* Enable display of malloc/free if wanted. */
+/* Enable display of malloc/free if wanted. We can do this only if either the 
+pattern or the subject is processed with a context. */
 
 show_memory = (dat_datctl.control & CTL_MEMORY) != 0;
+
+if (show_memory && 
+    (pat_patctl.control & dat_datctl.control & CTL_NULLCONTEXT) != 0)
+  fprintf(outfile, "** \\=memory requires either a pattern or a subject "
+    "context: ignored\n");    
 
 /* Create and assign a JIT stack if requested. */
 
