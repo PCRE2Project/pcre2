@@ -6084,11 +6084,6 @@ options |= (re->flags & FF) / ((FF & (~FF+1)) / (OO & (~OO+1)));
 #undef FF
 #undef OO
 
-/* A NULL match context means "use a default context" */
-
-if (mcontext == NULL)
-  mcontext = (pcre2_match_context *)(&PRIV(default_match_context));
-
 /* These two settings are used in the code for checking a UTF string that
 follows immediately afterwards. Other values in the mb block are used only
 during interpretive processing, not when the JIT support is in use, so they are
@@ -6156,7 +6151,7 @@ if (utf && (options & PCRE2_NO_UTF_CHECK) == 0)
 /* It is an error to set an offset limit without setting the flag at compile
 time. */
 
-if (mcontext->offset_limit != PCRE2_UNSET &&
+if (mcontext != NULL && mcontext->offset_limit != PCRE2_UNSET &&
      (re->overall_options & PCRE2_USE_OFFSET_LIMIT) == 0)
   return PCRE2_ERROR_BADOFFSETLIMIT;
 
@@ -6175,7 +6170,15 @@ if (re->executable_jit != NULL && (options & ~PUBLIC_JIT_MATCH_OPTIONS) == 0)
   }
 #endif
 
-/* Carry on with non-JIT matching. */
+/* Carry on with non-JIT matching. A NULL match context means "use a default
+context", but we take the memory control functions from the pattern. */
+
+if (mcontext == NULL)
+  {
+  mcontext = (pcre2_match_context *)(&PRIV(default_match_context));
+  mb->memctl = re->memctl;
+  }
+else mb->memctl = mcontext->memctl;
 
 anchored = ((re->overall_options | options) & PCRE2_ANCHORED) != 0;
 firstline = (re->overall_options & PCRE2_FIRSTLINE) != 0;
@@ -6187,7 +6190,6 @@ bumpalong_limit =  (mcontext->offset_limit == PCRE2_UNSET)?
 
 mb->callout = mcontext->callout;
 mb->callout_data = mcontext->callout_data;
-mb->memctl = mcontext->memctl;
 
 mb->start_subject = subject;
 mb->start_offset = start_offset;

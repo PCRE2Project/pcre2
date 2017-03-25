@@ -88,6 +88,10 @@ encountered a character class with a possessive repeat, for example [a-f]{3}+.
 of 10.23/36); pcre2test has been upgraded so that \=find_limits works with DFA 
 matching to find the minimum value for this limit.
 
+16. Since 10.21, if pcre2_match() was called with a null context, default 
+memory allocation functions were used instead of whatever was used when the 
+pattern was compiled.
+
 
 Version 10.23 14-February-2017
 ------------------------------
