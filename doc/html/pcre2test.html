@@ -1377,11 +1377,15 @@ is added to the non-match message.
 Showing memory usage
 </b><br>
 <P>
-The <b>memory</b> modifier causes <b>pcre2test</b> to log all heap memory
-allocation and freeing calls that occur during a call to <b>pcre2_match()</b>.
-These occur only when a match requires a bigger vector than the default for
-remembering backtracking points. In many cases there will be none. No heap
-memory is allocated during matching with <b>pcre2_dfa_match</b> or with JIT.
+The <b>memory</b> modifier causes <b>pcre2test</b> to log the sizes of all heap
+memory allocation and freeing calls that occur during a call to
+<b>pcre2_match()</b>. These occur only when a match requires a bigger vector
+than the default for remembering backtracking points. In many cases there will
+be no heap memory used and therefore no additional output. No heap memory is
+allocated during matching with <b>pcre2_dfa_match</b> or with JIT, so in those
+cases the <b>memory</b> modifier never has any effect. For this modifier to
+work, the <b>null_context</b> modifier must not be set on both the pattern and
+the subject, though it can be set on one or the other.
 </P>
 <br><b>
 Setting a starting offset
@@ -1794,7 +1798,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC21" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 24 March 2017
+Last updated: 25 March 2017
 <br>
 Copyright &copy; 1997-2017 University of Cambridge.
 <br>

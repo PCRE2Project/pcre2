@@ -68,6 +68,7 @@ dist_html_DATA = \
   doc/html/pcre2_set_callout.html \
   doc/html/pcre2_set_character_tables.html \
   doc/html/pcre2_set_compile_recursion_guard.html \
+  doc/html/pcre2_set_depth_limit.html \
   doc/html/pcre2_set_match_limit.html \
   doc/html/pcre2_set_max_pattern_length.html \
   doc/html/pcre2_set_offset_limit.html \
@@ -151,6 +152,7 @@ dist_man_MANS = \
   doc/pcre2_set_callout.3 \
   doc/pcre2_set_character_tables.3 \
   doc/pcre2_set_compile_recursion_guard.3 \
+  doc/pcre2_set_depth_limit.3 \
   doc/pcre2_set_match_limit.3 \
   doc/pcre2_set_max_pattern_length.3 \
   doc/pcre2_set_offset_limit.3 \

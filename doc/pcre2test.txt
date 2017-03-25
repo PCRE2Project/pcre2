@@ -1234,12 +1234,16 @@ SUBJECT MODIFIERS
 
    Showing memory usage
 
-       The  memory modifier causes pcre2test to log all heap memory allocation
-       and freeing calls that occur during a  call  to  pcre2_match().   These
-       occur  only  when a match requires a bigger vector than the default for
-       remembering backtracking points. In many cases there will be  none.  No
-       heap  memory  is allocated during matching with pcre2_dfa_match or with
-       JIT.
+       The  memory modifier causes pcre2test to log the sizes of all heap mem-
+       ory  allocation  and  freeing  calls  that  occur  during  a  call   to
+       pcre2_match().  These  occur only when a match requires a bigger vector
+       than the default for remembering backtracking  points.  In  many  cases
+       there  will  be no heap memory used and therefore no additional output.
+       No heap memory is allocated during  matching  with  pcre2_dfa_match  or
+       with  JIT,  so in those cases the memory modifier never has any effect.
+       For this modifier to work, the null_context modifier must not be set on
+       both  the  pattern  and the subject, though it can be set on one or the
+       other.
 
    Setting a starting offset
 
@@ -1626,5 +1630,5 @@ AUTHOR
 
 REVISION
 
-       Last updated: 24 March 2017
+       Last updated: 25 March 2017
        Copyright (c) 1997-2017 University of Cambridge.
