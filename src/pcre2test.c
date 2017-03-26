@@ -3934,6 +3934,30 @@ fprintf(outfile, "Frame size for pcre2_match(): %d\n", (int)frame_size);
 
 
 /*************************************************
+*         Get and output an error message        *
+*************************************************/
+
+static BOOL
+print_error_message(int errorcode, const char *before, const char *after)
+{
+int len;
+PCRE2_GET_ERROR_MESSAGE(len, errorcode, pbuffer);
+if (len < 0)
+  {
+  fprintf(outfile, "\n** pcre2test internal error: cannot interpret error "
+    "number\n** Unexpected return (%d) from pcre2_get_error_message()\n", len);
+  }
+else
+  {    
+  fprintf(outfile, "%s", before);
+  PCHARSV(CASTVAR(void *, pbuffer), 0, len, FALSE, outfile);
+  fprintf(outfile, "%s", after);
+  }
+return len >= 0;    
+}
+
+
+/*************************************************
 *     Callback function for callout enumeration  *
 *************************************************/
 
@@ -4251,16 +4275,10 @@ if ((pat_patctl.control & CTL_INFO) != 0)
     else
       {
 #ifdef SUPPORT_JIT
-      int len;
       fprintf(outfile, "JIT compilation was not successful");
-      if (jitrc != 0)
-        {
-        fprintf(outfile, " (");
-        PCRE2_GET_ERROR_MESSAGE(len, jitrc, pbuffer);
-        PCHARSV(CASTVAR(void *, pbuffer), 0, len, FALSE, outfile);
-        fprintf(outfile, ")");
-        }
-      fprintf(outfile, "\n");
+      if (jitrc != 0 && !print_error_message(jitrc, " (", ")")) 
+        return PR_ABEND;
+      fprintf(outfile, "\n");    
 #else
       fprintf(outfile, "JIT support is not available in this version of PCRE2\n");
 #endif
@@ -4274,14 +4292,9 @@ if ((pat_patctl.control & CTL_CALLOUT_INFO) != 0)
   PCRE2_CALLOUT_ENUMERATE(errorcode, callout_callback, 0);
   if (errorcode != 0)
     {
-    int len;
     fprintf(outfile, "Callout enumerate failed: error %d: ", errorcode);
-    if (errorcode < 0)
-      {
-      PCRE2_GET_ERROR_MESSAGE(len, errorcode, pbuffer);
-      PCHARSV(CASTVAR(void *, pbuffer), 0, len, FALSE, outfile);
-      }
-    fprintf(outfile, "\n");
+    if (errorcode < 0 && !print_error_message(errorcode, "", "\n")) 
+      return PR_ABEND;
     return PR_SKIP;
     }
   }
@@ -4301,16 +4314,14 @@ Arguments:
   rc         the error code
   msg        an initial message for what failed
 
-Returns:     nothing
+Returns:     FALSE if print_error_message() fails
 */
 
-static void
+static BOOL
 serial_error(int rc, const char *msg)
 {
 fprintf(outfile, "%s failed: error %d: ", msg, rc);
-PCRE2_GET_ERROR_MESSAGE(rc, rc, pbuffer);
-PCHARSV(CASTVAR(void *, pbuffer), 0, rc, FALSE, outfile);
-fprintf(outfile, "\n");
+return print_error_message(rc, "", "\n");
 }
 
 
@@ -4512,7 +4523,7 @@ switch(cmd)
     general_context);
   if (rc < 0)
     {
-    serial_error(rc, "Serialization");
+    if (!serial_error(rc, "Serialization")) return PR_ABEND;
     fclose(f); 
     break;
     }
@@ -4569,7 +4580,11 @@ switch(cmd)
   fclose(f);
 
   PCRE2_SERIALIZE_GET_NUMBER_OF_CODES(rc, serial);
-  if (rc < 0) serial_error(rc, "Get number of codes"); else
+  if (rc < 0) 
+    {
+    if (!serial_error(rc, "Get number of codes")) return PR_ABEND; 
+    } 
+  else
     {
     if (rc + patstacknext > PATSTACKSIZE)
       {
@@ -4581,8 +4596,11 @@ switch(cmd)
       }
     PCRE2_SERIALIZE_DECODE(rc, patstack + patstacknext, rc, serial,
       general_context);
-    if (rc < 0) serial_error(rc, "Deserialization");
-      else patstacknext += rc;
+    if (rc < 0) 
+      {
+      if (!serial_error(rc, "Deserialization")) return PR_ABEND;
+      } 
+    else patstacknext += rc;
     }
 
   free(serial);
@@ -5222,12 +5240,9 @@ if non-interactive. */
 
 if (TEST(compiled_code, ==, NULL))
   {
-  int len;
   fprintf(outfile, "Failed: error %d at offset %d: ", errorcode,
     (int)erroroffset);
-  PCRE2_GET_ERROR_MESSAGE(len, errorcode, pbuffer);
-  PCHARSV(CASTVAR(void *, pbuffer), 0, len, FALSE, outfile);
-  fprintf(outfile, "\n");
+  if (!print_error_message(errorcode, "", "\n")) return PR_ABEND;
   return PR_SKIP;
   }
 
@@ -5578,10 +5593,10 @@ Arguments:
   utf       TRUE for utf
   capcount  return from pcre2_match()
 
-Returns:    nothing
+Returns:    FALSE if print_error_message() fails
 */
 
-static void
+static BOOL
 copy_and_get(BOOL utf, int capcount)
 {
 int i;
@@ -5600,9 +5615,7 @@ for (i = 0; i < MAXCPYGET && dat_datctl.copy_numbers[i] >= 0; i++)
   if (rc < 0)
     {
     fprintf(outfile, "Copy substring %d failed (%d): ", n, rc);
-    PCRE2_GET_ERROR_MESSAGE(rc, rc, pbuffer);
-    PCHARSV(CASTVAR(void *, pbuffer), 0, rc, FALSE, outfile);
-    fprintf(outfile, "\n");
+    if (!print_error_message(rc, "", "\n")) return FALSE;
     }
   else
     {
@@ -5610,9 +5623,7 @@ for (i = 0; i < MAXCPYGET && dat_datctl.copy_numbers[i] >= 0; i++)
     if (rc < 0)
       {
       fprintf(outfile, "Get substring %d length failed (%d): ", n, rc);
-      PCRE2_GET_ERROR_MESSAGE(rc, rc, pbuffer);
-      PCHARSV(CASTVAR(void *, pbuffer), 0, rc, FALSE, outfile);
-      fprintf(outfile, "\n");
+      if (!print_error_message(rc, "", "\n")) return FALSE;
       }
     else if (length2 != length)
       {
@@ -5659,9 +5670,7 @@ for (;;)
   if (rc < 0)
     {
     fprintf(outfile, "Copy substring '%s' failed (%d): ", nptr, rc);
-    PCRE2_GET_ERROR_MESSAGE(rc, rc, pbuffer);
-    PCHARSV(CASTVAR(void *, pbuffer), 0, rc, FALSE, outfile);
-    fprintf(outfile, "\n");
+    if (!print_error_message(rc, "", "\n")) return FALSE;
     }
   else
     {
@@ -5669,9 +5678,7 @@ for (;;)
     if (rc < 0)
       {
       fprintf(outfile, "Get substring '%s' length failed (%d): ", nptr, rc);
-      PCRE2_GET_ERROR_MESSAGE(rc, rc, pbuffer);
-      PCHARSV(CASTVAR(void *, pbuffer), 0, rc, FALSE, outfile);
-      fprintf(outfile, "\n");
+      if (!print_error_message(rc, "", "\n")) return FALSE;
       }
     else if (length2 != length)
       {
@@ -5699,9 +5706,7 @@ for (i = 0; i < MAXCPYGET && dat_datctl.get_numbers[i] >= 0; i++)
   if (rc < 0)
     {
     fprintf(outfile, "Get substring %d failed (%d): ", n, rc);
-    PCRE2_GET_ERROR_MESSAGE(rc, rc, pbuffer);
-    PCHARSV(CASTVAR(void *, pbuffer), 0, rc, FALSE, outfile);
-    fprintf(outfile, "\n");
+    if (!print_error_message(rc, "", "\n")) return FALSE;
     }
   else
     {
@@ -5745,9 +5750,7 @@ for (;;)
   if (rc < 0)
     {
     fprintf(outfile, "Get substring '%s' failed (%d): ", nptr, rc);
-    PCRE2_GET_ERROR_MESSAGE(rc, rc, pbuffer);
-    PCHARSV(CASTVAR(void *, pbuffer), 0, rc, FALSE, outfile);
-    fprintf(outfile, "\n");
+    if (!print_error_message(rc, "", "\n")) return FALSE;
     }
   else
     {
@@ -5772,9 +5775,7 @@ if ((dat_datctl.control & CTL_GETALL) != 0)
   if (rc < 0)
     {
     fprintf(outfile, "get substring list failed (%d): ", rc);
-    PCRE2_GET_ERROR_MESSAGE(rc, rc, pbuffer);
-    PCHARSV(CASTVAR(void *, pbuffer), 0, rc, FALSE, outfile);
-    fprintf(outfile, "\n");
+    if (!print_error_message(rc, "", "\n")) return FALSE;
     }
   else
     {
@@ -5789,6 +5790,8 @@ if ((dat_datctl.control & CTL_GETALL) != 0)
     PCRE2_SUBSTRING_LIST_FREE(stringlist);
     }
   }
+  
+return TRUE; 
 }
 
 
@@ -6548,13 +6551,11 @@ if (dat_datctl.replacement[0] != 0)
 
   if (rc < 0)
     {
-    PCRE2_SIZE msize;
     fprintf(outfile, "Failed: error %d", rc);
     if (rc != PCRE2_ERROR_NOMEMORY && nsize != PCRE2_UNSET)
       fprintf(outfile, " at offset %ld in replacement", (long int)nsize);
     fprintf(outfile, ": ");
-    PCRE2_GET_ERROR_MESSAGE(msize, rc, pbuffer);
-    PCHARSV(CASTVAR(void *, pbuffer), 0, msize, FALSE, outfile);
+    if (!print_error_message(rc, "", "")) return PR_ABEND;
     if (rc == PCRE2_ERROR_NOMEMORY &&
         (xoptions & PCRE2_SUBSTITUTE_OVERFLOW_LENGTH) != 0)
       fprintf(outfile, ": %ld code units are needed", (long int)nsize);
@@ -6915,7 +6916,7 @@ else for (gmatched = 0;; gmatched++)
 
     /* Process copy/get strings */
 
-    copy_and_get(utf, capcount);
+    if (!copy_and_get(utf, capcount)) return PR_ABEND;
 
     }    /* End of handling a successful match */
 
@@ -6958,7 +6959,7 @@ else for (gmatched = 0;; gmatched++)
 
     /* Process copy/get strings */
 
-    copy_and_get(utf, 1);
+    if (!copy_and_get(utf, 1)) return PR_ABEND;
 
     break;  /* Out of the /g loop */
     }       /* End of handling partial match */
@@ -7014,8 +7015,6 @@ else for (gmatched = 0;; gmatched++)
 
   else
     {
-    int mlen;
-
     switch(capcount)
       {
       case PCRE2_ERROR_NOMATCH:
@@ -7040,8 +7039,7 @@ else for (gmatched = 0;; gmatched++)
 
       default:
       fprintf(outfile, "Failed: error %d: ", capcount);
-      PCRE2_GET_ERROR_MESSAGE(mlen, capcount, pbuffer);
-      PCHARSV(CASTVAR(void *, pbuffer), 0, mlen, FALSE, outfile);
+      if (!print_error_message(capcount, "", "")) return PR_ABEND;
       if (capcount <= PCRE2_ERROR_UTF8_ERR1 &&
           capcount >= PCRE2_ERROR_UTF32_ERR2)
         {

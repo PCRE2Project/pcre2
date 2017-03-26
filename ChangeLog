@@ -102,6 +102,9 @@ only to pcre2_match():
       lengths, and list only the lengths, so as to be system-independent.
       (In practice, the new interpreter never has more than 2 blocks allocated 
       simultaneously.) 
+      
+18. Make pcre2test detect an error return from pcre2_get_error_message(), give
+a message, and abandon the run (this would have detected #13 above). 
 
 
 Version 10.23 14-February-2017
