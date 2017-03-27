@@ -1228,19 +1228,23 @@ SLJIT_API_FUNC_ATTRIBUTE void SLJIT_CALL sljit_release_lock(void);
 
 #if (defined SLJIT_UTIL_STACK && SLJIT_UTIL_STACK)
 
-/* The sljit_stack is a utiliy feature of sljit, which allocates a
-   writable memory region between base (inclusive) and limit (exclusive).
-   Both base and limit is a pointer, and base is always <= than limit.
-   This feature uses the "address space reserve" feature
-   of modern operating systems. Basically we don't need to allocate a
-   huge memory block in one step for the worst case, we can start with
-   a smaller chunk and extend it later. Since the address space is
-   reserved, the data never copied to other regions, thus it is safe
-   to store pointers here. */
+/* The sljit_stack is a utility extension of sljit, which provides
+   a top-down stack. The stack starts at base and goes down to
+   max_limit, so the memory region for this stack is between
+   max_limit (inclusive) and base (exclusive). However the
+   application can only use the region between limit (inclusive)
+   and base (exclusive). The sljit_stack_resize can be used to
+   extend this region up to max_limit.
 
-/* Note: The base field is aligned to PAGE_SIZE bytes (usually 4k or more).
-   Note: stack growing should not happen in small steps: 4k, 16k or even
-     bigger growth is better.
+   This feature uses the "address space reserve" feature of modern
+   operating systems, so instead of allocating a huge memory block
+   applications can allocate a small region and extend it later
+   without moving the memory area. Hence pointers can be stored
+   in this area. */
+
+/* Note: base and max_limit fields are aligned to PAGE_SIZE bytes
+     (usually 4 Kbyte or more).
+   Note: stack should grow in larger steps, e.g. 4Kbyte, 16Kbyte or more.
    Note: this structure may not be supported by all operating systems.
      Some kind of fallback mechanism is suggested when SLJIT_UTIL_STACK
      is not defined. */
@@ -1248,15 +1252,16 @@ SLJIT_API_FUNC_ATTRIBUTE void SLJIT_CALL sljit_release_lock(void);
 struct sljit_stack {
 	/* User data, anything can be stored here.
 	   Starting with the same value as base. */
-	sljit_uw top;
+	sljit_u8 *top;
 	/* These members are read only. */
-	sljit_uw base;
-	sljit_uw limit;
-	sljit_uw max_limit;
+	sljit_u8 *base;
+	sljit_u8 *limit;
+	sljit_u8 *max_limit;
 };
 
 /* Returns NULL if unsuccessful.
-   Note: limit and max_limit contains the size for stack allocation.
+   Note: max_limit contains the maximum stack size in bytes.
+   Note: limit contains the starting stack size in bytes.
    Note: the top field is initialized to base.
    Note: see sljit_create_compiler for the explanation of allocator_data. */
 SLJIT_API_FUNC_ATTRIBUTE struct sljit_stack* SLJIT_CALL sljit_allocate_stack(sljit_uw limit, sljit_uw max_limit, void *allocator_data);
@@ -1268,7 +1273,7 @@ SLJIT_API_FUNC_ATTRIBUTE void SLJIT_CALL sljit_free_stack(struct sljit_stack *st
    since the growth ratio can be added to the current limit, and sljit_stack_resize
    will do all the necessary checks. The fields of the stack are not changed if
    sljit_stack_resize fails. */
-SLJIT_API_FUNC_ATTRIBUTE sljit_sw SLJIT_CALL sljit_stack_resize(struct sljit_stack *stack, sljit_uw new_limit);
+SLJIT_API_FUNC_ATTRIBUTE sljit_sw SLJIT_CALL sljit_stack_resize(struct sljit_stack *stack, sljit_u8 *new_limit);
 
 #endif /* (defined SLJIT_UTIL_STACK && SLJIT_UTIL_STACK) */
 
