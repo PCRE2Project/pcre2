@@ -296,6 +296,13 @@
 #define SLJIT_CACHE_FLUSH(from, to) \
 	sys_icache_invalidate((char*)(from), (char*)(to) - (char*)(from))
 
+#elif (defined SLJIT_CONFIG_PPC && SLJIT_CONFIG_PPC)
+
+/* The __clear_cache() implementation of GCC is a dummy function on PowerPC. */
+#define SLJIT_CACHE_FLUSH(from, to) \
+	ppc_cache_flush((from), (to))
+#define SLJIT_CACHE_FLUSH_OWN_IMPL 1
+
 #elif (defined(__GNUC__) && (__GNUC__ >= 5 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 3)))
 
 #define SLJIT_CACHE_FLUSH(from, to) \
@@ -307,13 +314,6 @@
 
 #define SLJIT_CACHE_FLUSH(from, to) \
     cacheflush((long)(from), (long)(to), 0)
-
-#elif (defined SLJIT_CONFIG_PPC && SLJIT_CONFIG_PPC)
-
-/* The __clear_cache() implementation of GCC is a dummy function on PowerPC. */
-#define SLJIT_CACHE_FLUSH(from, to) \
-	ppc_cache_flush((from), (to))
-#define SLJIT_CACHE_FLUSH_OWN_IMPL 1
 
 #elif (defined SLJIT_CONFIG_SPARC_32 && SLJIT_CONFIG_SPARC_32)
 

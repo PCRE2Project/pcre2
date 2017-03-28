@@ -1302,6 +1302,15 @@ SLJIT_API_FUNC_ATTRIBUTE void sljit_set_function_context(void** func_ptr, struct
 
 #endif /* !(defined SLJIT_INDIRECT_CALL && SLJIT_INDIRECT_CALL) */
 
+#if (defined SLJIT_EXECUTABLE_ALLOCATOR && SLJIT_EXECUTABLE_ALLOCATOR)
+/* Free unused executable memory. The allocator keeps some free memory
+   around to reduce the number of OS executable memory allocations.
+   This improves performance since these calls are costly. However
+   it is sometimes desired to free all unused memory regions, e.g.
+   before the application terminates. */
+SLJIT_API_FUNC_ATTRIBUTE void sljit_free_unused_memory_exec(void);
+#endif
+
 /* --------------------------------------------------------------------- */
 /*  CPU specific functions                                               */
 /* --------------------------------------------------------------------- */
