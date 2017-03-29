@@ -3221,12 +3221,12 @@ PCRE2 BUILD-TIME OPTIONS
 
          ./configure --help
 
-       The  following  sections  include  descriptions  of options whose names
-       begin with --enable or --disable. These settings specify changes to the
-       defaults  for  the configure command. Because of the way that configure
-       works, --enable and --disable always come in pairs, so  the  complemen-
-       tary  option always exists as well, but as it specifies the default, it
-       is not described.
+       The  following  sections include descriptions of "on/off" options whose
+       names begin with --enable or --disable. Because of the way that config-
+       ure  works, --enable and --disable always come in pairs, so the comple-
+       mentary option always exists as well, but as it specifies the  default,
+       it is not described.  Options that specify values have names that start
+       with --with.
 
 
 BUILDING 8-BIT, 16-BIT AND 32-BIT LIBRARIES
@@ -3283,11 +3283,11 @@ UNICODE AND UTF SUPPORT
        application has locked this out by setting PCRE2_NEVER_UTF.
 
        UTF support allows the libraries to process character code points up to
-       0x10ffff in the strings that they handle. It also provides support  for
-       accessing  the  Unicode  properties  of  such characters, using pattern
-       escapes such as \P, \p, and \X. Only the  general  category  properties
-       such  as Lu and Nd are supported. Details are given in the pcre2pattern
-       documentation.
+       0x10ffff in the strings that they handle. Unicode  support  also  gives
+       access  to  the Unicode properties of characters, using pattern escapes
+       such as \P, \p, and \X. Only the general category properties such as Lu
+       and  Nd are supported. Details are given in the pcre2pattern documenta-
+       tion.
 
        Pattern escapes such as \d and \w do not by default make use of Unicode
        properties.  The  application  can  request that they do by setting the
@@ -3310,14 +3310,15 @@ DISABLING THE USE OF \C
 
 JUST-IN-TIME COMPILER SUPPORT
 
-       Just-in-time compiler support is included in the build by specifying
+       Just-in-time  (JIT) compiler support is included in the build by speci-
+       fying
 
          --enable-jit
 
-       This  support  is available only for certain hardware architectures. If
-       this option is set for an unsupported architecture,  a  building  error
-       occurs.   See the pcre2jit documentation for a discussion of JIT usage.
-       When JIT support is enabled, pcre2grep automatically makes use  of  it,
+       This support is available only for certain hardware  architectures.  If
+       this  option  is  set for an unsupported architecture, a building error
+       occurs.  See the pcre2jit documentation for a discussion of JIT  usage.
+       When  JIT  support is enabled, pcre2grep automatically makes use of it,
        unless you add
 
          --disable-pcre2grep-jit
@@ -3327,14 +3328,14 @@ JUST-IN-TIME COMPILER SUPPORT
 
 NEWLINE RECOGNITION
 
-       By  default, PCRE2 interprets the linefeed (LF) character as indicating
-       the end of a line. This is the normal newline  character  on  Unix-like
-       systems.  You can compile PCRE2 to use carriage return (CR) instead, by
+       By default, PCRE2 interprets the linefeed (LF) character as  indicating
+       the  end  of  a line. This is the normal newline character on Unix-like
+       systems. You can compile PCRE2 to use carriage return (CR) instead,  by
        adding
 
          --enable-newline-is-cr
 
-       to the configure  command.  There  is  also  an  --enable-newline-is-lf
+       to  the  configure  command.  There  is  also an --enable-newline-is-lf
        option, which explicitly specifies linefeed as the newline character.
 
        Alternatively, you can specify that line endings are to be indicated by
@@ -3347,108 +3348,84 @@ NEWLINE RECOGNITION
 
          --enable-newline-is-anycrlf
 
-       which  causes  PCRE2 to recognize any of the three sequences CR, LF, or
+       which causes PCRE2 to recognize any of the three sequences CR,  LF,  or
        CRLF as indicating a line ending. Finally, a fifth option, specified by
 
          --enable-newline-is-any
 
-       causes PCRE2 to recognize any Unicode  newline  sequence.  The  Unicode
+       causes  PCRE2  to  recognize  any Unicode newline sequence. The Unicode
        newline sequences are the three just mentioned, plus the single charac-
        ters VT (vertical tab, U+000B), FF (form feed, U+000C), NEL (next line,
-       U+0085),  LS  (line  separator,  U+2028),  and PS (paragraph separator,
+       U+0085), LS (line separator,  U+2028),  and  PS  (paragraph  separator,
        U+2029).
 
        Whatever default line ending convention is selected when PCRE2 is built
-       can  be  overridden by applications that use the library. At build time
+       can be overridden by applications that use the library. At  build  time
        it is conventional to use the standard for your operating system.
 
 
 WHAT \R MATCHES
 
-       By default, the sequence \R in a pattern matches  any  Unicode  newline
-       sequence,  independently  of  what has been selected as the line ending
+       By  default,  the  sequence \R in a pattern matches any Unicode newline
+       sequence, independently of what has been selected as  the  line  ending
        sequence. If you specify
 
          --enable-bsr-anycrlf
 
-       the default is changed so that \R matches only CR, LF, or  CRLF.  What-
-       ever  is selected when PCRE2 is built can be overridden by applications
-       that use the called.
+       the  default  is changed so that \R matches only CR, LF, or CRLF. What-
+       ever is selected when PCRE2 is built can be overridden by  applications
+       that use the library.
 
 
 HANDLING VERY LARGE PATTERNS
 
-       Within a compiled pattern, offset values are used  to  point  from  one
-       part  to another (for example, from an opening parenthesis to an alter-
-       nation metacharacter). By default, in the 8-bit and  16-bit  libraries,
-       two-byte  values  are used for these offsets, leading to a maximum size
-       for a compiled pattern of around 64K code units. This is sufficient  to
+       Within  a  compiled  pattern,  offset values are used to point from one
+       part to another (for example, from an opening parenthesis to an  alter-
+       nation  metacharacter).  By default, in the 8-bit and 16-bit libraries,
+       two-byte values are used for these offsets, leading to a  maximum  size
+       for  a compiled pattern of around 64K code units. This is sufficient to
        handle all but the most gigantic patterns. Nevertheless, some people do
-       want to process truly enormous patterns, so it is possible  to  compile
-       PCRE2  to  use three-byte or four-byte offsets by adding a setting such
+       want  to  process truly enormous patterns, so it is possible to compile
+       PCRE2 to use three-byte or four-byte offsets by adding a  setting  such
        as
 
          --with-link-size=3
 
-       to the configure command. The value given must be 2, 3, or 4.  For  the
-       16-bit  library,  a  value of 3 is rounded up to 4. In these libraries,
-       using longer offsets slows down the operation of PCRE2 because  it  has
-       to  load additional data when handling them. For the 32-bit library the
-       value is always 4 and cannot be overridden; the value  of  --with-link-
+       to  the  configure command. The value given must be 2, 3, or 4. For the
+       16-bit library, a value of 3 is rounded up to 4.  In  these  libraries,
+       using  longer  offsets slows down the operation of PCRE2 because it has
+       to load additional data when handling them. For the 32-bit library  the
+       value  is  always 4 and cannot be overridden; the value of --with-link-
        size is ignored.
-
-
-AVOIDING EXCESSIVE STACK USAGE
-
-       When  matching  with the pcre2_match() function, PCRE2 implements back-
-       tracking by making recursive  calls  to  an  internal  function  called
-       match().  In  environments where the size of the stack is limited, this
-       can severely limit PCRE2's operation. (The Unix  environment  does  not
-       usually  suffer from this problem, but it may sometimes be necessary to
-       increase  the  maximum  stack  size.  There  is  a  discussion  in  the
-       pcre2stack  documentation.)  An  alternative approach to recursion that
-       uses memory from the heap to remember data, instead of using  recursive
-       function  calls, has been implemented to work round the problem of lim-
-       ited stack size. If you want to build a version  of  PCRE2  that  works
-       this way, add
-
-         --disable-stack-for-recursion
-
-       to the configure command. By default, the system functions malloc() and
-       free() are called to manage the heap memory that is required, but  cus-
-       tom  memory  management  functions  can  be  called instead. PCRE2 runs
-       noticeably more slowly when built in this way. This option affects only
-       the pcre2_match() function; it is not relevant for pcre2_dfa_match().
 
 
 LIMITING PCRE2 RESOURCE USAGE
 
-       Internally, PCRE2 has a function called match(), which it calls repeat-
-       edly  (sometimes  recursively)  when  matching  a  pattern   with   the
-       pcre2_match() function. By controlling the maximum number of times this
-       function may be called during a single matching operation, a limit  can
-       be  placed on the resources used by a single call to pcre2_match(). The
-       limit can be changed at run time, as described in the pcre2api documen-
-       tation.  The default is 10 million, but this can be changed by adding a
-       setting such as
+       The pcre2_match() function increments a counter each time it goes round
+       its  main  loop. Putting a limit on this counter controls the amount of
+       computing resource used by a single call to  pcre2_match().  The  limit
+       can be changed at run time, as described in the pcre2api documentation.
+       The default is 10 million, but this can be changed by adding a  setting
+       such as
 
          --with-match-limit=500000
 
-       to  the  configure  command.  This  setting  has  no  effect   on   the
-       pcre2_dfa_match() matching function.
+       to   the   configure  command.  This  setting  has  no  effect  on  the
+       pcre2_dfa_match() matching function, but it does also limit JIT  match-
+       ing (though the counting is done differently).
 
-       In  some  environments  it is desirable to limit the depth of recursive
-       calls of match() more strictly than the total number of calls, in order
-       to  restrict  the maximum amount of stack (or heap, if --disable-stack-
-       for-recursion is specified) that is used. A second limit controls this;
-       it  defaults  to  the  value  that is set for --with-match-limit, which
-       imposes no additional constraints. However, you can set a  lower  limit
-       by adding, for example,
+       In some environments it is desirable to limit the depth of nested back-
+       tracking in order to restrict the maximum amount of heap memory that is
+       used.  A  second  limit controls this; it defaults to the value that is
+       set for --with-match-limit. You  can  set  a  lower  default  limit  by
+       adding, for example,
 
-         --with-match-limit-recursion=10000
+         --with-match-limit_depth=10000
 
        to  the  configure  command.  This  value can also be overridden at run
-       time.
+       time.  As well as applying to pcre2_match(), this limit  also  controls
+       the  depth  of recursive function calls in pcre2_dfa_match(). These are
+       used for lookaround assertions and recursion within patterns.
 
 
 CREATING CHARACTER TABLES AT BUILD TIME
@@ -3463,10 +3440,10 @@ CREATING CHARACTER TABLES AT BUILD TIME
        to  the  configure  command, the distributed tables are no longer used.
        Instead, a program called dftables is compiled and  run.  This  outputs
        the source for new set of tables, created in the default locale of your
-       C run-time system. (This method of replacing the tables does  not  work
-       if  you are cross compiling, because dftables is run on the local host.
-       If you need to create alternative tables when cross compiling, you will
-       have to do so "by hand".)
+       C run-time system. This method of replacing the tables does not work if
+       you  are cross compiling, because dftables is run on the local host. If
+       you need to create alternative tables when cross  compiling,  you  will
+       have to do so "by hand".
 
 
 USING EBCDIC CODE
@@ -3672,13 +3649,28 @@ SUPPORT FOR FUZZERS
        string. When called, this function tries to compile  the  string  as  a
        pattern,  and if that succeeds, to match it.  This is done both with no
        options and with some random options bits that are generated  from  the
-       string.  Setting  --enable-fuzz-support  also  causes  a  binary called
-       pcre2fuzzcheck to be created. This is normally run  under  valgrind  or
-       used  when  PCRE2 is compiled with address sanitizing enabled. It calls
-       the fuzzing function and outputs information about  it  is  doing.  The
-       input  strings  are  specified by arguments: if an argument starts with
-       "=" the rest of it is a literal input string. Otherwise, it is  assumed
-       to be a file name, and the contents of the file are the test string.
+       string.
+
+       Setting  --enable-fuzz-support  also  causes  a binary called pcre2fuz-
+       zcheck to be created. This is normally run under valgrind or used  when
+       PCRE2 is compiled with address sanitizing enabled. It calls the fuzzing
+       function and outputs information about it is doing. The  input  strings
+       are  specified by arguments: if an argument starts with "=" the rest of
+       it is a literal input string. Otherwise, it is assumed  to  be  a  file
+       name, and the contents of the file are the test string.
+
+
+OBSOLETE OPTION
+
+       In  versions  of  PCRE2 prior to 10.30, there were two ways of handling
+       backtracking in the pcre2_match() function. The default was to use  the
+       system stack, but if
+
+         --disable-stack-for-recursion
+
+       was  set,  memory on the heap was used. From release 10.30 onwards this
+       has changed (the stack is no lonter used)  and  this  option  now  does
+       nothing except give a warning.
 
 
 SEE ALSO
@@ -3695,8 +3687,8 @@ AUTHOR
 
 REVISION
 
-       Last updated: 01 November 2016
-       Copyright (c) 1997-2016 University of Cambridge.
+       Last updated: 29 March 2017
+       Copyright (c) 1997-2017 University of Cambridge.
 ------------------------------------------------------------------------------
  
  
@@ -3740,9 +3732,8 @@ DESCRIPTION
 
        If the PCRE2_AUTO_CALLOUT option bit is set when a pattern is compiled,
        PCRE2 automatically inserts callouts, all with number 255, before  each
-       item  in  the  pattern except for immediately before or after a callout
-       item in the pattern.  For example, if PCRE2_AUTO_CALLOUT is  used  with
-       the pattern
+       item  in the pattern except for immediately before or after an explicit
+       callout. For example, if PCRE2_AUTO_CALLOUT is used with the pattern
 
          A(?C3)B
 
@@ -3756,38 +3747,38 @@ DESCRIPTION
 
        With PCRE2_AUTO_CALLOUT, this pattern is processed as if it were
 
-       (?C255)A(?C255)((?C255)\d{2}(?C255)|(?C255)-(?C255)-(?C255))(?C255)
+         (?C255)A(?C255)((?C255)\d{2}(?C255)|(?C255)-(?C255)-(?C255))(?C255)
 
-       Notice  that  there  is a callout before and after each parenthesis and
+       Notice that there is a callout before and after  each  parenthesis  and
        alternation bar. If the pattern contains a conditional group whose con-
-       dition  is  an  assertion, an automatic callout is inserted immediately
-       before the condition. Such a callout may also be  inserted  explicitly,
+       dition is an assertion, an automatic callout  is  inserted  immediately
+       before  the  condition. Such a callout may also be inserted explicitly,
        for example:
 
          (?(?C9)(?=a)ab|de)  (?(?C%text%)(?!=d)ab|de)
 
-       This  applies only to assertion conditions (because they are themselves
+       This applies only to assertion conditions (because they are  themselves
        independent groups).
 
-       Callouts can be useful for tracking the progress of  pattern  matching.
+       Callouts  can  be useful for tracking the progress of pattern matching.
        The pcre2test program has a pattern qualifier (/auto_callout) that sets
-       automatic callouts.  When any callouts are  present,  the  output  from
-       pcre2test  indicates  how  the pattern is being matched. This is useful
-       information when you are trying to optimize the performance of  a  par-
+       automatic  callouts.   When  any  callouts are present, the output from
+       pcre2test indicates how the pattern is being matched.  This  is  useful
+       information  when  you are trying to optimize the performance of a par-
        ticular pattern.
 
 
 MISSING CALLOUTS
 
-       You  should  be  aware  that, because of optimizations in the way PCRE2
+       You should be aware that, because of optimizations  in  the  way  PCRE2
        compiles and matches patterns, callouts sometimes do not happen exactly
        as you might expect.
 
    Auto-possessification
 
        At compile time, PCRE2 "auto-possessifies" repeated items when it knows
-       that what follows cannot be part of the repeat. For example, a+[bc]  is
-       compiled  as if it were a++[bc]. The pcre2test output when this pattern
+       that  what follows cannot be part of the repeat. For example, a+[bc] is
+       compiled as if it were a++[bc]. The pcre2test output when this  pattern
        is compiled with PCRE2_ANCHORED and PCRE2_AUTO_CALLOUT and then applied
        to the string "aaaa" is:
 
@@ -3796,11 +3787,11 @@ MISSING CALLOUTS
           +2 ^   ^    [bc]
          No match
 
-       This  indicates that when matching [bc] fails, there is no backtracking
+       This indicates that when matching [bc] fails, there is no  backtracking
        into a+ (because it is being treated as a++) and therefore the callouts
-       that  would  be  taken for the backtracks do not occur. You can disable
-       the  auto-possessify  feature  by  passing   PCRE2_NO_AUTO_POSSESS   to
-       pcre2_compile(),  or  starting  the pattern with (*NO_AUTO_POSSESS). In
+       that would be taken for the backtracks do not occur.  You  can  disable
+       the   auto-possessify   feature  by  passing  PCRE2_NO_AUTO_POSSESS  to
+       pcre2_compile(), or starting the pattern  with  (*NO_AUTO_POSSESS).  In
        this case, the output changes to this:
 
          --->aaaa
@@ -3817,14 +3808,17 @@ MISSING CALLOUTS
    Automatic .* anchoring
 
        By default, an optimization is applied when .* is the first significant
-       item in a pattern. If PCRE2_DOTALL is set, so that the  dot  can  match
-       any  character,  the pattern is automatically anchored. If PCRE2_DOTALL
-       is not set, a match can start only after an internal newline or at  the
-       beginning  of  the  subject,  and  pcre2_compile() remembers this. This
-       optimization is disabled, however, if .* is in an atomic  group  or  if
-       there  is  a back reference to the capturing group in which it appears.
-       It is also disabled if the pattern contains (*PRUNE) or  (*SKIP).  How-
-       ever, the presence of callouts does not affect it.
+       item  in  a  pattern. If PCRE2_DOTALL is set, so that the dot can match
+       any character, the pattern is automatically anchored.  If  PCRE2_DOTALL
+       is  not set, a match can start only after an internal newline or at the
+       beginning of the subject, and pcre2_compile() remembers this. If a pat-
+       tern  has more than one top-level branch, automatic anchoring occurs if
+       all branches are anchorable.
+
+       This optimization is disabled, however, if .* is in an atomic group  or
+       if  there  is  a  back  reference  to  the  capturing group in which it
+       appears. It is also  disabled  if  the  pattern  contains  (*PRUNE)  or
+       (*SKIP). However, the presence of callouts does not affect it.
 
        For  example,  if  the pattern .*\d is compiled with PCRE2_AUTO_CALLOUT
        and applied to the string "aa", the pcre2test output is:
@@ -3856,39 +3850,36 @@ MISSING CALLOUTS
        ter.   Another  optimization, described in the next section, means that
        there is no subsequent attempt to match with an empty subject.
 
-       If a pattern has more than one top-level  branch,  automatic  anchoring
-       occurs if all branches are anchorable.
-
    Other optimizations
 
-       Other  optimizations  that  provide fast "no match" results also affect
+       Other optimizations that provide fast "no match"  results  also  affect
        callouts.  For example, if the pattern is
 
          ab(?C4)cd
 
-       PCRE2 knows that any matching string must contain the  letter  "d".  If
-       the  subject  string  is  "abyz",  the  lack of "d" means that matching
-       doesn't ever start, and the callout is  never  reached.  However,  with
+       PCRE2  knows  that  any matching string must contain the letter "d". If
+       the subject string is "abyz", the  lack  of  "d"  means  that  matching
+       doesn't  ever  start,  and  the callout is never reached. However, with
        "abyd", though the result is still no match, the callout is obeyed.
 
-       PCRE2  also  knows  the  minimum  length of a matching string, and will
-       immediately give a "no match" return without actually running  a  match
-       if  the  subject is not long enough, or, for unanchored patterns, if it
-       has been scanned far enough.
+       For most patterns PCRE2 also knows the minimum  length  of  a  matching
+       string,  and will immediately give a "no match" return without actually
+       running a match if the subject is not long enough, or,  for  unanchored
+       patterns, if it has been scanned far enough.
 
        You can disable these optimizations by passing the PCRE2_NO_START_OPTI-
-       MIZE  option  to  pcre2_compile(),  or  by  starting  the  pattern with
-       (*NO_START_OPT). This slows down the matching process, but does  ensure
+       MIZE option  to  pcre2_compile(),  or  by  starting  the  pattern  with
+       (*NO_START_OPT).  This slows down the matching process, but does ensure
        that callouts such as the example above are obeyed.
 
 
 THE CALLOUT INTERFACE
 
-       During  matching,  when  PCRE2  reaches a callout point, if an external
-       function is set in the match context, it is  called.  This  applies  to
-       both  normal  and DFA matching. The first argument to the callout func-
-       tion is a pointer to a pcre2_callout block. The second argument is  the
-       void  *  callout  data that was supplied when the callout was set up by
+       During matching, when PCRE2 reaches a callout  point,  if  an  external
+       function  is  set  in  the match context, it is called. This applies to
+       both normal and DFA matching. The first argument to the  callout  func-
+       tion  is a pointer to a pcre2_callout block. The second argument is the
+       void * callout data that was supplied when the callout was  set  up  by
        calling pcre2_set_callout() (see the pcre2api documentation). The call-
        out block structure contains the following fields:
 
@@ -3908,50 +3899,77 @@ THE CALLOUT INTERFACE
          PCRE2_SIZE    callout_string_length;
          PCRE2_SPTR    callout_string;
 
-       The  version field contains the version number of the block format. The
-       current version is 1; the three callout string fields  were  added  for
-       this  version. If you are writing an application that might use an ear-
-       lier release of PCRE2, you  should  check  the  version  number  before
-       accessing  any  of  these  fields.  The version number will increase in
-       future if more fields are added, but the intention is never  to  remove
+       The version field contains the version number of the block format.  The
+       current  version  is  1; the three callout string fields were added for
+       this version. If you are writing an application that might use an  ear-
+       lier  release  of  PCRE2,  you  should  check the version number before
+       accessing any of these fields. The  version  number  will  increase  in
+       future  if  more fields are added, but the intention is never to remove
        any of the existing fields.
 
    Fields for numerical callouts
 
-       For  a  numerical  callout,  callout_string is NULL, and callout_number
-       contains the number of the callout, in the range  0-255.  This  is  the
-       number  that  follows  (?C for callouts that part of the pattern; it is
+       For a numerical callout, callout_string  is  NULL,  and  callout_number
+       contains  the  number  of  the callout, in the range 0-255. This is the
+       number that follows (?C for callouts that part of the  pattern;  it  is
        255 for automatically generated callouts.
 
    Fields for string callouts
 
-       For callouts with string arguments, callout_number is always zero,  and
-       callout_string  points  to the string that is contained within the com-
+       For  callouts with string arguments, callout_number is always zero, and
+       callout_string points to the string that is contained within  the  com-
        piled pattern. Its length is given by callout_string_length. Duplicated
        ending delimiters that were present in the original pattern string have
        been turned into single characters, but there is no other processing of
-       the  callout string argument. An additional code unit containing binary
-       zero is present after the string, but is not included  in  the  length.
-       The  delimiter  that was used to start the string is also stored within
-       the pattern, immediately before the string itself. You can access  this
+       the callout string argument. An additional code unit containing  binary
+       zero  is  present  after the string, but is not included in the length.
+       The delimiter that was used to start the string is also  stored  within
+       the  pattern, immediately before the string itself. You can access this
        delimiter as callout_string[-1] if you need it.
 
        The callout_string_offset field is the code unit offset to the start of
        the callout argument string within the original pattern string. This is
-       provided  for the benefit of applications such as script languages that
+       provided for the benefit of applications such as script languages  that
        might need to report errors in the callout string within the pattern.
 
    Fields for all callouts
 
-       The remaining fields in the callout block are the same for  both  kinds
+       The  remaining  fields in the callout block are the same for both kinds
        of callout.
 
-       The offset_vector field is a pointer to the vector of capturing offsets
-       (the "ovector") that was passed to the matching function in  the  match
-       data  block.  When pcre2_match() is used, the contents can be inspected
-       in order to extract substrings that have been matched so  far,  in  the
-       same  way as for extracting substrings after a match has completed. For
-       the DFA matching function, this field is not useful.
+       The offset_vector field is a pointer to a vector of  capturing  offsets
+       (the  "ovector"). You may read certain elements in this vector, but you
+       must not change any of them.
+
+       For calls to pcre2_match(),  the  offset_vector  field  is  not  (since
+       release  10.30)  a pointer to the actual ovector that was passed to the
+       matching function in the match data block.  Instead  it  points  to  an
+       internal  ovector  of a size large enough to hold all possible captured
+       substrings in the pattern. Note that whenever a recursion or subroutine
+       call  within  a pattern completes, the capturing state is reset to what
+       it was before.
+
+       The capture_last field contains the number of the  most  recently  cap-
+       tured  substring,  and the capture_top field contains one more than the
+       number of the highest numbered captured substring so far.  If  no  sub-
+       strings  have yet been captured, the value of capture_last is 0 and the
+       value of capture_top is 1. The values of these  fields  do  not  always
+       differ   by   one;  for  example,  when  the  callout  in  the  pattern
+       ((a)(b))(?C2) is taken, capture_last is 1 but capture_top is 4.
+
+       The  contents  of  ovector[2]  to  ovector[<capture_top>*2-1]  can   be
+       inspected in order to extract substrings that have been matched so far,
+       in the same way as extracting substrings after a match  has  completed.
+       The values in ovector[0] and ovector[1] are undefined and should not be
+       used in any way. Substrings that have not been captured (but whose num-
+       bers are less than capture_top) have both of their ovector slots set to
+       PCRE2_UNSET.
+
+       For DFA matching, the offset_vector field points to  the  ovector  that
+       was  passed  to  the  matching function in the match data block, but it
+       holds no useful information at callout time  because  pcre2_dfa_match()
+       does  not  support  substring  capturing.  The  value of capture_top is
+       always 1 and the value of capture_last is always 0 for DFA matching.
 
        The subject and subject_length fields contain copies of the values that
        were passed to the matching function.
@@ -3965,18 +3983,6 @@ THE CALLOUT INTERFACE
 
        The current_position field contains the offset within  the  subject  of
        the current match pointer.
-
-       When the pcre2_match() is used, the capture_top field contains one more
-       than the number of the highest numbered captured substring so  far.  If
-       no substrings have been captured, the value of capture_top is one. This
-       is always the case when the DFA functions are used, because they do not
-       support captured substrings.
-
-       The  capture_last  field  contains the number of the most recently cap-
-       tured substring. However, when a recursion exits, the value reverts  to
-       what  it  was  outside  the recursion, as do the values of all captured
-       substrings. If no substrings have been  captured,  the  value  of  cap-
-       ture_last is 0. This is always the case for the DFA matching functions.
 
        The pattern_position field contains the offset in the pattern string to
        the next item to be matched.
@@ -4075,8 +4081,8 @@ AUTHOR
 
 REVISION
 
-       Last updated: 29 September 2016
-       Copyright (c) 1997-2016 University of Cambridge.
+       Last updated: 29 March 2017
+       Copyright (c) 1997-2017 University of Cambridge.
 ------------------------------------------------------------------------------
  
  

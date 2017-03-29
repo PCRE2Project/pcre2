@@ -57,8 +57,8 @@ two callout points:
 </pre>
 If the PCRE2_AUTO_CALLOUT option bit is set when a pattern is compiled, PCRE2
 automatically inserts callouts, all with number 255, before each item in the
-pattern except for immediately before or after a callout item in the pattern.
-For example, if PCRE2_AUTO_CALLOUT is used with the pattern
+pattern except for immediately before or after an explicit callout. For
+example, if PCRE2_AUTO_CALLOUT is used with the pattern
 <pre>
   A(?C3)B
 </pre>
@@ -71,11 +71,9 @@ Here is a more complicated example:
   A(\d{2}|--)
 </pre>
 With PCRE2_AUTO_CALLOUT, this pattern is processed as if it were
-<br>
-<br>
-(?C255)A(?C255)((?C255)\d{2}(?C255)|(?C255)-(?C255)-(?C255))(?C255)
-<br>
-<br>
+<pre>
+  (?C255)A(?C255)((?C255)\d{2}(?C255)|(?C255)-(?C255)-(?C255))(?C255)
+</pre>
 Notice that there is a callout before and after each parenthesis and
 alternation bar. If the pattern contains a conditional group whose condition is
 an assertion, an automatic callout is inserted immediately before the
@@ -140,10 +138,14 @@ By default, an optimization is applied when .* is the first significant item in
 a pattern. If PCRE2_DOTALL is set, so that the dot can match any character, the
 pattern is automatically anchored. If PCRE2_DOTALL is not set, a match can
 start only after an internal newline or at the beginning of the subject, and
-<b>pcre2_compile()</b> remembers this. This optimization is disabled, however,
-if .* is in an atomic group or if there is a back reference to the capturing
-group in which it appears. It is also disabled if the pattern contains (*PRUNE)
-or (*SKIP). However, the presence of callouts does not affect it.
+<b>pcre2_compile()</b> remembers this. If a pattern has more than one top-level
+branch, automatic anchoring occurs if all branches are anchorable.
+</P>
+<P>
+This optimization is disabled, however, if .* is in an atomic group or if there
+is a back reference to the capturing group in which it appears. It is also
+disabled if the pattern contains (*PRUNE) or (*SKIP). However, the presence of
+callouts does not affect it.
 </P>
 <P>
 For example, if the pattern .*\d is compiled with PCRE2_AUTO_CALLOUT and
@@ -175,10 +177,6 @@ This shows more match attempts, starting at the second subject character.
 Another optimization, described in the next section, means that there is no
 subsequent attempt to match with an empty subject.
 </P>
-<P>
-If a pattern has more than one top-level branch, automatic anchoring occurs if
-all branches are anchorable.
-</P>
 <br><b>
 Other optimizations
 </b><br>
@@ -194,9 +192,10 @@ start, and the callout is never reached. However, with "abyd", though the
 result is still no match, the callout is obeyed.
 </P>
 <P>
-PCRE2 also knows the minimum length of a matching string, and will immediately
-give a "no match" return without actually running a match if the subject is not
-long enough, or, for unanchored patterns, if it has been scanned far enough.
+For most patterns PCRE2 also knows the minimum length of a matching string, and
+will immediately give a "no match" return without actually running a match if
+the subject is not long enough, or, for unanchored patterns, if it has been
+scanned far enough.
 </P>
 <P>
 You can disable these optimizations by passing the PCRE2_NO_START_OPTIMIZE
@@ -276,12 +275,41 @@ The remaining fields in the callout block are the same for both kinds of
 callout.
 </P>
 <P>
-The <i>offset_vector</i> field is a pointer to the vector of capturing offsets
-(the "ovector") that was passed to the matching function in the match data
-block. When <b>pcre2_match()</b> is used, the contents can be inspected in
+The <i>offset_vector</i> field is a pointer to a vector of capturing offsets
+(the "ovector"). You may read certain elements in this vector, but you must not
+change any of them.
+</P>
+<P>
+For calls to <b>pcre2_match()</b>, the <i>offset_vector</i> field is not (since
+release 10.30) a pointer to the actual ovector that was passed to the matching
+function in the match data block. Instead it points to an internal ovector of a
+size large enough to hold all possible captured substrings in the pattern. Note
+that whenever a recursion or subroutine call within a pattern completes, the
+capturing state is reset to what it was before.
+</P>
+<P>
+The <i>capture_last</i> field contains the number of the most recently captured
+substring, and the <i>capture_top</i> field contains one more than the number of
+the highest numbered captured substring so far. If no substrings have yet been
+captured, the value of <i>capture_last</i> is 0 and the value of
+<i>capture_top</i> is 1. The values of these fields do not always differ by one;
+for example, when the callout in the pattern ((a)(b))(?C2) is taken,
+<i>capture_last</i> is 1 but <i>capture_top</i> is 4.
+</P>
+<P>
+The contents of ovector[2] to ovector[&#60;capture_top&#62;*2-1] can be inspected in
 order to extract substrings that have been matched so far, in the same way as
-for extracting substrings after a match has completed. For the DFA matching
-function, this field is not useful.
+extracting substrings after a match has completed. The values in ovector[0] and 
+ovector[1] are undefined and should not be used in any way. Substrings that 
+have not been captured (but whose numbers are less than <i>capture_top</i>) have 
+both of their ovector slots set to PCRE2_UNSET.
+</P>
+<P>
+For DFA matching, the <i>offset_vector</i> field points to the ovector that was
+passed to the matching function in the match data block, but it holds no useful
+information at callout time because <b>pcre2_dfa_match()</b> does not support
+substring capturing. The value of <i>capture_top</i> is always 1 and the value
+of <i>capture_last</i> is always 0 for DFA matching.
 </P>
 <P>
 The <i>subject</i> and <i>subject_length</i> fields contain copies of the values
@@ -298,20 +326,6 @@ in the subject.
 <P>
 The <i>current_position</i> field contains the offset within the subject of the
 current match pointer.
-</P>
-<P>
-When the <b>pcre2_match()</b> is used, the <i>capture_top</i> field contains one
-more than the number of the highest numbered captured substring so far. If no
-substrings have been captured, the value of <i>capture_top</i> is one. This is
-always the case when the DFA functions are used, because they do not support
-captured substrings.
-</P>
-<P>
-The <i>capture_last</i> field contains the number of the most recently captured
-substring. However, when a recursion exits, the value reverts to what it was
-outside the recursion, as do the values of all captured substrings. If no
-substrings have been captured, the value of <i>capture_last</i> is 0. This is
-always the case for the DFA matching functions.
 </P>
 <P>
 The <i>pattern_position</i> field contains the offset in the pattern string to
@@ -413,9 +427,9 @@ Cambridge, England.
 </P>
 <br><a name="SEC8" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 29 September 2016
+Last updated: 29 March 2017
 <br>
-Copyright &copy; 1997-2016 University of Cambridge.
+Copyright &copy; 1997-2017 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE2 index page</a>.

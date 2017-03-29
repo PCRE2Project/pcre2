@@ -1,4 +1,4 @@
-.TH PCRE2CALLOUT 3 "29 September 2016" "PCRE2 10.23"
+.TH PCRE2CALLOUT 3 "29 March 2017" "PCRE2 10.30"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH SYNOPSIS
@@ -40,8 +40,8 @@ two callout points:
 .sp
 If the PCRE2_AUTO_CALLOUT option bit is set when a pattern is compiled, PCRE2
 automatically inserts callouts, all with number 255, before each item in the
-pattern except for immediately before or after a callout item in the pattern.
-For example, if PCRE2_AUTO_CALLOUT is used with the pattern
+pattern except for immediately before or after an explicit callout. For
+example, if PCRE2_AUTO_CALLOUT is used with the pattern
 .sp
   A(?C3)B
 .sp
@@ -55,7 +55,7 @@ Here is a more complicated example:
 .sp
 With PCRE2_AUTO_CALLOUT, this pattern is processed as if it were
 .sp
-(?C255)A(?C255)((?C255)\ed{2}(?C255)|(?C255)-(?C255)-(?C255))(?C255)
+  (?C255)A(?C255)((?C255)\ed{2}(?C255)|(?C255)-(?C255)-(?C255))(?C255)
 .sp
 Notice that there is a callout before and after each parenthesis and
 alternation bar. If the pattern contains a conditional group whose condition is
@@ -124,10 +124,13 @@ By default, an optimization is applied when .* is the first significant item in
 a pattern. If PCRE2_DOTALL is set, so that the dot can match any character, the
 pattern is automatically anchored. If PCRE2_DOTALL is not set, a match can
 start only after an internal newline or at the beginning of the subject, and
-\fBpcre2_compile()\fP remembers this. This optimization is disabled, however,
-if .* is in an atomic group or if there is a back reference to the capturing
-group in which it appears. It is also disabled if the pattern contains (*PRUNE)
-or (*SKIP). However, the presence of callouts does not affect it.
+\fBpcre2_compile()\fP remembers this. If a pattern has more than one top-level
+branch, automatic anchoring occurs if all branches are anchorable.
+.P
+This optimization is disabled, however, if .* is in an atomic group or if there
+is a back reference to the capturing group in which it appears. It is also
+disabled if the pattern contains (*PRUNE) or (*SKIP). However, the presence of
+callouts does not affect it.
 .P
 For example, if the pattern .*\ed is compiled with PCRE2_AUTO_CALLOUT and
 applied to the string "aa", the \fBpcre2test\fP output is:
@@ -157,9 +160,6 @@ pattern with (*NO_DOTSTAR_ANCHOR). In this case, the output changes to:
 This shows more match attempts, starting at the second subject character.
 Another optimization, described in the next section, means that there is no
 subsequent attempt to match with an empty subject.
-.P
-If a pattern has more than one top-level branch, automatic anchoring occurs if
-all branches are anchorable.
 .
 .
 .SS "Other optimizations"
@@ -175,9 +175,10 @@ subject string is "abyz", the lack of "d" means that matching doesn't ever
 start, and the callout is never reached. However, with "abyd", though the
 result is still no match, the callout is obeyed.
 .P
-PCRE2 also knows the minimum length of a matching string, and will immediately
-give a "no match" return without actually running a match if the subject is not
-long enough, or, for unanchored patterns, if it has been scanned far enough.
+For most patterns PCRE2 also knows the minimum length of a matching string, and
+will immediately give a "no match" return without actually running a match if
+the subject is not long enough, or, for unanchored patterns, if it has been
+scanned far enough.
 .P
 You can disable these optimizations by passing the PCRE2_NO_START_OPTIMIZE
 option to \fBpcre2_compile()\fP, or by starting the pattern with
@@ -259,12 +260,37 @@ need to report errors in the callout string within the pattern.
 The remaining fields in the callout block are the same for both kinds of
 callout.
 .P
-The \fIoffset_vector\fP field is a pointer to the vector of capturing offsets
-(the "ovector") that was passed to the matching function in the match data
-block. When \fBpcre2_match()\fP is used, the contents can be inspected in
+The \fIoffset_vector\fP field is a pointer to a vector of capturing offsets
+(the "ovector"). You may read certain elements in this vector, but you must not
+change any of them.
+.P
+For calls to \fBpcre2_match()\fP, the \fIoffset_vector\fP field is not (since
+release 10.30) a pointer to the actual ovector that was passed to the matching
+function in the match data block. Instead it points to an internal ovector of a
+size large enough to hold all possible captured substrings in the pattern. Note
+that whenever a recursion or subroutine call within a pattern completes, the
+capturing state is reset to what it was before.
+.P
+The \fIcapture_last\fP field contains the number of the most recently captured
+substring, and the \fIcapture_top\fP field contains one more than the number of
+the highest numbered captured substring so far. If no substrings have yet been
+captured, the value of \fIcapture_last\fP is 0 and the value of
+\fIcapture_top\fP is 1. The values of these fields do not always differ by one;
+for example, when the callout in the pattern ((a)(b))(?C2) is taken,
+\fIcapture_last\fP is 1 but \fIcapture_top\fP is 4.
+.P
+The contents of ovector[2] to ovector[<capture_top>*2-1] can be inspected in
 order to extract substrings that have been matched so far, in the same way as
-for extracting substrings after a match has completed. For the DFA matching
-function, this field is not useful.
+extracting substrings after a match has completed. The values in ovector[0] and 
+ovector[1] are undefined and should not be used in any way. Substrings that 
+have not been captured (but whose numbers are less than \fIcapture_top\fP) have 
+both of their ovector slots set to PCRE2_UNSET.
+.P
+For DFA matching, the \fIoffset_vector\fP field points to the ovector that was
+passed to the matching function in the match data block, but it holds no useful
+information at callout time because \fBpcre2_dfa_match()\fP does not support
+substring capturing. The value of \fIcapture_top\fP is always 1 and the value
+of \fIcapture_last\fP is always 0 for DFA matching.
 .P
 The \fIsubject\fP and \fIsubject_length\fP fields contain copies of the values
 that were passed to the matching function.
@@ -278,18 +304,6 @@ in the subject.
 .P
 The \fIcurrent_position\fP field contains the offset within the subject of the
 current match pointer.
-.P
-When the \fBpcre2_match()\fP is used, the \fIcapture_top\fP field contains one
-more than the number of the highest numbered captured substring so far. If no
-substrings have been captured, the value of \fIcapture_top\fP is one. This is
-always the case when the DFA functions are used, because they do not support
-captured substrings.
-.P
-The \fIcapture_last\fP field contains the number of the most recently captured
-substring. However, when a recursion exits, the value reverts to what it was
-outside the recursion, as do the values of all captured substrings. If no
-substrings have been captured, the value of \fIcapture_last\fP is 0. This is
-always the case for the DFA matching functions.
 .P
 The \fIpattern_position\fP field contains the offset in the pattern string to
 the next item to be matched.
@@ -396,6 +410,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 29 September 2016
-Copyright (c) 1997-2016 University of Cambridge.
+Last updated: 29 March 2017
+Copyright (c) 1997-2017 University of Cambridge.
 .fi
