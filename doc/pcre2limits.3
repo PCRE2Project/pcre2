@@ -1,4 +1,4 @@
-.TH PCRE2LIMITS 3 "26 October 2016" "PCRE2 10.23"
+.TH PCRE2LIMITS 3 "30 March 2017" "PCRE2 10.30"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "SIZE AND OTHER LIMITATIONS"
@@ -29,15 +29,6 @@ largest number a PCRE2_SIZE variable can hold. PCRE2_SIZE is an unsigned
 integer type, usually defined as size_t. Its maximum value (that is
 ~(PCRE2_SIZE)0) is reserved as a special indicator for zero-terminated strings
 and unset offsets.
-.P
-Note that when using the traditional matching function, PCRE2 uses recursion to
-handle subpatterns and indefinite repetition. This means that the available
-stack space may limit the size of a subject string that can be processed by
-certain patterns. For a discussion of stack issues, see the
-.\" HREF
-\fBpcre2stack\fP
-.\"
-documentation.
 .P
 All values in repeating quantifiers must be less than 65536.
 .P
@@ -76,6 +67,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 26 October 2016
-Copyright (c) 1997-2016 University of Cambridge.
+Last updated: 30 March 2017
+Copyright (c) 1997-2017 University of Cambridge.
 .fi

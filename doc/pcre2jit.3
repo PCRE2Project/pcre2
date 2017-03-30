@@ -1,4 +1,4 @@
-.TH PCRE2JIT 3 "05 June 2016" "PCRE2 10.22"
+.TH PCRE2JIT 3 "30 March 2017" "PCRE2 10.30"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 JUST-IN-TIME COMPILER SUPPORT"
@@ -152,7 +152,7 @@ below for a discussion of JIT stack usage.
 The error code PCRE2_ERROR_MATCHLIMIT is returned by the JIT code if searching
 a very large pattern tree goes on for too long, as it is in the same
 circumstance when JIT is not used, but the details of exactly what is counted
-are not the same. The PCRE2_ERROR_RECURSIONLIMIT error code is never returned
+are not the same. The PCRE2_ERROR_DEPTHLIMIT error code is never returned
 when JIT matching is used.
 .
 .
@@ -413,6 +413,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 05 June 2016
-Copyright (c) 1997-2016 University of Cambridge.
+Last updated: 30 March 2017
+Copyright (c) 1997-2017 University of Cambridge.
 .fi
