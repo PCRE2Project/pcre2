@@ -1862,11 +1862,14 @@ for (i = 0; i < RECURSE_TMP_REG_COUNT; i++)
 
 #undef RECURSE_TMP_REG_COUNT
 
-static int get_recurse_data_length(compiler_common *common, PCRE2_SPTR cc, PCRE2_SPTR ccend, BOOL *needs_control_head)
+static int get_recurse_data_length(compiler_common *common, PCRE2_SPTR cc, PCRE2_SPTR ccend,
+  BOOL *needs_control_head, BOOL *has_quit, BOOL *has_accept)
 {
 int length = 1;
 int size;
 PCRE2_SPTR alternative;
+BOOL quit_found = FALSE;
+BOOL accept_found = FALSE;
 BOOL setsom_found = FALSE;
 BOOL setmark_found = FALSE;
 BOOL capture_last_found = FALSE;
@@ -1875,7 +1878,6 @@ BOOL control_head_found = FALSE;
 #if defined DEBUG_FORCE_CONTROL_HEAD && DEBUG_FORCE_CONTROL_HEAD
 SLJIT_ASSERT(common->control_head_ptr != 0);
 control_head_found = TRUE;
-length++;
 #endif
 
 /* Calculate the sum of the private machine words. */
@@ -1886,30 +1888,17 @@ while (cc < ccend)
     {
     case OP_SET_SOM:
     SLJIT_ASSERT(common->has_set_som);
-    if (!setsom_found)
-      {
-      length++;
-      setsom_found = TRUE;
-      }
+    setsom_found = TRUE;
     cc += 1;
     break;
 
     case OP_RECURSE:
-    if (common->has_set_som && !setsom_found)
-      {
-      length++;
+    if (common->has_set_som)
       setsom_found = TRUE;
-      }
-    if (common->mark_ptr != 0 && !setmark_found)
-      {
-      length++;
+    if (common->mark_ptr != 0)
       setmark_found = TRUE;
-      }
-    if (common->capture_last_ptr != 0 && !capture_last_found)
-      {
-      length++;
+    if (common->capture_last_ptr != 0)
       capture_last_found = TRUE;
-      }
     cc += 1 + LINK_SIZE;
     break;
 
@@ -1940,11 +1929,8 @@ while (cc < ccend)
     case OP_CBRA:
     case OP_SCBRA:
     length += 2;
-    if (common->capture_last_ptr != 0 && !capture_last_found)
-      {
-      length++;
+    if (common->capture_last_ptr != 0)
       capture_last_found = TRUE;
-      }
     if (common->optimized_cbracket[GET2(cc, 1 + LINK_SIZE)] == 0)
       length++;
     cc += 1 + LINK_SIZE + IMM2_SIZE;
@@ -1953,11 +1939,8 @@ while (cc < ccend)
     case OP_CBRAPOS:
     case OP_SCBRAPOS:
     length += 2 + 2;
-    if (common->capture_last_ptr != 0 && !capture_last_found)
-      {
-      length++;
+    if (common->capture_last_ptr != 0)
       capture_last_found = TRUE;
-      }
     cc += 1 + LINK_SIZE + IMM2_SIZE;
     break;
 
@@ -2032,25 +2015,38 @@ while (cc < ccend)
     case OP_THEN_ARG:
     SLJIT_ASSERT(common->mark_ptr != 0);
     if (!setmark_found)
-      {
-      length++;
       setmark_found = TRUE;
-      }
-    if (common->control_head_ptr != 0 && !control_head_found)
-      {
-      length++;
+    if (common->control_head_ptr != 0)
       control_head_found = TRUE;
-      }
+    if (*cc != OP_MARK)
+      quit_found = TRUE;
+
+    cc += 1 + 2 + cc[1];
+    break;
+
+    case OP_PRUNE:
+    case OP_SKIP:
+    case OP_COMMIT:
+    quit_found = TRUE;
+    cc++;
+    break;
+
+    case OP_SKIP_ARG:
+    quit_found = TRUE;
     cc += 1 + 2 + cc[1];
     break;
 
     case OP_THEN:
     SLJIT_ASSERT(common->control_head_ptr != 0);
+    quit_found = TRUE;
     if (!control_head_found)
-      {
-      length++;
       control_head_found = TRUE;
-      }
+    cc++;
+    break;
+
+    case OP_ACCEPT:
+    case OP_ASSERT_ACCEPT:
+    accept_found = TRUE;
     cc++;
     break;
 
@@ -2062,7 +2058,21 @@ while (cc < ccend)
   }
 SLJIT_ASSERT(cc == ccend);
 
+if (control_head_found)
+  length++;
+if (capture_last_found)
+  length++;
+if (quit_found)
+  {
+  if (setsom_found)
+    length++;
+  if (setmark_found)
+    length++;
+  }
+
 *needs_control_head = control_head_found;
+*has_quit = quit_found;
+*has_accept = accept_found;
 return length;
 }
 
@@ -2070,11 +2080,12 @@ enum copy_recurse_data_types {
   recurse_copy_from_global,
   recurse_copy_private_to_global,
   recurse_copy_shared_to_global,
+  recurse_copy_kept_shared_to_global,
   recurse_swap_global
 };
 
 static void copy_recurse_data(compiler_common *common, PCRE2_SPTR cc, PCRE2_SPTR ccend,
-  int type, int stackptr, int stacktop)
+  int type, int stackptr, int stacktop, BOOL has_quit)
 {
 delayed_mem_copy_status status;
 PCRE2_SPTR alternative;
@@ -2102,6 +2113,7 @@ switch (type)
 
   case recurse_copy_private_to_global:
   case recurse_copy_shared_to_global:
+  case recurse_copy_kept_shared_to_global:
   from_sp = FALSE;
   base_reg = STACK_TOP;
   break;
@@ -2109,20 +2121,20 @@ switch (type)
   default:
   SLJIT_ASSERT(type == recurse_swap_global);
   from_sp = FALSE;
-  base_reg = TMP1;
+  base_reg = TMP2;
   break;
   }
 
 stackptr = STACK(stackptr);
 stacktop = STACK(stacktop);
 
-status.tmp_regs[0] = TMP2;
-status.saved_tmp_regs[0] = TMP2;
+status.tmp_regs[0] = TMP1;
+status.saved_tmp_regs[0] = TMP1;
 
-if (base_reg != TMP1)
+if (base_reg != TMP2)
   {
-  status.tmp_regs[1] = TMP1;
-  status.saved_tmp_regs[1] = TMP1;
+  status.tmp_regs[1] = TMP2;
+  status.saved_tmp_regs[1] = TMP2;
   }
 else
   {
@@ -2141,8 +2153,10 @@ else
 
 delayed_mem_copy_init(&status, common);
 
-if (type != recurse_copy_shared_to_global)
+if (type != recurse_copy_shared_to_global && type != recurse_copy_kept_shared_to_global)
   {
+  SLJIT_ASSERT(type == recurse_copy_from_global || type == recurse_copy_private_to_global || type == recurse_swap_global);
+
   if (!from_sp)
     delayed_mem_copy_move(&status, base_reg, stackptr, SLJIT_SP, common->recursive_head_ptr);
 
@@ -2175,7 +2189,7 @@ while (cc < ccend)
     {
     case OP_SET_SOM:
     SLJIT_ASSERT(common->has_set_som);
-    if (!setsom_found)
+    if (has_quit && !setsom_found)
       {
       kept_shared_srcw[0] = OVECTOR(0);
       kept_shared_count = 1;
@@ -2185,17 +2199,20 @@ while (cc < ccend)
     break;
 
     case OP_RECURSE:
-    if (common->has_set_som && !setsom_found)
+    if (has_quit)
       {
-      kept_shared_srcw[0] = OVECTOR(0);
-      kept_shared_count = 1;
-      setsom_found = TRUE;
-      }
-    if (common->mark_ptr != 0 && !setmark_found)
-      {
-      kept_shared_srcw[shared_count] = common->mark_ptr;
-      kept_shared_count++;
-      setmark_found = TRUE;
+      if (common->has_set_som && !setsom_found)
+        {
+        kept_shared_srcw[0] = OVECTOR(0);
+        kept_shared_count = 1;
+        setsom_found = TRUE;
+        }
+      if (common->mark_ptr != 0 && !setmark_found)
+        {
+        kept_shared_srcw[kept_shared_count] = common->mark_ptr;
+        kept_shared_count++;
+        setmark_found = TRUE;
+        }
       }
     if (common->capture_last_ptr != 0 && !capture_last_found)
       {
@@ -2384,7 +2401,7 @@ while (cc < ccend)
     case OP_PRUNE_ARG:
     case OP_THEN_ARG:
     SLJIT_ASSERT(common->mark_ptr != 0);
-    if (!setmark_found)
+    if (has_quit && !setmark_found)
       {
       kept_shared_srcw[0] = common->mark_ptr;
       kept_shared_count = 1;
@@ -2416,8 +2433,10 @@ while (cc < ccend)
     break;
     }
 
-  if (type != recurse_copy_shared_to_global)
+  if (type != recurse_copy_shared_to_global && type != recurse_copy_kept_shared_to_global)
     {
+    SLJIT_ASSERT(type == recurse_copy_from_global || type == recurse_copy_private_to_global || type == recurse_swap_global);
+
     for (i = 0; i < private_count; i++)
       {
       SLJIT_ASSERT(private_srcw[i] != 0);
@@ -2434,8 +2453,10 @@ while (cc < ccend)
   else
     stackptr += sizeof(sljit_sw) * private_count;
 
-  if (type != recurse_copy_private_to_global)
+  if (type != recurse_copy_private_to_global && type != recurse_copy_kept_shared_to_global)
     {
+    SLJIT_ASSERT(type == recurse_copy_from_global || type == recurse_copy_shared_to_global || type == recurse_swap_global);
+
     for (i = 0; i < shared_count; i++)
       {
       SLJIT_ASSERT(shared_srcw[i] != 0);
@@ -2452,8 +2473,10 @@ while (cc < ccend)
   else
     stackptr += sizeof(sljit_sw) * shared_count;
 
-  if (type == recurse_copy_from_global || type == recurse_copy_shared_to_global)
+  if (type != recurse_copy_private_to_global && type != recurse_swap_global)
     {
+    SLJIT_ASSERT(type == recurse_copy_from_global || type == recurse_copy_shared_to_global || type == recurse_copy_kept_shared_to_global);
+
     for (i = 0; i < kept_shared_count; i++)
       {
       SLJIT_ASSERT(kept_shared_srcw[i] != 0);
@@ -11001,13 +11024,16 @@ PCRE2_SPTR cc = common->start + common->currententry->start;
 PCRE2_SPTR ccbegin = cc + 1 + LINK_SIZE + (*cc == OP_BRA ? 0 : IMM2_SIZE);
 PCRE2_SPTR ccend = bracketend(cc) - (1 + LINK_SIZE);
 BOOL needs_control_head;
-int private_data_size = get_recurse_data_length(common, ccbegin, ccend, &needs_control_head);
+BOOL has_quit;
+BOOL has_accept;
+int private_data_size = get_recurse_data_length(common, ccbegin, ccend, &needs_control_head, &has_quit, &has_accept);
 int alt_count, alt_max, local_size;
 backtrack_common altbacktrack;
 jump_list *match = NULL;
 sljit_uw *next_update_addr = NULL;
 struct sljit_jump *alt1 = NULL;
 struct sljit_jump *alt2 = NULL;
+struct sljit_jump *accept_exit = NULL;
 struct sljit_label *quit;
 
 /* Recurse captures then. */
@@ -11028,13 +11054,14 @@ count_match(common);
 
 local_size = (alt_max > 1) ? 2 : 1;
 
-/* Stack layout: [private data][return address][alternative index] */
+/* (Reversed) stack layout:
+   [private data][return address][optional: str ptr] ... [optional: alternative index][recursive_head_ptr] */
 
 allocate_stack(common, private_data_size + local_size);
 /* Save return address. */
 OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(local_size - 1), TMP2, 0);
 
-copy_recurse_data(common, ccbegin, ccend, recurse_copy_from_global, local_size, private_data_size + local_size);
+copy_recurse_data(common, ccbegin, ccend, recurse_copy_from_global, local_size, private_data_size + local_size, has_quit);
 
 /* This variable is saved and restored all time when we enter or exit from a recursive context. */
 OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), common->recursive_head_ptr, STACK_TOP, 0);
@@ -11064,14 +11091,10 @@ while (1)
   if (SLJIT_UNLIKELY(sljit_get_compiler_error(compiler)))
     return;
 
-  /* TODO: this needs to be improved in the future. */
-  set_jumps(common->accept, LABEL());
-  common->accept_label = NULL;
+  allocate_stack(common, (alt_max > 1 || has_accept) ? 2 : 1);
+  OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(SLJIT_SP), common->recursive_head_ptr);
 
-  allocate_stack(common, (alt_max > 1) ? 2 : 1);
-  OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_SP), common->recursive_head_ptr);
-
-  if (alt_max > 1)
+  if (alt_max > 1 || has_accept)
     OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(1), SLJIT_IMM, alt_count);
 
   add_jump(compiler, &match, JUMP(SLJIT_JUMP));
@@ -11083,13 +11106,16 @@ while (1)
     common->currententry->backtrack_label = LABEL();
     set_jumps(common->currententry->backtrack_calls, common->currententry->backtrack_label);
 
-    sljit_emit_fast_enter(compiler, TMP2, 0);
+    sljit_emit_fast_enter(compiler, TMP1, 0);
 
-    OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(STACK_TOP), STACK(0));
+    if (has_accept)
+      accept_exit = CMP(SLJIT_EQUAL, SLJIT_MEM1(STACK_TOP), STACK(1), SLJIT_IMM, alt_max * sizeof (sljit_sw));
+
+    OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(STACK_TOP), STACK(0));
     /* Save return address. */
-    OP1(SLJIT_MOV, SLJIT_MEM1(TMP1), STACK(local_size - 1), TMP2, 0);
+    OP1(SLJIT_MOV, SLJIT_MEM1(TMP2), STACK(local_size - 1), TMP1, 0);
 
-    copy_recurse_data(common, ccbegin, ccend, recurse_swap_global, local_size, private_data_size + local_size);
+    copy_recurse_data(common, ccbegin, ccend, recurse_swap_global, local_size, private_data_size + local_size, has_quit);
 
     if (alt_max > 1)
       {
@@ -11113,7 +11139,7 @@ while (1)
         }
       }
     else
-      free_stack(common, 1);
+      free_stack(common, has_accept ? 2 : 1);
     }
   else if (alt_max > 4)
     add_label_addr(common, next_update_addr++);
@@ -11151,7 +11177,7 @@ while (1)
 
 quit = LABEL();
 
-copy_recurse_data(common, ccbegin, ccend, recurse_copy_private_to_global, local_size, private_data_size + local_size);
+copy_recurse_data(common, ccbegin, ccend, recurse_copy_private_to_global, local_size, private_data_size + local_size, has_quit);
 
 OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(STACK_TOP), STACK(local_size - 1));
 free_stack(common, private_data_size + local_size);
@@ -11160,19 +11186,50 @@ sljit_emit_fast_return(compiler, TMP2, 0);
 
 if (common->quit != NULL)
   {
+  SLJIT_ASSERT(has_quit);
+
   set_jumps(common->quit, LABEL());
   OP1(SLJIT_MOV, STACK_TOP, 0, SLJIT_MEM1(SLJIT_SP), common->recursive_head_ptr);
-  copy_recurse_data(common, ccbegin, ccend, recurse_copy_shared_to_global, local_size, private_data_size + local_size);
+  copy_recurse_data(common, ccbegin, ccend, recurse_copy_shared_to_global, local_size, private_data_size + local_size, has_quit);
   JUMPTO(SLJIT_JUMP, quit);
+  }
+
+if (has_accept)
+  {
+  JUMPHERE(accept_exit);
+  free_stack(common, 2);
+
+  /* Save return address. */
+  OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(local_size - 1), TMP1, 0);
+
+  copy_recurse_data(common, ccbegin, ccend, recurse_copy_kept_shared_to_global, local_size, private_data_size + local_size, has_quit);
+
+  OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(STACK_TOP), STACK(local_size - 1));
+  free_stack(common, private_data_size + local_size);
+  OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, 0);
+  sljit_emit_fast_return(compiler, TMP2, 0);
+  }
+
+if (common->accept != NULL)
+  {
+  SLJIT_ASSERT(has_accept);
+
+  set_jumps(common->accept, LABEL());
+
+  OP1(SLJIT_MOV, STACK_TOP, 0, SLJIT_MEM1(SLJIT_SP), common->recursive_head_ptr);
+  OP1(SLJIT_MOV, TMP2, 0, STACK_TOP, 0);
+
+  allocate_stack(common, 2);
+  OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(1), SLJIT_IMM, alt_count);
   }
 
 set_jumps(match, LABEL());
 
-OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(0), TMP1, 0);
+OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(0), TMP2, 0);
 
-copy_recurse_data(common, ccbegin, ccend, recurse_swap_global, local_size, private_data_size + local_size);
+copy_recurse_data(common, ccbegin, ccend, recurse_swap_global, local_size, private_data_size + local_size, has_quit);
 
-OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(TMP1), STACK(local_size - 1));
+OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(TMP2), STACK(local_size - 1));
 OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, 1);
 sljit_emit_fast_return(compiler, TMP2, 0);
 }

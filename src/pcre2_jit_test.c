@@ -724,6 +724,8 @@ static struct regression_test_case regression_test_cases[] = {
 	{ MU, A, 0, 0, "((?:(?(R)a|(?1))){3})", "XaaaaaaaaaX" },
 	{ MU, A, 0, 0, "((?(R)a|(?1)){1,3})aaaaaa", "aaaaaaaaXaaaaaaaaa" },
 	{ MU, A, 0, 0, "((?(R)a|(?1)){1,3}?)M", "aaaM" },
+	{ MU, A, 0, 0, "((.)(?:.|\\2(?1))){0}#(?1)#", "#aabbccdde# #aabbccddee#" },
+	{ MU, A, 0, 0, "((.)(?:\\2|\\2{4}b)){0}#(?:(?1))+#", "#aaaab# #aaaaab#" },
 
 	/* 16 bit specific tests. */
 	{ CM, A, 0, 0 | F_FORCECONV, "\xc3\xa1", "\xc3\x81\xc3\xa1" },
@@ -841,6 +843,16 @@ static struct regression_test_case regression_test_cases[] = {
 	{ MU, A, 0, 0, "(?(?!a(*THEN)b)ad|add)", "add" },
 	{ MU, A, 0, 0 | F_NOMATCH, "(?(?=a)a(*THEN)b|ad)", "ad" },
 	{ MU, A, 0, 0, "(?!(?(?=a)ab|b(*THEN)d))bn|bnn", "bnn" },
+
+	/* Recurse and control verbs. */
+	{ MU, A, 0, 0, "(a(*ACCEPT)b){0}a(?1)b", "aacaabb" },
+	{ MU, A, 0, 0, "((a)\\2(*ACCEPT)b){0}a(?1)b", "aaacaaabb" },
+	{ MU, A, 0, 0, "((ab|a(*ACCEPT)x)+|ababababax){0}_(?1)_", "_ababababax_ _ababababa_" },
+	{ MU, A, 0, 0, "((.)(?:A(*ACCEPT)|(?1)\\2)){0}_(?1)_", "_bcdaAdcb_bcdaAdcb_" },
+	{ MU, A, 0, 0, "((*MARK:m)(?:a|a(*COMMIT)b|aa)){0}_(?1)_", "_ab_" },
+	{ MU, A, 0, 0, "((*MARK:m)(?:a|a(*COMMIT)b|aa)){0}_(?1)_|(_aa_)", "_aa_" },
+	{ MU, A, 0, 0, "(a(*COMMIT)(?:b|bb)|c(*ACCEPT)d|dd){0}_(?1)+_", "_ax_ _cd_ _abbb_ _abcd_ _abbcdd_" },
+	{ MU, A, 0, 0, "((.)(?:.|(*COMMIT)\\2{3}(*ACCEPT).*|.*)){0}_(?1){0,4}_", "_aaaabbbbccccddd_ _aaaabbbbccccdddd_" },
 
 	/* Deep recursion. */
 	{ MU, A, 0, 0, "((((?:(?:(?:\\w)+)?)*|(?>\\w)+?)+|(?>\\w)?\?)*)?\\s", "aaaaa+ " },
