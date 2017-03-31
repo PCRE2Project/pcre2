@@ -1,4 +1,4 @@
-.TH PCRE2GREP 1 "21 March 2017" "PCRE2 10.30"
+.TH PCRE2GREP 1 "31 March 2017" "PCRE2 10.30"
 .SH NAME
 pcre2grep - a grep with Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -644,12 +644,12 @@ relying on the C I/O library to convert this to an appropriate sequence.
 Many of the short and long forms of \fBpcre2grep\fP's options are the same
 as in the GNU \fBgrep\fP program. Any long option of the form
 \fB--xxx-regexp\fP (GNU terminology) is also available as \fB--xxx-regex\fP
-(PCRE2 terminology). However, the \fB--file-list\fP, \fB--file-offsets\fP,
-\fB--include-dir\fP, \fB--line-offsets\fP, \fB--locale\fP, \fB--match-limit\fP,
-\fB-M\fP, \fB--multiline\fP, \fB-N\fP, \fB--newline\fP, \fB--om-separator\fP,
-\fB--recursion-limit\fP, \fB-u\fP, and \fB--utf-8\fP options are specific to
-\fBpcre2grep\fP, as is the use of the \fB--only-matching\fP option with a
-capturing parentheses number.
+(PCRE2 terminology). However, the \fB--depth-limit\fP, \fB--file-list\fP,
+\fB--file-offsets\fP, \fB--include-dir\fP, \fB--line-offsets\fP,
+\fB--locale\fP, \fB--match-limit\fP, \fB-M\fP, \fB--multiline\fP, \fB-N\fP,
+\fB--newline\fP, \fB--om-separator\fP, \fB-u\fP, and \fB--utf-8\fP options are
+specific to \fBpcre2grep\fP, as is the use of the \fB--only-matching\fP option
+with a capturing parentheses number.
 .P
 Although most of the common options work the same way, a few are different in
 \fBpcre2grep\fP. For example, the \fB--include\fP option's argument is a glob
@@ -789,6 +789,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 21 March 2017
+Last updated: 31 March 2017
 Copyright (c) 1997-2017 University of Cambridge.
 .fi

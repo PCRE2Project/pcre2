@@ -1,4 +1,4 @@
-.TH PCRE2BUILD 3 "29 March 2017" "PCRE2 10.30"
+.TH PCRE2BUILD 3 "31 March 2017" "PCRE2 10.30"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .
@@ -270,7 +270,7 @@ limit controls this; it defaults to the value that is set for
 to the \fBconfigure\fP command. This value can also be overridden at run time.
 As well as applying to \fBpcre2_match()\fP, this limit also controls the depth 
 of recursive function calls in \fBpcre2_dfa_match()\fP. These are used for 
-lookaround assertions and recursion within patterns.
+lookaround assertions, atomic groups, and recursion within patterns.
 .
 .
 .SH "CREATING CHARACTER TABLES AT BUILD TIME"
@@ -547,6 +547,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 29 March 2017
+Last updated: 31 March 2017
 Copyright (c) 1997-2017 University of Cambridge.
 .fi

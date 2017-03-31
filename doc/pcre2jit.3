@@ -1,4 +1,4 @@
-.TH PCRE2JIT 3 "30 March 2017" "PCRE2 10.30"
+.TH PCRE2JIT 3 "31 March 2017" "PCRE2 10.30"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 JUST-IN-TIME COMPILER SUPPORT"
@@ -178,11 +178,8 @@ allocation functions, or NULL for standard memory allocation). It returns a
 pointer to an opaque structure of type \fBpcre2_jit_stack\fP, or NULL if there
 is an error. The \fBpcre2_jit_stack_free()\fP function is used to free a stack
 that is no longer needed. (For the technically minded: the address space is
-allocated by mmap or VirtualAlloc.)
-.P
-JIT uses far less memory for recursion than the interpretive code,
-and a maximum stack size of 512K to 1M should be more than enough for any
-pattern.
+allocated by mmap or VirtualAlloc.) A maximum stack size of 512K to 1M should
+be more than enough for any pattern.
 .P
 The \fBpcre2_jit_stack_assign()\fP function specifies which stack JIT code
 should use. Its arguments are as follows:
@@ -413,6 +410,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 30 March 2017
+Last updated: 31 March 2017
 Copyright (c) 1997-2017 University of Cambridge.
 .fi
