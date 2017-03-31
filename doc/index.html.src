@@ -68,9 +68,6 @@ first.
 <tr><td><a href="pcre2serialize.html">pcre2serialize</a></td>
     <td>&nbsp;&nbsp;Serializing functions for saving precompiled patterns</td></tr>
 
-<tr><td><a href="pcre2stack.html">pcre2stack</a></td>
-    <td>&nbsp;&nbsp;Discussion of PCRE2's stack usage</td></tr>
-
 <tr><td><a href="pcre2syntax.html">pcre2syntax</a></td>
     <td>&nbsp;&nbsp;Syntax quick-reference summary</td></tr>
 

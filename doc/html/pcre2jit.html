@@ -173,7 +173,7 @@ below for a discussion of JIT stack usage.
 The error code PCRE2_ERROR_MATCHLIMIT is returned by the JIT code if searching
 a very large pattern tree goes on for too long, as it is in the same
 circumstance when JIT is not used, but the details of exactly what is counted
-are not the same. The PCRE2_ERROR_RECURSIONLIMIT error code is never returned
+are not the same. The PCRE2_ERROR_DEPTHLIMIT error code is never returned
 when JIT matching is used.
 <a name="stackcontrol"></a></P>
 <br><a name="SEC6" href="#TOC1">CONTROLLING THE JIT STACK</a><br>
@@ -436,9 +436,9 @@ Cambridge, England.
 </P>
 <br><a name="SEC13" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 05 June 2016
+Last updated: 30 March 2017
 <br>
-Copyright &copy; 1997-2016 University of Cambridge.
+Copyright &copy; 1997-2017 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE2 index page</a>.

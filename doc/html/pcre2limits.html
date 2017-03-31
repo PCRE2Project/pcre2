@@ -44,14 +44,6 @@ integer type, usually defined as size_t. Its maximum value (that is
 and unset offsets.
 </P>
 <P>
-Note that when using the traditional matching function, PCRE2 uses recursion to
-handle subpatterns and indefinite repetition. This means that the available
-stack space may limit the size of a subject string that can be processed by
-certain patterns. For a discussion of stack issues, see the
-<a href="pcre2stack.html"><b>pcre2stack</b></a>
-documentation.
-</P>
-<P>
 All values in repeating quantifiers must be less than 65536.
 </P>
 <P>
@@ -94,9 +86,9 @@ Cambridge, England.
 REVISION
 </b><br>
 <P>
-Last updated: 26 October 2016
+Last updated: 30 March 2017
 <br>
-Copyright &copy; 1997-2016 University of Cambridge.
+Copyright &copy; 1997-2017 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE2 index page</a>.

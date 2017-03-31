@@ -103,7 +103,6 @@ dist_html_DATA = \
   doc/html/pcre2posix.html \
   doc/html/pcre2sample.html \
   doc/html/pcre2serialize.html \
-  doc/html/pcre2stack.html \
   doc/html/pcre2syntax.html \
   doc/html/pcre2test.html \
   doc/html/pcre2unicode.html
@@ -187,7 +186,6 @@ dist_man_MANS = \
   doc/pcre2posix.3 \
   doc/pcre2sample.3 \
   doc/pcre2serialize.3 \
-  doc/pcre2stack.3 \
   doc/pcre2syntax.3 \
   doc/pcre2test.1 \
   doc/pcre2unicode.3
