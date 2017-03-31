@@ -464,8 +464,10 @@ so many of them that they are split into two fields. */
 #define CTL_ANYINFO          (CTL_DEBUG|CTL_BINCODE|CTL_CALLOUT_INFO)
 #define CTL_ANYGLOB          (CTL_ALTGLOBAL|CTL_GLOBAL)
 
-/* These are all the controls that may be set either on a pattern or on a
-data line. */
+/* These are the matching controls that may be set either on a pattern or on a
+data line. They are copied from the pattern controls as initial settings for 
+data line controls Note that CTL_MEMORY is not included here, because it does
+different things in the two cases. */
 
 #define CTL_ALLPD  (CTL_AFTERTEXT|\
                     CTL_ALLAFTERTEXT|\
@@ -474,7 +476,6 @@ data line. */
                     CTL_ALTGLOBAL|\
                     CTL_GLOBAL|\
                     CTL_MARK|\
-                    CTL_MEMORY|\
                     CTL_STARTCHAR|\
                     CTL_UTF8_INPUT)
 
