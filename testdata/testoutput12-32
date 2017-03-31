@@ -1410,7 +1410,7 @@ No match
 ------------------------------------------------------------------
 
 /\pP/ucp
-    \x{7fffffff}\=no_jit
+    \x{7fffffff}
 No match
 
 # End of testinput12

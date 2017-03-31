@@ -1416,7 +1416,7 @@ No match
 ------------------------------------------------------------------
 
 /\pP/ucp
-    \x{7fffffff}\=no_jit
+    \x{7fffffff}
 ** Character \x{7fffffff} is greater than 0xffff and UTF-16 mode is not enabled.
 ** Truncation will probably give the wrong result.
 No match

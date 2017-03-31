@@ -361,6 +361,6 @@
 /[\s[:^ascii:]]/B,ucp
 
 /\pP/ucp
-    \x{7fffffff}\=no_jit
+    \x{7fffffff}
 
 # End of testinput12
