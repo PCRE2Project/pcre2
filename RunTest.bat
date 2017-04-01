@@ -284,15 +284,6 @@ fc /n %srcdir%\testdata\%testoutput%%type% %2%bits%\%testoutput% >NUL
 
 if errorlevel 1 (
   echo.          failed comparison: fc /n %srcdir%\testdata\%testoutput% %2%bits%\%testoutput%
-  if [%1]==[2] (
-    echo.
-    echo ** Test 2 requires a lot of stack. PCRE2 can be configured to
-    echo ** use heap for recursion. Otherwise, to pass Test 2
-    echo ** you generally need to allocate 8 mb stack to PCRE2.
-    echo ** See the 'pcre2stack' page for a discussion of PCRE2's
-    echo ** stack usage.
-    echo.
-)
   if [%1]==[3] (
     echo.
     echo ** Test 3 failure usually means french locale is not
