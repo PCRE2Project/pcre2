@@ -721,9 +721,9 @@ OPTIONS COMPATIBILITY
        Many of the short and long forms of pcre2grep's options are the same as
        in  the GNU grep program. Any long option of the form --xxx-regexp (GNU
        terminology) is also available as --xxx-regex (PCRE2 terminology). How-
-       ever,  the  --file-list, --file-offsets, --include-dir, --line-offsets,
-       --locale, --match-limit, -M, --multiline, -N,  --newline,  --om-separa-
-       tor,  --recursion-limit,  -u,  and  --utf-8  options  are  specific  to
+       ever,  the  --depth-limit,  --file-list, --file-offsets, --include-dir,
+       --line-offsets, --locale, --match-limit, -M,  --multiline,  -N,  --new-
+       line,   --om-separator,   -u,  and  --utf-8  options  are  specific  to
        pcre2grep, as is the use of the --only-matching option with a capturing
        parentheses number.
 
@@ -857,5 +857,5 @@ AUTHOR
 
 REVISION
 
-       Last updated: 21 March 2017
+       Last updated: 31 March 2017
        Copyright (c) 1997-2017 University of Cambridge.

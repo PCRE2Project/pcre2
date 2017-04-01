@@ -440,7 +440,7 @@ of the newline or \R options with similar syntax. More than one of them may
 appear.
 <pre>
   (*LIMIT_MATCH=d) set the match limit to d (decimal number)
-  (*LIMIT_RECURSION=d) set the recursion limit to d (decimal number)
+  (*LIMIT_DEPTH=d) set the backtracking limit to d (decimal number)
   (*NOTEMPTY)     set PCRE2_NOTEMPTY when matching
   (*NOTEMPTY_ATSTART) set PCRE2_NOTEMPTY_ATSTART when matching
   (*NO_AUTO_POSSESS) no auto-possessification (PCRE2_NO_AUTO_POSSESS)
@@ -450,11 +450,11 @@ appear.
   (*UTF)          set appropriate UTF mode for the library in use
   (*UCP)          set PCRE2_UCP (use Unicode properties for \d etc)
 </pre>
-Note that LIMIT_MATCH and LIMIT_RECURSION can only reduce the value of the
-limits set by the caller of <b>pcre2_match()</b> or <b>pcre2_dfa_match()</b>, not
-increase them. The application can lock out the use of (*UTF) and (*UCP) by
-setting the PCRE2_NEVER_UTF or PCRE2_NEVER_UCP options, respectively, at
-compile time.
+Note that LIMIT_MATCH and LIMIT_DEPTH can only reduce the value of the limits
+set by the caller of <b>pcre2_match()</b> or <b>pcre2_dfa_match()</b>, not
+increase them. LIMIT_RECURSION is an obsolete synonym for LIMIT_DEPTH. The
+application can lock out the use of (*UTF) and (*UCP) by setting the
+PCRE2_NEVER_UTF or PCRE2_NEVER_UCP options, respectively, at compile time.
 </P>
 <br><a name="SEC17" href="#TOC1">NEWLINE CONVENTION</a><br>
 <P>
@@ -596,9 +596,9 @@ Cambridge, England.
 </P>
 <br><a name="SEC27" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 23 December 2016
+Last updated: 31 March 2017
 <br>
-Copyright &copy; 1997-2016 University of Cambridge.
+Copyright &copy; 1997-2017 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE2 index page</a>.

@@ -194,12 +194,8 @@ allocation functions, or NULL for standard memory allocation). It returns a
 pointer to an opaque structure of type <b>pcre2_jit_stack</b>, or NULL if there
 is an error. The <b>pcre2_jit_stack_free()</b> function is used to free a stack
 that is no longer needed. (For the technically minded: the address space is
-allocated by mmap or VirtualAlloc.)
-</P>
-<P>
-JIT uses far less memory for recursion than the interpretive code,
-and a maximum stack size of 512K to 1M should be more than enough for any
-pattern.
+allocated by mmap or VirtualAlloc.) A maximum stack size of 512K to 1M should
+be more than enough for any pattern.
 </P>
 <P>
 The <b>pcre2_jit_stack_assign()</b> function specifies which stack JIT code
@@ -436,7 +432,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC13" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 30 March 2017
+Last updated: 31 March 2017
 <br>
 Copyright &copy; 1997-2017 University of Cambridge.
 <br>

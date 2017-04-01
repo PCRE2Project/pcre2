@@ -146,7 +146,6 @@ USER DOCUMENTATION
          pcre2perform       discussion of performance issues
          pcre2posix         the POSIX-compatible C API for the 8-bit library
          pcre2sample        discussion of the pcre2demo program
-         pcre2stack         discussion of stack and memory usage
          pcre2syntax        quick syntax reference
          pcre2test          description of the pcre2test command
          pcre2unicode       discussion of Unicode and UTF support
@@ -168,7 +167,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 27 March 2017
+       Last updated: 01 April 2017
        Copyright (c) 1997-2017 University of Cambridge.
 ------------------------------------------------------------------------------
  
@@ -3161,8 +3160,7 @@ MATCHING A PATTERN: THE ALTERNATIVE FUNCTION
 SEE ALSO
 
        pcre2build(3),    pcre2callout(3),    pcre2demo(3),   pcre2matching(3),
-       pcre2partial(3),    pcre2posix(3),    pcre2sample(3),    pcre2stack(3),
-       pcre2unicode(3).
+       pcre2partial(3), pcre2posix(3), pcre2sample(3), pcre2unicode(3).
 
 
 AUTHOR
@@ -3174,7 +3172,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 27 March 2017
+       Last updated: 01 April 2017
        Copyright (c) 1997-2017 University of Cambridge.
 ------------------------------------------------------------------------------
  
@@ -3425,52 +3423,53 @@ LIMITING PCRE2 RESOURCE USAGE
        to  the  configure  command.  This  value can also be overridden at run
        time.  As well as applying to pcre2_match(), this limit  also  controls
        the  depth  of recursive function calls in pcre2_dfa_match(). These are
-       used for lookaround assertions and recursion within patterns.
+       used for lookaround assertions, atomic  groups,  and  recursion  within
+       patterns.
 
 
 CREATING CHARACTER TABLES AT BUILD TIME
 
        PCRE2 uses fixed tables for processing characters whose code points are
        less than 256. By default, PCRE2 is built with a set of tables that are
-       distributed in the file src/pcre2_chartables.c.dist. These  tables  are
+       distributed  in  the file src/pcre2_chartables.c.dist. These tables are
        for ASCII codes only. If you add
 
          --enable-rebuild-chartables
 
-       to  the  configure  command, the distributed tables are no longer used.
-       Instead, a program called dftables is compiled and  run.  This  outputs
+       to the configure command, the distributed tables are  no  longer  used.
+       Instead,  a  program  called dftables is compiled and run. This outputs
        the source for new set of tables, created in the default locale of your
        C run-time system. This method of replacing the tables does not work if
-       you  are cross compiling, because dftables is run on the local host. If
-       you need to create alternative tables when cross  compiling,  you  will
+       you are cross compiling, because dftables is run on the local host.  If
+       you  need  to  create alternative tables when cross compiling, you will
        have to do so "by hand".
 
 
 USING EBCDIC CODE
 
-       PCRE2  assumes  by default that it will run in an environment where the
-       character code is ASCII or Unicode, which is a superset of ASCII.  This
+       PCRE2 assumes by default that it will run in an environment  where  the
+       character  code is ASCII or Unicode, which is a superset of ASCII. This
        is the case for most computer operating systems. PCRE2 can, however, be
        compiled to run in an 8-bit EBCDIC environment by adding
 
          --enable-ebcdic --disable-unicode
 
        to the configure command. This setting implies --enable-rebuild-charta-
-       bles.  You  should  only  use  it if you know that you are in an EBCDIC
+       bles. You should only use it if you know that  you  are  in  an  EBCDIC
        environment (for example, an IBM mainframe operating system).
 
-       It is not possible to support both EBCDIC and UTF-8 codes in  the  same
-       version  of  the  library. Consequently, --enable-unicode and --enable-
+       It  is  not possible to support both EBCDIC and UTF-8 codes in the same
+       version of the library. Consequently,  --enable-unicode  and  --enable-
        ebcdic are mutually exclusive.
 
        The EBCDIC character that corresponds to an ASCII LF is assumed to have
-       the  value  0x15 by default. However, in some EBCDIC environments, 0x25
+       the value 0x15 by default. However, in some EBCDIC  environments,  0x25
        is used. In such an environment you should use
 
          --enable-ebcdic-nl25
 
        as well as, or instead of, --enable-ebcdic. The EBCDIC character for CR
-       has  the  same  value  as in ASCII, namely, 0x0d. Whichever of 0x15 and
+       has the same value as in ASCII, namely, 0x0d.  Whichever  of  0x15  and
        0x25 is not chosen as LF is made to correspond to the Unicode NEL char-
        acter (which, in Unicode, is 0x85).
 
@@ -3483,34 +3482,34 @@ PCRE2GREP SUPPORT FOR EXTERNAL SCRIPTS
 
        By default, on non-Windows systems, pcre2grep supports the use of call-
        outs with string arguments within the patterns it is matching, in order
-       to  run external scripts. For details, see the pcre2grep documentation.
-       This support can be disabled by adding  --disable-pcre2grep-callout  to
+       to run external scripts. For details, see the pcre2grep  documentation.
+       This  support  can be disabled by adding --disable-pcre2grep-callout to
        the configure command.
 
 
 PCRE2GREP OPTIONS FOR COMPRESSED FILE SUPPORT
 
-       By  default,  pcre2grep reads all files as plain text. You can build it
-       so that it recognizes files whose names end in .gz or .bz2,  and  reads
+       By default, pcre2grep reads all files as plain text. You can  build  it
+       so  that  it recognizes files whose names end in .gz or .bz2, and reads
        them with libz or libbz2, respectively, by adding one or both of
 
          --enable-pcre2grep-libz
          --enable-pcre2grep-libbz2
 
        to the configure command. These options naturally require that the rel-
-       evant libraries are installed on your system. Configuration  will  fail
+       evant  libraries  are installed on your system. Configuration will fail
        if they are not.
 
 
 PCRE2GREP BUFFER SIZE
 
-       pcre2grep  uses an internal buffer to hold a "window" on the file it is
+       pcre2grep uses an internal buffer to hold a "window" on the file it  is
        scanning, in order to be able to output "before" and "after" lines when
-       it  finds  a  match. The starting size of the buffer is controlled by a
-       parameter whose default value is 20K. The buffer itself is three  times
-       this  size,  but  because  of  the  way it is used for holding "before"
-       lines, the longest line that is guaranteed to  be  processable  is  the
-       parameter  size.  If  a longer line is encountered, pcre2grep automati-
+       it finds a match. The starting size of the buffer is  controlled  by  a
+       parameter  whose default value is 20K. The buffer itself is three times
+       this size, but because of the way  it  is  used  for  holding  "before"
+       lines,  the  longest  line  that is guaranteed to be processable is the
+       parameter size. If a longer line is  encountered,  pcre2grep  automati-
        cally expands the buffer, up to a specified maximum size, whose default
        is 1M or the starting size, whichever is the larger. You can change the
        default parameter values by adding, for example,
@@ -3518,8 +3517,8 @@ PCRE2GREP BUFFER SIZE
          --with-pcre2grep-bufsize=51200
          --with-pcre2grep-max-bufsize=2097152
 
-       to the configure command. The caller of pcre2grep  can  override  these
-       values  by  using  --buffer-size  and  --max-buffer-size on the command
+       to  the  configure  command. The caller of pcre2grep can override these
+       values by using --buffer-size  and  --max-buffer-size  on  the  command
        line.
 
 
@@ -3530,26 +3529,26 @@ PCRE2TEST OPTION FOR LIBREADLINE SUPPORT
          --enable-pcre2test-libreadline
          --enable-pcre2test-libedit
 
-       to the configure command, pcre2test  is  linked  with  the  libreadline
+       to  the  configure  command,  pcre2test  is linked with the libreadline
        orlibedit library, respectively, and when its input is from a terminal,
-       it reads it using the readline() function. This  provides  line-editing
-       and  history  facilities.  Note that libreadline is GPL-licensed, so if
-       you distribute a binary of pcre2test linked in this way, there  may  be
+       it  reads  it using the readline() function. This provides line-editing
+       and history facilities. Note that libreadline is  GPL-licensed,  so  if
+       you  distribute  a binary of pcre2test linked in this way, there may be
        licensing issues. These can be avoided by linking instead with libedit,
        which has a BSD licence.
 
-       Setting --enable-pcre2test-libreadline causes the -lreadline option  to
-       be  added to the pcre2test build. In many operating environments with a
-       sytem-installed readline library this is sufficient. However,  in  some
+       Setting  --enable-pcre2test-libreadline causes the -lreadline option to
+       be added to the pcre2test build. In many operating environments with  a
+       sytem-installed  readline  library this is sufficient. However, in some
        environments (e.g. if an unmodified distribution version of readline is
-       in use), some extra configuration may be necessary.  The  INSTALL  file
+       in  use),  some  extra configuration may be necessary. The INSTALL file
        for libreadline says this:
 
          "Readline uses the termcap functions, but does not link with
          the termcap or curses library itself, allowing applications
          which link with readline the to choose an appropriate library."
 
-       If  your environment has not been set up so that an appropriate library
+       If your environment has not been set up so that an appropriate  library
        is automatically included, you may need to add something like
 
          LIBS="-ncurses"
@@ -3563,7 +3562,7 @@ INCLUDING DEBUGGING CODE
 
          --enable-debug
 
-       to the configure command, additional debugging code is included in  the
+       to  the configure command, additional debugging code is included in the
        build. This feature is intended for use by the PCRE2 maintainers.
 
 
@@ -3573,15 +3572,15 @@ DEBUGGING WITH VALGRIND SUPPORT
 
          --enable-valgrind
 
-       to  the  configure command, PCRE2 will use valgrind annotations to mark
-       certain memory regions as  unaddressable.  This  allows  it  to  detect
-       invalid  memory  accesses,  and  is  mostly  useful for debugging PCRE2
+       to the configure command, PCRE2 will use valgrind annotations  to  mark
+       certain  memory  regions  as  unaddressable.  This  allows it to detect
+       invalid memory accesses, and  is  mostly  useful  for  debugging  PCRE2
        itself.
 
 
 CODE COVERAGE REPORTING
 
-       If your C compiler is gcc, you can build a version of  PCRE2  that  can
+       If  your  C  compiler is gcc, you can build a version of PCRE2 that can
        generate a code coverage report for its test suite. To enable this, you
        must install lcov version 1.6 or above. Then specify
 
@@ -3590,20 +3589,20 @@ CODE COVERAGE REPORTING
        to the configure command and build PCRE2 in the usual way.
 
        Note that using ccache (a caching C compiler) is incompatible with code
-       coverage  reporting. If you have configured ccache to run automatically
+       coverage reporting. If you have configured ccache to run  automatically
        on your system, you must set the environment variable
 
          CCACHE_DISABLE=1
 
        before running make to build PCRE2, so that ccache is not used.
 
-       When --enable-coverage is used,  the  following  addition  targets  are
+       When  --enable-coverage  is  used,  the  following addition targets are
        added to the Makefile:
 
          make coverage
 
-       This  creates  a  fresh coverage report for the PCRE2 test suite. It is
-       equivalent to running "make coverage-reset", "make  coverage-baseline",
+       This creates a fresh coverage report for the PCRE2 test  suite.  It  is
+       equivalent  to running "make coverage-reset", "make coverage-baseline",
        "make check", and then "make coverage-report".
 
          make coverage-reset
@@ -3620,56 +3619,56 @@ CODE COVERAGE REPORTING
 
          make coverage-clean-report
 
-       This  removes the generated coverage report without cleaning the cover-
+       This removes the generated coverage report without cleaning the  cover-
        age data itself.
 
          make coverage-clean-data
 
-       This removes the captured coverage data without removing  the  coverage
+       This  removes  the captured coverage data without removing the coverage
        files created at compile time (*.gcno).
 
          make coverage-clean
 
-       This  cleans all coverage data including the generated coverage report.
-       For more information about code coverage, see the gcov and  lcov  docu-
+       This cleans all coverage data including the generated coverage  report.
+       For  more  information about code coverage, see the gcov and lcov docu-
        mentation.
 
 
 SUPPORT FOR FUZZERS
 
-       There  is  a  special  option for use by people who want to run fuzzing
+       There is a special option for use by people who  want  to  run  fuzzing
        tests on PCRE2:
 
          --enable-fuzz-support
 
        At present this applies only to the 8-bit library. If set, it causes an
-       extra  library  called  libpcre2-fuzzsupport.a  to  be  built,  but not
-       installed. This contains a single function called  LLVMFuzzerTestOneIn-
-       put()  whose  arguments are a pointer to a string and the length of the
-       string. When called, this function tries to compile  the  string  as  a
-       pattern,  and if that succeeds, to match it.  This is done both with no
-       options and with some random options bits that are generated  from  the
+       extra library  called  libpcre2-fuzzsupport.a  to  be  built,  but  not
+       installed.  This contains a single function called LLVMFuzzerTestOneIn-
+       put() whose arguments are a pointer to a string and the length  of  the
+       string.  When  called,  this  function tries to compile the string as a
+       pattern, and if that succeeds, to match it.  This is done both with  no
+       options  and  with some random options bits that are generated from the
        string.
 
-       Setting  --enable-fuzz-support  also  causes  a binary called pcre2fuz-
-       zcheck to be created. This is normally run under valgrind or used  when
+       Setting --enable-fuzz-support also causes  a  binary  called  pcre2fuz-
+       zcheck  to be created. This is normally run under valgrind or used when
        PCRE2 is compiled with address sanitizing enabled. It calls the fuzzing
-       function and outputs information about it is doing. The  input  strings
-       are  specified by arguments: if an argument starts with "=" the rest of
-       it is a literal input string. Otherwise, it is assumed  to  be  a  file
+       function  and  outputs information about it is doing. The input strings
+       are specified by arguments: if an argument starts with "=" the rest  of
+       it  is  a  literal  input string. Otherwise, it is assumed to be a file
        name, and the contents of the file are the test string.
 
 
 OBSOLETE OPTION
 
-       In  versions  of  PCRE2 prior to 10.30, there were two ways of handling
-       backtracking in the pcre2_match() function. The default was to use  the
+       In versions of PCRE2 prior to 10.30, there were two  ways  of  handling
+       backtracking  in the pcre2_match() function. The default was to use the
        system stack, but if
 
          --disable-stack-for-recursion
 
-       was  set,  memory on the heap was used. From release 10.30 onwards this
-       has changed (the stack is no lonter used)  and  this  option  now  does
+       was set, memory on the heap was used. From release 10.30  onwards  this
+       has  changed  (the  stack  is  no lonter used) and this option now does
        nothing except give a warning.
 
 
@@ -3687,7 +3686,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 29 March 2017
+       Last updated: 31 March 2017
        Copyright (c) 1997-2017 University of Cambridge.
 ------------------------------------------------------------------------------
  
@@ -4436,13 +4435,10 @@ CONTROLLING THE JIT STACK
        It returns a pointer to an opaque structure of type pcre2_jit_stack, or
        NULL if there is an error. The pcre2_jit_stack_free() function is  used
        to  free a stack that is no longer needed. (For the technically minded:
-       the address space is allocated by mmap or VirtualAlloc.)
+       the address space is allocated by  mmap  or  VirtualAlloc.)  A  maximum
+       stack size of 512K to 1M should be more than enough for any pattern.
 
-       JIT uses far less memory for recursion than the interpretive code,  and
-       a  maximum  stack size of 512K to 1M should be more than enough for any
-       pattern.
-
-       The pcre2_jit_stack_assign() function specifies which  stack  JIT  code
+       The  pcre2_jit_stack_assign()  function  specifies which stack JIT code
        should use. Its arguments are as follows:
 
          pcre2_match_context  *mcontext
@@ -4451,7 +4447,7 @@ CONTROLLING THE JIT STACK
 
        The first argument is a pointer to a match context. When this is subse-
        quently passed to a matching function, its information determines which
-       JIT  stack  is  used. There are three cases for the values of the other
+       JIT stack is used. There are three cases for the values  of  the  other
        two options:
 
          (1) If callback is NULL and data is NULL, an internal 32K block
@@ -4469,34 +4465,34 @@ CONTROLLING THE JIT STACK
              return value must be a valid JIT stack, the result of calling
              pcre2_jit_stack_create().
 
-       A callback function is obeyed whenever JIT code is about to be run;  it
+       A  callback function is obeyed whenever JIT code is about to be run; it
        is not obeyed when pcre2_match() is called with options that are incom-
-       patible for JIT matching. A callback function can therefore be used  to
-       determine  whether  a  match  operation  was  executed by JIT or by the
+       patible  for JIT matching. A callback function can therefore be used to
+       determine whether a match operation was  executed  by  JIT  or  by  the
        interpreter.
 
        You may safely use the same JIT stack for more than one pattern (either
-       by  assigning  directly  or  by  callback), as long as the patterns are
+       by assigning directly or by callback), as  long  as  the  patterns  are
        matched sequentially in the same thread. Currently, the only way to set
-       up  non-sequential matches in one thread is to use callouts: if a call-
-       out function starts another match, that match must use a different  JIT
+       up non-sequential matches in one thread is to use callouts: if a  call-
+       out  function starts another match, that match must use a different JIT
        stack to the one used for currently suspended match(es).
 
-       In  a multithread application, if you do not specify a JIT stack, or if
-       you assign or pass back NULL from  a  callback,  that  is  thread-safe,
-       because  each  thread has its own machine stack. However, if you assign
-       or pass back a non-NULL JIT stack, this must be a different  stack  for
+       In a multithread application, if you do not specify a JIT stack, or  if
+       you  assign  or  pass  back  NULL from a callback, that is thread-safe,
+       because each thread has its own machine stack. However, if  you  assign
+       or  pass  back a non-NULL JIT stack, this must be a different stack for
        each thread so that the application is thread-safe.
 
-       Strictly  speaking,  even more is allowed. You can assign the same non-
-       NULL stack to a match context that is used by any number  of  patterns,
-       as  long  as  they are not used for matching by multiple threads at the
-       same time. For example, you could use the same stack  in  all  compiled
-       patterns,  with  a global mutex in the callback to wait until the stack
+       Strictly speaking, even more is allowed. You can assign the  same  non-
+       NULL  stack  to a match context that is used by any number of patterns,
+       as long as they are not used for matching by multiple  threads  at  the
+       same  time.  For  example, you could use the same stack in all compiled
+       patterns, with a global mutex in the callback to wait until  the  stack
        is available for use. However, this is an inefficient solution, and not
        recommended.
 
-       This  is a suggestion for how a multithreaded program that needs to set
+       This is a suggestion for how a multithreaded program that needs to  set
        up non-default JIT stacks might operate:
 
          During thread initalization
@@ -4508,7 +4504,7 @@ CONTROLLING THE JIT STACK
          Use a one-line callback function
            return thread_local_var
 
-       All the functions described in this section do nothing if  JIT  is  not
+       All  the  functions  described in this section do nothing if JIT is not
        available.
 
 
@@ -4517,20 +4513,20 @@ JIT STACK FAQ
        (1) Why do we need JIT stacks?
 
        PCRE2 (and JIT) is a recursive, depth-first engine, so it needs a stack
-       where the local data of the current node is pushed before checking  its
+       where  the local data of the current node is pushed before checking its
        child nodes.  Allocating real machine stack on some platforms is diffi-
        cult. For example, the stack chain needs to be updated every time if we
-       extend  the  stack  on  PowerPC.  Although it is possible, its updating
+       extend the stack on PowerPC.  Although it  is  possible,  its  updating
        time overhead decreases performance. So we do the recursion in memory.
 
        (2) Why don't we simply allocate blocks of memory with malloc()?
 
-       Modern operating systems have a  nice  feature:  they  can  reserve  an
+       Modern  operating  systems  have  a  nice  feature: they can reserve an
        address space instead of allocating memory. We can safely allocate mem-
-       ory pages inside this address space, so the stack  could  grow  without
+       ory  pages  inside  this address space, so the stack could grow without
        moving memory data (this is important because of pointers). Thus we can
-       allocate 1M address space, and use only a single memory  page  (usually
-       4K)  if  that is enough. However, we can still grow up to 1M anytime if
+       allocate  1M  address space, and use only a single memory page (usually
+       4K) if that is enough. However, we can still grow up to 1M  anytime  if
        needed.
 
        (3) Who "owns" a JIT stack?
@@ -4538,8 +4534,8 @@ JIT STACK FAQ
        The owner of the stack is the user program, not the JIT studied pattern
        or anything else. The user program must ensure that if a stack is being
        used by pcre2_match(), (that is, it is assigned to a match context that
-       is  passed  to  the  pattern currently running), that stack must not be
-       used by any other threads (to avoid overwriting the same memory  area).
+       is passed to the pattern currently running), that  stack  must  not  be
+       used  by any other threads (to avoid overwriting the same memory area).
        The best practice for multithreaded programs is to allocate a stack for
        each thread, and return this stack through the JIT callback function.
 
@@ -4547,36 +4543,36 @@ JIT STACK FAQ
 
        You can free a JIT stack at any time, as long as it will not be used by
        pcre2_match() again. When you assign the stack to a match context, only
-       a pointer is set. There is no reference counting or  any  other  magic.
+       a  pointer  is  set. There is no reference counting or any other magic.
        You can free compiled patterns, contexts, and stacks in any order, any-
-       time. Just do not call pcre2_match() with a match context  pointing  to
+       time.  Just  do not call pcre2_match() with a match context pointing to
        an already freed stack, as that will cause SEGFAULT. (Also, do not free
-       a stack currently used by pcre2_match() in  another  thread).  You  can
-       also  replace the stack in a context at any time when it is not in use.
+       a  stack  currently  used  by pcre2_match() in another thread). You can
+       also replace the stack in a context at any time when it is not in  use.
        You should free the previous stack before assigning a replacement.
 
-       (5) Should I allocate/free a  stack  every  time  before/after  calling
+       (5)  Should  I  allocate/free  a  stack every time before/after calling
        pcre2_match()?
 
-       No,  because  this  is  too  costly in terms of resources. However, you
-       could implement some clever idea which release the stack if it  is  not
-       used  in  let's  say  two minutes. The JIT callback can help to achieve
+       No, because this is too costly in  terms  of  resources.  However,  you
+       could  implement  some clever idea which release the stack if it is not
+       used in let's say two minutes. The JIT callback  can  help  to  achieve
        this without keeping a list of patterns.
 
-       (6) OK, the stack is for long term memory allocation. But what  happens
-       if  a pattern causes stack overflow with a stack of 1M? Is that 1M kept
+       (6)  OK, the stack is for long term memory allocation. But what happens
+       if a pattern causes stack overflow with a stack of 1M? Is that 1M  kept
        until the stack is freed?
 
-       Especially on embedded sytems, it might be a good idea to release  mem-
-       ory  sometimes  without  freeing the stack. There is no API for this at
-       the moment.  Probably a function call which returns with the  currently
-       allocated  memory for any stack and another which allows releasing mem-
+       Especially  on embedded sytems, it might be a good idea to release mem-
+       ory sometimes without freeing the stack. There is no API  for  this  at
+       the  moment.  Probably a function call which returns with the currently
+       allocated memory for any stack and another which allows releasing  mem-
        ory (shrinking the stack) would be a good idea if someone needs this.
 
        (7) This is too much of a headache. Isn't there any better solution for
        JIT stack handling?
 
-       No,  thanks to Windows. If POSIX threads were used everywhere, we could
+       No, thanks to Windows. If POSIX threads were used everywhere, we  could
        throw out this complicated API.
 
 
@@ -4585,18 +4581,18 @@ FREEING JIT SPECULATIVE MEMORY
        void pcre2_jit_free_unused_memory(pcre2_general_context *gcontext);
 
        The JIT executable allocator does not free all memory when it is possi-
-       ble.   It expects new allocations, and keeps some free memory around to
-       improve allocation speed. However, in low memory conditions,  it  might
-       be  better to free all possible memory. You can cause this to happen by
-       calling pcre2_jit_free_unused_memory(). Its argument is a general  con-
+       ble.  It expects new allocations, and keeps some free memory around  to
+       improve  allocation  speed. However, in low memory conditions, it might
+       be better to free all possible memory. You can cause this to happen  by
+       calling  pcre2_jit_free_unused_memory(). Its argument is a general con-
        text, for custom memory management, or NULL for standard memory manage-
        ment.
 
 
 EXAMPLE CODE
 
-       This is a single-threaded example that specifies a  JIT  stack  without
-       using  a  callback.  A real program should include error checking after
+       This  is  a  single-threaded example that specifies a JIT stack without
+       using a callback. A real program should include  error  checking  after
        all the function calls.
 
          int rc;
@@ -4624,29 +4620,29 @@ EXAMPLE CODE
 JIT FAST PATH API
 
        Because the API described above falls back to interpreted matching when
-       JIT  is  not  available, it is convenient for programs that are written
+       JIT is not available, it is convenient for programs  that  are  written
        for  general  use  in  many  environments.  However,  calling  JIT  via
        pcre2_match() does have a performance impact. Programs that are written
-       for use where JIT is known to be available, and  which  need  the  best
-       possible  performance,  can  instead  use a "fast path" API to call JIT
-       matching directly instead of calling pcre2_match() (obviously only  for
+       for  use  where  JIT  is known to be available, and which need the best
+       possible performance, can instead use a "fast path"  API  to  call  JIT
+       matching  directly instead of calling pcre2_match() (obviously only for
        patterns that have been successfully processed by pcre2_jit_compile()).
 
-       The  fast  path  function  is  called  pcre2_jit_match(),  and it takes
+       The fast path  function  is  called  pcre2_jit_match(),  and  it  takes
        exactly the same arguments as pcre2_match(). The return values are also
        the same, plus PCRE2_ERROR_JIT_BADOPTION if a matching mode (partial or
-       complete) is requested that was not compiled. Unsupported  option  bits
-       (for  example,  PCRE2_ANCHORED)  are  ignored,  as  is the PCRE2_NO_JIT
+       complete)  is  requested that was not compiled. Unsupported option bits
+       (for example, PCRE2_ANCHORED)  are  ignored,  as  is  the  PCRE2_NO_JIT
        option.
 
-       When you call pcre2_match(), as well as testing for invalid options,  a
+       When  you call pcre2_match(), as well as testing for invalid options, a
        number of other sanity checks are performed on the arguments. For exam-
        ple, if the subject pointer is NULL, an immediate error is given. Also,
-       unless  PCRE2_NO_UTF_CHECK  is  set, a UTF subject string is tested for
-       validity. In the interests of speed, these checks do not happen on  the
+       unless PCRE2_NO_UTF_CHECK is set, a UTF subject string  is  tested  for
+       validity.  In the interests of speed, these checks do not happen on the
        JIT fast path, and if invalid data is passed, the result is undefined.
 
-       Bypassing  the  sanity  checks  and the pcre2_match() wrapping can give
+       Bypassing the sanity checks and the  pcre2_match()  wrapping  can  give
        speedups of more than 10%.
 
 
@@ -4664,7 +4660,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 30 March 2017
+       Last updated: 31 March 2017
        Copyright (c) 1997-2017 University of Cambridge.
 ------------------------------------------------------------------------------
  
@@ -9229,177 +9225,6 @@ REVISION
 ------------------------------------------------------------------------------
  
  
-PCRE2STACK(3)              Library Functions Manual              PCRE2STACK(3)
-
-
-
-NAME
-       PCRE2 - Perl-compatible regular expressions (revised API)
-
-PCRE2 DISCUSSION OF STACK USAGE
-
-       When  you  call  pcre2_match(),  it  makes  use of an internal function
-       called match(). This calls itself recursively at branch points  in  the
-       pattern,  in  order  to  remember the state of the match so that it can
-       back up and try a different alternative after a  failure.  As  matching
-       proceeds  deeper  and deeper into the tree of possibilities, the recur-
-       sion depth increases. The match() function is also called in other cir-
-       cumstances,  for  example,  whenever  a  parenthesized  sub-pattern  is
-       entered, and in certain cases of repetition.
-
-       Not all calls of match() increase the recursion depth; for an item such
-       as  a* it may be called several times at the same level, after matching
-       different numbers of a's. Furthermore, in a number of cases  where  the
-       result  of  the  recursive call would immediately be passed back as the
-       result of the current call (a "tail recursion"), the function  is  just
-       restarted instead.
-
-       Each  time the internal match() function is called recursively, it uses
-       memory from the process stack. For certain kinds of pattern  and  data,
-       very  large  amounts of stack may be needed, despite the recognition of
-       "tail recursion". Note that if  PCRE2  is  compiled  with  the  -fsani-
-       tize=address  option  of  the  GCC compiler, the stack requirements are
-       greatly increased.
-
-       The above comments apply when pcre2_match() is run in its normal inter-
-       pretive manner. If the compiled pattern was processed by pcre2_jit_com-
-       pile(), and just-in-time compiling  was  successful,  and  the  options
-       passed  to  pcre2_match()  were  not incompatible, the matching process
-       uses the JIT-compiled code instead of the  match()  function.  In  this
-       case, the memory requirements are handled entirely differently. See the
-       pcre2jit documentation for details.
-
-       The  pcre2_dfa_match()  function  operates  in  a  different   way   to
-       pcre2_match(),  and uses recursion only when there is a regular expres-
-       sion recursion or subroutine call in the  pattern.  This  includes  the
-       processing  of assertion and "once-only" subpatterns, which are handled
-       like subroutine calls.  Normally, these are never very  deep,  and  the
-       limit  on  the  complexity  of  pcre2_dfa_match()  is controlled by the
-       amount of workspace it is given.  However, it is possible to write pat-
-       terns  with  runaway  infinite  recursions;  such  patterns  will cause
-       pcre2_dfa_match() to run out of stack unless a limit  is  applied  (see
-       below).
-
-       The   comments   in   the   next   three   sections  do  not  apply  to
-       pcre2_dfa_match(); they are relevant only for pcre2_match() without the
-       JIT optimization.
-
-   Reducing pcre2_match()'s stack usage
-
-       You  can often reduce the amount of recursion, and therefore the amount
-       of stack used, by modifying the pattern that  is  being  matched.  Con-
-       sider, for example, this pattern:
-
-         ([^<]|<(?!inet))+
-
-       It  matches  from wherever it starts until it encounters "<inet" or the
-       end of the data, and is the kind of pattern that  might  be  used  when
-       processing an XML file. Each iteration of the outer parentheses matches
-       either one character that is not "<" or a "<" that is not  followed  by
-       "inet".  However,  each  time  a  parenthesis is processed, a recursion
-       occurs, so this formulation uses a stack frame for each matched charac-
-       ter.  For  a long string, a lot of stack is required. Consider now this
-       rewritten pattern, which matches exactly the same strings:
-
-         ([^<]++|<(?!inet))+
-
-       This uses very much less stack, because runs of characters that do  not
-       contain  "<" are "swallowed" in one item inside the parentheses. Recur-
-       sion happens only when a "<" character that is not followed  by  "inet"
-       is  encountered  (and  we assume this is relatively rare). A possessive
-       quantifier is used to stop any backtracking into the  runs  of  non-"<"
-       characters, but that is not related to stack usage.
-
-       This  example shows that one way of avoiding stack problems when match-
-       ing long subject strings is to write repeated parenthesized subpatterns
-       to match more than one character whenever possible.
-
-   Compiling PCRE2 to use heap instead of stack for pcre2_match()
-
-       In  environments  where  stack memory is constrained, you might want to
-       compile PCRE2 to use heap memory instead of stack for remembering back-
-       up points when pcre2_match() is running. This makes it run more slowly,
-       however. Details of how to do this are given in the pcre2build documen-
-       tation.  When built in this way, instead of using the stack, PCRE2 gets
-       memory for remembering backup points from the  heap.  By  default,  the
-       memory is obtained by calling the system malloc() function, but you can
-       arrange to supply your own memory management function. For details, see
-       the section entitled "The match context" in the pcre2api documentation.
-       Since the block sizes are always the same, it may be possible to imple-
-       ment  a customized memory handler that is more efficient than the stan-
-       dard function. The memory blocks obtained for this purpose are retained
-       and  re-used  if  possible while pcre2_match() is running. They are all
-       freed just before it exits.
-
-   Limiting pcre2_match()'s stack usage
-
-       You can set limits on the number of times the internal match() function
-       is  called,  both  in  total  and  recursively. If a limit is exceeded,
-       pcre2_match() returns an error code.  Setting  suitable  limits  should
-       prevent  it from running out of stack. The default values of the limits
-       are very large, and unlikely ever to operate. They can be changed  when
-       PCRE2  is built, and they can also be set when pcre2_match() is called.
-       For details of these interfaces, see the pcre2build  documentation  and
-       the section entitled "The match context" in the pcre2api documentation.
-
-       As a very rough rule of thumb, you should reckon on about 500 bytes per
-       recursion. Thus, if you want to limit your  stack  usage  to  8Mb,  you
-       should  set  the  limit at 16000 recursions. A 64Mb stack, on the other
-       hand, can support around 128000 recursions.
-
-       The pcre2test test program has a modifier called  "find_limits"  which,
-       if  applied  to  a  subject line, causes it to find the smallest limits
-       that allow a a pattern to match. This is done by calling  pcre2_match()
-       repeatedly with different limits.
-
-   Limiting pcre2_dfa_match()'s stack usage
-
-       The recursion limit, as described above for pcre2_match(), also applies
-       to pcre2_dfa_match(), whose use of recursive function calls for  recur-
-       sions in the pattern can lead to runaway stack usage. The non-recursive
-       match limit is not relevant for DFA matching, and is ignored.
-
-   Changing stack size in Unix-like systems
-
-       In Unix-like environments, there is not often a problem with the  stack
-       unless  very  long  strings  are  involved, though the default limit on
-       stack size varies from system to system. Values from 8Mb  to  64Mb  are
-       common. You can find your default limit by running the command:
-
-         ulimit -s
-
-       Unfortunately,  the  effect  of  running out of stack is often SIGSEGV,
-       though sometimes a more explicit error message is given. You  can  nor-
-       mally increase the limit on stack size by code such as this:
-
-         struct rlimit rlim;
-         getrlimit(RLIMIT_STACK, &rlim);
-         rlim.rlim_cur = 100*1024*1024;
-         setrlimit(RLIMIT_STACK, &rlim);
-
-       This  reads  the current limits (soft and hard) using getrlimit(), then
-       attempts to increase the soft limit to  100Mb  using  setrlimit().  You
-       must do this before calling pcre2_match().
-
-   Changing stack size in Mac OS X
-
-       Using setrlimit(), as described above, should also work on Mac OS X. It
-       is also possible to set a stack size when linking a program. There is a
-       discussion   about   stack  sizes  in  Mac  OS  X  at  this  web  site:
-       http://developer.apple.com/qa/qa2005/qa1419.html.
-
-
-AUTHOR
-
-       Philip Hazel
-       University Computing Service
-       Cambridge, England.
-
-
-REVISION
-
-       Last updated: 23 December 2016
-       Copyright (c) 1997-2016 University of Cambridge.
 ------------------------------------------------------------------------------
  
  
@@ -9686,7 +9511,7 @@ OPTION SETTING
        one of them may appear.
 
          (*LIMIT_MATCH=d) set the match limit to d (decimal number)
-         (*LIMIT_RECURSION=d) set the recursion limit to d (decimal number)
+         (*LIMIT_DEPTH=d) set the backtracking limit to d (decimal number)
          (*NOTEMPTY)     set PCRE2_NOTEMPTY when matching
          (*NOTEMPTY_ATSTART) set PCRE2_NOTEMPTY_ATSTART when matching
          (*NO_AUTO_POSSESS) no auto-possessification (PCRE2_NO_AUTO_POSSESS)
@@ -9696,16 +9521,17 @@ OPTION SETTING
          (*UTF)          set appropriate UTF mode for the library in use
          (*UCP)          set PCRE2_UCP (use Unicode properties for \d etc)
 
-       Note that LIMIT_MATCH and LIMIT_RECURSION can only reduce the value  of
-       the limits set by the caller of pcre2_match() or pcre2_dfa_match(), not
-       increase them. The application can lock  out  the  use  of  (*UTF)  and
-       (*UCP)  by  setting  the  PCRE2_NEVER_UTF  or  PCRE2_NEVER_UCP options,
-       respectively, at compile time.
+       Note that LIMIT_MATCH and LIMIT_DEPTH can only reduce the value of  the
+       limits  set  by  the  caller of pcre2_match() or pcre2_dfa_match(), not
+       increase them. LIMIT_RECURSION is an obsolete synonym for  LIMIT_DEPTH.
+       The  application  can  lock out the use of (*UTF) and (*UCP) by setting
+       the PCRE2_NEVER_UTF or PCRE2_NEVER_UCP options, respectively,  at  com-
+       pile time.
 
 
 NEWLINE CONVENTION
 
-       These are recognized only at the very start of  the  pattern  or  after
+       These  are  recognized  only  at the very start of the pattern or after
        option settings with a similar syntax.
 
          (*CR)           carriage return only
@@ -9717,7 +9543,7 @@ NEWLINE CONVENTION
 
 WHAT \R MATCHES
 
-       These  are  recognized  only  at the very start of the pattern or after
+       These are recognized only at the very start of  the  pattern  or  after
        option setting with a similar syntax.
 
          (*BSR_ANYCRLF)  CR, LF, or CRLF
@@ -9786,8 +9612,8 @@ CONDITIONAL PATTERNS
          (?(VERSION[>]=n.m)  test PCRE2 version
          (?(assert)          assertion condition
 
-       Note the ambiguity of (?(R) and (?(Rn) which might be  named  reference
-       conditions  or  recursion  tests.  Such a condition is interpreted as a
+       Note  the  ambiguity of (?(R) and (?(Rn) which might be named reference
+       conditions or recursion tests. Such a condition  is  interpreted  as  a
        reference condition if the relevant named group exists.
 
 
@@ -9799,7 +9625,7 @@ BACKTRACKING CONTROL
          (*FAIL)         force backtrack; synonym (*F)
          (*MARK:NAME)    set name to be passed back; synonym (*:NAME)
 
-       The following act only when a subsequent match failure causes  a  back-
+       The  following  act only when a subsequent match failure causes a back-
        track to reach them. They all force a match failure, but they differ in
        what happens afterwards. Those that advance the start-of-match point do
        so only if the pattern is not anchored.
@@ -9821,14 +9647,14 @@ CALLOUTS
          (?C"text")      callout with string data
 
        The allowed string delimiters are ` ' " ^ % # $ (which are the same for
-       the start and the end), and the starting delimiter { matched  with  the
-       ending  delimiter  }. To encode the ending delimiter within the string,
+       the  start  and the end), and the starting delimiter { matched with the
+       ending delimiter }. To encode the ending delimiter within  the  string,
        double it.
 
 
 SEE ALSO
 
-       pcre2pattern(3),   pcre2api(3),   pcre2callout(3),    pcre2matching(3),
+       pcre2pattern(3),    pcre2api(3),   pcre2callout(3),   pcre2matching(3),
        pcre2(3).
 
 
@@ -9841,8 +9667,8 @@ AUTHOR
 
 REVISION
 
-       Last updated: 23 December 2016
-       Copyright (c) 1997-2016 University of Cambridge.
+       Last updated: 31 March 2017
+       Copyright (c) 1997-2017 University of Cambridge.
 ------------------------------------------------------------------------------
  
  
