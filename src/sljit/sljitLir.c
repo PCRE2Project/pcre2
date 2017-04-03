@@ -903,7 +903,7 @@ static SLJIT_INLINE CHECK_RETURN_TYPE check_sljit_emit_enter(struct sljit_compil
 	SLJIT_UNUSED_ARG(compiler);
 
 #if (defined SLJIT_ARGUMENT_CHECKS && SLJIT_ARGUMENT_CHECKS)
-	CHECK_ARGUMENT(!(options & ~SLJIT_DOUBLE_ALIGNMENT));
+	CHECK_ARGUMENT(!(options & ~SLJIT_F64_ALIGNMENT));
 	CHECK_ARGUMENT(args >= 0 && args <= 3);
 	CHECK_ARGUMENT(scratches >= 0 && scratches <= SLJIT_NUMBER_OF_REGISTERS);
 	CHECK_ARGUMENT(saveds >= 0 && saveds <= SLJIT_NUMBER_OF_REGISTERS);
@@ -928,7 +928,7 @@ static SLJIT_INLINE CHECK_RETURN_TYPE check_sljit_set_context(struct sljit_compi
 	sljit_s32 fscratches, sljit_s32 fsaveds, sljit_s32 local_size)
 {
 #if (defined SLJIT_ARGUMENT_CHECKS && SLJIT_ARGUMENT_CHECKS)
-	CHECK_ARGUMENT(!(options & ~SLJIT_DOUBLE_ALIGNMENT));
+	CHECK_ARGUMENT(!(options & ~SLJIT_F64_ALIGNMENT));
 	CHECK_ARGUMENT(args >= 0 && args <= 3);
 	CHECK_ARGUMENT(scratches >= 0 && scratches <= SLJIT_NUMBER_OF_REGISTERS);
 	CHECK_ARGUMENT(saveds >= 0 && saveds <= SLJIT_NUMBER_OF_REGISTERS);

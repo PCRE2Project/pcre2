@@ -332,10 +332,15 @@ struct sljit_compiler {
 
 #if (defined SLJIT_CONFIG_X86_32 && SLJIT_CONFIG_X86_32)
 	sljit_s32 args;
+	sljit_s32 locals_offset;
+	sljit_s32 saveds_offset;
 #endif
 
 #if (defined SLJIT_CONFIG_X86_64 && SLJIT_CONFIG_X86_64)
 	sljit_s32 mode32;
+#ifdef _WIN64
+	sljit_s32 locals_offset;
+#endif
 #endif
 
 #if (defined SLJIT_CONFIG_ARM_V5 && SLJIT_CONFIG_ARM_V5)
@@ -528,8 +533,8 @@ static SLJIT_INLINE sljit_uw sljit_get_generated_code_size(struct sljit_compiler
 */
 
 /* The absolute address returned by sljit_get_local_base with
-offset 0 is aligned to sljit_d. Otherwise it is aligned to sljit_uw. */
-#define SLJIT_DOUBLE_ALIGNMENT 0x00000001
+offset 0 is aligned to sljit_f64. Otherwise it is aligned to sljit_sw. */
+#define SLJIT_F64_ALIGNMENT 0x00000001
 
 /* The local_size must be >= 0 and <= SLJIT_MAX_LOCAL_SIZE. */
 #define SLJIT_MAX_LOCAL_SIZE	65536

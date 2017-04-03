@@ -71,8 +71,11 @@ static const sljit_u8 reg_map[SLJIT_NUMBER_OF_REGISTERS + 3] = {
 };
 
 #define CHECK_EXTRA_REGS(p, w, do) \
-	if (p >= SLJIT_R3 && p <= SLJIT_R8) { \
-		w = SLJIT_LOCALS_OFFSET + ((p) - (SLJIT_R3 + 6)) * sizeof(sljit_sw); \
+	if (p >= SLJIT_R3 && p <= SLJIT_S3) { \
+		if (p <= compiler->scratches) \
+			w = compiler->saveds_offset - ((p) - SLJIT_R2) * (sljit_sw)sizeof(sljit_sw); \
+		else \
+			w = compiler->locals_offset + ((p) - SLJIT_S2) * (sljit_sw)sizeof(sljit_sw); \
 		p = SLJIT_MEM1(SLJIT_SP); \
 		do; \
 	}
@@ -605,6 +608,9 @@ static sljit_s32 emit_mov(struct sljit_compiler *compiler,
 	sljit_s32 dst, sljit_sw dstw,
 	sljit_s32 src, sljit_sw srcw);
 
+#define EMIT_MOV(compiler, dst, dstw, src, srcw) \
+	FAIL_IF(emit_mov(compiler, dst, dstw, src, srcw));
+
 #ifdef _WIN32
 #include <malloc.h>
 
@@ -692,9 +698,6 @@ static sljit_s32 emit_mov(struct sljit_compiler *compiler,
 	*inst = MOV_rm_r;
 	return SLJIT_SUCCESS;
 }
-
-#define EMIT_MOV(compiler, dst, dstw, src, srcw) \
-	FAIL_IF(emit_mov(compiler, dst, dstw, src, srcw));
 
 SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op0(struct sljit_compiler *compiler, sljit_s32 op)
 {
@@ -1880,7 +1883,7 @@ static sljit_s32 emit_test_binary(struct sljit_compiler *compiler,
 	}
 
 #if (defined SLJIT_CONFIG_X86_64 && SLJIT_CONFIG_X86_64)
-	if (src2 == SLJIT_R0 && (src2 & SLJIT_IMM) && (src1w > 127 || src1w < -128) && (compiler->mode32 || IS_HALFWORD(src1w))) {
+	if (src2 == SLJIT_R0 && (src1 & SLJIT_IMM) && (src1w > 127 || src1w < -128) && (compiler->mode32 || IS_HALFWORD(src1w))) {
 #else
 	if (src2 == SLJIT_R0 && (src1 & SLJIT_IMM) && (src1w > 127 || src1w < -128)) {
 #endif
@@ -2039,14 +2042,13 @@ static sljit_s32 emit_shift(struct sljit_compiler *compiler,
 		EMIT_MOV(compiler, SLJIT_PREF_SHIFT_REG, 0, TMP_REG1, 0);
 	}
 	else {
-		/* This case is really difficult, since ecx itself may used for
-		   addressing, and we must ensure to work even in that case. */
+		/* This case is complex since ecx itself may be used for
+		   addressing, and this case must be supported as well. */
 		EMIT_MOV(compiler, TMP_REG1, 0, src1, src1w);
 #if (defined SLJIT_CONFIG_X86_64 && SLJIT_CONFIG_X86_64)
 		EMIT_MOV(compiler, TMP_REG2, 0, SLJIT_PREF_SHIFT_REG, 0);
 #else
-		/* [esp+0] contains the flags. */
-		EMIT_MOV(compiler, SLJIT_MEM1(SLJIT_SP), sizeof(sljit_sw), SLJIT_PREF_SHIFT_REG, 0);
+		EMIT_MOV(compiler, SLJIT_MEM1(SLJIT_SP), 0, SLJIT_PREF_SHIFT_REG, 0);
 #endif
 		EMIT_MOV(compiler, SLJIT_PREF_SHIFT_REG, 0, src2, src2w);
 		inst = emit_x86_instruction(compiler, 1 | EX86_SHIFT_INS, SLJIT_PREF_SHIFT_REG, 0, TMP_REG1, 0);
@@ -2055,7 +2057,7 @@ static sljit_s32 emit_shift(struct sljit_compiler *compiler,
 #if (defined SLJIT_CONFIG_X86_64 && SLJIT_CONFIG_X86_64)
 		EMIT_MOV(compiler, SLJIT_PREF_SHIFT_REG, 0, TMP_REG2, 0);
 #else
-		EMIT_MOV(compiler, SLJIT_PREF_SHIFT_REG, 0, SLJIT_MEM1(SLJIT_SP), sizeof(sljit_sw));
+		EMIT_MOV(compiler, SLJIT_PREF_SHIFT_REG, 0, SLJIT_MEM1(SLJIT_SP), 0);
 #endif
 		EMIT_MOV(compiler, dst, dstw, TMP_REG1, 0);
 	}
@@ -2594,11 +2596,10 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op_flags(struct sljit_compiler *co
 	sljit_u8 cond_set = 0;
 #if (defined SLJIT_CONFIG_X86_64 && SLJIT_CONFIG_X86_64)
 	sljit_s32 reg;
-#else
-	/* CHECK_EXTRA_REGS migh overwrite these values. */
+#endif
+	/* ADJUST_LOCAL_OFFSET and CHECK_EXTRA_REGS might overwrite these values. */
 	sljit_s32 dst_save = dst;
 	sljit_sw dstw_save = dstw;
-#endif
 
 	CHECK_ERROR();
 	CHECK(check_sljit_emit_op_flags(compiler, op, dst, dstw, src, srcw, type));
@@ -2641,6 +2642,7 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op_flags(struct sljit_compiler *co
 	*inst++ = cond_set;
 	*inst++ = MOD_REG | reg_lmap[reg];
 	*inst++ = REX_W | (reg_map[reg] <= 7 ? 0 : (REX_B | REX_R));
+	/* The movzx instruction does not affect flags. */
 	*inst++ = GROUP_0F;
 	*inst++ = MOVZX_r_rm8;
 	*inst = MOD_REG | (reg_lmap[reg] << 3) | reg_lmap[reg];
@@ -2656,8 +2658,10 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op_flags(struct sljit_compiler *co
 		|| (defined SLJIT_ARGUMENT_CHECKS && SLJIT_ARGUMENT_CHECKS)
 	compiler->skip_checks = 1;
 #endif
-	return sljit_emit_op2(compiler, op, dst, dstw, dst, dstw, TMP_REG1, 0);
-#else /* SLJIT_CONFIG_X86_64 */
+	return sljit_emit_op2(compiler, op, dst_save, dstw_save, dst_save, dstw_save, TMP_REG1, 0);
+
+#else
+	/* The SLJIT_CONFIG_X86_32 code path starts here. */
 	if (GET_OPCODE(op) < SLJIT_ADD && FAST_IS_REG(dst)) {
 		if (reg_map[dst] <= 4) {
 			/* Low byte is accessible. */

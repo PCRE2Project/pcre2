@@ -76,6 +76,14 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_enter(struct sljit_compiler *compi
 	CHECK(check_sljit_emit_enter(compiler, options, args, scratches, saveds, fscratches, fsaveds, local_size));
 	set_emit_enter(compiler, options, args, scratches, saveds, fscratches, fsaveds, local_size);
 
+#ifdef _WIN64
+	/* Two/four register slots for parameters plus space for xmm6 register if needed. */
+	if (fscratches >= 6 || fsaveds >= 1)
+		compiler->locals_offset = 6 * sizeof(sljit_sw);
+	else
+		compiler->locals_offset = ((scratches > 2) ? 4 : 2) * sizeof(sljit_sw);
+#endif
+
 	/* Including the return address saved by the call instruction. */
 	saved_register_size = GET_SAVED_REGISTERS_SIZE(scratches, saveds, 1);
 
@@ -153,7 +161,7 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_enter(struct sljit_compiler *compi
 		INC_SIZE(4 + (3 + sizeof(sljit_s32)));
 		*inst++ = REX_W;
 		*inst++ = GROUP_BINARY_83;
-		*inst++ = MOD_REG | SUB | 4;
+		*inst++ = MOD_REG | SUB | reg_map[SLJIT_SP];
 		/* Allocated size for registers must be divisible by 8. */
 		SLJIT_ASSERT(!(saved_register_size & 0x7));
 		/* Aligned to 16 byte. */
@@ -178,25 +186,26 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_enter(struct sljit_compiler *compi
 	}
 #endif
 
-	SLJIT_ASSERT(local_size > 0);
-	if (local_size <= 127) {
-		inst = (sljit_u8*)ensure_buf(compiler, 1 + 4);
-		FAIL_IF(!inst);
-		INC_SIZE(4);
-		*inst++ = REX_W;
-		*inst++ = GROUP_BINARY_83;
-		*inst++ = MOD_REG | SUB | 4;
-		*inst++ = local_size;
-	}
-	else {
-		inst = (sljit_u8*)ensure_buf(compiler, 1 + 7);
-		FAIL_IF(!inst);
-		INC_SIZE(7);
-		*inst++ = REX_W;
-		*inst++ = GROUP_BINARY_81;
-		*inst++ = MOD_REG | SUB | 4;
-		sljit_unaligned_store_s32(inst, local_size);
-		inst += sizeof(sljit_s32);
+	if (local_size > 0) {
+		if (local_size <= 127) {
+			inst = (sljit_u8*)ensure_buf(compiler, 1 + 4);
+			FAIL_IF(!inst);
+			INC_SIZE(4);
+			*inst++ = REX_W;
+			*inst++ = GROUP_BINARY_83;
+			*inst++ = MOD_REG | SUB | reg_map[SLJIT_SP];
+			*inst++ = local_size;
+		}
+		else {
+			inst = (sljit_u8*)ensure_buf(compiler, 1 + 7);
+			FAIL_IF(!inst);
+			INC_SIZE(7);
+			*inst++ = REX_W;
+			*inst++ = GROUP_BINARY_81;
+			*inst++ = MOD_REG | SUB | reg_map[SLJIT_SP];
+			sljit_unaligned_store_s32(inst, local_size);
+			inst += sizeof(sljit_s32);
+		}
 	}
 
 #ifdef _WIN64
@@ -222,6 +231,14 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_set_context(struct sljit_compiler *comp
 	CHECK_ERROR();
 	CHECK(check_sljit_set_context(compiler, options, args, scratches, saveds, fscratches, fsaveds, local_size));
 	set_set_context(compiler, options, args, scratches, saveds, fscratches, fsaveds, local_size);
+
+#ifdef _WIN64
+	/* Two/four register slots for parameters plus space for xmm6 register if needed. */
+	if (fscratches >= 6 || fsaveds >= 1)
+		compiler->locals_offset = 6 * sizeof(sljit_sw);
+	else
+		compiler->locals_offset = ((scratches > 2) ? 4 : 2) * sizeof(sljit_sw);
+#endif
 
 	/* Including the return address saved by the call instruction. */
 	saved_register_size = GET_SAVED_REGISTERS_SIZE(scratches, saveds, 1);
@@ -250,24 +267,25 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_return(struct sljit_compiler *comp
 	}
 #endif
 
-	SLJIT_ASSERT(compiler->local_size > 0);
-	if (compiler->local_size <= 127) {
-		inst = (sljit_u8*)ensure_buf(compiler, 1 + 4);
-		FAIL_IF(!inst);
-		INC_SIZE(4);
-		*inst++ = REX_W;
-		*inst++ = GROUP_BINARY_83;
-		*inst++ = MOD_REG | ADD | 4;
-		*inst = compiler->local_size;
-	}
-	else {
-		inst = (sljit_u8*)ensure_buf(compiler, 1 + 7);
-		FAIL_IF(!inst);
-		INC_SIZE(7);
-		*inst++ = REX_W;
-		*inst++ = GROUP_BINARY_81;
-		*inst++ = MOD_REG | ADD | 4;
-		sljit_unaligned_store_s32(inst, compiler->local_size);
+	if (compiler->local_size > 0) {
+		if (compiler->local_size <= 127) {
+			inst = (sljit_u8*)ensure_buf(compiler, 1 + 4);
+			FAIL_IF(!inst);
+			INC_SIZE(4);
+			*inst++ = REX_W;
+			*inst++ = GROUP_BINARY_83;
+			*inst++ = MOD_REG | ADD | 4;
+			*inst = compiler->local_size;
+		}
+		else {
+			inst = (sljit_u8*)ensure_buf(compiler, 1 + 7);
+			FAIL_IF(!inst);
+			INC_SIZE(7);
+			*inst++ = REX_W;
+			*inst++ = GROUP_BINARY_81;
+			*inst++ = MOD_REG | ADD | 4;
+			sljit_unaligned_store_s32(inst, compiler->local_size);
+		}
 	}
 
 	tmp = compiler->scratches;
