@@ -2216,15 +2216,27 @@ coded as \b, \B, \A, \G, \Z, \z, ^ and $ are described
 <P>
 More complicated assertions are coded as subpatterns. There are two kinds:
 those that look ahead of the current position in the subject string, and those
-that look behind it. An assertion subpattern is matched in the normal way,
-except that it does not cause the current matching position to be changed.
+that look behind it, and in each case an assertion may be positive (must
+succeed for matching to continue) or negative (must not succeed for matching to
+continue). An assertion subpattern is matched in the normal way, except that,
+when matching continues afterwards, the matching position in the subject string
+is as it was at the start of the assertion.
 </P>
 <P>
-Assertion subpatterns are not capturing subpatterns. If such an assertion
-contains capturing subpatterns within it, these are counted for the purposes of
+Assertion subpatterns are not capturing subpatterns. If an assertion contains
+capturing subpatterns within it, these are counted for the purposes of
 numbering the capturing subpatterns in the whole pattern. However, substring
-capturing is normally carried out only for positive assertions (but see the 
-discussion of conditional subpatterns below).
+capturing is carried out only for positive assertions that succeed, that is,
+one of their branches matches, so matching continues after the assertion. If
+all branches of a positive assertion fail to match, nothing is captured, and 
+control is passed to the previous backtracking point.
+</P>
+<P>
+No capturing is done for a negative assertion unless it is being used as a
+condition in a
+<a href="#subpatternsassubroutines">conditional subpattern</a>
+(see the discussion below). Matching continues after a non-conditional negative 
+assertion only if all its branches fail to match.
 </P>
 <P>
 For compatibility with Perl, most assertion subpatterns may be repeated; though
@@ -2604,10 +2616,11 @@ against the second. This pattern matches strings in one of the two forms
 dd-aaa-dd or dd-dd-dd, where aaa are letters and dd are digits.
 </P>
 <P>
-For Perl compatibility, if an assertion that is a condition contains capturing 
-subpatterns, any capturing that occurs is retained afterwards, for both 
-positive and negative assertions. (Compare non-conditional assertions, when 
-captures are retained only for positive assertions.)
+When an assertion that is a condition contains capturing subpatterns, any
+capturing that occurs in a matching branch is retained afterwards, for both
+positive and negative assertions, because matching always continues after the
+assertion, whether it succeeds or fails. (Compare non-conditional assertions,
+when captures are retained only for positive assertions that succeed.)
 <a name="comments"></a></P>
 <br><a name="SEC22" href="#TOC1">COMMENTS</a><br>
 <P>
@@ -3351,28 +3364,34 @@ in the second repeat of the group acts.
 Backtracking verbs in assertions
 </b><br>
 <P>
-(*FAIL) in an assertion has its normal effect: it forces an immediate
-backtrack.
+(*FAIL) in any assertion has its normal effect: it forces an immediate
+backtrack. The behaviour of the other backtracking verbs depends on whether or
+not the assertion is standalone or acting as the condition in a conditional
+subpattern.
 </P>
 <P>
-(*ACCEPT) in a positive assertion causes the assertion to succeed without any
-further processing. In a negative assertion, (*ACCEPT) causes the assertion to
-fail without any further processing.
+(*ACCEPT) in a standalone positive assertion causes the assertion to succeed
+without any further processing; captured strings are retained. In a standalone
+negative assertion, (*ACCEPT) causes the assertion to fail without any further
+processing; captured substrings are discarded.
+</P>
+<P>
+If the assertion is a condition, (*ACCEPT) causes the condition to be true for
+a positive assertion and false for a negative one; captured substrings are 
+retained in both cases.
+</P>
+<P>
+The effect of (*THEN) is not allowed to escape beyond an assertion. If there 
+are no more branches to try, (*THEN) causes a positive assertion to be false,
+and a negative assertion to be true.
 </P>
 <P>
 The other backtracking verbs are not treated specially if they appear in a
-positive assertion. In particular, (*THEN) skips to the next alternative in the
-innermost enclosing group that has alternations, whether or not this is within
-the assertion.
-</P>
-<P>
-Negative assertions are, however, different, in order to ensure that changing a
-positive assertion into a negative assertion changes its result. Backtracking
-into (*COMMIT), (*SKIP), or (*PRUNE) causes a negative assertion to be true,
-without considering any further alternative branches in the assertion.
-Backtracking into (*THEN) causes it to skip to the next enclosing alternative
-within the assertion (the normal behaviour), but if the assertion does not have
-such an alternative, (*THEN) behaves like (*PRUNE).
+standalone positive assertion. In a conditional positive assertion, 
+backtracking into (*COMMIT), (*SKIP), or (*PRUNE) causes the condition to be
+false. However, for both standalone and conditional negative assertions,
+backtracking into (*COMMIT), (*SKIP), or (*PRUNE) causes the assertion to be
+true, without considering any further alternative branches.
 <a name="btsub"></a></P>
 <br><b>
 Backtracking verbs in subroutines
@@ -3415,7 +3434,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC30" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 18 March 2017
+Last updated: 03 April 2017
 <br>
 Copyright &copy; 1997-2017 University of Cambridge.
 <br>

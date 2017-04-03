@@ -1,4 +1,4 @@
-.TH PCRE2COMPAT 3 "29 March 2017" "PCRE2 10.30"
+.TH PCRE2COMPAT 3 "03 April 2017" "PCRE2 10.30"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "DIFFERENCES BETWEEN PCRE2 AND PERL"
@@ -24,9 +24,9 @@ assertion just once). Perl allows some repeat quantifiers on other assertions,
 for example, \eb* (but not \eb{3}), but these do not seem to have any use.
 .P
 3. Capturing subpatterns that occur inside negative lookaround assertions are
-counted, but their entries in the offsets vector are set only if the assertion 
-is a condition. Perl has changed its behaviour in this regard from time to 
-time.
+counted, but their entries in the offsets vector are set only when a negative
+assertion is a condition that has a matching branch (that is, the condition is
+false).
 .P
 4. The following Perl escape sequences are not supported: \el, \eu, \eL,
 \eU, and \eN when followed by a character name or Unicode value. (\eN on its
@@ -179,6 +179,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 29 March 2017
+Last updated: 03 April 2017
 Copyright (c) 1997-2017 University of Cambridge.
 .fi

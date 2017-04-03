@@ -37,9 +37,9 @@ for example, \b* (but not \b{3}), but these do not seem to have any use.
 </P>
 <P>
 3. Capturing subpatterns that occur inside negative lookaround assertions are
-counted, but their entries in the offsets vector are set only if the assertion 
-is a condition. Perl has changed its behaviour in this regard from time to 
-time.
+counted, but their entries in the offsets vector are set only when a negative
+assertion is a condition that has a matching branch (that is, the condition is
+false).
 </P>
 <P>
 4. The following Perl escape sequences are not supported: \l, \u, \L,
@@ -214,7 +214,7 @@ Cambridge, England.
 REVISION
 </b><br>
 <P>
-Last updated: 29 March 2017
+Last updated: 03 April 2017
 <br>
 Copyright &copy; 1997-2017 University of Cambridge.
 <br>
