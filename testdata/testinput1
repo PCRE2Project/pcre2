@@ -5905,4 +5905,16 @@ ef) x/x,mark
 /^(.|(.)(?1)?\2)$/
     abcba
     
+/^(?(?=(a))abc|def)/
+    abc
+
+/^(?(?!(a))def|abc)/
+    abc
+
+/^(?(?=(a)(*ACCEPT))abc|def)/
+    abc
+
+/^(?(?!(a)(*ACCEPT))def|abc)/
+    abc
+
 # End of testinput1 

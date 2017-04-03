@@ -9467,4 +9467,24 @@ No match
  1: abcba
  2: a
     
+/^(?(?=(a))abc|def)/
+    abc
+ 0: abc
+ 1: a
+
+/^(?(?!(a))def|abc)/
+    abc
+ 0: abc
+ 1: a
+
+/^(?(?=(a)(*ACCEPT))abc|def)/
+    abc
+ 0: abc
+ 1: a
+
+/^(?(?!(a)(*ACCEPT))def|abc)/
+    abc
+ 0: abc
+ 1: a
+
 # End of testinput1 

@@ -5332,17 +5332,14 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
 
         switch(rrc)
           {
-          case MATCH_ACCEPT:
-          if (Lpositive)      /* Save captures if a positive assertion */
-            {
-            memcpy(Fovector,
-                  (char *)assert_accept_frame + offsetof(heapframe, ovector),
-                  assert_accept_frame->offset_top * sizeof(PCRE2_SIZE));
-            Foffset_top = assert_accept_frame->offset_top;
-            }
+          case MATCH_ACCEPT:  /* Save captures */
+          memcpy(Fovector,
+                (char *)assert_accept_frame + offsetof(heapframe, ovector),
+                assert_accept_frame->offset_top * sizeof(PCRE2_SIZE));
+          Foffset_top = assert_accept_frame->offset_top;
 
-          /* Fall through. In the case of a match for a positive assertion, the
-          captures have already been put into the current frame. */
+          /* Fall through. In the case of a match, the captures have already
+          been put into the current frame. */
 
           case MATCH_MATCH:
           condition = Lpositive;   /* TRUE for positive assertion */

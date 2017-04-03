@@ -29,7 +29,10 @@ bugs were never in fully released code, but are noted here for the record.
       vector on the stack is not big enough to handle at least 10 frames. 
       Fixes oss-fuzz issue 783. 
       
-  (c) Handling of (*VERB)s in recursions was wrong in some cases. 
+  (c) Handling of (*VERB)s in recursions was wrong in some cases.
+  
+  (d) Captures in negative assertions that were used as conditions were not
+      happening if the assertion matched via (*ACCEPT).   
       
 2. Now that pcre2_match() no longer uses recursive function calls (see above),
 the "match limit recursion" value seems misnamed. It still exists, and limits 
