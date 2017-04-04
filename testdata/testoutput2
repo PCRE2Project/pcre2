@@ -15537,6 +15537,45 @@ No match
  0: a
 MK: m
 
+# Temporary, until JIT is updated.
+#subject no_jit
+
+/abc/endanchored
+    xyzabc
+ 0: abc
+\= Expect no match
+    xyzabcdef
+No match
+\= Expect error
+    xyzabc\=ph
+Failed: error -34: bad option value
+
+/abc/
+    xyzabc\=endanchored
+ 0: abc
+\= Expect no match
+    xyzabcdef\=endanchored
+No match
+\= Expect error
+    xyzabc\=ps,endanchored
+Failed: error -34: bad option value
+
+/abc(*ACCEPT)d/endanchored
+    xyzabc
+ 0: abc
+\= Expect no match
+    xyzabcdef
+No match
+
+/abc|bcd/endanchored
+    xyzabcd
+ 0: bcd
+\= Expect no match
+    xyzabcdef
+No match
+
+#subject -no_jit
+
 # End of testinput2 
 Error -63: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

@@ -22,7 +22,7 @@ Written by Philip Hazel, October 2016
 #define ALLOWED_COMPILE_OPTIONS \
   (PCRE2_ANCHORED|PCRE2_ALLOW_EMPTY_CLASS|PCRE2_ALT_BSUX|PCRE2_ALT_CIRCUMFLEX| \
    PCRE2_ALT_VERBNAMES|PCRE2_AUTO_CALLOUT|PCRE2_CASELESS|PCRE2_DOLLAR_ENDONLY| \
-   PCRE2_DOTALL|PCRE2_DUPNAMES|PCRE2_EXTENDED|PCRE2_FIRSTLINE| \
+   PCRE2_DOTALL|PCRE2_DUPNAMES|PCRE2_ENDANCHORED|PCRE2_EXTENDED|PCRE2_FIRSTLINE| \
    PCRE2_MATCH_UNSET_BACKREF|PCRE2_MULTILINE|PCRE2_NEVER_BACKSLASH_C| \
    PCRE2_NO_AUTO_CAPTURE| \
    PCRE2_NO_AUTO_POSSESS|PCRE2_NO_DOTSTAR_ANCHOR|PCRE2_NO_START_OPTIMIZE| \
@@ -30,7 +30,7 @@ Written by Philip Hazel, October 2016
    PCRE2_UTF)
 
 #define ALLOWED_MATCH_OPTIONS \
-  (PCRE2_ANCHORED|PCRE2_NOTBOL|PCRE2_NOTEOL|PCRE2_NOTEMPTY| \
+  (PCRE2_ANCHORED|PCRE2_ENDANCHORED|PCRE2_NOTBOL|PCRE2_NOTEOL|PCRE2_NOTEMPTY| \
    PCRE2_NOTEMPTY_ATSTART|PCRE2_PARTIAL_HARD| \
    PCRE2_PARTIAL_SOFT|PCRE2_NO_JIT)
    
@@ -103,7 +103,7 @@ for (i = 0; i < 2; i++)
 
 #ifdef STANDALONE
   printf("Compile options %.8x never_backslash_c", compile_options);
-  printf("%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s\n",
+  printf("%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s\n",
     ((compile_options & PCRE2_ALT_BSUX) != 0)? ",alt_bsux" : "",
     ((compile_options & PCRE2_ALT_CIRCUMFLEX) != 0)? ",alt_circumflex" : "",
     ((compile_options & PCRE2_ALT_VERBNAMES) != 0)? ",alt_verbnames" : "",
@@ -114,6 +114,7 @@ for (i = 0; i < 2; i++)
     ((compile_options & PCRE2_DOLLAR_ENDONLY) != 0)? ",dollar_endonly" : "",
     ((compile_options & PCRE2_DOTALL) != 0)? ",dotall" : "",
     ((compile_options & PCRE2_DUPNAMES) != 0)? ",dupnames" : "",
+    ((compile_options & PCRE2_ENDANCHORED) != 0)? ",endanchored" : "",
     ((compile_options & PCRE2_EXTENDED) != 0)? ",extended" : "",
     ((compile_options & PCRE2_FIRSTLINE) != 0)? ",firstline" : "",
     ((compile_options & PCRE2_MATCH_UNSET_BACKREF) != 0)? ",match_unset_backref" : "",
@@ -178,8 +179,9 @@ for (i = 0; i < 2; i++)
       {
 #ifdef STANDALONE
       printf("Match options %.8x", match_options);
-      printf("%s%s%s%s%s%s%s%s\n",
+      printf("%s%s%s%s%s%s%s%s%s\n",
         ((match_options & PCRE2_ANCHORED) != 0)? ",anchored" : "",
+        ((match_options & PCRE2_ENDANCHORED) != 0)? ",endanchored" : "",
         ((match_options & PCRE2_NO_UTF_CHECK) != 0)? ",no_utf_check" : "",
         ((match_options & PCRE2_NOTBOL) != 0)? ",notbol" : "",
         ((match_options & PCRE2_NOTEMPTY) != 0)? ",notempty" : "",

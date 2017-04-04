@@ -578,6 +578,7 @@ static modstruct modlist[] = {
   { "dollar_endonly",             MOD_PAT,  MOD_OPT, PCRE2_DOLLAR_ENDONLY,       PO(options) },
   { "dotall",                     MOD_PATP, MOD_OPT, PCRE2_DOTALL,               PO(options) },
   { "dupnames",                   MOD_PATP, MOD_OPT, PCRE2_DUPNAMES,             PO(options) },
+  { "endanchored",                MOD_PD,   MOD_OPT, PCRE2_ENDANCHORED,          PD(options) },
   { "expand",                     MOD_PAT,  MOD_CTL, CTL_EXPAND,                 PO(control) },
   { "extended",                   MOD_PATP, MOD_OPT, PCRE2_EXTENDED,             PO(options) },
   { "find_limits",                MOD_DAT,  MOD_CTL, CTL_FINDLIMITS,             DO(control) },
@@ -3823,7 +3824,7 @@ static void
 show_compile_options(uint32_t options, const char *before, const char *after)
 {
 if (options == 0) fprintf(outfile, "%s <none>%s", before, after);
-else fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
+else fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
   before,
   ((options & PCRE2_ALT_BSUX) != 0)? " alt_bsux" : "",
   ((options & PCRE2_ALT_CIRCUMFLEX) != 0)? " alt_circumflex" : "",
@@ -3835,6 +3836,7 @@ else fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s"
   ((options & PCRE2_DOLLAR_ENDONLY) != 0)? " dollar_endonly" : "",
   ((options & PCRE2_DOTALL) != 0)? " dotall" : "",
   ((options & PCRE2_DUPNAMES) != 0)? " dupnames" : "",
+  ((options & PCRE2_ENDANCHORED) != 0)? " endanchored" : "",
   ((options & PCRE2_EXTENDED) != 0)? " extended" : "",
   ((options & PCRE2_FIRSTLINE) != 0)? " firstline" : "",
   ((options & PCRE2_MATCH_UNSET_BACKREF) != 0)? " match_unset_backref" : "",
@@ -3866,10 +3868,11 @@ else fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s"
 static void
 show_match_options(uint32_t options)
 {
-fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s",
+fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s",
   ((options & PCRE2_ANCHORED) != 0)? " anchored" : "",
   ((options & PCRE2_DFA_RESTART) != 0)? " dfa_restart" : "",
   ((options & PCRE2_DFA_SHORTEST) != 0)? " dfa_shortest" : "",
+  ((options & PCRE2_ENDANCHORED) != 0)? " endanchored" : "",
   ((options & PCRE2_NO_UTF_CHECK) != 0)? " no_utf_check" : "",
   ((options & PCRE2_NOTBOL) != 0)? " notbol" : "",
   ((options & PCRE2_NOTEMPTY) != 0)? " notempty" : "",

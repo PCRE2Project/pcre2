@@ -76,7 +76,7 @@ the heap is obtained for patterns that need more frames. */
 /* Masks for identifying the public options that are permitted at match time. */
 
 #define PUBLIC_MATCH_OPTIONS \
-  (PCRE2_ANCHORED|PCRE2_NOTBOL|PCRE2_NOTEOL|PCRE2_NOTEMPTY| \
+  (PCRE2_ANCHORED|PCRE2_ENDANCHORED|PCRE2_NOTBOL|PCRE2_NOTEOL|PCRE2_NOTEMPTY| \
    PCRE2_NOTEMPTY_ATSTART|PCRE2_NO_UTF_CHECK|PCRE2_PARTIAL_HARD| \
    PCRE2_PARTIAL_SOFT|PCRE2_NO_JIT)
 
@@ -791,10 +791,10 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
       continue;
       }
 
-    /* Not a recursion. Fail if either PCRE2_NOTEMPTY is set, or if
-    PCRE2_NOTEMPTY_ATSTART is set and we have matched at the start of the
-    subject. In both cases, backtracking will then try other alternatives, if
-    any. */
+    /* Not a recursion. Fail for an empty string match if either PCRE2_NOTEMPTY
+    is set, or if PCRE2_NOTEMPTY_ATSTART is set and we have matched at the
+    start of the subject. In both cases, backtracking will then try other
+    alternatives, if any. */
 
     if (Feptr == Fstart_match &&
          ((mb->moptions & PCRE2_NOTEMPTY) != 0 ||
@@ -802,6 +802,13 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
              Fstart_match == mb->start_subject + mb->start_offset)))
       RRETURN(MATCH_NOMATCH);
 
+    /* Also fail if PCRE2_ENDANCHORED is set and the end of the match is not 
+    the end of the subject. */
+    
+    if (Feptr < mb->end_subject &&
+        ((mb->moptions | mb->poptions) & PCRE2_ENDANCHORED) != 0)
+      RRETURN(MATCH_NOMATCH);     
+ 
     /* We have a successful match of the whole pattern. Record the result and
     then do a direct return from the function. If there is space in the offset
     vector, set any pairs that follow the highest-numbered captured string but
@@ -6086,6 +6093,13 @@ set up later. */
 utf = (re->overall_options & PCRE2_UTF) != 0;
 mb->partial = ((options & PCRE2_PARTIAL_HARD) != 0)? 2 :
               ((options & PCRE2_PARTIAL_SOFT) != 0)? 1 : 0;
+              
+/* Partial matching and PCRE2_ENDANCHORED are currently not allowed at the same 
+time. */ 
+              
+if (mb->partial != 0 && 
+   ((re->overall_options | options) & PCRE2_ENDANCHORED) != 0)
+  return PCRE2_ERROR_BADOPTION; 
 
 /* Check a UTF string for validity if required. For 8-bit and 16-bit strings,
 we must also check that a starting offset does not point into the middle of a

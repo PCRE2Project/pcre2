@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "01 April 2017" "PCRE2 10.30"
+.TH PCRE2API 3 "04 April 2017" "PCRE2 10.30"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -1091,8 +1091,8 @@ documentation).
 .P
 For those options that can be different in different parts of the pattern, the
 contents of the \fIoptions\fP argument specifies their settings at the start of
-compilation. The PCRE2_ANCHORED and PCRE2_NO_UTF_CHECK options can be set at
-the time of matching as well as at compile time.
+compilation. The PCRE2_ANCHORED, PCRE2_ENDANCHORED, and PCRE2_NO_UTF_CHECK
+options can be set at the time of matching as well as at compile time.
 .P
 Other, less frequently required compile-time parameters (for example, the
 newline setting) can be provided in a compile context (as described
@@ -1248,6 +1248,13 @@ details of named subpatterns below; see also the
 \fBpcre2pattern\fP
 .\"
 documentation.
+.sp
+  PCRE2_ENDANCHORED
+.sp
+If this bit is set, the end of any pattern match must be right at the end of
+the string being searched (the "subject string"). This effect can also be
+achieved by appropriate constructs in the pattern itself, which is the only way
+to do it in Perl.
 .sp
   PCRE2_EXTENDED
 .sp
@@ -2158,15 +2165,15 @@ the use of .* with PCRE2_DOTALL, not by starting the pattern with ^ or \eA.
 .rs
 .sp
 The unused bits of the \fIoptions\fP argument for \fBpcre2_match()\fP must be
-zero. The only bits that may be set are PCRE2_ANCHORED, PCRE2_NOTBOL,
-PCRE2_NOTEOL, PCRE2_NOTEMPTY, PCRE2_NOTEMPTY_ATSTART, PCRE2_NO_JIT,
-PCRE2_NO_UTF_CHECK, PCRE2_PARTIAL_HARD, and PCRE2_PARTIAL_SOFT. Their action is
-described below.
+zero. The only bits that may be set are PCRE2_ANCHORED, PCRE2_ENDANCHORED,
+PCRE2_NOTBOL, PCRE2_NOTEOL, PCRE2_NOTEMPTY, PCRE2_NOTEMPTY_ATSTART,
+PCRE2_NO_JIT, PCRE2_NO_UTF_CHECK, PCRE2_PARTIAL_HARD, and PCRE2_PARTIAL_SOFT.
+Their action is described below.
 .P
-Setting PCRE2_ANCHORED at match time is not supported by the just-in-time (JIT)
-compiler. If it is set, JIT matching is disabled and the interpretive code in
-\fBpcre2_match()\fP is run. Apart from PCRE2_NO_JIT (obviously), the remaining
-options are supported for JIT matching.
+Setting PCRE2_ANCHORED or PCRE2_ENDANCHORED at match time is not supported by
+the just-in-time (JIT) compiler. If it is set, JIT matching is disabled and the
+interpretive code in \fBpcre2_match()\fP is run. Apart from PCRE2_NO_JIT
+(obviously), the remaining options are supported for JIT matching.
 .sp
   PCRE2_ANCHORED
 .sp
@@ -2175,6 +2182,12 @@ matching position. If a pattern was compiled with PCRE2_ANCHORED, or turned out
 to be anchored by virtue of its contents, it cannot be made unachored at
 matching time. Note that setting the option at match time disables JIT
 matching.
+.sp
+  PCRE2_ENDANCHORED
+.sp
+If the PCRE2_ENDANCHORED option is set, any string that \fBpcre2_match()\fP
+matches must be right at the end of the subject string. Note that setting the
+option at match time disables JIT matching.
 .sp
   PCRE2_NOTBOL
 .sp
@@ -3141,11 +3154,11 @@ Here is an example of a simple call to \fBpcre2_dfa_match()\fP:
 .rs
 .sp
 The unused bits of the \fIoptions\fP argument for \fBpcre2_dfa_match()\fP must
-be zero. The only bits that may be set are PCRE2_ANCHORED, PCRE2_NOTBOL,
-PCRE2_NOTEOL, PCRE2_NOTEMPTY, PCRE2_NOTEMPTY_ATSTART, PCRE2_NO_UTF_CHECK,
-PCRE2_PARTIAL_HARD, PCRE2_PARTIAL_SOFT, PCRE2_DFA_SHORTEST, and
-PCRE2_DFA_RESTART. All but the last four of these are exactly the same as for
-\fBpcre2_match()\fP, so their description is not repeated here.
+be zero. The only bits that may be set are PCRE2_ANCHORED, PCRE2_ENDANCHORED,
+PCRE2_NOTBOL, PCRE2_NOTEOL, PCRE2_NOTEMPTY, PCRE2_NOTEMPTY_ATSTART,
+PCRE2_NO_UTF_CHECK, PCRE2_PARTIAL_HARD, PCRE2_PARTIAL_SOFT, PCRE2_DFA_SHORTEST,
+and PCRE2_DFA_RESTART. All but the last four of these are exactly the same as
+for \fBpcre2_match()\fP, so their description is not repeated here.
 .sp
   PCRE2_PARTIAL_HARD
   PCRE2_PARTIAL_SOFT
@@ -3309,6 +3322,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 01 April 2017
+Last updated: 04 April 2017
 Copyright (c) 1997-2017 University of Cambridge.
 .fi

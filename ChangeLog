@@ -111,6 +111,8 @@ only to pcre2_match():
 18. Make pcre2test detect an error return from pcre2_get_error_message(), give
 a message, and abandon the run (this would have detected #13 above). 
 
+19. Implemented PCRE2_ENDANCHORED.
+
 
 Version 10.23 14-February-2017
 ------------------------------

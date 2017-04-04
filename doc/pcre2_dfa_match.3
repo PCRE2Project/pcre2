@@ -1,4 +1,4 @@
-.TH PCRE2_DFA_MATCH 3 "24 March 2017" "PCRE2 10.30"
+.TH PCRE2_DFA_MATCH 3 "04 April 2017" "PCRE2 10.30"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH SYNOPSIS
@@ -38,6 +38,7 @@ up a callout function or specify the recursion depth limit. The \fIlength\fP
 and \fIstartoffset\fP values are code units, not characters. The options are:
 .sp
   PCRE2_ANCHORED          Match only at the first position
+  PCRE2_ENDANCHORED       Pattern can match only at end of subject
   PCRE2_NOTBOL            Subject is not the beginning of a line
   PCRE2_NOTEOL            Subject is not the end of a line
   PCRE2_NOTEMPTY          An empty string is not a valid match

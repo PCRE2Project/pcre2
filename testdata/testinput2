@@ -5011,4 +5011,33 @@ a)"xI
 /(a(*MARK:m)(*ACCEPT)){0}(?1)/mark
     abc
 
+# Temporary, until JIT is updated.
+#subject no_jit
+
+/abc/endanchored
+    xyzabc
+\= Expect no match
+    xyzabcdef
+\= Expect error
+    xyzabc\=ph
+
+/abc/
+    xyzabc\=endanchored
+\= Expect no match
+    xyzabcdef\=endanchored
+\= Expect error
+    xyzabc\=ps,endanchored
+
+/abc(*ACCEPT)d/endanchored
+    xyzabc
+\= Expect no match
+    xyzabcdef
+
+/abc|bcd/endanchored
+    xyzabcd
+\= Expect no match
+    xyzabcdef
+
+#subject -no_jit
+
 # End of testinput2 

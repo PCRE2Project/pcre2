@@ -83,7 +83,7 @@ in others, so I abandoned this code. */
 #include "pcre2_internal.h"
 
 #define PUBLIC_DFA_MATCH_OPTIONS \
-  (PCRE2_ANCHORED|PCRE2_NOTBOL|PCRE2_NOTEOL|PCRE2_NOTEMPTY| \
+  (PCRE2_ANCHORED|PCRE2_ENDANCHORED|PCRE2_NOTBOL|PCRE2_NOTEOL|PCRE2_NOTEMPTY| \
    PCRE2_NOTEMPTY_ATSTART|PCRE2_NO_UTF_CHECK|PCRE2_PARTIAL_HARD| \
    PCRE2_PARTIAL_SOFT|PCRE2_DFA_SHORTEST|PCRE2_DFA_RESTART)
 
@@ -3070,7 +3070,7 @@ for (;;)
           )
         )
       match_count = PCRE2_ERROR_PARTIAL;
-    break;        /* In effect, "return", but see the comment below */
+    break;  /* Exit from loop along the subject string */
     }
 
   /* One or more states are active for the next character. */
@@ -3078,11 +3078,13 @@ for (;;)
   ptr += clen;    /* Advance to next subject character */
   }               /* Loop to move along the subject string */
 
-/* Control gets here from "break" a few lines above. We do it this way because
-if we use "return" above, we have compiler trouble. Some compilers warn if
-there's nothing here because they think the function doesn't return a value. On
-the other hand, if we put a dummy statement here, some more clever compilers
-complain that it can't be reached. Sigh. */
+/* Control gets here from "break" a few lines above. If we have a match and 
+PCRE2_ENDANCHORED is set, the match fails. */
+
+if (match_count >= 0 && 
+    ((mb->moptions | mb->poptions) & PCRE2_ENDANCHORED) != 0 &&
+    ptr < end_subject)
+  match_count = PCRE2_ERROR_NOMATCH;    
 
 return match_count;
 }
@@ -3154,6 +3156,13 @@ if (re == NULL || subject == NULL || workspace == NULL || match_data == NULL)
   return PCRE2_ERROR_NULL;
 if (wscount < 20) return PCRE2_ERROR_DFA_WSSIZE;
 if (start_offset > length) return PCRE2_ERROR_BADOFFSET;
+
+/* Partial matching and PCRE2_ENDANCHORED are currently not allowed at the same 
+time. */ 
+              
+if ((options & (PCRE2_PARTIAL_HARD|PCRE2_PARTIAL_SOFT)) != 0 &&
+   ((re->overall_options | options) & PCRE2_ENDANCHORED) != 0)
+  return PCRE2_ERROR_BADOPTION; 
 
 /* Check that the first field in the block is the magic number. If it is not,
 return with PCRE2_ERROR_BADMAGIC. */

@@ -101,6 +101,7 @@ others can be added next to them */
 
 #define PCRE2_ANCHORED            0x80000000u
 #define PCRE2_NO_UTF_CHECK        0x40000000u
+#define PCRE2_ENDANCHORED         0x20000000u
 
 /* The following option bits can be passed only to pcre2_compile(). However,
 they may affect compilation, JIT compilation, and/or interpretive execution.

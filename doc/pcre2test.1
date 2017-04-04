@@ -1,4 +1,4 @@
-.TH PCRE2TEST 1 "25 March 2017" "PCRE 10.30"
+.TH PCRE2TEST 1 "04 April 2017" "PCRE 10.30"
 .SH NAME
 pcre2test - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -531,6 +531,7 @@ for a description of their effects.
       dollar_endonly            set PCRE2_DOLLAR_ENDONLY
   /s  dotall                    set PCRE2_DOTALL
       dupnames                  set PCRE2_DUPNAMES
+      endanchored               set PCRE2_ENDANCHORED
   /x  extended                  set PCRE2_EXTENDED
       firstline                 set PCRE2_FIRSTLINE
       match_unset_backref       set PCRE2_MATCH_UNSET_BACKREF
@@ -1010,6 +1011,7 @@ The following modifiers set options for \fBpcre2_match()\fP or
 for a description of their effects.
 .sp
       anchored                  set PCRE2_ANCHORED
+      endanchored               set PCRE2_ENDANCHORED
       dfa_restart               set PCRE2_DFA_RESTART
       dfa_shortest              set PCRE2_DFA_SHORTEST
       no_jit                    set PCRE2_NO_JIT
@@ -1775,6 +1777,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 25 March 2017
+Last updated: 04 April 2017
 Copyright (c) 1997-2017 University of Cambridge.
 .fi
