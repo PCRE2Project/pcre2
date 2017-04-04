@@ -725,7 +725,8 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
     where we know the starting frame is at the top of the chained frames, in
     this case we have to search back for the relevant frame in case other types
     of group that use chained frames have intervened. Multiple OP_CLOSEs always
-    come innermost first, which matches the chain order. */
+    come innermost first, which matches the chain order. We can ignore this in
+    a recursion, because captures are not passed out of recursions. */
 
     case OP_CLOSE:
     if (Fcurrent_recurse == RECURSE_UNSET)
@@ -746,23 +747,21 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
       Fovector[offset+1] = Feptr - mb->start_subject;
       if (offset >= Foffset_top) Foffset_top = offset + 2;
       }
-
     Fecode += PRIV(OP_lengths)[*Fecode];
     break;
 
 
     /* ===================================================================== */
-    /* End of the pattern, either real or forced. In an assertion ACCEPT,
-    update the last used pointer and remember the current frame so that the
-    captures can be fished out of it. */
+    /* Real or forced end of the pattern, assertion, or recursion. In an
+    assertion ACCEPT, update the last used pointer and remember the current
+    frame so that the captures can be fished out of it. */
 
     case OP_ASSERT_ACCEPT:
     if (Feptr > mb->last_used_ptr) mb->last_used_ptr = Feptr;
     assert_accept_frame = F;
     RRETURN(MATCH_ACCEPT);
 
-    /* The real end, or top-level (*ACCEPT). If recursing, we have to find the
-    most recent recursion. */
+    /* If recursing, we have to find the most recent recursion. */
 
     case OP_ACCEPT:
     case OP_END:
@@ -782,10 +781,11 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
         }
 
       /* N is now the frame of the recursion; the previous frame is at the
-      OP_RECURSE position. Go back there, copying the current subject position,
-      and move on past the OP_RECURSE. */
+      OP_RECURSE position. Go back there, copying the current subject position
+      and mark, and move on past the OP_RECURSE. */
 
       P->eptr = Feptr;
+      P->mark = Fmark;
       F = P;
       Fecode += 1 + LINK_SIZE;
       continue;
@@ -5078,10 +5078,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
         }
       }
 
-    /* Now run the recursion. If it successfully completes, it re-instates the
-    previous values of the captures and continues, just like a non-capturing
-    bracket. We must leave Fecode unchanged so that the ending code can find
-    out where to continue. */
+    /* Now run the recursion, branch by branch. */
 
     Lstart_branch = bracode;
     Lframe_type = GF_RECURSE | number;

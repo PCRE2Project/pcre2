@@ -15529,6 +15529,13 @@ Callout 1: last capture = 1
 \= Expect no match
     abc
 No match
+    
+# Perl gives no match for this one
+
+/(a(*MARK:m)(*ACCEPT)){0}(?1)/mark
+    abc
+ 0: a
+MK: m
 
 # End of testinput2 
 Error -63: PCRE2_ERROR_BADDATA (unknown error number)

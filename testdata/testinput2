@@ -5005,5 +5005,10 @@ a)"xI
 /^ (?(DEFINE) (..(*ACCEPT)|...) ) (?1)$/x
 \= Expect no match
     abc
+    
+# Perl gives no match for this one
+
+/(a(*MARK:m)(*ACCEPT)){0}(?1)/mark
+    abc
 
 # End of testinput2 
