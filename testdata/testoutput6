@@ -7694,4 +7694,31 @@ Failed: error -53: matching depth limit exceeded
 Minimum depth limit = 2
  0: abbab
 
+/abc/endanchored
+    xyzabc
+ 0: abc
+\= Expect no match
+    xyzabcdef
+No match
+\= Expect error
+    xyzabc\=ph
+Failed: error -34: bad option value
+
+/abc/
+    xyzabc\=endanchored
+ 0: abc
+\= Expect no match
+    xyzabcdef\=endanchored
+No match
+\= Expect error
+    xyzabc\=ps,endanchored
+Failed: error -34: bad option value
+
+/abc|bcd/endanchored
+    xyzabcd
+ 0: bcd
+\= Expect no match
+    xyzabcdef
+No match
+
 # End of testinput6

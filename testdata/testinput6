@@ -4892,4 +4892,23 @@
 /^(a(?2))(b)(?1)/
     abbab\=find_limits 
 
+/abc/endanchored
+    xyzabc
+\= Expect no match
+    xyzabcdef
+\= Expect error
+    xyzabc\=ph
+
+/abc/
+    xyzabc\=endanchored
+\= Expect no match
+    xyzabcdef\=endanchored
+\= Expect error
+    xyzabc\=ps,endanchored
+
+/abc|bcd/endanchored
+    xyzabcd
+\= Expect no match
+    xyzabcdef
+
 # End of testinput6
