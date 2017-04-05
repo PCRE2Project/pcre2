@@ -1537,7 +1537,7 @@ switch(endlinetype)
       case '\v':    /* VT */
       case '\f':    /* FF */
       case '\r':    /* CR */
-#ifndef EBCDIE
+#ifndef EBCDIC
       case 0x85:    /* Unicode NEL */
       case 0x2028:  /* Unicode LS */
       case 0x2029:  /* Unicode PS */
@@ -1554,8 +1554,6 @@ switch(endlinetype)
   return startptr;  /* Hit start of data */
   }     /* End of overall switch */
 }
-
-
 
 
 
@@ -1673,7 +1671,7 @@ executable name, and the following substrings specify the arguments:
 
   program_name|param1|param2|...
 
-Any substirng (including the program name) can contain escape sequences
+Any substring (including the program name) can contain escape sequences
 started by the dollar character. The escape sequences are substituted as
 follows:
 
@@ -2948,7 +2946,6 @@ switch(letter)
 
 return options;
 }
-
 
 
 
