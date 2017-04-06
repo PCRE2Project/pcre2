@@ -511,6 +511,7 @@ PATTERN MODIFIERS
              dollar_endonly            set PCRE2_DOLLAR_ENDONLY
          /s  dotall                    set PCRE2_DOTALL
              dupnames                  set PCRE2_DUPNAMES
+             endanchored               set PCRE2_ENDANCHORED
          /x  extended                  set PCRE2_EXTENDED
              firstline                 set PCRE2_FIRSTLINE
              match_unset_backref       set PCRE2_MATCH_UNSET_BACKREF
@@ -926,6 +927,7 @@ SUBJECT MODIFIERS
        pcre2_dfa_match(). See pcreapi for a description of their effects.
 
              anchored                  set PCRE2_ANCHORED
+             endanchored               set PCRE2_ENDANCHORED
              dfa_restart               set PCRE2_DFA_RESTART
              dfa_shortest              set PCRE2_DFA_SHORTEST
              no_jit                    set PCRE2_NO_JIT
@@ -1630,5 +1632,5 @@ AUTHOR
 
 REVISION
 
-       Last updated: 25 March 2017
+       Last updated: 04 April 2017
        Copyright (c) 1997-2017 University of Cambridge.

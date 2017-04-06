@@ -363,8 +363,8 @@ OPTIONS
                  length,  separated  by  a  comma. In this mode, no context is
                  shown. That is, the -A, -B, and -C options  are  ignored.  If
                  there is more than one match in a line, each of them is shown
-                 separately. This option is mutually  exclusive  with  --line-
-                 offsets and --only-matching.
+                 separately. This option is mutually exclusive with  --output,
+                 --line-offsets, and --only-matching.
 
        -H, --with-filename
                  Force  the  inclusion of the file name at the start of output
@@ -469,8 +469,8 @@ OPTIONS
                  separated by a comma. In this  mode,  no  context  is  shown.
                  That  is, the -A, -B, and -C options are ignored. If there is
                  more than one match in a line, each of them  is  shown  sepa-
-                 rately. This option is mutually exclusive with --file-offsets
-                 and --only-matching.
+                 rately.  This  option  is  mutually  exclusive with --output,
+                 --file-offsets, and --only-matching.
 
        --locale=locale-name
                  This option specifies a locale to be used for pattern  match-
@@ -585,6 +585,33 @@ OPTIONS
                  run time. It is provided for testing and working round  prob-
                  lems.  It should never be needed in normal use.
 
+       -O text, --output=text
+                 When  there  is a match, instead of outputting the whole line
+                 that matched, output just the  given  text.  This  option  is
+                 mutually  exclusive with --only-matching, --file-offsets, and
+                 --line-offsets. Escape sequences starting with a dollar char-
+                 acter  may be used to insert the contents of the matched part
+                 of the line and/or captured substrings into the text.
+
+                 $<digits> or ${<digits>} is replaced  by  the  captured  sub-
+                 string  of  the  given  decimal  number; zero substitutes the
+                 whole match. If the number is greater than the number of cap-
+                 turing  substrings,  or if the capture is unset, the replace-
+                 ment is empty.
+
+                 $a is replaced by bell; $b by backspace; $e by escape; $f  by
+                 form  feed;  $n by newline; $r by carriage return; $t by tab;
+                 $v by vertical tab.
+
+                 $o<digits> is replaced by the character  represented  by  the
+                 given octal number; up to three digits are processed.
+
+                 $x<digits>  is  replaced  by the character represented by the
+                 given hexadecimal number; up to two digits are processed.
+
+                 Any other character is substituted by itself. In  particular,
+                 $$ is replaced by a single dollar.
+
        -o, --only-matching
                  Show only the part of the line that matched a pattern instead
                  of the whole line. In this mode, no context  is  shown.  That
@@ -596,8 +623,8 @@ OPTIONS
                  ately. If the matched portion of the line is  empty,  nothing
                  is  output  unless  the  file  name  or line number are being
                  printed, in which case they are shown on an  otherwise  empty
-                 line.  This  option is mutually exclusive with --file-offsets
-                 and --line-offsets.
+                 line.  This  option  is  mutually  exclusive  with  --output,
+                 --file-offsets and --line-offsets.
 
        -onumber, --only-matching=number
                  Show only the part of the line  that  matched  the  capturing
@@ -607,7 +634,7 @@ OPTIONS
                  (see above), if an argument is present, it must be  given  in
                  the  same  shell item, for example, -o3 or --only-matching=2.
                  The comments given for the non-argument case above also apply
-                 to  this  case. If the specified capturing parentheses do not
+                 to this option. If the specified capturing parentheses do not
                  exist in the pattern, or were not set in the  match,  nothing
                  is  output unless the file name or line number are being out-
                  put.
@@ -723,7 +750,7 @@ OPTIONS COMPATIBILITY
        terminology) is also available as --xxx-regex (PCRE2 terminology). How-
        ever,  the  --depth-limit,  --file-list, --file-offsets, --include-dir,
        --line-offsets, --locale, --match-limit, -M,  --multiline,  -N,  --new-
-       line,   --om-separator,   -u,  and  --utf-8  options  are  specific  to
+       line, --om-separator, --output, -u, and --utf-8 options are specific to
        pcre2grep, as is the use of the --only-matching option with a capturing
        parentheses number.
 
@@ -766,33 +793,38 @@ OPTIONS WITH DATA
        equals character. Otherwise pcre2grep will assume that it has no data.
 
 
-CALLING EXTERNAL SCRIPTS
+USING PCRE2'S CALLOUT FACILITY
 
        pcre2grep has, by default, support for  calling  external  programs  or
-       scripts during matching by making use of PCRE2's callout facility. How-
-       ever, this support can be disabled when pcre2grep  is  built.  You  can
-       find  out  whether  your  binary has support for callouts by running it
-       with the --help option. If the support is not enabled, all callouts  in
-       patterns are ignored by pcre2grep.
+       scripts  or  echoing  specific strings during matching by making use of
+       PCRE2's callout facility. However, this support can  be  disabled  when
+       pcre2grep  is  built.  You can find out whether your binary has support
+       for callouts by running it with the --help option. If  the  support  is
+       not enabled, all callouts in patterns are ignored by pcre2grep.
 
        A  callout  in a PCRE2 pattern is of the form (?C<arg>) where the argu-
        ment is either a number or a quoted string (see the pcre2callout  docu-
-       mentation  for  details).  Numbered  callouts are ignored by pcre2grep.
-       String arguments are parsed as a list of substrings separated  by  pipe
-       (vertical  bar)  characters.  The first substring must be an executable
-       name, with the following substrings specifying arguments:
+       mentation  for  details).  Numbered  callouts are ignored by pcre2grep;
+       only callouts with string arguments are useful.
+
+   Calling external programs or scripts
+
+       If the callout string does not start with a pipe (vertical bar) charac-
+       ter,  it  is parsed into a list of substrings separated by pipe charac-
+       ters. The first substring must be an executable name, with the  follow-
+       ing substrings specifying arguments:
 
          executable_name|arg1|arg2|...
 
-       Any substring  (including  the  executable  name)  may  contain  escape
-       sequences  started  by  a dollar character: $<digits> or ${<digits>} is
-       replaced by the captured substring of the given decimal  number,  which
-       must  be greater than zero. If the number is greater than the number of
-       capturing substrings, or if the capture is unset,  the  replacement  is
+       Any  substring  (including  the  executable  name)  may  contain escape
+       sequences started by a dollar character: $<digits>  or  ${<digits>}  is
+       replaced  by  the captured substring of the given decimal number, which
+       must be greater than zero. If the number is greater than the number  of
+       capturing  substrings,  or  if the capture is unset, the replacement is
        empty.
 
-       Any  other  character  is  substituted  by itself. In particular, $$ is
-       replaced by a single dollar and $| is replaced  by  a  pipe  character.
+       Any other character is substituted by  itself.  In  particular,  $$  is
+       replaced  by  a  single  dollar and $| is replaced by a pipe character.
        Here is an example:
 
          echo -e "abcde\n12345" | pcre2grep \
@@ -808,37 +840,49 @@ CALLING EXTERNAL SCRIPTS
 
        The parameters for the execv() system call that is used to run the pro-
        gram or script are zero-terminated strings. This means that binary zero
-       characters  in the callout argument will cause premature termination of
-       their substrings, and therefore  should  not  be  present.  Any  syntax
-       errors  in  the  string  (for example, a dollar not followed by another
-       character) cause the callout to be  ignored.  If  running  the  program
+       characters in the callout argument will cause premature termination  of
+       their  substrings,  and  therefore  should  not  be present. Any syntax
+       errors in the string (for example, a dollar  not  followed  by  another
+       character)  cause  the  callout  to  be ignored. If running the program
        fails for any reason (including the non-existence of the executable), a
-       local matching failure occurs and the matcher backtracks in the  normal
+       local  matching failure occurs and the matcher backtracks in the normal
        way.
+
+   Echoing a specific string
+
+       If the callout string starts with a pipe (vertical bar) character,  the
+       rest of the string is written to the output, having been passed through
+       the same escape processing as text from the --output option. This  pro-
+       vides a simple echoing facility that avoids calling an external program
+       or script. No terminator is added to the string, so if you want a  new-
+       line,  you  must  include  it  explicitly.  Matching continues normally
+       after the string is output. If you want to see only the callout  output
+       but  not  any  output from an actual match, you should end the relevant
+       pattern with (*FAIL).
 
 
 MATCHING ERRORS
 
-       It  is  possible  to supply a regular expression that takes a very long
-       time to fail to match certain lines.  Such  patterns  normally  involve
-       nested  indefinite repeats, for example: (a+)*\d when matched against a
-       line of a's with no final digit. The  PCRE2  matching  function  has  a
-       resource  limit that causes it to abort in these circumstances. If this
-       happens, pcre2grep outputs an error message and the  line  that  caused
-       the  problem  to  the  standard error stream. If there are more than 20
+       It is possible to supply a regular expression that takes  a  very  long
+       time  to  fail  to  match certain lines. Such patterns normally involve
+       nested indefinite repeats, for example: (a+)*\d when matched against  a
+       line  of  a's  with  no  final digit. The PCRE2 matching function has a
+       resource limit that causes it to abort in these circumstances. If  this
+       happens,  pcre2grep  outputs  an error message and the line that caused
+       the problem to the standard error stream. If there  are  more  than  20
        such errors, pcre2grep gives up.
 
-       The --match-limit option of pcre2grep can be used to  set  the  overall
+       The  --match-limit  option  of pcre2grep can be used to set the overall
        resource limit; there is a second option called --depth-limit that sets
-       a limit on the amount of memory that is used  (see  the  discussion  of
+       a  limit  on  the  amount of memory that is used (see the discussion of
        these options above).
 
 
 DIAGNOSTICS
 
        Exit status is 0 if any matches were found, 1 if no matches were found,
-       and 2 for syntax errors, overlong lines, non-existent  or  inaccessible
-       files  (even if matches were found in other files) or too many matching
+       and  2  for syntax errors, overlong lines, non-existent or inaccessible
+       files (even if matches were found in other files) or too many  matching
        errors. Using the -s option to suppress error messages about inaccessi-
        ble files does not affect the return code.
 
@@ -857,5 +901,5 @@ AUTHOR
 
 REVISION
 
-       Last updated: 31 March 2017
+       Last updated: 06 April 2017
        Copyright (c) 1997-2017 University of Cambridge.

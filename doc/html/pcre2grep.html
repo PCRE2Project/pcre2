@@ -22,7 +22,7 @@ please consult the man page, in case the conversion went wrong.
 <li><a name="TOC7" href="#SEC7">NEWLINES</a>
 <li><a name="TOC8" href="#SEC8">OPTIONS COMPATIBILITY</a>
 <li><a name="TOC9" href="#SEC9">OPTIONS WITH DATA</a>
-<li><a name="TOC10" href="#SEC10">CALLING EXTERNAL SCRIPTS</a>
+<li><a name="TOC10" href="#SEC10">USING PCRE2'S CALLOUT FACILITY</a>
 <li><a name="TOC11" href="#SEC11">MATCHING ERRORS</a>
 <li><a name="TOC12" href="#SEC12">DIAGNOSTICS</a>
 <li><a name="TOC13" href="#SEC13">SEE ALSO</a>
@@ -384,8 +384,8 @@ Instead of showing lines or parts of lines that match, show each match as an
 offset from the start of the file and a length, separated by a comma. In this
 mode, no context is shown. That is, the <b>-A</b>, <b>-B</b>, and <b>-C</b>
 options are ignored. If there is more than one match in a line, each of them is
-shown separately. This option is mutually exclusive with <b>--line-offsets</b>
-and <b>--only-matching</b>.
+shown separately. This option is mutually exclusive with <b>--output</b>,
+<b>--line-offsets</b>, and <b>--only-matching</b>.
 </P>
 <P>
 <b>-H</b>, <b>--with-filename</b>
@@ -491,7 +491,8 @@ number is terminated by a colon (as usual; see the <b>-n</b> option), and the
 offset and length are separated by a comma. In this mode, no context is shown.
 That is, the <b>-A</b>, <b>-B</b>, and <b>-C</b> options are ignored. If there is
 more than one match in a line, each of them is shown separately. This option is
-mutually exclusive with <b>--file-offsets</b> and <b>--only-matching</b>.
+mutually exclusive with <b>--output</b>, <b>--file-offsets</b>, and
+<b>--only-matching</b>.
 </P>
 <P>
 <b>--locale</b>=<i>locale-name</i>
@@ -602,6 +603,36 @@ use of JIT at run time. It is provided for testing and working round problems.
 It should never be needed in normal use.
 </P>
 <P>
+<b>-O</b> <i>text</i>, <b>--output</b>=<i>text</i>
+When there is a match, instead of outputting the whole line that matched,
+output just the given text. This option is mutually exclusive with
+<b>--only-matching</b>, <b>--file-offsets</b>, and <b>--line-offsets</b>. Escape
+sequences starting with a dollar character may be used to insert the contents
+of the matched part of the line and/or captured substrings into the text.
+<br>
+<br>
+$&#60;digits&#62; or ${&#60;digits&#62;} is replaced by the captured
+substring of the given decimal number; zero substitutes the whole match. If
+the number is greater than the number of capturing substrings, or if the
+capture is unset, the replacement is empty.
+<br>
+<br>
+$a is replaced by bell; $b by backspace; $e by escape; $f by form feed; $n by
+newline; $r by carriage return; $t by tab; $v by vertical tab.
+<br>
+<br>
+$o&#60;digits&#62; is replaced by the character represented by the given octal
+number; up to three digits are processed.
+<br>
+<br>
+$x&#60;digits&#62; is replaced by the character represented by the given hexadecimal
+number; up to two digits are processed.
+<br>
+<br>
+Any other character is substituted by itself. In particular, $$ is replaced by
+a single dollar.
+</P>
+<P>
 <b>-o</b>, <b>--only-matching</b>
 Show only the part of the line that matched a pattern instead of the whole
 line. In this mode, no context is shown. That is, the <b>-A</b>, <b>-B</b>, and
@@ -611,7 +642,7 @@ combined with <b>-v</b> (invert the sense of the match to find non-matching
 lines), no output is generated, but the return code is set appropriately. If
 the matched portion of the line is empty, nothing is output unless the file
 name or line number are being printed, in which case they are shown on an
-otherwise empty line. This option is mutually exclusive with
+otherwise empty line. This option is mutually exclusive with <b>--output</b>,
 <b>--file-offsets</b> and <b>--line-offsets</b>.
 </P>
 <P>
@@ -621,7 +652,7 @@ given number. Up to 32 capturing parentheses are supported, and -o0 is
 equivalent to <b>-o</b> without a number. Because these options can be given
 without an argument (see above), if an argument is present, it must be given in
 the same shell item, for example, -o3 or --only-matching=2. The comments given
-for the non-argument case above also apply to this case. If the specified
+for the non-argument case above also apply to this option. If the specified
 capturing parentheses do not exist in the pattern, or were not set in the
 match, nothing is output unless the file name or line number are being output.
 <br>
@@ -735,9 +766,9 @@ as in the GNU <b>grep</b> program. Any long option of the form
 (PCRE2 terminology). However, the <b>--depth-limit</b>, <b>--file-list</b>,
 <b>--file-offsets</b>, <b>--include-dir</b>, <b>--line-offsets</b>,
 <b>--locale</b>, <b>--match-limit</b>, <b>-M</b>, <b>--multiline</b>, <b>-N</b>,
-<b>--newline</b>, <b>--om-separator</b>, <b>-u</b>, and <b>--utf-8</b> options are
-specific to <b>pcre2grep</b>, as is the use of the <b>--only-matching</b> option
-with a capturing parentheses number.
+<b>--newline</b>, <b>--om-separator</b>, <b>--output</b>, <b>-u</b>, and
+<b>--utf-8</b> options are specific to <b>pcre2grep</b>, as is the use of the
+<b>--only-matching</b> option with a capturing parentheses number.
 </P>
 <P>
 Although most of the common options work the same way, a few are different in
@@ -778,23 +809,30 @@ The exceptions to the above are the <b>--colour</b> (or <b>--color</b>) and
 options does have data, it must be given in the first form, using an equals
 character. Otherwise <b>pcre2grep</b> will assume that it has no data.
 </P>
-<br><a name="SEC10" href="#TOC1">CALLING EXTERNAL SCRIPTS</a><br>
+<br><a name="SEC10" href="#TOC1">USING PCRE2'S CALLOUT FACILITY</a><br>
 <P>
 <b>pcre2grep</b> has, by default, support for calling external programs or
-scripts during matching by making use of PCRE2's callout facility. However,
-this support can be disabled when <b>pcre2grep</b> is built. You can find out
-whether your binary has support for callouts by running it with the <b>--help</b>
-option. If the support is not enabled, all callouts in patterns are ignored by
-<b>pcre2grep</b>.
+scripts or echoing specific strings during matching by making use of PCRE2's
+callout facility. However, this support can be disabled when <b>pcre2grep</b> is
+built. You can find out whether your binary has support for callouts by running
+it with the <b>--help</b> option. If the support is not enabled, all callouts in
+patterns are ignored by <b>pcre2grep</b>.
 </P>
 <P>
 A callout in a PCRE2 pattern is of the form (?C&#60;arg&#62;) where the argument is
 either a number or a quoted string (see the
 <a href="pcre2callout.html"><b>pcre2callout</b></a>
-documentation for details). Numbered callouts are ignored by <b>pcre2grep</b>.
-String arguments are parsed as a list of substrings separated by pipe (vertical
-bar) characters. The first substring must be an executable name, with the
-following substrings specifying arguments:
+documentation for details). Numbered callouts are ignored by <b>pcre2grep</b>; 
+only callouts with string arguments are useful.
+</P>
+<br><b>
+Calling external programs or scripts
+</b><br>
+<P>
+If the callout string does not start with a pipe (vertical bar) character, it
+is parsed into a list of substrings separated by pipe characters. The first
+substring must be an executable name, with the following substrings specifying
+arguments:
 <pre>
   executable_name|arg1|arg2|...
 </pre>
@@ -827,6 +865,19 @@ string (for example, a dollar not followed by another character) cause the
 callout to be ignored. If running the program fails for any reason (including
 the non-existence of the executable), a local matching failure occurs and the
 matcher backtracks in the normal way.
+</P>
+<br><b>
+Echoing a specific string
+</b><br>
+<P>
+If the callout string starts with a pipe (vertical bar) character, the rest of
+the string is written to the output, having been passed through the same escape
+processing as text from the --output option. This provides a simple echoing
+facility that avoids calling an external program or script. No terminator is 
+added to the string, so if you want a newline, you must include it explicitly.
+Matching continues normally after the string is output. If you want to see only 
+the callout output but not any output from an actual match, you should end the 
+relevant pattern with (*FAIL).
 </P>
 <br><a name="SEC11" href="#TOC1">MATCHING ERRORS</a><br>
 <P>
@@ -867,7 +918,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC15" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 31 March 2017
+Last updated: 06 April 2017
 <br>
 Copyright &copy; 1997-2017 University of Cambridge.
 <br>

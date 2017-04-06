@@ -175,8 +175,9 @@ static const char *dee_option = NULL;
 static const char *DEE_option = NULL;
 static const char *locale = NULL;
 static const char *newline_arg = NULL;
-static const char *om_separator = "";
+static const char *om_separator = NULL;
 static const char *stdin_name = "(standard input)";
+static const char *output_text = NULL;
 
 static char *main_buffer = NULL;
 
@@ -196,6 +197,7 @@ static int dee_action = dee_SKIP;
 #else
 static int dee_action = dee_READ;
 #endif
+
 static int DEE_action = DEE_READ;
 static int error_count = 0;
 static int filenames = FN_DEFAULT;
@@ -233,7 +235,6 @@ static BOOL number = FALSE;
 static BOOL omit_zero_count = FALSE;
 static BOOL resource_error = FALSE;
 static BOOL quiet = FALSE;
-static BOOL show_only_matching = FALSE;
 static BOOL show_total_count = FALSE;
 static BOOL silent = FALSE;
 static BOOL utf = FALSE;
@@ -247,6 +248,7 @@ typedef struct omstr {
 
 static omstr *only_matching = NULL;
 static omstr *only_matching_last = NULL;
+static int only_matching_count;
 
 /* Structure for holding the two variables that describe a number chain. */
 
@@ -406,6 +408,7 @@ static option_item optionlist[] = {
 #else
   { OP_NODATA,     N_NOJIT,  NULL,              "no-jit",        "ignored: this pcre2grep does not support JIT" },
 #endif
+  { OP_STRING,     'O',      &output_text,       "output=text",   "show only this text (possibly expanded)" },
   { OP_OP_NUMBERS, 'o',      &only_matching_data, "only-matching=n", "show only the part of the line that matched" },
   { OP_STRING,     N_OM_SEPARATOR, &om_separator, "om-separator=text", "set separator for multiple -o output" },
   { OP_NODATA,     'q',      NULL,              "quiet",         "suppress output, just set return code" },
@@ -793,7 +796,7 @@ return isatty(fileno(f));
 /************* Print optionally coloured match Unix-style and z/OS **********/
 
 static void
-print_match(const char* buf, int length)
+print_match(const void *buf, int length)
 {
 if (length == 0) return;
 if (do_colour) fprintf(stdout, "%c[%sm", 0x1b, colour_string);
@@ -942,7 +945,7 @@ static CONSOLE_SCREEN_BUFFER_INFO csbi;
 static WORD match_colour;
 
 static void
-print_match(const char* buf, int length)
+print_match(const void *buf, int length)
 {
 if (length == 0) return;
 if (do_colour)
@@ -1001,7 +1004,7 @@ return FALSE;
 /************* Print optionally coloured match when we can't do it **********/
 
 static void
-print_match(const char* buf, int length)
+print_match(const void *buf, int length)
 {
 if (length == 0) return;
 FWRITE(buf, 1, length, stdout);
@@ -1658,6 +1661,277 @@ return FALSE;  /* No match, no errors */
 }
 
 
+/*************************************************
+*          Check output text for errors          *
+*************************************************/
+
+static BOOL
+syntax_check_output_text(PCRE2_SPTR string, BOOL callout)
+{
+PCRE2_SPTR begin = string;
+for (; *string != 0; string++)
+  {
+  if (*string == '$')
+    {
+    PCRE2_SIZE capture_id = 0;
+    BOOL brace = FALSE;
+
+    string++;
+
+    /* Syntax error: a character must be present after $. */
+    if (*string == 0)
+      {
+      if (!callout)
+        fprintf(stderr, "pcre2grep: Error in output text at offset %d: %s\n",
+          (int)(string - begin), "no character after $");
+      return FALSE;
+      }
+
+    if (*string == '{')
+      {
+      /* Must be a decimal number in braces, e.g: {5} or {38} */
+      string++;
+
+      brace = TRUE;
+      }
+
+    if ((*string >= '1' && *string <= '9') || (!callout && *string == '0'))
+      {
+      do
+        {
+        /* Maximum capture id is 65535. */
+        if (capture_id <= 65535)
+          capture_id = capture_id * 10 + (*string - '0');
+
+        string++;
+        }
+      while (*string >= '0' && *string <= '9');
+
+      if (brace)
+        {
+        /* Syntax error: closing brace is missing. */
+        if (*string != '}')
+          {
+          if (!callout)
+            fprintf(stderr, "pcre2grep: Error in output text at offset %d: %s\n",
+              (int)(string - begin), "missing closing brace");
+          return FALSE;
+          }
+        }
+      else
+        {
+        /* To negate the effect of the for. */
+        string--;
+        }
+      }
+    else if (brace)
+      {
+      /* Syntax error: a decimal number required. */
+      if (!callout)
+        fprintf(stderr, "pcre2grep: Error in output text at offset %d: %s\n",
+          (int)(string - begin), "decimal number expected");
+      return FALSE;
+      }
+    else if (*string == 'o')
+      {
+      string++;
+
+      if (*string < '0' || *string > '7')
+        {
+        /* Syntax error: an octal number required. */
+        if (!callout)
+          fprintf(stderr, "pcre2grep: Error in output text at offset %d: %s\n",
+            (int)(string - begin), "octal number expected");
+        return FALSE;
+        }
+      }
+    else if (*string == 'x')
+      {
+      string++;
+
+      if (!isxdigit((unsigned char)*string))
+        {
+        /* Syntax error: a hexdecimal number required. */
+        if (!callout)
+          fprintf(stderr, "pcre2grep: Error in output text at offset %d: %s\n",
+            (int)(string - begin), "hexadecimal number expected");
+        return FALSE;
+        }
+      }
+    }
+  }
+
+  return TRUE;
+}
+
+
+/*************************************************
+*              Display output text               *
+*************************************************/
+
+/* Display the output text, which is assumed to have already been syntax
+checked. Output may contain escape sequences started by the dollar sign. The
+escape sequences are substituted as follows:
+
+  $<digits> or ${<digits>} is replaced by the captured substring of the given
+  decimal number; zero will substitute the whole match. If the number is
+  greater than the number of capturing substrings, or if the capture is unset,
+  the replacement is empty.
+
+  $a is replaced by bell.
+  $b is replaced by backspace.
+  $e is replaced by escape.
+  $f is replaced by form feed.
+  $n is replaced by newline.
+  $r is replaced by carriage return.
+  $t is replaced by tab.
+  $v is replaced by vertical tab.
+
+  $o<digits> is replaced by the character represented by the given octal
+  number; up to three digits are processed.
+
+  $x<digits> is replaced by the character represented by the given hexadecimal
+  number; up to two digits are processed.
+
+  Any other character is substituted by itself. E.g: $$ is replaced by a single
+  dollar.
+
+Arguments:
+  string:       the output text
+  callout:      TRUE for the builtin callout, FALSE for --output
+  subject       the start of the subject
+  ovector:      capture offsets
+  capture_top:  number of captures
+
+Returns:        TRUE if something was output, other than newline
+                FALSE if nothing was output, or newline was last output
+*/
+
+static BOOL
+display_output_text(PCRE2_SPTR string, BOOL callout, PCRE2_SPTR subject,
+  PCRE2_SIZE *ovector, PCRE2_SIZE capture_top)
+{
+BOOL printed = FALSE;
+
+for (; *string != 0; string++)
+  {
+  int ch = EOF;
+  if (*string == '$')
+    {
+    PCRE2_SIZE capture_id = 0;
+    BOOL brace = FALSE;
+
+    string++;
+
+    if (*string == '{')
+      {
+      /* Must be a decimal number in braces, e.g: {5} or {38} */
+      string++;
+
+      brace = TRUE;
+      }
+
+    if ((*string >= '1' && *string <= '9') || (!callout && *string == '0'))
+      {
+      do
+        {
+        /* Maximum capture id is 65535. */
+        if (capture_id <= 65535)
+          capture_id = capture_id * 10 + (*string - '0');
+
+        string++;
+        }
+      while (*string >= '0' && *string <= '9');
+
+      if (!brace)
+        {
+        /* To negate the effect of the for. */
+        string--;
+        }
+
+      if (capture_id < capture_top)
+        {
+        PCRE2_SIZE capturesize;
+        capture_id *= 2;
+
+        capturesize = ovector[capture_id + 1] - ovector[capture_id];
+        if (capturesize > 0)
+          {
+          print_match(subject + ovector[capture_id], capturesize);
+          printed = TRUE;
+          }
+        }
+      }
+    else if (*string == 'a') ch = '\a';
+    else if (*string == 'b') ch = '\b';
+#ifndef EBCDIC
+    else if (*string == 'e') ch = '\033';
+#else
+    else if (*string == 'e') ch = '\047';
+#endif
+    else if (*string == 'f') ch = '\f';
+    else if (*string == 'r') ch = '\r';
+    else if (*string == 't') ch = '\t';
+    else if (*string == 'v') ch = '\v';
+    else if (*string == 'n')
+      {
+      fprintf(stdout, STDOUT_NL);
+      printed = FALSE;
+      }
+    else if (*string == 'o')
+      {
+      string++;
+
+      ch = *string - '0';
+      if (string[1] >= '0' && string[1] <= '7')
+        {
+        string++;
+        ch = ch * 8 + (*string - '0');
+        }
+      if (string[1] >= '0' && string[1] <= '7')
+        {
+        string++;
+        ch = ch * 8 + (*string - '0');
+        }
+      }
+    else if (*string == 'x')
+      {
+      string++;
+
+      if (*string >= '0' && *string <= '9')
+        ch = *string - '0';
+      else
+        ch = (*string | 0x20) - 'a' + 10;
+      if (isxdigit((unsigned char)string[1]))
+        {
+        string++;
+        ch *= 16;
+        if (*string >= '0' && *string <= '9')
+          ch += *string - '0';
+        else
+          ch += (*string | 0x20) - 'a' + 10;
+        }
+      }
+    else
+      {
+      ch = *string;
+      }
+    }
+  else
+    {
+    ch = *string;
+    }
+  if (ch != EOF)
+    {
+    fprintf(stdout, "%c", ch);
+    printed = TRUE;
+    }
+  }
+
+return printed;
+}
+
+
 #ifdef SUPPORT_PCRE2GREP_CALLOUT
 
 /*************************************************
@@ -1682,6 +1956,10 @@ follows:
 
   Any other character is substituted by itself. E.g: $$ is replaced by a single
   dollar or $| replaced by a pipe character.
+
+Alternatively, if string starts with pipe, the remainder is taken as an output
+string, same as --output. In this case, --om-separator is used to separate each
+callout, defaulting to newline.
 
 Example:
 
@@ -1724,6 +2002,16 @@ int result = 0;
 
 /* Only callout with strings are supported. */
 if (string == NULL || length == 0) return 0;
+
+/* If there's no command, output the remainder directly. */
+
+if (*string == '|')
+  {
+  string++;
+  if (!syntax_check_output_text(string, TRUE)) return 0;
+  (void)display_output_text(string, TRUE, subject, ovector, capture_top);
+  return 0;
+  }
 
 /* Checking syntax and compute the number of string fragments. Callout strings
 are ignored in case of a syntax error. */
@@ -2174,8 +2462,8 @@ while (ptr < endptr)
   }
 #endif
 
-  /* We come back here after a match when show_only_matching is set, in order
-  to find any further matches in the same line. This applies to
+  /* We come back here after a match when only_matching_count is non-zero, in
+  order to find any further matches in the same line. This applies to
   --only-matching, --file-offsets, and --line-offsets. */
 
   ONLY_MATCHING_RESTART:
@@ -2229,13 +2517,13 @@ while (ptr < endptr)
     /* The --only-matching option prints just the substring that matched,
     and/or one or more captured portions of it, as long as these strings are
     not empty. The --file-offsets and --line-offsets options output offsets for
-    the matching substring (all three set show_only_matching). None of these
-    mutually exclusive options prints any context. Afterwards, adjust the start
-    and then jump back to look for further matches in the same line. If we are
-    in invert mode, however, nothing is printed and we do not restart - this
-    could still be useful because the return code is set. */
+    the matching substring (all three set only_matching_count non-zero). None
+    of these mutually exclusive options prints any context. Afterwards, adjust
+    the start and then jump back to look for further matches in the same line.
+    If we are in invert mode, however, nothing is printed and we do not restart
+    - this could still be useful because the return code is set. */
 
-    else if (show_only_matching)
+    else if (only_matching_count != 0)
       {
       if (!invert)
         {
@@ -2257,6 +2545,16 @@ while (ptr < endptr)
             (int)(filepos + matchptr + offsets[0] - ptr),
             (int)(offsets[1] - offsets[0]));
 
+        /* Handle --output (which has already been syntax checked) */
+
+        else if (output_text != NULL)
+          {
+          if (display_output_text((PCRE2_SPTR)output_text, FALSE,
+              (PCRE2_SPTR)matchptr, offsets, mrc) || printname != NULL ||
+              number)
+            fprintf(stdout, STDOUT_NL);
+          }
+
         /* Handle --only-matching, which may occur many times */
 
         else
@@ -2272,7 +2570,8 @@ while (ptr < endptr)
               int plen = offsets[2*n + 1] - offsets[2*n];
               if (plen > 0)
                 {
-                if (printed) fprintf(stdout, "%s", om_separator);
+                if (printed && om_separator != NULL)
+                  fprintf(stdout, "%s", om_separator);
                 print_match(matchptr + offsets[n*2], plen);
                 printed = TRUE;
                 }
@@ -2557,7 +2856,7 @@ while (ptr < endptr)
 /* End of file; print final "after" lines if wanted; do_after_lines sets
 hyphenpending if it prints something. */
 
-if (!show_only_matching && !(count_only|show_total_count))
+if (only_matching_count == 0 && !(count_only|show_total_count))
   {
   do_after_lines(lastmatchnumber, lastmatchrestart, endptr, printname);
   hyphenpending |= endhyphenpending;
@@ -3518,25 +3817,30 @@ if (both_context > 0)
   if (before_context == 0) before_context = both_context;
   }
 
-/* Only one of --only-matching, --file-offsets, or --line-offsets is permitted.
-However, all three set show_only_matching because they display, each in their
-own way, only the data that has matched. */
+/* Only one of --only-matching, --output, --file-offsets, or --line-offsets is
+permitted. They display, each in their own way, only the data that has matched.
+*/
 
-if ((only_matching != NULL && (file_offsets || line_offsets)) ||
-    (file_offsets && line_offsets))
+only_matching_count = (only_matching != NULL) + (output_text != NULL) +
+  file_offsets + line_offsets;
+
+if (only_matching_count > 1)
   {
-  fprintf(stderr, "pcre2grep: Cannot mix --only-matching, --file-offsets "
-    "and/or --line-offsets\n");
+  fprintf(stderr, "pcre2grep: Cannot mix --only-matching, --output, "
+    "--file-offsets and/or --line-offsets\n");
   pcre2grep_exit(usage(2));
   }
+
+/* Check the text supplied to --output for errors. */
+
+if (output_text != NULL &&
+    !syntax_check_output_text((PCRE2_SPTR)output_text, FALSE))
+  goto EXIT2;
 
 /* Put limits into the match data block. */
 
 if (match_limit > 0) pcre2_set_match_limit(match_context, match_limit);
 if (depth_limit > 0) pcre2_set_depth_limit(match_context, depth_limit);
-
-if (only_matching != NULL || file_offsets || line_offsets)
-  show_only_matching = TRUE;
 
 /* If a locale has not been provided as an option, see if the LC_CTYPE or
 LC_ALL environment variable is set, and if so, use it. */
@@ -3826,6 +4130,14 @@ for (; i < argc; i++)
   if (frc > 1) rc = frc;
     else if (frc == 0 && rc == 1) rc = 0;
   }
+
+#ifdef SUPPORT_PCRE2GREP_CALLOUT
+/* If separating builtin echo callouts by implicit newline, add one more for
+the final item. */
+
+if (om_separator != NULL && strcmp(om_separator, STDOUT_NL) == 0)
+  fprintf(stdout, STDOUT_NL);
+#endif
 
 /* Show the total number of matches if requested, but not if only one file's
 count was printed. */

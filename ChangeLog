@@ -113,6 +113,9 @@ a message, and abandon the run (this would have detected #13 above).
 
 19. Implemented PCRE2_ENDANCHORED.
 
+20. Applied Jason Hood's patches (slightly modified) to pcre2grep, to implement 
+the --output=text (-O) option and the inbuilt callout echo.
+
 
 Version 10.23 14-February-2017
 ------------------------------

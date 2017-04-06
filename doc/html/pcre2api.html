@@ -1123,8 +1123,8 @@ documentation).
 <P>
 For those options that can be different in different parts of the pattern, the
 contents of the <i>options</i> argument specifies their settings at the start of
-compilation. The PCRE2_ANCHORED and PCRE2_NO_UTF_CHECK options can be set at
-the time of matching as well as at compile time.
+compilation. The PCRE2_ANCHORED, PCRE2_ENDANCHORED, and PCRE2_NO_UTF_CHECK
+options can be set at the time of matching as well as at compile time.
 </P>
 <P>
 Other, less frequently required compile-time parameters (for example, the
@@ -1279,6 +1279,13 @@ only one instance of the named subpattern can ever be matched. There are more
 details of named subpatterns below; see also the
 <a href="pcre2pattern.html"><b>pcre2pattern</b></a>
 documentation.
+<pre>
+  PCRE2_ENDANCHORED
+</pre>
+If this bit is set, the end of any pattern match must be right at the end of
+the string being searched (the "subject string"). This effect can also be
+achieved by appropriate constructs in the pattern itself, which is the only way
+to do it in Perl.
 <pre>
   PCRE2_EXTENDED
 </pre>
@@ -2141,16 +2148,16 @@ Option bits for <b>pcre2_match()</b>
 </b><br>
 <P>
 The unused bits of the <i>options</i> argument for <b>pcre2_match()</b> must be
-zero. The only bits that may be set are PCRE2_ANCHORED, PCRE2_NOTBOL,
-PCRE2_NOTEOL, PCRE2_NOTEMPTY, PCRE2_NOTEMPTY_ATSTART, PCRE2_NO_JIT,
-PCRE2_NO_UTF_CHECK, PCRE2_PARTIAL_HARD, and PCRE2_PARTIAL_SOFT. Their action is
-described below.
+zero. The only bits that may be set are PCRE2_ANCHORED, PCRE2_ENDANCHORED,
+PCRE2_NOTBOL, PCRE2_NOTEOL, PCRE2_NOTEMPTY, PCRE2_NOTEMPTY_ATSTART,
+PCRE2_NO_JIT, PCRE2_NO_UTF_CHECK, PCRE2_PARTIAL_HARD, and PCRE2_PARTIAL_SOFT.
+Their action is described below.
 </P>
 <P>
-Setting PCRE2_ANCHORED at match time is not supported by the just-in-time (JIT)
-compiler. If it is set, JIT matching is disabled and the interpretive code in
-<b>pcre2_match()</b> is run. Apart from PCRE2_NO_JIT (obviously), the remaining
-options are supported for JIT matching.
+Setting PCRE2_ANCHORED or PCRE2_ENDANCHORED at match time is not supported by
+the just-in-time (JIT) compiler. If it is set, JIT matching is disabled and the
+interpretive code in <b>pcre2_match()</b> is run. Apart from PCRE2_NO_JIT
+(obviously), the remaining options are supported for JIT matching.
 <pre>
   PCRE2_ANCHORED
 </pre>
@@ -2159,6 +2166,12 @@ matching position. If a pattern was compiled with PCRE2_ANCHORED, or turned out
 to be anchored by virtue of its contents, it cannot be made unachored at
 matching time. Note that setting the option at match time disables JIT
 matching.
+<pre>
+  PCRE2_ENDANCHORED
+</pre>
+If the PCRE2_ENDANCHORED option is set, any string that <b>pcre2_match()</b>
+matches must be right at the end of the subject string. Note that setting the
+option at match time disables JIT matching.
 <pre>
   PCRE2_NOTBOL
 </pre>
@@ -3100,11 +3113,11 @@ Option bits for <b>pcre_dfa_match()</b>
 </b><br>
 <P>
 The unused bits of the <i>options</i> argument for <b>pcre2_dfa_match()</b> must
-be zero. The only bits that may be set are PCRE2_ANCHORED, PCRE2_NOTBOL,
-PCRE2_NOTEOL, PCRE2_NOTEMPTY, PCRE2_NOTEMPTY_ATSTART, PCRE2_NO_UTF_CHECK,
-PCRE2_PARTIAL_HARD, PCRE2_PARTIAL_SOFT, PCRE2_DFA_SHORTEST, and
-PCRE2_DFA_RESTART. All but the last four of these are exactly the same as for
-<b>pcre2_match()</b>, so their description is not repeated here.
+be zero. The only bits that may be set are PCRE2_ANCHORED, PCRE2_ENDANCHORED,
+PCRE2_NOTBOL, PCRE2_NOTEOL, PCRE2_NOTEMPTY, PCRE2_NOTEMPTY_ATSTART,
+PCRE2_NO_UTF_CHECK, PCRE2_PARTIAL_HARD, PCRE2_PARTIAL_SOFT, PCRE2_DFA_SHORTEST,
+and PCRE2_DFA_RESTART. All but the last four of these are exactly the same as
+for <b>pcre2_match()</b>, so their description is not repeated here.
 <pre>
   PCRE2_PARTIAL_HARD
   PCRE2_PARTIAL_SOFT
@@ -3258,7 +3271,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC42" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 01 April 2017
+Last updated: 04 April 2017
 <br>
 Copyright &copy; 1997-2017 University of Cambridge.
 <br>

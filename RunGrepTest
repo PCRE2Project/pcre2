@@ -598,6 +598,10 @@ printf "123\n456\n789\n---abc\ndef\nxyz\n---\n" >testNinputgrep
 $valgrind $vjs $pcre2grep -Mo '(\n|[^-])*---' testNinputgrep >>testtrygrep
 echo "RC=$?" >>testtrygrep
 
+echo "---------------------------- Test 120 ------------------------------" >>testtrygrep
+(cd $srcdir; $valgrind $vjs $pcre2grep -HO '$0:$2$1$3' '(\w+) binary (\w+)(\.)?' ./testdata/grepinput) >>testtrygrep
+echo "RC=$?" >>testtrygrep
+
 # Now compare the results.
 
 $cf $srcdir/testdata/grepoutput testtrygrep
@@ -667,6 +671,9 @@ if $valgrind $vjs $pcre2grep --help | $valgrind $vjs $pcre2grep -q 'Callout scri
   echo "Testing pcre2grep script callouts"
   $valgrind $vjs $pcre2grep '(T)(..(.))(?C"/bin/echo|Arg1: [$1] [$2] [$3]|Arg2: $|${1}$| ($4) ($14) ($0)")()' $srcdir/testdata/grepinputv >testtrygrep
   $valgrind $vjs $pcre2grep '(T)(..(.))()()()()()()()(..)(?C"/bin/echo|Arg1: [$11] [${11}]")' $srcdir/testdata/grepinputv >>testtrygrep
+  $valgrind $vjs $pcre2grep '(T)(?C"|$0:$1$n")' $srcdir/testdata/grepinputv >>testtrygrep
+  $valgrind $vjs $pcre2grep '(T)(?C"|$1$n")(*F)' $srcdir/testdata/grepinputv >>testtrygrep
+  # The above has no newline, which 'diff -ub' ignores, so add one.
   $cf $srcdir/testdata/grepoutputC testtrygrep
   if [ $? != 0 ] ; then exit 1; fi
 else
