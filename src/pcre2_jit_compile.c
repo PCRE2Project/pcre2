@@ -4176,7 +4176,7 @@ while (TRUE)
   }
 }
 
-#if (defined SLJIT_CONFIG_X86 && SLJIT_CONFIG_X86)
+#if (defined SLJIT_CONFIG_X86 && SLJIT_CONFIG_X86) && !(defined SUPPORT_VALGRIND)
 
 static sljit_s32 character_to_int32(PCRE2_UCHAR chr)
 {
@@ -4486,6 +4486,7 @@ if (has_match_end)
     OP2(SLJIT_SUB | SLJIT_SET_GREATER, SLJIT_UNUSED, 0, STR_END, 0, TMP3, 0);
     sljit_x86_emit_cmov(compiler, SLJIT_GREATER, STR_END, TMP3, 0);
     }
+  else
 #endif
     {
     quit = CMP(SLJIT_LESS_EQUAL, STR_END, 0, TMP3, 0);
@@ -4499,7 +4500,7 @@ if (common->utf && offset > 0)
   utf_start = LABEL();
 #endif
 
-#if (defined SLJIT_CONFIG_X86 && SLJIT_CONFIG_X86)
+#if (defined SLJIT_CONFIG_X86 && SLJIT_CONFIG_X86) && !(defined SUPPORT_VALGRIND)
 
 /* SSE2 accelerated first character search. */
 
