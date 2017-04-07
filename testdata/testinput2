@@ -5040,4 +5040,20 @@ a)"xI
 
 #subject -no_jit
 
+# Check auto-anchoring when there is a group that is never obeyed at
+# the start of a branch.
+
+/(?(DEFINE)(a))^bc/I
+
+/(a){0}.*bc/sI
+
+# This should be anchored, as the condition is always false and there is
+# no alternative branch.
+
+/(?(VERSION>=999)yes)^bc/I
+
+# This should not be anchored.
+
+/(?(VERSION>=999)yes|no)^bc/I
+
 # End of testinput2 

@@ -15576,6 +15576,38 @@ No match
 
 #subject -no_jit
 
+# Check auto-anchoring when there is a group that is never obeyed at
+# the start of a branch.
+
+/(?(DEFINE)(a))^bc/I
+Capturing subpattern count = 1
+Compile options: <none>
+Overall options: anchored
+Subject length lower bound = 2
+
+/(a){0}.*bc/sI
+Capturing subpattern count = 1
+Compile options: dotall
+Overall options: anchored dotall
+Last code unit = 'c'
+Subject length lower bound = 2
+
+# This should be anchored, as the condition is always false and there is
+# no alternative branch.
+
+/(?(VERSION>=999)yes)^bc/I
+Capturing subpattern count = 0
+Compile options: <none>
+Overall options: anchored
+Subject length lower bound = 2
+
+# This should not be anchored.
+
+/(?(VERSION>=999)yes|no)^bc/I
+Capturing subpattern count = 0
+Last code unit = 'c'
+Subject length lower bound = 4
+
 # End of testinput2 
 Error -63: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

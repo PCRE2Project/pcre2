@@ -116,6 +116,11 @@ a message, and abandon the run (this would have detected #13 above).
 20. Applied Jason Hood's patches (slightly modified) to pcre2grep, to implement 
 the --output=text (-O) option and the inbuilt callout echo.
 
+21. Extend auto-anchoring etc. to ignore groups with a zero qualifier and 
+single-branch conditions with a false condition (e.g. DEFINE) at the start of a 
+branch. For example, /(?(DEFINE)...)^A/ and /(...){0}^B/ are now flagged as
+anchored.
+
 
 Version 10.23 14-February-2017
 ------------------------------

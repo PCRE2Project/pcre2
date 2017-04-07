@@ -4164,6 +4164,18 @@ for (;;)
     case OP_CALLOUT_STR:
     code += GET(code, 1 + 2*LINK_SIZE);
     break;
+    
+    case OP_SKIPZERO:
+    code += 2 + GET(code, 2) + LINK_SIZE;
+    break;   
+    
+    case OP_COND:
+    case OP_SCOND:
+    if (code[1+LINK_SIZE] != OP_FALSE ||   /* Not DEFINE */
+        code[GET(code, 1)] != OP_KET)      /* More than one branch */
+      return code;
+    code += GET(code, 1) + 1 + LINK_SIZE;
+    break;    
 
     default:
     return code;
