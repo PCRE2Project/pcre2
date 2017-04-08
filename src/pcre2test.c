@@ -7253,6 +7253,7 @@ printf("  -error <n,m,..>  show messages for error numbers, then exit\n");
 printf("  -help         show usage information\n");
 printf("  -i            set default pattern modifier 'info'\n");
 printf("  -jit          set default pattern modifier 'jit'\n");
+printf("  -jitverify    set default pattern modifier 'jitverify'\n");
 printf("  -q            quiet: do not output PCRE2 version number at start\n");
 printf("  -pattern <s>  set default pattern modifier fields\n");
 printf("  -subject <s>  set default subject modifier fields\n");
@@ -7588,12 +7589,13 @@ while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
   else if (strcmp(arg, "-d") == 0)   def_patctl.control |= CTL_DEBUG;
   else if (strcmp(arg, "-dfa") == 0) def_datctl.control |= CTL_DFA;
   else if (strcmp(arg, "-i") == 0)   def_patctl.control |= CTL_INFO;
-  else if (strcmp(arg, "-jit") == 0)
+  else if (strcmp(arg, "-jit") == 0 || strcmp(arg, "-jitverify") == 0)
     {
+    if (arg[4] != 0) def_patctl.control |= CTL_JITVERIFY; 
     def_patctl.jit = 7;  /* full & partial */
 #ifndef SUPPORT_JIT
     fprintf(stderr, "** Warning: JIT support is not available: "
-                    "-jit calls functions that do nothing.\n");
+                    "-jit[verify] calls functions that do nothing.\n");
 #endif
     }
 
