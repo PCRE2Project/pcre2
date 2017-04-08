@@ -630,10 +630,23 @@ Unix-style directory scanning can be used (see below). */
 
 #ifdef WIN32
 
+#ifndef STRICT
+# define STRICT
+#endif
+#ifndef WIN32_LEAN_AND_MEAN
+# define WIN32_LEAN_AND_MEAN
+#endif
+
+#include <windows.h>
+
 #define iswild(name) (strpbrk(name, "*?") != NULL)
 
 /* Convert ANSI BGR format to RGB used by Windows */
 #define BGR_RGB(x) ((x & 1 ? 4 : 0) | (x & 2) | (x & 4 ? 1 : 0))
+
+static HANDLE hstdout;
+static CONSOLE_SCREEN_BUFFER_INFO csbi;
+static WORD match_colour;
 
 static WORD
 decode_ANSI_colour(const char *cs)
@@ -817,15 +830,6 @@ when it did not exist. David Byron added a patch that moved the #include of
 
 #elif defined WIN32
 
-#ifndef STRICT
-# define STRICT
-#endif
-#ifndef WIN32_LEAN_AND_MEAN
-# define WIN32_LEAN_AND_MEAN
-#endif
-
-#include <windows.h>
-
 #ifndef INVALID_FILE_ATTRIBUTES
 #define INVALID_FILE_ATTRIBUTES 0xFFFFFFFF
 #endif
@@ -939,10 +943,6 @@ return _isatty(_fileno(f));
 
 
 /************* Print optionally coloured match in Windows **********/
-
-static HANDLE hstdout;
-static CONSOLE_SCREEN_BUFFER_INFO csbi;
-static WORD match_colour;
 
 static void
 print_match(const void *buf, int length)

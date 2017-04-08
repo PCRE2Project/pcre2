@@ -658,10 +658,8 @@ if %ERRORLEVEL% equ 0 (
   echo Testing pcre2grep script callouts
   %pcre2grep% "(T)(..(.))(?C'cmd|/c echo|Arg1: [$1] [$2] [$3]|Arg2: ^$|${1}^$| ($4) ($14) ($0)')()" %srcdir%/testdata/grepinputv >testtrygrep
   %pcre2grep% "(T)(..(.))()()()()()()()(..)(?C'cmd|/c echo|Arg1: [$11] [${11}]')" %srcdir%/testdata/grepinputv >>testtrygrep
-  %pcre2grep% "(T)(?C'|$0:$1')" %srcdir%/testdata/grepinputv >>testtrygrep
-  %pcre2grep% --om-separator / "(T)(?C'|$1')" %srcdir%/testdata/grepinputv >>testtrygrep
-  :: The above has no newline, which 'diff -ub' ignores, so add one.
-  echo />>testtrygrep
+  %pcre2grep% "(T)(?C'|$0:$1$n')" %srcdir%/testdata/grepinputv >>testtrygrep
+  %pcre2grep% "(T)(?C'|$1$n')(*F)" %srcdir%/testdata/grepinputv >>testtrygrep
   %cf% %srcdir%\testdata\grepoutputC testtrygrep %cfout%
   if ERRORLEVEL 1 exit /b 1
 ) else (

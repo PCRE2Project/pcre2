@@ -459,7 +459,7 @@ PCRE2 8-BIT, 16-BIT, AND 32-BIT LIBRARIES
        when processing any particular pattern to use  only  functions  from  a
        single  library.   For example, if you want to run a match using a pat-
        tern that was compiled with pcre2_compile_16(), you  must  do  so  with
-       pcre2_match_16(), not pcre2_match_8() or pcre2_match_32.
+       pcre2_match_16(), not pcre2_match_8() or pcre2_match_32().
 
        In  the  function summaries above, and in the rest of this document and
        other PCRE2 documents, functions and data  types  are  described  using
@@ -3683,7 +3683,7 @@ OBSOLETE OPTION
          --disable-stack-for-recursion
 
        was set, memory on the heap was used. From release 10.30  onwards  this
-       has  changed  (the  stack  is  no lonter used) and this option now does
+       has  changed  (the  stack  is  no longer used) and this option now does
        nothing except give a warning.
 
 
