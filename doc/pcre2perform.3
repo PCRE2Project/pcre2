@@ -1,4 +1,4 @@
-.TH PCRE2PERFORM 3 "31 March 2017" "PCRE2 10.30"
+.TH PCRE2PERFORM 3 "08 April 2017" "PCRE2 10.30"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 PERFORMANCE"
@@ -69,11 +69,12 @@ From release 10.30, the interpretive (non-JIT) version of \fBpcre2_match()\fP
 uses very little system stack at run time. In earlier releases recursive
 function calls could use a great deal of stack, and this could cause problems,
 but this usage has been eliminated. Backtracking positions are now explicitly
-remembered in memory frames controlled by the code. An initial 10K vector of
-frames is allocated on the system stack (enough for about 50 frames for small
-patterns), but if this is insufficient, heap memory is used. Rewriting patterns 
-to be time-efficient, as described below, may also reduce the memory 
-requirements.
+remembered in memory frames controlled by the code. An initial 20K vector of
+frames is allocated on the system stack (enough for about 100 frames for small
+patterns), but if this is insufficient, heap memory is used. The amount of heap
+memory can be limited; if the limit is set to zero, only the initial stack
+vector is used. Rewriting patterns to be time-efficient, as described below,
+may also reduce the memory requirements.
 .P
 In contrast to \fBpcre2_match()\fP, \fBpcre2_dfa_match()\fP does use recursive 
 function calls, but only for processing atomic groups, lookaround assertions,
@@ -231,6 +232,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 31 March 2017
+Last updated: 08 April 2017
 Copyright (c) 1997-2017 University of Cambridge.
 .fi

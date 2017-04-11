@@ -268,6 +268,7 @@ numbers must not be changed. */
 #define PCRE2_ERROR_BADSUBSPATTERN    (-60)
 #define PCRE2_ERROR_TOOMANYREPLACE    (-61)
 #define PCRE2_ERROR_BADSERIALIZEDDATA (-62)
+#define PCRE2_ERROR_HEAPLIMIT         (-63)
 
 /* Request types for pcre2_pattern_info() */
 
@@ -297,6 +298,7 @@ numbers must not be changed. */
 #define PCRE2_INFO_SIZE                 22
 #define PCRE2_INFO_HASBACKSLASHC        23
 #define PCRE2_INFO_FRAMESIZE            24
+#define PCRE2_INFO_HEAPLIMIT            25
 
 /* Request types for pcre2_config(). */
 
@@ -313,6 +315,7 @@ numbers must not be changed. */
 #define PCRE2_CONFIG_UNICODE                 9
 #define PCRE2_CONFIG_UNICODE_VERSION        10
 #define PCRE2_CONFIG_VERSION                11
+#define PCRE2_CONFIG_HEAPLIMIT              12
 
 /* Types for code units in patterns and subject strings. */
 
@@ -452,6 +455,8 @@ PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION \
     int (*)(pcre2_callout_block *, void *), void *); \
 PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION \
   pcre2_set_depth_limit(pcre2_match_context *, uint32_t); \
+PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION \
+  pcre2_set_heap_limit(pcre2_match_context *, uint32_t); \
 PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION \
   pcre2_set_match_limit(pcre2_match_context *, uint32_t); \
 PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION \
@@ -676,6 +681,7 @@ pcre2_compile are called by application code. */
 #define pcre2_set_character_tables            PCRE2_SUFFIX(pcre2_set_character_tables_)
 #define pcre2_set_compile_recursion_guard     PCRE2_SUFFIX(pcre2_set_compile_recursion_guard_)
 #define pcre2_set_depth_limit                 PCRE2_SUFFIX(pcre2_set_depth_limit_)
+#define pcre2_set_heap_limit                  PCRE2_SUFFIX(pcre2_set_heap_limit_)
 #define pcre2_set_match_limit                 PCRE2_SUFFIX(pcre2_set_match_limit_)
 #define pcre2_set_max_pattern_length          PCRE2_SUFFIX(pcre2_set_max_pattern_length_)
 #define pcre2_set_newline                     PCRE2_SUFFIX(pcre2_set_newline_)

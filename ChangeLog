@@ -121,6 +121,11 @@ single-branch conditions with a false condition (e.g. DEFINE) at the start of a
 branch. For example, /(?(DEFINE)...)^A/ and /(...){0}^B/ are now flagged as
 anchored.
 
+22. Added an explicit limit on the amount of heap used by pcre2_match(), set by 
+pcre2_set_heap_limit() or (*LIMIT_HEAP=xxx). Upgraded pcre2test to show the 
+heap limit along with other pattern information, and to find the minimum when 
+the find_limits modifier is set.
+
 
 Version 10.23 14-February-2017
 ------------------------------

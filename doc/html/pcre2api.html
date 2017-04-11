@@ -182,6 +182,10 @@ document for an overview of all the PCRE2 documentation.
 <b>  PCRE2_SIZE <i>value</i>);</b>
 <br>
 <br>
+<b>int pcre2_set_heap_limit(pcre2_match_context *<i>mcontext</i>,</b>
+<b>  uint32_t <i>value</i>);</b>
+<br>
+<br>
 <b>int pcre2_set_match_limit(pcre2_match_context *<i>mcontext</i>,</b>
 <b>  uint32_t <i>value</i>);</b>
 <br>
@@ -793,6 +797,7 @@ A match context is required if you want to:
 <pre>
   Set up a callout function
   Set an offset limit for matching an unanchored pattern
+  Change the limit on the amount of heap used when matching 
   Change the backtracking match limit
   Change the backtracking depth limit
   Set custom memory management specifically for the match
@@ -851,14 +856,47 @@ subject strings. See also the PCRE2_FIRSTLINE option, which requires a match to
 start within the first line of the subject. If this is set with an offset
 limit, a match must occur in the first line and also within the offset limit.
 In other words, whichever limit comes first is used.
+<b>int pcre2_set_heap_limit(pcre2_match_context *<i>mcontext</i>,</b>
+<b>  uint32_t <i>value</i>);</b>
+<br>
+<br>
+The <i>heap_limit</i> parameter specifies, in units of kilobytes, the maximum 
+amount of heap memory that <b>pcre2_match()</b> may use to hold backtracking
+information when running an interpretive match. This limit does not apply to
+matching with the JIT optimization, which has its own memory control
+arrangements (see the
+<a href="pcre2jit.html"><b>pcre2jit</b></a>
+documentation for more details), nor does it apply to <b>pcre2_dfa_match()</b>.
+If the limit is reached, the negative error code PCRE2_ERROR_HEAPLIMIT is 
+returned. The default limit is set when PCRE2 is built; the default default is 
+very large and is essentially "unlimited".
+</P>
+<P>
+A value for the heap limit may also be supplied by an item at the start of a
+pattern of the form
+<pre>
+  (*LIMIT_HEAP=ddd)
+</pre>
+where ddd is a decimal number. However, such a setting is ignored unless ddd is
+less than the limit set by the caller of <b>pcre2_match()</b> or, if no such
+limit is set, less than the default.
+</P>
+<P>
+The <b>pcre2_match()</b> function starts out using a 20K vector on the system
+stack for recording backtracking points. The more nested backtracking points
+there are (that is, the deeper the search tree), the more memory is needed. 
+Heap memory is used only if the initial vector is too small. If the heap limit 
+is set to a value less than 21 (in particular, zero) no heap memory will be 
+used. In this case, only patterns that do not have a lot of nested backtracking 
+can be successfully processed. 
 <b>int pcre2_set_match_limit(pcre2_match_context *<i>mcontext</i>,</b>
 <b>  uint32_t <i>value</i>);</b>
 <br>
 <br>
 The <i>match_limit</i> parameter provides a means of preventing PCRE2 from using
-up too many resources when processing patterns that are not going to match, but
-which have a very large number of possibilities in their search trees. The
-classic example is a pattern that uses nested unlimited repeats.
+up too many computing resources when processing patterns that are not going to
+match, but which have a very large number of possibilities in their search
+trees. The classic example is a pattern that uses nested unlimited repeats.
 </P>
 <P>
 There is an internal counter in <b>pcre2_match()</b> that is incremented each
@@ -895,16 +933,20 @@ limit is set, less than the default.
 This parameter limits the depth of nested backtracking in <b>pcre2_match()</b>.
 Each time a nested backtracking point is passed, a new memory "frame" is used 
 to remember the state of matching at that point. Thus, this parameter
-indirectly limits the amount of memory that is used in a match.
+indirectly limits the amount of memory that is used in a match. However,
+because the size of each memory "frame" depends on the number of capturing
+parentheses, the actual memory limit varies from pattern to pattern. This limit
+was more useful in versions before 10.30, where function recursion was used for
+backtracking.
 </P>
 <P>
-This limit is not relevant, and is ignored, when matching is done using JIT
-compiled code. However, it is supported by <b>pcre2_dfa_match()</b>, which uses
-it to limit the depth of internal recursive function calls that implement
-lookaround assertions and pattern recursions. This is, therefore, an indirect
-limit on the amount of system stack that is used. A recursive pattern such as
-/(.)(?1)/, when matched to a very long string using <b>pcre2_dfa_match()</b>,
-can use a great deal of stack.
+The depth limit is not relevant, and is ignored, when matching is done using
+JIT compiled code. However, it is supported by <b>pcre2_dfa_match()</b>, which
+uses it to limit the depth of internal recursive function calls that implement
+atomic groups, lookaround assertions, and pattern recursions. This is,
+therefore, an indirect limit on the amount of system stack that is used. A
+recursive pattern such as /(.)(?1)/, when matched to a very long string using
+<b>pcre2_dfa_match()</b>, can use a great deal of stack.
 </P>
 <P>
 The default value for the depth limit can be set when PCRE2 is built; the
@@ -958,6 +1000,12 @@ The output is a uint32_t integer that gives the default limit for the depth of
 nested backtracking in <b>pcre2_match()</b> or the depth of nested recursions
 and lookarounds in <b>pcre2_dfa_match()</b>. Further details are given with
 <b>pcre2_set_depth_limit()</b> above.
+<pre>
+  PCRE2_CONFIG_HEAPLIMIT
+</pre>
+The output is a uint32_t integer that gives, in kilobytes, the default limit
+for the amount of heap memory used by <b>pcre2_match()</b>. Further details are
+given with <b>pcre2_set_heap_limit()</b> above.
 <pre>
   PCRE2_CONFIG_JIT
 </pre>
@@ -1787,6 +1835,13 @@ otherwise 0. The third argument should point to an <b>uint32_t</b> variable. An
 explicit match is either a literal CR or LF character, or \r or \n or one of
 the equivalent hexadecimal or octal escape sequences.
 <pre>
+  PCRE2_INFO_HEAPLIMIT
+</pre>
+If the pattern set a heap memory limit by including an item of the form
+(*LIMIT_HEAP=nnnn) at the start, the value is returned. The third argument
+should point to an unsigned 32-bit integer. If no such value has been set, the
+call to <b>pcre2_pattern_info()</b> returns the error PCRE2_ERROR_UNSET.
+<pre>
   PCRE2_INFO_JCHANGED
 </pre>
 Return 1 if the (?J) or (?-J) option setting is used in the pattern, otherwise
@@ -2554,7 +2609,8 @@ The backtracking match limit was reached.
 </pre>
 If a pattern contains many nested backtracking points, heap memory is used to 
 remember them. This error is given when the memory allocation function (default 
-or custom) fails.
+or custom) fails. Note that a different error, PCRE2_ERROR_HEAPLIMIT, is given 
+if the amount of memory needed exceeds the heap limit.
 <pre>
   PCRE2_ERROR_NULL
 </pre>
@@ -3271,7 +3327,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC42" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 04 April 2017
+Last updated: 11 April 2017
 <br>
 Copyright &copy; 1997-2017 University of Cambridge.
 <br>

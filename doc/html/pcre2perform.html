@@ -83,11 +83,12 @@ From release 10.30, the interpretive (non-JIT) version of <b>pcre2_match()</b>
 uses very little system stack at run time. In earlier releases recursive
 function calls could use a great deal of stack, and this could cause problems,
 but this usage has been eliminated. Backtracking positions are now explicitly
-remembered in memory frames controlled by the code. An initial 10K vector of
-frames is allocated on the system stack (enough for about 50 frames for small
-patterns), but if this is insufficient, heap memory is used. Rewriting patterns 
-to be time-efficient, as described below, may also reduce the memory 
-requirements.
+remembered in memory frames controlled by the code. An initial 20K vector of
+frames is allocated on the system stack (enough for about 100 frames for small
+patterns), but if this is insufficient, heap memory is used. The amount of heap
+memory can be limited; if the limit is set to zero, only the initial stack
+vector is used. Rewriting patterns to be time-efficient, as described below,
+may also reduce the memory requirements.
 </P>
 <P>
 In contrast to <b>pcre2_match()</b>, <b>pcre2_dfa_match()</b> does use recursive 
@@ -243,7 +244,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC6" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 31 March 2017
+Last updated: 08 April 2017
 <br>
 Copyright &copy; 1997-2017 University of Cambridge.
 <br>

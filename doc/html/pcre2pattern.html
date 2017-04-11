@@ -170,14 +170,15 @@ the application to apply the JIT optimization by calling
 <b>pcre2_jit_compile()</b> is ignored.
 </P>
 <br><b>
-Setting match and backtracking depth limits
+Setting match resource limits
 </b><br>
 <P>
 The pcre2_match() function contains a counter that is incremented every time it
 goes round its main loop. The caller of <b>pcre2_match()</b> can set a limit on
 this counter, which therefore limits the amount of computing resource used for
-a match. The maximum depth of nested backtracking can also be limited, and this
-restricts the amount of heap memory that is used.
+a match. The maximum depth of nested backtracking can also be limited; this
+indirectly restricts the amount of heap memory that is used, but there is also 
+an explicit memory limit that can be set.
 </P>
 <P>
 These facilities are provided to catch runaway matches that are provoked by
@@ -186,6 +187,7 @@ unlimited repeats applied to a long string that does not match). When one of
 these limits is reached, <b>pcre2_match()</b> gives an error return. The limits
 can also be set by items at the start of the pattern of the form
 <pre>
+  (*LIMIT_HEAP=d)
   (*LIMIT_MATCH=d)
   (*LIMIT_DEPTH=d)
 </pre>
@@ -200,11 +202,13 @@ Prior to release 10.30, LIMIT_DEPTH was called LIMIT_RECURSION. This name is
 still recognized for backwards compatibility.
 </P>
 <P>
-The match limit is used (but in a different way) when JIT is being used, but it
-is not relevant, and is ignored, when matching with <b>pcre2_dfa_match()</b>.
-However, the depth limit is relevant for DFA matching, which uses function
-recursion for recursions within the pattern. In this case, the depth limit 
-controls the amount of system stack that is used.
+The heap limit applies only when the <b>pcre2_match()</b> interpreter is used
+for matching. It does not apply to JIT or DFA matching. The match limit is used
+(but in a different way) when JIT is being used, but it is not relevant, and is
+ignored, when matching with <b>pcre2_dfa_match()</b>. The depth limit is ignored 
+by JIT but is relevant for DFA matching, which uses function recursion for
+recursions within the pattern. In this case, the depth limit controls the
+amount of system stack that is used.
 <a name="newlines"></a></P>
 <br><b>
 Newline conventions
@@ -3434,7 +3438,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC30" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 03 April 2017
+Last updated: 11 April 2017
 <br>
 Copyright &copy; 1997-2017 University of Cambridge.
 <br>

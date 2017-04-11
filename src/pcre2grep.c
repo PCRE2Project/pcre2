@@ -212,6 +212,7 @@ static const uint8_t *character_tables = NULL;
 
 static uint32_t pcre2_options = 0;
 static uint32_t process_options = 0;
+static PCRE2_SIZE heap_limit = PCRE2_UNSET;
 static uint32_t match_limit = 0;
 static uint32_t depth_limit = 0;
 
@@ -330,7 +331,7 @@ static const char *incexname[4] = { "--include", "--exclude",
 
 /* Structure for options and list of them */
 
-enum { OP_NODATA, OP_STRING, OP_OP_STRING, OP_NUMBER, OP_U32NUMBER,
+enum { OP_NODATA, OP_STRING, OP_OP_STRING, OP_NUMBER, OP_U32NUMBER, OP_SIZE,
        OP_OP_NUMBER, OP_OP_NUMBERS, OP_PATLIST, OP_FILELIST, OP_BINFILES };
 
 typedef struct option_item {
@@ -356,16 +357,17 @@ used to identify them. */
 #define N_LOFFSETS     (-10)
 #define N_FOFFSETS     (-11)
 #define N_LBUFFER      (-12)
-#define N_M_LIMIT      (-13)
-#define N_M_LIMIT_DEP  (-14)
-#define N_BUFSIZE      (-15)
-#define N_NOJIT        (-16)
-#define N_FILE_LIST    (-17)
-#define N_BINARY_FILES (-18)
-#define N_EXCLUDE_FROM (-19)
-#define N_INCLUDE_FROM (-20)
-#define N_OM_SEPARATOR (-21)
-#define N_MAX_BUFSIZE  (-22)
+#define N_H_LIMIT      (-13)
+#define N_M_LIMIT      (-14)
+#define N_M_LIMIT_DEP  (-15)
+#define N_BUFSIZE      (-16)
+#define N_NOJIT        (-17)
+#define N_FILE_LIST    (-18)
+#define N_BINARY_FILES (-19)
+#define N_EXCLUDE_FROM (-20)
+#define N_INCLUDE_FROM (-21)
+#define N_OM_SEPARATOR (-22)
+#define N_MAX_BUFSIZE  (-23)
 
 static option_item optionlist[] = {
   { OP_NODATA,     N_NULL,   NULL,              "",              "terminate options" },
@@ -397,6 +399,7 @@ static option_item optionlist[] = {
   { OP_NODATA,     N_LBUFFER, NULL,             "line-buffered", "use line buffering" },
   { OP_NODATA,     N_LOFFSETS, NULL,            "line-offsets",  "output line numbers and offsets, not text" },
   { OP_STRING,     N_LOCALE, &locale,           "locale=locale", "use the named locale" },
+  { OP_SIZE,       N_H_LIMIT, &heap_limit,      "heap-limit=number",  "set PCRE2 heap limit option (kilobytes)" },
   { OP_U32NUMBER,  N_M_LIMIT, &match_limit,     "match-limit=number", "set PCRE2 match limit option" },
   { OP_U32NUMBER,  N_M_LIMIT_DEP, &depth_limit, "depth-limit=number", "set PCRE2 depth limit option" },
   { OP_U32NUMBER,  N_M_LIMIT_DEP, &depth_limit, "recursion-limit=number", "obsolete synonym for depth-limit" },
@@ -525,9 +528,9 @@ pcre2grep_exit(int rc)
 {
 if (resource_error)
   {
-  fprintf(stderr, "pcre2grep: Error %d, %d or %d means that a resource limit "
-    "was exceeded.\n", PCRE2_ERROR_JIT_STACKLIMIT, PCRE2_ERROR_MATCHLIMIT,
-    PCRE2_ERROR_DEPTHLIMIT);
+  fprintf(stderr, "pcre2grep: Error %d, %d, %d or %d means that a resource "
+    "limit was exceeded.\n", PCRE2_ERROR_JIT_STACKLIMIT, PCRE2_ERROR_MATCHLIMIT,
+    PCRE2_ERROR_DEPTHLIMIT, PCRE2_ERROR_HEAPLIMIT);
   fprintf(stderr, "pcre2grep: Check your regex for nested unlimited loops.\n");
   }
 exit(rc);
@@ -1647,7 +1650,7 @@ for (i = 1; p != NULL; p = p->next, i++)
   FWRITE(matchptr, 1, slen, stderr);   /* In case binary zero included */
   fprintf(stderr, "\n\n");
   if (*mrc == PCRE2_ERROR_MATCHLIMIT || *mrc == PCRE2_ERROR_DEPTHLIMIT ||
-      *mrc == PCRE2_ERROR_JIT_STACKLIMIT)
+      *mrc == PCRE2_ERROR_HEAPLIMIT || *mrc == PCRE2_ERROR_JIT_STACKLIMIT)
     resource_error = TRUE;
   if (error_count++ > 20)
     {
@@ -3796,7 +3799,7 @@ for (i = 1; i < argc; i++)
   /* Otherwise, deal with a single string or numeric data value. */
 
   else if (op->type != OP_NUMBER && op->type != OP_U32NUMBER &&
-           op->type != OP_OP_NUMBER)
+           op->type != OP_OP_NUMBER && op->type != OP_SIZE)
     {
     *((char **)op->dataptr) = option_data;
     }
@@ -3804,6 +3807,7 @@ for (i = 1; i < argc; i++)
     {
     unsigned long int n = decode_number(option_data, op, longop);
     if (op->type == OP_U32NUMBER) *((uint32_t *)op->dataptr) = n;
+      else if (op->type == OP_SIZE) *((PCRE2_SIZE *)op->dataptr) = n; 
       else *((int *)op->dataptr) = n;
     }
   }
@@ -3839,6 +3843,7 @@ if (output_text != NULL &&
 
 /* Put limits into the match data block. */
 
+if (heap_limit != PCRE2_UNSET) pcre2_set_heap_limit(match_context, heap_limit);
 if (match_limit > 0) pcre2_set_match_limit(match_context, match_limit);
 if (depth_limit > 0) pcre2_set_depth_limit(match_context, depth_limit);
 

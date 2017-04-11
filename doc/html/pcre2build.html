@@ -265,17 +265,41 @@ to the <b>configure</b> command. This setting has no effect on the
 (though the counting is done differently).
 </P>
 <P>
-In some environments it is desirable to limit the depth of nested backtracking
-in order to restrict the maximum amount of heap memory that is used. A second
-limit controls this; it defaults to the value that is set for
---with-match-limit. You can set a lower default limit by adding, for example,
+The <b>pcre2_match()</b> function starts out using a 20K vector on the system
+stack to record backtracking points. The more nested backtracking points there
+are (that is, the deeper the search tree), the more memory is needed. If the
+initial vector is not large enough, heap memory is used, up to a certain limit,
+which is specified in kilobytes. The limit can be changed at run time, as
+described in the
+<a href="pcre2api.html"><b>pcre2api</b></a>
+documentation. The default limit (in effect unlimited) is 20 million. You can
+change this by a setting such as
+<pre>
+  --with-heap-limit=500
+</pre>
+which limits the amount of heap to 500 kilobytes. This limit applies only to
+interpretive matching in pcre2_match(). It does not apply when JIT (which has
+its own memory arrangements) is used, nor does it apply to
+<b>pcre2_dfa_match()</b>.
+</P>
+<P>
+You can also explicitly limit the depth of nested backtracking in the
+<b>pcre2_match()</b> interpreter. This limit defaults to the value that is set
+for --with-match-limit. You can set a lower default limit by adding, for
+example,
 <pre>
   --with-match-limit_depth=10000
 </pre>
-to the <b>configure</b> command. This value can also be overridden at run time.
-As well as applying to <b>pcre2_match()</b>, this limit also controls the depth 
-of recursive function calls in <b>pcre2_dfa_match()</b>. These are used for 
-lookaround assertions, atomic groups, and recursion within patterns.
+to the <b>configure</b> command. This value can be overridden at run time. This
+depth limit indirectly limits the amount of heap memory that is used, but
+because the size of each backtracking "frame" depends on the number of
+capturing parentheses in a pattern, the amount of heap that is used before the
+limit is reached varies from pattern to pattern. This limit was more useful in
+versions before 10.30, where function recursion was used for backtracking.
+However, as well as applying to <b>pcre2_match()</b>, this limit also controls
+the depth of recursive function calls in <b>pcre2_dfa_match()</b>. These are
+used for lookaround assertions, atomic groups, and recursion within patterns.
+The limit does not apply to JIT matching.
 </P>
 <br><a name="SEC12" href="#TOC1">CREATING CHARACTER TABLES AT BUILD TIME</a><br>
 <P>
@@ -530,7 +554,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC25" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 31 March 2017
+Last updated: 10 April 2017
 <br>
 Copyright &copy; 1997-2017 University of Cambridge.
 <br>

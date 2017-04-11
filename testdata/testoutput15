@@ -12,11 +12,13 @@ Starting code units: a z
 Last code unit = 'z'
 Subject length lower bound = 2
   aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaazzbbbbbb\=find_limits
+Minimum heap limit = 0
 Minimum match limit = 7
 Minimum depth limit = 7
  0: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaazz
  1: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
   aaaaaaaaaaaaaz\=find_limits
+Minimum heap limit = 0
 Minimum match limit = 20481
 Minimum depth limit = 30
 No match
@@ -26,6 +28,7 @@ Capturing subpattern count = 1
 May match empty string
 Subject length lower bound = 0
    /* this is a C style comment */\=find_limits
+Minimum heap limit = 0
 Minimum match limit = 64
 Minimum depth limit = 7
  0: /* this is a C style comment */
@@ -33,21 +36,25 @@ Minimum depth limit = 7
 
 /^(?>a)++/
     aa\=find_limits
+Minimum heap limit = 0
 Minimum match limit = 5
 Minimum depth limit = 3
  0: aa
     aaaaaaaaa\=find_limits
+Minimum heap limit = 0
 Minimum match limit = 12
 Minimum depth limit = 3
  0: aaaaaaaaa
     
 /(a)(?1)++/
     aa\=find_limits
+Minimum heap limit = 0
 Minimum match limit = 7
 Minimum depth limit = 5
  0: aa
  1: a
     aaaaaaaaa\=find_limits
+Minimum heap limit = 0
 Minimum match limit = 21
 Minimum depth limit = 5
  0: aaaaaaaaa
@@ -55,30 +62,35 @@ Minimum depth limit = 5
 
 /a(?:.)*?a/ims
     abbbbbbbbbbbbbbbbbbbbba\=find_limits
+Minimum heap limit = 0
 Minimum match limit = 24
 Minimum depth limit = 3
  0: abbbbbbbbbbbbbbbbbbbbba
     
 /a(?:.(*THEN))*?a/ims
     abbbbbbbbbbbbbbbbbbbbba\=find_limits
+Minimum heap limit = 0
 Minimum match limit = 66
 Minimum depth limit = 45
  0: abbbbbbbbbbbbbbbbbbbbba
 
 /a(?:.(*THEN:ABC))*?a/ims
     abbbbbbbbbbbbbbbbbbbbba\=find_limits
+Minimum heap limit = 0
 Minimum match limit = 66
 Minimum depth limit = 45
  0: abbbbbbbbbbbbbbbbbbbbba
 
 /^(?>a+)(?>b+)(?>c+)(?>d+)(?>e+)/
      aabbccddee\=find_limits
+Minimum heap limit = 0
 Minimum match limit = 7
 Minimum depth limit = 7
  0: aabbccddee
 
 /^(?>(a+))(?>(b+))(?>(c+))(?>(d+))(?>(e+))/
      aabbccddee\=find_limits
+Minimum heap limit = 0
 Minimum match limit = 12
 Minimum depth limit = 12
  0: aabbccddee
@@ -90,6 +102,7 @@ Minimum depth limit = 12
 
 /^(?>(a+))(?>b+)(?>(c+))(?>d+)(?>(e+))/
      aabbccddee\=find_limits
+Minimum heap limit = 0
 Minimum match limit = 10
 Minimum depth limit = 10
  0: aabbccddee

@@ -213,6 +213,9 @@ in the library.
 <tr><td><a href="pcre2_set_depth_limit.html">pcre2_set_depth_limit</a></td>
     <td>&nbsp;&nbsp;Set the match backtracking depth limit</td></tr>
 
+<tr><td><a href="pcre2_set_heap_limit.html">pcre2_set_heap_limit</a></td>
+    <td>&nbsp;&nbsp;Set the match backtracking heap limit</td></tr>
+
 <tr><td><a href="pcre2_set_match_limit.html">pcre2_set_match_limit</a></td>
     <td>&nbsp;&nbsp;Set the match limit</td></tr>
 

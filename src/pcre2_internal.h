@@ -240,6 +240,16 @@ not rely on this. */
 
 #define COMPILE_ERROR_BASE 100
 
+/* The initial frames vector for remembering backtracking points in 
+pcre2_match() is allocated on the system stack, of this size (bytes). The size
+must be a multiple of sizeof(PCRE2_SPTR) in all environments, so making it a
+multiple of 8 is best. Typical frame sizes are a few hundred bytes (it depends
+on the number of capturing parentheses) so 20K handles quite a few frames. A
+larger vector on the heap is obtained for patterns that need more frames. The
+maximum size of this can be limited. */
+
+#define START_FRAMES_SIZE 20480
+
 /* Define the default BSR convention. */
 
 #ifdef BSR_ANYCRLF
@@ -922,6 +932,7 @@ a positive value. */
 #define STRING_NO_START_OPT_RIGHTPAR      "NO_START_OPT)"
 #define STRING_NOTEMPTY_RIGHTPAR          "NOTEMPTY)"
 #define STRING_NOTEMPTY_ATSTART_RIGHTPAR  "NOTEMPTY_ATSTART)"
+#define STRING_LIMIT_HEAP_EQ              "LIMIT_HEAP="
 #define STRING_LIMIT_MATCH_EQ             "LIMIT_MATCH="
 #define STRING_LIMIT_DEPTH_EQ             "LIMIT_DEPTH="
 #define STRING_LIMIT_RECURSION_EQ         "LIMIT_RECURSION="
@@ -1196,6 +1207,7 @@ only. */
 #define STRING_NO_START_OPT_RIGHTPAR      STR_N STR_O STR_UNDERSCORE STR_S STR_T STR_A STR_R STR_T STR_UNDERSCORE STR_O STR_P STR_T STR_RIGHT_PARENTHESIS
 #define STRING_NOTEMPTY_RIGHTPAR          STR_N STR_O STR_T STR_E STR_M STR_P STR_T STR_Y STR_RIGHT_PARENTHESIS
 #define STRING_NOTEMPTY_ATSTART_RIGHTPAR  STR_N STR_O STR_T STR_E STR_M STR_P STR_T STR_Y STR_UNDERSCORE STR_A STR_T STR_S STR_T STR_A STR_R STR_T STR_RIGHT_PARENTHESIS
+#define STRING_LIMIT_HEAP_EQ              STR_L STR_I STR_M STR_I STR_T STR_UNDERSCORE STR_H STR_E STR_A STR_P STR_EQUALS_SIGN
 #define STRING_LIMIT_MATCH_EQ             STR_L STR_I STR_M STR_I STR_T STR_UNDERSCORE STR_M STR_A STR_T STR_C STR_H STR_EQUALS_SIGN
 #define STRING_LIMIT_DEPTH_EQ             STR_L STR_I STR_M STR_I STR_T STR_UNDERSCORE STR_D STR_E STR_P STR_T STR_H STR_EQUALS_SIGN
 #define STRING_LIMIT_RECURSION_EQ         STR_L STR_I STR_M STR_I STR_T STR_UNDERSCORE STR_R STR_E STR_C STR_U STR_R STR_S STR_I STR_O STR_N STR_EQUALS_SIGN

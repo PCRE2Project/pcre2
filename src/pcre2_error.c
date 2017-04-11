@@ -256,6 +256,7 @@ static const unsigned char match_error_texts[] =
   "match with end before start is not supported\0"
   "too many replacements (more than INT_MAX)\0"
   "bad serialized data\0"
+  "heap limit exceeded\0" 
   ;
 
 

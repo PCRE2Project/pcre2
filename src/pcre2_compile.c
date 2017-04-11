@@ -727,6 +727,7 @@ enum { PSO_OPT,     /* Value is an option bit */
        PSO_FLG,     /* Value is a flag bit */
        PSO_NL,      /* Value is a newline type */
        PSO_BSR,     /* Value is a \R type */
+       PSO_LIMH,    /* Read integer value for heap limit */ 
        PSO_LIMM,    /* Read integer value for match limit */
        PSO_LIMD };  /* Read integer value for depth limit */
 
@@ -749,6 +750,7 @@ static pso pso_list[] = {
   { (uint8_t *)STRING_NO_DOTSTAR_ANCHOR_RIGHTPAR, 18, PSO_OPT, PCRE2_NO_DOTSTAR_ANCHOR },
   { (uint8_t *)STRING_NO_JIT_RIGHTPAR,             7, PSO_FLG, PCRE2_NOJIT },
   { (uint8_t *)STRING_NO_START_OPT_RIGHTPAR,      13, PSO_OPT, PCRE2_NO_START_OPTIMIZE },
+  { (uint8_t *)STRING_LIMIT_HEAP_EQ,              11, PSO_LIMH, 0 },
   { (uint8_t *)STRING_LIMIT_MATCH_EQ,             12, PSO_LIMM, 0 },
   { (uint8_t *)STRING_LIMIT_DEPTH_EQ,             12, PSO_LIMD, 0 },
   { (uint8_t *)STRING_LIMIT_RECURSION_EQ,         16, PSO_LIMD, 0 },
@@ -8853,6 +8855,7 @@ uint32_t firstcu, reqcu;              /* Value of first/req code unit */
 uint32_t setflags = 0;                /* NL and BSR set flags */
 
 uint32_t skipatstart;                 /* When checking (*UTF) etc */
+uint32_t limit_heap  = UINT32_MAX;
 uint32_t limit_match = UINT32_MAX;    /* Unset match limits */
 uint32_t limit_depth = UINT32_MAX;
 
@@ -9026,6 +9029,7 @@ while (patlen - skipatstart >= 2 &&
 
         case PSO_LIMM:
         case PSO_LIMD:
+        case PSO_LIMH: 
         c = 0;
         pp = skipatstart;
         if (!IS_DIGIT(ptr[pp]))
@@ -9045,7 +9049,8 @@ while (patlen - skipatstart >= 2 &&
           ptr += pp;
           goto HAD_EARLY_ERROR;
           }
-        if (p->type == PSO_LIMM) limit_match = c;
+        if (p->type == PSO_LIMH) limit_heap = c;
+          else if (p->type == PSO_LIMM) limit_match = c;
           else limit_depth = c;
         skipatstart += pp - skipatstart;
         break;
@@ -9288,6 +9293,7 @@ re->magic_number = MAGIC_NUMBER;
 re->compile_options = options;
 re->overall_options = cb.external_options;
 re->flags = PCRE2_CODE_UNIT_WIDTH/8 | cb.external_flags | setflags;
+re->limit_heap = limit_heap;
 re->limit_match = limit_match;
 re->limit_depth = limit_depth;
 re->first_codeunit = 0;

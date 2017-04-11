@@ -404,6 +404,10 @@ file name is followed by a colon; for context lines, a hyphen separator is used.
 If a line number is also being output, it follows the file name.
 </P>
 <P>
+<b>--heap-limit</b>=<i>number</i>
+See <b>--match-limit</b> below.
+</P>
+<P>
 <b>--help</b>
 Output a help message, giving brief details of the command options and file
 type support, and then exit. Anything else on the command line is
@@ -505,7 +509,7 @@ used. There is no short form for this option.
 <b>--match-limit</b>=<i>number</i>
 Processing some regular expression patterns may take a very long time to search
 for all possible matching strings. Others may require a very large amount of
-memory. There are two options that set resource limits for matching.
+memory. There are three options that set resource limits for matching.
 <br>
 <br>
 The <b>--match-limit</b> option provides a means of limiting computing resource
@@ -516,13 +520,24 @@ counter that is incremented each time around its main processing loop. If the
 value set by <b>--match-limit</b> is reached, an error occurs.
 <br>
 <br>
+The <b>--heap-limit</b> option specifies, as a number of kilobytes, the amount
+of heap memory that may be used for matching. Heap memory is needed only if
+matching the pattern requires a significant number of nested backtracking
+points to be remembered. This parameter can be set to zero to forbid the use of 
+heap memory altogether.
+<br>
+<br>
 The <b>--depth-limit</b> option limits the depth of nested backtracking points,
-which in turn limits the amount of memory that is used. This limit is of use
-only if it is set smaller than <b>--match-limit</b>.
+which indirectly limits the amount of memory that is used. The amount of memory 
+needed for each backtracking point depends on the number of capturing
+parentheses in the pattern, so the amount of memory that is used before this
+limit acts varies from pattern to pattern. This limit is of use only if it is
+set smaller than <b>--match-limit</b>.
 <br>
 <br>
 There are no short forms for these options. The default settings are specified
-when the PCRE2 library is compiled, with the default default being 10 million.
+when the PCRE2 library is compiled, with the default defaults being very large 
+and so effectively unlimited.
 </P>
 <P>
 \fB--max-buffer-size=<i>number</i>
@@ -764,11 +779,12 @@ Many of the short and long forms of <b>pcre2grep</b>'s options are the same
 as in the GNU <b>grep</b> program. Any long option of the form
 <b>--xxx-regexp</b> (GNU terminology) is also available as <b>--xxx-regex</b>
 (PCRE2 terminology). However, the <b>--depth-limit</b>, <b>--file-list</b>,
-<b>--file-offsets</b>, <b>--include-dir</b>, <b>--line-offsets</b>,
-<b>--locale</b>, <b>--match-limit</b>, <b>-M</b>, <b>--multiline</b>, <b>-N</b>,
-<b>--newline</b>, <b>--om-separator</b>, <b>--output</b>, <b>-u</b>, and
-<b>--utf-8</b> options are specific to <b>pcre2grep</b>, as is the use of the
-<b>--only-matching</b> option with a capturing parentheses number.
+<b>--file-offsets</b>, <b>--heap-limit</b>, <b>--include-dir</b>,
+<b>--line-offsets</b>, <b>--locale</b>, <b>--match-limit</b>, <b>-M</b>,
+<b>--multiline</b>, <b>-N</b>, <b>--newline</b>, <b>--om-separator</b>,
+<b>--output</b>, <b>-u</b>, and <b>--utf-8</b> options are specific to
+<b>pcre2grep</b>, as is the use of the <b>--only-matching</b> option with a
+capturing parentheses number.
 </P>
 <P>
 Although most of the common options work the same way, a few are different in
@@ -891,9 +907,9 @@ there are more than 20 such errors, <b>pcre2grep</b> gives up.
 </P>
 <P>
 The <b>--match-limit</b> option of <b>pcre2grep</b> can be used to set the
-overall resource limit; there is a second option called <b>--depth-limit</b>
-that sets a limit on the amount of memory that is used (see the discussion of
-these options above).
+overall resource limit. There are also other limits that affect the amount of 
+memory used during matching; see the discussion of <b>--heap-limit</b> and 
+<b>--depth-limit</b> above.
 </P>
 <br><a name="SEC12" href="#TOC1">DIAGNOSTICS</a><br>
 <P>
@@ -918,7 +934,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC15" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 06 April 2017
+Last updated: 11 April 2017
 <br>
 Copyright &copy; 1997-2017 University of Cambridge.
 <br>

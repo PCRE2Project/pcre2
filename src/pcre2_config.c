@@ -84,6 +84,7 @@ if (where == NULL)  /* Requests a length */
     return PCRE2_ERROR_BADOPTION;
 
     case PCRE2_CONFIG_BSR:
+    case PCRE2_CONFIG_HEAPLIMIT: 
     case PCRE2_CONFIG_JIT:
     case PCRE2_CONFIG_LINKSIZE:
     case PCRE2_CONFIG_MATCHLIMIT:
@@ -114,6 +115,10 @@ switch (what)
 #else
   *((uint32_t *)where) = PCRE2_BSR_UNICODE;
 #endif
+  break;
+
+  case PCRE2_CONFIG_HEAPLIMIT:
+  *((uint32_t *)where) = HEAP_LIMIT;
   break;
 
   case PCRE2_CONFIG_JIT:

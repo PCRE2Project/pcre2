@@ -585,6 +585,7 @@ typedef struct pcre2_real_match_context {
   int    (*callout)(pcre2_callout_block *, void *);
   void    *callout_data;
   PCRE2_SIZE offset_limit;
+  uint32_t heap_limit; 
   uint32_t match_limit;
   uint32_t depth_limit;
 } pcre2_real_match_context;
@@ -614,6 +615,7 @@ typedef struct pcre2_real_code {
   uint32_t compile_options;       /* Options passed to pcre2_compile() */
   uint32_t overall_options;       /* Options after processing the pattern */
   uint32_t flags;                 /* Various state flags */
+  uint32_t limit_heap;            /* Limit set in the pattern */ 
   uint32_t limit_match;           /* Limit set in the pattern */
   uint32_t limit_depth;           /* Limit set in the pattern */
   uint32_t first_codeunit;        /* Starting code unit */
@@ -808,9 +810,10 @@ typedef struct match_block {
   heapframe *match_frames;        /* Points to vector of frames */
   heapframe *match_frames_top;    /* Points after the end of the vector */
   heapframe *stack_frames;        /* The original vector on the stack */ 
-  uint32_t match_call_count;      /* Number of times a new frame is created */
+  PCRE2_SIZE heap_limit;          /* As it says */
   uint32_t match_limit;           /* As it says */
   uint32_t match_limit_depth;     /* As it says */
+  uint32_t match_call_count;      /* Number of times a new frame is created */
   BOOL hitend;                    /* Hit the end of the subject at some point */
   BOOL hasthen;                   /* Pattern contains (*THEN) */
   const uint8_t *lcc;             /* Points to lower casing table */

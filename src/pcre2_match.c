@@ -64,15 +64,6 @@ information, and fields within it. */
 
 #define RECURSE_UNSET 0xffffffffu  /* Bigger than max group number */
 
-/* The initial frames vector for remembering backtracking points is allocated
-on the system stack, of this size (bytes). The size must be a multiple of
-sizeof(PCRE2_SPTR) in all environments, so making it a multiple of 8 is best.
-Typical frame sizes are a few hundred bytes (it depends on the number of
-capturing parentheses) so 10K handles quite a few frames. A larger vector on
-the heap is obtained for patterns that need more frames. */
-
-#define START_FRAMES_SIZE 10240
-
 /* Masks for identifying the public options that are permitted at match time. */
 
 #define PUBLIC_MATCH_OPTIONS \
@@ -618,14 +609,22 @@ backtracking point. */
 MATCH_RECURSE:
 
 /* Set up a new backtracking frame. If the vector is full, get a new one
-on the heap, doubling the size. */
+on the heap, doubling the size, but constrained by the heap limit. */
 
 N = (heapframe *)((char *)F + frame_size);
 if (N >= mb->match_frames_top)
   {
   PCRE2_SIZE newsize = mb->frame_vector_size * 2;
-  heapframe *new = mb->memctl.malloc(newsize, mb->memctl.memory_data);
+  heapframe *new;
 
+  if ((newsize / 1024) > mb->heap_limit)
+    {
+    PCRE2_SIZE maxsize = ((mb->heap_limit * 1024)/frame_size) * frame_size;
+    if (mb->frame_vector_size == maxsize) return PCRE2_ERROR_HEAPLIMIT;
+    newsize = maxsize;
+    }
+
+  new = mb->memctl.malloc(newsize, mb->memctl.memory_data);
   if (new == NULL) return PCRE2_ERROR_NOMEMORY;
   memcpy(new, mb->match_frames, mb->frame_vector_size);
 
@@ -802,13 +801,13 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
              Fstart_match == mb->start_subject + mb->start_offset)))
       RRETURN(MATCH_NOMATCH);
 
-    /* Also fail if PCRE2_ENDANCHORED is set and the end of the match is not 
+    /* Also fail if PCRE2_ENDANCHORED is set and the end of the match is not
     the end of the subject. */
-    
+
     if (Feptr < mb->end_subject &&
         ((mb->moptions | mb->poptions) & PCRE2_ENDANCHORED) != 0)
-      RRETURN(MATCH_NOMATCH);     
- 
+      RRETURN(MATCH_NOMATCH);
+
     /* We have a successful match of the whole pattern. Record the result and
     then do a direct return from the function. If there is space in the offset
     vector, set any pairs that follow the highest-numbered captured string but
@@ -6093,13 +6092,13 @@ set up later. */
 utf = (re->overall_options & PCRE2_UTF) != 0;
 mb->partial = ((options & PCRE2_PARTIAL_HARD) != 0)? 2 :
               ((options & PCRE2_PARTIAL_SOFT) != 0)? 1 : 0;
-              
-/* Partial matching and PCRE2_ENDANCHORED are currently not allowed at the same 
-time. */ 
-              
-if (mb->partial != 0 && 
+
+/* Partial matching and PCRE2_ENDANCHORED are currently not allowed at the same
+time. */
+
+if (mb->partial != 0 &&
    ((re->overall_options | options) & PCRE2_ENDANCHORED) != 0)
-  return PCRE2_ERROR_BADOPTION; 
+  return PCRE2_ERROR_BADOPTION;
 
 /* Check a UTF string for validity if required. For 8-bit and 16-bit strings,
 we must also check that a starting offset does not point into the middle of a
@@ -6266,9 +6265,22 @@ correct when calling match() more than once for non-anchored patterns. */
 
 frame_size = sizeof(heapframe) + ((re->top_bracket - 1) * 2 * sizeof(PCRE2_SIZE));
 
+/* Limits set in the pattern override the match context only if they are
+smaller. */
+
+mb->heap_limit = (mcontext->heap_limit < re->limit_heap)?
+  mcontext->heap_limit : re->limit_heap;
+
+mb->match_limit = (mcontext->match_limit < re->limit_match)?
+  mcontext->match_limit : re->limit_match;
+
+mb->match_limit_depth = (mcontext->depth_limit < re->limit_depth)?
+  mcontext->depth_limit : re->limit_depth;
+
 /* If a pattern has very many capturing parentheses, the frame size may be very
 large. Ensure that there are at least 10 available frames by getting an initial
-vector on the heap if necessary. */
+vector on the heap if necessary, except when the heap limit prevents this. Get
+fewer if possible. (The heap limit is in kilobytes.) */
 
 if (frame_size <= START_FRAMES_SIZE/10)
   {
@@ -6278,6 +6290,11 @@ if (frame_size <= START_FRAMES_SIZE/10)
 else
   {
   mb->frame_vector_size = frame_size * 10;
+  if ((mb->frame_vector_size / 1024) > mb->heap_limit)
+    {
+    if (frame_size > mb->heap_limit * 1024) return PCRE2_ERROR_HEAPLIMIT;
+    mb->frame_vector_size = ((mb->heap_limit * 1024)/frame_size) * frame_size;
+    }
   mb->match_frames = mb->memctl.malloc(mb->frame_vector_size,
     mb->memctl.memory_data);
   if (mb->match_frames == NULL) return PCRE2_ERROR_NOMEMORY;
@@ -6291,14 +6308,6 @@ to avoid uninitialized memory read errors when it is copied to a new frame. */
 
 memset((char *)(mb->match_frames) + offsetof(heapframe, ovector), 0xff,
   re->top_bracket * 2 * sizeof(PCRE2_SIZE));
-
-/* Limits set in the pattern override the match context only if they are
-smaller. */
-
-mb->match_limit = (mcontext->match_limit < re->limit_match)?
-  mcontext->match_limit : re->limit_match;
-mb->match_limit_depth = (mcontext->depth_limit < re->limit_depth)?
-  mcontext->depth_limit : re->limit_depth;
 
 /* Pointers to the individual character tables */
 

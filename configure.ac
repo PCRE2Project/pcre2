@@ -263,6 +263,12 @@ AC_ARG_WITH(parens-nest-limit,
                            [nested parentheses limit (default=250)]),
             , with_parens_nest_limit=250)
 
+# Handle --with-heap-limit
+AC_ARG_WITH(heap-limit,
+            AS_HELP_STRING([--with-heap-limit=N],
+                           [default limit on heap memory (kilobytes, default=20000000)]),
+            , with_heap_limit=20000000)                
+
 # Handle --with-match-limit=N
 AC_ARG_WITH(match-limit,
             AS_HELP_STRING([--with-match-limit=N],
@@ -285,7 +291,7 @@ AC_ARG_WITH(match-limit-depth,
 
 AC_ARG_WITH(match-limit-recursion,,
             , with_match_limit_recursion=UNSET)
-
+            
 # Handle --enable-valgrind
 AC_ARG_ENABLE(valgrind,
               AS_HELP_STRING([--enable-valgrind],
@@ -680,12 +686,12 @@ AC_DEFINE_UNQUOTED([PARENS_NEST_LIMIT], [$with_parens_nest_limit], [
   stack that is used while compiling a pattern.])
 
 AC_DEFINE_UNQUOTED([MATCH_LIMIT], [$with_match_limit], [
-  The value of MATCH_LIMIT determines the default number of times the internal
-  match() function can record a backtrack position during a single matching
-  attempt. There is a runtime interface for setting a different limit. The
-  limit exists in order to catch runaway regular expressions that take for ever
-  to determine that they do not match. The default is set very large so that it
-  does not accidentally catch legitimate cases.])
+  The value of MATCH_LIMIT determines the default number of times the
+  pcre2_match() function can record a backtrack position during a single
+  matching attempt. There is a runtime interface for setting a different limit.
+  The limit exists in order to catch runaway regular expressions that take for
+  ever to determine that they do not match. The default is set very large so
+  that it does not accidentally catch legitimate cases.])
 
 # --with-match-limit-recursion is an obsolete synonym for --with-match-limit-depth
 
@@ -694,7 +700,7 @@ cat <<EOF
 
 WARNING: --with-match-limit-recursion is an obsolete option. Please use
   --with-match-limit-depth in future. If both are set, --with-match-limit-depth
-  will be used.
+  will be used. See also --with-heap-limit.
 
 EOF
 if test "$with_match_limit_depth" = "MATCH_LIMIT"; then
@@ -710,6 +716,10 @@ AC_DEFINE_UNQUOTED([MATCH_LIMIT_DEPTH], [$with_match_limit_depth], [
   MATCH_LIMIT_DEPTH provides this facility. To have any useful effect, it must
   be less than the value of MATCH_LIMIT. The default is to use the same value
   as MATCH_LIMIT. There is a runtime method for setting a different limit.])
+
+AC_DEFINE_UNQUOTED([HEAP_LIMIT], [$with_heap_limit], [
+  This limits the amount of memory that pcre2_match() may use while matching
+  a pattern. The value is in kilobytes.]) 
 
 AC_DEFINE([MAX_NAME_SIZE], [32], [
   This limit is parameterized just in case anybody ever wants to
@@ -971,6 +981,7 @@ $PACKAGE-$VERSION configuration summary:
     Rebuild char tables ................ : ${enable_rebuild_chartables}
     Internal link size ................. : ${with_link_size}
     Nested parentheses limit ........... : ${with_parens_nest_limit}
+    Heap limit ......................... : ${with_heap_limit} kilobytes
     Match limit ........................ : ${with_match_limit}
     Match depth limit .................. : ${with_match_limit_depth}
     Build shared libs .................. : ${enable_shared}

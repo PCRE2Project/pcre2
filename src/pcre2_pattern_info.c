@@ -80,6 +80,7 @@ if (where == NULL)   /* Requests field length */
     case PCRE2_INFO_FIRSTCODEUNIT:
     case PCRE2_INFO_HASBACKSLASHC:
     case PCRE2_INFO_HASCRORLF:
+    case PCRE2_INFO_HEAPLIMIT: 
     case PCRE2_INFO_JCHANGED:
     case PCRE2_INFO_LASTCODETYPE:
     case PCRE2_INFO_LASTCODEUNIT:
@@ -169,6 +170,11 @@ switch(what)
 
   case PCRE2_INFO_HASCRORLF:
   *((uint32_t *)where) = (re->flags & PCRE2_HASCRORLF) != 0;
+  break;
+
+  case PCRE2_INFO_HEAPLIMIT:
+  *((uint32_t *)where) = re->limit_heap;
+  if (re->limit_heap == UINT32_MAX) return PCRE2_ERROR_UNSET;
   break;
 
   case PCRE2_INFO_JCHANGED:

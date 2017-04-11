@@ -235,6 +235,12 @@ Behave as if each pattern line has the <b>jit</b> modifier; after successful
 compilation, each pattern is passed to the just-in-time compiler, if available.
 </P>
 <P>
+<b>-jitverify</b>
+Behave as if each pattern line has the <b>jitverify</b> modifier; after
+successful compilation, each pattern is passed to the just-in-time compiler, if
+available, and the use of JIT is verified.
+</P>
+<P>
 \fB-pattern\fB <i>modifier-list</i>
 Behave as if each pattern line contains the given modifiers.
 </P>
@@ -1088,6 +1094,7 @@ pattern.
       get=&#60;number or name&#62;       extract captured substring
       getall                     extract all captured substrings
   /g  global                     global matching
+      heap_limit=&#60;n&#62;             set a limit on heap memory
       jitstack=&#60;n&#62;               set size of JIT stack
       mark                       show mark values
       match_limit=&#60;n&#62;            set a match limit
@@ -1330,11 +1337,11 @@ stack that is larger than the default 32K is necessary only for very
 complicated patterns.
 </P>
 <br><b>
-Setting match and depth limits
+Setting heap, match, and depth limits
 </b><br>
 <P>
-The <b>match_limit</b> and <b>depth_limit</b> modifiers set the appropriate
-limits in the match context. These values are ignored when the
+The <b>heap_limit</b>, <b>match_limit</b>, and <b>depth_limit</b> modifiers set
+the appropriate limits in the match context. These values are ignored when the
 <b>find_limits</b> modifier is specified.
 </P>
 <br><b>
@@ -1343,8 +1350,8 @@ Finding minimum limits
 <P>
 If the <b>find_limits</b> modifier is present on a subject line, <b>pcre2test</b>
 calls the relevant matching function several times, setting different values in
-the match context via <b>pcre2_set_match_limit()</b> or
-<b>pcre2_set_depth_limit()</b> until it finds the minimum values for each
+the match context via <b>pcre2_set_heap_limit(), \fBpcre2_set_match_limit()</b>,
+or <b>pcre2_set_depth_limit()</b> until it finds the minimum values for each
 parameter that allows the match to complete without error.
 </P>
 <P>
@@ -1360,9 +1367,9 @@ increasing length of subject string.
 </P>
 <P>
 For non-DFA matching, the minimum <i>depth_limit</i> number is a measure of how
-much memory for recording backtracking points is needed to complete the match
-attempt. In the case of DFA matching, <i>depth_limit</i> controls the depth of 
-recursive calls of the internal function that is used for handling pattern 
+much nested backtracking happens (that is, how deeply the pattern's tree is
+searched). In the case of DFA matching, <i>depth_limit</i> controls the depth of
+recursive calls of the internal function that is used for handling pattern
 recursion, lookaround assertions, and atomic groups.
 </P>
 <br><b>
@@ -1800,7 +1807,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC21" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 04 April 2017
+Last updated: 11 April 2017
 <br>
 Copyright &copy; 1997-2017 University of Cambridge.
 <br>

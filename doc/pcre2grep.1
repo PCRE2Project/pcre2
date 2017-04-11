@@ -1,4 +1,4 @@
-.TH PCRE2GREP 1 "06 April 2017" "PCRE2 10.30"
+.TH PCRE2GREP 1 "11 April 2017" "PCRE2 10.30"
 .SH NAME
 pcre2grep - a grep with Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -347,6 +347,9 @@ file names are shown when multiple files are searched. For matching lines, the
 file name is followed by a colon; for context lines, a hyphen separator is used.
 If a line number is also being output, it follows the file name.
 .TP
+\fB--heap-limit\fP=\fInumber\fP
+See \fB--match-limit\fP below.
+.TP
 \fB--help\fP
 Output a help message, giving brief details of the command options and file
 type support, and then exit. Anything else on the command line is
@@ -436,7 +439,7 @@ used. There is no short form for this option.
 \fB--match-limit\fP=\fInumber\fP
 Processing some regular expression patterns may take a very long time to search
 for all possible matching strings. Others may require a very large amount of
-memory. There are two options that set resource limits for matching.
+memory. There are three options that set resource limits for matching.
 .sp
 The \fB--match-limit\fP option provides a means of limiting computing resource
 usage when processing patterns that are not going to match, but which have a
@@ -445,12 +448,22 @@ is a pattern that uses nested unlimited repeats. Internally, PCRE2 has a
 counter that is incremented each time around its main processing loop. If the 
 value set by \fB--match-limit\fP is reached, an error occurs.
 .sp
+The \fB--heap-limit\fP option specifies, as a number of kilobytes, the amount
+of heap memory that may be used for matching. Heap memory is needed only if
+matching the pattern requires a significant number of nested backtracking
+points to be remembered. This parameter can be set to zero to forbid the use of 
+heap memory altogether.
+.sp
 The \fB--depth-limit\fP option limits the depth of nested backtracking points,
-which in turn limits the amount of memory that is used. This limit is of use
-only if it is set smaller than \fB--match-limit\fP.
+which indirectly limits the amount of memory that is used. The amount of memory 
+needed for each backtracking point depends on the number of capturing
+parentheses in the pattern, so the amount of memory that is used before this
+limit acts varies from pattern to pattern. This limit is of use only if it is
+set smaller than \fB--match-limit\fP.
 .sp
 There are no short forms for these options. The default settings are specified
-when the PCRE2 library is compiled, with the default default being 10 million.
+when the PCRE2 library is compiled, with the default defaults being very large 
+and so effectively unlimited.
 .TP
 \fB--max-buffer-size=\fInumber\fP
 This limits the expansion of the processing buffer, whose initial size can be
@@ -670,11 +683,12 @@ Many of the short and long forms of \fBpcre2grep\fP's options are the same
 as in the GNU \fBgrep\fP program. Any long option of the form
 \fB--xxx-regexp\fP (GNU terminology) is also available as \fB--xxx-regex\fP
 (PCRE2 terminology). However, the \fB--depth-limit\fP, \fB--file-list\fP,
-\fB--file-offsets\fP, \fB--include-dir\fP, \fB--line-offsets\fP,
-\fB--locale\fP, \fB--match-limit\fP, \fB-M\fP, \fB--multiline\fP, \fB-N\fP,
-\fB--newline\fP, \fB--om-separator\fP, \fB--output\fP, \fB-u\fP, and
-\fB--utf-8\fP options are specific to \fBpcre2grep\fP, as is the use of the
-\fB--only-matching\fP option with a capturing parentheses number.
+\fB--file-offsets\fP, \fB--heap-limit\fP, \fB--include-dir\fP,
+\fB--line-offsets\fP, \fB--locale\fP, \fB--match-limit\fP, \fB-M\fP,
+\fB--multiline\fP, \fB-N\fP, \fB--newline\fP, \fB--om-separator\fP,
+\fB--output\fP, \fB-u\fP, and \fB--utf-8\fP options are specific to
+\fBpcre2grep\fP, as is the use of the \fB--only-matching\fP option with a
+capturing parentheses number.
 .P
 Although most of the common options work the same way, a few are different in
 \fBpcre2grep\fP. For example, the \fB--include\fP option's argument is a glob
@@ -799,9 +813,9 @@ message and the line that caused the problem to the standard error stream. If
 there are more than 20 such errors, \fBpcre2grep\fP gives up.
 .P
 The \fB--match-limit\fP option of \fBpcre2grep\fP can be used to set the
-overall resource limit; there is a second option called \fB--depth-limit\fP
-that sets a limit on the amount of memory that is used (see the discussion of
-these options above).
+overall resource limit. There are also other limits that affect the amount of 
+memory used during matching; see the discussion of \fB--heap-limit\fP and 
+\fB--depth-limit\fP above.
 .
 .
 .SH DIAGNOSTICS
@@ -834,6 +848,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 06 April 2017
+Last updated: 11 April 2017
 Copyright (c) 1997-2017 University of Cambridge.
 .fi

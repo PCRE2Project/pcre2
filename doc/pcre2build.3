@@ -1,4 +1,4 @@
-.TH PCRE2BUILD 3 "31 March 2017" "PCRE2 10.30"
+.TH PCRE2BUILD 3 "10 April 2017" "PCRE2 10.30"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .
@@ -260,17 +260,42 @@ to the \fBconfigure\fP command. This setting has no effect on the
 \fBpcre2_dfa_match()\fP matching function, but it does also limit JIT matching 
 (though the counting is done differently).
 .P
-In some environments it is desirable to limit the depth of nested backtracking
-in order to restrict the maximum amount of heap memory that is used. A second
-limit controls this; it defaults to the value that is set for
---with-match-limit. You can set a lower default limit by adding, for example,
+The \fBpcre2_match()\fP function starts out using a 20K vector on the system
+stack to record backtracking points. The more nested backtracking points there
+are (that is, the deeper the search tree), the more memory is needed. If the
+initial vector is not large enough, heap memory is used, up to a certain limit,
+which is specified in kilobytes. The limit can be changed at run time, as
+described in the
+.\" HREF
+\fBpcre2api\fP
+.\"
+documentation. The default limit (in effect unlimited) is 20 million. You can
+change this by a setting such as
+.sp
+  --with-heap-limit=500
+.sp   
+which limits the amount of heap to 500 kilobytes. This limit applies only to
+interpretive matching in pcre2_match(). It does not apply when JIT (which has
+its own memory arrangements) is used, nor does it apply to
+\fBpcre2_dfa_match()\fP.
+.P
+You can also explicitly limit the depth of nested backtracking in the
+\fBpcre2_match()\fP interpreter. This limit defaults to the value that is set
+for --with-match-limit. You can set a lower default limit by adding, for
+example,
 .sp
   --with-match-limit_depth=10000
 .sp
-to the \fBconfigure\fP command. This value can also be overridden at run time.
-As well as applying to \fBpcre2_match()\fP, this limit also controls the depth 
-of recursive function calls in \fBpcre2_dfa_match()\fP. These are used for 
-lookaround assertions, atomic groups, and recursion within patterns.
+to the \fBconfigure\fP command. This value can be overridden at run time. This
+depth limit indirectly limits the amount of heap memory that is used, but
+because the size of each backtracking "frame" depends on the number of
+capturing parentheses in a pattern, the amount of heap that is used before the
+limit is reached varies from pattern to pattern. This limit was more useful in
+versions before 10.30, where function recursion was used for backtracking.
+However, as well as applying to \fBpcre2_match()\fP, this limit also controls
+the depth of recursive function calls in \fBpcre2_dfa_match()\fP. These are
+used for lookaround assertions, atomic groups, and recursion within patterns.
+The limit does not apply to JIT matching.
 .
 .
 .SH "CREATING CHARACTER TABLES AT BUILD TIME"
@@ -547,6 +572,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 31 March 2017
+Last updated: 10 April 2017
 Copyright (c) 1997-2017 University of Cambridge.
 .fi

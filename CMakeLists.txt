@@ -78,6 +78,7 @@
 #            fix by David Gaussmann
 # 2016-10-07 PH added PCREGREP_MAX_BUFSIZE
 # 2017-03-11 PH turned HEAP_MATCH_RECURSE into a NO-OP for 10.30
+# 2017-04-08 PH added HEAP_LIMIT
 
 PROJECT(PCRE2 C)
 
@@ -142,6 +143,9 @@ SET(PCRE2_LINK_SIZE "2" CACHE STRING
 
 SET(PCRE2_PARENS_NEST_LIMIT "250" CACHE STRING
     "Default nested parentheses limit. See PARENS_NEST_LIMIT in config.h.in for details.")
+
+SET(PCRE2_HEAP_LIMIT "20000000" CACHE STRING
+    "Default limit on heap memory (kilobytes). See HEAP_LIMIT in config.h.in for details.")
 
 SET(PCRE2_MATCH_LIMIT "10000000" CACHE STRING
     "Default limit on internal looping. See MATCH_LIMIT in config.h.in for details.")
@@ -765,6 +769,7 @@ IF(PCRE2_SHOW_REPORT)
   MESSAGE(STATUS "  Rebuild char tables ............. : ${PCRE2_REBUILD_CHARTABLES}")
   MESSAGE(STATUS "  Internal link size .............. : ${PCRE2_LINK_SIZE}")
   MESSAGE(STATUS "  Parentheses nest limit .......... : ${PCRE2_PARENS_NEST_LIMIT}")
+  MESSAGE(STATUS "  Heap limit ...................... : ${PCRE2_HEAP_LIMIT}")
   MESSAGE(STATUS "  Match limit ..................... : ${PCRE2_MATCH_LIMIT}")
   MESSAGE(STATUS "  Match depth limit ............... : ${PCRE2_MATCH_LIMIT_DEPTH}")
   MESSAGE(STATUS "  Build shared libs ............... : ${BUILD_SHARED_LIBS}")

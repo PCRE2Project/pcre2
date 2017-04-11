@@ -588,6 +588,7 @@ static modstruct modlist[] = {
   { "get",                        MOD_DAT,  MOD_NN,  DO(get_numbers),            DO(get_names) },
   { "getall",                     MOD_DAT,  MOD_CTL, CTL_GETALL,                 DO(control) },
   { "global",                     MOD_PNDP, MOD_CTL, CTL_GLOBAL,                 PO(control) },
+  { "heap_limit",                 MOD_CTM,  MOD_INT, 0,                          MO(heap_limit) },
   { "hex",                        MOD_PAT,  MOD_CTL, CTL_HEXPAT,                 PO(control) },
   { "info",                       MOD_PAT,  MOD_CTL, CTL_INFO,                   PO(control) },
   { "jit",                        MOD_PAT,  MOD_IND, 7,                          PO(jit) },
@@ -1207,6 +1208,14 @@ are supported. */
   else \
     pcre2_set_depth_limit_32(G(a,32),b)
 
+#define PCRE2_SET_HEAP_LIMIT(a,b) \
+  if (test_mode == PCRE8_MODE) \
+    pcre2_set_heap_limit_8(G(a,8),b); \
+  else if (test_mode == PCRE16_MODE) \
+    pcre2_set_heap_limit_16(G(a,16),b); \
+  else \
+    pcre2_set_heap_limit_32(G(a,32),b)
+
 #define PCRE2_SET_MATCH_LIMIT(a,b) \
   if (test_mode == PCRE8_MODE) \
     pcre2_set_match_limit_8(G(a,8),b); \
@@ -1643,6 +1652,12 @@ the three different cases. */
   else \
     G(pcre2_set_depth_limit_,BITTWO)(G(a,BITTWO),b)
 
+#define PCRE2_SET_HEAP_LIMIT(a,b) \
+  if (test_mode == G(G(PCRE,BITONE),_MODE)) \
+    G(pcre2_set_heap_limit_,BITONE)(G(a,BITONE),b); \
+  else \
+    G(pcre2_set_heap_limit_,BITTWO)(G(a,BITTWO),b)
+
 #define PCRE2_SET_MATCH_LIMIT(a,b) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
     G(pcre2_set_match_limit_,BITONE)(G(a,BITONE),b); \
@@ -1856,6 +1871,7 @@ the three different cases. */
 #define PCRE2_SET_COMPILE_RECURSION_GUARD(a,b,c) \
   pcre2_set_compile_recursion_guard_8(G(a,8),b,c)
 #define PCRE2_SET_DEPTH_LIMIT(a,b) pcre2_set_depth_limit_8(G(a,8),b)
+#define PCRE2_SET_HEAP_LIMIT(a,b) pcre2_set_heap_limit_8(G(a,8),b)
 #define PCRE2_SET_MATCH_LIMIT(a,b) pcre2_set_match_limit_8(G(a,8),b)
 #define PCRE2_SET_MAX_PATTERN_LENGTH(a,b) pcre2_set_max_pattern_length_8(G(a,8),b)
 #define PCRE2_SET_OFFSET_LIMIT(a,b) pcre2_set_offset_limit_8(G(a,8),b)
@@ -1952,6 +1968,7 @@ the three different cases. */
 #define PCRE2_SET_COMPILE_RECURSION_GUARD(a,b,c) \
   pcre2_set_compile_recursion_guard_16(G(a,16),b,c)
 #define PCRE2_SET_DEPTH_LIMIT(a,b) pcre2_set_depth_limit_16(G(a,16),b)
+#define PCRE2_SET_HEAP_LIMIT(a,b) pcre2_set_heap_limit_16(G(a,16),b)
 #define PCRE2_SET_MATCH_LIMIT(a,b) pcre2_set_match_limit_16(G(a,16),b)
 #define PCRE2_SET_MAX_PATTERN_LENGTH(a,b) pcre2_set_max_pattern_length_16(G(a,16),b)
 #define PCRE2_SET_OFFSET_LIMIT(a,b) pcre2_set_offset_limit_16(G(a,16),b)
@@ -2048,6 +2065,7 @@ the three different cases. */
 #define PCRE2_SET_COMPILE_RECURSION_GUARD(a,b,c) \
   pcre2_set_compile_recursion_guard_32(G(a,32),b,c)
 #define PCRE2_SET_DEPTH_LIMIT(a,b) pcre2_set_depth_limit_32(G(a,32),b)
+#define PCRE2_SET_HEAP_LIMIT(a,b) pcre2_set_heap_limit_32(G(a,32),b)
 #define PCRE2_SET_MATCH_LIMIT(a,b) pcre2_set_match_limit_32(G(a,32),b)
 #define PCRE2_SET_MAX_PATTERN_LENGTH(a,b) pcre2_set_max_pattern_length_32(G(a,32),b)
 #define PCRE2_SET_OFFSET_LIMIT(a,b) pcre2_set_offset_limit_32(G(a,32),b)
@@ -4040,13 +4058,27 @@ if ((pat_patctl.control & CTL_INFO) != 0)
   {
   void *nametable;
   uint8_t *start_bits;
-  BOOL match_limit_set, depth_limit_set;
+  BOOL heap_limit_set, match_limit_set, depth_limit_set;
   uint32_t backrefmax, bsr_convention, capture_count, first_ctype, first_cunit,
     hasbackslashc, hascrorlf, jchanged, last_ctype, last_cunit, match_empty,
-    match_limit, minlength, nameentrysize, namecount, newline_convention,
-    depth_limit;
+    depth_limit, heap_limit, match_limit, minlength, nameentrysize, namecount, 
+    newline_convention;
 
   /* These info requests may return PCRE2_ERROR_UNSET. */
+
+  switch(pattern_info(PCRE2_INFO_HEAPLIMIT, &heap_limit, TRUE))
+    {
+    case 0:
+    heap_limit_set = TRUE;
+    break;
+
+    case PCRE2_ERROR_UNSET:
+    heap_limit_set = FALSE;
+    break;
+
+    default:
+    return PR_ABEND;
+    }
 
   switch(pattern_info(PCRE2_INFO_MATCHLIMIT, &match_limit, TRUE))
     {
@@ -4105,6 +4137,9 @@ if ((pat_patctl.control & CTL_INFO) != 0)
 
   if (maxlookbehind > 0)
     fprintf(outfile, "Max lookbehind = %d\n", maxlookbehind);
+
+  if (heap_limit_set)
+    fprintf(outfile, "Heap limit = %u\n", heap_limit);
 
   if (match_limit_set)
     fprintf(outfile, "Match limit = %u\n", match_limit);
@@ -5353,10 +5388,15 @@ uint32_t max = UINT32_MAX;
 
 PCRE2_SET_MATCH_LIMIT(dat_context, max);
 PCRE2_SET_DEPTH_LIMIT(dat_context, max);
+PCRE2_SET_HEAP_LIMIT(dat_context, max);
 
 for (;;)
   {
-  if (errnumber == PCRE2_ERROR_MATCHLIMIT)
+  if (errnumber == PCRE2_ERROR_HEAPLIMIT)
+    {
+    PCRE2_SET_HEAP_LIMIT(dat_context, mid);
+    }
+  else if (errnumber == PCRE2_ERROR_MATCHLIMIT)
     {
     PCRE2_SET_MATCH_LIMIT(dat_context, mid);
     }
@@ -5393,13 +5433,23 @@ for (;;)
            capcount == PCRE2_ERROR_NOMATCH ||
            capcount == PCRE2_ERROR_PARTIAL)
     {
+    /* If we've not hit the error with a heap limit less than the size of the
+    initial stack frame vector, the heap is not being used, so the minimum
+    limit is zero; there's no need to go on. The other limits are always 
+    greater than zero. */
+     
+    if (errnumber == PCRE2_ERROR_HEAPLIMIT && mid < START_FRAMES_SIZE/1024)   
+      {
+      fprintf(outfile, "Minimum %s limit = 0\n", msg);
+      break;
+      } 
     if (mid == min + 1)
       {
       fprintf(outfile, "Minimum %s limit = %d\n", msg, mid);
       break;
-      }
-    max = mid;
-    mid = (min + mid)/2;
+      } 
+    max = mid; 
+    mid = (min + max)/2;
     }
   else break;    /* Some other error */
   }
@@ -6662,20 +6712,32 @@ else for (gmatched = 0;; gmatched++)
         (double)CLOCKS_PER_SEC);
     }
 
-  /* Find the match and depth limits if requested. The match limit is not 
-  relevant for DFA matching and the depth limit is not relevant for JIT. */
+  /* Find the heap, match and depth limits if requested. The match and heap
+  limits are not relevant for DFA matching and the depth limit is not relevant
+  for JIT. */
 
   if ((dat_datctl.control & CTL_FINDLIMITS) != 0)
     {
     if ((dat_datctl.control & CTL_DFA) == 0)
+      { 
+      if (FLD(compiled_code, executable_jit) == NULL || 
+          (dat_datctl.options & PCRE2_NO_JIT) != 0)
+        {   
+        capcount = check_match_limit(pp, arg_ulen, PCRE2_ERROR_HEAPLIMIT, 
+          "heap");
+        }
       capcount = check_match_limit(pp, arg_ulen, PCRE2_ERROR_MATCHLIMIT, 
         "match");
+      }   
     else capcount = 0;     
+     
     if (FLD(compiled_code, executable_jit) == NULL || 
         (dat_datctl.options & PCRE2_NO_JIT) != 0 ||
         (dat_datctl.control & CTL_DFA) != 0)
+      {   
       capcount = check_match_limit(pp, arg_ulen, PCRE2_ERROR_DEPTHLIMIT,
         "depth");
+      }
     }
 
   /* Otherwise just run a single match, setting up a callout if required (the
@@ -7402,6 +7464,8 @@ printf("  \\C is supported\n");
 printf("  Internal link size = %d\n", optval);
 (void)PCRE2_CONFIG(PCRE2_CONFIG_PARENSLIMIT, &optval);
 printf("  Parentheses nest limit = %d\n", optval);
+(void)PCRE2_CONFIG(PCRE2_CONFIG_HEAPLIMIT, &optval);
+printf("  Default heap limit = %d\n", optval);
 (void)PCRE2_CONFIG(PCRE2_CONFIG_MATCHLIMIT, &optval);
 printf("  Default match limit = %d\n", optval);
 (void)PCRE2_CONFIG(PCRE2_CONFIG_DEPTHLIMIT, &optval);

@@ -1,4 +1,4 @@
-.TH PCRE2_PATTERN_INFO 3 "25 March 2017" "PCRE2 10.30"
+.TH PCRE2_PATTERN_INFO 3 "11 April 2017" "PCRE2 10.30"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH SYNOPSIS
@@ -43,6 +43,9 @@ request are as follows:
 .\" JOIN
   PCRE2_INFO_HASCRORLF       Return 1 if explicit CR or LF matches
                                exist in the pattern
+.\" JOIN
+  PCRE2_INFO_HEAPLIMIT       Heap memory limit if set,
+                               otherwise PCRE2_ERROR_UNSET
   PCRE2_INFO_JCHANGED        Return 1 if (?J) or (?-J) was used
   PCRE2_INFO_JITSIZE         Size of JIT compiled code, or 0
   PCRE2_INFO_LASTCODETYPE    Type of must-be-present information

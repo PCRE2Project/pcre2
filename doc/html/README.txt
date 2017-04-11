@@ -223,10 +223,10 @@ library. They are also documented in the pcre2build man page.
 
   --with-parens-nest-limit=500
 
-. PCRE2 has a counter that can be set to limit the amount of resources it uses
-  when matching a pattern. If the limit is exceeded during a match, the match
-  fails. The default is ten million. You can change the default by setting, for
-  example,
+. PCRE2 has a counter that can be set to limit the amount of computing resource
+  it uses when matching a pattern with the Perl-compatible matching function.
+  If the limit is exceeded during a match, the match fails. The default is ten
+  million. You can change the default by setting, for example,
 
   --with-match-limit=500000
 
@@ -235,14 +235,23 @@ library. They are also documented in the pcre2build man page.
   pcre2api man page (search for pcre2_set_match_limit).
 
 . There is a separate counter that limits the depth of nested backtracking
-  during a matching process, which in turn limits the amount of memory that is
-  used. This also has a default of ten million, which is essentially
+  during a matching process, which indirectly limits the amount of heap memory
+  that is used. This also has a default of ten million, which is essentially
   "unlimited". You can change the default by setting, for example,
 
   --with-match-limit-depth=5000
 
   There is more discussion in the pcre2api man page (search for
   pcre2_set_depth_limit).
+  
+. You can also set an explicit limit on the amount of heap memory used by 
+  the pcre2_match() interpreter:
+  
+  --with-heap-limit=500
+  
+  The units are kilobytes. This limit does not apply when the JIT optimization 
+  (which has its own memory control features) is used. There is more discussion 
+  on the pcre2api man page (search for pcre2_set_heap_limit).  
 
 . In the 8-bit library, the default maximum compiled pattern size is around
   64K bytes. You can increase this by adding --with-link-size=3 to the
@@ -865,4 +874,4 @@ The distribution should contain the files listed below.
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 17 March 2017
+Last updated: 11 April 2017

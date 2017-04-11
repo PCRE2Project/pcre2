@@ -168,6 +168,7 @@ const pcre2_match_context PRIV(default_match_context) = {
   NULL,
   NULL,
   PCRE2_UNSET,   /* Offset limit */
+  HEAP_LIMIT, 
   MATCH_LIMIT,
   MATCH_LIMIT_DEPTH };
 
@@ -343,6 +344,13 @@ pcre2_set_callout(pcre2_match_context *mcontext,
 {
 mcontext->callout = callout;
 mcontext->callout_data = callout_data;
+return 0;
+}
+
+PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
+pcre2_set_heap_limit(pcre2_match_context *mcontext, uint32_t limit)
+{
+mcontext->heap_limit = limit;
 return 0;
 }
 
