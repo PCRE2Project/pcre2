@@ -15574,6 +15574,10 @@ No match
     xyzabcdef
 No match
 
+/a(*ACCEPT)x|aa/endanchored
+    aaa
+ 0: a
+
 #subject -no_jit
 
 # Check auto-anchoring when there is a group that is never obeyed at

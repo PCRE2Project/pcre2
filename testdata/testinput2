@@ -5038,6 +5038,9 @@ a)"xI
 \= Expect no match
     xyzabcdef
 
+/a(*ACCEPT)x|aa/endanchored
+    aaa
+
 #subject -no_jit
 
 # Check auto-anchoring when there is a group that is never obeyed at
