@@ -392,7 +392,7 @@ pcre2grep: pcre2_match() gave error -47 while matching this text:
 
 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 
-pcre2grep: Error -46, -47 or -53 means that a resource limit was exceeded.
+pcre2grep: Error -46, -47, -53 or -63 means that a resource limit was exceeded.
 pcre2grep: Check your regex for nested unlimited loops.
 ---------------------------- Test 38 ------------------------------
 This line contains a binary zero here > < for testing.
@@ -516,7 +516,7 @@ This is a file of miscellaneous text that is used as test data for checking
 that the pcregrep command is working correctly. The file must be more than 24K
 long so that it needs more than a single read
 
-pcre2grep: Error -46, -47 or -53 means that a resource limit was exceeded.
+pcre2grep: Error -46, -47, -53 or -63 means that a resource limit was exceeded.
 pcre2grep: Check your regex for nested unlimited loops.
 RC=1
 ---------------------------- Test 63 -----------------------------
@@ -526,7 +526,7 @@ This is a file of miscellaneous text that is used as test data for checking
 that the pcregrep command is working correctly. The file must be more than 24K
 long so that it needs more than a single read
 
-pcre2grep: Error -46, -47 or -53 means that a resource limit was exceeded.
+pcre2grep: Error -46, -47, -53 or -63 means that a resource limit was exceeded.
 pcre2grep: Check your regex for nested unlimited loops.
 RC=1
 ---------------------------- Test 64 ------------------------------
