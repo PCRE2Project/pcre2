@@ -126,6 +126,11 @@ pcre2_set_heap_limit() or (*LIMIT_HEAP=xxx). Upgraded pcre2test to show the
 heap limit along with other pattern information, and to find the minimum when 
 the find_limits modifier is set.
 
+23. Write to the last 8 bytes of the pcre2_real_code structure when a compiled 
+pattern is set up so as to initialize any padding the compiler might have 
+included. This avoids valgrind warnings when a compiled pattern is copied, in 
+particular when it is serialized.
+
 
 Version 10.23 14-February-2017
 ------------------------------

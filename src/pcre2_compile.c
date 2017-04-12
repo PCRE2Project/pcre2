@@ -9283,7 +9283,14 @@ if (re == NULL)
   errorcode = ERR21;
   goto HAD_CB_ERROR;
   }
+  
+/* The compiler may put padding at the end of the pcre2_real_code structure in 
+order to round it up to a multiple of 4 or 8 bytes. This means that when a 
+compiled pattern is copied (for example, when serialized) undefined bytes are 
+read, and this annoys debuggers such as valgrind. To avoid this, we explicitly 
+write to the last 8 bytes of the structure before setting the fields. */
 
+memset((char *)re + sizeof(pcre2_real_code) - 8, 0, 8);
 re->memctl = ccontext->memctl;
 re->tables = tables;
 re->executable_jit = NULL;
