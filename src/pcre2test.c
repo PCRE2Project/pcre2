@@ -465,7 +465,7 @@ so many of them that they are split into two fields. */
 #define CTL_ANYGLOB          (CTL_ALTGLOBAL|CTL_GLOBAL)
 
 /* These are the matching controls that may be set either on a pattern or on a
-data line. They are copied from the pattern controls as initial settings for 
+data line. They are copied from the pattern controls as initial settings for
 data line controls Note that CTL_MEMORY is not included here, because it does
 different things in the two cases. */
 
@@ -2475,21 +2475,21 @@ if (show_memory)
     fprintf(outfile, "** malloc() failed for %zd\n", size);
     }
   else
-    {       
+    {
     fprintf(outfile, "malloc  %5zd", size);
 #ifdef DEBUG_SHOW_MALLOC_ADDRESSES
     fprintf(outfile, " %p", block);   /* Not portable */
-#endif     
+#endif
     if (malloclistptr < MALLOCLISTSIZE)
       {
       malloclist[malloclistptr] = block;
       malloclistlength[malloclistptr++] = size;
-      }    
-    else 
+      }
+    else
       fprintf(outfile, " (not remembered)");
-    fprintf(outfile, "\n"); 
-    }   
-  } 
+    fprintf(outfile, "\n");
+    }
+  }
 return block;
 }
 
@@ -2498,31 +2498,31 @@ static void my_free(void *block, void *data)
 (void)data;
 if (show_memory)
   {
-  uint32_t i, j; 
+  uint32_t i, j;
   BOOL found = FALSE;
-  
+
   fprintf(outfile, "free");
   for (i = 0; i < malloclistptr; i++)
     {
     if (block == malloclist[i])
       {
       fprintf(outfile, "    %5zd", malloclistlength[i]);
-      malloclistptr--; 
+      malloclistptr--;
       for (j = i; j < malloclistptr; j++)
         {
         malloclist[j] = malloclist[j+1];
         malloclistlength[j] = malloclistlength[j+1];
         }
-      found = TRUE;   
-      break;       
-      }    
+      found = TRUE;
+      break;
+      }
     }
   if (!found) fprintf(outfile, " unremembered block");
-#ifdef DEBUG_SHOW_MALLOC_ADDRESSES   
+#ifdef DEBUG_SHOW_MALLOC_ADDRESSES
   fprintf(outfile, " %p", block);  /* Not portable */
-#endif   
+#endif
   fprintf(outfile, "\n");
-  } 
+  }
 free(block);
 }
 
@@ -3970,12 +3970,12 @@ if (len < 0)
     "number\n** Unexpected return (%d) from pcre2_get_error_message()\n", len);
   }
 else
-  {    
+  {
   fprintf(outfile, "%s", before);
   PCHARSV(CASTVAR(void *, pbuffer), 0, len, FALSE, outfile);
   fprintf(outfile, "%s", after);
   }
-return len >= 0;    
+return len >= 0;
 }
 
 
@@ -4061,7 +4061,7 @@ if ((pat_patctl.control & CTL_INFO) != 0)
   BOOL heap_limit_set, match_limit_set, depth_limit_set;
   uint32_t backrefmax, bsr_convention, capture_count, first_ctype, first_cunit,
     hasbackslashc, hascrorlf, jchanged, last_ctype, last_cunit, match_empty,
-    depth_limit, heap_limit, match_limit, minlength, nameentrysize, namecount, 
+    depth_limit, heap_limit, match_limit, minlength, nameentrysize, namecount,
     newline_convention;
 
   /* These info requests may return PCRE2_ERROR_UNSET. */
@@ -4315,9 +4315,9 @@ if ((pat_patctl.control & CTL_INFO) != 0)
       {
 #ifdef SUPPORT_JIT
       fprintf(outfile, "JIT compilation was not successful");
-      if (jitrc != 0 && !print_error_message(jitrc, " (", ")")) 
+      if (jitrc != 0 && !print_error_message(jitrc, " (", ")"))
         return PR_ABEND;
-      fprintf(outfile, "\n");    
+      fprintf(outfile, "\n");
 #else
       fprintf(outfile, "JIT support is not available in this version of PCRE2\n");
 #endif
@@ -4332,7 +4332,7 @@ if ((pat_patctl.control & CTL_CALLOUT_INFO) != 0)
   if (errorcode != 0)
     {
     fprintf(outfile, "Callout enumerate failed: error %d: ", errorcode);
-    if (errorcode < 0 && !print_error_message(errorcode, "", "\n")) 
+    if (errorcode < 0 && !print_error_message(errorcode, "", "\n"))
       return PR_ABEND;
     return PR_SKIP;
     }
@@ -4563,7 +4563,7 @@ switch(cmd)
   if (rc < 0)
     {
     if (!serial_error(rc, "Serialization")) return PR_ABEND;
-    fclose(f); 
+    fclose(f);
     break;
     }
 
@@ -4577,7 +4577,7 @@ switch(cmd)
   if (fwrite(serial, 1, serial_size, f) != serial_size)
     {
     fprintf(outfile, "** Wrong return from fwrite()\n");
-    fclose(f); 
+    fclose(f);
     return PR_ABEND;
     }
 
@@ -4605,7 +4605,7 @@ switch(cmd)
     {
     fprintf(outfile, "** Failed to get memory (size %lu) for #load\n",
       (unsigned long int)serial_size);
-    fclose(f);   
+    fclose(f);
     return PR_ABEND;
     }
 
@@ -4613,16 +4613,16 @@ switch(cmd)
     {
     fprintf(outfile, "** Wrong return from fread()\n");
     free(serial);
-    fclose(f); 
+    fclose(f);
     return PR_ABEND;
     }
   fclose(f);
 
   PCRE2_SERIALIZE_GET_NUMBER_OF_CODES(rc, serial);
-  if (rc < 0) 
+  if (rc < 0)
     {
-    if (!serial_error(rc, "Get number of codes")) return PR_ABEND; 
-    } 
+    if (!serial_error(rc, "Get number of codes")) return PR_ABEND;
+    }
   else
     {
     if (rc + patstacknext > PATSTACKSIZE)
@@ -4635,10 +4635,10 @@ switch(cmd)
       }
     PCRE2_SERIALIZE_DECODE(rc, patstack + patstacknext, rc, serial,
       general_context);
-    if (rc < 0) 
+    if (rc < 0)
       {
       if (!serial_error(rc, "Deserialization")) return PR_ABEND;
-      } 
+      }
     else patstacknext += rc;
     }
 
@@ -5366,7 +5366,7 @@ return PR_OK;
 *          Check match or depth limit            *
 *************************************************/
 
-/* This is used for DFA, normal, and JIT fast matching. For DFA matching it 
+/* This is used for DFA, normal, and JIT fast matching. For DFA matching it
 should only called with the third argument set to PCRE2_ERROR_DEPTHLIMIT.
 
 Arguments:
@@ -5374,9 +5374,9 @@ Arguments:
   ulen      length of subject or PCRE2_ZERO_TERMINATED
   errnumber defines which limit to test
   msg       string to include in final message
-  
+
 Returns:    the return from the final match function call
-*/    
+*/
 
 static int
 check_match_limit(uint8_t *pp, PCRE2_SIZE ulen, int errnumber, const char *msg)
@@ -5404,22 +5404,22 @@ for (;;)
     {
     PCRE2_SET_DEPTH_LIMIT(dat_context, mid);
     }
-    
+
   if ((dat_datctl.control & CTL_DFA) != 0)
     {
     if (dfa_workspace == NULL)
       dfa_workspace = (int *)malloc(DFA_WS_DIMENSION*sizeof(int));
     if (dfa_matched++ == 0)
       dfa_workspace[0] = -1;  /* To catch bad restart */
-    PCRE2_DFA_MATCH(capcount, compiled_code, pp, ulen, dat_datctl.offset, 
+    PCRE2_DFA_MATCH(capcount, compiled_code, pp, ulen, dat_datctl.offset,
       dat_datctl.options, match_data,
       PTR(dat_context), dfa_workspace, DFA_WS_DIMENSION);
     }
-        
+
   else if ((pat_patctl.control & CTL_JITFAST) != 0)
     PCRE2_JIT_MATCH(capcount, compiled_code, pp, ulen, dat_datctl.offset,
       dat_datctl.options, match_data, PTR(dat_context));
-       
+
   else
     PCRE2_MATCH(capcount, compiled_code, pp, ulen, dat_datctl.offset,
       dat_datctl.options, match_data, PTR(dat_context));
@@ -5435,20 +5435,20 @@ for (;;)
     {
     /* If we've not hit the error with a heap limit less than the size of the
     initial stack frame vector, the heap is not being used, so the minimum
-    limit is zero; there's no need to go on. The other limits are always 
+    limit is zero; there's no need to go on. The other limits are always
     greater than zero. */
-     
-    if (errnumber == PCRE2_ERROR_HEAPLIMIT && mid < START_FRAMES_SIZE/1024)   
+
+    if (errnumber == PCRE2_ERROR_HEAPLIMIT && mid < START_FRAMES_SIZE/1024)
       {
       fprintf(outfile, "Minimum %s limit = 0\n", msg);
       break;
-      } 
+      }
     if (mid == min + 1)
       {
       fprintf(outfile, "Minimum %s limit = %d\n", msg, mid);
       break;
-      } 
-    max = mid; 
+      }
+    max = mid;
     mid = (min + max)/2;
     }
   else break;    /* Some other error */
@@ -5844,8 +5844,8 @@ if ((dat_datctl.control & CTL_GETALL) != 0)
     PCRE2_SUBSTRING_LIST_FREE(stringlist);
     }
   }
-  
-return TRUE; 
+
+return TRUE;
 }
 
 
@@ -6256,7 +6256,7 @@ if (pat_patctl.replacement[0] != 0 &&
   fprintf(outfile, "** Replacement text is not supported with null_context.\n");
   return PR_OK;
   }
-  
+
 /* We now have the subject in dbuffer, with len containing the byte length, and
 ulen containing the code unit length, with a copy in arg_ulen for use in match
 function arguments (this gets changed to PCRE2_ZERO_TERMINATED when the
@@ -6399,15 +6399,15 @@ NULL context. */
 use_dat_context = ((dat_datctl.control & CTL_NULLCONTEXT) != 0)?
   NULL : PTR(dat_context);
 
-/* Enable display of malloc/free if wanted. We can do this only if either the 
+/* Enable display of malloc/free if wanted. We can do this only if either the
 pattern or the subject is processed with a context. */
 
 show_memory = (dat_datctl.control & CTL_MEMORY) != 0;
 
-if (show_memory && 
+if (show_memory &&
     (pat_patctl.control & dat_datctl.control & CTL_NULLCONTEXT) != 0)
   fprintf(outfile, "** \\=memory requires either a pattern or a subject "
-    "context: ignored\n");    
+    "context: ignored\n");
 
 /* Create and assign a JIT stack if requested. */
 
@@ -6713,28 +6713,30 @@ else for (gmatched = 0;; gmatched++)
     }
 
   /* Find the heap, match and depth limits if requested. The match and heap
-  limits are not relevant for DFA matching and the depth limit is not relevant
-  for JIT. */
+  limits are not relevant for DFA matching and the depth and heap limits are
+  not relevant for JIT. The return from check_match_limit() is the return from
+  the final call to pcre2_match() or pcre2_dfa_match(). */
 
   if ((dat_datctl.control & CTL_FINDLIMITS) != 0)
     {
+    capcount = 0;  /* This stops compiler warnings */
+      
     if ((dat_datctl.control & CTL_DFA) == 0)
-      { 
-      if (FLD(compiled_code, executable_jit) == NULL || 
+      {
+      if (FLD(compiled_code, executable_jit) == NULL ||
           (dat_datctl.options & PCRE2_NO_JIT) != 0)
-        {   
-        capcount = check_match_limit(pp, arg_ulen, PCRE2_ERROR_HEAPLIMIT, 
+        {
+        (void)check_match_limit(pp, arg_ulen, PCRE2_ERROR_HEAPLIMIT,
           "heap");
         }
-      capcount = check_match_limit(pp, arg_ulen, PCRE2_ERROR_MATCHLIMIT, 
+      capcount = check_match_limit(pp, arg_ulen, PCRE2_ERROR_MATCHLIMIT,
         "match");
-      }   
-    else capcount = 0;     
-     
-    if (FLD(compiled_code, executable_jit) == NULL || 
+      }
+
+    if (FLD(compiled_code, executable_jit) == NULL ||
         (dat_datctl.options & PCRE2_NO_JIT) != 0 ||
         (dat_datctl.control & CTL_DFA) != 0)
-      {   
+      {
       capcount = check_match_limit(pp, arg_ulen, PCRE2_ERROR_DEPTHLIMIT,
         "depth");
       }
@@ -7655,7 +7657,7 @@ while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
   else if (strcmp(arg, "-i") == 0)   def_patctl.control |= CTL_INFO;
   else if (strcmp(arg, "-jit") == 0 || strcmp(arg, "-jitverify") == 0)
     {
-    if (arg[4] != 0) def_patctl.control |= CTL_JITVERIFY; 
+    if (arg[4] != 0) def_patctl.control |= CTL_JITVERIFY;
     def_patctl.jit = 7;  /* full & partial */
 #ifndef SUPPORT_JIT
     fprintf(stderr, "** Warning: JIT support is not available: "
@@ -7754,7 +7756,7 @@ if (arg_error != NULL)
   int errcode;
   char *endptr;
 
-/* Ensure the relevant non-8-bit buffer is available. Ensure that it is at 
+/* Ensure the relevant non-8-bit buffer is available. Ensure that it is at
 least 128 code units, because it is used for retrieving error messages. */
 
 #ifdef SUPPORT_PCRE2_16
