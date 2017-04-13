@@ -5011,9 +5011,6 @@ a)"xI
 /(a(*MARK:m)(*ACCEPT)){0}(?1)/mark
     abc
 
-# Temporary, until JIT is updated.
-#subject no_jit
-
 /abc/endanchored
     xyzabc
 \= Expect no match
@@ -5040,8 +5037,6 @@ a)"xI
 
 /a(*ACCEPT)x|aa/endanchored
     aaa
-
-#subject -no_jit
 
 # Check auto-anchoring when there is a group that is never obeyed at
 # the start of a branch.

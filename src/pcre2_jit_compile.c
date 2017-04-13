@@ -9554,6 +9554,9 @@ if (*cc == OP_FAIL)
   return cc + 1;
   }
 
+if (*cc == OP_ACCEPT && common->currententry == NULL && (common->re->overall_options & PCRE2_ENDANCHORED) != 0)
+  add_jump(compiler, &common->reset_match, CMP(SLJIT_NOT_EQUAL, STR_PTR, 0, STR_END, 0));
+
 if (*cc == OP_ASSERT_ACCEPT || common->currententry != NULL || !common->might_be_empty)
   {
   /* No need to check notempty conditions. */
@@ -11295,6 +11298,7 @@ struct sljit_jump *jump;
 struct sljit_jump *minlength_check_failed = NULL;
 struct sljit_jump *reqbyte_notfound = NULL;
 struct sljit_jump *empty_match = NULL;
+struct sljit_jump *end_anchor_failed = NULL;
 
 SLJIT_ASSERT(tables);
 
@@ -11577,6 +11581,9 @@ if (SLJIT_UNLIKELY(sljit_get_compiler_error(compiler)))
   return PCRE2_ERROR_NOMEMORY;
   }
 
+if ((re->overall_options & PCRE2_ENDANCHORED) != 0)
+  end_anchor_failed = CMP(SLJIT_NOT_EQUAL, STR_PTR, 0, STR_END, 0);
+
 if (common->might_be_empty)
   {
   empty_match = CMP(SLJIT_EQUAL, STR_PTR, 0, SLJIT_MEM1(SLJIT_SP), OVECTOR(0));
@@ -11597,6 +11604,9 @@ if (common->forced_quit != NULL)
 if (minlength_check_failed != NULL)
   SET_LABEL(minlength_check_failed, common->forced_quit_label);
 sljit_emit_return(compiler, SLJIT_MOV, SLJIT_RETURN_REG, 0);
+
+if ((re->overall_options & PCRE2_ENDANCHORED) != 0)
+  JUMPHERE(end_anchor_failed);
 
 if (mode != PCRE2_JIT_COMPLETE)
   {

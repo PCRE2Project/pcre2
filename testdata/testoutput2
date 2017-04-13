@@ -15537,9 +15537,6 @@ No match
  0: a
 MK: m
 
-# Temporary, until JIT is updated.
-#subject no_jit
-
 /abc/endanchored
     xyzabc
  0: abc
@@ -15577,8 +15574,6 @@ No match
 /a(*ACCEPT)x|aa/endanchored
     aaa
  0: a
-
-#subject -no_jit
 
 # Check auto-anchoring when there is a group that is never obeyed at
 # the start of a branch.
