@@ -135,6 +135,8 @@ particular when it is serialized.
 
 25. Remove a duplication typo in pcre2_tables.c
 
+26. Correct an incorrect cast in pcre2_valid_utf.c
+
 
 Version 10.23 14-February-2017
 ------------------------------
