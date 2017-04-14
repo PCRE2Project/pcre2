@@ -1,4 +1,4 @@
-.TH PCRE2CALLOUT 3 "29 March 2017" "PCRE2 10.30"
+.TH PCRE2CALLOUT 3 "14 April 2017" "PCRE2 10.30"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH SYNOPSIS
@@ -191,8 +191,8 @@ callouts such as the example above are obeyed.
 .rs
 .sp
 During matching, when PCRE2 reaches a callout point, if an external function is
-set in the match context, it is called. This applies to both normal and DFA
-matching. The first argument to the callout function is a pointer to a
+provided in the match context, it is called. This applies to both normal and
+DFA matching. The first argument to the callout function is a pointer to a
 \fBpcre2_callout\fP block. The second argument is the void * callout data that
 was supplied when the callout was set up by calling \fBpcre2_set_callout()\fP
 (see the
@@ -261,7 +261,7 @@ The remaining fields in the callout block are the same for both kinds of
 callout.
 .P
 The \fIoffset_vector\fP field is a pointer to a vector of capturing offsets
-(the "ovector"). You may read certain elements in this vector, but you must not
+(the "ovector"). You may read the elements in this vector, but you must not
 change any of them.
 .P
 For calls to \fBpcre2_match()\fP, the \fIoffset_vector\fP field is not (since
@@ -281,10 +281,11 @@ for example, when the callout in the pattern ((a)(b))(?C2) is taken,
 .P
 The contents of ovector[2] to ovector[<capture_top>*2-1] can be inspected in
 order to extract substrings that have been matched so far, in the same way as
-extracting substrings after a match has completed. The values in ovector[0] and 
-ovector[1] are undefined and should not be used in any way. Substrings that 
-have not been captured (but whose numbers are less than \fIcapture_top\fP) have 
-both of their ovector slots set to PCRE2_UNSET.
+extracting substrings after a match has completed. The values in ovector[0] and
+ovector[1] are always PCRE2_UNSET because the match is by definition not
+complete. Substrings that have not been captured but whose numbers are less
+than \fIcapture_top\fP also have both of their ovector slots set to
+PCRE2_UNSET.
 .P
 For DFA matching, the \fIoffset_vector\fP field points to the ovector that was
 passed to the matching function in the match data block, but it holds no useful
@@ -410,6 +411,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 29 March 2017
+Last updated: 14 April 2017
 Copyright (c) 1997-2017 University of Cambridge.
 .fi
