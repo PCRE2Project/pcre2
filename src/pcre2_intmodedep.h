@@ -774,8 +774,8 @@ typedef struct heapframe {
   uint32_t rdepth;           /* "Recursion" depth */
   uint32_t group_frame_type; /* Type information for group frames */
   uint32_t temp_32[4];       /* Used for short-term 32-bit or BOOL values */
-  uint16_t return_id;        /* Where to go on in internal "return" */
-  uint16_t op;               /* Processing opcode */
+  uint8_t return_id;         /* Where to go on in internal "return" */
+  uint8_t op;                /* Processing opcode */
 
 #if PCRE2_CODE_UNIT_WIDTH == 8
   PCRE2_UCHAR occu[6];       /* Used for other case code units */
