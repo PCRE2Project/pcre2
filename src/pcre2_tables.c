@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-         New API code Copyright (c) 2016 University of Cambridge
+          New API code Copyright (c) 2016-2017 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,7 @@ POSSIBILITY OF SUCH DAMAGE.
 */
 
 /* This module contains some fixed tables that are used by more than one of the
-PCRE code modules. The tables are also #included by the pcre2test program,
+PCRE2 code modules. The tables are also #included by the pcre2test program,
 which uses macros to change their names from _pcre2_xxx to xxxx, thereby
 avoiding name clashes with the library. In this case, PCRE2_PCRE2TEST is
 defined. */
@@ -148,7 +148,7 @@ two code points. The breaking rules are as follows:
 
 1. Break at the start and end of text (pretty obviously).
 
-2. Do not break between a CR and LF; otherwise, break before and   after
+2. Do not break between a CR and LF; otherwise, break before and after
    controls.
 
 3. Do not break Hangul syllable sequences, the rules for which are:
@@ -181,7 +181,7 @@ const uint32_t PRIV(ucp_gbtable)[] = {
 
    (1<<ucp_gbExtend)|(1<<ucp_gbSpacingMark),                /*  5 SpacingMark */
    (1<<ucp_gbExtend)|(1<<ucp_gbSpacingMark)|(1<<ucp_gbL)|   /*  6 L */
-     (1<<ucp_gbL)|(1<<ucp_gbV)|(1<<ucp_gbLV)|(1<<ucp_gbLVT),
+     (1<<ucp_gbV)|(1<<ucp_gbLV)|(1<<ucp_gbLVT),
 
    (1<<ucp_gbExtend)|(1<<ucp_gbSpacingMark)|(1<<ucp_gbV)|   /*  7 V */
      (1<<ucp_gbT),

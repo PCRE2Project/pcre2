@@ -133,6 +133,8 @@ particular when it is serialized.
 
 24. Remove a redundant line of code left in accidentally a long time ago.
 
+25. Remove a duplication typo in pcre2_tables.c
+
 
 Version 10.23 14-February-2017
 ------------------------------
