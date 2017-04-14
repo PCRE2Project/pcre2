@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "11 April 2017" "PCRE2 10.30"
+.TH PCRE2API 3 "14 April 2017" "PCRE2 10.30"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -1301,9 +1301,25 @@ documentation.
   PCRE2_ENDANCHORED
 .sp
 If this bit is set, the end of any pattern match must be right at the end of
-the string being searched (the "subject string"). This effect can also be
+the string being searched (the "subject string"). If the pattern match 
+succeeds by reaching (*ACCEPT), but does not reach the end of the subject, the 
+match fails at the current starting point. For unanchored patterns, a new match 
+is then tried at the next starting point. However, if the match succeeds by 
+reaching the end of the pattern, but not the end of the subject, backtracking 
+occurs and an alternative match may be found. Consider these two patterns:
+.sp
+  .(*ACCEPT)|..
+  .|..
+.sp
+If matched against "abc" with PCRE2_ENDANCHORED set, the first matches "c"
+whereas the second matches "bc". The effect of PCRE2_ENDANCHORED can also be
 achieved by appropriate constructs in the pattern itself, which is the only way
 to do it in Perl.
+.P
+For DFA matching with \fBpcre2_dfa_match()\fP, PCRE2_ENDANCHORED applies only 
+to the first (that is, the longest) matched string. Other parallel matches,
+which are necessarily substrings of the first one, must obviously end before 
+the end of the subject.
 .sp
   PCRE2_EXTENDED
 .sp
@@ -3379,6 +3395,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 11 April 2017
+Last updated: 14 April 2017
 Copyright (c) 1997-2017 University of Cambridge.
 .fi
