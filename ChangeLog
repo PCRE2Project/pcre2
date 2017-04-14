@@ -131,6 +131,8 @@ pattern is set up so as to initialize any padding the compiler might have
 included. This avoids valgrind warnings when a compiled pattern is copied, in 
 particular when it is serialized.
 
+24. Remove a redundant line of code left in accidentally a long time ago.
+
 
 Version 10.23 14-February-2017
 ------------------------------
