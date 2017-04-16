@@ -1075,7 +1075,7 @@ for (;;)
   {
   c = *code;
 
-  if (c > OP_TABLE_LENGTH) return -1;   /* Something gone wrong */
+  if (c >= OP_TABLE_LENGTH) return -1;   /* Something gone wrong */
 
   if (c >= OP_STAR && c <= OP_TYPEPOSUPTO)
     {

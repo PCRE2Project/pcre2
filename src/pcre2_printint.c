@@ -340,7 +340,7 @@ for(;;)
       case OP_TABLE_LENGTH +
         ((sizeof(OP_names)/sizeof(const char *) == OP_TABLE_LENGTH) &&
         (sizeof(OP_lengths) == OP_TABLE_LENGTH)):
-      break;
+      return;
 /* ========================================================================== */
 
     case OP_END:

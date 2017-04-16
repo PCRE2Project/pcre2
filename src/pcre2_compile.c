@@ -8440,6 +8440,7 @@ for (;; pptr++)
     case META_BACKREF_BYNAME:
     if ((cb->external_options & PCRE2_MATCH_UNSET_BACKREF) != 0)
       goto ISNOTFIXED;
+    /* Fall through */   
 
     case META_RECURSE_BYNAME:
       {
@@ -9274,7 +9275,8 @@ possible because nowadays we limit the maximum value of cb.names_found and
 cb.name_entry_size. */
 
 re_blocksize = sizeof(pcre2_real_code) +
-  CU2BYTES(length + cb.names_found * cb.name_entry_size);
+  CU2BYTES(length + 
+  (PCRE2_SIZE)cb.names_found * (PCRE2_SIZE)cb.name_entry_size);
 re = (pcre2_real_code *)
   ccontext->memctl.malloc(re_blocksize, ccontext->memctl.memory_data);
 if (re == NULL)

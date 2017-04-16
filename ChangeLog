@@ -140,6 +140,15 @@ particular when it is serialized.
 27. Update pcre2test, remove some unused code in pcre2_match(), and upgrade the 
 tests to improve coverage.
 
+28. Some fixes/tidies as a result of looking at Coverity Scan output:
+
+    (a) Typo: ">" should be ">=" in opcode check in pcre2_auto_possess.c.
+    (b) Added some casts to avoid "suspicious implicit sign extension". 
+    (c) Resource leaks in pcre2test in rare error cases. 
+    (d) Avoid warning for never-use case OP_TABLE_LENGTH which is just a fudge
+        for checking at compile time that tables are the right size.  
+    (e) Add missing "fall through" comment.     
+
 
 Version 10.23 14-February-2017
 ------------------------------

@@ -697,7 +697,7 @@ for (;;)
       case OP_TABLE_LENGTH +
         ((sizeof(coptable) == OP_TABLE_LENGTH) &&
          (sizeof(poptable) == OP_TABLE_LENGTH)):
-      break;
+      return 0;
 
 /* ========================================================================== */
       /* Reached a closing bracket. If not at the end of the pattern, carry

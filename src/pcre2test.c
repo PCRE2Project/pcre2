@@ -4434,7 +4434,7 @@ process_command(void)
 FILE *f;
 PCRE2_SIZE serial_size;
 size_t i;
-int rc, cmd, cmdlen;
+int rc, cmd, cmdlen, yield;
 uint16_t first_listed_newline;
 const char *cmdname;
 uint8_t *argptr, *serial;
@@ -4445,6 +4445,7 @@ if (restrict_for_perl_test)
   return PR_ABEND;
   }
 
+yield = PR_OK;
 cmd = CMD_UNKNOWN;
 cmdlen = 0;
 
@@ -4568,8 +4569,8 @@ switch(cmd)
     general_context);
   if (rc < 0)
     {
-    if (!serial_error(rc, "Serialization")) return PR_ABEND;
     fclose(f);
+    if (!serial_error(rc, "Serialization")) return PR_ABEND;
     break;
     }
 
@@ -4615,44 +4616,46 @@ switch(cmd)
     return PR_ABEND;
     }
 
-  if (fread(serial, 1, serial_size, f) != serial_size)
-    {
-    fprintf(outfile, "** Wrong return from fread()\n");
-    free(serial);
-    fclose(f);
-    return PR_ABEND;
-    }
+  i = fread(serial, 1, serial_size, f);
   fclose(f);
 
-  PCRE2_SERIALIZE_GET_NUMBER_OF_CODES(rc, serial);
-  if (rc < 0)
+  if (i != serial_size)
     {
-    if (!serial_error(rc, "Get number of codes")) return PR_ABEND;
+    fprintf(outfile, "** Wrong return from fread()\n");
+    yield = PR_ABEND;
     }
   else
     {
-    if (rc + patstacknext > PATSTACKSIZE)
-      {
-      fprintf(outfile, "** Not enough space on pattern stack for %d pattern%s\n",
-        rc, (rc == 1)? "" : "s");
-      rc = PATSTACKSIZE - patstacknext;
-      fprintf(outfile, "** Decoding %d pattern%s\n", rc,
-        (rc == 1)? "" : "s");
-      }
-    PCRE2_SERIALIZE_DECODE(rc, patstack + patstacknext, rc, serial,
-      general_context);
+    PCRE2_SERIALIZE_GET_NUMBER_OF_CODES(rc, serial);
     if (rc < 0)
       {
-      if (!serial_error(rc, "Deserialization")) return PR_ABEND;
+      if (!serial_error(rc, "Get number of codes")) yield = PR_ABEND;
       }
-    else patstacknext += rc;
+    else
+      {
+      if (rc + patstacknext > PATSTACKSIZE)
+        {
+        fprintf(outfile, "** Not enough space on pattern stack for %d pattern%s\n",
+          rc, (rc == 1)? "" : "s");
+        rc = PATSTACKSIZE - patstacknext;
+        fprintf(outfile, "** Decoding %d pattern%s\n", rc,
+          (rc == 1)? "" : "s");
+        }
+      PCRE2_SERIALIZE_DECODE(rc, patstack + patstacknext, rc, serial,
+        general_context);
+      if (rc < 0)
+        {
+        if (!serial_error(rc, "Deserialization")) yield = PR_ABEND;
+        }
+      else patstacknext += rc;
+      }
     }
 
   free(serial);
   break;
   }
 
-return PR_OK;
+return yield;
 }
 
 
@@ -5429,7 +5432,7 @@ for (;;)
   else
     PCRE2_MATCH(capcount, compiled_code, pp, ulen, dat_datctl.offset,
       dat_datctl.options, match_data, PTR(dat_context));
-      
+
   if (capcount == errnumber)
     {
     min = mid;
@@ -7896,7 +7899,7 @@ functions that are not otherwise called. */
 if (test_mode == PCRE8_MODE)
   {
   CREATECONTEXTS;
-  CONTEXTTESTS; 
+  CONTEXTTESTS;
   }
 #endif
 
@@ -7906,7 +7909,7 @@ if (test_mode == PCRE8_MODE)
 if (test_mode == PCRE16_MODE)
   {
   CREATECONTEXTS;
-  CONTEXTTESTS; 
+  CONTEXTTESTS;
   }
 #endif
 
@@ -7916,7 +7919,7 @@ if (test_mode == PCRE16_MODE)
 if (test_mode == PCRE32_MODE)
   {
   CREATECONTEXTS;
-  CONTEXTTESTS; 
+  CONTEXTTESTS;
   }
 #endif
 
