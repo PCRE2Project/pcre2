@@ -94,4 +94,8 @@
 \= Expect no match in 8-bit mode
     a\x{100}b
 
+/^ab\C/utf,no_start_optimize
+\= Expect no match - tests \C at end of subject
+    ab
+
 # End of testinput22

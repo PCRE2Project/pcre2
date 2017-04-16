@@ -9487,4 +9487,9 @@ No match
  0: abc
  1: a
 
+/^(?1)\d{3}(a)/
+    a123a
+ 0: a123a
+ 1: a
+
 # End of testinput1 

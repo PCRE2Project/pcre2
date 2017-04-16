@@ -15607,6 +15607,272 @@ Capturing subpattern count = 0
 Last code unit = 'c'
 Subject length lower bound = 4
 
+/(*LIMIT_HEAP=0)xxx/I
+Capturing subpattern count = 0
+Heap limit = 0
+First code unit = 'x'
+Last code unit = 'x'
+Subject length lower bound = 3
+
+/\d{0,3}(*:abc)(?C1)xxx/callout_info
+Callout 1  x
+
+# ----------------------------------------------------------------------
+
+# These are a whole pile of tests that touch lines of code that are not
+# used by any other tests (at least when these were created).
+
+/^a+?x/i,no_start_optimize,no_auto_possess
+\= Expect no match
+    aaa
+No match
+
+/^[^a]{3,}?x/i,no_start_optimize,no_auto_possess
+\= Expect no match
+    bbb
+No match
+    cc 
+No match
+
+/^X\S/no_start_optimize,no_auto_possess
+\= Expect no match
+    X
+No match
+
+/^X\W/no_start_optimize,no_auto_possess
+\= Expect no match
+    X
+No match
+
+/^X\H/no_start_optimize,no_auto_possess
+\= Expect no match
+    X
+No match
+
+/^X\h/no_start_optimize,no_auto_possess
+\= Expect no match
+    X
+No match
+
+/^X\V/no_start_optimize,no_auto_possess
+\= Expect no match
+    X
+No match
+
+/^X\v/no_start_optimize,no_auto_possess
+\= Expect no match
+    X
+No match
+
+/^X\h/no_start_optimize,no_auto_possess
+\= Expect no match
+    XY
+No match
+
+/^X\V/no_start_optimize,no_auto_possess
+\= Expect no match
+    X\n
+No match
+
+/^X\v/no_start_optimize,no_auto_possess
+\= Expect no match
+    XX
+No match
+
+/^X.+?/s,no_start_optimize,no_auto_possess
+\= Expect no match
+    X
+No match
+
+/^X\R+?/no_start_optimize,no_auto_possess
+\= Expect no match
+    XX
+No match
+
+/^X\H+?/no_start_optimize,no_auto_possess
+\= Expect no match
+    X
+No match
+
+/^X\h+?/no_start_optimize,no_auto_possess
+\= Expect no match
+    X
+No match
+
+/^X\V+?/no_start_optimize,no_auto_possess
+\= Expect no match
+    X
+No match
+    X\n 
+No match
+
+/^X\D+?/no_start_optimize,no_auto_possess
+\= Expect no match
+    X
+No match
+    X9
+No match
+
+/^X\S+?/no_start_optimize,no_auto_possess
+\= Expect no match
+    X
+No match
+    X\n 
+No match
+
+/^X\W+?/no_start_optimize,no_auto_possess
+\= Expect no match
+    X
+No match
+    XX 
+No match
+
+/^X.+?Z/no_start_optimize,no_auto_possess
+\= Expect no match
+    XY\n
+No match
+    
+/(*CRLF)^X.+?Z/no_start_optimize,no_auto_possess
+\= Expect no match
+    XY\r\=ps
+Partial match: XY\x0d
+
+/^X\R+?Z/no_start_optimize,no_auto_possess
+\= Expect no match
+    X\nX
+No match
+    X\n\r\n
+No match
+    X\n\rY
+No match
+    X\n\nY
+No match
+    X\n\x{0c}Y    
+No match
+    
+/(*BSR_ANYCRLF)^X\R+?Z/no_start_optimize,no_auto_possess
+\= Expect no match
+    X\nX
+No match
+    X\n\r\n
+No match
+    X\n\rY
+No match
+    X\n\nY
+No match
+    X\n\x{0c}Y    
+No match
+    
+/^X\H+?Z/no_start_optimize,no_auto_possess
+\= Expect no match
+    XY\t
+No match
+    XYY 
+No match
+
+/^X\h+?Z/no_start_optimize,no_auto_possess
+\= Expect no match
+    X\t\t
+No match
+    X\tY
+No match
+
+/^X\V+?Z/no_start_optimize,no_auto_possess
+\= Expect no match
+    XY\n
+No match
+    XYY 
+No match
+
+/^X\v+?Z/no_start_optimize,no_auto_possess
+\= Expect no match
+    X\n\n
+No match
+    X\nY
+No match
+
+/^X\D+?Z/no_start_optimize,no_auto_possess
+\= Expect no match
+    XY9
+No match
+    XYY 
+No match
+
+/^X\d+?Z/no_start_optimize,no_auto_possess
+\= Expect no match
+    X99
+No match
+    X9Y
+No match
+
+/^X\S+?Z/no_start_optimize,no_auto_possess
+\= Expect no match
+    XY\n
+No match
+    XYY 
+No match
+
+/^X\s+?Z/no_start_optimize,no_auto_possess
+\= Expect no match
+    X\n\n
+No match
+    X\nY
+No match
+
+/^X\W+?Z/no_start_optimize,no_auto_possess
+\= Expect no match
+    X.A
+No match
+    X++ 
+No match
+
+/^X\w+?Z/no_start_optimize,no_auto_possess
+\= Expect no match
+    Xa.
+No match
+    Xaa 
+No match
+
+/^X.{1,3}Z/s,no_start_optimize,no_auto_possess
+\= Expect no match
+    Xa.bd
+No match
+
+/^X\h+Z/no_start_optimize,no_auto_possess
+\= Expect no match
+    X\t\t
+No match
+    X\tY
+No match
+
+/^X\V+Z/no_start_optimize,no_auto_possess
+\= Expect no match
+    XY\n
+No match
+    XYY 
+No match
+
+/^(X(*THEN)Y|AB){0}(?1)/
+    ABX
+ 0: AB
+\= Expect no match
+    XAB     
+No match
+
+/^(?!A(?C1)B)C/
+    ABC\=callout_error=1
+--->ABC
+  1 ^^      B
+Failed: error -37: callout error code
+
+/^(?(?!A(?C1)B)C)/
+    ABC\=callout_error=1
+--->ABC
+  1 ^^      B
+Failed: error -37: callout error code
+
+# ----------------------------------------------------------------------
+
 # End of testinput2 
 Error -64: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

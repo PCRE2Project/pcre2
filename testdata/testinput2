@@ -5054,4 +5054,195 @@ a)"xI
 
 /(?(VERSION>=999)yes|no)^bc/I
 
+/(*LIMIT_HEAP=0)xxx/I
+
+/\d{0,3}(*:abc)(?C1)xxx/callout_info
+
+# ----------------------------------------------------------------------
+
+# These are a whole pile of tests that touch lines of code that are not
+# used by any other tests (at least when these were created).
+
+/^a+?x/i,no_start_optimize,no_auto_possess
+\= Expect no match
+    aaa
+
+/^[^a]{3,}?x/i,no_start_optimize,no_auto_possess
+\= Expect no match
+    bbb
+    cc 
+
+/^X\S/no_start_optimize,no_auto_possess
+\= Expect no match
+    X
+
+/^X\W/no_start_optimize,no_auto_possess
+\= Expect no match
+    X
+
+/^X\H/no_start_optimize,no_auto_possess
+\= Expect no match
+    X
+
+/^X\h/no_start_optimize,no_auto_possess
+\= Expect no match
+    X
+
+/^X\V/no_start_optimize,no_auto_possess
+\= Expect no match
+    X
+
+/^X\v/no_start_optimize,no_auto_possess
+\= Expect no match
+    X
+
+/^X\h/no_start_optimize,no_auto_possess
+\= Expect no match
+    XY
+
+/^X\V/no_start_optimize,no_auto_possess
+\= Expect no match
+    X\n
+
+/^X\v/no_start_optimize,no_auto_possess
+\= Expect no match
+    XX
+
+/^X.+?/s,no_start_optimize,no_auto_possess
+\= Expect no match
+    X
+
+/^X\R+?/no_start_optimize,no_auto_possess
+\= Expect no match
+    XX
+
+/^X\H+?/no_start_optimize,no_auto_possess
+\= Expect no match
+    X
+
+/^X\h+?/no_start_optimize,no_auto_possess
+\= Expect no match
+    X
+
+/^X\V+?/no_start_optimize,no_auto_possess
+\= Expect no match
+    X
+    X\n 
+
+/^X\D+?/no_start_optimize,no_auto_possess
+\= Expect no match
+    X
+    X9
+
+/^X\S+?/no_start_optimize,no_auto_possess
+\= Expect no match
+    X
+    X\n 
+
+/^X\W+?/no_start_optimize,no_auto_possess
+\= Expect no match
+    X
+    XX 
+
+/^X.+?Z/no_start_optimize,no_auto_possess
+\= Expect no match
+    XY\n
+    
+/(*CRLF)^X.+?Z/no_start_optimize,no_auto_possess
+\= Expect no match
+    XY\r\=ps
+
+/^X\R+?Z/no_start_optimize,no_auto_possess
+\= Expect no match
+    X\nX
+    X\n\r\n
+    X\n\rY
+    X\n\nY
+    X\n\x{0c}Y    
+    
+/(*BSR_ANYCRLF)^X\R+?Z/no_start_optimize,no_auto_possess
+\= Expect no match
+    X\nX
+    X\n\r\n
+    X\n\rY
+    X\n\nY
+    X\n\x{0c}Y    
+    
+/^X\H+?Z/no_start_optimize,no_auto_possess
+\= Expect no match
+    XY\t
+    XYY 
+
+/^X\h+?Z/no_start_optimize,no_auto_possess
+\= Expect no match
+    X\t\t
+    X\tY
+
+/^X\V+?Z/no_start_optimize,no_auto_possess
+\= Expect no match
+    XY\n
+    XYY 
+
+/^X\v+?Z/no_start_optimize,no_auto_possess
+\= Expect no match
+    X\n\n
+    X\nY
+
+/^X\D+?Z/no_start_optimize,no_auto_possess
+\= Expect no match
+    XY9
+    XYY 
+
+/^X\d+?Z/no_start_optimize,no_auto_possess
+\= Expect no match
+    X99
+    X9Y
+
+/^X\S+?Z/no_start_optimize,no_auto_possess
+\= Expect no match
+    XY\n
+    XYY 
+
+/^X\s+?Z/no_start_optimize,no_auto_possess
+\= Expect no match
+    X\n\n
+    X\nY
+
+/^X\W+?Z/no_start_optimize,no_auto_possess
+\= Expect no match
+    X.A
+    X++ 
+
+/^X\w+?Z/no_start_optimize,no_auto_possess
+\= Expect no match
+    Xa.
+    Xaa 
+
+/^X.{1,3}Z/s,no_start_optimize,no_auto_possess
+\= Expect no match
+    Xa.bd
+
+/^X\h+Z/no_start_optimize,no_auto_possess
+\= Expect no match
+    X\t\t
+    X\tY
+
+/^X\V+Z/no_start_optimize,no_auto_possess
+\= Expect no match
+    XY\n
+    XYY 
+
+/^(X(*THEN)Y|AB){0}(?1)/
+    ABX
+\= Expect no match
+    XAB     
+
+/^(?!A(?C1)B)C/
+    ABC\=callout_error=1
+
+/^(?(?!A(?C1)B)C)/
+    ABC\=callout_error=1
+
+# ----------------------------------------------------------------------
+
 # End of testinput2 

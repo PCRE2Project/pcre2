@@ -5917,4 +5917,7 @@ ef) x/x,mark
 /^(?(?!(a)(*ACCEPT))def|abc)/
     abc
 
+/^(?1)\d{3}(a)/
+    a123a
+
 # End of testinput1 

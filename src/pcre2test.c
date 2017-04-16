@@ -324,7 +324,7 @@ extern int valid_utf(PCRE2_SPTR8, PCRE2_SIZE, PCRE2_SIZE *);
 
 /* If we have 8-bit support, default to it; if there is also 16-or 32-bit
 support, it can be selected by a command-line option. If there is no 8-bit
-support, there must be 16- or 32-bit support, so default to one of them. The
+support, there must be 16-bit or 32-bit support, so default to one of them. The
 config function, JIT stack, contexts, and version string are the same in all
 modes, so use the form of the first that is available. */
 
@@ -336,7 +336,6 @@ modes, so use the form of the first that is available. */
 #define PCRE2_REAL_GENERAL_CONTEXT pcre2_real_general_context_8
 #define PCRE2_REAL_COMPILE_CONTEXT pcre2_real_compile_context_8
 #define PCRE2_REAL_MATCH_CONTEXT pcre2_real_match_context_8
-#define VERSION_TYPE PCRE2_UCHAR8
 
 #elif defined SUPPORT_PCRE2_16
 #define DEFAULT_TEST_MODE PCRE16_MODE
@@ -3725,6 +3724,7 @@ static int
 pattern_info(int what, void *where, BOOL unsetok)
 {
 int rc;
+PCRE2_PATTERN_INFO(rc, compiled_code, what, NULL);  /* Exercise the code */
 PCRE2_PATTERN_INFO(rc, compiled_code, what, where);
 if (rc >= 0) return 0;
 if (rc != PCRE2_ERROR_UNSET || !unsetok)
@@ -4056,6 +4056,7 @@ if ((pat_patctl.control & (CTL_BINCODE|CTL_FULLBINCODE)) != 0)
 
 if ((pat_patctl.control & CTL_INFO) != 0)
   {
+  int rc;
   void *nametable;
   uint8_t *start_bits;
   BOOL heap_limit_set, match_limit_set, depth_limit_set;
@@ -4063,6 +4064,11 @@ if ((pat_patctl.control & CTL_INFO) != 0)
     hasbackslashc, hascrorlf, jchanged, last_ctype, last_cunit, match_empty,
     depth_limit, heap_limit, match_limit, minlength, nameentrysize, namecount,
     newline_convention;
+
+  /* Exercise the error route. */
+
+  PCRE2_PATTERN_INFO(rc, compiled_code, 999, NULL);
+  (void)rc;
 
   /* These info requests may return PCRE2_ERROR_UNSET. */
 
@@ -5363,7 +5369,7 @@ return PR_OK;
 
 
 /*************************************************
-*          Check match or depth limit            *
+*          Check heap, match or depth limit      *
 *************************************************/
 
 /* This is used for DFA, normal, and JIT fast matching. For DFA matching it
@@ -5423,7 +5429,7 @@ for (;;)
   else
     PCRE2_MATCH(capcount, compiled_code, pp, ulen, dat_datctl.offset,
       dat_datctl.options, match_data, PTR(dat_context));
-
+      
   if (capcount == errnumber)
     {
     min = mid;
@@ -6720,7 +6726,7 @@ else for (gmatched = 0;; gmatched++)
   if ((dat_datctl.control & CTL_FINDLIMITS) != 0)
     {
     capcount = 0;  /* This stops compiler warnings */
-      
+
     if ((dat_datctl.control & CTL_DFA) == 0)
       {
       if (FLD(compiled_code, executable_jit) == NULL ||
@@ -7484,6 +7490,7 @@ return 0;
 int
 main(int argc, char **argv)
 {
+uint32_t temp;
 uint32_t yield = 0;
 uint32_t op = 1;
 BOOL notdone = TRUE;
@@ -7528,6 +7535,20 @@ if (PCRE2_CONFIG(PCRE2_CONFIG_VERSION, NULL) !=
   return 1;
   }
 
+/* Check that bad options are diagnosed. */
+
+if (PCRE2_CONFIG(999, NULL) != PCRE2_ERROR_BADOPTION ||
+    PCRE2_CONFIG(999, &temp) != PCRE2_ERROR_BADOPTION)
+  {
+  fprintf(stderr, "** Error in pcre2_config(): bad option not diagnosed\n");
+  return 1;
+  }
+
+/* This configuration option is now obsolete, but running a quick check ensures
+that its code is covered. */
+
+(void)PCRE2_CONFIG(PCRE2_CONFIG_STACKRECURSE, &temp);
+
 /* Get buffers from malloc() so that valgrind will check their misuse when
 debugging. They grow automatically when very long lines are read. The 16-
 and 32-bit buffers (pbuffer16, pbuffer32) are obtained only if needed. */
@@ -7571,32 +7592,45 @@ while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
     goto EXIT;
     }
 
-  /* Select operating mode */
+  /* Select operating mode. Ensure that pcre2_config() is called in 16-bit
+  and 32-bit modes because that won't happen naturally when 8-bit is also
+  configured. Also call some other functions that are not otherwise used. This
+  means that a coverage report won't claim there are uncalled functions. */
 
   if (strcmp(arg, "-8") == 0)
     {
 #ifdef SUPPORT_PCRE2_8
     test_mode = PCRE8_MODE;
+    (void)pcre2_set_bsr_8(pat_context8, 999);
+    (void)pcre2_set_newline_8(pat_context8, 999);
 #else
     fprintf(stderr,
       "** This version of PCRE2 was built without 8-bit support\n");
     exit(1);
 #endif
     }
+
   else if (strcmp(arg, "-16") == 0)
     {
 #ifdef SUPPORT_PCRE2_16
     test_mode = PCRE16_MODE;
+    (void)pcre2_config_16(PCRE2_CONFIG_VERSION, NULL);
+    (void)pcre2_set_bsr_16(pat_context16, 999);
+    (void)pcre2_set_newline_16(pat_context16, 999);
 #else
     fprintf(stderr,
       "** This version of PCRE2 was built without 16-bit support\n");
     exit(1);
 #endif
     }
+
   else if (strcmp(arg, "-32") == 0)
     {
 #ifdef SUPPORT_PCRE2_32
     test_mode = PCRE32_MODE;
+    (void)pcre2_config_32(PCRE2_CONFIG_VERSION, NULL);
+    (void)pcre2_set_bsr_32(pat_context32, 999);
+    (void)pcre2_set_newline_32(pat_context32, 999);
 #else
     fprintf(stderr,
       "** This version of PCRE2 was built without 32-bit support\n");
@@ -7848,7 +7882,13 @@ max_oveccount = DEFAULT_OVECCOUNT;
   G(dat_context,BITS) = G(pcre2_match_context_copy_,BITS)(G(default_dat_context,BITS)); \
   G(match_data,BITS) = G(pcre2_match_data_create_,BITS)(max_oveccount, G(general_context,BITS))
 
-/* Call the appropriate functions for the current mode. */
+#define CONTEXTTESTS \
+  (void)G(pcre2_set_max_pattern_length_,BITS)(G(pat_context,BITS), 0); \
+  (void)G(pcre2_set_offset_limit_,BITS)(G(dat_context,BITS), 0); \
+  (void)G(pcre2_set_recursion_memory_management_,BITS)(G(dat_context,BITS), my_malloc, my_free, NULL)
+
+/* Call the appropriate functions for the current mode, and exercise some
+functions that are not otherwise called. */
 
 #ifdef SUPPORT_PCRE2_8
 #undef BITS
@@ -7856,6 +7896,7 @@ max_oveccount = DEFAULT_OVECCOUNT;
 if (test_mode == PCRE8_MODE)
   {
   CREATECONTEXTS;
+  CONTEXTTESTS; 
   }
 #endif
 
@@ -7865,6 +7906,7 @@ if (test_mode == PCRE8_MODE)
 if (test_mode == PCRE16_MODE)
   {
   CREATECONTEXTS;
+  CONTEXTTESTS; 
   }
 #endif
 
@@ -7874,6 +7916,7 @@ if (test_mode == PCRE16_MODE)
 if (test_mode == PCRE32_MODE)
   {
   CREATECONTEXTS;
+  CONTEXTTESTS; 
   }
 #endif
 

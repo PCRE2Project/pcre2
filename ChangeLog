@@ -137,6 +137,9 @@ particular when it is serialized.
 
 26. Correct an incorrect cast in pcre2_valid_utf.c
 
+27. Update pcre2test, remove some unused code in pcre2_match(), and upgrade the 
+tests to improve coverage.
+
 
 Version 10.23 14-February-2017
 ------------------------------

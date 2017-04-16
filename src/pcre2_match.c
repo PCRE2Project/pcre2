@@ -298,13 +298,13 @@ else  /* String callout */
   cb.callout_string_length =
     *lengthptr - (1 + 4*LINK_SIZE) - 2;
   }
-  
+
 /* The original matching code (pre 10.30) worked directly with the ovector
 passed by the user, and this was passed to callouts. Now that the working
 ovector is in the backtracking frame, it no longer needs to reserve space for
 the overall match offsets (which would waste space in the frame). For backward
 compatibility, however, we pass capture_top and offset_vector to the callout as
-if for the extended ovector, and we ensure that the first two slots are unset 
+if for the extended ovector, and we ensure that the first two slots are unset
 by preserving and restoring their current contents. */
 
 save0 = Fovector[-2];
@@ -628,7 +628,7 @@ if (N >= mb->match_frames_top)
   if ((newsize / 1024) > mb->heap_limit)
     {
     PCRE2_SIZE maxsize = ((mb->heap_limit * 1024)/frame_size) * frame_size;
-    if (mb->frame_vector_size == maxsize) return PCRE2_ERROR_HEAPLIMIT;
+    if (mb->frame_vector_size >= maxsize) return PCRE2_ERROR_HEAPLIMIT;
     newsize = maxsize;
     }
 
@@ -810,15 +810,15 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
       RRETURN(MATCH_NOMATCH);
 
     /* Also fail if PCRE2_ENDANCHORED is set and the end of the match is not
-    the end of the subject. After (*ACCEPT) we fail the entire match (at this 
+    the end of the subject. After (*ACCEPT) we fail the entire match (at this
     position) but backtrack on reaching the end of the pattern. */
 
     if (Feptr < mb->end_subject &&
         ((mb->moptions | mb->poptions) & PCRE2_ENDANCHORED) != 0)
-      {   
+      {
       if (Fop == OP_END) RRETURN(MATCH_NOMATCH);
-      return MATCH_NOMATCH; 
-      } 
+      return MATCH_NOMATCH;
+      }
 
     /* We have a successful match of the whole pattern. Record the result and
     then do a direct return from the function. If there is space in the offset
@@ -3057,16 +3057,20 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
           }
         Feptr += Lmin;
         break;
+        
+        /* This OP_ANYBYTE case will never be reached because \C gets turned
+        into OP_ALLANY in non-UTF mode. Cut out the code so that coverage
+        reports don't complain about it's never being used. */
 
-        case OP_ANYBYTE:
-        if (Feptr > mb->end_subject - Lmin)
-          {
-          SCHECK_PARTIAL();
-          RRETURN(MATCH_NOMATCH);
-          }
-        Feptr += Lmin;
-        break;
-
+/*        case OP_ANYBYTE:
+*        if (Feptr > mb->end_subject - Lmin)
+*          {
+*          SCHECK_PARTIAL();
+*          RRETURN(MATCH_NOMATCH);
+*          }
+*        Feptr += Lmin;
+*        break;
+*/
         case OP_ANYNL:
         for (i = 1; i <= Lmin; i++)
           {
@@ -3573,6 +3577,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
             switch(fc)
               {
               default: RRETURN(MATCH_NOMATCH);
+
               case CHAR_CR:
               if (Feptr < mb->end_subject && UCHAR21(Feptr) == CHAR_LF) Feptr++;
               break;
@@ -3700,6 +3705,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
             switch(fc)
               {
               default: RRETURN(MATCH_NOMATCH);
+
               case CHAR_CR:
               if (Feptr < mb->end_subject && *Feptr == CHAR_LF) Feptr++;
               break;
@@ -5004,15 +5010,10 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
       Lnext_branch = Fecode + GET(Fecode, 1);
       if (*Lnext_branch != OP_ALT) break;
 
-      /* This is never the final branch */
+      /* This is never the final branch. We do not need to test for MATCH_THEN
+      here because this code is not used when there is a THEN in the pattern. */
 
       RMATCH(Fecode + PRIV(OP_lengths)[*Fecode], RM1);
-      if (rrc == MATCH_THEN)
-        {
-        if (mb->verb_ecode_ptr < Lnext_branch &&
-            (*Fecode == OP_ALT || *Lnext_branch == OP_ALT))
-          rrc = MATCH_NOMATCH;
-        }
       if (rrc != MATCH_NOMATCH) RRETURN(rrc);
       Fecode = Lnext_branch;
       }

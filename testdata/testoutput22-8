@@ -168,4 +168,9 @@ No match
     a\x{100}b
 No match
 
+/^ab\C/utf,no_start_optimize
+\= Expect no match - tests \C at end of subject
+    ab
+No match
+
 # End of testinput22

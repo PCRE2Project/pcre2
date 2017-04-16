@@ -400,4 +400,8 @@ No match
  0: 
  1: 
 
+/(*LIMIT_HEAP=21)\[(a)]{60}/expand
+    \[a]{60}
+Failed: error -63: heap limit exceeded
+
 # End of testinput15

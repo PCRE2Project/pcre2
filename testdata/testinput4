@@ -1627,6 +1627,11 @@
 /[z\x{1f88}]+/i,utf
     \x{1f88}\x{1f80} 
     
+# Check a reference with more than one other case
+
+/^(\x{00b5})\1{2}$/i,utf        
+    \x{00b5}\x{039c}\x{03bc} 
+    
 # Characters with more than one other case; test in classes 
 
 /[z\x{00b5}]+/i,utf
@@ -2287,5 +2292,13 @@
     
 /(?(?=.*b)(?=.*b)\pL|.*c)/
     11bb
+
+/^\x{123}+?$/utf,no_auto_possess
+    \x{123}\x{123}\x{123}
+
+/^\x{123}+?$/i,utf,no_auto_possess
+    \x{123}\x{122}\x{123}
+\= Expect no match     
+    \x{123}\x{124}\x{123}
 
 # End of testinput4
