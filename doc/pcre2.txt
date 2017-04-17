@@ -1351,9 +1351,26 @@ COMPILING A PATTERN
          PCRE2_ENDANCHORED
 
        If this bit is set, the end of any pattern match must be right  at  the
-       end  of  the  string being searched (the "subject string"). This effect
-       can also be achieved by appropriate constructs in the  pattern  itself,
+       end of the string being searched (the "subject string"). If the pattern
+       match succeeds by reaching (*ACCEPT), but does not reach the end of the
+       subject,  the match fails at the current starting point. For unanchored
+       patterns, a new match is then tried at the next  starting  point.  How-
+       ever, if the match succeeds by reaching the end of the pattern, but not
+       the end of the subject, backtracking occurs and  an  alternative  match
+       may be found. Consider these two patterns:
+
+         .(*ACCEPT)|..
+         .|..
+
+       If  matched against "abc" with PCRE2_ENDANCHORED set, the first matches
+       "c" whereas the second matches "bc". The  effect  of  PCRE2_ENDANCHORED
+       can  also  be achieved by appropriate constructs in the pattern itself,
        which is the only way to do it in Perl.
+
+       For DFA matching with pcre2_dfa_match(), PCRE2_ENDANCHORED applies only
+       to  the  first  (that  is,  the longest) matched string. Other parallel
+       matches, which are necessarily substrings of the first one, must  obvi-
+       ously end before the end of the subject.
 
          PCRE2_EXTENDED
 
@@ -3241,7 +3258,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 11 April 2017
+       Last updated: 14 April 2017
        Copyright (c) 1997-2017 University of Cambridge.
 ------------------------------------------------------------------------------
  
@@ -3965,12 +3982,12 @@ MISSING CALLOUTS
 THE CALLOUT INTERFACE
 
        During matching, when PCRE2 reaches a callout  point,  if  an  external
-       function  is  set  in  the match context, it is called. This applies to
-       both normal and DFA matching. The first argument to the  callout  func-
-       tion  is a pointer to a pcre2_callout block. The second argument is the
-       void * callout data that was supplied when the callout was  set  up  by
-       calling pcre2_set_callout() (see the pcre2api documentation). The call-
-       out block structure contains the following fields:
+       function  is  provided in the match context, it is called. This applies
+       to both normal and DFA matching. The  first  argument  to  the  callout
+       function  is a pointer to a pcre2_callout block. The second argument is
+       the void * callout data that was supplied when the callout was  set  up
+       by  calling  pcre2_set_callout()  (see the pcre2api documentation). The
+       callout block structure contains the following fields:
 
          uint32_t      version;
          uint32_t      callout_number;
@@ -4027,8 +4044,8 @@ THE CALLOUT INTERFACE
        of callout.
 
        The offset_vector field is a pointer to a vector of  capturing  offsets
-       (the  "ovector"). You may read certain elements in this vector, but you
-       must not change any of them.
+       (the "ovector"). You may read the elements in this vector, but you must
+       not change any of them.
 
        For calls to pcre2_match(),  the  offset_vector  field  is  not  (since
        release  10.30)  a pointer to the actual ovector that was passed to the
@@ -4049,10 +4066,10 @@ THE CALLOUT INTERFACE
        The  contents  of  ovector[2]  to  ovector[<capture_top>*2-1]  can   be
        inspected in order to extract substrings that have been matched so far,
        in the same way as extracting substrings after a match  has  completed.
-       The values in ovector[0] and ovector[1] are undefined and should not be
-       used in any way. Substrings that have not been captured (but whose num-
-       bers are less than capture_top) have both of their ovector slots set to
-       PCRE2_UNSET.
+       The  values in ovector[0] and ovector[1] are always PCRE2_UNSET because
+       the match is by definition not complete. Substrings that have not  been
+       captured  but whose numbers are less than capture_top also have both of
+       their ovector slots set to PCRE2_UNSET.
 
        For DFA matching, the offset_vector field points to  the  ovector  that
        was  passed  to  the  matching function in the match data block, but it
@@ -4170,7 +4187,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 29 March 2017
+       Last updated: 14 April 2017
        Copyright (c) 1997-2017 University of Cambridge.
 ------------------------------------------------------------------------------
  
