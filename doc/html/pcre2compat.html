@@ -18,7 +18,7 @@ DIFFERENCES BETWEEN PCRE2 AND PERL
 <P>
 This document describes the differences in the ways that PCRE2 and Perl handle
 regular expressions. The differences described here are with respect to Perl
-versions 5.24, but as both Perl and PCRE2 are continually changing, the
+versions 5.26, but as both Perl and PCRE2 are continually changing, the
 information may sometimes be out of date.
 </P>
 <P>
@@ -148,7 +148,7 @@ letters, regardless of case, when case independence is specified.
 17. PCRE2 provides some extensions to the Perl regular expression facilities.
 Perl 5.10 includes new features that are not in earlier versions of Perl, some
 of which (such as named parentheses) were in PCRE2 for some time before. This
-list is with respect to Perl 5.24:
+list is with respect to Perl 5.26:
 <br>
 <br>
 (a) Although lookbehind assertions in PCRE2 must match fixed length strings,
@@ -178,15 +178,16 @@ question mark they are.
 only at the first matching position in the subject string.
 <br>
 <br>
-(g) The PCRE2_NOTBOL, PCRE2_NOTEOL, PCRE2_NOTEMPTY, PCRE2_NOTEMPTY_ATSTART, and
-PCRE2_NO_AUTO_CAPTURE options have no Perl equivalents.
+(g) The PCRE2_NOTBOL, PCRE2_NOTEOL, PCRE2_NOTEMPTY and PCRE2_NOTEMPTY_ATSTART
+options have no Perl equivalents.
 <br>
 <br>
 (h) The \R escape sequence can be restricted to match only CR, LF, or CRLF
 by the PCRE2_BSR_ANYCRLF option.
 <br>
 <br>
-(i) The callout facility is PCRE2-specific.
+(i) The callout facility is PCRE2-specific. Perl supports codeblocks and
+variable interpolation, but not general hooks on every match.
 <br>
 <br>
 (j) The partial matching facility is PCRE2-specific.
@@ -196,8 +197,25 @@ by the PCRE2_BSR_ANYCRLF option.
 different way and is not Perl-compatible.
 <br>
 <br>
-(l) PCRE2 recognizes some special sequences such as (*CR) at the start of
-a pattern that set overall options that cannot be changed within the pattern.
+(l) PCRE2 recognizes some special sequences such as (*CR) or (*NO_JIT) at
+the start of a pattern that set overall options that cannot be changed within
+the pattern.
+<br>
+<br>
+18. The following new Perl 5.26 constructs are not yet supported in PCRE2:
+<br>
+<br>
+(a) The Perl /a modifier restricts /d numbers to pure ascii, the new /aa
+modifier restricts /i case-insensitive matching to pure ascii also, ignoring
+unicode rules. This separation cannot be represented with PCRE2_UTF.
+<br>
+<br>
+19. Perl has different limits than PCRE2. See the
+<a href="pcre2limit.html"><b>pcre2limit</b></a>
+documentation for details. Perl went with 5.10 from recursion to iteration
+keeping the intermediate matches on the heap, which is ~10% slower but does not
+fall into any stack-overflow limit. PCRE2 made a similar change at release
+10.30, and also has many build-time and run-time customizable limits.
 </P>
 <br><b>
 AUTHOR
@@ -214,7 +232,7 @@ Cambridge, England.
 REVISION
 </b><br>
 <P>
-Last updated: 03 April 2017
+Last updated: 17 April 2017
 <br>
 Copyright &copy; 1997-2017 University of Cambridge.
 <br>
