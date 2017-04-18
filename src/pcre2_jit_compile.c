@@ -350,6 +350,18 @@ typedef struct then_trap_backtrack {
   int framesize;
 } then_trap_backtrack;
 
+#define MAX_N_CHARS 12
+#define MAX_DIFF_CHARS 5
+
+typedef struct fast_forward_char_data {
+  /* Number of characters in the chars array, 255 for any character. */
+  sljit_u8 count;
+  /* Number of last UTF-8 characters in the chars array. */
+  sljit_u8 last_count;
+  /* Available characters in the current position. */
+  PCRE2_UCHAR chars[MAX_DIFF_CHARS];
+} fast_forward_char_data;
+
 #define MAX_RANGE_SIZE 4
 
 typedef struct compiler_common {
@@ -3746,40 +3758,42 @@ if (newlinecheck)
 return mainloop;
 }
 
-#define MAX_N_CHARS 16
-#define MAX_DIFF_CHARS 6
 
-static SLJIT_INLINE void add_prefix_char(PCRE2_UCHAR chr, PCRE2_UCHAR *chars)
+static SLJIT_INLINE void add_prefix_char(PCRE2_UCHAR chr, fast_forward_char_data *chars, BOOL last)
 {
-PCRE2_UCHAR i, len;
+sljit_u32 i, count = chars->count;
 
-len = chars[0];
-if (len == 255)
+if (count == 255)
   return;
 
-if (len == 0)
+if (count == 0)
   {
-  chars[0] = 1;
-  chars[1] = chr;
+  chars->count = 1;
+  chars->chars[0] = chr;
+
+  if (last)
+    chars->last_count = 1;
   return;
   }
 
-for (i = len; i > 0; i--)
-  if (chars[i] == chr)
+for (i = 0; i < count; i++)
+  if (chars->chars[i] == chr)
     return;
 
-if (len >= MAX_DIFF_CHARS - 1)
+if (count >= MAX_DIFF_CHARS)
   {
-  chars[0] = 255;
+  chars->count = 255;
   return;
   }
 
-len++;
-chars[len] = chr;
-chars[0] = len;
+chars->chars[count] = chr;
+chars->count = count + 1;
+
+if (last)
+  chars->last_count++;
 }
 
-static int scan_prefix(compiler_common *common, PCRE2_SPTR cc, PCRE2_UCHAR *chars, int max_chars, sljit_u32 *rec_count)
+static int scan_prefix(compiler_common *common, PCRE2_SPTR cc, fast_forward_char_data *chars, int max_chars, sljit_u32 *rec_count)
 {
 /* Recursive function, which scans prefix literals. */
 BOOL last, any, class, caseless;
@@ -3788,7 +3802,7 @@ sljit_u32 chr; /* Any unicode character. */
 sljit_u8 *bytes, *bytes_end, byte;
 PCRE2_SPTR alternative, cc_save, oc;
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH == 8
-PCRE2_UCHAR othercase[8];
+PCRE2_UCHAR othercase[4];
 #elif defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH == 16
 PCRE2_UCHAR othercase[2];
 #else
@@ -4003,12 +4017,12 @@ while (TRUE)
     {
     do
       {
-      chars[0] = 255;
+      chars->count = 255;
 
       consumed++;
       if (--max_chars == 0)
         return consumed;
-      chars += MAX_DIFF_CHARS;
+      chars++;
       }
     while (--repeat > 0);
 
@@ -4052,8 +4066,8 @@ while (TRUE)
     do
       {
       if (bytes[31] & 0x80)
-        chars[0] = 255;
-      else if (chars[0] != 255)
+        chars->count = 255;
+      else if (chars->count != 255)
         {
         bytes_end = bytes + 32;
         chr = 0;
@@ -4068,7 +4082,7 @@ while (TRUE)
             do
               {
               if ((byte & 0x1) != 0)
-                add_prefix_char(chr, chars);
+                add_prefix_char(chr, chars, TRUE);
               byte >>= 1;
               chr++;
               }
@@ -4076,14 +4090,14 @@ while (TRUE)
             chr = (chr + 7) & ~7;
             }
           }
-        while (chars[0] != 255 && bytes < bytes_end);
+        while (chars->count != 255 && bytes < bytes_end);
         bytes = bytes_end - 32;
         }
 
       consumed++;
       if (--max_chars == 0)
         return consumed;
-      chars += MAX_DIFF_CHARS;
+      chars++;
       }
     while (--repeat > 0);
 
@@ -4147,17 +4161,18 @@ while (TRUE)
     oc = othercase;
     do
       {
-      chr = *cc;
-      add_prefix_char(*cc, chars);
-
-      if (caseless)
-        add_prefix_char(*oc, chars);
-
       len--;
       consumed++;
+
+      chr = *cc;
+      add_prefix_char(*cc, chars, len == 0);
+
+      if (caseless)
+        add_prefix_char(*oc, chars, len == 0);
+
       if (--max_chars == 0)
         return consumed;
-      chars += MAX_DIFF_CHARS;
+      chars++;
       cc++;
       oc++;
       }
@@ -4228,7 +4243,7 @@ else
 instruction[0] = 0x66;
 instruction[1] = 0x0f;
 instruction[2] = 0x6f;
-instruction[3] = ;
+instruction[3] = (dst_xmm_reg << 3) | src_general_reg;
 sljit_emit_op_custom(compiler, instruction, 4);
 #endif
 }
@@ -4443,12 +4458,12 @@ sljit_s32 cmp1b_ind = 4;
 sljit_s32 cmp2a_ind = 5;
 sljit_s32 cmp2b_ind = 6;
 struct sljit_label *start;
-struct sljit_jump *jump[3];
+struct sljit_jump *jump[4];
 
 sljit_u8 instruction[8];
 
 SLJIT_ASSERT(offs1 > offs2);
-SLJIT_ASSERT(diff < IN_UCHARS(max_fast_forward_char_pair_sse2_offset()));
+SLJIT_ASSERT(diff <= IN_UCHARS(max_fast_forward_char_pair_sse2_offset()));
 SLJIT_ASSERT(tmp1_ind < 8 && tmp2_ind == 1);
 
 /* Initialize. */
@@ -4752,6 +4767,59 @@ if (common->match_end_ptr != 0)
   OP1(SLJIT_MOV, STR_END, 0, TMP3, 0);
 }
 
+static BOOL check_fast_forward_char_pair_sse2(compiler_common *common, fast_forward_char_data *chars, int max)
+{
+int i, priority, left, count;
+sljit_u32 priorities;
+PCRE2_UCHAR a1, a2, b1, b2;
+
+priorities = 0;
+
+count = 0;
+for (i = 0; i < max; i++)
+  {
+  if (chars[i].last_count > 2)
+    {
+    SLJIT_ASSERT(chars[i].last_count <= 7);
+
+    priorities |= (1 << chars[i].last_count);
+    count++;
+    }
+  }
+
+if (count < 2)
+  return FALSE;
+
+for (priority = 7; priority > 2; priority--)
+  {
+  if ((priorities & (1 << priority)) == 0)
+    continue;
+
+  left = -1;
+
+  for (i = 0; i < max; i++)
+    if (chars[i].last_count >= priority)
+      {
+      SLJIT_ASSERT(chars[i].count <= 2 && chars[i].count >= 1);
+
+      b1 = chars[i].chars[0];
+      b2 = chars[i].chars[chars[i].count - 1];
+
+      if (left >= 0 && i - left <= max_fast_forward_char_pair_sse2_offset() && a1 != b1 && a1 != b2 && a2 != b1 && a2 != b2)
+        {
+        fast_forward_char_pair_sse2(common, i, b1, b2, left, a1, a2);
+        return TRUE;
+        }
+
+      left = i;
+      a1 = b1;
+      a2 = b2;
+      }
+  }
+
+return FALSE;
+}
+
 #endif
 
 #undef SSE2_COMPARE_TYPE_INDEX
@@ -4933,10 +5001,8 @@ DEFINE_COMPILER;
 struct sljit_label *start;
 struct sljit_jump *quit;
 struct sljit_jump *match;
-/* bytes[0] represent the number of characters between 0
-and MAX_N_CHARS - 1, 255 represents any character. */
-PCRE2_UCHAR chars[MAX_N_CHARS * MAX_DIFF_CHARS];
-sljit_s32 offset, offset2;
+fast_forward_char_data chars[MAX_N_CHARS];
+sljit_s32 offset;
 PCRE2_UCHAR mask;
 PCRE2_UCHAR *char_set, *char_set_end;
 int i, max, from;
@@ -4946,7 +5012,10 @@ BOOL in_range;
 sljit_u32 rec_count;
 
 for (i = 0; i < MAX_N_CHARS; i++)
-  chars[i * MAX_DIFF_CHARS] = 0;
+  {
+  chars[i].count = 0;
+  chars[i].last_count = 0;
+  }
 
 rec_count = 10000;
 max = scan_prefix(common, common->start, chars, MAX_N_CHARS, &rec_count);
@@ -4954,19 +5023,29 @@ max = scan_prefix(common, common->start, chars, MAX_N_CHARS, &rec_count);
 if (max < 1)
   return FALSE;
 
-#if (defined SLJIT_CONFIG_X86 && SLJIT_CONFIG_X86) && !(defined SUPPORT_VALGRIND) && !(defined _WIN64)
-for (i = 0; i + 1 < max; i++)
+/* Convert last_count to priority. */
+for (i = 0; i < max; i++)
   {
-  if (chars[i * MAX_DIFF_CHARS] <= 2 && chars[(i + 1) * MAX_DIFF_CHARS] <= 2)
+  SLJIT_ASSERT(chars[i].count > 0 && chars[i].last_count <= chars[i].count);
+
+  if (chars[i].count == 1)
+    chars[i].last_count = (chars[i].last_count == 1) ? 7 : 5;
+  else if (chars[i].count == 2)
     {
-    offset = i * MAX_DIFF_CHARS;
-    offset2 = (i + 1) * MAX_DIFF_CHARS;
-    /* Works regardless the value is 1 or 2. */
-    fast_forward_char_pair_sse2(common, i + 1, chars[offset2 + 1],
-      chars[offset2 + chars[offset2]], i, chars[offset + 1], chars[offset + chars[offset]]);
-    return TRUE;
+    SLJIT_ASSERT(chars[i].chars[0] != chars[i].chars[1]);
+
+    if (is_powerof2(chars[i].chars[0] ^ chars[i].chars[1]))
+      chars[i].last_count = (chars[i].last_count == 2) ? 6 : 4;
+    else
+      chars[i].last_count = (chars[i].last_count == 2) ? 3 : 2;
     }
+  else
+    chars[i].last_count = (chars[i].count == 255) ? 0 : 1;
   }
+
+#if (defined SLJIT_CONFIG_X86 && SLJIT_CONFIG_X86) && !(defined SUPPORT_VALGRIND) && !(defined _WIN64)
+if (check_fast_forward_char_pair_sse2(common, chars, max))
+  return TRUE;
 #endif
 
 in_range = FALSE;
@@ -4975,15 +5054,15 @@ from = 0;
 range_len = 4 /* minimum length */ - 1;
 for (i = 0; i <= max; i++)
   {
-  if (in_range && (i - from) > range_len && (chars[(i - 1) * MAX_DIFF_CHARS] < 255))
+  if (in_range && (i - from) > range_len && (chars[i - 1].count < 255))
     {
     range_len = i - from;
     range_right = i - 1;
     }
 
-  if (i < max && chars[i * MAX_DIFF_CHARS] < 255)
+  if (i < max && chars[i].count < 255)
     {
-    SLJIT_ASSERT(chars[i * MAX_DIFF_CHARS] > 0);
+    SLJIT_ASSERT(chars[i].count > 0);
     if (!in_range)
       {
       in_range = TRUE;
@@ -5003,16 +5082,17 @@ if (range_right >= 0)
 
   for (i = 0; i < range_len; i++)
     {
-    char_set = chars + ((range_right - i) * MAX_DIFF_CHARS);
-    SLJIT_ASSERT(char_set[0] > 0 && char_set[0] < 255);
-    char_set_end = char_set + char_set[0];
-    char_set++;
-    while (char_set <= char_set_end)
+    SLJIT_ASSERT(chars[range_right - i].count > 0 && chars[range_right - i].count < 255);
+
+    char_set = chars[range_right - i].chars;
+    char_set_end = char_set + chars[range_right - i].count;
+    do
       {
       if (update_table[(*char_set) & 0xff] > IN_UCHARS(i))
         update_table[(*char_set) & 0xff] = IN_UCHARS(i);
       char_set++;
       }
+    while (char_set < char_set_end);
     }
   }
 
@@ -5022,41 +5102,26 @@ for (i = 0; i < max; i++)
   {
   if (offset == -1)
     {
-    if (chars[i * MAX_DIFF_CHARS] <= 2)
+    if (chars[i].last_count >= 2)
       offset = i;
     }
-  else if (chars[offset * MAX_DIFF_CHARS] == 2 && chars[i * MAX_DIFF_CHARS] <= 2)
-    {
-    if (chars[i * MAX_DIFF_CHARS] == 1)
-      offset = i;
-    else
-      {
-      mask = chars[offset * MAX_DIFF_CHARS + 1] ^ chars[offset * MAX_DIFF_CHARS + 2];
-      if (!is_powerof2(mask))
-        {
-        mask = chars[i * MAX_DIFF_CHARS + 1] ^ chars[i * MAX_DIFF_CHARS + 2];
-        if (is_powerof2(mask))
-          offset = i;
-        }
-      }
-    }
+  else if (chars[offset].last_count < chars[i].last_count)
+    offset = i;
   }
+
+SLJIT_ASSERT(offset == -1 || (chars[offset].count >= 1 && chars[offset].count <= 2));
 
 if (range_right < 0)
   {
   if (offset < 0)
     return FALSE;
-  SLJIT_ASSERT(chars[offset * MAX_DIFF_CHARS] >= 1 && chars[offset * MAX_DIFF_CHARS] <= 2);
   /* Works regardless the value is 1 or 2. */
-  mask = chars[offset * MAX_DIFF_CHARS + chars[offset * MAX_DIFF_CHARS]];
-  fast_forward_first_char2(common, chars[offset * MAX_DIFF_CHARS + 1], mask, offset);
+  fast_forward_first_char2(common, chars[offset].chars[0], chars[offset].chars[chars[offset].count - 1], offset);
   return TRUE;
   }
 
 if (range_right == offset)
   offset = -1;
-
-SLJIT_ASSERT(offset == -1 || (chars[offset * MAX_DIFF_CHARS] >= 1 && chars[offset * MAX_DIFF_CHARS] <= 2));
 
 max -= 1;
 SLJIT_ASSERT(max > 0);
@@ -5100,20 +5165,20 @@ if (offset >= 0)
   OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(offset));
   OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
 
-  if (chars[offset * MAX_DIFF_CHARS] == 1)
-    CMPTO(SLJIT_NOT_EQUAL, TMP1, 0, SLJIT_IMM, chars[offset * MAX_DIFF_CHARS + 1], start);
+  if (chars[offset].count == 1)
+    CMPTO(SLJIT_NOT_EQUAL, TMP1, 0, SLJIT_IMM, chars[offset].chars[0], start);
   else
     {
-    mask = chars[offset * MAX_DIFF_CHARS + 1] ^ chars[offset * MAX_DIFF_CHARS + 2];
+    mask = chars[offset].chars[0] ^ chars[offset].chars[1];
     if (is_powerof2(mask))
       {
       OP2(SLJIT_OR, TMP1, 0, TMP1, 0, SLJIT_IMM, mask);
-      CMPTO(SLJIT_NOT_EQUAL, TMP1, 0, SLJIT_IMM, chars[offset * MAX_DIFF_CHARS + 1] | mask, start);
+      CMPTO(SLJIT_NOT_EQUAL, TMP1, 0, SLJIT_IMM, chars[offset].chars[0] | mask, start);
       }
     else
       {
-      match = CMP(SLJIT_EQUAL, TMP1, 0, SLJIT_IMM, chars[offset * MAX_DIFF_CHARS + 1]);
-      CMPTO(SLJIT_NOT_EQUAL, TMP1, 0, SLJIT_IMM, chars[offset * MAX_DIFF_CHARS + 2], start);
+      match = CMP(SLJIT_EQUAL, TMP1, 0, SLJIT_IMM, chars[offset].chars[0]);
+      CMPTO(SLJIT_NOT_EQUAL, TMP1, 0, SLJIT_IMM, chars[offset].chars[1], start);
       JUMPHERE(match);
       }
     }
@@ -5164,8 +5229,6 @@ else
   OP2(SLJIT_ADD, STR_END, 0, STR_END, 0, SLJIT_IMM, IN_UCHARS(max));
 return TRUE;
 }
-
-#undef MAX_N_CHARS
 
 static SLJIT_INLINE void fast_forward_first_char(compiler_common *common)
 {
