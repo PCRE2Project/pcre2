@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "17 April 2017" "PCRE2 10.30"
+.TH PCRE2API 3 "18 April 2017" "PCRE2 10.30"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -1426,8 +1426,8 @@ PCRE2_NEVER_UTF causes an error.
 If this option is set, it disables the use of numbered capturing parentheses in
 the pattern. Any opening parenthesis that is not followed by ? behaves as if it
 were followed by ?: but named parentheses can still be used for capturing (and
-they acquire numbers in the usual way). There is no equivalent of this option
-in Perl. Note that, if this option is set, references to capturing groups (back
+they acquire numbers in the usual way). This is the same as Perl's /n option.
+Note that, when this option is set, references to capturing groups (back
 references or recursion/subroutine calls) may only refer to named groups,
 though the reference can be by name or by number.
 .sp
@@ -3402,6 +3402,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 17 April 2017
+Last updated: 18 April 2017
 Copyright (c) 1997-2017 University of Cambridge.
 .fi

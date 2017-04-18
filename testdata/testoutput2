@@ -15945,6 +15945,24 @@ Subject length lower bound = 1
         End
 ------------------------------------------------------------------
 
+/(a)(?-n:(b))(c)/nB
+------------------------------------------------------------------
+        Bra
+        Bra
+        a
+        Ket
+        Bra
+        CBra 1
+        b
+        Ket
+        Ket
+        Bra
+        c
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+
 # End of testinput2 
 Error -64: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

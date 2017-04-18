@@ -151,6 +151,8 @@ tests to improve coverage.
     
 29. Implemented PCRE2_EXTENDED_MORE and related /xx and (?xx) features. 
 
+30. Implement (?n: for PCRE2_NO_AUTO_CAPTURE, because Perl now has this.
+
 
 Version 10.23 14-February-2017
 ------------------------------

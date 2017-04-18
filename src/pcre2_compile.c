@@ -2233,11 +2233,11 @@ typedef struct nest_save {
 #define NSF_RESET          0x0001u
 #define NSF_CONDASSERT     0x0002u
 
-/* These options (changeable within the pattern) are tracked during parsing.
-The rest are put into META_OPTIONS items and used when compiling. */
+/* Of the options that are changeable within the pattern, these are tracked
+during parsing. The rest are used from META_OPTIONS items when compiling. */
 
 #define PARSE_TRACKED_OPTIONS \
-  (PCRE2_EXTENDED|PCRE2_EXTENDED_MORE|PCRE2_DUPNAMES)
+  (PCRE2_DUPNAMES|PCRE2_EXTENDED|PCRE2_EXTENDED_MORE|PCRE2_NO_AUTO_CAPTURE)
 
 /* States used for analyzing ranges in character classes. The two OK values
 must be last. */
@@ -3422,9 +3422,7 @@ while (ptr < ptrend)
         ptr++;
         }
 
-      /* Scan for options imsxJU. Some of them are tracked during parsing (see 
-      PARSE_TRACKED_OPTIONS) as they are local to groups. Others are not needed 
-      till compile time. */ 
+      /* Scan for options imnsxJU to be set or unset. */
 
       else
         {
@@ -3447,6 +3445,7 @@ while (ptr < ptrend)
 
             case CHAR_i: *optset |= PCRE2_CASELESS; break;
             case CHAR_m: *optset |= PCRE2_MULTILINE; break;
+            case CHAR_n: *optset |= PCRE2_NO_AUTO_CAPTURE; break;
             case CHAR_s: *optset |= PCRE2_DOTALL; break;
             case CHAR_U: *optset |= PCRE2_UNGREEDY; break;
             

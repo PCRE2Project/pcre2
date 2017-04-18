@@ -720,13 +720,14 @@ typedef struct c1modstruct {
 } c1modstruct;
 
 static c1modstruct c1modlist[] = {
-  { "bincode",      'B',           -1 },
-  { "info",         'I',           -1 },
-  { "global",       'g',           -1 },
-  { "caseless",     'i',           -1 },
-  { "multiline",    'm',           -1 },
-  { "dotall",       's',           -1 },
-  { "extended",     'x',           -1 }
+  { "bincode",         'B',           -1 },
+  { "info",            'I',           -1 },
+  { "global",          'g',           -1 },
+  { "caseless",        'i',           -1 },
+  { "multiline",       'm',           -1 },
+  { "no_auto_capture", 'n',           -1 },
+  { "dotall",          's',           -1 },
+  { "extended",        'x',           -1 }
 };
 
 #define C1MODLISTCOUNT sizeof(c1modlist)/sizeof(c1modstruct)

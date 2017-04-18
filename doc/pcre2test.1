@@ -1,4 +1,4 @@
-.TH PCRE2TEST 1 "17 April 2017" "PCRE 10.30"
+.TH PCRE2TEST 1 "18 April 2017" "PCRE 10.30"
 .SH NAME
 pcre2test - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -519,10 +519,11 @@ by a previous \fB#pattern\fP command.
 .SS "Setting compilation options"
 .rs
 .sp
-The following modifiers set options for \fBpcre2_compile()\fP. The most common
-ones have single-letter abbreviations, with special handling for /x (to make
-it like Perl). If a second x is present, PCRE2_EXTENDED is converted into
-PCRE2_EXTENDED_MORE. A third appearance adds PCRE2_EXTENDED as well. See
+The following modifiers set options for \fBpcre2_compile()\fP. There are some
+single-letter abbreviations that are the same as Perl options. There is special
+handling for /x: if a second x is present, PCRE2_EXTENDED is converted into
+PCRE2_EXTENDED_MORE as in Perl. A third appearance adds PCRE2_EXTENDED as well, 
+though this makes no difference to the way \fBpcre2_compile()\fP behaves. See
 .\" HREF
 \fBpcre2api\fP
 .\"
@@ -547,7 +548,7 @@ for a description of the effects of these options.
       never_backslash_c         set PCRE2_NEVER_BACKSLASH_C
       never_ucp                 set PCRE2_NEVER_UCP
       never_utf                 set PCRE2_NEVER_UTF
-      no_auto_capture           set PCRE2_NO_AUTO_CAPTURE
+  /n  no_auto_capture           set PCRE2_NO_AUTO_CAPTURE
       no_auto_possess           set PCRE2_NO_AUTO_POSSESS
       no_dotstar_anchor         set PCRE2_NO_DOTSTAR_ANCHOR
       no_start_optimize         set PCRE2_NO_START_OPTIMIZE
@@ -570,7 +571,8 @@ being passed to library functions.
 .rs
 .sp
 The following modifiers affect the compilation process or request information
-about the pattern:
+about the pattern. There are single-letter abbreviations for some that are
+heavily used in the test files.
 .sp
       bsr=[anycrlf|unicode]     specify \eR handling
   /B  bincode                   show binary code without lengths
@@ -1786,6 +1788,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 17 April 2017
+Last updated: 18 April 2017
 Copyright (c) 1997-2017 University of Cambridge.
 .fi

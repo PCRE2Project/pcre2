@@ -5259,4 +5259,6 @@ a)"xI
 
 /[a b](?xx: [ 12 ] (?-x:[ 34 ]) )y z/B
 
+/(a)(?-n:(b))(c)/nB
+
 # End of testinput2 
