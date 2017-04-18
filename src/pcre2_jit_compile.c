@@ -4233,201 +4233,6 @@ sljit_emit_op_custom(compiler, instruction, 4);
 #endif
 }
 
-static void fast_forward_first_char2_sse2(compiler_common *common, PCRE2_UCHAR char1, PCRE2_UCHAR char2)
-{
-DEFINE_COMPILER;
-struct sljit_label *start;
-struct sljit_jump *quit[3];
-struct sljit_jump *nomatch;
-sljit_u8 instruction[8];
-sljit_s32 tmp1_ind = sljit_get_register_index(TMP1);
-sljit_s32 tmp2_ind = sljit_get_register_index(TMP2);
-sljit_s32 str_ptr_ind = sljit_get_register_index(STR_PTR);
-BOOL load_twice = FALSE;
-PCRE2_UCHAR bit;
-
-bit = char1 ^ char2;
-if (!is_powerof2(bit))
-  bit = 0;
-
-if ((char1 != char2) && bit == 0)
-  load_twice = TRUE;
-
-quit[0] = CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0);
-
-/* First part (unaligned start) */
-
-OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, character_to_int32(char1 | bit));
-
-SLJIT_ASSERT(tmp1_ind < 8 && tmp2_ind == 1);
-
-/* MOVD xmm, r/m32 */
-instruction[0] = 0x66;
-instruction[1] = 0x0f;
-instruction[2] = 0x6e;
-instruction[3] = 0xc0 | (2 << 3) | tmp1_ind;
-sljit_emit_op_custom(compiler, instruction, 4);
-
-if (char1 != char2)
-  {
-  OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, character_to_int32(bit != 0 ? bit : char2));
-
-  /* MOVD xmm, r/m32 */
-  instruction[3] = 0xc0 | (3 << 3) | tmp1_ind;
-  sljit_emit_op_custom(compiler, instruction, 4);
-  }
-
-/* PSHUFD xmm1, xmm2/m128, imm8 */
-/* instruction[0] = 0x66; */
-/* instruction[1] = 0x0f; */
-instruction[2] = 0x70;
-instruction[3] = 0xc0 | (2 << 3) | 2;
-instruction[4] = 0;
-sljit_emit_op_custom(compiler, instruction, 5);
-
-if (char1 != char2)
-  {
-  /* PSHUFD xmm1, xmm2/m128, imm8 */
-  instruction[3] = 0xc0 | (3 << 3) | 3;
-  sljit_emit_op_custom(compiler, instruction, 5);
-  }
-
-OP2(SLJIT_AND, TMP2, 0, STR_PTR, 0, SLJIT_IMM, 0xf);
-OP2(SLJIT_AND, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, ~0xf);
-
-load_from_mem_sse2(compiler, 0, str_ptr_ind);
-if (load_twice)
-  load_from_mem_sse2(compiler, 1, str_ptr_ind);
-
-if (bit != 0)
-  {
-  /* POR xmm1, xmm2/m128 */
-  instruction[2] = 0xeb;
-  instruction[3] = 0xc0 | (0 << 3) | 3;
-  sljit_emit_op_custom(compiler, instruction, 4);
-  }
-
-/* PCMPEQB/W/D xmm1, xmm2/m128 */
-instruction[2] = 0x74 + SSE2_COMPARE_TYPE_INDEX;
-instruction[3] = 0xc0 | (0 << 3) | 2;
-sljit_emit_op_custom(compiler, instruction, 4);
-
-if (load_twice)
-  {
-  instruction[3] = 0xc0 | (1 << 3) | 3;
-  sljit_emit_op_custom(compiler, instruction, 4);
-  }
-
-/* PMOVMSKB reg, xmm */
-instruction[2] = 0xd7;
-instruction[3] = 0xc0 | (tmp1_ind << 3) | 0;
-sljit_emit_op_custom(compiler, instruction, 4);
-
-if (load_twice)
-  {
-  OP1(SLJIT_MOV, RETURN_ADDR, 0, TMP2, 0);
-  instruction[3] = 0xc0 | (tmp2_ind << 3) | 1;
-  sljit_emit_op_custom(compiler, instruction, 4);
-
-  OP2(SLJIT_OR, TMP1, 0, TMP1, 0, TMP2, 0);
-  OP1(SLJIT_MOV, TMP2, 0, RETURN_ADDR, 0);
-  }
-
-OP2(SLJIT_ASHR, TMP1, 0, TMP1, 0, TMP2, 0);
-
-/* BSF r32, r/m32 */
-instruction[0] = 0x0f;
-instruction[1] = 0xbc;
-instruction[2] = 0xc0 | (tmp1_ind << 3) | tmp1_ind;
-sljit_emit_op_custom(compiler, instruction, 3);
-sljit_set_current_flags(compiler, SLJIT_SET_Z);
-
-nomatch = JUMP(SLJIT_ZERO);
-
-OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, TMP2, 0);
-OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, TMP1, 0);
-quit[1] = JUMP(SLJIT_JUMP);
-
-JUMPHERE(nomatch);
-
-start = LABEL();
-OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, 16);
-quit[2] = CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0);
-
-/* Second part (aligned) */
-
-instruction[0] = 0x66;
-instruction[1] = 0x0f;
-
-/* MOVDQA xmm1, xmm2/m128 */
-load_from_mem_sse2(compiler, 0, str_ptr_ind);
-if (load_twice)
-  load_from_mem_sse2(compiler, 1, str_ptr_ind);
-
-if (bit != 0)
-  {
-  /* POR xmm1, xmm2/m128 */
-  instruction[2] = 0xeb;
-  instruction[3] = 0xc0 | (0 << 3) | 3;
-  sljit_emit_op_custom(compiler, instruction, 4);
-  }
-
-/* PCMPEQB/W/D xmm1, xmm2/m128 */
-instruction[2] = 0x74 + SSE2_COMPARE_TYPE_INDEX;
-instruction[3] = 0xc0 | (0 << 3) | 2;
-sljit_emit_op_custom(compiler, instruction, 4);
-
-if (load_twice)
-  {
-  instruction[3] = 0xc0 | (1 << 3) | 3;
-  sljit_emit_op_custom(compiler, instruction, 4);
-  }
-
-/* PMOVMSKB reg, xmm */
-instruction[2] = 0xd7;
-instruction[3] = 0xc0 | (tmp1_ind << 3) | 0;
-sljit_emit_op_custom(compiler, instruction, 4);
-
-if (load_twice)
-  {
-  instruction[3] = 0xc0 | (tmp2_ind << 3) | 1;
-  sljit_emit_op_custom(compiler, instruction, 4);
-
-  OP2(SLJIT_OR, TMP1, 0, TMP1, 0, TMP2, 0);
-  }
-
-/* BSF r32, r/m32 */
-instruction[0] = 0x0f;
-instruction[1] = 0xbc;
-instruction[2] = 0xc0 | (tmp1_ind << 3) | tmp1_ind;
-sljit_emit_op_custom(compiler, instruction, 3);
-sljit_set_current_flags(compiler, SLJIT_SET_Z);
-
-JUMPTO(SLJIT_ZERO, start);
-
-OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, TMP1, 0);
-
-start = LABEL();
-SET_LABEL(quit[0], start);
-SET_LABEL(quit[1], start);
-SET_LABEL(quit[2], start);
-}
-
-#ifndef _WIN64
-
-static SLJIT_INLINE sljit_u32 max_fast_forward_char_pair_sse2_offset(void)
-{
-#if PCRE2_CODE_UNIT_WIDTH == 8
-return 15;
-#elif PCRE2_CODE_UNIT_WIDTH == 16
-return 7;
-#elif PCRE2_CODE_UNIT_WIDTH == 32
-return 3;
-#else
-#error "Unsupported unit width"
-#endif
-}
-
 static void fast_forward_char_pair_sse2_compare(struct sljit_compiler *compiler, PCRE2_UCHAR char1, PCRE2_UCHAR char2,
   sljit_u32 bit, sljit_s32 dst_ind, sljit_s32 cmp1_ind, sljit_s32 cmp2_ind, sljit_s32 tmp_ind)
 {
@@ -4480,6 +4285,144 @@ else
   instruction[3] = 0xc0 | (dst_ind << 3) | tmp_ind;
   sljit_emit_op_custom(compiler, instruction, 4);
   }
+}
+
+static void fast_forward_first_char2_sse2(compiler_common *common, PCRE2_UCHAR char1, PCRE2_UCHAR char2)
+{
+DEFINE_COMPILER;
+struct sljit_label *start;
+struct sljit_jump *quit[3];
+sljit_u8 instruction[8];
+sljit_s32 tmp1_ind = sljit_get_register_index(TMP1);
+sljit_s32 tmp2_ind = sljit_get_register_index(TMP2);
+sljit_s32 str_ptr_ind = sljit_get_register_index(STR_PTR);
+sljit_s32 data_ind = 0;
+sljit_s32 tmp_ind = 1;
+sljit_s32 cmp1_ind = 2;
+sljit_s32 cmp2_ind = 3;
+sljit_u32 bit = 0;
+
+if (char1 != char2)
+  {
+  bit = char1 ^ char2;
+  if (!is_powerof2(bit))
+    bit = 0;
+  }
+
+quit[0] = CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0);
+
+/* First part (unaligned start) */
+
+OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, character_to_int32(char1 | bit));
+
+SLJIT_ASSERT(tmp1_ind < 8 && tmp2_ind == 1);
+
+/* MOVD xmm, r/m32 */
+instruction[0] = 0x66;
+instruction[1] = 0x0f;
+instruction[2] = 0x6e;
+instruction[3] = 0xc0 | (cmp1_ind << 3) | tmp1_ind;
+sljit_emit_op_custom(compiler, instruction, 4);
+
+if (char1 != char2)
+  {
+  OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, character_to_int32(bit != 0 ? bit : char2));
+
+  /* MOVD xmm, r/m32 */
+  instruction[3] = 0xc0 | (cmp2_ind << 3) | tmp1_ind;
+  sljit_emit_op_custom(compiler, instruction, 4);
+  }
+
+OP1(SLJIT_MOV, TMP2, 0, STR_PTR, 0);
+
+/* PSHUFD xmm1, xmm2/m128, imm8 */
+/* instruction[0] = 0x66; */
+/* instruction[1] = 0x0f; */
+instruction[2] = 0x70;
+instruction[3] = 0xc0 | (cmp1_ind << 3) | 2;
+instruction[4] = 0;
+sljit_emit_op_custom(compiler, instruction, 5);
+
+if (char1 != char2)
+  {
+  /* PSHUFD xmm1, xmm2/m128, imm8 */
+  instruction[3] = 0xc0 | (cmp2_ind << 3) | 3;
+  sljit_emit_op_custom(compiler, instruction, 5);
+  }
+
+OP2(SLJIT_AND, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, ~0xf);
+OP2(SLJIT_AND, TMP2, 0, TMP2, 0, SLJIT_IMM, 0xf);
+
+load_from_mem_sse2(compiler, data_ind, str_ptr_ind);
+fast_forward_char_pair_sse2_compare(compiler, char1, char2, bit, data_ind, cmp1_ind, cmp2_ind, tmp_ind);
+
+/* PMOVMSKB reg, xmm */
+/* instruction[0] = 0x66; */
+/* instruction[1] = 0x0f; */
+instruction[2] = 0xd7;
+instruction[3] = 0xc0 | (tmp1_ind << 3) | 0;
+sljit_emit_op_custom(compiler, instruction, 4);
+
+OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, TMP2, 0);
+OP2(SLJIT_LSHR, TMP1, 0, TMP1, 0, TMP2, 0);
+
+/* BSF r32, r/m32 */
+instruction[0] = 0x0f;
+instruction[1] = 0xbc;
+instruction[2] = 0xc0 | (tmp1_ind << 3) | tmp1_ind;
+sljit_emit_op_custom(compiler, instruction, 3);
+sljit_set_current_flags(compiler, SLJIT_SET_Z);
+
+quit[1] = JUMP(SLJIT_NOT_ZERO);
+
+OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, TMP2, 0);
+
+start = LABEL();
+OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, 16);
+quit[2] = CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0);
+
+/* Second part (aligned) */
+
+load_from_mem_sse2(compiler, 0, str_ptr_ind);
+fast_forward_char_pair_sse2_compare(compiler, char1, char2, bit, data_ind, cmp1_ind, cmp2_ind, tmp_ind);
+
+/* PMOVMSKB reg, xmm */
+instruction[0] = 0x66;
+instruction[1] = 0x0f;
+instruction[2] = 0xd7;
+instruction[3] = 0xc0 | (tmp1_ind << 3) | 0;
+sljit_emit_op_custom(compiler, instruction, 4);
+
+/* BSF r32, r/m32 */
+instruction[0] = 0x0f;
+instruction[1] = 0xbc;
+instruction[2] = 0xc0 | (tmp1_ind << 3) | tmp1_ind;
+sljit_emit_op_custom(compiler, instruction, 3);
+sljit_set_current_flags(compiler, SLJIT_SET_Z);
+
+JUMPTO(SLJIT_ZERO, start);
+
+JUMPHERE(quit[1]);
+OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, TMP1, 0);
+
+start = LABEL();
+JUMPHERE(quit[0]);
+JUMPHERE(quit[2]);
+}
+
+#ifndef _WIN64
+
+static SLJIT_INLINE sljit_u32 max_fast_forward_char_pair_sse2_offset(void)
+{
+#if PCRE2_CODE_UNIT_WIDTH == 8
+return 15;
+#elif PCRE2_CODE_UNIT_WIDTH == 16
+return 7;
+#elif PCRE2_CODE_UNIT_WIDTH == 32
+return 3;
+#else
+#error "Unsupported unit width"
+#endif
 }
 
 static void fast_forward_char_pair_sse2(compiler_common *common, sljit_u32 offs1,
@@ -4699,8 +4642,8 @@ instruction[3] = 0xc0 | (tmp1_ind << 3) | 0;
 sljit_emit_op_custom(compiler, instruction, 4);
 
 /* Ignore matches before the first STR_PTR. */
+OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, TMP2, 0);
 OP2(SLJIT_LSHR, TMP1, 0, TMP1, 0, TMP2, 0);
-OP2(SLJIT_SHL, TMP1, 0, TMP1, 0, TMP2, 0);
 
 /* BSF r32, r/m32 */
 instruction[0] = 0x0f;
@@ -4710,6 +4653,8 @@ sljit_emit_op_custom(compiler, instruction, 3);
 sljit_set_current_flags(compiler, SLJIT_SET_Z);
 
 jump[2] = JUMP(SLJIT_NOT_ZERO);
+
+OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, TMP2, 0);
 
 /* Main loop. */
 instruction[0] = 0x66;
