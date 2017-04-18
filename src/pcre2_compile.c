@@ -160,7 +160,7 @@ the length of compiled items varies with this.
 
 In the real compile phase, this workspace is not currently used. */
 
-#define COMPILE_WORK_SIZE (2048*LINK_SIZE)   /* Size in code units */
+#define COMPILE_WORK_SIZE (3000*LINK_SIZE)   /* Size in code units */
 
 #define C16_WORK_SIZE \
   ((COMPILE_WORK_SIZE * sizeof(PCRE2_UCHAR))/sizeof(uint16_t))
@@ -695,7 +695,8 @@ static int posix_substitutes[] = {
 #define PUBLIC_COMPILE_OPTIONS \
   (PCRE2_ANCHORED|PCRE2_ALLOW_EMPTY_CLASS|PCRE2_ALT_BSUX|PCRE2_ALT_CIRCUMFLEX| \
    PCRE2_ALT_VERBNAMES|PCRE2_AUTO_CALLOUT|PCRE2_CASELESS|PCRE2_DOLLAR_ENDONLY| \
-   PCRE2_DOTALL|PCRE2_DUPNAMES|PCRE2_ENDANCHORED|PCRE2_EXTENDED|PCRE2_FIRSTLINE| \
+   PCRE2_DOTALL|PCRE2_DUPNAMES|PCRE2_ENDANCHORED|PCRE2_EXTENDED| \
+   PCRE2_EXTENDED_MORE|PCRE2_FIRSTLINE| \
    PCRE2_MATCH_UNSET_BACKREF|PCRE2_MULTILINE|PCRE2_NEVER_BACKSLASH_C| \
    PCRE2_NEVER_UCP|PCRE2_NEVER_UTF|PCRE2_NO_AUTO_CAPTURE| \
    PCRE2_NO_AUTO_POSSESS|PCRE2_NO_DOTSTAR_ANCHOR|PCRE2_NO_START_OPTIMIZE| \
@@ -2226,12 +2227,17 @@ typedef struct nest_save {
   uint16_t  reset_group;
   uint16_t  max_group;
   uint16_t  flags;
+  uint32_t  options; 
 } nest_save;
 
-#define NSF_RESET      0x0001u
-#define NSF_EXTENDED   0x0002u
-#define NSF_DUPNAMES   0x0004u
-#define NSF_CONDASSERT 0x0008u
+#define NSF_RESET          0x0001u
+#define NSF_CONDASSERT     0x0002u
+
+/* These options (changeable within the pattern) are tracked during parsing.
+The rest are put into META_OPTIONS items and used when compiling. */
+
+#define PARSE_TRACKED_OPTIONS \
+  (PCRE2_EXTENDED|PCRE2_EXTENDED_MORE|PCRE2_DUPNAMES)
 
 /* States used for analyzing ranges in character classes. The two OK values
 must be last. */
@@ -2291,6 +2297,10 @@ creating a nest_save that spans the end of the workspace. */
 
 end_nests = (nest_save *)((char *)end_nests -
   ((cb->workspace_size * sizeof(PCRE2_UCHAR)) % sizeof(nest_save)));
+  
+/* PCRE2_EXTENDED_MORE implies PCRE2_EXTENDED */
+
+if ((options & PCRE2_EXTENDED_MORE) != 0) options |= PCRE2_EXTENDED; 
 
 /* Now scan the pattern */
 
@@ -2907,7 +2917,8 @@ while (ptr < ptrend)
 
     /* Process a regular character class. If the first character is '^', set
     the negation flag. If the first few characters (either before or after ^)
-    are \Q\E or \E we skip them too. This makes for compatibility with Perl. */
+    are \Q\E or \E or space or tab in extended-more mode, we skip them too.
+    This makes for compatibility with Perl. */
 
     negate_class = FALSE;
     while (ptr < ptrend)
@@ -2922,6 +2933,9 @@ while (ptr < ptrend)
         else
           break;
         }
+      else if ((options & PCRE2_EXTENDED_MORE) != 0 &&
+               (c == CHAR_SPACE || c == CHAR_HT))  /* Note: just these two */
+        continue;
       else if (!negate_class && c == CHAR_CIRCUMFLEX_ACCENT)
         negate_class = TRUE;
       else break;
@@ -2955,7 +2969,7 @@ while (ptr < ptrend)
     for (;;)
       {
       BOOL char_is_literal = TRUE;
-
+      
       /* Inside \Q...\E everything is literal except \E */
 
       if (inescq)
@@ -2968,6 +2982,12 @@ while (ptr < ptrend)
           }
         goto CLASS_LITERAL;
         }
+        
+      /* Skip over space and tab (only) in extended-more mode. */
+      
+      if ((options & PCRE2_EXTENDED_MORE) != 0 && 
+          (c == CHAR_SPACE || c == CHAR_HT)) 
+        goto CLASS_CONTINUE;
 
       /* Handle POSIX class names. Perl allows a negation extension of the
       form [:^name:]. A square bracket that doesn't match the syntax is
@@ -3387,8 +3407,7 @@ while (ptr < ptrend)
         }
       top_nest->nest_depth = nest_depth;
       top_nest->flags = 0;
-      if ((options & PCRE2_EXTENDED) != 0) top_nest->flags |= NSF_EXTENDED;
-      if ((options & PCRE2_DUPNAMES) != 0) top_nest->flags |= NSF_DUPNAMES;
+      top_nest->options = options & PARSE_TRACKED_OPTIONS;
 
       /* Start of non-capturing group that resets the capture count for each
       branch. */
@@ -3403,9 +3422,9 @@ while (ptr < ptrend)
         ptr++;
         }
 
-      /* Scan for options imsxJU. We need to keep track of (?x) and (?J) for
-      use while scanning. The other options are used during the compiling
-      phases. */
+      /* Scan for options imsxJU. Some of them are tracked during parsing (see 
+      PARSE_TRACKED_OPTIONS) as they are local to groups. Others are not needed 
+      till compile time. */ 
 
       else
         {
@@ -3429,8 +3448,14 @@ while (ptr < ptrend)
             case CHAR_i: *optset |= PCRE2_CASELESS; break;
             case CHAR_m: *optset |= PCRE2_MULTILINE; break;
             case CHAR_s: *optset |= PCRE2_DOTALL; break;
-            case CHAR_x: *optset |= PCRE2_EXTENDED; break;
             case CHAR_U: *optset |= PCRE2_UNGREEDY; break;
+            
+            /* If x appears twice it sets the extended extended option. */
+            
+            case CHAR_x: 
+            *optset |= ((*optset & PCRE2_EXTENDED) != 0)?
+              PCRE2_EXTENDED_MORE : PCRE2_EXTENDED; 
+            break;
 
             default:
             errorcode = ERR11;
@@ -3439,6 +3464,10 @@ while (ptr < ptrend)
             }
           }
         options = (options | set) & (~unset);
+        
+        /* Unsetting extended should also get rid of extended-more. */
+        
+        if ((options & PCRE2_EXTENDED) == 0) options &= ~PCRE2_EXTENDED_MORE;  
 
         /* If the options ended with ')' this is not the start of a nested
         group with option changes, so the options change at this level.
@@ -3916,8 +3945,7 @@ while (ptr < ptrend)
           }
         top_nest->nest_depth = nest_depth;
         top_nest->flags = NSF_CONDASSERT;
-        if ((options & PCRE2_EXTENDED) != 0) top_nest->flags |= NSF_EXTENDED;
-        if ((options & PCRE2_DUPNAMES) != 0) top_nest->flags |= NSF_DUPNAMES;
+        top_nest->options = options & PARSE_TRACKED_OPTIONS;
         }
       break;
 
@@ -4038,20 +4066,17 @@ while (ptr < ptrend)
     break;
 
     /* End of group; reset the capture count to the maximum if we are in a (?|
-    group and/or reset the extended and dupnames options. Disallow quantifier
-    for a condition that is an assertion. */
+    group and/or reset the options that are tracked during parsing. Disallow
+    quantifier for a condition that is an assertion. */
 
     case CHAR_RIGHT_PARENTHESIS:
     okquantifier = TRUE;
     if (top_nest != NULL && top_nest->nest_depth == nest_depth)
       {
+      options = (options & ~PARSE_TRACKED_OPTIONS) | top_nest->options;
       if ((top_nest->flags & NSF_RESET) != 0 &&
           top_nest->max_group > cb->bracount)
         cb->bracount = top_nest->max_group;
-      if ((top_nest->flags & NSF_EXTENDED) != 0) options |= PCRE2_EXTENDED;
-        else options &= ~PCRE2_EXTENDED;
-      if ((top_nest->flags & NSF_DUPNAMES) != 0) options |= PCRE2_DUPNAMES;
-        else options &= ~PCRE2_DUPNAMES;
       if ((top_nest->flags & NSF_CONDASSERT) != 0)
         okquantifier = FALSE;
       if (top_nest == (nest_save *)(cb->start_workspace)) top_nest = NULL;

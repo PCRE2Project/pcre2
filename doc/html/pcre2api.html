@@ -1378,6 +1378,13 @@ sequence at the start of the pattern, as described in the section entitled
 in the <b>pcre2pattern</b> documentation. A default is defined when PCRE2 is
 built.
 <pre>
+  PCRE2_EXTENDED_MORE
+</pre>
+This option has the effect of PCRE2_EXTENDED, but, in addition, space and
+horizontal tab characters are also ignored inside a character class.
+PCRE2_EXTENDED_MORE is equivalent to Perl's 5.26 /xx option, and it can be
+changed within a pattern by a (?xx) option setting.
+<pre>
   PCRE2_FIRSTLINE
 </pre>
 If this option is set, an unanchored pattern is required to match before or at
@@ -3344,7 +3351,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC42" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 14 April 2017
+Last updated: 17 April 2017
 <br>
 Copyright &copy; 1997-2017 University of Cambridge.
 <br>

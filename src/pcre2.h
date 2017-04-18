@@ -137,6 +137,7 @@ D   is inspected during pcre2_dfa_match() execution
 #define PCRE2_ALT_CIRCUMFLEX      0x00200000u  /*   J M D */
 #define PCRE2_ALT_VERBNAMES       0x00400000u  /* C       */
 #define PCRE2_USE_OFFSET_LIMIT    0x00800000u  /*   J M D */
+#define PCRE2_EXTENDED_MORE       0x01000000u  /* C       */
 
 /* These are for pcre2_jit_compile(). */
 

@@ -1,4 +1,4 @@
-.TH PCRE2COMPAT 3 "17 April 2017" "PCRE2 10.30"
+.TH PCRE2COMPAT 3 "18 April 2017" "PCRE2 10.30"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "DIFFERENCES BETWEEN PCRE2 AND PERL"
@@ -165,13 +165,11 @@ different way and is not Perl-compatible.
 (l) PCRE2 recognizes some special sequences such as (*CR) or (*NO_JIT) at
 the start of a pattern that set overall options that cannot be changed within
 the pattern.
-.sp
-18. The following new Perl 5.26 constructs are not yet supported in PCRE2:
-.sp
-(a) The Perl /a modifier restricts /d numbers to pure ascii, the new /aa
-modifier restricts /i case-insensitive matching to pure ascii also, ignoring
-unicode rules. This separation cannot be represented with PCRE2_UTF.
-.sp
+.P
+18. The Perl /a modifier restricts /d numbers to pure ascii, and the /aa
+modifier restricts /i case-insensitive matching to pure ascii, ignoring Unicode
+rules. This separation cannot be represented with PCRE2_UCP.
+.P
 19. Perl has different limits than PCRE2. See the
 .\" HREF
 \fBpcre2limit\fP
@@ -196,6 +194,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 17 April 2017
+Last updated: 18 April 2017
 Copyright (c) 1997-2017 University of Cambridge.
 .fi

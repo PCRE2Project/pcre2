@@ -1544,20 +1544,25 @@ alternative in the subpattern.
 </P>
 <br><a name="SEC13" href="#TOC1">INTERNAL OPTION SETTING</a><br>
 <P>
-The settings of the PCRE2_CASELESS, PCRE2_MULTILINE, PCRE2_DOTALL, and
-PCRE2_EXTENDED options (which are Perl-compatible) can be changed from within
-the pattern by a sequence of Perl option letters enclosed between "(?" and ")".
-The option letters are
+The settings of the PCRE2_CASELESS, PCRE2_MULTILINE, PCRE2_DOTALL,
+PCRE2_EXTENDED, and PCRE2_EXTENDED_MORE options (which are Perl-compatible) can
+be changed from within the pattern by a sequence of Perl option letters
+enclosed between "(?" and ")". The option letters are
 <pre>
   i  for PCRE2_CASELESS
   m  for PCRE2_MULTILINE
   s  for PCRE2_DOTALL
   x  for PCRE2_EXTENDED
+  xx for PCRE2_EXTENDED_MORE
 </pre>
 For example, (?im) sets caseless, multiline matching. It is also possible to
-unset these options by preceding the letter with a hyphen, and a combined
-setting and unsetting such as (?im-sx), which sets PCRE2_CASELESS and
-PCRE2_MULTILINE while unsetting PCRE2_DOTALL and PCRE2_EXTENDED, is also
+unset these options by preceding the letter with a hyphen. The two "extended" 
+options are not independent; unsetting either one cancels the effects of both 
+of them. 
+</P>
+<P>
+A combined setting and unsetting such as (?im-sx), which sets PCRE2_CASELESS
+and PCRE2_MULTILINE while unsetting PCRE2_DOTALL and PCRE2_EXTENDED, is also
 permitted. If a letter appears both before and after the hyphen, the option is
 unset. An empty options setting "(?)" is allowed. Needless to say, it has no
 effect.
@@ -3438,7 +3443,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC30" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 11 April 2017
+Last updated: 18 April 2017
 <br>
 Copyright &copy; 1997-2017 University of Cambridge.
 <br>

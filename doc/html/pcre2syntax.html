@@ -432,7 +432,8 @@ but some of them use Unicode properties if PCRE2_UCP is set. You can use
   (?m)            multiline
   (?s)            single line (dotall)
   (?U)            default ungreedy (lazy)
-  (?x)            extended (ignore white space)
+  (?x)            extended: ignore white space except in classes
+  (?xx)           as (?x) but also ignore space and tab in classes 
   (?-...)         unset option(s)
 </pre>
 The following are recognized only at the very start of a pattern or after one
@@ -596,7 +597,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC27" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 31 March 2017
+Last updated: 18 April 2017
 <br>
 Copyright &copy; 1997-2017 University of Cambridge.
 <br>

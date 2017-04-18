@@ -5245,4 +5245,18 @@ a)"xI
 
 # ----------------------------------------------------------------------
 
+/[a b c]/BxxI
+
+/[a b c]/BxxxI
+
+/[a b c]/B,extended_more
+
+/[ a b c ]/B,extended_more
+
+/[a b](?xx: [ 12 ] (?-xx:[ 34 ]) )y z/B
+
+# Unsetting /x also unsets /xx
+
+/[a b](?xx: [ 12 ] (?-x:[ 34 ]) )y z/B
+
 # End of testinput2 

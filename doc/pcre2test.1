@@ -1,4 +1,4 @@
-.TH PCRE2TEST 1 "11 April 2017" "PCRE 10.30"
+.TH PCRE2TEST 1 "17 April 2017" "PCRE 10.30"
 .SH NAME
 pcre2test - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -520,11 +520,13 @@ by a previous \fB#pattern\fP command.
 .rs
 .sp
 The following modifiers set options for \fBpcre2_compile()\fP. The most common
-ones have single-letter abbreviations. See
+ones have single-letter abbreviations, with special handling for /x (to make
+it like Perl). If a second x is present, PCRE2_EXTENDED is converted into
+PCRE2_EXTENDED_MORE. A third appearance adds PCRE2_EXTENDED as well. See
 .\" HREF
 \fBpcre2api\fP
 .\"
-for a description of their effects.
+for a description of the effects of these options.
 .sp
       allow_empty_class         set PCRE2_ALLOW_EMPTY_CLASS
       alt_bsux                  set PCRE2_ALT_BSUX
@@ -538,6 +540,7 @@ for a description of their effects.
       dupnames                  set PCRE2_DUPNAMES
       endanchored               set PCRE2_ENDANCHORED
   /x  extended                  set PCRE2_EXTENDED
+  /xx extended_more             set PCRE2_EXTENDED_MORE 
       firstline                 set PCRE2_FIRSTLINE
       match_unset_backref       set PCRE2_MATCH_UNSET_BACKREF
   /m  multiline                 set PCRE2_MULTILINE
@@ -1783,6 +1786,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 11 April 2017
+Last updated: 17 April 2017
 Copyright (c) 1997-2017 University of Cambridge.
 .fi

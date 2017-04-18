@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "14 April 2017" "PCRE2 10.30"
+.TH PCRE2API 3 "17 April 2017" "PCRE2 10.30"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -1347,6 +1347,13 @@ sequence at the start of the pattern, as described in the section entitled
 .\"
 in the \fBpcre2pattern\fP documentation. A default is defined when PCRE2 is
 built.
+.sp
+  PCRE2_EXTENDED_MORE
+.sp
+This option has the effect of PCRE2_EXTENDED, but, in addition, space and
+horizontal tab characters are also ignored inside a character class.
+PCRE2_EXTENDED_MORE is equivalent to Perl's 5.26 /xx option, and it can be
+changed within a pattern by a (?xx) option setting.
 .sp
   PCRE2_FIRSTLINE
 .sp
@@ -3395,6 +3402,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 14 April 2017
+Last updated: 17 April 2017
 Copyright (c) 1997-2017 University of Cambridge.
 .fi

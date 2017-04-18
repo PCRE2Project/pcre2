@@ -1,4 +1,4 @@
-.TH PCRE2SYNTAX 3 "31 March 2017" "PCRE2 10.30"
+.TH PCRE2SYNTAX 3 "18 April 2017" "PCRE2 10.30"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION SYNTAX SUMMARY"
@@ -409,7 +409,8 @@ but some of them use Unicode properties if PCRE2_UCP is set. You can use
   (?m)            multiline
   (?s)            single line (dotall)
   (?U)            default ungreedy (lazy)
-  (?x)            extended (ignore white space)
+  (?x)            extended: ignore white space except in classes
+  (?xx)           as (?x) but also ignore space and tab in classes 
   (?-...)         unset option(s)
 .sp
 The following are recognized only at the very start of a pattern or after one
@@ -585,6 +586,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 31 March 2017
+Last updated: 18 April 2017
 Copyright (c) 1997-2017 University of Cambridge.
 .fi

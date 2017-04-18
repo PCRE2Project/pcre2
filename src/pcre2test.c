@@ -580,6 +580,7 @@ static modstruct modlist[] = {
   { "endanchored",                MOD_PD,   MOD_OPT, PCRE2_ENDANCHORED,          PD(options) },
   { "expand",                     MOD_PAT,  MOD_CTL, CTL_EXPAND,                 PO(control) },
   { "extended",                   MOD_PATP, MOD_OPT, PCRE2_EXTENDED,             PO(options) },
+  { "extended_more",              MOD_PATP, MOD_OPT, PCRE2_EXTENDED_MORE,        PO(options) },
   { "find_limits",                MOD_DAT,  MOD_CTL, CTL_FINDLIMITS,             DO(control) },
   { "firstline",                  MOD_PAT,  MOD_OPT, PCRE2_FIRSTLINE,            PO(options) },
   { "framesize",                  MOD_PAT,  MOD_CTL, CTL_FRAMESIZE,              PO(control) },
@@ -3464,7 +3465,17 @@ for (;;)
 
       field = check_modifier(modlist + index, ctx, pctl, dctl, *p);
       if (field == NULL) return FALSE;
-      *((uint32_t *)field) |= modlist[index].value;
+      
+      /* /x is a special case; a second appearance changes PCRE2_EXTENDED to
+      PCRE2_EXTENDED_MORE. */ 
+      
+      if (cc == 'x' && (*((uint32_t *)field) & PCRE2_EXTENDED) != 0)
+        { 
+        *((uint32_t *)field) &= ~PCRE2_EXTENDED;
+        *((uint32_t *)field) |= PCRE2_EXTENDED_MORE;
+        } 
+      else
+        *((uint32_t *)field) |= modlist[index].value;
       }
 
     continue;    /* With tne next (fullname) modifier */
@@ -3842,7 +3853,7 @@ static void
 show_compile_options(uint32_t options, const char *before, const char *after)
 {
 if (options == 0) fprintf(outfile, "%s <none>%s", before, after);
-else fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
+else fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
   before,
   ((options & PCRE2_ALT_BSUX) != 0)? " alt_bsux" : "",
   ((options & PCRE2_ALT_CIRCUMFLEX) != 0)? " alt_circumflex" : "",
@@ -3856,6 +3867,7 @@ else fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%
   ((options & PCRE2_DUPNAMES) != 0)? " dupnames" : "",
   ((options & PCRE2_ENDANCHORED) != 0)? " endanchored" : "",
   ((options & PCRE2_EXTENDED) != 0)? " extended" : "",
+  ((options & PCRE2_EXTENDED_MORE) != 0)? " extended_more" : "",
   ((options & PCRE2_FIRSTLINE) != 0)? " firstline" : "",
   ((options & PCRE2_MATCH_UNSET_BACKREF) != 0)? " match_unset_backref" : "",
   ((options & PCRE2_MULTILINE) != 0)? " multiline" : "",

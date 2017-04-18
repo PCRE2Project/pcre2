@@ -148,6 +148,8 @@ tests to improve coverage.
     (d) Avoid warning for never-use case OP_TABLE_LENGTH which is just a fudge
         for checking at compile time that tables are the right size.  
     (e) Add missing "fall through" comment.     
+    
+29. Implemented PCRE2_EXTENDED_MORE and related /xx and (?xx) features. 
 
 
 Version 10.23 14-February-2017
