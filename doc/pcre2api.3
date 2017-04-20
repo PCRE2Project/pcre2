@@ -1,11 +1,11 @@
-.TH PCRE2API 3 "18 April 2017" "PCRE2 10.30"
+.TH PCRE2API 3 "20 April 2017" "PCRE2 10.30"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
 .B #include <pcre2.h>
 .sp
-PCRE2 is a new API for PCRE. This document contains a description of all its
-functions. See the
+PCRE2 is a new API for PCRE, starting at release 10.0. This document contains a
+description of all its native functions. See the
 .\" HREF
 \fBpcre2\fP
 .\"
@@ -266,7 +266,7 @@ document for an overview of all the PCRE2 documentation.
 These functions became obsolete at release 10.30 and are retained only for 
 backward compatibility. They should not be used in new code. The first is
 replaced by \fBpcre2_set_depth_limit()\fP; the second is no longer needed and
-no longer has any effect (it always returns zero).
+has no effect (it always returns zero).
 .
 .
 .SH "PCRE2 8-BIT, 16-BIT, AND 32-BIT LIBRARIES"
@@ -323,7 +323,7 @@ For example, if you want to run a match using a pattern that was compiled with
 .P
 In the function summaries above, and in the rest of this document and other
 PCRE2 documents, functions and data types are described using their generic
-names, without the 8, 16, or 32 suffix.
+names, without the _8, _16, or _32 suffix.
 .
 .
 .SH "PCRE2 API OVERVIEW"
@@ -332,17 +332,17 @@ names, without the 8, 16, or 32 suffix.
 PCRE2 has its own native API, which is described in this document. There are
 also some wrapper functions for the 8-bit library that correspond to the
 POSIX regular expression API, but they do not give access to all the
-functionality. They are described in the
+functionality of PCRE2. They are described in the
 .\" HREF
 \fBpcre2posix\fP
 .\"
 documentation. Both these APIs define a set of C function calls.
 .P
 The native API C data types, function prototypes, option values, and error
-codes are defined in the header file \fBpcre2.h\fP, which contains definitions
-of PCRE2_MAJOR and PCRE2_MINOR, the major and minor release numbers for the
-library. Applications can use these to include support for different releases
-of PCRE2.
+codes are defined in the header file \fBpcre2.h\fP, which also contains
+definitions of PCRE2_MAJOR and PCRE2_MINOR, the major and minor release numbers
+for the library. Applications can use these to include support for different
+releases of PCRE2.
 .P
 In a Windows environment, if you want to statically link an application program
 against a non-dll PCRE2 library, you must define PCRE2_STATIC before including
@@ -415,7 +415,7 @@ been matched by \fBpcre2_match()\fP. They are:
   \fBpcre2_substring_number_from_name()\fP
 .sp
 \fBpcre2_substring_free()\fP and \fBpcre2_substring_list_free()\fP are also
-provided, to free the memory used for extracted strings.
+provided, to free memory used for extracted strings.
 .P
 The function \fBpcre2_substitute()\fP can be called to match a pattern and
 return a copy of the subject string with substitutions for parts that were
@@ -536,7 +536,7 @@ required. JIT compilation updates a pointer within the compiled code block, so
 a thread must gain unique write access to the pointer before calling
 \fBpcre2_jit_compile()\fP. Alternatively, \fBpcre2_code_copy()\fP or
 \fBpcre2_code_copy_with_tables()\fP can be used to obtain a private copy of the
-compiled code.
+compiled code before calling the JIT compiler.
 .
 .
 .SS "Context blocks"
@@ -713,11 +713,11 @@ sequence such as (*CRLF). See the
 .\"
 page for details.
 .P
-When a pattern is compiled with the PCRE2_EXTENDED option, the newline 
-convention affects the recognition of white space and the end of internal
-comments starting with #. The value is saved with the compiled pattern for
-subsequent use by the JIT compiler and by the two interpreted matching
-functions, \fIpcre2_match()\fP and \fIpcre2_dfa_match()\fP.
+When a pattern is compiled with the PCRE2_EXTENDED or PCRE2_EXTENDED_MORE
+option, the newline convention affects the recognition of white space and the
+end of internal comments starting with #. The value is saved with the compiled
+pattern for subsequent use by the JIT compiler and by the two interpreted
+matching functions, \fIpcre2_match()\fP and \fIpcre2_dfa_match()\fP.
 .sp
 .nf
 .B int pcre2_set_parens_nest_limit(pcre2_compile_context *\fIccontext\fP,
@@ -737,10 +737,10 @@ parentheses of all kinds, not just capturing parentheses.
 There is at least one application that runs PCRE2 in threads with very limited
 system stack, where running out of stack is to be avoided at all costs. The
 parenthesis limit above cannot take account of how much stack is actually
-available. For a finer control, you can supply a function that is called
-whenever \fBpcre2_compile()\fP starts to compile a parenthesized part of a
-pattern. This function can check the actual stack size (or anything else that
-it wants to, of course).
+available during compilation. For a finer control, you can supply a function
+that is called whenever \fBpcre2_compile()\fP starts to compile a parenthesized
+part of a pattern. This function can check the actual stack size (or anything
+else that it wants to, of course).
 .P
 The first argument to the callout function gives the current depth of
 nesting, and the second is user data that is set up by the last argument of
@@ -1247,9 +1247,10 @@ parenthesis. The name is not processed in any way, and it is not possible to
 include a closing parenthesis in the name. However, if the PCRE2_ALT_VERBNAMES
 option is set, normal backslash processing is applied to verb names and only an
 unescaped closing parenthesis terminates the name. A closing parenthesis can be
-included in a name either as \e) or between \eQ and \eE. If the PCRE2_EXTENDED
-option is set, unescaped whitespace in verb names is skipped and #-comments are
-recognized in this mode, exactly as in the rest of the pattern.
+included in a name either as \e) or between \eQ and \eE. If the PCRE2_EXTENDED 
+or PCRE2_EXTENDED_MORE option is set, unescaped whitespace in verb names is
+skipped and #-comments are recognized in this mode, exactly as in the rest of
+the pattern.
 .sp
   PCRE2_AUTO_CALLOUT
 .sp
@@ -1266,7 +1267,13 @@ documentation.
 .sp
 If this bit is set, letters in the pattern match both upper and lower case
 letters in the subject. It is equivalent to Perl's /i option, and it can be
-changed within a pattern by a (?i) option setting.
+changed within a pattern by a (?i) option setting. If PCRE2_UTF is set, Unicode 
+properties are used for all characters with more than one other case, and for
+all characters whose code points are greater than U+007f. For lower valued 
+characters with only one other case, a lookup table is used for speed. When 
+PCRE2_UTF is not set, a lookup table is used for all code points less than 256, 
+and higher code points (available only in 16-bit or 32-bit mode) are treated as 
+not having another case.
 .sp
   PCRE2_DOLLAR_ENDONLY
 .sp
@@ -1350,18 +1357,18 @@ built.
 .sp
   PCRE2_EXTENDED_MORE
 .sp
-This option has the effect of PCRE2_EXTENDED, but, in addition, space and
-horizontal tab characters are also ignored inside a character class.
+This option has the effect of PCRE2_EXTENDED, but, in addition, unescaped space
+and horizontal tab characters are ignored inside a character class.
 PCRE2_EXTENDED_MORE is equivalent to Perl's 5.26 /xx option, and it can be
 changed within a pattern by a (?xx) option setting.
 .sp
   PCRE2_FIRSTLINE
 .sp
-If this option is set, an unanchored pattern is required to match before or at
-the first newline in the subject string, though the matched text may continue
-over the newline. See also PCRE2_USE_OFFSET_LIMIT, which provides a more
-general limiting facility. If PCRE2_FIRSTLINE is set with an offset limit, a
-match must occur in the first line and also within the offset limit. In other
+If this option is set, the start of an unanchored pattern match must be before
+or at the first newline in the subject string, though the matched text may
+continue over the newline. See also PCRE2_USE_OFFSET_LIMIT, which provides a
+more general limiting facility. If PCRE2_FIRSTLINE is set with an offset limit,
+a match must occur in the first line and also within the offset limit. In other
 words, whichever limit comes first is used.
 .sp
   PCRE2_MATCH_UNSET_BACKREF
@@ -1462,8 +1469,8 @@ compiler.
 .P
 There are a number of optimizations that may occur at the start of a match, in
 order to speed up the process. For example, if it is known that an unanchored
-match must start with a specific character, the matching code searches the
-subject for that character, and fails immediately if it cannot find it, without
+match must start with a specific code unit value, the matching code searches
+the subject for that value, and fails immediately if it cannot find it, without
 actually running the main matching function. This means that a special item
 such as (*COMMIT) at the start of a pattern is not considered until after a
 suitable starting point for the match has been found. Also, when callouts or
@@ -1490,9 +1497,10 @@ current starting position, which in this case, it does. However, if the same
 match is run with PCRE2_NO_START_OPTIMIZE set, the initial scan along the
 subject string does not happen. The first match attempt is run starting from
 "D" and when this fails, (*COMMIT) prevents any further matches being tried, so
-the overall result is "no match". There are also other start-up optimizations.
-For example, a minimum length for the subject may be recorded. Consider the
-pattern
+the overall result is "no match". 
+.P
+There are also other start-up optimizations. For example, a minimum length for
+the subject may be recorded. Consider the pattern
 .sp
   (*MARK:A)(X|Y)
 .sp
@@ -1578,8 +1586,8 @@ This option causes PCRE2 to regard both the pattern and the subject strings
 that are subsequently processed as strings of UTF characters instead of
 single-code-unit strings. It is available when PCRE2 is built to include
 Unicode support (which is the default). If Unicode support is not available,
-the use of this option provokes an error. Details of how this option changes
-the behaviour of PCRE2 are given in the
+the use of this option provokes an error. Details of how PCRE2_UTF changes the
+behaviour of PCRE2 are given in the
 .\" HREF
 \fBpcre2unicode\fP
 .\"
@@ -1804,7 +1812,9 @@ The third argument should point to an \fBuint32_t\fP variable.
 If the pattern set a backtracking depth limit by including an item of the form
 (*LIMIT_DEPTH=nnnn) at the start, the value is returned. The third argument
 should point to an unsigned 32-bit integer. If no such value has been set, the
-call to \fBpcre2_pattern_info()\fP returns the error PCRE2_ERROR_UNSET.
+call to \fBpcre2_pattern_info()\fP returns the error PCRE2_ERROR_UNSET. Note 
+that this limit will only be used during matching if it is less than the limit
+set or defaulted by the caller of the match function.
 .sp
   PCRE2_INFO_FIRSTBITMAP
 .sp
@@ -1822,15 +1832,15 @@ returned. Otherwise NULL is returned. The third argument should point to an
 Return information about the first code unit of any matched string, for a
 non-anchored pattern. The third argument should point to an \fBuint32_t\fP
 variable. If there is a fixed first value, for example, the letter "c" from a
-pattern such as (cat|cow|coyote), 1 is returned, and the character value can be
-retrieved using PCRE2_INFO_FIRSTCODEUNIT. If there is no fixed first value, but
-it is known that a match can occur only at the start of the subject or
-following a newline in the subject, 2 is returned. Otherwise, and for anchored
-patterns, 0 is returned.
+pattern such as (cat|cow|coyote), 1 is returned, and the value can be retrieved
+using PCRE2_INFO_FIRSTCODEUNIT. If there is no fixed first value, but it is
+known that a match can occur only at the start of the subject or following a
+newline in the subject, 2 is returned. Otherwise, and for anchored patterns, 0
+is returned.
 .sp
   PCRE2_INFO_FIRSTCODEUNIT
 .sp
-Return the value of the first code unit of any matched string in the situation
+Return the value of the first code unit of any matched string for a pattern
 where PCRE2_INFO_FIRSTCODETYPE returns 1; otherwise return 0. The third
 argument should point to an \fBuint32_t\fP variable. In the 8-bit library, the
 value is always less than 256. In the 16-bit library the value can be up to
@@ -1862,7 +1872,9 @@ the equivalent hexadecimal or octal escape sequences.
 If the pattern set a heap memory limit by including an item of the form
 (*LIMIT_HEAP=nnnn) at the start, the value is returned. The third argument
 should point to an unsigned 32-bit integer. If no such value has been set, the
-call to \fBpcre2_pattern_info()\fP returns the error PCRE2_ERROR_UNSET.
+call to \fBpcre2_pattern_info()\fP returns the error PCRE2_ERROR_UNSET. Note
+that this limit will only be used during matching if it is less than the limit
+set or defaulted by the caller of the match function.
 .sp
   PCRE2_INFO_JCHANGED
 .sp
@@ -1889,10 +1901,10 @@ PCRE2_INFO_LASTCODEUNIT), but for /^a\edz\ed/ the returned value is 0.
 .sp
   PCRE2_INFO_LASTCODEUNIT
 .sp
-Return the value of the rightmost literal data unit that must exist in any
-matched string, other than at its start, if such a value has been recorded. The
-third argument should point to an \fBuint32_t\fP variable. If there is no such
-value, 0 is returned.
+Return the value of the rightmost literal code unit that must exist in any
+matched string, other than at its start, for a pattern where
+PCRE2_INFO_LASTCODETYPE returns 1. Otherwise, return 0. The third argument
+should point to an \fBuint32_t\fP variable.
 .sp
   PCRE2_INFO_MATCHEMPTY
 .sp
@@ -1907,7 +1919,9 @@ in such cases.
 If the pattern set a match limit by including an item of the form
 (*LIMIT_MATCH=nnnn) at the start, the value is returned. The third argument
 should point to an unsigned 32-bit integer. If no such value has been set, the
-call to \fBpcre2_pattern_info()\fP returns the error PCRE2_ERROR_UNSET.
+call to \fBpcre2_pattern_info()\fP returns the error PCRE2_ERROR_UNSET. Note
+that this limit will only be used during matching if it is less than the limit
+set or defaulted by the caller of the match function.
 .sp
   PCRE2_INFO_MAXLOOKBEHIND
 .sp
@@ -1919,7 +1933,8 @@ require a one-character lookbehind. \eA also registers a one-character
 lookbehind, though it does not actually inspect the previous character. This is
 to ensure that at least one character from the old segment is retained when a
 new segment is processed. Otherwise, if there are no lookbehinds in the
-pattern, \eA might match incorrectly at the start of a new segment.
+pattern, \eA might match incorrectly at the start of a second or subsequent
+segment.
 .sp
   PCRE2_INFO_MINLENGTH
 .sp
@@ -2232,7 +2247,7 @@ newline convention recognizes CRLF as a newline, and if so, and the current
 character is CR followed by LF, advance the starting offset by two characters
 instead of one.
 .P
-If a non-zero starting offset is passed when the pattern is anchored, an single
+If a non-zero starting offset is passed when the pattern is anchored, a single
 attempt to match at the given offset is made. This can only succeed if the
 pattern does not require the match to be at the start of the subject. In other 
 words, the anchoring must be the result of setting the PCRE2_ANCHORED option or 
@@ -2658,6 +2673,10 @@ documentation for details.
   PCRE2_ERROR_DEPTHLIMIT
 .sp
 The nested backtracking depth limit was reached.
+.sp
+  PCRE2_ERROR_HEAPLIMIT
+.sp
+The heap limit was reached.
 .sp
   PCRE2_ERROR_INTERNAL
 .sp
@@ -3332,7 +3351,7 @@ NOTE: PCRE2's "auto-possessification" optimization usually applies to character
 repeats at the end of a pattern (as well as internally). For example, the
 pattern "a\ed+" is compiled as if it were "a\ed++". For DFA matching, this
 means that only one possible match is found. If you really do want multiple
-matches in such cases, either use an ungreedy repeat auch as "a\ed+?" or set
+matches in such cases, either use an ungreedy repeat such as "a\ed+?" or set
 the PCRE2_NO_AUTO_POSSESS option when compiling.
 .
 .
@@ -3402,6 +3421,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 18 April 2017
+Last updated: 20 April 2017
 Copyright (c) 1997-2017 University of Cambridge.
 .fi

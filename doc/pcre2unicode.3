@@ -1,4 +1,4 @@
-.TH PCRE2UNICODE 3 "03 July 2016" "PCRE2 10.22"
+.TH PCRE2UNICODE 3 "20 April 2017" "PCRE2 10.30"
 .SH NAME
 PCRE - Perl-compatible regular expressions (revised API)
 .SH "UNICODE AND UTF SUPPORT"
@@ -40,7 +40,7 @@ and
 documentation. Only the short names for properties are supported. For example,
 \ep{L} matches a letter. Its Perl synonym, \ep{Letter}, is not supported.
 Furthermore, in Perl, many properties may optionally be prefixed by "Is", for
-compatibility with Perl 5.6. PCRE does not support this.
+compatibility with Perl 5.6. PCRE2 does not support this.
 .
 .
 .SH "WIDE CHARACTERS AND UTF MODES"
@@ -101,10 +101,16 @@ low-valued characters, unless the PCRE2_UCP option is set.
 However, the special horizontal and vertical white space matching escapes (\eh,
 \eH, \ev, and \eV) do match all the appropriate Unicode characters, whether or
 not PCRE2_UCP is set.
-.P
-Case-insensitive matching in UTF mode makes use of Unicode properties. A few
-Unicode characters such as Greek sigma have more than two codepoints that are
-case-equivalent, and these are treated as such.
+.
+.
+.SH "CASE-EQUIVALENCE IN UTF MODES"
+.rs
+.sp
+Case-insensitive matching in a UTF mode makes use of Unicode properties except
+for characters whose code points are less than 128 and that have at most two
+case-equivalent values. For these, a direct table lookup is used for speed. A
+few Unicode characters such as Greek sigma have more than two codepoints that
+are case-equivalent, and these are treated as such.
 .
 .
 .SH "VALIDITY OF UTF STRINGS"
@@ -266,6 +272,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 03 July 2016
-Copyright (c) 1997-2016 University of Cambridge.
+Last updated: 20 April 2017
+Copyright (c) 1997-2017 University of Cambridge.
 .fi
