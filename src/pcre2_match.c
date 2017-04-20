@@ -929,7 +929,9 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
 
     /* ===================================================================== */
     /* Match a single character, caselessly. If we are at the end of the
-    subject, give up immediately. */
+    subject, give up immediately. We get here only when the pattern character 
+    has at most one other case. Characters with more than two cases are coded 
+    as OP_PROP with the pseudo-property PT_CLIST. */
 
     case OP_CHARI:
     if (Feptr >= mb->end_subject)
@@ -945,10 +947,10 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
       Fecode++;
       GETCHARLEN(fc, Fecode, Flength);
 
-      /* If the pattern character's value is < 128, we have only one byte, and
-      we know that its other case must also be one byte long, so we can use the
-      fast lookup table. We know that there is at least one byte left in the
-      subject. */
+      /* If the pattern character's value is < 128, we know that its other case
+      (if any) is also < 128 (and therefore only one code unit long in all 
+      code-unit widths), so we can use the fast lookup table. We checked above
+      that there is at least one character left in the subject. */
 
       if (fc < 128)
         {
@@ -958,32 +960,23 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
         Feptr++;
         }
 
-      /* Otherwise we must pick up the subject character. Note that we cannot
-      use the value of "Flength" to check for sufficient bytes left, because the
-      other case of the character may have more or fewer bytes.  */
+      /* Otherwise we must pick up the subject character and use Unicode 
+      property support to test its other case. Note that we cannot use the
+      value of "Flength" to check for sufficient bytes left, because the other
+      case of the character may have more or fewer code units. */
 
       else
         {
         uint32_t dc;
         GETCHARINC(dc, Feptr);
         Fecode += Flength;
-
-        /* If we have Unicode property support, we can use it to test the other
-        case of the character, if there is one. */
-
-        if (fc != dc)
-          {
-#ifdef SUPPORT_UNICODE
-          if (dc != UCD_OTHERCASE(fc))
-#endif
-            RRETURN(MATCH_NOMATCH);
-          }
+        if (dc != fc && dc != UCD_OTHERCASE(fc)) RRETURN(MATCH_NOMATCH);
         }
       }
     else
 #endif   /* SUPPORT_UNICODE */
 
-    /* Not UTF mode */
+    /* Not UTF mode; use the table for characters < 256. */
       {
       if (TABLE_GET(Fecode[1], mb->lcc, Fecode[1])
           != TABLE_GET(*Feptr, mb->lcc, *Feptr)) RRETURN(MATCH_NOMATCH);
