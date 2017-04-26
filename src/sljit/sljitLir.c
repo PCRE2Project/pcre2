@@ -342,7 +342,7 @@
 /*  Public functions                                                     */
 /* --------------------------------------------------------------------- */
 
-#if (defined SLJIT_CONFIG_ARM_V5 && SLJIT_CONFIG_ARM_V5) || (defined SLJIT_CONFIG_X86 && SLJIT_CONFIG_X86)
+#if (defined SLJIT_CONFIG_X86 && SLJIT_CONFIG_X86)
 #define SLJIT_NEEDS_COMPILER_INIT 1
 static sljit_s32 compiler_initialized = 0;
 /* A thread safe initialization. */
@@ -1042,7 +1042,7 @@ static SLJIT_INLINE CHECK_RETURN_TYPE check_sljit_emit_op1(struct sljit_compiler
 
 	switch (GET_OPCODE(op)) {
 	case SLJIT_NOT:
-	case SLJIT_CLZ:
+		/* Only SLJIT_I32_OP and SLJIT_SET_Z are allowed. */
 		CHECK_ARGUMENT(!(op & VARIABLE_FLAG_MASK));
 		break;
 	case SLJIT_NEG:
@@ -1060,7 +1060,7 @@ static SLJIT_INLINE CHECK_RETURN_TYPE check_sljit_emit_op1(struct sljit_compiler
 		CHECK_ARGUMENT(!(op & (SLJIT_I32_OP | SLJIT_SET_Z | VARIABLE_FLAG_MASK)));
 		break;
 	default:
-		/* Only SLJIT_I32_OP or SLJIT_F32_OP is allowed. */
+		/* Only SLJIT_I32_OP is allowed. */
 		CHECK_ARGUMENT(!(op & (SLJIT_SET_Z | VARIABLE_FLAG_MASK)));
 		break;
 	}
@@ -1241,7 +1241,7 @@ static SLJIT_INLINE CHECK_RETURN_TYPE check_sljit_emit_fop1(struct sljit_compile
 	}
 
 #if (defined SLJIT_ARGUMENT_CHECKS && SLJIT_ARGUMENT_CHECKS)
-	CHECK_ARGUMENT(sljit_is_fpu_available());
+	CHECK_ARGUMENT(sljit_has_cpu_feature(SLJIT_HAS_FPU));
 	CHECK_ARGUMENT(GET_OPCODE(op) >= SLJIT_MOV_F64 && GET_OPCODE(op) <= SLJIT_ABS_F64);
 	CHECK_ARGUMENT(!(op & (SLJIT_SET_Z | VARIABLE_FLAG_MASK)));
 	FUNCTION_FCHECK(src, srcw);
@@ -1279,7 +1279,7 @@ static SLJIT_INLINE CHECK_RETURN_TYPE check_sljit_emit_fop1_cmp(struct sljit_com
 	}
 
 #if (defined SLJIT_ARGUMENT_CHECKS && SLJIT_ARGUMENT_CHECKS)
-	CHECK_ARGUMENT(sljit_is_fpu_available());
+	CHECK_ARGUMENT(sljit_has_cpu_feature(SLJIT_HAS_FPU));
 	CHECK_ARGUMENT(GET_OPCODE(op) == SLJIT_CMP_F64);
 	CHECK_ARGUMENT(!(op & SLJIT_SET_Z));
 	CHECK_ARGUMENT((op & VARIABLE_FLAG_MASK)
@@ -1313,7 +1313,7 @@ static SLJIT_INLINE CHECK_RETURN_TYPE check_sljit_emit_fop1_conv_sw_from_f64(str
 	}
 
 #if (defined SLJIT_ARGUMENT_CHECKS && SLJIT_ARGUMENT_CHECKS)
-	CHECK_ARGUMENT(sljit_is_fpu_available());
+	CHECK_ARGUMENT(sljit_has_cpu_feature(SLJIT_HAS_FPU));
 	CHECK_ARGUMENT(GET_OPCODE(op) >= SLJIT_CONV_SW_FROM_F64 && GET_OPCODE(op) <= SLJIT_CONV_S32_FROM_F64);
 	CHECK_ARGUMENT(!(op & (SLJIT_SET_Z | VARIABLE_FLAG_MASK)));
 	FUNCTION_FCHECK(src, srcw);
@@ -1343,7 +1343,7 @@ static SLJIT_INLINE CHECK_RETURN_TYPE check_sljit_emit_fop1_conv_f64_from_sw(str
 	}
 
 #if (defined SLJIT_ARGUMENT_CHECKS && SLJIT_ARGUMENT_CHECKS)
-	CHECK_ARGUMENT(sljit_is_fpu_available());
+	CHECK_ARGUMENT(sljit_has_cpu_feature(SLJIT_HAS_FPU));
 	CHECK_ARGUMENT(GET_OPCODE(op) >= SLJIT_CONV_F64_FROM_SW && GET_OPCODE(op) <= SLJIT_CONV_F64_FROM_S32);
 	CHECK_ARGUMENT(!(op & (SLJIT_SET_Z | VARIABLE_FLAG_MASK)));
 	FUNCTION_CHECK_SRC(src, srcw);
@@ -1369,7 +1369,7 @@ static SLJIT_INLINE CHECK_RETURN_TYPE check_sljit_emit_fop2(struct sljit_compile
 	sljit_s32 src2, sljit_sw src2w)
 {
 #if (defined SLJIT_ARGUMENT_CHECKS && SLJIT_ARGUMENT_CHECKS)
-	CHECK_ARGUMENT(sljit_is_fpu_available());
+	CHECK_ARGUMENT(sljit_has_cpu_feature(SLJIT_HAS_FPU));
 	CHECK_ARGUMENT(GET_OPCODE(op) >= SLJIT_ADD_F64 && GET_OPCODE(op) <= SLJIT_DIV_F64);
 	CHECK_ARGUMENT(!(op & (SLJIT_SET_Z | VARIABLE_FLAG_MASK)));
 	FUNCTION_FCHECK(src1, src1w);
@@ -1393,6 +1393,11 @@ static SLJIT_INLINE CHECK_RETURN_TYPE check_sljit_emit_fop2(struct sljit_compile
 static SLJIT_INLINE CHECK_RETURN_TYPE check_sljit_emit_label(struct sljit_compiler *compiler)
 {
 	SLJIT_UNUSED_ARG(compiler);
+
+	if (SLJIT_UNLIKELY(compiler->skip_checks)) {
+		compiler->skip_checks = 0;
+		CHECK_RETURN_OK;
+	}
 
 #if (defined SLJIT_ARGUMENT_CHECKS && SLJIT_ARGUMENT_CHECKS)
 	compiler->last_flags = 0;
@@ -1464,7 +1469,7 @@ static SLJIT_INLINE CHECK_RETURN_TYPE check_sljit_emit_fcmp(struct sljit_compile
 	sljit_s32 src2, sljit_sw src2w)
 {
 #if (defined SLJIT_ARGUMENT_CHECKS && SLJIT_ARGUMENT_CHECKS)
-	CHECK_ARGUMENT(sljit_is_fpu_available());
+	CHECK_ARGUMENT(sljit_has_cpu_feature(SLJIT_HAS_FPU));
 	CHECK_ARGUMENT(!(type & ~(0xff | SLJIT_REWRITABLE_JUMP | SLJIT_F32_OP)));
 	CHECK_ARGUMENT((type & 0xff) >= SLJIT_EQUAL_F64 && (type & 0xff) <= SLJIT_ORDERED_F64);
 	FUNCTION_FCHECK(src1, src1w);
@@ -1553,6 +1558,37 @@ static SLJIT_INLINE CHECK_RETURN_TYPE check_sljit_emit_op_flags(struct sljit_com
 	CHECK_RETURN_OK;
 }
 
+static SLJIT_INLINE CHECK_RETURN_TYPE check_sljit_emit_cmov(struct sljit_compiler *compiler, sljit_s32 type,
+	sljit_s32 dst_reg,
+	sljit_s32 src, sljit_sw srcw)
+{
+#if (defined SLJIT_ARGUMENT_CHECKS && SLJIT_ARGUMENT_CHECKS)
+	CHECK_ARGUMENT(!(type & ~(0xff | SLJIT_I32_OP)));
+	CHECK_ARGUMENT((type & 0xff) >= SLJIT_EQUAL && (type & 0xff) <= SLJIT_ORDERED_F64);
+	CHECK_ARGUMENT(FUNCTION_CHECK_IS_REG(dst_reg & ~SLJIT_I32_OP));
+	if (src != SLJIT_IMM) {
+		CHECK_ARGUMENT(FUNCTION_CHECK_IS_REG(src));
+	}
+
+	if ((type & 0xff) <= SLJIT_NOT_ZERO)
+		CHECK_ARGUMENT(compiler->last_flags & SLJIT_SET_Z);
+	else
+		CHECK_ARGUMENT((type & 0xff) == (compiler->last_flags & 0xff));
+#endif
+#if (defined SLJIT_VERBOSE && SLJIT_VERBOSE)
+	if (SLJIT_UNLIKELY(!!compiler->verbose)) {
+		fprintf(compiler->verbose, "  cmov%s %s%s, ",
+			!(dst_reg & SLJIT_I32_OP) ? "" : ".i",
+			jump_names[type & 0xff], JUMP_POSTFIX(type));
+		sljit_verbose_reg(compiler, dst_reg & ~SLJIT_I32_OP);
+		fprintf(compiler->verbose, ", ");
+		sljit_verbose_param(compiler, src, srcw);
+		fprintf(compiler->verbose, "\n");
+	}
+#endif
+	CHECK_RETURN_OK;
+}
+
 static SLJIT_INLINE CHECK_RETURN_TYPE check_sljit_get_local_base(struct sljit_compiler *compiler, sljit_s32 dst, sljit_sw dstw, sljit_sw offset)
 {
 	SLJIT_UNUSED_ARG(offset);
@@ -1635,6 +1671,44 @@ static SLJIT_INLINE sljit_s32 emit_mov_before_return(struct sljit_compiler *comp
 #endif
 	return sljit_emit_op1(compiler, op, SLJIT_RETURN_REG, 0, src, srcw);
 }
+
+#if (defined SLJIT_CONFIG_X86 && SLJIT_CONFIG_X86) \
+		|| (defined SLJIT_CONFIG_PPC && SLJIT_CONFIG_PPC) \
+		|| (defined SLJIT_CONFIG_SPARC_32 && SLJIT_CONFIG_SPARC_32) \
+		|| ((defined SLJIT_CONFIG_MIPS && SLJIT_CONFIG_MIPS) && !(defined SLJIT_MIPS_R1 && SLJIT_MIPS_R1))
+
+static SLJIT_INLINE sljit_s32 sljit_emit_cmov_generic(struct sljit_compiler *compiler, sljit_s32 type,
+	sljit_s32 dst_reg,
+	sljit_s32 src, sljit_sw srcw)
+{
+	struct sljit_label *label;
+	struct sljit_jump *jump;
+	sljit_s32 op = (dst_reg & SLJIT_I32_OP) ? SLJIT_MOV32 : SLJIT_MOV;
+
+#if (defined SLJIT_VERBOSE && SLJIT_VERBOSE) \
+		|| (defined SLJIT_ARGUMENT_CHECKS && SLJIT_ARGUMENT_CHECKS)
+	compiler->skip_checks = 1;
+#endif
+	jump = sljit_emit_jump(compiler, type ^ 0x1);
+	FAIL_IF(!jump);
+
+#if (defined SLJIT_VERBOSE && SLJIT_VERBOSE) \
+		|| (defined SLJIT_ARGUMENT_CHECKS && SLJIT_ARGUMENT_CHECKS)
+	compiler->skip_checks = 1;
+#endif
+	FAIL_IF(sljit_emit_op1(compiler, op, dst_reg & ~SLJIT_I32_OP, 0, src, srcw));
+
+#if (defined SLJIT_VERBOSE && SLJIT_VERBOSE) \
+		|| (defined SLJIT_ARGUMENT_CHECKS && SLJIT_ARGUMENT_CHECKS)
+	compiler->skip_checks = 1;
+#endif
+	label = sljit_emit_label(compiler);
+	FAIL_IF(!label);
+	sljit_set_label(jump, label);
+	return SLJIT_SUCCESS;
+}
+
+#endif
 
 /* CPU description section */
 
@@ -1858,6 +1932,13 @@ SLJIT_API_FUNC_ATTRIBUTE void* sljit_generate_code(struct sljit_compiler *compil
 	return NULL;
 }
 
+SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_has_cpu_feature(sljit_s32 feature_type)
+{
+	SLJIT_UNUSED_ARG(feature_type);
+	SLJIT_UNREACHABLE();
+	return 0;
+}
+
 SLJIT_API_FUNC_ATTRIBUTE void sljit_free_code(void* code)
 {
 	SLJIT_UNUSED_ARG(code);
@@ -1985,12 +2066,6 @@ SLJIT_API_FUNC_ATTRIBUTE void sljit_set_current_flags(struct sljit_compiler *com
 	SLJIT_UNUSED_ARG(current_flags);
 }
 
-SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_is_fpu_available(void)
-{
-	SLJIT_UNREACHABLE();
-	return 0;
-}
-
 SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_fop1(struct sljit_compiler *compiler, sljit_s32 op,
 	sljit_s32 dst, sljit_sw dstw,
 	sljit_s32 src, sljit_sw srcw)
@@ -2101,6 +2176,19 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op_flags(struct sljit_compiler *co
 	SLJIT_UNUSED_ARG(src);
 	SLJIT_UNUSED_ARG(srcw);
 	SLJIT_UNUSED_ARG(type);
+	SLJIT_UNREACHABLE();
+	return SLJIT_ERR_UNSUPPORTED;
+}
+
+SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_cmov(struct sljit_compiler *compiler, sljit_s32 type,
+	sljit_s32 dst_reg,
+	sljit_s32 src, sljit_sw srcw)
+{
+	SLJIT_UNUSED_ARG(compiler);
+	SLJIT_UNUSED_ARG(type);
+	SLJIT_UNUSED_ARG(dst_reg);
+	SLJIT_UNUSED_ARG(src);
+	SLJIT_UNUSED_ARG(srcw);
 	SLJIT_UNREACHABLE();
 	return SLJIT_ERR_UNSUPPORTED;
 }

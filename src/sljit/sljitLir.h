@@ -489,6 +489,29 @@ static SLJIT_INLINE sljit_sw sljit_get_executable_offset(struct sljit_compiler *
 */
 static SLJIT_INLINE sljit_uw sljit_get_generated_code_size(struct sljit_compiler *compiler) { return compiler->executable_size; }
 
+/* Returns with non-zero if the passed SLJIT_HAS_* feature is available.
+
+   Some features (e.g. floating point operations) require CPU support
+   while other (e.g. move with update) is emulated if not available.
+   However it might be worth to generate a special code path even in
+   the latter case in certain cases. */
+
+/* [Not emulated] Floating-point support is available. */
+#define SLJIT_HAS_FPU			0
+/* [Emulated] Some forms of move with pre update is supported. */
+#define SLJIT_HAS_PRE_UPDATE		1
+/* [Emulated] Count leading zero is supported. */
+#define SLJIT_HAS_CLZ			2
+/* [Emulated] Conditional move is supported. */
+#define SLJIT_HAS_CMOV			3
+
+#if (defined SLJIT_CONFIG_X86 && SLJIT_CONFIG_X86)
+/* [Not emulated] SSE2 support is available on x86. */
+#define SLJIT_HAS_SSE2			100
+#endif
+
+SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_has_cpu_feature(sljit_s32 feature_type);
+
 /* Instruction generation. Returns with any error code. If there is no
    error, they return with SLJIT_SUCCESS. */
 
@@ -896,7 +919,7 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op0(struct sljit_compiler *compile
 #define SLJIT_NEG			(SLJIT_OP1_BASE + 17)
 #define SLJIT_NEG32			(SLJIT_NEG | SLJIT_I32_OP)
 /* Count leading zeroes
-   Flags: Z */
+   Flags: - (may destroy flags) */
 #define SLJIT_CLZ			(SLJIT_OP1_BASE + 18)
 #define SLJIT_CLZ32			(SLJIT_CLZ | SLJIT_I32_OP)
 
@@ -960,10 +983,6 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op2(struct sljit_compiler *compile
 	sljit_s32 dst, sljit_sw dstw,
 	sljit_s32 src1, sljit_sw src1w,
 	sljit_s32 src2, sljit_sw src2w);
-
-/* Returns with non-zero if fpu is available. */
-
-SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_is_fpu_available(void);
 
 /* Starting index of opcodes for sljit_emit_fop1. */
 #define SLJIT_FOP1_BASE			128
@@ -1058,7 +1077,7 @@ SLJIT_API_FUNC_ATTRIBUTE struct sljit_label* sljit_emit_label(struct sljit_compi
 #define SLJIT_SET_SIG_LESS		SLJIT_SET(SLJIT_SIG_LESS)
 #define SLJIT_SIG_GREATER_EQUAL		7
 #define SLJIT_SIG_GREATER_EQUAL32	(SLJIT_SIG_GREATER_EQUAL | SLJIT_I32_OP)
-#define SLJIT_SET_SIG_GREATER_EQUAL	SLJIT_SET(SLJIT_SET_SIG_GREATER_EQUAL)
+#define SLJIT_SET_SIG_GREATER_EQUAL	SLJIT_SET(SLJIT_SIG_GREATER_EQUAL)
 #define SLJIT_SIG_GREATER		8
 #define SLJIT_SIG_GREATER32		(SLJIT_SIG_GREATER | SLJIT_I32_OP)
 #define SLJIT_SET_SIG_GREATER		SLJIT_SET(SLJIT_SIG_GREATER)
@@ -1171,7 +1190,7 @@ SLJIT_API_FUNC_ATTRIBUTE void sljit_set_target(struct sljit_jump *jump, sljit_uw
 SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_ijump(struct sljit_compiler *compiler, sljit_s32 type, sljit_s32 src, sljit_sw srcw);
 
 /* Perform the operation using the conditional flags as the second argument.
-   Type must always be between SLJIT_EQUAL and SLJIT_S_ORDERED. The value
+   Type must always be between SLJIT_EQUAL and SLJIT_ORDERED_F64. The value
    represented by the type is 1, if the condition represented by the type
    is fulfilled, and 0 otherwise.
 
@@ -1189,6 +1208,20 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op_flags(struct sljit_compiler *co
 	sljit_s32 dst, sljit_sw dstw,
 	sljit_s32 src, sljit_sw srcw,
 	sljit_s32 type);
+
+/* Emit a conditional mov instruction which moves source to destination,
+   if the condition is satisfied. Unlike other arithmetic operations this
+   instruction does not support memory accesses.
+
+   type must be between SLJIT_EQUAL and SLJIT_ORDERED_F64
+   dst_reg must be a valid register and it can be combined
+      with SLJIT_I32_OP to perform a 32 bit arithmetic operation
+   src must be register or immediate (SLJIT_IMM)
+
+   Flags: - (does not modify flags) */
+SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_cmov(struct sljit_compiler *compiler, sljit_s32 type,
+	sljit_s32 dst_reg,
+	sljit_s32 src, sljit_sw srcw);
 
 /* Copies the base address of SLJIT_SP + offset to dst.
    Flags: - (may destroy flags) */
@@ -1215,7 +1248,7 @@ SLJIT_API_FUNC_ATTRIBUTE void sljit_set_const(sljit_uw addr, sljit_sw new_consta
 /* --------------------------------------------------------------------- */
 
 #define SLJIT_MAJOR_VERSION	0
-#define SLJIT_MINOR_VERSION	93
+#define SLJIT_MINOR_VERSION	94
 
 /* Get the human readable name of the platform. Can be useful on platforms
    like ARM, where ARM and Thumb2 functions can be mixed, and
@@ -1353,33 +1386,5 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op_custom(struct sljit_compiler *c
 
 SLJIT_API_FUNC_ATTRIBUTE void sljit_set_current_flags(struct sljit_compiler *compiler,
 	sljit_s32 current_flags);
-
-#if (defined SLJIT_CONFIG_X86 && SLJIT_CONFIG_X86)
-
-/* Returns with non-zero if sse2 is available. */
-
-SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_x86_is_sse2_available(void);
-
-/* Returns with non-zero if cmov instruction is available. */
-
-SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_x86_is_cmov_available(void);
-
-/* Emit a conditional mov instruction on x86 CPUs. This instruction
-   moves src to destination, if the condition is satisfied. Unlike
-   other arithmetic instructions, destination must be a register.
-   Before such instructions are emitted, cmov support should be
-   checked by sljit_x86_is_cmov_available function.
-    type must be between SLJIT_EQUAL and SLJIT_S_ORDERED
-    dst_reg must be a valid register and it can be combined
-      with SLJIT_I32_OP to perform 32 bit arithmetic
-   Flags: - (does not modify flags)
- */
-
-SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_x86_emit_cmov(struct sljit_compiler *compiler,
-	sljit_s32 type,
-	sljit_s32 dst_reg,
-	sljit_s32 src, sljit_sw srcw);
-
-#endif
 
 #endif /* _SLJIT_LIR_H_ */

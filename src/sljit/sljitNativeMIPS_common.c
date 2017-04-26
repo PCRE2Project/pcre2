@@ -173,6 +173,10 @@ static const sljit_u8 reg_map[SLJIT_NUMBER_OF_REGISTERS + 5] = {
 #if (defined SLJIT_MIPS_R1 && SLJIT_MIPS_R1)
 #define CLZ		(HI(28) | LO(32))
 #define DCLZ		(HI(28) | LO(36))
+#define MOVF		(HI(0) | (0 << 16) | LO(1))
+#define MOVN		(HI(0) | LO(11))
+#define MOVT		(HI(0) | (1 << 16) | LO(1))
+#define MOVZ		(HI(0) | LO(10))
 #define MUL		(HI(28) | LO(2))
 #define SEB		(HI(31) | (16 << 6) | LO(32))
 #define SEH		(HI(31) | (24 << 6) | LO(32))
@@ -488,6 +492,31 @@ SLJIT_API_FUNC_ATTRIBUTE void* sljit_generate_code(struct sljit_compiler *compil
 	sljit_cache_flush(code, code_ptr);
 #endif
 	return code;
+}
+
+SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_has_cpu_feature(sljit_s32 feature_type)
+{
+	switch (feature_type) {
+	case SLJIT_HAS_FPU:
+#ifdef SLJIT_IS_FPU_AVAILABLE
+		return SLJIT_IS_FPU_AVAILABLE;
+#elif defined(__GNUC__)
+		sljit_sw fir;
+		asm ("cfc1 %0, $0" : "=r"(fir));
+		return (fir >> 22) & 0x1;
+#else
+#error "FIR check is not implemented for this architecture"
+#endif
+
+#if (defined SLJIT_MIPS_R1 && SLJIT_MIPS_R1)
+	case SLJIT_HAS_CLZ:
+	case SLJIT_HAS_CMOV:
+		return 1;
+#endif
+
+	default:
+		return 0;
+	}
 }
 
 /* --------------------------------------------------------------------- */
@@ -1250,19 +1279,6 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op_custom(struct sljit_compiler *c
 /*  Floating point operators                                             */
 /* --------------------------------------------------------------------- */
 
-SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_is_fpu_available(void)
-{
-#ifdef SLJIT_IS_FPU_AVAILABLE
-	return SLJIT_IS_FPU_AVAILABLE;
-#elif defined(__GNUC__)
-	sljit_sw fir;
-	asm ("cfc1 %0, $0" : "=r"(fir));
-	return (fir >> 22) & 0x1;
-#else
-#error "FIR check is not implemented for this architecture"
-#endif
-}
-
 #define FLOAT_DATA(op) (DOUBLE_DATA | ((op & SLJIT_F32_OP) >> 7))
 #define FMT(op) (((op & SLJIT_F32_OP) ^ SLJIT_F32_OP) << (21 - 8))
 
@@ -1973,6 +1989,79 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op_flags(struct sljit_compiler *co
 
 #if (defined SLJIT_CONFIG_MIPS_32 && SLJIT_CONFIG_MIPS_32)
 #	undef mem_type
+#endif
+}
+
+SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_cmov(struct sljit_compiler *compiler, sljit_s32 type,
+	sljit_s32 dst_reg,
+	sljit_s32 src, sljit_sw srcw)
+{
+#if (defined SLJIT_MIPS_R1 && SLJIT_MIPS_R1)
+	sljit_ins ins;
+#endif
+
+	CHECK_ERROR();
+	CHECK(check_sljit_emit_cmov(compiler, type, dst_reg, src, srcw));
+
+#if (defined SLJIT_MIPS_R1 && SLJIT_MIPS_R1)
+
+	if (SLJIT_UNLIKELY(src & SLJIT_IMM)) {
+#if (defined SLJIT_CONFIG_MIPS_64 && SLJIT_CONFIG_MIPS_64)
+		if (dst_reg & SLJIT_I32_OP)
+			srcw = (sljit_s32)srcw;
+#endif
+		FAIL_IF(load_immediate(compiler, DR(TMP_REG1), srcw));
+		src = TMP_REG1;
+		srcw = 0;
+	}
+
+	dst_reg &= ~SLJIT_I32_OP;
+
+	switch (type & 0xff) {
+	case SLJIT_EQUAL:
+		ins = MOVZ | TA(EQUAL_FLAG);
+		break;
+	case SLJIT_NOT_EQUAL:
+		ins = MOVN | TA(EQUAL_FLAG);
+		break;
+	case SLJIT_LESS:
+	case SLJIT_GREATER:
+	case SLJIT_SIG_LESS:
+	case SLJIT_SIG_GREATER:
+	case SLJIT_OVERFLOW:
+	case SLJIT_MUL_OVERFLOW:
+		ins = MOVN | TA(OTHER_FLAG);
+		break;
+	case SLJIT_GREATER_EQUAL:
+	case SLJIT_LESS_EQUAL:
+	case SLJIT_SIG_GREATER_EQUAL:
+	case SLJIT_SIG_LESS_EQUAL:
+	case SLJIT_NOT_OVERFLOW:
+	case SLJIT_MUL_NOT_OVERFLOW:
+		ins = MOVZ | TA(OTHER_FLAG);
+		break;
+	case SLJIT_EQUAL_F64:
+	case SLJIT_LESS_F64:
+	case SLJIT_LESS_EQUAL_F64:
+	case SLJIT_UNORDERED_F64:
+		ins = MOVT;
+		break;
+	case SLJIT_NOT_EQUAL_F64:
+	case SLJIT_GREATER_EQUAL_F64:
+	case SLJIT_GREATER_F64:
+	case SLJIT_ORDERED_F64:
+		ins = MOVF;
+		break;
+	default:
+		ins = MOVZ | TA(OTHER_FLAG);
+		SLJIT_UNREACHABLE();
+		break;
+	}
+
+	return push_inst(compiler, ins | S(src) | D(dst_reg), DR(dst_reg));
+
+#else
+	return sljit_emit_cmov_generic(compiler, type, dst_reg, src, srcw);
 #endif
 }
 

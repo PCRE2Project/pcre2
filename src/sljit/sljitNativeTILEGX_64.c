@@ -2487,11 +2487,6 @@ SLJIT_API_FUNC_ATTRIBUTE struct sljit_jump * sljit_emit_jump(struct sljit_compil
 	return jump;
 }
 
-SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_is_fpu_available(void)
-{
-	return 0;
-}
-
 SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_fop1(struct sljit_compiler *compiler, sljit_s32 op, sljit_s32 dst, sljit_sw dstw, sljit_s32 src, sljit_sw srcw)
 {
 	SLJIT_UNREACHABLE();

@@ -393,7 +393,9 @@ typedef double sljit_f64;
 #ifndef SLJIT_W
 
 /* Defining long constants. */
-#if (defined SLJIT_64BIT_ARCHITECTURE && SLJIT_64BIT_ARCHITECTURE)
+#if (defined SLJIT_CONFIG_UNSUPPORTED && SLJIT_CONFIG_UNSUPPORTED)
+#define SLJIT_W(w)	(w##l)
+#elif (defined SLJIT_64BIT_ARCHITECTURE && SLJIT_64BIT_ARCHITECTURE)
 #define SLJIT_W(w)	(w##ll)
 #else
 #define SLJIT_W(w)	(w)

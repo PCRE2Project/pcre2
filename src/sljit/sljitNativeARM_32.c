@@ -82,6 +82,7 @@ static const sljit_u8 reg_map[SLJIT_NUMBER_OF_REGISTERS + 5] = {
 #define BLX		0xe12fff30
 #define BX		0xe12fff10
 #define CLZ		0xe16f0f10
+#define CMN_DP		0xb
 #define CMP_DP		0xa
 #define BKPT		0xe1200070
 #define EOR_DP		0x1
@@ -813,6 +814,27 @@ SLJIT_API_FUNC_ATTRIBUTE void* sljit_generate_code(struct sljit_compiler *compil
 	return code;
 }
 
+SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_has_cpu_feature(sljit_s32 feature_type)
+{
+	switch (feature_type) {
+	case SLJIT_HAS_FPU:
+#ifdef SLJIT_IS_FPU_AVAILABLE
+		return SLJIT_IS_FPU_AVAILABLE;
+#else
+		/* Available by default. */
+		return 1;
+#endif
+
+	case SLJIT_HAS_PRE_UPDATE:
+	case SLJIT_HAS_CLZ:
+	case SLJIT_HAS_CMOV:
+		return 1;
+
+	default:
+		return 0;
+	}
+}
+
 /* --------------------------------------------------------------------- */
 /*  Entry, exit                                                          */
 /* --------------------------------------------------------------------- */
@@ -969,6 +991,8 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_return(struct sljit_compiler *comp
 #define INV_IMM		0x02
   /* Source and destination is register. */
 #define MOVE_REG_CONV	0x04
+  /* Unused return value. */
+#define UNUSED_RETURN	0x08
 /* SET_FLAGS must be (1 << 20) as it is also the value of S bit (can be used for optimization). */
 #define SET_FLAGS	(1 << 20)
 /* dst: reg
@@ -1055,12 +1079,13 @@ static SLJIT_INLINE sljit_s32 emit_single_op(struct sljit_compiler *compiler, sl
 		SLJIT_ASSERT(!(flags & INV_IMM));
 		SLJIT_ASSERT(!(src2 & SRC2_IMM));
 		FAIL_IF(push_inst(compiler, CLZ | RD(dst) | RM(src2)));
-		if (flags & SET_FLAGS)
-			return push_inst(compiler, EMIT_DATA_PROCESS_INS(CMP_DP, flags & SET_FLAGS, SLJIT_UNUSED, dst, SRC2_IMM));
 		return SLJIT_SUCCESS;
 
 	case SLJIT_ADD:
 		SLJIT_ASSERT(!(flags & INV_IMM));
+		if ((flags & (UNUSED_RETURN | SET_FLAGS)) == (UNUSED_RETURN | SET_FLAGS) && !(flags & ARGS_SWAPPED))
+			return push_inst(compiler, EMIT_DATA_PROCESS_INS(CMN_DP, SET_FLAGS,
+				SLJIT_UNUSED, src1, (src2 & SRC2_IMM) ? src2 : RM(src2)));
 		return push_inst(compiler, EMIT_DATA_PROCESS_INS(ADD_DP, flags & SET_FLAGS,
 			dst, src1, (src2 & SRC2_IMM) ? src2 : RM(src2)));
 
@@ -1071,6 +1096,9 @@ static SLJIT_INLINE sljit_s32 emit_single_op(struct sljit_compiler *compiler, sl
 
 	case SLJIT_SUB:
 		SLJIT_ASSERT(!(flags & INV_IMM));
+		if ((flags & (UNUSED_RETURN | SET_FLAGS)) == (UNUSED_RETURN | SET_FLAGS) && !(flags & ARGS_SWAPPED))
+			return push_inst(compiler, EMIT_DATA_PROCESS_INS(CMP_DP, SET_FLAGS,
+				SLJIT_UNUSED, src1, (src2 & SRC2_IMM) ? src2 : RM(src2)));
 		return push_inst(compiler, EMIT_DATA_PROCESS_INS(!(flags & ARGS_SWAPPED) ? SUB_DP : RSB_DP, flags & SET_FLAGS,
 			dst, src1, (src2 & SRC2_IMM) ? src2 : RM(src2)));
 
@@ -1296,7 +1324,10 @@ static sljit_s32 load_immediate(struct sljit_compiler *compiler, sljit_s32 reg, 
 	/* Load integer. */
 	return push_inst_with_literal(compiler, EMIT_DATA_TRANSFER(WORD_DATA | LOAD_DATA, 1, 0, reg, TMP_PC, 0), imm);
 #else
-	return emit_imm(compiler, reg, imm);
+	FAIL_IF(push_inst(compiler, MOVW | RD(reg) | ((imm << 4) & 0xf0000) | (imm & 0xfff)));
+	if (imm <= 0xffff)
+		return SLJIT_SUCCESS;
+	return push_inst(compiler, MOVT | RD(reg) | ((imm >> 12) & 0xf0000) | ((imm >> 16) & 0xfff));
 #endif
 }
 
@@ -1413,10 +1444,8 @@ static sljit_s32 emit_op(struct sljit_compiler *compiler, sljit_s32 op, sljit_s3
 	sljit_s32 flags = HAS_FLAGS(op) ? SET_FLAGS : 0;
 
 	/* Destination check. */
-	if (SLJIT_UNLIKELY(dst == SLJIT_UNUSED)) {
-		if (op <= SLJIT_MOVU_P && !(src2 & SLJIT_MEM))
-			return SLJIT_SUCCESS;
-	}
+	if (SLJIT_UNLIKELY(dst == SLJIT_UNUSED))
+		flags |= UNUSED_RETURN;
 
 	SLJIT_ASSERT(!(inp_flags & ALLOW_INV_IMM) || (inp_flags & ALLOW_IMM));
 
@@ -1752,43 +1781,6 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op_custom(struct sljit_compiler *c
 /*  Floating point operators                                             */
 /* --------------------------------------------------------------------- */
 
-#if (defined SLJIT_CONFIG_ARM_V5 && SLJIT_CONFIG_ARM_V5)
-
-/* 0 - no fpu
-   1 - vfp */
-static sljit_s32 arm_fpu_type = -1;
-
-static void init_compiler(void)
-{
-	if (arm_fpu_type != -1)
-		return;
-
-	/* TODO: Only the OS can help to determine the correct fpu type. */
-	arm_fpu_type = 1;
-}
-
-SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_is_fpu_available(void)
-{
-#ifdef SLJIT_IS_FPU_AVAILABLE
-	return SLJIT_IS_FPU_AVAILABLE;
-#else
-	if (arm_fpu_type == -1)
-		init_compiler();
-	return arm_fpu_type;
-#endif
-}
-
-#else
-
-#define arm_fpu_type 1
-
-SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_is_fpu_available(void)
-{
-	/* Always available. */
-	return 1;
-}
-
-#endif
 
 #define FPU_LOAD (1 << 20)
 #define EMIT_FPU_DATA_TRANSFER(inst, add, base, freg, offs) \
@@ -2252,6 +2244,43 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op_flags(struct sljit_compiler *co
 		FAIL_IF(emit_op_mem(compiler, WORD_DATA, TMP_REG2, dst, dstw, TMP_REG1));
 
 	return (flags & SLJIT_SET_Z) ? push_inst(compiler, EMIT_DATA_PROCESS_INS(MOV_DP, SET_FLAGS, TMP_REG2, SLJIT_UNUSED, RM(dst_reg))) : SLJIT_SUCCESS;
+}
+
+SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_cmov(struct sljit_compiler *compiler, sljit_s32 type,
+	sljit_s32 dst_reg,
+	sljit_s32 src, sljit_sw srcw)
+{
+	sljit_uw cc, tmp;
+
+	CHECK_ERROR();
+	CHECK(check_sljit_emit_cmov(compiler, type, dst_reg, src, srcw));
+
+	dst_reg &= ~SLJIT_I32_OP;
+
+	cc = get_cc(type & 0xff);
+
+	if (SLJIT_UNLIKELY(src & SLJIT_IMM)) {
+		tmp = get_imm(srcw);
+		if (tmp)
+			return push_inst(compiler, (EMIT_DATA_PROCESS_INS(MOV_DP, 0, dst_reg, SLJIT_UNUSED, tmp) & ~COND_MASK) | cc);
+
+		tmp = get_imm(~srcw);
+		if (tmp)
+			return push_inst(compiler, (EMIT_DATA_PROCESS_INS(MVN_DP, 0, dst_reg, SLJIT_UNUSED, tmp) & ~COND_MASK) | cc);
+
+#if (defined SLJIT_CONFIG_ARM_V7 && SLJIT_CONFIG_ARM_V7)
+		tmp = (sljit_uw) srcw;
+		FAIL_IF(push_inst(compiler, (MOVW & ~COND_MASK) | cc | RD(dst_reg) | ((tmp << 4) & 0xf0000) | (tmp & 0xfff)));
+		if (tmp <= 0xffff)
+			return SLJIT_SUCCESS;
+		return push_inst(compiler, (MOVT & ~COND_MASK) | cc | RD(dst_reg) | ((tmp >> 12) & 0xf0000) | ((tmp >> 16) & 0xfff));
+#else
+		FAIL_IF(load_immediate(compiler, TMP_REG1, srcw));
+		src = TMP_REG1;
+#endif
+	}
+
+	return push_inst(compiler, (EMIT_DATA_PROCESS_INS(MOV_DP, 0, dst_reg, SLJIT_UNUSED, src) & ~COND_MASK) | cc);
 }
 
 SLJIT_API_FUNC_ATTRIBUTE struct sljit_const* sljit_emit_const(struct sljit_compiler *compiler, sljit_s32 dst, sljit_sw dstw, sljit_sw init_value)

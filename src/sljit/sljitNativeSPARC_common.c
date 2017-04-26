@@ -394,6 +394,27 @@ SLJIT_API_FUNC_ATTRIBUTE void* sljit_generate_code(struct sljit_compiler *compil
 	return code;
 }
 
+SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_has_cpu_feature(sljit_s32 feature_type)
+{
+	switch (feature_type) {
+	case SLJIT_HAS_FPU:
+#ifdef SLJIT_IS_FPU_AVAILABLE
+		return SLJIT_IS_FPU_AVAILABLE;
+#else
+		/* Available by default. */
+		return 1;
+#endif
+
+#if (defined SLJIT_CONFIG_SPARC_64 && SLJIT_CONFIG_SPARC_64)
+	case SLJIT_HAS_CMOV:
+		return 1;
+#endif
+
+	default:
+		return 0;
+	}
+}
+
 /* --------------------------------------------------------------------- */
 /*  Entry, exit                                                          */
 /* --------------------------------------------------------------------- */
@@ -953,16 +974,6 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op_custom(struct sljit_compiler *c
 /*  Floating point operators                                             */
 /* --------------------------------------------------------------------- */
 
-SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_is_fpu_available(void)
-{
-#ifdef SLJIT_IS_FPU_AVAILABLE
-	return SLJIT_IS_FPU_AVAILABLE;
-#else
-	/* Available by default. */
-	return 1;
-#endif
-}
-
 #define FLOAT_DATA(op) (DOUBLE_DATA | ((op & SLJIT_F32_OP) >> 7))
 #define SELECT_FOP(op, single, double) ((op & SLJIT_F32_OP) ? single : double)
 #define FLOAT_TMP_MEM_OFFSET (22 * sizeof(sljit_sw))
@@ -1421,6 +1432,20 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op_flags(struct sljit_compiler *co
 		return emit_op(compiler, op, flags | CUMULATIVE_OP | IMM_OP | ALT_KEEP_CACHE, dst, dstw, src, srcw, TMP_REG2, 0);
 
 	return (reg == TMP_REG2) ? emit_op_mem(compiler, WORD_DATA, TMP_REG2, dst, dstw) : SLJIT_SUCCESS;
+#else
+#error "Implementation required"
+#endif
+}
+
+SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_cmov(struct sljit_compiler *compiler, sljit_s32 type,
+	sljit_s32 dst_reg,
+	sljit_s32 src, sljit_sw srcw)
+{
+	CHECK_ERROR();
+	CHECK(check_sljit_emit_cmov(compiler, type, dst_reg, src, srcw));
+
+#if (defined SLJIT_CONFIG_SPARC_32 && SLJIT_CONFIG_SPARC_32)
+	return sljit_emit_cmov_generic(compiler, type, dst_reg, src, srcw);;
 #else
 #error "Implementation required"
 #endif

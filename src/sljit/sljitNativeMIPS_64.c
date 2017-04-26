@@ -240,8 +240,6 @@ static SLJIT_INLINE sljit_s32 emit_single_op(struct sljit_compiler *compiler, sl
 		FAIL_IF(push_inst(compiler, SELECT_OP(DADDIU, ADDIU) | S(dst) | T(dst) | IMM(1), DR(dst)));
 		FAIL_IF(push_inst(compiler, BGEZ | S(TMP_REG1) | IMM(-2), UNMOVABLE_INS));
 		FAIL_IF(push_inst(compiler, SELECT_OP(DSLL, SLL) | T(TMP_REG1) | D(TMP_REG1) | SH_IMM(1), UNMOVABLE_INS));
-		if (op & SLJIT_SET_Z)
-			return push_inst(compiler, SELECT_OP(DADDU, ADDU) | S(dst) | TA(0) | DA(EQUAL_FLAG), EQUAL_FLAG);
 #endif
 		return SLJIT_SUCCESS;
 

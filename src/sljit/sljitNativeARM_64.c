@@ -76,6 +76,7 @@ static const sljit_u8 reg_map[SLJIT_NUMBER_OF_REGISTERS + 8] = {
 #define BRK 0xd4200000
 #define CBZ 0xb4000000
 #define CLZ 0xdac01000
+#define CSEL 0x9a800000
 #define CSINC 0x9a800400
 #define EOR 0xca000000
 #define EORI 0xd2000000
@@ -321,6 +322,27 @@ SLJIT_API_FUNC_ATTRIBUTE void* sljit_generate_code(struct sljit_compiler *compil
 
 	SLJIT_CACHE_FLUSH(code, code_ptr);
 	return code;
+}
+
+SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_has_cpu_feature(sljit_s32 feature_type)
+{
+	switch (feature_type) {
+	case SLJIT_HAS_FPU:
+#ifdef SLJIT_IS_FPU_AVAILABLE
+		return SLJIT_IS_FPU_AVAILABLE;
+#else
+		/* Available by default. */
+		return 1;
+#endif
+
+	case SLJIT_HAS_PRE_UPDATE:
+	case SLJIT_HAS_CLZ:
+	case SLJIT_HAS_CMOV:
+		return 1;
+
+	default:
+		return 0;
+	}
 }
 
 /* --------------------------------------------------------------------- */
@@ -712,7 +734,7 @@ static sljit_s32 emit_op_imm(struct sljit_compiler *compiler, sljit_s32 flags, s
 	case SLJIT_NOT:
 		SLJIT_ASSERT(arg1 == TMP_REG1);
 		FAIL_IF(push_inst(compiler, (ORN ^ inv_bits) | RD(dst) | RN(TMP_ZERO) | RM(arg2)));
-		goto set_flags;
+		break; /* Set flags. */
 	case SLJIT_NEG:
 		SLJIT_ASSERT(arg1 == TMP_REG1);
 		if (flags & SET_FLAGS)
@@ -720,8 +742,7 @@ static sljit_s32 emit_op_imm(struct sljit_compiler *compiler, sljit_s32 flags, s
 		return push_inst(compiler, (SUB ^ inv_bits) | RD(dst) | RN(TMP_ZERO) | RM(arg2));
 	case SLJIT_CLZ:
 		SLJIT_ASSERT(arg1 == TMP_REG1);
-		FAIL_IF(push_inst(compiler, (CLZ ^ inv_bits) | RD(dst) | RN(arg2)));
-		goto set_flags;
+		return push_inst(compiler, (CLZ ^ inv_bits) | RD(dst) | RN(arg2));
 	case SLJIT_ADD:
 		CHECK_FLAGS(1 << 29);
 		return push_inst(compiler, (ADD ^ inv_bits) | RD(dst) | RN(arg1) | RM(arg2));
@@ -750,23 +771,23 @@ static sljit_s32 emit_op_imm(struct sljit_compiler *compiler, sljit_s32 flags, s
 		return push_inst(compiler, (AND ^ inv_bits) | RD(dst) | RN(arg1) | RM(arg2));
 	case SLJIT_OR:
 		FAIL_IF(push_inst(compiler, (ORR ^ inv_bits) | RD(dst) | RN(arg1) | RM(arg2)));
-		goto set_flags;
+		break; /* Set flags. */
 	case SLJIT_XOR:
 		FAIL_IF(push_inst(compiler, (EOR ^ inv_bits) | RD(dst) | RN(arg1) | RM(arg2)));
-		goto set_flags;
+		break; /* Set flags. */
 	case SLJIT_SHL:
 		FAIL_IF(push_inst(compiler, (LSLV ^ inv_bits) | RD(dst) | RN(arg1) | RM(arg2)));
-		goto set_flags;
+		break; /* Set flags. */
 	case SLJIT_LSHR:
 		FAIL_IF(push_inst(compiler, (LSRV ^ inv_bits) | RD(dst) | RN(arg1) | RM(arg2)));
-		goto set_flags;
+		break; /* Set flags. */
 	case SLJIT_ASHR:
 		FAIL_IF(push_inst(compiler, (ASRV ^ inv_bits) | RD(dst) | RN(arg1) | RM(arg2)));
-		goto set_flags;
+		break; /* Set flags. */
+	default:
+		SLJIT_UNREACHABLE();
+		return SLJIT_SUCCESS;
 	}
-
-	SLJIT_UNREACHABLE();
-	return SLJIT_SUCCESS;
 
 set_flags:
 	if (flags & SET_FLAGS)
@@ -1539,16 +1560,6 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op_custom(struct sljit_compiler *c
 /*  Floating point operators                                             */
 /* --------------------------------------------------------------------- */
 
-SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_is_fpu_available(void)
-{
-#ifdef SLJIT_IS_FPU_AVAILABLE
-	return SLJIT_IS_FPU_AVAILABLE;
-#else
-	/* Available by default. */
-	return 1;
-#endif
-}
-
 static sljit_s32 emit_fop_mem(struct sljit_compiler *compiler, sljit_s32 flags, sljit_s32 reg, sljit_s32 arg, sljit_sw argw)
 {
 	sljit_u32 shift = MEM_SIZE_SHIFT(flags);
@@ -2014,6 +2025,30 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op_flags(struct sljit_compiler *co
 	if (dst_r != TMP_REG1)
 		return SLJIT_SUCCESS;
 	return emit_op_mem2(compiler, mem_flags | STORE, TMP_REG1, dst, dstw, 0, 0);
+}
+
+SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_cmov(struct sljit_compiler *compiler, sljit_s32 type,
+	sljit_s32 dst_reg,
+	sljit_s32 src, sljit_sw srcw)
+{
+	sljit_ins inv_bits = (dst_reg & SLJIT_I32_OP) ? (1 << 31) : 0;
+	sljit_ins cc;
+
+	CHECK_ERROR();
+	CHECK(check_sljit_emit_cmov(compiler, type, dst_reg, src, srcw));
+
+	if (SLJIT_UNLIKELY(src & SLJIT_IMM)) {
+		if (dst_reg & SLJIT_I32_OP)
+			srcw = (sljit_s32)srcw;
+		FAIL_IF(load_immediate(compiler, TMP_REG1, srcw));
+		src = TMP_REG1;
+		srcw = 0;
+	}
+
+	cc = get_cc(type & 0xff);
+	dst_reg &= ~SLJIT_I32_OP;
+
+	return push_inst(compiler, (CSEL ^ inv_bits) | (cc << 12) | RD(dst_reg) | RN(src) | RM(dst_reg));
 }
 
 SLJIT_API_FUNC_ATTRIBUTE struct sljit_const* sljit_emit_const(struct sljit_compiler *compiler, sljit_s32 dst, sljit_sw dstw, sljit_sw init_value)
