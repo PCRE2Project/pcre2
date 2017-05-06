@@ -188,6 +188,34 @@ return mcontext;
 }
 
 
+/* A default covert context is set up to save having to initialize at run time
+when no context is supplied to the convert function. */
+
+const pcre2_convert_context PRIV(default_convert_context) = {
+  { default_malloc, default_free, NULL },    /* Default memory handling */
+#ifdef _WIN32
+  CHAR_BACKSLASH                             /* Default path separator */
+#else                                        /* is OS dependent */
+  CHAR_SLASH                                 /* Not Windows */
+#endif 
+  };
+
+/* The create function copies the default into the new memory, but must
+override the default memory handling functions if a gcontext was provided. */
+
+PCRE2_EXP_DEFN pcre2_convert_context * PCRE2_CALL_CONVENTION
+pcre2_convert_context_create(pcre2_general_context *gcontext)
+{
+pcre2_convert_context *ccontext = PRIV(memctl_malloc)(
+  sizeof(pcre2_real_convert_context), (pcre2_memctl *)gcontext);
+if (ccontext == NULL) return NULL;
+*ccontext = PRIV(default_convert_context);
+if (gcontext != NULL)
+  *((pcre2_memctl *)ccontext) = *((pcre2_memctl *)gcontext);
+return ccontext;
+}
+
+
 /*************************************************
 *              Context copy functions            *
 *************************************************/
@@ -229,10 +257,21 @@ return new;
 
 
 
+PCRE2_EXP_DEFN pcre2_convert_context * PCRE2_CALL_CONVENTION
+pcre2_convert_context_copy(pcre2_convert_context *ccontext)
+{
+pcre2_convert_context *new =
+  ccontext->memctl.malloc(sizeof(pcre2_real_convert_context),
+  ccontext->memctl.memory_data);
+if (new == NULL) return NULL;
+memcpy(new, ccontext, sizeof(pcre2_real_convert_context));
+return new;
+}
+
+
 /*************************************************
 *              Context free functions            *
 *************************************************/
-
 
 PCRE2_EXP_DEFN void PCRE2_CALL_CONVENTION
 pcre2_general_context_free(pcre2_general_context *gcontext)
@@ -258,6 +297,12 @@ if (mcontext != NULL)
 }
 
 
+PCRE2_EXP_DEFN void PCRE2_CALL_CONVENTION
+pcre2_convert_context_free(pcre2_convert_context *ccontext)
+{
+if (ccontext != NULL)
+  ccontext->memctl.free(ccontext, ccontext->memctl.memory_data);
+}
 
 
 /*************************************************
@@ -269,7 +314,7 @@ data is given. Only some of the functions are able to test the validity of the
 data. */
 
 
-/* ------------ Compile contexts ------------ */
+/* ------------ Compile context ------------ */
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_set_character_tables(pcre2_compile_context *ccontext,
@@ -336,7 +381,7 @@ return 0;
 }
 
 
-/* ------------ Match contexts ------------ */
+/* ------------ Match context ------------ */
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_set_callout(pcre2_match_context *mcontext,
@@ -389,5 +434,17 @@ pcre2_set_recursion_memory_management(pcre2_match_context *mcontext,
 (void)mydata;
 return 0;
 }
+
+/* ------------ Convert context ------------ */
+
+PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
+pcre2_set_glob_separator(pcre2_convert_context *ccontext, uint32_t separator)
+{
+if (separator != CHAR_SLASH && separator != CHAR_BACKSLASH &&
+    separator != CHAR_DOT) return PCRE2_ERROR_BADDATA;
+ccontext->glob_separator = separator;
+return 0;
+}
+
 
 /* End of pcre2_context.c */

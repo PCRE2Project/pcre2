@@ -15964,7 +15964,7 @@ Subject length lower bound = 1
 ------------------------------------------------------------------
 
 # End of testinput2 
-Error -64: PCRE2_ERROR_BADDATA (unknown error number)
+Error -65: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data
 Error -2: partial match
 Error -1: no match

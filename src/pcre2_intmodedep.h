@@ -590,6 +590,13 @@ typedef struct pcre2_real_match_context {
   uint32_t depth_limit;
 } pcre2_real_match_context;
 
+/* The real convert context structure. */
+
+typedef struct pcre2_real_convert_context {
+  pcre2_memctl memctl;
+  uint32_t glob_separator; 
+} pcre2_real_convert_context;
+
 /* The real compiled code structure. The type for the blocksize field is
 defined specially because it is required in pcre2_serialize_decode() when
 copying the size from possibly unaligned memory into a variable of the same

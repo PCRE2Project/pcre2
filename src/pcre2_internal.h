@@ -1851,6 +1851,7 @@ extern const uint8_t          PRIV(utf8_table4)[];
 #define _pcre2_callout_end_delims      PCRE2_SUFFIX(_pcre2_callout_end_delims_)
 #define _pcre2_callout_start_delims    PCRE2_SUFFIX(_pcre2_callout_start_delims_)
 #define _pcre2_default_compile_context PCRE2_SUFFIX(_pcre2_default_compile_context_)
+#define _pcre2_default_convert_context PCRE2_SUFFIX(_pcre2_default_convert_context_)
 #define _pcre2_default_match_context   PCRE2_SUFFIX(_pcre2_default_match_context_)
 #define _pcre2_default_tables          PCRE2_SUFFIX(_pcre2_default_tables_)
 #if PCRE2_CODE_UNIT_WIDTH == 32
@@ -1874,6 +1875,7 @@ extern const uint8_t                   PRIV(OP_lengths)[];
 extern const uint32_t                  PRIV(callout_end_delims)[];
 extern const uint32_t                  PRIV(callout_start_delims)[];
 extern const pcre2_compile_context     PRIV(default_compile_context);
+extern const pcre2_convert_context     PRIV(default_convert_context);
 extern const pcre2_match_context       PRIV(default_match_context);
 extern const uint8_t                   PRIV(default_tables)[];
 extern const uint32_t                  PRIV(hspace_list)[];

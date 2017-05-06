@@ -330,6 +330,7 @@ COMMON_SOURCES = \
   src/pcre2_compile.c \
   src/pcre2_config.c \
   src/pcre2_context.c \
+  src/pcre2_convert.c \
   src/pcre2_dfa_match.c \
   src/pcre2_error.c \
   src/pcre2_find_bracket.c \
@@ -621,6 +622,8 @@ EXTRA_DIST += \
   testdata/testinput21 \
   testdata/testinput22 \
   testdata/testinput23 \
+  testdata/testinput24 \
+  testdata/testinput25 \
   testdata/testinputEBC \
   testdata/testoutput1 \
   testdata/testoutput2 \
@@ -661,6 +664,8 @@ EXTRA_DIST += \
   testdata/testoutput22-32 \
   testdata/testoutput22-8 \
   testdata/testoutput23 \
+  testdata/testoutput24 \
+  testdata/testoutput25 \
   testdata/testoutputEBC \
   testdata/valgrind-jit.supp \
   testdata/wintestinput3 \

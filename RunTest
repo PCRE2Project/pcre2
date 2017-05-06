@@ -78,7 +78,9 @@ title20="Test 20: Serialization and code copy tests"
 title21="Test 21: \C tests without UTF (supported for DFA matching)"
 title22="Test 22: \C tests with UTF (not supported for DFA matching)"
 title23="Test 23: \C disabled test"
-maxtest=23
+title24="Test 24: Non-UTF pattern conversion tests"
+title25="Test 25: UTF pattern conversion tests"
+maxtest=25
 
 if [ $# -eq 1 -a "$1" = "list" ]; then
   echo $title0
@@ -105,6 +107,8 @@ if [ $# -eq 1 -a "$1" = "list" ]; then
   echo $title21
   echo $title22
   echo $title23
+  echo $title24
+  echo $title25
   exit 0
 fi
 
@@ -232,6 +236,8 @@ do20=no
 do21=no
 do22=no
 do23=no
+do24=no
+do25=no
 
 while [ $# -gt 0 ] ; do
   case $1 in
@@ -259,6 +265,8 @@ while [ $# -gt 0 ] ; do
    21) do21=yes;;
    22) do22=yes;;
    23) do23=yes;;
+   24) do24=yes;;
+   25) do25=yes;;
    -8) arg8=yes;;
   -16) arg16=yes;;
   -32) arg32=yes;;
@@ -407,7 +415,8 @@ if [ $do0  = no -a $do1  = no -a $do2  = no -a $do3  = no -a \
      $do8  = no -a $do9  = no -a $do10 = no -a $do11 = no -a \
      $do12 = no -a $do13 = no -a $do14 = no -a $do15 = no -a \
      $do16 = no -a $do17 = no -a $do18 = no -a $do19 = no -a \
-     $do20 = no -a $do21 = no -a $do22 = no -a $do23 = no \
+     $do20 = no -a $do21 = no -a $do22 = no -a $do23 = no -a \
+     $do24 = no -a $do25 = no \
    ]; then
   do0=yes
   do1=yes
@@ -433,6 +442,8 @@ if [ $do0  = no -a $do1  = no -a $do2  = no -a $do3  = no -a \
   do21=yes
   do22=yes
   do23=yes
+  do24=yes
+  do25=yes
 fi
 
 # Handle any explicit skips at this stage, so that an argument list may consist
@@ -489,7 +500,7 @@ for bmode in "$test8" "$test16" "$test32"; do
     for opt in "" $jitopt; do
       $sim $valgrind ${opt:+$vjs} ./pcre2test -q $setstack $bmode $opt $testdata/testinput2 testtry
       if [ $? = 0 ] ; then
-        $sim $valgrind ${opt:+$vjs} ./pcre2test -q $bmode $opt -error -64,-62,-2,-1,0,100,188,189,190,191 >>testtry
+        $sim $valgrind ${opt:+$vjs} ./pcre2test -q $bmode $opt -error -65,-62,-2,-1,0,100,188,189,190,191 >>testtry
         checkresult $? 2 "$opt"
       fi
     done
@@ -821,6 +832,26 @@ for bmode in "$test8" "$test16" "$test32"; do
     else
       $sim $valgrind ${opt:+$vjs} ./pcre2test -q $setstack $bmode $opt $testdata/testinput23 testtry
       checkresult $? 23 ""
+    fi
+  fi
+
+  # Non-UTF pattern conversion tests
+
+  if [ "$do24" = yes ] ; then
+    echo $title24
+    $sim $valgrind ${opt:+$vjs} ./pcre2test -q $setstack $bmode $opt $testdata/testinput24 testtry
+    checkresult $? 24 ""
+  fi
+
+  # UTF pattern converson tests
+
+  if [ "$do25" = yes ] ; then
+    echo $title25
+    if [ $utf -eq 0 ] ; then
+      echo "  Skipped because UTF-$bits support is not available"
+    else
+      $sim $valgrind ${opt:+$vjs} ./pcre2test -q $setstack $bmode $opt $testdata/testinput25 testtry
+      checkresult $? 25 ""
     fi
   fi
 

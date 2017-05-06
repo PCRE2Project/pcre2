@@ -186,16 +186,17 @@ void vms_setsymbol( char *, char *, int );
 #endif
 #endif
 
-#define CFORE_UNSET UINT32_MAX  /* Unset value for cfail/cerror fields */
-#define DFA_WS_DIMENSION 1000   /* Size of DFA workspace */
-#define DEFAULT_OVECCOUNT 15    /* Default ovector count */
-#define JUNK_OFFSET 0xdeadbeef  /* For initializing ovector */
-#define LOCALESIZE 32           /* Size of locale name */
-#define LOOPREPEAT 500000       /* Default loop count for timing */
-#define MALLOCLISTSIZE 20       /* For remembering mallocs */
-#define PATSTACKSIZE 20         /* Pattern stack for save/restore testing */
-#define REPLACE_MODSIZE 100     /* Field for reading 8-bit replacement */
-#define VERSION_SIZE 64         /* Size of buffer for the version strings */
+#define CFORE_UNSET UINT32_MAX    /* Unset value for cfail/cerror fields */
+#define CONVERT_UNSET UINT32_MAX  /* Unset value for convert_type field */
+#define DFA_WS_DIMENSION 1000     /* Size of DFA workspace */
+#define DEFAULT_OVECCOUNT 15      /* Default ovector count */
+#define JUNK_OFFSET 0xdeadbeef    /* For initializing ovector */
+#define LOCALESIZE 32             /* Size of locale name */
+#define LOOPREPEAT 500000         /* Default loop count for timing */
+#define MALLOCLISTSIZE 20         /* For remembering mallocs */
+#define PATSTACKSIZE 20           /* Pattern stack for save/restore testing */
+#define REPLACE_MODSIZE 100       /* Field for reading 8-bit replacement */
+#define VERSION_SIZE 64           /* Size of buffer for the version strings */
 
 /* Make sure the buffer into which replacement strings are copied is big enough
 to hold them as 32-bit code units. */
@@ -335,6 +336,7 @@ modes, so use the form of the first that is available. */
 #define PCRE2_JIT_STACK pcre2_jit_stack_8
 #define PCRE2_REAL_GENERAL_CONTEXT pcre2_real_general_context_8
 #define PCRE2_REAL_COMPILE_CONTEXT pcre2_real_compile_context_8
+#define PCRE2_REAL_CONVERT_CONTEXT pcre2_real_convert_context_8
 #define PCRE2_REAL_MATCH_CONTEXT pcre2_real_match_context_8
 
 #elif defined SUPPORT_PCRE2_16
@@ -344,6 +346,7 @@ modes, so use the form of the first that is available. */
 #define PCRE2_JIT_STACK pcre2_jit_stack_16
 #define PCRE2_REAL_GENERAL_CONTEXT pcre2_real_general_context_16
 #define PCRE2_REAL_COMPILE_CONTEXT pcre2_real_compile_context_16
+#define PCRE2_REAL_CONVERT_CONTEXT pcre2_real_convert_context_16
 #define PCRE2_REAL_MATCH_CONTEXT pcre2_real_match_context_16
 
 #elif defined SUPPORT_PCRE2_32
@@ -353,6 +356,7 @@ modes, so use the form of the first that is available. */
 #define PCRE2_JIT_STACK pcre2_jit_stack_32
 #define PCRE2_REAL_GENERAL_CONTEXT pcre2_real_general_context_32
 #define PCRE2_REAL_COMPILE_CONTEXT pcre2_real_compile_context_32
+#define PCRE2_REAL_CONVERT_CONTEXT pcre2_real_convert_context_32
 #define PCRE2_REAL_MATCH_CONTEXT pcre2_real_match_context_32
 #endif
 
@@ -377,7 +381,7 @@ static cmdstruct cmdlist[] = {
   { "save",            CMD_SAVE },
   { "subject",         CMD_SUBJECT }};
 
-#define cmdlistcount sizeof(cmdlist)/sizeof(cmdstruct)
+#define cmdlistcount (sizeof(cmdlist)/sizeof(cmdstruct))
 
 /* ------------- Structures and tables for handling modifiers -------------- */
 
@@ -386,6 +390,22 @@ of PCRE2_NEWLINE_xx in pcre2.h. */
 
 static const char *newlines[] = {
   "DEFAULT", "CR", "LF", "CRLF", "ANY", "ANYCRLF" };
+
+/* Structure and table for handling pattern conversion types. */
+
+typedef struct convertstruct {
+  const char *name;
+  uint32_t option;
+} convertstruct;
+
+static convertstruct convertlist[] = {
+  { "glob_basic",     PCRE2_CONVERT_GLOB_BASIC },
+  { "glob_bash",      PCRE2_CONVERT_GLOB_BASH },
+  { "posix_basic",    PCRE2_CONVERT_POSIX_BASIC },
+  { "posix_extended", PCRE2_CONVERT_POSIX_EXTENDED },
+  { "unset",          CONVERT_UNSET }};
+
+#define convertlistcount (sizeof(convertlist)/sizeof(convertstruct))
 
 /* Modifier types and applicability */
 
@@ -398,6 +418,8 @@ enum { MOD_CTC,    /* Applies to a compile context */
        MOD_PDP,    /* As MOD_PD, OK for Perl test */
        MOD_PND,    /* As MOD_PD, but not for a default pattern */
        MOD_PNDP,   /* As MOD_PND, OK for Perl test */
+       MOD_CHR,    /* Is a single character */ 
+       MOD_CON,    /* Is a "convert" type */
        MOD_CTL,    /* Is a control bit */
        MOD_BSR,    /* Is a BSR value */
        MOD_IN2,    /* Is one or two unsigned integers */
@@ -496,6 +518,9 @@ typedef struct patctl {    /* Structure for pattern modifiers. */
   uint32_t  jit;
   uint32_t  stackguard_test;
   uint32_t  tables_id;
+  uint32_t  convert_type;
+  uint32_t  convert_length; 
+  uint32_t  convert_glob_separator; 
   uint32_t  regerror_buffsize;
    uint8_t  locale[LOCALESIZE];
 } patctl;
@@ -568,6 +593,9 @@ static modstruct modlist[] = {
   { "callout_info",               MOD_PAT,  MOD_CTL, CTL_CALLOUT_INFO,           PO(control) },
   { "callout_none",               MOD_DAT,  MOD_CTL, CTL_CALLOUT_NONE,           DO(control) },
   { "caseless",                   MOD_PATP, MOD_OPT, PCRE2_CASELESS,             PO(options) },
+  { "convert",                    MOD_PAT,  MOD_CON, 0,                          PO(convert_type) },
+  { "convert_glob_separator",     MOD_PAT,  MOD_CHR, 0,                          PO(convert_glob_separator) },
+  { "convert_length",             MOD_PAT,  MOD_INT, 0,                          PO(convert_length) },
   { "copy",                       MOD_DAT,  MOD_NN,  DO(copy_numbers),           DO(copy_names) },
   { "debug",                      MOD_PAT,  MOD_CTL, CTL_DEBUG,                  PO(control) },
   { "depth_limit",                MOD_CTM,  MOD_INT, 0,                          MO(depth_limit) },
@@ -884,6 +912,7 @@ static uint8_t *dbuffer = NULL;
 static pcre2_code_8             *compiled_code8;
 static pcre2_general_context_8  *general_context8, *general_context_copy8;
 static pcre2_compile_context_8  *pat_context8, *default_pat_context8;
+static pcre2_convert_context_8  *con_context8, *default_con_context8;
 static pcre2_match_context_8    *dat_context8, *default_dat_context8;
 static pcre2_match_data_8       *match_data8;
 #endif
@@ -892,6 +921,7 @@ static pcre2_match_data_8       *match_data8;
 static pcre2_code_16            *compiled_code16;
 static pcre2_general_context_16 *general_context16, *general_context_copy16;
 static pcre2_compile_context_16 *pat_context16, *default_pat_context16;
+static pcre2_convert_context_16 *con_context16, *default_con_context16;
 static pcre2_match_context_16   *dat_context16, *default_dat_context16;
 static pcre2_match_data_16      *match_data16;
 static PCRE2_SIZE pbuffer16_size = 0;   /* Set only when needed */
@@ -902,6 +932,7 @@ static uint16_t *pbuffer16 = NULL;
 static pcre2_code_32            *compiled_code32;
 static pcre2_general_context_32 *general_context32, *general_context_copy32;
 static pcre2_compile_context_32 *pat_context32, *default_pat_context32;
+static pcre2_convert_context_32 *con_context32, *default_con_context32;
 static pcre2_match_context_32   *dat_context32, *default_dat_context32;
 static pcre2_match_data_32      *match_data32;
 static PCRE2_SIZE pbuffer32_size = 0;   /* Set only when needed */
@@ -941,6 +972,21 @@ are supported. */
   (test_mode == PCRE8_MODE)? (uint32_t)(((PCRE2_SPTR8)(a))[b]) : \
   (test_mode == PCRE16_MODE)? (uint32_t)(((PCRE2_SPTR16)(a))[b]) : \
   (uint32_t)(((PCRE2_SPTR32)(a))[b]))
+
+#define CONCTXCPY(a,b) \
+  if (test_mode == PCRE8_MODE) \
+    memcpy(G(a,8),G(b,8),sizeof(pcre2_convert_context_8)); \
+  else if (test_mode == PCRE16_MODE) \
+    memcpy(G(a,16),G(b,16),sizeof(pcre2_convert_context_16)); \
+  else memcpy(G(a,32),G(b,32),sizeof(pcre2_convert_context_32))
+
+#define CONVERT_COPY(a,b,c) \
+  if (test_mode == PCRE8_MODE) \
+    memcpy(G(a,8),(char *)b,c); \
+  else if (test_mode == PCRE16_MODE) \
+    memcpy(G(a,16),(char *)b,(c)*2); \
+  else if (test_mode == PCRE32_MODE) \
+    memcpy(G(a,32),(char *)b,(c)*4)
 
 #define DATCTXCPY(a,b) \
   if (test_mode == PCRE8_MODE) \
@@ -1017,6 +1063,11 @@ are supported. */
     G(a,16) = pcre2_compile_16(G(b,16),c,d,e,f,g); \
   else \
     G(a,32) = pcre2_compile_32(G(b,32),c,d,e,f,g)
+
+#define PCRE2_CONVERTED_PATTERN_FREE(a) \
+  if (test_mode == PCRE8_MODE) pcre2_converted_pattern_free_8((PCRE2_UCHAR8 *)a); \
+  else if (test_mode == PCRE16_MODE) pcre2_converted_pattern_free_16((PCRE2_UCHAR16 *)a); \
+  else pcre2_converted_pattern_free_32((PCRE2_UCHAR32 *)a)
 
 #define PCRE2_DFA_MATCH(a,b,c,d,e,f,g,h,i,j) \
   if (test_mode == PCRE8_MODE) \
@@ -1129,6 +1180,14 @@ are supported. */
   else \
     pcre2_match_data_free_32(G(a,32))
 
+#define PCRE2_PATTERN_CONVERT(a,b,c,d,e,f,g) \
+  if (test_mode == PCRE8_MODE) \
+    a = pcre2_pattern_convert_8(G(b,8),c,d,(PCRE2_UCHAR8 **)e,f,G(g,8)); \
+  else if (test_mode == PCRE16_MODE) \
+    a = pcre2_pattern_convert_16(G(b,16),c,d,(PCRE2_UCHAR16 **)e,f,G(g,16)); \
+  else \
+    a = pcre2_pattern_convert_32(G(b,32),c,d,(PCRE2_UCHAR32 **)e,f,G(g,32))
+
 #define PCRE2_PATTERN_INFO(a,b,c,d) \
   if (test_mode == PCRE8_MODE) \
     a = pcre2_pattern_info_8(G(b,8),c,d); \
@@ -1208,6 +1267,14 @@ are supported. */
     pcre2_set_depth_limit_16(G(a,16),b); \
   else \
     pcre2_set_depth_limit_32(G(a,32),b)
+
+#define PCRE2_SET_GLOB_SEPARATOR(r,a,b) \
+  if (test_mode == PCRE8_MODE) \
+    r = pcre2_set_glob_separator_8(G(a,8),b); \
+  else if (test_mode == PCRE16_MODE) \
+    r = pcre2_set_glob_separator_16(G(a,16),b); \
+  else \
+    r = pcre2_set_glob_separator_32(G(a,32),b)
 
 #define PCRE2_SET_HEAP_LIMIT(a,b) \
   if (test_mode == PCRE8_MODE) \
@@ -1436,6 +1503,17 @@ the three different cases. */
   (uint32_t)(((G(PCRE2_SPTR,BITONE))(a))[b]) : \
   (uint32_t)(((G(PCRE2_SPTR,BITTWO))(a))[b]))
 
+#define CONCTXCPY(a,b) \
+  if (test_mode == G(G(PCRE,BITONE),_MODE)) \
+    memcpy(G(a,BITONE),G(b,BITONE),sizeof(G(pcre2_convert_context_,BITONE))); \
+  else \
+    memcpy(G(a,BITTWO),G(b,BITTWO),sizeof(G(pcre2_convert_context_,BITTWO)))
+
+#define CONVERT_COPY(a,b,c) \
+  (test_mode == G(G(PCRE,BITONE),_MODE))? \
+  memcpy(G(a,BITONE),(char *)b,(c)*BYTEONE) : \
+  memcpy(G(a,BITTWO),(char *)b,(c)*BYTETWO)
+
 #define DATCTXCPY(a,b) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
     memcpy(G(a,BITONE),G(b,BITONE),sizeof(G(pcre2_match_context_,BITONE))); \
@@ -1494,6 +1572,12 @@ the three different cases. */
     G(a,BITONE) = G(pcre2_compile_,BITONE)(G(b,BITONE),c,d,e,f,g); \
   else \
     G(a,BITTWO) = G(pcre2_compile_,BITTWO)(G(b,BITTWO),c,d,e,f,g)
+
+#define PCRE2_CONVERTED_PATTERN_FREE(a) \
+  if (test_mode == G(G(PCRE,BITONE),_MODE)) \
+    G(pcre2_converted_pattern_free_,BITONE)((G(PCRE2_UCHAR,BITONE) *)a); \
+  else \
+    G(pcre2_converted_pattern)free_,BITTWO)((G(PCRE2_UCHAR,BITTWO) *)a)
 
 #define PCRE2_DFA_MATCH(a,b,c,d,e,f,g,h,i,j) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
@@ -1591,6 +1675,12 @@ the three different cases. */
   else \
     G(pcre2_match_data_free_,BITTWO)(G(a,BITTWO))
 
+#define PCRE2_PATTERN_CONVERT(a,b,c,d,e,f,g) \
+  if (test_mode == G(G(PCRE,BITONE),_MODE)) \
+    a = G(pcre2_pattern_convert_,BITONE)(G(b,BITONE),c,d,(G(PCRE2_UCHAR,BITONE) **)e,f,G(g,BITONE)); \
+  else \
+    a = G(pcre2_pattern_convert_,BITTWO)(G(b,BITTWO),c,d,(G(PCRE2_UCHAR,BITTWO) **)e,f,G(g,BITTWO))
+
 #define PCRE2_PATTERN_INFO(a,b,c,d) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
     a = G(pcre2_pattern_info_,BITONE)(G(b,BITONE),c,d); \
@@ -1652,6 +1742,12 @@ the three different cases. */
     G(pcre2_set_depth_limit_,BITONE)(G(a,BITONE),b); \
   else \
     G(pcre2_set_depth_limit_,BITTWO)(G(a,BITTWO),b)
+
+#define PCRE2_SET_GLOB_SEPARATOR(r,a,b) \
+  if (test_mode == G(G(PCRE,BITONE),_MODE)) \
+    r = G(pcre2_set_glob_separator_,BITONE)(G(a,BITONE),b); \
+  else \
+    r = G(pcre2_set_glob_separator_,BITTWO)(G(a,BITTWO),b)
 
 #define PCRE2_SET_HEAP_LIMIT(a,b) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
@@ -1820,6 +1916,8 @@ the three different cases. */
 #define CASTFLD(t,a,b) (t)(G(a,8)->b)
 #define CASTVAR(t,x) (t)G(x,8)
 #define CODE_UNIT(a,b) (uint32_t)(((PCRE2_SPTR8)(a))[b])
+#define CONCTXCPY(a,b) memcpy(G(a,8),G(b,8),sizeof(pcre2_convert_context_8))
+#define CONVERT_COPY(a,b,c) memcpy(G(a,8),(char *)b, c)
 #define DATCTXCPY(a,b) memcpy(G(a,8),G(b,8),sizeof(pcre2_match_context_8))
 #define FLD(a,b) G(a,8)->b
 #define PATCTXCPY(a,b) memcpy(G(a,8),G(b,8),sizeof(pcre2_compile_context_8))
@@ -1835,6 +1933,8 @@ the three different cases. */
 #define PCRE2_CODE_COPY_WITH_TABLES_TO_VOID(a,b) a = (void *)pcre2_code_copy_with_tables_8(G(b,8))
 #define PCRE2_COMPILE(a,b,c,d,e,f,g) \
   G(a,8) = pcre2_compile_8(G(b,8),c,d,e,f,g)
+#define PCRE2_CONVERTED_PATTERN_FREE(a) \
+  pcre2_converted_pattern_free_8((PCRE2_UCHAR8 *)a)
 #define PCRE2_DFA_MATCH(a,b,c,d,e,f,g,h,i,j) \
   a = pcre2_dfa_match_8(G(b,8),(PCRE2_SPTR8)c,d,e,f,G(g,8),h,i,j)
 #define PCRE2_GET_ERROR_MESSAGE(r,a,b) \
@@ -1857,6 +1957,7 @@ the three different cases. */
 #define PCRE2_MATCH_DATA_CREATE_FROM_PATTERN(a,b,c) \
   G(a,8) = pcre2_match_data_create_from_pattern_8(G(b,8),c)
 #define PCRE2_MATCH_DATA_FREE(a) pcre2_match_data_free_8(G(a,8))
+#define PCRE2_PATTERN_CONVERT(a,b,c,d,e,f,g) a = pcre2_pattern_info_8(G(b,8),c,d,(PCRE2_UCHAR8 **)e,f,G(g,8))
 #define PCRE2_PATTERN_INFO(a,b,c,d) a = pcre2_pattern_info_8(G(b,8),c,d)
 #define PCRE2_PRINTINT(a) pcre2_printint_8(compiled_code8,outfile,a)
 #define PCRE2_SERIALIZE_DECODE(r,a,b,c,d) \
@@ -1872,6 +1973,7 @@ the three different cases. */
 #define PCRE2_SET_COMPILE_RECURSION_GUARD(a,b,c) \
   pcre2_set_compile_recursion_guard_8(G(a,8),b,c)
 #define PCRE2_SET_DEPTH_LIMIT(a,b) pcre2_set_depth_limit_8(G(a,8),b)
+#define PCRE2_SET_GLOB_SEPARATOR(r,a,b) r = pcre2_set_glob_separator_8(G(a,8),b)
 #define PCRE2_SET_HEAP_LIMIT(a,b) pcre2_set_heap_limit_8(G(a,8),b)
 #define PCRE2_SET_MATCH_LIMIT(a,b) pcre2_set_match_limit_8(G(a,8),b)
 #define PCRE2_SET_MAX_PATTERN_LENGTH(a,b) pcre2_set_max_pattern_length_8(G(a,8),b)
@@ -1917,6 +2019,8 @@ the three different cases. */
 #define CASTFLD(t,a,b) (t)(G(a,16)->b)
 #define CASTVAR(t,x) (t)G(x,16)
 #define CODE_UNIT(a,b) (uint32_t)(((PCRE2_SPTR16)(a))[b])
+#define CONCTXCPY(a,b) memcpy(G(a,16),G(b,16),sizeof(pcre2_convert_context_16))
+#define CONVERT_COPY(a,b,c) memcpy(G(a,16),(char *)b, (c)*2)
 #define DATCTXCPY(a,b) memcpy(G(a,16),G(b,16),sizeof(pcre2_match_context_16))
 #define FLD(a,b) G(a,16)->b
 #define PATCTXCPY(a,b) memcpy(G(a,16),G(b,16),sizeof(pcre2_compile_context_16))
@@ -1932,6 +2036,8 @@ the three different cases. */
 #define PCRE2_CODE_COPY_WITH_TABLES_TO_VOID(a,b) a = (void *)pcre2_code_copy_with_tables_16(G(b,16))
 #define PCRE2_COMPILE(a,b,c,d,e,f,g) \
   G(a,16) = pcre2_compile_16(G(b,16),c,d,e,f,g)
+#define PCRE2_CONVERTED_PATTERN_FREE(a) \
+  pcre2_converted_pattern_free_16((PCRE2_UCHAR16 *)a)
 #define PCRE2_DFA_MATCH(a,b,c,d,e,f,g,h,i,j) \
   a = pcre2_dfa_match_16(G(b,16),(PCRE2_SPTR16)c,d,e,f,G(g,16),h,i,j)
 #define PCRE2_GET_ERROR_MESSAGE(r,a,b) \
@@ -1954,6 +2060,7 @@ the three different cases. */
 #define PCRE2_MATCH_DATA_CREATE_FROM_PATTERN(a,b,c) \
   G(a,16) = pcre2_match_data_create_from_pattern_16(G(b,16),c)
 #define PCRE2_MATCH_DATA_FREE(a) pcre2_match_data_free_16(G(a,16))
+#define PCRE2_PATTERN_CONVERT(a,b,c,d,e,f,g) a = pcre2_pattern_info_16(G(b,16),c,d,(PCRE2_UCHAR16 **)e,f,G(g,16))
 #define PCRE2_PATTERN_INFO(a,b,c,d) a = pcre2_pattern_info_16(G(b,16),c,d)
 #define PCRE2_PRINTINT(a) pcre2_printint_16(compiled_code16,outfile,a)
 #define PCRE2_SERIALIZE_DECODE(r,a,b,c,d) \
@@ -1969,6 +2076,7 @@ the three different cases. */
 #define PCRE2_SET_COMPILE_RECURSION_GUARD(a,b,c) \
   pcre2_set_compile_recursion_guard_16(G(a,16),b,c)
 #define PCRE2_SET_DEPTH_LIMIT(a,b) pcre2_set_depth_limit_16(G(a,16),b)
+#define PCRE2_SET_GLOB_SEPARATOR(r,a,b) r = pcre2_set_glob_separator_16(G(a,16),b)
 #define PCRE2_SET_HEAP_LIMIT(a,b) pcre2_set_heap_limit_16(G(a,16),b)
 #define PCRE2_SET_MATCH_LIMIT(a,b) pcre2_set_match_limit_16(G(a,16),b)
 #define PCRE2_SET_MAX_PATTERN_LENGTH(a,b) pcre2_set_max_pattern_length_16(G(a,16),b)
@@ -2014,6 +2122,8 @@ the three different cases. */
 #define CASTFLD(t,a,b) (t)(G(a,32)->b)
 #define CASTVAR(t,x) (t)G(x,32)
 #define CODE_UNIT(a,b) (uint32_t)(((PCRE2_SPTR32)(a))[b])
+#define CONCTXCPY(a,b) memcpy(G(a,32),G(b,32),sizeof(pcre2_convert_context_32))
+#define CONVERT_COPY(a,b,c) memcpy(G(a,32),(char *)b, (c)*4)
 #define DATCTXCPY(a,b) memcpy(G(a,32),G(b,32),sizeof(pcre2_match_context_32))
 #define FLD(a,b) G(a,32)->b
 #define PATCTXCPY(a,b) memcpy(G(a,32),G(b,32),sizeof(pcre2_compile_context_32))
@@ -2029,6 +2139,8 @@ the three different cases. */
 #define PCRE2_CODE_COPY_WITH_TABLES_TO_VOID(a,b) a = (void *)pcre2_code_copy_with_tables_32(G(b,32))
 #define PCRE2_COMPILE(a,b,c,d,e,f,g) \
   G(a,32) = pcre2_compile_32(G(b,32),c,d,e,f,g)
+#define PCRE2_CONVERTED_PATTERN_FREE(a) \
+  pcre2_converted_pattern_free_32((PCRE2_UCHAR32 *)a)
 #define PCRE2_DFA_MATCH(a,b,c,d,e,f,g,h,i,j) \
   a = pcre2_dfa_match_32(G(b,32),(PCRE2_SPTR32)c,d,e,f,G(g,32),h,i,j)
 #define PCRE2_GET_ERROR_MESSAGE(r,a,b) \
@@ -2051,6 +2163,7 @@ the three different cases. */
 #define PCRE2_MATCH_DATA_CREATE_FROM_PATTERN(a,b,c) \
   G(a,32) = pcre2_match_data_create_from_pattern_32(G(b,32),c)
 #define PCRE2_MATCH_DATA_FREE(a) pcre2_match_data_free_32(G(a,32))
+#define PCRE2_PATTERN_CONVERT(a,b,c,d,e,f,g) a = pcre2_pattern_info_32(G(b,32),c,d,(PCRE2_UCHAR32 **)e,f,G(g,32))
 #define PCRE2_PATTERN_INFO(a,b,c,d) a = pcre2_pattern_info_32(G(b,32),c,d)
 #define PCRE2_PRINTINT(a) pcre2_printint_32(compiled_code32,outfile,a)
 #define PCRE2_SERIALIZE_DECODE(r,a,b,c,d) \
@@ -2066,6 +2179,7 @@ the three different cases. */
 #define PCRE2_SET_COMPILE_RECURSION_GUARD(a,b,c) \
   pcre2_set_compile_recursion_guard_32(G(a,32),b,c)
 #define PCRE2_SET_DEPTH_LIMIT(a,b) pcre2_set_depth_limit_32(G(a,32),b)
+#define PCRE2_SET_GLOB_SEPARATOR(r,a,b) r = pcre2_set_glob_separator_32(G(a,32),b)
 #define PCRE2_SET_HEAP_LIMIT(a,b) pcre2_set_heap_limit_32(G(a,32),b)
 #define PCRE2_SET_MATCH_LIMIT(a,b) pcre2_set_match_limit_32(G(a,32),b)
 #define PCRE2_SET_MAX_PATTERN_LENGTH(a,b) pcre2_set_max_pattern_length_32(G(a,32),b)
@@ -3220,7 +3334,7 @@ strncmpic(const uint8_t *s, const uint8_t *t, int n)
 while (n--)
   {
   int c = tolower(*s++) - tolower(*t++);
-  if (c) return c;
+  if (c != 0) return c;
   }
 return 0;
 }
@@ -3466,15 +3580,15 @@ for (;;)
 
       field = check_modifier(modlist + index, ctx, pctl, dctl, *p);
       if (field == NULL) return FALSE;
-      
+
       /* /x is a special case; a second appearance changes PCRE2_EXTENDED to
-      PCRE2_EXTENDED_MORE. */ 
-      
+      PCRE2_EXTENDED_MORE. */
+
       if (cc == 'x' && (*((uint32_t *)field) & PCRE2_EXTENDED) != 0)
-        { 
+        {
         *((uint32_t *)field) &= ~PCRE2_EXTENDED;
         *((uint32_t *)field) |= PCRE2_EXTENDED_MORE;
-        } 
+        }
       else
         *((uint32_t *)field) |= modlist[index].value;
       }
@@ -3549,6 +3663,26 @@ for (;;)
         else dctl->control2 |= CTL_BSR_SET;
       }
     pp = ep;
+    break;
+    
+    case MOD_CHR:  /* A single character */
+    *((uint32_t *)field) = *pp++;
+    break;   
+
+    case MOD_CON:  /* A convert type */
+    for (i = 0; i < convertlistcount; i++)
+      {
+      if (strncmpic(pp, (const uint8_t *)convertlist[i].name, len) == 0)
+        {
+        if (*((uint32_t *)field) == CONVERT_UNSET)
+          *((uint32_t *)field) = convertlist[i].option;
+        else 
+          *((uint32_t *)field) |= convertlist[i].option;
+        break;
+        }
+      }
+    if (i >= convertlistcount) goto INVALID_VALUE;
+    pp = ep; 
     break;
 
     case MOD_IN2:    /* One or two unsigned integers */
@@ -4759,9 +4893,18 @@ if ((pat_patctl.control & CTL_UTF8_INPUT) != 0)
     return PR_SKIP;
     }
   }
+  
+/* The convert and posix modifiers are mutually exclusive. */
 
-/* Check for mutually exclusive modifiers. At present, these are all in the
-first control word. */
+if (pat_patctl.convert_type != CONVERT_UNSET &&
+    (pat_patctl.control & CTL_POSIX) != 0)
+  {
+  fprintf(outfile, "** The convert and posix modifiers are mutually exclusive\n");
+  return PR_SKIP; 
+  }    
+
+/* Check for mutually exclusive control modifiers. At present, these are all in
+the first control word. */
 
 for (k = 0; k < sizeof(exclusive_pat_controls)/sizeof(uint32_t); k++)
   {
@@ -5158,7 +5301,69 @@ switch(errorcode)
   }
 
 /* The pattern is now in pbuffer[8|16|32], with the length in code units in
-patlen. By default we pass a zero-terminated pattern, but a length is passed if
+patlen. If it is to be converted, copy the result back afterwards so that it
+it ends up back in the usual place. */
+
+if (pat_patctl.convert_type != CONVERT_UNSET)
+  {
+  int rc;
+  uint32_t convert_options = pat_patctl.convert_type;
+  void *converted_pattern;
+  PCRE2_SIZE converted_length;
+  
+  if (pat_patctl.convert_length != 0)
+    { 
+    converted_length = pat_patctl.convert_length; 
+    converted_pattern = malloc(converted_length * code_unit_size);
+    if (converted_pattern == NULL)
+      {
+      fprintf(outfile, "** Failed: malloc failed for converted pattern\n");
+      return PR_SKIP;  
+      }
+    }
+  else converted_pattern = NULL;  /* Let the library allocate */         
+  
+  if (utf) convert_options |= PCRE2_CONVERT_UTF;
+  if ((pat_patctl.options & PCRE2_NO_UTF_CHECK) != 0)
+    convert_options |= PCRE2_CONVERT_NO_UTF_CHECK;
+
+  CONCTXCPY(con_context, default_con_context);
+  if (pat_patctl.convert_glob_separator != 0)
+    { 
+    PCRE2_SET_GLOB_SEPARATOR(rc, con_context, pat_patctl.convert_glob_separator); 
+    if (rc != 0)
+      {
+      fprintf(outfile, "** Invalid glob separator '%c'\n",
+        pat_patctl.convert_glob_separator);
+      return PR_SKIP;  
+      }   
+    } 
+     
+  PCRE2_PATTERN_CONVERT(rc, pbuffer, patlen, convert_options, 
+    &converted_pattern, &converted_length, con_context);
+  if (rc != 0)
+    {
+    fprintf(outfile, "** Pattern conversion error at offset %lu: ",
+      converted_length);
+    if (!print_error_message(rc, "", "\n")) return PR_ABEND;
+    return PR_SKIP;
+    }
+  
+  /* Output the converted pattern, copy it, then free it. */
+  
+  PCHARSV(converted_pattern, 0, converted_length, utf, outfile); 
+  fprintf(outfile, "\n");
+ 
+  patlen = converted_length;
+  CONVERT_COPY(pbuffer, converted_pattern, converted_length + 1);
+  
+  if (pat_patctl.convert_length != 0)
+    free(converted_pattern);
+  else    
+    PCRE2_CONVERTED_PATTERN_FREE(converted_pattern);
+  }
+
+/* By default we pass a zero-terminated pattern, but a length is passed if
 "use_length" was specified or this is a hex pattern (which might contain binary
 zeros). When valgrind is supported, arrange for the unused part of the buffer
 to be marked as no access. */
@@ -7584,7 +7789,10 @@ _setmode( _fileno( stdout ), _O_BINARY );
 /* Initialization that does not depend on the running mode. */
 
 locale_name[0] = 0;
+
 memset(&def_patctl, 0, sizeof(patctl));
+def_patctl.convert_type = CONVERT_UNSET;
+
 memset(&def_datctl, 0, sizeof(datctl));
 def_datctl.oveccount = DEFAULT_OVECCOUNT;
 def_datctl.copy_numbers[0] = -1;
@@ -7896,6 +8104,8 @@ max_oveccount = DEFAULT_OVECCOUNT;
   G(pat_context,BITS) = G(pcre2_compile_context_copy_,BITS)(G(default_pat_context,BITS)); \
   G(default_dat_context,BITS) = G(pcre2_match_context_create_,BITS)(G(general_context,BITS)); \
   G(dat_context,BITS) = G(pcre2_match_context_copy_,BITS)(G(default_dat_context,BITS)); \
+  G(default_con_context,BITS) = G(pcre2_convert_context_create_,BITS)(G(general_context,BITS)); \
+  G(con_context,BITS) = G(pcre2_convert_context_copy_,BITS)(G(default_con_context,BITS)); \
   G(match_data,BITS) = G(pcre2_match_data_create_,BITS)(max_oveccount, G(general_context,BITS))
 
 #define CONTEXTTESTS \

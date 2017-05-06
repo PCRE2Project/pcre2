@@ -1,0 +1,418 @@
+# This file tests the auxiliary pattern conversion features of the PCRE2
+# library, in non-UTF mode.
+
+#forbid_utf
+#newline_default lf any anycrlf
+
+# -------- Tests of glob conversion --------
+
+# Set the glob separator explicitly so that different OS defaults are not a
+# problem. Then test various errors.
+
+#pattern convert=glob_basic,convert_glob_separator=/
+
+/abc/posix
+** The convert and posix modifiers are mutually exclusive
+
+# More than one glob type is an error.
+
+/abc/convert=glob_bash
+** Pattern conversion error at offset 0: bad option value
+
+# Separator must be / \ or .
+
+/a*b/convert_glob_separator=%
+** Invalid glob separator '%'
+
+# Can't have separator in a class
+
+"[ab/cd]"
+** Pattern conversion error at offset 3: invalid syntax
+
+"[,-/]"
+** Pattern conversion error at offset 3: invalid syntax
+
+/[ab/
+** Pattern conversion error at offset 3: missing terminating ] for character class
+
+# Length check
+
+/abc/convert_length=7
+** Pattern conversion error at offset 3: no more memory
+
+/abc/convert_length=8
+\Aabc\z
+
+# Now some actual tests
+
+/a?b[]xy]*c/
+\Aa[^/]b[]xy][^/]*c\z
+    azb]1234c
+ 0: azb]1234c
+
+# Tests from the gitwildmatch list, with some additions
+
+/foo/
+\Afoo\z
+    foo
+ 0: foo
+/= Expect no match
+No match
+    bar
+No match
+
+//
+\A\z
+    \
+ 0: 
+
+/???/
+\A(?!\.)[^/][^/][^/]\z
+    foo
+ 0: foo
+\= Expect no match
+    foobar
+No match
+
+/*/
+\A[^/]*\z
+    foo
+ 0: foo
+    \
+ 0: 
+
+/f*/
+\Af[^/]*\z
+    foo
+ 0: foo
+    f
+ 0: f
+
+/*f/
+(?s)\A(?!\.).*(?<=f)\z
+    oof
+ 0: oof
+\= Expect no match
+    foo
+No match
+
+/*foo*/
+\A(?!\.)[^/]*foo[^/]*\z
+    foo
+ 0: foo
+    food
+ 0: food
+    aprilfool
+ 0: aprilfool
+
+/*ob*a*r*/
+\A(?!\.)[^/]*ob[^/]*a[^/]*r[^/]*\z
+    foobar
+ 0: foobar
+
+/*ab/
+(?s)\A(?!\.).*(?<=ab)\z
+    aaaaaaabababab
+ 0: aaaaaaabababab
+
+/foo\*/
+\Afoo\*\z
+    foo*
+ 0: foo*
+
+/foo\*bar/
+\Afoo\*bar\z
+\= Expect no match
+    foobar
+No match
+
+/f\\oo/
+\Af\\oo\z
+    f\\oo
+ 0: f\oo
+
+/*[al]?/
+(?s)\A(?!\.).*(?<=[al][^/])\z
+    ball
+ 0: ball
+
+/[ten]/
+\A(?!\.)[ten]\z
+\= Expect no match
+    ten
+No match
+
+/t[a-g]n/
+\At[a-g]n\z
+    ten
+ 0: ten
+
+/a[]]b/
+\Aa[]]b\z
+    a]b
+ 0: a]b
+
+/a[]-]b/
+\Aa[]-]b\z
+    a-b
+ 0: a-b
+    a]b
+ 0: a]b
+\= Expect no match
+    aab
+No match
+
+/a[]a-]b/
+\Aa[]a-]b\z
+    aab
+ 0: aab
+
+/]/
+\A\]\z
+    ]
+ 0: ]
+
+/t[!a-g]n/
+\At[^a-g]n\z
+    ton
+ 0: ton
+\= Expect no match
+    ten
+No match
+
+'[[:alpha:]][[:digit:]][[:upper:]]'
+\A(?!\.)[[:alpha:]][[:digit:]][[:upper:]]\z
+    a1B
+ 0: a1B
+
+'[[:digit:][:upper:][:space:]]'
+\A(?!\.)[[:digit:][:upper:][:space:]]\z
+    A
+ 0: A
+    1
+ 0: 1
+    \ \=
+ 0:  
+\= Expect no match
+    a
+No match
+    .
+No match
+
+'[a-c[:digit:]x-z]'
+\A(?!\.)[a-c[:digit:]x-z]\z
+    5
+ 0: 5
+    b
+ 0: b
+    y
+ 0: y
+\= Expect no match
+    q
+No match
+
+# End of gitwildmatch tests
+
+/*.j?g/
+(?s)\A(?!\.).*(?<=\.j[^/]g)\z
+    pic01.jpg
+ 0: pic01.jpg
+    .jpg
+No match
+    pic02.jxg
+ 0: pic02.jxg
+\= Expect no match
+    pic03.j/g
+No match
+
+/A[+-0]B/
+\AA[+-0](?<!/)B\z
+    A+B
+ 0: A+B
+    A.B
+ 0: A.B
+    A0B
+ 0: A0B
+\= Expect no match
+    A/B
+No match
+
+/*x?z/
+(?s)\A(?!\.).*(?<=x[^/]z)\z
+    abc.xyz
+ 0: abc.xyz
+\= Expect no match
+    .xyz
+No match
+
+/?x?z/
+\A(?!\.)[^/]x[^/]z\z
+    axyz
+ 0: axyz
+\= Expect no match
+    .xyz
+No match
+
+"[,-0]x?z"
+\A(?!\.)[,-0](?<!/)x[^/]z\z
+    ,xyz
+ 0: ,xyz
+\= Expect no match
+    /xyz
+No match
+    .xyz
+No match
+
+".x*"
+\A\.x[^/]*\z
+    .xabc
+ 0: .xabc
+
+/a[--0]z/
+\Aa[--0](?<!/)z\z
+    a-z
+ 0: a-z
+    a.z
+ 0: a.z
+    a0z
+ 0: a0z
+\= Expect no match
+    a/z
+No match
+    a1z
+No match
+
+/<[a-c-d]>/
+\A<[a-c-d]>\z
+    <a>
+ 0: <a>
+    <b>
+ 0: <b>
+    <c>
+ 0: <c>
+    <d>
+ 0: <d>
+    <->
+ 0: <->
+
+/a[[:digit:].]z/
+\Aa[[:digit:].]z\z
+    a1z
+ 0: a1z
+    a.z
+ 0: a.z
+\= Expect no match
+    a:z
+No match
+
+/a[[:digit].]z/
+\Aa[[:digit]\.\]z\z
+    a[.]z
+ 0: a[.]z
+    a:.]z
+ 0: a:.]z
+    ad.]z
+ 0: ad.]z
+
+/<[[:a[:digit:]b]>/
+\A<[[:a[:digit:]b]>\z
+    <[>
+ 0: <[>
+    <:>
+ 0: <:>
+    <a>
+ 0: <a>
+    <9>
+ 0: <9>
+    <b>
+ 0: <b>
+\= Expect no match
+    <d>
+No match
+
+/a*b/convert_glob_separator=\
+\Aa[^\\]*b\z
+
+/a*b/convert_glob_separator=.
+\Aa[^.]*b\z
+
+/a*b/convert_glob_separator=/
+\Aa[^/]*b\z
+
+#pattern convert=unset
+#pattern convert=posix_extended
+
+/a[[:>:]z/
+a[[:>:]z
+Failed: error 130 at offset 4: unknown POSIX class name
+
+/<[[:a[:digit:]b]>/
+<[[:a[:digit:]b]>
+    <[>
+ 0: <[>
+    <:>
+ 0: <:>
+    <a>
+ 0: <a>
+    <9>
+ 0: <9>
+    <b>
+ 0: <b>
+\= Expect no match
+    <d>
+No match
+
+/a+\1b\\c|d[ab\c]/
+a+1b\\c|d[ab\\c]
+
+/a[[:<:]]b[[:>:]]/
+a[[:<:]]b[[:>:]]
+
+/<[]bc]>/
+<[]bc]>
+    <]>
+ 0: <]>
+    <b>
+ 0: <b>
+    <c>
+ 0: <c>
+
+/<[^]bc]>/
+<[^]bc]>
+    <.>
+ 0: <.>
+\= Expect no match
+    <]>
+No match
+    <b>
+No match
+
+/(a)\1b/
+(a)1b
+    a1b
+ 0: a1b
+ 1: a
+\= Expect no match
+    aab
+No match
+
+#pattern convert=unset
+#pattern convert=posix_basic
+
+/a*b+c\+[def](ab)\(cd\)/
+a*b\+c+[def]\(ab\)(cd)
+
+/\(a\)\1b/
+(a)\1b
+    aab
+ 0: aab
+ 1: a
+\= Expect no match
+    a1b
+No match
+
+#pattern convert=unset
+
+/abc/
+
+# End of testinput24
