@@ -721,12 +721,15 @@ the first control word. Note that CTL_POSIX_NOSUB is always accompanied by
 CTL_POSIX, so it doesn't need its own entries. */
 
 static uint32_t exclusive_pat_controls[] = {
-  CTL_POSIX  | CTL_HEXPAT,
-  CTL_POSIX  | CTL_PUSH,
-  CTL_POSIX  | CTL_PUSHCOPY,
-  CTL_POSIX  | CTL_PUSHTABLESCOPY,
-  CTL_POSIX  | CTL_USE_LENGTH,
-  CTL_EXPAND | CTL_HEXPAT };
+  CTL_POSIX    | CTL_HEXPAT,
+  CTL_POSIX    | CTL_PUSH,
+  CTL_POSIX    | CTL_PUSHCOPY,
+  CTL_POSIX    | CTL_PUSHTABLESCOPY,
+  CTL_POSIX    | CTL_USE_LENGTH,
+  CTL_PUSH     | CTL_PUSHCOPY,
+  CTL_PUSH     | CTL_PUSHTABLESCOPY,
+  CTL_PUSHCOPY | CTL_PUSHTABLESCOPY,   
+  CTL_EXPAND   | CTL_HEXPAT };
 
 /* Data controls that are mutually exclusive. At present these are all in the
 first control word. */

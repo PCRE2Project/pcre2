@@ -153,6 +153,9 @@ tests to improve coverage.
 
 30. Implement (?n: for PCRE2_NO_AUTO_CAPTURE, because Perl now has this.
 
+31. If more than one of "push", "pushcopy", or "pushtablescopy" were set in 
+pcre2test, a crash could occur.
+
 
 Version 10.23 14-February-2017
 ------------------------------
