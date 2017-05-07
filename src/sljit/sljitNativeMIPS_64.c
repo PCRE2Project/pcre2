@@ -244,7 +244,7 @@ static SLJIT_INLINE sljit_s32 emit_single_op(struct sljit_compiler *compiler, sl
 		return SLJIT_SUCCESS;
 
 	case SLJIT_ADD:
-		is_overflow = GET_FLAG_TYPE(op) == SLJIT_OVERFLOW || GET_FLAG_TYPE(op) == SLJIT_NOT_OVERFLOW;
+		is_overflow = GET_FLAG_TYPE(op) == SLJIT_OVERFLOW;
 		is_carry = GET_FLAG_TYPE(op) == GET_FLAG_TYPE(SLJIT_SET_CARRY);
 
 		if (flags & SRC2_IMM) {
@@ -386,7 +386,7 @@ static SLJIT_INLINE sljit_s32 emit_single_op(struct sljit_compiler *compiler, sl
 			return SLJIT_SUCCESS;
 		}
 
-		is_overflow = GET_FLAG_TYPE(op) == SLJIT_OVERFLOW || GET_FLAG_TYPE(op) == SLJIT_NOT_OVERFLOW;
+		is_overflow = GET_FLAG_TYPE(op) == SLJIT_OVERFLOW;
 		is_carry = GET_FLAG_TYPE(op) == GET_FLAG_TYPE(SLJIT_SET_CARRY);
 
 		if (flags & SRC2_IMM) {
@@ -458,7 +458,7 @@ static SLJIT_INLINE sljit_s32 emit_single_op(struct sljit_compiler *compiler, sl
 	case SLJIT_MUL:
 		SLJIT_ASSERT(!(flags & SRC2_IMM));
 
-		if (GET_FLAG_TYPE(op) != SLJIT_MUL_OVERFLOW && GET_FLAG_TYPE(op) != SLJIT_MUL_NOT_OVERFLOW) {
+		if (GET_FLAG_TYPE(op) != SLJIT_MUL_OVERFLOW) {
 #if (defined SLJIT_MIPS_R1 && SLJIT_MIPS_R1)
 			if (op & SLJIT_I32_OP)
 				return push_inst(compiler, MUL | S(src1) | T(src2) | D(dst), DR(dst));

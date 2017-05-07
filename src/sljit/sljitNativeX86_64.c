@@ -47,9 +47,8 @@ static sljit_u8* generate_far_jump_code(struct sljit_jump *jump, sljit_u8 *code_
 		*code_ptr++ = 10 + 3;
 	}
 
-	SLJIT_ASSERT(reg_map[TMP_REG3] == 9);
-	*code_ptr++ = REX_W | REX_B;
-	*code_ptr++ = MOV_r_i32 + 1;
+	*code_ptr++ = REX_W | ((reg_map[TMP_REG2] <= 7) ? 0 : REX_B);
+	*code_ptr++ = MOV_r_i32 | reg_lmap[TMP_REG2];
 	jump->addr = (sljit_uw)code_ptr;
 
 	if (jump->flags & JUMP_LABEL)
@@ -58,9 +57,10 @@ static sljit_u8* generate_far_jump_code(struct sljit_jump *jump, sljit_u8 *code_
 		sljit_unaligned_store_sw(code_ptr, jump->u.target);
 
 	code_ptr += sizeof(sljit_sw);
-	*code_ptr++ = REX_B;
+	if (reg_map[TMP_REG2] >= 8)
+		*code_ptr++ = REX_B;
 	*code_ptr++ = GROUP_FF;
-	*code_ptr++ = (type >= SLJIT_FAST_CALL) ? (MOD_REG | CALL_rm | 1) : (MOD_REG | JMP_rm | 1);
+	*code_ptr++ = MOD_REG | (type >= SLJIT_FAST_CALL ? CALL_rm : JMP_rm) | reg_lmap[TMP_REG2];
 
 	return code_ptr;
 }
@@ -380,12 +380,12 @@ static sljit_u8* emit_x86_instruction(struct sljit_compiler *compiler, sljit_s32
 	if (b & SLJIT_MEM) {
 		if (!(b & OFFS_REG_MASK)) {
 			if (NOT_HALFWORD(immb)) {
-				PTR_FAIL_IF(emit_load_imm64(compiler, TMP_REG3, immb));
+				PTR_FAIL_IF(emit_load_imm64(compiler, TMP_REG2, immb));
 				immb = 0;
 				if (b & REG_MASK)
-					b |= TO_OFFS_REG(TMP_REG3);
+					b |= TO_OFFS_REG(TMP_REG2);
 				else
-					b |= TMP_REG3;
+					b |= TMP_REG2;
 			}
 			else if (reg_lmap[b & REG_MASK] == 4)
 				b |= TO_OFFS_REG(SLJIT_SP);
@@ -545,17 +545,19 @@ static sljit_u8* emit_x86_instruction(struct sljit_compiler *compiler, sljit_s32
 /*  Call / return instructions                                           */
 /* --------------------------------------------------------------------- */
 
-static SLJIT_INLINE sljit_s32 call_with_args(struct sljit_compiler *compiler, sljit_s32 type)
+static sljit_s32 call_with_args(struct sljit_compiler *compiler, sljit_s32 type)
 {
 	sljit_u8 *inst;
 
+	/* After any change update IS_REG_CHANGED_BY_CALL as well. */
 #ifndef _WIN64
-	SLJIT_ASSERT(reg_map[SLJIT_R1] == 6 && reg_map[SLJIT_R0] < 8 && reg_map[SLJIT_R2] < 8);
+	SLJIT_ASSERT(reg_map[SLJIT_R1] == 6 && reg_map[SLJIT_R0] < 8 && reg_map[SLJIT_R2] < 8 && reg_map[TMP_REG1] == 2);
 
 	inst = (sljit_u8*)ensure_buf(compiler, 1 + ((type < SLJIT_CALL3) ? 3 : 6));
 	FAIL_IF(!inst);
 	INC_SIZE((type < SLJIT_CALL3) ? 3 : 6);
 	if (type >= SLJIT_CALL3) {
+		/* Move third argument to TMP_REG1. */
 		*inst++ = REX_W;
 		*inst++ = MOV_r_rm;
 		*inst++ = MOD_REG | (0x2 /* rdx */ << 3) | reg_lmap[SLJIT_R2];
@@ -564,12 +566,13 @@ static SLJIT_INLINE sljit_s32 call_with_args(struct sljit_compiler *compiler, sl
 	*inst++ = MOV_r_rm;
 	*inst++ = MOD_REG | (0x7 /* rdi */ << 3) | reg_lmap[SLJIT_R0];
 #else
-	SLJIT_ASSERT(reg_map[SLJIT_R1] == 2 && reg_map[SLJIT_R0] < 8 && reg_map[SLJIT_R2] < 8);
+	SLJIT_ASSERT(reg_map[SLJIT_R1] == 2 && reg_map[SLJIT_R0] < 8 && reg_map[SLJIT_R2] < 8 && reg_map[TMP_REG1] == 8);
 
 	inst = (sljit_u8*)ensure_buf(compiler, 1 + ((type < SLJIT_CALL3) ? 3 : 6));
 	FAIL_IF(!inst);
 	INC_SIZE((type < SLJIT_CALL3) ? 3 : 6);
 	if (type >= SLJIT_CALL3) {
+		/* Move third argument to TMP_REG1. */
 		*inst++ = REX_W | REX_R;
 		*inst++ = MOV_r_rm;
 		*inst++ = MOD_REG | (0x0 /* r8 */ << 3) | reg_lmap[SLJIT_R2];

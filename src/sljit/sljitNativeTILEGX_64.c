@@ -2092,9 +2092,6 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op_flags(struct sljit_compiler *co
 	CHECK(check_sljit_emit_op_flags(compiler, op, dst, dstw, src, srcw, type));
 	ADJUST_LOCAL_OFFSET(dst, dstw);
 
-	if (dst == SLJIT_UNUSED)
-		return SLJIT_SUCCESS;
-
 	op = GET_OPCODE(op);
 	if (op == SLJIT_MOV_S32 || op == SLJIT_MOV_U32)
 		mem_type = INT_DATA | SIGNED_DATA;

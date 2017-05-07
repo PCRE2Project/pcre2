@@ -890,6 +890,10 @@ static sljit_s32 getput_arg_fast(struct sljit_compiler *compiler, sljit_s32 flag
 	}
 
 	arg &= REG_MASK;
+
+	if (arg == SLJIT_UNUSED)
+		return 0;
+
 	if (argw >= 0 && (argw >> shift) <= 0xfff && (argw & ((1 << shift) - 1)) == 0) {
 		if (SLJIT_UNLIKELY(flags & ARG_TEST))
 			return 1;
@@ -950,7 +954,7 @@ static sljit_s32 getput_arg(struct sljit_compiler *compiler, sljit_s32 flags, sl
 		next_argw = 0;
 	}
 
-	tmp_r = (flags & STORE) ? TMP_REG3 : reg;
+	tmp_r = ((flags & STORE) || (flags == (WORD_SIZE | SIGNED))) ? TMP_REG3 : reg;
 
 	if (SLJIT_UNLIKELY((flags & UPDATE) && (arg & REG_MASK))) {
 		/* Update only applies if a base register exists. */
@@ -1021,15 +1025,15 @@ static sljit_s32 getput_arg(struct sljit_compiler *compiler, sljit_s32 flags, sl
 		}
 	}
 
-	if (argw >= 0 && argw <= 0xffffff && (argw & ((1 << shift) - 1)) == 0) {
-		FAIL_IF(push_inst(compiler, ADDI | (1 << 22) | RD(tmp_r) | RN(arg & REG_MASK) | ((argw >> 12) << 10)));
-		return push_inst(compiler, sljit_mem_imm[flags & 0x3] | (shift << 30)
-			| RT(reg) | RN(tmp_r) | ((argw & 0xfff) << (10 - shift)));
-	}
-
 	diff = argw - next_argw;
 	next_arg = (arg & REG_MASK) && (arg == next_arg) && diff <= 0xfff && diff >= -0xfff && diff != 0;
 	arg &= REG_MASK;
+
+	if (arg != SLJIT_UNUSED && argw >= 0 && argw <= 0xffffff && (argw & ((1 << shift) - 1)) == 0) {
+		FAIL_IF(push_inst(compiler, ADDI | (1 << 22) | RD(tmp_r) | RN(arg) | ((argw >> 12) << 10)));
+		return push_inst(compiler, sljit_mem_imm[flags & 0x3] | (shift << 30)
+			| RT(reg) | RN(tmp_r) | ((argw & 0xfff) << (10 - shift)));
+	}
 
 	if (arg && compiler->cache_arg == SLJIT_MEM) {
 		if (compiler->cache_argw == argw)
@@ -1313,6 +1317,23 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op1(struct sljit_compiler *compile
 	compiler->cache_arg = 0;
 	compiler->cache_argw = 0;
 
+	if (dst == SLJIT_UNUSED && !HAS_FLAGS(op)) {
+		if (op <= SLJIT_MOV_P && (src & SLJIT_MEM)) {
+			SLJIT_ASSERT(reg_map[1] == 0 && reg_map[3] == 2 && reg_map[5] == 4);
+
+			if (op >= SLJIT_MOV_U8 && op <= SLJIT_MOV_S8)
+				dst = 5;
+			else if (op >= SLJIT_MOV_U16 && op <= SLJIT_MOV_S16)
+				dst = 3;
+			else
+				dst = 1;
+
+			/* Signed word sized load is the prefetch instruction. */
+			return emit_op_mem(compiler, WORD_SIZE | SIGNED, dst, src, srcw);
+		}
+		return SLJIT_SUCCESS;
+	}
+
 	dst_r = SLOW_IS_REG(dst) ? dst : TMP_REG1;
 
 	op = GET_OPCODE(op);
@@ -1466,6 +1487,9 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op2(struct sljit_compiler *compile
 	compiler->cache_arg = 0;
 	compiler->cache_argw = 0;
 
+	if (dst == SLJIT_UNUSED && !HAS_FLAGS(op))
+		return SLJIT_SUCCESS;
+
 	dst_r = SLOW_IS_REG(dst) ? dst : TMP_REG1;
 	flags = HAS_FLAGS(op) ? SET_FLAGS : 0;
 	mem_flags = WORD_SIZE;
@@ -1617,7 +1641,7 @@ static SLJIT_INLINE sljit_s32 sljit_emit_fop1_conv_sw_from_f64(struct sljit_comp
 	sljit_s32 dst, sljit_sw dstw,
 	sljit_s32 src, sljit_sw srcw)
 {
-	sljit_s32 dst_r = SLOW_IS_REG(dst) ? dst : TMP_REG1;
+	sljit_s32 dst_r = FAST_IS_REG(dst) ? dst : TMP_REG1;
 	sljit_ins inv_bits = (op & SLJIT_F32_OP) ? (1 << 22) : 0;
 
 	if (GET_OPCODE(op) == SLJIT_CONV_S32_FROM_F64)
@@ -1630,7 +1654,7 @@ static SLJIT_INLINE sljit_s32 sljit_emit_fop1_conv_sw_from_f64(struct sljit_comp
 
 	FAIL_IF(push_inst(compiler, (FCVTZS ^ inv_bits) | RD(dst_r) | VN(src)));
 
-	if (dst_r == TMP_REG1 && dst != SLJIT_UNUSED)
+	if (dst & SLJIT_MEM)
 		return emit_op_mem(compiler, ((GET_OPCODE(op) == SLJIT_CONV_S32_FROM_F64) ? INT_SIZE : WORD_SIZE) | STORE, TMP_REG1, dst, dstw);
 	return SLJIT_SUCCESS;
 }
@@ -1787,10 +1811,6 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_fast_enter(struct sljit_compiler *
 	CHECK_ERROR();
 	CHECK(check_sljit_emit_fast_enter(compiler, dst, dstw));
 	ADJUST_LOCAL_OFFSET(dst, dstw);
-
-	/* For UNUSED dst. Uncommon, but possible. */
-	if (dst == SLJIT_UNUSED)
-		return SLJIT_SUCCESS;
 
 	if (FAST_IS_REG(dst))
 		return push_inst(compiler, ORR | RD(dst) | RN(TMP_ZERO) | RM(TMP_LR));
@@ -1979,19 +1999,14 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_ijump(struct sljit_compiler *compi
 
 SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op_flags(struct sljit_compiler *compiler, sljit_s32 op,
 	sljit_s32 dst, sljit_sw dstw,
-	sljit_s32 src, sljit_sw srcw,
 	sljit_s32 type)
 {
-	sljit_s32 dst_r, flags, mem_flags;
+	sljit_s32 dst_r, src_r, flags, mem_flags;
 	sljit_ins cc;
 
 	CHECK_ERROR();
-	CHECK(check_sljit_emit_op_flags(compiler, op, dst, dstw, src, srcw, type));
+	CHECK(check_sljit_emit_op_flags(compiler, op, dst, dstw, type));
 	ADJUST_LOCAL_OFFSET(dst, dstw);
-	ADJUST_LOCAL_OFFSET(src, srcw);
-
-	if (dst == SLJIT_UNUSED)
-		return SLJIT_SUCCESS;
 
 	cc = get_cc(type & 0xff);
 	dst_r = FAST_IS_REG(dst) ? dst : TMP_REG1;
@@ -2012,19 +2027,19 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op_flags(struct sljit_compiler *co
 		mem_flags = INT_SIZE;
 	}
 
-	if (src & SLJIT_MEM) {
-		FAIL_IF(emit_op_mem2(compiler, mem_flags, TMP_REG1, src, srcw, dst, dstw));
-		src = TMP_REG1;
-		srcw = 0;
-	} else if (src & SLJIT_IMM)
-		flags |= ARG1_IMM;
+	src_r = dst;
+
+	if (dst & SLJIT_MEM) {
+		FAIL_IF(emit_op_mem2(compiler, mem_flags, TMP_REG1, dst, dstw, dst, dstw));
+		src_r = TMP_REG1;
+	}
 
 	FAIL_IF(push_inst(compiler, CSINC | (cc << 12) | RD(TMP_REG2) | RN(TMP_ZERO) | RM(TMP_ZERO)));
-	emit_op_imm(compiler, flags | GET_OPCODE(op), dst_r, src, TMP_REG2);
+	emit_op_imm(compiler, flags | GET_OPCODE(op), dst_r, src_r, TMP_REG2);
 
-	if (dst_r != TMP_REG1)
-		return SLJIT_SUCCESS;
-	return emit_op_mem2(compiler, mem_flags | STORE, TMP_REG1, dst, dstw, 0, 0);
+	if (dst & SLJIT_MEM)
+		return emit_op_mem2(compiler, mem_flags | STORE, TMP_REG1, dst, dstw, 0, 0);
+	return SLJIT_SUCCESS;
 }
 
 SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_cmov(struct sljit_compiler *compiler, sljit_s32 type,
@@ -2064,7 +2079,7 @@ SLJIT_API_FUNC_ATTRIBUTE struct sljit_const* sljit_emit_const(struct sljit_compi
 	PTR_FAIL_IF(!const_);
 	set_const(const_, compiler);
 
-	dst_r = SLOW_IS_REG(dst) ? dst : TMP_REG1;
+	dst_r = FAST_IS_REG(dst) ? dst : TMP_REG1;
 	PTR_FAIL_IF(emit_imm64_const(compiler, dst_r, init_value));
 
 	if (dst & SLJIT_MEM)
