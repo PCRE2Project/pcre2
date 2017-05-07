@@ -418,7 +418,7 @@ enum { MOD_CTC,    /* Applies to a compile context */
        MOD_PDP,    /* As MOD_PD, OK for Perl test */
        MOD_PND,    /* As MOD_PD, but not for a default pattern */
        MOD_PNDP,   /* As MOD_PND, OK for Perl test */
-       MOD_CHR,    /* Is a single character */ 
+       MOD_CHR,    /* Is a single character */
        MOD_CON,    /* Is a "convert" type */
        MOD_CTL,    /* Is a control bit */
        MOD_BSR,    /* Is a BSR value */
@@ -519,8 +519,8 @@ typedef struct patctl {    /* Structure for pattern modifiers. */
   uint32_t  stackguard_test;
   uint32_t  tables_id;
   uint32_t  convert_type;
-  uint32_t  convert_length; 
-  uint32_t  convert_glob_separator; 
+  uint32_t  convert_length;
+  uint32_t  convert_glob_separator;
   uint32_t  regerror_buffsize;
    uint8_t  locale[LOCALESIZE];
 } patctl;
@@ -728,7 +728,7 @@ static uint32_t exclusive_pat_controls[] = {
   CTL_POSIX    | CTL_USE_LENGTH,
   CTL_PUSH     | CTL_PUSHCOPY,
   CTL_PUSH     | CTL_PUSHTABLESCOPY,
-  CTL_PUSHCOPY | CTL_PUSHTABLESCOPY,   
+  CTL_PUSHCOPY | CTL_PUSHTABLESCOPY,
   CTL_EXPAND   | CTL_HEXPAT };
 
 /* Data controls that are mutually exclusive. At present these are all in the
@@ -3667,10 +3667,10 @@ for (;;)
       }
     pp = ep;
     break;
-    
+
     case MOD_CHR:  /* A single character */
     *((uint32_t *)field) = *pp++;
-    break;   
+    break;
 
     case MOD_CON:  /* A convert type */
     for (i = 0; i < convertlistcount; i++)
@@ -3679,13 +3679,13 @@ for (;;)
         {
         if (*((uint32_t *)field) == CONVERT_UNSET)
           *((uint32_t *)field) = convertlist[i].option;
-        else 
+        else
           *((uint32_t *)field) |= convertlist[i].option;
         break;
         }
       }
     if (i >= convertlistcount) goto INVALID_VALUE;
-    pp = ep; 
+    pp = ep;
     break;
 
     case MOD_IN2:    /* One or two unsigned integers */
@@ -4896,15 +4896,15 @@ if ((pat_patctl.control & CTL_UTF8_INPUT) != 0)
     return PR_SKIP;
     }
   }
-  
+
 /* The convert and posix modifiers are mutually exclusive. */
 
 if (pat_patctl.convert_type != CONVERT_UNSET &&
     (pat_patctl.control & CTL_POSIX) != 0)
   {
   fprintf(outfile, "** The convert and posix modifiers are mutually exclusive\n");
-  return PR_SKIP; 
-  }    
+  return PR_SKIP;
+  }
 
 /* Check for mutually exclusive control modifiers. At present, these are all in
 the first control word. */
@@ -5310,60 +5310,71 @@ it ends up back in the usual place. */
 if (pat_patctl.convert_type != CONVERT_UNSET)
   {
   int rc;
+  int convert_return = PR_OK;
   uint32_t convert_options = pat_patctl.convert_type;
   void *converted_pattern;
   PCRE2_SIZE converted_length;
-  
+
   if (pat_patctl.convert_length != 0)
-    { 
-    converted_length = pat_patctl.convert_length; 
+    {
+    converted_length = pat_patctl.convert_length;
     converted_pattern = malloc(converted_length * code_unit_size);
     if (converted_pattern == NULL)
       {
       fprintf(outfile, "** Failed: malloc failed for converted pattern\n");
-      return PR_SKIP;  
+      return PR_SKIP;
       }
     }
-  else converted_pattern = NULL;  /* Let the library allocate */         
-  
+  else converted_pattern = NULL;  /* Let the library allocate */
+
   if (utf) convert_options |= PCRE2_CONVERT_UTF;
   if ((pat_patctl.options & PCRE2_NO_UTF_CHECK) != 0)
     convert_options |= PCRE2_CONVERT_NO_UTF_CHECK;
 
   CONCTXCPY(con_context, default_con_context);
   if (pat_patctl.convert_glob_separator != 0)
-    { 
-    PCRE2_SET_GLOB_SEPARATOR(rc, con_context, pat_patctl.convert_glob_separator); 
+    {
+    PCRE2_SET_GLOB_SEPARATOR(rc, con_context, pat_patctl.convert_glob_separator);
     if (rc != 0)
       {
       fprintf(outfile, "** Invalid glob separator '%c'\n",
         pat_patctl.convert_glob_separator);
-      return PR_SKIP;  
-      }   
-    } 
-     
-  PCRE2_PATTERN_CONVERT(rc, pbuffer, patlen, convert_options, 
+      convert_return = PR_SKIP;
+      goto CONVERT_FINISH;
+      }
+    }
+
+  PCRE2_PATTERN_CONVERT(rc, pbuffer, patlen, convert_options,
     &converted_pattern, &converted_length, con_context);
+
   if (rc != 0)
     {
     fprintf(outfile, "** Pattern conversion error at offset %lu: ",
       converted_length);
-    if (!print_error_message(rc, "", "\n")) return PR_ABEND;
-    return PR_SKIP;
+    convert_return = print_error_message(rc, "", "\n")? PR_SKIP:PR_ABEND;
     }
-  
-  /* Output the converted pattern, copy it, then free it. */
-  
-  PCHARSV(converted_pattern, 0, converted_length, utf, outfile); 
-  fprintf(outfile, "\n");
- 
-  patlen = converted_length;
-  CONVERT_COPY(pbuffer, converted_pattern, converted_length + 1);
-  
+
+  /* Output the converted pattern, then copy it. */
+
+  else
+    {
+    PCHARSV(converted_pattern, 0, converted_length, utf, outfile);
+    fprintf(outfile, "\n");
+    patlen = converted_length;
+    CONVERT_COPY(pbuffer, converted_pattern, converted_length + 1);
+    }
+
+  /* Free the converted pattern. */
+
+  CONVERT_FINISH:
   if (pat_patctl.convert_length != 0)
     free(converted_pattern);
-  else    
+  else
     PCRE2_CONVERTED_PATTERN_FREE(converted_pattern);
+
+  /* Return if conversion was unsuccessful. */
+
+  if (convert_return != PR_OK) return convert_return;
   }
 
 /* By default we pass a zero-terminated pattern, but a length is passed if
