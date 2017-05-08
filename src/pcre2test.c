@@ -1580,7 +1580,7 @@ the three different cases. */
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
     G(pcre2_converted_pattern_free_,BITONE)((G(PCRE2_UCHAR,BITONE) *)a); \
   else \
-    G(pcre2_converted_pattern)free_,BITTWO)((G(PCRE2_UCHAR,BITTWO) *)a)
+    G(pcre2_converted_pattern_free_,BITTWO)((G(PCRE2_UCHAR,BITTWO) *)a)
 
 #define PCRE2_DFA_MATCH(a,b,c,d,e,f,g,h,i,j) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
@@ -1960,7 +1960,7 @@ the three different cases. */
 #define PCRE2_MATCH_DATA_CREATE_FROM_PATTERN(a,b,c) \
   G(a,8) = pcre2_match_data_create_from_pattern_8(G(b,8),c)
 #define PCRE2_MATCH_DATA_FREE(a) pcre2_match_data_free_8(G(a,8))
-#define PCRE2_PATTERN_CONVERT(a,b,c,d,e,f,g) a = pcre2_pattern_info_8(G(b,8),c,d,(PCRE2_UCHAR8 **)e,f,G(g,8))
+#define PCRE2_PATTERN_CONVERT(a,b,c,d,e,f,g) a = pcre2_pattern_convert_8(G(b,8),c,d,(PCRE2_UCHAR8 **)e,f,G(g,8))
 #define PCRE2_PATTERN_INFO(a,b,c,d) a = pcre2_pattern_info_8(G(b,8),c,d)
 #define PCRE2_PRINTINT(a) pcre2_printint_8(compiled_code8,outfile,a)
 #define PCRE2_SERIALIZE_DECODE(r,a,b,c,d) \
@@ -2063,7 +2063,7 @@ the three different cases. */
 #define PCRE2_MATCH_DATA_CREATE_FROM_PATTERN(a,b,c) \
   G(a,16) = pcre2_match_data_create_from_pattern_16(G(b,16),c)
 #define PCRE2_MATCH_DATA_FREE(a) pcre2_match_data_free_16(G(a,16))
-#define PCRE2_PATTERN_CONVERT(a,b,c,d,e,f,g) a = pcre2_pattern_info_16(G(b,16),c,d,(PCRE2_UCHAR16 **)e,f,G(g,16))
+#define PCRE2_PATTERN_CONVERT(a,b,c,d,e,f,g) a = pcre2_pattern_convert_16(G(b,16),c,d,(PCRE2_UCHAR16 **)e,f,G(g,16))
 #define PCRE2_PATTERN_INFO(a,b,c,d) a = pcre2_pattern_info_16(G(b,16),c,d)
 #define PCRE2_PRINTINT(a) pcre2_printint_16(compiled_code16,outfile,a)
 #define PCRE2_SERIALIZE_DECODE(r,a,b,c,d) \
@@ -2166,7 +2166,7 @@ the three different cases. */
 #define PCRE2_MATCH_DATA_CREATE_FROM_PATTERN(a,b,c) \
   G(a,32) = pcre2_match_data_create_from_pattern_32(G(b,32),c)
 #define PCRE2_MATCH_DATA_FREE(a) pcre2_match_data_free_32(G(a,32))
-#define PCRE2_PATTERN_CONVERT(a,b,c,d,e,f,g) a = pcre2_pattern_info_32(G(b,32),c,d,(PCRE2_UCHAR32 **)e,f,G(g,32))
+#define PCRE2_PATTERN_CONVERT(a,b,c,d,e,f,g) a = pcre2_pattern_convert_32(G(b,32),c,d,(PCRE2_UCHAR32 **)e,f,G(g,32))
 #define PCRE2_PATTERN_INFO(a,b,c,d) a = pcre2_pattern_info_32(G(b,32),c,d)
 #define PCRE2_PRINTINT(a) pcre2_printint_32(compiled_code32,outfile,a)
 #define PCRE2_SERIALIZE_DECODE(r,a,b,c,d) \
