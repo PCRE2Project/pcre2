@@ -4194,7 +4194,37 @@ while (TRUE)
   }
 }
 
+#if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
+static void jumpto_if_not_utf_char_start(struct sljit_compiler *compiler, sljit_s32 reg, struct sljit_label *label)
+{
+#if PCRE2_CODE_UNIT_WIDTH == 8
+OP2(SLJIT_AND, reg, 0, reg, 0, SLJIT_IMM, 0xc0);
+CMPTO(SLJIT_EQUAL, reg, 0, SLJIT_IMM, 0x80, label);
+#elif PCRE2_CODE_UNIT_WIDTH == 16
+OP2(SLJIT_AND, reg, 0, reg, 0, SLJIT_IMM, 0xfc00);
+CMPTO(SLJIT_EQUAL, reg, 0, SLJIT_IMM, 0xdc00, label);
+#else
+#error "Unknown code width"
+#endif
+}
+#endif
+
 #if (defined SLJIT_CONFIG_X86 && SLJIT_CONFIG_X86) && !(defined SUPPORT_VALGRIND)
+
+#if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
+static struct sljit_jump *jump_if_utf_char_start(struct sljit_compiler *compiler, sljit_s32 reg)
+{
+#if PCRE2_CODE_UNIT_WIDTH == 8
+OP2(SLJIT_AND, reg, 0, reg, 0, SLJIT_IMM, 0xc0);
+return CMP(SLJIT_NOT_EQUAL, reg, 0, SLJIT_IMM, 0x80);
+#elif PCRE2_CODE_UNIT_WIDTH == 16
+OP2(SLJIT_AND, reg, 0, reg, 0, SLJIT_IMM, 0xfc00);
+return CMP(SLJIT_NOT_EQUAL, reg, 0, SLJIT_IMM, 0xdc00);
+#else
+#error "Unknown code width"
+#endif
+}
+#endif
 
 static sljit_s32 character_to_int32(PCRE2_UCHAR chr)
 {
@@ -4305,11 +4335,15 @@ else
   }
 }
 
-static void fast_forward_first_char2_sse2(compiler_common *common, PCRE2_UCHAR char1, PCRE2_UCHAR char2)
+static void fast_forward_first_char2_sse2(compiler_common *common, PCRE2_UCHAR char1, PCRE2_UCHAR char2, sljit_s32 offset)
 {
 DEFINE_COMPILER;
 struct sljit_label *start;
-struct sljit_jump *quit[3];
+#if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
+struct sljit_label *restart;
+#endif
+struct sljit_jump *quit;
+struct sljit_jump *partial_quit[2];
 sljit_u8 instruction[8];
 sljit_s32 tmp1_ind = sljit_get_register_index(TMP1);
 sljit_s32 tmp2_ind = sljit_get_register_index(TMP2);
@@ -4320,6 +4354,8 @@ sljit_s32 cmp1_ind = 2;
 sljit_s32 cmp2_ind = 3;
 sljit_u32 bit = 0;
 
+SLJIT_UNUSED_ARG(offset);
+
 if (char1 != char2)
   {
   bit = char1 ^ char2;
@@ -4327,7 +4363,9 @@ if (char1 != char2)
     bit = 0;
   }
 
-quit[0] = CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0);
+partial_quit[0] = CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0);
+if (common->mode == PCRE2_JIT_COMPLETE)
+  add_jump(compiler, &common->failed_match, partial_quit[0]);
 
 /* First part (unaligned start) */
 
@@ -4368,6 +4406,9 @@ if (char1 != char2)
   sljit_emit_op_custom(compiler, instruction, 5);
   }
 
+#if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
+restart = LABEL();
+#endif
 OP2(SLJIT_AND, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, ~0xf);
 OP2(SLJIT_AND, TMP2, 0, TMP2, 0, SLJIT_IMM, 0xf);
 
@@ -4391,13 +4432,16 @@ instruction[2] = 0xc0 | (tmp1_ind << 3) | tmp1_ind;
 sljit_emit_op_custom(compiler, instruction, 3);
 sljit_set_current_flags(compiler, SLJIT_SET_Z);
 
-quit[1] = JUMP(SLJIT_NOT_ZERO);
+quit = JUMP(SLJIT_NOT_ZERO);
 
 OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, TMP2, 0);
 
 start = LABEL();
 OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, 16);
-quit[2] = CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0);
+
+partial_quit[1] = CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0);
+if (common->mode == PCRE2_JIT_COMPLETE)
+  add_jump(compiler, &common->failed_match, partial_quit[1]);
 
 /* Second part (aligned) */
 
@@ -4420,12 +4464,36 @@ sljit_set_current_flags(compiler, SLJIT_SET_Z);
 
 JUMPTO(SLJIT_ZERO, start);
 
-JUMPHERE(quit[1]);
+JUMPHERE(quit);
 OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, TMP1, 0);
 
-start = LABEL();
-JUMPHERE(quit[0]);
-JUMPHERE(quit[2]);
+if (common->mode != PCRE2_JIT_COMPLETE)
+  {
+  JUMPHERE(partial_quit[0]);
+  JUMPHERE(partial_quit[1]);
+  OP2(SLJIT_SUB | SLJIT_SET_GREATER, SLJIT_UNUSED, 0, STR_PTR, 0, STR_END, 0);
+  CMOV(SLJIT_GREATER, STR_PTR, STR_END, 0);
+  }
+else
+  add_jump(compiler, &common->failed_match, CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0));
+
+#if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
+if (common->utf && offset > 0)
+  {
+  SLJIT_ASSERT(common->mode == PCRE2_JIT_COMPLETE);
+
+  OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(-offset));
+
+  quit = jump_if_utf_char_start(compiler, TMP1);
+
+  OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
+  add_jump(compiler, &common->failed_match, CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0));
+  OP1(SLJIT_MOV, TMP2, 0, STR_PTR, 0);
+  JUMPTO(SLJIT_JUMP, restart);
+
+  JUMPHERE(quit);
+  }
+#endif
 }
 
 #ifndef _WIN64
@@ -4815,14 +4883,15 @@ static void fast_forward_first_char2(compiler_common *common, PCRE2_UCHAR char1,
 {
 DEFINE_COMPILER;
 struct sljit_label *start;
-struct sljit_jump *quit;
-struct sljit_jump *found;
+struct sljit_jump *match;
+struct sljit_jump *partial_quit;
 PCRE2_UCHAR mask;
-#if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
-struct sljit_label *utf_start = NULL;
-struct sljit_jump *utf_quit = NULL;
-#endif
 BOOL has_match_end = (common->match_end_ptr != 0);
+
+SLJIT_ASSERT(common->mode == PCRE2_JIT_COMPLETE || offset == 0);
+
+if (has_match_end)
+  OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_SP), common->match_end_ptr);
 
 if (offset > 0)
   OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(offset));
@@ -4831,15 +4900,10 @@ if (has_match_end)
   {
   OP1(SLJIT_MOV, TMP3, 0, STR_END, 0);
 
-  OP2(SLJIT_ADD, STR_END, 0, SLJIT_MEM1(SLJIT_SP), common->match_end_ptr, SLJIT_IMM, IN_UCHARS(offset + 1));
-  OP2(SLJIT_SUB | SLJIT_SET_GREATER, SLJIT_UNUSED, 0, STR_END, 0, TMP3, 0);
-  CMOV(SLJIT_GREATER, STR_END, TMP3, 0);
+  OP2(SLJIT_ADD, TMP1, 0, TMP1, 0, SLJIT_IMM, IN_UCHARS(offset + 1));
+  OP2(SLJIT_SUB | SLJIT_SET_GREATER, SLJIT_UNUSED, 0, STR_END, 0, TMP1, 0);
+  CMOV(SLJIT_GREATER, STR_END, TMP1, 0);
   }
-
-#if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
-if (common->utf && offset > 0)
-  utf_start = LABEL();
-#endif
 
 #if (defined SLJIT_CONFIG_X86 && SLJIT_CONFIG_X86) && !(defined SUPPORT_VALGRIND)
 
@@ -4847,50 +4911,10 @@ if (common->utf && offset > 0)
 
 if (sljit_has_cpu_feature(SLJIT_HAS_SSE2))
   {
-  fast_forward_first_char2_sse2(common, char1, char2);
+  fast_forward_first_char2_sse2(common, char1, char2, offset);
 
-  SLJIT_ASSERT(common->mode == PCRE2_JIT_COMPLETE || offset == 0);
-  if (common->mode == PCRE2_JIT_COMPLETE)
-    {
-    /* In complete mode, we don't need to run a match when STR_PTR == STR_END. */
-    SLJIT_ASSERT(common->abort_label == NULL);
-    OP1(SLJIT_MOV, SLJIT_RETURN_REG, 0, SLJIT_IMM, PCRE2_ERROR_NOMATCH);
-    add_jump(compiler, &common->abort, CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0));
-
-#if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
-    if (common->utf && offset > 0)
-      {
-      SLJIT_ASSERT(common->mode == PCRE2_JIT_COMPLETE);
-
-      OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(-offset));
-      OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
-#if PCRE2_CODE_UNIT_WIDTH == 8
-      OP2(SLJIT_AND, TMP1, 0, TMP1, 0, SLJIT_IMM, 0xc0);
-      CMPTO(SLJIT_EQUAL, TMP1, 0, SLJIT_IMM, 0x80, utf_start);
-#elif PCRE2_CODE_UNIT_WIDTH == 16
-      OP2(SLJIT_AND, TMP1, 0, TMP1, 0, SLJIT_IMM, 0xfc00);
-      CMPTO(SLJIT_EQUAL, TMP1, 0, SLJIT_IMM, 0xdc00, utf_start);
-#else
-#error "Unknown code width"
-#endif
-      OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
-      }
-#endif
-
-    if (offset > 0)
-      OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(offset));
-    }
-  else
-    {
-    OP2(SLJIT_SUB | SLJIT_SET_GREATER_EQUAL, SLJIT_UNUSED, 0, STR_PTR, 0, STR_END, 0);
-    if (has_match_end)
-      {
-      OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_SP), common->match_end_ptr);
-      CMOV(SLJIT_GREATER_EQUAL, STR_PTR, TMP1, 0);
-      }
-    else
-      CMOV(SLJIT_GREATER_EQUAL, STR_PTR, STR_END, 0);
-    }
+  if (offset > 0)
+    OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(offset));
 
   if (has_match_end)
     OP1(SLJIT_MOV, STR_END, 0, TMP3, 0);
@@ -4899,74 +4923,49 @@ if (sljit_has_cpu_feature(SLJIT_HAS_SSE2))
 
 #endif
 
-quit = CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0);
-
 start = LABEL();
+
+partial_quit = CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0);
+
+if (common->mode == PCRE2_JIT_COMPLETE)
+  add_jump(compiler, &common->failed_match, partial_quit);
+
 OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), 0);
+OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
 
 if (char1 == char2)
-  found = CMP(SLJIT_EQUAL, TMP1, 0, SLJIT_IMM, char1);
+  CMPTO(SLJIT_NOT_EQUAL, TMP1, 0, SLJIT_IMM, char1, start);
 else
   {
   mask = char1 ^ char2;
   if (is_powerof2(mask))
     {
     OP2(SLJIT_OR, TMP1, 0, TMP1, 0, SLJIT_IMM, mask);
-    found = CMP(SLJIT_EQUAL, TMP1, 0, SLJIT_IMM, char1 | mask);
+    CMPTO(SLJIT_NOT_EQUAL, TMP1, 0, SLJIT_IMM, char1 | mask, start);
     }
   else
     {
-    OP2(SLJIT_SUB | SLJIT_SET_Z, SLJIT_UNUSED, 0, TMP1, 0, SLJIT_IMM, char1);
-    OP_FLAGS(SLJIT_MOV, TMP2, 0, SLJIT_EQUAL);
-    OP2(SLJIT_SUB | SLJIT_SET_Z, SLJIT_UNUSED, 0, TMP1, 0, SLJIT_IMM, char2);
-    OP_FLAGS(SLJIT_OR | SLJIT_SET_Z, TMP2, 0, SLJIT_EQUAL);
-    found = JUMP(SLJIT_NOT_ZERO);
+    match = CMP(SLJIT_EQUAL, TMP1, 0, SLJIT_IMM, char1);
+    CMPTO(SLJIT_NOT_EQUAL, TMP1, 0, SLJIT_IMM, char2, start);
+    JUMPHERE(match);
     }
   }
 
-OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
-CMPTO(SLJIT_LESS, STR_PTR, 0, STR_END, 0, start);
-
-#if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
-if (common->utf && offset > 0)
-  utf_quit = JUMP(SLJIT_JUMP);
-#endif
-
-JUMPHERE(found);
-
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
 if (common->utf && offset > 0)
   {
-  OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(-offset));
-  OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
-#if PCRE2_CODE_UNIT_WIDTH == 8
-  OP2(SLJIT_AND, TMP1, 0, TMP1, 0, SLJIT_IMM, 0xc0);
-  CMPTO(SLJIT_EQUAL, TMP1, 0, SLJIT_IMM, 0x80, utf_start);
-#elif PCRE2_CODE_UNIT_WIDTH == 16
-  OP2(SLJIT_AND, TMP1, 0, TMP1, 0, SLJIT_IMM, 0xfc00);
-  CMPTO(SLJIT_EQUAL, TMP1, 0, SLJIT_IMM, 0xdc00, utf_start);
-#else
-#error "Unknown code width"
-#endif
-  OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
-  JUMPHERE(utf_quit);
+  OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(-(offset + 1)));
+  jumpto_if_not_utf_char_start(compiler, TMP1, start);
   }
 #endif
 
-JUMPHERE(quit);
+OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(offset + 1));
+
+if (common->mode != PCRE2_JIT_COMPLETE)
+  JUMPHERE(partial_quit);
 
 if (has_match_end)
-  {
-  quit = CMP(SLJIT_LESS, STR_PTR, 0, STR_END, 0);
-  OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(SLJIT_SP), common->match_end_ptr);
-  if (offset > 0)
-    OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(offset));
-  JUMPHERE(quit);
   OP1(SLJIT_MOV, STR_END, 0, TMP3, 0);
-  }
-
-if (offset > 0)
-  OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(offset));
 }
 
 static SLJIT_INLINE BOOL fast_forward_first_n_chars(compiler_common *common)
@@ -5118,7 +5117,7 @@ OP1(SLJIT_MOV, RETURN_ADDR, 0, SLJIT_IMM, (sljit_sw)update_table);
 #endif
 
 start = LABEL();
-add_jump(compiler, &common->failed_match, CMP(SLJIT_GREATER, STR_PTR, 0, STR_END, 0));
+add_jump(compiler, &common->failed_match, CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0));
 
 #if PCRE2_CODE_UNIT_WIDTH == 8 || (defined SLJIT_LITTLE_ENDIAN && SLJIT_LITTLE_ENDIAN)
 OP1(SLJIT_MOV_U8, TMP1, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(range_right));
@@ -5168,15 +5167,9 @@ if (common->utf && offset != 0)
     }
   else
     OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(-1));
-#if PCRE2_CODE_UNIT_WIDTH == 8
-  OP2(SLJIT_AND, TMP1, 0, TMP1, 0, SLJIT_IMM, 0xc0);
-  CMPTO(SLJIT_EQUAL, TMP1, 0, SLJIT_IMM, 0x80, start);
-#elif PCRE2_CODE_UNIT_WIDTH == 16
-  OP2(SLJIT_AND, TMP1, 0, TMP1, 0, SLJIT_IMM, 0xfc00);
-  CMPTO(SLJIT_EQUAL, TMP1, 0, SLJIT_IMM, 0xdc00, start);
-#else
-#error "Unknown code width"
-#endif
+
+  jumpto_if_not_utf_char_start(compiler, TMP1, start);
+
   if (offset < 0)
     OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
   }
@@ -11945,6 +11938,7 @@ sljit_emit_return(compiler, SLJIT_MOV, SLJIT_RETURN_REG, 0);
 
 if (common->failed_match != NULL)
   {
+  SLJIT_ASSERT(common->mode == PCRE2_JIT_COMPLETE);
   set_jumps(common->failed_match, LABEL());
   OP1(SLJIT_MOV, SLJIT_RETURN_REG, 0, SLJIT_IMM, PCRE2_ERROR_NOMATCH);
   JUMPTO(SLJIT_JUMP, common->abort_label);
