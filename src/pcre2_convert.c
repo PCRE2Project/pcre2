@@ -284,7 +284,7 @@ while (plength > 0)
     break;  
 
     default:
-    if (c < 256 && strchr("\\{}?*+[]()|.^$", c) != NULL)
+    if (c < 256 && strchr("\\{}?*+[]()|", c) != NULL)
       {
       PUTCHARS(STR_BACKSLASH);
       }

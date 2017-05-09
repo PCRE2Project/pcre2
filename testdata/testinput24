@@ -257,6 +257,10 @@
 \= Expect no match
     a1b
 
+/how.to/
+
+/^how to/
+
 #pattern convert=unset
 
 /abc/
