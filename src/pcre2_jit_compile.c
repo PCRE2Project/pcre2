@@ -4873,7 +4873,7 @@ for (priority = 7; priority > 2; priority--)
       SLJIT_ASSERT(chars[i].count <= 2 && chars[i].count >= 1);
 
       b1 = chars[i].chars[0];
-      b2 = chars[i].chars[chars[i].count - 1];
+      b2 = chars[i].chars[1];
 
       if (left >= 0 && i - left <= max_fast_forward_char_pair_sse2_offset() && a1 != b1 && a1 != b2 && a2 != b1 && a2 != b2)
         {
@@ -5017,7 +5017,11 @@ for (i = 0; i < max; i++)
   SLJIT_ASSERT(chars[i].count > 0 && chars[i].last_count <= chars[i].count);
 
   if (chars[i].count == 1)
+    {
     chars[i].last_count = (chars[i].last_count == 1) ? 7 : 5;
+    /* Simplifies algorithms later. */
+    chars[i].chars[1] = chars[i].chars[0];
+    }
   else if (chars[i].count == 2)
     {
     SLJIT_ASSERT(chars[i].chars[0] != chars[i].chars[1]);
@@ -5107,7 +5111,7 @@ if (range_right < 0)
   if (offset < 0)
     return FALSE;
   /* Works regardless the value is 1 or 2. */
-  fast_forward_first_char2(common, chars[offset].chars[0], chars[offset].chars[chars[offset].count - 1], offset);
+  fast_forward_first_char2(common, chars[offset].chars[0], chars[offset].chars[1], offset);
   return TRUE;
   }
 
@@ -5313,15 +5317,11 @@ static SLJIT_INLINE void fast_forward_start_bits(compiler_common *common)
 DEFINE_COMPILER;
 const sljit_u8 *start_bits = common->re->start_bitmap;
 struct sljit_label *start;
-#if defined SUPPORT_UNICODE && (PCRE2_CODE_UNIT_WIDTH == 8 || PCRE2_CODE_UNIT_WIDTH == 16)
-struct sljit_label *utf_start;
-#endif
 struct sljit_jump *partial_quit;
-struct sljit_jump *found = NULL;
-jump_list *matches = NULL;
 #if PCRE2_CODE_UNIT_WIDTH != 8
-struct sljit_jump *jump;
+struct sljit_jump *found = NULL;
 #endif
+jump_list *matches = NULL;
 
 if (common->match_end_ptr != 0)
   {
@@ -5332,84 +5332,50 @@ if (common->match_end_ptr != 0)
   CMOV(SLJIT_GREATER, STR_END, TMP1, 0);
   }
 
-#if defined SUPPORT_UNICODE && (PCRE2_CODE_UNIT_WIDTH == 8 || PCRE2_CODE_UNIT_WIDTH == 16)
-utf_start = LABEL();
-#endif
+start = LABEL();
 
 partial_quit = CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0);
 if (common->mode == PCRE2_JIT_COMPLETE)
   add_jump(compiler, &common->failed_match, partial_quit);
 
-start = LABEL();
-
 OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), 0);
+OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
 
-#ifdef SUPPORT_UNICODE
-if (common->utf)
-  OP1(SLJIT_MOV, TMP3, 0, TMP1, 0);
-#endif
-
-if (!check_class_ranges(common, start_bits, (start_bits[31] & 0x80) != 0, TRUE, &matches))
+if (!check_class_ranges(common, start_bits, (start_bits[31] & 0x80) != 0, FALSE, &matches))
   {
 #if PCRE2_CODE_UNIT_WIDTH != 8
-  if (sljit_has_cpu_feature(SLJIT_HAS_CMOV))
-    {
-    OP1(SLJIT_MOV, TMP2, 0, SLJIT_IMM, 255);
-    OP2(SLJIT_SUB | SLJIT_SET_GREATER, SLJIT_UNUSED, 0, TMP1, 0, TMP2, 0);
-    CMOV(SLJIT_GREATER, TMP1, TMP2, 0);
-    }
+  if ((start_bits[31] & 0x80) != 0)
+    found = CMP(SLJIT_GREATER_EQUAL, TMP1, 0, SLJIT_IMM, 255);
   else
-    {
-    jump = CMP(SLJIT_LESS, TMP1, 0, SLJIT_IMM, 255);
-    OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, 255);
-    JUMPHERE(jump);
-    }
+    CMPTO(SLJIT_GREATER_EQUAL, TMP1, 0, SLJIT_IMM, 255, start);
+#elif defined SUPPORT_UNICODE
+  if (common->utf && is_char7_bitset(start_bits, FALSE))
+    CMPTO(SLJIT_GREATER, TMP1, 0, SLJIT_IMM, 127, start);
 #endif
   OP2(SLJIT_AND, TMP2, 0, TMP1, 0, SLJIT_IMM, 0x7);
   OP2(SLJIT_LSHR, TMP1, 0, TMP1, 0, SLJIT_IMM, 3);
   OP1(SLJIT_MOV_U8, TMP1, 0, SLJIT_MEM1(TMP1), (sljit_sw)start_bits);
-  OP2(SLJIT_SHL, TMP2, 0, SLJIT_IMM, 1, TMP2, 0);
-  OP2(SLJIT_AND | SLJIT_SET_Z, SLJIT_UNUSED, 0, TMP1, 0, TMP2, 0);
-  found = JUMP(SLJIT_NOT_ZERO);
+  if (sljit_get_register_index(TMP3) >= 0)
+    {
+    OP2(SLJIT_SHL, TMP3, 0, SLJIT_IMM, 1, TMP2, 0);
+    OP2(SLJIT_AND | SLJIT_SET_Z, SLJIT_UNUSED, 0, TMP1, 0, TMP3, 0);
+    }
+  else
+    {
+    OP2(SLJIT_SHL, TMP2, 0, SLJIT_IMM, 1, TMP2, 0);
+    OP2(SLJIT_AND | SLJIT_SET_Z, SLJIT_UNUSED, 0, TMP1, 0, TMP2, 0);
+    }
+  JUMPTO(SLJIT_ZERO, start);
   }
+else
+  set_jumps(matches, start);
 
-OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
-
-#ifdef SUPPORT_UNICODE
-if (common->utf)
-  OP1(SLJIT_MOV, TMP1, 0, TMP3, 0);
-#endif
-
-#ifdef SUPPORT_UNICODE
-#if PCRE2_CODE_UNIT_WIDTH == 8
-if (common->utf)
-  {
-  CMPTO(SLJIT_LESS, TMP1, 0, SLJIT_IMM, 0xc0, utf_start);
-  OP1(SLJIT_MOV_U8, TMP1, 0, SLJIT_MEM1(TMP1), (sljit_sw)PRIV(utf8_table4) - 0xc0);
-  OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, TMP1, 0);
-  }
-#elif PCRE2_CODE_UNIT_WIDTH == 16
-if (common->utf)
-  {
-  CMPTO(SLJIT_LESS, TMP1, 0, SLJIT_IMM, 0xd800, utf_start);
-  OP2(SLJIT_AND, TMP1, 0, TMP1, 0, SLJIT_IMM, 0xfc00);
-  OP2(SLJIT_SUB | SLJIT_SET_Z, SLJIT_UNUSED, 0, TMP1, 0, SLJIT_IMM, 0xd800);
-  OP_FLAGS(SLJIT_MOV, TMP1, 0, SLJIT_EQUAL);
-  OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, TMP1, 0);
-  OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, TMP1, 0);
-  }
-#endif /* PCRE2_CODE_UNIT_WIDTH == [8|16] */
-#endif /* SUPPORT_UNICODE */
-
-CMPTO(SLJIT_LESS, STR_PTR, 0, STR_END, 0, start);
-
-if (common->mode == PCRE2_JIT_COMPLETE)
-  add_jump(compiler, &common->failed_match, JUMP(SLJIT_JUMP));
-
+#if PCRE2_CODE_UNIT_WIDTH != 8
 if (found != NULL)
   JUMPHERE(found);
-if (matches != NULL)
-  set_jumps(matches, LABEL());
+#endif
+
+OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
 
 if (common->mode != PCRE2_JIT_COMPLETE)
   JUMPHERE(partial_quit);
