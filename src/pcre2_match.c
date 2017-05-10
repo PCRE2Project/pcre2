@@ -263,18 +263,32 @@ Returns:     the return from the callout
 static int
 do_callout(heapframe *F, match_block *mb, PCRE2_SIZE *lengthptr)
 {
-PCRE2_SIZE save0, save1;
-pcre2_callout_block cb;
 int rc;
+PCRE2_SIZE save0, save1;
+PCRE2_SIZE *callout_ovector;
+pcre2_callout_block cb;
 
 *lengthptr = (*Fecode == OP_CALLOUT)?
   PRIV(OP_lengths)[OP_CALLOUT] : GET(Fecode, 1 + 2*LINK_SIZE);
-
+  
 if (mb->callout == NULL) return 0;   /* No callout function provided */
+
+/* The original matching code (pre 10.30) worked directly with the ovector
+passed by the user, and this was passed to callouts. Now that the working
+ovector is in the backtracking frame, it no longer needs to reserve space for
+the overall match offsets (which would waste space in the frame). For backward
+compatibility, however, we pass capture_top and offset_vector to the callout as
+if for the extended ovector, and we ensure that the first two slots are unset
+by preserving and restoring their current contents. Picky compilers complain if 
+references such as Fovector[-2] are use directly, so we set up a separate 
+pointer. */
+
+callout_ovector = (PCRE2_SIZE *)(Fovector) - 2; 
+
 cb.version          = 1;
 cb.capture_top      = (uint32_t)Foffset_top/2 + 1;
 cb.capture_last     = Fcapture_last;
-cb.offset_vector    = Fovector - 2;
+cb.offset_vector    = callout_ovector;
 cb.mark             = mb->nomatch_mark;
 cb.subject          = mb->start_subject;
 cb.subject_length   = (PCRE2_SIZE)(mb->end_subject - mb->start_subject);
@@ -299,20 +313,12 @@ else  /* String callout */
     *lengthptr - (1 + 4*LINK_SIZE) - 2;
   }
 
-/* The original matching code (pre 10.30) worked directly with the ovector
-passed by the user, and this was passed to callouts. Now that the working
-ovector is in the backtracking frame, it no longer needs to reserve space for
-the overall match offsets (which would waste space in the frame). For backward
-compatibility, however, we pass capture_top and offset_vector to the callout as
-if for the extended ovector, and we ensure that the first two slots are unset
-by preserving and restoring their current contents. */
-
-save0 = Fovector[-2];
-save1 = Fovector[-1];
-Fovector[-2] = Fovector[-1] = PCRE2_UNSET;
+save0 = callout_ovector[0];
+save1 = callout_ovector[1];
+callout_ovector[0] = callout_ovector[1] = PCRE2_UNSET;
 rc = mb->callout(&cb, mb->callout_data);
-Fovector[-2] = save0;
-Fovector[-1] = save1;
+callout_ovector[0] = save0;
+callout_ovector[1] = save1;
 return rc;
 }
 

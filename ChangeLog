@@ -35,6 +35,10 @@ bugs were never in fully released code, but are noted here for the record.
       happening if the assertion matched via (*ACCEPT).   
       
   (e) Mark values were not being passed out of recursions. 
+  
+  (f) Refactor some code in do_callout() to avoid picky compiler warnings about 
+      negative indices. Fixes oss-fuzz issue 1454.
+ 
       
 2. Now that pcre2_match() no longer uses recursive function calls (see above),
 the "match limit recursion" value seems misnamed. It still exists, and limits 
@@ -155,6 +159,7 @@ tests to improve coverage.
 
 31. If more than one of "push", "pushcopy", or "pushtablescopy" were set in 
 pcre2test, a crash could occur.
+
 
 
 Version 10.23 14-February-2017
