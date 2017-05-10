@@ -279,12 +279,15 @@ while (plength > 0)
     /* Fall through */ 
     
     case CHAR_ASTERISK:
+    case CHAR_DOT:
+    case CHAR_CIRCUMFLEX_ACCENT:
+    case CHAR_DOLLAR_SIGN:   
     if (p + 1 > endp) return PCRE2_ERROR_NOMEMORY;
     *p++ = sc;
     break;  
-
+    
     default:
-    if (c < 256 && strchr("\\{}?*+[]()|", c) != NULL)
+    if (c < 256 && strchr("\\{}?*+[]()|.^$", c) != NULL)
       {
       PUTCHARS(STR_BACKSLASH);
       }

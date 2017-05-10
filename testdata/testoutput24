@@ -411,11 +411,11 @@ a*b\+c+[def]\(ab\)(cd)
     a1b
 No match
 
-/how.to/
-how.to
+/how.to how\.to/
+how.to how\.to
 
-/^how to/
-^how to
+/^how to \^how to/
+^how to \^how to
 
 #pattern convert=unset
 
