@@ -321,7 +321,7 @@ fi
 
 $sim ./pcre2test -S 1 /dev/null /dev/null
 if [ $? -eq 0 -a "$bigstack" != "" ] ; then
-  setstack="-S 16"
+  setstack="-S 64"
 else
   setstack=""
 fi

@@ -38,6 +38,9 @@ bugs were never in fully released code, but are noted here for the record.
   
   (f) Refactor some code in do_callout() to avoid picky compiler warnings about 
       negative indices. Fixes oss-fuzz issue 1454.
+      
+  (g) Similarly refactor the way the variable length ovector is addressed for
+      similar reasons. Fixes oss-fuzz issue 1465.
  
       
 2. Now that pcre2_match() no longer uses recursive function calls (see above),
@@ -159,6 +162,9 @@ tests to improve coverage.
 
 31. If more than one of "push", "pushcopy", or "pushtablescopy" were set in 
 pcre2test, a crash could occur.
+
+32. Make -bigstack in RunTest allocate a 64Mb stack (instead of 16 MB) so that 
+all the tests can run with clang's sanitizing options.
 
 
 
