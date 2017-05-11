@@ -160,8 +160,8 @@ switch(what)
   break;
 
   case PCRE2_INFO_FRAMESIZE:
-  *((size_t *)where) = sizeof(heapframe) +
-    ((re->top_bracket - 1) * 2 * sizeof(PCRE2_SIZE));
+  *((size_t *)where) = offsetof(heapframe, ovector) +
+    re->top_bracket * 2 * sizeof(PCRE2_SIZE);
   break;
 
   case PCRE2_INFO_HASBACKSLASHC:

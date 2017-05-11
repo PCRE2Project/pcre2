@@ -793,7 +793,11 @@ typedef struct heapframe {
 #endif
 
   /* The rest have to be copied from the previous frame whenever a new frame
-  becomes current. */
+  becomes current. The final field is specified as a large vector so that 
+  runtime array bound checks don't catch references to it. However, for any 
+  specific call to pcre2_match() the memory allocated for each frame structure 
+  allows for exactly the right size ovector for the number of capturing 
+  parentheses. */
 
   PCRE2_SPTR eptr;           /* MUST BE FIRST */
   PCRE2_SPTR start_match;    /* Can be adjusted by \K */
@@ -802,7 +806,7 @@ typedef struct heapframe {
   uint32_t capture_last;     /* Most recent capture */
   PCRE2_SIZE last_group_offset;  /* Saved offset to most recent group frame */
   PCRE2_SIZE offset_top;     /* Offset after highest capture */
-  PCRE2_SIZE ovector[2];     /* Must be last in the structure */
+  PCRE2_SIZE ovector[10000]; /* Must be last in the structure */
 } heapframe;
 
 typedef char check_heapframe_size[

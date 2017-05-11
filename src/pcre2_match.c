@@ -189,7 +189,7 @@ end of the backtrack frame, but when there are capturing parentheses the space
 allocated is bigger so we want to be able to address more elements. Without the 
 case, -fsanitize=undefined grumbles at this. */
 
-#define Fovector           ((PCRE2_SIZE *)(F->ovector))
+#define Fovector           F->ovector
 
 
 #ifdef DEBUG_FRAMES_DISPLAY
@@ -6281,7 +6281,8 @@ The last of these is changed within the match() function if the frame vector
 has to be expanded. We therefore put it into the match block so that it is
 correct when calling match() more than once for non-anchored patterns. */
 
-frame_size = sizeof(heapframe) + ((re->top_bracket - 1) * 2 * sizeof(PCRE2_SIZE));
+frame_size = offsetof(heapframe, ovector) + 
+  re->top_bracket * 2 * sizeof(PCRE2_SIZE);
 
 /* Limits set in the pattern override the match context only if they are
 smaller. */
