@@ -182,14 +182,8 @@ of use and undefined afterwards. */
 #define Foffset_top        F->offset_top
 #define Foccu              F->occu
 #define Fop                F->op
-#define Freturn_id         F->return_id
-
-/* We need a cast for this one because F->ovector is a vector of size 2, at the 
-end of the backtrack frame, but when there are capturing parentheses the space 
-allocated is bigger so we want to be able to address more elements. Without the 
-case, -fsanitize=undefined grumbles at this. */
-
 #define Fovector           F->ovector
+#define Freturn_id         F->return_id
 
 
 #ifdef DEBUG_FRAMES_DISPLAY

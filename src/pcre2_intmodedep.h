@@ -637,7 +637,11 @@ typedef struct pcre2_real_code {
   uint16_t name_count;            /* Number of name entries in the table */
 } pcre2_real_code;
 
-/* The real match data structure. */
+/* The real match data structure. Define ovector large so that array bound 
+checkers don't grumble. Memory for this structure is obtained by calling 
+pcre2_match_data_create(), which sets the size as the offset of ovector plus 
+pairs of elements for each capturing group. (See also the heapframe structure
+below.) */
 
 typedef struct pcre2_real_match_data {
   pcre2_memctl     memctl;
@@ -650,7 +654,7 @@ typedef struct pcre2_real_match_data {
   uint16_t         matchedby;     /* Type of match (normal, JIT, DFA) */
   uint16_t         oveccount;     /* Number of pairs */
   int              rc;            /* The return code from the match */
-  PCRE2_SIZE       ovector[1];    /* The first field */
+  PCRE2_SIZE       ovector[10000];/* The first field */
 } pcre2_real_match_data;
 
 
