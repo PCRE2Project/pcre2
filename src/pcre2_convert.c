@@ -118,7 +118,9 @@ PCRE2_UCHAR *pp = p;
 PCRE2_UCHAR *endp = p + use_length - 1;  /* Allow for trailing zero */
 PCRE2_SIZE convlength = 0;
 
+uint32_t bracount = 0;
 uint32_t posix_class_state = POSIX_CLASS_NOT_STARTED;
+uint32_t lastspecial = 0;
 BOOL extended = (pattype & PCRE2_CONVERT_POSIX_EXTENDED) != 0;
 BOOL inclass = FALSE;
 BOOL nextisliteral = FALSE;
@@ -130,7 +132,13 @@ BOOL nextisliteral = FALSE;
 
 *bufflenptr = plength;
 
-/* Now scan the input */
+/* Now scan the input. In non-extended patterns, an initial asterisk is treated 
+as literal. Still figuring out what happens in extended patterns... */
+
+if (plength > 0 && *posix == CHAR_ASTERISK)
+  {
+  if (!extended) nextisliteral = TRUE; 
+  } 
 
 while (plength > 0)
   {
@@ -262,35 +270,56 @@ while (plength > 0)
       {
       if (isdigit(*posix)) PUTCHARS(STR_BACKSLASH); 
       if (p + 1 > endp) return PCRE2_ERROR_NOMEMORY;
-      *p++ = *posix++;
+      lastspecial = *p++ = *posix++;
       plength--;  
       }
     else nextisliteral = TRUE;
     break;
     
+    case CHAR_RIGHT_PARENTHESIS:
+    if (!extended || bracount == 0) goto ESCAPE_LITERAL;
+    bracount--;
+    goto COPY_SPECIAL;
+
+    case CHAR_LEFT_PARENTHESIS:
+    bracount++;
+    /* Fall through */  
+
     case CHAR_QUESTION_MARK:
     case CHAR_PLUS:
     case CHAR_LEFT_CURLY_BRACKET:   
     case CHAR_RIGHT_CURLY_BRACKET:   
     case CHAR_VERTICAL_LINE:
-    case CHAR_LEFT_PARENTHESIS:
-    case CHAR_RIGHT_PARENTHESIS:
-    if (!extended) PUTCHARS(STR_BACKSLASH);
+    if (!extended) goto ESCAPE_LITERAL;
     /* Fall through */ 
     
-    case CHAR_ASTERISK:
     case CHAR_DOT:
-    case CHAR_CIRCUMFLEX_ACCENT:
     case CHAR_DOLLAR_SIGN:   
+    COPY_SPECIAL:
+    lastspecial = c; 
     if (p + 1 > endp) return PCRE2_ERROR_NOMEMORY;
-    *p++ = sc;
-    break;  
-    
+    *p++ = c;
+    break; 
+
+    case CHAR_ASTERISK:
+    if (lastspecial != CHAR_ASTERISK) goto COPY_SPECIAL;
+    break;   /* Ignore second and subsequent asterisks */  
+
+    case CHAR_CIRCUMFLEX_ACCENT:
+    if (extended || 
+          lastspecial == 0 || 
+          lastspecial == CHAR_LEFT_PARENTHESIS ||
+          lastspecial == CHAR_VERTICAL_LINE) 
+      goto COPY_SPECIAL;
+    /* Fall through */      
+
     default:
     if (c < 256 && strchr("\\{}?*+[]()|.^$", c) != NULL)
       {
+      ESCAPE_LITERAL: 
       PUTCHARS(STR_BACKSLASH);
       }
+    lastspecial = 0xff;  /* Indicates nothing special */   
     if (p + clength > endp) return PCRE2_ERROR_NOMEMORY;
     memcpy(p, posix - clength, CU2BYTES(clength));
     p += clength;

@@ -396,6 +396,15 @@ No match
     aab
 No match
 
+/(ab)c)d]/
+(ab)c\)d\]
+    Xabc)d]Y
+ 0: abc)d]
+ 1: ab
+
+/a***b/
+a*b
+
 #pattern convert=unset
 #pattern convert=posix_basic
 
@@ -416,6 +425,26 @@ how.to how\.to
 
 /^how to \^how to/
 ^how to \^how to
+
+/*abc/
+\*abc
+    X*abcY
+ 0: *abc
+
+/**abc/
+\**abc
+    XabcY
+ 0: abc
+    X*abcY
+ 0: *abc
+    X**abcY  
+ 0: **abc
+
+/^b\(c^d\)\(^e^f\)/
+^b(c\^d)(^e\^f)
+
+/a***b/
+a*b
 
 #pattern convert=unset
 
