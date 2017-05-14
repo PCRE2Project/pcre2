@@ -426,6 +426,9 @@ how.to how\.to
 /^how to \^how to/
 ^how to \^how to
 
+/^*abc/
+^\*abc
+
 /*abc/
 \*abc
     X*abcY
@@ -437,7 +440,7 @@ how.to how\.to
  0: abc
     X*abcY
  0: *abc
-    X**abcY  
+    X**abcY
  0: **abc
 
 /^b\(c^d\)\(^e^f\)/

@@ -266,13 +266,15 @@
 
 /^how to \^how to/
 
+/^*abc/
+
 /*abc/
     X*abcY
 
 /**abc/
     XabcY
     X*abcY
-    X**abcY  
+    X**abcY
 
 /^b\(c^d\)\(^e^f\)/
 
