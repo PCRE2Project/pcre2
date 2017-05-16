@@ -86,8 +86,23 @@ enum { POSIX_START_REGEX, POSIX_ANCHORED, POSIX_NOT_BRACKET,
     *p++ = *s; \
     } \
   }
+  
+/* Literals that must be escaped: \ ? * + | . ^ $ { } [ ] ( ) */
 
-static const char *pcre2_escaped_literals = "\\{}?*+[]()|.^$";
+static const char *pcre2_escaped_literals =
+  STR_BACKSLASH STR_QUESTION_MARK STR_ASTERISK STR_PLUS 
+  STR_VERTICAL_LINE STR_DOT STR_CIRCUMFLEX_ACCENT STR_DOLLAR_SIGN  
+  STR_LEFT_CURLY_BRACKET STR_RIGHT_CURLY_BRACKET
+  STR_LEFT_SQUARE_BRACKET STR_RIGHT_SQUARE_BRACKET
+  STR_LEFT_PARENTHESIS STR_RIGHT_PARENTHESIS;
+  
+/* Recognized escapes in POSIX basic patterns. */
+
+static const char *posix_basic_escapes =
+  STR_QUESTION_MARK STR_PLUS STR_VERTICAL_LINE
+  STR_LEFT_PARENTHESIS STR_RIGHT_PARENTHESIS
+  STR_0 STR_1 STR_2 STR_3 STR_4 STR_5 STR_6 STR_7 STR_8 STR_9;  
+ 
 
 
 /*************************************************
@@ -263,7 +278,8 @@ while (plength > 0)
 
     case CHAR_BACKSLASH:
     if (plength <= 0) return ERROR_END_BACKSLASH;
-    if (!extended && *posix < 127 && strchr("?+|()0123456789", *posix) != NULL)  
+    if (!extended && *posix < 127 && 
+          strchr(posix_basic_escapes, *posix) != NULL)  
       {
       if (isdigit(*posix)) PUTCHARS(STR_BACKSLASH); 
       if (p + 1 > endp) return PCRE2_ERROR_NOMEMORY;
