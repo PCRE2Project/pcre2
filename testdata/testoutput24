@@ -340,6 +340,39 @@ No match
 \Aa[^/]*b\z
 
 #pattern convert=unset
+#pattern convert=glob_bash,convert_glob_separator=/
+
+# Non control character checking
+
+//
+\A\z
+
+/A\B\\C\D/
+\AAB\\CD\z
+
+/A'B'C'''\'''D''/
+\AABC\\D\z
+
+/A""B"\\\"\C"''""/
+\AAB\\"\\C\z
+
+/'\{}?*+[]()|.^$'/
+\A\\\{\}\?\*\+\[\]\(\)\|\.\^\$\z
+
+/*a*\/*b*/
+\A(?:[^./][^/]*?)??a(*COMMIT)[^/]*?/(*COMMIT)(?:[^./][^/]*?)??b(*COMMIT)[^/]*?\z
+
+/?a?\/?b?/
+\A[^./]a[^/]/[^./]b[^/]\z
+
+/a|b@(a|b)*\/@(a|b)/
+\Aa\|b(?:a|b)(*COMMIT)[^/]*?/(?!\.)(?:a|b)\z
+
+/\/@(a\/|b\/)\//
+\A/(?!\.)(?:a(*F)|b(*F))/\z
+
+
+#pattern convert=unset
 #pattern convert=posix_extended
 
 /a[[:>:]z/

@@ -57,6 +57,8 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #define ERROR_END_BACKSLASH 101
 #define ERROR_MISSING_SQUARE_BRACKET 106
+#define ERROR_MISSING_CLOSING_PARENTHESIS 114
+#define ERROR_TOO_DEEP_NESTING 119
 #define ERROR_NO_UNICODE 132
 
 /* Generated pattern fragments */
@@ -84,6 +86,8 @@ enum { POSIX_START_REGEX, POSIX_ANCHORED, POSIX_NOT_BRACKET,
     *p++ = *s; \
     } \
   }
+
+static const char *pcre2_escaped_literals = "\\{}?*+[]()|.^$";
 
 
 /*************************************************
@@ -315,7 +319,7 @@ while (plength > 0)
     /* Fall through */      
 
     default:
-    if (c < 256 && strchr("\\{}?*+[]()|.^$", c) != NULL)
+    if (c < 128 && strchr(pcre2_escaped_literals, c) != NULL)
       {
       ESCAPE_LITERAL: 
       PUTCHARS(STR_BACKSLASH);
@@ -592,7 +596,7 @@ while (plength > 0)
     break;
 
     default:
-    if (c < 256 && strchr("\\{}?*+[]()|.^$", c) != NULL)
+    if (c < 128 && strchr(pcre2_escaped_literals, c) != NULL)
       {
       PUTCHARS(STR_BACKSLASH);
       }
@@ -610,6 +614,425 @@ PUTCHARS(STR_BACKSLASH_z);
 convlength += p - pp;        /* Final segment */
 *bufflenptr = convlength;
 *p++ = 0;
+return 0;
+}
+
+
+/*************************************************
+*           Convert a glob pattern               *
+*************************************************/
+
+/* Context for writing the output into a buffer. */
+
+typedef struct pcre2_output_context {
+  PCRE2_UCHAR *output;                  /* current output position */
+  PCRE2_SPTR output_end;                /* output end */
+  PCRE2_SIZE output_size;               /* size of the output */
+  uint8_t out_str[8];                   /* string copied to the output */
+} pcre2_output_context;
+
+
+/* Write a character into the output.
+
+Arguments:
+  context        the bash glob context
+  chr            the next character
+*/
+
+static void
+convert_glob_bash_write(pcre2_output_context *context, PCRE2_UCHAR chr)
+{
+context->output_size++;
+
+if (context->output < context->output_end)
+  *context->output++ = chr;
+}
+
+
+/* Write a string into the output.
+
+Arguments:
+  context        the bash glob context
+  length         length of context->out_str
+*/
+
+static void
+convert_glob_bash_write_str(pcre2_output_context *context, PCRE2_SIZE length)
+{
+uint8_t *out_str = context->out_str;
+PCRE2_UCHAR *output = context->output;
+PCRE2_SPTR output_end = context->output_end;
+PCRE2_SIZE output_size = context->output_size;
+
+do
+  {
+  output_size++;
+
+  if (output < output_end)
+    *output++ = *out_str++;
+  }
+while (--length != 0);
+
+context->output = output;
+context->output_size = output_size;
+}
+
+/* Bash glob reading modes. */
+
+#define PCRE2_BASH_GLOB_NORMAL           0
+#define PCRE2_BASH_GLOB_QUOTED           1
+#define PCRE2_BASH_GLOB_DOUBLE_QUOTED    2
+#define PCRE2_BASH_GLOB_BACKSLASH        3
+
+/* Maximum nesting level of enclosed groups. */
+
+#define PCRE2_BASH_GLOB_MAX_NESTING      16
+
+typedef struct pcre2_bash_glob_context {
+  PCRE2_SPTR pattern;
+  PCRE2_SPTR pattern_end;
+  pcre2_output_context out;
+  int read_mode;
+  BOOL is_control_char;
+} pcre2_bash_glob_context;
+
+/* Read the next character from the glob. If the character
+   is a control character context->is_control_char is set
+   to TRUE. Otherwise this field is FALSE.
+
+Arguments:
+  context        the bash glob context
+  utf            TRUE if UTF
+*/
+
+static BOOL
+convert_glob_bash_read(pcre2_bash_glob_context *context, BOOL utf)
+{
+while (TRUE)
+  {
+  if (context->pattern >= context->pattern_end)
+    return FALSE;
+
+  context->pattern++;
+
+#ifdef SUPPORT_UNICODE
+  /* Intermediate unicode octets are always normal characters. */
+  if (utf && NOT_FIRSTCU(context->pattern[-1]))
+    {
+    context->is_control_char = FALSE;
+    return TRUE;
+    }
+#endif
+
+  if (context->read_mode == PCRE2_BASH_GLOB_QUOTED)
+    {
+    if (context->pattern[-1] != CHAR_APOSTROPHE)
+      return TRUE;
+
+    context->read_mode = PCRE2_BASH_GLOB_NORMAL;
+    continue;
+    }
+  else if (context->read_mode == PCRE2_BASH_GLOB_DOUBLE_QUOTED)
+    {
+    if (context->pattern[-1] == CHAR_BACKSLASH &&
+        context->pattern < context->pattern_end &&
+        (context->pattern[0] == CHAR_QUOTATION_MARK ||
+         context->pattern[0] == CHAR_BACKSLASH))
+      {
+        context->pattern++;
+        return TRUE;
+      }
+    else if (context->pattern[-1] != CHAR_QUOTATION_MARK)
+      return TRUE;
+
+    context->read_mode = PCRE2_BASH_GLOB_NORMAL;
+    continue;
+    }
+
+  context->is_control_char = FALSE;
+
+  if (context->pattern[-1] == CHAR_APOSTROPHE)
+    {
+    context->read_mode = PCRE2_BASH_GLOB_QUOTED;
+    continue;
+    }
+
+  if (context->pattern[-1] == CHAR_QUOTATION_MARK)
+    {
+    context->read_mode = PCRE2_BASH_GLOB_DOUBLE_QUOTED;
+    continue;
+    }
+
+  if (context->pattern[-1] == CHAR_BACKSLASH)
+    {
+    if (context->pattern < context->pattern_end)
+      {
+      context->pattern++;
+      return TRUE;
+      }
+
+    context->read_mode = PCRE2_BASH_GLOB_BACKSLASH;
+    return FALSE;
+    }
+
+  context->is_control_char = TRUE;
+  return TRUE;
+  }
+}
+
+
+/* Prints a wildcard into the output.
+
+Arguments:
+  context           the bash glob context
+  separator         glob separator
+  after_sep         whether the wildcard is right after a separator
+*/
+
+static void
+convert_glob_bash_wildcard(pcre2_bash_glob_context *context,
+  PCRE2_UCHAR separator, BOOL after_sep)
+{
+int len = 2;
+
+context->out.out_str[0] = CHAR_LEFT_SQUARE_BRACKET;
+context->out.out_str[1] = CHAR_CIRCUMFLEX_ACCENT;
+
+if (separator == CHAR_BACKSLASH)
+  {
+  context->out.out_str[2] = CHAR_BACKSLASH;
+  len = 3;
+  }
+
+if (after_sep)
+  {
+  context->out.out_str[len] = CHAR_DOT;
+  len++;
+  }
+
+convert_glob_bash_write_str(&context->out, len);
+
+convert_glob_bash_write(&context->out, separator);
+convert_glob_bash_write(&context->out, CHAR_RIGHT_SQUARE_BRACKET);
+}
+
+
+/* Bash glob converter.
+
+Arguments:
+  pattype        the pattern type
+  pattern        the pattern
+  plength        length in code units
+  utf            TRUE if UTF
+  use_buffer     where to put the output
+  use_length     length of use_buffer
+  bufflenptr     where to put the used length
+  dummyrun       TRUE if a dummy run
+  ccontext       the convert context
+
+Returns:         0 => success
+                !0 => error code
+*/
+
+static int
+convert_glob_bash(uint32_t pattype, PCRE2_SPTR pattern, PCRE2_SIZE plength,
+  BOOL utf, PCRE2_UCHAR *use_buffer, PCRE2_SIZE use_length,
+  PCRE2_SIZE *bufflenptr, BOOL dummyrun, pcre2_convert_context *ccontext)
+{
+pcre2_bash_glob_context context;
+uint8_t group_types[PCRE2_BASH_GLOB_MAX_NESTING];
+int nesting_level, result;
+BOOL after_sep = TRUE;
+PCRE2_UCHAR c;
+
+/* Initialize default for error offset as end of input. */
+context.pattern = pattern;
+context.pattern_end = pattern + plength;
+context.read_mode = PCRE2_BASH_GLOB_NORMAL;
+context.out.output = use_buffer;
+context.out.output_end = use_buffer + use_length;
+context.out.output_size = 0;
+
+context.out.out_str[0] = CHAR_BACKSLASH;
+context.out.out_str[1] = CHAR_A;
+convert_glob_bash_write_str(&context.out, 2);
+
+nesting_level = 0;
+result = 0;
+
+while (convert_glob_bash_read(&context, utf))
+  {
+  c = context.pattern[-1];
+
+  if (context.is_control_char)
+    {
+    if (c == CHAR_LEFT_PARENTHESIS)
+      {
+      /* ! Unexpected open parenthesis ! */
+      result = ERROR_END_BACKSLASH;
+      break;
+      }
+
+    if (c == CHAR_RIGHT_PARENTHESIS)
+      {
+      if (nesting_level == 0)
+        {
+        /* ! Unexpected open parenthesis ! */
+        result = ERROR_END_BACKSLASH;
+        break;
+        }
+
+      c = group_types[--nesting_level];
+
+      convert_glob_bash_write(&context.out, CHAR_RIGHT_PARENTHESIS);
+      if (c != CHAR_COMMERCIAL_AT)
+        {
+        convert_glob_bash_write(&context.out, c);
+        convert_glob_bash_write(&context.out, CHAR_QUESTION_MARK);
+        }
+
+      after_sep = FALSE;
+      continue;
+      }
+
+    if (c == CHAR_VERTICAL_LINE && nesting_level > 0)
+      {
+      convert_glob_bash_write(&context.out, CHAR_VERTICAL_LINE);
+
+      after_sep = FALSE;
+      continue;
+      }
+
+    if ((c == CHAR_QUESTION_MARK || c == CHAR_ASTERISK ||
+         c == CHAR_PLUS || c == CHAR_COMMERCIAL_AT) &&
+        context.pattern < context.pattern_end &&
+        context.pattern[0] == CHAR_LEFT_PARENTHESIS)
+      {
+      if (nesting_level >= PCRE2_BASH_GLOB_MAX_NESTING)
+        {
+        result = ERROR_TOO_DEEP_NESTING;
+        break;
+        }
+
+      if (after_sep)
+        {
+        context.out.out_str[0] = CHAR_LEFT_PARENTHESIS;
+        context.out.out_str[1] = CHAR_QUESTION_MARK;
+        context.out.out_str[2] = CHAR_EXCLAMATION_MARK;
+        context.out.out_str[3] = CHAR_BACKSLASH;
+        context.out.out_str[4] = CHAR_DOT;
+        context.out.out_str[5] = CHAR_RIGHT_PARENTHESIS;
+        convert_glob_bash_write_str(&context.out, 6);
+        }
+
+      context.pattern++;
+      group_types[nesting_level++] = (uint8_t) c;
+
+      context.out.out_str[0] = CHAR_LEFT_PARENTHESIS;
+      context.out.out_str[1] = CHAR_QUESTION_MARK;
+      context.out.out_str[2] = CHAR_COLON;
+      convert_glob_bash_write_str(&context.out, 3);
+
+      after_sep = FALSE;
+      continue;
+      }
+
+    if (c == CHAR_ASTERISK)
+      {
+      if (nesting_level == 0 && context.pattern != pattern + 1)
+        {
+        context.out.out_str[0] = CHAR_LEFT_PARENTHESIS;
+        context.out.out_str[1] = CHAR_ASTERISK;
+        context.out.out_str[2] = CHAR_C;
+        context.out.out_str[3] = CHAR_O;
+        context.out.out_str[4] = CHAR_M;
+        context.out.out_str[5] = CHAR_M;
+        context.out.out_str[6] = CHAR_I;
+        context.out.out_str[7] = CHAR_T;
+        convert_glob_bash_write_str(&context.out, 8);
+        convert_glob_bash_write(&context.out, CHAR_RIGHT_PARENTHESIS);
+        }
+
+      if (after_sep)
+        {
+        context.out.out_str[0] = CHAR_LEFT_PARENTHESIS;
+        context.out.out_str[1] = CHAR_QUESTION_MARK;
+        context.out.out_str[2] = CHAR_COLON;
+        convert_glob_bash_write_str(&context.out, 3);
+
+        convert_glob_bash_wildcard(&context, ccontext->glob_separator, TRUE);
+        convert_glob_bash_wildcard(&context, ccontext->glob_separator, FALSE);
+
+        context.out.out_str[0] = CHAR_ASTERISK;
+        context.out.out_str[1] = CHAR_QUESTION_MARK;
+        context.out.out_str[2] = CHAR_RIGHT_PARENTHESIS;
+        context.out.out_str[3] = CHAR_QUESTION_MARK;
+        context.out.out_str[4] = CHAR_QUESTION_MARK;
+        convert_glob_bash_write_str(&context.out, 5);
+        }
+      else
+        {
+        convert_glob_bash_wildcard(&context, ccontext->glob_separator, FALSE);
+        context.out.out_str[0] = CHAR_ASTERISK;
+        context.out.out_str[1] = CHAR_QUESTION_MARK;
+        convert_glob_bash_write_str(&context.out, 2);
+        }
+
+      after_sep = FALSE;
+      continue;
+      }
+
+    if (c == CHAR_QUESTION_MARK)
+      {
+      convert_glob_bash_wildcard(&context,
+        ccontext->glob_separator, after_sep);
+
+      after_sep = FALSE;
+      continue;
+      }
+    }
+
+  after_sep = (c == ccontext->glob_separator);
+
+  if (after_sep && nesting_level > 0)
+    {
+    context.out.out_str[0] = CHAR_LEFT_PARENTHESIS;
+    context.out.out_str[1] = CHAR_ASTERISK;
+    context.out.out_str[2] = CHAR_F;
+    context.out.out_str[3] = CHAR_RIGHT_PARENTHESIS;
+    convert_glob_bash_write_str(&context.out, 4);
+
+    after_sep = FALSE;
+    continue;
+    }
+
+  if (c < 128 && strchr(pcre2_escaped_literals, c) != NULL)
+    convert_glob_bash_write(&context.out, CHAR_BACKSLASH);
+
+  convert_glob_bash_write(&context.out, c);
+  }
+
+if (result == 0)
+  {
+  /* ! Unexpected end of input ! */
+  if (nesting_level > 0 || context.read_mode != PCRE2_BASH_GLOB_NORMAL)
+    result = ERROR_MISSING_CLOSING_PARENTHESIS;
+  else
+    {
+    context.out.out_str[0] = CHAR_BACKSLASH;
+    context.out.out_str[1] = CHAR_z;
+    context.out.out_str[2] = CHAR_NULL;
+    convert_glob_bash_write_str(&context.out, 3);
+    }
+  }
+
+if (result != 0)
+  {
+  *bufflenptr = context.out.output - use_buffer;
+  return result;
+  }
+
+*bufflenptr = context.out.output_size - 1;
 return 0;
 }
 
@@ -696,6 +1119,11 @@ for (i = 0; i < 2; i++)
     {
     case PCRE2_CONVERT_GLOB_BASIC:
     rc = convert_glob(pattype, pattern, plength, utf, use_buffer, use_length,
+      bufflenptr, dummyrun, ccontext);
+    break;
+
+    case PCRE2_CONVERT_GLOB_BASH:
+    rc = convert_glob_bash(pattype, pattern, plength, utf, use_buffer, use_length,
       bufflenptr, dummyrun, ccontext);
     break;
 
