@@ -138,7 +138,8 @@ const pcre2_compile_context PRIV(default_compile_context) = {
   PCRE2_UNSET,                               /* Max pattern length */
   BSR_DEFAULT,                               /* Backslash R default */
   NEWLINE_DEFAULT,                           /* Newline convention */
-  PARENS_NEST_LIMIT };                       /* As it says */
+  PARENS_NEST_LIMIT,                         /* As it says */
+  0 };                                       /* Extra options */
 
 /* The create function copies the default into the new memory, but must
 override the default memory handling functions if a gcontext was provided. */
@@ -168,7 +169,7 @@ const pcre2_match_context PRIV(default_match_context) = {
   NULL,
   NULL,
   PCRE2_UNSET,   /* Offset limit */
-  HEAP_LIMIT, 
+  HEAP_LIMIT,
   MATCH_LIMIT,
   MATCH_LIMIT_DEPTH };
 
@@ -197,7 +198,7 @@ const pcre2_convert_context PRIV(default_convert_context) = {
   CHAR_BACKSLASH                             /* Default path separator */
 #else                                        /* is OS dependent */
   CHAR_SLASH                                 /* Not Windows */
-#endif 
+#endif
   };
 
 /* The create function copies the default into the new memory, but must
@@ -372,6 +373,13 @@ return 0;
 }
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
+pcre2_set_compile_extra_options(pcre2_compile_context *ccontext, uint32_t options)
+{
+ccontext->extra_options = options;
+return 0;
+}
+
+PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_set_compile_recursion_guard(pcre2_compile_context *ccontext,
   int (*guard)(uint32_t, void *), void *user_data)
 {
@@ -420,7 +428,7 @@ mcontext->offset_limit = limit;
 return 0;
 }
 
-/* This function became obsolete at release 10.30. It is kept as a no-op for 
+/* This function became obsolete at release 10.30. It is kept as a no-op for
 backwards compatibility. */
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
@@ -448,3 +456,4 @@ return 0;
 
 
 /* End of pcre2_context.c */
+

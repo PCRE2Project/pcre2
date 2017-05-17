@@ -15970,7 +15970,6 @@ Error -2: partial match
 Error -1: no match
 Error 0: PCRE2_ERROR_BADDATA (unknown error number)
 Error 100: no error
-Error 188: pattern string is longer than the limit set by the application
-Error 189: internal error: unknown code in parsed pattern
-Error 190: internal error: bad code value in parsed_skip()
-Error 191: PCRE2_ERROR_BADDATA (unknown error number)
+Error 101: \ at end of pattern
+Error 191: PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES is not allowed in UTF-16 mode
+Error 192: PCRE2_ERROR_BADDATA (unknown error number)

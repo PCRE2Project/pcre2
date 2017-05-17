@@ -572,6 +572,7 @@ typedef struct pcre2_real_compile_context {
   uint16_t bsr_convention;
   uint16_t newline_convention;
   uint32_t parens_nest_limit;
+  uint32_t extra_options; 
 } pcre2_real_compile_context;
 
 /* The real match context structure. */

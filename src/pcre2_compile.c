@@ -717,7 +717,8 @@ enum { ERR0 = COMPILE_ERROR_BASE,
        ERR51, ERR52, ERR53, ERR54, ERR55, ERR56, ERR57, ERR58, ERR59, ERR60,
        ERR61, ERR62, ERR63, ERR64, ERR65, ERR66, ERR67, ERR68, ERR69, ERR70,
        ERR71, ERR72, ERR73, ERR74, ERR75, ERR76, ERR77, ERR78, ERR79, ERR80,
-       ERR81, ERR82, ERR83, ERR84, ERR85, ERR86, ERR87, ERR88, ERR89, ERR90 };
+       ERR81, ERR82, ERR83, ERR84, ERR85, ERR86, ERR87, ERR88, ERR89, ERR90,
+       ERR91};
 
 /* This is a table of start-of-pattern options such as (*UTF) and settings such
 as (*LIMIT_MATCH=nnnn) and (*CRLF). For completeness and backward
@@ -728,7 +729,7 @@ enum { PSO_OPT,     /* Value is an option bit */
        PSO_FLG,     /* Value is a flag bit */
        PSO_NL,      /* Value is a newline type */
        PSO_BSR,     /* Value is a \R type */
-       PSO_LIMH,    /* Read integer value for heap limit */ 
+       PSO_LIMH,    /* Read integer value for heap limit */
        PSO_LIMM,    /* Read integer value for match limit */
        PSO_LIMD };  /* Read integer value for depth limit */
 
@@ -1474,7 +1475,10 @@ else
       if (utf)
         {
         if (c > 0x10ffffU) *errorcodeptr = ERR77;
-          else if (c >= 0xd800 && c <= 0xdfff) *errorcodeptr = ERR73;
+        else
+          if (c >= 0xd800 && c <= 0xdfff &&
+            (cb->cx->extra_options & PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES) == 0)
+              *errorcodeptr = ERR73;
         }
       else if (c > MAX_NON_UTF_CHAR) *errorcodeptr = ERR77;
       }
@@ -1663,7 +1667,8 @@ else
         }
       else if (ptr < ptrend && *ptr++ == CHAR_RIGHT_CURLY_BRACKET)
         {
-        if (utf && c >= 0xd800 && c <= 0xdfff)
+        if (utf && c >= 0xd800 && c <= 0xdfff &&
+            (cb->cx->extra_options & PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES) == 0)
           {
           ptr--;
           *errorcodeptr = ERR73;
@@ -1732,7 +1737,8 @@ else
           }
         else if (ptr < ptrend && *ptr++ == CHAR_RIGHT_CURLY_BRACKET)
           {
-          if (utf && c >= 0xd800 && c <= 0xdfff)
+          if (utf && c >= 0xd800 && c <= 0xdfff &&
+              (cb->cx->extra_options & PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES) == 0)
             {
             ptr--;
             *errorcodeptr = ERR73;
@@ -2227,7 +2233,7 @@ typedef struct nest_save {
   uint16_t  reset_group;
   uint16_t  max_group;
   uint16_t  flags;
-  uint32_t  options; 
+  uint32_t  options;
 } nest_save;
 
 #define NSF_RESET          0x0001u
@@ -2297,10 +2303,10 @@ creating a nest_save that spans the end of the workspace. */
 
 end_nests = (nest_save *)((char *)end_nests -
   ((cb->workspace_size * sizeof(PCRE2_UCHAR)) % sizeof(nest_save)));
-  
+
 /* PCRE2_EXTENDED_MORE implies PCRE2_EXTENDED */
 
-if ((options & PCRE2_EXTENDED_MORE) != 0) options |= PCRE2_EXTENDED; 
+if ((options & PCRE2_EXTENDED_MORE) != 0) options |= PCRE2_EXTENDED;
 
 /* Now scan the pattern */
 
@@ -2969,7 +2975,7 @@ while (ptr < ptrend)
     for (;;)
       {
       BOOL char_is_literal = TRUE;
-      
+
       /* Inside \Q...\E everything is literal except \E */
 
       if (inescq)
@@ -2982,11 +2988,11 @@ while (ptr < ptrend)
           }
         goto CLASS_LITERAL;
         }
-        
+
       /* Skip over space and tab (only) in extended-more mode. */
-      
-      if ((options & PCRE2_EXTENDED_MORE) != 0 && 
-          (c == CHAR_SPACE || c == CHAR_HT)) 
+
+      if ((options & PCRE2_EXTENDED_MORE) != 0 &&
+          (c == CHAR_SPACE || c == CHAR_HT))
         goto CLASS_CONTINUE;
 
       /* Handle POSIX class names. Perl allows a negation extension of the
@@ -3448,12 +3454,12 @@ while (ptr < ptrend)
             case CHAR_n: *optset |= PCRE2_NO_AUTO_CAPTURE; break;
             case CHAR_s: *optset |= PCRE2_DOTALL; break;
             case CHAR_U: *optset |= PCRE2_UNGREEDY; break;
-            
+
             /* If x appears twice it sets the extended extended option. */
-            
-            case CHAR_x: 
+
+            case CHAR_x:
             *optset |= ((*optset & PCRE2_EXTENDED) != 0)?
-              PCRE2_EXTENDED_MORE : PCRE2_EXTENDED; 
+              PCRE2_EXTENDED_MORE : PCRE2_EXTENDED;
             break;
 
             default:
@@ -3463,10 +3469,10 @@ while (ptr < ptrend)
             }
           }
         options = (options | set) & (~unset);
-        
+
         /* Unsetting extended should also get rid of extended-more. */
-        
-        if ((options & PCRE2_EXTENDED) == 0) options &= ~PCRE2_EXTENDED_MORE;  
+
+        if ((options & PCRE2_EXTENDED) == 0) options &= ~PCRE2_EXTENDED_MORE;
 
         /* If the options ended with ')' this is not the start of a nested
         group with option changes, so the options change at this level.
@@ -4190,18 +4196,18 @@ for (;;)
     case OP_CALLOUT_STR:
     code += GET(code, 1 + 2*LINK_SIZE);
     break;
-    
+
     case OP_SKIPZERO:
     code += 2 + GET(code, 2) + LINK_SIZE;
-    break;   
-    
+    break;
+
     case OP_COND:
     case OP_SCOND:
     if (code[1+LINK_SIZE] != OP_FALSE ||   /* Not DEFINE */
         code[GET(code, 1)] != OP_KET)      /* More than one branch */
       return code;
     code += GET(code, 1) + 1 + LINK_SIZE;
-    break;    
+    break;
 
     default:
     return code;
@@ -8150,7 +8156,7 @@ uint32_t nestlevel = 0;
 for (;; pptr++)
   {
   uint32_t meta = META_CODE(*pptr);
-  
+
   switch(meta)
     {
     default:  /* Just skip over most items */
@@ -8265,8 +8271,8 @@ int branchlength;
 int grouplength = -1;
 
 /* The cache can be used only if there is no possibility of there being two
-groups with the same number. We do not need to set the end pointer for a group 
-that is being processed as a back reference or recursion, but we must do so for 
+groups with the same number. We do not need to set the end pointer for a group
+that is being processed as a back reference or recursion, but we must do so for
 an inline group. */
 
 if (group > 0 && (cb->external_flags & PCRE2_DUPCAPUSED) == 0)
@@ -8438,7 +8444,7 @@ for (;; pptr++)
       }
     break;
 
-    /* Lookaheads can be ignored, but we must start the skip inside the group 
+    /* Lookaheads can be ignored, but we must start the skip inside the group
     so that it isn't treated as a group within the branch. */
 
     case META_LOOKAHEAD:
@@ -8464,7 +8470,7 @@ for (;; pptr++)
     case META_BACKREF_BYNAME:
     if ((cb->external_options & PCRE2_MATCH_UNSET_BACKREF) != 0)
       goto ISNOTFIXED;
-    /* Fall through */   
+    /* Fall through */
 
     case META_RECURSE_BYNAME:
       {
@@ -8542,7 +8548,7 @@ for (;; pptr++)
         else if (*gptr == (META_CAPTURE | group)) break;
       }
 
-    /* We must start the search for the end of the group at the first meta code 
+    /* We must start the search for the end of the group at the first meta code
     inside the group. Otherwise it will be treated as an enclosed group. */
 
     gptrend = parsed_skip(gptr + 1, PSKIP_KET);
@@ -8552,12 +8558,12 @@ for (;; pptr++)
     if (r != NULL) goto ISNOTFIXED;   /* Mutual recursion */
     this_recurse.prev = recurses;
     this_recurse.groupptr = gptr;
-    
+
     /* We do not need to know the position of the end of the group, that is,
-    gptr is not used after the call to get_grouplength(). Setting the second 
-    argument FALSE stops it scanning for the end when the length can be found 
-    in the cache. */ 
-     
+    gptr is not used after the call to get_grouplength(). Setting the second
+    argument FALSE stops it scanning for the end when the length can be found
+    in the cache. */
+
     gptr++;
     grouplength = get_grouplength(&gptr, FALSE, errcodeptr, lcptr, group,
       &this_recurse, cb);
@@ -8596,7 +8602,7 @@ for (;; pptr++)
     case META_NOCAPTURE:
     pptr++;
     CHECK_GROUP:
-    grouplength = get_grouplength(&pptr, TRUE, errcodeptr, lcptr, group, 
+    grouplength = get_grouplength(&pptr, TRUE, errcodeptr, lcptr, group,
       recurses, cb);
     if (grouplength < 0) return -1;
     itemlength = grouplength;
@@ -9053,7 +9059,7 @@ while (patlen - skipatstart >= 2 &&
 
         case PSO_LIMM:
         case PSO_LIMD:
-        case PSO_LIMH: 
+        case PSO_LIMH:
         c = 0;
         pp = skipatstart;
         if (!IS_DIGIT(ptr[pp]))
@@ -9100,7 +9106,9 @@ if ((cb.external_options & (PCRE2_UTF|PCRE2_UCP)) != 0)
 #endif
 
 /* Check UTF. We have the original options in 'options', with that value as
-modified by (*UTF) etc in cb->external_options. */
+modified by (*UTF) etc in cb->external_options. The extra option
+PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES is not permitted in UTF-16 mode because the
+surrogate code points cannot be represented in UTF-16. */
 
 utf = (cb.external_options & PCRE2_UTF) != 0;
 if (utf)
@@ -9113,6 +9121,14 @@ if (utf)
   if ((options & PCRE2_NO_UTF_CHECK) == 0 &&
        (errorcode = PRIV(valid_utf)(pattern, patlen, erroroffset)) != 0)
     goto HAD_ERROR;  /* Offset was set by valid_utf() */
+
+#if PCRE2_CODE_UNIT_WIDTH == 16
+  if ((ccontext->extra_options & PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES) != 0)
+    {
+    errorcode = ERR91;
+    goto HAD_EARLY_ERROR;
+    }
+#endif
   }
 
 /* Check UCP lockout. */
@@ -9299,7 +9315,7 @@ possible because nowadays we limit the maximum value of cb.names_found and
 cb.name_entry_size. */
 
 re_blocksize = sizeof(pcre2_real_code) +
-  CU2BYTES(length + 
+  CU2BYTES(length +
   (PCRE2_SIZE)cb.names_found * (PCRE2_SIZE)cb.name_entry_size);
 re = (pcre2_real_code *)
   ccontext->memctl.malloc(re_blocksize, ccontext->memctl.memory_data);
@@ -9308,11 +9324,11 @@ if (re == NULL)
   errorcode = ERR21;
   goto HAD_CB_ERROR;
   }
-  
-/* The compiler may put padding at the end of the pcre2_real_code structure in 
-order to round it up to a multiple of 4 or 8 bytes. This means that when a 
-compiled pattern is copied (for example, when serialized) undefined bytes are 
-read, and this annoys debuggers such as valgrind. To avoid this, we explicitly 
+
+/* The compiler may put padding at the end of the pcre2_real_code structure in
+order to round it up to a multiple of 4 or 8 bytes. This means that when a
+compiled pattern is copied (for example, when serialized) undefined bytes are
+read, and this annoys debuggers such as valgrind. To avoid this, we explicitly
 write to the last 8 bytes of the structure before setting the fields. */
 
 memset((char *)re + sizeof(pcre2_real_code) - 8, 0, 8);

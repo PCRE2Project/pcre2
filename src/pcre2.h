@@ -139,6 +139,10 @@ D   is inspected during pcre2_dfa_match() execution
 #define PCRE2_USE_OFFSET_LIMIT    0x00800000u  /*   J M D */
 #define PCRE2_EXTENDED_MORE       0x01000000u  /* C       */
 
+/* An additional compile options word is available in the compile context. */
+
+#define PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES  0x00000001u  /* C       */
+
 /* These are for pcre2_jit_compile(). */
 
 #define PCRE2_JIT_COMPLETE        0x00000001u  /* For full matching */
@@ -449,6 +453,8 @@ PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION \
 PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION \
   pcre2_set_character_tables(pcre2_compile_context *, const unsigned char *); \
 PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION \
+  pcre2_set_compile_extra_options(pcre2_compile_context *, uint32_t); \
+PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION \
   pcre2_set_max_pattern_length(pcre2_compile_context *, PCRE2_SIZE); \
 PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION \
   pcre2_set_newline(pcre2_compile_context *, uint32_t); \
@@ -721,6 +727,7 @@ pcre2_compile are called by application code. */
 #define pcre2_set_bsr                         PCRE2_SUFFIX(pcre2_set_bsr_)
 #define pcre2_set_callout                     PCRE2_SUFFIX(pcre2_set_callout_)
 #define pcre2_set_character_tables            PCRE2_SUFFIX(pcre2_set_character_tables_)
+#define pcre2_set_compile_extra_options       PCRE2_SUFFIX(pcre2_set_compile_extra_options_)
 #define pcre2_set_compile_recursion_guard     PCRE2_SUFFIX(pcre2_set_compile_recursion_guard_)
 #define pcre2_set_depth_limit                 PCRE2_SUFFIX(pcre2_set_depth_limit_)
 #define pcre2_set_glob_separator              PCRE2_SUFFIX(pcre2_set_glob_separator_)

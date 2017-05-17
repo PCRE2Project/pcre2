@@ -1,4 +1,4 @@
-.TH PCRE2UNICODE 3 "20 April 2017" "PCRE2 10.30"
+.TH PCRE2UNICODE 3 "17 May 2017" "PCRE2 10.30"
 .SH NAME
 PCRE - Perl-compatible regular expressions (revised API)
 .SH "UNICODE AND UTF SUPPORT"
@@ -164,6 +164,14 @@ or \fBpcre2_dfa_match()\fP.
 .P
 If you pass an invalid UTF string when PCRE2_NO_UTF_CHECK is set, the result
 is undefined and your program may crash or loop indefinitely.
+.P
+Note that setting PCRE2_NO_UTF_CHECK at compile time does not disable the error
+that is given if an escape sequence for an invalid Unicode code point is
+encountered in the pattern. If you want to allow escape sequences such as
+\ex{d800} (a surrogate code point) you can set the
+PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES extra option. However, this is possible
+only in UTF-8 and UTF-32 modes, because these values are not representable in
+UTF-16.
 .
 .
 .\" HTML <a name="utf8strings"></a>
@@ -272,6 +280,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 20 April 2017
+Last updated: 17 May 2017
 Copyright (c) 1997-2017 University of Cambridge.
 .fi

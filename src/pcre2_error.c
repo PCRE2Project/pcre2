@@ -176,6 +176,7 @@ static const unsigned char compile_error_texts[] =
   "internal error: unknown code in parsed pattern\0"
   /* 90 */
   "internal error: bad code value in parsed_skip()\0"
+  "PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES is not allowed in UTF-16 mode\0" 
   ;
 
 /* Match-time and UTF error texts are in the same format. */

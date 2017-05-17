@@ -1,4 +1,4 @@
-.TH PCRE2TEST 1 "18 April 2017" "PCRE 10.30"
+.TH PCRE2TEST 1 "17 May 2017" "PCRE 10.30"
 .SH NAME
 pcre2test - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -519,17 +519,21 @@ by a previous \fB#pattern\fP command.
 .SS "Setting compilation options"
 .rs
 .sp
-The following modifiers set options for \fBpcre2_compile()\fP. There are some
-single-letter abbreviations that are the same as Perl options. There is special
-handling for /x: if a second x is present, PCRE2_EXTENDED is converted into
-PCRE2_EXTENDED_MORE as in Perl. A third appearance adds PCRE2_EXTENDED as well, 
-though this makes no difference to the way \fBpcre2_compile()\fP behaves. See
+The following modifiers set options for \fBpcre2_compile()\fP. Most of them set
+bits in the options argument of that function, but those whose names start with 
+PCRE2_EXTRA are additional options that are set in the compile context. For the
+main options, there are some single-letter abbreviations that are the same as
+Perl options. There is special handling for /x: if a second x is present,
+PCRE2_EXTENDED is converted into PCRE2_EXTENDED_MORE as in Perl. A third
+appearance adds PCRE2_EXTENDED as well, though this makes no difference to the
+way \fBpcre2_compile()\fP behaves. See
 .\" HREF
 \fBpcre2api\fP
 .\"
 for a description of the effects of these options.
 .sp
       allow_empty_class         set PCRE2_ALLOW_EMPTY_CLASS
+      allow_surrogate_escapes   set PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES 
       alt_bsux                  set PCRE2_ALT_BSUX
       alt_circumflex            set PCRE2_ALT_CIRCUMFLEX
       alt_verbnames             set PCRE2_ALT_VERBNAMES
@@ -1788,6 +1792,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 18 April 2017
+Last updated: 17 May 2017
 Copyright (c) 1997-2017 University of Cambridge.
 .fi

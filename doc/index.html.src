@@ -207,6 +207,9 @@ in the library.
 <tr><td><a href="pcre2_set_character_tables.html">pcre2_set_character_tables</a></td>
     <td>&nbsp;&nbsp;Set character tables</td></tr>
 
+<tr><td><a href="pcre2_set_compile_extra_options.html">pcre2_set_compile_extra_options</a></td>
+    <td>&nbsp;&nbsp;Set compile time extra options</td></tr>
+
 <tr><td><a href="pcre2_set_compile_recursion_guard.html">pcre2_set_compile_recursion_guard</a></td>
     <td>&nbsp;&nbsp;Set up a compile recursion guard function</td></tr>
 

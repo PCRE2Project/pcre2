@@ -559,14 +559,19 @@ by a previous <b>#pattern</b> command.
 Setting compilation options
 </b><br>
 <P>
-The following modifiers set options for <b>pcre2_compile()</b>. The most common
-ones have single-letter abbreviations, with special handling for /x (to make
-it like Perl). If a second x is present, PCRE2_EXTENDED is converted into
-PCRE2_EXTENDED_MORE. A third appearance adds PCRE2_EXTENDED as well. See
+The following modifiers set options for <b>pcre2_compile()</b>. Most of them set
+bits in the options argument of that function, but those whose names start with 
+PCRE2_EXTRA are additional options that are set in the compile context. For the
+main options, there are some single-letter abbreviations that are the same as
+Perl options. There is special handling for /x: if a second x is present,
+PCRE2_EXTENDED is converted into PCRE2_EXTENDED_MORE as in Perl. A third
+appearance adds PCRE2_EXTENDED as well, though this makes no difference to the
+way <b>pcre2_compile()</b> behaves. See
 <a href="pcre2api.html"><b>pcre2api</b></a>
 for a description of the effects of these options.
 <pre>
       allow_empty_class         set PCRE2_ALLOW_EMPTY_CLASS
+      allow_surrogate_escapes   set PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES 
       alt_bsux                  set PCRE2_ALT_BSUX
       alt_circumflex            set PCRE2_ALT_CIRCUMFLEX
       alt_verbnames             set PCRE2_ALT_VERBNAMES
@@ -585,7 +590,7 @@ for a description of the effects of these options.
       never_backslash_c         set PCRE2_NEVER_BACKSLASH_C
       never_ucp                 set PCRE2_NEVER_UCP
       never_utf                 set PCRE2_NEVER_UTF
-      no_auto_capture           set PCRE2_NO_AUTO_CAPTURE
+  /n  no_auto_capture           set PCRE2_NO_AUTO_CAPTURE
       no_auto_possess           set PCRE2_NO_AUTO_POSSESS
       no_dotstar_anchor         set PCRE2_NO_DOTSTAR_ANCHOR
       no_start_optimize         set PCRE2_NO_START_OPTIMIZE
@@ -607,7 +612,8 @@ Setting compilation controls
 </b><br>
 <P>
 The following modifiers affect the compilation process or request information
-about the pattern:
+about the pattern. There are single-letter abbreviations for some that are
+heavily used in the test files.
 <pre>
       bsr=[anycrlf|unicode]     specify \R handling
   /B  bincode                   show binary code without lengths
@@ -1810,7 +1816,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC21" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 17 April 2017
+Last updated: 17 May 2017
 <br>
 Copyright &copy; 1997-2017 University of Cambridge.
 <br>

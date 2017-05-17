@@ -47,7 +47,7 @@ and
 documentation. Only the short names for properties are supported. For example,
 \p{L} matches a letter. Its Perl synonym, \p{Letter}, is not supported.
 Furthermore, in Perl, many properties may optionally be prefixed by "Is", for
-compatibility with Perl 5.6. PCRE does not support this.
+compatibility with Perl 5.6. PCRE2 does not support this.
 </P>
 <br><b>
 WIDE CHARACTERS AND UTF MODES
@@ -109,10 +109,15 @@ However, the special horizontal and vertical white space matching escapes (\h,
 \H, \v, and \V) do match all the appropriate Unicode characters, whether or
 not PCRE2_UCP is set.
 </P>
+<br><b>
+CASE-EQUIVALENCE IN UTF MODES
+</b><br>
 <P>
-Case-insensitive matching in UTF mode makes use of Unicode properties. A few
-Unicode characters such as Greek sigma have more than two codepoints that are
-case-equivalent, and these are treated as such.
+Case-insensitive matching in a UTF mode makes use of Unicode properties except
+for characters whose code points are less than 128 and that have at most two
+case-equivalent values. For these, a direct table lookup is used for speed. A
+few Unicode characters such as Greek sigma have more than two codepoints that
+are case-equivalent, and these are treated as such.
 </P>
 <br><b>
 VALIDITY OF UTF STRINGS
@@ -173,6 +178,15 @@ or <b>pcre2_dfa_match()</b>.
 <P>
 If you pass an invalid UTF string when PCRE2_NO_UTF_CHECK is set, the result
 is undefined and your program may crash or loop indefinitely.
+</P>
+<P>
+Note that setting PCRE2_NO_UTF_CHECK at compile time does not disable the error
+that is given if an escape sequence for an invalid Unicode code point is
+encountered in the pattern. If you want to allow escape sequences such as
+\x{d800} (a surrogate code point) you can set the
+PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES extra option. However, this is possible
+only in UTF-8 and UTF-32 modes, because these values are not representable in
+UTF-16.
 <a name="utf8strings"></a></P>
 <br><b>
 Errors in UTF-8 strings
@@ -280,9 +294,9 @@ Cambridge, England.
 REVISION
 </b><br>
 <P>
-Last updated: 03 July 2016
+Last updated: 17 May 2017
 <br>
-Copyright &copy; 1997-2016 University of Cambridge.
+Copyright &copy; 1997-2017 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE2 index page</a>.

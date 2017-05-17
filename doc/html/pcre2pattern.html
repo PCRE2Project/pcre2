@@ -1545,12 +1545,13 @@ alternative in the subpattern.
 <br><a name="SEC13" href="#TOC1">INTERNAL OPTION SETTING</a><br>
 <P>
 The settings of the PCRE2_CASELESS, PCRE2_MULTILINE, PCRE2_DOTALL,
-PCRE2_EXTENDED, and PCRE2_EXTENDED_MORE options (which are Perl-compatible) can
-be changed from within the pattern by a sequence of Perl option letters
-enclosed between "(?" and ")". The option letters are
+PCRE2_EXTENDED, PCRE2_EXTENDED_MORE, and PCRE2_NO_AUTO_CAPTURE options (which
+are Perl-compatible) can be changed from within the pattern by a sequence of
+Perl option letters enclosed between "(?" and ")". The option letters are
 <pre>
   i  for PCRE2_CASELESS
   m  for PCRE2_MULTILINE
+  n  for PCRE2_NO_AUTO_CAPTURE 
   s  for PCRE2_DOTALL
   x  for PCRE2_EXTENDED
   xx for PCRE2_EXTENDED_MORE

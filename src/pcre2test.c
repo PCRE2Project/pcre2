@@ -194,6 +194,7 @@ void vms_setsymbol( char *, char *, int );
 #define LOCALESIZE 32             /* Size of locale name */
 #define LOOPREPEAT 500000         /* Default loop count for timing */
 #define MALLOCLISTSIZE 20         /* For remembering mallocs */
+#define PARENS_NEST_DEFAULT 220   /* Default parentheses nest limit */
 #define PATSTACKSIZE 20           /* Pattern stack for save/restore testing */
 #define REPLACE_MODSIZE 100       /* Field for reading 8-bit replacement */
 #define VERSION_SIZE 64           /* Size of buffer for the version strings */
@@ -577,6 +578,7 @@ static modstruct modlist[] = {
   { "allaftertext",               MOD_PNDP, MOD_CTL, CTL_ALLAFTERTEXT,           PO(control) },
   { "allcaptures",                MOD_PND,  MOD_CTL, CTL_ALLCAPTURES,            PO(control) },
   { "allow_empty_class",          MOD_PAT,  MOD_OPT, PCRE2_ALLOW_EMPTY_CLASS,    PO(options) },
+  { "allow_surrogate_escapes",    MOD_CTC,  MOD_OPT, PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES, CO(extra_options) },
   { "allusedtext",                MOD_PNDP, MOD_CTL, CTL_ALLUSEDTEXT,            PO(control) },
   { "alt_bsux",                   MOD_PAT,  MOD_OPT, PCRE2_ALT_BSUX,             PO(options) },
   { "alt_circumflex",             MOD_PAT,  MOD_OPT, PCRE2_ALT_CIRCUMFLEX,       PO(options) },
@@ -685,6 +687,8 @@ static modstruct modlist[] = {
 #define POSIX_SUPPORTED_COMPILE_OPTIONS ( \
   PCRE2_CASELESS|PCRE2_DOTALL|PCRE2_MULTILINE|PCRE2_UCP|PCRE2_UTF| \
   PCRE2_UNGREEDY)
+  
+#define POSIX_SUPPORTED_COMPILE_EXTRA_OPTIONS (0) 
 
 #define POSIX_SUPPORTED_COMPILE_CONTROLS ( \
   CTL_AFTERTEXT|CTL_ALLAFTERTEXT|CTL_EXPAND|CTL_POSIX|CTL_POSIX_NOSUB)
@@ -4025,6 +4029,32 @@ else fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%
 }
 
 
+/*************************************************
+*           Show compile extra options           *
+*************************************************/
+
+/* Called for unsupported POSIX options.
+
+Arguments:
+  options     an options word
+  before      text to print before
+  after       text to print after
+
+Returns:      nothing
+*/
+
+static void
+show_compile_extra_options(uint32_t options, const char *before, 
+  const char *after) 
+{ 
+if (options == 0) fprintf(outfile, "%s <none>%s", before, after);
+else fprintf(outfile, "%s%s%s",   
+  before,
+  ((options & PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES) != 0)? " allow_surrogate_escapes" : "",
+  after);
+}
+
+
 
 #ifdef SUPPORT_PCRE2_8
 /*************************************************
@@ -5161,6 +5191,16 @@ if ((pat_patctl.control & CTL_POSIX) != 0)
       pat_patctl.options & ~POSIX_SUPPORTED_COMPILE_OPTIONS, msg, "");
     msg = "";
     }
+
+  if ((FLD(pat_context, extra_options) & 
+       ~POSIX_SUPPORTED_COMPILE_EXTRA_OPTIONS) != 0)
+    {
+    show_compile_extra_options(
+      FLD(pat_context, extra_options) & ~POSIX_SUPPORTED_COMPILE_EXTRA_OPTIONS,
+        msg, "");
+    msg = "";       
+    }     
+
   if ((pat_patctl.control & ~POSIX_SUPPORTED_COMPILE_CONTROLS) != 0 ||
       (pat_patctl.control2 & ~POSIX_SUPPORTED_COMPILE_CONTROLS2) != 0)
     {
@@ -5170,7 +5210,11 @@ if ((pat_patctl.control & CTL_POSIX) != 0)
     }
 
   if (local_newline_default != 0) prmsg(&msg, "#newline_default");
-
+  if (FLD(pat_context, max_pattern_length) != PCRE2_UNSET)
+    prmsg(&msg, "max_pattern_length");
+  if (FLD(pat_context, parens_nest_limit) != PARENS_NEST_DEFAULT)
+    prmsg(&msg, "parens_nest_limit"); 
+    
   if (msg[0] == 0) fprintf(outfile, "\n");
 
   /* Translate PCRE2 options to POSIX options and then compile. */
@@ -8123,6 +8167,7 @@ max_oveccount = DEFAULT_OVECCOUNT;
   G(match_data,BITS) = G(pcre2_match_data_create_,BITS)(max_oveccount, G(general_context,BITS))
 
 #define CONTEXTTESTS \
+  (void)G(pcre2_set_compile_extra_options_,BITS)(G(pat_context,BITS), 0); \
   (void)G(pcre2_set_max_pattern_length_,BITS)(G(pat_context,BITS), 0); \
   (void)G(pcre2_set_offset_limit_,BITS)(G(dat_context,BITS), 0); \
   (void)G(pcre2_set_recursion_memory_management_,BITS)(G(dat_context,BITS), my_malloc, my_free, NULL)
@@ -8163,7 +8208,7 @@ if (test_mode == PCRE32_MODE)
 /* Set a default parentheses nest limit that is large enough to run the
 standard tests (this also exercises the function). */
 
-PCRE2_SET_PARENS_NEST_LIMIT(default_pat_context, 220);
+PCRE2_SET_PARENS_NEST_LIMIT(default_pat_context, PARENS_NEST_DEFAULT);
 
 /* Handle command line modifier settings, sending any error messages to
 stderr. We need to know the mode before modifying the context, and it is tidier

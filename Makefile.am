@@ -67,6 +67,7 @@ dist_html_DATA = \
   doc/html/pcre2_set_bsr.html \
   doc/html/pcre2_set_callout.html \
   doc/html/pcre2_set_character_tables.html \
+  doc/html/pcre2_set_compile_extra_options.html \
   doc/html/pcre2_set_compile_recursion_guard.html \
   doc/html/pcre2_set_depth_limit.html \
   doc/html/pcre2_set_heap_limit.html \
@@ -151,6 +152,7 @@ dist_man_MANS = \
   doc/pcre2_set_bsr.3 \
   doc/pcre2_set_callout.3 \
   doc/pcre2_set_character_tables.3 \
+  doc/pcre2_set_compile_extra_options.3 \
   doc/pcre2_set_compile_recursion_guard.3 \
   doc/pcre2_set_depth_limit.3 \
   doc/pcre2_set_heap_limit.3 \

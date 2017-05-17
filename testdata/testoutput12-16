@@ -1421,4 +1421,16 @@ No match
 ** Truncation will probably give the wrong result.
 No match
 
+# A special extra option allows excaped surrogate code points in 32-bit mode,
+# but subjects containing them must not be UTF-checked. These patterns give
+# errors in 16-bit mode.
+
+/\x{d800}/utf,allow_surrogate_escapes
+Failed: error 191 at offset 0: PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES is not allowed in UTF-16 mode
+    \x{d800}\=no_utf_check
+
+/\udfff\o{157401}/utf,alt_bsux,allow_surrogate_escapes
+Failed: error 191 at offset 0: PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES is not allowed in UTF-16 mode
+    \x{dfff}\x{df01}\=no_utf_check
+
 # End of testinput12

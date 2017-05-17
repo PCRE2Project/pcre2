@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "20 April 2017" "PCRE2 10.30"
+.TH PCRE2API 3 "17 May 2017" "PCRE2 10.30"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -89,6 +89,9 @@ document for an overview of all the PCRE2 documentation.
 .sp
 .B int pcre2_set_character_tables(pcre2_compile_context *\fIccontext\fP,
 .B "  const unsigned char *\fItables\fP);"
+.sp
+.B int pcre2_set_compile_extra_options(pcre2_compile_context *\fIccontext\fP,
+.B "  uint32_t \fIextra_options\fP);"
 .sp
 .B int pcre2_set_max_pattern_length(pcre2_compile_context *\fIccontext\fP,
 .B "  PCRE2_SIZE \fIvalue\fP);"
@@ -643,6 +646,7 @@ following compile-time parameters:
   The newline character sequence
   The compile time nested parentheses limit
   The maximum length of the pattern string
+  The extra options bits (none set by default) 
 .sp
 A compile context is also required if you are using custom memory management.
 If none of these apply, just pass NULL as the context argument of
@@ -683,6 +687,23 @@ interpreted matching functions, \fIpcre2_match()\fP and
 The value must be the result of a call to \fIpcre2_maketables()\fP, whose only
 argument is a general context. This function builds a set of character tables
 in the current locale.
+.sp
+.nf
+.B int pcre2_set_compile_extra_options(pcre2_compile_context *\fIccontext\fP,
+.B "  uint32_t \fIextra_options\fP);"
+.fi
+.sp
+As PCRE2 has developed, almost all the 32 option bits that are available in
+the \fIoptions\fP argument of \fBpcre2_compile()\fP have been used up. To avoid
+running out, the compile context contains a set of extra option bits which are 
+used for some newer, assumed rarer, options. This function sets those bits. It 
+always sets all the bits (either on or off). It does not modify any existing 
+setting. The available options are defined in the section entitled "Extra
+compile options"
+.\" HTML <a href="#extracompileoptions">
+.\" </a>
+below.
+.\"
 .sp
 .nf
 .B int pcre2_set_max_pattern_length(pcre2_compile_context *\fIccontext\fP,
@@ -1533,14 +1554,29 @@ in the
 \fBpcre2unicode\fP
 .\"
 document. If an invalid UTF sequence is found, \fBpcre2_compile()\fP returns a
-negative error code.
+negative error code. 
 .P
-If you know that your pattern is valid, and you want to skip this check for
-performance reasons, you can set the PCRE2_NO_UTF_CHECK option. When it is set,
-the effect of passing an invalid UTF string as a pattern is undefined. It may
-cause your program to crash or loop. Note that this option can also be passed
-to \fBpcre2_match()\fP and \fBpcre_dfa_match()\fP, to suppress validity
-checking of the subject string.
+If you know that your pattern is a valid UTF string, and you want to skip this
+check for performance reasons, you can set the PCRE2_NO_UTF_CHECK option. When
+it is set, the effect of passing an invalid UTF string as a pattern is
+undefined. It may cause your program to crash or loop. 
+.P
+Note that this option can also be passed to \fBpcre2_match()\fP and
+\fBpcre_dfa_match()\fP, to suppress UTF validity checking of the subject
+string.
+.P
+Note also that setting PCRE2_NO_UTF_CHECK at compile time does not disable the
+error that is given if an escape sequence for an invalid Unicode code point is
+encountered in the pattern. In particular, the so-called "surrogate" code
+points (0xd800 to 0xdfff) are invalid. If you want to allow escape sequences
+such as \ex{d800} you can set the PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES extra
+option, as described in the section entitled "Extra compile options"
+.\" HTML <a href="#extracompileoptions">
+.\" </a>
+below. 
+.\"
+However, this is possible only in UTF-8 and UTF-32 modes, because these values
+are not representable in UTF-16.
 .sp
   PCRE2_UCP
 .sp
@@ -1592,6 +1628,37 @@ behaviour of PCRE2 are given in the
 \fBpcre2unicode\fP
 .\"
 page.
+.
+.
+.\" HTML <a name="extracompileoptions"></a>
+.SS "Extra compile options"
+.rs
+.sp
+Unlike the main compile-time options, the extra options are not saved with the
+compiled pattern. The option bits that can be set in a compile context by
+calling the \fBpcre2_set_compile_extra_options()\fP function are as follows:
+.sp
+  PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES
+.sp
+This option applies when compiling a pattern in UTF-8 or UTF-32 mode. It is 
+forbidden in UTF-16 mode, and ignored in non-UTF modes. Unicode "surrogate"
+code points in the range 0xd800 to 0xdfff are used in pairs in UTF-16 to encode
+code points with values in the range 0x10000 to 0x10ffff. The surrogates cannot 
+therefore be represented in UTF-16. They can be represented in UTF-8 and
+UTF-32, but are defined as invalid code points, and cause errors if encountered 
+in a UTF-8 or UTF-32 string that is being checked for validity by PCRE2. 
+.P
+These values also cause errors if encountered in escape sequences such as
+\ex{d912} within a pattern. However, it seems that some applications, when
+using PCRE2 to check for unwanted characters in UTF-8 strings, explicitly test
+for the surrogates using escape sequences. The PCRE2_NO_UTF_CHECK option does
+not disable the error that occurs, because it applies only to the testing of
+input strings for UTF validity.
+.P
+If the extra option PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES is set, surrogate code 
+point values in UTF-8 and UTF-32 patterns no longer provoke errors and are 
+incorporated in the compiled pattern. However, they can only match subject 
+characters if the matching function is called with PCRE2_NO_UTF_CHECK set.
 .
 .
 .SH "COMPILATION ERROR CODES"
@@ -3421,6 +3488,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 20 April 2017
+Last updated: 17 May 2017
 Copyright (c) 1997-2017 University of Cambridge.
 .fi

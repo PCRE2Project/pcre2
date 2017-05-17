@@ -1413,4 +1413,16 @@ No match
     \x{7fffffff}
 No match
 
+# A special extra option allows excaped surrogate code points in 32-bit mode,
+# but subjects containing them must not be UTF-checked. These patterns give
+# errors in 16-bit mode.
+
+/\x{d800}/utf,allow_surrogate_escapes
+    \x{d800}\=no_utf_check
+ 0: \x{d800}
+
+/\udfff\o{157401}/utf,alt_bsux,allow_surrogate_escapes
+    \x{dfff}\x{df01}\=no_utf_check
+ 0: \x{dfff}\x{df01}
+
 # End of testinput12
