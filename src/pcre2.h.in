@@ -182,12 +182,15 @@ ignored for pcre2_jit_match(). */
 
 /* Options for pcre2_pattern_convert(). */
 
-#define PCRE2_CONVERT_UTF             0x00000001u
-#define PCRE2_CONVERT_NO_UTF_CHECK    0x00000002u
-#define PCRE2_CONVERT_GLOB_BASIC      0x00000004u
-#define PCRE2_CONVERT_GLOB_BASH       0x00000008u
-#define PCRE2_CONVERT_POSIX_BASIC     0x00000010u
-#define PCRE2_CONVERT_POSIX_EXTENDED  0x00000020u
+#define PCRE2_CONVERT_UTF                    0x00000001u
+#define PCRE2_CONVERT_NO_UTF_CHECK           0x00000002u
+#define PCRE2_CONVERT_POSIX_BASIC            0x00000004u
+#define PCRE2_CONVERT_POSIX_EXTENDED         0x00000008u
+#define PCRE2_CONVERT_GLOB                   0x00000010u
+#define PCRE2_CONVERT_GLOB_NO_BACKSLASH      0x00000030u
+#define PCRE2_CONVERT_GLOB_NO_WILD_SEPARATOR 0x00000050u
+#define PCRE2_CONVERT_GLOB_NO_STARSTAR       0x00000090u
+#define PCRE2_CONVERT_GLOB_BASIC             0x000000f0u
 
 /* Newline and \R settings, for use in compile contexts. The newline values
 must be kept in step with values set in config.h and both sets must all be

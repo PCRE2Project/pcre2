@@ -400,11 +400,14 @@ typedef struct convertstruct {
 } convertstruct;
 
 static convertstruct convertlist[] = {
-  { "glob_basic",     PCRE2_CONVERT_GLOB_BASIC },
-  { "glob_bash",      PCRE2_CONVERT_GLOB_BASH },
-  { "posix_basic",    PCRE2_CONVERT_POSIX_BASIC },
-  { "posix_extended", PCRE2_CONVERT_POSIX_EXTENDED },
-  { "unset",          CONVERT_UNSET }};
+  { "glob",              PCRE2_CONVERT_GLOB },
+  { "glob_basic",        PCRE2_CONVERT_GLOB_BASIC },
+  { "glob_no_backslash", PCRE2_CONVERT_GLOB_NO_BACKSLASH }, 
+  { "glob_no_starstar",  PCRE2_CONVERT_GLOB_NO_STARSTAR }, 
+  { "glob_no_wild_separator", PCRE2_CONVERT_GLOB_NO_WILD_SEPARATOR }, 
+  { "posix_basic",       PCRE2_CONVERT_POSIX_BASIC },
+  { "posix_extended",    PCRE2_CONVERT_POSIX_EXTENDED },
+  { "unset",             CONVERT_UNSET }};
 
 #define convertlistcount (sizeof(convertlist)/sizeof(convertstruct))
 

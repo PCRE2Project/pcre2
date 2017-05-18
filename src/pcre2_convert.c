@@ -45,11 +45,12 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #include "pcre2_internal.h"
 
-#define TYPE_OPTIONS (PCRE2_CONVERT_GLOB_BASIC|PCRE2_CONVERT_GLOB_BASH| \
+#define TYPE_OPTIONS (PCRE2_CONVERT_GLOB| \
   PCRE2_CONVERT_POSIX_BASIC|PCRE2_CONVERT_POSIX_EXTENDED)
 
 #define ALL_OPTIONS (PCRE2_CONVERT_UTF|PCRE2_CONVERT_NO_UTF_CHECK| \
-  TYPE_OPTIONS)
+  PCRE2_CONVERT_GLOB_NO_BACKSLASH|PCRE2_CONVERT_GLOB_NO_WILD_SEPARATOR| \
+  PCRE2_CONVERT_GLOB_NO_STARSTAR|TYPE_OPTIONS)
 
 #define DUMMY_BUFFER_SIZE 100
 
@@ -1128,15 +1129,17 @@ for (i = 0; i < 2; i++)
 
   switch(pattype)
     {
-    case PCRE2_CONVERT_GLOB_BASIC:
+    case PCRE2_CONVERT_GLOB:
     rc = convert_glob(pattype, pattern, plength, utf, use_buffer, use_length,
       bufflenptr, dummyrun, ccontext);
     break;
 
+/*
     case PCRE2_CONVERT_GLOB_BASH:
     rc = convert_glob_bash(options, pattern, plength, utf, use_buffer, use_length,
       bufflenptr, dummyrun, ccontext);
     break;
+*/     
 
     case PCRE2_CONVERT_POSIX_BASIC:
     case PCRE2_CONVERT_POSIX_EXTENDED:
