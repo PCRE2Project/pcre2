@@ -359,6 +359,30 @@ No match
 /?a?\/?b?/
 (?s)\A[^/]a[^/]/[^/]b[^/]\z
 
+/[a\\b\c][]][-][\]\-]/
+(?s)\A(?!/)[a\\bc](?!/)[\]](?!/)[\-](?!/)[\]\-]\z
+
+/[^a\\b\c][!]][!-][^\]\-]/
+(?s)\A[^/a\\bc][^/\]][^/\-][^/\]\-]\z
+
+/[[:alpha:][:xdigit:][:word:]]/
+(?s)\A(?!/)[[:alpha:][:xdigit:][:word:]]\z
+
+/[[:alpha:/
+** Pattern conversion error at offset 9: missing terminating ] for character class
+
+/[[:alpha:]/
+** Pattern conversion error at offset 10: missing terminating ] for character class
+
+/[[:alphaa:]]/
+** Pattern conversion error at offset 11: unknown POSIX class name
+
+/[[:xdigi:]]/
+** Pattern conversion error at offset 10: unknown POSIX class name
+
+/[[:xdigit::]]/
+** Pattern conversion error at offset 10: missing terminating ] for character class
+
 
 #pattern convert=unset
 #pattern convert=posix_extended

@@ -58,7 +58,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #define ERROR_END_BACKSLASH 101
 #define ERROR_MISSING_SQUARE_BRACKET 106
 #define ERROR_MISSING_CLOSING_PARENTHESIS 114
-#define ERROR_TOO_DEEP_NESTING 119
+#define ERROR_UNKNOWN_POSIX_CLASS 130
 #define ERROR_NO_UNICODE 132
 
 /* Generated pattern fragments */
@@ -651,34 +651,34 @@ typedef struct pcre2_output_context {
 /* Write a character into the output.
 
 Arguments:
-  context        the bash glob context
+  out            output context
   chr            the next character
 */
 
 static void
-convert_glob_bash_write(pcre2_output_context *context, PCRE2_UCHAR chr)
+convert_glob_bash_write(pcre2_output_context *out, PCRE2_UCHAR chr)
 {
-context->output_size++;
+out->output_size++;
 
-if (context->output < context->output_end)
-  *context->output++ = chr;
+if (out->output < out->output_end)
+  *out->output++ = chr;
 }
 
 
 /* Write a string into the output.
 
 Arguments:
-  context        the bash glob context
-  length         length of context->out_str
+  out            output context
+  length         length of out->out_str
 */
 
 static void
-convert_glob_bash_write_str(pcre2_output_context *context, PCRE2_SIZE length)
+convert_glob_bash_write_str(pcre2_output_context *out, PCRE2_SIZE length)
 {
-uint8_t *out_str = context->out_str;
-PCRE2_UCHAR *output = context->output;
-PCRE2_SPTR output_end = context->output_end;
-PCRE2_SIZE output_size = context->output_size;
+uint8_t *out_str = out->out_str;
+PCRE2_UCHAR *output = out->output;
+PCRE2_SPTR output_end = out->output_end;
+PCRE2_SIZE output_size = out->output_size;
 
 do
   {
@@ -689,17 +689,219 @@ do
   }
 while (--length != 0);
 
-context->output = output;
-context->output_size = output_size;
+out->output = output;
+out->output_size = output_size;
+}
+
+
+/* Parse a posix class.
+
+Arguments:
+  from           starting point of scanning the range
+  pattern_end    end of pattern
+  out            output context
+
+Returns:      TRUE => success
+             FALSE => malformed class
+*/
+
+static int
+convert_glob_bash_parse_class(PCRE2_SPTR *from, PCRE2_SPTR pattern_end,
+  pcre2_output_context *out)
+{
+static const char *posix_classes = "alnum:alpha:ascii:blank:cntrl:digit:"
+  "graph:lower:print:punct:space:upper:word:xdigit:";
+PCRE2_SPTR pattern = *from;
+PCRE2_SPTR start;
+const char *class_ptr;
+PCRE2_UCHAR c;
+
+out->out_str[0] = CHAR_LEFT_SQUARE_BRACKET;
+out->out_str[1] = CHAR_COLON;
+convert_glob_bash_write_str(out, 2);
+
+while (TRUE)
+  {
+  if (pattern >= pattern_end)
+    {
+    *from = pattern;
+    return ERROR_MISSING_SQUARE_BRACKET;
+    }
+
+  c = *pattern++;
+
+  if (c == CHAR_COLON && pattern < pattern_end &&
+      *pattern == CHAR_RIGHT_SQUARE_BRACKET)
+    {
+      break;
+    }
+
+  if (c < CHAR_a || c > CHAR_z)
+    {
+    /* All POSIX class is composed of lowercase characters */
+    *from = pattern;
+    return ERROR_MISSING_SQUARE_BRACKET;
+    }
+
+  convert_glob_bash_write(out, c);
+  }
+
+start = *from;
+*from = pattern + 1;
+class_ptr = posix_classes;
+
+while (TRUE)
+  {
+  if (*class_ptr == CHAR_NULL) return ERROR_UNKNOWN_POSIX_CLASS;
+
+  pattern = start;
+
+  while (*pattern == (PCRE2_UCHAR) *class_ptr)
+    {
+    if (*pattern == CHAR_COLON)
+      {
+      out->out_str[0] = CHAR_COLON;
+      out->out_str[1] = CHAR_RIGHT_SQUARE_BRACKET;
+      convert_glob_bash_write_str(out, 2);
+      return 0;
+      }
+    pattern++;
+    class_ptr++;
+    }
+
+  while (*class_ptr != CHAR_COLON) class_ptr++;
+  class_ptr++;
+  }
+}
+
+
+/* Parse a range of characters.
+
+Arguments:
+  from           starting point of scanning the range
+  pattern_end    end of pattern
+  out            output context
+  separator      glob separator
+
+Returns:         0 => success
+                !0 => error code
+*/
+
+static int
+convert_glob_bash_parse_range(PCRE2_SPTR *from, PCRE2_SPTR pattern_end,
+  pcre2_output_context *out, PCRE2_UCHAR separator)
+{
+PCRE2_SPTR pattern = *from;
+PCRE2_UCHAR c;
+int result, len;
+
+if (pattern >= pattern_end)
+  {
+  *from = pattern;
+  return ERROR_MISSING_SQUARE_BRACKET;
+  }
+
+c = *pattern;
+
+if (c == CHAR_EXCLAMATION_MARK
+    || c == CHAR_CIRCUMFLEX_ACCENT)
+  {
+  out->out_str[0] = CHAR_LEFT_SQUARE_BRACKET;
+  out->out_str[1] = CHAR_CIRCUMFLEX_ACCENT;
+  len = 2;
+  }
+else
+  {
+  out->out_str[0] = CHAR_LEFT_PARENTHESIS;
+  out->out_str[1] = CHAR_QUESTION_MARK;
+  out->out_str[2] = CHAR_EXCLAMATION_MARK;
+  len = 3;
+  }
+
+if (separator < 128 && strchr(pcre2_escaped_literals, separator) != NULL)
+  {
+  out->out_str[len] = CHAR_BACKSLASH;
+  len++;
+  }
+
+convert_glob_bash_write_str(out, len);
+convert_glob_bash_write(out, separator);
+
+if (c == CHAR_EXCLAMATION_MARK
+    || c == CHAR_CIRCUMFLEX_ACCENT)
+  {
+  pattern++;
+  if (pattern >= pattern_end)
+    {
+    *from = pattern;
+    return ERROR_MISSING_SQUARE_BRACKET;
+    }
+  c = *pattern;
+  }
+else
+  {
+  out->out_str[0] = CHAR_RIGHT_PARENTHESIS;
+  out->out_str[1] = CHAR_LEFT_SQUARE_BRACKET;
+  convert_glob_bash_write_str(out, 2);
+  }
+
+if (c == CHAR_MINUS || c == CHAR_RIGHT_SQUARE_BRACKET)
+  {
+  convert_glob_bash_write(out, CHAR_BACKSLASH);
+  convert_glob_bash_write(out, c);
+  pattern++;
+  }
+
+while (pattern < pattern_end)
+  {
+  c = *pattern++;
+
+  if (c == CHAR_RIGHT_SQUARE_BRACKET)
+    {
+    convert_glob_bash_write(out, c);
+    *from = pattern;
+    return 0;
+    }
+
+  if (c == CHAR_LEFT_SQUARE_BRACKET && pattern < pattern_end &&
+      *pattern == CHAR_COLON)
+    {
+    *from = pattern + 1;
+
+    result = convert_glob_bash_parse_class(from, pattern_end, out);
+    if (result != 0) return result;
+
+    pattern = *from;
+    continue;
+    }
+
+  if (c == CHAR_BACKSLASH)
+    {
+    if (pattern >= pattern_end)
+      {
+      *from = pattern;
+      return ERROR_END_BACKSLASH;
+      }
+    c = *pattern++;
+    }
+
+  if (c == CHAR_LEFT_SQUARE_BRACKET || c == CHAR_RIGHT_SQUARE_BRACKET ||
+      c == CHAR_BACKSLASH || c == CHAR_MINUS)
+    convert_glob_bash_write(out, CHAR_BACKSLASH);
+
+  convert_glob_bash_write(out, c);
+  }
+
+*from = pattern;
+return ERROR_MISSING_SQUARE_BRACKET;
 }
 
 
 /* Prints a wildcard into the output.
 
 Arguments:
-  context           the bash glob context
-  separator         glob separator
-  after_sep         whether the wildcard is right after a separator
+  out            output context
+  separator      glob separator
 */
 
 static void
@@ -711,7 +913,7 @@ int len = 2;
 out->out_str[0] = CHAR_LEFT_SQUARE_BRACKET;
 out->out_str[1] = CHAR_CIRCUMFLEX_ACCENT;
 
-if (separator == CHAR_BACKSLASH)
+if (separator < 128 && strchr(pcre2_escaped_literals, separator) != NULL)
   {
   out->out_str[2] = CHAR_BACKSLASH;
   len = 3;
@@ -749,8 +951,8 @@ convert_glob_bash(uint32_t options, PCRE2_SPTR pattern, PCRE2_SIZE plength,
 pcre2_output_context out;
 PCRE2_SPTR pattern_start = pattern;
 PCRE2_SPTR pattern_end = pattern + plength;
-int result;
 PCRE2_UCHAR c;
+int result;
 
 /* Initialize default for error offset as end of input. */
 out.output = use_buffer;
@@ -797,6 +999,14 @@ while (pattern < pattern_end)
   if (c == CHAR_QUESTION_MARK)
     {
     convert_glob_bash_wildcard(&out, ccontext->glob_separator);
+    continue;
+    }
+
+  if (c == CHAR_LEFT_SQUARE_BRACKET)
+    {
+    result = convert_glob_bash_parse_range(&pattern, pattern_end,
+      &out, ccontext->glob_separator);
+    if (result != 0) break;
     continue;
     }
 

@@ -228,6 +228,22 @@
 
 /?a?\/?b?/
 
+/[a\\b\c][]][-][\]\-]/
+
+/[^a\\b\c][!]][!-][^\]\-]/
+
+/[[:alpha:][:xdigit:][:word:]]/
+
+/[[:alpha:/
+
+/[[:alpha:]/
+
+/[[:alphaa:]]/
+
+/[[:xdigi:]]/
+
+/[[:xdigit::]]/
+
 
 #pattern convert=unset
 #pattern convert=posix_extended
