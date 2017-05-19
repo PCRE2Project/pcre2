@@ -359,282 +359,6 @@ return 0;
 }
 
 
-
-/*************************************************
-*           Convert a glob pattern               *
-*************************************************/
-
-/* For a basic glob, only * ? and [...] are recognized.
-
-Arguments:
-  pattype        the pattern type
-  pattern        the pattern
-  plength        length in code units
-  utf            TRUE if UTF
-  use_buffer     where to put the output
-  use_length     length of use_buffer
-  bufflenptr     where to put the used length
-  dummyrun       TRUE if a dummy run
-  ccontext       the convert context
-
-Returns:         0 => success
-                !0 => error code
-*/
-
-static int
-convert_glob(uint32_t pattype, PCRE2_SPTR pattern, PCRE2_SIZE plength,
-  BOOL utf, PCRE2_UCHAR *use_buffer, PCRE2_SIZE use_length,
-  PCRE2_SIZE *bufflenptr, BOOL dummyrun, pcre2_convert_context *ccontext)
-{
-char *s;
-char not_sep_class[8];
-char lookbehind_not_sep[12];
-PCRE2_SPTR glob = pattern;
-PCRE2_UCHAR *p = use_buffer;
-PCRE2_UCHAR *pp = p;
-PCRE2_UCHAR *endp = p + use_length - 1;  /* Allow for trailing zero */
-PCRE2_SIZE convlength = 0;
-uint32_t range_start = 0;
-uint32_t range_state = RANGE_NOT_STARTED;
-uint32_t posix_class_state = POSIX_CLASS_NOT_STARTED;
-BOOL inclass = FALSE;
-BOOL nextisliteral = FALSE;
-BOOL endswith = FALSE;
-BOOL sep_in_range = FALSE;
-
-(void)utf;  /* Not used when Unicode not supported */
-(void)pattype; /* Pro tem */
-
-/* Set up a string containing [^<sep>] where <sep> is the possibly escaped part
-separator. */
-
-s = not_sep_class;
-*s++ = CHAR_LEFT_SQUARE_BRACKET;
-*s++ = CHAR_CIRCUMFLEX_ACCENT;
-if (ccontext->glob_separator == CHAR_BACKSLASH) *s++ = CHAR_BACKSLASH;
-*s++ = ccontext->glob_separator;
-*s++ = CHAR_RIGHT_SQUARE_BRACKET;
-*s++ = 0;
-
-/* Set up a string containing (?<!<sep>) where <sep> is the possibly escaped
-part separator. */
-
-s = lookbehind_not_sep;
-*s++ = CHAR_LEFT_PARENTHESIS;
-*s++ = CHAR_QUESTION_MARK;
-*s++ = CHAR_LESS_THAN_SIGN;
-*s++ = CHAR_EXCLAMATION_MARK;
-if (ccontext->glob_separator == CHAR_BACKSLASH) *s++ = CHAR_BACKSLASH;
-*s++ = ccontext->glob_separator;
-*s++ = CHAR_RIGHT_PARENTHESIS;
-*s++ = 0;
-
-/* Initialize default for error offset as end of input. */
-
-*bufflenptr = plength;
-
-/* If the pattern starts with * and contains at least one more character but no
-other asterisks or part separators, it means "ends with what follows". This can
-be optimized. */
-
-if (plength > 1 && *glob == CHAR_ASTERISK)
-  {
-  PCRE2_SPTR pt;
-  for (pt = glob + plength - 1; pt > glob; pt--)
-    if (*pt == ccontext->glob_separator || *pt == CHAR_ASTERISK) break;
-  endswith = pt == glob;
-  if (endswith) PUTCHARS(STR_QUERY_s);
-  }
-
-/* Output starts with \A and ends with \z and a binary zero. */
-
-PUTCHARS(STR_BACKSLASH_A);
-
-/* If the pattern starts with a wildcard, it must not match a subject that 
-starts with a dot. */
-
-if (plength > 1 && 
-    (*glob == CHAR_ASTERISK || *glob == CHAR_QUESTION_MARK ||
-     *glob == CHAR_LEFT_SQUARE_BRACKET))
-  PUTCHARS(STR_LOOKAHEAD_NOT_DOT);
-
-/* Now scan the input */
-
-while (plength > 0)
-  {
-  uint32_t c, sc;
-  int clength = 1;
-
-  /* Add in the length of the last item, then, if in the dummy run, pull the
-  pointer back to the start of the (temporary) buffer and then remember the
-  start of the next item. */
-
-  convlength += p - pp;
-  if (dummyrun) p = use_buffer;
-  pp = p;
-
-  /* Pick up the next character */
-
-#ifndef SUPPORT_UNICODE
-  c = *glob;
-#else
-  GETCHARLENTEST(c, glob, clength);
-#endif
-  glob += clength;
-  plength -= clength;
-
-  sc = nextisliteral? 0 : c;
-  nextisliteral = FALSE;
-
-  /* Handle a character within a class. */
-
-  if (inclass)
-    {
-    /* A literal part separator is a syntax error */
-      
-    if (c == ccontext->glob_separator)
-      {
-      *bufflenptr = glob - pattern - 1;
-      return PCRE2_ERROR_CONVERT_SYNTAX;
-      }
-      
-    /* At the end of the class, add a lookbehind for not the separator if any
-    range in the class includes the separator. */ 
-          
-    if (c == CHAR_RIGHT_SQUARE_BRACKET) 
-      {
-      PUTCHARS(STR_RIGHT_SQUARE_BRACKET); 
-      if (sep_in_range) PUTCHARS(lookbehind_not_sep);
-      inclass = FALSE;
-      }
-      
-    /* Not the end of the class */
-       
-    else 
-      {
-      switch (posix_class_state)
-        {
-        case POSIX_CLASS_STARTED:
-        if (c <= 127 && islower(c)) break;  /* Remain in started state */
-        posix_class_state = POSIX_CLASS_NOT_STARTED;       
-        if (c == CHAR_COLON  && plength > 0 && 
-            *glob == CHAR_RIGHT_SQUARE_BRACKET)
-          {
-          PUTCHARS(STR_COLON_RIGHT_SQUARE_BRACKET);
-          plength--; 
-          glob++;
-          continue;    /* With next character after :] */ 
-          }
-        /* Fall through */  
-          
-        case POSIX_CLASS_NOT_STARTED:  
-        if (c == CHAR_LEFT_SQUARE_BRACKET) 
-          posix_class_state = POSIX_CLASS_STARTING;
-        break;
-        
-        case POSIX_CLASS_STARTING:
-        if (c == CHAR_COLON) posix_class_state = POSIX_CLASS_STARTED;
-        break;
-        }   
- 
-      if (range_state == RANGE_STARTING && c == CHAR_MINUS)
-        range_state = RANGE_STARTED;
-      else if (range_state == RANGE_STARTED)
-        { 
-        if (range_start <= ccontext->glob_separator &&
-            c >= ccontext->glob_separator)
-          sep_in_range = TRUE;   
-        range_state = RANGE_NOT_STARTED;
-        }
-      else
-        {      
-        range_state = RANGE_STARTING;
-        range_start = c; 
-        }
-         
-      if (c == CHAR_BACKSLASH) PUTCHARS(STR_BACKSLASH);
-      if (p + clength > endp) return PCRE2_ERROR_NOMEMORY;
-      memcpy(p, glob - clength, CU2BYTES(clength));
-      p += clength;
-      } 
-    }
-
-  /* Handle a character not within a class. */
-
-  else switch(sc)
-    {
-    case CHAR_ASTERISK:
-    if (endswith)
-      {
-      PUTCHARS(STR_DOT_STAR_LOOKBEHIND);
-      }
-    else
-      {
-      PUTCHARS(not_sep_class);
-      PUTCHARS(STR_ASTERISK);
-      }
-    break;
-
-    case CHAR_QUESTION_MARK:
-    PUTCHARS(not_sep_class);
-    break;
-
-    case CHAR_LEFT_SQUARE_BRACKET:
-    posix_class_state = POSIX_CLASS_NOT_STARTED; 
-    range_state = RANGE_NOT_STARTED; 
-    sep_in_range = FALSE;
-    inclass = TRUE;
-    PUTCHARS(STR_LEFT_SQUARE_BRACKET);
-
-    /* Handle ! and ] as first characters */
-
-    if (plength > 0)
-      {
-      if (*glob == CHAR_EXCLAMATION_MARK)
-        {
-        glob++;
-        plength--;
-        PUTCHARS(STR_CIRCUMFLEX_ACCENT);
-        }
-      if (plength > 0 && *glob == CHAR_RIGHT_SQUARE_BRACKET)
-        {
-        glob++;
-        plength--;
-        PUTCHARS(STR_RIGHT_SQUARE_BRACKET);
-        range_start = CHAR_RIGHT_SQUARE_BRACKET;
-        range_state = RANGE_STARTING;
-        }    
-      }
-    break;
-
-    case CHAR_BACKSLASH:
-    if (plength <= 0) return ERROR_END_BACKSLASH;
-    nextisliteral = TRUE;
-    break;
-
-    default:
-    if (c < 128 && strchr(pcre2_escaped_literals, c) != NULL)
-      {
-      PUTCHARS(STR_BACKSLASH);
-      }
-    if (p + clength > endp) return PCRE2_ERROR_NOMEMORY;
-    memcpy(p, glob - clength, CU2BYTES(clength));
-    p += clength;
-    break;
-    }
-  }
-
-if (inclass) return ERROR_MISSING_SQUARE_BRACKET;
-
-if (endswith) PUTCHARS(STR_RIGHT_PARENTHESIS);
-PUTCHARS(STR_BACKSLASH_z);
-convlength += p - pp;        /* Final segment */
-*bufflenptr = convlength;
-*p++ = 0;
-return 0;
-}
-
-
 /*************************************************
 *           Convert a glob pattern               *
 *************************************************/
@@ -657,7 +381,7 @@ Arguments:
 */
 
 static void
-convert_glob_bash_write(pcre2_output_context *out, PCRE2_UCHAR chr)
+convert_glob_write(pcre2_output_context *out, PCRE2_UCHAR chr)
 {
 out->output_size++;
 
@@ -674,7 +398,7 @@ Arguments:
 */
 
 static void
-convert_glob_bash_write_str(pcre2_output_context *out, PCRE2_SIZE length)
+convert_glob_write_str(pcre2_output_context *out, PCRE2_SIZE length)
 {
 uint8_t *out_str = out->out_str;
 PCRE2_UCHAR *output = out->output;
@@ -707,7 +431,7 @@ Returns:      TRUE => success
 */
 
 static int
-convert_glob_bash_parse_class(PCRE2_SPTR *from, PCRE2_SPTR pattern_end,
+convert_glob_parse_class(PCRE2_SPTR *from, PCRE2_SPTR pattern_end,
   pcre2_output_context *out)
 {
 static const char *posix_classes = "alnum:alpha:ascii:blank:cntrl:digit:"
@@ -719,7 +443,7 @@ PCRE2_UCHAR c;
 
 out->out_str[0] = CHAR_LEFT_SQUARE_BRACKET;
 out->out_str[1] = CHAR_COLON;
-convert_glob_bash_write_str(out, 2);
+convert_glob_write_str(out, 2);
 
 while (TRUE)
   {
@@ -744,7 +468,7 @@ while (TRUE)
     return ERROR_MISSING_SQUARE_BRACKET;
     }
 
-  convert_glob_bash_write(out, c);
+  convert_glob_write(out, c);
   }
 
 start = *from;
@@ -763,7 +487,7 @@ while (TRUE)
       {
       out->out_str[0] = CHAR_COLON;
       out->out_str[1] = CHAR_RIGHT_SQUARE_BRACKET;
-      convert_glob_bash_write_str(out, 2);
+      convert_glob_write_str(out, 2);
       return 0;
       }
     pattern++;
@@ -783,14 +507,15 @@ Arguments:
   pattern_end    end of pattern
   out            output context
   separator      glob separator
+  with_escape    backslash is needed before separator
 
 Returns:         0 => success
                 !0 => error code
 */
 
 static int
-convert_glob_bash_parse_range(PCRE2_SPTR *from, PCRE2_SPTR pattern_end,
-  pcre2_output_context *out, PCRE2_UCHAR separator)
+convert_glob_parse_range(PCRE2_SPTR *from, PCRE2_SPTR pattern_end,
+  pcre2_output_context *out, PCRE2_UCHAR separator, BOOL with_escape)
 {
 PCRE2_SPTR pattern = *from;
 PCRE2_UCHAR c;
@@ -819,14 +544,15 @@ else
   len = 3;
   }
 
-if (separator < 128 && strchr(pcre2_escaped_literals, separator) != NULL)
+if (with_escape)
   {
   out->out_str[len] = CHAR_BACKSLASH;
   len++;
   }
 
-convert_glob_bash_write_str(out, len);
-convert_glob_bash_write(out, separator);
+out->out_str[len] = (uint8_t) separator;
+
+convert_glob_write_str(out, len + 1);
 
 if (c == CHAR_EXCLAMATION_MARK
     || c == CHAR_CIRCUMFLEX_ACCENT)
@@ -843,13 +569,13 @@ else
   {
   out->out_str[0] = CHAR_RIGHT_PARENTHESIS;
   out->out_str[1] = CHAR_LEFT_SQUARE_BRACKET;
-  convert_glob_bash_write_str(out, 2);
+  convert_glob_write_str(out, 2);
   }
 
 if (c == CHAR_MINUS || c == CHAR_RIGHT_SQUARE_BRACKET)
   {
-  convert_glob_bash_write(out, CHAR_BACKSLASH);
-  convert_glob_bash_write(out, c);
+  convert_glob_write(out, CHAR_BACKSLASH);
+  convert_glob_write(out, c);
   pattern++;
   }
 
@@ -859,42 +585,71 @@ while (pattern < pattern_end)
 
   if (c == CHAR_RIGHT_SQUARE_BRACKET)
     {
-    convert_glob_bash_write(out, c);
+    convert_glob_write(out, c);
     *from = pattern;
     return 0;
     }
 
-  if (c == CHAR_LEFT_SQUARE_BRACKET && pattern < pattern_end &&
-      *pattern == CHAR_COLON)
+  if (pattern >= pattern_end) break;
+
+  if (c == CHAR_LEFT_SQUARE_BRACKET && *pattern == CHAR_COLON)
     {
     *from = pattern + 1;
 
-    result = convert_glob_bash_parse_class(from, pattern_end, out);
+    result = convert_glob_parse_class(from, pattern_end, out);
     if (result != 0) return result;
 
     pattern = *from;
-    continue;
-    }
 
-  if (c == CHAR_BACKSLASH)
-    {
-    if (pattern >= pattern_end)
-      {
-      *from = pattern;
-      return ERROR_END_BACKSLASH;
-      }
-    c = *pattern++;
+    /* A dash after a character class is a normal character. */
+    if (pattern >= pattern_end || *pattern != CHAR_MINUS)
+      continue;
+
+    c = CHAR_MINUS;
+    pattern++;
     }
+  else if (c == CHAR_MINUS)
+    {
+    convert_glob_write(out, CHAR_MINUS);
+    c = *pattern++;
+
+    if (c == CHAR_BACKSLASH)
+      {
+      if (pattern >= pattern_end) break;
+        c = *pattern++;
+      }
+    }
+  else if (c == CHAR_BACKSLASH)
+    c = *pattern++;
 
   if (c == CHAR_LEFT_SQUARE_BRACKET || c == CHAR_RIGHT_SQUARE_BRACKET ||
       c == CHAR_BACKSLASH || c == CHAR_MINUS)
-    convert_glob_bash_write(out, CHAR_BACKSLASH);
+    convert_glob_write(out, CHAR_BACKSLASH);
 
-  convert_glob_bash_write(out, c);
+  convert_glob_write(out, c);
   }
 
 *from = pattern;
 return ERROR_MISSING_SQUARE_BRACKET;
+}
+
+
+/* Prints the separator into the output.
+
+Arguments:
+  out            output context
+  separator      glob separator
+  with_escape    backslash is needed before separator
+*/
+
+static void
+convert_glob_print_separator(pcre2_output_context *out,
+  PCRE2_UCHAR separator, BOOL with_escape)
+{
+if (with_escape)
+  convert_glob_write(out, CHAR_BACKSLASH);
+
+convert_glob_write(out, separator);
 }
 
 
@@ -903,27 +658,42 @@ return ERROR_MISSING_SQUARE_BRACKET;
 Arguments:
   out            output context
   separator      glob separator
+  with_escape    backslash is needed before separator
 */
 
 static void
-convert_glob_bash_wildcard(pcre2_output_context *out,
-  PCRE2_UCHAR separator)
+convert_glob_print_wildcard(pcre2_output_context *out,
+  PCRE2_UCHAR separator, BOOL with_escape)
 {
-int len = 2;
-
 out->out_str[0] = CHAR_LEFT_SQUARE_BRACKET;
 out->out_str[1] = CHAR_CIRCUMFLEX_ACCENT;
+convert_glob_write_str(out, 2);
 
-if (separator < 128 && strchr(pcre2_escaped_literals, separator) != NULL)
-  {
-  out->out_str[2] = CHAR_BACKSLASH;
-  len = 3;
-  }
+convert_glob_print_separator(out, separator, with_escape);
 
-convert_glob_bash_write_str(out, len);
+convert_glob_write(out, CHAR_RIGHT_SQUARE_BRACKET);
+}
 
-convert_glob_bash_write(out, separator);
-convert_glob_bash_write(out, CHAR_RIGHT_SQUARE_BRACKET);
+
+/* Prints a (*COMMIT) into the output.
+
+Arguments:
+  out            output context
+*/
+
+static void
+convert_glob_print_commit(pcre2_output_context *out)
+{
+out->out_str[0] = CHAR_LEFT_PARENTHESIS;
+out->out_str[1] = CHAR_ASTERISK;
+out->out_str[2] = CHAR_C;
+out->out_str[3] = CHAR_O;
+out->out_str[4] = CHAR_M;
+out->out_str[5] = CHAR_M;
+out->out_str[6] = CHAR_I;
+out->out_str[7] = CHAR_T;
+convert_glob_write_str(out, 8);
+convert_glob_write(out, CHAR_RIGHT_PARENTHESIS);
 }
 
 
@@ -945,15 +715,26 @@ Returns:         0 => success
 */
 
 static int
-convert_glob_bash(uint32_t options, PCRE2_SPTR pattern, PCRE2_SIZE plength,
+convert_glob(uint32_t options, PCRE2_SPTR pattern, PCRE2_SIZE plength,
   BOOL utf, PCRE2_UCHAR *use_buffer, PCRE2_SIZE use_length,
   PCRE2_SIZE *bufflenptr, BOOL dummyrun, pcre2_convert_context *ccontext)
 {
 pcre2_output_context out;
 PCRE2_SPTR pattern_start = pattern;
 PCRE2_SPTR pattern_end = pattern + plength;
+PCRE2_UCHAR separator = ccontext->glob_separator;
 PCRE2_UCHAR c;
-int result;
+BOOL with_escape, is_start;
+int result, len;
+
+if (separator >= 128)
+  {
+  /* Currently only ASCII separators are supported. */
+  *bufflenptr = 0;
+  return PCRE2_ERROR_CONVERT_SYNTAX;
+  }
+
+with_escape = strchr(pcre2_escaped_literals, separator) != NULL;
 
 /* Initialize default for error offset as end of input. */
 out.output = use_buffer;
@@ -964,9 +745,15 @@ out.out_str[0] = CHAR_LEFT_PARENTHESIS;
 out.out_str[1] = CHAR_QUESTION_MARK;
 out.out_str[2] = CHAR_s;
 out.out_str[3] = CHAR_RIGHT_PARENTHESIS;
-out.out_str[4] = CHAR_BACKSLASH;
-out.out_str[5] = CHAR_A;
-convert_glob_bash_write_str(&out, 6);
+convert_glob_write_str(&out, 4);
+
+if (pattern + 1 >= pattern_end ||
+    pattern[0] != CHAR_ASTERISK || pattern[1] != CHAR_ASTERISK)
+  {
+  out.out_str[0] = CHAR_BACKSLASH;
+  out.out_str[1] = CHAR_A;
+  convert_glob_write_str(&out, 2);
+  }
 
 result = 0;
 
@@ -976,37 +763,112 @@ while (pattern < pattern_end)
 
   if (c == CHAR_ASTERISK)
     {
-    if (pattern != pattern_start + 1)
+    if (pattern < pattern_end && *pattern == CHAR_ASTERISK)
       {
+      is_start = pattern == pattern_start + 1;
+
+      if (!is_start && pattern[-2] != separator)
+        {
+        result = PCRE2_ERROR_CONVERT_SYNTAX;
+        break;
+        }
+
+      do pattern++; while (pattern < pattern_end &&
+                           *pattern == CHAR_ASTERISK);
+
+      if (pattern >= pattern_end)
+        {
+        convert_glob_write(&out, CHAR_NULL);
+
+        if (!dummyrun &&
+            out.output_size != (PCRE2_SIZE) (out.output - use_buffer))
+          {
+          result = PCRE2_ERROR_NOMEMORY;
+          break;
+          }
+        *bufflenptr = out.output_size - 1;
+        return 0;
+        }
+
+      if (*pattern == CHAR_BACKSLASH)
+        {
+        pattern++;
+        if (pattern >= pattern_end)
+          {
+          result = PCRE2_ERROR_CONVERT_SYNTAX;
+          break;
+          }
+        }
+
+      if (*pattern != separator)
+        {
+        result = PCRE2_ERROR_CONVERT_SYNTAX;
+        break;
+        }
+
+      pattern++;
+
+      if (is_start)
+        {
+        out.out_str[0] = CHAR_LEFT_PARENTHESIS;
+        out.out_str[1] = CHAR_QUESTION_MARK;
+        out.out_str[2] = CHAR_COLON;
+        out.out_str[3] = CHAR_BACKSLASH;
+        out.out_str[4] = CHAR_A;
+        out.out_str[5] = CHAR_VERTICAL_LINE;
+        convert_glob_write_str(&out, 6);
+
+        convert_glob_print_wildcard(&out, separator, with_escape);
+        convert_glob_write(&out, CHAR_RIGHT_PARENTHESIS);
+        continue;
+        }
+
+      convert_glob_print_commit(&out);
+
       out.out_str[0] = CHAR_LEFT_PARENTHESIS;
-      out.out_str[1] = CHAR_ASTERISK;
-      out.out_str[2] = CHAR_C;
-      out.out_str[3] = CHAR_O;
-      out.out_str[4] = CHAR_M;
-      out.out_str[5] = CHAR_M;
-      out.out_str[6] = CHAR_I;
-      out.out_str[7] = CHAR_T;
-      convert_glob_bash_write_str(&out, 8);
-      convert_glob_bash_write(&out, CHAR_RIGHT_PARENTHESIS);
+      out.out_str[1] = CHAR_QUESTION_MARK;
+      out.out_str[2] = CHAR_COLON;
+      out.out_str[3] = CHAR_DOT;
+      out.out_str[4] = CHAR_ASTERISK;
+      out.out_str[5] = CHAR_QUESTION_MARK;
+      len = 6;
+
+      if (with_escape)
+        {
+        out.out_str[6] = CHAR_BACKSLASH;
+        len = 7;
+        }
+
+      convert_glob_write_str(&out, len);
+
+      out.out_str[0] = (uint8_t) separator;
+      out.out_str[1] = CHAR_RIGHT_PARENTHESIS;
+      out.out_str[2] = CHAR_QUESTION_MARK;
+      out.out_str[3] = CHAR_QUESTION_MARK;
+      convert_glob_write_str(&out, 4);
+      continue;
       }
 
-    convert_glob_bash_wildcard(&out, ccontext->glob_separator);
+    if (pattern != pattern_start + 1)
+      convert_glob_print_commit(&out);
+
+    convert_glob_print_wildcard(&out, separator, with_escape);
     out.out_str[0] = CHAR_ASTERISK;
     out.out_str[1] = CHAR_QUESTION_MARK;
-    convert_glob_bash_write_str(&out, 2);
+    convert_glob_write_str(&out, 2);
     continue;
     }
 
   if (c == CHAR_QUESTION_MARK)
     {
-    convert_glob_bash_wildcard(&out, ccontext->glob_separator);
+    convert_glob_print_wildcard(&out, separator, with_escape);
     continue;
     }
 
   if (c == CHAR_LEFT_SQUARE_BRACKET)
     {
-    result = convert_glob_bash_parse_range(&pattern, pattern_end,
-      &out, ccontext->glob_separator);
+    result = convert_glob_parse_range(&pattern, pattern_end,
+      &out, separator, with_escape);
     if (result != 0) break;
     continue;
     }
@@ -1022,9 +884,9 @@ while (pattern < pattern_end)
     }
 
   if (c < 128 && strchr(pcre2_escaped_literals, c) != NULL)
-    convert_glob_bash_write(&out, CHAR_BACKSLASH);
+    convert_glob_write(&out, CHAR_BACKSLASH);
 
-  convert_glob_bash_write(&out, c);
+  convert_glob_write(&out, c);
   }
 
 if (result == 0)
@@ -1032,9 +894,9 @@ if (result == 0)
   out.out_str[0] = CHAR_BACKSLASH;
   out.out_str[1] = CHAR_z;
   out.out_str[2] = CHAR_NULL;
-  convert_glob_bash_write_str(&out, 3);
+  convert_glob_write_str(&out, 3);
 
-  if (!dummyrun && out.output_size != (out.output - use_buffer))
+  if (!dummyrun && out.output_size != (PCRE2_SIZE) (out.output - use_buffer))
     result = PCRE2_ERROR_NOMEMORY;
   }
 
@@ -1130,16 +992,9 @@ for (i = 0; i < 2; i++)
   switch(pattype)
     {
     case PCRE2_CONVERT_GLOB:
-    rc = convert_glob(pattype, pattern, plength, utf, use_buffer, use_length,
+    rc = convert_glob(options, pattern, plength, utf, use_buffer, use_length,
       bufflenptr, dummyrun, ccontext);
     break;
-
-/*
-    case PCRE2_CONVERT_GLOB_BASH:
-    rc = convert_glob_bash(options, pattern, plength, utf, use_buffer, use_length,
-      bufflenptr, dummyrun, ccontext);
-    break;
-*/     
 
     case PCRE2_CONVERT_POSIX_BASIC:
     case PCRE2_CONVERT_POSIX_EXTENDED:

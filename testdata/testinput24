@@ -13,10 +13,6 @@
 
 /abc/posix
 
-# More than one glob type is an error.
-
-/abc/convert=glob_bash
-
 # Separator must be / \ or .
 
 /a*b/convert_glob_separator=%
@@ -213,12 +209,7 @@
 
 /a*b/convert_glob_separator=/
 
-#pattern convert=unset
-#pattern convert=glob_bash,convert_glob_separator=/
-
 # Non control character checking
-
-//
 
 /A\B\\C\D/
 
@@ -244,6 +235,13 @@
 
 /[[:xdigit::]]/
 
+/****/
+
+/**\/abc/
+
+/abc\/**/
+
+/abc\/**\/abc/
 
 #pattern convert=unset
 #pattern convert=posix_extended

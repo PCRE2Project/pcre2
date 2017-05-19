@@ -14,11 +14,6 @@
 /abc/posix
 ** The convert and posix modifiers are mutually exclusive
 
-# More than one glob type is an error.
-
-/abc/convert=glob_bash
-** Pattern conversion error at offset 0: bad option value
-
 # Separator must be / \ or .
 
 /a*b/convert_glob_separator=%
@@ -53,7 +48,7 @@
 # Tests from the gitwildmatch list, with some additions
 
 /foo/
-\Afoo\z
+(?s)\Afoo\z
     foo
  0: foo
 /= Expect no match
@@ -62,7 +57,7 @@ No match
 No match
 
 //
-\A\z
+(?s)\A\z
     \
  0: 
 
@@ -75,14 +70,14 @@ No match
 No match
 
 /*/
-\A[^/]*\z
+(?s)\A[^\/]*?\z
     foo
  0: foo
     \
  0: 
 
 /f*/
-\Af[^/]*\z
+(?s)\Af(*COMMIT)[^\/]*?\z
     foo
  0: foo
     f
@@ -116,18 +111,18 @@ No match
  0: aaaaaaabababab
 
 /foo\*/
-\Afoo\*\z
+(?s)\Afoo\*\z
     foo*
  0: foo*
 
 /foo\*bar/
-\Afoo\*bar\z
+(?s)\Afoo\*bar\z
 \= Expect no match
     foobar
 No match
 
 /f\\oo/
-\Af\\oo\z
+(?s)\Af\\oo\z
     f\\oo
  0: f\oo
 
@@ -339,13 +334,7 @@ No match
 /a*b/convert_glob_separator=/
 \Aa[^/]*b\z
 
-#pattern convert=unset
-#pattern convert=glob_bash,convert_glob_separator=/
-
 # Non control character checking
-
-//
-(?s)\A\z
 
 /A\B\\C\D/
 (?s)\AAB\\CD\z
@@ -383,6 +372,17 @@ No match
 /[[:xdigit::]]/
 ** Pattern conversion error at offset 10: missing terminating ] for character class
 
+/****/
+(?s)
+
+/**\/abc/
+(?s)(?:\A|[^/])abc\z
+
+/abc\/**/
+(?s)\Aabc/
+
+/abc\/**\/abc/
+(?s)\Aabc/(*COMMIT)(?:.*?/)??abc\z
 
 #pattern convert=unset
 #pattern convert=posix_extended
