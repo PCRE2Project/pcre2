@@ -22,26 +22,26 @@
 # Can't have separator in a class
 
 "[ab/cd]"
-** Pattern conversion error at offset 3: invalid syntax
+(?s)\A(?!/)[ab/cd]\z
 
 "[,-/]"
-** Pattern conversion error at offset 3: invalid syntax
+(?s)\A(?!/)[,-/]\z
 
 /[ab/
 ** Pattern conversion error at offset 3: missing terminating ] for character class
 
 # Length check
 
-/abc/convert_length=7
+/abc/convert_length=11
 ** Pattern conversion error at offset 3: no more memory
 
-/abc/convert_length=8
-\Aabc\z
+/abc/convert_length=12
+(?s)\Aabc\z
 
 # Now some actual tests
 
 /a?b[]xy]*c/
-\Aa[^/]b[]xy][^/]*c\z
+(?s)\Aa[^/]b(?!/)[\]xy](*COMMIT)[^/]*?c\z
     azb]1234c
  0: azb]1234c
 
@@ -62,7 +62,7 @@ No match
  0: 
 
 /???/
-\A(?!\.)[^/][^/][^/]\z
+(?s)\A[^/][^/][^/]\z
     foo
  0: foo
 \= Expect no match
@@ -70,21 +70,21 @@ No match
 No match
 
 /*/
-(?s)\A[^\/]*?\z
+(?s)\A[^/]*?\z
     foo
  0: foo
     \
  0: 
 
 /f*/
-(?s)\Af(*COMMIT)[^\/]*?\z
+(?s)\Af(*COMMIT)[^/]*?\z
     foo
  0: foo
     f
  0: f
 
 /*f/
-(?s)\A(?!\.).*(?<=f)\z
+(?s)\A[^/]*?f\z
     oof
  0: oof
 \= Expect no match
@@ -92,7 +92,7 @@ No match
 No match
 
 /*foo*/
-\A(?!\.)[^/]*foo[^/]*\z
+(?s)\A[^/]*?foo(*COMMIT)[^/]*?\z
     foo
  0: foo
     food
@@ -101,12 +101,12 @@ No match
  0: aprilfool
 
 /*ob*a*r*/
-\A(?!\.)[^/]*ob[^/]*a[^/]*r[^/]*\z
+(?s)\A[^/]*?ob(*COMMIT)[^/]*?a(*COMMIT)[^/]*?r(*COMMIT)[^/]*?\z
     foobar
  0: foobar
 
 /*ab/
-(?s)\A(?!\.).*(?<=ab)\z
+(?s)\A[^/]*?ab\z
     aaaaaaabababab
  0: aaaaaaabababab
 
@@ -127,48 +127,48 @@ No match
  0: f\oo
 
 /*[al]?/
-(?s)\A(?!\.).*(?<=[al][^/])\z
+(?s)\A[^/]*?(?!/)[al][^/]\z
     ball
  0: ball
 
 /[ten]/
-\A(?!\.)[ten]\z
+(?s)\A(?!/)[ten]\z
 \= Expect no match
     ten
 No match
 
 /t[a-g]n/
-\At[a-g]n\z
+(?s)\At(?!/)[a-g]n\z
     ten
  0: ten
 
 /a[]]b/
-\Aa[]]b\z
+(?s)\Aa(?!/)[\]]b\z
     a]b
  0: a]b
-
-/a[]-]b/
-\Aa[]-]b\z
-    a-b
- 0: a-b
-    a]b
- 0: a]b
-\= Expect no match
-    aab
-No match
 
 /a[]a-]b/
-\Aa[]a-]b\z
+** Pattern conversion error at offset 7: missing terminating ] for character class
+
+/a[]-]b/
+** Pattern conversion error at offset 6: missing terminating ] for character class
+    a-b
+    a]b
+\= Expect no match
+    aab
+
+/a[]a-z]b/
+(?s)\Aa(?!/)[\]a-z]b\z
     aab
  0: aab
 
 /]/
-\A\]\z
+(?s)\A\]\z
     ]
  0: ]
 
 /t[!a-g]n/
-\At[^a-g]n\z
+(?s)\At[^/a-g]n\z
     ton
  0: ton
 \= Expect no match
@@ -176,12 +176,12 @@ No match
 No match
 
 '[[:alpha:]][[:digit:]][[:upper:]]'
-\A(?!\.)[[:alpha:]][[:digit:]][[:upper:]]\z
+(?s)\A(?!/)[[:alpha:]](?!/)[[:digit:]](?!/)[[:upper:]]\z
     a1B
  0: a1B
 
 '[[:digit:][:upper:][:space:]]'
-\A(?!\.)[[:digit:][:upper:][:space:]]\z
+(?s)\A(?!/)[[:digit:][:upper:][:space:]]\z
     A
  0: A
     1
@@ -195,7 +195,7 @@ No match
 No match
 
 '[a-c[:digit:]x-z]'
-\A(?!\.)[a-c[:digit:]x-z]\z
+(?s)\A(?!/)[a-c[:digit:]x-z]\z
     5
  0: 5
     b
@@ -209,11 +209,11 @@ No match
 # End of gitwildmatch tests
 
 /*.j?g/
-(?s)\A(?!\.).*(?<=\.j[^/]g)\z
+(?s)\A[^/]*?\.j[^/]g\z
     pic01.jpg
  0: pic01.jpg
     .jpg
-No match
+ 0: .jpg
     pic02.jxg
  0: pic02.jxg
 \= Expect no match
@@ -221,7 +221,7 @@ No match
 No match
 
 /A[+-0]B/
-\AA[+-0](?<!/)B\z
+(?s)\AA(?!/)[+-0]B\z
     A+B
  0: A+B
     A.B
@@ -233,38 +233,38 @@ No match
 No match
 
 /*x?z/
-(?s)\A(?!\.).*(?<=x[^/]z)\z
+(?s)\A[^/]*?x[^/]z\z
     abc.xyz
  0: abc.xyz
 \= Expect no match
     .xyz
-No match
+ 0: .xyz
 
 /?x?z/
-\A(?!\.)[^/]x[^/]z\z
+(?s)\A[^/]x[^/]z\z
     axyz
  0: axyz
 \= Expect no match
     .xyz
-No match
+ 0: .xyz
 
 "[,-0]x?z"
-\A(?!\.)[,-0](?<!/)x[^/]z\z
+(?s)\A(?!/)[,-0]x[^/]z\z
     ,xyz
  0: ,xyz
 \= Expect no match
     /xyz
 No match
     .xyz
-No match
+ 0: .xyz
 
 ".x*"
-\A\.x[^/]*\z
+(?s)\A\.x(*COMMIT)[^/]*?\z
     .xabc
  0: .xabc
 
 /a[--0]z/
-\Aa[--0](?<!/)z\z
+(?s)\Aa(?!/)[\--0]z\z
     a-z
  0: a-z
     a.z
@@ -278,7 +278,7 @@ No match
 No match
 
 /<[a-c-d]>/
-\A<[a-c-d]>\z
+(?s)\A<(?!/)[a-c-d]>\z
     <a>
  0: <a>
     <b>
@@ -291,7 +291,7 @@ No match
  0: <->
 
 /a[[:digit:].]z/
-\Aa[[:digit:].]z\z
+(?s)\Aa(?!/)[[:digit:].]z\z
     a1z
  0: a1z
     a.z
@@ -301,38 +301,29 @@ No match
 No match
 
 /a[[:digit].]z/
-\Aa[[:digit]\.\]z\z
+** Pattern conversion error at offset 10: missing terminating ] for character class
     a[.]z
- 0: a[.]z
     a:.]z
- 0: a:.]z
     ad.]z
- 0: ad.]z
 
 /<[[:a[:digit:]b]>/
-\A<[[:a[:digit:]b]>\z
+** Pattern conversion error at offset 6: missing terminating ] for character class
     <[>
- 0: <[>
     <:>
- 0: <:>
     <a>
- 0: <a>
     <9>
- 0: <9>
     <b>
- 0: <b>
 \= Expect no match
     <d>
-No match
 
 /a*b/convert_glob_separator=\
-\Aa[^\\]*b\z
+(?s)\Aa(*COMMIT)[^\\]*?b\z
 
 /a*b/convert_glob_separator=.
-\Aa[^.]*b\z
+(?s)\Aa(*COMMIT)[^\.]*?b\z
 
 /a*b/convert_glob_separator=/
-\Aa[^/]*b\z
+(?s)\Aa(*COMMIT)[^/]*?b\z
 
 # Non control character checking
 

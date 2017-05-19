@@ -10,10 +10,10 @@
 
 #pattern convert=glob_basic,convert_glob_separator=/
 
-# The fact that this one works in 9 bytes in the 8-bit library shows that the
+# The fact that this one works in 13 bytes in the 8-bit library shows that the
 # output is in UTF-8, though pcre2test shows the character as an escape.
 
-/'>' c4 a3 '<'/hex,utf,convert_length=9
-\A>\x{123}<\z
+/'>' c4 a3 '<'/hex,utf,convert_length=13
+(?s)\A>\x{123}<\z
 
 # End of testinput25

@@ -27,9 +27,9 @@
 
 # Length check
 
-/abc/convert_length=7
+/abc/convert_length=11
 
-/abc/convert_length=8
+/abc/convert_length=12
 
 # Now some actual tests
 
@@ -98,13 +98,15 @@
 /a[]]b/
     a]b
 
+/a[]a-]b/
+
 /a[]-]b/
     a-b
     a]b
 \= Expect no match
     aab
 
-/a[]a-]b/
+/a[]a-z]b/
     aab
 
 /]/
