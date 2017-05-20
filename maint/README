@@ -114,7 +114,14 @@ distribution for a new release.
 
 . Run tests in both 32-bit and 64-bit environments if possible.
 
-. Run tests with two different compilers if possible (e.g. clang and gcc).
+. Run tests with two or more different compilers (e.g. clang and gcc), and
+  make use of -fsanitize=address and friends where possible. For gcc,
+  -fsanitize=undefined -std=gnu99 picks up undefined behaviour at runtime, but
+  needs -fno-sanitize=shift to get rid of warnings for shifts of negative
+  numbers in the JIT compiler. For clang, -fsanitize=address,undefined,integer
+  can be used but -fno-sanitize=alignment,shift,unsigned-integer-overflow must
+  be added when compiling with JIT. Another useful clang option is
+  -fsanitize=signed-integer-overflow
 
 . Do a test build using CMake.
 
@@ -248,13 +255,9 @@ very sensible; some are rather wacky. Some have been on this list for years.
   leaves $2 set. In Perl, it's unset. Changing this in PCRE2 will be very hard
   because I think it needs much more state to be remembered.
 
-. Perl 6 will be a revolution. Is it a revolution too far for PCRE?
-
 . An option to use NUL as a line terminator in subject strings. This could be
   done relatively easily. If it is done, a suitable option for pcre2grep is
   also required.
-
-. Catch SIGSEGV for stack overflows?
 
 . A feature to suspend a match via a callout was once requested.
 
@@ -345,13 +348,15 @@ very sensible; some are rather wacky. Some have been on this list for years.
 . A limit on substitutions: a user suggested somehow finding a way of making
   match_limit apply to the whole operation instead of each match separately.
 
-. The (relatively new) initial pre-pass in pcre2_compile() that identifies all
-  captures could be upgraded to do more parsing, saving the results in a new
-  vector (on-stack if the pattern is small enough). All comment removal and
-  escape processing could be done at this stage (so only done once). The code
-  for the other two passes would then be simpler.
+. There was a suggestion that Perl should lock out \K in lookarounds. If it
+  does, PCRE2 should follow.
+
+. Redesign handling of class/nclass/xclass because the compile code logic is
+  currently very contorted and obscure.
+
+. Some #defines could be replaced with enums to improve robustness.
 
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 15 December 2015
+Last updated: 20 May 2017
