@@ -423,7 +423,7 @@ enum { MOD_CTC,    /* Applies to a compile context */
        MOD_PND,    /* As MOD_PD, but not for a default pattern */
        MOD_PNDP,   /* As MOD_PND, OK for Perl test */
        MOD_CHR,    /* Is a single character */
-       MOD_CON,    /* Is a "convert" type */
+       MOD_CON,    /* Is a "convert" type/options list */
        MOD_CTL,    /* Is a control bit */
        MOD_BSR,    /* Is a BSR value */
        MOD_IN2,    /* Is one or two unsigned integers */
@@ -3679,20 +3679,26 @@ for (;;)
     *((uint32_t *)field) = *pp++;
     break;
 
-    case MOD_CON:  /* A convert type */
-    for (i = 0; i < convertlistcount; i++)
-      {
-      if (strncmpic(pp, (const uint8_t *)convertlist[i].name, len) == 0)
+    case MOD_CON:  /* A convert type/options list */
+    for (;; pp++)
+      { 
+      uint8_t *colon = (uint8_t *)strchr((const char *)pp, ':');
+      len = ((colon != NULL && colon < ep)? colon:ep) - pp;
+      for (i = 0; i < convertlistcount; i++)
         {
-        if (*((uint32_t *)field) == CONVERT_UNSET)
-          *((uint32_t *)field) = convertlist[i].option;
-        else
-          *((uint32_t *)field) |= convertlist[i].option;
-        break;
+        if (strncmpic(pp, (const uint8_t *)convertlist[i].name, len) == 0)
+          {
+          if (*((uint32_t *)field) == CONVERT_UNSET)
+            *((uint32_t *)field) = convertlist[i].option;
+          else
+            *((uint32_t *)field) |= convertlist[i].option;
+          break;
+          }
         }
+      if (i >= convertlistcount) goto INVALID_VALUE;
+      pp += len;
+      if (*pp != ':') break;
       }
-    if (i >= convertlistcount) goto INVALID_VALUE;
-    pp = ep;
     break;
 
     case MOD_IN2:    /* One or two unsigned integers */

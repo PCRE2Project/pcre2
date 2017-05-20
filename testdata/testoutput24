@@ -375,8 +375,7 @@ No match
 /abc\/**\/abc/
 (?s)\Aabc/(*COMMIT)(?:.*?/)??abc\z
 
-#pattern convert=unset
-#pattern convert=posix_extended
+#pattern convert=unset:posix_extended
 
 /a[[:>:]z/
 a[[:>:]z
@@ -441,8 +440,7 @@ No match
 /a***b/
 a*b
 
-#pattern convert=unset
-#pattern convert=posix_basic
+#pattern convert=unset:posix_basic
 
 /a*b+c\+[def](ab)\(cd\)/
 a*b\+c+[def]\(ab\)(cd)

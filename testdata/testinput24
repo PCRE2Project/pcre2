@@ -245,8 +245,7 @@
 
 /abc\/**\/abc/
 
-#pattern convert=unset
-#pattern convert=posix_extended
+#pattern convert=unset:posix_extended
 
 /a[[:>:]z/
 
@@ -284,8 +283,7 @@
 
 /a***b/
 
-#pattern convert=unset
-#pattern convert=posix_basic
+#pattern convert=unset:posix_basic
 
 /a*b+c\+[def](ab)\(cd\)/
 
