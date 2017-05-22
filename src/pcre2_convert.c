@@ -56,6 +56,8 @@ POSSIBILITY OF SUCH DAMAGE.
 
 /* Some pcre2_compile() error numbers are used herein. */
 
+/* Note: ERROR_NO_SLASH_Z is not an error code. */
+#define ERROR_NO_SLASH_Z 100
 #define ERROR_END_BACKSLASH 101
 #define ERROR_MISSING_SQUARE_BRACKET 106
 #define ERROR_MISSING_CLOSING_PARENTHESIS 114
@@ -724,6 +726,9 @@ PCRE2_SPTR pattern_start = pattern;
 PCRE2_SPTR pattern_end = pattern + plength;
 PCRE2_UCHAR separator = ccontext->glob_separator;
 PCRE2_UCHAR c;
+BOOL no_backslash = (options & PCRE2_CONVERT_GLOB_NO_BACKSLASH) != 0;
+BOOL no_wildsep = (options & PCRE2_CONVERT_GLOB_NO_WILD_SEPARATOR) != 0;
+BOOL no_starstar = (options & PCRE2_CONVERT_GLOB_NO_STARSTAR) != 0;
 BOOL with_escape, is_start;
 int result, len;
 
@@ -747,8 +752,18 @@ out.out_str[2] = CHAR_s;
 out.out_str[3] = CHAR_RIGHT_PARENTHESIS;
 convert_glob_write_str(&out, 4);
 
-if (pattern + 1 >= pattern_end ||
-    pattern[0] != CHAR_ASTERISK || pattern[1] != CHAR_ASTERISK)
+is_start = TRUE;
+
+if (pattern < pattern_end && pattern[0] == CHAR_ASTERISK)
+  {
+  if (no_wildsep)
+    is_start = FALSE;
+  else if (!no_starstar && pattern + 1 < pattern_end &&
+           pattern[1] == CHAR_ASTERISK)
+    is_start = FALSE;
+  }
+
+if (is_start)
   {
   out.out_str[0] = CHAR_BACKSLASH;
   out.out_str[1] = CHAR_A;
@@ -763,10 +778,10 @@ while (pattern < pattern_end)
 
   if (c == CHAR_ASTERISK)
     {
-    if (pattern < pattern_end && *pattern == CHAR_ASTERISK)
-      {
-      is_start = pattern == pattern_start + 1;
+    is_start = pattern == pattern_start + 1;
 
+    if (!no_starstar && pattern < pattern_end && *pattern == CHAR_ASTERISK)
+      {
       if (!is_start && pattern[-2] != separator)
         {
         result = PCRE2_ERROR_CONVERT_SYNTAX;
@@ -778,19 +793,11 @@ while (pattern < pattern_end)
 
       if (pattern >= pattern_end)
         {
-        convert_glob_write(&out, CHAR_NULL);
-
-        if (!dummyrun &&
-            out.output_size != (PCRE2_SIZE) (out.output - use_buffer))
-          {
-          result = PCRE2_ERROR_NOMEMORY;
-          break;
-          }
-        *bufflenptr = out.output_size - 1;
-        return 0;
+        result = ERROR_NO_SLASH_Z;
+        break;
         }
 
-      if (*pattern == CHAR_BACKSLASH)
+      if (!no_backslash && *pattern == CHAR_BACKSLASH)
         {
         pattern++;
         if (pattern >= pattern_end)
@@ -849,10 +856,32 @@ while (pattern < pattern_end)
       continue;
       }
 
-    if (pattern != pattern_start + 1)
+    if (pattern < pattern_end && *pattern == CHAR_ASTERISK)
+      {
+      do pattern++; while (pattern < pattern_end &&
+                           *pattern == CHAR_ASTERISK);
+      }
+
+    if (no_wildsep)
+      {
+      if (pattern >= pattern_end)
+        {
+        result = ERROR_NO_SLASH_Z;
+        break;
+        }
+
+      /* Start check must be after the end check. */
+      if (is_start) continue;
+      }
+
+    if (!is_start)
       convert_glob_print_commit(&out);
 
-    convert_glob_print_wildcard(&out, separator, with_escape);
+    if (no_wildsep)
+      convert_glob_write(&out, CHAR_DOT);
+    else
+      convert_glob_print_wildcard(&out, separator, with_escape);
+
     out.out_str[0] = CHAR_ASTERISK;
     out.out_str[1] = CHAR_QUESTION_MARK;
     convert_glob_write_str(&out, 2);
@@ -861,7 +890,10 @@ while (pattern < pattern_end)
 
   if (c == CHAR_QUESTION_MARK)
     {
-    convert_glob_print_wildcard(&out, separator, with_escape);
+    if (no_wildsep)
+      convert_glob_write(&out, CHAR_DOT);
+    else
+      convert_glob_print_wildcard(&out, separator, with_escape);
     continue;
     }
 
@@ -873,7 +905,7 @@ while (pattern < pattern_end)
     continue;
     }
 
-  if (c == CHAR_BACKSLASH)
+  if (!no_backslash && c == CHAR_BACKSLASH)
     {
     if (pattern >= pattern_end)
       {
@@ -889,12 +921,20 @@ while (pattern < pattern_end)
   convert_glob_write(&out, c);
   }
 
-if (result == 0)
+if (result == 0 || result == ERROR_NO_SLASH_Z)
   {
-  out.out_str[0] = CHAR_BACKSLASH;
-  out.out_str[1] = CHAR_z;
-  out.out_str[2] = CHAR_NULL;
-  convert_glob_write_str(&out, 3);
+  if (result == ERROR_NO_SLASH_Z)
+    {
+    convert_glob_write(&out, CHAR_NULL);
+    result = 0;
+    }
+  else
+    {
+    out.out_str[0] = CHAR_BACKSLASH;
+    out.out_str[1] = CHAR_z;
+    out.out_str[2] = CHAR_NULL;
+    convert_glob_write_str(&out, 3);
+    }
 
   if (!dummyrun && out.output_size != (PCRE2_SIZE) (out.output - use_buffer))
     result = PCRE2_ERROR_NOMEMORY;
@@ -992,8 +1032,8 @@ for (i = 0; i < 2; i++)
   switch(pattype)
     {
     case PCRE2_CONVERT_GLOB:
-    rc = convert_glob(options, pattern, plength, utf, use_buffer, use_length,
-      bufflenptr, dummyrun, ccontext);
+    rc = convert_glob(options & ~PCRE2_CONVERT_GLOB, pattern, plength, utf,
+      use_buffer, use_length, bufflenptr, dummyrun, ccontext);
     break;
 
     case PCRE2_CONVERT_POSIX_BASIC:

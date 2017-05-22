@@ -9,7 +9,7 @@
 # Set the glob separator explicitly so that different OS defaults are not a
 # problem. Then test various errors.
 
-#pattern convert=glob_basic,convert_glob_separator=/
+#pattern convert=glob,convert_glob_separator=/
 
 /abc/posix
 ** The convert and posix modifiers are mutually exclusive
@@ -374,6 +374,44 @@ No match
 
 /abc\/**\/abc/
 (?s)\Aabc/(*COMMIT)(?:.*?/)??abc\z
+
+#pattern convert=glob:glob_no_starstar
+
+/***/
+(?s)\A[^/]*?\z
+
+/**a**/
+(?s)\A[^/]*?a(*COMMIT)[^/]*?\z
+
+#pattern convert=unset
+#pattern convert=glob:glob_no_wild_separator
+
+/*/
+(?s)
+
+/*a*/
+(?s)a
+
+/**a**/
+** Pattern conversion error at offset 2: invalid syntax
+
+/a*b/
+(?s)\Aa(*COMMIT).*?b\z
+
+/*a*b*/
+(?s)a(*COMMIT).*?b
+
+/??a??/
+(?s)\A..a..\z
+
+#pattern convert=unset
+#pattern convert=glob:glob_no_backslash
+
+/a\b\cd/
+(?s)\Aa\\b\\cd\z
+
+/**\/a/
+** Pattern conversion error at offset 2: invalid syntax
 
 #pattern convert=unset:posix_extended
 

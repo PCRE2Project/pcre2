@@ -9,7 +9,7 @@
 # Set the glob separator explicitly so that different OS defaults are not a
 # problem. Then test various errors.
 
-#pattern convert=glob_basic,convert_glob_separator=/
+#pattern convert=glob,convert_glob_separator=/
 
 /abc/posix
 
@@ -244,6 +244,34 @@
 /abc\/**/
 
 /abc\/**\/abc/
+
+#pattern convert=glob:glob_no_starstar
+
+/***/
+
+/**a**/
+
+#pattern convert=unset
+#pattern convert=glob:glob_no_wild_separator
+
+/*/
+
+/*a*/
+
+/**a**/
+
+/a*b/
+
+/*a*b*/
+
+/??a??/
+
+#pattern convert=unset
+#pattern convert=glob:glob_no_backslash
+
+/a\b\cd/
+
+/**\/a/
 
 #pattern convert=unset:posix_extended
 
