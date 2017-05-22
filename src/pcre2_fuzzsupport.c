@@ -172,11 +172,12 @@ for (i = 0; i < 2; i++)
         return 0;
         }
       (void)pcre2_set_match_limit(match_context, 100);
-      (void)pcre2_set_depth_limit(match_context, 100);
       (void)pcre2_set_callout(match_context, callout_function, &callout_count);
       }
 
-    /* Match twice, with and without options */
+    /* Match twice, with and without options, with a depth limit of 100. */
+
+    (void)pcre2_set_depth_limit(match_context, 100);
 
     for (j = 0; j < 2; j++)
       {
@@ -210,9 +211,11 @@ for (i = 0; i < 2; i++)
       match_options = 0;  /* For second time */
       }
 
-    /* Match with DFA twice, with and without options */
+    /* Match with DFA twice, with and without options, depth limit of 10. */
 
-    match_options = save_match_options & ~PCRE2_NO_JIT;
+    (void)pcre2_set_depth_limit(match_context, 10);
+    match_options = save_match_options & ~PCRE2_NO_JIT;  /* Not valid for DFA */
+
     for (j = 0; j < 2; j++)
       {
 #ifdef STANDALONE
