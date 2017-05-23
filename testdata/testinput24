@@ -281,11 +281,17 @@
 /??a??/
 
 #pattern convert=unset
-#pattern convert=glob:glob_no_backslash
+#pattern convert=glob,convert_glob_escape=0
 
 /a\b\cd/
 
 /**\/a/
+
+/a`*b/convert_glob_escape=`
+
+/a`*b/convert_glob_escape=0
+
+/a`*b/convert_glob_escape=x
 
 #pattern convert=unset:posix_extended
 

@@ -189,15 +189,17 @@ return mcontext;
 }
 
 
-/* A default covert context is set up to save having to initialize at run time
+/* A default convert context is set up to save having to initialize at run time
 when no context is supplied to the convert function. */
 
 const pcre2_convert_context PRIV(default_convert_context) = {
   { default_malloc, default_free, NULL },    /* Default memory handling */
 #ifdef _WIN32
-  CHAR_BACKSLASH                             /* Default path separator */
-#else                                        /* is OS dependent */
-  CHAR_SLASH                                 /* Not Windows */
+  CHAR_BACKSLASH,                            /* Default path separator */
+  CHAR_GRAVE_ACCENT                          /* Default escape character */
+#else  /* Not Windows */
+  CHAR_SLASH,                                /* Default path separator */  
+  CHAR_BACKSLASH                             /* Default escape character */
 #endif
   };
 
@@ -454,6 +456,14 @@ ccontext->glob_separator = separator;
 return 0;
 }
 
+PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
+pcre2_set_glob_escape(pcre2_convert_context *ccontext, uint32_t escape)
+{
+if (escape > 255 || (escape != 0 && !ispunct(escape)))
+  return PCRE2_ERROR_BADDATA;
+ccontext->glob_escape = escape;
+return 0;
+}
 
 /* End of pcre2_context.c */
 

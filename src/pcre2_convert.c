@@ -49,8 +49,10 @@ POSSIBILITY OF SUCH DAMAGE.
   PCRE2_CONVERT_POSIX_BASIC|PCRE2_CONVERT_POSIX_EXTENDED)
 
 #define ALL_OPTIONS (PCRE2_CONVERT_UTF|PCRE2_CONVERT_NO_UTF_CHECK| \
-  PCRE2_CONVERT_GLOB_NO_BACKSLASH|PCRE2_CONVERT_GLOB_NO_WILD_SEPARATOR| \
-  PCRE2_CONVERT_GLOB_NO_STARSTAR|TYPE_OPTIONS)
+  PCRE2_CONVERT_GLOB_NO_DOT_SPECIAL| \
+  PCRE2_CONVERT_GLOB_NO_WILD_SEPARATOR| \
+  PCRE2_CONVERT_GLOB_NO_STARSTAR| \
+  TYPE_OPTIONS)
 
 #define DUMMY_BUFFER_SIZE 100
 
@@ -76,7 +78,7 @@ POSSIBILITY OF SUCH DAMAGE.
 /* States for range and POSIX processing */
 
 enum { RANGE_NOT_STARTED, RANGE_STARTING, RANGE_STARTED };
-enum { POSIX_START_REGEX, POSIX_ANCHORED, POSIX_NOT_BRACKET, 
+enum { POSIX_START_REGEX, POSIX_ANCHORED, POSIX_NOT_BRACKET,
        POSIX_CLASS_NOT_STARTED, POSIX_CLASS_STARTING, POSIX_CLASS_STARTED };
 
 /* Macro to add a character string to the output buffer, checking for overflow. */
@@ -89,23 +91,23 @@ enum { POSIX_START_REGEX, POSIX_ANCHORED, POSIX_NOT_BRACKET,
     *p++ = *s; \
     } \
   }
-  
+
 /* Literals that must be escaped: \ ? * + | . ^ $ { } [ ] ( ) */
 
 static const char *pcre2_escaped_literals =
-  STR_BACKSLASH STR_QUESTION_MARK STR_ASTERISK STR_PLUS 
-  STR_VERTICAL_LINE STR_DOT STR_CIRCUMFLEX_ACCENT STR_DOLLAR_SIGN  
+  STR_BACKSLASH STR_QUESTION_MARK STR_ASTERISK STR_PLUS
+  STR_VERTICAL_LINE STR_DOT STR_CIRCUMFLEX_ACCENT STR_DOLLAR_SIGN
   STR_LEFT_CURLY_BRACKET STR_RIGHT_CURLY_BRACKET
   STR_LEFT_SQUARE_BRACKET STR_RIGHT_SQUARE_BRACKET
   STR_LEFT_PARENTHESIS STR_RIGHT_PARENTHESIS;
-  
+
 /* Recognized escapes in POSIX basic patterns. */
 
 static const char *posix_basic_escapes =
   STR_QUESTION_MARK STR_PLUS STR_VERTICAL_LINE
   STR_LEFT_PARENTHESIS STR_RIGHT_PARENTHESIS
-  STR_0 STR_1 STR_2 STR_3 STR_4 STR_5 STR_6 STR_7 STR_8 STR_9;  
- 
+  STR_0 STR_1 STR_2 STR_3 STR_4 STR_5 STR_6 STR_7 STR_8 STR_9;
+
 
 
 /*************************************************
@@ -186,46 +188,46 @@ while (plength > 0)
 
   if (posix_state >= POSIX_CLASS_NOT_STARTED)
     {
-    if (c == CHAR_RIGHT_SQUARE_BRACKET) 
+    if (c == CHAR_RIGHT_SQUARE_BRACKET)
       {
-      PUTCHARS(STR_RIGHT_SQUARE_BRACKET); 
+      PUTCHARS(STR_RIGHT_SQUARE_BRACKET);
       posix_state = POSIX_NOT_BRACKET;
       }
-      
+
     /* Not the end of the class */
-       
-    else 
+
+    else
       {
       switch (posix_state)
         {
         case POSIX_CLASS_STARTED:
         if (c <= 127 && islower(c)) break;  /* Remain in started state */
-        posix_state = POSIX_CLASS_NOT_STARTED;       
-        if (c == CHAR_COLON  && plength > 0 && 
+        posix_state = POSIX_CLASS_NOT_STARTED;
+        if (c == CHAR_COLON  && plength > 0 &&
             *posix == CHAR_RIGHT_SQUARE_BRACKET)
           {
           PUTCHARS(STR_COLON_RIGHT_SQUARE_BRACKET);
-          plength--; 
+          plength--;
           posix++;
-          continue;    /* With next character after :] */ 
+          continue;    /* With next character after :] */
           }
-        /* Fall through */  
-          
-        case POSIX_CLASS_NOT_STARTED:  
-        if (c == CHAR_LEFT_SQUARE_BRACKET) 
+        /* Fall through */
+
+        case POSIX_CLASS_NOT_STARTED:
+        if (c == CHAR_LEFT_SQUARE_BRACKET)
           posix_state = POSIX_CLASS_STARTING;
         break;
-        
+
         case POSIX_CLASS_STARTING:
         if (c == CHAR_COLON) posix_state = POSIX_CLASS_STARTED;
         break;
-        }   
- 
+        }
+
       if (c == CHAR_BACKSLASH) PUTCHARS(STR_BACKSLASH);
       if (p + clength > endp) return PCRE2_ERROR_NOMEMORY;
       memcpy(p, posix - clength, CU2BYTES(clength));
       p += clength;
-      } 
+      }
     }
 
   /* Handle a character not within a class. */
@@ -234,31 +236,31 @@ while (plength > 0)
     {
     case CHAR_LEFT_SQUARE_BRACKET:
     PUTCHARS(STR_LEFT_SQUARE_BRACKET);
-    
+
     /* Handle special cases [[:<:]] and [[:>:]] (which PCRE does support) */
-     
+
     if (plength >= 6)
       {
       if (posix[0] == CHAR_LEFT_SQUARE_BRACKET &&
           posix[1] == CHAR_COLON &&
-          (posix[2] == CHAR_LESS_THAN_SIGN || 
+          (posix[2] == CHAR_LESS_THAN_SIGN ||
            posix[2] == CHAR_GREATER_THAN_SIGN) &&
           posix[3] == CHAR_COLON &&
-          posix[4] == CHAR_RIGHT_SQUARE_BRACKET &&    
+          posix[4] == CHAR_RIGHT_SQUARE_BRACKET &&
           posix[5] == CHAR_RIGHT_SQUARE_BRACKET)
         {
         if (p + 6 > endp) return PCRE2_ERROR_NOMEMORY;
         memcpy(p, posix, CU2BYTES(6));
         p += 6;
         posix += 6;
-        plength -= 6;  
-        continue;  /* With next character */ 
+        plength -= 6;
+        continue;  /* With next character */
         }
-      }   
-      
+      }
+
     /* Handle "normal" character classes */
- 
-    posix_state = POSIX_CLASS_NOT_STARTED; 
+
+    posix_state = POSIX_CLASS_NOT_STARTED;
 
     /* Handle ^ and ] as first characters */
 
@@ -275,23 +277,23 @@ while (plength > 0)
         posix++;
         plength--;
         PUTCHARS(STR_RIGHT_SQUARE_BRACKET);
-        }    
+        }
       }
     break;
 
     case CHAR_BACKSLASH:
     if (plength <= 0) return ERROR_END_BACKSLASH;
-    if (!extended && *posix < 127 && 
-          strchr(posix_basic_escapes, *posix) != NULL)  
+    if (!extended && *posix < 127 &&
+          strchr(posix_basic_escapes, *posix) != NULL)
       {
-      if (isdigit(*posix)) PUTCHARS(STR_BACKSLASH); 
+      if (isdigit(*posix)) PUTCHARS(STR_BACKSLASH);
       if (p + 1 > endp) return PCRE2_ERROR_NOMEMORY;
       lastspecial = *p++ = *posix++;
-      plength--;  
+      plength--;
       }
     else nextisliteral = TRUE;
     break;
-    
+
     case CHAR_RIGHT_PARENTHESIS:
     if (!extended || bracount == 0) goto ESCAPE_LITERAL;
     bracount--;
@@ -299,60 +301,60 @@ while (plength > 0)
 
     case CHAR_LEFT_PARENTHESIS:
     bracount++;
-    /* Fall through */  
+    /* Fall through */
 
     case CHAR_QUESTION_MARK:
     case CHAR_PLUS:
-    case CHAR_LEFT_CURLY_BRACKET:   
-    case CHAR_RIGHT_CURLY_BRACKET:   
+    case CHAR_LEFT_CURLY_BRACKET:
+    case CHAR_RIGHT_CURLY_BRACKET:
     case CHAR_VERTICAL_LINE:
     if (!extended) goto ESCAPE_LITERAL;
-    /* Fall through */ 
-    
+    /* Fall through */
+
     case CHAR_DOT:
-    case CHAR_DOLLAR_SIGN:   
-    posix_state = POSIX_NOT_BRACKET; 
+    case CHAR_DOLLAR_SIGN:
+    posix_state = POSIX_NOT_BRACKET;
     COPY_SPECIAL:
-    lastspecial = c; 
+    lastspecial = c;
     if (p + 1 > endp) return PCRE2_ERROR_NOMEMORY;
     *p++ = c;
-    break; 
+    break;
 
     case CHAR_ASTERISK:
-    if (lastspecial != CHAR_ASTERISK) 
+    if (lastspecial != CHAR_ASTERISK)
       {
       if (!extended && posix_state < POSIX_NOT_BRACKET)
-        goto ESCAPE_LITERAL; 
+        goto ESCAPE_LITERAL;
       goto COPY_SPECIAL;
-      } 
-    break;   /* Ignore second and subsequent asterisks */  
+      }
+    break;   /* Ignore second and subsequent asterisks */
 
     case CHAR_CIRCUMFLEX_ACCENT:
     if (extended) goto COPY_SPECIAL;
-    if (posix_state == POSIX_START_REGEX || 
-        lastspecial == CHAR_LEFT_PARENTHESIS) 
+    if (posix_state == POSIX_START_REGEX ||
+        lastspecial == CHAR_LEFT_PARENTHESIS)
       {
       posix_state = POSIX_ANCHORED;
       goto COPY_SPECIAL;
-      } 
-    /* Fall through */      
+      }
+    /* Fall through */
 
     default:
     if (c < 128 && strchr(pcre2_escaped_literals, c) != NULL)
       {
-      ESCAPE_LITERAL: 
+      ESCAPE_LITERAL:
       PUTCHARS(STR_BACKSLASH);
       }
-    lastspecial = 0xff;  /* Indicates nothing special */   
+    lastspecial = 0xff;  /* Indicates nothing special */
     if (p + clength > endp) return PCRE2_ERROR_NOMEMORY;
     memcpy(p, posix - clength, CU2BYTES(clength));
     p += clength;
-    posix_state = POSIX_NOT_BRACKET; 
+    posix_state = POSIX_NOT_BRACKET;
     break;
     }
   }
 
-if (posix_state >= POSIX_CLASS_NOT_STARTED) 
+if (posix_state >= POSIX_CLASS_NOT_STARTED)
   return ERROR_MISSING_SQUARE_BRACKET;
 convlength += p - pp;        /* Final segment */
 *bufflenptr = convlength;
@@ -726,13 +728,15 @@ PCRE2_SPTR pattern_start = pattern;
 PCRE2_SPTR pattern_end = pattern + plength;
 PCRE2_UCHAR separator = ccontext->glob_separator;
 PCRE2_UCHAR c;
-BOOL no_backslash = (options & PCRE2_CONVERT_GLOB_NO_BACKSLASH) != 0;
+BOOL no_escape = ccontext->glob_escape == 0;
 BOOL no_wildsep = (options & PCRE2_CONVERT_GLOB_NO_WILD_SEPARATOR) != 0;
 BOOL no_starstar = (options & PCRE2_CONVERT_GLOB_NO_STARSTAR) != 0;
 BOOL in_atomic = FALSE;
 BOOL after_starstar = FALSE;
 BOOL with_escape, is_start;
 int result, len;
+
+(void)utf;  /* Avoid compiler warning */
 
 if (separator >= 128)
   {
@@ -805,7 +809,7 @@ while (pattern < pattern_end)
         break;
         }
 
-      if (!no_backslash && *pattern == CHAR_BACKSLASH)
+      if (!no_escape && *pattern == ccontext->glob_escape)
         {
         pattern++;
         if (pattern >= pattern_end)
@@ -925,11 +929,11 @@ while (pattern < pattern_end)
     continue;
     }
 
-  if (!no_backslash && c == CHAR_BACKSLASH)
+  if (!no_escape && c == ccontext->glob_escape)
     {
     if (pattern >= pattern_end)
       {
-      result = ERROR_END_BACKSLASH;
+      result = PCRE2_ERROR_CONVERT_SYNTAX;
       break;
       }
     c = *pattern++;

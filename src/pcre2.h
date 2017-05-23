@@ -187,7 +187,7 @@ ignored for pcre2_jit_match(). */
 #define PCRE2_CONVERT_POSIX_BASIC            0x00000004u
 #define PCRE2_CONVERT_POSIX_EXTENDED         0x00000008u
 #define PCRE2_CONVERT_GLOB                   0x00000010u
-#define PCRE2_CONVERT_GLOB_NO_BACKSLASH      0x00000030u
+#define PCRE2_CONVERT_GLOB_NO_DOT_SPECIAL    0x00000030u
 #define PCRE2_CONVERT_GLOB_NO_WILD_SEPARATOR 0x00000050u
 #define PCRE2_CONVERT_GLOB_NO_STARSTAR       0x00000090u
 #define PCRE2_CONVERT_GLOB_BASIC             0x000000f0u
@@ -497,6 +497,8 @@ PCRE2_EXP_DECL pcre2_convert_context PCRE2_CALL_CONVENTION \
 PCRE2_EXP_DECL void PCRE2_CALL_CONVENTION \
   pcre2_convert_context_free(pcre2_convert_context *); \
 PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION \
+  pcre2_set_glob_escape(pcre2_convert_context *, uint32_t); \
+PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION \
   pcre2_set_glob_separator(pcre2_convert_context *, uint32_t);
 
 
@@ -733,6 +735,7 @@ pcre2_compile are called by application code. */
 #define pcre2_set_compile_extra_options       PCRE2_SUFFIX(pcre2_set_compile_extra_options_)
 #define pcre2_set_compile_recursion_guard     PCRE2_SUFFIX(pcre2_set_compile_recursion_guard_)
 #define pcre2_set_depth_limit                 PCRE2_SUFFIX(pcre2_set_depth_limit_)
+#define pcre2_set_glob_escape                 PCRE2_SUFFIX(pcre2_set_glob_escape_)
 #define pcre2_set_glob_separator              PCRE2_SUFFIX(pcre2_set_glob_separator_)
 #define pcre2_set_heap_limit                  PCRE2_SUFFIX(pcre2_set_heap_limit_)
 #define pcre2_set_match_limit                 PCRE2_SUFFIX(pcre2_set_match_limit_)

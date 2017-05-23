@@ -429,13 +429,22 @@ No match
 (?s)\A..a..\z
 
 #pattern convert=unset
-#pattern convert=glob:glob_no_backslash
+#pattern convert=glob,convert_glob_escape=0
 
 /a\b\cd/
 (?s)\Aa\\b\\cd\z
 
 /**\/a/
 ** Pattern conversion error at offset 2: invalid syntax
+
+/a`*b/convert_glob_escape=`
+(?s)\Aa\*b\z
+
+/a`*b/convert_glob_escape=0
+(?s)\Aa`(*COMMIT)[^/]*?b\z
+
+/a`*b/convert_glob_escape=x
+** Invalid glob escape 'x'
 
 #pattern convert=unset:posix_extended
 

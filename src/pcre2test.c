@@ -400,14 +400,14 @@ typedef struct convertstruct {
 } convertstruct;
 
 static convertstruct convertlist[] = {
-  { "glob",              PCRE2_CONVERT_GLOB },
-  { "glob_basic",        PCRE2_CONVERT_GLOB_BASIC },
-  { "glob_no_backslash", PCRE2_CONVERT_GLOB_NO_BACKSLASH }, 
-  { "glob_no_starstar",  PCRE2_CONVERT_GLOB_NO_STARSTAR }, 
+  { "glob",                   PCRE2_CONVERT_GLOB },
+  { "glob_basic",             PCRE2_CONVERT_GLOB_BASIC },
+  { "glob_no_dot_special",    PCRE2_CONVERT_GLOB_NO_DOT_SPECIAL }, 
+  { "glob_no_starstar",       PCRE2_CONVERT_GLOB_NO_STARSTAR }, 
   { "glob_no_wild_separator", PCRE2_CONVERT_GLOB_NO_WILD_SEPARATOR }, 
-  { "posix_basic",       PCRE2_CONVERT_POSIX_BASIC },
-  { "posix_extended",    PCRE2_CONVERT_POSIX_EXTENDED },
-  { "unset",             CONVERT_UNSET }};
+  { "posix_basic",            PCRE2_CONVERT_POSIX_BASIC },
+  { "posix_extended",         PCRE2_CONVERT_POSIX_EXTENDED },
+  { "unset",                  CONVERT_UNSET }};
 
 #define convertlistcount (sizeof(convertlist)/sizeof(convertstruct))
 
@@ -524,6 +524,7 @@ typedef struct patctl {    /* Structure for pattern modifiers. */
   uint32_t  tables_id;
   uint32_t  convert_type;
   uint32_t  convert_length;
+  uint32_t  convert_glob_escape;
   uint32_t  convert_glob_separator;
   uint32_t  regerror_buffsize;
    uint8_t  locale[LOCALESIZE];
@@ -599,6 +600,7 @@ static modstruct modlist[] = {
   { "callout_none",               MOD_DAT,  MOD_CTL, CTL_CALLOUT_NONE,           DO(control) },
   { "caseless",                   MOD_PATP, MOD_OPT, PCRE2_CASELESS,             PO(options) },
   { "convert",                    MOD_PAT,  MOD_CON, 0,                          PO(convert_type) },
+  { "convert_glob_escape",        MOD_PAT,  MOD_CHR, 0,                          PO(convert_glob_escape) },
   { "convert_glob_separator",     MOD_PAT,  MOD_CHR, 0,                          PO(convert_glob_separator) },
   { "convert_length",             MOD_PAT,  MOD_INT, 0,                          PO(convert_length) },
   { "copy",                       MOD_DAT,  MOD_NN,  DO(copy_numbers),           DO(copy_names) },
@@ -1286,6 +1288,14 @@ are supported. */
   else \
     r = pcre2_set_glob_separator_32(G(a,32),b)
 
+#define PCRE2_SET_GLOB_ESCAPE(r,a,b) \
+  if (test_mode == PCRE8_MODE) \
+    r = pcre2_set_glob_escape_8(G(a,8),b); \
+  else if (test_mode == PCRE16_MODE) \
+    r = pcre2_set_glob_escape_16(G(a,16),b); \
+  else \
+    r = pcre2_set_glob_escape_32(G(a,32),b)
+
 #define PCRE2_SET_HEAP_LIMIT(a,b) \
   if (test_mode == PCRE8_MODE) \
     pcre2_set_heap_limit_8(G(a,8),b); \
@@ -1753,6 +1763,12 @@ the three different cases. */
   else \
     G(pcre2_set_depth_limit_,BITTWO)(G(a,BITTWO),b)
 
+#define PCRE2_SET_GLOB_ESCAPE(r,a,b) \
+  if (test_mode == G(G(PCRE,BITONE),_MODE)) \
+    r = G(pcre2_set_glob_escape_,BITONE)(G(a,BITONE),b); \
+  else \
+    r = G(pcre2_set_glob_escape_,BITTWO)(G(a,BITTWO),b)
+
 #define PCRE2_SET_GLOB_SEPARATOR(r,a,b) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
     r = G(pcre2_set_glob_separator_,BITONE)(G(a,BITONE),b); \
@@ -1983,6 +1999,7 @@ the three different cases. */
 #define PCRE2_SET_COMPILE_RECURSION_GUARD(a,b,c) \
   pcre2_set_compile_recursion_guard_8(G(a,8),b,c)
 #define PCRE2_SET_DEPTH_LIMIT(a,b) pcre2_set_depth_limit_8(G(a,8),b)
+#define PCRE2_SET_GLOB_ESCAPE(r,a,b) r = pcre2_set_glob_escape_8(G(a,8),b)
 #define PCRE2_SET_GLOB_SEPARATOR(r,a,b) r = pcre2_set_glob_separator_8(G(a,8),b)
 #define PCRE2_SET_HEAP_LIMIT(a,b) pcre2_set_heap_limit_8(G(a,8),b)
 #define PCRE2_SET_MATCH_LIMIT(a,b) pcre2_set_match_limit_8(G(a,8),b)
@@ -2086,6 +2103,7 @@ the three different cases. */
 #define PCRE2_SET_COMPILE_RECURSION_GUARD(a,b,c) \
   pcre2_set_compile_recursion_guard_16(G(a,16),b,c)
 #define PCRE2_SET_DEPTH_LIMIT(a,b) pcre2_set_depth_limit_16(G(a,16),b)
+#define PCRE2_SET_GLOB_ESCAPE(r,a,b) r = pcre2_set_glob_escape_16(G(a,16),b)
 #define PCRE2_SET_GLOB_SEPARATOR(r,a,b) r = pcre2_set_glob_separator_16(G(a,16),b)
 #define PCRE2_SET_HEAP_LIMIT(a,b) pcre2_set_heap_limit_16(G(a,16),b)
 #define PCRE2_SET_MATCH_LIMIT(a,b) pcre2_set_match_limit_16(G(a,16),b)
@@ -2189,6 +2207,7 @@ the three different cases. */
 #define PCRE2_SET_COMPILE_RECURSION_GUARD(a,b,c) \
   pcre2_set_compile_recursion_guard_32(G(a,32),b,c)
 #define PCRE2_SET_DEPTH_LIMIT(a,b) pcre2_set_depth_limit_32(G(a,32),b)
+#define PCRE2_SET_GLOB_ESCAPE(r,a,b) r = pcre2_set_glob_escape_32(G(a,32),b)
 #define PCRE2_SET_GLOB_SEPARATOR(r,a,b) r = pcre2_set_glob_separator_32(G(a,32),b)
 #define PCRE2_SET_HEAP_LIMIT(a,b) pcre2_set_heap_limit_32(G(a,32),b)
 #define PCRE2_SET_MATCH_LIMIT(a,b) pcre2_set_match_limit_32(G(a,32),b)
@@ -2903,13 +2922,14 @@ return yield;
 *************************************************/
 
 /* Must handle UTF-32 strings in utf mode. Yields number of characters printed.
-For printing *MARK strings, a negative length is given.If handed a NULL file,
+For printing *MARK strings, a negative length is given. If handed a NULL file,
 just counts chars without printing. */
 
 static int pchars32(PCRE2_SPTR32 p, int length, BOOL utf, FILE *f)
 {
 int yield = 0;
 (void)(utf);  /* Avoid compiler warning */
+
 if (length < 0) length = p[-1];
 while (length-- > 0)
   {
@@ -5385,6 +5405,21 @@ if (pat_patctl.convert_type != CONVERT_UNSET)
     convert_options |= PCRE2_CONVERT_NO_UTF_CHECK;
 
   CONCTXCPY(con_context, default_con_context);
+
+  if (pat_patctl.convert_glob_escape != 0)
+    {
+    uint32_t escape = (pat_patctl.convert_glob_escape == '0')? 0 :
+      pat_patctl.convert_glob_escape;  
+    PCRE2_SET_GLOB_ESCAPE(rc, con_context, escape);
+    if (rc != 0)
+      {
+      fprintf(outfile, "** Invalid glob escape '%c'\n",
+        pat_patctl.convert_glob_escape);
+      convert_return = PR_SKIP;
+      goto CONVERT_FINISH;
+      }
+    }
+
   if (pat_patctl.convert_glob_separator != 0)
     {
     PCRE2_SET_GLOB_SEPARATOR(rc, con_context, pat_patctl.convert_glob_separator);
