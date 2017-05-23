@@ -729,6 +729,8 @@ PCRE2_UCHAR c;
 BOOL no_backslash = (options & PCRE2_CONVERT_GLOB_NO_BACKSLASH) != 0;
 BOOL no_wildsep = (options & PCRE2_CONVERT_GLOB_NO_WILD_SEPARATOR) != 0;
 BOOL no_starstar = (options & PCRE2_CONVERT_GLOB_NO_STARSTAR) != 0;
+BOOL in_atomic = FALSE;
+BOOL after_starstar = FALSE;
 BOOL with_escape, is_start;
 int result, len;
 
@@ -780,6 +782,12 @@ while (pattern < pattern_end)
     {
     is_start = pattern == pattern_start + 1;
 
+    if (in_atomic)
+      {
+      convert_glob_write(&out, CHAR_RIGHT_PARENTHESIS);
+      in_atomic = FALSE;
+      }
+
     if (!no_starstar && pattern < pattern_end && *pattern == CHAR_ASTERISK)
       {
       if (!is_start && pattern[-2] != separator)
@@ -814,6 +822,7 @@ while (pattern < pattern_end)
         }
 
       pattern++;
+      after_starstar = TRUE;
 
       if (is_start)
         {
@@ -825,7 +834,7 @@ while (pattern < pattern_end)
         out.out_str[5] = CHAR_VERTICAL_LINE;
         convert_glob_write_str(&out, 6);
 
-        convert_glob_print_wildcard(&out, separator, with_escape);
+        convert_glob_print_separator(&out, separator, with_escape);
         convert_glob_write(&out, CHAR_RIGHT_PARENTHESIS);
         continue;
         }
@@ -875,7 +884,18 @@ while (pattern < pattern_end)
       }
 
     if (!is_start)
-      convert_glob_print_commit(&out);
+      {
+      if (after_starstar)
+        {
+        out.out_str[0] = CHAR_LEFT_PARENTHESIS;
+        out.out_str[1] = CHAR_QUESTION_MARK;
+        out.out_str[2] = CHAR_GREATER_THAN_SIGN;
+        convert_glob_write_str(&out, 3);
+        in_atomic = TRUE;
+        }
+      else
+        convert_glob_print_commit(&out);
+      }
 
     if (no_wildsep)
       convert_glob_write(&out, CHAR_DOT);
@@ -923,18 +943,18 @@ while (pattern < pattern_end)
 
 if (result == 0 || result == ERROR_NO_SLASH_Z)
   {
-  if (result == ERROR_NO_SLASH_Z)
-    {
-    convert_glob_write(&out, CHAR_NULL);
-    result = 0;
-    }
-  else
+  if (result == 0)
     {
     out.out_str[0] = CHAR_BACKSLASH;
     out.out_str[1] = CHAR_z;
-    out.out_str[2] = CHAR_NULL;
-    convert_glob_write_str(&out, 3);
+    convert_glob_write_str(&out, 2);
     }
+
+  if (in_atomic)
+    convert_glob_write(&out, CHAR_RIGHT_PARENTHESIS);
+
+  convert_glob_write(&out, CHAR_NULL);
+  result = 0;
 
   if (!dummyrun && out.output_size != (PCRE2_SIZE) (out.output - use_buffer))
     result = PCRE2_ERROR_NOMEMORY;

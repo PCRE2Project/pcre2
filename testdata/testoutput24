@@ -367,13 +367,37 @@ No match
 (?s)
 
 /**\/abc/
-(?s)(?:\A|[^/])abc\z
+(?s)(?:\A|/)abc\z
 
 /abc\/**/
 (?s)\Aabc/
 
 /abc\/**\/abc/
 (?s)\Aabc/(*COMMIT)(?:.*?/)??abc\z
+
+/**\/*a*b*g*n*t/
+(?s)(?:\A|/)(?>[^/]*?a)(?>[^/]*?b)(?>[^/]*?g)(?>[^/]*?n)(?>[^/]*?t\z)
+  abcd/abcdefg/abcdefghijk/abcdefghijklmnop.txt
+ 0: /abcdefghijklmnop.txt
+
+/**\/*a*\/**/
+(?s)(?:\A|/)(?>[^/]*?a)(?>[^/]*?/)
+  xx/xx/xx/xax/xx/xb
+ 0: /xax/
+
+/**\/*a*/
+(?s)(?:\A|/)(?>[^/]*?a)(?>[^/]*?\z)
+  xx/xx/xx/xax
+ 0: /xax
+  xx/xx/xx/xax/xx
+No match
+
+/**\/*a*\/**\/*b*/
+(?s)(?:\A|/)(?>[^/]*?a)(?>[^/]*?/)(*COMMIT)(?:.*?/)??(?>[^/]*?b)(?>[^/]*?\z)
+  xx/xx/xx/xax/xx/xb
+ 0: /xax/xx/xb
+  xx/xx/xx/xax/xx/x
+No match
 
 #pattern convert=glob:glob_no_starstar
 

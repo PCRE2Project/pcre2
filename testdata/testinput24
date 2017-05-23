@@ -245,6 +245,20 @@
 
 /abc\/**\/abc/
 
+/**\/*a*b*g*n*t/
+  abcd/abcdefg/abcdefghijk/abcdefghijklmnop.txt
+
+/**\/*a*\/**/
+  xx/xx/xx/xax/xx/xb
+
+/**\/*a*/
+  xx/xx/xx/xax
+  xx/xx/xx/xax/xx
+
+/**\/*a*\/**\/*b*/
+  xx/xx/xx/xax/xx/xb
+  xx/xx/xx/xax/xx/x
+
 #pattern convert=glob:glob_no_starstar
 
 /***/
