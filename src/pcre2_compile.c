@@ -1667,8 +1667,8 @@ else
         }
       else if (ptr < ptrend && *ptr++ == CHAR_RIGHT_CURLY_BRACKET)
         {
-        if (utf && c >= 0xd800 && c <= 0xdfff &&
-            (cb->cx->extra_options & PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES) == 0)
+        if (utf && c >= 0xd800 && c <= 0xdfff && (cb == NULL ||
+            (cb->cx->extra_options & PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES) == 0))
           {
           ptr--;
           *errorcodeptr = ERR73;
@@ -1737,8 +1737,8 @@ else
           }
         else if (ptr < ptrend && *ptr++ == CHAR_RIGHT_CURLY_BRACKET)
           {
-          if (utf && c >= 0xd800 && c <= 0xdfff &&
-              (cb->cx->extra_options & PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES) == 0)
+          if (utf && c >= 0xd800 && c <= 0xdfff && (cb == NULL ||
+              (cb->cx->extra_options & PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES) == 0))
             {
             ptr--;
             *errorcodeptr = ERR73;
