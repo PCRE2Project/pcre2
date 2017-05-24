@@ -423,6 +423,47 @@ out->output_size = output_size;
 }
 
 
+/* Prints the separator into the output.
+
+Arguments:
+  out            output context
+  separator      glob separator
+  with_escape    backslash is needed before separator
+*/
+
+static void
+convert_glob_print_separator(pcre2_output_context *out,
+  PCRE2_UCHAR separator, BOOL with_escape)
+{
+if (with_escape)
+  convert_glob_write(out, CHAR_BACKSLASH);
+
+convert_glob_write(out, separator);
+}
+
+
+/* Prints a wildcard into the output.
+
+Arguments:
+  out            output context
+  separator      glob separator
+  with_escape    backslash is needed before separator
+*/
+
+static void
+convert_glob_print_wildcard(pcre2_output_context *out,
+  PCRE2_UCHAR separator, BOOL with_escape)
+{
+out->out_str[0] = CHAR_LEFT_SQUARE_BRACKET;
+out->out_str[1] = CHAR_CIRCUMFLEX_ACCENT;
+convert_glob_write_str(out, 2);
+
+convert_glob_print_separator(out, separator, with_escape);
+
+convert_glob_write(out, CHAR_RIGHT_SQUARE_BRACKET);
+}
+
+
 /* Parse a posix class.
 
 Arguments:
@@ -519,11 +560,18 @@ Returns:         0 => success
 
 static int
 convert_glob_parse_range(PCRE2_SPTR *from, PCRE2_SPTR pattern_end,
-  pcre2_output_context *out, PCRE2_UCHAR separator, BOOL with_escape)
+  pcre2_output_context *out, BOOL utf, PCRE2_UCHAR separator,
+  BOOL with_escape, PCRE2_UCHAR escape, BOOL no_wildsep)
 {
+BOOL is_negative = FALSE;
+BOOL separator_seen = FALSE;
+BOOL has_prev_c;
 PCRE2_SPTR pattern = *from;
-PCRE2_UCHAR c;
+PCRE2_SPTR char_start = NULL;
+uint32_t c, prev_c;
 int result, len;
+
+(void)utf; /* Avoid compiler warning. */
 
 if (pattern >= pattern_end)
   {
@@ -531,65 +579,70 @@ if (pattern >= pattern_end)
   return ERROR_MISSING_SQUARE_BRACKET;
   }
 
-c = *pattern;
-
-if (c == CHAR_EXCLAMATION_MARK
-    || c == CHAR_CIRCUMFLEX_ACCENT)
-  {
-  out->out_str[0] = CHAR_LEFT_SQUARE_BRACKET;
-  out->out_str[1] = CHAR_CIRCUMFLEX_ACCENT;
-  len = 2;
-  }
-else
-  {
-  out->out_str[0] = CHAR_LEFT_PARENTHESIS;
-  out->out_str[1] = CHAR_QUESTION_MARK;
-  out->out_str[2] = CHAR_EXCLAMATION_MARK;
-  len = 3;
-  }
-
-if (with_escape)
-  {
-  out->out_str[len] = CHAR_BACKSLASH;
-  len++;
-  }
-
-out->out_str[len] = (uint8_t) separator;
-
-convert_glob_write_str(out, len + 1);
-
-if (c == CHAR_EXCLAMATION_MARK
-    || c == CHAR_CIRCUMFLEX_ACCENT)
+if (*pattern == CHAR_EXCLAMATION_MARK
+    || *pattern == CHAR_CIRCUMFLEX_ACCENT)
   {
   pattern++;
+
   if (pattern >= pattern_end)
     {
     *from = pattern;
     return ERROR_MISSING_SQUARE_BRACKET;
     }
-  c = *pattern;
+
+  is_negative = TRUE;
+
+  out->out_str[0] = CHAR_LEFT_SQUARE_BRACKET;
+  out->out_str[1] = CHAR_CIRCUMFLEX_ACCENT;
+  len = 2;
+
+  if (!no_wildsep)
+    {
+    if (with_escape)
+      {
+      out->out_str[len] = CHAR_BACKSLASH;
+      len++;
+      }
+    out->out_str[len] = (uint8_t) separator;
+    }
+
+  convert_glob_write_str(out, len + 1);
   }
 else
-  {
-  out->out_str[0] = CHAR_RIGHT_PARENTHESIS;
-  out->out_str[1] = CHAR_LEFT_SQUARE_BRACKET;
-  convert_glob_write_str(out, 2);
-  }
+  convert_glob_write(out, CHAR_LEFT_SQUARE_BRACKET);
 
-if (c == CHAR_MINUS || c == CHAR_RIGHT_SQUARE_BRACKET)
+has_prev_c = FALSE;
+prev_c = 0;
+
+if (*pattern == CHAR_RIGHT_SQUARE_BRACKET)
   {
-  convert_glob_write(out, CHAR_BACKSLASH);
-  convert_glob_write(out, c);
+  convert_glob_write(out, CHAR_RIGHT_SQUARE_BRACKET);
+  has_prev_c = TRUE;
+  prev_c = CHAR_RIGHT_SQUARE_BRACKET;
   pattern++;
   }
 
 while (pattern < pattern_end)
   {
-  c = *pattern++;
+  char_start = pattern;
+  GETCHARINCTEST(c, pattern);
 
   if (c == CHAR_RIGHT_SQUARE_BRACKET)
     {
     convert_glob_write(out, c);
+
+    if (!is_negative && !no_wildsep && separator_seen)
+      {
+      out->out_str[0] = CHAR_LEFT_PARENTHESIS;
+      out->out_str[1] = CHAR_QUESTION_MARK;
+      out->out_str[2] = CHAR_LESS_THAN_SIGN;
+      out->out_str[3] = CHAR_EXCLAMATION_MARK;
+      convert_glob_write_str(out, 4);
+
+      convert_glob_print_separator(out, separator, with_escape);
+      convert_glob_write(out, CHAR_RIGHT_PARENTHESIS);
+      }
+
     *from = pattern;
     return 0;
     }
@@ -605,77 +658,68 @@ while (pattern < pattern_end)
 
     pattern = *from;
 
-    /* A dash after a character class is a normal character. */
-    if (pattern >= pattern_end || *pattern != CHAR_MINUS)
-      continue;
-
-    c = CHAR_MINUS;
-    pattern++;
+    has_prev_c = FALSE;
+    prev_c = 0;
+    separator_seen = TRUE;
+    continue;
     }
-  else if (c == CHAR_MINUS)
+  else if (c == CHAR_MINUS && has_prev_c &&
+           *pattern != CHAR_RIGHT_SQUARE_BRACKET)
     {
     convert_glob_write(out, CHAR_MINUS);
-    c = *pattern++;
 
-    if (c == CHAR_BACKSLASH)
+    char_start = pattern;
+    GETCHARINCTEST(c, pattern);
+
+    if (pattern >= pattern_end) break;
+
+    if (escape != 0 && c == escape)
       {
-      if (pattern >= pattern_end) break;
-        c = *pattern++;
+      char_start = pattern;
+      GETCHARINCTEST(c, pattern);
       }
+    else if (c == CHAR_LEFT_SQUARE_BRACKET && *pattern == CHAR_COLON)
+      {
+      *from = pattern;
+      return PCRE2_ERROR_CONVERT_SYNTAX;
+      }
+
+    if (prev_c > c)
+      {
+      *from = pattern;
+      return PCRE2_ERROR_CONVERT_SYNTAX;
+      }
+
+    if (prev_c < separator && separator < c) separator_seen = TRUE;
+
+    has_prev_c = FALSE;
+    prev_c = 0;
     }
-  else if (c == CHAR_BACKSLASH)
-    c = *pattern++;
+  else
+    {
+    if (escape != 0 && c == escape)
+      {
+      char_start = pattern;
+      GETCHARINCTEST(c, pattern);
+
+      if (pattern >= pattern_end) break;
+      }
+
+    has_prev_c = TRUE;
+    prev_c = c;
+    }
 
   if (c == CHAR_LEFT_SQUARE_BRACKET || c == CHAR_RIGHT_SQUARE_BRACKET ||
       c == CHAR_BACKSLASH || c == CHAR_MINUS)
     convert_glob_write(out, CHAR_BACKSLASH);
 
-  convert_glob_write(out, c);
+  if (c == separator) separator_seen = TRUE;
+
+  do convert_glob_write(out, *char_start++); while (char_start < pattern);
   }
 
 *from = pattern;
 return ERROR_MISSING_SQUARE_BRACKET;
-}
-
-
-/* Prints the separator into the output.
-
-Arguments:
-  out            output context
-  separator      glob separator
-  with_escape    backslash is needed before separator
-*/
-
-static void
-convert_glob_print_separator(pcre2_output_context *out,
-  PCRE2_UCHAR separator, BOOL with_escape)
-{
-if (with_escape)
-  convert_glob_write(out, CHAR_BACKSLASH);
-
-convert_glob_write(out, separator);
-}
-
-
-/* Prints a wildcard into the output.
-
-Arguments:
-  out            output context
-  separator      glob separator
-  with_escape    backslash is needed before separator
-*/
-
-static void
-convert_glob_print_wildcard(pcre2_output_context *out,
-  PCRE2_UCHAR separator, BOOL with_escape)
-{
-out->out_str[0] = CHAR_LEFT_SQUARE_BRACKET;
-out->out_str[1] = CHAR_CIRCUMFLEX_ACCENT;
-convert_glob_write_str(out, 2);
-
-convert_glob_print_separator(out, separator, with_escape);
-
-convert_glob_write(out, CHAR_RIGHT_SQUARE_BRACKET);
 }
 
 
@@ -727,8 +771,8 @@ pcre2_output_context out;
 PCRE2_SPTR pattern_start = pattern;
 PCRE2_SPTR pattern_end = pattern + plength;
 PCRE2_UCHAR separator = ccontext->glob_separator;
+PCRE2_UCHAR escape = ccontext->glob_escape;
 PCRE2_UCHAR c;
-BOOL no_escape = ccontext->glob_escape == 0;
 BOOL no_wildsep = (options & PCRE2_CONVERT_GLOB_NO_WILD_SEPARATOR) != 0;
 BOOL no_starstar = (options & PCRE2_CONVERT_GLOB_NO_STARSTAR) != 0;
 BOOL in_atomic = FALSE;
@@ -736,14 +780,16 @@ BOOL after_starstar = FALSE;
 BOOL with_escape, is_start;
 int result, len;
 
-(void)utf;  /* Avoid compiler warning */
+(void)utf; /* Avoid compiler warning. */
 
-if (separator >= 128)
+#ifdef SUPPORT_UNICODE
+if (utf && (separator >= 128 || escape >= 128))
   {
-  /* Currently only ASCII separators are supported. */
+  /* Currently only ASCII characters are supported. */
   *bufflenptr = 0;
   return PCRE2_ERROR_CONVERT_SYNTAX;
   }
+#endif
 
 with_escape = strchr(pcre2_escaped_literals, separator) != NULL;
 
@@ -809,7 +855,7 @@ while (pattern < pattern_end)
         break;
         }
 
-      if (!no_escape && *pattern == ccontext->glob_escape)
+      if (escape != 0 && *pattern == escape)
         {
         pattern++;
         if (pattern >= pattern_end)
@@ -908,6 +954,8 @@ while (pattern < pattern_end)
 
     out.out_str[0] = CHAR_ASTERISK;
     out.out_str[1] = CHAR_QUESTION_MARK;
+    if (pattern >= pattern_end)
+      out.out_str[1] = CHAR_PLUS;
     convert_glob_write_str(&out, 2);
     continue;
     }
@@ -924,12 +972,12 @@ while (pattern < pattern_end)
   if (c == CHAR_LEFT_SQUARE_BRACKET)
     {
     result = convert_glob_parse_range(&pattern, pattern_end,
-      &out, separator, with_escape);
+      &out, utf, separator, with_escape, escape, no_wildsep);
     if (result != 0) break;
     continue;
     }
 
-  if (!no_escape && c == ccontext->glob_escape)
+  if (escape != 0 && c == escape)
     {
     if (pattern >= pattern_end)
       {
