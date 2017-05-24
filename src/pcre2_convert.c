@@ -616,7 +616,9 @@ prev_c = 0;
 
 if (*pattern == CHAR_RIGHT_SQUARE_BRACKET)
   {
-  convert_glob_write(out, CHAR_RIGHT_SQUARE_BRACKET);
+  out->out_str[0] = CHAR_BACKSLASH;
+  out->out_str[1] = CHAR_RIGHT_SQUARE_BRACKET;
+  convert_glob_write_str(out, 2);
   has_prev_c = TRUE;
   prev_c = CHAR_RIGHT_SQUARE_BRACKET;
   pattern++;
@@ -777,8 +779,8 @@ BOOL no_wildsep = (options & PCRE2_CONVERT_GLOB_NO_WILD_SEPARATOR) != 0;
 BOOL no_starstar = (options & PCRE2_CONVERT_GLOB_NO_STARSTAR) != 0;
 BOOL in_atomic = FALSE;
 BOOL after_starstar = FALSE;
-BOOL with_escape, is_start;
-int result, len;
+BOOL with_escape, is_start, after_separator;
+int result;
 
 (void)utf; /* Avoid compiler warning. */
 
@@ -840,11 +842,7 @@ while (pattern < pattern_end)
 
     if (!no_starstar && pattern < pattern_end && *pattern == CHAR_ASTERISK)
       {
-      if (!is_start && pattern[-2] != separator)
-        {
-        result = PCRE2_ERROR_CONVERT_SYNTAX;
-        break;
-        }
+      after_separator = is_start || (pattern[-2] == separator);
 
       do pattern++; while (pattern < pattern_end &&
                            *pattern == CHAR_ASTERISK);
@@ -855,27 +853,16 @@ while (pattern < pattern_end)
         break;
         }
 
-      if (escape != 0 && *pattern == escape)
-        {
-        pattern++;
-        if (pattern >= pattern_end)
-          {
-          result = PCRE2_ERROR_CONVERT_SYNTAX;
-          break;
-          }
-        }
-
-      if (*pattern != separator)
-        {
-        result = PCRE2_ERROR_CONVERT_SYNTAX;
-        break;
-        }
-
-      pattern++;
       after_starstar = TRUE;
+
+      if (after_separator && escape != 0 && *pattern == escape &&
+          pattern + 1 < pattern_end && pattern[1] == separator)
+        pattern++;
 
       if (is_start)
         {
+        if (*pattern != separator) continue;
+
         out.out_str[0] = CHAR_LEFT_PARENTHESIS;
         out.out_str[1] = CHAR_QUESTION_MARK;
         out.out_str[2] = CHAR_COLON;
@@ -886,10 +873,21 @@ while (pattern < pattern_end)
 
         convert_glob_print_separator(&out, separator, with_escape);
         convert_glob_write(&out, CHAR_RIGHT_PARENTHESIS);
+
+        pattern++;
         continue;
         }
 
       convert_glob_print_commit(&out);
+
+      if (!after_separator || *pattern != separator)
+        {
+        out.out_str[0] = CHAR_DOT;
+        out.out_str[1] = CHAR_ASTERISK;
+        out.out_str[2] = CHAR_QUESTION_MARK;
+        convert_glob_write_str(&out, 3);
+        continue;
+        }
 
       out.out_str[0] = CHAR_LEFT_PARENTHESIS;
       out.out_str[1] = CHAR_QUESTION_MARK;
@@ -897,21 +895,17 @@ while (pattern < pattern_end)
       out.out_str[3] = CHAR_DOT;
       out.out_str[4] = CHAR_ASTERISK;
       out.out_str[5] = CHAR_QUESTION_MARK;
-      len = 6;
 
-      if (with_escape)
-        {
-        out.out_str[6] = CHAR_BACKSLASH;
-        len = 7;
-        }
+      convert_glob_write_str(&out, 6);
 
-      convert_glob_write_str(&out, len);
+      convert_glob_print_separator(&out, separator, with_escape);
 
-      out.out_str[0] = (uint8_t) separator;
-      out.out_str[1] = CHAR_RIGHT_PARENTHESIS;
+      out.out_str[0] = CHAR_RIGHT_PARENTHESIS;
+      out.out_str[1] = CHAR_QUESTION_MARK;
       out.out_str[2] = CHAR_QUESTION_MARK;
-      out.out_str[3] = CHAR_QUESTION_MARK;
-      convert_glob_write_str(&out, 4);
+      convert_glob_write_str(&out, 3);
+
+      pattern++;
       continue;
       }
 

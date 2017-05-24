@@ -41,7 +41,7 @@
 # Now some actual tests
 
 /a?b[]xy]*c/
-(?s)\Aa[^/]b[]xy](*COMMIT)[^/]*?c\z
+(?s)\Aa[^/]b[\]xy](*COMMIT)[^/]*?c\z
     azb]1234c
  0: azb]1234c
 
@@ -143,15 +143,15 @@ No match
  0: ten
 
 /a[]]b/
-(?s)\Aa[]]b\z
+(?s)\Aa[\]]b\z
     a]b
  0: a]b
 
 /a[]a-]b/
-(?s)\Aa[]a\-]b\z
+(?s)\Aa[\]a\-]b\z
 
 /a[]-]b/
-(?s)\Aa[]\-]b\z
+(?s)\Aa[\]\-]b\z
     a-b
  0: a-b
     a]b
@@ -161,7 +161,7 @@ No match
 No match
 
 /a[]a-z]b/
-(?s)\Aa[]a-z]b\z
+(?s)\Aa[\]a-z]b\z
     aab
  0: aab
 
@@ -343,10 +343,10 @@ No match
 (?s)\A[^/]a[^/]/[^/]b[^/]\z
 
 /[a\\b\c][]][-][\]\-]/
-(?s)\A[a\\bc][]][\-][\]\-]\z
+(?s)\A[a\\bc][\]][\-][\]\-]\z
 
 /[^a\\b\c][!]][!-][^\]\-]/
-(?s)\A[^/a\\bc][^/]][^/\-][^/\]\-]\z
+(?s)\A[^/a\\bc][^/\]][^/\-][^/\]\-]\z
 
 /[[:alpha:][:xdigit:][:word:]]/
 (?s)\A[[:alpha:][:xdigit:][:word:]](?<!/)\z
@@ -389,6 +389,12 @@ No match
 
 /**\/abc/
 (?s)(?:\A|/)abc\z
+  abc
+ 0: abc
+  x/abc
+ 0: /abc
+  xabc
+No match
 
 /abc\/**/
 (?s)\Aabc/
@@ -420,6 +426,29 @@ No match
   xx/xx/xx/xax/xx/x
 No match
 
+"**a"convert=glob
+(?s)a\z
+  a
+ 0: a
+  c/b/a
+ 0: a
+  c/b/aaa
+ 0: a
+
+"a**/b"convert=glob
+(?s)\Aa(*COMMIT).*?/b\z
+  a/b
+ 0: a/b
+  ab
+No match
+
+"a/**b"convert=glob
+(?s)\Aa/(*COMMIT).*?b\z
+  a/b
+ 0: a/b
+  ab
+No match
+
 #pattern convert=glob:glob_no_starstar
 
 /***/
@@ -438,7 +467,7 @@ No match
 (?s)a
 
 /**a**/
-** Pattern conversion error at offset 2: invalid syntax
+(?s)a
 
 /a*b/
 (?s)\Aa(*COMMIT).*?b\z
@@ -456,7 +485,7 @@ No match
 (?s)\Aa\\b\\cd\z
 
 /**\/a/
-** Pattern conversion error at offset 2: invalid syntax
+(?s)\\/a\z
 
 /a`*b/convert_glob_escape=`
 (?s)\Aa\*b\z
