@@ -179,12 +179,12 @@ No match
 No match
 
 '[[:alpha:]][[:digit:]][[:upper:]]'
-(?s)\A[[:alpha:]](?<!/)[[:digit:]](?<!/)[[:upper:]](?<!/)\z
+(?s)\A[[:alpha:]][[:digit:]][[:upper:]]\z
     a1B
  0: a1B
 
 '[[:digit:][:upper:][:space:]]'
-(?s)\A[[:digit:][:upper:][:space:]](?<!/)\z
+(?s)\A[[:digit:][:upper:][:space:]]\z
     A
  0: A
     1
@@ -198,7 +198,7 @@ No match
 No match
 
 '[a-c[:digit:]x-z]'
-(?s)\A[a-c[:digit:]x-z](?<!/)\z
+(?s)\A[a-c[:digit:]x-z]\z
     5
  0: 5
     b
@@ -294,7 +294,7 @@ No match
  0: <->
 
 /a[[:digit:].]z/
-(?s)\Aa[[:digit:].](?<!/)z\z
+(?s)\Aa[[:digit:].]z\z
     a1z
  0: a1z
     a.z
@@ -304,20 +304,29 @@ No match
 No match
 
 /a[[:digit].]z/
-** Pattern conversion error at offset 10: missing terminating ] for character class
+(?s)\Aa[\[:digit]\.\]z\z
     a[.]z
+ 0: a[.]z
     a:.]z
+ 0: a:.]z
     ad.]z
+ 0: ad.]z
 
 /<[[:a[:digit:]b]>/
-** Pattern conversion error at offset 6: missing terminating ] for character class
+(?s)\A<[\[:a[:digit:]b]>\z
     <[>
+ 0: <[>
     <:>
+ 0: <:>
     <a>
+ 0: <a>
     <9>
+ 0: <9>
     <b>
+ 0: <b>
 \= Expect no match
     <d>
+No match
 
 /a*b/convert_glob_separator=\
 (?s)\Aa(*COMMIT)[^\\]*?b\z
@@ -349,7 +358,7 @@ No match
 (?s)\A[^/a\\bc][^/\]][^/\-][^/\]\-]\z
 
 /[[:alpha:][:xdigit:][:word:]]/
-(?s)\A[[:alpha:][:xdigit:][:word:]](?<!/)\z
+(?s)\A[[:alpha:][:xdigit:][:word:]]\z
 
 "[/-/]"
 (?s)\A[/-/](?<!/)\z
@@ -364,7 +373,10 @@ No match
 (?s)\A[^/\--\-\--\-]\z
 
 /[[:alpha:]-a]/
-(?s)\A[[:alpha:]\-a](?<!/)\z
+(?s)\A[[:alpha:]\-a]\z
+
+/[[:alpha:]][[:punct:]][[:ascii:]]/
+(?s)\A[[:alpha:]][[:punct:]](?<!/)[[:ascii:]](?<!/)\z
 
 /[a-[:alpha:]]/
 ** Pattern conversion error at offset 4: invalid syntax
@@ -376,13 +388,13 @@ No match
 ** Pattern conversion error at offset 10: missing terminating ] for character class
 
 /[[:alphaa:]]/
-** Pattern conversion error at offset 11: unknown POSIX class name
+(?s)\A[\[:alphaa:]\]\z
 
 /[[:xdigi:]]/
-** Pattern conversion error at offset 10: unknown POSIX class name
+(?s)\A[\[:xdigi:]\]\z
 
 /[[:xdigit::]]/
-** Pattern conversion error at offset 10: missing terminating ] for character class
+(?s)\A[\[:xdigit::]\]\z
 
 /****/
 (?s)

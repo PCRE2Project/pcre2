@@ -471,8 +471,8 @@ Arguments:
   pattern_end    end of pattern
   out            output context
 
-Returns:      TRUE => success
-             FALSE => malformed class
+Returns:  >0 => class index
+          0  => malformed class
 */
 
 static int
@@ -481,48 +481,31 @@ convert_glob_parse_class(PCRE2_SPTR *from, PCRE2_SPTR pattern_end,
 {
 static const char *posix_classes = "alnum:alpha:ascii:blank:cntrl:digit:"
   "graph:lower:print:punct:space:upper:word:xdigit:";
-PCRE2_SPTR pattern = *from;
-PCRE2_SPTR start;
+PCRE2_SPTR start = *from + 1;
+PCRE2_SPTR pattern = start;
 const char *class_ptr;
 PCRE2_UCHAR c;
-
-out->out_str[0] = CHAR_LEFT_SQUARE_BRACKET;
-out->out_str[1] = CHAR_COLON;
-convert_glob_write_str(out, 2);
+int class_index;
 
 while (TRUE)
   {
-  if (pattern >= pattern_end)
-    {
-    *from = pattern;
-    return ERROR_MISSING_SQUARE_BRACKET;
-    }
+  if (pattern >= pattern_end) return 0;
 
   c = *pattern++;
 
-  if (c == CHAR_COLON && pattern < pattern_end &&
-      *pattern == CHAR_RIGHT_SQUARE_BRACKET)
-    {
-      break;
-    }
-
-  if (c < CHAR_a || c > CHAR_z)
-    {
-    /* All POSIX class is composed of lowercase characters */
-    *from = pattern;
-    return ERROR_MISSING_SQUARE_BRACKET;
-    }
-
-  convert_glob_write(out, c);
+  if (c < CHAR_a || c > CHAR_z) break;
   }
 
-start = *from;
-*from = pattern + 1;
+if (c != CHAR_COLON || pattern >= pattern_end ||
+    *pattern != CHAR_RIGHT_SQUARE_BRACKET)
+  return 0;
+
 class_ptr = posix_classes;
+class_index = 0;
 
 while (TRUE)
   {
-  if (*class_ptr == CHAR_NULL) return ERROR_UNKNOWN_POSIX_CLASS;
+  if (*class_ptr == CHAR_NULL) return 0;
 
   pattern = start;
 
@@ -530,10 +513,13 @@ while (TRUE)
     {
     if (*pattern == CHAR_COLON)
       {
-      out->out_str[0] = CHAR_COLON;
-      out->out_str[1] = CHAR_RIGHT_SQUARE_BRACKET;
-      convert_glob_write_str(out, 2);
-      return 0;
+      pattern += 2;
+      start -= 2;
+
+      do convert_glob_write(out, *start++); while (start < pattern);
+
+      *from = pattern;
+      return class_index;
       }
     pattern++;
     class_ptr++;
@@ -541,9 +527,41 @@ while (TRUE)
 
   while (*class_ptr != CHAR_COLON) class_ptr++;
   class_ptr++;
+  class_index++;
   }
 }
 
+/* Checks whether the character is in the class.
+
+Arguments:
+  class_index    class index
+  c              character
+
+Returns:   !0 => character is found in the class
+            0 => otherwise
+*/
+
+static BOOL
+convert_glob_char_in_class(int class_index, PCRE2_UCHAR c)
+{
+switch (class_index)
+  {
+  case 0: return isalnum(c);
+  case 1: return isalpha(c);
+  case 2: return 1;
+  case 3: return c == CHAR_HT || c == CHAR_SPACE;
+  case 4: return iscntrl(c);
+  case 5: return isdigit(c);
+  case 6: return isgraph(c);
+  case 7: return islower(c);
+  case 8: return isprint(c);
+  case 9: return ispunct(c);
+  case 10: return isspace(c);
+  case 11: return isupper(c);
+  case 12: return isalnum(c) || c == CHAR_UNDERSCORE;
+  default: return isxdigit(c);
+  }
+}
 
 /* Parse a range of characters.
 
@@ -569,7 +587,7 @@ BOOL has_prev_c;
 PCRE2_SPTR pattern = *from;
 PCRE2_SPTR char_start = NULL;
 uint32_t c, prev_c;
-int result, len;
+int len, class_index;
 
 (void)utf; /* Avoid compiler warning. */
 
@@ -653,17 +671,21 @@ while (pattern < pattern_end)
 
   if (c == CHAR_LEFT_SQUARE_BRACKET && *pattern == CHAR_COLON)
     {
-    *from = pattern + 1;
+    *from = pattern;
+    class_index = convert_glob_parse_class(from, pattern_end, out);
 
-    result = convert_glob_parse_class(from, pattern_end, out);
-    if (result != 0) return result;
+    if (class_index != 0)
+      {
+      pattern = *from;
 
-    pattern = *from;
+      has_prev_c = FALSE;
+      prev_c = 0;
 
-    has_prev_c = FALSE;
-    prev_c = 0;
-    separator_seen = TRUE;
-    continue;
+      if (!is_negative &&
+          convert_glob_char_in_class (class_index, separator))
+        separator_seen = TRUE;
+      continue;
+      }
     }
   else if (c == CHAR_MINUS && has_prev_c &&
            *pattern != CHAR_RIGHT_SQUARE_BRACKET)

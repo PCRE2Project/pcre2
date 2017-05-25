@@ -237,6 +237,8 @@
 
 /[[:alpha:]-a]/
 
+/[[:alpha:]][[:punct:]][[:ascii:]]/
+
 /[a-[:alpha:]]/
 
 /[[:alpha:/
