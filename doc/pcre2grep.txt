@@ -114,7 +114,9 @@ BINARY FILES
 
        By default, a file that contains a binary zero byte  within  the  first
        1024  bytes is identified as a binary file, and is processed specially.
-       (GNU grep also  identifies  binary  files  in  this  manner.)  See  the
+       (GNU grep identifies binary files in this manner.) However, if the new-
+       line  type  is  specified  as  "nul", that is, the line terminator is a
+       binary zero, the test for  a  binary  file  is  not  applied.  See  the
        --binary-files  option for a means of changing the way binary files are
        handled.
 
@@ -915,5 +917,5 @@ AUTHOR
 
 REVISION
 
-       Last updated: 11 April 2017
+       Last updated: 26 May 2017
        Copyright (c) 1997-2017 University of Cambridge.

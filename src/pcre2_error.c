@@ -307,8 +307,8 @@ else                                /* Invalid error number */
 
 for (; n > 0; n--)
   {
-  while (*message++ != CHAR_NULL) {};
-  if (*message == CHAR_NULL) return PCRE2_ERROR_BADDATA;
+  while (*message++ != CHAR_NUL) {};
+  if (*message == CHAR_NUL) return PCRE2_ERROR_BADDATA;
   }
 
 for (i = 0; *message != 0; i++)

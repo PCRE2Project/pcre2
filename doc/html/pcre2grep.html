@@ -142,9 +142,11 @@ standard input is always so treated.
 <br><a name="SEC4" href="#TOC1">BINARY FILES</a><br>
 <P>
 By default, a file that contains a binary zero byte within the first 1024 bytes
-is identified as a binary file, and is processed specially. (GNU grep also
-identifies binary files in this manner.) See the <b>--binary-files</b> option
-for a means of changing the way binary files are handled.
+is identified as a binary file, and is processed specially. (GNU grep
+identifies binary files in this manner.) However, if the newline type is
+specified as "nul", that is, the line terminator is a binary zero, the test for
+a binary file is not applied. See the <b>--binary-files</b> option for a means
+of changing the way binary files are handled.
 </P>
 <br><a name="SEC5" href="#TOC1">OPTIONS</a><br>
 <P>
@@ -934,7 +936,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC15" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 11 April 2017
+Last updated: 26 May 2017
 <br>
 Copyright &copy; 1997-2017 University of Cambridge.
 <br>

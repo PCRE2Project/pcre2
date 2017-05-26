@@ -4911,4 +4911,22 @@
 \= Expect no match
     xyzabcdef
 
+/(*NUL)^.*/
+    a\nb\x00ccc
+    
+/(*NUL)^.*/s
+    a\nb\x00ccc
+    
+/^x/m,newline=nul
+    ab\x00xy
+    
+/'#comment' 0d 0a 00 '^x\' 0a 'y'/x,newline=nul,hex
+    x\nyz 
+ 
+/(*NUL)^X\NY/
+    X\nY
+    X\rY
+\= Expect no match
+    X\x00Y      
+
 # End of testinput6

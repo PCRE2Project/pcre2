@@ -141,7 +141,7 @@ COMMAND LINE OPTIONS
                    linksize   the configured internal link size (2, 3, or 4)
                                 exit code is set to the link size
                    newline    the default newline setting:
-                                CR, LF, CRLF, ANYCRLF, or ANY
+                                CR, LF, CRLF, ANYCRLF, ANY, or NUL
                                 exit code is always 0
                    bsr        the default setting for what \R matches:
                                 ANYCRLF or ANY
@@ -306,7 +306,7 @@ COMMAND LINES
 
        The #newline_default command specifies a list of newline types that are
        acceptable  as the default. The types must be one of CR, LF, CRLF, ANY-
-       CRLF, or ANY (in upper or lower case), for example:
+       CRLF, ANY, or NUL (in upper or lower case), for example:
 
          #newline_default LF Any anyCRLF
 
@@ -594,7 +594,7 @@ PATTERN MODIFIERS
 
        The newline modifier specifies which characters are to  be  interpreted
        as newlines, both in the pattern and in subject lines. The type must be
-       one of CR, LF, CRLF, ANYCRLF, or ANY (in upper or lower case).
+       one of CR, LF, CRLF, ANYCRLF, ANY, or NUL (in upper or lower case).
 
    Information about a pattern
 
@@ -1650,5 +1650,5 @@ AUTHOR
 
 REVISION
 
-       Last updated: 17 May 2017
+       Last updated: 26 May 2017
        Copyright (c) 1997-2017 University of Cambridge.

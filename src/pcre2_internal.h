@@ -678,7 +678,7 @@ a positive value. */
 
 /* The remaining definitions work in both environments. */
 
-#define CHAR_NULL                   '\0'
+#define CHAR_NUL                    '\0'
 #define CHAR_HT                     '\t'
 #define CHAR_VT                     '\v'
 #define CHAR_FF                     '\f'
@@ -919,6 +919,7 @@ a positive value. */
 #define STRING_CRLF_RIGHTPAR              "CRLF)"
 #define STRING_ANY_RIGHTPAR               "ANY)"
 #define STRING_ANYCRLF_RIGHTPAR           "ANYCRLF)"
+#define STRING_NUL_RIGHTPAR               "NUL)"
 #define STRING_BSR_ANYCRLF_RIGHTPAR       "BSR_ANYCRLF)"
 #define STRING_BSR_UNICODE_RIGHTPAR       "BSR_UNICODE)"
 #define STRING_UTF8_RIGHTPAR              "UTF8)"
@@ -956,7 +957,7 @@ only. */
 #define CHAR_ESC                    '\033'
 #define CHAR_DEL                    '\177'
 
-#define CHAR_NULL                   '\0'
+#define CHAR_NUL                    '\0'
 #define CHAR_SPACE                  '\040'
 #define CHAR_EXCLAMATION_MARK       '\041'
 #define CHAR_QUOTATION_MARK         '\042'
@@ -1194,6 +1195,7 @@ only. */
 #define STRING_CRLF_RIGHTPAR              STR_C STR_R STR_L STR_F STR_RIGHT_PARENTHESIS
 #define STRING_ANY_RIGHTPAR               STR_A STR_N STR_Y STR_RIGHT_PARENTHESIS
 #define STRING_ANYCRLF_RIGHTPAR           STR_A STR_N STR_Y STR_C STR_R STR_L STR_F STR_RIGHT_PARENTHESIS
+#define STRING_NUL_RIGHTPAR               STR_N STR_U STR_L STR_RIGHT_PARENTHESIS
 #define STRING_BSR_ANYCRLF_RIGHTPAR       STR_B STR_S STR_R STR_UNDERSCORE STR_A STR_N STR_Y STR_C STR_R STR_L STR_F STR_RIGHT_PARENTHESIS
 #define STRING_BSR_UNICODE_RIGHTPAR       STR_B STR_S STR_R STR_UNDERSCORE STR_U STR_N STR_I STR_C STR_O STR_D STR_E STR_RIGHT_PARENTHESIS
 #define STRING_UTF8_RIGHTPAR              STR_U STR_T STR_F STR_8 STR_RIGHT_PARENTHESIS

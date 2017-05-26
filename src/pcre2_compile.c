@@ -760,6 +760,7 @@ static pso pso_list[] = {
   { (uint8_t *)STRING_LF_RIGHTPAR,                 3, PSO_NL,  PCRE2_NEWLINE_LF },
   { (uint8_t *)STRING_CRLF_RIGHTPAR,               5, PSO_NL,  PCRE2_NEWLINE_CRLF },
   { (uint8_t *)STRING_ANY_RIGHTPAR,                4, PSO_NL,  PCRE2_NEWLINE_ANY },
+  { (uint8_t *)STRING_NUL_RIGHTPAR,                4, PSO_NL,  PCRE2_NEWLINE_NUL },
   { (uint8_t *)STRING_ANYCRLF_RIGHTPAR,            8, PSO_NL,  PCRE2_NEWLINE_ANYCRLF },
   { (uint8_t *)STRING_BSR_ANYCRLF_RIGHTPAR,       12, PSO_BSR, PCRE2_BSR_ANYCRLF },
   { (uint8_t *)STRING_BSR_UNICODE_RIGHTPAR,       12, PSO_BSR, PCRE2_BSR_UNICODE }
@@ -1911,7 +1912,7 @@ if (c == CHAR_LEFT_CURLY_BRACKET)
     {
     if (ptr >= cb->end_pattern) goto ERROR_RETURN;
     c = *ptr++;
-    if (c == CHAR_NULL) goto ERROR_RETURN;
+    if (c == CHAR_NUL) goto ERROR_RETURN;
     if (c == CHAR_RIGHT_CURLY_BRACKET) break;
     name[i] = c;
     }
@@ -6150,7 +6151,7 @@ for (;; pptr++)
           }
         else *callout_string++ = *pp++;
         }
-      *callout_string++ = CHAR_NULL;
+      *callout_string++ = CHAR_NUL;
 
       /* Set the length of the entire item, the advance to its end. */
 
@@ -9158,6 +9159,11 @@ switch(newline)
   case PCRE2_NEWLINE_LF:
   cb.nllen = 1;
   cb.nl[0] = CHAR_NL;
+  break;
+
+  case PCRE2_NEWLINE_NUL:
+  cb.nllen = 1;
+  cb.nl[0] = CHAR_NUL;
   break;
 
   case PCRE2_NEWLINE_CRLF:

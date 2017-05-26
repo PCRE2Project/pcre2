@@ -189,6 +189,10 @@ AC_ARG_ENABLE(newline-is-any,
               AS_HELP_STRING([--enable-newline-is-any],
                              [use any valid Unicode newline sequence]),
               ac_pcre2_newline=any)
+AC_ARG_ENABLE(newline-is-nul,
+              AS_HELP_STRING([--enable-newline-is-nul],
+                             [use NUL (binary zero) as newline character]),
+              ac_pcre2_newline=nul)
 enable_newline="$ac_pcre2_newline"
 
 # Handle --enable-bsr-anycrlf
@@ -360,6 +364,7 @@ case "$enable_newline" in
   crlf)    ac_pcre2_newline_value=3 ;;
   any)     ac_pcre2_newline_value=4 ;;
   anycrlf) ac_pcre2_newline_value=5 ;;
+  nul)     ac_pcre2_newline_value=6 ;; 
   *)
   AC_MSG_ERROR([invalid argument \"$enable_newline\" to --enable-newline option])
   ;;
@@ -658,7 +663,7 @@ AC_DEFINE_UNQUOTED([NEWLINE_DEFAULT], [$ac_pcre2_newline_value], [
   The value of NEWLINE_DEFAULT determines the default newline character
   sequence. PCRE2 client programs can override this by selecting other values
   at run time. The valid values are 1 (CR), 2 (LF), 3 (CRLF), 4 (ANY),
-  and 5 (ANYCRLF).])
+  5 (ANYCRLF), and 6 (NUL).])
 
 if test "$enable_bsr_anycrlf" = "yes"; then
   AC_DEFINE([BSR_ANYCRLF], [], [

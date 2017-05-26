@@ -662,6 +662,11 @@ $valgrind $vjs $pcre2grep -n --newline=any "^(abc|def|ghi|jkl)" testNinputgrep >
 printf "%c--------------------------- Test N6 ------------------------------\r\n" - >>testtrygrep
 $valgrind $vjs $pcre2grep -n --newline=anycrlf "^(abc|def|ghi|jkl)" testNinputgrep >>testtrygrep
 
+printf "abc\0def" >testNinputgrep
+
+printf "%c--------------------------- Test N7 ------------------------------\r\n" - >>testtrygrep
+$valgrind $vjs $pcre2grep -na --newline=nul "^(abc|def)" testNinputgrep | sed 's/\x00/ZERO/' >>testtrygrep
+
 $cf $srcdir/testdata/grepoutputN testtrygrep
 if [ $? != 0 ] ; then exit 1; fi
 

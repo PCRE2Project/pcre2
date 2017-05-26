@@ -1,4 +1,4 @@
-.TH PCRE2TEST 1 "17 May 2017" "PCRE 10.30"
+.TH PCRE2TEST 1 "26 May 2017" "PCRE 10.30"
 .SH NAME
 pcre2test - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -150,7 +150,7 @@ following options output the value and set the exit code as indicated:
   linksize   the configured internal link size (2, 3, or 4)
                exit code is set to the link size
   newline    the default newline setting:
-               CR, LF, CRLF, ANYCRLF, or ANY
+               CR, LF, CRLF, ANYCRLF, ANY, or NUL
                exit code is always 0
   bsr        the default setting for what \eR matches:
                ANYCRLF or ANY
@@ -320,8 +320,8 @@ recognized as a newline by default. Without special action the tests would fail
 when PCRE2 is compiled with either CR or CRLF as the default newline.
 .P
 The #newline_default command specifies a list of newline types that are
-acceptable as the default. The types must be one of CR, LF, CRLF, ANYCRLF, or
-ANY (in upper or lower case), for example:
+acceptable as the default. The types must be one of CR, LF, CRLF, ANYCRLF,
+ANY, or NUL (in upper or lower case), for example:
 .sp
   #newline_default LF Any anyCRLF
 .sp
@@ -617,7 +617,7 @@ is built, with the default default being Unicode.
 .P
 The \fBnewline\fP modifier specifies which characters are to be interpreted as
 newlines, both in the pattern and in subject lines. The type must be one of CR,
-LF, CRLF, ANYCRLF, or ANY (in upper or lower case).
+LF, CRLF, ANYCRLF, ANY, or NUL (in upper or lower case).
 .
 .
 .SS "Information about a pattern"
@@ -1792,6 +1792,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 17 May 2017
+Last updated: 26 May 2017
 Copyright (c) 1997-2017 University of Cambridge.
 .fi

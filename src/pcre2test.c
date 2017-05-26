@@ -390,7 +390,7 @@ static cmdstruct cmdlist[] = {
 of PCRE2_NEWLINE_xx in pcre2.h. */
 
 static const char *newlines[] = {
-  "DEFAULT", "CR", "LF", "CRLF", "ANY", "ANYCRLF" };
+  "DEFAULT", "CR", "LF", "CRLF", "ANY", "ANYCRLF", "NUL" };
 
 /* Structure and table for handling pattern conversion types. */
 
@@ -4453,6 +4453,10 @@ if ((pat_patctl.control & CTL_INFO) != 0)
       fprintf(outfile, "Forced newline is any Unicode newline\n");
       break;
 
+      case PCRE2_NEWLINE_NUL:
+      fprintf(outfile, "Forced newline is NUL\n");
+      break;
+
       default:
       break;
       }
@@ -7635,7 +7639,7 @@ printf("     ebcdic         compiled for EBCDIC character code [0,1]\n");
 printf("     ebcdic-nl      NL code if compiled for EBCDIC\n");
 printf("     jit            just-in-time compiler supported [0, 1]\n");
 printf("     linksize       internal link size [2, 3, 4]\n");
-printf("     newline        newline type [CR, LF, CRLF, ANYCRLF, ANY]\n");
+printf("     newline        newline type [CR, LF, CRLF, ANYCRLF, ANY, NUL]\n");
 printf("     pcre2-8        8 bit library support enabled [0, 1]\n");
 printf("     pcre2-16       16 bit library support enabled [0, 1]\n");
 printf("     pcre2-32       32 bit library support enabled [0, 1]\n");

@@ -179,8 +179,8 @@ sure both macros are undefined; an emulation function will then be used. */
 
 /* The value of NEWLINE_DEFAULT determines the default newline character
    sequence. PCRE2 client programs can override this by selecting other values
-   at run time. The valid values are 1 (CR), 2 (LF), 3 (CRLF), 4 (ANY), and 5
-   (ANYCRLF). */
+   at run time. The valid values are 1 (CR), 2 (LF), 3 (CRLF), 4 (ANY), 5
+   (ANYCRLF), and 6 (NUL). */
 #undef NEWLINE_DEFAULT
 
 /* Name of package */

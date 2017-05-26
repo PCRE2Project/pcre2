@@ -359,6 +359,7 @@ switch(newline)
   case PCRE2_NEWLINE_CRLF:
   case PCRE2_NEWLINE_ANY:
   case PCRE2_NEWLINE_ANYCRLF:
+  case PCRE2_NEWLINE_NUL: 
   ccontext->newline_convention = newline;
   return 0;
 

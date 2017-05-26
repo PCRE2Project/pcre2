@@ -214,10 +214,10 @@ amount of system stack that is used.
 Newline conventions
 </b><br>
 <P>
-PCRE2 supports five different conventions for indicating line breaks in
+PCRE2 supports six different conventions for indicating line breaks in
 strings: a single CR (carriage return) character, a single LF (linefeed)
-character, the two-character sequence CRLF, any of the three preceding, or any
-Unicode newline sequence. The
+character, the two-character sequence CRLF, any of the three preceding, any
+Unicode newline sequence, or the NUL character (binary zero). The
 <a href="pcre2api.html"><b>pcre2api</b></a>
 page has
 <a href="pcre2api.html#newlines">further discussion</a>
@@ -226,13 +226,14 @@ about newlines, and shows how to set the newline convention when calling
 </P>
 <P>
 It is also possible to specify a newline convention by starting a pattern
-string with one of the following five sequences:
+string with one of the following sequences:
 <pre>
   (*CR)        carriage return
   (*LF)        linefeed
   (*CRLF)      carriage return, followed by linefeed
   (*ANYCRLF)   any of the three above
   (*ANY)       all Unicode newline sequences
+  (*NUL)       the NUL character (binary zero) 
 </pre>
 These override the default and the options given to the compiling function. For
 example, on a Unix system where LF is the default newline sequence, the pattern
@@ -3444,7 +3445,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC30" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 18 April 2017
+Last updated: 26 May 2017
 <br>
 Copyright &copy; 1997-2017 University of Cambridge.
 <br>

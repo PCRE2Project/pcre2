@@ -505,7 +505,7 @@ class_index = 0;
 
 while (TRUE)
   {
-  if (*class_ptr == CHAR_NULL) return 0;
+  if (*class_ptr == CHAR_NUL) return 0;
 
   pattern = start;
 
@@ -1021,7 +1021,7 @@ if (result == 0 || result == ERROR_NO_SLASH_Z)
   if (in_atomic)
     convert_glob_write(&out, CHAR_RIGHT_PARENTHESIS);
 
-  convert_glob_write(&out, CHAR_NULL);
+  convert_glob_write(&out, CHAR_NUL);
   result = 0;
 
   if (!dummyrun && out.output_size != (PCRE2_SIZE) (out.output - use_buffer))

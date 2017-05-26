@@ -7721,4 +7721,29 @@ Failed: error -34: bad option value
     xyzabcdef
 No match
 
+/(*NUL)^.*/
+    a\nb\x00ccc
+ 0: a\x0ab
+    
+/(*NUL)^.*/s
+    a\nb\x00ccc
+ 0: a\x0ab\x00ccc
+    
+/^x/m,newline=nul
+    ab\x00xy
+ 0: x
+    
+/'#comment' 0d 0a 00 '^x\' 0a 'y'/x,newline=nul,hex
+    x\nyz 
+ 0: x\x0ay
+ 
+/(*NUL)^X\NY/
+    X\nY
+ 0: X\x0aY
+    X\rY
+ 0: X\x0dY
+\= Expect no match
+    X\x00Y      
+No match
+
 # End of testinput6

@@ -160,7 +160,7 @@ SET(PCRE2GREP_MAX_BUFSIZE "1048576" CACHE STRING
     "Buffer maximum size parameter for pcre2grep. See PCRE2GREP_MAX_BUFSIZE in config.h.in for details.")
 
 SET(PCRE2_NEWLINE "LF" CACHE STRING
-    "What to recognize as a newline (one of CR, LF, CRLF, ANY, ANYCRLF).")
+    "What to recognize as a newline (one of CR, LF, CRLF, ANY, ANYCRLF, NUL).")
 
 SET(PCRE2_HEAP_MATCH_RECURSE OFF CACHE BOOL
     "Obsolete option: do not use")
@@ -344,6 +344,9 @@ ENDIF(PCRE2_NEWLINE STREQUAL "ANY")
 IF(PCRE2_NEWLINE STREQUAL "ANYCRLF")
         SET(NEWLINE_DEFAULT "5")
 ENDIF(PCRE2_NEWLINE STREQUAL "ANYCRLF")
+IF(PCRE2_NEWLINE STREQUAL "NUL")
+        SET(NEWLINE_DEFAULT "6")
+ENDIF(PCRE2_NEWLINE STREQUAL "NUL")
 
 IF(NEWLINE_DEFAULT STREQUAL "")
         MESSAGE(FATAL_ERROR "The PCRE2_NEWLINE variable must be set to one of the following values: \"LF\", \"CR\", \"CRLF\", \"ANY\", \"ANYCRLF\".")

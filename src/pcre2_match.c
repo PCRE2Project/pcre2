@@ -6246,6 +6246,11 @@ switch(re->newline_convention)
   mb->nl[0] = CHAR_NL;
   break;
 
+  case PCRE2_NEWLINE_NUL:
+  mb->nllen = 1;
+  mb->nl[0] = CHAR_NUL;
+  break;
+
   case PCRE2_NEWLINE_CRLF:
   mb->nllen = 2;
   mb->nl[0] = CHAR_CR;

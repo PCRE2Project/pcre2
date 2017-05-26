@@ -201,6 +201,7 @@ greater than zero. */
 #define PCRE2_NEWLINE_CRLF        3
 #define PCRE2_NEWLINE_ANY         4
 #define PCRE2_NEWLINE_ANYCRLF     5
+#define PCRE2_NEWLINE_NUL         6
 
 #define PCRE2_BSR_UNICODE         1
 #define PCRE2_BSR_ANYCRLF         2

@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "17 May 2017" "PCRE2 10.30"
+.TH PCRE2API 3 "26 May 2017" "PCRE2 10.30"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -724,8 +724,9 @@ PCRE2_SIZE variable can hold, which is effectively unlimited.
 This specifies which characters or character sequences are to be recognized as
 newlines. The value must be one of PCRE2_NEWLINE_CR (carriage return only),
 PCRE2_NEWLINE_LF (linefeed only), PCRE2_NEWLINE_CRLF (the two-character
-sequence CR followed by LF), PCRE2_NEWLINE_ANYCRLF (any of the above), or
-PCRE2_NEWLINE_ANY (any Unicode newline sequence).
+sequence CR followed by LF), PCRE2_NEWLINE_ANYCRLF (any of the above), 
+PCRE2_NEWLINE_ANY (any Unicode newline sequence), or PCRE2_NEWLINE_NUL (the 
+NUL character, that is a binary zero).
 .P
 A pattern can override the value set in the compile context by starting with a
 sequence such as (*CRLF). See the
@@ -1039,6 +1040,7 @@ sequence that is recognized as meaning "newline". The values are:
   PCRE2_NEWLINE_CRLF     Carriage return, linefeed (CRLF)
   PCRE2_NEWLINE_ANY      Any Unicode line ending
   PCRE2_NEWLINE_ANYCRLF  Any of CR, LF, or CRLF
+  PCRE2_NEWLINE_NUL      The NUL character (binary zero) 
 .sp
 The default should normally correspond to the standard sequence for your
 operating system.
@@ -2090,6 +2092,7 @@ The output is one of the following \fBuint32_t\fP values:
   PCRE2_NEWLINE_CRLF     Carriage return, linefeed (CRLF)
   PCRE2_NEWLINE_ANY      Any Unicode line ending
   PCRE2_NEWLINE_ANYCRLF  Any of CR, LF, or CRLF
+  PCRE2_NEWLINE_NUL      The NUL character (binary zero) 
 .sp
 This identifies the character sequence that will be recognized as meaning
 "newline" while matching.
@@ -3488,6 +3491,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 17 May 2017
+Last updated: 26 May 2017
 Copyright (c) 1997-2017 University of Cambridge.
 .fi

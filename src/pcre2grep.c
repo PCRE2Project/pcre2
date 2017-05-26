@@ -404,7 +404,7 @@ static option_item optionlist[] = {
   { OP_U32NUMBER,  N_M_LIMIT_DEP, &depth_limit, "depth-limit=number", "set PCRE2 depth limit option" },
   { OP_U32NUMBER,  N_M_LIMIT_DEP, &depth_limit, "recursion-limit=number", "obsolete synonym for depth-limit" },
   { OP_NODATA,     'M',      NULL,              "multiline",     "run in multiline mode" },
-  { OP_STRING,     'N',      &newline_arg,      "newline=type",  "set newline type (CR, LF, CRLF, ANYCRLF or ANY)" },
+  { OP_STRING,     'N',      &newline_arg,      "newline=type",  "set newline type (CR, LF, CRLF, ANYCRLF, ANY, or NUL)" },
   { OP_NODATA,     'n',      NULL,              "line-number",   "print line number with output lines" },
 #ifdef SUPPORT_PCRE2GREP_JIT
   { OP_NODATA,     N_NOJIT,  NULL,              "no-jit",        "do not use just-in-time compiler optimization" },
@@ -439,7 +439,7 @@ static option_item optionlist[] = {
 of PCRE2_NEWLINE_xx in pcre2.h. */
 
 static const char *newlines[] = {
-  "DEFAULT", "CR", "LF", "CRLF", "ANY", "ANYCRLF" };
+  "DEFAULT", "CR", "LF", "CRLF", "ANY", "ANYCRLF", "NUL" };
 
 /* Tables for prefixing and suffixing patterns, according to the -w, -x, and -F
 options. These set the 1, 2, and 4 bits in process_options, respectively. Note
@@ -1337,6 +1337,16 @@ switch(endlinetype)
   *lenptr = 0;
   return endptr;
 
+  case PCRE2_NEWLINE_NUL:
+  while (p < endptr && *p != '\0') p++;
+  if (p < endptr)
+    {
+    *lenptr = 1;
+    return p + 1;
+    }
+  *lenptr = 0;
+  return endptr;
+
   case PCRE2_NEWLINE_CRLF:
   for (;;)
     {
@@ -1486,6 +1496,11 @@ switch(endlinetype)
   case PCRE2_NEWLINE_CR:
   p--;
   while (p > startptr && p[-1] != '\n') p--;
+  return p;
+
+  case PCRE2_NEWLINE_NUL:
+  p--;
+  while (p > startptr && p[-1] != '\0') p--;
   return p;
 
   case PCRE2_NEWLINE_CRLF:
@@ -2319,12 +2334,13 @@ endptr = main_buffer + bufflength;
 
 /* Unless binary-files=text, see if we have a binary file. This uses the same
 rule as GNU grep, namely, a search for a binary zero byte near the start of the
-file. */
+file. However, when the newline convention is binary zero, we can't do this. */
 
 if (binary_files != BIN_TEXT)
   {
-  binary =
-    memchr(main_buffer, 0, (bufflength > 1024)? 1024 : bufflength) != NULL;
+  if (endlinetype != PCRE2_NEWLINE_NUL)
+    binary = memchr(main_buffer, 0, (bufflength > 1024)? 1024 : bufflength) 
+      != NULL;
   if (binary && binary_files == BIN_NOMATCH) return 1;
   }
 
