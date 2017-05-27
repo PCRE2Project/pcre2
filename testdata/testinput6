@@ -4929,4 +4929,16 @@
 \= Expect no match
     X\x00Y      
 
+/(?<=abc|)/
+    abcde\=aftertext
+    
+/(?<=|abc)/ 
+    abcde\=aftertext
+
+/(?<=abc|)/endanchored
+    abcde\=aftertext
+    
+/(?<=|abc)/endanchored
+    abcde\=aftertext
+
 # End of testinput6

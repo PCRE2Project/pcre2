@@ -171,6 +171,9 @@ one: PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES.
 
 34. Implement newline type PCRE2_NEWLINE_NUL.
 
+35. A lookbehind assertion that had a zero-length branch caused undefined 
+behaviour when processed by pcre2_dfa_match(). This is oss-fuzz issue 1859.
+
 
 Version 10.23 14-February-2017
 ------------------------------

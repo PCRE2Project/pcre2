@@ -375,14 +375,10 @@ internal_dfa_match(
 {
 stateblock *active_states, *new_states, *temp_states;
 stateblock *next_active_state, *next_new_state;
-
 const uint8_t *ctypes, *lcc, *fcc;
 PCRE2_SPTR ptr;
 PCRE2_SPTR end_code;
-PCRE2_SPTR first_op;
-
 dfa_recursion_info new_recursive;
-
 int active_count, new_count, match_count;
 
 /* Some fields in the mb block are frequently referenced, so we load them into
@@ -417,21 +413,15 @@ active_states = (stateblock *)(workspace + 2);
 next_new_state = new_states = active_states + wscount;
 new_count = 0;
 
-first_op = this_start_code + 1 + LINK_SIZE +
-  ((*this_start_code == OP_CBRA || *this_start_code == OP_SCBRA ||
-    *this_start_code == OP_CBRAPOS || *this_start_code == OP_SCBRAPOS)
-    ? IMM2_SIZE:0);
-
 /* The first thing in any (sub) pattern is a bracket of some sort. Push all
 the alternative states onto the list, and find out where the end is. This
 makes is possible to use this function recursively, when we want to stop at a
 matching internal ket rather than at the end.
 
-If the first opcode in the first alternative is OP_REVERSE, we are dealing with
-a backward assertion. In that case, we have to find out the maximum amount to
-move back, and set up each alternative appropriately. */
+If we are dealing with a backward assertion we have to find out the maximum
+amount to move back, and set up each alternative appropriately. */
 
-if (*first_op == OP_REVERSE)
+if (*this_start_code == OP_ASSERTBACK || *this_start_code == OP_ASSERTBACK_NOT)
   {
   size_t max_back = 0;
   size_t gone_back;
@@ -476,15 +466,17 @@ if (*first_op == OP_REVERSE)
   if (current_subject < mb->start_used_ptr)
     mb->start_used_ptr = current_subject;
 
-  /* Now we can process the individual branches. */
+  /* Now we can process the individual branches. There will be an OP_REVERSE at
+  the start of each branch, except when the length of the branch is zero. */
 
   end_code = this_start_code;
   do
     {
-    size_t back = (size_t)GET(end_code, 2+LINK_SIZE);
+    uint32_t revlen = (end_code[1+LINK_SIZE] == OP_REVERSE)? 1 + LINK_SIZE : 0;
+    size_t back = (revlen == 0)? 0 : (size_t)GET(end_code, 2+LINK_SIZE);
     if (back <= gone_back)
       {
-      int bstate = (int)(end_code - start_code + 2 + 2*LINK_SIZE);
+      int bstate = (int)(end_code - start_code + 1 + LINK_SIZE + revlen);
       ADD_NEW_DATA(-bstate, 0, (int)(gone_back - back));
       }
     end_code += GET(end_code, 1);
@@ -544,7 +536,7 @@ for (;;)
   BOOL partial_newline = FALSE;
   BOOL could_continue = reset_could_continue;
   reset_could_continue = FALSE;
-  
+
   if (ptr > mb->last_used_ptr) mb->last_used_ptr = ptr;
 
   /* Make the new state list into the active state list and empty the
@@ -597,7 +589,7 @@ for (;;)
     int state_offset = current_state->offset;
     int rrc;
     int count;
-    
+
     /* A negative offset is a special case meaning "hold off going to this
     (negated) state until the number of characters in the data field have
     been skipped". If the could_continue flag was passed over from a previous
@@ -633,7 +625,7 @@ for (;;)
 
     code = start_code + state_offset;
     codevalue = *code;
-    
+
     /* If this opcode inspects a character, but we are at the end of the
     subject, remember the fact for use when testing for a partial match. */
 
@@ -3078,13 +3070,13 @@ for (;;)
   ptr += clen;    /* Advance to next subject character */
   }               /* Loop to move along the subject string */
 
-/* Control gets here from "break" a few lines above. If we have a match and 
+/* Control gets here from "break" a few lines above. If we have a match and
 PCRE2_ENDANCHORED is set, the match fails. */
 
-if (match_count >= 0 && 
+if (match_count >= 0 &&
     ((mb->moptions | mb->poptions) & PCRE2_ENDANCHORED) != 0 &&
     ptr < end_subject)
-  match_count = PCRE2_ERROR_NOMATCH;    
+  match_count = PCRE2_ERROR_NOMATCH;
 
 return match_count;
 }
@@ -3157,12 +3149,12 @@ if (re == NULL || subject == NULL || workspace == NULL || match_data == NULL)
 if (wscount < 20) return PCRE2_ERROR_DFA_WSSIZE;
 if (start_offset > length) return PCRE2_ERROR_BADOFFSET;
 
-/* Partial matching and PCRE2_ENDANCHORED are currently not allowed at the same 
-time. */ 
-              
+/* Partial matching and PCRE2_ENDANCHORED are currently not allowed at the same
+time. */
+
 if ((options & (PCRE2_PARTIAL_HARD|PCRE2_PARTIAL_SOFT)) != 0 &&
    ((re->overall_options | options) & PCRE2_ENDANCHORED) != 0)
-  return PCRE2_ERROR_BADOPTION; 
+  return PCRE2_ERROR_BADOPTION;
 
 /* Check that the first field in the block is the magic number. If it is not,
 return with PCRE2_ERROR_BADMAGIC. */

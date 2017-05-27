@@ -7746,4 +7746,24 @@ No match
     X\x00Y      
 No match
 
+/(?<=abc|)/
+    abcde\=aftertext
+ 0: 
+ 0+ abcde
+    
+/(?<=|abc)/ 
+    abcde\=aftertext
+ 0: 
+ 0+ abcde
+
+/(?<=abc|)/endanchored
+    abcde\=aftertext
+ 0: 
+ 0+ 
+    
+/(?<=|abc)/endanchored
+    abcde\=aftertext
+ 0: 
+ 0+ 
+
 # End of testinput6
