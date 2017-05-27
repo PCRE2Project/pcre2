@@ -85,14 +85,20 @@ r2 = rand();
 and also that PCRE2_NO_UTF_CHECK is unset, as there is no guarantee that the
 input is UTF-8. Also unset PCRE2_NEVER_UTF and PCRE2_NEVER_UCP as there is no
 reason to disallow UTF and UCP. Force PCRE2_NEVER_BACKSLASH_C to be set because
-\C in random patterns is highly likely to cause a crash.  */
+\C in random patterns is highly likely to cause a crash. */
 
 compile_options =
   ((((uint32_t)r1 << 16) | ((uint32_t)r2 & 0xffff)) & ALLOWED_COMPILE_OPTIONS) |
   PCRE2_NEVER_BACKSLASH_C;
-
+  
 match_options =
   ((((uint32_t)r1 << 16) | ((uint32_t)r2 & 0xffff)) & ALLOWED_MATCH_OPTIONS);
+  
+/* Discard partial matching if PCRE2_ENDANCHORED is set, because they are not
+allowed together and just give an immediate error return. */
+
+if (((compile_options|match_options) & PCRE2_ENDANCHORED) != 0)
+  match_options &= ~(PCRE2_PARTIAL_HARD|PCRE2_PARTIAL_SOFT); 
 
 /* Do the compile with and without the options, and after a successful compile,
 likewise do the match with and without the options. */

@@ -42,7 +42,6 @@ bugs were never in fully released code, but are noted here for the record.
   (g) Similarly refactor the way the variable length ovector is addressed for
       similar reasons. Fixes oss-fuzz issue 1465.
  
-      
 2. Now that pcre2_match() no longer uses recursive function calls (see above),
 the "match limit recursion" value seems misnamed. It still exists, and limits 
 the depth of tree that is searched. To avoid future confusion, it has been 
