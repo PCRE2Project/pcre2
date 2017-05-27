@@ -74,6 +74,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #define STR_DOT_STAR_LOOKBEHIND STR_DOT STR_ASTERISK STR_LEFT_PARENTHESIS STR_QUESTION_MARK STR_LESS_THAN_SIGN STR_EQUALS_SIGN
 #define STR_LOOKAHEAD_NOT_DOT STR_LEFT_PARENTHESIS STR_QUESTION_MARK STR_EXCLAMATION_MARK STR_BACKSLASH STR_DOT STR_RIGHT_PARENTHESIS
 #define STR_QUERY_s STR_LEFT_PARENTHESIS STR_QUESTION_MARK STR_s STR_RIGHT_PARENTHESIS
+#define STR_STAR_NUL STR_LEFT_PARENTHESIS STR_ASTERISK STR_N STR_U STR_L STR_RIGHT_PARENTHESIS
 
 /* States for range and POSIX processing */
 
@@ -101,12 +102,12 @@ static const char *pcre2_escaped_literals =
   STR_LEFT_SQUARE_BRACKET STR_RIGHT_SQUARE_BRACKET
   STR_LEFT_PARENTHESIS STR_RIGHT_PARENTHESIS;
 
-/* Recognized escapes in POSIX basic patterns. */
+/* Recognized escaped metacharacters in POSIX basic patterns. */
 
-static const char *posix_basic_escapes =
-  STR_QUESTION_MARK STR_PLUS STR_VERTICAL_LINE
+static const char *posix_meta_escapes =
   STR_LEFT_PARENTHESIS STR_RIGHT_PARENTHESIS
-  STR_0 STR_1 STR_2 STR_3 STR_4 STR_5 STR_6 STR_7 STR_8 STR_9;
+  STR_LEFT_CURLY_BRACKET STR_RIGHT_CURLY_BRACKET 
+  STR_1 STR_2 STR_3 STR_4 STR_5 STR_6 STR_7 STR_8 STR_9;
 
 
 
@@ -155,6 +156,7 @@ BOOL nextisliteral = FALSE;
 /* Initialize default for error offset as end of input. */
 
 *bufflenptr = plength;
+PUTCHARS(STR_STAR_NUL);
 
 /* Now scan the input. */
 
@@ -237,7 +239,9 @@ while (plength > 0)
     case CHAR_LEFT_SQUARE_BRACKET:
     PUTCHARS(STR_LEFT_SQUARE_BRACKET);
 
-    /* Handle special cases [[:<:]] and [[:>:]] (which PCRE does support) */
+#ifdef NEVER
+    /* We could handle special cases [[:<:]] and [[:>:]] (which PCRE does
+    support) but they are not part of POSIX 1003.1. */
 
     if (plength >= 6)
       {
@@ -257,8 +261,9 @@ while (plength > 0)
         continue;  /* With next character */
         }
       }
+#endif       
 
-    /* Handle "normal" character classes */
+    /* Handle start of "normal" character classes */
 
     posix_state = POSIX_CLASS_NOT_STARTED;
 
@@ -283,15 +288,17 @@ while (plength > 0)
 
     case CHAR_BACKSLASH:
     if (plength <= 0) return ERROR_END_BACKSLASH;
-    if (!extended && *posix < 127 &&
-          strchr(posix_basic_escapes, *posix) != NULL)
-      {
-      if (isdigit(*posix)) PUTCHARS(STR_BACKSLASH);
-      if (p + 1 > endp) return PCRE2_ERROR_NOMEMORY;
-      lastspecial = *p++ = *posix++;
-      plength--;
+    if (extended) nextisliteral = TRUE; else
+      { 
+      if (*posix < 127 && strchr(posix_meta_escapes, *posix) != NULL)
+        {
+        if (isdigit(*posix)) PUTCHARS(STR_BACKSLASH);
+        if (p + 1 > endp) return PCRE2_ERROR_NOMEMORY;
+        lastspecial = *p++ = *posix++;
+        plength--;
+        }
+      else nextisliteral = TRUE;  
       }
-    else nextisliteral = TRUE;
     break;
 
     case CHAR_RIGHT_PARENTHESIS:
@@ -323,7 +330,8 @@ while (plength > 0)
     case CHAR_ASTERISK:
     if (lastspecial != CHAR_ASTERISK)
       {
-      if (!extended && posix_state < POSIX_NOT_BRACKET)
+      if (!extended && (posix_state < POSIX_NOT_BRACKET ||
+          lastspecial == CHAR_LEFT_PARENTHESIS))
         goto ESCAPE_LITERAL;
       goto COPY_SPECIAL;
       }

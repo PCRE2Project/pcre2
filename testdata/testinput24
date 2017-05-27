@@ -323,9 +323,9 @@
 
 /a`*b/convert_glob_escape=x
 
-#pattern convert=unset:posix_extended
+# -------- Tests of extended POSIX conversion --------
 
-/a[[:>:]z/
+#pattern convert=unset:posix_extended
 
 /<[[:a[:digit:]b]>/
     <[>
@@ -337,8 +337,6 @@
     <d>
 
 /a+\1b\\c|d[ab\c]/
-
-/a[[:<:]]b[[:>:]]/
 
 /<[]bc]>/
     <]>
@@ -361,6 +359,8 @@
 
 /a***b/
 
+# -------- Tests of basic POSIX conversion --------
+
 #pattern convert=unset:posix_basic
 
 /a*b+c\+[def](ab)\(cd\)/
@@ -371,6 +371,9 @@
     a1b
 
 /how.to how\.to/
+    how\nto how.to
+\= Expect no match     
+    how\x{0}to how.to
 
 /^how to \^how to/
 
@@ -383,13 +386,11 @@
     XabcY
     X*abcY
     X**abcY
+    
+/*ab\(*cd\)/ 
 
 /^b\(c^d\)\(^e^f\)/
 
 /a***b/
-
-#pattern convert=unset
-
-/abc/
 
 # End of testinput24

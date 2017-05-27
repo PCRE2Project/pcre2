@@ -508,14 +508,12 @@ No match
 /a`*b/convert_glob_escape=x
 ** Invalid glob escape 'x'
 
+# -------- Tests of extended POSIX conversion --------
+
 #pattern convert=unset:posix_extended
 
-/a[[:>:]z/
-a[[:>:]z
-Failed: error 130 at offset 4: unknown POSIX class name
-
 /<[[:a[:digit:]b]>/
-<[[:a[:digit:]b]>
+(*NUL)<[[:a[:digit:]b]>
     <[>
  0: <[>
     <:>
@@ -531,13 +529,10 @@ Failed: error 130 at offset 4: unknown POSIX class name
 No match
 
 /a+\1b\\c|d[ab\c]/
-a+1b\\c|d[ab\\c]
-
-/a[[:<:]]b[[:>:]]/
-a[[:<:]]b[[:>:]]
+(*NUL)a+1b\\c|d[ab\\c]
 
 /<[]bc]>/
-<[]bc]>
+(*NUL)<[]bc]>
     <]>
  0: <]>
     <b>
@@ -546,7 +541,7 @@ a[[:<:]]b[[:>:]]
  0: <c>
 
 /<[^]bc]>/
-<[^]bc]>
+(*NUL)<[^]bc]>
     <.>
  0: <.>
 \= Expect no match
@@ -556,7 +551,7 @@ No match
 No match
 
 /(a)\1b/
-(a)1b
+(*NUL)(a)1b
     a1b
  0: a1b
  1: a
@@ -565,21 +560,23 @@ No match
 No match
 
 /(ab)c)d]/
-(ab)c\)d\]
+(*NUL)(ab)c\)d\]
     Xabc)d]Y
  0: abc)d]
  1: ab
 
 /a***b/
-a*b
+(*NUL)a*b
+
+# -------- Tests of basic POSIX conversion --------
 
 #pattern convert=unset:posix_basic
 
 /a*b+c\+[def](ab)\(cd\)/
-a*b\+c+[def]\(ab\)(cd)
+(*NUL)a*b\+c\+[def]\(ab\)(cd)
 
 /\(a\)\1b/
-(a)\1b
+(*NUL)(a)\1b
     aab
  0: aab
  1: a
@@ -588,36 +585,40 @@ a*b\+c+[def]\(ab\)(cd)
 No match
 
 /how.to how\.to/
-how.to how\.to
+(*NUL)how.to how\.to
+    how\nto how.to
+ 0: how\x0ato how.to
+\= Expect no match     
+    how\x{0}to how.to
+No match
 
 /^how to \^how to/
-^how to \^how to
+(*NUL)^how to \^how to
 
 /^*abc/
-^\*abc
+(*NUL)^\*abc
 
 /*abc/
-\*abc
+(*NUL)\*abc
     X*abcY
  0: *abc
 
 /**abc/
-\**abc
+(*NUL)\**abc
     XabcY
  0: abc
     X*abcY
  0: *abc
     X**abcY
  0: **abc
+    
+/*ab\(*cd\)/ 
+(*NUL)\*ab(\*cd)
 
 /^b\(c^d\)\(^e^f\)/
-^b(c\^d)(^e\^f)
+(*NUL)^b(c\^d)(^e\^f)
 
 /a***b/
-a*b
-
-#pattern convert=unset
-
-/abc/
+(*NUL)a*b
 
 # End of testinput24
