@@ -357,8 +357,8 @@ No match
 /[^a\\b\c][!]][!-][^\]\-]/
 (?s)\A[^/a\\bc][^/\]][^/\-][^/\]\-]\z
 
-/[[:alpha:][:xdigit:][:word:]]/
-(?s)\A[[:alpha:][:xdigit:][:word:]]\z
+/[[:alnum:][:alpha:][:blank:][:cntrl:][:digit:][:graph:][:lower:][:print:][:punct:][:space:][:upper:][:word:][:xdigit:]]/
+(?s)\A[[:alnum:][:alpha:][:blank:][:cntrl:][:digit:][:graph:][:lower:][:print:][:punct:][:space:][:upper:][:word:][:xdigit:]](?<!/)\z
 
 "[/-/]"
 (?s)\A[/-/](?<!/)\z

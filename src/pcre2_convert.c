@@ -509,7 +509,7 @@ if (c != CHAR_COLON || pattern >= pattern_end ||
   return 0;
 
 class_ptr = posix_classes;
-class_index = 0;
+class_index = 1;
 
 while (TRUE)
   {
@@ -554,19 +554,19 @@ convert_glob_char_in_class(int class_index, PCRE2_UCHAR c)
 {
 switch (class_index)
   {
-  case 0: return isalnum(c);
-  case 1: return isalpha(c);
-  case 2: return 1;
-  case 3: return c == CHAR_HT || c == CHAR_SPACE;
-  case 4: return iscntrl(c);
-  case 5: return isdigit(c);
-  case 6: return isgraph(c);
-  case 7: return islower(c);
-  case 8: return isprint(c);
-  case 9: return ispunct(c);
-  case 10: return isspace(c);
-  case 11: return isupper(c);
-  case 12: return isalnum(c) || c == CHAR_UNDERSCORE;
+  case 1: return isalnum(c);
+  case 2: return isalpha(c);
+  case 3: return 1;
+  case 4: return c == CHAR_HT || c == CHAR_SPACE;
+  case 5: return iscntrl(c);
+  case 6: return isdigit(c);
+  case 7: return isgraph(c);
+  case 8: return islower(c);
+  case 9: return isprint(c);
+  case 10: return ispunct(c);
+  case 11: return isspace(c);
+  case 12: return isupper(c);
+  case 13: return isalnum(c) || c == CHAR_UNDERSCORE;
   default: return isxdigit(c);
   }
 }

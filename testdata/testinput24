@@ -225,7 +225,7 @@
 
 /[^a\\b\c][!]][!-][^\]\-]/
 
-/[[:alpha:][:xdigit:][:word:]]/
+/[[:alnum:][:alpha:][:blank:][:cntrl:][:digit:][:graph:][:lower:][:print:][:punct:][:space:][:upper:][:word:][:xdigit:]]/
 
 "[/-/]"
 
