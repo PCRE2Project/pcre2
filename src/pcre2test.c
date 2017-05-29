@@ -3024,7 +3024,7 @@ if (pbuffer16_size < 2*len + 2)
   {
   if (pbuffer16 != NULL) free(pbuffer16);
   pbuffer16_size = 2*len + 2;
-  if (pbuffer16_size < 256) pbuffer16_size = 256;
+  if (pbuffer16_size < 4096) pbuffer16_size = 4096;
   pbuffer16 = (uint16_t *)malloc(pbuffer16_size);
   if (pbuffer16 == NULL)
     {
@@ -3111,7 +3111,7 @@ if (pbuffer32_size < 4*len + 4)
   {
   if (pbuffer32 != NULL) free(pbuffer32);
   pbuffer32_size = 4*len + 4;
-  if (pbuffer32_size < 512) pbuffer32_size = 512;
+  if (pbuffer32_size < 8192) pbuffer32_size = 8192;
   pbuffer32 = (uint32_t *)malloc(pbuffer32_size);
   if (pbuffer32 == NULL)
     {
