@@ -421,6 +421,7 @@ SET(PCRE2_SOURCES
   src/pcre2_compile.c
   src/pcre2_config.c
   src/pcre2_context.c
+  src/pcre2_convert.c 
   src/pcre2_dfa_match.c
   src/pcre2_error.c
   src/pcre2_find_bracket.c
