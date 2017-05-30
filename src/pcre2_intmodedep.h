@@ -877,7 +877,9 @@ typedef struct dfa_match_block {
   PCRE2_SPTR last_used_ptr;       /* Latest consulted character */
   const uint8_t *tables;          /* Character tables */
   PCRE2_SIZE start_offset;        /* The start offset value */
+  uint32_t match_limit;           /* As it says */
   uint32_t match_limit_depth;     /* As it says */
+  uint32_t match_call_count;      /* Number of calls of internal function */
   uint32_t moptions;              /* Match options */
   uint32_t poptions;              /* Pattern options */
   uint32_t nltype;                /* Newline type */

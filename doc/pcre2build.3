@@ -1,4 +1,4 @@
-.TH PCRE2BUILD 3 "10 April 2017" "PCRE2 10.30"
+.TH PCRE2BUILD 3 "30 May 2017" "PCRE2 10.30"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .
@@ -256,9 +256,9 @@ setting such as
 .sp
   --with-match-limit=500000
 .sp
-to the \fBconfigure\fP command. This setting has no effect on the
-\fBpcre2_dfa_match()\fP matching function, but it does also limit JIT matching 
-(though the counting is done differently).
+to the \fBconfigure\fP command. This setting also applies to the
+\fBpcre2_dfa_match()\fP matching function, and to JIT matching (though the
+counting is done differently).
 .P
 The \fBpcre2_match()\fP function starts out using a 20K vector on the system
 stack to record backtracking points. The more nested backtracking points there
@@ -572,6 +572,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 10 April 2017
+Last updated: 30 May 2017
 Copyright (c) 1997-2017 University of Cambridge.
 .fi

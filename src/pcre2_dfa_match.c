@@ -396,6 +396,7 @@ BOOL utf = FALSE;
 
 BOOL reset_could_continue = FALSE;
 
+if (mb->match_call_count++ >= mb->match_limit) return PCRE2_ERROR_MATCHLIMIT;
 if (rlevel++ > mb->match_limit_depth) return PCRE2_ERROR_DEPTHLIMIT;
 offsetcount &= (uint32_t)(-2);  /* Round down */
 
@@ -3218,6 +3219,7 @@ if (mcontext == NULL)
   {
   mb->callout = NULL;
   mb->memctl = re->memctl;
+  mb->match_limit = PRIV(default_match_context).match_limit;
   mb->match_limit_depth = PRIV(default_match_context).depth_limit;
   }
 else
@@ -3231,8 +3233,13 @@ else
   mb->callout = mcontext->callout;
   mb->callout_data = mcontext->callout_data;
   mb->memctl = mcontext->memctl;
+  mb->match_limit = mcontext->match_limit;
   mb->match_limit_depth = mcontext->depth_limit;
   }
+
+if (mb->match_limit > re->limit_match)
+  mb->match_limit = re->limit_match;
+
 if (mb->match_limit_depth > re->limit_depth)
   mb->match_limit_depth = re->limit_depth;
 
@@ -3244,6 +3251,7 @@ mb->end_subject = end_subject;
 mb->start_offset = start_offset;
 mb->moptions = options;
 mb->poptions = re->overall_options;
+mb->match_call_count = 0;
 
 /* Process the \R and newline settings. */
 

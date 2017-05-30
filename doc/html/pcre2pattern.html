@@ -204,11 +204,11 @@ still recognized for backwards compatibility.
 <P>
 The heap limit applies only when the <b>pcre2_match()</b> interpreter is used
 for matching. It does not apply to JIT or DFA matching. The match limit is used
-(but in a different way) when JIT is being used, but it is not relevant, and is
-ignored, when matching with <b>pcre2_dfa_match()</b>. The depth limit is ignored 
-by JIT but is relevant for DFA matching, which uses function recursion for
-recursions within the pattern. In this case, the depth limit controls the
-amount of system stack that is used.
+(but in a different way) when JIT is being used, or when
+<b>pcre2_dfa_match()</b> is called, to limit computing resource usage by those
+matching functions. The depth limit is ignored by JIT but is relevant for DFA
+matching, which uses function recursion for recursions within the pattern. In
+this case, the depth limit controls the amount of system stack that is used.
 <a name="newlines"></a></P>
 <br><b>
 Newline conventions
@@ -3445,7 +3445,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC30" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 26 May 2017
+Last updated: 30 May 2017
 <br>
 Copyright &copy; 1997-2017 University of Cambridge.
 <br>

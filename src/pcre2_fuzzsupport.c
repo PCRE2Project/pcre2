@@ -178,20 +178,20 @@ for (i = 0; i < 2; i++)
         return 0;
         }
       (void)pcre2_set_match_limit(match_context, 100);
+      (void)pcre2_set_depth_limit(match_context, 100);
       (void)pcre2_set_callout(match_context, callout_function, &callout_count);
       }
 
-    /* Match twice, with and without options, with a depth limit of 100. */
-
-    (void)pcre2_set_depth_limit(match_context, 100);
+    /* Match twice, with and without options. */
 
     for (j = 0; j < 2; j++)
       {
 #ifdef STANDALONE
       printf("Match options %.8x", match_options);
-      printf("%s%s%s%s%s%s%s%s%s\n",
+      printf("%s%s%s%s%s%s%s%s%s%s\n",
         ((match_options & PCRE2_ANCHORED) != 0)? ",anchored" : "",
         ((match_options & PCRE2_ENDANCHORED) != 0)? ",endanchored" : "",
+        ((match_options & PCRE2_NO_JIT) != 0)? ",no_jit" : "",
         ((match_options & PCRE2_NO_UTF_CHECK) != 0)? ",no_utf_check" : "",
         ((match_options & PCRE2_NOTBOL) != 0)? ",notbol" : "",
         ((match_options & PCRE2_NOTEMPTY) != 0)? ",notempty" : "",
@@ -217,9 +217,8 @@ for (i = 0; i < 2; i++)
       match_options = 0;  /* For second time */
       }
 
-    /* Match with DFA twice, with and without options, depth limit of 10. */
+    /* Match with DFA twice, with and without options. */
 
-    (void)pcre2_set_depth_limit(match_context, 10);
     match_options = save_match_options & ~PCRE2_NO_JIT;  /* Not valid for DFA */
 
     for (j = 0; j < 2; j++)

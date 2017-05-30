@@ -173,6 +173,10 @@ one: PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES.
 35. A lookbehind assertion that had a zero-length branch caused undefined 
 behaviour when processed by pcre2_dfa_match(). This is oss-fuzz issue 1859.
 
+36. The match limit value now also applies to pcre2_dfa_match() as there are 
+patterns that can use up a lot of resources without necessarily recursing very 
+deeply. (Compare item 10.23/36.) This should fix oss-fuzz #1761.
+
 
 Version 10.23 14-February-2017
 ------------------------------

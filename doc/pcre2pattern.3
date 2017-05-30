@@ -1,4 +1,4 @@
-.TH PCRE2PATTERN 3 "26 May 2017" "PCRE2 10.30"
+.TH PCRE2PATTERN 3 "30 May 2017" "PCRE2 10.30"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION DETAILS"
@@ -169,11 +169,11 @@ still recognized for backwards compatibility.
 .P
 The heap limit applies only when the \fBpcre2_match()\fP interpreter is used
 for matching. It does not apply to JIT or DFA matching. The match limit is used
-(but in a different way) when JIT is being used, but it is not relevant, and is
-ignored, when matching with \fBpcre2_dfa_match()\fP. The depth limit is ignored 
-by JIT but is relevant for DFA matching, which uses function recursion for
-recursions within the pattern. In this case, the depth limit controls the
-amount of system stack that is used.
+(but in a different way) when JIT is being used, or when
+\fBpcre2_dfa_match()\fP is called, to limit computing resource usage by those
+matching functions. The depth limit is ignored by JIT but is relevant for DFA
+matching, which uses function recursion for recursions within the pattern. In
+this case, the depth limit controls the amount of system stack that is used.
 .
 .
 .\" HTML <a name="newlines"></a>
@@ -3475,6 +3475,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 26 May 2017
+Last updated: 30 May 2017
 Copyright (c) 1997-2017 University of Cambridge.
 .fi

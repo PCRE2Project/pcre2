@@ -7054,17 +7054,15 @@ else for (gmatched = 0;; gmatched++)
     {
     capcount = 0;  /* This stops compiler warnings */
 
-    if ((dat_datctl.control & CTL_DFA) == 0)
-      {
-      if (FLD(compiled_code, executable_jit) == NULL ||
-          (dat_datctl.options & PCRE2_NO_JIT) != 0)
-        {
-        (void)check_match_limit(pp, arg_ulen, PCRE2_ERROR_HEAPLIMIT,
-          "heap");
-        }
-      capcount = check_match_limit(pp, arg_ulen, PCRE2_ERROR_MATCHLIMIT,
-        "match");
-      }
+    if ((dat_datctl.control & CTL_DFA) == 0 &&
+        (FLD(compiled_code, executable_jit) == NULL ||
+          (dat_datctl.options & PCRE2_NO_JIT) != 0))
+      {     
+      (void)check_match_limit(pp, arg_ulen, PCRE2_ERROR_HEAPLIMIT, "heap");
+      } 
+       
+    capcount = check_match_limit(pp, arg_ulen, PCRE2_ERROR_MATCHLIMIT,
+      "match");
 
     if (FLD(compiled_code, executable_jit) == NULL ||
         (dat_datctl.options & PCRE2_NO_JIT) != 0 ||
