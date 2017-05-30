@@ -362,7 +362,8 @@ typedef struct fast_forward_char_data {
   PCRE2_UCHAR chars[MAX_DIFF_CHARS];
 } fast_forward_char_data;
 
-#define MAX_RANGE_SIZE 4
+#define MAX_CLASS_RANGE_SIZE 4
+#define MAX_CLASS_CHARS_SIZE 3
 
 typedef struct compiler_common {
   /* The sljit ceneric compiler. */
@@ -5318,7 +5319,7 @@ if (common->match_end_ptr != 0)
   OP1(SLJIT_MOV, STR_END, 0, TMP3, 0);
 }
 
-static BOOL check_class_ranges(compiler_common *common, const sljit_u8 *bits, BOOL nclass, BOOL invert, jump_list **backtracks);
+static BOOL optimize_class(compiler_common *common, const sljit_u8 *bits, BOOL nclass, BOOL invert, jump_list **backtracks);
 
 static SLJIT_INLINE void fast_forward_start_bits(compiler_common *common)
 {
@@ -5349,7 +5350,7 @@ if (common->mode == PCRE2_JIT_COMPLETE)
 OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), 0);
 OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
 
-if (!check_class_ranges(common, start_bits, (start_bits[31] & 0x80) != 0, FALSE, &matches))
+if (!optimize_class(common, start_bits, (start_bits[31] & 0x80) != 0, FALSE, &matches))
   {
 #if PCRE2_CODE_UNIT_WIDTH != 8
   if ((start_bits[31] & 0x80) != 0)
@@ -5618,11 +5619,11 @@ OP2(SLJIT_XOR | SLJIT_SET_Z, SLJIT_UNUSED, 0, TMP2, 0, SLJIT_MEM1(SLJIT_SP), LOC
 sljit_emit_fast_return(compiler, SLJIT_MEM1(SLJIT_SP), LOCALS0);
 }
 
-static BOOL check_class_ranges(compiler_common *common, const sljit_u8 *bits, BOOL nclass, BOOL invert, jump_list **backtracks)
+static BOOL optimize_class_ranges(compiler_common *common, const sljit_u8 *bits, BOOL nclass, BOOL invert, jump_list **backtracks)
 {
 /* May destroy TMP1. */
 DEFINE_COMPILER;
-int ranges[MAX_RANGE_SIZE];
+int ranges[MAX_CLASS_RANGE_SIZE];
 sljit_u8 bit, cbit, all;
 int i, byte, length = 0;
 
@@ -5640,7 +5641,7 @@ for (i = 0; i < 256; )
     cbit = (bits[byte] >> (i & 0x7)) & 0x1;
     if (cbit != bit)
       {
-      if (length >= MAX_RANGE_SIZE)
+      if (length >= MAX_CLASS_RANGE_SIZE)
         return FALSE;
       ranges[length] = i;
       length++;
@@ -5653,7 +5654,7 @@ for (i = 0; i < 256; )
 
 if (((bit == 0) && nclass) || ((bit == 1) && !nclass))
   {
-  if (length >= MAX_RANGE_SIZE)
+  if (length >= MAX_CLASS_RANGE_SIZE)
     return FALSE;
   ranges[length] = 256;
   length++;
@@ -5768,6 +5769,111 @@ switch(length)
   SLJIT_UNREACHABLE();
   return FALSE;
   }
+}
+
+static BOOL optimize_class_chars(compiler_common *common, const sljit_u8 *bits, BOOL nclass, BOOL invert, jump_list **backtracks)
+{
+/* May destroy TMP1. */
+DEFINE_COMPILER;
+uint16_t char_list[MAX_CLASS_CHARS_SIZE];
+uint8_t byte;
+sljit_s32 type;
+int i, j, k, len, c;
+struct sljit_jump *jump;
+jump_list *found = NULL;
+
+if (invert)
+  nclass = !nclass;
+
+len = 0;
+
+for (i = 0; i < 32; i++)
+  {
+  byte = bits[i];
+
+  if (nclass)
+    byte = ~byte;
+
+  j = 0;
+  while (byte != 0)
+    {
+    if (byte & 0x1)
+      {
+      c = i * 8 + j;
+
+      k = len;
+
+      if ((c & 0x20) != 0)
+        {
+        for (k = 0; k < len; k++)
+          if (char_list[k] == c - 0x20)
+            {
+            char_list[k] |= 0x120;
+            break;
+            }
+        }
+
+      if (k == len)
+        {
+        if (len >= MAX_CLASS_CHARS_SIZE)
+          return FALSE;
+
+        char_list[len++] = (uint16_t) c;
+        }
+      }
+
+    byte >>= 1;
+    j++;
+    }
+  }
+
+jump = NULL;
+j = 0;
+
+for (i = 0; i < len; i++)
+  {
+  if ((char_list[i] & 0x100) != 0)
+    j++;
+  else 
+    {
+    type = SLJIT_EQUAL;
+    if (!nclass && j == 0 && i + 1 == len)
+      type = SLJIT_NOT_EQUAL;
+
+    jump = CMP(type, TMP1, 0, SLJIT_IMM, char_list[i]);
+
+    add_jump(compiler, (nclass || type == SLJIT_NOT_EQUAL) ? backtracks : &found, jump);
+    }
+  }
+
+if (j != 0)
+  {
+  OP2(SLJIT_OR, TMP1, 0, TMP1, 0, SLJIT_IMM, 0x20);
+
+  for (i = 0; i < len; i++)
+    if ((char_list[i] & 0x100) != 0)
+      {
+      j--;
+
+      type = SLJIT_EQUAL;
+      if (!nclass && j == 0)
+        type = SLJIT_NOT_EQUAL;
+
+      jump = CMP(type, TMP1, 0, SLJIT_IMM, char_list[i] & 0xff);
+      add_jump(compiler, (nclass || type == SLJIT_NOT_EQUAL) ? backtracks : &found, jump);
+      }
+  }
+
+set_jumps(found, LABEL());
+return TRUE;
+}
+
+static BOOL optimize_class(compiler_common *common, const sljit_u8 *bits, BOOL nclass, BOOL invert, jump_list **backtracks)
+{
+/* May destroy TMP1. */
+if (optimize_class_ranges(common, bits, nclass, invert, backtracks))
+  return TRUE;
+return optimize_class_chars(common, bits, nclass, invert, backtracks);
 }
 
 static void check_anynewline(compiler_common *common)
@@ -6288,7 +6394,7 @@ if ((cc[-1] & XCL_HASPROP) == 0)
   if ((cc[-1] & XCL_MAP) != 0)
     {
     jump = CMP(SLJIT_GREATER, TMP1, 0, SLJIT_IMM, 255);
-    if (!check_class_ranges(common, (const sljit_u8 *)cc, (((const sljit_u8 *)cc)[31] & 0x80) != 0, TRUE, &found))
+    if (!optimize_class(common, (const sljit_u8 *)cc, (((const sljit_u8 *)cc)[31] & 0x80) != 0, TRUE, &found))
       {
       OP2(SLJIT_AND, TMP2, 0, TMP1, 0, SLJIT_IMM, 0x7);
       OP2(SLJIT_LSHR, TMP1, 0, TMP1, 0, SLJIT_IMM, 3);
@@ -6315,7 +6421,7 @@ else if ((cc[-1] & XCL_MAP) != 0)
 #ifdef SUPPORT_UNICODE
   charsaved = TRUE;
 #endif
-  if (!check_class_ranges(common, (const sljit_u8 *)cc, FALSE, TRUE, list))
+  if (!optimize_class(common, (const sljit_u8 *)cc, FALSE, TRUE, list))
     {
 #if PCRE2_CODE_UNIT_WIDTH == 8
     jump = NULL;
@@ -7274,7 +7380,7 @@ switch(type)
   read_char_range(common, 0, 255, type == OP_NCLASS);
 #endif
 
-  if (check_class_ranges(common, (const sljit_u8 *)cc, type == OP_NCLASS, FALSE, backtracks))
+  if (optimize_class(common, (const sljit_u8 *)cc, type == OP_NCLASS, FALSE, backtracks))
     return cc + 32 / sizeof(PCRE2_UCHAR);
 
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH == 8
