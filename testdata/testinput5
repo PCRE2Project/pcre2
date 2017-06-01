@@ -2015,6 +2015,13 @@
 \= Expect no match
     X$
 
-# ---------------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# These test the dangerous PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL option.
+
+/\x{d800}/B,utf,bad_escape_is_literal
+
+/\ud800/B,utf,alt_bsux,bad_escape_is_literal
+
+# ----------------------------------------------------------------------
 
 # End of testinput5

@@ -402,9 +402,9 @@ typedef struct convertstruct {
 static convertstruct convertlist[] = {
   { "glob",                   PCRE2_CONVERT_GLOB },
   { "glob_basic",             PCRE2_CONVERT_GLOB_BASIC },
-  { "glob_ignore_dot_start",  PCRE2_CONVERT_GLOB_IGNORE_DOT_START }, 
-  { "glob_no_starstar",       PCRE2_CONVERT_GLOB_NO_STARSTAR }, 
-  { "glob_no_wild_separator", PCRE2_CONVERT_GLOB_NO_WILD_SEPARATOR }, 
+  { "glob_ignore_dot_start",  PCRE2_CONVERT_GLOB_IGNORE_DOT_START },
+  { "glob_no_starstar",       PCRE2_CONVERT_GLOB_NO_STARSTAR },
+  { "glob_no_wild_separator", PCRE2_CONVERT_GLOB_NO_WILD_SEPARATOR },
   { "posix_basic",            PCRE2_CONVERT_POSIX_BASIC },
   { "posix_extended",         PCRE2_CONVERT_POSIX_EXTENDED },
   { "unset",                  CONVERT_UNSET }};
@@ -590,6 +590,7 @@ static modstruct modlist[] = {
   { "altglobal",                  MOD_PND,  MOD_CTL, CTL_ALTGLOBAL,              PO(control) },
   { "anchored",                   MOD_PD,   MOD_OPT, PCRE2_ANCHORED,             PD(options) },
   { "auto_callout",               MOD_PAT,  MOD_OPT, PCRE2_AUTO_CALLOUT,         PO(options) },
+  { "bad_escape_is_literal",      MOD_CTC,  MOD_OPT, PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL, CO(extra_options) },
   { "bincode",                    MOD_PAT,  MOD_CTL, CTL_BINCODE,                PO(control) },
   { "bsr",                        MOD_CTC,  MOD_BSR, 0,                          CO(bsr_convention) },
   { "callout_capture",            MOD_DAT,  MOD_CTL, CTL_CALLOUT_CAPTURE,        DO(control) },
@@ -692,8 +693,8 @@ static modstruct modlist[] = {
 #define POSIX_SUPPORTED_COMPILE_OPTIONS ( \
   PCRE2_CASELESS|PCRE2_DOTALL|PCRE2_MULTILINE|PCRE2_UCP|PCRE2_UTF| \
   PCRE2_UNGREEDY)
-  
-#define POSIX_SUPPORTED_COMPILE_EXTRA_OPTIONS (0) 
+
+#define POSIX_SUPPORTED_COMPILE_EXTRA_OPTIONS (0)
 
 #define POSIX_SUPPORTED_COMPILE_CONTROLS ( \
   CTL_AFTERTEXT|CTL_ALLAFTERTEXT|CTL_EXPAND|CTL_POSIX|CTL_POSIX_NOSUB)
@@ -3701,7 +3702,7 @@ for (;;)
 
     case MOD_CON:  /* A convert type/options list */
     for (;; pp++)
-      { 
+      {
       uint8_t *colon = (uint8_t *)strchr((const char *)pp, ':');
       len = ((colon != NULL && colon < ep)? colon:ep) - pp;
       for (i = 0; i < convertlistcount; i++)
@@ -4073,13 +4074,14 @@ Returns:      nothing
 */
 
 static void
-show_compile_extra_options(uint32_t options, const char *before, 
-  const char *after) 
-{ 
+show_compile_extra_options(uint32_t options, const char *before,
+  const char *after)
+{
 if (options == 0) fprintf(outfile, "%s <none>%s", before, after);
-else fprintf(outfile, "%s%s%s",   
+else fprintf(outfile, "%s%s%s%s",
   before,
   ((options & PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES) != 0)? " allow_surrogate_escapes" : "",
+  ((options & PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL) != 0)? " bad_escape_is_literal" : "",
   after);
 }
 
@@ -5225,14 +5227,14 @@ if ((pat_patctl.control & CTL_POSIX) != 0)
     msg = "";
     }
 
-  if ((FLD(pat_context, extra_options) & 
+  if ((FLD(pat_context, extra_options) &
        ~POSIX_SUPPORTED_COMPILE_EXTRA_OPTIONS) != 0)
     {
     show_compile_extra_options(
       FLD(pat_context, extra_options) & ~POSIX_SUPPORTED_COMPILE_EXTRA_OPTIONS,
         msg, "");
-    msg = "";       
-    }     
+    msg = "";
+    }
 
   if ((pat_patctl.control & ~POSIX_SUPPORTED_COMPILE_CONTROLS) != 0 ||
       (pat_patctl.control2 & ~POSIX_SUPPORTED_COMPILE_CONTROLS2) != 0)
@@ -5246,8 +5248,8 @@ if ((pat_patctl.control & CTL_POSIX) != 0)
   if (FLD(pat_context, max_pattern_length) != PCRE2_UNSET)
     prmsg(&msg, "max_pattern_length");
   if (FLD(pat_context, parens_nest_limit) != PARENS_NEST_DEFAULT)
-    prmsg(&msg, "parens_nest_limit"); 
-    
+    prmsg(&msg, "parens_nest_limit");
+
   if (msg[0] == 0) fprintf(outfile, "\n");
 
   /* Translate PCRE2 options to POSIX options and then compile. */
@@ -5413,7 +5415,7 @@ if (pat_patctl.convert_type != CONVERT_UNSET)
   if (pat_patctl.convert_glob_escape != 0)
     {
     uint32_t escape = (pat_patctl.convert_glob_escape == '0')? 0 :
-      pat_patctl.convert_glob_escape;  
+      pat_patctl.convert_glob_escape;
     PCRE2_SET_GLOB_ESCAPE(rc, con_context, escape);
     if (rc != 0)
       {
@@ -7057,10 +7059,10 @@ else for (gmatched = 0;; gmatched++)
     if ((dat_datctl.control & CTL_DFA) == 0 &&
         (FLD(compiled_code, executable_jit) == NULL ||
           (dat_datctl.options & PCRE2_NO_JIT) != 0))
-      {     
+      {
       (void)check_match_limit(pp, arg_ulen, PCRE2_ERROR_HEAPLIMIT, "heap");
-      } 
-       
+      }
+
     capcount = check_match_limit(pp, arg_ulen, PCRE2_ERROR_MATCHLIMIT,
       "match");
 

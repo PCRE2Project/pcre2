@@ -142,6 +142,7 @@ D   is inspected during pcre2_dfa_match() execution
 /* An additional compile options word is available in the compile context. */
 
 #define PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES  0x00000001u  /* C       */
+#define PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL    0x00000002u  /* C       */
 
 /* These are for pcre2_jit_compile(). */
 

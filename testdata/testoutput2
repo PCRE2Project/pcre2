@@ -15988,6 +15988,33 @@ Subject length lower bound = 1
         End
 ------------------------------------------------------------------
 
+# ----------------------------------------------------------------------
+# These test the dangerous PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL option.
+
+/\j\x{z}\o{82}\L\uabcd\u\U\g{\g/B,\bad_escape_is_literal
+** Unrecognized modifier '\' in '\bad_escape_is_literal'
+
+/\N{\c/B,bad_escape_is_literal
+------------------------------------------------------------------
+        Bra
+        N{c
+        Ket
+        End
+------------------------------------------------------------------
+
+/[\j\x{z}\o\gA-\Nb-\g]/B,bad_escape_is_literal
+------------------------------------------------------------------
+        Bra
+        [A-Nb-gjoxz{}]
+        Ket
+        End
+------------------------------------------------------------------
+
+/[Q-\N]/B,bad_escape_is_literal
+Failed: error 108 at offset 4: range out of order in character class
+
+# ----------------------------------------------------------------------
+
 # End of testinput2 
 Error -65: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "30 May 2017" "PCRE2 10.30"
+.TH PCRE2API 3 "01 June 2017" "PCRE2 10.30"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -1661,6 +1661,23 @@ If the extra option PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES is set, surrogate code
 point values in UTF-8 and UTF-32 patterns no longer provoke errors and are
 incorporated in the compiled pattern. However, they can only match subject
 characters if the matching function is called with PCRE2_NO_UTF_CHECK set.
+.sp
+  PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL
+.sp
+This is a dangerous option. Use with care. By default, an unrecognized escape
+such as \ej or a malformed one such as \ex{2z} causes a compile-time error when
+detected by \fBpcre2_compile()\fP. Perl is somewhat inconsistent in handling
+such items: for example, \ej is treated as a literal "j", and non-hexadecimal
+digits in \ex{} are just ignored, though warnings are given in both cases if
+Perl's warning switch is enabled. However, a malformed octal number after \eo{
+always causes an error in Perl.
+.P
+If the PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL extra option is passed to
+\fBpcre2_compile()\fP, all unrecognized or erroneous escape sequences are
+treated as single-character escapes. For example, \ej is a literal "j" and
+\ex{2z} is treated as the literal string "x{2z}". Setting this option means
+that typos in patterns may go undetected and have unexpected results. This is a
+dangerous option. Use with care.
 .
 .
 .SH "COMPILATION ERROR CODES"
@@ -3491,6 +3508,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 30 May 2017
+Last updated: 01 June 2017
 Copyright (c) 1997-2017 University of Cambridge.
 .fi

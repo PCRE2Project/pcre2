@@ -2591,11 +2591,23 @@ while (ptr < ptrend)
     /* ---- Escape sequence ---- */
 
     case CHAR_BACKSLASH:
+    tempptr = ptr;
     escape = PRIV(check_escape)(&ptr, ptrend, &c, &errorcode, options,
       FALSE, cb);
-    if (errorcode != 0) goto FAILED;
+    if (errorcode != 0)
+      {
+      ESCAPE_FAILED:
+      if ((cb->cx->extra_options & PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL) == 0)
+        goto FAILED;
+      ptr = tempptr;
+      if (ptr >= ptrend) c = CHAR_BACKSLASH; else
+        { 
+        GETCHARINCTEST(c, ptr);   /* Get character value, increment pointer */
+        } 
+      escape = 0;                 /* Treat as literal character */
+      }
 
-    /* The escape was a data character. */
+    /* The escape was a data escape or literal character. */
 
     if (escape == 0)
       {
@@ -2647,12 +2659,12 @@ while (ptr < ptrend)
       case ESC_C:
 #ifdef NEVER_BACKSLASH_C
       errorcode = ERR85;
-      goto FAILED;
+      goto ESCAPE_FAILED;
 #else
       if ((options & PCRE2_NEVER_BACKSLASH_C) != 0)
         {
         errorcode = ERR83;
-        goto FAILED;
+        goto ESCAPE_FAILED;
         }
 #endif
       okquantifier = TRUE;
@@ -2662,7 +2674,7 @@ while (ptr < ptrend)
       case ESC_X:
 #ifndef SUPPORT_UNICODE
       errorcode = ERR45;   /* Supported only with Unicode support */
-      goto FAILED;
+      goto ESCAPE_FAILED;
 #endif
       case ESC_H:
       case ESC_h:
@@ -2727,7 +2739,7 @@ while (ptr < ptrend)
         BOOL negated;
         uint16_t ptype = 0, pdata = 0;
         if (!get_ucp(&ptr, &negated, &ptype, &pdata, &errorcode, cb))
-          goto FAILED;
+          goto ESCAPE_FAILED;
         if (negated) escape = (escape == ESC_P)? ESC_p : ESC_P;
         *parsed_pattern++ = META_ESCAPE + escape;
         *parsed_pattern++ = (ptype << 16) | pdata;
@@ -2735,7 +2747,7 @@ while (ptr < ptrend)
         }
 #else
       errorcode = ERR45;
-      goto FAILED;
+      goto ESCAPE_FAILED;
 #endif
       break;  /* End \P and \p */
 
@@ -2751,7 +2763,7 @@ while (ptr < ptrend)
           *ptr != CHAR_LESS_THAN_SIGN && *ptr != CHAR_APOSTROPHE))
         {
         errorcode = (escape == ESC_g)? ERR57 : ERR69;
-        goto FAILED;
+        goto ESCAPE_FAILED;
         }
       terminator = (*ptr == CHAR_LESS_THAN_SIGN)?
         CHAR_GREATER_THAN_SIGN : (*ptr == CHAR_APOSTROPHE)?
@@ -2769,18 +2781,18 @@ while (ptr < ptrend)
           if (p >= ptrend || *p != terminator)
             {
             errorcode = ERR57;
-            goto FAILED;
+            goto ESCAPE_FAILED;
             }
           ptr = p;
           goto SET_RECURSION;
           }
-        if (errorcode != 0) goto FAILED;
+        if (errorcode != 0) goto ESCAPE_FAILED;
         }
 
       /* Not a numerical recursion */
 
       if (!read_name(&ptr, ptrend, terminator, &offset, &name, &namelen,
-          &errorcode, cb)) goto FAILED;
+          &errorcode, cb)) goto ESCAPE_FAILED;
 
       /* \k and \g when used with braces are back references, whereas \g used
       with quotes or angle brackets is a recursion */
@@ -2792,7 +2804,7 @@ while (ptr < ptrend)
 
       PUTOFFSET(offset, parsed_pattern);
       okquantifier = TRUE;
-      break;
+      break;  /* End special escape processing */
       }
     break;    /* End escape sequence processing */
 
@@ -3139,10 +3151,23 @@ while (ptr < ptrend)
 
       else
         {
+        tempptr = ptr; 
         escape = PRIV(check_escape)(&ptr, ptrend, &c, &errorcode,
           options, TRUE, cb);
-
-        if (errorcode != 0) goto FAILED;
+           
+        if (errorcode != 0)
+          {
+          CLASS_ESCAPE_FAILED:
+          if ((cb->cx->extra_options & PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL) == 0)
+            goto FAILED;
+          ptr = tempptr;
+          if (ptr >= ptrend) c = CHAR_BACKSLASH; else
+            { 
+            GETCHARINCTEST(c, ptr);   /* Get character value, increment pointer */
+            } 
+          escape = 0;                 /* Treat as literal character */
+          }
+         
         if (escape == 0)  /* Escaped character code point is in c */
           {
           char_is_literal = FALSE;
@@ -3176,7 +3201,7 @@ while (ptr < ptrend)
         if (class_range_state == RANGE_STARTED)
           {
           errorcode = ERR50;
-          goto FAILED;
+          goto CLASS_ESCAPE_FAILED;
           }
 
         /* Of the remaining escapes, only those that define characters are
@@ -3187,7 +3212,7 @@ while (ptr < ptrend)
           {
           case ESC_N:
           errorcode = ERR71;  /* Not supported in a class */
-          goto FAILED;
+          goto CLASS_ESCAPE_FAILED;
 
           case ESC_H:
           case ESC_h:
@@ -3250,13 +3275,14 @@ while (ptr < ptrend)
             }
 #else
           errorcode = ERR45;
-          goto FAILED;
+          goto CLASS_ESCAPE_FAILED;
 #endif
           break;  /* End \P and \p */
 
           default:    /* All others are not allowed in a class */
           errorcode = ERR7;
-          goto FAILED_BACK;
+          ptr--; 
+          goto CLASS_ESCAPE_FAILED;
           }
         }
 

@@ -27,10 +27,11 @@ DESCRIPTION
 </b><br>
 <P>
 This function sets additional option bits for <b>pcre2_compile()</b> that are
-housed in a compile context. It completely replaces all the bits. The extra 
+housed in a compile context. It completely replaces all the bits. The extra
 options are:
 <pre>
   PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES  Allow \x{df800} to \x{dfff} in UTF-8 and UTF-32 modes
+  PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL    Treat all invalid escapes as a literal following character
 </pre>
 There is a complete description of the PCRE2 native API in the
 <a href="pcre2api.html"><b>pcre2api</b></a>
