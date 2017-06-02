@@ -177,6 +177,8 @@ behaviour when processed by pcre2_dfa_match(). This is oss-fuzz issue 1859.
 patterns that can use up a lot of resources without necessarily recursing very 
 deeply. (Compare item 10.23/36.) This should fix oss-fuzz #1761.
 
+37. Implement PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL.
+
 
 Version 10.23 14-February-2017
 ------------------------------
