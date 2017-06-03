@@ -2129,6 +2129,7 @@ for (;;)
         case 0x2029:
 #endif  /* Not EBCDIC */
         if (mb->bsr_convention == PCRE2_BSR_ANYCRLF) break;
+        /* Fall through */ 
 
         case CHAR_LF:
         ADD_NEW(state_offset + 1, 0);

@@ -3829,6 +3829,7 @@ while (TRUE)
     {
     case OP_CHARI:
     caseless = TRUE;
+    /* Fall through */ 
     case OP_CHAR:
     last = FALSE;
     cc++;
@@ -3860,6 +3861,7 @@ while (TRUE)
     case OP_MINPLUSI:
     case OP_POSPLUSI:
     caseless = TRUE;
+    /* Fall through */ 
     case OP_PLUS:
     case OP_MINPLUS:
     case OP_POSPLUS:
@@ -3868,6 +3870,7 @@ while (TRUE)
 
     case OP_EXACTI:
     caseless = TRUE;
+    /* Fall through */ 
     case OP_EXACT:
     repeat = GET2(cc, 1);
     last = FALSE;
@@ -3878,6 +3881,7 @@ while (TRUE)
     case OP_MINQUERYI:
     case OP_POSQUERYI:
     caseless = TRUE;
+    /* Fall through */ 
     case OP_QUERY:
     case OP_MINQUERY:
     case OP_POSQUERY:

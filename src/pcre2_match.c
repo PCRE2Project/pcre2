@@ -5352,9 +5352,10 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
                 (char *)assert_accept_frame + offsetof(heapframe, ovector),
                 assert_accept_frame->offset_top * sizeof(PCRE2_SIZE));
           Foffset_top = assert_accept_frame->offset_top;
-
-          /* Fall through. In the case of a match, the captures have already
-          been put into the current frame. */
+           
+          /* Fall through */ 
+          /* In the case of a match, the captures have already been put into
+          the current frame. */
 
           case MATCH_MATCH:
           condition = Lpositive;   /* TRUE for positive assertion */
@@ -5649,8 +5650,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
     if ((mb->moptions & PCRE2_NOTEOL) != 0) RRETURN(MATCH_NOMATCH);
     if ((mb->poptions & PCRE2_DOLLAR_ENDONLY) == 0) goto ASSERT_NL_OR_EOS;
 
-    /* ... else fall through for endonly */
-
+    /* Fall through */ 
     /* Unconditional end of subject assertion (\z) */
 
     case OP_EOD:

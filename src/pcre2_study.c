@@ -1448,6 +1448,10 @@ do
       classmap = ((tcode[1 + LINK_SIZE] & XCL_MAP) == 0)? NULL :
         (uint8_t *)(tcode + 1 + LINK_SIZE + 1);
 #endif
+      /* It seems that the fall through comment must be outside the #ifdef if
+      it is to avoid the gcc compiler warning. */
+        
+      /* Fall through */
 
       /* Enter here for a negative non-XCLASS. In the 8-bit library, if we are
       in UTF mode, any byte with a value >= 0xc4 is a potentially valid starter

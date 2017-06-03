@@ -3218,7 +3218,7 @@ handle_option(int letter, int options)
 switch(letter)
   {
   case N_FOFFSETS: file_offsets = TRUE; break;
-  case N_HELP: help(); pcre2grep_exit(0);
+  case N_HELP: help(); pcre2grep_exit(0); break; /* Stops compiler warning */
   case N_LBUFFER: line_buffered = TRUE; break;
   case N_LOFFSETS: line_offsets = number = TRUE; break;
   case N_NOJIT: use_jit = FALSE; break;

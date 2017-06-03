@@ -1613,8 +1613,8 @@ else
 
     if (c >= CHAR_8) break;
 
-    /* Fall through with a digit less than 8 */
-
+    /* Fall through */ 
+     
     /* \0 always starts an octal number, but we may drop through to here with a
     larger first octal digit. The original code used just to take the least
     significant 8 bits of octal numbers (I think this is what early Perls used
@@ -6425,8 +6425,8 @@ for (;; pptr++)
       length_prevgroup = 3 + 3*LINK_SIZE;
       group_return = -1;  /* Set "may match empty string" */
 
-      /* Now fall through and treat as a repeated OP_BRA. */
-      /* VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV */
+      /* Now treat as a repeated OP_BRA. */
+      /* Fall through */ 
 
       /* If previous was a bracket group, we may have to replicate it in
       certain cases. Note that at this point we can encounter only the "basic"
@@ -8552,7 +8552,8 @@ for (;; pptr++)
       goto RECURSE_OR_BACKREF_LENGTH;
       }
 
-    /* Fall through for groups >= 10 - picking up group twice does no harm. */
+    /* Fall through */ 
+    /* For groups >= 10 - picking up group twice does no harm. */
 
     /* A true recursion implies not fixed length, but a subroutine call may
     be OK. Back reference "recursions" are also failed. */
