@@ -338,8 +338,8 @@ if (rc >= 0)
   if ((size_t)rc > nmatch) rc = (int)nmatch;
   for (i = 0; i < (size_t)rc; i++)
     {
-    pmatch[i].rm_so = ovector[i*2];
-    pmatch[i].rm_eo = ovector[i*2+1];
+    pmatch[i].rm_so = ovector[i*2] + so;
+    pmatch[i].rm_eo = ovector[i*2+1] + so;
     }
   for (; i < nmatch; i++) pmatch[i].rm_so = pmatch[i].rm_eo = -1;
   return 0;

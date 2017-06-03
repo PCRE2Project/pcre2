@@ -1,4 +1,4 @@
-.TH PCRE2TEST 1 "01 June 2017" "PCRE 10.30"
+.TH PCRE2TEST 1 "03 June 2017" "PCRE 10.30"
 .SH NAME
 pcre2test - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -1046,6 +1046,20 @@ wrapper API to be used, the only option-setting modifiers that have any effect
 are \fBnotbol\fP, \fBnotempty\fP, and \fBnoteol\fP, causing REG_NOTBOL,
 REG_NOTEMPTY, and REG_NOTEOL, respectively, to be passed to \fBregexec()\fP.
 The other modifiers are ignored, with a warning message.
+.P
+There is one additional modifier that can be used with the POSIX wrapper. It is 
+ignored (with a warning) if used for non-POSIX matching.
+.sp
+      posix_startend=<n>[:<m>] 
+.sp
+This causes the subject string to be passed to \fBregexec()\fP using the
+REG_STARTEND option, which uses offsets to restrict which part of the string is
+searched. If only one number is given, the end offset is passed as the end of
+the subject string. For more detail of REG_STARTEND, see the
+.\" HREF
+\fBpcre2posix\fP
+.\"
+documentation. 
 .
 .
 .SS "Setting match controls"
@@ -1793,6 +1807,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 01 June 2017
+Last updated: 03 June 2017
 Copyright (c) 1997-2017 University of Cambridge.
 .fi

@@ -1,4 +1,4 @@
-.TH PCRE2POSIX 3 "31 January 2016" "PCRE2 10.22"
+.TH PCRE2POSIX 3 "03 June 2017" "PCRE2 10.30"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "SYNOPSIS"
@@ -204,15 +204,21 @@ function.
 .sp
   REG_STARTEND
 .sp
-The string is considered to start at \fIstring\fP + \fIpmatch[0].rm_so\fP and
-to have a terminating NUL located at \fIstring\fP + \fIpmatch[0].rm_eo\fP
-(there need not actually be a NUL at that location), regardless of the value of
-\fInmatch\fP. This is a BSD extension, compatible with but not specified by
-IEEE Standard 1003.2 (POSIX.2), and should be used with caution in software
-intended to be portable to other systems. Note that a non-zero \fIrm_so\fP does
-not imply REG_NOTBOL; REG_STARTEND affects only the location of the string, not
-how it is matched. Setting REG_STARTEND and passing \fIpmatch\fP as NULL are
-mutually exclusive; the error REG_INVARG is returned.
+When this option is set, the string is considered to start at \fIstring\fP +
+\fIpmatch[0].rm_so\fP and to have a terminating NUL located at \fIstring\fP +
+\fIpmatch[0].rm_eo\fP (there need not actually be a NUL at that location),
+regardless of the value of \fInmatch\fP. However, the offsets of the matched
+string and any captured substrings are still given relative to the start of
+\fIstring\fP. (Before PCRE2 release 10.30 these were given relative to
+\fIstring\fP + \fIpmatch[0].rm_so\fP, but this differs from other
+implementations.)
+.P
+This is a BSD extension, compatible with but not specified by IEEE Standard
+1003.2 (POSIX.2), and should be used with caution in software intended to be
+portable to other systems. Note that a non-zero \fIrm_so\fP does not imply
+REG_NOTBOL; REG_STARTEND affects only the location of the string, not how it is
+matched. Setting REG_STARTEND and passing \fIpmatch\fP as NULL are mutually
+exclusive; the error REG_INVARG is returned.
 .P
 If the pattern was compiled with the REG_NOSUB flag, no data about any matched
 strings is returned. The \fInmatch\fP and \fIpmatch\fP arguments of
@@ -271,6 +277,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 31 January 2016
-Copyright (c) 1997-2016 University of Cambridge.
+Last updated: 03 June 2017
+Copyright (c) 1997-2017 University of Cambridge.
 .fi

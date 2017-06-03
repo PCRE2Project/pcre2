@@ -179,6 +179,9 @@ deeply. (Compare item 10.23/36.) This should fix oss-fuzz #1761.
 
 37. Implement PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL.
 
+38. Fix returned offsets from regexec() when REG_STARTEND is used with a 
+starting offset greater than zero.
+
 
 Version 10.23 14-February-2017
 ------------------------------

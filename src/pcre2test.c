@@ -186,7 +186,7 @@ void vms_setsymbol( char *, char *, int );
 #endif
 #endif
 
-#define CFORE_UNSET UINT32_MAX    /* Unset value for cfail/cerror fields */
+#define CFORE_UNSET UINT32_MAX    /* Unset value for startend/cfail/cerror fields */
 #define CONVERT_UNSET UINT32_MAX  /* Unset value for convert_type field */
 #define DFA_WS_DIMENSION 1000     /* Size of DFA workspace */
 #define DEFAULT_OVECCOUNT 15      /* Default ovector count */
@@ -538,6 +538,7 @@ typedef struct datctl {    /* Structure for data line modifiers. */
   uint32_t  control;       /* Must be in same position as patctl */
   uint32_t  control2;      /* Must be in same position as patctl */
    uint8_t  replacement[REPLACE_MODSIZE];  /* So must this */
+  uint32_t  startend[2];  
   uint32_t  cerror[2];
   uint32_t  cfail[2];
    int32_t  callout_data;
@@ -662,6 +663,7 @@ static modstruct modlist[] = {
   { "ph",                         MOD_DAT,  MOD_OPT, PCRE2_PARTIAL_HARD,         DO(options) },
   { "posix",                      MOD_PAT,  MOD_CTL, CTL_POSIX,                  PO(control) },
   { "posix_nosub",                MOD_PAT,  MOD_CTL, CTL_POSIX|CTL_POSIX_NOSUB,  PO(control) },
+  { "posix_startend",             MOD_DAT,  MOD_IN2, 0,                          DO(startend) },
   { "ps",                         MOD_DAT,  MOD_OPT, PCRE2_PARTIAL_SOFT,         DO(options) },
   { "push",                       MOD_PAT,  MOD_CTL, CTL_PUSH,                   PO(control) },
   { "pushcopy",                   MOD_PAT,  MOD_CTL, CTL_PUSHCOPY,               PO(control) },
@@ -6660,6 +6662,14 @@ if ((pat_patctl.control & CTL_POSIX) != 0)
       }
     }
 
+  if (dat_datctl.startend[0] != CFORE_UNSET)
+    {
+    pmatch[0].rm_so = dat_datctl.startend[0];
+    pmatch[0].rm_eo = (dat_datctl.startend[1] != 0)? 
+      dat_datctl.startend[1] : len;
+    eflags |= REG_STARTEND;
+    }  
+
   if ((dat_datctl.options & PCRE2_NOTBOL) != 0) eflags |= REG_NOTBOL;
   if ((dat_datctl.options & PCRE2_NOTEOL) != 0) eflags |= REG_NOTEOL;
   if ((dat_datctl.options & PCRE2_NOTEMPTY) != 0) eflags |= REG_NOTEMPTY;
@@ -6712,6 +6722,9 @@ if ((pat_patctl.control & CTL_POSIX) != 0)
 
  /* Handle matching via the native interface. Check for consistency of
 modifiers. */
+
+if (dat_datctl.startend[0] != CFORE_UNSET)
+  fprintf(outfile, "** \\=posix_startend ignored for non-POSIX matching\n");
 
 /* ALLUSEDTEXT is not supported with JIT, but JIT is not used with DFA
 matching, even if the JIT compiler was used. */
@@ -7903,6 +7916,7 @@ memset(&def_datctl, 0, sizeof(datctl));
 def_datctl.oveccount = DEFAULT_OVECCOUNT;
 def_datctl.copy_numbers[0] = -1;
 def_datctl.get_numbers[0] = -1;
+def_datctl.startend[0] = def_datctl.startend[1] = CFORE_UNSET;
 def_datctl.cerror[0] = def_datctl.cerror[1] = CFORE_UNSET;
 def_datctl.cfail[0] = def_datctl.cfail[1] = CFORE_UNSET;
 
