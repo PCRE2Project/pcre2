@@ -231,10 +231,14 @@ PCRE2POSIX_EXP_DEFN int PCRE2_CALL_CONVENTION
 regcomp(regex_t *preg, const char *pattern, int cflags)
 {
 PCRE2_SIZE erroffset;
+PCRE2_SIZE patlen;
 int errorcode;
 int options = 0;
 int re_nsub = 0;
 
+patlen = ((cflags & REG_PEND) != 0)? (PCRE2_SIZE)(preg->re_endp - pattern) :
+  PCRE2_ZERO_TERMINATED;
+  
 if ((cflags & REG_ICASE) != 0)    options |= PCRE2_CASELESS;
 if ((cflags & REG_NEWLINE) != 0)  options |= PCRE2_MULTILINE;
 if ((cflags & REG_DOTALL) != 0)   options |= PCRE2_DOTALL;
@@ -243,8 +247,8 @@ if ((cflags & REG_UCP) != 0)      options |= PCRE2_UCP;
 if ((cflags & REG_UNGREEDY) != 0) options |= PCRE2_UNGREEDY;
 
 preg->re_cflags = cflags;
-preg->re_pcre2_code = pcre2_compile((PCRE2_SPTR)pattern, PCRE2_ZERO_TERMINATED,
-   options, &errorcode, &erroffset, NULL);
+preg->re_pcre2_code = pcre2_compile((PCRE2_SPTR)pattern, patlen, options, 
+  &errorcode, &erroffset, NULL);
 preg->re_erroffset = erroffset;
 
 if (preg->re_pcre2_code == NULL)

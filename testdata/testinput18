@@ -123,4 +123,10 @@
 /^a\x{00}b$/posix
     a\x{00}b\=posix_startend=0:3
 
+/"A" 00 "B"/hex
+    A\x{00}B\=posix_startend=0:3
+    
+/ABC/use_length 
+    ABC
+
 # End of testdata/testinput18

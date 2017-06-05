@@ -191,4 +191,12 @@ No match: POSIX code 17: match failed
     a\x{00}b\=posix_startend=0:3
  0: a\x00b
 
+/"A" 00 "B"/hex
+    A\x{00}B\=posix_startend=0:3
+ 0: A\x00B
+    
+/ABC/use_length 
+    ABC
+ 0: ABC
+
 # End of testdata/testinput18

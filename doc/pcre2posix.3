@@ -1,4 +1,4 @@
-.TH PCRE2POSIX 3 "03 June 2017" "PCRE2 10.30"
+.TH PCRE2POSIX 3 "05 June 2017" "PCRE2 10.30"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "SYNOPSIS"
@@ -46,7 +46,7 @@ replacement library. Other POSIX options are not even defined.
 .P
 There are also some options that are not defined by POSIX. These have been
 added at the request of users who want to make use of certain PCRE2-specific
-features via the POSIX calling interface.
+features via the POSIX calling interface or to add BSD or GNU functionality.
 .P
 When PCRE2 is called via these functions, it is only the API that is POSIX-like
 in style. The syntax and semantics of the regular expressions themselves are
@@ -68,10 +68,11 @@ identifying error codes.
 .rs
 .sp
 The function \fBregcomp()\fP is called to compile a pattern into an
-internal form. The pattern is a C string terminated by a binary zero, and
-is passed in the argument \fIpattern\fP. The \fIpreg\fP argument is a pointer
-to a \fBregex_t\fP structure that is used as a base for storing information
-about the compiled regular expression.
+internal form. By default, the pattern is a C string terminated by a binary
+zero (but see REG_PEND below). The \fIpreg\fP argument is a pointer to a
+\fBregex_t\fP structure that is used as a base for storing information about
+the compiled regular expression. (It is also used for input when REG_PEND is 
+set.)
 .P
 The argument \fIcflags\fP is either zero, or contains one or more of the bits
 defined by the following macros:
@@ -100,6 +101,16 @@ matching, the \fInmatch\fP and \fIpmatch\fP arguments are ignored, and no
 captured strings are returned. Versions of the PCRE library prior to 10.22 used
 to set the PCRE2_NO_AUTO_CAPTURE compile option, but this no longer happens
 because it disables the use of back references.
+.sp
+  REG_PEND
+.sp
+If this option is set, the \fBreg_endp\fP field in the \fIpreg\fP structure 
+(which has the type const char *) must be set to point to the character beyond 
+the end of the pattern before calling \fBregcomp()\fP. The pattern itself may
+now contain binary zeroes, which are treated as data characters. Without
+REG_PEND, a binary zero terminates the pattern and the \fBre_endp\fP field is
+ignored. This is a GNU extension to the POSIX standard and should be used with
+caution in software intended to be portable to other systems.
 .sp
   REG_UCP
 .sp
@@ -130,9 +141,10 @@ newlines are matched by the dot metacharacter (they are not) or by a negative
 class such as [^a] (they are).
 .P
 The yield of \fBregcomp()\fP is zero on success, and non-zero otherwise. The
-\fIpreg\fP structure is filled in on success, and one member of the structure
-is public: \fIre_nsub\fP contains the number of capturing subpatterns in
-the regular expression. Various error codes are defined in the header file.
+\fIpreg\fP structure is filled in on success, and one other member of the
+structure (as well as \fIre_endp\fP) is public: \fIre_nsub\fP contains the
+number of capturing subpatterns in the regular expression. Various error codes
+are defined in the header file.
 .P
 NOTE: If the yield of \fBregcomp()\fP is non-zero, you must not attempt to
 use the contents of the \fIpreg\fP structure. If, for example, you pass it to
@@ -204,21 +216,24 @@ function.
 .sp
   REG_STARTEND
 .sp
-When this option is set, the string is considered to start at \fIstring\fP +
-\fIpmatch[0].rm_so\fP and to have a terminating NUL located at \fIstring\fP +
-\fIpmatch[0].rm_eo\fP (there need not actually be a NUL at that location),
-regardless of the value of \fInmatch\fP. However, the offsets of the matched
-string and any captured substrings are still given relative to the start of
-\fIstring\fP. (Before PCRE2 release 10.30 these were given relative to
+When this option is set, the subject string is starts at \fIstring\fP +
+\fIpmatch[0].rm_so\fP and ends at \fIstring\fP + \fIpmatch[0].rm_eo\fP, which
+should point to the first character beyond the string. There may be binary 
+zeroes within the subject string, and indeed, using REG_STARTEND is the only 
+way to pass a subject string that contains a binary zero.
+.P
+Whatever the value of \fIpmatch[0].rm_so\fP, the offsets of the matched string
+and any captured substrings are still given relative to the start of
+\fIstring\fP itself. (Before PCRE2 release 10.30 these were given relative to
 \fIstring\fP + \fIpmatch[0].rm_so\fP, but this differs from other
 implementations.)
 .P
 This is a BSD extension, compatible with but not specified by IEEE Standard
 1003.2 (POSIX.2), and should be used with caution in software intended to be
 portable to other systems. Note that a non-zero \fIrm_so\fP does not imply
-REG_NOTBOL; REG_STARTEND affects only the location of the string, not how it is
-matched. Setting REG_STARTEND and passing \fIpmatch\fP as NULL are mutually
-exclusive; the error REG_INVARG is returned.
+REG_NOTBOL; REG_STARTEND affects only the location and length of the string,
+not how it is matched. Setting REG_STARTEND and passing \fIpmatch\fP as NULL
+are mutually exclusive; the error REG_INVARG is returned.
 .P
 If the pattern was compiled with the REG_NOSUB flag, no data about any matched
 strings is returned. The \fInmatch\fP and \fIpmatch\fP arguments of
@@ -277,6 +292,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 03 June 2017
+Last updated: 05 June 2017
 Copyright (c) 1997-2017 University of Cambridge.
 .fi

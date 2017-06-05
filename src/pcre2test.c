@@ -538,7 +538,7 @@ typedef struct datctl {    /* Structure for data line modifiers. */
   uint32_t  control;       /* Must be in same position as patctl */
   uint32_t  control2;      /* Must be in same position as patctl */
    uint8_t  replacement[REPLACE_MODSIZE];  /* So must this */
-  uint32_t  startend[2];  
+  uint32_t  startend[2];
   uint32_t  cerror[2];
   uint32_t  cfail[2];
    int32_t  callout_data;
@@ -699,7 +699,8 @@ static modstruct modlist[] = {
 #define POSIX_SUPPORTED_COMPILE_EXTRA_OPTIONS (0)
 
 #define POSIX_SUPPORTED_COMPILE_CONTROLS ( \
-  CTL_AFTERTEXT|CTL_ALLAFTERTEXT|CTL_EXPAND|CTL_POSIX|CTL_POSIX_NOSUB)
+  CTL_AFTERTEXT|CTL_ALLAFTERTEXT|CTL_EXPAND|CTL_HEXPAT|CTL_POSIX| \
+  CTL_POSIX_NOSUB|CTL_USE_LENGTH)
 
 #define POSIX_SUPPORTED_COMPILE_CONTROLS2 (0)
 
@@ -733,11 +734,9 @@ the first control word. Note that CTL_POSIX_NOSUB is always accompanied by
 CTL_POSIX, so it doesn't need its own entries. */
 
 static uint32_t exclusive_pat_controls[] = {
-  CTL_POSIX    | CTL_HEXPAT,
   CTL_POSIX    | CTL_PUSH,
   CTL_POSIX    | CTL_PUSHCOPY,
   CTL_POSIX    | CTL_PUSHTABLESCOPY,
-  CTL_POSIX    | CTL_USE_LENGTH,
   CTL_PUSH     | CTL_PUSHCOPY,
   CTL_PUSH     | CTL_PUSHTABLESCOPY,
   CTL_PUSHCOPY | CTL_PUSHTABLESCOPY,
@@ -896,7 +895,7 @@ static PCRE2_SIZE malloclistlength[MALLOCLISTSIZE];
 static uint32_t malloclistptr = 0;
 
 #ifdef SUPPORT_PCRE2_8
-static regex_t preg = { NULL, NULL, 0, 0, 0 };
+static regex_t preg = { NULL, NULL, 0, 0, 0, 0 };
 #endif
 
 static int *dfa_workspace = NULL;
@@ -5264,6 +5263,12 @@ if ((pat_patctl.control & CTL_POSIX) != 0)
   if ((pat_patctl.options & PCRE2_DOTALL) != 0) cflags |= REG_DOTALL;
   if ((pat_patctl.options & PCRE2_UNGREEDY) != 0) cflags |= REG_UNGREEDY;
 
+  if ((pat_patctl.control & (CTL_HEXPAT|CTL_USE_LENGTH)) != 0)
+    {
+    preg.re_endp = (char *)pbuffer8 + patlen;
+    cflags |= REG_PEND;  
+    }  
+
   rc = regcomp(&preg, (char *)pbuffer8, cflags);
 
   /* Compiling failed */
@@ -6665,10 +6670,10 @@ if ((pat_patctl.control & CTL_POSIX) != 0)
   if (dat_datctl.startend[0] != CFORE_UNSET)
     {
     pmatch[0].rm_so = dat_datctl.startend[0];
-    pmatch[0].rm_eo = (dat_datctl.startend[1] != 0)? 
+    pmatch[0].rm_eo = (dat_datctl.startend[1] != 0)?
       dat_datctl.startend[1] : len;
     eflags |= REG_STARTEND;
-    }  
+    }
 
   if ((dat_datctl.options & PCRE2_NOTBOL) != 0) eflags |= REG_NOTBOL;
   if ((dat_datctl.options & PCRE2_NOTEOL) != 0) eflags |= REG_NOTEOL;

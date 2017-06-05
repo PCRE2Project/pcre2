@@ -69,7 +69,7 @@ replacement library. Other POSIX options are not even defined.
 <P>
 There are also some options that are not defined by POSIX. These have been
 added at the request of users who want to make use of certain PCRE2-specific
-features via the POSIX calling interface.
+features via the POSIX calling interface or to add BSD or GNU functionality.
 </P>
 <P>
 When PCRE2 is called via these functions, it is only the API that is POSIX-like
@@ -91,10 +91,11 @@ identifying error codes.
 <br><a name="SEC3" href="#TOC1">COMPILING A PATTERN</a><br>
 <P>
 The function <b>regcomp()</b> is called to compile a pattern into an
-internal form. The pattern is a C string terminated by a binary zero, and
-is passed in the argument <i>pattern</i>. The <i>preg</i> argument is a pointer
-to a <b>regex_t</b> structure that is used as a base for storing information
-about the compiled regular expression.
+internal form. By default, the pattern is a C string terminated by a binary
+zero (but see REG_PEND below). The <i>preg</i> argument is a pointer to a
+<b>regex_t</b> structure that is used as a base for storing information about
+the compiled regular expression. (It is also used for input when REG_PEND is 
+set.)
 </P>
 <P>
 The argument <i>cflags</i> is either zero, or contains one or more of the bits
@@ -124,6 +125,16 @@ matching, the <i>nmatch</i> and <i>pmatch</i> arguments are ignored, and no
 captured strings are returned. Versions of the PCRE library prior to 10.22 used
 to set the PCRE2_NO_AUTO_CAPTURE compile option, but this no longer happens
 because it disables the use of back references.
+<pre>
+  REG_PEND
+</pre>
+If this option is set, the <b>reg_endp</b> field in the <i>preg</i> structure 
+(which has the type const char *) must be set to point to the character beyond 
+the end of the pattern before calling <b>regcomp()</b>. The pattern itself may
+now contain binary zeroes, which are treated as data characters. Without
+REG_PEND, a binary zero terminates the pattern and the <b>re_endp</b> field is
+ignored. This is a GNU extension to the POSIX standard and should be used with
+caution in software intended to be portable to other systems.
 <pre>
   REG_UCP
 </pre>
@@ -156,9 +167,10 @@ class such as [^a] (they are).
 </P>
 <P>
 The yield of <b>regcomp()</b> is zero on success, and non-zero otherwise. The
-<i>preg</i> structure is filled in on success, and one member of the structure
-is public: <i>re_nsub</i> contains the number of capturing subpatterns in
-the regular expression. Various error codes are defined in the header file.
+<i>preg</i> structure is filled in on success, and one other member of the
+structure (as well as <i>re_endp</i>) is public: <i>re_nsub</i> contains the
+number of capturing subpatterns in the regular expression. Various error codes
+are defined in the header file.
 </P>
 <P>
 NOTE: If the yield of <b>regcomp()</b> is non-zero, you must not attempt to
@@ -228,15 +240,26 @@ function.
 <pre>
   REG_STARTEND
 </pre>
-The string is considered to start at <i>string</i> + <i>pmatch[0].rm_so</i> and
-to have a terminating NUL located at <i>string</i> + <i>pmatch[0].rm_eo</i>
-(there need not actually be a NUL at that location), regardless of the value of
-<i>nmatch</i>. This is a BSD extension, compatible with but not specified by
-IEEE Standard 1003.2 (POSIX.2), and should be used with caution in software
-intended to be portable to other systems. Note that a non-zero <i>rm_so</i> does
-not imply REG_NOTBOL; REG_STARTEND affects only the location of the string, not
-how it is matched. Setting REG_STARTEND and passing <i>pmatch</i> as NULL are
-mutually exclusive; the error REG_INVARG is returned.
+When this option is set, the subject string is starts at <i>string</i> +
+<i>pmatch[0].rm_so</i> and ends at <i>string</i> + <i>pmatch[0].rm_eo</i>, which
+should point to the first character beyond the string. There may be binary 
+zeroes within the subject string, and indeed, using REG_STARTEND is the only 
+way to pass a subject string that contains a binary zero.
+</P>
+<P>
+Whatever the value of <i>pmatch[0].rm_so</i>, the offsets of the matched string
+and any captured substrings are still given relative to the start of
+<i>string</i> itself. (Before PCRE2 release 10.30 these were given relative to
+<i>string</i> + <i>pmatch[0].rm_so</i>, but this differs from other
+implementations.)
+</P>
+<P>
+This is a BSD extension, compatible with but not specified by IEEE Standard
+1003.2 (POSIX.2), and should be used with caution in software intended to be
+portable to other systems. Note that a non-zero <i>rm_so</i> does not imply
+REG_NOTBOL; REG_STARTEND affects only the location and length of the string,
+not how it is matched. Setting REG_STARTEND and passing <i>pmatch</i> as NULL
+are mutually exclusive; the error REG_INVARG is returned.
 </P>
 <P>
 If the pattern was compiled with the REG_NOSUB flag, no data about any matched
@@ -291,9 +314,9 @@ Cambridge, England.
 </P>
 <br><a name="SEC9" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 31 January 2016
+Last updated: 05 June 2017
 <br>
-Copyright &copy; 1997-2016 University of Cambridge.
+Copyright &copy; 1997-2017 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE2 index page</a>.

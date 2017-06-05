@@ -1078,6 +1078,19 @@ are <b>notbol</b>, <b>notempty</b>, and <b>noteol</b>, causing REG_NOTBOL,
 REG_NOTEMPTY, and REG_NOTEOL, respectively, to be passed to <b>regexec()</b>.
 The other modifiers are ignored, with a warning message.
 </P>
+<P>
+There is one additional modifier that can be used with the POSIX wrapper. It is 
+ignored (with a warning) if used for non-POSIX matching.
+<pre>
+      posix_startend=&#60;n&#62;[:&#60;m&#62;] 
+</pre>
+This causes the subject string to be passed to <b>regexec()</b> using the
+REG_STARTEND option, which uses offsets to restrict which part of the string is
+searched. If only one number is given, the end offset is passed as the end of
+the subject string. For more detail of REG_STARTEND, see the
+<a href="pcre2posix.html"><b>pcre2posix</b></a>
+documentation. 
+</P>
 <br><b>
 Setting match controls
 </b><br>
@@ -1817,7 +1830,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC21" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 01 June 2017
+Last updated: 03 June 2017
 <br>
 Copyright &copy; 1997-2017 University of Cambridge.
 <br>

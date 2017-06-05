@@ -182,6 +182,8 @@ deeply. (Compare item 10.23/36.) This should fix oss-fuzz #1761.
 38. Fix returned offsets from regexec() when REG_STARTEND is used with a 
 starting offset greater than zero.
 
+39. Implement REG_PEND (GNU extension) for the POSIX wrapper.
+
 
 Version 10.23 14-February-2017
 ------------------------------
