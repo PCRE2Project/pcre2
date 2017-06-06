@@ -1,4 +1,4 @@
-.TH PCRE2TEST 1 "03 June 2017" "PCRE 10.30"
+.TH PCRE2TEST 1 "06 June 2017" "PCRE 10.30"
 .SH NAME
 pcre2test - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -67,7 +67,7 @@ no further data is read, so this character should be avoided unless you really
 want that action.
 .P
 The input is processed using using C's string functions, so must not
-contain binary zeroes, even though in Unix-like environments, \fBfgets()\fP
+contain binary zeros, even though in Unix-like environments, \fBfgets()\fP
 treats any bytes other than newline as data characters. An error is generated
 if a binary zero is encountered. Subject lines are processed for backslash
 escapes, which makes it possible to include any data value in strings that are
@@ -334,8 +334,9 @@ of the standard test input files.
 .P
 When the POSIX API is being tested there is no way to override the default
 newline convention, though it is possible to set the newline convention from
-within the pattern. A warning is given if the \fBposix\fP modifier is used when
-\fB#newline_default\fP would set a default for the non-POSIX API.
+within the pattern. A warning is given if the \fBposix\fP or \fBposix_nosub\fP
+modifier is used when \fB#newline_default\fP would set a default for the
+non-POSIX API.
 .sp
   #pattern <modifier-list>
 .sp
@@ -685,18 +686,6 @@ testing that \fBpcre2_compile()\fP behaves correctly in this case (it uses
 default values).
 .
 .
-.SS "Specifying the pattern's length"
-.rs
-.sp
-By default, patterns are passed to the compiling functions as zero-terminated
-strings. When using the POSIX wrapper API, there is no other option. However,
-when using PCRE2's native API, patterns can be passed by length instead of
-being zero-terminated. The \fBuse_length\fP modifier causes this to happen.
-Using a length happens automatically (whether or not \fBuse_length\fP is set)
-when \fBhex\fP is set, because patterns specified in hexadecimal may contain
-binary zeros.
-.
-.
 .SS "Specifying pattern characters in hexadecimal"
 .rs
 .sp
@@ -717,11 +706,23 @@ nine characters, only two of which are specified in hexadecimal:
 Either single or double quotes may be used. There is no way of including
 the delimiter within a substring. The \fBhex\fP and \fBexpand\fP modifiers are
 mutually exclusive.
+.
+.
+.SS "Specifying the pattern's length"
+.rs
+.sp
+By default, patterns are passed to the compiling functions as zero-terminated
+strings but can be passed by length instead of being zero-terminated. The
+\fBuse_length\fP modifier causes this to happen. Using a length happens
+automatically (whether or not \fBuse_length\fP is set) when \fBhex\fP is set,
+because patterns specified in hexadecimal may contain binary zeros.
 .P
-The POSIX API cannot be used with patterns specified in hexadecimal because
-they may contain binary zeros, which conflicts with \fBregcomp()\fP's
-requirement for a zero-terminated string. Such patterns are always passed to
-\fBpcre2_compile()\fP as a string with a length, not as zero-terminated.
+If \fBhex\fP or \fBuse_length\fP is used with the POSIX wrapper API (see
+.\" HTML <a href="#posixwrapper">
+.\" </a>
+"Using the POSIX wrapper API"
+.\"
+below), the REG_PEND extension is used to pass the pattern's length.
 .
 .
 .SS "Specifying wide characters in 16-bit and 32-bit modes"
@@ -787,7 +788,7 @@ below
 .\"
 for details of how these options are specified for each match attempt.
 .P
-JIT compilation is requested by the \fB/jit\fP pattern modifier, which may
+JIT compilation is requested by the \fBjit\fP pattern modifier, which may
 optionally be followed by an equals sign and a number in the range 0 to 7.
 The three bits that make up the number specify which of the three JIT operating
 modes are to be compiled:
@@ -811,7 +812,7 @@ to \fBpcre2_match()\fP with either the PCRE2_PARTIAL_SOFT or the
 PCRE2_PARTIAL_HARD option set. Note that such a call may return a complete
 match; the options enable the possibility of a partial match, but do not
 require it. Note also that if you request JIT compilation only for partial
-matching (for example, /jit=2) but do not set the \fBpartial\fP modifier on a
+matching (for example, jit=2) but do not set the \fBpartial\fP modifier on a
 subject line, that match will not use JIT code because none was compiled for
 non-partial matching.
 .P
@@ -888,10 +889,11 @@ causes a compilation error. The default is the largest number a PCRE2_SIZE
 variable can hold (essentially unlimited).
 .
 .
+.\" HTML <a name="posixwrapper"></a>
 .SS "Using the POSIX wrapper API"
 .rs
 .sp
-The \fB/posix\fP and \fBposix_nosub\fP modifiers cause \fBpcre2test\fP to call
+The \fBposix\fP and \fBposix_nosub\fP modifiers cause \fBpcre2test\fP to call
 PCRE2 via the POSIX wrapper API rather than its native API. When
 \fBposix_nosub\fP is used, the POSIX option REG_NOSUB is passed to
 \fBregcomp()\fP. The POSIX wrapper supports only the 8-bit library. Note that
@@ -921,6 +923,10 @@ large buffer is used.
 The \fBaftertext\fP and \fBallaftertext\fP subject modifiers work as described
 below. All other modifiers are either ignored, with a warning message, or cause
 an error.
+.P
+The pattern is passed to \fBregcomp()\fP as a zero-terminated string by 
+default, but if the \fBuse_length\fP or \fBhex\fP modifiers are set, the 
+REG_PEND extension is used to pass it by length.
 .
 .
 .SS "Testing the stack guard feature"
@@ -1041,11 +1047,11 @@ for a description of their effects.
 The partial matching modifiers are provided with abbreviations because they
 appear frequently in tests.
 .P
-If the \fBposix\fP modifier was present on the pattern, causing the POSIX
-wrapper API to be used, the only option-setting modifiers that have any effect
-are \fBnotbol\fP, \fBnotempty\fP, and \fBnoteol\fP, causing REG_NOTBOL,
-REG_NOTEMPTY, and REG_NOTEOL, respectively, to be passed to \fBregexec()\fP.
-The other modifiers are ignored, with a warning message.
+If the \fBposix\fP or \fBposix_nosub\fP modifier was present on the pattern,
+causing the POSIX wrapper API to be used, the only option-setting modifiers
+that have any effect are \fBnotbol\fP, \fBnotempty\fP, and \fBnoteol\fP,
+causing REG_NOTBOL, REG_NOTEMPTY, and REG_NOTEOL, respectively, to be passed to
+\fBregexec()\fP. The other modifiers are ignored, with a warning message.
 .P
 There is one additional modifier that can be used with the POSIX wrapper. It is 
 ignored (with a warning) if used for non-POSIX matching.
@@ -1053,13 +1059,15 @@ ignored (with a warning) if used for non-POSIX matching.
       posix_startend=<n>[:<m>] 
 .sp
 This causes the subject string to be passed to \fBregexec()\fP using the
-REG_STARTEND option, which uses offsets to restrict which part of the string is
+REG_STARTEND option, which uses offsets to specify which part of the string is
 searched. If only one number is given, the end offset is passed as the end of
 the subject string. For more detail of REG_STARTEND, see the
 .\" HREF
 \fBpcre2posix\fP
 .\"
-documentation. 
+documentation. If the subject string contains binary zeros (coded as escapes 
+such as \ex{00} because \fBpcre2test\fP does not support actual binary zeros in 
+its input), you must use \fBposix_startend\fP to specify its length.
 .
 .
 .SS "Setting match controls"
@@ -1416,8 +1424,8 @@ pair of offsets.)
 By default, the subject string is passed to a native API matching function with
 its correct length. In order to test the facility for passing a zero-terminated
 string, the \fBzero_terminate\fP modifier is provided. It causes the length to
-be passed as PCRE2_ZERO_TERMINATED. (When matching via the POSIX interface,
-this modifier has no effect, as there is no facility for passing a length.)
+be passed as PCRE2_ZERO_TERMINATED. When matching via the POSIX interface,
+this modifier is ignored, with a warning.
 .P
 When testing \fBpcre2_substitute()\fP, this modifier also has the effect of
 passing the replacement string as zero-terminated.
@@ -1636,7 +1644,7 @@ the current position precedes the start position, which can happen if the
 callout is in a lookbehind assertion.
 .P
 Callouts numbered 255 are assumed to be automatic callouts, inserted as a
-result of the \fB/auto_callout\fP pattern modifier. In this case, instead of
+result of the \fBauto_callout\fP pattern modifier. In this case, instead of
 showing the callout number, the offset in the pattern, preceded by a plus, is
 output. For example:
 .sp
@@ -1807,6 +1815,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 03 June 2017
+Last updated: 06 June 2017
 Copyright (c) 1997-2017 University of Cambridge.
 .fi
