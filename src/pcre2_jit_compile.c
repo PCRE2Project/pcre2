@@ -5783,8 +5783,9 @@ uint16_t char_list[MAX_CLASS_CHARS_SIZE];
 uint8_t byte;
 sljit_s32 type;
 int i, j, k, len, c;
-struct sljit_jump *jump;
-jump_list *found = NULL;
+
+if (!sljit_has_cpu_feature(SLJIT_HAS_CMOV))
+  return FALSE;
 
 if (invert)
   nclass = !nclass;
@@ -5831,23 +5832,28 @@ for (i = 0; i < 32; i++)
     }
   }
 
-jump = NULL;
+i = 0;
 j = 0;
 
-for (i = 0; i < len; i++)
+if (char_list[0] == 0)
+  {
+  i++;
+  OP2(SLJIT_SUB | SLJIT_SET_Z, SLJIT_UNUSED, 0, TMP1, 0, SLJIT_IMM, 0);
+  OP_FLAGS(SLJIT_MOV, TMP2, 0, SLJIT_ZERO);
+  }
+else
+  OP1(SLJIT_MOV, TMP2, 0, SLJIT_IMM, 0);
+
+while (i < len)
   {
   if ((char_list[i] & 0x100) != 0)
     j++;
-  else 
+  else
     {
-    type = SLJIT_EQUAL;
-    if (!nclass && j == 0 && i + 1 == len)
-      type = SLJIT_NOT_EQUAL;
-
-    jump = CMP(type, TMP1, 0, SLJIT_IMM, char_list[i]);
-
-    add_jump(compiler, (nclass || type == SLJIT_NOT_EQUAL) ? backtracks : &found, jump);
+    OP2(SLJIT_SUB | SLJIT_SET_Z, SLJIT_UNUSED, 0, TMP1, 0, SLJIT_IMM, char_list[i]);
+    CMOV(SLJIT_ZERO, TMP2, TMP1, 0);
     }
+  i++;
   }
 
 if (j != 0)
@@ -5858,17 +5864,13 @@ if (j != 0)
     if ((char_list[i] & 0x100) != 0)
       {
       j--;
-
-      type = SLJIT_EQUAL;
-      if (!nclass && j == 0)
-        type = SLJIT_NOT_EQUAL;
-
-      jump = CMP(type, TMP1, 0, SLJIT_IMM, char_list[i] & 0xff);
-      add_jump(compiler, (nclass || type == SLJIT_NOT_EQUAL) ? backtracks : &found, jump);
+      OP2(SLJIT_SUB | SLJIT_SET_Z, SLJIT_UNUSED, 0, TMP1, 0, SLJIT_IMM, char_list[i] & 0xff);
+      CMOV(SLJIT_ZERO, TMP2, TMP1, 0);
       }
   }
 
-set_jumps(found, LABEL());
+type = nclass ? SLJIT_NOT_EQUAL : SLJIT_EQUAL;
+add_jump(compiler, backtracks, CMP(type, TMP2, 0, SLJIT_IMM, 0));
 return TRUE;
 }
 
