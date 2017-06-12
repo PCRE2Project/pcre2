@@ -1,4 +1,4 @@
-.TH PCRE2TEST 1 "06 June 2017" "PCRE 10.30"
+.TH PCRE2TEST 1 "12 June 2017" "PCRE 10.30"
 .SH NAME
 pcre2test - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -69,10 +69,10 @@ want that action.
 The input is processed using using C's string functions, so must not
 contain binary zeros, even though in Unix-like environments, \fBfgets()\fP
 treats any bytes other than newline as data characters. An error is generated
-if a binary zero is encountered. Subject lines are processed for backslash
-escapes, which makes it possible to include any data value in strings that are
-passed to the library for matching. For patterns, there is a facility for
-specifying some or all of the 8-bit input characters as hexadecimal pairs,
+if a binary zero is encountered. By default subject lines are processed for
+backslash escapes, which makes it possible to include any data value in strings
+that are passed to the library for matching. For patterns, there is a facility
+for specifying some or all of the 8-bit input characters as hexadecimal pairs,
 which makes it possible to include binary zeros.
 .
 .
@@ -442,8 +442,9 @@ A pattern can be followed by a modifier list (details below).
 .sp
 Before each subject line is passed to \fBpcre2_match()\fP or
 \fBpcre2_dfa_match()\fP, leading and trailing white space is removed, and the
-line is scanned for backslash escapes. The following provide a means of
-encoding non-printing characters in a visible way:
+line is scanned for backslash escapes, unless the \fBsubject_literal\fP
+modifier was set for the pattern. The following provide a means of encoding
+non-printing characters in a visible way:
 .sp
   \ea         alarm (BEL, \ex07)
   \eb         backspace (\ex08)
@@ -505,6 +506,11 @@ character. A backslash followed by anything else causes an error. However, if
 the very last character in the line is a backslash (and there is no modifier
 list), it is ignored. This gives a way of passing an empty line as data, since
 a real empty line terminates the data input.
+.P
+If the \fBsubject_literal\fP modifier is set for a pattern, all subject lines
+that follow are treated as literals, with no special treatment of backslashes.
+No replication is possible, and any subject modifiers must be set as defaults
+by a \fB#subject\fP command.
 .
 .
 .SH "PATTERN MODIFIERS"
@@ -602,6 +608,7 @@ heavily used in the test files.
       push                      push compiled pattern onto the stack
       pushcopy                  push a copy onto the stack
       stackguard=<number>       test the stackguard feature
+      subject_literal           treat all subject lines as literal 
       tables=[0|1|2]            select internal tables
       use_length                do not zero-terminate the pattern
       utf8_input                treat input as UTF-8
@@ -967,17 +974,18 @@ are mutually exclusive.
 .SS "Setting certain match controls"
 .rs
 .sp
-The following modifiers are really subject modifiers, and are described below.
-However, they may be included in a pattern's modifier list, in which case they
-are applied to every subject line that is processed with that pattern. They may
-not appear in \fB#pattern\fP commands. These modifiers do not affect the
-compilation process.
+The following modifiers are really subject modifiers, and are described under 
+"Subject Modifiers" below. However, they may be included in a pattern's
+modifier list, in which case they are applied to every subject line that is
+processed with that pattern. They may not appear in \fB#pattern\fP commands.
+These modifiers do not affect the compilation process.
 .sp
       aftertext                  show text after match
       allaftertext               show text after captures
       allcaptures                show all captures
       allusedtext                show all consulted text
   /g  global                     global matching
+      jitstack=<n>               set size of JIT stack
       mark                       show mark values
       replace=<string>           specify a replacement string
       startchar                  show starting character when relevant
@@ -988,6 +996,15 @@ compilation process.
 .sp
 These modifiers may not appear in a \fB#pattern\fP command. If you want them as
 defaults, set them in a \fB#subject\fP command.
+.
+.
+.SS "Specifying literal subject lines"
+.rs
+.sp
+If the \fBsubject_literal\fP modifier is present on a pattern, all the subject 
+lines that it matches are taken as literal strings, with no interpretation of 
+backslashes. It is not possible to set subject modifiers on such lines, but any 
+that are set as defaults by a \fB#subject\fP command are recognized.
 .
 .
 .SS "Saving a compiled pattern"
@@ -1321,9 +1338,11 @@ matching provokes an error return ("bad option value") from
 .sp
 The \fBjitstack\fP modifier provides a way of setting the maximum stack size
 that is used by the just-in-time optimization code. It is ignored if JIT
-optimization is not being used. The value is a number of kilobytes. Providing a
-stack that is larger than the default 32K is necessary only for very
-complicated patterns.
+optimization is not being used. The value is a number of kilobytes. Setting
+zero reverts to the default of 32K. Providing a stack that is larger than the
+default is necessary only for very complicated patterns. If \fBjitstack\fP is
+set non-zero on a subject line it overrides any value that was set on the 
+pattern.
 .
 .
 .SS "Setting heap, match, and depth limits"
@@ -1815,6 +1834,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 06 June 2017
+Last updated: 12 June 2017
 Copyright (c) 1997-2017 University of Cambridge.
 .fi

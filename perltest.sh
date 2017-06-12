@@ -42,13 +42,16 @@ fi
 #   aftertext          interpreted as "print $' afterwards"
 #   afteralltext       ignored
 #   dupnames           ignored (Perl always allows)
+#   jitstack           ignored
 #   mark               ignored
 #   no_auto_possess    ignored
 #   no_start_optimize  ignored
+#   subject_literal    does not process subjects for escapes
 #   ucp                sets Perl's /u modifier
 #   utf                invoke UTF-8 functionality
 #
-# The data lines must not have any pcre2test modifiers. They are processed as
+# The data lines must not have any pcre2test modifiers. Unless 
+# "subject_litersl" is on the pattern, data lines are processed as
 # Perl double-quoted strings, so if they contain " $ or @ characters, these
 # have to be escaped. For this reason, all such characters in the
 # Perl-compatible testinput1 and testinput4 files are escaped so that they can
@@ -138,16 +141,20 @@ for (;;)
 
   chomp($pattern);
   $pattern =~ s/\s+$//;
-
+  
   # Split the pattern from the modifiers and adjust them as necessary.
 
   $pattern =~ /^\s*((.).*\2)(.*)$/s;
   $pat = $1;
   $mod = $3;
-
+  
   # The private "aftertext" modifier means "print $' afterwards".
 
   $showrest = ($mod =~ s/aftertext,?//);
+  
+  # The "subject_literal" modifer disables escapes in subjects.
+  
+  $subject_literal = ($mod =~ s/subject_literal,?//); 
 
   # "allaftertext" is used by pcre2test to print remainders after captures
 
@@ -160,6 +167,10 @@ for (;;)
   # Remove "dupnames".
 
   $mod =~ s/dupnames,?//;
+
+  # Remove "jitstack".
+
+  $mod =~ s/jitstack=\d+,?//;
 
   # Remove "mark" (asks pcre2test to check MARK data) */
 
@@ -222,7 +233,14 @@ for (;;)
     last if ($_ eq "");
     next if $_ =~ /^\\=(?:\s|$)/;   # Comment line
 
-    $x = eval "\"$_\"";   # To get escapes processed
+    if ($subject_literal)
+      {
+      $x = $_;
+      }
+    else
+      {     
+      $x = eval "\"$_\"";   # To get escapes processed
+      }
 
     # Empty array for holding results, ensure $REGERROR and $REGMARK are
     # unset, then do the matching.

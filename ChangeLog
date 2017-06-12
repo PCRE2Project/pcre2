@@ -184,6 +184,9 @@ starting offset greater than zero.
 
 39. Implement REG_PEND (GNU extension) for the POSIX wrapper.
 
+40. Implement the subject_literal modifier in pcre2test, and allow jitstack on 
+pattern lines.
+
 
 Version 10.23 14-February-2017
 ------------------------------

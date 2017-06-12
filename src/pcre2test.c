@@ -479,6 +479,7 @@ so many of them that they are split into two fields. */
 #define CTL2_SUBSTITUTE_OVERFLOW_LENGTH  0x00000002u
 #define CTL2_SUBSTITUTE_UNKNOWN_UNSET    0x00000004u
 #define CTL2_SUBSTITUTE_UNSET_EMPTY      0x00000008u
+#define CTL2_SUBJECT_LITERAL             0x00000010u
 
 #define CTL_NL_SET                       0x40000000u  /* Informational */
 #define CTL_BSR_SET                      0x80000000u  /* Informational */
@@ -518,6 +519,7 @@ typedef struct patctl {    /* Structure for pattern modifiers. */
   uint32_t  options;       /* Must be in same position as datctl */
   uint32_t  control;       /* Must be in same position as datctl */
   uint32_t  control2;      /* Must be in same position as datctl */
+  uint32_t  jitstack;      /* Must be in same position as datctl */
    uint8_t  replacement[REPLACE_MODSIZE];  /* So must this */
   uint32_t  jit;
   uint32_t  stackguard_test;
@@ -537,6 +539,7 @@ typedef struct datctl {    /* Structure for data line modifiers. */
   uint32_t  options;       /* Must be in same position as patctl */
   uint32_t  control;       /* Must be in same position as patctl */
   uint32_t  control2;      /* Must be in same position as patctl */
+  uint32_t  jitstack;      /* Must be in same position as patctl */
    uint8_t  replacement[REPLACE_MODSIZE];  /* So must this */
   uint32_t  startend[2];
   uint32_t  cerror[2];
@@ -544,7 +547,6 @@ typedef struct datctl {    /* Structure for data line modifiers. */
    int32_t  callout_data;
    int32_t  copy_numbers[MAXCPYGET];
    int32_t  get_numbers[MAXCPYGET];
-  uint32_t  jitstack;
   uint32_t  oveccount;
   uint32_t  offset;
   uint8_t   copy_names[LENCPYGET];
@@ -630,7 +632,7 @@ static modstruct modlist[] = {
   { "info",                       MOD_PAT,  MOD_CTL, CTL_INFO,                   PO(control) },
   { "jit",                        MOD_PAT,  MOD_IND, 7,                          PO(jit) },
   { "jitfast",                    MOD_PAT,  MOD_CTL, CTL_JITFAST,                PO(control) },
-  { "jitstack",                   MOD_DAT,  MOD_INT, 0,                          DO(jitstack) },
+  { "jitstack",                   MOD_PNDP, MOD_INT, 0,                          PO(jitstack) },
   { "jitverify",                  MOD_PAT,  MOD_CTL, CTL_JITVERIFY,              PO(control) },
   { "locale",                     MOD_PAT,  MOD_STR, LOCALESIZE,                 PO(locale) },
   { "mark",                       MOD_PNDP, MOD_CTL, CTL_MARK,                   PO(control) },
@@ -674,6 +676,7 @@ static modstruct modlist[] = {
   { "stackguard",                 MOD_PAT,  MOD_INT, 0,                          PO(stackguard_test) },
   { "startchar",                  MOD_PND,  MOD_CTL, CTL_STARTCHAR,              PO(control) },
   { "startoffset",                MOD_DAT,  MOD_INT, 0,                          DO(offset) },
+  { "subject_literal",            MOD_PATP, MOD_CTL, CTL2_SUBJECT_LITERAL,       PO(control2) },
   { "substitute_extended",        MOD_PND,  MOD_CTL, CTL2_SUBSTITUTE_EXTENDED,   PO(control2) },
   { "substitute_overflow_length", MOD_PND,  MOD_CTL, CTL2_SUBSTITUTE_OVERFLOW_LENGTH, PO(control2) },
   { "substitute_unknown_unset",   MOD_PND,  MOD_CTL, CTL2_SUBSTITUTE_UNKNOWN_UNSET, PO(control2) },
@@ -3477,7 +3480,8 @@ switch (m->which)
   case MOD_PND:  /* Ditto, but not default pattern */
   case MOD_PNDP: /* Ditto, allowed for Perl test */
   if (dctl != NULL) field = dctl;
-    else if (pctl != NULL && (m->which == MOD_PD || ctx != CTX_DEFPAT))
+    else if (pctl != NULL && (m->which == MOD_PD || m->which == MOD_PDP ||
+             ctx != CTX_DEFPAT))
       field = pctl;
   break;
   }
@@ -6216,6 +6220,7 @@ uint8_t *p, *pp, *start_rep;
 size_t needlen;
 void *use_dat_context;
 BOOL utf;
+BOOL subject_literal;
 
 #ifdef SUPPORT_PCRE2_8
 uint8_t *q8 = NULL;
@@ -6226,6 +6231,8 @@ uint16_t *q16 = NULL;
 #ifdef SUPPORT_PCRE2_32
 uint32_t *q32 = NULL;
 #endif
+
+subject_literal = (pat_patctl.control2 & CTL2_SUBJECT_LITERAL) != 0;
 
 /* Copy the default context and data control blocks to the active ones. Then
 copy from the pattern the controls that can be set in either the pattern or the
@@ -6238,6 +6245,7 @@ memcpy(&dat_datctl, &def_datctl, sizeof(datctl));
 dat_datctl.control |= (pat_patctl.control & CTL_ALLPD);
 dat_datctl.control2 |= (pat_patctl.control2 & CTL2_ALLPD);
 strcpy((char *)dat_datctl.replacement, (char *)pat_patctl.replacement);
+if (dat_datctl.jitstack == 0) dat_datctl.jitstack = pat_patctl.jitstack;
 
 /* Initialize for scanning the data line. */
 
@@ -6373,7 +6381,7 @@ while ((c = *p++) != 0)
   /* Handle a non-escaped character. In non-UTF 32-bit mode with utf8_input
   set, do the fudge for setting the top bit. */
 
-  if (c != '\\')
+  if (c != '\\' || subject_literal)
     {
     uint32_t topbit = 0;
     if (test_mode == PCRE32_MODE && c == 0xff && *p != 0)
