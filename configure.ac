@@ -143,6 +143,12 @@ AC_ARG_ENABLE(jit,
                              [enable Just-In-Time compiling support]),
               , enable_jit=no)
 
+# Handle --enable-jit-sealloc (disabled by default)
+AC_ARG_ENABLE(jit-sealloc,
+              AS_HELP_STRING([--enable-jit-sealloc],
+                             [enable SELinux compatible execmem allocator in JIT]),
+              , enable_jit_sealloc=no)
+
 # Handle --disable-pcre2grep-jit (enabled by default)
 AC_ARG_ENABLE(pcre2grep-jit,
               AS_HELP_STRING([--disable-pcre2grep-jit],
@@ -584,6 +590,13 @@ else
   enable_pcre2grep_jit="no"
 fi
 
+if test "$enable_jit_sealloc" = "yes"; then
+  AC_DEFINE([SLJIT_PROT_EXECUTABLE_ALLOCATOR], [1], [
+    Define to any non-zero number to enable support for SELinux
+    compatible executable memory allocator in JIT. Note that this
+    will have no effect unless SUPPORT_JIT is also defined.])
+fi
+
 if test "$enable_pcre2grep_jit" = "yes"; then
   AC_DEFINE([SUPPORT_PCRE2GREP_JIT], [], [
     Define to any value to enable JIT support in pcre2grep. Note that this will
@@ -977,6 +990,7 @@ $PACKAGE-$VERSION configuration summary:
     Build 32-bit pcre2 library ......... : ${enable_pcre2_32}
     Include debugging code ............. : ${enable_debug}
     Enable JIT compiling support ....... : ${enable_jit}
+    Use SELinux allocator in JIT ....... : ${enable_jit_sealloc}
     Enable Unicode support ............. : ${enable_unicode}
     Newline char/sequence .............. : ${enable_newline}
     \R matches only ANYCRLF ............ : ${enable_bsr_anycrlf}
