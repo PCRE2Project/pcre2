@@ -187,6 +187,8 @@ starting offset greater than zero.
 40. Implement the subject_literal modifier in pcre2test, and allow jitstack on 
 pattern lines.
 
+41. Implement PCRE2_LITERAL and use it to support REG_NOSPEC.
+
 
 Version 10.23 14-February-2017
 ------------------------------

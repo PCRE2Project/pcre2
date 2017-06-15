@@ -142,6 +142,7 @@ static const int eint2[] = {
   32, REG_INVARG,  /* this version of PCRE2 does not have Unicode support */
   37, REG_EESCAPE, /* PCRE2 does not support \L, \l, \N{name}, \U, or \u */
   56, REG_INVARG,  /* internal error: unknown newline setting */
+  92, REG_INVARG,  /* invalid option bits with PCRE2_LITERAL */ 
 };
 
 /* Table of texts corresponding to POSIX error codes */
@@ -242,6 +243,7 @@ patlen = ((cflags & REG_PEND) != 0)? (PCRE2_SIZE)(preg->re_endp - pattern) :
 if ((cflags & REG_ICASE) != 0)    options |= PCRE2_CASELESS;
 if ((cflags & REG_NEWLINE) != 0)  options |= PCRE2_MULTILINE;
 if ((cflags & REG_DOTALL) != 0)   options |= PCRE2_DOTALL;
+if ((cflags & REG_NOSPEC) != 0)   options |= PCRE2_LITERAL;
 if ((cflags & REG_UTF) != 0)      options |= PCRE2_UTF;
 if ((cflags & REG_UCP) != 0)      options |= PCRE2_UCP;
 if ((cflags & REG_UNGREEDY) != 0) options |= PCRE2_UNGREEDY;
@@ -260,10 +262,10 @@ if (preg->re_pcre2_code == NULL)
 
   if (errorcode < COMPILE_ERROR_BASE) return REG_BADPAT;
   errorcode -= COMPILE_ERROR_BASE;
-
+  
   if (errorcode < (int)(sizeof(eint1)/sizeof(const int)))
     return eint1[errorcode];
-  for (i = 0; i < sizeof(eint2)/(2*sizeof(const int)); i += 2)
+  for (i = 0; i < sizeof(eint2)/sizeof(const int); i += 2)
     if (errorcode == eint2[i]) return eint2[i+1];
   return REG_BADPAT;
   }

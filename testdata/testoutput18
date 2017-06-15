@@ -199,4 +199,11 @@ No match: POSIX code 17: match failed
     ABC
  0: ABC
 
+/a\b(c/literal,posix
+    a\\b(c
+ 0: a\b(c
+
+/a\b(c/literal,posix,dotall
+Failed: POSIX code 16: bad argument at offset 0     
+
 # End of testdata/testinput18

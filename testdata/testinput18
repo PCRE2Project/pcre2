@@ -129,4 +129,9 @@
 /ABC/use_length 
     ABC
 
+/a\b(c/literal,posix
+    a\\b(c
+
+/a\b(c/literal,posix,dotall
+
 # End of testdata/testinput18

@@ -1,4 +1,4 @@
-.TH PCRE2POSIX 3 "05 June 2017" "PCRE2 10.30"
+.TH PCRE2POSIX 3 "15 June 2017" "PCRE2 10.30"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "SYNOPSIS"
@@ -71,7 +71,7 @@ The function \fBregcomp()\fP is called to compile a pattern into an
 internal form. By default, the pattern is a C string terminated by a binary
 zero (but see REG_PEND below). The \fIpreg\fP argument is a pointer to a
 \fBregex_t\fP structure that is used as a base for storing information about
-the compiled regular expression. (It is also used for input when REG_PEND is 
+the compiled regular expression. (It is also used for input when REG_PEND is
 set.)
 .P
 The argument \fIcflags\fP is either zero, or contains one or more of the bits
@@ -94,6 +94,14 @@ The PCRE2_MULTILINE option is set when the regular expression is passed for
 compilation to the native function. Note that this does \fInot\fP mimic the
 defined POSIX behaviour for REG_NEWLINE (see the following section).
 .sp
+  REG_NOSPEC
+.sp
+The PCRE2_LITERAL option is set when the regular expression is passed for
+compilation to the native function. This disables all meta characters in the
+pattern, causing it to be treated as a literal string. The only other options
+that are allowed with REG_NOSPEC are REG_ICASE, REG_NOSUB, REG_PEND, and
+REG_UTF. Note that REG_NOSPEC is not part of the POSIX standard.
+.sp
   REG_NOSUB
 .sp
 When a pattern that is compiled with this flag is passed to \fBregexec()\fP for
@@ -104,8 +112,8 @@ because it disables the use of back references.
 .sp
   REG_PEND
 .sp
-If this option is set, the \fBreg_endp\fP field in the \fIpreg\fP structure 
-(which has the type const char *) must be set to point to the character beyond 
+If this option is set, the \fBreg_endp\fP field in the \fIpreg\fP structure
+(which has the type const char *) must be set to point to the character beyond
 the end of the pattern before calling \fBregcomp()\fP. The pattern itself may
 now contain binary zeroes, which are treated as data characters. Without
 REG_PEND, a binary zero terminates the pattern and the \fBre_endp\fP field is
@@ -218,8 +226,8 @@ function.
 .sp
 When this option is set, the subject string is starts at \fIstring\fP +
 \fIpmatch[0].rm_so\fP and ends at \fIstring\fP + \fIpmatch[0].rm_eo\fP, which
-should point to the first character beyond the string. There may be binary 
-zeroes within the subject string, and indeed, using REG_STARTEND is the only 
+should point to the first character beyond the string. There may be binary
+zeroes within the subject string, and indeed, using REG_STARTEND is the only
 way to pass a subject string that contains a binary zero.
 .P
 Whatever the value of \fIpmatch[0].rm_so\fP, the offsets of the matched string
@@ -292,6 +300,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 05 June 2017
+Last updated: 15 June 2017
 Copyright (c) 1997-2017 University of Cambridge.
 .fi

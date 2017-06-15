@@ -5292,4 +5292,39 @@ a)"xI
 
 # ----------------------------------------------------------------------
 
+/a\b(c/literal
+    a\\b(c
+
+/a\b(c/literal,caseless
+    a\\b(c
+    a\\B(c
+
+/a\b(c/literal,firstline
+    XYYa\\b(c
+\= Expect no match
+    X\na\\b(c
+
+/a\b?c/literal,use_offset_limit
+    XXXXa\\b?c\=offset_limit=5
+\= Expect no match
+    XXXXa\\b?c\=offset_limit=3
+
+/a\b(c/literal,anchored,endanchored
+    a\\b(c
+\= Expect no match
+    Xa\\b(c
+    a\\b(cX
+    Xa\\b(cX
+
+//literal,extended
+
+/a\b(c/literal,auto_callout,no_start_optimize
+    XXXXa\\b(c
+
+/a\b(c/literal,auto_callout
+    XXXXa\\b(c
+
+/(*CR)abc/literal
+    (*CR)abc
+
 # End of testinput2 

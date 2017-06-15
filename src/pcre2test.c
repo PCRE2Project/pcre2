@@ -634,6 +634,7 @@ static modstruct modlist[] = {
   { "jitfast",                    MOD_PAT,  MOD_CTL, CTL_JITFAST,                PO(control) },
   { "jitstack",                   MOD_PNDP, MOD_INT, 0,                          PO(jitstack) },
   { "jitverify",                  MOD_PAT,  MOD_CTL, CTL_JITVERIFY,              PO(control) },
+  { "literal",                    MOD_PAT,  MOD_OPT, PCRE2_LITERAL,              PO(options) },
   { "locale",                     MOD_PAT,  MOD_STR, LOCALESIZE,                 PO(locale) },
   { "mark",                       MOD_PNDP, MOD_CTL, CTL_MARK,                   PO(control) },
   { "match_limit",                MOD_CTM,  MOD_INT, 0,                          MO(match_limit) },
@@ -696,8 +697,8 @@ static modstruct modlist[] = {
 /* Controls and options that are supported for use with the POSIX interface. */
 
 #define POSIX_SUPPORTED_COMPILE_OPTIONS ( \
-  PCRE2_CASELESS|PCRE2_DOTALL|PCRE2_MULTILINE|PCRE2_UCP|PCRE2_UTF| \
-  PCRE2_UNGREEDY)
+  PCRE2_CASELESS|PCRE2_DOTALL|PCRE2_LITERAL|PCRE2_MULTILINE|PCRE2_UCP| \
+  PCRE2_UTF|PCRE2_UNGREEDY)
 
 #define POSIX_SUPPORTED_COMPILE_EXTRA_OPTIONS (0)
 
@@ -4030,7 +4031,7 @@ static void
 show_compile_options(uint32_t options, const char *before, const char *after)
 {
 if (options == 0) fprintf(outfile, "%s <none>%s", before, after);
-else fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
+else fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
   before,
   ((options & PCRE2_ALT_BSUX) != 0)? " alt_bsux" : "",
   ((options & PCRE2_ALT_CIRCUMFLEX) != 0)? " alt_circumflex" : "",
@@ -4046,6 +4047,7 @@ else fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%
   ((options & PCRE2_EXTENDED) != 0)? " extended" : "",
   ((options & PCRE2_EXTENDED_MORE) != 0)? " extended_more" : "",
   ((options & PCRE2_FIRSTLINE) != 0)? " firstline" : "",
+  ((options & PCRE2_LITERAL) != 0)? " literal" : "",
   ((options & PCRE2_MATCH_UNSET_BACKREF) != 0)? " match_unset_backref" : "",
   ((options & PCRE2_MULTILINE) != 0)? " multiline" : "",
   ((options & PCRE2_NEVER_BACKSLASH_C) != 0)? " never_backslash_c" : "",
@@ -4905,6 +4907,7 @@ uint8_t *p = buffer;
 unsigned int delimiter = *p++;
 int errorcode;
 void *use_pat_context;
+uint32_t use_forbid_utf = forbid_utf;
 PCRE2_SIZE patlen;
 PCRE2_SIZE valgrind_access_length;
 PCRE2_SIZE erroroffset;
@@ -5263,6 +5266,7 @@ if ((pat_patctl.control & CTL_POSIX) != 0)
   if ((pat_patctl.control & CTL_POSIX_NOSUB) != 0) cflags |= REG_NOSUB;
   if ((pat_patctl.options & PCRE2_UCP) != 0) cflags |= REG_UCP;
   if ((pat_patctl.options & PCRE2_CASELESS) != 0) cflags |= REG_ICASE;
+  if ((pat_patctl.options & PCRE2_LITERAL) != 0) cflags |= REG_NOSPEC; 
   if ((pat_patctl.options & PCRE2_MULTILINE) != 0) cflags |= REG_NEWLINE;
   if ((pat_patctl.options & PCRE2_DOTALL) != 0) cflags |= REG_DOTALL;
   if ((pat_patctl.options & PCRE2_UNGREEDY) != 0) cflags |= REG_UNGREEDY;
@@ -5534,6 +5538,11 @@ NULL context. */
 
 use_pat_context = ((pat_patctl.control & CTL_NULLCONTEXT) != 0)?
   NULL : PTR(pat_context);
+  
+/* If PCRE2_LITERAL is set, set use_forbid_utf zero because PCRE2_NEVER_UTF
+and PCRE2_NEVER_UCP are invalid with it. */
+
+if ((pat_patctl.options & PCRE2_LITERAL) != 0) use_forbid_utf = 0; 
 
 /* Compile many times when timing. */
 
@@ -5545,7 +5554,8 @@ if (timeit > 0)
     {
     clock_t start_time = clock();
     PCRE2_COMPILE(compiled_code, pbuffer, patlen,
-      pat_patctl.options|forbid_utf, &errorcode, &erroroffset, use_pat_context);
+      pat_patctl.options|use_forbid_utf, &errorcode, &erroroffset, 
+        use_pat_context);
     time_taken += clock() - start_time;
     if (TEST(compiled_code, !=, NULL))
       { SUB1(pcre2_code_free, compiled_code); }
@@ -5558,7 +5568,7 @@ if (timeit > 0)
 
 /* A final compile that is used "for real". */
 
-PCRE2_COMPILE(compiled_code, pbuffer, patlen, pat_patctl.options|forbid_utf,
+PCRE2_COMPILE(compiled_code, pbuffer, patlen, pat_patctl.options|use_forbid_utf,
   &errorcode, &erroroffset, use_pat_context);
 
 /* Call the JIT compiler if requested. When timing, we must free and recompile
@@ -5576,7 +5586,7 @@ if (TEST(compiled_code, !=, NULL) && pat_patctl.jit != 0)
       clock_t start_time;
       SUB1(pcre2_code_free, compiled_code);
       PCRE2_COMPILE(compiled_code, pbuffer, patlen,
-        pat_patctl.options|forbid_utf, &errorcode, &erroroffset,
+        pat_patctl.options|use_forbid_utf, &errorcode, &erroroffset,
         use_pat_context);
       start_time = clock();
       PCRE2_JIT_COMPILE(jitrc,compiled_code, pat_patctl.jit);

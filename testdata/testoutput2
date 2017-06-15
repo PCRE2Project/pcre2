@@ -16015,6 +16015,72 @@ Failed: error 108 at offset 4: range out of order in character class
 
 # ----------------------------------------------------------------------
 
+/a\b(c/literal
+    a\\b(c
+ 0: a\b(c
+
+/a\b(c/literal,caseless
+    a\\b(c
+ 0: a\b(c
+    a\\B(c
+ 0: a\B(c
+
+/a\b(c/literal,firstline
+    XYYa\\b(c
+ 0: a\b(c
+\= Expect no match
+    X\na\\b(c
+No match
+
+/a\b?c/literal,use_offset_limit
+    XXXXa\\b?c\=offset_limit=5
+ 0: a\b?c
+\= Expect no match
+    XXXXa\\b?c\=offset_limit=3
+No match
+
+/a\b(c/literal,anchored,endanchored
+    a\\b(c
+ 0: a\b(c
+\= Expect no match
+    Xa\\b(c
+No match
+    a\\b(cX
+No match
+    Xa\\b(cX
+No match
+
+//literal,extended
+Failed: error 192 at offset 0: invalid option bits with PCRE2_LITERAL
+
+/a\b(c/literal,auto_callout,no_start_optimize
+    XXXXa\\b(c
+--->XXXXa\b(c
+ +0 ^             a
+ +0  ^            a
+ +0   ^           a
+ +0    ^          a
+ +0     ^         a
+ +1     ^^        \
+ +2     ^ ^       b
+ +3     ^  ^      (
+ +4     ^   ^     
+ 0: a\b(c
+
+/a\b(c/literal,auto_callout
+    XXXXa\\b(c
+--->XXXXa\b(c
+ +0     ^         a
+ +1     ^^        \
+ +2     ^ ^       b
+ +3     ^  ^      (
+ +4     ^   ^     
+ 0: a\b(c
+
+/(*CR)abc/literal
+    (*CR)abc
+ 0: (*CR)abc
+
 # End of testinput2 
 Error -65: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data
@@ -16024,4 +16090,4 @@ Error 0: PCRE2_ERROR_BADDATA (unknown error number)
 Error 100: no error
 Error 101: \ at end of pattern
 Error 191: PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES is not allowed in UTF-16 mode
-Error 192: PCRE2_ERROR_BADDATA (unknown error number)
+Error 200: PCRE2_ERROR_BADDATA (unknown error number)

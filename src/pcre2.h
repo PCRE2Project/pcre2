@@ -138,6 +138,7 @@ D   is inspected during pcre2_dfa_match() execution
 #define PCRE2_ALT_VERBNAMES       0x00400000u  /* C       */
 #define PCRE2_USE_OFFSET_LIMIT    0x00800000u  /*   J M D */
 #define PCRE2_EXTENDED_MORE       0x01000000u  /* C       */
+#define PCRE2_LITERAL             0x02000000u  /* C       */
 
 /* An additional compile options word is available in the compile context. */
 
