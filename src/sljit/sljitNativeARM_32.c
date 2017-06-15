@@ -2285,7 +2285,7 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_cmov(struct sljit_compiler *compil
 #endif
 	}
 
-	return push_inst(compiler, (EMIT_DATA_PROCESS_INS(MOV_DP, 0, dst_reg, SLJIT_UNUSED, src) & ~COND_MASK) | cc);
+	return push_inst(compiler, (EMIT_DATA_PROCESS_INS(MOV_DP, 0, dst_reg, SLJIT_UNUSED, RM(src)) & ~COND_MASK) | cc);
 }
 
 SLJIT_API_FUNC_ATTRIBUTE struct sljit_const* sljit_emit_const(struct sljit_compiler *compiler, sljit_s32 dst, sljit_sw dstw, sljit_sw init_value)
