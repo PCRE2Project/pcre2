@@ -96,12 +96,12 @@ want that action.
 </P>
 <P>
 The input is processed using using C's string functions, so must not
-contain binary zeroes, even though in Unix-like environments, <b>fgets()</b>
+contain binary zeros, even though in Unix-like environments, <b>fgets()</b>
 treats any bytes other than newline as data characters. An error is generated
-if a binary zero is encountered. Subject lines are processed for backslash
-escapes, which makes it possible to include any data value in strings that are
-passed to the library for matching. For patterns, there is a facility for
-specifying some or all of the 8-bit input characters as hexadecimal pairs,
+if a binary zero is encountered. By default subject lines are processed for
+backslash escapes, which makes it possible to include any data value in strings
+that are passed to the library for matching. For patterns, there is a facility
+for specifying some or all of the 8-bit input characters as hexadecimal pairs,
 which makes it possible to include binary zeros.
 </P>
 <br><b>
@@ -382,8 +382,9 @@ of the standard test input files.
 <P>
 When the POSIX API is being tested there is no way to override the default
 newline convention, though it is possible to set the newline convention from
-within the pattern. A warning is given if the <b>posix</b> modifier is used when
-<b>#newline_default</b> would set a default for the non-POSIX API.
+within the pattern. A warning is given if the <b>posix</b> or <b>posix_nosub</b>
+modifier is used when <b>#newline_default</b> would set a default for the
+non-POSIX API.
 <pre>
   #pattern &#60;modifier-list&#62;
 </pre>
@@ -479,8 +480,9 @@ A pattern can be followed by a modifier list (details below).
 <P>
 Before each subject line is passed to <b>pcre2_match()</b> or
 <b>pcre2_dfa_match()</b>, leading and trailing white space is removed, and the
-line is scanned for backslash escapes. The following provide a means of
-encoding non-printing characters in a visible way:
+line is scanned for backslash escapes, unless the <b>subject_literal</b>
+modifier was set for the pattern. The following provide a means of encoding
+non-printing characters in a visible way:
 <pre>
   \a         alarm (BEL, \x07)
   \b         backspace (\x08)
@@ -548,6 +550,12 @@ the very last character in the line is a backslash (and there is no modifier
 list), it is ignored. This gives a way of passing an empty line as data, since
 a real empty line terminates the data input.
 </P>
+<P>
+If the <b>subject_literal</b> modifier is set for a pattern, all subject lines
+that follow are treated as literals, with no special treatment of backslashes.
+No replication is possible, and any subject modifiers must be set as defaults
+by a <b>#subject</b> command.
+</P>
 <br><a name="SEC10" href="#TOC1">PATTERN MODIFIERS</a><br>
 <P>
 There are several types of modifier that can appear in pattern lines. Except
@@ -586,7 +594,10 @@ for a description of the effects of these options.
   /x  extended                  set PCRE2_EXTENDED
   /xx extended_more             set PCRE2_EXTENDED_MORE 
       firstline                 set PCRE2_FIRSTLINE
+      literal                   set PCRE2_LITERAL 
+      match_line                set PCRE2_EXTRA_MATCH_LINE 
       match_unset_backref       set PCRE2_MATCH_UNSET_BACKREF
+      match_word                set PCRE2_EXTRA_MATCH_WORD 
   /m  multiline                 set PCRE2_MULTILINE
       never_backslash_c         set PCRE2_NEVER_BACKSLASH_C
       never_ucp                 set PCRE2_NEVER_UCP
@@ -638,6 +649,7 @@ heavily used in the test files.
       push                      push compiled pattern onto the stack
       pushcopy                  push a copy onto the stack
       stackguard=&#60;number&#62;       test the stackguard feature
+      subject_literal           treat all subject lines as literal 
       tables=[0|1|2]            select internal tables
       use_length                do not zero-terminate the pattern
       utf8_input                treat input as UTF-8
@@ -728,18 +740,6 @@ testing that <b>pcre2_compile()</b> behaves correctly in this case (it uses
 default values).
 </P>
 <br><b>
-Specifying the pattern's length
-</b><br>
-<P>
-By default, patterns are passed to the compiling functions as zero-terminated
-strings. When using the POSIX wrapper API, there is no other option. However,
-when using PCRE2's native API, patterns can be passed by length instead of
-being zero-terminated. The <b>use_length</b> modifier causes this to happen.
-Using a length happens automatically (whether or not <b>use_length</b> is set)
-when <b>hex</b> is set, because patterns specified in hexadecimal may contain
-binary zeros.
-</P>
-<br><b>
 Specifying pattern characters in hexadecimal
 </b><br>
 <P>
@@ -761,11 +761,20 @@ Either single or double quotes may be used. There is no way of including
 the delimiter within a substring. The <b>hex</b> and <b>expand</b> modifiers are
 mutually exclusive.
 </P>
+<br><b>
+Specifying the pattern's length
+</b><br>
 <P>
-The POSIX API cannot be used with patterns specified in hexadecimal because
-they may contain binary zeros, which conflicts with <b>regcomp()</b>'s
-requirement for a zero-terminated string. Such patterns are always passed to
-<b>pcre2_compile()</b> as a string with a length, not as zero-terminated.
+By default, patterns are passed to the compiling functions as zero-terminated
+strings but can be passed by length instead of being zero-terminated. The
+<b>use_length</b> modifier causes this to happen. Using a length happens
+automatically (whether or not <b>use_length</b> is set) when <b>hex</b> is set,
+because patterns specified in hexadecimal may contain binary zeros.
+</P>
+<P>
+If <b>hex</b> or <b>use_length</b> is used with the POSIX wrapper API (see
+<a href="#posixwrapper">"Using the POSIX wrapper API"</a>
+below), the REG_PEND extension is used to pass the pattern's length.
 </P>
 <br><b>
 Specifying wide characters in 16-bit and 32-bit modes
@@ -826,7 +835,7 @@ modifier in "Subject Modifiers"
 for details of how these options are specified for each match attempt.
 </P>
 <P>
-JIT compilation is requested by the <b>/jit</b> pattern modifier, which may
+JIT compilation is requested by the <b>jit</b> pattern modifier, which may
 optionally be followed by an equals sign and a number in the range 0 to 7.
 The three bits that make up the number specify which of the three JIT operating
 modes are to be compiled:
@@ -850,7 +859,7 @@ to <b>pcre2_match()</b> with either the PCRE2_PARTIAL_SOFT or the
 PCRE2_PARTIAL_HARD option set. Note that such a call may return a complete
 match; the options enable the possibility of a partial match, but do not
 require it. Note also that if you request JIT compilation only for partial
-matching (for example, /jit=2) but do not set the <b>partial</b> modifier on a
+matching (for example, jit=2) but do not set the <b>partial</b> modifier on a
 subject line, that match will not use JIT code because none was compiled for
 non-partial matching.
 </P>
@@ -927,12 +936,12 @@ The <b>max_pattern_length</b> modifier sets a limit, in code units, to the
 length of pattern that <b>pcre2_compile()</b> will accept. Breaching the limit
 causes a compilation error. The default is the largest number a PCRE2_SIZE
 variable can hold (essentially unlimited).
-</P>
+<a name="posixwrapper"></a></P>
 <br><b>
 Using the POSIX wrapper API
 </b><br>
 <P>
-The <b>/posix</b> and <b>posix_nosub</b> modifiers cause <b>pcre2test</b> to call
+The <b>posix</b> and <b>posix_nosub</b> modifiers cause <b>pcre2test</b> to call
 PCRE2 via the POSIX wrapper API rather than its native API. When
 <b>posix_nosub</b> is used, the POSIX option REG_NOSUB is passed to
 <b>regcomp()</b>. The POSIX wrapper supports only the 8-bit library. Note that
@@ -961,6 +970,11 @@ large buffer is used.
 The <b>aftertext</b> and <b>allaftertext</b> subject modifiers work as described
 below. All other modifiers are either ignored, with a warning message, or cause
 an error.
+</P>
+<P>
+The pattern is passed to <b>regcomp()</b> as a zero-terminated string by 
+default, but if the <b>use_length</b> or <b>hex</b> modifiers are set, the 
+REG_PEND extension is used to pass it by length.
 </P>
 <br><b>
 Testing the stack guard feature
@@ -999,17 +1013,18 @@ are mutually exclusive.
 Setting certain match controls
 </b><br>
 <P>
-The following modifiers are really subject modifiers, and are described below.
-However, they may be included in a pattern's modifier list, in which case they
-are applied to every subject line that is processed with that pattern. They may
-not appear in <b>#pattern</b> commands. These modifiers do not affect the
-compilation process.
+The following modifiers are really subject modifiers, and are described under 
+"Subject Modifiers" below. However, they may be included in a pattern's
+modifier list, in which case they are applied to every subject line that is
+processed with that pattern. They may not appear in <b>#pattern</b> commands.
+These modifiers do not affect the compilation process.
 <pre>
       aftertext                  show text after match
       allaftertext               show text after captures
       allcaptures                show all captures
       allusedtext                show all consulted text
   /g  global                     global matching
+      jitstack=&#60;n&#62;               set size of JIT stack
       mark                       show mark values
       replace=&#60;string&#62;           specify a replacement string
       startchar                  show starting character when relevant
@@ -1020,6 +1035,15 @@ compilation process.
 </pre>
 These modifiers may not appear in a <b>#pattern</b> command. If you want them as
 defaults, set them in a <b>#subject</b> command.
+</P>
+<br><b>
+Specifying literal subject lines
+</b><br>
+<P>
+If the <b>subject_literal</b> modifier is present on a pattern, all the subject 
+lines that it matches are taken as literal strings, with no interpretation of 
+backslashes. It is not possible to set subject modifiers on such lines, but any 
+that are set as defaults by a <b>#subject</b> command are recognized.
 </P>
 <br><b>
 Saving a compiled pattern
@@ -1072,11 +1096,11 @@ The partial matching modifiers are provided with abbreviations because they
 appear frequently in tests.
 </P>
 <P>
-If the <b>posix</b> modifier was present on the pattern, causing the POSIX
-wrapper API to be used, the only option-setting modifiers that have any effect
-are <b>notbol</b>, <b>notempty</b>, and <b>noteol</b>, causing REG_NOTBOL,
-REG_NOTEMPTY, and REG_NOTEOL, respectively, to be passed to <b>regexec()</b>.
-The other modifiers are ignored, with a warning message.
+If the <b>posix</b> or <b>posix_nosub</b> modifier was present on the pattern,
+causing the POSIX wrapper API to be used, the only option-setting modifiers
+that have any effect are <b>notbol</b>, <b>notempty</b>, and <b>noteol</b>,
+causing REG_NOTBOL, REG_NOTEMPTY, and REG_NOTEOL, respectively, to be passed to
+<b>regexec()</b>. The other modifiers are ignored, with a warning message.
 </P>
 <P>
 There is one additional modifier that can be used with the POSIX wrapper. It is 
@@ -1085,11 +1109,13 @@ ignored (with a warning) if used for non-POSIX matching.
       posix_startend=&#60;n&#62;[:&#60;m&#62;] 
 </pre>
 This causes the subject string to be passed to <b>regexec()</b> using the
-REG_STARTEND option, which uses offsets to restrict which part of the string is
+REG_STARTEND option, which uses offsets to specify which part of the string is
 searched. If only one number is given, the end offset is passed as the end of
 the subject string. For more detail of REG_STARTEND, see the
 <a href="pcre2posix.html"><b>pcre2posix</b></a>
-documentation. 
+documentation. If the subject string contains binary zeros (coded as escapes 
+such as \x{00} because <b>pcre2test</b> does not support actual binary zeros in 
+its input), you must use <b>posix_startend</b> to specify its length.
 </P>
 <br><b>
 Setting match controls
@@ -1355,9 +1381,11 @@ Setting the JIT stack size
 <P>
 The <b>jitstack</b> modifier provides a way of setting the maximum stack size
 that is used by the just-in-time optimization code. It is ignored if JIT
-optimization is not being used. The value is a number of kilobytes. Providing a
-stack that is larger than the default 32K is necessary only for very
-complicated patterns.
+optimization is not being used. The value is a number of kilobytes. Setting
+zero reverts to the default of 32K. Providing a stack that is larger than the
+default is necessary only for very complicated patterns. If <b>jitstack</b> is
+set non-zero on a subject line it overrides any value that was set on the 
+pattern.
 </P>
 <br><b>
 Setting heap, match, and depth limits
@@ -1461,8 +1489,8 @@ Passing the subject as zero-terminated
 By default, the subject string is passed to a native API matching function with
 its correct length. In order to test the facility for passing a zero-terminated
 string, the <b>zero_terminate</b> modifier is provided. It causes the length to
-be passed as PCRE2_ZERO_TERMINATED. (When matching via the POSIX interface,
-this modifier has no effect, as there is no facility for passing a length.)
+be passed as PCRE2_ZERO_TERMINATED. When matching via the POSIX interface,
+this modifier is ignored, with a warning.
 </P>
 <P>
 When testing <b>pcre2_substitute()</b>, this modifier also has the effect of
@@ -1675,7 +1703,7 @@ callout is in a lookbehind assertion.
 </P>
 <P>
 Callouts numbered 255 are assumed to be automatic callouts, inserted as a
-result of the <b>/auto_callout</b> pattern modifier. In this case, instead of
+result of the <b>auto_callout</b> pattern modifier. In this case, instead of
 showing the callout number, the offset in the pattern, preceded by a plus, is
 output. For example:
 <pre>
@@ -1830,7 +1858,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC21" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 03 June 2017
+Last updated: 16 June 2017
 <br>
 Copyright &copy; 1997-2017 University of Cambridge.
 <br>

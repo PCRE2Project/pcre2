@@ -1441,6 +1441,20 @@ COMPILING A PATTERN
        first  line and also within the offset limit. In other words, whichever
        limit comes first is used.
 
+         PCRE2_LITERAL
+
+       If this option is set, all meta-characters in the pattern are disabled,
+       and  it is treated as a literal string. Matching literal strings with a
+       regular expression engine is not the most efficient way of doing it. If
+       you  are  doing  a  lot of literal matching and are worried about effi-
+       ciency, you should consider using other approaches. The only other main
+       options  that  are  allowed  with  PCRE2_LITERAL  are:  PCRE2_ANCHORED,
+       PCRE2_ENDANCHORED, PCRE2_AUTO_CALLOUT, PCRE2_CASELESS, PCRE2_FIRSTLINE,
+       PCRE2_NO_START_OPTIMIZE,     PCRE2_NO_UTF_CHECK,     PCRE2_UTF,     and
+       PCRE2_USE_OFFSET_LIMIT. The extra  options  PCRE2_EXTRA_MATCH_LINE  and
+       PCRE2_EXTRA_MATCH_WORD  are  also supported. Any other options cause an
+       error.
+
          PCRE2_MATCH_UNSET_BACKREF
 
        If this option is set, a back reference to an  unset  subpattern  group
@@ -1705,6 +1719,24 @@ COMPILING A PATTERN
        and  \x{2z}  is  treated  as  the  literal string "x{2z}". Setting this
        option means that typos in patterns may go undetected  and  have  unex-
        pected results. This is a dangerous option. Use with care.
+
+         PCRE2_EXTRA_MATCH_LINE
+
+       This  option  is  provided  for  use  by the -x option of pcre2grep. It
+       causes the pattern only to match complete lines. This  is  achieved  by
+       automatically  inserting  the  code for "^(?:" at the start of the com-
+       piled pattern and ")$" at the end. Thus, when PCRE2_MULTILINE  is  set,
+       the  matched  line  may  be  in  the middle of the subject string. This
+       option can be used with PCRE2_LITERAL.
+
+         PCRE2_EXTRA_MATCH_WORD
+
+       This option is provided for use by  the  -w  option  of  pcre2grep.  It
+       causes  the  pattern only to match strings that have a word boundary at
+       the start and the end. This is achieved by automatically inserting  the
+       code  for "\b(?:" at the start of the compiled pattern and ")\b" at the
+       end. The option may be used with PCRE2_LITERAL. However, it is  ignored
+       if PCRE2_EXTRA_MATCH_LINE is also set.
 
 
 COMPILATION ERROR CODES
@@ -3368,7 +3400,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 01 June 2017
+       Last updated: 16 June 2017
        Copyright (c) 1997-2017 University of Cambridge.
 ------------------------------------------------------------------------------
  
@@ -9036,60 +9068,69 @@ COMPILING A PATTERN
        the defined POSIX behaviour for REG_NEWLINE  (see  the  following  sec-
        tion).
 
+         REG_NOSPEC
+
+       The  PCRE2_LITERAL  option is set when the regular expression is passed
+       for compilation to the native function. This disables all meta  charac-
+       ters  in the pattern, causing it to be treated as a literal string. The
+       only other options that are  allowed  with  REG_NOSPEC  are  REG_ICASE,
+       REG_NOSUB,  REG_PEND,  and REG_UTF. Note that REG_NOSPEC is not part of
+       the POSIX standard.
+
          REG_NOSUB
 
-       When  a  pattern that is compiled with this flag is passed to regexec()
-       for matching, the nmatch and pmatch arguments are ignored, and no  cap-
+       When a pattern that is compiled with this flag is passed  to  regexec()
+       for  matching, the nmatch and pmatch arguments are ignored, and no cap-
        tured strings are returned. Versions of the PCRE library prior to 10.22
-       used to set the  PCRE2_NO_AUTO_CAPTURE  compile  option,  but  this  no
+       used  to  set  the  PCRE2_NO_AUTO_CAPTURE  compile  option, but this no
        longer happens because it disables the use of back references.
 
          REG_PEND
 
-       If  this option is set, the reg_endp field in the preg structure (which
+       If this option is set, the reg_endp field in the preg structure  (which
        has the type const char *) must be set to point to the character beyond
        the end of the pattern before calling regcomp(). The pattern itself may
-       now contain binary zeroes, which are treated as data characters.  With-
-       out  REG_PEND,  a  binary  zero  terminates the pattern and the re_endp
-       field is ignored. This is a GNU extension to  the  POSIX  standard  and
-       should  be  used  with  caution  in software intended to be portable to
+       now  contain binary zeroes, which are treated as data characters. With-
+       out REG_PEND, a binary zero terminates  the  pattern  and  the  re_endp
+       field  is  ignored.  This  is a GNU extension to the POSIX standard and
+       should be used with caution in software  intended  to  be  portable  to
        other systems.
 
          REG_UCP
 
-       The PCRE2_UCP option is set when the regular expression is  passed  for
-       compilation  to  the  native function. This causes PCRE2 to use Unicode
-       properties when matchine \d, \w,  etc.,  instead  of  just  recognizing
+       The  PCRE2_UCP  option is set when the regular expression is passed for
+       compilation to the native function. This causes PCRE2  to  use  Unicode
+       properties  when  matchine  \d,  \w,  etc., instead of just recognizing
        ASCII values. Note that REG_UCP is not part of the POSIX standard.
 
          REG_UNGREEDY
 
-       The  PCRE2_UNGREEDY option is set when the regular expression is passed
-       for compilation to the native function. Note that REG_UNGREEDY  is  not
+       The PCRE2_UNGREEDY option is set when the regular expression is  passed
+       for  compilation  to the native function. Note that REG_UNGREEDY is not
        part of the POSIX standard.
 
          REG_UTF
 
-       The  PCRE2_UTF  option is set when the regular expression is passed for
-       compilation to the native function. This causes the pattern itself  and
-       all  data  strings used for matching it to be treated as UTF-8 strings.
+       The PCRE2_UTF option is set when the regular expression is  passed  for
+       compilation  to the native function. This causes the pattern itself and
+       all data strings used for matching it to be treated as  UTF-8  strings.
        Note that REG_UTF is not part of the POSIX standard.
 
-       In the absence of these flags, no options  are  passed  to  the  native
-       function.   This  means  the  the  regex is compiled with PCRE2 default
-       semantics. In particular, the way it handles newline characters in  the
-       subject  string  is  the Perl way, not the POSIX way. Note that setting
+       In  the  absence  of  these  flags, no options are passed to the native
+       function.  This means the the regex  is  compiled  with  PCRE2  default
+       semantics.  In particular, the way it handles newline characters in the
+       subject string is the Perl way, not the POSIX way.  Note  that  setting
        PCRE2_MULTILINE has only some of the effects specified for REG_NEWLINE.
-       It  does not affect the way newlines are matched by the dot metacharac-
+       It does not affect the way newlines are matched by the dot  metacharac-
        ter (they are not) or by a negative class such as [^a] (they are).
 
-       The yield of regcomp() is zero on success, and non-zero otherwise.  The
-       preg  structure  is  filled  in on success, and one other member of the
-       structure (as well as re_endp) is public: re_nsub contains  the  number
+       The  yield of regcomp() is zero on success, and non-zero otherwise. The
+       preg structure is filled in on success, and one  other  member  of  the
+       structure  (as  well as re_endp) is public: re_nsub contains the number
        of capturing subpatterns in the regular expression. Various error codes
        are defined in the header file.
 
-       NOTE: If the yield of regcomp() is non-zero, you must  not  attempt  to
+       NOTE:  If  the  yield of regcomp() is non-zero, you must not attempt to
        use the contents of the preg structure. If, for example, you pass it to
        regexec(), the result is undefined and your program is likely to crash.
 
@@ -9097,9 +9138,9 @@ COMPILING A PATTERN
 MATCHING NEWLINE CHARACTERS
 
        This area is not simple, because POSIX and Perl take different views of
-       things.   It  is not possible to get PCRE2 to obey POSIX semantics, but
+       things.  It is not possible to get PCRE2 to obey POSIX  semantics,  but
        then PCRE2 was never intended to be a POSIX engine. The following table
-       lists  the  different  possibilities for matching newline characters in
+       lists the different possibilities for matching  newline  characters  in
        Perl and PCRE2:
 
                                  Default   Change with
@@ -9120,25 +9161,25 @@ MATCHING NEWLINE CHARACTERS
          $ matches \n in middle     no     REG_NEWLINE
          ^ matches \n in middle     no     REG_NEWLINE
 
-       This behaviour is not what happens when PCRE2 is called via  its  POSIX
-       API.  By  default, PCRE2's behaviour is the same as Perl's, except that
-       there is no equivalent for PCRE2_DOLLAR_ENDONLY in Perl. In both  PCRE2
+       This  behaviour  is not what happens when PCRE2 is called via its POSIX
+       API. By default, PCRE2's behaviour is the same as Perl's,  except  that
+       there  is no equivalent for PCRE2_DOLLAR_ENDONLY in Perl. In both PCRE2
        and Perl, there is no way to stop newline from matching [^a].
 
-       Default  POSIX newline handling can be obtained by setting PCRE2_DOTALL
-       and PCRE2_DOLLAR_ENDONLY when  calling  pcre2_compile()  directly,  but
-       there  is  no  way  to make PCRE2 behave exactly as for the REG_NEWLINE
-       action. When using the POSIX API, passing REG_NEWLINE to  PCRE2's  reg-
+       Default POSIX newline handling can be obtained by setting  PCRE2_DOTALL
+       and  PCRE2_DOLLAR_ENDONLY  when  calling  pcre2_compile() directly, but
+       there is no way to make PCRE2 behave exactly  as  for  the  REG_NEWLINE
+       action.  When  using the POSIX API, passing REG_NEWLINE to PCRE2's reg-
        comp() function causes PCRE2_MULTILINE to be passed to pcre2_compile(),
-       and REG_DOTALL passes PCRE2_DOTALL. There is no way to pass  PCRE2_DOL-
+       and  REG_DOTALL passes PCRE2_DOTALL. There is no way to pass PCRE2_DOL-
        LAR_ENDONLY.
 
 
 MATCHING A PATTERN
 
-       The  function  regexec()  is  called  to  match a compiled pattern preg
-       against a given string, which is by default terminated by a  zero  byte
-       (but  see  REG_STARTEND below), subject to the options in eflags. These
+       The function regexec() is called  to  match  a  compiled  pattern  preg
+       against  a  given string, which is by default terminated by a zero byte
+       (but see REG_STARTEND below), subject to the options in  eflags.  These
        can be:
 
          REG_NOTBOL
@@ -9148,9 +9189,9 @@ MATCHING A PATTERN
 
          REG_NOTEMPTY
 
-       The  PCRE2_NOTEMPTY  option  is  set  when calling the underlying PCRE2
-       matching function. Note that REG_NOTEMPTY is  not  part  of  the  POSIX
-       standard.  However, setting this option can give more POSIX-like behav-
+       The PCRE2_NOTEMPTY option is set  when  calling  the  underlying  PCRE2
+       matching  function.  Note  that  REG_NOTEMPTY  is not part of the POSIX
+       standard. However, setting this option can give more POSIX-like  behav-
        iour in some situations.
 
          REG_NOTEOL
@@ -9160,66 +9201,66 @@ MATCHING A PATTERN
 
          REG_STARTEND
 
-       When  this  option  is  set,  the  subject string is starts at string +
-       pmatch[0].rm_so and ends at  string  +  pmatch[0].rm_eo,  which  should
-       point  to  the  first  character beyond the string. There may be binary
+       When this option is set, the subject  string  is  starts  at  string  +
+       pmatch[0].rm_so  and  ends  at  string  + pmatch[0].rm_eo, which should
+       point to the first character beyond the string.  There  may  be  binary
        zeroes within the subject string, and indeed, using REG_STARTEND is the
        only way to pass a subject string that contains a binary zero.
 
-       Whatever  the  value  of  pmatch[0].rm_so,  the  offsets of the matched
-       string and any captured substrings are  still  given  relative  to  the
-       start  of  string  itself. (Before PCRE2 release 10.30 these were given
-       relative to string +  pmatch[0].rm_so,  but  this  differs  from  other
+       Whatever the value of  pmatch[0].rm_so,  the  offsets  of  the  matched
+       string  and  any  captured  substrings  are still given relative to the
+       start of string itself. (Before PCRE2 release 10.30  these  were  given
+       relative  to  string  +  pmatch[0].rm_so,  but  this differs from other
        implementations.)
 
-       This  is  a  BSD  extension,  compatible with but not specified by IEEE
-       Standard 1003.2 (POSIX.2), and should be used with caution in  software
-       intended  to  be  portable to other systems. Note that a non-zero rm_so
-       does not imply REG_NOTBOL; REG_STARTEND affects only the  location  and
-       length  of  the string, not how it is matched. Setting REG_STARTEND and
-       passing pmatch as NULL are mutually exclusive; the error REG_INVARG  is
+       This is a BSD extension, compatible with  but  not  specified  by  IEEE
+       Standard  1003.2 (POSIX.2), and should be used with caution in software
+       intended to be portable to other systems. Note that  a  non-zero  rm_so
+       does  not  imply REG_NOTBOL; REG_STARTEND affects only the location and
+       length of the string, not how it is matched. Setting  REG_STARTEND  and
+       passing  pmatch as NULL are mutually exclusive; the error REG_INVARG is
        returned.
 
-       If  the pattern was compiled with the REG_NOSUB flag, no data about any
-       matched strings  is  returned.  The  nmatch  and  pmatch  arguments  of
+       If the pattern was compiled with the REG_NOSUB flag, no data about  any
+       matched  strings  is  returned.  The  nmatch  and  pmatch  arguments of
        regexec() are ignored (except possibly as input for REG_STARTEND).
 
-       The  value  of  nmatch  may  be  zero, and the value pmatch may be NULL
-       (unless REG_STARTEND is set); in both these cases  no  data  about  any
+       The value of nmatch may be zero, and  the  value  pmatch  may  be  NULL
+       (unless  REG_STARTEND  is  set);  in both these cases no data about any
        matched strings is returned.
 
-       Otherwise,  the  portion  of  the string that was matched, and also any
+       Otherwise, the portion of the string that was  matched,  and  also  any
        captured substrings, are returned via the pmatch argument, which points
-       to  an  array  of  nmatch structures of type regmatch_t, containing the
-       members rm_so and rm_eo. These contain the byte  offset  to  the  first
+       to an array of nmatch structures of  type  regmatch_t,  containing  the
+       members  rm_so  and  rm_eo.  These contain the byte offset to the first
        character of each substring and the offset to the first character after
-       the end of each substring, respectively. The 0th element of the  vector
-       relates  to  the  entire portion of string that was matched; subsequent
+       the  end of each substring, respectively. The 0th element of the vector
+       relates to the entire portion of string that  was  matched;  subsequent
        elements relate to the capturing subpatterns of the regular expression.
        Unused entries in the array have both structure members set to -1.
 
-       A  successful  match  yields  a  zero  return;  various error codes are
-       defined in the header file, of  which  REG_NOMATCH  is  the  "expected"
+       A successful match yields  a  zero  return;  various  error  codes  are
+       defined  in  the  header  file,  of which REG_NOMATCH is the "expected"
        failure code.
 
 
 ERROR MESSAGES
 
        The regerror() function maps a non-zero errorcode from either regcomp()
-       or regexec() to a printable message. If preg is  not  NULL,  the  error
+       or  regexec()  to  a  printable message. If preg is not NULL, the error
        should have arisen from the use of that structure. A message terminated
-       by a binary zero is placed in errbuf. If the buffer is too short,  only
+       by  a binary zero is placed in errbuf. If the buffer is too short, only
        the first errbuf_size - 1 characters of the error message are used. The
-       yield of the function is the size of buffer needed to  hold  the  whole
-       message,  including  the  terminating  zero. This value is greater than
+       yield  of  the  function is the size of buffer needed to hold the whole
+       message, including the terminating zero. This  value  is  greater  than
        errbuf_size if the message was truncated.
 
 
 MEMORY USAGE
 
-       Compiling a regular expression causes memory to be allocated and  asso-
-       ciated  with  the preg structure. The function regfree() frees all such
-       memory, after which preg may no longer be used as  a  compiled  expres-
+       Compiling  a regular expression causes memory to be allocated and asso-
+       ciated with the preg structure. The function regfree() frees  all  such
+       memory,  after  which  preg may no longer be used as a compiled expres-
        sion.
 
 
@@ -9232,7 +9273,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 05 June 2017
+       Last updated: 15 June 2017
        Copyright (c) 1997-2017 University of Cambridge.
 ------------------------------------------------------------------------------
  

@@ -1,4 +1,4 @@
-.TH PCRE2_COMPILE 3 "17 May 2017" "PCRE2 10.30"
+.TH PCRE2_COMPILE 3 "16 June 2017" "PCRE2 10.30"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH SYNOPSIS
@@ -35,7 +35,7 @@ system stack size checking, or to change one or more of these parameters:
   The newline character sequence;
   The compile time nested parentheses limit;
   The maximum pattern length (in code units) that is allowed.
-  The additional options bits
+  The additional options bits (see pcre2_set_compile_extra_options())
 .sp
 The option bits are:
 .sp
@@ -52,6 +52,7 @@ The option bits are:
   PCRE2_ENDANCHORED        Pattern can match only at end of subject
   PCRE2_EXTENDED           Ignore white space and # comments
   PCRE2_FIRSTLINE          Force matching to be before newline
+  PCRE2_LITERAL            Pattern characters are all literal 
   PCRE2_MATCH_UNSET_BACKREF  Match unset back references
   PCRE2_MULTILINE          ^ and $ match newlines within data
   PCRE2_NEVER_BACKSLASH_C  Lock out the use of \eC in patterns
