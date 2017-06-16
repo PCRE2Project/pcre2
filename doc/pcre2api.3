@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "15 June 2017" "PCRE2 10.30"
+.TH PCRE2API 3 "16 June 2017" "PCRE2 10.30"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -1396,14 +1396,16 @@ words, whichever limit comes first is used.
 .sp
   PCRE2_LITERAL
 .sp
-If this option is set, all meta-characters in the pattern are disabled, and it 
-is treated as a literal string. Matching literal strings with a regular 
-expression engine is not the most efficient way of doing it. If you are doing a 
-lot of literal matching and are worried about efficiency, you should consider 
-using other approaches. The only other options that are allowed with 
-PCRE2_LITERAL are: PCRE2_ANCHORED, PCRE2_ENDANCHORED, PCRE2_AUTO_CALLOUT, 
+If this option is set, all meta-characters in the pattern are disabled, and it
+is treated as a literal string. Matching literal strings with a regular
+expression engine is not the most efficient way of doing it. If you are doing a
+lot of literal matching and are worried about efficiency, you should consider
+using other approaches. The only other main options that are allowed with
+PCRE2_LITERAL are: PCRE2_ANCHORED, PCRE2_ENDANCHORED, PCRE2_AUTO_CALLOUT,
 PCRE2_CASELESS, PCRE2_FIRSTLINE, PCRE2_NO_START_OPTIMIZE, PCRE2_NO_UTF_CHECK,
-PCRE2_UTF, and PCRE2_USE_OFFSET_LIMIT. Any other options cause an error.
+PCRE2_UTF, and PCRE2_USE_OFFSET_LIMIT. The extra options PCRE2_EXTRA_MATCH_LINE
+and PCRE2_EXTRA_MATCH_WORD are also supported. Any other options cause an
+error.
 .sp
   PCRE2_MATCH_UNSET_BACKREF
 .sp
@@ -1689,6 +1691,24 @@ treated as single-character escapes. For example, \ej is a literal "j" and
 \ex{2z} is treated as the literal string "x{2z}". Setting this option means
 that typos in patterns may go undetected and have unexpected results. This is a
 dangerous option. Use with care.
+.sp
+  PCRE2_EXTRA_MATCH_LINE
+.sp
+This option is provided for use by the \fB-x\fP option of \fBpcre2grep\fP. It
+causes the pattern only to match complete lines. This is achieved by 
+automatically inserting the code for "^(?:" at the start of the compiled
+pattern and ")$" at the end. Thus, when PCRE2_MULTILINE is set, the matched
+line may be in the middle of the subject string. This option can be used with
+PCRE2_LITERAL.
+.sp
+  PCRE2_EXTRA_MATCH_WORD
+.sp
+This option is provided for use by the \fB-w\fP option of \fBpcre2grep\fP. It
+causes the pattern only to match strings that have a word boundary at the start
+and the end. This is achieved by automatically inserting the code for "\eb(?:"
+at the start of the compiled pattern and ")\eb" at the end. The option may be
+used with PCRE2_LITERAL. However, it is ignored if PCRE2_EXTRA_MATCH_LINE is
+also set.
 .
 .
 .SH "COMPILATION ERROR CODES"
@@ -3519,6 +3539,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 15 June 2017
+Last updated: 16 June 2017
 Copyright (c) 1997-2017 University of Cambridge.
 .fi

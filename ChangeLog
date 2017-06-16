@@ -189,6 +189,9 @@ pattern lines.
 
 41. Implement PCRE2_LITERAL and use it to support REG_NOSPEC.
 
+42. Implement PCRE2_EXTRA_MATCH_LINE and PCRE2_EXTRA_MATCH_WORD for the benefit 
+of pcre2grep.
+
 
 Version 10.23 14-February-2017
 ------------------------------

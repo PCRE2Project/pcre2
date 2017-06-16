@@ -16033,7 +16033,7 @@ Failed: error 108 at offset 4: range out of order in character class
 No match
 
 /a\b?c/literal,use_offset_limit
-    XXXXa\\b?c\=offset_limit=5
+    XXXXa\\b?c\=offset_limit=4
  0: a\b?c
 \= Expect no match
     XXXXa\\b?c\=offset_limit=3
@@ -16064,7 +16064,8 @@ Failed: error 192 at offset 0: invalid option bits with PCRE2_LITERAL
  +1     ^^        \
  +2     ^ ^       b
  +3     ^  ^      (
- +4     ^   ^     
+ +4     ^   ^     c
+ +5     ^    ^    
  0: a\b(c
 
 /a\b(c/literal,auto_callout
@@ -16074,12 +16075,44 @@ Failed: error 192 at offset 0: invalid option bits with PCRE2_LITERAL
  +1     ^^        \
  +2     ^ ^       b
  +3     ^  ^      (
- +4     ^   ^     
+ +4     ^   ^     c
+ +5     ^    ^    
  0: a\b(c
 
 /(*CR)abc/literal
     (*CR)abc
  0: (*CR)abc
+
+/cat|dog/match_word
+    the cat sat
+ 0: cat
+\= Expect no match   
+    caterpillar
+No match
+    snowcat
+No match
+    syndicate
+No match
+
+/(cat)|dog/match_line,literal
+    (cat)|dog
+ 0: (cat)|dog
+\= Expect no match   
+    the cat sat
+No match
+    caterpillar
+No match
+    snowcat
+No match
+    syndicate
+No match
+
+/a whole line/match_line,multiline
+    Rhubarb \na whole line\n custard
+ 0: a whole line
+\= Expect no match
+    Not a whole line         
+No match
 
 # End of testinput2 
 Error -65: PCRE2_ERROR_BADDATA (unknown error number)

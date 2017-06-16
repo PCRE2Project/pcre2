@@ -690,23 +690,29 @@ static int posix_substitutes[] = {
 #define POSIX_SUBSIZE (sizeof(posix_substitutes) / (2*sizeof(uint32_t)))
 #endif  /* SUPPORT_UNICODE */
 
-/* Masks for checking option settings. */
-
-#define PUBLIC_COMPILE_OPTIONS \
-  (PCRE2_ANCHORED|PCRE2_ALLOW_EMPTY_CLASS|PCRE2_ALT_BSUX|PCRE2_ALT_CIRCUMFLEX| \
-   PCRE2_ALT_VERBNAMES|PCRE2_AUTO_CALLOUT|PCRE2_CASELESS|PCRE2_DOLLAR_ENDONLY| \
-   PCRE2_DOTALL|PCRE2_DUPNAMES|PCRE2_ENDANCHORED|PCRE2_EXTENDED| \
-   PCRE2_EXTENDED_MORE|PCRE2_FIRSTLINE|PCRE2_LITERAL| \
-   PCRE2_MATCH_UNSET_BACKREF|PCRE2_MULTILINE|PCRE2_NEVER_BACKSLASH_C| \
-   PCRE2_NEVER_UCP|PCRE2_NEVER_UTF|PCRE2_NO_AUTO_CAPTURE| \
-   PCRE2_NO_AUTO_POSSESS|PCRE2_NO_DOTSTAR_ANCHOR|PCRE2_NO_START_OPTIMIZE| \
-   PCRE2_NO_UTF_CHECK|PCRE2_UCP|PCRE2_UNGREEDY|PCRE2_USE_OFFSET_LIMIT| \
-   PCRE2_UTF)
+/* Masks for checking option settings. When PCRE2_LITERAL is set, only a subset
+are allowed. */
 
 #define PUBLIC_LITERAL_COMPILE_OPTIONS \
   (PCRE2_ANCHORED|PCRE2_AUTO_CALLOUT|PCRE2_CASELESS|PCRE2_ENDANCHORED| \
    PCRE2_FIRSTLINE|PCRE2_LITERAL|PCRE2_NO_START_OPTIMIZE| \
    PCRE2_NO_UTF_CHECK|PCRE2_USE_OFFSET_LIMIT|PCRE2_UTF)
+
+#define PUBLIC_COMPILE_OPTIONS \
+  (PUBLIC_LITERAL_COMPILE_OPTIONS| \
+   PCRE2_ALLOW_EMPTY_CLASS|PCRE2_ALT_BSUX|PCRE2_ALT_CIRCUMFLEX| \
+   PCRE2_ALT_VERBNAMES|PCRE2_DOLLAR_ENDONLY|PCRE2_DOTALL|PCRE2_DUPNAMES| \
+   PCRE2_EXTENDED|PCRE2_EXTENDED_MORE|PCRE2_MATCH_UNSET_BACKREF| \
+   PCRE2_MULTILINE|PCRE2_NEVER_BACKSLASH_C|PCRE2_NEVER_UCP| \
+   PCRE2_NEVER_UTF|PCRE2_NO_AUTO_CAPTURE|PCRE2_NO_AUTO_POSSESS| \
+   PCRE2_NO_DOTSTAR_ANCHOR|PCRE2_UCP|PCRE2_UNGREEDY)
+
+#define PUBLIC_LITERAL_COMPILE_EXTRA_OPTIONS \
+   (PCRE2_EXTRA_MATCH_LINE|PCRE2_EXTRA_MATCH_WORD)
+
+#define PUBLIC_COMPILE_EXTRA_OPTIONS \
+   (PUBLIC_LITERAL_COMPILE_EXTRA_OPTIONS| \
+    PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES|PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL)
 
 /* Compile time error code numbers. They are given names so that they can more
 easily be tracked. When a new number is added, the tables called eint1 and
@@ -2304,6 +2310,20 @@ PCRE2_SPTR verbnamestart = NULL;    /* Value avoids compiler warning */
 named_group *ng;
 nest_save *top_nest, *end_nests;
 
+/* Insert leading items for word and line matching (features provided for the
+benefit of pcre2grep). */
+
+if ((cb->cx->extra_options & PCRE2_EXTRA_MATCH_LINE) != 0)
+  {
+  *parsed_pattern++ = META_CIRCUMFLEX;
+  *parsed_pattern++ = META_NOCAPTURE;
+  }
+else if ((cb->cx->extra_options & PCRE2_EXTRA_MATCH_WORD) != 0)
+  {
+  *parsed_pattern++ = META_ESCAPE + ESC_b;
+  *parsed_pattern++ = META_NOCAPTURE;
+  }
+
 /* If the pattern is actually a literal string, process it separately to avoid
 cluttering up the main loop. */
 
@@ -2323,8 +2343,7 @@ if ((options & PCRE2_LITERAL) != 0)
         auto_callout, parsed_pattern, cb);
     PARSED_LITERAL(c, parsed_pattern);
     }
-  *parsed_pattern = META_END;
-  return 0;
+  goto PARSED_END;
   }
 
 /* Process a real regex which may contain meta-characters. */
@@ -4166,8 +4185,23 @@ if (inverbname && ptr >= ptrend)
 
 /* Manage callout for the final item */
 
+PARSED_END:
 parsed_pattern = manage_callouts(ptr, &previous_callout, auto_callout,
   parsed_pattern, cb);
+
+/* Insert trailing items for word and line matching (features provided for the
+benefit of pcre2grep). */
+
+if ((cb->cx->extra_options & PCRE2_EXTRA_MATCH_LINE) != 0)
+  {
+  *parsed_pattern++ = META_KET;
+  *parsed_pattern++ = META_DOLLAR;
+  }
+else if ((cb->cx->extra_options & PCRE2_EXTRA_MATCH_WORD) != 0)
+  {
+  *parsed_pattern++ = META_KET;
+  *parsed_pattern++ = META_ESCAPE + ESC_b;
+  }
 
 /* Terminate the parsed pattern, then return success if all groups are closed.
 Otherwise we have unclosed parentheses. */
@@ -4177,6 +4211,7 @@ if (parsed_pattern >= parsed_pattern_end)
   errorcode = ERR63;  /* Internal error (parsed pattern overflow) */
   goto FAILED;
   }
+
 *parsed_pattern = META_END;
 if (nest_depth == 0) return 0;
 
@@ -8984,25 +9019,27 @@ if (pattern == NULL)
   return NULL;
   }
 
+/* A NULL compile context means "use a default context" */
+
+if (ccontext == NULL)
+  ccontext = (pcre2_compile_context *)(&PRIV(default_compile_context));
+
 /* Check that all undefined public option bits are zero. */
 
-if ((options & ~PUBLIC_COMPILE_OPTIONS) != 0)
+if ((options & ~PUBLIC_COMPILE_OPTIONS) != 0 ||
+    (ccontext->extra_options & ~PUBLIC_COMPILE_EXTRA_OPTIONS) != 0)
   {
   *errorptr = ERR17;
   return NULL;
   }
 
 if ((options & PCRE2_LITERAL) != 0 &&
-    (options & ~PUBLIC_LITERAL_COMPILE_OPTIONS) != 0)
+    ((options & ~PUBLIC_LITERAL_COMPILE_OPTIONS) != 0 ||
+     (ccontext->extra_options & ~PUBLIC_LITERAL_COMPILE_EXTRA_OPTIONS) != 0))
   {
   *errorptr = ERR92;
   return NULL;
   }
-
-/* A NULL compile context means "use a default context" */
-
-if (ccontext == NULL)
-  ccontext = (pcre2_compile_context *)(&PRIV(default_compile_context));
 
 /* A zero-terminated pattern is indicated by the special length value
 PCRE2_ZERO_TERMINATED. Check for an overlong pattern. */
@@ -9262,10 +9299,10 @@ and comments removed (amongst other things).
 
 In all but one case, when PCRE2_AUTO_CALLOUT is not set, the number of unsigned
 32-bit ints in the parsed pattern is bounded by the length of the pattern plus
-one (for the terminator). The exceptional case is when running in 32-bit,
-non-UTF mode, when literal characters greater than META_END (0x80000000) have
-to be coded as two units. In this case, therefore, we scan the pattern to check
-for such values. */
+one (for the terminator) plus four if PCRE2_EXTRA_WORD or PCRE2_EXTRA_LINE is
+set. The exceptional case is when running in 32-bit, non-UTF mode, when literal
+characters greater than META_END (0x80000000) have to be coded as two units. In
+this case, therefore, we scan the pattern to check for such values. */
 
 #if PCRE2_CODE_UNIT_WIDTH == 32
 if (!utf)
@@ -9282,6 +9319,11 @@ many smaller patterns the vector on the stack (which was set up above) can be
 used. */
 
 parsed_size_needed = patlen - skipatstart + big32count;
+
+if ((ccontext->extra_options &
+     (PCRE2_EXTRA_MATCH_WORD|PCRE2_EXTRA_MATCH_LINE)) != 0)
+  parsed_size_needed += 4;
+
 if ((options & PCRE2_AUTO_CALLOUT) != 0)
   parsed_size_needed = (parsed_size_needed + 1) * 5;
 

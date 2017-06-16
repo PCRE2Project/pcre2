@@ -5305,7 +5305,7 @@ a)"xI
     X\na\\b(c
 
 /a\b?c/literal,use_offset_limit
-    XXXXa\\b?c\=offset_limit=5
+    XXXXa\\b?c\=offset_limit=4
 \= Expect no match
     XXXXa\\b?c\=offset_limit=3
 
@@ -5326,5 +5326,25 @@ a)"xI
 
 /(*CR)abc/literal
     (*CR)abc
+
+/cat|dog/match_word
+    the cat sat
+\= Expect no match   
+    caterpillar
+    snowcat
+    syndicate
+
+/(cat)|dog/match_line,literal
+    (cat)|dog
+\= Expect no match   
+    the cat sat
+    caterpillar
+    snowcat
+    syndicate
+
+/a whole line/match_line,multiline
+    Rhubarb \na whole line\n custard
+\= Expect no match
+    Not a whole line         
 
 # End of testinput2 
