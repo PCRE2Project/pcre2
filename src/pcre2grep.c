@@ -4053,6 +4053,8 @@ for (fn = pattern_files; fn != NULL; fn = fn->next)
 
 /* Unless JIT has been explicitly disabled, arrange a stack for it to use. */
 
+
+#ifdef NEVER
 #ifdef SUPPORT_PCRE2GREP_JIT
 if (use_jit)
   jit_stack = pcre2_jit_stack_create(32*1024, 1024*1024, NULL);
@@ -4065,6 +4067,17 @@ for (j = 1, cp = patterns; cp != NULL; j++, cp = cp->next)
     pcre2_jit_stack_assign(match_context, NULL, jit_stack);
 #endif
   }
+#endif
+ 
+
+#ifdef SUPPORT_PCRE2GREP_JIT
+if (use_jit)
+  {
+  jit_stack = pcre2_jit_stack_create(32*1024, 1024*1024, NULL);
+  if (jit_stack != NULL                        )
+    pcre2_jit_stack_assign(match_context, NULL, jit_stack);
+  }  
+#endif
 
 /* If there are include or exclude patterns read from the command line, compile
 them. -F, -w, and -x do not apply, so the third argument of compile_pattern is
