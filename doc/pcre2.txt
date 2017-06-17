@@ -9829,11 +9829,12 @@ OPTION SETTING
 
        The following are recognized only at the very start  of  a  pattern  or
        after  one  of the newline or \R options with similar syntax. More than
-       one of them may appear.
+       one of them may appear. For the first three, d is a decimal number.
 
-         (*LIMIT_MATCH=d) set the match limit to d (decimal number)
-         (*LIMIT_DEPTH=d) set the backtracking limit to d (decimal number)
-         (*NOTEMPTY)     set PCRE2_NOTEMPTY when matching
+         (*LIMIT_DEPTH=d) set the backtracking limit to d
+         (*LIMIT_HEAP=d)  set the heap size limit to d kilobytes
+         (*LIMIT_MATCH=d) set the match limit to d
+         (*NOTEMPTY)      set PCRE2_NOTEMPTY when matching
          (*NOTEMPTY_ATSTART) set PCRE2_NOTEMPTY_ATSTART when matching
          (*NO_AUTO_POSSESS) no auto-possessification (PCRE2_NO_AUTO_POSSESS)
          (*NO_DOTSTAR_ANCHOR) no .* anchoring (PCRE2_NO_DOTSTAR_ANCHOR)
@@ -9842,12 +9843,12 @@ OPTION SETTING
          (*UTF)          set appropriate UTF mode for the library in use
          (*UCP)          set PCRE2_UCP (use Unicode properties for \d etc)
 
-       Note that LIMIT_MATCH and LIMIT_DEPTH can only reduce the value of  the
-       limits  set  by  the  caller of pcre2_match() or pcre2_dfa_match(), not
-       increase them. LIMIT_RECURSION is an obsolete synonym for  LIMIT_DEPTH.
-       The  application  can  lock out the use of (*UTF) and (*UCP) by setting
-       the PCRE2_NEVER_UTF or PCRE2_NEVER_UCP options, respectively,  at  com-
-       pile time.
+       Note that LIMIT_DEPTH, LIMIT_HEAP, and LIMIT_MATCH can only reduce  the
+       value   of   the   limits   set  by  the  caller  of  pcre2_match()  or
+       pcre2_dfa_match(), not increase them. LIMIT_RECURSION  is  an  obsolete
+       synonym for LIMIT_DEPTH. The application can lock out the use of (*UTF)
+       and (*UCP) by setting the PCRE2_NEVER_UTF or  PCRE2_NEVER_UCP  options,
+       respectively, at compile time.
 
 
 NEWLINE CONVENTION
@@ -9989,7 +9990,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 26 May 2017
+       Last updated: 17 June 2017
        Copyright (c) 1997-2017 University of Cambridge.
 ------------------------------------------------------------------------------
  

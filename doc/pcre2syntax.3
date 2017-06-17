@@ -1,4 +1,4 @@
-.TH PCRE2SYNTAX 3 "26 May 2017" "PCRE2 10.30"
+.TH PCRE2SYNTAX 3 "17 June 2017" "PCRE2 10.30"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION SYNTAX SUMMARY"
@@ -416,11 +416,12 @@ but some of them use Unicode properties if PCRE2_UCP is set. You can use
 .sp
 The following are recognized only at the very start of a pattern or after one
 of the newline or \eR options with similar syntax. More than one of them may
-appear.
+appear. For the first three, d is a decimal number.
 .sp
-  (*LIMIT_MATCH=d) set the match limit to d (decimal number)
-  (*LIMIT_DEPTH=d) set the backtracking limit to d (decimal number)
-  (*NOTEMPTY)     set PCRE2_NOTEMPTY when matching
+  (*LIMIT_DEPTH=d) set the backtracking limit to d
+  (*LIMIT_HEAP=d)  set the heap size limit to d kilobytes
+  (*LIMIT_MATCH=d) set the match limit to d
+  (*NOTEMPTY)      set PCRE2_NOTEMPTY when matching
   (*NOTEMPTY_ATSTART) set PCRE2_NOTEMPTY_ATSTART when matching
   (*NO_AUTO_POSSESS) no auto-possessification (PCRE2_NO_AUTO_POSSESS)
   (*NO_DOTSTAR_ANCHOR) no .* anchoring (PCRE2_NO_DOTSTAR_ANCHOR)
@@ -429,9 +430,9 @@ appear.
   (*UTF)          set appropriate UTF mode for the library in use
   (*UCP)          set PCRE2_UCP (use Unicode properties for \ed etc)
 .sp
-Note that LIMIT_MATCH and LIMIT_DEPTH can only reduce the value of the limits
-set by the caller of \fBpcre2_match()\fP or \fBpcre2_dfa_match()\fP, not
-increase them. LIMIT_RECURSION is an obsolete synonym for LIMIT_DEPTH. The
+Note that LIMIT_DEPTH, LIMIT_HEAP, and LIMIT_MATCH can only reduce the value of
+the limits set by the caller of \fBpcre2_match()\fP or \fBpcre2_dfa_match()\fP,
+not increase them. LIMIT_RECURSION is an obsolete synonym for LIMIT_DEPTH. The
 application can lock out the use of (*UTF) and (*UCP) by setting the
 PCRE2_NEVER_UTF or PCRE2_NEVER_UCP options, respectively, at compile time.
 .
@@ -588,6 +589,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 26 May 2017
+Last updated: 17 June 2017
 Copyright (c) 1997-2017 University of Cambridge.
 .fi
