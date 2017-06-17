@@ -192,6 +192,12 @@ pattern lines.
 42. Implement PCRE2_EXTRA_MATCH_LINE and PCRE2_EXTRA_MATCH_WORD for the benefit 
 of pcre2grep.
 
+43. Re-implement pcre2grep's -F, -w, and -x options using PCRE2_LITERAL, 
+PCRE2_EXTRA_MATCH_WORD, and PCRE2_EXTRA_MATCH_LINE. This fixes two bugs:
+
+    (a) The -F option did not work for fixed strings containing \E.
+    (b) The -w option did not work for patterns with multiple branches. 
+
 
 Version 10.23 14-February-2017
 ------------------------------

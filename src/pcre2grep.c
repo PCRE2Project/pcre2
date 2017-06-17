@@ -103,7 +103,8 @@ typedef int BOOL;
 #define MAXPATLEN 8192
 #endif
 
-#define PATBUFSIZE (MAXPATLEN + 10)   /* Allows for prefix+suffix */
+#define FNBUFSIZ 1024
+#define ERRBUFSIZ 256
 
 /* Values for the "filenames" variable, which specifies options for file name
 output. The order is important; it is assumed that a file name is wanted for
@@ -211,7 +212,7 @@ static BOOL use_jit = FALSE;
 static const uint8_t *character_tables = NULL;
 
 static uint32_t pcre2_options = 0;
-static uint32_t process_options = 0;
+static uint32_t extra_options = 0;
 static PCRE2_SIZE heap_limit = PCRE2_UNSET;
 static uint32_t match_limit = 0;
 static uint32_t depth_limit = 0;
@@ -440,19 +441,6 @@ of PCRE2_NEWLINE_xx in pcre2.h. */
 
 static const char *newlines[] = {
   "DEFAULT", "CR", "LF", "CRLF", "ANY", "ANYCRLF", "NUL" };
-
-/* Tables for prefixing and suffixing patterns, according to the -w, -x, and -F
-options. These set the 1, 2, and 4 bits in process_options, respectively. Note
-that the combination of -w and -x has the same effect as -x on its own, so we
-can treat them as the same. Note that the MAXPATLEN macro assumes the longest
-prefix+suffix is 10 characters; if anything longer is added, it must be
-adjusted. */
-
-static const char *prefix[] = {
-  "", "\\b", "^(?:", "^(?:", "\\Q", "\\b\\Q", "^(?:\\Q", "^(?:\\Q" };
-
-static const char *suffix[] = {
-  "", "\\b", ")$",   ")$",   "\\E", "\\E\\b", "\\E)$",   "\\E)$" };
 
 /* UTF-8 tables - used only when the newline setting is "any". */
 
@@ -2339,7 +2327,7 @@ file. However, when the newline convention is binary zero, we can't do this. */
 if (binary_files != BIN_TEXT)
   {
   if (endlinetype != PCRE2_NEWLINE_NUL)
-    binary = memchr(main_buffer, 0, (bufflength > 1024)? 1024 : bufflength) 
+    binary = memchr(main_buffer, 0, (bufflength > 1024)? 1024 : bufflength)
       != NULL;
   if (binary && binary_files == BIN_NOMATCH) return 1;
   }
@@ -3224,7 +3212,7 @@ switch(letter)
   case N_NOJIT: use_jit = FALSE; break;
   case 'a': binary_files = BIN_TEXT; break;
   case 'c': count_only = TRUE; break;
-  case 'F': process_options |= PO_FIXED_STRINGS; break;
+  case 'F': options |= PCRE2_LITERAL; break;
   case 'H': filenames = FN_FORCE; break;
   case 'I': binary_files = BIN_NOMATCH; break;
   case 'h': filenames = FN_NONE; break;
@@ -3245,8 +3233,8 @@ switch(letter)
   case 't': show_total_count = TRUE; break;
   case 'u': options |= PCRE2_UTF; utf = TRUE; break;
   case 'v': invert = TRUE; break;
-  case 'w': process_options |= PO_WORD_MATCH; break;
-  case 'x': process_options |= PO_LINE_MATCH; break;
+  case 'w': extra_options |= PCRE2_EXTRA_MATCH_WORD; break;
+  case 'x': extra_options |= PCRE2_EXTRA_MATCH_LINE; break;
 
   case 'V':
     {
@@ -3309,7 +3297,6 @@ pattern chain.
 Arguments:
   p              points to the pattern block
   options        the PCRE options
-  popts          the processing options
   fromfile       TRUE if the pattern was read from a file
   fromtext       file name or identifying text (e.g. "include")
   count          0 if this is the only command line pattern, or
@@ -3320,18 +3307,20 @@ Returns:         TRUE on success, FALSE after an error
 */
 
 static BOOL
-compile_pattern(patstr *p, int options, int popts, int fromfile,
-  const char *fromtext, int count)
+compile_pattern(patstr *p, int options, int fromfile, const char *fromtext,
+  int count)
 {
-unsigned char buffer[PATBUFSIZE];
-PCRE2_SIZE erroffset;
-char *ps = p->string;
-unsigned int patlen = strlen(ps);
+char *ps;
 int errcode;
+PCRE2_SIZE patlen, erroffset;
+PCRE2_UCHAR errmessbuffer[ERRBUFSIZ];
 
 if (p->compiled != NULL) return TRUE;
 
-if ((popts & PO_FIXED_STRINGS) != 0)
+ps = p->string;
+patlen = strlen(ps);
+
+if ((options & PCRE2_LITERAL) != 0)
   {
   int ellength;
   char *eop = ps + patlen;
@@ -3344,8 +3333,7 @@ if ((popts & PO_FIXED_STRINGS) != 0)
     }
   }
 
-sprintf((char *)buffer, "%s%.*s%s", prefix[popts], patlen, ps, suffix[popts]);
-p->compiled = pcre2_compile(buffer, PCRE2_ZERO_TERMINATED, options, &errcode,
+p->compiled = pcre2_compile((PCRE2_SPTR)ps, patlen, options, &errcode,
   &erroffset, compile_context);
 
 /* Handle successful compile. Try JIT-compiling if supported and enabled. We
@@ -3362,23 +3350,22 @@ if (p->compiled != NULL)
 
 /* Handle compile errors */
 
-erroffset -= (int)strlen(prefix[popts]);
 if (erroffset > patlen) erroffset = patlen;
-pcre2_get_error_message(errcode, buffer, PATBUFSIZE);
+pcre2_get_error_message(errcode, errmessbuffer, sizeof(errmessbuffer));
 
 if (fromfile)
   {
   fprintf(stderr, "pcre2grep: Error in regex in line %d of %s "
-    "at offset %d: %s\n", count, fromtext, (int)erroffset, buffer);
+    "at offset %d: %s\n", count, fromtext, (int)erroffset, errmessbuffer);
   }
 else
   {
   if (count == 0)
     fprintf(stderr, "pcre2grep: Error in %s regex at offset %d: %s\n",
-      fromtext, (int)erroffset, buffer);
+      fromtext, (int)erroffset, errmessbuffer);
   else
     fprintf(stderr, "pcre2grep: Error in %s %s regex at offset %d: %s\n",
-      ordin(count), fromtext, (int)erroffset, buffer);
+      ordin(count), fromtext, (int)erroffset, errmessbuffer);
   }
 
 return FALSE;
@@ -3396,18 +3383,17 @@ Arguments:
   name         the name of the file; "-" is stdin
   patptr       pointer to the pattern chain anchor
   patlastptr   pointer to the last pattern pointer
-  popts        the process options to pass to pattern_compile()
 
 Returns:       TRUE if all went well
 */
 
 static BOOL
-read_pattern_file(char *name, patstr **patptr, patstr **patlastptr, int popts)
+read_pattern_file(char *name, patstr **patptr, patstr **patlastptr)
 {
 int linenumber = 0;
 FILE *f;
 const char *filename;
-char buffer[PATBUFSIZE];
+char buffer[MAXPATLEN+20];
 
 if (strcmp(name, "-") == 0)
   {
@@ -3425,7 +3411,7 @@ else
   filename = name;
   }
 
-while (fgets(buffer, PATBUFSIZE, f) != NULL)
+while (fgets(buffer, sizeof(buffer), f) != NULL)
   {
   char *s = buffer + (int)strlen(buffer);
   while (s > buffer && isspace((unsigned char)(s[-1]))) s--;
@@ -3453,7 +3439,7 @@ while (fgets(buffer, PATBUFSIZE, f) != NULL)
 
   for(;;)
     {
-    if (!compile_pattern(*patlastptr, pcre2_options, popts, TRUE, filename,
+    if (!compile_pattern(*patlastptr, pcre2_options, TRUE, filename,
         linenumber))
       {
       if (f != stdin) fclose(f);
@@ -3823,7 +3809,7 @@ for (i = 1; i < argc; i++)
     {
     unsigned long int n = decode_number(option_data, op, longop);
     if (op->type == OP_U32NUMBER) *((uint32_t *)op->dataptr) = n;
-      else if (op->type == OP_SIZE) *((PCRE2_SIZE *)op->dataptr) = n; 
+      else if (op->type == OP_SIZE) *((PCRE2_SIZE *)op->dataptr) = n;
       else *((int *)op->dataptr) = n;
     }
   }
@@ -3978,6 +3964,10 @@ if (DEE_option != NULL)
     }
   }
 
+/* Set the extra options */
+
+(void)pcre2_set_compile_extra_options(compile_context, extra_options);
+
 /* Check the values for Jeffrey Friedl's debugging options. */
 
 #ifdef JFRIEDL_DEBUG
@@ -4038,7 +4028,7 @@ chain, so we must not access the next pointer till after the compile. */
 
 for (j = 1, cp = patterns; cp != NULL; j++, cp = cp->next)
   {
-  if (!compile_pattern(cp, pcre2_options, process_options, FALSE, "command-line",
+  if (!compile_pattern(cp, pcre2_options, FALSE, "command-line",
        (j == 1 && patterns->next == NULL)? 0 : j))
     goto EXIT2;
   }
@@ -4047,28 +4037,10 @@ for (j = 1, cp = patterns; cp != NULL; j++, cp = cp->next)
 
 for (fn = pattern_files; fn != NULL; fn = fn->next)
   {
-  if (!read_pattern_file(fn->name, &patterns, &patterns_last, process_options))
-    goto EXIT2;
+  if (!read_pattern_file(fn->name, &patterns, &patterns_last)) goto EXIT2;
   }
 
 /* Unless JIT has been explicitly disabled, arrange a stack for it to use. */
-
-
-#ifdef NEVER
-#ifdef SUPPORT_PCRE2GREP_JIT
-if (use_jit)
-  jit_stack = pcre2_jit_stack_create(32*1024, 1024*1024, NULL);
-#endif
-
-for (j = 1, cp = patterns; cp != NULL; j++, cp = cp->next)
-  {
-#ifdef SUPPORT_PCRE2GREP_JIT
-  if (jit_stack != NULL && cp->compiled != NULL)
-    pcre2_jit_stack_assign(match_context, NULL, jit_stack);
-#endif
-  }
-#endif
- 
 
 #ifdef SUPPORT_PCRE2GREP_JIT
 if (use_jit)
@@ -4076,19 +4048,24 @@ if (use_jit)
   jit_stack = pcre2_jit_stack_create(32*1024, 1024*1024, NULL);
   if (jit_stack != NULL                        )
     pcre2_jit_stack_assign(match_context, NULL, jit_stack);
-  }  
+  }
 #endif
 
+/* -F, -w, and -x do not apply to include or exclude patterns, so we must
+adjust the options. */
+
+pcre2_options &= ~PCRE2_LITERAL;
+(void)pcre2_set_compile_extra_options(compile_context, 0);
+
 /* If there are include or exclude patterns read from the command line, compile
-them. -F, -w, and -x do not apply, so the third argument of compile_pattern is
-0. */
+them. */
 
 for (j = 0; j < 4; j++)
   {
   int k;
   for (k = 1, cp = *(incexlist[j]); cp != NULL; k++, cp = cp->next)
     {
-    if (!compile_pattern(cp, pcre2_options, 0, FALSE, incexname[j],
+    if (!compile_pattern(cp, pcre2_options, FALSE, incexname[j],
          (k == 1 && cp->next == NULL)? 0 : k))
       goto EXIT2;
     }
@@ -4098,13 +4075,13 @@ for (j = 0; j < 4; j++)
 
 for (fn = include_from; fn != NULL; fn = fn->next)
   {
-  if (!read_pattern_file(fn->name, &include_patterns, &include_patterns_last, 0))
+  if (!read_pattern_file(fn->name, &include_patterns, &include_patterns_last))
     goto EXIT2;
   }
 
 for (fn = exclude_from; fn != NULL; fn = fn->next)
   {
-  if (!read_pattern_file(fn->name, &exclude_patterns, &exclude_patterns_last, 0))
+  if (!read_pattern_file(fn->name, &exclude_patterns, &exclude_patterns_last))
     goto EXIT2;
   }
 
@@ -4123,7 +4100,7 @@ read them line by line and search the given files. */
 
 for (fn = file_lists; fn != NULL; fn = fn->next)
   {
-  char buffer[PATBUFSIZE];
+  char buffer[FNBUFSIZ];
   FILE *fl;
   if (strcmp(fn->name, "-") == 0) fl = stdin; else
     {
@@ -4135,7 +4112,7 @@ for (fn = file_lists; fn != NULL; fn = fn->next)
       goto EXIT2;
       }
     }
-  while (fgets(buffer, PATBUFSIZE, fl) != NULL)
+  while (fgets(buffer, sizeof(buffer), fl) != NULL)
     {
     int frc;
     char *end = buffer + (int)strlen(buffer);

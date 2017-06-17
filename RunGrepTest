@@ -602,6 +602,19 @@ echo "---------------------------- Test 120 ------------------------------" >>te
 (cd $srcdir; $valgrind $vjs $pcre2grep -HO '$0:$2$1$3' '(\w+) binary (\w+)(\.)?' ./testdata/grepinput) >>testtrygrep
 echo "RC=$?" >>testtrygrep
 
+echo "---------------------------- Test 121 -----------------------------" >>testtrygrep
+(cd $srcdir; $valgrind $vjs $pcre2grep -F '\E and (regex)' testdata/grepinputv) >>testtrygrep
+echo "RC=$?" >>testtrygrep
+
+echo "---------------------------- Test 122 -----------------------------" >>testtrygrep
+(cd $srcdir; $valgrind $vjs $pcre2grep -w 'cat|dog' testdata/grepinputv) >>testtrygrep
+echo "RC=$?" >>testtrygrep
+
+echo "---------------------------- Test 122 -----------------------------" >>testtrygrep
+(cd $srcdir; $valgrind $vjs $pcre2grep -w 'dog|cat' testdata/grepinputv) >>testtrygrep
+echo "RC=$?" >>testtrygrep
+
+
 # Now compare the results.
 
 $cf $srcdir/testdata/grepoutput testtrygrep

@@ -740,20 +740,21 @@ the patterns are the ones that are found.
 </P>
 <P>
 <b>-w</b>, <b>--word-regex</b>, <b>--word-regexp</b>
-Force the patterns to match only whole words. This is equivalent to having \b
-at the start and end of the pattern. This option applies only to the patterns
-that are matched against the contents of files; it does not apply to patterns
-specified by any of the <b>--include</b> or <b>--exclude</b> options.
+Force the patterns only to match "words". That is, there must be a word
+boundary at the start and end of each matched string. This is equivalent to
+having "\b(?:" at the start of each pattern, and ")\b" at the end. This
+option applies only to the patterns that are matched against the contents of
+files; it does not apply to patterns specified by any of the <b>--include</b> or
+<b>--exclude</b> options.
 </P>
 <P>
 <b>-x</b>, <b>--line-regex</b>, <b>--line-regexp</b>
-Force the patterns to be anchored (each must start matching at the beginning of
-a line) and in addition, require them to match entire lines. In multiline mode
-the match may be more than one line. This is equivalent to having \A and \Z
-characters at the start and end of each alternative top-level branch in every
-pattern. This option applies only to the patterns that are matched against the
-contents of files; it does not apply to patterns specified by any of the
-<b>--include</b> or <b>--exclude</b> options.
+Force the patterns to start matching only at the beginnings of lines, and in
+addition, require them to match entire lines. In multiline mode the match may
+be more than one line. This is equivalent to having "^(?:" at the start of each
+pattern and ")$" at the end. This option applies only to the patterns that are
+matched against the contents of files; it does not apply to patterns specified
+by any of the <b>--include</b> or <b>--exclude</b> options.
 </P>
 <br><a name="SEC6" href="#TOC1">ENVIRONMENT VARIABLES</a><br>
 <P>
@@ -936,7 +937,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC15" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 26 May 2017
+Last updated: 17 June 2017
 <br>
 Copyright &copy; 1997-2017 University of Cambridge.
 <br>

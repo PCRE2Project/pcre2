@@ -454,6 +454,11 @@ RC=1
 ---------------------------- Test 51 ------------------------------
 over the lazy dog.
 This time it jumps and jumps and jumps.
+This line contains \E and (regex) *meta* [characters].
+The word is cat in this line
+The caterpillar sat on the mat
+The snowcat is not an animal
+A buried feline in the syndicate
 RC=0
 ---------------------------- Test 52 ------------------------------
 fox [1;31mjumps[0m
@@ -788,32 +793,32 @@ RC=0
 37216,12
 RC=0
 ---------------------------- Test 113 -----------------------------
-476
+478
 RC=0
 ---------------------------- Test 114 -----------------------------
 testdata/grepinput:469
 testdata/grepinput3:0
 testdata/grepinput8:0
-testdata/grepinputv:1
+testdata/grepinputv:3
 testdata/grepinputx:6
-TOTAL:476
+TOTAL:478
 RC=0
 ---------------------------- Test 115 -----------------------------
 testdata/grepinput:469
-testdata/grepinputv:1
+testdata/grepinputv:3
 testdata/grepinputx:6
-TOTAL:476
+TOTAL:478
 RC=0
 ---------------------------- Test 116 -----------------------------
-476
+478
 RC=0
 ---------------------------- Test 117 -----------------------------
 469
 0
 0
-1
+3
 6
-476
+478
 RC=0
 ---------------------------- Test 118 -----------------------------
 testdata/grepinput3
@@ -833,4 +838,15 @@ RC=0
 ./testdata/grepinput:the binary zero.:zerothe.
 ./testdata/grepinput:a binary zero:zeroa
 ./testdata/grepinput:the binary zero.:zerothe.
+RC=0
+---------------------------- Test 121 -----------------------------
+This line contains \E and (regex) *meta* [characters].
+RC=0
+---------------------------- Test 122 -----------------------------
+over the lazy dog.
+The word is cat in this line
+RC=0
+---------------------------- Test 122 -----------------------------
+over the lazy dog.
+The word is cat in this line
 RC=0
