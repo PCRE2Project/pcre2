@@ -25,6 +25,7 @@
 #cmakedefine SUPPORT_LIBZ 1
 
 #cmakedefine SUPPORT_JIT 1
+#cmakedefine SLJIT_PROT_EXECUTABLE_ALLOCATOR 1
 #cmakedefine SUPPORT_PCRE2GREP_JIT 1
 #cmakedefine SUPPORT_UNICODE 1
 #cmakedefine SUPPORT_VALGRIND 1

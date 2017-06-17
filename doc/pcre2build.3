@@ -1,4 +1,4 @@
-.TH PCRE2BUILD 3 "30 May 2017" "PCRE2 10.30"
+.TH PCRE2BUILD 3 "17 June 2017" "PCRE2 10.30"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .
@@ -156,8 +156,13 @@ Just-in-time (JIT) compiler support is included in the build by specifying
   --enable-jit
 .sp
 This support is available only for certain hardware architectures. If this
-option is set for an unsupported architecture, a building error occurs.
-See the
+option is set for an unsupported architecture, a building error occurs. If you
+are running under SELinux you may also want to add
+.sp
+  --enable-jit-sealloc
+.sp
+which enables the use of an execmem allocator in JIT that is compatible with
+SELinux. This has no effect if JIT is not enabled. See the
 .\" HREF
 \fBpcre2jit\fP
 .\"
@@ -273,7 +278,7 @@ documentation. The default limit (in effect unlimited) is 20 million. You can
 change this by a setting such as
 .sp
   --with-heap-limit=500
-.sp   
+.sp
 which limits the amount of heap to 500 kilobytes. This limit applies only to
 interpretive matching in pcre2_match(). It does not apply when JIT (which has
 its own memory arrangements) is used, nor does it apply to
@@ -528,7 +533,7 @@ contains a single function called LLVMFuzzerTestOneInput() whose arguments are
 a pointer to a string and the length of the string. When called, this function
 tries to compile the string as a pattern, and if that succeeds, to match it.
 This is done both with no options and with some random options bits that are
-generated from the string. 
+generated from the string.
 .P
 Setting --enable-fuzz-support also causes a binary called \fBpcre2fuzzcheck\fP
 to be created. This is normally run under valgrind or used when PCRE2 is
@@ -542,13 +547,13 @@ file are the test string.
 .SH "OBSOLETE OPTION"
 .rs
 .sp
-In versions of PCRE2 prior to 10.30, there were two ways of handling 
-backtracking in the \fBpcre2_match()\fP function. The default was to use the 
+In versions of PCRE2 prior to 10.30, there were two ways of handling
+backtracking in the \fBpcre2_match()\fP function. The default was to use the
 system stack, but if
 .sp
   --disable-stack-for-recursion
 .sp
-was set, memory on the heap was used. From release 10.30 onwards this has 
+was set, memory on the heap was used. From release 10.30 onwards this has
 changed (the stack is no longer used) and this option now does nothing except
 give a warning.
 .
@@ -572,6 +577,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 30 May 2017
+Last updated: 17 June 2017
 Copyright (c) 1997-2017 University of Cambridge.
 .fi
