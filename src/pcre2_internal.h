@@ -557,9 +557,14 @@ enum { PCRE2_MATCHEDBY_INTERPRETER,     /* pcre2_match() */
 #define MAGIC_NUMBER  0x50435245UL   /* 'PCRE' */
 
 /* The maximum remaining length of subject we are prepared to search for a
-req_unit match. */
+req_unit match. In 8-bit mode, memchr() is used and is much faster than the 
+search loop that has to be used in 16-bit and 32-bit modes. */
 
+#if PCRE2_CODE_UNIT_WIDTH == 8
+#define REQ_CU_MAX 2000
+#else
 #define REQ_CU_MAX 1000
+#endif
 
 /* Offsets for the bitmap tables in the cbits set of tables. Each table
 contains a set of bits for a class map. Some classes are built by combining

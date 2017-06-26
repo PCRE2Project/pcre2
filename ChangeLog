@@ -201,6 +201,10 @@ PCRE2_EXTRA_MATCH_WORD, and PCRE2_EXTRA_MATCH_LINE. This fixes two bugs:
 44. Added configuration options for the SELinux compatible execmem allocator in
 JIT.
 
+45. Increased the limit for searching for a "must be present" code unit in 
+subjects from 1000 to 2000 for 8-bit searches, since they use memchr() and are 
+much faster.
+
 
 Version 10.23 14-February-2017
 ------------------------------
