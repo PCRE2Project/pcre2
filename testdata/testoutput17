@@ -368,6 +368,7 @@ No match
 Capturing subpattern count = 0
 Compile options: <none>
 Overall options: anchored
+First code unit = 'a'
 Subject length lower bound = 6
 JIT compilation was successful
 #pop jitverify
@@ -379,6 +380,7 @@ JIT compilation was successful
 Capturing subpattern count = 0
 Compile options: <none>
 Overall options: anchored
+First code unit = 'a'
 Subject length lower bound = 6
 JIT compilation was successful
 #save testsaved1

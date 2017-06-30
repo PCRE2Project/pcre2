@@ -799,7 +799,7 @@ if (caseless)
     if (c > 0xff) SET_BIT(0xff); else SET_BIT(c);
 #endif
     }
-  else 
+  else
 #endif  /* SUPPORT_UNICODE */
 
   /* Not UTF */
@@ -953,7 +953,6 @@ do
       case OP_ALLANY:
       case OP_ANY:
       case OP_ANYBYTE:
-      case OP_CIRC:
       case OP_CIRCM:
       case OP_CLOSE:
       case OP_COMMIT:
@@ -1020,6 +1019,13 @@ do
       case OP_THEN:
       case OP_THEN_ARG:
       return SSB_FAIL;
+
+      /* OP_CIRC happens only at the start of an anchored branch (multiline ^
+      uses OP_CIRCM). Skip over it. */
+
+      case OP_CIRC:
+      tcode += PRIV(OP_lengths)[OP_CIRC];
+      break;
 
       /* A "real" property test implies no starting bits, but the fake property
       PT_CLIST identifies a list of characters. These lists are short, as they
@@ -1450,7 +1456,7 @@ do
 #endif
       /* It seems that the fall through comment must be outside the #ifdef if
       it is to avoid the gcc compiler warning. */
-        
+
       /* Fall through */
 
       /* Enter here for a negative non-XCLASS. In the 8-bit library, if we are
@@ -1579,12 +1585,11 @@ BOOL utf = (re->overall_options & PCRE2_UTF) != 0;
 code = (PCRE2_UCHAR *)((uint8_t *)re + sizeof(pcre2_real_code)) +
   re->name_entry_size * re->name_count;
 
-/* For an anchored pattern, or an unanchored pattern that has a first code
-unit, or a multiline pattern that matches only at "line start", there is no
-point in seeking a list of starting code units. */
+/* For a pattern that has a first code unit, or a multiline pattern that
+matches only at "line start", there is no point in seeking a list of starting
+code units. */
 
-if ((re->overall_options & PCRE2_ANCHORED) == 0 &&
-    (re->flags & (PCRE2_FIRSTSET|PCRE2_STARTLINE)) == 0)
+if ((re->flags & (PCRE2_FIRSTSET|PCRE2_STARTLINE)) == 0)
   {
   int rc = set_start_bits(re, code, utf);
   if (rc == SSB_UNKNOWN) return 1;

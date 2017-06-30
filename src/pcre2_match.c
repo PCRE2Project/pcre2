@@ -270,7 +270,7 @@ pcre2_callout_block cb;
 
 *lengthptr = (*Fecode == OP_CALLOUT)?
   PRIV(OP_lengths)[OP_CALLOUT] : GET(Fecode, 1 + 2*LINK_SIZE);
-  
+
 if (mb->callout == NULL) return 0;   /* No callout function provided */
 
 /* The original matching code (pre 10.30) worked directly with the ovector
@@ -279,11 +279,11 @@ ovector is in the backtracking frame, it no longer needs to reserve space for
 the overall match offsets (which would waste space in the frame). For backward
 compatibility, however, we pass capture_top and offset_vector to the callout as
 if for the extended ovector, and we ensure that the first two slots are unset
-by preserving and restoring their current contents. Picky compilers complain if 
-references such as Fovector[-2] are use directly, so we set up a separate 
+by preserving and restoring their current contents. Picky compilers complain if
+references such as Fovector[-2] are use directly, so we set up a separate
 pointer. */
 
-callout_ovector = (PCRE2_SIZE *)(Fovector) - 2; 
+callout_ovector = (PCRE2_SIZE *)(Fovector) - 2;
 
 cb.version          = 1;
 cb.capture_top      = (uint32_t)Foffset_top/2 + 1;
@@ -935,8 +935,8 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
 
     /* ===================================================================== */
     /* Match a single character, caselessly. If we are at the end of the
-    subject, give up immediately. We get here only when the pattern character 
-    has at most one other case. Characters with more than two cases are coded 
+    subject, give up immediately. We get here only when the pattern character
+    has at most one other case. Characters with more than two cases are coded
     as OP_PROP with the pseudo-property PT_CLIST. */
 
     case OP_CHARI:
@@ -954,7 +954,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
       GETCHARLEN(fc, Fecode, Flength);
 
       /* If the pattern character's value is < 128, we know that its other case
-      (if any) is also < 128 (and therefore only one code unit long in all 
+      (if any) is also < 128 (and therefore only one code unit long in all
       code-unit widths), so we can use the fast lookup table. We checked above
       that there is at least one character left in the subject. */
 
@@ -966,7 +966,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
         Feptr++;
         }
 
-      /* Otherwise we must pick up the subject character and use Unicode 
+      /* Otherwise we must pick up the subject character and use Unicode
       property support to test its other case. Note that we cannot use the
       value of "Flength" to check for sufficient bytes left, because the other
       case of the character may have more or fewer code units. */
@@ -3056,7 +3056,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
           }
         Feptr += Lmin;
         break;
-        
+
         /* This OP_ANYBYTE case will never be reached because \C gets turned
         into OP_ALLANY in non-UTF mode. Cut out the code so that coverage
         reports don't complain about it's never being used. */
@@ -5352,8 +5352,8 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
                 (char *)assert_accept_frame + offsetof(heapframe, ovector),
                 assert_accept_frame->offset_top * sizeof(PCRE2_SIZE));
           Foffset_top = assert_accept_frame->offset_top;
-           
-          /* Fall through */ 
+
+          /* Fall through */
           /* In the case of a match, the captures have already been put into
           the current frame. */
 
@@ -5650,7 +5650,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
     if ((mb->moptions & PCRE2_NOTEOL) != 0) RRETURN(MATCH_NOMATCH);
     if ((mb->poptions & PCRE2_DOLLAR_ENDONLY) == 0) goto ASSERT_NL_OR_EOS;
 
-    /* Fall through */ 
+    /* Fall through */
     /* Unconditional end of subject assertion (\z) */
 
     case OP_EOD:
@@ -6280,7 +6280,7 @@ The last of these is changed within the match() function if the frame vector
 has to be expanded. We therefore put it into the match block so that it is
 correct when calling match() more than once for non-anchored patterns. */
 
-frame_size = offsetof(heapframe, ovector) + 
+frame_size = offsetof(heapframe, ovector) +
   re->top_bracket * 2 * sizeof(PCRE2_SIZE);
 
 /* Limits set in the pattern override the match context only if they are
@@ -6333,33 +6333,26 @@ mb->lcc = re->tables + lcc_offset;
 mb->fcc = re->tables + fcc_offset;
 mb->ctypes = re->tables + ctypes_offset;
 
-/* Set up the first code unit to match, if available. The first_codeunit value
-is never set for an anchored regular expression, but the anchoring may be
-forced at run time, so we have to test for anchoring. The first code unit may
-be unset for an unanchored pattern, of course. If there's no first code unit
-there may be a bitmap of possible first characters. */
+/* Set up the first code unit to match, if available. If there's no first code
+unit there may be a bitmap of possible first characters. */
 
-if (!anchored)
+if ((re->flags & PCRE2_FIRSTSET) != 0)
   {
-  if ((re->flags & PCRE2_FIRSTSET) != 0)
+  has_first_cu = TRUE;
+  first_cu = first_cu2 = (PCRE2_UCHAR)(re->first_codeunit);
+  if ((re->flags & PCRE2_FIRSTCASELESS) != 0)
     {
-    has_first_cu = TRUE;
-    first_cu = first_cu2 = (PCRE2_UCHAR)(re->first_codeunit);
-    if ((re->flags & PCRE2_FIRSTCASELESS) != 0)
-      {
-      first_cu2 = TABLE_GET(first_cu, mb->fcc, first_cu);
+    first_cu2 = TABLE_GET(first_cu, mb->fcc, first_cu);
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 8
-      if (utf && first_cu > 127) first_cu2 = UCD_OTHERCASE(first_cu);
+    if (utf && first_cu > 127) first_cu2 = UCD_OTHERCASE(first_cu);
 #endif
-      }
     }
-  else
-    if (!startline && (re->flags & PCRE2_FIRSTMAPSET) != 0)
-      start_bits = re->start_bitmap;
   }
+else
+  if (!startline && (re->flags & PCRE2_FIRSTMAPSET) != 0)
+    start_bits = re->start_bitmap;
 
-/* For anchored or unanchored matches, there may be a "last known required
-character" set. */
+/* There may also be a "last known required character" set. */
 
 if ((re->flags & PCRE2_LASTSET) != 0)
   {
@@ -6398,8 +6391,8 @@ for(;;)
     /* If firstline is TRUE, the start of the match is constrained to the first
     line of a multiline string. That is, the match must be before or at the
     first newline. Implement this by temporarily adjusting end_subject so that
-    we stop the optimization scans at a newline. If the match fails at the
-    newline, later code breaks this loop. */
+    we stop the optimization scans for a first code unit at a newline. If the
+    match fails at the newline, later code breaks this loop. */
 
     if (firstline)
       {
@@ -6419,107 +6412,143 @@ for(;;)
       end_subject = t;
       }
 
-    /* Advance to a unique first code unit if there is one. In 8-bit mode, the
-    use of memchr() gives a big speed up, even though we have to call it twice
-    in caseless mode, in order to find the first occurrence of the character in
-    either of its cases. */
+    /* Anchored: check the first code unit if one is recorded. This may seem
+    pointless but it can help in detecting a no match case without scanning for
+    the required code unit. */
 
-    if (has_first_cu)
+    if (anchored)
       {
-      if (first_cu != first_cu2)  /* Caseless */
+      if (has_first_cu || start_bits != NULL)
         {
-#if PCRE2_CODE_UNIT_WIDTH != 8
-        PCRE2_UCHAR smc;
-        while (start_match < end_subject &&
-              (smc = UCHAR21TEST(start_match)) != first_cu && smc != first_cu2)
-          start_match++;
-#else  /* 8-bit code units */
-        PCRE2_SPTR pp1 = memchr(start_match, first_cu, end_subject-start_match);
-        PCRE2_SPTR pp2 = memchr(start_match, first_cu2, end_subject-start_match);
-        if (pp1 == NULL)
-          start_match = (pp2 == NULL)? end_subject : pp2;
-        else
-          start_match = (pp2 == NULL || pp1 < pp2)? pp1 : pp2;
-#endif
-        }
-
-      /* The caseful case */
-
-      else
-        {
-#if PCRE2_CODE_UNIT_WIDTH != 8
-        while (start_match < end_subject && UCHAR21TEST(start_match) != first_cu)
-          start_match++;
-#else
-        start_match = memchr(start_match, first_cu, end_subject - start_match);
-        if (start_match == NULL) start_match = end_subject;
-#endif
-        }
-
-      /* If we can't find the required code unit, break the bumpalong loop, to
-      force a match failure, except when doing partial matching, when we let
-      the next cycle run at the end of the subject. To see why, consider the
-      pattern /(?<=abc)def/, which partially matches "abc", even though the
-      string does not contain the starting character "d". */
-
-      if (!mb->partial && start_match >= end_subject)
-        {
-        rc = MATCH_NOMATCH;
-        break;
-        }
-      }
-
-    /* If there's no first code unit, advance to just after a linebreak for a
-    multiline match if required. */
-
-    else if (startline)
-      {
-      if (start_match > mb->start_subject + start_offset)
-        {
-#ifdef SUPPORT_UNICODE
-        if (utf)
+        BOOL ok = start_match < end_subject;
+        if (ok)
           {
-          while (start_match < end_subject && !WAS_NEWLINE(start_match))
+          PCRE2_UCHAR c = UCHAR21TEST(start_match);
+          ok = has_first_cu && (c == first_cu || c == first_cu2);
+          if (!ok && start_bits != NULL)
             {
-            start_match++;
-            ACROSSCHAR(start_match < end_subject, *start_match,
-              start_match++);
+#if PCRE2_CODE_UNIT_WIDTH != 8
+            if (c > 255) c = 255;
+#endif
+            ok = (start_bits[c/8] & (1 << (c&7))) != 0;
             }
           }
-        else
-#endif
-        while (start_match < end_subject && !WAS_NEWLINE(start_match))
-          start_match++;
-
-        /* If we have just passed a CR and the newline option is ANY or
-        ANYCRLF, and we are now at a LF, advance the match position by one more
-        code unit. */
-
-        if (start_match[-1] == CHAR_CR &&
-             (mb->nltype == NLTYPE_ANY || mb->nltype == NLTYPE_ANYCRLF) &&
-             start_match < end_subject &&
-             UCHAR21TEST(start_match) == CHAR_NL)
-          start_match++;
+        if (!ok)
+          {
+          rc = MATCH_NOMATCH;
+          break;
+          }
         }
       }
 
-    /* If there's no first code unit or a requirement for a multiline line
-    start, advance to a non-unique first code unit if any have been identified.
-    The bitmap contains only 256 bits. When code units are 16 or 32 bits wide,
-    all code units greater than 254 set the 255 bit. */
+    /* Not anchored. Advance to a unique first code unit if there is one. In
+    8-bit mode, the use of memchr() gives a big speed up, even though we have
+    to call it twice in caseless mode, in order to find the earliest occurrence
+    of the character in either of its cases. */
 
-    else if (start_bits != NULL)
+    else
       {
-      while (start_match < end_subject)
+      if (has_first_cu)
         {
-        uint32_t c = UCHAR21TEST(start_match);
+        if (first_cu != first_cu2)  /* Caseless */
+          {
 #if PCRE2_CODE_UNIT_WIDTH != 8
-        if (c > 255) c = 255;
+          PCRE2_UCHAR smc;
+          while (start_match < end_subject &&
+                (smc = UCHAR21TEST(start_match)) != first_cu &&
+                  smc != first_cu2)
+            start_match++;
+#else  /* 8-bit code units */
+          PCRE2_SPTR pp1 =
+            memchr(start_match, first_cu, end_subject-start_match);
+          PCRE2_SPTR pp2 =
+            memchr(start_match, first_cu2, end_subject-start_match);
+          if (pp1 == NULL)
+            start_match = (pp2 == NULL)? end_subject : pp2;
+          else
+            start_match = (pp2 == NULL || pp1 < pp2)? pp1 : pp2;
 #endif
-        if ((start_bits[c/8] & (1 << (c&7))) != 0) break;
-        start_match++;
+          }
+
+        /* The caseful case */
+
+        else
+          {
+#if PCRE2_CODE_UNIT_WIDTH != 8
+          while (start_match < end_subject && UCHAR21TEST(start_match) !=
+                 first_cu)
+            start_match++;
+#else
+          start_match = memchr(start_match, first_cu, end_subject - start_match);
+          if (start_match == NULL) start_match = end_subject;
+#endif
+          }
+
+        /* If we can't find the required code unit, break the bumpalong loop,
+        to force a match failure, except when doing partial matching, when we
+        let the next cycle run at the end of the subject. To see why, consider
+        the pattern /(?<=abc)def/, which partially matches "abc", even though
+        the string does not contain the starting character "d". */
+
+        if (!mb->partial && start_match >= end_subject)
+          {
+          rc = MATCH_NOMATCH;
+          break;
+          }
         }
-      }
+
+      /* If there's no first code unit, advance to just after a linebreak for a
+      multiline match if required. */
+
+      else if (startline)
+        {
+        if (start_match > mb->start_subject + start_offset)
+          {
+#ifdef SUPPORT_UNICODE
+          if (utf)
+            {
+            while (start_match < end_subject && !WAS_NEWLINE(start_match))
+              {
+              start_match++;
+              ACROSSCHAR(start_match < end_subject, *start_match,
+                start_match++);
+              }
+            }
+          else
+#endif
+          while (start_match < end_subject && !WAS_NEWLINE(start_match))
+            start_match++;
+
+          /* If we have just passed a CR and the newline option is ANY or
+          ANYCRLF, and we are now at a LF, advance the match position by one
+          more code unit. */
+
+          if (start_match[-1] == CHAR_CR &&
+               (mb->nltype == NLTYPE_ANY || mb->nltype == NLTYPE_ANYCRLF) &&
+               start_match < end_subject &&
+               UCHAR21TEST(start_match) == CHAR_NL)
+            start_match++;
+          }
+        }
+
+      /* If there's no first code unit or a requirement for a multiline line
+      start, advance to a non-unique first code unit if any have been
+      identified. The bitmap contains only 256 bits. When code units are 16 or
+      32 bits wide, all code units greater than 254 set the 255 bit. */
+
+      else if (start_bits != NULL)
+        {
+        while (start_match < end_subject)
+          {
+          uint32_t c = UCHAR21TEST(start_match);
+#if PCRE2_CODE_UNIT_WIDTH != 8
+          if (c > 255) c = 255;
+#endif
+          if ((start_bits[c/8] & (1 << (c&7))) != 0) break;
+          start_match++;
+          }
+        }
+      }   /* End first code unit handling */
 
     /* Restore fudged end_subject */
 

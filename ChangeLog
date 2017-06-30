@@ -205,6 +205,11 @@ JIT.
 subjects from 1000 to 2000 for 8-bit searches, since they use memchr() and are 
 much faster.
 
+46. Arrange for anchored patterns to record and use "first code unit" data,
+because this can give a fast "no match" without searching for a "required code 
+unit". Previously only non-anchored patterns did this.
+
+
 
 Version 10.23 14-February-2017
 ------------------------------

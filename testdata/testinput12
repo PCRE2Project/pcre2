@@ -373,4 +373,13 @@
 /\udfff\o{157401}/utf,alt_bsux,allow_surrogate_escapes
     \x{dfff}\x{df01}\=no_utf_check
 
+# This has different starting code units in 8-bit mode. 
+
+/^[^ab]/IB,utf
+    c
+    \x{ff}
+    \x{100}
+\= Expect no match
+    aaa
+
 # End of testinput12

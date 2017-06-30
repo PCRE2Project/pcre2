@@ -120,13 +120,6 @@
     \x{ff}
     \x{100}
 
-/^[^ab]/IB,utf
-    c
-    \x{ff}
-    \x{100}
-\= Expect no match
-    aaa
-
 /\x{100}*(\d+|"(?1)")/utf
     1234
     "1234"
@@ -190,7 +183,10 @@
 /\w/utf
     \x{100}X
 
-/^\ሴ/IB,utf
+# Use no_start_optimize because the first code unit is different in 8-bit from
+# the wider modes.
+
+/^\ሴ/IB,utf,no_start_optimize
 
 /()()()()()()()()()()
  ()()()()()()()()()()

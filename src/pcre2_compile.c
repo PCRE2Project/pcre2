@@ -9632,14 +9632,19 @@ if ((re->overall_options & PCRE2_ANCHORED) == 0 &&
      is_anchored(codestart, 0, &cb, 0, FALSE))
   re->overall_options |= PCRE2_ANCHORED;
 
-/* If the pattern is still not anchored and we do not have a first code unit,
-see if there is one that is asserted (these are not saved during the compile
-because they can cause conflicts with actual literals that follow). This code
-need not be obeyed if PCRE2_NO_START_OPTIMIZE is set, as the data it would
-create will not be used. */
+/* Set up the first code unit or startline flag, the required code unit, and
+then study the pattern. This code need not be obeyed if PCRE2_NO_START_OPTIMIZE
+is set, as the data it would create will not be used. Note that a first code
+unit (but not the startline flag) is useful for anchored patterns because it
+can still give a quick "no match" and also avoid searching for a last code
+unit. */
 
-if ((re->overall_options & (PCRE2_ANCHORED|PCRE2_NO_START_OPTIMIZE)) == 0)
+if ((re->overall_options & PCRE2_NO_START_OPTIMIZE) == 0)
   {
+  /* If we do not have a first code unit, see if there is one that is asserted
+  (these are not saved during the compile because they can cause conflicts with
+  actual literals that follow). */
+
   if (firstcuflags < 0)
     firstcu = find_firstassertedcu(codestart, &firstcuflags, FALSE);
 
@@ -9672,52 +9677,50 @@ if ((re->overall_options & (PCRE2_ANCHORED|PCRE2_NO_START_OPTIMIZE)) == 0)
       }
     }
 
-  /* When there is no first code unit, see if we can set the PCRE2_STARTLINE
-  flag. This is helpful for multiline matches when all branches start with ^
-  and also when all branches start with non-atomic .* for non-DOTALL matches
-  when *PRUNE and SKIP are not present. (There is an option that disables this
-  case.) */
+  /* When there is no first code unit, for non-anchored patterns, see if we can
+  set the PCRE2_STARTLINE flag. This is helpful for multiline matches when all
+  branches start with ^ and also when all branches start with non-atomic .* for
+  non-DOTALL matches when *PRUNE and SKIP are not present. (There is an option
+  that disables this case.) */
 
-  else if (is_startline(codestart, 0, &cb, 0, FALSE))
+  else if ((re->overall_options & PCRE2_ANCHORED) == 0 &&
+           is_startline(codestart, 0, &cb, 0, FALSE))
     re->flags |= PCRE2_STARTLINE;
-  }
 
-/* Handle the "required code unit", if one is set. In the case of an anchored
-pattern, do this only if it follows a variable length item in the pattern.
-Again, skip this if PCRE2_NO_START_OPTIMIZE is set. */
+  /* Handle the "required code unit", if one is set. In the case of an anchored
+  pattern, do this only if it follows a variable length item in the pattern. */
 
-if (reqcuflags >= 0 &&
-     ((re->overall_options & (PCRE2_ANCHORED|PCRE2_NO_START_OPTIMIZE)) == 0 ||
-      (reqcuflags & REQ_VARY) != 0))
-  {
-  re->last_codeunit = reqcu;
-  re->flags |= PCRE2_LASTSET;
-
-  /* Handle caseless required code units as for first code units (above). */
-
-  if ((reqcuflags & REQ_CASELESS) != 0)
+  if (reqcuflags >= 0 &&
+       ((re->overall_options & PCRE2_ANCHORED) == 0 ||
+        (reqcuflags & REQ_VARY) != 0))
     {
-    if (reqcu < 128 || (!utf && reqcu < 255))
+    re->last_codeunit = reqcu;
+    re->flags |= PCRE2_LASTSET;
+
+    /* Handle caseless required code units as for first code units (above). */
+
+    if ((reqcuflags & REQ_CASELESS) != 0)
       {
-      if (cb.fcc[reqcu] != reqcu) re->flags |= PCRE2_LASTCASELESS;
-      }
+      if (reqcu < 128 || (!utf && reqcu < 255))
+        {
+        if (cb.fcc[reqcu] != reqcu) re->flags |= PCRE2_LASTCASELESS;
+        }
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 8
-    else if (reqcu <= MAX_UTF_CODE_POINT && UCD_OTHERCASE(reqcu) != reqcu)
-      re->flags |= PCRE2_LASTCASELESS;
+      else if (reqcu <= MAX_UTF_CODE_POINT && UCD_OTHERCASE(reqcu) != reqcu)
+        re->flags |= PCRE2_LASTCASELESS;
 #endif
+      }
     }
-  }
 
-/* Finally, unless PCRE2_NO_START_OPTIMIZE is set, study the compiled pattern
-to set up information such as a bitmap of starting code units and a minimum
-matching length. */
+  /* Finally, study the compiled pattern to set up information such as a bitmap
+  of starting code units and a minimum matching length. */
 
-if ((re->overall_options & PCRE2_NO_START_OPTIMIZE) == 0 &&
-    PRIV(study)(re) != 0)
-  {
-  errorcode = ERR31;
-  goto HAD_CB_ERROR;
-  }
+  if (PRIV(study)(re) != 0)
+    {
+    errorcode = ERR31;
+    goto HAD_CB_ERROR;
+    }
+  }   /* End of start-of-match optimizations. */
 
 /* Control ends up here in all cases. When running under valgrind, make a
 pattern's terminating zero defined again. If memory was obtained for the parsed

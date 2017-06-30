@@ -194,6 +194,7 @@ Subject length lower bound = 3
 Capturing subpattern count = 0
 Compile options: utf
 Overall options: anchored utf
+Starting code units: a b 
 Subject length lower bound = 1
     bar
  0: b
@@ -203,28 +204,6 @@ No match
     \x{ff}
 No match
     \x{100}
-No match
-
-/^[^ab]/IB,utf
-------------------------------------------------------------------
-        Bra
-        ^
-        [\x00-`c-\xff] (neg)
-        Ket
-        End
-------------------------------------------------------------------
-Capturing subpattern count = 0
-Compile options: utf
-Overall options: anchored utf
-Subject length lower bound = 1
-    c
- 0: c
-    \x{ff}
- 0: \x{ff}
-    \x{100}
- 0: \x{100}
-\= Expect no match
-    aaa
 No match
 
 /\x{100}*(\d+|"(?1)")/utf
@@ -479,7 +458,10 @@ Subject length lower bound = 0
     \x{100}X
  0: X
 
-/^\ሴ/IB,utf
+# Use no_start_optimize because the first code unit is different in 8-bit from
+# the wider modes.
+
+/^\ሴ/IB,utf,no_start_optimize
 ------------------------------------------------------------------
         Bra
         ^
@@ -488,9 +470,9 @@ Subject length lower bound = 0
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
-Compile options: utf
-Overall options: anchored utf
-Subject length lower bound = 1
+Compile options: no_start_optimize utf
+Overall options: anchored no_start_optimize utf
+Subject length lower bound = 0
 
 /()()()()()()()()()()
  ()()()()()()()()()()
