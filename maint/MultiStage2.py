@@ -122,6 +122,7 @@
 # 20-June-2014:      Updated for Unicode 7.0.0
 # 12-August-2014:    Updated to put Unicode version into the file
 # 19-June-2015:      Updated for Unicode 8.0.0
+# 02-July-2017:      Updated for Unicode 10.0.0
 ##############################################################################
 
 
@@ -335,7 +336,10 @@ script_names = ['Arabic', 'Armenian', 'Bengali', 'Bopomofo', 'Braille', 'Bugines
  'Pau_Cin_Hau', 'Siddham', 'Tirhuta', 'Warang_Citi',
 # New for Unicode 8.0.0
  'Ahom', 'Anatolian_Hieroglyphs', 'Hatran', 'Multani', 'Old_Hungarian',
- 'SignWriting'
+ 'SignWriting',
+# New for Unicode 10.0.0
+ 'Adlam', 'Bhaiksuki', 'Marchen', 'Newa', 'Osage', 'Tangut', 'Masaram_Gondi',
+ 'Nushu', 'Soyombo', 'Zanabazar_Square'
  ]
  
 category_names = ['Cc', 'Cf', 'Cn', 'Co', 'Cs', 'Ll', 'Lm', 'Lo', 'Lt', 'Lu',
@@ -343,7 +347,8 @@ category_names = ['Cc', 'Cf', 'Cn', 'Co', 'Cs', 'Ll', 'Lm', 'Lo', 'Lt', 'Lu',
   'Sc', 'Sk', 'Sm', 'So', 'Zl', 'Zp', 'Zs' ]
 
 break_property_names = ['CR', 'LF', 'Control', 'Extend', 'Prepend',
-  'SpacingMark', 'L', 'V', 'T', 'LV', 'LVT', 'Regional_Indicator', 'Other' ]
+  'SpacingMark', 'L', 'V', 'T', 'LV', 'LVT', 'Regional_Indicator', 'Other',
+  'E_Base', 'E_Modifier', 'E_Base_GAZ', 'ZWJ', 'Glue_After_Zwj' ]
 
 test_record_size()
 unicode_version = ""

@@ -6,16 +6,18 @@
 #newline_default lf any anycrlf
 
 # PCRE2 and Perl disagree about the characteristics of certain Unicode
-# characters. For example, 061C is considered by Perl to be Arabic, though
-# is it not listed as such in the Unicode Scripts.txt file, and 2066-2069 are
-# graphic and printable according to Perl, though they are actually "isolate"
-# control characters. That is why the following tests are here rather than in
-# test 4.
+# characters. For example, 061C was considered by Perl to be Arabic, though
+# it was not listed as such in the Unicode Scripts.txt file for Unicode 8.
+# However, it *is* in that file for Unicode 10, but when I came to re-check,
+# Perl had changed in the meantime, with 5.026 not recognizing it as Arabic.
+
+# 2066-2069 are graphic and printable according to Perl, though they are
+# actually "isolate" control characters. That is why the following tests are
+# here rather than in test 4.
 
 /^[\p{Arabic}]/utf
-\= Expect no match
     \x{061c}
-No match
+ 0: \x{61c}
 
 /^[[:graph:]]+$/utf,ucp
 \= Expect no match
@@ -4585,5 +4587,84 @@ No match
 /Aሴ+B/literal,utf,no_utf_check
     Aሴ+B
  0: A\x{1234}+B
+    
+# These are here because I upgraded to Unicode 10.0.0 before Perl did, so it
+# doesn't recognize all these scripts. In time these three tests can be moved
+# to test 4.
+
+/^(\p{Adlam}+)(\p{Bhaiksuki}+)(\p{Marchen}+)(\p{Newa}+)(\p{Osage}+)
+ (\p{Tangut}+)(\p{Masaram_Gondi}+)(\p{Nushu}+)(\p{Soyombo}+)
+ (\p{Zanabazar_Square}+)/x,utf
+    \x{1E900}\x{1E924}\x{1E953}\x{11C00}\x{11C2D}\x{11C3E}\x{11C70}\x{11C77}\x{11CAB}\x{11400}\x{1142F}\x{11455}\x{104B0}\x{104D8}\x{104FB}\x{16FE0}\x{18800}\x{18AF2}\x{11D00}\x{11D3A}\x{11D59}\x{16FE1}\x{1B170}\x{1B2FB}\x{11A50}\x{11A58}\x{11AA2}\x{11A00}\x{11A07}\x{11A47} 
+ 0: \x{1e900}\x{1e924}\x{1e953}\x{11c00}\x{11c2d}\x{11c3e}\x{11c70}\x{11c77}\x{11cab}\x{11400}\x{1142f}\x{11455}\x{104b0}\x{104d8}\x{104fb}\x{16fe0}\x{18800}\x{18af2}\x{11d00}\x{11d3a}\x{11d59}\x{16fe1}\x{1b170}\x{1b2fb}\x{11a50}\x{11a58}\x{11aa2}\x{11a00}\x{11a07}\x{11a47}
+ 1: \x{1e900}\x{1e924}\x{1e953}
+ 2: \x{11c00}\x{11c2d}\x{11c3e}
+ 3: \x{11c70}\x{11c77}\x{11cab}
+ 4: \x{11400}\x{1142f}\x{11455}
+ 5: \x{104b0}\x{104d8}\x{104fb}
+ 6: \x{16fe0}\x{18800}\x{18af2}
+ 7: \x{11d00}\x{11d3a}\x{11d59}
+ 8: \x{16fe1}\x{1b170}\x{1b2fb}
+ 9: \x{11a50}\x{11a58}\x{11aa2}
+10: \x{11a00}\x{11a07}\x{11a47}
+
+/^\x{1E900}\x{104B0}/i,utf
+    \x{1E900}\x{104B0}
+ 0: \x{1e900}\x{104b0}
+    \x{1E922}\x{104D8}
+ 0: \x{1e922}\x{104d8}
+
+/^(?:(\X)(?C))+$/utf
+    \x{1E900}\x{1E924}\x{1E953}\x{11C00}\x{11C2D}\x{11C3E}\x{11C70}\x{11C77}\x{11CAB}\x{11400}\x{1142F}\x{11455}\x{104B0}\x{104D8}\x{104FB}\x{16FE0}\x{18800}\x{18AF2}\x{11D00}\x{11D3A}\x{11D59}\x{16FE1}\x{1B170}\x{1B2FB}\x{11A50}\x{11A58}\x{11AA2}\x{11A00}\x{11A07}\x{11A47}\=callout_capture,callout_no_where 
+Callout 0: last capture = 1
+ 1: \x{1e900}
+Callout 0: last capture = 1
+ 1: \x{1e924}
+Callout 0: last capture = 1
+ 1: \x{1e953}
+Callout 0: last capture = 1
+ 1: \x{11c00}
+Callout 0: last capture = 1
+ 1: \x{11c2d}\x{11c3e}
+Callout 0: last capture = 1
+ 1: \x{11c70}
+Callout 0: last capture = 1
+ 1: \x{11c77}\x{11cab}
+Callout 0: last capture = 1
+ 1: \x{11400}
+Callout 0: last capture = 1
+ 1: \x{1142f}
+Callout 0: last capture = 1
+ 1: \x{11455}
+Callout 0: last capture = 1
+ 1: \x{104b0}
+Callout 0: last capture = 1
+ 1: \x{104d8}
+Callout 0: last capture = 1
+ 1: \x{104fb}
+Callout 0: last capture = 1
+ 1: \x{16fe0}
+Callout 0: last capture = 1
+ 1: \x{18800}
+Callout 0: last capture = 1
+ 1: \x{18af2}
+Callout 0: last capture = 1
+ 1: \x{11d00}\x{11d3a}
+Callout 0: last capture = 1
+ 1: \x{11d59}
+Callout 0: last capture = 1
+ 1: \x{16fe1}
+Callout 0: last capture = 1
+ 1: \x{1b170}
+Callout 0: last capture = 1
+ 1: \x{1b2fb}
+Callout 0: last capture = 1
+ 1: \x{11a50}\x{11a58}
+Callout 0: last capture = 1
+ 1: \x{11aa2}
+Callout 0: last capture = 1
+ 1: \x{11a00}\x{11a07}\x{11a47}
+ 0: \x{1e900}\x{1e924}\x{1e953}\x{11c00}\x{11c2d}\x{11c3e}\x{11c70}\x{11c77}\x{11cab}\x{11400}\x{1142f}\x{11455}\x{104b0}\x{104d8}\x{104fb}\x{16fe0}\x{18800}\x{18af2}\x{11d00}\x{11d3a}\x{11d59}\x{16fe1}\x{1b170}\x{1b2fb}\x{11a50}\x{11a58}\x{11aa2}\x{11a00}\x{11a07}\x{11a47}
+ 1: \x{11a00}\x{11a07}\x{11a47}
 
 # End of testinput5

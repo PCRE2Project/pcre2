@@ -6,14 +6,16 @@
 #newline_default lf any anycrlf
 
 # PCRE2 and Perl disagree about the characteristics of certain Unicode
-# characters. For example, 061C is considered by Perl to be Arabic, though
-# is it not listed as such in the Unicode Scripts.txt file, and 2066-2069 are
-# graphic and printable according to Perl, though they are actually "isolate"
-# control characters. That is why the following tests are here rather than in
-# test 4.
+# characters. For example, 061C was considered by Perl to be Arabic, though
+# it was not listed as such in the Unicode Scripts.txt file for Unicode 8.
+# However, it *is* in that file for Unicode 10, but when I came to re-check,
+# Perl had changed in the meantime, with 5.026 not recognizing it as Arabic.
+
+# 2066-2069 are graphic and printable according to Perl, though they are
+# actually "isolate" control characters. That is why the following tests are
+# here rather than in test 4.
 
 /^[\p{Arabic}]/utf
-\= Expect no match
     \x{061c}
 
 /^[[:graph:]]+$/utf,ucp
@@ -2022,5 +2024,21 @@
 
 /Aሴ+B/literal,utf,no_utf_check
     Aሴ+B
+    
+# These are here because I upgraded to Unicode 10.0.0 before Perl did, so it
+# doesn't recognize all these scripts. In time these three tests can be moved
+# to test 4.
+
+/^(\p{Adlam}+)(\p{Bhaiksuki}+)(\p{Marchen}+)(\p{Newa}+)(\p{Osage}+)
+ (\p{Tangut}+)(\p{Masaram_Gondi}+)(\p{Nushu}+)(\p{Soyombo}+)
+ (\p{Zanabazar_Square}+)/x,utf
+    \x{1E900}\x{1E924}\x{1E953}\x{11C00}\x{11C2D}\x{11C3E}\x{11C70}\x{11C77}\x{11CAB}\x{11400}\x{1142F}\x{11455}\x{104B0}\x{104D8}\x{104FB}\x{16FE0}\x{18800}\x{18AF2}\x{11D00}\x{11D3A}\x{11D59}\x{16FE1}\x{1B170}\x{1B2FB}\x{11A50}\x{11A58}\x{11AA2}\x{11A00}\x{11A07}\x{11A47} 
+
+/^\x{1E900}\x{104B0}/i,utf
+    \x{1E900}\x{104B0}
+    \x{1E922}\x{104D8}
+
+/^(?:(\X)(?C))+$/utf
+    \x{1E900}\x{1E924}\x{1E953}\x{11C00}\x{11C2D}\x{11C3E}\x{11C70}\x{11C77}\x{11CAB}\x{11400}\x{1142F}\x{11455}\x{104B0}\x{104D8}\x{104FB}\x{16FE0}\x{18800}\x{18AF2}\x{11D00}\x{11D3A}\x{11D59}\x{16FE1}\x{1B170}\x{1B2FB}\x{11A50}\x{11A58}\x{11AA2}\x{11A00}\x{11A07}\x{11A47}\=callout_capture,callout_no_where 
 
 # End of testinput5

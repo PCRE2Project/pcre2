@@ -171,7 +171,10 @@ library. They are also documented in the pcre2build man page.
   give large performance improvements on certain platforms, add --enable-jit to
   the "configure" command. This support is available only for certain hardware
   architectures. If you try to enable it on an unsupported architecture, there
-  will be a compile time error.
+  will be a compile time error. If you are running under SELinux you may also
+  want to add --enable-jit-sealloc, which enables the use of an execmem
+  allocator in JIT that is compatible with SELinux. This has no effect if JIT 
+  is not enabled.
 
 . If you do not want to make use of the default support for UTF-8 Unicode
   character strings in the 8-bit library, UTF-16 Unicode character strings in
@@ -874,4 +877,4 @@ The distribution should contain the files listed below.
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 11 April 2017
+Last updated: 17 June 2017

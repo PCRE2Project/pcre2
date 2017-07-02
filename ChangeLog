@@ -209,6 +209,9 @@ much faster.
 because this can give a fast "no match" without searching for a "required code 
 unit". Previously only non-anchored patterns did this.
 
+47. Upgraded the Unicode tables from Unicode 8.0.0 to Unicode 10.0.0.
+
+48. Add the callout_no_where modifier to pcre2test.
 
 
 Version 10.23 14-February-2017

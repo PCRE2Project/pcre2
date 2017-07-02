@@ -568,7 +568,7 @@ Setting compilation options
 </b><br>
 <P>
 The following modifiers set options for <b>pcre2_compile()</b>. Most of them set
-bits in the options argument of that function, but those whose names start with 
+bits in the options argument of that function, but those whose names start with
 PCRE2_EXTRA are additional options that are set in the compile context. For the
 main options, there are some single-letter abbreviations that are the same as
 Perl options. There is special handling for /x: if a second x is present,
@@ -579,25 +579,25 @@ way <b>pcre2_compile()</b> behaves. See
 for a description of the effects of these options.
 <pre>
       allow_empty_class         set PCRE2_ALLOW_EMPTY_CLASS
-      allow_surrogate_escapes   set PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES 
+      allow_surrogate_escapes   set PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES
       alt_bsux                  set PCRE2_ALT_BSUX
       alt_circumflex            set PCRE2_ALT_CIRCUMFLEX
       alt_verbnames             set PCRE2_ALT_VERBNAMES
       anchored                  set PCRE2_ANCHORED
       auto_callout              set PCRE2_AUTO_CALLOUT
-      bad_escape_is_literal     set PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL 
+      bad_escape_is_literal     set PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL
   /i  caseless                  set PCRE2_CASELESS
       dollar_endonly            set PCRE2_DOLLAR_ENDONLY
   /s  dotall                    set PCRE2_DOTALL
       dupnames                  set PCRE2_DUPNAMES
       endanchored               set PCRE2_ENDANCHORED
   /x  extended                  set PCRE2_EXTENDED
-  /xx extended_more             set PCRE2_EXTENDED_MORE 
+  /xx extended_more             set PCRE2_EXTENDED_MORE
       firstline                 set PCRE2_FIRSTLINE
-      literal                   set PCRE2_LITERAL 
-      match_line                set PCRE2_EXTRA_MATCH_LINE 
+      literal                   set PCRE2_LITERAL
+      match_line                set PCRE2_EXTRA_MATCH_LINE
       match_unset_backref       set PCRE2_MATCH_UNSET_BACKREF
-      match_word                set PCRE2_EXTRA_MATCH_WORD 
+      match_word                set PCRE2_EXTRA_MATCH_WORD
   /m  multiline                 set PCRE2_MULTILINE
       never_backslash_c         set PCRE2_NEVER_BACKSLASH_C
       never_ucp                 set PCRE2_NEVER_UCP
@@ -631,7 +631,7 @@ heavily used in the test files.
   /B  bincode                   show binary code without lengths
       callout_info              show callout information
       debug                     same as info,fullbincode
-      framesize                 show matching frame size 
+      framesize                 show matching frame size
       fullbincode               show binary code with lengths
   /I  info                      show info about compiled pattern
       hex                       unquoted characters are hexadecimal
@@ -649,7 +649,7 @@ heavily used in the test files.
       push                      push compiled pattern onto the stack
       pushcopy                  push a copy onto the stack
       stackguard=&#60;number&#62;       test the stackguard feature
-      subject_literal           treat all subject lines as literal 
+      subject_literal           treat all subject lines as literal
       tables=[0|1|2]            select internal tables
       use_length                do not zero-terminate the pattern
       utf8_input                treat input as UTF-8
@@ -720,7 +720,7 @@ not necessarily the last character. These lines are omitted if no starting or
 ending code units are recorded.
 </P>
 <P>
-The <b>framesize</b> modifier shows the size, in bytes, of the storage frames 
+The <b>framesize</b> modifier shows the size, in bytes, of the storage frames
 used by <b>pcre2_match()</b> for handling backtracking. The size depends on the
 number of capturing parentheses in the pattern.
 </P>
@@ -972,8 +972,8 @@ below. All other modifiers are either ignored, with a warning message, or cause
 an error.
 </P>
 <P>
-The pattern is passed to <b>regcomp()</b> as a zero-terminated string by 
-default, but if the <b>use_length</b> or <b>hex</b> modifiers are set, the 
+The pattern is passed to <b>regcomp()</b> as a zero-terminated string by
+default, but if the <b>use_length</b> or <b>hex</b> modifiers are set, the
 REG_PEND extension is used to pass it by length.
 </P>
 <br><b>
@@ -1013,7 +1013,7 @@ are mutually exclusive.
 Setting certain match controls
 </b><br>
 <P>
-The following modifiers are really subject modifiers, and are described under 
+The following modifiers are really subject modifiers, and are described under
 "Subject Modifiers" below. However, they may be included in a pattern's
 modifier list, in which case they are applied to every subject line that is
 processed with that pattern. They may not appear in <b>#pattern</b> commands.
@@ -1040,9 +1040,9 @@ defaults, set them in a <b>#subject</b> command.
 Specifying literal subject lines
 </b><br>
 <P>
-If the <b>subject_literal</b> modifier is present on a pattern, all the subject 
-lines that it matches are taken as literal strings, with no interpretation of 
-backslashes. It is not possible to set subject modifiers on such lines, but any 
+If the <b>subject_literal</b> modifier is present on a pattern, all the subject
+lines that it matches are taken as literal strings, with no interpretation of
+backslashes. It is not possible to set subject modifiers on such lines, but any
 that are set as defaults by a <b>#subject</b> command are recognized.
 </P>
 <br><b>
@@ -1054,7 +1054,8 @@ pushed onto a stack of compiled patterns, and <b>pcre2test</b> expects the next
 line to contain a new pattern (or a command) instead of a subject line. This
 facility is used when saving compiled patterns to a file, as described in the
 section entitled "Saving and restoring compiled patterns"
-<a href="#saverestore">below. If <b>pushcopy</b> is used instead of <b>push</b>, a copy of the compiled</a>
+<a href="#saverestore">below.</a>
+If <b>pushcopy</b> is used instead of <b>push</b>, a copy of the compiled
 pattern is stacked, leaving the original as current, ready to match the
 following input lines. This provides a way of testing the
 <b>pcre2_code_copy()</b> function.
@@ -1103,18 +1104,18 @@ causing REG_NOTBOL, REG_NOTEMPTY, and REG_NOTEOL, respectively, to be passed to
 <b>regexec()</b>. The other modifiers are ignored, with a warning message.
 </P>
 <P>
-There is one additional modifier that can be used with the POSIX wrapper. It is 
+There is one additional modifier that can be used with the POSIX wrapper. It is
 ignored (with a warning) if used for non-POSIX matching.
 <pre>
-      posix_startend=&#60;n&#62;[:&#60;m&#62;] 
+      posix_startend=&#60;n&#62;[:&#60;m&#62;]
 </pre>
 This causes the subject string to be passed to <b>regexec()</b> using the
 REG_STARTEND option, which uses offsets to specify which part of the string is
 searched. If only one number is given, the end offset is passed as the end of
 the subject string. For more detail of REG_STARTEND, see the
 <a href="pcre2posix.html"><b>pcre2posix</b></a>
-documentation. If the subject string contains binary zeros (coded as escapes 
-such as \x{00} because <b>pcre2test</b> does not support actual binary zeros in 
+documentation. If the subject string contains binary zeros (coded as escapes
+such as \x{00} because <b>pcre2test</b> does not support actual binary zeros in
 its input), you must use <b>posix_startend</b> to specify its length.
 </P>
 <br><b>
@@ -1135,6 +1136,7 @@ pattern.
       callout_data=&#60;n&#62;           set a value to pass via callouts
       callout_error=&#60;n&#62;[:&#60;m&#62;]    control callout error
       callout_fail=&#60;n&#62;[:&#60;m&#62;]     control callout failure
+      callout_no_where           do not show position of a callout
       callout_none               do not supply a callout function
       copy=&#60;number or name&#62;      copy captured substring
       depth_limit=&#60;n&#62;            set a depth limit
@@ -1230,29 +1232,10 @@ Testing callouts
 </b><br>
 <P>
 A callout function is supplied when <b>pcre2test</b> calls the library matching
-functions, unless <b>callout_none</b> is specified. If <b>callout_capture</b> is
-set, the current captured groups are output when a callout occurs. The default
-return from the callout function is zero, which allows matching to continue.
-</P>
-<P>
-The <b>callout_fail</b> modifier can be given one or two numbers. If there is
-only one number, 1 is returned instead of 0 (causing matching to backtrack)
-when a callout of that number is reached. If two numbers (&#60;n&#62;:&#60;m&#62;) are given, 1
-is returned when callout &#60;n&#62; is reached and there have been at least &#60;m&#62;
-callouts. The <b>callout_error</b> modifier is similar, except that
-PCRE2_ERROR_CALLOUT is returned, causing the entire matching process to be
-aborted. If both these modifiers are set for the same callout number,
-<b>callout_error</b> takes precedence.
-</P>
-<P>
-Note that callouts with string arguments are always given the number zero. See
-"Callouts" below for a description of the output when a callout it taken.
-</P>
-<P>
-The <b>callout_data</b> modifier can be given an unsigned or a negative number.
-This is set as the "user data" that is passed to the matching function, and
-passed back when the callout function is invoked. Any value other than zero is
-used as a return from <b>pcre2test</b>'s callout function.
+functions, unless <b>callout_none</b> is specified. Its behaviour can be
+controlled by various modifiers listed above whose names begin with
+<b>callout_</b>. Details are given in the section entitled "Callouts"
+<a href="#callouts">below.</a>
 </P>
 <br><b>
 Finding all matches in a string
@@ -1384,7 +1367,7 @@ that is used by the just-in-time optimization code. It is ignored if JIT
 optimization is not being used. The value is a number of kilobytes. Setting
 zero reverts to the default of 32K. Providing a stack that is larger than the
 default is necessary only for very complicated patterns. If <b>jitstack</b> is
-set non-zero on a subject line it overrides any value that was set on the 
+set non-zero on a subject line it overrides any value that was set on the
 pattern.
 </P>
 <br><b>
@@ -1414,7 +1397,7 @@ The <i>match_limit</i> number is a measure of the amount of backtracking
 that takes place, and learning the minimum value can be instructive. For most
 simple matches, the number is quite small, but for patterns with very large
 numbers of matching possibilities, it can become large very quickly with
-increasing length of subject string. 
+increasing length of subject string.
 </P>
 <P>
 For non-DFA matching, the minimum <i>depth_limit</i> number is a measure of how
@@ -1660,7 +1643,7 @@ restart the match with additional subject data by means of the
 For further information about partial matching, see the
 <a href="pcre2partial.html"><b>pcre2partial</b></a>
 documentation.
-</P>
+<a name="callouts"></a></P>
 <br><a name="SEC16" href="#TOC1">CALLOUTS</a><br>
 <P>
 If the pattern contains any callout requests, <b>pcre2test</b>'s callout
@@ -1669,8 +1652,33 @@ This works with both matching functions.
 </P>
 <P>
 The callout function in <b>pcre2test</b> returns zero (carry on matching) by
-default, but you can use a <b>callout_fail</b> modifier in a subject line (as
-described above) to change this and other parameters of the callout.
+default, but you can use a <b>callout_fail</b> modifier in a subject line to
+change this and other parameters of the callout.
+</P>
+<P>
+If <b>callout_capture</b> is set, the current captured groups are output when a
+callout occurs. By default, the callout function then generates output that
+indicates where the current match start and matching points are in the subject,
+and what the next pattern item is. This output is suppressed if the
+<b>callout_no_where</b> modifier is set.
+</P>
+<P>
+The default return from the callout function is zero, which allows matching to
+continue. The <b>callout_fail</b> modifier can be given one or two numbers. If
+there is only one number, 1 is returned instead of 0 (causing matching to
+backtrack) when a callout of that number is reached. If two numbers (&#60;n&#62;:&#60;m&#62;)
+are given, 1 is returned when callout &#60;n&#62; is reached and there have been at
+least &#60;m&#62; callouts. The <b>callout_error</b> modifier is similar, except that
+PCRE2_ERROR_CALLOUT is returned, causing the entire matching process to be
+aborted. If both these modifiers are set for the same callout number,
+<b>callout_error</b> takes precedence. Note that callouts with string arguments
+are always given the number zero. See
+</P>
+<P>
+The <b>callout_data</b> modifier can be given an unsigned or a negative number.
+This is set as the "user data" that is passed to the matching function, and
+passed back when the callout function is invoked. Any value other than zero is
+used as a return from <b>pcre2test</b>'s callout function.
 </P>
 <P>
 Inserting callouts can be helpful when using <b>pcre2test</b> to check
@@ -1858,7 +1866,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC21" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 16 June 2017
+Last updated: 02 July 2017
 <br>
 Copyright &copy; 1997-2017 University of Cambridge.
 <br>

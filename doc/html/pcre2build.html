@@ -170,8 +170,13 @@ Just-in-time (JIT) compiler support is included in the build by specifying
   --enable-jit
 </pre>
 This support is available only for certain hardware architectures. If this
-option is set for an unsupported architecture, a building error occurs.
-See the
+option is set for an unsupported architecture, a building error occurs. If you
+are running under SELinux you may also want to add
+<pre>
+  --enable-jit-sealloc
+</pre>
+which enables the use of an execmem allocator in JIT that is compatible with
+SELinux. This has no effect if JIT is not enabled. See the
 <a href="pcre2jit.html"><b>pcre2jit</b></a>
 documentation for a discussion of JIT usage. When JIT support is enabled,
 pcre2grep automatically makes use of it, unless you add
@@ -516,7 +521,7 @@ contains a single function called LLVMFuzzerTestOneInput() whose arguments are
 a pointer to a string and the length of the string. When called, this function
 tries to compile the string as a pattern, and if that succeeds, to match it.
 This is done both with no options and with some random options bits that are
-generated from the string. 
+generated from the string.
 </P>
 <P>
 Setting --enable-fuzz-support also causes a binary called <b>pcre2fuzzcheck</b>
@@ -529,13 +534,13 @@ file are the test string.
 </P>
 <br><a name="SEC22" href="#TOC1">OBSOLETE OPTION</a><br>
 <P>
-In versions of PCRE2 prior to 10.30, there were two ways of handling 
-backtracking in the <b>pcre2_match()</b> function. The default was to use the 
+In versions of PCRE2 prior to 10.30, there were two ways of handling
+backtracking in the <b>pcre2_match()</b> function. The default was to use the
 system stack, but if
 <pre>
   --disable-stack-for-recursion
 </pre>
-was set, memory on the heap was used. From release 10.30 onwards this has 
+was set, memory on the heap was used. From release 10.30 onwards this has
 changed (the stack is no longer used) and this option now does nothing except
 give a warning.
 </P>
@@ -554,7 +559,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC25" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 30 May 2017
+Last updated: 17 June 2017
 <br>
 Copyright &copy; 1997-2017 University of Cambridge.
 <br>

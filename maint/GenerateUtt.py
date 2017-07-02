@@ -23,6 +23,7 @@
 # Script updated to Python 3 by running it through the 2to3 converter.
 # Added script names for Unicode 7.0.0, 20-June-2014.
 # Added script names for Unicode 8.0.0, 19-June-2015.
+# Added script names for Unicode 10.0.0, 02-July-2017.
 
 script_names = ['Arabic', 'Armenian', 'Bengali', 'Bopomofo', 'Braille', 'Buginese', 'Buhid', 'Canadian_Aboriginal', \
  'Cherokee', 'Common', 'Coptic', 'Cypriot', 'Cyrillic', 'Deseret', 'Devanagari', 'Ethiopic', 'Georgian', \
@@ -51,7 +52,10 @@ script_names = ['Arabic', 'Armenian', 'Bengali', 'Bopomofo', 'Braille', 'Bugines
  'Pau_Cin_Hau', 'Siddham', 'Tirhuta', 'Warang_Citi',
 # New for Unicode 8.0.0
  'Ahom', 'Anatolian_Hieroglyphs', 'Hatran', 'Multani', 'Old_Hungarian',
- 'SignWriting'
+ 'SignWriting',
+# New for Unicode 10.0.0
+ 'Adlam', 'Bhaiksuki', 'Marchen', 'Newa', 'Osage', 'Tangut', 'Masaram_Gondi',
+ 'Nushu', 'Soyombo', 'Zanabazar_Square'
  ]
 
 category_names = ['Cc', 'Cf', 'Cn', 'Co', 'Cs', 'Ll', 'Lm', 'Lo', 'Lt', 'Lu',

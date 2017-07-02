@@ -943,7 +943,7 @@ PATTERN MODIFIERS
        next  line to contain a new pattern (or a command) instead of a subject
        line. This facility is used when saving compiled patterns to a file, as
        described  in  the section entitled "Saving and restoring compiled pat-
-       terns" below. If pushcopy is used instead of push, a copy of  the  com-
+       terns" below.  If pushcopy is used instead of push, a copy of the  com-
        piled  pattern  is  stacked,  leaving the original as current, ready to
        match the following input lines. This provides a  way  of  testing  the
        pcre2_code_copy()  function.   The  push  and  pushcopy   modifiers are
@@ -1016,6 +1016,7 @@ SUBJECT MODIFIERS
              callout_data=<n>           set a value to pass via callouts
              callout_error=<n>[:<m>]    control callout error
              callout_fail=<n>[:<m>]     control callout failure
+             callout_no_where           do not show position of a callout
              callout_none               do not supply a callout function
              copy=<number or name>      copy captured substring
              depth_limit=<n>            set a depth limit
@@ -1107,29 +1108,9 @@ SUBJECT MODIFIERS
    Testing callouts
 
        A  callout function is supplied when pcre2test calls the library match-
-       ing functions, unless callout_none is specified. If callout_capture  is
-       set,  the current captured groups are output when a callout occurs. The
-       default return from the callout function is zero, which allows matching
-       to continue.
-
-       The  callout_fail modifier can be given one or two numbers. If there is
-       only one number, 1 is returned instead of 0 (causing matching to  back-
-       track)  when  a  callout  of  that  number  is  reached. If two numbers
-       (<n>:<m>) are given, 1 is returned when  callout  <n>  is  reached  and
-       there  have  been  at least <m> callouts. The callout_error modifier is
-       similar, except  that  PCRE2_ERROR_CALLOUT  is  returned,  causing  the
-       entire  matching process to be aborted. If both these modifiers are set
-       for the same callout number, callout_error takes precedence.
-
-       Note that callouts with string arguments are always  given  the  number
-       zero. See "Callouts" below for a description of the output when a call-
-       out it taken.
-
-       The callout_data modifier can be given an unsigned or a  negative  num-
-       ber.   This  is  set  as the "user data" that is passed to the matching
-       function, and passed back when the callout  function  is  invoked.  Any
-       value  other  than  zero  is  used as a return from pcre2test's callout
-       function.
+       ing functions, unless callout_none is specified. Its behaviour  can  be
+       controlled  by  various  modifiers  listed above whose names begin with
+       callout_. Details are given in the section entitled "Callouts" below.
 
    Finding all matches in a string
 
@@ -1511,8 +1492,32 @@ CALLOUTS
        works with both matching functions.
 
        The callout function in pcre2test returns zero (carry on  matching)  by
-       default,  but you can use a callout_fail modifier in a subject line (as
-       described above) to change this and other parameters of the callout.
+       default,  but  you can use a callout_fail modifier in a subject line to
+       change this and other parameters of the callout.
+
+       If callout_capture is set, the current captured groups are output  when
+       a  callout occurs. By default, the callout function then generates out-
+       put that indicates where the current match start  and  matching  points
+       are  in  the subject, and what the next pattern item is. This output is
+       suppressed if the callout_no_where modifier is set.
+
+       The default return from the callout  function  is  zero,  which  allows
+       matching to continue. The callout_fail modifier can be given one or two
+       numbers. If there is only one number, 1 is returned instead of 0 (caus-
+       ing matching to backtrack) when a callout of that number is reached. If
+       two numbers (<n>:<m>) are given, 1 is  returned  when  callout  <n>  is
+       reached  and  there  have been at least <m> callouts. The callout_error
+       modifier is similar, except that PCRE2_ERROR_CALLOUT is returned, caus-
+       ing  the entire matching process to be aborted. If both these modifiers
+       are set for the same callout number,  callout_error  takes  precedence.
+       Note  that  callouts  with string arguments are always given the number
+       zero. See
+
+       The callout_data modifier can be given an unsigned or a  negative  num-
+       ber.   This  is  set  as the "user data" that is passed to the matching
+       function, and passed back when the callout  function  is  invoked.  Any
+       value  other  than  zero  is  used as a return from pcre2test's callout
+       function.
 
        Inserting callouts can be helpful when using pcre2test to check compli-
        cated  regular expressions. For further information about callouts, see
@@ -1687,5 +1692,5 @@ AUTHOR
 
 REVISION
 
-       Last updated: 16 June 2017
+       Last updated: 02 July 2017
        Copyright (c) 1997-2017 University of Cambridge.

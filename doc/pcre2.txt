@@ -3543,9 +3543,14 @@ JUST-IN-TIME COMPILER SUPPORT
 
        This support is available only for certain hardware  architectures.  If
        this  option  is  set for an unsupported architecture, a building error
-       occurs.  See the pcre2jit documentation for a discussion of JIT  usage.
-       When  JIT  support is enabled, pcre2grep automatically makes use of it,
-       unless you add
+       occurs. If you are running under SELinux you may also want to add
+
+         --enable-jit-sealloc
+
+       which enables the use of an execmem allocator in JIT that is compatible
+       with  SELinux.  This  has  no  effect  if  JIT  is not enabled. See the
+       pcre2jit documentation for a discussion of JIT usage. When JIT  support
+       is enabled, pcre2grep automatically makes use of it, unless you add
 
          --disable-pcre2grep-jit
 
@@ -3554,14 +3559,14 @@ JUST-IN-TIME COMPILER SUPPORT
 
 NEWLINE RECOGNITION
 
-       By default, PCRE2 interprets the linefeed (LF) character as  indicating
-       the  end  of  a line. This is the normal newline character on Unix-like
-       systems. You can compile PCRE2 to use carriage return (CR) instead,  by
+       By  default, PCRE2 interprets the linefeed (LF) character as indicating
+       the end of a line. This is the normal newline  character  on  Unix-like
+       systems.  You can compile PCRE2 to use carriage return (CR) instead, by
        adding
 
          --enable-newline-is-cr
 
-       to  the  configure  command.  There  is  also an --enable-newline-is-lf
+       to the configure  command.  There  is  also  an  --enable-newline-is-lf
        option, which explicitly specifies linefeed as the newline character.
 
        Alternatively, you can specify that line endings are to be indicated by
@@ -3574,104 +3579,104 @@ NEWLINE RECOGNITION
 
          --enable-newline-is-anycrlf
 
-       which causes PCRE2 to recognize any of the three sequences CR,  LF,  or
+       which  causes  PCRE2 to recognize any of the three sequences CR, LF, or
        CRLF as indicating a line ending. Finally, a fifth option, specified by
 
          --enable-newline-is-any
 
-       causes  PCRE2  to  recognize  any Unicode newline sequence. The Unicode
+       causes PCRE2 to recognize any Unicode  newline  sequence.  The  Unicode
        newline sequences are the three just mentioned, plus the single charac-
        ters VT (vertical tab, U+000B), FF (form feed, U+000C), NEL (next line,
-       U+0085), LS (line separator,  U+2028),  and  PS  (paragraph  separator,
+       U+0085),  LS  (line  separator,  U+2028),  and PS (paragraph separator,
        U+2029).
 
        Whatever default line ending convention is selected when PCRE2 is built
-       can be overridden by applications that use the library. At  build  time
+       can  be  overridden by applications that use the library. At build time
        it is conventional to use the standard for your operating system.
 
 
 WHAT \R MATCHES
 
-       By  default,  the  sequence \R in a pattern matches any Unicode newline
-       sequence, independently of what has been selected as  the  line  ending
+       By default, the sequence \R in a pattern matches  any  Unicode  newline
+       sequence,  independently  of  what has been selected as the line ending
        sequence. If you specify
 
          --enable-bsr-anycrlf
 
-       the  default  is changed so that \R matches only CR, LF, or CRLF. What-
-       ever is selected when PCRE2 is built can be overridden by  applications
+       the default is changed so that \R matches only CR, LF, or  CRLF.  What-
+       ever  is selected when PCRE2 is built can be overridden by applications
        that use the library.
 
 
 HANDLING VERY LARGE PATTERNS
 
-       Within  a  compiled  pattern,  offset values are used to point from one
-       part to another (for example, from an opening parenthesis to an  alter-
-       nation  metacharacter).  By default, in the 8-bit and 16-bit libraries,
-       two-byte values are used for these offsets, leading to a  maximum  size
-       for  a compiled pattern of around 64K code units. This is sufficient to
+       Within a compiled pattern, offset values are used  to  point  from  one
+       part  to another (for example, from an opening parenthesis to an alter-
+       nation metacharacter). By default, in the 8-bit and  16-bit  libraries,
+       two-byte  values  are used for these offsets, leading to a maximum size
+       for a compiled pattern of around 64K code units. This is sufficient  to
        handle all but the most gigantic patterns. Nevertheless, some people do
-       want  to  process truly enormous patterns, so it is possible to compile
-       PCRE2 to use three-byte or four-byte offsets by adding a  setting  such
+       want to process truly enormous patterns, so it is possible  to  compile
+       PCRE2  to  use three-byte or four-byte offsets by adding a setting such
        as
 
          --with-link-size=3
 
-       to  the  configure command. The value given must be 2, 3, or 4. For the
-       16-bit library, a value of 3 is rounded up to 4.  In  these  libraries,
-       using  longer  offsets slows down the operation of PCRE2 because it has
-       to load additional data when handling them. For the 32-bit library  the
-       value  is  always 4 and cannot be overridden; the value of --with-link-
+       to the configure command. The value given must be 2, 3, or 4.  For  the
+       16-bit  library,  a  value of 3 is rounded up to 4. In these libraries,
+       using longer offsets slows down the operation of PCRE2 because  it  has
+       to  load additional data when handling them. For the 32-bit library the
+       value is always 4 and cannot be overridden; the value  of  --with-link-
        size is ignored.
 
 
 LIMITING PCRE2 RESOURCE USAGE
 
        The pcre2_match() function increments a counter each time it goes round
-       its  main  loop. Putting a limit on this counter controls the amount of
-       computing resource used by a single call to  pcre2_match().  The  limit
+       its main loop. Putting a limit on this counter controls the  amount  of
+       computing  resource  used  by a single call to pcre2_match(). The limit
        can be changed at run time, as described in the pcre2api documentation.
-       The default is 10 million, but this can be changed by adding a  setting
+       The  default is 10 million, but this can be changed by adding a setting
        such as
 
          --with-match-limit=500000
 
-       to   the   configure   command.   This  setting  also  applies  to  the
-       pcre2_dfa_match() matching function, and to JIT  matching  (though  the
+       to  the  configure  command.  This  setting   also   applies   to   the
+       pcre2_dfa_match()  matching  function,  and to JIT matching (though the
        counting is done differently).
 
-       The  pcre2_match() function starts out using a 20K vector on the system
-       stack to record  backtracking  points.  The  more  nested  backtracking
+       The pcre2_match() function starts out using a 20K vector on the  system
+       stack  to  record  backtracking  points.  The  more nested backtracking
        points there are (that is, the deeper the search tree), the more memory
-       is needed. If the initial vector is not large enough,  heap  memory  is
+       is  needed.  If  the initial vector is not large enough, heap memory is
        used, up to a certain limit, which is specified in kilobytes. The limit
        can be changed at run time, as described in the pcre2api documentation.
-       The  default  limit (in effect unlimited) is 20 million. You can change
+       The default limit (in effect unlimited) is 20 million. You  can  change
        this by a setting such as
 
          --with-heap-limit=500
 
-       which limits the amount of heap to 500 kilobytes.  This  limit  applies
-       only  to interpretive matching in pcre2_match(). It does not apply when
-       JIT (which has its own memory arrangements) is used, nor does it  apply
+       which  limits  the  amount of heap to 500 kilobytes. This limit applies
+       only to interpretive matching in pcre2_match(). It does not apply  when
+       JIT  (which has its own memory arrangements) is used, nor does it apply
        to pcre2_dfa_match().
 
-       You  can  also explicitly limit the depth of nested backtracking in the
+       You can also explicitly limit the depth of nested backtracking  in  the
        pcre2_match() interpreter. This limit defaults to the value that is set
-       for  --with-match-limit.  You  can set a lower default limit by adding,
+       for --with-match-limit. You can set a lower default  limit  by  adding,
        for example,
 
          --with-match-limit_depth=10000
 
-       to the configure command. This value can be  overridden  at  run  time.
-       This  depth  limit  indirectly limits the amount of heap memory that is
-       used, but because the size of each backtracking "frame" depends on  the
-       number  of  capturing parentheses in a pattern, the amount of heap that
-       is used before the limit is reached varies  from  pattern  to  pattern.
-       This  limit  was  more  useful in versions before 10.30, where function
-       recursion was used for backtracking.  However, as well as  applying  to
+       to  the  configure  command.  This value can be overridden at run time.
+       This depth limit indirectly limits the amount of heap  memory  that  is
+       used,  but because the size of each backtracking "frame" depends on the
+       number of capturing parentheses in a pattern, the amount of  heap  that
+       is  used  before  the  limit is reached varies from pattern to pattern.
+       This limit was more useful in versions  before  10.30,  where  function
+       recursion  was  used for backtracking.  However, as well as applying to
        pcre2_match(), this limit also controls the depth of recursive function
-       calls in pcre2_dfa_match(). These are used for  lookaround  assertions,
+       calls  in  pcre2_dfa_match(). These are used for lookaround assertions,
        atomic groups, and recursion within patterns.  The limit does not apply
        to JIT matching.
 
@@ -3680,45 +3685,45 @@ CREATING CHARACTER TABLES AT BUILD TIME
 
        PCRE2 uses fixed tables for processing characters whose code points are
        less than 256. By default, PCRE2 is built with a set of tables that are
-       distributed in the file src/pcre2_chartables.c.dist. These  tables  are
+       distributed  in  the file src/pcre2_chartables.c.dist. These tables are
        for ASCII codes only. If you add
 
          --enable-rebuild-chartables
 
-       to  the  configure  command, the distributed tables are no longer used.
-       Instead, a program called dftables is compiled and  run.  This  outputs
+       to the configure command, the distributed tables are  no  longer  used.
+       Instead,  a  program  called dftables is compiled and run. This outputs
        the source for new set of tables, created in the default locale of your
        C run-time system. This method of replacing the tables does not work if
-       you  are cross compiling, because dftables is run on the local host. If
-       you need to create alternative tables when cross  compiling,  you  will
+       you are cross compiling, because dftables is run on the local host.  If
+       you  need  to  create alternative tables when cross compiling, you will
        have to do so "by hand".
 
 
 USING EBCDIC CODE
 
-       PCRE2  assumes  by default that it will run in an environment where the
-       character code is ASCII or Unicode, which is a superset of ASCII.  This
+       PCRE2 assumes by default that it will run in an environment  where  the
+       character  code is ASCII or Unicode, which is a superset of ASCII. This
        is the case for most computer operating systems. PCRE2 can, however, be
        compiled to run in an 8-bit EBCDIC environment by adding
 
          --enable-ebcdic --disable-unicode
 
        to the configure command. This setting implies --enable-rebuild-charta-
-       bles.  You  should  only  use  it if you know that you are in an EBCDIC
+       bles. You should only use it if you know that  you  are  in  an  EBCDIC
        environment (for example, an IBM mainframe operating system).
 
-       It is not possible to support both EBCDIC and UTF-8 codes in  the  same
-       version  of  the  library. Consequently, --enable-unicode and --enable-
+       It  is  not possible to support both EBCDIC and UTF-8 codes in the same
+       version of the library. Consequently,  --enable-unicode  and  --enable-
        ebcdic are mutually exclusive.
 
        The EBCDIC character that corresponds to an ASCII LF is assumed to have
-       the  value  0x15 by default. However, in some EBCDIC environments, 0x25
+       the value 0x15 by default. However, in some EBCDIC  environments,  0x25
        is used. In such an environment you should use
 
          --enable-ebcdic-nl25
 
        as well as, or instead of, --enable-ebcdic. The EBCDIC character for CR
-       has  the  same  value  as in ASCII, namely, 0x0d. Whichever of 0x15 and
+       has the same value as in ASCII, namely, 0x0d.  Whichever  of  0x15  and
        0x25 is not chosen as LF is made to correspond to the Unicode NEL char-
        acter (which, in Unicode, is 0x85).
 
@@ -3731,34 +3736,34 @@ PCRE2GREP SUPPORT FOR EXTERNAL SCRIPTS
 
        By default, on non-Windows systems, pcre2grep supports the use of call-
        outs with string arguments within the patterns it is matching, in order
-       to  run external scripts. For details, see the pcre2grep documentation.
-       This support can be disabled by adding  --disable-pcre2grep-callout  to
+       to run external scripts. For details, see the pcre2grep  documentation.
+       This  support  can be disabled by adding --disable-pcre2grep-callout to
        the configure command.
 
 
 PCRE2GREP OPTIONS FOR COMPRESSED FILE SUPPORT
 
-       By  default,  pcre2grep reads all files as plain text. You can build it
-       so that it recognizes files whose names end in .gz or .bz2,  and  reads
+       By default, pcre2grep reads all files as plain text. You can  build  it
+       so  that  it recognizes files whose names end in .gz or .bz2, and reads
        them with libz or libbz2, respectively, by adding one or both of
 
          --enable-pcre2grep-libz
          --enable-pcre2grep-libbz2
 
        to the configure command. These options naturally require that the rel-
-       evant libraries are installed on your system. Configuration  will  fail
+       evant  libraries  are installed on your system. Configuration will fail
        if they are not.
 
 
 PCRE2GREP BUFFER SIZE
 
-       pcre2grep  uses an internal buffer to hold a "window" on the file it is
+       pcre2grep uses an internal buffer to hold a "window" on the file it  is
        scanning, in order to be able to output "before" and "after" lines when
-       it  finds  a  match. The starting size of the buffer is controlled by a
-       parameter whose default value is 20K. The buffer itself is three  times
-       this  size,  but  because  of  the  way it is used for holding "before"
-       lines, the longest line that is guaranteed to  be  processable  is  the
-       parameter  size.  If  a longer line is encountered, pcre2grep automati-
+       it finds a match. The starting size of the buffer is  controlled  by  a
+       parameter  whose default value is 20K. The buffer itself is three times
+       this size, but because of the way  it  is  used  for  holding  "before"
+       lines,  the  longest  line  that is guaranteed to be processable is the
+       parameter size. If a longer line is  encountered,  pcre2grep  automati-
        cally expands the buffer, up to a specified maximum size, whose default
        is 1M or the starting size, whichever is the larger. You can change the
        default parameter values by adding, for example,
@@ -3766,8 +3771,8 @@ PCRE2GREP BUFFER SIZE
          --with-pcre2grep-bufsize=51200
          --with-pcre2grep-max-bufsize=2097152
 
-       to the configure command. The caller of pcre2grep  can  override  these
-       values  by  using  --buffer-size  and  --max-buffer-size on the command
+       to  the  configure  command. The caller of pcre2grep can override these
+       values by using --buffer-size  and  --max-buffer-size  on  the  command
        line.
 
 
@@ -3778,26 +3783,26 @@ PCRE2TEST OPTION FOR LIBREADLINE SUPPORT
          --enable-pcre2test-libreadline
          --enable-pcre2test-libedit
 
-       to the configure command, pcre2test  is  linked  with  the  libreadline
+       to  the  configure  command,  pcre2test  is linked with the libreadline
        orlibedit library, respectively, and when its input is from a terminal,
-       it reads it using the readline() function. This  provides  line-editing
-       and  history  facilities.  Note that libreadline is GPL-licensed, so if
-       you distribute a binary of pcre2test linked in this way, there  may  be
+       it  reads  it using the readline() function. This provides line-editing
+       and history facilities. Note that libreadline is  GPL-licensed,  so  if
+       you  distribute  a binary of pcre2test linked in this way, there may be
        licensing issues. These can be avoided by linking instead with libedit,
        which has a BSD licence.
 
-       Setting --enable-pcre2test-libreadline causes the -lreadline option  to
-       be  added to the pcre2test build. In many operating environments with a
-       sytem-installed readline library this is sufficient. However,  in  some
+       Setting  --enable-pcre2test-libreadline causes the -lreadline option to
+       be added to the pcre2test build. In many operating environments with  a
+       sytem-installed  readline  library this is sufficient. However, in some
        environments (e.g. if an unmodified distribution version of readline is
-       in use), some extra configuration may be necessary.  The  INSTALL  file
+       in  use),  some  extra configuration may be necessary. The INSTALL file
        for libreadline says this:
 
          "Readline uses the termcap functions, but does not link with
          the termcap or curses library itself, allowing applications
          which link with readline the to choose an appropriate library."
 
-       If  your environment has not been set up so that an appropriate library
+       If your environment has not been set up so that an appropriate  library
        is automatically included, you may need to add something like
 
          LIBS="-ncurses"
@@ -3811,7 +3816,7 @@ INCLUDING DEBUGGING CODE
 
          --enable-debug
 
-       to the configure command, additional debugging code is included in  the
+       to  the configure command, additional debugging code is included in the
        build. This feature is intended for use by the PCRE2 maintainers.
 
 
@@ -3821,15 +3826,15 @@ DEBUGGING WITH VALGRIND SUPPORT
 
          --enable-valgrind
 
-       to  the  configure command, PCRE2 will use valgrind annotations to mark
-       certain memory regions as  unaddressable.  This  allows  it  to  detect
-       invalid  memory  accesses,  and  is  mostly  useful for debugging PCRE2
+       to the configure command, PCRE2 will use valgrind annotations  to  mark
+       certain  memory  regions  as  unaddressable.  This  allows it to detect
+       invalid memory accesses, and  is  mostly  useful  for  debugging  PCRE2
        itself.
 
 
 CODE COVERAGE REPORTING
 
-       If your C compiler is gcc, you can build a version of  PCRE2  that  can
+       If  your  C  compiler is gcc, you can build a version of PCRE2 that can
        generate a code coverage report for its test suite. To enable this, you
        must install lcov version 1.6 or above. Then specify
 
@@ -3838,20 +3843,20 @@ CODE COVERAGE REPORTING
        to the configure command and build PCRE2 in the usual way.
 
        Note that using ccache (a caching C compiler) is incompatible with code
-       coverage  reporting. If you have configured ccache to run automatically
+       coverage reporting. If you have configured ccache to run  automatically
        on your system, you must set the environment variable
 
          CCACHE_DISABLE=1
 
        before running make to build PCRE2, so that ccache is not used.
 
-       When --enable-coverage is used,  the  following  addition  targets  are
+       When  --enable-coverage  is  used,  the  following addition targets are
        added to the Makefile:
 
          make coverage
 
-       This  creates  a  fresh coverage report for the PCRE2 test suite. It is
-       equivalent to running "make coverage-reset", "make  coverage-baseline",
+       This creates a fresh coverage report for the PCRE2 test  suite.  It  is
+       equivalent  to running "make coverage-reset", "make coverage-baseline",
        "make check", and then "make coverage-report".
 
          make coverage-reset
@@ -3868,56 +3873,56 @@ CODE COVERAGE REPORTING
 
          make coverage-clean-report
 
-       This  removes the generated coverage report without cleaning the cover-
+       This removes the generated coverage report without cleaning the  cover-
        age data itself.
 
          make coverage-clean-data
 
-       This removes the captured coverage data without removing  the  coverage
+       This  removes  the captured coverage data without removing the coverage
        files created at compile time (*.gcno).
 
          make coverage-clean
 
-       This  cleans all coverage data including the generated coverage report.
-       For more information about code coverage, see the gcov and  lcov  docu-
+       This cleans all coverage data including the generated coverage  report.
+       For  more  information about code coverage, see the gcov and lcov docu-
        mentation.
 
 
 SUPPORT FOR FUZZERS
 
-       There  is  a  special  option for use by people who want to run fuzzing
+       There is a special option for use by people who  want  to  run  fuzzing
        tests on PCRE2:
 
          --enable-fuzz-support
 
        At present this applies only to the 8-bit library. If set, it causes an
-       extra  library  called  libpcre2-fuzzsupport.a  to  be  built,  but not
-       installed. This contains a single function called  LLVMFuzzerTestOneIn-
-       put()  whose  arguments are a pointer to a string and the length of the
-       string. When called, this function tries to compile  the  string  as  a
-       pattern,  and if that succeeds, to match it.  This is done both with no
-       options and with some random options bits that are generated  from  the
+       extra library  called  libpcre2-fuzzsupport.a  to  be  built,  but  not
+       installed.  This contains a single function called LLVMFuzzerTestOneIn-
+       put() whose arguments are a pointer to a string and the length  of  the
+       string.  When  called,  this  function tries to compile the string as a
+       pattern, and if that succeeds, to match it.  This is done both with  no
+       options  and  with some random options bits that are generated from the
        string.
 
-       Setting  --enable-fuzz-support  also  causes  a binary called pcre2fuz-
-       zcheck to be created. This is normally run under valgrind or used  when
+       Setting --enable-fuzz-support also causes  a  binary  called  pcre2fuz-
+       zcheck  to be created. This is normally run under valgrind or used when
        PCRE2 is compiled with address sanitizing enabled. It calls the fuzzing
-       function and outputs information about it is doing. The  input  strings
-       are  specified by arguments: if an argument starts with "=" the rest of
-       it is a literal input string. Otherwise, it is assumed  to  be  a  file
+       function  and  outputs information about it is doing. The input strings
+       are specified by arguments: if an argument starts with "=" the rest  of
+       it  is  a  literal  input string. Otherwise, it is assumed to be a file
        name, and the contents of the file are the test string.
 
 
 OBSOLETE OPTION
 
-       In  versions  of  PCRE2 prior to 10.30, there were two ways of handling
-       backtracking in the pcre2_match() function. The default was to use  the
+       In versions of PCRE2 prior to 10.30, there were two  ways  of  handling
+       backtracking  in the pcre2_match() function. The default was to use the
        system stack, but if
 
          --disable-stack-for-recursion
 
-       was  set,  memory on the heap was used. From release 10.30 onwards this
-       has changed (the stack is no longer used)  and  this  option  now  does
+       was set, memory on the heap was used. From release 10.30  onwards  this
+       has  changed  (the  stack  is  no longer used) and this option now does
        nothing except give a warning.
 
 
@@ -3935,7 +3940,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 30 May 2017
+       Last updated: 17 June 2017
        Copyright (c) 1997-2017 University of Cambridge.
 ------------------------------------------------------------------------------
  
@@ -6309,26 +6314,28 @@ BACKSLASH
        Those  that are not part of an identified script are lumped together as
        "Common". The current list of scripts is:
 
-       Ahom,  Anatolian_Hieroglyphs,  Arabic,  Armenian,  Avestan,   Balinese,
-       Bamum,  Bassa_Vah, Batak, Bengali, Bopomofo, Brahmi, Braille, Buginese,
-       Buhid, Canadian_Aboriginal, Carian, Caucasian_Albanian,  Chakma,  Cham,
-       Cherokee,   Common,  Coptic,  Cuneiform,  Cypriot,  Cyrillic,  Deseret,
-       Devanagari, Duployan, Egyptian_Hieroglyphs,  Elbasan,  Ethiopic,  Geor-
-       gian,  Glagolitic,  Gothic,  Grantha,  Greek,  Gujarati, Gurmukhi, Han,
-       Hangul, Hanunoo, Hatran, Hebrew, Hiragana, Imperial_Aramaic, Inherited,
-       Inscriptional_Pahlavi,  Inscriptional_Parthian,  Javanese, Kaithi, Kan-
-       nada, Katakana, Kayah_Li, Kharoshthi, Khmer,  Khojki,  Khudawadi,  Lao,
-       Latin,  Lepcha,  Limbu, Linear_A, Linear_B, Lisu, Lycian, Lydian, Maha-
-       jani,  Malayalam,  Mandaic,  Manichaean,  Meetei_Mayek,  Mende_Kikakui,
-       Meroitic_Cursive,  Meroitic_Hieroglyphs,  Miao,  Modi,  Mongolian, Mro,
-       Multani,  Myanmar,  Nabataean,  New_Tai_Lue,  Nko,   Ogham,   Ol_Chiki,
-       Old_Hungarian,  Old_Italic, Old_North_Arabian, Old_Permic, Old_Persian,
-       Old_South_Arabian, Old_Turkic, Oriya, Osmanya, Pahawh_Hmong, Palmyrene,
-       Pau_Cin_Hau,  Phags_Pa,  Phoenician,  Psalter_Pahlavi,  Rejang,  Runic,
-       Samaritan, Saurashtra, Sharada, Shavian, Siddham, SignWriting, Sinhala,
-       Sora_Sompeng,   Sundanese,  Syloti_Nagri,  Syriac,  Tagalog,  Tagbanwa,
-       Tai_Le,  Tai_Tham,  Tai_Viet,  Takri,  Tamil,  Telugu,  Thaana,   Thai,
-       Tibetan, Tifinagh, Tirhuta, Ugaritic, Vai, Warang_Citi, Yi.
+       Adlam, Ahom, Anatolian_Hieroglyphs, Arabic,  Armenian,  Avestan,  Bali-
+       nese,  Bamum,  Bassa_Vah,  Batak, Bengali, Bhaiksuki, Bopomofo, Brahmi,
+       Braille, Buginese, Buhid, Canadian_Aboriginal, Carian,  Caucasian_Alba-
+       nian,  Chakma,  Cham,  Cherokee,  Common,  Coptic,  Cuneiform, Cypriot,
+       Cyrillic, Deseret, Devanagari, Duployan, Egyptian_Hieroglyphs, Elbasan,
+       Ethiopic,  Georgian, Glagolitic, Gothic, Grantha, Greek, Gujarati, Gur-
+       mukhi, Han, Hangul, Hanunoo, Hatran,  Hebrew,  Hiragana,  Imperial_Ara-
+       maic,    Inherited,    Inscriptional_Pahlavi,   Inscriptional_Parthian,
+       Javanese, Kaithi, Kannada, Katakana, Kayah_Li, Kharoshthi, Khmer,  Kho-
+       jki,  Khudawadi,  Lao,  Latin, Lepcha, Limbu, Linear_A, Linear_B, Lisu,
+       Lycian, Lydian,  Mahajani,  Malayalam,  Mandaic,  Manichaean,  Marchen,
+       Masaram_Gondi,     Meetei_Mayek,    Mende_Kikakui,    Meroitic_Cursive,
+       Meroitic_Hieroglyphs, Miao, Modi,  Mongolian,  Mro,  Multani,  Myanmar,
+       Nabataean,  New_Tai_Lue, Newa, Nko, Nushu, Ogham, Ol_Chiki, Old_Hungar-
+       ian,   Old_Italic,    Old_North_Arabian,    Old_Permic,    Old_Persian,
+       Old_South_Arabian,  Old_Turkic,  Oriya,  Osage,  Osmanya, Pahawh_Hmong,
+       Palmyrene, Pau_Cin_Hau, Phags_Pa, Phoenician, Psalter_Pahlavi,  Rejang,
+       Runic,  Samaritan,  Saurashtra, Sharada, Shavian, Siddham, SignWriting,
+       Sinhala, Sora_Sompeng, Soyombo, Sundanese, Syloti_Nagri, Syriac,  Taga-
+       log,  Tagbanwa,  Tai_Le, Tai_Tham, Tai_Viet, Takri, Tamil, Tangut, Tel-
+       ugu,  Thaana,  Thai,  Tibetan,  Tifinagh,   Tirhuta,   Ugaritic,   Vai,
+       Warang_Citi, Yi, Zanabazar_Square.
 
        Each character has exactly one Unicode general category property, spec-
        ified by a two-letter abbreviation. For compatibility with Perl,  nega-
@@ -8737,7 +8744,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 30 May 2017
+       Last updated: 02 July 2017
        Copyright (c) 1997-2017 University of Cambridge.
 ------------------------------------------------------------------------------
  

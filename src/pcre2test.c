@@ -473,6 +473,12 @@ so many of them that they are split into two fields. */
 #define CTL_UTF8_INPUT                   0x40000000u
 #define CTL_ZERO_TERMINATE               0x80000000u
 
+/* Combinations */
+
+#define CTL_DEBUG            (CTL_FULLBINCODE|CTL_INFO)  /* For setting */
+#define CTL_ANYINFO          (CTL_DEBUG|CTL_BINCODE|CTL_CALLOUT_INFO)
+#define CTL_ANYGLOB          (CTL_ALTGLOBAL|CTL_GLOBAL)
+
 /* Second control word */
 
 #define CTL2_SUBSTITUTE_EXTENDED         0x00000001u
@@ -480,15 +486,10 @@ so many of them that they are split into two fields. */
 #define CTL2_SUBSTITUTE_UNKNOWN_UNSET    0x00000004u
 #define CTL2_SUBSTITUTE_UNSET_EMPTY      0x00000008u
 #define CTL2_SUBJECT_LITERAL             0x00000010u
+#define CTL2_CALLOUT_NO_WHERE            0x00000020u
 
-#define CTL_NL_SET                       0x40000000u  /* Informational */
-#define CTL_BSR_SET                      0x80000000u  /* Informational */
-
-/* Combinations */
-
-#define CTL_DEBUG            (CTL_FULLBINCODE|CTL_INFO)  /* For setting */
-#define CTL_ANYINFO          (CTL_DEBUG|CTL_BINCODE|CTL_CALLOUT_INFO)
-#define CTL_ANYGLOB          (CTL_ALTGLOBAL|CTL_GLOBAL)
+#define CTL2_NL_SET                      0x40000000u  /* Informational */
+#define CTL2_BSR_SET                     0x80000000u  /* Informational */
 
 /* These are the matching controls that may be set either on a pattern or on a
 data line. They are copied from the pattern controls as initial settings for
@@ -601,6 +602,7 @@ static modstruct modlist[] = {
   { "callout_error",              MOD_DAT,  MOD_IN2, 0,                          DO(cerror) },
   { "callout_fail",               MOD_DAT,  MOD_IN2, 0,                          DO(cfail) },
   { "callout_info",               MOD_PAT,  MOD_CTL, CTL_CALLOUT_INFO,           PO(control) },
+  { "callout_no_where",           MOD_DAT,  MOD_CTL, CTL2_CALLOUT_NO_WHERE,      DO(control2) },
   { "callout_none",               MOD_DAT,  MOD_CTL, CTL_CALLOUT_NONE,           DO(control) },
   { "caseless",                   MOD_PATP, MOD_OPT, PCRE2_CASELESS,             PO(options) },
   { "convert",                    MOD_PAT,  MOD_CON, 0,                          PO(convert_type) },
@@ -723,7 +725,7 @@ static modstruct modlist[] = {
   CTL_JITVERIFY|CTL_MEMORY|CTL_FRAMESIZE|CTL_PUSH|CTL_PUSHCOPY| \
   CTL_PUSHTABLESCOPY|CTL_USE_LENGTH)
 
-#define PUSH_SUPPORTED_COMPILE_CONTROLS2 (CTL_BSR_SET|CTL_NL_SET)
+#define PUSH_SUPPORTED_COMPILE_CONTROLS2 (CTL2_BSR_SET|CTL2_NL_SET)
 
 /* Controls that apply only at compile time with 'push'. */
 
@@ -3688,8 +3690,8 @@ for (;;)
 #else
       *((uint16_t *)field) = PCRE2_BSR_UNICODE;
 #endif
-      if (ctx == CTX_PAT || ctx == CTX_DEFPAT) pctl->control2 &= ~CTL_BSR_SET;
-        else dctl->control2 &= ~CTL_BSR_SET;
+      if (ctx == CTX_PAT || ctx == CTX_DEFPAT) pctl->control2 &= ~CTL2_BSR_SET;
+        else dctl->control2 &= ~CTL2_BSR_SET;
       }
     else
       {
@@ -3698,8 +3700,8 @@ for (;;)
       else if (len == 7 && strncmpic(pp, (const uint8_t *)"unicode", 7) == 0)
         *((uint16_t *)field) = PCRE2_BSR_UNICODE;
       else goto INVALID_VALUE;
-      if (ctx == CTX_PAT || ctx == CTX_DEFPAT) pctl->control2 |= CTL_BSR_SET;
-        else dctl->control2 |= CTL_BSR_SET;
+      if (ctx == CTX_PAT || ctx == CTX_DEFPAT) pctl->control2 |= CTL2_BSR_SET;
+        else dctl->control2 |= CTL2_BSR_SET;
       }
     pp = ep;
     break;
@@ -3792,14 +3794,14 @@ for (;;)
     if (i == 0)
       {
       *((uint16_t *)field) = NEWLINE_DEFAULT;
-      if (ctx == CTX_PAT || ctx == CTX_DEFPAT) pctl->control2 &= ~CTL_NL_SET;
-        else dctl->control2 &= ~CTL_NL_SET;
+      if (ctx == CTX_PAT || ctx == CTX_DEFPAT) pctl->control2 &= ~CTL2_NL_SET;
+        else dctl->control2 &= ~CTL2_NL_SET;
       }
     else
       {
       *((uint16_t *)field) = i;
-      if (ctx == CTX_PAT || ctx == CTX_DEFPAT) pctl->control2 |= CTL_NL_SET;
-        else dctl->control2 |= CTL_NL_SET;
+      if (ctx == CTX_PAT || ctx == CTX_DEFPAT) pctl->control2 |= CTL2_NL_SET;
+        else dctl->control2 |= CTL2_NL_SET;
       }
     pp = ep;
     break;
@@ -3971,7 +3973,7 @@ Returns:      nothing
 static void
 show_controls(uint32_t controls, uint32_t controls2, const char *before)
 {
-fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
+fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
   before,
   ((controls & CTL_AFTERTEXT) != 0)? " aftertext" : "",
   ((controls & CTL_ALLAFTERTEXT) != 0)? " allaftertext" : "",
@@ -3979,10 +3981,11 @@ fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s
   ((controls & CTL_ALLUSEDTEXT) != 0)? " allusedtext" : "",
   ((controls & CTL_ALTGLOBAL) != 0)? " altglobal" : "",
   ((controls & CTL_BINCODE) != 0)? " bincode" : "",
-  ((controls2 & CTL_BSR_SET) != 0)? " bsr" : "",
+  ((controls2 & CTL2_BSR_SET) != 0)? " bsr" : "",
   ((controls & CTL_CALLOUT_CAPTURE) != 0)? " callout_capture" : "",
   ((controls & CTL_CALLOUT_INFO) != 0)? " callout_info" : "",
   ((controls & CTL_CALLOUT_NONE) != 0)? " callout_none" : "",
+  ((controls2 & CTL2_CALLOUT_NO_WHERE) != 0)? " callout_no_where" : "",
   ((controls & CTL_DFA) != 0)? " dfa" : "",
   ((controls & CTL_EXPAND) != 0)? " expand" : "",
   ((controls & CTL_FINDLIMITS) != 0)? " find_limits" : "",
@@ -3996,7 +3999,7 @@ fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s
   ((controls & CTL_JITVERIFY) != 0)? " jitverify" : "",
   ((controls & CTL_MARK) != 0)? " mark" : "",
   ((controls & CTL_MEMORY) != 0)? " memory" : "",
-  ((controls2 & CTL_NL_SET) != 0)? " newline" : "",
+  ((controls2 & CTL2_NL_SET) != 0)? " newline" : "",
   ((controls & CTL_NULLCONTEXT) != 0)? " null_context" : "",
   ((controls & CTL_POSIX) != 0)? " posix" : "",
   ((controls & CTL_POSIX_NOSUB) != 0)? " posix_nosub" : "",
@@ -4435,7 +4438,7 @@ if ((pat_patctl.control & CTL_INFO) != 0)
 
   if (jchanged) fprintf(outfile, "Duplicate name status changes\n");
 
-  if ((pat_patctl.control2 & CTL_BSR_SET) != 0 ||
+  if ((pat_patctl.control2 & CTL2_BSR_SET) != 0 ||
       (FLD(compiled_code, flags) & PCRE2_BSR_SET) != 0)
     fprintf(outfile, "\\R matches %s\n", (bsr_convention == PCRE2_BSR_UNICODE)?
       "any Unicode newline" : "CR, LF, or CRLF");
@@ -5268,7 +5271,7 @@ if ((pat_patctl.control & CTL_POSIX) != 0)
   if ((pat_patctl.control & CTL_POSIX_NOSUB) != 0) cflags |= REG_NOSUB;
   if ((pat_patctl.options & PCRE2_UCP) != 0) cflags |= REG_UCP;
   if ((pat_patctl.options & PCRE2_CASELESS) != 0) cflags |= REG_ICASE;
-  if ((pat_patctl.options & PCRE2_LITERAL) != 0) cflags |= REG_NOSPEC; 
+  if ((pat_patctl.options & PCRE2_LITERAL) != 0) cflags |= REG_NOSPEC;
   if ((pat_patctl.options & PCRE2_MULTILINE) != 0) cflags |= REG_NEWLINE;
   if ((pat_patctl.options & PCRE2_DOTALL) != 0) cflags |= REG_DOTALL;
   if ((pat_patctl.options & PCRE2_UNGREEDY) != 0) cflags |= REG_UNGREEDY;
@@ -5276,8 +5279,8 @@ if ((pat_patctl.control & CTL_POSIX) != 0)
   if ((pat_patctl.control & (CTL_HEXPAT|CTL_USE_LENGTH)) != 0)
     {
     preg.re_endp = (char *)pbuffer8 + patlen;
-    cflags |= REG_PEND;  
-    }  
+    cflags |= REG_PEND;
+    }
 
   rc = regcomp(&preg, (char *)pbuffer8, cflags);
 
@@ -5530,7 +5533,7 @@ if (test_mode == PCRE32_MODE && pbuffer32 != NULL)
 appropriate default newline setting, local_newline_default will be non-zero. We
 use this if there is no explicit newline modifier. */
 
-if ((pat_patctl.control2 & CTL_NL_SET) == 0 && local_newline_default != 0)
+if ((pat_patctl.control2 & CTL2_NL_SET) == 0 && local_newline_default != 0)
   {
   SETFLD(pat_context, newline_convention, local_newline_default);
   }
@@ -5540,11 +5543,11 @@ NULL context. */
 
 use_pat_context = ((pat_patctl.control & CTL_NULLCONTEXT) != 0)?
   NULL : PTR(pat_context);
-  
+
 /* If PCRE2_LITERAL is set, set use_forbid_utf zero because PCRE2_NEVER_UTF
 and PCRE2_NEVER_UCP are invalid with it. */
 
-if ((pat_patctl.options & PCRE2_LITERAL) != 0) use_forbid_utf = 0; 
+if ((pat_patctl.options & PCRE2_LITERAL) != 0) use_forbid_utf = 0;
 
 /* Compile many times when timing. */
 
@@ -5556,7 +5559,7 @@ if (timeit > 0)
     {
     clock_t start_time = clock();
     PCRE2_COMPILE(compiled_code, pbuffer, patlen,
-      pat_patctl.options|use_forbid_utf, &errorcode, &erroroffset, 
+      pat_patctl.options|use_forbid_utf, &errorcode, &erroroffset,
         use_pat_context);
     time_taken += clock() - start_time;
     if (TEST(compiled_code, !=, NULL))
@@ -5665,7 +5668,7 @@ if (pattern_info(PCRE2_INFO_MAXLOOKBEHIND, &maxlookbehind, FALSE) != 0)
 /* If an explicit newline modifier was given, set the information flag in the
 pattern so that it is preserved over push/pop. */
 
-if ((pat_patctl.control2 & CTL_NL_SET) != 0)
+if ((pat_patctl.control2 & CTL2_NL_SET) != 0)
   {
   SETFLD(compiled_code, flags, FLD(compiled_code, flags) | PCRE2_NL_SET);
   }
@@ -5822,11 +5825,11 @@ return capcount;
 *************************************************/
 
 /* Called from a PCRE2 library as a result of the (?C) item. We print out where
-we are in the match. Yield zero unless more callouts than the fail count, or
-the callout data is not zero. The only differences in the callout block for
-different code unit widths are that the pointers to the subject, the most
-recent MARK, and a callout argument string point to strings of the appropriate
-width. Casts can be used to deal with this.
+we are in the match (unless suppressed). Yield zero unless more callouts than
+the fail count, or the callout data is not zero. The only differences in the
+callout block for different code unit widths are that the pointers to the
+subject, the most recent MARK, and a callout argument string point to strings
+of the appropriate width. Casts can be used to deal with this.
 
 Argument:  a pointer to a callout block
 Return:
@@ -5839,6 +5842,7 @@ uint32_t i, pre_start, post_start, subject_length;
 PCRE2_SIZE current_position;
 BOOL utf = (FLD(compiled_code, overall_options) & PCRE2_UTF) != 0;
 BOOL callout_capture = (dat_datctl.control & CTL_CALLOUT_CAPTURE) != 0;
+BOOL callout_where = (dat_datctl.control2 & CTL2_CALLOUT_NO_WHERE) == 0;
 
 /* This FILE is used for echoing the subject. This is done only once in simple
 cases. */
@@ -5887,74 +5891,81 @@ if (callout_capture)
     }
   }
 
-/* Re-print the subject in canonical form (with escapes for non-printing
-characters), the first time, or if giving full details. On subsequent calls in
-the same match, we use PCHARS() just to find the printed lengths of the
-substrings. */
+/* Unless suppressed, re-print the subject in canonical form (with escapes for
+non-printing characters), the first time, or if giving full details. On
+subsequent calls in the same match, we use PCHARS() just to find the printed
+lengths of the substrings. */
 
-if (f != NULL) fprintf(f, "--->");
-
-/* The subject before the match start. */
-
-PCHARS(pre_start, cb->subject, 0, cb->start_match, utf, f);
-
-/* If a lookbehind is involved, the current position may be earlier than the
-match start. If so, use the match start instead. */
-
-current_position = (cb->current_position >= cb->start_match)?
-  cb->current_position : cb->start_match;
-
-/* The subject between the match start and the current position. */
-
-PCHARS(post_start, cb->subject, cb->start_match,
-  current_position - cb->start_match, utf, f);
-
-/* Print from the current position to the end. */
-
-PCHARSV(cb->subject, current_position, cb->subject_length - current_position,
-  utf, f);
-
-/* Calculate the total subject printed length (no print). */
-
-PCHARS(subject_length, cb->subject, 0, cb->subject_length, utf, NULL);
-
-if (f != NULL) fprintf(f, "\n");
-
-/* For automatic callouts, show the pattern offset. Otherwise, for a numerical
-callout whose number has not already been shown with captured strings, show the
-number here. A callout with a string argument has been displayed above. */
-
-if (cb->callout_number == 255)
+if (callout_where)
   {
-  fprintf(outfile, "%+3d ", (int)cb->pattern_position);
-  if (cb->pattern_position > 99) fprintf(outfile, "\n    ");
-  }
-else
-  {
-  if (callout_capture || cb->callout_string != NULL) fprintf(outfile, "    ");
-    else fprintf(outfile, "%3d ", cb->callout_number);
-  }
 
-/* Now show position indicators */
+  if (f != NULL) fprintf(f, "--->");
 
-for (i = 0; i < pre_start; i++) fprintf(outfile, " ");
-fprintf(outfile, "^");
+  /* The subject before the match start. */
 
-if (post_start > 0)
-  {
-  for (i = 0; i < post_start - 1; i++) fprintf(outfile, " ");
+  PCHARS(pre_start, cb->subject, 0, cb->start_match, utf, f);
+
+  /* If a lookbehind is involved, the current position may be earlier than the
+  match start. If so, use the match start instead. */
+
+  current_position = (cb->current_position >= cb->start_match)?
+    cb->current_position : cb->start_match;
+
+  /* The subject between the match start and the current position. */
+
+  PCHARS(post_start, cb->subject, cb->start_match,
+    current_position - cb->start_match, utf, f);
+
+  /* Print from the current position to the end. */
+
+  PCHARSV(cb->subject, current_position, cb->subject_length - current_position,
+    utf, f);
+
+  /* Calculate the total subject printed length (no print). */
+
+  PCHARS(subject_length, cb->subject, 0, cb->subject_length, utf, NULL);
+
+  if (f != NULL) fprintf(f, "\n");
+
+  /* For automatic callouts, show the pattern offset. Otherwise, for a numerical
+  callout whose number has not already been shown with captured strings, show the
+  number here. A callout with a string argument has been displayed above. */
+
+  if (cb->callout_number == 255)
+    {
+    fprintf(outfile, "%+3d ", (int)cb->pattern_position);
+    if (cb->pattern_position > 99) fprintf(outfile, "\n    ");
+    }
+  else
+    {
+    if (callout_capture || cb->callout_string != NULL) fprintf(outfile, "    ");
+      else fprintf(outfile, "%3d ", cb->callout_number);
+    }
+
+  /* Now show position indicators */
+
+  for (i = 0; i < pre_start; i++) fprintf(outfile, " ");
   fprintf(outfile, "^");
+
+  if (post_start > 0)
+    {
+    for (i = 0; i < post_start - 1; i++) fprintf(outfile, " ");
+    fprintf(outfile, "^");
+    }
+
+  for (i = 0; i < subject_length - pre_start - post_start + 4; i++)
+    fprintf(outfile, " ");
+
+  if (cb->next_item_length != 0)
+    fprintf(outfile, "%.*s", (int)(cb->next_item_length),
+      pbuffer8 + cb->pattern_position);
+
+  fprintf(outfile, "\n");
   }
 
-for (i = 0; i < subject_length - pre_start - post_start + 4; i++)
-  fprintf(outfile, " ");
-
-if (cb->next_item_length != 0)
-  fprintf(outfile, "%.*s", (int)(cb->next_item_length),
-    pbuffer8 + cb->pattern_position);
-
-fprintf(outfile, "\n");
 first_callout = FALSE;
+
+/* Show any mark info */
 
 if (cb->mark != last_callout_mark)
   {
@@ -5969,6 +5980,8 @@ if (cb->mark != last_callout_mark)
   last_callout_mark = cb->mark;
   }
 
+/* Show callout data */
+
 if (callout_data_ptr != NULL)
   {
   int callout_data = *((int32_t *)callout_data_ptr);
@@ -5978,6 +5991,8 @@ if (callout_data_ptr != NULL)
     return callout_data;
     }
   }
+
+/* Keep count and give the appropriate return code */
 
 callout_count++;
 
