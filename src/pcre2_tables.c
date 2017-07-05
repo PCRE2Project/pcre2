@@ -157,48 +157,61 @@ two code points. The breaking rules are as follows:
     LV or V may be followed by V or T
     LVT or T may be followed by T
 
-4. Do not break before extending characters.
+4. Do not break before extending characters or zero-width-joiner (ZWJ).
 
-The next two rules are only for extended grapheme clusters (but that's what we
+The following rules are only for extended grapheme clusters (but that's what we
 are implementing).
 
 5. Do not break before SpacingMarks.
 
 6. Do not break after Prepend characters.
 
-7. Otherwise, break everywhere.
+7. Do not break within emoji modifier sequences (E_Base or E_Base_GAZ followed
+   by E_Modifier). Extend characters are allowed before the modifier; this 
+   cannot be represented in this table, the code has to deal with it.
+   
+8. Do not break within emoji zwj sequences (ZWJ followed by Glue_After_Zwj   or
+   E_Base_GAZ).
+   
+9. Do not break within emoji flag sequences. That is, do not break between 
+   regional indicator (RI) symbols if there are an odd number of RI characters 
+   before the break point. This table encodes "join RI characters"; the code 
+   has to deal with checking for previous adjoining RIs.
+
+10. Otherwise, break everywhere.
 */
+
+#define ESZ (1<<ucp_gbExtend)|(1<<ucp_gbSpacingMark)|(1<<ucp_gbZWJ)
 
 const uint32_t PRIV(ucp_gbtable)[] = {
    (1<<ucp_gbLF),                                           /*  0 CR */
    0,                                                       /*  1 LF */
    0,                                                       /*  2 Control */
-   (1<<ucp_gbExtend)|(1<<ucp_gbSpacingMark),                /*  3 Extend */
-   (1<<ucp_gbExtend)|(1<<ucp_gbPrepend)|                    /*  4 Prepend */
-     (1<<ucp_gbSpacingMark)|(1<<ucp_gbL)|
-     (1<<ucp_gbV)|(1<<ucp_gbT)|(1<<ucp_gbLV)|
-     (1<<ucp_gbLVT)|(1<<ucp_gbOther),
-
-   (1<<ucp_gbExtend)|(1<<ucp_gbSpacingMark),                /*  5 SpacingMark */
-   (1<<ucp_gbExtend)|(1<<ucp_gbSpacingMark)|(1<<ucp_gbL)|   /*  6 L */
-     (1<<ucp_gbV)|(1<<ucp_gbLV)|(1<<ucp_gbLVT),
-
-   (1<<ucp_gbExtend)|(1<<ucp_gbSpacingMark)|(1<<ucp_gbV)|   /*  7 V */
-     (1<<ucp_gbT),
-
-   (1<<ucp_gbExtend)|(1<<ucp_gbSpacingMark)|(1<<ucp_gbT),   /*  8 T */
-   (1<<ucp_gbExtend)|(1<<ucp_gbSpacingMark)|(1<<ucp_gbV)|   /*  9 LV */
-     (1<<ucp_gbT),
-
-   (1<<ucp_gbExtend)|(1<<ucp_gbSpacingMark)|(1<<ucp_gbT),   /* 10 LVT */
+   ESZ,                                                     /*  3 Extend */
+   ESZ|(1<<ucp_gbPrepend)|                                  /*  4 Prepend */
+       (1<<ucp_gbL)|(1<<ucp_gbV)|(1<<ucp_gbT)|
+       (1<<ucp_gbLV)|(1<<ucp_gbLVT)|(1<<ucp_gbOther)|
+       (1<<ucp_gbRegionalIndicator)|
+       (1<<ucp_gbE_Base)|(1<<ucp_gbE_Modifier)|
+       (1<<ucp_gbE_Base_GAZ)|
+       (1<<ucp_gbZWJ)|(1<<ucp_gbGlue_After_Zwj),
+   ESZ,                                                     /*  5 SpacingMark */
+   ESZ|(1<<ucp_gbL)|(1<<ucp_gbV)|(1<<ucp_gbLV)|             /*  6 L */
+       (1<<ucp_gbLVT),
+   ESZ|(1<<ucp_gbV)|(1<<ucp_gbT),                           /*  7 V */
+   ESZ|(1<<ucp_gbT),                                        /*  8 T */
+   ESZ|(1<<ucp_gbV)|(1<<ucp_gbT),                           /*  9 LV */
+   ESZ|(1<<ucp_gbT),                                        /* 10 LVT */
    (1<<ucp_gbRegionalIndicator),                            /* 11 RegionalIndicator */
-   (1<<ucp_gbExtend)|(1<<ucp_gbSpacingMark),                /* 12 Other */
-   (1<<ucp_gbExtend)|(1<<ucp_gbSpacingMark),                /* 13 E_Base */
-   (1<<ucp_gbExtend)|(1<<ucp_gbSpacingMark),                /* 14 E_Modifier */
-   (1<<ucp_gbExtend)|(1<<ucp_gbSpacingMark),                /* 15 E_Base_GAZ */
-   (1<<ucp_gbExtend)|(1<<ucp_gbSpacingMark),                /* 16 ZWJ */
-   (1<<ucp_gbExtend)|(1<<ucp_gbSpacingMark)                 /* 12 Glue_After_Zwj */
+   ESZ,                                                     /* 12 Other */
+   ESZ|(1<<ucp_gbE_Modifier),                               /* 13 E_Base */
+   ESZ,                                                     /* 14 E_Modifier */
+   ESZ|(1<<ucp_gbE_Modifier),                               /* 15 E_Base_GAZ */
+   ESZ|(1<<ucp_gbGlue_After_Zwj)|(1<<ucp_gbE_Base_GAZ),     /* 16 ZWJ */
+   ESZ                                                      /* 12 Glue_After_Zwj */
 };
+
+#undef ESZ
 
 #ifdef SUPPORT_JIT
 /* This table reverses PRIV(ucp_gentype). We can save the cost

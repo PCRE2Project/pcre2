@@ -1,4 +1,4 @@
-.TH PCRE2PATTERN 3 "02 July 2017" "PCRE2 10.30"
+.TH PCRE2PATTERN 3 "05 July 2017" "PCRE2 10.30"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION DETAILS"
@@ -145,7 +145,7 @@ The pcre2_match() function contains a counter that is incremented every time it
 goes round its main loop. The caller of \fBpcre2_match()\fP can set a limit on
 this counter, which therefore limits the amount of computing resource used for
 a match. The maximum depth of nested backtracking can also be limited; this
-indirectly restricts the amount of heap memory that is used, but there is also 
+indirectly restricts the amount of heap memory that is used, but there is also
 an explicit memory limit that can be set.
 .P
 These facilities are provided to catch runaway matches that are provoked by
@@ -164,7 +164,7 @@ for it to have any effect. In other words, the pattern writer can lower the
 limits set by the programmer, but not raise them. If there is more than one
 setting of one of these limits, the lower value is used.
 .P
-Prior to release 10.30, LIMIT_DEPTH was called LIMIT_RECURSION. This name is 
+Prior to release 10.30, LIMIT_DEPTH was called LIMIT_RECURSION. This name is
 still recognized for backwards compatibility.
 .P
 The heap limit applies only when the \fBpcre2_match()\fP interpreter is used
@@ -203,7 +203,7 @@ string with one of the following sequences:
   (*CRLF)      carriage return, followed by linefeed
   (*ANYCRLF)   any of the three above
   (*ANY)       all Unicode newline sequences
-  (*NUL)       the NUL character (binary zero) 
+  (*NUL)       the NUL character (binary zero)
 .sp
 These override the default and the options given to the compiling function. For
 example, on a Unix system where LF is the default newline sequence, the pattern
@@ -218,7 +218,7 @@ The newline convention affects where the circumflex and dollar assertions are
 true. It also affects the interpretation of the dot metacharacter when
 PCRE2_DOTALL is not set, and the behaviour of \eN. However, it does not affect
 what the \eR escape sequence matches. By default, this is any Unicode newline
-sequence, for Perl compatibility. However, this can be changed; see the next 
+sequence, for Perl compatibility. However, this can be changed; see the next
 section and the description of \eR in the section entitled
 .\" HTML <a href="#newlineseq">
 .\" </a>
@@ -998,9 +998,11 @@ grapheme cluster", and treats the sequence as an atomic group
 .\"
 Unicode supports various kinds of composite character by giving each character
 a grapheme breaking property, and having rules that use these properties to
-define the boundaries of extended grapheme clusters. \eX always matches at
-least one character. Then it decides whether to add additional characters
-according to the following rules for ending a cluster:
+define the boundaries of extended grapheme clusters. The rules are defined in
+Unicode Standard Annex 29, "Unicode Text Segmentation".
+.P
+\eX always matches at least one character. Then it decides whether to add
+additional characters according to the following rules for ending a cluster:
 .P
 1. End at the end of the subject string.
 .P
@@ -1011,10 +1013,21 @@ are of five types: L, V, T, LV, and LVT. An L character may be followed by an
 L, V, LV, or LVT character; an LV or V character may be followed by a V or T
 character; an LVT or T character may be follwed only by a T character.
 .P
-4. Do not end before extending characters or spacing marks. Characters with
-the "mark" property always have the "extend" grapheme breaking property.
+4. Do not end before extending characters or spacing marks or the "zero-width
+joiner" characters. Characters with the "mark" property always have the
+"extend" grapheme breaking property.
 .P
 5. Do not end after prepend characters.
+.P
+6. Do not break within emoji modifier sequences (a base character followed by a
+modifier). Extending characters are allowed before the modifier.
+.P
+7. Do not break within emoji zwj sequences (zero-width jointer followed by
+"glue after ZWJ" or "base glue after ZWJ").
+.P
+8. Do not break within emoji flag sequences. That is, do not break between
+regional indicator (RI) characters if there are an odd number of RI characters
+before the break point.
 .P
 6. Otherwise, end the cluster.
 .
@@ -1560,15 +1573,15 @@ Perl option letters enclosed between "(?" and ")". The option letters are
 .sp
   i  for PCRE2_CASELESS
   m  for PCRE2_MULTILINE
-  n  for PCRE2_NO_AUTO_CAPTURE 
+  n  for PCRE2_NO_AUTO_CAPTURE
   s  for PCRE2_DOTALL
   x  for PCRE2_EXTENDED
   xx for PCRE2_EXTENDED_MORE
 .sp
 For example, (?im) sets caseless, multiline matching. It is also possible to
-unset these options by preceding the letter with a hyphen. The two "extended" 
-options are not independent; unsetting either one cancels the effects of both 
-of them. 
+unset these options by preceding the letter with a hyphen. The two "extended"
+options are not independent; unsetting either one cancels the effects of both
+of them.
 .P
 A combined setting and unsetting such as (?im-sx), which sets PCRE2_CASELESS
 and PCRE2_MULTILINE while unsetting PCRE2_DOTALL and PCRE2_EXTENDED, is also
@@ -2256,16 +2269,16 @@ capturing subpatterns within it, these are counted for the purposes of
 numbering the capturing subpatterns in the whole pattern. However, substring
 capturing is carried out only for positive assertions that succeed, that is,
 one of their branches matches, so matching continues after the assertion. If
-all branches of a positive assertion fail to match, nothing is captured, and 
+all branches of a positive assertion fail to match, nothing is captured, and
 control is passed to the previous backtracking point.
 .P
 No capturing is done for a negative assertion unless it is being used as a
 condition in a
 .\" HTML <a href="#subpatternsassubroutines">
 .\" </a>
-conditional subpattern 
+conditional subpattern
 .\"
-(see the discussion below). Matching continues after a non-conditional negative 
+(see the discussion below). Matching continues after a non-conditional negative
 assertion only if all its branches fail to match.
 .P
 For compatibility with Perl, most assertion subpatterns may be repeated; though
@@ -2846,13 +2859,13 @@ once it had matched some of the subject string, it was never re-entered, even
 if it contained untried alternatives and there was a subsequent matching
 failure. (Historical note: PCRE implemented recursion before Perl did.)
 .P
-Starting with release 10.30, recursive subroutine calls are no longer treated 
-as atomic. That is, they can be re-entered to try unused alternatives if there 
-is a matching failure later in the pattern. This is now compatible with the way 
+Starting with release 10.30, recursive subroutine calls are no longer treated
+as atomic. That is, they can be re-entered to try unused alternatives if there
+is a matching failure later in the pattern. This is now compatible with the way
 Perl works. If you want a subroutine call to be atomic, you must explicitly
 enclose it in an atomic group.
 .P
-Supporting backtracking into recursions simplifies certain types of recursive 
+Supporting backtracking into recursions simplifies certain types of recursive
 pattern. For example, this pattern matches palindromic strings:
 .sp
   ^((.)(?1)\e2|.?)$
@@ -2883,7 +2896,7 @@ in PCRE2 these values can be referenced. Consider this pattern:
 This pattern matches "bab". The first capturing parentheses match "b", then in
 the second group, when the back reference \e1 fails to match "b", the second
 alternative matches "a" and then recurses. In the recursion, \e1 does now match
-"b" and so the whole match succeeds. This match used to fail in Perl, but in 
+"b" and so the whole match succeeds. This match used to fail in Perl, but in
 later versions (I tried 5.024) it now works.
 .
 .
@@ -3427,15 +3440,15 @@ negative assertion, (*ACCEPT) causes the assertion to fail without any further
 processing; captured substrings are discarded.
 .P
 If the assertion is a condition, (*ACCEPT) causes the condition to be true for
-a positive assertion and false for a negative one; captured substrings are 
+a positive assertion and false for a negative one; captured substrings are
 retained in both cases.
 .P
-The effect of (*THEN) is not allowed to escape beyond an assertion. If there 
+The effect of (*THEN) is not allowed to escape beyond an assertion. If there
 are no more branches to try, (*THEN) causes a positive assertion to be false,
 and a negative assertion to be true.
 .P
 The other backtracking verbs are not treated specially if they appear in a
-standalone positive assertion. In a conditional positive assertion, 
+standalone positive assertion. In a conditional positive assertion,
 backtracking into (*COMMIT), (*SKIP), or (*PRUNE) causes the condition to be
 false. However, for both standalone and conditional negative assertions,
 backtracking into (*COMMIT), (*SKIP), or (*PRUNE) causes the assertion to be
@@ -3485,6 +3498,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 02 July 2017
+Last updated: 05 July 2017
 Copyright (c) 1997-2017 University of Cambridge.
 .fi

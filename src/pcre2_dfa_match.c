@@ -1379,8 +1379,46 @@ for (;;)
           if (!utf) d = *nptr; else { GETCHARLEN(d, nptr, dlen); }
           rgb = UCD_GRAPHBREAK(d);
           if ((PRIV(ucp_gbtable)[lgb] & (1u << rgb)) == 0) break;
+
+          /* Not breaking between Regional Indicators is allowed only if
+          there are an even number of preceding RIs. */
+
+          if (lgb == ucp_gbRegionalIndicator &&
+              rgb == ucp_gbRegionalIndicator)
+            {
+            int ricount = 0;
+            PCRE2_SPTR bptr = nptr - 1;
+#ifdef SUPPORT_UNICODE
+            if (utf) BACKCHAR(bptr);
+#endif
+            /* bptr is pointing to the left-hand character */
+
+            while (bptr > mb->start_subject)
+              {
+              bptr--;
+#ifdef SUPPORT_UNICODE
+              if (utf)
+                {
+                BACKCHAR(bptr);
+                GETCHAR(d, bptr);
+                }
+              else
+#endif
+              d = *bptr;
+              if (UCD_GRAPHBREAK(d) != ucp_gbRegionalIndicator) break;
+              ricount++;
+              }
+            if ((ricount & 1) != 0) break;  /* Grapheme break required */
+            }
+
+          /* If Extend follows E_Base[_GAZ] do not update lgb; this allows
+          any number of Extend before a following E_Modifier. */
+
+          if (rgb != ucp_gbExtend ||
+              (lgb != ucp_gbE_Base && lgb != ucp_gbE_Base_GAZ))
+            lgb = rgb;
+
           ncount++;
-          lgb = rgb;
           nptr += dlen;
           }
         count++;
@@ -1641,8 +1679,46 @@ for (;;)
           if (!utf) d = *nptr; else { GETCHARLEN(d, nptr, dlen); }
           rgb = UCD_GRAPHBREAK(d);
           if ((PRIV(ucp_gbtable)[lgb] & (1u << rgb)) == 0) break;
+
+          /* Not breaking between Regional Indicators is allowed only if
+          there are an even number of preceding RIs. */
+
+          if (lgb == ucp_gbRegionalIndicator &&
+              rgb == ucp_gbRegionalIndicator)
+            {
+            int ricount = 0;
+            PCRE2_SPTR bptr = nptr - 1;
+#ifdef SUPPORT_UNICODE
+            if (utf) BACKCHAR(bptr);
+#endif
+            /* bptr is pointing to the left-hand character */
+
+            while (bptr > mb->start_subject)
+              {
+              bptr--;
+#ifdef SUPPORT_UNICODE
+              if (utf)
+                {
+                BACKCHAR(bptr);
+                GETCHAR(d, bptr);
+                }
+              else
+#endif
+              d = *bptr;
+              if (UCD_GRAPHBREAK(d) != ucp_gbRegionalIndicator) break;
+              ricount++;
+              }
+            if ((ricount & 1) != 0) break;  /* Grapheme break required */
+            }
+
+          /* If Extend follows E_Base[_GAZ] do not update lgb; this allows
+          any number of Extend before a following E_Modifier. */
+
+          if (rgb != ucp_gbExtend ||
+              (lgb != ucp_gbE_Base && lgb != ucp_gbE_Base_GAZ))
+            lgb = rgb;
+
           ncount++;
-          lgb = rgb;
           nptr += dlen;
           }
         ADD_NEW_DATA(-(state_offset + count), 0, ncount);
@@ -1912,8 +1988,46 @@ for (;;)
           if (!utf) d = *nptr; else { GETCHARLEN(d, nptr, dlen); }
           rgb = UCD_GRAPHBREAK(d);
           if ((PRIV(ucp_gbtable)[lgb] & (1u << rgb)) == 0) break;
+
+          /* Not breaking between Regional Indicators is allowed only if
+          there are an even number of preceding RIs. */
+
+          if (lgb == ucp_gbRegionalIndicator &&
+              rgb == ucp_gbRegionalIndicator)
+            {
+            int ricount = 0;
+            PCRE2_SPTR bptr = nptr - 1;
+#ifdef SUPPORT_UNICODE
+            if (utf) BACKCHAR(bptr);
+#endif
+            /* bptr is pointing to the left-hand character */
+
+            while (bptr > mb->start_subject)
+              {
+              bptr--;
+#ifdef SUPPORT_UNICODE
+              if (utf)
+                {
+                BACKCHAR(bptr);
+                GETCHAR(d, bptr);
+                }
+              else
+#endif
+              d = *bptr;
+              if (UCD_GRAPHBREAK(d) != ucp_gbRegionalIndicator) break;
+              ricount++;
+              }
+            if ((ricount & 1) != 0) break;  /* Grapheme break required */
+            }
+
+          /* If Extend follows E_Base[_GAZ] do not update lgb; this allows
+          any number of Extend before a following E_Modifier. */
+
+          if (rgb != ucp_gbExtend ||
+              (lgb != ucp_gbE_Base && lgb != ucp_gbE_Base_GAZ))
+            lgb = rgb;
+
           ncount++;
-          lgb = rgb;
           nptr += dlen;
           }
         if (nptr >= end_subject && (mb->moptions & PCRE2_PARTIAL_HARD) != 0)
@@ -2102,8 +2216,46 @@ for (;;)
           if (!utf) d = *nptr; else { GETCHARLEN(d, nptr, dlen); }
           rgb = UCD_GRAPHBREAK(d);
           if ((PRIV(ucp_gbtable)[lgb] & (1u << rgb)) == 0) break;
+
+          /* Not breaking between Regional Indicators is allowed only if
+          there are an even number of preceding RIs. */
+
+          if (lgb == ucp_gbRegionalIndicator &&
+              rgb == ucp_gbRegionalIndicator)
+            {
+            int ricount = 0;
+            PCRE2_SPTR bptr = nptr - 1;
+#ifdef SUPPORT_UNICODE
+            if (utf) BACKCHAR(bptr);
+#endif
+            /* bptr is pointing to the left-hand character */
+
+            while (bptr > mb->start_subject)
+              {
+              bptr--;
+#ifdef SUPPORT_UNICODE
+              if (utf)
+                {
+                BACKCHAR(bptr);
+                GETCHAR(d, bptr);
+                }
+              else
+#endif
+              d = *bptr;
+              if (UCD_GRAPHBREAK(d) != ucp_gbRegionalIndicator) break;
+              ricount++;
+              }
+            if ((ricount & 1) != 0) break;  /* Grapheme break required */
+            }
+
+          /* If Extend follows E_Base[_GAZ] do not update lgb; this allows
+          any number of Extend before a following E_Modifier. */
+
+          if (rgb != ucp_gbExtend ||
+              (lgb != ucp_gbE_Base && lgb != ucp_gbE_Base_GAZ))
+            lgb = rgb;
+
           ncount++;
-          lgb = rgb;
           nptr += dlen;
           }
         if (nptr >= end_subject && (mb->moptions & PCRE2_PARTIAL_HARD) != 0)
@@ -2129,7 +2281,7 @@ for (;;)
         case 0x2029:
 #endif  /* Not EBCDIC */
         if (mb->bsr_convention == PCRE2_BSR_ANYCRLF) break;
-        /* Fall through */ 
+        /* Fall through */
 
         case CHAR_LF:
         ADD_NEW(state_offset + 1, 0);
@@ -3427,7 +3579,7 @@ for (;;)
       while (t < mb->end_subject && !IS_NEWLINE(t)) t++;
       end_subject = t;
       }
-      
+
     /* Anchored: check the first code unit if one is recorded. This may seem
     pointless but it can help in detecting a no match case without scanning for
     the required code unit. */

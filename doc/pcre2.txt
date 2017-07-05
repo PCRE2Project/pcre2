@@ -6433,26 +6433,40 @@ BACKSLASH
        (see  below).  Unicode supports various kinds of composite character by
        giving each character a grapheme breaking property,  and  having  rules
        that use these properties to define the boundaries of extended grapheme
-       clusters. \X always matches at least one  character.  Then  it  decides
-       whether  to  add additional characters according to the following rules
-       for ending a cluster:
+       clusters. The rules are defined in Unicode Standard Annex 29,  "Unicode
+       Text Segmentation".
+
+       \X  always  matches  at least one character. Then it decides whether to
+       add additional characters according to the following rules for ending a
+       cluster:
 
        1. End at the end of the subject string.
 
-       2. Do not end between CR and LF; otherwise end after any control  char-
+       2.  Do not end between CR and LF; otherwise end after any control char-
        acter.
 
-       3.  Do  not  break  Hangul (a Korean script) syllable sequences. Hangul
-       characters are of five types: L, V, T, LV, and LVT. An L character  may
-       be  followed by an L, V, LV, or LVT character; an LV or V character may
+       3. Do not break Hangul (a Korean  script)  syllable  sequences.  Hangul
+       characters  are of five types: L, V, T, LV, and LVT. An L character may
+       be followed by an L, V, LV, or LVT character; an LV or V character  may
        be followed by a V or T character; an LVT or T character may be follwed
        only by a T character.
 
-       4.  Do not end before extending characters or spacing marks. Characters
-       with the "mark" property always have  the  "extend"  grapheme  breaking
-       property.
+       4. Do not end before extending  characters  or  spacing  marks  or  the
+       "zero-width  joiner"  characters.  Characters  with the "mark" property
+       always have the "extend" grapheme breaking property.
 
        5. Do not end after prepend characters.
+
+       6. Do not break within emoji modifier sequences (a base character  fol-
+       lowed by a modifier). Extending characters are allowed before the modi-
+       fier.
+
+       7. Do not break within emoji zwj sequences (zero-width jointer followed
+       by "glue after ZWJ" or "base glue after ZWJ").
+
+       8.  Do  not  break  within  emoji flag sequences. That is, do not break
+       between regional indicator (RI) characters if there are an  odd  number
+       of RI characters before the break point.
 
        6. Otherwise, end the cluster.
 
@@ -8744,7 +8758,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 02 July 2017
+       Last updated: 05 July 2017
        Copyright (c) 1997-2017 University of Cambridge.
 ------------------------------------------------------------------------------
  

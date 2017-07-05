@@ -4667,4 +4667,38 @@ Callout 0: last capture = 1
  0: \x{1e900}\x{1e924}\x{1e953}\x{11c00}\x{11c2d}\x{11c3e}\x{11c70}\x{11c77}\x{11cab}\x{11400}\x{1142f}\x{11455}\x{104b0}\x{104d8}\x{104fb}\x{16fe0}\x{18800}\x{18af2}\x{11d00}\x{11d3a}\x{11d59}\x{16fe1}\x{1b170}\x{1b2fb}\x{11a50}\x{11a58}\x{11aa2}\x{11a00}\x{11a07}\x{11a47}
  1: \x{11a00}\x{11a07}\x{11a47}
 
+# These two are here because JIT is not yet updated. Also, the very first data
+# line is handled differently by Perl.
+
+/^\X/utf
+    A\x{200d}B                     A ZWJ
+ 0: A\x{200d}
+    \x{261D}\x{1F3FB}B             E_Base E_Modifier
+ 0: \x{261d}\x{1f3fb}
+    \x{1F466}\x{1F3FF}B            E_Base_GAZ E_Modifier 
+ 0: \x{1f466}\x{1f3ff}
+    \x{200d}\x{1F3A4}B             ZWJ Glue_After_ZWJ
+ 0: \x{200d}\x{1f3a4}
+    \x{200d}\x{1F469}B             ZWJ E_Base_GAZ  
+ 0: \x{200d}\x{1f469}
+    \x{1F1E6}\x{1F1E7}B            RegionalIndicator RegionalIndicator 
+ 0: \x{1f1e6}\x{1f1e7}
+    \x{261D}\x{E0100}\x{1F3FB}B\=no_jit    E_Base Extend E_Modifier
+** /n is not valid here
+    
+# Regional indicators
+
+/^(\X)(\X)/utf,aftertext
+    \x{1F1E6}\x{1F1E7}\x{1F1E7}B\=no_jit
+ 0: \x{1f1e6}\x{1f1e7}\x{1f1e7}
+ 0+ B
+ 1: \x{1f1e6}\x{1f1e7}
+ 2: \x{1f1e7}
+    \x{1F1E6}\x{1F1E7}\x{1F1E7}\x{1F1E6}B\=no_jit
+ 0: \x{1f1e6}\x{1f1e7}\x{1f1e7}\x{1f1e6}
+ 0+ B
+ 1: \x{1f1e6}\x{1f1e7}
+ 2: \x{1f1e7}\x{1f1e6}
+
+
 # End of testinput5

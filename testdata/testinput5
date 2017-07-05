@@ -2041,4 +2041,23 @@
 /^(?:(\X)(?C))+$/utf
     \x{1E900}\x{1E924}\x{1E953}\x{11C00}\x{11C2D}\x{11C3E}\x{11C70}\x{11C77}\x{11CAB}\x{11400}\x{1142F}\x{11455}\x{104B0}\x{104D8}\x{104FB}\x{16FE0}\x{18800}\x{18AF2}\x{11D00}\x{11D3A}\x{11D59}\x{16FE1}\x{1B170}\x{1B2FB}\x{11A50}\x{11A58}\x{11AA2}\x{11A00}\x{11A07}\x{11A47}\=callout_capture,callout_no_where 
 
+# These two are here because JIT is not yet updated. Also, the very first data
+# line is handled differently by Perl.
+
+/^\X/utf
+    A\x{200d}B                     A ZWJ
+    \x{261D}\x{1F3FB}B             E_Base E_Modifier
+    \x{1F466}\x{1F3FF}B            E_Base_GAZ E_Modifier 
+    \x{200d}\x{1F3A4}B             ZWJ Glue_After_ZWJ
+    \x{200d}\x{1F469}B             ZWJ E_Base_GAZ  
+    \x{1F1E6}\x{1F1E7}B            RegionalIndicator RegionalIndicator 
+    \x{261D}\x{E0100}\x{1F3FB}B\=no_jit    E_Base Extend E_Modifier
+    
+# Regional indicators
+
+/^(\X)(\X)/utf,aftertext
+    \x{1F1E6}\x{1F1E7}\x{1F1E7}B\=no_jit
+    \x{1F1E6}\x{1F1E7}\x{1F1E7}\x{1F1E6}B\=no_jit
+
+
 # End of testinput5
