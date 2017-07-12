@@ -1,4 +1,4 @@
-.TH PCRE2TEST 1 "02 July 2017" "PCRE 10.30"
+.TH PCRE2TEST 1 "12 July 2017" "PCRE 10.30"
 .SH NAME
 pcre2test - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -592,6 +592,10 @@ heavily used in the test files.
       bsr=[anycrlf|unicode]     specify \eR handling
   /B  bincode                   show binary code without lengths
       callout_info              show callout information
+      convert=<options>         request foreign pattern conversion
+      convert_glob_escape=c     set glob escape character
+      convert_glob_separator=c  set glob separator character
+      convert_length            set convert buffer length
       debug                     same as info,fullbincode
       framesize                 show matching frame size
       fullbincode               show binary code with lengths
@@ -1033,6 +1037,39 @@ are ignored (for the stacked copy), with a warning message, except for
 \fBreplace\fP, which causes an error. Note that \fBjitverify\fP, which is
 allowed, does not carry through to any subsequent matching that uses a stacked
 pattern.
+.
+.
+.SS "Testing foreign pattern conversion"
+.rs
+.sp
+The experimental foreign pattern conversion functions in PCRE2 can be tested by
+setting the \fBconvert\fP modifier. Its argument is a colon-separated list of
+options, which set the equivalent option for the \fBpcre2_pattern_convert()\fP
+function:
+.sp
+  glob                    PCRE2_CONVERT_GLOB
+  glob_no_starstar        PCRE2_CONVERT_GLOB_NO_STARSTAR
+  glob_no_wild_separator  PCRE2_CONVERT_GLOB_NO_WILD_SEPARATOR
+  posix_basic             PCRE2_CONVERT_POSIX_BASIC
+  posix_extended          PCRE2_CONVERT_POSIX_EXTENDED
+  unset                   Unset all options
+.sp
+The "unset" value is useful for turning off a default that has been set by a
+\fB#pattern\fP command. When one of these options is set, the input pattern is
+passed to \fBpcre2_pattern_convert()\fP. If the conversion is successful, the
+result is reflected in the output and then passed to \fBpcre2_compile()\fP. The
+normal \fButf\fP and \fBno_utf_check\fP options, if set, cause the
+PCRE2_CONVERT_UTF and PCRE2_CONVERT_NO_UTF_CHECK options to be passed to
+\fBpcre2_pattern_convert()\fP.
+.P
+By default, the conversion function is allowed to allocate a buffer for its
+output. However, if the \fBconvert_length\fP modifier is set to a value greater
+than zero, \fBpcre2test\fP passes a buffer of the given length. This makes it
+possible to test the length check.
+.P
+The \fBconvert_glob_escape\fP and \fBconvert_glob_separator\fP modifiers can be
+used to specify the escape and separator characters for glob processing,
+overriding the defaults, which are operating-system dependent.
 .
 .
 .\" HTML <a name="subjectmodifiers"></a>
@@ -1850,6 +1887,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 02 July 2017
+Last updated: 12 July 2017
 Copyright (c) 1997-2017 University of Cambridge.
 .fi

@@ -413,6 +413,35 @@ PCRE2 NATIVE API OBSOLETE FUNCTIONS
        needed and has no effect (it always returns zero).
 
 
+PCRE2 EXPERIMENTAL PATTERN CONVERSION FUNCTIONS
+
+       pcre2_convert_context *pcre2_convert_context_create(
+         pcre2_general_context *gcontext);
+
+       pcre2_convert_context *pcre2_convert_context_copy(
+         pcre2_convert_context *cvcontext);
+
+       void pcre2_convert_context_free(pcre2_convert_context *cvcontext);
+
+       int pcre2_set_glob_escape(pcre2_convert_context *cvcontext,
+         uint32_t escape_char);
+
+       int pcre2_set_glob_separator(pcre2_convert_context *cvcontext,
+         uint32_t separator_char);
+
+       int pcre2_pattern_convert(PCRE2_SPTR pattern, PCRE2_SIZE length,
+         uint32_t options, PCRE2_UCHAR **buffer,
+         PCRE2_SIZE *blength, pcre2_convert_context *cvcontext);
+
+       void pcre2_converted_pattern_free(PCRE2_UCHAR *converted_pattern);
+
+       These functions provide a way of  converting  non-PCRE2  patterns  into
+       patterns  that  can  be  processed by pcre2_compile(). This facility is
+       experimental and may be changed in future releases. At present, "globs"
+       and  POSIX  basic  and  extended patterns can be converted. Details are
+       given in the pcre2convert documentation.
+
+
 PCRE2 8-BIT, 16-BIT, AND 32-BIT LIBRARIES
 
        There are three PCRE2 libraries, supporting 8-bit, 16-bit,  and  32-bit
@@ -3400,7 +3429,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 16 June 2017
+       Last updated: 10 July 2017
        Copyright (c) 1997-2017 University of Cambridge.
 ------------------------------------------------------------------------------
  

@@ -216,6 +216,9 @@ unit". Previously only non-anchored patterns did this.
 49. Update extended grapheme breaking rules to the latest set that are in 
 Unicode Standard Annex #29.
 
+50. Added experimental foreign pattern conversion facilities 
+(pcre2_pattern_convert() and friends).
+
 
 Version 10.23 14-February-2017
 ------------------------------

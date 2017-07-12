@@ -36,6 +36,10 @@ dist_html_DATA = \
   doc/html/pcre2_compile_context_create.html \
   doc/html/pcre2_compile_context_free.html \
   doc/html/pcre2_config.html \
+  doc/html/pcre2_convert_context_copy.html \
+  doc/html/pcre2_convert_context_create.html \
+  doc/html/pcre2_convert_context_free.html \
+  doc/html/pcre2_converted_pattern_free.html \
   doc/html/pcre2_dfa_match.html \
   doc/html/pcre2_general_context_copy.html \
   doc/html/pcre2_general_context_create.html \
@@ -59,6 +63,7 @@ dist_html_DATA = \
   doc/html/pcre2_match_data_create.html \
   doc/html/pcre2_match_data_create_from_pattern.html \
   doc/html/pcre2_match_data_free.html \
+  doc/html/pcre2_pattern_convert.html \
   doc/html/pcre2_pattern_info.html \
   doc/html/pcre2_serialize_decode.html \
   doc/html/pcre2_serialize_encode.html \
@@ -70,6 +75,8 @@ dist_html_DATA = \
   doc/html/pcre2_set_compile_extra_options.html \
   doc/html/pcre2_set_compile_recursion_guard.html \
   doc/html/pcre2_set_depth_limit.html \
+  doc/html/pcre2_set_glob_escape.html \
+  doc/html/pcre2_set_glob_separator.html \
   doc/html/pcre2_set_heap_limit.html \
   doc/html/pcre2_set_match_limit.html \
   doc/html/pcre2_set_max_pattern_length.html \
@@ -94,6 +101,7 @@ dist_html_DATA = \
   doc/html/pcre2build.html \
   doc/html/pcre2callout.html \
   doc/html/pcre2compat.html \
+  doc/html/pcre2convert.html \
   doc/html/pcre2demo.html \
   doc/html/pcre2grep.html \
   doc/html/pcre2jit.html \
@@ -121,6 +129,10 @@ dist_man_MANS = \
   doc/pcre2_compile_context_create.3 \
   doc/pcre2_compile_context_free.3 \
   doc/pcre2_config.3 \
+  doc/pcre2_convert_context_copy.3 \
+  doc/pcre2_convert_context_create.3 \
+  doc/pcre2_convert_context_free.3 \
+  doc/pcre2_converted_pattern_free.3 \
   doc/pcre2_dfa_match.3 \
   doc/pcre2_general_context_copy.3 \
   doc/pcre2_general_context_create.3 \
@@ -144,6 +156,7 @@ dist_man_MANS = \
   doc/pcre2_match_data_create.3 \
   doc/pcre2_match_data_create_from_pattern.3 \
   doc/pcre2_match_data_free.3 \
+  doc/pcre2_pattern_convert.3 \
   doc/pcre2_pattern_info.3 \
   doc/pcre2_serialize_decode.3 \
   doc/pcre2_serialize_encode.3 \
@@ -155,6 +168,8 @@ dist_man_MANS = \
   doc/pcre2_set_compile_extra_options.3 \
   doc/pcre2_set_compile_recursion_guard.3 \
   doc/pcre2_set_depth_limit.3 \
+  doc/pcre2_set_glob_escape.3 \
+  doc/pcre2_set_glob_separator.3 \
   doc/pcre2_set_heap_limit.3 \
   doc/pcre2_set_match_limit.3 \
   doc/pcre2_set_max_pattern_length.3 \
@@ -179,6 +194,7 @@ dist_man_MANS = \
   doc/pcre2build.3 \
   doc/pcre2callout.3 \
   doc/pcre2compat.3 \
+  doc/pcre2convert.3 \
   doc/pcre2demo.3 \
   doc/pcre2grep.1 \
   doc/pcre2jit.3 \

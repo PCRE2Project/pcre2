@@ -401,8 +401,6 @@ typedef struct convertstruct {
 
 static convertstruct convertlist[] = {
   { "glob",                   PCRE2_CONVERT_GLOB },
-  { "glob_basic",             PCRE2_CONVERT_GLOB_BASIC },
-  { "glob_ignore_dot_start",  PCRE2_CONVERT_GLOB_IGNORE_DOT_START },
   { "glob_no_starstar",       PCRE2_CONVERT_GLOB_NO_STARSTAR },
   { "glob_no_wild_separator", PCRE2_CONVERT_GLOB_NO_WILD_SEPARATOR },
   { "posix_basic",            PCRE2_CONVERT_POSIX_BASIC },

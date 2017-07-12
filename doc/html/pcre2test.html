@@ -630,6 +630,10 @@ heavily used in the test files.
       bsr=[anycrlf|unicode]     specify \R handling
   /B  bincode                   show binary code without lengths
       callout_info              show callout information
+      convert=&#60;options&#62;         request foreign pattern conversion
+      convert_glob_escape=c     set glob escape character
+      convert_glob_separator=c  set glob separator character
+      convert_length            set convert buffer length
       debug                     same as info,fullbincode
       framesize                 show matching frame size
       fullbincode               show binary code with lengths
@@ -1065,6 +1069,41 @@ are ignored (for the stacked copy), with a warning message, except for
 <b>replace</b>, which causes an error. Note that <b>jitverify</b>, which is
 allowed, does not carry through to any subsequent matching that uses a stacked
 pattern.
+</P>
+<br><b>
+Testing foreign pattern conversion
+</b><br>
+<P>
+The experimental foreign pattern conversion functions in PCRE2 can be tested by
+setting the <b>convert</b> modifier. Its argument is a colon-separated list of
+options, which set the equivalent option for the <b>pcre2_pattern_convert()</b>
+function:
+<pre>
+  glob                    PCRE2_CONVERT_GLOB
+  glob_no_starstar        PCRE2_CONVERT_GLOB_NO_STARSTAR
+  glob_no_wild_separator  PCRE2_CONVERT_GLOB_NO_WILD_SEPARATOR
+  posix_basic             PCRE2_CONVERT_POSIX_BASIC
+  posix_extended          PCRE2_CONVERT_POSIX_EXTENDED
+  unset                   Unset all options
+</pre>
+The "unset" value is useful for turning off a default that has been set by a
+<b>#pattern</b> command. When one of these options is set, the input pattern is
+passed to <b>pcre2_pattern_convert()</b>. If the conversion is successful, the
+result is reflected in the output and then passed to <b>pcre2_compile()</b>. The
+normal <b>utf</b> and <b>no_utf_check</b> options, if set, cause the
+PCRE2_CONVERT_UTF and PCRE2_CONVERT_NO_UTF_CHECK options to be passed to
+<b>pcre2_pattern_convert()</b>.
+</P>
+<P>
+By default, the conversion function is allowed to allocate a buffer for its
+output. However, if the <b>convert_length</b> modifier is set to a value greater
+than zero, <b>pcre2test</b> passes a buffer of the given length. This makes it
+possible to test the length check.
+</P>
+<P>
+The <b>convert_glob_escape</b> and <b>convert_glob_separator</b> modifiers can be
+used to specify the escape and separator characters for glob processing,
+overriding the defaults, which are operating-system dependent.
 <a name="subjectmodifiers"></a></P>
 <br><a name="SEC11" href="#TOC1">SUBJECT MODIFIERS</a><br>
 <P>
@@ -1866,7 +1905,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC21" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 02 July 2017
+Last updated: 12 July 2017
 <br>
 Copyright &copy; 1997-2017 University of Cambridge.
 <br>

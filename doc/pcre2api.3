@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "16 June 2017" "PCRE2 10.30"
+.TH PCRE2API 3 "10 July 2017" "PCRE2 10.30"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -270,6 +270,41 @@ These functions became obsolete at release 10.30 and are retained only for
 backward compatibility. They should not be used in new code. The first is
 replaced by \fBpcre2_set_depth_limit()\fP; the second is no longer needed and
 has no effect (it always returns zero).
+.
+.
+.SH "PCRE2 EXPERIMENTAL PATTERN CONVERSION FUNCTIONS"
+.rs
+.sp
+.nf
+.B pcre2_convert_context *pcre2_convert_context_create(
+.B "  pcre2_general_context *\fIgcontext\fP);"
+.sp
+.B pcre2_convert_context *pcre2_convert_context_copy(
+.B "  pcre2_convert_context *\fIcvcontext\fP);"
+.sp
+.B void pcre2_convert_context_free(pcre2_convert_context *\fIcvcontext\fP);
+.sp
+.B int pcre2_set_glob_escape(pcre2_convert_context *\fIcvcontext\fP,
+.B "  uint32_t \fIescape_char\fP);"
+.sp
+.B int pcre2_set_glob_separator(pcre2_convert_context *\fIcvcontext\fP,
+.B "  uint32_t \fIseparator_char\fP);"
+.sp
+.B int pcre2_pattern_convert(PCRE2_SPTR \fIpattern\fP, PCRE2_SIZE \fIlength\fP,
+.B "  uint32_t \fIoptions\fP, PCRE2_UCHAR **\fIbuffer\fP,"
+.B "  PCRE2_SIZE *\fIblength\fP, pcre2_convert_context *\fIcvcontext\fP);"
+.sp
+.B void pcre2_converted_pattern_free(PCRE2_UCHAR *\fIconverted_pattern\fP);
+.fi
+.sp
+These functions provide a way of converting non-PCRE2 patterns into
+patterns that can be processed by \fBpcre2_compile()\fP. This facility is
+experimental and may be changed in future releases. At present, "globs" and
+POSIX basic and extended patterns can be converted. Details are given in the
+.\" HREF
+\fBpcre2convert\fP
+.\"
+documentation.
 .
 .
 .SH "PCRE2 8-BIT, 16-BIT, AND 32-BIT LIBRARIES"
@@ -1695,7 +1730,7 @@ dangerous option. Use with care.
   PCRE2_EXTRA_MATCH_LINE
 .sp
 This option is provided for use by the \fB-x\fP option of \fBpcre2grep\fP. It
-causes the pattern only to match complete lines. This is achieved by 
+causes the pattern only to match complete lines. This is achieved by
 automatically inserting the code for "^(?:" at the start of the compiled
 pattern and ")$" at the end. Thus, when PCRE2_MULTILINE is set, the matched
 line may be in the middle of the subject string. This option can be used with
@@ -3539,6 +3574,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 16 June 2017
+Last updated: 10 July 2017
 Copyright (c) 1997-2017 University of Cambridge.
 .fi
