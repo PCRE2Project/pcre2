@@ -2,105 +2,105 @@ Change Log for PCRE2
 --------------------
 
 
-Version 10.30-DEV 09-March-2017
--------------------------------
+Version 10.30-RC1 18-July-2017
+------------------------------
 
-1. The main interpreter, pcre2_match(), has been refactored into a new version 
-that does not use recursive function calls (and therefore the stack) for 
-remembering backtracking positions. This makes --disable-stack-for-recursion a 
+1. The main interpreter, pcre2_match(), has been refactored into a new version
+that does not use recursive function calls (and therefore the stack) for
+remembering backtracking positions. This makes --disable-stack-for-recursion a
 NOOP. The new implementation allows backtracking into recursive group calls in
-patterns, making it more compatible with Perl, and also fixes some other 
-hard-to-do issues such as #1887 in Bugzilla. The code is also cleaner because 
-the old code had a number of fudges to try to reduce stack usage. It seems to 
+patterns, making it more compatible with Perl, and also fixes some other
+hard-to-do issues such as #1887 in Bugzilla. The code is also cleaner because
+the old code had a number of fudges to try to reduce stack usage. It seems to
 run no slower than the old code.
 
 A number of bugs in the refactored code were subsequently fixed during testing
 before release, but after the code was made available in the repository. These
 bugs were never in fully released code, but are noted here for the record.
 
-  (a) If a pattern had fewer capturing parentheses than the ovector supplied in 
+  (a) If a pattern had fewer capturing parentheses than the ovector supplied in
       the match data block, a memory error (detectable by ASAN) occurred after
       a match, because the external block was being set from non-existent
       internal ovector fields. Fixes oss-fuzz issue 781.
 
-  (b) A pattern with very many capturing parentheses (when the internal frame 
-      size was greater than the initial frame vector on the stack) caused a 
-      crash. A vector on the heap is now set up at the start of matching if the 
-      vector on the stack is not big enough to handle at least 10 frames. 
-      Fixes oss-fuzz issue 783. 
-      
+  (b) A pattern with very many capturing parentheses (when the internal frame
+      size was greater than the initial frame vector on the stack) caused a
+      crash. A vector on the heap is now set up at the start of matching if the
+      vector on the stack is not big enough to handle at least 10 frames.
+      Fixes oss-fuzz issue 783.
+
   (c) Handling of (*VERB)s in recursions was wrong in some cases.
-  
+
   (d) Captures in negative assertions that were used as conditions were not
-      happening if the assertion matched via (*ACCEPT).   
-      
-  (e) Mark values were not being passed out of recursions. 
-  
-  (f) Refactor some code in do_callout() to avoid picky compiler warnings about 
+      happening if the assertion matched via (*ACCEPT).
+
+  (e) Mark values were not being passed out of recursions.
+
+  (f) Refactor some code in do_callout() to avoid picky compiler warnings about
       negative indices. Fixes oss-fuzz issue 1454.
-      
+
   (g) Similarly refactor the way the variable length ovector is addressed for
       similar reasons. Fixes oss-fuzz issue 1465.
- 
+
 2. Now that pcre2_match() no longer uses recursive function calls (see above),
-the "match limit recursion" value seems misnamed. It still exists, and limits 
-the depth of tree that is searched. To avoid future confusion, it has been 
-renamed as "depth limit" in all relevant places (--with-depth-limit, 
-(*LIMIT_DEPTH), pcre2_set_depth_limit(), etc) but the old names are still 
-available for backwards compatibility. 
-       
+the "match limit recursion" value seems misnamed. It still exists, and limits
+the depth of tree that is searched. To avoid future confusion, it has been
+renamed as "depth limit" in all relevant places (--with-depth-limit,
+(*LIMIT_DEPTH), pcre2_set_depth_limit(), etc) but the old names are still
+available for backwards compatibility.
+
 3. Hardened pcre2test so as to reduce the number of bugs reported by fuzzers:
 
-  (a) Check for malloc failures when getting memory for the ovector (POSIX) or 
-      the match data block (non-POSIX). 
-      
+  (a) Check for malloc failures when getting memory for the ovector (POSIX) or
+      the match data block (non-POSIX).
+
 4. In the 32-bit library in non-UTF mode, an attempt to find a Unicode property
 for a character with a code point greater than 0x10ffff (the Unicode maximum)
 caused a crash.
 
-5. If a lookbehind assertion that contained a back reference to a group 
+5. If a lookbehind assertion that contained a back reference to a group
 appearing later in the pattern was compiled with the PCRE2_ANCHORED option,
-undefined actions (often a segmentation fault) could occur, depending on what 
-other options were set. An example assertion is (?<!\1(abc)) where the 
+undefined actions (often a segmentation fault) could occur, depending on what
+other options were set. An example assertion is (?<!\1(abc)) where the
 reference \1 precedes the group (abc). This fixes oss-fuzz issue 865.
 
-6. Added the PCRE2_INFO_FRAMESIZE item to pcre2_pattern_info() and arranged for 
+6. Added the PCRE2_INFO_FRAMESIZE item to pcre2_pattern_info() and arranged for
 pcre2test to use it to output the frame size when the "framesize" modifier is
 given.
 
 7. Reworked the recursive pattern matching in the JIT compiler to follow the
 interpreter changes.
 
-8. When the zero_terminate modifier was specified on a pcre2test subject line 
-for global matching, unpredictable things could happen. For example, in UTF-8 
-mode, the pattern //g,zero_terminate read random memory when matched against an 
+8. When the zero_terminate modifier was specified on a pcre2test subject line
+for global matching, unpredictable things could happen. For example, in UTF-8
+mode, the pattern //g,zero_terminate read random memory when matched against an
 empty string with zero_terminate. This was a bug in pcre2test, not the library.
 
 9. Moved some Windows-specific code in pcre2grep (introduced in 10.23/13) out
 of the section that is compiled when Unix-style directory scanning is
 available, and into a new section that is always compiled for Windows.
 
-10. In pcre2test, explicitly close the file after an error during serialization 
+10. In pcre2test, explicitly close the file after an error during serialization
 or deserialization (the "load" or "save" commands).
 
 11. Fix memory leak in pcre2_serialize_decode() when the input is invalid.
 
-12. Fix potential NULL dereference in pcre2_callout_enumerate() if called with 
+12. Fix potential NULL dereference in pcre2_callout_enumerate() if called with
 a NULL pattern pointer when Unicode support is available.
 
-13. When the 32-bit library was being tested by pcre2test, error messages that 
-were longer than 64 code units could cause a buffer overflow. This was a bug in 
+13. When the 32-bit library was being tested by pcre2test, error messages that
+were longer than 64 code units could cause a buffer overflow. This was a bug in
 pcre2test.
 
-14. The alternative matching function, pcre2_dfa_match() misbehaved if it 
+14. The alternative matching function, pcre2_dfa_match() misbehaved if it
 encountered a character class with a possessive repeat, for example [a-f]{3}+.
 
-15. The depth (formerly recursion) limit now applies to DFA matching (as 
-of 10.23/36); pcre2test has been upgraded so that \=find_limits works with DFA 
+15. The depth (formerly recursion) limit now applies to DFA matching (as
+of 10.23/36); pcre2test has been upgraded so that \=find_limits works with DFA
 matching to find the minimum value for this limit.
 
-16. Since 10.21, if pcre2_match() was called with a null context, default 
-memory allocation functions were used instead of whatever was used when the 
+16. Since 10.21, if pcre2_match() was called with a null context, default
+memory allocation functions were used instead of whatever was used when the
 pattern was compiled.
 
 17. Changes to the pcre2test "memory" modifier on a subject line. These apply
@@ -108,33 +108,33 @@ only to pcre2_match():
 
   (a) Warn if null_context is set on both pattern and subject, because the
       memory details cannot then be shown.
-      
+
   (b) Remember (up to a certain number of) memory allocations and their
       lengths, and list only the lengths, so as to be system-independent.
-      (In practice, the new interpreter never has more than 2 blocks allocated 
-      simultaneously.) 
-      
+      (In practice, the new interpreter never has more than 2 blocks allocated
+      simultaneously.)
+
 18. Make pcre2test detect an error return from pcre2_get_error_message(), give
-a message, and abandon the run (this would have detected #13 above). 
+a message, and abandon the run (this would have detected #13 above).
 
 19. Implemented PCRE2_ENDANCHORED.
 
-20. Applied Jason Hood's patches (slightly modified) to pcre2grep, to implement 
+20. Applied Jason Hood's patches (slightly modified) to pcre2grep, to implement
 the --output=text (-O) option and the inbuilt callout echo.
 
-21. Extend auto-anchoring etc. to ignore groups with a zero qualifier and 
-single-branch conditions with a false condition (e.g. DEFINE) at the start of a 
+21. Extend auto-anchoring etc. to ignore groups with a zero qualifier and
+single-branch conditions with a false condition (e.g. DEFINE) at the start of a
 branch. For example, /(?(DEFINE)...)^A/ and /(...){0}^B/ are now flagged as
 anchored.
 
-22. Added an explicit limit on the amount of heap used by pcre2_match(), set by 
-pcre2_set_heap_limit() or (*LIMIT_HEAP=xxx). Upgraded pcre2test to show the 
-heap limit along with other pattern information, and to find the minimum when 
+22. Added an explicit limit on the amount of heap used by pcre2_match(), set by
+pcre2_set_heap_limit() or (*LIMIT_HEAP=xxx). Upgraded pcre2test to show the
+heap limit along with other pattern information, and to find the minimum when
 the find_limits modifier is set.
 
-23. Write to the last 8 bytes of the pcre2_real_code structure when a compiled 
-pattern is set up so as to initialize any padding the compiler might have 
-included. This avoids valgrind warnings when a compiled pattern is copied, in 
+23. Write to the last 8 bytes of the pcre2_real_code structure when a compiled
+pattern is set up so as to initialize any padding the compiler might have
+included. This avoids valgrind warnings when a compiled pattern is copied, in
 particular when it is serialized.
 
 24. Remove a redundant line of code left in accidentally a long time ago.
@@ -143,80 +143,80 @@ particular when it is serialized.
 
 26. Correct an incorrect cast in pcre2_valid_utf.c
 
-27. Update pcre2test, remove some unused code in pcre2_match(), and upgrade the 
+27. Update pcre2test, remove some unused code in pcre2_match(), and upgrade the
 tests to improve coverage.
 
 28. Some fixes/tidies as a result of looking at Coverity Scan output:
 
     (a) Typo: ">" should be ">=" in opcode check in pcre2_auto_possess.c.
-    (b) Added some casts to avoid "suspicious implicit sign extension". 
-    (c) Resource leaks in pcre2test in rare error cases. 
+    (b) Added some casts to avoid "suspicious implicit sign extension".
+    (c) Resource leaks in pcre2test in rare error cases.
     (d) Avoid warning for never-use case OP_TABLE_LENGTH which is just a fudge
-        for checking at compile time that tables are the right size.  
-    (e) Add missing "fall through" comment.     
-    
-29. Implemented PCRE2_EXTENDED_MORE and related /xx and (?xx) features. 
+        for checking at compile time that tables are the right size.
+    (e) Add missing "fall through" comment.
+
+29. Implemented PCRE2_EXTENDED_MORE and related /xx and (?xx) features.
 
 30. Implement (?n: for PCRE2_NO_AUTO_CAPTURE, because Perl now has this.
 
-31. If more than one of "push", "pushcopy", or "pushtablescopy" were set in 
+31. If more than one of "push", "pushcopy", or "pushtablescopy" were set in
 pcre2test, a crash could occur.
 
-32. Make -bigstack in RunTest allocate a 64Mb stack (instead of 16 MB) so that 
+32. Make -bigstack in RunTest allocate a 64Mb stack (instead of 16 MB) so that
 all the tests can run with clang's sanitizing options.
 
-33. Implement extra compile options in the compile context and add the first 
+33. Implement extra compile options in the compile context and add the first
 one: PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES.
 
 34. Implement newline type PCRE2_NEWLINE_NUL.
 
-35. A lookbehind assertion that had a zero-length branch caused undefined 
+35. A lookbehind assertion that had a zero-length branch caused undefined
 behaviour when processed by pcre2_dfa_match(). This is oss-fuzz issue 1859.
 
-36. The match limit value now also applies to pcre2_dfa_match() as there are 
-patterns that can use up a lot of resources without necessarily recursing very 
+36. The match limit value now also applies to pcre2_dfa_match() as there are
+patterns that can use up a lot of resources without necessarily recursing very
 deeply. (Compare item 10.23/36.) This should fix oss-fuzz #1761.
 
 37. Implement PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL.
 
-38. Fix returned offsets from regexec() when REG_STARTEND is used with a 
+38. Fix returned offsets from regexec() when REG_STARTEND is used with a
 starting offset greater than zero.
 
 39. Implement REG_PEND (GNU extension) for the POSIX wrapper.
 
-40. Implement the subject_literal modifier in pcre2test, and allow jitstack on 
+40. Implement the subject_literal modifier in pcre2test, and allow jitstack on
 pattern lines.
 
 41. Implement PCRE2_LITERAL and use it to support REG_NOSPEC.
 
-42. Implement PCRE2_EXTRA_MATCH_LINE and PCRE2_EXTRA_MATCH_WORD for the benefit 
+42. Implement PCRE2_EXTRA_MATCH_LINE and PCRE2_EXTRA_MATCH_WORD for the benefit
 of pcre2grep.
 
-43. Re-implement pcre2grep's -F, -w, and -x options using PCRE2_LITERAL, 
+43. Re-implement pcre2grep's -F, -w, and -x options using PCRE2_LITERAL,
 PCRE2_EXTRA_MATCH_WORD, and PCRE2_EXTRA_MATCH_LINE. This fixes two bugs:
 
     (a) The -F option did not work for fixed strings containing \E.
-    (b) The -w option did not work for patterns with multiple branches. 
-    
+    (b) The -w option did not work for patterns with multiple branches.
+
 44. Added configuration options for the SELinux compatible execmem allocator in
 JIT.
 
-45. Increased the limit for searching for a "must be present" code unit in 
-subjects from 1000 to 2000 for 8-bit searches, since they use memchr() and are 
+45. Increased the limit for searching for a "must be present" code unit in
+subjects from 1000 to 2000 for 8-bit searches, since they use memchr() and are
 much faster.
 
 46. Arrange for anchored patterns to record and use "first code unit" data,
-because this can give a fast "no match" without searching for a "required code 
+because this can give a fast "no match" without searching for a "required code
 unit". Previously only non-anchored patterns did this.
 
 47. Upgraded the Unicode tables from Unicode 8.0.0 to Unicode 10.0.0.
 
 48. Add the callout_no_where modifier to pcre2test.
 
-49. Update extended grapheme breaking rules to the latest set that are in 
+49. Update extended grapheme breaking rules to the latest set that are in
 Unicode Standard Annex #29.
 
-50. Added experimental foreign pattern conversion facilities 
+50. Added experimental foreign pattern conversion facilities
 (pcre2_pattern_convert() and friends).
 
 

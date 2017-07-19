@@ -80,7 +80,7 @@ if (where == NULL)   /* Requests field length */
     case PCRE2_INFO_FIRSTCODEUNIT:
     case PCRE2_INFO_HASBACKSLASHC:
     case PCRE2_INFO_HASCRORLF:
-    case PCRE2_INFO_HEAPLIMIT: 
+    case PCRE2_INFO_HEAPLIMIT:
     case PCRE2_INFO_JCHANGED:
     case PCRE2_INFO_LASTCODETYPE:
     case PCRE2_INFO_LASTCODEUNIT:

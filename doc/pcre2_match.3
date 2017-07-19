@@ -31,14 +31,14 @@ offsets to captured substrings. Its arguments are:
 A match context is needed only if you want to:
 .sp
   Set up a callout function
-  Set a matching offset limit 
-  Change the heap memory limit 
-  Change the backtracking match limit 
+  Set a matching offset limit
+  Change the heap memory limit
+  Change the backtracking match limit
   Change the backtracking depth limit
   Set custom memory management specifically for the match
 .sp
 The \fIlength\fP and \fIstartoffset\fP values are code
-units, not characters. The length may be given as PCRE2_ZERO_TERMINATE for a 
+units, not characters. The length may be given as PCRE2_ZERO_TERMINATE for a
 subject that is terminated by a binary zero code unit. The options are:
 .sp
   PCRE2_ANCHORED          Match only at the first position
@@ -49,7 +49,7 @@ subject that is terminated by a binary zero code unit. The options are:
 .\" JOIN
   PCRE2_NOTEMPTY_ATSTART  An empty string at the start of the subject
                            is not a valid match
-  PCRE2_NO_JIT            Do not use JIT matching                          
+  PCRE2_NO_JIT            Do not use JIT matching
 .\" JOIN
   PCRE2_NO_UTF_CHECK      Do not check the subject for UTF
                            validity (only relevant if PCRE2_UTF

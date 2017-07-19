@@ -12,7 +12,7 @@ of them.
 .rs
 .sp
 Patterns are compiled by PCRE2 into a reasonably efficient interpretive code,
-so that most simple patterns do not use much memory for storing the compiled 
+so that most simple patterns do not use much memory for storing the compiled
 version. However, there is one case where the memory usage of a compiled
 pattern can be unexpectedly large. If a parenthesized subpattern has a
 quantifier with a minimum greater than 1 and/or a limited maximum, the whole
@@ -76,7 +76,7 @@ memory can be limited; if the limit is set to zero, only the initial stack
 vector is used. Rewriting patterns to be time-efficient, as described below,
 may also reduce the memory requirements.
 .P
-In contrast to \fBpcre2_match()\fP, \fBpcre2_dfa_match()\fP does use recursive 
+In contrast to \fBpcre2_match()\fP, \fBpcre2_dfa_match()\fP does use recursive
 function calls, but only for processing atomic groups, lookaround assertions,
 and recursion within the pattern. Too much nested recursion may cause stack
 issues. The "match depth" parameter can be used to limit the depth of function
@@ -163,7 +163,7 @@ applied to a whole line of "a" characters, whereas the latter takes an
 appreciable time with strings longer than about 20 characters.
 .P
 In many cases, the solution to this kind of performance issue is to use an
-atomic group or a possessive quantifier. This can often reduce memory 
+atomic group or a possessive quantifier. This can often reduce memory
 requirements as well. As another example, consider this pattern:
 .sp
   ([^<]|<(?!inet))+
@@ -184,7 +184,7 @@ are "swallowed" in one item inside the parentheses, and a possessive quantifier
 is used to stop any backtracking into the runs of non-"<" characters. This
 version also uses a lot less memory because entry to a new set of parentheses
 happens only when a "<" character that is not followed by "inet" is encountered
-(and we assume this is relatively rare). 
+(and we assume this is relatively rare).
 .P
 This example shows that one way of optimizing performance when matching long
 subject strings is to write repeated parenthesized subpatterns to match more
@@ -194,10 +194,10 @@ than one character whenever possible.
 .SS "SETTING RESOURCE LIMITS"
 .rs
 .sp
-You can set limits on the amount of processing that takes place when matching, 
+You can set limits on the amount of processing that takes place when matching,
 and on the amount of heap memory that is used. The default values of the limits
 are very large, and unlikely ever to operate. They can be changed when PCRE2 is
-built, and they can also be set when \fBpcre2_match()\fP or 
+built, and they can also be set when \fBpcre2_match()\fP or
 \fBpcre2_dfa_match()\fP is called. For details of these interfaces, see the
 .\" HREF
 \fBpcre2build\fP

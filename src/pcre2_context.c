@@ -198,7 +198,7 @@ const pcre2_convert_context PRIV(default_convert_context) = {
   CHAR_BACKSLASH,                            /* Default path separator */
   CHAR_GRAVE_ACCENT                          /* Default escape character */
 #else  /* Not Windows */
-  CHAR_SLASH,                                /* Default path separator */  
+  CHAR_SLASH,                                /* Default path separator */
   CHAR_BACKSLASH                             /* Default escape character */
 #endif
   };
@@ -359,7 +359,7 @@ switch(newline)
   case PCRE2_NEWLINE_CRLF:
   case PCRE2_NEWLINE_ANY:
   case PCRE2_NEWLINE_ANYCRLF:
-  case PCRE2_NEWLINE_NUL: 
+  case PCRE2_NEWLINE_NUL:
   ccontext->newline_convention = newline;
   return 0;
 

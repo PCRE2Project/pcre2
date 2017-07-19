@@ -4073,7 +4073,8 @@ else fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%
 *           Show compile extra options           *
 *************************************************/
 
-/* Called for unsupported POSIX options.
+/* Called only for unsupported POSIX options at present, and therefore needed
+only when the 8-bit library is being compiled.
 
 Arguments:
   options     an options word
@@ -4083,17 +4084,21 @@ Arguments:
 Returns:      nothing
 */
 
+#ifdef SUPPORT_PCRE2_8
 static void
 show_compile_extra_options(uint32_t options, const char *before,
   const char *after)
 {
 if (options == 0) fprintf(outfile, "%s <none>%s", before, after);
-else fprintf(outfile, "%s%s%s%s",
+else fprintf(outfile, "%s%s%s%s%s%s",
   before,
   ((options & PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES) != 0)? " allow_surrogate_escapes" : "",
   ((options & PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL) != 0)? " bad_escape_is_literal" : "",
+  ((options & PCRE2_EXTRA_MATCH_WORD) != 0)? " match_word" : "",
+  ((options & PCRE2_EXTRA_MATCH_LINE) != 0)? " match_line" : "",
   after);
 }
+#endif
 
 
 

@@ -95,17 +95,6 @@
     aaac
     abbbbbbbbbbbac
 
-/^(b+|a){1,2}?bc/
-    bbc
-
-/^(b*|ba){1,2}?bc/
-    babc
-    bbabc
-    bababc
-\= Expect no match
-    bababbc
-    babababc
-
 /^(ba|b*){1,2}?bc/
     babc
     bbabc

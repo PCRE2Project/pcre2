@@ -93,13 +93,13 @@ enum {
 };
 
 
-/* The structure representing a compiled regular expression. It is also used 
+/* The structure representing a compiled regular expression. It is also used
 for passing the pattern end pointer when REG_PEND is set. */
 
 typedef struct {
   void *re_pcre2_code;
   void *re_match_data;
-  const char *re_endp; 
+  const char *re_endp;
   size_t re_nsub;
   size_t re_erroffset;
   int re_cflags;

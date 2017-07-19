@@ -10,17 +10,17 @@ dnl be defined as -RC2, for example. For real releases, it should be empty.
 
 m4_define(pcre2_major, [10])
 m4_define(pcre2_minor, [30])
-m4_define(pcre2_prerelease, [-DEV])
-m4_define(pcre2_date, [2017-03-05])
+m4_define(pcre2_prerelease, [-RC1])
+m4_define(pcre2_date, [2017-07-18])
 
 # NOTE: The CMakeLists.txt file searches for the above variables in the first
 # 50 lines of this file. Please update that if the variables above are moved.
 
 # Libtool shared library interface versions (current:revision:age)
-m4_define(libpcre2_8_version,     [5:0:5])
-m4_define(libpcre2_16_version,    [5:0:5])
-m4_define(libpcre2_32_version,    [5:0:5])
-m4_define(libpcre2_posix_version, [1:1:0])
+m4_define(libpcre2_8_version,     [6:0:6])
+m4_define(libpcre2_16_version,    [6:0:6])
+m4_define(libpcre2_32_version,    [6:0:6])
+m4_define(libpcre2_posix_version, [2:0:0])
 
 AC_PREREQ(2.57)
 AC_INIT(PCRE2, pcre2_major.pcre2_minor[]pcre2_prerelease, , pcre2)
@@ -277,7 +277,7 @@ AC_ARG_WITH(parens-nest-limit,
 AC_ARG_WITH(heap-limit,
             AS_HELP_STRING([--with-heap-limit=N],
                            [default limit on heap memory (kilobytes, default=20000000)]),
-            , with_heap_limit=20000000)                
+            , with_heap_limit=20000000)
 
 # Handle --with-match-limit=N
 AC_ARG_WITH(match-limit,
@@ -301,7 +301,7 @@ AC_ARG_WITH(match-limit-depth,
 
 AC_ARG_WITH(match-limit-recursion,,
             , with_match_limit_recursion=UNSET)
-            
+
 # Handle --enable-valgrind
 AC_ARG_ENABLE(valgrind,
               AS_HELP_STRING([--enable-valgrind],
@@ -370,7 +370,7 @@ case "$enable_newline" in
   crlf)    ac_pcre2_newline_value=3 ;;
   any)     ac_pcre2_newline_value=4 ;;
   anycrlf) ac_pcre2_newline_value=5 ;;
-  nul)     ac_pcre2_newline_value=6 ;; 
+  nul)     ac_pcre2_newline_value=6 ;;
   *)
   AC_MSG_ERROR([invalid argument \"$enable_newline\" to --enable-newline option])
   ;;
@@ -737,7 +737,7 @@ AC_DEFINE_UNQUOTED([MATCH_LIMIT_DEPTH], [$with_match_limit_depth], [
 
 AC_DEFINE_UNQUOTED([HEAP_LIMIT], [$with_heap_limit], [
   This limits the amount of memory that pcre2_match() may use while matching
-  a pattern. The value is in kilobytes.]) 
+  a pattern. The value is in kilobytes.])
 
 AC_DEFINE([MAX_NAME_SIZE], [32], [
   This limit is parameterized just in case anybody ever wants to

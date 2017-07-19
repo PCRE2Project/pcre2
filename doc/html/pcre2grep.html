@@ -517,20 +517,20 @@ memory. There are three options that set resource limits for matching.
 The <b>--match-limit</b> option provides a means of limiting computing resource
 usage when processing patterns that are not going to match, but which have a
 very large number of possibilities in their search trees. The classic example
-is a pattern that uses nested unlimited repeats. Internally, PCRE2 has a 
-counter that is incremented each time around its main processing loop. If the 
+is a pattern that uses nested unlimited repeats. Internally, PCRE2 has a
+counter that is incremented each time around its main processing loop. If the
 value set by <b>--match-limit</b> is reached, an error occurs.
 <br>
 <br>
 The <b>--heap-limit</b> option specifies, as a number of kilobytes, the amount
 of heap memory that may be used for matching. Heap memory is needed only if
 matching the pattern requires a significant number of nested backtracking
-points to be remembered. This parameter can be set to zero to forbid the use of 
+points to be remembered. This parameter can be set to zero to forbid the use of
 heap memory altogether.
 <br>
 <br>
 The <b>--depth-limit</b> option limits the depth of nested backtracking points,
-which indirectly limits the amount of memory that is used. The amount of memory 
+which indirectly limits the amount of memory that is used. The amount of memory
 needed for each backtracking point depends on the number of capturing
 parentheses in the pattern, so the amount of memory that is used before this
 limit acts varies from pattern to pattern. This limit is of use only if it is
@@ -538,7 +538,7 @@ set smaller than <b>--match-limit</b>.
 <br>
 <br>
 There are no short forms for these options. The default settings are specified
-when the PCRE2 library is compiled, with the default defaults being very large 
+when the PCRE2 library is compiled, with the default defaults being very large
 and so effectively unlimited.
 </P>
 <P>
@@ -841,7 +841,7 @@ patterns are ignored by <b>pcre2grep</b>.
 A callout in a PCRE2 pattern is of the form (?C&#60;arg&#62;) where the argument is
 either a number or a quoted string (see the
 <a href="pcre2callout.html"><b>pcre2callout</b></a>
-documentation for details). Numbered callouts are ignored by <b>pcre2grep</b>; 
+documentation for details). Numbered callouts are ignored by <b>pcre2grep</b>;
 only callouts with string arguments are useful.
 </P>
 <br><b>
@@ -892,10 +892,10 @@ Echoing a specific string
 If the callout string starts with a pipe (vertical bar) character, the rest of
 the string is written to the output, having been passed through the same escape
 processing as text from the --output option. This provides a simple echoing
-facility that avoids calling an external program or script. No terminator is 
+facility that avoids calling an external program or script. No terminator is
 added to the string, so if you want a newline, you must include it explicitly.
-Matching continues normally after the string is output. If you want to see only 
-the callout output but not any output from an actual match, you should end the 
+Matching continues normally after the string is output. If you want to see only
+the callout output but not any output from an actual match, you should end the
 relevant pattern with (*FAIL).
 </P>
 <br><a name="SEC11" href="#TOC1">MATCHING ERRORS</a><br>
@@ -910,8 +910,8 @@ there are more than 20 such errors, <b>pcre2grep</b> gives up.
 </P>
 <P>
 The <b>--match-limit</b> option of <b>pcre2grep</b> can be used to set the
-overall resource limit. There are also other limits that affect the amount of 
-memory used during matching; see the discussion of <b>--heap-limit</b> and 
+overall resource limit. There are also other limits that affect the amount of
+memory used during matching; see the discussion of <b>--heap-limit</b> and
 <b>--depth-limit</b> above.
 </P>
 <br><a name="SEC12" href="#TOC1">DIAGNOSTICS</a><br>

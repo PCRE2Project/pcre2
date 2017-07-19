@@ -240,7 +240,7 @@ not rely on this. */
 
 #define COMPILE_ERROR_BASE 100
 
-/* The initial frames vector for remembering backtracking points in 
+/* The initial frames vector for remembering backtracking points in
 pcre2_match() is allocated on the system stack, of this size (bytes). The size
 must be a multiple of sizeof(PCRE2_SPTR) in all environments, so making it a
 multiple of 8 is best. Typical frame sizes are a few hundred bytes (it depends
@@ -557,7 +557,7 @@ enum { PCRE2_MATCHEDBY_INTERPRETER,     /* pcre2_match() */
 #define MAGIC_NUMBER  0x50435245UL   /* 'PCRE' */
 
 /* The maximum remaining length of subject we are prepared to search for a
-req_unit match. In 8-bit mode, memchr() is used and is much faster than the 
+req_unit match. In 8-bit mode, memchr() is used and is much faster than the
 search loop that has to be used in 16-bit and 32-bit modes. */
 
 #if PCRE2_CODE_UNIT_WIDTH == 8

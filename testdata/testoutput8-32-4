@@ -853,10 +853,8 @@ Memory allocation (code space): 28
 # with link size - hence multiple tests with different values.
 
 /(?'ABC'\[[bar](]{792}*THEN:\[A]{255}\[)]{793}/expand,-fullbincode,parens_nest_limit=1000
-Failed: error 186 at offset 5813: regular expression is too complicated
 
 /(?'ABC'\[[bar](]{793}*THEN:\[A]{255}\[)]{794}/expand,-fullbincode,parens_nest_limit=1000
-Failed: error 186 at offset 5820: regular expression is too complicated
 
 /(?'ABC'\[[bar](]{1793}*THEN:\[A]{255}\[)]{1794}/expand,-fullbincode,parens_nest_limit=2000
 Failed: error 186 at offset 12820: regular expression is too complicated

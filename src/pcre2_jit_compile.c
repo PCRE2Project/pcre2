@@ -3829,7 +3829,7 @@ while (TRUE)
     {
     case OP_CHARI:
     caseless = TRUE;
-    /* Fall through */ 
+    /* Fall through */
     case OP_CHAR:
     last = FALSE;
     cc++;
@@ -3861,7 +3861,7 @@ while (TRUE)
     case OP_MINPLUSI:
     case OP_POSPLUSI:
     caseless = TRUE;
-    /* Fall through */ 
+    /* Fall through */
     case OP_PLUS:
     case OP_MINPLUS:
     case OP_POSPLUS:
@@ -3870,7 +3870,7 @@ while (TRUE)
 
     case OP_EXACTI:
     caseless = TRUE;
-    /* Fall through */ 
+    /* Fall through */
     case OP_EXACT:
     repeat = GET2(cc, 1);
     last = FALSE;
@@ -3881,7 +3881,7 @@ while (TRUE)
     case OP_MINQUERYI:
     case OP_POSQUERYI:
     caseless = TRUE;
-    /* Fall through */ 
+    /* Fall through */
     case OP_QUERY:
     case OP_MINQUERY:
     case OP_POSQUERY:
@@ -4351,7 +4351,7 @@ struct sljit_jump *quit;
 struct sljit_jump *partial_quit[2];
 sljit_u8 instruction[8];
 sljit_s32 tmp1_ind = sljit_get_register_index(TMP1);
-sljit_s32 tmp2_ind = sljit_get_register_index(TMP2);
+// sljit_s32 tmp2_ind = sljit_get_register_index(TMP2);
 sljit_s32 str_ptr_ind = sljit_get_register_index(STR_PTR);
 sljit_s32 data_ind = 0;
 sljit_s32 tmp_ind = 1;
@@ -4376,7 +4376,9 @@ if (common->mode == PCRE2_JIT_COMPLETE)
 
 OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, character_to_int32(char1 | bit));
 
-SLJIT_ASSERT(tmp1_ind < 8 && tmp2_ind == 1);
+// SLJIT_ASSERT(tmp1_ind < 8 && tmp2_ind == 1);
+
+SLJIT_ASSERT(tmp1_ind < 8);
 
 /* MOVD xmm, r/m32 */
 instruction[0] = 0x66;

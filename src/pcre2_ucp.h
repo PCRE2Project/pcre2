@@ -264,7 +264,7 @@ enum {
   ucp_Multani,
   ucp_Old_Hungarian,
   ucp_SignWriting,
-  /* New for Unicode 10.0.0 (no update since 8.0.0) */ 
+  /* New for Unicode 10.0.0 (no update since 8.0.0) */
   ucp_Adlam,
   ucp_Bhaiksuki,
   ucp_Marchen,
@@ -272,7 +272,7 @@ enum {
   ucp_Osage,
   ucp_Tangut,
   ucp_Masaram_Gondi,
-  ucp_Nushu, 
+  ucp_Nushu,
   ucp_Soyombo,
   ucp_Zanabazar_Square
 };

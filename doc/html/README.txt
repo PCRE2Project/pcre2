@@ -173,7 +173,7 @@ library. They are also documented in the pcre2build man page.
   architectures. If you try to enable it on an unsupported architecture, there
   will be a compile time error. If you are running under SELinux you may also
   want to add --enable-jit-sealloc, which enables the use of an execmem
-  allocator in JIT that is compatible with SELinux. This has no effect if JIT 
+  allocator in JIT that is compatible with SELinux. This has no effect if JIT
   is not enabled.
 
 . If you do not want to make use of the default support for UTF-8 Unicode
@@ -198,13 +198,14 @@ library. They are also documented in the pcre2build man page.
   or starting a pattern with (*UCP).
 
 . You can build PCRE2 to recognize either CR or LF or the sequence CRLF, or any
-  of the preceding, or any of the Unicode newline sequences, as indicating the
-  end of a line. Whatever you specify at build time is the default; the caller
-  of PCRE2 can change the selection at run time. The default newline indicator
-  is a single LF character (the Unix standard). You can specify the default
-  newline indicator by adding --enable-newline-is-cr, --enable-newline-is-lf,
-  --enable-newline-is-crlf, --enable-newline-is-anycrlf, or
-  --enable-newline-is-any to the "configure" command, respectively.
+  of the preceding, or any of the Unicode newline sequences, or the NUL (zero)
+  character as indicating the end of a line. Whatever you specify at build time
+  is the default; the caller of PCRE2 can change the selection at run time. The
+  default newline indicator is a single LF character (the Unix standard). You
+  can specify the default newline indicator by adding --enable-newline-is-cr,
+  --enable-newline-is-lf, --enable-newline-is-crlf,
+  --enable-newline-is-anycrlf, --enable-newline-is-any, or
+  --enable-newline-is-nul to the "configure" command, respectively.
 
 . By default, the sequence \R in a pattern matches any Unicode line ending
   sequence. This is independent of the option specifying what PCRE2 considers
@@ -227,15 +228,15 @@ library. They are also documented in the pcre2build man page.
   --with-parens-nest-limit=500
 
 . PCRE2 has a counter that can be set to limit the amount of computing resource
-  it uses when matching a pattern with the Perl-compatible matching function.
-  If the limit is exceeded during a match, the match fails. The default is ten
-  million. You can change the default by setting, for example,
+  it uses when matching a pattern. If the limit is exceeded during a match, the
+  match fails. The default is ten million. You can change the default by
+  setting, for example,
 
   --with-match-limit=500000
 
   on the "configure" command. This is just the default; individual calls to
-  pcre2_match() can supply their own value. There is more discussion in the
-  pcre2api man page (search for pcre2_set_match_limit).
+  pcre2_match() or pcre2_dfa_match() can supply their own value. There is more
+  discussion in the pcre2api man page (search for pcre2_set_match_limit).
 
 . There is a separate counter that limits the depth of nested backtracking
   during a matching process, which indirectly limits the amount of heap memory
@@ -246,15 +247,15 @@ library. They are also documented in the pcre2build man page.
 
   There is more discussion in the pcre2api man page (search for
   pcre2_set_depth_limit).
-  
-. You can also set an explicit limit on the amount of heap memory used by 
+
+. You can also set an explicit limit on the amount of heap memory used by
   the pcre2_match() interpreter:
-  
+
   --with-heap-limit=500
-  
-  The units are kilobytes. This limit does not apply when the JIT optimization 
-  (which has its own memory control features) is used. There is more discussion 
-  on the pcre2api man page (search for pcre2_set_heap_limit).  
+
+  The units are kilobytes. This limit does not apply when the JIT optimization
+  (which has its own memory control features) is used. There is more discussion
+  on the pcre2api man page (search for pcre2_set_heap_limit).
 
 . In the 8-bit library, the default maximum compiled pattern size is around
   64K bytes. You can increase this by adding --with-link-size=3 to the
@@ -659,9 +660,10 @@ with the perltest.sh script, and test 5 checking PCRE2-specific things.
 Tests 6 and 7 check the pcre2_dfa_match() alternative matching function, in
 non-UTF mode and UTF-mode with Unicode property support, respectively.
 
-Test 8 checks some internal offsets and code size features; it is run only when
-the default "link size" of 2 is set (in other cases the sizes change) and when
-Unicode support is enabled.
+Test 8 checks some internal offsets and code size features, but it is run only
+when Unicode support is enabled. The output is different in 8-bit, 16-bit, and
+32-bit modes and for different link sizes, so there are different output files
+for each mode and link size.
 
 Tests 9 and 10 are run only in 8-bit mode, and tests 11 and 12 are run only in
 16-bit and 32-bit modes. These are tests that generate different output in
@@ -671,7 +673,7 @@ Test 13 checks the handling of non-UTF characters greater than 255 by
 pcre2_dfa_match() in 16-bit and 32-bit modes.
 
 Test 14 contains some special UTF and UCP tests that give different output for
-the different widths.
+different code unit widths.
 
 Test 15 contains a number of tests that must not be run with JIT. They check,
 among other non-JIT things, the match-limiting features of the intepretive
@@ -692,6 +694,9 @@ patterns to a file, and then reloading and checking them.
 Tests 21 and 22 test \C support when the use of \C is not locked out, without
 and with UTF support, respectively. Test 23 tests \C when it is locked out.
 
+Tests 24 and 25 test the experimental pattern conversion functions, without and
+with UTF support, respectively.
+
 
 Character tables
 ----------------
@@ -710,7 +715,7 @@ specified for ./configure, a different version of pcre2_chartables.c is built
 by the program dftables (compiled from dftables.c), which uses the ANSI C
 character handling functions such as isalnum(), isalpha(), isupper(),
 islower(), etc. to build the table sources. This means that the default C
-locale which is set for your system will control the contents of these default
+locale that is set for your system will control the contents of these default
 tables. You can change the default tables by editing pcre2_chartables.c and
 then re-building PCRE2. If you do this, you should take care to ensure that the
 file does not get automatically re-generated. The best way to do this is to
@@ -765,6 +770,7 @@ The distribution should contain the files listed below.
   src/pcre2_compile.c      )
   src/pcre2_config.c       )
   src/pcre2_context.c      )
+  src/pcre2_convert.c      )
   src/pcre2_dfa_match.c    )
   src/pcre2_error.c        )
   src/pcre2_find_bracket.c )
@@ -804,7 +810,6 @@ The distribution should contain the files listed below.
   src/pcre2demo.c          simple demonstration of coding calls to PCRE2
   src/pcre2grep.c          source of a grep utility that uses PCRE2
   src/pcre2test.c          comprehensive test program
-  src/pcre2_printint.c     part of pcre2test
   src/pcre2_jit_test.c     JIT test program
 
 (C) Auxiliary files:
@@ -869,12 +874,12 @@ The distribution should contain the files listed below.
 
 (E) Auxiliary files for building PCRE2 "by hand"
 
-  pcre2.h.generic         ) a version of the public PCRE2 header file
+  src/pcre2.h.generic     ) a version of the public PCRE2 header file
                           )   for use in non-"configure" environments
-  config.h.generic        ) a version of config.h for use in non-"configure"
+  src/config.h.generic    ) a version of config.h for use in non-"configure"
                           )   environments
 
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 17 June 2017
+Last updated: 18 July 2017

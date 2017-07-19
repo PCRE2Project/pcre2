@@ -132,6 +132,12 @@ sure both macros are undefined; an emulation function will then be used. */
 /* Define to 1 if you have the <zlib.h> header file. */
 /* #undef HAVE_ZLIB_H */
 
+/* This limits the amount of memory that pcre2_match() may use while matching
+   a pattern. The value is in kilobytes. */
+#ifndef HEAP_LIMIT
+#define HEAP_LIMIT 20000000
+#endif
+
 /* The value of LINK_SIZE determines the number of bytes used to store links
    as offsets within the compiled regex. The default is 2, which allows for
    compiled patterns up to 64K long. This covers the vast majority of cases.
@@ -148,7 +154,7 @@ sure both macros are undefined; an emulation function will then be used. */
 #endif
 
 /* The value of MATCH_LIMIT determines the default number of times the
-   internal match() function can record a backtrack position during a single
+   pcre2_match() function can record a backtrack position during a single
    matching attempt. There is a runtime interface for setting a different
    limit. The limit exists in order to catch runaway regular expressions that
    take for ever to determine that they do not match. The default is set very
@@ -188,8 +194,8 @@ sure both macros are undefined; an emulation function will then be used. */
 
 /* The value of NEWLINE_DEFAULT determines the default newline character
    sequence. PCRE2 client programs can override this by selecting other values
-   at run time. The valid values are 1 (CR), 2 (LF), 3 (CRLF), 4 (ANY), and 5
-   (ANYCRLF). */
+   at run time. The valid values are 1 (CR), 2 (LF), 3 (CRLF), 4 (ANY), 5
+   (ANYCRLF), and 6 (NUL). */
 #ifndef NEWLINE_DEFAULT
 #define NEWLINE_DEFAULT 2
 #endif
@@ -204,7 +210,7 @@ sure both macros are undefined; an emulation function will then be used. */
 #define PACKAGE_NAME "PCRE2"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "PCRE2 10.30-DEV"
+#define PACKAGE_STRING "PCRE2 10.30-RC1"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "pcre2"
@@ -213,7 +219,7 @@ sure both macros are undefined; an emulation function will then be used. */
 #define PACKAGE_URL ""
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "10.30-DEV"
+#define PACKAGE_VERSION "10.30-RC1"
 
 /* The value of PARENS_NEST_LIMIT specifies the maximum depth of nested
    parentheses (of any kind) in a pattern. This limits the amount of system
@@ -260,6 +266,11 @@ sure both macros are undefined; an emulation function will then be used. */
 /* Define to necessary symbol if this constant uses a non-standard name on
    your system. */
 /* #undef PTHREAD_CREATE_JOINABLE */
+
+/* Define to any non-zero number to enable support for SELinux compatible
+   executable memory allocator in JIT. Note that this will have no effect
+   unless SUPPORT_JIT is also defined. */
+/* #undef SLJIT_PROT_EXECUTABLE_ALLOCATOR */
 
 /* Define to 1 if you have the ANSI C header files. */
 /* #undef STDC_HEADERS */
@@ -328,7 +339,7 @@ sure both macros are undefined; an emulation function will then be used. */
 #endif
 
 /* Version number of package */
-#define VERSION "10.30-DEV"
+#define VERSION "10.30-RC1"
 
 /* Define to 1 if on MINIX. */
 /* #undef _MINIX */

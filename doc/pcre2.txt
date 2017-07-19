@@ -170,8 +170,8 @@ REVISION
        Last updated: 01 April 2017
        Copyright (c) 1997-2017 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCRE2API(3)                Library Functions Manual                PCRE2API(3)
 
 
@@ -3432,8 +3432,8 @@ REVISION
        Last updated: 10 July 2017
        Copyright (c) 1997-2017 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCRE2BUILD(3)              Library Functions Manual              PCRE2BUILD(3)
 
 
@@ -3487,10 +3487,10 @@ PCRE2 BUILD-TIME OPTIONS
 BUILDING 8-BIT, 16-BIT AND 32-BIT LIBRARIES
 
        By default, a library called libpcre2-8 is built, containing  functions
-       that  take  string arguments contained in vectors of bytes, interpreted
+       that  take  string  arguments contained in arrays of bytes, interpreted
        either as single-byte characters, or UTF-8 strings. You can also  build
        two  other libraries, called libpcre2-16 and libpcre2-32, which process
-       strings that are contained in vectors of 16-bit and 32-bit code  units,
+       strings that are contained in arrays of 16-bit and 32-bit  code  units,
        respectively. These can be interpreted either as single-unit characters
        or UTF-16/UTF-32 strings. To build these additional libraries, add  one
        or both of the following to the configure command:
@@ -3609,7 +3609,7 @@ NEWLINE RECOGNITION
          --enable-newline-is-anycrlf
 
        which  causes  PCRE2 to recognize any of the three sequences CR, LF, or
-       CRLF as indicating a line ending. Finally, a fifth option, specified by
+       CRLF as indicating a line ending. A fifth option, specified by
 
          --enable-newline-is-any
 
@@ -3617,97 +3617,103 @@ NEWLINE RECOGNITION
        newline sequences are the three just mentioned, plus the single charac-
        ters VT (vertical tab, U+000B), FF (form feed, U+000C), NEL (next line,
        U+0085),  LS  (line  separator,  U+2028),  and PS (paragraph separator,
-       U+2029).
+       U+2029). The final option is
+
+         --enable-newline-is-nul
+
+       which causes NUL (binary zero) is set as the default line-ending  char-
+       acter.
 
        Whatever default line ending convention is selected when PCRE2 is built
-       can  be  overridden by applications that use the library. At build time
-       it is conventional to use the standard for your operating system.
+       can be overridden by applications that use the library. At  build  time
+       it is recommended to use the standard for your operating system.
 
 
 WHAT \R MATCHES
 
-       By default, the sequence \R in a pattern matches  any  Unicode  newline
-       sequence,  independently  of  what has been selected as the line ending
+       By  default,  the  sequence \R in a pattern matches any Unicode newline
+       sequence, independently of what has been selected as  the  line  ending
        sequence. If you specify
 
          --enable-bsr-anycrlf
 
-       the default is changed so that \R matches only CR, LF, or  CRLF.  What-
-       ever  is selected when PCRE2 is built can be overridden by applications
+       the  default  is changed so that \R matches only CR, LF, or CRLF. What-
+       ever is selected when PCRE2 is built can be overridden by  applications
        that use the library.
 
 
 HANDLING VERY LARGE PATTERNS
 
-       Within a compiled pattern, offset values are used  to  point  from  one
-       part  to another (for example, from an opening parenthesis to an alter-
-       nation metacharacter). By default, in the 8-bit and  16-bit  libraries,
-       two-byte  values  are used for these offsets, leading to a maximum size
-       for a compiled pattern of around 64K code units. This is sufficient  to
+       Within  a  compiled  pattern,  offset values are used to point from one
+       part to another (for example, from an opening parenthesis to an  alter-
+       nation  metacharacter).  By default, in the 8-bit and 16-bit libraries,
+       two-byte values are used for these offsets, leading to a  maximum  size
+       for  a compiled pattern of around 64K code units. This is sufficient to
        handle all but the most gigantic patterns. Nevertheless, some people do
-       want to process truly enormous patterns, so it is possible  to  compile
-       PCRE2  to  use three-byte or four-byte offsets by adding a setting such
+       want  to  process truly enormous patterns, so it is possible to compile
+       PCRE2 to use three-byte or four-byte offsets by adding a  setting  such
        as
 
          --with-link-size=3
 
-       to the configure command. The value given must be 2, 3, or 4.  For  the
-       16-bit  library,  a  value of 3 is rounded up to 4. In these libraries,
-       using longer offsets slows down the operation of PCRE2 because  it  has
-       to  load additional data when handling them. For the 32-bit library the
-       value is always 4 and cannot be overridden; the value  of  --with-link-
+       to  the  configure command. The value given must be 2, 3, or 4. For the
+       16-bit library, a value of 3 is rounded up to 4.  In  these  libraries,
+       using  longer  offsets slows down the operation of PCRE2 because it has
+       to load additional data when handling them. For the 32-bit library  the
+       value  is  always 4 and cannot be overridden; the value of --with-link-
        size is ignored.
 
 
 LIMITING PCRE2 RESOURCE USAGE
 
        The pcre2_match() function increments a counter each time it goes round
-       its main loop. Putting a limit on this counter controls the  amount  of
-       computing  resource  used  by a single call to pcre2_match(). The limit
+       its  main  loop. Putting a limit on this counter controls the amount of
+       computing resource used by a single call to  pcre2_match().  The  limit
        can be changed at run time, as described in the pcre2api documentation.
-       The  default is 10 million, but this can be changed by adding a setting
+       The default is 10 million, but this can be changed by adding a  setting
        such as
 
          --with-match-limit=500000
 
-       to  the  configure  command.  This  setting   also   applies   to   the
-       pcre2_dfa_match()  matching  function,  and to JIT matching (though the
+       to   the   configure   command.   This  setting  also  applies  to  the
+       pcre2_dfa_match() matching function, and to JIT  matching  (though  the
        counting is done differently).
 
-       The pcre2_match() function starts out using a 20K vector on the  system
-       stack  to  record  backtracking  points.  The  more nested backtracking
+       The  pcre2_match() function starts out using a 20K vector on the system
+       stack to record  backtracking  points.  The  more  nested  backtracking
        points there are (that is, the deeper the search tree), the more memory
-       is  needed.  If  the initial vector is not large enough, heap memory is
+       is needed. If the initial vector is not large enough,  heap  memory  is
        used, up to a certain limit, which is specified in kilobytes. The limit
        can be changed at run time, as described in the pcre2api documentation.
-       The default limit (in effect unlimited) is 20 million. You  can  change
+       The  default  limit (in effect unlimited) is 20 million. You can change
        this by a setting such as
 
          --with-heap-limit=500
 
-       which  limits  the  amount of heap to 500 kilobytes. This limit applies
-       only to interpretive matching in pcre2_match(). It does not apply  when
-       JIT  (which has its own memory arrangements) is used, nor does it apply
+       which limits the amount of heap to 500 kilobytes.  This  limit  applies
+       only  to interpretive matching in pcre2_match(). It does not apply when
+       JIT (which has its own memory arrangements) is used, nor does it  apply
        to pcre2_dfa_match().
 
-       You can also explicitly limit the depth of nested backtracking  in  the
+       You  can  also explicitly limit the depth of nested backtracking in the
        pcre2_match() interpreter. This limit defaults to the value that is set
-       for --with-match-limit. You can set a lower default  limit  by  adding,
+       for  --with-match-limit.  You  can set a lower default limit by adding,
        for example,
 
          --with-match-limit_depth=10000
 
-       to  the  configure  command.  This value can be overridden at run time.
-       This depth limit indirectly limits the amount of heap  memory  that  is
-       used,  but because the size of each backtracking "frame" depends on the
-       number of capturing parentheses in a pattern, the amount of  heap  that
-       is  used  before  the  limit is reached varies from pattern to pattern.
-       This limit was more useful in versions  before  10.30,  where  function
-       recursion  was  used for backtracking.  However, as well as applying to
-       pcre2_match(), this limit also controls the depth of recursive function
-       calls  in  pcre2_dfa_match(). These are used for lookaround assertions,
-       atomic groups, and recursion within patterns.  The limit does not apply
-       to JIT matching.
+       to the configure command. This value can be  overridden  at  run  time.
+       This  depth  limit  indirectly limits the amount of heap memory that is
+       used, but because the size of each backtracking "frame" depends on  the
+       number  of  capturing parentheses in a pattern, the amount of heap that
+       is used before the limit is reached varies  from  pattern  to  pattern.
+       This  limit  was  more  useful in versions before 10.30, where function
+       recursion was used for backtracking.
+
+       As well as applying to pcre2_match(), the depth limit also controls the
+       depth  of recursive function calls in pcre2_dfa_match(). These are used
+       for lookaround assertions, atomic groups,  and  recursion  within  pat-
+       terns.  The limit does not apply to JIT matching.
 
 
 CREATING CHARACTER TABLES AT BUILD TIME
@@ -3969,11 +3975,11 @@ AUTHOR
 
 REVISION
 
-       Last updated: 17 June 2017
+       Last updated: 18 July 2017
        Copyright (c) 1997-2017 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCRE2CALLOUT(3)            Library Functions Manual            PCRE2CALLOUT(3)
 
 
@@ -4366,8 +4372,8 @@ REVISION
        Last updated: 14 April 2017
        Copyright (c) 1997-2017 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCRE2COMPAT(3)             Library Functions Manual             PCRE2COMPAT(3)
 
 
@@ -4564,8 +4570,8 @@ REVISION
        Last updated: 18 April 2017
        Copyright (c) 1997-2017 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCRE2JIT(3)                Library Functions Manual                PCRE2JIT(3)
 
 
@@ -4958,8 +4964,8 @@ REVISION
        Last updated: 31 March 2017
        Copyright (c) 1997-2017 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCRE2LIMITS(3)             Library Functions Manual             PCRE2LIMITS(3)
 
 
@@ -5029,8 +5035,8 @@ REVISION
        Last updated: 30 March 2017
        Copyright (c) 1997-2017 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCRE2MATCHING(3)           Library Functions Manual           PCRE2MATCHING(3)
 
 
@@ -5248,8 +5254,8 @@ REVISION
        Last updated: 29 September 2014
        Copyright (c) 1997-2014 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCRE2PARTIAL(3)            Library Functions Manual            PCRE2PARTIAL(3)
 
 
@@ -5688,8 +5694,8 @@ REVISION
        Last updated: 22 December 2014
        Copyright (c) 1997-2014 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCRE2PATTERN(3)            Library Functions Manual            PCRE2PATTERN(3)
 
 
@@ -8790,8 +8796,8 @@ REVISION
        Last updated: 05 July 2017
        Copyright (c) 1997-2017 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCRE2PERFORM(3)            Library Functions Manual            PCRE2PERFORM(3)
 
 
@@ -9018,8 +9024,8 @@ REVISION
        Last updated: 08 April 2017
        Copyright (c) 1997-2017 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCRE2POSIX(3)              Library Functions Manual              PCRE2POSIX(3)
 
 
@@ -9326,8 +9332,8 @@ REVISION
        Last updated: 15 June 2017
        Copyright (c) 1997-2017 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCRE2SAMPLE(3)             Library Functions Manual             PCRE2SAMPLE(3)
 
 
@@ -9595,8 +9601,8 @@ REVISION
        Last updated: 21 March 2017
        Copyright (c) 1997-2017 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCRE2SYNTAX(3)             Library Functions Manual             PCRE2SYNTAX(3)
 
 
@@ -10043,8 +10049,8 @@ REVISION
        Last updated: 17 June 2017
        Copyright (c) 1997-2017 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCRE2UNICODE(3)            Library Functions Manual            PCRE2UNICODE(3)
 
 
@@ -10300,5 +10306,5 @@ REVISION
        Last updated: 17 May 2017
        Copyright (c) 1997-2017 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+

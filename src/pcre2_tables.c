@@ -167,15 +167,15 @@ are implementing).
 6. Do not break after Prepend characters.
 
 7. Do not break within emoji modifier sequences (E_Base or E_Base_GAZ followed
-   by E_Modifier). Extend characters are allowed before the modifier; this 
+   by E_Modifier). Extend characters are allowed before the modifier; this
    cannot be represented in this table, the code has to deal with it.
-   
+
 8. Do not break within emoji zwj sequences (ZWJ followed by Glue_After_Zwj   or
    E_Base_GAZ).
-   
-9. Do not break within emoji flag sequences. That is, do not break between 
-   regional indicator (RI) symbols if there are an odd number of RI characters 
-   before the break point. This table encodes "join RI characters"; the code 
+
+9. Do not break within emoji flag sequences. That is, do not break between
+   regional indicator (RI) symbols if there are an odd number of RI characters
+   before the break point. This table encodes "join RI characters"; the code
    has to deal with checking for previous adjoining RIs.
 
 10. Otherwise, break everywhere.

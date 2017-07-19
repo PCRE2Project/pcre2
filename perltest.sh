@@ -50,7 +50,7 @@ fi
 #   ucp                sets Perl's /u modifier
 #   utf                invoke UTF-8 functionality
 #
-# The data lines must not have any pcre2test modifiers. Unless 
+# The data lines must not have any pcre2test modifiers. Unless
 # "subject_litersl" is on the pattern, data lines are processed as
 # Perl double-quoted strings, so if they contain " $ or @ characters, these
 # have to be escaped. For this reason, all such characters in the
@@ -141,20 +141,20 @@ for (;;)
 
   chomp($pattern);
   $pattern =~ s/\s+$//;
-  
+
   # Split the pattern from the modifiers and adjust them as necessary.
 
   $pattern =~ /^\s*((.).*\2)(.*)$/s;
   $pat = $1;
   $mod = $3;
-  
+
   # The private "aftertext" modifier means "print $' afterwards".
 
   $showrest = ($mod =~ s/aftertext,?//);
-  
+
   # The "subject_literal" modifer disables escapes in subjects.
-  
-  $subject_literal = ($mod =~ s/subject_literal,?//); 
+
+  $subject_literal = ($mod =~ s/subject_literal,?//);
 
   # "allaftertext" is used by pcre2test to print remainders after captures
 
@@ -238,7 +238,7 @@ for (;;)
       $x = $_;
       }
     else
-      {     
+      {
       $x = eval "\"$_\"";   # To get escapes processed
       }
 

@@ -830,7 +830,7 @@ for bmode in "$test8" "$test16" "$test32"; do
     if [ $supportBSC -ne 0 ] ; then
       echo "  Skipped because \C is not disabled"
     else
-      $sim $valgrind ${opt:+$vjs} ./pcre2test -q $setstack $bmode $opt $testdata/testinput23 testtry
+      $sim $valgrind ./pcre2test -q $setstack $bmode $testdata/testinput23 testtry
       checkresult $? 23 ""
     fi
   fi
@@ -839,7 +839,7 @@ for bmode in "$test8" "$test16" "$test32"; do
 
   if [ "$do24" = yes ] ; then
     echo $title24
-    $sim $valgrind ${opt:+$vjs} ./pcre2test -q $setstack $bmode $opt $testdata/testinput24 testtry
+    $sim $valgrind ./pcre2test -q $setstack $bmode $testdata/testinput24 testtry
     checkresult $? 24 ""
   fi
 
@@ -850,7 +850,7 @@ for bmode in "$test8" "$test16" "$test32"; do
     if [ $utf -eq 0 ] ; then
       echo "  Skipped because UTF-$bits support is not available"
     else
-      $sim $valgrind ${opt:+$vjs} ./pcre2test -q $setstack $bmode $opt $testdata/testinput25 testtry
+      $sim $valgrind ./pcre2test -q $setstack $bmode $testdata/testinput25 testtry
       checkresult $? 25 ""
     fi
   fi

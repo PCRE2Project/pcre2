@@ -1,6 +1,63 @@
 News about PCRE2 releases
 -------------------------
 
+Version 10.30-RC1 18-July-2017
+------------------------------
+
+The full list of changes that includes bugfixes and tidies is, as always, in
+ChangeLog. These are the most important new features:
+
+1. The main interpreter, pcre2_match(), has been refactored into a new version
+that does not use recursive function calls (and therefore the system stack) for
+remembering backtracking positions. This makes --disable-stack-for-recursion a
+NOOP. The new implementation allows backtracking into recursive group calls in
+patterns, making it more compatible with Perl, and also fixes some other
+previously hard-to-do issues. For patterns that have a lot of backtracking, the
+heap is now used, and there is explicit limit on the amount, settable by
+pcre2_set_heap_limit() or (*LIMIT_HEAP=xxx). The "recursion limit" is retained,
+but is renamed as "depth limit" (though the old names remain for
+compatibility).
+
+There is also a change in the way callouts from pcre2_match() are handled. The
+offset_vector field in the callout block is no longer a pointer to the
+actual ovector that was passed to the matching function in the match data
+block. Instead it points to an internal ovector of a size large enough to hold
+all possible captured substrings in the pattern.
+
+2. The new option PCRE2_ENDANCHORED insists that a pattern match must end at
+the end of the subject.
+
+3. The new option PCRE2_EXTENDED_MORE implements Perl's /xx feature, and
+pcre2test is upgraded to support it. Setting within the pattern by (?xx) is
+also supported.
+
+4. (?n) can be used to set PCRE2_NO_AUTO_CAPTURE, because Perl now has this.
+
+5. Additional compile options in the compile context are now available, and the
+first two are: PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES and
+PCRE2_EXTRA_BAD_ESCAPE_IS LITERAL.
+
+6. The newline type PCRE2_NEWLINE_NUL is now available.
+
+7. The match limit value now also applies to pcre2_dfa_match() as there are
+patterns that can use up a lot of resources without necessarily recursing very
+deeply.
+
+8. The option REG_PEND (a GNU extension) is now available for the POSIX
+wrapper. Also there is a new option PCRE2_LITERAL which is used to support
+REG_NOSPEC.
+
+9. PCRE2_EXTRA_MATCH_LINE and PCRE2_EXTRA_MATCH_WORD are implemented for the
+benefit of pcre2grep, and pcre2grep's -F, -w, and -x options are re-implemented
+using PCRE2_LITERAL, PCRE2_EXTRA_MATCH_WORD, and PCRE2_EXTRA_MATCH_LINE. This
+is tidier and also fixes some bugs.
+
+10. The Unicode tables are upgraded from Unicode 8.0.0 to Unicode 10.0.0.
+
+11. There are some experimental functions for converting foreign patterns
+(globs and POSIX patterns) into PCRE2 patterns.
+
+
 Version 10.23 14-February-2017
 ------------------------------
 

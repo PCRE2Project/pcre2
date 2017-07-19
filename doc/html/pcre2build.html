@@ -87,10 +87,10 @@ Options that specify values have names that start with --with.
 <br><a name="SEC3" href="#TOC1">BUILDING 8-BIT, 16-BIT AND 32-BIT LIBRARIES</a><br>
 <P>
 By default, a library called <b>libpcre2-8</b> is built, containing functions
-that take string arguments contained in vectors of bytes, interpreted either as
+that take string arguments contained in arrays of bytes, interpreted either as
 single-byte characters, or UTF-8 strings. You can also build two other
 libraries, called <b>libpcre2-16</b> and <b>libpcre2-32</b>, which process
-strings that are contained in vectors of 16-bit and 32-bit code units,
+strings that are contained in arrays of 16-bit and 32-bit code units,
 respectively. These can be interpreted either as single-unit characters or
 UTF-16/UTF-32 strings. To build these additional libraries, add one or both of
 the following to the <b>configure</b> command:
@@ -208,19 +208,23 @@ to the <b>configure</b> command. There is a fourth option, specified by
   --enable-newline-is-anycrlf
 </pre>
 which causes PCRE2 to recognize any of the three sequences CR, LF, or CRLF as
-indicating a line ending. Finally, a fifth option, specified by
+indicating a line ending. A fifth option, specified by
 <pre>
   --enable-newline-is-any
 </pre>
 causes PCRE2 to recognize any Unicode newline sequence. The Unicode newline
 sequences are the three just mentioned, plus the single characters VT (vertical
 tab, U+000B), FF (form feed, U+000C), NEL (next line, U+0085), LS (line
-separator, U+2028), and PS (paragraph separator, U+2029).
+separator, U+2028), and PS (paragraph separator, U+2029). The final option is
+<pre>
+  --enable-newline-is-nul
+</pre>
+which causes NUL (binary zero) is set as the default line-ending character.
 </P>
 <P>
 Whatever default line ending convention is selected when PCRE2 is built can be
 overridden by applications that use the library. At build time it is
-conventional to use the standard for your operating system.
+recommended to use the standard for your operating system.
 </P>
 <br><a name="SEC9" href="#TOC1">WHAT \R MATCHES</a><br>
 <P>
@@ -301,7 +305,9 @@ because the size of each backtracking "frame" depends on the number of
 capturing parentheses in a pattern, the amount of heap that is used before the
 limit is reached varies from pattern to pattern. This limit was more useful in
 versions before 10.30, where function recursion was used for backtracking.
-However, as well as applying to <b>pcre2_match()</b>, this limit also controls
+</P>
+<P>
+As well as applying to <b>pcre2_match()</b>, the depth limit also controls
 the depth of recursive function calls in <b>pcre2_dfa_match()</b>. These are
 used for lookaround assertions, atomic groups, and recursion within patterns.
 The limit does not apply to JIT matching.
@@ -559,7 +565,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC25" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 17 June 2017
+Last updated: 18 July 2017
 <br>
 Copyright &copy; 1997-2017 University of Cambridge.
 <br>

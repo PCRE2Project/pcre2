@@ -183,27 +183,6 @@ No match
     abbbbbbbbbbbac
 No match
 
-/^(b+|a){1,2}?bc/
-    bbc
- 0: bbc
- 1: b
-
-/^(b*|ba){1,2}?bc/
-    babc
- 0: babc
- 1: ba
-    bbabc
- 0: bbabc
- 1: ba
-    bababc
- 0: bababc
- 1: ba
-\= Expect no match
-    bababbc
-No match
-    babababc
-No match
-
 /^(ba|b*){1,2}?bc/
     babc
  0: babc

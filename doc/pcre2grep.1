@@ -446,25 +446,25 @@ memory. There are three options that set resource limits for matching.
 The \fB--match-limit\fP option provides a means of limiting computing resource
 usage when processing patterns that are not going to match, but which have a
 very large number of possibilities in their search trees. The classic example
-is a pattern that uses nested unlimited repeats. Internally, PCRE2 has a 
-counter that is incremented each time around its main processing loop. If the 
+is a pattern that uses nested unlimited repeats. Internally, PCRE2 has a
+counter that is incremented each time around its main processing loop. If the
 value set by \fB--match-limit\fP is reached, an error occurs.
 .sp
 The \fB--heap-limit\fP option specifies, as a number of kilobytes, the amount
 of heap memory that may be used for matching. Heap memory is needed only if
 matching the pattern requires a significant number of nested backtracking
-points to be remembered. This parameter can be set to zero to forbid the use of 
+points to be remembered. This parameter can be set to zero to forbid the use of
 heap memory altogether.
 .sp
 The \fB--depth-limit\fP option limits the depth of nested backtracking points,
-which indirectly limits the amount of memory that is used. The amount of memory 
+which indirectly limits the amount of memory that is used. The amount of memory
 needed for each backtracking point depends on the number of capturing
 parentheses in the pattern, so the amount of memory that is used before this
 limit acts varies from pattern to pattern. This limit is of use only if it is
 set smaller than \fB--match-limit\fP.
 .sp
 There are no short forms for these options. The default settings are specified
-when the PCRE2 library is compiled, with the default defaults being very large 
+when the PCRE2 library is compiled, with the default defaults being very large
 and so effectively unlimited.
 .TP
 \fB--max-buffer-size=\fInumber\fP
@@ -747,7 +747,7 @@ either a number or a quoted string (see the
 .\" HREF
 \fBpcre2callout\fP
 .\"
-documentation for details). Numbered callouts are ignored by \fBpcre2grep\fP; 
+documentation for details). Numbered callouts are ignored by \fBpcre2grep\fP;
 only callouts with string arguments are useful.
 .
 .
@@ -797,10 +797,10 @@ matcher backtracks in the normal way.
 If the callout string starts with a pipe (vertical bar) character, the rest of
 the string is written to the output, having been passed through the same escape
 processing as text from the --output option. This provides a simple echoing
-facility that avoids calling an external program or script. No terminator is 
+facility that avoids calling an external program or script. No terminator is
 added to the string, so if you want a newline, you must include it explicitly.
-Matching continues normally after the string is output. If you want to see only 
-the callout output but not any output from an actual match, you should end the 
+Matching continues normally after the string is output. If you want to see only
+the callout output but not any output from an actual match, you should end the
 relevant pattern with (*FAIL).
 .
 .
@@ -816,8 +816,8 @@ message and the line that caused the problem to the standard error stream. If
 there are more than 20 such errors, \fBpcre2grep\fP gives up.
 .P
 The \fB--match-limit\fP option of \fBpcre2grep\fP can be used to set the
-overall resource limit. There are also other limits that affect the amount of 
-memory used during matching; see the discussion of \fB--heap-limit\fP and 
+overall resource limit. There are also other limits that affect the amount of
+memory used during matching; see the discussion of \fB--heap-limit\fP and
 \fB--depth-limit\fP above.
 .
 .
