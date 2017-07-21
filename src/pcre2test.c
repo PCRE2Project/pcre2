@@ -5466,7 +5466,7 @@ if (pat_patctl.convert_type != CONVERT_UNSET)
 
   if (rc != 0)
     {
-    fprintf(outfile, "** Pattern conversion error at offset %lu: ",
+    fprintf(outfile, "** Pattern conversion error at offset %zu: ",
       converted_length);
     convert_return = print_error_message(rc, "", "\n")? PR_SKIP:PR_ABEND;
     }
