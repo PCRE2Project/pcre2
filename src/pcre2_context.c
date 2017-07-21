@@ -431,8 +431,14 @@ mcontext->offset_limit = limit;
 return 0;
 }
 
-/* This function became obsolete at release 10.30. It is kept as a no-op for
+/* This function became obsolete at release 10.30. It is kept as a synonym for
 backwards compatibility. */
+
+PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
+pcre2_set_recursion_limit(pcre2_match_context *mcontext, uint32_t limit)
+{
+return pcre2_set_depth_limit(mcontext, limit);
+}
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_set_recursion_memory_management(pcre2_match_context *mcontext,

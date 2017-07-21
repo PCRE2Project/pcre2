@@ -489,6 +489,8 @@ PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION \
 PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION \
   pcre2_set_offset_limit(pcre2_match_context *, PCRE2_SIZE); \
 PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION \
+  pcre2_set_recursion_limit(pcre2_match_context *, uint32_t); \
+PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION \
   pcre2_set_recursion_memory_management(pcre2_match_context *, \
     void *(*)(PCRE2_SIZE, void *), void (*)(void *, void *), void *);
 
@@ -760,7 +762,7 @@ pcre2_compile are called by application code. */
 #define pcre2_substring_number_from_name      PCRE2_SUFFIX(pcre2_substring_number_from_name_)
 
 /* Keep this old function name for backwards compatibility */
-#define pcre2_set_recursion_limit pcre2_set_depth_limit
+#define pcre2_set_recursion_limit PCRE2_SUFFIX(pcre2_set_recursion_limit_)
 
 /* Keep this obsolete function for backwards compatibility: it is now a noop. */
 #define pcre2_set_recursion_memory_management PCRE2_SUFFIX(pcre2_set_recursion_memory_management_)
