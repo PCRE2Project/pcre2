@@ -219,6 +219,9 @@ Unicode Standard Annex #29.
 50. Added experimental foreign pattern conversion facilities
 (pcre2_pattern_convert() and friends).
 
+51. Change the macro FWRITE, used in pcre2grep, to FWRITE_IGNORE because FWRITE 
+is defined in a system header in cygwin.
+
 
 Version 10.23 14-February-2017
 ------------------------------

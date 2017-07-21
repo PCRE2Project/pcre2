@@ -137,7 +137,7 @@ Unfortunately, casting to (void) does not suppress the warning. To get round
 this, we use a macro that compiles a fudge. Oddly, this does not also seem to
 apply to fprintf(). */
 
-#define FWRITE(a,b,c,d) if (fwrite(a,b,c,d)) {}
+#define FWRITE_IGNORE(a,b,c,d) if (fwrite(a,b,c,d)) {}
 
 /* Under Windows, we have to set stdout to be binary, so that it does not
 convert \r\n at the ends of output lines to \r\r\n. However, that means that
@@ -804,7 +804,7 @@ print_match(const void *buf, int length)
 {
 if (length == 0) return;
 if (do_colour) fprintf(stdout, "%c[%sm", 0x1b, colour_string);
-FWRITE(buf, 1, length, stdout);
+FWRITE_IGNORE(buf, 1, length, stdout);
 if (do_colour) fprintf(stdout, "%c[0m", 0x1b);
 }
 
@@ -944,7 +944,7 @@ if (do_colour)
   if (do_ansi) fprintf(stdout, "%c[%sm", 0x1b, colour_string);
     else SetConsoleTextAttribute(hstdout, match_colour);
   }
-FWRITE(buf, 1, length, stdout);
+FWRITE_IGNORE(buf, 1, length, stdout);
 if (do_colour)
   {
   if (do_ansi) fprintf(stdout, "%c[0m", 0x1b);
@@ -998,7 +998,7 @@ static void
 print_match(const void *buf, int length)
 {
 if (length == 0) return;
-FWRITE(buf, 1, length, stdout);
+FWRITE_IGNORE(buf, 1, length, stdout);
 }
 
 #endif  /* End of system-specific functions */
@@ -1597,7 +1597,7 @@ if (after_context > 0 && lastmatchnumber > 0)
     if (ellength == 0 && pp == main_buffer + bufsize) break;
     if (printname != NULL) fprintf(stdout, "%s-", printname);
     if (number) fprintf(stdout, "%d-", lastmatchnumber++);
-    FWRITE(lastmatchrestart, 1, pp - lastmatchrestart, stdout);
+    FWRITE_IGNORE(lastmatchrestart, 1, pp - lastmatchrestart, stdout);
     lastmatchrestart = pp;
     count++;
     }
@@ -1650,7 +1650,7 @@ for (i = 1; p != NULL; p = p->next, i++)
   fprintf(stderr, "pcre2grep: pcre2_match() gave error %d while matching ", *mrc);
   if (patterns->next != NULL) fprintf(stderr, "pattern number %d to ", i);
   fprintf(stderr, "%s", msg);
-  FWRITE(matchptr, 1, slen, stderr);   /* In case binary zero included */
+  FWRITE_IGNORE(matchptr, 1, slen, stderr);   /* In case binary zero included */
   fprintf(stderr, "\n\n");
   if (*mrc == PCRE2_ERROR_MATCHLIMIT || *mrc == PCRE2_ERROR_DEPTHLIMIT ||
       *mrc == PCRE2_ERROR_HEAPLIMIT || *mrc == PCRE2_ERROR_JIT_STACKLIMIT)
@@ -2659,7 +2659,7 @@ while (ptr < endptr)
           if (printname != NULL) fprintf(stdout, "%s-", printname);
           if (number) fprintf(stdout, "%d-", lastmatchnumber++);
           pp = end_of_line(pp, endptr, &ellength);
-          FWRITE(lastmatchrestart, 1, pp - lastmatchrestart, stdout);
+          FWRITE_IGNORE(lastmatchrestart, 1, pp - lastmatchrestart, stdout);
           lastmatchrestart = pp;
           }
         if (lastmatchrestart != ptr) hyphenpending = TRUE;
@@ -2699,7 +2699,7 @@ while (ptr < endptr)
           if (printname != NULL) fprintf(stdout, "%s-", printname);
           if (number) fprintf(stdout, "%d-", linenumber - linecount--);
           pp = end_of_line(pp, endptr, &ellength);
-          FWRITE(p, 1, pp - p, stdout);
+          FWRITE_IGNORE(p, 1, pp - p, stdout);
           p = pp;
           }
         }
@@ -2743,9 +2743,9 @@ while (ptr < endptr)
         {
         int first = S_arg * 2;
         int last  = first + 1;
-        FWRITE(ptr, 1, offsets[first], stdout);
+        FWRITE_IGNORE(ptr, 1, offsets[first], stdout);
         fprintf(stdout, "X");
-        FWRITE(ptr + offsets[last], 1, linelength - offsets[last], stdout);
+        FWRITE_IGNORE(ptr + offsets[last], 1, linelength - offsets[last], stdout);
         }
       else
 #endif
@@ -2756,7 +2756,7 @@ while (ptr < endptr)
       if (do_colour && !invert)
         {
         int plength;
-        FWRITE(ptr, 1, offsets[0], stdout);
+        FWRITE_IGNORE(ptr, 1, offsets[0], stdout);
         print_match(ptr + offsets[0], offsets[1] - offsets[0]);
         for (;;)
           {
@@ -2764,7 +2764,7 @@ while (ptr < endptr)
           if (startoffset >= linelength + endlinelength ||
               !match_patterns(matchptr, length, options, startoffset, &mrc))
             break;
-          FWRITE(matchptr + startoffset, 1, offsets[0] - startoffset, stdout);
+          FWRITE_IGNORE(matchptr + startoffset, 1, offsets[0] - startoffset, stdout);
           print_match(matchptr + offsets[0], offsets[1] - offsets[0]);
           }
 
@@ -2773,12 +2773,12 @@ while (ptr < endptr)
         may be no more to print. */
 
         plength = (int)((linelength + endlinelength) - startoffset);
-        if (plength > 0) FWRITE(ptr + startoffset, 1, plength, stdout);
+        if (plength > 0) FWRITE_IGNORE(ptr + startoffset, 1, plength, stdout);
         }
 
       /* Not colouring; no need to search for further matches */
 
-      else FWRITE(ptr, 1, linelength + endlinelength, stdout);
+      else FWRITE_IGNORE(ptr, 1, linelength + endlinelength, stdout);
       }
 
     /* End of doing what has to be done for a match. If --line-buffered was
