@@ -442,6 +442,7 @@ EXTRA_DIST += \
   src/sljit/sljitNativeX86_32.c \
   src/sljit/sljitNativeX86_64.c \
   src/sljit/sljitNativeX86_common.c \
+  src/sljit/sljitProtExecAllocator.c \
   src/sljit/sljitUtils.c
 
 # Some of the JIT sources are also in separate files that are #included.
