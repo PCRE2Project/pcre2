@@ -124,10 +124,10 @@
 /* SLJIT_REWRITABLE_JUMP is 0x1000. */
 
 #if (defined SLJIT_CONFIG_X86 && SLJIT_CONFIG_X86)
-#	define PATCH_MB 0x4
-#	define PATCH_MW 0x8
+#	define PATCH_MB	0x4
+#	define PATCH_MW	0x8
 #if (defined SLJIT_CONFIG_X86_64 && SLJIT_CONFIG_X86_64)
-#	define PATCH_MD 0x10
+#	define PATCH_MD	0x10
 #endif
 #endif
 
@@ -1555,7 +1555,6 @@ static SLJIT_INLINE CHECK_RETURN_TYPE check_sljit_emit_cmov(struct sljit_compile
 	sljit_s32 dst_reg,
 	sljit_s32 src, sljit_sw srcw)
 {
-(void)srcw; /* To stop compiler warning */
 #if (defined SLJIT_ARGUMENT_CHECKS && SLJIT_ARGUMENT_CHECKS)
 	CHECK_ARGUMENT(!(type & ~(0xff | SLJIT_I32_OP)));
 	CHECK_ARGUMENT((type & 0xff) >= SLJIT_EQUAL && (type & 0xff) <= SLJIT_ORDERED_F64);

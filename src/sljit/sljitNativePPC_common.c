@@ -2282,16 +2282,15 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op_flags(struct sljit_compiler *co
 		FAIL_IF(emit_op_mem2(compiler, input_flags | LOAD_DATA, TMP_REG1, dst, dstw, dst, dstw));
 
 	invert = 0;
+	cr_bit = 0;
 
 	switch (type & 0xff) {
 	case SLJIT_LESS:
 	case SLJIT_SIG_LESS:
-		cr_bit = 0;
 		break;
 
 	case SLJIT_GREATER_EQUAL:
 	case SLJIT_SIG_GREATER_EQUAL:
-		cr_bit = 0;
 		invert = 1;
 		break;
 
