@@ -3535,8 +3535,12 @@ while (ptr < ptrend)
             /* If x appears twice it sets the extended extended option. */
 
             case CHAR_x:
-            *optset |= ((*optset & PCRE2_EXTENDED) != 0)?
-              PCRE2_EXTENDED_MORE : PCRE2_EXTENDED;
+            *optset |= PCRE2_EXTENDED;
+            if (ptr < ptrend && *ptr == CHAR_x)
+              {
+              *optset |= PCRE2_EXTENDED_MORE;
+              ptr++;
+              }
             break;
 
             default:
@@ -3545,11 +3549,16 @@ while (ptr < ptrend)
             goto FAILED;
             }
           }
+
+        /* If we are setting extended without extended-more, ensure that any
+        existing extended-more gets unset. Also, unsetting extended must also
+        unset extended-more. */
+
+        if ((set & (PCRE2_EXTENDED|PCRE2_EXTENDED_MORE)) == PCRE2_EXTENDED ||
+            (unset & PCRE2_EXTENDED) != 0)
+          unset |= PCRE2_EXTENDED_MORE;
+
         options = (options | set) & (~unset);
-
-        /* Unsetting extended should also get rid of extended-more. */
-
-        if ((options & PCRE2_EXTENDED) == 0) options &= ~PCRE2_EXTENDED_MORE;
 
         /* If the options ended with ')' this is not the start of a nested
         group with option changes, so the options change at this level.
