@@ -220,7 +220,8 @@ Unicode Standard Annex #29.
 (pcre2_pattern_convert() and friends).
 
 51. Change the macro FWRITE, used in pcre2grep, to FWRITE_IGNORE because FWRITE 
-is defined in a system header in cygwin.
+is defined in a system header in cygwin. Also modified some of the #ifdefs in 
+pcre2grep related to Windows and Cygwin support.
 
 
 Version 10.23 14-February-2017

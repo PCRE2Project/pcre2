@@ -58,7 +58,13 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#if (defined _WIN32 || (defined HAVE_WINDOWS_H && HAVE_WINDOWS_H)) && !defined WIN32
+#if (defined _WIN32 || (defined HAVE_WINDOWS_H && HAVE_WINDOWS_H)) \
+  && !defined WIN32 && !defined(__CYGWIN__)
+#define WIN32
+#endif
+
+/* Some cmake's define it still */
+#if defined(__CYGWIN__) && !defined(WIN32)
 #define WIN32
 #endif
 
