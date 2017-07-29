@@ -16325,6 +16325,21 @@ No match
     babababc
 No match
 
+/[[:digit:]-a]/
+Failed: error 150 at offset 10: invalid range in character class
+
+/[[:digit:]-[:print:]]/
+Failed: error 150 at offset 10: invalid range in character class
+
+/[\d-a]/
+Failed: error 150 at offset 3: invalid range in character class
+
+/[\H-z]/
+Failed: error 150 at offset 3: invalid range in character class
+
+/[\d-[:print:]]/
+Failed: error 150 at offset 3: invalid range in character class
+
 # End of testinput2
 Error -65: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

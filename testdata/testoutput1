@@ -1985,13 +1985,6 @@ No match
     aaa
 No match
 
-/[\d-z]+/
-    12-34z
- 0: 12-34z
-\= Expect no match
-    aaa
-No match
-
 /\x5c/
     \\
  0: \
@@ -5743,17 +5736,6 @@ No match
  0: 
  0: 
 
-/^[\d-a]/
-    abcde
- 0: a
-    -things
- 0: -
-    0digit
- 0: 0
-\= Expect no match
-    bcdef    
-No match
-    
 /[[:space:]]+/
     > \x09\x0a\x0c\x0d\x0b<
  0:  \x09\x0a\x0c\x0d\x0b
@@ -9754,5 +9736,9 @@ No match
 /<(?-x:[a b])>/xx
     < >
  0: < >
+
+/[[:digit:]-]+/
+    12-24
+ 0: 12-24
 
 # End of testinput1 

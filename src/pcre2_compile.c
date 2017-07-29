@@ -3105,21 +3105,23 @@ while (ptr < ptrend)
         ptr = tempptr + 2;
 
         /* Perl treats a hyphen after a POSIX class as a literal, not the
-        start of a range. However, it gives a warning in its warning mode. PCRE
-        does not have a warning mode, so we give an error, because this is
-        likely an error on the user's part. */
+        start of a range. However, it gives a warning in its warning mode
+        unless the hyphen is the last character in the class. PCRE does not
+        have a warning mode, so we give an error, because this is likely an
+        error on the user's part. */
 
-        if (ptr < ptrend && *ptr == CHAR_MINUS)
+        if (ptr < ptrend - 1 && *ptr == CHAR_MINUS &&
+            ptr[1] != CHAR_RIGHT_SQUARE_BRACKET)
           {
           errorcode = ERR50;
           goto FAILED;
           }
 
-        /* Set "a hyphen is not the start of a range" just in case the POSIX
-        class is followed by \E or \Q\E (possibly repeated - fuzzers do that
-        kind of thing) and *then* a hyphen. This causes that hyphen to be
-        treated as a literal. I don't think it's worth setting up special
-        apparatus to do otherwise. */
+        /* Set "a hyphen is not the start of a range" for the -] case, and also
+        in case the POSIX class is followed by \E or \Q\E (possibly repeated -
+        fuzzers do that kind of thing) and *then* a hyphen. This causes that
+        hyphen to be treated as a literal. I don't think it's worth setting up
+        special apparatus to do otherwise. */
 
         class_range_state = RANGE_NO;
 
@@ -3333,6 +3335,16 @@ while (ptr < ptrend)
           errorcode = ERR7;
           ptr--;
           goto CLASS_ESCAPE_FAILED;
+          }
+
+        /* Perl gives a warning unless a following hyphen is the last character
+        in the class. PCRE throws an error. */
+
+        if (ptr < ptrend - 1 && *ptr == CHAR_MINUS &&
+            ptr[1] != CHAR_RIGHT_SQUARE_BRACKET)
+          {
+          errorcode = ERR50;
+          goto FAILED;
           }
         }
 

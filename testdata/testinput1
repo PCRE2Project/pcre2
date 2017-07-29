@@ -1423,11 +1423,6 @@
 \= Expect no match
     aaa
 
-/[\d-z]+/
-    12-34z
-\= Expect no match
-    aaa
-
 /\x5c/
     \\
 
@@ -3620,13 +3615,6 @@
 /a*/g
     abbab
 
-/^[\d-a]/
-    abcde
-    -things
-    0digit
-\= Expect no match
-    bcdef    
-    
 /[[:space:]]+/
     > \x09\x0a\x0c\x0d\x0b<
      
@@ -6157,5 +6145,8 @@ ef) x/x,mark
     
 /<(?-x:[a b])>/xx
     < >
+
+/[[:digit:]-]+/
+    12-24
 
 # End of testinput1 

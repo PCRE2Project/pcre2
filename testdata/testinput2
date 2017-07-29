@@ -5365,4 +5365,14 @@ a)"xI
     bababbc
     babababc
 
+/[[:digit:]-a]/
+
+/[[:digit:]-[:print:]]/
+
+/[\d-a]/
+
+/[\H-z]/
+
+/[\d-[:print:]]/
+
 # End of testinput2
