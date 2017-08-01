@@ -760,7 +760,7 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_return(struct sljit_compiler *comp
 	(((inst) & ~(INT_ALIGNED | UPDATE_REQ)) | (((flags) & MEM_MASK) <= GPR_REG ? D(reg) : FD(reg)))
 #endif
 
-static const sljit_ins data_transfer_insts[64 + 8] = {
+static const sljit_ins data_transfer_insts[64 + 16] = {
 
 /* -------- Unsigned -------- */
 
@@ -869,11 +869,20 @@ static const sljit_ins data_transfer_insts[64 + 8] = {
 /* d   n x s */ HI(31) | LO(727) /* stfdx */,
 /* d   n x l */ HI(31) | LO(599) /* lfdx */,
 
+/* d   w i s */ HI(55) /* stfdu */,
+/* d   w i l */ HI(51) /* lfdu */,
+/* d   w x s */ HI(31) | LO(759) /* stfdux */,
+/* d   w x l */ HI(31) | LO(631) /* lfdux */,
+
 /* s   n i s */ HI(52) /* stfs */,
 /* s   n i l */ HI(48) /* lfs */,
 /* s   n x s */ HI(31) | LO(663) /* stfsx */,
 /* s   n x l */ HI(31) | LO(535) /* lfsx */,
 
+/* s   w i s */ HI(53) /* stfsu */,
+/* s   w i l */ HI(49) /* lfsu */,
+/* s   w x s */ HI(31) | LO(695) /* stfsux */,
+/* s   w x l */ HI(31) | LO(567) /* lfsux */,
 };
 
 #undef ARCH_32_64
@@ -1753,7 +1762,7 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op_custom(struct sljit_compiler *c
 /*  Floating point operators                                             */
 /* --------------------------------------------------------------------- */
 
-#define FLOAT_DATA(op) (DOUBLE_DATA | ((op & SLJIT_F32_OP) >> 6))
+#define FLOAT_DATA(op) (DOUBLE_DATA | ((op & SLJIT_F32_OP) >> 5))
 #define SELECT_FOP(op, single, double) ((op & SLJIT_F32_OP) ? single : double)
 
 #if (defined SLJIT_CONFIG_PPC_64 && SLJIT_CONFIG_PPC_64)

@@ -124,10 +124,10 @@
 /* SLJIT_REWRITABLE_JUMP is 0x1000. */
 
 #if (defined SLJIT_CONFIG_X86 && SLJIT_CONFIG_X86)
-#	define PATCH_MB	0x4
-#	define PATCH_MW	0x8
+#	define PATCH_MB		0x4
+#	define PATCH_MW		0x8
 #if (defined SLJIT_CONFIG_X86_64 && SLJIT_CONFIG_X86_64)
-#	define PATCH_MD	0x10
+#	define PATCH_MD		0x10
 #endif
 #endif
 
@@ -1561,6 +1561,7 @@ static SLJIT_INLINE CHECK_RETURN_TYPE check_sljit_emit_cmov(struct sljit_compile
 	CHECK_ARGUMENT(FUNCTION_CHECK_IS_REG(dst_reg & ~SLJIT_I32_OP));
 	if (src != SLJIT_IMM) {
 		CHECK_ARGUMENT(FUNCTION_CHECK_IS_REG(src));
+		CHECK_ARGUMENT(srcw == 0);
 	}
 
 	if ((type & 0xff) <= SLJIT_NOT_ZERO)
@@ -1586,6 +1587,7 @@ static SLJIT_INLINE CHECK_RETURN_TYPE check_sljit_emit_cmov(struct sljit_compile
 
 static SLJIT_INLINE CHECK_RETURN_TYPE check_sljit_get_local_base(struct sljit_compiler *compiler, sljit_s32 dst, sljit_sw dstw, sljit_sw offset)
 {
+	/* Any offset is allowed. */
 	SLJIT_UNUSED_ARG(offset);
 
 #if (defined SLJIT_ARGUMENT_CHECKS && SLJIT_ARGUMENT_CHECKS)

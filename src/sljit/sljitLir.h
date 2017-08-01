@@ -1225,7 +1225,15 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_cmov(struct sljit_compiler *compil
 	sljit_s32 dst_reg,
 	sljit_s32 src, sljit_sw srcw);
 
-/* Copies the base address of SLJIT_SP + offset to dst.
+/* Copies the base address of SLJIT_SP + offset to dst. The offset can be
+   anything to negate the effect of relative addressing. For example if an
+   array of sljit_sw values is stored on the stack from offset 0x40, and R0
+   contains the offset of an array item plus 0x120, this item can be
+   overwritten by two SLJIT instructions:
+
+   sljit_get_local_base(compiler, SLJIT_R1, 0, 0x40 - 0x120);
+   sljit_emit_op1(compiler, SLJIT_MOV, SLJIT_MEM2(SLJIT_R1, SLJIT_R0), 0, SLJIT_IMM, 0x5);
+
    Flags: - (may destroy flags) */
 SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_get_local_base(struct sljit_compiler *compiler, sljit_s32 dst, sljit_sw dstw, sljit_sw offset);
 

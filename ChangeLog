@@ -230,6 +230,9 @@ warning. PCRE2 now also treats this as a literal.
 53. Related to 52, though PCRE2 was throwing an error for [[:digit:]-X] it was
 not doing so for [\d-X] (and similar escapes), as is documented.
 
+54. Fixed a MIPS issue in the JIT compiler reported by Joshua Kinard.
+
+
 
 Version 10.23 14-February-2017
 ------------------------------
