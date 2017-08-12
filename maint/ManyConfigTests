@@ -124,6 +124,7 @@ if [ $? -eq 0 ] && grep GCC /tmp/pcre2ccversion >/dev/null; then
   CFLAGS="$CFLAGS -Wnested-externs"
   CFLAGS="$CFLAGS -pedantic"
   CFLAGS="$CFLAGS -Wuninitialized"
+  CFLAGS="$CFLAGS -Wmaybe-uninitialized" 
   CFLAGS="$CFLAGS -Wmissing-prototypes"
   CFLAGS="$CFLAGS -Wstrict-prototypes"
 fi

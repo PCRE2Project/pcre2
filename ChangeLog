@@ -232,6 +232,9 @@ not doing so for [\d-X] (and similar escapes), as is documented.
 
 54. Fixed a MIPS issue in the JIT compiler reported by Joshua Kinard.
 
+55. Fixed a "maybe uninitialized" warning for class_uchardata in \p handling in 
+pcre2_compile() which could never actually trigger (code should have been cut
+out when Unicode support is disabled).
 
 
 Version 10.23 14-February-2017

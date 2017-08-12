@@ -5356,6 +5356,10 @@ for (;; pptr++)
             options & ~PCRE2_CASELESS, cb, PRIV(vspace_list));
           break;
 
+          /* If Unicode is not supported, \P and \p are not allowed and are
+          faulted at parse time, so will never appear here. */
+
+#ifdef SUPPORT_UNICODE
           case ESC_p:
           case ESC_P:
             {
@@ -5364,12 +5368,11 @@ for (;; pptr++)
             *class_uchardata++ = (escape == ESC_p)? XCL_PROP : XCL_NOTPROP;
             *class_uchardata++ = ptype;
             *class_uchardata++ = pdata;
-#ifdef SUPPORT_WIDE_CHARS
             xclass_has_prop = TRUE;
-#endif
             class_has_8bitchar--;                /* Undo! */
             }
           break;
+#endif
           }
 
         goto CONTINUE_CLASS;
