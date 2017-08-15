@@ -1395,9 +1395,10 @@ b to d, a hyphen character, or z.
 </P>
 <P>
 Perl treats a hyphen as a literal if it appears before or after a POSIX class
-(see below) or a character type escape such as as \d, but gives a warning in
-its warning mode, as this is most likely a user error. As PCRE2 has no facility
-for warning, an error is given in these cases.
+(see below) or before or after a character type escape such as as \d or \H.
+However, unless the hyphen is the last character in the class, Perl outputs a
+warning in its warning mode, as this is most likely a user error. As PCRE2 has
+no facility for warning, an error is given in these cases.
 </P>
 <P>
 It is not possible to have the literal character "]" as the end character of a
@@ -3472,7 +3473,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC30" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 05 July 2017
+Last updated: 29 July 2017
 <br>
 Copyright &copy; 1997-2017 University of Cambridge.
 <br>

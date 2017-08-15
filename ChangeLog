@@ -2,8 +2,8 @@ Change Log for PCRE2
 --------------------
 
 
-Version 10.30-RC1 18-July-2017
-------------------------------
+Version 10.30 14-August-2017
+----------------------------
 
 1. The main interpreter, pcre2_match(), has been refactored into a new version
 that does not use recursive function calls (and therefore the stack) for
@@ -232,7 +232,7 @@ not doing so for [\d-X] (and similar escapes), as is documented.
 
 54. Fixed a MIPS issue in the JIT compiler reported by Joshua Kinard.
 
-55. Fixed a "maybe uninitialized" warning for class_uchardata in \p handling in 
+55. Fixed a "maybe uninitialized" warning for class_uchardata in \p handling in
 pcre2_compile() which could never actually trigger (code should have been cut
 out when Unicode support is disabled).
 

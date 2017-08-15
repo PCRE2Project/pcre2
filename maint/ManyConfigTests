@@ -286,7 +286,9 @@ if [ $ISGCC -ne 0 -a $usemain -ne 0 ]; then
   runtest
   if [ $useasan -ne 0 ]; then
     echo "---------- Maximally configured test with -fsanitize=address ----------"
-    CFLAGS="$OFLAGS $SAVECFLAGS -fsanitize=address"
+# Following a kernel change, sanitize address doesn't work unless the extra
+# PIE options are also set.
+    CFLAGS="$OFLAGS $SAVECFLAGS -no-pie -fno-PIE -fsanitize=address"
     echo "CFLAGS=$CFLAGS"
     opts="--disable-shared $enable_jit --enable-pcre2-16 --enable-pcre2-32"
     runtest
