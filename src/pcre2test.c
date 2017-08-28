@@ -7787,7 +7787,7 @@ if (arg != NULL)
     {
     char ucname[16];
     strcpy(ucname, coptlist[i].name);
-    for (i = 0; ucname[i] != 0; i++) ucname[i] = toupper[ucname[i];
+    for (i = 0; ucname[i] != 0; i++) ucname[i] = toupper[ucname[i]];
     vms_setsymbol(ucname, 0, optval);
     }
 #endif

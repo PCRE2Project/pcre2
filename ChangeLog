@@ -2,6 +2,12 @@ Change Log for PCRE2
 --------------------
 
 
+Version 10.31 xx-xxx-201x
+-------------------------
+
+1.  Fix typo (missing ]) in VMS code in pcre2test.c.
+
+
 Version 10.30 14-August-2017
 ----------------------------
 
