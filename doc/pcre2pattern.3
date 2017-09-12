@@ -1,4 +1,4 @@
-.TH PCRE2PATTERN 3 "29 July 2017" "PCRE2 10.30"
+.TH PCRE2PATTERN 3 "12 September 2017" "PCRE2 10.31"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION DETAILS"
@@ -492,8 +492,10 @@ limited to certain values, as follows:
   32-bit non-UTF mode   no greater than 0xffffffff
   All UTF modes         no greater than 0x10ffff and a valid codepoint
 .sp
-Invalid Unicode codepoints are the range 0xd800 to 0xdfff (the so-called
-"surrogate" codepoints), and 0xffef.
+Invalid Unicode codepoints are all those in the range 0xd800 to 0xdfff (the
+so-called "surrogate" codepoints). The check for these can be disabled by the 
+caller of \fBpcre2_compile()\fP by setting the option 
+PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES.
 .
 .
 .SS "Escape sequences in character classes"
@@ -1404,7 +1406,11 @@ followed by two other characters. The octal or hexadecimal representation of
 Ranges normally include all code points between the start and end characters,
 inclusive. They can also be used for code points specified numerically, for
 example [\e000-\e037]. Ranges can include any characters that are valid for the
-current mode.
+current mode. In any UTF mode, the so-called "surrogate" characters (those
+whose code points lie between 0xd800 and 0xdfff inclusive) may not be specified 
+explicitly by default (the PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES option disables
+this check). However, ranges such as [\ex{d7ff}-\ex{e000}], which include the 
+surrogates, are always permitted.
 .P
 There is a special case in EBCDIC environments for ranges whose end points are
 both specified as literal letters in the same case. For compatibility with
@@ -3499,6 +3505,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 29 July 2017
+Last updated: 12 September 2017
 Copyright (c) 1997-2017 University of Cambridge.
 .fi
