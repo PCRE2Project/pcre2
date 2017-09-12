@@ -351,6 +351,7 @@ COMMON_SOURCES = \
   src/pcre2_convert.c \
   src/pcre2_dfa_match.c \
   src/pcre2_error.c \
+  src/pcre2_extuni.c \
   src/pcre2_find_bracket.c \
   src/pcre2_internal.h \
   src/pcre2_intmodedep.h \

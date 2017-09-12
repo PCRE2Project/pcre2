@@ -5,7 +5,11 @@ Change Log for PCRE2
 Version 10.31 xx-xxx-201x
 -------------------------
 
-1.  Fix typo (missing ]) in VMS code in pcre2test.c.
+1. Fix typo (missing ]) in VMS code in pcre2test.c.
+
+2. Replace the replicated code for matching extended Unicode grapheme sequences
+(which got a lot more complicated by change 10.30/49) by a single subroutine
+that is called by both pcre2_match() and pcre2_dfa_match().
 
 
 Version 10.30 14-August-2017

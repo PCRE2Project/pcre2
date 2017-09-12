@@ -1364,63 +1364,14 @@ for (;;)
       if (count > 0) { ADD_ACTIVE(state_offset + 2, 0); }
       if (clen > 0)
         {
-        uint32_t lgb, rgb;
-        PCRE2_SPTR nptr = ptr + clen;
         int ncount = 0;
         if (count > 0 && codevalue == OP_EXTUNI_EXTRA + OP_TYPEPOSPLUS)
           {
           active_count--;           /* Remove non-match possibility */
           next_active_state--;
           }
-        lgb = UCD_GRAPHBREAK(c);
-        while (nptr < end_subject)
-          {
-          dlen = 1;
-          if (!utf) d = *nptr; else { GETCHARLEN(d, nptr, dlen); }
-          rgb = UCD_GRAPHBREAK(d);
-          if ((PRIV(ucp_gbtable)[lgb] & (1u << rgb)) == 0) break;
-
-          /* Not breaking between Regional Indicators is allowed only if
-          there are an even number of preceding RIs. */
-
-          if (lgb == ucp_gbRegionalIndicator &&
-              rgb == ucp_gbRegionalIndicator)
-            {
-            int ricount = 0;
-            PCRE2_SPTR bptr = nptr - 1;
-#ifdef SUPPORT_UNICODE
-            if (utf) BACKCHAR(bptr);
-#endif
-            /* bptr is pointing to the left-hand character */
-
-            while (bptr > mb->start_subject)
-              {
-              bptr--;
-#ifdef SUPPORT_UNICODE
-              if (utf)
-                {
-                BACKCHAR(bptr);
-                GETCHAR(d, bptr);
-                }
-              else
-#endif
-              d = *bptr;
-              if (UCD_GRAPHBREAK(d) != ucp_gbRegionalIndicator) break;
-              ricount++;
-              }
-            if ((ricount & 1) != 0) break;  /* Grapheme break required */
-            }
-
-          /* If Extend follows E_Base[_GAZ] do not update lgb; this allows
-          any number of Extend before a following E_Modifier. */
-
-          if (rgb != ucp_gbExtend ||
-              (lgb != ucp_gbE_Base && lgb != ucp_gbE_Base_GAZ))
-            lgb = rgb;
-
-          ncount++;
-          nptr += dlen;
-          }
+        (void)PRIV(extuni)(c, ptr + clen, mb->start_subject, end_subject, utf, 
+          &ncount);
         count++;
         ADD_NEW_DATA(-state_offset, count, ncount);
         }
@@ -1663,8 +1614,6 @@ for (;;)
       ADD_ACTIVE(state_offset + 2, 0);
       if (clen > 0)
         {
-        uint32_t lgb, rgb;
-        PCRE2_SPTR nptr = ptr + clen;
         int ncount = 0;
         if (codevalue == OP_EXTUNI_EXTRA + OP_TYPEPOSSTAR ||
             codevalue == OP_EXTUNI_EXTRA + OP_TYPEPOSQUERY)
@@ -1672,55 +1621,8 @@ for (;;)
           active_count--;           /* Remove non-match possibility */
           next_active_state--;
           }
-        lgb = UCD_GRAPHBREAK(c);
-        while (nptr < end_subject)
-          {
-          dlen = 1;
-          if (!utf) d = *nptr; else { GETCHARLEN(d, nptr, dlen); }
-          rgb = UCD_GRAPHBREAK(d);
-          if ((PRIV(ucp_gbtable)[lgb] & (1u << rgb)) == 0) break;
-
-          /* Not breaking between Regional Indicators is allowed only if
-          there are an even number of preceding RIs. */
-
-          if (lgb == ucp_gbRegionalIndicator &&
-              rgb == ucp_gbRegionalIndicator)
-            {
-            int ricount = 0;
-            PCRE2_SPTR bptr = nptr - 1;
-#ifdef SUPPORT_UNICODE
-            if (utf) BACKCHAR(bptr);
-#endif
-            /* bptr is pointing to the left-hand character */
-
-            while (bptr > mb->start_subject)
-              {
-              bptr--;
-#ifdef SUPPORT_UNICODE
-              if (utf)
-                {
-                BACKCHAR(bptr);
-                GETCHAR(d, bptr);
-                }
-              else
-#endif
-              d = *bptr;
-              if (UCD_GRAPHBREAK(d) != ucp_gbRegionalIndicator) break;
-              ricount++;
-              }
-            if ((ricount & 1) != 0) break;  /* Grapheme break required */
-            }
-
-          /* If Extend follows E_Base[_GAZ] do not update lgb; this allows
-          any number of Extend before a following E_Modifier. */
-
-          if (rgb != ucp_gbExtend ||
-              (lgb != ucp_gbE_Base && lgb != ucp_gbE_Base_GAZ))
-            lgb = rgb;
-
-          ncount++;
-          nptr += dlen;
-          }
+        (void)PRIV(extuni)(c, ptr + clen, mb->start_subject, end_subject, utf, 
+          &ncount);
         ADD_NEW_DATA(-(state_offset + count), 0, ncount);
         }
       break;
@@ -1973,63 +1875,15 @@ for (;;)
       count = current_state->count;  /* Number already matched */
       if (clen > 0)
         {
-        uint32_t lgb, rgb;
-        PCRE2_SPTR nptr = ptr + clen;
+        PCRE2_SPTR nptr;
         int ncount = 0;
         if (codevalue == OP_EXTUNI_EXTRA + OP_TYPEPOSUPTO)
           {
           active_count--;           /* Remove non-match possibility */
           next_active_state--;
           }
-        lgb = UCD_GRAPHBREAK(c);
-        while (nptr < end_subject)
-          {
-          dlen = 1;
-          if (!utf) d = *nptr; else { GETCHARLEN(d, nptr, dlen); }
-          rgb = UCD_GRAPHBREAK(d);
-          if ((PRIV(ucp_gbtable)[lgb] & (1u << rgb)) == 0) break;
-
-          /* Not breaking between Regional Indicators is allowed only if
-          there are an even number of preceding RIs. */
-
-          if (lgb == ucp_gbRegionalIndicator &&
-              rgb == ucp_gbRegionalIndicator)
-            {
-            int ricount = 0;
-            PCRE2_SPTR bptr = nptr - 1;
-#ifdef SUPPORT_UNICODE
-            if (utf) BACKCHAR(bptr);
-#endif
-            /* bptr is pointing to the left-hand character */
-
-            while (bptr > mb->start_subject)
-              {
-              bptr--;
-#ifdef SUPPORT_UNICODE
-              if (utf)
-                {
-                BACKCHAR(bptr);
-                GETCHAR(d, bptr);
-                }
-              else
-#endif
-              d = *bptr;
-              if (UCD_GRAPHBREAK(d) != ucp_gbRegionalIndicator) break;
-              ricount++;
-              }
-            if ((ricount & 1) != 0) break;  /* Grapheme break required */
-            }
-
-          /* If Extend follows E_Base[_GAZ] do not update lgb; this allows
-          any number of Extend before a following E_Modifier. */
-
-          if (rgb != ucp_gbExtend ||
-              (lgb != ucp_gbE_Base && lgb != ucp_gbE_Base_GAZ))
-            lgb = rgb;
-
-          ncount++;
-          nptr += dlen;
-          }
+        nptr = PRIV(extuni)(c, ptr + clen, mb->start_subject, end_subject, utf, 
+          &ncount);
         if (nptr >= end_subject && (mb->moptions & PCRE2_PARTIAL_HARD) != 0)
             reset_could_continue = TRUE;
         if (++count >= (int)GET2(code, 1))
@@ -2206,58 +2060,9 @@ for (;;)
       case OP_EXTUNI:
       if (clen > 0)
         {
-        uint32_t lgb, rgb;
-        PCRE2_SPTR nptr = ptr + clen;
         int ncount = 0;
-        lgb = UCD_GRAPHBREAK(c);
-        while (nptr < end_subject)
-          {
-          dlen = 1;
-          if (!utf) d = *nptr; else { GETCHARLEN(d, nptr, dlen); }
-          rgb = UCD_GRAPHBREAK(d);
-          if ((PRIV(ucp_gbtable)[lgb] & (1u << rgb)) == 0) break;
-
-          /* Not breaking between Regional Indicators is allowed only if
-          there are an even number of preceding RIs. */
-
-          if (lgb == ucp_gbRegionalIndicator &&
-              rgb == ucp_gbRegionalIndicator)
-            {
-            int ricount = 0;
-            PCRE2_SPTR bptr = nptr - 1;
-#ifdef SUPPORT_UNICODE
-            if (utf) BACKCHAR(bptr);
-#endif
-            /* bptr is pointing to the left-hand character */
-
-            while (bptr > mb->start_subject)
-              {
-              bptr--;
-#ifdef SUPPORT_UNICODE
-              if (utf)
-                {
-                BACKCHAR(bptr);
-                GETCHAR(d, bptr);
-                }
-              else
-#endif
-              d = *bptr;
-              if (UCD_GRAPHBREAK(d) != ucp_gbRegionalIndicator) break;
-              ricount++;
-              }
-            if ((ricount & 1) != 0) break;  /* Grapheme break required */
-            }
-
-          /* If Extend follows E_Base[_GAZ] do not update lgb; this allows
-          any number of Extend before a following E_Modifier. */
-
-          if (rgb != ucp_gbExtend ||
-              (lgb != ucp_gbE_Base && lgb != ucp_gbE_Base_GAZ))
-            lgb = rgb;
-
-          ncount++;
-          nptr += dlen;
-          }
+        PCRE2_SPTR nptr = PRIV(extuni)(c, ptr + clen, mb->start_subject, 
+          end_subject, utf, &ncount);
         if (nptr >= end_subject && (mb->moptions & PCRE2_PARTIAL_HARD) != 0)
             reset_could_continue = TRUE;
         ADD_NEW_DATA(-(state_offset + 1), 0, ncount);
