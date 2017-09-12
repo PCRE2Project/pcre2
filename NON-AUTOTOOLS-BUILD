@@ -45,7 +45,7 @@ can skip ahead to the CMake section.
      macro settings that it contains to whatever is appropriate for your
      environment. In particular, you can alter the definition of the NEWLINE
      macro to specify what character(s) you want to be interpreted as line
-     terminators.
+     terminators by default.
 
      When you compile any of the PCRE2 modules, you must specify
      -DHAVE_CONFIG_H to your compiler so that src/config.h is included in the
@@ -121,10 +121,14 @@ can skip ahead to the CMake section.
      Note that you must compile pcre2_jit_compile.c, even if you have not
      defined SUPPORT_JIT in src/config.h, because when JIT support is not
      configured, dummy functions are compiled. When JIT support IS configured,
-     pcre2_compile.c #includes other files from the sljit subdirectory, where
-     there should be 16 files, all of whose names begin with "sljit". It also
-     #includes src/pcre2_jit_match.c and src/pcre2_jit_misc.c, so you should
-     not compile these yourself.
+     pcre2_jit_compile.c #includes other files from the sljit subdirectory,
+     all of whose names begin with "sljit". It also #includes
+     src/pcre2_jit_match.c and src/pcre2_jit_misc.c, so you should not compile
+     these yourself.
+     
+     Not also that the pcre2_fuzzsupport.c file contains special code that is 
+     useful to those who want to run fuzzing tests on the PCRE2 library. Unless 
+     you are doing that, you can ignore it. 
 
  (5) Now link all the compiled code into an object library in whichever form
      your system keeps such libraries. This is the basic PCRE2 C 8-bit library.
