@@ -369,18 +369,19 @@ BUILDING PCRE2 ON NATIVE Z/OS AND Z/VM
 z/OS and z/VM are operating systems for mainframe computers, produced by IBM.
 The character code used is EBCDIC, not ASCII or Unicode. In z/OS, UNIX APIs and
 applications can be supported through UNIX System Services, and in such an
-environment PCRE2 can be built in the same way as in other systems. However, in
-native z/OS (without UNIX System Services) and in z/VM, special ports are
-required. For details, please see this web site:
+environment it should be possible to build PCRE2 in the same way as in other
+systems, with the EBCDIC related configuration settings, but it is not known if 
+anybody has tried this.
 
-  http://www.zaconsultants.net
+In native z/OS (without UNIX System Services) and in z/VM, special ports are
+required. For details, please see file 939 on this web site:
 
-The site currently has ports for PCRE1 releases, but PCRE2 should follow in due
-course.
+  http://www.cbttape.org
 
-You may also download PCRE1 from WWW.CBTTAPE.ORG, file 882. Everything, source
-and executable, is in EBCDIC and native z/OS file formats and this is the
-recommended download site.
+Everything in that location, source and executable, is in EBCDIC and native
+z/OS file formats. The port provides an API for LE languages such as COBOL and 
+for the z/OS and z/VM versions of the Rexx languages.
 
-=============================
-Last Updated: 12 September 2017
+===============================
+Last Updated: 13 September 2017
+===============================
