@@ -38,6 +38,9 @@ POSSIBILITY OF SUCH DAMAGE.
 -----------------------------------------------------------------------------
 */
 
+#ifndef PCRE2_INTERNAL_H_IDEMPOTENT_GUARD
+#define PCRE2_INTERNAL_H_IDEMPOTENT_GUARD
+
 /* We do not support both EBCDIC and Unicode at the same time. The "configure"
 script prevents both being selected, but not everybody uses "configure". EBCDIC
 is only supported for the 8-bit library, but the check for this has to be later
@@ -1973,5 +1976,6 @@ extern BOOL         _pcre2_was_newline(PCRE2_SPTR, uint32_t, PCRE2_SPTR,
                       uint32_t *, BOOL);
 extern BOOL         _pcre2_xclass(uint32_t, PCRE2_SPTR, BOOL);
 #endif  /* PCRE2_CODE_UNIT_WIDTH */
+#endif  /* PCRE2_INTERNAL_H_IDEMPOTENT_GUARD */
 
 /* End of pcre2_internal.h */

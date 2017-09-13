@@ -11,6 +11,8 @@ Version 10.31 xx-xxx-201x
 (which got a lot more complicated by change 10.30/49) by a single subroutine
 that is called by both pcre2_match() and pcre2_dfa_match().
 
+3. Add idempotent guard to pcre2_internal.h.
+
 
 Version 10.30 14-August-2017
 ----------------------------
