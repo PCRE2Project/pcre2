@@ -16,6 +16,9 @@ that is called by both pcre2_match() and pcre2_dfa_match().
 4. Add new pcre2_config() options: PCRE2_CONFIG_NEVER_BACKSLASH_C and
 PCRE2_CONFIG_COMPILED_WIDTHS.
 
+5. Cut out \C tests in the JIT regression tests when NEVER_BACKSLASH_C is 
+defined (e.g. by --enable-never-backslash-C).
+
 
 Version 10.30 14-August-2017
 ----------------------------
