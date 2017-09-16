@@ -7807,15 +7807,11 @@ printf("  EBCDIC code page %s or similar\n", pcrz_cpversion());
 #endif
 #endif
 
-#ifdef SUPPORT_PCRE2_8
-printf("  8-bit support\n");
-#endif
-#ifdef SUPPORT_PCRE2_16
-printf("  16-bit support\n");
-#endif
-#ifdef SUPPORT_PCRE2_32
-printf("  32-bit support\n");
-#endif
+(void)PCRE2_CONFIG(PCRE2_CONFIG_COMPILED_WIDTHS, &optval);
+if (optval & 1) printf("  8-bit support\n");
+if (optval & 2) printf("  16-bit support\n");
+if (optval & 4) printf("  32-bit support\n");
+
 #ifdef SUPPORT_VALGRIND
 printf("  Valgrind support\n");
 #endif
@@ -7846,11 +7842,8 @@ print_newline_config(optval, FALSE);
 (void)PCRE2_CONFIG(PCRE2_CONFIG_BSR, &optval);
 printf("  \\R matches %s\n", optval? "CR, LF, or CRLF only" :
                                  "all Unicode newlines");
-#ifdef NEVER_BACKSLASH_C
-printf("  \\C is not supported\n");
-#else
-printf("  \\C is supported\n");
-#endif
+(void)PCRE2_CONFIG(PCRE2_CONFIG_NEVER_BACKSLASH_C, &optval);
+printf("  \\C is %ssupported\n", optval? "not ":"");
 (void)PCRE2_CONFIG(PCRE2_CONFIG_LINKSIZE, &optval);
 printf("  Internal link size = %d\n", optval);
 (void)PCRE2_CONFIG(PCRE2_CONFIG_PARENSLIMIT, &optval);

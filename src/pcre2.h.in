@@ -338,6 +338,9 @@ numbers must not be changed. */
 #define PCRE2_CONFIG_UNICODE_VERSION        10
 #define PCRE2_CONFIG_VERSION                11
 #define PCRE2_CONFIG_HEAPLIMIT              12
+#define PCRE2_CONFIG_NEVER_BACKSLASH_C      13
+#define PCRE2_CONFIG_COMPILED_WIDTHS        14
+
 
 /* Types for code units in patterns and subject strings. */
 

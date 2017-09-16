@@ -1,4 +1,4 @@
-.TH PCRE2_CONFIG 3 "26 May 2017" "PCRE2 10.30"
+.TH PCRE2_CONFIG 3 "16 September 2017" "PCRE2 10.31"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH SYNOPSIS
@@ -31,8 +31,9 @@ point to a uint32_t integer variable. The available codes are:
   PCRE2_CONFIG_BSR             Indicates what \eR matches by default:
                                  PCRE2_BSR_UNICODE
                                  PCRE2_BSR_ANYCRLF
-  PCRE2_CONFIG_HEAPLIMIT       Default heap memory limit
+  PCRE2_CONFIG_COMPILED_WIDTHS Which of 8/16/32 support was compiled
   PCRE2_CONFIG_DEPTHLIMIT      Default backtracking depth limit
+  PCRE2_CONFIG_HEAPLIMIT       Default heap memory limit
 .\" JOIN
   PCRE2_CONFIG_JIT             Availability of just-in-time compiler
                                 support (1=yes 0=no)
@@ -41,6 +42,7 @@ point to a uint32_t integer variable. The available codes are:
                                  architecture for the JIT compiler
   PCRE2_CONFIG_LINKSIZE        Configured internal link size (2, 3, 4)
   PCRE2_CONFIG_MATCHLIMIT      Default internal resource limit
+  PCRE2_CONFIG_NEVER_BACKSLASH_C  Whether or not \eC is disabled
   PCRE2_CONFIG_NEWLINE         Code for the default newline sequence:
                                  PCRE2_NEWLINE_CR
                                  PCRE2_NEWLINE_LF

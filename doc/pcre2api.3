@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "10 July 2017" "PCRE2 10.30"
+.TH PCRE2API 3 "16 September 2017" "PCRE2 10.31"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -1015,6 +1015,12 @@ PCRE2_BSR_UNICODE means that \eR matches any Unicode line ending sequence; a
 value of PCRE2_BSR_ANYCRLF means that \eR matches only CR, LF, or CRLF. The
 default can be overridden when a pattern is compiled.
 .sp
+  PCRE2_CONFIG_COMPILED_WIDTHS
+.sp
+The output is a uint32_t integer whose lower bits indicate which code unit
+widths were selected when PCRE2 was built. The 1-bit indicates 8-bit support, 
+and the 2-bit and 4-bit indicate 16-bit and 32-bit support, respectively.
+.sp
   PCRE2_CONFIG_DEPTHLIMIT
 .sp
 The output is a uint32_t integer that gives the default limit for the depth of
@@ -1079,6 +1085,11 @@ sequence that is recognized as meaning "newline". The values are:
 .sp
 The default should normally correspond to the standard sequence for your
 operating system.
+.sp
+  PCRE2_CONFIG_NEVER_BACKSLASH_C
+.sp
+The output is a uint32_t integer that is set to one if the use of \eC was 
+permanently disabled when PCRE2 was built; otherwise it is set to zero.   
 .sp
   PCRE2_CONFIG_PARENSLIMIT
 .sp
@@ -3574,6 +3585,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 10 July 2017
+Last updated: 16 September 2017
 Copyright (c) 1997-2017 University of Cambridge.
 .fi
