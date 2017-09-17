@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "16 September 2017" "PCRE2 10.31"
+.TH PCRE2API 3 "17 September 2017" "PCRE2 10.31"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -1018,7 +1018,7 @@ default can be overridden when a pattern is compiled.
   PCRE2_CONFIG_COMPILED_WIDTHS
 .sp
 The output is a uint32_t integer whose lower bits indicate which code unit
-widths were selected when PCRE2 was built. The 1-bit indicates 8-bit support, 
+widths were selected when PCRE2 was built. The 1-bit indicates 8-bit support,
 and the 2-bit and 4-bit indicate 16-bit and 32-bit support, respectively.
 .sp
   PCRE2_CONFIG_DEPTHLIMIT
@@ -1088,8 +1088,8 @@ operating system.
 .sp
   PCRE2_CONFIG_NEVER_BACKSLASH_C
 .sp
-The output is a uint32_t integer that is set to one if the use of \eC was 
-permanently disabled when PCRE2 was built; otherwise it is set to zero.   
+The output is a uint32_t integer that is set to one if the use of \eC was
+permanently disabled when PCRE2 was built; otherwise it is set to zero.
 .sp
   PCRE2_CONFIG_PARENSLIMIT
 .sp
@@ -1147,8 +1147,8 @@ zero.
 .fi
 .P
 The \fBpcre2_compile()\fP function compiles a pattern into an internal form.
-The pattern is defined by a pointer to a string of code units and a length. If
-the pattern is zero-terminated, the length can be specified as
+The pattern is defined by a pointer to a string of code units and a length (in
+code units). If the pattern is zero-terminated, the length can be specified as
 PCRE2_ZERO_TERMINATED. The function returns a pointer to a block of memory that
 contains the compiled pattern and related data, or NULL if an error occurred.
 .P
@@ -1226,22 +1226,30 @@ respectively, when \fBpcre2_compile()\fP returns NULL because a compilation
 error has occurred. The values are not defined when compilation is successful
 and \fBpcre2_compile()\fP returns a non-NULL value.
 .P
-The value returned in \fIerroroffset\fP is an indication of where in the
-pattern the error occurred. It is not necessarily the furthest point in the
-pattern that was read. For example, after the error "lookbehind assertion is
-not fixed length", the error offset points to the start of the failing
-assertion.
-.P
-The \fBpcre2_get_error_message()\fP function (see "Obtaining a textual error
+There are nearly 100 positive error codes that \fBpcre2_compile()\fP may return
+if it finds an error in the pattern. There are also some negative error codes
+that are used for invalid UTF strings. These are the same as given by
+\fBpcre2_match()\fP and \fBpcre2_dfa_match()\fP, and are described in the
+.\" HREF
+\fBpcre2unicode\fP
+.\"
+page. There is no separate documentation for the positive error codes, because
+the textual error messages that are obtained by calling the
+\fBpcre2_get_error_message()\fP function (see "Obtaining a textual error
 message"
 .\" HTML <a href="#geterrormessage">
 .\" </a>
 below)
 .\"
-provides a textual message for each error code. Compilation errors have
-positive error codes; UTF formatting error codes are negative. For an invalid
-UTF-8 or UTF-16 string, the offset is that of the first code unit of the
-failing character.
+should be self-explanatory. Macro names starting with PCRE2_ERROR_ are defined
+for both positive and negative error codes in \fBpcre2.h\fP.
+.P
+The value returned in \fIerroroffset\fP is an indication of where in the
+pattern the error occurred. It is not necessarily the furthest point in the
+pattern that was read. For example, after the error "lookbehind assertion is
+not fixed length", the error offset points to the start of the failing
+assertion. For an invalid UTF-8 or UTF-16 string, the offset is that of the
+first code unit of the failing character.
 .P
 Some errors are not detected until the whole pattern has been scanned; in these
 cases, the offset passed back is the length of the pattern. Note that the
@@ -1755,26 +1763,6 @@ and the end. This is achieved by automatically inserting the code for "\eb(?:"
 at the start of the compiled pattern and ")\eb" at the end. The option may be
 used with PCRE2_LITERAL. However, it is ignored if PCRE2_EXTRA_MATCH_LINE is
 also set.
-.
-.
-.SH "COMPILATION ERROR CODES"
-.rs
-.sp
-There are nearly 100 positive error codes that \fBpcre2_compile()\fP may return
-(via \fIerrorcode\fP) if it finds an error in the pattern. There are also some
-negative error codes that are used for invalid UTF strings. These are the same
-as given by \fBpcre2_match()\fP and \fBpcre2_dfa_match()\fP, and are described
-in the
-.\" HREF
-\fBpcre2unicode\fP
-.\"
-page. The \fBpcre2_get_error_message()\fP function (see "Obtaining a textual
-error message"
-.\" HTML <a href="#geterrormessage">
-.\" </a>
-below)
-.\"
-can be called to obtain a textual error message from any error code.
 .
 .
 .\" HTML <a name="jitcompiling"></a>
@@ -3585,6 +3573,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 16 September 2017
+Last updated: 17 September 2017
 Copyright (c) 1997-2017 University of Cambridge.
 .fi

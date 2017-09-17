@@ -33,29 +33,28 @@ please consult the man page, in case the conversion went wrong.
 <li><a name="TOC18" href="#SEC18">PCRE2 CONTEXTS</a>
 <li><a name="TOC19" href="#SEC19">CHECKING BUILD-TIME OPTIONS</a>
 <li><a name="TOC20" href="#SEC20">COMPILING A PATTERN</a>
-<li><a name="TOC21" href="#SEC21">COMPILATION ERROR CODES</a>
-<li><a name="TOC22" href="#SEC22">JUST-IN-TIME (JIT) COMPILATION</a>
-<li><a name="TOC23" href="#SEC23">LOCALE SUPPORT</a>
-<li><a name="TOC24" href="#SEC24">INFORMATION ABOUT A COMPILED PATTERN</a>
-<li><a name="TOC25" href="#SEC25">INFORMATION ABOUT A PATTERN'S CALLOUTS</a>
-<li><a name="TOC26" href="#SEC26">SERIALIZATION AND PRECOMPILING</a>
-<li><a name="TOC27" href="#SEC27">THE MATCH DATA BLOCK</a>
-<li><a name="TOC28" href="#SEC28">MATCHING A PATTERN: THE TRADITIONAL FUNCTION</a>
-<li><a name="TOC29" href="#SEC29">NEWLINE HANDLING WHEN MATCHING</a>
-<li><a name="TOC30" href="#SEC30">HOW PCRE2_MATCH() RETURNS A STRING AND CAPTURED SUBSTRINGS</a>
-<li><a name="TOC31" href="#SEC31">OTHER INFORMATION ABOUT A MATCH</a>
-<li><a name="TOC32" href="#SEC32">ERROR RETURNS FROM <b>pcre2_match()</b></a>
-<li><a name="TOC33" href="#SEC33">OBTAINING A TEXTUAL ERROR MESSAGE</a>
-<li><a name="TOC34" href="#SEC34">EXTRACTING CAPTURED SUBSTRINGS BY NUMBER</a>
-<li><a name="TOC35" href="#SEC35">EXTRACTING A LIST OF ALL CAPTURED SUBSTRINGS</a>
-<li><a name="TOC36" href="#SEC36">EXTRACTING CAPTURED SUBSTRINGS BY NAME</a>
-<li><a name="TOC37" href="#SEC37">CREATING A NEW STRING WITH SUBSTITUTIONS</a>
-<li><a name="TOC38" href="#SEC38">DUPLICATE SUBPATTERN NAMES</a>
-<li><a name="TOC39" href="#SEC39">FINDING ALL POSSIBLE MATCHES AT ONE POSITION</a>
-<li><a name="TOC40" href="#SEC40">MATCHING A PATTERN: THE ALTERNATIVE FUNCTION</a>
-<li><a name="TOC41" href="#SEC41">SEE ALSO</a>
-<li><a name="TOC42" href="#SEC42">AUTHOR</a>
-<li><a name="TOC43" href="#SEC43">REVISION</a>
+<li><a name="TOC21" href="#SEC21">JUST-IN-TIME (JIT) COMPILATION</a>
+<li><a name="TOC22" href="#SEC22">LOCALE SUPPORT</a>
+<li><a name="TOC23" href="#SEC23">INFORMATION ABOUT A COMPILED PATTERN</a>
+<li><a name="TOC24" href="#SEC24">INFORMATION ABOUT A PATTERN'S CALLOUTS</a>
+<li><a name="TOC25" href="#SEC25">SERIALIZATION AND PRECOMPILING</a>
+<li><a name="TOC26" href="#SEC26">THE MATCH DATA BLOCK</a>
+<li><a name="TOC27" href="#SEC27">MATCHING A PATTERN: THE TRADITIONAL FUNCTION</a>
+<li><a name="TOC28" href="#SEC28">NEWLINE HANDLING WHEN MATCHING</a>
+<li><a name="TOC29" href="#SEC29">HOW PCRE2_MATCH() RETURNS A STRING AND CAPTURED SUBSTRINGS</a>
+<li><a name="TOC30" href="#SEC30">OTHER INFORMATION ABOUT A MATCH</a>
+<li><a name="TOC31" href="#SEC31">ERROR RETURNS FROM <b>pcre2_match()</b></a>
+<li><a name="TOC32" href="#SEC32">OBTAINING A TEXTUAL ERROR MESSAGE</a>
+<li><a name="TOC33" href="#SEC33">EXTRACTING CAPTURED SUBSTRINGS BY NUMBER</a>
+<li><a name="TOC34" href="#SEC34">EXTRACTING A LIST OF ALL CAPTURED SUBSTRINGS</a>
+<li><a name="TOC35" href="#SEC35">EXTRACTING CAPTURED SUBSTRINGS BY NAME</a>
+<li><a name="TOC36" href="#SEC36">CREATING A NEW STRING WITH SUBSTITUTIONS</a>
+<li><a name="TOC37" href="#SEC37">DUPLICATE SUBPATTERN NAMES</a>
+<li><a name="TOC38" href="#SEC38">FINDING ALL POSSIBLE MATCHES AT ONE POSITION</a>
+<li><a name="TOC39" href="#SEC39">MATCHING A PATTERN: THE ALTERNATIVE FUNCTION</a>
+<li><a name="TOC40" href="#SEC40">SEE ALSO</a>
+<li><a name="TOC41" href="#SEC41">AUTHOR</a>
+<li><a name="TOC42" href="#SEC42">REVISION</a>
 </ul>
 <P>
 <b>#include &#60;pcre2.h&#62;</b>
@@ -1083,6 +1082,12 @@ PCRE2_BSR_UNICODE means that \R matches any Unicode line ending sequence; a
 value of PCRE2_BSR_ANYCRLF means that \R matches only CR, LF, or CRLF. The
 default can be overridden when a pattern is compiled.
 <pre>
+  PCRE2_CONFIG_COMPILED_WIDTHS
+</pre>
+The output is a uint32_t integer whose lower bits indicate which code unit
+widths were selected when PCRE2 was built. The 1-bit indicates 8-bit support,
+and the 2-bit and 4-bit indicate 16-bit and 32-bit support, respectively.
+<pre>
   PCRE2_CONFIG_DEPTHLIMIT
 </pre>
 The output is a uint32_t integer that gives the default limit for the depth of
@@ -1149,6 +1154,11 @@ sequence that is recognized as meaning "newline". The values are:
 The default should normally correspond to the standard sequence for your
 operating system.
 <pre>
+  PCRE2_CONFIG_NEVER_BACKSLASH_C
+</pre>
+The output is a uint32_t integer that is set to one if the use of \C was
+permanently disabled when PCRE2 was built; otherwise it is set to zero.
+<pre>
   PCRE2_CONFIG_PARENSLIMIT
 </pre>
 The output is a uint32_t integer that gives the maximum depth of nesting
@@ -1204,8 +1214,8 @@ zero.
 </P>
 <P>
 The <b>pcre2_compile()</b> function compiles a pattern into an internal form.
-The pattern is defined by a pointer to a string of code units and a length. If
-the pattern is zero-terminated, the length can be specified as
+The pattern is defined by a pointer to a string of code units and a length (in
+code units). If the pattern is zero-terminated, the length can be specified as
 PCRE2_ZERO_TERMINATED. The function returns a pointer to a block of memory that
 contains the compiled pattern and related data, or NULL if an error occurred.
 </P>
@@ -1278,20 +1288,26 @@ error has occurred. The values are not defined when compilation is successful
 and <b>pcre2_compile()</b> returns a non-NULL value.
 </P>
 <P>
+There are nearly 100 positive error codes that <b>pcre2_compile()</b> may return
+if it finds an error in the pattern. There are also some negative error codes
+that are used for invalid UTF strings. These are the same as given by
+<b>pcre2_match()</b> and <b>pcre2_dfa_match()</b>, and are described in the
+<a href="pcre2unicode.html"><b>pcre2unicode</b></a>
+page. There is no separate documentation for the positive error codes, because
+the textual error messages that are obtained by calling the
+<b>pcre2_get_error_message()</b> function (see "Obtaining a textual error
+message"
+<a href="#geterrormessage">below)</a>
+should be self-explanatory. Macro names starting with PCRE2_ERROR_ are defined
+for both positive and negative error codes in <b>pcre2.h</b>.
+</P>
+<P>
 The value returned in <i>erroroffset</i> is an indication of where in the
 pattern the error occurred. It is not necessarily the furthest point in the
 pattern that was read. For example, after the error "lookbehind assertion is
 not fixed length", the error offset points to the start of the failing
-assertion.
-</P>
-<P>
-The <b>pcre2_get_error_message()</b> function (see "Obtaining a textual error
-message"
-<a href="#geterrormessage">below)</a>
-provides a textual message for each error code. Compilation errors have
-positive error codes; UTF formatting error codes are negative. For an invalid
-UTF-8 or UTF-16 string, the offset is that of the first code unit of the
-failing character.
+assertion. For an invalid UTF-8 or UTF-16 string, the offset is that of the
+first code unit of the failing character.
 </P>
 <P>
 Some errors are not detected until the whole pattern has been scanned; in these
@@ -1792,21 +1808,8 @@ and the end. This is achieved by automatically inserting the code for "\b(?:"
 at the start of the compiled pattern and ")\b" at the end. The option may be
 used with PCRE2_LITERAL. However, it is ignored if PCRE2_EXTRA_MATCH_LINE is
 also set.
-</P>
-<br><a name="SEC21" href="#TOC1">COMPILATION ERROR CODES</a><br>
-<P>
-There are nearly 100 positive error codes that <b>pcre2_compile()</b> may return
-(via <i>errorcode</i>) if it finds an error in the pattern. There are also some
-negative error codes that are used for invalid UTF strings. These are the same
-as given by <b>pcre2_match()</b> and <b>pcre2_dfa_match()</b>, and are described
-in the
-<a href="pcre2unicode.html"><b>pcre2unicode</b></a>
-page. The <b>pcre2_get_error_message()</b> function (see "Obtaining a textual
-error message"
-<a href="#geterrormessage">below)</a>
-can be called to obtain a textual error message from any error code.
 <a name="jitcompiling"></a></P>
-<br><a name="SEC22" href="#TOC1">JUST-IN-TIME (JIT) COMPILATION</a><br>
+<br><a name="SEC21" href="#TOC1">JUST-IN-TIME (JIT) COMPILATION</a><br>
 <P>
 <b>int pcre2_jit_compile(pcre2_code *<i>code</i>, uint32_t <i>options</i>);</b>
 <br>
@@ -1844,7 +1847,7 @@ patterns to be analyzed, and for one-off matches and simple patterns the
 benefit of faster execution might be offset by a much slower compilation time.
 Most (but not all) patterns can be optimized by the JIT compiler.
 <a name="localesupport"></a></P>
-<br><a name="SEC23" href="#TOC1">LOCALE SUPPORT</a><br>
+<br><a name="SEC22" href="#TOC1">LOCALE SUPPORT</a><br>
 <P>
 PCRE2 handles caseless matching, and determines whether characters are letters,
 digits, or whatever, by reference to a set of tables, indexed by character code
@@ -1900,7 +1903,7 @@ is saved with the compiled pattern, and the same tables are used by
 compilation and matching both happen in the same locale, but different patterns
 can be processed in different locales.
 <a name="infoaboutpattern"></a></P>
-<br><a name="SEC24" href="#TOC1">INFORMATION ABOUT A COMPILED PATTERN</a><br>
+<br><a name="SEC23" href="#TOC1">INFORMATION ABOUT A COMPILED PATTERN</a><br>
 <P>
 <b>int pcre2_pattern_info(const pcre2 *<i>code</i>, uint32_t <i>what</i>, void *<i>where</i>);</b>
 </P>
@@ -2225,7 +2228,7 @@ value returned by this option, because there are cases where the code that
 calculates the size has to over-estimate. Processing a pattern with the JIT
 compiler does not alter the value returned by this option.
 <a name="infoaboutcallouts"></a></P>
-<br><a name="SEC25" href="#TOC1">INFORMATION ABOUT A PATTERN'S CALLOUTS</a><br>
+<br><a name="SEC24" href="#TOC1">INFORMATION ABOUT A PATTERN'S CALLOUTS</a><br>
 <P>
 <b>int pcre2_callout_enumerate(const pcre2_code *<i>code</i>,</b>
 <b>  int (*<i>callback</i>)(pcre2_callout_enumerate_block *, void *),</b>
@@ -2244,7 +2247,7 @@ contents of the callout enumeration block are described in the
 <a href="pcre2callout.html"><b>pcre2callout</b></a>
 documentation, which also gives further details about callouts.
 </P>
-<br><a name="SEC26" href="#TOC1">SERIALIZATION AND PRECOMPILING</a><br>
+<br><a name="SEC25" href="#TOC1">SERIALIZATION AND PRECOMPILING</a><br>
 <P>
 It is possible to save compiled patterns on disc or elsewhere, and reload them
 later, subject to a number of restrictions. The functions whose names begin
@@ -2253,7 +2256,7 @@ the
 <a href="pcre2serialize.html"><b>pcre2serialize</b></a>
 documentation.
 <a name="matchdatablock"></a></P>
-<br><a name="SEC27" href="#TOC1">THE MATCH DATA BLOCK</a><br>
+<br><a name="SEC26" href="#TOC1">THE MATCH DATA BLOCK</a><br>
 <P>
 <b>pcre2_match_data *pcre2_match_data_create(uint32_t <i>ovecsize</i>,</b>
 <b>  pcre2_general_context *<i>gcontext</i>);</b>
@@ -2324,7 +2327,7 @@ match data block (for that match) have taken place.
 When a match data block itself is no longer needed, it should be freed by
 calling <b>pcre2_match_data_free()</b>.
 </P>
-<br><a name="SEC28" href="#TOC1">MATCHING A PATTERN: THE TRADITIONAL FUNCTION</a><br>
+<br><a name="SEC27" href="#TOC1">MATCHING A PATTERN: THE TRADITIONAL FUNCTION</a><br>
 <P>
 <b>int pcre2_match(const pcre2_code *<i>code</i>, PCRE2_SPTR <i>subject</i>,</b>
 <b>  PCRE2_SIZE <i>length</i>, PCRE2_SIZE <i>startoffset</i>,</b>
@@ -2562,7 +2565,7 @@ examples, in the
 <a href="pcre2partial.html"><b>pcre2partial</b></a>
 documentation.
 </P>
-<br><a name="SEC29" href="#TOC1">NEWLINE HANDLING WHEN MATCHING</a><br>
+<br><a name="SEC28" href="#TOC1">NEWLINE HANDLING WHEN MATCHING</a><br>
 <P>
 When PCRE2 is built, a default newline convention is set; this is usually the
 standard convention for the operating system. The default can be overridden in
@@ -2602,7 +2605,7 @@ does \s, even though it includes CR and LF in the characters that it matches.
 Notwithstanding the above, anomalous effects may still occur when CRLF is a
 valid newline sequence and explicit \r or \n escapes appear in the pattern.
 <a name="matchedstrings"></a></P>
-<br><a name="SEC30" href="#TOC1">HOW PCRE2_MATCH() RETURNS A STRING AND CAPTURED SUBSTRINGS</a><br>
+<br><a name="SEC29" href="#TOC1">HOW PCRE2_MATCH() RETURNS A STRING AND CAPTURED SUBSTRINGS</a><br>
 <P>
 <b>uint32_t pcre2_get_ovector_count(pcre2_match_data *<i>match_data</i>);</b>
 <br>
@@ -2701,7 +2704,7 @@ parentheses, no more than <i>ovector[0]</i> to <i>ovector[2n+1]</i> are set by
 <b>pcre2_match()</b>. The other elements retain whatever values they previously
 had.
 <a name="matchotherdata"></a></P>
-<br><a name="SEC31" href="#TOC1">OTHER INFORMATION ABOUT A MATCH</a><br>
+<br><a name="SEC30" href="#TOC1">OTHER INFORMATION ABOUT A MATCH</a><br>
 <P>
 <b>PCRE2_SPTR pcre2_get_mark(pcre2_match_data *<i>match_data</i>);</b>
 <br>
@@ -2751,7 +2754,7 @@ the code unit offset of the invalid UTF character. Details are given in the
 <a href="pcre2unicode.html"><b>pcre2unicode</b></a>
 page.
 <a name="errorlist"></a></P>
-<br><a name="SEC32" href="#TOC1">ERROR RETURNS FROM <b>pcre2_match()</b></a><br>
+<br><a name="SEC31" href="#TOC1">ERROR RETURNS FROM <b>pcre2_match()</b></a><br>
 <P>
 If <b>pcre2_match()</b> fails, it returns a negative number. This can be
 converted to a text string by calling the <b>pcre2_get_error_message()</b>
@@ -2857,7 +2860,7 @@ faulted at compile time, but more complicated cases, in particular mutual
 recursions between two different subpatterns, cannot be detected until matching
 is attempted.
 <a name="geterrormessage"></a></P>
-<br><a name="SEC33" href="#TOC1">OBTAINING A TEXTUAL ERROR MESSAGE</a><br>
+<br><a name="SEC32" href="#TOC1">OBTAINING A TEXTUAL ERROR MESSAGE</a><br>
 <P>
 <b>int pcre2_get_error_message(int <i>errorcode</i>, PCRE2_UCHAR *<i>buffer</i>,</b>
 <b>  PCRE2_SIZE <i>bufflen</i>);</b>
@@ -2878,7 +2881,7 @@ returned. If the buffer is too small, the message is truncated (but still with
 a trailing zero), and the negative error code PCRE2_ERROR_NOMEMORY is returned.
 None of the messages are very long; a buffer size of 120 code units is ample.
 <a name="extractbynumber"></a></P>
-<br><a name="SEC34" href="#TOC1">EXTRACTING CAPTURED SUBSTRINGS BY NUMBER</a><br>
+<br><a name="SEC33" href="#TOC1">EXTRACTING CAPTURED SUBSTRINGS BY NUMBER</a><br>
 <P>
 <b>int pcre2_substring_length_bynumber(pcre2_match_data *<i>match_data</i>,</b>
 <b>  uint32_t <i>number</i>, PCRE2_SIZE *<i>length</i>);</b>
@@ -2975,7 +2978,7 @@ The substring did not participate in the match. For example, if the pattern is
 (abc)|(def) and the subject is "def", and the ovector contains at least two
 capturing slots, substring number 1 is unset.
 </P>
-<br><a name="SEC35" href="#TOC1">EXTRACTING A LIST OF ALL CAPTURED SUBSTRINGS</a><br>
+<br><a name="SEC34" href="#TOC1">EXTRACTING A LIST OF ALL CAPTURED SUBSTRINGS</a><br>
 <P>
 <b>int pcre2_substring_list_get(pcre2_match_data *<i>match_data</i>,</b>
 <b>"  PCRE2_UCHAR ***<i>listptr</i>, PCRE2_SIZE **<i>lengthsptr</i>);</b>
@@ -3014,7 +3017,7 @@ can be distinguished from a genuine zero-length substring by inspecting the
 appropriate offset in the ovector, which contain PCRE2_UNSET for unset
 substrings, or by calling <b>pcre2_substring_length_bynumber()</b>.
 <a name="extractbyname"></a></P>
-<br><a name="SEC36" href="#TOC1">EXTRACTING CAPTURED SUBSTRINGS BY NAME</a><br>
+<br><a name="SEC35" href="#TOC1">EXTRACTING CAPTURED SUBSTRINGS BY NAME</a><br>
 <P>
 <b>int pcre2_substring_number_from_name(const pcre2_code *<i>code</i>,</b>
 <b>  PCRE2_SPTR <i>name</i>);</b>
@@ -3074,7 +3077,7 @@ names are not included in the compiled code. The matching process uses only
 numbers. For this reason, the use of different names for subpatterns of the
 same number causes an error at compile time.
 </P>
-<br><a name="SEC37" href="#TOC1">CREATING A NEW STRING WITH SUBSTITUTIONS</a><br>
+<br><a name="SEC36" href="#TOC1">CREATING A NEW STRING WITH SUBSTITUTIONS</a><br>
 <P>
 <b>int pcre2_substitute(const pcre2_code *<i>code</i>, PCRE2_SPTR <i>subject</i>,</b>
 <b>  PCRE2_SIZE <i>length</i>, PCRE2_SIZE <i>startoffset</i>,</b>
@@ -3281,7 +3284,7 @@ obtained by calling the <b>pcre2_get_error_message()</b> function (see
 "Obtaining a textual error message"
 <a href="#geterrormessage">above).</a>
 </P>
-<br><a name="SEC38" href="#TOC1">DUPLICATE SUBPATTERN NAMES</a><br>
+<br><a name="SEC37" href="#TOC1">DUPLICATE SUBPATTERN NAMES</a><br>
 <P>
 <b>int pcre2_substring_nametable_scan(const pcre2_code *<i>code</i>,</b>
 <b>  PCRE2_SPTR <i>name</i>, PCRE2_SPTR *<i>first</i>, PCRE2_SPTR *<i>last</i>);</b>
@@ -3326,7 +3329,7 @@ in the section entitled <i>Information about a pattern</i>. Given all the
 relevant entries for the name, you can extract each of their numbers, and hence
 the captured data.
 </P>
-<br><a name="SEC39" href="#TOC1">FINDING ALL POSSIBLE MATCHES AT ONE POSITION</a><br>
+<br><a name="SEC38" href="#TOC1">FINDING ALL POSSIBLE MATCHES AT ONE POSITION</a><br>
 <P>
 The traditional matching function uses a similar algorithm to Perl, which stops
 when it finds the first match at a given point in the subject. If you want to
@@ -3344,7 +3347,7 @@ substring. Then return 1, which forces <b>pcre2_match()</b> to backtrack and try
 other alternatives. Ultimately, when it runs out of matches,
 <b>pcre2_match()</b> will yield PCRE2_ERROR_NOMATCH.
 <a name="dfamatch"></a></P>
-<br><a name="SEC40" href="#TOC1">MATCHING A PATTERN: THE ALTERNATIVE FUNCTION</a><br>
+<br><a name="SEC39" href="#TOC1">MATCHING A PATTERN: THE ALTERNATIVE FUNCTION</a><br>
 <P>
 <b>int pcre2_dfa_match(const pcre2_code *<i>code</i>, PCRE2_SPTR <i>subject</i>,</b>
 <b>  PCRE2_SIZE <i>length</i>, PCRE2_SIZE <i>startoffset</i>,</b>
@@ -3540,13 +3543,13 @@ some plausibility checks are made on the contents of the workspace, which
 should contain data about the previous partial match. If any of these checks
 fail, this error is given.
 </P>
-<br><a name="SEC41" href="#TOC1">SEE ALSO</a><br>
+<br><a name="SEC40" href="#TOC1">SEE ALSO</a><br>
 <P>
 <b>pcre2build</b>(3), <b>pcre2callout</b>(3), <b>pcre2demo(3)</b>,
 <b>pcre2matching</b>(3), <b>pcre2partial</b>(3), <b>pcre2posix</b>(3),
 <b>pcre2sample</b>(3), <b>pcre2unicode</b>(3).
 </P>
-<br><a name="SEC42" href="#TOC1">AUTHOR</a><br>
+<br><a name="SEC41" href="#TOC1">AUTHOR</a><br>
 <P>
 Philip Hazel
 <br>
@@ -3555,9 +3558,9 @@ University Computing Service
 Cambridge, England.
 <br>
 </P>
-<br><a name="SEC43" href="#TOC1">REVISION</a><br>
+<br><a name="SEC42" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 10 July 2017
+Last updated: 17 September 2017
 <br>
 Copyright &copy; 1997-2017 University of Cambridge.
 <br>

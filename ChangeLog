@@ -19,6 +19,9 @@ PCRE2_CONFIG_COMPILED_WIDTHS.
 5. Cut out \C tests in the JIT regression tests when NEVER_BACKSLASH_C is 
 defined (e.g. by --enable-never-backslash-C).
 
+6. Defined public names for all the pcre2_compile() error numbers, and used 
+the public names in pcre2_convert.c.
+
 
 Version 10.30 14-August-2017
 ----------------------------
