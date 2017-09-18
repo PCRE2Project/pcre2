@@ -8511,7 +8511,9 @@ if (jit_stack != NULL)
   G(pcre2_compile_context_free_,BITS)(G(pat_context,BITS)); \
   G(pcre2_compile_context_free_,BITS)(G(default_pat_context,BITS)); \
   G(pcre2_match_context_free_,BITS)(G(dat_context,BITS)); \
-  G(pcre2_match_context_free_,BITS)(G(default_dat_context,BITS))
+  G(pcre2_match_context_free_,BITS)(G(default_dat_context,BITS)); \
+  G(pcre2_convert_context_free_,BITS)(G(default_con_context,BITS)); \
+  G(pcre2_convert_context_free_,BITS)(G(con_context,BITS));
 
 #ifdef SUPPORT_PCRE2_8
 #undef BITS

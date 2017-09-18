@@ -22,6 +22,8 @@ defined (e.g. by --enable-never-backslash-C).
 6. Defined public names for all the pcre2_compile() error numbers, and used 
 the public names in pcre2_convert.c.
 
+7. Fixed a small memory leak in pcre2test (convert contexts).
+
 
 Version 10.30 14-August-2017
 ----------------------------
