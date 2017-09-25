@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "17 September 2017" "PCRE2 10.31"
+.TH PCRE2API 3 "25 September 2017" "PCRE2 10.31"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -2335,7 +2335,7 @@ Here is an example of a simple call to \fBpcre2_match()\fP:
     11,             /* the length of the subject string */
     0,              /* start at offset 0 in the subject */
     0,              /* default options */
-    match_data,     /* the match data block */
+    md,             /* the match data block */
     NULL);          /* a match context; NULL means use defaults */
 .sp
 If the subject string is zero-terminated, the length can be given as
@@ -3267,10 +3267,10 @@ default.
 .P
 PCRE2_ERROR_BADREPLACEMENT is used for miscellaneous syntax errors in the
 replacement string, with more particular errors being PCRE2_ERROR_BADREPESCAPE
-(invalid escape sequence), PCRE2_ERROR_REPMISSING_BRACE (closing curly bracket
-not found), PCRE2_BADSUBSTITUTION (syntax error in extended group
-substitution), and PCRE2_BADSUBPATTERN (the pattern match ended before it
-started, which can happen if \eK is used in an assertion).
+(invalid escape sequence), PCRE2_ERROR_REPMISSINGBRACE (closing curly bracket
+not found), PCRE2_ERROR_BADSUBSTITUTION (syntax error in extended group
+substitution), and PCRE2_ERROR_BADSUBSPATTERN (the pattern match ended before
+it started, which can happen if \eK is used in an assertion).
 .P
 As for all PCRE2 errors, a text message that describes the error can be
 obtained by calling the \fBpcre2_get_error_message()\fP function (see
@@ -3573,6 +3573,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 17 September 2017
+Last updated: 25 September 2017
 Copyright (c) 1997-2017 University of Cambridge.
 .fi

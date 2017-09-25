@@ -2322,7 +2322,7 @@ MATCHING A PATTERN: THE TRADITIONAL FUNCTION
            11,             /* the length of the subject string */
            0,              /* start at offset 0 in the subject */
            0,              /* default options */
-           match_data,     /* the match data block */
+           md,             /* the match data block */
            NULL);          /* a match context; NULL means use defaults */
 
        If the subject string is zero-terminated, the length can  be  given  as
@@ -3170,10 +3170,10 @@ CREATING A NEW STRING WITH SUBSTITUTIONS
        PCRE2_ERROR_BADREPLACEMENT  is  used for miscellaneous syntax errors in
        the   replacement   string,   with   more   particular   errors   being
        PCRE2_ERROR_BADREPESCAPE  (invalid  escape  sequence), PCRE2_ERROR_REP-
-       MISSING_BRACE (closing curly bracket not found),  PCRE2_BADSUBSTITUTION
-       (syntax  error in extended group substitution), and PCRE2_BADSUBPATTERN
-       (the pattern match ended before it started, which can happen if  \K  is
-       used in an assertion).
+       MISSINGBRACE (closing curly bracket not found),  PCRE2_ERROR_BADSUBSTI-
+       TUTION   (syntax   error   in   extended   group   substitution),   and
+       PCRE2_ERROR_BADSUBSPATTERN (the pattern match ended before it  started,
+       which can happen if \K is used in an assertion).
 
        As for all PCRE2 errors, a text message that describes the error can be
        obtained  by  calling  the  pcre2_get_error_message()   function   (see
@@ -3437,7 +3437,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 17 September 2017
+       Last updated: 25 September 2017
        Copyright (c) 1997-2017 University of Cambridge.
 ------------------------------------------------------------------------------
  
