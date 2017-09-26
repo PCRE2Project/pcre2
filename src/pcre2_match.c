@@ -729,7 +729,7 @@ for (;;)
 fprintf(stderr, "++ op=%d\n", *Fecode);
 #endif
 
-  Fop = *Fecode;
+  Fop = (uint8_t)(*Fecode);  /* Cast needed for 16-bit and 32-bit modes */
   switch(Fop)
     {
     /* ===================================================================== */

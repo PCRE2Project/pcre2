@@ -2194,8 +2194,8 @@ manage_callouts(PCRE2_SPTR ptr, uint32_t **pcalloutptr, BOOL auto_callout,
 {
 uint32_t *previous_callout = *pcalloutptr;
 
-if (previous_callout != NULL) previous_callout[2] = ptr - cb->start_pattern -
-  (PCRE2_SIZE)previous_callout[1];
+if (previous_callout != NULL) previous_callout[2] = (uint32_t)(ptr - 
+  cb->start_pattern - (PCRE2_SIZE)previous_callout[1]);
 
 if (!auto_callout) previous_callout = NULL; else
   {
@@ -3806,7 +3806,7 @@ while (ptr < ptrend)
       /* Remember the offset to the next item in the pattern, and set a default
       length. This should get updated after the next item is read. */
 
-      previous_callout[1] = ptr - cb->start_pattern;
+      previous_callout[1] = (uint32_t)(ptr - cb->start_pattern);
       previous_callout[2] = 0;
       break;                  /* End callout */
 

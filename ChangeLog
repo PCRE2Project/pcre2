@@ -24,6 +24,8 @@ the public names in pcre2_convert.c.
 
 7. Fixed a small memory leak in pcre2test (convert contexts).
 
+8. Added two casts to compile.c and one to match.c to avoid compiler warnings.
+
 
 Version 10.30 14-August-2017
 ----------------------------
