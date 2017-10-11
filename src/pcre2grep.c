@@ -520,6 +520,22 @@ Returns:   does not return
 static void
 pcre2grep_exit(int rc)
 {
+/* VMS does exit codes differently: both exit(1) and exit(0) return with a
+status of 1, which is not helpful. To help with this problem, define a symbol
+(akin to an environment variable) called "PCRE2GREP_RC" and put the exit code
+therein. */
+
+#ifdef __VMS
+#include descrip
+#include lib$routines
+  char val_buf[4];
+  $DESCRIPTOR(sym_nam, "PCRE2GREP_RC");
+  $DESCRIPTOR(sym_val, val_buf);
+  sprintf(val_buf, "%d", rc);
+  sym_val.dsc$w_length = strlen(val_buf);
+  lib$set_symbol(&sym_nam, &sym_val);
+#endif
+
 if (resource_error)
   {
   fprintf(stderr, "pcre2grep: Error %d, %d, %d or %d means that a resource "
