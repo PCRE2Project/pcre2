@@ -1,4 +1,4 @@
-.TH PCRE2GREP 1 "17 June 2017" "PCRE2 10.30"
+.TH PCRE2GREP 1 "11 October 2017" "PCRE2 10.31"
 .SH NAME
 pcre2grep - a grep with Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -829,6 +829,9 @@ for syntax errors, overlong lines, non-existent or inaccessible files (even if
 matches were found in other files) or too many matching errors. Using the
 \fB-s\fP option to suppress error messages about inaccessible files does not
 affect the return code.
+.P
+When run under VMS, the return code is placed in the symbol PCRE2GREP_RC 
+because VMS does not distinguish between exit(0) and exit(1).
 .
 .
 .SH "SEE ALSO"
@@ -851,6 +854,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 17 June 2017
+Last updated: 11 October 2017
 Copyright (c) 1997-2017 University of Cambridge.
 .fi
