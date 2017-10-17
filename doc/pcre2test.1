@@ -1,4 +1,4 @@
-.TH PCRE2TEST 1 "12 July 2017" "PCRE 10.30"
+.TH PCRE2TEST 1 "17 October 2017" "PCRE 10.31"
 .SH NAME
 pcre2test - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -136,7 +136,8 @@ internal binary form of the pattern is output after compilation.
 \fB-C\fP
 Output the version number of the PCRE2 library, and all available information
 about the optional features that are included, and then exit with zero exit
-code. All other options are ignored.
+code. All other options are ignored. If both -C and -LM are present, whichever
+is first is recognized.
 .TP 10
 \fB-C\fP \fIoption\fP
 Output information about a specific build-time option, then exit. This
@@ -200,6 +201,11 @@ compilation, each pattern is passed to the just-in-time compiler, if available.
 Behave as if each pattern line has the \fBjitverify\fP modifier; after
 successful compilation, each pattern is passed to the just-in-time compiler, if
 available, and the use of JIT is verified.
+.TP 10
+\fB-LM\fP
+List modifiers: write a list of available pattern and subject modifiers to the 
+standard output, then exit with zero exit code. All other options are ignored. 
+If both -C and -LM are present, whichever is first is recognized.
 .TP 10
 \fB-pattern\fB \fImodifier-list\fP
 Behave as if each pattern line contains the given modifiers.
@@ -984,13 +990,14 @@ are mutually exclusive.
 The following modifiers are really subject modifiers, and are described under
 "Subject Modifiers" below. However, they may be included in a pattern's
 modifier list, in which case they are applied to every subject line that is
-processed with that pattern. They may not appear in \fB#pattern\fP commands.
-These modifiers do not affect the compilation process.
+processed with that pattern. These modifiers do not affect the compilation
+process.
 .sp
       aftertext                  show text after match
       allaftertext               show text after captures
       allcaptures                show all captures
       allusedtext                show all consulted text
+      altglobal                  alternative global matching
   /g  global                     global matching
       jitstack=<n>               set size of JIT stack
       mark                       show mark values
@@ -1887,6 +1894,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 12 July 2017
+Last updated: 17 October 2017
 Copyright (c) 1997-2017 University of Cambridge.
 .fi

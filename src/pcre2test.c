@@ -7707,6 +7707,7 @@ printf("  -help         show usage information\n");
 printf("  -i            set default pattern modifier 'info'\n");
 printf("  -jit          set default pattern modifier 'jit'\n");
 printf("  -jitverify    set default pattern modifier 'jitverify'\n");
+printf("  -LM           list pattern and subject modifiers, then exit\n");
 printf("  -q            quiet: do not output PCRE2 version number at start\n");
 printf("  -pattern <s>  set default pattern modifier fields\n");
 printf("  -subject <s>  set default subject modifier fields\n");
@@ -7737,19 +7738,18 @@ static int
 c_option(const char *arg)
 {
 uint32_t optval;
+unsigned int i = COPTLISTCOUNT;
 int yield = 0;
 
-if (arg != NULL)
+if (arg != NULL && arg[0] != CHAR_MINUS)
   {
-  unsigned int i;
-
   for (i = 0; i < COPTLISTCOUNT; i++)
     if (strcmp(arg, coptlist[i].name) == 0) break;
 
   if (i >= COPTLISTCOUNT)
     {
     fprintf(stderr, "** Unknown -C option '%s'\n", arg);
-    return -1;
+    return 0;
     }
 
   switch (coptlist[i].type)
@@ -7860,6 +7860,114 @@ return 0;
 
 
 /*************************************************
+*              Display one modifier              *
+*************************************************/
+
+static void
+display_one_modifier(modstruct *m, BOOL for_pattern)
+{
+uint32_t c = (!for_pattern && (m->which == MOD_PND || m->which == MOD_PNDP))?
+  '*' : ' ';
+printf("%c%s", c, m->name);
+}
+
+
+
+/*************************************************
+*       Display pattern or subject modifiers     *
+*************************************************/
+
+/* In order to print in two columns, first scan without printing to get a list
+of the modifiers that are required.
+
+Arguments:
+  for_pattern   TRUE for pattern modifiers, FALSE for subject modifiers
+  title         string to be used in title
+
+Returns:        nothing
+*/
+
+static void
+display_selected_modifiers(BOOL for_pattern, const char *title)
+{
+uint32_t i, j;
+uint32_t n = 0;
+uint32_t list[MODLISTCOUNT];
+
+for (i = 0; i < MODLISTCOUNT; i++)
+  {
+  BOOL is_pattern = TRUE;
+  modstruct *m = modlist + i;
+
+  switch (m->which)
+    {
+    case MOD_CTC:       /* Compile context */
+    case MOD_PAT:       /* Pattern */
+    case MOD_PATP:      /* Pattern, OK for Perl-compatible test */
+    break;
+
+    /* The MOD_PND and MOD_PNDP modifiers are precisely those that affect
+    subjects, but can be given with a pattern. We list them as subject
+    modifiers, but marked with an asterisk.*/
+
+    case MOD_CTM:       /* Match context */
+    case MOD_DAT:       /* Subject line */
+    case MOD_PND:       /* As PD, but not default pattern */
+    case MOD_PNDP:      /* As PND, OK for Perl-compatible test */
+    is_pattern = FALSE;
+    break;
+
+    default: printf("** Unknown type for modifier '%s'\n", m->name);
+    /* Fall through */
+    case MOD_PD:        /* Pattern or subject */
+    case MOD_PDP:       /* As PD, OK for Perl-compatible test */
+    is_pattern = for_pattern;
+    break;
+    }
+
+  if (for_pattern == is_pattern) list[n++] = i;
+  }
+
+/* Now print from the list in two columns. */
+
+printf("-------------- %s MODIFIERS --------------\n", title);
+
+for (i = 0, j = (n+1)/2; i < (n+1)/2; i++, j++)
+  {
+  modstruct *m = modlist + list[i];
+  display_one_modifier(m, for_pattern);
+  if (j < n)
+    {
+    uint32_t k = 27 - strlen(m->name);
+    while (k-- > 0) printf(" ");
+    display_one_modifier(modlist + list[j], for_pattern);
+    }
+  printf("\n");
+  }
+}
+
+
+
+/*************************************************
+*          Display the list of modifiers         *
+*************************************************/
+
+static void
+display_modifiers(void)
+{
+printf(
+  "An asterisk on a subject modifier means that it may be given on a pattern\n"
+  "line, in order to apply to all subjects matched by that pattern. Modifiers\n"
+  "that are listed for both patterns and subjects have different effects in\n"
+  "each case.\n\n");
+display_selected_modifiers(TRUE, "PATTERN");
+printf("\n");
+display_selected_modifiers(FALSE, "SUBJECT");
+}
+
+
+
+/*************************************************
 *                Main Program                    *
 *************************************************/
 
@@ -7963,6 +8071,14 @@ while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
   char *endptr;
   char *arg = argv[op];
   unsigned long uli;
+
+  /* List modifiers and exit. */
+
+  if (strcmp(arg, "-LM") == 0)
+    {
+    display_modifiers();
+    goto EXIT;
+    }
 
   /* Display and/or set return code for configuration options. */
 

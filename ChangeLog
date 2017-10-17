@@ -30,6 +30,10 @@ the public names in pcre2_convert.c.
 PCRE2GREP_RC to the exit status, because VMS does not distinguish between
 exit(0) and exit(1).
 
+10. Added the -LM (list modifiers) option to pcre2test. Also made -C complain 
+about a bad option only if the following argument item does not start with a 
+hyphen.
+
 
 Version 10.30 14-August-2017
 ----------------------------
