@@ -903,6 +903,10 @@ DIAGNOSTICS
        errors. Using the -s option to suppress error messages about inaccessi-
        ble files does not affect the return code.
 
+       When  run  under  VMS,  the  return  code  is  placed  in  the   symbol
+       PCRE2GREP_RC  because  VMS  does  not  distinguish  between exit(0) and
+       exit(1).
+
 
 SEE ALSO
 
@@ -918,5 +922,5 @@ AUTHOR
 
 REVISION
 
-       Last updated: 17 June 2017
+       Last updated: 11 October 2017
        Copyright (c) 1997-2017 University of Cambridge.

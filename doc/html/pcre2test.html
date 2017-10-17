@@ -167,7 +167,8 @@ internal binary form of the pattern is output after compilation.
 <b>-C</b>
 Output the version number of the PCRE2 library, and all available information
 about the optional features that are included, and then exit with zero exit
-code. All other options are ignored.
+code. All other options are ignored. If both -C and -LM are present, whichever
+is first is recognized.
 </P>
 <P>
 <b>-C</b> <i>option</i>
@@ -239,6 +240,12 @@ compilation, each pattern is passed to the just-in-time compiler, if available.
 Behave as if each pattern line has the <b>jitverify</b> modifier; after
 successful compilation, each pattern is passed to the just-in-time compiler, if
 available, and the use of JIT is verified.
+</P>
+<P>
+<b>-LM</b>
+List modifiers: write a list of available pattern and subject modifiers to the 
+standard output, then exit with zero exit code. All other options are ignored. 
+If both -C and -LM are present, whichever is first is recognized.
 </P>
 <P>
 \fB-pattern\fB <i>modifier-list</i>
@@ -1020,13 +1027,14 @@ Setting certain match controls
 The following modifiers are really subject modifiers, and are described under
 "Subject Modifiers" below. However, they may be included in a pattern's
 modifier list, in which case they are applied to every subject line that is
-processed with that pattern. They may not appear in <b>#pattern</b> commands.
-These modifiers do not affect the compilation process.
+processed with that pattern. These modifiers do not affect the compilation
+process.
 <pre>
       aftertext                  show text after match
       allaftertext               show text after captures
       allcaptures                show all captures
       allusedtext                show all consulted text
+      altglobal                  alternative global matching
   /g  global                     global matching
       jitstack=&#60;n&#62;               set size of JIT stack
       mark                       show mark values
@@ -1905,7 +1913,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC21" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 12 July 2017
+Last updated: 17 October 2017
 <br>
 Copyright &copy; 1997-2017 University of Cambridge.
 <br>
