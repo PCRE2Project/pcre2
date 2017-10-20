@@ -34,6 +34,11 @@ exit(0) and exit(1).
 about a bad option only if the following argument item does not start with a 
 hyphen.
 
+11. pcre2grep was truncating components of file names to 128 characters when
+processing files with the -r option, and also (some very odd code) truncating
+path names to 512 characters. There is now a check on the absolute length of
+full path file names, which may be up to 2047 characters long.
+
 
 Version 10.30 14-August-2017
 ----------------------------

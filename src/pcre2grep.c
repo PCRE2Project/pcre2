@@ -109,7 +109,7 @@ typedef int BOOL;
 #define MAXPATLEN 8192
 #endif
 
-#define FNBUFSIZ 1024
+#define FNBUFSIZ 2048
 #define ERRBUFSIZ 256
 
 /* Values for the "filenames" variable, which specifies options for file name
@@ -3032,7 +3032,7 @@ if (isdirectory(pathname))
 
   if (dee_action == dee_RECURSE)
     {
-    char buffer[1024];
+    char buffer[FNBUFSIZ];
     char *nextfile;
     directory_type *dir = opendirectory(pathname);
 
@@ -3047,7 +3047,13 @@ if (isdirectory(pathname))
     while ((nextfile = readdirectory(dir)) != NULL)
       {
       int frc;
-      sprintf(buffer, "%.512s%c%.128s", pathname, FILESEP, nextfile);
+      int fnlength = strlen(pathname) + strlen(nextfile) + 2;
+      if (fnlength > FNBUFSIZ)
+        {
+        fprintf(stderr, "pcre2grep: recursive filename is too long\n");
+        return 2;
+        }
+      sprintf(buffer, "%s%c%s", pathname, FILESEP, nextfile);
       frc = grep_or_recurse(buffer, dir_recurse, FALSE);
       if (frc > 1) rc = frc;
        else if (frc == 0 && rc == 1) rc = 0;
