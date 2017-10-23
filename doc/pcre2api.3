@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "13 October 2017" "PCRE2 10.31"
+.TH PCRE2API 3 "22 October 2017" "PCRE2 10.31"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -859,11 +859,14 @@ The \fIoffset_limit\fP parameter limits how far an unanchored search can
 advance in the subject string. The default value is PCRE2_UNSET. The
 \fBpcre2_match()\fP and \fBpcre2_dfa_match()\fP functions return
 PCRE2_ERROR_NOMATCH if a match with a starting point before or at the given
-offset is not found. For example, if the pattern /abc/ is matched against
-"123abc" with an offset limit less than 3, the result is PCRE2_ERROR_NO_MATCH.
-A match can never be found if the \fIstartoffset\fP argument of
-\fBpcre2_match()\fP or \fBpcre2_dfa_match()\fP is greater than the offset
-limit.
+offset is not found. The \fBpcre2_substitute()\fP function makes no more 
+substitutions.
+.P
+For example, if the pattern /abc/ is matched against "123abc" with an offset
+limit less than 3, the result is PCRE2_ERROR_NO_MATCH. A match can never be
+found if the \fIstartoffset\fP argument of \fBpcre2_match()\fP,
+\fBpcre2_dfa_match()\fP, or \fBpcre2_substitute()\fP is greater than the offset
+limit set in the match context.
 .P
 When using this facility, you must set the PCRE2_USE_OFFSET_LIMIT option when
 calling \fBpcre2_compile()\fP so that when JIT is in use, different code can be
@@ -871,10 +874,11 @@ compiled. If a match is started with a non-default match limit when
 PCRE2_USE_OFFSET_LIMIT is not set, an error is generated.
 .P
 The offset limit facility can be used to track progress when searching large
-subject strings. See also the PCRE2_FIRSTLINE option, which requires a match to
-start within the first line of the subject. If this is set with an offset
-limit, a match must occur in the first line and also within the offset limit.
-In other words, whichever limit comes first is used.
+subject strings or to limit the extent of global substitutions. See also the
+PCRE2_FIRSTLINE option, which requires a match to start within the first line
+of the subject. If this is set with an offset limit, a match must occur in the
+first line and also within the offset limit. In other words, whichever limit
+comes first is used.
 .sp
 .nf
 .B int pcre2_set_heap_limit(pcre2_match_context *\fImcontext\fP,
@@ -3166,13 +3170,26 @@ As well as the usual options for \fBpcre2_match()\fP, a number of additional
 options can be set in the \fIoptions\fP argument of \fBpcre2_substitute()\fP.
 .P
 PCRE2_SUBSTITUTE_GLOBAL causes the function to iterate over the subject string,
-replacing every matching substring. If this is not set, only the first matching
-substring is replaced. If any matched substring has zero length, after the
-substitution has happened, an attempt to find a non-empty match at the same
-position is performed. If this is not successful, the current position is
-advanced by one character except when CRLF is a valid newline sequence and the
-next two characters are CR, LF. In this case, the current position is advanced
-by two characters.
+replacing every matching substring. If this option is not set, only the first
+matching substring is replaced. The search for matches takes place in the
+original subject string (that is, previous replacements do not affect it). 
+Iteration is implemented by advancing the \fIstartoffset\fP value for each
+search, which is always passed the entire subject string. If an offset limit is
+set in the match context, searching stops when that limit is reached.
+.P
+You can restrict the effect of a global substitution to a portion of the
+subject string by setting either or both of \fIstartoffset\fP and an offset
+limit. Here is a \fPpcre2test\fP example:
+.sp
+  /B/g,replace=!,use_offset_limit
+  ABC ABC ABC ABC\=offset=3,offset_limit=12
+   2: ABC A!C A!C ABC
+.sp
+When continuing with global substitutions after matching a substring with zero
+length, an attempt to find a non-empty match at the same offset is performed.
+If this is not successful, the offset is advanced by one character except when
+CRLF is a valid newline sequence and the next two characters are CR, LF. In
+this case, the offset is advanced by two characters.
 .P
 PCRE2_SUBSTITUTE_OVERFLOW_LENGTH changes what happens when the output buffer is
 too small. The default action is to return PCRE2_ERROR_NOMEMORY immediately. If
@@ -3580,6 +3597,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 13 October 2017
+Last updated: 22 October 2017
 Copyright (c) 1997-2017 University of Cambridge.
 .fi

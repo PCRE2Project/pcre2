@@ -1,4 +1,4 @@
-.TH PCRE2GREP 1 "11 October 2017" "PCRE2 10.31"
+.TH PCRE2GREP 1 "23 October 2017" "PCRE2 10.31"
 .SH NAME
 pcre2grep - a grep with Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -123,7 +123,7 @@ of changing the way binary files are handled.
 .rs
 .sp
 The order in which some of the options appear can affect the output. For
-example, both the \fB-h\fP and \fB-l\fP options affect the printing of file
+example, both the \fB-H\fP and \fB-l\fP options affect the printing of file
 names. Whichever comes later in the command line will be the one that takes
 effect. Similarly, except where noted below, if an option is given twice, the
 later setting is used. Numerical values for options may be followed by K or M,
@@ -341,13 +341,15 @@ searching a single file. By default, the file name is not shown in this case.
 For matching lines, the file name is followed by a colon; for context lines, a
 hyphen separator is used. If a line number is also being output, it follows the
 file name. When the \fB-M\fP option causes a pattern to match more than one
-line, only the first is preceded by the file name.
+line, only the first is preceded by the file name. This option overrides any
+previous \fB-h\fP, \fB-l\fP, or \fB-L\fP options.
 .TP
 \fB-h\fP, \fB--no-filename\fP
 Suppress the output file names when searching multiple files. By default,
 file names are shown when multiple files are searched. For matching lines, the
 file name is followed by a colon; for context lines, a hyphen separator is used.
-If a line number is also being output, it follows the file name.
+If a line number is also being output, it follows the file name. This option
+overrides any previous \fB-H\fP, \fB-L\fP, or \fB-l\fP options.
 .TP
 \fB--heap-limit\fP=\fInumber\fP
 See \fB--match-limit\fP below.
@@ -396,16 +398,18 @@ given any number of times. If a directory matches both \fB--include-dir\fP and
 \fB-L\fP, \fB--files-without-match\fP
 Instead of outputting lines from the files, just output the names of the files
 that do not contain any lines that would have been output. Each file name is
-output once, on a separate line.
+output once, on a separate line. This option overrides any previous \fB-H\fP, 
+\fB-h\fP, or \fB-l\fP options.
 .TP
 \fB-l\fP, \fB--files-with-matches\fP
 Instead of outputting lines from the files, just output the names of the files
-containing lines that would have been output. Each file name is output
-once, on a separate line. Searching normally stops as soon as a matching line
-is found in a file. However, if the \fB-c\fP (count) option is also used,
-matching continues in order to obtain the correct count, and those files that
-have at least one match are listed along with their counts. Using this option
-with \fB-c\fP is a way of suppressing the listing of files with no matches.
+containing lines that would have been output. Each file name is output once, on
+a separate line. Searching normally stops as soon as a matching line is found
+in a file. However, if the \fB-c\fP (count) option is also used, matching
+continues in order to obtain the correct count, and those files that have at
+least one match are listed along with their counts. Using this option with
+\fB-c\fP is a way of suppressing the listing of files with no matches. This
+opeion overrides any previous \fB-H\fP, \fB-h\fP, or \fB-L\fP options.
 .TP
 \fB--label\fP=\fIname\fP
 This option supplies a name to be used for the standard input when file names
@@ -854,6 +858,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 11 October 2017
+Last updated: 23 October 2017
 Copyright (c) 1997-2017 University of Cambridge.
 .fi
