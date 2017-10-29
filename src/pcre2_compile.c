@@ -2194,7 +2194,7 @@ manage_callouts(PCRE2_SPTR ptr, uint32_t **pcalloutptr, BOOL auto_callout,
 {
 uint32_t *previous_callout = *pcalloutptr;
 
-if (previous_callout != NULL) previous_callout[2] = (uint32_t)(ptr - 
+if (previous_callout != NULL) previous_callout[2] = (uint32_t)(ptr -
   cb->start_pattern - (PCRE2_SIZE)previous_callout[1]);
 
 if (!auto_callout) previous_callout = NULL; else
@@ -5599,14 +5599,17 @@ for (;; pptr++)
     /* ===================================================================*/
     /* Deal with (*VERB)s. */
 
-    /* Check for open captures before ACCEPT and convert it to ASSERT_ACCEPT if
-    in an assertion. In the first pass, just accumulate the length required;
+    /* Check for open captures before ACCEPT and close those that are within
+    the same assertion level, also converting ACCEPT to ASSERT_ACCEPT in an
+    assertion. In the first pass, just accumulate the length required;
     otherwise hitting (*ACCEPT) inside many nested parentheses can cause
     workspace overflow. Do not set firstcu after *ACCEPT. */
 
     case META_ACCEPT:
     cb->had_accept = TRUE;
-    for (oc = cb->open_caps; oc != NULL; oc = oc->next)
+    for (oc = cb->open_caps;
+         oc != NULL && oc->assert_depth >= cb->assert_depth;
+         oc = oc->next)
       {
       if (lengthptr != NULL)
         {
@@ -7483,6 +7486,7 @@ if (*code == OP_CBRA)
   capitem.number = capnumber;
   capitem.next = cb->open_caps;
   capitem.flag = FALSE;
+  capitem.assert_depth = cb->assert_depth;
   cb->open_caps = &capitem;
   }
 

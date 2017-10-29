@@ -723,6 +723,8 @@ typedef struct compile_block {
   PCRE2_SIZE erroroffset;          /* Offset of error in pattern */
   uint16_t names_found;            /* Number of entries so far */
   uint16_t name_entry_size;        /* Size of each entry */
+  uint16_t parens_depth;           /* Depth of nested parentheses */
+  uint16_t assert_depth;           /* Depth of nested assertions */
   open_capitem *open_caps;         /* Chain of open capture items */
   named_group *named_groups;       /* Points to vector in pre-compile */
   uint32_t named_group_list_size;  /* Number of entries in the list */
@@ -741,8 +743,6 @@ typedef struct compile_block {
   uint32_t class_range_end;        /* Overall class range end */
   PCRE2_UCHAR nl[4];               /* Newline string when fixed length */
   int  max_lookbehind;             /* Maximum lookbehind (characters) */
-  int  parens_depth;               /* Depth of nested parentheses */
-  int  assert_depth;               /* Depth of nested assertions */
   int  req_varyopt;                /* "After variable item" flag for reqbyte */
   BOOL had_accept;                 /* (*ACCEPT) encountered */
   BOOL had_pruneorskip;            /* (*PRUNE) or (*SKIP) encountered */

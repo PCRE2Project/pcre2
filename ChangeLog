@@ -39,6 +39,12 @@ processing files with the -r option, and also (some very odd code) truncating
 path names to 512 characters. There is now a check on the absolute length of
 full path file names, which may be up to 2047 characters long.
 
+12. When an assertion contained (*ACCEPT) it caused all open capturing groups 
+to be closed (as for a non-assertion ACCEPT), which was wrong and could lead to 
+misbehaviour for subsequent references to groups that started outside the 
+recursion. ACCEPT in an assertion now closes only those groups that were 
+started within that assertion. Fixes oss-fuzz issues 3852 and 3891.
+
 
 Version 10.30 14-August-2017
 ----------------------------

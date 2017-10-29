@@ -9741,4 +9741,21 @@ No match
     12-24
  0: 12-24
 
+/((?<=((*ACCEPT)) )\1?\b) /
+\= Expect no match     
+    ((?<=((*ACCEPT)) )\\1?\\b)\x20
+No match
+
+/((?<=((*ACCEPT))X)\1?Y)\1/
+    XYYZ
+ 0: YY
+ 1: Y
+ 2: 
+
+/((?<=((*ACCEPT))X)\1?Y(*ACCEPT))\1/
+    XYYZ
+ 0: Y
+ 1: Y
+ 2: 
+
 # End of testinput1 
