@@ -2365,7 +2365,6 @@ while (ptr < endptr)
   int mrc = 0;
   unsigned int options = 0;
   BOOL match;
-  char *matchptr = ptr;
   char *t = ptr;
   size_t length, linelength;
   size_t startoffset = 0;
@@ -2503,7 +2502,7 @@ while (ptr < endptr)
   match, set PCRE2_NOTEMPTY to disable any further matches of null strings in
   this line. */
 
-  match = match_patterns(matchptr, length, options, startoffset, &mrc);
+  match = match_patterns(ptr, length, options, startoffset, &mrc);
   options = PCRE2_NOTEMPTY;
 
   /* If it's a match or a not-match (as required), do what's wanted. */
@@ -2564,14 +2563,14 @@ while (ptr < endptr)
         /* Handle --line-offsets */
 
         if (line_offsets)
-          fprintf(stdout, "%d,%d" STDOUT_NL, (int)(matchptr + offsets[0] - ptr),
+          fprintf(stdout, "%d,%d" STDOUT_NL, (int)(ptr + offsets[0] - ptr),
             (int)(offsets[1] - offsets[0]));
 
         /* Handle --file-offsets */
 
         else if (file_offsets)
           fprintf(stdout, "%d,%d" STDOUT_NL,
-            (int)(filepos + matchptr + offsets[0] - ptr),
+            (int)(filepos + ptr + offsets[0] - ptr),
             (int)(offsets[1] - offsets[0]));
 
         /* Handle --output (which has already been syntax checked) */
@@ -2579,7 +2578,7 @@ while (ptr < endptr)
         else if (output_text != NULL)
           {
           if (display_output_text((PCRE2_SPTR)output_text, FALSE,
-              (PCRE2_SPTR)matchptr, offsets, mrc) || printname != NULL ||
+              (PCRE2_SPTR)ptr, offsets, mrc) || printname != NULL ||
               number)
             fprintf(stdout, STDOUT_NL);
           }
@@ -2601,7 +2600,7 @@ while (ptr < endptr)
                 {
                 if (printed && om_separator != NULL)
                   fprintf(stdout, "%s", om_separator);
-                print_match(matchptr + offsets[n*2], plen);
+                print_match(ptr + offsets[n*2], plen);
                 printed = TRUE;
                 }
               }
@@ -2628,7 +2627,7 @@ while (ptr < endptr)
           {
           if (startoffset >= length) goto END_ONE_MATCH;  /* Were at end */
           startoffset = oldstartoffset + 1;
-          if (utf) while ((matchptr[startoffset] & 0xc0) == 0x80) startoffset++;
+          if (utf) while ((ptr[startoffset] & 0xc0) == 0x80) startoffset++;
           }
 
         /* If the current match ended past the end of the line (only possible
@@ -2637,7 +2636,7 @@ while (ptr < endptr)
 
         while (startoffset > linelength)
           {
-          matchptr = ptr += linelength + endlinelength;
+          ptr += linelength + endlinelength;
           filepos += (int)(linelength + endlinelength);
           linenumber++;
           startoffset -= (int)(linelength + endlinelength);
@@ -2784,10 +2783,10 @@ while (ptr < endptr)
           {
           startoffset = offsets[1];
           if (startoffset >= linelength + endlinelength ||
-              !match_patterns(matchptr, length, options, startoffset, &mrc))
+              !match_patterns(ptr, length, options, startoffset, &mrc))
             break;
-          FWRITE_IGNORE(matchptr + startoffset, 1, offsets[0] - startoffset, stdout);
-          print_match(matchptr + offsets[0], offsets[1] - offsets[0]);
+          FWRITE_IGNORE(ptr + startoffset, 1, offsets[0] - startoffset, stdout);
+          print_match(ptr + offsets[0], offsets[1] - offsets[0]);
           }
 
         /* In multiline mode, we may have already printed the complete line
