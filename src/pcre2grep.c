@@ -2505,7 +2505,10 @@ while (ptr < endptr)
   match = match_patterns(ptr, length, options, startoffset, &mrc);
   options = PCRE2_NOTEMPTY;
 
-  /* If it's a match or a not-match (as required), do what's wanted. */
+  /* If it's a match or a not-match (as required), do what's wanted. NOTE: Use
+  only FWRITE_IGNORE() - which is just a packaged fwrite() that ignores its
+  return code - to output data lines, so that binary zeroes are treated as just
+  another data character. */
 
   if (match != invert)
     {
@@ -2734,27 +2737,6 @@ while (ptr < endptr)
       if (printname != NULL) fprintf(stdout, "%s:", printname);
       if (number) fprintf(stdout, "%d:", linenumber);
 
-      /* In multiline mode, we want to print to the end of the line in which
-      the end of the matched string is found, so we adjust linelength and the
-      line number appropriately, but only when there actually was a match
-      (invert not set). Because the PCRE2_FIRSTLINE option is set, the start of
-      the match will always be before the first newline sequence. */
-
-      if (multiline & !invert)
-        {
-        char *endmatch = ptr + offsets[1];
-        t = ptr;
-        while (t <= endmatch)
-          {
-          t = end_of_line(t, endptr, &endlinelength);
-          if (t < endmatch) linenumber++; else break;
-          }
-        linelength = t - ptr - endlinelength;
-        }
-
-      /*** NOTE: Use only fwrite() to output the data line, so that binary
-      zeroes are treated as just another data character. */
-
       /* This extra option, for Jeffrey Friedl's debugging requirements,
       replaces the matched string, or a specific captured string if it exists,
       with X. When this happens, colouring is ignored. */
@@ -2771,20 +2753,48 @@ while (ptr < endptr)
       else
 #endif
 
-      /* We have to split the line(s) up if colouring, and search for further
-      matches, but not of course if the line is a non-match. */
+      /* In multiline mode, or if colouring, we have to split the line(s) up
+      and search for further matches, but not of course if the line is a
+      non-match. In multiline mode this is necessary in case there is another
+      match that spans the end of the current line. When colouring we want to
+      colour all matches. */
 
-      if (do_colour && !invert)
+      if ((multiline || do_colour) && !invert)
         {
         int plength;
         FWRITE_IGNORE(ptr, 1, offsets[0], stdout);
         print_match(ptr + offsets[0], offsets[1] - offsets[0]);
         for (;;)
           {
-          startoffset = offsets[1];
-          if (startoffset >= linelength + endlinelength ||
-              !match_patterns(ptr, length, options, startoffset, &mrc))
-            break;
+          startoffset = offsets[1];  /* Advance after previous match. */
+
+          /* If the current match ended past the end of the line (only possible
+          in multiline mode), we must move on to the line in which it did end
+          before searching for more matches. Because the PCRE2_FIRSTLINE option
+          is set, the start of the match will always be before the first
+          newline sequence. */
+
+          while (startoffset > linelength + endlinelength)
+            {
+            ptr += linelength + endlinelength;
+            filepos += (int)(linelength + endlinelength);
+            linenumber++;
+            startoffset -= (int)(linelength + endlinelength);
+            t = end_of_line(ptr, endptr, &endlinelength);
+            linelength = t - ptr - endlinelength;
+            length = (size_t)(endptr - ptr);
+            }
+
+          /* If startoffset is at the exact end of the line it means this
+          complete line was the final part of the match, so there is nothing
+          more to do. */
+
+          if (startoffset == linelength + endlinelength) break;
+
+          /* Otherwise, run a match from within the final line, and if found,
+          loop for any that may follow. */
+
+          if (!match_patterns(ptr, length, options, startoffset, &mrc)) break;
           FWRITE_IGNORE(ptr + startoffset, 1, offsets[0] - startoffset, stdout);
           print_match(ptr + offsets[0], offsets[1] - offsets[0]);
           }
@@ -2797,7 +2807,7 @@ while (ptr < endptr)
         if (plength > 0) FWRITE_IGNORE(ptr + startoffset, 1, plength, stdout);
         }
 
-      /* Not colouring; no need to search for further matches */
+      /* Not colouring or multiline; no need to search for further matches. */
 
       else FWRITE_IGNORE(ptr, 1, linelength + endlinelength, stdout);
       }

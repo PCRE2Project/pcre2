@@ -248,7 +248,7 @@ echo "---------------------------- Test 35 -----------------------------" >>test
 echo "RC=$?" >>testtrygrep
 
 echo "---------------------------- Test 36 -----------------------------" >>testtrygrep
-(cd $srcdir; $valgrind $vjs $pcre2grep -L -r --include=grepinput --exclude 'grepinput$' --exclude=grepinput8 --exclude-dir='^\.' 'fox' ./testdata | sort) >>testtrygrep
+(cd $srcdir; $valgrind $vjs $pcre2grep -L -r --include=grepinput --exclude 'grepinput$' --exclude=grepinput8 --exclude=grepinputM --exclude-dir='^\.' 'fox' ./testdata | sort) >>testtrygrep
 echo "RC=$?" >>testtrygrep
 
 echo "---------------------------- Test 37 -----------------------------" >>testtrygrep
@@ -391,6 +391,12 @@ echo "RC=$?" >>testtrygrep
 echo "---------------------------- Test 70 -----------------------------" >>testtrygrep
 (cd $srcdir; $valgrind $vjs $pcre2grep --color=always -M "triple:\t.*\n\n" ./testdata/grepinput3) >>testtrygrep
 echo "RC=$?" >>testtrygrep
+(cd $srcdir; $valgrind $vjs $pcre2grep --color=always -M -n "triple:\t.*\n\n" ./testdata/grepinput3) >>testtrygrep
+echo "RC=$?" >>testtrygrep
+(cd $srcdir; $valgrind $vjs $pcre2grep -M "triple:\t.*\n\n" ./testdata/grepinput3) >>testtrygrep
+echo "RC=$?" >>testtrygrep
+(cd $srcdir; $valgrind $vjs $pcre2grep -M -n "triple:\t.*\n\n" ./testdata/grepinput3) >>testtrygrep
+echo "RC=$?" >>testtrygrep
 
 echo "---------------------------- Test 71 -----------------------------" >>testtrygrep
 (cd $srcdir; $valgrind $vjs $pcre2grep -o "^01|^02|^03" ./testdata/grepinput) >>testtrygrep
@@ -494,25 +500,25 @@ echo "---------------------------- Test 95 -----------------------------" >>test
 echo "RC=$?" >>testtrygrep
 
 echo "---------------------------- Test 96 -----------------------------" >>testtrygrep
-(cd $srcdir; $valgrind $vjs $pcre2grep -L -r --include-dir=testdata --exclude '^(?!grepinput)' 'fox' ./test* | sort) >>testtrygrep
+(cd $srcdir; $valgrind $vjs $pcre2grep -L -r --include-dir=testdata --exclude '^(?!grepinput)' --exclude=grepinputM 'fox' ./test* | sort) >>testtrygrep
 echo "RC=$?" >>testtrygrep
 
 echo "---------------------------- Test 97 -----------------------------" >>testtrygrep
 echo "grepinput$" >testtemp1grep
 echo "grepinput8" >>testtemp1grep
-(cd $srcdir; $valgrind $vjs $pcre2grep -L -r --include=grepinput --exclude-from $builddir/testtemp1grep --exclude-dir='^\.' 'fox' ./testdata | sort) >>testtrygrep
+(cd $srcdir; $valgrind $vjs $pcre2grep -L -r --include=grepinput --exclude=grepinputM --exclude-from $builddir/testtemp1grep --exclude-dir='^\.' 'fox' ./testdata | sort) >>testtrygrep
 echo "RC=$?" >>testtrygrep
 
 echo "---------------------------- Test 98 -----------------------------" >>testtrygrep
 echo "grepinput$" >testtemp1grep
 echo "grepinput8" >>testtemp1grep
-(cd $srcdir; $valgrind $vjs $pcre2grep -L -r --exclude=grepinput3 --include=grepinput --exclude-from $builddir/testtemp1grep --exclude-dir='^\.' 'fox' ./testdata | sort) >>testtrygrep
+(cd $srcdir; $valgrind $vjs $pcre2grep -L -r --exclude=grepinput3 --exclude=grepinputM --include=grepinput --exclude-from $builddir/testtemp1grep --exclude-dir='^\.' 'fox' ./testdata | sort) >>testtrygrep
 echo "RC=$?" >>testtrygrep
 
 echo "---------------------------- Test 99 -----------------------------" >>testtrygrep
 echo "grepinput$" >testtemp1grep
 echo "grepinput8" >testtemp2grep
-(cd $srcdir; $valgrind $vjs $pcre2grep -L -r --include grepinput --exclude-from $builddir/testtemp1grep --exclude-from=$builddir/testtemp2grep --exclude-dir='^\.' 'fox' ./testdata | sort) >>testtrygrep
+(cd $srcdir; $valgrind $vjs $pcre2grep -L -r --include grepinput --exclude=grepinputM --exclude-from $builddir/testtemp1grep --exclude-from=$builddir/testtemp2grep --exclude-dir='^\.' 'fox' ./testdata | sort) >>testtrygrep
 echo "RC=$?" >>testtrygrep
 
 echo "---------------------------- Test 100 ------------------------------" >>testtrygrep
@@ -582,7 +588,7 @@ echo "---------------------------- Test 115 -----------------------------" >>tes
 echo "RC=$?" >>testtrygrep
 
 echo "---------------------------- Test 116 -----------------------------" >>testtrygrep
-(cd $srcdir; $valgrind $vjs $pcre2grep -th 'the' testdata/grepinput*) >>testtrygrep
+(cd $srcdir; $valgrind $vjs $pcre2grep --exclude=grepinputM -th 'the' testdata/grepinput*) >>testtrygrep
 echo "RC=$?" >>testtrygrep
 
 echo "---------------------------- Test 117 -----------------------------" >>testtrygrep
@@ -610,8 +616,18 @@ echo "---------------------------- Test 122 -----------------------------" >>tes
 (cd $srcdir; $valgrind $vjs $pcre2grep -w 'cat|dog' testdata/grepinputv) >>testtrygrep
 echo "RC=$?" >>testtrygrep
 
-echo "---------------------------- Test 122 -----------------------------" >>testtrygrep
+echo "---------------------------- Test 123 -----------------------------" >>testtrygrep
 (cd $srcdir; $valgrind $vjs $pcre2grep -w 'dog|cat' testdata/grepinputv) >>testtrygrep
+echo "RC=$?" >>testtrygrep
+
+echo "---------------------------- Test 124 -----------------------------" >>testtrygrep
+(cd $srcdir; $valgrind $vjs $pcre2grep -Mn --colour=always 'start[\s]+end' testdata/grepinputM) >>testtrygrep
+echo "RC=$?" >>testtrygrep
+(cd $srcdir; $valgrind $vjs $pcre2grep -Mn --colour=always -A2 'start[\s]+end' testdata/grepinputM) >>testtrygrep
+echo "RC=$?" >>testtrygrep
+(cd $srcdir; $valgrind $vjs $pcre2grep -Mn 'start[\s]+end' testdata/grepinputM) >>testtrygrep
+echo "RC=$?" >>testtrygrep
+(cd $srcdir; $valgrind $vjs $pcre2grep -Mn -A2 'start[\s]+end' testdata/grepinputM) >>testtrygrep
 echo "RC=$?" >>testtrygrep
 
 

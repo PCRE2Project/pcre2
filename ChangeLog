@@ -45,6 +45,12 @@ misbehaviour for subsequent references to groups that started outside the
 recursion. ACCEPT in an assertion now closes only those groups that were 
 started within that assertion. Fixes oss-fuzz issues 3852 and 3891.
 
+13. Multiline matching in pcre2grep was misbehaving if the pattern matched 
+within a line, and then matched again at the end of the line and over into 
+subsequent lines. Behaviour was different with and without colouring, and 
+sometimes context lines were incorrectly printed and/or line endings were lost. 
+All these issues should now be fixed.
+
 
 Version 10.30 14-August-2017
 ----------------------------

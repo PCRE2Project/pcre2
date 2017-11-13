@@ -487,6 +487,7 @@ RC=0
 ./testdata/grepinput:456
 ./testdata/grepinput3:0
 ./testdata/grepinput8:0
+./testdata/grepinputM:0
 ./testdata/grepinputv:1
 ./testdata/grepinputx:0
 RC=0
@@ -600,6 +601,33 @@ RC=0
 [0m[1;31mtriple:	t6_txt	s2_tag	s_txt	p_tag	p_txt	o_tag	o_txt
 
 [0mRC=0
+1:[1;31mtriple:	t1_txt	s1_tag	s_txt	p_tag	p_txt	o_tag	o_txt
+
+[0m6:[1;31mtriple:	t3_txt	s2_tag	s_txt	p_tag	p_txt	o_tag	o_txt
+
+[0m8:[1;31mtriple:	t4_txt	s1_tag	s_txt	p_tag	p_txt	o_tag	o_txt
+
+[0m13:[1;31mtriple:	t6_txt	s2_tag	s_txt	p_tag	p_txt	o_tag	o_txt
+
+[0mRC=0
+triple:	t1_txt	s1_tag	s_txt	p_tag	p_txt	o_tag	o_txt
+
+triple:	t3_txt	s2_tag	s_txt	p_tag	p_txt	o_tag	o_txt
+
+triple:	t4_txt	s1_tag	s_txt	p_tag	p_txt	o_tag	o_txt
+
+triple:	t6_txt	s2_tag	s_txt	p_tag	p_txt	o_tag	o_txt
+
+RC=0
+1:triple:	t1_txt	s1_tag	s_txt	p_tag	p_txt	o_tag	o_txt
+
+6:triple:	t3_txt	s2_tag	s_txt	p_tag	p_txt	o_tag	o_txt
+
+8:triple:	t4_txt	s1_tag	s_txt	p_tag	p_txt	o_tag	o_txt
+
+13:triple:	t6_txt	s2_tag	s_txt	p_tag	p_txt	o_tag	o_txt
+
+RC=0
 ---------------------------- Test 71 -----------------------------
 01
 RC=0
@@ -793,21 +821,23 @@ RC=0
 37216,12
 RC=0
 ---------------------------- Test 113 -----------------------------
-478
+480
 RC=0
 ---------------------------- Test 114 -----------------------------
 testdata/grepinput:469
 testdata/grepinput3:0
 testdata/grepinput8:0
+testdata/grepinputM:2
 testdata/grepinputv:3
 testdata/grepinputx:6
-TOTAL:478
+TOTAL:480
 RC=0
 ---------------------------- Test 115 -----------------------------
 testdata/grepinput:469
+testdata/grepinputM:2
 testdata/grepinputv:3
 testdata/grepinputx:6
-TOTAL:478
+TOTAL:480
 RC=0
 ---------------------------- Test 116 -----------------------------
 478
@@ -816,9 +846,10 @@ RC=0
 469
 0
 0
+2
 3
 6
-478
+480
 RC=0
 ---------------------------- Test 118 -----------------------------
 testdata/grepinput3
@@ -846,7 +877,62 @@ RC=0
 over the lazy dog.
 The word is cat in this line
 RC=0
----------------------------- Test 122 -----------------------------
+---------------------------- Test 123 -----------------------------
 over the lazy dog.
 The word is cat in this line
+RC=0
+---------------------------- Test 124 -----------------------------
+3:[1;31mstart end[0m in between [1;31mstart
+end[0m and following
+7:[1;31mstart end[0m in between [1;31mstart
+end[0m and following [1;31mstart
+end[0m other stuff
+11:[1;31mstart end[0m in between [1;31mstart
+
+end[0m
+16:[1;31mstart end[0m in between [1;31mstart
+end[0m
+RC=0
+3:[1;31mstart end[0m in between [1;31mstart
+end[0m and following
+5-Other stuff
+6-
+7:[1;31mstart end[0m in between [1;31mstart
+end[0m and following [1;31mstart
+end[0m other stuff
+10-
+11:[1;31mstart end[0m in between [1;31mstart
+
+end[0m
+14-
+15-** These two lines must be last.
+16:[1;31mstart end[0m in between [1;31mstart
+end[0m
+RC=0
+3:start end in between start
+end and following
+7:start end in between start
+end and following start
+end other stuff
+11:start end in between start
+
+end
+16:start end in between start
+end
+RC=0
+3:start end in between start
+end and following
+5-Other stuff
+6-
+7:start end in between start
+end and following start
+end other stuff
+10-
+11:start end in between start
+
+end
+14-
+15-** These two lines must be last.
+16:start end in between start
+end
 RC=0
