@@ -2332,6 +2332,7 @@ if (frtype != FR_LIBZ && frtype != FR_LIBBZ2)
   in = (FILE *)handle;
   if (is_file_tty(in)) input_line_buffered = TRUE;
   }
+else input_line_buffered = FALSE;
 
 bufflength = fill_buffer(handle, frtype, main_buffer, bufsize,
   input_line_buffered);

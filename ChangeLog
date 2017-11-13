@@ -51,6 +51,10 @@ subsequent lines. Behaviour was different with and without colouring, and
 sometimes context lines were incorrectly printed and/or line endings were lost. 
 All these issues should now be fixed.
 
+14. If --line-buffered was specified for pcre2grep when input was from a 
+compressed file (.gz or .bz2) a segfault occurred. (Line buffering should be 
+ignored for compressed files.)
+
 
 Version 10.30 14-August-2017
 ----------------------------

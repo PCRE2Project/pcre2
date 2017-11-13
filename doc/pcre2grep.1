@@ -1,4 +1,4 @@
-.TH PCRE2GREP 1 "23 October 2017" "PCRE2 10.31"
+.TH PCRE2GREP 1 "13 November 2017" "PCRE2 10.31"
 .SH NAME
 pcre2grep - a grep with Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -101,11 +101,13 @@ The \fB--locale\fP option can be used to override this.
 .rs
 .sp
 It is possible to compile \fBpcre2grep\fP so that it uses \fBlibz\fP or
-\fBlibbz2\fP to read files whose names end in \fB.gz\fP or \fB.bz2\fP,
-respectively. You can find out whether your binary has support for one or both
-of these file types by running it with the \fB--help\fP option. If the
-appropriate support is not present, files are treated as plain text. The
-standard input is always so treated.
+\fBlibbz2\fP to read compressed files whose names end in \fB.gz\fP or
+\fB.bz2\fP, respectively. You can find out whether your \fBpcre2grep\fP binary
+has support for one or both of these file types by running it with the
+\fB--help\fP option. If the appropriate support is not present, all files are
+treated as plain text. The standard input is always so treated. When input is
+from a compressed .gz or .bz2 file, the \fB--line-buffered\fP option is
+ignored.
 .
 .
 .SH "BINARY FILES"
@@ -417,14 +419,16 @@ are being output. If not supplied, "(standard input)" is used. There is no
 short form for this option.
 .TP
 \fB--line-buffered\fP
-When this option is given, input is read and processed line by line, and the
-output is flushed after each write. By default, input is read in large chunks,
-unless \fBpcre2grep\fP can determine that it is reading from a terminal (which
-is currently possible only in Unix-like environments). Output to terminal is
-normally automatically flushed by the operating system. This option can be
-useful when the input or output is attached to a pipe and you do not want
-\fBpcre2grep\fP to buffer up large amounts of data. However, its use will
-affect performance, and the \fB-M\fP (multiline) option ceases to work.
+When this option is given, non-compressed input is read and processed line by
+line, and the output is flushed after each write. By default, input is read in
+large chunks, unless \fBpcre2grep\fP can determine that it is reading from a
+terminal (which is currently possible only in Unix-like environments). Output
+to terminal is normally automatically flushed by the operating system. This
+option can be useful when the input or output is attached to a pipe and you do
+not want \fBpcre2grep\fP to buffer up large amounts of data. However, its use
+will affect performance, and the \fB-M\fP (multiline) option ceases to work.
+When input is from a compressed .gz or .bz2 file, \fB--line-buffered\fP is 
+ignored.
 .TP
 \fB--line-offsets\fP
 Instead of showing lines or parts of lines that match, show each match as a
@@ -858,6 +862,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 23 October 2017
+Last updated: 13 November 2017
 Copyright (c) 1997-2017 University of Cambridge.
 .fi
