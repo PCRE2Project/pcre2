@@ -611,6 +611,7 @@ EXTRA_DIST += \
   testdata/grepinput \
   testdata/grepinput3 \
   testdata/grepinput8 \
+  testdata/grepinputM \
   testdata/grepinputv \
   testdata/grepinputx \
   testdata/greplist \
