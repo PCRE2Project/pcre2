@@ -1,4 +1,4 @@
-.TH PCRE2_MATCH 3 "11 April 2017" "PCRE2 10.30"
+.TH PCRE2_MATCH 3 "14 November 2017" "PCRE2 10.31"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH SYNOPSIS
@@ -18,7 +18,13 @@ PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
 This function matches a compiled regular expression against a given subject
 string, using a matching algorithm that is similar to Perl's. It returns
-offsets to captured substrings. Its arguments are:
+offsets to what it has matched and to captured substrings via the
+\fBmatch_data\fP block, which can be processed by functions with names that
+start with \fBpcre2_get_ovector_...()\fP or \fBpcre2_substring_...()\fP. The
+return from \fBpcre2_match()\fP is one more than the highest numbered capturing
+pair that has been set (for example, 1 if there are no captures), zero if the
+vector of offsets is too small, or a negative error code for no match and other
+errors. The function arguments are:
 .sp
   \fIcode\fP         Points to the compiled pattern
   \fIsubject\fP      Points to the subject string
