@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "22 October 2017" "PCRE2 10.31"
+.TH PCRE2API 3 "14 November 2017" "PCRE2 10.31"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -3420,7 +3420,7 @@ Here is an example of a simple call to \fBpcre2_dfa_match()\fP:
     11,             /* the length of the subject string */
     0,              /* start at offset 0 in the subject */
     0,              /* default options */
-    match_data,     /* the match data block */
+    md,             /* the match data block */
     NULL,           /* a match context; NULL means use defaults */
     wspace,         /* working space vector */
     20);            /* number of elements (NOT size in bytes) */
