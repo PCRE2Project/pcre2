@@ -2176,7 +2176,7 @@ for (;;)
       case OP_NOTI:
       if (clen > 0)
         {
-        unsigned int otherd;
+        uint32_t otherd;
 #ifdef SUPPORT_UNICODE
         if (utf && d >= 128)
           otherd = UCD_OTHERCASE(d);
