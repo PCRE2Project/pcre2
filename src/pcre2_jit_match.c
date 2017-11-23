@@ -118,7 +118,7 @@ if ((options & PCRE2_PARTIAL_HARD) != 0)
 else if ((options & PCRE2_PARTIAL_SOFT) != 0)
   index = 1;
 
-if (functions->executable_funcs[index] == NULL)
+if (functions->executable_funcs == NULL || functions->executable_funcs[index] == NULL)
   return PCRE2_ERROR_JIT_BADOPTION;
 
 /* Sanity checks should be handled by pcre_exec. */

@@ -55,6 +55,11 @@ All these issues should now be fixed.
 compressed file (.gz or .bz2) a segfault occurred. (Line buffering should be 
 ignored for compressed files.)
 
+15. Although pcre2_jit_match checks whether the pattern is compiled
+in a given mode, it was also expected that at least one mode is available.
+This is fixed and pcre2_jit_match returns with PCRE2_ERROR_JIT_BADOPTION
+when the pattern is not optimized by JIT at all.
+
 
 Version 10.30 14-August-2017
 ----------------------------
