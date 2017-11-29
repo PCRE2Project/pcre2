@@ -213,14 +213,6 @@ of sljitConfigInternal.h */
 
 #define SLJIT_RETURN_REG	SLJIT_R0
 
-/* x86 prefers specific registers for special purposes. In case of shift
-   by register it supports only SLJIT_R2 for shift argument
-   (which is the src2 argument of sljit_emit_op2). If another register is
-   used, sljit must exchange data between registers which cause a minor
-   slowdown. Other architectures has no such limitation. */
-
-#define SLJIT_PREF_SHIFT_REG	SLJIT_R2
-
 /* --------------------------------------------------------------------- */
 /*  Floating point registers                                             */
 /* --------------------------------------------------------------------- */
@@ -256,6 +248,79 @@ of sljitConfigInternal.h */
 
 /* Float registers >= SLJIT_FIRST_SAVED_FLOAT_REG are saved registers. */
 #define SLJIT_FIRST_SAVED_FLOAT_REG (SLJIT_FS0 - SLJIT_NUMBER_OF_SAVED_FLOAT_REGISTERS + 1)
+
+/* --------------------------------------------------------------------- */
+/*  Argument type definitions                                            */
+/* --------------------------------------------------------------------- */
+
+/* Argument type definitions.
+   Used by SLJIT_[DEF_]ARGx and SLJIT_[DEF]_RET macros. */
+
+#define SLJIT_ARG_TYPE_VOID 0
+#define SLJIT_ARG_TYPE_SW 1
+#define SLJIT_ARG_TYPE_UW 2
+#define SLJIT_ARG_TYPE_S32 3
+#define SLJIT_ARG_TYPE_U32 4
+#define SLJIT_ARG_TYPE_F32 5
+#define SLJIT_ARG_TYPE_F64 6
+
+/* The following argument type definitions are used by sljit_emit_enter,
+   sljit_set_context, sljit_emit_call, and sljit_emit_icall functions.
+   The following return type definitions are used by sljit_emit_call
+   and sljit_emit_icall functions.
+
+   When a function is called, the first integer argument must be placed
+   in SLJIT_R0, the second in SLJIT_R1, and so on. Similarly the first
+   floating point argument must be placed in SLJIT_FR0, the second in
+   SLJIT_FR1, and so on.
+
+   Example function definition:
+     sljit_f32 SLJIT_FUNC example_c_callback(sljit_sw arg_a,
+         sljit_f64 arg_b, sljit_u32 arg_c, sljit_f32 arg_d);
+
+   Argument type definition:
+     SLJIT_DEF_RET(SLJIT_ARG_TYPE_F32)
+        | SLJIT_DEF_ARG1(SLJIT_ARG_TYPE_SW) | SLJIT_DEF_ARG2(SLJIT_ARG_TYPE_F64)
+        | SLJIT_DEF_ARG3(SLJIT_ARG_TYPE_U32) | SLJIT_DEF_ARG2(SLJIT_ARG_TYPE_F32)
+
+   Short form of argument type definition:
+     SLJIT_RET(F32) | SLJIT_ARG1(SW) | SLJIT_ARG2(F64)
+        | SLJIT_ARG3(S32) | SLJIT_ARG4(F32)
+
+   Argument passing:
+     arg_a must be placed in SLJIT_R0
+     arg_c must be placed in SLJIT_R1
+     arg_b must be placed in SLJIT_FR0
+     arg_d must be placed in SLJIT_FR1
+
+Note:
+   The SLJIT_ARG_TYPE_VOID type is only supported by
+   SLJIT_DEF_RET, and SLJIT_ARG_TYPE_VOID is also the
+   default value when SLJIT_DEF_RET is not specified. */
+#define SLJIT_DEF_SHIFT 4
+#define SLJIT_DEF_RET(type) (type)
+#define SLJIT_DEF_ARG1(type) ((type) << SLJIT_DEF_SHIFT)
+#define SLJIT_DEF_ARG2(type) ((type) << (2 * SLJIT_DEF_SHIFT))
+#define SLJIT_DEF_ARG3(type) ((type) << (3 * SLJIT_DEF_SHIFT))
+#define SLJIT_DEF_ARG4(type) ((type) << (4 * SLJIT_DEF_SHIFT))
+
+/* Short form of the macros above.
+
+   For example the following definition:
+   SLJIT_DEF_RET(SLJIT_ARG_TYPE_SW) | SLJIT_DEF_ARG1(SLJIT_ARG_TYPE_F32)
+
+   can be shortened to:
+   SLJIT_RET(SW) | SLJIT_ARG1(F32)
+
+Note:
+   The VOID type is only supported by SLJIT_RET, and
+   VOID is also the default value when SLJIT_RET is
+   not specified. */
+#define SLJIT_RET(type) SLJIT_DEF_RET(SLJIT_ARG_TYPE_ ## type)
+#define SLJIT_ARG1(type) SLJIT_DEF_ARG1(SLJIT_ARG_TYPE_ ## type)
+#define SLJIT_ARG2(type) SLJIT_DEF_ARG2(SLJIT_ARG_TYPE_ ## type)
+#define SLJIT_ARG3(type) SLJIT_DEF_ARG3(SLJIT_ARG_TYPE_ ## type)
+#define SLJIT_ARG4(type) SLJIT_DEF_ARG4(SLJIT_ARG_TYPE_ ## type)
 
 /* --------------------------------------------------------------------- */
 /*  Main structures and functions                                        */
@@ -331,6 +396,7 @@ struct sljit_compiler {
 	sljit_s32 args;
 	sljit_s32 locals_offset;
 	sljit_s32 saveds_offset;
+	sljit_s32 stack_tmp_size;
 #endif
 
 #if (defined SLJIT_CONFIG_X86_64 && SLJIT_CONFIG_X86_64)
@@ -505,8 +571,6 @@ static SLJIT_INLINE sljit_uw sljit_get_generated_code_size(struct sljit_compiler
 #define SLJIT_HAS_CLZ			3
 /* [Emulated] Conditional move is supported. */
 #define SLJIT_HAS_CMOV			4
-/* [Limitation] [Emulated] Shifting with register is limited to SLJIT_PREF_SHIFT_REG. */
-#define SLJIT_HAS_PREF_SHIFT_REG	5
 
 #if (defined SLJIT_CONFIG_X86 && SLJIT_CONFIG_X86)
 /* [Not emulated] SSE2 support is available on x86. */
@@ -519,27 +583,28 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_has_cpu_feature(sljit_s32 feature_type)
    error, they return with SLJIT_SUCCESS. */
 
 /*
-   The executable code is a function call from the viewpoint of the C
+   The executable code is a function from the viewpoint of the C
    language. The function calls must obey to the ABI (Application
    Binary Interface) of the platform, which specify the purpose of
-   all machine registers and stack handling among other things. The
+   machine registers and stack handling among other things. The
    sljit_emit_enter function emits the necessary instructions for
    setting up a new context for the executable code and moves function
    arguments to the saved registers. Furthermore the options argument
    can be used to pass configuration options to the compiler. The
    available options are listed before sljit_emit_enter.
 
-   The number of sljit_sw arguments passed to the generated function
-   are specified in the "args" parameter. The number of arguments must
-   be less than or equal to 3. The first argument goes to SLJIT_S0,
-   the second goes to SLJIT_S1 and so on. The register set used by
-   the function must be declared as well. The number of scratch and
-   saved registers used by the function must be passed to sljit_emit_enter.
-   Only R registers between R0 and "scratches" argument can be used
-   later. E.g. if "scratches" is set to 2, the register set will be
-   limited to R0 and R1. The S registers and the floating point
+   The function argument list is the combination of SLJIT_ARGx
+   (SLJIT_DEF_ARG1) macros. Currently maximum 3 SW / UW
+   (SLJIT_ARG_TYPE_SW / LJIT_ARG_TYPE_UW) arguments are supported.
+   The first argument goes to SLJIT_S0, the second goes to SLJIT_S1
+   and so on. The register set used by the function must be declared
+   as well. The number of scratch and saved registers used by the
+   function must be passed to sljit_emit_enter. Only R registers
+   between R0 and "scratches" argument can be used later. E.g. if
+   "scratches" is set to 2, the scratch register set will be limited
+   to SLJIT_R0 and SLJIT_R1. The S registers and the floating point
    registers ("fscratches" and "fsaveds") are specified in a similar
-   way. The sljit_emit_enter is also capable of allocating a stack
+   manner. The sljit_emit_enter is also capable of allocating a stack
    space for local variables. The "local_size" argument contains the
    size in bytes of this local area and its staring address is stored
    in SLJIT_SP. The memory area between SLJIT_SP (inclusive) and
@@ -566,7 +631,7 @@ offset 0 is aligned to sljit_f64. Otherwise it is aligned to sljit_sw. */
 #define SLJIT_MAX_LOCAL_SIZE	65536
 
 SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_enter(struct sljit_compiler *compiler,
-	sljit_s32 options, sljit_s32 args, sljit_s32 scratches, sljit_s32 saveds,
+	sljit_s32 options, sljit_s32 arg_types, sljit_s32 scratches, sljit_s32 saveds,
 	sljit_s32 fscratches, sljit_s32 fsaveds, sljit_s32 local_size);
 
 /* The machine code has a context (which contains the local stack space size,
@@ -580,7 +645,7 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_enter(struct sljit_compiler *compi
          the previous context. */
 
 SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_set_context(struct sljit_compiler *compiler,
-	sljit_s32 options, sljit_s32 args, sljit_s32 scratches, sljit_s32 saveds,
+	sljit_s32 options, sljit_s32 arg_types, sljit_s32 scratches, sljit_s32 saveds,
 	sljit_s32 fscratches, sljit_s32 fsaveds, sljit_s32 local_size);
 
 /* Return from machine code.  The op argument can be SLJIT_UNUSED which means the
@@ -1136,24 +1201,31 @@ SLJIT_API_FUNC_ATTRIBUTE struct sljit_label* sljit_emit_label(struct sljit_compi
 
 /* Unconditional jump types. */
 #define SLJIT_JUMP			24
+	/* Fast calling method. See sljit_emit_fast_enter / sljit_emit_fast_return. */
 #define SLJIT_FAST_CALL			25
-#define SLJIT_CALL0			26
-#define SLJIT_CALL1			27
-#define SLJIT_CALL2			28
-#define SLJIT_CALL3			29
-
-/* Fast calling method. See sljit_emit_fast_enter / sljit_emit_fast_return. */
+	/* Called function must be declared with the SLJIT_FUNC attribute. */
+#define SLJIT_CALL			26
+	/* Called function must be decalred with cdecl attribute.
+	   This is the default attribute for C functions. */
+#define SLJIT_CALL_CDECL		27
 
 /* The target can be changed during runtime (see: sljit_set_jump_addr). */
 #define SLJIT_REWRITABLE_JUMP		0x1000
 
 /* Emit a jump instruction. The destination is not set, only the type of the jump.
-    type must be between SLJIT_EQUAL and SLJIT_CALL3
+    type must be between SLJIT_EQUAL and SLJIT_FAST_CALL
     type can be combined (or'ed) with SLJIT_REWRITABLE_JUMP
 
-   Flags: does not modify flags for conditional and unconditional
-          jumps but destroy all flags for calls. */
+   Flags: does not modify flags. */
 SLJIT_API_FUNC_ATTRIBUTE struct sljit_jump* sljit_emit_jump(struct sljit_compiler *compiler, sljit_s32 type);
+
+/* Emit a C compiler (ABI) compatible function call.
+    type must be SLJIT_CALL or SLJIT_CALL_CDECL
+    type can be combined (or'ed) with SLJIT_REWRITABLE_JUMP
+    arg_types is the combination of SLJIT_RET / SLJIT_ARGx (SLJIT_DEF_RET / SLJIT_DEF_ARGx) macros
+
+   Flags: destroy all flags. */
+SLJIT_API_FUNC_ATTRIBUTE struct sljit_jump* sljit_emit_call(struct sljit_compiler *compiler, sljit_s32 type, sljit_s32 arg_types);
 
 /* Basic arithmetic comparison. In most architectures it is implemented as
    an SLJIT_SUB operation (with SLJIT_UNUSED destination and setting
@@ -1162,6 +1234,7 @@ SLJIT_API_FUNC_ATTRIBUTE struct sljit_jump* sljit_emit_jump(struct sljit_compile
    It is suggested to use this comparison form when appropriate.
     type must be between SLJIT_EQUAL and SLJIT_I_SIG_LESS_EQUAL
     type can be combined (or'ed) with SLJIT_REWRITABLE_JUMP
+
    Flags: may destroy flags. */
 SLJIT_API_FUNC_ATTRIBUTE struct sljit_jump* sljit_emit_cmp(struct sljit_compiler *compiler, sljit_s32 type,
 	sljit_s32 src1, sljit_sw src1w,
@@ -1186,14 +1259,22 @@ SLJIT_API_FUNC_ATTRIBUTE void sljit_set_label(struct sljit_jump *jump, struct sl
 /* Set the destination address of the jump to this label. */
 SLJIT_API_FUNC_ATTRIBUTE void sljit_set_target(struct sljit_jump *jump, sljit_uw target);
 
-/* Call function or jump anywhere. Both direct and indirect form
-    type must be between SLJIT_JUMP and SLJIT_CALL3
-    Direct form: set src to SLJIT_IMM() and srcw to the address
-    Indirect form: any other valid addressing mode
+/* Emit an indirect jump or fast call. Both direct and indirect form
+   Direct form: set src to SLJIT_IMM() and srcw to the address
+   Indirect form: any other valid addressing mode
+    type must be between SLJIT_JUMP and SLJIT_FAST_CALL
 
-   Flags: does not modify flags for unconditional jumps but
-          destroy all flags for calls. */
+   Flags: does not modify flags. */
 SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_ijump(struct sljit_compiler *compiler, sljit_s32 type, sljit_s32 src, sljit_sw srcw);
+
+/* Emit a C compiler (ABI) compatible function call.
+   Direct form: set src to SLJIT_IMM() and srcw to the address
+   Indirect form: any other valid addressing mode
+    type must be SLJIT_CALL or SLJIT_CALL_CDECL
+    arg_types is the combination of SLJIT_RET / SLJIT_ARGx (SLJIT_DEF_RET / SLJIT_DEF_ARGx) macros
+
+   Flags: destroy all flags. */
+SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_icall(struct sljit_compiler *compiler, sljit_s32 type, sljit_s32 arg_types, sljit_s32 src, sljit_sw srcw);
 
 /* Perform the operation using the conditional flags as the second argument.
    Type must always be between SLJIT_EQUAL and SLJIT_ORDERED_F64. The value
@@ -1270,8 +1351,8 @@ SLJIT_API_FUNC_ATTRIBUTE const char* sljit_get_platform_name(void);
 
 #if (defined SLJIT_UTIL_GLOBAL_LOCK && SLJIT_UTIL_GLOBAL_LOCK)
 /* This global lock is useful to compile common functions. */
-SLJIT_API_FUNC_ATTRIBUTE void SLJIT_CALL sljit_grab_lock(void);
-SLJIT_API_FUNC_ATTRIBUTE void SLJIT_CALL sljit_release_lock(void);
+SLJIT_API_FUNC_ATTRIBUTE void SLJIT_FUNC sljit_grab_lock(void);
+SLJIT_API_FUNC_ATTRIBUTE void SLJIT_FUNC sljit_release_lock(void);
 #endif
 
 #if (defined SLJIT_UTIL_STACK && SLJIT_UTIL_STACK)
@@ -1312,8 +1393,8 @@ struct sljit_stack {
    Note: limit contains the starting stack size in bytes.
    Note: the top field is initialized to base.
    Note: see sljit_create_compiler for the explanation of allocator_data. */
-SLJIT_API_FUNC_ATTRIBUTE struct sljit_stack* SLJIT_CALL sljit_allocate_stack(sljit_uw limit, sljit_uw max_limit, void *allocator_data);
-SLJIT_API_FUNC_ATTRIBUTE void SLJIT_CALL sljit_free_stack(struct sljit_stack *stack, void *allocator_data);
+SLJIT_API_FUNC_ATTRIBUTE struct sljit_stack* SLJIT_FUNC sljit_allocate_stack(sljit_uw limit, sljit_uw max_limit, void *allocator_data);
+SLJIT_API_FUNC_ATTRIBUTE void SLJIT_FUNC sljit_free_stack(struct sljit_stack *stack, void *allocator_data);
 
 /* Can be used to increase (allocate) or decrease (free) the memory area.
    Returns with a non-zero value if unsuccessful. If new_limit is greater than
@@ -1321,7 +1402,7 @@ SLJIT_API_FUNC_ATTRIBUTE void SLJIT_CALL sljit_free_stack(struct sljit_stack *st
    since the growth ratio can be added to the current limit, and sljit_stack_resize
    will do all the necessary checks. The fields of the stack are not changed if
    sljit_stack_resize fails. */
-SLJIT_API_FUNC_ATTRIBUTE sljit_sw SLJIT_CALL sljit_stack_resize(struct sljit_stack *stack, sljit_u8 *new_limit);
+SLJIT_API_FUNC_ATTRIBUTE sljit_sw SLJIT_FUNC sljit_stack_resize(struct sljit_stack *stack, sljit_u8 *new_limit);
 
 #endif /* (defined SLJIT_UTIL_STACK && SLJIT_UTIL_STACK) */
 

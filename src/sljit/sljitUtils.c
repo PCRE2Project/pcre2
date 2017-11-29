@@ -48,12 +48,12 @@ static SLJIT_INLINE void allocator_release_lock(void)
 
 #if (defined SLJIT_UTIL_GLOBAL_LOCK && SLJIT_UTIL_GLOBAL_LOCK)
 
-SLJIT_API_FUNC_ATTRIBUTE void SLJIT_CALL sljit_grab_lock(void)
+SLJIT_API_FUNC_ATTRIBUTE void SLJIT_FUNC sljit_grab_lock(void)
 {
 	/* Always successful. */
 }
 
-SLJIT_API_FUNC_ATTRIBUTE void SLJIT_CALL sljit_release_lock(void)
+SLJIT_API_FUNC_ATTRIBUTE void SLJIT_FUNC sljit_release_lock(void)
 {
 	/* Always successful. */
 }
@@ -88,7 +88,7 @@ static SLJIT_INLINE void allocator_release_lock(void)
 
 static HANDLE global_mutex = 0;
 
-SLJIT_API_FUNC_ATTRIBUTE void SLJIT_CALL sljit_grab_lock(void)
+SLJIT_API_FUNC_ATTRIBUTE void SLJIT_FUNC sljit_grab_lock(void)
 {
 	/* No idea what to do if an error occures. Static mutexes should never fail... */
 	if (!global_mutex)
@@ -97,7 +97,7 @@ SLJIT_API_FUNC_ATTRIBUTE void SLJIT_CALL sljit_grab_lock(void)
 		WaitForSingleObject(global_mutex, INFINITE);
 }
 
-SLJIT_API_FUNC_ATTRIBUTE void SLJIT_CALL sljit_release_lock(void)
+SLJIT_API_FUNC_ATTRIBUTE void SLJIT_FUNC sljit_release_lock(void)
 {
 	ReleaseMutex(global_mutex);
 }
@@ -130,12 +130,12 @@ static SLJIT_INLINE void allocator_release_lock(void)
 
 static pthread_mutex_t global_mutex = PTHREAD_MUTEX_INITIALIZER;
 
-SLJIT_API_FUNC_ATTRIBUTE void SLJIT_CALL sljit_grab_lock(void)
+SLJIT_API_FUNC_ATTRIBUTE void SLJIT_FUNC sljit_grab_lock(void)
 {
 	pthread_mutex_lock(&global_mutex);
 }
 
-SLJIT_API_FUNC_ATTRIBUTE void SLJIT_CALL sljit_release_lock(void)
+SLJIT_API_FUNC_ATTRIBUTE void SLJIT_FUNC sljit_release_lock(void)
 {
 	pthread_mutex_unlock(&global_mutex);
 }
@@ -203,7 +203,7 @@ static SLJIT_INLINE sljit_s32 open_dev_zero(void)
 /* Planning to make it even more clever in the future. */
 static sljit_sw sljit_page_align = 0;
 
-SLJIT_API_FUNC_ATTRIBUTE struct sljit_stack* SLJIT_CALL sljit_allocate_stack(sljit_uw limit, sljit_uw max_limit, void *allocator_data)
+SLJIT_API_FUNC_ATTRIBUTE struct sljit_stack* SLJIT_FUNC sljit_allocate_stack(sljit_uw limit, sljit_uw max_limit, void *allocator_data)
 {
 	struct sljit_stack *stack;
 	void *ptr;
@@ -276,7 +276,7 @@ SLJIT_API_FUNC_ATTRIBUTE struct sljit_stack* SLJIT_CALL sljit_allocate_stack(slj
 
 #undef PAGE_ALIGN
 
-SLJIT_API_FUNC_ATTRIBUTE void SLJIT_CALL sljit_free_stack(struct sljit_stack *stack, void *allocator_data)
+SLJIT_API_FUNC_ATTRIBUTE void SLJIT_FUNC sljit_free_stack(struct sljit_stack *stack, void *allocator_data)
 {
 	SLJIT_UNUSED_ARG(allocator_data);
 #ifdef _WIN32
@@ -287,7 +287,7 @@ SLJIT_API_FUNC_ATTRIBUTE void SLJIT_CALL sljit_free_stack(struct sljit_stack *st
 	SLJIT_FREE(stack, allocator_data);
 }
 
-SLJIT_API_FUNC_ATTRIBUTE sljit_sw SLJIT_CALL sljit_stack_resize(struct sljit_stack *stack, sljit_u8 *new_limit)
+SLJIT_API_FUNC_ATTRIBUTE sljit_sw SLJIT_FUNC sljit_stack_resize(struct sljit_stack *stack, sljit_u8 *new_limit)
 {
 	sljit_uw aligned_old_limit;
 	sljit_uw aligned_new_limit;
