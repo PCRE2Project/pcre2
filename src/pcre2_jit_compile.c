@@ -527,9 +527,24 @@ typedef struct compare_context {
 /* Used for accessing the elements of the stack. */
 #define STACK(i)      ((i) * (int)sizeof(sljit_sw))
 
+#ifdef SLJIT_PREF_SHIFT_REG
+#if SLJIT_PREF_SHIFT_REG == SLJIT_R2
+/* Nothing. */
+#elif SLJIT_PREF_SHIFT_REG == SLJIT_R3
+#define SHIFT_REG_IS_R3
+#else
+#error "Unsupported shift register"
+#endif
+#endif
+
 #define TMP1          SLJIT_R0
+#ifdef SHIFT_REG_IS_R3
+#define TMP2          SLJIT_R3
+#define TMP3          SLJIT_R2
+#else
 #define TMP2          SLJIT_R2
 #define TMP3          SLJIT_R3
+#endif
 #define STR_PTR       SLJIT_S0
 #define STR_END       SLJIT_S1
 #define STACK_TOP     SLJIT_R1
@@ -4351,7 +4366,6 @@ struct sljit_jump *quit;
 struct sljit_jump *partial_quit[2];
 sljit_u8 instruction[8];
 sljit_s32 tmp1_ind = sljit_get_register_index(TMP1);
-// sljit_s32 tmp2_ind = sljit_get_register_index(TMP2);
 sljit_s32 str_ptr_ind = sljit_get_register_index(STR_PTR);
 sljit_s32 data_ind = 0;
 sljit_s32 tmp_ind = 1;
@@ -4375,8 +4389,6 @@ if (common->mode == PCRE2_JIT_COMPLETE)
 /* First part (unaligned start) */
 
 OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, character_to_int32(char1 | bit));
-
-// SLJIT_ASSERT(tmp1_ind < 8 && tmp2_ind == 1);
 
 SLJIT_ASSERT(tmp1_ind < 8);
 
@@ -6057,12 +6069,10 @@ sljit_emit_fast_return(compiler, RETURN_ADDR, 0);
 
 #if defined SUPPORT_UNICODE
 
-static PCRE2_SPTR SLJIT_FUNC do_utf_caselesscmp(PCRE2_SPTR src1, jit_arguments *args, PCRE2_SPTR end1)
+static PCRE2_SPTR SLJIT_FUNC do_utf_caselesscmp(PCRE2_SPTR src1, PCRE2_SPTR src2, PCRE2_SPTR end1, PCRE2_SPTR end2)
 {
 /* This function would be ineffective to do in JIT level. */
 sljit_u32 c1, c2;
-PCRE2_SPTR src2 = args->startchar_ptr;
-PCRE2_SPTR end2 = args->end;
 const ucd_record *ur;
 const sljit_u32 *pp;
 
@@ -7585,20 +7595,20 @@ else
 #if defined SUPPORT_UNICODE
 if (common->utf && *cc == OP_REFI)
   {
-  SLJIT_ASSERT(TMP1 == SLJIT_R0 && STACK_TOP == SLJIT_R1 && TMP2 == SLJIT_R2);
+  SLJIT_ASSERT(TMP1 == SLJIT_R0 && STACK_TOP == SLJIT_R1);
   if (ref)
-    OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(SLJIT_SP), OVECTOR(offset + 1));
+    OP1(SLJIT_MOV, SLJIT_R2, 0, SLJIT_MEM1(SLJIT_SP), OVECTOR(offset + 1));
   else
-    OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(TMP2), sizeof(sljit_sw));
+    OP1(SLJIT_MOV, SLJIT_R2, 0, SLJIT_MEM1(TMP2), sizeof(sljit_sw));
 
   if (withchecks)
-    jump = CMP(SLJIT_EQUAL, TMP1, 0, TMP2, 0);
+    jump = CMP(SLJIT_EQUAL, TMP1, 0, SLJIT_R2, 0);
 
-  /* Needed to save important temporary registers. */
+  /* No free saved registers so save data on stack. */
   OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), LOCALS0, STACK_TOP, 0);
-  OP1(SLJIT_MOV, SLJIT_R1, 0, ARGUMENTS, 0);
-  OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_R1), SLJIT_OFFSETOF(jit_arguments, startchar_ptr), STR_PTR, 0);
-  sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_RET(SW) | SLJIT_ARG1(SW) | SLJIT_ARG2(SW) | SLJIT_ARG3(SW), SLJIT_IMM, SLJIT_FUNC_OFFSET(do_utf_caselesscmp));
+  OP1(SLJIT_MOV, SLJIT_R1, 0, STR_PTR, 0);
+  OP1(SLJIT_MOV, SLJIT_R3, 0, STR_END, 0);
+  sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_RET(SW) | SLJIT_ARG1(SW) | SLJIT_ARG2(SW) | SLJIT_ARG3(SW) | SLJIT_ARG4(SW), SLJIT_IMM, SLJIT_FUNC_OFFSET(do_utf_caselesscmp));
   OP1(SLJIT_MOV, STACK_TOP, 0, SLJIT_MEM1(SLJIT_SP), LOCALS0);
 
   if (common->mode == PCRE2_JIT_COMPLETE)
