@@ -196,8 +196,9 @@ static int bufthird = PCRE2GREP_BUFSIZE;
 static int max_bufthird = PCRE2GREP_MAX_BUFSIZE;
 static int bufsize = 3*PCRE2GREP_BUFSIZE;
 static int endlinetype;
-static int total_count = 0;
-static int counts_printed = 0;
+
+static unsigned long int total_count = 0;
+static unsigned long int counts_printed = 0;
 
 #ifdef WIN32
 static int dee_action = dee_SKIP;
@@ -1606,8 +1607,8 @@ Returns:            nothing
 */
 
 static void
-do_after_lines(int lastmatchnumber, char *lastmatchrestart, char *endptr,
-  const char *printname)
+do_after_lines(unsigned long int lastmatchnumber, char *lastmatchrestart, 
+  char *endptr, const char *printname)
 {
 if (after_context > 0 && lastmatchnumber > 0)
   {
@@ -1618,7 +1619,7 @@ if (after_context > 0 && lastmatchnumber > 0)
     char *pp = end_of_line(lastmatchrestart, endptr, &ellength);
     if (ellength == 0 && pp == main_buffer + bufsize) break;
     if (printname != NULL) fprintf(stdout, "%s-", printname);
-    if (number) fprintf(stdout, "%d-", lastmatchnumber++);
+    if (number) fprintf(stdout, "%lu-", lastmatchnumber++);
     FWRITE_IGNORE(lastmatchrestart, 1, pp - lastmatchrestart, stdout);
     lastmatchrestart = pp;
     count++;
@@ -2309,10 +2310,10 @@ static int
 pcre2grep(void *handle, int frtype, const char *filename, const char *printname)
 {
 int rc = 1;
-int linenumber = 1;
-int lastmatchnumber = 0;
-int count = 0;
 int filepos = 0;
+unsigned long int linenumber = 1;
+unsigned long int lastmatchnumber = 0;
+unsigned long int count = 0;
 char *lastmatchrestart = NULL;
 char *ptr = main_buffer;
 char *endptr;
@@ -2400,7 +2401,7 @@ while (ptr < endptr)
       if (new_buffer == NULL)
         {
         fprintf(stderr,
-          "pcre2grep: line %d%s%s is too long for the internal buffer\n"
+          "pcre2grep: line %lu%s%s is too long for the internal buffer\n"
           "pcre2grep: not enough memory to increase the buffer size to %d\n",
           linenumber,
           (filename == NULL)? "" : " of file ",
@@ -2430,7 +2431,7 @@ while (ptr < endptr)
     else
       {
       fprintf(stderr,
-        "pcre2grep: line %d%s%s is too long for the internal buffer\n"
+        "pcre2grep: line %lu%s%s is too long for the internal buffer\n"
         "pcre2grep: the maximum buffer size is %d\n"
         "pcre2grep: use the --max-buffer-size option to change it\n",
         linenumber,
@@ -2562,7 +2563,7 @@ while (ptr < endptr)
         size_t oldstartoffset;
 
         if (printname != NULL) fprintf(stdout, "%s:", printname);
-        if (number) fprintf(stdout, "%d:", linenumber);
+        if (number) fprintf(stdout, "%lu:", linenumber);
 
         /* Handle --line-offsets */
 
@@ -2682,7 +2683,7 @@ while (ptr < endptr)
           {
           char *pp = lastmatchrestart;
           if (printname != NULL) fprintf(stdout, "%s-", printname);
-          if (number) fprintf(stdout, "%d-", lastmatchnumber++);
+          if (number) fprintf(stdout, "%lu-", lastmatchnumber++);
           pp = end_of_line(pp, endptr, &ellength);
           FWRITE_IGNORE(lastmatchrestart, 1, pp - lastmatchrestart, stdout);
           lastmatchrestart = pp;
@@ -2722,7 +2723,7 @@ while (ptr < endptr)
           int ellength;
           char *pp = p;
           if (printname != NULL) fprintf(stdout, "%s-", printname);
-          if (number) fprintf(stdout, "%d-", linenumber - linecount--);
+          if (number) fprintf(stdout, "%lu-", linenumber - linecount--);
           pp = end_of_line(pp, endptr, &ellength);
           FWRITE_IGNORE(p, 1, pp - p, stdout);
           p = pp;
@@ -2736,7 +2737,7 @@ while (ptr < endptr)
         endhyphenpending = TRUE;
 
       if (printname != NULL) fprintf(stdout, "%s:", printname);
-      if (number) fprintf(stdout, "%d:", linenumber);
+      if (number) fprintf(stdout, "%lu:", linenumber);
 
       /* This extra option, for Jeffrey Friedl's debugging requirements,
       replaces the matched string, or a specific captured string if it exists,
@@ -2918,7 +2919,7 @@ if (count_only && !quiet)
     {
     if (printname != NULL && filenames != FN_NONE)
       fprintf(stdout, "%s:", printname);
-    fprintf(stdout, "%d" STDOUT_NL, count);
+    fprintf(stdout, "%lu" STDOUT_NL, count);
     counts_printed++;
     }
   }
@@ -4196,7 +4197,7 @@ if (show_total_count && counts_printed != 1 && filenames != FN_NOMATCH_ONLY)
   {
   if (counts_printed != 0 && filenames >= FN_DEFAULT)
     fprintf(stdout, "TOTAL:");
-  fprintf(stdout, "%d" STDOUT_NL, total_count);
+  fprintf(stdout, "%lu" STDOUT_NL, total_count);
   }
 
 EXIT:

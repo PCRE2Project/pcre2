@@ -60,6 +60,11 @@ in a given mode, it was also expected that at least one mode is available.
 This is fixed and pcre2_jit_match returns with PCRE2_ERROR_JIT_BADOPTION
 when the pattern is not optimized by JIT at all.
 
+16. The line number and related variables such as match counts in pcre2grep 
+were all int variables, causing overflow when files with more than 2147483647 
+lines were processed (assuming 32-bit ints). They have all been changed to 
+unsigned long ints.
+
 
 Version 10.30 14-August-2017
 ----------------------------
