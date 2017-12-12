@@ -5375,4 +5375,14 @@ a)"xI
 
 /[\d-[:print:]]/
 
+# Perl gets the second of these wrong, giving no match.
+
+"(?<=(a))\1?b"I
+    ab
+    aaab 
+
+"(?=(a))\1?b"I
+    ab
+    aaab 
+
 # End of testinput2

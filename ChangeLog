@@ -65,6 +65,11 @@ were all int variables, causing overflow when files with more than 2147483647
 lines were processed (assuming 32-bit ints). They have all been changed to 
 unsigned long ints.
 
+17. If a backreference with a minimum repeat count of zero was first in a 
+pattern, apart from assertions, an incorrect first matching character could be 
+recorded. For example, for the pattern /(?=(a))\1?b/, "b" was incorrectly set 
+as the first character of a match.
+
 
 Version 10.30 14-August-2017
 ----------------------------

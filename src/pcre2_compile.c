@@ -7135,7 +7135,7 @@ for (;; pptr++)
     later. */
 
     HANDLE_SINGLE_REFERENCE:
-    if (firstcuflags == REQ_UNSET) firstcuflags = REQ_NONE;
+    if (firstcuflags == REQ_UNSET) zerofirstcuflags = firstcuflags = REQ_NONE;
     *code++ = ((options & PCRE2_CASELESS) != 0)? OP_REFI : OP_REF;
     PUT2INC(code, 0, meta_arg);
 
