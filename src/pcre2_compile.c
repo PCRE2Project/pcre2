@@ -8106,13 +8106,13 @@ REQ_NONE in the flags.
 Arguments:
   code       points to start of compiled pattern
   flags      points to the first code unit flags
-  inassert   TRUE if in an assertion
+  inassert   non-zero if in an assertion
 
 Returns:     the fixed first code unit, or 0 with REQ_NONE in flags
 */
 
 static uint32_t
-find_firstassertedcu(PCRE2_SPTR code, int32_t *flags, BOOL inassert)
+find_firstassertedcu(PCRE2_SPTR code, int32_t *flags, uint32_t inassert)
 {
 uint32_t c = 0;
 int cflags = REQ_NONE;
@@ -8139,7 +8139,7 @@ do {
      case OP_SCBRAPOS:
      case OP_ASSERT:
      case OP_ONCE:
-     d = find_firstassertedcu(scode, &dflags, op == OP_ASSERT);
+     d = find_firstassertedcu(scode, &dflags, inassert + ((op==OP_ASSERT)?1:0));
      if (dflags < 0)
        return 0;
      if (cflags < 0) { c = d; cflags = dflags; }
@@ -8154,7 +8154,7 @@ do {
      case OP_PLUS:
      case OP_MINPLUS:
      case OP_POSPLUS:
-     if (!inassert) return 0;
+     if (inassert == 0) return 0;
      if (cflags < 0) { c = scode[1]; cflags = 0; }
        else if (c != scode[1]) return 0;
      break;
@@ -8167,7 +8167,7 @@ do {
      case OP_PLUSI:
      case OP_MINPLUSI:
      case OP_POSPLUSI:
-     if (!inassert) return 0;
+     if (inassert == 0) return 0;
      if (cflags < 0) { c = scode[1]; cflags = REQ_CASELESS; }
        else if (c != scode[1]) return 0;
      break;
@@ -9674,7 +9674,7 @@ if ((re->overall_options & PCRE2_NO_START_OPTIMIZE) == 0)
   actual literals that follow). */
 
   if (firstcuflags < 0)
-    firstcu = find_firstassertedcu(codestart, &firstcuflags, FALSE);
+    firstcu = find_firstassertedcu(codestart, &firstcuflags, 0);
 
   /* Save the data for a first code unit. */
 

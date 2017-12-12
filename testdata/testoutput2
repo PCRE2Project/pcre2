@@ -16358,7 +16358,7 @@ Subject length lower bound = 1
 "(?=(a))\1?b"I
 Capturing subpattern count = 1
 Max back reference = 1
-Starting code units: a 
+First code unit = 'a'
 Last code unit = 'b'
 Subject length lower bound = 1
     ab

@@ -70,6 +70,14 @@ pattern, apart from assertions, an incorrect first matching character could be
 recorded. For example, for the pattern /(?=(a))\1?b/, "b" was incorrectly set 
 as the first character of a match.
 
+18. Characters in a leading positive assertion are considered for recording a
+first character of a match when the rest of the pattern does not provide one.
+However, a character in a non-assertive group within a leading assertion such
+as in the pattern /(?=(a))\1?b/ caused this process to fail. This was an 
+infelicity rather than an outright bug, because it did not affect the result of 
+a match, just its speed. (In fact, in this case, the starting 'a' was 
+subsequently picked up in the study.)
+
 
 Version 10.30 14-August-2017
 ----------------------------
