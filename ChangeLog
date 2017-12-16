@@ -78,6 +78,10 @@ infelicity rather than an outright bug, because it did not affect the result of
 a match, just its speed. (In fact, in this case, the starting 'a' was 
 subsequently picked up in the study.)
 
+19. A minor tidy in pcre2_match(): making all PCRE2_ERROR_ returns use "return"
+instead of "RRETURN" saves unwinding the backtracks in these cases (only one 
+didn't).
+
 
 Version 10.30 14-August-2017
 ----------------------------

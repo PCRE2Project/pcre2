@@ -5052,7 +5052,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
         P = (heapframe *)((char *)N - frame_size);
         if (N->group_frame_type == (GF_RECURSE | number))
           {
-          if (Feptr == P->eptr) RRETURN(PCRE2_ERROR_RECURSELOOP);
+          if (Feptr == P->eptr) return PCRE2_ERROR_RECURSELOOP;
           break;
           }
         offset = P->last_group_offset;
