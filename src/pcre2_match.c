@@ -249,7 +249,8 @@ for (i = 0, Q = mb->match_frames;
 
 /* This function is called for all callouts, whether "standalone" or at the
 start of a conditional group. Feptr will be pointing to either OP_CALLOUT or
-OP_CALLOUT_STR.
+OP_CALLOUT_STR. A callout block is allocated in pcre2_match() and initialized
+with fixed values.
 
 Arguments:
   F          points to the current backtracking frame
@@ -266,7 +267,7 @@ do_callout(heapframe *F, match_block *mb, PCRE2_SIZE *lengthptr)
 int rc;
 PCRE2_SIZE save0, save1;
 PCRE2_SIZE *callout_ovector;
-pcre2_callout_block cb;
+pcre2_callout_block *cb;
 
 *lengthptr = (*Fecode == OP_CALLOUT)?
   PRIV(OP_lengths)[OP_CALLOUT] : GET(Fecode, 1 + 2*LINK_SIZE);
@@ -285,38 +286,39 @@ pointer. */
 
 callout_ovector = (PCRE2_SIZE *)(Fovector) - 2;
 
-cb.version          = 1;
-cb.capture_top      = (uint32_t)Foffset_top/2 + 1;
-cb.capture_last     = Fcapture_last;
-cb.offset_vector    = callout_ovector;
-cb.mark             = mb->nomatch_mark;
-cb.subject          = mb->start_subject;
-cb.subject_length   = (PCRE2_SIZE)(mb->end_subject - mb->start_subject);
-cb.start_match      = (PCRE2_SIZE)(Fstart_match - mb->start_subject);
-cb.current_position = (PCRE2_SIZE)(Feptr - mb->start_subject);
-cb.pattern_position = GET(Fecode, 1);
-cb.next_item_length = GET(Fecode, 1 + LINK_SIZE);
+/* The cb->version, cb->subject, cb->subject_length, and cb->start_match fields
+are set externally. The first 3 never change; the last is updated for each
+bumpalong. */
+
+cb = mb->cb;
+cb->capture_top      = (uint32_t)Foffset_top/2 + 1;
+cb->capture_last     = Fcapture_last;
+cb->offset_vector    = callout_ovector;
+cb->mark             = mb->nomatch_mark;
+cb->current_position = (PCRE2_SIZE)(Feptr - mb->start_subject);
+cb->pattern_position = GET(Fecode, 1);
+cb->next_item_length = GET(Fecode, 1 + LINK_SIZE);
 
 if (*Fecode == OP_CALLOUT)  /* Numerical callout */
   {
-  cb.callout_number = Fecode[1 + 2*LINK_SIZE];
-  cb.callout_string_offset = 0;
-  cb.callout_string = NULL;
-  cb.callout_string_length = 0;
+  cb->callout_number = Fecode[1 + 2*LINK_SIZE];
+  cb->callout_string_offset = 0;
+  cb->callout_string = NULL;
+  cb->callout_string_length = 0;
   }
 else  /* String callout */
   {
-  cb.callout_number = 0;
-  cb.callout_string_offset = GET(Fecode, 1 + 3*LINK_SIZE);
-  cb.callout_string = Fecode + (1 + 4*LINK_SIZE) + 1;
-  cb.callout_string_length =
+  cb->callout_number = 0;
+  cb->callout_string_offset = GET(Fecode, 1 + 3*LINK_SIZE);
+  cb->callout_string = Fecode + (1 + 4*LINK_SIZE) + 1;
+  cb->callout_string_length =
     *lengthptr - (1 + 4*LINK_SIZE) - 2;
   }
 
 save0 = callout_ovector[0];
 save1 = callout_ovector[1];
 callout_ovector[0] = callout_ovector[1] = PCRE2_UNSET;
-rc = mb->callout(&cb, mb->callout_data);
+rc = mb->callout(cb, mb->callout_data);
 callout_ovector[0] = save0;
 callout_ovector[1] = save1;
 return rc;
@@ -2441,7 +2443,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
     else
       {
       GETCHARINCTEST(fc, Feptr);
-      Feptr = PRIV(extuni)(fc, Feptr, mb->start_subject, mb->end_subject, utf, 
+      Feptr = PRIV(extuni)(fc, Feptr, mb->start_subject, mb->end_subject, utf,
         NULL);
       }
     CHECK_PARTIAL();
@@ -2740,7 +2742,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
           else
             {
             GETCHARINCTEST(fc, Feptr);
-            Feptr = PRIV(extuni)(fc, Feptr, mb->start_subject, 
+            Feptr = PRIV(extuni)(fc, Feptr, mb->start_subject,
               mb->end_subject, utf, NULL);
             }
           CHECK_PARTIAL();
@@ -6008,6 +6010,7 @@ PCRE2_SIZE frame_size;
 /* We need to have mb as a pointer to a match block, because the IS_NEWLINE
 macro is used below, and it expects NLBLOCK to be defined as a pointer. */
 
+pcre2_callout_block cb;
 match_block actual_match_block;
 match_block *mb = &actual_match_block;
 
@@ -6167,6 +6170,14 @@ firstline = (re->overall_options & PCRE2_FIRSTLINE) != 0;
 startline = (re->flags & PCRE2_STARTLINE) != 0;
 bumpalong_limit =  (mcontext->offset_limit == PCRE2_UNSET)?
   end_subject : subject + mcontext->offset_limit;
+
+/* Set up the fixed fields in the callout block, with a pointer in the
+match block. */
+
+mb->cb = &cb;
+cb.version = 1;
+cb.subject = subject;
+cb.subject_length = (PCRE2_SIZE)(end_subject - subject);
 
 /* Fill in the remaining fields in the match block. */
 
@@ -6632,6 +6643,7 @@ for(;;)
   /* OK, we can now run the match. If "hitend" is set afterwards, remember the
   first starting point for which a partial match was found. */
 
+  cb.start_match = (PCRE2_SIZE)(start_match - subject);
   mb->start_used_ptr = start_match;
   mb->last_used_ptr = start_match;
   mb->match_call_count = 0;
