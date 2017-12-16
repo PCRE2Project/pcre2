@@ -367,7 +367,7 @@
 # but subjects containing them must not be UTF-checked. These patterns give
 # errors in 16-bit mode.
 
-/\x{d800}/utf,allow_surrogate_escapes
+/\x{d800}/I,utf,allow_surrogate_escapes
     \x{d800}\=no_utf_check
 
 /\udfff\o{157401}/utf,alt_bsux,allow_surrogate_escapes

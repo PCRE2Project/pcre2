@@ -623,6 +623,7 @@ typedef struct pcre2_real_code {
   uint32_t magic_number;          /* Paranoid and endianness check */
   uint32_t compile_options;       /* Options passed to pcre2_compile() */
   uint32_t overall_options;       /* Options after processing the pattern */
+  uint32_t extra_options;         /* Taken from compile_context */ 
   uint32_t flags;                 /* Various state flags */
   uint32_t limit_heap;            /* Limit set in the pattern */
   uint32_t limit_match;           /* Limit set in the pattern */

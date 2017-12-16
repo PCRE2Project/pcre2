@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "14 November 2017" "PCRE2 10.31"
+.TH PCRE2API 3 "16 December 2017" "PCRE2 10.31"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -1904,12 +1904,15 @@ are as follows:
 .sp
   PCRE2_INFO_ALLOPTIONS
   PCRE2_INFO_ARGOPTIONS
+  PCRE2_INFO_EXTRAOPTIONS 
 .sp
-Return a copy of the pattern's options. The third argument should point to a
+Return copies of the pattern's options. The third argument should point to a
 \fBuint32_t\fP variable. PCRE2_INFO_ARGOPTIONS returns exactly the options that
 were passed to \fBpcre2_compile()\fP, whereas PCRE2_INFO_ALLOPTIONS returns
 the compile options as modified by any top-level (*XXX) option settings such as
-(*UTF) at the start of the pattern itself.
+(*UTF) at the start of the pattern itself. PCRE2_INFO_EXTRAOPTIONS returns the 
+extra options that were set in the compile context by calling the
+pcre2_set_compile_extra_options() function.
 .P
 For example, if the pattern /(*UTF)abc/ is compiled with the PCRE2_EXTENDED
 option, the result for PCRE2_INFO_ALLOPTIONS is PCRE2_EXTENDED and PCRE2_UTF.
@@ -3597,6 +3600,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 22 October 2017
+Last updated: 16 December 2017
 Copyright (c) 1997-2017 University of Cambridge.
 .fi

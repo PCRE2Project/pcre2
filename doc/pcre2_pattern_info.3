@@ -1,4 +1,4 @@
-.TH PCRE2_PATTERN_INFO 3 "26 May 2017" "PCRE2 10.30"
+.TH PCRE2_PATTERN_INFO 3 "16 December 2017" "PCRE2 10.31"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH SYNOPSIS
@@ -15,7 +15,7 @@ PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
 This function returns information about a compiled pattern. Its arguments are:
 .sp
-  \fIcode\fP     Pointer to a compiled regular expression
+  \fIcode\fP     Pointer to a compiled regular expression pattern
   \fIwhat\fP     What information is required
   \fIwhere\fP    Where to put the information
 .sp
@@ -32,6 +32,8 @@ request are as follows:
 .\" JOIN
   PCRE2_INFO_DEPTHLIMIT      Backtracking depth limit if set,
                                otherwise PCRE2_ERROR_UNSET
+  PCRE2_INFO_EXTRAOPTIONS    Extra options that were passed in the
+                               compile context
   PCRE2_INFO_FIRSTBITMAP     Bitmap of first code units, or NULL
   PCRE2_INFO_FIRSTCODETYPE   Type of start-of-match information
                                0 nothing set

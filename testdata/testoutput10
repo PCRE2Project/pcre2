@@ -1578,7 +1578,13 @@ Failed: error 176 at offset 259: name is too long in (*MARK), (*PRUNE), (*SKIP),
 # A special extra option allows excaped surrogate code points in 8-bit mode,
 # but subjects containing them must not be UTF-checked.
 
-/\x{d800}/utf,allow_surrogate_escapes
+/\x{d800}/I,utf,allow_surrogate_escapes
+Capturing subpattern count = 0
+Options: utf
+Extra options: allow_surrogate_escapes
+First code unit = \xed
+Last code unit = \x80
+Subject length lower bound = 1
     \x{d800}\=no_utf_check
  0: \x{d800}
 

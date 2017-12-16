@@ -418,6 +418,7 @@ released, the numbers must not be changed. */
 #define PCRE2_INFO_HASBACKSLASHC        23
 #define PCRE2_INFO_FRAMESIZE            24
 #define PCRE2_INFO_HEAPLIMIT            25
+#define PCRE2_INFO_EXTRAOPTIONS         26
 
 /* Request types for pcre2_config(). */
 

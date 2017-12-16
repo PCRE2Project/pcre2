@@ -5287,7 +5287,7 @@ a)"xI
 
 /\j\x{z}\o{82}\L\uabcd\u\U\g{\g/B,\bad_escape_is_literal
 
-/\N{\c/B,bad_escape_is_literal
+/\N{\c/IB,bad_escape_is_literal
 
 /[\j\x{z}\o\gA-\Nb-\g]/B,bad_escape_is_literal
 
@@ -5330,14 +5330,14 @@ a)"xI
 /(*CR)abc/literal
     (*CR)abc
 
-/cat|dog/match_word
+/cat|dog/I,match_word
     the cat sat
 \= Expect no match
     caterpillar
     snowcat
     syndicate
 
-/(cat)|dog/match_line,literal
+/(cat)|dog/I,match_line,literal
     (cat)|dog
 \= Expect no match
     the cat sat

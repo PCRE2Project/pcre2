@@ -1417,7 +1417,12 @@ No match
 # but subjects containing them must not be UTF-checked. These patterns give
 # errors in 16-bit mode.
 
-/\x{d800}/utf,allow_surrogate_escapes
+/\x{d800}/I,utf,allow_surrogate_escapes
+Capturing subpattern count = 0
+Options: utf
+Extra options: allow_surrogate_escapes
+First code unit = \x{d800}
+Subject length lower bound = 1
     \x{d800}\=no_utf_check
  0: \x{d800}
 

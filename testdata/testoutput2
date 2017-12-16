@@ -16180,13 +16180,18 @@ Subject length lower bound = 1
 /\j\x{z}\o{82}\L\uabcd\u\U\g{\g/B,\bad_escape_is_literal
 ** Unrecognized modifier '\' in '\bad_escape_is_literal'
 
-/\N{\c/B,bad_escape_is_literal
+/\N{\c/IB,bad_escape_is_literal
 ------------------------------------------------------------------
         Bra
         N{c
         Ket
         End
 ------------------------------------------------------------------
+Capturing subpattern count = 0
+Extra options: bad_escape_is_literal
+First code unit = 'N'
+Last code unit = 'c'
+Subject length lower bound = 3
 
 /[\j\x{z}\o\gA-\Nb-\g]/B,bad_escape_is_literal
 ------------------------------------------------------------------
@@ -16269,7 +16274,12 @@ Failed: error 192 at offset 0: invalid option bits with PCRE2_LITERAL
     (*CR)abc
  0: (*CR)abc
 
-/cat|dog/match_word
+/cat|dog/I,match_word
+Capturing subpattern count = 0
+Max lookbehind = 1
+Extra options: match_word
+Starting code units: c d 
+Subject length lower bound = 3
     the cat sat
  0: cat
 \= Expect no match
@@ -16280,7 +16290,13 @@ No match
     syndicate
 No match
 
-/(cat)|dog/match_line,literal
+/(cat)|dog/I,match_line,literal
+Capturing subpattern count = 0
+Compile options: literal
+Overall options: anchored literal
+Extra options: match_line
+First code unit = '('
+Subject length lower bound = 9
     (cat)|dog
  0: (cat)|dog
 \= Expect no match

@@ -9485,6 +9485,7 @@ re->blocksize = re_blocksize;
 re->magic_number = MAGIC_NUMBER;
 re->compile_options = options;
 re->overall_options = cb.external_options;
+re->extra_options = ccontext->extra_options;
 re->flags = PCRE2_CODE_UNIT_WIDTH/8 | cb.external_flags | setflags;
 re->limit_heap = limit_heap;
 re->limit_match = limit_match;

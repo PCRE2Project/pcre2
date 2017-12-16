@@ -4073,8 +4073,7 @@ else fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%
 *           Show compile extra options           *
 *************************************************/
 
-/* Called only for unsupported POSIX options at present, and therefore needed
-only when the 8-bit library is being compiled.
+/* Called from show_pattern_info() and for unsupported POSIX options.
 
 Arguments:
   options     an options word
@@ -4084,7 +4083,6 @@ Arguments:
 Returns:      nothing
 */
 
-#ifdef SUPPORT_PCRE2_8
 static void
 show_compile_extra_options(uint32_t options, const char *before,
   const char *after)
@@ -4098,7 +4096,6 @@ else fprintf(outfile, "%s%s%s%s%s%s",
   ((options & PCRE2_EXTRA_MATCH_LINE) != 0)? " match_line" : "",
   after);
 }
-#endif
 
 
 
@@ -4272,7 +4269,7 @@ Returns:    PR_OK     continue processing next line
 static int
 show_pattern_info(void)
 {
-uint32_t compile_options, overall_options;
+uint32_t compile_options, overall_options, extra_options;
 
 if ((pat_patctl.control & (CTL_BINCODE|CTL_FULLBINCODE)) != 0)
   {
@@ -4412,6 +4409,7 @@ if ((pat_patctl.control & CTL_INFO) != 0)
 
   pattern_info(PCRE2_INFO_ARGOPTIONS, &compile_options, FALSE);
   pattern_info(PCRE2_INFO_ALLOPTIONS, &overall_options, FALSE);
+  pattern_info(PCRE2_INFO_EXTRAOPTIONS, &extra_options, FALSE); 
 
   /* Remove UTF/UCP if they were there only because of forbid_utf. This saves
   cluttering up the verification output of non-UTF test files. */
@@ -4438,6 +4436,9 @@ if ((pat_patctl.control & CTL_INFO) != 0)
       show_compile_options(overall_options, "Overall options:", "\n");
       }
     }
+    
+  if (extra_options != 0) 
+    show_compile_extra_options(extra_options, "Extra options:", "\n");  
 
   if (jchanged) fprintf(outfile, "Duplicate name status changes\n");
 

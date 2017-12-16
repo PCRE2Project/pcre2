@@ -85,6 +85,10 @@ didn't).
 20. Allocate a single callout block on the stack at the start of pcre2_match()
 and set its never-changing fields once only.
 
+21. Save the extra compile options (set in the compile context) with the
+compiled pattern (they were not previously saved), add PCRE2_INFO_EXTRAOPTIONS
+to retrieve them, and update pcre2test to show them.
+
 
 Version 10.30 14-August-2017
 ----------------------------
