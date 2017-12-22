@@ -726,7 +726,7 @@ No match
  +4 ^   ^      c
  +2 ^    ^     b
  +3 ^     ^    |
-+12 ^     ^    
++12 ^     ^    End of pattern
  +1 ^     ^    a
  +4 ^     ^    c
  0: ababab
@@ -745,12 +745,12 @@ No match
  +4 ^   ^        c
  +2 ^    ^       b
  +3 ^     ^      |
-+12 ^     ^      
++12 ^     ^      End of pattern
  +1 ^     ^      a
  +4 ^     ^      c
  +5 ^      ^     d
  +6 ^       ^    ){3,4}
-+12 ^       ^    
++12 ^       ^    End of pattern
  0: abcdabcd
  1: abcdab
   abcdcdcdcdcd  
@@ -768,12 +768,12 @@ No match
  +4 ^   ^            c
  +5 ^    ^           d
  +6 ^     ^          ){3,4}
-+12 ^     ^          
++12 ^     ^          End of pattern
  +1 ^     ^          a
  +4 ^     ^          c
  +5 ^      ^         d
  +6 ^       ^        ){3,4}
-+12 ^       ^        
++12 ^       ^        End of pattern
  0: abcdcdcd
  1: abcdcd
 
@@ -6610,14 +6610,14 @@ No match
  +0 ^       x
  +1 ^^      y
  +2 ^ ^     z
- +3 ^  ^    
+ +3 ^  ^    End of pattern
  0: xyz
   abcxyz 
 --->abcxyz
  +0    ^       x
  +1    ^^      y
  +2    ^ ^     z
- +3    ^  ^    
+ +3    ^  ^    End of pattern
  0: xyz
 \= Expect no match 
   abc
@@ -6634,7 +6634,7 @@ No match
  +0    ^       x
  +1    ^^      y
  +2    ^ ^     z
- +3    ^  ^    
+ +3    ^  ^    End of pattern
  0: xyz
 \= Expect no match 
   abc
@@ -6668,7 +6668,7 @@ No match
 +15    ^       x
 +16    ^^      y
 +17    ^ ^     z
-+18    ^  ^    
++18    ^  ^    End of pattern
  0: xyz
   
 /(?C)ab/
@@ -6684,7 +6684,7 @@ No match
 --->ab
  +0 ^      a
  +1 ^^     b
- +2 ^ ^    
+ +2 ^ ^    End of pattern
  0: ab
   ab\=callout_none
  0: ab
@@ -6717,7 +6717,7 @@ No match
  +8    ^     [a]
 +17 ^  ^     |
 +22 ^   ^    $
-+23 ^   ^    
++23 ^   ^    End of pattern
  0: "ab"
     "ab"\=callout_none
  0: "ab"

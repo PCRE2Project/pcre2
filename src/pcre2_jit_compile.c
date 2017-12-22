@@ -7952,7 +7952,8 @@ oveccount = callout_block->capture_top;
 
 SLJIT_ASSERT(oveccount >= 1);
 
-callout_block->version = 1;
+callout_block->version = 2;
+callout_block->callout_flags = 0;
 
 /* Offsets in subject. */
 callout_block->subject_length = arguments->end - arguments->begin;

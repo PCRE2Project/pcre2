@@ -321,6 +321,7 @@ callout_ovector[0] = callout_ovector[1] = PCRE2_UNSET;
 rc = mb->callout(cb, mb->callout_data);
 callout_ovector[0] = save0;
 callout_ovector[1] = save1;
+cb->callout_flags = 0;
 return rc;
 }
 
@@ -5919,8 +5920,9 @@ in rrc. */
 #define LBL(val) case val: goto L_RM##val;
 
 RETURN_SWITCH:
-if (Frdepth == 0) return rrc;                /* Exit from the top level */
-F = (heapframe *)((char *)F - Fback_frame);  /* Back track */
+if (Frdepth == 0) return rrc;                     /* Exit from the top level */
+F = (heapframe *)((char *)F - Fback_frame);       /* Back track */
+mb->cb->callout_flags |= PCRE2_CALLOUT_BACKTRACK; /* Note for callouts */
 
 #ifdef DEBUG_SHOW_RMATCH
 fprintf(stderr, "++ RETURN %d to %d\n", rrc, Freturn_id);
@@ -6171,13 +6173,14 @@ startline = (re->flags & PCRE2_STARTLINE) != 0;
 bumpalong_limit =  (mcontext->offset_limit == PCRE2_UNSET)?
   end_subject : subject + mcontext->offset_limit;
 
-/* Set up the fixed fields in the callout block, with a pointer in the
-match block. */
+/* Initialize and set up the fixed fields in the callout block, with a pointer
+in the match block. */
 
 mb->cb = &cb;
-cb.version = 1;
+cb.version = 2;
 cb.subject = subject;
 cb.subject_length = (PCRE2_SIZE)(end_subject - subject);
+cb.callout_flags = 0;
 
 /* Fill in the remaining fields in the match block. */
 
@@ -6644,6 +6647,8 @@ for(;;)
   first starting point for which a partial match was found. */
 
   cb.start_match = (PCRE2_SIZE)(start_match - subject);
+  cb.callout_flags |= PCRE2_CALLOUT_STARTMATCH;
+    
   mb->start_used_ptr = start_match;
   mb->last_used_ptr = start_match;
   mb->match_call_count = 0;

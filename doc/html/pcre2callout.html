@@ -206,18 +206,20 @@ callouts such as the example above are obeyed.
 <br><a name="SEC4" href="#TOC1">THE CALLOUT INTERFACE</a><br>
 <P>
 During matching, when PCRE2 reaches a callout point, if an external function is
-provided in the match context, it is called. This applies to both normal and
-DFA matching. The first argument to the callout function is a pointer to a
-<b>pcre2_callout</b> block. The second argument is the void * callout data that
-was supplied when the callout was set up by calling <b>pcre2_set_callout()</b>
-(see the
+provided in the match context, it is called. This applies to both normal,
+DFA, and JIT matching. The first argument to the callout function is a pointer
+to a <b>pcre2_callout</b> block. The second argument is the void * callout data
+that was supplied when the callout was set up by calling
+<b>pcre2_set_callout()</b> (see the
 <a href="pcre2api.html"><b>pcre2api</b></a>
-documentation). The callout block structure contains the following fields:
+documentation). The callout block structure contains the following fields, not
+necessarily in this order:
 <pre>
   uint32_t      <i>version</i>;
   uint32_t      <i>callout_number</i>;
   uint32_t      <i>capture_top</i>;
   uint32_t      <i>capture_last</i>;
+  uint32_t      <i>callout_flags</i>;
   PCRE2_SIZE   *<i>offset_vector</i>;
   PCRE2_SPTR    <i>mark</i>;
   PCRE2_SPTR    <i>subject</i>;
@@ -231,11 +233,12 @@ documentation). The callout block structure contains the following fields:
   PCRE2_SPTR    <i>callout_string</i>;
 </pre>
 The <i>version</i> field contains the version number of the block format. The
-current version is 1; the three callout string fields were added for this
-version. If you are writing an application that might use an earlier release of
-PCRE2, you should check the version number before accessing any of these
-fields. The version number will increase in future if more fields are added,
-but the intention is never to remove any of the existing fields.
+current version is 2; the three callout string fields were added for version 1,
+and the <i>callout_flags</i> field for version 2. If you are writing an
+application that might use an earlier release of PCRE2, you should check the
+version number before accessing any of these fields. The version number will
+increase in future if more fields are added, but the intention is never to
+remove any of the existing fields.
 </P>
 <br><b>
 Fields for numerical callouts
@@ -358,6 +361,36 @@ the zero-terminated name of the most recently passed (*MARK), (*PRUNE), or
 of (*PRUNE) or (*THEN) without a name do not obliterate a previous (*MARK). In
 callouts from the DFA matching function this field always contains NULL.
 </P>
+<P>
+The <i>callout_flags</i> field is always zero in callouts from
+<b>pcre2_dfa_match()</b> or when JIT is being used. When <b>pcre2_match()</b>
+without JIT is used, the following bits may be set:
+<pre>
+  PCRE2_CALLOUT_STARTMATCH
+</pre>
+This is set for the first callout after the start of matching for each new
+starting position in the subject.
+<pre>
+  PCRE2_CALLOUT_BACKTRACK
+</pre>
+This is set if there has been a matching backtrack since the previous callout,
+or since the start of matching if this is the first callout from a
+<b>pcre2_match()</b> run.
+</P>
+<P>
+Both bits are set when a backtrack has caused a "bumpalong" to a new starting
+position in the subject. Output from <b>pcre2test</b> does not indicate the
+presence of these bits unless the <b>callout_extra</b> modifier is set.
+</P>
+<P>
+The information in the <b>callout_flags</b> field is provided so that
+applications can track and tell their users how matching with backtracking is
+done. This can be useful when trying to optimize patterns, or just to
+understand how PCRE2 works. There is no support in <b>pcre2_dfa_match()</b>
+because there is no backtracking in DFA matching, and there is no support in
+JIT because JIT is all about maximimizing matching performance. In both these
+cases the <b>callout_flags</b> field is always zero.
+</P>
 <br><a name="SEC5" href="#TOC1">RETURN VALUES FROM CALLOUTS</a><br>
 <P>
 The external callout function returns an integer to PCRE2. If the value is
@@ -428,7 +461,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC8" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 14 April 2017
+Last updated: 22 December 2017
 <br>
 Copyright &copy; 1997-2017 University of Cambridge.
 <br>

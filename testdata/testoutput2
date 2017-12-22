@@ -3832,7 +3832,7 @@ Subject length lower bound = 2
 \= Expect no match
     abbbbbccc\=callout_data=1
 --->abbbbbccc
-  1 ^        ^    
+  1 ^        ^    End of pattern
 Callout data = 1
 No match
 
@@ -3844,21 +3844,21 @@ Subject length lower bound = 2
 \= Expect no match
     abbbbbccc\=callout_data=1
 --->abbbbbccc
-  1 ^ ^           
+  1 ^ ^           End of pattern
 Callout data = 1
-  1 ^  ^          
+  1 ^  ^          End of pattern
 Callout data = 1
-  1 ^   ^         
+  1 ^   ^         End of pattern
 Callout data = 1
-  1 ^    ^        
+  1 ^    ^        End of pattern
 Callout data = 1
-  1 ^     ^       
+  1 ^     ^       End of pattern
 Callout data = 1
-  1 ^      ^      
+  1 ^      ^      End of pattern
 Callout data = 1
-  1 ^       ^     
+  1 ^       ^     End of pattern
 Callout data = 1
-  1 ^        ^    
+  1 ^        ^    End of pattern
 Callout data = 1
 No match
 
@@ -4718,7 +4718,7 @@ Subject length lower bound = 5
  +2 ^ ^       c
  +3 ^  ^      d
  +4 ^   ^     e
- +5 ^    ^    
+ +5 ^    ^    End of pattern
  0: abcde
 \= Expect no match
   abcdfe
@@ -4750,13 +4750,13 @@ Subject length lower bound = 1
 --->ab
  +0 ^      a*
  +2 ^^     b
- +3 ^ ^    
+ +3 ^ ^    End of pattern
  0: ab
   aaaab
 --->aaaab
  +0 ^         a*
  +2 ^   ^     b
- +3 ^    ^    
+ +3 ^    ^    End of pattern
  0: aaaab
   aaaacb
 --->aaaacb
@@ -4770,7 +4770,7 @@ Subject length lower bound = 1
  +2    ^^      b
  +0      ^     a*
  +2      ^     b
- +3      ^^    
+ +3      ^^    End of pattern
  0: b
 
 /a*b/IB,auto_callout
@@ -4793,13 +4793,13 @@ Subject length lower bound = 1
 --->ab
  +0 ^      a*
  +2 ^^     b
- +3 ^ ^    
+ +3 ^ ^    End of pattern
  0: ab
   aaaab
 --->aaaab
  +0 ^         a*
  +2 ^   ^     b
- +3 ^    ^    
+ +3 ^    ^    End of pattern
  0: aaaab
   aaaacb
 --->aaaacb
@@ -4813,7 +4813,7 @@ Subject length lower bound = 1
  +2    ^^      b
  +0      ^     a*
  +2      ^     b
- +3      ^^    
+ +3      ^^    End of pattern
  0: b
 
 /a+b/IB,auto_callout
@@ -4836,13 +4836,13 @@ Subject length lower bound = 2
 --->ab
  +0 ^      a+
  +2 ^^     b
- +3 ^ ^    
+ +3 ^ ^    End of pattern
  0: ab
   aaaab
 --->aaaab
  +0 ^         a+
  +2 ^   ^     b
- +3 ^    ^    
+ +3 ^    ^    End of pattern
  0: aaaab
 \= Expect no match
   aaaacb
@@ -4897,7 +4897,7 @@ Subject length lower bound = 4
  +3 ^ ^      c
  +4 ^  ^     |
  +9 ^  ^     x
-+10 ^   ^    
++10 ^   ^    End of pattern
  0: abcx
  1: abc
   defx
@@ -4909,7 +4909,7 @@ Subject length lower bound = 4
  +7 ^ ^      f
  +8 ^  ^     )
  +9 ^  ^     x
-+10 ^   ^    
++10 ^   ^    End of pattern
  0: defx
  1: def
 \= Expect no match
@@ -4971,7 +4971,7 @@ Subject length lower bound = 4
  +3 ^ ^      c
  +4 ^  ^     |
  +9 ^  ^     x
-+10 ^   ^    
++10 ^   ^    End of pattern
  0: abcx
  1: abc
   defx
@@ -4983,7 +4983,7 @@ Subject length lower bound = 4
  +7 ^ ^      f
  +8 ^  ^     )
  +9 ^  ^     x
-+10 ^   ^    
++10 ^   ^    End of pattern
  0: defx
  1: def
 \= Expect no match
@@ -5024,7 +5024,7 @@ Subject length lower bound = 6
  +3 ^     ^    |
  +1 ^     ^    a
  +4 ^     ^    c
-+12 ^     ^    
++12 ^     ^    End of pattern
  0: ababab
  1: ab
   abcdabcd
@@ -5044,7 +5044,7 @@ Subject length lower bound = 6
  +4 ^     ^      c
  +5 ^      ^     d
  +6 ^       ^    ){3,4}
-+12 ^       ^    
++12 ^       ^    End of pattern
  0: abcdabcd
  1: cd
   abcdcdcdcdcd
@@ -5065,7 +5065,7 @@ Subject length lower bound = 6
  +4 ^     ^          c
  +5 ^      ^         d
  +6 ^       ^        ){3,4}
-+12 ^       ^        
++12 ^       ^        End of pattern
  0: abcdcdcd
  1: cd
 
@@ -5276,7 +5276,7 @@ Subject length lower bound = 11
 +21 ^              ^       1
 +22 ^               ^      2
 +23 ^                ^     3
-+24 ^                 ^    
++24 ^                 ^    End of pattern
  0: aacaacaacaacaac123
  1: aac
 
@@ -8900,7 +8900,7 @@ Subject length lower bound = 0
  +7 ^       b
 +11 ^       ^
 +12 ^       )
-+13 ^       
++13 ^       End of pattern
  0: 
    abc
 --->abc
@@ -8921,7 +8921,7 @@ Subject length lower bound = 0
  +8  ^^     )
  +9  ^      b
 +10  ^^     |
-+13  ^^     
++13  ^^     End of pattern
  0: b
 
 /(?(?=b).*b|^d)/I
@@ -8938,14 +8938,14 @@ Subject length lower bound = 1
  +0 ^       x
  +1 ^^      y
  +2 ^ ^     z
- +3 ^  ^    
+ +3 ^  ^    End of pattern
  0: xyz
   abcxyz
 --->abcxyz
  +0    ^       x
  +1    ^^      y
  +2    ^ ^     z
- +3    ^  ^    
+ +3    ^  ^    End of pattern
  0: xyz
 \= Expect no match
   abc
@@ -8962,7 +8962,7 @@ No match
  +0    ^       x
  +1    ^^      y
  +2    ^ ^     z
- +3    ^  ^    
+ +3    ^  ^    End of pattern
  0: xyz
 \= Expect no match
   abc
@@ -8996,7 +8996,7 @@ No match
 +15    ^       x
 +16    ^^      y
 +17    ^ ^     z
-+18    ^  ^    
++18    ^  ^    End of pattern
  0: xyz
 
 /(*NO_AUTO_POSSESS)a+b/B
@@ -9017,7 +9017,7 @@ No match
  +0    ^       x
  +1    ^^      y
  +2    ^ ^     z
- +3    ^  ^    
+ +3    ^  ^    End of pattern
  0: xyz
 
 /^"((?(?=[a])[^"])|b)*"$/auto_callout
@@ -9046,7 +9046,7 @@ No match
 +17 ^  ^     |
 +21 ^  ^     "
 +22 ^   ^    $
-+23 ^   ^    
++23 ^   ^    End of pattern
  0: "ab"
  1: 
 
@@ -11136,7 +11136,7 @@ Latest Mark: A
 +10 ^ ^     |
 +18 ^ ^     z
 +19 ^  ^    |
-+24 ^  ^    
++24 ^  ^    End of pattern
  0: adz
  1: adz
  2: d
@@ -11155,7 +11155,7 @@ Latest Mark: A
 Latest Mark: B
 +18 ^ ^     z
 +19 ^  ^    |
-+24 ^  ^    
++24 ^  ^    End of pattern
  0: aez
  1: aez
  2: e
@@ -11177,7 +11177,7 @@ Latest Mark: B
 +21 ^^           e
 +22 ^ ^          q
 +23 ^  ^         )
-+24 ^  ^         
++24 ^  ^         End of pattern
  0: aeq
  1: aeq
 
@@ -11951,7 +11951,7 @@ Partial match: 123a
 +11 ^      b
 +12 ^^     b
 +13 ^ ^    )
-+14 ^ ^    
++14 ^ ^    End of pattern
  0: bb
 
 /(?C1)^(?C2)(?(?C99)(?=(?C3)a(?C4))(?C5)a(?C6)a(?C7)|(?C8)b(?C9)b(?C10))(?C11)/
@@ -11964,7 +11964,7 @@ Partial match: 123a
   8 ^      b
   9 ^^     b
  10 ^ ^    )
- 11 ^ ^    
+ 11 ^ ^    End of pattern
  0: bb
 
 # Perl seems to have a bug with this one.
@@ -15144,7 +15144,7 @@ Subject length lower bound = 0
  +0     ^      (
  +1     ^      )\Q\E*
  +7     ^      ]
- +8     ^^     
+ +8     ^^     End of pattern
  0: ]
  1: 
 
@@ -15428,7 +15428,7 @@ Failed: error 125 at offset 13: lookbehind assertion is not fixed length
  +0 ^       a
  +1 ^^      b
   1 ^ ^     c
- +8 ^  ^    
+ +8 ^  ^    End of pattern
  0: abc
 
 /'ab(?C1)c'/hex,auto_callout
@@ -15437,7 +15437,7 @@ Failed: error 125 at offset 13: lookbehind assertion is not fixed length
  +0 ^       a
  +1 ^^      b
   1 ^ ^     c
- +8 ^  ^    
+ +8 ^  ^    End of pattern
  0: abc
 
 # Perl accepts these, but gives a warning. We can't warn, so give an error.
@@ -16256,7 +16256,7 @@ Failed: error 192 at offset 0: invalid option bits with PCRE2_LITERAL
  +2     ^ ^       b
  +3     ^  ^      (
  +4     ^   ^     c
- +5     ^    ^    
+ +5     ^    ^    End of pattern
  0: a\b(c
 
 /a\b(c/literal,auto_callout
@@ -16267,7 +16267,7 @@ Failed: error 192 at offset 0: invalid option bits with PCRE2_LITERAL
  +2     ^ ^       b
  +3     ^  ^      (
  +4     ^   ^     c
- +5     ^    ^    
+ +5     ^    ^    End of pattern
  0: a\b(c
 
 /(*CR)abc/literal
@@ -16380,9 +16380,65 @@ Subject length lower bound = 1
     ab
  0: ab
  1: a
-    aaab 
+    aaab
  0: ab
  1: a
+    
+# JIT does not support callout_extra  
+    
+/(*NO_JIT)(a+)b/auto_callout,no_start_optimize,no_auto_possess
+\= Expect no match
+    aac\=callout_extra 
+New match attempt
+--->aac
+ +9 ^       (
++10 ^       a+
++12 ^ ^     )
++13 ^ ^     b
+Backtrack
+--->aac
++12 ^^      )
++13 ^^      b
+Backtrack
+No other matching paths
+New match attempt
+--->aac
+ +9  ^      (
++10  ^      a+
++12  ^^     )
++13  ^^     b
+Backtrack
+No other matching paths
+New match attempt
+--->aac
+ +9   ^     (
++10   ^     a+
+Backtrack
+No other matching paths
+New match attempt
+--->aac
+ +9    ^    (
++10    ^    a+
+No match
+    
+/(*NO_JIT)a+(?C'XXX')b/no_start_optimize,no_auto_possess
+\= Expect no match
+    aac\=callout_extra 
+New match attempt
+Callout (15): 'XXX'
+--->aac
+    ^ ^     b
+Backtrack
+Callout (15): 'XXX'
+--->aac
+    ^^      b
+Backtrack
+No other matching paths
+New match attempt
+Callout (15): 'XXX'
+--->aac
+     ^^     b
+No match
 
 # End of testinput2
 Error -65: PCRE2_ERROR_BADDATA (unknown error number)

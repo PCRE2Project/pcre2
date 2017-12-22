@@ -159,6 +159,12 @@ Behave as if each pattern has the <b>auto_callout</b> modifier, that is, insert
 automatic callouts into every pattern that is compiled.
 </P>
 <P>
+<b>-AC</b>
+As for <b>-ac</b>, but in addition behave as if each subject line has the
+<b>callout_extra</b> modifier, that is, show additional information from
+callouts.
+</P>
+<P>
 <b>-b</b>
 Behave as if each pattern has the <b>fullbincode</b> modifier; the full
 internal binary form of the pattern is output after compilation.
@@ -243,8 +249,8 @@ available, and the use of JIT is verified.
 </P>
 <P>
 <b>-LM</b>
-List modifiers: write a list of available pattern and subject modifiers to the 
-standard output, then exit with zero exit code. All other options are ignored. 
+List modifiers: write a list of available pattern and subject modifiers to the
+standard output, then exit with zero exit code. All other options are ignored.
 If both -C and -LM are present, whichever is first is recognized.
 </P>
 <P>
@@ -1182,6 +1188,7 @@ pattern.
       callout_capture            show captures at callout time
       callout_data=&#60;n&#62;           set a value to pass via callouts
       callout_error=&#60;n&#62;[:&#60;m&#62;]    control callout error
+      callout_extra              show extra callout information
       callout_fail=&#60;n&#62;[:&#60;m&#62;]     control callout failure
       callout_no_where           do not show position of a callout
       callout_none               do not supply a callout function
@@ -1694,49 +1701,10 @@ documentation.
 <br><a name="SEC16" href="#TOC1">CALLOUTS</a><br>
 <P>
 If the pattern contains any callout requests, <b>pcre2test</b>'s callout
-function is called during matching unless <b>callout_none</b> is specified.
-This works with both matching functions.
-</P>
-<P>
-The callout function in <b>pcre2test</b> returns zero (carry on matching) by
-default, but you can use a <b>callout_fail</b> modifier in a subject line to
-change this and other parameters of the callout.
-</P>
-<P>
-If <b>callout_capture</b> is set, the current captured groups are output when a
-callout occurs. By default, the callout function then generates output that
-indicates where the current match start and matching points are in the subject,
-and what the next pattern item is. This output is suppressed if the
-<b>callout_no_where</b> modifier is set.
-</P>
-<P>
-The default return from the callout function is zero, which allows matching to
-continue. The <b>callout_fail</b> modifier can be given one or two numbers. If
-there is only one number, 1 is returned instead of 0 (causing matching to
-backtrack) when a callout of that number is reached. If two numbers (&#60;n&#62;:&#60;m&#62;)
-are given, 1 is returned when callout &#60;n&#62; is reached and there have been at
-least &#60;m&#62; callouts. The <b>callout_error</b> modifier is similar, except that
-PCRE2_ERROR_CALLOUT is returned, causing the entire matching process to be
-aborted. If both these modifiers are set for the same callout number,
-<b>callout_error</b> takes precedence. Note that callouts with string arguments
-are always given the number zero. See
-</P>
-<P>
-The <b>callout_data</b> modifier can be given an unsigned or a negative number.
-This is set as the "user data" that is passed to the matching function, and
-passed back when the callout function is invoked. Any value other than zero is
-used as a return from <b>pcre2test</b>'s callout function.
-</P>
-<P>
-Inserting callouts can be helpful when using <b>pcre2test</b> to check
-complicated regular expressions. For further information about callouts, see
-the
-<a href="pcre2callout.html"><b>pcre2callout</b></a>
-documentation.
-</P>
-<P>
-The output for callouts with numerical arguments and those with string
-arguments is slightly different.
+function is called during matching unless <b>callout_none</b> is specified. This
+works with both matching functions, and with JIT, though there are some
+differences in behaviour. The output for callouts with numerical arguments and
+those with string arguments is slightly different.
 </P>
 <br><b>
 Callouts with numerical arguments
@@ -1810,6 +1778,107 @@ example:
    0: abcdef
 
 </PRE>
+</P>
+<br><b>
+Callout modifiers
+</b><br>
+<P>
+The callout function in <b>pcre2test</b> returns zero (carry on matching) by
+default, but you can use a <b>callout_fail</b> modifier in a subject line to
+change this and other parameters of the callout (see below).
+</P>
+<P>
+If the <b>callout_capture</b> modifier is set, the current captured groups are
+output when a callout occurs. This is useful only for non-DFA matching, as
+<b>pcre2_dfa_match()</b> does not support capturing, so no captures are ever
+shown.
+</P>
+<P>
+The normal callout output, showing the callout number or pattern offset (as
+described above) is suppressed if the <b>callout_no_where</b> modifier is set.
+</P>
+<P>
+When using the interpretive matching function <b>pcre2_match()</b> without JIT,
+setting the <b>callout_extra</b> modifier causes additional output from
+<b>pcre2test</b>'s callout function to be generated. For the first callout in a
+match attempt at a new starting position in the subject, "New match attempt" is
+output. If there has been a backtrack since the last callout (or start of
+matching if this is the first callout), "Backtrack" is output, followed by "No
+other matching paths" if the backtrack ended the previous match attempt. For
+example:
+<pre>
+   re&#62; /(a+)b/auto_callout,no_start_optimize,no_auto_possess
+  data&#62; aac\=callout_extra
+  New match attempt
+  ---&#62;aac
+   +0 ^       (
+   +1 ^       a+
+   +3 ^ ^     )
+   +4 ^ ^     b
+  Backtrack
+  ---&#62;aac
+   +3 ^^      )
+   +4 ^^      b
+  Backtrack
+  No other matching paths
+  New match attempt
+  ---&#62;aac
+   +0  ^      (
+   +1  ^      a+
+   +3  ^^     )
+   +4  ^^     b
+  Backtrack
+  No other matching paths
+  New match attempt
+  ---&#62;aac
+   +0   ^     (
+   +1   ^     a+
+  Backtrack
+  No other matching paths
+  New match attempt
+  ---&#62;aac
+   +0    ^    (
+   +1    ^    a+
+  No match
+</pre>
+Notice that various optimizations must be turned off if you want all possible
+matching paths to be scanned. If <b>no_start_optimize</b> is not used, there is
+an immediate "no match", without any callouts, because the starting
+optimization fails to find "b" in the subject, which it knows must be present
+for any match. If <b>no_auto_possess</b> is not used, the "a+" item is turned
+into "a++", which reduces the number of backtracks.
+</P>
+<P>
+The <b>callout_extra</b> modifier has no effect if used with the DFA matching
+function, or with JIT.
+</P>
+<br><b>
+Return values from callouts
+</b><br>
+<P>
+The default return from the callout function is zero, which allows matching to
+continue. The <b>callout_fail</b> modifier can be given one or two numbers. If
+there is only one number, 1 is returned instead of 0 (causing matching to
+backtrack) when a callout of that number is reached. If two numbers (&#60;n&#62;:&#60;m&#62;)
+are given, 1 is returned when callout &#60;n&#62; is reached and there have been at
+least &#60;m&#62; callouts. The <b>callout_error</b> modifier is similar, except that
+PCRE2_ERROR_CALLOUT is returned, causing the entire matching process to be
+aborted. If both these modifiers are set for the same callout number,
+<b>callout_error</b> takes precedence. Note that callouts with string arguments
+are always given the number zero.
+</P>
+<P>
+The <b>callout_data</b> modifier can be given an unsigned or a negative number.
+This is set as the "user data" that is passed to the matching function, and
+passed back when the callout function is invoked. Any value other than zero is
+used as a return from <b>pcre2test</b>'s callout function.
+</P>
+<P>
+Inserting callouts can be helpful when using <b>pcre2test</b> to check
+complicated regular expressions. For further information about callouts, see
+the
+<a href="pcre2callout.html"><b>pcre2callout</b></a>
+documentation.
 </P>
 <br><a name="SEC17" href="#TOC1">NON-PRINTING CHARACTERS</a><br>
 <P>
@@ -1913,7 +1982,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC21" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 17 October 2017
+Last updated: 21 December 2017
 <br>
 Copyright &copy; 1997-2017 University of Cambridge.
 <br>

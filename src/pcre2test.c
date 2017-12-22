@@ -485,6 +485,7 @@ so many of them that they are split into two fields. */
 #define CTL2_SUBSTITUTE_UNSET_EMPTY      0x00000008u
 #define CTL2_SUBJECT_LITERAL             0x00000010u
 #define CTL2_CALLOUT_NO_WHERE            0x00000020u
+#define CTL2_CALLOUT_EXTRA               0x00000040u
 
 #define CTL2_NL_SET                      0x40000000u  /* Informational */
 #define CTL2_BSR_SET                     0x80000000u  /* Informational */
@@ -598,6 +599,7 @@ static modstruct modlist[] = {
   { "callout_capture",            MOD_DAT,  MOD_CTL, CTL_CALLOUT_CAPTURE,        DO(control) },
   { "callout_data",               MOD_DAT,  MOD_INS, 0,                          DO(callout_data) },
   { "callout_error",              MOD_DAT,  MOD_IN2, 0,                          DO(cerror) },
+  { "callout_extra",              MOD_DAT,  MOD_CTL, CTL2_CALLOUT_EXTRA,         DO(control2) },
   { "callout_fail",               MOD_DAT,  MOD_IN2, 0,                          DO(cfail) },
   { "callout_info",               MOD_PAT,  MOD_CTL, CTL_CALLOUT_INFO,           PO(control) },
   { "callout_no_where",           MOD_DAT,  MOD_CTL, CTL2_CALLOUT_NO_WHERE,      DO(control2) },
@@ -3971,7 +3973,7 @@ Returns:      nothing
 static void
 show_controls(uint32_t controls, uint32_t controls2, const char *before)
 {
-fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
+fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
   before,
   ((controls & CTL_AFTERTEXT) != 0)? " aftertext" : "",
   ((controls & CTL_ALLAFTERTEXT) != 0)? " allaftertext" : "",
@@ -3981,6 +3983,7 @@ fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s
   ((controls & CTL_BINCODE) != 0)? " bincode" : "",
   ((controls2 & CTL2_BSR_SET) != 0)? " bsr" : "",
   ((controls & CTL_CALLOUT_CAPTURE) != 0)? " callout_capture" : "",
+  ((controls2 & CTL2_CALLOUT_EXTRA) != 0)? " callout_extra" : "",
   ((controls & CTL_CALLOUT_INFO) != 0)? " callout_info" : "",
   ((controls & CTL_CALLOUT_NONE) != 0)? " callout_none" : "",
   ((controls2 & CTL2_CALLOUT_NO_WHERE) != 0)? " callout_no_where" : "",
@@ -4409,7 +4412,7 @@ if ((pat_patctl.control & CTL_INFO) != 0)
 
   pattern_info(PCRE2_INFO_ARGOPTIONS, &compile_options, FALSE);
   pattern_info(PCRE2_INFO_ALLOPTIONS, &overall_options, FALSE);
-  pattern_info(PCRE2_INFO_EXTRAOPTIONS, &extra_options, FALSE); 
+  pattern_info(PCRE2_INFO_EXTRAOPTIONS, &extra_options, FALSE);
 
   /* Remove UTF/UCP if they were there only because of forbid_utf. This saves
   cluttering up the verification output of non-UTF test files. */
@@ -4436,9 +4439,9 @@ if ((pat_patctl.control & CTL_INFO) != 0)
       show_compile_options(overall_options, "Overall options:", "\n");
       }
     }
-    
-  if (extra_options != 0) 
-    show_compile_extra_options(extra_options, "Extra options:", "\n");  
+
+  if (extra_options != 0)
+    show_compile_extra_options(extra_options, "Extra options:", "\n");
 
   if (jchanged) fprintf(outfile, "Duplicate name status changes\n");
 
@@ -5842,17 +5845,43 @@ Return:
 static int
 callout_function(pcre2_callout_block_8 *cb, void *callout_data_ptr)
 {
+FILE *f, *fdefault;
 uint32_t i, pre_start, post_start, subject_length;
 PCRE2_SIZE current_position;
 BOOL utf = (FLD(compiled_code, overall_options) & PCRE2_UTF) != 0;
 BOOL callout_capture = (dat_datctl.control & CTL_CALLOUT_CAPTURE) != 0;
 BOOL callout_where = (dat_datctl.control2 & CTL2_CALLOUT_NO_WHERE) == 0;
 
-/* This FILE is used for echoing the subject. This is done only once in simple
-cases. */
+/* The FILE f is used for echoing the subject string if it is non-NULL. This
+happens only once in simple cases, but we want to repeat after any additional
+output caused by CALLOUT_EXTRA. */
 
-FILE *f = (first_callout || callout_capture || cb->callout_string != NULL)?
-  outfile : NULL;
+fdefault = (!first_callout && !callout_capture && cb->callout_string == NULL)?
+  NULL : outfile;
+  
+if ((dat_datctl.control2 & CTL2_CALLOUT_EXTRA) != 0)
+  {
+  f = outfile;
+  switch (cb->callout_flags)
+    {
+    case PCRE2_CALLOUT_BACKTRACK:
+    fprintf(f, "Backtrack\n");
+    break;
+
+    case PCRE2_CALLOUT_STARTMATCH|PCRE2_CALLOUT_BACKTRACK:
+    fprintf(f, "Backtrack\nNo other matching paths\n");
+    /* Fall through */
+
+    case PCRE2_CALLOUT_STARTMATCH:
+    fprintf(f, "New match attempt\n");
+    break;
+
+    default:
+    f = fdefault;
+    break;
+    }
+  }
+else f = fdefault;
 
 /* For a callout with a string argument, show the string first because there
 isn't a tidy way to fit it in the rest of the data. */
@@ -5902,7 +5931,6 @@ lengths of the substrings. */
 
 if (callout_where)
   {
-
   if (f != NULL) fprintf(f, "--->");
 
   /* The subject before the match start. */
@@ -5931,9 +5959,10 @@ if (callout_where)
 
   if (f != NULL) fprintf(f, "\n");
 
-  /* For automatic callouts, show the pattern offset. Otherwise, for a numerical
-  callout whose number has not already been shown with captured strings, show the
-  number here. A callout with a string argument has been displayed above. */
+  /* For automatic callouts, show the pattern offset. Otherwise, for a
+  numerical callout whose number has not already been shown with captured
+  strings, show the number here. A callout with a string argument has been
+  displayed above. */
 
   if (cb->callout_number == 255)
     {
@@ -5963,6 +5992,8 @@ if (callout_where)
   if (cb->next_item_length != 0)
     fprintf(outfile, "%.*s", (int)(cb->next_item_length),
       pbuffer8 + cb->pattern_position);
+  else
+    fprintf(outfile, "End of pattern");
 
   fprintf(outfile, "\n");
   }
@@ -7685,7 +7716,8 @@ printf("  -16           use the 16-bit library\n");
 #ifdef SUPPORT_PCRE2_32
 printf("  -32           use the 32-bit library\n");
 #endif
-printf("  -ac           set default pattern option PCRE2_AUTO_CALLOUT\n");
+printf("  -ac           set default pattern modifier PCRE2_AUTO_CALLOUT\n");
+printf("  -AC           as -ac, but also set subject 'callout_extra' modifier\n");
 printf("  -b            set default pattern modifier 'fullbincode'\n");
 printf("  -C            show PCRE2 compile-time options and exit\n");
 printf("  -C arg        show a specific compile-time option and exit with its\n");
@@ -8181,6 +8213,11 @@ while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
 
   /* Set some common pattern and subject controls */
 
+  else if (strcmp(arg, "-AC") == 0)  
+    {
+    def_patctl.options |= PCRE2_AUTO_CALLOUT;
+    def_datctl.control2 |= CTL2_CALLOUT_EXTRA;
+    } 
   else if (strcmp(arg, "-ac") == 0)  def_patctl.options |= PCRE2_AUTO_CALLOUT;
   else if (strcmp(arg, "-b") == 0)   def_patctl.control |= CTL_FULLBINCODE;
   else if (strcmp(arg, "-d") == 0)   def_patctl.control |= CTL_DEBUG;

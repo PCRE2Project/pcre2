@@ -27,7 +27,7 @@ DESCRIPTION
 <P>
 This function returns information about a compiled pattern. Its arguments are:
 <pre>
-  <i>code</i>     Pointer to a compiled regular expression
+  <i>code</i>     Pointer to a compiled regular expression pattern
   <i>what</i>     What information is required
   <i>where</i>    Where to put the information
 </pre>
@@ -42,6 +42,8 @@ request are as follows:
                                PCRE2_BSR_ANYCRLF: CR, LF, or CRLF only
   PCRE2_INFO_CAPTURECOUNT    Number of capturing subpatterns
   PCRE2_INFO_DEPTHLIMIT      Backtracking depth limit if set, otherwise PCRE2_ERROR_UNSET
+  PCRE2_INFO_EXTRAOPTIONS    Extra options that were passed in the
+                               compile context
   PCRE2_INFO_FIRSTBITMAP     Bitmap of first code units, or NULL
   PCRE2_INFO_FIRSTCODETYPE   Type of start-of-match information
                                0 nothing set

@@ -494,6 +494,11 @@ without changing the API of the function, thereby allowing old clients to work
 without modification. Define the generic version in a macro; the width-specific
 versions are generated from this macro below. */
 
+/* Flags for the callout_flags field. These are cleared after a callout. */
+
+#define PCRE2_CALLOUT_STARTMATCH    0x00000001u  /* Set for each bumpalong */
+#define PCRE2_CALLOUT_BACKTRACK     0x00000002u  /* Set after a backtrack */
+
 #define PCRE2_STRUCTURE_LIST \
 typedef struct pcre2_callout_block { \
   uint32_t      version;           /* Identifies version of block */ \
@@ -513,6 +518,8 @@ typedef struct pcre2_callout_block { \
   PCRE2_SIZE    callout_string_offset; /* Offset to string within pattern */ \
   PCRE2_SIZE    callout_string_length; /* Length of string compiled into pattern */ \
   PCRE2_SPTR    callout_string;    /* String compiled into pattern */ \
+  /* ------------------- Added for Version 2 -------------------------- */ \
+  uint32_t      callout_flags;     /* See above for list */ \
   /* ------------------------------------------------------------------ */ \
 } pcre2_callout_block; \
 \

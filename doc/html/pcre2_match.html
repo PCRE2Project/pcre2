@@ -30,7 +30,13 @@ DESCRIPTION
 <P>
 This function matches a compiled regular expression against a given subject
 string, using a matching algorithm that is similar to Perl's. It returns
-offsets to captured substrings. Its arguments are:
+offsets to what it has matched and to captured substrings via the
+<b>match_data</b> block, which can be processed by functions with names that
+start with <b>pcre2_get_ovector_...()</b> or <b>pcre2_substring_...()</b>. The
+return from <b>pcre2_match()</b> is one more than the highest numbered capturing
+pair that has been set (for example, 1 if there are no captures), zero if the
+vector of offsets is too small, or a negative error code for no match and other
+errors. The function arguments are:
 <pre>
   <i>code</i>         Points to the compiled pattern
   <i>subject</i>      Points to the subject string

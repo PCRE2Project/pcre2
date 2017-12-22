@@ -133,11 +133,13 @@ The <b>--locale</b> option can be used to override this.
 <br><a name="SEC3" href="#TOC1">SUPPORT FOR COMPRESSED FILES</a><br>
 <P>
 It is possible to compile <b>pcre2grep</b> so that it uses <b>libz</b> or
-<b>libbz2</b> to read files whose names end in <b>.gz</b> or <b>.bz2</b>,
-respectively. You can find out whether your binary has support for one or both
-of these file types by running it with the <b>--help</b> option. If the
-appropriate support is not present, files are treated as plain text. The
-standard input is always so treated.
+<b>libbz2</b> to read compressed files whose names end in <b>.gz</b> or
+<b>.bz2</b>, respectively. You can find out whether your <b>pcre2grep</b> binary
+has support for one or both of these file types by running it with the
+<b>--help</b> option. If the appropriate support is not present, all files are
+treated as plain text. The standard input is always so treated. When input is
+from a compressed .gz or .bz2 file, the <b>--line-buffered</b> option is
+ignored.
 </P>
 <br><a name="SEC4" href="#TOC1">BINARY FILES</a><br>
 <P>
@@ -151,7 +153,7 @@ of changing the way binary files are handled.
 <br><a name="SEC5" href="#TOC1">OPTIONS</a><br>
 <P>
 The order in which some of the options appear can affect the output. For
-example, both the <b>-h</b> and <b>-l</b> options affect the printing of file
+example, both the <b>-H</b> and <b>-l</b> options affect the printing of file
 names. Whichever comes later in the command line will be the one that takes
 effect. Similarly, except where noted below, if an option is given twice, the
 later setting is used. Numerical values for options may be followed by K or M,
@@ -396,14 +398,16 @@ searching a single file. By default, the file name is not shown in this case.
 For matching lines, the file name is followed by a colon; for context lines, a
 hyphen separator is used. If a line number is also being output, it follows the
 file name. When the <b>-M</b> option causes a pattern to match more than one
-line, only the first is preceded by the file name.
+line, only the first is preceded by the file name. This option overrides any
+previous <b>-h</b>, <b>-l</b>, or <b>-L</b> options.
 </P>
 <P>
 <b>-h</b>, <b>--no-filename</b>
 Suppress the output file names when searching multiple files. By default,
 file names are shown when multiple files are searched. For matching lines, the
 file name is followed by a colon; for context lines, a hyphen separator is used.
-If a line number is also being output, it follows the file name.
+If a line number is also being output, it follows the file name. This option
+overrides any previous <b>-H</b>, <b>-L</b>, or <b>-l</b> options.
 </P>
 <P>
 <b>--heap-limit</b>=<i>number</i>
@@ -460,17 +464,19 @@ given any number of times. If a directory matches both <b>--include-dir</b> and
 <b>-L</b>, <b>--files-without-match</b>
 Instead of outputting lines from the files, just output the names of the files
 that do not contain any lines that would have been output. Each file name is
-output once, on a separate line.
+output once, on a separate line. This option overrides any previous <b>-H</b>, 
+<b>-h</b>, or <b>-l</b> options.
 </P>
 <P>
 <b>-l</b>, <b>--files-with-matches</b>
 Instead of outputting lines from the files, just output the names of the files
-containing lines that would have been output. Each file name is output
-once, on a separate line. Searching normally stops as soon as a matching line
-is found in a file. However, if the <b>-c</b> (count) option is also used,
-matching continues in order to obtain the correct count, and those files that
-have at least one match are listed along with their counts. Using this option
-with <b>-c</b> is a way of suppressing the listing of files with no matches.
+containing lines that would have been output. Each file name is output once, on
+a separate line. Searching normally stops as soon as a matching line is found
+in a file. However, if the <b>-c</b> (count) option is also used, matching
+continues in order to obtain the correct count, and those files that have at
+least one match are listed along with their counts. Using this option with
+<b>-c</b> is a way of suppressing the listing of files with no matches. This
+opeion overrides any previous <b>-H</b>, <b>-h</b>, or <b>-L</b> options.
 </P>
 <P>
 <b>--label</b>=<i>name</i>
@@ -480,14 +486,16 @@ short form for this option.
 </P>
 <P>
 <b>--line-buffered</b>
-When this option is given, input is read and processed line by line, and the
-output is flushed after each write. By default, input is read in large chunks,
-unless <b>pcre2grep</b> can determine that it is reading from a terminal (which
-is currently possible only in Unix-like environments). Output to terminal is
-normally automatically flushed by the operating system. This option can be
-useful when the input or output is attached to a pipe and you do not want
-<b>pcre2grep</b> to buffer up large amounts of data. However, its use will
-affect performance, and the <b>-M</b> (multiline) option ceases to work.
+When this option is given, non-compressed input is read and processed line by
+line, and the output is flushed after each write. By default, input is read in
+large chunks, unless <b>pcre2grep</b> can determine that it is reading from a
+terminal (which is currently possible only in Unix-like environments). Output
+to terminal is normally automatically flushed by the operating system. This
+option can be useful when the input or output is attached to a pipe and you do
+not want <b>pcre2grep</b> to buffer up large amounts of data. However, its use
+will affect performance, and the <b>-M</b> (multiline) option ceases to work.
+When input is from a compressed .gz or .bz2 file, <b>--line-buffered</b> is 
+ignored.
 </P>
 <P>
 <b>--line-offsets</b>
@@ -941,7 +949,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC15" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 11 October 2017
+Last updated: 13 November 2017
 <br>
 Copyright &copy; 1997-2017 University of Cambridge.
 <br>

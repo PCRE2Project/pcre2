@@ -920,11 +920,15 @@ The <i>offset_limit</i> parameter limits how far an unanchored search can
 advance in the subject string. The default value is PCRE2_UNSET. The
 <b>pcre2_match()</b> and <b>pcre2_dfa_match()</b> functions return
 PCRE2_ERROR_NOMATCH if a match with a starting point before or at the given
-offset is not found. For example, if the pattern /abc/ is matched against
-"123abc" with an offset limit less than 3, the result is PCRE2_ERROR_NO_MATCH.
-A match can never be found if the <i>startoffset</i> argument of
-<b>pcre2_match()</b> or <b>pcre2_dfa_match()</b> is greater than the offset
-limit.
+offset is not found. The <b>pcre2_substitute()</b> function makes no more 
+substitutions.
+</P>
+<P>
+For example, if the pattern /abc/ is matched against "123abc" with an offset
+limit less than 3, the result is PCRE2_ERROR_NO_MATCH. A match can never be
+found if the <i>startoffset</i> argument of <b>pcre2_match()</b>,
+<b>pcre2_dfa_match()</b>, or <b>pcre2_substitute()</b> is greater than the offset
+limit set in the match context.
 </P>
 <P>
 When using this facility, you must set the PCRE2_USE_OFFSET_LIMIT option when
@@ -934,10 +938,11 @@ PCRE2_USE_OFFSET_LIMIT is not set, an error is generated.
 </P>
 <P>
 The offset limit facility can be used to track progress when searching large
-subject strings. See also the PCRE2_FIRSTLINE option, which requires a match to
-start within the first line of the subject. If this is set with an offset
-limit, a match must occur in the first line and also within the offset limit.
-In other words, whichever limit comes first is used.
+subject strings or to limit the extent of global substitutions. See also the
+PCRE2_FIRSTLINE option, which requires a match to start within the first line
+of the subject. If this is set with an offset limit, a match must occur in the
+first line and also within the offset limit. In other words, whichever limit
+comes first is used.
 <br>
 <br>
 <b>int pcre2_set_heap_limit(pcre2_match_context *<i>mcontext</i>,</b>
@@ -1940,12 +1945,15 @@ are as follows:
 <pre>
   PCRE2_INFO_ALLOPTIONS
   PCRE2_INFO_ARGOPTIONS
+  PCRE2_INFO_EXTRAOPTIONS 
 </pre>
-Return a copy of the pattern's options. The third argument should point to a
+Return copies of the pattern's options. The third argument should point to a
 <b>uint32_t</b> variable. PCRE2_INFO_ARGOPTIONS returns exactly the options that
 were passed to <b>pcre2_compile()</b>, whereas PCRE2_INFO_ALLOPTIONS returns
 the compile options as modified by any top-level (*XXX) option settings such as
-(*UTF) at the start of the pattern itself.
+(*UTF) at the start of the pattern itself. PCRE2_INFO_EXTRAOPTIONS returns the 
+extra options that were set in the compile context by calling the
+pcre2_set_compile_extra_options() function.
 </P>
 <P>
 For example, if the pattern /(*UTF)abc/ is compiled with the PCRE2_EXTENDED
@@ -3157,13 +3165,27 @@ options can be set in the <i>options</i> argument of <b>pcre2_substitute()</b>.
 </P>
 <P>
 PCRE2_SUBSTITUTE_GLOBAL causes the function to iterate over the subject string,
-replacing every matching substring. If this is not set, only the first matching
-substring is replaced. If any matched substring has zero length, after the
-substitution has happened, an attempt to find a non-empty match at the same
-position is performed. If this is not successful, the current position is
-advanced by one character except when CRLF is a valid newline sequence and the
-next two characters are CR, LF. In this case, the current position is advanced
-by two characters.
+replacing every matching substring. If this option is not set, only the first
+matching substring is replaced. The search for matches takes place in the
+original subject string (that is, previous replacements do not affect it). 
+Iteration is implemented by advancing the <i>startoffset</i> value for each
+search, which is always passed the entire subject string. If an offset limit is
+set in the match context, searching stops when that limit is reached.
+</P>
+<P>
+You can restrict the effect of a global substitution to a portion of the
+subject string by setting either or both of <i>startoffset</i> and an offset
+limit. Here is a \fPpcre2test\fP example:
+<pre>
+  /B/g,replace=!,use_offset_limit
+  ABC ABC ABC ABC\=offset=3,offset_limit=12
+   2: ABC A!C A!C ABC
+</pre>
+When continuing with global substitutions after matching a substring with zero
+length, an attempt to find a non-empty match at the same offset is performed.
+If this is not successful, the offset is advanced by one character except when
+CRLF is a valid newline sequence and the next two characters are CR, LF. In
+this case, the offset is advanced by two characters.
 </P>
 <P>
 PCRE2_SUBSTITUTE_OVERFLOW_LENGTH changes what happens when the output buffer is
@@ -3398,7 +3420,7 @@ Here is an example of a simple call to <b>pcre2_dfa_match()</b>:
     11,             /* the length of the subject string */
     0,              /* start at offset 0 in the subject */
     0,              /* default options */
-    match_data,     /* the match data block */
+    md,             /* the match data block */
     NULL,           /* a match context; NULL means use defaults */
     wspace,         /* working space vector */
     20);            /* number of elements (NOT size in bytes) */
@@ -3567,7 +3589,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC42" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 13 October 2017
+Last updated: 16 December 2017
 <br>
 Copyright &copy; 1997-2017 University of Cambridge.
 <br>

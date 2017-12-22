@@ -1,4 +1,4 @@
-.TH PCRE2TEST 1 "17 October 2017" "PCRE 10.31"
+.TH PCRE2TEST 1 "21 Decbmber 2017" "PCRE 10.31"
 .SH NAME
 pcre2test - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -129,6 +129,11 @@ has not been built, this option causes an error.
 Behave as if each pattern has the \fBauto_callout\fP modifier, that is, insert
 automatic callouts into every pattern that is compiled.
 .TP 10
+\fB-AC\fP
+As for \fB-ac\fP, but in addition behave as if each subject line has the
+\fBcallout_extra\fP modifier, that is, show additional information from
+callouts.
+.TP 10
 \fB-b\fP
 Behave as if each pattern has the \fBfullbincode\fP modifier; the full
 internal binary form of the pattern is output after compilation.
@@ -203,8 +208,8 @@ successful compilation, each pattern is passed to the just-in-time compiler, if
 available, and the use of JIT is verified.
 .TP 10
 \fB-LM\fP
-List modifiers: write a list of available pattern and subject modifiers to the 
-standard output, then exit with zero exit code. All other options are ignored. 
+List modifiers: write a list of available pattern and subject modifiers to the
+standard output, then exit with zero exit code. All other options are ignored.
 If both -C and -LM are present, whichever is first is recognized.
 .TP 10
 \fB-pattern\fB \fImodifier-list\fP
@@ -1152,6 +1157,7 @@ pattern.
       callout_capture            show captures at callout time
       callout_data=<n>           set a value to pass via callouts
       callout_error=<n>[:<m>]    control callout error
+      callout_extra              show extra callout information
       callout_fail=<n>[:<m>]     control callout failure
       callout_no_where           do not show position of a callout
       callout_none               do not supply a callout function
@@ -1664,45 +1670,10 @@ documentation.
 .rs
 .sp
 If the pattern contains any callout requests, \fBpcre2test\fP's callout
-function is called during matching unless \fBcallout_none\fP is specified.
-This works with both matching functions.
-.P
-The callout function in \fBpcre2test\fP returns zero (carry on matching) by
-default, but you can use a \fBcallout_fail\fP modifier in a subject line to
-change this and other parameters of the callout.
-.P
-If \fBcallout_capture\fP is set, the current captured groups are output when a
-callout occurs. By default, the callout function then generates output that
-indicates where the current match start and matching points are in the subject,
-and what the next pattern item is. This output is suppressed if the
-\fBcallout_no_where\fP modifier is set.
-.P
-The default return from the callout function is zero, which allows matching to
-continue. The \fBcallout_fail\fP modifier can be given one or two numbers. If
-there is only one number, 1 is returned instead of 0 (causing matching to
-backtrack) when a callout of that number is reached. If two numbers (<n>:<m>)
-are given, 1 is returned when callout <n> is reached and there have been at
-least <m> callouts. The \fBcallout_error\fP modifier is similar, except that
-PCRE2_ERROR_CALLOUT is returned, causing the entire matching process to be
-aborted. If both these modifiers are set for the same callout number,
-\fBcallout_error\fP takes precedence. Note that callouts with string arguments
-are always given the number zero. See
-.P
-The \fBcallout_data\fP modifier can be given an unsigned or a negative number.
-This is set as the "user data" that is passed to the matching function, and
-passed back when the callout function is invoked. Any value other than zero is
-used as a return from \fBpcre2test\fP's callout function.
-.P
-Inserting callouts can be helpful when using \fBpcre2test\fP to check
-complicated regular expressions. For further information about callouts, see
-the
-.\" HREF
-\fBpcre2callout\fP
-.\"
-documentation.
-.P
-The output for callouts with numerical arguments and those with string
-arguments is slightly different.
+function is called during matching unless \fBcallout_none\fP is specified. This
+works with both matching functions, and with JIT, though there are some
+differences in behaviour. The output for callouts with numerical arguments and
+those with string arguments is slightly different.
 .
 .
 .SS "Callouts with numerical arguments"
@@ -1774,6 +1745,103 @@ example:
       ^   ^       e
    0: abcdef
 .sp
+.
+.
+.SS "Callout modifiers"
+.rs
+.sp
+The callout function in \fBpcre2test\fP returns zero (carry on matching) by
+default, but you can use a \fBcallout_fail\fP modifier in a subject line to
+change this and other parameters of the callout (see below).
+.P
+If the \fBcallout_capture\fP modifier is set, the current captured groups are
+output when a callout occurs. This is useful only for non-DFA matching, as
+\fBpcre2_dfa_match()\fP does not support capturing, so no captures are ever
+shown.
+.P
+The normal callout output, showing the callout number or pattern offset (as
+described above) is suppressed if the \fBcallout_no_where\fP modifier is set.
+.P
+When using the interpretive matching function \fBpcre2_match()\fP without JIT,
+setting the \fBcallout_extra\fP modifier causes additional output from
+\fBpcre2test\fP's callout function to be generated. For the first callout in a
+match attempt at a new starting position in the subject, "New match attempt" is
+output. If there has been a backtrack since the last callout (or start of
+matching if this is the first callout), "Backtrack" is output, followed by "No
+other matching paths" if the backtrack ended the previous match attempt. For
+example:
+.sp
+   re> /(a+)b/auto_callout,no_start_optimize,no_auto_possess
+  data> aac\e=callout_extra
+  New match attempt
+  --->aac
+   +0 ^       (
+   +1 ^       a+
+   +3 ^ ^     )
+   +4 ^ ^     b
+  Backtrack
+  --->aac
+   +3 ^^      )
+   +4 ^^      b
+  Backtrack
+  No other matching paths
+  New match attempt
+  --->aac
+   +0  ^      (
+   +1  ^      a+
+   +3  ^^     )
+   +4  ^^     b
+  Backtrack
+  No other matching paths
+  New match attempt
+  --->aac
+   +0   ^     (
+   +1   ^     a+
+  Backtrack
+  No other matching paths
+  New match attempt
+  --->aac
+   +0    ^    (
+   +1    ^    a+
+  No match
+.sp
+Notice that various optimizations must be turned off if you want all possible
+matching paths to be scanned. If \fBno_start_optimize\fP is not used, there is
+an immediate "no match", without any callouts, because the starting
+optimization fails to find "b" in the subject, which it knows must be present
+for any match. If \fBno_auto_possess\fP is not used, the "a+" item is turned
+into "a++", which reduces the number of backtracks.
+.P
+The \fBcallout_extra\fP modifier has no effect if used with the DFA matching
+function, or with JIT.
+.
+.
+.SS "Return values from callouts"
+.rs
+.sp
+The default return from the callout function is zero, which allows matching to
+continue. The \fBcallout_fail\fP modifier can be given one or two numbers. If
+there is only one number, 1 is returned instead of 0 (causing matching to
+backtrack) when a callout of that number is reached. If two numbers (<n>:<m>)
+are given, 1 is returned when callout <n> is reached and there have been at
+least <m> callouts. The \fBcallout_error\fP modifier is similar, except that
+PCRE2_ERROR_CALLOUT is returned, causing the entire matching process to be
+aborted. If both these modifiers are set for the same callout number,
+\fBcallout_error\fP takes precedence. Note that callouts with string arguments
+are always given the number zero.
+.P
+The \fBcallout_data\fP modifier can be given an unsigned or a negative number.
+This is set as the "user data" that is passed to the matching function, and
+passed back when the callout function is invoked. Any value other than zero is
+used as a return from \fBpcre2test\fP's callout function.
+.P
+Inserting callouts can be helpful when using \fBpcre2test\fP to check
+complicated regular expressions. For further information about callouts, see
+the
+.\" HREF
+\fBpcre2callout\fP
+.\"
+documentation.
 .
 .
 .
@@ -1894,6 +1962,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 17 October 2017
+Last updated: 21 December 2017
 Copyright (c) 1997-2017 University of Cambridge.
 .fi

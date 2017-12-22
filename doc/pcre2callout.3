@@ -1,4 +1,4 @@
-.TH PCRE2CALLOUT 3 "14 April 2017" "PCRE2 10.30"
+.TH PCRE2CALLOUT 3 "22 December 2017" "PCRE2 10.31"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH SYNOPSIS
@@ -191,20 +191,22 @@ callouts such as the example above are obeyed.
 .rs
 .sp
 During matching, when PCRE2 reaches a callout point, if an external function is
-provided in the match context, it is called. This applies to both normal and
-DFA matching. The first argument to the callout function is a pointer to a
-\fBpcre2_callout\fP block. The second argument is the void * callout data that
-was supplied when the callout was set up by calling \fBpcre2_set_callout()\fP
-(see the
+provided in the match context, it is called. This applies to both normal,
+DFA, and JIT matching. The first argument to the callout function is a pointer
+to a \fBpcre2_callout\fP block. The second argument is the void * callout data
+that was supplied when the callout was set up by calling
+\fBpcre2_set_callout()\fP (see the
 .\" HREF
 \fBpcre2api\fP
 .\"
-documentation). The callout block structure contains the following fields:
+documentation). The callout block structure contains the following fields, not
+necessarily in this order:
 .sp
   uint32_t      \fIversion\fP;
   uint32_t      \fIcallout_number\fP;
   uint32_t      \fIcapture_top\fP;
   uint32_t      \fIcapture_last\fP;
+  uint32_t      \fIcallout_flags\fP;
   PCRE2_SIZE   *\fIoffset_vector\fP;
   PCRE2_SPTR    \fImark\fP;
   PCRE2_SPTR    \fIsubject\fP;
@@ -218,11 +220,12 @@ documentation). The callout block structure contains the following fields:
   PCRE2_SPTR    \fIcallout_string\fP;
 .sp
 The \fIversion\fP field contains the version number of the block format. The
-current version is 1; the three callout string fields were added for this
-version. If you are writing an application that might use an earlier release of
-PCRE2, you should check the version number before accessing any of these
-fields. The version number will increase in future if more fields are added,
-but the intention is never to remove any of the existing fields.
+current version is 2; the three callout string fields were added for version 1,
+and the \fIcallout_flags\fP field for version 2. If you are writing an
+application that might use an earlier release of PCRE2, you should check the
+version number before accessing any of these fields. The version number will
+increase in future if more fields are added, but the intention is never to
+remove any of the existing fields.
 .
 .
 .SS "Fields for numerical callouts"
@@ -331,6 +334,33 @@ the zero-terminated name of the most recently passed (*MARK), (*PRUNE), or
 (*THEN) item in the match, or NULL if no such items have been passed. Instances
 of (*PRUNE) or (*THEN) without a name do not obliterate a previous (*MARK). In
 callouts from the DFA matching function this field always contains NULL.
+.P
+The \fIcallout_flags\fP field is always zero in callouts from
+\fBpcre2_dfa_match()\fP or when JIT is being used. When \fBpcre2_match()\fP
+without JIT is used, the following bits may be set:
+.sp
+  PCRE2_CALLOUT_STARTMATCH
+.sp
+This is set for the first callout after the start of matching for each new
+starting position in the subject.
+.sp
+  PCRE2_CALLOUT_BACKTRACK
+.sp
+This is set if there has been a matching backtrack since the previous callout,
+or since the start of matching if this is the first callout from a
+\fBpcre2_match()\fP run.
+.P
+Both bits are set when a backtrack has caused a "bumpalong" to a new starting
+position in the subject. Output from \fBpcre2test\fP does not indicate the
+presence of these bits unless the \fBcallout_extra\fP modifier is set.
+.P
+The information in the \fBcallout_flags\fP field is provided so that
+applications can track and tell their users how matching with backtracking is
+done. This can be useful when trying to optimize patterns, or just to
+understand how PCRE2 works. There is no support in \fBpcre2_dfa_match()\fP
+because there is no backtracking in DFA matching, and there is no support in
+JIT because JIT is all about maximimizing matching performance. In both these
+cases the \fBcallout_flags\fP field is always zero.
 .
 .
 .SH "RETURN VALUES FROM CALLOUTS"
@@ -411,6 +441,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 14 April 2017
+Last updated: 22 December 2017
 Copyright (c) 1997-2017 University of Cambridge.
 .fi

@@ -3185,7 +3185,7 @@ subject string by setting either or both of \fIstartoffset\fP and an offset
 limit. Here is a \fPpcre2test\fP example:
 .sp
   /B/g,replace=!,use_offset_limit
-  ABC ABC ABC ABC\=offset=3,offset_limit=12
+  ABC ABC ABC ABC\e=offset=3,offset_limit=12
    2: ABC A!C A!C ABC
 .sp
 When continuing with global substitutions after matching a substring with zero

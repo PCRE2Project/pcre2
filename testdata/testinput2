@@ -5383,6 +5383,16 @@ a)"xI
 
 "(?=(a))\1?b"I
     ab
-    aaab 
+    aaab
+    
+# JIT does not support callout_extra  
+    
+/(*NO_JIT)(a+)b/auto_callout,no_start_optimize,no_auto_possess
+\= Expect no match
+    aac\=callout_extra 
+    
+/(*NO_JIT)a+(?C'XXX')b/no_start_optimize,no_auto_possess
+\= Expect no match
+    aac\=callout_extra 
 
 # End of testinput2

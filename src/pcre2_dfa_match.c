@@ -2574,7 +2574,8 @@ for (;;)
           if (mb->callout != NULL)
             {
             pcre2_callout_block cb;
-            cb.version          = 1;
+            cb.version          = 2;
+            cb.callout_flags    = 0; 
             cb.capture_top      = 1;
             cb.capture_last     = 0;
             cb.offset_vector    = offsets;
@@ -2943,7 +2944,8 @@ for (;;)
         if (mb->callout != NULL)
           {
           pcre2_callout_block cb;
-          cb.version          = 1;
+          cb.version          = 2;
+          cb.callout_flags    = 0; 
           cb.capture_top      = 1;
           cb.capture_last     = 0;
           cb.offset_vector    = offsets;

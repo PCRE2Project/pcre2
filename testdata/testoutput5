@@ -3763,7 +3763,7 @@ No match
     abcd
 --->abcd
  +0 ^        \w+
- +3 ^   ^    
+ +3 ^   ^    End of pattern
  0: abcd
 
 /[\p{N}]?+/B,no_auto_possess
@@ -4165,7 +4165,7 @@ Failed: error 125 at offset 2: lookbehind assertion is not fixed length
  +0 ^                                      .
  +0       ^                                .
  +1       ^      ^                         .
- +2       ^             ^                  
+ +2       ^             ^                  End of pattern
  0: \x{123}\x{123}
 
 # This tests processing wide characters in extended mode.

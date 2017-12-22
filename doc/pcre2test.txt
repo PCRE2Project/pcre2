@@ -120,6 +120,10 @@ COMMAND LINE OPTIONS
                  is, insert automatic callouts into every pattern that is com-
                  piled.
 
+       -AC       As  for  -ac,  but in addition behave as if each subject line
+                 has the callout_extra  modifier,  that  is,  show  additional
+                 information from callouts.
+
        -b        Behave  as  if each pattern has the fullbincode modifier; the
                  full internal binary form of the pattern is output after com-
                  pilation.
@@ -1056,6 +1060,7 @@ SUBJECT MODIFIERS
              callout_capture            show captures at callout time
              callout_data=<n>           set a value to pass via callouts
              callout_error=<n>[:<m>]    control callout error
+             callout_extra              show extra callout information
              callout_fail=<n>[:<m>]     control callout failure
              callout_no_where           do not show position of a callout
              callout_none               do not supply a callout function
@@ -1529,63 +1534,30 @@ RESTARTING AFTER A PARTIAL MATCH
 CALLOUTS
 
        If the pattern contains any callout requests, pcre2test's callout func-
-       tion is called during matching unless callout_none is specified.   This
-       works with both matching functions.
-
-       The  callout  function in pcre2test returns zero (carry on matching) by
-       default, but you can use a callout_fail modifier in a subject  line  to
-       change this and other parameters of the callout.
-
-       If  callout_capture is set, the current captured groups are output when
-       a callout occurs. By default, the callout function then generates  out-
-       put  that  indicates  where the current match start and matching points
-       are in the subject, and what the next pattern item is. This  output  is
-       suppressed if the callout_no_where modifier is set.
-
-       The  default  return  from  the  callout function is zero, which allows
-       matching to continue. The callout_fail modifier can be given one or two
-       numbers. If there is only one number, 1 is returned instead of 0 (caus-
-       ing matching to backtrack) when a callout of that number is reached. If
-       two  numbers  (<n>:<m>)  are  given,  1 is returned when callout <n> is
-       reached and there have been at least <m>  callouts.  The  callout_error
-       modifier is similar, except that PCRE2_ERROR_CALLOUT is returned, caus-
-       ing the entire matching process to be aborted. If both these  modifiers
-       are  set  for  the same callout number, callout_error takes precedence.
-       Note that callouts with string arguments are always  given  the  number
-       zero. See
-
-       The  callout_data  modifier can be given an unsigned or a negative num-
-       ber.  This is set as the "user data" that is  passed  to  the  matching
-       function,  and  passed  back  when the callout function is invoked. Any
-       value other than zero is used as  a  return  from  pcre2test's  callout
-       function.
-
-       Inserting callouts can be helpful when using pcre2test to check compli-
-       cated regular expressions. For further information about callouts,  see
-       the pcre2callout documentation.
-
-       The  output for callouts with numerical arguments and those with string
-       arguments is slightly different.
+       tion is called during matching unless callout_none is  specified.  This
+       works with both matching functions, and with JIT, though there are some
+       differences in behaviour. The output for callouts with numerical  argu-
+       ments and those with string arguments is slightly different.
 
    Callouts with numerical arguments
 
        By default, the callout function displays the callout number, the start
-       and  current positions in the subject text at the callout time, and the
+       and current positions in the subject text at the callout time, and  the
        next pattern item to be tested. For example:
 
          --->pqrabcdef
            0    ^  ^     \d
 
-       This output indicates that  callout  number  0  occurred  for  a  match
-       attempt  starting  at  the fourth character of the subject string, when
-       the pointer was at the seventh character, and  when  the  next  pattern
-       item  was  \d.  Just  one circumflex is output if the start and current
-       positions are the same, or if the current position precedes  the  start
+       This  output  indicates  that  callout  number  0  occurred for a match
+       attempt starting at the fourth character of the  subject  string,  when
+       the  pointer  was  at  the seventh character, and when the next pattern
+       item was \d. Just one circumflex is output if  the  start  and  current
+       positions  are  the same, or if the current position precedes the start
        position, which can happen if the callout is in a lookbehind assertion.
 
        Callouts numbered 255 are assumed to be automatic callouts, inserted as
        a result of the auto_callout pattern modifier. In this case, instead of
-       showing  the  callout  number, the offset in the pattern, preceded by a
+       showing the callout number, the offset in the pattern,  preceded  by  a
        plus, is output. For example:
 
            re> /\d?[A-E]\*/auto_callout
@@ -1598,7 +1570,7 @@ CALLOUTS
           0: E*
 
        If a pattern contains (*MARK) items, an additional line is output when-
-       ever  a  change  of  latest mark is passed to the callout function. For
+       ever a change of latest mark is passed to  the  callout  function.  For
        example:
 
            re> /a(*MARK:X)bc/auto_callout
@@ -1612,17 +1584,17 @@ CALLOUTS
          +12 ^  ^
           0: abc
 
-       The mark changes between matching "a" and "b", but stays the  same  for
-       the  rest  of  the match, so nothing more is output. If, as a result of
-       backtracking, the mark reverts to being unset, the  text  "<unset>"  is
+       The  mark  changes between matching "a" and "b", but stays the same for
+       the rest of the match, so nothing more is output. If, as  a  result  of
+       backtracking,  the  mark  reverts to being unset, the text "<unset>" is
        output.
 
    Callouts with string arguments
 
        The output for a callout with a string argument is similar, except that
-       instead of outputting a callout number before the position  indicators,
-       the  callout  string  and  its  offset in the pattern string are output
-       before the reflection of the subject string, and the subject string  is
+       instead  of outputting a callout number before the position indicators,
+       the callout string and its offset in  the  pattern  string  are  output
+       before  the reflection of the subject string, and the subject string is
        reflected for each callout. For example:
 
            re> /^ab(?C'first')cd(?C"second")ef/
@@ -1634,6 +1606,100 @@ CALLOUTS
          --->abcdefg
              ^   ^       e
           0: abcdef
+
+
+   Callout modifiers
+
+       The callout function in pcre2test returns zero (carry on  matching)  by
+       default,  but  you can use a callout_fail modifier in a subject line to
+       change this and other parameters of the callout (see below).
+
+       If the callout_capture modifier is set, the current captured groups are
+       output when a callout occurs. This is useful only for non-DFA matching,
+       as pcre2_dfa_match() does not support capturing,  so  no  captures  are
+       ever shown.
+
+       The normal callout output, showing the callout number or pattern offset
+       (as described above) is suppressed if the callout_no_where modifier  is
+       set.
+
+       When  using  the  interpretive  matching function pcre2_match() without
+       JIT, setting the callout_extra modifier causes additional  output  from
+       pcre2test's  callout function to be generated. For the first callout in
+       a match attempt at a new starting position in the subject,  "New  match
+       attempt"  is output. If there has been a backtrack since the last call-
+       out (or start of matching if this is the first callout), "Backtrack" is
+       output,  followed  by  "No other matching paths" if the backtrack ended
+       the previous match attempt. For example:
+
+          re> /(a+)b/auto_callout,no_start_optimize,no_auto_possess
+         data> aac\=callout_extra
+         New match attempt
+         --->aac
+          +0 ^       (
+          +1 ^       a+
+          +3 ^ ^     )
+          +4 ^ ^     b
+         Backtrack
+         --->aac
+          +3 ^^      )
+          +4 ^^      b
+         Backtrack
+         No other matching paths
+         New match attempt
+         --->aac
+          +0  ^      (
+          +1  ^      a+
+          +3  ^^     )
+          +4  ^^     b
+         Backtrack
+         No other matching paths
+         New match attempt
+         --->aac
+          +0   ^     (
+          +1   ^     a+
+         Backtrack
+         No other matching paths
+         New match attempt
+         --->aac
+          +0    ^    (
+          +1    ^    a+
+         No match
+
+       Notice that various optimizations must be turned off if  you  want  all
+       possible  matching  paths  to  be  scanned. If no_start_optimize is not
+       used, there is an immediate "no match", without any  callouts,  because
+       the  starting  optimization  fails to find "b" in the subject, which it
+       knows must be present for any match. If no_auto_possess  is  not  used,
+       the  "a+"  item is turned into "a++", which reduces the number of back-
+       tracks.
+
+       The callout_extra modifier has no effect if used with the DFA  matching
+       function, or with JIT.
+
+   Return values from callouts
+
+       The  default  return  from  the  callout function is zero, which allows
+       matching to continue. The callout_fail modifier can be given one or two
+       numbers. If there is only one number, 1 is returned instead of 0 (caus-
+       ing matching to backtrack) when a callout of that number is reached. If
+       two  numbers  (<n>:<m>)  are  given,  1 is returned when callout <n> is
+       reached and there have been at least <m>  callouts.  The  callout_error
+       modifier is similar, except that PCRE2_ERROR_CALLOUT is returned, caus-
+       ing the entire matching process to be aborted. If both these  modifiers
+       are  set  for  the same callout number, callout_error takes precedence.
+       Note that callouts with string arguments are always  given  the  number
+       zero.
+
+       The  callout_data  modifier can be given an unsigned or a negative num-
+       ber.  This is set as the "user data" that is  passed  to  the  matching
+       function,  and  passed  back  when the callout function is invoked. Any
+       value other than zero is used as  a  return  from  pcre2test's  callout
+       function.
+
+       Inserting callouts can be helpful when using pcre2test to check compli-
+       cated regular expressions. For further information about callouts,  see
+       the pcre2callout documentation.
 
 
 NON-PRINTING CHARACTERS
@@ -1733,5 +1799,5 @@ AUTHOR
 
 REVISION
 
-       Last updated: 17 October 2017
+       Last updated: 21 December 2017
        Copyright (c) 1997-2017 University of Cambridge.
