@@ -95,6 +95,11 @@ not by JIT or pcre2_dfa_match(). Their settings are shown in pcre2test callouts
 if the callout_extra subject modifier is set. These bits are provided to help
 with tracking how a backtracking match is proceeding.
 
+23. Updated the pcre2demo.c demonstration program, which was missing the extra
+code for -g that handles the case when \K in an assertion causes the match to
+end at the original start point. Also arranged for it to detect when \K causes
+the end of a match to be before its start.
+
 
 Version 10.30 14-August-2017
 ----------------------------

@@ -211,6 +211,21 @@ pcre2_match_data_create_from_pattern() above. */
 if (rc == 0)
   printf("ovector was not big enough for all the captured substrings\n");
 
+/* We must guard against patterns such as /(?=.\K)/ that use \K in an assertion
+to set the start of a match later than its end. In this demonstration program,
+we just detect this case and give up. */
+
+if (ovector[0] > ovector[1])
+  {
+  printf("\\K was used in an assertion to set the match start after its end.\n"
+    "From end to start the match was: %.*s\n", (int)(ovector[0] - ovector[1]),
+      (char *)(subject + ovector[1]));
+  printf("Run abandoned\n");
+  pcre2_match_data_free(match_data);
+  pcre2_code_free(re);
+  return 1;
+  }
+
 /* Show substrings stored in the output vector by number. Obviously, in a real
 application you might want to do things other than print them. */
 
@@ -338,6 +353,29 @@ for (;;)
     options = PCRE2_NOTEMPTY_ATSTART | PCRE2_ANCHORED;
     }
 
+  /* If the previous match was not an empty string, there is one tricky case to
+  consider. If a pattern contains \K within a lookbehind assertion at the
+  start, the end of the matched string can be at the offset where the match
+  started. Without special action, this leads to a loop that keeps on matching
+  the same substring. We must detect this case and arrange to move the start on
+  by one character. The pcre2_get_startchar() function returns the starting
+  offset that was passed to pcre2_match(). */
+
+  else
+    {
+    PCRE2_SIZE startchar = pcre2_get_startchar(match_data);
+    if (start_offset <= startchar)
+      {
+      if (startchar >= subject_length) break;   /* Reached end of subject.   */
+      start_offset = startchar + 1;             /* Advance by one character. */
+      if (utf8)                                 /* If UTF-8, it may be more  */
+        {                                       /*   than one code unit.     */
+        for (; start_offset < subject_length; start_offset++)
+          if ((subject[start_offset] & 0xc0) != 0x80) break;
+        }
+      }
+    }
+
   /* Run the next matching operation */
 
   rc = pcre2_match(
@@ -401,6 +439,21 @@ for (;;)
 
   if (rc == 0)
     printf("ovector was not big enough for all the captured substrings\n");
+
+  /* We must guard against patterns such as /(?=.\K)/ that use \K in an
+  assertion to set the start of a match later than its end. In this
+  demonstration program, we just detect this case and give up. */
+
+  if (ovector[0] > ovector[1])
+    {
+    printf("\\K was used in an assertion to set the match start after its end.\n"
+      "From end to start the match was: %.*s\n", (int)(ovector[0] - ovector[1]),
+        (char *)(subject + ovector[1]));
+    printf("Run abandoned\n");
+    pcre2_match_data_free(match_data);
+    pcre2_code_free(re);
+    return 1;
+    }
 
   /* As before, show substrings stored in the output vector by number, and then
   also any named substrings. */
