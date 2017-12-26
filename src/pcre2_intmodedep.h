@@ -888,6 +888,7 @@ typedef struct dfa_match_block {
   uint32_t nllen;                 /* Newline string length */
   PCRE2_UCHAR nl[4];              /* Newline string when fixed */
   uint16_t bsr_convention;        /* \R interpretation */
+  pcre2_callout_block *cb;        /* Points to a callout block */ 
   void *callout_data;             /* To pass back to callouts */
   int (*callout)(pcre2_callout_block *,void *);  /* Callout function or NULL */
   dfa_recursion_info *recursive;  /* Linked list of recursion data */
