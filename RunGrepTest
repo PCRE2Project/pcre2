@@ -630,6 +630,17 @@ echo "RC=$?" >>testtrygrep
 (cd $srcdir; $valgrind $vjs $pcre2grep -Mn -A2 'start[\s]+end' testdata/grepinputM) >>testtrygrep
 echo "RC=$?" >>testtrygrep
 
+echo "---------------------------- Test 125 -----------------------------" >>testtrygrep
+printf "abcd\n" >testNinputgrep
+$valgrind $vjs $pcre2grep --colour=always '(?<=\K.)' testNinputgrep >>testtrygrep
+echo "RC=$?" >>testtrygrep
+$valgrind $vjs $pcre2grep --colour=always '(?=.\K)' testNinputgrep >>testtrygrep
+echo "RC=$?" >>testtrygrep
+$valgrind $vjs $pcre2grep --colour=always '(?<=\K[ac])' testNinputgrep >>testtrygrep
+echo "RC=$?" >>testtrygrep
+$valgrind $vjs $pcre2grep --colour=always '(?=[ac]\K)' testNinputgrep >>testtrygrep
+echo "RC=$?" >>testtrygrep
+
 
 # Now compare the results.
 

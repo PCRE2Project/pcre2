@@ -1607,7 +1607,7 @@ Returns:            nothing
 */
 
 static void
-do_after_lines(unsigned long int lastmatchnumber, char *lastmatchrestart, 
+do_after_lines(unsigned long int lastmatchnumber, char *lastmatchrestart,
   char *endptr, const char *printname)
 {
 if (after_context > 0 && lastmatchnumber > 0)
@@ -2764,11 +2764,38 @@ while (ptr < endptr)
       if ((multiline || do_colour) && !invert)
         {
         int plength;
+        PCRE2_SIZE endprevious;
+
+        /* The use of \K may make the end offset earlier than the start. In
+        this situation, swap them round. */
+
+        if (offsets[0] > offsets[1])
+          {
+          PCRE2_SIZE temp = offsets[0];
+          offsets[0] = offsets[1];
+          offsets[1] = temp;
+          }
+
         FWRITE_IGNORE(ptr, 1, offsets[0], stdout);
         print_match(ptr + offsets[0], offsets[1] - offsets[0]);
+
         for (;;)
           {
-          startoffset = offsets[1];  /* Advance after previous match. */
+          PCRE2_SIZE oldstartoffset = pcre2_get_startchar(match_data);
+
+          endprevious = offsets[1];
+          startoffset = endprevious;  /* Advance after previous match. */
+
+          /* If the pattern contained a lookbehind that included \K, it is
+          possible that the end of the match might be at or before the actual
+          starting offset we have just used. In this case, start one character
+          further on. */
+
+          if (startoffset <= oldstartoffset)
+            {
+            startoffset = oldstartoffset + 1;
+            if (utf) while ((ptr[startoffset] & 0xc0) == 0x80) startoffset++;
+            }
 
           /* If the current match ended past the end of the line (only possible
           in multiline mode), we must move on to the line in which it did end
@@ -2782,6 +2809,7 @@ while (ptr < endptr)
             filepos += (int)(linelength + endlinelength);
             linenumber++;
             startoffset -= (int)(linelength + endlinelength);
+            endprevious -= (int)(linelength + endlinelength);
             t = end_of_line(ptr, endptr, &endlinelength);
             linelength = t - ptr - endlinelength;
             length = (size_t)(endptr - ptr);
@@ -2797,7 +2825,18 @@ while (ptr < endptr)
           loop for any that may follow. */
 
           if (!match_patterns(ptr, length, options, startoffset, &mrc)) break;
-          FWRITE_IGNORE(ptr + startoffset, 1, offsets[0] - startoffset, stdout);
+
+          /* The use of \K may make the end offset earlier than the start. In
+          this situation, swap them round. */
+
+          if (offsets[0] > offsets[1])
+            {
+            PCRE2_SIZE temp = offsets[0];
+            offsets[0] = offsets[1];
+            offsets[1] = temp;
+            }
+
+          FWRITE_IGNORE(ptr + endprevious, 1, offsets[0] - endprevious, stdout);
           print_match(ptr + offsets[0], offsets[1] - offsets[0]);
           }
 
@@ -2805,8 +2844,8 @@ while (ptr < endptr)
         and its line-ending characters (if they matched the pattern), so there
         may be no more to print. */
 
-        plength = (int)((linelength + endlinelength) - startoffset);
-        if (plength > 0) FWRITE_IGNORE(ptr + startoffset, 1, plength, stdout);
+        plength = (int)((linelength + endlinelength) - endprevious);
+        if (plength > 0) FWRITE_IGNORE(ptr + endprevious, 1, plength, stdout);
         }
 
       /* Not colouring or multiline; no need to search for further matches. */

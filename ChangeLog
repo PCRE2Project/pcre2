@@ -100,6 +100,11 @@ code for -g that handles the case when \K in an assertion causes the match to
 end at the original start point. Also arranged for it to detect when \K causes
 the end of a match to be before its start.
 
+24. Similar to 23 above, strange things (including loops) could happen in 
+pcre2grep when \K was used in an assertion when --colour was used or in 
+multiline mode. The "end at original start point" bug is fixed, and if the end 
+point is found to be before the start point, they are swapped.
+
 
 Version 10.30 14-August-2017
 ----------------------------
