@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "16 December 2017" "PCRE2 10.31"
+.TH PCRE2API 3 "31 December 2017" "PCRE2 10.31"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -875,10 +875,10 @@ PCRE2_USE_OFFSET_LIMIT is not set, an error is generated.
 .P
 The offset limit facility can be used to track progress when searching large
 subject strings or to limit the extent of global substitutions. See also the
-PCRE2_FIRSTLINE option, which requires a match to start within the first line
-of the subject. If this is set with an offset limit, a match must occur in the
-first line and also within the offset limit. In other words, whichever limit
-comes first is used.
+PCRE2_FIRSTLINE option, which requires a match to start before or at the first
+newline that follows the start of matching in the subject. If this is set with
+an offset limit, a match must occur in the first line and also within the
+offset limit. In other words, whichever limit comes first is used.
 .sp
 .nf
 .B int pcre2_set_heap_limit(pcre2_match_context *\fImcontext\fP,
@@ -1446,11 +1446,16 @@ changed within a pattern by a (?xx) option setting.
   PCRE2_FIRSTLINE
 .sp
 If this option is set, the start of an unanchored pattern match must be before
-or at the first newline in the subject string, though the matched text may
-continue over the newline. See also PCRE2_USE_OFFSET_LIMIT, which provides a
-more general limiting facility. If PCRE2_FIRSTLINE is set with an offset limit,
-a match must occur in the first line and also within the offset limit. In other
-words, whichever limit comes first is used.
+or at the first newline in the subject string following the start of matching,
+though the matched text may continue over the newline. If \fIstartoffset\fP is 
+non-zero, the limiting newline is not necessarily the first newline in the 
+subject. For example, if the subject string is "abc\enxyz" (where \en
+represents a single-character newline) a pattern match for "yz" succeeds with
+PCRE2_FIRSTLINE if \fIstartoffset\fP is greater than 3. See also
+PCRE2_USE_OFFSET_LIMIT, which provides a more general limiting facility. If
+PCRE2_FIRSTLINE is set with an offset limit, a match must occur in the first
+line and also within the offset limit. In other words, whichever limit comes
+first is used.
 .sp
   PCRE2_LITERAL
 .sp
@@ -3600,6 +3605,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 16 December 2017
+Last updated: 31 December 2017
 Copyright (c) 1997-2017 University of Cambridge.
 .fi
