@@ -16453,6 +16453,11 @@ No match
     xyz\r\nabc
 No match
 
+/[abc]/firstline
+\= Expect no match
+    \na
+No match
+    
 # End of testinput2
 Error -65: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

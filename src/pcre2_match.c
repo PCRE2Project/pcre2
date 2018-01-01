@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-          New API code Copyright (c) 2015-2017 University of Cambridge
+          New API code Copyright (c) 2015-2018 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -6363,15 +6363,11 @@ for(;;)
 
   if ((re->overall_options & PCRE2_NO_START_OPTIMIZE) == 0)
     {
-    PCRE2_SPTR save_end_subject = end_subject;
-
     /* If firstline is TRUE, the start of the match is constrained to the first
     line of a multiline string. That is, the match must be before or at the
     first newline following the start of matching. Temporarily adjust
-    end_subject so that we stop the optimization scans for a first code unit
-    immediately after the first character of a newline (the first code unit can
-    legitimately be a newline). If the match fails at the newline, later code
-    breaks this loop. */
+    end_subject so that we stop the scans for a first code unit at a newline.
+    If the match fails at the newline, later code breaks the loop. */
 
     if (firstline)
       {
@@ -6388,13 +6384,6 @@ for(;;)
       else
 #endif
       while (t < end_subject && !IS_NEWLINE(t)) t++;
-
-      /* Note that we only need to advance by one code unit if we found a
-      newline. If the newline is CRLF, a first code unit of LF should not
-      match, because it is not at or before the newline. Similarly, only the
-      first code unit of a Unicode newline might be relevant. */
-
-      if (t < end_subject) t++;
       end_subject = t;
       }
 
@@ -6470,13 +6459,17 @@ for(;;)
 #endif
           }
 
-        /* If we can't find the required code unit, break the bumpalong loop,
-        to force a match failure, except when doing partial matching, when we
-        let the next cycle run at the end of the subject. To see why, consider
-        the pattern /(?<=abc)def/, which partially matches "abc", even though
-        the string does not contain the starting character "d". */
+        /* If we can't find the required code unit, having reached the true end
+        of the subject, break the bumpalong loop, to force a match failure,
+        except when doing partial matching, when we let the next cycle run at
+        the end of the subject. To see why, consider the pattern /(?<=abc)def/,
+        which partially matches "abc", even though the string does not contain
+        the starting character "d". If we have not reached the true end of the
+        subject (PCRE2_FIRSTLINE caused end_subject to be temporarily modified)
+        we also let the cycle run, because the matching string is legitimately
+        allowed to start with the first code unit of a newline. */
 
-        if (!mb->partial && start_match >= end_subject)
+        if (!mb->partial && start_match >= mb->end_subject)
           {
           rc = MATCH_NOMATCH;
           break;
@@ -6538,7 +6531,7 @@ for(;;)
 
     /* Restore fudged end_subject */
 
-    end_subject = save_end_subject;
+    end_subject = mb->end_subject;
 
     /* The following two optimizations must be disabled for partial matching. */
 

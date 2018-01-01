@@ -7766,4 +7766,9 @@ Failed: error -47: match limit exceeded
     xyz\r\nabc
 No match
 
+/[abc]/firstline
+\= Expect no match
+    \na
+No match
+    
 # End of testinput6

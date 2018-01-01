@@ -4942,4 +4942,8 @@
 \= Expect no match
     xyz\r\nabc
 
+/[abc]/firstline
+\= Expect no match
+    \na
+    
 # End of testinput6
