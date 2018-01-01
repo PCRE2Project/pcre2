@@ -351,7 +351,7 @@ because almost all calls are already within a block of UTF-8 only code. */
 
 /* Same as above, but it allows a fully customizable form. */
 #define ACROSSCHAR(condition, eptr, action) \
-  while((condition) && ((eptr) & 0xc0u) == 0x80u) action
+  while((condition) && ((*eptr) & 0xc0u) == 0x80u) action
 
 /* Deposit a character into memory, returning the number of code units. */
 
@@ -457,7 +457,7 @@ code. */
 
 /* Same as above, but it allows a fully customizable form. */
 #define ACROSSCHAR(condition, eptr, action) \
-  if ((condition) && ((eptr) & 0xfc00u) == 0xdc00u) action
+  if ((condition) && ((*eptr) & 0xfc00u) == 0xdc00u) action
 
 /* Deposit a character into memory, returning the number of code units. */
 

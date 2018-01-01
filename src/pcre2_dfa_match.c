@@ -508,7 +508,8 @@ if (*this_start_code == OP_ASSERTBACK || *this_start_code == OP_ASSERTBACK_NOT)
       {
       if (current_subject <= start_subject) break;
       current_subject--;
-      ACROSSCHAR(current_subject > start_subject, *current_subject, current_subject--);
+      ACROSSCHAR(current_subject > start_subject, current_subject, 
+        current_subject--);
       }
     }
   else
@@ -3380,7 +3381,7 @@ for (;;)
         while (t < end_subject && !IS_NEWLINE(t))
           {
           t++;
-          ACROSSCHAR(t < end_subject, *t, t++);
+          ACROSSCHAR(t < end_subject, t, t++);
           }
         }
       else
@@ -3485,8 +3486,7 @@ for (;;)
             while (start_match < end_subject && !WAS_NEWLINE(start_match))
               {
               start_match++;
-              ACROSSCHAR(start_match < end_subject, *start_match,
-                start_match++);
+              ACROSSCHAR(start_match < end_subject, start_match, start_match++);
               }
             }
           else
@@ -3648,8 +3648,7 @@ for (;;)
 #ifdef SUPPORT_UNICODE
   if (utf)
     {
-    ACROSSCHAR(start_match < end_subject, *start_match,
-      start_match++);
+    ACROSSCHAR(start_match < end_subject, start_match, start_match++);
     }
 #endif
   if (start_match > end_subject) break;

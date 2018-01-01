@@ -879,7 +879,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
       }
     Feptr++;
 #ifdef SUPPORT_UNICODE
-    if (utf) ACROSSCHAR(Feptr < mb->end_subject, *Feptr, Feptr++);
+    if (utf) ACROSSCHAR(Feptr < mb->end_subject, Feptr, Feptr++);
 #endif
     Fecode++;
     break;
@@ -2776,7 +2776,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
             if (mb->partial > 1) return PCRE2_ERROR_PARTIAL;
             }
           Feptr++;
-          ACROSSCHAR(Feptr < mb->end_subject, *Feptr, Feptr++);
+          ACROSSCHAR(Feptr < mb->end_subject, Feptr, Feptr++);
           }
         break;
 
@@ -2789,7 +2789,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
             RRETURN(MATCH_NOMATCH);
             }
           Feptr++;
-          ACROSSCHAR(Feptr < mb->end_subject, *Feptr, Feptr++);
+          ACROSSCHAR(Feptr < mb->end_subject, Feptr, Feptr++);
           }
         break;
 
@@ -2943,7 +2943,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
           if (cc < 128 && (mb->ctypes[cc] & ctype_space) != 0)
             RRETURN(MATCH_NOMATCH);
           Feptr++;
-          ACROSSCHAR(Feptr < mb->end_subject, *Feptr, Feptr++);
+          ACROSSCHAR(Feptr < mb->end_subject, Feptr, Feptr++);
           }
         break;
 
@@ -2977,7 +2977,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
           if (cc < 128 && (mb->ctypes[cc] & ctype_word) != 0)
             RRETURN(MATCH_NOMATCH);
           Feptr++;
-          ACROSSCHAR(Feptr < mb->end_subject, *Feptr, Feptr++);
+          ACROSSCHAR(Feptr < mb->end_subject, Feptr, Feptr++);
           }
         break;
 
@@ -4110,7 +4110,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
               if (mb->partial > 1) return PCRE2_ERROR_PARTIAL;
               }
             Feptr++;
-            ACROSSCHAR(Feptr < mb->end_subject, *Feptr, Feptr++);
+            ACROSSCHAR(Feptr < mb->end_subject, Feptr, Feptr++);
             }
           break;
 
@@ -4125,7 +4125,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
                 break;
                 }
               Feptr++;
-              ACROSSCHAR(Feptr < mb->end_subject, *Feptr, Feptr++);
+              ACROSSCHAR(Feptr < mb->end_subject, Feptr, Feptr++);
               }
             }
           else
@@ -6378,7 +6378,7 @@ for(;;)
         while (t < end_subject && !IS_NEWLINE(t))
           {
           t++;
-          ACROSSCHAR(t < end_subject, *t, t++);
+          ACROSSCHAR(t < end_subject, t, t++);
           }
         }
       else
@@ -6489,8 +6489,7 @@ for(;;)
             while (start_match < end_subject && !WAS_NEWLINE(start_match))
               {
               start_match++;
-              ACROSSCHAR(start_match < end_subject, *start_match,
-                start_match++);
+              ACROSSCHAR(start_match < end_subject, start_match, start_match++);
               }
             }
           else
@@ -6709,7 +6708,7 @@ for(;;)
     new_start_match = start_match + 1;
 #ifdef SUPPORT_UNICODE
     if (utf)
-      ACROSSCHAR(new_start_match < end_subject, *new_start_match,
+      ACROSSCHAR(new_start_match < end_subject, new_start_match,
         new_start_match++);
 #endif
     break;
