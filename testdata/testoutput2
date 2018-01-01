@@ -16440,6 +16440,19 @@ Callout (15): 'XXX'
      ^^     b
 No match
 
+/\n/firstline
+    xyz\nabc
+ 0: \x0a
+
+/\nabc/firstline
+    xyz\nabc
+ 0: \x0aabc
+
+/\x{0a}abc/firstline,newline=crlf
+\= Expect no match
+    xyz\r\nabc
+No match
+
 # End of testinput2
 Error -65: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

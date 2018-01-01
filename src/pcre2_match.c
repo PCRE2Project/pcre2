@@ -6367,9 +6367,11 @@ for(;;)
 
     /* If firstline is TRUE, the start of the match is constrained to the first
     line of a multiline string. That is, the match must be before or at the
-    first newline. Implement this by temporarily adjusting end_subject so that
-    we stop the optimization scans for a first code unit at a newline. If the
-    match fails at the newline, later code breaks this loop. */
+    first newline following the start of matching. Temporarily adjust
+    end_subject so that we stop the optimization scans for a first code unit
+    immediately after the first character of a newline (the first code unit can
+    legitimately be a newline). If the match fails at the newline, later code
+    breaks this loop. */
 
     if (firstline)
       {
@@ -6377,7 +6379,7 @@ for(;;)
 #ifdef SUPPORT_UNICODE
       if (utf)
         {
-        while (t < mb->end_subject && !IS_NEWLINE(t))
+        while (t < end_subject && !IS_NEWLINE(t))
           {
           t++;
           ACROSSCHAR(t < end_subject, *t, t++);
@@ -6385,7 +6387,14 @@ for(;;)
         }
       else
 #endif
-      while (t < mb->end_subject && !IS_NEWLINE(t)) t++;
+      while (t < end_subject && !IS_NEWLINE(t)) t++;
+
+      /* Note that we only need to advance by one code unit if we found a
+      newline. If the newline is CRLF, a first code unit of LF should not
+      match, because it is not at or before the newline. Similarly, only the
+      first code unit of a Unicode newline might be relevant. */
+
+      if (t < end_subject) t++;
       end_subject = t;
       }
 
@@ -6648,7 +6657,7 @@ for(;;)
 
   cb.start_match = (PCRE2_SIZE)(start_match - subject);
   cb.callout_flags |= PCRE2_CALLOUT_STARTMATCH;
-    
+
   mb->start_used_ptr = start_match;
   mb->last_used_ptr = start_match;
   mb->match_call_count = 0;

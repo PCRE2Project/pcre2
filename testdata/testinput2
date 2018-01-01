@@ -5395,4 +5395,14 @@ a)"xI
 \= Expect no match
     aac\=callout_extra 
 
+/\n/firstline
+    xyz\nabc
+
+/\nabc/firstline
+    xyz\nabc
+
+/\x{0a}abc/firstline,newline=crlf
+\= Expect no match
+    xyz\r\nabc
+
 # End of testinput2
