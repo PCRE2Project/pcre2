@@ -3522,6 +3522,12 @@ for (;;)
           if ((start_bits[c/8] & (1 << (c&7))) != 0) break;
           start_match++;
           }
+
+        /* See comment above in first_cu checking about the next line. */
+
+        if ((mb->moptions & (PCRE2_PARTIAL_HARD|PCRE2_PARTIAL_SOFT)) == 0 &&
+            start_match >= mb->end_subject)
+          break;
         }
       }  /* End of first code unit handling */
 

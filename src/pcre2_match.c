@@ -6526,6 +6526,14 @@ for(;;)
           if ((start_bits[c/8] & (1 << (c&7))) != 0) break;
           start_match++;
           }
+
+        /* See comment above in first_cu checking about the next few lines. */
+
+        if (!mb->partial && start_match >= mb->end_subject)
+          {
+          rc = MATCH_NOMATCH;
+          break;
+          }
         }
       }   /* End first code unit handling */
 
