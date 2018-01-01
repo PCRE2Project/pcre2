@@ -83,7 +83,7 @@ instead of "RRETURN" saves unwinding the backtracks in these cases (only one
 didn't).
 
 20. Allocate a single callout block on the stack at the start of pcre2_match()
-and set its never-changing fields once only.
+and set its never-changing fields once only. Do the same for pcre2_dfa_match().
 
 21. Save the extra compile options (set in the compile context) with the
 compiled pattern (they were not previously saved), add PCRE2_INFO_EXTRAOPTIONS
@@ -108,8 +108,16 @@ point is found to be before the start point, they are swapped.
 25. When PCRE2_FIRSTLINE without PCRE2_NO_START_OPTIMIZE was used in non-JIT
 matching (both pcre2_match() and pcre2_dfa_match()) and the matched string
 started with the first code unit of a newline sequence, matching failed because
-the search for the first code unit stopped before rather than after the first
-code unit of a newline in the subject string.
+it was not tried at the newline.
+
+26. Code for giving up a non-partial match after failing to find a starting
+code unit anywhere in the subject was missing when searching for one of a
+number of code units (the bitmap case) in both pcre2_match() and
+pcre2_dfa_match(). This was a missing optimization rather than a bug.
+
+27. Tidied up the ACROSSCHAR macro to be like FORWARDCHAR and BACKCHAR, using a
+pointer argument rather than a code unit value. This should not have affected
+the generated code.
 
 
 Version 10.30 14-August-2017
