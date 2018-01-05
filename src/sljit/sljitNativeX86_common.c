@@ -39,7 +39,7 @@ SLJIT_API_FUNC_ATTRIBUTE const char* sljit_get_platform_name(void)
      1 - ECX
      2 - EDX
      3 - EBX
-     4 - none
+     4 - ESP
      5 - EBP
      6 - ESI
      7 - EDI
@@ -51,7 +51,7 @@ SLJIT_API_FUNC_ATTRIBUTE const char* sljit_get_platform_name(void)
      1 - RCX
      2 - RDX
      3 - RBX
-     4 - none
+     4 - RSP
      5 - RBP
      6 - RSI
      7 - RDI
@@ -477,11 +477,7 @@ static sljit_u8* generate_near_jump_code(struct sljit_jump *jump, sljit_u8 *code
 		code_ptr += sizeof(sljit_s8);
 	} else {
 		jump->flags |= PATCH_MW;
-#if (defined SLJIT_CONFIG_X86_32 && SLJIT_CONFIG_X86_32)
-		code_ptr += sizeof(sljit_sw);
-#else
 		code_ptr += sizeof(sljit_s32);
-#endif
 	}
 
 	return code_ptr;
@@ -1135,7 +1131,7 @@ static sljit_s32 emit_unary(struct sljit_compiler *compiler, sljit_u8 opcode,
 		return SLJIT_SUCCESS;
 	}
 
-	if (dst == SLJIT_UNUSED)
+	if (SLJIT_UNLIKELY(dst == SLJIT_UNUSED))
 		dst = TMP_REG1;
 
 	if (FAST_IS_REG(dst)) {
@@ -1202,12 +1198,6 @@ static sljit_s32 emit_clz(struct sljit_compiler *compiler, sljit_s32 op_flags,
 
 	SLJIT_UNUSED_ARG(op_flags);
 
-	if (SLJIT_UNLIKELY(src & SLJIT_IMM)) {
-		EMIT_MOV(compiler, TMP_REG1, 0, SLJIT_IMM, srcw);
-		src = TMP_REG1;
-		srcw = 0;
-	}
-
 	if (cpu_has_cmov == -1)
 		get_cpu_features();
 
@@ -1262,13 +1252,9 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op1(struct sljit_compiler *compile
 	sljit_s32 dst, sljit_sw dstw,
 	sljit_s32 src, sljit_sw srcw)
 {
-	sljit_s32 update = 0;
 	sljit_s32 op_flags = GET_ALL_FLAGS(op);
 #if (defined SLJIT_CONFIG_X86_32 && SLJIT_CONFIG_X86_32)
 	sljit_s32 dst_is_ereg = 0;
-	sljit_s32 src_is_ereg = 0;
-#else
-#	define src_is_ereg 0
 #endif
 
 	CHECK_ERROR();
@@ -1277,7 +1263,7 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op1(struct sljit_compiler *compile
 	ADJUST_LOCAL_OFFSET(src, srcw);
 
 	CHECK_EXTRA_REGS(dst, dstw, dst_is_ereg = 1);
-	CHECK_EXTRA_REGS(src, srcw, src_is_ereg = 1);
+	CHECK_EXTRA_REGS(src, srcw, (void)0);
 #if (defined SLJIT_CONFIG_X86_64 && SLJIT_CONFIG_X86_64)
 	compiler->mode32 = op_flags & SLJIT_I32_OP;
 #endif
@@ -1290,7 +1276,7 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op1(struct sljit_compiler *compile
 
 	op = GET_OPCODE(op);
 
-	if (op >= SLJIT_MOV && op <= SLJIT_MOVU_P) {
+	if (op >= SLJIT_MOV && op <= SLJIT_MOV_P) {
 #if (defined SLJIT_CONFIG_X86_64 && SLJIT_CONFIG_X86_64)
 		compiler->mode32 = 0;
 #endif
@@ -1305,22 +1291,12 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op1(struct sljit_compiler *compile
 			if (src & SLJIT_MEM) {
 				if (op == SLJIT_MOV_S32)
 					op = SLJIT_MOV_U32;
-				if (op == SLJIT_MOVU_S32)
-					op = SLJIT_MOVU_U32;
 			}
 			else if (src & SLJIT_IMM) {
 				if (op == SLJIT_MOV_U32)
 					op = SLJIT_MOV_S32;
-				if (op == SLJIT_MOVU_U32)
-					op = SLJIT_MOVU_S32;
 			}
 #endif
-		}
-
-		SLJIT_COMPILE_ASSERT(SLJIT_MOV + 8 == SLJIT_MOVU, movu_offset);
-		if (op >= SLJIT_MOVU) {
-			update = 1;
-			op -= 8;
 		}
 
 		if (src & SLJIT_IMM) {
@@ -1394,28 +1370,6 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op1(struct sljit_compiler *compile
 		if (SLJIT_UNLIKELY(dst_is_ereg) && dst == TMP_REG1)
 			return emit_mov(compiler, SLJIT_MEM1(SLJIT_SP), dstw, TMP_REG1, 0);
 #endif
-
-		if (SLJIT_UNLIKELY(update) && (src & SLJIT_MEM) && !src_is_ereg && (src & REG_MASK)) {
-			if ((src & OFFS_REG_MASK) != 0) {
-				FAIL_IF(emit_cum_binary(compiler, BINARY_OPCODE(ADD),
-						(src & REG_MASK), 0, (src & REG_MASK), 0, OFFS_REG(dst), 0));
-			}
-			else if (srcw != 0) {
-				FAIL_IF(emit_cum_binary(compiler, BINARY_OPCODE(ADD),
-						(src & REG_MASK), 0, (src & REG_MASK), 0, SLJIT_IMM, srcw));
-			}
-		}
-
-		if (SLJIT_UNLIKELY(update) && (dst & SLJIT_MEM) && (dst & REG_MASK)) {
-			if ((dst & OFFS_REG_MASK) != 0) {
-				FAIL_IF(emit_cum_binary(compiler, BINARY_OPCODE(ADD),
-						(dst & REG_MASK), 0, (dst & REG_MASK), 0, OFFS_REG(dst), 0));
-			}
-			else if (dstw != 0) {
-				FAIL_IF(emit_cum_binary(compiler, BINARY_OPCODE(ADD),
-						(dst & REG_MASK), 0, (dst & REG_MASK), 0, SLJIT_IMM, dstw));
-			}
-		}
 		return SLJIT_SUCCESS;
 	}
 
@@ -1433,10 +1387,6 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op1(struct sljit_compiler *compile
 	}
 
 	return SLJIT_SUCCESS;
-
-#if (defined SLJIT_CONFIG_X86_64 && SLJIT_CONFIG_X86_64)
-#	undef src_is_ereg
-#endif
 }
 
 #if (defined SLJIT_CONFIG_X86_64 && SLJIT_CONFIG_X86_64)
