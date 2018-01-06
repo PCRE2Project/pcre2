@@ -2051,13 +2051,13 @@
     \x{200d}\x{1F3A4}B             ZWJ Glue_After_ZWJ
     \x{200d}\x{1F469}B             ZWJ E_Base_GAZ  
     \x{1F1E6}\x{1F1E7}B            RegionalIndicator RegionalIndicator 
-    \x{261D}\x{E0100}\x{1F3FB}B\=no_jit    E_Base Extend E_Modifier
-    
+    \x{261D}\x{E0100}\x{1F3FB}B    E_Base Extend E_Modifier
+
 # Regional indicators
 
 /^(\X)(\X)/utf,aftertext
-    \x{1F1E6}\x{1F1E7}\x{1F1E7}B\=no_jit
-    \x{1F1E6}\x{1F1E7}\x{1F1E7}\x{1F1E6}B\=no_jit
+    \x{1F1E6}\x{1F1E7}\x{1F1E7}B
+    \x{1F1E6}\x{1F1E7}\x{1F1E7}\x{1F1E6}B
 
 
 # End of testinput5

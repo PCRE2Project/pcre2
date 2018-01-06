@@ -7207,6 +7207,122 @@ SLJIT_UNREACHABLE();
 return cc;
 }
 
+#ifdef SUPPORT_UNICODE
+
+#if PCRE2_CODE_UNIT_WIDTH != 32
+
+static PCRE2_SPTR SLJIT_FUNC do_extuni_utf(PCRE2_SPTR cc, jit_arguments *args)
+{
+PCRE2_SPTR start_subject = args->begin;
+PCRE2_SPTR end_subject = args->end;
+int lgb, rgb, len, ricount;
+PCRE2_SPTR prevcc, bptr;
+uint32_t c;
+
+prevcc = cc;
+GETCHARINC(c, cc);
+lgb = UCD_GRAPHBREAK(c);
+
+while (cc < end_subject)
+  {
+  len = 1;
+  GETCHARLEN(c, cc, len);
+  rgb = UCD_GRAPHBREAK(c);
+
+  if ((PRIV(ucp_gbtable)[lgb] & (1 << rgb)) == 0) break;
+
+  /* Not breaking between Regional Indicators is allowed only if there
+  are an even number of preceding RIs. */
+
+  if (lgb == ucp_gbRegionalIndicator && rgb == ucp_gbRegionalIndicator)
+    {
+    ricount = 0;
+    bptr = prevcc;
+
+    /* bptr is pointing to the left-hand character */
+    while (bptr > start_subject)
+      {
+      bptr--;
+      BACKCHAR(bptr);
+      GETCHAR(c, bptr);
+
+      if (UCD_GRAPHBREAK(c) != ucp_gbRegionalIndicator) break;
+
+      ricount++;
+      }
+
+    if ((ricount & 1) != 0) break;  /* Grapheme break required */
+    }
+
+  /* If Extend follows E_Base[_GAZ] do not update lgb; this allows
+  any number of Extend before a following E_Modifier. */
+
+  if (rgb != ucp_gbExtend || (lgb != ucp_gbE_Base && lgb != ucp_gbE_Base_GAZ))
+    lgb = rgb;
+
+  prevcc = cc;
+  cc += len;
+  }
+
+return cc;
+}
+
+#endif
+
+static PCRE2_SPTR SLJIT_FUNC do_extuni_no_utf(PCRE2_SPTR cc, jit_arguments *args)
+{
+PCRE2_SPTR start_subject = args->begin;
+PCRE2_SPTR end_subject = args->end;
+int lgb, rgb, ricount;
+PCRE2_SPTR bptr;
+uint32_t c;
+
+GETCHARINC(c, cc);
+lgb = UCD_GRAPHBREAK(c);
+
+while (cc < end_subject)
+  {
+  c = *cc;
+  rgb = UCD_GRAPHBREAK(c);
+
+  if ((PRIV(ucp_gbtable)[lgb] & (1 << rgb)) == 0) break;
+
+  /* Not breaking between Regional Indicators is allowed only if there
+  are an even number of preceding RIs. */
+
+  if (lgb == ucp_gbRegionalIndicator && rgb == ucp_gbRegionalIndicator)
+    {
+    ricount = 0;
+    bptr = cc - 1;
+
+    /* bptr is pointing to the left-hand character */
+    while (bptr > start_subject)
+      {
+      bptr--;
+      c = *bptr;
+
+      if (UCD_GRAPHBREAK(c) != ucp_gbRegionalIndicator) break;
+
+      ricount++;
+      }
+
+    if ((ricount & 1) != 0) break;  /* Grapheme break required */
+    }
+
+  /* If Extend follows E_Base[_GAZ] do not update lgb; this allows
+  any number of Extend before a following E_Modifier. */
+
+  if (rgb != ucp_gbExtend || (lgb != ucp_gbE_Base && lgb != ucp_gbE_Base_GAZ))
+    lgb = rgb;
+
+  cc++;
+  }
+
+return cc;
+}
+
+#endif
+
 static PCRE2_SPTR compile_char1_matchingpath(compiler_common *common, PCRE2_UCHAR type, PCRE2_SPTR cc, jump_list **backtracks, BOOL check_str_ptr)
 {
 DEFINE_COMPILER;
@@ -7216,7 +7332,6 @@ compare_context context;
 struct sljit_jump *jump[3];
 jump_list *end_list;
 #ifdef SUPPORT_UNICODE
-struct sljit_label *label;
 PCRE2_UCHAR propdata[5];
 #endif /* SUPPORT_UNICODE */
 
@@ -7383,35 +7498,24 @@ switch(type)
   case OP_EXTUNI:
   if (check_str_ptr)
     detect_partial_match(common, backtracks);
-  read_char(common);
-  add_jump(compiler, &common->getucd, JUMP(SLJIT_FAST_CALL));
-  OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, (sljit_sw)PRIV(ucd_records) + SLJIT_OFFSETOF(ucd_record, gbprop));
-  /* Optimize register allocation: use a real register. */
+
+  OP1(SLJIT_MOV, SLJIT_R0, 0, STR_PTR, 0);
   OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), LOCALS0, STACK_TOP, 0);
-  OP1(SLJIT_MOV_U8, STACK_TOP, 0, SLJIT_MEM2(TMP1, TMP2), 3);
+  OP1(SLJIT_MOV, SLJIT_R1, 0, ARGUMENTS, 0);
 
-  label = LABEL();
-  jump[0] = CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0);
-  OP1(SLJIT_MOV, TMP3, 0, STR_PTR, 0);
-  read_char(common);
-  add_jump(compiler, &common->getucd, JUMP(SLJIT_FAST_CALL));
-  OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, (sljit_sw)PRIV(ucd_records) + SLJIT_OFFSETOF(ucd_record, gbprop));
-  OP1(SLJIT_MOV_U8, TMP2, 0, SLJIT_MEM2(TMP1, TMP2), 3);
+#if PCRE2_CODE_UNIT_WIDTH != 32
+  sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_RET(SW) | SLJIT_ARG1(SW) | SLJIT_ARG2(SW), SLJIT_IMM,
+      common->utf ? SLJIT_FUNC_OFFSET(do_extuni_utf) : SLJIT_FUNC_OFFSET(do_extuni_no_utf));
+#else
+  sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_RET(SW) | SLJIT_ARG1(SW) | SLJIT_ARG2(SW), SLJIT_IMM, SLJIT_FUNC_OFFSET(do_extuni_no_utf));
+#endif
 
-  OP2(SLJIT_SHL, STACK_TOP, 0, STACK_TOP, 0, SLJIT_IMM, 2);
-  OP1(SLJIT_MOV_U32, TMP1, 0, SLJIT_MEM1(STACK_TOP), (sljit_sw)PRIV(ucp_gbtable));
-  OP1(SLJIT_MOV, STACK_TOP, 0, TMP2, 0);
-  OP2(SLJIT_SHL, TMP2, 0, SLJIT_IMM, 1, TMP2, 0);
-  OP2(SLJIT_AND | SLJIT_SET_Z, SLJIT_UNUSED, 0, TMP1, 0, TMP2, 0);
-  JUMPTO(SLJIT_NOT_ZERO, label);
-
-  OP1(SLJIT_MOV, STR_PTR, 0, TMP3, 0);
-  JUMPHERE(jump[0]);
   OP1(SLJIT_MOV, STACK_TOP, 0, SLJIT_MEM1(SLJIT_SP), LOCALS0);
+  OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_RETURN_REG, 0);
 
   if (common->mode == PCRE2_JIT_PARTIAL_HARD)
     {
-    jump[0] = CMP(SLJIT_LESS, STR_PTR, 0, STR_END, 0);
+    jump[0] = CMP(SLJIT_LESS, SLJIT_RETURN_REG, 0, STR_END, 0);
     /* Since we successfully read a char above, partial matching must occure. */
     check_partial(common, TRUE);
     JUMPHERE(jump[0]);
