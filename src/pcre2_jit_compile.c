@@ -545,9 +545,9 @@ typedef struct compare_context {
 #define TMP2          SLJIT_R2
 #define TMP3          SLJIT_R3
 #endif
-#define STR_PTR       SLJIT_S0
-#define STR_END       SLJIT_S1
-#define STACK_TOP     SLJIT_R1
+#define STR_PTR       SLJIT_R1
+#define STR_END       SLJIT_S0
+#define STACK_TOP     SLJIT_S1
 #define STACK_LIMIT   SLJIT_S2
 #define COUNT_MATCH   SLJIT_S3
 #define ARGUMENTS     SLJIT_S4
@@ -2788,7 +2788,7 @@ if (common->control_head_ptr != 0)
   OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), common->control_head_ptr, SLJIT_IMM, 0);
 OP1(SLJIT_MOV, STACK_TOP, 0, SLJIT_MEM1(STACK_TOP), SLJIT_OFFSETOF(jit_arguments, stack));
 OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_SP), common->start_ptr);
-OP1(SLJIT_MOV, STACK_TOP, 0, SLJIT_MEM1(STACK_TOP), SLJIT_OFFSETOF(struct sljit_stack, base));
+OP1(SLJIT_MOV, STACK_TOP, 0, SLJIT_MEM1(STACK_TOP), SLJIT_OFFSETOF(struct sljit_stack, end));
 }
 
 static sljit_sw SLJIT_FUNC do_search_mark(sljit_sw *current, PCRE2_SPTR skip_arg)
@@ -2812,7 +2812,7 @@ while (current != NULL)
   SLJIT_ASSERT(current[0] == 0 || current < (sljit_sw*)current[0]);
   current = (sljit_sw*)current[0];
   }
-return -1;
+return 0;
 }
 
 static SLJIT_INLINE void copy_ovector(compiler_common *common, int topbracket)
@@ -2902,7 +2902,7 @@ static SLJIT_INLINE void return_with_partial_match(compiler_common *common, stru
 DEFINE_COMPILER;
 sljit_s32 mov_opcode;
 
-SLJIT_COMPILE_ASSERT(STR_END == SLJIT_S1, str_end_must_be_saved_reg2);
+SLJIT_COMPILE_ASSERT(STR_END == SLJIT_S0, str_end_must_be_saved_reg0);
 SLJIT_ASSERT(common->start_used_ptr != 0 && common->start_ptr != 0
   && (common->mode == PCRE2_JIT_PARTIAL_SOFT ? common->hit_start != 0 : common->hit_start == 0));
 
@@ -2912,19 +2912,19 @@ OP1(SLJIT_MOV, SLJIT_R2, 0, SLJIT_MEM1(SLJIT_SP),
 OP1(SLJIT_MOV, SLJIT_RETURN_REG, 0, SLJIT_IMM, PCRE2_ERROR_PARTIAL);
 
 /* Store match begin and end. */
-OP1(SLJIT_MOV, SLJIT_S0, 0, SLJIT_MEM1(SLJIT_R1), SLJIT_OFFSETOF(jit_arguments, begin));
+OP1(SLJIT_MOV, SLJIT_S1, 0, SLJIT_MEM1(SLJIT_R1), SLJIT_OFFSETOF(jit_arguments, begin));
 OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_R1), SLJIT_OFFSETOF(jit_arguments, startchar_ptr), SLJIT_R2, 0);
 OP1(SLJIT_MOV, SLJIT_R1, 0, SLJIT_MEM1(SLJIT_R1), SLJIT_OFFSETOF(jit_arguments, match_data));
 
 mov_opcode = (sizeof(PCRE2_SIZE) == 4) ? SLJIT_MOV_U32 : SLJIT_MOV;
 
-OP2(SLJIT_SUB, SLJIT_R2, 0, SLJIT_R2, 0, SLJIT_S0, 0);
+OP2(SLJIT_SUB, SLJIT_R2, 0, SLJIT_R2, 0, SLJIT_S1, 0);
 #if PCRE2_CODE_UNIT_WIDTH == 16 || PCRE2_CODE_UNIT_WIDTH == 32
 OP2(SLJIT_ASHR, SLJIT_R2, 0, SLJIT_R2, 0, SLJIT_IMM, UCHAR_SHIFT);
 #endif
 OP1(mov_opcode, SLJIT_MEM1(SLJIT_R1), SLJIT_OFFSETOF(pcre2_match_data, ovector), SLJIT_R2, 0);
 
-OP2(SLJIT_SUB, STR_END, 0, STR_END, 0, SLJIT_S0, 0);
+OP2(SLJIT_SUB, STR_END, 0, STR_END, 0, SLJIT_S1, 0);
 #if PCRE2_CODE_UNIT_WIDTH == 16 || PCRE2_CODE_UNIT_WIDTH == 32
 OP2(SLJIT_ASHR, STR_END, 0, STR_END, 0, SLJIT_IMM, UCHAR_SHIFT);
 #endif
@@ -7211,7 +7211,7 @@ return cc;
 
 #if PCRE2_CODE_UNIT_WIDTH != 32
 
-static PCRE2_SPTR SLJIT_FUNC do_extuni_utf(PCRE2_SPTR cc, jit_arguments *args)
+static PCRE2_SPTR SLJIT_FUNC do_extuni_utf(jit_arguments *args, PCRE2_SPTR cc)
 {
 PCRE2_SPTR start_subject = args->begin;
 PCRE2_SPTR end_subject = args->end;
@@ -7269,7 +7269,7 @@ return cc;
 
 #endif
 
-static PCRE2_SPTR SLJIT_FUNC do_extuni_no_utf(PCRE2_SPTR cc, jit_arguments *args)
+static PCRE2_SPTR SLJIT_FUNC do_extuni_no_utf(jit_arguments *args, PCRE2_SPTR cc)
 {
 PCRE2_SPTR start_subject = args->begin;
 PCRE2_SPTR end_subject = args->end;
@@ -7499,9 +7499,8 @@ switch(type)
   if (check_str_ptr)
     detect_partial_match(common, backtracks);
 
-  OP1(SLJIT_MOV, SLJIT_R0, 0, STR_PTR, 0);
-  OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), LOCALS0, STACK_TOP, 0);
-  OP1(SLJIT_MOV, SLJIT_R1, 0, ARGUMENTS, 0);
+  SLJIT_ASSERT(TMP1 == SLJIT_R0 && STR_PTR == SLJIT_R1);
+  OP1(SLJIT_MOV, SLJIT_R0, 0, ARGUMENTS, 0);
 
 #if PCRE2_CODE_UNIT_WIDTH != 32
   sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_RET(SW) | SLJIT_ARG1(SW) | SLJIT_ARG2(SW), SLJIT_IMM,
@@ -7510,7 +7509,6 @@ switch(type)
   sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_RET(SW) | SLJIT_ARG1(SW) | SLJIT_ARG2(SW), SLJIT_IMM, SLJIT_FUNC_OFFSET(do_extuni_no_utf));
 #endif
 
-  OP1(SLJIT_MOV, STACK_TOP, 0, SLJIT_MEM1(SLJIT_SP), LOCALS0);
   OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_RETURN_REG, 0);
 
   if (common->mode == PCRE2_JIT_PARTIAL_HARD)
@@ -7848,7 +7846,7 @@ else
 #if defined SUPPORT_UNICODE
 if (common->utf && *cc == OP_REFI)
   {
-  SLJIT_ASSERT(TMP1 == SLJIT_R0 && STACK_TOP == SLJIT_R1);
+  SLJIT_ASSERT(TMP1 == SLJIT_R0 && STR_PTR == SLJIT_R1);
   if (ref)
     OP1(SLJIT_MOV, SLJIT_R2, 0, SLJIT_MEM1(SLJIT_SP), OVECTOR(offset + 1));
   else
@@ -7856,25 +7854,26 @@ if (common->utf && *cc == OP_REFI)
 
   if (withchecks)
     jump = CMP(SLJIT_EQUAL, TMP1, 0, SLJIT_R2, 0);
-
   /* No free saved registers so save data on stack. */
-  OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), LOCALS0, STACK_TOP, 0);
-  OP1(SLJIT_MOV, SLJIT_R1, 0, STR_PTR, 0);
+
   OP1(SLJIT_MOV, SLJIT_R3, 0, STR_END, 0);
   sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_RET(SW) | SLJIT_ARG1(SW) | SLJIT_ARG2(SW) | SLJIT_ARG3(SW) | SLJIT_ARG4(SW), SLJIT_IMM, SLJIT_FUNC_OFFSET(do_utf_caselesscmp));
-  OP1(SLJIT_MOV, STACK_TOP, 0, SLJIT_MEM1(SLJIT_SP), LOCALS0);
+  OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_RETURN_REG, 0);
 
   if (common->mode == PCRE2_JIT_COMPLETE)
     add_jump(compiler, backtracks, CMP(SLJIT_LESS_EQUAL, SLJIT_RETURN_REG, 0, SLJIT_IMM, 1));
   else
     {
-    add_jump(compiler, backtracks, CMP(SLJIT_EQUAL, SLJIT_RETURN_REG, 0, SLJIT_IMM, 0));
-    nopartial = CMP(SLJIT_NOT_EQUAL, SLJIT_RETURN_REG, 0, SLJIT_IMM, 1);
+    OP2(SLJIT_SUB | SLJIT_SET_Z | SLJIT_SET_LESS, SLJIT_UNUSED, 0, SLJIT_RETURN_REG, 0, SLJIT_IMM, 1);
+
+    add_jump(compiler, backtracks, JUMP(SLJIT_LESS));
+
+    nopartial = JUMP(SLJIT_NOT_EQUAL);
+    OP1(SLJIT_MOV, STR_PTR, 0, STR_END, 0);
     check_partial(common, FALSE);
     add_jump(compiler, backtracks, JUMP(SLJIT_JUMP));
     JUMPHERE(nopartial);
     }
-  OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_RETURN_REG, 0);
   }
 else
 #endif /* SUPPORT_UNICODE */
@@ -8298,21 +8297,22 @@ OP1(mov_opcode, SLJIT_MEM1(STACK_TOP), CALLOUT_ARG_OFFSET(callout_string_length)
 OP1(mov_opcode, SLJIT_MEM1(STACK_TOP), CALLOUT_ARG_OFFSET(callout_string_offset), SLJIT_IMM, value3);
 OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), CALLOUT_ARG_OFFSET(mark), (common->mark_ptr != 0) ? TMP2 : SLJIT_IMM, 0);
 
+SLJIT_ASSERT(TMP1 == SLJIT_R0 && STR_PTR == SLJIT_R1);
+
 /* Needed to save important temporary registers. */
-OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), LOCALS0, STACK_TOP, 0);
+OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), LOCALS0, STR_PTR, 0);
 /* SLJIT_R0 = arguments */
 OP1(SLJIT_MOV, SLJIT_R1, 0, STACK_TOP, 0);
 GET_LOCAL_BASE(SLJIT_R2, 0, OVECTOR_START);
 sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_RET(S32) | SLJIT_ARG1(SW) | SLJIT_ARG2(SW) | SLJIT_ARG3(SW), SLJIT_IMM, SLJIT_FUNC_OFFSET(do_callout));
-OP1(SLJIT_MOV_S32, SLJIT_RETURN_REG, 0, SLJIT_RETURN_REG, 0);
-OP1(SLJIT_MOV, STACK_TOP, 0, SLJIT_MEM1(SLJIT_SP), LOCALS0);
+OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(SLJIT_SP), LOCALS0);
 free_stack(common, callout_arg_size);
 
 /* Check return value. */
-OP2(SLJIT_SUB | SLJIT_SET_Z | SLJIT_SET_SIG_GREATER, SLJIT_UNUSED, 0, SLJIT_RETURN_REG, 0, SLJIT_IMM, 0);
-add_jump(compiler, &backtrack->topbacktracks, JUMP(SLJIT_SIG_GREATER));
+OP2(SLJIT_SUB32 | SLJIT_SET_Z | SLJIT_SET_SIG_GREATER, SLJIT_UNUSED, 0, SLJIT_RETURN_REG, 0, SLJIT_IMM, 0);
+add_jump(compiler, &backtrack->topbacktracks, JUMP(SLJIT_SIG_GREATER32));
 if (common->abort_label == NULL)
-  add_jump(compiler, &common->abort, JUMP(SLJIT_NOT_EQUAL) /* SIG_LESS */);
+  add_jump(compiler, &common->abort, JUMP(SLJIT_NOT_EQUAL32) /* SIG_LESS */);
 else
   JUMPTO(SLJIT_NOT_EQUAL /* SIG_LESS */, common->abort_label);
 return cc + callout_length;
@@ -11544,15 +11544,13 @@ if (common->local_quit_available)
 
 if (opcode == OP_SKIP_ARG)
   {
-  SLJIT_ASSERT(common->control_head_ptr != 0);
+  SLJIT_ASSERT(common->control_head_ptr != 0 && TMP1 == SLJIT_R0 && STR_PTR == SLJIT_R1);
   OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_SP), common->control_head_ptr);
-  OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), LOCALS0, STACK_TOP, 0);
-  OP1(SLJIT_MOV, STACK_TOP, 0, SLJIT_IMM, (sljit_sw)(current->cc + 2));
+  OP1(SLJIT_MOV, SLJIT_R1, 0, SLJIT_IMM, (sljit_sw)(current->cc + 2));
   sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_RET(SW) | SLJIT_ARG1(SW) | SLJIT_ARG2(SW), SLJIT_IMM, SLJIT_FUNC_OFFSET(do_search_mark));
-  OP1(SLJIT_MOV, STACK_TOP, 0, SLJIT_MEM1(SLJIT_SP), LOCALS0);
 
-  OP1(SLJIT_MOV, STR_PTR, 0, TMP1, 0);
-  add_jump(compiler, &common->reset_match, CMP(SLJIT_NOT_EQUAL, STR_PTR, 0, SLJIT_IMM, -1));
+  OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_R0, 0);
+  add_jump(compiler, &common->reset_match, CMP(SLJIT_NOT_EQUAL, SLJIT_R0, 0, SLJIT_IMM, 0));
   return;
   }
 
@@ -12235,8 +12233,8 @@ OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(TMP1), SLJIT_OFFSETOF(jit_arguments, str))
 OP1(SLJIT_MOV, STR_END, 0, SLJIT_MEM1(TMP1), SLJIT_OFFSETOF(jit_arguments, end));
 OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(TMP1), SLJIT_OFFSETOF(jit_arguments, stack));
 OP1(SLJIT_MOV_U32, TMP1, 0, SLJIT_MEM1(TMP1), SLJIT_OFFSETOF(jit_arguments, limit_match));
-OP1(SLJIT_MOV, STACK_TOP, 0, SLJIT_MEM1(TMP2), SLJIT_OFFSETOF(struct sljit_stack, base));
-OP1(SLJIT_MOV, STACK_LIMIT, 0, SLJIT_MEM1(TMP2), SLJIT_OFFSETOF(struct sljit_stack, limit));
+OP1(SLJIT_MOV, STACK_TOP, 0, SLJIT_MEM1(TMP2), SLJIT_OFFSETOF(struct sljit_stack, end));
+OP1(SLJIT_MOV, STACK_LIMIT, 0, SLJIT_MEM1(TMP2), SLJIT_OFFSETOF(struct sljit_stack, start));
 OP2(SLJIT_ADD, TMP1, 0, TMP1, 0, SLJIT_IMM, 1);
 OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), LIMIT_MATCH, TMP1, 0);
 
@@ -12465,20 +12463,23 @@ common->quit_label = quit_label;
 set_jumps(common->stackalloc, LABEL());
 /* RETURN_ADDR is not a saved register. */
 sljit_emit_fast_enter(compiler, SLJIT_MEM1(SLJIT_SP), LOCALS0);
-OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), LOCALS1, TMP2, 0);
-OP1(SLJIT_MOV, TMP1, 0, ARGUMENTS, 0);
-OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(TMP1), SLJIT_OFFSETOF(jit_arguments, stack));
-OP1(SLJIT_MOV, SLJIT_MEM1(TMP1), SLJIT_OFFSETOF(struct sljit_stack, top), STACK_TOP, 0);
-OP2(SLJIT_SUB, TMP2, 0, SLJIT_MEM1(TMP1), SLJIT_OFFSETOF(struct sljit_stack, limit), SLJIT_IMM, STACK_GROWTH_RATE);
+
+SLJIT_ASSERT(TMP1 == SLJIT_R0 && STR_PTR == SLJIT_R1);
+
+OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), LOCALS1, STR_PTR, 0);
+OP1(SLJIT_MOV, SLJIT_R0, 0, ARGUMENTS, 0);
+OP2(SLJIT_SUB, SLJIT_R1, 0, STACK_LIMIT, 0, SLJIT_IMM, STACK_GROWTH_RATE);
+OP1(SLJIT_MOV, SLJIT_R0, 0, SLJIT_MEM1(SLJIT_R0), SLJIT_OFFSETOF(jit_arguments, stack));
+OP1(SLJIT_MOV, STACK_LIMIT, 0, TMP2, 0);
 
 sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_RET(SW) | SLJIT_ARG1(SW) | SLJIT_ARG2(SW), SLJIT_IMM, SLJIT_FUNC_OFFSET(sljit_stack_resize));
-jump = CMP(SLJIT_NOT_EQUAL, SLJIT_RETURN_REG, 0, SLJIT_IMM, 0);
-OP1(SLJIT_MOV, TMP1, 0, ARGUMENTS, 0);
-OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(TMP1), SLJIT_OFFSETOF(jit_arguments, stack));
-OP1(SLJIT_MOV, STACK_TOP, 0, SLJIT_MEM1(TMP1), SLJIT_OFFSETOF(struct sljit_stack, top));
-OP1(SLJIT_MOV, STACK_LIMIT, 0, SLJIT_MEM1(TMP1), SLJIT_OFFSETOF(struct sljit_stack, limit));
-OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(SLJIT_SP), LOCALS1);
-sljit_emit_fast_return(compiler, SLJIT_MEM1(SLJIT_SP), LOCALS0);
+
+jump = CMP(SLJIT_EQUAL, SLJIT_RETURN_REG, 0, SLJIT_IMM, 0);
+OP1(SLJIT_MOV, TMP2, 0, STACK_LIMIT, 0);
+OP1(SLJIT_MOV, STACK_LIMIT, 0, SLJIT_RETURN_REG, 0);
+OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_SP), LOCALS0);
+OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(SLJIT_SP), LOCALS1);
+sljit_emit_fast_return(compiler, TMP1, 0);
 
 /* Allocation failed. */
 JUMPHERE(jump);

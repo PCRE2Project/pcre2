@@ -1353,56 +1353,52 @@ SLJIT_API_FUNC_ATTRIBUTE void SLJIT_FUNC sljit_release_lock(void);
 
 #if (defined SLJIT_UTIL_STACK && SLJIT_UTIL_STACK)
 
-/* The sljit_stack is a utility extension of sljit, which provides
-   a top-down stack. The stack top is stored in base and the stack
-   goes down to max_limit, so the memory region for this stack is
-   between max_limit (inclusive) and base (exclusive). However the
-   application can only use the region between limit (inclusive)
-   and base (exclusive). The sljit_stack_resize can be used to
-   extend this region up to max_limit.
+/* The sljit_stack structure and its manipulation functions provides
+   an implementation for a top-down stack. The stack top is stored
+   in the end field of the sljit_stack structure and the stack goes
+   down to the min_start field, so the memory region reserved for
+   this stack is between min_start (inclusive) and end (exclusive)
+   fields. However the application can only use the region between
+   start (inclusive) and end (exclusive) fields. The sljit_stack_resize
+   function can be used to extend this region up to min_start.
 
    This feature uses the "address space reserve" feature of modern
-   operating systems, so instead of allocating a huge memory block
-   applications can allocate a small region and extend it later
-   without moving the memory area. Hence the region is never moved
-   so pointers are valid after resize. */
+   operating systems. Instead of allocating a large memory block
+   applications can allocate a small memory region and extend it
+   later without moving the content of the memory area. Therefore
+   after a successful resize by sljit_stack_resize all pointers into
+   this region are still valid.
 
-/* Note: base and max_limit fields are aligned to PAGE_SIZE bytes
-     (usually 4 Kbyte or more).
-   Note: stack should grow in larger steps, e.g. 4Kbyte, 16Kbyte or more.
-   Note: this structure may not be supported by all operating systems.
-     Some kind of fallback mechanism is suggested when SLJIT_UTIL_STACK
-     is not defined. */
+   Note:
+     this structure may not be supported by all operating systems.
+     end and max_limit fields are aligned to PAGE_SIZE bytes (usually
+         4 Kbyte or more).
+     stack should grow in larger steps, e.g. 4Kbyte, 16Kbyte or more. */
 
 struct sljit_stack {
 	/* User data, anything can be stored here.
-	   Starting with the same value as base. */
+	   Initialized to the same value as the end field. */
 	sljit_u8 *top;
-	/* These members are read only. */
-	sljit_u8 *base;
-	sljit_u8 *limit;
-	sljit_u8 *max_limit;
+/* These members are read only. */
+	/* End address of the stack */
+	sljit_u8 *end;
+	/* Current start address of the stack. */
+	sljit_u8 *start;
+	/* Lowest start address of the stack. */
+	sljit_u8 *min_start;
 };
 
-/* Returns NULL if unsuccessful.
-
-   Note:
-     max_limit field contains the lower bound adress of the stack.
-     limit field contains the current starting address of the stack.
-     base field contains the end address of the stack.
-     top field is initialized to base.
-
+/* Allocates a new stack. Returns NULL if unsuccessful.
    Note: see sljit_create_compiler for the explanation of allocator_data. */
-SLJIT_API_FUNC_ATTRIBUTE struct sljit_stack* SLJIT_FUNC sljit_allocate_stack(sljit_uw limit, sljit_uw max_limit, void *allocator_data);
+SLJIT_API_FUNC_ATTRIBUTE struct sljit_stack* SLJIT_FUNC sljit_allocate_stack(sljit_uw start_size, sljit_uw max_size, void *allocator_data);
 SLJIT_API_FUNC_ATTRIBUTE void SLJIT_FUNC sljit_free_stack(struct sljit_stack *stack, void *allocator_data);
 
-/* Can be used to increase (allocate) or decrease (free) the memory area.
-   Returns with a non-zero value if unsuccessful. If new_limit is greater than
-   max_limit, it will fail. It is very easy to implement a stack data structure,
-   since the growth ratio can be added to the current limit, and sljit_stack_resize
-   will do all the necessary checks. The fields of the stack are not changed if
-   sljit_stack_resize fails. */
-SLJIT_API_FUNC_ATTRIBUTE sljit_sw SLJIT_FUNC sljit_stack_resize(struct sljit_stack *stack, sljit_u8 *new_limit);
+/* Can be used to increase (extend) or decrease (shrink) the stack
+   memory area. Returns with new_start if successful and NULL otherwise.
+   It always fails if new_start is less than min_start or greater or equal
+   than end fields. The fields of the stack are not changed if the returned
+   value is NULL (the current memory content is never lost). */
+SLJIT_API_FUNC_ATTRIBUTE sljit_u8 *SLJIT_FUNC sljit_stack_resize(struct sljit_stack *stack, sljit_u8 *new_start);
 
 #endif /* (defined SLJIT_UTIL_STACK && SLJIT_UTIL_STACK) */
 

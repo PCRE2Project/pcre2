@@ -41,10 +41,10 @@ static sljit_s32 emit_load_imm64(struct sljit_compiler *compiler, sljit_s32 reg,
 
 static sljit_u8* generate_far_jump_code(struct sljit_jump *jump, sljit_u8 *code_ptr, sljit_s32 type)
 {
+	int short_addr = !(jump->flags & SLJIT_REWRITABLE_JUMP) && !(jump->flags & JUMP_LABEL) && (jump->u.target <= 0xffffffff);
+
 	/* The relative jump below specialized for this case. */
 	SLJIT_ASSERT(reg_map[TMP_REG2] >= 8);
-
-	int short_addr = !(jump->flags & SLJIT_REWRITABLE_JUMP) && !(jump->flags & JUMP_LABEL) && (jump->u.target <= 0xffffffff);
 
 	if (type < SLJIT_JUMP) {
 		/* Invert type. */
