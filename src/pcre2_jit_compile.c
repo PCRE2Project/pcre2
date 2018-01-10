@@ -8314,7 +8314,7 @@ add_jump(compiler, &backtrack->topbacktracks, JUMP(SLJIT_SIG_GREATER32));
 if (common->abort_label == NULL)
   add_jump(compiler, &common->abort, JUMP(SLJIT_NOT_EQUAL32) /* SIG_LESS */);
 else
-  JUMPTO(SLJIT_NOT_EQUAL /* SIG_LESS */, common->abort_label);
+  JUMPTO(SLJIT_NOT_EQUAL32 /* SIG_LESS */, common->abort_label);
 return cc + callout_length;
 }
 

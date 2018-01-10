@@ -1099,6 +1099,9 @@
 
 /(?C)a|b/I
 
+/a|(b)(?C)/I
+    b
+
 /x(ab|(bc|(de|(?R))))/I
     xab
     xbc

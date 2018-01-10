@@ -3880,6 +3880,16 @@ Capturing subpattern count = 0
 Starting code units: a b 
 Subject length lower bound = 1
 
+/a|(b)(?C)/I
+Capturing subpattern count = 1
+Starting code units: a b 
+Subject length lower bound = 1
+    b
+--->b
+  0 ^^    End of pattern
+ 0: b
+ 1: b
+
 /x(ab|(bc|(de|(?R))))/I
 Capturing subpattern count = 3
 First code unit = 'x'
