@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-          New API code Copyright (c) 2016-2017 University of Cambridge
+          New API code Copyright (c) 2016-2018 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -40,7 +40,9 @@ POSSIBILITY OF SUCH DAMAGE.
 
 /* This module contains an internal function that is used to match a Unicode
 extended grapheme sequence. It is used by both pcre2_match() and
-pcre2_def_match(). */
+pcre2_def_match(). However, it is called only when Unicode support is being
+compiled. Nevertheless, we provide a dummy function when there is no Unicode
+support, because some compilers do not like functionless source files. */
 
 
 #ifdef HAVE_CONFIG_H
@@ -50,19 +52,38 @@ pcre2_def_match(). */
 
 #include "pcre2_internal.h"
 
+
+/* Dummy function */
+
+#ifndef SUPPORT_UNICODE
+PCRE2_SPTR
+PRIV(extuni)(uint32_t c, PCRE2_SPTR eptr, PCRE2_SPTR start_subject,
+  PCRE2_SPTR end_subject, BOOL utf, int *xcount)
+{
+(void)c;
+(void)eptr;
+(void)start_subject;
+(void)end_subject;
+(void)utf;
+(void)xcount;
+return NULL;
+}
+#else
+
+
 /*************************************************
 *      Match an extended grapheme sequence       *
 *************************************************/
 
-/* 
+/*
 Arguments:
   c              the first character
   eptr           pointer to next character
   start_subject  pointer to start of subject
-  end_subject    pointer to end of subject 
+  end_subject    pointer to end of subject
   utf            TRUE if in UTF mode
   xcount         pointer to count of additional characters,
-                   or NULL if count not needed 
+                   or NULL if count not needed
 
 Returns:         pointer after the end of the sequence
 */
@@ -75,7 +96,7 @@ int lgb = UCD_GRAPHBREAK(c);
 
 while (eptr < end_subject)
   {
-  int rgb; 
+  int rgb;
   int len = 1;
   if (!utf) c = *eptr; else { GETCHARLEN(c, eptr, len); }
   rgb = UCD_GRAPHBREAK(c);
@@ -88,23 +109,19 @@ while (eptr < end_subject)
     {
     int ricount = 0;
     PCRE2_SPTR bptr = eptr - 1;
-#ifdef SUPPORT_UNICODE
     if (utf) BACKCHAR(bptr);
-#endif
 
     /* bptr is pointing to the left-hand character */
 
     while (bptr > start_subject)
       {
       bptr--;
-#ifdef SUPPORT_UNICODE
       if (utf)
         {
         BACKCHAR(bptr);
         GETCHAR(c, bptr);
         }
       else
-#endif
       c = *bptr;
       if (UCD_GRAPHBREAK(c) != ucp_gbRegionalIndicator) break;
       ricount++;
@@ -120,10 +137,12 @@ while (eptr < end_subject)
     lgb = rgb;
 
   eptr += len;
-  if (xcount != NULL) *xcount += 1; 
+  if (xcount != NULL) *xcount += 1;
   }
 
 return eptr;
 }
+
+#endif  /* SUPPORT_UNICODE */
 
 /* End of pcre2_extuni.c */
