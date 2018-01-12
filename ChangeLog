@@ -119,6 +119,12 @@ pcre2_dfa_match(). This was a missing optimization rather than a bug.
 pointer argument rather than a code unit value. This should not have affected
 the generated code.
 
+28. The JIT compiler has been updated.
+
+29. Avoid pointer overflow for unset captures in pcre2_substring_list_get().
+This could not actually cause a crash because it was always used in a memcpy()
+call with zero length.
+
 
 Version 10.30 14-August-2017
 ----------------------------
