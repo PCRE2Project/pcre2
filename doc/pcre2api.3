@@ -859,7 +859,7 @@ The \fIoffset_limit\fP parameter limits how far an unanchored search can
 advance in the subject string. The default value is PCRE2_UNSET. The
 \fBpcre2_match()\fP and \fBpcre2_dfa_match()\fP functions return
 PCRE2_ERROR_NOMATCH if a match with a starting point before or at the given
-offset is not found. The \fBpcre2_substitute()\fP function makes no more 
+offset is not found. The \fBpcre2_substitute()\fP function makes no more
 substitutions.
 .P
 For example, if the pattern /abc/ is matched against "123abc" with an offset
@@ -1447,8 +1447,8 @@ changed within a pattern by a (?xx) option setting.
 .sp
 If this option is set, the start of an unanchored pattern match must be before
 or at the first newline in the subject string following the start of matching,
-though the matched text may continue over the newline. If \fIstartoffset\fP is 
-non-zero, the limiting newline is not necessarily the first newline in the 
+though the matched text may continue over the newline. If \fIstartoffset\fP is
+non-zero, the limiting newline is not necessarily the first newline in the
 subject. For example, if the subject string is "abc\enxyz" (where \en
 represents a single-character newline) a pattern match for "yz" succeeds with
 PCRE2_FIRSTLINE if \fIstartoffset\fP is greater than 3. See also
@@ -1909,13 +1909,13 @@ are as follows:
 .sp
   PCRE2_INFO_ALLOPTIONS
   PCRE2_INFO_ARGOPTIONS
-  PCRE2_INFO_EXTRAOPTIONS 
+  PCRE2_INFO_EXTRAOPTIONS
 .sp
 Return copies of the pattern's options. The third argument should point to a
 \fBuint32_t\fP variable. PCRE2_INFO_ARGOPTIONS returns exactly the options that
 were passed to \fBpcre2_compile()\fP, whereas PCRE2_INFO_ALLOPTIONS returns
 the compile options as modified by any top-level (*XXX) option settings such as
-(*UTF) at the start of the pattern itself. PCRE2_INFO_EXTRAOPTIONS returns the 
+(*UTF) at the start of the pattern itself. PCRE2_INFO_EXTRAOPTIONS returns the
 extra options that were set in the compile context by calling the
 pcre2_set_compile_extra_options() function.
 .P
@@ -3180,7 +3180,7 @@ options can be set in the \fIoptions\fP argument of \fBpcre2_substitute()\fP.
 PCRE2_SUBSTITUTE_GLOBAL causes the function to iterate over the subject string,
 replacing every matching substring. If this option is not set, only the first
 matching substring is replaced. The search for matches takes place in the
-original subject string (that is, previous replacements do not affect it). 
+original subject string (that is, previous replacements do not affect it).
 Iteration is implemented by advancing the \fIstartoffset\fP value for each
 search, which is always passed the entire subject string. If an offset limit is
 set in the match context, searching stops when that limit is reached.

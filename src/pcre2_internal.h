@@ -1770,7 +1770,7 @@ typedef struct open_capitem {
   struct open_capitem *next;    /* Chain link */
   uint16_t number;              /* Capture number */
   uint16_t flag;                /* Set TRUE if recursive back ref */
-  uint16_t assert_depth;        /* Assertion depth when opened */ 
+  uint16_t assert_depth;        /* Assertion depth when opened */
 } open_capitem;
 
 /* Layout of the UCP type table that translates property names into types and

@@ -5858,7 +5858,7 @@ output caused by CALLOUT_EXTRA. */
 
 fdefault = (!first_callout && !callout_capture && cb->callout_string == NULL)?
   NULL : outfile;
-  
+
 if ((dat_datctl.control2 & CTL2_CALLOUT_EXTRA) != 0)
   {
   f = outfile;
@@ -8213,11 +8213,11 @@ while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
 
   /* Set some common pattern and subject controls */
 
-  else if (strcmp(arg, "-AC") == 0)  
+  else if (strcmp(arg, "-AC") == 0)
     {
     def_patctl.options |= PCRE2_AUTO_CALLOUT;
     def_datctl.control2 |= CTL2_CALLOUT_EXTRA;
-    } 
+    }
   else if (strcmp(arg, "-ac") == 0)  def_patctl.options |= PCRE2_AUTO_CALLOUT;
   else if (strcmp(arg, "-b") == 0)   def_patctl.control |= CTL_FULLBINCODE;
   else if (strcmp(arg, "-d") == 0)   def_patctl.control |= CTL_DEBUG;

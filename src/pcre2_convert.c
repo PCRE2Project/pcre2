@@ -95,7 +95,7 @@ static const char *pcre2_escaped_literals =
 
 static const char *posix_meta_escapes =
   STR_LEFT_PARENTHESIS STR_RIGHT_PARENTHESIS
-  STR_LEFT_CURLY_BRACKET STR_RIGHT_CURLY_BRACKET 
+  STR_LEFT_CURLY_BRACKET STR_RIGHT_CURLY_BRACKET
   STR_1 STR_2 STR_3 STR_4 STR_5 STR_6 STR_7 STR_8 STR_9;
 
 
@@ -250,7 +250,7 @@ while (plength > 0)
         continue;  /* With next character */
         }
       }
-#endif       
+#endif
 
     /* Handle start of "normal" character classes */
 
@@ -278,7 +278,7 @@ while (plength > 0)
     case CHAR_BACKSLASH:
     if (plength <= 0) return PCRE2_ERROR_END_BACKSLASH;
     if (extended) nextisliteral = TRUE; else
-      { 
+      {
       if (*posix < 127 && strchr(posix_meta_escapes, *posix) != NULL)
         {
         if (isdigit(*posix)) PUTCHARS(STR_BACKSLASH);
@@ -286,7 +286,7 @@ while (plength > 0)
         lastspecial = *p++ = *posix++;
         plength--;
         }
-      else nextisliteral = TRUE;  
+      else nextisliteral = TRUE;
       }
     break;
 
@@ -867,7 +867,7 @@ while (pattern < pattern_end)
 
       if (pattern >= pattern_end)
         {
-        no_slash_z = TRUE; 
+        no_slash_z = TRUE;
         break;
         }
 
@@ -937,7 +937,7 @@ while (pattern < pattern_end)
       {
       if (pattern >= pattern_end)
         {
-        no_slash_z = TRUE; 
+        no_slash_z = TRUE;
         break;
         }
 

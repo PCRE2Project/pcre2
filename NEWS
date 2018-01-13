@@ -1,6 +1,24 @@
 News about PCRE2 releases
 -------------------------
 
+Version 10.31 13-January-2018
+-----------------------------
+
+This is mainly a bugfix and tidying release (see ChangeLog for full details).
+However, there are some minor enhancements.
+
+1. New pcre2_config() options: PCRE2_CONFIG_NEVER_BACKSLASH_C and
+PCRE2_CONFIG_COMPILED_WIDTHS.
+
+2. New pcre2_pattern_info() option PCRE2_INFO_EXTRAOPTIONS to retrieve the
+extra compile time options.
+
+3. There are now public names for all the pcre2_compile() error numbers.
+
+4. Added PCRE2_CALLOUT_STARTMATCH and PCRE2_CALLOUT_BACKTRACK bits to a new
+field callout_flags in callout blocks.
+
+
 Version 10.30 14-August-2017
 ----------------------------
 

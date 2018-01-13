@@ -493,8 +493,8 @@ limited to certain values, as follows:
   All UTF modes         no greater than 0x10ffff and a valid codepoint
 .sp
 Invalid Unicode codepoints are all those in the range 0xd800 to 0xdfff (the
-so-called "surrogate" codepoints). The check for these can be disabled by the 
-caller of \fBpcre2_compile()\fP by setting the option 
+so-called "surrogate" codepoints). The check for these can be disabled by the
+caller of \fBpcre2_compile()\fP by setting the option
 PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES.
 .
 .
@@ -1407,9 +1407,9 @@ Ranges normally include all code points between the start and end characters,
 inclusive. They can also be used for code points specified numerically, for
 example [\e000-\e037]. Ranges can include any characters that are valid for the
 current mode. In any UTF mode, the so-called "surrogate" characters (those
-whose code points lie between 0xd800 and 0xdfff inclusive) may not be specified 
+whose code points lie between 0xd800 and 0xdfff inclusive) may not be specified
 explicitly by default (the PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES option disables
-this check). However, ranges such as [\ex{d7ff}-\ex{e000}], which include the 
+this check). However, ranges such as [\ex{d7ff}-\ex{e000}], which include the
 surrogates, are always permitted.
 .P
 There is a special case in EBCDIC environments for ranges whose end points are

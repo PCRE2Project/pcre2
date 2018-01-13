@@ -508,7 +508,7 @@ if (*this_start_code == OP_ASSERTBACK || *this_start_code == OP_ASSERTBACK_NOT)
       {
       if (current_subject <= start_subject) break;
       current_subject--;
-      ACROSSCHAR(current_subject > start_subject, current_subject, 
+      ACROSSCHAR(current_subject > start_subject, current_subject,
         current_subject--);
       }
     }

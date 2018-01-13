@@ -400,7 +400,7 @@ given any number of times. If a directory matches both \fB--include-dir\fP and
 \fB-L\fP, \fB--files-without-match\fP
 Instead of outputting lines from the files, just output the names of the files
 that do not contain any lines that would have been output. Each file name is
-output once, on a separate line. This option overrides any previous \fB-H\fP, 
+output once, on a separate line. This option overrides any previous \fB-H\fP,
 \fB-h\fP, or \fB-l\fP options.
 .TP
 \fB-l\fP, \fB--files-with-matches\fP
@@ -427,7 +427,7 @@ to terminal is normally automatically flushed by the operating system. This
 option can be useful when the input or output is attached to a pipe and you do
 not want \fBpcre2grep\fP to buffer up large amounts of data. However, its use
 will affect performance, and the \fB-M\fP (multiline) option ceases to work.
-When input is from a compressed .gz or .bz2 file, \fB--line-buffered\fP is 
+When input is from a compressed .gz or .bz2 file, \fB--line-buffered\fP is
 ignored.
 .TP
 \fB--line-offsets\fP
@@ -838,7 +838,7 @@ matches were found in other files) or too many matching errors. Using the
 \fB-s\fP option to suppress error messages about inaccessible files does not
 affect the return code.
 .P
-When run under VMS, the return code is placed in the symbol PCRE2GREP_RC 
+When run under VMS, the return code is placed in the symbol PCRE2GREP_RC
 because VMS does not distinguish between exit(0) and exit(1).
 .
 .
