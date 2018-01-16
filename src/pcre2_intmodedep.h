@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-          New API code Copyright (c) 2016-2017 University of Cambridge
+          New API code Copyright (c) 2016-2018 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -640,11 +640,13 @@ typedef struct pcre2_real_code {
   uint16_t name_count;            /* Number of name entries in the table */
 } pcre2_real_code;
 
-/* The real match data structure. Define ovector large so that array bound
-checkers don't grumble. Memory for this structure is obtained by calling
-pcre2_match_data_create(), which sets the size as the offset of ovector plus
-pairs of elements for each capturing group. (See also the heapframe structure
-below.) */
+/* The real match data structure. Define ovector as large as it can ever
+actually be so that array bound checkers don't grumble. Memory for this
+structure is obtained by calling pcre2_match_data_create(), which sets the size
+as the offset of ovector plus a pair of elements for each capturable string, so
+the size varies from call to call. As the maximum number of capturing
+subpatterns is 65535 we must allow for 65536 strings to include the overall
+match. (See also the heapframe structure below.) */
 
 typedef struct pcre2_real_match_data {
   pcre2_memctl     memctl;
@@ -657,7 +659,7 @@ typedef struct pcre2_real_match_data {
   uint16_t         matchedby;     /* Type of match (normal, JIT, DFA) */
   uint16_t         oveccount;     /* Number of pairs */
   int              rc;            /* The return code from the match */
-  PCRE2_SIZE       ovector[10000];/* The first field */
+  PCRE2_SIZE       ovector[131072]; /* Must be last in the structure */
 } pcre2_real_match_data;
 
 
@@ -804,7 +806,7 @@ typedef struct heapframe {
   runtime array bound checks don't catch references to it. However, for any
   specific call to pcre2_match() the memory allocated for each frame structure
   allows for exactly the right size ovector for the number of capturing
-  parentheses. */
+  parentheses. (See also the comment for pcre2_real_match_data above.) */
 
   PCRE2_SPTR eptr;           /* MUST BE FIRST */
   PCRE2_SPTR start_match;    /* Can be adjusted by \K */
@@ -813,7 +815,7 @@ typedef struct heapframe {
   uint32_t capture_last;     /* Most recent capture */
   PCRE2_SIZE last_group_offset;  /* Saved offset to most recent group frame */
   PCRE2_SIZE offset_top;     /* Offset after highest capture */
-  PCRE2_SIZE ovector[10000]; /* Must be last in the structure */
+  PCRE2_SIZE ovector[131072]; /* Must be last in the structure */
 } heapframe;
 
 typedef char check_heapframe_size[

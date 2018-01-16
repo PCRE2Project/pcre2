@@ -125,6 +125,15 @@ the generated code.
 This could not actually cause a crash because it was always used in a memcpy()
 call with zero length.
 
+30. Some internal structures have a variable-length ovector[] as their last
+element. Their actual memory is obtained dynamically, giving an ovector of
+appropriate length. However, they are defined in the structure as
+ovector[NUMBER], where NUMBER is large so that array bound checkers don't
+grumble. The value of NUMBER was 10000, but a fuzzer exceeded 5000 capturing 
+groups, making the ovector larger than this. The number has been increased to 
+131072, which allows for the maximum number of captures (65535) plus the 
+overall match. This fixes oss-fuzz issue 5415.
+
 
 Version 10.30 14-August-2017
 ----------------------------
