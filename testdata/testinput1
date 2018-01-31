@@ -6159,4 +6159,34 @@ ef) x/x,mark
 /((?<=((*ACCEPT))X)\1?Y(*ACCEPT))\1/
     XYYZ
 
+/(?(DEFINE)(?<optional_a>a?)X)^(?&optional_a)a$/
+    aa
+    a
+
+/^(a?)b(?1)a/
+    abaa
+    aba 
+    baa
+    ba  
+
+/^(a?)+b(?1)a/
+    abaa
+    aba 
+    baa
+    ba  
+
+/^(a?)++b(?1)a/
+    abaa
+    aba 
+    baa
+    ba  
+
+/^(a?)+b/
+    b
+    ab
+    aaab 
+
+/(?=a+)a(a+)++b/
+    aab
+
 # End of testinput1 

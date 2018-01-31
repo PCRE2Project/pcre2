@@ -12701,7 +12701,7 @@ Subject length lower bound = 5
         Ket
         a
         CBraPos 1
-        a++
+        a+
         KetRpos
         a
         Ket
@@ -16468,6 +16468,113 @@ No match
     \na
 No match
     
+# These tests are matched in test 1 as they are Perl compatible. Here we are
+# looking at what does and does not get auto-possessified. 
+
+/(?(DEFINE)(?<optional_a>a?))^(?&optional_a)a$/B
+------------------------------------------------------------------
+        Bra
+        Cond
+        Cond false
+        CBra 1
+        a?
+        Ket
+        Ket
+        ^
+        Recurse
+        a
+        $
+        Ket
+        End
+------------------------------------------------------------------
+
+/(?(DEFINE)(?<optional_a>a?)X)^(?&optional_a)a$/B
+------------------------------------------------------------------
+        Bra
+        Cond
+        Cond false
+        CBra 1
+        a?
+        Ket
+        X
+        Ket
+        ^
+        Recurse
+        a
+        $
+        Ket
+        End
+------------------------------------------------------------------
+    
+/^(a?)b(?1)a/B
+------------------------------------------------------------------
+        Bra
+        ^
+        CBra 1
+        a?
+        Ket
+        b
+        Recurse
+        a
+        Ket
+        End
+------------------------------------------------------------------
+
+/^(a?)+b(?1)a/B
+------------------------------------------------------------------
+        Bra
+        ^
+        SCBra 1
+        a?
+        KetRmax
+        b
+        Recurse
+        a
+        Ket
+        End
+------------------------------------------------------------------
+
+/^(a?)++b(?1)a/B
+------------------------------------------------------------------
+        Bra
+        ^
+        SCBraPos 1
+        a?
+        KetRpos
+        b
+        Recurse
+        a
+        Ket
+        End
+------------------------------------------------------------------
+
+/^(a?)+b/B
+------------------------------------------------------------------
+        Bra
+        ^
+        SCBra 1
+        a?
+        KetRmax
+        b
+        Ket
+        End
+------------------------------------------------------------------
+
+/(?=a+)a(a+)++b/B
+------------------------------------------------------------------
+        Bra
+        Assert
+        a++
+        Ket
+        a
+        CBraPos 1
+        a++
+        KetRpos
+        b
+        Ket
+        End
+------------------------------------------------------------------
+
 # End of testinput2
 Error -65: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

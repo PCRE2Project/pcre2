@@ -134,6 +134,15 @@ groups, making the ovector larger than this. The number has been increased to
 131072, which allows for the maximum number of captures (65535) plus the 
 overall match. This fixes oss-fuzz issue 5415.
 
+31. Auto-possessification at the end of a capturing group was dependent on what 
+follows the group (e.g. /(a+)b/ would auto-possessify the a+) but this caused 
+incorrect behaviour when the group was called recursively from elsewhere in the 
+pattern where something different might follow. This bug is an unforseen
+consequence of change #1 for 10.30 - the implementation of backtracking into
+recursions. Iterators at the ends of capturing groups are no longer considered
+for auto-possessification if the pattern contains any recursions. Fixes 
+Bugzilla #2232.
+
 
 Version 10.30 14-August-2017
 ----------------------------

@@ -5412,4 +5412,21 @@ a)"xI
 \= Expect no match
     \na
     
+# These tests are matched in test 1 as they are Perl compatible. Here we are
+# looking at what does and does not get auto-possessified. 
+
+/(?(DEFINE)(?<optional_a>a?))^(?&optional_a)a$/B
+
+/(?(DEFINE)(?<optional_a>a?)X)^(?&optional_a)a$/B
+    
+/^(a?)b(?1)a/B
+
+/^(a?)+b(?1)a/B
+
+/^(a?)++b(?1)a/B
+
+/^(a?)+b/B
+
+/(?=a+)a(a+)++b/B
+
 # End of testinput2

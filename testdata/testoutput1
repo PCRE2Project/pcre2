@@ -9758,4 +9758,68 @@ No match
  1: Y
  2: 
 
+/(?(DEFINE)(?<optional_a>a?)X)^(?&optional_a)a$/
+    aa
+ 0: aa
+    a
+ 0: a
+
+/^(a?)b(?1)a/
+    abaa
+ 0: abaa
+ 1: a
+    aba 
+ 0: aba
+ 1: a
+    baa
+ 0: baa
+ 1: 
+    ba  
+ 0: ba
+ 1: 
+
+/^(a?)+b(?1)a/
+    abaa
+ 0: abaa
+ 1: 
+    aba 
+ 0: aba
+ 1: 
+    baa
+ 0: baa
+ 1: 
+    ba  
+ 0: ba
+ 1: 
+
+/^(a?)++b(?1)a/
+    abaa
+ 0: abaa
+ 1: 
+    aba 
+ 0: aba
+ 1: 
+    baa
+ 0: baa
+ 1: 
+    ba  
+ 0: ba
+ 1: 
+
+/^(a?)+b/
+    b
+ 0: b
+ 1: 
+    ab
+ 0: ab
+ 1: 
+    aaab 
+ 0: aaab
+ 1: 
+
+/(?=a+)a(a+)++b/
+    aab
+ 0: aab
+ 1: a
+
 # End of testinput1 
