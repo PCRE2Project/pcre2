@@ -2,8 +2,8 @@ Change Log for PCRE2
 --------------------
 
 
-Version 10.31 13-January-2018
------------------------------
+Version 10.31 12-February-2018
+------------------------------
 
 1. Fix typo (missing ]) in VMS code in pcre2test.c.
 
@@ -42,7 +42,7 @@ full path file names, which may be up to 2047 characters long.
 12. When an assertion contained (*ACCEPT) it caused all open capturing groups
 to be closed (as for a non-assertion ACCEPT), which was wrong and could lead to
 misbehaviour for subsequent references to groups that started outside the
-recursion. ACCEPT in an assertion now closes only those groups that were
+assertion. ACCEPT in an assertion now closes only those groups that were
 started within that assertion. Fixes oss-fuzz issues 3852 and 3891.
 
 13. Multiline matching in pcre2grep was misbehaving if the pattern matched
@@ -129,18 +129,18 @@ call with zero length.
 element. Their actual memory is obtained dynamically, giving an ovector of
 appropriate length. However, they are defined in the structure as
 ovector[NUMBER], where NUMBER is large so that array bound checkers don't
-grumble. The value of NUMBER was 10000, but a fuzzer exceeded 5000 capturing 
-groups, making the ovector larger than this. The number has been increased to 
-131072, which allows for the maximum number of captures (65535) plus the 
+grumble. The value of NUMBER was 10000, but a fuzzer exceeded 5000 capturing
+groups, making the ovector larger than this. The number has been increased to
+131072, which allows for the maximum number of captures (65535) plus the
 overall match. This fixes oss-fuzz issue 5415.
 
-31. Auto-possessification at the end of a capturing group was dependent on what 
-follows the group (e.g. /(a+)b/ would auto-possessify the a+) but this caused 
-incorrect behaviour when the group was called recursively from elsewhere in the 
+31. Auto-possessification at the end of a capturing group was dependent on what
+follows the group (e.g. /(a+)b/ would auto-possessify the a+) but this caused
+incorrect behaviour when the group was called recursively from elsewhere in the
 pattern where something different might follow. This bug is an unforseen
 consequence of change #1 for 10.30 - the implementation of backtracking into
 recursions. Iterators at the ends of capturing groups are no longer considered
-for auto-possessification if the pattern contains any recursions. Fixes 
+for auto-possessification if the pattern contains any recursions. Fixes
 Bugzilla #2232.
 
 
