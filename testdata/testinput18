@@ -134,4 +134,8 @@
 
 /a\b(c/literal,posix,dotall
 
+/((a)(b)?(c))/posix
+    123ace
+    123ace\=posix_startend=2:6
+
 # End of testdata/testinput18

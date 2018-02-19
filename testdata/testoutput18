@@ -46,6 +46,7 @@
     defabc\=noteol
  0: def
  1: def
+ 2: <unset>
  3: def
 
 /the quick brown fox/
@@ -205,5 +206,19 @@ No match: POSIX code 17: match failed
 
 /a\b(c/literal,posix,dotall
 Failed: POSIX code 16: bad argument at offset 0     
+
+/((a)(b)?(c))/posix
+    123ace
+ 0: ac
+ 1: ac
+ 2: a
+ 3: <unset>
+ 4: c
+    123ace\=posix_startend=2:6
+ 0: ac
+ 1: ac
+ 2: a
+ 3: <unset>
+ 4: c
 
 # End of testdata/testinput18

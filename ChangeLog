@@ -2,6 +2,19 @@ Change Log for PCRE2
 --------------------
 
 
+Version 10.32-RC1 19-February-2018
+----------------------------------
+
+1. When matching using the the REG_STARTEND feature of the POSIX API with a 
+non-zero starting offset, unset capturing groups with lower numbers than a
+group that did capture something were not being correctly returned as "unset" 
+(that is, with offset values of -1).
+
+2. When matching using the POSIX API, pcre2test used to omit listing unset 
+groups altogether. Now it shows those that come before any actual captures as
+"<unset>", as happens for non-POSIX matching.
+
+
 Version 10.31 12-February-2018
 ------------------------------
 

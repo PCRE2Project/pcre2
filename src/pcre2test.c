@@ -11,7 +11,7 @@ hacked-up (non-) design had also run out of steam.
 
                        Written by Philip Hazel
      Original code Copyright (c) 1997-2012 University of Cambridge
-    Rewritten code Copyright (c) 2016-2017 University of Cambridge
+    Rewritten code Copyright (c) 2016-2018 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -6761,13 +6761,17 @@ if ((pat_patctl.control & CTL_POSIX) != 0)
     fprintf(outfile, "Matched without capture\n");
   else
     {
-    size_t i;
+    size_t i, j;
+    size_t last_printed = (size_t)dat_datctl.oveccount;
     for (i = 0; i < (size_t)dat_datctl.oveccount; i++)
       {
       if (pmatch[i].rm_so >= 0)
         {
         PCRE2_SIZE start = pmatch[i].rm_so;
         PCRE2_SIZE end = pmatch[i].rm_eo;
+        for (j = last_printed + 1; j < i; j++)
+          fprintf(outfile, "%2d: <unset>\n", (int)j);
+        last_printed = i; 
         if (start > end)
           {
           start = pmatch[i].rm_eo;
