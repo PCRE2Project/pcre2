@@ -7877,7 +7877,8 @@ else
 (void)PCRE2_CONFIG(PCRE2_CONFIG_NEWLINE, &optval);
 print_newline_config(optval, FALSE);
 (void)PCRE2_CONFIG(PCRE2_CONFIG_BSR, &optval);
-printf("  \\R matches %s\n", optval? "CR, LF, or CRLF only" :
+printf("  \\R matches %s\n", 
+  (optval == PCRE2_BSR_ANYCRLF)? "CR, LF, or CRLF only" :
                                  "all Unicode newlines");
 (void)PCRE2_CONFIG(PCRE2_CONFIG_NEVER_BACKSLASH_C, &optval);
 printf("  \\C is %ssupported\n", optval? "not ":"");
