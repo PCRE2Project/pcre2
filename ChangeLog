@@ -17,7 +17,8 @@ groups altogether. Now it shows those that come before any actual captures as
 3. Running "pcre2test -C" always stated "\R matches CR, LF, or CRLF only", 
 whatever the build configuration was. It now correctly says "\R matches all 
 Unicode newlines" in the default case when --enable-bsr-anycrlf has not been 
-specified.
+specified. Similarly, running "pcfre2test -C bsr" never produced the result 
+ANY.
 
 
 Version 10.31 12-February-2018

@@ -7793,7 +7793,7 @@ if (arg != NULL && arg[0] != CHAR_MINUS)
     {
     case CONF_BSR:
     (void)PCRE2_CONFIG(coptlist[i].value, &optval);
-    printf("%s\n", optval? "ANYCRLF" : "ANY");
+    printf("%s\n", (optval == PCRE2_BSR_ANYCRLF)? "ANYCRLF" : "ANY");
     break;
 
     case CONF_FIX:
