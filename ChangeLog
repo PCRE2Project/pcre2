@@ -20,6 +20,11 @@ Unicode newlines" in the default case when --enable-bsr-anycrlf has not been
 specified. Similarly, running "pcfre2test -C bsr" never produced the result 
 ANY.
 
+4. Matching the pattern /(*UTF)\C[^\v]+\x80/ against an 8-bit string containing 
+multi-code-unit characters caused bad behaviour and possibly a crash. This 
+issue was fixed for other kinds of repeat in release 10.20 by change 19, but
+repeating character classes were overlooked.
+
 
 Version 10.31 12-February-2018
 ------------------------------

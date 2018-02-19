@@ -1962,11 +1962,15 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
 
           if (reptype == REPTYPE_POS) continue;    /* No backtracking */
 
+          /* After \C in UTF mode, Lstart_eptr might be in the middle of a
+          Unicode character. Use <= Lstart_eptr to ensure backtracking doesn't
+          go too far. */
+
           for (;;)
             {
             RMATCH(Fecode, RM201);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-            if (Feptr-- == Lstart_eptr) break;  /* Tried at original position */
+            if (Feptr-- <= Lstart_eptr) break;  /* Tried at original position */
             BACKCHAR(Feptr);
             }
           }
@@ -2126,11 +2130,15 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
 
         if (reptype == REPTYPE_POS) continue;    /* No backtracking */
 
+        /* After \C in UTF mode, Lstart_eptr might be in the middle of a
+        Unicode character. Use <= Lstart_eptr to ensure backtracking doesn't
+        go too far. */
+
         for(;;)
           {
           RMATCH(Fecode, RM101);
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-          if (Feptr-- == Lstart_eptr) break;  /* Tried at original position */
+          if (Feptr-- <= Lstart_eptr) break;  /* Tried at original position */
 #ifdef SUPPORT_UNICODE
           if (utf) BACKCHAR(Feptr);
 #endif
@@ -4002,8 +4010,8 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
         if (reptype == REPTYPE_POS) continue;    /* No backtracking */
 
         /* After \C in UTF mode, Lstart_eptr might be in the middle of a
-        Unicode character. Use <= pp to ensure backtracking doesn't go too far.
-        */
+        Unicode character. Use <= Lstart_eptr to ensure backtracking doesn't
+        go too far. */
 
         for(;;)
           {
