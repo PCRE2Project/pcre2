@@ -101,4 +101,7 @@
 /\C[^\v]+\x80/utf
     [AΏBŀC]
 
+/\C[^\d]+\x80/utf
+    [AΏBŀC]
+
 # End of testinput22
