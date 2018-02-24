@@ -641,6 +641,12 @@ echo "RC=$?" >>testtrygrep
 $valgrind $vjs $pcre2grep --colour=always '(?=[ac]\K)' testNinputgrep >>testtrygrep
 echo "RC=$?" >>testtrygrep
 
+echo "---------------------------- Test 126 -----------------------------" >>testtrygrep
+printf "Next line pattern has binary zero\nABC\x00XYZ\n" >testtemp1grep
+printf "ABC\x00XYZ\nABCDEF\nDEFABC\n" >testtemp2grep
+$valgrind $vjs $pcre2grep -a -f testtemp1grep testtemp2grep >>testtrygrep
+echo "RC=$?" >>testtrygrep
+
 
 # Now compare the results.
 

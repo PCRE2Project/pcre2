@@ -1,4 +1,4 @@
-.TH PCRE2GREP 1 "13 November 2017" "PCRE2 10.31"
+.TH PCRE2GREP 1 "24 February 2018" "PCRE2 10.32"
 .SH NAME
 pcre2grep - a grep with Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -119,6 +119,14 @@ identifies binary files in this manner.) However, if the newline type is
 specified as "nul", that is, the line terminator is a binary zero, the test for
 a binary file is not applied. See the \fB--binary-files\fP option for a means
 of changing the way binary files are handled.
+.
+.
+.SH "BINARY ZEROS IN PATTERNS"
+.rs
+.sp
+Patterns passed from the command line are strings that are terminated by a
+binary zero, so cannot contain internal zeros. However, patterns that are read 
+from a file via the \fB-f\fP option may contain binary zeros.
 .
 .
 .SH OPTIONS
@@ -304,12 +312,15 @@ files; it does not apply to patterns specified by any of the \fB--include\fP or
 .TP
 \fB-f\fP \fIfilename\fP, \fB--file=\fP\fIfilename\fP
 Read patterns from the file, one per line, and match them against each line of
-input. What constitutes a newline when reading the file is the operating
-system's default. The \fB--newline\fP option has no effect on this option.
-Trailing white space is removed from each line, and blank lines are ignored. An
-empty file contains no patterns and therefore matches nothing. See also the
-comments about multiple patterns versus a single pattern with alternatives in
-the description of \fB-e\fP above.
+input. As is the case with patterns on the command line, no delimiters should
+be used. What constitutes a newline when reading the file is the operating
+system's default interpretation of \en. The \fB--newline\fP option has no
+effect on this option. Trailing white space is removed from each line, and
+blank lines are ignored. An empty file contains no patterns and therefore
+matches nothing. Patterns read from a file in this way may contain binary
+zeros, which are treated as ordinary data characters. See also the comments
+about multiple patterns versus a single pattern with alternatives in the
+description of \fB-e\fP above.
 .sp
 If this option is given more than once, all the specified files are read. A
 data line is output if any of the patterns match it. A file name can be given
@@ -320,14 +331,15 @@ command line; all arguments are treated as the names of paths to be searched.
 .TP
 \fB--file-list\fP=\fIfilename\fP
 Read a list of files and/or directories that are to be scanned from the given
-file, one per line. Trailing white space is removed from each line, and blank
-lines are ignored. These paths are processed before any that are listed on the
-command line. The file name can be given as "-" to refer to the standard input.
-If \fB--file\fP and \fB--file-list\fP are both specified as "-", patterns are
-read first. This is useful only when the standard input is a terminal, from
-which further lines (the list of files) can be read after an end-of-file
-indication. If this option is given more than once, all the specified files are
-read.
+file, one per line. What constitutes a newline when reading the file is the
+operating system's default. Trailing white space is removed from each line, and
+blank lines are ignored. These paths are processed before any that are listed
+on the command line. The file name can be given as "-" to refer to the standard
+input. If \fB--file\fP and \fB--file-list\fP are both specified as "-",
+patterns are read first. This is useful only when the standard input is a
+terminal, from which further lines (the list of files) can be read after an
+end-of-file indication. If this option is given more than once, all the
+specified files are read.
 .TP
 \fB--file-offsets\fP
 Instead of showing lines or parts of lines that match, show each match as an
@@ -679,12 +691,13 @@ The \fB-N\fP (\fB--newline\fP) option allows \fBpcre2grep\fP to scan files with
 different newline conventions from the default. Any parts of the input files
 that are written to the standard output are copied identically, with whatever
 newline sequences they have in the input. However, the setting of this option
-does not affect the interpretation of files specified by the \fB-f\fP,
-\fB--exclude-from\fP, or \fB--include-from\fP options, which are assumed to use
-the operating system's standard newline sequence, nor does it affect the way in
-which \fBpcre2grep\fP writes informational messages to the standard error and
-output streams. For these it uses the string "\en" to indicate newlines,
-relying on the C I/O library to convert this to an appropriate sequence.
+affects only the way scanned files are processed. It does not affect the
+interpretation of files specified by the \fB-f\fP, \fB--file-list\fP,
+\fB--exclude-from\fP, or \fB--include-from\fP options, nor does it affect the
+way in which \fBpcre2grep\fP writes informational messages to the standard
+error and output streams. For these it uses the string "\en" to indicate
+newlines, relying on the C I/O library to convert this to an appropriate
+sequence.
 .
 .
 .SH "OPTIONS COMPATIBILITY"
@@ -862,6 +875,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 13 November 2017
-Copyright (c) 1997-2017 University of Cambridge.
+Last updated: 24 February 2018
+Copyright (c) 1997-2018 University of Cambridge.
 .fi

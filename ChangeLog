@@ -25,6 +25,9 @@ multi-code-unit characters caused bad behaviour and possibly a crash. This
 issue was fixed for other kinds of repeat in release 10.20 by change 19, but
 repeating character classes were overlooked.
 
+5. pcre2grep now supports the inclusion of binary zeros in patterns that are 
+read from files via the -f option.
+
 
 Version 10.31 12-February-2018
 ------------------------------
