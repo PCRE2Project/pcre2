@@ -17,17 +17,18 @@ please consult the man page, in case the conversion went wrong.
 <li><a name="TOC2" href="#SEC2">DESCRIPTION</a>
 <li><a name="TOC3" href="#SEC3">SUPPORT FOR COMPRESSED FILES</a>
 <li><a name="TOC4" href="#SEC4">BINARY FILES</a>
-<li><a name="TOC5" href="#SEC5">OPTIONS</a>
-<li><a name="TOC6" href="#SEC6">ENVIRONMENT VARIABLES</a>
-<li><a name="TOC7" href="#SEC7">NEWLINES</a>
-<li><a name="TOC8" href="#SEC8">OPTIONS COMPATIBILITY</a>
-<li><a name="TOC9" href="#SEC9">OPTIONS WITH DATA</a>
-<li><a name="TOC10" href="#SEC10">USING PCRE2'S CALLOUT FACILITY</a>
-<li><a name="TOC11" href="#SEC11">MATCHING ERRORS</a>
-<li><a name="TOC12" href="#SEC12">DIAGNOSTICS</a>
-<li><a name="TOC13" href="#SEC13">SEE ALSO</a>
-<li><a name="TOC14" href="#SEC14">AUTHOR</a>
-<li><a name="TOC15" href="#SEC15">REVISION</a>
+<li><a name="TOC5" href="#SEC5">BINARY ZEROS IN PATTERNS</a>
+<li><a name="TOC6" href="#SEC6">OPTIONS</a>
+<li><a name="TOC7" href="#SEC7">ENVIRONMENT VARIABLES</a>
+<li><a name="TOC8" href="#SEC8">NEWLINES</a>
+<li><a name="TOC9" href="#SEC9">OPTIONS COMPATIBILITY</a>
+<li><a name="TOC10" href="#SEC10">OPTIONS WITH DATA</a>
+<li><a name="TOC11" href="#SEC11">USING PCRE2'S CALLOUT FACILITY</a>
+<li><a name="TOC12" href="#SEC12">MATCHING ERRORS</a>
+<li><a name="TOC13" href="#SEC13">DIAGNOSTICS</a>
+<li><a name="TOC14" href="#SEC14">SEE ALSO</a>
+<li><a name="TOC15" href="#SEC15">AUTHOR</a>
+<li><a name="TOC16" href="#SEC16">REVISION</a>
 </ul>
 <br><a name="SEC1" href="#TOC1">SYNOPSIS</a><br>
 <P>
@@ -150,7 +151,13 @@ specified as "nul", that is, the line terminator is a binary zero, the test for
 a binary file is not applied. See the <b>--binary-files</b> option for a means
 of changing the way binary files are handled.
 </P>
-<br><a name="SEC5" href="#TOC1">OPTIONS</a><br>
+<br><a name="SEC5" href="#TOC1">BINARY ZEROS IN PATTERNS</a><br>
+<P>
+Patterns passed from the command line are strings that are terminated by a
+binary zero, so cannot contain internal zeros. However, patterns that are read 
+from a file via the <b>-f</b> option may contain binary zeros.
+</P>
+<br><a name="SEC6" href="#TOC1">OPTIONS</a><br>
 <P>
 The order in which some of the options appear can affect the output. For
 example, both the <b>-H</b> and <b>-l</b> options affect the printing of file
@@ -355,12 +362,15 @@ files; it does not apply to patterns specified by any of the <b>--include</b> or
 <P>
 <b>-f</b> <i>filename</i>, <b>--file=</b><i>filename</i>
 Read patterns from the file, one per line, and match them against each line of
-input. What constitutes a newline when reading the file is the operating
-system's default. The <b>--newline</b> option has no effect on this option.
-Trailing white space is removed from each line, and blank lines are ignored. An
-empty file contains no patterns and therefore matches nothing. See also the
-comments about multiple patterns versus a single pattern with alternatives in
-the description of <b>-e</b> above.
+input. As is the case with patterns on the command line, no delimiters should
+be used. What constitutes a newline when reading the file is the operating
+system's default interpretation of \n. The <b>--newline</b> option has no
+effect on this option. Trailing white space is removed from each line, and
+blank lines are ignored. An empty file contains no patterns and therefore
+matches nothing. Patterns read from a file in this way may contain binary
+zeros, which are treated as ordinary data characters. See also the comments
+about multiple patterns versus a single pattern with alternatives in the
+description of <b>-e</b> above.
 <br>
 <br>
 If this option is given more than once, all the specified files are read. A
@@ -373,14 +383,15 @@ command line; all arguments are treated as the names of paths to be searched.
 <P>
 <b>--file-list</b>=<i>filename</i>
 Read a list of files and/or directories that are to be scanned from the given
-file, one per line. Trailing white space is removed from each line, and blank
-lines are ignored. These paths are processed before any that are listed on the
-command line. The file name can be given as "-" to refer to the standard input.
-If <b>--file</b> and <b>--file-list</b> are both specified as "-", patterns are
-read first. This is useful only when the standard input is a terminal, from
-which further lines (the list of files) can be read after an end-of-file
-indication. If this option is given more than once, all the specified files are
-read.
+file, one per line. What constitutes a newline when reading the file is the
+operating system's default. Trailing white space is removed from each line, and
+blank lines are ignored. These paths are processed before any that are listed
+on the command line. The file name can be given as "-" to refer to the standard
+input. If <b>--file</b> and <b>--file-list</b> are both specified as "-",
+patterns are read first. This is useful only when the standard input is a
+terminal, from which further lines (the list of files) can be read after an
+end-of-file indication. If this option is given more than once, all the
+specified files are read.
 </P>
 <P>
 <b>--file-offsets</b>
@@ -764,27 +775,28 @@ pattern and ")$" at the end. This option applies only to the patterns that are
 matched against the contents of files; it does not apply to patterns specified
 by any of the <b>--include</b> or <b>--exclude</b> options.
 </P>
-<br><a name="SEC6" href="#TOC1">ENVIRONMENT VARIABLES</a><br>
+<br><a name="SEC7" href="#TOC1">ENVIRONMENT VARIABLES</a><br>
 <P>
 The environment variables <b>LC_ALL</b> and <b>LC_CTYPE</b> are examined, in that
 order, for a locale. The first one that is set is used. This can be overridden
 by the <b>--locale</b> option. If no locale is set, the PCRE2 library's default
 (usually the "C" locale) is used.
 </P>
-<br><a name="SEC7" href="#TOC1">NEWLINES</a><br>
+<br><a name="SEC8" href="#TOC1">NEWLINES</a><br>
 <P>
 The <b>-N</b> (<b>--newline</b>) option allows <b>pcre2grep</b> to scan files with
 different newline conventions from the default. Any parts of the input files
 that are written to the standard output are copied identically, with whatever
 newline sequences they have in the input. However, the setting of this option
-does not affect the interpretation of files specified by the <b>-f</b>,
-<b>--exclude-from</b>, or <b>--include-from</b> options, which are assumed to use
-the operating system's standard newline sequence, nor does it affect the way in
-which <b>pcre2grep</b> writes informational messages to the standard error and
-output streams. For these it uses the string "\n" to indicate newlines,
-relying on the C I/O library to convert this to an appropriate sequence.
+affects only the way scanned files are processed. It does not affect the
+interpretation of files specified by the <b>-f</b>, <b>--file-list</b>,
+<b>--exclude-from</b>, or <b>--include-from</b> options, nor does it affect the
+way in which <b>pcre2grep</b> writes informational messages to the standard
+error and output streams. For these it uses the string "\n" to indicate
+newlines, relying on the C I/O library to convert this to an appropriate
+sequence.
 </P>
-<br><a name="SEC8" href="#TOC1">OPTIONS COMPATIBILITY</a><br>
+<br><a name="SEC9" href="#TOC1">OPTIONS COMPATIBILITY</a><br>
 <P>
 Many of the short and long forms of <b>pcre2grep</b>'s options are the same
 as in the GNU <b>grep</b> program. Any long option of the form
@@ -804,7 +816,7 @@ for GNU <b>grep</b>, but a regular expression for <b>pcre2grep</b>. If both the
 <b>-c</b> and <b>-l</b> options are given, GNU grep lists only file names,
 without counts, but <b>pcre2grep</b> gives the counts as well.
 </P>
-<br><a name="SEC9" href="#TOC1">OPTIONS WITH DATA</a><br>
+<br><a name="SEC10" href="#TOC1">OPTIONS WITH DATA</a><br>
 <P>
 There are four different ways in which an option with data can be specified.
 If a short form option is used, the data may follow immediately, or (with one
@@ -836,7 +848,7 @@ The exceptions to the above are the <b>--colour</b> (or <b>--color</b>) and
 options does have data, it must be given in the first form, using an equals
 character. Otherwise <b>pcre2grep</b> will assume that it has no data.
 </P>
-<br><a name="SEC10" href="#TOC1">USING PCRE2'S CALLOUT FACILITY</a><br>
+<br><a name="SEC11" href="#TOC1">USING PCRE2'S CALLOUT FACILITY</a><br>
 <P>
 <b>pcre2grep</b> has, by default, support for calling external programs or
 scripts or echoing specific strings during matching by making use of PCRE2's
@@ -906,7 +918,7 @@ Matching continues normally after the string is output. If you want to see only
 the callout output but not any output from an actual match, you should end the
 relevant pattern with (*FAIL).
 </P>
-<br><a name="SEC11" href="#TOC1">MATCHING ERRORS</a><br>
+<br><a name="SEC12" href="#TOC1">MATCHING ERRORS</a><br>
 <P>
 It is possible to supply a regular expression that takes a very long time to
 fail to match certain lines. Such patterns normally involve nested indefinite
@@ -922,7 +934,7 @@ overall resource limit. There are also other limits that affect the amount of
 memory used during matching; see the discussion of <b>--heap-limit</b> and
 <b>--depth-limit</b> above.
 </P>
-<br><a name="SEC12" href="#TOC1">DIAGNOSTICS</a><br>
+<br><a name="SEC13" href="#TOC1">DIAGNOSTICS</a><br>
 <P>
 Exit status is 0 if any matches were found, 1 if no matches were found, and 2
 for syntax errors, overlong lines, non-existent or inaccessible files (even if
@@ -934,11 +946,11 @@ affect the return code.
 When run under VMS, the return code is placed in the symbol PCRE2GREP_RC
 because VMS does not distinguish between exit(0) and exit(1).
 </P>
-<br><a name="SEC13" href="#TOC1">SEE ALSO</a><br>
+<br><a name="SEC14" href="#TOC1">SEE ALSO</a><br>
 <P>
 <b>pcre2pattern</b>(3), <b>pcre2syntax</b>(3), <b>pcre2callout</b>(3).
 </P>
-<br><a name="SEC14" href="#TOC1">AUTHOR</a><br>
+<br><a name="SEC15" href="#TOC1">AUTHOR</a><br>
 <P>
 Philip Hazel
 <br>
@@ -947,11 +959,11 @@ University Computing Service
 Cambridge, England.
 <br>
 </P>
-<br><a name="SEC15" href="#TOC1">REVISION</a><br>
+<br><a name="SEC16" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 13 November 2017
+Last updated: 24 February 2018
 <br>
-Copyright &copy; 1997-2017 University of Cambridge.
+Copyright &copy; 1997-2018 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE2 index page</a>.

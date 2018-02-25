@@ -170,8 +170,8 @@ REVISION
        Last updated: 01 April 2017
        Copyright (c) 1997-2017 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRE2API(3)                Library Functions Manual                PCRE2API(3)
 
 
@@ -3477,8 +3477,8 @@ REVISION
        Last updated: 31 December 2017
        Copyright (c) 1997-2017 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRE2BUILD(3)              Library Functions Manual              PCRE2BUILD(3)
 
 
@@ -3526,18 +3526,19 @@ PCRE2 BUILD-TIME OPTIONS
        ure  works, --enable and --disable always come in pairs, so the comple-
        mentary option always exists as well, but as it specifies the  default,
        it is not described.  Options that specify values have names that start
-       with --with.
+       with --with. At the end of a configure run, a summary of the configura-
+       tion is output.
 
 
 BUILDING 8-BIT, 16-BIT AND 32-BIT LIBRARIES
 
-       By default, a library called libpcre2-8 is built, containing  functions
-       that  take  string  arguments contained in arrays of bytes, interpreted
-       either as single-byte characters, or UTF-8 strings. You can also  build
-       two  other libraries, called libpcre2-16 and libpcre2-32, which process
-       strings that are contained in arrays of 16-bit and 32-bit  code  units,
+       By  default, a library called libpcre2-8 is built, containing functions
+       that take string arguments contained in arrays  of  bytes,  interpreted
+       either  as single-byte characters, or UTF-8 strings. You can also build
+       two other libraries, called libpcre2-16 and libpcre2-32, which  process
+       strings  that  are contained in arrays of 16-bit and 32-bit code units,
        respectively. These can be interpreted either as single-unit characters
-       or UTF-16/UTF-32 strings. To build these additional libraries, add  one
+       or  UTF-16/UTF-32 strings. To build these additional libraries, add one
        or both of the following to the configure command:
 
          --enable-pcre2-16
@@ -3547,16 +3548,16 @@ BUILDING 8-BIT, 16-BIT AND 32-BIT LIBRARIES
 
          --disable-pcre2-8
 
-       as  well.  At least one of the three libraries must be built. Note that
-       the POSIX wrapper is for the 8-bit library only, and that pcre2grep  is
-       an  8-bit  program.  Neither  of these are built if you select only the
+       as well. At least one of the three libraries must be built.  Note  that
+       the  POSIX wrapper is for the 8-bit library only, and that pcre2grep is
+       an 8-bit program. Neither of these are built if  you  select  only  the
        16-bit or 32-bit libraries.
 
 
 BUILDING SHARED AND STATIC LIBRARIES
 
-       The Autotools PCRE2 building process uses libtool to build both  shared
-       and  static  libraries by default. You can suppress an unwanted library
+       The  Autotools PCRE2 building process uses libtool to build both shared
+       and static libraries by default. You can suppress an  unwanted  library
        by adding one of
 
          --disable-shared
@@ -3567,40 +3568,40 @@ BUILDING SHARED AND STATIC LIBRARIES
 
 UNICODE AND UTF SUPPORT
 
-       By default, PCRE2 is built with support for Unicode and  UTF  character
+       By  default,  PCRE2 is built with support for Unicode and UTF character
        strings.  To build it without Unicode support, add
 
          --disable-unicode
 
-       to  the configure command. This setting applies to all three libraries.
-       It is not possible to build  one  library  with  Unicode  support,  and
+       to the configure command. This setting applies to all three  libraries.
+       It  is  not  possible  to  build  one library with Unicode support, and
        another without, in the same configuration.
 
-       Of  itself, Unicode support does not make PCRE2 treat strings as UTF-8,
+       Of itself, Unicode support does not make PCRE2 treat strings as  UTF-8,
        UTF-16 or UTF-32. To do that, applications that use the library can set
-       the  PCRE2_UTF  option when they call pcre2_compile() to compile a pat-
-       tern.  Alternatively, patterns may be started with  (*UTF)  unless  the
+       the PCRE2_UTF option when they call pcre2_compile() to compile  a  pat-
+       tern.   Alternatively,  patterns  may be started with (*UTF) unless the
        application has locked this out by setting PCRE2_NEVER_UTF.
 
        UTF support allows the libraries to process character code points up to
-       0x10ffff in the strings that they handle. Unicode  support  also  gives
-       access  to  the Unicode properties of characters, using pattern escapes
+       0x10ffff  in  the  strings that they handle. Unicode support also gives
+       access to the Unicode properties of characters, using  pattern  escapes
        such as \P, \p, and \X. Only the general category properties such as Lu
-       and  Nd are supported. Details are given in the pcre2pattern documenta-
+       and Nd are supported. Details are given in the pcre2pattern  documenta-
        tion.
 
        Pattern escapes such as \d and \w do not by default make use of Unicode
-       properties.  The  application  can  request that they do by setting the
-       PCRE2_UCP option. Unless the application  has  set  PCRE2_NEVER_UCP,  a
+       properties. The application can request that they  do  by  setting  the
+       PCRE2_UCP  option.  Unless  the  application has set PCRE2_NEVER_UCP, a
        pattern may also request this by starting with (*UCP).
 
 
 DISABLING THE USE OF \C
 
        The \C escape sequence, which matches a single code unit, even in a UTF
-       mode, can cause unpredictable behaviour because it may leave  the  cur-
-       rent  matching  point in the middle of a multi-code-unit character. The
-       application can lock it  out  by  setting  the  PCRE2_NEVER_BACKSLASH_C
+       mode,  can  cause unpredictable behaviour because it may leave the cur-
+       rent matching point in the middle of a multi-code-unit  character.  The
+       application  can  lock  it  out  by setting the PCRE2_NEVER_BACKSLASH_C
        option when calling pcre2_compile(). There is also a build-time option
 
          --enable-never-backslash-C
@@ -3610,14 +3611,21 @@ DISABLING THE USE OF \C
 
 JUST-IN-TIME COMPILER SUPPORT
 
-       Just-in-time  (JIT) compiler support is included in the build by speci-
+       Just-in-time (JIT) compiler support is included in the build by  speci-
        fying
 
          --enable-jit
 
-       This support is available only for certain hardware  architectures.  If
-       this  option  is  set for an unsupported architecture, a building error
-       occurs. If you are running under SELinux you may also want to add
+       This  support  is available only for certain hardware architectures. If
+       this option is set for an unsupported architecture,  a  building  error
+       occurs.  If in doubt, use
+
+         --enable-jit=auto
+
+       which  enables  JIT  only if the current hardware is supported. You can
+       check if JIT is enabled in the configuration summary that is output  at
+       the  end  of a configure run. If you are enabling JIT under SELinux you
+       may also want to add
 
          --enable-jit-sealloc
 
@@ -4020,11 +4028,11 @@ AUTHOR
 
 REVISION
 
-       Last updated: 18 July 2017
-       Copyright (c) 1997-2017 University of Cambridge.
+       Last updated: 25 February 2018
+       Copyright (c) 1997-2018 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRE2CALLOUT(3)            Library Functions Manual            PCRE2CALLOUT(3)
 
 
@@ -4447,8 +4455,8 @@ REVISION
        Last updated: 22 December 2017
        Copyright (c) 1997-2017 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRE2COMPAT(3)             Library Functions Manual             PCRE2COMPAT(3)
 
 
@@ -4645,8 +4653,8 @@ REVISION
        Last updated: 18 April 2017
        Copyright (c) 1997-2017 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRE2JIT(3)                Library Functions Manual                PCRE2JIT(3)
 
 
@@ -5039,8 +5047,8 @@ REVISION
        Last updated: 31 March 2017
        Copyright (c) 1997-2017 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRE2LIMITS(3)             Library Functions Manual             PCRE2LIMITS(3)
 
 
@@ -5110,8 +5118,8 @@ REVISION
        Last updated: 30 March 2017
        Copyright (c) 1997-2017 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRE2MATCHING(3)           Library Functions Manual           PCRE2MATCHING(3)
 
 
@@ -5329,8 +5337,8 @@ REVISION
        Last updated: 29 September 2014
        Copyright (c) 1997-2014 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRE2PARTIAL(3)            Library Functions Manual            PCRE2PARTIAL(3)
 
 
@@ -5769,8 +5777,8 @@ REVISION
        Last updated: 22 December 2014
        Copyright (c) 1997-2014 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRE2PATTERN(3)            Library Functions Manual            PCRE2PATTERN(3)
 
 
@@ -8880,8 +8888,8 @@ REVISION
        Last updated: 12 September 2017
        Copyright (c) 1997-2017 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRE2PERFORM(3)            Library Functions Manual            PCRE2PERFORM(3)
 
 
@@ -9108,8 +9116,8 @@ REVISION
        Last updated: 08 April 2017
        Copyright (c) 1997-2017 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRE2POSIX(3)              Library Functions Manual              PCRE2POSIX(3)
 
 
@@ -9416,8 +9424,8 @@ REVISION
        Last updated: 15 June 2017
        Copyright (c) 1997-2017 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRE2SAMPLE(3)             Library Functions Manual             PCRE2SAMPLE(3)
 
 
@@ -9685,8 +9693,8 @@ REVISION
        Last updated: 21 March 2017
        Copyright (c) 1997-2017 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRE2SYNTAX(3)             Library Functions Manual             PCRE2SYNTAX(3)
 
 
@@ -10133,8 +10141,8 @@ REVISION
        Last updated: 17 June 2017
        Copyright (c) 1997-2017 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRE2UNICODE(3)            Library Functions Manual            PCRE2UNICODE(3)
 
 
@@ -10390,5 +10398,5 @@ REVISION
        Last updated: 17 May 2017
        Copyright (c) 1997-2017 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
