@@ -28,6 +28,8 @@ repeating character classes were overlooked.
 5. pcre2grep now supports the inclusion of binary zeros in patterns that are 
 read from files via the -f option.
 
+6. A small fix to pcre2grep to avoid compiler warnings for -Wformat-overflow=2.
+
 
 Version 10.31 12-February-2018
 ------------------------------

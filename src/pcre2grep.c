@@ -303,7 +303,7 @@ also for include/exclude patterns. */
 typedef struct patstr {
   struct patstr *next;
   char *string;
-  PCRE2_SIZE length; 
+  PCRE2_SIZE length;
   pcre2_code *compiled;
 } patstr;
 
@@ -558,7 +558,7 @@ exit(rc);
 
 Arguments:
   s          pattern string to add
-  patlen     length of pattern 
+  patlen     length of pattern
   after      if not NULL points to item to insert after
 
 Returns:     new pattern block or NULL on error
@@ -1285,7 +1285,7 @@ doing this for tty input means that no output appears until a lot of input has
 been typed. Instead, tty input is handled line by line. We cannot use fgets()
 for this, because it does not stop at a binary zero, and therefore there is no
 way of telling how many characters it has read, because there may be binary
-zeros embedded in the data. This function is also used for reading patterns 
+zeros embedded in the data. This function is also used for reading patterns
 from files (the -f option).
 
 Arguments:
@@ -3497,7 +3497,7 @@ else
 
 while ((patlen = read_one_line(buffer, sizeof(buffer), f)) > 0)
   {
-  while (patlen > 0 && isspace((unsigned char)(buffer[patlen-1]))) patlen--; 
+  while (patlen > 0 && isspace((unsigned char)(buffer[patlen-1]))) patlen--;
   linenumber++;
   if (patlen == 0) continue;   /* Skip blank lines */
 
@@ -3669,8 +3669,15 @@ for (i = 1; i < argc; i++)
         int arglen = (argequals == NULL || equals == NULL)?
           (int)strlen(arg) : (int)(argequals - arg);
 
-        sprintf(buff1, "%.*s", baselen, op->long_name);
-        sprintf(buff2, "%s%.*s", buff1, fulllen - baselen - 2, opbra + 1);
+        if (snprintf(buff1, sizeof(buff1), "%.*s", baselen, op->long_name) >
+              (int)sizeof(buff1) ||
+            snprintf(buff2, sizeof(buff2), "%s%.*s", buff1,
+              fulllen - baselen - 2, opbra + 1) > (int)sizeof(buff2))
+          {
+          fprintf(stderr, "pcre2grep: Buffer overflow when parsing %s option\n",
+            op->long_name);
+          pcre2grep_exit(2);
+          }
 
         if (strncmp(arg, buff1, arglen) == 0 ||
            strncmp(arg, buff2, arglen) == 0)
@@ -3837,7 +3844,7 @@ for (i = 1; i < argc; i++)
   else if (op->type == OP_PATLIST)
     {
     patdatastr *pd = (patdatastr *)op->dataptr;
-    *(pd->lastptr) = add_pattern(option_data, (PCRE2_SIZE)strlen(option_data), 
+    *(pd->lastptr) = add_pattern(option_data, (PCRE2_SIZE)strlen(option_data),
       *(pd->lastptr));
     if (*(pd->lastptr) == NULL) goto EXIT2;
     if (*(pd->anchor) == NULL) *(pd->anchor) = *(pd->lastptr);
@@ -4102,7 +4109,7 @@ if (patterns == NULL && pattern_files == NULL)
   if (i >= argc) return usage(2);
   patterns = patterns_last = add_pattern(argv[i], (PCRE2_SIZE)strlen(argv[i]),
     NULL);
-  i++;   
+  i++;
   if (patterns == NULL) goto EXIT2;
   }
 
