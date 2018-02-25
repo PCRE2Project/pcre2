@@ -30,6 +30,8 @@ read from files via the -f option.
 
 6. A small fix to pcre2grep to avoid compiler warnings for -Wformat-overflow=2.
 
+7. Added --enable-jit=auto support to configure.ac.
+
 
 Version 10.31 12-February-2018
 ------------------------------

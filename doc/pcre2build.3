@@ -1,4 +1,4 @@
-.TH PCRE2BUILD 3 "18 July 2017" "PCRE2 10.30"
+.TH PCRE2BUILD 3 "25 February 2018" "PCRE2 10.32"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .
@@ -59,7 +59,8 @@ The following sections include descriptions of "on/off" options whose names
 begin with --enable or --disable. Because of the way that \fBconfigure\fP
 works, --enable and --disable always come in pairs, so the complementary option
 always exists as well, but as it specifies the default, it is not described.
-Options that specify values have names that start with --with.
+Options that specify values have names that start with --with. At the end of a 
+\fBconfigure\fP run, a summary of the configuration is output.
 .
 .
 .SH "BUILDING 8-BIT, 16-BIT AND 32-BIT LIBRARIES"
@@ -156,8 +157,15 @@ Just-in-time (JIT) compiler support is included in the build by specifying
   --enable-jit
 .sp
 This support is available only for certain hardware architectures. If this
-option is set for an unsupported architecture, a building error occurs. If you
-are running under SELinux you may also want to add
+option is set for an unsupported architecture, a building error occurs. 
+If in doubt, use 
+.sp
+  --enable-jit=auto
+.sp
+which enables JIT only if the current hardware is supported. You can check 
+if JIT is enabled in the configuration summary that is output at the end of a
+\fBconfigure\fP run. If you are enabling JIT under SELinux you may also want to
+add
 .sp
   --enable-jit-sealloc
 .sp
@@ -582,6 +590,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 18 July 2017
-Copyright (c) 1997-2017 University of Cambridge.
+Last updated: 25 February 2018
+Copyright (c) 1997-2018 University of Cambridge.
 .fi
