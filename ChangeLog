@@ -32,6 +32,12 @@ read from files via the -f option.
 
 7. Added --enable-jit=auto support to configure.ac.
 
+8. Added some dummy variables to the heapframe structure in 16-bit and 32-bit
+modes for the benefit of m68k, where pointers can be 16-bit aligned. The
+dummies force 32-bit alignment and this ensures that the structure is a
+multiple of PCRE2_SIZE, a requirement that is tested at compile time. In other
+architectures, alignment requirements take care of this automatically.
+
 
 Version 10.31 12-February-2018
 ------------------------------

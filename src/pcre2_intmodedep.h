@@ -793,12 +793,23 @@ typedef struct heapframe {
   uint8_t return_id;         /* Where to go on in internal "return" */
   uint8_t op;                /* Processing opcode */
 
+  /* At this point, the structure is 16-bit aligned. On most architectures
+  the alignment requirement for a pointer will ensure that the eptr field below
+  is 32-bit or 64-bit aligned. However, on m68k it is fine to have a pointer
+  that is 16-bit aligned. We must therefore ensure that the occu vector is an
+  odd multiple of 16 bits so as to get back into 32-bit alignment. This happens
+  naturally when PCRE2_UCHAR is 8 bits wide, but needs fudges in the other
+  cases. Without these, this structure is no longer a multiple of PCRE2_SIZE
+  and the check below fails. */
+
 #if PCRE2_CODE_UNIT_WIDTH == 8
   PCRE2_UCHAR occu[6];       /* Used for other case code units */
 #elif PCRE2_CODE_UNIT_WIDTH == 16
   PCRE2_UCHAR occu[2];       /* Used for other case code units */
+  uint8_t unused[2];         /* Ensure 32-bit alignment (see above) */
 #else
   PCRE2_UCHAR occu[1];       /* Used for other case code units */
+  uint8_t unused[2];         /* Ensure 32-bit alignment (see above) */
 #endif
 
   /* The rest have to be copied from the previous frame whenever a new frame
@@ -817,6 +828,9 @@ typedef struct heapframe {
   PCRE2_SIZE offset_top;     /* Offset after highest capture */
   PCRE2_SIZE ovector[131072]; /* Must be last in the structure */
 } heapframe;
+
+/* This typedef is a check that the size of the heapframe structure is a 
+multiple of PCRE2_SIZE. See various comments above. */
 
 typedef char check_heapframe_size[
   ((sizeof(heapframe) % sizeof(PCRE2_SIZE)) == 0)? (+1):(-1)];
