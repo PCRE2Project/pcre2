@@ -135,6 +135,7 @@ USER DOCUMENTATION
          pcre2build         building PCRE2
          pcre2callout       details of the callout feature
          pcre2compat        discussion of Perl compatibility
+         pcre2convert       details of pattern conversion functions
          pcre2demo          a demonstration C program that uses PCRE2
          pcre2grep          description of the pcre2grep command (8-bit only)
          pcre2jit           discussion of just-in-time optimization support
@@ -146,6 +147,7 @@ USER DOCUMENTATION
          pcre2perform       discussion of performance issues
          pcre2posix         the POSIX-compatible C API for the 8-bit library
          pcre2sample        discussion of the pcre2demo program
+         pcre2serialize     details of pattern serialization
          pcre2syntax        quick syntax reference
          pcre2test          description of the pcre2test command
          pcre2unicode       discussion of Unicode and UTF support
@@ -167,8 +169,8 @@ AUTHOR
 
 REVISION
 
-       Last updated: 01 April 2017
-       Copyright (c) 1997-2017 University of Cambridge.
+       Last updated: 04 March 2018
+       Copyright (c) 1997-2018 University of Cambridge.
 ------------------------------------------------------------------------------
  
  
