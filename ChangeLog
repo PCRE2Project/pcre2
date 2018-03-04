@@ -38,6 +38,9 @@ dummies force 32-bit alignment and this ensures that the structure is a
 multiple of PCRE2_SIZE, a requirement that is tested at compile time. In other
 architectures, alignment requirements take care of this automatically.
 
+9. When returning an error from pcre2_pattern_convert(), ensure the error
+offset is set zero for early errors.
+
 
 Version 10.31 12-February-2018
 ------------------------------
