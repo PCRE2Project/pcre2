@@ -96,6 +96,14 @@ POSSIBILITY OF SUCH DAMAGE.
 #define PCRE2_CODE_UNIT_WIDTH 8
 #include "pcre2.h"
 
+/* Older versions of MSVC lack snprintf(). This define allows for
+warning/error-free compilation and testing with MSVC compilers back to at least
+MSVC 10/2010. Except for VC6 (which is missing some fundamentals and fails). */
+
+#if defined(_MSC_VER) && (_MSC_VER < 1900)
+#define snprintf _snprintf
+#endif
+
 #define FALSE 0
 #define TRUE 1
 
@@ -3663,16 +3671,18 @@ for (i = 1; i < argc; i++)
         {
         char buff1[24];
         char buff2[24];
+        int ret;
 
         int baselen = (int)(opbra - op->long_name);
         int fulllen = (int)(strchr(op->long_name, ')') - op->long_name + 1);
         int arglen = (argequals == NULL || equals == NULL)?
           (int)strlen(arg) : (int)(argequals - arg);
 
-        if (snprintf(buff1, sizeof(buff1), "%.*s", baselen, op->long_name) >
-              (int)sizeof(buff1) ||
-            snprintf(buff2, sizeof(buff2), "%s%.*s", buff1,
-              fulllen - baselen - 2, opbra + 1) > (int)sizeof(buff2))
+        if ((ret = snprintf(buff1, sizeof(buff1), "%.*s", baselen, op->long_name),
+             ret < 0 || ret > (int)sizeof(buff1)) ||
+            (ret = snprintf(buff2, sizeof(buff2), "%s%.*s", buff1,
+                     fulllen - baselen - 2, opbra + 1),
+             ret < 0 || ret > (int)sizeof(buff2)))
           {
           fprintf(stderr, "pcre2grep: Buffer overflow when parsing %s option\n",
             op->long_name);

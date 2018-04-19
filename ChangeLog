@@ -41,6 +41,15 @@ architectures, alignment requirements take care of this automatically.
 9. When returning an error from pcre2_pattern_convert(), ensure the error
 offset is set zero for early errors.
 
+10. A number of patches for Windows support from Daniel Richard G:
+
+  (a) List of error numbers in Runtest.bat corrected (it was not the same as in 
+      Runtest). 
+      
+  (b) pcre2grep snprintf() workaround as used elsewhere in the tree.
+  
+  (c) Support for non-C99 snprintf() that returns -1 in the overflow case.  
+
 
 Version 10.31 12-February-2018
 ------------------------------

@@ -263,7 +263,7 @@ if errorlevel 1 (
   set failed="yes"
   goto :eof
 ) else if [%1]==[2] (
-  %pcre2test% %mode% %4 %5 %6 %7 %8 %9 -error -63,-62,-2,-1,0,100,188,189,190,191 >>%2%bits%\%testoutput%
+  %pcre2test% %mode% %4 %5 %6 %7 %8 %9 -error -65,-62,-2,-1,0,100,101,191,200 >>%2%bits%\%testoutput%
 )
 
 set type=
