@@ -2615,8 +2615,6 @@ for (;;)
       case OP_COND:
       case OP_SCOND:
         {
-        PCRE2_SIZE local_offsets[1000];
-        int local_workspace[1000];
         int codelink = (int)GET(code, 1);
         PCRE2_UCHAR condcode;
 
@@ -2672,6 +2670,8 @@ for (;;)
 
         else
           {
+          PCRE2_SIZE local_offsets[2];
+          int local_workspace[1000];
           int rc;
           PCRE2_SPTR asscode = code + LINK_SIZE + 1;
           PCRE2_SPTR endasscode = asscode + GET(asscode, 1);

@@ -49,6 +49,8 @@ offset is set zero for early errors.
   (b) pcre2grep snprintf() workaround as used elsewhere in the tree.
   
   (c) Support for non-C99 snprintf() that returns -1 in the overflow case.  
+  
+11. Minor tidy of pcre2_dfa_matgch() code. 
 
 
 Version 10.31 12-February-2018
