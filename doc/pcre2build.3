@@ -1,4 +1,4 @@
-.TH PCRE2BUILD 3 "25 February 2018" "PCRE2 10.32"
+.TH PCRE2BUILD 3 "26 April 2018" "PCRE2 10.32"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .
@@ -292,9 +292,10 @@ change this by a setting such as
   --with-heap-limit=500
 .sp
 which limits the amount of heap to 500 kilobytes. This limit applies only to
-interpretive matching in pcre2_match(). It does not apply when JIT (which has
-its own memory arrangements) is used, nor does it apply to
-\fBpcre2_dfa_match()\fP.
+interpretive matching in \fBpcre2_match()\fP and \fBpcre2_dfa_match()\fP, which
+may also use the heap for internal workspace when processing complicated
+patterns. This limit does not apply when JIT (which has its own memory
+arrangements) is used.
 .P
 You can also explicitly limit the depth of nested backtracking in the
 \fBpcre2_match()\fP interpreter. This limit defaults to the value that is set
@@ -590,6 +591,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 25 February 2018
+Last updated: 26 April 2018
 Copyright (c) 1997-2018 University of Cambridge.
 .fi

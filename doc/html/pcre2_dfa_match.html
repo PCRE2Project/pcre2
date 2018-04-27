@@ -46,9 +46,9 @@ just once (except when processing lookaround assertions). This function is
   <i>wscount</i>      Number of elements in the vector
 </pre>
 For <b>pcre2_dfa_match()</b>, a match context is needed only if you want to set
-up a callout function or specify the match and/or the recursion depth limits.
-The <i>length</i> and <i>startoffset</i> values are code units, not characters.
-The options are:
+up a callout function or specify the heap limit or the match or the recursion
+depth limits. The <i>length</i> and <i>startoffset</i> values are code units, not
+characters. The options are:
 <pre>
   PCRE2_ANCHORED          Match only at the first position
   PCRE2_ENDANCHORED       Pattern can match only at end of subject

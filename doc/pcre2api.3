@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "31 December 2017" "PCRE2 10.31"
+.TH PCRE2API 3 "27 April 2018" "PCRE2 10.32"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -887,16 +887,17 @@ offset limit. In other words, whichever limit comes first is used.
 .sp
 The \fIheap_limit\fP parameter specifies, in units of kilobytes, the maximum
 amount of heap memory that \fBpcre2_match()\fP may use to hold backtracking
-information when running an interpretive match. This limit does not apply to
-matching with the JIT optimization, which has its own memory control
-arrangements (see the
+information when running an interpretive match. This limit also applies to
+\fBpcre2_dfa_match()\fP, which may use the heap when processing patterns with a
+lot of nested pattern recursion or lookarounds or atomic groups. This limit
+does not apply to matching with the JIT optimization, which has its own memory
+control arrangements (see the
 .\" HREF
 \fBpcre2jit\fP
 .\"
-documentation for more details), nor does it apply to \fBpcre2_dfa_match()\fP.
-If the limit is reached, the negative error code PCRE2_ERROR_HEAPLIMIT is
-returned. The default limit is set when PCRE2 is built; the default default is
-very large and is essentially "unlimited".
+documentation for more details). If the limit is reached, the negative error
+code PCRE2_ERROR_HEAPLIMIT is returned. The default limit is set when PCRE2 is
+built; the default default is very large and is essentially "unlimited".
 .P
 A value for the heap limit may also be supplied by an item at the start of a
 pattern of the form
@@ -914,6 +915,11 @@ Heap memory is used only if the initial vector is too small. If the heap limit
 is set to a value less than 21 (in particular, zero) no heap memory will be
 used. In this case, only patterns that do not have a lot of nested backtracking
 can be successfully processed.
+.P
+Similarly, for \fBpcre2_dfa_match()\fP, a vector on the system stack is used 
+when processing pattern recursions, lookarounds, or atomic groups, and only if 
+this is not big enough is heap memory used. In this case, too, setting a value 
+of zero disables the use of the heap.
 .sp
 .nf
 .B int pcre2_set_match_limit(pcre2_match_context *\fImcontext\fP,
@@ -967,11 +973,21 @@ backtracking.
 .P
 The depth limit is not relevant, and is ignored, when matching is done using
 JIT compiled code. However, it is supported by \fBpcre2_dfa_match()\fP, which
-uses it to limit the depth of internal recursive function calls that implement
-atomic groups, lookaround assertions, and pattern recursions. This is,
-therefore, an indirect limit on the amount of system stack that is used. A
-recursive pattern such as /(.)(?1)/, when matched to a very long string using
-\fBpcre2_dfa_match()\fP, can use a great deal of stack.
+uses it to limit the depth of nested internal recursive function calls that
+implement atomic groups, lookaround assertions, and pattern recursions. This
+limits, indirectly, the amount of system stack this is used. It was more useful
+in versions before 10.32, when stack memory was used for local workspace
+vectors for recursive function calls. From version 10.32, only local variables
+are allocated on the stack and as each call uses only a few hundred bytes, even
+a small stack can support quite a lot of recursion.
+.P
+If the depth of internal recursive function calls is great enough, local
+workspace vectors are allocated on the heap from version 10.32 onwards, so the
+depth limit also indirectly limits the amount of heap memory that is used. A
+recursive pattern such as /(.(?2))((?1)|)/, when matched to a very long string
+using \fBpcre2_dfa_match()\fP, can use a great deal of memory. However, it is
+probably better to limit heap usage directly by calling
+\fBpcre2_set_heap_limit()\fP.
 .P
 The default value for the depth limit can be set when PCRE2 is built; the
 default default is the same value as the default for the match limit. If the
@@ -1028,15 +1044,16 @@ and the 2-bit and 4-bit indicate 16-bit and 32-bit support, respectively.
   PCRE2_CONFIG_DEPTHLIMIT
 .sp
 The output is a uint32_t integer that gives the default limit for the depth of
-nested backtracking in \fBpcre2_match()\fP or the depth of nested recursions
-and lookarounds in \fBpcre2_dfa_match()\fP. Further details are given with
-\fBpcre2_set_depth_limit()\fP above.
+nested backtracking in \fBpcre2_match()\fP or the depth of nested recursions,
+lookarounds, and atomic groups in \fBpcre2_dfa_match()\fP. Further details are
+given with \fBpcre2_set_depth_limit()\fP above.
 .sp
   PCRE2_CONFIG_HEAPLIMIT
 .sp
 The output is a uint32_t integer that gives, in kilobytes, the default limit
-for the amount of heap memory used by \fBpcre2_match()\fP. Further details are
-given with \fBpcre2_set_heap_limit()\fP above.
+for the amount of heap memory used by \fBpcre2_match()\fP or 
+\fBpcre2_dfa_match()\fP. Further details are given with
+\fBpcre2_set_heap_limit()\fP above.
 .sp
   PCRE2_CONFIG_JIT
 .sp
@@ -3514,17 +3531,7 @@ capture.
 Calls to the convenience functions that extract substrings by name
 return the error PCRE2_ERROR_DFA_UFUNC (unsupported function) if used after a
 DFA match. The convenience functions that extract substrings by number never
-return PCRE2_ERROR_NOSUBSTRING, and the meanings of some other errors are
-slightly different:
-.sp
-  PCRE2_ERROR_UNAVAILABLE
-.sp
-The ovector is not big enough to include a slot for the given substring number.
-.sp
-  PCRE2_ERROR_UNSET
-.sp
-There is a slot in the ovector for this substring, but there were insufficient
-matches to fill it.
+return PCRE2_ERROR_NOSUBSTRING.
 .P
 The matched strings are stored in the ovector in reverse order of length; that
 is, the longest matching string is first. If there were too many matches to fit
@@ -3605,6 +3612,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 31 December 2017
-Copyright (c) 1997-2017 University of Cambridge.
+Last updated: 27 April 2018
+Copyright (c) 1997-2018 University of Cambridge.
 .fi

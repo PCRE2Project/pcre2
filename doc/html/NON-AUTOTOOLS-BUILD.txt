@@ -10,6 +10,7 @@ This document contains the following sections:
   Calling conventions in Windows environments
   Comments about Win32 builds
   Building PCRE2 on Windows with CMake
+  Building PCRE2 on Windows with Visual Studio
   Testing with RunTest.bat
   Building PCRE2 on native z/OS and z/VM
 
@@ -328,6 +329,18 @@ cache can be deleted by selecting "File > Delete Cache".
     most recent build configuration is targeted by the tests. A summary of
     test results is presented. Complete test output is subsequently
     available for review in Testing\Temporary under your build dir.
+    
+
+BUILDING PCRE2 ON WINDOWS WITH VISUAL STUDIO
+
+The code currently cannot be compiled without a stdint.h header, which is
+available only in relatively recent versions of Visual Studio. However, this
+portable and permissively-licensed implementation of the header worked without
+issue:
+
+  http://www.azillionmonkeys.com/qed/pstdint.h
+
+Just rename it and drop it into the top level of the build tree.
 
 
 TESTING WITH RUNTEST.BAT
@@ -382,6 +395,6 @@ Everything in that location, source and executable, is in EBCDIC and native
 z/OS file formats. The port provides an API for LE languages such as COBOL and
 for the z/OS and z/VM versions of the Rexx languages.
 
-===============================
-Last Updated: 13 September 2017
-===============================
+===========================
+Last Updated: 19 April 2018
+===========================

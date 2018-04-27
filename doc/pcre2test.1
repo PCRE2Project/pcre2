@@ -1,4 +1,4 @@
-.TH PCRE2TEST 1 "21 Decbmber 2017" "PCRE 10.31"
+.TH PCRE2TEST 1 "25 April 2018" "PCRE 10.32"
 .SH NAME
 pcre2test - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -1168,7 +1168,7 @@ pattern.
       get=<number or name>       extract captured substring
       getall                     extract all captured substrings
   /g  global                     global matching
-      heap_limit=<n>             set a limit on heap memory
+      heap_limit=<n>             set a limit on heap memory (Kbytes)
       jitstack=<n>               set size of JIT stack
       mark                       show mark values
       match_limit=<n>            set a match limit
@@ -1401,24 +1401,36 @@ the appropriate limits in the match context. These values are ignored when the
 .sp
 If the \fBfind_limits\fP modifier is present on a subject line, \fBpcre2test\fP
 calls the relevant matching function several times, setting different values in
-the match context via \fBpcre2_set_heap_limit(), \fBpcre2_set_match_limit()\fP,
-or \fBpcre2_set_depth_limit()\fP until it finds the minimum values for each
-parameter that allows the match to complete without error.
+the match context via \fBpcre2_set_heap_limit()\fP,
+\fBpcre2_set_match_limit()\fP, or \fBpcre2_set_depth_limit()\fP until it finds
+the minimum values for each parameter that allows the match to complete without
+error. If JIT is being used, only the match limit is relevant.
 .P
-If JIT is being used, only the match limit is relevant. If DFA matching is
-being used, only the depth limit is relevant.
-.P
-The \fImatch_limit\fP number is a measure of the amount of backtracking
-that takes place, and learning the minimum value can be instructive. For most
-simple matches, the number is quite small, but for patterns with very large
-numbers of matching possibilities, it can become large very quickly with
-increasing length of subject string.
+When using this modifier, the pattern should not contain any limit settings 
+such as (*LIMIT_MATCH=...) within it. If such a setting is present and is 
+lower than the minimum matching value, the minimum value cannot be found 
+because \fBpcre2_set_match_limit()\fP etc. are only able to reduce the value of 
+an in-pattern limit; they cannot increase it.
 .P
 For non-DFA matching, the minimum \fIdepth_limit\fP number is a measure of how
 much nested backtracking happens (that is, how deeply the pattern's tree is
 searched). In the case of DFA matching, \fIdepth_limit\fP controls the depth of
 recursive calls of the internal function that is used for handling pattern
 recursion, lookaround assertions, and atomic groups.
+.P
+For non-DFA matching, the \fImatch_limit\fP number is a measure of the amount
+of backtracking that takes place, and learning the minimum value can be
+instructive. For most simple matches, the number is quite small, but for
+patterns with very large numbers of matching possibilities, it can become large
+very quickly with increasing length of subject string. In the case of DFA 
+matching, \fImatch_limit\fP controls the total number of calls, both recursive 
+and non-recursive, to the internal matching function, thus controlling the 
+overall amount of computing resource that is used.
+.P
+For both kinds of matching, the \fIheap_limit\fP number (which is in kilobytes) 
+limits the amount of heap memory used for matching. A value of zero disables 
+the use of any heap memory; many simple pattern matches can be done without 
+using the heap, so this is not an unreasonable setting.
 .
 .
 .SS "Showing MARK names"
@@ -1437,13 +1449,14 @@ is added to the non-match message.
 .sp
 The \fBmemory\fP modifier causes \fBpcre2test\fP to log the sizes of all heap
 memory allocation and freeing calls that occur during a call to
-\fBpcre2_match()\fP. These occur only when a match requires a bigger vector
-than the default for remembering backtracking points. In many cases there will
-be no heap memory used and therefore no additional output. No heap memory is
-allocated during matching with \fBpcre2_dfa_match\fP or with JIT, so in those
-cases the \fBmemory\fP modifier never has any effect. For this modifier to
-work, the \fBnull_context\fP modifier must not be set on both the pattern and
-the subject, though it can be set on one or the other.
+\fBpcre2_match()\fP or \fBpcre2_dfa_match()\fP. These occur only when a match
+requires a bigger vector than the default for remembering backtracking points
+(\fBpcre2_match()\fP) or for internal workspace (\fBpcre2_dfa_match()\fP). In
+many cases there will be no heap memory used and therefore no additional
+output. No heap memory is allocated during matching with JIT, so in that case
+the \fBmemory\fP modifier never has any effect. For this modifier to work, the
+\fBnull_context\fP modifier must not be set on both the pattern and the
+subject, though it can be set on one or the other.
 .
 .
 .SS "Setting a starting offset"
@@ -1962,6 +1975,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 21 December 2017
-Copyright (c) 1997-2017 University of Cambridge.
+Last updated: 25 April 2018
+Copyright (c) 1997-2018 University of Cambridge.
 .fi

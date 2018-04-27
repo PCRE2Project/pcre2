@@ -173,12 +173,12 @@ the application to apply the JIT optimization by calling
 Setting match resource limits
 </b><br>
 <P>
-The pcre2_match() function contains a counter that is incremented every time it
-goes round its main loop. The caller of <b>pcre2_match()</b> can set a limit on
-this counter, which therefore limits the amount of computing resource used for
-a match. The maximum depth of nested backtracking can also be limited; this
-indirectly restricts the amount of heap memory that is used, but there is also
-an explicit memory limit that can be set.
+The <b>pcre2_match()</b> function contains a counter that is incremented every
+time it goes round its main loop. The caller of <b>pcre2_match()</b> can set a
+limit on this counter, which therefore limits the amount of computing resource
+used for a match. The maximum depth of nested backtracking can also be limited;
+this indirectly restricts the amount of heap memory that is used, but there is
+also an explicit memory limit that can be set.
 </P>
 <P>
 These facilities are provided to catch runaway matches that are provoked by
@@ -195,20 +195,22 @@ where d is any number of decimal digits. However, the value of the setting must
 be less than the value set (or defaulted) by the caller of <b>pcre2_match()</b>
 for it to have any effect. In other words, the pattern writer can lower the
 limits set by the programmer, but not raise them. If there is more than one
-setting of one of these limits, the lower value is used.
+setting of one of these limits, the lower value is used. The heap limit is 
+specified in kilobytes.
 </P>
 <P>
 Prior to release 10.30, LIMIT_DEPTH was called LIMIT_RECURSION. This name is
 still recognized for backwards compatibility.
 </P>
 <P>
-The heap limit applies only when the <b>pcre2_match()</b> interpreter is used
-for matching. It does not apply to JIT or DFA matching. The match limit is used
-(but in a different way) when JIT is being used, or when
-<b>pcre2_dfa_match()</b> is called, to limit computing resource usage by those
-matching functions. The depth limit is ignored by JIT but is relevant for DFA
-matching, which uses function recursion for recursions within the pattern. In
-this case, the depth limit controls the amount of system stack that is used.
+The heap limit applies only when the <b>pcre2_match()</b> or
+<b>pcre2_dfa_match()</b> interpreters are used for matching. It does not apply
+to JIT. The match limit is used (but in a different way) when JIT is being
+used, or when <b>pcre2_dfa_match()</b> is called, to limit computing resource
+usage by those matching functions. The depth limit is ignored by JIT but is
+relevant for DFA matching, which uses function recursion for recursions within
+the pattern and for lookaround assertions and atomic groups. In this case, the
+depth limit controls the depth of such recursion.
 <a name="newlines"></a></P>
 <br><b>
 Newline conventions
@@ -2818,11 +2820,6 @@ matched at the top level, its final captured value is unset, even if it was
 (temporarily) set at a deeper level during the matching process.
 </P>
 <P>
-If there are more than 15 capturing parentheses in a pattern, PCRE2 has to
-obtain extra memory from the heap to store data during a recursion. If no
-memory can be obtained, the match fails with the PCRE2_ERROR_NOMEMORY error.
-</P>
-<P>
 Do not confuse the (?R) item with the condition (R), which tests for recursion.
 Consider this pattern, which matches text in angle brackets, allowing for
 arbitrary nesting. Only digits are allowed in nested brackets (that is, when
@@ -3479,9 +3476,9 @@ Cambridge, England.
 </P>
 <br><a name="SEC30" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 12 September 2017
+Last updated: 25 April 2018
 <br>
-Copyright &copy; 1997-2017 University of Cambridge.
+Copyright &copy; 1997-2018 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE2 index page</a>.

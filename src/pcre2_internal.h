@@ -253,6 +253,11 @@ maximum size of this can be limited. */
 
 #define START_FRAMES_SIZE 20480
 
+/* Similarly, for DFA matching, an initial internal workspace vector is 
+allocated on the stack. */
+
+#define DFA_START_RWS_SIZE 30720
+
 /* Define the default BSR convention. */
 
 #ifdef BSR_ANYCRLF

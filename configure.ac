@@ -142,7 +142,7 @@ AC_ARG_ENABLE(jit,
               AS_HELP_STRING([--enable-jit],
                              [enable Just-In-Time compiling support]),
               , enable_jit=no)
-              
+
 # This code enables JIT if the hardware supports it.
 if test "$enable_jit" = "auto"; then
   AC_LANG(C)
@@ -718,10 +718,11 @@ AC_DEFINE_UNQUOTED([PARENS_NEST_LIMIT], [$with_parens_nest_limit], [
 AC_DEFINE_UNQUOTED([MATCH_LIMIT], [$with_match_limit], [
   The value of MATCH_LIMIT determines the default number of times the
   pcre2_match() function can record a backtrack position during a single
-  matching attempt. There is a runtime interface for setting a different limit.
-  The limit exists in order to catch runaway regular expressions that take for
-  ever to determine that they do not match. The default is set very large so
-  that it does not accidentally catch legitimate cases.])
+  matching attempt. The value is also used to limit a loop counter in
+  pcre2_dfa_match(). There is a runtime interface for setting a different
+  limit. The limit exists in order to catch runaway regular expressions that
+  take for ever to determine that they do not match. The default is set very
+  large so that it does not accidentally catch legitimate cases.])
 
 # --with-match-limit-recursion is an obsolete synonym for --with-match-limit-depth
 
@@ -745,11 +746,15 @@ AC_DEFINE_UNQUOTED([MATCH_LIMIT_DEPTH], [$with_match_limit_depth], [
   the maximum amount of heap memory that is used. The value of
   MATCH_LIMIT_DEPTH provides this facility. To have any useful effect, it must
   be less than the value of MATCH_LIMIT. The default is to use the same value
-  as MATCH_LIMIT. There is a runtime method for setting a different limit.])
+  as MATCH_LIMIT. There is a runtime method for setting a different limit. In
+  the case of pcre2_dfa_match(), this limit controls the depth of the internal
+  nested function calls that are used for pattern recursions, lookarounds, and
+  atomic groups.])
 
 AC_DEFINE_UNQUOTED([HEAP_LIMIT], [$with_heap_limit], [
-  This limits the amount of memory that pcre2_match() may use while matching
-  a pattern. The value is in kilobytes.])
+  This limits the amount of memory that may be used while matching
+  a pattern. It applies to both pcre2_match() and pcre2_dfa_match(). It does
+  not apply to JIT matching. The value is in kilobytes.])
 
 AC_DEFINE([MAX_NAME_SIZE], [32], [
   This limit is parameterized just in case anybody ever wants to

@@ -1,4 +1,4 @@
-.TH PCRE2CALLOUT 3 "22 December 2017" "PCRE2 10.31"
+.TH PCRE2CALLOUT 3 "26 April 2018" "PCRE2 10.32"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH SYNOPSIS
@@ -291,10 +291,12 @@ than \fIcapture_top\fP also have both of their ovector slots set to
 PCRE2_UNSET.
 .P
 For DFA matching, the \fIoffset_vector\fP field points to the ovector that was
-passed to the matching function in the match data block, but it holds no useful
-information at callout time because \fBpcre2_dfa_match()\fP does not support
-substring capturing. The value of \fIcapture_top\fP is always 1 and the value
-of \fIcapture_last\fP is always 0 for DFA matching.
+passed to the matching function in the match data block for callouts at the top
+level, but to an internal ovector during the processing of pattern recursions,
+lookarounds, and atomic groups. However, these ovectors hold no useful
+information because \fBpcre2_dfa_match()\fP does not support substring
+capturing. The value of \fIcapture_top\fP is always 1 and the value of
+\fIcapture_last\fP is always 0 for DFA matching.
 .P
 The \fIsubject\fP and \fIsubject_length\fP fields contain copies of the values
 that were passed to the matching function.
@@ -441,6 +443,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 22 December 2017
-Copyright (c) 1997-2017 University of Cambridge.
+Last updated: 26 April 2018
+Copyright (c) 1997-2018 University of Cambridge.
 .fi

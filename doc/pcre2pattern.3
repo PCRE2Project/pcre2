@@ -1,4 +1,4 @@
-.TH PCRE2PATTERN 3 "12 September 2017" "PCRE2 10.31"
+.TH PCRE2PATTERN 3 "25 April 2018" "PCRE2 10.32"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION DETAILS"
@@ -141,12 +141,12 @@ the application to apply the JIT optimization by calling
 .SS "Setting match resource limits"
 .rs
 .sp
-The pcre2_match() function contains a counter that is incremented every time it
-goes round its main loop. The caller of \fBpcre2_match()\fP can set a limit on
-this counter, which therefore limits the amount of computing resource used for
-a match. The maximum depth of nested backtracking can also be limited; this
-indirectly restricts the amount of heap memory that is used, but there is also
-an explicit memory limit that can be set.
+The \fBpcre2_match()\fP function contains a counter that is incremented every
+time it goes round its main loop. The caller of \fBpcre2_match()\fP can set a
+limit on this counter, which therefore limits the amount of computing resource
+used for a match. The maximum depth of nested backtracking can also be limited;
+this indirectly restricts the amount of heap memory that is used, but there is
+also an explicit memory limit that can be set.
 .P
 These facilities are provided to catch runaway matches that are provoked by
 patterns with huge matching trees (a typical example is a pattern with nested
@@ -162,18 +162,20 @@ where d is any number of decimal digits. However, the value of the setting must
 be less than the value set (or defaulted) by the caller of \fBpcre2_match()\fP
 for it to have any effect. In other words, the pattern writer can lower the
 limits set by the programmer, but not raise them. If there is more than one
-setting of one of these limits, the lower value is used.
+setting of one of these limits, the lower value is used. The heap limit is 
+specified in kilobytes.
 .P
 Prior to release 10.30, LIMIT_DEPTH was called LIMIT_RECURSION. This name is
 still recognized for backwards compatibility.
 .P
-The heap limit applies only when the \fBpcre2_match()\fP interpreter is used
-for matching. It does not apply to JIT or DFA matching. The match limit is used
-(but in a different way) when JIT is being used, or when
-\fBpcre2_dfa_match()\fP is called, to limit computing resource usage by those
-matching functions. The depth limit is ignored by JIT but is relevant for DFA
-matching, which uses function recursion for recursions within the pattern. In
-this case, the depth limit controls the amount of system stack that is used.
+The heap limit applies only when the \fBpcre2_match()\fP or
+\fBpcre2_dfa_match()\fP interpreters are used for matching. It does not apply
+to JIT. The match limit is used (but in a different way) when JIT is being
+used, or when \fBpcre2_dfa_match()\fP is called, to limit computing resource
+usage by those matching functions. The depth limit is ignored by JIT but is
+relevant for DFA matching, which uses function recursion for recursions within
+the pattern and for lookaround assertions and atomic groups. In this case, the
+depth limit controls the depth of such recursion.
 .
 .
 .\" HTML <a name="newlines"></a>
@@ -2838,10 +2840,6 @@ the last value taken on at the top level. If a capturing subpattern is not
 matched at the top level, its final captured value is unset, even if it was
 (temporarily) set at a deeper level during the matching process.
 .P
-If there are more than 15 capturing parentheses in a pattern, PCRE2 has to
-obtain extra memory from the heap to store data during a recursion. If no
-memory can be obtained, the match fails with the PCRE2_ERROR_NOMEMORY error.
-.P
 Do not confuse the (?R) item with the condition (R), which tests for recursion.
 Consider this pattern, which matches text in angle brackets, allowing for
 arbitrary nesting. Only digits are allowed in nested brackets (that is, when
@@ -3505,6 +3503,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 12 September 2017
-Copyright (c) 1997-2017 University of Cambridge.
+Last updated: 25 April 2018
+Copyright (c) 1997-2018 University of Cambridge.
 .fi

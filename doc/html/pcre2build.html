@@ -295,9 +295,10 @@ change this by a setting such as
   --with-heap-limit=500
 </pre>
 which limits the amount of heap to 500 kilobytes. This limit applies only to
-interpretive matching in pcre2_match(). It does not apply when JIT (which has
-its own memory arrangements) is used, nor does it apply to
-<b>pcre2_dfa_match()</b>.
+interpretive matching in <b>pcre2_match()</b> and <b>pcre2_dfa_match()</b>, which
+may also use the heap for internal workspace when processing complicated
+patterns. This limit does not apply when JIT (which has its own memory
+arrangements) is used.
 </P>
 <P>
 You can also explicitly limit the depth of nested backtracking in the
@@ -573,7 +574,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC25" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 25 February 2018
+Last updated: 26 April 2018
 <br>
 Copyright &copy; 1997-2018 University of Cambridge.
 <br>

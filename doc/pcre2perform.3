@@ -1,4 +1,4 @@
-.TH PCRE2PERFORM 3 "08 April 2017" "PCRE2 10.30"
+.TH PCRE2PERFORM 3 "25 April 2018" "PCRE2 10.32"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 PERFORMANCE"
@@ -78,9 +78,16 @@ may also reduce the memory requirements.
 .P
 In contrast to \fBpcre2_match()\fP, \fBpcre2_dfa_match()\fP does use recursive
 function calls, but only for processing atomic groups, lookaround assertions,
-and recursion within the pattern. Too much nested recursion may cause stack
-issues. The "match depth" parameter can be used to limit the depth of function
-recursion in \fBpcre2_dfa_match()\fP.
+and recursion within the pattern. The original version of the code used to
+allocate quite large internal workspace vectors on the stack, which caused some 
+problems for some patterns in environments with small stacks. From release
+10.32 the code for \fBpcre2_dfa_match()\fP has been re-factored to use heap
+memory when necessary for internal workspace when recursing, though recursive
+function calls are still used.
+.P
+The "match depth" parameter can be used to limit the depth of function
+recursion, and the "match heap" parameter to limit heap memory in
+\fBpcre2_dfa_match()\fP.
 .
 .
 .SH "PROCESSING TIME"
@@ -232,6 +239,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 08 April 2017
-Copyright (c) 1997-2017 University of Cambridge.
+Last updated: 25 April 2018
+Copyright (c) 1997-2018 University of Cambridge.
 .fi

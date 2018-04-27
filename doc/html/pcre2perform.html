@@ -93,9 +93,17 @@ may also reduce the memory requirements.
 <P>
 In contrast to <b>pcre2_match()</b>, <b>pcre2_dfa_match()</b> does use recursive
 function calls, but only for processing atomic groups, lookaround assertions,
-and recursion within the pattern. Too much nested recursion may cause stack
-issues. The "match depth" parameter can be used to limit the depth of function
-recursion in <b>pcre2_dfa_match()</b>.
+and recursion within the pattern. The original version of the code used to
+allocate quite large internal workspace vectors on the stack, which caused some 
+problems for some patterns in environments with small stacks. From release
+10.32 the code for <b>pcre2_dfa_match()</b> has been re-factored to use heap
+memory when necessary for internal workspace when recursing, though recursive
+function calls are still used.
+</P>
+<P>
+The "match depth" parameter can be used to limit the depth of function
+recursion, and the "match heap" parameter to limit heap memory in
+<b>pcre2_dfa_match()</b>.
 </P>
 <br><a name="SEC4" href="#TOC1">PROCESSING TIME</a><br>
 <P>
@@ -244,9 +252,9 @@ Cambridge, England.
 </P>
 <br><a name="SEC6" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 08 April 2017
+Last updated: 25 April 2018
 <br>
-Copyright &copy; 1997-2017 University of Cambridge.
+Copyright &copy; 1997-2018 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE2 index page</a>.

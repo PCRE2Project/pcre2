@@ -310,10 +310,12 @@ PCRE2_UNSET.
 </P>
 <P>
 For DFA matching, the <i>offset_vector</i> field points to the ovector that was
-passed to the matching function in the match data block, but it holds no useful
-information at callout time because <b>pcre2_dfa_match()</b> does not support
-substring capturing. The value of <i>capture_top</i> is always 1 and the value
-of <i>capture_last</i> is always 0 for DFA matching.
+passed to the matching function in the match data block for callouts at the top
+level, but to an internal ovector during the processing of pattern recursions,
+lookarounds, and atomic groups. However, these ovectors hold no useful
+information because <b>pcre2_dfa_match()</b> does not support substring
+capturing. The value of <i>capture_top</i> is always 1 and the value of
+<i>capture_last</i> is always 0 for DFA matching.
 </P>
 <P>
 The <i>subject</i> and <i>subject_length</i> fields contain copies of the values
@@ -461,9 +463,9 @@ Cambridge, England.
 </P>
 <br><a name="SEC8" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 22 December 2017
+Last updated: 26 April 2018
 <br>
-Copyright &copy; 1997-2017 University of Cambridge.
+Copyright &copy; 1997-2018 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE2 index page</a>.

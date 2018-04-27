@@ -1199,7 +1199,7 @@ pattern.
       get=&#60;number or name&#62;       extract captured substring
       getall                     extract all captured substrings
   /g  global                     global matching
-      heap_limit=&#60;n&#62;             set a limit on heap memory
+      heap_limit=&#60;n&#62;             set a limit on heap memory (Kbytes)
       jitstack=&#60;n&#62;               set size of JIT stack
       mark                       show mark values
       match_limit=&#60;n&#62;            set a match limit
@@ -1438,20 +1438,17 @@ Finding minimum limits
 <P>
 If the <b>find_limits</b> modifier is present on a subject line, <b>pcre2test</b>
 calls the relevant matching function several times, setting different values in
-the match context via <b>pcre2_set_heap_limit(), \fBpcre2_set_match_limit()</b>,
-or <b>pcre2_set_depth_limit()</b> until it finds the minimum values for each
-parameter that allows the match to complete without error.
+the match context via <b>pcre2_set_heap_limit()</b>,
+<b>pcre2_set_match_limit()</b>, or <b>pcre2_set_depth_limit()</b> until it finds
+the minimum values for each parameter that allows the match to complete without
+error. If JIT is being used, only the match limit is relevant.
 </P>
 <P>
-If JIT is being used, only the match limit is relevant. If DFA matching is
-being used, only the depth limit is relevant.
-</P>
-<P>
-The <i>match_limit</i> number is a measure of the amount of backtracking
-that takes place, and learning the minimum value can be instructive. For most
-simple matches, the number is quite small, but for patterns with very large
-numbers of matching possibilities, it can become large very quickly with
-increasing length of subject string.
+When using this modifier, the pattern should not contain any limit settings 
+such as (*LIMIT_MATCH=...) within it. If such a setting is present and is 
+lower than the minimum matching value, the minimum value cannot be found 
+because <b>pcre2_set_match_limit()</b> etc. are only able to reduce the value of 
+an in-pattern limit; they cannot increase it.
 </P>
 <P>
 For non-DFA matching, the minimum <i>depth_limit</i> number is a measure of how
@@ -1459,6 +1456,22 @@ much nested backtracking happens (that is, how deeply the pattern's tree is
 searched). In the case of DFA matching, <i>depth_limit</i> controls the depth of
 recursive calls of the internal function that is used for handling pattern
 recursion, lookaround assertions, and atomic groups.
+</P>
+<P>
+For non-DFA matching, the <i>match_limit</i> number is a measure of the amount
+of backtracking that takes place, and learning the minimum value can be
+instructive. For most simple matches, the number is quite small, but for
+patterns with very large numbers of matching possibilities, it can become large
+very quickly with increasing length of subject string. In the case of DFA 
+matching, <i>match_limit</i> controls the total number of calls, both recursive 
+and non-recursive, to the internal matching function, thus controlling the 
+overall amount of computing resource that is used.
+</P>
+<P>
+For both kinds of matching, the <i>heap_limit</i> number (which is in kilobytes) 
+limits the amount of heap memory used for matching. A value of zero disables 
+the use of any heap memory; many simple pattern matches can be done without 
+using the heap, so this is not an unreasonable setting.
 </P>
 <br><b>
 Showing MARK names
@@ -1476,13 +1489,14 @@ Showing memory usage
 <P>
 The <b>memory</b> modifier causes <b>pcre2test</b> to log the sizes of all heap
 memory allocation and freeing calls that occur during a call to
-<b>pcre2_match()</b>. These occur only when a match requires a bigger vector
-than the default for remembering backtracking points. In many cases there will
-be no heap memory used and therefore no additional output. No heap memory is
-allocated during matching with <b>pcre2_dfa_match</b> or with JIT, so in those
-cases the <b>memory</b> modifier never has any effect. For this modifier to
-work, the <b>null_context</b> modifier must not be set on both the pattern and
-the subject, though it can be set on one or the other.
+<b>pcre2_match()</b> or <b>pcre2_dfa_match()</b>. These occur only when a match
+requires a bigger vector than the default for remembering backtracking points
+(<b>pcre2_match()</b>) or for internal workspace (<b>pcre2_dfa_match()</b>). In
+many cases there will be no heap memory used and therefore no additional
+output. No heap memory is allocated during matching with JIT, so in that case
+the <b>memory</b> modifier never has any effect. For this modifier to work, the
+<b>null_context</b> modifier must not be set on both the pattern and the
+subject, though it can be set on one or the other.
 </P>
 <br><b>
 Setting a starting offset
@@ -1982,9 +1996,9 @@ Cambridge, England.
 </P>
 <br><a name="SEC21" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 21 December 2017
+Last updated: 25 April 2018
 <br>
-Copyright &copy; 1997-2017 University of Cambridge.
+Copyright &copy; 1997-2018 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE2 index page</a>.

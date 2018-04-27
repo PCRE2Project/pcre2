@@ -5760,6 +5760,8 @@ PCRE2_SET_HEAP_LIMIT(dat_context, max);
 
 for (;;)
   {
+  uint32_t stack_start = 0;
+
   if (errnumber == PCRE2_ERROR_HEAPLIMIT)
     {
     PCRE2_SET_HEAP_LIMIT(dat_context, mid);
@@ -5775,6 +5777,7 @@ for (;;)
 
   if ((dat_datctl.control & CTL_DFA) != 0)
     {
+    stack_start = DFA_START_RWS_SIZE/1024;
     if (dfa_workspace == NULL)
       dfa_workspace = (int *)malloc(DFA_WS_DIMENSION*sizeof(int));
     if (dfa_matched++ == 0)
@@ -5789,11 +5792,21 @@ for (;;)
       dat_datctl.options, match_data, PTR(dat_context));
 
   else
+    {
+    stack_start = START_FRAMES_SIZE/1024;
     PCRE2_MATCH(capcount, compiled_code, pp, ulen, dat_datctl.offset,
       dat_datctl.options, match_data, PTR(dat_context));
+    }
 
   if (capcount == errnumber)
     {
+    if ((mid & 0x80000000u) != 0)
+      {
+      fprintf(outfile, "Can't find minimum %s limit: check pattern for "
+        "restriction\n", msg);
+      break;
+      }
+
     min = mid;
     mid = (mid == max - 1)? max : (max != UINT32_MAX)? (min + max)/2 : mid*2;
     }
@@ -5802,11 +5815,12 @@ for (;;)
            capcount == PCRE2_ERROR_PARTIAL)
     {
     /* If we've not hit the error with a heap limit less than the size of the
-    initial stack frame vector, the heap is not being used, so the minimum
-    limit is zero; there's no need to go on. The other limits are always
-    greater than zero. */
+    initial stack frame vector (for pcre2_match()) or the initial stack
+    workspace vector (for pcre2_dfa_match()), the heap is not being used, so
+    the minimum limit is zero; there's no need to go on. The other limits are
+    always greater than zero. */
 
-    if (errnumber == PCRE2_ERROR_HEAPLIMIT && mid < START_FRAMES_SIZE/1024)
+    if (errnumber == PCRE2_ERROR_HEAPLIMIT && mid < stack_start)
       {
       fprintf(outfile, "Minimum %s limit = 0\n", msg);
       break;
@@ -6771,7 +6785,7 @@ if ((pat_patctl.control & CTL_POSIX) != 0)
         PCRE2_SIZE end = pmatch[i].rm_eo;
         for (j = last_printed + 1; j < i; j++)
           fprintf(outfile, "%2d: <unset>\n", (int)j);
-        last_printed = i; 
+        last_printed = i;
         if (start > end)
           {
           start = pmatch[i].rm_eo;
@@ -7139,18 +7153,16 @@ else for (gmatched = 0;; gmatched++)
         (double)CLOCKS_PER_SEC);
     }
 
-  /* Find the heap, match and depth limits if requested. The match and heap
-  limits are not relevant for DFA matching and the depth and heap limits are
-  not relevant for JIT. The return from check_match_limit() is the return from
-  the final call to pcre2_match() or pcre2_dfa_match(). */
+  /* Find the heap, match and depth limits if requested. The depth and heap
+  limits are not relevant for JIT. The return from check_match_limit() is the
+  return from the final call to pcre2_match() or pcre2_dfa_match(). */
 
   if ((dat_datctl.control & CTL_FINDLIMITS) != 0)
     {
     capcount = 0;  /* This stops compiler warnings */
 
-    if ((dat_datctl.control & CTL_DFA) == 0 &&
-        (FLD(compiled_code, executable_jit) == NULL ||
-          (dat_datctl.options & PCRE2_NO_JIT) != 0))
+    if (FLD(compiled_code, executable_jit) == NULL ||
+          (dat_datctl.options & PCRE2_NO_JIT) != 0)
       {
       (void)check_match_limit(pp, arg_ulen, PCRE2_ERROR_HEAPLIMIT, "heap");
       }
@@ -7164,6 +7176,12 @@ else for (gmatched = 0;; gmatched++)
       {
       capcount = check_match_limit(pp, arg_ulen, PCRE2_ERROR_DEPTHLIMIT,
         "depth");
+      }
+       
+    if (capcount == 0)
+      {
+      fprintf(outfile, "Matched, but offsets vector is too small to show all matches\n");
+      capcount = dat_datctl.oveccount;
       }
     }
 
@@ -7877,7 +7895,7 @@ else
 (void)PCRE2_CONFIG(PCRE2_CONFIG_NEWLINE, &optval);
 print_newline_config(optval, FALSE);
 (void)PCRE2_CONFIG(PCRE2_CONFIG_BSR, &optval);
-printf("  \\R matches %s\n", 
+printf("  \\R matches %s\n",
   (optval == PCRE2_BSR_ANYCRLF)? "CR, LF, or CRLF only" :
                                  "all Unicode newlines");
 (void)PCRE2_CONFIG(PCRE2_CONFIG_NEVER_BACKSLASH_C, &optval);

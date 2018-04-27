@@ -241,9 +241,11 @@ library. They are also documented in the pcre2build man page.
   discussion in the pcre2api man page (search for pcre2_set_match_limit).
 
 . There is a separate counter that limits the depth of nested backtracking
-  during a matching process, which indirectly limits the amount of heap memory
-  that is used. This also has a default of ten million, which is essentially
-  "unlimited". You can change the default by setting, for example,
+  (pcre2_match()) or nested function calls (pcre2_dfa_match()) during a
+  matching process, which indirectly limits the amount of heap memory that is
+  used, and in the case of pcre2_dfa_match() the amount of stack as well. This
+  counter also has a default of ten million, which is essentially "unlimited".
+  You can change the default by setting, for example,
 
   --with-match-limit-depth=5000
 
@@ -251,7 +253,7 @@ library. They are also documented in the pcre2build man page.
   pcre2_set_depth_limit).
 
 . You can also set an explicit limit on the amount of heap memory used by
-  the pcre2_match() interpreter:
+  the pcre2_match() and pcre2_dfa_match() interpreters:
 
   --with-heap-limit=500
 
@@ -885,4 +887,4 @@ The distribution should contain the files listed below.
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 25 February 2018
+Last updated: 27 April 2018

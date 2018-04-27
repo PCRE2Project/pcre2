@@ -50,7 +50,15 @@ offset is set zero for early errors.
   
   (c) Support for non-C99 snprintf() that returns -1 in the overflow case.  
   
-11. Minor tidy of pcre2_dfa_matgch() code. 
+11. Minor tidy of pcre2_dfa_match() code. 
+
+12. Refactored pcre2_dfa_match() so that the internal recursive calls no longer 
+use the stack for local workspace and local ovectors. Instead, an initial block 
+of stack is reserved, but if this is insufficient, heap memory is used. The 
+heap limit parameter now applies to pcre2_dfa_match().
+
+13. If a "find limits" test of DFA matching in pcre2test resulted in too many 
+matches for the ovector, no matches were displayed.
 
 
 Version 10.31 12-February-2018
