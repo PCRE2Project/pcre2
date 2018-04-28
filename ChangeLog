@@ -60,6 +60,9 @@ heap limit parameter now applies to pcre2_dfa_match().
 13. If a "find limits" test of DFA matching in pcre2test resulted in too many 
 matches for the ovector, no matches were displayed.
 
+14. Removed an occurrence of ctrl/Z from test 6 because Windows treats it as 
+EOF. The test looks to have come from a fuzzer.
+
 
 Version 10.31 12-February-2018
 ------------------------------
