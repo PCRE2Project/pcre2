@@ -124,12 +124,15 @@ Last code unit = 'c'
 Subject length lower bound = 3
 
 /(a+)*zz/
+\= Expect no match
     aaaaaaaaaaaaaz
 No match
+\= Expect limit exceeded
     aaaaaaaaaaaaaz\=match_limit=3000
 Failed: error -47: match limit exceeded
 
 /(a+)*zz/
+\= Expect limit exceeded
     aaaaaaaaaaaaaz\=depth_limit=10
 Failed: error -53: matching depth limit exceeded
 
@@ -139,8 +142,10 @@ Match limit = 3000
 Starting code units: a z 
 Last code unit = 'z'
 Subject length lower bound = 2
+\= Expect limit exceeded
     aaaaaaaaaaaaaz
 Failed: error -47: match limit exceeded
+\= Expect limit exceeded
     aaaaaaaaaaaaaz\=match_limit=60000
 Failed: error -47: match limit exceeded
 
@@ -150,6 +155,7 @@ Match limit = 3000
 Starting code units: a z 
 Last code unit = 'z'
 Subject length lower bound = 2
+\= Expect limit exceeded
     aaaaaaaaaaaaaz
 Failed: error -47: match limit exceeded
 
@@ -159,8 +165,10 @@ Match limit = 60000
 Starting code units: a z 
 Last code unit = 'z'
 Subject length lower bound = 2
+\= Expect no match
     aaaaaaaaaaaaaz
 No match
+\= Expect limit exceeded
     aaaaaaaaaaaaaz\=match_limit=3000
 Failed: error -47: match limit exceeded
 
@@ -170,8 +178,10 @@ Depth limit = 10
 Starting code units: a z 
 Last code unit = 'z'
 Subject length lower bound = 2
+\= Expect limit exceeded
     aaaaaaaaaaaaaz
 Failed: error -53: matching depth limit exceeded
+\= Expect limit exceeded
     aaaaaaaaaaaaaz\=depth_limit=1000
 Failed: error -53: matching depth limit exceeded
 
@@ -181,6 +191,7 @@ Depth limit = 1000
 Starting code units: a z 
 Last code unit = 'z'
 Subject length lower bound = 2
+\= Expect no match
     aaaaaaaaaaaaaz
 No match
 
@@ -190,8 +201,10 @@ Depth limit = 1000
 Starting code units: a z 
 Last code unit = 'z'
 Subject length lower bound = 2
+\= Expect no match
     aaaaaaaaaaaaaz
 No match
+\= Expect limit exceeded
     aaaaaaaaaaaaaz\=depth_limit=10
 Failed: error -53: matching depth limit exceeded
     

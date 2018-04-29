@@ -300,8 +300,10 @@ Starting code units: a z
 Last code unit = 'z'
 Subject length lower bound = 2
 JIT compilation was successful
+\= Expect limit exceeded
     aaaaaaaaaaaaaz
 Failed: error -47: match limit exceeded
+\= Expect limit exceeded
     aaaaaaaaaaaaaz\=match_limit=60000
 Failed: error -47: match limit exceeded
 
@@ -312,6 +314,7 @@ Starting code units: a z
 Last code unit = 'z'
 Subject length lower bound = 2
 JIT compilation was successful
+\= Expect limit exceeded
     aaaaaaaaaaaaaz
 Failed: error -47: match limit exceeded
 
@@ -332,14 +335,17 @@ Failed: error -47: match limit exceeded
 # These three have infinitely nested recursions. 
     
 /((?2))((?1))/
+\= Expect JIT stack limit reached
     abc
 Failed: error -46: JIT stack limit reached
 
 /((?(R2)a+|(?1)b))()/
+\= Expect JIT stack limit reached
     aaaabcde
 Failed: error -46: JIT stack limit reached
 
 /(?(R)a*(?1)|((?R))b)/
+\= Expect JIT stack limit reached
     aaaabcde
 Failed: error -46: JIT stack limit reached
     
@@ -516,7 +522,8 @@ Failed: error -46: JIT stack limit reached
 /[axm]{7}/
 
 /(.|.)*?bx/
-    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabax
+\= Expect limit exceeded
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabax\=match_limit=10000000
 Failed: error -47: match limit exceeded
     
 # Test JIT disable 

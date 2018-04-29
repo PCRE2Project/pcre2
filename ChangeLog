@@ -63,6 +63,10 @@ matches for the ovector, no matches were displayed.
 14. Removed an occurrence of ctrl/Z from test 6 because Windows treats it as 
 EOF. The test looks to have come from a fuzzer.
 
+15. If PCRE2 was built with a default match limit a lot greater than the 
+default default of 10 000 000, some JIT tests of the match limit no longer
+failed. All such tests now set 10 000 000 as the upper limit.
+
 
 Version 10.31 12-February-2018
 ------------------------------

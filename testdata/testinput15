@@ -46,32 +46,45 @@
 /(*LIMIT_DEPTH=4294967280)abc/I
 
 /(a+)*zz/
+\= Expect no match
     aaaaaaaaaaaaaz
+\= Expect limit exceeded
     aaaaaaaaaaaaaz\=match_limit=3000
 
 /(a+)*zz/
+\= Expect limit exceeded
     aaaaaaaaaaaaaz\=depth_limit=10
 
 /(*LIMIT_MATCH=3000)(a+)*zz/I
+\= Expect limit exceeded
     aaaaaaaaaaaaaz
+\= Expect limit exceeded
     aaaaaaaaaaaaaz\=match_limit=60000
 
 /(*LIMIT_MATCH=60000)(*LIMIT_MATCH=3000)(a+)*zz/I
+\= Expect limit exceeded
     aaaaaaaaaaaaaz
 
 /(*LIMIT_MATCH=60000)(a+)*zz/I
+\= Expect no match
     aaaaaaaaaaaaaz
+\= Expect limit exceeded
     aaaaaaaaaaaaaz\=match_limit=3000
 
 /(*LIMIT_DEPTH=10)(a+)*zz/I
+\= Expect limit exceeded
     aaaaaaaaaaaaaz
+\= Expect limit exceeded
     aaaaaaaaaaaaaz\=depth_limit=1000
 
 /(*LIMIT_DEPTH=10)(*LIMIT_DEPTH=1000)(a+)*zz/I
+\= Expect no match
     aaaaaaaaaaaaaz
 
 /(*LIMIT_DEPTH=1000)(a+)*zz/I
+\= Expect no match
     aaaaaaaaaaaaaz
+\= Expect limit exceeded
     aaaaaaaaaaaaaz\=depth_limit=10
     
 # These three have infinitely nested recursions. 
