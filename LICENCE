@@ -35,7 +35,7 @@ PCRE2 JUST-IN-TIME COMPILATION SUPPORT
 
 Written by:       Zoltan Herczeg
 Email local part: hzmester
-Emain domain:     freemail.hu
+Email domain:     freemail.hu
 
 Copyright(c) 2010-2018 Zoltan Herczeg
 All rights reserved.
@@ -46,7 +46,7 @@ STACK-LESS JUST-IN-TIME COMPILER
 
 Written by:       Zoltan Herczeg
 Email local part: hzmester
-Emain domain:     freemail.hu
+Email domain:     freemail.hu
 
 Copyright(c) 2009-2018 Zoltan Herczeg
 All rights reserved.
