@@ -46,7 +46,7 @@ compatibility with Perl 5.6. PCRE2 does not support this.
 .SH "WIDE CHARACTERS AND UTF MODES"
 .rs
 .sp
-Codepoints less than 256 can be specified in patterns by either braced or
+Code points less than 256 can be specified in patterns by either braced or
 unbraced hexadecimal escape sequences (for example, \ex{b3} or \exb3). Larger
 values have to use braced sequences. Unbraced octal code points up to \e777 are
 also recognized; larger ones can be coded using \eo{...}.
@@ -109,7 +109,7 @@ not PCRE2_UCP is set.
 Case-insensitive matching in a UTF mode makes use of Unicode properties except
 for characters whose code points are less than 128 and that have at most two
 case-equivalent values. For these, a direct table lookup is used for speed. A
-few Unicode characters such as Greek sigma have more than two codepoints that
+few Unicode characters such as Greek sigma have more than two code points that
 are case-equivalent, and these are treated as such.
 .
 .

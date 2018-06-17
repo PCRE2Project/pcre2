@@ -1274,7 +1274,7 @@ do
       break;
 
       /* Single character types set the bits and stop. Note that if PCRE2_UCP
-      is set, we do not see these op codes because \d etc are converted to
+      is set, we do not see these opcodes because \d etc are converted to
       properties. Therefore, these apply in the case when only characters less
       than 256 are recognized to match the types. */
 

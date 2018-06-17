@@ -132,14 +132,14 @@ When a pattern that is compiled with this flag is passed to <b>regexec()</b> for
 matching, the <i>nmatch</i> and <i>pmatch</i> arguments are ignored, and no
 captured strings are returned. Versions of the PCRE library prior to 10.22 used
 to set the PCRE2_NO_AUTO_CAPTURE compile option, but this no longer happens
-because it disables the use of back references.
+because it disables the use of backreferences.
 <pre>
   REG_PEND
 </pre>
 If this option is set, the <b>reg_endp</b> field in the <i>preg</i> structure
 (which has the type const char *) must be set to point to the character beyond
 the end of the pattern before calling <b>regcomp()</b>. The pattern itself may
-now contain binary zeroes, which are treated as data characters. Without
+now contain binary zeros, which are treated as data characters. Without
 REG_PEND, a binary zero terminates the pattern and the <b>re_endp</b> field is
 ignored. This is a GNU extension to the POSIX standard and should be used with
 caution in software intended to be portable to other systems.
@@ -248,10 +248,10 @@ function.
 <pre>
   REG_STARTEND
 </pre>
-When this option is set, the subject string is starts at <i>string</i> +
+When this option is set, the subject string starts at <i>string</i> +
 <i>pmatch[0].rm_so</i> and ends at <i>string</i> + <i>pmatch[0].rm_eo</i>, which
 should point to the first character beyond the string. There may be binary
-zeroes within the subject string, and indeed, using REG_STARTEND is the only
+zeros within the subject string, and indeed, using REG_STARTEND is the only
 way to pass a subject string that contains a binary zero.
 </P>
 <P>

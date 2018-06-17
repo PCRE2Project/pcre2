@@ -163,7 +163,7 @@ be less than the value set (or defaulted) by the caller of \fBpcre2_match()\fP
 for it to have any effect. In other words, the pattern writer can lower the
 limits set by the programmer, but not raise them. If there is more than one
 setting of one of these limits, the lower value is used. The heap limit is 
-specified in kilobytes.
+specified in kibibytes (units of 1024 bytes).
 .P
 Prior to release 10.30, LIMIT_DEPTH was called LIMIT_RECURSION. This name is
 still recognized for backwards compatibility.
@@ -318,7 +318,7 @@ precede a non-alphanumeric with backslash to specify that it stands for itself.
 In particular, if you want to match a backslash, you write \e\e.
 .P
 In a UTF mode, only ASCII numbers and letters have any special meaning after a
-backslash. All other characters (in particular, those whose codepoints are
+backslash. All other characters (in particular, those whose code points are
 greater than 127) are treated as literals.
 .P
 If a pattern is compiled with the PCRE2_EXTENDED option, most white space in
@@ -367,7 +367,7 @@ these escapes are as follows:
   \er        carriage return (hex 0D)
   \et        tab (hex 09)
   \e0dd      character with octal code 0dd
-  \eddd      character with octal code ddd, or back reference
+  \eddd      character with octal code ddd, or backreference
   \eo{ddd..} character with octal code ddd..
   \exhh      character with hex code hh
   \ex{hhh..} character with hex code hhh.. (default mode)
@@ -410,12 +410,12 @@ follows is itself an octal digit.
 The escape \eo must be followed by a sequence of octal digits, enclosed in
 braces. An error occurs if this is not the case. This escape is a recent
 addition to Perl; it provides way of specifying character code points as octal
-numbers greater than 0777, and it also allows octal numbers and back references
+numbers greater than 0777, and it also allows octal numbers and backreferences
 to be unambiguously specified.
 .P
 For greater clarity and unambiguity, it is best to avoid following \e by a
 digit greater than zero. Instead, use \eo{} or \ex{} to specify character
-numbers, and \eg{} to specify back references. The following paragraphs
+numbers, and \eg{} to specify backreferences. The following paragraphs
 describe the old, ambiguous syntax.
 .P
 The handling of a backslash followed by a digit other than 0 is complicated,
@@ -424,7 +424,7 @@ and Perl has changed over time, causing PCRE2 also to change.
 Outside a character class, PCRE2 reads the digit and any following digits as a
 decimal number. If the number is less than 10, begins with the digit 8 or 9, or
 if there are at least that many previous capturing left parentheses in the
-expression, the entire sequence is taken as a \fIback reference\fP. A
+expression, the entire sequence is taken as a \fIbackreference\fP. A
 description of how this works is given
 .\" HTML <a href="#backreferences">
 .\" </a>
@@ -446,20 +446,20 @@ for themselves. For example, outside a character class:
 .\" JOIN
   \e40    is the same, provided there are fewer than 40
             previous capturing subpatterns
-  \e7     is always a back reference
+  \e7     is always a backreference
 .\" JOIN
-  \e11    might be a back reference, or another way of
+  \e11    might be a backreference, or another way of
             writing a tab
   \e011   is always a tab
   \e0113  is a tab followed by the character "3"
 .\" JOIN
-  \e113   might be a back reference, otherwise the
+  \e113   might be a backreference, otherwise the
             character with octal code 113
 .\" JOIN
-  \e377   might be a back reference, otherwise
+  \e377   might be a backreference, otherwise
             the value 255 (decimal)
 .\" JOIN
-  \e81    is always a back reference
+  \e81    is always a backreference
 .sp
 Note that octal values of 100 or greater that are specified using this syntax
 must not be introduced by a leading zero, because no more than three octal
@@ -492,10 +492,10 @@ limited to certain values, as follows:
   8-bit non-UTF mode    no greater than 0xff
   16-bit non-UTF mode   no greater than 0xffff
   32-bit non-UTF mode   no greater than 0xffffffff
-  All UTF modes         no greater than 0x10ffff and a valid codepoint
+  All UTF modes         no greater than 0x10ffff and a valid code point
 .sp
-Invalid Unicode codepoints are all those in the range 0xd800 to 0xdfff (the
-so-called "surrogate" codepoints). The check for these can be disabled by the
+Invalid Unicode code points are all those in the range 0xd800 to 0xdfff (the
+so-called "surrogate" code points). The check for these can be disabled by the
 caller of \fBpcre2_compile()\fP by setting the option
 PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES.
 .
@@ -523,12 +523,12 @@ is set, \eU matches a "U" character, and \eu can be used to define a character
 by code point, as described above.
 .
 .
-.SS "Absolute and relative back references"
+.SS "Absolute and relative backreferences"
 .rs
 .sp
 The sequence \eg followed by a signed or unsigned number, optionally enclosed
-in braces, is an absolute or relative back reference. A named back reference
-can be coded as \eg{name}. Back references are discussed
+in braces, is an absolute or relative backreference. A named backreference
+can be coded as \eg{name}. backreferences are discussed
 .\" HTML <a href="#backreferences">
 .\" </a>
 later,
@@ -551,7 +551,7 @@ syntax for referencing a subpattern as a "subroutine". Details are discussed
 later.
 .\"
 Note that \eg{...} (Perl syntax) and \eg<...> (Oniguruma syntax) are \fInot\fP
-synonymous. The former is a back reference; the latter is a
+synonymous. The former is a backreference; the latter is a
 .\" HTML <a href="#subpatternsassubroutines">
 .\" </a>
 subroutine
@@ -692,7 +692,7 @@ U+000B), FF (form feed, U+000C), CR (carriage return, U+000D), or NEL (next
 line, U+0085). Because this is an atomic group, the two-character sequence is
 treated as a single unit that cannot be split.
 .P
-In other modes, two additional characters whose codepoints are greater than 255
+In other modes, two additional characters whose code points are greater than 255
 are added: LS (line separator, U+2028) and PS (paragraph separator, U+2029).
 Unicode support is not needed for these characters to be recognized.
 .P
@@ -727,8 +727,8 @@ an error.
 When PCRE2 is built with Unicode support (the default), three additional escape
 sequences that match characters with specific properties are available. In
 8-bit non-UTF-8 mode, these sequences are of course limited to testing
-characters whose codepoints are less than 256, but they do work in this mode.
-In 32-bit non-UTF mode, codepoints greater than 0x10ffff (the Unicode limit)
+characters whose code points are less than 256, but they do work in this mode.
+In 32-bit non-UTF mode, code points greater than 0x10ffff (the Unicode limit)
 may be encountered. These are all treated as being in the Common script and
 with an unassigned type. The extra escape sequences are:
 .sp
@@ -1026,7 +1026,7 @@ joiner" characters. Characters with the "mark" property always have the
 6. Do not break within emoji modifier sequences (a base character followed by a
 modifier). Extending characters are allowed before the modifier.
 .P
-7. Do not break within emoji zwj sequences (zero-width jointer followed by
+7. Do not break within emoji zwj sequences (zero-width joiner followed by
 "glue after ZWJ" or "base glue after ZWJ").
 .P
 8. Do not break within emoji flag sequences. That is, do not break between
@@ -1724,7 +1724,7 @@ numbers underneath show in which buffer the captured content will be stored.
   / ( a )  (?| x ( y ) z | (p (q) r) | (t) u (v) ) ( z ) /x
   # 1            2         2  3        2     3     4
 .sp
-A back reference to a numbered subpattern uses the most recent value that is
+A backreference to a numbered subpattern uses the most recent value that is
 set for that number by any subpattern. The following pattern matches "abcabc"
 or "defdef":
 .sp
@@ -1768,7 +1768,7 @@ In PCRE2, a subpattern can be named in one of three ways: (?<name>...) or
 parentheses from other parts of the pattern, such as
 .\" HTML <a href="#backreferences">
 .\" </a>
-back references,
+backreferences,
 .\"
 .\" HTML <a href="#recursion">
 .\" </a>
@@ -1811,7 +1811,7 @@ The convenience functions for extracting the data by name returns the substring
 for the first (and in this example, the only) subpattern of that name that
 matched. This saves searching to find which numbered subpattern it was.
 .P
-If you make a back reference to a non-unique named subpattern from elsewhere in
+If you make a backreference to a non-unique named subpattern from elsewhere in
 the pattern, the subpatterns to which the name refers are checked in the order
 in which they appear in the overall pattern. The first one that is set is used
 for the reference. For example, this pattern matches both "foofoo" and
@@ -1863,7 +1863,7 @@ items:
   the \eR escape sequence
   an escape such as \ed or \epL that matches a single character
   a character class
-  a back reference
+  a backreference
   a parenthesized subpattern (including most assertions)
   a subroutine call to a subpattern (recursive or otherwise)
 .sp
@@ -1980,7 +1980,7 @@ worth setting PCRE2_DOTALL in order to obtain this optimization, or
 alternatively, using ^ to indicate anchoring explicitly.
 .P
 However, there are some cases where the optimization cannot be used. When .*
-is inside capturing parentheses that are the subject of a back reference
+is inside capturing parentheses that are the subject of a backreference
 elsewhere in the pattern, a match at the start may fail where a later one
 succeeds. Consider, for example:
 .sp
@@ -2116,23 +2116,23 @@ sequences of non-digits cannot be broken, and failure happens quickly.
 .
 .
 .\" HTML <a name="backreferences"></a>
-.SH "BACK REFERENCES"
+.SH "BACKREFERENCES"
 .rs
 .sp
 Outside a character class, a backslash followed by a digit greater than 0 (and
-possibly further digits) is a back reference to a capturing subpattern earlier
+possibly further digits) is a backreference to a capturing subpattern earlier
 (that is, to its left) in the pattern, provided there have been that many
 previous capturing left parentheses.
 .P
 However, if the decimal number following the backslash is less than 8, it is
-always taken as a back reference, and causes an error only if there are not
+always taken as a backreference, and causes an error only if there are not
 that many capturing left parentheses in the entire pattern. In other words, the
 parentheses that are referenced need not be to the left of the reference for
-numbers less than 8. A "forward back reference" of this type can make sense
+numbers less than 8. A "forward backreference" of this type can make sense
 when a repetition is involved and the subpattern to the right has participated
 in an earlier iteration.
 .P
-It is not possible to have a numerical "forward back reference" to a subpattern
+It is not possible to have a numerical "forward backreference" to a subpattern
 whose number is 8 or more using this syntax because a sequence such as \e50 is
 interpreted as a character defined in octal. See the subsection entitled
 "Non-printing characters"
@@ -2141,7 +2141,7 @@ interpreted as a character defined in octal. See the subsection entitled
 above
 .\"
 for further details of the handling of digits following a backslash. There is
-no such problem when named parentheses are used. A back reference to any
+no such problem when named parentheses are used. A backreference to any
 subpattern is possible using named parentheses (see below).
 .P
 Another way of avoiding the ambiguity inherent in the use of digits following a
@@ -2169,7 +2169,7 @@ The sequence \eg{+1} is a reference to the next capturing subpattern. This kind
 of forward reference can be useful it patterns that repeat. Perl does not
 support the use of + in this way.
 .P
-A back reference matches whatever actually matched the capturing subpattern in
+A backreference matches whatever actually matched the capturing subpattern in
 the current subject string, rather than anything matching the subpattern
 itself (see
 .\" HTML <a href="#subpatternsassubroutines">
@@ -2182,17 +2182,17 @@ below for a way of doing that). So the pattern
 .sp
 matches "sense and sensibility" and "response and responsibility", but not
 "sense and responsibility". If caseful matching is in force at the time of the
-back reference, the case of letters is relevant. For example,
+backreference, the case of letters is relevant. For example,
 .sp
   ((?i)rah)\es+\e1
 .sp
 matches "rah rah" and "RAH RAH", but not "RAH rah", even though the original
 capturing subpattern is matched caselessly.
 .P
-There are several different ways of writing back references to named
+There are several different ways of writing backreferences to named
 subpatterns. The .NET syntax \ek{name} and the Perl syntax \ek<name> or
 \ek'name' are supported, as is the Python syntax (?P=name). Perl 5.10's unified
-back reference syntax, in which \eg can be used for both numeric and named
+backreference syntax, in which \eg can be used for both numeric and named
 references, is also supported. We could rewrite the above example in any of
 the following ways:
 .sp
@@ -2204,20 +2204,20 @@ the following ways:
 A subpattern that is referenced by name may appear in the pattern before or
 after the reference.
 .P
-There may be more than one back reference to the same subpattern. If a
-subpattern has not actually been used in a particular match, any back
-references to it always fail by default. For example, the pattern
+There may be more than one backreference to the same subpattern. If a
+subpattern has not actually been used in a particular match, any backreferences
+to it always fail by default. For example, the pattern
 .sp
   (a|(bc))\e2
 .sp
 always fails if it starts to match "a" rather than "bc". However, if the
-PCRE2_MATCH_UNSET_BACKREF option is set at compile time, a back reference to an
+PCRE2_MATCH_UNSET_BACKREF option is set at compile time, a backreference to an
 unset value matches an empty string.
 .P
 Because there may be many capturing parentheses in a pattern, all digits
-following a backslash are taken as part of a potential back reference number.
+following a backslash are taken as part of a potential backreference number.
 If the pattern continues with a digit character, some delimiter must be used to
-terminate the back reference. If the PCRE2_EXTENDED option is set, this can be
+terminate the backreference. If the PCRE2_EXTENDED option is set, this can be
 white space. Otherwise, the \eg{ syntax or an empty comment (see
 .\" HTML <a href="#comments">
 .\" </a>
@@ -2226,10 +2226,10 @@ white space. Otherwise, the \eg{ syntax or an empty comment (see
 below) can be used.
 .
 .
-.SS "Recursive back references"
+.SS "Recursive backreferences"
 .rs
 .sp
-A back reference that occurs inside the parentheses to which it refers fails
+A backreference that occurs inside the parentheses to which it refers fails
 when the subpattern is first used, so, for example, (a\e1) never matches.
 However, such references can be useful inside repeated subpatterns. For
 example, the pattern
@@ -2237,13 +2237,13 @@ example, the pattern
   (a|b\e1)+
 .sp
 matches any number of "a"s and also "aba", "ababbaa" etc. At each iteration of
-the subpattern, the back reference matches the character string corresponding
+the subpattern, the backreference matches the character string corresponding
 to the previous iteration. In order for this to work, the pattern must be such
-that the first iteration does not need to match the back reference. This can be
+that the first iteration does not need to match the backreference. This can be
 done using alternation, as in the example above, or by a quantifier with a
 minimum of zero.
 .P
-Back references of this type cause the group that they reference to be treated
+backreferences of this type cause the group that they reference to be treated
 as an
 .\" HTML <a href="#atomicgroup">
 .\" </a>
@@ -2406,10 +2406,10 @@ recursion,
 that is, a "subroutine" call into a group that is already active,
 is not supported.
 .P
-Perl does not support back references in lookbehinds. PCRE2 does support them,
+Perl does not support backreferences in lookbehinds. PCRE2 does support them,
 but only if certain conditions are met. The PCRE2_MATCH_UNSET_BACKREF option
 must not be set, there must be no use of (?| in the pattern (it creates
-duplicate subpattern numbers), and if the back reference is by name, the name
+duplicate subpattern numbers), and if the backreference is by name, the name
 must be unique. Of course, the referenced subpattern must itself be of fixed
 length. The following pattern matches words containing at least two characters
 that begin and end with the same character:
@@ -2899,7 +2899,7 @@ in PCRE2 these values can be referenced. Consider this pattern:
   ^(.)(\e1|a(?2))
 .sp
 This pattern matches "bab". The first capturing parentheses match "b", then in
-the second group, when the back reference \e1 fails to match "b", the second
+the second group, when the backreference \e1 fails to match "b", the second
 alternative matches "a" and then recurses. In the recursion, \e1 does now match
 "b" and so the whole match succeeds. This match used to fail in Perl, but in
 later versions (I tried 5.024) it now works.
@@ -2964,7 +2964,7 @@ plus or a minus sign it is taken as a relative reference. For example:
   (abc)(?i:\eg<-1>)
 .sp
 Note that \eg{...} (Perl syntax) and \eg<...> (Oniguruma syntax) are \fInot\fP
-synonymous. The former is a back reference; the latter is a subroutine call.
+synonymous. The former is a backreference; the latter is a subroutine call.
 .
 .
 .SH CALLOUTS

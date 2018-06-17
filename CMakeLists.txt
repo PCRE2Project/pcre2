@@ -146,7 +146,7 @@ SET(PCRE2_PARENS_NEST_LIMIT "250" CACHE STRING
     "Default nested parentheses limit. See PARENS_NEST_LIMIT in config.h.in for details.")
 
 SET(PCRE2_HEAP_LIMIT "20000000" CACHE STRING
-    "Default limit on heap memory (kilobytes). See HEAP_LIMIT in config.h.in for details.")
+    "Default limit on heap memory (kibibytes). See HEAP_LIMIT in config.h.in for details.")
 
 SET(PCRE2_MATCH_LIMIT "10000000" CACHE STRING
     "Default limit on internal looping. See MATCH_LIMIT in config.h.in for details.")

@@ -497,10 +497,10 @@ U+000C), NEL (next line, U+0085), LS (line separator, U+2028), and PS
 .P
 Each of the first three conventions is used by at least one operating system as
 its standard newline sequence. When PCRE2 is built, a default can be specified.
-The default default is LF, which is the Unix standard. However, the newline
-convention can be changed by an application when calling \fBpcre2_compile()\fP,
-or it can be specified by special text at the start of the pattern itself; this
-overrides any other settings. See the
+If it is not, the default is set to LF, which is the Unix standard. However,
+the newline convention can be changed by an application when calling
+\fBpcre2_compile()\fP, or it can be specified by special text at the start of
+the pattern itself; this overrides any other settings. See the
 .\" HREF
 \fBpcre2pattern\fP
 .\"
@@ -885,19 +885,20 @@ offset limit. In other words, whichever limit comes first is used.
 .B "  uint32_t \fIvalue\fP);"
 .fi
 .sp
-The \fIheap_limit\fP parameter specifies, in units of kilobytes, the maximum
-amount of heap memory that \fBpcre2_match()\fP may use to hold backtracking
-information when running an interpretive match. This limit also applies to
-\fBpcre2_dfa_match()\fP, which may use the heap when processing patterns with a
-lot of nested pattern recursion or lookarounds or atomic groups. This limit
-does not apply to matching with the JIT optimization, which has its own memory
-control arrangements (see the
+The \fIheap_limit\fP parameter specifies, in units of kibibytes (1024 bytes),
+the maximum amount of heap memory that \fBpcre2_match()\fP may use to hold
+backtracking information when running an interpretive match. This limit also
+applies to \fBpcre2_dfa_match()\fP, which may use the heap when processing
+patterns with a lot of nested pattern recursion or lookarounds or atomic
+groups. This limit does not apply to matching with the JIT optimization, which
+has its own memory control arrangements (see the
 .\" HREF
 \fBpcre2jit\fP
 .\"
 documentation for more details). If the limit is reached, the negative error
-code PCRE2_ERROR_HEAPLIMIT is returned. The default limit is set when PCRE2 is
-built; the default default is very large and is essentially "unlimited".
+code PCRE2_ERROR_HEAPLIMIT is returned. The default limit can be set when PCRE2
+is built; if it is not, the default is set very large and is essentially
+"unlimited".
 .P
 A value for the heap limit may also be supplied by an item at the start of a
 pattern of the form
@@ -975,7 +976,7 @@ The depth limit is not relevant, and is ignored, when matching is done using
 JIT compiled code. However, it is supported by \fBpcre2_dfa_match()\fP, which
 uses it to limit the depth of nested internal recursive function calls that
 implement atomic groups, lookaround assertions, and pattern recursions. This
-limits, indirectly, the amount of system stack this is used. It was more useful
+limits, indirectly, the amount of system stack that is used. It was more useful
 in versions before 10.32, when stack memory was used for local workspace
 vectors for recursive function calls. From version 10.32, only local variables
 are allocated on the stack and as each call uses only a few hundred bytes, even
@@ -989,11 +990,11 @@ using \fBpcre2_dfa_match()\fP, can use a great deal of memory. However, it is
 probably better to limit heap usage directly by calling
 \fBpcre2_set_heap_limit()\fP.
 .P
-The default value for the depth limit can be set when PCRE2 is built; the
-default default is the same value as the default for the match limit. If the
-limit is exceeded, \fBpcre2_match()\fP or \fBpcre2_dfa_match()\fP returns
-PCRE2_ERROR_DEPTHLIMIT. A value for the depth limit may also be supplied by an
-item at the start of a pattern of the form
+The default value for the depth limit can be set when PCRE2 is built; if it is 
+not, the default is set to the same value as the default for the match limit.
+If the limit is exceeded, \fBpcre2_match()\fP or \fBpcre2_dfa_match()\fP
+returns PCRE2_ERROR_DEPTHLIMIT. A value for the depth limit may also be
+supplied by an item at the start of a pattern of the form
 .sp
   (*LIMIT_DEPTH=ddd)
 .sp
@@ -1050,7 +1051,7 @@ given with \fBpcre2_set_depth_limit()\fP above.
 .sp
   PCRE2_CONFIG_HEAPLIMIT
 .sp
-The output is a uint32_t integer that gives, in kilobytes, the default limit
+The output is a uint32_t integer that gives, in kibibytes, the default limit
 for the amount of heap memory used by \fBpcre2_match()\fP or 
 \fBpcre2_dfa_match()\fP. Further details are given with
 \fBpcre2_set_heap_limit()\fP above.
@@ -1367,7 +1368,7 @@ If this bit is set, letters in the pattern match both upper and lower case
 letters in the subject. It is equivalent to Perl's /i option, and it can be
 changed within a pattern by a (?i) option setting. If PCRE2_UTF is set, Unicode
 properties are used for all characters with more than one other case, and for
-all characters whose code points are greater than U+007f. For lower valued
+all characters whose code points are greater than U+007F. For lower valued
 characters with only one other case, a lookup table is used for speed. When
 PCRE2_UTF is not set, a lookup table is used for all code points less than 256,
 and higher code points (available only in 16-bit or 32-bit mode) are treated as
@@ -1489,7 +1490,7 @@ error.
 .sp
   PCRE2_MATCH_UNSET_BACKREF
 .sp
-If this option is set, a back reference to an unset subpattern group matches an
+If this option is set, a backreference to an unset subpattern group matches an
 empty string (by default this causes the current matching alternative to fail).
 A pattern such as (\e1)(a) succeeds when this option is set (assuming it can
 find an "a" in the subject), whereas it fails by default, for Perl
@@ -1550,8 +1551,8 @@ If this option is set, it disables the use of numbered capturing parentheses in
 the pattern. Any opening parenthesis that is not followed by ? behaves as if it
 were followed by ?: but named parentheses can still be used for capturing (and
 they acquire numbers in the usual way). This is the same as Perl's /n option.
-Note that, when this option is set, references to capturing groups (back
-references or recursion/subroutine calls) may only refer to named groups,
+Note that, when this option is set, references to capturing groups
+(backreferences or recursion/subroutine calls) may only refer to named groups,
 though the reference can be by name or by number.
 .sp
   PCRE2_NO_AUTO_POSSESS
@@ -1570,7 +1571,7 @@ If this option is set, it disables an optimization that is applied when .* is
 the first significant item in a top-level branch of a pattern, and all the
 other branches also start with .* or with \eA or \eG or ^. The optimization is
 automatically disabled for .* if it is inside an atomic group or a capturing
-group that is the subject of a back reference, or if the pattern contains
+group that is the subject of a backreference, or if the pattern contains
 (*PRUNE) or (*SKIP). When the optimization is not disabled, such a pattern is
 automatically anchored if PCRE2_DOTALL is set for all the .* items and
 PCRE2_MULTILINE is not set for any ^ items. Otherwise, the fact that any match
@@ -1956,7 +1957,7 @@ following are true:
   .* is not in an atomic group
 .\" JOIN
   .* is not in a capturing group that is the subject
-       of a back reference
+       of a backreference
   PCRE2_DOTALL is in force for .*
   Neither (*PRUNE) nor (*SKIP) appears in the pattern
   PCRE2_NO_DOTSTAR_ANCHOR is not set
@@ -1966,20 +1967,20 @@ options returned for PCRE2_INFO_ALLOPTIONS.
 .sp
   PCRE2_INFO_BACKREFMAX
 .sp
-Return the number of the highest back reference in the pattern. The third
+Return the number of the highest backreference in the pattern. The third
 argument should point to an \fBuint32_t\fP variable. Named subpatterns acquire
-numbers as well as names, and these count towards the highest back reference.
-Back references such as \e4 or \eg{12} match the captured characters of the
+numbers as well as names, and these count towards the highest backreference.
+Backreferences such as \e4 or \eg{12} match the captured characters of the
 given group, but in addition, the check that a capturing group is set in a
-conditional subpattern such as (?(3)a|b) is also a back reference. Zero is
-returned if there are no back references.
+conditional subpattern such as (?(3)a|b) is also a backreference. Zero is
+returned if there are no backreferences.
 .sp
   PCRE2_INFO_BSR
 .sp
-The output is a uint32_t whose value indicates what character sequences the \eR
-escape sequence matches. A value of PCRE2_BSR_UNICODE means that \eR matches
-any Unicode line ending sequence; a value of PCRE2_BSR_ANYCRLF means that \eR
-matches only CR, LF, or CRLF.
+The output is a uint32_t integer whose value indicates what character sequences
+the \eR escape sequence matches. A value of PCRE2_BSR_UNICODE means that \eR
+matches any Unicode line ending sequence; a value of PCRE2_BSR_ANYCRLF means
+that \eR matches only CR, LF, or CRLF.
 .sp
   PCRE2_INFO_CAPTURECOUNT
 .sp
@@ -1991,10 +1992,10 @@ The third argument should point to an \fBuint32_t\fP variable.
 .sp
 If the pattern set a backtracking depth limit by including an item of the form
 (*LIMIT_DEPTH=nnnn) at the start, the value is returned. The third argument
-should point to an unsigned 32-bit integer. If no such value has been set, the
-call to \fBpcre2_pattern_info()\fP returns the error PCRE2_ERROR_UNSET. Note
-that this limit will only be used during matching if it is less than the limit
-set or defaulted by the caller of the match function.
+should point to a uint32_t integer. If no such value has been set, the call to
+\fBpcre2_pattern_info()\fP returns the error PCRE2_ERROR_UNSET. Note that this
+limit will only be used during matching if it is less than the limit set or
+defaulted by the caller of the match function.
 .sp
   PCRE2_INFO_FIRSTBITMAP
 .sp
@@ -2004,7 +2005,7 @@ values for the first code unit in any match. For example, a pattern that starts
 with [abc] results in a table with three bits set. When code unit values
 greater than 255 are supported, the flag bit for 255 means "any code unit of
 value 255 or above". If such a table was constructed, a pointer to it is
-returned. Otherwise NULL is returned. The third argument should point to an
+returned. Otherwise NULL is returned. The third argument should point to a
 \fBconst uint8_t *\fP variable.
 .sp
   PCRE2_INFO_FIRSTCODETYPE
@@ -2031,7 +2032,7 @@ and up to 0xffffffff when not using UTF-32 mode.
 .sp
 Return the size (in bytes) of the data frames that are used to remember
 backtracking positions when the pattern is processed by \fBpcre2_match()\fP
-without the use of JIT. The third argument should point to an \fBsize_t\fP
+without the use of JIT. The third argument should point to a \fBsize_t\fP
 variable. The frame size depends on the number of capturing parentheses in the
 pattern. Each additional capturing group adds two PCRE2_SIZE variables.
 .sp
@@ -2051,10 +2052,10 @@ the equivalent hexadecimal or octal escape sequences.
 .sp
 If the pattern set a heap memory limit by including an item of the form
 (*LIMIT_HEAP=nnnn) at the start, the value is returned. The third argument
-should point to an unsigned 32-bit integer. If no such value has been set, the
-call to \fBpcre2_pattern_info()\fP returns the error PCRE2_ERROR_UNSET. Note
-that this limit will only be used during matching if it is less than the limit
-set or defaulted by the caller of the match function.
+should point to a uint32_t integer. If no such value has been set, the call to
+\fBpcre2_pattern_info()\fP returns the error PCRE2_ERROR_UNSET. Note that this
+limit will only be used during matching if it is less than the limit set or
+defaulted by the caller of the match function.
 .sp
   PCRE2_INFO_JCHANGED
 .sp
@@ -2098,15 +2099,15 @@ in such cases.
 .sp
 If the pattern set a match limit by including an item of the form
 (*LIMIT_MATCH=nnnn) at the start, the value is returned. The third argument
-should point to an unsigned 32-bit integer. If no such value has been set, the
-call to \fBpcre2_pattern_info()\fP returns the error PCRE2_ERROR_UNSET. Note
-that this limit will only be used during matching if it is less than the limit
-set or defaulted by the caller of the match function.
+should point to a uint32_t integer. If no such value has been set, the call to
+\fBpcre2_pattern_info()\fP returns the error PCRE2_ERROR_UNSET. Note that this
+limit will only be used during matching if it is less than the limit set or
+defaulted by the caller of the match function.
 .sp
   PCRE2_INFO_MAXLOOKBEHIND
 .sp
 Return the number of characters (not code units) in the longest lookbehind
-assertion in the pattern. The third argument should point to an unsigned 32-bit
+assertion in the pattern. The third argument should point to a uint32_t
 integer. This information is useful when doing multi-segment matching using the
 partial matching facilities. Note that the simple assertions \eb and \eB
 require a one-character lookbehind. \eA also registers a one-character
@@ -2393,7 +2394,7 @@ zero, the search for a match starts at the beginning of the subject, and this
 is by far the most common case. In UTF-8 or UTF-16 mode, the starting offset
 must point to the start of a character, or to the end of the subject (in UTF-32
 mode, one code unit equals one character, so all offsets are valid). Like the
-pattern string, the subject may contain binary zeroes.
+pattern string, the subject may contain binary zeros.
 .P
 A non-zero starting offset is useful when searching for another match in the
 same subject by calling \fBpcre2_match()\fP again after a previous success.
@@ -3562,12 +3563,12 @@ There are in addition the following errors that are specific to
 .sp
 This return is given if \fBpcre2_dfa_match()\fP encounters an item in the
 pattern that it does not support, for instance, the use of \eC in a UTF mode or
-a back reference.
+a backreference.
 .sp
   PCRE2_ERROR_DFA_UCOND
 .sp
 This return is given if \fBpcre2_dfa_match()\fP encounters a condition item
-that uses a back reference for the condition, or a test for recursion in a
+that uses a backreference for the condition, or a test for recursion in a
 specific group. These are not supported.
 .sp
   PCRE2_ERROR_DFA_WSSIZE

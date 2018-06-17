@@ -216,7 +216,7 @@ separator, U+2028), and PS (paragraph separator, U+2029). The final option is
 .sp
   --enable-newline-is-nul
 .sp
-which causes NUL (binary zero) is set as the default line-ending character.
+which causes NUL (binary zero) to be set as the default line-ending character.
 .P
 Whatever default line ending convention is selected when PCRE2 is built can be
 overridden by applications that use the library. At build time it is
@@ -281,8 +281,8 @@ The \fBpcre2_match()\fP function starts out using a 20K vector on the system
 stack to record backtracking points. The more nested backtracking points there
 are (that is, the deeper the search tree), the more memory is needed. If the
 initial vector is not large enough, heap memory is used, up to a certain limit,
-which is specified in kilobytes. The limit can be changed at run time, as
-described in the
+which is specified in kibibytes (units of 1024 bytes). The limit can be changed
+at run time, as described in the
 .\" HREF
 \fBpcre2api\fP
 .\"
@@ -291,7 +291,7 @@ change this by a setting such as
 .sp
   --with-heap-limit=500
 .sp
-which limits the amount of heap to 500 kilobytes. This limit applies only to
+which limits the amount of heap to 500 KiB. This limit applies only to
 interpretive matching in \fBpcre2_match()\fP and \fBpcre2_dfa_match()\fP, which
 may also use the heap for internal workspace when processing complicated
 patterns. This limit does not apply when JIT (which has its own memory
@@ -552,7 +552,7 @@ generated from the string.
 Setting --enable-fuzz-support also causes a binary called \fBpcre2fuzzcheck\fP
 to be created. This is normally run under valgrind or used when PCRE2 is
 compiled with address sanitizing enabled. It calls the fuzzing function and
-outputs information about it is doing. The input strings are specified by
+outputs information about what it is doing. The input strings are specified by
 arguments: if an argument starts with "=" the rest of it is a literal input
 string. Otherwise, it is assumed to be a file name, and the contents of the
 file are the test string.

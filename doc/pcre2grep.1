@@ -57,9 +57,10 @@ controlled by parameters that can be set by the \fB--buffer-size\fP and
 that is obtained at the start of processing. If an input file contains very
 long lines, a larger buffer may be needed; this is handled by automatically
 extending the buffer, up to the limit specified by \fB--max-buffer-size\fP. The
-default values for these parameters are specified when \fBpcre2grep\fP is
-built, with the default defaults being 20K and 1M respectively. An error occurs
-if a line is too long and the buffer can no longer be expanded.
+default values for these parameters can be set when \fBpcre2grep\fP is
+built; if nothing is specified, the defaults are set to 20K and 1M
+respectively. An error occurs if a line is too long and the buffer can no
+longer be expanded.
 .P
 The block of memory that is actually used is three times the "buffer size", to
 allow for buffering "before" and "after" lines. If the buffer size is too
@@ -434,13 +435,13 @@ short form for this option.
 When this option is given, non-compressed input is read and processed line by
 line, and the output is flushed after each write. By default, input is read in
 large chunks, unless \fBpcre2grep\fP can determine that it is reading from a
-terminal (which is currently possible only in Unix-like environments). Output
-to terminal is normally automatically flushed by the operating system. This
-option can be useful when the input or output is attached to a pipe and you do
-not want \fBpcre2grep\fP to buffer up large amounts of data. However, its use
-will affect performance, and the \fB-M\fP (multiline) option ceases to work.
-When input is from a compressed .gz or .bz2 file, \fB--line-buffered\fP is
-ignored.
+terminal (which is currently possible only in Unix-like environments or
+Windows). Output to terminal is normally automatically flushed by the operating
+system. This option can be useful when the input or output is attached to a
+pipe and you do not want \fBpcre2grep\fP to buffer up large amounts of data.
+However, its use will affect performance, and the \fB-M\fP (multiline) option
+ceases to work. When input is from a compressed .gz or .bz2 file,
+\fB--line-buffered\fP is ignored.
 .TP
 \fB--line-offsets\fP
 Instead of showing lines or parts of lines that match, show each match as a
@@ -470,11 +471,11 @@ is a pattern that uses nested unlimited repeats. Internally, PCRE2 has a
 counter that is incremented each time around its main processing loop. If the
 value set by \fB--match-limit\fP is reached, an error occurs.
 .sp
-The \fB--heap-limit\fP option specifies, as a number of kilobytes, the amount
-of heap memory that may be used for matching. Heap memory is needed only if
-matching the pattern requires a significant number of nested backtracking
-points to be remembered. This parameter can be set to zero to forbid the use of
-heap memory altogether.
+The \fB--heap-limit\fP option specifies, as a number of kibibytes (units of 
+1024 bytes), the amount of heap memory that may be used for matching. Heap
+memory is needed only if matching the pattern requires a significant number of
+nested backtracking points to be remembered. This parameter can be set to zero
+to forbid the use of heap memory altogether.
 .sp
 The \fB--depth-limit\fP option limits the depth of nested backtracking points,
 which indirectly limits the amount of memory that is used. The amount of memory
@@ -483,9 +484,9 @@ parentheses in the pattern, so the amount of memory that is used before this
 limit acts varies from pattern to pattern. This limit is of use only if it is
 set smaller than \fB--match-limit\fP.
 .sp
-There are no short forms for these options. The default settings are specified
-when the PCRE2 library is compiled, with the default defaults being very large
-and so effectively unlimited.
+There are no short forms for these options. The default limits can be set
+when the PCRE2 library is compiled; if they are not specified, the defaults
+are very large and so effectively unlimited.
 .TP
 \fB--max-buffer-size=\fInumber\fP
 This limits the expansion of the processing buffer, whose initial size can be

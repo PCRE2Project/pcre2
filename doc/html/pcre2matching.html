@@ -85,7 +85,7 @@ ungreedy repetition quantifiers are specified in the pattern.
 Because it ends up with a single path through the tree, it is relatively
 straightforward for this algorithm to keep track of the substrings that are
 matched by portions of the pattern in parentheses. This provides support for
-capturing parentheses and back references.
+capturing parentheses and backreferences.
 </P>
 <br><a name="SEC4" href="#TOC1">THE ALTERNATIVE MATCHING ALGORITHM</a><br>
 <P>
@@ -158,7 +158,7 @@ possibilities, and PCRE2's implementation of this algorithm does not attempt to
 do this. This means that no captured substrings are available.
 </P>
 <P>
-3. Because no substrings are captured, back references within the pattern are
+3. Because no substrings are captured, backreferences within the pattern are
 not supported, and cause errors if encountered.
 </P>
 <P>
@@ -215,7 +215,7 @@ because it has to search for all possible matches, but is also because it is
 less susceptible to optimization.
 </P>
 <P>
-2. Capturing parentheses and back references are not supported.
+2. Capturing parentheses and backreferences are not supported.
 </P>
 <P>
 3. Although atomic groups are supported, their use does not provide the

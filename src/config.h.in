@@ -134,7 +134,7 @@ sure both macros are undefined; an emulation function will then be used. */
 
 /* This limits the amount of memory that may be used while matching a pattern.
    It applies to both pcre2_match() and pcre2_dfa_match(). It does not apply
-   to JIT matching. The value is in kilobytes. */
+   to JIT matching. The value is in kibibytes (units of 1024 bytes). */
 #undef HEAP_LIMIT
 
 /* The value of LINK_SIZE determines the number of bytes used to store links

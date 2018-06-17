@@ -348,7 +348,7 @@ The /i, /m, or /s options (PCRE2_CASELESS, PCRE2_MULTILINE, PCRE2_DOTALL, and
 others) may be changed in the middle of patterns by items such as (?i). Their
 processing is handled entirely at compile time by generating different opcodes
 for the different settings. The runtime functions do not need to keep track of
-an options state.
+an option's state.
 
 PCRE2_DUPNAMES, PCRE2_EXTENDED, PCRE2_EXTENDED_MORE, and PCRE2_NO_AUTO_CAPTURE
 are tracked and processed during the parsing pre-pass. The others are handled
@@ -764,7 +764,7 @@ OP_RECURSE is followed by a LINK_SIZE value that is the offset to the starting
 bracket from the start of the whole pattern. OP_RECURSE is also used for
 "subroutine" calls, even though they are not strictly a recursion. Up till
 release 10.30 recursions were treated as atomic groups, making them
-incompatible with Perl (but PCRE had then well before Perl did). From 10.30,
+incompatible with Perl (but PCRE had them well before Perl did). From 10.30,
 backtracking into recursions is supported.
 
 Repeated recursions used to be wrapped inside OP_ONCE brackets, which not only

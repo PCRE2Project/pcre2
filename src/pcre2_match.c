@@ -43,7 +43,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "config.h"
 #endif
 
-/* These defines enables debugging code */
+/* These defines enable debugging code */
 
 //#define DEBUG_FRAMES_DISPLAY
 //#define DEBUG_SHOW_OPS
@@ -1776,7 +1776,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
 
 
     /* ===================================================================== */
-    /* Match a bit-mapped character class, possibly repeatedly. These op codes
+    /* Match a bit-mapped character class, possibly repeatedly. These opcodes
     are used when all the characters in the class have values in the range
     0-255, and either the matching is caseful, or the characters are in the
     range 0-127 when UTF processing is enabled. The only difference between
@@ -2464,7 +2464,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
 
     /* ===================================================================== */
     /* Match a single character type repeatedly. Note that the property type
-    does not need to be in a stack frame as it not used within an RMATCH()
+    does not need to be in a stack frame as it is not used within an RMATCH()
     loop. */
 
 #define Lstart_eptr  F->temp_sptr[0]
@@ -4143,7 +4143,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
             }
           break;
 
-          /* The "byte" (i.e. "code unit")  case is the same as non-UTF */
+          /* The "byte" (i.e. "code unit") case is the same as non-UTF */
 
           case OP_ANYBYTE:
           fc = Lmax - Lmin;
@@ -5424,7 +5424,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
       Feptr -= number;
       }
 
-    /* Save the earliest consulted character, then skip to next op code */
+    /* Save the earliest consulted character, then skip to next opcode */
 
     if (Feptr < mb->start_used_ptr) mb->start_used_ptr = Feptr;
     Fecode += 1 + LINK_SIZE;
@@ -5929,7 +5929,7 @@ in rrc. */
 
 RETURN_SWITCH:
 if (Frdepth == 0) return rrc;                     /* Exit from the top level */
-F = (heapframe *)((char *)F - Fback_frame);       /* Back track */
+F = (heapframe *)((char *)F - Fback_frame);       /* Backtrack */
 mb->cb->callout_flags |= PCRE2_CALLOUT_BACKTRACK; /* Note for callouts */
 
 #ifdef DEBUG_SHOW_RMATCH

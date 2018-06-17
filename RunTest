@@ -843,7 +843,7 @@ for bmode in "$test8" "$test16" "$test32"; do
     checkresult $? 24 ""
   fi
 
-  # UTF pattern converson tests
+  # UTF pattern conversion tests
 
   if [ "$do25" = yes ] ; then
     echo $title25

@@ -387,8 +387,8 @@ return (mb->callout)(cb, mb->callout_data);
 *************************************************/
 
 /* This function is called when internal_dfa_match() is about to be called
-recursively and there is insufficient workingspace left in the current work
-space block. If there's an existing next block, use it; otherwise get a new
+recursively and there is insufficient working space left in the current
+workspace block. If there's an existing next block, use it; otherwise get a new
 block unless the heap limit is reached.
 
 Arguments:
@@ -2800,7 +2800,7 @@ for (;;)
             local_workspace,                      /* workspace vector */
             RWS_RSIZE,                            /* size of same */
             rlevel,                               /* function recursion level */
-            RWS);                                 /* recursion work space */
+            RWS);                                 /* recursion workspace */
 
           rws->free += RWS_RSIZE + RWS_OVEC_OSIZE;
 

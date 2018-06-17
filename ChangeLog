@@ -17,7 +17,7 @@ groups altogether. Now it shows those that come before any actual captures as
 3. Running "pcre2test -C" always stated "\R matches CR, LF, or CRLF only", 
 whatever the build configuration was. It now correctly says "\R matches all 
 Unicode newlines" in the default case when --enable-bsr-anycrlf has not been 
-specified. Similarly, running "pcfre2test -C bsr" never produced the result 
+specified. Similarly, running "pcre2test -C bsr" never produced the result 
 ANY.
 
 4. Matching the pattern /(*UTF)\C[^\v]+\x80/ against an 8-bit string containing 
@@ -370,7 +370,7 @@ tests to improve coverage.
 31. If more than one of "push", "pushcopy", or "pushtablescopy" were set in
 pcre2test, a crash could occur.
 
-32. Make -bigstack in RunTest allocate a 64Mb stack (instead of 16 MB) so that
+32. Make -bigstack in RunTest allocate a 64MB stack (instead of 16 MB) so that
 all the tests can run with clang's sanitizing options.
 
 33. Implement extra compile options in the compile context and add the first

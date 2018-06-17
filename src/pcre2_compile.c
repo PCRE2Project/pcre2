@@ -4261,11 +4261,11 @@ goto FAILED;
 
 
 /*************************************************
-*      Find first significant op code            *
+*       Find first significant opcode            *
 *************************************************/
 
 /* This is called by several functions that scan a compiled expression looking
-for a fixed first character, or an anchoring op code etc. It skips over things
+for a fixed first character, or an anchoring opcode etc. It skips over things
 that do not influence this. For some calls, it makes sense to skip negative
 forward and all backward assertions, and also the \b assertion; for others it
 does not.
@@ -5472,7 +5472,7 @@ for (;; pptr++)
       set xclass = TRUE. Then, in the pre-compile phase, accumulate the length
       of the extra data and reset the pointer. This is so that very large
       classes that contain a zillion wide characters or Unicode property tests
-      do not overwrite the work space (which is on the stack). */
+      do not overwrite the workspace (which is on the stack). */
 
       if (class_uchardata > class_uchardata_base)
         {
@@ -7460,7 +7460,7 @@ length of the BRA and KET and any extra code units that are required at the
 beginning. We accumulate in a local variable to save frequent testing of
 lengthptr for NULL. We cannot do this by looking at the value of 'code' at the
 start and end of each alternative, because compiled items are discarded during
-the pre-compile phase so that the work space is not exceeded. */
+the pre-compile phase so that the workspace is not exceeded. */
 
 length = 2 + 2*LINK_SIZE + skipunits;
 

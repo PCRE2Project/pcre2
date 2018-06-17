@@ -108,14 +108,14 @@ When a pattern that is compiled with this flag is passed to \fBregexec()\fP for
 matching, the \fInmatch\fP and \fIpmatch\fP arguments are ignored, and no
 captured strings are returned. Versions of the PCRE library prior to 10.22 used
 to set the PCRE2_NO_AUTO_CAPTURE compile option, but this no longer happens
-because it disables the use of back references.
+because it disables the use of backreferences.
 .sp
   REG_PEND
 .sp
 If this option is set, the \fBreg_endp\fP field in the \fIpreg\fP structure
 (which has the type const char *) must be set to point to the character beyond
 the end of the pattern before calling \fBregcomp()\fP. The pattern itself may
-now contain binary zeroes, which are treated as data characters. Without
+now contain binary zeros, which are treated as data characters. Without
 REG_PEND, a binary zero terminates the pattern and the \fBre_endp\fP field is
 ignored. This is a GNU extension to the POSIX standard and should be used with
 caution in software intended to be portable to other systems.
@@ -224,10 +224,10 @@ function.
 .sp
   REG_STARTEND
 .sp
-When this option is set, the subject string is starts at \fIstring\fP +
+When this option is set, the subject string starts at \fIstring\fP +
 \fIpmatch[0].rm_so\fP and ends at \fIstring\fP + \fIpmatch[0].rm_eo\fP, which
 should point to the first character beyond the string. There may be binary
-zeroes within the subject string, and indeed, using REG_STARTEND is the only
+zeros within the subject string, and indeed, using REG_STARTEND is the only
 way to pass a subject string that contains a binary zero.
 .P
 Whatever the value of \fIpmatch[0].rm_so\fP, the offsets of the matched string

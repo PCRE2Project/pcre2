@@ -257,9 +257,10 @@ library. They are also documented in the pcre2build man page.
 
   --with-heap-limit=500
 
-  The units are kilobytes. This limit does not apply when the JIT optimization
-  (which has its own memory control features) is used. There is more discussion
-  on the pcre2api man page (search for pcre2_set_heap_limit).
+  The units are kibibytes (units of 1024 bytes). This limit does not apply when
+  the JIT optimization (which has its own memory control features) is used.
+  There is more discussion on the pcre2api man page (search for
+  pcre2_set_heap_limit).
 
 . In the 8-bit library, the default maximum compiled pattern size is around
   64K bytes. You can increase this by adding --with-link-size=3 to the
@@ -319,10 +320,10 @@ library. They are also documented in the pcre2build man page.
 . When JIT support is enabled, pcre2grep automatically makes use of it, unless
   you add --disable-pcre2grep-jit to the "configure" command.
 
-. On non-Windows sytems there is support for calling external scripts during
-  matching in the pcre2grep command via PCRE2's callout facility with string
-  arguments. This support can be disabled by adding --disable-pcre2grep-callout
-  to the "configure" command.
+. There is support for calling external programs during matching in the
+  pcre2grep command, using PCRE2's callout facility with string arguments. This
+  support can be disabled by adding --disable-pcre2grep-callout to the
+  "configure" command.
 
 . The pcre2grep program currently supports only 8-bit data files, and so
   requires the 8-bit PCRE2 library. It is possible to compile pcre2grep to use
@@ -887,4 +888,4 @@ The distribution should contain the files listed below.
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 27 April 2018
+Last updated: 17 June 2018

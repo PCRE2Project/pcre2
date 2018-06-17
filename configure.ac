@@ -288,7 +288,7 @@ AC_ARG_WITH(parens-nest-limit,
 # Handle --with-heap-limit
 AC_ARG_WITH(heap-limit,
             AS_HELP_STRING([--with-heap-limit=N],
-                           [default limit on heap memory (kilobytes, default=20000000)]),
+                           [default limit on heap memory (kibibytes, default=20000000)]),
             , with_heap_limit=20000000)
 
 # Handle --with-match-limit=N
@@ -754,7 +754,7 @@ AC_DEFINE_UNQUOTED([MATCH_LIMIT_DEPTH], [$with_match_limit_depth], [
 AC_DEFINE_UNQUOTED([HEAP_LIMIT], [$with_heap_limit], [
   This limits the amount of memory that may be used while matching
   a pattern. It applies to both pcre2_match() and pcre2_dfa_match(). It does
-  not apply to JIT matching. The value is in kilobytes.])
+  not apply to JIT matching. The value is in kibibytes (units of 1024 bytes).])
 
 AC_DEFINE([MAX_NAME_SIZE], [32], [
   This limit is parameterized just in case anybody ever wants to
@@ -1017,7 +1017,7 @@ $PACKAGE-$VERSION configuration summary:
     Rebuild char tables ................ : ${enable_rebuild_chartables}
     Internal link size ................. : ${with_link_size}
     Nested parentheses limit ........... : ${with_parens_nest_limit}
-    Heap limit ......................... : ${with_heap_limit} kilobytes
+    Heap limit ......................... : ${with_heap_limit} kibibytes
     Match limit ........................ : ${with_match_limit}
     Match depth limit .................. : ${with_match_limit_depth}
     Build shared libs .................. : ${enable_shared}

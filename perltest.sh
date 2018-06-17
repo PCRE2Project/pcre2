@@ -51,7 +51,7 @@ fi
 #   utf                invoke UTF-8 functionality
 #
 # The data lines must not have any pcre2test modifiers. Unless
-# "subject_litersl" is on the pattern, data lines are processed as
+# "subject_literal" is on the pattern, data lines are processed as
 # Perl double-quoted strings, so if they contain " $ or @ characters, these
 # have to be escaped. For this reason, all such characters in the
 # Perl-compatible testinput1 and testinput4 files are escaped so that they can

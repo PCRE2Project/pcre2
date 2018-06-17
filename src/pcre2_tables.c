@@ -170,7 +170,7 @@ are implementing).
    by E_Modifier). Extend characters are allowed before the modifier; this
    cannot be represented in this table, the code has to deal with it.
 
-8. Do not break within emoji zwj sequences (ZWJ followed by Glue_After_Zwj   or
+8. Do not break within emoji zwj sequences (ZWJ followed by Glue_After_Zwj or
    E_Base_GAZ).
 
 9. Do not break within emoji flag sequences. That is, do not break between

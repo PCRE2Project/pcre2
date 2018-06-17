@@ -492,7 +492,7 @@ so many of them that they are split into two fields. */
 
 /* These are the matching controls that may be set either on a pattern or on a
 data line. They are copied from the pattern controls as initial settings for
-data line controls Note that CTL_MEMORY is not included here, because it does
+data line controls. Note that CTL_MEMORY is not included here, because it does
 different things in the two cases. */
 
 #define CTL_ALLPD  (CTL_AFTERTEXT|\
@@ -5411,7 +5411,7 @@ switch(errorcode)
 
 /* The pattern is now in pbuffer[8|16|32], with the length in code units in
 patlen. If it is to be converted, copy the result back afterwards so that it
-it ends up back in the usual place. */
+ends up back in the usual place. */
 
 if (pat_patctl.convert_type != CONVERT_UNSET)
   {
@@ -5735,7 +5735,7 @@ return PR_OK;
 *************************************************/
 
 /* This is used for DFA, normal, and JIT fast matching. For DFA matching it
-should only called with the third argument set to PCRE2_ERROR_DEPTHLIMIT.
+should only be called with the third argument set to PCRE2_ERROR_DEPTHLIMIT.
 
 Arguments:
   pp        the subject string
@@ -7766,7 +7766,7 @@ printf("  -LM           list pattern and subject modifiers, then exit\n");
 printf("  -q            quiet: do not output PCRE2 version number at start\n");
 printf("  -pattern <s>  set default pattern modifier fields\n");
 printf("  -subject <s>  set default subject modifier fields\n");
-printf("  -S <n>        set stack size to <n> megabytes\n");
+printf("  -S <n>        set stack size to <n> mebibytes\n");
 printf("  -t [<n>]      time compilation and execution, repeating <n> times\n");
 printf("  -tm [<n>]     time execution (matching) only, repeating <n> times\n");
 printf("  -T            same as -t, but show total times at the end\n");

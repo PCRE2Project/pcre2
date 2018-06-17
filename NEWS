@@ -31,7 +31,7 @@ remembering backtracking positions. This makes --disable-stack-for-recursion a
 NOOP. The new implementation allows backtracking into recursive group calls in
 patterns, making it more compatible with Perl, and also fixes some other
 previously hard-to-do issues. For patterns that have a lot of backtracking, the
-heap is now used, and there is explicit limit on the amount, settable by
+heap is now used, and there is an explicit limit on the amount, settable by
 pcre2_set_heap_limit() or (*LIMIT_HEAP=xxx). The "recursion limit" is retained,
 but is renamed as "depth limit" (though the old names remain for
 compatibility).
@@ -53,7 +53,7 @@ also supported.
 
 5. Additional compile options in the compile context are now available, and the
 first two are: PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES and
-PCRE2_EXTRA_BAD_ESCAPE_IS LITERAL.
+PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL.
 
 6. The newline type PCRE2_NEWLINE_NUL is now available.
 

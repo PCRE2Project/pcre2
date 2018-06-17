@@ -127,7 +127,7 @@ can skip ahead to the CMake section.
      src/pcre2_jit_match.c and src/pcre2_jit_misc.c, so you should not compile
      these yourself.
 
-     Not also that the pcre2_fuzzsupport.c file contains special code that is
+     Note also that the pcre2_fuzzsupport.c file contains special code that is
      useful to those who want to run fuzzing tests on the PCRE2 library. Unless
      you are doing that, you can ignore it.
 
@@ -186,7 +186,7 @@ can skip ahead to the CMake section.
 
 STACK SIZE IN WINDOWS ENVIRONMENTS
 
-Prior to release 10.30 the default system stack size of 1Mb in some Windows
+Prior to release 10.30 the default system stack size of 1MB in some Windows
 environments caused issues with some tests. This should no longer be the case
 for 10.30 and later releases.
 

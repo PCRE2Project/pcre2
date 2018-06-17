@@ -31,7 +31,7 @@ page.
 2. Like Perl, PCRE2 allows repeat quantifiers on parenthesized assertions, but
 they do not mean what you might think. For example, (?!a){3} does not assert
 that the next three characters are not "a". It just asserts that the next
-character is not "a" three times (in principle: PCRE2 optimizes this to run the
+character is not "a" three times (in principle; PCRE2 optimizes this to run the
 assertion just once). Perl allows some repeat quantifiers on other assertions,
 for example, \b* (but not \b{3}), but these do not seem to have any use.
 </P>
@@ -77,8 +77,8 @@ The \Q...\E sequence is recognized both inside and outside character classes.
 </P>
 <P>
 7. Fairly obviously, PCRE2 does not support the (?{code}) and (??{code})
-constructions. However, there is support PCRE2's "callout" feature, which
-allows an external function to be called during pattern matching. See the
+constructions. However, PCRE2 does have a "callout" feature, which allows an
+external function to be called during pattern matching. See the
 <a href="pcre2callout.html"><b>pcre2callout</b></a>
 documentation for details.
 </P>
@@ -156,7 +156,7 @@ each alternative branch of a lookbehind assertion can match a different length
 of string. Perl requires them all to have the same length.
 <br>
 <br>
-(b) From PCRE2 10.23, back references to groups of fixed length are supported
+(b) From PCRE2 10.23, backreferences to groups of fixed length are supported
 in lookbehinds, provided that there is no possibility of referencing a
 non-unique number or name. Perl does not support backreferences in lookbehinds.
 <br>
