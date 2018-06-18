@@ -412,7 +412,7 @@ if (rws->next != NULL)
   }
 
 /* All sizes are in units of sizeof(int), except for mb->heaplimit, which is in
-kilobytes. */
+kibibytes. */
 
 else
   {

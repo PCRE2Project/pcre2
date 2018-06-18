@@ -247,7 +247,7 @@ not rely on this. */
 pcre2_match() is allocated on the system stack, of this size (bytes). The size
 must be a multiple of sizeof(PCRE2_SPTR) in all environments, so making it a
 multiple of 8 is best. Typical frame sizes are a few hundred bytes (it depends
-on the number of capturing parentheses) so 20K handles quite a few frames. A
+on the number of capturing parentheses) so 20KiB handles quite a few frames. A
 larger vector on the heap is obtained for patterns that need more frames. The
 maximum size of this can be limited. */
 

@@ -973,7 +973,7 @@ less than the limit set by the caller of <b>pcre2_match()</b> or, if no such
 limit is set, less than the default.
 </P>
 <P>
-The <b>pcre2_match()</b> function starts out using a 20K vector on the system
+The <b>pcre2_match()</b> function starts out using a 20KiB vector on the system
 stack for recording backtracking points. The more nested backtracking points
 there are (that is, the deeper the search tree), the more memory is needed.
 Heap memory is used only if the initial vector is too small. If the heap limit
@@ -1155,7 +1155,7 @@ relevant.
 <P>
 The default value of 2 for the 8-bit and 16-bit libraries is sufficient for all
 but the most massive patterns, since it allows the size of the compiled pattern
-to be up to 64K code units. Larger values allow larger regular expressions to
+to be up to 65535 code units. Larger values allow larger regular expressions to
 be compiled by those two libraries, but at the expense of slower matching.
 <pre>
   PCRE2_CONFIG_MATCHLIMIT

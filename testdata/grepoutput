@@ -346,7 +346,7 @@ RC=0
 ./testdata/grepinput-9-
 ./testdata/grepinput:10:This pattern is in lower case.
 ./testdata/grepinput-11-
-./testdata/grepinput-12-Here follows a whole lot of stuff that makes the file over 24K long.
+./testdata/grepinput-12-Here follows a whole lot of stuff that makes the file over 24KiB long.
 ./testdata/grepinput-13-
 --
 ./testdata/grepinput:623:Check up on PATTERN near the end.
@@ -379,6 +379,7 @@ RC=0
 ./testdata/grepinputx
 RC=0
 ---------------------------- Test 37 -----------------------------
+24KiB long so that it needs more than a single read() call to process it. New
 aaaaa0
 aaaaa2
 010203040506
@@ -465,11 +466,11 @@ fox [1;31mjumps[0m
 This time it [1;31mjumps[0m and [1;31mjumps[0m and [1;31mjumps[0m.
 RC=0
 ---------------------------- Test 53 ------------------------------
-36972,6
-36990,4
-37024,4
-37066,5
-37083,4
+36976,6
+36994,4
+37028,4
+37070,5
+37087,4
 RC=0
 ---------------------------- Test 54 ------------------------------
 595:15,6
@@ -519,8 +520,8 @@ RC=0
 pcre2grep: pcre2_match() gave error -47 while matching text that starts:
 
 This is a file of miscellaneous text that is used as test data for checking
-that the pcregrep command is working correctly. The file must be more than 24K
-long so that it needs more than a single read
+that the pcregrep command is working correctly. The file must be more than
+24KiB long so that it needs more than a single re
 
 pcre2grep: Error -46, -47, -53 or -63 means that a resource limit was exceeded.
 pcre2grep: Check your regex for nested unlimited loops.
@@ -529,8 +530,8 @@ RC=1
 pcre2grep: pcre2_match() gave error -53 while matching text that starts:
 
 This is a file of miscellaneous text that is used as test data for checking
-that the pcregrep command is working correctly. The file must be more than 24K
-long so that it needs more than a single read
+that the pcregrep command is working correctly. The file must be more than
+24KiB long so that it needs more than a single re
 
 pcre2grep: Error -46, -47, -53 or -63 means that a resource limit was exceeded.
 pcre2grep: Check your regex for nested unlimited loops.
@@ -814,11 +815,11 @@ RC=0
 615:0,12
 RC=0
 ---------------------------- Test 112 -----------------------------
-37168,12
-37180,12
-37192,12
-37204,12
-37216,12
+37172,12
+37184,12
+37196,12
+37208,12
+37220,12
 RC=0
 ---------------------------- Test 113 -----------------------------
 480

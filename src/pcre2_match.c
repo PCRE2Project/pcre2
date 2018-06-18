@@ -6283,7 +6283,7 @@ mb->match_limit_depth = (mcontext->depth_limit < re->limit_depth)?
 /* If a pattern has very many capturing parentheses, the frame size may be very
 large. Ensure that there are at least 10 available frames by getting an initial
 vector on the heap if necessary, except when the heap limit prevents this. Get
-fewer if possible. (The heap limit is in kilobytes.) */
+fewer if possible. (The heap limit is in kibibytes.) */
 
 if (frame_size <= START_FRAMES_SIZE/10)
   {

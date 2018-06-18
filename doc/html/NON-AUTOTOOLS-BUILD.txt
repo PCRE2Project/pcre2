@@ -186,7 +186,7 @@ can skip ahead to the CMake section.
 
 STACK SIZE IN WINDOWS ENVIRONMENTS
 
-Prior to release 10.30 the default system stack size of 1MB in some Windows
+Prior to release 10.30 the default system stack size of 1MiB in some Windows
 environments caused issues with some tests. This should no longer be the case
 for 10.30 and later releases.
 

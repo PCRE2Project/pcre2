@@ -370,8 +370,8 @@ tests to improve coverage.
 31. If more than one of "push", "pushcopy", or "pushtablescopy" were set in
 pcre2test, a crash could occur.
 
-32. Make -bigstack in RunTest allocate a 64MB stack (instead of 16 MB) so that
-all the tests can run with clang's sanitizing options.
+32. Make -bigstack in RunTest allocate a 64MiB stack (instead of 16 MiB) so
+that all the tests can run with clang's sanitizing options.
 
 33. Implement extra compile options in the compile context and add the first
 one: PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES.
@@ -964,9 +964,9 @@ to the same code as '.' when PCRE2_DOTALL is set).
 40. Fix two clang compiler warnings in pcre2test when only one code unit width
 is supported.
 
-41. Upgrade RunTest to automatically re-run test 2 with a large (64M) stack if
-it fails when running the interpreter with a 16M stack (and if changing the
-stack size via pcre2test is possible). This avoids having to manually set a
+41. Upgrade RunTest to automatically re-run test 2 with a large (64MiB) stack
+if it fails when running the interpreter with a 16MiB stack (and if changing
+the stack size via pcre2test is possible). This avoids having to manually set a
 large stack size when testing with clang.
 
 42. Fix register overwite in JIT when SSE2 acceleration is enabled.

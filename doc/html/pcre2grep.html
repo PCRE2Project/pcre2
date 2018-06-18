@@ -87,7 +87,7 @@ that is obtained at the start of processing. If an input file contains very
 long lines, a larger buffer may be needed; this is handled by automatically
 extending the buffer, up to the limit specified by <b>--max-buffer-size</b>. The
 default values for these parameters can be set when <b>pcre2grep</b> is
-built; if nothing is specified, the defaults are set to 20K and 1M
+built; if nothing is specified, the defaults are set to 20KiB and 1MiB
 respectively. An error occurs if a line is too long and the buffer can no
 longer be expanded.
 </P>
@@ -97,7 +97,7 @@ allow for buffering "before" and "after" lines. If the buffer size is too
 small, fewer than requested "before" and "after" lines may be output.
 </P>
 <P>
-Patterns can be no longer than 8K or BUFSIZ bytes, whichever is the greater.
+Patterns can be no longer than 8KiB or BUFSIZ bytes, whichever is the greater.
 BUFSIZ is defined in <b>&#60;stdio.h&#62;</b>. When there is more than one pattern
 (specified by the use of <b>-e</b> and/or <b>-f</b>), each pattern is applied to
 each line in the order in which they are defined, except that all the <b>-e</b>

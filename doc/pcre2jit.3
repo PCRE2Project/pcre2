@@ -161,7 +161,7 @@ when JIT matching is used.
 .rs
 .sp
 When the compiled JIT code runs, it needs a block of memory to use as a stack.
-By default, it uses 32K on the machine stack. However, some large or
+By default, it uses 32KiB on the machine stack. However, some large or
 complicated patterns need more than this. The error PCRE2_ERROR_JIT_STACKLIMIT
 is given when there is not enough stack. Three functions are provided for
 managing blocks of memory for use as JIT stacks. There is further discussion
@@ -178,8 +178,8 @@ allocation functions, or NULL for standard memory allocation). It returns a
 pointer to an opaque structure of type \fBpcre2_jit_stack\fP, or NULL if there
 is an error. The \fBpcre2_jit_stack_free()\fP function is used to free a stack
 that is no longer needed. (For the technically minded: the address space is
-allocated by mmap or VirtualAlloc.) A maximum stack size of 512K to 1M should
-be more than enough for any pattern.
+allocated by mmap or VirtualAlloc.) A maximum stack size of 512KiB to 1MiB
+should be more than enough for any pattern.
 .P
 The \fBpcre2_jit_stack_assign()\fP function specifies which stack JIT code
 should use. Its arguments are as follows:
@@ -192,7 +192,7 @@ The first argument is a pointer to a match context. When this is subsequently
 passed to a matching function, its information determines which JIT stack is
 used. There are three cases for the values of the other two options:
 .sp
-  (1) If \fIcallback\fP is NULL and \fIdata\fP is NULL, an internal 32K block
+  (1) If \fIcallback\fP is NULL and \fIdata\fP is NULL, an internal 32KiB block
       on the machine stack is used. This is the default when a match
       context is created.
 .sp
@@ -203,7 +203,7 @@ used. There are three cases for the values of the other two options:
   (3) If \fIcallback\fP is not NULL, it must point to a function that is
       called with \fIdata\fP as an argument at the start of matching, in
       order to set up a JIT stack. If the return from the callback
-      function is NULL, the internal 32K stack is used; otherwise the
+      function is NULL, the internal 32KiB stack is used; otherwise the
       return value must be a valid JIT stack, the result of calling
       \fBpcre2_jit_stack_create()\fP.
 .sp
@@ -265,9 +265,9 @@ we do the recursion in memory.
 Modern operating systems have a nice feature: they can reserve an address space
 instead of allocating memory. We can safely allocate memory pages inside this
 address space, so the stack could grow without moving memory data (this is
-important because of pointers). Thus we can allocate 1M address space, and use
-only a single memory page (usually 4K) if that is enough. However, we can still
-grow up to 1M anytime if needed.
+important because of pointers). Thus we can allocate 1MiB address space, and
+use only a single memory page (usually 4KiB) if that is enough. However, we can
+still grow up to 1MiB anytime if needed.
 .P
 (3) Who "owns" a JIT stack?
 .sp
@@ -300,7 +300,7 @@ say two minutes. The JIT callback can help to achieve this without keeping a
 list of patterns.
 .P
 (6) OK, the stack is for long term memory allocation. But what happens if a
-pattern causes stack overflow with a stack of 1M? Is that 1M kept until the
+pattern causes stack overflow with a stack of 1MiB? Is that 1MiB kept until the
 stack is freed?
 .sp
 Especially on embedded sytems, it might be a good idea to release memory

@@ -706,8 +706,8 @@ fi
 AC_DEFINE_UNQUOTED([LINK_SIZE], [$with_link_size], [
   The value of LINK_SIZE determines the number of bytes used to store
   links as offsets within the compiled regex. The default is 2, which
-  allows for compiled patterns up to 64K long. This covers the vast
-  majority of cases. However, PCRE2 can also be compiled to use 3 or 4
+  allows for compiled patterns up to 65535 code units long. This covers the
+  vast majority of cases. However, PCRE2 can also be compiled to use 3 or 4
   bytes instead. This allows for longer patterns in extreme cases.])
 
 AC_DEFINE_UNQUOTED([PARENS_NEST_LIMIT], [$with_parens_nest_limit], [

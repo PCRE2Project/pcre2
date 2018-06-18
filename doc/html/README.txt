@@ -263,7 +263,7 @@ library. They are also documented in the pcre2build man page.
   pcre2_set_heap_limit).
 
 . In the 8-bit library, the default maximum compiled pattern size is around
-  64K bytes. You can increase this by adding --with-link-size=3 to the
+  64 kibibytes. You can increase this by adding --with-link-size=3 to the
   "configure" command. PCRE2 then uses three bytes instead of two for offsets
   to different parts of the compiled pattern. In the 16-bit library,
   --with-link-size=3 is the same as --with-link-size=4, which (in both

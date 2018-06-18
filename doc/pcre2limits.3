@@ -7,12 +7,12 @@ PCRE2 - Perl-compatible regular expressions (revised API)
 There are some size limitations in PCRE2 but it is hoped that they will never
 in practice be relevant.
 .P
-The maximum size of a compiled pattern is approximately 64K code units for the
-8-bit and 16-bit libraries if PCRE2 is compiled with the default internal
-linkage size, which is 2 bytes for these libraries. If you want to process
-regular expressions that are truly enormous, you can compile PCRE2 with an
-internal linkage size of 3 or 4 (when building the 16-bit library, 3 is rounded
-up to 4). See the \fBREADME\fP file in the source distribution and the
+The maximum size of a compiled pattern is approximately 64 thousand code units
+for the 8-bit and 16-bit libraries if PCRE2 is compiled with the default
+internal linkage size, which is 2 bytes for these libraries. If you want to
+process regular expressions that are truly enormous, you can compile PCRE2 with
+an internal linkage size of 3 or 4 (when building the 16-bit library, 3 is
+rounded up to 4). See the \fBREADME\fP file in the source distribution and the
 .\" HREF
 \fBpcre2build\fP
 .\"

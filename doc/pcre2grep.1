@@ -58,7 +58,7 @@ that is obtained at the start of processing. If an input file contains very
 long lines, a larger buffer may be needed; this is handled by automatically
 extending the buffer, up to the limit specified by \fB--max-buffer-size\fP. The
 default values for these parameters can be set when \fBpcre2grep\fP is
-built; if nothing is specified, the defaults are set to 20K and 1M
+built; if nothing is specified, the defaults are set to 20KiB and 1MiB
 respectively. An error occurs if a line is too long and the buffer can no
 longer be expanded.
 .P
@@ -66,7 +66,7 @@ The block of memory that is actually used is three times the "buffer size", to
 allow for buffering "before" and "after" lines. If the buffer size is too
 small, fewer than requested "before" and "after" lines may be output.
 .P
-Patterns can be no longer than 8K or BUFSIZ bytes, whichever is the greater.
+Patterns can be no longer than 8KiB or BUFSIZ bytes, whichever is the greater.
 BUFSIZ is defined in \fB<stdio.h>\fP. When there is more than one pattern
 (specified by the use of \fB-e\fP and/or \fB-f\fP), each pattern is applied to
 each line in the order in which they are defined, except that all the \fB-e\fP

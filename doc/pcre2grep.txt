@@ -58,15 +58,15 @@ DESCRIPTION
        automatically extending the buffer, up to the limit specified by --max-
        buffer-size. The default values for these parameters can  be  set  when
        pcre2grep  is  built;  if nothing is specified, the defaults are set to
-       20K and 1M respectively. An error occurs if a line is too long and  the
-       buffer can no longer be expanded.
+       20KiB and 1MiB respectively. An error occurs if a line is too long  and
+       the buffer can no longer be expanded.
 
        The  block  of  memory that is actually used is three times the "buffer
        size", to allow for buffering "before" and "after" lines. If the buffer
        size  is too small, fewer than requested "before" and "after" lines may
        be output.
 
-       Patterns can be no longer than 8K or BUFSIZ  bytes,  whichever  is  the
+       Patterns can be no longer than 8KiB or BUFSIZ bytes, whichever  is  the
        greater.   BUFSIZ  is defined in <stdio.h>. When there is more than one
        pattern (specified by the use of -e and/or -f), each pattern is applied
        to  each  line  in the order in which they are defined, except that all

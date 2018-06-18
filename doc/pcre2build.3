@@ -244,10 +244,10 @@ Within a compiled pattern, offset values are used to point from one part to
 another (for example, from an opening parenthesis to an alternation
 metacharacter). By default, in the 8-bit and 16-bit libraries, two-byte values
 are used for these offsets, leading to a maximum size for a compiled pattern of
-around 64K code units. This is sufficient to handle all but the most gigantic
-patterns. Nevertheless, some people do want to process truly enormous patterns,
-so it is possible to compile PCRE2 to use three-byte or four-byte offsets by
-adding a setting such as
+around 64 thousand code units. This is sufficient to handle all but the most
+gigantic patterns. Nevertheless, some people do want to process truly enormous
+patterns, so it is possible to compile PCRE2 to use three-byte or four-byte
+offsets by adding a setting such as
 .sp
   --with-link-size=3
 .sp
@@ -277,7 +277,7 @@ to the \fBconfigure\fP command. This setting also applies to the
 \fBpcre2_dfa_match()\fP matching function, and to JIT matching (though the
 counting is done differently).
 .P
-The \fBpcre2_match()\fP function starts out using a 20K vector on the system
+The \fBpcre2_match()\fP function starts out using a 20KiB vector on the system
 stack to record backtracking points. The more nested backtracking points there
 are (that is, the deeper the search tree), the more memory is needed. If the
 initial vector is not large enough, heap memory is used, up to a certain limit,
@@ -403,13 +403,13 @@ they are not.
 .sp
 \fBpcre2grep\fP uses an internal buffer to hold a "window" on the file it is
 scanning, in order to be able to output "before" and "after" lines when it
-finds a match. The starting size of the buffer is controlled by a parameter
-whose default value is 20K. The buffer itself is three times this size, but
-because of the way it is used for holding "before" lines, the longest line that
-is guaranteed to be processable is the parameter size. If a longer line is
-encountered, \fBpcre2grep\fP automatically expands the buffer, up to a
-specified maximum size, whose default is 1M or the starting size, whichever is
-the larger. You can change the default parameter values by adding, for example,
+finds a match. The default starting size of the buffer is 20KiB. The buffer
+itself is three times this size, but because of the way it is used for holding
+"before" lines, the longest line that is guaranteed to be processable is the
+notional buffer size. If a longer line is encountered, \fBpcre2grep\fP
+automatically expands the buffer, up to a specified maximum size, whose default
+is 1MiB or the starting size, whichever is the larger. You can change the
+default parameter values by adding, for example,
 .sp
   --with-pcre2grep-bufsize=51200
   --with-pcre2grep-max-bufsize=2097152

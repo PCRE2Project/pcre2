@@ -370,7 +370,7 @@ default value for LINK_SIZE is 2, except for the 32-bit library, where it can
 only be 4. The 8-bit library can be compiled to used 3-byte or 4-byte values,
 and the 16-bit library can be compiled to use 4-byte values, though this
 impairs performance. Specifing a LINK_SIZE larger than 2 for these libraries is
-necessary only when patterns whose compiled length is greater than 64K code
+necessary only when patterns whose compiled length is greater than 65535 code
 units are going to be processed. When a LINK_SIZE value uses more than one code
 unit, the most significant unit is first.
 

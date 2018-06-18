@@ -416,7 +416,7 @@ static option_item optionlist[] = {
   { OP_NODATA,     N_LBUFFER, NULL,             "line-buffered", "use line buffering" },
   { OP_NODATA,     N_LOFFSETS, NULL,            "line-offsets",  "output line numbers and offsets, not text" },
   { OP_STRING,     N_LOCALE, &locale,           "locale=locale", "use the named locale" },
-  { OP_SIZE,       N_H_LIMIT, &heap_limit,      "heap-limit=number",  "set PCRE2 heap limit option (kilobytes)" },
+  { OP_SIZE,       N_H_LIMIT, &heap_limit,      "heap-limit=number",  "set PCRE2 heap limit option (kibibytes)" },
   { OP_U32NUMBER,  N_M_LIMIT, &match_limit,     "match-limit=number", "set PCRE2 match limit option" },
   { OP_U32NUMBER,  N_M_LIMIT_DEP, &depth_limit, "depth-limit=number", "set PCRE2 depth limit option" },
   { OP_U32NUMBER,  N_M_LIMIT_DEP, &depth_limit, "recursion-limit=number", "obsolete synonym for depth-limit" },
