@@ -370,7 +370,7 @@ tests to improve coverage.
 31. If more than one of "push", "pushcopy", or "pushtablescopy" were set in
 pcre2test, a crash could occur.
 
-32. Make -bigstack in RunTest allocate a 64MiB stack (instead of 16 MiB) so
+32. Make -bigstack in RunTest allocate a 64MiB stack (instead of 16MiB) so
 that all the tests can run with clang's sanitizing options.
 
 33. Implement extra compile options in the compile context and add the first
