@@ -64,8 +64,8 @@ POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 /* Some cmake's define it still */
-#if defined(__CYGWIN__) && !defined(WIN32)
-#define WIN32
+#if defined(__CYGWIN__) && defined(WIN32)
+#undef WIN32
 #endif
 
 #ifdef WIN32

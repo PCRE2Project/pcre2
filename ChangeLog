@@ -67,6 +67,9 @@ EOF. The test looks to have come from a fuzzer.
 default default of 10 000 000, some JIT tests of the match limit no longer
 failed. All such tests now set 10 000 000 as the upper limit.
 
+16. Another Windows related patch for pcregrep to ensure that WIN32 is 
+undefiined under Cygwin.
+
 
 Version 10.31 12-February-2018
 ------------------------------
