@@ -435,10 +435,10 @@ to set the macro values. In this case, you do not have to set -DHAVE_CONFIG_H,
 but if you do, default values will be taken from config.h for non-boolean
 macros that are not defined on the command line.
 
-Boolean macros such as HAVE_STDLIB_H and SUPPORT_PCRE2_8 should either be defined
-(conventionally to 1) for TRUE, and not defined at all for FALSE. All such
-macros are listed as a commented #undef in config.h.generic. Macros such as
-MATCH_LIMIT, whose actual value is relevant, have defaults defined, but are
+Boolean macros such as HAVE_STDLIB_H and SUPPORT_PCRE2_8 should either be
+defined (conventionally to 1) for TRUE, and not defined at all for FALSE. All
+such macros are listed as a commented #undef in config.h.generic. Macros such
+as MATCH_LIMIT, whose actual value is relevant, have defaults defined, but are
 surrounded by #ifndef/#endif lines so that the value can be overridden by -D.
 
 PCRE2 uses memmove() if HAVE_MEMMOVE is defined; otherwise it uses bcopy() if
@@ -450,6 +450,11 @@ AC_HEADER_STDC
 AC_CHECK_HEADERS(limits.h sys/types.h sys/stat.h dirent.h)
 AC_CHECK_HEADERS([windows.h], [HAVE_WINDOWS_H=1])
 AC_CHECK_HEADERS([sys/wait.h], [HAVE_SYS_WAIT_H=1])
+
+AC_CHECK_HEADERS([stdint.h], [PCRE2_HAVE_STDINT_H=1])
+AC_CHECK_HEADERS([inttypes.h], [PCRE2_HAVE_INTTYPES_H=1])
+AC_SUBST([PCRE2_HAVE_STDINT_H])
+AC_SUBST([PCRE2_HAVE_INTTYPES_H])
 
 # Conditional compilation
 AM_CONDITIONAL(WITH_PCRE2_8, test "x$enable_pcre2_8" = "xyes")

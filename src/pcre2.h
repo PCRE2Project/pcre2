@@ -41,10 +41,16 @@ POSSIBILITY OF SUCH DAMAGE.
 
 /* The current PCRE version information. */
 
-#define PCRE2_MAJOR          10
-#define PCRE2_MINOR          32
-#define PCRE2_PRERELEASE     -RC1
-#define PCRE2_DATE           2018-02-19
+#define PCRE2_MAJOR           10
+#define PCRE2_MINOR           32
+#define PCRE2_PRERELEASE      -RC1
+#define PCRE2_DATE            2018-02-19
+
+/* For the benefit of systems without stdint.h, an alternative is to use 
+inttypes.h. The existence of these headers is checked by configure or CMake. */
+
+#define PCRE2_HAVE_STDINT_H   1
+#define PCRE2_HAVE_INTTYPES_H 1
 
 /* When an application links to a PCRE DLL in Windows, the symbols that are
 imported have to be identified as such. When building PCRE2, the appropriate
@@ -81,12 +87,18 @@ set, we ensure here that it has no effect. */
 #define PCRE2_CALL_CONVENTION
 #endif
 
-/* Have to include limits.h, stdlib.h and stdint.h to ensure that size_t and
-uint8_t, UCHAR_MAX, etc are defined. */
+/* Have to include limits.h, stdlib.h and stdint.h (or inttypes.h) to ensure
+that size_t and uint8_t, UCHAR_MAX, etc are defined. If the system has neither 
+header, the relevant values must be provided by some other means. */
 
 #include <limits.h>
 #include <stdlib.h>
+
+#if PCRE2_HAVE_STDINT_H
 #include <stdint.h>
+#elif PCRE2_HAVE_INTTYPES_H
+#include <inttypes.h>
+#endif
 
 /* Allow for C++ users compiling this directly. */
 

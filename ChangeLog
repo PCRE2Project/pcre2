@@ -70,6 +70,10 @@ failed. All such tests now set 10 000 000 as the upper limit.
 16. Another Windows related patch for pcregrep to ensure that WIN32 is 
 undefiined under Cygwin.
 
+17. Test for the presence of stdint.h and inttypes.h in configure and CMake and 
+include whichever exists (stdint preferred) instead of unconditionally 
+including stdint. This makes life easier for old and non-standard systems.
+
 
 Version 10.31 12-February-2018
 ------------------------------
