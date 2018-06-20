@@ -4,6 +4,12 @@
 # itself. What we are checking here is the file handling and options that are
 # supported by pcre2grep. This script must be run in the build directory.
 
+# CODING CONVENTIONS: 
+# * Put printf arguments in single, not double quotes to avoid unwanted
+#     escaping.
+# * Use \0 for binary zero in printf, not \x0, for the benefit of older 
+#     versions.
+
 # Set the C locale, so that sort(1) behaves predictably.
 
 LC_ALL=C
@@ -600,7 +606,7 @@ echo "---------------------------- Test 118 -----------------------------" >>tes
 echo "RC=$?" >>testtrygrep
 
 echo "---------------------------- Test 119 -----------------------------" >>testtrygrep
-printf "123\n456\n789\n---abc\ndef\nxyz\n---\n" >testNinputgrep
+printf '123\n456\n789\n---abc\ndef\nxyz\n---\n' >testNinputgrep
 $valgrind $vjs $pcre2grep -Mo '(\n|[^-])*---' testNinputgrep >>testtrygrep
 echo "RC=$?" >>testtrygrep
 
@@ -631,7 +637,7 @@ echo "RC=$?" >>testtrygrep
 echo "RC=$?" >>testtrygrep
 
 echo "---------------------------- Test 125 -----------------------------" >>testtrygrep
-printf "abcd\n" >testNinputgrep
+printf 'abcd\n' >testNinputgrep
 $valgrind $vjs $pcre2grep --colour=always '(?<=\K.)' testNinputgrep >>testtrygrep
 echo "RC=$?" >>testtrygrep
 $valgrind $vjs $pcre2grep --colour=always '(?=.\K)' testNinputgrep >>testtrygrep
@@ -642,8 +648,8 @@ $valgrind $vjs $pcre2grep --colour=always '(?=[ac]\K)' testNinputgrep >>testtryg
 echo "RC=$?" >>testtrygrep
 
 echo "---------------------------- Test 126 -----------------------------" >>testtrygrep
-printf "Next line pattern has binary zero\nABC\x00XYZ\n" >testtemp1grep
-printf "ABC\x00XYZ\nABCDEF\nDEFABC\n" >testtemp2grep
+printf 'Next line pattern has binary zero\nABC\0XYZ\n' >testtemp1grep
+printf 'ABC\0XYZ\nABCDEF\nDEFABC\n' >testtemp2grep
 $valgrind $vjs $pcre2grep -a -f testtemp1grep testtemp2grep >>testtrygrep
 echo "RC=$?" >>testtrygrep
 
@@ -687,25 +693,25 @@ fi
 # starts with a hyphen. These tests are run in the build directory.
 
 echo "Testing pcre2grep newline settings"
-printf "abc\rdef\r\nghi\njkl" >testNinputgrep
+printf 'abc\rdef\r\nghi\njkl' >testNinputgrep
 
-printf "%c--------------------------- Test N1 ------------------------------\r\n" - >testtrygrep
+printf '%c--------------------------- Test N1 ------------------------------\r\n' - >testtrygrep
 $valgrind $vjs $pcre2grep -n -N CR "^(abc|def|ghi|jkl)" testNinputgrep >>testtrygrep
 
-printf "%c--------------------------- Test N2 ------------------------------\r\n" - >>testtrygrep
+printf '%c--------------------------- Test N2 ------------------------------\r\n' - >>testtrygrep
 $valgrind $vjs $pcre2grep -n --newline=crlf "^(abc|def|ghi|jkl)" testNinputgrep >>testtrygrep
 
-printf "%c--------------------------- Test N3 ------------------------------\r\n" - >>testtrygrep
+printf '%c--------------------------- Test N3 ------------------------------\r\n' - >>testtrygrep
 pattern=`printf 'def\rjkl'`
 $valgrind $vjs $pcre2grep -n --newline=cr -F "$pattern" testNinputgrep >>testtrygrep
 
-printf "%c--------------------------- Test N4 ------------------------------\r\n" - >>testtrygrep
+printf '%c--------------------------- Test N4 ------------------------------\r\n' - >>testtrygrep
 $valgrind $vjs $pcre2grep -n --newline=crlf -F -f $srcdir/testdata/greppatN4 testNinputgrep >>testtrygrep
 
-printf "%c--------------------------- Test N5 ------------------------------\r\n" - >>testtrygrep
+printf '%c--------------------------- Test N5 ------------------------------\r\n' - >>testtrygrep
 $valgrind $vjs $pcre2grep -n --newline=any "^(abc|def|ghi|jkl)" testNinputgrep >>testtrygrep
 
-printf "%c--------------------------- Test N6 ------------------------------\r\n" - >>testtrygrep
+printf '%c--------------------------- Test N6 ------------------------------\r\n' - >>testtrygrep
 $valgrind $vjs $pcre2grep -n --newline=anycrlf "^(abc|def|ghi|jkl)" testNinputgrep >>testtrygrep
 
 # It seems impossible to handle NUL characters easily in Solaris (aka SunOS).
@@ -713,10 +719,10 @@ $valgrind $vjs $pcre2grep -n --newline=anycrlf "^(abc|def|ghi|jkl)" testNinputgr
 # don't run this test under SunOS. Fudge the output so that the comparison
 # works. A similar problem has also been reported for MacOS (Darwin).
 
-printf "%c--------------------------- Test N7 ------------------------------\r\n" - >>testtrygrep
+printf '%c--------------------------- Test N7 ------------------------------\r\n' - >>testtrygrep
 uname=`uname`
 if [ "$uname" != "SunOS" -a "$uname" != "Darwin" ] ; then
-  printf "abc\0def" >testNinputgrep
+  printf 'abc\0def' >testNinputgrep
   $valgrind $vjs $pcre2grep -na --newline=nul "^(abc|def)" testNinputgrep | sed 's/\x00/ZERO/' >>testtrygrep
   echo "" >>testtrygrep
 else

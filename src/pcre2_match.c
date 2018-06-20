@@ -45,9 +45,9 @@ POSSIBILITY OF SUCH DAMAGE.
 
 /* These defines enable debugging code */
 
-//#define DEBUG_FRAMES_DISPLAY
-//#define DEBUG_SHOW_OPS
-//#define DEBUG_SHOW_RMATCH
+/* #define DEBUG_FRAMES_DISPLAY */
+/* #define DEBUG_SHOW_OPS */
+/* #define DEBUG_SHOW_RMATCH */
 
 #ifdef DEBUG_FRAME_DISPLAY
 #include <stdarg.h>

@@ -80,7 +80,7 @@ from www.cbttape.org. */
 
 /* Debugging code enabler */
 
-// #define DEBUG_SHOW_MALLOC_ADDRESSES
+/* #define DEBUG_SHOW_MALLOC_ADDRESSES */
 
 /* Both libreadline and libedit are optionally supported. The user-supplied
 original patch uses readline/readline.h for libedit, but in at least one system
@@ -162,11 +162,16 @@ patterns. */
 void vms_setsymbol( char *, char *, int );
 #endif
 
-/* VC doesn't support "%td". */
-#ifdef _MSC_VER
-#define PTR_SPEC "%lu"
+/* VC and older compilers don't support %td or %zu. */
+
+#if defined(_MSC_VER) || !defined(__STDC_VERSION__) || __STDC_VERSION__ < 199901L
+#define PTR_FORM "lu"
+#define SIZ_FORM "lu"
+#define SIZ_CAST (unsigned long int)
 #else
-#define PTR_SPEC "%td"
+#define PTR_FORM "td"
+#define SIZ_FORM "zu"
+#define SIZ_CAST
 #endif
 
 /* ------------------End of system-specific definitions -------------------- */
@@ -2626,11 +2631,11 @@ if (show_memory)
   {
   if (block == NULL)
     {
-    fprintf(outfile, "** malloc() failed for %zd\n", size);
+    fprintf(outfile, "** malloc() failed for %" SIZ_FORM "\n", SIZ_CAST size);
     }
   else
     {
-    fprintf(outfile, "malloc  %5zd", size);
+    fprintf(outfile, "malloc  %5" SIZ_FORM, SIZ_CAST size);
 #ifdef DEBUG_SHOW_MALLOC_ADDRESSES
     fprintf(outfile, " %p", block);   /* Not portable */
 #endif
@@ -2660,7 +2665,7 @@ if (show_memory)
     {
     if (block == malloclist[i])
       {
-      fprintf(outfile, "    %5zd", malloclistlength[i]);
+      fprintf(outfile, "    %5" SIZ_FORM, SIZ_CAST malloclistlength[i]);
       malloclistptr--;
       for (j = i; j < malloclistptr; j++)
         {
@@ -3038,8 +3043,8 @@ if (pbuffer16_size < 2*len + 2)
   pbuffer16 = (uint16_t *)malloc(pbuffer16_size);
   if (pbuffer16 == NULL)
     {
-    fprintf(stderr, "pcre2test: malloc(%lu) failed for pbuffer16\n",
-      (unsigned long int)pbuffer16_size);
+    fprintf(stderr, "pcre2test: malloc(%" SIZ_FORM ") failed for pbuffer16\n",
+      SIZ_CAST pbuffer16_size);
     exit(1);
     }
   }
@@ -3125,8 +3130,8 @@ if (pbuffer32_size < 4*len + 4)
   pbuffer32 = (uint32_t *)malloc(pbuffer32_size);
   if (pbuffer32 == NULL)
     {
-    fprintf(stderr, "pcre2test: malloc(%lu) failed for pbuffer32\n",
-      (unsigned long int)pbuffer32_size);
+    fprintf(stderr, "pcre2test: malloc(%" SIZ_FORM ") failed for pbuffer32\n",
+      SIZ_CAST pbuffer32_size);
     exit(1);
     }
   }
@@ -4844,8 +4849,8 @@ switch(cmd)
   serial = malloc(serial_size);
   if (serial == NULL)
     {
-    fprintf(outfile, "** Failed to get memory (size %lu) for #load\n",
-      (unsigned long int)serial_size);
+    fprintf(outfile, "** Failed to get memory (size %" SIZ_FORM ") for #load\n",
+      SIZ_CAST serial_size);
     fclose(f);
     return PR_ABEND;
     }
@@ -5039,7 +5044,7 @@ if ((pat_patctl.control & CTL_HEXPAT) != 0)
         if (d == 0)
           {
           fprintf(outfile, "** Missing closing quote in hex pattern: "
-            "opening quote is at offset " PTR_SPEC ".\n", pq - buffer - 2);
+            "opening quote is at offset %" PTR_FORM ".\n", pq - buffer - 2);
           return PR_SKIP;
           }
         if (d == c) break;
@@ -5053,8 +5058,8 @@ if ((pat_patctl.control & CTL_HEXPAT) != 0)
       {
       if (!isxdigit(c))
         {
-        fprintf(outfile, "** Unexpected non-hex-digit '%c' at offset "
-          PTR_SPEC " in hex pattern: quote missing?\n", c, pp - buffer - 2);
+        fprintf(outfile, "** Unexpected non-hex-digit '%c' at offset %"
+          PTR_FORM " in hex pattern: quote missing?\n", c, pp - buffer - 2);
         return PR_SKIP;
         }
       if (*pp == 0)
@@ -5065,8 +5070,8 @@ if ((pat_patctl.control & CTL_HEXPAT) != 0)
       d = *pp;
       if (!isxdigit(d))
         {
-        fprintf(outfile, "** Unexpected non-hex-digit '%c' at offset "
-          PTR_SPEC " in hex pattern: quote missing?\n", d, pp - buffer - 1);
+        fprintf(outfile, "** Unexpected non-hex-digit '%c' at offset %"
+          PTR_FORM " in hex pattern: quote missing?\n", d, pp - buffer - 1);
         return PR_SKIP;
         }
       c = toupper(c);
@@ -5470,8 +5475,8 @@ if (pat_patctl.convert_type != CONVERT_UNSET)
 
   if (rc != 0)
     {
-    fprintf(outfile, "** Pattern conversion error at offset %zu: ",
-      converted_length);
+    fprintf(outfile, "** Pattern conversion error at offset %" SIZ_FORM ": ",
+      SIZ_CAST converted_length);
     convert_return = print_error_message(rc, "", "\n")? PR_SKIP:PR_ABEND;
     }
 
@@ -5903,8 +5908,8 @@ isn't a tidy way to fit it in the rest of the data. */
 if (cb->callout_string != NULL)
   {
   uint32_t delimiter = CODE_UNIT(cb->callout_string, -1);
-  fprintf(outfile, "Callout (%lu): %c",
-    (unsigned long int)cb->callout_string_offset, delimiter);
+  fprintf(outfile, "Callout (%" SIZ_FORM "): %c",
+    SIZ_CAST cb->callout_string_offset, delimiter);
   PCHARSV(cb->callout_string, 0,
     cb->callout_string_length, utf, outfile);
   for (i = 0; callout_start_delims[i] != 0; i++)
@@ -6103,12 +6108,12 @@ for (i = 0; i < MAXCPYGET && dat_datctl.copy_numbers[i] >= 0; i++)
       }
     else if (length2 != length)
       {
-      fprintf(outfile, "Mismatched substring lengths: %lu %lu\n",
-        (unsigned long int)length, (unsigned long int)length2);
+      fprintf(outfile, "Mismatched substring lengths: %"
+        SIZ_FORM " %" SIZ_FORM "\n", SIZ_CAST length, SIZ_CAST length2);
       }
     fprintf(outfile, "%2dC ", n);
     PCHARSV(copybuffer, 0, length, utf, outfile);
-    fprintf(outfile, " (%lu)\n", (unsigned long)length);
+    fprintf(outfile, " (%" SIZ_FORM ")\n", SIZ_CAST length);
     }
   }
 
@@ -6158,12 +6163,12 @@ for (;;)
       }
     else if (length2 != length)
       {
-      fprintf(outfile, "Mismatched substring lengths: %lu %lu\n",
-        (unsigned long int)length, (unsigned long int)length2);
+      fprintf(outfile, "Mismatched substring lengths: %"
+        SIZ_FORM " %" SIZ_FORM "\n", SIZ_CAST length, SIZ_CAST length2);
       }
     fprintf(outfile, "  C ");
     PCHARSV(copybuffer, 0, length, utf, outfile);
-    fprintf(outfile, " (%lu) %s", (unsigned long)length, nptr);
+    fprintf(outfile, " (%" SIZ_FORM ") %s", SIZ_CAST length, nptr);
     if (groupnumber >= 0) fprintf(outfile, " (group %d)\n", groupnumber);
       else fprintf(outfile, " (non-unique)\n");
     }
@@ -6188,7 +6193,7 @@ for (i = 0; i < MAXCPYGET && dat_datctl.get_numbers[i] >= 0; i++)
     {
     fprintf(outfile, "%2dG ", n);
     PCHARSV(gotbuffer, 0, length, utf, outfile);
-    fprintf(outfile, " (%lu)\n", (unsigned long)length);
+    fprintf(outfile, " (%" SIZ_FORM ")\n", SIZ_CAST length);
     PCRE2_SUBSTRING_FREE(gotbuffer);
     }
   }
@@ -6232,7 +6237,7 @@ for (;;)
     {
     fprintf(outfile, "  G ");
     PCHARSV(gotbuffer, 0, length, utf, outfile);
-    fprintf(outfile, " (%lu) %s", (unsigned long)length, nptr);
+    fprintf(outfile, " (%" SIZ_FORM ") %s", SIZ_CAST length, nptr);
     if (groupnumber >= 0) fprintf(outfile, " (group %d)\n", groupnumber);
       else fprintf(outfile, " (non-unique)\n");
     PCRE2_SUBSTRING_FREE(gotbuffer);
@@ -6973,8 +6978,8 @@ if (dat_datctl.replacement[0] != 0)
       }
     if (n > nsize)
       {
-      fprintf(outfile, "Replacement buffer setting (%lu) is too large "
-        "(max %lu)\n", (unsigned long int)n, (unsigned long int)nsize);
+      fprintf(outfile, "Replacement buffer setting (%" SIZ_FORM ") is too "
+        "large (max %" SIZ_FORM ")\n", SIZ_CAST n, SIZ_CAST nsize);
       return PR_OK;
       }
     nsize = n;
@@ -7177,7 +7182,7 @@ else for (gmatched = 0;; gmatched++)
       capcount = check_match_limit(pp, arg_ulen, PCRE2_ERROR_DEPTHLIMIT,
         "depth");
       }
-       
+
     if (capcount == 0)
       {
       fprintf(outfile, "Matched, but offsets vector is too small to show all matches\n");
@@ -7556,7 +7561,7 @@ else for (gmatched = 0;; gmatched++)
         {
         PCRE2_SIZE startchar;
         PCRE2_GET_STARTCHAR(startchar, match_data);
-        fprintf(outfile, " at offset %lu", (unsigned long int)startchar);
+        fprintf(outfile, " at offset %" SIZ_FORM, SIZ_CAST startchar);
         }
       fprintf(outfile, "\n");
       break;
@@ -8217,15 +8222,15 @@ while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
     if (rlim.rlim_cur > rlim.rlim_max)
       {
       fprintf(stderr,
-        "pcre2test: requested stack size %luM is greater than hard limit %lu\n",
-        (unsigned long int)stack_size,
-        (unsigned long int)(rlim.rlim_max));
+        "pcre2test: requested stack size %luMiB is greater than hard limit "
+          "%luMiB\n", (unsigned long int)stack_size,
+          (unsigned long int)(rlim.rlim_max));
       exit(1);
       }
     rc = setrlimit(RLIMIT_STACK, &rlim);
     if (rc != 0)
       {
-      fprintf(stderr, "pcre2test: setting stack size %luM failed: %s\n",
+      fprintf(stderr, "pcre2test: setting stack size %luMiB failed: %s\n",
         (unsigned long int)stack_size, strerror(errno));
       exit(1);
       }
@@ -8357,8 +8362,8 @@ least 128 code units, because it is used for retrieving error messages. */
     pbuffer16 = (uint16_t *)malloc(pbuffer16_size);
     if (pbuffer16 == NULL)
       {
-      fprintf(stderr, "pcre2test: malloc(%lu) failed for pbuffer16\n",
-        (unsigned long int)pbuffer16_size);
+      fprintf(stderr, "pcre2test: malloc(%" SIZ_FORM ") failed for pbuffer16\n",
+        SIZ_CAST pbuffer16_size);
       yield = 1;
       goto EXIT;
       }
@@ -8372,8 +8377,8 @@ least 128 code units, because it is used for retrieving error messages. */
     pbuffer32 = (uint32_t *)malloc(pbuffer32_size);
     if (pbuffer32 == NULL)
       {
-      fprintf(stderr, "pcre2test: malloc(%lu) failed for pbuffer32\n",
-        (unsigned long int)pbuffer32_size);
+      fprintf(stderr, "pcre2test: malloc(%" SIZ_FORM ") failed for pbuffer32\n",
+        SIZ_CAST pbuffer32_size);
       yield = 1;
       goto EXIT;
       }

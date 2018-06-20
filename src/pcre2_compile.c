@@ -63,8 +63,8 @@ POSSIBILITY OF SUCH DAMAGE.
 
 /* Other debugging code can be enabled by these defines. */
 
-// #define DEBUG_SHOW_CAPTURES
-// #define DEBUG_SHOW_PARSED
+/* #define DEBUG_SHOW_CAPTURES */
+/* #define DEBUG_SHOW_PARSED */
 
 /* There are a few things that vary with different code unit sizes. Handle them
 by defining macros in order to minimize #if usage. */

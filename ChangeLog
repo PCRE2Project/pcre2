@@ -74,6 +74,18 @@ undefiined under Cygwin.
 include whichever exists (stdint preferred) instead of unconditionally 
 including stdint. This makes life easier for old and non-standard systems.
 
+18. Further changes to improve portability, especially to old and or non-
+standard systems:
+
+  (a) Put all printf arguments in RunGrepTest into single, not double, quotes,
+      and use \0 not \x00 for binary zero. 
+  
+  (b) Avoid the use of C++ (i.e. BCPL) // comments.
+  
+  (c) Parameterize the use of %zu in pcre2test to make it like %td. For both of
+      these now, if using MSVC or a standard C before C99, %lu is used with a 
+      cast if necessary.  
+
 
 Version 10.31 12-February-2018
 ------------------------------
