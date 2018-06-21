@@ -32,6 +32,12 @@ AC_CONFIG_HEADERS(src/config.h)
 # This was added at the suggestion of libtoolize (03-Jan-10)
 AC_CONFIG_MACRO_DIR([m4])
 
+# Clear out any previously created config.h and pcre2.h in the source 
+# directory so that if we are compiling in a separate build directory there
+# is no confusion.
+
+rm -f $srcdir/src/config.h $srcdir/src/pcre2.h
+
 # The default CFLAGS in Autoconf are "-g -O2" for gcc and just "-g" for any
 # other compiler. There doesn't seem to be a standard way of getting rid of the
 # -g (which I don't think is needed for a production library). This fudge seems
