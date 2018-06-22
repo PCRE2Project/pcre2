@@ -81,7 +81,6 @@
 # 2017-04-08 PH added HEAP_LIMIT
 # 2017-06-15 ZH added SUPPORT_JIT_SEALLOC support
 # 2018-06-19 PH added checks for stdint.h and inttypes.h
-# 2018-06-21 PH added deletion of src/pcre2.h and src/config.h
 
 PROJECT(PCRE2 C)
 
@@ -130,12 +129,6 @@ ENDIF(HAVE_STDINT_H)
 CHECK_FUNCTION_EXISTS(bcopy     HAVE_BCOPY)
 CHECK_FUNCTION_EXISTS(memmove   HAVE_MEMMOVE)
 CHECK_FUNCTION_EXISTS(strerror  HAVE_STRERROR)
-
-# Clear out any previously created config.h and pcre2.h in the source 
-# directory so that if we are compiling in a separate build directory there
-# is no confusion.
-
-FILE(REMOVE ${CMAKE_SOURCE_DIR}/src/config.h ${CMAKE_SOURCE_DIR}/src/pcre2.h)
 
 # User-configurable options
 #

@@ -86,10 +86,6 @@ standard systems:
       these now, if using MSVC or a standard C before C99, %lu is used with a 
       cast if necessary.  
       
-19. Arrange for "configure" and CMake to delete pcre2.h and config.h from the 
-source directory src so that there is no confusion when building in a different 
-directory if these files happen to be present. 
-
 
 Version 10.31 12-February-2018
 ------------------------------
