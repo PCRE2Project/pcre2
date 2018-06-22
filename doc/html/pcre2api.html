@@ -982,9 +982,9 @@ used. In this case, only patterns that do not have a lot of nested backtracking
 can be successfully processed.
 </P>
 <P>
-Similarly, for <b>pcre2_dfa_match()</b>, a vector on the system stack is used 
-when processing pattern recursions, lookarounds, or atomic groups, and only if 
-this is not big enough is heap memory used. In this case, too, setting a value 
+Similarly, for <b>pcre2_dfa_match()</b>, a vector on the system stack is used
+when processing pattern recursions, lookarounds, or atomic groups, and only if
+this is not big enough is heap memory used. In this case, too, setting a value
 of zero disables the use of the heap.
 <br>
 <br>
@@ -1061,7 +1061,7 @@ probably better to limit heap usage directly by calling
 <b>pcre2_set_heap_limit()</b>.
 </P>
 <P>
-The default value for the depth limit can be set when PCRE2 is built; if it is 
+The default value for the depth limit can be set when PCRE2 is built; if it is
 not, the default is set to the same value as the default for the match limit.
 If the limit is exceeded, <b>pcre2_match()</b> or <b>pcre2_dfa_match()</b>
 returns PCRE2_ERROR_DEPTHLIMIT. A value for the depth limit may also be
@@ -1122,7 +1122,7 @@ given with <b>pcre2_set_depth_limit()</b> above.
   PCRE2_CONFIG_HEAPLIMIT
 </pre>
 The output is a uint32_t integer that gives, in kibibytes, the default limit
-for the amount of heap memory used by <b>pcre2_match()</b> or 
+for the amount of heap memory used by <b>pcre2_match()</b> or
 <b>pcre2_dfa_match()</b>. Further details are given with
 <b>pcre2_set_heap_limit()</b> above.
 <pre>
@@ -2569,7 +2569,7 @@ calls to <b>pcre2_match()</b> if you are making repeated calls to find other
 matches in the same subject string.
 </P>
 <P>
-WARNING: When PCRE2_NO_UTF_CHECK is set, the effect of passing an invalid
+<b>Warning:</b> When PCRE2_NO_UTF_CHECK is set, the effect of passing an invalid
 string as a subject, or an invalid value of <i>startoffset</i>, is undefined.
 Your program may crash or loop indefinitely.
 <pre>
@@ -2774,6 +2774,15 @@ For example, consider this pattern:
 When it matches "bc", the returned name is A. The B mark is "seen" in the first
 branch of the group, but it is not on the matching path. On the other hand,
 when this pattern fails to match "bx", the returned name is B.
+</P>
+<P>
+<b>Warning:</b> By default, certain start-of-match optimizations are used to
+give a fast "no match" result in some situations. For example, if the anchoring
+is removed from the pattern above, there is an initial check for the presence
+of "c" in the subject before running the matching engine. This check fails for
+"bx", causing a match failure without seeing any marks. You can disable the
+start-of-match optimizations by setting the PCRE2_NO_START_OPTIMIZE option for
+<b>pcre2_compile()</b> or starting the pattern with (*NO_START_OPT).
 </P>
 <P>
 After a successful match, a partial match, or one of the invalid UTF errors
@@ -3330,7 +3339,8 @@ replacement string, with more particular errors being PCRE2_ERROR_BADREPESCAPE
 (invalid escape sequence), PCRE2_ERROR_REPMISSINGBRACE (closing curly bracket
 not found), PCRE2_ERROR_BADSUBSTITUTION (syntax error in extended group
 substitution), and PCRE2_ERROR_BADSUBSPATTERN (the pattern match ended before
-it started, which can happen if \K is used in an assertion).
+it started or the match started earlier than the current position in the 
+subject, which can happen if \K is used in an assertion).
 </P>
 <P>
 As for all PCRE2 errors, a text message that describes the error can be
@@ -3604,7 +3614,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC42" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 27 April 2018
+Last updated: 22 June 2018
 <br>
 Copyright &copy; 1997-2018 University of Cambridge.
 <br>

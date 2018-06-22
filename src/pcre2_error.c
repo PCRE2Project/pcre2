@@ -255,7 +255,7 @@ static const unsigned char match_error_texts[] =
   "expected closing curly bracket in replacement string\0"
   "bad substitution in replacement string\0"
   /* 60 */
-  "match with end before start is not supported\0"
+  "match with end before start or start moved backwards is not supported\0"
   "too many replacements (more than INT_MAX)\0"
   "bad serialized data\0"
   "heap limit exceeded\0"

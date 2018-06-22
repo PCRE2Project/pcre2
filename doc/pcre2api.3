@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "18 June 2018" "PCRE2 10.32"
+.TH PCRE2API 3 "22 June 2018" "PCRE2 10.32"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -3328,7 +3328,8 @@ replacement string, with more particular errors being PCRE2_ERROR_BADREPESCAPE
 (invalid escape sequence), PCRE2_ERROR_REPMISSINGBRACE (closing curly bracket
 not found), PCRE2_ERROR_BADSUBSTITUTION (syntax error in extended group
 substitution), and PCRE2_ERROR_BADSUBSPATTERN (the pattern match ended before
-it started, which can happen if \eK is used in an assertion).
+it started or the match started earlier than the current position in the 
+subject, which can happen if \eK is used in an assertion).
 .P
 As for all PCRE2 errors, a text message that describes the error can be
 obtained by calling the \fBpcre2_get_error_message()\fP function (see
@@ -3621,6 +3622,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 18 June 2018
+Last updated: 22 June 2018
 Copyright (c) 1997-2018 University of Cambridge.
 .fi

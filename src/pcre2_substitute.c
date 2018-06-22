@@ -361,9 +361,9 @@ do
     }
 
   /* Handle a successful match. Matches that use \K to end before they start
-  are not supported. */
-
-  if (ovector[1] < ovector[0])
+  or start before the current point in the subject are not supported. */
+  
+  if (ovector[1] < ovector[0] || ovector[0] < start_offset)
     {
     rc = PCRE2_ERROR_BADSUBSPATTERN;
     goto EXIT;

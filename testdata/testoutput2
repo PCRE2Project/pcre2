@@ -14899,7 +14899,11 @@ Subject length lower bound = 1
 
 /(?=a\K)/replace=z
     BaCaD
-Failed: error -60: match with end before start is not supported
+Failed: error -60: match with end before start or start moved backwards is not supported
+    
+/(?<=\K.)/g,replace=-
+    ab
+Failed: error -60: match with end before start or start moved backwards is not supported
 
 /(?'abcdefghijklmnopqrstuvwxyzABCDEFG'toolong)/
 Failed: error 148 at offset 36: subpattern name is too long (maximum 32 characters)
