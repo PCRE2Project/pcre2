@@ -81,6 +81,7 @@
 # 2017-04-08 PH added HEAP_LIMIT
 # 2017-06-15 ZH added SUPPORT_JIT_SEALLOC support
 # 2018-06-19 PH added checks for stdint.h and inttypes.h
+# 2018-06-27 PH added Daniel's patch to increase the stack for MSVC
 
 PROJECT(PCRE2 C)
 
@@ -607,6 +608,13 @@ IF(PCRE2_BUILD_TESTS)
 
   SET(PCRE2TEST_SOURCES src/pcre2test.c)
 
+  IF(MSVC)
+    # This is needed to avoid a stack overflow error in the standard tests. The
+    # flag should be indicated with a forward-slash instead of a hyphen, but
+    # then CMake treats it as a file path.
+    SET(PCRE2TEST_LINKER_FLAGS -STACK:2500000)
+  ENDIF(MSVC)
+
   ADD_EXECUTABLE(pcre2test ${PCRE2TEST_SOURCES})
   SET(targets ${targets} pcre2test)
   IF(PCRE2_BUILD_PCRE2_8)
@@ -618,7 +626,7 @@ IF(PCRE2_BUILD_TESTS)
   IF(PCRE2_BUILD_PCRE2_32)
     LIST(APPEND PCRE2TEST_LIBS pcre2-32)
   ENDIF(PCRE2_BUILD_PCRE2_32)
-  TARGET_LINK_LIBRARIES(pcre2test ${PCRE2TEST_LIBS})
+  TARGET_LINK_LIBRARIES(pcre2test ${PCRE2TEST_LIBS} ${PCRE2TEST_LINKER_FLAGS})
 
   IF(PCRE2_SUPPORT_JIT)
     ADD_EXECUTABLE(pcre2_jit_test src/pcre2_jit_test.c)

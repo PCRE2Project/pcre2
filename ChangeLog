@@ -86,6 +86,10 @@ standard systems:
       these now, if using MSVC or a standard C before C99, %lu is used with a 
       cast if necessary.  
       
+19. Applied a contributed patch to CMakeLists.txt to increase the stack size 
+when linking pcre2test with MSVC. This gets rid of a stack overflow error in
+the standard set of tests.
+      
 
 Version 10.31 12-February-2018
 ------------------------------
