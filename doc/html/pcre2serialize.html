@@ -49,6 +49,15 @@ and PCRE2_SIZE type. For example, patterns compiled on a 32-bit system using
 PCRE2's 16-bit library cannot be reloaded on a 64-bit system, nor can they be
 reloaded using the 8-bit library.
 </P>
+<P>
+Note that "serialization" in PCRE2 does not convert compiled patterns to an 
+abstract format like Java or .NET serialization. The serialized output is 
+really just a bytecode dump, which is why it can only be reloaded in the same 
+environment as the one that created it. Hence the restrictions mentioned above.
+Applications that are not statically linked with a fixed version of PCRE2 must
+be prepared to recompile patterns from their sources, in order to be immune to 
+PCRE2 upgrades. 
+</P>
 <br><a name="SEC2" href="#TOC1">SECURITY CONCERNS</a><br>
 <P>
 The facility for saving and restoring compiled patterns is intended for use
@@ -62,11 +71,11 @@ the byte stream that is passed to it.
 </P>
 <br><a name="SEC3" href="#TOC1">SAVING COMPILED PATTERNS</a><br>
 <P>
-Before compiled patterns can be saved they must be serialized, that is,
-converted to a stream of bytes. A single byte stream may contain any number of
-compiled patterns, but they must all use the same character tables. A single
-copy of the tables is included in the byte stream (its size is 1088 bytes). For
-more details of character tables, see the
+Before compiled patterns can be saved they must be serialized, which in PCRE2
+means converting the pattern to a stream of bytes. A single byte stream may
+contain any number of compiled patterns, but they must all use the same
+character tables. A single copy of the tables is included in the byte stream
+(its size is 1088 bytes). For more details of character tables, see the
 <a href="pcre2api.html#localesupport">section on locale support</a>
 in the
 <a href="pcre2api.html"><b>pcre2api</b></a>
@@ -193,9 +202,9 @@ Cambridge, England.
 </P>
 <br><a name="SEC6" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 21 March 2017
+Last updated: 27 June 2018
 <br>
-Copyright &copy; 1997-2017 University of Cambridge.
+Copyright &copy; 1997-2018 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE2 index page</a>.

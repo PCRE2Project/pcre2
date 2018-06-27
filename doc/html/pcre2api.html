@@ -2283,11 +2283,16 @@ documentation, which also gives further details about callouts.
 <br><a name="SEC25" href="#TOC1">SERIALIZATION AND PRECOMPILING</a><br>
 <P>
 It is possible to save compiled patterns on disc or elsewhere, and reload them
-later, subject to a number of restrictions. The functions whose names begin
-with <b>pcre2_serialize_</b> are used for this purpose. They are described in
-the
+later, subject to a number of restrictions. The host on which the patterns are
+reloaded must be running the same version of PCRE2, with the same code unit
+width, and must also have the same endianness, pointer width, and PCRE2_SIZE
+type. Before compiled patterns can be saved, they must be converted to a
+"serialized" form, which in the case of PCRE2 is really just a bytecode dump.
+The functions whose names begin with <b>pcre2_serialize_</b> are used for 
+converting to and from the serialized form. They are described in the
 <a href="pcre2serialize.html"><b>pcre2serialize</b></a>
-documentation.
+documentation. Note that PCRE2 serialization does not convert compiled patterns
+to an abstract format like Java or .NET serialization.
 <a name="matchdatablock"></a></P>
 <br><a name="SEC26" href="#TOC1">THE MATCH DATA BLOCK</a><br>
 <P>

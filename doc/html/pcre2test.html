@@ -1927,15 +1927,21 @@ documentation. In this section we describe the features of <b>pcre2test</b> that
 can be used to test these functions.
 </P>
 <P>
-When a pattern with <b>push</b> modifier is successfully compiled, it is pushed
-onto a stack of compiled patterns, and <b>pcre2test</b> expects the next line to
-contain a new pattern (or command) instead of a subject line. By contrast,
-the <b>pushcopy</b> modifier causes a copy of the compiled pattern to be
-stacked, leaving the original available for immediate matching. By using
-<b>push</b> and/or <b>pushcopy</b>, a number of patterns can be compiled and
-retained. These modifiers are incompatible with <b>posix</b>, and control
-modifiers that act at match time are ignored (with a message) for the stacked
-patterns. The <b>jitverify</b> modifier applies only at compile time.
+Note that "serialization" in PCRE2 does not convert compiled patterns to an 
+abstract format like Java or .NET. It just makes a reloadable byte code stream.
+Hence the restrictions on reloading mentioned above.
+</P>
+<P>
+In <b>pcre2test</b>, when a pattern with <b>push</b> modifier is successfully
+compiled, it is pushed onto a stack of compiled patterns, and <b>pcre2test</b>
+expects the next line to contain a new pattern (or command) instead of a
+subject line. By contrast, the <b>pushcopy</b> modifier causes a copy of the
+compiled pattern to be stacked, leaving the original available for immediate
+matching. By using <b>push</b> and/or <b>pushcopy</b>, a number of patterns can
+be compiled and retained. These modifiers are incompatible with <b>posix</b>,
+and control modifiers that act at match time are ignored (with a message) for
+the stacked patterns. The <b>jitverify</b> modifier applies only at compile
+time.
 </P>
 <P>
 The command
@@ -1996,7 +2002,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC21" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 25 April 2018
+Last updated: 27 June 2018
 <br>
 Copyright &copy; 1997-2018 University of Cambridge.
 <br>
