@@ -1,4 +1,4 @@
-.TH PCRE2JIT 3 "31 March 2017" "PCRE2 10.30"
+.TH PCRE2JIT 3 "28 June 2018" "PCRE2 10.32"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 JUST-IN-TIME COMPILER SUPPORT"
@@ -177,9 +177,10 @@ are a starting size, a maximum size, and a general context (for memory
 allocation functions, or NULL for standard memory allocation). It returns a
 pointer to an opaque structure of type \fBpcre2_jit_stack\fP, or NULL if there
 is an error. The \fBpcre2_jit_stack_free()\fP function is used to free a stack
-that is no longer needed. (For the technically minded: the address space is
-allocated by mmap or VirtualAlloc.) A maximum stack size of 512KiB to 1MiB
-should be more than enough for any pattern.
+that is no longer needed. If its argument is NULL, this function returns 
+immediately, without doing anything. (For the technically minded: the address
+space is allocated by mmap or VirtualAlloc.) A maximum stack size of 512KiB to
+1MiB should be more than enough for any pattern.
 .P
 The \fBpcre2_jit_stack_assign()\fP function specifies which stack JIT code
 should use. Its arguments are as follows:
@@ -190,7 +191,8 @@ should use. Its arguments are as follows:
 .sp
 The first argument is a pointer to a match context. When this is subsequently
 passed to a matching function, its information determines which JIT stack is
-used. There are three cases for the values of the other two options:
+used. If this argument is NULL, the function returns immediately, without doing
+anything. There are three cases for the values of the other two options:
 .sp
   (1) If \fIcallback\fP is NULL and \fIdata\fP is NULL, an internal 32KiB block
       on the machine stack is used. This is the default when a match
@@ -410,6 +412,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 31 March 2017
-Copyright (c) 1997-2017 University of Cambridge.
+Last updated: 28 June 2018
+Copyright (c) 1997-2018 University of Cambridge.
 .fi

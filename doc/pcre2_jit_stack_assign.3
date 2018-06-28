@@ -1,4 +1,4 @@
-.TH PCRE2_JIT_STACK_ASSIGN 3 "08 November 2014" "PCRE2 10.0"
+.TH PCRE2_JIT_STACK_ASSIGN 3 "28 June 2018" "PCRE2 10.32"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH SYNOPSIS
@@ -23,6 +23,9 @@ passed to a matching function. The arguments of this function are:
   mcontext       a pointer to a match context
   callback       a callback function
   callback_data  a JIT stack or a value to be passed to the callback
+.P
+If \fImcontext\fP is NULL, the function returns immediately, without doing 
+anything.   
 .P
 If \fIcallback\fP is NULL and \fIcallback_data\fP is NULL, an internal 32KiB
 block on the machine stack is used.

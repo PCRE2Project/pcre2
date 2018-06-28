@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "22 June 2018" "PCRE2 10.32"
+.TH PCRE2API 3 "28 June 2018" "PCRE2 10.32"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -453,7 +453,9 @@ been matched by \fBpcre2_match()\fP. They are:
   \fBpcre2_substring_number_from_name()\fP
 .sp
 \fBpcre2_substring_free()\fP and \fBpcre2_substring_list_free()\fP are also
-provided, to free memory used for extracted strings.
+provided, to free memory used for extracted strings. If either of these 
+functions is called with a NULL argument, the function returns immediately 
+without doing anything.
 .P
 The function \fBpcre2_substitute()\fP can be called to match a pattern and
 return a copy of the subject string with substitutions for parts that were
@@ -666,6 +668,8 @@ The memory used for a general context should be freed by calling:
 .B void pcre2_general_context_free(pcre2_general_context *\fIgcontext\fP);
 .fi
 .sp
+If this function is passed a NULL argument, it function returns immediately
+without doing anything.
 .
 .
 .\" HTML <a name="compilecontext"></a>
@@ -1178,6 +1182,8 @@ If the compile context argument \fIccontext\fP is NULL, memory for the compiled
 pattern is obtained by calling \fBmalloc()\fP. Otherwise, it is obtained from
 the same memory function that was used for the compile context. The caller must
 free the memory by calling \fBpcre2_code_free()\fP when it is no longer needed.
+If \fBpcre2_code_free()\fP is called with a NULL argument, it returns 
+immediately, without doing anything.
 .P
 The function \fBpcre2_code_copy()\fP makes a copy of the compiled code in new
 memory, using the same memory allocator as was used for the original. However,
@@ -1188,7 +1194,8 @@ below),
 .\"
 the JIT information cannot be copied (because it is position-dependent).
 The new copy can initially be used only for non-JIT matching, though it can be
-passed to \fBpcre2_jit_compile()\fP if required.
+passed to \fBpcre2_jit_compile()\fP if required. If \fBpcre2_code_copy()\fP is 
+called with a NULL argument, it returns NULL.
 .P
 The \fBpcre2_code_copy()\fP function provides a way for individual threads in a
 multithreaded application to acquire a private copy of shared compiled code.
@@ -1205,7 +1212,9 @@ there are occasions when a copy of a compiled pattern and the relevant tables
 are needed. The \fBpcre2_code_copy_with_tables()\fP provides this facility.
 Copies of both the code and the tables are made, with the new code pointing to
 the new tables. The memory for the new tables is automatically freed when
-\fBpcre2_code_free()\fP is called for the new copy of the compiled code.
+\fBpcre2_code_free()\fP is called for the new copy of the compiled code. If
+\fBpcre2_code_copy_withy_tables()\fP is called with a NULL argument, it returns
+NULL.
 .P
 NOTE: When one of the matching functions is called, pointers to the compiled
 pattern and the subject string are set in the match data block so that they can
@@ -2333,7 +2342,8 @@ free a compiled pattern or a subject string until after all operations on the
 match data block (for that match) have taken place.
 .P
 When a match data block itself is no longer needed, it should be freed by
-calling \fBpcre2_match_data_free()\fP.
+calling \fBpcre2_match_data_free()\fP. If this function is called with a NULL 
+argument, it returns immediately, without doing anything.
 .
 .
 .SH "MATCHING A PATTERN: THE TRADITIONAL FUNCTION"
@@ -3627,6 +3637,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 22 June 2018
+Last updated: 28 June 2018
 Copyright (c) 1997-2018 University of Cambridge.
 .fi

@@ -193,9 +193,10 @@ are a starting size, a maximum size, and a general context (for memory
 allocation functions, or NULL for standard memory allocation). It returns a
 pointer to an opaque structure of type <b>pcre2_jit_stack</b>, or NULL if there
 is an error. The <b>pcre2_jit_stack_free()</b> function is used to free a stack
-that is no longer needed. (For the technically minded: the address space is
-allocated by mmap or VirtualAlloc.) A maximum stack size of 512KiB to 1MiB
-should be more than enough for any pattern.
+that is no longer needed. If its argument is NULL, this function returns 
+immediately, without doing anything. (For the technically minded: the address
+space is allocated by mmap or VirtualAlloc.) A maximum stack size of 512KiB to
+1MiB should be more than enough for any pattern.
 </P>
 <P>
 The <b>pcre2_jit_stack_assign()</b> function specifies which stack JIT code
@@ -207,7 +208,8 @@ should use. Its arguments are as follows:
 </pre>
 The first argument is a pointer to a match context. When this is subsequently
 passed to a matching function, its information determines which JIT stack is
-used. There are three cases for the values of the other two options:
+used. If this argument is NULL, the function returns immediately, without doing
+anything. There are three cases for the values of the other two options:
 <pre>
   (1) If <i>callback</i> is NULL and <i>data</i> is NULL, an internal 32KiB block
       on the machine stack is used. This is the default when a match
@@ -432,9 +434,9 @@ Cambridge, England.
 </P>
 <br><a name="SEC13" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 31 March 2017
+Last updated: 28 June 2018
 <br>
-Copyright &copy; 1997-2017 University of Cambridge.
+Copyright &copy; 1997-2018 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE2 index page</a>.

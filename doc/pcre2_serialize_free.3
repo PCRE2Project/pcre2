@@ -15,7 +15,8 @@ PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
 This function frees the memory that was obtained by
 \fBpcre2_serialize_encode()\fP to hold a serialized byte stream. The argument
-must point to such a byte stream.
+must point to such a byte stream or be NULL, in which case the function returns 
+without doing anything.
 .P
 There is a complete description of the PCRE2 native API in the
 .\" HREF

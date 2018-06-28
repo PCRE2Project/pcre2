@@ -129,7 +129,9 @@ non-binary data, be sure that the file is opened for binary output.
 Serializing a set of patterns leaves the original data untouched, so they can
 still be used for matching. Their memory must eventually be freed in the usual
 way by calling <b>pcre2_code_free()</b>. When you have finished with the byte
-stream, it too must be freed by calling <b>pcre2_serialize_free()</b>.
+stream, it too must be freed by calling <b>pcre2_serialize_free()</b>. If this
+function is called with a NULL argument, it returns immediately without doing
+anything.
 </P>
 <br><a name="SEC4" href="#TOC1">RE-USING PRECOMPILED PATTERNS</a><br>
 <P>

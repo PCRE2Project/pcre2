@@ -518,7 +518,9 @@ been matched by <b>pcre2_match()</b>. They are:
   <b>pcre2_substring_number_from_name()</b>
 </pre>
 <b>pcre2_substring_free()</b> and <b>pcre2_substring_list_free()</b> are also
-provided, to free memory used for extracted strings.
+provided, to free memory used for extracted strings. If either of these 
+functions is called with a NULL argument, the function returns immediately 
+without doing anything.
 </P>
 <P>
 The function <b>pcre2_substitute()</b> can be called to match a pattern and
@@ -727,6 +729,10 @@ The memory used for a general context should be freed by calling:
 <br>
 <br>
 <b>void pcre2_general_context_free(pcre2_general_context *<i>gcontext</i>);</b>
+<br>
+<br>
+If this function is passed a NULL argument, it function returns immediately
+without doing anything.
 <a name="compilecontext"></a></P>
 <br><b>
 The compile context
@@ -1249,6 +1255,8 @@ If the compile context argument <i>ccontext</i> is NULL, memory for the compiled
 pattern is obtained by calling <b>malloc()</b>. Otherwise, it is obtained from
 the same memory function that was used for the compile context. The caller must
 free the memory by calling <b>pcre2_code_free()</b> when it is no longer needed.
+If <b>pcre2_code_free()</b> is called with a NULL argument, it returns 
+immediately, without doing anything.
 </P>
 <P>
 The function <b>pcre2_code_copy()</b> makes a copy of the compiled code in new
@@ -1257,7 +1265,8 @@ if the code has been processed by the JIT compiler (see
 <a href="#jitcompiling">below),</a>
 the JIT information cannot be copied (because it is position-dependent).
 The new copy can initially be used only for non-JIT matching, though it can be
-passed to <b>pcre2_jit_compile()</b> if required.
+passed to <b>pcre2_jit_compile()</b> if required. If <b>pcre2_code_copy()</b> is 
+called with a NULL argument, it returns NULL.
 </P>
 <P>
 The <b>pcre2_code_copy()</b> function provides a way for individual threads in a
@@ -1272,7 +1281,9 @@ there are occasions when a copy of a compiled pattern and the relevant tables
 are needed. The <b>pcre2_code_copy_with_tables()</b> provides this facility.
 Copies of both the code and the tables are made, with the new code pointing to
 the new tables. The memory for the new tables is automatically freed when
-<b>pcre2_code_free()</b> is called for the new copy of the compiled code.
+<b>pcre2_code_free()</b> is called for the new copy of the compiled code. If
+<b>pcre2_code_copy_withy_tables()</b> is called with a NULL argument, it returns
+NULL.
 </P>
 <P>
 NOTE: When one of the matching functions is called, pointers to the compiled
@@ -2363,7 +2374,8 @@ match data block (for that match) have taken place.
 </P>
 <P>
 When a match data block itself is no longer needed, it should be freed by
-calling <b>pcre2_match_data_free()</b>.
+calling <b>pcre2_match_data_free()</b>. If this function is called with a NULL 
+argument, it returns immediately, without doing anything.
 </P>
 <br><a name="SEC27" href="#TOC1">MATCHING A PATTERN: THE TRADITIONAL FUNCTION</a><br>
 <P>
@@ -3619,7 +3631,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC42" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 22 June 2018
+Last updated: 28 June 2018
 <br>
 Copyright &copy; 1997-2018 University of Cambridge.
 <br>

@@ -114,7 +114,9 @@ non-binary data, be sure that the file is opened for binary output.
 Serializing a set of patterns leaves the original data untouched, so they can
 still be used for matching. Their memory must eventually be freed in the usual
 way by calling \fBpcre2_code_free()\fP. When you have finished with the byte
-stream, it too must be freed by calling \fBpcre2_serialize_free()\fP.
+stream, it too must be freed by calling \fBpcre2_serialize_free()\fP. If this
+function is called with a NULL argument, it returns immediately without doing
+anything.
 .
 .
 .SH "RE-USING PRECOMPILED PATTERNS"

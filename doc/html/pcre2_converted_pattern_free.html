@@ -28,7 +28,8 @@ DESCRIPTION
 This function is part of an experimental set of pattern conversion functions.
 It frees the memory occupied by a converted pattern that was obtained by
 calling <b>pcre2_pattern_convert()</b> with arguments that caused it to place
-the converted pattern into newly obtained heap memory.
+the converted pattern into newly obtained heap memory. If the argument is NULL, 
+the function returns immediately without doing anything.
 </P>
 <P>
 The pattern conversion functions are described in the
