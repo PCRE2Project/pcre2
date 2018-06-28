@@ -1,4 +1,4 @@
-.TH PCRE2PATTERN 3 "25 April 2018" "PCRE2 10.32"
+.TH PCRE2PATTERN 3 "28 June 2018" "PCRE2 10.32"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION DETAILS"
@@ -162,7 +162,7 @@ where d is any number of decimal digits. However, the value of the setting must
 be less than the value set (or defaulted) by the caller of \fBpcre2_match()\fP
 for it to have any effect. In other words, the pattern writer can lower the
 limits set by the programmer, but not raise them. If there is more than one
-setting of one of these limits, the lower value is used. The heap limit is 
+setting of one of these limits, the lower value is used. The heap limit is
 specified in kibibytes (units of 1024 bytes).
 .P
 Prior to release 10.30, LIMIT_DEPTH was called LIMIT_RECURSION. This name is
@@ -1073,12 +1073,19 @@ sequences but the characters that they represent.)
 .rs
 .sp
 The escape sequence \eK causes any previously matched characters not to be
-included in the final matched sequence. For example, the pattern:
+included in the final matched sequence that is returned. For example, the
+pattern:
 .sp
   foo\eKbar
 .sp
-matches "foobar", but reports that it has matched "bar". This feature is
-similar to a lookbehind assertion
+matches "foobar", but reports that it has matched "bar". \eK does not interact
+with anchoring in any way. The pattern:
+.sp
+  ^foo\eKbar
+.sp
+matches only when the subject begins with "foobar" (in single line mode),
+though it again reports the matched string as "bar". This feature is similar to
+a lookbehind assertion
 .\" HTML <a href="#lookbehind">
 .\" </a>
 (described below).
@@ -1100,7 +1107,8 @@ Perl documents that the use of \eK within assertions is "not well defined". In
 PCRE2, \eK is acted upon when it occurs inside positive assertions, but is
 ignored in negative assertions. Note that when a pattern such as (?=ab\eK)
 matches, the reported start of the match can be greater than the end of the
-match.
+match. Using \eK in a lookbehind assertion at the start of a pattern can also
+lead to odd effects.
 .
 .
 .\" HTML <a name="smallassertions"></a>
@@ -1152,17 +1160,17 @@ end of the string as well as at the very end, whereas \ez matches only at the
 end.
 .P
 The \eG assertion is true only when the current matching position is at the
-start point of the match, as specified by the \fIstartoffset\fP argument of
-\fBpcre2_match()\fP. It differs from \eA when the value of \fIstartoffset\fP is
-non-zero. By calling \fBpcre2_match()\fP multiple times with appropriate
-arguments, you can mimic Perl's /g option, and it is in this kind of
-implementation where \eG can be useful.
+start point of the matching process, as specified by the \fIstartoffset\fP
+argument of \fBpcre2_match()\fP. It differs from \eA when the value of
+\fIstartoffset\fP is non-zero. By calling \fBpcre2_match()\fP multiple times
+with appropriate arguments, you can mimic Perl's /g option, and it is in this
+kind of implementation where \eG can be useful.
 .P
-Note, however, that PCRE2's interpretation of \eG, as the start of the current
-match, is subtly different from Perl's, which defines it as the end of the
-previous match. In Perl, these can be different when the previously matched
-string was empty. Because PCRE2 does just one match at a time, it cannot
-reproduce this behaviour.
+Note, however, that PCRE2's implementation of \eG, being true at the starting
+character of the matching process, is subtly different from Perl's, which
+defines it as true at the end of the previous match. In Perl, these can be
+different when the previously matched string was empty. Because PCRE2 does just
+one match at a time, it cannot reproduce this behaviour.
 .P
 If all the alternatives of a pattern begin with \eG, the expression is anchored
 to the starting match position, and the "anchored" flag is set in the compiled
@@ -3503,6 +3511,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 25 April 2018
+Last updated: 28 June 2018
 Copyright (c) 1997-2018 University of Cambridge.
 .fi

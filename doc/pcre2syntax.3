@@ -1,4 +1,4 @@
-.TH PCRE2SYNTAX 3 "17 June 2017" "PCRE2 10.30"
+.TH PCRE2SYNTAX 3 "28 June 2018" "PCRE2 10.32"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION SYNTAX SUMMARY"
@@ -361,10 +361,10 @@ but some of them use Unicode properties if PCRE2_UCP is set. You can use
   \eG          first matching position in subject
 .
 .
-.SH "MATCH POINT RESET"
+.SH "REPORTED MATCH POINT SETTING"
 .rs
 .sp
-  \eK          reset start of match
+  \eK          set reported start of match
 .sp
 \eK is honoured in positive assertions, but ignored in negative ones.
 .
@@ -589,6 +589,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 17 June 2017
-Copyright (c) 1997-2017 University of Cambridge.
+Last updated: 28 June 2018
+Copyright (c) 1997-2018 University of Cambridge.
 .fi

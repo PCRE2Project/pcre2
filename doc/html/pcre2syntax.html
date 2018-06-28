@@ -23,7 +23,7 @@ please consult the man page, in case the conversion went wrong.
 <li><a name="TOC8" href="#SEC8">CHARACTER CLASSES</a>
 <li><a name="TOC9" href="#SEC9">QUANTIFIERS</a>
 <li><a name="TOC10" href="#SEC10">ANCHORS AND SIMPLE ASSERTIONS</a>
-<li><a name="TOC11" href="#SEC11">MATCH POINT RESET</a>
+<li><a name="TOC11" href="#SEC11">REPORTED MATCH POINT SETTING</a>
 <li><a name="TOC12" href="#SEC12">ALTERNATION</a>
 <li><a name="TOC13" href="#SEC13">CAPTURING</a>
 <li><a name="TOC14" href="#SEC14">ATOMIC GROUPS</a>
@@ -387,10 +387,10 @@ but some of them use Unicode properties if PCRE2_UCP is set. You can use
   \G          first matching position in subject
 </PRE>
 </P>
-<br><a name="SEC11" href="#TOC1">MATCH POINT RESET</a><br>
+<br><a name="SEC11" href="#TOC1">REPORTED MATCH POINT SETTING</a><br>
 <P>
 <pre>
-  \K          reset start of match
+  \K          set reported start of match
 </pre>
 \K is honoured in positive assertions, but ignored in negative ones.
 </P>
@@ -600,9 +600,9 @@ Cambridge, England.
 </P>
 <br><a name="SEC27" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 17 June 2017
+Last updated: 28 June 2018
 <br>
-Copyright &copy; 1997-2017 University of Cambridge.
+Copyright &copy; 1997-2018 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE2 index page</a>.
