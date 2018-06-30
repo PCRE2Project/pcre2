@@ -774,8 +774,8 @@ PCRE2 CONTEXTS
 
        void pcre2_general_context_free(pcre2_general_context *gcontext);
 
-       If this function is passed a NULL argument, it function returns immedi-
-       ately without doing anything.
+       If  this  function  is  passed  a NULL argument, it returns immediately
+       without doing anything.
 
    The compile context
 
@@ -3509,7 +3509,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 28 June 2018
+       Last updated: 30 June 2018
        Copyright (c) 1997-2018 University of Cambridge.
 ------------------------------------------------------------------------------
  
