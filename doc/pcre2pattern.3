@@ -1,4 +1,4 @@
-.TH PCRE2PATTERN 3 "28 June 2018" "PCRE2 10.32"
+.TH PCRE2PATTERN 3 "30 June 2018" "PCRE2 10.32"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION DETAILS"
@@ -1072,9 +1072,9 @@ sequences but the characters that they represent.)
 .SS "Resetting the match start"
 .rs
 .sp
-The escape sequence \eK causes any previously matched characters not to be
-included in the final matched sequence that is returned. For example, the
-pattern:
+In normal use, the escape sequence \eK causes any previously matched characters
+not to be included in the final matched sequence that is returned. For example,
+the pattern:
 .sp
   foo\eKbar
 .sp
@@ -1108,7 +1108,13 @@ PCRE2, \eK is acted upon when it occurs inside positive assertions, but is
 ignored in negative assertions. Note that when a pattern such as (?=ab\eK)
 matches, the reported start of the match can be greater than the end of the
 match. Using \eK in a lookbehind assertion at the start of a pattern can also
-lead to odd effects.
+lead to odd effects. For example, consider this pattern:
+.sp
+  (?<=\Kfoo)bar
+.sp
+If the subject is "foobar", a call to \fBpcre2_match()\fP with a starting 
+offset of 3 succeeds and reports the matching string as "foobar", that is, the 
+start of the reported match is earlier than where the match started.
 .
 .
 .\" HTML <a name="smallassertions"></a>
@@ -3511,6 +3517,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 28 June 2018
+Last updated: 30 June 2018
 Copyright (c) 1997-2018 University of Cambridge.
 .fi
