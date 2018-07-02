@@ -16583,6 +16583,20 @@ No match
         End
 ------------------------------------------------------------------
 
+/(?<=(?=.){4,5}x)/B
+------------------------------------------------------------------
+        Bra
+        AssertB
+        Reverse
+        Assert
+        Any
+        Ket
+        x
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+
 # End of testinput2
 Error -70: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

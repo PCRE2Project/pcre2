@@ -100,6 +100,10 @@ a pattern. Because \G is in a lookbehind assertion, there has to be a
 "bumpalong" before there can be a match. The automatic "advance by one 
 character after an empty string match" rule is therefore inappropriate. A more 
 complicated algorithm has now been implemented.
+
+22. When checking to see if a lookbehind is of fixed length, lookaheads were 
+correctly ignored, but qualifiers on lookaheads were not being ignored, leading 
+to an incorrect "lookbehind assertion is not fixed length" error.
       
 
 Version 10.31 12-February-2018

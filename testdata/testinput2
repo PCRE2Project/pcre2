@@ -5435,4 +5435,6 @@ a)"xI
 
 /(?=a+)a(a+)++b/B
 
+/(?<=(?=.){4,5}x)/B
+
 # End of testinput2

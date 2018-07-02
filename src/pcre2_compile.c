@@ -8572,6 +8572,32 @@ for (;; pptr++)
     case META_LOOKAHEADNOT:
     pptr = parsed_skip(pptr + 1, PSKIP_KET);
     if (pptr == NULL) goto PARSED_SKIP_FAILED;
+    
+    /* Also ignore any qualifiers that follow a lookahead assertion. */
+    
+    switch (pptr[1])
+      {
+      case META_ASTERISK:
+      case META_ASTERISK_PLUS:
+      case META_ASTERISK_QUERY:   
+      case META_PLUS:
+      case META_PLUS_PLUS: 
+      case META_PLUS_QUERY:
+      case META_QUERY:
+      case META_QUERY_PLUS:
+      case META_QUERY_QUERY:       
+      pptr++;
+      break;
+      
+      case META_MINMAX:
+      case META_MINMAX_PLUS:
+      case META_MINMAX_QUERY:
+      pptr += 3;
+      break;
+      
+      default:
+      break;      
+      }
     break;
 
     /* Lookbehinds can be ignored, but must themselves be checked. */
