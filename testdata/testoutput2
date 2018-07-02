@@ -13483,6 +13483,10 @@ Subject length lower bound = 2
     yesno
  0: yes
 
+/(?(VERSION>=10.04)yes|no)/
+    yesno
+ 0: yes
+
 /(?(VERSION=8)yes){3}/BI,aftertext
 ------------------------------------------------------------------
         Bra
@@ -13537,7 +13541,7 @@ Failed: error 179 at offset 11: syntax error or number too big in (?(VERSION con
 Failed: error 179 at offset 16: syntax error or number too big in (?(VERSION condition
 
 /(?(VERSION=10.101)yes|no)/
-Failed: error 179 at offset 17: syntax error or number too big in (?(VERSION condition
+Failed: error 179 at offset 16: syntax error or number too big in (?(VERSION condition
 
 /abcd/I
 Capturing subpattern count = 0

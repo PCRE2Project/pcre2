@@ -104,6 +104,9 @@ complicated algorithm has now been implemented.
 22. When checking to see if a lookbehind is of fixed length, lookaheads were 
 correctly ignored, but qualifiers on lookaheads were not being ignored, leading 
 to an incorrect "lookbehind assertion is not fixed length" error.
+
+23. The VERSION condition test was reading fractional PCRE2 version numbers 
+such as the 04 in 10.04 incorrectly and hence giving wrong results.
       
 
 Version 10.31 12-February-2018

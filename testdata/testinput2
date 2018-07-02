@@ -4007,6 +4007,9 @@
 /(?(VERSION>=10.0)yes|no)/I
     yesno
 
+/(?(VERSION>=10.04)yes|no)/
+    yesno
+
 /(?(VERSION=8)yes){3}/BI,aftertext
     yesno
 

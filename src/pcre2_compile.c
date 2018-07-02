@@ -3896,9 +3896,8 @@ while (ptr < ptrend)
         if (*ptr == CHAR_DOT)
           {
           if (++ptr >= ptrend || !IS_DIGIT(*ptr)) goto BAD_VERSION_CONDITION;
-          if (!read_number(&ptr, ptrend, -1, 99 , ERR79, &minor, &errorcode))
-            goto FAILED;
-          if (minor < 10) minor *= 10;
+          minor = (*ptr++ - CHAR_0) * 10;
+          if (IS_DIGIT(*ptr)) minor += *ptr++ - CHAR_0; 
           if (ptr >= ptrend || *ptr != CHAR_RIGHT_PARENTHESIS)
             goto BAD_VERSION_CONDITION;
           }
