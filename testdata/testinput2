@@ -4938,6 +4938,9 @@ a)"xI
 //replace=0
     \=offset=7
 
+/(?<=\G.)/g,replace=+
+    abc
+
 ".+\QX\E+"B,no_auto_possess
 
 ".+\QX\E+"B,auto_callout,no_auto_possess

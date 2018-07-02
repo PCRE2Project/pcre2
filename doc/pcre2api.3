@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "30 June 2018" "PCRE2 10.32"
+.TH PCRE2API 3 "02 July 2018" "PCRE2 10.32"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -3163,7 +3163,10 @@ string in \fIoutputbuffer\fP, replacing the part that was matched with the
 \fIreplacement\fP string, whose length is supplied in \fBrlength\fP. This can
 be given as PCRE2_ZERO_TERMINATED for a zero-terminated string. Matches in
 which a \eK item in a lookahead in the pattern causes the match to end before
-it starts are not supported, and give rise to an error return.
+it starts are not supported, and give rise to an error return. For global
+replacements, matches in which \eK in a lookbehind causes the match to start
+earlier than the point that was reached in the previous iteration are also not
+supported.
 .P
 The first seven arguments of \fBpcre2_substitute()\fP are the same as for
 \fBpcre2_match()\fP, except that the partial matching options are not
@@ -3637,6 +3640,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 30 June 2018
+Last updated: 02 July 2018
 Copyright (c) 1997-2018 University of Cambridge.
 .fi

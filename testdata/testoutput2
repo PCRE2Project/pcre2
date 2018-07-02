@@ -15549,6 +15549,10 @@ Failed: error -57 at offset 2 in replacement: bad escape sequence in replacement
     \=offset=7
 Failed: error -33: bad offset value
 
+/(?<=\G.)/g,replace=+
+    abc
+ 3: a+b+c+
+
 ".+\QX\E+"B,no_auto_possess
 ------------------------------------------------------------------
         Bra
@@ -16580,7 +16584,7 @@ No match
 ------------------------------------------------------------------
 
 # End of testinput2
-Error -65: PCRE2_ERROR_BADDATA (unknown error number)
+Error -70: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data
 Error -2: partial match
 Error -1: no match

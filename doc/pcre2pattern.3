@@ -1110,7 +1110,7 @@ matches, the reported start of the match can be greater than the end of the
 match. Using \eK in a lookbehind assertion at the start of a pattern can also
 lead to odd effects. For example, consider this pattern:
 .sp
-  (?<=\Kfoo)bar
+  (?<=\eKfoo)bar
 .sp
 If the subject is "foobar", a call to \fBpcre2_match()\fP with a starting 
 offset of 3 succeeds and reports the matching string as "foobar", that is, the 

@@ -1084,9 +1084,9 @@ sequences but the characters that they represent.)
 Resetting the match start
 </b><br>
 <P>
-The escape sequence \K causes any previously matched characters not to be
-included in the final matched sequence that is returned. For example, the
-pattern:
+In normal use, the escape sequence \K causes any previously matched characters
+not to be included in the final matched sequence that is returned. For example,
+the pattern:
 <pre>
   foo\Kbar
 </pre>
@@ -1115,7 +1115,13 @@ PCRE2, \K is acted upon when it occurs inside positive assertions, but is
 ignored in negative assertions. Note that when a pattern such as (?=ab\K)
 matches, the reported start of the match can be greater than the end of the
 match. Using \K in a lookbehind assertion at the start of a pattern can also
-lead to odd effects.
+lead to odd effects. For example, consider this pattern:
+<pre>
+  (?&#60;=\Kfoo)bar
+</pre>
+If the subject is "foobar", a call to <b>pcre2_match()</b> with a starting 
+offset of 3 succeeds and reports the matching string as "foobar", that is, the 
+start of the reported match is earlier than where the match started.
 <a name="smallassertions"></a></P>
 <br><b>
 Simple assertions
@@ -3484,7 +3490,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC30" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 28 June 2018
+Last updated: 30 June 2018
 <br>
 Copyright &copy; 1997-2018 University of Cambridge.
 <br>

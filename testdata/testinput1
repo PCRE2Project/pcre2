@@ -6189,4 +6189,7 @@ ef) x/x,mark
 /(?=a+)a(a+)++b/
     aab
 
+/(?<=\G.)/g,aftertext
+    abc
+
 # End of testinput1 

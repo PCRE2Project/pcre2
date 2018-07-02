@@ -89,6 +89,17 @@ standard systems:
 19. Applied a contributed patch to CMakeLists.txt to increase the stack size 
 when linking pcre2test with MSVC. This gets rid of a stack overflow error in
 the standard set of tests.
+
+20. Output a warning in pcre2test when ignoring the "altglobal" modifier when
+it is given with the "replace" modifier.
+
+21. In both pcre2test and pcre2_substitute(), with global matching, a pattern 
+that matched an empty string, but never at the starting match offset, was not 
+handled in a Perl-compatible way. The pattern /(<?=\G.)/ is an example of such 
+a pattern. Because \G is in a lookbehind assertion, there has to be a 
+"bumpalong" before there can be a match. The automatic "advance by one 
+character after an empty string match" rule is therefore inappropriate. A more 
+complicated algorithm has now been implemented.
       
 
 Version 10.31 12-February-2018

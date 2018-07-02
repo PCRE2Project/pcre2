@@ -5,7 +5,7 @@
 /* This is the public header file for the PCRE library, second API, to be
 #included by applications that call PCRE2 functions.
 
-           Copyright (c) 2016-2017 University of Cambridge
+           Copyright (c) 2016-2018 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -399,6 +399,7 @@ released, the numbers must not be changed. */
 #define PCRE2_ERROR_BADSERIALIZEDDATA (-62)
 #define PCRE2_ERROR_HEAPLIMIT         (-63)
 #define PCRE2_ERROR_CONVERT_SYNTAX    (-64)
+#define PCRE2_ERROR_INTERNAL_DUPMATCH (-65)
 
 
 /* Request types for pcre2_pattern_info() */

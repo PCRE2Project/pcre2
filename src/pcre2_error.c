@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-          New API code Copyright (c) 2016-2017 University of Cambridge
+          New API code Copyright (c) 2016-2018 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -260,6 +260,8 @@ static const unsigned char match_error_texts[] =
   "bad serialized data\0"
   "heap limit exceeded\0"
   "invalid syntax\0"
+  /* 65 */ 
+  "internal error - duplicate substitution match\0"
   ;
 
 

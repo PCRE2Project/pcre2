@@ -9822,4 +9822,13 @@ No match
  0: aab
  1: a
 
+/(?<=\G.)/g,aftertext
+    abc
+ 0: 
+ 0+ bc
+ 0: 
+ 0+ c
+ 0: 
+ 0+ 
+
 # End of testinput1 

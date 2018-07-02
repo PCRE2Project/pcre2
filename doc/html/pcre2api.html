@@ -3154,7 +3154,10 @@ string in <i>outputbuffer</i>, replacing the part that was matched with the
 <i>replacement</i> string, whose length is supplied in <b>rlength</b>. This can
 be given as PCRE2_ZERO_TERMINATED for a zero-terminated string. Matches in
 which a \K item in a lookahead in the pattern causes the match to end before
-it starts are not supported, and give rise to an error return.
+it starts are not supported, and give rise to an error return. For global
+replacements, matches in which \K in a lookbehind causes the match to start
+earlier than the point that was reached in the previous iteration are also not
+supported.
 </P>
 <P>
 The first seven arguments of <b>pcre2_substitute()</b> are the same as for
@@ -3631,7 +3634,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC42" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 30 June 2018
+Last updated: 02 July 2018
 <br>
 Copyright &copy; 1997-2018 University of Cambridge.
 <br>

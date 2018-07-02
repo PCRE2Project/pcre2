@@ -6302,6 +6302,7 @@ size_t needlen;
 void *use_dat_context;
 BOOL utf;
 BOOL subject_literal;
+PCRE2_SIZE ovecsave[3];
 
 #ifdef SUPPORT_PCRE2_8
 uint8_t *q8 = NULL;
@@ -6948,6 +6949,9 @@ if (dat_datctl.replacement[0] != 0)
 
   if (timeitm)
     fprintf(outfile, "** Timing is not supported with replace: ignored\n");
+    
+  if ((dat_datctl.control & CTL_ALTGLOBAL) != 0)
+    fprintf(outfile, "** Altglobal is not supported with replace: ignored\n"); 
 
   xoptions = (((dat_datctl.control & CTL_GLOBAL) == 0)? 0 :
                 PCRE2_SUBSTITUTE_GLOBAL) |
@@ -7067,34 +7071,23 @@ if (dat_datctl.replacement[0] != 0)
     }
 
   fprintf(outfile, "\n");
+  show_memory = FALSE;
+  return PR_OK;
   }   /* End of substitution handling */
 
 /* When a replacement string is not provided, run a loop for global matching
-with one of the basic matching functions. */
+with one of the basic matching functions. For altglobal (or first time round
+the loop), set an "unset" value for the previous match info. */
 
-else for (gmatched = 0;; gmatched++)
+ovecsave[0] = ovecsave[1] = ovecsave[2] = PCRE2_UNSET;
+
+for (gmatched = 0;; gmatched++)
   {
   PCRE2_SIZE j;
   int capcount;
   PCRE2_SIZE *ovector;
-  PCRE2_SIZE ovecsave[2];
 
   ovector = FLD(match_data, ovector);
-
-  /* After the first time round a global loop, for a normal global (/g)
-  iteration, save the current ovector[0,1] so that we can check that they do
-  change each time. Otherwise a matching bug that returns the same string
-  causes an infinite loop. It has happened! */
-
-  if (gmatched > 0 && (dat_datctl.control & CTL_GLOBAL) != 0)
-    {
-    ovecsave[0] = ovector[0];
-    ovecsave[1] = ovector[1];
-    }
-
-  /* For altglobal (or first time round the loop), set an "unset" value. */
-
-  else ovecsave[0] = ovecsave[1] = PCRE2_UNSET;
 
   /* Fill the ovector with junk to detect elements that do not get set
   when they should be. */
@@ -7266,12 +7259,23 @@ else for (gmatched = 0;; gmatched++)
       }
 
     /* If this is not the first time round a global loop, check that the
-    returned string has changed. If not, there is a bug somewhere and we must
-    break the loop because it will go on for ever. We know that there are
-    always at least two elements in the ovector. */
-
+    returned string has changed. If it has not, check for an empty string match 
+    at different starting offset from the previous match. This is a failed test
+    retry for null-matching patterns that don't match at their starting offset,
+    for example /(?<=\G.)/. A repeated match at the same point is not such a
+    pattern, and must be discarded, and we then proceed to seek a non-null
+    match at the current point. For any other repeated match, there is a bug
+    somewhere and we must break the loop because it will go on for ever. We
+    know that there are always at least two elements in the ovector. */
+    
     if (gmatched > 0 && ovecsave[0] == ovector[0] && ovecsave[1] == ovector[1])
       {
+      if (ovector[0] == ovector[1] && ovecsave[2] != dat_datctl.offset)
+        {
+        g_notempty = PCRE2_NOTEMPTY_ATSTART | PCRE2_ANCHORED;
+        ovecsave[2] = dat_datctl.offset; 
+        continue;    /* Back to the top of the loop */
+        }  
       fprintf(outfile,
         "** PCRE2 error: global repeat returned the same string as previous\n");
       fprintf(outfile, "** Global loop abandoned\n");
@@ -7579,6 +7583,7 @@ else for (gmatched = 0;; gmatched++)
 
   if ((dat_datctl.control & CTL_ANYGLOB) == 0) break; else
     {
+    PCRE2_SIZE match_offset = FLD(match_data, ovector)[0];
     PCRE2_SIZE end_offset = FLD(match_data, ovector)[1];
 
     /* We must now set up for the next iteration of a global search. If we have
@@ -7586,12 +7591,19 @@ else for (gmatched = 0;; gmatched++)
     subject. If so, the loop is over. Otherwise, mimic what Perl's /g option
     does. Set PCRE2_NOTEMPTY_ATSTART and PCRE2_ANCHORED and try the match again
     at the same point. If this fails it will be picked up above, where a fake
-    match is set up so that at this point we advance to the next character. */
+    match is set up so that at this point we advance to the next character. 
+    
+    However, in order to cope with patterns that never match at their starting 
+    offset (e.g. /(?<=\G.)/) we don't do this when the match offset is greater 
+    than the starting offset. This means there will be a retry with the 
+    starting offset at the match offset. If this returns the same match again,
+    it is picked up above and ignored, and the special action is then taken. */
 
-    if (FLD(match_data, ovector)[0] == end_offset)
+    if (match_offset == end_offset)
       {
-      if (end_offset == ulen) break;      /* End of subject */
-      g_notempty = PCRE2_NOTEMPTY_ATSTART | PCRE2_ANCHORED;
+      if (end_offset == ulen) break;           /* End of subject */
+      if (match_offset <= dat_datctl.offset)
+        g_notempty = PCRE2_NOTEMPTY_ATSTART | PCRE2_ANCHORED;
       }
 
     /* However, even after matching a non-empty string, there is still one
@@ -7629,10 +7641,19 @@ else for (gmatched = 0;; gmatched++)
         }
       }
 
-    /* For /g (global), update the start offset, leaving the rest alone. */
+    /* For a normal global (/g) iteration, save the current ovector[0,1] and
+    the starting offset so that we can check that they do change each time.
+    Otherwise a matching bug that returns the same string causes an infinite
+    loop. It has happened! Then update the start offset, leaving other 
+    parameters alone. */
 
     if ((dat_datctl.control & CTL_GLOBAL) != 0)
+      {
+      ovecsave[0] = ovector[0];
+      ovecsave[1] = ovector[1];
+      ovecsave[2] = dat_datctl.offset; 
       dat_datctl.offset = end_offset;
+      } 
 
     /* For altglobal, just update the pointer and length. */
 
