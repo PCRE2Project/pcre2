@@ -4593,8 +4593,8 @@ No match
 # to test 4.
 
 /^(\p{Adlam}+)(\p{Bhaiksuki}+)(\p{Marchen}+)(\p{Newa}+)(\p{Osage}+)
- (\p{Tangut}+)(\p{Masaram_Gondi}+)(\p{Nushu}+)(\p{Soyombo}+)
- (\p{Zanabazar_Square}+)/x,utf
+  (\p{Tangut}+)(\p{Masaram_Gondi}+)(\p{Nushu}+)(\p{Soyombo}+)
+  (\p{Zanabazar_Square}+)/x,utf
     \x{1E900}\x{1E924}\x{1E953}\x{11C00}\x{11C2D}\x{11C3E}\x{11C70}\x{11C77}\x{11CAB}\x{11400}\x{1142F}\x{11455}\x{104B0}\x{104D8}\x{104FB}\x{16FE0}\x{18800}\x{18AF2}\x{11D00}\x{11D3A}\x{11D59}\x{16FE1}\x{1B170}\x{1B2FB}\x{11A50}\x{11A58}\x{11AA2}\x{11A00}\x{11A07}\x{11A47} 
  0: \x{1e900}\x{1e924}\x{1e953}\x{11c00}\x{11c2d}\x{11c3e}\x{11c70}\x{11c77}\x{11cab}\x{11400}\x{1142f}\x{11455}\x{104b0}\x{104d8}\x{104fb}\x{16fe0}\x{18800}\x{18af2}\x{11d00}\x{11d3a}\x{11d59}\x{16fe1}\x{1b170}\x{1b2fb}\x{11a50}\x{11a58}\x{11aa2}\x{11a00}\x{11a07}\x{11a47}
  1: \x{1e900}\x{1e924}\x{1e953}
@@ -4667,24 +4667,35 @@ Callout 0: last capture = 1
  0: \x{1e900}\x{1e924}\x{1e953}\x{11c00}\x{11c2d}\x{11c3e}\x{11c70}\x{11c77}\x{11cab}\x{11400}\x{1142f}\x{11455}\x{104b0}\x{104d8}\x{104fb}\x{16fe0}\x{18800}\x{18af2}\x{11d00}\x{11d3a}\x{11d59}\x{16fe1}\x{1b170}\x{1b2fb}\x{11a50}\x{11a58}\x{11aa2}\x{11a00}\x{11a07}\x{11a47}
  1: \x{11a00}\x{11a07}\x{11a47}
 
-# These two are here because JIT is not yet updated. Also, the very first data
-# line is handled differently by Perl.
+# Similarly for Unicode 11.0.0
+
+/^(\p{Dogra}+)(\p{Gunjala_Gondi}+)(\p{Hanifi_Rohingya}+)(\p{Makasar}+)
+  (\p{Medefaidrin}+)(\p{Old_Sogdian}+)(\p{Sogdian}+)/x,utf
+    \x{11800}\x{11da9}\x{10d27}\x{11ee0}\x{16e48}\x{10f27}\x{10f30} 
+ 0: \x{11800}\x{11da9}\x{10d27}\x{11ee0}\x{16e48}\x{10f27}\x{10f30}
+ 1: \x{11800}
+ 2: \x{11da9}
+ 3: \x{10d27}
+ 4: \x{11ee0}
+ 5: \x{16e48}
+ 6: \x{10f27}
+ 7: \x{10f30}
+
+# These two are here because of differences from Perl.
 
 /^\X/utf
     A\x{200d}B                     A ZWJ
  0: A\x{200d}
-    \x{261D}\x{1F3FB}B             E_Base E_Modifier
+    \x{261d}\x{261d}B              Extended_Pictographic Extended_Pictographic 
+ 0: \x{261d}\x{261d}
+    \x{261D}\x{1F3FB}B             Extended_Pictographic Extend
  0: \x{261d}\x{1f3fb}
-    \x{1F466}\x{1F3FF}B            E_Base_GAZ E_Modifier 
- 0: \x{1f466}\x{1f3ff}
-    \x{200d}\x{1F3A4}B             ZWJ Glue_After_ZWJ
- 0: \x{200d}\x{1f3a4}
-    \x{200d}\x{1F469}B             ZWJ E_Base_GAZ  
- 0: \x{200d}\x{1f469}
     \x{1F1E6}\x{1F1E7}B            RegionalIndicator RegionalIndicator 
  0: \x{1f1e6}\x{1f1e7}
-    \x{261D}\x{E0100}\x{1F3FB}B    E_Base Extend E_Modifier
- 0: \x{261d}\x{e0100}\x{1f3fb}
+    \x{261D}\x{1F3FB}\x{261d}B     Extended_Pictographic Extend E-P
+ 0: \x{261d}\x{1f3fb}\x{261d}
+    \x{261D}\x{1F3FB}\x{200d}\x{261d}B     Extended_Pictographic Extend ZWJ E-P
+ 0: \x{261d}\x{1f3fb}\x{200d}\x{261d}
 
 # Regional indicators
 
@@ -4699,6 +4710,44 @@ Callout 0: last capture = 1
  0+ B
  1: \x{1f1e6}\x{1f1e7}
  2: \x{1f1e7}\x{1f1e6}
+    
+# More differences from Perl
 
+/^[\p{Arabic}]/utf
+\= Expect no match
+    \x{650}
+No match
+    \x{651}  
+No match
+    \x{652}  
+No match
+    \x{653}  
+No match
+    \x{654} 
+No match
+    \x{655} 
+No match
+    
+/^\p{Common}/utf
+    \x{589}
+ 0: \x{589}
+    \x{60c}
+ 0: \x{60c}
+    \x{61f}  
+ 0: \x{61f}
+    \x{964}
+ 0: \x{964}
+    \x{965}  
+ 0: \x{965}
+
+/^\p{Inherited}/utf
+    \x{64b}
+ 0: \x{64b}
+    \x{654}
+ 0: \x{654}
+    \x{655}
+ 0: \x{655}
+    \x{1D1AA} 
+ 0: \x{1d1aa}
 
 # End of testinput5

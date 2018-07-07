@@ -107,6 +107,10 @@ to an incorrect "lookbehind assertion is not fixed length" error.
 
 23. The VERSION condition test was reading fractional PCRE2 version numbers 
 such as the 04 in 10.04 incorrectly and hence giving wrong results.
+
+24. Updated to Unicode version 11.0.0. As well as the usual addition of new 
+scripts and characters, this involved re-jigging the grapheme break property
+algorithm because Unicode has changed the way emojis are handled.
       
 
 Version 10.31 12-February-2018

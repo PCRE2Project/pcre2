@@ -179,12 +179,12 @@ findprop a0 a1 a2 a3 a4 a5 a6 a7 a8 a9 aa ab ac ad ae af
 00a6 Symbol: Other symbol, Common, Other
 00a7 Punctuation: Other punctuation, Common, Other
 00a8 Symbol: Modifier symbol, Common, Other
-00a9 Symbol: Other symbol, Common, Other
+00a9 Symbol: Other symbol, Common, Extended Pictographic
 00aa Letter: Other letter, Latin, Other
 00ab Punctuation: Initial punctuation, Common, Other
 00ac Symbol: Mathematical symbol, Common, Other
 00ad Control: Format, Common, Control
-00ae Symbol: Other symbol, Common, Other
+00ae Symbol: Other symbol, Common, Extended Pictographic
 00af Symbol: Modifier symbol, Common, Other
 findprop b0 b1 b2 b3 b4 b5 b6 b7 b8 b9 ba bb bc bd be bf 
 00b0 Symbol: Other symbol, Common, Other
@@ -369,3 +369,13 @@ findprop 11700 14400 108e0 11280 1d800
 108e0 Letter: Other letter, Hatran, Other
 11280 Letter: Other letter, Multani, Other
 1d800 Symbol: Other symbol, SignWriting, Other
+
+findprop 11800 1e903 11da9 10d27 11ee0 16e48 10f27 10f30
+11800 Letter: Other letter, Dogra, Other
+1e903 Letter: Upper case letter, Adlam, Other, 1e925
+11da9 Number: Decimal number, Gunjala_Gondi, Other
+10d27 Mark: Non-spacing mark, Hanifi_Rohingya, Extend
+11ee0 Letter: Other letter, Makasar, Other
+16e48 Letter: Upper case letter, Medefaidrin, Other, 16e68
+10f27 Letter: Other letter, Old_Sogdian, Other
+10f30 Letter: Other letter, Sogdian, Other

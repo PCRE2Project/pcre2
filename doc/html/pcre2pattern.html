@@ -789,6 +789,7 @@ Cypriot,
 Cyrillic,
 Deseret,
 Devanagari,
+Dogra,
 Duployan,
 Egyptian_Hieroglyphs,
 Elbasan,
@@ -799,9 +800,11 @@ Gothic,
 Grantha,
 Greek,
 Gujarati,
+Gunjala_Gondi,
 Gurmukhi,
 Han,
 Hangul,
+Hanifi_Rohingya,
 Hanunoo,
 Hatran,
 Hebrew,
@@ -829,11 +832,13 @@ Lisu,
 Lycian,
 Lydian,
 Mahajani,
+Makasar,
 Malayalam,
 Mandaic,
 Manichaean,
 Marchen,
 Masaram_Gondi,
+Medefaidrin,
 Meetei_Mayek,
 Mende_Kikakui,
 Meroitic_Cursive,
@@ -856,6 +861,7 @@ Old_Italic,
 Old_North_Arabian,
 Old_Permic,
 Old_Persian,
+Old_Sogdian,
 Old_South_Arabian,
 Old_Turkic,
 Oriya,
@@ -876,6 +882,7 @@ Shavian,
 Siddham,
 SignWriting,
 Sinhala,
+Sogdian,
 Sora_Sompeng,
 Soyombo,
 Sundanese,
@@ -1006,7 +1013,10 @@ grapheme cluster", and treats the sequence as an atomic group
 Unicode supports various kinds of composite character by giving each character
 a grapheme breaking property, and having rules that use these properties to
 define the boundaries of extended grapheme clusters. The rules are defined in
-Unicode Standard Annex 29, "Unicode Text Segmentation".
+Unicode Standard Annex 29, "Unicode Text Segmentation". Unicode 11.0.0 
+abandoned the use of some previous properties that had been used for emojis. 
+Instead it introduced various emoji-specific properties. PCRE2 uses only the
+Extended Pictographic property.
 </P>
 <P>
 \X always matches at least one character. Then it decides whether to add
@@ -1026,27 +1036,24 @@ character; an LVT or T character may be follwed only by a T character.
 </P>
 <P>
 4. Do not end before extending characters or spacing marks or the "zero-width
-joiner" characters. Characters with the "mark" property always have the
+joiner" character. Characters with the "mark" property always have the
 "extend" grapheme breaking property.
 </P>
 <P>
 5. Do not end after prepend characters.
 </P>
 <P>
-6. Do not break within emoji modifier sequences (a base character followed by a
-modifier). Extending characters are allowed before the modifier.
+6. Do not break within emoji modifier sequences or emoji zwj sequences. That
+is, do not break between characters with the Extended_Pictographic property.
+Extend and ZWJ characters are allowed between the characters.
 </P>
 <P>
-7. Do not break within emoji zwj sequences (zero-width joiner followed by
-"glue after ZWJ" or "base glue after ZWJ").
-</P>
-<P>
-8. Do not break within emoji flag sequences. That is, do not break between
+7. Do not break within emoji flag sequences. That is, do not break between
 regional indicator (RI) characters if there are an odd number of RI characters
 before the break point.
 </P>
 <P>
-6. Otherwise, end the cluster.
+8. Otherwise, end the cluster.
 <a name="extraprops"></a></P>
 <br><b>
 PCRE2's additional properties
@@ -1119,8 +1126,8 @@ lead to odd effects. For example, consider this pattern:
 <pre>
   (?&#60;=\Kfoo)bar
 </pre>
-If the subject is "foobar", a call to <b>pcre2_match()</b> with a starting 
-offset of 3 succeeds and reports the matching string as "foobar", that is, the 
+If the subject is "foobar", a call to <b>pcre2_match()</b> with a starting
+offset of 3 succeeds and reports the matching string as "foobar", that is, the
 start of the reported match is earlier than where the match started.
 <a name="smallassertions"></a></P>
 <br><b>
@@ -3490,7 +3497,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC30" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 30 June 2018
+Last updated: 07 July 2018
 <br>
 Copyright &copy; 1997-2018 University of Cambridge.
 <br>

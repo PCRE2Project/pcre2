@@ -2,7 +2,7 @@
 * A program for testing the Unicode property table *
 ***************************************************/
 
-/* Copyright (c) University of Cambridge 2008 - 2014 */
+/* Copyright (c) University of Cambridge 2008 - 2018 */
 
 /* Compile thus:
    gcc -DHAVE_CONFIG_H -DPCRE2_CODE_UNIT_WIDTH=8 -o ucptest \
@@ -123,7 +123,13 @@ switch(gbprop)
   case ucp_gbT:            graphbreak = US"Hangul syllable type T"; break;
   case ucp_gbLV:           graphbreak = US"Hangul syllable type LV"; break;
   case ucp_gbLVT:          graphbreak = US"Hangul syllable type LVT"; break;
+  case ucp_gbRegionalIndicator:
+                           graphbreak = US"Regional Indicator"; break;
   case ucp_gbOther:        graphbreak = US"Other"; break;
+  case ucp_gbZWJ:          graphbreak = US"Zero Width Joiner"; break;
+  case ucp_gbExtended_Pictographic:
+                           graphbreak = US"Extended Pictographic"; break;  
+  default:                 graphbreak = US"Unknown"; break;  
   }
 
 switch(script)
@@ -268,6 +274,27 @@ switch(script)
   case ucp_Multani:               scriptname = US"Multani"; break;
   case ucp_Old_Hungarian:         scriptname = US"Old_Hungarian"; break;
   case ucp_SignWriting:           scriptname = US"SignWriting"; break;
+
+  /* New for Unicode 10.0.0 (no update since 8.0.0) */
+  case ucp_Adlam:               scriptname = US"Adlam"; break;
+  case ucp_Bhaiksuki:           scriptname = US"Bhaiksuki"; break;
+  case ucp_Marchen:             scriptname = US"Marchen"; break;
+  case ucp_Newa:                scriptname = US"Newa"; break;
+  case ucp_Osage:               scriptname = US"Osage"; break;
+  case ucp_Tangut:              scriptname = US"Tangut"; break;
+  case ucp_Masaram_Gondi:       scriptname = US"Masaram_Gondi"; break;
+  case ucp_Nushu:               scriptname = US"Nushu"; break;
+  case ucp_Soyombo:             scriptname = US"Soyombo"; break;
+  case ucp_Zanabazar_Square:    scriptname = US"Zanabazar_Square"; break;
+
+  /* New for Unicode 11.0.0 */ 
+  case ucp_Dogra:               scriptname = US"Dogra"; break; 
+  case ucp_Gunjala_Gondi:       scriptname = US"Gunjala_Gondi"; break; 
+  case ucp_Hanifi_Rohingya:     scriptname = US"Hanifi_Rohingya"; break; 
+  case ucp_Makasar:             scriptname = US"Makasar"; break; 
+  case ucp_Medefaidrin:         scriptname = US"Medefaidrin"; break;
+  case ucp_Old_Sogdian:         scriptname = US"Old_Sogdian"; break; 
+  case ucp_Sogdian:             scriptname = US"Sogdian"; break;
   }
 
 printf("%04x %s: %s, %s, %s", c, typename, fulltypename, scriptname, graphbreak);

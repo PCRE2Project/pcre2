@@ -2293,43 +2293,18 @@ No match
  0: \x{6ef}
     \x{6fa}  
  0: \x{6fa}
-\= Expect no match
-    \x{650}
-No match
-    \x{651}  
-No match
-    \x{652}  
-No match
-    \x{653}  
-No match
-    \x{654} 
-No match
-    \x{655} 
-No match
-    
+
 /^\p{Cyrillic}/utf
     \x{1d2b} 
  0: \x{1d2b}
     
 /^\p{Common}/utf
-    \x{589}
- 0: \x{589}
-    \x{60c}
- 0: \x{60c}
-    \x{61f}  
- 0: \x{61f}
-    \x{964}
- 0: \x{964}
-    \x{965}  
- 0: \x{965}
+    \x{2116}
+ 0: \x{2116}
+    \x{1D183}  
+ 0: \x{1d183}
 
 /^\p{Inherited}/utf
-    \x{64b}
- 0: \x{64b}
-    \x{654}
- 0: \x{654}
-    \x{655}
- 0: \x{655}
     \x{200c} 
  0: \x{200c}
 \= Expect no match

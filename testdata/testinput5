@@ -2030,8 +2030,8 @@
 # to test 4.
 
 /^(\p{Adlam}+)(\p{Bhaiksuki}+)(\p{Marchen}+)(\p{Newa}+)(\p{Osage}+)
- (\p{Tangut}+)(\p{Masaram_Gondi}+)(\p{Nushu}+)(\p{Soyombo}+)
- (\p{Zanabazar_Square}+)/x,utf
+  (\p{Tangut}+)(\p{Masaram_Gondi}+)(\p{Nushu}+)(\p{Soyombo}+)
+  (\p{Zanabazar_Square}+)/x,utf
     \x{1E900}\x{1E924}\x{1E953}\x{11C00}\x{11C2D}\x{11C3E}\x{11C70}\x{11C77}\x{11CAB}\x{11400}\x{1142F}\x{11455}\x{104B0}\x{104D8}\x{104FB}\x{16FE0}\x{18800}\x{18AF2}\x{11D00}\x{11D3A}\x{11D59}\x{16FE1}\x{1B170}\x{1B2FB}\x{11A50}\x{11A58}\x{11AA2}\x{11A00}\x{11A07}\x{11A47} 
 
 /^\x{1E900}\x{104B0}/i,utf
@@ -2041,23 +2041,50 @@
 /^(?:(\X)(?C))+$/utf
     \x{1E900}\x{1E924}\x{1E953}\x{11C00}\x{11C2D}\x{11C3E}\x{11C70}\x{11C77}\x{11CAB}\x{11400}\x{1142F}\x{11455}\x{104B0}\x{104D8}\x{104FB}\x{16FE0}\x{18800}\x{18AF2}\x{11D00}\x{11D3A}\x{11D59}\x{16FE1}\x{1B170}\x{1B2FB}\x{11A50}\x{11A58}\x{11AA2}\x{11A00}\x{11A07}\x{11A47}\=callout_capture,callout_no_where 
 
-# These two are here because JIT is not yet updated. Also, the very first data
-# line is handled differently by Perl.
+# Similarly for Unicode 11.0.0
+
+/^(\p{Dogra}+)(\p{Gunjala_Gondi}+)(\p{Hanifi_Rohingya}+)(\p{Makasar}+)
+  (\p{Medefaidrin}+)(\p{Old_Sogdian}+)(\p{Sogdian}+)/x,utf
+    \x{11800}\x{11da9}\x{10d27}\x{11ee0}\x{16e48}\x{10f27}\x{10f30} 
+
+# These two are here because of differences from Perl.
 
 /^\X/utf
     A\x{200d}B                     A ZWJ
-    \x{261D}\x{1F3FB}B             E_Base E_Modifier
-    \x{1F466}\x{1F3FF}B            E_Base_GAZ E_Modifier 
-    \x{200d}\x{1F3A4}B             ZWJ Glue_After_ZWJ
-    \x{200d}\x{1F469}B             ZWJ E_Base_GAZ  
+    \x{261d}\x{261d}B              Extended_Pictographic Extended_Pictographic 
+    \x{261D}\x{1F3FB}B             Extended_Pictographic Extend
     \x{1F1E6}\x{1F1E7}B            RegionalIndicator RegionalIndicator 
-    \x{261D}\x{E0100}\x{1F3FB}B    E_Base Extend E_Modifier
+    \x{261D}\x{1F3FB}\x{261d}B     Extended_Pictographic Extend E-P
+    \x{261D}\x{1F3FB}\x{200d}\x{261d}B     Extended_Pictographic Extend ZWJ E-P
 
 # Regional indicators
 
 /^(\X)(\X)/utf,aftertext
     \x{1F1E6}\x{1F1E7}\x{1F1E7}B
     \x{1F1E6}\x{1F1E7}\x{1F1E7}\x{1F1E6}B
+    
+# More differences from Perl
 
+/^[\p{Arabic}]/utf
+\= Expect no match
+    \x{650}
+    \x{651}  
+    \x{652}  
+    \x{653}  
+    \x{654} 
+    \x{655} 
+    
+/^\p{Common}/utf
+    \x{589}
+    \x{60c}
+    \x{61f}  
+    \x{964}
+    \x{965}  
+
+/^\p{Inherited}/utf
+    \x{64b}
+    \x{654}
+    \x{655}
+    \x{1D1AA} 
 
 # End of testinput5

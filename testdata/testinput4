@@ -1394,28 +1394,15 @@
     \x{6e9} 
     \x{6ef}
     \x{6fa}  
-\= Expect no match
-    \x{650}
-    \x{651}  
-    \x{652}  
-    \x{653}  
-    \x{654} 
-    \x{655} 
-    
+
 /^\p{Cyrillic}/utf
     \x{1d2b} 
     
 /^\p{Common}/utf
-    \x{589}
-    \x{60c}
-    \x{61f}  
-    \x{964}
-    \x{965}  
+    \x{2116}
+    \x{1D183}  
 
 /^\p{Inherited}/utf
-    \x{64b}
-    \x{654}
-    \x{655}
     \x{200c} 
 \= Expect no match
     \x{64a}

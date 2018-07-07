@@ -1901,7 +1901,7 @@ extern const ucd_record                PRIV(ucd_records)[];
 #if PCRE2_CODE_UNIT_WIDTH == 32
 extern const ucd_record                PRIV(dummy_ucd_record)[];
 #endif
-extern const uint8_t                   PRIV(ucd_stage1)[];
+extern const uint16_t                  PRIV(ucd_stage1)[];
 extern const uint16_t                  PRIV(ucd_stage2)[];
 extern const uint32_t                  PRIV(ucp_gbtable)[];
 extern const uint32_t                  PRIV(ucp_gentype)[];

@@ -23,7 +23,7 @@ GenerateUtt.py   A Python script to generate part of the pcre2_tables.c file
 ManyConfigTests  A shell script that runs "configure, make, test" a number of
                  times with different configuration settings.
 
-MultiStage2.py   A Python script that generates the file pcre2_ucd.c from three
+MultiStage2.py   A Python script that generates the file pcre2_ucd.c from five
                  Unicode data tables, which are themselves downloaded from the
                  Unicode web site. Run this script in the "maint" directory.
                  The generated file contains the tables for a 2-stage lookup
@@ -37,11 +37,17 @@ pcre2_chartables.c.non-standard
 
 README           This file.
 
-Unicode.tables   The files in this directory (CaseFolding.txt,
-                 DerivedGeneralCategory.txt, GraphemeBreakProperty.txt,
-                 Scripts.txt and UnicodeData.txt) were downloaded from the
-                 Unicode web site. They contain information about Unicode
-                 characters and scripts.
+Unicode.tables   The files in this directory were downloaded from the Unicode 
+                 web site. They contain information about Unicode characters
+                 and scripts. The ones used by the MultiStage2.py script are
+                 CaseFolding.txt, DerivedGeneralCategory.txt, Scripts.txt, 
+                 GraphemeBreakProperty.txt, and emoji-data.txt. I've kept 
+                 UnicodeData.txt (which is no longer used by the script)
+                 because it is useful occasionally for manually looking up the
+                 details of certain characters. However, note that character
+                 names in this file such as "Arabic sign sanah" do NOT mean 
+                 that the character is in a particular script (in this case, 
+                 Arabic). Scripts.txt is where to look for script information.
 
 ucptest.c        A short C program for testing the Unicode property macros
                  that do lookups in the pcre2_ucd.c data, mainly useful after
@@ -359,4 +365,4 @@ very sensible; some are rather wacky. Some have been on this list for years.
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 20 May 2017
+Last updated: 07 July 2018

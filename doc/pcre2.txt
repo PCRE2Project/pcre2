@@ -6483,34 +6483,35 @@ BACKSLASH
        nese, Bamum, Bassa_Vah, Batak, Bengali,  Bhaiksuki,  Bopomofo,  Brahmi,
        Braille,  Buginese, Buhid, Canadian_Aboriginal, Carian, Caucasian_Alba-
        nian, Chakma,  Cham,  Cherokee,  Common,  Coptic,  Cuneiform,  Cypriot,
-       Cyrillic, Deseret, Devanagari, Duployan, Egyptian_Hieroglyphs, Elbasan,
-       Ethiopic, Georgian, Glagolitic, Gothic, Grantha, Greek, Gujarati,  Gur-
-       mukhi,  Han,  Hangul,  Hanunoo, Hatran, Hebrew, Hiragana, Imperial_Ara-
-       maic,   Inherited,    Inscriptional_Pahlavi,    Inscriptional_Parthian,
-       Javanese,  Kaithi, Kannada, Katakana, Kayah_Li, Kharoshthi, Khmer, Kho-
-       jki, Khudawadi, Lao, Latin, Lepcha, Limbu,  Linear_A,  Linear_B,  Lisu,
-       Lycian,  Lydian,  Mahajani,  Malayalam,  Mandaic,  Manichaean, Marchen,
-       Masaram_Gondi,    Meetei_Mayek,    Mende_Kikakui,     Meroitic_Cursive,
-       Meroitic_Hieroglyphs,  Miao,  Modi,  Mongolian,  Mro, Multani, Myanmar,
-       Nabataean, New_Tai_Lue, Newa, Nko, Nushu, Ogham, Ol_Chiki,  Old_Hungar-
-       ian,    Old_Italic,    Old_North_Arabian,    Old_Permic,   Old_Persian,
-       Old_South_Arabian, Old_Turkic,  Oriya,  Osage,  Osmanya,  Pahawh_Hmong,
-       Palmyrene,  Pau_Cin_Hau, Phags_Pa, Phoenician, Psalter_Pahlavi, Rejang,
-       Runic, Samaritan, Saurashtra, Sharada, Shavian,  Siddham,  SignWriting,
-       Sinhala,  Sora_Sompeng, Soyombo, Sundanese, Syloti_Nagri, Syriac, Taga-
-       log, Tagbanwa, Tai_Le, Tai_Tham, Tai_Viet, Takri, Tamil,  Tangut,  Tel-
-       ugu,   Thaana,   Thai,   Tibetan,  Tifinagh,  Tirhuta,  Ugaritic,  Vai,
-       Warang_Citi, Yi, Zanabazar_Square.
+       Cyrillic,  Deseret,  Devanagari, Dogra, Duployan, Egyptian_Hieroglyphs,
+       Elbasan,  Ethiopic,  Georgian,  Glagolitic,  Gothic,  Grantha,   Greek,
+       Gujarati,   Gunjala_Gondi,   Gurmukhi,  Han,  Hangul,  Hanifi_Rohingya,
+       Hanunoo,  Hatran,  Hebrew,   Hiragana,   Imperial_Aramaic,   Inherited,
+       Inscriptional_Pahlavi,  Inscriptional_Parthian,  Javanese, Kaithi, Kan-
+       nada, Katakana, Kayah_Li, Kharoshthi, Khmer,  Khojki,  Khudawadi,  Lao,
+       Latin,  Lepcha,  Limbu, Linear_A, Linear_B, Lisu, Lycian, Lydian, Maha-
+       jani, Makasar, Malayalam, Mandaic, Manichaean, Marchen,  Masaram_Gondi,
+       Medefaidrin,     Meetei_Mayek,     Mende_Kikakui,     Meroitic_Cursive,
+       Meroitic_Hieroglyphs, Miao, Modi,  Mongolian,  Mro,  Multani,  Myanmar,
+       Nabataean,  New_Tai_Lue, Newa, Nko, Nushu, Ogham, Ol_Chiki, Old_Hungar-
+       ian, Old_Italic, Old_North_Arabian, Old_Permic,  Old_Persian,  Old_Sog-
+       dian,    Old_South_Arabian,    Old_Turkic,   Oriya,   Osage,   Osmanya,
+       Pahawh_Hmong,    Palmyrene,    Pau_Cin_Hau,    Phags_Pa,    Phoenician,
+       Psalter_Pahlavi,  Rejang,  Runic,  Samaritan, Saurashtra, Sharada, Sha-
+       vian, Siddham, SignWriting, Sinhala,  Sogdian,  Sora_Sompeng,  Soyombo,
+       Sundanese,  Syloti_Nagri,  Syriac, Tagalog, Tagbanwa, Tai_Le, Tai_Tham,
+       Tai_Viet, Takri, Tamil, Tangut, Telugu, Thaana,  Thai,  Tibetan,  Tifi-
+       nagh, Tirhuta, Ugaritic, Vai, Warang_Citi, Yi, Zanabazar_Square.
 
        Each character has exactly one Unicode general category property, spec-
-       ified  by a two-letter abbreviation. For compatibility with Perl, nega-
-       tion can be specified by including a  circumflex  between  the  opening
-       brace  and  the  property  name.  For  example,  \p{^Lu} is the same as
+       ified by a two-letter abbreviation. For compatibility with Perl,  nega-
+       tion  can  be  specified  by including a circumflex between the opening
+       brace and the property name.  For  example,  \p{^Lu}  is  the  same  as
        \P{Lu}.
 
        If only one letter is specified with \p or \P, it includes all the gen-
-       eral  category properties that start with that letter. In this case, in
-       the absence of negation, the curly brackets in the escape sequence  are
+       eral category properties that start with that letter. In this case,  in
+       the  absence of negation, the curly brackets in the escape sequence are
        optional; these two examples have the same effect:
 
          \p{L}
@@ -6562,44 +6563,47 @@ BACKSLASH
          Zp    Paragraph separator
          Zs    Space separator
 
-       The  special property L& is also supported: it matches a character that
-       has the Lu, Ll, or Lt property, in other words, a letter  that  is  not
+       The special property L& is also supported: it matches a character  that
+       has  the  Lu,  Ll, or Lt property, in other words, a letter that is not
        classified as a modifier or "other".
 
-       The  Cs  (Surrogate)  property  applies only to characters in the range
-       U+D800 to U+DFFF. Such characters are not valid in Unicode strings  and
-       so  cannot  be  tested  by PCRE2, unless UTF validity checking has been
-       turned off (see the discussion of PCRE2_NO_UTF_CHECK  in  the  pcre2api
+       The Cs (Surrogate) property applies only to  characters  in  the  range
+       U+D800  to U+DFFF. Such characters are not valid in Unicode strings and
+       so cannot be tested by PCRE2, unless UTF  validity  checking  has  been
+       turned  off  (see  the discussion of PCRE2_NO_UTF_CHECK in the pcre2api
        page). Perl does not support the Cs property.
 
-       The  long  synonyms  for  property  names  that  Perl supports (such as
-       \p{Letter}) are not supported by PCRE2, nor is it permitted  to  prefix
+       The long synonyms for  property  names  that  Perl  supports  (such  as
+       \p{Letter})  are  not supported by PCRE2, nor is it permitted to prefix
        any of these properties with "Is".
 
        No character that is in the Unicode table has the Cn (unassigned) prop-
        erty.  Instead, this property is assumed for any code point that is not
        in the Unicode table.
 
-       Specifying  caseless  matching  does not affect these escape sequences.
-       For example, \p{Lu} always matches only upper  case  letters.  This  is
+       Specifying caseless matching does not affect  these  escape  sequences.
+       For  example,  \p{Lu}  always  matches only upper case letters. This is
        different from the behaviour of current versions of Perl.
 
-       Matching  characters by Unicode property is not fast, because PCRE2 has
-       to do a multistage table lookup in order to find  a  character's  prop-
+       Matching characters by Unicode property is not fast, because PCRE2  has
+       to  do  a  multistage table lookup in order to find a character's prop-
        erty. That is why the traditional escape sequences such as \d and \w do
-       not use Unicode properties in PCRE2 by default,  though  you  can  make
-       them  do  so by setting the PCRE2_UCP option or by starting the pattern
+       not  use  Unicode  properties  in PCRE2 by default, though you can make
+       them do so by setting the PCRE2_UCP option or by starting  the  pattern
        with (*UCP).
 
    Extended grapheme clusters
 
-       The \X escape matches any number of Unicode  characters  that  form  an
+       The  \X  escape  matches  any number of Unicode characters that form an
        "extended grapheme cluster", and treats the sequence as an atomic group
-       (see below).  Unicode supports various kinds of composite character  by
-       giving  each  character  a grapheme breaking property, and having rules
+       (see  below).  Unicode supports various kinds of composite character by
+       giving each character a grapheme breaking property,  and  having  rules
        that use these properties to define the boundaries of extended grapheme
-       clusters.  The rules are defined in Unicode Standard Annex 29, "Unicode
-       Text Segmentation".
+       clusters. The rules are defined in Unicode Standard Annex 29,  "Unicode
+       Text  Segmentation".  Unicode 11.0.0 abandoned the use of some previous
+       properties that had been used for emojis.  Instead it introduced  vari-
+       ous  emoji-specific  properties.  PCRE2  uses  only the Extended Picto-
+       graphic property.
 
        \X always matches at least one character. Then it  decides  whether  to
        add additional characters according to the following rules for ending a
@@ -6617,23 +6621,21 @@ BACKSLASH
        only by a T character.
 
        4.  Do  not  end  before  extending  characters or spacing marks or the
-       "zero-width joiner" characters. Characters  with  the  "mark"  property
+       "zero-width joiner" character.  Characters  with  the  "mark"  property
        always have the "extend" grapheme breaking property.
 
        5. Do not end after prepend characters.
 
-       6.  Do not break within emoji modifier sequences (a base character fol-
-       lowed by a modifier). Extending characters are allowed before the modi-
-       fier.
+       6. Do not break within emoji modifier sequences or emoji zwj sequences.
+       That is, do not break between characters with the Extended_Pictographic
+       property.   Extend  and  ZWJ characters are allowed between the charac-
+       ters.
 
-       7.  Do not break within emoji zwj sequences (zero-width joiner followed
-       by "glue after ZWJ" or "base glue after ZWJ").
-
-       8. Do not break within emoji flag sequences.  That  is,  do  not  break
+       7. Do not break within emoji flag sequences.  That  is,  do  not  break
        between  regional  indicator (RI) characters if there are an odd number
        of RI characters before the break point.
 
-       6. Otherwise, end the cluster.
+       8. Otherwise, end the cluster.
 
    PCRE2's additional properties
 
@@ -8941,7 +8943,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 30 June 2018
+       Last updated: 07 July 2018
        Copyright (c) 1997-2018 University of Cambridge.
 ------------------------------------------------------------------------------
  
@@ -9915,26 +9917,29 @@ PCRE2 SPECIAL CATEGORY PROPERTIES FOR \p and \P
 
 SCRIPT NAMES FOR \p AND \P
 
-       Ahom,   Anatolian_Hieroglyphs,  Arabic,  Armenian,  Avestan,  Balinese,
-       Bamum, Bassa_Vah, Batak, Bengali, Bopomofo, Brahmi, Braille,  Buginese,
-       Buhid,  Canadian_Aboriginal,  Carian, Caucasian_Albanian, Chakma, Cham,
-       Cherokee,  Common,  Coptic,  Cuneiform,  Cypriot,  Cyrillic,   Deseret,
-       Devanagari,  Duployan,  Egyptian_Hieroglyphs,  Elbasan, Ethiopic, Geor-
-       gian, Glagolitic, Gothic,  Grantha,  Greek,  Gujarati,  Gurmukhi,  Han,
-       Hangul, Hanunoo, Hatran, Hebrew, Hiragana, Imperial_Aramaic, Inherited,
-       Inscriptional_Pahlavi, Inscriptional_Parthian, Javanese,  Kaithi,  Kan-
-       nada,  Katakana,  Kayah_Li,  Kharoshthi, Khmer, Khojki, Khudawadi, Lao,
-       Latin, Lepcha, Limbu, Linear_A, Linear_B, Lisu, Lycian,  Lydian,  Maha-
-       jani,  Malayalam,  Mandaic,  Manichaean,  Meetei_Mayek,  Mende_Kikakui,
-       Meroitic_Cursive, Meroitic_Hieroglyphs,  Miao,  Modi,  Mongolian,  Mro,
-       Multani,   Myanmar,   Nabataean,  New_Tai_Lue,  Nko,  Ogham,  Ol_Chiki,
-       Old_Hungarian, Old_Italic, Old_North_Arabian, Old_Permic,  Old_Persian,
-       Old_South_Arabian, Old_Turkic, Oriya, Osmanya, Pahawh_Hmong, Palmyrene,
-       Pau_Cin_Hau,  Phags_Pa,  Phoenician,  Psalter_Pahlavi,  Rejang,  Runic,
-       Samaritan, Saurashtra, Sharada, Shavian, Siddham, SignWriting, Sinhala,
-       Sora_Sompeng,  Sundanese,  Syloti_Nagri,  Syriac,  Tagalog,   Tagbanwa,
-       Tai_Le,   Tai_Tham,  Tai_Viet,  Takri,  Tamil,  Telugu,  Thaana,  Thai,
-       Tibetan, Tifinagh, Tirhuta, Ugaritic, Vai, Warang_Citi, Yi.
+       Adlam,  Ahom,  Anatolian_Hieroglyphs,  Arabic, Armenian, Avestan, Bali-
+       nese, Bamum, Bassa_Vah, Batak, Bengali,  Bhaiksuki,  Bopomofo,  Brahmi,
+       Braille,  Buginese, Buhid, Canadian_Aboriginal, Carian, Caucasian_Alba-
+       nian, Chakma,  Cham,  Cherokee,  Common,  Coptic,  Cuneiform,  Cypriot,
+       Cyrillic,  Deseret,  Devanagari, Dogra, Duployan, Egyptian_Hieroglyphs,
+       Elbasan,  Ethiopic,  Georgian,  Glagolitic,  Gothic,  Grantha,   Greek,
+       Gujarati,   Gunjala_Gondi,   Gurmukhi,  Han,  Hangul,  Hanifi_Rohingya,
+       Hanunoo,  Hatran,  Hebrew,   Hiragana,   Imperial_Aramaic,   Inherited,
+       Inscriptional_Pahlavi,  Inscriptional_Parthian,  Javanese, Kaithi, Kan-
+       nada, Katakana, Kayah_Li, Kharoshthi, Khmer,  Khojki,  Khudawadi,  Lao,
+       Latin,  Lepcha,  Limbu, Linear_A, Linear_B, Lisu, Lycian, Lydian, Maha-
+       jani, Makasar, Malayalam, Mandaic, Manichaean, Marchen,  Masaram_Gondi,
+       Medefaidrin,     Meetei_Mayek,     Mende_Kikakui,     Meroitic_Cursive,
+       Meroitic_Hieroglyphs, Miao, Modi,  Mongolian,  Mro,  Multani,  Myanmar,
+       Nabataean,  New_Tai_Lue, Newa, Nko, Nushu, Ogham, Ol_Chiki, Old_Hungar-
+       ian, Old_Italic, Old_North_Arabian, Old_Permic,  Old_Persian,  Old_Sog-
+       dian,    Old_South_Arabian,    Old_Turkic,   Oriya,   Osage,   Osmanya,
+       Pahawh_Hmong,    Palmyrene,    Pau_Cin_Hau,    Phags_Pa,    Phoenician,
+       Psalter_Pahlavi,  Rejang,  Runic,  Samaritan, Saurashtra, Sharada, Sha-
+       vian, Siddham, SignWriting, Sinhala,  Sogdian,  Sora_Sompeng,  Soyombo,
+       Sundanese,  Syloti_Nagri,  Syriac, Tagalog, Tagbanwa, Tai_Le, Tai_Tham,
+       Tai_Viet, Takri, Tamil, Tangut, Telugu, Thaana,  Thai,  Tibetan,  Tifi-
+       nagh, Tirhuta, Ugaritic, Vai, Warang_Citi, Yi, Zanabazar_Square.
 
 
 CHARACTER CLASSES
@@ -9960,8 +9965,8 @@ CHARACTER CLASSES
          word        same as \w
          xdigit      hexadecimal digit
 
-       In PCRE2, POSIX character set names recognize only ASCII characters  by
-       default,  but  some of them use Unicode properties if PCRE2_UCP is set.
+       In  PCRE2, POSIX character set names recognize only ASCII characters by
+       default, but some of them use Unicode properties if PCRE2_UCP  is  set.
        You can use \Q...\E inside a character class.
 
 
@@ -10047,8 +10052,8 @@ OPTION SETTING
          (?xx)           as (?x) but also ignore space and tab in classes
          (?-...)         unset option(s)
 
-       The following are recognized only at the very start  of  a  pattern  or
-       after  one  of the newline or \R options with similar syntax. More than
+       The  following  are  recognized  only at the very start of a pattern or
+       after one of the newline or \R options with similar syntax.  More  than
        one of them may appear. For the first three, d is a decimal number.
 
          (*LIMIT_DEPTH=d) set the backtracking limit to d
@@ -10063,17 +10068,17 @@ OPTION SETTING
          (*UTF)          set appropriate UTF mode for the library in use
          (*UCP)          set PCRE2_UCP (use Unicode properties for \d etc)
 
-       Note that LIMIT_DEPTH, LIMIT_HEAP, and LIMIT_MATCH can only reduce  the
-       value   of   the   limits   set  by  the  caller  of  pcre2_match()  or
-       pcre2_dfa_match(), not increase them. LIMIT_RECURSION  is  an  obsolete
+       Note  that LIMIT_DEPTH, LIMIT_HEAP, and LIMIT_MATCH can only reduce the
+       value  of  the  limits  set  by  the   caller   of   pcre2_match()   or
+       pcre2_dfa_match(),  not  increase  them. LIMIT_RECURSION is an obsolete
        synonym for LIMIT_DEPTH. The application can lock out the use of (*UTF)
-       and (*UCP) by setting the PCRE2_NEVER_UTF or  PCRE2_NEVER_UCP  options,
+       and  (*UCP)  by setting the PCRE2_NEVER_UTF or PCRE2_NEVER_UCP options,
        respectively, at compile time.
 
 
 NEWLINE CONVENTION
 
-       These  are  recognized  only  at the very start of the pattern or after
+       These are recognized only at the very start of  the  pattern  or  after
        option settings with a similar syntax.
 
          (*CR)           carriage return only
@@ -10086,7 +10091,7 @@ NEWLINE CONVENTION
 
 WHAT \R MATCHES
 
-       These are recognized only at the very start of  the  pattern  or  after
+       These  are  recognized  only  at the very start of the pattern or after
        option setting with a similar syntax.
 
          (*BSR_ANYCRLF)  CR, LF, or CRLF
@@ -10155,8 +10160,8 @@ CONDITIONAL PATTERNS
          (?(VERSION[>]=n.m)  test PCRE2 version
          (?(assert)          assertion condition
 
-       Note  the  ambiguity of (?(R) and (?(Rn) which might be named reference
-       conditions or recursion tests. Such a condition  is  interpreted  as  a
+       Note the ambiguity of (?(R) and (?(Rn) which might be  named  reference
+       conditions  or  recursion  tests.  Such a condition is interpreted as a
        reference condition if the relevant named group exists.
 
 
@@ -10168,7 +10173,7 @@ BACKTRACKING CONTROL
          (*FAIL)         force backtrack; synonym (*F)
          (*MARK:NAME)    set name to be passed back; synonym (*:NAME)
 
-       The  following  act only when a subsequent match failure causes a back-
+       The following act only when a subsequent match failure causes  a  back-
        track to reach them. They all force a match failure, but they differ in
        what happens afterwards. Those that advance the start-of-match point do
        so only if the pattern is not anchored.
@@ -10190,14 +10195,14 @@ CALLOUTS
          (?C"text")      callout with string data
 
        The allowed string delimiters are ` ' " ^ % # $ (which are the same for
-       the  start  and the end), and the starting delimiter { matched with the
-       ending delimiter }. To encode the ending delimiter within  the  string,
+       the start and the end), and the starting delimiter { matched  with  the
+       ending  delimiter  }. To encode the ending delimiter within the string,
        double it.
 
 
 SEE ALSO
 
-       pcre2pattern(3),    pcre2api(3),   pcre2callout(3),   pcre2matching(3),
+       pcre2pattern(3),   pcre2api(3),   pcre2callout(3),    pcre2matching(3),
        pcre2(3).
 
 
@@ -10210,7 +10215,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 28 June 2018
+       Last updated: 07 July 2018
        Copyright (c) 1997-2018 University of Cambridge.
 ------------------------------------------------------------------------------
  

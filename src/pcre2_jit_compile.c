@@ -3666,7 +3666,8 @@ if (!common->utf)
 #endif
 
 OP2(SLJIT_LSHR, TMP2, 0, TMP1, 0, SLJIT_IMM, UCD_BLOCK_SHIFT);
-OP1(SLJIT_MOV_U8, TMP2, 0, SLJIT_MEM1(TMP2), (sljit_sw)PRIV(ucd_stage1));
+OP2(SLJIT_ADD, TMP2, 0, TMP2, 0, TMP2, 0);
+OP1(SLJIT_MOV_U16, TMP2, 0, SLJIT_MEM1(TMP2), (sljit_sw)PRIV(ucd_stage1));
 OP2(SLJIT_AND, TMP1, 0, TMP1, 0, SLJIT_IMM, UCD_BLOCK_MASK);
 OP2(SLJIT_SHL, TMP2, 0, TMP2, 0, SLJIT_IMM, UCD_BLOCK_SHIFT);
 OP2(SLJIT_ADD, TMP1, 0, TMP1, 0, TMP2, 0);
@@ -6627,7 +6628,8 @@ if (needstype || needsscript)
 #endif
 
   OP2(SLJIT_LSHR, TMP2, 0, TMP1, 0, SLJIT_IMM, UCD_BLOCK_SHIFT);
-  OP1(SLJIT_MOV_U8, TMP2, 0, SLJIT_MEM1(TMP2), (sljit_sw)PRIV(ucd_stage1));
+  OP2(SLJIT_ADD, TMP2, 0, TMP2, 0, TMP2, 0);
+  OP1(SLJIT_MOV_U16, TMP2, 0, SLJIT_MEM1(TMP2), (sljit_sw)PRIV(ucd_stage1));
   OP2(SLJIT_AND, TMP1, 0, TMP1, 0, SLJIT_IMM, UCD_BLOCK_MASK);
   OP2(SLJIT_SHL, TMP2, 0, TMP2, 0, SLJIT_IMM, UCD_BLOCK_SHIFT);
   OP2(SLJIT_ADD, TMP1, 0, TMP1, 0, TMP2, 0);
@@ -7254,12 +7256,13 @@ while (cc < end_subject)
     if ((ricount & 1) != 0) break;  /* Grapheme break required */
     }
 
-  /* If Extend follows E_Base[_GAZ] do not update lgb; this allows
-  any number of Extend before a following E_Modifier. */
-
-  if (rgb != ucp_gbExtend || (lgb != ucp_gbE_Base && lgb != ucp_gbE_Base_GAZ))
+  /* If Extend or ZWJ follows Extended_Pictographic, do not update lgb; this
+  allows any number of them before a following Extended_Pictographic. */
+  
+  if ((rgb != ucp_gbExtend && rgb != ucp_gbZWJ) || 
+       lgb != ucp_gbExtended_Pictographic)
     lgb = rgb;
-
+     
   prevcc = cc;
   cc += len;
   }
@@ -7309,12 +7312,13 @@ while (cc < end_subject)
     if ((ricount & 1) != 0) break;  /* Grapheme break required */
     }
 
-  /* If Extend follows E_Base[_GAZ] do not update lgb; this allows
-  any number of Extend before a following E_Modifier. */
-
-  if (rgb != ucp_gbExtend || (lgb != ucp_gbE_Base && lgb != ucp_gbE_Base_GAZ))
+  /* If Extend or ZWJ follows Extended_Pictographic, do not update lgb; this
+  allows any number of them before a following Extended_Pictographic. */
+  
+  if ((rgb != ucp_gbExtend && rgb != ucp_gbZWJ) || 
+       lgb != ucp_gbExtended_Pictographic)
     lgb = rgb;
-
+     
   cc++;
   }
 
