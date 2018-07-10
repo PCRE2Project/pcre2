@@ -2287,24 +2287,35 @@ those that look ahead of the current position in the subject string, and those
 that look behind it, and in each case an assertion may be positive (must
 succeed for matching to continue) or negative (must not succeed for matching to
 continue). An assertion subpattern is matched in the normal way, except that,
-when matching continues afterwards, the matching position in the subject string
-is as it was at the start of the assertion.
+when matching continues after a successful assertion, the matching position in
+the subject string is as it was before the assertion was processed.
 </P>
 <P>
 Assertion subpatterns are not capturing subpatterns. If an assertion contains
 capturing subpatterns within it, these are counted for the purposes of
-numbering the capturing subpatterns in the whole pattern. However, substring
-capturing is carried out only for positive assertions that succeed, that is,
-one of their branches matches, so matching continues after the assertion. If
-all branches of a positive assertion fail to match, nothing is captured, and
-control is passed to the previous backtracking point.
+numbering the capturing subpatterns in the whole pattern. Within each branch of 
+an assertion, locally captured substrings may be referenced in the usual way.
+For example, a sequence such as (.)\g{-1} can be used to check that two 
+adjacent characters are the same.
 </P>
 <P>
-No capturing is done for a negative assertion unless it is being used as a
-condition in a
-<a href="#subpatternsassubroutines">conditional subpattern</a>
-(see the discussion below). Matching continues after a non-conditional negative
-assertion only if all its branches fail to match.
+When a branch within an assertion fails to match, any substrings that were
+captured are discarded (as happens with any pattern branch that fails to 
+match). A negative assertion succeeds only when all its branches fail to match;
+this means that no captured substrings are ever retained after a successful
+negative assertion. When an assertion contains a matching branch, what happens
+depends on the type of assertion.
+</P>
+<P>
+For a positive assertion, internally captured substrings in the successful
+branch are retained, and matching continues with the next pattern item after
+the assertion. For a negative assertion, a matching branch means that the
+assertion has failed. If the assertion is being used as a condition in a
+<a href="#conditions">conditional subpattern</a>
+(see below), captured substrings are retained, because matching continues with
+the "no" branch of the condition. For other failing negative assertions,
+control passes to the previous backtracking point, thus discarding any captured 
+strings within the assertion.
 </P>
 <P>
 For compatibility with Perl, most assertion subpatterns may be repeated; though
@@ -2502,7 +2513,8 @@ already been matched. The two possible forms of conditional subpattern are:
   (?(condition)yes-pattern|no-pattern)
 </pre>
 If the condition is satisfied, the yes-pattern is used; otherwise the
-no-pattern (if present) is used. If there are more than two alternatives in the
+no-pattern (if present) is used. An absent no-pattern is equivalent to an empty
+string (it always matches). If there are more than two alternatives in the
 subpattern, a compile-time error occurs. Each of the two alternatives may
 itself contain nested subpatterns of any form, including conditional
 subpatterns; the restriction to two alternatives applies only at the level of
@@ -3497,7 +3509,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC30" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 07 July 2018
+Last updated: 10 July 2018
 <br>
 Copyright &copy; 1997-2018 University of Cambridge.
 <br>
