@@ -1,4 +1,4 @@
-.TH PCRE2 3 "04 March 2018" "PCRE2 10.32"
+.TH PCRE2 3 "11 July 2018" "PCRE2 10.32"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH INTRODUCTION
@@ -6,12 +6,18 @@ PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
 PCRE2 is the name used for a revised API for the PCRE library, which is a set
 of functions, written in C, that implement regular expression pattern matching
-using the same syntax and semantics as Perl, with just a few differences. Some
-features that appeared in Python and the original PCRE before they appeared in
-Perl are also available using the Python syntax. There is also some support for
-one or two .NET and Oniguruma syntax items, and there are options for
-requesting some minor changes that give better ECMAScript (aka JavaScript)
-compatibility.
+using the same syntax and semantics as Perl, with just a few differences. After 
+nearly two decades, the limitations of the original API were making development 
+increasingly difficult. The new API is more extensible, and it was simplified
+by abolishing the separate "study" optimizing function; in PCRE2, patterns are
+automatically optimized where possible. Since forking from PCRE1, the code has 
+been extensively refactored and new features introduced.
+.P
+As well as Perl-style regular expression patterns, some features that appeared
+in Python and the original PCRE before they appeared in Perl are available
+using the Python syntax. There is also some support for one or two .NET and
+Oniguruma syntax items, and there are options for requesting some minor changes
+that give better ECMAScript (aka JavaScript) compatibility.
 .P
 The source code for PCRE2 can be compiled to support 8-bit, 16-bit, or 32-bit
 code units, which means that up to three separate libraries may be installed.
@@ -191,6 +197,6 @@ use my two initials, followed by the two digits 10, at the domain cam.ac.uk.
 .rs
 .sp
 .nf
-Last updated: 04 March 2018
+Last updated: 11 July 2018
 Copyright (c) 1997-2018 University of Cambridge.
 .fi

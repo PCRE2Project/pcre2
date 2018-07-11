@@ -20,11 +20,19 @@ INTRODUCTION
        PCRE2 is the name used for a revised API for the PCRE library, which is
        a set of functions, written in C,  that  implement  regular  expression
        pattern matching using the same syntax and semantics as Perl, with just
-       a few differences. Some features that appeared in Python and the origi-
-       nal  PCRE  before  they  appeared  in Perl are also available using the
-       Python syntax. There is also some support for one or two .NET and Onig-
-       uruma  syntax  items,  and  there are options for requesting some minor
-       changes that give better ECMAScript (aka JavaScript) compatibility.
+       a few differences. After nearly two decades,  the  limitations  of  the
+       original  API  were  making development increasingly difficult. The new
+       API is more extensible, and it was simplified by abolishing  the  sepa-
+       rate  "study" optimizing function; in PCRE2, patterns are automatically
+       optimized where possible. Since forking from PCRE1, the code  has  been
+       extensively refactored and new features introduced.
+
+       As  well  as Perl-style regular expression patterns, some features that
+       appeared in Python and the original PCRE before they appeared  in  Perl
+       are  available  using the Python syntax. There is also some support for
+       one or two .NET and Oniguruma syntax items, and there are  options  for
+       requesting   some  minor  changes  that  give  better  ECMAScript  (aka
+       JavaScript) compatibility.
 
        The source code for PCRE2 can be compiled to support 8-bit, 16-bit,  or
        32-bit  code units, which means that up to three separate libraries may
@@ -169,7 +177,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 04 March 2018
+       Last updated: 11 July 2018
        Copyright (c) 1997-2018 University of Cambridge.
 ------------------------------------------------------------------------------
  
