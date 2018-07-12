@@ -6202,4 +6202,13 @@ ef) x/x,mark
 
 /(?<=(?=.){4,5}x)/
 
+/a(?=.(*:X))(*SKIP:X)(*F)|(.)/
+    abc
+
+/a(?>(*:X))(*SKIP:X)(*F)|(.)/
+    abc
+
+/a(?:(*:X))(*SKIP:X)(*F)|(.)/
+    abc
+
 # End of testinput1 

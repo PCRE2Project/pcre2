@@ -43,7 +43,7 @@ fi
 #   afteralltext       ignored
 #   dupnames           ignored (Perl always allows)
 #   jitstack           ignored
-#   mark               ignored
+#   mark               show mark information
 #   no_auto_possess    ignored
 #   no_start_optimize  ignored
 #   subject_literal    does not process subjects for escapes
@@ -172,9 +172,9 @@ for (;;)
 
   $mod =~ s/jitstack=\d+,?//;
 
-  # Remove "mark" (asks pcre2test to check MARK data) */
+  # The "mark" modifier requests checking of MARK data */
 
-  $mod =~ s/mark,?//;
+  $show_mark = ($mod =~ s/mark,?//);
 
   # "ucp" asks pcre2test to set PCRE2_UCP; change this to /u for Perl
 
@@ -279,7 +279,7 @@ for (;;)
     elsif (scalar(@subs) == 0)
       {
       printf $outfile "No match";
-      if (defined $REGERROR && $REGERROR != 1)
+      if ($show_mark && defined $REGERROR && $REGERROR != 1)
         { printf $outfile (", mark = %s", &pchars($REGERROR)); }
       printf $outfile "\n";
       }
@@ -307,7 +307,7 @@ for (;;)
       # set and the input pattern was a UTF-8 string. We can, however, force
       # it to be so marked.
 
-      if (defined $REGMARK && $REGMARK != 1)
+      if ($show_mark && defined $REGMARK && $REGMARK != 1)
         {
         $xx = $REGMARK;
         $xx = Encode::decode_utf8($xx) if $utf8;

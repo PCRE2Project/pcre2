@@ -9841,4 +9841,19 @@ No match
 
 /(?<=(?=.){4,5}x)/
 
+/a(?=.(*:X))(*SKIP:X)(*F)|(.)/
+    abc
+ 0: a
+ 1: a
+
+/a(?>(*:X))(*SKIP:X)(*F)|(.)/
+    abc
+ 0: a
+ 1: a
+
+/a(?:(*:X))(*SKIP:X)(*F)|(.)/
+    abc
+ 0: b
+ 1: b
+
 # End of testinput1 

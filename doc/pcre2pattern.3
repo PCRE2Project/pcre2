@@ -1,4 +1,4 @@
-.TH PCRE2PATTERN 3 "10 July 2018" "PCRE2 10.32"
+.TH PCRE2PATTERN 3 "11 July 2018" "PCRE2 10.32"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION DETAILS"
@@ -3262,13 +3262,13 @@ to ensure that the match is always attempted.
 .rs
 .sp
 The following verbs do nothing when they are encountered. Matching continues
-with what follows, but if there is no subsequent match, causing a backtrack to
-the verb, a failure is forced. That is, backtracking cannot pass to the left of
-the verb. However, when one of these verbs appears inside an atomic group or in
-an assertion that is true, its effect is confined to that group, because once
-the group has been matched, there is never any backtracking into it. In this
-situation, backtracking has to jump to the left of the entire atomic group or
-assertion.
+with what follows, but if there is a subsequent match failure, causing a
+backtrack to the verb, a failure is forced. That is, backtracking cannot pass
+to the left of the verb. However, when one of these verbs appears inside an
+atomic group or in a lookaround assertion that is true, its effect is confined
+to that group, because once the group has been matched, there is never any
+backtracking into it. Backtracking from beyond an assertion or an atomic group
+ignores the entire group, and seeks a preceeding backtracking point.
 .P
 These verbs differ in exactly what kind of failure occurs when backtracking
 reaches them. The behaviour described below is what happens when the verb is
@@ -3352,12 +3352,36 @@ instead of skipping on to "c".
 .sp
   (*SKIP:NAME)
 .sp
-When (*SKIP) has an associated name, its behaviour is modified. When it is
-triggered, the previous path through the pattern is searched for the most
-recent (*MARK) that has the same name. If one is found, the "bumpalong" advance
-is to the subject position that corresponds to that (*MARK) instead of to where
-(*SKIP) was encountered. If no (*MARK) with a matching name is found, the
-(*SKIP) is ignored.
+When (*SKIP) has an associated name, its behaviour is modified. When such a
+(*SKIP) is triggered, the previous path through the pattern is searched for the
+most recent (*MARK) that has the same name. If one is found, the "bumpalong"
+advance is to the subject position that corresponds to that (*MARK) instead of
+to where (*SKIP) was encountered. If no (*MARK) with a matching name is found,
+the (*SKIP) is ignored.
+.P
+The search for a (*MARK) name uses the normal backtracking mechanism, which
+means that it does not see (*MARK) settings that are inside atomic groups or
+assertions, because they are never re-entered by backtracking. Compare the
+following \fBpcre2test\fP examples:
+.sp
+    re> /a(?>(*MARK:X))(*SKIP:X)(*F)|(.)/
+  data: abc
+   0: a
+   1: a
+  data:
+    re> /a(?:(*MARK:X))(*SKIP:X)(*F)|(.)/
+  data: abc
+   0: b
+   1: b
+.sp    
+In the first example, the (*MARK) setting is in an atomic group, so it is not 
+seen when (*SKIP:X) triggers, causing the (*SKIP) to be ignored. This allows
+the second branch of the pattern to be tried at the first character position.
+In the second example, the (*MARK) setting is not in an atomic group. This
+allows (*SKIP:X) to immediately cause a new matching attempt to start at the
+second character. This time, the (*MARK) is never seen because "a" does not
+match "b", so the matcher immediately jumps to the second branch of the
+pattern.
 .P
 Note that (*SKIP:NAME) searches only for names set by (*MARK:NAME). It ignores
 names that are set by (*PRUNE:NAME) or (*THEN:NAME).
@@ -3481,16 +3505,23 @@ If the assertion is a condition, (*ACCEPT) causes the condition to be true for
 a positive assertion and false for a negative one; captured substrings are
 retained in both cases.
 .P
+The remaining verbs act only when a later failure causes a backtrack to 
+reach them. This means that their effect is confined to the assertion, 
+because lookaround assertions are atomic. A backtrack that occurs after an
+assertion is complete does not jump back into the assertion. Note in particular 
+that a (*MARK) name that is set in an assertion is not "seen" by an instance of 
+(*SKIP:NAME) latter in the pattern.
+.P
 The effect of (*THEN) is not allowed to escape beyond an assertion. If there
 are no more branches to try, (*THEN) causes a positive assertion to be false,
 and a negative assertion to be true.
 .P
 The other backtracking verbs are not treated specially if they appear in a
 standalone positive assertion. In a conditional positive assertion,
-backtracking into (*COMMIT), (*SKIP), or (*PRUNE) causes the condition to be
-false. However, for both standalone and conditional negative assertions,
-backtracking into (*COMMIT), (*SKIP), or (*PRUNE) causes the assertion to be
-true, without considering any further alternative branches.
+backtracking (from within the assertion) into (*COMMIT), (*SKIP), or (*PRUNE)
+causes the condition to be false. However, for both standalone and conditional
+negative assertions, backtracking into (*COMMIT), (*SKIP), or (*PRUNE) causes
+the assertion to be true, without considering any further alternative branches.
 .
 .
 .\" HTML <a name="btsub"></a>
@@ -3536,6 +3567,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 10 July 2018
+Last updated: 11 July 2018
 Copyright (c) 1997-2018 University of Cambridge.
 .fi
