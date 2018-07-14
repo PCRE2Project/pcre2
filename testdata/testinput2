@@ -5440,4 +5440,14 @@ a)"xI
 
 /(?<=(?=.){4,5}x)/B
 
+# Perl behaves differently with these when optimization is turned off
+
+/a(*PRUNE:X)bc|qq/mark,no_start_optimize
+\= Expect no match
+    axy
+
+/a(*THEN:X)bc|qq/mark,no_start_optimize
+\= Expect no match
+    axy
+
 # End of testinput2

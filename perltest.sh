@@ -45,7 +45,7 @@ fi
 #   jitstack           ignored
 #   mark               show mark information
 #   no_auto_possess    ignored
-#   no_start_optimize  ignored
+#   no_start_optimize  insert ({""}) at pattern start (disable Perl optimizing)
 #   subject_literal    does not process subjects for escapes
 #   ucp                sets Perl's /u modifier
 #   utf                invoke UTF-8 functionality
@@ -147,6 +147,7 @@ for (;;)
   $pattern =~ /^\s*((.).*\2)(.*)$/s;
   $pat = $1;
   $mod = $3;
+  $del = $2; 
 
   # The private "aftertext" modifier means "print $' afterwards".
 
@@ -180,10 +181,14 @@ for (;;)
 
   $mod =~ s/ucp,?/u/;
 
-  # Remove "no_auto_possess" and "no_start_optimize" (disable PCRE2 optimizations)
+  # Remove "no_auto_possess".
 
   $mod =~ s/no_auto_possess,?//;
-  $mod =~ s/no_start_optimize,?//;
+
+  # Use no_start_optimize (disable PCRE2 start-up optimization) to disable Perl
+  # optimization by inserting (??{""}) at the start of the pattern.
+ 
+  if ($mod =~ s/no_start_optimize,?//) { $pat =~ s/$del/$del(??{""})/; }
 
   # Add back retained modifiers and check that the pattern is valid.
 

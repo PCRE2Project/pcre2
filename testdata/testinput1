@@ -5157,14 +5157,6 @@ name)/mark
 /A(*MARK:A)A+(*SKIP:B)(B|Z) | AAC/x,mark
     AAAC
 
-/a(*PRUNE:X)bc|qq/mark,no_start_optimize
-\= Expect no match
-    axy
-
-/a(*THEN:X)bc|qq/mark,no_start_optimize
-\= Expect no match
-    axy
-
 /(?=a(*MARK:A)b)..x/mark
     abxy
 \= Expect no match

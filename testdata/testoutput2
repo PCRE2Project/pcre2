@@ -16601,6 +16601,18 @@ No match
         End
 ------------------------------------------------------------------
 
+# Perl behaves differently with these when optimization is turned off
+
+/a(*PRUNE:X)bc|qq/mark,no_start_optimize
+\= Expect no match
+    axy
+No match, mark = X
+
+/a(*THEN:X)bc|qq/mark,no_start_optimize
+\= Expect no match
+    axy
+No match, mark = X
+
 # End of testinput2
 Error -70: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

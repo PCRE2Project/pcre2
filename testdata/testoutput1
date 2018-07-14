@@ -8282,16 +8282,6 @@ No match, mark = m
     AAAC
  0: AAC
 
-/a(*PRUNE:X)bc|qq/mark,no_start_optimize
-\= Expect no match
-    axy
-No match, mark = X
-
-/a(*THEN:X)bc|qq/mark,no_start_optimize
-\= Expect no match
-    axy
-No match, mark = X
-
 /(?=a(*MARK:A)b)..x/mark
     abxy
  0: abx
