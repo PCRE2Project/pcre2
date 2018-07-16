@@ -3176,14 +3176,23 @@ A name is always required with this verb. There may be as many instances of
 (*MARK) as you like in a pattern, and their names do not have to be unique.
 </P>
 <P>
-When a match succeeds, the name of the last-encountered (*MARK:NAME),
-(*PRUNE:NAME), or (*THEN:NAME) on the matching path is passed back to the
-caller as described in the section entitled
+When a match succeeds, the name of the last-encountered (*MARK:NAME) on the
+matching path is passed back to the caller as described in the section entitled
 <a href="pcre2api.html#matchotherdata">"Other information about the match"</a>
 in the
 <a href="pcre2api.html"><b>pcre2api</b></a>
-documentation. Here is an example of <b>pcre2test</b> output, where the "mark"
-modifier requests the retrieval and outputting of (*MARK) data:
+documentation. This applies to all instances of (*MARK), including those inside
+assertions and atomic groups. (There are differences in those cases when 
+(*MARK) is used in conjunction with (*SKIP) as described below.)
+</P>
+<P>
+As well as (*MARK), the (*PRUNE) and (*THEN) verbs may have associated NAME
+arguments. Whichever is last on the matching path is passed back. See below for 
+more details of these other verbs.
+</P>
+<P>
+Here is an example of <b>pcre2test</b> output, where the "mark" modifier
+requests the retrieval and outputting of (*MARK) data:
 <pre>
     re&#62; /X(*MARK:A)Y|X(*MARK:B)Z/mark
   data&#62; XY
@@ -3344,14 +3353,14 @@ following <b>pcre2test</b> examples:
    0: b
    1: b
 </pre>
-In the first example, the (*MARK) setting is in an atomic group, so it is not 
+In the first example, the (*MARK) setting is in an atomic group, so it is not
 seen when (*SKIP:X) triggers, causing the (*SKIP) to be ignored. This allows
 the second branch of the pattern to be tried at the first character position.
 In the second example, the (*MARK) setting is not in an atomic group. This
-allows (*SKIP:X) to immediately cause a new matching attempt to start at the
-second character. This time, the (*MARK) is never seen because "a" does not
-match "b", so the matcher immediately jumps to the second branch of the
-pattern.
+allows (*SKIP:X) to find the (*MARK) when it backtracks, and this causes a new
+matching attempt to start at the second character. This time, the (*MARK) is
+never seen because "a" does not match "b", so the matcher immediately jumps to
+the second branch of the pattern.
 </P>
 <P>
 Note that (*SKIP:NAME) searches only for names set by (*MARK:NAME). It ignores
@@ -3542,7 +3551,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC30" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 11 July 2018
+Last updated: 16 July 2018
 <br>
 Copyright &copy; 1997-2018 University of Cambridge.
 <br>

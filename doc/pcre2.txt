@@ -8651,12 +8651,20 @@ BACKTRACKING CONTROL
        instances  of  (*MARK) as you like in a pattern, and their names do not
        have to be unique.
 
-       When a match succeeds, the name of the  last-encountered  (*MARK:NAME),
-       (*PRUNE:NAME),  or  (*THEN:NAME) on the matching path is passed back to
-       the caller as described in  the  section  entitled  "Other  information
-       about  the  match" in the pcre2api documentation. Here is an example of
-       pcre2test output, where the "mark" modifier requests the retrieval  and
-       outputting of (*MARK) data:
+       When a match succeeds, the name of the last-encountered (*MARK:NAME) on
+       the matching path is passed back to the caller as described in the sec-
+       tion entitled "Other information about the match" in the pcre2api docu-
+       mentation.  This  applies  to all instances of (*MARK), including those
+       inside assertions and atomic groups. (There are  differences  in  those
+       cases  when  (*MARK)  is  used in conjunction with (*SKIP) as described
+       below.)
+
+       As well as (*MARK), the (*PRUNE) and (*THEN) verbs may have  associated
+       NAME  arguments. Whichever is last on the matching path is passed back.
+       See below for more details of these other verbs.
+
+       Here is an example of  pcre2test  output,  where  the  "mark"  modifier
+       requests the retrieval and outputting of (*MARK) data:
 
            re> /X(*MARK:A)Y|X(*MARK:B)Z/mark
          data> XY
@@ -8816,171 +8824,172 @@ BACKTRACKING CONTROL
        is not seen when (*SKIP:X) triggers, causing the (*SKIP) to be ignored.
        This  allows  the second branch of the pattern to be tried at the first
        character position.  In the second example, the (*MARK) setting is  not
-       in  an  atomic  group. This allows (*SKIP:X) to immediately cause a new
-       matching attempt to start at  the  second  character.  This  time,  the
-       (*MARK)  is  never  seen because "a" does not match "b", so the matcher
-       immediately jumps to the second branch of the pattern.
+       in  an  atomic group. This allows (*SKIP:X) to find the (*MARK) when it
+       backtracks, and this causes a new matching attempt to start at the sec-
+       ond  character.  This  time, the (*MARK) is never seen because "a" does
+       not match "b", so the matcher immediately jumps to the second branch of
+       the pattern.
 
-       Note that (*SKIP:NAME) searches only for names set by (*MARK:NAME).  It
+       Note  that (*SKIP:NAME) searches only for names set by (*MARK:NAME). It
        ignores names that are set by (*PRUNE:NAME) or (*THEN:NAME).
 
          (*THEN) or (*THEN:NAME)
 
-       This  verb  causes  a skip to the next innermost alternative when back-
-       tracking reaches it. That  is,  it  cancels  any  further  backtracking
-       within  the  current  alternative.  Its name comes from the observation
+       This verb causes a skip to the next innermost  alternative  when  back-
+       tracking  reaches  it.  That  is,  it  cancels any further backtracking
+       within the current alternative. Its name  comes  from  the  observation
        that it can be used for a pattern-based if-then-else block:
 
          ( COND1 (*THEN) FOO | COND2 (*THEN) BAR | COND3 (*THEN) BAZ ) ...
 
-       If the COND1 pattern matches, FOO is tried (and possibly further  items
-       after  the  end  of the group if FOO succeeds); on failure, the matcher
-       skips to the second alternative and tries COND2,  without  backtracking
-       into  COND1.  If that succeeds and BAR fails, COND3 is tried. If subse-
-       quently BAZ fails, there are no more alternatives, so there is a  back-
-       track  to  whatever  came  before  the  entire group. If (*THEN) is not
+       If  the COND1 pattern matches, FOO is tried (and possibly further items
+       after the end of the group if FOO succeeds); on  failure,  the  matcher
+       skips  to  the second alternative and tries COND2, without backtracking
+       into COND1. If that succeeds and BAR fails, COND3 is tried.  If  subse-
+       quently  BAZ fails, there are no more alternatives, so there is a back-
+       track to whatever came before the  entire  group.  If  (*THEN)  is  not
        inside an alternation, it acts like (*PRUNE).
 
-       The   behaviour   of   (*THEN:NAME)   is   the   not   the   same    as
-       (*MARK:NAME)(*THEN).   It  is  like  (*MARK:NAME)  in  that the name is
-       remembered for  passing  back  to  the  caller.  However,  (*SKIP:NAME)
-       searches  only  for  names  set  with  (*MARK),  ignoring  those set by
+       The    behaviour   of   (*THEN:NAME)   is   the   not   the   same   as
+       (*MARK:NAME)(*THEN).  It is like  (*MARK:NAME)  in  that  the  name  is
+       remembered  for  passing  back  to  the  caller.  However, (*SKIP:NAME)
+       searches only for  names  set  with  (*MARK),  ignoring  those  set  by
        (*PRUNE) and (*THEN).
 
-       A subpattern that does not contain a | character is just a part of  the
-       enclosing  alternative;  it  is  not a nested alternation with only one
-       alternative. The effect of (*THEN) extends beyond such a subpattern  to
-       the  enclosing alternative. Consider this pattern, where A, B, etc. are
-       complex pattern fragments that do not contain any | characters at  this
+       A  subpattern that does not contain a | character is just a part of the
+       enclosing alternative; it is not a nested  alternation  with  only  one
+       alternative.  The effect of (*THEN) extends beyond such a subpattern to
+       the enclosing alternative. Consider this pattern, where A, B, etc.  are
+       complex  pattern fragments that do not contain any | characters at this
        level:
 
          A (B(*THEN)C) | D
 
-       If  A and B are matched, but there is a failure in C, matching does not
+       If A and B are matched, but there is a failure in C, matching does  not
        backtrack into A; instead it moves to the next alternative, that is, D.
-       However,  if the subpattern containing (*THEN) is given an alternative,
+       However, if the subpattern containing (*THEN) is given an  alternative,
        it behaves differently:
 
          A (B(*THEN)C | (*FAIL)) | D
 
-       The effect of (*THEN) is now confined to the inner subpattern. After  a
+       The  effect of (*THEN) is now confined to the inner subpattern. After a
        failure in C, matching moves to (*FAIL), which causes the whole subpat-
-       tern to fail because there are no more alternatives  to  try.  In  this
+       tern  to  fail  because  there are no more alternatives to try. In this
        case, matching does now backtrack into A.
 
-       Note  that  a  conditional  subpattern  is not considered as having two
-       alternatives, because only one is ever used.  In  other  words,  the  |
+       Note that a conditional subpattern is  not  considered  as  having  two
+       alternatives,  because  only  one  is  ever used. In other words, the |
        character in a conditional subpattern has a different meaning. Ignoring
        white space, consider:
 
          ^.*? (?(?=a) a | b(*THEN)c )
 
-       If the subject is "ba", this pattern does not  match.  Because  .*?  is
-       ungreedy,  it  initially  matches  zero characters. The condition (?=a)
-       then fails, the character "b" is matched,  but  "c"  is  not.  At  this
-       point,  matching does not backtrack to .*? as might perhaps be expected
-       from the presence of the | character.  The  conditional  subpattern  is
+       If  the  subject  is  "ba", this pattern does not match. Because .*? is
+       ungreedy, it initially matches zero  characters.  The  condition  (?=a)
+       then  fails,  the  character  "b"  is  matched, but "c" is not. At this
+       point, matching does not backtrack to .*? as might perhaps be  expected
+       from  the  presence  of  the | character. The conditional subpattern is
        part of the single alternative that comprises the whole pattern, and so
-       the match fails. (If there was a backtrack into  .*?,  allowing  it  to
+       the  match  fails.  (If  there was a backtrack into .*?, allowing it to
        match "b", the match would succeed.)
 
-       The  verbs just described provide four different "strengths" of control
+       The verbs just described provide four different "strengths" of  control
        when subsequent matching fails. (*THEN) is the weakest, carrying on the
-       match  at  the next alternative. (*PRUNE) comes next, failing the match
-       at the current starting position, but allowing an advance to  the  next
-       character  (for an unanchored pattern). (*SKIP) is similar, except that
+       match at the next alternative. (*PRUNE) comes next, failing  the  match
+       at  the  current starting position, but allowing an advance to the next
+       character (for an unanchored pattern). (*SKIP) is similar, except  that
        the advance may be more than one character. (*COMMIT) is the strongest,
        causing the entire match to fail.
 
    More than one backtracking verb
 
-       If  more  than  one  backtracking verb is present in a pattern, the one
-       that is backtracked onto first acts. For example,  consider  this  pat-
+       If more than one backtracking verb is present in  a  pattern,  the  one
+       that  is  backtracked  onto first acts. For example, consider this pat-
        tern, where A, B, etc. are complex pattern fragments:
 
          (A(*COMMIT)B(*THEN)C|ABD)
 
-       If  A matches but B fails, the backtrack to (*COMMIT) causes the entire
+       If A matches but B fails, the backtrack to (*COMMIT) causes the  entire
        match to fail. However, if A and B match, but C fails, the backtrack to
-       (*THEN)  causes  the next alternative (ABD) to be tried. This behaviour
-       is consistent, but is not always the same as Perl's. It means  that  if
-       two  or  more backtracking verbs appear in succession, all the the last
+       (*THEN) causes the next alternative (ABD) to be tried.  This  behaviour
+       is  consistent,  but is not always the same as Perl's. It means that if
+       two or more backtracking verbs appear in succession, all the  the  last
        of them has no effect. Consider this example:
 
          ...(*COMMIT)(*PRUNE)...
 
        If there is a matching failure to the right, backtracking onto (*PRUNE)
-       causes  it to be triggered, and its action is taken. There can never be
+       causes it to be triggered, and its action is taken. There can never  be
        a backtrack onto (*COMMIT).
 
    Backtracking verbs in repeated groups
 
-       PCRE2 differs from Perl  in  its  handling  of  backtracking  verbs  in
+       PCRE2  differs  from  Perl  in  its  handling  of backtracking verbs in
        repeated groups. For example, consider:
 
          /(a(*COMMIT)b)+ac/
 
-       If  the  subject  is  "abac", Perl matches, but PCRE2 fails because the
+       If the subject is "abac", Perl matches, but  PCRE2  fails  because  the
        (*COMMIT) in the second repeat of the group acts.
 
    Backtracking verbs in assertions
 
-       (*FAIL) in any assertion has its normal effect: it forces an  immediate
-       backtrack.  The  behaviour  of  the other backtracking verbs depends on
-       whether or not the assertion is standalone or acting as  the  condition
+       (*FAIL)  in any assertion has its normal effect: it forces an immediate
+       backtrack. The behaviour of the other  backtracking  verbs  depends  on
+       whether  or  not the assertion is standalone or acting as the condition
        in a conditional subpattern.
 
-       (*ACCEPT)  in  a  standalone positive assertion causes the assertion to
-       succeed without any further processing; captured strings are  retained.
-       In  a  standalone negative assertion, (*ACCEPT) causes the assertion to
+       (*ACCEPT) in a standalone positive assertion causes  the  assertion  to
+       succeed  without any further processing; captured strings are retained.
+       In a standalone negative assertion, (*ACCEPT) causes the  assertion  to
        fail without any further processing; captured substrings are discarded.
 
-       If the assertion is a condition, (*ACCEPT) causes the condition  to  be
-       true  for  a  positive assertion and false for a negative one; captured
+       If  the  assertion is a condition, (*ACCEPT) causes the condition to be
+       true for a positive assertion and false for a  negative  one;  captured
        substrings are retained in both cases.
 
        The remaining verbs act only when a later failure causes a backtrack to
-       reach  them. This means that their effect is confined to the assertion,
+       reach them. This means that their effect is confined to the  assertion,
        because lookaround assertions are atomic. A backtrack that occurs after
        an assertion is complete does not jump back into the assertion. Note in
-       particular that a (*MARK) name that is  set  in  an  assertion  is  not
+       particular  that  a  (*MARK)  name  that  is set in an assertion is not
        "seen" by an instance of (*SKIP:NAME) latter in the pattern.
 
-       The  effect of (*THEN) is not allowed to escape beyond an assertion. If
-       there are no more branches to try, (*THEN) causes a positive  assertion
+       The effect of (*THEN) is not allowed to escape beyond an assertion.  If
+       there  are no more branches to try, (*THEN) causes a positive assertion
        to be false, and a negative assertion to be true.
 
-       The  other  backtracking verbs are not treated specially if they appear
-       in a standalone positive assertion. In a  conditional  positive  asser-
+       The other backtracking verbs are not treated specially if  they  appear
+       in  a  standalone  positive assertion. In a conditional positive asser-
        tion, backtracking (from within the assertion) into (*COMMIT), (*SKIP),
-       or (*PRUNE) causes the condition to be false. However, for both  stand-
+       or  (*PRUNE) causes the condition to be false. However, for both stand-
        alone and conditional negative assertions, backtracking into (*COMMIT),
        (*SKIP), or (*PRUNE) causes the assertion to be true, without consider-
        ing any further alternative branches.
 
    Backtracking verbs in subroutines
 
-       These  behaviours  occur whether or not the subpattern is called recur-
+       These behaviours occur whether or not the subpattern is  called  recur-
        sively.  Perl's treatment of subroutines is different in some cases.
 
-       (*FAIL) in a subpattern called as a subroutine has its  normal  effect:
+       (*FAIL)  in  a subpattern called as a subroutine has its normal effect:
        it forces an immediate backtrack.
 
-       (*ACCEPT)  in a subpattern called as a subroutine causes the subroutine
-       match to succeed without any further processing. Matching then  contin-
+       (*ACCEPT) in a subpattern called as a subroutine causes the  subroutine
+       match  to succeed without any further processing. Matching then contin-
        ues after the subroutine call.
 
        (*COMMIT), (*SKIP), and (*PRUNE) in a subpattern called as a subroutine
        cause the subroutine match to fail.
 
-       (*THEN) skips to the next alternative in the innermost enclosing  group
-       within  the subpattern that has alternatives. If there is no such group
+       (*THEN)  skips to the next alternative in the innermost enclosing group
+       within the subpattern that has alternatives. If there is no such  group
        within the subpattern, (*THEN) causes the subroutine match to fail.
 
 
 SEE ALSO
 
-       pcre2api(3),   pcre2callout(3),    pcre2matching(3),    pcre2syntax(3),
+       pcre2api(3),    pcre2callout(3),    pcre2matching(3),   pcre2syntax(3),
        pcre2(3).
 
 
@@ -8993,7 +9002,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 11 July 2018
+       Last updated: 16 July 2018
        Copyright (c) 1997-2018 University of Cambridge.
 ------------------------------------------------------------------------------
  
