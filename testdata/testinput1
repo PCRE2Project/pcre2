@@ -6203,4 +6203,10 @@ ef) x/x,mark
 /a(?:(*:X))(*SKIP:X)(*F)|(.)/
     abc
 
+/(?>a(*:1))(?>b(*:1))(*SKIP:1)x|.*/no_start_optimize
+    abc
+
+/(?>a(*:1))(?>b)(*SKIP:1)x|.*/no_start_optimize
+    abc
+
 # End of testinput1 

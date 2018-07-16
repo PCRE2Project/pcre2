@@ -9846,4 +9846,12 @@ No match
  0: b
  1: b
 
+/(?>a(*:1))(?>b(*:1))(*SKIP:1)x|.*/no_start_optimize
+    abc
+ 0: abc
+
+/(?>a(*:1))(?>b)(*SKIP:1)x|.*/no_start_optimize
+    abc
+ 0: abc
+
 # End of testinput1 

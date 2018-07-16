@@ -5509,7 +5509,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
       frame so that it points to the final branch. */
 
       case OP_ONCE:
-      Fback_frame = ((char *)F - (char *)P) + frame_size;
+      Fback_frame = ((char *)F - (char *)P);
       for (;;)
         {
         uint32_t y = GET(P->ecode,1);

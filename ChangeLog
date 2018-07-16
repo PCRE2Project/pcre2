@@ -111,6 +111,12 @@ such as the 04 in 10.04 incorrectly and hence giving wrong results.
 24. Updated to Unicode version 11.0.0. As well as the usual addition of new 
 scripts and characters, this involved re-jigging the grapheme break property
 algorithm because Unicode has changed the way emojis are handled.
+
+25. Fixed an obscure bug that struck when there were two atomic groups not 
+separated by something with a backtracking point. There could be an incorrect 
+backtrack into the first of the atomic groups. A complicated example is
+/(?>a(*:1))(?>b)(*SKIP:1)x|.*/ matched against "abc", where the *SKIP 
+shouldn't find a MARK (because is in an atomic group), but it did.
       
 
 Version 10.31 12-February-2018
