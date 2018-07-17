@@ -50,6 +50,13 @@ fi
 #   ucp                sets Perl's /u modifier
 #   utf                invoke UTF-8 functionality
 #
+# Comment lines are ignored. The #pattern command can be used to set modifiers
+# that will be added to each subsequent pattern. NOTE: this is different to
+# pcre2test where #pattern sets defaults, some of which can be overridden on
+# individual patterns. The #perltest, #forbid_utf, and #newline_default
+# commands, which are needed in the relevant pcre2test files, are ignored. Any
+# other #-command is ignored, with a warning message.
+#
 # The data lines must not have any pcre2test modifiers. Unless
 # "subject_literal" is on the pattern, data lines are processed as
 # Perl double-quoted strings, so if they contain " $ or @ characters, these
@@ -127,7 +134,26 @@ for (;;)
   printf "  re> " if $interact;
   last if ! ($_ = <$infile>);
   printf $outfile "$_" if ! $interact;
-  next if ($_ =~ /^\s*$/ || $_ =~ /^#/);
+  next if ($_ =~ /^\s*$/ || $_ =~ /^#[\s!]/);
+  
+  # A few of pcre2test's #-commands are supported, or just ignored. Any others
+  # cause an error.  
+   
+  if ($_ =~ /^#pattern(.*)/)
+    {
+    $extra_modifiers = $1;
+    chomp($extra_modifiers); 
+    $extra_modifiers =~ s/\s+$//;
+    next;
+    }  
+  elsif ($_ =~ /^#/)
+    {
+    if ($_ !~ /^#newline_default|^#perltest|^#forbid_utf/)    
+      {
+      printf $outfile "** Warning: #-command ignored: %s", $_;
+      }   
+    next;
+    }
 
   $pattern = $_;
 
@@ -146,7 +172,8 @@ for (;;)
 
   $pattern =~ /^\s*((.).*\2)(.*)$/s;
   $pat = $1;
-  $mod = $3;
+  $mod = "$3,$extra_modifiers";
+  $mod =~ s/^,\s*//; 
   $del = $2; 
 
   # The private "aftertext" modifier means "print $' afterwards".

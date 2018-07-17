@@ -117,6 +117,11 @@ separated by something with a backtracking point. There could be an incorrect
 backtrack into the first of the atomic groups. A complicated example is
 /(?>a(*:1))(?>b)(*SKIP:1)x|.*/ matched against "abc", where the *SKIP 
 shouldn't find a MARK (because is in an atomic group), but it did.
+
+26. Upgraded the perltest.sh script: (1) #pattern lines can now be used to set
+certain modifiers that the script recognizes; (2) Unsupported #command lines
+give a warning when they are ignored; (3) Mark data is output only if the
+"mark" modifier is present.
       
 
 Version 10.31 12-February-2018
