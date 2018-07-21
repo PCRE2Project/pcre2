@@ -256,6 +256,7 @@ The following are followed by a length element, then a number of character code
 values (which should match with the length):
 
 META_MARK             (*MARK:xxxx)
+META_COMMIT_ARG       )*COMMIT:xxxx)
 META_PRUNE_ARG        (*PRUNE:xxx)
 META_SKIP_ARG         (*SKIP:xxxx)
 META_THEN_ARG         (*THEN:xxxx)
@@ -382,7 +383,7 @@ that are counts (e.g. quantifiers) are always two bytes long in 8-bit mode
 Opcodes with no following data
 ------------------------------
 
-These items are all just one unit long
+These items are all just one unit long:
 
   OP_END                 end of pattern
   OP_ANY                 match any one character other than newline
@@ -430,14 +431,22 @@ character). Another use is for [^] when empty classes are permitted
 (PCRE2_ALLOW_EMPTY_CLASS is set).
 
 
-Backtracking control verbs with optional data
----------------------------------------------
+Backtracking control verbs
+--------------------------
 
-(*THEN) without an argument generates the opcode OP_THEN and no following data.
-OP_MARK is followed by the mark name, preceded by a length in one code unit,
-and followed by a binary zero. For (*PRUNE), (*SKIP), and (*THEN) with
-arguments, the opcodes OP_PRUNE_ARG, OP_SKIP_ARG, and OP_THEN_ARG are used,
-with the name following in the same format as OP_MARK.
+Verbs with no arguments generate opcodes with no following data (as listed
+in the section above). 
+
+(*MARK:NAME) generates OP_MARK followed by the mark name, preceded by a
+length in one code unit, and followed by a binary zero. The name length is
+limited by the size of the code unit.
+
+(*ACCEPT:NAME) and (*FAIL:NAME) are compiled as (*MARK:NAME)(*ACCEPT) and
+(*MARK:NAME)(*FAIL) respectively.
+
+For (*COMMIT:NAME), (*PRUNE:NAME), (*SKIP:NAME), and (*THEN:NAME), the opcodes
+OP_COMMIT_ARG, OP_PRUNE_ARG, OP_SKIP_ARG, and OP_THEN_ARG are used, with the
+name following in the same format as for OP_MARK.
 
 
 Matching literal characters
@@ -814,4 +823,4 @@ not a real opcode, but is used to check at compile time that tables indexed by
 opcode are the correct length, in order to catch updating errors.
 
 Philip Hazel
-21 April 2017
+20 July 2018

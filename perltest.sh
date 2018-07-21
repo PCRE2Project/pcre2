@@ -45,17 +45,19 @@ fi
 #   jitstack           ignored
 #   mark               show mark information
 #   no_auto_possess    ignored
-#   no_start_optimize  insert ({""}) at pattern start (disable Perl optimizing)
+#   no_start_optimize  insert (??{""}) at pattern start (disables optimizing)
 #   subject_literal    does not process subjects for escapes
 #   ucp                sets Perl's /u modifier
 #   utf                invoke UTF-8 functionality
 #
 # Comment lines are ignored. The #pattern command can be used to set modifiers
-# that will be added to each subsequent pattern. NOTE: this is different to
-# pcre2test where #pattern sets defaults, some of which can be overridden on
-# individual patterns. The #perltest, #forbid_utf, and #newline_default
-# commands, which are needed in the relevant pcre2test files, are ignored. Any
-# other #-command is ignored, with a warning message.
+# that will be added to each subsequent pattern, after any modifiers it may
+# already have. NOTE: this is different to pcre2test where #pattern sets
+# defaults which can be overridden on individual patterns. The #subject command
+# may be used to set or unset a default "mark" modifier for data lines. This is
+# the only use of #subject that is supported. The #perltest, #forbid_utf, and
+# #newline_default commands, which are needed in the relevant pcre2test files,
+# are ignored. Any other #-command is ignored, with a warning message.
 #
 # The data lines must not have any pcre2test modifiers. Unless
 # "subject_literal" is on the pattern, data lines are processed as
@@ -135,23 +137,39 @@ for (;;)
   last if ! ($_ = <$infile>);
   printf $outfile "$_" if ! $interact;
   next if ($_ =~ /^\s*$/ || $_ =~ /^#[\s!]/);
-  
+
   # A few of pcre2test's #-commands are supported, or just ignored. Any others
-  # cause an error.  
-   
+  # cause an error.
+
   if ($_ =~ /^#pattern(.*)/)
     {
     $extra_modifiers = $1;
-    chomp($extra_modifiers); 
+    chomp($extra_modifiers);
     $extra_modifiers =~ s/\s+$//;
     next;
-    }  
+    }
+  elsif ($_ =~ /^#subject(.*)/)
+    {
+    $mod = $1;
+    chomp($mod);
+    $mod =~ s/\s+$//;
+    if ($mod =~ s/(-?)mark,?//)
+      {
+      $minus = $1;
+      $default_show_mark = ($minus =~ /^$/);
+      }
+    if ($mod !~ /^\s*$/)
+      {
+      printf $outfile "** Warning: \"$mod\" in #subject ignored\n";
+      }
+    next;
+    }
   elsif ($_ =~ /^#/)
     {
-    if ($_ !~ /^#newline_default|^#perltest|^#forbid_utf/)    
+    if ($_ !~ /^#newline_default|^#perltest|^#forbid_utf/)
       {
       printf $outfile "** Warning: #-command ignored: %s", $_;
-      }   
+      }
     next;
     }
 
@@ -172,9 +190,9 @@ for (;;)
 
   $pattern =~ /^\s*((.).*\2)(.*)$/s;
   $pat = $1;
+  $del = $2;
   $mod = "$3,$extra_modifiers";
-  $mod =~ s/^,\s*//; 
-  $del = $2; 
+  $mod =~ s/^,\s*//;
 
   # The private "aftertext" modifier means "print $' afterwards".
 
@@ -202,7 +220,7 @@ for (;;)
 
   # The "mark" modifier requests checking of MARK data */
 
-  $show_mark = ($mod =~ s/mark,?//);
+  $show_mark = $default_show_mark | ($mod =~ s/mark,?//);
 
   # "ucp" asks pcre2test to set PCRE2_UCP; change this to /u for Perl
 
@@ -214,7 +232,7 @@ for (;;)
 
   # Use no_start_optimize (disable PCRE2 start-up optimization) to disable Perl
   # optimization by inserting (??{""}) at the start of the pattern.
- 
+
   if ($mod =~ s/no_start_optimize,?//) { $pat =~ s/$del/$del(??{""})/; }
 
   # Add back retained modifiers and check that the pattern is valid.

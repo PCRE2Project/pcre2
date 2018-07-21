@@ -149,7 +149,7 @@ changed, the code at RETURN_SWITCH below must be updated in sync.  */
 enum { RM1=1, RM2,  RM3,  RM4,  RM5,  RM6,  RM7,  RM8,  RM9,  RM10,
        RM11,  RM12, RM13, RM14, RM15, RM16, RM17, RM18, RM19, RM20,
        RM21,  RM22, RM23, RM24, RM25, RM26, RM27, RM28, RM29, RM30,
-       RM31,  RM32, RM33, RM34, RM35 };
+       RM31,  RM32, RM33, RM34, RM35, RM36 };
 
 #ifdef SUPPORT_WIDE_CHARS
 enum { RM100=100, RM101 };
@@ -770,7 +770,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
     /* ===================================================================== */
     /* Real or forced end of the pattern, assertion, or recursion. In an
     assertion ACCEPT, update the last used pointer and remember the current
-    frame so that the captures can be fished out of it. */
+    frame so that the captures and mark can be fished out of it. */
 
     case OP_ASSERT_ACCEPT:
     if (Feptr > mb->last_used_ptr) mb->last_used_ptr = Feptr;
@@ -5119,7 +5119,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
     /* Positive assertions are like other groups except that PCRE doesn't allow
     the effect of (*THEN) to escape beyond an assertion; it is therefore
     treated as NOMATCH. (*ACCEPT) is treated as successful assertion, with its
-    captures retained. Any other return is an error. */
+    captures and mark retained. Any other return is an error. */
 
 #define Lframe_type  F->temp_32[0]
 
@@ -5136,6 +5136,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
               (char *)assert_accept_frame + offsetof(heapframe, ovector),
               assert_accept_frame->offset_top * sizeof(PCRE2_SIZE));
         Foffset_top = assert_accept_frame->offset_top;
+        Fmark = assert_accept_frame->mark; 
         break;
         }
       if (rrc != MATCH_NOMATCH && rrc != MATCH_THEN) RRETURN(rrc);
@@ -5837,6 +5838,13 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
     mb->verb_current_recurse = Fcurrent_recurse;
     RRETURN(MATCH_COMMIT);
 
+    case OP_COMMIT_ARG:
+    Fmark = mb->nomatch_mark = Fecode + 2;
+    RMATCH(Fecode + PRIV(OP_lengths)[*Fecode] + Fecode[1], RM36);
+    if (rrc != MATCH_NOMATCH) RRETURN(rrc);
+    mb->verb_current_recurse = Fcurrent_recurse;
+    RRETURN(MATCH_COMMIT);
+
     case OP_PRUNE:
     RMATCH(Fecode + PRIV(OP_lengths)[*Fecode], RM14);
     if (rrc != MATCH_NOMATCH) RRETURN(rrc);
@@ -5942,7 +5950,7 @@ switch (Freturn_id)
   LBL( 9) LBL(10) LBL(11) LBL(12) LBL(13) LBL(14) LBL(15) LBL(16)
   LBL(17) LBL(18) LBL(19) LBL(20) LBL(21) LBL(22) LBL(23) LBL(24)
   LBL(25) LBL(26) LBL(27) LBL(28) LBL(29) LBL(30) LBL(31) LBL(32)
-  LBL(33) LBL(34) LBL(35)
+  LBL(33) LBL(34) LBL(35) LBL(36)
 
 #ifdef SUPPORT_WIDE_CHARS
   LBL(100) LBL(101)

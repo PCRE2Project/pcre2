@@ -119,9 +119,16 @@ backtrack into the first of the atomic groups. A complicated example is
 shouldn't find a MARK (because is in an atomic group), but it did.
 
 26. Upgraded the perltest.sh script: (1) #pattern lines can now be used to set
-certain modifiers that the script recognizes; (2) Unsupported #command lines
-give a warning when they are ignored; (3) Mark data is output only if the
-"mark" modifier is present.
+a list of modifiers for all subsequent patterns - only those that the script
+recognizes are meaningful; (2) #subject lines can be used to set or unset a
+default "mark" modifier; (3) Unsupported #command lines give a warning when
+they are ignored; (4) Mark data is output only if the "mark" modifier is
+present.
+
+27. (*ACCEPT:ARG), (*FAIL:ARG), and (*COMMIT:ARG) are now supported. 
+
+28. A (*MARK) name was not being passed back for positive assertions that were 
+terminated by (*ACCEPT).
       
 
 Version 10.31 12-February-2018

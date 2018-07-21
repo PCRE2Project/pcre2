@@ -4678,12 +4678,6 @@ uint16_t first_listed_newline;
 const char *cmdname;
 uint8_t *argptr, *serial;
 
-if (restrict_for_perl_test)
-  {
-  fprintf(outfile, "** #-commands are not allowed after #perltest\n");
-  return PR_ABEND;
-  }
-
 yield = PR_OK;
 cmd = CMD_UNKNOWN;
 cmdlen = 0;
@@ -4701,6 +4695,12 @@ for (i = 0; i < cmdlistcount; i++)
   }
 
 argptr = buffer + cmdlen + 1;
+
+if (restrict_for_perl_test && cmd != CMD_PATTERN && cmd != CMD_SUBJECT)
+  {
+  fprintf(outfile, "** #%s is not allowed after #perltest\n", cmdname);
+  return PR_ABEND;
+  }
 
 switch(cmd)
   {

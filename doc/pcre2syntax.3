@@ -1,4 +1,4 @@
-.TH PCRE2SYNTAX 3 "07 July 2018" "PCRE2 10.32"
+.TH PCRE2SYNTAX 3 "21 July 2018" "PCRE2 10.32"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION SYNTAX SUMMARY"
@@ -410,8 +410,6 @@ but some of them use Unicode properties if PCRE2_UCP is set. You can use
   (?>...)         atomic, non-capturing group
 .
 .
-.
-.
 .SH "COMMENT"
 .rs
 .sp
@@ -552,7 +550,11 @@ condition if the relevant named group exists.
 .SH "BACKTRACKING CONTROL"
 .rs
 .sp
-The following act immediately they are reached:
+All backtracking control verbs may be in the form (*VERB:NAME). For (*MARK) the
+name is mandatory, for the others it is optional. (*SKIP) changes its behaviour
+if :NAME is present. The others just set a name for passing back to the caller,
+but this is not a name that (*SKIP) can see. The following act immediately they
+are reached:
 .sp
   (*ACCEPT)       force successful match
   (*FAIL)         force backtrack; synonym (*F)
@@ -565,12 +567,13 @@ pattern is not anchored.
 .sp
   (*COMMIT)       overall failure, no advance of starting point
   (*PRUNE)        advance to next starting character
-  (*PRUNE:NAME)   equivalent to (*MARK:NAME)(*PRUNE)
   (*SKIP)         advance to current matching position
   (*SKIP:NAME)    advance to position corresponding to an earlier
                   (*MARK:NAME); if not found, the (*SKIP) is ignored
   (*THEN)         local failure, backtrack to next alternation
-  (*THEN:NAME)    equivalent to (*MARK:NAME)(*THEN)
+.sp
+The effect of one of these verbs in a group called as a subroutine is confined 
+to the subroutine call.   
 .
 .
 .SH "CALLOUTS"
@@ -606,6 +609,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 07 July 2018
+Last updated: 21 July 2018
 Copyright (c) 1997-2018 University of Cambridge.
 .fi

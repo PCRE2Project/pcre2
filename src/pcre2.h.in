@@ -281,6 +281,7 @@ pcre2_pattern_convert(). */
 #define PCRE2_ERROR_INTERNAL_UNKNOWN_NEWLINE       156
 #define PCRE2_ERROR_BACKSLASH_G_SYNTAX             157
 #define PCRE2_ERROR_PARENS_QUERY_R_MISSING_CLOSING 158
+/* Error 159 is obsolete and should now never occur */
 #define PCRE2_ERROR_VERB_ARGUMENT_NOT_ALLOWED      159
 #define PCRE2_ERROR_VERB_UNKNOWN                   160
 #define PCRE2_ERROR_SUBPATTERN_NUMBER_TOO_BIG      161

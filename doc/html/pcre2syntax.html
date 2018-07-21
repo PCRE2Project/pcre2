@@ -569,7 +569,11 @@ condition if the relevant named group exists.
 </P>
 <br><a name="SEC23" href="#TOC1">BACKTRACKING CONTROL</a><br>
 <P>
-The following act immediately they are reached:
+All backtracking control verbs may be in the form (*VERB:NAME). For (*MARK) the
+name is mandatory, for the others it is optional. (*SKIP) changes its behaviour
+if :NAME is present. The others just set a name for passing back to the caller,
+but this is not a name that (*SKIP) can see. The following act immediately they
+are reached:
 <pre>
   (*ACCEPT)       force successful match
   (*FAIL)         force backtrack; synonym (*F)
@@ -582,13 +586,13 @@ pattern is not anchored.
 <pre>
   (*COMMIT)       overall failure, no advance of starting point
   (*PRUNE)        advance to next starting character
-  (*PRUNE:NAME)   equivalent to (*MARK:NAME)(*PRUNE)
   (*SKIP)         advance to current matching position
   (*SKIP:NAME)    advance to position corresponding to an earlier
                   (*MARK:NAME); if not found, the (*SKIP) is ignored
   (*THEN)         local failure, backtrack to next alternation
-  (*THEN:NAME)    equivalent to (*MARK:NAME)(*THEN)
-</PRE>
+</pre>
+The effect of one of these verbs in a group called as a subroutine is confined 
+to the subroutine call.   
 </P>
 <br><a name="SEC24" href="#TOC1">CALLOUTS</a><br>
 <P>
@@ -617,7 +621,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC27" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 07 July 2018
+Last updated: 21 July 2018
 <br>
 Copyright &copy; 1997-2018 University of Cambridge.
 <br>

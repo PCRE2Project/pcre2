@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-          New API code Copyright (c) 2016-2017 University of Cambridge
+          New API code Copyright (c) 2016-2018 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -253,7 +253,7 @@ maximum size of this can be limited. */
 
 #define START_FRAMES_SIZE 20480
 
-/* Similarly, for DFA matching, an initial internal workspace vector is 
+/* Similarly, for DFA matching, an initial internal workspace vector is
 allocated on the stack. */
 
 #define DFA_START_RWS_SIZE 30720
@@ -1583,23 +1583,26 @@ enum {
   OP_THEN,           /* 155 */
   OP_THEN_ARG,       /* 156 same, but with argument */
   OP_COMMIT,         /* 157 */
+  OP_COMMIT_ARG,     /* 158 same, but with argument */
 
-  /* These are forced failure and success verbs */
+  /* These are forced failure and success verbs. FAIL and ACCEPT do accept an
+  argument, but these cases can be compiled as, for example, (*MARK:X)(*FAIL)
+  without the need for a special opcode. */
 
-  OP_FAIL,           /* 158 */
-  OP_ACCEPT,         /* 159 */
-  OP_ASSERT_ACCEPT,  /* 160 Used inside assertions */
-  OP_CLOSE,          /* 161 Used before OP_ACCEPT to close open captures */
+  OP_FAIL,           /* 159 */
+  OP_ACCEPT,         /* 160 */
+  OP_ASSERT_ACCEPT,  /* 161 Used inside assertions */
+  OP_CLOSE,          /* 162 Used before OP_ACCEPT to close open captures */
 
   /* This is used to skip a subpattern with a {0} quantifier */
 
-  OP_SKIPZERO,       /* 162 */
+  OP_SKIPZERO,       /* 163 */
 
   /* This is used to identify a DEFINE group during compilation so that it can
   be checked for having only one branch. It is changed to OP_FALSE before
   compilation finishes. */
 
-  OP_DEFINE,         /* 163 */
+  OP_DEFINE,         /* 164 */
 
   /* This is not an opcode, but is used to check that tables indexed by opcode
   are the correct length, in order to catch updating errors - there have been
@@ -1655,7 +1658,7 @@ some cases doesn't actually use these names at all). */
   "Cond false", "Cond true",                                      \
   "Brazero", "Braminzero", "Braposzero",                          \
   "*MARK", "*PRUNE", "*PRUNE", "*SKIP", "*SKIP",                  \
-  "*THEN", "*THEN", "*COMMIT", "*FAIL",                           \
+  "*THEN", "*THEN", "*COMMIT", "*COMMIT", "*FAIL",                \
   "*ACCEPT", "*ASSERT_ACCEPT",                                    \
   "Close", "Skip zero", "Define"
 
@@ -1747,7 +1750,8 @@ in UTF-8 mode. The code that uses this table must know about such things. */
   3, 1, 3,                       /* MARK, PRUNE, PRUNE_ARG                 */ \
   1, 3,                          /* SKIP, SKIP_ARG                         */ \
   1, 3,                          /* THEN, THEN_ARG                         */ \
-  1, 1, 1, 1,                    /* COMMIT, FAIL, ACCEPT, ASSERT_ACCEPT    */ \
+  1, 3,                          /* COMMIT, COMMIT_ARG                     */ \
+  1, 1, 1,                       /* FAIL, ACCEPT, ASSERT_ACCEPT            */ \
   1+IMM2_SIZE, 1,                /* CLOSE, SKIPZERO                        */ \
   1                              /* DEFINE                                 */
 

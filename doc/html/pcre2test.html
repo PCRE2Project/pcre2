@@ -410,10 +410,11 @@ patterns. Modifiers on a pattern can change these settings.
 The appearance of this line causes all subsequent modifier settings to be
 checked for compatibility with the <b>perltest.sh</b> script, which is used to
 confirm that Perl gives the same results as PCRE2. Also, apart from comment
-lines, none of the other command lines are permitted, because they and many
-of the modifiers are specific to <b>pcre2test</b>, and should not be used in
-test files that are also processed by <b>perltest.sh</b>. The <b>#perltest</b>
-command helps detect tests that are accidentally put in the wrong file.
+lines, #pattern commands, and #subject commands that set or unset "mark", no
+command lines are permitted, because they and many of the modifiers are
+specific to <b>pcre2test</b>, and should not be used in test files that are also
+processed by <b>perltest.sh</b>. The <b>#perltest</b> command helps detect tests
+that are accidentally put in the wrong file.
 <pre>
   #pop [&#60;modifiers&#62;]
   #popcopy [&#60;modifiers&#62;]
@@ -2003,7 +2004,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC21" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 16 July 2018
+Last updated: 21 July 2018
 <br>
 Copyright &copy; 1997-2018 University of Cambridge.
 <br>

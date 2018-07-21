@@ -9846,12 +9846,64 @@ No match
  0: b
  1: b
 
-/(?>a(*:1))(?>b(*:1))(*SKIP:1)x|.*/no_start_optimize
+#pattern no_start_optimize
+
+/(?>a(*:1))(?>b(*:1))(*SKIP:1)x|.*/
     abc
  0: abc
 
-/(?>a(*:1))(?>b)(*SKIP:1)x|.*/no_start_optimize
+/(?>a(*:1))(?>b)(*SKIP:1)x|.*/
     abc
  0: abc
+
+#subject mark
+
+/a(*ACCEPT:X)b/
+    abc
+ 0: a
+MK: X
+    
+/(?=a(*ACCEPT:QQ)bc)axyz/
+    axyz
+ 0: axyz
+MK: QQ
+
+/(?(DEFINE)(a(*ACCEPT:X)))(?1)b/
+    abc
+ 0: ab
+MK: X
+    
+/a(*F:X)b/
+    abc
+No match, mark = X
+    
+/(?(DEFINE)(a(*F:X)))(?1)b/
+    abc
+No match, mark = X
+
+/a(*COMMIT:X)b/
+    abc
+ 0: ab
+MK: X
+    
+/(?(DEFINE)(a(*COMMIT:X)))(?1)b/
+    abc
+ 0: ab
+MK: X
+    
+/a+(*:Z)b(*COMMIT:X)(*SKIP:Z)c|.*/
+    aaaabd
+ 0: bd
+
+/a+(*:Z)b(*COMMIT:X)(*SKIP:X)c|.*/
+    aaaabd
+No match, mark = X
+
+/a(*COMMIT:X)b/
+    axabc
+No match, mark = X
+
+#pattern -no_start_optimize
+#subject -mark 
 
 # End of testinput1 

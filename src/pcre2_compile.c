@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-          New API code Copyright (c) 2016-2017 University of Cambridge
+          New API code Copyright (c) 2016-2018 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -250,34 +250,35 @@ is present where expected in a conditional group. */
 #define META_LOOKBEHINDNOT    0x80250000u  /* (?<! */
 
 /* These must be kept in this order, with consecutive values, and the _ARG
-versions of PRUNE, SKIP, and THEN immediately after their non-argument
+versions of COMMIT, PRUNE, SKIP, and THEN immediately after their non-argument
 versions. */
 
 #define META_MARK             0x80260000u  /* (*MARK) */
 #define META_ACCEPT           0x80270000u  /* (*ACCEPT) */
-#define META_COMMIT           0x80280000u  /* (*COMMIT) */
-#define META_FAIL             0x80290000u  /* (*FAIL) */
-#define META_PRUNE            0x802a0000u  /* These pairs must    */
-#define META_PRUNE_ARG        0x802b0000u  /*   be                */
-#define META_SKIP             0x802c0000u  /*     kept            */
-#define META_SKIP_ARG         0x802d0000u  /*         in          */
-#define META_THEN             0x802e0000u  /*           this      */
-#define META_THEN_ARG         0x802f0000u  /*               order */
+#define META_FAIL             0x80280000u  /* (*FAIL) */
+#define META_COMMIT           0x80290000u  /* These               */
+#define META_COMMIT_ARG       0x802a0000u  /*   pairs             */
+#define META_PRUNE            0x802b0000u  /*     must            */
+#define META_PRUNE_ARG        0x802c0000u  /*       be            */
+#define META_SKIP             0x802d0000u  /*         kept        */
+#define META_SKIP_ARG         0x802e0000u  /*           in        */
+#define META_THEN             0x802f0000u  /*             this    */
+#define META_THEN_ARG         0x80300000u  /*               order */  
 
 /* These must be kept in groups of adjacent 3 values, and all together. */
 
-#define META_ASTERISK         0x80300000u  /* *  */
-#define META_ASTERISK_PLUS    0x80310000u  /* *+ */
-#define META_ASTERISK_QUERY   0x80320000u  /* *? */
-#define META_PLUS             0x80330000u  /* +  */
-#define META_PLUS_PLUS        0x80340000u  /* ++ */
-#define META_PLUS_QUERY       0x80350000u  /* +? */
-#define META_QUERY            0x80360000u  /* ?  */
-#define META_QUERY_PLUS       0x80370000u  /* ?+ */
-#define META_QUERY_QUERY      0x80380000u  /* ?? */
-#define META_MINMAX           0x80390000u  /* {n,m}  repeat */
-#define META_MINMAX_PLUS      0x803a0000u  /* {n,m}+ repeat */
-#define META_MINMAX_QUERY     0x803b0000u  /* {n,m}? repeat */
+#define META_ASTERISK         0x80310000u  /* *  */
+#define META_ASTERISK_PLUS    0x80320000u  /* *+ */
+#define META_ASTERISK_QUERY   0x80330000u  /* *? */
+#define META_PLUS             0x80340000u  /* +  */
+#define META_PLUS_PLUS        0x80350000u  /* ++ */
+#define META_PLUS_QUERY       0x80360000u  /* +? */
+#define META_QUERY            0x80370000u  /* ?  */
+#define META_QUERY_PLUS       0x80380000u  /* ?+ */
+#define META_QUERY_QUERY      0x80390000u  /* ?? */
+#define META_MINMAX           0x803a0000u  /* {n,m}  repeat */
+#define META_MINMAX_PLUS      0x803b0000u  /* {n,m}+ repeat */
+#define META_MINMAX_QUERY     0x803c0000u  /* {n,m}? repeat */
 
 #define META_FIRST_QUANTIFIER META_ASTERISK
 #define META_LAST_QUANTIFIER  META_MINMAX_QUERY
@@ -327,8 +328,9 @@ static unsigned char meta_extra_lengths[] = {
   SIZEOFFSET,    /* META_LOOKBEHINDNOT */
   1,             /* META_MARK - plus the string length */
   0,             /* META_ACCEPT */
-  0,             /* META_COMMIT */
   0,             /* META_FAIL */
+  0,             /* META_COMMIT */
+  1,             /* META_COMMIT_ARG - plus the string length */ 
   0,             /* META_PRUNE */
   1,             /* META_PRUNE_ARG - plus the string length */
   0,             /* META_SKIP */
@@ -586,9 +588,9 @@ static const char verbnames[] =
   "\0"                       /* Empty name is a shorthand for MARK */
   STRING_MARK0
   STRING_ACCEPT0
-  STRING_COMMIT0
   STRING_F0
   STRING_FAIL0
+  STRING_COMMIT0
   STRING_PRUNE0
   STRING_SKIP0
   STRING_THEN;
@@ -596,11 +598,11 @@ static const char verbnames[] =
 static const verbitem verbs[] = {
   { 0, META_MARK,   +1 },  /* > 0 => must have an argument */
   { 4, META_MARK,   +1 },
-  { 6, META_ACCEPT, -1 },  /* < 0 => must not have an argument */
-  { 6, META_COMMIT, -1 },
+  { 6, META_ACCEPT, -1 },  /* < 0 => Optional argument, convert to pre-MARK */
   { 1, META_FAIL,   -1 },
   { 4, META_FAIL,   -1 },
-  { 5, META_PRUNE,   0 },  /* Argument is optional; bump META code if found */
+  { 6, META_COMMIT,  0 },
+  { 5, META_PRUNE,   0 },  /* Optional argument; bump META code if found */
   { 4, META_SKIP,    0 },
   { 4, META_THEN,    0 }
 };
@@ -610,8 +612,8 @@ static const int verbcount = sizeof(verbs)/sizeof(verbitem);
 /* Verb opcodes, indexed by their META code offset from META_MARK. */
 
 static const uint32_t verbops[] = {
-  OP_MARK, OP_ACCEPT, OP_COMMIT, OP_FAIL, OP_PRUNE, OP_PRUNE_ARG, OP_SKIP,
-  OP_SKIP_ARG, OP_THEN, OP_THEN_ARG };
+  OP_MARK, OP_ACCEPT, OP_FAIL, OP_COMMIT, OP_COMMIT_ARG, OP_PRUNE, 
+  OP_PRUNE_ARG, OP_SKIP, OP_SKIP_ARG, OP_THEN, OP_THEN_ARG };
 
 /* Offsets from OP_STAR for case-independent and negative repeat opcodes. */
 
@@ -976,8 +978,8 @@ for (;;)
     case META_POSIX_NEG: fprintf(stderr, "META_POSIX_NEG %d", *pptr++); break;
 
     case META_ACCEPT: fprintf(stderr, "META (*ACCEPT)"); break;
-    case META_COMMIT: fprintf(stderr, "META (*COMMIT)"); break;
     case META_FAIL: fprintf(stderr, "META (*FAIL)"); break;
+    case META_COMMIT: fprintf(stderr, "META (*COMMIT)"); break;
     case META_PRUNE: fprintf(stderr, "META (*PRUNE)"); break;
     case META_SKIP: fprintf(stderr, "META (*SKIP)"); break;
     case META_THEN: fprintf(stderr, "META (*THEN)"); break;
@@ -1065,6 +1067,10 @@ for (;;)
 
     case META_MARK:
     fprintf(stderr, "META (*MARK:");
+    goto SHOWARG;
+
+    case META_COMMIT_ARG:
+    fprintf(stderr, "META (*COMMIT:");
     goto SHOWARG;
 
     case META_PRUNE_ARG:
@@ -2290,6 +2296,7 @@ uint32_t *previous_callout = NULL;
 uint32_t *parsed_pattern = cb->parsed_pattern;
 uint32_t *parsed_pattern_end = cb->parsed_pattern_end;
 uint32_t meta_quantifier = 0;
+uint32_t add_after_mark = 0;
 uint16_t nest_depth = 0;
 int after_manual_callout = 0;
 int expect_cond_assert = 0;
@@ -2461,6 +2468,16 @@ while (ptr < ptrend)
         goto FAILED;
         }
       *verblengthptr = (uint32_t)verbnamelength;
+      
+      /* If this name was on a verb such as (*ACCEPT) which does not continue,
+      a (*MARK) was generated for the name. We now add the original verb as the 
+      next item. */  
+
+      if (add_after_mark != 0)
+        {
+        *parsed_pattern++ = add_after_mark;
+        add_after_mark = 0;   
+        }
       break;
 
       case CHAR_BACKSLASH:
@@ -3454,13 +3471,25 @@ while (ptr < ptrend)
 
         if (*ptr++ == CHAR_COLON)   /* Skip past : or ) */
           {
-          if (verbs[i].has_arg < 0)  /* Argument is forbidden */
+          /* Some optional arguments can be treated as a preceding (*MARK) */
+ 
+          if (verbs[i].has_arg < 0)
             {
-            errorcode = ERR59;
-            goto FAILED;
+            add_after_mark = verbs[i].meta;
+            *parsed_pattern++ = META_MARK; 
             }
-          *parsed_pattern++ = verbs[i].meta +
-            ((verbs[i].meta != META_MARK)? 0x00010000u:0);
+            
+          /* The remaining verbs with arguments (except *MARK) need a different
+          opcode. */
+          
+          else
+            {  
+            *parsed_pattern++ = verbs[i].meta +
+              ((verbs[i].meta != META_MARK)? 0x00010000u:0);
+            }   
+            
+          /* Set up for reading the name in the main loop. */
+
           verblengthptr = parsed_pattern++;
           verbnamestart = ptr;
           inverbname = TRUE;
@@ -5654,6 +5683,7 @@ for (;; pptr++)
     cb->had_pruneorskip = TRUE;
     /* Fall through */
     case META_MARK:
+    case META_COMMIT_ARG: 
     VERB_ARG:
     *code++ = verbops[(meta - META_MARK) >> 16];
     /* The length is in characters. */
@@ -8002,6 +8032,7 @@ for (;;)
       break;
 
       case OP_MARK:
+      case OP_COMMIT_ARG: 
       case OP_PRUNE_ARG:
       case OP_SKIP_ARG:
       case OP_THEN_ARG:
@@ -8310,6 +8341,7 @@ for (;; pptr++)
     break;
 
     case META_MARK:     /* Add the length of the name. */
+    case META_COMMIT_ARG: 
     case META_PRUNE_ARG:
     case META_SKIP_ARG:
     case META_THEN_ARG:
@@ -8500,6 +8532,7 @@ for (;; pptr++)
     goto EXIT;
 
     case META_MARK:
+    case META_COMMIT_ARG: 
     case META_PRUNE_ARG:
     case META_SKIP_ARG:
     case META_THEN_ARG:
@@ -8967,6 +9000,7 @@ for (pptr = cb->parsed_pattern; *pptr != META_END; pptr++)
     break;
 
     case META_MARK:
+    case META_COMMIT_ARG: 
     case META_PRUNE_ARG:
     case META_SKIP_ARG:
     case META_THEN_ARG:

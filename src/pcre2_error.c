@@ -133,7 +133,8 @@ static const unsigned char compile_error_texts[] =
   "internal error: unknown newline setting\0"
   "\\g is not followed by a braced, angle-bracketed, or quoted name/number or by a plain number\0"
   "(?R (recursive pattern call) must be followed by a closing parenthesis\0"
-  "an argument is not allowed for (*ACCEPT), (*FAIL), or (*COMMIT)\0"
+  /* "an argument is not allowed for (*ACCEPT), (*FAIL), or (*COMMIT)\0" */
+  "obsolete error (should not occur)\0"  /* Was the above */
   /* 60 */
   "(*VERB) not recognized or malformed\0"
   "group number is too big\0"

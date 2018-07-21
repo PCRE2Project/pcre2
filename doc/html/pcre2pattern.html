@@ -3122,17 +3122,16 @@ in the
 documentation.
 </P>
 <P>
-Experiments with Perl suggest that it too has similar optimizations, sometimes
-leading to anomalous results.
+Experiments with Perl suggest that it too has similar optimizations, and like 
+PCRE2, turning them off can change the result of a match.
 </P>
 <br><b>
 Verbs that act immediately
 </b><br>
 <P>
-The following verbs act as soon as they are encountered. They may not be
-followed by a name.
+The following verbs act as soon as they are encountered.
 <pre>
-   (*ACCEPT)
+   (*ACCEPT) or (*ACCEPT:NAME)
 </pre>
 This verb causes the match to end successfully, skipping the remainder of the
 pattern. However, when it is inside a subpattern that is called as a
@@ -3149,18 +3148,22 @@ example:
 This matches "AB", "AAD", or "ACD"; when it matches "AB", "B" is captured by
 the outer parentheses.
 <pre>
-  (*FAIL) or (*F)
+  (*FAIL) or (*FAIL:NAME)
 </pre>
-This verb causes a matching failure, forcing backtracking to occur. It is
-equivalent to (?!) but easier to read. The Perl documentation notes that it is
-probably useful only when combined with (?{}) or (??{}). Those are, of course,
-Perl features that are not present in PCRE2. The nearest equivalent is the
-callout feature, as for example in this pattern:
+This verb causes a matching failure, forcing backtracking to occur. It may be 
+abbreviated to (*F). It is equivalent to (?!) but easier to read. The Perl
+documentation notes that it is probably useful only when combined with (?{}) or
+(??{}). Those are, of course, Perl features that are not present in PCRE2. The
+nearest equivalent is the callout feature, as for example in this pattern:
 <pre>
   a+(?C)(*FAIL)
 </pre>
 A match with the string "aaaa" always fails, but the callout is taken before
 each backtrack happens (in this example, 10 times).
+</P>
+<P>
+(*ACCEPT:NAME) and (*FAIL:NAME) behave exactly the same as 
+(*MARK:NAME)(*ACCEPT) and (*MARK:NAME)(*FAIL), respectively.
 </P>
 <br><b>
 Recording which path was taken
@@ -3186,9 +3189,9 @@ assertions and atomic groups. (There are differences in those cases when
 (*MARK) is used in conjunction with (*SKIP) as described below.)
 </P>
 <P>
-As well as (*MARK), the (*PRUNE) and (*THEN) verbs may have associated NAME
-arguments. Whichever is last on the matching path is passed back. See below for 
-more details of these other verbs.
+As well as (*MARK), the (*COMMIT), (*PRUNE) and (*THEN) verbs may have
+associated NAME arguments. Whichever is last on the matching path is passed
+back. See below for more details of these other verbs.
 </P>
 <P>
 Here is an example of <b>pcre2test</b> output, where the "mark" modifier
@@ -3250,22 +3253,25 @@ reaches them. The behaviour described below is what happens when the verb is
 not in a subroutine or an assertion. Subsequent sections cover these special
 cases.
 <pre>
-  (*COMMIT)
+  (*COMMIT) or (*COMMIT:NAME)
 </pre>
-This verb, which may not be followed by a name, causes the whole match to fail
-outright if there is a later matching failure that causes backtracking to reach
-it. Even if the pattern is unanchored, no further attempts to find a match by
-advancing the starting point take place. If (*COMMIT) is the only backtracking
-verb that is encountered, once it has been passed <b>pcre2_match()</b> is
-committed to finding a match at the current starting point, or not at all. For
-example:
+This verb causes the whole match to fail outright if there is a later matching
+failure that causes backtracking to reach it. Even if the pattern is
+unanchored, no further attempts to find a match by advancing the starting point
+take place. If (*COMMIT) is the only backtracking verb that is encountered,
+once it has been passed <b>pcre2_match()</b> is committed to finding a match at
+the current starting point, or not at all. For example:
 <pre>
   a+(*COMMIT)b
 </pre>
 This matches "xxaab" but not "aacaab". It can be thought of as a kind of
-dynamic anchor, or "I've started, so I must finish." The name of the most
-recently passed (*MARK) in the path is passed back when (*COMMIT) forces a
-match failure.
+dynamic anchor, or "I've started, so I must finish." 
+</P>
+<P>
+The behaviour of (*COMMIT:NAME) is not the same as (*MARK:NAME)(*COMMIT). It is
+like (*MARK:NAME) in that the name is remembered for passing back to the
+caller. However, (*SKIP:NAME) searches only for names set with (*MARK),
+ignoring those set by (*COMMIT), (*PRUNE) and (*THEN).
 </P>
 <P>
 If there is more than one backtracking verb in a pattern, a different one that
@@ -3309,7 +3315,7 @@ as (*COMMIT).
 The behaviour of (*PRUNE:NAME) is not the same as (*MARK:NAME)(*PRUNE). It is
 like (*MARK:NAME) in that the name is remembered for passing back to the
 caller. However, (*SKIP:NAME) searches only for names set with (*MARK),
-ignoring those set by (*PRUNE) or (*THEN).
+ignoring those set by (*COMMIT), (*PRUNE) or (*THEN).
 <pre>
   (*SKIP)
 </pre>
@@ -3317,7 +3323,7 @@ This verb, when given without a name, is like (*PRUNE), except that if the
 pattern is unanchored, the "bumpalong" advance is not to the next character,
 but to the position in the subject where (*SKIP) was encountered. (*SKIP)
 signifies that whatever text was matched leading up to it cannot be part of a
-successful match. Consider:
+successful match if there is a later mismatch. Consider:
 <pre>
   a+(*SKIP)b
 </pre>
@@ -3364,7 +3370,7 @@ the second branch of the pattern.
 </P>
 <P>
 Note that (*SKIP:NAME) searches only for names set by (*MARK:NAME). It ignores
-names that are set by (*PRUNE:NAME) or (*THEN:NAME).
+names that are set by (*COMMIT:NAME), (*PRUNE:NAME) or (*THEN:NAME).
 <pre>
   (*THEN) or (*THEN:NAME)
 </pre>
@@ -3383,10 +3389,10 @@ more alternatives, so there is a backtrack to whatever came before the entire
 group. If (*THEN) is not inside an alternation, it acts like (*PRUNE).
 </P>
 <P>
-The behaviour of (*THEN:NAME) is the not the same as (*MARK:NAME)(*THEN).
-It is like (*MARK:NAME) in that the name is remembered for passing back to the
+The behaviour of (*THEN:NAME) is not the same as (*MARK:NAME)(*THEN). It is
+like (*MARK:NAME) in that the name is remembered for passing back to the
 caller. However, (*SKIP:NAME) searches only for names set with (*MARK),
-ignoring those set by (*PRUNE) and (*THEN).
+ignoring those set by (*COMMIT), (*PRUNE) and (*THEN).
 </P>
 <P>
 A subpattern that does not contain a | character is just a part of the
@@ -3461,13 +3467,14 @@ onto (*COMMIT).
 Backtracking verbs in repeated groups
 </b><br>
 <P>
-PCRE2 differs from Perl in its handling of backtracking verbs in repeated
-groups. For example, consider:
+PCRE2 sometimes differs from Perl in its handling of backtracking verbs in
+repeated groups. For example, consider:
 <pre>
   /(a(*COMMIT)b)+ac/
 </pre>
-If the subject is "abac", Perl matches, but PCRE2 fails because the (*COMMIT)
-in the second repeat of the group acts.
+If the subject is "abac", Perl matches unless its optimizations are disabled,
+but PCRE2 always fails because the (*COMMIT) in the second repeat of the group
+acts.
 <a name="btassert"></a></P>
 <br><b>
 Backtracking verbs in assertions
@@ -3480,9 +3487,10 @@ subpattern.
 </P>
 <P>
 (*ACCEPT) in a standalone positive assertion causes the assertion to succeed
-without any further processing; captured strings are retained. In a standalone
-negative assertion, (*ACCEPT) causes the assertion to fail without any further
-processing; captured substrings are discarded.
+without any further processing; captured strings and a (*MARK) name (if set)
+are retained. In a standalone negative assertion, (*ACCEPT) causes the
+assertion to fail without any further processing; captured substrings and any 
+(*MARK) name are discarded.
 </P>
 <P>
 If the assertion is a condition, (*ACCEPT) causes the condition to be true for
@@ -3515,16 +3523,16 @@ Backtracking verbs in subroutines
 </b><br>
 <P>
 These behaviours occur whether or not the subpattern is called recursively.
-Perl's treatment of subroutines is different in some cases.
-</P>
-<P>
-(*FAIL) in a subpattern called as a subroutine has its normal effect: it forces
-an immediate backtrack.
 </P>
 <P>
 (*ACCEPT) in a subpattern called as a subroutine causes the subroutine match to
 succeed without any further processing. Matching then continues after the
-subroutine call.
+subroutine call. Perl documents this behaviour. Perl's treatment of the other
+verbs in subroutines is different in some cases.
+</P>
+<P>
+(*FAIL) in a subpattern called as a subroutine has its normal effect: it forces
+an immediate backtrack.
 </P>
 <P>
 (*COMMIT), (*SKIP), and (*PRUNE) in a subpattern called as a subroutine cause
@@ -3551,7 +3559,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC30" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 16 July 2018
+Last updated: 20 July 2018
 <br>
 Copyright &copy; 1997-2018 University of Cambridge.
 <br>
