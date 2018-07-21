@@ -2949,6 +2949,8 @@
 
 /abc(*:)pqr/
 
+/(*COMMIT:X)/B
+
 # This should, and does, fail. In Perl, it does not, which I think is a
 # bug because replacing the B in the pattern by (B|D) does make it fail.
 # Turning off Perl's optimization by inserting (??{""}) also makes it fail.

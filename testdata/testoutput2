@@ -10154,6 +10154,14 @@ Failed: error 166 at offset 10: (*MARK) must have an argument
 /abc(*:)pqr/
 Failed: error 166 at offset 6: (*MARK) must have an argument
 
+/(*COMMIT:X)/B
+------------------------------------------------------------------
+        Bra
+        *COMMIT X
+        Ket
+        End
+------------------------------------------------------------------
+
 # This should, and does, fail. In Perl, it does not, which I think is a
 # bug because replacing the B in the pattern by (B|D) does make it fail.
 # Turning off Perl's optimization by inserting (??{""}) also makes it fail.
