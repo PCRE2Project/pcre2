@@ -9906,4 +9906,6 @@ No match, mark = X
 #pattern -no_start_optimize
 #subject -mark 
 
+/(.COMMIT)(*COMMIT::::::::::interal error:::)/
+
 # End of testinput1 
