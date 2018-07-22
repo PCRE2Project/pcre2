@@ -9908,4 +9908,8 @@ No match, mark = X
 
 /(.COMMIT)(*COMMIT::::::::::interal error:::)/
 
+/(*COMMIT:ÿÿ)/
+
+/(*COMMIT:]w)/
+
 # End of testinput1 

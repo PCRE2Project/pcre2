@@ -6248,4 +6248,8 @@ ef) x/x,mark
 
 /(.COMMIT)(*COMMIT::::::::::interal error:::)/
 
+/(*COMMIT:ÿÿ)/
+
+/(*COMMIT:]w)/
+
 # End of testinput1 
