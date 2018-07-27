@@ -46,6 +46,7 @@ fi
 #   mark               show mark information
 #   no_auto_possess    ignored
 #   no_start_optimize  insert (??{""}) at pattern start (disables optimizing)
+#  -no_start_optimize  ignored
 #   subject_literal    does not process subjects for escapes
 #   ucp                sets Perl's /u modifier
 #   utf                invoke UTF-8 functionality
@@ -231,8 +232,10 @@ for (;;)
   $mod =~ s/no_auto_possess,?//;
 
   # Use no_start_optimize (disable PCRE2 start-up optimization) to disable Perl
-  # optimization by inserting (??{""}) at the start of the pattern.
-
+  # optimization by inserting (??{""}) at the start of the pattern. We may
+  # also encounter -no_start_optimize from a #pattern setting. 
+  
+  $mod =~ s/-no_start_optimize,?//;
   if ($mod =~ s/no_start_optimize,?//) { $pat =~ s/$del/$del(??{""})/; }
 
   # Add back retained modifiers and check that the pattern is valid.
