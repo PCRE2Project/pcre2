@@ -731,7 +731,7 @@ enum { ERR0 = COMPILE_ERROR_BASE,
        ERR61, ERR62, ERR63, ERR64, ERR65, ERR66, ERR67, ERR68, ERR69, ERR70,
        ERR71, ERR72, ERR73, ERR74, ERR75, ERR76, ERR77, ERR78, ERR79, ERR80,
        ERR81, ERR82, ERR83, ERR84, ERR85, ERR86, ERR87, ERR88, ERR89, ERR90,
-       ERR91, ERR92};
+       ERR91, ERR92, ERR93 };
 
 /* This is a table of start-of-pattern options such as (*UTF) and settings such
 as (*LIMIT_MATCH=nnnn) and (*CRLF). For completeness and backward
@@ -1441,6 +1441,42 @@ else if ((i = escapes[c - ESCAPES_FIRST]) != 0)
     escape = -i;                    /* Else return a special escape */
     if (cb != NULL && (escape == ESC_P || escape == ESC_p || escape == ESC_X))
       cb->external_flags |= PCRE2_HASBKPORX;   /* Note \P, \p, or \X */
+ 
+    /* Perl supports \N{name} for character names and \N{U+dddd} for numerical
+    Unicode code points, as well as plain \N for "not newline". PCRE does not
+    support \N{name}. However, it does support quantification such as \N{2,3}, 
+    so if \N{ is not followed by U+dddd we check for a quantifier. */
+
+    if (escape == ESC_N && ptr < ptrend && *ptr == CHAR_LEFT_CURLY_BRACKET)
+      {
+      PCRE2_SPTR p = ptr + 1;
+      
+      /* \N{U+ can be handled by the \x{ code. However, this construction is 
+      not valid in EBCDIC environments because it specifies a Unicode 
+      character, not a codepoint in the local code. For example \N{U+0041} 
+      must be "A" in all environments. */
+      
+      if (ptrend - p > 1 && *p == CHAR_U && p[1] == CHAR_PLUS)
+        {
+#ifdef EBCDIC
+        *errorcodeptr = ERR93;
+#else        
+        ptr = p + 1;
+        escape = 0;   /* Not a fancy escape after all */ 
+        goto COME_FROM_NU;
+#endif 
+        }  
+        
+      /* Give an error if what follows is not a quantifier, but don't override 
+      an error set by the quantifier reader (e.g. number overflow). */
+ 
+      else
+        { 
+        if (!read_repeat_counts(&p, ptrend, NULL, NULL, errorcodeptr) &&
+             *errorcodeptr == 0)
+          *errorcodeptr = ERR37;
+        }   
+      }
     }
   }
 
@@ -1725,6 +1761,9 @@ else
       {
       if (ptr < ptrend && *ptr == CHAR_LEFT_CURLY_BRACKET)
         {
+#ifndef EBCDIC         
+        COME_FROM_NU: 
+#endif         
         if (++ptr >= ptrend || *ptr == CHAR_RIGHT_CURLY_BRACKET)
           {
           *errorcodeptr = ERR78;
@@ -1856,19 +1895,6 @@ else
     *ptrptr = ptr - 1;     /* Point to the character at fault */
     return 0;
     }
-  }
-
-/* Perl supports \N{name} for character names, as well as plain \N for "not
-newline". PCRE does not support \N{name}. However, it does support
-quantification such as \N{2,3}. */
-
-if (escape == ESC_N && ptr < ptrend && *ptr == CHAR_LEFT_CURLY_BRACKET &&
-    ptrend - ptr > 2)
-  {
-  PCRE2_SPTR p = ptr + 1;
-  if (!read_repeat_counts(&p, ptrend, NULL, NULL, errorcodeptr) &&
-       *errorcodeptr == 0)
-    *errorcodeptr = ERR37;
   }
 
 /* Set the pointer to the next character before returning. */
@@ -3223,7 +3249,6 @@ while (ptr < ptrend)
         tempptr = ptr;
         escape = PRIV(check_escape)(&ptr, ptrend, &c, &errorcode,
           options, TRUE, cb);
-
         if (errorcode != 0)
           {
           CLASS_ESCAPE_FAILED:

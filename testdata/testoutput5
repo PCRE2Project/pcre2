@@ -4750,4 +4750,10 @@ No match
     \x{1D1AA} 
  0: \x{1d1aa}
 
+/\N{U+}/
+Failed: error 178 at offset 5: digits missing in \x{} or \o{} or \N{U+}
+
+/\N{U}/
+Failed: error 137 at offset 2: PCRE does not support \L, \l, \N{name}, \U, or \u
+
 # End of testinput5

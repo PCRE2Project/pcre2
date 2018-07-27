@@ -3703,5 +3703,13 @@ No match
 \= Expect no match     
     \x{123}\x{124}\x{123}
 No match
+    
+/\N{U+1234}/utf
+    \x{1234}
+ 0: \x{1234}
+
+/[\N{U+1234}]/utf
+    \x{1234}
+ 0: \x{1234}
 
 # End of testinput4

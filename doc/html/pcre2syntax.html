@@ -70,9 +70,10 @@ This table applies to ASCII and Unicode environments.
   \ddd       character with octal code ddd, or backreference
   \o{ddd..}  character with octal code ddd..
   \U         "U" if PCRE2_ALT_BSUX is set (otherwise is an error)
+  \N{U+hh..} character with Unicode code point hh.. 
   \uhhhh     character with hex code hhhh (if PCRE2_ALT_BSUX is set)
   \xhh       character with hex code hh
-  \x{hhh..}  character with hex code hhh..
+  \x{hh..}   character with hex code hh..
 </pre>
 Note that \0dd is always an octal code. The treatment of backslash followed by
 a non-zero digit is complicated; for details see the section
@@ -80,7 +81,9 @@ a non-zero digit is complicated; for details see the section
 in the
 <a href="pcre2pattern.html"><b>pcre2pattern</b></a>
 documentation, where details of escape processing in EBCDIC environments are
-also given.
+also given. \N{U+hh..} is synonymous with \x{hh..} in PCRE2 but is not
+supported in EBCDIC environments. Note that \N not followed by an opening
+curly bracket has a different meaning (see below).
 </P>
 <P>
 When \x is not followed by {, from zero to two hexadecimal digits are read,
@@ -621,7 +624,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC27" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 21 July 2018
+Last updated: 27 July 2018
 <br>
 Copyright &copy; 1997-2018 University of Cambridge.
 <br>

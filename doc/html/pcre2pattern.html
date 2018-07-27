@@ -249,10 +249,11 @@ is used.
 <P>
 The newline convention affects where the circumflex and dollar assertions are
 true. It also affects the interpretation of the dot metacharacter when
-PCRE2_DOTALL is not set, and the behaviour of \N. However, it does not affect
-what the \R escape sequence matches. By default, this is any Unicode newline
-sequence, for Perl compatibility. However, this can be changed; see the next
-section and the description of \R in the section entitled
+PCRE2_DOTALL is not set, and the behaviour of \N when not followed by an 
+opening brace. However, it does not affect what the \R escape sequence
+matches. By default, this is any Unicode newline sequence, for Perl
+compatibility. However, this can be changed; see the next section and the
+description of \R in the section entitled
 <a href="#newlineseq">"Newline sequences"</a>
 below. A change of \R setting can be combined with a change of newline
 convention.
@@ -382,20 +383,27 @@ text editing, it is often easier to use one of the following escape sequences
 than the binary character it represents. In an ASCII or Unicode environment,
 these escapes are as follows:
 <pre>
-  \a        alarm, that is, the BEL character (hex 07)
-  \cx       "control-x", where x is any printable ASCII character
-  \e        escape (hex 1B)
-  \f        form feed (hex 0C)
-  \n        linefeed (hex 0A)
-  \r        carriage return (hex 0D)
-  \t        tab (hex 09)
-  \0dd      character with octal code 0dd
-  \ddd      character with octal code ddd, or backreference
-  \o{ddd..} character with octal code ddd..
-  \xhh      character with hex code hh
-  \x{hhh..} character with hex code hhh.. (default mode)
-  \uhhhh    character with hex code hhhh (when PCRE2_ALT_BSUX is set)
+  \a          alarm, that is, the BEL character (hex 07)
+  \cx         "control-x", where x is any printable ASCII character
+  \e          escape (hex 1B)
+  \f          form feed (hex 0C)
+  \n          linefeed (hex 0A)
+  \r          carriage return (hex 0D)
+  \t          tab (hex 09)
+  \0dd        character with octal code 0dd
+  \ddd        character with octal code ddd, or backreference
+  \o{ddd..}   character with octal code ddd..
+  \xhh        character with hex code hh
+  \x{hhh..}   character with hex code hhh.. (default mode)
+  \N{U+hhh..} character with Unicode code point hhh.. 
+  \uhhhh      character with hex code hhhh (when PCRE2_ALT_BSUX is set)
 </pre>
+Note that when \N is not followed by an opening brace (curly bracket) it has
+an entirely different meaning, matching any character that is not a newline.
+Perl also uses \N{name} to specify characters by Unicode name; PCRE2 does not
+support this.
+</P>
+<P>
 The precise effect of \cx on ASCII characters is as follows: if x is a lower
 case letter, it is converted to upper case. Then bit 6 of the character (hex
 40) is inverted. Thus \cA to \cZ become hex 01 to hex 1A (A is 41, Z is 5A),
@@ -404,14 +412,14 @@ code unit following \c has a value less than 32 or greater than 126, a
 compile-time error occurs.
 </P>
 <P>
-When PCRE2 is compiled in EBCDIC mode, \a, \e, \f, \n, \r, and \t
-generate the appropriate EBCDIC code values. The \c escape is processed
-as specified for Perl in the <b>perlebcdic</b> document. The only characters
-that are allowed after \c are A-Z, a-z, or one of @, [, \, ], ^, _, or ?. Any
-other character provokes a compile-time error. The sequence \c@ encodes
-character code 0; after \c the letters (in either case) encode characters 1-26
-(hex 01 to hex 1A); [, \, ], ^, and _ encode characters 27-31 (hex 1B to hex
-1F), and \c? becomes either 255 (hex FF) or 95 (hex 5F).
+When PCRE2 is compiled in EBCDIC mode, \N{U+hhh..} is not supported. \a, \e,
+\f, \n, \r, and \t generate the appropriate EBCDIC code values. The \c
+escape is processed as specified for Perl in the <b>perlebcdic</b> document. The
+only characters that are allowed after \c are A-Z, a-z, or one of @, [, \, ],
+^, _, or ?. Any other character provokes a compile-time error. The sequence
+\c@ encodes character code 0; after \c the letters (in either case) encode
+characters 1-26 (hex 01 to hex 1A); [, \, ], ^, and _ encode characters 27-31
+(hex 1B to hex 1F), and \c? becomes either 255 (hex FF) or 95 (hex 5F).
 </P>
 <P>
 Thus, apart from \c?, these escapes generate the same character code values as
@@ -443,9 +451,9 @@ to be unambiguously specified.
 </P>
 <P>
 For greater clarity and unambiguity, it is best to avoid following \ by a
-digit greater than zero. Instead, use \o{} or \x{} to specify character
-numbers, and \g{} to specify backreferences. The following paragraphs
-describe the old, ambiguous syntax.
+digit greater than zero. Instead, use \o{} or \x{} to specify numerical
+character code points, and \g{} to specify backreferences. The following
+paragraphs describe the old, ambiguous syntax.
 </P>
 <P>
 The handling of a backslash followed by a digit other than 0 is complicated,
@@ -528,10 +536,10 @@ and outside character classes. In addition, inside a character class, \b is
 interpreted as the backspace character (hex 08).
 </P>
 <P>
-\N is not allowed in a character class. \B, \R, and \X are not special
-inside a character class. Like other unrecognized alphabetic escape sequences,
-they cause an error. Outside a character class, these sequences have different
-meanings.
+When not followed by an opening brace, \N is not allowed in a character class.
+\B, \R, and \X are not special inside a character class. Like other
+unrecognized alphabetic escape sequences, they cause an error. Outside a
+character class, these sequences have different meanings.
 </P>
 <br><b>
 Unsupported escape sequences
@@ -577,6 +585,7 @@ Another use of backslash is for specifying generic character types:
   \D     any character that is not a decimal digit
   \h     any horizontal white space character
   \H     any character that is not a horizontal white space character
+  \N     any character that is not a newline 
   \s     any white space character
   \S     any character that is not a white space character
   \v     any vertical white space character
@@ -584,11 +593,14 @@ Another use of backslash is for specifying generic character types:
   \w     any "word" character
   \W     any "non-word" character
 </pre>
-There is also the single sequence \N, which matches a non-newline character.
-This is the same as
+The \N escape sequence has the same meaning as
 <a href="#fullstopdot">the "." metacharacter</a>
-when PCRE2_DOTALL is not set. Perl also uses \N to match characters by name;
-PCRE2 does not support this.
+when PCRE2_DOTALL is not set, but setting PCRE2_DOTALL does not change the 
+meaning of \N. Note that when \N is followed by an opening brace it has a 
+different meaning. See the section entitled
+<a href="#digitsafterbackslash">"Non-printing characters"</a>
+above for details. Perl also uses \N{name} to specify characters by Unicode
+name; PCRE2 does not support this.
 </P>
 <P>
 Each pair of lower and upper case escape sequences partitions the complete set
@@ -1297,9 +1309,15 @@ dollar, the only relationship being that they both involve newlines. Dot has no
 special meaning in a character class.
 </P>
 <P>
-The escape sequence \N behaves like a dot, except that it is not affected by
-the PCRE2_DOTALL option. In other words, it matches any character except one
-that signifies the end of a line. Perl also uses \N to match characters by
+The escape sequence \N when not followed by an opening brace behaves like a
+dot, except that it is not affected by the PCRE2_DOTALL option. In other words,
+it matches any character except one that signifies the end of a line. 
+</P>
+<P>
+When \N is followed by an opening brace it has a different meaning. See the
+section entitled
+<a href="digitsafterbackslash">"Non-printing characters"</a>
+above for details. Perl also uses \N{name} to specify characters by Unicode
 name; PCRE2 does not support this.
 </P>
 <br><a name="SEC8" href="#TOC1">MATCHING A SINGLE CODE UNIT</a><br>
@@ -1385,10 +1403,11 @@ string, and therefore it fails if the current pointer is at the end of the
 string.
 </P>
 <P>
-When caseless matching is set, any letters in a class represent both their
-upper case and lower case versions, so for example, a caseless [aeiou] matches
-"A" as well as "a", and a caseless [^aeiou] does not match "A", whereas a
-caseful version would.
+Characters in a class may be specified by their code points using \o, \x, or
+\N{U+hh..} in the usual way. When caseless matching is set, any letters in a
+class represent both their upper case and lower case versions, so for example,
+a caseless [aeiou] matches "A" as well as "a", and a caseless [^aeiou] does not
+match "A", whereas a caseful version would.
 </P>
 <P>
 Characters that might indicate line breaks are never treated in any special way
@@ -1397,17 +1416,18 @@ whatever setting of the PCRE2_DOTALL and PCRE2_MULTILINE options is used. A
 class such as [^a] always matches one of these characters.
 </P>
 <P>
-The character escape sequences \d, \D, \h, \H, \p, \P, \s, \S, \v,
-\V, \w, and \W may appear in a character class, and add the characters that
-they match to the class. For example, [\dABCDEF] matches any hexadecimal
-digit. In UTF modes, the PCRE2_UCP option affects the meanings of \d, \s, \w
-and their upper case partners, just as it does when they appear outside a
-character class, as described in the section entitled
+The generic character type escape sequences \d, \D, \h, \H, \p, \P, \s,
+\S, \v, \V, \w, and \W may appear in a character class, and add the
+characters that they match to the class. For example, [\dABCDEF] matches any
+hexadecimal digit. In UTF modes, the PCRE2_UCP option affects the meanings of
+\d, \s, \w and their upper case partners, just as it does when they appear
+outside a character class, as described in the section entitled
 <a href="#genericchartypes">"Generic character types"</a>
 above. The escape sequence \b has a different meaning inside a character
-class; it matches the backspace character. The sequences \B, \N, \R, and \X
-are not special inside a character class. Like any other unrecognized escape
-sequences, they cause an error.
+class; it matches the backspace character. The sequences \B, \R, and \X are
+not special inside a character class. Like any other unrecognized escape
+sequences, they cause an error. The same is true for \N when not followed by
+an opening brace.
 </P>
 <P>
 The minus (hyphen) character can be used to specify a range of characters in a
@@ -3559,7 +3579,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC30" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 20 July 2018
+Last updated: 27 July 2018
 <br>
 Copyright &copy; 1997-2018 University of Cambridge.
 <br>

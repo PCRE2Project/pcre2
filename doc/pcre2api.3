@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "02 July 2018" "PCRE2 10.32"
+.TH PCRE2API 3 "27 July 2018" "PCRE2 10.32"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -1400,7 +1400,8 @@ character, even if newlines are coded as CRLF. Without this option, a dot does
 not match when the current position in the subject is at a newline. This option
 is equivalent to Perl's /s option, and it can be changed within a pattern by a
 (?s) option setting. A negative class such as [^a] always matches newline
-characters, independent of the setting of this option.
+characters, and the \eN escape sequence always matches a non-newline character,
+independent of the setting of PCRE2_DOTALL.
 .sp
   PCRE2_DUPNAMES
 .sp
@@ -3640,6 +3641,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 02 July 2018
+Last updated: 27 July 2018
 Copyright (c) 1997-2018 University of Cambridge.
 .fi

@@ -2287,5 +2287,11 @@
     \x{123}\x{122}\x{123}
 \= Expect no match     
     \x{123}\x{124}\x{123}
+    
+/\N{U+1234}/utf
+    \x{1234}
+
+/[\N{U+1234}]/utf
+    \x{1234}
 
 # End of testinput4

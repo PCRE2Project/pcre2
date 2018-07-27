@@ -1,4 +1,4 @@
-.TH PCRE2PATTERN 3 "20 July 2018" "PCRE2 10.32"
+.TH PCRE2PATTERN 3 "27 July 2018" "PCRE2 10.32"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION DETAILS"
@@ -218,10 +218,11 @@ is used.
 .P
 The newline convention affects where the circumflex and dollar assertions are
 true. It also affects the interpretation of the dot metacharacter when
-PCRE2_DOTALL is not set, and the behaviour of \eN. However, it does not affect
-what the \eR escape sequence matches. By default, this is any Unicode newline
-sequence, for Perl compatibility. However, this can be changed; see the next
-section and the description of \eR in the section entitled
+PCRE2_DOTALL is not set, and the behaviour of \eN when not followed by an 
+opening brace. However, it does not affect what the \eR escape sequence
+matches. By default, this is any Unicode newline sequence, for Perl
+compatibility. However, this can be changed; see the next section and the
+description of \eR in the section entitled
 .\" HTML <a href="#newlineseq">
 .\" </a>
 "Newline sequences"
@@ -359,20 +360,26 @@ text editing, it is often easier to use one of the following escape sequences
 than the binary character it represents. In an ASCII or Unicode environment,
 these escapes are as follows:
 .sp
-  \ea        alarm, that is, the BEL character (hex 07)
-  \ecx       "control-x", where x is any printable ASCII character
-  \ee        escape (hex 1B)
-  \ef        form feed (hex 0C)
-  \en        linefeed (hex 0A)
-  \er        carriage return (hex 0D)
-  \et        tab (hex 09)
-  \e0dd      character with octal code 0dd
-  \eddd      character with octal code ddd, or backreference
-  \eo{ddd..} character with octal code ddd..
-  \exhh      character with hex code hh
-  \ex{hhh..} character with hex code hhh.. (default mode)
-  \euhhhh    character with hex code hhhh (when PCRE2_ALT_BSUX is set)
+  \ea          alarm, that is, the BEL character (hex 07)
+  \ecx         "control-x", where x is any printable ASCII character
+  \ee          escape (hex 1B)
+  \ef          form feed (hex 0C)
+  \en          linefeed (hex 0A)
+  \er          carriage return (hex 0D)
+  \et          tab (hex 09)
+  \e0dd        character with octal code 0dd
+  \eddd        character with octal code ddd, or backreference
+  \eo{ddd..}   character with octal code ddd..
+  \exhh        character with hex code hh
+  \ex{hhh..}   character with hex code hhh.. (default mode)
+  \eN{U+hhh..} character with Unicode code point hhh.. 
+  \euhhhh      character with hex code hhhh (when PCRE2_ALT_BSUX is set)
 .sp
+Note that when \eN is not followed by an opening brace (curly bracket) it has
+an entirely different meaning, matching any character that is not a newline.
+Perl also uses \eN{name} to specify characters by Unicode name; PCRE2 does not
+support this.
+.P
 The precise effect of \ecx on ASCII characters is as follows: if x is a lower
 case letter, it is converted to upper case. Then bit 6 of the character (hex
 40) is inverted. Thus \ecA to \ecZ become hex 01 to hex 1A (A is 41, Z is 5A),
@@ -380,14 +387,14 @@ but \ec{ becomes hex 3B ({ is 7B), and \ec; becomes hex 7B (; is 3B). If the
 code unit following \ec has a value less than 32 or greater than 126, a
 compile-time error occurs.
 .P
-When PCRE2 is compiled in EBCDIC mode, \ea, \ee, \ef, \en, \er, and \et
-generate the appropriate EBCDIC code values. The \ec escape is processed
-as specified for Perl in the \fBperlebcdic\fP document. The only characters
-that are allowed after \ec are A-Z, a-z, or one of @, [, \e, ], ^, _, or ?. Any
-other character provokes a compile-time error. The sequence \ec@ encodes
-character code 0; after \ec the letters (in either case) encode characters 1-26
-(hex 01 to hex 1A); [, \e, ], ^, and _ encode characters 27-31 (hex 1B to hex
-1F), and \ec? becomes either 255 (hex FF) or 95 (hex 5F).
+When PCRE2 is compiled in EBCDIC mode, \eN{U+hhh..} is not supported. \ea, \ee,
+\ef, \en, \er, and \et generate the appropriate EBCDIC code values. The \ec
+escape is processed as specified for Perl in the \fBperlebcdic\fP document. The
+only characters that are allowed after \ec are A-Z, a-z, or one of @, [, \e, ],
+^, _, or ?. Any other character provokes a compile-time error. The sequence
+\ec@ encodes character code 0; after \ec the letters (in either case) encode
+characters 1-26 (hex 01 to hex 1A); [, \e, ], ^, and _ encode characters 27-31
+(hex 1B to hex 1F), and \ec? becomes either 255 (hex FF) or 95 (hex 5F).
 .P
 Thus, apart from \ec?, these escapes generate the same character code values as
 they do in an ASCII environment, though the meanings of the values mostly
@@ -414,9 +421,9 @@ numbers greater than 0777, and it also allows octal numbers and backreferences
 to be unambiguously specified.
 .P
 For greater clarity and unambiguity, it is best to avoid following \e by a
-digit greater than zero. Instead, use \eo{} or \ex{} to specify character
-numbers, and \eg{} to specify backreferences. The following paragraphs
-describe the old, ambiguous syntax.
+digit greater than zero. Instead, use \eo{} or \ex{} to specify numerical
+character code points, and \eg{} to specify backreferences. The following
+paragraphs describe the old, ambiguous syntax.
 .P
 The handling of a backslash followed by a digit other than 0 is complicated,
 and Perl has changed over time, causing PCRE2 also to change.
@@ -507,10 +514,10 @@ All the sequences that define a single character value can be used both inside
 and outside character classes. In addition, inside a character class, \eb is
 interpreted as the backspace character (hex 08).
 .P
-\eN is not allowed in a character class. \eB, \eR, and \eX are not special
-inside a character class. Like other unrecognized alphabetic escape sequences,
-they cause an error. Outside a character class, these sequences have different
-meanings.
+When not followed by an opening brace, \eN is not allowed in a character class.
+\eB, \eR, and \eX are not special inside a character class. Like other
+unrecognized alphabetic escape sequences, they cause an error. Outside a
+character class, these sequences have different meanings.
 .
 .
 .SS "Unsupported escape sequences"
@@ -569,6 +576,7 @@ Another use of backslash is for specifying generic character types:
   \eD     any character that is not a decimal digit
   \eh     any horizontal white space character
   \eH     any character that is not a horizontal white space character
+  \eN     any character that is not a newline 
   \es     any white space character
   \eS     any character that is not a white space character
   \ev     any vertical white space character
@@ -576,14 +584,20 @@ Another use of backslash is for specifying generic character types:
   \ew     any "word" character
   \eW     any "non-word" character
 .sp
-There is also the single sequence \eN, which matches a non-newline character.
-This is the same as
+The \eN escape sequence has the same meaning as
 .\" HTML <a href="#fullstopdot">
 .\" </a>
 the "." metacharacter
 .\"
-when PCRE2_DOTALL is not set. Perl also uses \eN to match characters by name;
-PCRE2 does not support this.
+when PCRE2_DOTALL is not set, but setting PCRE2_DOTALL does not change the 
+meaning of \eN. Note that when \eN is followed by an opening brace it has a 
+different meaning. See the section entitled
+.\" HTML <a href="#digitsafterbackslash">
+.\" </a>
+"Non-printing characters"
+.\"
+above for details. Perl also uses \eN{name} to specify characters by Unicode
+name; PCRE2 does not support this.
 .P
 Each pair of lower and upper case escape sequences partitions the complete set
 of characters into two disjoint sets. Any given character matches one, and only
@@ -1289,9 +1303,17 @@ The handling of dot is entirely independent of the handling of circumflex and
 dollar, the only relationship being that they both involve newlines. Dot has no
 special meaning in a character class.
 .P
-The escape sequence \eN behaves like a dot, except that it is not affected by
-the PCRE2_DOTALL option. In other words, it matches any character except one
-that signifies the end of a line. Perl also uses \eN to match characters by
+The escape sequence \eN when not followed by an opening brace behaves like a
+dot, except that it is not affected by the PCRE2_DOTALL option. In other words,
+it matches any character except one that signifies the end of a line. 
+.P
+When \eN is followed by an opening brace it has a different meaning. See the
+section entitled
+.\" HTML <a href="digitsafterbackslash">
+.\" </a>
+"Non-printing characters"
+.\"
+above for details. Perl also uses \eN{name} to specify characters by Unicode
 name; PCRE2 does not support this.
 .
 .
@@ -1380,30 +1402,32 @@ circumflex is not an assertion; it still consumes a character from the subject
 string, and therefore it fails if the current pointer is at the end of the
 string.
 .P
-When caseless matching is set, any letters in a class represent both their
-upper case and lower case versions, so for example, a caseless [aeiou] matches
-"A" as well as "a", and a caseless [^aeiou] does not match "A", whereas a
-caseful version would.
+Characters in a class may be specified by their code points using \eo, \ex, or
+\eN{U+hh..} in the usual way. When caseless matching is set, any letters in a
+class represent both their upper case and lower case versions, so for example,
+a caseless [aeiou] matches "A" as well as "a", and a caseless [^aeiou] does not
+match "A", whereas a caseful version would.
 .P
 Characters that might indicate line breaks are never treated in any special way
 when matching character classes, whatever line-ending sequence is in use, and
 whatever setting of the PCRE2_DOTALL and PCRE2_MULTILINE options is used. A
 class such as [^a] always matches one of these characters.
 .P
-The character escape sequences \ed, \eD, \eh, \eH, \ep, \eP, \es, \eS, \ev,
-\eV, \ew, and \eW may appear in a character class, and add the characters that
-they match to the class. For example, [\edABCDEF] matches any hexadecimal
-digit. In UTF modes, the PCRE2_UCP option affects the meanings of \ed, \es, \ew
-and their upper case partners, just as it does when they appear outside a
-character class, as described in the section entitled
+The generic character type escape sequences \ed, \eD, \eh, \eH, \ep, \eP, \es,
+\eS, \ev, \eV, \ew, and \eW may appear in a character class, and add the
+characters that they match to the class. For example, [\edABCDEF] matches any
+hexadecimal digit. In UTF modes, the PCRE2_UCP option affects the meanings of
+\ed, \es, \ew and their upper case partners, just as it does when they appear
+outside a character class, as described in the section entitled
 .\" HTML <a href="#genericchartypes">
 .\" </a>
 "Generic character types"
 .\"
 above. The escape sequence \eb has a different meaning inside a character
-class; it matches the backspace character. The sequences \eB, \eN, \eR, and \eX
-are not special inside a character class. Like any other unrecognized escape
-sequences, they cause an error.
+class; it matches the backspace character. The sequences \eB, \eR, and \eX are
+not special inside a character class. Like any other unrecognized escape
+sequences, they cause an error. The same is true for \eN when not followed by
+an opening brace.
 .P
 The minus (hyphen) character can be used to specify a range of characters in a
 character class. For example, [d-m] matches any letter between d and m,
@@ -3580,6 +3604,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 20 July 2018
+Last updated: 27 July 2018
 Copyright (c) 1997-2018 University of Cambridge.
 .fi

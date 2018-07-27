@@ -161,7 +161,7 @@ static const unsigned char compile_error_texts[] =
   "using UCP is disabled by the application\0"
   "name is too long in (*MARK), (*PRUNE), (*SKIP), or (*THEN)\0"
   "character code point value in \\u.... sequence is too large\0"
-  "digits missing in \\x{} or \\o{}\0"
+  "digits missing in \\x{} or \\o{} or \\N{U+}\0"
   "syntax error or number too big in (?(VERSION condition\0"
   /* 80 */
   "internal error: unknown opcode in auto_possessify()\0"
@@ -179,6 +179,7 @@ static const unsigned char compile_error_texts[] =
   "internal error: bad code value in parsed_skip()\0"
   "PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES is not allowed in UTF-16 mode\0"
   "invalid option bits with PCRE2_LITERAL\0"
+  "\\N{U+dddd} is not supported in EBCDIC mode\0" 
   ;
 
 /* Match-time and UTF error texts are in the same format. */

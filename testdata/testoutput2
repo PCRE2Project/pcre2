@@ -13194,7 +13194,7 @@ Failed: error 167 at offset 5: non-hex character in \x{} (closing brace missing?
 Failed: error 167 at offset 7: non-hex character in \x{} (closing brace missing?)
 
 /^A\x{/
-Failed: error 178 at offset 5: digits missing in \x{} or \o{}
+Failed: error 178 at offset 5: digits missing in \x{} or \o{} or \N{U+}
 
 /[ab]++/B,no_auto_possess
 ------------------------------------------------------------------
@@ -13408,7 +13408,7 @@ Failed: error 133 at offset 7: parentheses are too deeply nested (stack check)
 Failed: error 155 at offset 2: missing opening brace after \o
 
 /\o{}/
-Failed: error 178 at offset 3: digits missing in \x{} or \o{}
+Failed: error 178 at offset 3: digits missing in \x{} or \o{} or \N{U+}
 
 /\o{whatever}/
 Failed: error 164 at offset 3: non-octal character in \o{} (closing brace missing?)
@@ -13416,7 +13416,7 @@ Failed: error 164 at offset 3: non-octal character in \o{} (closing brace missin
 /\xthing/
 
 /\x{}/
-Failed: error 178 at offset 3: digits missing in \x{} or \o{}
+Failed: error 178 at offset 3: digits missing in \x{} or \o{} or \N{U+}
 
 /\x{whatever}/
 Failed: error 167 at offset 3: non-hex character in \x{} (closing brace missing?)
