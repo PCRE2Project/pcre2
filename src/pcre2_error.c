@@ -107,7 +107,7 @@ static const unsigned char compile_error_texts[] =
   /* 35 */
   "lookbehind is too complicated\0"
   "\\C is not allowed in a lookbehind assertion in UTF-" XSTRING(PCRE2_CODE_UNIT_WIDTH) " mode\0"
-  "PCRE does not support \\L, \\l, \\N{name}, \\U, or \\u\0"
+  "PCRE2 does not support \\F, \\L, \\l, \\N{name}, \\U, or \\u\0"
   "number after (?C is greater than 255\0"
   "closing parenthesis for (?C expected\0"
   /* 40 */

@@ -4754,6 +4754,6 @@ No match
 Failed: error 178 at offset 5: digits missing in \x{} or \o{} or \N{U+}
 
 /\N{U}/
-Failed: error 137 at offset 2: PCRE does not support \L, \l, \N{name}, \U, or \u
+Failed: error 137 at offset 2: PCRE2 does not support \F, \L, \l, \N{name}, \U, or \u
 
 # End of testinput5

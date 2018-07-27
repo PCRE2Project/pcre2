@@ -523,7 +523,7 @@ character class, these sequences have different meanings.
 .SS "Unsupported escape sequences"
 .rs
 .sp
-In Perl, the sequences \el, \eL, \eu, and \eU are recognized by its string
+In Perl, the sequences \eF, \el, \eL, \eu, and \eU are recognized by its string
 handler and used to modify the case of following characters. By default, PCRE2
 does not support these escape sequences. However, if the PCRE2_ALT_BSUX option
 is set, \eU matches a "U" character, and \eu can be used to define a character

@@ -3244,20 +3244,23 @@ Failed: error 113 at offset 0: POSIX collating elements are not supported
 /[:x:]/I
 Failed: error 112 at offset 0: POSIX named classes are supported only within a class
 
+/\F/I
+Failed: error 137 at offset 2: PCRE2 does not support \F, \L, \l, \N{name}, \U, or \u
+
 /\l/I
-Failed: error 137 at offset 2: PCRE does not support \L, \l, \N{name}, \U, or \u
+Failed: error 137 at offset 2: PCRE2 does not support \F, \L, \l, \N{name}, \U, or \u
 
 /\L/I
-Failed: error 137 at offset 2: PCRE does not support \L, \l, \N{name}, \U, or \u
+Failed: error 137 at offset 2: PCRE2 does not support \F, \L, \l, \N{name}, \U, or \u
 
 /\N{name}/I
-Failed: error 137 at offset 2: PCRE does not support \L, \l, \N{name}, \U, or \u
+Failed: error 137 at offset 2: PCRE2 does not support \F, \L, \l, \N{name}, \U, or \u
 
 /\u/I
-Failed: error 137 at offset 2: PCRE does not support \L, \l, \N{name}, \U, or \u
+Failed: error 137 at offset 2: PCRE2 does not support \F, \L, \l, \N{name}, \U, or \u
 
 /\U/I
-Failed: error 137 at offset 2: PCRE does not support \L, \l, \N{name}, \U, or \u
+Failed: error 137 at offset 2: PCRE2 does not support \F, \L, \l, \N{name}, \U, or \u
 
 /a{1,3}b/ungreedy
     ab

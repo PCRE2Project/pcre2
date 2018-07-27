@@ -1504,6 +1504,7 @@ else
     /* A number of Perl escapes are not handled by PCRE. We give an explicit
     error. */
 
+    case CHAR_F:
     case CHAR_l:
     case CHAR_L:
     *errorcodeptr = ERR37;
