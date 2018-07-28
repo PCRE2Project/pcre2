@@ -1,4 +1,4 @@
-.TH PCRE2PATTERN 3 "27 July 2018" "PCRE2 10.32"
+.TH PCRE2PATTERN 3 "28 July 2018" "PCRE2 10.32"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION DETAILS"
@@ -331,7 +331,10 @@ of the pattern.
 If you want to remove the special meaning from a sequence of characters, you
 can do so by putting them between \eQ and \eE. This is different from Perl in
 that $ and @ are handled as literals in \eQ...\eE sequences in PCRE2, whereas
-in Perl, $ and @ cause variable interpolation. Note the following examples:
+in Perl, $ and @ cause variable interpolation. Also, Perl does "double-quotish 
+backslash interpolation" on any backslashes between \eQ and \eE which, its
+documentation says, "may lead to confusing results". PCRE2 treats a backslash
+between \eQ and \eE just like any other character. Note the following examples:
 .sp
   Pattern            PCRE2 matches   Perl matches
 .sp
@@ -340,6 +343,8 @@ in Perl, $ and @ cause variable interpolation. Note the following examples:
                                       contents of $xyz
   \eQabc\e$xyz\eE       abc\e$xyz       abc\e$xyz
   \eQabc\eE\e$\eQxyz\eE   abc$xyz        abc$xyz
+  \eQA\eB\eE            A\eB            A\eB
+  \eQ\e\eE              \e              \e\eE
 .sp
 The \eQ...\eE sequence is recognized both inside and outside character classes.
 An isolated \eE that is not preceded by \eQ is ignored. If \eQ is not followed
@@ -3604,6 +3609,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 27 July 2018
+Last updated: 28 July 2018
 Copyright (c) 1997-2018 University of Cambridge.
 .fi
