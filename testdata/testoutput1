@@ -9912,4 +9912,13 @@ No match, mark = X
 
 /(*COMMIT:]w)/
 
+/(?i)A(?^)B(?^x:C D)(?^i)e f/
+    aBCDE F
+ 0: aBCDE F
+\= Expect no match
+    aBCDEF
+No match
+    AbCDe f
+No match
+    
 # End of testinput1 

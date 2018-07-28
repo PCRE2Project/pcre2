@@ -16622,6 +16622,15 @@ No match, mark = X
     axy
 No match, mark = X
 
+/(?^x-i)AB/ 
+Failed: error 194 at offset 4: invalid hyphen in option setting
+
+/(?^-i)AB/ 
+Failed: error 194 at offset 3: invalid hyphen in option setting
+
+/(?x-i-i)/
+Failed: error 194 at offset 5: invalid hyphen in option setting
+
 # End of testinput2
 Error -70: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

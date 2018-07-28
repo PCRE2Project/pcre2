@@ -357,13 +357,18 @@ of the pattern.
 If you want to remove the special meaning from a sequence of characters, you
 can do so by putting them between \Q and \E. This is different from Perl in
 that $ and @ are handled as literals in \Q...\E sequences in PCRE2, whereas
-in Perl, $ and @ cause variable interpolation. Note the following examples:
+in Perl, $ and @ cause variable interpolation. Also, Perl does "double-quotish 
+backslash interpolation" on any backslashes between \Q and \E which, its
+documentation says, "may lead to confusing results". PCRE2 treats a backslash
+between \Q and \E just like any other character. Note the following examples:
 <pre>
   Pattern            PCRE2 matches   Perl matches
 
   \Qabc$xyz\E        abc$xyz        abc followed by the contents of $xyz
   \Qabc\$xyz\E       abc\$xyz       abc\$xyz
   \Qabc\E\$\Qxyz\E   abc$xyz        abc$xyz
+  \QA\B\E            A\B            A\B
+  \Q\\E              \              \\E
 </pre>
 The \Q...\E sequence is recognized both inside and outside character classes.
 An isolated \E that is not preceded by \Q is ignored. If \Q is not followed
@@ -545,7 +550,7 @@ character class, these sequences have different meanings.
 Unsupported escape sequences
 </b><br>
 <P>
-In Perl, the sequences \l, \L, \u, and \U are recognized by its string
+In Perl, the sequences \F, \l, \L, \u, and \U are recognized by its string
 handler and used to modify the case of following characters. By default, PCRE2
 does not support these escape sequences. However, if the PCRE2_ALT_BSUX option
 is set, \U matches a "U" character, and \u can be used to define a character
@@ -1635,21 +1640,27 @@ Perl option letters enclosed between "(?" and ")". The option letters are
   xx for PCRE2_EXTENDED_MORE
 </pre>
 For example, (?im) sets caseless, multiline matching. It is also possible to
-unset these options by preceding the letter with a hyphen. The two "extended"
-options are not independent; unsetting either one cancels the effects of both
-of them.
+unset these options by preceding the relevant letters with a hyphen, for 
+example (?-im). The two "extended" options are not independent; unsetting either
+one cancels the effects of both of them.
 </P>
 <P>
 A combined setting and unsetting such as (?im-sx), which sets PCRE2_CASELESS
 and PCRE2_MULTILINE while unsetting PCRE2_DOTALL and PCRE2_EXTENDED, is also
-permitted. If a letter appears both before and after the hyphen, the option is
-unset. An empty options setting "(?)" is allowed. Needless to say, it has no
-effect.
+permitted. Only one hyphen may appear in the options string. If a letter
+appears both before and after the hyphen, the option is unset. An empty options
+setting "(?)" is allowed. Needless to say, it has no effect.
+</P>
+<P>
+If the first character following (? is a circumflex, it causes all of the above 
+options to be unset. Thus, (?^) is equivalent to (?-imnsx). Letters may follow 
+the circumflex to cause some options to be re-instated, but a hyphen may not 
+appear.
 </P>
 <P>
 The PCRE2-specific options PCRE2_DUPNAMES and PCRE2_UNGREEDY can be changed in
 the same way as the Perl-compatible options by using the characters J and U
-respectively.
+respectively. However, these are not unset by (?^).
 </P>
 <P>
 When one of these option changes occurs at top level (that is, not inside
@@ -3579,7 +3590,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC30" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 27 July 2018
+Last updated: 28 July 2018
 <br>
 Copyright &copy; 1997-2018 University of Cambridge.
 <br>

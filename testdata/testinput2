@@ -5453,4 +5453,10 @@ a)"xI
 \= Expect no match
     axy
 
+/(?^x-i)AB/ 
+
+/(?^-i)AB/ 
+
+/(?x-i-i)/
+
 # End of testinput2

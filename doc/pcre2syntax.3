@@ -1,4 +1,4 @@
-.TH PCRE2SYNTAX 3 "27 July 2018" "PCRE2 10.32"
+.TH PCRE2SYNTAX 3 "28 July 2018" "PCRE2 10.32"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION SYNTAX SUMMARY"
@@ -431,7 +431,14 @@ but some of them use Unicode properties if PCRE2_UCP is set. You can use
   (?x)            extended: ignore white space except in classes
   (?xx)           as (?x) but also ignore space and tab in classes
   (?-...)         unset option(s)
+  (?^)            unset imnsx options 
 .sp
+Unsetting x or xx unsets both. Several options may be set at once, and a
+mixture of setting and unsetting such as (?i-x) is allowed, but there may be
+only one hyphen. Setting (but no unsetting) is allowed after (?^ for example
+(?^in). An option setting may appear at the start of a non-capturing group, for 
+example (?i:...).
+.P
 The following are recognized only at the very start of a pattern or after one
 of the newline or \eR options with similar syntax. More than one of them may
 appear. For the first three, d is a decimal number.
@@ -612,6 +619,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 27 July 2018
+Last updated: 28 July 2018
 Copyright (c) 1997-2018 University of Cambridge.
 .fi

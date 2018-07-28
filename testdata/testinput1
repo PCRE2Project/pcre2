@@ -6252,4 +6252,10 @@ ef) x/x,mark
 
 /(*COMMIT:]w)/
 
+/(?i)A(?^)B(?^x:C D)(?^i)e f/
+    aBCDE F
+\= Expect no match
+    aBCDEF
+    AbCDe f
+    
 # End of testinput1 

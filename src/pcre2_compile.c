@@ -263,7 +263,7 @@ versions. */
 #define META_SKIP             0x802d0000u  /*         kept        */
 #define META_SKIP_ARG         0x802e0000u  /*           in        */
 #define META_THEN             0x802f0000u  /*             this    */
-#define META_THEN_ARG         0x80300000u  /*               order */  
+#define META_THEN_ARG         0x80300000u  /*               order */
 
 /* These must be kept in groups of adjacent 3 values, and all together. */
 
@@ -330,7 +330,7 @@ static unsigned char meta_extra_lengths[] = {
   0,             /* META_ACCEPT */
   0,             /* META_FAIL */
   0,             /* META_COMMIT */
-  1,             /* META_COMMIT_ARG - plus the string length */ 
+  1,             /* META_COMMIT_ARG - plus the string length */
   0,             /* META_PRUNE */
   1,             /* META_PRUNE_ARG - plus the string length */
   0,             /* META_SKIP */
@@ -612,7 +612,7 @@ static const int verbcount = sizeof(verbs)/sizeof(verbitem);
 /* Verb opcodes, indexed by their META code offset from META_MARK. */
 
 static const uint32_t verbops[] = {
-  OP_MARK, OP_ACCEPT, OP_FAIL, OP_COMMIT, OP_COMMIT_ARG, OP_PRUNE, 
+  OP_MARK, OP_ACCEPT, OP_FAIL, OP_COMMIT, OP_COMMIT_ARG, OP_PRUNE,
   OP_PRUNE_ARG, OP_SKIP, OP_SKIP_ARG, OP_THEN, OP_THEN_ARG };
 
 /* Offsets from OP_STAR for case-independent and negative repeat opcodes. */
@@ -731,7 +731,7 @@ enum { ERR0 = COMPILE_ERROR_BASE,
        ERR61, ERR62, ERR63, ERR64, ERR65, ERR66, ERR67, ERR68, ERR69, ERR70,
        ERR71, ERR72, ERR73, ERR74, ERR75, ERR76, ERR77, ERR78, ERR79, ERR80,
        ERR81, ERR82, ERR83, ERR84, ERR85, ERR86, ERR87, ERR88, ERR89, ERR90,
-       ERR91, ERR92, ERR93 };
+       ERR91, ERR92, ERR93, ERR94 };
 
 /* This is a table of start-of-pattern options such as (*UTF) and settings such
 as (*LIMIT_MATCH=nnnn) and (*CRLF). For completeness and backward
@@ -1441,41 +1441,41 @@ else if ((i = escapes[c - ESCAPES_FIRST]) != 0)
     escape = -i;                    /* Else return a special escape */
     if (cb != NULL && (escape == ESC_P || escape == ESC_p || escape == ESC_X))
       cb->external_flags |= PCRE2_HASBKPORX;   /* Note \P, \p, or \X */
- 
+
     /* Perl supports \N{name} for character names and \N{U+dddd} for numerical
     Unicode code points, as well as plain \N for "not newline". PCRE does not
-    support \N{name}. However, it does support quantification such as \N{2,3}, 
+    support \N{name}. However, it does support quantification such as \N{2,3},
     so if \N{ is not followed by U+dddd we check for a quantifier. */
 
     if (escape == ESC_N && ptr < ptrend && *ptr == CHAR_LEFT_CURLY_BRACKET)
       {
       PCRE2_SPTR p = ptr + 1;
-      
-      /* \N{U+ can be handled by the \x{ code. However, this construction is 
-      not valid in EBCDIC environments because it specifies a Unicode 
-      character, not a codepoint in the local code. For example \N{U+0041} 
+
+      /* \N{U+ can be handled by the \x{ code. However, this construction is
+      not valid in EBCDIC environments because it specifies a Unicode
+      character, not a codepoint in the local code. For example \N{U+0041}
       must be "A" in all environments. */
-      
+
       if (ptrend - p > 1 && *p == CHAR_U && p[1] == CHAR_PLUS)
         {
 #ifdef EBCDIC
         *errorcodeptr = ERR93;
-#else        
+#else
         ptr = p + 1;
-        escape = 0;   /* Not a fancy escape after all */ 
+        escape = 0;   /* Not a fancy escape after all */
         goto COME_FROM_NU;
-#endif 
-        }  
-        
-      /* Give an error if what follows is not a quantifier, but don't override 
+#endif
+        }
+
+      /* Give an error if what follows is not a quantifier, but don't override
       an error set by the quantifier reader (e.g. number overflow). */
- 
+
       else
-        { 
+        {
         if (!read_repeat_counts(&p, ptrend, NULL, NULL, errorcodeptr) &&
              *errorcodeptr == 0)
           *errorcodeptr = ERR37;
-        }   
+        }
       }
     }
   }
@@ -1762,9 +1762,9 @@ else
       {
       if (ptr < ptrend && *ptr == CHAR_LEFT_CURLY_BRACKET)
         {
-#ifndef EBCDIC         
-        COME_FROM_NU: 
-#endif         
+#ifndef EBCDIC
+        COME_FROM_NU:
+#endif
         if (++ptr >= ptrend || *ptr == CHAR_RIGHT_CURLY_BRACKET)
           {
           *errorcodeptr = ERR78;
@@ -2495,15 +2495,15 @@ while (ptr < ptrend)
         goto FAILED;
         }
       *verblengthptr = (uint32_t)verbnamelength;
-      
+
       /* If this name was on a verb such as (*ACCEPT) which does not continue,
-      a (*MARK) was generated for the name. We now add the original verb as the 
-      next item. */  
+      a (*MARK) was generated for the name. We now add the original verb as the
+      next item. */
 
       if (add_after_mark != 0)
         {
         *parsed_pattern++ = add_after_mark;
-        add_after_mark = 0;   
+        add_after_mark = 0;
         }
       break;
 
@@ -3498,22 +3498,22 @@ while (ptr < ptrend)
         if (*ptr++ == CHAR_COLON)   /* Skip past : or ) */
           {
           /* Some optional arguments can be treated as a preceding (*MARK) */
- 
+
           if (verbs[i].has_arg < 0)
             {
             add_after_mark = verbs[i].meta;
-            *parsed_pattern++ = META_MARK; 
+            *parsed_pattern++ = META_MARK;
             }
-            
+
           /* The remaining verbs with arguments (except *MARK) need a different
           opcode. */
-          
+
           else
-            {  
+            {
             *parsed_pattern++ = verbs[i].meta +
               ((verbs[i].meta != META_MARK)? 0x00010000u:0);
-            }   
-            
+            }
+
           /* Set up for reading the name in the main loop. */
 
           verblengthptr = parsed_pattern++;
@@ -3576,17 +3576,37 @@ while (ptr < ptrend)
 
       else
         {
+        BOOL hyphenok = TRUE;
         top_nest->reset_group = 0;
         top_nest->max_group = 0;
         set = unset = 0;
         optset = &set;
+
+        /* ^ at the start unsets imnsx and disables the subsequent use of - */
+
+        if (ptr < ptrend && *ptr == CHAR_CIRCUMFLEX_ACCENT)
+          {
+          options &= ~(PCRE2_CASELESS|PCRE2_MULTILINE|PCRE2_NO_AUTO_CAPTURE|
+                       PCRE2_DOTALL|PCRE2_EXTENDED|PCRE2_EXTENDED_MORE);
+          hyphenok = FALSE;
+          ptr++; 
+          }
 
         while (ptr < ptrend && *ptr != CHAR_RIGHT_PARENTHESIS &&
                                *ptr != CHAR_COLON)
           {
           switch (*ptr++)
             {
-            case CHAR_MINUS: optset = &unset; break;
+            case CHAR_MINUS:
+            if (!hyphenok)
+              {
+              errorcode = ERR94;
+              ptr--;  /* Correct the offset */
+              goto FAILED;
+              }
+            optset = &unset;
+            hyphenok = FALSE; 
+            break;
 
             case CHAR_J:  /* Record that it changed in the external options */
             *optset |= PCRE2_DUPNAMES;
@@ -3644,9 +3664,10 @@ while (ptr < ptrend)
           }
         else *parsed_pattern++ = META_NOCAPTURE;
 
-        /* If nothing changed, no need to record. */
+        /* If nothing changed, no need to record. The check of hyphenok catches 
+        the (?^) case. */
 
-        if (set != 0 || unset != 0)
+        if (set != 0 || unset != 0 || !hyphenok)
           {
           *parsed_pattern++ = META_OPTIONS;
           *parsed_pattern++ = options;
@@ -3952,7 +3973,7 @@ while (ptr < ptrend)
           {
           if (++ptr >= ptrend || !IS_DIGIT(*ptr)) goto BAD_VERSION_CONDITION;
           minor = (*ptr++ - CHAR_0) * 10;
-          if (IS_DIGIT(*ptr)) minor += *ptr++ - CHAR_0; 
+          if (IS_DIGIT(*ptr)) minor += *ptr++ - CHAR_0;
           if (ptr >= ptrend || *ptr != CHAR_RIGHT_PARENTHESIS)
             goto BAD_VERSION_CONDITION;
           }
@@ -5709,7 +5730,7 @@ for (;; pptr++)
     cb->had_pruneorskip = TRUE;
     /* Fall through */
     case META_MARK:
-    case META_COMMIT_ARG: 
+    case META_COMMIT_ARG:
     VERB_ARG:
     *code++ = verbops[(meta - META_MARK) >> 16];
     /* The length is in characters. */
@@ -8058,7 +8079,7 @@ for (;;)
       break;
 
       case OP_MARK:
-      case OP_COMMIT_ARG: 
+      case OP_COMMIT_ARG:
       case OP_PRUNE_ARG:
       case OP_SKIP_ARG:
       case OP_THEN_ARG:
@@ -8367,7 +8388,7 @@ for (;; pptr++)
     break;
 
     case META_MARK:     /* Add the length of the name. */
-    case META_COMMIT_ARG: 
+    case META_COMMIT_ARG:
     case META_PRUNE_ARG:
     case META_SKIP_ARG:
     case META_THEN_ARG:
@@ -8558,7 +8579,7 @@ for (;; pptr++)
     goto EXIT;
 
     case META_MARK:
-    case META_COMMIT_ARG: 
+    case META_COMMIT_ARG:
     case META_PRUNE_ARG:
     case META_SKIP_ARG:
     case META_THEN_ARG:
@@ -8630,31 +8651,31 @@ for (;; pptr++)
     case META_LOOKAHEADNOT:
     pptr = parsed_skip(pptr + 1, PSKIP_KET);
     if (pptr == NULL) goto PARSED_SKIP_FAILED;
-    
+
     /* Also ignore any qualifiers that follow a lookahead assertion. */
-    
+
     switch (pptr[1])
       {
       case META_ASTERISK:
       case META_ASTERISK_PLUS:
-      case META_ASTERISK_QUERY:   
+      case META_ASTERISK_QUERY:
       case META_PLUS:
-      case META_PLUS_PLUS: 
+      case META_PLUS_PLUS:
       case META_PLUS_QUERY:
       case META_QUERY:
       case META_QUERY_PLUS:
-      case META_QUERY_QUERY:       
+      case META_QUERY_QUERY:
       pptr++;
       break;
-      
+
       case META_MINMAX:
       case META_MINMAX_PLUS:
       case META_MINMAX_QUERY:
       pptr += 3;
       break;
-      
+
       default:
-      break;      
+      break;
       }
     break;
 
@@ -9026,7 +9047,7 @@ for (pptr = cb->parsed_pattern; *pptr != META_END; pptr++)
     break;
 
     case META_MARK:
-    case META_COMMIT_ARG: 
+    case META_COMMIT_ARG:
     case META_PRUNE_ARG:
     case META_SKIP_ARG:
     case META_THEN_ARG:

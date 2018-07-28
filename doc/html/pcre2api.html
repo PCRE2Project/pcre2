@@ -1466,7 +1466,8 @@ character, even if newlines are coded as CRLF. Without this option, a dot does
 not match when the current position in the subject is at a newline. This option
 is equivalent to Perl's /s option, and it can be changed within a pattern by a
 (?s) option setting. A negative class such as [^a] always matches newline
-characters, independent of the setting of this option.
+characters, and the \N escape sequence always matches a non-newline character,
+independent of the setting of PCRE2_DOTALL.
 <pre>
   PCRE2_DUPNAMES
 </pre>
@@ -3634,7 +3635,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC42" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 02 July 2018
+Last updated: 27 July 2018
 <br>
 Copyright &copy; 1997-2018 University of Cambridge.
 <br>

@@ -131,6 +131,8 @@ present.
 terminated by (*ACCEPT).
 
 29. Add support for \N{U+dddd}, but not in EBCDIC environments.
+
+30. Add support for (?^) for unsetting all imnsx options.
       
 
 Version 10.31 12-February-2018

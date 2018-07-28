@@ -317,6 +317,7 @@ pcre2_pattern_convert(). */
 #define PCRE2_ERROR_NO_SURROGATES_IN_UTF16         191
 #define PCRE2_ERROR_BAD_LITERAL_OPTIONS            192
 #define PCRE2_ERROR_NOT_SUPPORTED_IN_EBCDIC        193
+#define PCRE2_ERROR_INVALID_HYPHEN_IN_OPTIONS      194
 
 
 /* "Expected" matching error codes: no match and partial match. */
