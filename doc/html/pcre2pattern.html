@@ -249,7 +249,7 @@ is used.
 <P>
 The newline convention affects where the circumflex and dollar assertions are
 true. It also affects the interpretation of the dot metacharacter when
-PCRE2_DOTALL is not set, and the behaviour of \N when not followed by an 
+PCRE2_DOTALL is not set, and the behaviour of \N when not followed by an
 opening brace. However, it does not affect what the \R escape sequence
 matches. By default, this is any Unicode newline sequence, for Perl
 compatibility. However, this can be changed; see the next section and the
@@ -357,7 +357,7 @@ of the pattern.
 If you want to remove the special meaning from a sequence of characters, you
 can do so by putting them between \Q and \E. This is different from Perl in
 that $ and @ are handled as literals in \Q...\E sequences in PCRE2, whereas
-in Perl, $ and @ cause variable interpolation. Also, Perl does "double-quotish 
+in Perl, $ and @ cause variable interpolation. Also, Perl does "double-quotish
 backslash interpolation" on any backslashes between \Q and \E which, its
 documentation says, "may lead to confusing results". PCRE2 treats a backslash
 between \Q and \E just like any other character. Note the following examples:
@@ -400,7 +400,7 @@ these escapes are as follows:
   \o{ddd..}   character with octal code ddd..
   \xhh        character with hex code hh
   \x{hhh..}   character with hex code hhh.. (default mode)
-  \N{U+hhh..} character with Unicode code point hhh.. 
+  \N{U+hhh..} character with Unicode code point hhh..
   \uhhhh      character with hex code hhhh (when PCRE2_ALT_BSUX is set)
 </pre>
 Note that when \N is not followed by an opening brace (curly bracket) it has
@@ -590,7 +590,7 @@ Another use of backslash is for specifying generic character types:
   \D     any character that is not a decimal digit
   \h     any horizontal white space character
   \H     any character that is not a horizontal white space character
-  \N     any character that is not a newline 
+  \N     any character that is not a newline
   \s     any white space character
   \S     any character that is not a white space character
   \v     any vertical white space character
@@ -600,8 +600,8 @@ Another use of backslash is for specifying generic character types:
 </pre>
 The \N escape sequence has the same meaning as
 <a href="#fullstopdot">the "." metacharacter</a>
-when PCRE2_DOTALL is not set, but setting PCRE2_DOTALL does not change the 
-meaning of \N. Note that when \N is followed by an opening brace it has a 
+when PCRE2_DOTALL is not set, but setting PCRE2_DOTALL does not change the
+meaning of \N. Note that when \N is followed by an opening brace it has a
 different meaning. See the section entitled
 <a href="#digitsafterbackslash">"Non-printing characters"</a>
 above for details. Perl also uses \N{name} to specify characters by Unicode
@@ -1030,8 +1030,8 @@ grapheme cluster", and treats the sequence as an atomic group
 Unicode supports various kinds of composite character by giving each character
 a grapheme breaking property, and having rules that use these properties to
 define the boundaries of extended grapheme clusters. The rules are defined in
-Unicode Standard Annex 29, "Unicode Text Segmentation". Unicode 11.0.0 
-abandoned the use of some previous properties that had been used for emojis. 
+Unicode Standard Annex 29, "Unicode Text Segmentation". Unicode 11.0.0
+abandoned the use of some previous properties that had been used for emojis.
 Instead it introduced various emoji-specific properties. PCRE2 uses only the
 Extended Pictographic property.
 </P>
@@ -1316,7 +1316,7 @@ special meaning in a character class.
 <P>
 The escape sequence \N when not followed by an opening brace behaves like a
 dot, except that it is not affected by the PCRE2_DOTALL option. In other words,
-it matches any character except one that signifies the end of a line. 
+it matches any character except one that signifies the end of a line.
 </P>
 <P>
 When \N is followed by an opening brace it has a different meaning. See the
@@ -1642,7 +1642,7 @@ documentation. The option letters are:
   xx for PCRE2_EXTENDED_MORE
 </pre>
 For example, (?im) sets caseless, multiline matching. It is also possible to
-unset these options by preceding the relevant letters with a hyphen, for 
+unset these options by preceding the relevant letters with a hyphen, for
 example (?-im). The two "extended" options are not independent; unsetting either
 one cancels the effects of both of them.
 </P>
@@ -1654,9 +1654,9 @@ appears both before and after the hyphen, the option is unset. An empty options
 setting "(?)" is allowed. Needless to say, it has no effect.
 </P>
 <P>
-If the first character following (? is a circumflex, it causes all of the above 
-options to be unset. Thus, (?^) is equivalent to (?-imnsx). Letters may follow 
-the circumflex to cause some options to be re-instated, but a hyphen may not 
+If the first character following (? is a circumflex, it causes all of the above
+options to be unset. Thus, (?^) is equivalent to (?-imnsx). Letters may follow
+the circumflex to cause some options to be re-instated, but a hyphen may not
 appear.
 </P>
 <P>
@@ -1813,41 +1813,68 @@ duplicate named subpatterns, as described in the next section.
 <br><a name="SEC16" href="#TOC1">NAMED SUBPATTERNS</a><br>
 <P>
 Identifying capturing parentheses by number is simple, but it can be very hard
-to keep track of the numbers in complicated regular expressions. Furthermore,
-if an expression is modified, the numbers may change. To help with this
-difficulty, PCRE2 supports the naming of subpatterns. This feature was not
-added to Perl until release 5.10. Python had the feature earlier, and PCRE1
+to keep track of the numbers in complicated patterns. Furthermore, if an
+expression is modified, the numbers may change. To help with this difficulty,
+PCRE2 supports the naming of capturing subpatterns. This feature was not added
+to Perl until release 5.10. Python had the feature earlier, and PCRE1
 introduced it at release 4.0, using the Python syntax. PCRE2 supports both the
-Perl and the Python syntax. Perl allows identically numbered subpatterns to
-have different names, but PCRE2 does not.
+Perl and the Python syntax.
 </P>
 <P>
-In PCRE2, a subpattern can be named in one of three ways: (?&#60;name&#62;...) or
-(?'name'...) as in Perl, or (?P&#60;name&#62;...) as in Python. References to capturing
-parentheses from other parts of the pattern, such as
+In PCRE2, a capturing subpattern can be named in one of three ways:
+(?&#60;name&#62;...) or (?'name'...) as in Perl, or (?P&#60;name&#62;...) as in Python. Names
+consist of up to 32 alphanumeric characters and underscores, but must start
+with a non-digit. References to capturing parentheses from other parts of the
+pattern, such as
 <a href="#backreferences">backreferences,</a>
 <a href="#recursion">recursion,</a>
 and
 <a href="#conditions">conditions,</a>
-can be made by name as well as by number.
+can all be made by name as well as by number.
 </P>
 <P>
-Names consist of up to 32 alphanumeric characters and underscores, but must
-start with a non-digit. Named capturing parentheses are still allocated numbers
-as well as names, exactly as if the names were not present. The PCRE2 API
-provides function calls for extracting the name-to-number translation table
-from a compiled pattern. There are also convenience functions for extracting a
-captured substring by name.
+Named capturing parentheses are allocated numbers as well as names, exactly as
+if the names were not present. In both PCRE2 and Perl, capturing subpatterns
+are primarily identified by numbers; any names are just aliases for these
+numbers. The PCRE2 API provides function calls for extracting the complete
+name-to-number translation table from a compiled pattern, as well as
+convenience functions for extracting captured substrings by name.
 </P>
 <P>
-By default, a name must be unique within a pattern, but it is possible to relax
-this constraint by setting the PCRE2_DUPNAMES option at compile time.
-(Duplicate names are also always permitted for subpatterns with the same
-number, set up as described in the previous section.) Duplicate names can be
-useful for patterns where only one instance of the named parentheses can match.
-Suppose you want to match the name of a weekday, either as a 3-letter
-abbreviation or as the full name, and in both cases you want to extract the
-abbreviation. This pattern (ignoring the line breaks) does the job:
+<b>Warning:</b> When more than one subpattern has the same number, as described
+in the previous section, a name given to one of them applies to all of them.
+Perl allows identically numbered subpatterns to have different names. Consider
+this pattern, where there are two capturing subpatterns, both numbered 1:
+<pre>
+  (?|(?&#60;AA&#62;aa)|(?&#60;BB&#62;bb))
+</pre>
+Perl allows this, with both names AA and BB as aliases of group 1. Thus, after
+a successful match, both names yield the same value (either "aa" or "bb").
+</P>
+<P>
+In an attempt to reduce confusion, PCRE2 does not allow the same group number
+to be associated with more than one name. The example above provokes a
+compile-time error. However, there is still scope for confusion. Consider this
+pattern:
+<pre>
+  (?|(?&#60;AA&#62;aa)|(bb))
+</pre>
+Although the second subpattern number 1 is not explicitly named, the name AA is
+still an alias for subpattern 1. Whether the pattern matches "aa" or "bb", a
+reference by name to group AA yields the matched string.
+</P>
+<P>
+By default, a name must be unique within a pattern, except that duplicate names
+are permitted for subpatterns with the same number, for example:
+<pre>
+  (?|(?&#60;AA&#62;aa)|(?&#60;AA&#62;bb))
+</pre>
+The duplicate name constraint can be disabled by setting the PCRE2_DUPNAMES
+option at compile time, or by the use of (?J) within the pattern. Duplicate
+names can be useful for patterns where only one instance of the named
+parentheses can match. Suppose you want to match the name of a weekday, either
+as a 3-letter abbreviation or as the full name, and in both cases you want to
+extract the abbreviation. This pattern (ignoring the line breaks) does the job:
 <pre>
   (?&#60;DN&#62;Mon|Fri|Sun)(?:day)?|
   (?&#60;DN&#62;Tue)(?:sday)?|
@@ -1856,13 +1883,11 @@ abbreviation. This pattern (ignoring the line breaks) does the job:
   (?&#60;DN&#62;Sat)(?:urday)?
 </pre>
 There are five capturing substrings, but only one is ever set after a match.
-(An alternative way of solving this problem is to use a "branch reset"
-subpattern, as described in the previous section.)
-</P>
-<P>
 The convenience functions for extracting the data by name returns the substring
 for the first (and in this example, the only) subpattern of that name that
-matched. This saves searching to find which numbered subpattern it was.
+matched. This saves searching to find which numbered subpattern it was. (An
+alternative way of solving this problem is to use a "branch reset" subpattern,
+as described in the previous section.)
 </P>
 <P>
 If you make a backreference to a non-unique named subpattern from elsewhere in
@@ -1878,8 +1903,7 @@ for the reference. For example, this pattern matches both "foofoo" and
 <P>
 If you make a subroutine call to a non-unique named subpattern, the one that
 corresponds to the first occurrence of the name is used. In the absence of
-duplicate numbers (see the previous section) this is the one with the lowest
-number.
+duplicate numbers this is the one with the lowest number.
 </P>
 <P>
 If you use a named reference in a condition
@@ -1892,14 +1916,6 @@ behaviour as testing by number. For further details of the interfaces for
 handling named subpatterns, see the
 <a href="pcre2api.html"><b>pcre2api</b></a>
 documentation.
-</P>
-<P>
-<b>Warning:</b> You cannot use different names to distinguish between two
-subpatterns with the same number because PCRE2 uses only the numbers when
-matching. For this reason, an error is given at compile time if different names
-are given to subpatterns with the same number. However, you can always give the
-same name to subpatterns with the same number, even when PCRE2_DUPNAMES is not
-set.
 </P>
 <br><a name="SEC17" href="#TOC1">REPETITION</a><br>
 <P>
@@ -2327,14 +2343,14 @@ the subject string is as it was before the assertion was processed.
 <P>
 Assertion subpatterns are not capturing subpatterns. If an assertion contains
 capturing subpatterns within it, these are counted for the purposes of
-numbering the capturing subpatterns in the whole pattern. Within each branch of 
+numbering the capturing subpatterns in the whole pattern. Within each branch of
 an assertion, locally captured substrings may be referenced in the usual way.
-For example, a sequence such as (.)\g{-1} can be used to check that two 
+For example, a sequence such as (.)\g{-1} can be used to check that two
 adjacent characters are the same.
 </P>
 <P>
 When a branch within an assertion fails to match, any substrings that were
-captured are discarded (as happens with any pattern branch that fails to 
+captured are discarded (as happens with any pattern branch that fails to
 match). A negative assertion succeeds only when all its branches fail to match;
 this means that no captured substrings are ever retained after a successful
 negative assertion. When an assertion contains a matching branch, what happens
@@ -2348,7 +2364,7 @@ assertion has failed. If the assertion is being used as a condition in a
 <a href="#conditions">conditional subpattern</a>
 (see below), captured substrings are retained, because matching continues with
 the "no" branch of the condition. For other failing negative assertions,
-control passes to the previous backtracking point, thus discarding any captured 
+control passes to the previous backtracking point, thus discarding any captured
 strings within the assertion.
 </P>
 <P>
@@ -2957,10 +2973,12 @@ later versions (I tried 5.024) it now works.
 <br><a name="SEC24" href="#TOC1">SUBPATTERNS AS SUBROUTINES</a><br>
 <P>
 If the syntax for a recursive subpattern call (either by number or by
-name) is used outside the parentheses to which it refers, it operates like a
-subroutine in a programming language. The called subpattern may be defined
-before or after the reference. A numbered reference can be absolute or
-relative, as in these examples:
+name) is used outside the parentheses to which it refers, it operates a bit
+like a subroutine in a programming language. More accurately, PCRE2 treats the
+referenced subpattern as an independent subpattern which it tries to match at
+the current matching position. The called subpattern may be defined before or
+after the reference. A numbered reference can be absolute or relative, as in
+these examples:
 <pre>
   (...(absolute)...)...(?2)...
   (...(relative)...)...(?-1)...
@@ -2993,6 +3011,13 @@ different calls. For example, consider this pattern:
 </pre>
 It matches "abcabc". It does not match "abcABC" because the change of
 processing option does not affect the called subpattern.
+</P>
+<P>
+The behaviour of
+<a href="#backtrackcontrol">backtracking control verbs</a>
+in subpatterns when called as subroutines is described in the section entitled
+<a href="#btsub">"Backtracking verbs in subroutines"</a>
+below.
 <a name="onigurumasubroutines"></a></P>
 <br><a name="SEC25" href="#TOC1">ONIGURUMA SUBROUTINE SYNTAX</a><br>
 <P>
@@ -3111,7 +3136,7 @@ are faulted.
 </P>
 <P>
 A closing parenthesis can be included in a name either as \) or between \Q
-and \E. In addition to backslash processing, if the PCRE2_EXTENDED or 
+and \E. In addition to backslash processing, if the PCRE2_EXTENDED or
 PCRE2_EXTENDED_MORE option is also set, unescaped whitespace in verb names is
 skipped, and #-comments are recognized, exactly as in the rest of the pattern.
 PCRE2_EXTENDED and PCRE2_EXTENDED_MORE do not affect verb names unless
@@ -3157,7 +3182,7 @@ in the
 documentation.
 </P>
 <P>
-Experiments with Perl suggest that it too has similar optimizations, and like 
+Experiments with Perl suggest that it too has similar optimizations, and like
 PCRE2, turning them off can change the result of a match.
 </P>
 <br><b>
@@ -3185,7 +3210,7 @@ the outer parentheses.
 <pre>
   (*FAIL) or (*FAIL:NAME)
 </pre>
-This verb causes a matching failure, forcing backtracking to occur. It may be 
+This verb causes a matching failure, forcing backtracking to occur. It may be
 abbreviated to (*F). It is equivalent to (?!) but easier to read. The Perl
 documentation notes that it is probably useful only when combined with (?{}) or
 (??{}). Those are, of course, Perl features that are not present in PCRE2. The
@@ -3197,7 +3222,7 @@ A match with the string "aaaa" always fails, but the callout is taken before
 each backtrack happens (in this example, 10 times).
 </P>
 <P>
-(*ACCEPT:NAME) and (*FAIL:NAME) behave exactly the same as 
+(*ACCEPT:NAME) and (*FAIL:NAME) behave exactly the same as
 (*MARK:NAME)(*ACCEPT) and (*MARK:NAME)(*FAIL), respectively.
 </P>
 <br><b>
@@ -3220,7 +3245,7 @@ matching path is passed back to the caller as described in the section entitled
 in the
 <a href="pcre2api.html"><b>pcre2api</b></a>
 documentation. This applies to all instances of (*MARK), including those inside
-assertions and atomic groups. (There are differences in those cases when 
+assertions and atomic groups. (There are differences in those cases when
 (*MARK) is used in conjunction with (*SKIP) as described below.)
 </P>
 <P>
@@ -3300,7 +3325,7 @@ the current starting point, or not at all. For example:
   a+(*COMMIT)b
 </pre>
 This matches "xxaab" but not "aacaab". It can be thought of as a kind of
-dynamic anchor, or "I've started, so I must finish." 
+dynamic anchor, or "I've started, so I must finish."
 </P>
 <P>
 The behaviour of (*COMMIT:NAME) is not the same as (*MARK:NAME)(*COMMIT). It is
@@ -3524,7 +3549,7 @@ subpattern.
 (*ACCEPT) in a standalone positive assertion causes the assertion to succeed
 without any further processing; captured strings and a (*MARK) name (if set)
 are retained. In a standalone negative assertion, (*ACCEPT) causes the
-assertion to fail without any further processing; captured substrings and any 
+assertion to fail without any further processing; captured substrings and any
 (*MARK) name are discarded.
 </P>
 <P>
@@ -3533,11 +3558,11 @@ a positive assertion and false for a negative one; captured substrings are
 retained in both cases.
 </P>
 <P>
-The remaining verbs act only when a later failure causes a backtrack to 
-reach them. This means that their effect is confined to the assertion, 
+The remaining verbs act only when a later failure causes a backtrack to
+reach them. This means that their effect is confined to the assertion,
 because lookaround assertions are atomic. A backtrack that occurs after an
-assertion is complete does not jump back into the assertion. Note in particular 
-that a (*MARK) name that is set in an assertion is not "seen" by an instance of 
+assertion is complete does not jump back into the assertion. Note in particular
+that a (*MARK) name that is set in an assertion is not "seen" by an instance of
 (*SKIP:NAME) latter in the pattern.
 </P>
 <P>
