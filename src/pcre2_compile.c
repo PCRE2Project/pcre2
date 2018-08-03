@@ -2468,11 +2468,17 @@ while (ptr < ptrend)
         /* EITHER: not both options set */
         ((options & (PCRE2_EXTENDED | PCRE2_ALT_VERBNAMES)) !=
                     (PCRE2_EXTENDED | PCRE2_ALT_VERBNAMES)) ||
-        /* OR: character > 255 */
-        c > 255 ||
-        /* OR: not a # comment or white space */
-        (c != CHAR_NUMBER_SIGN && (cb->ctypes[c] & ctype_space) == 0)
-       ))
+#ifdef SUPPORT_UNICODE                     
+        /* OR: character > 255 AND not Unicode Pattern White Space */
+        (c > 255 && (c|1) != 0x200f && (c|1) != 0x2029) ||
+#endif         
+        /* OR: not a # comment or isspace() white space */
+        (c < 256 && c != CHAR_NUMBER_SIGN && (cb->ctypes[c] & ctype_space) == 0
+#ifdef SUPPORT_UNICODE
+        /* and not CHAR_NEL when Unicode is supported */
+          && c != CHAR_NEL
+#endif                     
+       )))
     {
     PCRE2_SIZE verbnamelength;
 
@@ -2554,11 +2560,18 @@ while (ptr < ptrend)
 
   /* Skip over whitespace and # comments in extended mode. Note that c is a
   character, not a code unit, so we must not use MAX_255 to test its size
-  because MAX_255 tests code units and is assumed TRUE in 8-bit mode. */
+  because MAX_255 tests code units and is assumed TRUE in 8-bit mode. The
+  whitespace characters are those designated as "Pattern White Space" by
+  Unicode, which are the isspace() characters plus CHAR_NEL (newline), which is 
+  U+0085 in Unicode, plus U+200E, U+200F, U+2028, and U+2029. These are a 
+  subset of space characters that match \h and \v. */
 
   if ((options & PCRE2_EXTENDED) != 0)
     {
     if (c < 256 && (cb->ctypes[c] & ctype_space) != 0) continue;
+#ifdef SUPPORT_UNICODE     
+    if (c == CHAR_NEL || (c|1) == 0x200f || (c|1) == 0x2029) continue;
+#endif     
     if (c == CHAR_NUMBER_SIGN)
       {
       while (ptr < ptrend)

@@ -1,4 +1,4 @@
-.TH PCRE2PATTERN 3 "28 July 2018" "PCRE2 10.32"
+.TH PCRE2PATTERN 3 "03 August 2018" "PCRE2 10.32"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION DETAILS"
@@ -1627,9 +1627,13 @@ alternative in the subpattern.
 .rs
 .sp
 The settings of the PCRE2_CASELESS, PCRE2_MULTILINE, PCRE2_DOTALL,
-PCRE2_EXTENDED, PCRE2_EXTENDED_MORE, and PCRE2_NO_AUTO_CAPTURE options (which
-are Perl-compatible) can be changed from within the pattern by a sequence of
-Perl option letters enclosed between "(?" and ")". The option letters are
+PCRE2_EXTENDED, PCRE2_EXTENDED_MORE, and PCRE2_NO_AUTO_CAPTURE options can be
+changed from within the pattern by a sequence of letters enclosed between "(?"
+and ")". These options are Perl-compatible, and are described in detail in the
+.\" HREF
+\fBpcre2api\fP
+.\"
+documentation. The option letters are:
 .sp
   i  for PCRE2_CASELESS
   m  for PCRE2_MULTILINE
@@ -2273,8 +2277,9 @@ unset value matches an empty string.
 Because there may be many capturing parentheses in a pattern, all digits
 following a backslash are taken as part of a potential backreference number.
 If the pattern continues with a digit character, some delimiter must be used to
-terminate the backreference. If the PCRE2_EXTENDED option is set, this can be
-white space. Otherwise, the \eg{ syntax or an empty comment (see
+terminate the backreference. If the PCRE2_EXTENDED or PCRE2_EXTENDED_MORE
+option is set, this can be white space. Otherwise, the \eg{ syntax or an empty
+comment (see
 .\" HTML <a href="#comments">
 .\" </a>
 "Comments"
@@ -2762,12 +2767,12 @@ no part in the pattern matching.
 .P
 The sequence (?# marks the start of a comment that continues up to the next
 closing parenthesis. Nested parentheses are not permitted. If the
-PCRE2_EXTENDED option is set, an unescaped # character also introduces a
-comment, which in this case continues to immediately after the next newline
-character or character sequence in the pattern. Which characters are
-interpreted as newlines is controlled by an option passed to the compiling
-function or by a special sequence at the start of the pattern, as described in
-the section entitled
+PCRE2_EXTENDED or PCRE2_EXTENDED_MORE option is set, an unescaped # character
+also introduces a comment, which in this case continues to immediately after
+the next newline character or character sequence in the pattern. Which
+characters are interpreted as newlines is controlled by an option passed to the
+compiling function or by a special sequence at the start of the pattern, as
+described in the section entitled
 .\" HTML <a href="#newlines">
 .\" </a>
 "Newline conventions"
@@ -3132,10 +3137,11 @@ only backslash items that are permitted are \eQ, \eE, and sequences such as
 are faulted.
 .P
 A closing parenthesis can be included in a name either as \e) or between \eQ
-and \eE. In addition to backslash processing, if the PCRE2_EXTENDED option is
-also set, unescaped whitespace in verb names is skipped, and #-comments are
-recognized, exactly as in the rest of the pattern. PCRE2_EXTENDED does not
-affect verb names unless PCRE2_ALT_VERBNAMES is also set.
+and \eE. In addition to backslash processing, if the PCRE2_EXTENDED or 
+PCRE2_EXTENDED_MORE option is also set, unescaped whitespace in verb names is
+skipped, and #-comments are recognized, exactly as in the rest of the pattern.
+PCRE2_EXTENDED and PCRE2_EXTENDED_MORE do not affect verb names unless
+PCRE2_ALT_VERBNAMES is also set.
 .P
 The maximum length of a name is 255 in the 8-bit library and 65535 in the
 16-bit and 32-bit libraries. If the name is empty, that is, if the closing
@@ -3614,6 +3620,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 28 July 2018
+Last updated: 03 August 2018
 Copyright (c) 1997-2018 University of Cambridge.
 .fi

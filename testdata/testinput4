@@ -2293,5 +2293,20 @@
 
 /[\N{U+1234}]/utf
     \x{1234}
+    
+# Test the full list of Unicode "Pattern White Space" characters that are to
+# be ignored by /x. The pattern lines below may show up oddly in text editors
+# or when listed to the screen. Note that characters such as U+2002, which are
+# matched as space by \h and \v are *not* "Pattern White Space".
+
+/A‎‏  B/x,utf
+    AB
+
+/A B/x,utf
+    A\x{2002}B
+\= Expect no match
+    AB
+    
+# ------- 
 
 # End of testinput4

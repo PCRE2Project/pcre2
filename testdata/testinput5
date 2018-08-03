@@ -2091,4 +2091,18 @@
 
 /\N{U}/
 
+# This tests the non-UTF Unicode NEL pattern whitespace character, only
+# recognized by PCRE2 with /x when there is Unicode support.
+
+/A      
+�B/x
+    AB 
+    
+# This tests Unicode Pattern White Space characters in verb names when they
+# are being processed with PCRE2_EXTENDED. Note: there are UTF-8 characters
+# with code points greater than 255 between A, B, and C in the pattern.
+
+/(*: A‎B C)abc/x,utf,mark,alt_verbnames
+    abc
+
 # End of testinput5

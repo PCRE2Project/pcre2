@@ -1,4 +1,4 @@
-.TH PCRE2SYNTAX 3 "28 July 2018" "PCRE2 10.32"
+.TH PCRE2SYNTAX 3 "01 August 2018" "PCRE2 10.32"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION SYNTAX SUMMARY"
@@ -421,6 +421,8 @@ but some of them use Unicode properties if PCRE2_UCP is set. You can use
 .
 .SH "OPTION SETTING"
 .rs
+Changes of these options within a group are automatically cancelled at the end 
+of the group.
 .sp
   (?i)            caseless
   (?J)            allow duplicate names
@@ -619,6 +621,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 28 July 2018
+Last updated: 01 August 2018
 Copyright (c) 1997-2018 University of Cambridge.
 .fi

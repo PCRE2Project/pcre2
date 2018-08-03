@@ -837,10 +837,10 @@ page for details.
 </P>
 <P>
 When a pattern is compiled with the PCRE2_EXTENDED or PCRE2_EXTENDED_MORE
-option, the newline convention affects the recognition of white space and the
-end of internal comments starting with #. The value is saved with the compiled
-pattern for subsequent use by the JIT compiler and by the two interpreted
-matching functions, <i>pcre2_match()</i> and <i>pcre2_dfa_match()</i>.
+option, the newline convention affects the recognition of the end of internal
+comments starting with #. The value is saved with the compiled pattern for
+subsequent use by the JIT compiler and by the two interpreted matching
+functions, <i>pcre2_match()</i> and <i>pcre2_dfa_match()</i>.
 <br>
 <br>
 <b>int pcre2_set_parens_nest_limit(pcre2_compile_context *<i>ccontext</i>,</b>
@@ -1424,9 +1424,9 @@ include a closing parenthesis in the name. However, if the PCRE2_ALT_VERBNAMES
 option is set, normal backslash processing is applied to verb names and only an
 unescaped closing parenthesis terminates the name. A closing parenthesis can be
 included in a name either as \) or between \Q and \E. If the PCRE2_EXTENDED
-or PCRE2_EXTENDED_MORE option is set, unescaped whitespace in verb names is
-skipped and #-comments are recognized in this mode, exactly as in the rest of
-the pattern.
+or PCRE2_EXTENDED_MORE option is set with PCRE2_ALT_VERBNAMES, unescaped
+whitespace in verb names is skipped and #-comments are recognized, exactly as
+in the rest of the pattern.
 <pre>
   PCRE2_AUTO_CALLOUT
 </pre>
@@ -1510,15 +1510,36 @@ is not allowed within sequences such as (?&#62; that introduce various
 parenthesized subpatterns, nor within numerical quantifiers such as {1,3}.
 Ignorable white space is permitted between an item and a following quantifier
 and between a quantifier and a following + that indicates possessiveness.
+PCRE2_EXTENDED is equivalent to Perl's /x option, and it can be changed within
+a pattern by a (?x) option setting.
 </P>
 <P>
-PCRE2_EXTENDED also causes characters between an unescaped # outside a
-character class and the next newline, inclusive, to be ignored, which makes it
-possible to include comments inside complicated patterns. Note that the end of
-this type of comment is a literal newline sequence in the pattern; escape
-sequences that happen to represent a newline do not count. PCRE2_EXTENDED is
-equivalent to Perl's /x option, and it can be changed within a pattern by a
-(?x) option setting.
+When PCRE2 is compiled without Unicode support, PCRE2_EXTENDED recognizes as 
+white space only those characters with code points less than 256 that are 
+flagged as white space in its low-character table. The table is normally 
+created by 
+<a href="pcre2_maketables.html"><b>pcre2_maketables()</b>,</a>
+which uses the <b>isspace()</b> function to identify space characters. In most
+ASCII environments, the relevant characters are those with code points 0x0009
+(tab), 0x000A (linefeed), 0x000B (vertical tab), 0x000C (formfeed), 0x000D
+(carriage return), and 0x0020 (space). 
+</P>
+<P>
+When PCRE2 is compiled with Unicode support, in addition to these characters,
+five more Unicode "Pattern White Space" characters are recognized by
+PCRE2_EXTENDED. These are U+0085 (next line), U+200E (left-to-right mark),
+U+200F (right-to-left mark), U+2028 (line separator), and U+2029 (paragraph
+separator). This set of characters is the same as recognized by Perl's /x
+option. Note that the horizontal and vertical space characters that are matched
+by the \h and \v escapes in patterns are a much bigger set.
+</P>
+<P>
+As well as ignoring most white space, PCRE2_EXTENDED also causes characters
+between an unescaped # outside a character class and the next newline,
+inclusive, to be ignored, which makes it possible to include comments inside
+complicated patterns. Note that the end of this type of comment is a literal
+newline sequence in the pattern; escape sequences that happen to represent a
+newline do not count.
 </P>
 <P>
 Which characters are interpreted as newlines can be specified by a setting in
@@ -1531,9 +1552,11 @@ built.
   PCRE2_EXTENDED_MORE
 </pre>
 This option has the effect of PCRE2_EXTENDED, but, in addition, unescaped space
-and horizontal tab characters are ignored inside a character class.
-PCRE2_EXTENDED_MORE is equivalent to Perl's 5.26 /xx option, and it can be
-changed within a pattern by a (?xx) option setting.
+and horizontal tab characters are ignored inside a character class. Note: only 
+these two characters are ignored, not the full set of pattern white space 
+characters that are ignored outside a character class. PCRE2_EXTENDED_MORE is
+equivalent to Perl's /xx option, and it can be changed within a pattern by a
+(?xx) option setting.
 <pre>
   PCRE2_FIRSTLINE
 </pre>
@@ -3635,7 +3658,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC42" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 27 July 2018
+Last updated: 03 August 2018
 <br>
 Copyright &copy; 1997-2018 University of Cambridge.
 <br>

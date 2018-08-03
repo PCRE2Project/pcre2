@@ -4756,4 +4756,21 @@ Failed: error 178 at offset 5: digits missing in \x{} or \o{} or \N{U+}
 /\N{U}/
 Failed: error 137 at offset 2: PCRE2 does not support \F, \L, \l, \N{name}, \U, or \u
 
+# This tests the non-UTF Unicode NEL pattern whitespace character, only
+# recognized by PCRE2 with /x when there is Unicode support.
+
+/A      
+�B/x
+    AB 
+ 0: AB
+    
+# This tests Unicode Pattern White Space characters in verb names when they
+# are being processed with PCRE2_EXTENDED. Note: there are UTF-8 characters
+# with code points greater than 255 between A, B, and C in the pattern.
+
+/(*: A‎B C)abc/x,utf,mark,alt_verbnames
+    abc
+ 0: abc
+MK: ABC
+
 # End of testinput5
