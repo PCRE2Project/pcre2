@@ -2184,6 +2184,11 @@
     Blah blah      
     blaH blah 
 
+/((?i)blah)\s+(?m)A(?i:\1)/
+    blah ABLAH
+\= Expect no match
+    blah aBLAH
+
 /(?>a*)*/
     a
     aa

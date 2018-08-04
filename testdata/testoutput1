@@ -3346,6 +3346,14 @@ No match
  0: blaH blah
  1: blaH
 
+/((?i)blah)\s+(?m)A(?i:\1)/
+    blah ABLAH
+ 0: blah ABLAH
+ 1: blah
+\= Expect no match
+    blah aBLAH
+No match
+
 /(?>a*)*/
     a
  0: a

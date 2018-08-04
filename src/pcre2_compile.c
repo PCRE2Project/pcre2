@@ -2284,11 +2284,14 @@ typedef struct nest_save {
 #define NSF_RESET          0x0001u
 #define NSF_CONDASSERT     0x0002u
 
-/* Of the options that are changeable within the pattern, these are tracked
-during parsing. The rest are used from META_OPTIONS items when compiling. */
+/* Options that are changeable within the pattern must be tracked during
+parsing. Some (e.g. PCRE2_EXTENDED) are implemented entirely during parsing,
+but all must be tracked so that META_OPTIONS items set the correct values for
+the main compiling phase. */
 
-#define PARSE_TRACKED_OPTIONS \
-  (PCRE2_DUPNAMES|PCRE2_EXTENDED|PCRE2_EXTENDED_MORE|PCRE2_NO_AUTO_CAPTURE)
+#define PARSE_TRACKED_OPTIONS (PCRE2_CASELESS|PCRE2_DOTALL|PCRE2_DUPNAMES| \
+  PCRE2_EXTENDED|PCRE2_EXTENDED_MORE|PCRE2_MULTILINE|PCRE2_NO_AUTO_CAPTURE| \
+  PCRE2_UNGREEDY)
 
 /* States used for analyzing ranges in character classes. The two OK values
 must be last. */
@@ -2468,16 +2471,16 @@ while (ptr < ptrend)
         /* EITHER: not both options set */
         ((options & (PCRE2_EXTENDED | PCRE2_ALT_VERBNAMES)) !=
                     (PCRE2_EXTENDED | PCRE2_ALT_VERBNAMES)) ||
-#ifdef SUPPORT_UNICODE                     
+#ifdef SUPPORT_UNICODE
         /* OR: character > 255 AND not Unicode Pattern White Space */
         (c > 255 && (c|1) != 0x200f && (c|1) != 0x2029) ||
-#endif         
+#endif
         /* OR: not a # comment or isspace() white space */
         (c < 256 && c != CHAR_NUMBER_SIGN && (cb->ctypes[c] & ctype_space) == 0
 #ifdef SUPPORT_UNICODE
         /* and not CHAR_NEL when Unicode is supported */
           && c != CHAR_NEL
-#endif                     
+#endif
        )))
     {
     PCRE2_SIZE verbnamelength;
@@ -2562,16 +2565,16 @@ while (ptr < ptrend)
   character, not a code unit, so we must not use MAX_255 to test its size
   because MAX_255 tests code units and is assumed TRUE in 8-bit mode. The
   whitespace characters are those designated as "Pattern White Space" by
-  Unicode, which are the isspace() characters plus CHAR_NEL (newline), which is 
-  U+0085 in Unicode, plus U+200E, U+200F, U+2028, and U+2029. These are a 
+  Unicode, which are the isspace() characters plus CHAR_NEL (newline), which is
+  U+0085 in Unicode, plus U+200E, U+200F, U+2028, and U+2029. These are a
   subset of space characters that match \h and \v. */
 
   if ((options & PCRE2_EXTENDED) != 0)
     {
     if (c < 256 && (cb->ctypes[c] & ctype_space) != 0) continue;
-#ifdef SUPPORT_UNICODE     
+#ifdef SUPPORT_UNICODE
     if (c == CHAR_NEL || (c|1) == 0x200f || (c|1) == 0x2029) continue;
-#endif     
+#endif
     if (c == CHAR_NUMBER_SIGN)
       {
       while (ptr < ptrend)
@@ -3590,6 +3593,8 @@ while (ptr < ptrend)
       else
         {
         BOOL hyphenok = TRUE;
+        uint32_t oldoptions = options; 
+         
         top_nest->reset_group = 0;
         top_nest->max_group = 0;
         set = unset = 0;
@@ -3602,7 +3607,7 @@ while (ptr < ptrend)
           options &= ~(PCRE2_CASELESS|PCRE2_MULTILINE|PCRE2_NO_AUTO_CAPTURE|
                        PCRE2_DOTALL|PCRE2_EXTENDED|PCRE2_EXTENDED_MORE);
           hyphenok = FALSE;
-          ptr++; 
+          ptr++;
           }
 
         while (ptr < ptrend && *ptr != CHAR_RIGHT_PARENTHESIS &&
@@ -3618,7 +3623,7 @@ while (ptr < ptrend)
               goto FAILED;
               }
             optset = &unset;
-            hyphenok = FALSE; 
+            hyphenok = FALSE;
             break;
 
             case CHAR_J:  /* Record that it changed in the external options */
@@ -3677,10 +3682,9 @@ while (ptr < ptrend)
           }
         else *parsed_pattern++ = META_NOCAPTURE;
 
-        /* If nothing changed, no need to record. The check of hyphenok catches 
-        the (?^) case. */
+        /* If nothing changed, no need to record. */
 
-        if (set != 0 || unset != 0 || !hyphenok)
+        if (options != oldoptions)
           {
           *parsed_pattern++ = META_OPTIONS;
           *parsed_pattern++ = options;
