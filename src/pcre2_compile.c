@@ -5655,7 +5655,7 @@ for (;; pptr++)
       if (class_has_8bitchar > 0)
         {
         *code++ |= XCL_MAP;
-        memmove(code + (32 / sizeof(PCRE2_UCHAR)), code,
+        (void)memmove(code + (32 / sizeof(PCRE2_UCHAR)), code,
           CU2BYTES(class_uchardata - code));
         if (negate_class && !xclass_has_prop)
           for (i = 0; i < 32; i++) classbits[i] = ~classbits[i];
@@ -6602,7 +6602,7 @@ for (;; pptr++)
 
       /* Wrap the recursion call in OP_BRA brackets. */
 
-      memmove(previous + 1 + LINK_SIZE, previous, CU2BYTES(1 + LINK_SIZE));
+      (void)memmove(previous + 1 + LINK_SIZE, previous, CU2BYTES(1 + LINK_SIZE));
       op_previous = *previous = OP_BRA;
       PUT(previous, 1, 2 + 2*LINK_SIZE);
       previous[2 + 2*LINK_SIZE] = OP_KET;
@@ -6682,7 +6682,7 @@ for (;; pptr++)
 
           if (repeat_max <= 1 || repeat_max == REPEAT_UNLIMITED)
             {
-            memmove(previous + 1, previous, CU2BYTES(len));
+            (void)memmove(previous + 1, previous, CU2BYTES(len));
             code++;
             if (repeat_max == 0)
               {
@@ -6703,7 +6703,7 @@ for (;; pptr++)
           else
             {
             int linkoffset;
-            memmove(previous + 2 + LINK_SIZE, previous, CU2BYTES(len));
+            (void)memmove(previous + 2 + LINK_SIZE, previous, CU2BYTES(len));
             code += 2 + LINK_SIZE;
             *previous++ = OP_BRAZERO + repeat_type;
             *previous++ = OP_BRA;
@@ -6904,7 +6904,7 @@ for (;; pptr++)
               if (*bracode == OP_COND || *bracode == OP_SCOND)
                 {
                 int nlen = (int)(code - bracode);
-                memmove(bracode + 1 + LINK_SIZE, bracode, CU2BYTES(nlen));
+                (void)memmove(bracode + 1 + LINK_SIZE, bracode, CU2BYTES(nlen));
                 code += 1 + LINK_SIZE;
                 nlen += 1 + LINK_SIZE;
                 *bracode = (*bracode == OP_COND)? OP_BRAPOS : OP_SBRAPOS;
@@ -7175,7 +7175,7 @@ for (;; pptr++)
 
         else
           {
-          memmove(tempcode + 1 + LINK_SIZE, tempcode, CU2BYTES(len));
+          (void)memmove(tempcode + 1 + LINK_SIZE, tempcode, CU2BYTES(len));
           code += 1 + LINK_SIZE;
           len += 1 + LINK_SIZE;
           tempcode[0] = OP_ONCE;
@@ -7715,7 +7715,7 @@ for (;;)
       {
       if (cb->open_caps->flag)
         {
-        memmove(start_bracket + 1 + LINK_SIZE, start_bracket,
+        (void)memmove(start_bracket + 1 + LINK_SIZE, start_bracket,
           CU2BYTES(code - start_bracket));
         *start_bracket = OP_ONCE;
         code += 1 + LINK_SIZE;
@@ -8315,7 +8315,7 @@ for (i = 0; i < tablecount; i++)
 
   if (crc < 0)
     {
-    memmove(slot + cb->name_entry_size, slot,
+    (void)memmove(slot + cb->name_entry_size, slot,
       CU2BYTES((tablecount - i) * cb->name_entry_size));
     break;
     }

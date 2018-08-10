@@ -2595,6 +2595,46 @@ static const uint8_t tables2[] = {
 };
 
 
+
+#if !defined(VPCOMPAT) && !defined(HAVE_MEMMOVE)
+/*************************************************
+*    Emulated memmove() for systems without it   *
+*************************************************/
+
+/* This function can make use of bcopy() if it is available. Otherwise do it by
+steam, as there are some non-Unix environments that lack both memmove() and
+bcopy(). */
+
+static void *
+emulated_memmove(void *d, const void *s, size_t n)
+{
+#ifdef HAVE_BCOPY
+bcopy(s, d, n);
+return d;
+#else
+size_t i;
+unsigned char *dest = (unsigned char *)d;
+const unsigned char *src = (const unsigned char *)s;
+if (dest > src)
+  {
+  dest += n;
+  src += n;
+  for (i = 0; i < n; ++i) *(--dest) = *(--src);
+  return (void *)dest;
+  }
+else
+  {
+  for (i = 0; i < n; ++i) *dest++ = *src++;
+  return (void *)(dest - n);
+  }
+#endif   /* not HAVE_BCOPY */
+}
+#undef memmove
+#define memmove(d,s,n) emulated_memmove(d,s,n)
+#endif   /* not VPCOMPAT && not HAVE_MEMMOVE */
+
+
+
 #ifndef HAVE_STRERROR
 /*************************************************
 *     Provide strerror() for non-ANSI libraries  *
@@ -6949,9 +6989,9 @@ if (dat_datctl.replacement[0] != 0)
 
   if (timeitm)
     fprintf(outfile, "** Timing is not supported with replace: ignored\n");
-    
+
   if ((dat_datctl.control & CTL_ALTGLOBAL) != 0)
-    fprintf(outfile, "** Altglobal is not supported with replace: ignored\n"); 
+    fprintf(outfile, "** Altglobal is not supported with replace: ignored\n");
 
   xoptions = (((dat_datctl.control & CTL_GLOBAL) == 0)? 0 :
                 PCRE2_SUBSTITUTE_GLOBAL) |
@@ -7259,7 +7299,7 @@ for (gmatched = 0;; gmatched++)
       }
 
     /* If this is not the first time round a global loop, check that the
-    returned string has changed. If it has not, check for an empty string match 
+    returned string has changed. If it has not, check for an empty string match
     at different starting offset from the previous match. This is a failed test
     retry for null-matching patterns that don't match at their starting offset,
     for example /(?<=\G.)/. A repeated match at the same point is not such a
@@ -7267,15 +7307,15 @@ for (gmatched = 0;; gmatched++)
     match at the current point. For any other repeated match, there is a bug
     somewhere and we must break the loop because it will go on for ever. We
     know that there are always at least two elements in the ovector. */
-    
+
     if (gmatched > 0 && ovecsave[0] == ovector[0] && ovecsave[1] == ovector[1])
       {
       if (ovector[0] == ovector[1] && ovecsave[2] != dat_datctl.offset)
         {
         g_notempty = PCRE2_NOTEMPTY_ATSTART | PCRE2_ANCHORED;
-        ovecsave[2] = dat_datctl.offset; 
+        ovecsave[2] = dat_datctl.offset;
         continue;    /* Back to the top of the loop */
-        }  
+        }
       fprintf(outfile,
         "** PCRE2 error: global repeat returned the same string as previous\n");
       fprintf(outfile, "** Global loop abandoned\n");
@@ -7591,11 +7631,11 @@ for (gmatched = 0;; gmatched++)
     subject. If so, the loop is over. Otherwise, mimic what Perl's /g option
     does. Set PCRE2_NOTEMPTY_ATSTART and PCRE2_ANCHORED and try the match again
     at the same point. If this fails it will be picked up above, where a fake
-    match is set up so that at this point we advance to the next character. 
-    
-    However, in order to cope with patterns that never match at their starting 
-    offset (e.g. /(?<=\G.)/) we don't do this when the match offset is greater 
-    than the starting offset. This means there will be a retry with the 
+    match is set up so that at this point we advance to the next character.
+
+    However, in order to cope with patterns that never match at their starting
+    offset (e.g. /(?<=\G.)/) we don't do this when the match offset is greater
+    than the starting offset. This means there will be a retry with the
     starting offset at the match offset. If this returns the same match again,
     it is picked up above and ignored, and the special action is then taken. */
 
@@ -7644,16 +7684,16 @@ for (gmatched = 0;; gmatched++)
     /* For a normal global (/g) iteration, save the current ovector[0,1] and
     the starting offset so that we can check that they do change each time.
     Otherwise a matching bug that returns the same string causes an infinite
-    loop. It has happened! Then update the start offset, leaving other 
+    loop. It has happened! Then update the start offset, leaving other
     parameters alone. */
 
     if ((dat_datctl.control & CTL_GLOBAL) != 0)
       {
       ovecsave[0] = ovector[0];
       ovecsave[1] = ovector[1];
-      ovecsave[2] = dat_datctl.offset; 
+      ovecsave[2] = dat_datctl.offset;
       dat_datctl.offset = end_offset;
-      } 
+      }
 
     /* For altglobal, just update the pointer and length. */
 

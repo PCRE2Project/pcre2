@@ -147,6 +147,13 @@ matched "ab". (The (?m) setting lost the fact that (?i) should be reset at the
 end of its group during the parse process, but without another setting such as 
 (?m) the compile phase got it right.) This bug was introduced by the
 refactoring in release 10.23.
+
+33. PCRE2 uses bcopy() if available when memmove() is not, and it used just to 
+define memmove() as function call to bcopy(). This hasn't been tested for a
+long time because in pcre2test the result of memmove() was being used, whereas 
+bcopy() doesn't return a result. This feature is now refactored always to call 
+an emulation function when there is no memmove(). The emulation makes use of 
+bcopy() when available.
       
 
 Version 10.31 12-February-2018

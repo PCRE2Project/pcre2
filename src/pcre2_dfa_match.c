@@ -875,7 +875,7 @@ for (;;)
             else if (match_count > 0 && ++match_count * 2 > (int)offsetcount)
               match_count = 0;
           count = ((match_count == 0)? (int)offsetcount : match_count * 2) - 2;
-          if (count > 0) memmove(offsets + 2, offsets,
+          if (count > 0) (void)memmove(offsets + 2, offsets,
             (size_t)count * sizeof(PCRE2_SIZE));
           if (offsetcount >= 2)
             {
