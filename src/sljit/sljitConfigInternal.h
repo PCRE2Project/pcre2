@@ -66,7 +66,7 @@
      SLJIT_RETURN_ADDRESS_OFFSET : a return instruction always adds this offset to the return address
 
    Other macros:
-     SLJIT_FUNC : calling convention attribute for both calling JIT form C and C calling back from JIT
+     SLJIT_FUNC : calling convention attribute for both calling JIT from C and C calling back from JIT
      SLJIT_W(number) : defining 64 bit constants on 64 bit architectures (compiler independent helper)
 */
 
