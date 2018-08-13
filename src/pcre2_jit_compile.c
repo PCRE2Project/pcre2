@@ -839,7 +839,7 @@ switch(*cc)
 #endif
 
   case OP_MARK:
-  case OP_COMMIT_ARG: 
+  case OP_COMMIT_ARG:
   case OP_PRUNE_ARG:
   case OP_SKIP_ARG:
   case OP_THEN_ARG:
@@ -940,7 +940,7 @@ while (cc < ccend)
     common->control_head_ptr = 1;
     /* Fall through. */
 
-    case OP_COMMIT_ARG: 
+    case OP_COMMIT_ARG:
     case OP_PRUNE_ARG:
     case OP_MARK:
     if (common->mark_ptr == 0)
@@ -1555,7 +1555,7 @@ while (cc < ccend)
     break;
 
     case OP_MARK:
-    case OP_COMMIT_ARG: 
+    case OP_COMMIT_ARG:
     case OP_PRUNE_ARG:
     case OP_THEN_ARG:
     SLJIT_ASSERT(common->mark_ptr != 0);
@@ -1736,7 +1736,7 @@ while (cc < ccend)
     break;
 
     case OP_MARK:
-    case OP_COMMIT_ARG: 
+    case OP_COMMIT_ARG:
     case OP_PRUNE_ARG:
     case OP_THEN_ARG:
     SLJIT_ASSERT(common->mark_ptr != 0);
@@ -2045,7 +2045,7 @@ while (cc < ccend)
     break;
 
     case OP_MARK:
-    case OP_COMMIT_ARG: 
+    case OP_COMMIT_ARG:
     case OP_PRUNE_ARG:
     case OP_THEN_ARG:
     SLJIT_ASSERT(common->mark_ptr != 0);
@@ -2433,7 +2433,7 @@ while (cc < ccend)
     break;
 
     case OP_MARK:
-    case OP_COMMIT_ARG: 
+    case OP_COMMIT_ARG:
     case OP_PRUNE_ARG:
     case OP_THEN_ARG:
     SLJIT_ASSERT(common->mark_ptr != 0);
@@ -7264,11 +7264,11 @@ while (cc < end_subject)
 
   /* If Extend or ZWJ follows Extended_Pictographic, do not update lgb; this
   allows any number of them before a following Extended_Pictographic. */
-  
-  if ((rgb != ucp_gbExtend && rgb != ucp_gbZWJ) || 
+
+  if ((rgb != ucp_gbExtend && rgb != ucp_gbZWJ) ||
        lgb != ucp_gbExtended_Pictographic)
     lgb = rgb;
-     
+
   prevcc = cc;
   cc += len;
   }
@@ -7320,11 +7320,11 @@ while (cc < end_subject)
 
   /* If Extend or ZWJ follows Extended_Pictographic, do not update lgb; this
   allows any number of them before a following Extended_Pictographic. */
-  
-  if ((rgb != ucp_gbExtend && rgb != ucp_gbZWJ) || 
+
+  if ((rgb != ucp_gbExtend && rgb != ucp_gbZWJ) ||
        lgb != ucp_gbExtended_Pictographic)
     lgb = rgb;
-     
+
   cc++;
   }
 
@@ -10356,7 +10356,7 @@ backtrack_common *backtrack;
 PCRE2_UCHAR opcode = *cc;
 PCRE2_SPTR ccend = cc + 1;
 
-if (opcode == OP_COMMIT_ARG || opcode == OP_PRUNE_ARG || 
+if (opcode == OP_COMMIT_ARG || opcode == OP_PRUNE_ARG ||
     opcode == OP_SKIP_ARG || opcode == OP_THEN_ARG)
   ccend += 2 + cc[1];
 
@@ -10688,7 +10688,7 @@ while (cc < ccend)
     case OP_THEN:
     case OP_THEN_ARG:
     case OP_COMMIT:
-    case OP_COMMIT_ARG: 
+    case OP_COMMIT_ARG:
     cc = compile_control_verb_matchingpath(common, cc, parent);
     break;
 
@@ -11763,7 +11763,7 @@ while (current)
     break;
 
     case OP_COMMIT:
-    case OP_COMMIT_ARG: 
+    case OP_COMMIT_ARG:
     if (!common->local_quit_available)
       OP1(SLJIT_MOV, SLJIT_RETURN_REG, 0, SLJIT_IMM, PCRE2_ERROR_NOMATCH);
     if (common->quit_label == NULL)

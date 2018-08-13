@@ -707,7 +707,7 @@ for (;;)
     /* Skip these, but we need to add in the name length. */
 
     case OP_MARK:
-    case OP_COMMIT_ARG: 
+    case OP_COMMIT_ARG:
     case OP_PRUNE_ARG:
     case OP_SKIP_ARG:
     case OP_THEN_ARG:
@@ -957,7 +957,7 @@ do
       case OP_CIRCM:
       case OP_CLOSE:
       case OP_COMMIT:
-      case OP_COMMIT_ARG: 
+      case OP_COMMIT_ARG:
       case OP_COND:
       case OP_CREF:
       case OP_FALSE:

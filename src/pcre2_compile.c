@@ -3593,8 +3593,8 @@ while (ptr < ptrend)
       else
         {
         BOOL hyphenok = TRUE;
-        uint32_t oldoptions = options; 
-         
+        uint32_t oldoptions = options;
+
         top_nest->reset_group = 0;
         top_nest->max_group = 0;
         set = unset = 0;

@@ -100,7 +100,7 @@ enum {
   ucp_Zs     /* Space separator */
 };
 
-/* These are grapheme break properties. The Extended Pictographic property 
+/* These are grapheme break properties. The Extended Pictographic property
 comes from the emoji-data.txt file. */
 
 enum {
@@ -273,13 +273,13 @@ enum {
   ucp_Nushu,
   ucp_Soyombo,
   ucp_Zanabazar_Square,
-  /* New for Unicode 11.0.0 */ 
-  ucp_Dogra, 
-  ucp_Gunjala_Gondi, 
-  ucp_Hanifi_Rohingya, 
-  ucp_Makasar, 
+  /* New for Unicode 11.0.0 */
+  ucp_Dogra,
+  ucp_Gunjala_Gondi,
+  ucp_Hanifi_Rohingya,
+  ucp_Makasar,
   ucp_Medefaidrin,
-  ucp_Old_Sogdian, 
+  ucp_Old_Sogdian,
   ucp_Sogdian
 };
 

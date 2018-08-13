@@ -83,7 +83,7 @@ If \fBbuffer\fP points to a NULL pointer, an output buffer is obtained using
 the allocator in the context or \fBmalloc()\fP if no context is supplied. A
 pointer to this buffer is placed in the variable to which \fBbuffer\fP points.
 When no longer needed the output buffer must be freed by calling
-\fBpcre2_converted_pattern_free()\fP. If this function is called with a NULL 
+\fBpcre2_converted_pattern_free()\fP. If this function is called with a NULL
 argument, it returns immediately without doing anything.
 .P
 If \fBbuffer\fP points to a non-NULL pointer, \fBblength\fP must be set to the

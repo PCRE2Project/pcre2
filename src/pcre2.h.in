@@ -46,7 +46,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #define PCRE2_PRERELEASE      @PCRE2_PRERELEASE@
 #define PCRE2_DATE            @PCRE2_DATE@
 
-/* For the benefit of systems without stdint.h, an alternative is to use 
+/* For the benefit of systems without stdint.h, an alternative is to use
 inttypes.h. The existence of these headers is checked by configure or CMake. */
 
 #define PCRE2_HAVE_STDINT_H   @PCRE2_HAVE_STDINT_H@
@@ -88,7 +88,7 @@ set, we ensure here that it has no effect. */
 #endif
 
 /* Have to include limits.h, stdlib.h and stdint.h (or inttypes.h) to ensure
-that size_t and uint8_t, UCHAR_MAX, etc are defined. If the system has neither 
+that size_t and uint8_t, UCHAR_MAX, etc are defined. If the system has neither
 header, the relevant values must be provided by some other means. */
 
 #include <limits.h>

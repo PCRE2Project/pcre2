@@ -177,7 +177,7 @@ are a starting size, a maximum size, and a general context (for memory
 allocation functions, or NULL for standard memory allocation). It returns a
 pointer to an opaque structure of type \fBpcre2_jit_stack\fP, or NULL if there
 is an error. The \fBpcre2_jit_stack_free()\fP function is used to free a stack
-that is no longer needed. If its argument is NULL, this function returns 
+that is no longer needed. If its argument is NULL, this function returns
 immediately, without doing anything. (For the technically minded: the address
 space is allocated by mmap or VirtualAlloc.) A maximum stack size of 512KiB to
 1MiB should be more than enough for any pattern.

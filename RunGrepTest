@@ -4,10 +4,10 @@
 # itself. What we are checking here is the file handling and options that are
 # supported by pcre2grep. This script must be run in the build directory.
 
-# CODING CONVENTIONS: 
+# CODING CONVENTIONS:
 # * Put printf arguments in single, not double quotes to avoid unwanted
 #     escaping.
-# * Use \0 for binary zero in printf, not \x0, for the benefit of older 
+# * Use \0 for binary zero in printf, not \x0, for the benefit of older
 #     versions.
 
 # Set the C locale, so that sort(1) behaves predictably.

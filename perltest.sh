@@ -233,8 +233,8 @@ for (;;)
 
   # Use no_start_optimize (disable PCRE2 start-up optimization) to disable Perl
   # optimization by inserting (??{""}) at the start of the pattern. We may
-  # also encounter -no_start_optimize from a #pattern setting. 
-  
+  # also encounter -no_start_optimize from a #pattern setting.
+
   $mod =~ s/-no_start_optimize,?//;
   if ($mod =~ s/no_start_optimize,?//) { $pat =~ s/$del/$del(??{""})/; }
 

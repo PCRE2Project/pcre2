@@ -94,7 +94,7 @@ may also reduce the memory requirements.
 In contrast to <b>pcre2_match()</b>, <b>pcre2_dfa_match()</b> does use recursive
 function calls, but only for processing atomic groups, lookaround assertions,
 and recursion within the pattern. The original version of the code used to
-allocate quite large internal workspace vectors on the stack, which caused some 
+allocate quite large internal workspace vectors on the stack, which caused some
 problems for some patterns in environments with small stacks. From release
 10.32 the code for <b>pcre2_dfa_match()</b> has been re-factored to use heap
 memory when necessary for internal workspace when recursing, though recursive

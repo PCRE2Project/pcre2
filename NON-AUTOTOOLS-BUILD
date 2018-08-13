@@ -329,7 +329,7 @@ cache can be deleted by selecting "File > Delete Cache".
     most recent build configuration is targeted by the tests. A summary of
     test results is presented. Complete test output is subsequently
     available for review in Testing\Temporary under your build dir.
-    
+
 
 BUILDING PCRE2 ON WINDOWS WITH VISUAL STUDIO
 

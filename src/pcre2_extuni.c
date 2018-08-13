@@ -132,10 +132,10 @@ while (eptr < end_subject)
   /* If Extend or ZWJ follows Extended_Pictographic, do not update lgb; this
   allows any number of them before a following Extended_Pictographic. */
 
-  if ((rgb != ucp_gbExtend && rgb != ucp_gbZWJ) || 
+  if ((rgb != ucp_gbExtend && rgb != ucp_gbZWJ) ||
        lgb != ucp_gbExtended_Pictographic)
     lgb = rgb;
-     
+
   eptr += len;
   if (xcount != NULL) *xcount += 1;
   }

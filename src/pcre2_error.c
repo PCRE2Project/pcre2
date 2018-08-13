@@ -263,7 +263,7 @@ static const unsigned char match_error_texts[] =
   "bad serialized data\0"
   "heap limit exceeded\0"
   "invalid syntax\0"
-  /* 65 */ 
+  /* 65 */
   "internal error - duplicate substitution match\0"
   ;
 

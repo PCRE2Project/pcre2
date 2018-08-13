@@ -2,30 +2,30 @@ Change Log for PCRE2
 --------------------
 
 
-Version 10.32-RC1 19-February-2018
-----------------------------------
+Version 10.32-RC1 13-August-2018
+--------------------------------
 
-1. When matching using the the REG_STARTEND feature of the POSIX API with a 
+1. When matching using the the REG_STARTEND feature of the POSIX API with a
 non-zero starting offset, unset capturing groups with lower numbers than a
-group that did capture something were not being correctly returned as "unset" 
+group that did capture something were not being correctly returned as "unset"
 (that is, with offset values of -1).
 
-2. When matching using the POSIX API, pcre2test used to omit listing unset 
+2. When matching using the POSIX API, pcre2test used to omit listing unset
 groups altogether. Now it shows those that come before any actual captures as
 "<unset>", as happens for non-POSIX matching.
 
-3. Running "pcre2test -C" always stated "\R matches CR, LF, or CRLF only", 
-whatever the build configuration was. It now correctly says "\R matches all 
-Unicode newlines" in the default case when --enable-bsr-anycrlf has not been 
-specified. Similarly, running "pcre2test -C bsr" never produced the result 
+3. Running "pcre2test -C" always stated "\R matches CR, LF, or CRLF only",
+whatever the build configuration was. It now correctly says "\R matches all
+Unicode newlines" in the default case when --enable-bsr-anycrlf has not been
+specified. Similarly, running "pcre2test -C bsr" never produced the result
 ANY.
 
-4. Matching the pattern /(*UTF)\C[^\v]+\x80/ against an 8-bit string containing 
-multi-code-unit characters caused bad behaviour and possibly a crash. This 
+4. Matching the pattern /(*UTF)\C[^\v]+\x80/ against an 8-bit string containing
+multi-code-unit characters caused bad behaviour and possibly a crash. This
 issue was fixed for other kinds of repeat in release 10.20 by change 19, but
 repeating character classes were overlooked.
 
-5. pcre2grep now supports the inclusion of binary zeros in patterns that are 
+5. pcre2grep now supports the inclusion of binary zeros in patterns that are
 read from files via the -f option.
 
 6. A small fix to pcre2grep to avoid compiler warnings for -Wformat-overflow=2.
@@ -43,79 +43,79 @@ offset is set zero for early errors.
 
 10. A number of patches for Windows support from Daniel Richard G:
 
-  (a) List of error numbers in Runtest.bat corrected (it was not the same as in 
-      Runtest). 
-      
-  (b) pcre2grep snprintf() workaround as used elsewhere in the tree.
-  
-  (c) Support for non-C99 snprintf() that returns -1 in the overflow case.  
-  
-11. Minor tidy of pcre2_dfa_match() code. 
+  (a) List of error numbers in Runtest.bat corrected (it was not the same as in
+      Runtest).
 
-12. Refactored pcre2_dfa_match() so that the internal recursive calls no longer 
-use the stack for local workspace and local ovectors. Instead, an initial block 
-of stack is reserved, but if this is insufficient, heap memory is used. The 
+  (b) pcre2grep snprintf() workaround as used elsewhere in the tree.
+
+  (c) Support for non-C99 snprintf() that returns -1 in the overflow case.
+
+11. Minor tidy of pcre2_dfa_match() code.
+
+12. Refactored pcre2_dfa_match() so that the internal recursive calls no longer
+use the stack for local workspace and local ovectors. Instead, an initial block
+of stack is reserved, but if this is insufficient, heap memory is used. The
 heap limit parameter now applies to pcre2_dfa_match().
 
-13. If a "find limits" test of DFA matching in pcre2test resulted in too many 
+13. If a "find limits" test of DFA matching in pcre2test resulted in too many
 matches for the ovector, no matches were displayed.
 
-14. Removed an occurrence of ctrl/Z from test 6 because Windows treats it as 
+14. Removed an occurrence of ctrl/Z from test 6 because Windows treats it as
 EOF. The test looks to have come from a fuzzer.
 
-15. If PCRE2 was built with a default match limit a lot greater than the 
+15. If PCRE2 was built with a default match limit a lot greater than the
 default default of 10 000 000, some JIT tests of the match limit no longer
 failed. All such tests now set 10 000 000 as the upper limit.
 
-16. Another Windows related patch for pcregrep to ensure that WIN32 is 
-undefiined under Cygwin.
+16. Another Windows related patch for pcregrep to ensure that WIN32 is
+undefined under Cygwin.
 
-17. Test for the presence of stdint.h and inttypes.h in configure and CMake and 
-include whichever exists (stdint preferred) instead of unconditionally 
+17. Test for the presence of stdint.h and inttypes.h in configure and CMake and
+include whichever exists (stdint preferred) instead of unconditionally
 including stdint. This makes life easier for old and non-standard systems.
 
 18. Further changes to improve portability, especially to old and or non-
 standard systems:
 
   (a) Put all printf arguments in RunGrepTest into single, not double, quotes,
-      and use \0 not \x00 for binary zero. 
-  
+      and use \0 not \x00 for binary zero.
+
   (b) Avoid the use of C++ (i.e. BCPL) // comments.
-  
+
   (c) Parameterize the use of %zu in pcre2test to make it like %td. For both of
-      these now, if using MSVC or a standard C before C99, %lu is used with a 
-      cast if necessary.  
-      
-19. Applied a contributed patch to CMakeLists.txt to increase the stack size 
+      these now, if using MSVC or a standard C before C99, %lu is used with a
+      cast if necessary.
+
+19. Applied a contributed patch to CMakeLists.txt to increase the stack size
 when linking pcre2test with MSVC. This gets rid of a stack overflow error in
 the standard set of tests.
 
 20. Output a warning in pcre2test when ignoring the "altglobal" modifier when
 it is given with the "replace" modifier.
 
-21. In both pcre2test and pcre2_substitute(), with global matching, a pattern 
-that matched an empty string, but never at the starting match offset, was not 
-handled in a Perl-compatible way. The pattern /(<?=\G.)/ is an example of such 
-a pattern. Because \G is in a lookbehind assertion, there has to be a 
-"bumpalong" before there can be a match. The automatic "advance by one 
-character after an empty string match" rule is therefore inappropriate. A more 
+21. In both pcre2test and pcre2_substitute(), with global matching, a pattern
+that matched an empty string, but never at the starting match offset, was not
+handled in a Perl-compatible way. The pattern /(<?=\G.)/ is an example of such
+a pattern. Because \G is in a lookbehind assertion, there has to be a
+"bumpalong" before there can be a match. The automatic "advance by one
+character after an empty string match" rule is therefore inappropriate. A more
 complicated algorithm has now been implemented.
 
-22. When checking to see if a lookbehind is of fixed length, lookaheads were 
-correctly ignored, but qualifiers on lookaheads were not being ignored, leading 
+22. When checking to see if a lookbehind is of fixed length, lookaheads were
+correctly ignored, but qualifiers on lookaheads were not being ignored, leading
 to an incorrect "lookbehind assertion is not fixed length" error.
 
-23. The VERSION condition test was reading fractional PCRE2 version numbers 
+23. The VERSION condition test was reading fractional PCRE2 version numbers
 such as the 04 in 10.04 incorrectly and hence giving wrong results.
 
-24. Updated to Unicode version 11.0.0. As well as the usual addition of new 
+24. Updated to Unicode version 11.0.0. As well as the usual addition of new
 scripts and characters, this involved re-jigging the grapheme break property
 algorithm because Unicode has changed the way emojis are handled.
 
-25. Fixed an obscure bug that struck when there were two atomic groups not 
-separated by something with a backtracking point. There could be an incorrect 
+25. Fixed an obscure bug that struck when there were two atomic groups not
+separated by something with a backtracking point. There could be an incorrect
 backtrack into the first of the atomic groups. A complicated example is
-/(?>a(*:1))(?>b)(*SKIP:1)x|.*/ matched against "abc", where the *SKIP 
+/(?>a(*:1))(?>b)(*SKIP:1)x|.*/ matched against "abc", where the *SKIP
 shouldn't find a MARK (because is in an atomic group), but it did.
 
 26. Upgraded the perltest.sh script: (1) #pattern lines can now be used to set
@@ -125,9 +125,9 @@ default "mark" modifier; (3) Unsupported #command lines give a warning when
 they are ignored; (4) Mark data is output only if the "mark" modifier is
 present.
 
-27. (*ACCEPT:ARG), (*FAIL:ARG), and (*COMMIT:ARG) are now supported. 
+27. (*ACCEPT:ARG), (*FAIL:ARG), and (*COMMIT:ARG) are now supported.
 
-28. A (*MARK) name was not being passed back for positive assertions that were 
+28. A (*MARK) name was not being passed back for positive assertions that were
 terminated by (*ACCEPT).
 
 29. Add support for \N{U+dddd}, but not in EBCDIC environments.
@@ -141,20 +141,20 @@ Now, when Unicode support is compiled, PCRE2_EXTENDED also discards U+0085,
 U+200E, U+200F, U+2028, and U+2029, which are additional characters defined by
 Unicode as "Pattern White Space". This makes PCRE2 compatible with Perl.
 
-32. In certain circumstances, option settings within patterns were not being 
-correctly processed. For example, the pattern /((?i)A)(?m)B/ incorrectly 
-matched "ab". (The (?m) setting lost the fact that (?i) should be reset at the 
-end of its group during the parse process, but without another setting such as 
+32. In certain circumstances, option settings within patterns were not being
+correctly processed. For example, the pattern /((?i)A)(?m)B/ incorrectly
+matched "ab". (The (?m) setting lost the fact that (?i) should be reset at the
+end of its group during the parse process, but without another setting such as
 (?m) the compile phase got it right.) This bug was introduced by the
 refactoring in release 10.23.
 
-33. PCRE2 uses bcopy() if available when memmove() is not, and it used just to 
+33. PCRE2 uses bcopy() if available when memmove() is not, and it used just to
 define memmove() as function call to bcopy(). This hasn't been tested for a
-long time because in pcre2test the result of memmove() was being used, whereas 
-bcopy() doesn't return a result. This feature is now refactored always to call 
-an emulation function when there is no memmove(). The emulation makes use of 
+long time because in pcre2test the result of memmove() was being used, whereas
+bcopy() doesn't return a result. This feature is now refactored always to call
+an emulation function when there is no memmove(). The emulation makes use of
 bcopy() when available.
-      
+
 
 Version 10.31 12-February-2018
 ------------------------------

@@ -70,7 +70,7 @@ This table applies to ASCII and Unicode environments.
   \ddd       character with octal code ddd, or backreference
   \o{ddd..}  character with octal code ddd..
   \U         "U" if PCRE2_ALT_BSUX is set (otherwise is an error)
-  \N{U+hh..} character with Unicode code point hh.. 
+  \N{U+hh..} character with Unicode code point hh..
   \uhhhh     character with hex code hhhh (if PCRE2_ALT_BSUX is set)
   \xhh       character with hex code hh
   \x{hh..}   character with hex code hh..
@@ -446,7 +446,7 @@ but some of them use Unicode properties if PCRE2_UCP is set. You can use
 </P>
 <br><a name="SEC16" href="#TOC1">OPTION SETTING</a><br>
 <P>
-Changes of these options within a group are automatically cancelled at the end 
+Changes of these options within a group are automatically cancelled at the end
 of the group.
 <pre>
   (?i)            caseless
@@ -458,12 +458,12 @@ of the group.
   (?x)            extended: ignore white space except in classes
   (?xx)           as (?x) but also ignore space and tab in classes
   (?-...)         unset option(s)
-  (?^)            unset imnsx options 
+  (?^)            unset imnsx options
 </pre>
 Unsetting x or xx unsets both. Several options may be set at once, and a
 mixture of setting and unsetting such as (?i-x) is allowed, but there may be
 only one hyphen. Setting (but no unsetting) is allowed after (?^ for example
-(?^in). An option setting may appear at the start of a non-capturing group, for 
+(?^in). An option setting may appear at the start of a non-capturing group, for
 example (?i:...).
 </P>
 <P>
@@ -604,8 +604,8 @@ pattern is not anchored.
                   (*MARK:NAME); if not found, the (*SKIP) is ignored
   (*THEN)         local failure, backtrack to next alternation
 </pre>
-The effect of one of these verbs in a group called as a subroutine is confined 
-to the subroutine call.   
+The effect of one of these verbs in a group called as a subroutine is confined
+to the subroutine call.
 </P>
 <br><a name="SEC24" href="#TOC1">CALLOUTS</a><br>
 <P>

@@ -126,7 +126,7 @@ of changing the way binary files are handled.
 .rs
 .sp
 Patterns passed from the command line are strings that are terminated by a
-binary zero, so cannot contain internal zeros. However, patterns that are read 
+binary zero, so cannot contain internal zeros. However, patterns that are read
 from a file via the \fB-f\fP option may contain binary zeros.
 .
 .
@@ -471,7 +471,7 @@ is a pattern that uses nested unlimited repeats. Internally, PCRE2 has a
 counter that is incremented each time around its main processing loop. If the
 value set by \fB--match-limit\fP is reached, an error occurs.
 .sp
-The \fB--heap-limit\fP option specifies, as a number of kibibytes (units of 
+The \fB--heap-limit\fP option specifies, as a number of kibibytes (units of
 1024 bytes), the amount of heap memory that may be used for matching. Heap
 memory is needed only if matching the pattern requires a significant number of
 nested backtracking points to be remembered. This parameter can be set to zero

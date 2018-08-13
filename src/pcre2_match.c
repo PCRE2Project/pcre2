@@ -5136,7 +5136,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
               (char *)assert_accept_frame + offsetof(heapframe, ovector),
               assert_accept_frame->offset_top * sizeof(PCRE2_SIZE));
         Foffset_top = assert_accept_frame->offset_top;
-        Fmark = assert_accept_frame->mark; 
+        Fmark = assert_accept_frame->mark;
         break;
         }
       if (rrc != MATCH_NOMATCH && rrc != MATCH_THEN) RRETURN(rrc);

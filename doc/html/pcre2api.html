@@ -518,8 +518,8 @@ been matched by <b>pcre2_match()</b>. They are:
   <b>pcre2_substring_number_from_name()</b>
 </pre>
 <b>pcre2_substring_free()</b> and <b>pcre2_substring_list_free()</b> are also
-provided, to free memory used for extracted strings. If either of these 
-functions is called with a NULL argument, the function returns immediately 
+provided, to free memory used for extracted strings. If either of these
+functions is called with a NULL argument, the function returns immediately
 without doing anything.
 </P>
 <P>
@@ -1255,7 +1255,7 @@ If the compile context argument <i>ccontext</i> is NULL, memory for the compiled
 pattern is obtained by calling <b>malloc()</b>. Otherwise, it is obtained from
 the same memory function that was used for the compile context. The caller must
 free the memory by calling <b>pcre2_code_free()</b> when it is no longer needed.
-If <b>pcre2_code_free()</b> is called with a NULL argument, it returns 
+If <b>pcre2_code_free()</b> is called with a NULL argument, it returns
 immediately, without doing anything.
 </P>
 <P>
@@ -1265,7 +1265,7 @@ if the code has been processed by the JIT compiler (see
 <a href="#jitcompiling">below),</a>
 the JIT information cannot be copied (because it is position-dependent).
 The new copy can initially be used only for non-JIT matching, though it can be
-passed to <b>pcre2_jit_compile()</b> if required. If <b>pcre2_code_copy()</b> is 
+passed to <b>pcre2_jit_compile()</b> if required. If <b>pcre2_code_copy()</b> is
 called with a NULL argument, it returns NULL.
 </P>
 <P>
@@ -1514,15 +1514,15 @@ PCRE2_EXTENDED is equivalent to Perl's /x option, and it can be changed within
 a pattern by a (?x) option setting.
 </P>
 <P>
-When PCRE2 is compiled without Unicode support, PCRE2_EXTENDED recognizes as 
-white space only those characters with code points less than 256 that are 
-flagged as white space in its low-character table. The table is normally 
-created by 
+When PCRE2 is compiled without Unicode support, PCRE2_EXTENDED recognizes as
+white space only those characters with code points less than 256 that are
+flagged as white space in its low-character table. The table is normally
+created by
 <a href="pcre2_maketables.html"><b>pcre2_maketables()</b>,</a>
 which uses the <b>isspace()</b> function to identify space characters. In most
 ASCII environments, the relevant characters are those with code points 0x0009
 (tab), 0x000A (linefeed), 0x000B (vertical tab), 0x000C (formfeed), 0x000D
-(carriage return), and 0x0020 (space). 
+(carriage return), and 0x0020 (space).
 </P>
 <P>
 When PCRE2 is compiled with Unicode support, in addition to these characters,
@@ -1552,8 +1552,8 @@ built.
   PCRE2_EXTENDED_MORE
 </pre>
 This option has the effect of PCRE2_EXTENDED, but, in addition, unescaped space
-and horizontal tab characters are ignored inside a character class. Note: only 
-these two characters are ignored, not the full set of pattern white space 
+and horizontal tab characters are ignored inside a character class. Note: only
+these two characters are ignored, not the full set of pattern white space
 characters that are ignored outside a character class. PCRE2_EXTENDED_MORE is
 equivalent to Perl's /xx option, and it can be changed within a pattern by a
 (?xx) option setting.
@@ -2323,7 +2323,7 @@ reloaded must be running the same version of PCRE2, with the same code unit
 width, and must also have the same endianness, pointer width, and PCRE2_SIZE
 type. Before compiled patterns can be saved, they must be converted to a
 "serialized" form, which in the case of PCRE2 is really just a bytecode dump.
-The functions whose names begin with <b>pcre2_serialize_</b> are used for 
+The functions whose names begin with <b>pcre2_serialize_</b> are used for
 converting to and from the serialized form. They are described in the
 <a href="pcre2serialize.html"><b>pcre2serialize</b></a>
 documentation. Note that PCRE2 serialization does not convert compiled patterns
@@ -2398,7 +2398,7 @@ match data block (for that match) have taken place.
 </P>
 <P>
 When a match data block itself is no longer needed, it should be freed by
-calling <b>pcre2_match_data_free()</b>. If this function is called with a NULL 
+calling <b>pcre2_match_data_free()</b>. If this function is called with a NULL
 argument, it returns immediately, without doing anything.
 </P>
 <br><a name="SEC27" href="#TOC1">MATCHING A PATTERN: THE TRADITIONAL FUNCTION</a><br>
@@ -3383,7 +3383,7 @@ replacement string, with more particular errors being PCRE2_ERROR_BADREPESCAPE
 (invalid escape sequence), PCRE2_ERROR_REPMISSINGBRACE (closing curly bracket
 not found), PCRE2_ERROR_BADSUBSTITUTION (syntax error in extended group
 substitution), and PCRE2_ERROR_BADSUBSPATTERN (the pattern match ended before
-it started or the match started earlier than the current position in the 
+it started or the match started earlier than the current position in the
 subject, which can happen if \K is used in an assertion).
 </P>
 <P>

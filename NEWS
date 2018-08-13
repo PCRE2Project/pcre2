@@ -1,6 +1,32 @@
 News about PCRE2 releases
 -------------------------
 
+Version 10.32 13-August-2018
+----------------------------
+
+This is another mainly bugfix and tidying release with a few minor
+enhancements.
+
+1. pcre2grep now supports the inclusion of binary zeros in patterns that are
+read from files via the -f option.
+
+2. ./configure now supports --enable-jit=auto, which automatically enables JIT
+if the hardware supports it.
+
+3. In pcre2_dfa_match(), internal recursive calls no longer use the stack for
+local workspace and local ovectors. Instead, an initial block of stack is
+reserved, but if this is insufficient, heap memory is used. The heap limit
+parameter now applies to pcre2_dfa_match().
+
+4. Updated to Unicode version 11.0.0.
+
+5. (*ACCEPT:ARG), (*FAIL:ARG), and (*COMMIT:ARG) are now supported.
+
+6. Added support for \N{U+dddd}, but not in EBCDIC environments.
+
+7. Added support for (?^) to unset all imnsx options.
+
+
 Version 10.31 12-February-2018
 ------------------------------
 

@@ -29,13 +29,13 @@ and PCRE2_SIZE type. For example, patterns compiled on a 32-bit system using
 PCRE2's 16-bit library cannot be reloaded on a 64-bit system, nor can they be
 reloaded using the 8-bit library.
 .P
-Note that "serialization" in PCRE2 does not convert compiled patterns to an 
-abstract format like Java or .NET serialization. The serialized output is 
-really just a bytecode dump, which is why it can only be reloaded in the same 
+Note that "serialization" in PCRE2 does not convert compiled patterns to an
+abstract format like Java or .NET serialization. The serialized output is
+really just a bytecode dump, which is why it can only be reloaded in the same
 environment as the one that created it. Hence the restrictions mentioned above.
 Applications that are not statically linked with a fixed version of PCRE2 must
-be prepared to recompile patterns from their sources, in order to be immune to 
-PCRE2 upgrades. 
+be prepared to recompile patterns from their sources, in order to be immune to
+PCRE2 upgrades.
 .
 .
 .SH "SECURITY CONCERNS"

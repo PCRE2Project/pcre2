@@ -131,7 +131,7 @@ for (;;)
       break;
 
       case OP_MARK:
-      case OP_COMMIT_ARG: 
+      case OP_COMMIT_ARG:
       case OP_PRUNE_ARG:
       case OP_SKIP_ARG:
       case OP_THEN_ARG:
