@@ -137,9 +137,7 @@ distribution for a new release.
   PCRE2-specific features or options).
 
 . It is possible to test with the emulated memmove() function by undefining
-  HAVE_MEMMOVE and HAVE_BCOPY in config.h, though I do not do this often. You
-  may see a number of "pcre2_memmove defined but not used" warnings for the
-  modules in which there is no call to memmove(). These can be ignored.
+  HAVE_MEMMOVE and HAVE_BCOPY in config.h, though I do not do this often.
 
 . Documentation: check AUTHORS, ChangeLog (check version and date), LICENCE,
   NEWS (check version and date), NON-AUTOTOOLS-BUILD, and README. Many of these
@@ -261,10 +259,6 @@ very sensible; some are rather wacky. Some have been on this list for years.
   leaves $2 set. In Perl, it's unset. Changing this in PCRE2 will be very hard
   because I think it needs much more state to be remembered.
 
-. An option to use NUL as a line terminator in subject strings. This could be
-  done relatively easily. If it is done, a suitable option for pcre2grep is
-  also required.
-
 . A feature to suspend a match via a callout was once requested.
 
 . An option to convert results into character offsets and character lengths.
@@ -311,7 +305,9 @@ very sensible; some are rather wacky. Some have been on this list for years.
 . PCRE2 cannot at present distinguish between subpatterns with different names,
   but the same number (created by the use of ?|). In order to do so, a way of
   remembering *which* subpattern numbered n matched is needed. Bugzilla #760.
-  (*MARK) can perhaps be used as a way round this problem.
+  (*MARK) can perhaps be used as a way round this problem. However, note that
+  Perl does not distinguish: like PCRE2, a name is just an alias for a number 
+  in Perl. 
 
 . Instead of having #ifdef HAVE_CONFIG_H in each module, put #include
   "something" and the the #ifdef appears only in one place, in "something".
@@ -326,7 +322,8 @@ very sensible; some are rather wacky. Some have been on this list for years.
 . A user wanted a way of ignoring all Unicode "mark" characters so that, for
   example "a" followed by an accent would, together, match "a".
 
-. Perl supports [\N{x}-\N{y}] as a Unicode range, even in EBCDIC.
+. Perl supports [\N{x}-\N{y}] as a Unicode range, even in EBCDIC. PCRE2 
+  supports \N{U+dd..} everywhere but, not in EBCDIC.
 
 . Unicode stuff from Perl:
 
@@ -365,4 +362,4 @@ very sensible; some are rather wacky. Some have been on this list for years.
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 07 July 2018
+Last updated: 13 August 2018
