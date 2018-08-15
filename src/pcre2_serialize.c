@@ -127,7 +127,21 @@ dst_bytes += tables_length;
 for (i = 0; i < number_of_codes; i++)
   {
   re = (const pcre2_real_code *)(codes[i]);
-  memcpy(dst_bytes, (char *)re, re->blocksize);
+  (void)memcpy(dst_bytes, (char *)re, re->blocksize);
+  
+  /* Certain fields in the compiled code block are re-set during 
+  deserialization. In order to ensure that the serialized data stream is always 
+  the same for the same pattern, set them to zero here. We can't assume the 
+  copy of the pattern is correctly aligned for accessing the fields as part of 
+  a structure. */
+  
+  (void)memset((void *)(dst_bytes + offsetof(pcre2_real_code, memctl)), 0, 
+    sizeof(pcre2_memctl));
+  (void)memset((void *)(dst_bytes + offsetof(pcre2_real_code, tables)), 0, 
+    sizeof(uint8_t *));
+  (void)memset((void *)(dst_bytes + offsetof(pcre2_real_code, executable_jit)),
+    0, sizeof(void *));        
+ 
   dst_bytes += re->blocksize;
   }
 

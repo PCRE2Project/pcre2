@@ -155,6 +155,11 @@ bcopy() doesn't return a result. This feature is now refactored always to call
 an emulation function when there is no memmove(). The emulation makes use of
 bcopy() when available.
 
+34. When serializing a pattern, set the memctl, executable_jit, and tables 
+fields (that is, all the fields that contain pointers) to zeros so that the 
+result of serializing is always the same. These fields are re-set when the 
+pattern is deserialized.
+
 
 Version 10.31 12-February-2018
 ------------------------------
