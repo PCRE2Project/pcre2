@@ -160,6 +160,11 @@ fields (that is, all the fields that contain pointers) to zeros so that the
 result of serializing is always the same. These fields are re-set when the 
 pattern is deserialized.
 
+35. In a pattern such as /[^\x{100}-\x{ffff}]*[\x80-\xff]/ which has a repeated
+negative class with no characters less than 0x100 followed by a positive class
+with only characters less than 0x100, the first class was incorrectly being 
+auto-possessified, causing incorrect match failures.
+
 
 Version 10.31 12-February-2018
 ------------------------------
