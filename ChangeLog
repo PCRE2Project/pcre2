@@ -168,6 +168,8 @@ auto-possessified, causing incorrect match failures.
 36. Removed the character type bit ctype_meta, which dates from PCRE1 and is 
 not used in PCRE2.
 
+37. Tidied up unnecessarily complicated macros used in the escapes table.
+
 
 Version 10.31 12-February-2018
 ------------------------------

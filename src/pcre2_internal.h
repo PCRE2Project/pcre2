@@ -565,8 +565,8 @@ these tables. */
 #define cbit_cntrl   288      /* [:cntrl:] */
 #define cbit_length  320      /* Length of the cbits table */
 
-/* Bit definitions for entries in the ctypes table. Do not change these values 
-without checking pcre2_jit_compile.c, which has an assertion to ensure that 
+/* Bit definitions for entries in the ctypes table. Do not change these values
+without checking pcre2_jit_compile.c, which has an assertion to ensure that
 ctype_word has the value 16. */
 
 #define ctype_space   0x01
@@ -1247,36 +1247,6 @@ contain characters with values greater than 255. */
 #define XCL_RANGE     2    /* A range (two multibyte chars) follows */
 #define XCL_PROP      3    /* Unicode property (2-byte property code follows) */
 #define XCL_NOTPROP   4    /* Unicode inverted property (ditto) */
-
-/* Escape items that are just an encoding of a particular data value. These
-appear in the escapes[] table in pcre2_compile.c as positive numbers. */
-
-#ifndef ESC_a
-#define ESC_a CHAR_BEL
-#endif
-
-#ifndef ESC_e
-#define ESC_e CHAR_ESC
-#endif
-
-#ifndef ESC_f
-#define ESC_f CHAR_FF
-#endif
-
-#ifndef ESC_n
-#define ESC_n CHAR_LF
-#endif
-
-#ifndef ESC_r
-#define ESC_r CHAR_CR
-#endif
-
-/* We can't officially use ESC_t because it is a POSIX reserved identifier
-(presumably because of all the others like size_t). */
-
-#ifndef ESC_tee
-#define ESC_tee CHAR_HT
-#endif
 
 /* These are escaped items that aren't just an encoding of a particular data
 value such as \n. They must have non-zero values, as check_escape() returns 0
