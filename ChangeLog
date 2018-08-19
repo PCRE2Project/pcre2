@@ -165,6 +165,9 @@ negative class with no characters less than 0x100 followed by a positive class
 with only characters less than 0x100, the first class was incorrectly being 
 auto-possessified, causing incorrect match failures.
 
+36. Removed the character type bit ctype_meta, which dates from PCRE1 and is 
+not used in PCRE2.
+
 
 Version 10.31 12-February-2018
 ------------------------------

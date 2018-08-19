@@ -565,14 +565,15 @@ these tables. */
 #define cbit_cntrl   288      /* [:cntrl:] */
 #define cbit_length  320      /* Length of the cbits table */
 
-/* Bit definitions for entries in the ctypes table. */
+/* Bit definitions for entries in the ctypes table. Do not change these values 
+without checking pcre2_jit_compile.c, which has an assertion to ensure that 
+ctype_word has the value 16. */
 
 #define ctype_space   0x01
 #define ctype_letter  0x02
 #define ctype_digit   0x04
-#define ctype_xdigit  0x08
+#define ctype_xdigit  0x08    /* not actually used any more */
 #define ctype_word    0x10    /* alphanumeric or '_' */
-#define ctype_meta    0x80    /* regexp meta char or zero (end pattern) */
 
 /* Offsets of the various tables from the base tables pointer, and
 total length of the tables. */
