@@ -323,7 +323,7 @@ very sensible; some are rather wacky. Some have been on this list for years.
   example "a" followed by an accent would, together, match "a".
 
 . Perl supports [\N{x}-\N{y}] as a Unicode range, even in EBCDIC. PCRE2 
-  supports \N{U+dd..} everywhere but, not in EBCDIC.
+  supports \N{U+dd..} everywhere, but not in EBCDIC.
 
 . Unicode stuff from Perl:
 
@@ -331,7 +331,7 @@ very sensible; some are rather wacky. Some have been on this list for years.
     \b{sb}              sentence boundary
     \b{wb}              word boundary
 
-  See Unicode TR 29.
+  See Unicode TR 29. The last two are very much aimed at natural language.
 
 . (?[...]) extended classes: big project.
 
@@ -359,7 +359,86 @@ very sensible; some are rather wacky. Some have been on this list for years.
 
 . Some #defines could be replaced with enums to improve robustness.
 
+. There was a request for and option for pcre2_match() to return the longest 
+  match. This would mean searching for all possible matches, of course.
+  
+. Perl's /a modifier sets Unicode, but restricts \d etc to ASCII characters, 
+  which is the PCRE2 default for PCRE2_UTF (use PCRE2_UCP to change). However,
+  Perl also has /aa, which in addition, disables ASCII/non-ASCII caseless
+  matching. Perhaps we need a new option PCRE2_CASELESS_RESTRICT_ASCII. In 
+  practice, this just means not using the ucd_caseless_sets[] table.
+  
+. There is more that could be done to the oss-fuzz setup (needs some research). 
+  A seed corpus could be built. I noted something about $LIB_FUZZING_ENGINE. 
+  The test function could make use of get_substrings() to cover more code.
+  
+. A neater way of handling recursion file names in pcre2grep, e.g. a single 
+  buffer that can grow.  
+  
+. A user suggested that before/after parameters in pcre2grep could have 
+  negative values, to list lines near to the matched line, but not necessarily 
+  the line itself. For example, --before-context=-1 would list the line *after* 
+  each matched line, without showing the matched line. The problem here is what
+  to do with matches that are close together. Maybe a simpler way would be a 
+  flag to disable showing matched lines, only valid with either -A or -B?
+  
+. There was a suggestiong for a pcre2grep colour default, or possibly a more
+  general PCRE2GREP_OPT, but only for some options - not file names or patterns. 
+
+. Breaking loops that match an empty string: perhaps find a way of continuing 
+  if *something* has changed, but this might mean remembering additional data.
+  "Something" could be a capture value, but then a list of previous values 
+  would be needed to avoid a cycle of changes. Bugzilla #2182.
+  
+. The use of \K in assertions is problematic. There was some talk of Perl 
+  banning this, but it hasn't happened. Some problems could be avoided by 
+  not allowing it to set a value before the match start; others by not allowing 
+  it to set a value after the match end. This could be controlled by an option 
+  such as PCRE2_SANE_BACKSLASH_K, for compatibility (or possibly make the sane 
+  behaviour the default and implement PCRE2_INSANE_BACKSLASH_K).
+  
+. If a function could be written to find 3-character (or other length) fixed 
+  strings, at least one of which must be present for a match, efficient
+  pre-searching of large datasets could be implemented.
+  
+. There's a Perl proposal for some new (* things, including alpha synonyms for 
+  the lookaround assertions:
+
+  (*pla: …)
+  (*plb: …)
+  (*nla: …)
+  (*nlb: …)
+  (*atomic: …)
+  (*positive_look_ahead:...)
+  (*negative_look_ahead:...)
+  (*positive_look_behind:...)
+  (*negative_look_behind:...)
+
+  Also a new one (with synonyms):
+
+  (*script_run: ...)        Ensure all captured chars are in the same script
+  (*sr: …)
+  (*atomic_script_run: …)   A combination of script_run and atomic
+  (*asr:...)
+
+. If pcre2grep had --first-line (match only in the first line) it could be 
+  efficiently used to find files "starting with xxx". What about --last-line?
+  
+. A user requested a means of determining whether a failed match was failed by
+  the start-of-match optimizations, or by running the match engine. Easy enough 
+  to define a bit in the match data, but all three matchers would need work.
+  
+. Would inlining "simple" recursions provide a useful performance boost for the 
+  interpreters? JIT already does some of this.
+  
+. There was a request for a way of re-defining \w (and therefore \W, \b, and 
+  \B). An in-pattern sequence such as (?w=[...]) was suggested. Easiest way 
+  would be simply to inline the class, with lookarounds for \b and \B. Ideally 
+  the setting should last till the end of the group, which means remembering 
+  all previous settings; maybe a fixed amount of stack would do - how deep 
+  would anyone want to nest these things? Bugzilla #2301.
+
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 13 August 2018
+Last updated: 21 August 2018
