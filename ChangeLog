@@ -170,6 +170,10 @@ not used in PCRE2.
 
 37. Tidied up unnecessarily complicated macros used in the escapes table.
 
+38. Since 10.21, the new testoutput8-16-4 file has accidentally been omitted 
+from distribution tarballs, owing to a typo in Makefile.am which had 
+testoutput8-16-3 twice. Now fixed.
+
 
 Version 10.31 12-February-2018
 ------------------------------
