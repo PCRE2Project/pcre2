@@ -4751,6 +4751,9 @@ No match
  0: \x{1d1aa}
 
 /\N{U+}/
+Failed: error 193 at offset 2: \N{U+dddd} is supported only in Unicode (UTF) mode
+
+/\N{U+}/utf
 Failed: error 178 at offset 5: digits missing in \x{} or \o{} or \N{U+}
 
 /\N{U}/

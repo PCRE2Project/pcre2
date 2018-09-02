@@ -2089,6 +2089,8 @@
 
 /\N{U+}/
 
+/\N{U+}/utf
+
 /\N{U}/
 
 # This tests the non-UTF Unicode NEL pattern whitespace character, only

@@ -1454,16 +1454,22 @@ else if ((i = escapes[c - ESCAPES_FIRST]) != 0)
       /* \N{U+ can be handled by the \x{ code. However, this construction is
       not valid in EBCDIC environments because it specifies a Unicode
       character, not a codepoint in the local code. For example \N{U+0041}
-      must be "A" in all environments. */
+      must be "A" in all environments. Also, in Perl, \N{U+ forces Unicode 
+      casing semantics for the entire pattern, so allow it only in UTF (i.e. 
+      Unicode) mode. */
 
       if (ptrend - p > 1 && *p == CHAR_U && p[1] == CHAR_PLUS)
         {
 #ifdef EBCDIC
         *errorcodeptr = ERR93;
 #else
-        ptr = p + 1;
-        escape = 0;   /* Not a fancy escape after all */
-        goto COME_FROM_NU;
+        if (utf)
+          { 
+          ptr = p + 1;
+          escape = 0;   /* Not a fancy escape after all */
+          goto COME_FROM_NU;
+          }
+        else *errorcodeptr = ERR93;   
 #endif
         }
 

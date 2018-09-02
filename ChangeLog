@@ -130,7 +130,7 @@ present.
 28. A (*MARK) name was not being passed back for positive assertions that were
 terminated by (*ACCEPT).
 
-29. Add support for \N{U+dddd}, but not in EBCDIC environments.
+29. Add support for \N{U+dddd}, but only in Unicode mode.
 
 30. Add support for (?^) for unsetting all imnsx options.
 
