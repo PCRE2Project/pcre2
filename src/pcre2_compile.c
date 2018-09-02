@@ -1454,8 +1454,8 @@ else if ((i = escapes[c - ESCAPES_FIRST]) != 0)
       /* \N{U+ can be handled by the \x{ code. However, this construction is
       not valid in EBCDIC environments because it specifies a Unicode
       character, not a codepoint in the local code. For example \N{U+0041}
-      must be "A" in all environments. Also, in Perl, \N{U+ forces Unicode 
-      casing semantics for the entire pattern, so allow it only in UTF (i.e. 
+      must be "A" in all environments. Also, in Perl, \N{U+ forces Unicode
+      casing semantics for the entire pattern, so allow it only in UTF (i.e.
       Unicode) mode. */
 
       if (ptrend - p > 1 && *p == CHAR_U && p[1] == CHAR_PLUS)
@@ -1464,12 +1464,12 @@ else if ((i = escapes[c - ESCAPES_FIRST]) != 0)
         *errorcodeptr = ERR93;
 #else
         if (utf)
-          { 
+          {
           ptr = p + 1;
           escape = 0;   /* Not a fancy escape after all */
           goto COME_FROM_NU;
           }
-        else *errorcodeptr = ERR93;   
+        else *errorcodeptr = ERR93;
 #endif
         }
 
@@ -7864,10 +7864,11 @@ do {
      if (!is_anchored(scode, bracket_map, cb, atomcount, TRUE)) return FALSE;
      }
 
-   /* Condition */
+   /* Condition. If there is no second branch, it can't be anchored. */
 
    else if (op == OP_COND)
      {
+     if (scode[GET(scode,1)] != OP_ALT) return FALSE;
      if (!is_anchored(scode, bracket_map, cb, atomcount, inassert))
        return FALSE;
      }

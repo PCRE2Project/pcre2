@@ -5459,4 +5459,19 @@ a)"xI
 
 /(?x-i-i)/
 
+/(?(?=^))b/I
+    abc
+
+/(?(?=^)|)b/I
+    abc
+
+/(?(?=^)|^)b/I
+    bbc
+\= Expect no match
+    abc     
+
+/(?(1)^|^())/I
+
+/(?(1)^())b/I
+
 # End of testinput2
