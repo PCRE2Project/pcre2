@@ -179,6 +179,12 @@ subpattern was treated as anchored, when it should not have been, since the
 assumed empty second branch cannot be anchored. Demonstrated by test patterns 
 such as /(?(1)^())b/ or /(?(?=^))b/.
 
+40. A repeated conditional subpattern that could match an empty string was 
+always assumed to be unanchored. Now it it checked just like any other
+repeated conditional subpattern, and can be found to be anchored if the minimum 
+quantifier is one or more. I can't see much use for a repeated anchored
+pattern, but the behaviour is now consistent.
+
 
 Version 10.31 12-February-2018
 ------------------------------

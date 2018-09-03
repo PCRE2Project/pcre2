@@ -5474,4 +5474,35 @@ a)"xI
 
 /(?(1)^())b/I
 
+/(?(1)^())+b/I,aftertext
+    abc
+
+/(?(1)^()|^)+b/I,aftertext
+    bbc 
+\= Expect no match     
+    abc
+
+/(?(1)^()|^)*b/I,aftertext
+    bbc 
+    abc
+    xbc 
+
+/(?(1)^())+b/I,aftertext
+    abc
+
+/(?(1)^a()|^a)+b/I,aftertext
+    abc 
+\= Expect no match     
+    bbc
+
+/(?(1)^|^(a))+b/I,aftertext
+    abc 
+\= Expect no match     
+    bbc
+
+/(?(1)^a()|^a)*b/I,aftertext
+    abc 
+    bbc
+    xbc 
+
 # End of testinput2

@@ -7866,7 +7866,7 @@ do {
 
    /* Condition. If there is no second branch, it can't be anchored. */
 
-   else if (op == OP_COND)
+   else if (op == OP_COND || op == OP_SCOND)
      {
      if (scode[GET(scode,1)] != OP_ALT) return FALSE;
      if (!is_anchored(scode, bracket_map, cb, atomcount, inassert))
