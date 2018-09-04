@@ -1,4 +1,4 @@
-.TH PCRE2PATTERN 3 "02 September 2018" "PCRE2 10.32"
+.TH PCRE2PATTERN 3 "04 September 2018" "PCRE2 10.32"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION DETAILS"
@@ -3623,12 +3623,15 @@ verbs in subroutines is different in some cases.
 (*FAIL) in a subpattern called as a subroutine has its normal effect: it forces
 an immediate backtrack.
 .P
-(*COMMIT), (*SKIP), and (*PRUNE) in a subpattern called as a subroutine cause
-the subroutine match to fail.
+(*COMMIT), (*SKIP), and (*PRUNE) cause the subroutine match to fail when
+triggered by being backtracked to in a subpattern called as a subroutine. There
+is then a backtrack at the outer level.
 .P
-(*THEN) skips to the next alternative in the innermost enclosing group within
-the subpattern that has alternatives. If there is no such group within the
-subpattern, (*THEN) causes the subroutine match to fail.
+(*THEN), when triggered, skips to the next alternative in the innermost
+enclosing group within the subpattern that has alternatives (its normal
+behaviour). However, if there is no such group within the subroutine
+subpattern, the subroutine match fails and there is a backtrack at the outer 
+level.
 .
 .
 .SH "SEE ALSO"
@@ -3652,6 +3655,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 02 September 2018
+Last updated: 04 September 2018
 Copyright (c) 1997-2018 University of Cambridge.
 .fi
