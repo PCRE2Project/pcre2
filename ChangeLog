@@ -185,6 +185,10 @@ repeated conditional subpattern, and can be found to be anchored if the minimum
 quantifier is one or more. I can't see much use for a repeated anchored
 pattern, but the behaviour is now consistent.
 
+41. Minor addition to pcre2_jit_compile.c to avoid static analyzer complaint 
+(for an event that could never occur but you had to have external information
+to know that).
+
 
 Version 10.31 12-February-2018
 ------------------------------

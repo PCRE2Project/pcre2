@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-          New API code Copyright (c) 2016-2017 University of Cambridge
+          New API code Copyright (c) 2016-2018 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -5900,6 +5900,8 @@ for (i = 0; i < 32; i++)
     j++;
     }
   }
+
+if (len == 0) return FALSE;  /* Should never occur, but stops analyzers complaining. */
 
 i = 0;
 j = 0;
