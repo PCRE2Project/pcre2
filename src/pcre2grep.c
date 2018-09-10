@@ -2364,7 +2364,7 @@ int filepos = 0;
 unsigned long int linenumber = 1;
 unsigned long int lastmatchnumber = 0;
 unsigned long int count = 0;
-char *lastmatchrestart = NULL;
+char *lastmatchrestart = main_buffer;
 char *ptr = main_buffer;
 char *endptr;
 PCRE2_SIZE bufflength;

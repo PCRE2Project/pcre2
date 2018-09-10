@@ -2,8 +2,8 @@ Change Log for PCRE2
 --------------------
 
 
-Version 10.32-RC1 13-August-2018
---------------------------------
+Version 10.32-RC1 10-September-2018
+-----------------------------------
 
 1. When matching using the the REG_STARTEND feature of the POSIX API with a
 non-zero starting offset, unset capturing groups with lower numbers than a
@@ -188,6 +188,14 @@ pattern, but the behaviour is now consistent.
 41. Minor addition to pcre2_jit_compile.c to avoid static analyzer complaint 
 (for an event that could never occur but you had to have external information
 to know that).
+
+42. If before the first match in a file that was being searched by pcre2grep
+there was a line that was sufficiently long to cause the input buffer to be
+expanded, the variable holding the location of the end of the previous match
+was being adjusted incorrectly, and could cause an overflow warning from a code
+sanitizer. However, as the value is used only to print pending "after" lines
+when the next match is reached (and there are no such lines in this case) this 
+bug could do no damage.
 
 
 Version 10.31 12-February-2018
