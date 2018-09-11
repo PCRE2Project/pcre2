@@ -1804,7 +1804,8 @@ Unicode support (which is the default). If Unicode support is not available,
 the use of this option provokes an error. Details of how PCRE2_UTF changes the
 behaviour of PCRE2 are given in the
 <a href="pcre2unicode.html"><b>pcre2unicode</b></a>
-page.
+page. In particular, note that it changes the way PCRE2_CASELESS handles
+characters with code points greater than 127.
 <a name="extracompileoptions"></a></P>
 <br><b>
 Extra compile options
@@ -2776,7 +2777,7 @@ Elements in the ovector that do not correspond to capturing parentheses in the
 pattern are never changed. That is, if a pattern contains <i>n</i> capturing
 parentheses, no more than <i>ovector[0]</i> to <i>ovector[2n+1]</i> are set by
 <b>pcre2_match()</b>. The other elements retain whatever values they previously
-had.
+had. After a failed match attempt, the contents of the ovector are unchanged.
 <a name="matchotherdata"></a></P>
 <br><a name="SEC30" href="#TOC1">OTHER INFORMATION ABOUT A MATCH</a><br>
 <P>
@@ -3190,6 +3191,12 @@ permitted, and <i>match_data</i> may be passed as NULL, in which case a match
 data block is obtained and freed within this function, using memory management
 functions from the match context, if provided, or else those that were used to
 allocate memory for the compiled code.
+</P>
+<P>
+If an external <i>match_data</i> block is provided, its contents afterwards
+are those set by the final call to <b>pcre2_match()</b>, which will have
+ended in a matching error. The contents of the ovector within the match data
+block may or may not have been changed.
 </P>
 <P>
 The <i>outlengthptr</i> argument must point to a variable that contains the
@@ -3658,7 +3665,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC42" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 03 August 2018
+Last updated: 07 September 2018
 <br>
 Copyright &copy; 1997-2018 University of Cambridge.
 <br>

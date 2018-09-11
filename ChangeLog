@@ -155,37 +155,37 @@ bcopy() doesn't return a result. This feature is now refactored always to call
 an emulation function when there is no memmove(). The emulation makes use of
 bcopy() when available.
 
-34. When serializing a pattern, set the memctl, executable_jit, and tables 
-fields (that is, all the fields that contain pointers) to zeros so that the 
-result of serializing is always the same. These fields are re-set when the 
+34. When serializing a pattern, set the memctl, executable_jit, and tables
+fields (that is, all the fields that contain pointers) to zeros so that the
+result of serializing is always the same. These fields are re-set when the
 pattern is deserialized.
 
 35. In a pattern such as /[^\x{100}-\x{ffff}]*[\x80-\xff]/ which has a repeated
 negative class with no characters less than 0x100 followed by a positive class
-with only characters less than 0x100, the first class was incorrectly being 
+with only characters less than 0x100, the first class was incorrectly being
 auto-possessified, causing incorrect match failures.
 
-36. Removed the character type bit ctype_meta, which dates from PCRE1 and is 
+36. Removed the character type bit ctype_meta, which dates from PCRE1 and is
 not used in PCRE2.
 
 37. Tidied up unnecessarily complicated macros used in the escapes table.
 
-38. Since 10.21, the new testoutput8-16-4 file has accidentally been omitted 
-from distribution tarballs, owing to a typo in Makefile.am which had 
+38. Since 10.21, the new testoutput8-16-4 file has accidentally been omitted
+from distribution tarballs, owing to a typo in Makefile.am which had
 testoutput8-16-3 twice. Now fixed.
 
-39. If the only branch in a conditional subpattern was anchored, the whole 
-subpattern was treated as anchored, when it should not have been, since the 
-assumed empty second branch cannot be anchored. Demonstrated by test patterns 
+39. If the only branch in a conditional subpattern was anchored, the whole
+subpattern was treated as anchored, when it should not have been, since the
+assumed empty second branch cannot be anchored. Demonstrated by test patterns
 such as /(?(1)^())b/ or /(?(?=^))b/.
 
-40. A repeated conditional subpattern that could match an empty string was 
+40. A repeated conditional subpattern that could match an empty string was
 always assumed to be unanchored. Now it it checked just like any other
-repeated conditional subpattern, and can be found to be anchored if the minimum 
+repeated conditional subpattern, and can be found to be anchored if the minimum
 quantifier is one or more. I can't see much use for a repeated anchored
 pattern, but the behaviour is now consistent.
 
-41. Minor addition to pcre2_jit_compile.c to avoid static analyzer complaint 
+41. Minor addition to pcre2_jit_compile.c to avoid static analyzer complaint
 (for an event that could never occur but you had to have external information
 to know that).
 
@@ -194,7 +194,7 @@ there was a line that was sufficiently long to cause the input buffer to be
 expanded, the variable holding the location of the end of the previous match
 was being adjusted incorrectly, and could cause an overflow warning from a code
 sanitizer. However, as the value is used only to print pending "after" lines
-when the next match is reached (and there are no such lines in this case) this 
+when the next match is reached (and there are no such lines in this case) this
 bug could do no damage.
 
 

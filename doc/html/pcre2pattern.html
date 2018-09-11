@@ -399,14 +399,15 @@ these escapes are as follows:
   \ddd        character with octal code ddd, or backreference
   \o{ddd..}   character with octal code ddd..
   \xhh        character with hex code hh
-  \x{hhh..}   character with hex code hhh.. (default mode)
-  \N{U+hhh..} character with Unicode code point hhh..
+  \x{hhh..}   character with hex code hhh..
+  \N{U+hhh..} character with Unicode hex code point hhh..
   \uhhhh      character with hex code hhhh (when PCRE2_ALT_BSUX is set)
 </pre>
+The \N{U+hhh..} escape sequence is recognized only when the PCRE2_UTF option
+is set, that is, when PCRE2 is operating in a Unicode mode. Perl also uses
+\N{name} to specify characters by Unicode name; PCRE2 does not support this.
 Note that when \N is not followed by an opening brace (curly bracket) it has
 an entirely different meaning, matching any character that is not a newline.
-Perl also uses \N{name} to specify characters by Unicode name; PCRE2 does not
-support this.
 </P>
 <P>
 The precise effect of \cx on ASCII characters is as follows: if x is a lower
@@ -530,7 +531,8 @@ limited to certain values, as follows:
 Invalid Unicode code points are all those in the range 0xd800 to 0xdfff (the
 so-called "surrogate" code points). The check for these can be disabled by the
 caller of <b>pcre2_compile()</b> by setting the option
-PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES.
+PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES. However, this is possible only in UTF-8
+and UTF-32 modes, because these values are not representable in UTF-16.
 </P>
 <br><b>
 Escape sequences in character classes
@@ -3595,13 +3597,16 @@ verbs in subroutines is different in some cases.
 an immediate backtrack.
 </P>
 <P>
-(*COMMIT), (*SKIP), and (*PRUNE) in a subpattern called as a subroutine cause
-the subroutine match to fail.
+(*COMMIT), (*SKIP), and (*PRUNE) cause the subroutine match to fail when
+triggered by being backtracked to in a subpattern called as a subroutine. There
+is then a backtrack at the outer level.
 </P>
 <P>
-(*THEN) skips to the next alternative in the innermost enclosing group within
-the subpattern that has alternatives. If there is no such group within the
-subpattern, (*THEN) causes the subroutine match to fail.
+(*THEN), when triggered, skips to the next alternative in the innermost
+enclosing group within the subpattern that has alternatives (its normal
+behaviour). However, if there is no such group within the subroutine
+subpattern, the subroutine match fails and there is a backtrack at the outer
+level.
 </P>
 <br><a name="SEC28" href="#TOC1">SEE ALSO</a><br>
 <P>
@@ -3619,7 +3624,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC30" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 03 August 2018
+Last updated: 04 September 2018
 <br>
 Copyright &copy; 1997-2018 University of Cambridge.
 <br>

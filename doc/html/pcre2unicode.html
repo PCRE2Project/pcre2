@@ -26,7 +26,8 @@ you must call
 with the PCRE2_UTF option flag, or the pattern must start with the sequence
 (*UTF). When either of these is the case, both the pattern and any subject
 strings that are matched against it are treated as UTF strings instead of
-strings of individual one-code-unit characters.
+strings of individual one-code-unit characters. There are also some other
+changes to the way characters are handled, as documented below.
 </P>
 <P>
 If you do not need Unicode support you can build PCRE2 without it, in which
@@ -57,6 +58,11 @@ Code points less than 256 can be specified in patterns by either braced or
 unbraced hexadecimal escape sequences (for example, \x{b3} or \xb3). Larger
 values have to use braced sequences. Unbraced octal code points up to \777 are
 also recognized; larger ones can be coded using \o{...}.
+</P>
+<P>
+The escape sequence \N{U+&#60;hex digits&#62;} is recognized as another way of
+specifying a Unicode character by code point in a UTF mode. It is not allowed
+in non-UTF modes.
 </P>
 <P>
 In UTF modes, repeat quantifiers apply to complete UTF characters, not to
@@ -294,9 +300,9 @@ Cambridge, England.
 REVISION
 </b><br>
 <P>
-Last updated: 17 May 2017
+Last updated: 02 September 2018
 <br>
-Copyright &copy; 1997-2017 University of Cambridge.
+Copyright &copy; 1997-2018 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE2 index page</a>.

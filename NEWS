@@ -1,11 +1,12 @@
 News about PCRE2 releases
 -------------------------
 
-Version 10.32 13-August-2018
-----------------------------
+
+Version 10.32 10-September-2018
+-------------------------------
 
 This is another mainly bugfix and tidying release with a few minor
-enhancements.
+enhancements. These are the main ones:
 
 1. pcre2grep now supports the inclusion of binary zeros in patterns that are
 read from files via the -f option.
@@ -22,7 +23,7 @@ parameter now applies to pcre2_dfa_match().
 
 5. (*ACCEPT:ARG), (*FAIL:ARG), and (*COMMIT:ARG) are now supported.
 
-6. Added support for \N{U+dddd}, but not in EBCDIC environments.
+6. Added support for \N{U+dddd}, but only in Unicode mode.
 
 7. Added support for (?^) to unset all imnsx options.
 

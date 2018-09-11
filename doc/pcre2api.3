@@ -1756,7 +1756,7 @@ behaviour of PCRE2 are given in the
 .\" HREF
 \fBpcre2unicode\fP
 .\"
-page. In particular, note that it changes the way PCRE2_CASELESS handles 
+page. In particular, note that it changes the way PCRE2_CASELESS handles
 characters with code points greater than 127.
 .
 .
@@ -3200,9 +3200,9 @@ data block is obtained and freed within this function, using memory management
 functions from the match context, if provided, or else those that were used to
 allocate memory for the compiled code.
 .P
-If an external \fImatch_data\fP block is provided, its contents afterwards 
+If an external \fImatch_data\fP block is provided, its contents afterwards
 are those set by the final call to \fBpcre2_match()\fP, which will have
-ended in a matching error. The contents of the ovector within the match data 
+ended in a matching error. The contents of the ovector within the match data
 block may or may not have been changed.
 .P
 The \fIoutlengthptr\fP argument must point to a variable that contains the
