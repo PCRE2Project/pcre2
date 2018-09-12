@@ -164,6 +164,7 @@ D   is inspected during pcre2_dfa_match() execution
 #define PCRE2_JIT_COMPLETE        0x00000001u  /* For full matching */
 #define PCRE2_JIT_PARTIAL_SOFT    0x00000002u
 #define PCRE2_JIT_PARTIAL_HARD    0x00000004u
+#define PCRE2_JIT_INVALID_UTF     0x00000100u
 
 /* These are for pcre2_match(), pcre2_dfa_match(), and pcre2_jit_match(). Note
 that PCRE2_ANCHORED and PCRE2_NO_UTF_CHECK can also be passed to these
