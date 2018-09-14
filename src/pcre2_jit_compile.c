@@ -1052,6 +1052,7 @@ while (cc < ccend)
       common->ovector_start += 3 * sizeof(sljit_sw);
       }
 #endif /* SUPPORT_UNICODE */
+    /* Fall through. */
     case OP_REF:
     common->optimized_cbracket[GET2(cc, 1)] = 0;
     cc += 1 + IMM2_SIZE;
