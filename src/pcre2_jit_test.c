@@ -1755,6 +1755,41 @@ static int regression_tests(void)
 	}
 }
 
+#if defined SUPPORT_UNICODE && (defined SUPPORT_PCRE2_8 || defined SUPPORT_PCRE2_16)
+
+static int check_invalid_utf_result(int pattern_index, char *type, int result,
+	int match_start, int match_end, PCRE2_SIZE *ovector)
+{
+	if (match_start < 0) {
+		if (result != -1) {
+			printf("Pattern[%d] %s result is not -1.\n", pattern_index, type);
+			return 1;
+		}
+		return 0;
+	}
+
+	if (result <= 0) {
+		printf("Pattern[%d] %s result (%d) is not greater than 0.\n", pattern_index, type, result);
+		return 1;
+	}
+
+	if (ovector[0] != (PCRE2_SIZE)match_start) {
+		printf("Pattern[%d] %s ovector[0] is unexpected (%d instead of %d)\n",
+			pattern_index, type, (int)ovector[0], match_start);
+		return 1;
+	}
+
+	if (ovector[1] != (PCRE2_SIZE)match_end) {
+		printf("Pattern[%d] %s ovector[1] is unexpected (%d instead of %d)\n",
+			pattern_index, type, (int)ovector[1], match_end);
+		return 1;
+	}
+
+	return 0;
+}
+
+#endif /* SUPPORT_UNICODE && (SUPPORT_PCRE2_8 || SUPPORT_PCRE2_16) */
+
 #if defined SUPPORT_UNICODE && defined SUPPORT_PCRE2_8
 
 #define UDA (PCRE2_UTF | PCRE2_DOTALL | PCRE2_ANCHORED)
@@ -1767,121 +1802,132 @@ struct invalid_utf8_regression_test_case {
 	int start_offset;
 	int skip_left;
 	int skip_right;
-	int expected_result;
+	int match_start;
+	int match_end;
 	const char *pattern[2];
 	const char *input;
 };
 
 static struct invalid_utf8_regression_test_case invalid_utf8_regression_test_cases[] = {
-	{ UDA, CI, 0, 0, 0, 1, { ".", NULL }, "\xf4\x8f\xbf\xbf" },
-	{ UDA, CI, 0, 0, 0, 1, { ".", NULL }, "\xf0\x90\x80\x80" },
-	{ UDA, CI, 0, 0, 0, -1, { ".", NULL }, "\xf4\x90\x80\x80" },
-	{ UDA, CI, 0, 0, 1, -1, { ".", NULL }, "\xf4\x8f\xbf\xbf" },
-	{ UDA, CI, 0, 0, 0, -1, { ".", NULL }, "\xf0\x90\x80\x7f" },
-	{ UDA, CI, 0, 0, 0, -1, { ".", NULL }, "\xf0\x90\x80\xc0" },
-	{ UDA, CI, 0, 0, 0, -1, { ".", NULL }, "\xf0\x8f\xbf\xbf" },
-	{ UDA, CI, 0, 0, 0, 1, { ".", NULL }, "\xef\xbf\xbf#" },
-	{ UDA, CI, 0, 0, 0, 1, { ".", NULL }, "\xef\xbf\xbf" },
-	{ UDA, CI, 0, 0, 0, 1, { ".", NULL }, "\xe0\xa0\x80#" },
-	{ UDA, CI, 0, 0, 0, 1, { ".", NULL }, "\xe0\xa0\x80" },
-	{ UDA, CI, 0, 0, 2, -1, { ".", NULL }, "\xef\xbf\xbf#" },
-	{ UDA, CI, 0, 0, 1, -1, { ".", NULL }, "\xef\xbf\xbf" },
-	{ UDA, CI, 0, 0, 0, -1, { ".", NULL }, "\xef\xbf\x7f#" },
-	{ UDA, CI, 0, 0, 0, -1, { ".", NULL }, "\xef\xbf\xc0" },
-	{ UDA, CI, 0, 0, 0, -1, { ".", NULL }, "\xe0\x9f\xbf#" },
-	{ UDA, CI, 0, 0, 0, -1, { ".", NULL }, "\xe0\x9f\xbf" },
-	{ UDA, CI, 0, 0, 0, 1, { ".", NULL }, "\xed\x9f\xbf#" },
-	{ UDA, CI, 0, 0, 0, -1, { ".", NULL }, "\xed\xa0\x80#" },
-	{ UDA, CI, 0, 0, 0, 1, { ".", NULL }, "\xee\x80\x80#" },
-	{ UDA, CI, 0, 0, 0, -1, { ".", NULL }, "\xed\xbf\xbf#" },
-	{ UDA, CI, 0, 0, 0, 1, { ".", NULL }, "\xdf\xbf##" },
-	{ UDA, CI, 0, 0, 0, 1, { ".", NULL }, "\xdf\xbf#" },
-	{ UDA, CI, 0, 0, 0, 1, { ".", NULL }, "\xdf\xbf" },
-	{ UDA, CI, 0, 0, 0, 1, { ".", NULL }, "\xc2\x80##" },
-	{ UDA, CI, 0, 0, 0, 1, { ".", NULL }, "\xc2\x80#" },
-	{ UDA, CI, 0, 0, 0, 1, { ".", NULL }, "\xc2\x80" },
-	{ UDA, CI, 0, 0, 0, -1, { ".", NULL }, "\xe0\x80##" },
-	{ UDA, CI, 0, 0, 0, -1, { ".", NULL }, "\xdf\xc0##" },
-	{ UDA, CI, 0, 0, 0, -1, { ".", NULL }, "\xe0\x80" },
-	{ UDA, CI, 0, 0, 0, -1, { ".", NULL }, "\xdf\xc0" },
-	{ UDA, CI, 0, 0, 0, -1, { ".", NULL }, "\xc1\xbf##" },
-	{ UDA, CI, 0, 0, 0, -1, { ".", NULL }, "\xc1\xbf" },
-	{ UDA, CI, 0, 0, 0, -1, { ".", NULL }, "\x80###" },
-	{ UDA, CI, 0, 0, 0, -1, { ".", NULL }, "\x80" },
-	{ UDA, CI, 0, 0, 0, -1, { ".", NULL }, "\xf8###" },
-	{ UDA, CI, 0, 0, 0, -1, { ".", NULL }, "\xf8" },
-	{ UDA, CI, 0, 0, 0, 1, { ".", NULL }, "\x7f" },
+	{ UDA, CI, 0, 0, 0, 0, 4, { ".", NULL }, "\xf4\x8f\xbf\xbf" },
+	{ UDA, CI, 0, 0, 0, 0, 4, { ".", NULL }, "\xf0\x90\x80\x80" },
+	{ UDA, CI, 0, 0, 0, -1, -1, { ".", NULL }, "\xf4\x90\x80\x80" },
+	{ UDA, CI, 0, 0, 1, -1, -1, { ".", NULL }, "\xf4\x8f\xbf\xbf" },
+	{ UDA, CI, 0, 0, 0, -1, -1, { ".", NULL }, "\xf0\x90\x80\x7f" },
+	{ UDA, CI, 0, 0, 0, -1, -1, { ".", NULL }, "\xf0\x90\x80\xc0" },
+	{ UDA, CI, 0, 0, 0, -1, -1, { ".", NULL }, "\xf0\x8f\xbf\xbf" },
+	{ UDA, CI, 0, 0, 0, 0, 3, { ".", NULL }, "\xef\xbf\xbf#" },
+	{ UDA, CI, 0, 0, 0, 0, 3, { ".", NULL }, "\xef\xbf\xbf" },
+	{ UDA, CI, 0, 0, 0, 0, 3, { ".", NULL }, "\xe0\xa0\x80#" },
+	{ UDA, CI, 0, 0, 0, 0, 3, { ".", NULL }, "\xe0\xa0\x80" },
+	{ UDA, CI, 0, 0, 2, -1, -1, { ".", NULL }, "\xef\xbf\xbf#" },
+	{ UDA, CI, 0, 0, 1, -1, -1, { ".", NULL }, "\xef\xbf\xbf" },
+	{ UDA, CI, 0, 0, 0, -1, -1, { ".", NULL }, "\xef\xbf\x7f#" },
+	{ UDA, CI, 0, 0, 0, -1, -1, { ".", NULL }, "\xef\xbf\xc0" },
+	{ UDA, CI, 0, 0, 0, -1, -1, { ".", NULL }, "\xe0\x9f\xbf#" },
+	{ UDA, CI, 0, 0, 0, -1, -1, { ".", NULL }, "\xe0\x9f\xbf" },
+	{ UDA, CI, 0, 0, 0, 0, 3, { ".", NULL }, "\xed\x9f\xbf#" },
+	{ UDA, CI, 0, 0, 0, -1, -1, { ".", NULL }, "\xed\xa0\x80#" },
+	{ UDA, CI, 0, 0, 0, 0, 3, { ".", NULL }, "\xee\x80\x80#" },
+	{ UDA, CI, 0, 0, 0, -1, -1, { ".", NULL }, "\xed\xbf\xbf#" },
+	{ UDA, CI, 0, 0, 0, 0, 2, { ".", NULL }, "\xdf\xbf##" },
+	{ UDA, CI, 0, 0, 0, 0, 2, { ".", NULL }, "\xdf\xbf#" },
+	{ UDA, CI, 0, 0, 0, 0, 2, { ".", NULL }, "\xdf\xbf" },
+	{ UDA, CI, 0, 0, 0, 0, 2, { ".", NULL }, "\xc2\x80##" },
+	{ UDA, CI, 0, 0, 0, 0, 2, { ".", NULL }, "\xc2\x80#" },
+	{ UDA, CI, 0, 0, 0, 0, 2, { ".", NULL }, "\xc2\x80" },
+	{ UDA, CI, 0, 0, 0, -1, -1, { ".", NULL }, "\xe0\x80##" },
+	{ UDA, CI, 0, 0, 0, -1, -1, { ".", NULL }, "\xdf\xc0##" },
+	{ UDA, CI, 0, 0, 0, -1, -1, { ".", NULL }, "\xe0\x80" },
+	{ UDA, CI, 0, 0, 0, -1, -1, { ".", NULL }, "\xdf\xc0" },
+	{ UDA, CI, 0, 0, 0, -1, -1, { ".", NULL }, "\xc1\xbf##" },
+	{ UDA, CI, 0, 0, 0, -1, -1, { ".", NULL }, "\xc1\xbf" },
+	{ UDA, CI, 0, 0, 0, -1, -1, { ".", NULL }, "\x80###" },
+	{ UDA, CI, 0, 0, 0, -1, -1, { ".", NULL }, "\x80" },
+	{ UDA, CI, 0, 0, 0, -1, -1, { ".", NULL }, "\xf8###" },
+	{ UDA, CI, 0, 0, 0, -1, -1, { ".", NULL }, "\xf8" },
+	{ UDA, CI, 0, 0, 0, 0, 1, { ".", NULL }, "\x7f" },
 
-	{ UDA, CPI, 4, 0, 0, 1, { "\\B", NULL }, "\xf4\x8f\xbf\xbf#" },
-	{ UDA, CPI, 4, 0, 0, -1, { "\\B", "\\b" }, "\xf4\xa0\x80\x80#" },
-	{ UDA, CPI, 4, 1, 0, -1, { "\\B", "\\b" }, "\xf4\x8f\xbf\xbf#" },
-	{ UDA, CPI, 4, 0, 0, 1, { "\\B", NULL }, "#\xef\xbf\xbf#" },
-	{ UDA, CPI, 4, 0, 0, 1, { "\\B", NULL }, "#\xe0\xa0\x80#" },
-	{ UDA, CPI, 4, 0, 0, 1, { "\\B", NULL }, "\xf0\x90\x80\x80#" },
-	{ UDA, CPI, 4, 0, 0, 1, { "\\B", NULL }, "\xf3\xbf\xbf\xbf#" },
-	{ UDA, CPI, 4, 0, 0, -1, { "\\B", "\\b" }, "\xf0\x8f\xbf\xbf#" },
-	{ UDA, CPI, 4, 0, 0, -1, { "\\B", "\\b" }, "\xf5\x80\x80\x80#" },
-	{ UDA, CPI, 4, 0, 0, -1, { "\\B", "\\b" }, "\xf4\x90\x80\x80#" },
-	{ UDA, CPI, 4, 0, 0, -1, { "\\B", "\\b" }, "\xf4\x8f\xbf\xff#" },
-	{ UDA, CPI, 4, 0, 0, -1, { "\\B", "\\b" }, "\xf4\x8f\xff\xbf#" },
-	{ UDA, CPI, 4, 0, 0, -1, { "\\B", "\\b" }, "\xef\x80\x80\x80#" },
-	{ UDA, CPI, 4, 0, 0, -1, { "\\B", "\\b" }, "\x80\x80\x80\x80#" },
-	{ UDA, CPI, 4, 0, 0, -1, { "\\B", "\\b" }, "#\xe0\x9f\xbf#" },
-	{ UDA, CPI, 4, 2, 0, -1, { "\\B", "\\b" }, "#\xe0\xa0\x80#" },
-	{ UDA, CPI, 4, 0, 0, -1, { "\\B", "\\b" }, "#\xf0\x80\x80#" },
-	{ UDA, CPI, 4, 0, 0, -1, { "\\B", "\\b" }, "#\xed\xa0\x80#" },
-	{ UDA, CPI, 4, 0, 0, 1, { "\\B", NULL }, "##\xdf\xbf#" },
-	{ UDA, CPI, 4, 2, 0, 1, { "\\B", NULL }, "##\xdf\xbf#" },
-	{ UDA, CPI, 4, 0, 0, 1, { "\\B", NULL }, "##\xc2\x80#" },
-	{ UDA, CPI, 4, 2, 0, 1, { "\\B", NULL }, "##\xc2\x80#" },
-	{ UDA, CPI, 4, 0, 0, -1, { "\\B", "\\b" }, "##\xc1\xbf#" },
-	{ UDA, CPI, 4, 0, 0, -1, { "\\B", "\\b" }, "##\xdf\xc0#" },
-	{ UDA, CPI, 4, 0, 0, -1, { "\\B", "\\b" }, "##\xe0\x80#" },
-	{ UDA, CPI, 4, 2, 0, -1, { "\\B", "\\b" }, "##\xe0\x80#" },
+	{ UDA, CPI, 4, 0, 0, 4, 4, { "\\B", NULL }, "\xf4\x8f\xbf\xbf#" },
+	{ UDA, CPI, 4, 0, 0, -1, -1, { "\\B", "\\b" }, "\xf4\xa0\x80\x80#" },
+	{ UDA, CPI, 4, 1, 0, -1, -1, { "\\B", "\\b" }, "\xf4\x8f\xbf\xbf#" },
+	{ UDA, CPI, 4, 0, 0, 4, 4, { "\\B", NULL }, "#\xef\xbf\xbf#" },
+	{ UDA, CPI, 4, 0, 0, 4, 4, { "\\B", NULL }, "#\xe0\xa0\x80#" },
+	{ UDA, CPI, 4, 0, 0, 4, 4, { "\\B", NULL }, "\xf0\x90\x80\x80#" },
+	{ UDA, CPI, 4, 0, 0, 4, 4, { "\\B", NULL }, "\xf3\xbf\xbf\xbf#" },
+	{ UDA, CPI, 4, 0, 0, -1, -1, { "\\B", "\\b" }, "\xf0\x8f\xbf\xbf#" },
+	{ UDA, CPI, 4, 0, 0, -1, -1, { "\\B", "\\b" }, "\xf5\x80\x80\x80#" },
+	{ UDA, CPI, 4, 0, 0, -1, -1, { "\\B", "\\b" }, "\xf4\x90\x80\x80#" },
+	{ UDA, CPI, 4, 0, 0, -1, -1, { "\\B", "\\b" }, "\xf4\x8f\xbf\xff#" },
+	{ UDA, CPI, 4, 0, 0, -1, -1, { "\\B", "\\b" }, "\xf4\x8f\xff\xbf#" },
+	{ UDA, CPI, 4, 0, 0, -1, -1, { "\\B", "\\b" }, "\xef\x80\x80\x80#" },
+	{ UDA, CPI, 4, 0, 0, -1, -1, { "\\B", "\\b" }, "\x80\x80\x80\x80#" },
+	{ UDA, CPI, 4, 0, 0, -1, -1, { "\\B", "\\b" }, "#\xe0\x9f\xbf#" },
+	{ UDA, CPI, 4, 2, 0, -1, -1, { "\\B", "\\b" }, "#\xe0\xa0\x80#" },
+	{ UDA, CPI, 4, 0, 0, -1, -1, { "\\B", "\\b" }, "#\xf0\x80\x80#" },
+	{ UDA, CPI, 4, 0, 0, -1, -1, { "\\B", "\\b" }, "#\xed\xa0\x80#" },
+	{ UDA, CPI, 4, 0, 0, 4, 4, { "\\B", NULL }, "##\xdf\xbf#" },
+	{ UDA, CPI, 4, 2, 0, 2, 2, { "\\B", NULL }, "##\xdf\xbf#" },
+	{ UDA, CPI, 4, 0, 0, 4, 4, { "\\B", NULL }, "##\xc2\x80#" },
+	{ UDA, CPI, 4, 2, 0, 2, 2, { "\\B", NULL }, "##\xc2\x80#" },
+	{ UDA, CPI, 4, 0, 0, -1, -1, { "\\B", "\\b" }, "##\xc1\xbf#" },
+	{ UDA, CPI, 4, 0, 0, -1, -1, { "\\B", "\\b" }, "##\xdf\xc0#" },
+	{ UDA, CPI, 4, 0, 0, -1, -1, { "\\B", "\\b" }, "##\xe0\x80#" },
+	{ UDA, CPI, 4, 2, 0, -1, -1, { "\\B", "\\b" }, "##\xe0\x80#" },
 
-	{ UDA, CPI, 3, 0, 0, 1, { "\\B", NULL }, "\xef\xbf\xbf#" },
-	{ UDA, CPI, 3, 0, 0, 1, { "\\B", NULL }, "\xe0\xa0\x80#" },
-	{ UDA, CPI, 3, 0, 0, -1, { "\\B", "\\b" }, "\xe0\x9f\xbf#" },
-	{ UDA, CPI, 3, 1, 0, -1, { "\\B", "\\b" }, "\xef\xbf\xbf#" },
-	{ UDA, CPI, 3, 0, 0, -1, { "\\B", "\\b" }, "\xdf\x80\x80#" },
-	{ UDA, CPI, 3, 0, 0, -1, { "\\B", "\\b" }, "\xef\xbf\xff#" },
-	{ UDA, CPI, 3, 0, 0, -1, { "\\B", "\\b" }, "\xef\xff\xbf#" },
-	{ UDA, CPI, 3, 0, 0, -1, { "\\B", "\\b" }, "\xed\xbf\xbf#" },
+	{ UDA, CPI, 3, 0, 0, 3, 3, { "\\B", NULL }, "\xef\xbf\xbf#" },
+	{ UDA, CPI, 3, 0, 0, 3, 3, { "\\B", NULL }, "\xe0\xa0\x80#" },
+	{ UDA, CPI, 3, 0, 0, -1, -1, { "\\B", "\\b" }, "\xe0\x9f\xbf#" },
+	{ UDA, CPI, 3, 1, 0, -1, -1, { "\\B", "\\b" }, "\xef\xbf\xbf#" },
+	{ UDA, CPI, 3, 0, 0, -1, -1, { "\\B", "\\b" }, "\xdf\x80\x80#" },
+	{ UDA, CPI, 3, 0, 0, -1, -1, { "\\B", "\\b" }, "\xef\xbf\xff#" },
+	{ UDA, CPI, 3, 0, 0, -1, -1, { "\\B", "\\b" }, "\xef\xff\xbf#" },
+	{ UDA, CPI, 3, 0, 0, -1, -1, { "\\B", "\\b" }, "\xed\xbf\xbf#" },
 
-	{ UDA, CPI, 2, 0, 0, 1, { "\\B", NULL }, "\xdf\xbf#" },
-	{ UDA, CPI, 2, 0, 0, 1, { "\\B", NULL }, "\xc2\x80#" },
-	{ UDA, CPI, 2, 1, 0, -1, { "\\B", "\\b" }, "\xdf\xbf#" },
-	{ UDA, CPI, 2, 0, 0, -1, { "\\B", "\\b" }, "\xc1\xbf#" },
-	{ UDA, CPI, 2, 0, 0, -1, { "\\B", "\\b" }, "\xe0\x80#" },
-	{ UDA, CPI, 2, 0, 0, -1, { "\\B", "\\b" }, "\xdf\xff#" },
-	{ UDA, CPI, 2, 0, 0, -1, { "\\B", "\\b" }, "\xff\xbf#" },
+	{ UDA, CPI, 2, 0, 0, 2, 2, { "\\B", NULL }, "\xdf\xbf#" },
+	{ UDA, CPI, 2, 0, 0, 2, 2, { "\\B", NULL }, "\xc2\x80#" },
+	{ UDA, CPI, 2, 1, 0, -1, -1, { "\\B", "\\b" }, "\xdf\xbf#" },
+	{ UDA, CPI, 2, 0, 0, -1, -1, { "\\B", "\\b" }, "\xc1\xbf#" },
+	{ UDA, CPI, 2, 0, 0, -1, -1, { "\\B", "\\b" }, "\xe0\x80#" },
+	{ UDA, CPI, 2, 0, 0, -1, -1, { "\\B", "\\b" }, "\xdf\xff#" },
+	{ UDA, CPI, 2, 0, 0, -1, -1, { "\\B", "\\b" }, "\xff\xbf#" },
 
-	{ UDA, CPI, 1, 0, 0, 1, { "\\B", NULL }, "\x7f#" },
-	{ UDA, CPI, 1, 0, 0, 1, { "\\B", NULL }, "\x01#" },
-	{ UDA, CPI, 1, 0, 0, -1, { "\\B", "\\b" }, "\x80#" },
-	{ UDA, CPI, 1, 0, 0, -1, { "\\B", "\\b" }, "\x80#" },
+	{ UDA, CPI, 1, 0, 0, 1, 1, { "\\B", NULL }, "\x7f#" },
+	{ UDA, CPI, 1, 0, 0, 1, 1, { "\\B", NULL }, "\x01#" },
+	{ UDA, CPI, 1, 0, 0, -1, -1, { "\\B", "\\b" }, "\x80#" },
+	{ UDA, CPI, 1, 0, 0, -1, -1, { "\\B", "\\b" }, "\x80#" },
 
-	{ UDA | PCRE2_CASELESS, CPI, 0, 0, 0, 2, { "(.)\\1", NULL }, "aA" },
-	{ UDA | PCRE2_CASELESS, CPI, 0, 0, 0, -1, { "(.)\\1", NULL }, "a\xff" },
-	{ UDA | PCRE2_CASELESS, CPI, 0, 0, 0, 2, { "(.)\\1", NULL }, "\xc3\xa1\xc3\x81" },
-	{ UDA | PCRE2_CASELESS, CPI, 0, 0, 1, -1, { "(.)\\1", NULL }, "\xc3\xa1\xc3\x81" },
-	{ UDA | PCRE2_CASELESS, CPI, 0, 0, 0, -1, { "(.)\\1", NULL }, "\xc2\x80\x80" },
-	{ UDA | PCRE2_CASELESS, CPI, 0, 0, 0, 2, { "(.)\\1", NULL }, "\xe1\xbd\xb8\xe1\xbf\xb8" },
-	{ UDA | PCRE2_CASELESS, CPI, 0, 0, 1, -1, { "(.)\\1", NULL }, "\xe1\xbd\xb8\xe1\xbf\xb8" },
-	{ UDA | PCRE2_CASELESS, CPI, 0, 0, 0, 2, { "(.)\\1", NULL }, "\xf0\x90\x90\x80\xf0\x90\x90\xa8" },
-	{ UDA | PCRE2_CASELESS, CPI, 0, 0, 1, -1, { "(.)\\1", NULL }, "\xf0\x90\x90\x80\xf0\x90\x90\xa8" },
+	{ UDA | PCRE2_CASELESS, CPI, 0, 0, 0, 0, 2, { "(.)\\1", NULL }, "aA" },
+	{ UDA | PCRE2_CASELESS, CPI, 0, 0, 0, -1, -1, { "(.)\\1", NULL }, "a\xff" },
+	{ UDA | PCRE2_CASELESS, CPI, 0, 0, 0, 0, 4, { "(.)\\1", NULL }, "\xc3\xa1\xc3\x81" },
+	{ UDA | PCRE2_CASELESS, CPI, 0, 0, 1, -1, -1, { "(.)\\1", NULL }, "\xc3\xa1\xc3\x81" },
+	{ UDA | PCRE2_CASELESS, CPI, 0, 0, 0, -1, -1, { "(.)\\1", NULL }, "\xc2\x80\x80" },
+	{ UDA | PCRE2_CASELESS, CPI, 0, 0, 0, 0, 6, { "(.)\\1", NULL }, "\xe1\xbd\xb8\xe1\xbf\xb8" },
+	{ UDA | PCRE2_CASELESS, CPI, 0, 0, 1, -1, -1, { "(.)\\1", NULL }, "\xe1\xbd\xb8\xe1\xbf\xb8" },
+	{ UDA | PCRE2_CASELESS, CPI, 0, 0, 0, 0, 8, { "(.)\\1", NULL }, "\xf0\x90\x90\x80\xf0\x90\x90\xa8" },
+	{ UDA | PCRE2_CASELESS, CPI, 0, 0, 1, -1, -1, { "(.)\\1", NULL }, "\xf0\x90\x90\x80\xf0\x90\x90\xa8" },
 
-	{ UDA, CPI, 0, 0, 0, 1, { "\\X", NULL }, "A" },
-	{ UDA, CPI, 0, 0, 0, -1, { "\\X", NULL }, "\xff" },
-	{ UDA, CPI, 0, 0, 0, 1, { "\\X", NULL }, "\xc3\xa1" },
-	{ UDA, CPI, 0, 0, 1, -1, { "\\X", NULL }, "\xc3\xa1" },
-	{ UDA, CPI, 0, 0, 0, -1, { "\\X", NULL }, "\xc3\x7f" },
-	{ UDA, CPI, 0, 0, 0, 1, { "\\X", NULL }, "\xe1\xbd\xb8" },
-	{ UDA, CPI, 0, 0, 1, -1, { "\\X", NULL }, "\xe1\xbd\xb8" },
-	{ UDA, CPI, 0, 0, 0, 1, { "\\X", NULL }, "\xf0\x90\x90\x80" },
-	{ UDA, CPI, 0, 0, 1, -1, { "\\X", NULL }, "\xf0\x90\x90\x80" },
+	{ UDA, CPI, 0, 0, 0, 0, 1, { "\\X", NULL }, "A" },
+	{ UDA, CPI, 0, 0, 0, -1, -1, { "\\X", NULL }, "\xff" },
+	{ UDA, CPI, 0, 0, 0, 0, 2, { "\\X", NULL }, "\xc3\xa1" },
+	{ UDA, CPI, 0, 0, 1, -1, -1, { "\\X", NULL }, "\xc3\xa1" },
+	{ UDA, CPI, 0, 0, 0, -1, -1, { "\\X", NULL }, "\xc3\x7f" },
+	{ UDA, CPI, 0, 0, 0, 0, 3, { "\\X", NULL }, "\xe1\xbd\xb8" },
+	{ UDA, CPI, 0, 0, 1, -1, -1, { "\\X", NULL }, "\xe1\xbd\xb8" },
+	{ UDA, CPI, 0, 0, 0, 0, 4, { "\\X", NULL }, "\xf0\x90\x90\x80" },
+	{ UDA, CPI, 0, 0, 1, -1, -1, { "\\X", NULL }, "\xf0\x90\x90\x80" },
 
-	{ 0, 0, 0, 0, 0, 0, { NULL, NULL }, NULL }
+	{ PCRE2_UTF | PCRE2_MULTILINE, CI, 1, 0, 0, 2, 3, { "^\\W", NULL }, " \x0a#"},
+	{ PCRE2_UTF | PCRE2_MULTILINE, CI, 1, 0, 0, 14, 15, { "^\\W", NULL }, " \xc0\x8a#\xe0\x80\x8a#\xf0\x80\x80\x8a#\x0a#"},
+	{ PCRE2_UTF | PCRE2_MULTILINE, CI, 1, 0, 0, 3, 4, { "^\\W", NULL }, " \xf8\x0a#"},
+	{ PCRE2_UTF | PCRE2_MULTILINE, CI, 1, 0, 0, 3, 4, { "^\\W", NULL }, " \xc3\x0a#"},
+	{ PCRE2_UTF | PCRE2_MULTILINE, CI, 1, 0, 0, 3, 4, { "^\\W", NULL }, " \xf1\x0a#"},
+	{ PCRE2_UTF | PCRE2_MULTILINE, CI, 1, 0, 0, 4, 5, { "^\\W", NULL }, " \xf2\xbf\x0a#"},
+	{ PCRE2_UTF | PCRE2_MULTILINE, CI, 1, 0, 0, 5, 6, { "^\\W", NULL }, " \xf2\xbf\xbf\x0a#"},
+	{ PCRE2_UTF | PCRE2_MULTILINE, CI, 1, 0, 0, 3, 4, { "^\\W", NULL }, " \xef\x0a#"},
+	{ PCRE2_UTF | PCRE2_MULTILINE, CI, 1, 0, 0, 4, 5, { "^\\W", NULL }, " \xef\xbf\x0a#"},
+
+	{ 0, 0, 0, 0, 0, 0, 0, { NULL, NULL }, NULL }
 };
 
 #undef UDA
@@ -1889,17 +1935,18 @@ static struct invalid_utf8_regression_test_case invalid_utf8_regression_test_cas
 #undef CPI
 
 static int run_invalid_utf8_test(struct invalid_utf8_regression_test_case *current,
-	int pattern_index, int i, pcre2_match_data_8 *mdata)
+	int pattern_index, int i, pcre2_compile_context_8 *ccontext, pcre2_match_data_8 *mdata)
 {
 	pcre2_code_8 *code;
 	int result, errorcode;
 	PCRE2_SIZE length, erroroffset;
+	PCRE2_SIZE *ovector = pcre2_get_ovector_pointer_8(mdata);
 
 	if (current->pattern[i] == NULL)
 		return 1;
 
 	code = pcre2_compile_8((PCRE2_UCHAR8*)current->pattern[i], PCRE2_ZERO_TERMINATED,
-		current->compile_options, &errorcode, &erroroffset, NULL);
+		current->compile_options, &errorcode, &erroroffset, ccontext);
 
 	if (!code) {
 		printf("Pattern[%d:0] cannot be compiled. Error offset: %d\n", pattern_index, (int)erroroffset);
@@ -1918,8 +1965,7 @@ static int run_invalid_utf8_test(struct invalid_utf8_regression_test_case *curre
 		result = pcre2_jit_match_8(code, (PCRE2_UCHAR8*)(current->input + current->skip_left),
 			length, current->start_offset - current->skip_left, 0, mdata, NULL);
 
-		if (result != current->expected_result) {
-			printf("Pattern[%d:0] match result %d differs from expected %d.\n", pattern_index, result, current->expected_result);
+		if (check_invalid_utf_result(pattern_index, "match", result, current->match_start, current->match_end, ovector)) {
 			pcre2_code_free_8(code);
 			return 0;
 		}
@@ -1929,8 +1975,7 @@ static int run_invalid_utf8_test(struct invalid_utf8_regression_test_case *curre
 		result = pcre2_jit_match_8(code, (PCRE2_UCHAR8*)(current->input + current->skip_left),
 			length, current->start_offset - current->skip_left, PCRE2_PARTIAL_SOFT, mdata, NULL);
 
-		if (result != current->expected_result) {
-			printf("Pattern[%d:0] partial match result %d differs from expected %d.\n", pattern_index, result, current->expected_result);
+		if (check_invalid_utf_result(pattern_index, "partial match", result, current->match_start, current->match_end, ovector)) {
 			pcre2_code_free_8(code);
 			return 0;
 		}
@@ -1943,12 +1988,15 @@ static int run_invalid_utf8_test(struct invalid_utf8_regression_test_case *curre
 static int invalid_utf8_regression_tests(void)
 {
 	struct invalid_utf8_regression_test_case *current;
+	pcre2_compile_context_8 *ccontext;
 	pcre2_match_data_8 *mdata;
 	int total = 0, successful = 0;
 	int result;
 
 	printf("\nRunning invalid-utf8 JIT regression tests\n");
 
+	ccontext = pcre2_compile_context_create_8(NULL);
+	pcre2_set_newline_8(ccontext, PCRE2_NEWLINE_ANY);
 	mdata = pcre2_match_data_create_8(4, NULL);
 
 	for (current = invalid_utf8_regression_test_cases; current->pattern[0]; current++) {
@@ -1956,9 +2004,9 @@ static int invalid_utf8_regression_tests(void)
 		total++;
 
 		result = 1;
-		if (!run_invalid_utf8_test(current, total - 1, 0, mdata))
+		if (!run_invalid_utf8_test(current, total - 1, 0, ccontext, mdata))
 			result = 0;
-		if (!run_invalid_utf8_test(current, total - 1, 1, mdata))
+		if (!run_invalid_utf8_test(current, total - 1, 1, ccontext, mdata))
 			result = 0;
 
 		if (result) {
@@ -1974,6 +2022,7 @@ static int invalid_utf8_regression_tests(void)
 		printf("\n");
 
 	pcre2_match_data_free_8(mdata);
+	pcre2_compile_context_free_8(ccontext);
 
 	if (total == successful) {
 		printf("\nAll invalid UTF8 JIT regression tests are successfully passed.\n");
@@ -2005,7 +2054,8 @@ struct invalid_utf16_regression_test_case {
 	int start_offset;
 	int skip_left;
 	int skip_right;
-	int expected_result;
+	int match_start;
+	int match_end;
 	const PCRE2_UCHAR16 *pattern[2];
 	const PCRE2_UCHAR16 *input;
 };
@@ -2024,41 +2074,41 @@ static PCRE2_UCHAR16 test6[] = { 'a', 'A', 0xdc28, 0 };
 static PCRE2_UCHAR16 test7[] = { 0xd801, 0xdc00, 0xd801, 0xdc28, 0 };
 
 static struct invalid_utf16_regression_test_case invalid_utf16_regression_test_cases[] = {
-	{ UDA, CI, 0, 0, 0, 1, { allany, NULL }, test1 },
-	{ UDA, CI, 1, 0, 0, 1, { allany, NULL }, test1 },
-	{ UDA, CI, 2, 0, 0, 1, { allany, NULL }, test1 },
-	{ UDA, CI, 3, 0, 0, 1, { allany, NULL }, test1 },
-	{ UDA, CI, 0, 0, 0, 1, { allany, NULL }, test2 },
-	{ UDA, CI, 0, 0, 2, -1, { allany, NULL }, test2 },
-	{ UDA, CI, 1, 0, 0, -1, { allany, NULL }, test2 },
-	{ UDA, CI, 0, 0, 0, 1, { allany, NULL }, test3 },
-	{ UDA, CI, 0, 0, 2, -1, { allany, NULL }, test3 },
-	{ UDA, CI, 1, 0, 0, -1, { allany, NULL }, test3 },
+	{ UDA, CI, 0, 0, 0, 0, 1, { allany, NULL }, test1 },
+	{ UDA, CI, 1, 0, 0, 1, 2, { allany, NULL }, test1 },
+	{ UDA, CI, 2, 0, 0, 2, 3, { allany, NULL }, test1 },
+	{ UDA, CI, 3, 0, 0, 3, 4, { allany, NULL }, test1 },
+	{ UDA, CI, 0, 0, 0, 0, 2, { allany, NULL }, test2 },
+	{ UDA, CI, 0, 0, 2, -1, -1, { allany, NULL }, test2 },
+	{ UDA, CI, 1, 0, 0, -1, -1, { allany, NULL }, test2 },
+	{ UDA, CI, 0, 0, 0, 0, 2, { allany, NULL }, test3 },
+	{ UDA, CI, 0, 0, 2, -1, -1, { allany, NULL }, test3 },
+	{ UDA, CI, 1, 0, 0, -1, -1, { allany, NULL }, test3 },
 
-	{ UDA, CPI, 1, 0, 0, 1, { non_word_boundary, NULL }, test1 },
-	{ UDA, CPI, 2, 0, 0, 1, { non_word_boundary, NULL }, test1 },
-	{ UDA, CPI, 3, 0, 0, 1, { non_word_boundary, NULL }, test1 },
-	{ UDA, CPI, 4, 0, 0, 1, { non_word_boundary, NULL }, test1 },
-	{ UDA, CPI, 2, 0, 0, 1, { non_word_boundary, NULL }, test2 },
-	{ UDA, CPI, 2, 0, 0, 1, { non_word_boundary, NULL }, test3 },
-	{ UDA, CPI, 2, 1, 0, -1, { non_word_boundary, word_boundary }, test2 },
-	{ UDA, CPI, 2, 1, 0, -1, { non_word_boundary, word_boundary }, test3 },
-	{ UDA, CPI, 2, 0, 0, -1, { non_word_boundary, word_boundary }, test4 },
-	{ UDA, CPI, 2, 0, 0, -1, { non_word_boundary, word_boundary }, test5 },
+	{ UDA, CPI, 1, 0, 0, 1, 1, { non_word_boundary, NULL }, test1 },
+	{ UDA, CPI, 2, 0, 0, 2, 2, { non_word_boundary, NULL }, test1 },
+	{ UDA, CPI, 3, 0, 0, 3, 3, { non_word_boundary, NULL }, test1 },
+	{ UDA, CPI, 4, 0, 0, 4, 4, { non_word_boundary, NULL }, test1 },
+	{ UDA, CPI, 2, 0, 0, 2, 2, { non_word_boundary, NULL }, test2 },
+	{ UDA, CPI, 2, 0, 0, 2, 2, { non_word_boundary, NULL }, test3 },
+	{ UDA, CPI, 2, 1, 0, -1, -1, { non_word_boundary, word_boundary }, test2 },
+	{ UDA, CPI, 2, 1, 0, -1, -1, { non_word_boundary, word_boundary }, test3 },
+	{ UDA, CPI, 2, 0, 0, -1, -1, { non_word_boundary, word_boundary }, test4 },
+	{ UDA, CPI, 2, 0, 0, -1, -1, { non_word_boundary, word_boundary }, test5 },
 
-	{ UDA | PCRE2_CASELESS, CPI, 0, 0, 0, 2, { backreference, NULL }, test6 },
-	{ UDA | PCRE2_CASELESS, CPI, 1, 0, 0, -1, { backreference, NULL }, test6 },
-	{ UDA | PCRE2_CASELESS, CPI, 0, 0, 0, 2, { backreference, NULL }, test7 },
-	{ UDA | PCRE2_CASELESS, CPI, 0, 0, 1, -1, { backreference, NULL }, test7 },
+	{ UDA | PCRE2_CASELESS, CPI, 0, 0, 0, 0, 2, { backreference, NULL }, test6 },
+	{ UDA | PCRE2_CASELESS, CPI, 1, 0, 0, -1, -1, { backreference, NULL }, test6 },
+	{ UDA | PCRE2_CASELESS, CPI, 0, 0, 0, 0, 4, { backreference, NULL }, test7 },
+	{ UDA | PCRE2_CASELESS, CPI, 0, 0, 1, -1, -1, { backreference, NULL }, test7 },
 
-	{ UDA, CPI, 0, 0, 0, 1, { grapheme, NULL }, test6 },
-	{ UDA, CPI, 1, 0, 0, 1, { grapheme, NULL }, test6 },
-	{ UDA, CPI, 2, 0, 0, -1, { grapheme, NULL }, test6 },
-	{ UDA, CPI, 0, 0, 0, 1, { grapheme, NULL }, test7 },
-	{ UDA, CPI, 2, 0, 0, 1, { grapheme, NULL }, test7 },
-	{ UDA, CPI, 1, 0, 0, -1, { grapheme, NULL }, test7 },
+	{ UDA, CPI, 0, 0, 0, 0, 1, { grapheme, NULL }, test6 },
+	{ UDA, CPI, 1, 0, 0, 1, 2, { grapheme, NULL }, test6 },
+	{ UDA, CPI, 2, 0, 0, -1, -1, { grapheme, NULL }, test6 },
+	{ UDA, CPI, 0, 0, 0, 0, 2, { grapheme, NULL }, test7 },
+	{ UDA, CPI, 2, 0, 0, 2, 4, { grapheme, NULL }, test7 },
+	{ UDA, CPI, 1, 0, 0, -1, -1, { grapheme, NULL }, test7 },
 
-	{ 0, 0, 0, 0, 0, 0, { NULL, NULL }, NULL }
+	{ 0, 0, 0, 0, 0, 0, 0, { NULL, NULL }, NULL }
 };
 
 #undef UDA
@@ -2066,18 +2116,19 @@ static struct invalid_utf16_regression_test_case invalid_utf16_regression_test_c
 #undef CPI
 
 static int run_invalid_utf16_test(struct invalid_utf16_regression_test_case *current,
-	int pattern_index, int i, pcre2_match_data_16 *mdata)
+	int pattern_index, int i, pcre2_compile_context_16 *ccontext, pcre2_match_data_16 *mdata)
 {
 	pcre2_code_16 *code;
 	int result, errorcode;
 	PCRE2_SIZE length, erroroffset;
 	const PCRE2_UCHAR16 *input;
+	PCRE2_SIZE *ovector = pcre2_get_ovector_pointer_16(mdata);
 
 	if (current->pattern[i] == NULL)
 		return 1;
 
 	code = pcre2_compile_16(current->pattern[i], PCRE2_ZERO_TERMINATED,
-		current->compile_options, &errorcode, &erroroffset, NULL);
+		current->compile_options, &errorcode, &erroroffset, ccontext);
 
 	if (!code) {
 		printf("Pattern[%d:0] cannot be compiled. Error offset: %d\n", pattern_index, (int)erroroffset);
@@ -2102,8 +2153,7 @@ static int run_invalid_utf16_test(struct invalid_utf16_regression_test_case *cur
 		result = pcre2_jit_match_16(code, (current->input + current->skip_left),
 			length, current->start_offset - current->skip_left, 0, mdata, NULL);
 
-		if (result != current->expected_result) {
-			printf("Pattern[%d:0] match result %d differs from expected %d.\n", pattern_index, result, current->expected_result);
+		if (check_invalid_utf_result(pattern_index, "match", result, current->match_start, current->match_end, ovector)) {
 			pcre2_code_free_16(code);
 			return 0;
 		}
@@ -2113,8 +2163,7 @@ static int run_invalid_utf16_test(struct invalid_utf16_regression_test_case *cur
 		result = pcre2_jit_match_16(code, (current->input + current->skip_left),
 			length, current->start_offset - current->skip_left, PCRE2_PARTIAL_SOFT, mdata, NULL);
 
-		if (result != current->expected_result) {
-			printf("Pattern[%d:0] partial match result %d differs from expected %d.\n", pattern_index, result, current->expected_result);
+		if (check_invalid_utf_result(pattern_index, "partial match", result, current->match_start, current->match_end, ovector)) {
 			pcre2_code_free_16(code);
 			return 0;
 		}
@@ -2127,12 +2176,15 @@ static int run_invalid_utf16_test(struct invalid_utf16_regression_test_case *cur
 static int invalid_utf16_regression_tests(void)
 {
 	struct invalid_utf16_regression_test_case *current;
+	pcre2_compile_context_16 *ccontext;
 	pcre2_match_data_16 *mdata;
 	int total = 0, successful = 0;
 	int result;
 
 	printf("\nRunning invalid-utf16 JIT regression tests\n");
 
+	ccontext = pcre2_compile_context_create_16(NULL);
+	pcre2_set_newline_16(ccontext, PCRE2_NEWLINE_ANY);
 	mdata = pcre2_match_data_create_16(4, NULL);
 
 	for (current = invalid_utf16_regression_test_cases; current->pattern[0]; current++) {
@@ -2140,9 +2192,9 @@ static int invalid_utf16_regression_tests(void)
 		total++;
 
 		result = 1;
-		if (!run_invalid_utf16_test(current, total - 1, 0, mdata))
+		if (!run_invalid_utf16_test(current, total - 1, 0, ccontext, mdata))
 			result = 0;
-		if (!run_invalid_utf16_test(current, total - 1, 1, mdata))
+		if (!run_invalid_utf16_test(current, total - 1, 1, ccontext, mdata))
 			result = 0;
 
 		if (result) {
@@ -2158,6 +2210,7 @@ static int invalid_utf16_regression_tests(void)
 		printf("\n");
 
 	pcre2_match_data_free_16(mdata);
+	pcre2_compile_context_free_16(ccontext);
 
 	if (total == successful) {
 		printf("\nAll invalid UTF16 JIT regression tests are successfully passed.\n");
