@@ -16763,6 +16763,38 @@ Subject length lower bound = 1
  0: b
  0+ c
 
+/a(b)c|xyz/g,allvector,replace=<$0>
+    abcdefabcpqr\=ovector=4
+ 2: <abc>def<abc>pqr
+ 0: 6 9
+ 1: 7 8
+ 2: <unchanged>
+ 3: <unchanged>
+    abxyz\=ovector=4
+ 1: ab<xyz>
+ 0: 2 5
+ 1: <unset>
+ 2: <unchanged>
+ 3: <unchanged>
+    abcdefxyz\=ovector=4
+ 2: <abc>def<xyz>
+ 0: 6 9
+ 1: <unset>
+ 2: <unchanged>
+ 3: <unchanged>
+    
+/a(b)c|xyz/allvector
+    abcdef\=ovector=4
+ 0: abc
+ 1: b
+ 2: <unchanged>
+ 3: <unchanged>
+    abxyz\=ovector=4
+ 0: xyz
+ 1: <unset>
+ 2: <unchanged>
+ 3: <unchanged>
+
 # End of testinput2
 Error -70: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

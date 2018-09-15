@@ -5505,4 +5505,13 @@ a)"xI
     bbc
     xbc 
 
+/a(b)c|xyz/g,allvector,replace=<$0>
+    abcdefabcpqr\=ovector=4
+    abxyz\=ovector=4
+    abcdefxyz\=ovector=4
+    
+/a(b)c|xyz/allvector
+    abcdef\=ovector=4
+    abxyz\=ovector=4
+
 # End of testinput2

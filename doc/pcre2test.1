@@ -1,4 +1,4 @@
-.TH PCRE2TEST 1 "21 July 2018" "PCRE 10.32"
+.TH PCRE2TEST 1 "15 September 2018" "PCRE 10.33"
 .SH NAME
 pcre2test - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -1003,6 +1003,7 @@ process.
       aftertext                  show text after match
       allaftertext               show text after captures
       allcaptures                show all captures
+      allvector                  show the entire ovector 
       allusedtext                show all consulted text
       altglobal                  alternative global matching
   /g  global                     global matching
@@ -1154,6 +1155,7 @@ pattern.
       aftertext                  show text after match
       allaftertext               show text after captures
       allcaptures                show all captures
+      allvector                  show the entire ovector 
       allusedtext                show all consulted text (non-JIT only)
       altglobal                  alternative global matching
       callout_capture            show captures at callout time
@@ -1248,7 +1250,25 @@ captured parentheses be output after a match. By default, only those up to the
 highest one actually used in the match are output (corresponding to the return
 code from \fBpcre2_match()\fP). Groups that did not take part in the match
 are output as "<unset>". This modifier is not relevant for DFA matching (which
-does no capturing); it is ignored, with a warning message, if present.
+does no capturing) and does not apply when \fBreplace\fP is specified; it is
+ignored, with a warning message, if present.
+.
+.
+.SS "Showing the entire ovector, for all outcomes"
+.rs
+.sp
+The \fBallvector\fP modifier requests that the entire ovector be shown,
+whatever the outcome of the match. Compare \fBallcaptures\fP, which shows only
+up to the maximum number of capture groups for the pattern, and then only for a
+successful complete non-DFA match. This modifier, which acts after any match
+result, and also for DFA matching, provides a means of checking that there are
+no unexpected modifications to ovector fields. Before each match attempt, the
+ovector is filled with a special value, and if this is found in both elements
+of a capturing pair, "<unchanged>" is output. After a successful match, this
+applies to all groups after the maximum capture group for the pattern. In other 
+cases it applies to the entire ovector. After a partial match, the first two 
+elements are the only ones that should be set. After a DFA match, the amount of 
+ovector that is used depends on the number of matches that were found.
 .
 .
 .SS "Testing callouts"
@@ -1982,6 +2002,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 21 July 2018
+Last updated: 15 September 2018
 Copyright (c) 1997-2018 University of Cambridge.
 .fi

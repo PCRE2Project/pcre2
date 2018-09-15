@@ -2,8 +2,16 @@ Change Log for PCRE2
 --------------------
 
 
-Version 10.32-RC1 10-September-2018
+Version 10.33-RC1 15-September-2018
 -----------------------------------
+
+1. Added "allvector" to pcre2test to make it easy to check the part of the 
+ovector that shouldn't be changed, in particular after substitute and failed or 
+partial matches.
+
+
+Version 10.32 10-September-2018
+-------------------------------
 
 1. When matching using the the REG_STARTEND feature of the POSIX API with a
 non-zero starting offset, unset capturing groups with lower numbers than a

@@ -491,6 +491,7 @@ so many of them that they are split into two fields. */
 #define CTL2_SUBJECT_LITERAL             0x00000010u
 #define CTL2_CALLOUT_NO_WHERE            0x00000020u
 #define CTL2_CALLOUT_EXTRA               0x00000040u
+#define CTL2_ALLVECTOR                   0x00000080u
 
 #define CTL2_NL_SET                      0x40000000u  /* Informational */
 #define CTL2_BSR_SET                     0x80000000u  /* Informational */
@@ -513,7 +514,8 @@ different things in the two cases. */
 #define CTL2_ALLPD (CTL2_SUBSTITUTE_EXTENDED|\
                     CTL2_SUBSTITUTE_OVERFLOW_LENGTH|\
                     CTL2_SUBSTITUTE_UNKNOWN_UNSET|\
-                    CTL2_SUBSTITUTE_UNSET_EMPTY)
+                    CTL2_SUBSTITUTE_UNSET_EMPTY|\
+                    CTL2_ALLVECTOR)
 
 /* Structures for holding modifier information for patterns and subject strings
 (data). Fields containing modifiers that can be set either for a pattern or a
@@ -592,6 +594,7 @@ static modstruct modlist[] = {
   { "allow_empty_class",          MOD_PAT,  MOD_OPT, PCRE2_ALLOW_EMPTY_CLASS,    PO(options) },
   { "allow_surrogate_escapes",    MOD_CTC,  MOD_OPT, PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES, CO(extra_options) },
   { "allusedtext",                MOD_PNDP, MOD_CTL, CTL_ALLUSEDTEXT,            PO(control) },
+  { "allvector",                  MOD_PND,  MOD_CTL, CTL2_ALLVECTOR,             PO(control2) },
   { "alt_bsux",                   MOD_PAT,  MOD_OPT, PCRE2_ALT_BSUX,             PO(options) },
   { "alt_circumflex",             MOD_PAT,  MOD_OPT, PCRE2_ALT_CIRCUMFLEX,       PO(options) },
   { "alt_verbnames",              MOD_PAT,  MOD_OPT, PCRE2_ALT_VERBNAMES,        PO(options) },
@@ -888,6 +891,7 @@ static uint32_t forbid_utf = 0;
 static uint32_t maxlookbehind;
 static uint32_t max_oveccount;
 static uint32_t callout_count;
+static uint32_t maxcapcount;
 
 static uint16_t local_newline_default = 0;
 
@@ -4018,12 +4022,13 @@ Returns:      nothing
 static void
 show_controls(uint32_t controls, uint32_t controls2, const char *before)
 {
-fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
+fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
   before,
   ((controls & CTL_AFTERTEXT) != 0)? " aftertext" : "",
   ((controls & CTL_ALLAFTERTEXT) != 0)? " allaftertext" : "",
   ((controls & CTL_ALLCAPTURES) != 0)? " allcaptures" : "",
   ((controls & CTL_ALLUSEDTEXT) != 0)? " allusedtext" : "",
+  ((controls2 & CTL2_ALLVECTOR) != 0)? " allvector" : "",
   ((controls & CTL_ALTGLOBAL) != 0)? " altglobal" : "",
   ((controls & CTL_BINCODE) != 0)? " bincode" : "",
   ((controls2 & CTL2_BSR_SET) != 0)? " bsr" : "",
@@ -5717,6 +5722,11 @@ if (forbid_utf != 0)
 if (pattern_info(PCRE2_INFO_MAXLOOKBEHIND, &maxlookbehind, FALSE) != 0)
   return PR_ABEND;
 
+/* Remember the number of captures. */
+
+if (pattern_info(PCRE2_INFO_CAPTURECOUNT, &maxcapcount, FALSE) < 0)
+  return PR_ABEND;
+
 /* If an explicit newline modifier was given, set the information flag in the
 pattern so that it is preserved over push/pop. */
 
@@ -6318,6 +6328,42 @@ return TRUE;
 
 
 /*************************************************
+*            Show an entire ovector              *
+*************************************************/
+
+/* This function is called after partial matching or match failure, when the
+"allvector" modifier is set. It is a means of checking the contents of the
+entire ovector, to ensure no modification of fields that should be unchanged.
+
+Arguments:
+  ovector      points to the ovector
+  oveccount    number of pairs
+
+Returns:       nothing
+*/
+
+static void
+show_ovector(PCRE2_SIZE *ovector, uint32_t oveccount)
+{
+uint32_t i;
+for (i = 0; i < 2*oveccount; i += 2)
+  {
+  PCRE2_SIZE start = ovector[i];
+  PCRE2_SIZE end = ovector[i+1];
+
+  fprintf(outfile, "%2d: ", i/2);
+  if (start == PCRE2_UNSET && end == PCRE2_UNSET)
+    fprintf(outfile, "<unset>\n");
+  else if (start == JUNK_OFFSET && end == JUNK_OFFSET)
+    fprintf(outfile, "<unchanged>\n");
+  else
+    fprintf(outfile, "%ld %ld\n", (unsigned long int)start,
+      (unsigned long int)end);
+  }
+}
+
+
+/*************************************************
 *               Process a data line              *
 *************************************************/
 
@@ -6342,7 +6388,10 @@ size_t needlen;
 void *use_dat_context;
 BOOL utf;
 BOOL subject_literal;
+
+PCRE2_SIZE *ovector;
 PCRE2_SIZE ovecsave[3];
+uint32_t oveccount;
 
 #ifdef SUPPORT_PCRE2_8
 uint8_t *q8 = NULL;
@@ -6722,11 +6771,23 @@ for (k = 0; k < sizeof(exclusive_dat_controls)/sizeof(uint32_t); k++)
     }
   }
 
-if (pat_patctl.replacement[0] != 0 &&
-    (dat_datctl.control & CTL_NULLCONTEXT) != 0)
+if (pat_patctl.replacement[0] != 0)
   {
-  fprintf(outfile, "** Replacement text is not supported with null_context.\n");
-  return PR_OK;
+  if ((dat_datctl.control & CTL_NULLCONTEXT) != 0)
+    {
+    fprintf(outfile, "** Replacement text is not supported with null_context.\n");
+    return PR_OK;
+    }
+  if ((dat_datctl.control & CTL_ALLCAPTURES) != 0)
+    fprintf(outfile, "** Ignored with replacement text: allcaptures\n");   
+  }   
+
+/* Warn for modifiers that are ignored for DFA. */
+
+if ((dat_datctl.control & CTL_DFA) != 0)
+  {
+  if ((dat_datctl.control & CTL_ALLCAPTURES) != 0)
+    fprintf(outfile, "** Ignored after DFA matching: allcaptures\n");
   }
 
 /* We now have the subject in dbuffer, with len containing the byte length, and
@@ -6955,6 +7016,9 @@ if (CASTVAR(void *, match_data) == NULL)
   return PR_OK;
   }
 
+ovector = FLD(match_data, ovector);
+PCRE2_GET_OVECTOR_COUNT(oveccount, match_data);
+
 /* Replacement processing is ignored for DFA matching. */
 
 if (dat_datctl.replacement[0] != 0 && (dat_datctl.control & CTL_DFA) != 0)
@@ -6974,7 +7038,7 @@ if (dat_datctl.replacement[0] != 0)
   uint8_t rbuffer[REPLACE_BUFFSIZE];
   uint8_t nbuffer[REPLACE_BUFFSIZE];
   uint32_t xoptions;
-  PCRE2_SIZE rlen, nsize, erroroffset;
+  PCRE2_SIZE j, rlen, nsize, erroroffset;
   BOOL badutf = FALSE;
 
 #ifdef SUPPORT_PCRE2_8
@@ -6986,6 +7050,11 @@ if (dat_datctl.replacement[0] != 0)
 #ifdef SUPPORT_PCRE2_32
   uint32_t *r32 = NULL;
 #endif
+
+  /* Fill the ovector with junk to detect elements that do not get set
+  when they should be (relevant only when "allvector" is specified). */
+
+  for (j = 0; j < 2*oveccount; j++) ovector[j] = JUNK_OFFSET;
 
   if (timeitm)
     fprintf(outfile, "** Timing is not supported with replace: ignored\n");
@@ -7112,6 +7181,12 @@ if (dat_datctl.replacement[0] != 0)
 
   fprintf(outfile, "\n");
   show_memory = FALSE;
+
+  /* Show final ovector contents if requested. */
+
+  if ((dat_datctl.control2 & CTL2_ALLVECTOR) != 0)
+    show_ovector(ovector, oveccount);
+
   return PR_OK;
   }   /* End of substitution handling */
 
@@ -7125,14 +7200,11 @@ for (gmatched = 0;; gmatched++)
   {
   PCRE2_SIZE j;
   int capcount;
-  PCRE2_SIZE *ovector;
-
-  ovector = FLD(match_data, ovector);
 
   /* Fill the ovector with junk to detect elements that do not get set
   when they should be. */
 
-  for (j = 0; j < 2*dat_datctl.oveccount; j++) ovector[j] = JUNK_OFFSET;
+  for (j = 0; j < 2*oveccount; j++) ovector[j] = JUNK_OFFSET;
 
   /* When matching is via pcre2_match(), we will detect the use of JIT via the
   stack callback function. */
@@ -7280,12 +7352,8 @@ for (gmatched = 0;; gmatched++)
   if (capcount >= 0)
     {
     int i;
-    uint32_t oveccount;
 
-    /* This is a check against a lunatic return value. */
-
-    PCRE2_GET_OVECTOR_COUNT(oveccount, match_data);
-    if (capcount > (int)oveccount)
+    if (capcount > (int)oveccount)   /* Check for lunatic return value */
       {
       fprintf(outfile,
         "** PCRE2 error: returned count %d is too big for ovector count %d\n",
@@ -7325,23 +7393,17 @@ for (gmatched = 0;; gmatched++)
     /* "allcaptures" requests showing of all captures in the pattern, to check
     unset ones at the end. It may be set on the pattern or the data. Implement
     by setting capcount to the maximum. This is not relevant for DFA matching,
-    so ignore it. */
+    so ignore it (warning given above). */
 
-    if ((dat_datctl.control & CTL_ALLCAPTURES) != 0)
+    if ((dat_datctl.control & (CTL_ALLCAPTURES|CTL_DFA)) == CTL_ALLCAPTURES)
       {
-      uint32_t maxcapcount;
-      if ((dat_datctl.control & CTL_DFA) != 0)
-        {
-        fprintf(outfile, "** Ignored after DFA matching: allcaptures\n");
-        }
-      else
-        {
-        if (pattern_info(PCRE2_INFO_CAPTURECOUNT, &maxcapcount, FALSE) < 0)
-          return PR_SKIP;
-        capcount = maxcapcount + 1;   /* Allow for full match */
-        if (capcount > (int)oveccount) capcount = oveccount;
-        }
+      capcount = maxcapcount + 1;   /* Allow for full match */
+      if (capcount > (int)oveccount) capcount = oveccount;
       }
+
+    /* "allvector" request showing the entire ovector. */
+
+    if ((dat_datctl.control2 & CTL2_ALLVECTOR) != 0) capcount = oveccount;
 
     /* Output the captured substrings. Note that, for the matched string,
     the use of \K in an assertion can make the start later than the end. */
@@ -7364,19 +7426,26 @@ for (gmatched = 0;; gmatched++)
 
       /* Check for an unset group */
 
-      if (start == PCRE2_UNSET)
+      if (start == PCRE2_UNSET && end == PCRE2_UNSET)
         {
         fprintf(outfile, "<unset>\n");
         continue;
         }
 
       /* Check for silly offsets, in particular, values that have not been
-      set when they should have been. */
+      set when they should have been. However, if we are past the end of the
+      captures for this pattern ("allvector" causes this), or if we are DFA
+      matching, it isn't an error if the entry is unchanged. */
 
       if (start > ulen || end > ulen)
         {
-        fprintf(outfile, "ERROR: bad value(s) for offset(s): 0x%lx 0x%lx\n",
-          (unsigned long int)start, (unsigned long int)end);
+        if (((dat_datctl.control & CTL_DFA) != 0 ||
+              i >= (int)(2*maxcapcount + 2)) &&
+            start == JUNK_OFFSET && end == JUNK_OFFSET)
+          fprintf(outfile, "<unchanged>\n");
+        else
+          fprintf(outfile, "ERROR: bad value(s) for offset(s): 0x%lx 0x%lx\n",
+            (unsigned long int)start, (unsigned long int)end);
         continue;
         }
 
@@ -7517,9 +7586,18 @@ for (gmatched = 0;; gmatched++)
       fprintf(outfile, "\n");
       }
 
+    if (ulen != ovector[1])
+      fprintf(outfile, "** ovector[1] is not equal to the subject length: "
+        "%ld != %ld\n", (unsigned long int)ovector[1], (unsigned long int)ulen);
+
     /* Process copy/get strings */
 
     if (!copy_and_get(utf, 1)) return PR_ABEND;
+
+    /* "allvector" outputs the entire vector */
+
+    if ((dat_datctl.control2 & CTL2_ALLVECTOR) != 0)
+      show_ovector(ovector, oveccount);
 
     break;  /* Out of the /g loop */
     }       /* End of handling partial match */
@@ -7590,6 +7668,11 @@ for (gmatched = 0;; gmatched++)
         if ((pat_patctl.control & CTL_JITVERIFY) != 0 && jit_was_used)
           fprintf(outfile, " (JIT)");
         fprintf(outfile, "\n");
+
+        /* "allvector" outputs the entire vector */
+
+        if ((dat_datctl.control2 & CTL2_ALLVECTOR) != 0)
+          show_ovector(ovector, oveccount);
         }
       break;
 
