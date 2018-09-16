@@ -1757,7 +1757,7 @@ static int regression_tests(void)
 
 #if defined SUPPORT_UNICODE && (defined SUPPORT_PCRE2_8 || defined SUPPORT_PCRE2_16)
 
-static int check_invalid_utf_result(int pattern_index, char *type, int result,
+static int check_invalid_utf_result(int pattern_index, const char *type, int result,
 	int match_start, int match_end, PCRE2_SIZE *ovector)
 {
 	if (match_start < 0) {
@@ -1926,6 +1926,15 @@ static struct invalid_utf8_regression_test_case invalid_utf8_regression_test_cas
 	{ PCRE2_UTF | PCRE2_MULTILINE, CI, 1, 0, 0, 5, 6, { "^\\W", NULL }, " \xf2\xbf\xbf\x0a#"},
 	{ PCRE2_UTF | PCRE2_MULTILINE, CI, 1, 0, 0, 3, 4, { "^\\W", NULL }, " \xef\x0a#"},
 	{ PCRE2_UTF | PCRE2_MULTILINE, CI, 1, 0, 0, 4, 5, { "^\\W", NULL }, " \xef\xbf\x0a#"},
+	{ PCRE2_UTF | PCRE2_MULTILINE, CI, 1, 0, 0, 5, 6, { "^\\W", NULL }, " \x85#\xc2\x85#"},
+	{ PCRE2_UTF | PCRE2_MULTILINE, CI, 1, 0, 0, 7, 8, { "^\\W", NULL }, " \xe2\x80\xf8\xe2\x80\xa8#"},
+
+	{ PCRE2_UTF | PCRE2_FIRSTLINE, CI, 0, 0, 0, -1, -1, { "#", NULL }, "\xe2\x80\xf8\xe2\x80\xa8#"},
+	{ PCRE2_UTF | PCRE2_FIRSTLINE, CI, 0, 0, 0, 3, 4, { "#", NULL }, "\xe2\x80\xf8#\xe2\x80\xa8#"},
+	{ PCRE2_UTF | PCRE2_FIRSTLINE, CI, 0, 0, 0, -1, -1, { "#", NULL }, "abcd\xc2\x85#"},
+	{ PCRE2_UTF | PCRE2_FIRSTLINE, CI, 0, 0, 0, 1, 2, { "#", NULL }, "\x85#\xc2\x85#"},
+	{ PCRE2_UTF | PCRE2_FIRSTLINE, CI, 0, 0, 0, 5, 6, { "#", NULL }, "\xef,\x80,\xf8#\x0a"},
+	{ PCRE2_UTF | PCRE2_FIRSTLINE, CI, 0, 0, 0, -1, -1, { "#", NULL }, "\xef,\x80,\xf8\x0a#"},
 
 	{ 0, 0, 0, 0, 0, 0, 0, { NULL, NULL }, NULL }
 };
