@@ -1943,6 +1943,11 @@ static struct invalid_utf8_regression_test_case invalid_utf8_regression_test_cas
 	{ PCRE2_UTF | PCRE2_FIRSTLINE, CI, 0, 0, 0, 5, 6, { "#", NULL }, "\xef,\x80,\xf8#\x0a"},
 	{ PCRE2_UTF | PCRE2_FIRSTLINE, CI, 0, 0, 0, -1, -1, { "#", NULL }, "\xef,\x80,\xf8\x0a#"},
 
+	{ PCRE2_UTF | PCRE2_NO_START_OPTIMIZE, CI, 0, 0, 0, 4, 8, { "#\xc7\x85#", NULL }, "\x80\x80#\xc7#\xc7\x85#" },
+	{ PCRE2_UTF | PCRE2_NO_START_OPTIMIZE, CI, 0, 0, 0, 7, 11, { "#\xc7\x85#", NULL }, "\x80\x80#\xc7\x80\x80\x80#\xc7\x85#" },
+	{ PCRE2_UTF, CI, 0, 0, 0, 4, 8, { "#\xc7\x85#", NULL }, "\x80\x80#\xc7#\xc7\x85#" },
+	{ PCRE2_UTF, CI, 0, 0, 0, 7, 11, { "#\xc7\x85#", NULL }, "\x80\x80#\xc7\x80\x80\x80#\xc7\x85#" },
+
 	{ 0, 0, 0, 0, 0, 0, 0, { NULL, NULL }, NULL }
 };
 
@@ -2083,6 +2088,7 @@ static PCRE2_UCHAR16 backreference16[] = { '(', '.', ')', '\\', '1', 0 };
 static PCRE2_UCHAR16 grapheme16[] = { '\\', 'X', 0 };
 static PCRE2_UCHAR16 nothashmark16[] = { '[', '^', '#', ']', 0 };
 static PCRE2_UCHAR16 afternl16[] = { '^', '\\', 'W', 0 };
+static PCRE2_UCHAR16 generic16[] = { '#', 0xd800, 0xdc00, '#', 0 };
 static PCRE2_UCHAR16 test16_1[] = { 0xd7ff, 0xe000, 0xffff, 0x01, '#', 0 };
 static PCRE2_UCHAR16 test16_2[] = { 0xd800, 0xdc00, '#', 0 };
 static PCRE2_UCHAR16 test16_3[] = { 0xdbff, 0xdfff, '#', 0 };
@@ -2093,6 +2099,8 @@ static PCRE2_UCHAR16 test16_7[] = { 0xd801, 0xdc00, 0xd801, 0xdc28, 0 };
 static PCRE2_UCHAR16 test16_8[] = { '#', 0xd800, 0xdc00, 0 };
 static PCRE2_UCHAR16 test16_9[] = { ' ', 0x2028, '#', 0 };
 static PCRE2_UCHAR16 test16_10[] = { ' ', 0xdc00, 0xd800, 0x2028, '#', 0 };
+static PCRE2_UCHAR16 test16_11[] = { 0xdc00, 0xdc00, 0xd800, 0xdc00, 0xdc00, '#', 0xd800, 0xdc00, '#', 0 };
+static PCRE2_UCHAR16 test16_12[] = { '#', 0xd800, 0xdc00, 0xd800, '#', 0xd800, 0xdc00, 0xdc00, 0xdc00, '#', 0xd800, 0xdc00, '#', 0 };
 
 static struct invalid_utf16_regression_test_case invalid_utf16_regression_test_cases[] = {
 	{ UDA, CI, 0, 0, 0, 0, 1, { allany16, NULL }, test16_1 },
@@ -2135,6 +2143,11 @@ static struct invalid_utf16_regression_test_case invalid_utf16_regression_test_c
 
 	{ PCRE2_UTF | PCRE2_MULTILINE, CI, 1, 0, 0, 2, 3, { afternl16, NULL }, test16_9 },
 	{ PCRE2_UTF | PCRE2_MULTILINE, CI, 1, 0, 0, 4, 5, { afternl16, NULL }, test16_10 },
+
+	{ PCRE2_UTF | PCRE2_NO_START_OPTIMIZE, CI, 0, 0, 0, 5, 9, { generic16, NULL }, test16_11 },
+	{ PCRE2_UTF | PCRE2_NO_START_OPTIMIZE, CI, 0, 0, 0, 9, 13, { generic16, NULL }, test16_12 },
+	{ PCRE2_UTF, CI, 0, 0, 0, 5, 9, { generic16, NULL }, test16_11 },
+	{ PCRE2_UTF, CI, 0, 0, 0, 9, 13, { generic16, NULL }, test16_12 },
 
 	{ 0, 0, 0, 0, 0, 0, 0, { NULL, NULL }, NULL }
 };
