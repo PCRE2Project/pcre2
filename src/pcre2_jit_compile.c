@@ -485,12 +485,12 @@ typedef struct compiler_common {
   jump_list *getucdtype;
 #if PCRE2_CODE_UNIT_WIDTH == 8
   jump_list *utfreadchar;
-  jump_list *utfreadnewline_invalid;
   jump_list *utfreadtype8;
   jump_list *utfpeakcharback;
 #endif
 #if PCRE2_CODE_UNIT_WIDTH == 8 || PCRE2_CODE_UNIT_WIDTH == 16
   jump_list *utfreadchar_invalid;
+  jump_list *utfreadnewline_invalid;
   jump_list *utfmoveback_invalid;
   jump_list *utfpeakcharback_invalid;
 #endif
@@ -640,7 +640,7 @@ the start pointers when the end of the capturing group has not yet reached. */
     { \
     c = ptr[1] - 0x80; \
     \
-    if (ptr[0] >= 0xc0 && ptr[0] <= 0xdf) \
+    if (ptr[0] >= 0xc2 && ptr[0] <= 0xdf) \
       { \
       c |= (ptr[0] - 0xc0) << 6; \
       ptr += 2; \
@@ -653,6 +653,11 @@ the start pointers when the end of the capturing group has not yet reached. */
         { \
         c |= (ptr[0] - 0xe0) << 12; \
         ptr += 3; \
+        \
+        if (c < 0x800 || (c >= 0xd800 && c < 0xe000)) \
+          { \
+          invalid_action; \
+          } \
         } \
       else if (ptr + 3 < end && ptr[3] >= 0x80 && ptr[3] < 0xc0) \
         { \
@@ -663,7 +668,7 @@ the start pointers when the end of the capturing group has not yet reached. */
           c |= (ptr[0] - 0xf0) << 18; \
           ptr += 4; \
           \
-          if (c >= 0x110000) \
+          if (c >= 0x110000 || c < 0x10000) \
             { \
             invalid_action; \
             } \
@@ -697,7 +702,7 @@ the start pointers when the end of the capturing group has not yet reached. */
     { \
     c = ptr[-1] - 0x80; \
     \
-    if (ptr[-2] >= 0xc0 && ptr[-2] <= 0xdf) \
+    if (ptr[-2] >= 0xc2 && ptr[-2] <= 0xdf) \
       { \
       c |= (ptr[-2] - 0xc0) << 6; \
       ptr -= 2; \
@@ -710,6 +715,11 @@ the start pointers when the end of the capturing group has not yet reached. */
         { \
         c |= (ptr[-3] - 0xe0) << 12; \
         ptr -= 3; \
+        \
+        if (c < 0x800 || (c >= 0xd800 && c < 0xe000)) \
+          { \
+          invalid_action; \
+          } \
         } \
       else if (ptr - 3 > start && ptr[-3] >= 0x80 && ptr[-3] < 0xc0) \
         { \
@@ -720,7 +730,7 @@ the start pointers when the end of the capturing group has not yet reached. */
           c |= (ptr[-4] - 0xf0) << 18; \
           ptr -= 4; \
           \
-          if (c >= 0x110000) \
+          if (c >= 0x110000 || c < 0x10000) \
             { \
             invalid_action; \
             } \
@@ -3343,7 +3353,7 @@ else
 JUMPHERE(jump);
 }
 
-static void peek_char(compiler_common *common, sljit_u32 max, sljit_s32 dst, sljit_sw dstw)
+static void peek_char(compiler_common *common, sljit_u32 max, sljit_s32 dst, sljit_sw dstw, jump_list **backtracks)
 {
 /* Reads the character into TMP1, keeps STR_PTR.
 Does not check STR_END. TMP2, dst, RETURN_ADDR Destroyed. */
@@ -3355,6 +3365,7 @@ struct sljit_jump *jump;
 SLJIT_UNUSED_ARG(max);
 SLJIT_UNUSED_ARG(dst);
 SLJIT_UNUSED_ARG(dstw);
+SLJIT_UNUSED_ARG(backtracks);
 
 OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(0));
 
@@ -3369,6 +3380,8 @@ if (common->utf)
   OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
   add_jump(compiler, common->invalid_utf ? &common->utfreadchar_invalid : &common->utfreadchar, JUMP(SLJIT_FAST_CALL));
   OP1(SLJIT_MOV, STR_PTR, 0, dst, dstw);
+  if (backtracks && common->invalid_utf)
+    add_jump(compiler, backtracks, CMP(SLJIT_EQUAL, TMP1, 0, SLJIT_IMM, INVALID_UTF_CHAR));
   JUMPHERE(jump);
   }
 #elif PCRE2_CODE_UNIT_WIDTH == 16
@@ -3381,7 +3394,12 @@ if (common->utf)
   if (common->invalid_utf)
     {
     jump = CMP(SLJIT_GREATER_EQUAL, TMP2, 0, SLJIT_IMM, 0xe000 - 0xd800);
+    OP1(SLJIT_MOV, dst, dstw, STR_PTR, 0);
+    OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
     add_jump(compiler, &common->utfreadchar_invalid, JUMP(SLJIT_FAST_CALL));
+    OP1(SLJIT_MOV, STR_PTR, 0, dst, dstw);
+    if (backtracks && common->invalid_utf)
+      add_jump(compiler, backtracks, CMP(SLJIT_EQUAL, TMP1, 0, SLJIT_IMM, INVALID_UTF_CHAR));
     }
   else
     {
@@ -3392,10 +3410,20 @@ if (common->utf)
     OP2(SLJIT_ADD, TMP1, 0, TMP1, 0, SLJIT_IMM, 0x10000 - 0xdc00);
     OP2(SLJIT_ADD, TMP1, 0, TMP1, 0, TMP2, 0);
     }
+
   JUMPHERE(jump);
   }
 #elif PCRE2_CODE_UNIT_WIDTH == 32
-
+if (common->invalid_utf)
+  {
+  if (backtracks != NULL)
+    add_jump(compiler, backtracks, CMP(SLJIT_GREATER_EQUAL, TMP1, 0, SLJIT_IMM, 0x110000));
+  else
+    {
+    OP2(SLJIT_SUB | SLJIT_SET_GREATER_EQUAL, SLJIT_UNUSED, 0, TMP1, 0, SLJIT_IMM, 0x110000);
+    CMOV(SLJIT_GREATER_EQUAL, TMP1, SLJIT_IMM, INVALID_UTF_CHAR);
+    }
+  }
 #endif /* PCRE2_CODE_UNIT_WIDTH == [8|16|32] */
 #endif /* SUPPORT_UNICODE */
 }
@@ -3458,7 +3486,8 @@ if (common->utf)
     JUMPHERE(jump);
   }
 #elif PCRE2_CODE_UNIT_WIDTH == 32
-
+  if (common->invalid_utf)
+    add_jump(compiler, backtracks, CMP(SLJIT_GREATER_EQUAL, TMP1, 0, SLJIT_IMM, 0x110000));
 #endif /* PCRE2_CODE_UNIT_WIDTH == [8|16|32] */
 #endif /* SUPPORT_UNICODE */
 }
@@ -3591,7 +3620,12 @@ if (common->utf)
     {
     OP2(SLJIT_SUB, TMP2, 0, TMP1, 0, SLJIT_IMM, 0xd800);
     jump = CMP(SLJIT_GREATER_EQUAL, TMP2, 0, SLJIT_IMM, 0xe000 - 0xd800);
-    add_jump(compiler, &common->utfreadchar_invalid, JUMP(SLJIT_FAST_CALL));
+
+    if (options & READ_CHAR_UTF8_NEWLINE)
+      add_jump(compiler, &common->utfreadnewline_invalid, JUMP(SLJIT_FAST_CALL));
+    else
+      add_jump(compiler, &common->utfreadchar_invalid, JUMP(SLJIT_FAST_CALL));
+
     if (backtracks != NULL)
       add_jump(compiler, backtracks, CMP(SLJIT_EQUAL, TMP1, 0, SLJIT_IMM, INVALID_UTF_CHAR));
     JUMPHERE(jump);
@@ -3868,7 +3902,18 @@ if (common->utf)
 if (common->invalid_utf && !must_be_valid)
   {
   OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), -IN_UCHARS(1));
-  add_jump(compiler, backtracks, CMP(SLJIT_GREATER_EQUAL, TMP1, 0, SLJIT_IMM, 0x110000));
+  if (backtracks != NULL)
+    {
+    add_jump(compiler, backtracks, CMP(SLJIT_GREATER_EQUAL, TMP1, 0, SLJIT_IMM, 0x110000));
+    OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
+    return;
+    }
+
+  OP2(SLJIT_SUB | SLJIT_SET_LESS, SLJIT_UNUSED, 0, TMP1, 0, SLJIT_IMM, 0x110000);
+  OP_FLAGS(SLJIT_MOV, TMP1, 0, SLJIT_LESS);
+  OP2(SLJIT_SHL,  TMP1, 0, TMP1, 0, SLJIT_IMM, 2);
+  OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, TMP1, 0);
+  return;
   }
 #endif /* PCRE2_CODE_UNIT_WIDTH == [8|16|32] */
 #endif /* SUPPORT_UNICODE */
@@ -4132,8 +4177,9 @@ sljit_emit_fast_return(compiler, RETURN_ADDR, 0);
 
 static void do_utfreadnewline_invalid(compiler_common *common)
 {
-/* Slow decoding a UTF-8 character. TMP1 contains the first byte
-of the character (>= 0xc0). Return char value in TMP1. */
+/* Slow decoding a UTF-8 character, specialized for newlines.
+TMP1 contains the first byte of the character (>= 0xc0). Return
+char value in TMP1. */
 DEFINE_COMPILER;
 struct sljit_jump *jump;
 struct sljit_jump *buffer_end_close;
@@ -4506,7 +4552,8 @@ sljit_emit_fast_return(compiler, RETURN_ADDR, 0);
 static void do_utfreadchar_invalid(compiler_common *common)
 {
 /* Slow decoding a UTF-16 character. TMP1 contains the first half
-of the character (>= 0xd800). Return char value in TMP1, length in TMP2. */
+of the character (>= 0xd800). Return char value in TMP1. STR_PTR is
+undefined for invalid characters. */
 DEFINE_COMPILER;
 struct sljit_jump *exit_invalid[3];
 
@@ -4530,6 +4577,38 @@ sljit_emit_fast_return(compiler, RETURN_ADDR, 0);
 JUMPHERE(exit_invalid[0]);
 JUMPHERE(exit_invalid[1]);
 JUMPHERE(exit_invalid[2]);
+OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, INVALID_UTF_CHAR);
+sljit_emit_fast_return(compiler, RETURN_ADDR, 0);
+}
+
+static void do_utfreadnewline_invalid(compiler_common *common)
+{
+/* Slow decoding a UTF-16 character, specialized for newlines.
+TMP1 contains the first half of the character (>= 0xd800). Return
+char value in TMP1. */
+
+DEFINE_COMPILER;
+struct sljit_jump *exit_invalid[2];
+
+sljit_emit_fast_enter(compiler, RETURN_ADDR, 0);
+
+/* TMP2 contains the high surrogate. */
+exit_invalid[0] = CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0);
+
+OP1(MOV_UCHAR, TMP2, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(0));
+exit_invalid[1] = CMP(SLJIT_GREATER_EQUAL, TMP1, 0, SLJIT_IMM, 0xdc00);
+
+OP2(SLJIT_SUB, TMP2, 0, TMP2, 0, SLJIT_IMM, 0xdc00);
+OP2(SLJIT_SUB | SLJIT_SET_LESS, SLJIT_UNUSED, 0, TMP2, 0, SLJIT_IMM, 0x400);
+OP_FLAGS(SLJIT_MOV, TMP2, 0, SLJIT_LESS);
+OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, 0x10000);
+OP2(SLJIT_SHL, TMP2, 0, TMP2, 0, SLJIT_IMM, 1);
+OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, TMP2, 0);
+
+sljit_emit_fast_return(compiler, RETURN_ADDR, 0);
+
+JUMPHERE(exit_invalid[0]);
+JUMPHERE(exit_invalid[1]);
 OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, INVALID_UTF_CHAR);
 sljit_emit_fast_return(compiler, RETURN_ADDR, 0);
 }
@@ -6651,7 +6730,7 @@ JUMPHERE(skipread);
 
 OP1(SLJIT_MOV, TMP2, 0, SLJIT_IMM, 0);
 check_str_end(common, &skipread_list);
-peek_char(common, READ_CHAR_MAX, SLJIT_MEM1(SLJIT_SP), LOCALS1);
+peek_char(common, READ_CHAR_MAX, SLJIT_MEM1(SLJIT_SP), LOCALS1, &invalid_utf);
 
 /* Testing char type. This is a code duplication. */
 #ifdef SUPPORT_UNICODE
@@ -8144,7 +8223,7 @@ switch(type)
     }
   else
     {
-    peek_char(common, common->nlmax, TMP3, 0);
+    peek_char(common, common->nlmax, TMP3, 0, NULL);
     check_newlinechar(common, common->nltype, backtracks, FALSE);
     }
   JUMPHERE(jump[0]);
@@ -8506,7 +8585,7 @@ switch(type)
   case OP_ALLANY:
   if (check_str_ptr)
     detect_partial_match(common, backtracks);
-#if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
+#ifdef SUPPORT_UNICODE
   if (common->utf)
     {
     if (common->invalid_utf)
@@ -8515,9 +8594,9 @@ switch(type)
       return cc;
       }
 
+#if PCRE2_CODE_UNIT_WIDTH == 8 || PCRE2_CODE_UNIT_WIDTH == 16
     OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), 0);
     OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
-#if PCRE2_CODE_UNIT_WIDTH == 8 || PCRE2_CODE_UNIT_WIDTH == 16
 #if PCRE2_CODE_UNIT_WIDTH == 8
     jump[0] = CMP(SLJIT_LESS, TMP1, 0, SLJIT_IMM, 0xc0);
     OP1(SLJIT_MOV_U8, TMP1, 0, SLJIT_MEM1(TMP1), (sljit_sw)PRIV(utf8_table4) - 0xc0);
@@ -8529,12 +8608,12 @@ switch(type)
     OP_FLAGS(SLJIT_MOV, TMP1, 0, SLJIT_EQUAL);
     OP2(SLJIT_SHL, TMP1, 0, TMP1, 0, SLJIT_IMM, 1);
     OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, TMP1, 0);
-#endif
+#endif /* PCRE2_CODE_UNIT_WIDTH == 8 */
     JUMPHERE(jump[0]);
-#endif /* PCRE2_CODE_UNIT_WIDTH == [8|16] */
     return cc;
+#endif /* PCRE2_CODE_UNIT_WIDTH == [8|16] */
     }
-#endif
+#endif /* SUPPORT_UNICODE */
   OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
   return cc;
 
@@ -13749,11 +13828,6 @@ if (common->utfreadchar != NULL)
   set_jumps(common->utfreadchar, LABEL());
   do_utfreadchar(common);
   }
-if (common->utfreadnewline_invalid != NULL)
-  {
-  set_jumps(common->utfreadnewline_invalid, LABEL());
-  do_utfreadnewline_invalid(common);
-  }
 if (common->utfreadtype8 != NULL)
   {
   set_jumps(common->utfreadtype8, LABEL());
@@ -13770,6 +13844,11 @@ if (common->utfreadchar_invalid != NULL)
   {
   set_jumps(common->utfreadchar_invalid, LABEL());
   do_utfreadchar_invalid(common);
+  }
+if (common->utfreadnewline_invalid != NULL)
+  {
+  set_jumps(common->utfreadnewline_invalid, LABEL());
+  do_utfreadnewline_invalid(common);
   }
 if (common->utfmoveback_invalid)
   {
