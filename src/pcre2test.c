@@ -484,14 +484,15 @@ so many of them that they are split into two fields. */
 
 /* Second control word */
 
-#define CTL2_SUBSTITUTE_EXTENDED         0x00000001u
-#define CTL2_SUBSTITUTE_OVERFLOW_LENGTH  0x00000002u
-#define CTL2_SUBSTITUTE_UNKNOWN_UNSET    0x00000004u
-#define CTL2_SUBSTITUTE_UNSET_EMPTY      0x00000008u
-#define CTL2_SUBJECT_LITERAL             0x00000010u
-#define CTL2_CALLOUT_NO_WHERE            0x00000020u
-#define CTL2_CALLOUT_EXTRA               0x00000040u
-#define CTL2_ALLVECTOR                   0x00000080u
+#define CTL2_SUBSTITUTE_CALLOUT          0x00000001u
+#define CTL2_SUBSTITUTE_EXTENDED         0x00000002u
+#define CTL2_SUBSTITUTE_OVERFLOW_LENGTH  0x00000004u
+#define CTL2_SUBSTITUTE_UNKNOWN_UNSET    0x00000008u
+#define CTL2_SUBSTITUTE_UNSET_EMPTY      0x00000010u
+#define CTL2_SUBJECT_LITERAL             0x00000020u
+#define CTL2_CALLOUT_NO_WHERE            0x00000040u
+#define CTL2_CALLOUT_EXTRA               0x00000080u
+#define CTL2_ALLVECTOR                   0x00000100u
 
 #define CTL2_NL_SET                      0x40000000u  /* Informational */
 #define CTL2_BSR_SET                     0x80000000u  /* Informational */
@@ -511,7 +512,8 @@ different things in the two cases. */
                     CTL_STARTCHAR|\
                     CTL_UTF8_INPUT)
 
-#define CTL2_ALLPD (CTL2_SUBSTITUTE_EXTENDED|\
+#define CTL2_ALLPD (CTL2_SUBSTITUTE_CALLOUT|\
+                    CTL2_SUBSTITUTE_EXTENDED|\
                     CTL2_SUBSTITUTE_OVERFLOW_LENGTH|\
                     CTL2_SUBSTITUTE_UNKNOWN_UNSET|\
                     CTL2_SUBSTITUTE_UNSET_EMPTY|\
@@ -690,6 +692,7 @@ static modstruct modlist[] = {
   { "startchar",                  MOD_PND,  MOD_CTL, CTL_STARTCHAR,              PO(control) },
   { "startoffset",                MOD_DAT,  MOD_INT, 0,                          DO(offset) },
   { "subject_literal",            MOD_PATP, MOD_CTL, CTL2_SUBJECT_LITERAL,       PO(control2) },
+  { "substitute_callout",         MOD_PND,  MOD_CTL, CTL2_SUBSTITUTE_CALLOUT,    PO(control2) },
   { "substitute_extended",        MOD_PND,  MOD_CTL, CTL2_SUBSTITUTE_EXTENDED,   PO(control2) },
   { "substitute_overflow_length", MOD_PND,  MOD_CTL, CTL2_SUBSTITUTE_OVERFLOW_LENGTH, PO(control2) },
   { "substitute_unknown_unset",   MOD_PND,  MOD_CTL, CTL2_SUBSTITUTE_UNKNOWN_UNSET, PO(control2) },
@@ -1355,6 +1358,17 @@ are supported. */
   else \
     pcre2_set_parens_nest_limit_32(G(a,32),b)
 
+#define PCRE2_SET_SUBSTITUTE_CALLOUT(a,b,c) \
+  if (test_mode == PCRE8_MODE) \
+    pcre2_set_substitute_callout_8(G(a,8), \
+      (void (*)(pcre2_substitute_callout_block_8 *, void *))b,c); \
+  else if (test_mode == PCRE16_MODE) \
+    pcre2_set_substitute_callout_16(G(a,16), \
+      (void (*)(pcre2_substitute_callout_block_16 *, void *))b,c); \
+  else \
+    pcre2_set_substitute_callout_32(G(a,32), \
+      (void (*)(pcre2_substitute_callout_block_32 *, void *))b,c)
+
 #define PCRE2_SUBSTITUTE(a,b,c,d,e,f,g,h,i,j,k,l) \
   if (test_mode == PCRE8_MODE) \
     a = pcre2_substitute_8(G(b,8),(PCRE2_SPTR8)c,d,e,f,G(g,8),G(h,8), \
@@ -1824,6 +1838,14 @@ the three different cases. */
   else \
     G(pcre2_set_parens_nest_limit_,BITTWO)(G(a,BITTWO),b)
 
+#define PCRE2_SET_SUBSTITUTE_CALLOUT(a,b,c) \
+  if (test_mode == G(G(PCRE,BITONE),_MODE)) \
+    G(pcre2_set_substitute_callout_,BITONE)(G(a,BITONE), \
+      (void (*)(G(pcre2_substitute_callout_block_,BITONE) *, void *))b,c); \
+  else \
+    G(pcre2_set_substitute_callout_,BITTWO)(G(a,BITTWO), \
+      (void (*)(G(pcre2_substitute_callout_block_,BITTWO) *, void *))b,c)
+
 #define PCRE2_SUBSTITUTE(a,b,c,d,e,f,g,h,i,j,k,l) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
     a = G(pcre2_substitute_,BITONE)(G(b,BITONE),(G(PCRE2_SPTR,BITONE))c,d,e,f, \
@@ -2025,6 +2047,9 @@ the three different cases. */
 #define PCRE2_SET_MAX_PATTERN_LENGTH(a,b) pcre2_set_max_pattern_length_8(G(a,8),b)
 #define PCRE2_SET_OFFSET_LIMIT(a,b) pcre2_set_offset_limit_8(G(a,8),b)
 #define PCRE2_SET_PARENS_NEST_LIMIT(a,b) pcre2_set_parens_nest_limit_8(G(a,8),b)
+#define PCRE2_SET_SUBSTITUTE_CALLOUT(a,b,c) \
+  pcre2_set_substitute_callout_8(G(a,8), \
+    (void (*)(pcre2_substitute_callout_block_8 *, void *))b,c)
 #define PCRE2_SUBSTITUTE(a,b,c,d,e,f,g,h,i,j,k,l) \
   a = pcre2_substitute_8(G(b,8),(PCRE2_SPTR8)c,d,e,f,G(g,8),G(h,8), \
     (PCRE2_SPTR8)i,j,(PCRE2_UCHAR8 *)k,l)
@@ -2129,6 +2154,9 @@ the three different cases. */
 #define PCRE2_SET_MAX_PATTERN_LENGTH(a,b) pcre2_set_max_pattern_length_16(G(a,16),b)
 #define PCRE2_SET_OFFSET_LIMIT(a,b) pcre2_set_offset_limit_16(G(a,16),b)
 #define PCRE2_SET_PARENS_NEST_LIMIT(a,b) pcre2_set_parens_nest_limit_16(G(a,16),b)
+#define PCRE2_SET_SUBSTITUTE_CALLOUT(a,b,c) \
+  pcre2_set_substitute_callout_16(G(a,16), \
+    (void (*)(pcre2_substitute_callout_block_16 *, void *))b,c)
 #define PCRE2_SUBSTITUTE(a,b,c,d,e,f,g,h,i,j,k,l) \
   a = pcre2_substitute_16(G(b,16),(PCRE2_SPTR16)c,d,e,f,G(g,16),G(h,16), \
     (PCRE2_SPTR16)i,j,(PCRE2_UCHAR16 *)k,l)
@@ -2221,7 +2249,7 @@ the three different cases. */
 #define PCRE2_SERIALIZE_GET_NUMBER_OF_CODES(r,a) \
   r = pcre2_serialize_get_number_of_codes_32(a)
 #define PCRE2_SET_CALLOUT(a,b,c) \
-  pcre2_set_callout_32(G(a,32),(int (*)(pcre2_callout_block_32 *, void *))b,c);
+  pcre2_set_callout_32(G(a,32),(int (*)(pcre2_callout_block_32 *, void *))b,c)
 #define PCRE2_SET_CHARACTER_TABLES(a,b) pcre2_set_character_tables_32(G(a,32),b)
 #define PCRE2_SET_COMPILE_RECURSION_GUARD(a,b,c) \
   pcre2_set_compile_recursion_guard_32(G(a,32),b,c)
@@ -2233,6 +2261,9 @@ the three different cases. */
 #define PCRE2_SET_MAX_PATTERN_LENGTH(a,b) pcre2_set_max_pattern_length_32(G(a,32),b)
 #define PCRE2_SET_OFFSET_LIMIT(a,b) pcre2_set_offset_limit_32(G(a,32),b)
 #define PCRE2_SET_PARENS_NEST_LIMIT(a,b) pcre2_set_parens_nest_limit_32(G(a,32),b)
+#define PCRE2_SET_SUBSTITUTE_CALLOUT(a,b,c) \
+  pcre2_set_substitute_callout_32(G(a,32), \
+    (void (*)(pcre2_substitute_callout_block_32 *, void *))b,c)
 #define PCRE2_SUBSTITUTE(a,b,c,d,e,f,g,h,i,j,k,l) \
   a = pcre2_substitute_32(G(b,32),(PCRE2_SPTR32)c,d,e,f,G(g,32),G(h,32), \
     (PCRE2_SPTR32)i,j,(PCRE2_UCHAR32 *)k,l)
@@ -4022,7 +4053,7 @@ Returns:      nothing
 static void
 show_controls(uint32_t controls, uint32_t controls2, const char *before)
 {
-fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
+fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
   before,
   ((controls & CTL_AFTERTEXT) != 0)? " aftertext" : "",
   ((controls & CTL_ALLAFTERTEXT) != 0)? " allaftertext" : "",
@@ -4058,6 +4089,7 @@ fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s
   ((controls & CTL_PUSHCOPY) != 0)? " pushcopy" : "",
   ((controls & CTL_PUSHTABLESCOPY) != 0)? " pushtablescopy" : "",
   ((controls & CTL_STARTCHAR) != 0)? " startchar" : "",
+  ((controls2 & CTL2_SUBSTITUTE_CALLOUT) != 0)? " substitute_callout" : "",
   ((controls2 & CTL2_SUBSTITUTE_EXTENDED) != 0)? " substitute_extended" : "",
   ((controls2 & CTL2_SUBSTITUTE_OVERFLOW_LENGTH) != 0)? " substitute_overflow_length" : "",
   ((controls2 & CTL2_SUBSTITUTE_UNKNOWN_UNSET) != 0)? " substitute_unknown_unset" : "",
@@ -5897,6 +5929,35 @@ return capcount;
 
 
 /*************************************************
+*        Substitute callout function             *
+*************************************************/
+
+/* Called from pcre2_substitute() when the substitute_callout modifier is set.
+Print out the data that is passed back. The substitute callout block is
+identical for all code unit widths, so we just pick one.
+
+Arguments:
+  scb         pointer to substitute callout block
+  data_ptr    callout data
+
+Returns:      nothing
+*/
+
+static void
+substitute_callout_function(pcre2_substitute_callout_block_8 *scb,
+  void *data_ptr)
+{
+(void)data_ptr;   /* Not used */
+fprintf(outfile, "Old %" SIZ_FORM " %" SIZ_FORM "  New %" SIZ_FORM
+  " %" SIZ_FORM "\n",
+  SIZ_CAST scb->input_offsets[0],
+  SIZ_CAST scb->input_offsets[1],
+  SIZ_CAST scb->output_offsets[0],
+  SIZ_CAST scb->output_offsets[1]);
+}
+
+
+/*************************************************
 *              Callout function                  *
 *************************************************/
 
@@ -5907,8 +5968,11 @@ callout block for different code unit widths are that the pointers to the
 subject, the most recent MARK, and a callout argument string point to strings
 of the appropriate width. Casts can be used to deal with this.
 
-Argument:  a pointer to a callout block
-Return:
+Arguments:
+  cb                a pointer to a callout block
+  callout_data_ptr  the provided callout data
+
+Returns:            0 or 1 or an error, as determined by settings
 */
 
 static int
@@ -6779,8 +6843,8 @@ if (pat_patctl.replacement[0] != 0)
     return PR_OK;
     }
   if ((dat_datctl.control & CTL_ALLCAPTURES) != 0)
-    fprintf(outfile, "** Ignored with replacement text: allcaptures\n");   
-  }   
+    fprintf(outfile, "** Ignored with replacement text: allcaptures\n");
+  }
 
 /* Warn for modifiers that are ignored for DFA. */
 
@@ -7158,6 +7222,16 @@ if (dat_datctl.replacement[0] != 0)
     rlen = PCRE2_ZERO_TERMINATED;
   else
     rlen = (CASTVAR(uint8_t *, r) - rbuffer)/code_unit_size;
+
+  if ((dat_datctl.control2 & CTL2_SUBSTITUTE_CALLOUT) != 0)
+    {
+    PCRE2_SET_SUBSTITUTE_CALLOUT(dat_context, substitute_callout_function, NULL);
+    }
+  else
+    {
+    PCRE2_SET_SUBSTITUTE_CALLOUT(dat_context, NULL, NULL);  /* No callout */
+    }
+
   PCRE2_SUBSTITUTE(rc, compiled_code, pp, arg_ulen, dat_datctl.offset,
     dat_datctl.options|xoptions, match_data, dat_context,
     rbuffer, rlen, nbuffer, &nsize);

@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "07 September 2018" "PCRE2 10.32"
+.TH PCRE2API 3 "18 September 2018" "PCRE2 10.33"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -121,6 +121,10 @@ document for an overview of all the PCRE2 documentation.
 .sp
 .B int pcre2_set_callout(pcre2_match_context *\fImcontext\fP,
 .B "  int (*\fIcallout_function\fP)(pcre2_callout_block *, void *),"
+.B "  void *\fIcallout_data\fP);"
+.sp
+.B int pcre2_set_substitute_callout(pcre2_match_context *\fImcontext\fP,
+.B "  void (*\fIcallout_function\fP)(pcre2_substitute_callout_block *, void *),"
 .B "  void *\fIcallout_data\fP);"
 .sp
 .B int pcre2_set_offset_limit(pcre2_match_context *\fImcontext\fP,
@@ -847,12 +851,26 @@ PCRE2_ERROR_BADDATA if invalid data is detected.
 .B "  void *\fIcallout_data\fP);"
 .fi
 .sp
-This sets up a "callout" function for PCRE2 to call at specified points
+This sets up a callout function for PCRE2 to call at specified points
 during a matching operation. Details are given in the
 .\" HREF
 \fBpcre2callout\fP
 .\"
 documentation.
+.sp
+.nf
+.B int pcre2_set_substitute_callout(pcre2_match_context *\fImcontext\fP,
+.B "  void (*\fIcallout_function\fP)(pcre2_substitute_callout_block *, void *),"
+.B "  void *\fIcallout_data\fP);"
+.fi
+.sp
+This sets up a callout function for PCRE2 to call after each substitution
+made by \fBpcre2_substitute()\fP. Details are given in the section entitled
+"Creating a new string with substitutions"
+.\" HTML <a href="#substitutions">
+.\" </a>
+below.
+.\"
 .sp
 .nf
 .B int pcre2_set_offset_limit(pcre2_match_context *\fImcontext\fP,
@@ -3171,6 +3189,7 @@ numbers. For this reason, the use of different names for subpatterns of the
 same number causes an error at compile time.
 .
 .
+.\" HTML <a name="substitutions"></a>
 .SH "CREATING A NEW STRING WITH SUBSTITUTIONS"
 .rs
 .sp
@@ -3179,19 +3198,22 @@ same number causes an error at compile time.
 .B "  PCRE2_SIZE \fIlength\fP, PCRE2_SIZE \fIstartoffset\fP,"
 .B "  uint32_t \fIoptions\fP, pcre2_match_data *\fImatch_data\fP,"
 .B "  pcre2_match_context *\fImcontext\fP, PCRE2_SPTR \fIreplacement\fP,"
-.B "  PCRE2_SIZE \fIrlength\fP, PCRE2_UCHAR *\fIoutputbuffer\zfP,"
+.B "  PCRE2_SIZE \fIrlength\fP, PCRE2_UCHAR *\fIoutputbuffer\fP,"
 .B "  PCRE2_SIZE *\fIoutlengthptr\fP);"
 .fi
 .P
 This function calls \fBpcre2_match()\fP and then makes a copy of the subject
-string in \fIoutputbuffer\fP, replacing the part that was matched with the
-\fIreplacement\fP string, whose length is supplied in \fBrlength\fP. This can
-be given as PCRE2_ZERO_TERMINATED for a zero-terminated string. Matches in
-which a \eK item in a lookahead in the pattern causes the match to end before
-it starts are not supported, and give rise to an error return. For global
-replacements, matches in which \eK in a lookbehind causes the match to start
-earlier than the point that was reached in the previous iteration are also not
-supported.
+string in \fIoutputbuffer\fP, replacing one or more parts that were matched
+with the \fIreplacement\fP string, whose length is supplied in \fBrlength\fP.
+This can be given as PCRE2_ZERO_TERMINATED for a zero-terminated string.
+The default is to perform just one replacement, but there is an option that
+requests multiple replacements (see PCRE2_SUBSTITUTE_GLOBAL below for details).
+.P
+Matches in which a \eK item in a lookahead in the pattern causes the match to
+end before it starts are not supported, and give rise to an error return. For
+global replacements, matches in which \eK in a lookbehind causes the match to
+start earlier than the point that was reached in the previous iteration are
+also not supported.
 .P
 The first seven arguments of \fBpcre2_substitute()\fP are the same as for
 \fBpcre2_match()\fP, except that the partial matching options are not
@@ -3201,9 +3223,9 @@ functions from the match context, if provided, or else those that were used to
 allocate memory for the compiled code.
 .P
 If an external \fImatch_data\fP block is provided, its contents afterwards
-are those set by the final call to \fBpcre2_match()\fP, which will have
-ended in a matching error. The contents of the ovector within the match data
-block may or may not have been changed.
+are those set by the final call to \fBpcre2_match()\fP. For global changes,
+this will have ended in a matching error. The contents of the ovector within
+the match data block may or may not have been changed.
 .P
 The \fIoutlengthptr\fP argument must point to a variable that contains the
 length, in code units, of the output buffer. If the function is successful, the
@@ -3224,12 +3246,12 @@ length is in code units, not bytes.
 In the replacement string, which is interpreted as a UTF string in UTF mode,
 and is checked for UTF validity unless the PCRE2_NO_UTF_CHECK option is set, a
 dollar character is an escape character that can specify the insertion of
-characters from capturing groups or (*MARK), (*PRUNE), or (*THEN) items in the
-pattern. The following forms are always recognized:
+characters from capturing groups or names from (*MARK) or other control verbs
+in the pattern. The following forms are always recognized:
 .sp
   $$                  insert a dollar character
   $<n> or ${<n>}      insert the contents of group <n>
-  $*MARK or ${*MARK}  insert a (*MARK), (*PRUNE), or (*THEN) name
+  $*MARK or ${*MARK}  insert a control verb name
 .sp
 Either a group number or a group name can be given for <n>. Curly brackets are
 required only if the following character would be interpreted as part of the
@@ -3237,12 +3259,13 @@ number or name. The number may be zero to include the entire matched string.
 For example, if the pattern a(b)c is matched with "=abc=" and the replacement
 string "+$1$0$1+", the result is "=+babcb+=".
 .P
-$*MARK inserts the name from the last encountered (*MARK), (*PRUNE), or (*THEN)
-on the matching path that has a name. (*MARK) must always include a name, but
-(*PRUNE) and (*THEN) need not. For example, in the case of (*MARK:A)(*PRUNE)
-the name inserted is "A", but for (*MARK:A)(*PRUNE:B) the relevant name is "B".
-This facility can be used to perform simple simultaneous substitutions, as this
-\fBpcre2test\fP example shows:
+$*MARK inserts the name from the last encountered (*ACCEPT), (*COMMIT),
+(*MARK), (*PRUNE), or (*THEN) on the matching path that has a name. (*MARK)
+must always include a name, but the other verbs need not. For example, in
+the case of (*MARK:A)(*PRUNE) the name inserted is "A", but for
+(*MARK:A)(*PRUNE:B) the relevant name is "B". This facility can be used to
+perform simple simultaneous substitutions, as this \fBpcre2test\fP example
+shows:
 .sp
   /(*MARK:pear)apple|(*MARK:orange)lemon/g,replace=${*MARK}
       apple lemon
@@ -3386,6 +3409,42 @@ obtained by calling the \fBpcre2_get_error_message()\fP function (see
 .\" </a>
 above).
 .\"
+.
+.
+.SS "Substitution callouts"
+.rs
+.sp
+.nf
+.B int pcre2_set_substitute_callout(pcre2_match_context *\fImcontext\fP,
+.B "  void (*\fIcallout_function\fP)(pcre2_substitute_callout_block *, void *),"
+.B "  void *\fIcallout_data\fP);"
+.fi
+.sp
+The \fBpcre2_set_substitution_callout()\fP function can be used to specify a
+callout function for \fBpcre2_substitute()\fP. This information is passed in
+a match context. The callout function is called after each substitution. It is
+not called for simulated substitutions that happen as a result of the
+PCRE2_SUBSTITUTE_OVERFLOW_LENGTH option. A callout function should not return 
+any value.
+.P
+The first argument of the callout function is a pointer to a substitute callout
+block structure, which contains the following fields, not necessarily in this
+order:
+.sp
+  uint32_t    \fIversion\fP;
+  PCRE2_SIZE  \fIinput_offsets[2]\fP;
+  PCRE2_SIZE  \fIoutput_offsets[2]\fP;
+.sp
+The \fIversion\fP field contains the version number of the block format. The
+current version is 0. The version number will increase in future if more fields
+are added, but the intention is never to remove any of the existing fields.
+.P
+The \fIinput_offsets\fP vector contains the code unit offsets in the input
+string of the matched substring, and the \fIoutput_offsets\fP vector contains
+the offsets of the replacement in the output string.
+.P
+The second argument of the callout function is the value passed as
+\fIcallout_data\fP when the function was registered.
 .
 .
 .SH "DUPLICATE SUBPATTERN NAMES"
@@ -3670,6 +3729,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 07 September 2018
+Last updated: 18 September 2018
 Copyright (c) 1997-2018 University of Cambridge.
 .fi

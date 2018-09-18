@@ -381,5 +381,10 @@
     \x{100}
 \= Expect no match
     aaa
+    
+# Offsets are different in 8-bit mode. 
+
+/(?<=abc)(|def)/g,utf,replace=<$0>,substitute_callout
+    123abcáyzabcdef789abcሴqr
 
 # End of testinput12

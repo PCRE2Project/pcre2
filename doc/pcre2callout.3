@@ -1,4 +1,4 @@
-.TH PCRE2CALLOUT 3 "26 April 2018" "PCRE2 10.32"
+.TH PCRE2CALLOUT 3 "17 September 2018" "PCRE2 10.33"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH SYNOPSIS
@@ -26,6 +26,15 @@ a match context (see \fBpcre2_set_callout()\fP in the
 \fBpcre2api\fP
 .\"
 documentation).
+.P
+When using the \fBpcre2_substitute()\fP function, an additional callout feature
+is available. This does a callout after each change to the subject string and
+is described in the
+.\" HREF
+\fBpcre2api\fP
+.\"
+documentation; the rest of this document is concerned with callouts during 
+pattern matching.
 .P
 Within a regular expression, (?C<arg>) indicates a point at which the external
 function is to be called. Different callout points can be identified by putting
@@ -443,6 +452,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 26 April 2018
+Last updated: 17 September 2018
 Copyright (c) 1997-2018 University of Cambridge.
 .fi

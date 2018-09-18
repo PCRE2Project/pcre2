@@ -929,6 +929,7 @@ PATTERN MODIFIERS
              aftertext                  show text after match
              allaftertext               show text after captures
              allcaptures                show all captures
+             allvector                  show the entire ovector
              allusedtext                show all consulted text
              altglobal                  alternative global matching
          /g  global                     global matching
@@ -936,6 +937,7 @@ PATTERN MODIFIERS
              mark                       show mark values
              replace=<string>           specify a replacement string
              startchar                  show starting character when relevant
+             substitute_callout         use substitution callouts
              substitute_extended        use PCRE2_SUBSTITUTE_EXTENDED
              substitute_overflow_length use PCRE2_SUBSTITUTE_OVERFLOW_LENGTH
              substitute_unknown_unset   use PCRE2_SUBSTITUTE_UNKNOWN_UNSET
@@ -1057,6 +1059,7 @@ SUBJECT MODIFIERS
              aftertext                  show text after match
              allaftertext               show text after captures
              allcaptures                show all captures
+             allvector                  show the entire ovector
              allusedtext                show all consulted text (non-JIT only)
              altglobal                  alternative global matching
              callout_capture            show captures at callout time
@@ -1086,6 +1089,7 @@ SUBJECT MODIFIERS
              replace=<string>           specify a replacement string
              startchar                  show startchar when relevant
              startoffset=<n>            same as offset=<n>
+             substitute_callout         use substitution callouts
              substitute_extedded        use PCRE2_SUBSTITUTE_EXTENDED
              substitute_overflow_length use PCRE2_SUBSTITUTE_OVERFLOW_LENGTH
              substitute_unknown_unset   use PCRE2_SUBSTITUTE_UNKNOWN_UNSET
@@ -1150,76 +1154,95 @@ SUBJECT MODIFIERS
        the highest one actually used in the match are output (corresponding to
        the  return  code from pcre2_match()). Groups that did not take part in
        the match are output as "<unset>". This modifier is  not  relevant  for
-       DFA  matching  (which does no capturing); it is ignored, with a warning
-       message, if present.
+       DFA  matching (which does no capturing) and does not apply when replace
+       is specified; it is ignored, with a warning message, if present.
 
-   Testing callouts
+   Showing the entire ovector, for all outcomes
 
-       A callout function is supplied when pcre2test calls the library  match-
-       ing  functions,  unless callout_none is specified. Its behaviour can be
-       controlled by various modifiers listed above  whose  names  begin  with
-       callout_. Details are given in the section entitled "Callouts" below.
+       The allvector modifier requests that the entire ovector be shown, what-
+       ever the outcome of the match. Compare allcaptures, which shows only up
+       to the maximum number of capture groups for the pattern, and then  only
+       for  a  successful  complete  non-DFA  match. This modifier, which acts
+       after any match result, and also for DFA matching, provides a means  of
+       checking  that there are no unexpected modifications to ovector fields.
+       Before each match attempt, the ovector is filled with a special  value,
+       and   if   this  is  found  in  both  elements  of  a  capturing  pair,
+       "<unchanged>" is output. After a successful match, this applies to  all
+       groups  after the maximum capture group for the pattern. In other cases
+       it applies to the entire ovector. After a partial match, the first  two
+       elements  are  the only ones that should be set. After a DFA match, the
+       amount of ovector that is used depends on the number  of  matches  that
+       were found.
+
+   Testing pattern callouts
+
+       A  callout function is supplied when pcre2test calls the library match-
+       ing functions, unless callout_none is specified. Its behaviour  can  be
+       controlled  by  various  modifiers  listed above whose names begin with
+       callout_. Details are given in the section entitled  "Callouts"  below.
+       Testing  callouts  from  pcre2_substitute()  is  decribed separately in
+       "Testing the substitution function" below.
 
    Finding all matches in a string
 
        Searching for all possible matches within a subject can be requested by
-       the global or altglobal modifier. After finding a match,  the  matching
-       function  is  called  again to search the remainder of the subject. The
-       difference between global and altglobal is that  the  former  uses  the
-       start_offset  argument  to  pcre2_match() or pcre2_dfa_match() to start
-       searching at a new point within the entire string (which is  what  Perl
+       the  global  or altglobal modifier. After finding a match, the matching
+       function is called again to search the remainder of  the  subject.  The
+       difference  between  global  and  altglobal is that the former uses the
+       start_offset argument to pcre2_match() or  pcre2_dfa_match()  to  start
+       searching  at  a new point within the entire string (which is what Perl
        does), whereas the latter passes over a shortened subject. This makes a
        difference to the matching process if the pattern begins with a lookbe-
        hind assertion (including \b or \B).
 
-       If  an  empty  string  is  matched,  the  next  match  is done with the
+       If an empty string  is  matched,  the  next  match  is  done  with  the
        PCRE2_NOTEMPTY_ATSTART and PCRE2_ANCHORED flags set, in order to search
        for another, non-empty, match at the same point in the subject. If this
-       match fails, the start offset is advanced,  and  the  normal  match  is
-       retried.  This  imitates the way Perl handles such cases when using the
-       /g modifier or the split() function.  Normally,  the  start  offset  is
-       advanced  by  one  character,  but if the newline convention recognizes
-       CRLF as a newline, and the current character is CR followed by  LF,  an
+       match  fails,  the  start  offset  is advanced, and the normal match is
+       retried. This imitates the way Perl handles such cases when  using  the
+       /g  modifier  or  the  split()  function. Normally, the start offset is
+       advanced by one character, but if  the  newline  convention  recognizes
+       CRLF  as  a newline, and the current character is CR followed by LF, an
        advance of two characters occurs.
 
    Testing substring extraction functions
 
-       The  copy  and  get  modifiers  can  be  used  to  test  the pcre2_sub-
+       The copy  and  get  modifiers  can  be  used  to  test  the  pcre2_sub-
        string_copy_xxx() and pcre2_substring_get_xxx() functions.  They can be
-       given  more than once, and each can specify a group name or number, for
+       given more than once, and each can specify a group name or number,  for
        example:
 
           abcd\=copy=1,copy=3,get=G1
 
-       If the #subject command is used to set default copy and/or  get  lists,
-       these  can  be unset by specifying a negative number to cancel all num-
+       If  the  #subject command is used to set default copy and/or get lists,
+       these can be unset by specifying a negative number to cancel  all  num-
        bered groups and an empty name to cancel all named groups.
 
-       The getall modifier tests  pcre2_substring_list_get(),  which  extracts
+       The  getall  modifier  tests pcre2_substring_list_get(), which extracts
        all captured substrings.
 
-       If  the  subject line is successfully matched, the substrings extracted
-       by the convenience functions are output with  C,  G,  or  L  after  the
-       string  number  instead  of  a colon. This is in addition to the normal
-       full list. The string length (that is, the return from  the  extraction
+       If the subject line is successfully matched, the  substrings  extracted
+       by  the  convenience  functions  are  output  with C, G, or L after the
+       string number instead of a colon. This is in  addition  to  the  normal
+       full  list.  The string length (that is, the return from the extraction
        function) is given in parentheses after each substring, followed by the
        name when the extraction was by name.
 
    Testing the substitution function
 
-       If the replace modifier is  set,  the  pcre2_substitute()  function  is
-       called  instead of one of the matching functions. Note that replacement
-       strings cannot contain commas, because a comma signifies the end  of  a
+       If  the  replace  modifier  is  set, the pcre2_substitute() function is
+       called instead of one of the matching functions. Note that  replacement
+       strings  cannot  contain commas, because a comma signifies the end of a
        modifier. This is not thought to be an issue in a test program.
 
-       Unlike  subject strings, pcre2test does not process replacement strings
-       for escape sequences. In UTF mode, a replacement string is  checked  to
-       see  if it is a valid UTF-8 string. If so, it is correctly converted to
-       a UTF string of the appropriate code unit width. If it is not  a  valid
-       UTF-8  string, the individual code units are copied directly. This pro-
+       Unlike subject strings, pcre2test does not process replacement  strings
+       for  escape  sequences. In UTF mode, a replacement string is checked to
+       see if it is a valid UTF-8 string. If so, it is correctly converted  to
+       a  UTF  string of the appropriate code unit width. If it is not a valid
+       UTF-8 string, the individual code units are copied directly. This  pro-
        vides a means of passing an invalid UTF-8 string for testing purposes.
 
-       The following modifiers set options (in additional to the normal  match
+       The  following modifiers set options (in additional to the normal match
        options) for pcre2_substitute():
 
          global                      PCRE2_SUBSTITUTE_GLOBAL
@@ -1229,8 +1252,8 @@ SUBJECT MODIFIERS
          substitute_unset_empty      PCRE2_SUBSTITUTE_UNSET_EMPTY
 
 
-       After  a  successful  substitution, the modified string is output, pre-
-       ceded by the number of replacements. This may be zero if there were  no
+       After a successful substitution, the modified string  is  output,  pre-
+       ceded  by the number of replacements. This may be zero if there were no
        matches. Here is a simple example of a substitution test:
 
          /abc/replace=xxx
@@ -1239,12 +1262,22 @@ SUBJECT MODIFIERS
              =abc=abc=\=global
           2: =xxx=xxx=
 
-       Subject  and replacement strings should be kept relatively short (fewer
-       than 256 characters) for substitution tests, as fixed-size buffers  are
-       used.  To  make it easy to test for buffer overflow, if the replacement
-       string starts with a number in square brackets, that number  is  passed
-       to  pcre2_substitute()  as  the  size  of  the  output buffer, with the
-       replacement string starting at the next character. Here is  an  example
+       If the substitute_callout modifier is set, a substitution callout func-
+       tion  is  set up. When it is called (after each substitution), the off-
+       sets in the input and output strings are output. For example:
+
+         /abc/g,replace=<$0>,substitute_callout
+             abcdefabcpqr
+         Old 0 3  New 0 5
+         Old 6 9  New 8 13
+          2: <abc>def<abc>pqr
+
+       Subject and replacement strings should be kept relatively short  (fewer
+       than  256 characters) for substitution tests, as fixed-size buffers are
+       used. To make it easy to test for buffer overflow, if  the  replacement
+       string  starts  with a number in square brackets, that number is passed
+       to pcre2_substitute() as the  size  of  the  output  buffer,  with  the
+       replacement  string  starting at the next character. Here is an example
        that tests the edge case:
 
          /abc/
@@ -1253,14 +1286,15 @@ SUBJECT MODIFIERS
              123abc123\=replace=[9]XYZ
          Failed: error -47: no more memory
 
-       The    default    action    of    pcre2_substitute()   is   to   return
-       PCRE2_ERROR_NOMEMORY when the output buffer is too small.  However,  if
-       the  PCRE2_SUBSTITUTE_OVERFLOW_LENGTH  option is set (by using the sub-
-       stitute_overflow_length modifier), pcre2_substitute() continues  to  go
-       through  the  motions of matching and substituting, in order to compute
-       the size of buffer that is required. When this happens, pcre2test shows
-       the required buffer length (which includes space for the trailing zero)
-       as part of the error message. For example:
+       The   default   action   of    pcre2_substitute()    is    to    return
+       PCRE2_ERROR_NOMEMORY  when  the output buffer is too small. However, if
+       the PCRE2_SUBSTITUTE_OVERFLOW_LENGTH option is set (by using  the  sub-
+       stitute_overflow_length  modifier),  pcre2_substitute() continues to go
+       through the motions of matching and substituting  (but  not  doing  any
+       callouts),  in  order  to  compute the size of buffer that is required.
+       When this happens, pcre2test shows the required  buffer  length  (which
+       includes space for the trailing zero) as part of the error message. For
+       example:
 
          /abc/substitute_overflow_length
              123abc123\=replace=[9]XYZ
@@ -1818,5 +1852,5 @@ AUTHOR
 
 REVISION
 
-       Last updated: 21 July 2018
+       Last updated: 17 September 2018
        Copyright (c) 1997-2018 University of Cambridge.

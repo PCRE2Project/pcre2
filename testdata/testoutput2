@@ -16795,6 +16795,12 @@ Subject length lower bound = 1
  2: <unchanged>
  3: <unchanged>
 
+/a(b)c|xyz/g,replace=<$0>,substitute_callout
+    abcdefabcpqr
+Old 0 3  New 0 5
+Old 6 9  New 8 13
+ 2: <abc>def<abc>pqr
+
 # End of testinput2
 Error -70: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

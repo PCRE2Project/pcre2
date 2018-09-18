@@ -44,6 +44,14 @@ a match context (see <b>pcre2_set_callout()</b> in the
 documentation).
 </P>
 <P>
+When using the <b>pcre2_substitute()</b> function, an additional callout feature
+is available. This does a callout after each change to the subject string and
+is described in the
+<a href="pcre2api.html"><b>pcre2api</b></a>
+documentation; the rest of this document is concerned with callouts during 
+pattern matching.
+</P>
+<P>
 Within a regular expression, (?C&#60;arg&#62;) indicates a point at which the external
 function is to be called. Different callout points can be identified by putting
 a number less than 256 after the letter C. The default value is zero.
@@ -463,7 +471,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC8" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 26 April 2018
+Last updated: 17 September 2018
 <br>
 Copyright &copy; 1997-2018 University of Cambridge.
 <br>

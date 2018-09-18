@@ -239,7 +239,9 @@ PCRE2_SIZE extra_needed = 0;
 PCRE2_SIZE buff_offset, buff_length, lengthleft, fraglength;
 PCRE2_SIZE *ovector;
 PCRE2_SIZE ovecsave[3];
+pcre2_substitute_callout_block scb;
 
+scb.version = 0;
 buff_offset = 0;
 lengthleft = buff_length = *blength;
 *blength = PCRE2_UNSET;
@@ -390,7 +392,12 @@ do
     rc = PCRE2_ERROR_INTERNAL_DUPMATCH;
     goto EXIT;   
     }   
-
+    
+  /* Save the match point for a possible callout */
+  
+  scb.input_offsets[0] = ovector[0];
+  scb.input_offsets[1] = ovector[1];   
+    
   /* Count substitutions with a paranoid check for integer overflow; surely no
   real call to this function would ever hit this! */
 
@@ -401,11 +408,13 @@ do
     }
   subs++;
 
-  /* Copy the text leading up to the match. */
+  /* Copy the text leading up to the match, and remember where the insert
+  begins. */
 
   if (rc == 0) rc = ovector_count;
   fraglength = ovector[0] - start_offset;
   CHECKMEMCPY(subject + start_offset, fraglength);
+  scb.output_offsets[0] = buff_offset;
 
   /* Process the replacement string. Literal mode is set by \Q, but only in
   extended mode when backslashes are being interpreted. In extended mode we
@@ -821,10 +830,19 @@ do
       } /* End handling a literal code unit */
     }   /* End of loop for scanning the replacement. */
 
-  /* The replacement has been copied to the output. Save the details of this
-  match. See above for how this data is used. If we matched an empty string, do
-  the magic for global matches. Finally, update the start offset to point to
-  the rest of the subject string. */
+  /* The replacement has been copied to the output, or its size has been 
+  remembered. Do the callout if there is one and we have done an actual 
+  replacement. */
+  
+  if (!overflowed && mcontext->substitute_callout != NULL)
+    {
+    scb.output_offsets[1] = buff_offset;
+    mcontext->substitute_callout(&scb, mcontext->substitute_callout_data); 
+    }   
+ 
+  /* Save the details of this match. See above for how this data is used. If we
+  matched an empty string, do the magic for global matches. Finally, update the
+  start offset to point to the rest of the subject string. */
   
   ovecsave[0] = ovector[0];                                
   ovecsave[1] = ovector[1];                                        

@@ -5514,4 +5514,7 @@ a)"xI
     abcdef\=ovector=4
     abxyz\=ovector=4
 
+/a(b)c|xyz/g,replace=<$0>,substitute_callout
+    abcdefabcpqr
+
 # End of testinput2

@@ -182,6 +182,11 @@ document for an overview of all the PCRE2 documentation.
 <b>  void *<i>callout_data</i>);</b>
 <br>
 <br>
+<b>int pcre2_set_substitute_callout(pcre2_match_context *<i>mcontext</i>,</b>
+<b>  void (*<i>callout_function</i>)(pcre2_substitute_callout_block *, void *),</b>
+<b>  void *<i>callout_data</i>);</b>
+<br>
+<br>
 <b>int pcre2_set_offset_limit(pcre2_match_context *<i>mcontext</i>,</b>
 <b>  PCRE2_SIZE <i>value</i>);</b>
 <br>
@@ -912,10 +917,21 @@ PCRE2_ERROR_BADDATA if invalid data is detected.
 <b>  void *<i>callout_data</i>);</b>
 <br>
 <br>
-This sets up a "callout" function for PCRE2 to call at specified points
+This sets up a callout function for PCRE2 to call at specified points
 during a matching operation. Details are given in the
 <a href="pcre2callout.html"><b>pcre2callout</b></a>
 documentation.
+<br>
+<br>
+<b>int pcre2_set_substitute_callout(pcre2_match_context *<i>mcontext</i>,</b>
+<b>  void (*<i>callout_function</i>)(pcre2_substitute_callout_block *, void *),</b>
+<b>  void *<i>callout_data</i>);</b>
+<br>
+<br>
+This sets up a callout function for PCRE2 to call after each substitution
+made by <b>pcre2_substitute()</b>. Details are given in the section entitled
+"Creating a new string with substitutions"
+<a href="#substitutions">below.</a>
 <br>
 <br>
 <b>int pcre2_set_offset_limit(pcre2_match_context *<i>mcontext</i>,</b>
@@ -3163,26 +3179,30 @@ page, you cannot use names to distinguish the different subpatterns, because
 names are not included in the compiled code. The matching process uses only
 numbers. For this reason, the use of different names for subpatterns of the
 same number causes an error at compile time.
-</P>
+<a name="substitutions"></a></P>
 <br><a name="SEC36" href="#TOC1">CREATING A NEW STRING WITH SUBSTITUTIONS</a><br>
 <P>
 <b>int pcre2_substitute(const pcre2_code *<i>code</i>, PCRE2_SPTR <i>subject</i>,</b>
 <b>  PCRE2_SIZE <i>length</i>, PCRE2_SIZE <i>startoffset</i>,</b>
 <b>  uint32_t <i>options</i>, pcre2_match_data *<i>match_data</i>,</b>
 <b>  pcre2_match_context *<i>mcontext</i>, PCRE2_SPTR <i>replacement</i>,</b>
-<b>  PCRE2_SIZE <i>rlength</i>, PCRE2_UCHAR *\fIoutputbuffer\zfP,</b>
+<b>  PCRE2_SIZE <i>rlength</i>, PCRE2_UCHAR *<i>outputbuffer</i>,</b>
 <b>  PCRE2_SIZE *<i>outlengthptr</i>);</b>
 </P>
 <P>
 This function calls <b>pcre2_match()</b> and then makes a copy of the subject
-string in <i>outputbuffer</i>, replacing the part that was matched with the
-<i>replacement</i> string, whose length is supplied in <b>rlength</b>. This can
-be given as PCRE2_ZERO_TERMINATED for a zero-terminated string. Matches in
-which a \K item in a lookahead in the pattern causes the match to end before
-it starts are not supported, and give rise to an error return. For global
-replacements, matches in which \K in a lookbehind causes the match to start
-earlier than the point that was reached in the previous iteration are also not
-supported.
+string in <i>outputbuffer</i>, replacing one or more parts that were matched
+with the <i>replacement</i> string, whose length is supplied in <b>rlength</b>.
+This can be given as PCRE2_ZERO_TERMINATED for a zero-terminated string.
+The default is to perform just one replacement, but there is an option that
+requests multiple replacements (see PCRE2_SUBSTITUTE_GLOBAL below for details).
+</P>
+<P>
+Matches in which a \K item in a lookahead in the pattern causes the match to
+end before it starts are not supported, and give rise to an error return. For
+global replacements, matches in which \K in a lookbehind causes the match to
+start earlier than the point that was reached in the previous iteration are
+also not supported.
 </P>
 <P>
 The first seven arguments of <b>pcre2_substitute()</b> are the same as for
@@ -3194,9 +3214,9 @@ allocate memory for the compiled code.
 </P>
 <P>
 If an external <i>match_data</i> block is provided, its contents afterwards
-are those set by the final call to <b>pcre2_match()</b>, which will have
-ended in a matching error. The contents of the ovector within the match data
-block may or may not have been changed.
+are those set by the final call to <b>pcre2_match()</b>. For global changes,
+this will have ended in a matching error. The contents of the ovector within
+the match data block may or may not have been changed.
 </P>
 <P>
 The <i>outlengthptr</i> argument must point to a variable that contains the
@@ -3220,12 +3240,12 @@ length is in code units, not bytes.
 In the replacement string, which is interpreted as a UTF string in UTF mode,
 and is checked for UTF validity unless the PCRE2_NO_UTF_CHECK option is set, a
 dollar character is an escape character that can specify the insertion of
-characters from capturing groups or (*MARK), (*PRUNE), or (*THEN) items in the
-pattern. The following forms are always recognized:
+characters from capturing groups or names from (*MARK) or other control verbs
+in the pattern. The following forms are always recognized:
 <pre>
   $$                  insert a dollar character
   $&#60;n&#62; or ${&#60;n&#62;}      insert the contents of group &#60;n&#62;
-  $*MARK or ${*MARK}  insert a (*MARK), (*PRUNE), or (*THEN) name
+  $*MARK or ${*MARK}  insert a control verb name
 </pre>
 Either a group number or a group name can be given for &#60;n&#62;. Curly brackets are
 required only if the following character would be interpreted as part of the
@@ -3234,12 +3254,13 @@ For example, if the pattern a(b)c is matched with "=abc=" and the replacement
 string "+$1$0$1+", the result is "=+babcb+=".
 </P>
 <P>
-$*MARK inserts the name from the last encountered (*MARK), (*PRUNE), or (*THEN)
-on the matching path that has a name. (*MARK) must always include a name, but
-(*PRUNE) and (*THEN) need not. For example, in the case of (*MARK:A)(*PRUNE)
-the name inserted is "A", but for (*MARK:A)(*PRUNE:B) the relevant name is "B".
-This facility can be used to perform simple simultaneous substitutions, as this
-<b>pcre2test</b> example shows:
+$*MARK inserts the name from the last encountered (*ACCEPT), (*COMMIT),
+(*MARK), (*PRUNE), or (*THEN) on the matching path that has a name. (*MARK)
+must always include a name, but the other verbs need not. For example, in
+the case of (*MARK:A)(*PRUNE) the name inserted is "A", but for
+(*MARK:A)(*PRUNE:B) the relevant name is "B". This facility can be used to
+perform simple simultaneous substitutions, as this <b>pcre2test</b> example
+shows:
 <pre>
   /(*MARK:pear)apple|(*MARK:orange)lemon/g,replace=${*MARK}
       apple lemon
@@ -3398,6 +3419,44 @@ As for all PCRE2 errors, a text message that describes the error can be
 obtained by calling the <b>pcre2_get_error_message()</b> function (see
 "Obtaining a textual error message"
 <a href="#geterrormessage">above).</a>
+</P>
+<br><b>
+Substitution callouts
+</b><br>
+<P>
+<b>int pcre2_set_substitute_callout(pcre2_match_context *<i>mcontext</i>,</b>
+<b>  void (*<i>callout_function</i>)(pcre2_substitute_callout_block *, void *),</b>
+<b>  void *<i>callout_data</i>);</b>
+<br>
+<br>
+The <b>pcre2_set_substitution_callout()</b> function can be used to specify a
+callout function for <b>pcre2_substitute()</b>. This information is passed in
+a match context. The callout function is called after each substitution. It is
+not called for simulated substitutions that happen as a result of the
+PCRE2_SUBSTITUTE_OVERFLOW_LENGTH option. A callout function should not return 
+any value.
+</P>
+<P>
+The first argument of the callout function is a pointer to a substitute callout
+block structure, which contains the following fields, not necessarily in this
+order:
+<pre>
+  uint32_t    <i>version</i>;
+  PCRE2_SIZE  <i>input_offsets[2]</i>;
+  PCRE2_SIZE  <i>output_offsets[2]</i>;
+</pre>
+The <i>version</i> field contains the version number of the block format. The
+current version is 0. The version number will increase in future if more fields
+are added, but the intention is never to remove any of the existing fields.
+</P>
+<P>
+The <i>input_offsets</i> vector contains the code unit offsets in the input
+string of the matched substring, and the <i>output_offsets</i> vector contains
+the offsets of the replacement in the output string.
+</P>
+<P>
+The second argument of the callout function is the value passed as
+<i>callout_data</i> when the function was registered.
 </P>
 <br><a name="SEC37" href="#TOC1">DUPLICATE SUBPATTERN NAMES</a><br>
 <P>
@@ -3665,7 +3724,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC42" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 07 September 2018
+Last updated: 18 September 2018
 <br>
 Copyright &copy; 1997-2018 University of Cambridge.
 <br>
