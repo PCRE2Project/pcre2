@@ -9,6 +9,9 @@ Version 10.33-RC1 15-September-2018
 ovector that shouldn't be changed, in particular after substitute and failed or 
 partial matches.
 
+2. Fix subject buffer overread in JIT when UTF is disabled and \X or \R has
+a greater than 1 fixed quantifier. This issue was found by Yunho Kim.
+
 
 Version 10.32 10-September-2018
 -------------------------------

@@ -1948,6 +1948,10 @@ static struct invalid_utf8_regression_test_case invalid_utf8_regression_test_cas
 	{ PCRE2_UTF, CI, 0, 0, 0, 4, 8, { "#\xc7\x85#", NULL }, "\x80\x80#\xc7#\xc7\x85#" },
 	{ PCRE2_UTF, CI, 0, 0, 0, 7, 11, { "#\xc7\x85#", NULL }, "\x80\x80#\xc7\x80\x80\x80#\xc7\x85#" },
 
+	/* These two are not invalid UTF tests, but this infrastructure fits better for them. */
+	{ 0, PCRE2_JIT_COMPLETE, 0, 0, 1, -1, -1, { "\\X{2}", NULL }, "\r\n\n" },
+	{ 0, PCRE2_JIT_COMPLETE, 0, 0, 1, -1, -1, { "\\R{2}", NULL }, "\r\n\n" },
+
 	{ 0, 0, 0, 0, 0, 0, 0, { NULL, NULL }, NULL }
 };
 

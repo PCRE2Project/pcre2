@@ -11268,7 +11268,7 @@ if (exact > 1)
 #ifdef SUPPORT_UNICODE
       && !common->utf
 #endif
-      )
+      && type != OP_ANYNL && type != OP_EXTUNI)
     {
     OP2(SLJIT_ADD, TMP1, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(exact));
     add_jump(compiler, &backtrack->topbacktracks, CMP(SLJIT_GREATER, TMP1, 0, STR_END, 0));
