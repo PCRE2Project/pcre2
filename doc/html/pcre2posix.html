@@ -32,7 +32,15 @@ please consult the man page, in case the conversion went wrong.
 <b>     int <i>cflags</i>);</b>
 <br>
 <br>
+<b>int pcre2_regcomp(regex_t *<i>preg</i>, const char *<i>pattern</i>,</b>
+<b>     int <i>cflags</i>);</b>
+<br>
+<br>
 <b>int regexec(const regex_t *<i>preg</i>, const char *<i>string</i>,</b>
+<b>     size_t <i>nmatch</i>, regmatch_t <i>pmatch</i>[], int <i>eflags</i>);</b>
+<br>
+<br>
+<b>int pcre2_regexec(const regex_t *<i>preg</i>, const char *<i>string</i>,</b>
 <b>     size_t <i>nmatch</i>, regmatch_t <i>pmatch</i>[], int <i>eflags</i>);</b>
 <br>
 <br>
@@ -40,7 +48,14 @@ please consult the man page, in case the conversion went wrong.
 <b>     char *<i>errbuf</i>, size_t <i>errbuf_size</i>);</b>
 <br>
 <br>
+<b>size_t pcre2_regerror(int <i>errcode</i>, const regex_t *<i>preg</i>,</b>
+<b>     char *<i>errbuf</i>, size_t <i>errbuf_size</i>);</b>
+<br>
+<br>
 <b>void regfree(regex_t *<i>preg</i>);</b>
+<br>
+<br>
+<b>void pcre2_regfree(regex_t *<i>preg</i>);</b>
 </P>
 <br><a name="SEC2" href="#TOC1">DESCRIPTION</a><br>
 <P>
@@ -58,6 +73,14 @@ header file, and on Unix systems the library itself is called
 <b>libpcre2-posix.a</b>, so can be accessed by adding <b>-lpcre2-posix</b> to the
 command for linking an application that uses them. Because the POSIX functions
 call the native ones, it is also necessary to add <b>-lpcre2-8</b>.
+</P>
+<P>
+When another POSIX regex library is also installed, there is the possibility of 
+linking an application with the wrong library. To help avoid this issue, the 
+PCRE2 POSIX library provides alternative names for the functions, all starting 
+with "pcre2_". If an application uses these names, possible ambiguity is 
+avoided. In the following description, however, the standard POSIX function
+names are used.
 </P>
 <P>
 Those POSIX option bits that can reasonably be mapped to PCRE2 native options
@@ -322,9 +345,9 @@ Cambridge, England.
 </P>
 <br><a name="SEC9" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 15 June 2017
+Last updated: 19 September 2018
 <br>
-Copyright &copy; 1997-2017 University of Cambridge.
+Copyright &copy; 1997-2018 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE2 index page</a>.
