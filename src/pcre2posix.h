@@ -3,11 +3,13 @@
 *************************************************/
 
 /* PCRE2 is a library of functions to support regular expressions whose syntax
-and semantics are as close as possible to those of the Perl 5 language.
+and semantics are as close as possible to those of the Perl 5 language. This is 
+the public header file to be #included by applications that call PCRE2 via the 
+POSIX wrapper interface.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-         New API code Copyright (c) 2016 University of Cambridge
+          New API code Copyright (c) 2016-2018 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -136,12 +138,22 @@ file. */
 #  endif
 #endif
 
-/* The functions */
+/* The functions. The actual code is in functions with pcre2_xxx names for 
+uniqueness. Wrappers with the POSIX names are provided for those who can ensure 
+they get them from the PCRE2 library and not by accident from elsewhere. */
 
+PCRE2POSIX_EXP_DECL int pcre2_regcomp(regex_t *, const char *, int);
 PCRE2POSIX_EXP_DECL int regcomp(regex_t *, const char *, int);
+
+PCRE2POSIX_EXP_DECL int pcre2_regexec(const regex_t *, const char *, size_t,
+                     regmatch_t *, int);
 PCRE2POSIX_EXP_DECL int regexec(const regex_t *, const char *, size_t,
                      regmatch_t *, int);
+
+PCRE2POSIX_EXP_DECL size_t pcre2_regerror(int, const regex_t *, char *, size_t);
 PCRE2POSIX_EXP_DECL size_t regerror(int, const regex_t *, char *, size_t);
+
+PCRE2POSIX_EXP_DECL void pcre2_regfree(regex_t *);
 PCRE2POSIX_EXP_DECL void regfree(regex_t *);
 
 #ifdef __cplusplus

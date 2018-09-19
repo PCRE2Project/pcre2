@@ -40,7 +40,10 @@ POSSIBILITY OF SUCH DAMAGE.
 
 
 /* This module is a wrapper that provides a POSIX API to the underlying PCRE2
-functions. */
+functions. The operative functions are called pcre2_regcomp(), etc., with
+wrappers that use the plain POSIX names. This makes it easier for an
+application to be sure it gets the PCRE2 versions in the presence of other
+POSIX regex libraries. */
 
 
 #ifdef HAVE_CONFIG_H
@@ -170,13 +173,44 @@ static const char *const pstring[] = {
 
 
 
+/*************************************************
+*      Wrappers with traditional POSIX names     *
+*************************************************/
+
+PCRE2POSIX_EXP_DEFN size_t PCRE2_CALL_CONVENTION
+regerror(int errcode, const regex_t *preg, char *errbuf, size_t errbuf_size)
+{
+return pcre2_regerror(errcode, preg, errbuf, errbuf_size);
+}
+
+PCRE2POSIX_EXP_DEFN void PCRE2_CALL_CONVENTION
+regfree(regex_t *preg)
+{
+pcre2_regfree(preg);
+}
+
+PCRE2POSIX_EXP_DEFN int PCRE2_CALL_CONVENTION
+regcomp(regex_t *preg, const char *pattern, int cflags)
+{
+return pcre2_regcomp(preg, pattern, cflags);
+}
+
+PCRE2POSIX_EXP_DEFN int PCRE2_CALL_CONVENTION
+regexec(const regex_t *preg, const char *string, size_t nmatch,
+  regmatch_t pmatch[], int eflags)
+{
+return pcre2_regexec(preg, string, nmatch, pmatch, eflags);
+}
+
+
 
 /*************************************************
 *          Translate error code to string        *
 *************************************************/
 
 PCRE2POSIX_EXP_DEFN size_t PCRE2_CALL_CONVENTION
-regerror(int errcode, const regex_t *preg, char *errbuf, size_t errbuf_size)
+pcre2_regerror(int errcode, const regex_t *preg, char *errbuf, 
+  size_t errbuf_size)
 {
 int used;
 const char *message;
@@ -199,18 +233,16 @@ return used + 1;
 
 
 
-
 /*************************************************
 *           Free store held by a regex           *
 *************************************************/
 
 PCRE2POSIX_EXP_DEFN void PCRE2_CALL_CONVENTION
-regfree(regex_t *preg)
+pcre2_regfree(regex_t *preg)
 {
 pcre2_match_data_free(preg->re_match_data);
 pcre2_code_free(preg->re_pcre2_code);
 }
-
 
 
 
@@ -229,7 +261,7 @@ Returns:      0 on success
 */
 
 PCRE2POSIX_EXP_DEFN int PCRE2_CALL_CONVENTION
-regcomp(regex_t *preg, const char *pattern, int cflags)
+pcre2_regcomp(regex_t *preg, const char *pattern, int cflags)
 {
 PCRE2_SIZE erroffset;
 PCRE2_SIZE patlen;
@@ -296,7 +328,7 @@ for each match. If REG_NOSUB was specified at compile time, the nmatch and
 pmatch arguments are ignored, and the only result is yes/no/error. */
 
 PCRE2POSIX_EXP_DEFN int PCRE2_CALL_CONVENTION
-regexec(const regex_t *preg, const char *string, size_t nmatch,
+pcre2_regexec(const regex_t *preg, const char *string, size_t nmatch,
   regmatch_t pmatch[], int eflags)
 {
 int rc, so, eo;

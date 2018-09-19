@@ -42,18 +42,18 @@ the 16-bit library, which processes strings of 16-bit values, and one for the
 32-bit library, which processes strings of 32-bit values. There are no C++
 wrappers.
 
-The distribution does contain a set of C wrapper functions for the 8-bit
-library that are based on the POSIX regular expression API (see the pcre2posix
-man page). These can be found in a library called libpcre2-posix. Note that
-this just provides a POSIX calling interface to PCRE2; the regular expressions
-themselves still follow Perl syntax and semantics. The POSIX API is restricted,
-and does not give full access to all of PCRE2's facilities.
+In addition, the distribution contains a set of C wrapper functions for the
+8-bit library that are based on the POSIX regular expression API (see the
+pcre2posix man page). These are built into a library called libpcre2-posix.
+Note that this just provides a POSIX calling interface to PCRE2; the regular
+expressions themselves still follow Perl syntax and semantics. The POSIX API is
+restricted, and does not give full access to all of PCRE2's facilities.
 
 The header file for the POSIX-style functions is called pcre2posix.h. The
 official POSIX name is regex.h, but I did not want to risk possible problems
 with existing files of that name by distributing it that way. To use PCRE2 with
 an existing program that uses the POSIX API, pcre2posix.h will have to be
-renamed or pointed at by a link.
+renamed or pointed at by a link (or the program modified, of course).
 
 If you are using the POSIX interface to PCRE2 and there is already a POSIX
 regex library installed on your system, as well as worrying about the regex.h
@@ -61,12 +61,11 @@ header file (as mentioned above), you must also take care when linking programs
 to ensure that they link with PCRE2's libpcre2-posix library. Otherwise they
 may pick up the POSIX functions of the same name from the other library.
 
-One way of avoiding this confusion is to compile PCRE2 with the addition of
--Dregcomp=PCRE2regcomp (and similarly for the other POSIX functions) to the
-compiler flags (CFLAGS if you are using "configure" -- see below). This has the
-effect of renaming the functions so that the names no longer clash. Of course,
-you have to do the same thing for your applications, or write them using the
-new names.
+To help with this issue, the libpcre2-posix library provides alternative names
+for the POSIX functions. These are the POSIX names, prefixed with "pcre2_", for 
+example, pcre2_regcomp(). If an application can be compiled to use the 
+alternative names (for example by the use of -Dregcomp=pcre2_regcomp etc.) it 
+can be sure of linking with the PCRE2 functions.
 
 
 Documentation for PCRE2
@@ -888,4 +887,4 @@ The distribution should contain the files listed below.
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 17 June 2018
+Last updated: 19 September 2018

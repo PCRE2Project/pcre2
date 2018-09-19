@@ -1,4 +1,4 @@
-.TH PCRE2POSIX 3 "15 June 2017" "PCRE2 10.30"
+.TH PCRE2POSIX 3 "19 September 2018" "PCRE2 10.33"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "SYNOPSIS"
@@ -10,13 +10,24 @@ PCRE2 - Perl-compatible regular expressions (revised API)
 .B int regcomp(regex_t *\fIpreg\fP, const char *\fIpattern\fP,
 .B "     int \fIcflags\fP);"
 .sp
+.B int pcre2_regcomp(regex_t *\fIpreg\fP, const char *\fIpattern\fP,
+.B "     int \fIcflags\fP);"
+.sp
 .B int regexec(const regex_t *\fIpreg\fP, const char *\fIstring\fP,
+.B "     size_t \fInmatch\fP, regmatch_t \fIpmatch\fP[], int \fIeflags\fP);"
+.sp
+.B int pcre2_regexec(const regex_t *\fIpreg\fP, const char *\fIstring\fP,
 .B "     size_t \fInmatch\fP, regmatch_t \fIpmatch\fP[], int \fIeflags\fP);"
 .sp
 .B "size_t regerror(int \fIerrcode\fP, const regex_t *\fIpreg\fP,"
 .B "     char *\fIerrbuf\fP, size_t \fIerrbuf_size\fP);"
 .sp
+.B "size_t pcre2_regerror(int \fIerrcode\fP, const regex_t *\fIpreg\fP,"
+.B "     char *\fIerrbuf\fP, size_t \fIerrbuf_size\fP);"
+.sp
 .B void regfree(regex_t *\fIpreg\fP);
+.sp
+.B void pcre2_regfree(regex_t *\fIpreg\fP);
 .fi
 .
 .SH DESCRIPTION
@@ -37,6 +48,13 @@ header file, and on Unix systems the library itself is called
 \fBlibpcre2-posix.a\fP, so can be accessed by adding \fB-lpcre2-posix\fP to the
 command for linking an application that uses them. Because the POSIX functions
 call the native ones, it is also necessary to add \fB-lpcre2-8\fP.
+.P
+When another POSIX regex library is also installed, there is the possibility of 
+linking an application with the wrong library. To help avoid this issue, the 
+PCRE2 POSIX library provides alternative names for the functions, all starting 
+with "pcre2_". If an application uses these names, possible ambiguity is 
+avoided. In the following description, however, the standard POSIX function
+names are used.
 .P
 Those POSIX option bits that can reasonably be mapped to PCRE2 native options
 have been implemented. In addition, the option REG_EXTENDED is defined with the
@@ -300,6 +318,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 15 June 2017
-Copyright (c) 1997-2017 University of Cambridge.
+Last updated: 19 September 2018
+Copyright (c) 1997-2018 University of Cambridge.
 .fi
