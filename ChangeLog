@@ -18,6 +18,8 @@ a greater than 1 fixed quantifier. This issue was found by Yunho Kim.
 that use the standard POSIX names. This should help avoid linking with the 
 wrong library in some environments.
 
+5. Fix an xclass matching issue in JIT.
+
 
 Version 10.32 10-September-2018
 -------------------------------
