@@ -714,7 +714,8 @@ are allowed. */
 
 #define PUBLIC_COMPILE_EXTRA_OPTIONS \
    (PUBLIC_LITERAL_COMPILE_EXTRA_OPTIONS| \
-    PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES|PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL)
+    PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES|PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL| \
+    PCRE2_EXTRA_ESCAPED_CR_IS_LF)
 
 /* Compile time error code numbers. They are given names so that they can more
 easily be tracked. When a new number is added, the tables called eint1 and
@@ -1398,7 +1399,7 @@ Arguments:
   errorcodeptr   points to the errorcode variable (containing zero)
   options        the current options bits
   isclass        TRUE if inside a character class
-  cb             compile data block
+  cb             compile data block or NULL when called from pcre2_substitute()
 
 Returns:         zero => a data character
                  positive => a special escape sequence
@@ -1429,14 +1430,26 @@ GETCHARINCTEST(c, ptr);         /* Get character value, increment pointer */
 
 /* Non-alphanumerics are literals, so we just leave the value in c. An initial
 value test saves a memory lookup for code points outside the alphanumeric
-range. Otherwise, do a table lookup. A non-zero result is something that can be
-returned immediately. Otherwise further processing is required. */
+range. */
 
 if (c < ESCAPES_FIRST || c > ESCAPES_LAST) {}  /* Definitely literal */
 
+/* Otherwise, do a table lookup. Non-zero values need little processing here. A
+positive value is a literal value for something like \n. A negative value is
+the negation of one of the ESC_ macros that is passed back for handling by the
+calling function. Some extra checking is needed for \N because only \N{U+dddd}
+is supported. If the value is zero, further processing is handled below. */
+
 else if ((i = escapes[c - ESCAPES_FIRST]) != 0)
   {
-  if (i > 0) c = (uint32_t)i; else  /* Positive is a data character */
+  if (i > 0)
+    {
+    c = (uint32_t)i;
+    if (cb != NULL && c == CHAR_CR &&
+        (cb->cx->extra_options & PCRE2_EXTRA_ESCAPED_CR_IS_LF) != 0)
+      c = CHAR_LF;   
+    }
+  else  /* Negative table entry */  
     {
     escape = -i;                    /* Else return a special escape */
     if (cb != NULL && (escape == ESC_P || escape == ESC_p || escape == ESC_X))
@@ -1486,9 +1499,9 @@ else if ((i = escapes[c - ESCAPES_FIRST]) != 0)
     }
   }
 
-/* Escapes that need further processing, including those that are unknown.
-When called from pcre2_substitute(), only \c, \o, and \x are recognized (and \u
-when BSUX is set). */
+/* Escapes that need further processing, including those that are unknown, have 
+a zero entry in the lookup table. When called from pcre2_substitute(), only \c,
+\o, and \x are recognized (and \u when BSUX is set). */
 
 else
   {

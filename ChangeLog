@@ -20,6 +20,8 @@ wrong library in some environments.
 
 5. Fix an xclass matching issue in JIT.
 
+6. Implement PCRE2_EXTRA_ESCAPED_CR_IS_LF (see Bugzilla 2315).
+
 
 Version 10.32 10-September-2018
 -------------------------------

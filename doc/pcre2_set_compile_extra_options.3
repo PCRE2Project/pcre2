@@ -1,4 +1,4 @@
-.TH PCRE2_SET_COMPILE_EXTRA_OPTIONS 3 "16 June 2017" "PCRE2 10.30"
+.TH PCRE2_SET_COMPILE_EXTRA_OPTIONS 3 "21 September 2018" "PCRE2 10.33"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH SYNOPSIS
@@ -24,6 +24,7 @@ options are:
 .\" JOIN
   PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL    Treat all invalid escapes as
                                          a literal following character
+  PCRE2_EXTRA_ESCAPED_CR_IS_LF         Interpret \er as \en
   PCRE2_EXTRA_MATCH_LINE               Pattern matches whole lines
   PCRE2_EXTRA_MATCH_WORD               Pattern matches "words"
 .sp

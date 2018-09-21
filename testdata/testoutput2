@@ -16801,6 +16801,17 @@ Old 0 3  New 0 5
 Old 6 9  New 8 13
  2: <abc>def<abc>pqr
 
+/abc\rdef/
+    abc\ndef
+No match
+
+/abc\rdef\x{0d}xyz/escaped_cr_is_lf
+    abc\ndef\rxyz
+ 0: abc\x0adef\x0dxyz
+\= Expect no match     
+    abc\ndef\nxyz
+No match
+
 # End of testinput2
 Error -70: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

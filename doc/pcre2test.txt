@@ -544,6 +544,7 @@ PATTERN MODIFIERS
          /s  dotall                    set PCRE2_DOTALL
              dupnames                  set PCRE2_DUPNAMES
              endanchored               set PCRE2_ENDANCHORED
+             escaped_cr_is_lf          set PCRE2_EXTRA_ESCAPED_CR_IS_LF
          /x  extended                  set PCRE2_EXTENDED
          /xx extended_more             set PCRE2_EXTENDED_MORE
              firstline                 set PCRE2_FIRSTLINE
@@ -1852,5 +1853,5 @@ AUTHOR
 
 REVISION
 
-       Last updated: 17 September 2018
+       Last updated: 21 September 2018
        Copyright (c) 1997-2018 University of Cambridge.

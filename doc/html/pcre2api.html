@@ -1873,6 +1873,14 @@ treated as single-character escapes. For example, \j is a literal "j" and
 that typos in patterns may go undetected and have unexpected results. This is a
 dangerous option. Use with care.
 <pre>
+  PCRE2_EXTRA_ESCAPED_CR_IS_LF
+</pre>
+There are some legacy applications where the escape sequence \r in a pattern 
+is expected to match a newline. If this option is set, \r in a pattern is 
+converted to \n so that it matches a LF (linefeed) instead of a CR (carriage 
+return) character. The option does not affect a literal CR in the pattern, nor
+does it affect CR specified as an explicit code point such as \x{0D}.
+<pre>
   PCRE2_EXTRA_MATCH_LINE
 </pre>
 This option is provided for use by the <b>-x</b> option of <b>pcre2grep</b>. It
@@ -3724,7 +3732,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC42" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 18 September 2018
+Last updated: 21 September 2018
 <br>
 Copyright &copy; 1997-2018 University of Cambridge.
 <br>

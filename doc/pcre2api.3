@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "18 September 2018" "PCRE2 10.33"
+.TH PCRE2API 3 "21 September 2018" "PCRE2 10.33"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -1824,6 +1824,14 @@ treated as single-character escapes. For example, \ej is a literal "j" and
 \ex{2z} is treated as the literal string "x{2z}". Setting this option means
 that typos in patterns may go undetected and have unexpected results. This is a
 dangerous option. Use with care.
+.sp
+  PCRE2_EXTRA_ESCAPED_CR_IS_LF
+.sp
+There are some legacy applications where the escape sequence \er in a pattern 
+is expected to match a newline. If this option is set, \er in a pattern is 
+converted to \en so that it matches a LF (linefeed) instead of a CR (carriage 
+return) character. The option does not affect a literal CR in the pattern, nor
+does it affect CR specified as an explicit code point such as \ex{0D}.
 .sp
   PCRE2_EXTRA_MATCH_LINE
 .sp
@@ -3729,6 +3737,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 18 September 2018
+Last updated: 21 September 2018
 Copyright (c) 1997-2018 University of Cambridge.
 .fi

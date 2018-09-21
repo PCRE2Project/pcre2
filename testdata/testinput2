@@ -5517,4 +5517,12 @@ a)"xI
 /a(b)c|xyz/g,replace=<$0>,substitute_callout
     abcdefabcpqr
 
+/abc\rdef/
+    abc\ndef
+
+/abc\rdef\x{0d}xyz/escaped_cr_is_lf
+    abc\ndef\rxyz
+\= Expect no match     
+    abc\ndef\nxyz
+
 # End of testinput2
