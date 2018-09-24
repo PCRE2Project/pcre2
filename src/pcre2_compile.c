@@ -615,6 +615,46 @@ static const uint32_t verbops[] = {
   OP_MARK, OP_ACCEPT, OP_FAIL, OP_COMMIT, OP_COMMIT_ARG, OP_PRUNE,
   OP_PRUNE_ARG, OP_SKIP, OP_SKIP_ARG, OP_THEN, OP_THEN_ARG };
 
+/* Table of "alpha assertions" like (*pla:...), similar to the (*VERB) table. */
+
+typedef struct alasitem {
+  unsigned int len;          /* Length of name */
+  uint32_t meta;             /* Base META_ code */
+} alasitem;
+
+static const char alasnames[] =
+  STRING_pla0
+  STRING_plb0
+  STRING_nla0
+  STRING_nlb0
+  STRING_positive_lookahead0
+  STRING_positive_lookbehind0
+  STRING_negative_lookahead0
+  STRING_negative_lookbehind0
+  STRING_atomic0
+  STRING_sr0
+  STRING_asr0
+  STRING_script_run0
+  STRING_atomic_script_run;
+
+static const alasitem alasmeta[] = {
+  {  3, META_LOOKAHEAD     },
+  {  3, META_LOOKBEHIND    },
+  {  3, META_LOOKAHEADNOT  },
+  {  3, META_LOOKBEHINDNOT },
+  { 18, META_LOOKAHEAD     },
+  { 19, META_LOOKBEHIND    },
+  { 18, META_LOOKAHEADNOT  },
+  { 19, META_LOOKBEHINDNOT },
+  {  6, META_ATOMIC        },
+  {  2, 0                  }, /* sr = script run */
+  {  3, 0                  }, /* asr = atomic script run */
+  { 10, 0                  }, /* script run */
+  { 17, 0                  }  /* atomic script run */
+};
+
+static const int alascount = sizeof(alasmeta)/sizeof(alasitem);
+
 /* Offsets from OP_STAR for case-independent and negative repeat opcodes. */
 
 static uint32_t chartypeoffset[] = {
@@ -732,7 +772,7 @@ enum { ERR0 = COMPILE_ERROR_BASE,
        ERR61, ERR62, ERR63, ERR64, ERR65, ERR66, ERR67, ERR68, ERR69, ERR70,
        ERR71, ERR72, ERR73, ERR74, ERR75, ERR76, ERR77, ERR78, ERR79, ERR80,
        ERR81, ERR82, ERR83, ERR84, ERR85, ERR86, ERR87, ERR88, ERR89, ERR90,
-       ERR91, ERR92, ERR93, ERR94 };
+       ERR91, ERR92, ERR93, ERR94, ERR95 };
 
 /* This is a table of start-of-pattern options such as (*UTF) and settings such
 as (*LIMIT_MATCH=nnnn) and (*CRLF). For completeness and backward
@@ -1447,9 +1487,9 @@ else if ((i = escapes[c - ESCAPES_FIRST]) != 0)
     c = (uint32_t)i;
     if (cb != NULL && c == CHAR_CR &&
         (cb->cx->extra_options & PCRE2_EXTRA_ESCAPED_CR_IS_LF) != 0)
-      c = CHAR_LF;   
+      c = CHAR_LF;
     }
-  else  /* Negative table entry */  
+  else  /* Negative table entry */
     {
     escape = -i;                    /* Else return a special escape */
     if (cb != NULL && (escape == ESC_P || escape == ESC_p || escape == ESC_X))
@@ -1499,7 +1539,7 @@ else if ((i = escapes[c - ESCAPES_FIRST]) != 0)
     }
   }
 
-/* Escapes that need further processing, including those that are unknown, have 
+/* Escapes that need further processing, including those that are unknown, have
 a zero entry in the lookup table. When called from pcre2_substitute(), only \c,
 \o, and \x are recognized (and \u when BSUX is set). */
 
@@ -2133,9 +2173,10 @@ return -1;
 *************************************************/
 
 /* This function is called from parse_regex() below whenever it needs to read
-the name of a subpattern or a (*VERB). The initial pointer must be to the
-character before the name. If that character is '*' we are reading a verb name.
-The pointer is updated to point after the name, for a VERB, or after tha name's
+the name of a subpattern or a (*VERB) or an (*alpha_assertion). The initial
+pointer must be to the character before the name. If that character is '*' we
+are reading a verb or alpha assertion name. The pointer is updated to point
+after the name, for a VERB or alpha assertion name, or after tha name's
 terminator for a subpattern name. Returning both the offset and the name
 pointer is redundant information, but some callers use one and some the other,
 so it is simplest just to return both.
@@ -2160,27 +2201,29 @@ read_name(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t terminator,
   int *errorcodeptr, compile_block *cb)
 {
 PCRE2_SPTR ptr = *ptrptr;
-BOOL is_verb = (*ptr == CHAR_ASTERISK);
+BOOL is_group = (*ptr != CHAR_ASTERISK);
 uint32_t namelen = 0;
-uint32_t ctype = is_verb? ctype_letter : ctype_word;
 
-if (++ptr >= ptrend)
+if (++ptr >= ptrend)               /* No characters in name */
   {
-  *errorcodeptr = is_verb? ERR60:  /* Verb not recognized or malformed */
-                           ERR62;  /* Subpattern name expected */
+  *errorcodeptr = is_group? ERR62: /* Subpattern name expected */
+                            ERR60; /* Verb not recognized or malformed */
   goto FAILED;
   }
+  
+/* A group name must not start with a digit. If either of the others start with 
+a digit it just won't be recognized. */ 
+  
+if (is_group && IS_DIGIT(*ptr))
+  {
+  *errorcodeptr = ERR44;
+  goto FAILED;
+  }   
 
 *nameptr = ptr;
 *offsetptr = (PCRE2_SIZE)(ptr - cb->start_pattern);
 
-if (IS_DIGIT(*ptr))
-  {
-  *errorcodeptr = ERR44;   /* Group name must not start with digit */
-  goto FAILED;
-  }
-
-while (ptr < ptrend && MAX_255(*ptr) && (cb->ctypes[*ptr] & ctype) != 0)
+while (ptr < ptrend && MAX_255(*ptr) && (cb->ctypes[*ptr] & ctype_word) != 0)
   {
   ptr++;
   namelen++;
@@ -2192,9 +2235,9 @@ while (ptr < ptrend && MAX_255(*ptr) && (cb->ctypes[*ptr] & ctype) != 0)
   }
 
 /* Subpattern names must not be empty, and their terminator is checked here.
-(What follows a verb name is checked separately.) */
+(What follows a verb or alpha assertion name is checked separately.) */
 
-if (!is_verb)
+if (is_group)
   {
   if (namelen == 0)
     {
@@ -2652,24 +2695,31 @@ while (ptr < ptrend)
   if (expect_cond_assert > 0)
     {
     BOOL ok = c == CHAR_LEFT_PARENTHESIS && ptrend - ptr >= 3 &&
-              ptr[0] == CHAR_QUESTION_MARK;
-    if (ok) switch(ptr[1])
+              (ptr[0] == CHAR_QUESTION_MARK || ptr[0] == CHAR_ASTERISK);
+    if (ok)
       {
-      case CHAR_C:
-      ok = expect_cond_assert == 2;
-      break;
-
-      case CHAR_EQUALS_SIGN:
-      case CHAR_EXCLAMATION_MARK:
-      break;
-
-      case CHAR_LESS_THAN_SIGN:
-      ok = ptr[2] == CHAR_EQUALS_SIGN || ptr[2] == CHAR_EXCLAMATION_MARK;
-      break;
-
-      default:
-      ok = FALSE;
-      }
+      if (ptr[0] == CHAR_ASTERISK)  /* New alpha assertion format, possibly */
+        {
+        ok = MAX_255(ptr[1]) && (cb->ctypes[ptr[1]] & ctype_lcletter) != 0;
+        }
+      else switch(ptr[1])  /* Traditional symbolic format */
+        {
+        case CHAR_C:
+        ok = expect_cond_assert == 2;
+        break;
+       
+        case CHAR_EQUALS_SIGN:
+        case CHAR_EXCLAMATION_MARK:
+        break;
+       
+        case CHAR_LESS_THAN_SIGN:
+        ok = ptr[2] == CHAR_EQUALS_SIGN || ptr[2] == CHAR_EXCLAMATION_MARK;
+        break;
+       
+        default:
+        ok = FALSE;
+        }
+      }      
 
     if (!ok)
       {
@@ -3453,7 +3503,8 @@ while (ptr < ptrend)
     case CHAR_LEFT_PARENTHESIS:
     if (ptr >= ptrend) goto UNCLOSED_PARENTHESIS;
 
-    /* If ( is not followed by ? it is either a capture or a special verb. */
+    /* If ( is not followed by ? it is either a capture or a special verb or an
+    alpha assertion. */
 
     if (*ptr != CHAR_QUESTION_MARK)
       {
@@ -3473,13 +3524,88 @@ while (ptr < ptrend)
         else *parsed_pattern++ = META_NOCAPTURE;
         }
 
+      /* Do nothing for (* followed by end of pattern or ) so it gives a "bad
+      quantifier" error rather than "(*MARK) must have an argument". */
+
+      else if (ptrend - ptr <= 1 || (c = ptr[1]) == CHAR_RIGHT_PARENTHESIS)
+        break;
+
+      /* Handle "alpha assertions" such as (*pla:...). Most of these are
+      synonyms for the historical symbolic assertions, but the script run ones
+      are new. They are distinguished by starting with a lower case letter.
+      Checking both ends of the alphabet makes this work in all character 
+      codes. */
+
+      else if (CHMAX_255(c) && (cb->ctypes[c] & ctype_lcletter) != 0)
+        {
+        uint32_t meta;
+          
+        vn = alasnames;
+        if (!read_name(&ptr, ptrend, 0, &offset, &name, &namelen, &errorcode,
+          cb)) goto FAILED;
+        if (ptr >= ptrend || *ptr != CHAR_COLON)
+          {
+          errorcode = ERR95;  /* Malformed */
+          goto FAILED;
+          }
+
+        /* Scan the table of alpha assertion names */
+        
+        for (i = 0; i < alascount; i++)
+          {
+          if (namelen == alasmeta[i].len &&
+              PRIV(strncmp_c8)(name, vn, namelen) == 0)
+            break;
+          vn += alasmeta[i].len + 1;
+          }
+
+        if (i >= alascount)
+          {
+          errorcode = ERR95;  /* Alpha assertion not recognized */
+          goto FAILED;
+          }
+          
+        /* Check for expecting an assertion condition. If so, only lookaround 
+        assertions are valid. */
+         
+        meta = alasmeta[i].meta;
+        if (prev_expect_cond_assert > 0 && 
+            (meta < META_LOOKAHEAD || meta > META_LOOKBEHINDNOT))
+          {
+          errorcode = ERR28;  /* Assertion expected */
+          goto FAILED;  
+          }                                  
+
+        switch(meta)
+          {
+          case META_ATOMIC:
+          goto ATOMIC_GROUP; 
+
+          case META_LOOKAHEAD:
+          goto POSITIVE_LOOK_AHEAD;
+          
+          case META_LOOKAHEADNOT:
+          goto NEGATIVE_LOOK_AHEAD;
+          
+          case META_LOOKBEHIND:
+          case META_LOOKBEHINDNOT: 
+          *parsed_pattern++ = meta; 
+          ptr--;
+          goto LOOKBEHIND;  
+          
+          /* FIXME: Script Run stuff ... */ 
+            
+          
+ 
+
+ 
+          }  
+        }
+
 
       /* ---- Handle (*VERB) and (*VERB:NAME) ---- */
 
-      /* Do nothing for (*) so it gives a "bad quantifier" error rather than
-      "(*MARK) must have an argument". */
-
-      else if (ptrend - ptr > 1 && ptr[1] != CHAR_RIGHT_PARENTHESIS)
+      else
         {
         vn = verbnames;
         if (!read_name(&ptr, ptrend, 0, &offset, &name, &namelen, &errorcode,
@@ -3946,14 +4072,15 @@ while (ptr < ptrend)
       if (++ptr >= ptrend) goto UNCLOSED_PARENTHESIS;
       nest_depth++;
 
-      /* If the next character is ? there must be an assertion next (optionally
-      preceded by a callout). We do not check this here, but instead we set
-      expect_cond_assert to 2. If this is still greater than zero (callouts
-      decrement it) when the next assertion is read, it will be marked as a
-      condition that must not be repeated. A value greater than zero also
-      causes checking that an assertion (possibly with callout) follows. */
+      /* If the next character is ? or * there must be an assertion next
+      (optionally preceded by a callout). We do not check this here, but
+      instead we set expect_cond_assert to 2. If this is still greater than
+      zero (callouts decrement it) when the next assertion is read, it will be
+      marked as a condition that must not be repeated. A value greater than
+      zero also causes checking that an assertion (possibly with callout)
+      follows. */
 
-      if (*ptr == CHAR_QUESTION_MARK)
+      if (*ptr == CHAR_QUESTION_MARK || *ptr == CHAR_ASTERISK)
         {
         *parsed_pattern++ = META_COND_ASSERT;
         ptr--;   /* Pull pointer back to the opening parenthesis. */
@@ -4099,6 +4226,7 @@ while (ptr < ptrend)
       /* ---- Atomic group ---- */
 
       case CHAR_GREATER_THAN_SIGN:
+      ATOMIC_GROUP:                          /* Come from (*atomic: */
       *parsed_pattern++ = META_ATOMIC;
       nest_depth++;
       ptr++;
@@ -4108,11 +4236,13 @@ while (ptr < ptrend)
       /* ---- Lookahead assertions ---- */
 
       case CHAR_EQUALS_SIGN:
+      POSITIVE_LOOK_AHEAD:                   /* Come from (*pla: */
       *parsed_pattern++ = META_LOOKAHEAD;
       ptr++;
       goto POST_ASSERTION;
 
       case CHAR_EXCLAMATION_MARK:
+      NEGATIVE_LOOK_AHEAD:                   /* Come from (*nla: */
       *parsed_pattern++ = META_LOOKAHEADNOT;
       ptr++;
       goto POST_ASSERTION;
@@ -4132,6 +4262,8 @@ while (ptr < ptrend)
         }
       *parsed_pattern++ = (ptr[1] == CHAR_EQUALS_SIGN)?
         META_LOOKBEHIND : META_LOOKBEHINDNOT;
+        
+      LOOKBEHIND:                /* Come from (*plb: and (*nlb: */
       *has_lookbehind = TRUE;
       offset = (PCRE2_SIZE)(ptr - cb->start_pattern - 2);
       PUTOFFSET(offset, parsed_pattern);

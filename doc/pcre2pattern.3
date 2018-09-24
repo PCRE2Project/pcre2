@@ -1,4 +1,4 @@
-.TH PCRE2PATTERN 3 "21 September 2018" "PCRE2 10.33"
+.TH PCRE2PATTERN 3 "24 September 2018" "PCRE2 10.33"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION DETAILS"
@@ -2124,6 +2124,11 @@ special parenthesis, starting with (?> as in this example:
 .sp
   (?>\ed+)foo
 .sp
+Perl 5.28 introduced an experimental alphabetic form starting with (* which may
+be easier to remember:
+.sp
+  (*atomic:\ed+)foo
+.sp
 This kind of parenthesis "locks up" the  part of the pattern it contains once
 it has matched, and a failure further into the pattern is prevented from
 backtracking into it. Backtracking past it to previous items, however, works as
@@ -2351,11 +2356,19 @@ above.
 .P
 More complicated assertions are coded as subpatterns. There are two kinds:
 those that look ahead of the current position in the subject string, and those
-that look behind it, and in each case an assertion may be positive (must
-succeed for matching to continue) or negative (must not succeed for matching to
-continue). An assertion subpattern is matched in the normal way, except that,
-when matching continues after a successful assertion, the matching position in
-the subject string is as it was before the assertion was processed.
+that look behind it, and in each case an assertion may be positive (must match
+for the assertion to be true) or negative (must not match for the assertion to
+be true). An assertion subpattern is matched in the normal way, and if it is
+true, matching continues after it, but with the matching position in the
+subject string is was it was before the assertion was processed.
+.P
+A lookaround assertion may also appear as the condition in a
+.\" HTML <a href="#conditions">
+.\" </a>
+conditional subpattern
+.\"
+(see below). In this case, the result of matching the assertion determines
+which branch of the condition is followed.
 .P
 Assertion subpatterns are not capturing subpatterns. If an assertion contains
 capturing subpatterns within it, these are counted for the purposes of
@@ -2366,7 +2379,7 @@ adjacent characters are the same.
 .P
 When a branch within an assertion fails to match, any substrings that were
 captured are discarded (as happens with any pattern branch that fails to
-match). A negative assertion succeeds only when all its branches fail to match;
+match). A negative assertion is true only when all its branches fail to match;
 this means that no captured substrings are ever retained after a successful
 negative assertion. When an assertion contains a matching branch, what happens
 depends on the type of assertion.
@@ -2374,7 +2387,7 @@ depends on the type of assertion.
 For a positive assertion, internally captured substrings in the successful
 branch are retained, and matching continues with the next pattern item after
 the assertion. For a negative assertion, a matching branch means that the
-assertion has failed. If the assertion is being used as a condition in a
+assertion is not true. If such an assertion is being used as a condition in a
 .\" HTML <a href="#conditions">
 .\" </a>
 conditional subpattern
@@ -2404,6 +2417,25 @@ without the assertion, the order depending on the greediness of the quantifier.
 .sp
 (3) If the minimum repetition is greater than zero, the quantifier is ignored.
 The assertion is obeyed just once when encountered during matching.
+.
+.
+.SS "Alphabetic assertion names"
+.rs
+.sp
+Traditionally, symbolic sequences such as (?= and (?<= have been used to specify
+lookaround assertions. Perl 5.28 introduced some experimental alphabetic
+alternatives which might be easier to remember. They all start with (* instead
+of (? and must be written using lower case letters. PCRE2 supports the
+following synonyms:
+.sp
+  (*positive_lookahead:  or (*pla: is the same as (?=
+  (*negative_lookahead:  or (*nla: is the same as (?!
+  (*positive_lookbehind: or (*plb: is the same as (?<=
+  (*negative_lookbehind: or (*nlb: is the same as (?<!
+.sp
+For example, (*pla:foo) is the same assertion as (?=foo). However, in the
+following sections, the various assertions are described using the original
+symbolic forms.
 .
 .
 .SS "Lookahead assertions"
@@ -3660,6 +3692,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 21 September 2018
+Last updated: 24 September 2018
 Copyright (c) 1997-2018 University of Cambridge.
 .fi

@@ -16812,6 +16812,15 @@ No match
     abc\ndef\nxyz
 No match
 
+/(?(*ACCEPT)xxx)/
+Failed: error 128 at offset 2: assertion expected after (?( or (?(?C)
+
+/(?(*atomic:xx)xxx)/
+Failed: error 128 at offset 10: assertion expected after (?( or (?(?C)
+
+/(?(*script_run:xxx)zzz)/
+Failed: error 128 at offset 14: assertion expected after (?( or (?(?C)
+
 # End of testinput2
 Error -70: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

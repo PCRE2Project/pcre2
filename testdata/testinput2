@@ -5525,4 +5525,10 @@ a)"xI
 \= Expect no match     
     abc\ndef\nxyz
 
+/(?(*ACCEPT)xxx)/
+
+/(?(*atomic:xx)xxx)/
+
+/(?(*script_run:xxx)zzz)/
+
 # End of testinput2

@@ -9929,4 +9929,100 @@ No match
     AbCDe f
 No match
 
+/(*pla:foo).{6}/
+    abcfoobarxyz
+ 0: foobar
+\= Expect no match
+    abcfooba
+No match
+
+/(*positive_lookahead:foo).{6}/
+    abcfoobarxyz
+ 0: foobar
+    
+/(?(*pla:foo).{6}|a..)/
+    foobarbaz
+ 0: foobar
+    abcfoobar       
+ 0: abc
+
+/(?(*positive_lookahead:foo).{6}|a..)/
+    foobarbaz
+ 0: foobar
+    abcfoobar       
+ 0: abc
+    
+/(*plb:foo)bar/
+    abcfoobar
+ 0: bar
+\= Expect no match
+    abcbarfoo     
+No match
+
+/(*positive_lookbehind:foo)bar/
+    abcfoobar
+ 0: bar
+\= Expect no match
+    abcbarfoo
+No match
+    
+/(?(*plb:foo)bar|baz)/
+    abcfoobar
+ 0: bar
+    bazfoobar
+ 0: baz
+    abcbazfoobar
+ 0: baz
+    foobazfoobar    
+ 0: bar
+ 
+/(?(*positive_lookbehind:foo)bar|baz)/
+    abcfoobar
+ 0: bar
+    bazfoobar
+ 0: baz
+    abcbazfoobar
+ 0: baz
+    foobazfoobar    
+ 0: bar
+ 
+/(*nlb:foo)bar/
+    abcbarfoo     
+ 0: bar
+\= Expect no match
+    abcfoobar
+No match
+
+/(*negative_lookbehind:foo)bar/
+    abcbarfoo     
+ 0: bar
+\= Expect no match
+    abcfoobar
+No match
+    
+/(?(*nlb:foo)bar|baz)/
+    abcfoobaz 
+ 0: baz
+    abcbarbaz 
+ 0: bar
+\= Expect no match
+    abcfoobar
+No match
+ 
+/(?(*negative_lookbehind:foo)bar|baz)/
+    abcfoobaz 
+ 0: baz
+    abcbarbaz 
+ 0: bar
+\= Expect no match
+    abcfoobar
+No match
+ 
+/(*atomic:a+)\w/
+    aaab
+ 0: aaab
+\= Expect no match
+    aaaa      
+No match
+
 # End of testinput1 

@@ -5,8 +5,8 @@ Change Log for PCRE2
 Version 10.33-RC1 15-September-2018
 -----------------------------------
 
-1. Added "allvector" to pcre2test to make it easy to check the part of the 
-ovector that shouldn't be changed, in particular after substitute and failed or 
+1. Added "allvector" to pcre2test to make it easy to check the part of the
+ovector that shouldn't be changed, in particular after substitute and failed or
 partial matches.
 
 2. Fix subject buffer overread in JIT when UTF is disabled and \X or \R has
@@ -15,12 +15,20 @@ a greater than 1 fixed quantifier. This issue was found by Yunho Kim.
 3. Added support for callouts from pcre2_substitute().
 
 4. The POSIX functions are now all called pcre2_regcomp() etc., with wrappers
-that use the standard POSIX names. This should help avoid linking with the 
+that use the standard POSIX names. This should help avoid linking with the
 wrong library in some environments.
 
 5. Fix an xclass matching issue in JIT.
 
 6. Implement PCRE2_EXTRA_ESCAPED_CR_IS_LF (see Bugzilla 2315).
+
+7. Implement the Perl 5.28 experimental alphabetic names for atomic groups and
+lookaround assertions, for example, (*pla:...) and (*atomic:...). These are
+characterized by a lower case letter following (* and to simplify coding for
+this, the character tables created by pcre2_maketables() were updated to add a
+new "is lower case letter" bit. At the same time, the now unused "is
+hexadecimal digit" bit was removed. The default tables in
+src/pcre2_chartables.c.dist are updated.
 
 
 Version 10.32 10-September-2018

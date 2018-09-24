@@ -436,6 +436,7 @@ but some of them use Unicode properties if PCRE2_UCP is set. You can use
 <P>
 <pre>
   (?&#62;...)         atomic, non-capturing group
+  (*atomic:...)   atomic, non-capturing group
 </PRE>
 </P>
 <br><a name="SEC15" href="#TOC1">COMMENT</a><br>
@@ -514,12 +515,23 @@ setting with a similar syntax.
 <br><a name="SEC19" href="#TOC1">LOOKAHEAD AND LOOKBEHIND ASSERTIONS</a><br>
 <P>
 <pre>
-  (?=...)         positive look ahead
-  (?!...)         negative look ahead
-  (?&#60;=...)        positive look behind
-  (?&#60;!...)        negative look behind
+  (?=...)                     )
+  (*pla:...)                  ) positive lookahead
+  (*positive_lookahead:...)   )
+
+  (?!...)                     )
+  (*nla:...)                  ) negative lookahead
+  (*negative_lookahead:...)   )
+
+  (?&#60;=...)                    )
+  (*plb:...)                  ) positive lookbehind
+  (*positive_lookbehind:...)  )
+
+  (?&#60;!...)                    )
+  (*nlb:...)                  ) negative lookbehind
+  (*negative_lookbehind:...)  )
 </pre>
-Each top-level branch of a look behind must be of a fixed length.
+Each top-level branch of a lookbehind must be of a fixed length.
 </P>
 <br><a name="SEC20" href="#TOC1">BACKREFERENCES</a><br>
 <P>
@@ -634,7 +646,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC27" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 02 September 2018
+Last updated: 24 September 2018
 <br>
 Copyright &copy; 1997-2018 University of Cambridge.
 <br>

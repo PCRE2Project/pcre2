@@ -569,11 +569,11 @@ these tables. */
 without checking pcre2_jit_compile.c, which has an assertion to ensure that
 ctype_word has the value 16. */
 
-#define ctype_space   0x01
-#define ctype_letter  0x02
-#define ctype_digit   0x04
-#define ctype_xdigit  0x08    /* not actually used any more */
-#define ctype_word    0x10    /* alphanumeric or '_' */
+#define ctype_space    0x01
+#define ctype_letter   0x02
+#define ctype_lcletter 0x04
+#define ctype_digit    0x08
+#define ctype_word     0x10    /* alphanumeric or '_' */
 
 /* Offsets of the various tables from the base tables pointer, and
 total length of the tables. */
@@ -874,34 +874,48 @@ a positive value. */
 #define STR_RIGHT_CURLY_BRACKET     "}"
 #define STR_TILDE                   "~"
 
-#define STRING_ACCEPT0              "ACCEPT\0"
-#define STRING_COMMIT0              "COMMIT\0"
-#define STRING_F0                   "F\0"
-#define STRING_FAIL0                "FAIL\0"
-#define STRING_MARK0                "MARK\0"
-#define STRING_PRUNE0               "PRUNE\0"
-#define STRING_SKIP0                "SKIP\0"
-#define STRING_THEN                 "THEN"
+#define STRING_ACCEPT0               "ACCEPT\0"
+#define STRING_COMMIT0               "COMMIT\0"
+#define STRING_F0                    "F\0"
+#define STRING_FAIL0                 "FAIL\0"
+#define STRING_MARK0                 "MARK\0"
+#define STRING_PRUNE0                "PRUNE\0"
+#define STRING_SKIP0                 "SKIP\0"
+#define STRING_THEN                  "THEN"
 
-#define STRING_alpha0               "alpha\0"
-#define STRING_lower0               "lower\0"
-#define STRING_upper0               "upper\0"
-#define STRING_alnum0               "alnum\0"
-#define STRING_ascii0               "ascii\0"
-#define STRING_blank0               "blank\0"
-#define STRING_cntrl0               "cntrl\0"
-#define STRING_digit0               "digit\0"
-#define STRING_graph0               "graph\0"
-#define STRING_print0               "print\0"
-#define STRING_punct0               "punct\0"
-#define STRING_space0               "space\0"
-#define STRING_word0                "word\0"
-#define STRING_xdigit               "xdigit"
+#define STRING_atomic0               "atomic\0"
+#define STRING_pla0                  "pla\0"
+#define STRING_plb0                  "plb\0"
+#define STRING_nla0                  "nla\0"
+#define STRING_nlb0                  "nlb\0"
+#define STRING_sr0                   "sr\0"
+#define STRING_asr0                  "asr\0"
+#define STRING_positive_lookahead0   "positive_lookahead\0"
+#define STRING_positive_lookbehind0  "positive_lookbehind\0"
+#define STRING_negative_lookahead0   "negative_lookahead\0"
+#define STRING_negative_lookbehind0  "negative_lookbehind\0"
+#define STRING_script_run0           "script_run\0"
+#define STRING_atomic_script_run     "atomic_script_run"
 
-#define STRING_DEFINE               "DEFINE"
-#define STRING_VERSION              "VERSION"
-#define STRING_WEIRD_STARTWORD      "[:<:]]"
-#define STRING_WEIRD_ENDWORD        "[:>:]]"
+#define STRING_alpha0                "alpha\0"
+#define STRING_lower0                "lower\0"
+#define STRING_upper0                "upper\0"
+#define STRING_alnum0                "alnum\0"
+#define STRING_ascii0                "ascii\0"
+#define STRING_blank0                "blank\0"
+#define STRING_cntrl0                "cntrl\0"
+#define STRING_digit0                "digit\0"
+#define STRING_graph0                "graph\0"
+#define STRING_print0                "print\0"
+#define STRING_punct0                "punct\0"
+#define STRING_space0                "space\0"
+#define STRING_word0                 "word\0"
+#define STRING_xdigit                "xdigit"
+
+#define STRING_DEFINE                "DEFINE"
+#define STRING_VERSION               "VERSION"
+#define STRING_WEIRD_STARTWORD       "[:<:]]"
+#define STRING_WEIRD_ENDWORD         "[:>:]]"
 
 #define STRING_CR_RIGHTPAR                "CR)"
 #define STRING_LF_RIGHTPAR                "LF)"
@@ -1150,34 +1164,48 @@ only. */
 #define STR_RIGHT_CURLY_BRACKET     "\175"
 #define STR_TILDE                   "\176"
 
-#define STRING_ACCEPT0              STR_A STR_C STR_C STR_E STR_P STR_T "\0"
-#define STRING_COMMIT0              STR_C STR_O STR_M STR_M STR_I STR_T "\0"
-#define STRING_F0                   STR_F "\0"
-#define STRING_FAIL0                STR_F STR_A STR_I STR_L "\0"
-#define STRING_MARK0                STR_M STR_A STR_R STR_K "\0"
-#define STRING_PRUNE0               STR_P STR_R STR_U STR_N STR_E "\0"
-#define STRING_SKIP0                STR_S STR_K STR_I STR_P "\0"
-#define STRING_THEN                 STR_T STR_H STR_E STR_N
+#define STRING_ACCEPT0               STR_A STR_C STR_C STR_E STR_P STR_T "\0"
+#define STRING_COMMIT0               STR_C STR_O STR_M STR_M STR_I STR_T "\0"
+#define STRING_F0                    STR_F "\0"
+#define STRING_FAIL0                 STR_F STR_A STR_I STR_L "\0"
+#define STRING_MARK0                 STR_M STR_A STR_R STR_K "\0"
+#define STRING_PRUNE0                STR_P STR_R STR_U STR_N STR_E "\0"
+#define STRING_SKIP0                 STR_S STR_K STR_I STR_P "\0"
+#define STRING_THEN                  STR_T STR_H STR_E STR_N
 
-#define STRING_alpha0               STR_a STR_l STR_p STR_h STR_a "\0"
-#define STRING_lower0               STR_l STR_o STR_w STR_e STR_r "\0"
-#define STRING_upper0               STR_u STR_p STR_p STR_e STR_r "\0"
-#define STRING_alnum0               STR_a STR_l STR_n STR_u STR_m "\0"
-#define STRING_ascii0               STR_a STR_s STR_c STR_i STR_i "\0"
-#define STRING_blank0               STR_b STR_l STR_a STR_n STR_k "\0"
-#define STRING_cntrl0               STR_c STR_n STR_t STR_r STR_l "\0"
-#define STRING_digit0               STR_d STR_i STR_g STR_i STR_t "\0"
-#define STRING_graph0               STR_g STR_r STR_a STR_p STR_h "\0"
-#define STRING_print0               STR_p STR_r STR_i STR_n STR_t "\0"
-#define STRING_punct0               STR_p STR_u STR_n STR_c STR_t "\0"
-#define STRING_space0               STR_s STR_p STR_a STR_c STR_e "\0"
-#define STRING_word0                STR_w STR_o STR_r STR_d       "\0"
-#define STRING_xdigit               STR_x STR_d STR_i STR_g STR_i STR_t
+#define STRING_atomic0               STR_a STR_t STR_o STR_m STR_i STR_c "\0"
+#define STRING_pla0                  STR_p STR_l STR_a "\0"
+#define STRING_plb0                  STR_p STR_l STR_b "\0"
+#define STRING_nla0                  STR_n STR_l STR_a "\0"
+#define STRING_nlb0                  STR_n STR_l STR_b "\0"
+#define STRING_sr0                   STR_s STR_r "\0"
+#define STRING_asr0                  STR_a STR_s STR_r "\0"
+#define STRING_positive_lookahead0   STR_p STR_o STR_s STR_i STR_t STR_i STR_v STR_e STR_UNDERSCORE STR_l STR_o STR_o STR_k STR_a STR_h STR_e STR_a STR_d "\0"
+#define STRING_positive_lookbehind0  STR_p STR_o STR_s STR_i STR_t STR_i STR_v STR_e STR_UNDERSCORE STR_l STR_o STR_o STR_k STR_b STR_e STR_h STR_i STR_n STR_d "\0"
+#define STRING_negative_lookahead0   STR_n STR_e STR_g STR_a STR_t STR_i STR_v STR_e STR_UNDERSCORE STR_l STR_o STR_o STR_k STR_a STR_h STR_e STR_a STR_d "\0"
+#define STRING_negative_lookbehind0  STR_n STR_e STR_g STR_a STR_t STR_i STR_v STR_e STR_UNDERSCORE STR_l STR_o STR_o STR_k STR_b STR_e STR_h STR_i STR_n STR_d "\0"
+#define STRING_script_run0           STR_s STR_c STR_r STR_i STR_p STR_t STR_UNDERSCORE STR_r STR_u STR_n "\0"
+#define STRING_atomic_script_run     STR_a STR_t STR_o STR_m STR_i STR_c STR_UNDERSCORE STR_s STR_c STR_r STR_i STR_p STR_t STR_UNDERSCORE STR_r STR_u STR_n
 
-#define STRING_DEFINE               STR_D STR_E STR_F STR_I STR_N STR_E
-#define STRING_VERSION              STR_V STR_E STR_R STR_S STR_I STR_O STR_N
-#define STRING_WEIRD_STARTWORD      STR_LEFT_SQUARE_BRACKET STR_COLON STR_LESS_THAN_SIGN STR_COLON STR_RIGHT_SQUARE_BRACKET STR_RIGHT_SQUARE_BRACKET
-#define STRING_WEIRD_ENDWORD        STR_LEFT_SQUARE_BRACKET STR_COLON STR_GREATER_THAN_SIGN STR_COLON STR_RIGHT_SQUARE_BRACKET STR_RIGHT_SQUARE_BRACKET
+#define STRING_alpha0                STR_a STR_l STR_p STR_h STR_a "\0"
+#define STRING_lower0                STR_l STR_o STR_w STR_e STR_r "\0"
+#define STRING_upper0                STR_u STR_p STR_p STR_e STR_r "\0"
+#define STRING_alnum0                STR_a STR_l STR_n STR_u STR_m "\0"
+#define STRING_ascii0                STR_a STR_s STR_c STR_i STR_i "\0"
+#define STRING_blank0                STR_b STR_l STR_a STR_n STR_k "\0"
+#define STRING_cntrl0                STR_c STR_n STR_t STR_r STR_l "\0"
+#define STRING_digit0                STR_d STR_i STR_g STR_i STR_t "\0"
+#define STRING_graph0                STR_g STR_r STR_a STR_p STR_h "\0"
+#define STRING_print0                STR_p STR_r STR_i STR_n STR_t "\0"
+#define STRING_punct0                STR_p STR_u STR_n STR_c STR_t "\0"
+#define STRING_space0                STR_s STR_p STR_a STR_c STR_e "\0"
+#define STRING_word0                 STR_w STR_o STR_r STR_d       "\0"
+#define STRING_xdigit                STR_x STR_d STR_i STR_g STR_i STR_t
+
+#define STRING_DEFINE                STR_D STR_E STR_F STR_I STR_N STR_E
+#define STRING_VERSION               STR_V STR_E STR_R STR_S STR_I STR_O STR_N
+#define STRING_WEIRD_STARTWORD       STR_LEFT_SQUARE_BRACKET STR_COLON STR_LESS_THAN_SIGN STR_COLON STR_RIGHT_SQUARE_BRACKET STR_RIGHT_SQUARE_BRACKET
+#define STRING_WEIRD_ENDWORD         STR_LEFT_SQUARE_BRACKET STR_COLON STR_GREATER_THAN_SIGN STR_COLON STR_RIGHT_SQUARE_BRACKET STR_RIGHT_SQUARE_BRACKET
 
 #define STRING_CR_RIGHTPAR                STR_C STR_R STR_RIGHT_PARENTHESIS
 #define STRING_LF_RIGHTPAR                STR_L STR_F STR_RIGHT_PARENTHESIS

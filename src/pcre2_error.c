@@ -181,6 +181,8 @@ static const unsigned char compile_error_texts[] =
   "invalid option bits with PCRE2_LITERAL\0"
   "\\N{U+dddd} is supported only in Unicode (UTF) mode\0"
   "invalid hyphen in option setting\0"
+  /* 95 */
+  "(*alpha_assertion) not recognized\0"  
   ;
 
 /* Match-time and UTF error texts are in the same format. */

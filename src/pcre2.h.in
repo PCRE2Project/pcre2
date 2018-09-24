@@ -320,6 +320,7 @@ pcre2_pattern_convert(). */
 #define PCRE2_ERROR_BAD_LITERAL_OPTIONS            192
 #define PCRE2_ERROR_SUPPORTED_ONLY_IN_UNICODE      193
 #define PCRE2_ERROR_INVALID_HYPHEN_IN_OPTIONS      194
+#define PCRE2_ERROR_ALPHA_ASSERTION_UNKNOWN        195
 
 
 /* "Expected" matching error codes: no match and partial match. */

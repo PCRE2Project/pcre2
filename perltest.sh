@@ -75,6 +75,10 @@ fi
 
 (echo "$prefix" ; cat <<'PERLEND'
 
+# The alpha assertions currently give warnings even when -w is not specified.
+
+no warnings "experimental::alpha_assertions";
+
 # Function for turning a string into a string of printing chars.
 
 sub pchars {
@@ -128,6 +132,9 @@ if (@ARGV > 1)
 else { $outfile = "STDOUT"; }
 
 printf($outfile "Perl $] Regular Expressions\n\n");
+
+$extra_modifiers = "";
+$default_show_mark = 0;
 
 # Main loop
 
@@ -370,7 +377,10 @@ for (;;)
     }
   }
 
-# printf $outfile "\n";
+# By closing OUTFILE explicitly, we avoid a Perl warning in -w mode 
+# "main::OUTFILE" used only once".
+
+close(OUTFILE) if $outfile eq "OUTFILE"; 
 
 PERLEND
 ) | $perl $perlarg - $@

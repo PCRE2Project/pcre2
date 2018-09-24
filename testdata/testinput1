@@ -6263,4 +6263,69 @@ ef) x/x,mark
     aBCDEF
     AbCDe f
 
+/(*pla:foo).{6}/
+    abcfoobarxyz
+\= Expect no match
+    abcfooba
+
+/(*positive_lookahead:foo).{6}/
+    abcfoobarxyz
+    
+/(?(*pla:foo).{6}|a..)/
+    foobarbaz
+    abcfoobar       
+
+/(?(*positive_lookahead:foo).{6}|a..)/
+    foobarbaz
+    abcfoobar       
+    
+/(*plb:foo)bar/
+    abcfoobar
+\= Expect no match
+    abcbarfoo     
+
+/(*positive_lookbehind:foo)bar/
+    abcfoobar
+\= Expect no match
+    abcbarfoo
+    
+/(?(*plb:foo)bar|baz)/
+    abcfoobar
+    bazfoobar
+    abcbazfoobar
+    foobazfoobar    
+ 
+/(?(*positive_lookbehind:foo)bar|baz)/
+    abcfoobar
+    bazfoobar
+    abcbazfoobar
+    foobazfoobar    
+ 
+/(*nlb:foo)bar/
+    abcbarfoo     
+\= Expect no match
+    abcfoobar
+
+/(*negative_lookbehind:foo)bar/
+    abcbarfoo     
+\= Expect no match
+    abcfoobar
+    
+/(?(*nlb:foo)bar|baz)/
+    abcfoobaz 
+    abcbarbaz 
+\= Expect no match
+    abcfoobar
+ 
+/(?(*negative_lookbehind:foo)bar|baz)/
+    abcfoobaz 
+    abcbarbaz 
+\= Expect no match
+    abcfoobar
+ 
+/(*atomic:a+)\w/
+    aaab
+\= Expect no match
+    aaaa      
+
 # End of testinput1 

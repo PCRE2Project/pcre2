@@ -1,4 +1,4 @@
-.TH PCRE2SYNTAX 3 "02 September 2018" "PCRE2 10.32"
+.TH PCRE2SYNTAX 3 "24 September 2018" "PCRE2 10.33"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION SYNTAX SUMMARY"
@@ -411,6 +411,7 @@ but some of them use Unicode properties if PCRE2_UCP is set. You can use
 .rs
 .sp
   (?>...)         atomic, non-capturing group
+  (*atomic:...)   atomic, non-capturing group
 .
 .
 .SH "COMMENT"
@@ -491,12 +492,23 @@ setting with a similar syntax.
 .SH "LOOKAHEAD AND LOOKBEHIND ASSERTIONS"
 .rs
 .sp
-  (?=...)         positive look ahead
-  (?!...)         negative look ahead
-  (?<=...)        positive look behind
-  (?<!...)        negative look behind
+  (?=...)                     )
+  (*pla:...)                  ) positive lookahead
+  (*positive_lookahead:...)   )
 .sp
-Each top-level branch of a look behind must be of a fixed length.
+  (?!...)                     )
+  (*nla:...)                  ) negative lookahead
+  (*negative_lookahead:...)   )
+.sp
+  (?<=...)                    )
+  (*plb:...)                  ) positive lookbehind
+  (*positive_lookbehind:...)  )
+.sp
+  (?<!...)                    )
+  (*nlb:...)                  ) negative lookbehind
+  (*negative_lookbehind:...)  )
+.sp
+Each top-level branch of a lookbehind must be of a fixed length.
 .
 .
 .SH "BACKREFERENCES"
@@ -621,6 +633,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 02 September 2018
+Last updated: 24 September 2018
 Copyright (c) 1997-2018 University of Cambridge.
 .fi
