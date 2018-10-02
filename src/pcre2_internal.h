@@ -1513,70 +1513,71 @@ enum {
   OP_ASSERTBACK,     /* 128 Positive lookbehind */
   OP_ASSERTBACK_NOT, /* 129 Negative lookbehind */
 
-  /* ONCE, BRA, BRAPOS, CBRA, CBRAPOS, and COND must come immediately after the
-  assertions, with ONCE first, as there's a test for >= ONCE for a subpattern
-  that isn't an assertion. The POS versions must immediately follow the non-POS
-  versions in each case. */
+  /* ONCE, SCRIPT_RUN, BRA, BRAPOS, CBRA, CBRAPOS, and COND must come
+  immediately after the assertions, with ONCE first, as there's a test for >=
+  ONCE for a subpattern that isn't an assertion. The POS versions must
+  immediately follow the non-POS versions in each case. */
 
   OP_ONCE,           /* 130 Atomic group, contains captures */
-  OP_BRA,            /* 131 Start of non-capturing bracket */
-  OP_BRAPOS,         /* 132 Ditto, with unlimited, possessive repeat */
-  OP_CBRA,           /* 133 Start of capturing bracket */
-  OP_CBRAPOS,        /* 134 Ditto, with unlimited, possessive repeat */
-  OP_COND,           /* 135 Conditional group */
+  OP_SCRIPT_RUN,     /* 131 Non-capture, but check characters' scripts */
+  OP_BRA,            /* 132 Start of non-capturing bracket */
+  OP_BRAPOS,         /* 133 Ditto, with unlimited, possessive repeat */
+  OP_CBRA,           /* 134 Start of capturing bracket */
+  OP_CBRAPOS,        /* 135 Ditto, with unlimited, possessive repeat */
+  OP_COND,           /* 136 Conditional group */
 
   /* These five must follow the previous five, in the same order. There's a
   check for >= SBRA to distinguish the two sets. */
 
-  OP_SBRA,           /* 136 Start of non-capturing bracket, check empty  */
-  OP_SBRAPOS,        /* 137 Ditto, with unlimited, possessive repeat */
-  OP_SCBRA,          /* 138 Start of capturing bracket, check empty */
-  OP_SCBRAPOS,       /* 139 Ditto, with unlimited, possessive repeat */
-  OP_SCOND,          /* 140 Conditional group, check empty */
+  OP_SBRA,           /* 137 Start of non-capturing bracket, check empty  */
+  OP_SBRAPOS,        /* 138 Ditto, with unlimited, possessive repeat */
+  OP_SCBRA,          /* 139 Start of capturing bracket, check empty */
+  OP_SCBRAPOS,       /* 140 Ditto, with unlimited, possessive repeat */
+  OP_SCOND,          /* 141 Conditional group, check empty */
 
   /* The next two pairs must (respectively) be kept together. */
 
-  OP_CREF,           /* 141 Used to hold a capture number as condition */
-  OP_DNCREF,         /* 142 Used to point to duplicate names as a condition */
-  OP_RREF,           /* 143 Used to hold a recursion number as condition */
-  OP_DNRREF,         /* 144 Used to point to duplicate names as a condition */
-  OP_FALSE,          /* 145 Always false (used by DEFINE and VERSION) */
-  OP_TRUE,           /* 146 Always true (used by VERSION) */
+  OP_CREF,           /* 142 Used to hold a capture number as condition */
+  OP_DNCREF,         /* 143 Used to point to duplicate names as a condition */
+  OP_RREF,           /* 144 Used to hold a recursion number as condition */
+  OP_DNRREF,         /* 145 Used to point to duplicate names as a condition */
+  OP_FALSE,          /* 146 Always false (used by DEFINE and VERSION) */
+  OP_TRUE,           /* 147 Always true (used by VERSION) */
 
-  OP_BRAZERO,        /* 147 These two must remain together and in this */
-  OP_BRAMINZERO,     /* 148 order. */
-  OP_BRAPOSZERO,     /* 149 */
+  OP_BRAZERO,        /* 148 These two must remain together and in this */
+  OP_BRAMINZERO,     /* 149 order. */
+  OP_BRAPOSZERO,     /* 150 */
 
   /* These are backtracking control verbs */
 
-  OP_MARK,           /* 150 always has an argument */
-  OP_PRUNE,          /* 151 */
-  OP_PRUNE_ARG,      /* 152 same, but with argument */
-  OP_SKIP,           /* 153 */
-  OP_SKIP_ARG,       /* 154 same, but with argument */
-  OP_THEN,           /* 155 */
-  OP_THEN_ARG,       /* 156 same, but with argument */
-  OP_COMMIT,         /* 157 */
-  OP_COMMIT_ARG,     /* 158 same, but with argument */
+  OP_MARK,           /* 151 always has an argument */
+  OP_PRUNE,          /* 152 */
+  OP_PRUNE_ARG,      /* 153 same, but with argument */
+  OP_SKIP,           /* 154 */
+  OP_SKIP_ARG,       /* 155 same, but with argument */
+  OP_THEN,           /* 156 */
+  OP_THEN_ARG,       /* 157 same, but with argument */
+  OP_COMMIT,         /* 158 */
+  OP_COMMIT_ARG,     /* 159 same, but with argument */
 
   /* These are forced failure and success verbs. FAIL and ACCEPT do accept an
   argument, but these cases can be compiled as, for example, (*MARK:X)(*FAIL)
   without the need for a special opcode. */
 
-  OP_FAIL,           /* 159 */
-  OP_ACCEPT,         /* 160 */
-  OP_ASSERT_ACCEPT,  /* 161 Used inside assertions */
-  OP_CLOSE,          /* 162 Used before OP_ACCEPT to close open captures */
+  OP_FAIL,           /* 160 */
+  OP_ACCEPT,         /* 161 */
+  OP_ASSERT_ACCEPT,  /* 162 Used inside assertions */
+  OP_CLOSE,          /* 163 Used before OP_ACCEPT to close open captures */
 
   /* This is used to skip a subpattern with a {0} quantifier */
 
-  OP_SKIPZERO,       /* 163 */
+  OP_SKIPZERO,       /* 164 */
 
   /* This is used to identify a DEFINE group during compilation so that it can
   be checked for having only one branch. It is changed to OP_FALSE before
   compilation finishes. */
 
-  OP_DEFINE,         /* 164 */
+  OP_DEFINE,         /* 165 */
 
   /* This is not an opcode, but is used to check that tables indexed by opcode
   are the correct length, in order to catch updating errors - there have been
@@ -1624,6 +1625,7 @@ some cases doesn't actually use these names at all). */
   "Alt", "Ket", "KetRmax", "KetRmin", "KetRpos",                  \
   "Reverse", "Assert", "Assert not", "AssertB", "AssertB not",    \
   "Once",                                                         \
+  "Script run",                                                   \
   "Bra", "BraPos", "CBra", "CBraPos",                             \
   "Cond",                                                         \
   "SBra", "SBraPos", "SCBra", "SCBraPos",                         \
@@ -1707,6 +1709,7 @@ in UTF-8 mode. The code that uses this table must know about such things. */
   1+LINK_SIZE,                   /* Assert behind                          */ \
   1+LINK_SIZE,                   /* Assert behind not                      */ \
   1+LINK_SIZE,                   /* ONCE                                   */ \
+  1+LINK_SIZE,                   /* SCRIPT_RUN                             */ \
   1+LINK_SIZE,                   /* BRA                                    */ \
   1+LINK_SIZE,                   /* BRAPOS                                 */ \
   1+LINK_SIZE+IMM2_SIZE,         /* CBRA                                   */ \
@@ -1854,6 +1857,7 @@ extern const uint8_t          PRIV(utf8_table4)[];
 #define _pcre2_hspace_list             PCRE2_SUFFIX(_pcre2_hspace_list_)
 #define _pcre2_vspace_list             PCRE2_SUFFIX(_pcre2_vspace_list_)
 #define _pcre2_ucd_caseless_sets       PCRE2_SUFFIX(_pcre2_ucd_caseless_sets_)
+#define _pcre2_ucd_digit_sets          PCRE2_SUFFIX(_pcre2_ucd_digit_sets_)
 #define _pcre2_ucd_records             PCRE2_SUFFIX(_pcre2_ucd_records_)
 #define _pcre2_ucd_stage1              PCRE2_SUFFIX(_pcre2_ucd_stage1_)
 #define _pcre2_ucd_stage2              PCRE2_SUFFIX(_pcre2_ucd_stage2_)
@@ -1875,6 +1879,7 @@ extern const uint8_t                   PRIV(default_tables)[];
 extern const uint32_t                  PRIV(hspace_list)[];
 extern const uint32_t                  PRIV(vspace_list)[];
 extern const uint32_t                  PRIV(ucd_caseless_sets)[];
+extern const uint32_t                  PRIV(ucd_digit_sets)[];
 extern const ucd_record                PRIV(ucd_records)[];
 #if PCRE2_CODE_UNIT_WIDTH == 32
 extern const ucd_record                PRIV(dummy_ucd_record)[];
@@ -1922,6 +1927,7 @@ is available. */
 #define _pcre2_jit_get_target        PCRE2_SUFFIX(_pcre2_jit_get_target_)
 #define _pcre2_memctl_malloc         PCRE2_SUFFIX(_pcre2_memctl_malloc_)
 #define _pcre2_ord2utf               PCRE2_SUFFIX(_pcre2_ord2utf_)
+#define _pcre2_script_run            PCRE2_SUFFIX(_pcre2_script_run_)
 #define _pcre2_strcmp                PCRE2_SUFFIX(_pcre2_strcmp_)
 #define _pcre2_strcmp_c8             PCRE2_SUFFIX(_pcre2_strcmp_c8_)
 #define _pcre2_strcpy_c8             PCRE2_SUFFIX(_pcre2_strcpy_c8_)
@@ -1948,6 +1954,7 @@ extern size_t       _pcre2_jit_get_size(void *);
 const char *        _pcre2_jit_get_target(void);
 extern void *       _pcre2_memctl_malloc(size_t, pcre2_memctl *);
 extern unsigned int _pcre2_ord2utf(uint32_t, PCRE2_UCHAR *);
+extern BOOL         _pcre2_script_run(PCRE2_SPTR, PCRE2_SPTR, BOOL);
 extern int          _pcre2_strcmp(PCRE2_SPTR, PCRE2_SPTR);
 extern int          _pcre2_strcmp_c8(PCRE2_SPTR, const char *);
 extern PCRE2_SIZE   _pcre2_strcpy_c8(PCRE2_UCHAR *, const char *);

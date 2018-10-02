@@ -321,6 +321,7 @@ pcre2_pattern_convert(). */
 #define PCRE2_ERROR_SUPPORTED_ONLY_IN_UNICODE      193
 #define PCRE2_ERROR_INVALID_HYPHEN_IN_OPTIONS      194
 #define PCRE2_ERROR_ALPHA_ASSERTION_UNKNOWN        195
+#define PCRE2_ERROR_SCRIPT_RUN_NOT_AVAILABLE       196
 
 
 /* "Expected" matching error codes: no match and partial match. */

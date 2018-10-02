@@ -1480,5 +1480,20 @@ Old 12 12  New 14 16
 Old 12 15  New 16 21
 Old 21 21  New 27 29
  4: 123abc<>\x{e1}yzabc<><def>789abc<>\x{1234}qr
+    
+# A few script run tests in non-UTF mode (but they need Unicode support)
+
+/^(*script_run:.{4})/
+    \x{3041}\x{30a1}\x{3007}\x{3007}   Hiragana Katakana Han Han
+ 0: \x{3041}\x{30a1}\x{3007}\x{3007}
+    \x{30a1}\x{3041}\x{3007}\x{3007}   Katakana Hiragana Han Han
+ 0: \x{30a1}\x{3041}\x{3007}\x{3007}
+    \x{1100}\x{2e80}\x{2e80}\x{1101}   Hangul Han Han Hangul
+ 0: \x{1100}\x{2e80}\x{2e80}\x{1101}
+ 
+/^(*sr:.*)/utf,allow_surrogate_escapes
+Failed: error 191 at offset 0: PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES is not allowed in UTF-16 mode
+    \x{2e80}\x{3105}\x{2e80}\x{30a1}   Han Bopomofo Han Katakana
+    \x{d800}\x{dfff}                   Surrogates (Unknown) \=no_utf_check
 
 # End of testinput12

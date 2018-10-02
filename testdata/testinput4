@@ -2317,5 +2317,96 @@
 
 /[^\x{100}-\x{ffff}]*[\x80-\xff]/i,utf
     \x{99}\x{99}\x{99}
+    
+# Script run tests
+
+/^(*script_run:.{4})/utf
+    abcd                               Latin x4
+    \x{2e80}\x{2fa1d}\x{3041}\x{30a1}  Han Han Hiragana Katakana
+    \x{3041}\x{30a1}\x{3007}\x{3007}   Hiragana Katakana Han Han
+    \x{30a1}\x{3041}\x{3007}\x{3007}   Katakana Hiragana Han Han
+    \x{1100}\x{2e80}\x{2e80}\x{1101}   Hangul Han Han Hangul
+    \x{2e80}\x{3105}\x{2e80}\x{3105}   Han Bopomofo Han Bopomofo
+    \x{02ea}\x{2e80}\x{2e80}\x{3105}   Bopomofo-Sk Han Han Bopomofo
+    \x{3105}\x{2e80}\x{2e80}\x{3105}   Bopomofo Han Han Bopomofo
+    \x{0300}cd!                        Inherited Latin Latin Common
+    \x{0391}12\x{03a9}                 Greek Common-digits Greek 
+    \x{0400}12\x{fe2f}                 Cyrillic Common-digits Cyrillic
+    \x{0531}12\x{fb17}                 Armenian Common-digits Armenian
+    \x{0591}12\x{fb4f}                 Hebrew Common-digits Hebrew
+    \x{0600}12\x{1eef1}                Arabic Common-digits Arabic
+    \x{0600}\x{0660}\x{0669}\x{1eef1}  Arabic Arabic-digits Arabic
+    \x{0700}12\x{086a}                 Syriac Common-digits Syriac
+    \x{1200}12\x{ab2e}                 Ethiopic Common-digits Ethiopic
+    \x{1680}12\x{169c}                 Ogham Common-digits Ogham
+    \x{3041}12\x{3041}                 Hiragana Common-digits Hiragana
+    \x{0980}\x{09e6}\x{09e7}\x{0993}   Bengali Bengali-digits Bengali
+    !cde                               Common Latin Latin Latin
+    A..B                               Latin Common Common Latin 
+    0abc                               Ascii-digit Latin Latin Latin
+    1\x{0700}\x{0700}\x{0700}          Ascii-digit Syriac x 3
+    \x{1A80}\x{1A80}\x{1a40}\x{1a41}   Tai Tham Hora digits, letters
+\= Expect no match
+    a\x{370}bcd                        Latin Greek Latin Latin
+    \x{1100}\x{02ea}\x{02ea}\x{02ea}   Hangul Bopomofo x3
+    \x{02ea}\x{02ea}\x{02ea}\x{1100}   Bopomofo x3 Hangul
+    \x{1100}\x{2e80}\x{3041}\x{1101}   Hangul Han Hiragana Hangul
+    \x{0391}\x{09e6}\x{09e7}\x{03a9}   Greek Bengali digits Greek 
+    \x{0600}7\x{0669}\x{1eef1}         Arabic ascii-digit Arabic-digit Arabic
+    \x{0600}\x{0669}7\x{1eef1}         Arabic Arabic-digit ascii-digit Arabic
+    A5\x{ff19}B                        Latin Common-ascii/notascii-digits Latin 
+    \x{0300}cd\x{0391}                 Inherited Latin Latin Greek
+    !cd\x{0391}                        Common Latin Latin Greek
+    \x{1A80}\x{1A90}\x{1a40}\x{1a41}   Tai Tham Hora digit, Tham digit, letters
+    A\x{1d7ce}\x{1d7ff}B               Common fancy-common-2-sets-digits Common
+    \x{2e80}\x{3105}\x{2e80}\x{30a1}   Han Bopomofo Han Katakana
+    
+/^(*sr:.{4}|..)/utf
+    \x{2e80}\x{3105}\x{2e80}\x{30a1}   Han Bopomofo Han Katakana
+
+/^(*atomic_script_run:.{4}|..)/utf
+\= Expect no match
+    \x{2e80}\x{3105}\x{2e80}\x{30a1}   Han Bopomofo Han Katakana
+
+/^(*asr:.*)/utf
+\= Expect no match
+    \x{2e80}\x{3105}\x{2e80}\x{30a1}   Han Bopomofo Han Katakana
+
+/^(?>(*sr:.*))/utf
+    \x{2e80}\x{3105}\x{2e80}\x{30a1}   Han Bopomofo Han Katakana
+
+/^(*sr:.*)/utf
+    \x{2e80}\x{3105}\x{2e80}\x{30a1}   Han Bopomofo Han Katakana
+    \x{10fffd}\x{10fffd}\x{10fffd}     Private use (Unknown)
+
+/^(*sr:\x{2e80}*)/utf
+    \x{2e80}\x{2e80}\x{3105}           Han Han Bopomofo
+
+/^(*sr:\x{2e80}*)\x{2e80}/utf
+    \x{2e80}\x{2e80}\x{3105}           Han Han Bopomofo
+    
+/^(*sr:.*)Test/utf
+    Test script run on an empty string
+
+/^(*sr:(.{2})){2}/utf
+    \x{0600}7\x{0669}\x{1eef1}         Arabic ascii-digit Arabic-digit Arabic
+    \x{1A80}\x{1A80}\x{1a40}\x{1a41}   Tai Tham Hora digits, letters
+    \x{1A80}\x{1a40}\x{1A90}\x{1a41}   Tai Tham Hora digit, letter, Tham digit, letter
+\= Expect no match
+    \x{1100}\x{2e80}\x{3041}\x{1101}   Hangul Han Hiragana Hangul
+
+# Test loop breaking for empty string match
+
+/^(*sr:A|)*BCD/utf
+    AABCD
+    ABCD
+    BCD 
+    
+# The use of (*ACCEPT) breaks script run checking 
+
+/^(*sr:.*(*ACCEPT)ZZ)/utf
+    \x{1100}\x{2e80}\x{3041}\x{1101}   Hangul Han Hiragana Hangul
+
+# ------- 
 
 # End of testinput4

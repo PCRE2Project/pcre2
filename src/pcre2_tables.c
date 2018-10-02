@@ -417,6 +417,7 @@ strings to make sure that UTF-8 support works on EBCDIC platforms. */
 #define STRING_Tifinagh0 STR_T STR_i STR_f STR_i STR_n STR_a STR_g STR_h "\0"
 #define STRING_Tirhuta0 STR_T STR_i STR_r STR_h STR_u STR_t STR_a "\0"
 #define STRING_Ugaritic0 STR_U STR_g STR_a STR_r STR_i STR_t STR_i STR_c "\0"
+#define STRING_Unknown0 STR_U STR_n STR_k STR_n STR_o STR_w STR_n "\0"
 #define STRING_Vai0 STR_V STR_a STR_i "\0"
 #define STRING_Warang_Citi0 STR_W STR_a STR_r STR_a STR_n STR_g STR_UNDERSCORE STR_C STR_i STR_t STR_i "\0"
 #define STRING_Xan0 STR_X STR_a STR_n "\0"
@@ -611,6 +612,7 @@ const char PRIV(utt_names)[] =
   STRING_Tifinagh0
   STRING_Tirhuta0
   STRING_Ugaritic0
+  STRING_Unknown0
   STRING_Vai0
   STRING_Warang_Citi0
   STRING_Xan0
@@ -805,19 +807,20 @@ const ucp_type_table PRIV(utt)[] = {
   { 1424, PT_SC, ucp_Tifinagh },
   { 1433, PT_SC, ucp_Tirhuta },
   { 1441, PT_SC, ucp_Ugaritic },
-  { 1450, PT_SC, ucp_Vai },
-  { 1454, PT_SC, ucp_Warang_Citi },
-  { 1466, PT_ALNUM, 0 },
-  { 1470, PT_PXSPACE, 0 },
-  { 1474, PT_SPACE, 0 },
-  { 1478, PT_UCNC, 0 },
-  { 1482, PT_WORD, 0 },
-  { 1486, PT_SC, ucp_Yi },
-  { 1489, PT_GC, ucp_Z },
-  { 1491, PT_SC, ucp_Zanabazar_Square },
-  { 1508, PT_PC, ucp_Zl },
-  { 1511, PT_PC, ucp_Zp },
-  { 1514, PT_PC, ucp_Zs }
+  { 1450, PT_SC, ucp_Unknown },
+  { 1458, PT_SC, ucp_Vai },
+  { 1462, PT_SC, ucp_Warang_Citi },
+  { 1474, PT_ALNUM, 0 },
+  { 1478, PT_PXSPACE, 0 },
+  { 1482, PT_SPACE, 0 },
+  { 1486, PT_UCNC, 0 },
+  { 1490, PT_WORD, 0 },
+  { 1494, PT_SC, ucp_Yi },
+  { 1497, PT_GC, ucp_Z },
+  { 1499, PT_SC, ucp_Zanabazar_Square },
+  { 1516, PT_PC, ucp_Zl },
+  { 1519, PT_PC, ucp_Zp },
+  { 1522, PT_PC, ucp_Zs }
 };
 
 const size_t PRIV(utt_size) = sizeof(PRIV(utt)) / sizeof(ucp_type_table);

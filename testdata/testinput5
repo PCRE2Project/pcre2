@@ -2106,5 +2106,28 @@
 
 /(*: A‎B C)abc/x,utf,mark,alt_verbnames
     abc
+    
+# Script run tests: auto-possessification
+
+/^(*sr:.*)/B,utf 
+    paypаl.com   A classic example of why script run checks are a good thing
+
+/^(*sr:\x{2e80}*)/B,utf
+
+/^(*sr:\x{2e80}*)\x{2e80}/B,utf
+
+# Some script run patterns are broken in Perl 5.28.0. These can be moved into
+# test 4 when a mended version of Perl is released.
+
+/^(*sr:.{4})/utf
+    \x{0980}12\x{0993}     Bengali Common-digits Bengali
+    \x{0780}12\x{07b1}     Thaana Common-digits Thaana
+    \x{0e01}12\x{0e5b}     Thai Common-digits Thai
+    \x{1780}12\x{19ff}     Khmer Common-digits Khmer
+    \x{0904}12\x{0939}     Devanagari Common-digits Devanagari
+    A\x{ff10}\x{ff19}B     Latin Common-notascii-digits Latin 
+    A\x{1d7ce}\x{1d7cf}B   Latin fancy-common-digits Latin
+
+# ------- 
 
 # End of testinput5

@@ -4775,5 +4775,64 @@ Failed: error 137 at offset 2: PCRE2 does not support \F, \L, \l, \N{name}, \U, 
     abc
  0: abc
 MK: ABC
+    
+# Script run tests: auto-possessification
+
+/^(*sr:.*)/B,utf 
+------------------------------------------------------------------
+        Bra
+        ^
+        Script run
+        Any*
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+    paypаl.com   A classic example of why script run checks are a good thing
+ 0: payp
+
+/^(*sr:\x{2e80}*)/B,utf
+------------------------------------------------------------------
+        Bra
+        ^
+        Script run
+        \x{2e80}*+
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+
+/^(*sr:\x{2e80}*)\x{2e80}/B,utf
+------------------------------------------------------------------
+        Bra
+        ^
+        Script run
+        \x{2e80}*
+        Ket
+        \x{2e80}
+        Ket
+        End
+------------------------------------------------------------------
+
+# Some script run patterns are broken in Perl 5.28.0. These can be moved into
+# test 4 when a mended version of Perl is released.
+
+/^(*sr:.{4})/utf
+    \x{0980}12\x{0993}     Bengali Common-digits Bengali
+ 0: \x{980}12\x{993}
+    \x{0780}12\x{07b1}     Thaana Common-digits Thaana
+ 0: \x{780}12\x{7b1}
+    \x{0e01}12\x{0e5b}     Thai Common-digits Thai
+ 0: \x{e01}12\x{e5b}
+    \x{1780}12\x{19ff}     Khmer Common-digits Khmer
+ 0: \x{1780}12\x{19ff}
+    \x{0904}12\x{0939}     Devanagari Common-digits Devanagari
+ 0: \x{904}12\x{939}
+    A\x{ff10}\x{ff19}B     Latin Common-notascii-digits Latin 
+ 0: A\x{ff10}\x{ff19}B
+    A\x{1d7ce}\x{1d7cf}B   Latin fancy-common-digits Latin
+ 0: A\x{1d7ce}\x{1d7cf}B
+
+# ------- 
 
 # End of testinput5

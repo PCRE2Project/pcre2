@@ -240,48 +240,56 @@ code (meta_extra_lengths, just below) must be updated to remain in step. */
 #define META_RANGE_LITERAL    0x801f0000u  /* range defined literally */
 #define META_RECURSE          0x80200000u  /* Recursion */
 #define META_RECURSE_BYNAME   0x80210000u  /* (?&name) */
+#define META_SCRIPT_RUN       0x80220000u  /* (*script_run:...) */
 
 /* These must be kept together to make it easy to check that an assertion
 is present where expected in a conditional group. */
 
-#define META_LOOKAHEAD        0x80220000u  /* (?= */
-#define META_LOOKAHEADNOT     0x80230000u  /* (?! */
-#define META_LOOKBEHIND       0x80240000u  /* (?<= */
-#define META_LOOKBEHINDNOT    0x80250000u  /* (?<! */
+#define META_LOOKAHEAD        0x80230000u  /* (?= */
+#define META_LOOKAHEADNOT     0x80240000u  /* (?! */
+#define META_LOOKBEHIND       0x80250000u  /* (?<= */
+#define META_LOOKBEHINDNOT    0x80260000u  /* (?<! */
 
 /* These must be kept in this order, with consecutive values, and the _ARG
 versions of COMMIT, PRUNE, SKIP, and THEN immediately after their non-argument
 versions. */
 
-#define META_MARK             0x80260000u  /* (*MARK) */
-#define META_ACCEPT           0x80270000u  /* (*ACCEPT) */
-#define META_FAIL             0x80280000u  /* (*FAIL) */
-#define META_COMMIT           0x80290000u  /* These               */
-#define META_COMMIT_ARG       0x802a0000u  /*   pairs             */
-#define META_PRUNE            0x802b0000u  /*     must            */
-#define META_PRUNE_ARG        0x802c0000u  /*       be            */
-#define META_SKIP             0x802d0000u  /*         kept        */
-#define META_SKIP_ARG         0x802e0000u  /*           in        */
-#define META_THEN             0x802f0000u  /*             this    */
-#define META_THEN_ARG         0x80300000u  /*               order */
+#define META_MARK             0x80270000u  /* (*MARK) */
+#define META_ACCEPT           0x80280000u  /* (*ACCEPT) */
+#define META_FAIL             0x80290000u  /* (*FAIL) */
+#define META_COMMIT           0x802a0000u  /* These               */
+#define META_COMMIT_ARG       0x802b0000u  /*   pairs             */
+#define META_PRUNE            0x802c0000u  /*     must            */
+#define META_PRUNE_ARG        0x802d0000u  /*       be            */
+#define META_SKIP             0x802e0000u  /*         kept        */
+#define META_SKIP_ARG         0x802f0000u  /*           in        */
+#define META_THEN             0x80300000u  /*             this    */
+#define META_THEN_ARG         0x80310000u  /*               order */
 
 /* These must be kept in groups of adjacent 3 values, and all together. */
 
-#define META_ASTERISK         0x80310000u  /* *  */
-#define META_ASTERISK_PLUS    0x80320000u  /* *+ */
-#define META_ASTERISK_QUERY   0x80330000u  /* *? */
-#define META_PLUS             0x80340000u  /* +  */
-#define META_PLUS_PLUS        0x80350000u  /* ++ */
-#define META_PLUS_QUERY       0x80360000u  /* +? */
-#define META_QUERY            0x80370000u  /* ?  */
-#define META_QUERY_PLUS       0x80380000u  /* ?+ */
-#define META_QUERY_QUERY      0x80390000u  /* ?? */
-#define META_MINMAX           0x803a0000u  /* {n,m}  repeat */
-#define META_MINMAX_PLUS      0x803b0000u  /* {n,m}+ repeat */
-#define META_MINMAX_QUERY     0x803c0000u  /* {n,m}? repeat */
+#define META_ASTERISK         0x80320000u  /* *  */
+#define META_ASTERISK_PLUS    0x80330000u  /* *+ */
+#define META_ASTERISK_QUERY   0x80340000u  /* *? */
+#define META_PLUS             0x80350000u  /* +  */
+#define META_PLUS_PLUS        0x80360000u  /* ++ */
+#define META_PLUS_QUERY       0x80370000u  /* +? */
+#define META_QUERY            0x80380000u  /* ?  */
+#define META_QUERY_PLUS       0x80390000u  /* ?+ */
+#define META_QUERY_QUERY      0x803a0000u  /* ?? */
+#define META_MINMAX           0x803b0000u  /* {n,m}  repeat */
+#define META_MINMAX_PLUS      0x803c0000u  /* {n,m}+ repeat */
+#define META_MINMAX_QUERY     0x803d0000u  /* {n,m}? repeat */
 
 #define META_FIRST_QUANTIFIER META_ASTERISK
 #define META_LAST_QUANTIFIER  META_MINMAX_QUERY
+
+/* This is a special "meta code" that is used only to distinguish (*asr: from
+(*sr in the table of aphabetic assertions. It is never stored in the parsed
+pattern because (*asr: is turned into (*sr:(*atomic: at that stage. There is
+therefore no need for it to have a length entry, so use a high value. */
+
+#define META_ATOMIC_SCRIPT_RUN 0x8fff0000u
 
 /* Table of extra lengths for each of the meta codes. Must be kept in step with
 the definitions above. For some items these values are a basic length to which
@@ -322,6 +330,7 @@ static unsigned char meta_extra_lengths[] = {
   0,             /* META_RANGE_LITERAL */
   SIZEOFFSET,    /* META_RECURSE */
   1+SIZEOFFSET,  /* META_RECURSE_BYNAME */
+  0,             /* META_SCRIPT_RUN */
   0,             /* META_LOOKAHEAD */
   0,             /* META_LOOKAHEADNOT */
   SIZEOFFSET,    /* META_LOOKBEHIND */
@@ -638,19 +647,19 @@ static const char alasnames[] =
   STRING_atomic_script_run;
 
 static const alasitem alasmeta[] = {
-  {  3, META_LOOKAHEAD     },
-  {  3, META_LOOKBEHIND    },
-  {  3, META_LOOKAHEADNOT  },
-  {  3, META_LOOKBEHINDNOT },
-  { 18, META_LOOKAHEAD     },
-  { 19, META_LOOKBEHIND    },
-  { 18, META_LOOKAHEADNOT  },
-  { 19, META_LOOKBEHINDNOT },
-  {  6, META_ATOMIC        },
-  {  2, 0                  }, /* sr = script run */
-  {  3, 0                  }, /* asr = atomic script run */
-  { 10, 0                  }, /* script run */
-  { 17, 0                  }  /* atomic script run */
+  {  3, META_LOOKAHEAD         },
+  {  3, META_LOOKBEHIND        },
+  {  3, META_LOOKAHEADNOT      },
+  {  3, META_LOOKBEHINDNOT     },
+  { 18, META_LOOKAHEAD         },
+  { 19, META_LOOKBEHIND        },
+  { 18, META_LOOKAHEADNOT      },
+  { 19, META_LOOKBEHINDNOT     },
+  {  6, META_ATOMIC            },
+  {  2, META_SCRIPT_RUN        }, /* sr = script run */
+  {  3, META_ATOMIC_SCRIPT_RUN }, /* asr = atomic script run */
+  { 10, META_SCRIPT_RUN        }, /* script run */
+  { 17, META_ATOMIC_SCRIPT_RUN }  /* atomic script run */
 };
 
 static const int alascount = sizeof(alasmeta)/sizeof(alasitem);
@@ -772,7 +781,7 @@ enum { ERR0 = COMPILE_ERROR_BASE,
        ERR61, ERR62, ERR63, ERR64, ERR65, ERR66, ERR67, ERR68, ERR69, ERR70,
        ERR71, ERR72, ERR73, ERR74, ERR75, ERR76, ERR77, ERR78, ERR79, ERR80,
        ERR81, ERR82, ERR83, ERR84, ERR85, ERR86, ERR87, ERR88, ERR89, ERR90,
-       ERR91, ERR92, ERR93, ERR94, ERR95 };
+       ERR91, ERR92, ERR93, ERR94, ERR95, ERR96 };
 
 /* This is a table of start-of-pattern options such as (*UTF) and settings such
 as (*LIMIT_MATCH=nnnn) and (*CRLF). For completeness and backward
@@ -1003,6 +1012,7 @@ for (;;)
     case META_NOCAPTURE: fprintf(stderr, "META (?:"); break;
     case META_LOOKAHEAD: fprintf(stderr, "META (?="); break;
     case META_LOOKAHEADNOT: fprintf(stderr, "META (?!"); break;
+    case META_SCRIPT_RUN: fprintf(stderr, "META (*sr:"); break;
     case META_KET: fprintf(stderr, "META )"); break;
     case META_ALT: fprintf(stderr, "META | %d", meta_arg); break;
 
@@ -2210,15 +2220,15 @@ if (++ptr >= ptrend)               /* No characters in name */
                             ERR60; /* Verb not recognized or malformed */
   goto FAILED;
   }
-  
-/* A group name must not start with a digit. If either of the others start with 
-a digit it just won't be recognized. */ 
-  
+
+/* A group name must not start with a digit. If either of the others start with
+a digit it just won't be recognized. */
+
 if (is_group && IS_DIGIT(*ptr))
   {
   *errorcodeptr = ERR44;
   goto FAILED;
-  }   
+  }
 
 *nameptr = ptr;
 *offsetptr = (PCRE2_SIZE)(ptr - cb->start_pattern);
@@ -2345,6 +2355,7 @@ typedef struct nest_save {
 
 #define NSF_RESET          0x0001u
 #define NSF_CONDASSERT     0x0002u
+#define NSF_ATOMICSR       0x0004u
 
 /* Options that are changeable within the pattern must be tracked during
 parsing. Some (e.g. PCRE2_EXTENDED) are implemented entirely during parsing,
@@ -2707,19 +2718,19 @@ while (ptr < ptrend)
         case CHAR_C:
         ok = expect_cond_assert == 2;
         break;
-       
+
         case CHAR_EQUALS_SIGN:
         case CHAR_EXCLAMATION_MARK:
         break;
-       
+
         case CHAR_LESS_THAN_SIGN:
         ok = ptr[2] == CHAR_EQUALS_SIGN || ptr[2] == CHAR_EXCLAMATION_MARK;
         break;
-       
+
         default:
         ok = FALSE;
         }
-      }      
+      }
 
     if (!ok)
       {
@@ -3533,13 +3544,13 @@ while (ptr < ptrend)
       /* Handle "alpha assertions" such as (*pla:...). Most of these are
       synonyms for the historical symbolic assertions, but the script run ones
       are new. They are distinguished by starting with a lower case letter.
-      Checking both ends of the alphabet makes this work in all character 
+      Checking both ends of the alphabet makes this work in all character
       codes. */
 
       else if (CHMAX_255(c) && (cb->ctypes[c] & ctype_lcletter) != 0)
         {
         uint32_t meta;
-          
+
         vn = alasnames;
         if (!read_name(&ptr, ptrend, 0, &offset, &name, &namelen, &errorcode,
           cb)) goto FAILED;
@@ -3550,7 +3561,7 @@ while (ptr < ptrend)
           }
 
         /* Scan the table of alpha assertion names */
-        
+
         for (i = 0; i < alascount; i++)
           {
           if (namelen == alasmeta[i].len &&
@@ -3564,42 +3575,72 @@ while (ptr < ptrend)
           errorcode = ERR95;  /* Alpha assertion not recognized */
           goto FAILED;
           }
-          
-        /* Check for expecting an assertion condition. If so, only lookaround 
+
+        /* Check for expecting an assertion condition. If so, only lookaround
         assertions are valid. */
-         
+
         meta = alasmeta[i].meta;
-        if (prev_expect_cond_assert > 0 && 
+        if (prev_expect_cond_assert > 0 &&
             (meta < META_LOOKAHEAD || meta > META_LOOKBEHINDNOT))
           {
           errorcode = ERR28;  /* Assertion expected */
-          goto FAILED;  
-          }                                  
+          goto FAILED;
+          }
+
+        /* The lookaround alphabetic synonyms can be almost entirely handled by
+        jumping to the code that handles the traditional symbolic forms. */
 
         switch(meta)
           {
+          default:
+          errorcode = ERR89;  /* Unknown code; should never occur because */
+          goto FAILED;        /* the meta values come from a table above. */
+
           case META_ATOMIC:
-          goto ATOMIC_GROUP; 
+          goto ATOMIC_GROUP;
 
           case META_LOOKAHEAD:
           goto POSITIVE_LOOK_AHEAD;
-          
+
           case META_LOOKAHEADNOT:
           goto NEGATIVE_LOOK_AHEAD;
-          
-          case META_LOOKBEHIND:
-          case META_LOOKBEHINDNOT: 
-          *parsed_pattern++ = meta; 
-          ptr--;
-          goto LOOKBEHIND;  
-          
-          /* FIXME: Script Run stuff ... */ 
-            
-          
- 
 
- 
-          }  
+          case META_LOOKBEHIND:
+          case META_LOOKBEHINDNOT:
+          *parsed_pattern++ = meta;
+          ptr--;
+          goto POST_LOOKBEHIND;
+
+          /* The script run facilities are handled here. Unicode support is
+          required (give an error if not, as this is a security issue). Always
+          record a META_SCRIPT_RUN item. Then, for the atomic version, insert
+          META_ATOMIC and remember that we need two META_KETs at the end. */
+
+          case META_SCRIPT_RUN:
+          case META_ATOMIC_SCRIPT_RUN:
+#ifdef SUPPORT_UNICODE
+          *parsed_pattern++ = META_SCRIPT_RUN;
+          nest_depth++;
+          ptr++;
+          if (meta == META_ATOMIC_SCRIPT_RUN)
+            {
+            *parsed_pattern++ = META_ATOMIC;
+            if (top_nest == NULL) top_nest = (nest_save *)(cb->start_workspace);
+            else if (++top_nest >= end_nests)
+              {
+              errorcode = ERR84;
+              goto FAILED;
+              }
+            top_nest->nest_depth = nest_depth;
+            top_nest->flags = NSF_ATOMICSR;
+            top_nest->options = options & PARSE_TRACKED_OPTIONS;
+            }
+          break;
+#else  /* SUPPORT_UNICODE */
+          errorcode = ERR96;
+          goto FAILED;
+#endif
+          }
         }
 
 
@@ -4262,8 +4303,8 @@ while (ptr < ptrend)
         }
       *parsed_pattern++ = (ptr[1] == CHAR_EQUALS_SIGN)?
         META_LOOKBEHIND : META_LOOKBEHINDNOT;
-        
-      LOOKBEHIND:                /* Come from (*plb: and (*nlb: */
+
+      POST_LOOKBEHIND:              /* Come from (*plb: and (*nlb: */
       *has_lookbehind = TRUE;
       offset = (PCRE2_SIZE)(ptr - cb->start_pattern - 2);
       PUTOFFSET(offset, parsed_pattern);
@@ -4425,6 +4466,14 @@ while (ptr < ptrend)
         cb->bracount = top_nest->max_group;
       if ((top_nest->flags & NSF_CONDASSERT) != 0)
         okquantifier = FALSE;
+
+      if ((top_nest->flags & NSF_ATOMICSR) != 0)
+        {
+        *parsed_pattern++ = META_KET;
+        }
+
+
+
       if (top_nest == (nest_save *)(cb->start_workspace)) top_nest = NULL;
         else top_nest--;
       }
@@ -6142,6 +6191,10 @@ for (;; pptr++)
     bravalue = OP_ONCE;
     goto GROUP_PROCESS_NOTE_EMPTY;
 
+    case META_SCRIPT_RUN:
+    bravalue = OP_SCRIPT_RUN;
+    goto GROUP_PROCESS_NOTE_EMPTY;
+
     case META_NOCAPTURE:
     bravalue = OP_BRA;
     /* Fall through */
@@ -6777,6 +6830,7 @@ for (;; pptr++)
       case OP_ASSERTBACK:
       case OP_ASSERTBACK_NOT:
       case OP_ONCE:
+      case OP_SCRIPT_RUN:
       case OP_BRA:
       case OP_CBRA:
       case OP_COND:
@@ -6989,16 +7043,16 @@ for (;; pptr++)
           }
 
         /* If the maximum is unlimited, set a repeater in the final copy. For
-        ONCE brackets, that's all we need to do. However, possessively repeated
-        ONCE brackets can be converted into non-capturing brackets, as the
-        behaviour of (?:xx)++ is the same as (?>xx)++ and this saves having to
-        deal with possessive ONCEs specially.
+        SCRIPT_RUN and ONCE brackets, that's all we need to do. However,
+        possessively repeated ONCE brackets can be converted into non-capturing
+        brackets, as the behaviour of (?:xx)++ is the same as (?>xx)++ and this
+        saves having to deal with possessive ONCEs specially.
 
         Otherwise, when we are doing the actual compile phase, check to see
         whether this group is one that could match an empty string. If so,
         convert the initial operator to the S form (e.g. OP_BRA -> OP_SBRA) so
         that runtime checking can be done. [This check is also applied to ONCE
-        groups at runtime, but in a different way.]
+        and SCRIPT_RUN groups at runtime, but in a different way.]
 
         Then, if the quantifier was possessive and the bracket is not a
         conditional, we convert the BRA code to the POS form, and the KET code to
@@ -7022,13 +7076,14 @@ for (;; pptr++)
 
           if (*bracode == OP_ONCE && possessive_quantifier) *bracode = OP_BRA;
 
-          /* For non-possessive ONCE brackets, all we need to do is to
-          set the KET. */
+          /* For non-possessive ONCE and for SCRIPT_RUN brackets, all we need
+          to do is to set the KET. */
 
-          if (*bracode == OP_ONCE) *ketcode = OP_KETRMAX + repeat_type;
+          if (*bracode == OP_ONCE || *bracode == OP_SCRIPT_RUN)
+            *ketcode = OP_KETRMAX + repeat_type;
 
-          /* Handle non-ONCE brackets and possessive ONCEs (which have been
-          converted to non-capturing above). */
+          /* Handle non-SCRIPT_RUN and non-ONCE brackets and possessive ONCEs
+          (which have been converted to non-capturing above). */
 
           else
             {
@@ -8385,6 +8440,7 @@ do {
      case OP_SCBRAPOS:
      case OP_ASSERT:
      case OP_ONCE:
+     case OP_SCRIPT_RUN:
      d = find_firstassertedcu(scode, &dflags, inassert + ((op==OP_ASSERT)?1:0));
      if (dflags < 0)
        return 0;

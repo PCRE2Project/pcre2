@@ -1,8 +1,10 @@
 #! /bin/sh
 
 # Script for testing regular expressions with perl to check that PCRE2 handles
-# them the same. If the first argument to this script is "-w", Perl is also
-# called with "-w", which turns on its warning mode.
+# them the same. For testing with different versions of Perl, if the first
+# argument is -perl then the second is taken as the Perl command to use, and
+# both are then removed. If the next argument is "-w", Perl is called with
+# "-w", which turns on its warning mode.
 #
 # The Perl code has to have "use utf8" and "require Encode" at the start when
 # running UTF-8 tests, but *not* for non-utf8 tests. (The "require" would
@@ -10,8 +12,8 @@
 # the script will always run for these tests.)
 #
 # The desired effect is achieved by making this a shell script that passes the
-# Perl script to Perl through a pipe. If the first argument (possibly after
-# removing "-w") is "-utf8", a suitable prefix is set up.
+# Perl script to Perl through a pipe. If the next argument is "-utf8", a
+# suitable prefix is set up.
 #
 # The remaining arguments, if any, are passed to Perl. They are an input file
 # and an output file. If there is one argument, the output is written to
@@ -22,6 +24,12 @@
 perl=perl
 perlarg=''
 prefix=''
+
+if [ $# -gt 1 -a "$1" = "-perl" ] ; then
+  shift
+  perl=$1
+  shift
+fi     
 
 if [ $# -gt 0 -a "$1" = "-w" ] ; then
   perlarg="-w"
@@ -78,6 +86,7 @@ fi
 # The alpha assertions currently give warnings even when -w is not specified.
 
 no warnings "experimental::alpha_assertions";
+no warnings "experimental::script_run";
 
 # Function for turning a string into a string of printing chars.
 

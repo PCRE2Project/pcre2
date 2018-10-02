@@ -386,5 +386,16 @@
 
 /(?<=abc)(|def)/g,utf,replace=<$0>,substitute_callout
     123abcáyzabcdef789abcሴqr
+    
+# A few script run tests in non-UTF mode (but they need Unicode support)
+
+/^(*script_run:.{4})/
+    \x{3041}\x{30a1}\x{3007}\x{3007}   Hiragana Katakana Han Han
+    \x{30a1}\x{3041}\x{3007}\x{3007}   Katakana Hiragana Han Han
+    \x{1100}\x{2e80}\x{2e80}\x{1101}   Hangul Han Han Hangul
+ 
+/^(*sr:.*)/utf,allow_surrogate_escapes
+    \x{2e80}\x{3105}\x{2e80}\x{30a1}   Han Bopomofo Han Katakana
+    \x{d800}\x{dfff}                   Surrogates (Unknown) \=no_utf_check
 
 # End of testinput12

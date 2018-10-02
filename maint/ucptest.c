@@ -134,6 +134,7 @@ switch(gbprop)
 
 switch(script)
   {
+  case ucp_Unknown:     scriptname = US"Unknown"; break; 
   case ucp_Arabic:      scriptname = US"Arabic"; break;
   case ucp_Armenian:    scriptname = US"Armenian"; break;
   case ucp_Balinese:    scriptname = US"Balinese"; break;

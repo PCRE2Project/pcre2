@@ -788,6 +788,7 @@ The distribution should contain the files listed below.
   src/pcre2_newline.c      )
   src/pcre2_ord2utf.c      )
   src/pcre2_pattern_info.c )
+  src/pcre2_script_run.c   ) 
   src/pcre2_serialize.c    )
   src/pcre2_string_utils.c )
   src/pcre2_study.c        )

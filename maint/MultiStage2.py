@@ -143,6 +143,7 @@
 # 03-July-2018:      Updated for Unicode 11.0.0
 # 07-July-2018:      Added code to scan emoji-data.txt for the Extended
 #                      Pictographic property.
+# 01-October-2018:   Added the 'Unknown' script name
 ##############################################################################
 
 
@@ -300,7 +301,7 @@ def get_record_size_struct(records):
         slice_type, slice_size = get_type_size(record_slice)
         size = (size + slice_size - 1) & -slice_size
 
-        structure += '} ucd_record;\n*/\n\n'
+        structure += '} ucd_record;\n*/\n'
         return size, structure
 
 def test_record_size():
@@ -329,7 +330,7 @@ def print_records(records, record_size):
                 print(('  {' + '%6d, ' * len(record[0]) + '}, /* %3d */') % (record[0] + (i,)))
         print('};\n')
 
-script_names = ['Arabic', 'Armenian', 'Bengali', 'Bopomofo', 'Braille', 'Buginese', 'Buhid', 'Canadian_Aboriginal', \
+script_names = ['Unknown', 'Arabic', 'Armenian', 'Bengali', 'Bopomofo', 'Braille', 'Buginese', 'Buhid', 'Canadian_Aboriginal', \
  'Cherokee', 'Common', 'Coptic', 'Cypriot', 'Cyrillic', 'Deseret', 'Devanagari', 'Ethiopic', 'Georgian', \
  'Glagolitic', 'Gothic', 'Greek', 'Gujarati', 'Gurmukhi', 'Han', 'Hangul', 'Hanunoo', 'Hebrew', 'Hiragana', \
  'Inherited', 'Kannada', 'Katakana', 'Kharoshthi', 'Khmer', 'Lao', 'Latin', 'Limbu', 'Linear_B', 'Malayalam', \
@@ -380,7 +381,7 @@ break_property_names = ['CR', 'LF', 'Control', 'Extend', 'Prepend',
 test_record_size()
 unicode_version = ""
 
-script = read_table('Unicode.tables/Scripts.txt', make_get_names(script_names), script_names.index('Common'))
+script = read_table('Unicode.tables/Scripts.txt', make_get_names(script_names), script_names.index('Unknown'))
 category = read_table('Unicode.tables/DerivedGeneralCategory.txt', make_get_names(category_names), category_names.index('Cn'))
 break_props = read_table('Unicode.tables/GraphemeBreakProperty.txt', make_get_names(break_property_names), break_property_names.index('Other'))
 other_case = read_table('Unicode.tables/CaseFolding.txt', get_other_case, 0)
@@ -553,17 +554,20 @@ print("special record. */")
 print()
 print("#if PCRE2_CODE_UNIT_WIDTH == 32")
 print("const ucd_record PRIV(dummy_ucd_record)[] = {{")
-print("  ucp_Common,    /* script */")
-print("  ucp_Cn,        /* type unassigned */")
-print("  ucp_gbOther,   /* grapheme break property */")
-print("  0,             /* case set */")
-print("  0,             /* other case */")
+print("  ucp_Unknown,    /* script */")
+print("  ucp_Cn,         /* type unassigned */")
+print("  ucp_gbOther,    /* grapheme break property */")
+print("  0,              /* case set */")
+print("  0,              /* other case */")
 print("  }};")
 print("#endif")
 print()
 print(record_struct)
 
 # --- Added by PH: output the table of caseless character sets ---
+
+print("/* This table contains lists of characters that are caseless sets of")
+print("more than one character. Each list is terminated by NOTACHAR. */\n")
 
 print("const uint32_t PRIV(ucd_caseless_sets)[] = {")
 print("  NOTACHAR,")
@@ -577,10 +581,53 @@ print()
 
 # ------
 
-print("/* When #included in pcre2test, we don't need this large table. */")
+print("/* When #included in pcre2test, we don't need the table of digit")
+print("sets, nor the the large main UCD tables. */")
 print()
 print("#ifndef PCRE2_PCRE2TEST")
 print()
+
+# --- Added by PH: read Scripts.txt again for the sets of 10 digits. ---
+
+digitsets = []
+file = open('Unicode.tables/Scripts.txt', 'r', encoding='utf-8')
+
+for line in file:
+  m = re.match(r'([0-9a-fA-F]+)\.\.([0-9a-fA-F]+)\s+;\s+\S+\s+#\s+Nd\s+', line)
+  if m is None:
+    continue
+  first = int(m.group(1),16)   
+  last  = int(m.group(2),16)   
+  if ((last - first + 1) % 10) != 0:
+    print("ERROR: %04x..%04x does not contain a multiple of 10 characters" % (first, last),
+      file=sys.stderr) 
+  while first < last:
+    digitsets.append(first + 9)
+    first += 10
+file.close()
+digitsets.sort()
+
+print("/* This table lists the code points for the '9' characters in each")
+print("set of decimal digits. It is used to ensure that all the digits in")
+print("a script run come from the same set. */")
+print()
+print("const uint32_t PRIV(ucd_digit_sets)[] = {")
+
+print("  %d,  /* Number of subsequent values */" % len(digitsets), end='')
+count = 8
+for d in digitsets:
+  if count == 8:
+    print("\n ", end='')
+    count = 0
+  print(" 0x%05x," % d, end='')
+  count += 1
+print("\n};")
+print()
+
+# Output the main UCD tables.
+
+print("/* These are the main two-stage UCD tables. */\n")
+
 print_records(records, record_size)
 print_table(min_stage1, 'PRIV(ucd_stage1)')
 print_table(min_stage2, 'PRIV(ucd_stage2)', min_block_size)
@@ -590,6 +637,10 @@ print("#endif")
 print("#endif  /* SUPPORT_UNICODE */")
 print()
 print("#endif  /* PCRE2_PCRE2TEST */")
+
+
+# This code was part of the original contribution, but is commented out as it
+# was never used. A two-stage table has sufficed.
 
 """
 

@@ -5014,6 +5014,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
     must record a backtracking point and also set up a chained frame. */
 
     case OP_ONCE:
+    case OP_SCRIPT_RUN: 
     case OP_SBRA:
     Lframe_type = GF_NOCAPTURE | Fop;
 
@@ -5525,6 +5526,14 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
       case OP_ASSERT_NOT:
       case OP_ASSERTBACK_NOT:
       RRETURN(MATCH_MATCH);
+      
+      /* At the end of a script run, apply the script-checking rules. This code 
+      will never by exercised if Unicode support it not compiled, because in 
+      that environment script runs cause an error at compile time. */
+      
+      case OP_SCRIPT_RUN:
+      if (!PRIV(script_run)(P->eptr, Feptr, utf)) RRETURN(MATCH_NOMATCH);
+      break;  
 
       /* Whole-pattern recursion is coded as a recurse into group 0, so it
       won't be picked up here. Instead, we catch it when the OP_END is reached.
