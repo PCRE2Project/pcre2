@@ -4814,6 +4814,39 @@ MK: ABC
         End
 ------------------------------------------------------------------
 
+/(?<!)(*sr:)/B
+------------------------------------------------------------------
+        Bra
+        AssertB not
+        Ket
+        Script run
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+
+/(?<=abc(?=X(*sr:BXY)CCC)XBXYCCC)./B
+------------------------------------------------------------------
+        Bra
+        AssertB
+        Reverse
+        abc
+        Assert
+        X
+        Script run
+        BXY
+        Ket
+        CCC
+        Ket
+        XBXYCCC
+        Ket
+        Any
+        Ket
+        End
+------------------------------------------------------------------
+   abcXBXYCCC!
+ 0: !
+
 # Some script run patterns are broken in Perl 5.28.0. These can be moved into
 # test 4 when a mended version of Perl is released.
 

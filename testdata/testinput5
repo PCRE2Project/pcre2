@@ -2116,6 +2116,11 @@
 
 /^(*sr:\x{2e80}*)\x{2e80}/B,utf
 
+/(?<!)(*sr:)/B
+
+/(?<=abc(?=X(*sr:BXY)CCC)XBXYCCC)./B
+   abcXBXYCCC!
+
 # Some script run patterns are broken in Perl 5.28.0. These can be moved into
 # test 4 when a mended version of Perl is released.
 

@@ -3873,6 +3873,18 @@ No match
     \x{1100}\x{2e80}\x{3041}\x{1101}   Hangul Han Hiragana Hangul
 No match
 
+/(?<!)(*sr:)/
+
+/(?<!X(*sr:B)C)/
+
+/(?<=abc(?=X(*sr:BCY)Z)XBCYZ)./
+    abcXBCYZ!
+ 0: !
+
+/(?<=abc(?=X(*sr:BXY)CCC)XBXYCCC)./
+   abcXBXYCCC!
+ 0: !
+
 # Test loop breaking for empty string match
 
 /^(*sr:A|)*BCD/utf

@@ -8640,6 +8640,7 @@ for (;; pptr++)
     case META_LOOKBEHIND:
     case META_LOOKBEHINDNOT:
     case META_NOCAPTURE:
+    case META_SCRIPT_RUN: 
     nestlevel++;
     break;
 
@@ -9052,6 +9053,7 @@ for (;; pptr++)
 
     case META_ATOMIC:
     case META_NOCAPTURE:
+    case META_SCRIPT_RUN: 
     pptr++;
     CHECK_GROUP:
     grouplength = get_grouplength(&pptr, TRUE, errcodeptr, lcptr, group,
@@ -9231,6 +9233,7 @@ for (pptr = cb->parsed_pattern; *pptr != META_END; pptr++)
     case META_QUERY_QUERY:
     case META_RANGE_ESCAPED:
     case META_RANGE_LITERAL:
+    case META_SCRIPT_RUN: 
     case META_SKIP:
     case META_THEN:
     break;
