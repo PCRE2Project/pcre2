@@ -289,7 +289,7 @@ ffe3 Symbol: Modifier symbol, Common, Other
 ffe4 Symbol: Other symbol, Common, Other
 ffe5 Symbol: Currency symbol, Common, Other
 ffe6 Symbol: Currency symbol, Common, Other
-ffe7 Control: Unassigned, Common, Other
+ffe7 Control: Unassigned, Unknown, Other
 findprop ffe8 ffe9 ffea ffeb ffec ffed ffee ffef
 ffe8 Symbol: Other symbol, Common, Other
 ffe9 Symbol: Mathematical symbol, Common, Other
@@ -298,22 +298,22 @@ ffeb Symbol: Mathematical symbol, Common, Other
 ffec Symbol: Mathematical symbol, Common, Other
 ffed Symbol: Other symbol, Common, Other
 ffee Symbol: Other symbol, Common, Other
-ffef Control: Unassigned, Common, Other
+ffef Control: Unassigned, Unknown, Other
 findprop fff8 fff9 fffa fffb fffc fffd fffe ffff
-fff8 Control: Unassigned, Common, Control
+fff8 Control: Unassigned, Unknown, Control
 fff9 Control: Format, Common, Control
 fffa Control: Format, Common, Control
 fffb Control: Format, Common, Control
 fffc Symbol: Other symbol, Common, Other
 fffd Symbol: Other symbol, Common, Other
-fffe Control: Unassigned, Common, Other
-ffff Control: Unassigned, Common, Other
+fffe Control: Unassigned, Unknown, Other
+ffff Control: Unassigned, Unknown, Other
 findprop 10000 10001 e01ef f0000 100000
 10000 Letter: Other letter, Linear_B, Other
 10001 Letter: Other letter, Linear_B, Other
 e01ef Mark: Non-spacing mark, Inherited, Extend
-f0000 Control: Private use, Common, Other
-100000 Control: Private use, Common, Other
+f0000 Control: Private use, Unknown, Other
+100000 Control: Private use, Unknown, Other
 
 findprop 1b00 12000 7c0 a840 10900
 1b00 Mark: Non-spacing mark, Balinese, Extend
@@ -379,3 +379,10 @@ findprop 11800 1e903 11da9 10d27 11ee0 16e48 10f27 10f30
 16e48 Letter: Upper case letter, Medefaidrin, Other, 16e68
 10f27 Letter: Other letter, Old_Sogdian, Other
 10f30 Letter: Other letter, Sogdian, Other
+
+findprop  a836  a833  1cf4  20f0  1cd0
+a836 Symbol: Other symbol, Common, Other, [Devanagari, Dogra, Gujarati, Gurmukhi, Khojki, Kaithi, Mahajani, Modi, Khudawadi, Takri, Tirhuta]
+a833 Number: Other number, Common, Other, [Devanagari, Dogra, Gujarati, Gurmukhi, Khojki, Kannada, Kaithi, Mahajani, Modi, Khudawadi, Takri, Tirhuta]
+1cf4 Mark: Non-spacing mark, Inherited, Extend, [Devanagari, Grantha, Kannada]
+20f0 Mark: Non-spacing mark, Inherited, Extend, [Devanagari, Grantha, Latin]
+1cd0 Mark: Non-spacing mark, Inherited, Extend, [Bengali, Devanagari, Grantha, Kannada]

@@ -4716,11 +4716,11 @@ struct sljit_jump *jump;
 #if defined SLJIT_DEBUG && SLJIT_DEBUG
 /* dummy_ucd_record */
 const ucd_record *record = GET_UCD(UNASSIGNED_UTF_CHAR);
-SLJIT_ASSERT(record->script == ucp_Common && record->chartype == ucp_Cn && record->gbprop == ucp_gbOther);
+SLJIT_ASSERT(record->script == ucp_Unknown && record->chartype == ucp_Cn && record->gbprop == ucp_gbOther);
 SLJIT_ASSERT(record->caseset == 0 && record->other_case == 0);
 #endif
 
-SLJIT_ASSERT(UCD_BLOCK_SIZE == 128 && sizeof(ucd_record) == 8);
+SLJIT_ASSERT(UCD_BLOCK_SIZE == 128 && sizeof(ucd_record) == 12);
 
 sljit_emit_fast_enter(compiler, RETURN_ADDR, 0);
 
@@ -4756,11 +4756,11 @@ struct sljit_jump *jump;
 #if defined SLJIT_DEBUG && SLJIT_DEBUG
 /* dummy_ucd_record */
 const ucd_record *record = GET_UCD(UNASSIGNED_UTF_CHAR);
-SLJIT_ASSERT(record->script == ucp_Common && record->chartype == ucp_Cn && record->gbprop == ucp_gbOther);
+SLJIT_ASSERT(record->script == ucp_Unknown && record->chartype == ucp_Cn && record->gbprop == ucp_gbOther);
 SLJIT_ASSERT(record->caseset == 0 && record->other_case == 0);
 #endif
 
-SLJIT_ASSERT(UCD_BLOCK_SIZE == 128 && sizeof(ucd_record) == 8);
+SLJIT_ASSERT(UCD_BLOCK_SIZE == 128 && sizeof(ucd_record) == 12);
 
 sljit_emit_fast_enter(compiler, RETURN_ADDR, 0);
 
@@ -4781,8 +4781,19 @@ OP2(SLJIT_SHL, TMP2, 0, TMP2, 0, SLJIT_IMM, UCD_BLOCK_SHIFT);
 OP2(SLJIT_ADD, TMP1, 0, TMP1, 0, TMP2, 0);
 OP1(SLJIT_MOV, TMP2, 0, SLJIT_IMM, (sljit_sw)PRIV(ucd_stage2));
 OP1(SLJIT_MOV_U16, TMP2, 0, SLJIT_MEM2(TMP2, TMP1), 1);
+
+// PH hacking
+//fprintf(stderr, "~~A\n");
+  OP2(SLJIT_SHL, TMP1, 0, TMP2, 0, SLJIT_IMM, 2);
+  OP2(SLJIT_SHL, TMP2, 0, TMP2, 0, SLJIT_IMM, 3);
+  OP2(SLJIT_ADD, TMP2, 0, TMP2, 0, TMP1, 0);
+  OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, (sljit_sw)PRIV(ucd_records) + SLJIT_OFFSETOF(ucd_record, chartype));
+
 OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, (sljit_sw)PRIV(ucd_records) + SLJIT_OFFSETOF(ucd_record, chartype));
-OP1(SLJIT_MOV_U8, TMP1, 0, SLJIT_MEM2(TMP1, TMP2), 3);
+
+  OP1(SLJIT_MOV_U8, TMP1, 0, SLJIT_MEM2(TMP1, TMP2), 0);
+
+// OP1(SLJIT_MOV_U8, TMP1, 0, SLJIT_MEM2(TMP1, TMP2), 3);
 sljit_emit_fast_return(compiler, RETURN_ADDR, 0);
 }
 
@@ -7775,8 +7786,18 @@ if (needstype || needsscript)
   /* Before anything else, we deal with scripts. */
   if (needsscript)
     {
+// PH hacking
+//fprintf(stderr, "~~B\n");
+
+      OP2(SLJIT_SHL, TMP1, 0, TMP2, 0, SLJIT_IMM, 2);
+      OP2(SLJIT_SHL, TMP2, 0, TMP2, 0, SLJIT_IMM, 3);
+      OP2(SLJIT_ADD, TMP2, 0, TMP2, 0, TMP1, 0); 
+
     OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, (sljit_sw)PRIV(ucd_records) + SLJIT_OFFSETOF(ucd_record, script));
-    OP1(SLJIT_MOV_U8, TMP1, 0, SLJIT_MEM2(TMP1, TMP2), 3);
+
+      OP1(SLJIT_MOV_U8, TMP1, 0, SLJIT_MEM2(TMP1, TMP2), 0);
+     
+    // OP1(SLJIT_MOV_U8, TMP1, 0, SLJIT_MEM2(TMP1, TMP2), 3);
 
     ccbegin = cc;
 
@@ -7820,12 +7841,30 @@ if (needstype || needsscript)
     {
     if (!needschar)
       {
+// PH hacking
+//fprintf(stderr, "~~C\n");
+  OP2(SLJIT_SHL, TMP1, 0, TMP2, 0, SLJIT_IMM, 2);
+  OP2(SLJIT_SHL, TMP2, 0, TMP2, 0, SLJIT_IMM, 3);
+  OP2(SLJIT_ADD, TMP2, 0, TMP2, 0, TMP1, 0); 
+  OP2(SLJIT_ADD, TMP1, 0, TMP2, 0, TMP1, 0);
+
       OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, (sljit_sw)PRIV(ucd_records) + SLJIT_OFFSETOF(ucd_record, chartype));
-      OP1(SLJIT_MOV_U8, TMP1, 0, SLJIT_MEM2(TMP1, TMP2), 3);
+
+  OP1(SLJIT_MOV_U8, TMP1, 0, SLJIT_MEM2(TMP1, TMP2), 0);
+
+//      OP1(SLJIT_MOV_U8, TMP1, 0, SLJIT_MEM2(TMP1, TMP2), 3);
       }
     else
       {
+// PH hacking
+//fprintf(stderr, "~~D\n");
+  OP2(SLJIT_SHL, TMP1, 0, TMP2, 0, SLJIT_IMM, 2);
+ 
       OP2(SLJIT_SHL, TMP2, 0, TMP2, 0, SLJIT_IMM, 3);
+      
+  OP2(SLJIT_ADD, TMP2, 0, TMP2, 0, TMP1, 0);
+  OP1(SLJIT_MOV, TMP1, 0, RETURN_ADDR, 0);
+ 
       OP1(SLJIT_MOV_U8, RETURN_ADDR, 0, SLJIT_MEM1(TMP2), (sljit_sw)PRIV(ucd_records) + SLJIT_OFFSETOF(ucd_record, chartype));
       typereg = RETURN_ADDR;
       }
@@ -9155,10 +9194,19 @@ if (common->utf && *cc == OP_REFI)
 
   CMPTO(SLJIT_EQUAL, TMP1, 0, char1_reg, 0, loop);
 
+// PH hacking
+//fprintf(stderr, "~~E\n");
+
   OP1(SLJIT_MOV, TMP3, 0, TMP1, 0);
+
   add_jump(compiler, &common->getucd, JUMP(SLJIT_FAST_CALL));
 
+    OP2(SLJIT_SHL, TMP1, 0, TMP2, 0, SLJIT_IMM, 2);
+
   OP2(SLJIT_SHL, TMP2, 0, TMP2, 0, SLJIT_IMM, 3);
+    
+    OP2(SLJIT_ADD, TMP2, 0, TMP2, 0, TMP1, 0); 
+ 
   OP2(SLJIT_ADD, TMP2, 0, TMP2, 0, SLJIT_IMM, (sljit_sw)PRIV(ucd_records));
 
   OP1(SLJIT_MOV_S32, TMP1, 0, SLJIT_MEM1(TMP2), SLJIT_OFFSETOF(ucd_record, other_case));

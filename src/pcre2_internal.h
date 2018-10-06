@@ -1778,6 +1778,8 @@ typedef struct {
   uint8_t gbprop;     /* ucp_gbControl, etc. (grapheme break property) */
   uint8_t caseset;    /* offset to multichar other cases or zero */
   int32_t other_case; /* offset to other case, or zero if none */
+  int16_t scriptx;    /* script extension value */
+  int16_t dummy;      /* spare - to round to multiple of 4 bytes */  
 } ucd_record;
 
 /* UCD access macros */
@@ -1800,6 +1802,7 @@ typedef struct {
 #define UCD_GRAPHBREAK(ch)  GET_UCD(ch)->gbprop
 #define UCD_CASESET(ch)     GET_UCD(ch)->caseset
 #define UCD_OTHERCASE(ch)   ((uint32_t)((int)ch + (int)(GET_UCD(ch)->other_case)))
+#define UCD_SCRIPTX(ch)     GET_UCD(ch)->scriptx
 
 /* Header for serialized pcre2 codes. */
 
@@ -1858,6 +1861,7 @@ extern const uint8_t          PRIV(utf8_table4)[];
 #define _pcre2_vspace_list             PCRE2_SUFFIX(_pcre2_vspace_list_)
 #define _pcre2_ucd_caseless_sets       PCRE2_SUFFIX(_pcre2_ucd_caseless_sets_)
 #define _pcre2_ucd_digit_sets          PCRE2_SUFFIX(_pcre2_ucd_digit_sets_)
+#define _pcre2_ucd_script_sets         PCRE2_SUFFIX(_pcre2_ucd_script_sets_)
 #define _pcre2_ucd_records             PCRE2_SUFFIX(_pcre2_ucd_records_)
 #define _pcre2_ucd_stage1              PCRE2_SUFFIX(_pcre2_ucd_stage1_)
 #define _pcre2_ucd_stage2              PCRE2_SUFFIX(_pcre2_ucd_stage2_)
@@ -1880,6 +1884,7 @@ extern const uint32_t                  PRIV(hspace_list)[];
 extern const uint32_t                  PRIV(vspace_list)[];
 extern const uint32_t                  PRIV(ucd_caseless_sets)[];
 extern const uint32_t                  PRIV(ucd_digit_sets)[];
+extern const uint8_t                   PRIV(ucd_script_sets)[];
 extern const ucd_record                PRIV(ucd_records)[];
 #if PCRE2_CODE_UNIT_WIDTH == 32
 extern const ucd_record                PRIV(dummy_ucd_record)[];

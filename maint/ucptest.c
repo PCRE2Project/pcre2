@@ -9,11 +9,12 @@
      ucptest.c ../src/pcre2_ucd.c ../src/pcre2_tables.c
 */
 
-/* The program expects to read commands on stdin, and it writes output
-to stdout. There is only one command, "findprop", followed by a list of Unicode 
-code points as hex numbers (without any prefixes). The output is one line per 
-character, giving its Unicode properties followed by its other case if there is 
-one. */
+/* If there are arguments, they are a list of hexadecimal code points whose
+properties are to be output. Otherwise, the program expects to read commands on
+stdin, and it writes output to stdout. There is only one command, "findprop",
+followed by a list of Unicode code points as hex numbers (without any
+prefixes). The output is one line per character, giving its Unicode properties
+followed by its other case if there is one. */
 
 #ifdef HAVE_CONFIG_H
 #include "../src/config.h"
@@ -47,6 +48,183 @@ one. */
 
 
 /*************************************************
+*          Find a script name                    *
+*************************************************/
+
+static unsigned char *
+find_script_name(int script)
+{
+switch(script)
+  {
+  default:              return US"??"; 
+  case ucp_Unknown:     return US"Unknown";  
+  case ucp_Arabic:      return US"Arabic"; 
+  case ucp_Armenian:    return US"Armenian"; 
+  case ucp_Balinese:    return US"Balinese"; 
+  case ucp_Bengali:     return US"Bengali"; 
+  case ucp_Bopomofo:    return US"Bopomofo"; 
+  case ucp_Braille:     return US"Braille"; 
+  case ucp_Buginese:    return US"Buginese"; 
+  case ucp_Buhid:       return US"Buhid"; 
+  case ucp_Canadian_Aboriginal: return US"Canadian_Aboriginal"; 
+  case ucp_Cherokee:    return US"Cherokee"; 
+  case ucp_Common:      return US"Common"; 
+  case ucp_Coptic:      return US"Coptic"; 
+  case ucp_Cuneiform:   return US"Cuneiform"; 
+  case ucp_Cypriot:     return US"Cypriot"; 
+  case ucp_Cyrillic:    return US"Cyrillic"; 
+  case ucp_Deseret:     return US"Deseret"; 
+  case ucp_Devanagari:  return US"Devanagari"; 
+  case ucp_Ethiopic:    return US"Ethiopic"; 
+  case ucp_Georgian:    return US"Georgian"; 
+  case ucp_Glagolitic:  return US"Glagolitic"; 
+  case ucp_Gothic:      return US"Gothic"; 
+  case ucp_Greek:       return US"Greek"; 
+  case ucp_Gujarati:    return US"Gujarati"; 
+  case ucp_Gurmukhi:    return US"Gurmukhi"; 
+  case ucp_Han:         return US"Han"; 
+  case ucp_Hangul:      return US"Hangul"; 
+  case ucp_Hanunoo:     return US"Hanunoo"; 
+  case ucp_Hebrew:      return US"Hebrew"; 
+  case ucp_Hiragana:    return US"Hiragana"; 
+  case ucp_Inherited:   return US"Inherited"; 
+  case ucp_Kannada:     return US"Kannada"; 
+  case ucp_Katakana:    return US"Katakana"; 
+  case ucp_Kharoshthi:  return US"Kharoshthi"; 
+  case ucp_Khmer:       return US"Khmer"; 
+  case ucp_Lao:         return US"Lao"; 
+  case ucp_Latin:       return US"Latin"; 
+  case ucp_Limbu:       return US"Limbu"; 
+  case ucp_Linear_B:    return US"Linear_B"; 
+  case ucp_Malayalam:   return US"Malayalam"; 
+  case ucp_Mongolian:   return US"Mongolian"; 
+  case ucp_Myanmar:     return US"Myanmar"; 
+  case ucp_New_Tai_Lue: return US"New_Tai_Lue"; 
+  case ucp_Nko:         return US"Nko"; 
+  case ucp_Ogham:       return US"Ogham"; 
+  case ucp_Old_Italic:  return US"Old_Italic"; 
+  case ucp_Old_Persian: return US"Old_Persian"; 
+  case ucp_Oriya:       return US"Oriya"; 
+  case ucp_Osmanya:     return US"Osmanya"; 
+  case ucp_Phags_Pa:    return US"Phags_Pa"; 
+  case ucp_Phoenician:  return US"Phoenician"; 
+  case ucp_Runic:       return US"Runic"; 
+  case ucp_Shavian:     return US"Shavian"; 
+  case ucp_Sinhala:     return US"Sinhala"; 
+  case ucp_Syloti_Nagri: return US"Syloti_Nagri"; 
+  case ucp_Syriac:      return US"Syriac"; 
+  case ucp_Tagalog:     return US"Tagalog"; 
+  case ucp_Tagbanwa:    return US"Tagbanwa"; 
+  case ucp_Tai_Le:      return US"Tai_Le"; 
+  case ucp_Tamil:       return US"Tamil"; 
+  case ucp_Telugu:      return US"Telugu"; 
+  case ucp_Thaana:      return US"Thaana"; 
+  case ucp_Thai:        return US"Thai"; 
+  case ucp_Tibetan:     return US"Tibetan"; 
+  case ucp_Tifinagh:    return US"Tifinagh"; 
+  case ucp_Ugaritic:    return US"Ugaritic"; 
+  case ucp_Yi:          return US"Yi"; 
+  /* New for Unicode 5.1: */
+  case ucp_Carian:      return US"Carian"; 
+  case ucp_Cham:        return US"Cham"; 
+  case ucp_Kayah_Li:    return US"Kayah_Li"; 
+  case ucp_Lepcha:      return US"Lepcha"; 
+  case ucp_Lycian:      return US"Lycian"; 
+  case ucp_Lydian:      return US"Lydian"; 
+  case ucp_Ol_Chiki:    return US"Ol_Chiki"; 
+  case ucp_Rejang:      return US"Rejang"; 
+  case ucp_Saurashtra:  return US"Saurashtra"; 
+  case ucp_Sundanese:   return US"Sundanese"; 
+  case ucp_Vai:         return US"Vai"; 
+  /* New for Unicode 5.2: */
+  case ucp_Avestan:     return US"Avestan"; 
+  case ucp_Bamum:       return US"Bamum"; 
+  case ucp_Egyptian_Hieroglyphs: return US"Egyptian_Hieroglyphs"; 
+  case ucp_Imperial_Aramaic: return US"Imperial_Aramaic"; 
+  case ucp_Inscriptional_Pahlavi: return US"Inscriptional_Pahlavi"; 
+  case ucp_Inscriptional_Parthian: return US"Inscriptional_Parthian"; 
+  case ucp_Javanese:    return US"Javanese"; 
+  case ucp_Kaithi:      return US"Kaithi"; 
+  case ucp_Lisu:        return US"Lisu"; 
+  case ucp_Meetei_Mayek: return US"Meetei_Mayek"; 
+  case ucp_Old_South_Arabian: return US"Old_South_Arabian"; 
+  case ucp_Old_Turkic:  return US"Old_Turkic"; 
+  case ucp_Samaritan:   return US"Samaritan"; 
+  case ucp_Tai_Tham:    return US"Tai_Tham"; 
+  case ucp_Tai_Viet:    return US"Tai_Viet"; 
+  /* New for Unicode 6.0.0 */
+  case ucp_Batak:       return US"Batak"; 
+  case ucp_Brahmi:      return US"Brahmi"; 
+  case ucp_Mandaic:     return US"Mandaic"; 
+
+  /* New for Unicode 6.1.0 */
+  case ucp_Chakma:               return US"Chakma"; 
+  case ucp_Meroitic_Cursive:     return US"Meroitic_Cursive"; 
+  case ucp_Meroitic_Hieroglyphs: return US"Meroitic_Hieroglyphs"; 
+  case ucp_Miao:                 return US"Miao"; 
+  case ucp_Sharada:              return US"Sharada"; 
+  case ucp_Sora_Sompeng:         return US"Sora Sompent"; 
+  case ucp_Takri:                return US"Takri"; 
+
+  /* New for Unicode 7.0.0 */
+  case ucp_Bassa_Vah:          return US"Bassa_Vah"; 
+  case ucp_Caucasian_Albanian: return US"Caucasian_Albanian"; 
+  case ucp_Duployan:           return US"Duployan"; 
+  case ucp_Elbasan:            return US"Elbasan"; 
+  case ucp_Grantha:            return US"Grantha"; 
+  case ucp_Khojki:             return US"Khojki"; 
+  case ucp_Khudawadi:          return US"Khudawadi"; 
+  case ucp_Linear_A:           return US"Linear_A"; 
+  case ucp_Mahajani:           return US"Mahajani"; 
+  case ucp_Manichaean:         return US"Manichaean"; 
+  case ucp_Mende_Kikakui:      return US"Mende_Kikakui"; 
+  case ucp_Modi:               return US"Modi"; 
+  case ucp_Mro:                return US"Mro"; 
+  case ucp_Nabataean:          return US"Nabataean"; 
+  case ucp_Old_North_Arabian:  return US"Old_North_Arabian"; 
+  case ucp_Old_Permic:         return US"Old_Permic"; 
+  case ucp_Pahawh_Hmong:       return US"Pahawh_Hmong"; 
+  case ucp_Palmyrene:          return US"Palmyrene"; 
+  case ucp_Psalter_Pahlavi:    return US"Psalter_Pahlavi"; 
+  case ucp_Pau_Cin_Hau:        return US"Pau_Cin_Hau"; 
+  case ucp_Siddham:            return US"Siddham"; 
+  case ucp_Tirhuta:            return US"Tirhuta"; 
+  case ucp_Warang_Citi:        return US"Warang_Citi"; 
+
+  /* New for Unicode 8.0.0 */
+  case ucp_Ahom:                  return US"Ahom"; 
+  case ucp_Anatolian_Hieroglyphs: return US"Anatolian_Hieroglyphs"; 
+  case ucp_Hatran:                return US"Hatran"; 
+  case ucp_Multani:               return US"Multani"; 
+  case ucp_Old_Hungarian:         return US"Old_Hungarian"; 
+  case ucp_SignWriting:           return US"SignWriting"; 
+
+  /* New for Unicode 10.0.0 (no update since 8.0.0) */
+  case ucp_Adlam:               return US"Adlam"; 
+  case ucp_Bhaiksuki:           return US"Bhaiksuki"; 
+  case ucp_Marchen:             return US"Marchen"; 
+  case ucp_Newa:                return US"Newa"; 
+  case ucp_Osage:               return US"Osage"; 
+  case ucp_Tangut:              return US"Tangut"; 
+  case ucp_Masaram_Gondi:       return US"Masaram_Gondi"; 
+  case ucp_Nushu:               return US"Nushu"; 
+  case ucp_Soyombo:             return US"Soyombo"; 
+  case ucp_Zanabazar_Square:    return US"Zanabazar_Square"; 
+
+  /* New for Unicode 11.0.0 */ 
+  case ucp_Dogra:               return US"Dogra";  
+  case ucp_Gunjala_Gondi:       return US"Gunjala_Gondi";  
+  case ucp_Hanifi_Rohingya:     return US"Hanifi_Rohingya";  
+  case ucp_Makasar:             return US"Makasar";  
+  case ucp_Medefaidrin:         return US"Medefaidrin"; 
+  case ucp_Old_Sogdian:         return US"Old_Sogdian";  
+  case ucp_Sogdian:             return US"Sogdian"; 
+  }
+}
+
+
+
+/*************************************************
 *      Print Unicode property info for a char    *
 *************************************************/
 
@@ -56,14 +234,16 @@ print_prop(int c)
 int type = UCD_CATEGORY(c);
 int fulltype = UCD_CHARTYPE(c);
 int script = UCD_SCRIPT(c);
+int scriptx = UCD_SCRIPTX(c);
 int gbprop = UCD_GRAPHBREAK(c);
 int othercase = UCD_OTHERCASE(c);
 int caseset = UCD_CASESET(c);
 
 unsigned char *fulltypename = US"??";
 unsigned char *typename = US"??";
-unsigned char *scriptname = US"??";
 unsigned char *graphbreak = US"??";
+
+unsigned char *scriptname = find_script_name(script); 
 
 switch (type)
   {
@@ -131,173 +311,7 @@ switch(gbprop)
                            graphbreak = US"Extended Pictographic"; break;  
   default:                 graphbreak = US"Unknown"; break;  
   }
-
-switch(script)
-  {
-  case ucp_Unknown:     scriptname = US"Unknown"; break; 
-  case ucp_Arabic:      scriptname = US"Arabic"; break;
-  case ucp_Armenian:    scriptname = US"Armenian"; break;
-  case ucp_Balinese:    scriptname = US"Balinese"; break;
-  case ucp_Bengali:     scriptname = US"Bengali"; break;
-  case ucp_Bopomofo:    scriptname = US"Bopomofo"; break;
-  case ucp_Braille:     scriptname = US"Braille"; break;
-  case ucp_Buginese:    scriptname = US"Buginese"; break;
-  case ucp_Buhid:       scriptname = US"Buhid"; break;
-  case ucp_Canadian_Aboriginal: scriptname = US"Canadian_Aboriginal"; break;
-  case ucp_Cherokee:    scriptname = US"Cherokee"; break;
-  case ucp_Common:      scriptname = US"Common"; break;
-  case ucp_Coptic:      scriptname = US"Coptic"; break;
-  case ucp_Cuneiform:   scriptname = US"Cuneiform"; break;
-  case ucp_Cypriot:     scriptname = US"Cypriot"; break;
-  case ucp_Cyrillic:    scriptname = US"Cyrillic"; break;
-  case ucp_Deseret:     scriptname = US"Deseret"; break;
-  case ucp_Devanagari:  scriptname = US"Devanagari"; break;
-  case ucp_Ethiopic:    scriptname = US"Ethiopic"; break;
-  case ucp_Georgian:    scriptname = US"Georgian"; break;
-  case ucp_Glagolitic:  scriptname = US"Glagolitic"; break;
-  case ucp_Gothic:      scriptname = US"Gothic"; break;
-  case ucp_Greek:       scriptname = US"Greek"; break;
-  case ucp_Gujarati:    scriptname = US"Gujarati"; break;
-  case ucp_Gurmukhi:    scriptname = US"Gurmukhi"; break;
-  case ucp_Han:         scriptname = US"Han"; break;
-  case ucp_Hangul:      scriptname = US"Hangul"; break;
-  case ucp_Hanunoo:     scriptname = US"Hanunoo"; break;
-  case ucp_Hebrew:      scriptname = US"Hebrew"; break;
-  case ucp_Hiragana:    scriptname = US"Hiragana"; break;
-  case ucp_Inherited:   scriptname = US"Inherited"; break;
-  case ucp_Kannada:     scriptname = US"Kannada"; break;
-  case ucp_Katakana:    scriptname = US"Katakana"; break;
-  case ucp_Kharoshthi:  scriptname = US"Kharoshthi"; break;
-  case ucp_Khmer:       scriptname = US"Khmer"; break;
-  case ucp_Lao:         scriptname = US"Lao"; break;
-  case ucp_Latin:       scriptname = US"Latin"; break;
-  case ucp_Limbu:       scriptname = US"Limbu"; break;
-  case ucp_Linear_B:    scriptname = US"Linear_B"; break;
-  case ucp_Malayalam:   scriptname = US"Malayalam"; break;
-  case ucp_Mongolian:   scriptname = US"Mongolian"; break;
-  case ucp_Myanmar:     scriptname = US"Myanmar"; break;
-  case ucp_New_Tai_Lue: scriptname = US"New_Tai_Lue"; break;
-  case ucp_Nko:         scriptname = US"Nko"; break;
-  case ucp_Ogham:       scriptname = US"Ogham"; break;
-  case ucp_Old_Italic:  scriptname = US"Old_Italic"; break;
-  case ucp_Old_Persian: scriptname = US"Old_Persian"; break;
-  case ucp_Oriya:       scriptname = US"Oriya"; break;
-  case ucp_Osmanya:     scriptname = US"Osmanya"; break;
-  case ucp_Phags_Pa:    scriptname = US"Phags_Pa"; break;
-  case ucp_Phoenician:  scriptname = US"Phoenician"; break;
-  case ucp_Runic:       scriptname = US"Runic"; break;
-  case ucp_Shavian:     scriptname = US"Shavian"; break;
-  case ucp_Sinhala:     scriptname = US"Sinhala"; break;
-  case ucp_Syloti_Nagri: scriptname = US"Syloti_Nagri"; break;
-  case ucp_Syriac:      scriptname = US"Syriac"; break;
-  case ucp_Tagalog:     scriptname = US"Tagalog"; break;
-  case ucp_Tagbanwa:    scriptname = US"Tagbanwa"; break;
-  case ucp_Tai_Le:      scriptname = US"Tai_Le"; break;
-  case ucp_Tamil:       scriptname = US"Tamil"; break;
-  case ucp_Telugu:      scriptname = US"Telugu"; break;
-  case ucp_Thaana:      scriptname = US"Thaana"; break;
-  case ucp_Thai:        scriptname = US"Thai"; break;
-  case ucp_Tibetan:     scriptname = US"Tibetan"; break;
-  case ucp_Tifinagh:    scriptname = US"Tifinagh"; break;
-  case ucp_Ugaritic:    scriptname = US"Ugaritic"; break;
-  case ucp_Yi:          scriptname = US"Yi"; break;
-  /* New for Unicode 5.1: */
-  case ucp_Carian:      scriptname = US"Carian"; break;
-  case ucp_Cham:        scriptname = US"Cham"; break;
-  case ucp_Kayah_Li:    scriptname = US"Kayah_Li"; break;
-  case ucp_Lepcha:      scriptname = US"Lepcha"; break;
-  case ucp_Lycian:      scriptname = US"Lycian"; break;
-  case ucp_Lydian:      scriptname = US"Lydian"; break;
-  case ucp_Ol_Chiki:    scriptname = US"Ol_Chiki"; break;
-  case ucp_Rejang:      scriptname = US"Rejang"; break;
-  case ucp_Saurashtra:  scriptname = US"Saurashtra"; break;
-  case ucp_Sundanese:   scriptname = US"Sundanese"; break;
-  case ucp_Vai:         scriptname = US"Vai"; break;
-  /* New for Unicode 5.2: */
-  case ucp_Avestan:     scriptname = US"Avestan"; break;
-  case ucp_Bamum:       scriptname = US"Bamum"; break;
-  case ucp_Egyptian_Hieroglyphs: scriptname = US"Egyptian_Hieroglyphs"; break;
-  case ucp_Imperial_Aramaic: scriptname = US"Imperial_Aramaic"; break;
-  case ucp_Inscriptional_Pahlavi: scriptname = US"Inscriptional_Pahlavi"; break;
-  case ucp_Inscriptional_Parthian: scriptname = US"Inscriptional_Parthian"; break;
-  case ucp_Javanese:    scriptname = US"Javanese"; break;
-  case ucp_Kaithi:      scriptname = US"Kaithi"; break;
-  case ucp_Lisu:        scriptname = US"Lisu"; break;
-  case ucp_Meetei_Mayek: scriptname = US"Meetei_Mayek"; break;
-  case ucp_Old_South_Arabian: scriptname = US"Old_South_Arabian"; break;
-  case ucp_Old_Turkic:  scriptname = US"Old_Turkic"; break;
-  case ucp_Samaritan:   scriptname = US"Samaritan"; break;
-  case ucp_Tai_Tham:    scriptname = US"Tai_Tham"; break;
-  case ucp_Tai_Viet:    scriptname = US"Tai_Viet"; break;
-  /* New for Unicode 6.0.0 */
-  case ucp_Batak:       scriptname = US"Batak"; break;
-  case ucp_Brahmi:      scriptname = US"Brahmi"; break;
-  case ucp_Mandaic:     scriptname = US"Mandaic"; break;
-
-  /* New for Unicode 6.1.0 */
-  case ucp_Chakma:               scriptname = US"Chakma"; break;
-  case ucp_Meroitic_Cursive:     scriptname = US"Meroitic_Cursive"; break;
-  case ucp_Meroitic_Hieroglyphs: scriptname = US"Meroitic_Hieroglyphs"; break;
-  case ucp_Miao:                 scriptname = US"Miao"; break;
-  case ucp_Sharada:              scriptname = US"Sharada"; break;
-  case ucp_Sora_Sompeng:         scriptname = US"Sora Sompent"; break;
-  case ucp_Takri:                scriptname = US"Takri"; break;
-
-  /* New for Unicode 7.0.0 */
-  case ucp_Bassa_Vah:          scriptname = US"Bassa_Vah"; break;
-  case ucp_Caucasian_Albanian: scriptname = US"Caucasian_Albanian"; break;
-  case ucp_Duployan:           scriptname = US"Duployan"; break;
-  case ucp_Elbasan:            scriptname = US"Elbasan"; break;
-  case ucp_Grantha:            scriptname = US"Grantha"; break;
-  case ucp_Khojki:             scriptname = US"Khojki"; break;
-  case ucp_Khudawadi:          scriptname = US"Khudawadi"; break;
-  case ucp_Linear_A:           scriptname = US"Linear_A"; break;
-  case ucp_Mahajani:           scriptname = US"Mahajani"; break;
-  case ucp_Manichaean:         scriptname = US"Manichaean"; break;
-  case ucp_Mende_Kikakui:      scriptname = US"Mende_Kikakui"; break;
-  case ucp_Modi:               scriptname = US"Modi"; break;
-  case ucp_Mro:                scriptname = US"Mro"; break;
-  case ucp_Nabataean:          scriptname = US"Nabataean"; break;
-  case ucp_Old_North_Arabian:  scriptname = US"Old_North_Arabian"; break;
-  case ucp_Old_Permic:         scriptname = US"Old_Permic"; break;
-  case ucp_Pahawh_Hmong:       scriptname = US"Pahawh_Hmong"; break;
-  case ucp_Palmyrene:          scriptname = US"Palmyrene"; break;
-  case ucp_Psalter_Pahlavi:    scriptname = US"Psalter_Pahlavi"; break;
-  case ucp_Pau_Cin_Hau:        scriptname = US"Pau_Cin_Hau"; break;
-  case ucp_Siddham:            scriptname = US"Siddham"; break;
-  case ucp_Tirhuta:            scriptname = US"Tirhuta"; break;
-  case ucp_Warang_Citi:        scriptname = US"Warang_Citi"; break;
-
-  /* New for Unicode 8.0.0 */
-  case ucp_Ahom:                  scriptname = US"Ahom"; break;
-  case ucp_Anatolian_Hieroglyphs: scriptname = US"Anatolian_Hieroglyphs"; break;
-  case ucp_Hatran:                scriptname = US"Hatran"; break;
-  case ucp_Multani:               scriptname = US"Multani"; break;
-  case ucp_Old_Hungarian:         scriptname = US"Old_Hungarian"; break;
-  case ucp_SignWriting:           scriptname = US"SignWriting"; break;
-
-  /* New for Unicode 10.0.0 (no update since 8.0.0) */
-  case ucp_Adlam:               scriptname = US"Adlam"; break;
-  case ucp_Bhaiksuki:           scriptname = US"Bhaiksuki"; break;
-  case ucp_Marchen:             scriptname = US"Marchen"; break;
-  case ucp_Newa:                scriptname = US"Newa"; break;
-  case ucp_Osage:               scriptname = US"Osage"; break;
-  case ucp_Tangut:              scriptname = US"Tangut"; break;
-  case ucp_Masaram_Gondi:       scriptname = US"Masaram_Gondi"; break;
-  case ucp_Nushu:               scriptname = US"Nushu"; break;
-  case ucp_Soyombo:             scriptname = US"Soyombo"; break;
-  case ucp_Zanabazar_Square:    scriptname = US"Zanabazar_Square"; break;
-
-  /* New for Unicode 11.0.0 */ 
-  case ucp_Dogra:               scriptname = US"Dogra"; break; 
-  case ucp_Gunjala_Gondi:       scriptname = US"Gunjala_Gondi"; break; 
-  case ucp_Hanifi_Rohingya:     scriptname = US"Hanifi_Rohingya"; break; 
-  case ucp_Makasar:             scriptname = US"Makasar"; break; 
-  case ucp_Medefaidrin:         scriptname = US"Medefaidrin"; break;
-  case ucp_Old_Sogdian:         scriptname = US"Old_Sogdian"; break; 
-  case ucp_Sogdian:             scriptname = US"Sogdian"; break;
-  }
-
+  
 printf("%04x %s: %s, %s, %s", c, typename, fulltypename, scriptname, graphbreak);
 if (othercase != c) 
   {
@@ -309,6 +323,23 @@ if (othercase != c)
       if (*p != othercase && *p != c) printf(", %04x", *p);
     }   
   } 
+  
+if (scriptx != script)
+  {
+  printf(", ["); 
+  if (scriptx >= 0) printf("%s", find_script_name(scriptx)); else
+    {
+    char *sep = ""; 
+    const uint8_t *p = PRIV(ucd_script_sets) - scriptx;
+    while (*p != 0)
+      {
+      printf("%s%s", sep, find_script_name(*p++));
+      sep = ", "; 
+      }   
+    }  
+  printf("]");
+  } 
+ 
 printf("\n");
 }
 
@@ -319,9 +350,22 @@ printf("\n");
 *************************************************/
 
 int
-main(void)
+main(int argc, char **argv)
 {
 unsigned char buffer[1024];
+
+if (argc > 1)
+  {
+  int i;
+  for (i = 1; i < argc; i++)
+    {
+    unsigned char *endptr; 
+    int c = strtoul(argv[i], CSS(&endptr), 16);
+    print_prop(c); 
+    }
+  return 0;
+  }    
+
 while (fgets(CS buffer, sizeof(buffer), stdin) != NULL)
   {
   unsigned char name[24];
