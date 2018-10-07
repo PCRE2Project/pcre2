@@ -23,11 +23,12 @@ GenerateUtt.py   A Python script to generate part of the pcre2_tables.c file
 ManyConfigTests  A shell script that runs "configure, make, test" a number of
                  times with different configuration settings.
 
-MultiStage2.py   A Python script that generates the file pcre2_ucd.c from five
-                 Unicode data tables, which are themselves downloaded from the
+MultiStage2.py   A Python script that generates the file pcre2_ucd.c from six
+                 Unicode data files, which are themselves downloaded from the
                  Unicode web site. Run this script in the "maint" directory.
-                 The generated file contains the tables for a 2-stage lookup
-                 of Unicode properties.
+                 The generated file is written to stdout. It contains the
+                 tables for a 2-stage lookup of Unicode properties, along with
+                 some auxiliary tables.
 
 pcre2_chartables.c.non-standard
                  This is a set of character tables that came from a Windows
@@ -40,14 +41,15 @@ README           This file.
 Unicode.tables   The files in this directory were downloaded from the Unicode 
                  web site. They contain information about Unicode characters
                  and scripts. The ones used by the MultiStage2.py script are
-                 CaseFolding.txt, DerivedGeneralCategory.txt, Scripts.txt, 
-                 GraphemeBreakProperty.txt, and emoji-data.txt. I've kept 
-                 UnicodeData.txt (which is no longer used by the script)
-                 because it is useful occasionally for manually looking up the
-                 details of certain characters. However, note that character
-                 names in this file such as "Arabic sign sanah" do NOT mean 
-                 that the character is in a particular script (in this case, 
-                 Arabic). Scripts.txt is where to look for script information.
+                 CaseFolding.txt, DerivedGeneralCategory.txt, Scripts.txt,
+                 ScriptExtensions.txt, GraphemeBreakProperty.txt, and
+                 emoji-data.txt. I've kept UnicodeData.txt (which is no longer
+                 used by the script) because it is useful occasionally for
+                 manually looking up the details of certain characters.
+                 However, note that character names in this file such as
+                 "Arabic sign sanah" do NOT mean that the character is in a
+                 particular script (in this case, Arabic). Scripts.txt and
+                 ScriptExtensions.txt are where to look for script information.
 
 ucptest.c        A short C program for testing the Unicode property macros
                  that do lookups in the pcre2_ucd.c data, mainly useful after
@@ -61,7 +63,7 @@ utf8.c           A short, freestanding C program for converting a Unicode code
                  point into a sequence of bytes in the UTF-8 encoding, and vice
                  versa. If its argument is a hex number such as 0x1234, it
                  outputs a list of the equivalent UTF-8 bytes. If its argument
-                 is sequence of concatenated UTF-8 bytes (e.g. e188b4) it
+                 is a sequence of concatenated UTF-8 bytes (e.g. e188b4) it
                  treats them as a UTF-8 character and outputs the equivalent
                  code point in hex.
 
@@ -72,25 +74,31 @@ Updating to a new Unicode release
 When there is a new release of Unicode, the files in Unicode.tables must be
 refreshed from the web site. If the new version of Unicode adds new character
 scripts, the source file pcre2_ucp.h and both the MultiStage2.py and the
-GenerateUtt.py scripts must be edited to add the new names. Then MultiStage2.py
-can be run to generate a new version of pcre2_ucd.c, and GenerateUtt.py can be
-run to generate the tricky tables for inclusion in pcre2_tables.c.
+GenerateUtt.py scripts must be edited to add the new names. I have been adding
+each new group at the end of the relevant list, with a comment. Note also that
+both the pcre2syntax.3 and pcre2pattern.3 man pages contain lists of Unicode
+script names.
 
-If MultiStage2.py gives the error "ValueError: list.index(x): x not in list",
-the cause is usually a missing (or misspelt) name in the list of scripts. I
-couldn't find a straightforward list of scripts on the Unicode site, but
-there's a useful Wikipedia page that lists them, and notes the Unicode version
-in which they were introduced:
+MultiStage2.py has two lists: the full names and the abbreviations that are
+found in the ScriptExtensions.txt file. A list of script names and their
+abbreviations s can be found in the PropertyValueAliases.txt file on the
+Unicode web site. There is also a Wikipedia page that lists them, and notes the
+Unicode version in which they were introduced:
 
 http://en.wikipedia.org/wiki/Unicode_scripts#Table_of_Unicode_scripts
 
+Once the script name lists have been updated, MultiStage2.py can be run to
+generate a new version of pcre2_ucd.c, and GenerateUtt.py can be run to
+generate the tricky tables for inclusion in pcre2_tables.c (which must be
+hand-edited). If MultiStage2.py gives the error "ValueError: list.index(x): x
+not in list", the cause is usually a missing (or misspelt) name in one of the
+lists of scripts.
+
 The ucptest program can be compiled and used to check that the new tables in
 pcre2_ucd.c work properly, using the data files in ucptestdata to check a
-number of test characters. The source file ucptest.c must be updated whenever
-new Unicode script names are added.
-
-Note also that both the pcre2syntax.3 and pcre2pattern.3 man pages contain
-lists of Unicode script names.
+number of test characters. The source file ucptest.c should also be updated
+whenever new Unicode script names are added, and adding a few tests for new 
+scripts is a good idea.
 
 
 Preparing for a PCRE2 release
@@ -401,26 +409,6 @@ very sensible; some are rather wacky. Some have been on this list for years.
   strings, at least one of which must be present for a match, efficient
   pre-searching of large datasets could be implemented.
   
-. There's a Perl proposal for some new (* things, including alpha synonyms for 
-  the lookaround assertions:
-
-  (*pla: …)
-  (*plb: …)
-  (*nla: …)
-  (*nlb: …)
-  (*atomic: …)
-  (*positive_look_ahead:...)
-  (*negative_look_ahead:...)
-  (*positive_look_behind:...)
-  (*negative_look_behind:...)
-
-  Also a new one (with synonyms):
-
-  (*script_run: ...)        Ensure all captured chars are in the same script
-  (*sr: …)
-  (*atomic_script_run: …)   A combination of script_run and atomic
-  (*asr:...)
-
 . If pcre2grep had --first-line (match only in the first line) it could be 
   efficiently used to find files "starting with xxx". What about --last-line?
   
@@ -441,4 +429,4 @@ very sensible; some are rather wacky. Some have been on this list for years.
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 21 August 2018
+Last updated: 07 October 2018
