@@ -4865,6 +4865,23 @@ MK: ABC
  0: A\x{ff10}\x{ff19}B
     A\x{1d7ce}\x{1d7cf}B   Latin fancy-common-digits Latin
  0: A\x{1d7ce}\x{1d7cf}B
+    
+# These ones involve non-ASCII but nevertheless Common digits. As of October
+# 2018 even blead Perl wasn't handling all of these - but is going to. 
+
+/^(*sr:.{4})/utf
+    A\x{ff10}\x{ff19}B     Latin Common-notascii-digits Latin 
+ 0: A\x{ff10}\x{ff19}B
+    \x{ff10}\x{ff19}..     Common-notascii-digits Common Common
+ 0: \x{ff10}\x{ff19}..
+    A\x{ff10}BC            Latin Common-notascii-digit Latin Latin
+ 0: A\x{ff10}BC
+    A\x{1d7ce}\x{1d7cf}B   Latin fancy-common-digits Latin
+ 0: A\x{1d7ce}\x{1d7cf}B
+    \x{1d7ce}\x{1d7cf},,   fancy-common-digits Common Common
+ 0: \x{1d7ce}\x{1d7cf},,
+    A\x{1d7ce}BC           Latin fancy-common-digit Latin Latin
+ 0: A\x{1d7ce}BC
 
 # ------- 
 

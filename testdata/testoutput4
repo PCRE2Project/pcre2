@@ -3872,6 +3872,36 @@ No match
 \= Expect no match
     \x{1100}\x{2e80}\x{3041}\x{1101}   Hangul Han Hiragana Hangul
 No match
+    
+/^(*sr:\S*)/utf
+    \x{1cf4}\x{20f0}\x{900}\x{11305}   [Dev,Gran,Kan] [Dev,Gran,Lat] Dev Gran
+ 0: \x{1cf4}\x{20f0}\x{900}
+    \x{1cf4}\x{20f0}\x{11305}\x{900}   [Dev,Gran,Kan] [Dev,Gran,Lat] Gran Dev
+ 0: \x{1cf4}\x{20f0}\x{11305}
+    \x{1cf4}\x{20f0}\x{900}ABC         [Dev,Gran,Kan] [Dev,Gran,Lat] Dev Lat
+ 0: \x{1cf4}\x{20f0}\x{900}
+    \x{1cf4}\x{20f0}ABC                [Dev,Gran,Kan] [Dev,Gran,Lat] Lat
+ 0: \x{1cf4}\x{20f0}
+    \x{20f0}ABC                        [Dev,Gran,Lat] Lat
+ 0: \x{20f0}ABC
+    XYZ\x{20f0}ABC                     Lat [Dev,Gran,Lat] Lat
+ 0: XYZ\x{20f0}ABC
+    \x{a36}\x{a33}\x{900}              [Dev,...] [Dev,...] Dev  
+ 0: \x{a36}\x{a33}
+    \x{3001}\x{2e80}\x{3041}\x{30a1}   [Bopo, Han, etc] Han Hira Kata
+ 0: \x{3001}\x{2e80}\x{3041}\x{30a1}
+    \x{3001}\x{30a1}\x{2e80}\x{3041}   [Bopo, Han, etc] Kata Han Hira
+ 0: \x{3001}\x{30a1}\x{2e80}\x{3041}
+    \x{3001}\x{3105}\x{2e80}\x{1101}   [Bopo, Han, etc] Bopomofo Han Hangul
+ 0: \x{3001}\x{3105}\x{2e80}
+    \x{3105}\x{3001}\x{2e80}\x{1101}   Bopomofo [Bopo, Han, etc] Han Hangul
+ 0: \x{3105}\x{3001}\x{2e80}
+    \x{3031}\x{3041}\x{30a1}\x{2e80}   [Hira Kata] Hira Kata Han
+ 0: \x{3031}\x{3041}\x{30a1}\x{2e80}
+    \x{060c}\x{06d4}\x{0600}\x{10d00}\x{0700}  [Arab Rohg Syrc Thaa] [Arab Rohg] Arab Rohg Syrc
+ 0: \x{60c}\x{6d4}\x{600}
+    \x{060c}\x{06d4}\x{0700}\x{0600}\x{10d00}  [Arab Rohg Syrc Thaa] [Arab Rohg] Syrc Arab Rohg
+ 0: \x{60c}\x{6d4}
 
 /(?<!)(*sr:)/
 
@@ -3885,6 +3915,26 @@ No match
    abcXBXYCCC!
  0: !
 
+/^(*sr:\S*)/utf
+    \x{10d00}\x{10d00}\x{06d4}     Rohingya Rohingya Arabic-full-stop
+ 0: \x{10d00}\x{10d00}\x{6d4}
+    \x{06d4}\x{10d00}\x{10d00}     Arabic-full-stop Rohingya Rohingya
+ 0: \x{6d4}\x{10d00}\x{10d00}
+    \x{10d00}\x{10d00}\x{0363}     Rohingya Rohingya Inherited-extend-Latin
+ 0: \x{10d00}\x{10d00}
+    \x{0363}\x{10d00}\x{10d00}     Inherited-extend-Latin Rohingya Rohingya
+ 0: \x{363}
+    AB\x{0363}                     Latin Latin Inherited-extend-Latin
+ 0: AB\x{363}
+    \x{0363}AB                     Inherited-extend-Latin Latin Latin
+ 0: \x{363}AB
+    AB\x{1cf7}                     Latin Latin Common-extended-Beng
+ 0: AB
+    \x{1cf7}AB                     Common-extend-Beng Latin Latin
+ 0: \x{1cf7}
+    \x{1cf7}\x{0993}               Common-extend-Beng Bengali
+ 0: \x{1cf7}\x{993}
+    
 # Test loop breaking for empty string match
 
 /^(*sr:A|)*BCD/utf

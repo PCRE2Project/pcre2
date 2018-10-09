@@ -2394,6 +2394,22 @@
     \x{1A80}\x{1a40}\x{1A90}\x{1a41}   Tai Tham Hora digit, letter, Tham digit, letter
 \= Expect no match
     \x{1100}\x{2e80}\x{3041}\x{1101}   Hangul Han Hiragana Hangul
+    
+/^(*sr:\S*)/utf
+    \x{1cf4}\x{20f0}\x{900}\x{11305}   [Dev,Gran,Kan] [Dev,Gran,Lat] Dev Gran
+    \x{1cf4}\x{20f0}\x{11305}\x{900}   [Dev,Gran,Kan] [Dev,Gran,Lat] Gran Dev
+    \x{1cf4}\x{20f0}\x{900}ABC         [Dev,Gran,Kan] [Dev,Gran,Lat] Dev Lat
+    \x{1cf4}\x{20f0}ABC                [Dev,Gran,Kan] [Dev,Gran,Lat] Lat
+    \x{20f0}ABC                        [Dev,Gran,Lat] Lat
+    XYZ\x{20f0}ABC                     Lat [Dev,Gran,Lat] Lat
+    \x{a36}\x{a33}\x{900}              [Dev,...] [Dev,...] Dev  
+    \x{3001}\x{2e80}\x{3041}\x{30a1}   [Bopo, Han, etc] Han Hira Kata
+    \x{3001}\x{30a1}\x{2e80}\x{3041}   [Bopo, Han, etc] Kata Han Hira
+    \x{3001}\x{3105}\x{2e80}\x{1101}   [Bopo, Han, etc] Bopomofo Han Hangul
+    \x{3105}\x{3001}\x{2e80}\x{1101}   Bopomofo [Bopo, Han, etc] Han Hangul
+    \x{3031}\x{3041}\x{30a1}\x{2e80}   [Hira Kata] Hira Kata Han
+    \x{060c}\x{06d4}\x{0600}\x{10d00}\x{0700}  [Arab Rohg Syrc Thaa] [Arab Rohg] Arab Rohg Syrc
+    \x{060c}\x{06d4}\x{0700}\x{0600}\x{10d00}  [Arab Rohg Syrc Thaa] [Arab Rohg] Syrc Arab Rohg
 
 /(?<!)(*sr:)/
 
@@ -2405,6 +2421,17 @@
 /(?<=abc(?=X(*sr:BXY)CCC)XBXYCCC)./
    abcXBXYCCC!
 
+/^(*sr:\S*)/utf
+    \x{10d00}\x{10d00}\x{06d4}     Rohingya Rohingya Arabic-full-stop
+    \x{06d4}\x{10d00}\x{10d00}     Arabic-full-stop Rohingya Rohingya
+    \x{10d00}\x{10d00}\x{0363}     Rohingya Rohingya Inherited-extend-Latin
+    \x{0363}\x{10d00}\x{10d00}     Inherited-extend-Latin Rohingya Rohingya
+    AB\x{0363}                     Latin Latin Inherited-extend-Latin
+    \x{0363}AB                     Inherited-extend-Latin Latin Latin
+    AB\x{1cf7}                     Latin Latin Common-extended-Beng
+    \x{1cf7}AB                     Common-extend-Beng Latin Latin
+    \x{1cf7}\x{0993}               Common-extend-Beng Bengali
+    
 # Test loop breaking for empty string match
 
 /^(*sr:A|)*BCD/utf
