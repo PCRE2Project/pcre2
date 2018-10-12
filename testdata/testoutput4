@@ -3902,6 +3902,8 @@ No match
  0: \x{60c}\x{6d4}\x{600}
     \x{060c}\x{06d4}\x{0700}\x{0600}\x{10d00}  [Arab Rohg Syrc Thaa] [Arab Rohg] Syrc Arab Rohg
  0: \x{60c}\x{6d4}
+    \x{2e80}\x{3041}\x{3001}\x{3031}\x{2e80}   Han Hira [Bopo, Han, etc] [Hira Kata] Han
+ 0: \x{2e80}\x{3041}\x{3001}\x{3031}\x{2e80}
 
 /(?<!)(*sr:)/
 

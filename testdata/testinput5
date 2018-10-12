@@ -2112,6 +2112,9 @@
 /^(*sr:.*)/B,utf 
     paypаl.com   A classic example of why script run checks are a good thing
 
+/^(*sr:.*(*ACCEPT))/utf 
+    paypаl.com   But *ACCEPT breaks things
+
 /^(*sr:\x{2e80}*)/B,utf
 
 /^(*sr:\x{2e80}*)\x{2e80}/B,utf

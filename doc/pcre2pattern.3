@@ -1,4 +1,4 @@
-.TH PCRE2PATTERN 3 "24 September 2018" "PCRE2 10.33"
+.TH PCRE2PATTERN 3 "12 October 2018" "PCRE2 10.33"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION DETAILS"
@@ -755,7 +755,7 @@ sequences that match characters with specific properties are available. In
 8-bit non-UTF-8 mode, these sequences are of course limited to testing
 characters whose code points are less than 256, but they do work in this mode.
 In 32-bit non-UTF mode, code points greater than 0x10ffff (the Unicode limit)
-may be encountered. These are all treated as being in the Common script and
+may be encountered. These are all treated as being in the Unknown script and
 with an unassigned type. The extra escape sequences are:
 .sp
   \ep{\fIxx\fP}   a character with the \fIxx\fP property
@@ -781,8 +781,10 @@ example:
   \ep{Greek}
   \eP{Han}
 .sp
-Those that are not part of an identified script are lumped together as
-"Common". The current list of scripts is:
+Unassigned characters (and in non-UTF 32-bit mode, characters with code points
+greater than 0x10FFFF) are assigned the "Unknown" script. Others that are not
+part of an identified script are lumped together as "Common". The current list
+of scripts is:
 .P
 Adlam,
 Ahom,
@@ -928,6 +930,7 @@ Tibetan,
 Tifinagh,
 Tirhuta,
 Ugaritic,
+Unknown,
 Vai,
 Warang_Citi,
 Yi,
@@ -2603,6 +2606,73 @@ is another pattern that matches "foo" preceded by three digits and any three
 characters that are not "999".
 .
 .
+.SH "SCRIPT RUNS"
+.rs
+.sp
+In concept, a script run is a sequence of characters that are all from the same
+Unicode script such as Latin or Greek. However, because some scripts are
+commonly used together, and because some diacritical and other marks are used
+with multiple scripts, it is not that simple. There is a full description of
+the rules that PCRE2 uses in the section entitled
+.\" HTML <a href="pcre2unicode.html#scriptruns">
+.\" </a>
+"Script Runs"
+.\"
+in the
+.\" HREF
+\fBpcre2unicode\fP
+.\"
+documentation.
+.P
+If part of a pattern is enclosed between (*script_run: or (*sr: and a closing
+parenthesis, it fails if the sequence of characters that it matches are not a
+script run. After a failure, normal backtracking occurs. Script runs can be
+used to detect spoofing attacks using characters that look the same, but are
+from different scripts. The string "paypal.com" is an infamous example, where
+the letters could be a mixture of Latin and Cyrillic. This pattern ensures that
+the matched characters in a sequence of non-spaces that follow white space are
+a script run:
+.sp
+  \es+(*sr:\eS+)
+.sp
+To be sure that they are all from the Latin script (for example), a lookahead
+can be used:
+.sp
+  \es+(?=\ep{Latin})(*sr:\eS+)
+.sp
+This works as long as the first character is expected to be a character in that 
+script, and not (for example) punctuation, which is allowed with any script. If
+this is not the case, a more creative lookahead is needed. For example, if 
+digits, underscore, and dots are permitted at the start:
+.sp
+  \es+(?=[0-9_.]*\ep{Latin})(*sr:\eS+)
+.sp
+.P
+In many cases, backtracking into a script run pattern fragment is not
+desirable. The script run can employ an atomic group to prevent this. Because
+this is a common requirement, a shorthand notation is provided by
+(*atomic_script_run: or (*asr:
+.sp
+  (*asr:...) is the same as (*sr:(?>...))
+.sp
+Note that the atomic group is inside the script run. Putting it outside would
+not prevent backtracking into the script run pattern.
+.P
+Support for script runs is not available if PCRE2 is compiled without Unicode
+support. A compile-time error is given if any of the above constructs is
+encountered. Script runs are not supported by the alternate matching function,
+\fBpcre2_dfa_match()\fP because they use the same mechanism as capturing
+parentheses.
+.P
+\fBWarning:\fP The (*ACCEPT) control verb
+.\" HTML <a href="#acceptverb">
+.\" </a>
+(see below)
+.\"
+should not be used within a script run subpattern, because it causes an
+immediate exit from the subpattern, bypassing the script run checking.
+.
+.
 .\" HTML <a name="conditions"></a>
 .SH "CONDITIONAL SUBPATTERNS"
 .rs
@@ -3267,6 +3337,7 @@ Experiments with Perl suggest that it too has similar optimizations, and like
 PCRE2, turning them off can change the result of a match.
 .
 .
+.\" HTML <a name="acceptverb"></a>
 .SS "Verbs that act immediately"
 .rs
 .sp
@@ -3287,6 +3358,10 @@ example:
 .sp
 This matches "AB", "AAD", or "ACD"; when it matches "AB", "B" is captured by
 the outer parentheses.
+.P
+\fBWarning:\fP (*ACCEPT) should not be used within a script run subpattern,
+because it causes an immediate exit from the subpattern, bypassing the script
+run checking.
 .sp
   (*FAIL) or (*FAIL:NAME)
 .sp
@@ -3692,6 +3767,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 24 September 2018
+Last updated: 12 October 2018
 Copyright (c) 1997-2018 University of Cambridge.
 .fi

@@ -1,4 +1,4 @@
-.TH PCRE2SYNTAX 3 "24 September 2018" "PCRE2 10.33"
+.TH PCRE2SYNTAX 3 "10 October 2018" "PCRE2 10.33"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION SYNTAX SUMMARY"
@@ -511,6 +511,16 @@ setting with a similar syntax.
 Each top-level branch of a lookbehind must be of a fixed length.
 .
 .
+.SH "SCRIPT RUNS"
+.rs
+.sp
+  (*script_run:...)           ) script run, can be backtracked into
+  (*sr:...)                   )
+.sp
+  (*atomic_script_run:...)    ) atomic script run
+  (*asr:...)                  )
+.
+.
 .SH "BACKREFERENCES"
 .rs
 .sp
@@ -633,6 +643,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 24 September 2018
+Last updated: 10 October 2018
 Copyright (c) 1997-2018 University of Cambridge.
 .fi

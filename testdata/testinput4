@@ -2410,6 +2410,7 @@
     \x{3031}\x{3041}\x{30a1}\x{2e80}   [Hira Kata] Hira Kata Han
     \x{060c}\x{06d4}\x{0600}\x{10d00}\x{0700}  [Arab Rohg Syrc Thaa] [Arab Rohg] Arab Rohg Syrc
     \x{060c}\x{06d4}\x{0700}\x{0600}\x{10d00}  [Arab Rohg Syrc Thaa] [Arab Rohg] Syrc Arab Rohg
+    \x{2e80}\x{3041}\x{3001}\x{3031}\x{2e80}   Han Hira [Bopo, Han, etc] [Hira Kata] Han
 
 /(?<!)(*sr:)/
 

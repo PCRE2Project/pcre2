@@ -31,8 +31,7 @@ hexadecimal digit" bit was removed. The default tables in
 src/pcre2_chartables.c.dist are updated.
 
 8. Implement the new Perl "script run" features (*script_run:...) and 
-(*atomic_script_run:...) aka (*sr:...) and (*asr:...). At present, this is 
-not yet documented.
+(*atomic_script_run:...) aka (*sr:...) and (*asr:...).
 
 
 Version 10.32 10-September-2018

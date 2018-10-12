@@ -1,4 +1,4 @@
-.TH PCRE2UNICODE 3 "02 September 2018" "PCRE2 10.32"
+.TH PCRE2UNICODE 3 "12 October 2018" "PCRE2 10.33"
 .SH NAME
 PCRE - Perl-compatible regular expressions (revised API)
 .SH "UNICODE AND UTF SUPPORT"
@@ -116,6 +116,108 @@ for characters whose code points are less than 128 and that have at most two
 case-equivalent values. For these, a direct table lookup is used for speed. A
 few Unicode characters such as Greek sigma have more than two code points that
 are case-equivalent, and these are treated as such.
+.
+.
+.\" HTML <a name="scriptruns"></a>
+.SH "SCRIPT RUNS"
+.rs
+.sp
+The pattern constructs (*script_run:...) and (*atomic_script_run:...), with
+synonyms (*sr:...) and (*asr:...), verify that the string matched within the
+parentheses is a script run. In concept, a script run is a sequence of
+characters that are all from the same Unicode script. However, because some
+scripts are commonly used together, and because some diacritical and other
+marks are used with multiple scripts, it is not that simple.
+.P
+Every Unicode character has a Script property, mostly with a value 
+corresponding to the name of a script, such as Latin, Greek, or Cyrillic. There
+are also three special values:
+.P
+"Unknown" is used for code points that have not been assigned, and also for the
+surrogate code points. In the PCRE2 32-bit library, characters whose code
+points are greater than the Unicode maximum (U+10FFFF), which are accessible 
+only in non-UTF mode, are assigned the Unknown script.
+.P
+"Common" is used for characters that are used with many scripts. These include
+punctuation, emoji, mathematical, musical, and currency symbols, and the ASCII
+digits 0 to 9.
+.P
+"Inherited" is used for characters such as diacritical marks that modify a
+previous character. These are considered to take on the script of the character
+that they modify.
+.P
+Some Inherited characters are used with many scripts, but many of them are only 
+normally used with a small number of scripts. For example, U+102E0 (Coptic 
+Epact thousands mark) is used only with Arabic and Coptic. In order to make it 
+possible to check this, a Unicode property called Script Extension exists. Its 
+value is a list of scripts that apply to the character. For the majority of 
+characters, the list contains just one script, the same one as the Script
+property. However, for characters such as U+102E0 more than one Script is
+listed. There are also some Common characters that have a single, non-Common
+script in their Script Extension list.
+.P
+The next section describes the basic rules for deciding whether a given string 
+of characters is a script run. Note, however, that there are some special cases 
+involving the Chinese Han script, and an additional constraint for decimal 
+digits. These are covered in subsequent sections.
+.
+.
+.SS "Basic script run rules"
+.rs
+.sp
+A string that is less than two characters long is a script run. This is the
+only case in which an Unknown character can be part of a script run. Longer
+strings are checked using only the Script Extensions property, not the basic
+Script property.
+.P
+If a character's Script Extension property is the single value "Inherited", it
+is always accepted as part of a script run. This is also true for the property
+"Common", subject to the checking of decimal digits described below. All the
+remaining characters in a script run must have at least one script in common in
+their Script Extension lists. In set-theoretic terminology, the intersection of
+all the sets of scripts must not be empty.
+.P
+A simple example is an Internet name such as "google.com". The letters are all
+in the Latin script, and the dot is Common, so this string is a script run.
+However, the Cyrillic letter "o" looks exactly the same as the Latin "o"; a 
+string that looks the same, but with Cyrillic "o"s is not a script run.
+.P
+More interesting examples involve characters with more than one script in their 
+Script Extension. Consider the following characters:
+.sp
+  U+060C  Arabic comma
+  U+06D4  Arabic full stop
+.sp
+The first has the Script Extension list Arabic, Hanifi Rohingya, Syriac, and 
+Thaana; the second has just Arabic and Hanifi Rohingya. Both of them could
+appear in script runs of either Arabic or Hanifi Rohingya. The first could also
+appear in Syriac or Thaana script runs, but the second could not.
+.
+.
+.SS "The Chinese Han script"
+.rs
+.sp  
+The Chinese Han script is commonly used in conjunction with other scripts for 
+writing certain languages. Japanese uses the Hiragana and Katakana scripts 
+together with Han; Korean uses Hangul and Han; Taiwanese Mandarin uses Bopomofo
+and Han. These three combinations are treated as special cases when checking
+script runs and are, in effect, "virtual scripts". Thus, a script run may
+contain a mixture of Hiragana, Katakana, and Han, or a mixture of Hangul and
+Han, or a mixture of Bopomofo and Han, but not, for example, a mixture of
+Hangul and Bopomofo and Han. PCRE2 (like Perl) follows Unicode's Technical
+Standard 39 ("Unicode Security Mechanisms", http://unicode.org/reports/tr39/)
+in allowing such mixtures.
+.
+.
+.SS "Decimal digits"
+.rs
+.sp
+Unicode contains many sets of 10 decimal digits in different scripts, and some
+scripts (including the Common script) contain more than one set. Some of these
+decimal digits them are visually indistinguishable from the common ASCII
+digits. In addition to the script checking described above, if a script run
+contains any decimal digits, they must all come from the same set of 10
+adjacent characters.
 .
 .
 .SH "VALIDITY OF UTF STRINGS"
@@ -285,6 +387,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 02 September 2018
+Last updated: 12 October 2018
 Copyright (c) 1997-2018 University of Cambridge.
 .fi
