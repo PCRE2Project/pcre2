@@ -2432,6 +2432,8 @@
     AB\x{1cf7}                     Latin Latin Common-extended-Beng
     \x{1cf7}AB                     Common-extend-Beng Latin Latin
     \x{1cf7}\x{0993}               Common-extend-Beng Bengali
+    A\x{1abe}BC                    Test enclosing mark
+    \x{0370}\x{1abe}\x{0371}       Which can occur with any script (Greek here)
     
 # Test loop breaking for empty string match
 
