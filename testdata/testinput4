@@ -2434,6 +2434,14 @@
     \x{1cf7}\x{0993}               Common-extend-Beng Bengali
     A\x{1abe}BC                    Test enclosing mark
     \x{0370}\x{1abe}\x{0371}       Which can occur with any script (Greek here)
+    \x{3001}\x{adf9}\x{3001}       [.. Hangul ..] Hangul [.. Hangul ..]
+    \x{3400}\x{3001}XXX            Han [Han etc.]
+    \x{3400}\x{1cd5}               Han [Bengali Devanagari]
+    \x{ac01}\x{3400}               Hangul [.. Hangul ..]
+    \x{ac01}\x{1cd5}               Hangul [Bengali Devanagari]
+    \x{102e0}\x{06d4}\x{1ee4d}     [Arabic Coptic] [Arab Rohingya] Arabic
+    \x{102e0}\x{06d4}\x{2cc9}      [Arabic Coptic] [Arab Rohingya] Coptic
+    \x{102e0}\x{06d4}\x{10d30}     [Arabic Coptic] [Arab Rohingya] Rohingya
     
 # Test loop breaking for empty string match
 

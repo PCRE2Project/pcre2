@@ -531,6 +531,10 @@ noinst_PROGRAMS += pcre2fuzzcheck
 pcre2fuzzcheck_SOURCES = src/pcre2_fuzzsupport.c
 pcre2fuzzcheck_CFLAGS = -DSTANDALONE $(AM_CFLAGS)
 pcre2fuzzcheck_LDADD = libpcre2-8.la
+if WITH_GCOV
+pcre2fuzzcheck_CFLAGS += $(GCOV_CFLAGS)
+pcre2fuzzcheck_LDADD += $(GCOV_LIBS)
+endif # WITH_GCOV
 endif # WITH FUZZ_SUPPORT
 endif # WITH_PCRE2_8
 
