@@ -33,6 +33,10 @@ src/pcre2_chartables.c.dist are updated.
 8. Implement the new Perl "script run" features (*script_run:...) and 
 (*atomic_script_run:...) aka (*sr:...) and (*asr:...).
 
+9. Fixed two typos in change 22 for 10.21, which added special handling for
+ranges such as a-z in EBCDIC environments. The original code probably never 
+worked, though there were no bug reports. 
+
 
 Version 10.32 10-September-2018
 -------------------------------

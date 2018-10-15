@@ -1937,9 +1937,9 @@ else
     c ^= 0x40;
 
     /* Handle \c in an EBCDIC environment. The special case \c? is converted to
-    255 (0xff) or 95 (0x5f) if other character suggest we are using th POSIX-BC
-    encoding. (This is the way Perl indicates that it handles \c?.) The other
-    valid sequences correspond to a list of specific characters. */
+    255 (0xff) or 95 (0x5f) if other characters suggest we are using the
+    POSIX-BC encoding. (This is the way Perl indicates that it handles \c?.)
+    The other valid sequences correspond to a list of specific characters. */
 
 #else
     if (c == CHAR_QUESTION_MARK)
@@ -5710,10 +5710,10 @@ for (;; pptr++)
           if (range_is_literal &&
                (cb->ctypes[c] & ctype_letter) != 0 &&
                (cb->ctypes[d] & ctype_letter) != 0 &&
-               (d <= CHAR_z) == (d <= CHAR_z))
+               (c <= CHAR_z) == (d <= CHAR_z))
             {
             uint32_t uc = (d <= CHAR_z)? 0 : 64;
-            uint32_t C = d - uc;
+            uint32_t C = c - uc;
             uint32_t D = d - uc;
 
             if (C <= CHAR_i)
