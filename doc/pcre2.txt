@@ -881,11 +881,11 @@ PCRE2 CONTEXTS
        int pcre2_set_parens_nest_limit(pcre2_compile_context *ccontext,
          uint32_t value);
 
-       This parameter ajusts the limit, set when PCRE2 is built (default 250),
-       on the depth of parenthesis nesting in  a  pattern.  This  limit  stops
-       rogue  patterns using up too much system stack when being compiled. The
-       limit applies to parentheses of all kinds, not just capturing parenthe-
-       ses.
+       This  parameter  adjusts  the  limit,  set when PCRE2 is built (default
+       250), on the depth of parenthesis nesting  in  a  pattern.  This  limit
+       stops  rogue  patterns  using  up too much system stack when being com-
+       piled. The limit applies to parentheses of all kinds, not just  captur-
+       ing parentheses.
 
        int pcre2_set_compile_recursion_guard(pcre2_compile_context *ccontext,
          int (*guard_function)(uint32_t, void *), void *user_data);
@@ -3631,7 +3631,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 16 October 2018
+       Last updated: 17 October 2018
        Copyright (c) 1997-2018 University of Cambridge.
 ------------------------------------------------------------------------------
  
