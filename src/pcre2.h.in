@@ -167,36 +167,27 @@ D   is inspected during pcre2_dfa_match() execution
 #define PCRE2_JIT_PARTIAL_HARD    0x00000004u
 #define PCRE2_JIT_INVALID_UTF     0x00000100u
 
-/* These are for pcre2_match(), pcre2_dfa_match(), and pcre2_jit_match(). Note
-that PCRE2_ANCHORED and PCRE2_NO_UTF_CHECK can also be passed to these
-functions (though pcre2_jit_match() ignores the latter since it bypasses all
-sanity checks). */
+/* These are for pcre2_match(), pcre2_dfa_match(), pcre2_jit_match(), and
+pcre2_substitute(). Some are allowed only for one of the functions, and in
+these cases it is noted below. Note that PCRE2_ANCHORED, PCRE2_ENDANCHORED and
+PCRE2_NO_UTF_CHECK can also be passed to these functions (though
+pcre2_jit_match() ignores the latter since it bypasses all sanity checks). */
 
-#define PCRE2_NOTBOL              0x00000001u
-#define PCRE2_NOTEOL              0x00000002u
-#define PCRE2_NOTEMPTY            0x00000004u  /* ) These two must be kept */
-#define PCRE2_NOTEMPTY_ATSTART    0x00000008u  /* ) adjacent to each other. */
-#define PCRE2_PARTIAL_SOFT        0x00000010u
-#define PCRE2_PARTIAL_HARD        0x00000020u
-
-/* These are additional options for pcre2_dfa_match(). */
-
-#define PCRE2_DFA_RESTART         0x00000040u
-#define PCRE2_DFA_SHORTEST        0x00000080u
-
-/* These are additional options for pcre2_substitute(), which passes any others
-through to pcre2_match(). */
-
-#define PCRE2_SUBSTITUTE_GLOBAL           0x00000100u
-#define PCRE2_SUBSTITUTE_EXTENDED         0x00000200u
-#define PCRE2_SUBSTITUTE_UNSET_EMPTY      0x00000400u
-#define PCRE2_SUBSTITUTE_UNKNOWN_UNSET    0x00000800u
-#define PCRE2_SUBSTITUTE_OVERFLOW_LENGTH  0x00001000u
-
-/* A further option for pcre2_match(), not allowed for pcre2_dfa_match(),
-ignored for pcre2_jit_match(). */
-
-#define PCRE2_NO_JIT              0x00002000u
+#define PCRE2_NOTBOL                      0x00000001u
+#define PCRE2_NOTEOL                      0x00000002u
+#define PCRE2_NOTEMPTY                    0x00000004u  /* ) These two must be kept */
+#define PCRE2_NOTEMPTY_ATSTART            0x00000008u  /* ) adjacent to each other. */
+#define PCRE2_PARTIAL_SOFT                0x00000010u
+#define PCRE2_PARTIAL_HARD                0x00000020u
+#define PCRE2_DFA_RESTART                 0x00000040u  /* pcre2_dfa_match() only */
+#define PCRE2_DFA_SHORTEST                0x00000080u  /* pcre2_dfa_match() only */
+#define PCRE2_SUBSTITUTE_GLOBAL           0x00000100u  /* pcre2_substitute() only */
+#define PCRE2_SUBSTITUTE_EXTENDED         0x00000200u  /* pcre2_substitute() only */
+#define PCRE2_SUBSTITUTE_UNSET_EMPTY      0x00000400u  /* pcre2_substitute() only */
+#define PCRE2_SUBSTITUTE_UNKNOWN_UNSET    0x00000800u  /* pcre2_substitute() only */
+#define PCRE2_SUBSTITUTE_OVERFLOW_LENGTH  0x00001000u  /* pcre2_substitute() only */
+#define PCRE2_NO_JIT                      0x00002000u  /* Not for pcre2_dfa_match() */
+#define PCRE2_COPY_MATCHED_SUBJECT        0x00004000u
 
 /* Options for pcre2_pattern_convert(). */
 

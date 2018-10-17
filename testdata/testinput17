@@ -299,9 +299,9 @@
 # ---- 
 
 /[aC]/mg,firstline,newline=lf
-match\nmatch
+    match\nmatch
 
 /[aCz]/mg,firstline,newline=lf
-match\nmatch
+    match\nmatch
 
 # End of testinput17

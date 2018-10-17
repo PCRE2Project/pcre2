@@ -1,4 +1,4 @@
-.TH PCRE2_DFA_MATCH 3 "26 April 2018" "PCRE2 10.32"
+.TH PCRE2_DFA_MATCH 3 "16 October 2018" "PCRE2 10.33"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH SYNOPSIS
@@ -39,6 +39,8 @@ depth limits. The \fIlength\fP and \fIstartoffset\fP values are code units, not
 characters. The options are:
 .sp
   PCRE2_ANCHORED          Match only at the first position
+  PCRE2_COPY_MATCHED_SUBJECT
+                          On success, make a private subject copy  
   PCRE2_ENDANCHORED       Pattern can match only at end of subject
   PCRE2_NOTBOL            Subject is not the beginning of a line
   PCRE2_NOTEOL            Subject is not the end of a line

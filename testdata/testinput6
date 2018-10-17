@@ -4955,4 +4955,11 @@
 \= Expect no match
     \na
     
+/foobar/
+    the foobar thing\=copy_matched_subject
+    the foobar thing\=copy_matched_subject,zero_terminate
+
+/foobar/g
+    the foobar thing foobar again\=copy_matched_subject
+
 # End of testinput6

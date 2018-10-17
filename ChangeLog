@@ -37,6 +37,10 @@ src/pcre2_chartables.c.dist are updated.
 ranges such as a-z in EBCDIC environments. The original code probably never 
 worked, though there were no bug reports. 
 
+10. Implement PCRE2_COPY_MATCHED_SUBJECT for pcre2_match() (including JIT via
+pcre2_match()) and pcre2_dfa_match(), but *not* the pcre2_jit_match() fast
+path.
+
 
 Version 10.32 10-September-2018
 -------------------------------

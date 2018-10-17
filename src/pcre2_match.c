@@ -69,11 +69,12 @@ information, and fields within it. */
 #define PUBLIC_MATCH_OPTIONS \
   (PCRE2_ANCHORED|PCRE2_ENDANCHORED|PCRE2_NOTBOL|PCRE2_NOTEOL|PCRE2_NOTEMPTY| \
    PCRE2_NOTEMPTY_ATSTART|PCRE2_NO_UTF_CHECK|PCRE2_PARTIAL_HARD| \
-   PCRE2_PARTIAL_SOFT|PCRE2_NO_JIT)
+   PCRE2_PARTIAL_SOFT|PCRE2_NO_JIT|PCRE2_COPY_MATCHED_SUBJECT)
 
 #define PUBLIC_JIT_MATCH_OPTIONS \
    (PCRE2_NO_UTF_CHECK|PCRE2_NOTBOL|PCRE2_NOTEOL|PCRE2_NOTEMPTY|\
-    PCRE2_NOTEMPTY_ATSTART|PCRE2_PARTIAL_SOFT|PCRE2_PARTIAL_HARD)
+    PCRE2_NOTEMPTY_ATSTART|PCRE2_PARTIAL_SOFT|PCRE2_PARTIAL_HARD|\
+    PCRE2_COPY_MATCHED_SUBJECT)
 
 /* Non-error returns from and within the match() function. Error returns are
 externally defined PCRE2_ERROR_xxx codes, which are all negative. */
@@ -5014,7 +5015,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
     must record a backtracking point and also set up a chained frame. */
 
     case OP_ONCE:
-    case OP_SCRIPT_RUN: 
+    case OP_SCRIPT_RUN:
     case OP_SBRA:
     Lframe_type = GF_NOCAPTURE | Fop;
 
@@ -5526,14 +5527,14 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
       case OP_ASSERT_NOT:
       case OP_ASSERTBACK_NOT:
       RRETURN(MATCH_MATCH);
-      
-      /* At the end of a script run, apply the script-checking rules. This code 
-      will never by exercised if Unicode support it not compiled, because in 
+
+      /* At the end of a script run, apply the script-checking rules. This code
+      will never by exercised if Unicode support it not compiled, because in
       that environment script runs cause an error at compile time. */
-      
+
       case OP_SCRIPT_RUN:
       if (!PRIV(script_run)(P->eptr, Feptr, utf)) RRETURN(MATCH_NOMATCH);
-      break;  
+      break;
 
       /* Whole-pattern recursion is coded as a recurse into group 0, so it
       won't be picked up here. Instead, we catch it when the OP_END is reached.
@@ -6009,9 +6010,10 @@ pcre2_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
   pcre2_match_context *mcontext)
 {
 int rc;
+int was_zero_terminated = 0;
 const uint8_t *start_bits = NULL;
-
 const pcre2_real_code *re = (const pcre2_real_code *)code;
+
 
 BOOL anchored;
 BOOL firstline;
@@ -6052,7 +6054,11 @@ mb->stack_frames = (heapframe *)stack_frames_vector;
 /* A length equal to PCRE2_ZERO_TERMINATED implies a zero-terminated
 subject string. */
 
-if (length == PCRE2_ZERO_TERMINATED) length = PRIV(strlen)(subject);
+if (length == PCRE2_ZERO_TERMINATED) 
+  {
+  length = PRIV(strlen)(subject);
+  was_zero_terminated = 1;
+  }  
 end_subject = subject + length;
 
 /* Plausibility checks */
@@ -6166,6 +6172,16 @@ time. */
 if (mcontext != NULL && mcontext->offset_limit != PCRE2_UNSET &&
      (re->overall_options & PCRE2_USE_OFFSET_LIMIT) == 0)
   return PCRE2_ERROR_BADOFFSETLIMIT;
+  
+/* If the match data block was previously used with PCRE2_COPY_MATCHED_SUBJECT,
+free the memory that was obtained. */
+
+if ((match_data->flags & PCRE2_MD_COPIED_SUBJECT) != 0)
+  {
+  match_data->memctl.free((void *)match_data->subject, 
+    match_data->memctl.memory_data);
+  match_data->flags &= ~PCRE2_MD_COPIED_SUBJECT;
+  }    
 
 /* If the pattern was successfully studied with JIT support, run the JIT
 executable instead of the rest of this function. Most options must be set at
@@ -6178,7 +6194,19 @@ if (re->executable_jit != NULL && (options & ~PUBLIC_JIT_MATCH_OPTIONS) == 0)
   {
   rc = pcre2_jit_match(code, subject, length, start_offset, options,
     match_data, mcontext);
-  if (rc != PCRE2_ERROR_JIT_BADOPTION) return rc;
+  if (rc != PCRE2_ERROR_JIT_BADOPTION) 
+    {
+    if (rc >= 0 && (options & PCRE2_COPY_MATCHED_SUBJECT) != 0)
+      {
+      length = CU2BYTES(length + was_zero_terminated);
+      match_data->subject = match_data->memctl.malloc(length,
+        match_data->memctl.memory_data);
+      if (match_data->subject == NULL) return PCRE2_ERROR_NOMEMORY;
+      memcpy((void *)match_data->subject, subject, length);
+      match_data->flags |= PCRE2_MD_COPIED_SUBJECT;
+      }
+    return rc;
+    } 
   }
 #endif
 
@@ -6819,12 +6847,14 @@ if (mb->match_frames != mb->stack_frames)
 
 match_data->code = re;
 match_data->subject = subject;
+match_data->flags = 0;
 match_data->mark = mb->mark;
 match_data->matchedby = PCRE2_MATCHEDBY_INTERPRETER;
 
 /* Handle a fully successful match. Set the return code to the number of
 captured strings, or 0 if there were too many to fit into the ovector, and then
-set the remaining returned values before returning. */
+set the remaining returned values before returning. Make a copy of the subject
+string if requested. */
 
 if (rc == MATCH_MATCH)
   {
@@ -6834,6 +6864,17 @@ if (rc == MATCH_MATCH)
   match_data->leftchar = mb->start_used_ptr - subject;
   match_data->rightchar = ((mb->last_used_ptr > mb->end_match_ptr)?
     mb->last_used_ptr : mb->end_match_ptr) - subject;
+    
+  if ((options & PCRE2_COPY_MATCHED_SUBJECT) != 0)
+    {
+    length = CU2BYTES(length + was_zero_terminated);
+    match_data->subject = match_data->memctl.malloc(length,
+      match_data->memctl.memory_data);
+    if (match_data->subject == NULL) return PCRE2_ERROR_NOMEMORY;
+    memcpy((void *)match_data->subject, subject, length);
+    match_data->flags |= PCRE2_MD_COPIED_SUBJECT;
+    }
+     
   return match_data->rc;
   }
 

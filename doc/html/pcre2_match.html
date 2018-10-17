@@ -55,11 +55,13 @@ A match context is needed only if you want to:
   Change the backtracking depth limit
   Set custom memory management specifically for the match
 </pre>
-The <i>length</i> and <i>startoffset</i> values are code
-units, not characters. The length may be given as PCRE2_ZERO_TERMINATE for a
-subject that is terminated by a binary zero code unit. The options are:
+The <i>length</i> and <i>startoffset</i> values are code units, not characters.
+The length may be given as PCRE2_ZERO_TERMINATED for a subject that is
+terminated by a binary zero code unit. The options are:
 <pre>
   PCRE2_ANCHORED          Match only at the first position
+  PCRE2_COPY_MATCHED_SUBJECT
+                          On success, make a private subject copy   
   PCRE2_ENDANCHORED       Pattern can match only at end of subject
   PCRE2_NOTBOL            Subject string is not the beginning of a line
   PCRE2_NOTEOL            Subject string is not the end of a line

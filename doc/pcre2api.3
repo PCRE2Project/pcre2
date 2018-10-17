@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "21 September 2018" "PCRE2 10.33"
+.TH PCRE2API 3 "16 October 2018" "PCRE2 10.33"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -1237,13 +1237,19 @@ NULL.
 NOTE: When one of the matching functions is called, pointers to the compiled
 pattern and the subject string are set in the match data block so that they can
 be referenced by the substring extraction functions. After running a match, you
-must not free a compiled pattern (or a subject string) until after all
+must not free a compiled pattern or a subject string until after all
 operations on the
 .\" HTML <a href="#matchdatablock">
 .\" </a>
 match data block
 .\"
-have taken place.
+have taken place, unless, in the case of the subject string, you have used the 
+PCRE2_COPY_MATCHED_SUBJECT option, which is described in the section entitled
+"Option bits for \fBpcre2_match()\fP"
+.\" HTML <a href="#matchoptions>">
+.\" </a>
+below.
+.\"
 .P
 The \fIoptions\fP argument for \fBpcre2_compile()\fP contains various bit
 settings that affect the compilation. It should be zero if no options are
@@ -2390,7 +2396,13 @@ When one of the matching functions is called, pointers to the compiled pattern
 and the subject string are set in the match data block so that they can be
 referenced by the extraction functions. After running a match, you must not
 free a compiled pattern or a subject string until after all operations on the
-match data block (for that match) have taken place.
+match data block (for that match) have taken place, unless, in the case of the
+subject string, you have used the PCRE2_COPY_MATCHED_SUBJECT option, which is
+described in the section entitled "Option bits for \fBpcre2_match()\fP"
+.\" HTML <a href="#matchoptions>">
+.\" </a>
+below.
+.\"
 .P
 When a match data block itself is no longer needed, it should be freed by
 calling \fBpcre2_match_data_free()\fP. If this function is called with a NULL
@@ -2507,10 +2519,10 @@ the use of .* with PCRE2_DOTALL, not by starting the pattern with ^ or \eA.
 .rs
 .sp
 The unused bits of the \fIoptions\fP argument for \fBpcre2_match()\fP must be
-zero. The only bits that may be set are PCRE2_ANCHORED, PCRE2_ENDANCHORED,
-PCRE2_NOTBOL, PCRE2_NOTEOL, PCRE2_NOTEMPTY, PCRE2_NOTEMPTY_ATSTART,
-PCRE2_NO_JIT, PCRE2_NO_UTF_CHECK, PCRE2_PARTIAL_HARD, and PCRE2_PARTIAL_SOFT.
-Their action is described below.
+zero. The only bits that may be set are PCRE2_ANCHORED, 
+PCRE2_COPY_MATCHED_SUBJECT, PCRE2_ENDANCHORED, PCRE2_NOTBOL, PCRE2_NOTEOL,
+PCRE2_NOTEMPTY, PCRE2_NOTEMPTY_ATSTART, PCRE2_NO_JIT, PCRE2_NO_UTF_CHECK,
+PCRE2_PARTIAL_HARD, and PCRE2_PARTIAL_SOFT. Their action is described below.
 .P
 Setting PCRE2_ANCHORED or PCRE2_ENDANCHORED at match time is not supported by
 the just-in-time (JIT) compiler. If it is set, JIT matching is disabled and the
@@ -2524,6 +2536,22 @@ matching position. If a pattern was compiled with PCRE2_ANCHORED, or turned out
 to be anchored by virtue of its contents, it cannot be made unachored at
 matching time. Note that setting the option at match time disables JIT
 matching.
+.sp
+  PCRE2_COPY_MATCHED_SUBJECT
+.sp
+By default, a pointer to the subject is remembered in the match data block so 
+that, after a successful match, it can be referenced by the substring 
+extraction functions. This means that the subject's memory must not be freed
+until all such operations are complete. For some applications where the
+lifetime of the subject string is not guaranteed, it may be necessary to make a
+copy of the subject string, but it is wasteful to do this unless the match is
+successful. After a successful match, if PCRE2_COPY_MATCHED_SUBJECT is set, the
+subject is copied and the new pointer is remembered in the match data block
+instead of the original subject pointer. The memory allocator that was used for
+the match block itself is used. The copy is automatically freed when
+\fBpcre2_match_data_free()\fP is called to free the match data block. It is also
+automatically freed if the match data block is re-used for another match
+operation.
 .sp
   PCRE2_ENDANCHORED
 .sp
@@ -2961,7 +2989,8 @@ The backtracking match limit was reached.
 If a pattern contains many nested backtracking points, heap memory is used to
 remember them. This error is given when the memory allocation function (default
 or custom) fails. Note that a different error, PCRE2_ERROR_HEAPLIMIT, is given
-if the amount of memory needed exceeds the heap limit.
+if the amount of memory needed exceeds the heap limit. PCRE2_ERROR_NOMEMORY is 
+also returned if PCRE2_COPY_MATCHED_SUBJECT is set and memory allocation fails.
 .sp
   PCRE2_ERROR_NULL
 .sp
@@ -3579,11 +3608,12 @@ Here is an example of a simple call to \fBpcre2_dfa_match()\fP:
 .rs
 .sp
 The unused bits of the \fIoptions\fP argument for \fBpcre2_dfa_match()\fP must
-be zero. The only bits that may be set are PCRE2_ANCHORED, PCRE2_ENDANCHORED,
-PCRE2_NOTBOL, PCRE2_NOTEOL, PCRE2_NOTEMPTY, PCRE2_NOTEMPTY_ATSTART,
-PCRE2_NO_UTF_CHECK, PCRE2_PARTIAL_HARD, PCRE2_PARTIAL_SOFT, PCRE2_DFA_SHORTEST,
-and PCRE2_DFA_RESTART. All but the last four of these are exactly the same as
-for \fBpcre2_match()\fP, so their description is not repeated here.
+be zero. The only bits that may be set are PCRE2_ANCHORED,
+PCRE2_COPY_MATCHED_SUBJECT, PCRE2_ENDANCHORED, PCRE2_NOTBOL, PCRE2_NOTEOL,
+PCRE2_NOTEMPTY, PCRE2_NOTEMPTY_ATSTART, PCRE2_NO_UTF_CHECK, PCRE2_PARTIAL_HARD,
+PCRE2_PARTIAL_SOFT, PCRE2_DFA_SHORTEST, and PCRE2_DFA_RESTART. All but the last
+four of these are exactly the same as for \fBpcre2_match()\fP, so their
+description is not repeated here.
 .sp
   PCRE2_PARTIAL_HARD
   PCRE2_PARTIAL_SOFT
@@ -3737,6 +3767,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 21 September 2018
+Last updated: 16 October 2018
 Copyright (c) 1997-2018 University of Cambridge.
 .fi

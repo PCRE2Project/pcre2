@@ -16821,6 +16821,17 @@ Failed: error 128 at offset 10: assertion expected after (?( or (?(?C)
 /(?(*script_run:xxx)zzz)/
 Failed: error 128 at offset 14: assertion expected after (?( or (?(?C)
 
+/foobar/
+    the foobar thing\=copy_matched_subject
+ 0: foobar
+    the foobar thing\=copy_matched_subject,zero_terminate
+ 0: foobar
+
+/foobar/g
+    the foobar thing foobar again\=copy_matched_subject
+ 0: foobar
+ 0: foobar
+
 # End of testinput2
 Error -70: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

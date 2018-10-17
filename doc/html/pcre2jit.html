@@ -147,9 +147,10 @@ pattern.
 <br><a name="SEC4" href="#TOC1">UNSUPPORTED OPTIONS AND PATTERN ITEMS</a><br>
 <P>
 The <b>pcre2_match()</b> options that are supported for JIT matching are
-PCRE2_NOTBOL, PCRE2_NOTEOL, PCRE2_NOTEMPTY, PCRE2_NOTEMPTY_ATSTART,
-PCRE2_NO_UTF_CHECK, PCRE2_PARTIAL_HARD, and PCRE2_PARTIAL_SOFT. The
-PCRE2_ANCHORED option is not supported at match time.
+PCRE2_COPY_MATCHED_SUBJECT, PCRE2_NOTBOL, PCRE2_NOTEOL, PCRE2_NOTEMPTY,
+PCRE2_NOTEMPTY_ATSTART, PCRE2_NO_UTF_CHECK, PCRE2_PARTIAL_HARD, and
+PCRE2_PARTIAL_SOFT. The PCRE2_ANCHORED and PCRE2_ENDANCHORED options are not
+supported at match time.
 </P>
 <P>
 If the PCRE2_NO_JIT option is passed to <b>pcre2_match()</b> it disables the
@@ -402,10 +403,13 @@ processed by <b>pcre2_jit_compile()</b>).
 </P>
 <P>
 The fast path function is called <b>pcre2_jit_match()</b>, and it takes exactly
-the same arguments as <b>pcre2_match()</b>. The return values are also the same,
-plus PCRE2_ERROR_JIT_BADOPTION if a matching mode (partial or complete) is
-requested that was not compiled. Unsupported option bits (for example,
-PCRE2_ANCHORED) are ignored, as is the PCRE2_NO_JIT option.
+the same arguments as <b>pcre2_match()</b>. However, the subject string must be
+specified with a length; PCRE2_ZERO_TERMINATED is not supported. Unsupported
+option bits (for example, PCRE2_ANCHORED, PCRE2_ENDANCHORED and
+PCRE2_COPY_MATCHED_SUBJECT) are ignored, as is the PCRE2_NO_JIT option. The
+return values are also the same as for <b>pcre2_match()</b>, plus
+PCRE2_ERROR_JIT_BADOPTION if a matching mode (partial or complete) is requested
+that was not compiled.
 </P>
 <P>
 When you call <b>pcre2_match()</b>, as well as testing for invalid options, a
@@ -434,7 +438,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC13" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 28 June 2018
+Last updated: 16 October 2018
 <br>
 Copyright &copy; 1997-2018 University of Cambridge.
 <br>

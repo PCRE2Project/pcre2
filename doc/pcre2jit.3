@@ -1,4 +1,4 @@
-.TH PCRE2JIT 3 "28 June 2018" "PCRE2 10.32"
+.TH PCRE2JIT 3 "16 October 2018" "PCRE2 10.33"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 JUST-IN-TIME COMPILER SUPPORT"
@@ -124,9 +124,10 @@ pattern.
 .rs
 .sp
 The \fBpcre2_match()\fP options that are supported for JIT matching are
-PCRE2_NOTBOL, PCRE2_NOTEOL, PCRE2_NOTEMPTY, PCRE2_NOTEMPTY_ATSTART,
-PCRE2_NO_UTF_CHECK, PCRE2_PARTIAL_HARD, and PCRE2_PARTIAL_SOFT. The
-PCRE2_ANCHORED option is not supported at match time.
+PCRE2_COPY_MATCHED_SUBJECT, PCRE2_NOTBOL, PCRE2_NOTEOL, PCRE2_NOTEMPTY,
+PCRE2_NOTEMPTY_ATSTART, PCRE2_NO_UTF_CHECK, PCRE2_PARTIAL_HARD, and
+PCRE2_PARTIAL_SOFT. The PCRE2_ANCHORED and PCRE2_ENDANCHORED options are not
+supported at match time.
 .P
 If the PCRE2_NO_JIT option is passed to \fBpcre2_match()\fP it disables the
 use of JIT, forcing matching by the interpreter code.
@@ -376,10 +377,13 @@ available, and which need the best possible performance, can instead use a
 processed by \fBpcre2_jit_compile()\fP).
 .P
 The fast path function is called \fBpcre2_jit_match()\fP, and it takes exactly
-the same arguments as \fBpcre2_match()\fP. The return values are also the same,
-plus PCRE2_ERROR_JIT_BADOPTION if a matching mode (partial or complete) is
-requested that was not compiled. Unsupported option bits (for example,
-PCRE2_ANCHORED) are ignored, as is the PCRE2_NO_JIT option.
+the same arguments as \fBpcre2_match()\fP. However, the subject string must be
+specified with a length; PCRE2_ZERO_TERMINATED is not supported. Unsupported
+option bits (for example, PCRE2_ANCHORED, PCRE2_ENDANCHORED and
+PCRE2_COPY_MATCHED_SUBJECT) are ignored, as is the PCRE2_NO_JIT option. The
+return values are also the same as for \fBpcre2_match()\fP, plus
+PCRE2_ERROR_JIT_BADOPTION if a matching mode (partial or complete) is requested
+that was not compiled.
 .P
 When you call \fBpcre2_match()\fP, as well as testing for invalid options, a
 number of other sanity checks are performed on the arguments. For example, if
@@ -412,6 +416,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 28 June 2018
+Last updated: 16 October 2018
 Copyright (c) 1997-2018 University of Cambridge.
 .fi

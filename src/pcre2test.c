@@ -620,6 +620,7 @@ static modstruct modlist[] = {
   { "convert_glob_separator",     MOD_PAT,  MOD_CHR, 0,                          PO(convert_glob_separator) },
   { "convert_length",             MOD_PAT,  MOD_INT, 0,                          PO(convert_length) },
   { "copy",                       MOD_DAT,  MOD_NN,  DO(copy_numbers),           DO(copy_names) },
+  { "copy_matched_subject",       MOD_DAT,  MOD_OPT, PCRE2_COPY_MATCHED_SUBJECT, DO(options) },
   { "debug",                      MOD_PAT,  MOD_CTL, CTL_DEBUG,                  PO(control) },
   { "depth_limit",                MOD_CTM,  MOD_INT, 0,                          MO(depth_limit) },
   { "dfa",                        MOD_DAT,  MOD_CTL, CTL_DFA,                    DO(control) },
@@ -4180,7 +4181,7 @@ else fprintf(outfile, "%s%s%s%s%s%s%s",
   ((options & PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL) != 0)? " bad_escape_is_literal" : "",
   ((options & PCRE2_EXTRA_MATCH_WORD) != 0)? " match_word" : "",
   ((options & PCRE2_EXTRA_MATCH_LINE) != 0)? " match_line" : "",
-  ((options & PCRE2_EXTRA_ESCAPED_CR_IS_LF) != 0)? " escaped_cr_is_lf" : "", 
+  ((options & PCRE2_EXTRA_ESCAPED_CR_IS_LF) != 0)? " escaped_cr_is_lf" : "",
   after);
 }
 
@@ -4196,11 +4197,13 @@ else fprintf(outfile, "%s%s%s%s%s%s%s",
 static void
 show_match_options(uint32_t options)
 {
-fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s",
+fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s",
   ((options & PCRE2_ANCHORED) != 0)? " anchored" : "",
+  ((options & PCRE2_COPY_MATCHED_SUBJECT) != 0)? " copy_matched_subject" : "",
   ((options & PCRE2_DFA_RESTART) != 0)? " dfa_restart" : "",
   ((options & PCRE2_DFA_SHORTEST) != 0)? " dfa_shortest" : "",
   ((options & PCRE2_ENDANCHORED) != 0)? " endanchored" : "",
+  ((options & PCRE2_NO_JIT) != 0)? " no_jit" : "",
   ((options & PCRE2_NO_UTF_CHECK) != 0)? " no_utf_check" : "",
   ((options & PCRE2_NOTBOL) != 0)? " notbol" : "",
   ((options & PCRE2_NOTEMPTY) != 0)? " notempty" : "",
@@ -7440,6 +7443,25 @@ for (gmatched = 0;; gmatched++)
         fprintf(outfile, "** Global loop abandoned\n");
         dat_datctl.control &= ~CTL_ANYGLOB;        /* Break g/G loop */
         }
+      }
+
+    /* If PCRE2_COPY_MATCHED_SUBJECT was set, check that things are as they
+    should be, but not for fast JIT, where it isn't supported. */
+
+    if ((dat_datctl.options & PCRE2_COPY_MATCHED_SUBJECT) != 0 &&
+        (pat_patctl.control & CTL_JITFAST) == 0)
+      {
+      if ((FLD(match_data, flags) & PCRE2_MD_COPIED_SUBJECT) == 0)
+        fprintf(outfile,
+          "** PCRE2 error: flag not set after copy_matched_subject\n");
+
+      if (CASTFLD(void *, match_data, subject) == pp)
+        fprintf(outfile,
+          "** PCRE2 error: copy_matched_subject has not copied\n");
+
+      if (memcmp(CASTFLD(void *, match_data, subject), pp, ulen) != 0)
+        fprintf(outfile,
+          "** PCRE2 error: copy_matched_subject mismatch\n");
       }
 
     /* If this is not the first time round a global loop, check that the

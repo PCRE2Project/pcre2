@@ -85,7 +85,8 @@ in others, so I abandoned this code. */
 #define PUBLIC_DFA_MATCH_OPTIONS \
   (PCRE2_ANCHORED|PCRE2_ENDANCHORED|PCRE2_NOTBOL|PCRE2_NOTEOL|PCRE2_NOTEMPTY| \
    PCRE2_NOTEMPTY_ATSTART|PCRE2_NO_UTF_CHECK|PCRE2_PARTIAL_HARD| \
-   PCRE2_PARTIAL_SOFT|PCRE2_DFA_SHORTEST|PCRE2_DFA_RESTART)
+   PCRE2_PARTIAL_SOFT|PCRE2_DFA_SHORTEST|PCRE2_DFA_RESTART| \
+   PCRE2_COPY_MATCHED_SUBJECT)
 
 
 /*************************************************
@@ -3228,6 +3229,8 @@ pcre2_dfa_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
   pcre2_match_context *mcontext, int *workspace, PCRE2_SIZE wscount)
 {
 int rc;
+int was_zero_terminated = 0;
+
 const pcre2_real_code *re = (const pcre2_real_code *)code;
 
 PCRE2_SPTR start_match;
@@ -3267,7 +3270,11 @@ rws->free = RWS_BASE_SIZE - RWS_ANCHOR_SIZE;
 /* A length equal to PCRE2_ZERO_TERMINATED implies a zero-terminated
 subject string. */
 
-if (length == PCRE2_ZERO_TERMINATED) length = PRIV(strlen)(subject);
+if (length == PCRE2_ZERO_TERMINATED) 
+  {
+  length = PRIV(strlen)(subject);
+  was_zero_terminated = 1;
+  }  
 
 /* Plausibility checks */
 
@@ -3520,10 +3527,21 @@ if ((re->flags & PCRE2_LASTSET) != 0)
     }
   }
 
+/* If the match data block was previously used with PCRE2_COPY_MATCHED_SUBJECT,
+free the memory that was obtained. */
+
+if ((match_data->flags & PCRE2_MD_COPIED_SUBJECT) != 0)
+  {
+  match_data->memctl.free((void *)match_data->subject, 
+    match_data->memctl.memory_data);
+  match_data->flags &= ~PCRE2_MD_COPIED_SUBJECT;
+  }    
+
 /* Fill in fields that are always returned in the match data. */
 
 match_data->code = re;
 match_data->subject = subject;
+match_data->flags = 0;
 match_data->mark = NULL;
 match_data->matchedby = PCRE2_MATCHEDBY_DFA_INTERPRETER;
 
@@ -3818,6 +3836,17 @@ for (;;)
     match_data->rightchar = (PCRE2_SIZE)( mb->last_used_ptr - subject);
     match_data->startchar = (PCRE2_SIZE)(start_match - subject);
     match_data->rc = rc;
+
+    if (rc >= 0 &&(options & PCRE2_COPY_MATCHED_SUBJECT) != 0)
+      {
+      length = CU2BYTES(length + was_zero_terminated);
+      match_data->subject = match_data->memctl.malloc(length,
+        match_data->memctl.memory_data);
+      if (match_data->subject == NULL) return PCRE2_ERROR_NOMEMORY;
+      memcpy((void *)match_data->subject, subject, length);
+      match_data->flags |= PCRE2_MD_COPIED_SUBJECT;
+      }
+ 
     goto EXIT;
     }
 

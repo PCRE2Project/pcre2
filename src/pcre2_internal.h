@@ -534,6 +534,10 @@ bytes in a code unit in that mode. */
 enum { PCRE2_MATCHEDBY_INTERPRETER,     /* pcre2_match() */
        PCRE2_MATCHEDBY_DFA_INTERPRETER, /* pcre2_dfa_match() */
        PCRE2_MATCHEDBY_JIT };           /* pcre2_jit_match() */
+       
+/* Values for the flags field in a match data block. */
+
+#define PCRE2_MD_COPIED_SUBJECT  0x01u 
 
 /* Magic number to provide a small check against being handed junk. */
 

@@ -31,6 +31,11 @@ using the memory freeing function from the general context or compiled pattern
 with which it was created, or <b>free()</b> if that was not set.
 </P>
 <P>
+If the PCRE2_COPY_MATCHED_SUBJECT was used for a successful match using this 
+match data block, the copy of the subject that was remembered with the block is
+also freed.
+</P>
+<P>
 There is a complete description of the PCRE2 native API in the
 <a href="pcre2api.html"><b>pcre2api</b></a>
 page and a description of the POSIX API in the

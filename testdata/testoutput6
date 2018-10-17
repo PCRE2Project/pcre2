@@ -7783,4 +7783,15 @@ No match
     \na
 No match
     
+/foobar/
+    the foobar thing\=copy_matched_subject
+ 0: foobar
+    the foobar thing\=copy_matched_subject,zero_terminate
+ 0: foobar
+
+/foobar/g
+    the foobar thing foobar again\=copy_matched_subject
+ 0: foobar
+ 0: foobar
+
 # End of testinput6
