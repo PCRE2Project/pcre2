@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "17 October 2018" "PCRE2 10.33"
+.TH PCRE2API 3 "19 October 2018" "PCRE2 10.33"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -1236,9 +1236,9 @@ NULL.
 .P
 NOTE: When one of the matching functions is called, pointers to the compiled
 pattern and the subject string are set in the match data block so that they can
-be referenced by the substring extraction functions. After running a match, you
-must not free a compiled pattern or a subject string until after all
-operations on the
+be referenced by the substring extraction functions after a successful match.
+After running a match, you must not free a compiled pattern or a subject string
+until after all operations on the
 .\" HTML <a href="#matchdatablock">
 .\" </a>
 match data block
@@ -2394,11 +2394,12 @@ on the error, and is detailed below.
 .P
 When one of the matching functions is called, pointers to the compiled pattern
 and the subject string are set in the match data block so that they can be
-referenced by the extraction functions. After running a match, you must not
-free a compiled pattern or a subject string until after all operations on the
-match data block (for that match) have taken place, unless, in the case of the
-subject string, you have used the PCRE2_COPY_MATCHED_SUBJECT option, which is
-described in the section entitled "Option bits for \fBpcre2_match()\fP"
+referenced by the extraction functions after a successful match. After running
+a match, you must not free a compiled pattern or a subject string until after
+all operations on the match data block (for that match) have taken place,
+unless, in the case of the subject string, you have used the
+PCRE2_COPY_MATCHED_SUBJECT option, which is described in the section entitled
+"Option bits for \fBpcre2_match()\fP"
 .\" HTML <a href="#matchoptions>">
 .\" </a>
 below.
@@ -3767,6 +3768,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 17 October 2018
+Last updated: 19 October 2018
 Copyright (c) 1997-2018 University of Cambridge.
 .fi

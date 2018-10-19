@@ -6174,15 +6174,16 @@ if (mcontext != NULL && mcontext->offset_limit != PCRE2_UNSET &&
   return PCRE2_ERROR_BADOFFSETLIMIT;
   
 /* If the match data block was previously used with PCRE2_COPY_MATCHED_SUBJECT,
-free the memory that was obtained. */
+free the memory that was obtained. Set the field to NULL for no match cases. */
 
 if ((match_data->flags & PCRE2_MD_COPIED_SUBJECT) != 0)
   {
   match_data->memctl.free((void *)match_data->subject, 
     match_data->memctl.memory_data);
   match_data->flags &= ~PCRE2_MD_COPIED_SUBJECT;
-  }    
-
+  }
+match_data->subject = NULL; 
+  
 /* If the pattern was successfully studied with JIT support, run the JIT
 executable instead of the rest of this function. Most options must be set at
 compile time for the JIT code to be usable. Fallback to the normal code path if
@@ -6846,8 +6847,6 @@ if (mb->match_frames != mb->stack_frames)
 /* Fill in fields that are always returned in the match data. */
 
 match_data->code = re;
-match_data->subject = subject;
-match_data->flags = 0;
 match_data->mark = mb->mark;
 match_data->matchedby = PCRE2_MATCHEDBY_INTERPRETER;
 
@@ -6864,7 +6863,6 @@ if (rc == MATCH_MATCH)
   match_data->leftchar = mb->start_used_ptr - subject;
   match_data->rightchar = ((mb->last_used_ptr > mb->end_match_ptr)?
     mb->last_used_ptr : mb->end_match_ptr) - subject;
-    
   if ((options & PCRE2_COPY_MATCHED_SUBJECT) != 0)
     {
     length = CU2BYTES(length + was_zero_terminated);
@@ -6874,7 +6872,7 @@ if (rc == MATCH_MATCH)
     memcpy((void *)match_data->subject, subject, length);
     match_data->flags |= PCRE2_MD_COPIED_SUBJECT;
     }
-     
+  else match_data->subject = subject; 
   return match_data->rc;
   }
 
@@ -6892,6 +6890,7 @@ if (rc != MATCH_NOMATCH && rc != PCRE2_ERROR_PARTIAL) match_data->rc = rc;
 
 else if (match_partial != NULL)
   {
+  match_data->subject = subject; 
   match_data->ovector[0] = match_partial - subject;
   match_data->ovector[1] = end_subject - subject;
   match_data->startchar = match_partial - subject;

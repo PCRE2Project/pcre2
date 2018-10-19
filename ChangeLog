@@ -39,7 +39,9 @@ worked, though there were no bug reports.
 
 10. Implement PCRE2_COPY_MATCHED_SUBJECT for pcre2_match() (including JIT via
 pcre2_match()) and pcre2_dfa_match(), but *not* the pcre2_jit_match() fast
-path.
+path. Also, when a match fails, set the subject field in the match data to NULL 
+for tidiness - none of the substring extractors should reference this after 
+match failure.
 
 
 Version 10.32 10-September-2018

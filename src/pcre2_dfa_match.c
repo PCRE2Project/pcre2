@@ -3540,8 +3540,7 @@ if ((match_data->flags & PCRE2_MD_COPIED_SUBJECT) != 0)
 /* Fill in fields that are always returned in the match data. */
 
 match_data->code = re;
-match_data->subject = subject;
-match_data->flags = 0;
+match_data->subject = NULL;  /* Default for no match */
 match_data->mark = NULL;
 match_data->matchedby = PCRE2_MATCHEDBY_DFA_INTERPRETER;
 
@@ -3846,7 +3845,10 @@ for (;;)
       memcpy((void *)match_data->subject, subject, length);
       match_data->flags |= PCRE2_MD_COPIED_SUBJECT;
       }
- 
+    else 
+      { 
+      if (rc >= 0 || rc == PCRE2_ERROR_PARTIAL) match_data->subject = subject;   
+      }
     goto EXIT;
     }
 

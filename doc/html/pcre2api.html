@@ -1304,9 +1304,9 @@ NULL.
 <P>
 NOTE: When one of the matching functions is called, pointers to the compiled
 pattern and the subject string are set in the match data block so that they can
-be referenced by the substring extraction functions. After running a match, you
-must not free a compiled pattern or a subject string until after all
-operations on the
+be referenced by the substring extraction functions after a successful match.
+After running a match, you must not free a compiled pattern or a subject string
+until after all operations on the
 <a href="#matchdatablock">match data block</a>
 have taken place, unless, in the case of the subject string, you have used the 
 PCRE2_COPY_MATCHED_SUBJECT option, which is described in the section entitled
@@ -2420,11 +2420,12 @@ on the error, and is detailed below.
 <P>
 When one of the matching functions is called, pointers to the compiled pattern
 and the subject string are set in the match data block so that they can be
-referenced by the extraction functions. After running a match, you must not
-free a compiled pattern or a subject string until after all operations on the
-match data block (for that match) have taken place, unless, in the case of the
-subject string, you have used the PCRE2_COPY_MATCHED_SUBJECT option, which is
-described in the section entitled "Option bits for <b>pcre2_match()</b>"
+referenced by the extraction functions after a successful match. After running
+a match, you must not free a compiled pattern or a subject string until after
+all operations on the match data block (for that match) have taken place,
+unless, in the case of the subject string, you have used the
+PCRE2_COPY_MATCHED_SUBJECT option, which is described in the section entitled
+"Option bits for <b>pcre2_match()</b>"
 <a href="#matchoptions>">below.</a>
 </P>
 <P>
@@ -3756,7 +3757,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC42" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 17 October 2018
+Last updated: 19 October 2018
 <br>
 Copyright &copy; 1997-2018 University of Cambridge.
 <br>
