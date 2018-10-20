@@ -6095,7 +6095,7 @@ for (;; pptr++)
       }
     goto GROUP_PROCESS_NOTE_EMPTY;
 
-    /* The DEFINE condition is always false. It's internal groups may never
+    /* The DEFINE condition is always false. Its internal groups may never
     be called, so matched_char must remain false, hence the jump to
     GROUP_PROCESS rather than GROUP_PROCESS_NOTE_EMPTY. */
 
@@ -6435,8 +6435,8 @@ for (;; pptr++)
           groupnumber = ng->number;
 
           /* For a recursion, that's all that is needed. We can now go to
-          the code above that handles numerical recursion, applying it to
-          the first group with the given name. */
+          the code that handles numerical recursion, applying it to the first
+          group with the given name. */
 
           if (meta == META_RECURSE_BYNAME)
             {
@@ -7486,6 +7486,8 @@ for (;; pptr++)
     groupsetfirstcu = FALSE;
     cb->had_recurse = TRUE;
     if (firstcuflags == REQ_UNSET) firstcuflags = REQ_NONE;
+    zerofirstcu = firstcu;
+    zerofirstcuflags = firstcuflags;   
     break;
 
 

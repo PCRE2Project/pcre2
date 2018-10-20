@@ -6328,4 +6328,19 @@ ef) x/x,mark
 \= Expect no match
     aaaa      
 
+/   (?<word> \w+ )*    \.   /xi
+    pokus.
+    
+/(?(DEFINE) (?<word> \w+ ) ) (?&word)*   \./xi
+    pokus.
+
+/(?(DEFINE) (?<word> \w+ ) ) ( (?&word)* )   \./xi 
+    pokus.
+
+/(?&word)*  (?(DEFINE) (?<word> \w+ ) )  \./xi
+    pokus.
+
+/(?&word)*  \. (?<word> \w+ )/xi
+    pokus.hokus
+
 # End of testinput1 

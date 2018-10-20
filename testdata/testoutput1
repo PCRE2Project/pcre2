@@ -10025,4 +10025,28 @@ No match
     aaaa      
 No match
 
+/   (?<word> \w+ )*    \.   /xi
+    pokus.
+ 0: pokus.
+ 1: pokus
+    
+/(?(DEFINE) (?<word> \w+ ) ) (?&word)*   \./xi
+    pokus.
+ 0: pokus.
+
+/(?(DEFINE) (?<word> \w+ ) ) ( (?&word)* )   \./xi 
+    pokus.
+ 0: pokus.
+ 1: <unset>
+ 2: pokus
+
+/(?&word)*  (?(DEFINE) (?<word> \w+ ) )  \./xi
+    pokus.
+ 0: pokus.
+
+/(?&word)*  \. (?<word> \w+ )/xi
+    pokus.hokus
+ 0: pokus.hokus
+ 1: hokus
+
 # End of testinput1 
