@@ -152,8 +152,6 @@ else
   jit_stack = NULL;
   }
 
-/* JIT only need two offsets for each ovector entry. Hence
-   the last 1/3 of the ovector will never be touched. */
 
 max_oveccount = functions->top_bracket;
 if (oveccount > max_oveccount)

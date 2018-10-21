@@ -285,7 +285,7 @@ versions. */
 #define META_LAST_QUANTIFIER  META_MINMAX_QUERY
 
 /* This is a special "meta code" that is used only to distinguish (*asr: from
-(*sr in the table of aphabetic assertions. It is never stored in the parsed
+(*sr: in the table of aphabetic assertions. It is never stored in the parsed
 pattern because (*asr: is turned into (*sr:(*atomic: at that stage. There is
 therefore no need for it to have a length entry, so use a high value. */
 
@@ -7467,9 +7467,8 @@ for (;; pptr++)
     scanned and these numbers are replaced by offsets within the pattern. It is
     done like this to avoid problems with forward references and adjusting
     offsets when groups are duplicated and moved (as discovered in previous
-    implementations). Note that a recursion does not have a set first character
-    (relevant if it is repeated, because it will then be wrapped with ONCE
-    brackets). */
+    implementations). Note that a recursion does not have a set first
+    character. */
 
     case META_RECURSE:
     GETPLUSOFFSET(offset, pptr);
