@@ -48,6 +48,10 @@ minimum of zero, an incorrect "match must start with this character" could be
 recorded. Example: /(?&xxx)*ABC(?<xxx>XYZ)/ would (incorrectly) expect 'A' to 
 be the first character of a match. 
 
+12. The heap limit checking code in pcre2_dfa_match() could suffer from 
+overflow if the heap limit was set very large. This could cause incorrect "heap 
+limit exceeded" errors. 
+
 
 Version 10.32 10-September-2018
 -------------------------------

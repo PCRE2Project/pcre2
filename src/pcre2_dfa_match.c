@@ -319,8 +319,8 @@ finding the minimum heap requirement for a match. */
 
 typedef struct RWS_anchor {
   struct RWS_anchor *next;
-  unsigned int size;  /* Number of ints */
-  unsigned int free;  /* Number of ints */
+  uint32_t size;  /* Number of ints */
+  uint32_t free;  /* Number of ints */
 } RWS_anchor;
 
 #define RWS_ANCHOR_SIZE (sizeof(RWS_anchor)/sizeof(int))
@@ -416,20 +416,24 @@ if (rws->next != NULL)
   new = rws->next;
   }
 
-/* All sizes are in units of sizeof(int), except for mb->heaplimit, which is in
-kibibytes. */
+/* Sizes in the RWS_anchor blocks are in units of sizeof(int), but
+mb->heap_limit and mb->heap_used are in kibibytes. Play carefully, to avoid
+overflow. */
 
 else
   {
-  unsigned int newsize = rws->size * 2;
-  unsigned int heapleft = (unsigned int)
-    (((1024/sizeof(int))*mb->heap_limit - mb->heap_used));
-  if (newsize > heapleft) newsize = heapleft;
+  uint32_t newsize = (rws->size >= UINT32_MAX/2)? UINT32_MAX/2 : rws->size * 2;
+  uint32_t newsizeK = newsize/(1024/sizeof(int));
+
+  if (newsizeK + mb->heap_used > mb->heap_limit)
+    newsizeK = mb->heap_limit - mb->heap_used;
+  newsize = newsizeK*(1024/sizeof(int));
+
   if (newsize < RWS_RSIZE + ovecsize + RWS_ANCHOR_SIZE)
     return PCRE2_ERROR_HEAPLIMIT;
   new = mb->memctl.malloc(newsize*sizeof(int), mb->memctl.memory_data);
   if (new == NULL) return PCRE2_ERROR_NOMEMORY;
-  mb->heap_used += newsize;
+  mb->heap_used += newsizeK;
   new->next = NULL;
   new->size = newsize;
   rws->next = new;
@@ -3270,11 +3274,11 @@ rws->free = RWS_BASE_SIZE - RWS_ANCHOR_SIZE;
 /* A length equal to PCRE2_ZERO_TERMINATED implies a zero-terminated
 subject string. */
 
-if (length == PCRE2_ZERO_TERMINATED) 
+if (length == PCRE2_ZERO_TERMINATED)
   {
   length = PRIV(strlen)(subject);
   was_zero_terminated = 1;
-  }  
+  }
 
 /* Plausibility checks */
 
@@ -3532,10 +3536,10 @@ free the memory that was obtained. */
 
 if ((match_data->flags & PCRE2_MD_COPIED_SUBJECT) != 0)
   {
-  match_data->memctl.free((void *)match_data->subject, 
+  match_data->memctl.free((void *)match_data->subject,
     match_data->memctl.memory_data);
   match_data->flags &= ~PCRE2_MD_COPIED_SUBJECT;
-  }    
+  }
 
 /* Fill in fields that are always returned in the match data. */
 
@@ -3845,9 +3849,9 @@ for (;;)
       memcpy((void *)match_data->subject, subject, length);
       match_data->flags |= PCRE2_MD_COPIED_SUBJECT;
       }
-    else 
-      { 
-      if (rc >= 0 || rc == PCRE2_ERROR_PARTIAL) match_data->subject = subject;   
+    else
+      {
+      if (rc >= 0 || rc == PCRE2_ERROR_PARTIAL) match_data->subject = subject;
       }
     goto EXIT;
     }
