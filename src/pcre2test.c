@@ -8152,7 +8152,7 @@ printf("  Internal link size = %d\n", optval);
 (void)PCRE2_CONFIG(PCRE2_CONFIG_PARENSLIMIT, &optval);
 printf("  Parentheses nest limit = %d\n", optval);
 (void)PCRE2_CONFIG(PCRE2_CONFIG_HEAPLIMIT, &optval);
-printf("  Default heap limit = %d\n", optval);
+printf("  Default heap limit = %d kibibytes\n", optval);
 (void)PCRE2_CONFIG(PCRE2_CONFIG_MATCHLIMIT, &optval);
 printf("  Default match limit = %d\n", optval);
 (void)PCRE2_CONFIG(PCRE2_CONFIG_DEPTHLIMIT, &optval);
