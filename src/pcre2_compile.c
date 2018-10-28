@@ -1242,7 +1242,7 @@ if (code != NULL)
   if ((code->flags & PCRE2_DEREF_TABLES) != 0)
     {
     /* Decoded tables belong to the codes after deserialization, and they must
-    be freed when there are no more reference to them. The *ref_count should
+    be freed when there are no more references to them. The *ref_count should
     always be > 0. */
 
     ref_count = (PCRE2_SIZE *)(code->tables + tables_length);
