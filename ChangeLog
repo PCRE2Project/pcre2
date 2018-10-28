@@ -55,6 +55,8 @@ limit exceeded" errors.
 13. Add "kibibytes" to the heap limit output from pcre2test -C to make the 
 units clear.
 
+14. Add a call to pcre2_jit_free_unused_memory() in pcre2grep, for tidiness.
+
 
 Version 10.32 10-September-2018
 -------------------------------

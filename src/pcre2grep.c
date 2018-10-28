@@ -4302,6 +4302,7 @@ if (show_total_count && counts_printed != 1 && filenames != FN_NOMATCH_ONLY)
 
 EXIT:
 #ifdef SUPPORT_PCRE2GREP_JIT
+pcre2_jit_free_unused_memory(NULL);
 if (jit_stack != NULL) pcre2_jit_stack_free(jit_stack);
 #endif
 
