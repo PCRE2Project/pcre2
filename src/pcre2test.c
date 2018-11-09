@@ -157,9 +157,16 @@ patterns. */
 #endif
 #endif
 
+/* VMS-specific code was included as suggested by a VMS user [1]. Another VMS
+user [2] provided alternative code which worked better for him. I have
+commented out the original, but kept it around just in case. */
+
 #ifdef __VMS
 #include <ssdef.h>
-void vms_setsymbol( char *, char *, int );
+/* These two includes came from [2]. */
+#include descrip
+#include lib$routines
+/* void vms_setsymbol( char *, char *, int ); Original code from [1]. */
 #endif
 
 /* VC and older compilers don't support %td or %zu. */
@@ -8082,9 +8089,13 @@ if (arg != NULL && arg[0] != CHAR_MINUS)
     break;
     }
 
-/* For VMS, return the value by setting a symbol, for certain values only. */
+/* For VMS, return the value by setting a symbol, for certain values only. This 
+is contributed code which the PCRE2 developers have no means of testing. */
 
 #ifdef __VMS
+
+/* This is the original code provided by the first VMS contributor. */
+#ifdef NEVER
   if (copytlist[i].type == CONF_FIX || coptlist[i].type == CONF_INT)
     {
     char ucname[16];
@@ -8093,6 +8104,22 @@ if (arg != NULL && arg[0] != CHAR_MINUS)
     vms_setsymbol(ucname, 0, optval);
     }
 #endif
+
+/* This is the new code, provided by a second VMS contributor. */
+
+  if (coptlist[i].type == CONF_FIX || coptlist[i].type == CONF_INT)
+    {
+    char nam_buf[22], val_buf[4];
+    $DESCRIPTOR(nam, nam_buf);
+    $DESCRIPTOR(val, val_buf);
+
+    strcpy(nam_buf, coptlist[i].name);
+    nam.dsc$w_length = strlen(nam_buf);
+    sprintf(val_buf, "%d", yield);
+    val.dsc$w_length = strlen(val_buf);
+    lib$set_symbol(&nam, &val);
+    }
+#endif  /* __VMS */
 
   return yield;
   }

@@ -57,6 +57,8 @@ units clear.
 
 14. Add a call to pcre2_jit_free_unused_memory() in pcre2grep, for tidiness.
 
+15. Updated the VMS-specific code in pcre2test on the advice of a VMS user.
+
 
 Version 10.32 10-September-2018
 -------------------------------
