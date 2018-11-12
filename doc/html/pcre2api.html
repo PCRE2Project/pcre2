@@ -183,7 +183,7 @@ document for an overview of all the PCRE2 documentation.
 <br>
 <br>
 <b>int pcre2_set_substitute_callout(pcre2_match_context *<i>mcontext</i>,</b>
-<b>  void (*<i>callout_function</i>)(pcre2_substitute_callout_block *, void *),</b>
+<b>  int (*<i>callout_function</i>)(pcre2_substitute_callout_block *, void *),</b>
 <b>  void *<i>callout_data</i>);</b>
 <br>
 <br>
@@ -924,7 +924,7 @@ documentation.
 <br>
 <br>
 <b>int pcre2_set_substitute_callout(pcre2_match_context *<i>mcontext</i>,</b>
-<b>  void (*<i>callout_function</i>)(pcre2_substitute_callout_block *, void *),</b>
+<b>  int (*<i>callout_function</i>)(pcre2_substitute_callout_block *, void *),</b>
 <b>  void *<i>callout_data</i>);</b>
 <br>
 <br>
@@ -3413,9 +3413,9 @@ substitutions. However, PCRE2_SUBSTITUTE_UNKNOWN_UNSET does cause unknown
 groups in the extended syntax forms to be treated as unset.
 </P>
 <P>
-If successful, <b>pcre2_substitute()</b> returns the number of replacements that
-were made. This may be zero if no matches were found, and is never greater than
-1 unless PCRE2_SUBSTITUTE_GLOBAL is set.
+If successful, <b>pcre2_substitute()</b> returns the number of successful 
+matches. This may be zero if no matches were found, and is never greater than 1
+unless PCRE2_SUBSTITUTE_GLOBAL is set.
 </P>
 <P>
 In the event of an error, a negative error code is returned. Except for
@@ -3457,16 +3457,16 @@ Substitution callouts
 </b><br>
 <P>
 <b>int pcre2_set_substitute_callout(pcre2_match_context *<i>mcontext</i>,</b>
-<b>  void (*<i>callout_function</i>)(pcre2_substitute_callout_block *, void *),</b>
+<b>  int (*<i>callout_function</i>)(pcre2_substitute_callout_block *, void *),</b>
 <b>  void *<i>callout_data</i>);</b>
 <br>
 <br>
 The <b>pcre2_set_substitution_callout()</b> function can be used to specify a
 callout function for <b>pcre2_substitute()</b>. This information is passed in
-a match context. The callout function is called after each substitution. It is
-not called for simulated substitutions that happen as a result of the
-PCRE2_SUBSTITUTE_OVERFLOW_LENGTH option. A callout function should not return 
-any value.
+a match context. The callout function is called after each substitution has 
+been processed, but it can cause the replacement not to happen. The callout 
+function is not called for simulated substitutions that happen as a result of
+the PCRE2_SUBSTITUTE_OVERFLOW_LENGTH option.
 </P>
 <P>
 The first argument of the callout function is a pointer to a substitute callout
@@ -3474,7 +3474,11 @@ block structure, which contains the following fields, not necessarily in this
 order:
 <pre>
   uint32_t    <i>version</i>;
-  PCRE2_SIZE  <i>input_offsets[2]</i>;
+  uint32_t    <i>subscount</i>;  
+  PCRE2_SPTR  <i>input</i>;
+  PCRE2_SPTR  <i>output</i>; 
+  PCRE2_SIZE <i>*ovector</i>; 
+  uint32_t    <i>oveccount</i>;
   PCRE2_SIZE  <i>output_offsets[2]</i>;
 </pre>
 The <i>version</i> field contains the version number of the block format. The
@@ -3482,13 +3486,34 @@ current version is 0. The version number will increase in future if more fields
 are added, but the intention is never to remove any of the existing fields.
 </P>
 <P>
-The <i>input_offsets</i> vector contains the code unit offsets in the input
-string of the matched substring, and the <i>output_offsets</i> vector contains
-the offsets of the replacement in the output string.
+The <i>subscount</i> field is the number of the current match. It is 1 for the
+first callout, 2 for the second, and so on. The <i>input</i> and <i>output</i>
+pointers are copies of the values passed to <b>pcre2_substitute()</b>.
+</P>
+<P>
+The <i>ovector</i> field points to the ovector, which contains the result of the 
+most recent match. The <i>oveccount</i> field contains the number of pairs that 
+are set in the ovector, and is always greater than zero. 
+</P>
+<P>
+The <i>output_offsets</i> vector contains the offsets of the replacement in the
+output string. This has already been processed for dollar and (if requested)
+backslash substitutions as described above.
 </P>
 <P>
 The second argument of the callout function is the value passed as
-<i>callout_data</i> when the function was registered.
+<i>callout_data</i> when the function was registered. The value returned by the
+callout function is interpreted as follows:
+</P>
+<P>
+If the value is zero, the replacement is accepted, and, if
+PCRE2_SUBSTITUTE_GLOBAL is set, processing continues with a search for the next
+match. If the value is not zero, the current replacement is not accepted. If
+the value is greater than zero, processing continues when
+PCRE2_SUBSTITUTE_GLOBAL is set. Otherwise (the value is less than zero or
+PCRE2_SUBSTITUTE_GLOBAL is not set), the the rest of the input is copied to the
+output and the call to <b>pcre2_substitute()</b> exits, returning the number of
+matches so far.
 </P>
 <br><a name="SEC37" href="#TOC1">DUPLICATE SUBPATTERN NAMES</a><br>
 <P>
@@ -3757,7 +3782,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC42" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 19 October 2018
+Last updated: 12 November 2018
 <br>
 Copyright &copy; 1997-2018 University of Cambridge.
 <br>

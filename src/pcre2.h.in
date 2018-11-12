@@ -549,8 +549,12 @@ typedef struct pcre2_callout_enumerate_block { \
 typedef struct pcre2_substitute_callout_block { \
   uint32_t      version;           /* Identifies version of block */ \
   /* ------------------------ Version 0 ------------------------------- */ \
-  PCRE2_SIZE    input_offsets[2];  /* Matched portion of the input */ \
+  PCRE2_SPTR    input;             /* Pointer to input subject string */ \
+  PCRE2_SPTR    output;            /* Pointer to output buffer */ \
   PCRE2_SIZE    output_offsets[2]; /* Changed portion of the output */ \
+  PCRE2_SIZE   *ovector;           /* Pointer to current ovector */ \
+  uint32_t      oveccount;         /* Count of pairs set in ovector */ \
+  uint32_t      subscount;         /* Substitution number */ \
   /* ------------------------------------------------------------------ */ \
 } pcre2_substitute_callout_block;
 
@@ -609,7 +613,7 @@ PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION \
     int (*)(pcre2_callout_block *, void *), void *); \
 PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION \
   pcre2_set_substitute_callout(pcre2_match_context *, \
-    void (*)(pcre2_substitute_callout_block *, void *), void *); \
+    int (*)(pcre2_substitute_callout_block *, void *), void *); \
 PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION \
   pcre2_set_depth_limit(pcre2_match_context *, uint32_t); \
 PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION \

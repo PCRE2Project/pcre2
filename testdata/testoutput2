@@ -16797,9 +16797,52 @@ Subject length lower bound = 1
 
 /a(b)c|xyz/g,replace=<$0>,substitute_callout
     abcdefabcpqr
-Old 0 3  New 0 5
-Old 6 9  New 8 13
+ 1(2) Old 0 3 "abc" New 0 5 "<abc>"
+ 2(2) Old 6 9 "abc" New 8 13 "<abc>"
  2: <abc>def<abc>pqr
+    abxyzpqrabcxyz
+ 1(1) Old 2 5 "xyz" New 2 7 "<xyz>"
+ 2(2) Old 8 11 "abc" New 10 15 "<abc>"
+ 3(1) Old 11 14 "xyz" New 15 20 "<xyz>"
+ 3: ab<xyz>pqr<abc><xyz>
+    12abc34xyz99abc55\=substitute_stop=2
+ 1(2) Old 2 5 "abc" New 2 7 "<abc>"
+ 2(1) Old 7 10 "xyz" New 9 14 "<xyz> STOPPED"
+ 2: 12<abc>34xyz99abc55
+    12abc34xyz99abc55\=substitute_skip=1
+ 1(2) Old 2 5 "abc" New 2 7 "<abc> SKIPPED"
+ 2(1) Old 7 10 "xyz" New 7 12 "<xyz>"
+ 3(2) Old 12 15 "abc" New 14 19 "<abc>"
+ 3: 12abc34<xyz>99<abc>55
+    12abc34xyz99abc55\=substitute_skip=2
+ 1(2) Old 2 5 "abc" New 2 7 "<abc>"
+ 2(1) Old 7 10 "xyz" New 9 14 "<xyz> SKIPPED"
+ 3(2) Old 12 15 "abc" New 14 19 "<abc>"
+ 3: 12<abc>34xyz99<abc>55
+
+/a(b)c|xyz/g,replace=<$0>
+    abcdefabcpqr
+ 2: <abc>def<abc>pqr
+    abxyzpqrabcxyz
+ 3: ab<xyz>pqr<abc><xyz>
+    12abc34xyz\=substitute_stop=2
+ 1(2) Old 2 5 "abc" New 2 7 "<abc>"
+ 2(1) Old 7 10 "xyz" New 9 14 "<xyz> STOPPED"
+ 2: 12<abc>34xyz
+    12abc34xyz\=substitute_skip=1
+ 1(2) Old 2 5 "abc" New 2 7 "<abc> SKIPPED"
+ 2(1) Old 7 10 "xyz" New 7 12 "<xyz>"
+ 2: 12abc34<xyz>
+
+/a(b)c|xyz/replace=<$0>
+    abcdefabcpqr
+ 1: <abc>defabcpqr
+    12abc34xyz\=substitute_skip=1
+ 1(2) Old 2 5 "abc" New 2 7 "<abc> SKIPPED"
+ 1: 12abc34xyz
+    12abc34xyz\=substitute_stop=1
+ 1(2) Old 2 5 "abc" New 2 7 "<abc> STOPPED"
+ 1: 12abc34xyz
 
 /abc\rdef/
     abc\ndef

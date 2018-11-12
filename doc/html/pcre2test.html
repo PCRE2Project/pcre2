@@ -1052,7 +1052,9 @@ process.
       startchar                  show starting character when relevant
       substitute_callout         use substitution callouts 
       substitute_extended        use PCRE2_SUBSTITUTE_EXTENDED
+      substitute_skip=&#60;n&#62;        skip substitution number n 
       substitute_overflow_length use PCRE2_SUBSTITUTE_OVERFLOW_LENGTH
+      substitute_stop=&#60;n&#62;        skip substitution number n and greater
       substitute_unknown_unset   use PCRE2_SUBSTITUTE_UNKNOWN_UNSET
       substitute_unset_empty     use PCRE2_SUBSTITUTE_UNSET_EMPTY
 </pre>
@@ -1220,7 +1222,9 @@ pattern.
       startoffset=&#60;n&#62;            same as offset=&#60;n&#62;
       substitute_callout         use substitution callouts 
       substitute_extedded        use PCRE2_SUBSTITUTE_EXTENDED
+      substitute_skip=&#60;n&#62;        skip substitution number n 
       substitute_overflow_length use PCRE2_SUBSTITUTE_OVERFLOW_LENGTH
+      substitute_stop=&#60;n&#62;        skip substitution number n and greater
       substitute_unknown_unset   use PCRE2_SUBSTITUTE_UNKNOWN_UNSET
       substitute_unset_empty     use PCRE2_SUBSTITUTE_UNSET_EMPTY
       zero_terminate             pass the subject as zero-terminated
@@ -1410,16 +1414,6 @@ simple example of a substitution test:
       =abc=abc=\=global
    2: =xxx=xxx=
 </pre>
-If the <b>substitute_callout</b> modifier is set, a substitution callout 
-function is set up. When it is called (after each substitution), the offsets in
-the input and output strings are output. For example:
-<pre>
-  /abc/g,replace=&#60;$0&#62;,substitute_callout
-      abcdefabcpqr
-  Old 0 3  New 0 5
-  Old 6 9  New 8 13
-   2: &#60;abc&#62;def&#60;abc&#62;pqr
-</pre>
 Subject and replacement strings should be kept relatively short (fewer than 256
 characters) for substitution tests, as fixed-size buffers are used. To make it
 easy to test for buffer overflow, if the replacement string starts with a
@@ -1449,6 +1443,47 @@ for the trailing zero) as part of the error message. For example:
 A replacement string is ignored with POSIX and DFA matching. Specifying partial
 matching provokes an error return ("bad option value") from
 <b>pcre2_substitute()</b>.
+</P>
+<br><b>
+Testing substitute callouts
+</b><br>
+<P>
+If the <b>substitute_callout</b> modifier is set, a substitution callout 
+function is set up. When it is called (after each substitution), details of the
+the input and output strings are output. For example:
+<pre>
+  /abc/g,replace=&#60;$0&#62;,substitute_callout
+      abcdefabcpqr
+   1(1) Old 0 3 "abc" New 0 5 "&#60;abc&#62;"
+   2(1) Old 6 9 "abc" New 8 13 "&#60;abc&#62;" 
+   2: &#60;abc&#62;def&#60;abc&#62;pqr
+</pre>
+The first number on each callout line is the count of matches. The
+parenthesized number is the number of pairs that are set in the ovector (that
+is, one more than the number of capturing groups that were set). Then are
+listed the offsets of the old substring, its contents, and the same for the
+replacement.
+</P>
+<P>
+By default, the substitution callout function returns zero, which accepts the 
+replacement and causes matching to continue if /g was used. Two further 
+modifiers can be used to test other return values. If <b>substitute_skip</b> is 
+set to a value greater than zero the callout function returns +1 for the match 
+of that number, and similarly <b>substitute_stop</b> returns -1. These cause the 
+replacement to be rejected, and -1 causes no further matching to take place. If
+either of them are set, <b>substitute_callout</b> is assumed. For example:
+<pre>
+  /abc/g,replace=&#60;$0&#62;,substitute_skip=1
+      abcdefabcpqr
+   1(1) Old 0 3 "abc" New 0 5 "&#60;abc&#62; SKIPPED"
+   2(1) Old 6 9 "abc" New 6 11 "&#60;abc&#62;"
+   2: abcdef&#60;abc&#62;pqr
+      abcdefabcpqr\=substitute_stop=1
+   1(1) Old 0 3 "abc" New 0 5 "&#60;abc&#62; STOPPED"
+   1: abcdefabcpqr
+</pre>
+If both are set for the same number, stop takes precedence. Only a single skip 
+or stop is supported, which is sufficient for testing that the feature works.
 </P>
 <br><b>
 Setting the JIT stack size
@@ -2040,7 +2075,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC21" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 21 September 2018
+Last updated: 12 November 2018
 <br>
 Copyright &copy; 1997-2018 University of Cambridge.
 <br>

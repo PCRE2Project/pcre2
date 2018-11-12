@@ -1472,10 +1472,10 @@ No match
 
 /(?<=abc)(|def)/g,utf,replace=<$0>,substitute_callout
     123abcáyzabcdef789abcሴqr
-Old 6 6  New 6 8
-Old 12 12  New 14 16
-Old 12 15  New 16 21
-Old 21 21  New 27 29
+ 1(2) Old 6 6 "" New 6 8 "<>"
+ 2(2) Old 12 12 "" New 14 16 "<>"
+ 3(2) Old 12 15 "def" New 16 21 "<def>"
+ 4(2) Old 21 21 "" New 27 29 "<>"
  4: 123abc<>\x{e1}yzabc<><def>789abc<>\x{1234}qr
     
 # A few script run tests in non-UTF mode (but they need Unicode support)

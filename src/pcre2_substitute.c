@@ -241,13 +241,15 @@ PCRE2_SIZE *ovector;
 PCRE2_SIZE ovecsave[3];
 pcre2_substitute_callout_block scb;
 
-scb.version = 0;
+/* General initialization */
+
 buff_offset = 0;
 lengthleft = buff_length = *blength;
 *blength = PCRE2_UNSET;
 ovecsave[0] = ovecsave[1] = ovecsave[2] = PCRE2_UNSET;
 
-/* Partial matching is not valid. */
+/* Partial matching is not valid. This must come after setting *blength to 
+PCRE2_UNSET, so as not to imply an offset in the replacement. */
 
 if ((options & (PCRE2_PARTIAL_HARD|PCRE2_PARTIAL_SOFT)) != 0)
   return PCRE2_ERROR_BADOPTION;
@@ -265,6 +267,13 @@ if (match_data == NULL)
   }
 ovector = pcre2_get_ovector_pointer(match_data);
 ovector_count = pcre2_get_ovector_count(match_data);
+
+/* Fixed things in the callout block */
+
+scb.version = 0;
+scb.input = subject;
+scb.output = (PCRE2_SPTR)buffer;
+scb.ovector = ovector;
 
 /* Find lengths of zero-terminated strings and the end of the replacement. */
 
@@ -393,11 +402,6 @@ do
     goto EXIT;   
     }   
     
-  /* Save the match point for a possible callout */
-  
-  scb.input_offsets[0] = ovector[0];
-  scb.input_offsets[1] = ovector[1];   
-    
   /* Count substitutions with a paranoid check for integer overflow; surely no
   real call to this function would ever hit this! */
 
@@ -409,12 +413,13 @@ do
   subs++;
 
   /* Copy the text leading up to the match, and remember where the insert
-  begins. */
+  begins and how many ovector pairs are set. */
 
   if (rc == 0) rc = ovector_count;
   fraglength = ovector[0] - start_offset;
   CHECKMEMCPY(subject + start_offset, fraglength);
   scb.output_offsets[0] = buff_offset;
+  scb.oveccount = rc;
 
   /* Process the replacement string. Literal mode is set by \Q, but only in
   extended mode when backslashes are being interpreted. In extended mode we
@@ -836,8 +841,26 @@ do
   
   if (!overflowed && mcontext->substitute_callout != NULL)
     {
+    scb.subscount = subs;  
     scb.output_offsets[1] = buff_offset;
-    mcontext->substitute_callout(&scb, mcontext->substitute_callout_data); 
+    rc = mcontext->substitute_callout(&scb, mcontext->substitute_callout_data); 
+
+    /* A non-zero return means cancel this substitution. Instead, copy the 
+    matched string fragment. */
+
+    if (rc != 0)
+      {
+      PCRE2_SIZE newlength = scb.output_offsets[1] - scb.output_offsets[0];
+      PCRE2_SIZE oldlength = ovector[1] - ovector[0];
+      
+      buff_offset -= newlength;
+      lengthleft += newlength;
+      CHECKMEMCPY(subject + ovector[0], oldlength);    
+      
+      /* A negative return means do not do any more. */
+      
+      if (rc < 0) suboptions &= (~PCRE2_SUBSTITUTE_GLOBAL);
+      }
     }   
  
   /* Save the details of this match. See above for how this data is used. If we

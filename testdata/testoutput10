@@ -1630,10 +1630,10 @@ No match
 
 /(?<=abc)(|def)/g,utf,replace=<$0>,substitute_callout
     123abcáyzabcdef789abcሴqr
-Old 6 6  New 6 8
-Old 13 13  New 15 17
-Old 13 16  New 17 22
-Old 22 22  New 28 30
+ 1(2) Old 6 6 "" New 6 8 "<>"
+ 2(2) Old 13 13 "" New 15 17 "<>"
+ 3(2) Old 13 16 "def" New 17 22 "<def>"
+ 4(2) Old 22 22 "" New 28 30 "<>"
  4: 123abc<>\x{e1}yzabc<><def>789abc<>\x{1234}qr
 
 # End of testinput10

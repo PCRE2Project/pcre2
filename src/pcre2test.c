@@ -531,12 +531,14 @@ different things in the two cases. */
 subject must be at the start and in the same order in both cases so that the
 same offset in the big table below works for both. */
 
-typedef struct patctl {    /* Structure for pattern modifiers. */
-  uint32_t  options;       /* Must be in same position as datctl */
-  uint32_t  control;       /* Must be in same position as datctl */
-  uint32_t  control2;      /* Must be in same position as datctl */
-  uint32_t  jitstack;      /* Must be in same position as datctl */
+typedef struct patctl {       /* Structure for pattern modifiers. */
+  uint32_t  options;          /* Must be in same position as datctl */
+  uint32_t  control;          /* Must be in same position as datctl */
+  uint32_t  control2;         /* Must be in same position as datctl */
+  uint32_t  jitstack;         /* Must be in same position as datctl */
    uint8_t  replacement[REPLACE_MODSIZE];  /* So must this */
+  uint32_t  substitute_skip;  /* Must be in same position as patctl */
+  uint32_t  substitute_stop;  /* Must be in same position as patctl */ 
   uint32_t  jit;
   uint32_t  stackguard_test;
   uint32_t  tables_id;
@@ -551,12 +553,14 @@ typedef struct patctl {    /* Structure for pattern modifiers. */
 #define MAXCPYGET 10
 #define LENCPYGET 64
 
-typedef struct datctl {    /* Structure for data line modifiers. */
-  uint32_t  options;       /* Must be in same position as patctl */
-  uint32_t  control;       /* Must be in same position as patctl */
-  uint32_t  control2;      /* Must be in same position as patctl */
-  uint32_t  jitstack;      /* Must be in same position as patctl */
+typedef struct datctl {       /* Structure for data line modifiers. */
+  uint32_t  options;          /* Must be in same position as patctl */
+  uint32_t  control;          /* Must be in same position as patctl */
+  uint32_t  control2;         /* Must be in same position as patctl */
+  uint32_t  jitstack;         /* Must be in same position as patctl */
    uint8_t  replacement[REPLACE_MODSIZE];  /* So must this */
+  uint32_t  substitute_skip;  /* Must be in same position as patctl */
+  uint32_t  substitute_stop;  /* Must be in same position as patctl */ 
   uint32_t  startend[2];
   uint32_t  cerror[2];
   uint32_t  cfail[2];
@@ -704,6 +708,8 @@ static modstruct modlist[] = {
   { "substitute_callout",         MOD_PND,  MOD_CTL, CTL2_SUBSTITUTE_CALLOUT,    PO(control2) },
   { "substitute_extended",        MOD_PND,  MOD_CTL, CTL2_SUBSTITUTE_EXTENDED,   PO(control2) },
   { "substitute_overflow_length", MOD_PND,  MOD_CTL, CTL2_SUBSTITUTE_OVERFLOW_LENGTH, PO(control2) },
+  { "substitute_skip",            MOD_PND,  MOD_INT, 0,                          PO(substitute_skip) },
+  { "substitute_stop",            MOD_PND,  MOD_INT, 0,                          PO(substitute_stop) },
   { "substitute_unknown_unset",   MOD_PND,  MOD_CTL, CTL2_SUBSTITUTE_UNKNOWN_UNSET, PO(control2) },
   { "substitute_unset_empty",     MOD_PND,  MOD_CTL, CTL2_SUBSTITUTE_UNSET_EMPTY, PO(control2) },
   { "tables",                     MOD_PAT,  MOD_INT, 0,                          PO(tables_id) },
@@ -1370,13 +1376,13 @@ are supported. */
 #define PCRE2_SET_SUBSTITUTE_CALLOUT(a,b,c) \
   if (test_mode == PCRE8_MODE) \
     pcre2_set_substitute_callout_8(G(a,8), \
-      (void (*)(pcre2_substitute_callout_block_8 *, void *))b,c); \
+      (int (*)(pcre2_substitute_callout_block_8 *, void *))b,c); \
   else if (test_mode == PCRE16_MODE) \
     pcre2_set_substitute_callout_16(G(a,16), \
-      (void (*)(pcre2_substitute_callout_block_16 *, void *))b,c); \
+      (int (*)(pcre2_substitute_callout_block_16 *, void *))b,c); \
   else \
     pcre2_set_substitute_callout_32(G(a,32), \
-      (void (*)(pcre2_substitute_callout_block_32 *, void *))b,c)
+      (int (*)(pcre2_substitute_callout_block_32 *, void *))b,c)
 
 #define PCRE2_SUBSTITUTE(a,b,c,d,e,f,g,h,i,j,k,l) \
   if (test_mode == PCRE8_MODE) \
@@ -1850,10 +1856,10 @@ the three different cases. */
 #define PCRE2_SET_SUBSTITUTE_CALLOUT(a,b,c) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
     G(pcre2_set_substitute_callout_,BITONE)(G(a,BITONE), \
-      (void (*)(G(pcre2_substitute_callout_block_,BITONE) *, void *))b,c); \
+      (int (*)(G(pcre2_substitute_callout_block_,BITONE) *, void *))b,c); \
   else \
     G(pcre2_set_substitute_callout_,BITTWO)(G(a,BITTWO), \
-      (void (*)(G(pcre2_substitute_callout_block_,BITTWO) *, void *))b,c)
+      (int (*)(G(pcre2_substitute_callout_block_,BITTWO) *, void *))b,c)
 
 #define PCRE2_SUBSTITUTE(a,b,c,d,e,f,g,h,i,j,k,l) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
@@ -2058,7 +2064,7 @@ the three different cases. */
 #define PCRE2_SET_PARENS_NEST_LIMIT(a,b) pcre2_set_parens_nest_limit_8(G(a,8),b)
 #define PCRE2_SET_SUBSTITUTE_CALLOUT(a,b,c) \
   pcre2_set_substitute_callout_8(G(a,8), \
-    (void (*)(pcre2_substitute_callout_block_8 *, void *))b,c)
+    (int (*)(pcre2_substitute_callout_block_8 *, void *))b,c)
 #define PCRE2_SUBSTITUTE(a,b,c,d,e,f,g,h,i,j,k,l) \
   a = pcre2_substitute_8(G(b,8),(PCRE2_SPTR8)c,d,e,f,G(g,8),G(h,8), \
     (PCRE2_SPTR8)i,j,(PCRE2_UCHAR8 *)k,l)
@@ -2165,7 +2171,7 @@ the three different cases. */
 #define PCRE2_SET_PARENS_NEST_LIMIT(a,b) pcre2_set_parens_nest_limit_16(G(a,16),b)
 #define PCRE2_SET_SUBSTITUTE_CALLOUT(a,b,c) \
   pcre2_set_substitute_callout_16(G(a,16), \
-    (void (*)(pcre2_substitute_callout_block_16 *, void *))b,c)
+    (int (*)(pcre2_substitute_callout_block_16 *, void *))b,c)
 #define PCRE2_SUBSTITUTE(a,b,c,d,e,f,g,h,i,j,k,l) \
   a = pcre2_substitute_16(G(b,16),(PCRE2_SPTR16)c,d,e,f,G(g,16),G(h,16), \
     (PCRE2_SPTR16)i,j,(PCRE2_UCHAR16 *)k,l)
@@ -2272,7 +2278,7 @@ the three different cases. */
 #define PCRE2_SET_PARENS_NEST_LIMIT(a,b) pcre2_set_parens_nest_limit_32(G(a,32),b)
 #define PCRE2_SET_SUBSTITUTE_CALLOUT(a,b,c) \
   pcre2_set_substitute_callout_32(G(a,32), \
-    (void (*)(pcre2_substitute_callout_block_32 *, void *))b,c)
+    (int (*)(pcre2_substitute_callout_block_32 *, void *))b,c)
 #define PCRE2_SUBSTITUTE(a,b,c,d,e,f,g,h,i,j,k,l) \
   a = pcre2_substitute_32(G(b,32),(PCRE2_SPTR32)c,d,e,f,G(g,32),G(h,32), \
     (PCRE2_SPTR32)i,j,(PCRE2_UCHAR32 *)k,l)
@@ -5955,17 +5961,40 @@ Arguments:
 Returns:      nothing
 */
 
-static void
+static int
 substitute_callout_function(pcre2_substitute_callout_block_8 *scb,
   void *data_ptr)
 {
+int yield = 0;
+BOOL utf = (FLD(compiled_code, overall_options) & PCRE2_UTF) != 0;
 (void)data_ptr;   /* Not used */
-fprintf(outfile, "Old %" SIZ_FORM " %" SIZ_FORM "  New %" SIZ_FORM
-  " %" SIZ_FORM "\n",
-  SIZ_CAST scb->input_offsets[0],
-  SIZ_CAST scb->input_offsets[1],
-  SIZ_CAST scb->output_offsets[0],
-  SIZ_CAST scb->output_offsets[1]);
+
+fprintf(outfile, "%2d(%d) Old %" SIZ_FORM " %" SIZ_FORM " \"",
+  scb->subscount, scb->oveccount, 
+  SIZ_CAST scb->ovector[0], SIZ_CAST scb->ovector[1]);
+
+PCHARSV(scb->input, scb->ovector[0], scb->ovector[1] - scb->ovector[0], 
+  utf, outfile);
+
+fprintf(outfile, "\" New %" SIZ_FORM " %" SIZ_FORM " \"",
+  SIZ_CAST scb->output_offsets[0], SIZ_CAST scb->output_offsets[1]);
+
+PCHARSV(scb->output, scb->output_offsets[0], 
+  scb->output_offsets[1] - scb->output_offsets[0], utf, outfile);
+
+if (scb->subscount == dat_datctl.substitute_stop) 
+  {
+  yield = -1;
+  fprintf(outfile, " STOPPED"); 
+  } 
+else if (scb->subscount == dat_datctl.substitute_skip) 
+  {
+  yield = +1;
+  fprintf(outfile, " SKIPPED"); 
+  } 
+
+fprintf(outfile, "\"\n"); 
+return yield;
 }
 
 
@@ -6494,6 +6523,11 @@ dat_datctl.control2 |= (pat_patctl.control2 & CTL2_ALLPD);
 strcpy((char *)dat_datctl.replacement, (char *)pat_patctl.replacement);
 if (dat_datctl.jitstack == 0) dat_datctl.jitstack = pat_patctl.jitstack;
 
+if (dat_datctl.substitute_skip == 0)
+    dat_datctl.substitute_skip = pat_patctl.substitute_skip;
+if (dat_datctl.substitute_stop == 0)
+    dat_datctl.substitute_stop = pat_patctl.substitute_stop;
+
 /* Initialize for scanning the data line. */
 
 #ifdef SUPPORT_PCRE2_8
@@ -6832,6 +6866,11 @@ arg_ulen = ulen;                          /* Value to use in match arg */
 
 if (p[-1] != 0 && !decode_modifiers(p, CTX_DAT, NULL, &dat_datctl))
   return PR_OK;
+  
+/* Setting substitute_{skip,fail} implies a substitute callout. */ 
+
+if (dat_datctl.substitute_skip != 0 || dat_datctl.substitute_stop != 0)
+  dat_datctl.control2 |= CTL2_SUBSTITUTE_CALLOUT; 
 
 /* Check for mutually exclusive modifiers. At present, these are all in the
 first control word. */
