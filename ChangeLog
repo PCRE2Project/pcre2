@@ -59,6 +59,15 @@ units clear.
 
 15. Updated the VMS-specific code in pcre2test on the advice of a VMS user.
 
+16. Removed the unnecessary inclusion of stdint.h (or inttypes.h) from
+pcre2_internal.h as it is now included by pcre2.h. Also, change 17 for 10.32
+below was unnecessarily complicated, as inttypes.h is a Standard C header,
+which is defined to be a superset of stdint.h. Instead of conditionally
+including stdint.h or inttypes.h, pcre2.h now unconditionally includes
+inttypes.h. This supports environments that do not have stdint.h but do have
+inttypes.h, which are known to exist. A note in the autotools documentation
+says (November 2018) that there are none known that are the other way round.
+
 
 Version 10.32 10-September-2018
 -------------------------------

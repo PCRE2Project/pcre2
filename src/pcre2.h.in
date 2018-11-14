@@ -46,12 +46,6 @@ POSSIBILITY OF SUCH DAMAGE.
 #define PCRE2_PRERELEASE      @PCRE2_PRERELEASE@
 #define PCRE2_DATE            @PCRE2_DATE@
 
-/* For the benefit of systems without stdint.h, an alternative is to use
-inttypes.h. The existence of these headers is checked by configure or CMake. */
-
-#define PCRE2_HAVE_STDINT_H   @PCRE2_HAVE_STDINT_H@
-#define PCRE2_HAVE_INTTYPES_H @PCRE2_HAVE_INTTYPES_H@
-
 /* When an application links to a PCRE DLL in Windows, the symbols that are
 imported have to be identified as such. When building PCRE2, the appropriate
 export setting is defined in pcre2_internal.h, which includes this file. So we
@@ -87,18 +81,15 @@ set, we ensure here that it has no effect. */
 #define PCRE2_CALL_CONVENTION
 #endif
 
-/* Have to include limits.h, stdlib.h and stdint.h (or inttypes.h) to ensure
-that size_t and uint8_t, UCHAR_MAX, etc are defined. If the system has neither
-header, the relevant values must be provided by some other means. */
+/* Have to include limits.h, stdlib.h, and inttypes.h to ensure that size_t and
+uint8_t, UCHAR_MAX, etc are defined. Some systems that do have inttypes.h do
+not have stdint.h, which is why we use inttypes.h, which according to the C
+standard is a superset of stdint.h. If none of these headers are available,
+the relevant values must be provided by some other means. */
 
 #include <limits.h>
 #include <stdlib.h>
-
-#if PCRE2_HAVE_STDINT_H
-#include <stdint.h>
-#elif PCRE2_HAVE_INTTYPES_H
 #include <inttypes.h>
-#endif
 
 /* Allow for C++ users compiling this directly. */
 

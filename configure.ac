@@ -451,11 +451,6 @@ AC_CHECK_HEADERS(limits.h sys/types.h sys/stat.h dirent.h)
 AC_CHECK_HEADERS([windows.h], [HAVE_WINDOWS_H=1])
 AC_CHECK_HEADERS([sys/wait.h], [HAVE_SYS_WAIT_H=1])
 
-AC_CHECK_HEADERS([stdint.h], [PCRE2_HAVE_STDINT_H=1], [PCRE2_HAVE_STDINT_H=0])
-AC_CHECK_HEADERS([inttypes.h], [PCRE2_HAVE_INTTYPES_H=1], [PCRE2_HAVE_INTTYPES_H=0])
-AC_SUBST([PCRE2_HAVE_STDINT_H])
-AC_SUBST([PCRE2_HAVE_INTTYPES_H])
-
 # Conditional compilation
 AM_CONDITIONAL(WITH_PCRE2_8, test "x$enable_pcre2_8" = "xyes")
 AM_CONDITIONAL(WITH_PCRE2_16, test "x$enable_pcre2_16" = "xyes")

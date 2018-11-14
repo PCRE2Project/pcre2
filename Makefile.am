@@ -233,7 +233,7 @@ noinst_PROGRAMS =
 # and 'make maintainer-clean'.
 
 CLEANFILES =
-DISTCLEANFILES = src/config.h.in~ config.h pcre2.h.generic
+DISTCLEANFILES = src/config.h.in~
 MAINTAINERCLEANFILES =
 
 # Additional files to bundle with the distribution, over and above what
