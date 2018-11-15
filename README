@@ -374,6 +374,15 @@ library. They are also documented in the pcre2build man page.
   If you get error messages about missing functions tgetstr, tgetent, tputs,
   tgetflag, or tgoto, this is the problem, and linking with the ncurses library
   should fix it.
+  
+. The C99 standard defines formatting modifiers z and t for size_t and 
+  ptrdiff_t values, respectively. By default, PCRE2 uses these modifiers in 
+  environments other than Microsoft Visual Studio when __STDC_VERSION__ is 
+  defined and has a value greater than or equal to 199901L (indicating C99).
+  However, there is at least one environment that claims to be C99 but does not
+  support these modifiers. If --disable-percent-zt is specified, no use is made
+  of the z or t modifiers. Instead or %td or %zu, %lu is used, with a cast for 
+  size_t values.
 
 . There is a special option called --enable-fuzz-support for use by people who
   want to run fuzzing tests on PCRE2. At present this applies only to the 8-bit
@@ -888,4 +897,4 @@ The distribution should contain the files listed below.
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 19 September 2018
+Last updated: 15 November 2018

@@ -33,11 +33,12 @@ please consult the man page, in case the conversion went wrong.
 <li><a name="TOC18" href="#SEC18">INCLUDING DEBUGGING CODE</a>
 <li><a name="TOC19" href="#SEC19">DEBUGGING WITH VALGRIND SUPPORT</a>
 <li><a name="TOC20" href="#SEC20">CODE COVERAGE REPORTING</a>
-<li><a name="TOC21" href="#SEC21">SUPPORT FOR FUZZERS</a>
-<li><a name="TOC22" href="#SEC22">OBSOLETE OPTION</a>
-<li><a name="TOC23" href="#SEC23">SEE ALSO</a>
-<li><a name="TOC24" href="#SEC24">AUTHOR</a>
-<li><a name="TOC25" href="#SEC25">REVISION</a>
+<li><a name="TOC21" href="#SEC21">DISABLING THE Z AND T FORMATTING MODIFIERS</a>
+<li><a name="TOC22" href="#SEC22">SUPPORT FOR FUZZERS</a>
+<li><a name="TOC23" href="#SEC23">OBSOLETE OPTION</a>
+<li><a name="TOC24" href="#SEC24">SEE ALSO</a>
+<li><a name="TOC25" href="#SEC25">AUTHOR</a>
+<li><a name="TOC26" href="#SEC26">REVISION</a>
 </ul>
 <br><a name="SEC1" href="#TOC1">BUILDING PCRE2</a><br>
 <P>
@@ -523,7 +524,21 @@ This cleans all coverage data including the generated coverage report. For more
 information about code coverage, see the <b>gcov</b> and <b>lcov</b>
 documentation.
 </P>
-<br><a name="SEC21" href="#TOC1">SUPPORT FOR FUZZERS</a><br>
+<br><a name="SEC21" href="#TOC1">DISABLING THE Z AND T FORMATTING MODIFIERS</a><br>
+<P>
+The C99 standard defines formatting modifiers z and t for size_t and 
+ptrdiff_t values, respectively. By default, PCRE2 uses these modifiers in 
+environments other than Microsoft Visual Studio when __STDC_VERSION__ is 
+defined and has a value greater than or equal to 199901L (indicating C99).
+However, there is at least one environment that claims to be C99 but does not
+support these modifiers. If 
+<pre>
+  --disable-percent-zt 
+</pre>
+is specified, no use is made of the z or t modifiers. Instead or %td or %zu,
+%lu is used, with a cast for size_t values.
+</P>
+<br><a name="SEC22" href="#TOC1">SUPPORT FOR FUZZERS</a><br>
 <P>
 There is a special option for use by people who want to run fuzzing tests on
 PCRE2:
@@ -547,7 +562,7 @@ arguments: if an argument starts with "=" the rest of it is a literal input
 string. Otherwise, it is assumed to be a file name, and the contents of the
 file are the test string.
 </P>
-<br><a name="SEC22" href="#TOC1">OBSOLETE OPTION</a><br>
+<br><a name="SEC23" href="#TOC1">OBSOLETE OPTION</a><br>
 <P>
 In versions of PCRE2 prior to 10.30, there were two ways of handling
 backtracking in the <b>pcre2_match()</b> function. The default was to use the
@@ -559,11 +574,11 @@ was set, memory on the heap was used. From release 10.30 onwards this has
 changed (the stack is no longer used) and this option now does nothing except
 give a warning.
 </P>
-<br><a name="SEC23" href="#TOC1">SEE ALSO</a><br>
+<br><a name="SEC24" href="#TOC1">SEE ALSO</a><br>
 <P>
 <b>pcre2api</b>(3), <b>pcre2-config</b>(3).
 </P>
-<br><a name="SEC24" href="#TOC1">AUTHOR</a><br>
+<br><a name="SEC25" href="#TOC1">AUTHOR</a><br>
 <P>
 Philip Hazel
 <br>
@@ -572,9 +587,9 @@ University Computing Service
 Cambridge, England.
 <br>
 </P>
-<br><a name="SEC25" href="#TOC1">REVISION</a><br>
+<br><a name="SEC26" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 26 April 2018
+Last updated: 15 November 2018
 <br>
 Copyright &copy; 1997-2018 University of Cambridge.
 <br>

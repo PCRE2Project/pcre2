@@ -4158,6 +4158,21 @@ CODE COVERAGE REPORTING
        mentation.
 
 
+DISABLING THE Z AND T FORMATTING MODIFIERS
+
+       The  C99  standard  defines formatting modifiers z and t for size_t and
+       ptrdiff_t values, respectively. By default, PCRE2 uses these  modifiers
+       in  environments  other  than  Microsoft Visual Studio when __STDC_VER-
+       SION__ is defined and has a value greater  than  or  equal  to  199901L
+       (indicating  C99).   However,  there  is  at least one environment that
+       claims to be C99 but does not support these modifiers. If
+
+         --disable-percent-zt
+
+       is specified, no use is made of the z or t modifiers. Instead or %td or
+       %zu, %lu is used, with a cast for size_t values.
+
+
 SUPPORT FOR FUZZERS
 
        There  is  a  special  option for use by people who want to run fuzzing
@@ -4210,7 +4225,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 26 April 2018
+       Last updated: 15 November 2018
        Copyright (c) 1997-2018 University of Cambridge.
 ------------------------------------------------------------------------------
  

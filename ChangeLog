@@ -68,6 +68,11 @@ inttypes.h. This supports environments that do not have stdint.h but do have
 inttypes.h, which are known to exist. A note in the autotools documentation
 says (November 2018) that there are none known that are the other way round.
 
+17. Added --disable-percent-zt to "configure" (and equivalent to CMake) to 
+forcibly disable the use of %zu and %td in formatting strings because there is 
+at least one version of VMS that claims to be C99 but does not support these 
+modifiers.
+
 
 Version 10.32 10-September-2018
 -------------------------------

@@ -136,6 +136,8 @@ OPTION(PCRE2_BUILD_PCRE2_32 "Build 32 bit PCRE2 library" OFF)
 
 OPTION(PCRE2_DEBUG "Include debugging code" OFF)
 
+OPTION(DISABLE_PERCENT_ZT "Disable the use of %zu and %td (rarely needed)" OFF)
+
 SET(PCRE2_EBCDIC OFF CACHE BOOL
     "Use EBCDIC coding instead of ASCII. (This is rarely used outside of mainframe systems.)")
 

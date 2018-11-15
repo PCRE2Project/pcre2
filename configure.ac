@@ -131,7 +131,7 @@ AC_ARG_ENABLE(pcre2-32,
               , enable_pcre2_32=unset)
 AC_SUBST(enable_pcre2_32)
 
-# Handle --dnable-debug (disabled by default)
+# Handle --enable-debug (disabled by default)
 AC_ARG_ENABLE(debug,
               AS_HELP_STRING([--enable-debug],
                              [enable debugging code]),
@@ -342,6 +342,12 @@ AC_ARG_ENABLE(stack-for-recursion,,
 #               AS_HELP_STRING([--disable-stack-for-recursion],
 #                              [don't use stack recursion when matching]),
 #               , enable_stack_for_recursion=yes)
+
+# Handle --disable-percent_zt (set as "auto" by default)
+AC_ARG_ENABLE(percent-zt,
+              AS_HELP_STRING([--disable-percent-zt],
+                             [disable the use of z and t formatting modifiers]),
+              , enable_percent_zt=auto)
 
 # Set the default value for pcre2-8
 if test "x$enable_pcre2_8" = "xunset"
@@ -585,6 +591,14 @@ fi
 if test "$enable_debug" = "yes"; then
   AC_DEFINE([PCRE2_DEBUG], [], [
     Define to any value to include debugging code.])
+fi
+
+if test "$enable_percent_zt" = "no"; then
+  AC_DEFINE([DISABLE_PERCENT_ZT], [], [
+    Define to any value to disable the use of the z and t modifiers in
+    formatting settings such as %zu or %td (this is rarely needed).])
+else
+  enable_percent_zt=auto     
 fi
 
 # Unless running under Windows, JIT support requires pthreads.
@@ -1033,6 +1047,7 @@ $PACKAGE-$VERSION configuration summary:
     Valgrind support ................... : ${enable_valgrind}
     Code coverage ...................... : ${enable_coverage}
     Fuzzer support ..................... : ${enable_fuzz_support}
+    Use %zu and %td .................... : ${enable_percent_zt}
 
 EOF
 

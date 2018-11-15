@@ -35,6 +35,10 @@ sure both macros are undefined; an emulation function will then be used. */
    */
 #undef BSR_ANYCRLF
 
+/* Define to any value to disable the use of the z and t modifiers in
+   formatting settings such as %zu or %td (this is rarely needed). */
+#undef DISABLE_PERCENT_ZT
+
 /* If you are compiling for a system that uses EBCDIC instead of ASCII
    character codes, define this macro to any value. When EBCDIC is set, PCRE2
    assumes that all input strings are in EBCDIC. If you do not define this
