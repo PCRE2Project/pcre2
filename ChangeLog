@@ -77,6 +77,9 @@ modifiers.
 in pcre2grep to the inbuilt echo facility. This may be useful in environments 
 that do not support fork().
 
+19. Fix two instances of <= 0 being applied to unsigned integers (the VMS 
+compiler complains).
+
 
 Version 10.32 10-September-2018
 -------------------------------

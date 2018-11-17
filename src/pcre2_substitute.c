@@ -435,7 +435,7 @@ do
 
     if (ptr >= repend)
       {
-      if (ptrstackptr <= 0) break;       /* End of replacement string */
+      if (ptrstackptr == 0) break;       /* End of replacement string */
       repend = ptrstack[--ptrstackptr];
       ptr = ptrstack[--ptrstackptr];
       continue;
