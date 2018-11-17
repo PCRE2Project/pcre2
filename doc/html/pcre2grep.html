@@ -853,10 +853,12 @@ character. Otherwise <b>pcre2grep</b> will assume that it has no data.
 <P>
 <b>pcre2grep</b> has, by default, support for calling external programs or
 scripts or echoing specific strings during matching by making use of PCRE2's
-callout facility. However, this support can be disabled when <b>pcre2grep</b> is
-built. You can find out whether your binary has support for callouts by running
-it with the <b>--help</b> option. If the support is not enabled, all callouts in
-patterns are ignored by <b>pcre2grep</b>.
+callout facility. However, this support can be completely or partially disabled
+when <b>pcre2grep</b> is built. You can find out whether your binary has support
+for callouts by running it with the <b>--help</b> option. If callout support is
+completely disabled, all callouts in patterns are ignored by <b>pcre2grep</b>.
+If the facility is partially disabled, calling external programs is not
+supported, and callouts that request it are ignored.
 </P>
 <P>
 A callout in a PCRE2 pattern is of the form (?C&#60;arg&#62;) where the argument is
@@ -869,8 +871,9 @@ only callouts with string arguments are useful.
 Calling external programs or scripts
 </b><br>
 <P>
-If the callout string does not start with a pipe (vertical bar) character, it
-is parsed into a list of substrings separated by pipe characters. The first
+This facility can be independently disabled when <b>pcre2grep</b> is built. If
+the callout string does not start with a pipe (vertical bar) character, it is
+parsed into a list of substrings separated by pipe characters. The first
 substring must be an executable name, with the following substrings specifying
 arguments:
 <pre>
@@ -910,14 +913,15 @@ matcher backtracks in the normal way.
 Echoing a specific string
 </b><br>
 <P>
-If the callout string starts with a pipe (vertical bar) character, the rest of
-the string is written to the output, having been passed through the same escape
-processing as text from the --output option. This provides a simple echoing
-facility that avoids calling an external program or script. No terminator is
-added to the string, so if you want a newline, you must include it explicitly.
-Matching continues normally after the string is output. If you want to see only
-the callout output but not any output from an actual match, you should end the
-relevant pattern with (*FAIL).
+This facility is always available, provided that callouts were not completely
+disabled when <b>pcre2grep</b> was built. If the callout string starts with a
+pipe (vertical bar) character, the rest of the string is written to the output,
+having been passed through the same escape processing as text from the --output
+option. This provides a simple echoing facility that avoids calling an external
+program or script. No terminator is added to the string, so if you want a
+newline, you must include it explicitly. Matching continues normally after the
+string is output. If you want to see only the callout output but not any output
+from an actual match, you should end the relevant pattern with (*FAIL).
 </P>
 <br><a name="SEC12" href="#TOC1">MATCHING ERRORS</a><br>
 <P>
@@ -962,7 +966,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC16" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 24 February 2018
+Last updated: 17 November 2018
 <br>
 Copyright &copy; 1997-2018 University of Cambridge.
 <br>

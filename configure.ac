@@ -173,6 +173,12 @@ AC_ARG_ENABLE(pcre2grep-callout,
                              [disable callout script support in pcre2grep]),
               , enable_pcre2grep_callout=yes)
 
+# Handle --disable-pcre2grep-callout-fork (enabled by default)
+AC_ARG_ENABLE(pcre2grep-callout-fork,
+              AS_HELP_STRING([--disable-pcre2grep-callout-fork],
+                             [disable callout script fork support in pcre2grep]),
+              , enable_pcre2grep_callout_fork=yes)
+
 # Handle --enable-rebuild-chartables
 AC_ARG_ENABLE(rebuild-chartables,
               AS_HELP_STRING([--enable-rebuild-chartables],
@@ -630,13 +636,21 @@ if test "$enable_pcre2grep_jit" = "yes"; then
 fi
 
 if test "$enable_pcre2grep_callout" = "yes"; then
-  if test "$HAVE_WINDOWS_H" != "1"; then
-    if test "$HAVE_SYS_WAIT_H" != "1"; then
-      AC_MSG_ERROR([Callout script support needs sys/wait.h.])
+  if test "$enable_pcre2grep_callout_fork" = "yes"; then
+    if test "$HAVE_WINDOWS_H" != "1"; then
+      if test "$HAVE_SYS_WAIT_H" != "1"; then
+        AC_MSG_ERROR([Callout script support needs sys/wait.h.])
+      fi
     fi
+    AC_DEFINE([SUPPORT_PCRE2GREP_CALLOUT_FORK], [], [
+      Define to any value to enable fork support in pcre2grep callout scripts.
+      This will have no effect unless SUPPORT_PCRE2GREP_CALLOUT is also 
+      defined.])  
   fi
   AC_DEFINE([SUPPORT_PCRE2GREP_CALLOUT], [], [
     Define to any value to enable callout script support in pcre2grep.])
+else
+  enable_pcre2grep_callout_fork="no"     
 fi
 
 if test "$enable_unicode" = "yes"; then
@@ -1038,6 +1052,7 @@ $PACKAGE-$VERSION configuration summary:
     Build static libs .................. : ${enable_static}
     Use JIT in pcre2grep ............... : ${enable_pcre2grep_jit}
     Enable callouts in pcre2grep ....... : ${enable_pcre2grep_callout}
+    Enable fork in pcre2grep callouts .. : ${enable_pcre2grep_callout_fork} 
     Initial buffer size for pcre2grep .. : ${with_pcre2grep_bufsize}
     Maximum buffer size for pcre2grep .. : ${with_pcre2grep_max_bufsize}
     Link pcre2grep with libz ........... : ${enable_pcre2grep_libz}

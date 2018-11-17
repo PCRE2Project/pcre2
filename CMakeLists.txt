@@ -83,6 +83,7 @@
 # 2018-06-19 PH added checks for stdint.h and inttypes.h (later removed)
 # 2018-06-27 PH added Daniel's patch to increase the stack for MSVC
 # 2018-11-14 PH removed unnecessary checks for stdint.h and inttypes.h
+# 2018-11-16 PH added PCRE2GREP_SUPPORT_CALLOUT_FORK support and tidied
 
 PROJECT(PCRE2 C)
 
@@ -136,7 +137,7 @@ OPTION(PCRE2_BUILD_PCRE2_32 "Build 32 bit PCRE2 library" OFF)
 
 OPTION(PCRE2_DEBUG "Include debugging code" OFF)
 
-OPTION(DISABLE_PERCENT_ZT "Disable the use of %zu and %td (rarely needed)" OFF)
+OPTION(PCRE2_DISABLE_PERCENT_ZT "Disable the use of %zu and %td (rarely needed)" OFF)
 
 SET(PCRE2_EBCDIC OFF CACHE BOOL
     "Use EBCDIC coding instead of ASCII. (This is rarely used outside of mainframe systems.)")
@@ -177,11 +178,14 @@ SET(PCRE2_SUPPORT_JIT OFF CACHE BOOL
 SET(PCRE2_SUPPORT_JIT_SEALLOC OFF CACHE BOOL
     "Enable SELinux compatible execmem allocator in JIT.")
 
-SET(PCRE2_SUPPORT_PCRE2GREP_JIT ON CACHE BOOL
+SET(PCRE2GREP_SUPPORT_JIT ON CACHE BOOL
     "Enable use of Just-in-time compiling in pcre2grep.")
 
-SET(PCRE2_SUPPORT_PCRE2GREP_CALLOUT ON CACHE BOOL
+SET(PCRE2GREP_SUPPORT_CALLOUT ON CACHE BOOL
     "Enable callout string support in pcre2grep.")
+
+SET(PCRE2GREP_SUPPORT_CALLOUT_FORK ON CACHE BOOL
+    "Enable callout string fork support in pcre2grep.")
 
 SET(PCRE2_SUPPORT_UNICODE ON CACHE BOOL
     "Enable support for Unicode and UTF-8/UTF-16/UTF-32 encoding.")
@@ -301,17 +305,24 @@ IF(PCRE2_SUPPORT_JIT_SEALLOC)
         SET(SLJIT_PROT_EXECUTABLE_ALLOCATOR 1)
 ENDIF(PCRE2_SUPPORT_JIT_SEALLOC)
 
-IF(PCRE2_SUPPORT_PCRE2GREP_JIT)
+IF(PCRE2GREP_SUPPORT_JIT)
         SET(SUPPORT_PCRE2GREP_JIT 1)
-ENDIF(PCRE2_SUPPORT_PCRE2GREP_JIT)
+ENDIF(PCRE2GREP_SUPPORT_JIT)
 
-IF(PCRE2_SUPPORT_PCRE2GREP_CALLOUT)
+IF(PCRE2GREP_SUPPORT_CALLOUT)
         SET(SUPPORT_PCRE2GREP_CALLOUT 1)
-ENDIF(PCRE2_SUPPORT_PCRE2GREP_CALLOUT)
+        IF(PCRE2GREP_SUPPORT_CALLOUT_FORK)
+                SET(SUPPORT_PCRE2GREP_CALLOUT_FORK 1)
+        ENDIF(PCRE2GREP_SUPPORT_CALLOUT_FORK)
+ENDIF(PCRE2GREP_SUPPORT_CALLOUT)
 
 IF(PCRE2_SUPPORT_VALGRIND)
         SET(SUPPORT_VALGRIND 1)
 ENDIF(PCRE2_SUPPORT_VALGRIND)
+
+IF(PCRE2_DISABLE_PERCENT_ZT)
+        SET(DISABLE_PERCENT_ZT 1)
+ENDIF(PCRE2_DISABLE_PERCENT_ZT)         
 
 # This next one used to reference ${READLINE_LIBRARY})
 # but I was advised to add the NCURSES test as well, along with
@@ -802,10 +813,11 @@ IF(PCRE2_SHOW_REPORT)
   MESSAGE(STATUS "  Build shared libs ............... : ${BUILD_SHARED_LIBS}")
   MESSAGE(STATUS "  Build static libs ............... : ${BUILD_STATIC_LIBS}")
   MESSAGE(STATUS "  Build pcre2grep ................. : ${PCRE2_BUILD_PCRE2GREP}")
-  MESSAGE(STATUS "  Enable JIT in pcre2grep ......... : ${PCRE2_SUPPORT_PCRE2GREP_JIT}")
-  MESSAGE(STATUS "  Enable callouts in pcre2grep .... : ${PCRE2_SUPPORT_PCRE2GREP_CALLOUT}")
+  MESSAGE(STATUS "  Enable JIT in pcre2grep ......... : ${PCRE2GREP_SUPPORT_JIT}")
+  MESSAGE(STATUS "  Enable callouts in pcre2grep .... : ${PCRE2GREP_SUPPORT_CALLOUT}")
+  MESSAGE(STATUS "  Enable callout fork in pcre2grep. : ${PCRE2GREP_SUPPORT_CALLOUT_FORK}")
   MESSAGE(STATUS "  Buffer size for pcre2grep ....... : ${PCRE2GREP_BUFSIZE}")
-  MESSAGE(STATUS "  Build tests (implies pcre2test  . : ${PCRE2_BUILD_TESTS}")
+  MESSAGE(STATUS "  Build tests (implies pcre2test .. : ${PCRE2_BUILD_TESTS}")
   MESSAGE(STATUS "               and pcre2grep)")
   IF(ZLIB_FOUND)
     MESSAGE(STATUS "  Link pcre2grep with libz ........ : ${PCRE2_SUPPORT_LIBZ}")
@@ -828,6 +840,11 @@ IF(PCRE2_SHOW_REPORT)
     MESSAGE(STATUS "  Link pcre2test with libreadline . : Library not found" )
   ENDIF(READLINE_FOUND)
   MESSAGE(STATUS "  Support Valgrind .................: ${PCRE2_SUPPORT_VALGRIND}")
+  IF(PCRE2_DISABLE_PERCENT_ZT)
+    MESSAGE(STATUS "  Use %zu and %td ..................: OFF" )
+  ELSE(PCRE2_DISABLE_PERCENT_ZT)   
+    MESSAGE(STATUS "  Use %zu and %td ..................: AUTO" )
+  ENDIF(PCRE2_DISABLE_PERCENT_ZT)   
 
   IF(MINGW AND NOT PCRE2_STATIC)
     MESSAGE(STATUS "  Non-standard dll names (prefix) . : ${NON_STANDARD_LIB_PREFIX}")

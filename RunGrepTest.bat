@@ -653,14 +653,19 @@ if ERRORLEVEL 1 exit /b 1
 
 :: If pcre2grep supports script callouts, run some tests on them.
 
-%pcre2grep% --help | %pcre2grep% -q "Callout scripts in patterns are supported"
+%pcre2grep% --help | %pcre2grep% -q "callout scripts in patterns are supported"
 if %ERRORLEVEL% equ 0 (
   echo Testing pcre2grep script callouts
   %pcre2grep% "(T)(..(.))(?C'cmd|/c echo|Arg1: [$1] [$2] [$3]|Arg2: ^$|${1}^$| ($4) ($14) ($0)')()" %srcdir%/testdata/grepinputv >testtrygrep
   %pcre2grep% "(T)(..(.))()()()()()()()(..)(?C'cmd|/c echo|Arg1: [$11] [${11}]')" %srcdir%/testdata/grepinputv >>testtrygrep
   %pcre2grep% "(T)(?C'|$0:$1$n')" %srcdir%/testdata/grepinputv >>testtrygrep
   %pcre2grep% "(T)(?C'|$1$n')(*F)" %srcdir%/testdata/grepinputv >>testtrygrep
-  %cf% %srcdir%\testdata\grepoutputC testtrygrep %cfout%
+  %pcre2grep% --help | %pcre2grep% -q "Non-script callout scripts in patterns are supported"
+  if %ERRORLEVEL% equ 0 (
+    %cf% %srcdir%\testdata\grepoutputCN testtrygrep %cfout%
+  ) else (
+    %cf% %srcdir%\testdata\grepoutputC testtrygrep %cfout%
+  )
   if ERRORLEVEL 1 exit /b 1
 ) else (
   echo Script callouts are not supported

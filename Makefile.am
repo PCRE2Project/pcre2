@@ -625,6 +625,7 @@ EXTRA_DIST += \
   testdata/grepoutput \
   testdata/grepoutput8 \
   testdata/grepoutputC \
+  testdata/grepoutputCN \
   testdata/grepoutputN \
   testdata/greppatN4 \
   testdata/testinput1 \

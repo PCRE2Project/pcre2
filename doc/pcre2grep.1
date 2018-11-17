@@ -1,4 +1,4 @@
-.TH PCRE2GREP 1 "24 February 2018" "PCRE2 10.32"
+.TH PCRE2GREP 1 "17 November 2018" "PCRE2 10.33"
 .SH NAME
 pcre2grep - a grep with Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -759,10 +759,12 @@ character. Otherwise \fBpcre2grep\fP will assume that it has no data.
 .sp
 \fBpcre2grep\fP has, by default, support for calling external programs or
 scripts or echoing specific strings during matching by making use of PCRE2's
-callout facility. However, this support can be disabled when \fBpcre2grep\fP is
-built. You can find out whether your binary has support for callouts by running
-it with the \fB--help\fP option. If the support is not enabled, all callouts in
-patterns are ignored by \fBpcre2grep\fP.
+callout facility. However, this support can be completely or partially disabled
+when \fBpcre2grep\fP is built. You can find out whether your binary has support
+for callouts by running it with the \fB--help\fP option. If callout support is
+completely disabled, all callouts in patterns are ignored by \fBpcre2grep\fP.
+If the facility is partially disabled, calling external programs is not
+supported, and callouts that request it are ignored.
 .P
 A callout in a PCRE2 pattern is of the form (?C<arg>) where the argument is
 either a number or a quoted string (see the
@@ -776,8 +778,9 @@ only callouts with string arguments are useful.
 .SS "Calling external programs or scripts"
 .rs
 .sp
-If the callout string does not start with a pipe (vertical bar) character, it
-is parsed into a list of substrings separated by pipe characters. The first
+This facility can be independently disabled when \fBpcre2grep\fP is built. If
+the callout string does not start with a pipe (vertical bar) character, it is
+parsed into a list of substrings separated by pipe characters. The first
 substring must be an executable name, with the following substrings specifying
 arguments:
 .sp
@@ -816,14 +819,15 @@ matcher backtracks in the normal way.
 .SS "Echoing a specific string"
 .rs
 .sp
-If the callout string starts with a pipe (vertical bar) character, the rest of
-the string is written to the output, having been passed through the same escape
-processing as text from the --output option. This provides a simple echoing
-facility that avoids calling an external program or script. No terminator is
-added to the string, so if you want a newline, you must include it explicitly.
-Matching continues normally after the string is output. If you want to see only
-the callout output but not any output from an actual match, you should end the
-relevant pattern with (*FAIL).
+This facility is always available, provided that callouts were not completely
+disabled when \fBpcre2grep\fP was built. If the callout string starts with a
+pipe (vertical bar) character, the rest of the string is written to the output,
+having been passed through the same escape processing as text from the --output
+option. This provides a simple echoing facility that avoids calling an external
+program or script. No terminator is added to the string, so if you want a
+newline, you must include it explicitly. Matching continues normally after the
+string is output. If you want to see only the callout output but not any output
+from an actual match, you should end the relevant pattern with (*FAIL).
 .
 .
 .SH "MATCHING ERRORS"
@@ -876,6 +880,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 24 February 2018
+Last updated: 17 November 2018
 Copyright (c) 1997-2018 University of Cambridge.
 .fi

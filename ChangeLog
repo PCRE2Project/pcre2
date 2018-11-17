@@ -73,6 +73,10 @@ forcibly disable the use of %zu and %td in formatting strings because there is
 at least one version of VMS that claims to be C99 but does not support these 
 modifiers.
 
+18. Added --disable-pcre2grep-callout-fork, which restricts the callout support 
+in pcre2grep to the inbuilt echo facility. This may be useful in environments 
+that do not support fork().
+
 
 Version 10.32 10-September-2018
 -------------------------------
