@@ -1,4 +1,4 @@
-.TH PCRE2GREP 1 "17 November 2018" "PCRE2 10.33"
+.TH PCRE2GREP 1 "24 November 2018" "PCRE2 10.33"
 .SH NAME
 pcre2grep - a grep with Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -778,9 +778,13 @@ only callouts with string arguments are useful.
 .SS "Calling external programs or scripts"
 .rs
 .sp
-This facility can be independently disabled when \fBpcre2grep\fP is built. If
-the callout string does not start with a pipe (vertical bar) character, it is
-parsed into a list of substrings separated by pipe characters. The first
+This facility can be independently disabled when \fBpcre2grep\fP is built. It 
+is supported for Windows, where a call to \fB_spawnvp()\fP is used, for VMS, 
+where \fBlib$spawn()\fP is used, and for any other Unix-like environment where
+\fBfork()\fP and \fBexecv()\fP are available.
+.P
+If the callout string does not start with a pipe (vertical bar) character, it
+is parsed into a list of substrings separated by pipe characters. The first
 substring must be an executable name, with the following substrings specifying
 arguments:
 .sp
@@ -806,7 +810,7 @@ a single dollar and $| is replaced by a pipe character. Here is an example:
     Arg1: [1] [234] [4] Arg2: |1| ()
     12345
 .sp
-The parameters for the \fBexecv()\fP system call that is used to run the
+The parameters for the system call that is used to run the
 program or script are zero-terminated strings. This means that binary zero
 characters in the callout argument will cause premature termination of their
 substrings, and therefore should not be present. Any syntax errors in the
@@ -880,6 +884,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 17 November 2018
+Last updated: 24 November 2018
 Copyright (c) 1997-2018 University of Cambridge.
 .fi

@@ -80,6 +80,9 @@ that do not support fork().
 19. Fix two instances of <= 0 being applied to unsigned integers (the VMS 
 compiler complains).
 
+20. Added "fork" support for VMS to pcre2grep, for running an external program 
+via a string callout.
+
 
 Version 10.32 10-September-2018
 -------------------------------

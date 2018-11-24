@@ -68,6 +68,12 @@ POSSIBILITY OF SUCH DAMAGE.
 #undef WIN32
 #endif
 
+#ifdef __VMS
+#include clidef
+#include descrip
+#include lib$routines
+#endif
+
 #ifdef WIN32
 #include <io.h>                /* For _setmode() */
 #include <fcntl.h>             /* For _O_BINARY */
@@ -573,8 +579,6 @@ status of 1, which is not helpful. To help with this problem, define a symbol
 therein. */
 
 #ifdef __VMS
-#include descrip
-#include lib$routines
   char val_buf[4];
   $DESCRIPTOR(sym_nam, "PCRE2GREP_RC");
   $DESCRIPTOR(sym_val, val_buf);
@@ -2041,7 +2045,7 @@ follows:
   dollar or $| replaced by a pipe character.
 
 Alternatively, if string starts with pipe, the remainder is taken as an output
-string, same as --output. This is the only form that is supported if 
+string, same as --output. This is the only form that is supported if
 SUPPORT_PCRE2GREP_FORK is not defined. In this case, --om-separator is used to
 separate each callout, defaulting to newline.
 
@@ -2100,7 +2104,7 @@ if (*string == '|')
   (void)display_output_text(string, TRUE, subject, ovector, capture_top);
   return 0;
   }
-  
+
 #ifndef SUPPORT_PCRE2GREP_CALLOUT_FORK
 return 0;
 #else
@@ -2285,11 +2289,34 @@ while (length > 0)
 *argsptr++ = '\0';
 *argsvectorptr = NULL;
 
+/* Running an external command is system-dependent. Handle Windows and VMS as
+necessary, otherwise assume fork(). */
+
 #ifdef WIN32
 result = _spawnvp(_P_WAIT, argsvector[0], (const char * const *)argsvector);
-#else
-pid = fork();
 
+#elif defined __VMS
+  {
+  char cmdbuf[500];
+  short i = 0;
+  int flags = CLI$M_NOCLISYM|CLI$M_NOLOGNAM|CLI$M_NOKEYPAD, status, retstat;
+  $DESCRIPTOR(cmd, cmdbuf);
+
+  cmdbuf[0] = 0;
+  while (argsvector[i])
+  {
+    strcat(cmdbuf, argsvector[i]);
+    strcat(cmdbuf, " ");
+    i++;
+  }
+  cmd.dsc$w_length = strlen(cmdbuf) - 1;
+  status = lib$spawn(&cmd, 0,0, &flags, 0,0, &retstat);
+  if (!(status & 1)) result = 0;
+  else result = retstat & 1 ? 0 : 1;
+  }
+
+#else  /* Neither Windows nor VMS */
+pid = fork();
 if (pid == 0)
   {
   (void)execv(argsvector[0], argsvector);
@@ -2298,7 +2325,7 @@ if (pid == 0)
   }
 else if (pid > 0)
   (void)waitpid(pid, &result, 0);
-#endif
+#endif  /* End Windows/VMS/other handling */
 
 free(args);
 free(argsvector);
