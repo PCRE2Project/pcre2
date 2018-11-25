@@ -83,6 +83,8 @@ compiler complains).
 20. Added "fork" support for VMS to pcre2grep, for running an external program 
 via a string callout.
 
+21. Improve MAP_JIT flag usage on MacOS. Patch by Rich Siegel.
+
 
 Version 10.32 10-September-2018
 -------------------------------

@@ -94,6 +94,38 @@ static SLJIT_INLINE void free_chunk(void *chunk, sljit_uw size)
 
 #else
 
+#ifdef MAP_JIT
+
+static SLJIT_INLINE int get_map_jit_flag()
+{
+#ifdef TARGET_OS_MAC
+	/* On macOS systems, returns MAP_JIT if it is defined _and_ we're running on a version
+	   of macOS where it's OK to have more than one JIT block. On non-macOS systems, returns
+	   MAP_JIT if it is defined. */
+
+	static dispatch_once_t _inited;
+	static int map_jit_flag;
+
+	dispatch_once(&_inited,
+		^() {
+			struct utsname name;
+
+			uname(&name);
+
+			/* Kernel version for 10.14.0 (Mojave) */
+			if (atoi(name.release) >= 18)
+				map_jit_flag = MAP_JIT;
+		}
+	);
+
+	return map_jit_flag;
+#else /* !TARGET_OS_MAC */
+	return MAP_JIT;
+#endif /* TARGET_OS_MAC */
+}
+
+#endif /* MAP_JIT */
+
 static SLJIT_INLINE void* alloc_chunk(sljit_uw size)
 {
 	void *retval;
@@ -103,17 +135,17 @@ static SLJIT_INLINE void* alloc_chunk(sljit_uw size)
 	int flags = MAP_PRIVATE | MAP_ANON;
 
 #ifdef MAP_JIT
-	flags |= MAP_JIT;
+	flags |= get_map_jit_flag();
 #endif
 
 	retval = mmap(NULL, size, PROT_READ | PROT_WRITE | PROT_EXEC, flags, -1, 0);
-#else
+#else /* !MAP_ANON */
 	if (dev_zero < 0) {
 		if (open_dev_zero())
 			return NULL;
 	}
 	retval = mmap(NULL, size, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_PRIVATE, dev_zero, 0);
-#endif
+#endif /* MAP_ANON */
 
 	return (retval != MAP_FAILED) ? retval : NULL;
 }
