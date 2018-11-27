@@ -16875,6 +16875,24 @@ Failed: error 128 at offset 14: assertion expected after (?( or (?(?C)
  0: foobar
  0: foobar
 
+/(*:XX)^abc/I
+Capturing subpattern count = 0
+Compile options: <none>
+Overall options: anchored
+First code unit = 'a'
+Subject length lower bound = 3
+
+/(*COMMIT:XX)^abc/I
+Capturing subpattern count = 0
+Compile options: <none>
+Overall options: anchored
+First code unit = 'a'
+Subject length lower bound = 3
+
+/(*ACCEPT:XX)^abc/I
+Capturing subpattern count = 0
+Subject length lower bound = 0
+
 # End of testinput2
 Error -70: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

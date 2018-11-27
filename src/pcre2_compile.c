@@ -4615,6 +4615,14 @@ for (;;)
     code += GET(code, 1) + 1 + LINK_SIZE;
     break;
 
+    case OP_MARK:
+    case OP_COMMIT_ARG:
+    case OP_PRUNE_ARG:
+    case OP_SKIP_ARG:
+    case OP_THEN_ARG:
+    code += code[1] + PRIV(OP_lengths)[*code];
+    break;
+
     default:
     return code;
     }
@@ -7486,7 +7494,7 @@ for (;; pptr++)
     cb->had_recurse = TRUE;
     if (firstcuflags == REQ_UNSET) firstcuflags = REQ_NONE;
     zerofirstcu = firstcu;
-    zerofirstcuflags = firstcuflags;   
+    zerofirstcuflags = firstcuflags;
     break;
 
 
@@ -8641,7 +8649,7 @@ for (;; pptr++)
     case META_LOOKBEHIND:
     case META_LOOKBEHINDNOT:
     case META_NOCAPTURE:
-    case META_SCRIPT_RUN: 
+    case META_SCRIPT_RUN:
     nestlevel++;
     break;
 
@@ -9054,7 +9062,7 @@ for (;; pptr++)
 
     case META_ATOMIC:
     case META_NOCAPTURE:
-    case META_SCRIPT_RUN: 
+    case META_SCRIPT_RUN:
     pptr++;
     CHECK_GROUP:
     grouplength = get_grouplength(&pptr, TRUE, errcodeptr, lcptr, group,
@@ -9234,7 +9242,7 @@ for (pptr = cb->parsed_pattern; *pptr != META_END; pptr++)
     case META_QUERY_QUERY:
     case META_RANGE_ESCAPED:
     case META_RANGE_LITERAL:
-    case META_SCRIPT_RUN: 
+    case META_SCRIPT_RUN:
     case META_SKIP:
     case META_THEN:
     break;

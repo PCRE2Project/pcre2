@@ -5553,4 +5553,10 @@ a)"xI
 /foobar/g
     the foobar thing foobar again\=copy_matched_subject
 
+/(*:XX)^abc/I
+
+/(*COMMIT:XX)^abc/I
+
+/(*ACCEPT:XX)^abc/I
+
 # End of testinput2

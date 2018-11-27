@@ -85,6 +85,9 @@ via a string callout.
 
 21. Improve MAP_JIT flag usage on MacOS. Patch by Rich Siegel.
 
+22. If a pattern started with (*MARK), (*COMMIT), (*PRUNE), (*SKIP), or (*THEN) 
+followed by ^ it was not recognized as anchored.
+
 
 Version 10.32 10-September-2018
 -------------------------------
