@@ -6054,11 +6054,11 @@ mb->stack_frames = (heapframe *)stack_frames_vector;
 /* A length equal to PCRE2_ZERO_TERMINATED implies a zero-terminated
 subject string. */
 
-if (length == PCRE2_ZERO_TERMINATED) 
+if (length == PCRE2_ZERO_TERMINATED)
   {
   length = PRIV(strlen)(subject);
   was_zero_terminated = 1;
-  }  
+  }
 end_subject = subject + length;
 
 /* Plausibility checks */
@@ -6172,18 +6172,18 @@ time. */
 if (mcontext != NULL && mcontext->offset_limit != PCRE2_UNSET &&
      (re->overall_options & PCRE2_USE_OFFSET_LIMIT) == 0)
   return PCRE2_ERROR_BADOFFSETLIMIT;
-  
+
 /* If the match data block was previously used with PCRE2_COPY_MATCHED_SUBJECT,
 free the memory that was obtained. Set the field to NULL for no match cases. */
 
 if ((match_data->flags & PCRE2_MD_COPIED_SUBJECT) != 0)
   {
-  match_data->memctl.free((void *)match_data->subject, 
+  match_data->memctl.free((void *)match_data->subject,
     match_data->memctl.memory_data);
   match_data->flags &= ~PCRE2_MD_COPIED_SUBJECT;
   }
-match_data->subject = NULL; 
-  
+match_data->subject = NULL;
+
 /* If the pattern was successfully studied with JIT support, run the JIT
 executable instead of the rest of this function. Most options must be set at
 compile time for the JIT code to be usable. Fallback to the normal code path if
@@ -6195,7 +6195,7 @@ if (re->executable_jit != NULL && (options & ~PUBLIC_JIT_MATCH_OPTIONS) == 0)
   {
   rc = pcre2_jit_match(code, subject, length, start_offset, options,
     match_data, mcontext);
-  if (rc != PCRE2_ERROR_JIT_BADOPTION) 
+  if (rc != PCRE2_ERROR_JIT_BADOPTION)
     {
     if (rc >= 0 && (options & PCRE2_COPY_MATCHED_SUBJECT) != 0)
       {
@@ -6207,7 +6207,7 @@ if (re->executable_jit != NULL && (options & ~PUBLIC_JIT_MATCH_OPTIONS) == 0)
       match_data->flags |= PCRE2_MD_COPIED_SUBJECT;
       }
     return rc;
-    } 
+    }
   }
 #endif
 
@@ -6872,7 +6872,7 @@ if (rc == MATCH_MATCH)
     memcpy((void *)match_data->subject, subject, length);
     match_data->flags |= PCRE2_MD_COPIED_SUBJECT;
     }
-  else match_data->subject = subject; 
+  else match_data->subject = subject;
   return match_data->rc;
   }
 
@@ -6886,11 +6886,14 @@ match_data->mark = mb->nomatch_mark;
 
 if (rc != MATCH_NOMATCH && rc != PCRE2_ERROR_PARTIAL) match_data->rc = rc;
 
-/* Handle a partial match. */
+/* Handle a partial match. If a "soft" partial match was requested, searching
+for a complete match will have continued, and the value of rc at this point
+will be MATCH_NOMATCH. For a "hard" partial match, it will already be
+PCRE2_ERROR_PARTIAL. */
 
 else if (match_partial != NULL)
   {
-  match_data->subject = subject; 
+  match_data->subject = subject;
   match_data->ovector[0] = match_partial - subject;
   match_data->ovector[1] = end_subject - subject;
   match_data->startchar = match_partial - subject;
