@@ -1,4 +1,4 @@
-.TH PCRE2PATTERN 3 "12 October 2018" "PCRE2 10.33"
+.TH PCRE2PATTERN 3 "27 November 2018" "PCRE2 10.33"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION DETAILS"
@@ -2640,9 +2640,9 @@ can be used:
 .sp
   \es+(?=\ep{Latin})(*sr:\eS+)
 .sp
-This works as long as the first character is expected to be a character in that 
+This works as long as the first character is expected to be a character in that
 script, and not (for example) punctuation, which is allowed with any script. If
-this is not the case, a more creative lookahead is needed. For example, if 
+this is not the case, a more creative lookahead is needed. For example, if
 digits, underscore, and dots are permitted at the start:
 .sp
   \es+(?=[0-9_.]*\ep{Latin})(*sr:\eS+)
@@ -3262,6 +3262,7 @@ There are a number of special "Backtracking Control Verbs" (to use Perl's
 terminology) that modify the behaviour of backtracking during matching. They
 are generally of the form (*VERB) or (*VERB:NAME). Some verbs take either form,
 possibly behaving differently depending on whether or not a name is present.
+The names are not required to be unique within the pattern.
 .P
 By default, for compatibility with Perl, a name is any sequence of characters
 that does not include a closing parenthesis. The name is not processed in
@@ -3376,8 +3377,8 @@ nearest equivalent is the callout feature, as for example in this pattern:
 A match with the string "aaaa" always fails, but the callout is taken before
 each backtrack happens (in this example, 10 times).
 .P
-(*ACCEPT:NAME) and (*FAIL:NAME) behave exactly the same as
-(*MARK:NAME)(*ACCEPT) and (*MARK:NAME)(*FAIL), respectively.
+(*ACCEPT:NAME) and (*FAIL:NAME) are treated as (*MARK:NAME)(*ACCEPT) and
+(*MARK:NAME)(*FAIL), respectively.
 .
 .
 .SS "Recording which path was taken"
@@ -3389,10 +3390,10 @@ starting point (see (*SKIP) below).
 .sp
   (*MARK:NAME) or (*:NAME)
 .sp
-A name is always required with this verb. There may be as many instances of
-(*MARK) as you like in a pattern, and their names do not have to be unique.
+A name is always required with this verb. For all the other backtracking
+control verbs, a NAME argument is optional.
 .P
-When a match succeeds, the name of the last-encountered (*MARK:NAME) on the
+When a match succeeds, the name of the last-encountered mark name on the
 matching path is passed back to the caller as described in the section entitled
 .\" HTML <a href="pcre2api.html#matchotherdata">
 .\" </a>
@@ -3402,16 +3403,15 @@ in the
 .\" HREF
 \fBpcre2api\fP
 .\"
-documentation. This applies to all instances of (*MARK), including those inside
-assertions and atomic groups. (There are differences in those cases when
-(*MARK) is used in conjunction with (*SKIP) as described below.)
+documentation. This applies to all instances of (*MARK) and other verbs,
+including those inside assertions and atomic groups. However, there are
+differences in those cases when (*MARK) is used in conjunction with (*SKIP) as
+described below.
 .P
-As well as (*MARK), the (*COMMIT), (*PRUNE) and (*THEN) verbs may have
-associated NAME arguments. Whichever is last on the matching path is passed
-back. See below for more details of these other verbs.
-.P
-Here is an example of \fBpcre2test\fP output, where the "mark" modifier
-requests the retrieval and outputting of (*MARK) data:
+The mark name that was last encountered on the matching path is passed back. A
+verb without a NAME argument is ignored for this purpose. Here is an example of
+\fBpcre2test\fP output, where the "mark" modifier requests the retrieval and
+outputting of (*MARK) data:
 .sp
     re> /X(*MARK:A)Y|X(*MARK:B)Z/mark
   data> XY
@@ -3461,7 +3461,7 @@ to the left of the verb. However, when one of these verbs appears inside an
 atomic group or in a lookaround assertion that is true, its effect is confined
 to that group, because once the group has been matched, there is never any
 backtracking into it. Backtracking from beyond an assertion or an atomic group
-ignores the entire group, and seeks a preceeding backtracking point.
+ignores the entire group, and seeks a preceding backtracking point.
 .P
 These verbs differ in exactly what kind of failure occurs when backtracking
 reaches them. The behaviour described below is what happens when the verb is
@@ -3484,8 +3484,8 @@ dynamic anchor, or "I've started, so I must finish."
 .P
 The behaviour of (*COMMIT:NAME) is not the same as (*MARK:NAME)(*COMMIT). It is
 like (*MARK:NAME) in that the name is remembered for passing back to the
-caller. However, (*SKIP:NAME) searches only for names set with (*MARK),
-ignoring those set by (*COMMIT), (*PRUNE) and (*THEN).
+caller. However, (*SKIP:NAME) searches only for names that are set with
+(*MARK), ignoring those set by any of the other backtracking verbs.
 .P
 If there is more than one backtracking verb in a pattern, a different one that
 follows (*COMMIT) may be triggered first, so merely passing (*COMMIT) during a
@@ -3526,7 +3526,7 @@ as (*COMMIT).
 The behaviour of (*PRUNE:NAME) is not the same as (*MARK:NAME)(*PRUNE). It is
 like (*MARK:NAME) in that the name is remembered for passing back to the
 caller. However, (*SKIP:NAME) searches only for names set with (*MARK),
-ignoring those set by (*COMMIT), (*PRUNE) or (*THEN).
+ignoring those set by other backtracking verbs.
 .sp
   (*SKIP)
 .sp
@@ -3579,7 +3579,7 @@ never seen because "a" does not match "b", so the matcher immediately jumps to
 the second branch of the pattern.
 .P
 Note that (*SKIP:NAME) searches only for names set by (*MARK:NAME). It ignores
-names that are set by (*COMMIT:NAME), (*PRUNE:NAME) or (*THEN:NAME).
+names that are set by other backtracking verbs.
 .sp
   (*THEN) or (*THEN:NAME)
 .sp
@@ -3600,7 +3600,7 @@ group. If (*THEN) is not inside an alternation, it acts like (*PRUNE).
 The behaviour of (*THEN:NAME) is not the same as (*MARK:NAME)(*THEN). It is
 like (*MARK:NAME) in that the name is remembered for passing back to the
 caller. However, (*SKIP:NAME) searches only for names set with (*MARK),
-ignoring those set by (*COMMIT), (*PRUNE) and (*THEN).
+ignoring those set by other backtracking verbs.
 .P
 A subpattern that does not contain a | character is just a part of the
 enclosing alternative; it is not a nested alternation with only one
@@ -3693,10 +3693,10 @@ not the assertion is standalone or acting as the condition in a conditional
 subpattern.
 .P
 (*ACCEPT) in a standalone positive assertion causes the assertion to succeed
-without any further processing; captured strings and a (*MARK) name (if set)
-are retained. In a standalone negative assertion, (*ACCEPT) causes the
-assertion to fail without any further processing; captured substrings and any
-(*MARK) name are discarded.
+without any further processing; captured strings and a mark name (if set) are
+retained. In a standalone negative assertion, (*ACCEPT) causes the assertion to
+fail without any further processing; captured substrings and any mark name are
+discarded.
 .P
 If the assertion is a condition, (*ACCEPT) causes the condition to be true for
 a positive assertion and false for a negative one; captured substrings are
@@ -3767,6 +3767,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 12 October 2018
+Last updated: 27 November 2018
 Copyright (c) 1997-2018 University of Cambridge.
 .fi

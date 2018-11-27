@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "12 November 2018" "PCRE2 10.33"
+.TH PCRE2API 3 "27 November 2018" "PCRE2 10.33"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -2842,21 +2842,22 @@ appropriate circumstances. If they are called at other times, the result is
 undefined.
 .P
 After a successful match, a partial match (PCRE2_ERROR_PARTIAL), or a failure
-to match (PCRE2_ERROR_NOMATCH), a (*MARK), (*PRUNE), or (*THEN) name may be
-available. The function \fBpcre2_get_mark()\fP can be called to access this
-name. The same function applies to all three verbs. It returns a pointer to the
-zero-terminated name, which is within the compiled pattern. If no name is
+to match (PCRE2_ERROR_NOMATCH), a mark name may be available. The function
+\fBpcre2_get_mark()\fP can be called to access this name, which can be 
+specified in the pattern by any of the backtracking control verbs, not just 
+(*MARK). The same function applies to all the verbs. It returns a pointer to
+the zero-terminated name, which is within the compiled pattern. If no name is
 available, NULL is returned. The length of the name (excluding the terminating
 zero) is stored in the code unit that precedes the name. You should use this
 length instead of relying on the terminating zero if the name might contain a
 binary zero.
 .P
-After a successful match, the name that is returned is the last (*MARK),
-(*PRUNE), or (*THEN) name encountered on the matching path through the pattern.
-Instances of (*PRUNE) and (*THEN) without names are ignored. Thus, for example,
-if the matching path contains (*MARK:A)(*PRUNE), the name "A" is returned.
-After a "no match" or a partial match, the last encountered name is returned.
-For example, consider this pattern:
+After a successful match, the name that is returned is the last mark name
+encountered on the matching path through the pattern. Instances of backtracking
+verbs without names do not count. Thus, for example, if the matching path
+contains (*MARK:A)(*PRUNE), the name "A" is returned. After a "no match" or a
+partial match, the last encountered name is returned. For example, consider
+this pattern:
 .sp
   ^(*MARK:A)((*MARK:B)a|b)c
 .sp
@@ -2870,7 +2871,7 @@ is removed from the pattern above, there is an initial check for the presence
 of "c" in the subject before running the matching engine. This check fails for
 "bx", causing a match failure without seeing any marks. You can disable the
 start-of-match optimizations by setting the PCRE2_NO_START_OPTIMIZE option for
-\fBpcre2_compile()\fP or starting the pattern with (*NO_START_OPT).
+\fBpcre2_compile()\fP or by starting the pattern with (*NO_START_OPT).
 .P
 After a successful match, a partial match, or one of the invalid UTF errors
 (for example, PCRE2_ERROR_UTF8_ERR5), \fBpcre2_get_startchar()\fP can be
@@ -3297,13 +3298,12 @@ number or name. The number may be zero to include the entire matched string.
 For example, if the pattern a(b)c is matched with "=abc=" and the replacement
 string "+$1$0$1+", the result is "=+babcb+=".
 .P
-$*MARK inserts the name from the last encountered (*ACCEPT), (*COMMIT),
-(*MARK), (*PRUNE), or (*THEN) on the matching path that has a name. (*MARK)
-must always include a name, but the other verbs need not. For example, in
-the case of (*MARK:A)(*PRUNE) the name inserted is "A", but for
-(*MARK:A)(*PRUNE:B) the relevant name is "B". This facility can be used to
-perform simple simultaneous substitutions, as this \fBpcre2test\fP example
-shows:
+$*MARK inserts the name from the last encountered backtracking control verb on
+the matching path that has a name. (*MARK) must always include a name, but the
+other verbs need not. For example, in the case of (*MARK:A)(*PRUNE) the name
+inserted is "A", but for (*MARK:A)(*PRUNE:B) the relevant name is "B". This
+facility can be used to perform simple simultaneous substitutions, as this
+\fBpcre2test\fP example shows:
 .sp
   /(*MARK:pear)apple|(*MARK:orange)lemon/g,replace=${*MARK}
       apple lemon
@@ -3790,6 +3790,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 12 November 2018
+Last updated: 27 November 2018
 Copyright (c) 1997-2018 University of Cambridge.
 .fi

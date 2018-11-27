@@ -2623,9 +2623,9 @@ can be used:
 <pre>
   \s+(?=\p{Latin})(*sr:\S+)
 </pre>
-This works as long as the first character is expected to be a character in that 
+This works as long as the first character is expected to be a character in that
 script, and not (for example) punctuation, which is allowed with any script. If
-this is not the case, a more creative lookahead is needed. For example, if 
+this is not the case, a more creative lookahead is needed. For example, if
 digits, underscore, and dots are permitted at the start:
 <pre>
   \s+(?=[0-9_.]*\p{Latin})(*sr:\S+)
@@ -3223,6 +3223,7 @@ There are a number of special "Backtracking Control Verbs" (to use Perl's
 terminology) that modify the behaviour of backtracking during matching. They
 are generally of the form (*VERB) or (*VERB:NAME). Some verbs take either form,
 possibly behaving differently depending on whether or not a name is present.
+The names are not required to be unique within the pattern.
 </P>
 <P>
 By default, for compatibility with Perl, a name is any sequence of characters
@@ -3331,8 +3332,8 @@ A match with the string "aaaa" always fails, but the callout is taken before
 each backtrack happens (in this example, 10 times).
 </P>
 <P>
-(*ACCEPT:NAME) and (*FAIL:NAME) behave exactly the same as
-(*MARK:NAME)(*ACCEPT) and (*MARK:NAME)(*FAIL), respectively.
+(*ACCEPT:NAME) and (*FAIL:NAME) are treated as (*MARK:NAME)(*ACCEPT) and
+(*MARK:NAME)(*FAIL), respectively.
 </P>
 <br><b>
 Recording which path was taken
@@ -3344,27 +3345,25 @@ starting point (see (*SKIP) below).
 <pre>
   (*MARK:NAME) or (*:NAME)
 </pre>
-A name is always required with this verb. There may be as many instances of
-(*MARK) as you like in a pattern, and their names do not have to be unique.
+A name is always required with this verb. For all the other backtracking
+control verbs, a NAME argument is optional.
 </P>
 <P>
-When a match succeeds, the name of the last-encountered (*MARK:NAME) on the
+When a match succeeds, the name of the last-encountered mark name on the
 matching path is passed back to the caller as described in the section entitled
 <a href="pcre2api.html#matchotherdata">"Other information about the match"</a>
 in the
 <a href="pcre2api.html"><b>pcre2api</b></a>
-documentation. This applies to all instances of (*MARK), including those inside
-assertions and atomic groups. (There are differences in those cases when
-(*MARK) is used in conjunction with (*SKIP) as described below.)
+documentation. This applies to all instances of (*MARK) and other verbs,
+including those inside assertions and atomic groups. However, there are
+differences in those cases when (*MARK) is used in conjunction with (*SKIP) as
+described below.
 </P>
 <P>
-As well as (*MARK), the (*COMMIT), (*PRUNE) and (*THEN) verbs may have
-associated NAME arguments. Whichever is last on the matching path is passed
-back. See below for more details of these other verbs.
-</P>
-<P>
-Here is an example of <b>pcre2test</b> output, where the "mark" modifier
-requests the retrieval and outputting of (*MARK) data:
+The mark name that was last encountered on the matching path is passed back. A
+verb without a NAME argument is ignored for this purpose. Here is an example of
+<b>pcre2test</b> output, where the "mark" modifier requests the retrieval and
+outputting of (*MARK) data:
 <pre>
     re&#62; /X(*MARK:A)Y|X(*MARK:B)Z/mark
   data&#62; XY
@@ -3414,7 +3413,7 @@ to the left of the verb. However, when one of these verbs appears inside an
 atomic group or in a lookaround assertion that is true, its effect is confined
 to that group, because once the group has been matched, there is never any
 backtracking into it. Backtracking from beyond an assertion or an atomic group
-ignores the entire group, and seeks a preceeding backtracking point.
+ignores the entire group, and seeks a preceding backtracking point.
 </P>
 <P>
 These verbs differ in exactly what kind of failure occurs when backtracking
@@ -3439,8 +3438,8 @@ dynamic anchor, or "I've started, so I must finish."
 <P>
 The behaviour of (*COMMIT:NAME) is not the same as (*MARK:NAME)(*COMMIT). It is
 like (*MARK:NAME) in that the name is remembered for passing back to the
-caller. However, (*SKIP:NAME) searches only for names set with (*MARK),
-ignoring those set by (*COMMIT), (*PRUNE) and (*THEN).
+caller. However, (*SKIP:NAME) searches only for names that are set with
+(*MARK), ignoring those set by any of the other backtracking verbs.
 </P>
 <P>
 If there is more than one backtracking verb in a pattern, a different one that
@@ -3484,7 +3483,7 @@ as (*COMMIT).
 The behaviour of (*PRUNE:NAME) is not the same as (*MARK:NAME)(*PRUNE). It is
 like (*MARK:NAME) in that the name is remembered for passing back to the
 caller. However, (*SKIP:NAME) searches only for names set with (*MARK),
-ignoring those set by (*COMMIT), (*PRUNE) or (*THEN).
+ignoring those set by other backtracking verbs.
 <pre>
   (*SKIP)
 </pre>
@@ -3539,7 +3538,7 @@ the second branch of the pattern.
 </P>
 <P>
 Note that (*SKIP:NAME) searches only for names set by (*MARK:NAME). It ignores
-names that are set by (*COMMIT:NAME), (*PRUNE:NAME) or (*THEN:NAME).
+names that are set by other backtracking verbs.
 <pre>
   (*THEN) or (*THEN:NAME)
 </pre>
@@ -3561,7 +3560,7 @@ group. If (*THEN) is not inside an alternation, it acts like (*PRUNE).
 The behaviour of (*THEN:NAME) is not the same as (*MARK:NAME)(*THEN). It is
 like (*MARK:NAME) in that the name is remembered for passing back to the
 caller. However, (*SKIP:NAME) searches only for names set with (*MARK),
-ignoring those set by (*COMMIT), (*PRUNE) and (*THEN).
+ignoring those set by other backtracking verbs.
 </P>
 <P>
 A subpattern that does not contain a | character is just a part of the
@@ -3656,10 +3655,10 @@ subpattern.
 </P>
 <P>
 (*ACCEPT) in a standalone positive assertion causes the assertion to succeed
-without any further processing; captured strings and a (*MARK) name (if set)
-are retained. In a standalone negative assertion, (*ACCEPT) causes the
-assertion to fail without any further processing; captured substrings and any
-(*MARK) name are discarded.
+without any further processing; captured strings and a mark name (if set) are
+retained. In a standalone negative assertion, (*ACCEPT) causes the assertion to
+fail without any further processing; captured substrings and any mark name are
+discarded.
 </P>
 <P>
 If the assertion is a condition, (*ACCEPT) causes the condition to be true for
@@ -3731,7 +3730,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC31" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 12 October 2018
+Last updated: 27 November 2018
 <br>
 Copyright &copy; 1997-2018 University of Cambridge.
 <br>

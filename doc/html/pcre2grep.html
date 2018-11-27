@@ -871,9 +871,14 @@ only callouts with string arguments are useful.
 Calling external programs or scripts
 </b><br>
 <P>
-This facility can be independently disabled when <b>pcre2grep</b> is built. If
-the callout string does not start with a pipe (vertical bar) character, it is
-parsed into a list of substrings separated by pipe characters. The first
+This facility can be independently disabled when <b>pcre2grep</b> is built. It 
+is supported for Windows, where a call to <b>_spawnvp()</b> is used, for VMS, 
+where <b>lib$spawn()</b> is used, and for any other Unix-like environment where
+<b>fork()</b> and <b>execv()</b> are available.
+</P>
+<P>
+If the callout string does not start with a pipe (vertical bar) character, it
+is parsed into a list of substrings separated by pipe characters. The first
 substring must be an executable name, with the following substrings specifying
 arguments:
 <pre>
@@ -900,7 +905,7 @@ a single dollar and $| is replaced by a pipe character. Here is an example:
     Arg1: [1] [234] [4] Arg2: |1| ()
     12345
 </pre>
-The parameters for the <b>execv()</b> system call that is used to run the
+The parameters for the system call that is used to run the
 program or script are zero-terminated strings. This means that binary zero
 characters in the callout argument will cause premature termination of their
 substrings, and therefore should not be present. Any syntax errors in the
@@ -966,7 +971,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC16" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 17 November 2018
+Last updated: 24 November 2018
 <br>
 Copyright &copy; 1997-2018 University of Cambridge.
 <br>
