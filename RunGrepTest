@@ -170,11 +170,11 @@ echo "---------------------------- Test 14 -----------------------------" >>test
 echo "RC=$?" >>testtrygrep
 
 echo "---------------------------- Test 15 -----------------------------" >>testtrygrep
-(cd $srcdir; $valgrind $vjs $pcre2grep 'abc^*' ./testdata/grepinput) 2>>testtrygrep >>testtrygrep
+(cd $srcdir; $valgrind $vjs $pcre2grep 'abc^*' ./testdata/grepinput) >>testtrygrep 2>&1
 echo "RC=$?" >>testtrygrep
 
 echo "---------------------------- Test 16 -----------------------------" >>testtrygrep
-(cd $srcdir; $valgrind $vjs $pcre2grep abc ./testdata/grepinput ./testdata/nonexistfile) 2>>testtrygrep >>testtrygrep
+(cd $srcdir; $valgrind $vjs $pcre2grep abc ./testdata/grepinput ./testdata/nonexistfile) >>testtrygrep 2>&1
 echo "RC=$?" >>testtrygrep
 
 echo "---------------------------- Test 17 -----------------------------" >>testtrygrep
@@ -296,7 +296,7 @@ echo "---------------------------- Test 45 ------------------------------" >>tes
 echo "RC=$?" >>testtrygrep
 
 echo "---------------------------- Test 46 ------------------------------" >>testtrygrep
-(cd $srcdir; $valgrind $vjs $pcre2grep -eabc -e '(unclosed' ./testdata/grepinput) 2>>testtrygrep >>testtrygrep
+(cd $srcdir; $valgrind $vjs $pcre2grep -eabc -e '(unclosed' ./testdata/grepinput) >>testtrygrep 2>&1
 echo "RC=$?" >>testtrygrep
 
 echo "---------------------------- Test 47 ------------------------------" >>testtrygrep

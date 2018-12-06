@@ -93,6 +93,10 @@ Solaris and MacOS as printf and sed can't handle them. It seems that the *BSD
 systems can't either. I've inverted the test so that only those OS that are 
 known to work (currently only Linux) try to run this test.
 
+24. Some tests in RunGrepTest appended to testtrygrep from two different file 
+descriptors instead of redirecting stderr to stdout. This worked on Linux, but 
+it was reported not to on other systems, causing the tests to fail.
+
 
 Version 10.32 10-September-2018
 -------------------------------
