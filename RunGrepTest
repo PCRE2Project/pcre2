@@ -714,20 +714,24 @@ $valgrind $vjs $pcre2grep -n --newline=any "^(abc|def|ghi|jkl)" testNinputgrep >
 printf '%c--------------------------- Test N6 ------------------------------\r\n' - >>testtrygrep
 $valgrind $vjs $pcre2grep -n --newline=anycrlf "^(abc|def|ghi|jkl)" testNinputgrep >>testtrygrep
 
-# It seems impossible to handle NUL characters easily in Solaris (aka SunOS).
-# The version of sed explicitly doesn't like them. For the moment, we just
-# don't run this test under SunOS. Fudge the output so that the comparison
-# works. A similar problem has also been reported for MacOS (Darwin).
+# It seems impossible to handle NUL characters easily in many operating
+# systems, including Solaris (aka SunOS), where the version of sed explicitly
+# doesn't like them, and also MacOS (Darwin), OpenBSD, FreeBSD, and NetBSD. So
+# now we run this test only on OS that are known to work. For the rest, we
+# fudge the output so that the comparison works.
 
 printf '%c--------------------------- Test N7 ------------------------------\r\n' - >>testtrygrep
 uname=`uname`
-if [ "$uname" != "SunOS" -a "$uname" != "Darwin" ] ; then
-  printf 'abc\0def' >testNinputgrep
-  $valgrind $vjs $pcre2grep -na --newline=nul "^(abc|def)" testNinputgrep | sed 's/\x00/ZERO/' >>testtrygrep
-  echo "" >>testtrygrep
-else
-  echo '1:abcZERO2:def' >>testtrygrep
-fi
+case $uname in
+  Linux)
+    printf 'abc\0def' >testNinputgrep
+    $valgrind $vjs $pcre2grep -na --newline=nul "^(abc|def)" testNinputgrep | sed 's/\x00/ZERO/' >>testtrygrep
+    echo "" >>testtrygrep
+    ;;
+  *)
+    echo '1:abcZERO2:def' >>testtrygrep
+    ;;
+esac
 
 $cf $srcdir/testdata/grepoutputN testtrygrep
 if [ $? != 0 ] ; then exit 1; fi
