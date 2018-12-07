@@ -319,7 +319,7 @@ fi
 # If it is possible to set the system stack size and -bigstack was given,
 # set up a large stack.
 
-$sim ./pcre2test -S 1 /dev/null /dev/null
+$sim ./pcre2test -S 64 /dev/null /dev/null
 if [ $? -eq 0 -a "$bigstack" != "" ] ; then
   setstack="-S 64"
 else

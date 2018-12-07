@@ -97,6 +97,9 @@ known to work (currently only Linux) try to run this test.
 descriptors instead of redirecting stderr to stdout. This worked on Linux, but 
 it was reported not to on other systems, causing the tests to fail.
 
+25. In the RunTest script, make the test for stack setting use the same value
+for the stack as it needs for -bigstack.
+
 
 Version 10.32 10-September-2018
 -------------------------------
