@@ -96,32 +96,31 @@ static SLJIT_INLINE void free_chunk(void *chunk, sljit_uw size)
 
 #ifdef MAP_JIT
 
+#ifdef __APPLE__
+#include <sys/utsname.h>
+#endif /* __APPLE__ */
+
 static SLJIT_INLINE int get_map_jit_flag()
 {
-#ifdef TARGET_OS_MAC
+#ifdef __APPLE__
 	/* On macOS systems, returns MAP_JIT if it is defined _and_ we're running on a version
 	   of macOS where it's OK to have more than one JIT block. On non-macOS systems, returns
 	   MAP_JIT if it is defined. */
+	static int map_jit_flag = -1;
 
-	static dispatch_once_t _inited;
-	static int map_jit_flag;
+	if (map_jit_flag == -1) {
+		struct utsname name;
 
-	dispatch_once(&_inited,
-		^() {
-			struct utsname name;
+		uname(&name);
 
-			uname(&name);
-
-			/* Kernel version for 10.14.0 (Mojave) */
-			if (atoi(name.release) >= 18)
-				map_jit_flag = MAP_JIT;
-		}
-	);
+		/* Kernel version for 10.14.0 (Mojave) */
+		map_jit_flag = (atoi(name.release) >= 18) ? MAP_JIT : 0;
+	}
 
 	return map_jit_flag;
-#else /* !TARGET_OS_MAC */
+#else /* !__APPLE__ */
 	return MAP_JIT;
-#endif /* TARGET_OS_MAC */
+#endif /* __APPLE__ */
 }
 
 #endif /* MAP_JIT */
