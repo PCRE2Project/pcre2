@@ -94,20 +94,28 @@ static SLJIT_INLINE void free_chunk(void *chunk, sljit_uw size)
 
 #else
 
-#ifdef MAP_JIT
-
 #ifdef __APPLE__
+// Configures TARGET_OS_MAC when appropriate.
+#include <TargetConditionals.h>
+
+#if defined TARGET_OS_MAC && defined MAP_JIT
 #include <sys/utsname.h>
+#endif /* TARGET_OS_MAC && MAP_JIT */
 #endif /* __APPLE__ */
+
+#ifdef MAP_JIT
 
 static SLJIT_INLINE int get_map_jit_flag()
 {
-#ifdef __APPLE__
+#ifdef TARGET_OS_MAC
 	/* On macOS systems, returns MAP_JIT if it is defined _and_ we're running on a version
 	   of macOS where it's OK to have more than one JIT block. On non-macOS systems, returns
 	   MAP_JIT if it is defined. */
 	static int map_jit_flag = -1;
 
+	/* The following code is thread safe because multiple initialization
+	   sets map_jit_flag to the same value and the code has no side-effects.
+	   Changing the kernel version witout system restart is (very) unlikely. */
 	if (map_jit_flag == -1) {
 		struct utsname name;
 
@@ -118,9 +126,9 @@ static SLJIT_INLINE int get_map_jit_flag()
 	}
 
 	return map_jit_flag;
-#else /* !__APPLE__ */
+#else /* !TARGET_OS_MAC */
 	return MAP_JIT;
-#endif /* __APPLE__ */
+#endif /* TARGET_OS_MAC */
 }
 
 #endif /* MAP_JIT */
