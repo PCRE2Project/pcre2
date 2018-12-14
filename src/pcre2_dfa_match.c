@@ -426,7 +426,7 @@ else
   uint32_t newsizeK = newsize/(1024/sizeof(int));
 
   if (newsizeK + mb->heap_used > mb->heap_limit)
-    newsizeK = mb->heap_limit - mb->heap_used;
+    newsizeK = (uint32_t)(mb->heap_limit - mb->heap_used);
   newsize = newsizeK*(1024/sizeof(int));
 
   if (newsize < RWS_RSIZE + ovecsize + RWS_ANCHOR_SIZE)

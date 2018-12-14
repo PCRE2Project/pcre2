@@ -100,6 +100,8 @@ it was reported not to on other systems, causing the tests to fail.
 25. In the RunTest script, make the test for stack setting use the same value
 for the stack as it needs for -bigstack.
 
+26. Insert a cast in pcre2_dfa_match.c to suppress a compiler warning.
+
 
 Version 10.32 10-September-2018
 -------------------------------
