@@ -960,7 +960,7 @@ PCRE2 CONTEXTS
        more substitutions.
 
        For example, if the pattern /abc/ is matched against "123abc"  with  an
-       offset  limit  less than 3, the result is PCRE2_ERROR_NO_MATCH. A match
+       offset  limit  less  than 3, the result is PCRE2_ERROR_NOMATCH. A match
        can never be  found  if  the  startoffset  argument  of  pcre2_match(),
        pcre2_dfa_match(),  or  pcre2_substitute()  is  greater than the offset
        limit set in the match context.

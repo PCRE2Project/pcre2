@@ -885,7 +885,7 @@ offset is not found. The \fBpcre2_substitute()\fP function makes no more
 substitutions.
 .P
 For example, if the pattern /abc/ is matched against "123abc" with an offset
-limit less than 3, the result is PCRE2_ERROR_NO_MATCH. A match can never be
+limit less than 3, the result is PCRE2_ERROR_NOMATCH. A match can never be
 found if the \fIstartoffset\fP argument of \fBpcre2_match()\fP,
 \fBpcre2_dfa_match()\fP, or \fBpcre2_substitute()\fP is greater than the offset
 limit set in the match context.
