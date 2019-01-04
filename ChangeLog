@@ -102,6 +102,16 @@ for the stack as it needs for -bigstack.
 
 26. Insert a cast in pcre2_dfa_match.c to suppress a compiler warning.
 
+26. With PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL set, escape sequences such as \s 
+which are valid in character classes, but not as the end of ranges, were being 
+treated as literals. An example is [_-\s] (but not [\s-_] because that gave an 
+error at the *start* of a range). Now an "invalid range" error is given 
+independently of PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL.
+
+27. Related to 26 above, PCRE2_BAD_ESCAPE_IS_LITERAL was affecting known escape 
+sequences such as \eX when they appeared invalidly in a character class. Now
+the option applies only to unrecognized or malformed escape sequences.
+
 
 Version 10.32 10-September-2018
 -------------------------------

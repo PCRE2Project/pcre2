@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "27 November 2018" "PCRE2 10.33"
+.TH PCRE2API 3 "04 January 2019" "PCRE2 10.33"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -1825,11 +1825,14 @@ Perl's warning switch is enabled. However, a malformed octal number after \eo{
 always causes an error in Perl.
 .P
 If the PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL extra option is passed to
-\fBpcre2_compile()\fP, all unrecognized or erroneous escape sequences are
+\fBpcre2_compile()\fP, all unrecognized or malformed escape sequences are
 treated as single-character escapes. For example, \ej is a literal "j" and
 \ex{2z} is treated as the literal string "x{2z}". Setting this option means
-that typos in patterns may go undetected and have unexpected results. This is a
-dangerous option. Use with care.
+that typos in patterns may go undetected and have unexpected results. Also note 
+that a sequence such as [\eN{] is interpreted as a malformed attempt at
+[\eN{...}] and so is treated as [N{] whereas [\eN] gives an error because an
+unqualified \eN is a valid escape sequence but is not supported in a character
+class. To reiterate: this is a dangerous option. Use with great care.
 .sp
   PCRE2_EXTRA_ESCAPED_CR_IS_LF
 .sp
@@ -3790,6 +3793,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 27 November 2018
-Copyright (c) 1997-2018 University of Cambridge.
+Last updated: 04 January 2019
+Copyright (c) 1997-2019 University of Cambridge.
 .fi

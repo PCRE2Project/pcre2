@@ -5304,9 +5304,21 @@ a)"xI
 
 /\N{\c/IB,bad_escape_is_literal
 
-/[\j\x{z}\o\gA-\Nb-\g]/B,bad_escape_is_literal
+/[\j\x{z}\o\gAb\g]/B,bad_escape_is_literal
 
 /[Q-\N]/B,bad_escape_is_literal
+
+/[\s-_]/bad_escape_is_literal
+
+/[_-\s]/bad_escape_is_literal
+
+/[\B\R\X]/B
+
+/[\B\R\X]/B,bad_escape_is_literal
+
+/[A-\BP-\RV-\X]/B
+
+/[A-\BP-\RV-\X]/B,bad_escape_is_literal
 
 # ----------------------------------------------------------------------
 

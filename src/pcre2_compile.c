@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-          New API code Copyright (c) 2016-2018 University of Cambridge
+          New API code Copyright (c) 2016-2019 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -3346,9 +3346,9 @@ while (ptr < ptrend)
         tempptr = ptr;
         escape = PRIV(check_escape)(&ptr, ptrend, &c, &errorcode,
           options, TRUE, cb);
+
         if (errorcode != 0)
           {
-          CLASS_ESCAPE_FAILED:
           if ((cb->cx->extra_options & PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL) == 0)
             goto FAILED;
           ptr = tempptr;
@@ -3359,29 +3359,31 @@ while (ptr < ptrend)
           escape = 0;                 /* Treat as literal character */
           }
 
-        if (escape == 0)  /* Escaped character code point is in c */
+        switch(escape)
           {
+          case 0:  /* Escaped character code point is in c */
           char_is_literal = FALSE;
           goto CLASS_LITERAL;
-          }
 
-        /* These three escapes do not alter the class range state. */
-
-        if (escape == ESC_b)
-          {
-          c = CHAR_BS;   /* \b is backspace in a class */
+          case ESC_b:
+          c = CHAR_BS;    /* \b is backspace in a class */
           char_is_literal = FALSE;
           goto CLASS_LITERAL;
-          }
 
-        else if (escape == ESC_Q)
-          {
+          case ESC_Q:
           inescq = TRUE;  /* Enter literal mode */
           goto CLASS_CONTINUE;
-          }
 
-        else if (escape == ESC_E)  /* Ignore orphan \E */
+          case ESC_E:     /* Ignore orphan \E */
           goto CLASS_CONTINUE;
+
+          case ESC_B:     /* Always an error in a class */
+          case ESC_R:
+          case ESC_X:
+          errorcode = ERR7;
+          ptr--;
+          goto FAILED;
+          }
 
         /* The second part of a range can be a single-character escape
         sequence (detected above), but not any of the other escapes. Perl
@@ -3392,7 +3394,7 @@ while (ptr < ptrend)
         if (class_range_state == RANGE_STARTED)
           {
           errorcode = ERR50;
-          goto CLASS_ESCAPE_FAILED;
+          goto FAILED;  /* Not CLASS_ESCAPE_FAILED; always an error */
           }
 
         /* Of the remaining escapes, only those that define characters are
@@ -3402,8 +3404,8 @@ while (ptr < ptrend)
         switch(escape)
           {
           case ESC_N:
-          errorcode = ERR71;  /* Not supported in a class */
-          goto CLASS_ESCAPE_FAILED;
+          errorcode = ERR71;
+          goto FAILED;
 
           case ESC_H:
           case ESC_h:
@@ -3466,14 +3468,14 @@ while (ptr < ptrend)
             }
 #else
           errorcode = ERR45;
-          goto CLASS_ESCAPE_FAILED;
+          goto FAILED;
 #endif
           break;  /* End \P and \p */
 
           default:    /* All others are not allowed in a class */
           errorcode = ERR7;
           ptr--;
-          goto CLASS_ESCAPE_FAILED;
+          goto FAILED;
           }
 
         /* Perl gives a warning unless a following hyphen is the last character

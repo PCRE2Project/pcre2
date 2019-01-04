@@ -1846,11 +1846,15 @@ COMPILING A PATTERN
        Perl.
 
        If the PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL  extra  option  is  passed  to
-       pcre2_compile(),  all  unrecognized  or  erroneous escape sequences are
+       pcre2_compile(),  all  unrecognized  or  malformed escape sequences are
        treated as single-character escapes. For example, \j is a  literal  "j"
        and  \x{2z}  is  treated  as  the  literal string "x{2z}". Setting this
        option means that typos in patterns may go undetected  and  have  unex-
-       pected results. This is a dangerous option. Use with care.
+       pected  results. Also note that a sequence such as [\N{] is interpreted
+       as a malformed attempt at [\N{...}] and so is treated as  [N{]  whereas
+       [\N]  gives  an  error  because  an  unqualified  \N  is a valid escape
+       sequence but is not supported in a character class. To reiterate:  this
+       is a dangerous option. Use with great care.
 
          PCRE2_EXTRA_ESCAPED_CR_IS_LF
 
@@ -3654,8 +3658,8 @@ AUTHOR
 
 REVISION
 
-       Last updated: 27 November 2018
-       Copyright (c) 1997-2018 University of Cambridge.
+       Last updated: 04 January 2019
+       Copyright (c) 1997-2019 University of Cambridge.
 ------------------------------------------------------------------------------
  
  

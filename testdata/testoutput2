@@ -135,13 +135,13 @@ Failed: error 105 at offset 7: number too big in {} quantifier
 Failed: error 106 at offset 5: missing terminating ] for character class
 
 /[\B]/B
-Failed: error 107 at offset 2: invalid escape sequence in character class
+Failed: error 107 at offset 2: escape sequence is invalid in character class
 
 /[\R]/B
-Failed: error 107 at offset 2: invalid escape sequence in character class
+Failed: error 107 at offset 2: escape sequence is invalid in character class
 
 /[\X]/B
-Failed: error 107 at offset 2: invalid escape sequence in character class
+Failed: error 107 at offset 2: escape sequence is invalid in character class
 
 /[z-a]/
 Failed: error 108 at offset 3: range out of order in character class
@@ -16224,16 +16224,34 @@ First code unit = 'N'
 Last code unit = 'c'
 Subject length lower bound = 3
 
-/[\j\x{z}\o\gA-\Nb-\g]/B,bad_escape_is_literal
+/[\j\x{z}\o\gAb\g]/B,bad_escape_is_literal
 ------------------------------------------------------------------
         Bra
-        [A-Nb-gjoxz{}]
+        [Abgjoxz{}]
         Ket
         End
 ------------------------------------------------------------------
 
 /[Q-\N]/B,bad_escape_is_literal
-Failed: error 108 at offset 4: range out of order in character class
+Failed: error 150 at offset 5: invalid range in character class
+
+/[\s-_]/bad_escape_is_literal
+Failed: error 150 at offset 3: invalid range in character class
+
+/[_-\s]/bad_escape_is_literal
+Failed: error 150 at offset 5: invalid range in character class
+
+/[\B\R\X]/B
+Failed: error 107 at offset 2: escape sequence is invalid in character class
+
+/[\B\R\X]/B,bad_escape_is_literal
+Failed: error 107 at offset 2: escape sequence is invalid in character class
+
+/[A-\BP-\RV-\X]/B
+Failed: error 107 at offset 4: escape sequence is invalid in character class
+
+/[A-\BP-\RV-\X]/B,bad_escape_is_literal
+Failed: error 107 at offset 4: escape sequence is invalid in character class
 
 # ----------------------------------------------------------------------
 
