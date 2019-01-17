@@ -112,6 +112,8 @@ independently of PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL.
 sequences such as \eX when they appeared invalidly in a character class. Now
 the option applies only to unrecognized or malformed escape sequences.
 
+28. Fix word boundary in JIT compiler. Patch by Mike Munday.
+
 
 Version 10.32 10-September-2018
 -------------------------------

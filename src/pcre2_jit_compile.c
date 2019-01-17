@@ -6841,7 +6841,7 @@ else
 set_jumps(skipread_list, LABEL());
 
 OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_SP), LOCALS0);
-OP2(SLJIT_XOR, TMP2, 0, TMP2, 0, TMP3, 0);
+OP2(SLJIT_XOR | SLJIT_SET_Z, TMP2, 0, TMP2, 0, TMP3, 0);
 sljit_emit_fast_return(compiler, TMP1, 0);
 
 #ifdef SUPPORT_UNICODE
@@ -6856,7 +6856,6 @@ if (common->invalid_utf)
   return;
   }
 #endif /* SUPPORT_UNICODE */
-SLJIT_ASSERT(invalid_utf == NULL);
 }
 
 static BOOL optimize_class_ranges(compiler_common *common, const sljit_u8 *bits, BOOL nclass, BOOL invert, jump_list **backtracks)
