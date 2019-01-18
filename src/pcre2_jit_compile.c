@@ -902,6 +902,7 @@ switch(*cc)
   case OP_ASSERTBACK:
   case OP_ASSERTBACK_NOT:
   case OP_ONCE:
+  case OP_SCRIPT_RUN:
   case OP_BRA:
   case OP_BRAPOS:
   case OP_CBRA:
@@ -1569,6 +1570,7 @@ while (cc < ccend)
     case OP_ASSERTBACK:
     case OP_ASSERTBACK_NOT:
     case OP_ONCE:
+    case OP_SCRIPT_RUN:
     case OP_BRAPOS:
     case OP_SBRA:
     case OP_SBRAPOS:
@@ -2145,6 +2147,7 @@ while (cc < ccend)
     case OP_ASSERTBACK:
     case OP_ASSERTBACK_NOT:
     case OP_ONCE:
+    case OP_SCRIPT_RUN:
     case OP_BRAPOS:
     case OP_SBRA:
     case OP_SBRAPOS:
@@ -2468,6 +2471,7 @@ while (cc < ccend)
     case OP_ASSERTBACK:
     case OP_ASSERTBACK_NOT:
     case OP_ONCE:
+    case OP_SCRIPT_RUN:
     case OP_BRAPOS:
     case OP_SBRA:
     case OP_SBRAPOS:
@@ -10225,6 +10229,42 @@ if (common->optimized_cbracket[offset >> 1] == 0)
 return stacksize;
 }
 
+static PCRE2_SPTR SLJIT_FUNC do_script_run(PCRE2_SPTR ptr, PCRE2_SPTR endptr)
+{
+  if (PRIV(script_run)(ptr, endptr, FALSE))
+    return endptr;
+  return NULL;
+}
+
+#ifdef SUPPORT_UNICODE
+
+static PCRE2_SPTR SLJIT_FUNC do_script_run_utf(PCRE2_SPTR ptr, PCRE2_SPTR endptr)
+{
+  if (PRIV(script_run)(ptr, endptr, TRUE))
+    return endptr;
+  return NULL;
+}
+
+#endif /* SUPPORT_UNICODE */
+
+static SLJIT_INLINE void match_script_run_common(compiler_common *common, int private_data_ptr, backtrack_common *parent)
+{
+DEFINE_COMPILER;
+
+SLJIT_ASSERT(TMP1 == SLJIT_R0 && STR_PTR == SLJIT_R1);
+
+OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_SP), private_data_ptr);
+#ifdef SUPPORT_UNICODE
+sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_RET(SW) | SLJIT_ARG1(SW) | SLJIT_ARG2(SW), SLJIT_IMM,
+  common->utf ? SLJIT_FUNC_OFFSET(do_script_run_utf) : SLJIT_FUNC_OFFSET(do_script_run));
+#else
+sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_RET(SW) | SLJIT_ARG1(SW) | SLJIT_ARG2(SW), SLJIT_IMM, SLJIT_FUNC_OFFSET(do_script_run));
+#endif
+
+OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_RETURN_REG, 0);
+add_jump(compiler, parent->top != NULL ? &parent->top->nextbacktracks : &parent->topbacktracks, CMP(SLJIT_EQUAL, SLJIT_RETURN_REG, 0, SLJIT_IMM, 0));
+}
+
 /*
   Handling bracketed expressions is probably the most complex part.
 
@@ -10360,7 +10400,7 @@ if (opcode == OP_CBRA || opcode == OP_SCBRA)
   BACKTRACK_AS(bracket_backtrack)->private_data_ptr = private_data_ptr;
   matchingpath += IMM2_SIZE;
   }
-else if (opcode == OP_ONCE || opcode == OP_SBRA || opcode == OP_SCOND)
+else if (opcode == OP_ONCE || opcode == OP_SCRIPT_RUN || opcode == OP_SBRA || opcode == OP_SCOND)
   {
   /* Other brackets simply allocate the next entry. */
   private_data_ptr = PRIVATE_DATA(ccbegin);
@@ -10399,35 +10439,32 @@ if (bra == OP_BRAMINZERO)
     free_stack(common, 1);
     braminzero = CMP(SLJIT_EQUAL, STR_PTR, 0, SLJIT_IMM, 0);
     }
-  else
+  else if (opcode == OP_ONCE || opcode >= OP_SBRA)
     {
-    if (opcode == OP_ONCE || opcode >= OP_SBRA)
+    jump = CMP(SLJIT_NOT_EQUAL, STR_PTR, 0, SLJIT_IMM, 0);
+    OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(STACK_TOP), STACK(1));
+    /* Nothing stored during the first run. */
+    skip = JUMP(SLJIT_JUMP);
+    JUMPHERE(jump);
+    /* Checking zero-length iteration. */
+    if (opcode != OP_ONCE || BACKTRACK_AS(bracket_backtrack)->u.framesize < 0)
       {
-      jump = CMP(SLJIT_NOT_EQUAL, STR_PTR, 0, SLJIT_IMM, 0);
-      OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(STACK_TOP), STACK(1));
-      /* Nothing stored during the first run. */
-      skip = JUMP(SLJIT_JUMP);
-      JUMPHERE(jump);
-      /* Checking zero-length iteration. */
-      if (opcode != OP_ONCE || BACKTRACK_AS(bracket_backtrack)->u.framesize < 0)
-        {
-        /* When we come from outside, private_data_ptr contains the previous STR_PTR. */
-        braminzero = CMP(SLJIT_EQUAL, STR_PTR, 0, SLJIT_MEM1(SLJIT_SP), private_data_ptr);
-        }
-      else
-        {
-        /* Except when the whole stack frame must be saved. */
-        OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_SP), private_data_ptr);
-        braminzero = CMP(SLJIT_EQUAL, STR_PTR, 0, SLJIT_MEM1(TMP1), STACK(-BACKTRACK_AS(bracket_backtrack)->u.framesize - 2));
-        }
-      JUMPHERE(skip);
+      /* When we come from outside, private_data_ptr contains the previous STR_PTR. */
+      braminzero = CMP(SLJIT_EQUAL, STR_PTR, 0, SLJIT_MEM1(SLJIT_SP), private_data_ptr);
       }
     else
       {
-      jump = CMP(SLJIT_NOT_EQUAL, STR_PTR, 0, SLJIT_IMM, 0);
-      OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(STACK_TOP), STACK(1));
-      JUMPHERE(jump);
+      /* Except when the whole stack frame must be saved. */
+      OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_SP), private_data_ptr);
+      braminzero = CMP(SLJIT_EQUAL, STR_PTR, 0, SLJIT_MEM1(TMP1), STACK(-BACKTRACK_AS(bracket_backtrack)->u.framesize - 2));
       }
+    JUMPHERE(skip);
+    }
+  else
+    {
+    jump = CMP(SLJIT_NOT_EQUAL, STR_PTR, 0, SLJIT_IMM, 0);
+    OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(STACK_TOP), STACK(1));
+    JUMPHERE(jump);
     }
   }
 
@@ -10444,7 +10481,7 @@ if (ket == OP_KETRMIN)
 if (ket == OP_KETRMAX)
   {
   rmax_label = LABEL();
-  if (has_alternatives && opcode != OP_ONCE && opcode < OP_SBRA && repeat_type == 0)
+  if (has_alternatives && opcode >= OP_BRA && opcode < OP_SBRA && repeat_type == 0)
     BACKTRACK_AS(bracket_backtrack)->alternative_matchingpath = rmax_label;
   }
 
@@ -10548,7 +10585,7 @@ else if (opcode == OP_CBRA || opcode == OP_SCBRA)
     OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(0), TMP2, 0);
     }
   }
-else if (opcode == OP_SBRA || opcode == OP_SCOND)
+else if (opcode == OP_SCRIPT_RUN || opcode == OP_SBRA || opcode == OP_SCOND)
   {
   /* Saving the previous value. */
   OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(SLJIT_SP), private_data_ptr);
@@ -10677,6 +10714,9 @@ if (SLJIT_UNLIKELY(sljit_get_compiler_error(compiler)))
 if (opcode == OP_ONCE)
   match_once_common(common, ket, BACKTRACK_AS(bracket_backtrack)->u.framesize, private_data_ptr, has_alternatives, needs_control_head);
 
+if (opcode == OP_SCRIPT_RUN)
+  match_script_run_common(common, private_data_ptr, backtrack);
+
 stacksize = 0;
 if (repeat_type == OP_MINUPTO)
   {
@@ -10746,13 +10786,15 @@ if (ket == OP_KETRMAX)
     if (opcode != OP_ONCE)
       free_stack(common, 1);
     }
-  else if (opcode == OP_ONCE || opcode >= OP_SBRA)
+  else if (opcode < OP_BRA || opcode >= OP_SBRA)
     {
     if (has_alternatives)
       BACKTRACK_AS(bracket_backtrack)->alternative_matchingpath = LABEL();
+
     /* Checking zero-length iteration. */
     if (opcode != OP_ONCE)
       {
+      /* This case includes opcodes such as OP_SCRIPT_RUN. */
       CMPTO(SLJIT_NOT_EQUAL, SLJIT_MEM1(SLJIT_SP), private_data_ptr, STR_PTR, 0, rmax_label);
       /* Drop STR_PTR for greedy plus quantifier. */
       if (bra != OP_BRAZERO)
@@ -11997,6 +12039,7 @@ while (cc < ccend)
     break;
 
     case OP_ONCE:
+    case OP_SCRIPT_RUN:
     case OP_BRA:
     case OP_CBRA:
     case OP_COND:
@@ -12603,6 +12646,9 @@ if (has_alternatives)
       compile_matchingpath(common, ccprev, cc, current);
       if (SLJIT_UNLIKELY(sljit_get_compiler_error(compiler)))
         return;
+
+      if (opcode == OP_SCRIPT_RUN)
+        match_script_run_common(common, private_data_ptr, current);
       }
 
     /* Instructions after the current alternative is successfully matched. */
@@ -12731,7 +12777,7 @@ if (offset != 0)
     OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), private_data_ptr, TMP1, 0);
     }
   }
-else if (opcode == OP_SBRA || opcode == OP_SCOND)
+else if (opcode == OP_SCRIPT_RUN || opcode == OP_SBRA || opcode == OP_SCOND)
   {
   OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), private_data_ptr, SLJIT_MEM1(STACK_TOP), STACK(0));
   free_stack(common, 1);
@@ -13080,6 +13126,7 @@ while (current)
     break;
 
     case OP_ONCE:
+    case OP_SCRIPT_RUN:
     case OP_BRA:
     case OP_CBRA:
     case OP_COND:

@@ -868,6 +868,16 @@ static struct regression_test_case regression_test_cases[] = {
 	{ MU, A, 0, 0, "(a(*COMMIT)(?:b|bb)|c(*ACCEPT)d|dd){0}_(?1)+_", "_ax_ _cd_ _abbb_ _abcd_ _abbcdd_" },
 	{ MU, A, 0, 0, "((.)(?:.|(*COMMIT)\\2{3}(*ACCEPT).*|.*)){0}_(?1){0,4}_", "_aaaabbbbccccddd_ _aaaabbbbccccdddd_" },
 
+	/* Script runs and iterations. */
+	{ MU, A, 0, 0, "!(*sr:\\w\\w|\\w\\w\\w)*#", "!abcdefghijklmno!abcdefghijklmno!abcdef#" },
+	{ MU, A, 0, 0, "!(*sr:\\w\\w|\\w\\w\\w)+#", "!abcdefghijklmno!abcdefghijklmno!abcdef#" },
+	{ MU, A, 0, 0, "!(*sr:\\w\\w|\\w\\w\\w)*?#", "!abcdefghijklmno!abcdefghijklmno!abcdef#" },
+	{ MU, A, 0, 0, "!(*sr:\\w\\w|\\w\\w\\w)+?#", "!abcdefghijklmno!abcdefghijklmno!abcdef#" },
+	{ MU, A, 0, 0, "!(*sr:\\w\\w|\\w\\w\\w)*+#", "!abcdefghijklmno!abcdefghijklmno!abcdef#" },
+	{ MU, A, 0, 0, "!(*sr:\\w\\w|\\w\\w\\w)++#", "!abcdefghijklmno!abcdefghijklmno!abcdef#" },
+	{ MU, A, 0, 0, "!(*sr:\\w\\w|\\w\\w\\w)?#", "!ab!abc!ab!ab#" },
+	{ MU, A, 0, 0, "!(*sr:\\w\\w|\\w\\w\\w)??#", "!ab!abc!ab!ab#" },
+
 	/* Deep recursion. */
 	{ MU, A, 0, 0, "((((?:(?:(?:\\w)+)?)*|(?>\\w)+?)+|(?>\\w)?\?)*)?\\s", "aaaaa+ " },
 	{ MU, A, 0, 0, "(?:((?:(?:(?:\\w*?)+)??|(?>\\w)?|\\w*+)*)+)+?\\s", "aa+ " },
