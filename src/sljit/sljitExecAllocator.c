@@ -95,19 +95,18 @@ static SLJIT_INLINE void free_chunk(void *chunk, sljit_uw size)
 #else
 
 #ifdef __APPLE__
-// Configures TARGET_OS_MAC when appropriate.
+/* Configures TARGET_OS_OSX when appropriate */
 #include <TargetConditionals.h>
 
-#if defined TARGET_OS_MAC && defined MAP_JIT
+#if TARGET_OS_OSX && defined(MAP_JIT)
 #include <sys/utsname.h>
-#endif /* TARGET_OS_MAC && MAP_JIT */
-#endif /* __APPLE__ */
+#endif /* TARGET_OS_OSX && MAP_JIT */
 
 #ifdef MAP_JIT
 
 static SLJIT_INLINE int get_map_jit_flag()
 {
-#ifdef TARGET_OS_MAC
+#if TARGET_OS_OSX
 	/* On macOS systems, returns MAP_JIT if it is defined _and_ we're running on a version
 	   of macOS where it's OK to have more than one JIT block. On non-macOS systems, returns
 	   MAP_JIT if it is defined. */
@@ -126,12 +125,14 @@ static SLJIT_INLINE int get_map_jit_flag()
 	}
 
 	return map_jit_flag;
-#else /* !TARGET_OS_MAC */
+#else /* !TARGET_OS_OSX */
 	return MAP_JIT;
-#endif /* TARGET_OS_MAC */
+#endif /* TARGET_OS_OSX */
 }
 
 #endif /* MAP_JIT */
+
+#endif /* __APPLE__ */
 
 static SLJIT_INLINE void* alloc_chunk(sljit_uw size)
 {
