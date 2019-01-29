@@ -4962,4 +4962,14 @@
 /foobar/g
     the foobar thing foobar again\=copy_matched_subject
 
+/(?(VERSION>=0)^B0W)/
+    B0W-W0W
+\= Expect no match
+    0
+
+/(?(VERSION>=1000)^B0W|W0W)/
+    B0W-W0W
+\= Expect no match
+    0
+
 # End of testinput6

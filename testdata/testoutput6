@@ -7794,4 +7794,18 @@ No match
  0: foobar
  0: foobar
 
+/(?(VERSION>=0)^B0W)/
+    B0W-W0W
+ 0: B0W
+\= Expect no match
+    0
+No match
+
+/(?(VERSION>=1000)^B0W|W0W)/
+    B0W-W0W
+ 0: W0W
+\= Expect no match
+    0
+No match
+
 # End of testinput6

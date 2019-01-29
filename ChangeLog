@@ -114,6 +114,10 @@ the option applies only to unrecognized or malformed escape sequences.
 
 28. Fix word boundary in JIT compiler. Patch by Mike Munday.
 
+29. The pcre2_dfa_match() function was incorrectly handling conditional version
+tests such as (?(VERSION>=0)...) when the version test was true. Incorrect 
+processing or a crash could result.
+
 
 Version 10.32 10-September-2018
 -------------------------------

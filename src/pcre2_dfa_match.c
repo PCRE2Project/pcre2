@@ -2760,7 +2760,7 @@ for (;;)
         /* There is also an always-true condition */
 
         else if (condcode == OP_TRUE)
-          { ADD_ACTIVE(state_offset + LINK_SIZE + 2 + IMM2_SIZE, 0); }
+          { ADD_ACTIVE(state_offset + LINK_SIZE + 2, 0); }
 
         /* The only supported version of OP_RREF is for the value RREF_ANY,
         which means "test if in any recursion". We can't test for specifically
