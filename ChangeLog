@@ -14,9 +14,12 @@ a greater than 1 fixed quantifier. This issue was found by Yunho Kim.
 
 3. Added support for callouts from pcre2_substitute().
 
-4. The POSIX functions are now all called pcre2_regcomp() etc., with wrappers
-that use the standard POSIX names. This should help avoid linking with the
-wrong library in some environments.
+4. The POSIX functions are now all called pcre2_regcomp() etc., with wrapper 
+functions that use the standard POSIX names. However, in pcre2posix.h the POSIX
+names are defined as macros. This should help avoid linking with the wrong
+library in some environments while still exporting the POSIX names for
+pre-existing programs that use them. (The Debian alternative names are also 
+defined as macros, but not documented.)
 
 5. Fix an xclass matching issue in JIT.
 

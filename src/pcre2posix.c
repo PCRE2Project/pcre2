@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-          New API code Copyright (c) 2016-2018 University of Cambridge
+          New API code Copyright (c) 2016-2019 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -41,9 +41,11 @@ POSSIBILITY OF SUCH DAMAGE.
 
 /* This module is a wrapper that provides a POSIX API to the underlying PCRE2
 functions. The operative functions are called pcre2_regcomp(), etc., with
-wrappers that use the plain POSIX names. This makes it easier for an
-application to be sure it gets the PCRE2 versions in the presence of other
-POSIX regex libraries. */
+wrappers that use the plain POSIX names. In addition, pcre2posix.h defines the
+POSIX names as macros for the pcre2_xxx functions, so any program that includes
+it and uses the POSIX names will call the base functions directly. This makes
+it easier for an application to be sure it gets the PCRE2 versions in the
+presence of other POSIX regex libraries. */
 
 
 #ifdef HAVE_CONFIG_H
@@ -177,24 +179,39 @@ static const char *const pstring[] = {
 *      Wrappers with traditional POSIX names     *
 *************************************************/
 
+/* Keep defining them to preseve the ABI for applications linked to the pcre2
+POSIX library before these names were changed into macros in pcre2posix.h.
+This also ensures that the POSIX names are callable from languages that do not
+include pcre2posix.h. It is vital to #undef the macro definitions from
+pcre2posix.h! */
+
+#undef regerror
+PCRE2POSIX_EXP_DECL size_t regerror(int, const regex_t *, char *, size_t);
 PCRE2POSIX_EXP_DEFN size_t PCRE2_CALL_CONVENTION
 regerror(int errcode, const regex_t *preg, char *errbuf, size_t errbuf_size)
 {
 return pcre2_regerror(errcode, preg, errbuf, errbuf_size);
 }
 
+#undef regfree
+PCRE2POSIX_EXP_DECL void regfree(regex_t *);
 PCRE2POSIX_EXP_DEFN void PCRE2_CALL_CONVENTION
 regfree(regex_t *preg)
 {
 pcre2_regfree(preg);
 }
 
+#undef regcomp
+PCRE2POSIX_EXP_DECL int regcomp(regex_t *, const char *, int);
 PCRE2POSIX_EXP_DEFN int PCRE2_CALL_CONVENTION
 regcomp(regex_t *preg, const char *pattern, int cflags)
 {
 return pcre2_regcomp(preg, pattern, cflags);
 }
 
+#undef regexec
+PCRE2POSIX_EXP_DECL int regexec(const regex_t *, const char *, size_t,
+  regmatch_t *, int);
 PCRE2POSIX_EXP_DEFN int PCRE2_CALL_CONVENTION
 regexec(const regex_t *preg, const char *string, size_t nmatch,
   regmatch_t pmatch[], int eflags)
@@ -209,7 +226,7 @@ return pcre2_regexec(preg, string, nmatch, pmatch, eflags);
 *************************************************/
 
 PCRE2POSIX_EXP_DEFN size_t PCRE2_CALL_CONVENTION
-pcre2_regerror(int errcode, const regex_t *preg, char *errbuf, 
+pcre2_regerror(int errcode, const regex_t *preg, char *errbuf,
   size_t errbuf_size)
 {
 int used;

@@ -53,19 +53,8 @@ The header file for the POSIX-style functions is called pcre2posix.h. The
 official POSIX name is regex.h, but I did not want to risk possible problems
 with existing files of that name by distributing it that way. To use PCRE2 with
 an existing program that uses the POSIX API, pcre2posix.h will have to be
-renamed or pointed at by a link (or the program modified, of course).
-
-If you are using the POSIX interface to PCRE2 and there is already a POSIX
-regex library installed on your system, as well as worrying about the regex.h
-header file (as mentioned above), you must also take care when linking programs
-to ensure that they link with PCRE2's libpcre2-posix library. Otherwise they
-may pick up the POSIX functions of the same name from the other library.
-
-To help with this issue, the libpcre2-posix library provides alternative names
-for the POSIX functions. These are the POSIX names, prefixed with "pcre2_", for 
-example, pcre2_regcomp(). If an application can be compiled to use the 
-alternative names (for example by the use of -Dregcomp=pcre2_regcomp etc.) it 
-can be sure of linking with the PCRE2 functions.
+renamed or pointed at by a link (or the program modified, of course). See the 
+pcre2posix documentation for more details.
 
 
 Documentation for PCRE2
@@ -897,4 +886,4 @@ The distribution should contain the files listed below.
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 15 November 2018
+Last updated: 29 January 2019
