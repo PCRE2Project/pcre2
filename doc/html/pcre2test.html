@@ -716,14 +716,14 @@ information is obtained from the <b>pcre2_pattern_info()</b> function. Here are
 some typical examples:
 <pre>
     re&#62; /(?i)(^a|^b)/m,info
-  Capturing subpattern count = 1
+  Capture group count = 1
   Compile options: multiline
   Overall options: caseless multiline
   First code unit at start or follows newline
   Subject length lower bound = 1
 
     re&#62; /(?i)abc/info
-  Capturing subpattern count = 0
+  Capture group count = 0
   Compile options: &#60;none&#62;
   Overall options: caseless
   First code unit = 'a' (caseless)
@@ -1353,8 +1353,8 @@ Testing substring extraction functions
 <P>
 The <b>copy</b> and <b>get</b> modifiers can be used to test the
 <b>pcre2_substring_copy_xxx()</b> and <b>pcre2_substring_get_xxx()</b> functions.
-They can be given more than once, and each can specify a group name or number,
-for example:
+They can be given more than once, and each can specify a capture group name or
+number, for example:
 <pre>
    abcd\=copy=1,copy=3,get=G1
 </pre>
@@ -2075,9 +2075,9 @@ Cambridge, England.
 </P>
 <br><a name="SEC21" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 12 November 2018
+Last updated: 03 February 2019
 <br>
-Copyright &copy; 1997-2018 University of Cambridge.
+Copyright &copy; 1997-2019 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE2 index page</a>.

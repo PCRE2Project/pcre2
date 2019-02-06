@@ -3975,4 +3975,41 @@ No match
 
 # ------- 
 
+# Test group names containing non-ASCII letters and digits
+
+/(?'ABáC'...)\g{ABáC}/utf
+    abcabcdefg
+ 0: abcabc
+ 1: abc
+
+/(?'XʰABC'...)/utf
+    xyzpq
+ 0: xyz
+ 1: xyz
+
+/(?'XאABC'...)/utf
+    12345
+ 0: 123
+ 1: 123
+
+/(?'XᾈABC'...)/utf
+    %^&*(...
+ 0: %^&
+ 1: %^&
+
+/(?'𐨐ABC'...)/utf
+    abcde
+ 0: abc
+ 1: abc
+
+/^(?'אABC'...)(?&אABC)(?P=אABC)/utf
+    123123123456
+ 0: 123123123
+ 1: 123
+
+/^(?'אABC'...)(?&אABC)/utf
+    123123123456
+ 0: 123123
+ 1: 123
+
 # End of testinput4

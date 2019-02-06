@@ -151,7 +151,7 @@ branch, automatic anchoring occurs if all branches are anchorable.
 </P>
 <P>
 This optimization is disabled, however, if .* is in an atomic group or if there
-is a backreference to the capturing group in which it appears. It is also
+is a backreference to the capture group in which it appears. It is also
 disabled if the pattern contains (*PRUNE) or (*SKIP). However, the presence of
 callouts does not affect it.
 </P>
@@ -354,8 +354,8 @@ callout before an assertion such as (?=ab) the length is 3. For an an
 alternation bar or a closing parenthesis, the length is one, unless a closing
 parenthesis is followed by a quantifier, in which case its length is included.
 (This changed in release 10.23. In earlier releases, before an opening
-parenthesis the length was that of the entire subpattern, and before an
-alternation bar or a closing parenthesis the length was zero.)
+parenthesis the length was that of the entire group, and before an alternation
+bar or a closing parenthesis the length was zero.)
 </P>
 <P>
 The <i>pattern_position</i> and <i>next_item_length</i> fields are intended to
@@ -471,9 +471,9 @@ Cambridge, England.
 </P>
 <br><a name="SEC8" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 17 September 2018
+Last updated: 03 February 2019
 <br>
-Copyright &copy; 1997-2018 University of Cambridge.
+Copyright &copy; 1997-2019 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE2 index page</a>.

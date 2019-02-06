@@ -1,4 +1,4 @@
-.TH PCRE2PERFORM 3 "25 April 2018" "PCRE2 10.32"
+.TH PCRE2PERFORM 3 "03 February 2019" "PCRE2 10.33"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 PERFORMANCE"
@@ -14,9 +14,9 @@ of them.
 Patterns are compiled by PCRE2 into a reasonably efficient interpretive code,
 so that most simple patterns do not use much memory for storing the compiled
 version. However, there is one case where the memory usage of a compiled
-pattern can be unexpectedly large. If a parenthesized subpattern has a
-quantifier with a minimum greater than 1 and/or a limited maximum, the whole
-subpattern is repeated in the compiled code. For example, the pattern
+pattern can be unexpectedly large. If a parenthesized group has a quantifier
+with a minimum greater than 1 and/or a limited maximum, the whole group is
+repeated in the compiled code. For example, the pattern
 .sp
   (abc|def){2,4}
 .sp
@@ -239,6 +239,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 25 April 2018
-Copyright (c) 1997-2018 University of Cambridge.
+Last updated: 03 February 2019
+Copyright (c) 1997-2019 University of Cambridge.
 .fi

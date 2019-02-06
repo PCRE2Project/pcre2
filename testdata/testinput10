@@ -480,5 +480,13 @@
 
 /(?<=abc)(|def)/g,utf,replace=<$0>,substitute_callout
     123abcáyzabcdef789abcሴqr
+    
+# Check name length with non-ASCII characters 
+
+/(?'ABáC678901234567890123456789012'...)/utf
+
+/(?'ABáC6789012345678901234567890123'...)/utf
+
+/(?'ABZC6789012345678901234567890123'...)/utf
 
 # End of testinput10

@@ -2457,4 +2457,27 @@
 
 # ------- 
 
+# Test group names containing non-ASCII letters and digits
+
+/(?'ABáC'...)\g{ABáC}/utf
+    abcabcdefg
+
+/(?'XʰABC'...)/utf
+    xyzpq
+
+/(?'XאABC'...)/utf
+    12345
+
+/(?'XᾈABC'...)/utf
+    %^&*(...
+
+/(?'𐨐ABC'...)/utf
+    abcde
+
+/^(?'אABC'...)(?&אABC)(?P=אABC)/utf
+    123123123456
+
+/^(?'אABC'...)(?&אABC)/utf
+    123123123456
+
 # End of testinput4

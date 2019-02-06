@@ -5978,7 +5978,7 @@ Partial match: 123
  0: Content-Type:xxxyyyz
 
 /^abc/Im,newline=lf
-Capturing subpattern count = 0
+Capture group count = 0
 Options: multiline
 Forced newline is LF
 First code unit at start or follows newline
@@ -6001,7 +6001,7 @@ No match
 No match
 
 /^abc/Im,newline=crlf
-Capturing subpattern count = 0
+Capture group count = 0
 Options: multiline
 Forced newline is CRLF
 First code unit at start or follows newline
@@ -6016,7 +6016,7 @@ No match
 No match
     
 /^abc/Im,newline=cr
-Capturing subpattern count = 0
+Capture group count = 0
 Options: multiline
 Forced newline is CR
 First code unit at start or follows newline
@@ -6031,7 +6031,7 @@ No match
 No match
 
 /.*/I,newline=lf
-Capturing subpattern count = 0
+Capture group count = 0
 May match empty string
 Forced newline is LF
 First code unit at start or follows newline
@@ -6044,7 +6044,7 @@ Subject length lower bound = 0
  0: abc\x0d
 
 /.*/I,newline=cr
-Capturing subpattern count = 0
+Capture group count = 0
 May match empty string
 Forced newline is CR
 First code unit at start or follows newline
@@ -6057,7 +6057,7 @@ Subject length lower bound = 0
  0: abc
 
 /.*/I,newline=crlf
-Capturing subpattern count = 0
+Capture group count = 0
 May match empty string
 Forced newline is CRLF
 First code unit at start or follows newline
@@ -6070,7 +6070,7 @@ Subject length lower bound = 0
  0: abc
 
 /\w+(.)(.)?def/Is
-Capturing subpattern count = 2
+Capture group count = 2
 Options: dotall
 Starting code units: 0 1 2 3 4 5 6 7 8 9 A B C D E F G H I J K L M N O P 
   Q R S T U V W X Y Z _ a b c d e f g h i j k l m n o p q r s t u v w x y z 
@@ -6447,7 +6447,7 @@ No match
  0: \x0aA
 
 /a\Rb/I,bsr=anycrlf
-Capturing subpattern count = 0
+Capture group count = 0
 \R matches CR, LF, or CRLF
 First code unit = 'a'
 Last code unit = 'b'
@@ -6465,7 +6465,7 @@ No match
 No match
 
 /a\Rb/I,bsr=unicode
-Capturing subpattern count = 0
+Capture group count = 0
 \R matches any Unicode newline
 First code unit = 'a'
 Last code unit = 'b'
@@ -6482,7 +6482,7 @@ Subject length lower bound = 3
  0: a\x0bb
     
 /a\R?b/I,bsr=anycrlf
-Capturing subpattern count = 0
+Capture group count = 0
 \R matches CR, LF, or CRLF
 First code unit = 'a'
 Last code unit = 'b'
@@ -6500,7 +6500,7 @@ No match
 No match
 
 /a\R?b/I,bsr=unicode
-Capturing subpattern count = 0
+Capture group count = 0
 \R matches any Unicode newline
 First code unit = 'a'
 Last code unit = 'b'
@@ -6517,7 +6517,7 @@ Subject length lower bound = 2
  0: a\x0bb
     
 /a\R{2,4}b/I,bsr=anycrlf
-Capturing subpattern count = 0
+Capture group count = 0
 \R matches CR, LF, or CRLF
 First code unit = 'a'
 Last code unit = 'b'
@@ -6535,7 +6535,7 @@ No match
 No match
 
 /a\R{2,4}b/I,bsr=unicode
-Capturing subpattern count = 0
+Capture group count = 0
 \R matches any Unicode newline
 First code unit = 'a'
 Last code unit = 'b'
@@ -6831,7 +6831,7 @@ Partial match: +ab
  0+ CBA
 
 /(abc|def|xyz)/I
-Capturing subpattern count = 1
+Capture group count = 1
 Starting code units: a d x 
 Subject length lower bound = 3
     terhjk;abcdaadsfe
@@ -6843,7 +6843,7 @@ Subject length lower bound = 3
 No match
 
 /(abc|def|xyz)/I,no_start_optimize
-Capturing subpattern count = 1
+Capture group count = 1
 Options: no_start_optimize
 Subject length lower bound = 0
     terhjk;abcdaadsfe

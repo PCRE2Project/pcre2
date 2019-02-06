@@ -95,7 +95,7 @@ static const unsigned char compile_error_texts[] =
   /* 25 */
   "lookbehind assertion is not fixed length\0"
   "a relative value of zero is not allowed\0"
-  "conditional group contains more than two branches\0"
+  "conditional subpattern contains more than two branches\0"
   "assertion expected after (?( or (?(?C)\0"
   "digit expected after (?+ or (?-\0"
   /* 30 */
@@ -113,21 +113,21 @@ static const unsigned char compile_error_texts[] =
   /* 40 */
   "invalid escape sequence in (*VERB) name\0"
   "unrecognized character after (?P\0"
-  "syntax error in subpattern name (missing terminator)\0"
+  "syntax error in subpattern name (missing terminator?)\0"
   "two named subpatterns have the same name (PCRE2_DUPNAMES not set)\0"
-  "group name must start with a non-digit\0"
+  "subpattern name must start with a non-digit\0"
   /* 45 */
   "this version of PCRE2 does not have support for \\P, \\p, or \\X\0"
   "malformed \\P or \\p sequence\0"
   "unknown property name after \\P or \\p\0"
-  "subpattern name is too long (maximum " XSTRING(MAX_NAME_SIZE) " characters)\0"
+  "subpattern name is too long (maximum " XSTRING(MAX_NAME_SIZE) " code units)\0"
   "too many named subpatterns (maximum " XSTRING(MAX_NAME_COUNT) ")\0"
   /* 50 */
   "invalid range in character class\0"
   "octal value is greater than \\377 in 8-bit non-UTF-8 mode\0"
   "internal error: overran compiling workspace\0"
   "internal error: previously-checked referenced subpattern not found\0"
-  "DEFINE group contains more than one branch\0"
+  "DEFINE subpattern contains more than one branch\0"
   /* 55 */
   "missing opening brace after \\o\0"
   "internal error: unknown newline setting\0"
@@ -137,7 +137,7 @@ static const unsigned char compile_error_texts[] =
   "obsolete error (should not occur)\0"  /* Was the above */
   /* 60 */
   "(*VERB) not recognized or malformed\0"
-  "group number is too big\0"
+  "subpattern number is too big\0"
   "subpattern name expected\0"
   "internal error: parsed pattern overflow\0"
   "non-octal character in \\o{} (closing brace missing?)\0"

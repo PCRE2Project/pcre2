@@ -147,7 +147,7 @@ Failed: error 173 at offset 9: disallowed Unicode code point (>= 0xd800 && <= 0x
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Options: utf
 First code unit = 'A'
 Last code unit = '.'
@@ -164,7 +164,7 @@ Subject length lower bound = 4
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Options: utf
 Last code unit = 'X'
 Subject length lower bound = 4
@@ -179,7 +179,7 @@ Subject length lower bound = 4
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Options: utf
 Subject length lower bound = 3
     \x{212ab}\x{212ab}\x{212ab}\x{861}
@@ -193,7 +193,7 @@ Subject length lower bound = 3
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Compile options: utf
 Overall options: anchored utf
 Starting code units: a b 
@@ -238,7 +238,7 @@ No match
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 May match empty string
 Options: utf
 Subject length lower bound = 0
@@ -251,7 +251,7 @@ Subject length lower bound = 0
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Options: utf
 First code unit = 'a'
 Subject length lower bound = 1
@@ -264,7 +264,7 @@ Subject length lower bound = 1
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Options: utf
 First code unit = 'a'
 Last code unit = 'b'
@@ -291,7 +291,7 @@ No match
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 First code unit = \xff
 Subject length lower bound = 1
     >\xff<
@@ -304,7 +304,7 @@ Subject length lower bound = 1
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Subject length lower bound = 1
 
 /[Ä-Ü]/utf
@@ -343,7 +343,7 @@ Subject length lower bound = 1
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 1
+Capture group count = 1
 Options: utf
 Last code unit = 'z'
 Subject length lower bound = 7
@@ -363,7 +363,7 @@ Subject length lower bound = 7
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 2
+Capture group count = 2
 May match empty string
 Options: utf
 Subject length lower bound = 0
@@ -394,7 +394,7 @@ Subject length lower bound = 0
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 2
+Capture group count = 2
 May match empty string
 Options: utf
 Subject length lower bound = 0
@@ -414,7 +414,7 @@ Subject length lower bound = 0
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 2
+Capture group count = 2
 May match empty string
 Options: utf
 Subject length lower bound = 0
@@ -445,7 +445,7 @@ Subject length lower bound = 0
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 2
+Capture group count = 2
 May match empty string
 Options: utf
 Subject length lower bound = 0
@@ -471,7 +471,7 @@ Subject length lower bound = 0
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Compile options: no_start_optimize utf
 Overall options: anchored no_start_optimize utf
 Subject length lower bound = 0
@@ -713,7 +713,7 @@ No match
  0: \x{1ec5}
 
 /a\Rb/I,bsr=anycrlf,utf
-Capturing subpattern count = 0
+Capture group count = 0
 Options: utf
 \R matches CR, LF, or CRLF
 First code unit = 'a'
@@ -732,7 +732,7 @@ No match
 No match
 
 /a\Rb/I,bsr=unicode,utf
-Capturing subpattern count = 0
+Capture group count = 0
 Options: utf
 \R matches any Unicode newline
 First code unit = 'a'
@@ -750,7 +750,7 @@ Subject length lower bound = 3
  0: a\x{0b}b
 
 /a\R?b/I,bsr=anycrlf,utf
-Capturing subpattern count = 0
+Capture group count = 0
 Options: utf
 \R matches CR, LF, or CRLF
 First code unit = 'a'
@@ -769,7 +769,7 @@ No match
 No match
 
 /a\R?b/I,bsr=unicode,utf
-Capturing subpattern count = 0
+Capture group count = 0
 Options: utf
 \R matches any Unicode newline
 First code unit = 'a'
@@ -1408,22 +1408,22 @@ Failed: error 168 at offset 3: \c must be followed by a printable ASCII characte
  2: \x{0d}
 
 /[^\x{1234}]+/Ii,utf
-Capturing subpattern count = 0
+Capture group count = 0
 Options: caseless utf
 Subject length lower bound = 1
 
 /[^\x{1234}]+?/Ii,utf
-Capturing subpattern count = 0
+Capture group count = 0
 Options: caseless utf
 Subject length lower bound = 1
 
 /[^\x{1234}]++/Ii,utf
-Capturing subpattern count = 0
+Capture group count = 0
 Options: caseless utf
 Subject length lower bound = 1
 
 /[^\x{1234}]{2}/Ii,utf
-Capturing subpattern count = 0
+Capture group count = 0
 Options: caseless utf
 Subject length lower bound = 2
 
@@ -1703,7 +1703,7 @@ Partial match: \x{0d}\x{0d}
 ------------------------------------------------------------------
 
 /(?<=\x{1234}\x{1234})\bxy/I,utf
-Capturing subpattern count = 0
+Capture group count = 0
 Max lookbehind = 2
 Options: utf
 First code unit = 'x'
@@ -1768,7 +1768,7 @@ Failed: error 173 at offset 6: disallowed Unicode code point (>= 0xd800 && <= 0x
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Subject length lower bound = 1
 
 /[\p{^L}]/IB
@@ -1778,7 +1778,7 @@ Subject length lower bound = 1
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Subject length lower bound = 1
 
 /[\P{L}]/IB
@@ -1788,7 +1788,7 @@ Subject length lower bound = 1
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Subject length lower bound = 1
 
 /[\P{^L}]/IB
@@ -1798,7 +1798,7 @@ Subject length lower bound = 1
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Subject length lower bound = 1
 
 /[abc\p{L}\x{0660}]/IB,utf
@@ -1808,7 +1808,7 @@ Subject length lower bound = 1
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Options: utf
 Subject length lower bound = 1
 
@@ -1819,7 +1819,7 @@ Subject length lower bound = 1
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Options: utf
 Subject length lower bound = 1
     1234
@@ -1832,7 +1832,7 @@ Subject length lower bound = 1
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Options: utf
 Subject length lower bound = 1
     1234
@@ -2998,7 +2998,7 @@ Partial match: AA
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Options: caseless utf
 First code unit = 'A' (caseless)
 Last code unit = 'B' (caseless)
@@ -3914,7 +3914,7 @@ No match
 ------------------------------------------------------------------
 
 /^s?c/Iim,utf
-Capturing subpattern count = 0
+Capture group count = 0
 Options: caseless multiline utf
 First code unit at start or follows newline
 Last code unit = 'c' (caseless)
@@ -4888,5 +4888,32 @@ MK: ABC
  0: A\x{1d7ce}BC
 
 # ------- 
+
+# Test reference and errors in non-ASCII characters in group names
+
+/(?'𑠅ABC'...)/I,utf
+Capture group count = 1
+Named capture groups:
+  𑠅ABC   1
+Options: utf
+Subject length lower bound = 3
+   abcde\=copy=𑠅ABC
+ 0: abc
+ 1: abc
+  C abc (3) 𑠅ABC (group 1)
+
+# Bad ones
+
+/(?'AB၌C'...)\g{AB၌C}/utf
+Failed: error 142 at offset 5: syntax error in subpattern name (missing terminator?)
+
+/(?'٠ABC'...)/utf
+Failed: error 144 at offset 3: subpattern name must start with a non-digit
+
+/(?'²ABC'...)/utf
+Failed: error 162 at offset 3: subpattern name expected
+
+/(?'X²ABC'...)/utf
+Failed: error 142 at offset 4: syntax error in subpattern name (missing terminator?)
 
 # End of testinput5

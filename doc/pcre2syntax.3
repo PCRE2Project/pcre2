@@ -1,4 +1,4 @@
-.TH PCRE2SYNTAX 3 "10 October 2018" "PCRE2 10.33"
+.TH PCRE2SYNTAX 3 "03 February 2019" "PCRE2 10.33"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION SYNTAX SUMMARY"
@@ -398,20 +398,24 @@ but some of them use Unicode properties if PCRE2_UCP is set. You can use
 .SH "CAPTURING"
 .rs
 .sp
-  (...)           capturing group
-  (?<name>...)    named capturing group (Perl)
-  (?'name'...)    named capturing group (Perl)
-  (?P<name>...)   named capturing group (Python)
-  (?:...)         non-capturing group
-  (?|...)         non-capturing group; reset group numbers for
-                   capturing groups in each alternative
+  (...)           capture group
+  (?<name>...)    named capture group (Perl)
+  (?'name'...)    named capture group (Perl)
+  (?P<name>...)   named capture group (Python)
+  (?:...)         non-capture group
+  (?|...)         non-capture group; reset group numbers for
+                   capture groups in each alternative
+.sp
+In non-UTF modes, names may contain underscores and ASCII letters and digits;
+in UTF modes, any Unicode letters and Unicode decimal digits are permitted. In
+both cases, a name must not start with a digit.
 .
 .
 .SH "ATOMIC GROUPS"
 .rs
 .sp
-  (?>...)         atomic, non-capturing group
-  (*atomic:...)   atomic, non-capturing group
+  (?>...)         atomic non-capture group
+  (*atomic:...)   atomic non-capture group
 .
 .
 .SH "COMMENT"
@@ -439,7 +443,7 @@ of the group.
 Unsetting x or xx unsets both. Several options may be set at once, and a
 mixture of setting and unsetting such as (?i-x) is allowed, but there may be
 only one hyphen. Setting (but no unsetting) is allowed after (?^ for example
-(?^in). An option setting may appear at the start of a non-capturing group, for
+(?^in). An option setting may appear at the start of a non-capture group, for
 example (?i:...).
 .P
 The following are recognized only at the very start of a pattern or after one
@@ -542,19 +546,19 @@ Each top-level branch of a lookbehind must be of a fixed length.
 .rs
 .sp
   (?R)            recurse whole pattern
-  (?n)            call subpattern by absolute number
-  (?+n)           call subpattern by relative number
-  (?-n)           call subpattern by relative number
-  (?&name)        call subpattern by name (Perl)
-  (?P>name)       call subpattern by name (Python)
-  \eg<name>        call subpattern by name (Oniguruma)
-  \eg'name'        call subpattern by name (Oniguruma)
-  \eg<n>           call subpattern by absolute number (Oniguruma)
-  \eg'n'           call subpattern by absolute number (Oniguruma)
-  \eg<+n>          call subpattern by relative number (PCRE2 extension)
-  \eg'+n'          call subpattern by relative number (PCRE2 extension)
-  \eg<-n>          call subpattern by relative number (PCRE2 extension)
-  \eg'-n'          call subpattern by relative number (PCRE2 extension)
+  (?n)            call subroutine by absolute number
+  (?+n)           call subroutine by relative number
+  (?-n)           call subroutine by relative number
+  (?&name)        call subroutine by name (Perl)
+  (?P>name)       call subroutine by name (Python)
+  \eg<name>        call subroutine by name (Oniguruma)
+  \eg'name'        call subroutine by name (Oniguruma)
+  \eg<n>           call subroutine by absolute number (Oniguruma)
+  \eg'n'           call subroutine by absolute number (Oniguruma)
+  \eg<+n>          call subroutine by relative number (PCRE2 extension)
+  \eg'+n'          call subroutine by relative number (PCRE2 extension)
+  \eg<-n>          call subroutine by relative number (PCRE2 extension)
+  \eg'-n'          call subroutine by relative number (PCRE2 extension)
 .
 .
 .SH "CONDITIONAL PATTERNS"
@@ -572,7 +576,7 @@ Each top-level branch of a lookbehind must be of a fixed length.
   (?(R)               overall recursion condition
   (?(Rn)              specific numbered group recursion condition
   (?(R&name)          specific named group recursion condition
-  (?(DEFINE)          define subpattern for reference
+  (?(DEFINE)          define groups for reference
   (?(VERSION[>]=n.m)  test PCRE2 version
   (?(assert)          assertion condition
 .sp
@@ -643,6 +647,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 10 October 2018
-Copyright (c) 1997-2018 University of Cambridge.
+Last updated: 03 February 2019
+Copyright (c) 1997-2019 University of Cambridge.
 .fi

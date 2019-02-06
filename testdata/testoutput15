@@ -7,7 +7,7 @@
 # (2) Other tests that must not be run with JIT.
 
 /(a+)*zz/I
-Capturing subpattern count = 1
+Capture group count = 1
 Starting code units: a z 
 Last code unit = 'z'
 Subject length lower bound = 2
@@ -24,7 +24,7 @@ Minimum depth limit = 30
 No match
 
 !((?:\s|//.*\\n|/[*](?:\\n|.)*?[*]/)*)!I
-Capturing subpattern count = 1
+Capture group count = 1
 May match empty string
 Subject length lower bound = 0
    /* this is a C style comment */\=find_limits
@@ -117,7 +117,7 @@ Failed: error 160 at offset 17: (*VERB) not recognized or malformed
 Failed: error 160 at offset 24: (*VERB) not recognized or malformed
 
 /(*LIMIT_DEPTH=4294967280)abc/I
-Capturing subpattern count = 0
+Capture group count = 0
 Depth limit = 4294967280
 First code unit = 'a'
 Last code unit = 'c'
@@ -137,7 +137,7 @@ Failed: error -47: match limit exceeded
 Failed: error -53: matching depth limit exceeded
 
 /(*LIMIT_MATCH=3000)(a+)*zz/I
-Capturing subpattern count = 1
+Capture group count = 1
 Match limit = 3000
 Starting code units: a z 
 Last code unit = 'z'
@@ -150,7 +150,7 @@ Failed: error -47: match limit exceeded
 Failed: error -47: match limit exceeded
 
 /(*LIMIT_MATCH=60000)(*LIMIT_MATCH=3000)(a+)*zz/I
-Capturing subpattern count = 1
+Capture group count = 1
 Match limit = 3000
 Starting code units: a z 
 Last code unit = 'z'
@@ -160,7 +160,7 @@ Subject length lower bound = 2
 Failed: error -47: match limit exceeded
 
 /(*LIMIT_MATCH=60000)(a+)*zz/I
-Capturing subpattern count = 1
+Capture group count = 1
 Match limit = 60000
 Starting code units: a z 
 Last code unit = 'z'
@@ -173,7 +173,7 @@ No match
 Failed: error -47: match limit exceeded
 
 /(*LIMIT_DEPTH=10)(a+)*zz/I
-Capturing subpattern count = 1
+Capture group count = 1
 Depth limit = 10
 Starting code units: a z 
 Last code unit = 'z'
@@ -186,7 +186,7 @@ Failed: error -53: matching depth limit exceeded
 Failed: error -53: matching depth limit exceeded
 
 /(*LIMIT_DEPTH=10)(*LIMIT_DEPTH=1000)(a+)*zz/I
-Capturing subpattern count = 1
+Capture group count = 1
 Depth limit = 1000
 Starting code units: a z 
 Last code unit = 'z'
@@ -196,7 +196,7 @@ Subject length lower bound = 2
 No match
 
 /(*LIMIT_DEPTH=1000)(a+)*zz/I
-Capturing subpattern count = 1
+Capture group count = 1
 Depth limit = 1000
 Starting code units: a z 
 Last code unit = 'z'
@@ -269,14 +269,14 @@ Failed: error -52: nested recursion at the same subject position
 # when JIT is used.
 
 /(?R)/I
-Capturing subpattern count = 0
+Capture group count = 0
 May match empty string
 Subject length lower bound = 0
     abcd
 Failed: error -52: nested recursion at the same subject position
 
 /(a|(?R))/I
-Capturing subpattern count = 1
+Capture group count = 1
 May match empty string
 Subject length lower bound = 0
     abcd
@@ -286,7 +286,7 @@ Subject length lower bound = 0
 Failed: error -52: nested recursion at the same subject position
 
 /(ab|(bc|(de|(?R))))/I
-Capturing subpattern count = 3
+Capture group count = 3
 May match empty string
 Subject length lower bound = 0
     abcd
@@ -296,7 +296,7 @@ Subject length lower bound = 0
 Failed: error -52: nested recursion at the same subject position
 
 /(ab|(bc|(de|(?1))))/I
-Capturing subpattern count = 3
+Capture group count = 3
 May match empty string
 Subject length lower bound = 0
     abcd
@@ -306,7 +306,7 @@ Subject length lower bound = 0
 Failed: error -52: nested recursion at the same subject position
 
 /x(ab|(bc|(de|(?1)x)x)x)/I
-Capturing subpattern count = 3
+Capture group count = 3
 First code unit = 'x'
 Subject length lower bound = 3
     xab123
@@ -352,7 +352,7 @@ Failed: error -52: nested recursion at the same subject position
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 1
+Capture group count = 1
 Subject length lower bound = 1
     abcd
 Failed: error -52: nested recursion at the same subject position
@@ -367,7 +367,7 @@ Failed: error -52: nested recursion at the same subject position
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Options: no_auto_possess
 Starting code units: 0 1 2 3 4 5 6 7 8 9 A B C D E F G H I J K L M N O P 
   Q R S T U V W X Y Z _ a b c d e f g h i j k l m n o p q r s t u v w x y z 
@@ -390,7 +390,7 @@ No match
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Compile options: <none>
 Overall options: no_auto_possess
 Starting code units: 0 1 2 3 4 5 6 7 8 9 A B C D E F G H I J K L M N O P 

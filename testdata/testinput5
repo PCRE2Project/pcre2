@@ -2149,4 +2149,19 @@
 
 # ------- 
 
+# Test reference and errors in non-ASCII characters in group names
+
+/(?'𑠅ABC'...)/I,utf
+   abcde\=copy=𑠅ABC
+
+# Bad ones
+
+/(?'AB၌C'...)\g{AB၌C}/utf
+
+/(?'٠ABC'...)/utf
+
+/(?'²ABC'...)/utf
+
+/(?'X²ABC'...)/utf
+
 # End of testinput5

@@ -1,4 +1,4 @@
-.TH PCRE2CALLOUT 3 "17 September 2018" "PCRE2 10.33"
+.TH PCRE2CALLOUT 3 "03 February 2019" "PCRE2 10.33"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH SYNOPSIS
@@ -137,7 +137,7 @@ start only after an internal newline or at the beginning of the subject, and
 branch, automatic anchoring occurs if all branches are anchorable.
 .P
 This optimization is disabled, however, if .* is in an atomic group or if there
-is a backreference to the capturing group in which it appears. It is also
+is a backreference to the capture group in which it appears. It is also
 disabled if the pattern contains (*PRUNE) or (*SKIP). However, the presence of
 callouts does not affect it.
 .P
@@ -331,8 +331,8 @@ callout before an assertion such as (?=ab) the length is 3. For an an
 alternation bar or a closing parenthesis, the length is one, unless a closing
 parenthesis is followed by a quantifier, in which case its length is included.
 (This changed in release 10.23. In earlier releases, before an opening
-parenthesis the length was that of the entire subpattern, and before an
-alternation bar or a closing parenthesis the length was zero.)
+parenthesis the length was that of the entire group, and before an alternation
+bar or a closing parenthesis the length was zero.)
 .P
 The \fIpattern_position\fP and \fInext_item_length\fP fields are intended to
 help in distinguishing between different automatic callouts, which all have the
@@ -452,6 +452,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 17 September 2018
-Copyright (c) 1997-2018 University of Cambridge.
+Last updated: 03 February 2019
+Copyright (c) 1997-2019 University of Cambridge.
 .fi

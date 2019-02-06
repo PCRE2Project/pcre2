@@ -2194,6 +2194,7 @@ so it is simplest just to return both.
 Arguments:
   ptrptr      points to the character pointer variable
   ptrend      points to the end of the input string
+  utf         true if the input is UTF-encoded
   terminator  the terminator of a subpattern name must be this
   offsetptr   where to put the offset from the start of the pattern
   nameptr     where to put a pointer to the name in the input
@@ -2206,13 +2207,12 @@ Returns:    TRUE if a name was read
 */
 
 static BOOL
-read_name(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t terminator,
+read_name(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, BOOL utf, uint32_t terminator,
   PCRE2_SIZE *offsetptr, PCRE2_SPTR *nameptr, uint32_t *namelenptr,
   int *errorcodeptr, compile_block *cb)
 {
 PCRE2_SPTR ptr = *ptrptr;
 BOOL is_group = (*ptr != CHAR_ASTERISK);
-uint32_t namelen = 0;
 
 if (++ptr >= ptrend)               /* No characters in name */
   {
@@ -2221,35 +2221,74 @@ if (++ptr >= ptrend)               /* No characters in name */
   goto FAILED;
   }
 
-/* A group name must not start with a digit. If either of the others start with
-a digit it just won't be recognized. */
-
-if (is_group && IS_DIGIT(*ptr))
-  {
-  *errorcodeptr = ERR44;
-  goto FAILED;
-  }
-
 *nameptr = ptr;
 *offsetptr = (PCRE2_SIZE)(ptr - cb->start_pattern);
 
-while (ptr < ptrend && MAX_255(*ptr) && (cb->ctypes[*ptr] & ctype_word) != 0)
+/* In UTF mode, a group name may contain letters and decimal digits as defined
+by Unicode properties, and underscores, but must not start with a digit. */
+
+#ifdef SUPPORT_UNICODE
+if (utf && is_group)
   {
-  ptr++;
-  namelen++;
-  if (namelen > MAX_NAME_SIZE)
+  uint32_t c, type;
+
+  GETCHAR(c, ptr);
+  type = UCD_CHARTYPE(c);
+
+  if (type == ucp_Nd)
     {
-    *errorcodeptr = ERR48;
+    *errorcodeptr = ERR44;
     goto FAILED;
     }
+
+  for(;;)
+    {
+    if (type != ucp_Nd && PRIV(ucp_gentype)[type] != ucp_L &&
+        c != CHAR_UNDERSCORE) break;
+    ptr++;
+    FORWARDCHAR(ptr);
+    if (ptr >= ptrend) break;
+    GETCHAR(c, ptr);
+    type = UCD_CHARTYPE(c);
+    }
   }
+else
+#else
+(void)utf;  /* Avoid compiler warning */
+#endif      /* SUPPORT_UNICODE */
+
+/* Handle non-group names and group names in non-UTF modes. A group name must
+not start with a digit. If either of the others start with a digit it just
+won't be recognized. */
+
+  {
+  if (is_group && IS_DIGIT(*ptr))
+    {
+    *errorcodeptr = ERR44;
+    goto FAILED;
+    }
+
+  while (ptr < ptrend && MAX_255(*ptr) && (cb->ctypes[*ptr] & ctype_word) != 0)
+    {
+    ptr++;
+    }
+  }
+
+/* Check name length */
+
+if (ptr > *nameptr + MAX_NAME_SIZE)
+  {
+  *errorcodeptr = ERR48;
+  goto FAILED;
+  }
+*namelenptr = ptr - *nameptr;
 
 /* Subpattern names must not be empty, and their terminator is checked here.
 (What follows a verb or alpha assertion name is checked separately.) */
 
 if (is_group)
   {
-  if (namelen == 0)
+  if (ptr == *nameptr)
     {
     *errorcodeptr = ERR62;   /* Subpattern name expected */
     goto FAILED;
@@ -2262,7 +2301,6 @@ if (is_group)
   ptr++;
   }
 
-*namelenptr = namelen;
 *ptrptr = ptr;
 return TRUE;
 
@@ -2981,7 +3019,7 @@ while (ptr < ptrend)
 
       /* Not a numerical recursion */
 
-      if (!read_name(&ptr, ptrend, terminator, &offset, &name, &namelen,
+      if (!read_name(&ptr, ptrend, utf, terminator, &offset, &name, &namelen,
           &errorcode, cb)) goto ESCAPE_FAILED;
 
       /* \k and \g when used with braces are back references, whereas \g used
@@ -3554,8 +3592,8 @@ while (ptr < ptrend)
         uint32_t meta;
 
         vn = alasnames;
-        if (!read_name(&ptr, ptrend, 0, &offset, &name, &namelen, &errorcode,
-          cb)) goto FAILED;
+        if (!read_name(&ptr, ptrend, utf, 0, &offset, &name, &namelen,
+          &errorcode, cb)) goto FAILED;
         if (ptr >= ptrend || *ptr != CHAR_COLON)
           {
           errorcode = ERR95;  /* Malformed */
@@ -3651,8 +3689,8 @@ while (ptr < ptrend)
       else
         {
         vn = verbnames;
-        if (!read_name(&ptr, ptrend, 0, &offset, &name, &namelen, &errorcode,
-          cb)) goto FAILED;
+        if (!read_name(&ptr, ptrend, utf, 0, &offset, &name, &namelen,
+          &errorcode, cb)) goto FAILED;
         if (ptr >= ptrend || (*ptr != CHAR_COLON &&
                               *ptr != CHAR_RIGHT_PARENTHESIS))
           {
@@ -3907,7 +3945,7 @@ while (ptr < ptrend)
         errorcode = ERR41;
         goto FAILED;
         }
-      if (!read_name(&ptr, ptrend, CHAR_RIGHT_PARENTHESIS, &offset, &name,
+      if (!read_name(&ptr, ptrend, utf, CHAR_RIGHT_PARENTHESIS, &offset, &name,
           &namelen, &errorcode, cb)) goto FAILED;
       *parsed_pattern++ = META_BACKREF_BYNAME;
       *parsed_pattern++ = namelen;
@@ -3967,7 +4005,7 @@ while (ptr < ptrend)
 
       case CHAR_AMPERSAND:
       RECURSE_BY_NAME:
-      if (!read_name(&ptr, ptrend, CHAR_RIGHT_PARENTHESIS, &offset, &name,
+      if (!read_name(&ptr, ptrend, utf, CHAR_RIGHT_PARENTHESIS, &offset, &name,
           &namelen, &errorcode, cb)) goto FAILED;
       *parsed_pattern++ = META_RECURSE_BYNAME;
       *parsed_pattern++ = namelen;
@@ -4215,7 +4253,7 @@ while (ptr < ptrend)
           terminator = CHAR_RIGHT_PARENTHESIS;
           ptr--;   /* Point to char before name */
           }
-        if (!read_name(&ptr, ptrend, terminator, &offset, &name, &namelen,
+        if (!read_name(&ptr, ptrend, utf, terminator, &offset, &name, &namelen,
             &errorcode, cb)) goto FAILED;
 
         /* Handle (?(R&name) */
@@ -4349,7 +4387,7 @@ while (ptr < ptrend)
       terminator = CHAR_APOSTROPHE;    /* Terminator */
 
       DEFINE_NAME:
-      if (!read_name(&ptr, ptrend, terminator, &offset, &name, &namelen,
+      if (!read_name(&ptr, ptrend, utf, terminator, &offset, &name, &namelen,
           &errorcode, cb)) goto FAILED;
 
       /* We have a name for this capturing group. It is also assigned a number,

@@ -49,7 +49,7 @@ please consult the man page, in case the conversion went wrong.
 <li><a name="TOC34" href="#SEC34">EXTRACTING A LIST OF ALL CAPTURED SUBSTRINGS</a>
 <li><a name="TOC35" href="#SEC35">EXTRACTING CAPTURED SUBSTRINGS BY NAME</a>
 <li><a name="TOC36" href="#SEC36">CREATING A NEW STRING WITH SUBSTITUTIONS</a>
-<li><a name="TOC37" href="#SEC37">DUPLICATE SUBPATTERN NAMES</a>
+<li><a name="TOC37" href="#SEC37">DUPLICATE CAPTURE GROUP NAMES</a>
 <li><a name="TOC38" href="#SEC38">FINDING ALL POSSIBLE MATCHES AT ONE POSITION</a>
 <li><a name="TOC39" href="#SEC39">MATCHING A PATTERN: THE ALTERNATIVE FUNCTION</a>
 <li><a name="TOC40" href="#SEC40">SEE ALSO</a>
@@ -1490,10 +1490,10 @@ independent of the setting of PCRE2_DOTALL.
 <pre>
   PCRE2_DUPNAMES
 </pre>
-If this bit is set, names used to identify capturing subpatterns need not be
-unique. This can be helpful for certain types of pattern when it is known that
-only one instance of the named subpattern can ever be matched. There are more
-details of named subpatterns below; see also the
+If this bit is set, names used to identify capture groups need not be unique.
+This can be helpful for certain types of pattern when it is known that only one
+instance of the named group can ever be matched. There are more details of
+named capture groups below; see also the
 <a href="pcre2pattern.html"><b>pcre2pattern</b></a>
 documentation.
 <pre>
@@ -1526,11 +1526,11 @@ the end of the subject.
 If this bit is set, most white space characters in the pattern are totally
 ignored except when escaped or inside a character class. However, white space
 is not allowed within sequences such as (?&#62; that introduce various
-parenthesized subpatterns, nor within numerical quantifiers such as {1,3}.
-Ignorable white space is permitted between an item and a following quantifier
-and between a quantifier and a following + that indicates possessiveness.
-PCRE2_EXTENDED is equivalent to Perl's /x option, and it can be changed within
-a pattern by a (?x) option setting.
+parenthesized groups, nor within numerical quantifiers such as {1,3}. Ignorable
+white space is permitted between an item and a following quantifier and between
+a quantifier and a following + that indicates possessiveness. PCRE2_EXTENDED is
+equivalent to Perl's /x option, and it can be changed within a pattern by a
+(?x) option setting.
 </P>
 <P>
 When PCRE2 is compiled without Unicode support, PCRE2_EXTENDED recognizes as
@@ -1606,7 +1606,7 @@ error.
 <pre>
   PCRE2_MATCH_UNSET_BACKREF
 </pre>
-If this option is set, a backreference to an unset subpattern group matches an
+If this option is set, a backreference to an unset capture group matches an
 empty string (by default this causes the current matching alternative to fail).
 A pattern such as (\1)(a) succeeds when this option is set (assuming it can
 find an "a" in the subject), whereas it fails by default, for Perl
@@ -1668,7 +1668,7 @@ If this option is set, it disables the use of numbered capturing parentheses in
 the pattern. Any opening parenthesis that is not followed by ? behaves as if it
 were followed by ?: but named parentheses can still be used for capturing (and
 they acquire numbers in the usual way). This is the same as Perl's /n option.
-Note that, when this option is set, references to capturing groups
+Note that, when this option is set, references to capture groups
 (backreferences or recursion/subroutine calls) may only refer to named groups,
 though the reference can be by name or by number.
 <pre>
@@ -1687,7 +1687,7 @@ purposes.
 If this option is set, it disables an optimization that is applied when .* is
 the first significant item in a top-level branch of a pattern, and all the
 other branches also start with .* or with \A or \G or ^. The optimization is
-automatically disabled for .* if it is inside an atomic group or a capturing
+automatically disabled for .* if it is inside an atomic group or a capture
 group that is the subject of a backreference, or if the pattern contains
 (*PRUNE) or (*SKIP). When the optimization is not disabled, such a pattern is
 automatically anchored if PCRE2_DOTALL is set for all the .* items and
@@ -2066,7 +2066,7 @@ When .* is the first significant item, anchoring is possible only when all the
 following are true:
 <pre>
   .* is not in an atomic group
-  .* is not in a capturing group that is the subject of a backreference
+  .* is not in a capture group that is the subject of a backreference
   PCRE2_DOTALL is in force for .*
   Neither (*PRUNE) nor (*SKIP) appears in the pattern
   PCRE2_NO_DOTSTAR_ANCHOR is not set
@@ -2077,12 +2077,12 @@ options returned for PCRE2_INFO_ALLOPTIONS.
   PCRE2_INFO_BACKREFMAX
 </pre>
 Return the number of the highest backreference in the pattern. The third
-argument should point to an <b>uint32_t</b> variable. Named subpatterns acquire
-numbers as well as names, and these count towards the highest backreference.
-Backreferences such as \4 or \g{12} match the captured characters of the
-given group, but in addition, the check that a capturing group is set in a
-conditional subpattern such as (?(3)a|b) is also a backreference. Zero is
-returned if there are no backreferences.
+argument should point to an <b>uint32_t</b> variable. Named capture groups
+acquire numbers as well as names, and these count towards the highest
+backreference. Backreferences such as \4 or \g{12} match the captured
+characters of the given group, but in addition, the check that a capture
+group is set in a conditional group such as (?(3)a|b) is also a backreference.
+Zero is returned if there are no backreferences.
 <pre>
   PCRE2_INFO_BSR
 </pre>
@@ -2093,9 +2093,9 @@ that \R matches only CR, LF, or CRLF.
 <pre>
   PCRE2_INFO_CAPTURECOUNT
 </pre>
-Return the highest capturing subpattern number in the pattern. In patterns
-where (?| is not used, this is also the total number of capturing subpatterns.
-The third argument should point to an <b>uint32_t</b> variable.
+Return the highest capture group number in the pattern. In patterns where (?|
+is not used, this is also the total number of capture groups. The third
+argument should point to an <b>uint32_t</b> variable.
 <pre>
   PCRE2_INFO_DEPTHLIMIT
 </pre>
@@ -2143,7 +2143,7 @@ Return the size (in bytes) of the data frames that are used to remember
 backtracking positions when the pattern is processed by <b>pcre2_match()</b>
 without the use of JIT. The third argument should point to a <b>size_t</b>
 variable. The frame size depends on the number of capturing parentheses in the
-pattern. Each additional capturing group adds two PCRE2_SIZE variables.
+pattern. Each additional capture group adds two PCRE2_SIZE variables.
 <pre>
   PCRE2_INFO_HASBACKSLASHC
 </pre>
@@ -2267,20 +2267,20 @@ the parenthesis number. The rest of the entry is the corresponding name, zero
 terminated.
 </P>
 <P>
-The names are in alphabetical order. If (?| is used to create multiple groups
-with the same number, as described in the
-<a href="pcre2pattern.html#dupsubpatternnumber">section on duplicate subpattern numbers</a>
+The names are in alphabetical order. If (?| is used to create multiple capture
+groups with the same number, as described in the
+<a href="pcre2pattern.html#dupgroupnumber">section on duplicate group numbers</a>
 in the
 <a href="pcre2pattern.html"><b>pcre2pattern</b></a>
 page, the groups may be given the same name, but there is only one entry in the
 table. Different names for groups of the same number are not permitted.
 </P>
 <P>
-Duplicate names for subpatterns with different numbers are permitted, but only
-if PCRE2_DUPNAMES is set. They appear in the table in the order in which they
-were found in the pattern. In the absence of (?| this is the order of
+Duplicate names for capture groups with different numbers are permitted, but
+only if PCRE2_DUPNAMES is set. They appear in the table in the order in which
+they were found in the pattern. In the absence of (?| this is the order of
 increasing number; when (?| is used this is not necessarily the case because
-later subpatterns may have lower numbers.
+later capture groups may have lower numbers.
 </P>
 <P>
 As a simple example of the name/number table, consider the following pattern
@@ -2289,16 +2289,16 @@ space - including newlines - is ignored):
 <pre>
   (?&#60;date&#62; (?&#60;year&#62;(\d\d)?\d\d) - (?&#60;month&#62;\d\d) - (?&#60;day&#62;\d\d) )
 </pre>
-There are four named subpatterns, so the table has four entries, and each entry
-in the table is eight bytes long. The table is as follows, with non-printing
-bytes shows in hexadecimal, and undefined bytes shown as ??:
+There are four named capture groups, so the table has four entries, and each
+entry in the table is eight bytes long. The table is as follows, with
+non-printing bytes shows in hexadecimal, and undefined bytes shown as ??:
 <pre>
   00 01 d  a  t  e  00 ??
   00 05 d  a  y  00 ?? ??
   00 04 m  o  n  t  h  00
   00 02 y  e  a  r  00 ??
 </pre>
-When writing code to extract data from named subpatterns using the
+When writing code to extract data from named capture groups using the
 name-to-number map, remember that the length of the entries is likely to be
 different for each compiled pattern.
 <pre>
@@ -2741,12 +2741,12 @@ valid newline sequence and explicit \r or \n escapes appear in the pattern.
 In general, a pattern matches a certain portion of the subject, and in
 addition, further substrings from the subject may be picked out by
 parenthesized parts of the pattern. Following the usage in Jeffrey Friedl's
-book, this is called "capturing" in what follows, and the phrase "capturing
-subpattern" or "capturing group" is used for a fragment of a pattern that picks
-out a substring. PCRE2 supports several other kinds of parenthesized subpattern
-that do not cause substrings to be captured. The <b>pcre2_pattern_info()</b>
-function can be used to find out how many capturing subpatterns there are in a
-compiled pattern.
+book, this is called "capturing" in what follows, and the phrase "capture
+group" (Perl terminology) is used for a fragment of a pattern that picks out a
+substring. PCRE2 supports several other kinds of parenthesized group that do
+not cause substrings to be captured. The <b>pcre2_pattern_info()</b> function
+can be used to find out how many capture groups there are in a compiled
+pattern.
 </P>
 <P>
 You can use auxiliary functions for accessing captured substrings
@@ -2795,9 +2795,8 @@ For example, if the pattern (?=ab\K) is matched against "ab", the start and
 end offset values for the match are 2 and 0.
 </P>
 <P>
-If a capturing subpattern group is matched repeatedly within a single match
-operation, it is the last portion of the subject that it matched that is
-returned.
+If a capture group is matched repeatedly within a single match operation, it is
+the last portion of the subject that it matched that is returned.
 </P>
 <P>
 If the ovector is too small to hold all the captured substring offsets, as much
@@ -2806,21 +2805,20 @@ substrings are not of interest, <b>pcre2_match()</b> may be called with a match
 data block whose ovector is of minimum length (that is, one pair).
 </P>
 <P>
-It is possible for capturing subpattern number <i>n+1</i> to match some part of
-the subject when subpattern <i>n</i> has not been used at all. For example, if
-the string "abc" is matched against the pattern (a|(z))(bc) the return from the
-function is 4, and subpatterns 1 and 3 are matched, but 2 is not. When this
-happens, both values in the offset pairs corresponding to unused subpatterns
-are set to PCRE2_UNSET.
+It is possible for capture group number <i>n+1</i> to match some part of the
+subject when group <i>n</i> has not been used at all. For example, if the string
+"abc" is matched against the pattern (a|(z))(bc) the return from the function
+is 4, and groups 1 and 3 are matched, but 2 is not. When this happens, both
+values in the offset pairs corresponding to unused groups are set to
+PCRE2_UNSET.
 </P>
 <P>
-Offset values that correspond to unused subpatterns at the end of the
-expression are also set to PCRE2_UNSET. For example, if the string "abc" is
-matched against the pattern (abc)(x(yz)?)? subpatterns 2 and 3 are not matched.
-The return from the function is 2, because the highest used capturing
-subpattern number is 1. The offsets for for the second and third capturing
-subpatterns (assuming the vector is large enough, of course) are set to
-PCRE2_UNSET.
+Offset values that correspond to unused groups at the end of the expression are
+also set to PCRE2_UNSET. For example, if the string "abc" is matched against
+the pattern (abc)(x(yz)?)? groups 2 and 3 are not matched. The return from the
+function is 2, because the highest used capture group number is 1. The offsets
+for for the second and third capture groupss (assuming the vector is large
+enough, of course) are set to PCRE2_UNSET.
 </P>
 <P>
 Elements in the ovector that do not correspond to capturing parentheses in the
@@ -2993,11 +2991,11 @@ as NULL.
 </pre>
 This error is returned when <b>pcre2_match()</b> detects a recursion loop within
 the pattern. Specifically, it means that either the whole pattern or a
-subpattern has been called recursively for the second time at the same position
-in the subject string. Some simple patterns that might do this are detected and
-faulted at compile time, but more complicated cases, in particular mutual
-recursions between two different subpatterns, cannot be detected until matching
-is attempted.
+capture group has been called recursively for the second time at the same
+position in the subject string. Some simple patterns that might do this are
+detected and faulted at compile time, but more complicated cases, in particular
+mutual recursions between two different groups, cannot be detected until
+matching is attempted.
 <a name="geterrormessage"></a></P>
 <br><a name="SEC32" href="#TOC1">OBTAINING A TEXTUAL ERROR MESSAGE</a><br>
 <P>
@@ -3074,7 +3072,7 @@ The <b>pcre2_substring_copy_bynumber()</b> function copies a captured substring
 into a supplied buffer, whereas <b>pcre2_substring_get_bynumber()</b> copies it
 into new memory, obtained using the same memory allocation function that was
 used for the match data block. The first two arguments of these functions are a
-pointer to the match data block and a capturing group number.
+pointer to the match data block and a capture group number.
 </P>
 <P>
 The final arguments of <b>pcre2_substring_copy_bynumber()</b> are a pointer to
@@ -3150,9 +3148,9 @@ calling <b>pcre2_substring_list_free()</b>.
 </P>
 <P>
 If this function encounters a substring that is unset, which can happen when
-capturing subpattern number <i>n+1</i> matches some part of the subject, but
-subpattern <i>n</i> has not been used at all, it returns an empty string. This
-can be distinguished from a genuine zero-length substring by inspecting the
+capture group number <i>n+1</i> matches some part of the subject, but group
+<i>n</i> has not been used at all, it returns an empty string. This can be
+distinguished from a genuine zero-length substring by inspecting the
 appropriate offset in the ovector, which contain PCRE2_UNSET for unset
 substrings, or by calling <b>pcre2_substring_length_bynumber()</b>.
 <a name="extractbyname"></a></P>
@@ -3182,21 +3180,21 @@ For example, for this pattern:
 <pre>
   (a+)b(?&#60;xxx&#62;\d+)...
 </pre>
-the number of the subpattern called "xxx" is 2. If the name is known to be
+the number of the capture group called "xxx" is 2. If the name is known to be
 unique (PCRE2_DUPNAMES was not set), you can find the number from the name by
 calling <b>pcre2_substring_number_from_name()</b>. The first argument is the
 compiled pattern, and the second is the name. The yield of the function is the
-subpattern number, PCRE2_ERROR_NOSUBSTRING if there is no subpattern of that
-name, or PCRE2_ERROR_NOUNIQUESUBSTRING if there is more than one subpattern of
-that name. Given the number, you can extract the substring directly from the
-ovector, or use one of the "bynumber" functions described above.
+group number, PCRE2_ERROR_NOSUBSTRING if there is no group with that name, or
+PCRE2_ERROR_NOUNIQUESUBSTRING if there is more than one group with that name.
+Given the number, you can extract the substring directly from the ovector, or
+use one of the "bynumber" functions described above.
 </P>
 <P>
 For convenience, there are also "byname" functions that correspond to the
 "bynumber" functions, the only difference being that the second argument is a
 name instead of a number. If PCRE2_DUPNAMES is set and there are duplicate
 names, these functions scan all the groups with the given name, and return the
-first named string that is set.
+captured substring from the first named group that is set.
 </P>
 <P>
 If there are no groups with the given name, PCRE2_ERROR_NOSUBSTRING is
@@ -3207,13 +3205,13 @@ set, PCRE2_ERROR_UNSET is returned.
 </P>
 <P>
 <b>Warning:</b> If the pattern uses the (?| feature to set up multiple
-subpatterns with the same number, as described in the
-<a href="pcre2pattern.html#dupsubpatternnumber">section on duplicate subpattern numbers</a>
+capture groups with the same number, as described in the
+<a href="pcre2pattern.html#dupgroupnumber">section on duplicate group numbers</a>
 in the
 <a href="pcre2pattern.html"><b>pcre2pattern</b></a>
-page, you cannot use names to distinguish the different subpatterns, because
+page, you cannot use names to distinguish the different capture groups, because
 names are not included in the compiled code. The matching process uses only
-numbers. For this reason, the use of different names for subpatterns of the
+numbers. For this reason, the use of different names for groups with the
 same number causes an error at compile time.
 <a name="substitutions"></a></P>
 <br><a name="SEC36" href="#TOC1">CREATING A NEW STRING WITH SUBSTITUTIONS</a><br>
@@ -3276,7 +3274,7 @@ length is in code units, not bytes.
 In the replacement string, which is interpreted as a UTF string in UTF mode,
 and is checked for UTF validity unless the PCRE2_NO_UTF_CHECK option is set, a
 dollar character is an escape character that can specify the insertion of
-characters from capturing groups or names from (*MARK) or other control verbs
+characters from capture groups or names from (*MARK) or other control verbs
 in the pattern. The following forms are always recognized:
 <pre>
   $$                  insert a dollar character
@@ -3345,13 +3343,13 @@ efficient to allocate a large buffer and free the excess afterwards, instead of
 using PCRE2_SUBSTITUTE_OVERFLOW_LENGTH.
 </P>
 <P>
-PCRE2_SUBSTITUTE_UNKNOWN_UNSET causes references to capturing groups that do
+PCRE2_SUBSTITUTE_UNKNOWN_UNSET causes references to capture groups that do
 not appear in the pattern to be treated as unset groups. This option should be
 used with care, because it means that a typo in a group name or number no
 longer causes the PCRE2_ERROR_NOSUBSTRING error.
 </P>
 <P>
-PCRE2_SUBSTITUTE_UNSET_EMPTY causes unset capturing groups (including unknown
+PCRE2_SUBSTITUTE_UNSET_EMPTY causes unset capture groups (including unknown
 groups when PCRE2_SUBSTITUTE_UNKNOWN_UNSET is set) to be treated as empty
 strings when inserted as described above. If this option is not set, an attempt
 to insert an unset group causes the PCRE2_ERROR_UNSET error. This option does
@@ -3379,7 +3377,7 @@ terminating a \Q quoted sequence) reverts to no case forcing. The sequences
 \u and \l force the next character (if it is a letter) to upper or lower
 case, respectively, and then the state automatically reverts to no case
 forcing. Case forcing applies to all inserted  characters, including those from
-captured groups and letters within \Q...\E quoted sequences.
+capture groups and letters within \Q...\E quoted sequences.
 </P>
 <P>
 Note that case forcing sequences such as \U...\E do not nest. For example,
@@ -3388,7 +3386,8 @@ effect.
 </P>
 <P>
 The second effect of setting PCRE2_SUBSTITUTE_EXTENDED is to add more
-flexibility to group substitution. The syntax is similar to that used by Bash:
+flexibility to capture group substitution. The syntax is similar to that used
+by Bash:
 <pre>
   ${&#60;n&#62;:-&#60;string&#62;}
   ${&#60;n&#62;:+&#60;string1&#62;:&#60;string2&#62;}
@@ -3518,20 +3517,21 @@ PCRE2_SUBSTITUTE_GLOBAL is not set), the the rest of the input is copied to the
 output and the call to <b>pcre2_substitute()</b> exits, returning the number of
 matches so far.
 </P>
-<br><a name="SEC37" href="#TOC1">DUPLICATE SUBPATTERN NAMES</a><br>
+<br><a name="SEC37" href="#TOC1">DUPLICATE CAPTURE GROUP NAMES</a><br>
 <P>
 <b>int pcre2_substring_nametable_scan(const pcre2_code *<i>code</i>,</b>
 <b>  PCRE2_SPTR <i>name</i>, PCRE2_SPTR *<i>first</i>, PCRE2_SPTR *<i>last</i>);</b>
 </P>
 <P>
-When a pattern is compiled with the PCRE2_DUPNAMES option, names for
-subpatterns are not required to be unique. Duplicate names are always allowed
-for subpatterns with the same number, created by using the (?| feature. Indeed,
-if such subpatterns are named, they are required to use the same names.
+When a pattern is compiled with the PCRE2_DUPNAMES option, names for capture
+groups are not required to be unique. Duplicate names are always allowed for
+groups with the same number, created by using the (?| feature. Indeed, if such
+groups are named, they are required to use the same names.
 </P>
 <P>
-Normally, patterns with duplicate names are such that in any one match, only
-one of the named subpatterns participates. An example is shown in the
+Normally, patterns that use duplicate names are such that in any one match,
+only one of each set of identically-named groups participates. An example is
+shown in the
 <a href="pcre2pattern.html"><b>pcre2pattern</b></a>
 documentation.
 </P>
@@ -3703,9 +3703,8 @@ the three matched strings are
 On success, the yield of the function is a number greater than zero, which is
 the number of matched substrings. The offsets of the substrings are returned in
 the ovector, and can be extracted by number in the same way as for
-<b>pcre2_match()</b>, but the numbers bear no relation to any capturing groups
-that may exist in the pattern, because DFA matching does not support group
-capture.
+<b>pcre2_match()</b>, but the numbers bear no relation to any capture groups
+that may exist in the pattern, because DFA matching does not support capturing.
 </P>
 <P>
 Calls to the convenience functions that extract substrings by name
@@ -3747,7 +3746,7 @@ a backreference.
 </pre>
 This return is given if <b>pcre2_dfa_match()</b> encounters a condition item
 that uses a backreference for the condition, or a test for recursion in a
-specific group. These are not supported.
+specific capture group. These are not supported.
 <pre>
   PCRE2_ERROR_DFA_WSSIZE
 </pre>
@@ -3756,9 +3755,9 @@ This return is given if <b>pcre2_dfa_match()</b> runs out of space in the
 <pre>
   PCRE2_ERROR_DFA_RECURSE
 </pre>
-When a recursive subpattern is processed, the matching function calls itself
-recursively, using private memory for the ovector and <i>workspace</i>. This
-error is given if the internal ovector is not large enough. This should be
+When a recursion or subroutine call is processed, the matching function calls
+itself recursively, using private memory for the ovector and <i>workspace</i>.
+This error is given if the internal ovector is not large enough. This should be
 extremely rare, as a vector of size 1000 is used.
 <pre>
   PCRE2_ERROR_DFA_BADRESTART
@@ -3785,7 +3784,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC42" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 04 January 2019
+Last updated: 04 February 2019
 <br>
 Copyright &copy; 1997-2019 University of Cambridge.
 <br>

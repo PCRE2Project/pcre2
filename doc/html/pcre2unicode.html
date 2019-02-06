@@ -38,10 +38,11 @@ UNICODE PROPERTY SUPPORT
 </b><br>
 <P>
 When PCRE2 is built with Unicode support, the escape sequences \p{..},
-\P{..}, and \X can be used. The Unicode properties that can be tested are
-limited to the general category properties such as Lu for an upper case letter
-or Nd for a decimal number, the Unicode script names such as Arabic or Han, and
-the derived properties Any and L&. Full lists are given in the
+\P{..}, and \X can be used. This is not dependent on the PCRE2_UTF setting.
+The Unicode properties that can be tested are limited to the general category
+properties such as Lu for an upper case letter or Nd for a decimal number, the
+Unicode script names such as Arabic or Han, and the derived properties Any and
+L&. Full lists are given in the
 <a href="pcre2pattern.html"><b>pcre2pattern</b></a>
 and
 <a href="pcre2syntax.html"><b>pcre2syntax</b></a>
@@ -73,11 +74,17 @@ In UTF modes, the dot metacharacter matches one UTF character instead of a
 single code unit.
 </P>
 <P>
+In UTF modes, capture group names are not restricted to ASCII, and may contain
+any Unicode letters and decimal digits, as well as underscore.
+</P>
+<P>
 The escape sequence \C can be used to match a single code unit in a UTF mode,
 but its use can lead to some strange effects because it breaks up multi-unit
 characters (see the description of \C in the
 <a href="pcre2pattern.html"><b>pcre2pattern</b></a>
-documentation).
+documentation). For this reason, there is a build-time option that disables 
+support for \C completely. There is also a less draconian compile-time option
+for locking out the use of \C when a pattern is compiled.
 </P>
 <P>
 The use of \C is not supported by the alternative matching function
@@ -410,9 +417,9 @@ Cambridge, England.
 REVISION
 </b><br>
 <P>
-Last updated: 12 October 2018
+Last updated: 03 February 2019
 <br>
-Copyright &copy; 1997-2018 University of Cambridge.
+Copyright &copy; 1997-2019 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE2 index page</a>.

@@ -32,9 +32,9 @@
 #load testsaved2
 
 #pop info
-Capturing subpattern count = 2
+Capture group count = 2
 Max back reference = 2
-Named capturing subpatterns:
+Named capture groups:
   n   1
   n   2
 Options: dupnames
@@ -66,8 +66,8 @@ No match, mark = A
  4: A
 
 #pop info
-Capturing subpattern count = 4
-Named capturing subpatterns:
+Capture group count = 4
+Named capture groups:
   ADDR          2
   ADDRESS_PAT   4
   NAME          1

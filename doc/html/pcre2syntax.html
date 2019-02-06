@@ -424,20 +424,23 @@ but some of them use Unicode properties if PCRE2_UCP is set. You can use
 <br><a name="SEC13" href="#TOC1">CAPTURING</a><br>
 <P>
 <pre>
-  (...)           capturing group
-  (?&#60;name&#62;...)    named capturing group (Perl)
-  (?'name'...)    named capturing group (Perl)
-  (?P&#60;name&#62;...)   named capturing group (Python)
-  (?:...)         non-capturing group
-  (?|...)         non-capturing group; reset group numbers for
-                   capturing groups in each alternative
-</PRE>
+  (...)           capture group
+  (?&#60;name&#62;...)    named capture group (Perl)
+  (?'name'...)    named capture group (Perl)
+  (?P&#60;name&#62;...)   named capture group (Python)
+  (?:...)         non-capture group
+  (?|...)         non-capture group; reset group numbers for
+                   capture groups in each alternative
+</pre>
+In non-UTF modes, names may contain underscores and ASCII letters and digits;
+in UTF modes, any Unicode letters and Unicode decimal digits are permitted. In
+both cases, a name must not start with a digit.
 </P>
 <br><a name="SEC14" href="#TOC1">ATOMIC GROUPS</a><br>
 <P>
 <pre>
-  (?&#62;...)         atomic, non-capturing group
-  (*atomic:...)   atomic, non-capturing group
+  (?&#62;...)         atomic non-capture group
+  (*atomic:...)   atomic non-capture group
 </PRE>
 </P>
 <br><a name="SEC15" href="#TOC1">COMMENT</a><br>
@@ -465,7 +468,7 @@ of the group.
 Unsetting x or xx unsets both. Several options may be set at once, and a
 mixture of setting and unsetting such as (?i-x) is allowed, but there may be
 only one hyphen. Setting (but no unsetting) is allowed after (?^ for example
-(?^in). An option setting may appear at the start of a non-capturing group, for
+(?^in). An option setting may appear at the start of a non-capture group, for
 example (?i:...).
 </P>
 <P>
@@ -565,19 +568,19 @@ Each top-level branch of a lookbehind must be of a fixed length.
 <P>
 <pre>
   (?R)            recurse whole pattern
-  (?n)            call subpattern by absolute number
-  (?+n)           call subpattern by relative number
-  (?-n)           call subpattern by relative number
-  (?&name)        call subpattern by name (Perl)
-  (?P&#62;name)       call subpattern by name (Python)
-  \g&#60;name&#62;        call subpattern by name (Oniguruma)
-  \g'name'        call subpattern by name (Oniguruma)
-  \g&#60;n&#62;           call subpattern by absolute number (Oniguruma)
-  \g'n'           call subpattern by absolute number (Oniguruma)
-  \g&#60;+n&#62;          call subpattern by relative number (PCRE2 extension)
-  \g'+n'          call subpattern by relative number (PCRE2 extension)
-  \g&#60;-n&#62;          call subpattern by relative number (PCRE2 extension)
-  \g'-n'          call subpattern by relative number (PCRE2 extension)
+  (?n)            call subroutine by absolute number
+  (?+n)           call subroutine by relative number
+  (?-n)           call subroutine by relative number
+  (?&name)        call subroutine by name (Perl)
+  (?P&#62;name)       call subroutine by name (Python)
+  \g&#60;name&#62;        call subroutine by name (Oniguruma)
+  \g'name'        call subroutine by name (Oniguruma)
+  \g&#60;n&#62;           call subroutine by absolute number (Oniguruma)
+  \g'n'           call subroutine by absolute number (Oniguruma)
+  \g&#60;+n&#62;          call subroutine by relative number (PCRE2 extension)
+  \g'+n'          call subroutine by relative number (PCRE2 extension)
+  \g&#60;-n&#62;          call subroutine by relative number (PCRE2 extension)
+  \g'-n'          call subroutine by relative number (PCRE2 extension)
 </PRE>
 </P>
 <br><a name="SEC23" href="#TOC1">CONDITIONAL PATTERNS</a><br>
@@ -595,7 +598,7 @@ Each top-level branch of a lookbehind must be of a fixed length.
   (?(R)               overall recursion condition
   (?(Rn)              specific numbered group recursion condition
   (?(R&name)          specific named group recursion condition
-  (?(DEFINE)          define subpattern for reference
+  (?(DEFINE)          define groups for reference
   (?(VERSION[&#62;]=n.m)  test PCRE2 version
   (?(assert)          assertion condition
 </pre>
@@ -657,9 +660,9 @@ Cambridge, England.
 </P>
 <br><a name="SEC28" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 10 October 2018
+Last updated: 03 February 2019
 <br>
-Copyright &copy; 1997-2018 University of Cambridge.
+Copyright &copy; 1997-2019 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE2 index page</a>.

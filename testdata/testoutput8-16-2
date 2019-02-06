@@ -67,7 +67,7 @@ Memory allocation (code space): 10
   2   2 Ket
   4     End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 May match empty string
 Options: extended
 Subject length lower bound = 0
@@ -80,7 +80,7 @@ Memory allocation (code space): 14
   4   4 Ket
   6     End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Options: extended
 First code unit = 'a'
 Subject length lower bound = 1
@@ -376,7 +376,7 @@ Memory allocation (code space): 26
  10  10 Ket
  12     End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Options: utf
 First code unit = 'A'
 Last code unit = '.'
@@ -390,7 +390,7 @@ Memory allocation (code space): 22
   8   8 Ket
  10     End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Options: utf
 First code unit = \x{d55c}
 Last code unit = \x{c5b4}
@@ -404,7 +404,7 @@ Memory allocation (code space): 22
   8   8 Ket
  10     End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Options: utf
 First code unit = \x{65e5}
 Last code unit = \x{8a9e}
@@ -904,7 +904,7 @@ Failed: error 186 at offset 12820: regular expression is too complicated
  79  79 Ket
  81     End
 ------------------------------------------------------------------
-Capturing subpattern count = 1
+Capture group count = 1
 Max back reference = 1
 May match empty string
 Subject length lower bound = 0
@@ -938,7 +938,7 @@ Subject length lower bound = 0
  43  43 Ket
  45     End
 ------------------------------------------------------------------
-Capturing subpattern count = 1
+Capture group count = 1
 Max back reference = 1
 May match empty string
 Subject length lower bound = 0
@@ -1011,7 +1011,7 @@ No match
 133 133 Ket
 135     End
 ------------------------------------------------------------------
-Capturing subpattern count = 10
+Capture group count = 10
 May match empty string
 Subject length lower bound = 0
 

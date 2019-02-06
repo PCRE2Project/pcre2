@@ -1,4 +1,4 @@
-.TH PCRE2TEST 1 "12 November 2018" "PCRE 10.33"
+.TH PCRE2TEST 1 "03 February 2019" "PCRE 10.33"
 .SH NAME
 pcre2test - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -672,14 +672,14 @@ information is obtained from the \fBpcre2_pattern_info()\fP function. Here are
 some typical examples:
 .sp
     re> /(?i)(^a|^b)/m,info
-  Capturing subpattern count = 1
+  Capture group count = 1
   Compile options: multiline
   Overall options: caseless multiline
   First code unit at start or follows newline
   Subject length lower bound = 1
 .sp
     re> /(?i)abc/info
-  Capturing subpattern count = 0
+  Capture group count = 0
   Compile options: <none>
   Overall options: caseless
   First code unit = 'a' (caseless)
@@ -1325,8 +1325,8 @@ current character is CR followed by LF, an advance of two characters occurs.
 .sp
 The \fBcopy\fP and \fBget\fP modifiers can be used to test the
 \fBpcre2_substring_copy_xxx()\fP and \fBpcre2_substring_get_xxx()\fP functions.
-They can be given more than once, and each can specify a group name or number,
-for example:
+They can be given more than once, and each can specify a capture group name or
+number, for example:
 .sp
    abcd\e=copy=1,copy=3,get=G1
 .sp
@@ -2056,6 +2056,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 12 November 2018
-Copyright (c) 1997-2018 University of Cambridge.
+Last updated: 03 February 2019
+Copyright (c) 1997-2019 University of Cambridge.
 .fi

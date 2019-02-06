@@ -47,12 +47,12 @@
  0: DE
 
 /(a)b|/I
-Capturing subpattern count = 1
+Capture group count = 1
 May match empty string
 Subject length lower bound = 0
 
 /abc/I
-Capturing subpattern count = 0
+Capture group count = 0
 First code unit = 'a'
 Last code unit = 'c'
 Subject length lower bound = 3
@@ -69,7 +69,7 @@ No match
 No match
 
 /^abc/I
-Capturing subpattern count = 0
+Capture group count = 0
 Compile options: <none>
 Overall options: anchored
 First code unit = 'a'
@@ -85,30 +85,30 @@ No match
 No match
 
 /a+bc/I
-Capturing subpattern count = 0
+Capture group count = 0
 First code unit = 'a'
 Last code unit = 'c'
 Subject length lower bound = 3
 
 /a*bc/I
-Capturing subpattern count = 0
+Capture group count = 0
 Starting code units: a b 
 Last code unit = 'c'
 Subject length lower bound = 2
 
 /a{3}bc/I
-Capturing subpattern count = 0
+Capture group count = 0
 First code unit = 'a'
 Last code unit = 'c'
 Subject length lower bound = 5
 
 /(abc|a+z)/I
-Capturing subpattern count = 1
+Capture group count = 1
 First code unit = 'a'
 Subject length lower bound = 2
 
 /^abc$/I
-Capturing subpattern count = 0
+Capture group count = 0
 Compile options: <none>
 Overall options: anchored
 First code unit = 'a'
@@ -159,19 +159,19 @@ Failed: error 118 at offset 7: missing ) after (?# comment
 Failed: error 111 at offset 2: unrecognized character after (? or (?-
 
 /.*b/I
-Capturing subpattern count = 0
+Capture group count = 0
 First code unit at start or follows newline
 Last code unit = 'b'
 Subject length lower bound = 1
 
 /.*?b/I
-Capturing subpattern count = 0
+Capture group count = 0
 First code unit at start or follows newline
 Last code unit = 'b'
 Subject length lower bound = 1
 
 /cat|dog|elephant/I
-Capturing subpattern count = 0
+Capture group count = 0
 Starting code units: c d e 
 Subject length lower bound = 3
     this sentence eventually mentions a cat
@@ -180,7 +180,7 @@ Subject length lower bound = 3
  0: elephant
 
 /cat|dog|elephant/I
-Capturing subpattern count = 0
+Capture group count = 0
 Starting code units: c d e 
 Subject length lower bound = 3
     this sentence eventually mentions a cat
@@ -189,7 +189,7 @@ Subject length lower bound = 3
  0: elephant
 
 /cat|dog|elephant/Ii
-Capturing subpattern count = 0
+Capture group count = 0
 Options: caseless
 Starting code units: C D E c d e 
 Subject length lower bound = 3
@@ -199,12 +199,12 @@ Subject length lower bound = 3
  0: elephant
 
 /a|[bcd]/I
-Capturing subpattern count = 0
+Capture group count = 0
 Starting code units: a b c d 
 Subject length lower bound = 1
 
 /(a|[^\dZ])/I
-Capturing subpattern count = 1
+Capture group count = 1
 Starting code units: \x00 \x01 \x02 \x03 \x04 \x05 \x06 \x07 \x08 \x09 \x0a 
   \x0b \x0c \x0d \x0e \x0f \x10 \x11 \x12 \x13 \x14 \x15 \x16 \x17 \x18 \x19 
   \x1a \x1b \x1c \x1d \x1e \x1f \x20 ! " # $ % & ' ( ) * + , - . / : ; < = > 
@@ -222,7 +222,7 @@ Starting code units: \x00 \x01 \x02 \x03 \x04 \x05 \x06 \x07 \x08 \x09 \x0a
 Subject length lower bound = 1
 
 /(a|b)*[\s]/I
-Capturing subpattern count = 1
+Capture group count = 1
 Starting code units: \x09 \x0a \x0b \x0c \x0d \x20 a b 
 Subject length lower bound = 1
 
@@ -233,7 +233,7 @@ Failed: error 115 at offset 4: reference to non-existent subpattern
 Failed: error 109 at offset 4: quantifier does not follow a repeatable item
 
 /(a)(b)(c)\2/I
-Capturing subpattern count = 3
+Capture group count = 3
 Max back reference = 2
 First code unit = 'a'
 Last code unit = 'c'
@@ -267,7 +267,7 @@ Matched, but too many substrings
  3: c
 
 /(a)bc|(a)(b)\2/I
-Capturing subpattern count = 3
+Capture group count = 3
 Max back reference = 2
 First code unit = 'a'
 Subject length lower bound = 3
@@ -312,7 +312,7 @@ Matched, but too many substrings
  3: b
 
 /abc$/I,dollar_endonly
-Capturing subpattern count = 0
+Capture group count = 0
 Options: dollar_endonly
 First code unit = 'a'
 Last code unit = 'c'
@@ -329,7 +329,7 @@ No match
 Failed: error 115 at offset 16: reference to non-existent subpattern
 
 /the quick brown fox/I
-Capturing subpattern count = 0
+Capture group count = 0
 First code unit = 't'
 Last code unit = 'x'
 Subject length lower bound = 19
@@ -339,7 +339,7 @@ Subject length lower bound = 19
  0: the quick brown fox
 
 /the quick brown fox/I,anchored
-Capturing subpattern count = 0
+Capture group count = 0
 Options: anchored
 First code unit = 't'
 Subject length lower bound = 19
@@ -353,7 +353,7 @@ No match
 Failed: error 111 at offset 4: unrecognized character after (? or (?-
 
 /^abc|def/I
-Capturing subpattern count = 0
+Capture group count = 0
 Starting code units: a d 
 Subject length lower bound = 3
     abcdef
@@ -362,7 +362,7 @@ Subject length lower bound = 3
  0: def
 
 /.*((abc)$|(def))/I
-Capturing subpattern count = 3
+Capture group count = 3
 First code unit at start or follows newline
 Subject length lower bound = 3
     defabc
@@ -382,7 +382,7 @@ Failed: error 122 at offset 0: unmatched closing parenthesis
 Failed: error 106 at offset 4: missing terminating ] for character class
 
 /[^aeiou ]{3,}/I
-Capturing subpattern count = 0
+Capture group count = 0
 Starting code units: \x00 \x01 \x02 \x03 \x04 \x05 \x06 \x07 \x08 \x09 \x0a 
   \x0b \x0c \x0d \x0e \x0f \x10 \x11 \x12 \x13 \x14 \x15 \x16 \x17 \x18 \x19 
   \x1a \x1b \x1c \x1d \x1e \x1f ! " # $ % & ' ( ) * + , - . / 0 1 2 3 4 5 6 
@@ -402,7 +402,7 @@ Subject length lower bound = 3
  0: -pr
 
 /<.*>/I
-Capturing subpattern count = 0
+Capture group count = 0
 First code unit = '<'
 Last code unit = '>'
 Subject length lower bound = 2
@@ -410,7 +410,7 @@ Subject length lower bound = 2
  0: <def>ghi<klm>
 
 /<.*?>/I
-Capturing subpattern count = 0
+Capture group count = 0
 First code unit = '<'
 Last code unit = '>'
 Subject length lower bound = 2
@@ -418,7 +418,7 @@ Subject length lower bound = 2
  0: <def>
 
 /<.*>/I,ungreedy
-Capturing subpattern count = 0
+Capture group count = 0
 Options: ungreedy
 First code unit = '<'
 Last code unit = '>'
@@ -427,7 +427,7 @@ Subject length lower bound = 2
  0: <def>
 
 /(?U)<.*>/I
-Capturing subpattern count = 0
+Capture group count = 0
 First code unit = '<'
 Last code unit = '>'
 Subject length lower bound = 2
@@ -435,7 +435,7 @@ Subject length lower bound = 2
  0: <def>
 
 /<.*?>/I,ungreedy
-Capturing subpattern count = 0
+Capture group count = 0
 Options: ungreedy
 First code unit = '<'
 Last code unit = '>'
@@ -444,7 +444,7 @@ Subject length lower bound = 2
  0: <def>ghi<klm>
 
 /={3,}/I,ungreedy
-Capturing subpattern count = 0
+Capture group count = 0
 Options: ungreedy
 First code unit = '='
 Last code unit = '='
@@ -453,7 +453,7 @@ Subject length lower bound = 3
  0: ===
 
 /(?U)={3,}?/I
-Capturing subpattern count = 0
+Capture group count = 0
 First code unit = '='
 Last code unit = '='
 Subject length lower bound = 3
@@ -461,7 +461,7 @@ Subject length lower bound = 3
  0: ========
 
 /(?<!bar|cattle)foo/I
-Capturing subpattern count = 0
+Capture group count = 0
 Max lookbehind = 6
 First code unit = 'f'
 Last code unit = 'o'
@@ -485,69 +485,69 @@ Failed: error 125 at offset 5: lookbehind assertion is not fixed length
 /(?<!(foo)a\1)bar/
 
 /(?i)abc/I
-Capturing subpattern count = 0
+Capture group count = 0
 First code unit = 'a' (caseless)
 Last code unit = 'c' (caseless)
 Subject length lower bound = 3
 
 /(a|(?m)a)/I
-Capturing subpattern count = 1
+Capture group count = 1
 First code unit = 'a'
 Subject length lower bound = 1
 
 /(?i)^1234/I
-Capturing subpattern count = 0
+Capture group count = 0
 Compile options: <none>
 Overall options: anchored
 First code unit = '1'
 Subject length lower bound = 4
 
 /(^b|(?i)^d)/I
-Capturing subpattern count = 1
+Capture group count = 1
 Compile options: <none>
 Overall options: anchored
 Starting code units: D b d 
 Subject length lower bound = 1
 
 /(?s).*/I
-Capturing subpattern count = 0
+Capture group count = 0
 May match empty string
 Compile options: <none>
 Overall options: anchored
 Subject length lower bound = 0
 
 /[abcd]/I
-Capturing subpattern count = 0
+Capture group count = 0
 Starting code units: a b c d 
 Subject length lower bound = 1
 
 /(?i)[abcd]/I
-Capturing subpattern count = 0
+Capture group count = 0
 Starting code units: A B C D a b c d 
 Subject length lower bound = 1
 
 /(?m)[xy]|(b|c)/I
-Capturing subpattern count = 1
+Capture group count = 1
 Starting code units: b c x y 
 Subject length lower bound = 1
 
 /(^a|^b)/Im
-Capturing subpattern count = 1
+Capture group count = 1
 Options: multiline
 First code unit at start or follows newline
 Subject length lower bound = 1
 
 /(?i)(^a|^b)/Im
-Capturing subpattern count = 1
+Capture group count = 1
 Options: multiline
 First code unit at start or follows newline
 Subject length lower bound = 1
 
 /(a)(?(1)a|b|c)/
-Failed: error 127 at offset 3: conditional group contains more than two branches
+Failed: error 127 at offset 3: conditional subpattern contains more than two branches
 
 /(?(?=a)a|b|c)/
-Failed: error 127 at offset 0: conditional group contains more than two branches
+Failed: error 127 at offset 0: conditional subpattern contains more than two branches
 
 /(?(1a)/
 Failed: error 124 at offset 4: missing closing parenthesis for condition
@@ -565,14 +565,14 @@ Failed: error 115 at offset 3: reference to non-existent subpattern
 Failed: error 128 at offset 2: assertion expected after (?( or (?(?C)
 
 /((?s)blah)\s+\1/I
-Capturing subpattern count = 1
+Capture group count = 1
 Max back reference = 1
 First code unit = 'b'
 Last code unit = 'h'
 Subject length lower bound = 9
 
 /((?i)blah)\s+\1/I
-Capturing subpattern count = 1
+Capture group count = 1
 Max back reference = 1
 First code unit = 'b' (caseless)
 Last code unit = 'h' (caseless)
@@ -587,17 +587,17 @@ Subject length lower bound = 9
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 1
+Capture group count = 1
 First code unit = 'b' (caseless)
 Subject length lower bound = 1
 
 /(a*b|(?i:c*(?-i)d))/I
-Capturing subpattern count = 1
+Capture group count = 1
 Starting code units: C a b c d 
 Subject length lower bound = 1
 
 /a$/I
-Capturing subpattern count = 0
+Capture group count = 0
 First code unit = 'a'
 Subject length lower bound = 1
     a
@@ -611,7 +611,7 @@ No match
 No match
 
 /a$/Im
-Capturing subpattern count = 0
+Capture group count = 0
 Options: multiline
 First code unit = 'a'
 Subject length lower bound = 1
@@ -626,7 +626,7 @@ Subject length lower bound = 1
 No match
 
 /\Aabc/Im
-Capturing subpattern count = 0
+Capture group count = 0
 Max lookbehind = 1
 Compile options: multiline
 Overall options: anchored multiline
@@ -634,14 +634,14 @@ First code unit = 'a'
 Subject length lower bound = 3
 
 /^abc/Im
-Capturing subpattern count = 0
+Capture group count = 0
 Options: multiline
 First code unit at start or follows newline
 Last code unit = 'c'
 Subject length lower bound = 3
 
 /^((a+)(?U)([ab]+)(?-U)([bc]+)(\w*))/I
-Capturing subpattern count = 5
+Capture group count = 5
 Compile options: <none>
 Overall options: anchored
 First code unit = 'a'
@@ -655,25 +655,25 @@ Subject length lower bound = 3
  5: def
 
 /(?<=foo)[ab]/I
-Capturing subpattern count = 0
+Capture group count = 0
 Max lookbehind = 3
 Starting code units: a b 
 Subject length lower bound = 1
 
 /(?<!foo)(alpha|omega)/I
-Capturing subpattern count = 1
+Capture group count = 1
 Max lookbehind = 3
 Starting code units: a o 
 Last code unit = 'a'
 Subject length lower bound = 5
 
 /(?!alphabet)[ab]/I
-Capturing subpattern count = 0
+Capture group count = 0
 Starting code units: a b 
 Subject length lower bound = 1
 
 /(?<=foo\n)^bar/Im
-Capturing subpattern count = 0
+Capture group count = 0
 Max lookbehind = 4
 Contains explicit CR or LF match
 Options: multiline
@@ -690,7 +690,7 @@ No match
 No match
 
 /^(?<=foo\n)bar/Im
-Capturing subpattern count = 0
+Capture group count = 0
 Max lookbehind = 4
 Contains explicit CR or LF match
 Options: multiline
@@ -708,7 +708,7 @@ No match
 No match
 
 /(?>^abc)/Im
-Capturing subpattern count = 0
+Capture group count = 0
 Options: multiline
 First code unit at start or follows newline
 Last code unit = 'c'
@@ -733,7 +733,7 @@ Failed: error 125 at offset 0: lookbehind assertion is not fixed length
 /The next three are in testinput2 because they have variable length branches/
 
 /(?<=bullock|donkey)-cart/I
-Capturing subpattern count = 0
+Capture group count = 0
 Max lookbehind = 7
 First code unit = '-'
 Last code unit = 't'
@@ -749,13 +749,13 @@ No match
 No match
 
 /(?<=ab(?i)x|y|z)/I
-Capturing subpattern count = 0
+Capture group count = 0
 Max lookbehind = 3
 May match empty string
 Subject length lower bound = 0
 
 /(?>.*)(?<=(abcd)|(xyz))/I
-Capturing subpattern count = 2
+Capture group count = 2
 Max lookbehind = 4
 May match empty string
 Subject length lower bound = 0
@@ -768,7 +768,7 @@ Subject length lower bound = 0
  2: xyz
 
 /(?<=ab(?i)x(?-i)y|(?i)z|b)ZZ/I
-Capturing subpattern count = 0
+Capture group count = 0
 Max lookbehind = 4
 First code unit = 'Z'
 Last code unit = 'Z'
@@ -796,7 +796,7 @@ No match
 No match
 
 /(?<!(foo)a)bar/I
-Capturing subpattern count = 1
+Capture group count = 1
 Max lookbehind = 4
 First code unit = 'b'
 Last code unit = 'r'
@@ -812,7 +812,7 @@ No match
 # This one is here because Perl behaves differently; see also the following.
 
 /^(a\1?){4}$/I
-Capturing subpattern count = 1
+Capture group count = 1
 Max back reference = 1
 Compile options: <none>
 Overall options: anchored
@@ -949,7 +949,7 @@ Failed: error 101 at offset 4: \ at end of pattern
 Failed: error 101 at offset 4: \ at end of pattern
 
 /(a)bc(d)/I
-Capturing subpattern count = 2
+Capture group count = 2
 First code unit = 'a'
 Last code unit = 'd'
 Subject length lower bound = 4
@@ -969,7 +969,7 @@ Subject length lower bound = 4
 Copy substring 5 failed (-49): unknown substring
 
 /(.{20})/I
-Capturing subpattern count = 1
+Capture group count = 1
 Subject length lower bound = 20
     abcdefghijklmnopqrstuvwxyz
  0: abcdefghijklmnopqrst
@@ -984,7 +984,7 @@ Subject length lower bound = 20
  1G abcdefghijklmnopqrst (20)
 
 /(.{15})/I
-Capturing subpattern count = 1
+Capture group count = 1
 Subject length lower bound = 15
     abcdefghijklmnopqrstuvwxyz
  0: abcdefghijklmno
@@ -996,7 +996,7 @@ Subject length lower bound = 15
  1G abcdefghijklmno (15)
 
 /(.{16})/I
-Capturing subpattern count = 1
+Capture group count = 1
 Subject length lower bound = 16
     abcdefghijklmnopqrstuvwxyz
  0: abcdefghijklmnop
@@ -1010,7 +1010,7 @@ Subject length lower bound = 16
  1L abcdefghijklmnop
 
 /^(a|(bc))de(f)/I
-Capturing subpattern count = 3
+Capture group count = 3
 Compile options: <none>
 Overall options: anchored
 Starting code units: a b 
@@ -1049,7 +1049,7 @@ Get substring 4 failed (-49): unknown substring
  0C adef (4)
 
 /^abc\00def/I
-Capturing subpattern count = 0
+Capture group count = 0
 Compile options: <none>
 Overall options: anchored
 First code unit = 'a'
@@ -1062,7 +1062,7 @@ Subject length lower bound = 7
 /word ((?:[a-zA-Z0-9]+ )((?:[a-zA-Z0-9]+ )((?:[a-zA-Z0-9]+ )((?:[a-zA-Z0-9]+
 )((?:[a-zA-Z0-9]+ )((?:[a-zA-Z0-9]+ )((?:[a-zA-Z0-9]+ )((?:[a-zA-Z0-9]+
 )?)?)?)?)?)?)?)?)?otherword/I
-Capturing subpattern count = 8
+Capture group count = 8
 Contains explicit CR or LF match
 First code unit = 'w'
 Last code unit = 'd'
@@ -1076,7 +1076,7 @@ Subject length lower bound = 14
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 First code unit at start or follows newline
 Last code unit = 'X'
 Subject length lower bound = 1
@@ -1089,7 +1089,7 @@ Subject length lower bound = 1
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Compile options: dotall
 Overall options: anchored dotall
 Last code unit = 'X'
@@ -1108,7 +1108,7 @@ Subject length lower bound = 1
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 1
+Capture group count = 1
 First code unit at start or follows newline
 Subject length lower bound = 1
 
@@ -1125,7 +1125,7 @@ Subject length lower bound = 1
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 1
+Capture group count = 1
 Compile options: dotall
 Overall options: anchored dotall
 Subject length lower bound = 1
@@ -1143,7 +1143,7 @@ Subject length lower bound = 1
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 1
+Capture group count = 1
 Compile options: <none>
 Overall options: anchored
 Subject length lower bound = 1
@@ -1161,13 +1161,13 @@ Subject length lower bound = 1
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Compile options: <none>
 Overall options: anchored
 Subject length lower bound = 1
 
 /\Biss\B/I,aftertext
-Capturing subpattern count = 0
+Capture group count = 0
 Max lookbehind = 1
 First code unit = 'i'
 Last code unit = 's'
@@ -1177,7 +1177,7 @@ Subject length lower bound = 3
  0+ issippi
 
 /iss/I,aftertext,altglobal
-Capturing subpattern count = 0
+Capture group count = 0
 First code unit = 'i'
 Last code unit = 's'
 Subject length lower bound = 3
@@ -1188,7 +1188,7 @@ Subject length lower bound = 3
  0+ ippi
 
 /\Biss\B/I,aftertext,altglobal
-Capturing subpattern count = 0
+Capture group count = 0
 Max lookbehind = 1
 First code unit = 'i'
 Last code unit = 's'
@@ -1198,7 +1198,7 @@ Subject length lower bound = 3
  0+ issippi
 
 /\Biss\B/Ig,aftertext
-Capturing subpattern count = 0
+Capture group count = 0
 Max lookbehind = 1
 First code unit = 'i'
 Last code unit = 's'
@@ -1213,7 +1213,7 @@ Subject length lower bound = 3
 No match
 
 /(?<=[Ms])iss/Ig,aftertext
-Capturing subpattern count = 0
+Capture group count = 0
 Max lookbehind = 1
 First code unit = 'i'
 Last code unit = 's'
@@ -1225,7 +1225,7 @@ Subject length lower bound = 3
  0+ ippi
 
 /(?<=[Ms])iss/I,aftertext,altglobal
-Capturing subpattern count = 0
+Capture group count = 0
 Max lookbehind = 1
 First code unit = 'i'
 Last code unit = 's'
@@ -1235,7 +1235,7 @@ Subject length lower bound = 3
  0+ issippi
 
 /^iss/Ig,aftertext
-Capturing subpattern count = 0
+Capture group count = 0
 Compile options: <none>
 Overall options: anchored
 First code unit = 'i'
@@ -1245,7 +1245,7 @@ Subject length lower bound = 3
  0+ issippi
 
 /.*iss/Ig,aftertext
-Capturing subpattern count = 0
+Capture group count = 0
 First code unit at start or follows newline
 Last code unit = 's'
 Subject length lower bound = 3
@@ -1256,7 +1256,7 @@ Subject length lower bound = 3
  0+ pqr
 
 /.i./Ig,aftertext
-Capturing subpattern count = 0
+Capture group count = 0
 Last code unit = 'i'
 Subject length lower bound = 3
     Mississippi
@@ -1285,7 +1285,7 @@ Subject length lower bound = 3
  0+ souri river
 
 /^.is/Ig,aftertext
-Capturing subpattern count = 0
+Capture group count = 0
 Compile options: <none>
 Overall options: anchored
 Subject length lower bound = 3
@@ -1294,7 +1294,7 @@ Subject length lower bound = 3
  0+ sissippi
 
 /^ab\n/Ig,aftertext
-Capturing subpattern count = 0
+Capture group count = 0
 Contains explicit CR or LF match
 Compile options: <none>
 Overall options: anchored
@@ -1305,7 +1305,7 @@ Subject length lower bound = 3
  0+ ab\x0acd
 
 /^ab\n/Igm,aftertext
-Capturing subpattern count = 0
+Capture group count = 0
 Contains explicit CR or LF match
 Options: multiline
 First code unit at start or follows newline
@@ -1329,238 +1329,238 @@ Subject length lower bound = 3
  0+ xyz
 
 /abc/I
-Capturing subpattern count = 0
+Capture group count = 0
 First code unit = 'a'
 Last code unit = 'c'
 Subject length lower bound = 3
 
 /abc|bac/I
-Capturing subpattern count = 0
+Capture group count = 0
 Starting code units: a b 
 Last code unit = 'c'
 Subject length lower bound = 3
 
 /(abc|bac)/I
-Capturing subpattern count = 1
+Capture group count = 1
 Starting code units: a b 
 Last code unit = 'c'
 Subject length lower bound = 3
 
 /(abc|(c|dc))/I
-Capturing subpattern count = 2
+Capture group count = 2
 Starting code units: a c d 
 Last code unit = 'c'
 Subject length lower bound = 1
 
 /(abc|(d|de)c)/I
-Capturing subpattern count = 2
+Capture group count = 2
 Starting code units: a d 
 Last code unit = 'c'
 Subject length lower bound = 2
 
 /a*/I
-Capturing subpattern count = 0
+Capture group count = 0
 May match empty string
 Subject length lower bound = 0
 
 /a+/I
-Capturing subpattern count = 0
+Capture group count = 0
 First code unit = 'a'
 Subject length lower bound = 1
 
 /(baa|a+)/I
-Capturing subpattern count = 1
+Capture group count = 1
 Starting code units: a b 
 Last code unit = 'a'
 Subject length lower bound = 1
 
 /a{0,3}/I
-Capturing subpattern count = 0
+Capture group count = 0
 May match empty string
 Subject length lower bound = 0
 
 /baa{3,}/I
-Capturing subpattern count = 0
+Capture group count = 0
 First code unit = 'b'
 Last code unit = 'a'
 Subject length lower bound = 5
 
 /"([^\\"]+|\\.)*"/I
-Capturing subpattern count = 1
+Capture group count = 1
 First code unit = '"'
 Last code unit = '"'
 Subject length lower bound = 2
 
 /(abc|ab[cd])/I
-Capturing subpattern count = 1
+Capture group count = 1
 First code unit = 'a'
 Subject length lower bound = 3
 
 /(a|.)/I
-Capturing subpattern count = 1
+Capture group count = 1
 Subject length lower bound = 1
 
 /a|ba|\w/I
-Capturing subpattern count = 0
+Capture group count = 0
 Starting code units: 0 1 2 3 4 5 6 7 8 9 A B C D E F G H I J K L M N O P 
   Q R S T U V W X Y Z _ a b c d e f g h i j k l m n o p q r s t u v w x y z 
 Subject length lower bound = 1
 
 /abc(?=pqr)/I
-Capturing subpattern count = 0
+Capture group count = 0
 First code unit = 'a'
 Last code unit = 'r'
 Subject length lower bound = 3
 
 /...(?<=abc)/I
-Capturing subpattern count = 0
+Capture group count = 0
 Max lookbehind = 3
 Subject length lower bound = 3
 
 /abc(?!pqr)/I
-Capturing subpattern count = 0
+Capture group count = 0
 First code unit = 'a'
 Last code unit = 'c'
 Subject length lower bound = 3
 
 /ab./I
-Capturing subpattern count = 0
+Capture group count = 0
 First code unit = 'a'
 Last code unit = 'b'
 Subject length lower bound = 3
 
 /ab[xyz]/I
-Capturing subpattern count = 0
+Capture group count = 0
 First code unit = 'a'
 Last code unit = 'b'
 Subject length lower bound = 3
 
 /abc*/I
-Capturing subpattern count = 0
+Capture group count = 0
 First code unit = 'a'
 Last code unit = 'b'
 Subject length lower bound = 2
 
 /ab.c*/I
-Capturing subpattern count = 0
+Capture group count = 0
 First code unit = 'a'
 Last code unit = 'b'
 Subject length lower bound = 3
 
 /a.c*/I
-Capturing subpattern count = 0
+Capture group count = 0
 First code unit = 'a'
 Subject length lower bound = 2
 
 /.c*/I
-Capturing subpattern count = 0
+Capture group count = 0
 Subject length lower bound = 1
 
 /ac*/I
-Capturing subpattern count = 0
+Capture group count = 0
 First code unit = 'a'
 Subject length lower bound = 1
 
 /(a.c*|b.c*)/I
-Capturing subpattern count = 1
+Capture group count = 1
 Starting code units: a b 
 Subject length lower bound = 2
 
 /a.c*|aba/I
-Capturing subpattern count = 0
+Capture group count = 0
 First code unit = 'a'
 Subject length lower bound = 2
 
 /.+a/I
-Capturing subpattern count = 0
+Capture group count = 0
 Last code unit = 'a'
 Subject length lower bound = 2
 
 /(?=abcda)a.*/I
-Capturing subpattern count = 0
+Capture group count = 0
 First code unit = 'a'
 Last code unit = 'a'
 Subject length lower bound = 1
 
 /(?=a)a.*/I
-Capturing subpattern count = 0
+Capture group count = 0
 First code unit = 'a'
 Subject length lower bound = 1
 
 /a(b)*/I
-Capturing subpattern count = 1
+Capture group count = 1
 First code unit = 'a'
 Subject length lower bound = 1
 
 /a\d*/I
-Capturing subpattern count = 0
+Capture group count = 0
 First code unit = 'a'
 Subject length lower bound = 1
 
 /ab\d*/I
-Capturing subpattern count = 0
+Capture group count = 0
 First code unit = 'a'
 Last code unit = 'b'
 Subject length lower bound = 2
 
 /a(\d)*/I
-Capturing subpattern count = 1
+Capture group count = 1
 First code unit = 'a'
 Subject length lower bound = 1
 
 /abcde{0,0}/I
-Capturing subpattern count = 0
+Capture group count = 0
 First code unit = 'a'
 Last code unit = 'd'
 Subject length lower bound = 4
 
 /ab\d+/I
-Capturing subpattern count = 0
+Capture group count = 0
 First code unit = 'a'
 Last code unit = 'b'
 Subject length lower bound = 3
 
 /a(?(1)b)(.)/I
-Capturing subpattern count = 1
+Capture group count = 1
 Max back reference = 1
 First code unit = 'a'
 Subject length lower bound = 2
 
 /a(?(1)bag|big)(.)/I
-Capturing subpattern count = 1
+Capture group count = 1
 Max back reference = 1
 First code unit = 'a'
 Last code unit = 'g'
 Subject length lower bound = 5
 
 /a(?(1)bag|big)*(.)/I
-Capturing subpattern count = 1
+Capture group count = 1
 Max back reference = 1
 First code unit = 'a'
 Subject length lower bound = 2
 
 /a(?(1)bag|big)+(.)/I
-Capturing subpattern count = 1
+Capture group count = 1
 Max back reference = 1
 First code unit = 'a'
 Last code unit = 'g'
 Subject length lower bound = 5
 
 /a(?(1)b..|b..)(.)/I
-Capturing subpattern count = 1
+Capture group count = 1
 Max back reference = 1
 First code unit = 'a'
 Last code unit = 'b'
 Subject length lower bound = 5
 
 /ab\d{0}e/I
-Capturing subpattern count = 0
+Capture group count = 0
 First code unit = 'a'
 Last code unit = 'e'
 Subject length lower bound = 3
 
 /a?b?/I
-Capturing subpattern count = 0
+Capture group count = 0
 May match empty string
 Subject length lower bound = 0
     a
@@ -1576,7 +1576,7 @@ Subject length lower bound = 0
 No match
 
 /|-/I
-Capturing subpattern count = 0
+Capture group count = 0
 May match empty string
 Subject length lower bound = 0
     abcd
@@ -1590,7 +1590,7 @@ Subject length lower bound = 0
 No match
 
 /^.?abcd/I
-Capturing subpattern count = 0
+Capture group count = 0
 Compile options: <none>
 Overall options: anchored
 Last code unit = 'd'
@@ -1604,7 +1604,7 @@ Subject length lower bound = 4
   )*            # Zero or more contents
   \)            # Closing )
   /Ix
-Capturing subpattern count = 0
+Capture group count = 0
 Options: extended
 First code unit = '('
 Last code unit = ')'
@@ -1632,7 +1632,7 @@ No match
 No match
 
 /\(  ( (?>[^()]+) | (?R) )* \) /Igx
-Capturing subpattern count = 1
+Capture group count = 1
 Options: extended
 First code unit = '('
 Last code unit = ')'
@@ -1647,7 +1647,7 @@ Subject length lower bound = 2
  1: z
 
 /\(  (?: (?>[^()]+) | (?R) ) \) /Ix
-Capturing subpattern count = 0
+Capture group count = 0
 Options: extended
 First code unit = '('
 Last code unit = ')'
@@ -1665,7 +1665,7 @@ Subject length lower bound = 3
 No match
 
 /\(  (?: (?>[^()]+) | (?R) )? \) /Ix
-Capturing subpattern count = 0
+Capture group count = 0
 Options: extended
 First code unit = '('
 Last code unit = ')'
@@ -1676,7 +1676,7 @@ Subject length lower bound = 2
  0: (fsh)
 
 /\(  ( (?>[^()]+) | (?R) )* \) /Ix
-Capturing subpattern count = 1
+Capture group count = 1
 Options: extended
 First code unit = '('
 Last code unit = ')'
@@ -1686,7 +1686,7 @@ Subject length lower bound = 2
  1: cd
 
 /\( ( ( (?>[^()]+) | (?R) )* ) \) /Ix
-Capturing subpattern count = 2
+Capture group count = 2
 Options: extended
 First code unit = '('
 Last code unit = ')'
@@ -1697,7 +1697,7 @@ Subject length lower bound = 2
  2: cd
 
 /\( (123)? ( ( (?>[^()]+) | (?R) )* ) \) /Ix
-Capturing subpattern count = 3
+Capture group count = 3
 Options: extended
 First code unit = '('
 Last code unit = ')'
@@ -1714,7 +1714,7 @@ Subject length lower bound = 2
  3: cd
 
 /\( ( (123)? ( (?>[^()]+) | (?R) )* ) \) /Ix
-Capturing subpattern count = 3
+Capture group count = 3
 Options: extended
 First code unit = '('
 Last code unit = ')'
@@ -1731,7 +1731,7 @@ Subject length lower bound = 2
  3: cd
 
 /\( (((((((((( ( (?>[^()]+) | (?R) )* )))))))))) \) /Ix
-Capturing subpattern count = 11
+Capture group count = 11
 Options: extended
 First code unit = '('
 Last code unit = ')'
@@ -1751,7 +1751,7 @@ Subject length lower bound = 2
 11: cd
 
 /\( ( ( (?>[^()<>]+) | ((?>[^()]+)) | (?R) )* ) \) /Ix
-Capturing subpattern count = 3
+Capture group count = 3
 Options: extended
 First code unit = '('
 Last code unit = ')'
@@ -1762,7 +1762,7 @@ Subject length lower bound = 2
  2: 123
 
 /\( ( ( (?>[^()]+) | ((?R)) )* ) \) /Ix
-Capturing subpattern count = 3
+Capture group count = 3
 Options: extended
 First code unit = '('
 Last code unit = ')'
@@ -1786,7 +1786,7 @@ Subject length lower bound = 2
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Compile options: <none>
 Overall options: anchored
 Starting code units: 0 1 2 3 4 5 6 7 8 9 A B C D E F G H I J K L M N O P 
@@ -1801,7 +1801,7 @@ Subject length lower bound = 1
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Compile options: <none>
 Overall options: anchored
 Starting code units: \x00 \x01 \x02 \x03 \x04 \x05 \x06 \x07 \x08 \x09 \x0a 
@@ -1826,7 +1826,7 @@ Subject length lower bound = 1
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Compile options: <none>
 Overall options: anchored
 Starting code units: A B C D E F G H I J K L M N O P Q R S T U V W X Y Z 
@@ -1841,7 +1841,7 @@ Subject length lower bound = 1
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Compile options: <none>
 Overall options: anchored
 Starting code units: \x00 \x01 \x02 \x03 \x04 \x05 \x06 \x07 \x08 \x09 \x0a 
@@ -1860,7 +1860,7 @@ Starting code units: \x00 \x01 \x02 \x03 \x04 \x05 \x06 \x07 \x08 \x09 \x0a
 Subject length lower bound = 1
 
 /[_[:alpha:]]/I
-Capturing subpattern count = 0
+Capture group count = 0
 Starting code units: A B C D E F G H I J K L M N O P Q R S T U V W X Y Z 
   _ a b c d e f g h i j k l m n o p q r s t u v w x y z 
 Subject length lower bound = 1
@@ -1873,7 +1873,7 @@ Subject length lower bound = 1
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Compile options: <none>
 Overall options: anchored
 Starting code units: \x00 \x01 \x02 \x03 \x04 \x05 \x06 \x07 \x08 \x09 \x0a 
@@ -1892,7 +1892,7 @@ Subject length lower bound = 1
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Compile options: <none>
 Overall options: anchored
 Starting code units: \x80 \x81 \x82 \x83 \x84 \x85 \x86 \x87 \x88 \x89 \x8a 
@@ -1914,7 +1914,7 @@ Subject length lower bound = 1
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Compile options: <none>
 Overall options: anchored
 Starting code units: \x09 \x20 
@@ -1928,7 +1928,7 @@ Subject length lower bound = 1
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Compile options: <none>
 Overall options: anchored
 Starting code units: \x00 \x01 \x02 \x03 \x04 \x05 \x06 \x07 \x08 \x0a \x0b 
@@ -1948,7 +1948,7 @@ Starting code units: \x00 \x01 \x02 \x03 \x04 \x05 \x06 \x07 \x08 \x0a \x0b
 Subject length lower bound = 1
 
 /[\n\x0b\x0c\x0d[:blank:]]/I
-Capturing subpattern count = 0
+Capture group count = 0
 Contains explicit CR or LF match
 Starting code units: \x09 \x0a \x0b \x0c \x0d \x20 
 Subject length lower bound = 1
@@ -1961,7 +1961,7 @@ Subject length lower bound = 1
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Compile options: <none>
 Overall options: anchored
 Starting code units: \x00 \x01 \x02 \x03 \x04 \x05 \x06 \x07 \x08 \x09 \x0a 
@@ -1977,7 +1977,7 @@ Subject length lower bound = 1
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Compile options: <none>
 Overall options: anchored
 Starting code units: 0 1 2 3 4 5 6 7 8 9 
@@ -1991,7 +1991,7 @@ Subject length lower bound = 1
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Compile options: <none>
 Overall options: anchored
 Starting code units: ! " # $ % & ' ( ) * + , - . / 0 1 2 3 4 5 6 7 8 9 : 
@@ -2007,7 +2007,7 @@ Subject length lower bound = 1
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Compile options: <none>
 Overall options: anchored
 Starting code units: a b c d e f g h i j k l m n o p q r s t u v w x y z 
@@ -2021,7 +2021,7 @@ Subject length lower bound = 1
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Compile options: <none>
 Overall options: anchored
 Starting code units: \x20 ! " # $ % & ' ( ) * + , - . / 0 1 2 3 4 5 6 7 8 
@@ -2037,7 +2037,7 @@ Subject length lower bound = 1
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Compile options: <none>
 Overall options: anchored
 Starting code units: ! " # $ % & ' ( ) * + , - . / : ; < = > ? @ [ \ ] ^ 
@@ -2052,7 +2052,7 @@ Subject length lower bound = 1
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Compile options: <none>
 Overall options: anchored
 Starting code units: \x09 \x0a \x0b \x0c \x0d \x20 
@@ -2066,7 +2066,7 @@ Subject length lower bound = 1
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Compile options: <none>
 Overall options: anchored
 Starting code units: A B C D E F G H I J K L M N O P Q R S T U V W X Y Z 
@@ -2080,7 +2080,7 @@ Subject length lower bound = 1
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Compile options: <none>
 Overall options: anchored
 Starting code units: 0 1 2 3 4 5 6 7 8 9 A B C D E F a b c d e f 
@@ -2094,7 +2094,7 @@ Subject length lower bound = 1
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Compile options: <none>
 Overall options: anchored
 Starting code units: 0 1 2 3 4 5 6 7 8 9 A B C D E F G H I J K L M N O P 
@@ -2109,7 +2109,7 @@ Subject length lower bound = 1
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Compile options: <none>
 Overall options: anchored
 Starting code units: \x20 ! " # $ % & ' ( ) * + , - . / 0 1 2 3 4 5 6 7 8 
@@ -2134,7 +2134,7 @@ Subject length lower bound = 1
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Compile options: <none>
 Overall options: anchored
 Starting code units: \x00 \x01 \x02 \x03 \x04 \x05 \x06 \x07 \x08 \x09 \x0a 
@@ -2161,7 +2161,7 @@ Subject length lower bound = 1
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Compile options: <none>
 Overall options: anchored
 Starting code units: \x00 \x01 \x02 \x03 \x04 \x05 \x06 \x07 \x08 \x0a \x0b 
@@ -2187,7 +2187,7 @@ Subject length lower bound = 1
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Starting code units: % 0 1 A B C D E F G H I J K L M N O P Q R S T U V W 
   X Y Z a b c d e f g h i j k l m n o p q r s t u v w x y z 
 Subject length lower bound = 1
@@ -2202,7 +2202,7 @@ Failed: error 113 at offset 1: POSIX collating elements are not supported
 Failed: error 130 at offset 3: unknown POSIX class name
 
 /[[:upper:]]/Ii
-Capturing subpattern count = 0
+Capture group count = 0
 Options: caseless
 Starting code units: A B C D E F G H I J K L M N O P Q R S T U V W X Y Z 
   a b c d e f g h i j k l m n o p q r s t u v w x y z 
@@ -2213,7 +2213,7 @@ Subject length lower bound = 1
  0: a
 
 /[[:lower:]]/Ii
-Capturing subpattern count = 0
+Capture group count = 0
 Options: caseless
 Starting code units: A B C D E F G H I J K L M N O P Q R S T U V W X Y Z 
   a b c d e f g h i j k l m n o p q r s t u v w x y z 
@@ -2224,7 +2224,7 @@ Subject length lower bound = 1
  0: a
 
 /((?-i)[[:lower:]])[[:lower:]]/Ii
-Capturing subpattern count = 1
+Capture group count = 1
 Options: caseless
 Starting code units: a b c d e f g h i j k l m n o p q r s t u v w x y z 
 Subject length lower bound = 2
@@ -2249,7 +2249,7 @@ Failed: error 115 at offset 5: reference to non-existent subpattern
 # This one's here because of the large output vector needed
 
 /(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\w+)\s+(\270)/I
-Capturing subpattern count = 271
+Capture group count = 271
 Max back reference = 270
 Starting code units: 0 1 2 3 4 5 6 7 8 9 
 Subject length lower bound = 0
@@ -2530,7 +2530,7 @@ Subject length lower bound = 0
 # This one's here because Perl does this differently and PCRE2 can't at present
 
 /(main(O)?)+/I
-Capturing subpattern count = 2
+Capture group count = 2
 First code unit = 'm'
 Last code unit = 'n'
 Subject length lower bound = 4
@@ -2545,7 +2545,7 @@ Subject length lower bound = 4
 # These are all cases where Perl does it differently (nested captures)
 
 /^(a(b)?)+$/I
-Capturing subpattern count = 2
+Capture group count = 2
 Compile options: <none>
 Overall options: anchored
 First code unit = 'a'
@@ -2556,7 +2556,7 @@ Subject length lower bound = 1
  2: b
 
 /^(aa(bb)?)+$/I
-Capturing subpattern count = 2
+Capture group count = 2
 Compile options: <none>
 Overall options: anchored
 First code unit = 'a'
@@ -2567,7 +2567,7 @@ Subject length lower bound = 2
  2: bb
 
 /^(aa|aa(bb))+$/I
-Capturing subpattern count = 2
+Capture group count = 2
 Compile options: <none>
 Overall options: anchored
 First code unit = 'a'
@@ -2578,7 +2578,7 @@ Subject length lower bound = 2
  2: bb
 
 /^(aa(bb)??)+$/I
-Capturing subpattern count = 2
+Capture group count = 2
 Compile options: <none>
 Overall options: anchored
 First code unit = 'a'
@@ -2589,7 +2589,7 @@ Subject length lower bound = 2
  2: bb
 
 /^(?:aa(bb)?)+$/I
-Capturing subpattern count = 1
+Capture group count = 1
 Compile options: <none>
 Overall options: anchored
 First code unit = 'a'
@@ -2599,7 +2599,7 @@ Subject length lower bound = 2
  1: bb
 
 /^(aa(b(b))?)+$/I
-Capturing subpattern count = 3
+Capture group count = 3
 Compile options: <none>
 Overall options: anchored
 First code unit = 'a'
@@ -2611,7 +2611,7 @@ Subject length lower bound = 2
  3: b
 
 /^(?:aa(b(b))?)+$/I
-Capturing subpattern count = 2
+Capture group count = 2
 Compile options: <none>
 Overall options: anchored
 First code unit = 'a'
@@ -2622,7 +2622,7 @@ Subject length lower bound = 2
  2: b
 
 /^(?:aa(b(?:b))?)+$/I
-Capturing subpattern count = 1
+Capture group count = 1
 Compile options: <none>
 Overall options: anchored
 First code unit = 'a'
@@ -2632,7 +2632,7 @@ Subject length lower bound = 2
  1: bb
 
 /^(?:aa(bb(?:b))?)+$/I
-Capturing subpattern count = 1
+Capture group count = 1
 Compile options: <none>
 Overall options: anchored
 First code unit = 'a'
@@ -2642,7 +2642,7 @@ Subject length lower bound = 2
  1: bbb
 
 /^(?:aa(b(?:bb))?)+$/I
-Capturing subpattern count = 1
+Capture group count = 1
 Compile options: <none>
 Overall options: anchored
 First code unit = 'a'
@@ -2652,7 +2652,7 @@ Subject length lower bound = 2
  1: bbb
 
 /^(?:aa(?:b(b))?)+$/I
-Capturing subpattern count = 1
+Capture group count = 1
 Compile options: <none>
 Overall options: anchored
 First code unit = 'a'
@@ -2662,7 +2662,7 @@ Subject length lower bound = 2
  1: b
 
 /^(?:aa(?:b(bb))?)+$/I
-Capturing subpattern count = 1
+Capture group count = 1
 Compile options: <none>
 Overall options: anchored
 First code unit = 'a'
@@ -2672,7 +2672,7 @@ Subject length lower bound = 2
  1: bb
 
 /^(aa(b(bb))?)+$/I
-Capturing subpattern count = 3
+Capture group count = 3
 Compile options: <none>
 Overall options: anchored
 First code unit = 'a'
@@ -2684,7 +2684,7 @@ Subject length lower bound = 2
  3: bb
 
 /^(aa(bb(bb))?)+$/I
-Capturing subpattern count = 3
+Capture group count = 3
 Compile options: <none>
 Overall options: anchored
 First code unit = 'a'
@@ -2703,7 +2703,7 @@ Subject length lower bound = 2
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 May match empty string
 Options: extended
 Subject length lower bound = 0
@@ -2715,7 +2715,7 @@ Subject length lower bound = 0
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Options: extended
 First code unit = 'a'
 Subject length lower bound = 1
@@ -2727,7 +2727,7 @@ Subject length lower bound = 1
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Starting code units: \x09 \x0a \x0b \x0c \x0d \x20 
 Subject length lower bound = 1
 
@@ -2738,7 +2738,7 @@ Subject length lower bound = 1
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Starting code units: \x00 \x01 \x02 \x03 \x04 \x05 \x06 \x07 \x08 \x0e \x0f 
   \x10 \x11 \x12 \x13 \x14 \x15 \x16 \x17 \x18 \x19 \x1a \x1b \x1c \x1d \x1e 
   \x1f ! " # $ % & ' ( ) * + , - . / 0 1 2 3 4 5 6 7 8 9 : ; < = > ? @ A B C 
@@ -2763,7 +2763,7 @@ Subject length lower bound = 1
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 First code unit = 'a'
 Last code unit = 'b' (caseless)
 Subject length lower bound = 2
@@ -2785,7 +2785,7 @@ No match
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 1
+Capture group count = 1
 First code unit = 'a'
 Last code unit = 'b' (caseless)
 Subject length lower bound = 2
@@ -2806,7 +2806,7 @@ No match
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Options: extended
 First code unit = 'a' (caseless)
 Last code unit = 'c' (caseless)
@@ -2820,7 +2820,7 @@ Subject length lower bound = 3
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Options: extended
 First code unit = 'a' (caseless)
 Last code unit = 'c' (caseless)
@@ -2833,7 +2833,7 @@ Subject length lower bound = 3
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 First code unit = '1'
 Last code unit = '0'
 Subject length lower bound = 300
@@ -2845,7 +2845,7 @@ Subject length lower bound = 300
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 First code unit = '1'
 Last code unit = '0'
 Subject length lower bound = 300
@@ -2856,7 +2856,7 @@ Subject length lower bound = 300
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 May match empty string
 Subject length lower bound = 0
     \
@@ -2869,7 +2869,7 @@ Subject length lower bound = 0
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 First code unit = 'x'
 Subject length lower bound = 1
 
@@ -2880,7 +2880,7 @@ Subject length lower bound = 1
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 First code unit = ' '
 Subject length lower bound = 1
 
@@ -2891,7 +2891,7 @@ Subject length lower bound = 1
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 First code unit = 'a'
 Subject length lower bound = 1
   abc
@@ -2908,7 +2908,7 @@ Subject length lower bound = 1
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 First code unit = 'a'
 Last code unit = 'b'
 Subject length lower bound = 2
@@ -2922,7 +2922,7 @@ Subject length lower bound = 2
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 First code unit = 'a'
 Last code unit = 'c'
 Subject length lower bound = 3
@@ -2935,7 +2935,7 @@ Subject length lower bound = 3
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Starting code units: 0 1 2 3 4 5 6 7 8 9 A B C D E F G H I J K L M N O P 
   Q R S T U V W X Y Z _ a b c d e f g h i j k l m n o p q r s t u v w x y z 
 Subject length lower bound = 1
@@ -2950,7 +2950,7 @@ No match
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 May match empty string
 Subject length lower bound = 0
 
@@ -2961,7 +2961,7 @@ Subject length lower bound = 0
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 First code unit = 'x'
 Subject length lower bound = 1
 
@@ -3011,12 +3011,12 @@ Subject length lower bound = 1
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 1
+Capture group count = 1
 May match empty string
 Subject length lower bound = 0
 
 /^(\w++|\s++)*$/I
-Capturing subpattern count = 1
+Capture group count = 1
 May match empty string
 Compile options: <none>
 Overall options: anchored
@@ -3029,7 +3029,7 @@ Subject length lower bound = 0
 No match
 
 /(\d++)(\w)/I
-Capturing subpattern count = 2
+Capture group count = 2
 Starting code units: 0 1 2 3 4 5 6 7 8 9 
 Subject length lower bound = 2
     12345a
@@ -3041,7 +3041,7 @@ Subject length lower bound = 2
 No match
 
 /a++b/I
-Capturing subpattern count = 0
+Capture group count = 0
 First code unit = 'a'
 Last code unit = 'b'
 Subject length lower bound = 2
@@ -3049,7 +3049,7 @@ Subject length lower bound = 2
  0: aaab
 
 /(a++b)/I
-Capturing subpattern count = 1
+Capture group count = 1
 First code unit = 'a'
 Last code unit = 'b'
 Subject length lower bound = 2
@@ -3058,7 +3058,7 @@ Subject length lower bound = 2
  1: aaab
 
 /(a++)b/I
-Capturing subpattern count = 1
+Capture group count = 1
 First code unit = 'a'
 Last code unit = 'b'
 Subject length lower bound = 2
@@ -3067,7 +3067,7 @@ Subject length lower bound = 2
  1: aaa
 
 /([^()]++|\([^()]*\))+/I
-Capturing subpattern count = 1
+Capture group count = 1
 Starting code units: \x00 \x01 \x02 \x03 \x04 \x05 \x06 \x07 \x08 \x09 \x0a 
   \x0b \x0c \x0d \x0e \x0f \x10 \x11 \x12 \x13 \x14 \x15 \x16 \x17 \x18 \x19 
   \x1a \x1b \x1c \x1d \x1e \x1f \x20 ! " # $ % & ' ( * + , - . / 0 1 2 3 4 5 
@@ -3088,7 +3088,7 @@ Subject length lower bound = 1
  1: x
 
 /\(([^()]++|\([^()]+\))+\)/I
-Capturing subpattern count = 1
+Capture group count = 1
 First code unit = '('
 Last code unit = ')'
 Subject length lower bound = 3
@@ -3123,7 +3123,7 @@ No match
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 1
+Capture group count = 1
 First code unit = 'a'
 Last code unit = 'c'
 Subject length lower bound = 3
@@ -3149,7 +3149,7 @@ Failed: error 109 at offset 7: quantifier does not follow a repeatable item
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 First code unit = 'x'
 Last code unit = 'b'
 Subject length lower bound = 3
@@ -3165,7 +3165,7 @@ Subject length lower bound = 3
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 First code unit = 'x'
 Last code unit = 'b'
 Subject length lower bound = 3
@@ -3193,7 +3193,7 @@ Subject length lower bound = 3
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 5
+Capture group count = 5
 Compile options: <none>
 Overall options: anchored
 First code unit = 'a'
@@ -3209,7 +3209,7 @@ Subject length lower bound = 3
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Compile options: <none>
 Overall options: anchored
 First code unit = 'x'
@@ -3228,7 +3228,7 @@ Subject length lower bound = 3
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 1
+Capture group count = 1
 Compile options: <none>
 Overall options: anchored
 First code unit = 'x'
@@ -3282,7 +3282,7 @@ Failed: error 106 at offset 10: missing terminating ] for character class
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Starting code units: \x09 \x0a \x0b \x0c \x0d \x20 
 Subject length lower bound = 1
 
@@ -3293,7 +3293,7 @@ Subject length lower bound = 1
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Starting code units: \x09 \x0a \x0b \x0c \x0d \x20 
 Subject length lower bound = 1
 
@@ -3304,12 +3304,12 @@ Subject length lower bound = 1
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Starting code units: \x09 \x0a \x0b \x0c \x0d \x20 a b c d e 
 Subject length lower bound = 1
 
 /< (?: (?(R) \d++  | [^<>]*+) | (?R)) * >/Ix
-Capturing subpattern count = 0
+Capture group count = 0
 Options: extended
 First code unit = '<'
 Last code unit = '>'
@@ -3338,7 +3338,7 @@ No match
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Max lookbehind = 1
 First code unit = '8'
 Last code unit = 'X'
@@ -3352,43 +3352,43 @@ Subject length lower bound = 409
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Max lookbehind = 1
 First code unit = '$'
 Last code unit = 'X'
 Subject length lower bound = 404
 
 /(.*)\d+\1/I
-Capturing subpattern count = 1
+Capture group count = 1
 Max back reference = 1
 Subject length lower bound = 1
 
 /(.*)\d+/I
-Capturing subpattern count = 1
+Capture group count = 1
 First code unit at start or follows newline
 Subject length lower bound = 1
 
 /(.*)\d+\1/Is
-Capturing subpattern count = 1
+Capture group count = 1
 Max back reference = 1
 Options: dotall
 Subject length lower bound = 1
 
 /(.*)\d+/Is
-Capturing subpattern count = 1
+Capture group count = 1
 Compile options: dotall
 Overall options: anchored dotall
 Subject length lower bound = 1
 
 /(.*(xyz))\d+\2/I
-Capturing subpattern count = 2
+Capture group count = 2
 Max back reference = 2
 First code unit at start or follows newline
 Last code unit = 'z'
 Subject length lower bound = 7
 
 /((.*))\d+\1/I
-Capturing subpattern count = 2
+Capture group count = 2
 Max back reference = 1
 Subject length lower bound = 1
     abc123bc
@@ -3397,143 +3397,143 @@ Subject length lower bound = 1
  2: bc
 
 /a[b]/I
-Capturing subpattern count = 0
+Capture group count = 0
 First code unit = 'a'
 Last code unit = 'b'
 Subject length lower bound = 2
 
 /(?=a).*/I
-Capturing subpattern count = 0
+Capture group count = 0
 May match empty string
 First code unit = 'a'
 Subject length lower bound = 0
 
 /(?=abc).xyz/Ii
-Capturing subpattern count = 0
+Capture group count = 0
 Options: caseless
 First code unit = 'a' (caseless)
 Last code unit = 'z' (caseless)
 Subject length lower bound = 4
 
 /(?=abc)(?i).xyz/I
-Capturing subpattern count = 0
+Capture group count = 0
 First code unit = 'a'
 Last code unit = 'z' (caseless)
 Subject length lower bound = 4
 
 /(?=a)(?=b)/I
-Capturing subpattern count = 0
+Capture group count = 0
 May match empty string
 First code unit = 'a'
 Subject length lower bound = 0
 
 /(?=.)a/I
-Capturing subpattern count = 0
+Capture group count = 0
 First code unit = 'a'
 Subject length lower bound = 1
 
 /((?=abcda)a)/I
-Capturing subpattern count = 1
+Capture group count = 1
 First code unit = 'a'
 Last code unit = 'a'
 Subject length lower bound = 1
 
 /((?=abcda)ab)/I
-Capturing subpattern count = 1
+Capture group count = 1
 First code unit = 'a'
 Last code unit = 'b'
 Subject length lower bound = 2
 
 /()a/I
-Capturing subpattern count = 1
+Capture group count = 1
 First code unit = 'a'
 Subject length lower bound = 1
 
 /(?:(?=.)|(?<!x))a/I
-Capturing subpattern count = 0
+Capture group count = 0
 Max lookbehind = 1
 First code unit = 'a'
 Subject length lower bound = 1
 
 /(?(1)ab|ac)(.)/I
-Capturing subpattern count = 1
+Capture group count = 1
 Max back reference = 1
 First code unit = 'a'
 Subject length lower bound = 3
 
 /(?(1)abz|acz)(.)/I
-Capturing subpattern count = 1
+Capture group count = 1
 Max back reference = 1
 First code unit = 'a'
 Last code unit = 'z'
 Subject length lower bound = 4
 
 /(?(1)abz)(.)/I
-Capturing subpattern count = 1
+Capture group count = 1
 Max back reference = 1
 Subject length lower bound = 1
 
 /(?(1)abz)(1)23/I
-Capturing subpattern count = 1
+Capture group count = 1
 Max back reference = 1
 Last code unit = '3'
 Subject length lower bound = 3
 
 /(a)+/I
-Capturing subpattern count = 1
+Capture group count = 1
 First code unit = 'a'
 Subject length lower bound = 1
 
 /(a){2,3}/I
-Capturing subpattern count = 1
+Capture group count = 1
 First code unit = 'a'
 Last code unit = 'a'
 Subject length lower bound = 2
 
 /(a)*/I
-Capturing subpattern count = 1
+Capture group count = 1
 May match empty string
 Subject length lower bound = 0
 
 /[a]/I
-Capturing subpattern count = 0
+Capture group count = 0
 First code unit = 'a'
 Subject length lower bound = 1
 
 /[ab]/I
-Capturing subpattern count = 0
+Capture group count = 0
 Starting code units: a b 
 Subject length lower bound = 1
 
 /[ab]/I
-Capturing subpattern count = 0
+Capture group count = 0
 Starting code units: a b 
 Subject length lower bound = 1
 
 /[^a]/I
-Capturing subpattern count = 0
+Capture group count = 0
 Subject length lower bound = 1
 
 /\d456/I
-Capturing subpattern count = 0
+Capture group count = 0
 Starting code units: 0 1 2 3 4 5 6 7 8 9 
 Last code unit = '6'
 Subject length lower bound = 4
 
 /\d456/I
-Capturing subpattern count = 0
+Capture group count = 0
 Starting code units: 0 1 2 3 4 5 6 7 8 9 
 Last code unit = '6'
 Subject length lower bound = 4
 
 /a^b/I
-Capturing subpattern count = 0
+Capture group count = 0
 First code unit = 'a'
 Last code unit = 'b'
 Subject length lower bound = 2
 
 /^a/Im
-Capturing subpattern count = 0
+Capture group count = 0
 Options: multiline
 First code unit at start or follows newline
 Last code unit = 'a'
@@ -3547,24 +3547,24 @@ Subject length lower bound = 1
 No match
 
 /c|abc/I
-Capturing subpattern count = 0
+Capture group count = 0
 Starting code units: a c 
 Last code unit = 'c'
 Subject length lower bound = 1
 
 /(?i)[ab]/I
-Capturing subpattern count = 0
+Capture group count = 0
 Starting code units: A B a b 
 Subject length lower bound = 1
 
 /[ab](?i)cd/I
-Capturing subpattern count = 0
+Capture group count = 0
 Starting code units: a b 
 Last code unit = 'd' (caseless)
 Subject length lower bound = 3
 
 /abc(?C)def/I
-Capturing subpattern count = 0
+Capture group count = 0
 First code unit = 'a'
 Last code unit = 'f'
 Subject length lower bound = 6
@@ -3585,7 +3585,7 @@ No match
 No match
 
 /abc(?C)de(?C1)f/I
-Capturing subpattern count = 0
+Capture group count = 0
 First code unit = 'a'
 Last code unit = 'f'
 Subject length lower bound = 6
@@ -3596,7 +3596,7 @@ Subject length lower bound = 6
  0: abcdef
 
 /(?C1)\dabc(?C2)def/I
-Capturing subpattern count = 0
+Capture group count = 0
 Starting code units: 0 1 2 3 4 5 6 7 8 9 
 Last code unit = 'f'
 Subject length lower bound = 7
@@ -3613,7 +3613,7 @@ Subject length lower bound = 7
 No match
 
 /(?C1)\dabc(?C2)def/I
-Capturing subpattern count = 0
+Capture group count = 0
 Starting code units: 0 1 2 3 4 5 6 7 8 9 
 Last code unit = 'f'
 Subject length lower bound = 7
@@ -3630,7 +3630,7 @@ Subject length lower bound = 7
 No match
 
 /(?C255)ab/I
-Capturing subpattern count = 0
+Capture group count = 0
 First code unit = 'a'
 Last code unit = 'b'
 Subject length lower bound = 2
@@ -3645,7 +3645,7 @@ Failed: error 182 at offset 3: unrecognized string delimiter follows (?C
 Failed: error 139 at offset 5: closing parenthesis for (?C expected
 
 /abc(?C)def/I
-Capturing subpattern count = 0
+Capture group count = 0
 First code unit = 'a'
 Last code unit = 'f'
 Subject length lower bound = 6
@@ -3655,7 +3655,7 @@ Subject length lower bound = 6
  0: abcdef
 
 /(abc)(?C)de(?C1)f/I
-Capturing subpattern count = 1
+Capture group count = 1
 First code unit = 'a'
 Last code unit = 'f'
 Subject length lower bound = 6
@@ -3687,7 +3687,7 @@ Callout 1: last capture = 1
 No match
 
 /(?C0)(abc(?C1))*/I
-Capturing subpattern count = 1
+Capture group count = 1
 May match empty string
 Subject length lower bound = 0
     abcabcabc
@@ -3715,7 +3715,7 @@ Subject length lower bound = 0
  1: abc
 
 /(\d{3}(?C))*/I
-Capturing subpattern count = 1
+Capture group count = 1
 May match empty string
 Subject length lower bound = 0
     123\=callout_capture
@@ -3750,7 +3750,7 @@ Callout 0: last capture = 1
  1: 789
 
 /((xyz)(?C)p|(?C1)xyzabc)/I
-Capturing subpattern count = 2
+Capture group count = 2
 First code unit = 'x'
 Subject length lower bound = 4
     xyzabc\=callout_capture
@@ -3766,7 +3766,7 @@ Callout 1: last capture = 0
  1: xyzabc
 
 /(X)((xyz)(?C)p|(?C1)xyzabc)/I
-Capturing subpattern count = 3
+Capture group count = 3
 First code unit = 'X'
 Last code unit = 'x'
 Subject length lower bound = 5
@@ -3786,7 +3786,7 @@ Callout 1: last capture = 1
  2: xyzabc
 
 /(?=(abc))(?C)abcdef/I
-Capturing subpattern count = 1
+Capture group count = 1
 First code unit = 'a'
 Last code unit = 'f'
 Subject length lower bound = 6
@@ -3799,7 +3799,7 @@ Callout 0: last capture = 1
  1: abc
 
 /(?!(abc)(?C1)d)(?C2)abcxyz/I
-Capturing subpattern count = 1
+Capture group count = 1
 First code unit = 'a'
 Last code unit = 'z'
 Subject length lower bound = 6
@@ -3814,7 +3814,7 @@ Callout 2: last capture = 0
  0: abcxyz
 
 /(?<=(abc)(?C))xyz/I
-Capturing subpattern count = 1
+Capture group count = 1
 Max lookbehind = 3
 First code unit = 'x'
 Last code unit = 'z'
@@ -3828,7 +3828,7 @@ Callout 0: last capture = 1
  1: abc
 
 /a(b+)(c*)(?C1)/I
-Capturing subpattern count = 2
+Capture group count = 2
 First code unit = 'a'
 Last code unit = 'b'
 Subject length lower bound = 2
@@ -3840,7 +3840,7 @@ Callout data = 1
 No match
 
 /a(b+?)(c*?)(?C1)/I
-Capturing subpattern count = 2
+Capture group count = 2
 First code unit = 'a'
 Last code unit = 'b'
 Subject length lower bound = 2
@@ -3866,25 +3866,25 @@ Callout data = 1
 No match
 
 /(?C)abc/I
-Capturing subpattern count = 0
+Capture group count = 0
 First code unit = 'a'
 Last code unit = 'c'
 Subject length lower bound = 3
 
 /(?C)^abc/I
-Capturing subpattern count = 0
+Capture group count = 0
 Compile options: <none>
 Overall options: anchored
 First code unit = 'a'
 Subject length lower bound = 3
 
 /(?C)a|b/I
-Capturing subpattern count = 0
+Capture group count = 0
 Starting code units: a b 
 Subject length lower bound = 1
 
 /a|(b)(?C)/I
-Capturing subpattern count = 1
+Capture group count = 1
 Starting code units: a b 
 Subject length lower bound = 1
     b
@@ -3894,7 +3894,7 @@ Subject length lower bound = 1
  1: b
 
 /x(ab|(bc|(de|(?R))))/I
-Capturing subpattern count = 3
+Capture group count = 3
 First code unit = 'x'
 Subject length lower bound = 3
     xab
@@ -3924,7 +3924,7 @@ Subject length lower bound = 3
 No match
 
 /^([^()]|\((?1)*\))*$/I
-Capturing subpattern count = 1
+Capture group count = 1
 May match empty string
 Compile options: <none>
 Overall options: anchored
@@ -3943,7 +3943,7 @@ Subject length lower bound = 0
 No match
 
 /^>abc>([^()]|\((?1)*\))*<xyz<$/I
-Capturing subpattern count = 1
+Capture group count = 1
 Compile options: <none>
 Overall options: anchored
 First code unit = '>'
@@ -3970,7 +3970,7 @@ Subject length lower bound = 10
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 1
+Capture group count = 1
 First code unit = 'a'
 Last code unit = 'b'
 Subject length lower bound = 2
@@ -3988,13 +3988,13 @@ Subject length lower bound = 2
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 1
+Capture group count = 1
 First code unit = 'a'
 Last code unit = 'b'
 Subject length lower bound = 2
 
 /^(\d+|\((?1)([+*-])(?1)\)|-(?1))$/I
-Capturing subpattern count = 2
+Capture group count = 2
 Compile options: <none>
 Overall options: anchored
 Starting code units: ( - 0 1 2 3 4 5 6 7 8 9 
@@ -4014,7 +4014,7 @@ Subject length lower bound = 1
 No match
 
 /^(x(y|(?1){2})z)/I
-Capturing subpattern count = 2
+Capture group count = 2
 Compile options: <none>
 Overall options: anchored
 First code unit = 'x'
@@ -4034,7 +4034,7 @@ No match
 No match
 
 /((< (?: (?(R) \d++  | [^<>]*+) | (?2)) * >))/Ix
-Capturing subpattern count = 2
+Capture group count = 2
 Options: extended
 First code unit = '<'
 Last code unit = '>'
@@ -4074,7 +4074,7 @@ Failed: error 115 at offset 3: reference to non-existent subpattern
 Failed: error 114 at offset 10: missing closing parenthesis
 
 /^(abc)def(?1)/I
-Capturing subpattern count = 1
+Capture group count = 1
 Compile options: <none>
 Overall options: anchored
 First code unit = 'a'
@@ -4084,7 +4084,7 @@ Subject length lower bound = 9
  1: abc
 
 /^(a|b|c)=(?1)+/I
-Capturing subpattern count = 1
+Capture group count = 1
 Compile options: <none>
 Overall options: anchored
 Starting code units: a b c 
@@ -4100,7 +4100,7 @@ Subject length lower bound = 2
  1: a
 
 /^(a|b|c)=((?1))+/I
-Capturing subpattern count = 2
+Capture group count = 2
 Compile options: <none>
 Overall options: anchored
 Starting code units: a b c 
@@ -4134,8 +4134,8 @@ Subject length lower bound = 2
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 2
-Named capturing subpatterns:
+Capture group count = 2
+Named capture groups:
   longername2   2
   name1         1
 First code unit = 'a'
@@ -4168,8 +4168,8 @@ Subject length lower bound = 4
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 3
-Named capturing subpatterns:
+Capture group count = 3
+Named capture groups:
   a   3
   c   1
   d   2
@@ -4193,18 +4193,18 @@ Subject length lower bound = 4
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 1
+Capture group count = 1
 Max back reference = 1
-Named capturing subpatterns:
+Named capture groups:
   a   1
 First code unit = 'a'
 Last code unit = 'd'
 Subject length lower bound = 10
 
 /^\W*(?:(?P<one>(?P<two>.)\W*(?P>one)\W*(?P=two)|)|(?P<three>(?P<four>.)\W*(?P>three)\W*(?P=four)|\W*.\W*))\W*$/Ii
-Capturing subpattern count = 4
+Capture group count = 4
 Max back reference = 4
-Named capturing subpatterns:
+Named capture groups:
   four    4
   one     1
   three   3
@@ -4240,7 +4240,7 @@ Subject length lower bound = 0
 No match
 
 /((?(R)a|b))\1(?1)?/I
-Capturing subpattern count = 1
+Capture group count = 1
 Max back reference = 1
 Subject length lower bound = 2
   bb
@@ -4251,21 +4251,21 @@ Subject length lower bound = 2
  1: b
 
 /(.*)a/Is
-Capturing subpattern count = 1
+Capture group count = 1
 Compile options: dotall
 Overall options: anchored dotall
 Last code unit = 'a'
 Subject length lower bound = 1
 
 /(.*)a\1/Is
-Capturing subpattern count = 1
+Capture group count = 1
 Max back reference = 1
 Options: dotall
 Last code unit = 'a'
 Subject length lower bound = 1
 
 /(.*)a(b)\2/Is
-Capturing subpattern count = 2
+Capture group count = 2
 Max back reference = 2
 Compile options: dotall
 Overall options: anchored dotall
@@ -4273,35 +4273,35 @@ Last code unit = 'b'
 Subject length lower bound = 3
 
 /((.*)a|(.*)b)z/Is
-Capturing subpattern count = 3
+Capture group count = 3
 Compile options: dotall
 Overall options: anchored dotall
 Last code unit = 'z'
 Subject length lower bound = 2
 
 /((.*)a|(.*)b)z\1/Is
-Capturing subpattern count = 3
+Capture group count = 3
 Max back reference = 1
 Options: dotall
 Last code unit = 'z'
 Subject length lower bound = 3
 
 /((.*)a|(.*)b)z\2/Is
-Capturing subpattern count = 3
+Capture group count = 3
 Max back reference = 2
 Options: dotall
 Last code unit = 'z'
 Subject length lower bound = 2
 
 /((.*)a|(.*)b)z\3/Is
-Capturing subpattern count = 3
+Capture group count = 3
 Max back reference = 3
 Options: dotall
 Last code unit = 'z'
 Subject length lower bound = 2
 
 /((.*)a|^(.*)b)z\3/Is
-Capturing subpattern count = 3
+Capture group count = 3
 Max back reference = 3
 Compile options: dotall
 Overall options: anchored dotall
@@ -4309,21 +4309,21 @@ Last code unit = 'z'
 Subject length lower bound = 2
 
 /(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)a/Is
-Capturing subpattern count = 31
+Capture group count = 31
 May match empty string
 Compile options: dotall
 Overall options: anchored dotall
 Subject length lower bound = 0
 
 /(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)a\31/Is
-Capturing subpattern count = 31
+Capture group count = 31
 Max back reference = 31
 May match empty string
 Options: dotall
 Subject length lower bound = 0
 
 /(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)a\32/Is
-Capturing subpattern count = 32
+Capture group count = 32
 Max back reference = 32
 May match empty string
 Options: dotall
@@ -4341,7 +4341,7 @@ Subject length lower bound = 0
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Options: no_auto_capture
 First code unit = 'a'
 Last code unit = 'c'
@@ -4361,8 +4361,8 @@ Subject length lower bound = 3
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 1
-Named capturing subpatterns:
+Capture group count = 1
+Named capture groups:
   one   1
 Options: no_auto_capture
 First code unit = 'a'
@@ -4384,8 +4384,8 @@ Subject length lower bound = 3
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 1
-Named capturing subpatterns:
+Capture group count = 1
+Named capture groups:
   named   1
 Options: no_auto_capture
 First code unit = 'a'
@@ -4393,7 +4393,7 @@ Last code unit = 'c'
 Subject length lower bound = 3
 
 /(aaa(?C1)bbb|ab)/I
-Capturing subpattern count = 1
+Capture group count = 1
 First code unit = 'a'
 Last code unit = 'b'
 Subject length lower bound = 2
@@ -4421,8 +4421,8 @@ Callout data = -1
 No match
 
 /ab(?P<one>cd)ef(?P<two>gh)/I
-Capturing subpattern count = 2
-Named capturing subpatterns:
+Capture group count = 2
+Named capture groups:
   one   1
   two   2
 First code unit = 'a'
@@ -4461,8 +4461,8 @@ Copy substring 'three' failed (-49): unknown substring
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 2
-Named capturing subpatterns:
+Capture group count = 2
+Named capture groups:
   Tes    1
   Test   2
 May match empty string
@@ -4478,16 +4478,16 @@ Subject length lower bound = 0
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 2
-Named capturing subpatterns:
+Capture group count = 2
+Named capture groups:
   Tes    2
   Test   1
 May match empty string
 Subject length lower bound = 0
 
 /(?P<Z>zz)(?P<A>aa)/I
-Capturing subpattern count = 2
-Named capturing subpatterns:
+Capture group count = 2
+Named capture groups:
   A   2
   Z   1
 First code unit = 'z'
@@ -4511,8 +4511,8 @@ Failed: error 143 at offset 16: two named subpatterns have the same name (PCRE2_
 Failed: error 143 at offset 31: two named subpatterns have the same name (PCRE2_DUPNAMES not set)
 
 "\[((?P<elem>\d+)(,(?P>elem))*)\]"I
-Capturing subpattern count = 3
-Named capturing subpatterns:
+Capture group count = 3
+Named capture groups:
   elem   2
 First code unit = '['
 Last code unit = ']'
@@ -4527,8 +4527,8 @@ Subject length lower bound = 3
 No match
 
 "\[((?P<elem>\d+)(,(?P>elem))*)?\]"I
-Capturing subpattern count = 3
-Named capturing subpatterns:
+Capture group count = 3
+Named capture groups:
   elem   2
 First code unit = '['
 Last code unit = ']'
@@ -4556,7 +4556,7 @@ Subject length lower bound = 2
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 2
+Capture group count = 2
 May match empty string
 Subject length lower bound = 0
 
@@ -4575,7 +4575,7 @@ Subject length lower bound = 0
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 2
+Capture group count = 2
 May match empty string
 Subject length lower bound = 0
 
@@ -4605,7 +4605,7 @@ Subject length lower bound = 0
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 2
+Capture group count = 2
 May match empty string
 Subject length lower bound = 0
 
@@ -4638,7 +4638,7 @@ Subject length lower bound = 0
 ------------------------------------------------------------------
 
 /((w\/|-|with)*(free|immediate)*.*?shipping\s*[!.-]*)/Ii
-Capturing subpattern count = 3
+Capture group count = 3
 Options: caseless
 Last code unit = 'g' (caseless)
 Subject length lower bound = 8
@@ -4647,7 +4647,7 @@ Subject length lower bound = 8
  1: Baby Bjorn Active Carrier - With free SHIPPING!!
 
 /((w\/|-|with)*(free|immediate)*.*?shipping\s*[!.-]*)/Ii
-Capturing subpattern count = 3
+Capture group count = 3
 Options: caseless
 Last code unit = 'g' (caseless)
 Subject length lower bound = 8
@@ -4664,7 +4664,7 @@ Subject length lower bound = 8
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Last code unit = 'b'
 Subject length lower bound = 1
 
@@ -4682,7 +4682,7 @@ Subject length lower bound = 1
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 1
+Capture group count = 1
 Last code unit = 'c'
 Subject length lower bound = 1
 
@@ -4697,7 +4697,7 @@ Subject length lower bound = 1
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 First code unit = 'a'
 Last code unit = 'f'
 Subject length lower bound = 6
@@ -4719,7 +4719,7 @@ Subject length lower bound = 6
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Options: auto_callout
 First code unit = 'a'
 Last code unit = 'e'
@@ -4754,7 +4754,7 @@ No match
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Options: auto_callout
 Starting code units: a b 
 Last code unit = 'b'
@@ -4797,7 +4797,7 @@ Subject length lower bound = 1
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Options: auto_callout
 Starting code units: a b 
 Last code unit = 'b'
@@ -4840,7 +4840,7 @@ Subject length lower bound = 1
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Options: auto_callout
 First code unit = 'a'
 Last code unit = 'b'
@@ -4897,7 +4897,7 @@ No match
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 1
+Capture group count = 1
 Options: auto_callout
 Starting code units: a d 
 Last code unit = 'x'
@@ -4971,7 +4971,7 @@ No match
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 1
+Capture group count = 1
 Options: auto_callout
 Starting code units: a d 
 Last code unit = 'x'
@@ -5019,7 +5019,7 @@ Subject length lower bound = 4
 No match
 
 /(ab|cd){3,4}/I,auto_callout
-Capturing subpattern count = 1
+Capture group count = 1
 Options: auto_callout
 Starting code units: a c 
 Subject length lower bound = 6
@@ -5111,7 +5111,7 @@ Subject length lower bound = 6
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 1
+Capture group count = 1
 Options: auto_callout
 Starting code units: a b x 
 Subject length lower bound = 2
@@ -5161,7 +5161,7 @@ No match
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 1
+Capture group count = 1
 Options: auto_callout
 Starting code units: a b x 
 Subject length lower bound = 2
@@ -5262,7 +5262,7 @@ No match
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 1
+Capture group count = 1
 Options: auto_callout
 Starting code units: a b x 
 Last code unit = '3'
@@ -5294,7 +5294,7 @@ Subject length lower bound = 11
  1: aac
 
 /\b.*/I
-Capturing subpattern count = 0
+Capture group count = 0
 Max lookbehind = 1
 May match empty string
 Subject length lower bound = 0
@@ -5302,7 +5302,7 @@ Subject length lower bound = 0
  0:  cd
 
 /\b.*/Is
-Capturing subpattern count = 0
+Capture group count = 0
 Max lookbehind = 1
 May match empty string
 Options: dotall
@@ -5311,14 +5311,14 @@ Subject length lower bound = 0
  0:  cd
 
 /(?!.bcd).*/I
-Capturing subpattern count = 0
+Capture group count = 0
 May match empty string
 Subject length lower bound = 0
   Xbcd12345
  0: bcd12345
 
 /abcde/I
-Capturing subpattern count = 0
+Capture group count = 0
 First code unit = 'a'
 Last code unit = 'e'
 Subject length lower bound = 5
@@ -5337,7 +5337,7 @@ Partial match: abc
 No match
 
 "^(0?[1-9]|[12][0-9]|3[01])/(0?[1-9]|1[012])/(20)?\d\d$"I
-Capturing subpattern count = 3
+Capture group count = 3
 Compile options: <none>
 Overall options: anchored
 Starting code units: 0 1 2 3 4 5 6 7 8 9 
@@ -5393,31 +5393,31 @@ No match
 No match
 
 /0{0,2}ABC/I
-Capturing subpattern count = 0
+Capture group count = 0
 Starting code units: 0 A 
 Last code unit = 'C'
 Subject length lower bound = 3
 
 /\d{3,}ABC/I
-Capturing subpattern count = 0
+Capture group count = 0
 Starting code units: 0 1 2 3 4 5 6 7 8 9 
 Last code unit = 'C'
 Subject length lower bound = 6
 
 /\d*ABC/I
-Capturing subpattern count = 0
+Capture group count = 0
 Starting code units: 0 1 2 3 4 5 6 7 8 9 A 
 Last code unit = 'C'
 Subject length lower bound = 3
 
 /[abc]+DE/I
-Capturing subpattern count = 0
+Capture group count = 0
 Starting code units: a b c 
 Last code unit = 'E'
 Subject length lower bound = 3
 
 /[abc]?123/I
-Capturing subpattern count = 0
+Capture group count = 0
 Starting code units: 1 a b c 
 Last code unit = '3'
 Subject length lower bound = 3
@@ -5435,7 +5435,7 @@ Partial match: c12
  0: c123
 
 /^(?:\d){3,5}X/I
-Capturing subpattern count = 0
+Capture group count = 0
 Compile options: <none>
 Overall options: anchored
 Starting code units: 0 1 2 3 4 5 6 7 8 9 
@@ -5462,7 +5462,7 @@ No match
 No match
 
 "<(\w+)/?>(.)*</(\1)>"Igms
-Capturing subpattern count = 3
+Capture group count = 3
 Max back reference = 1
 Options: dotall multiline
 First code unit = '<'
@@ -5475,7 +5475,7 @@ Subject length lower bound = 7
  3: seite
 
 /line\nbreak/I
-Capturing subpattern count = 0
+Capture group count = 0
 Contains explicit CR or LF match
 First code unit = 'l'
 Last code unit = 'k'
@@ -5486,7 +5486,7 @@ Subject length lower bound = 10
  0: line\x0abreak
 
 /line\nbreak/I,firstline
-Capturing subpattern count = 0
+Capture group count = 0
 Contains explicit CR or LF match
 Options: firstline
 First code unit = 'l'
@@ -5499,7 +5499,7 @@ Subject length lower bound = 10
 No match
 
 /line\nbreak/Im,firstline
-Capturing subpattern count = 0
+Capture group count = 0
 Contains explicit CR or LF match
 Options: firstline multiline
 First code unit = 'l'
@@ -5512,7 +5512,7 @@ Subject length lower bound = 10
 No match
 
 /(?i)(?-i)AbCd/I
-Capturing subpattern count = 0
+Capture group count = 0
 First code unit = 'A'
 Last code unit = 'd'
 Subject length lower bound = 4
@@ -5532,7 +5532,7 @@ Failed: error 105 at offset 9: number too big in {} quantifier
 Failed: error 105 at offset 11: number too big in {} quantifier
 
 "(?i:a)(?i:b)(?i:c)(?i:d)(?i:e)(?i:f)(?i:g)(?i:h)(?i:i)(?i:j)(k)(?i:l)A\1B"I
-Capturing subpattern count = 1
+Capture group count = 1
 Max back reference = 1
 First code unit = 'a' (caseless)
 Last code unit = 'B'
@@ -5542,9 +5542,9 @@ Subject length lower bound = 15
  1: k
 
 "(?P<n0>a)(?P<n1>b)(?P<n2>c)(?P<n3>d)(?P<n4>e)(?P<n5>f)(?P<n6>g)(?P<n7>h)(?P<n8>i)(?P<n9>j)(?P<n10>k)(?P<n11>l)A\11B"I
-Capturing subpattern count = 12
+Capture group count = 12
 Max back reference = 11
-Named capturing subpatterns:
+Named capture groups:
   n0    1
   n1    2
   n10  11
@@ -5576,7 +5576,7 @@ Subject length lower bound = 15
 12: l
 
 "(a)(b)(c)(d)(e)(f)(g)(h)(i)(j)(k)(l)A\11B"I
-Capturing subpattern count = 12
+Capture group count = 12
 Max back reference = 11
 First code unit = 'a'
 Last code unit = 'B'
@@ -5597,8 +5597,8 @@ Subject length lower bound = 15
 12: l
 
 "(?P<name0>a)(?P<name1>a)(?P<name2>a)(?P<name3>a)(?P<name4>a)(?P<name5>a)(?P<name6>a)(?P<name7>a)(?P<name8>a)(?P<name9>a)(?P<name10>a)(?P<name11>a)(?P<name12>a)(?P<name13>a)(?P<name14>a)(?P<name15>a)(?P<name16>a)(?P<name17>a)(?P<name18>a)(?P<name19>a)(?P<name20>a)(?P<name21>a)(?P<name22>a)(?P<name23>a)(?P<name24>a)(?P<name25>a)(?P<name26>a)(?P<name27>a)(?P<name28>a)(?P<name29>a)(?P<name30>a)(?P<name31>a)(?P<name32>a)(?P<name33>a)(?P<name34>a)(?P<name35>a)(?P<name36>a)(?P<name37>a)(?P<name38>a)(?P<name39>a)(?P<name40>a)(?P<name41>a)(?P<name42>a)(?P<name43>a)(?P<name44>a)(?P<name45>a)(?P<name46>a)(?P<name47>a)(?P<name48>a)(?P<name49>a)(?P<name50>a)(?P<name51>a)(?P<name52>a)(?P<name53>a)(?P<name54>a)(?P<name55>a)(?P<name56>a)(?P<name57>a)(?P<name58>a)(?P<name59>a)(?P<name60>a)(?P<name61>a)(?P<name62>a)(?P<name63>a)(?P<name64>a)(?P<name65>a)(?P<name66>a)(?P<name67>a)(?P<name68>a)(?P<name69>a)(?P<name70>a)(?P<name71>a)(?P<name72>a)(?P<name73>a)(?P<name74>a)(?P<name75>a)(?P<name76>a)(?P<name77>a)(?P<name78>a)(?P<name79>a)(?P<name80>a)(?P<name81>a)(?P<name82>a)(?P<name83>a)(?P<name84>a)(?P<name85>a)(?P<name86>a)(?P<name87>a)(?P<name88>a)(?P<name89>a)(?P<name90>a)(?P<name91>a)(?P<name92>a)(?P<name93>a)(?P<name94>a)(?P<name95>a)(?P<name96>a)(?P<name97>a)(?P<name98>a)(?P<name99>a)(?P<name100>a)"I
-Capturing subpattern count = 101
-Named capturing subpatterns:
+Capture group count = 101
+Named capture groups:
   name0     1
   name1     2
   name10   11
@@ -5722,7 +5722,7 @@ Matched, but too many substrings
 14: a
 
 "(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)"I
-Capturing subpattern count = 101
+Capture group count = 101
 First code unit = 'a'
 Last code unit = 'a'
 Subject length lower bound = 101
@@ -5745,7 +5745,7 @@ Matched, but too many substrings
 14: a
 
 /[^()]*(?:\((?R)\)[^()]*)*/I
-Capturing subpattern count = 0
+Capture group count = 0
 May match empty string
 Subject length lower bound = 0
     (this(and)that
@@ -5756,7 +5756,7 @@ Subject length lower bound = 0
  0: (this(and)that)stuff
 
 /[^()]*(?:\((?>(?R))\)[^()]*)*/I
-Capturing subpattern count = 0
+Capture group count = 0
 May match empty string
 Subject length lower bound = 0
     (this(and)that
@@ -5765,7 +5765,7 @@ Subject length lower bound = 0
  0: (this(and)that)
 
 /[^()]*(?:\((?R)\))*[^()]*/I
-Capturing subpattern count = 0
+Capture group count = 0
 May match empty string
 Subject length lower bound = 0
     (this(and)that
@@ -5774,7 +5774,7 @@ Subject length lower bound = 0
  0: (this(and)that)
 
 /(?:\((?R)\))*[^()]*/I
-Capturing subpattern count = 0
+Capture group count = 0
 May match empty string
 Subject length lower bound = 0
     (this(and)that
@@ -5785,7 +5785,7 @@ Subject length lower bound = 0
  0: ((this))
 
 /(?:\((?R)\))|[^()]*/I
-Capturing subpattern count = 0
+Capture group count = 0
 May match empty string
 Subject length lower bound = 0
     (this(and)that
@@ -5798,7 +5798,7 @@ Subject length lower bound = 0
  0: ((this))
 
 /\x{0000ff}/I
-Capturing subpattern count = 0
+Capture group count = 0
 First code unit = \xff
 Subject length lower bound = 1
 
@@ -5806,8 +5806,8 @@ Subject length lower bound = 1
 Failed: error 143 at offset 18: two named subpatterns have the same name (PCRE2_DUPNAMES not set)
 
 /^((?P<A>a1)|(?P<A>a2)b)/I,dupnames
-Capturing subpattern count = 3
-Named capturing subpatterns:
+Capture group count = 3
+Named capture groups:
   A   2
   A   3
 Compile options: dupnames
@@ -5834,8 +5834,8 @@ Copy substring 'Z' failed (-49): unknown substring
   C a1 (2) A (non-unique)
 
 /(?|(?<a>)(?<b>)(?<a>)|(?<a>)(?<b>)(?<a>))/I,dupnames
-Capturing subpattern count = 3
-Named capturing subpatterns:
+Capture group count = 3
+Named capture groups:
   a   1
   a   3
   b   2
@@ -5844,8 +5844,8 @@ Options: dupnames
 Subject length lower bound = 0
 
 /^(?P<A>a)(?P<A>b)/I,dupnames
-Capturing subpattern count = 2
-Named capturing subpatterns:
+Capture group count = 2
+Named capture groups:
   A   1
   A   2
 Compile options: dupnames
@@ -5859,8 +5859,8 @@ Subject length lower bound = 2
   C a (1) A (non-unique)
 
 /^(?P<A>a)(?P<A>b)|cd/I,dupnames
-Capturing subpattern count = 2
-Named capturing subpatterns:
+Capture group count = 2
+Named capture groups:
   A   1
   A   2
 Options: dupnames
@@ -5876,8 +5876,8 @@ Subject length lower bound = 2
 Copy substring 'A' failed (-55): requested value is not set
 
 /^(?P<A>a)(?P<A>b)|cd(?P<A>ef)(?P<A>gh)/I,dupnames
-Capturing subpattern count = 4
-Named capturing subpatterns:
+Capture group count = 4
+Named capture groups:
   A   1
   A   2
   A   3
@@ -5894,8 +5894,8 @@ Subject length lower bound = 2
   C ef (2) A (non-unique)
 
 /^((?P<A>a1)|(?P<A>a2)b)/I,dupnames
-Capturing subpattern count = 3
-Named capturing subpatterns:
+Capture group count = 3
+Named capture groups:
   A   2
   A   3
 Compile options: dupnames
@@ -5922,8 +5922,8 @@ Get substring 'Z' failed (-49): unknown substring
   G a1 (2) A (non-unique)
 
 /^(?P<A>a)(?P<A>b)/I,dupnames
-Capturing subpattern count = 2
-Named capturing subpatterns:
+Capture group count = 2
+Named capture groups:
   A   1
   A   2
 Compile options: dupnames
@@ -5937,8 +5937,8 @@ Subject length lower bound = 2
   G a (1) A (non-unique)
 
 /^(?P<A>a)(?P<A>b)|cd/I,dupnames
-Capturing subpattern count = 2
-Named capturing subpatterns:
+Capture group count = 2
+Named capture groups:
   A   1
   A   2
 Options: dupnames
@@ -5954,8 +5954,8 @@ Subject length lower bound = 2
 Get substring 'A' failed (-55): requested value is not set
 
 /^(?P<A>a)(?P<A>b)|cd(?P<A>ef)(?P<A>gh)/I,dupnames
-Capturing subpattern count = 4
-Named capturing subpatterns:
+Capture group count = 4
+Named capture groups:
   A   1
   A   2
   A   3
@@ -5972,8 +5972,8 @@ Subject length lower bound = 2
   G ef (2) A (non-unique)
 
 /(?J)^((?P<A>a1)|(?P<A>a2)b)/I
-Capturing subpattern count = 3
-Named capturing subpatterns:
+Capture group count = 3
+Named capture groups:
   A   2
   A   3
 Compile options: <none>
@@ -6001,8 +6001,8 @@ Failed: error 143 at offset 38: two named subpatterns have the same name (PCRE2_
 # a random value.
 
 /^(?P<A>a) (?J:(?P<B>b)(?P<B>c)) (?P<C>d)/I
-Capturing subpattern count = 4
-Named capturing subpatterns:
+Capture group count = 4
+Named capture groups:
   A   1
   B   2
   B   3
@@ -6023,9 +6023,9 @@ Subject length lower bound = 6
   C d (1) C (group 4)
 
 /^(?P<A>a)?(?(A)a|b)/I
-Capturing subpattern count = 1
+Capture group count = 1
 Max back reference = 1
-Named capturing subpatterns:
+Named capture groups:
   A   1
 Compile options: <none>
 Overall options: anchored
@@ -6040,9 +6040,9 @@ Subject length lower bound = 1
 No match
 
 /(?:(?(ZZ)a|b)(?P<ZZ>X))+/I
-Capturing subpattern count = 1
+Capture group count = 1
 Max back reference = 1
-Named capturing subpatterns:
+Named capture groups:
   ZZ   1
 Last code unit = 'X'
 Subject length lower bound = 2
@@ -6057,9 +6057,9 @@ Failed: error 124 at offset 7: missing closing parenthesis for condition
 Failed: error 115 at offset 6: reference to non-existent subpattern
 
 /(?:(?(ZZ)a|b)(?(ZZ)a|b)(?P<ZZ>X))+/I
-Capturing subpattern count = 1
+Capture group count = 1
 Max back reference = 1
-Named capturing subpatterns:
+Named capture groups:
   ZZ   1
 Last code unit = 'X'
 Subject length lower bound = 3
@@ -6068,9 +6068,9 @@ Subject length lower bound = 3
  1: X
 
 /(?:(?(ZZ)a|\(b\))\\(?P<ZZ>X))+/I
-Capturing subpattern count = 1
+Capture group count = 1
 Max back reference = 1
-Named capturing subpatterns:
+Named capture groups:
   ZZ   1
 Last code unit = 'X'
 Subject length lower bound = 3
@@ -6079,12 +6079,12 @@ Subject length lower bound = 3
  1: X
 
 /(?P<ABC/I
-Failed: error 142 at offset 7: syntax error in subpattern name (missing terminator)
+Failed: error 142 at offset 7: syntax error in subpattern name (missing terminator?)
 
 /(?:(?(A)(?P=A)a|b)(?P<A>X|Y))+/I
-Capturing subpattern count = 1
+Capture group count = 1
 Max back reference = 1
-Named capturing subpatterns:
+Named capture groups:
   A   1
 Subject length lower bound = 2
     bXXaYYaY
@@ -6095,9 +6095,9 @@ Subject length lower bound = 2
  1: X
 
 /()()()()()()()()()(?:(?(A)(?P=A)a|b)(?P<A>X|Y))+/I
-Capturing subpattern count = 10
+Capture group count = 10
 Max back reference = 10
-Named capturing subpatterns:
+Named capture groups:
   A  10
 Subject length lower bound = 2
     bXXaYYaY
@@ -6114,7 +6114,7 @@ Subject length lower bound = 2
 10: Y
 
 /\s*,\s*/I
-Capturing subpattern count = 0
+Capture group count = 0
 Starting code units: \x09 \x0a \x0b \x0c \x0d \x20 , 
 Last code unit = ','
 Subject length lower bound = 1
@@ -6124,7 +6124,7 @@ Subject length lower bound = 1
  0: \x0c,\x0d
 
 /^abc/Im,newline=lf
-Capturing subpattern count = 0
+Capture group count = 0
 Options: multiline
 Forced newline is LF
 First code unit at start or follows newline
@@ -6147,7 +6147,7 @@ No match
 No match
 
 /^abc/Im,newline=crlf
-Capturing subpattern count = 0
+Capture group count = 0
 Options: multiline
 Forced newline is CRLF
 First code unit at start or follows newline
@@ -6162,7 +6162,7 @@ No match
 No match
 
 /^abc/Im,newline=cr
-Capturing subpattern count = 0
+Capture group count = 0
 Options: multiline
 Forced newline is CR
 First code unit at start or follows newline
@@ -6180,7 +6180,7 @@ No match
 ** Invalid value in 'newline=bad'
 
 /.*/I,newline=lf
-Capturing subpattern count = 0
+Capture group count = 0
 May match empty string
 Forced newline is LF
 First code unit at start or follows newline
@@ -6193,7 +6193,7 @@ Subject length lower bound = 0
  0: abc\x0d
 
 /.*/I,newline=cr
-Capturing subpattern count = 0
+Capture group count = 0
 May match empty string
 Forced newline is CR
 First code unit at start or follows newline
@@ -6206,7 +6206,7 @@ Subject length lower bound = 0
  0: abc
 
 /.*/I,newline=crlf
-Capturing subpattern count = 0
+Capture group count = 0
 May match empty string
 Forced newline is CRLF
 First code unit at start or follows newline
@@ -6219,7 +6219,7 @@ Subject length lower bound = 0
  0: abc
 
 /\w+(.)(.)?def/Is
-Capturing subpattern count = 2
+Capture group count = 2
 Options: dotall
 Starting code units: 0 1 2 3 4 5 6 7 8 9 A B C D E F G H I J K L M N O P 
   Q R S T U V W X Y Z _ a b c d e f g h i j k l m n o p q r s t u v w x y z 
@@ -6237,8 +6237,8 @@ Subject length lower bound = 5
  2: \x0a
 
 /(?P<B>25[0-5]|2[0-4]\d|[01]?\d?\d)(?:\.(?P>B)){3}/I
-Capturing subpattern count = 1
-Named capturing subpatterns:
+Capture group count = 1
+Named capture groups:
   B   1
 Starting code units: 0 1 2 3 4 5 6 7 8 9 
 Last code unit = '.'
@@ -6250,7 +6250,7 @@ Subject length lower bound = 7
  ()()()()()()()()()()()()()()()()()()()()
  ()()()()()()()()()()()()()()()()()()()()
  (.(.))/Ix
-Capturing subpattern count = 102
+Capture group count = 102
 Options: extended
 Subject length lower bound = 2
     XY\=ovector=133
@@ -6359,42 +6359,42 @@ Subject length lower bound = 2
 102: Y
 
 /(a*b|(?i:c*(?-i)d))/I
-Capturing subpattern count = 1
+Capture group count = 1
 Starting code units: C a b c d 
 Subject length lower bound = 1
 
 /()[ab]xyz/I
-Capturing subpattern count = 1
+Capture group count = 1
 Starting code units: a b 
 Last code unit = 'z'
 Subject length lower bound = 4
 
 /(|)[ab]xyz/I
-Capturing subpattern count = 1
+Capture group count = 1
 Starting code units: a b 
 Last code unit = 'z'
 Subject length lower bound = 4
 
 /(|c)[ab]xyz/I
-Capturing subpattern count = 1
+Capture group count = 1
 Starting code units: a b c 
 Last code unit = 'z'
 Subject length lower bound = 4
 
 /(|c?)[ab]xyz/I
-Capturing subpattern count = 1
+Capture group count = 1
 Starting code units: a b c 
 Last code unit = 'z'
 Subject length lower bound = 4
 
 /(d?|c?)[ab]xyz/I
-Capturing subpattern count = 1
+Capture group count = 1
 Starting code units: a b c d 
 Last code unit = 'z'
 Subject length lower bound = 4
 
 /(d?|c)[ab]xyz/I
-Capturing subpattern count = 1
+Capture group count = 1
 Starting code units: a b c d 
 Last code unit = 'z'
 Subject length lower bound = 4
@@ -6409,7 +6409,7 @@ Subject length lower bound = 4
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Compile options: <none>
 Overall options: anchored
 Starting code units: a b 
@@ -6426,7 +6426,7 @@ Subject length lower bound = 2
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Compile options: <none>
 Overall options: anchored
 Starting code units: a b 
@@ -6443,7 +6443,7 @@ Subject length lower bound = 2
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Compile options: <none>
 Overall options: anchored
 Starting code units: a b 
@@ -6460,7 +6460,7 @@ Subject length lower bound = 2
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Compile options: <none>
 Overall options: anchored
 First code unit = 'a'
@@ -6482,7 +6482,7 @@ No match
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Compile options: caseless
 Overall options: anchored caseless
 Starting code units: A a 
@@ -6494,22 +6494,22 @@ Subject length lower bound = 2
  0: aaaa5
 
 /(a*|b*)[cd]/I
-Capturing subpattern count = 1
+Capture group count = 1
 Starting code units: a b c d 
 Subject length lower bound = 1
 
 /(a+|b*)[cd]/I
-Capturing subpattern count = 1
+Capture group count = 1
 Starting code units: a b c d 
 Subject length lower bound = 1
 
 /(a*|b+)[cd]/I
-Capturing subpattern count = 1
+Capture group count = 1
 Starting code units: a b c d 
 Subject length lower bound = 1
 
 /(a+|b+)[cd]/I
-Capturing subpattern count = 1
+Capture group count = 1
 Starting code units: a b 
 Subject length lower bound = 2
 
@@ -6521,7 +6521,7 @@ Subject length lower bound = 2
  ))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))
  )))
 /Ix
-Capturing subpattern count = 203
+Capture group count = 203
 Options: extended
 First code unit = 'a'
 Subject length lower bound = 1
@@ -7138,8 +7138,8 @@ Matched, but too many substrings
 ------------------------------------------------------------------
 
 /(?P<abc>x)(?P<xyz>y)/I
-Capturing subpattern count = 2
-Named capturing subpatterns:
+Capture group count = 2
+Named capture groups:
   abc   1
   xyz   2
 First code unit = 'x'
@@ -7153,8 +7153,8 @@ Subject length lower bound = 2
   C y (1) xyz (group 2)
 
 /(?<abc>x)(?'xyz'y)/I
-Capturing subpattern count = 2
-Named capturing subpatterns:
+Capture group count = 2
+Named capture groups:
   abc   1
   xyz   2
 First code unit = 'x'
@@ -7168,10 +7168,10 @@ Subject length lower bound = 2
   C y (1) xyz (group 2)
 
 /(?<abc'x)(?'xyz'y)/I
-Failed: error 142 at offset 6: syntax error in subpattern name (missing terminator)
+Failed: error 142 at offset 6: syntax error in subpattern name (missing terminator?)
 
 /(?<abc>x)(?'xyz>y)/I
-Failed: error 142 at offset 15: syntax error in subpattern name (missing terminator)
+Failed: error 142 at offset 15: syntax error in subpattern name (missing terminator?)
 
 /(?P'abc'x)(?P<xyz>y)/I
 Failed: error 141 at offset 3: unrecognized character after (?P
@@ -7364,9 +7364,9 @@ No match
 ------------------------------------------------------------------
 
 /^\W*(?:(?<one>(?<two>.)\W*(?&one)\W*\k<two>|)|(?<three>(?<four>.)\W*(?&three)\W*\k'four'|\W*.\W*))\W*$/Ii
-Capturing subpattern count = 4
+Capture group count = 4
 Max back reference = 4
-Named capturing subpatterns:
+Named capture groups:
   four    4
   one     1
   three   3
@@ -7402,7 +7402,7 @@ Subject length lower bound = 0
 No match
 
 /(?=(\w+))\1:/I
-Capturing subpattern count = 1
+Capture group count = 1
 Max back reference = 1
 Starting code units: 0 1 2 3 4 5 6 7 8 9 A B C D E F G H I J K L M N O P 
   Q R S T U V W X Y Z _ a b c d e f g h i j k l m n o p q r s t u v w x y z 
@@ -7413,9 +7413,9 @@ Subject length lower bound = 2
  1: abcd
 
 /(?=(?'abc'\w+))\k<abc>:/I
-Capturing subpattern count = 1
+Capture group count = 1
 Max back reference = 1
-Named capturing subpatterns:
+Named capture groups:
   abc   1
 Starting code units: 0 1 2 3 4 5 6 7 8 9 A B C D E F G H I J K L M N O P 
   Q R S T U V W X Y Z _ a b c d e f g h i j k l m n o p q r s t u v w x y z 
@@ -7450,7 +7450,7 @@ No match
 No match
 
 /(?(<bc))/
-Failed: error 142 at offset 6: syntax error in subpattern name (missing terminator)
+Failed: error 142 at offset 6: syntax error in subpattern name (missing terminator?)
 
 /(?(''))/
 Failed: error 162 at offset 4: subpattern name expected
@@ -7474,10 +7474,10 @@ Failed: error 115 at offset 4: reference to non-existent subpattern
 Failed: error 115 at offset 27: reference to non-existent subpattern
 
 /^(?(DEFINE) abc | xyz ) /x
-Failed: error 154 at offset 4: DEFINE group contains more than one branch
+Failed: error 154 at offset 4: DEFINE subpattern contains more than one branch
 
 /(?(DEFINE) abc) xyz/Ix
-Capturing subpattern count = 0
+Capture group count = 0
 Options: extended
 First code unit = 'x'
 Last code unit = 'z'
@@ -7621,8 +7621,8 @@ No match
 No match
 
 /(?&abc)X(?<abc>P)/I
-Capturing subpattern count = 1
-Named capturing subpatterns:
+Capture group count = 1
+Named capture groups:
   abc   1
 Last code unit = 'P'
 Subject length lower bound = 3
@@ -7631,8 +7631,8 @@ Subject length lower bound = 3
  1: P
 
 /(?1)X(?<abc>P)/I
-Capturing subpattern count = 1
-Named capturing subpatterns:
+Capture group count = 1
+Named capture groups:
   abc   1
 Last code unit = 'P'
 Subject length lower bound = 3
@@ -7933,7 +7933,7 @@ Failed: error 115 at offset 6: reference to non-existent subpattern
 No match
 
 /\g{A/
-Failed: error 142 at offset 4: syntax error in subpattern name (missing terminator)
+Failed: error 142 at offset 4: syntax error in subpattern name (missing terminator?)
 
 /(?|(abc)|(xyz))/B
 ------------------------------------------------------------------
@@ -8390,10 +8390,10 @@ No match
 Failed: error 166 at offset 7: (*MARK) must have an argument
 
 /(?i:A{1,}\6666666666)/
-Failed: error 161 at offset 19: group number is too big
+Failed: error 161 at offset 19: subpattern number is too big
 
 /\g6666666666/
-Failed: error 161 at offset 7: group number is too big
+Failed: error 161 at offset 7: subpattern number is too big
 
 /[\g6666666666]/B
 ------------------------------------------------------------------
@@ -8524,7 +8524,7 @@ No match
 No match
 
 /a\Rb/I,bsr=anycrlf
-Capturing subpattern count = 0
+Capture group count = 0
 \R matches CR, LF, or CRLF
 First code unit = 'a'
 Last code unit = 'b'
@@ -8542,7 +8542,7 @@ No match
 No match
 
 /a\Rb/I,bsr=unicode
-Capturing subpattern count = 0
+Capture group count = 0
 \R matches any Unicode newline
 First code unit = 'a'
 Last code unit = 'b'
@@ -8559,7 +8559,7 @@ Subject length lower bound = 3
  0: a\x0bb
 
 /a\R?b/I,bsr=anycrlf
-Capturing subpattern count = 0
+Capture group count = 0
 \R matches CR, LF, or CRLF
 First code unit = 'a'
 Last code unit = 'b'
@@ -8577,7 +8577,7 @@ No match
 No match
 
 /a\R?b/I,bsr=unicode
-Capturing subpattern count = 0
+Capture group count = 0
 \R matches any Unicode newline
 First code unit = 'a'
 Last code unit = 'b'
@@ -8594,7 +8594,7 @@ Subject length lower bound = 2
  0: a\x0bb
 
 /a\R{2,4}b/I,bsr=anycrlf
-Capturing subpattern count = 0
+Capture group count = 0
 \R matches CR, LF, or CRLF
 First code unit = 'a'
 Last code unit = 'b'
@@ -8612,7 +8612,7 @@ No match
 No match
 
 /a\R{2,4}b/I,bsr=unicode
-Capturing subpattern count = 0
+Capture group count = 0
 \R matches any Unicode newline
 First code unit = 'a'
 Last code unit = 'b'
@@ -8632,7 +8632,7 @@ Subject length lower bound = 4
 No match
 
 /(*BSR_ANYCRLF)a\Rb/I
-Capturing subpattern count = 0
+Capture group count = 0
 \R matches CR, LF, or CRLF
 First code unit = 'a'
 Last code unit = 'b'
@@ -8643,7 +8643,7 @@ Subject length lower bound = 3
  0: a\x0db
 
 /(*BSR_UNICODE)a\Rb/I
-Capturing subpattern count = 0
+Capture group count = 0
 \R matches any Unicode newline
 First code unit = 'a'
 Last code unit = 'b'
@@ -8652,7 +8652,7 @@ Subject length lower bound = 3
  0: a\x85b
 
 /(*BSR_ANYCRLF)(*CRLF)a\Rb/I
-Capturing subpattern count = 0
+Capture group count = 0
 \R matches CR, LF, or CRLF
 Forced newline is CRLF
 First code unit = 'a'
@@ -8664,7 +8664,7 @@ Subject length lower bound = 3
  0: a\x0db
 
 /(*CRLF)(*BSR_UNICODE)a\Rb/I
-Capturing subpattern count = 0
+Capture group count = 0
 \R matches any Unicode newline
 Forced newline is CRLF
 First code unit = 'a'
@@ -8674,7 +8674,7 @@ Subject length lower bound = 3
  0: a\x85b
 
 /(*CRLF)(*BSR_ANYCRLF)(*CR)ab/I
-Capturing subpattern count = 0
+Capture group count = 0
 \R matches CR, LF, or CRLF
 Forced newline is CR
 First code unit = 'a'
@@ -8893,12 +8893,12 @@ No match
 Failed: error 109 at offset 8: quantifier does not follow a repeatable item
 
 /(abc|pqr|123){0}[xyz]/I
-Capturing subpattern count = 1
+Capture group count = 1
 Starting code units: x y z 
 Subject length lower bound = 1
 
 /(?(?=.*b)b|^)/I,auto_callout
-Capturing subpattern count = 0
+Capture group count = 0
 May match empty string
 Options: auto_callout
 Subject length lower bound = 0
@@ -8938,11 +8938,11 @@ Subject length lower bound = 0
  0: b
 
 /(?(?=b).*b|^d)/I
-Capturing subpattern count = 0
+Capture group count = 0
 Subject length lower bound = 1
 
 /(?(?=.*b).*b|^d)/I
-Capturing subpattern count = 0
+Capture group count = 0
 Subject length lower bound = 1
 
 /xyz/auto_callout
@@ -9680,48 +9680,48 @@ Failed: error 115 at offset 8: reference to non-existent subpattern
 Failed: error 125 at offset 0: lookbehind assertion is not fixed length
 
 /(a|bc)\1/I
-Capturing subpattern count = 1
+Capture group count = 1
 Max back reference = 1
 Starting code units: a b 
 Subject length lower bound = 2
 
 /(a|bc)\1{2,3}/I
-Capturing subpattern count = 1
+Capture group count = 1
 Max back reference = 1
 Starting code units: a b 
 Subject length lower bound = 3
 
 /(a|bc)(?1)/I
-Capturing subpattern count = 1
+Capture group count = 1
 Starting code units: a b 
 Subject length lower bound = 2
 
 /(a|b\1)(a|b\1)/I
-Capturing subpattern count = 2
+Capture group count = 2
 Max back reference = 1
 Starting code units: a b 
 Subject length lower bound = 2
 
 /(a|b\1){2}/I
-Capturing subpattern count = 1
+Capture group count = 1
 Max back reference = 1
 Starting code units: a b 
 Subject length lower bound = 2
 
 /(a|bbbb\1)(a|bbbb\1)/I
-Capturing subpattern count = 2
+Capture group count = 2
 Max back reference = 1
 Starting code units: a b 
 Subject length lower bound = 2
 
 /(a|bbbb\1){2}/I
-Capturing subpattern count = 1
+Capture group count = 1
 Max back reference = 1
 Starting code units: a b 
 Subject length lower bound = 2
 
 /^From +([^ ]+) +[a-zA-Z][a-zA-Z][a-zA-Z] +[a-zA-Z][a-zA-Z][a-zA-Z] +[0-9]?[0-9] +[0-9][0-9]:[0-9][0-9]/I
-Capturing subpattern count = 1
+Capture group count = 1
 Compile options: <none>
 Overall options: anchored
 First code unit = 'F'
@@ -9729,31 +9729,31 @@ Last code unit = ':'
 Subject length lower bound = 22
 
 /<tr([\w\W\s\d][^<>]{0,})><TD([\w\W\s\d][^<>]{0,})>([\d]{0,}\.)(.*)((<BR>([\w\W\s\d][^<>]{0,})|[\s]{0,}))<\/a><\/TD><TD([\w\W\s\d][^<>]{0,})>([\w\W\s\d][^<>]{0,})<\/TD><TD([\w\W\s\d][^<>]{0,})>([\w\W\s\d][^<>]{0,})<\/TD><\/TR>/Iis
-Capturing subpattern count = 11
+Capture group count = 11
 Options: caseless dotall
 First code unit = '<'
 Last code unit = '>'
 Subject length lower bound = 47
 
 "(?>.*/)foo"I
-Capturing subpattern count = 0
+Capture group count = 0
 Last code unit = 'o'
 Subject length lower bound = 4
 
 /(?(?=[^a-z]+[a-z])  \d{2}-[a-z]{3}-\d{2}  |  \d{2}-\d{2}-\d{2} ) /Ix
-Capturing subpattern count = 0
+Capture group count = 0
 Options: extended
 Last code unit = '-'
 Subject length lower bound = 8
 
 /(?:(?:(?:(?:(?:(?:(?:(?:(?:(a|b|c))))))))))/Ii
-Capturing subpattern count = 1
+Capture group count = 1
 Options: caseless
 Starting code units: A B C a b c 
 Subject length lower bound = 1
 
 /(?:c|d)(?:)(?:aaaaaaaa(?:)(?:bbbbbbbb)(?:bbbbbbbb(?:))(?:bbbbbbbb(?:)(?:bbbbbbbb)))/I
-Capturing subpattern count = 0
+Capture group count = 0
 Starting code units: c d 
 Last code unit = 'b'
 Subject length lower bound = 41
@@ -9763,7 +9763,7 @@ Subject length lower bound = 41
  (?(1) (.*?)\1 | ([^\s]+))       # if quote found, match up to next matching
                                  # quote, otherwise match up to next space
 /Iisx
-Capturing subpattern count = 3
+Capture group count = 3
 Max back reference = 1
 Options: caseless dotall extended
 First code unit = '<'
@@ -9779,7 +9779,7 @@ Subject length lower bound = 9
   [0-9a-f]{1,4} $             # final hex number at end of string
   (?(1)|.)                    # check that there was an empty component
   /Iix
-Capturing subpattern count = 1
+Capture group count = 1
 Max back reference = 1
 Compile options: caseless extended
 Overall options: anchored caseless extended
@@ -9787,8 +9787,8 @@ Last code unit = ':'
 Subject length lower bound = 2
 
 /(?|(?<a>A)|(?<a>B))/I
-Capturing subpattern count = 1
-Named capturing subpatterns:
+Capture group count = 1
+Named capture groups:
   a   1
 Starting code units: A B 
 Subject length lower bound = 1
@@ -9807,9 +9807,9 @@ Failed: error 165 at offset 16: different names for subpatterns of the same numb
 /(?:a(?<quote> (?<apostrophe>')|(?<realquote>")) |
     b(?<quote> (?<apostrophe>')|(?<realquote>")) )
     (?('quote')[a-z]+|[0-9]+)/Ix,dupnames
-Capturing subpattern count = 6
+Capture group count = 6
 Max back reference = 4
-Named capturing subpatterns:
+Named capture groups:
   apostrophe   2
   apostrophe   5
   quote        1
@@ -9869,9 +9869,9 @@ No match
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 4
+Capture group count = 4
 Max back reference = 4
-Named capturing subpatterns:
+Named capture groups:
   D   4
   D   1
 Compile options: dupnames extended
@@ -9917,9 +9917,9 @@ No match
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 4
+Capture group count = 4
 Max back reference = 4
-Named capturing subpatterns:
+Named capture groups:
   A   1
   A   4
 Options: dupnames extended
@@ -9979,7 +9979,7 @@ Partial match: abcde
  3: a
 
 /(\3)(\1)(a)/I,alt_bsux,allow_empty_class,match_unset_backref,dupnames
-Capturing subpattern count = 3
+Capture group count = 3
 Max back reference = 3
 Options: alt_bsux allow_empty_class dupnames match_unset_backref
 Last code unit = 'a'
@@ -9991,7 +9991,7 @@ Subject length lower bound = 1
  3: a
 
 /(\3)(\1)(a)/I
-Capturing subpattern count = 3
+Capture group count = 3
 Max back reference = 3
 Last code unit = 'a'
 Subject length lower bound = 3
@@ -10000,8 +10000,8 @@ Subject length lower bound = 3
 No match
 
 /i(?(DEFINE)(?<s>a))/I
-Capturing subpattern count = 1
-Named capturing subpatterns:
+Capture group count = 1
+Named capture groups:
   s   1
 First code unit = 'i'
 Subject length lower bound = 1
@@ -10009,7 +10009,7 @@ Subject length lower bound = 1
  0: i
 
 /()i(?(1)a)/I
-Capturing subpattern count = 1
+Capture group count = 1
 Max back reference = 1
 First code unit = 'i'
 Subject length lower bound = 1
@@ -10507,7 +10507,7 @@ Failed: error 168 at offset 3: \c must be followed by a printable ASCII characte
 ------------------------------------------------------------------
 
 /(?P<abn>(?P=abn)(?<badstufxxx)/B
-Failed: error 142 at offset 29: syntax error in subpattern name (missing terminator)
+Failed: error 142 at offset 29: syntax error in subpattern name (missing terminator?)
 
 /(?P<abn>(?P=axn)xxx)/B
 Failed: error 115 at offset 12: reference to non-existent subpattern
@@ -10619,13 +10619,13 @@ No match
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 1
+Capture group count = 1
 First code unit = 'a'
 Last code unit = '4'
 Subject length lower bound = 5
 
 /([abc])++1234/I
-Capturing subpattern count = 1
+Capture group count = 1
 Starting code units: a b c 
 Last code unit = '4'
 Subject length lower bound = 5
@@ -10634,149 +10634,149 @@ Subject length lower bound = 5
 Failed: error 125 at offset 0: lookbehind assertion is not fixed length
 
 /(^ab)/I
-Capturing subpattern count = 1
+Capture group count = 1
 Compile options: <none>
 Overall options: anchored
 First code unit = 'a'
 Subject length lower bound = 2
 
 /(^ab)++/I
-Capturing subpattern count = 1
+Capture group count = 1
 Compile options: <none>
 Overall options: anchored
 First code unit = 'a'
 Subject length lower bound = 2
 
 /(^ab|^)+/I
-Capturing subpattern count = 1
+Capture group count = 1
 May match empty string
 Compile options: <none>
 Overall options: anchored
 Subject length lower bound = 0
 
 /(^ab|^)++/I
-Capturing subpattern count = 1
+Capture group count = 1
 May match empty string
 Compile options: <none>
 Overall options: anchored
 Subject length lower bound = 0
 
 /(?:^ab)/I
-Capturing subpattern count = 0
+Capture group count = 0
 Compile options: <none>
 Overall options: anchored
 First code unit = 'a'
 Subject length lower bound = 2
 
 /(?:^ab)++/I
-Capturing subpattern count = 0
+Capture group count = 0
 Compile options: <none>
 Overall options: anchored
 First code unit = 'a'
 Subject length lower bound = 2
 
 /(?:^ab|^)+/I
-Capturing subpattern count = 0
+Capture group count = 0
 May match empty string
 Compile options: <none>
 Overall options: anchored
 Subject length lower bound = 0
 
 /(?:^ab|^)++/I
-Capturing subpattern count = 0
+Capture group count = 0
 May match empty string
 Compile options: <none>
 Overall options: anchored
 Subject length lower bound = 0
 
 /(.*ab)/I
-Capturing subpattern count = 1
+Capture group count = 1
 First code unit at start or follows newline
 Last code unit = 'b'
 Subject length lower bound = 2
 
 /(.*ab)++/I
-Capturing subpattern count = 1
+Capture group count = 1
 First code unit at start or follows newline
 Last code unit = 'b'
 Subject length lower bound = 2
 
 /(.*ab|.*)+/I
-Capturing subpattern count = 1
+Capture group count = 1
 May match empty string
 First code unit at start or follows newline
 Subject length lower bound = 0
 
 /(.*ab|.*)++/I
-Capturing subpattern count = 1
+Capture group count = 1
 May match empty string
 First code unit at start or follows newline
 Subject length lower bound = 0
 
 /(?:.*ab)/I
-Capturing subpattern count = 0
+Capture group count = 0
 First code unit at start or follows newline
 Last code unit = 'b'
 Subject length lower bound = 2
 
 /(?:.*ab)++/I
-Capturing subpattern count = 0
+Capture group count = 0
 First code unit at start or follows newline
 Last code unit = 'b'
 Subject length lower bound = 2
 
 /(?:.*ab|.*)+/I
-Capturing subpattern count = 0
+Capture group count = 0
 May match empty string
 First code unit at start or follows newline
 Subject length lower bound = 0
 
 /(?:.*ab|.*)++/I
-Capturing subpattern count = 0
+Capture group count = 0
 May match empty string
 First code unit at start or follows newline
 Subject length lower bound = 0
 
 /(?=a)[bcd]/I
-Capturing subpattern count = 0
+Capture group count = 0
 First code unit = 'a'
 Subject length lower bound = 1
 
 /((?=a))[bcd]/I
-Capturing subpattern count = 1
+Capture group count = 1
 First code unit = 'a'
 Subject length lower bound = 1
 
 /((?=a))+[bcd]/I
-Capturing subpattern count = 1
+Capture group count = 1
 First code unit = 'a'
 Subject length lower bound = 1
 
 /((?=a))++[bcd]/I
-Capturing subpattern count = 1
+Capture group count = 1
 First code unit = 'a'
 Subject length lower bound = 1
 
 /(?=a+)[bcd]/Ii
-Capturing subpattern count = 0
+Capture group count = 0
 Options: caseless
 First code unit = 'a' (caseless)
 Subject length lower bound = 1
 
 /(?=a+?)[bcd]/Ii
-Capturing subpattern count = 0
+Capture group count = 0
 Options: caseless
 First code unit = 'a' (caseless)
 Subject length lower bound = 1
 
 /(?=a++)[bcd]/Ii
-Capturing subpattern count = 0
+Capture group count = 0
 Options: caseless
 First code unit = 'a' (caseless)
 Subject length lower bound = 1
 
 /(?=a{3})[bcd]/Ii
-Capturing subpattern count = 0
+Capture group count = 0
 Options: caseless
 First code unit = 'a' (caseless)
 Last code unit = 'a' (caseless)
@@ -10922,22 +10922,22 @@ Matched, but too many substrings
  3: b
 
 /(?(DEFINE)(a(?2)|b)(b(?1)|a))(?:(?1)|(?2))/I
-Capturing subpattern count = 2
+Capture group count = 2
 May match empty string
 Subject length lower bound = 0
 
 /(a(?2)|b)(b(?1)|a)(?:(?1)|(?2))/I
-Capturing subpattern count = 2
+Capture group count = 2
 Starting code units: a b 
 Subject length lower bound = 3
 
 /(a(?2)|b)(b(?1)|a)(?1)(?2)/I
-Capturing subpattern count = 2
+Capture group count = 2
 Starting code units: a b 
 Subject length lower bound = 4
 
 /(abc)(?1)/I
-Capturing subpattern count = 1
+Capture group count = 1
 First code unit = 'a'
 Last code unit = 'c'
 Subject length lower bound = 6
@@ -11206,20 +11206,20 @@ Latest Mark: B
 No match
 
 /\btype\b\W*?\btext\b\W*?\bjavascript\b/I
-Capturing subpattern count = 0
+Capture group count = 0
 Max lookbehind = 1
 First code unit = 't'
 Last code unit = 't'
 Subject length lower bound = 18
 
 /\btype\b\W*?\btext\b\W*?\bjavascript\b|\burl\b\W*?\bshell:|<input\b.*?\btype\b\W*?\bimage\b|\bonkeyup\b\W*?\=/I
-Capturing subpattern count = 0
+Capture group count = 0
 Max lookbehind = 1
 Starting code units: < o t u 
 Subject length lower bound = 8
 
 /a(*SKIP)c|b(*ACCEPT)|/I,aftertext
-Capturing subpattern count = 0
+Capture group count = 0
 May match empty string
 Subject length lower bound = 0
     a
@@ -11227,7 +11227,7 @@ Subject length lower bound = 0
  0+ 
 
 /a(*SKIP)c|b(*ACCEPT)cd(*ACCEPT)|x/I
-Capturing subpattern count = 0
+Capture group count = 0
 Starting code units: a b x 
 Subject length lower bound = 0
     ax
@@ -11245,14 +11245,14 @@ Subject length lower bound = 0
 No match
 
 /(*ACCEPT)a/I,aftertext
-Capturing subpattern count = 0
+Capture group count = 0
 Subject length lower bound = 0
     bax
  0: 
  0+ bax
 
 /z(*ACCEPT)a/I,aftertext
-Capturing subpattern count = 0
+Capture group count = 0
 First code unit = 'z'
 Subject length lower bound = 0
     baxzbx
@@ -11755,96 +11755,96 @@ Matched, but too many substrings
 # settings of the anchored and startline bits.
 
 /(?>.*?a)(?<=ba)/I
-Capturing subpattern count = 0
+Capture group count = 0
 Max lookbehind = 2
 Last code unit = 'a'
 Subject length lower bound = 1
 
 /(?:.*?a)(?<=ba)/I
-Capturing subpattern count = 0
+Capture group count = 0
 Max lookbehind = 2
 First code unit at start or follows newline
 Last code unit = 'a'
 Subject length lower bound = 1
 
 /.*?a(*PRUNE)b/I
-Capturing subpattern count = 0
+Capture group count = 0
 Last code unit = 'b'
 Subject length lower bound = 2
 
 /.*?a(*PRUNE)b/Is
-Capturing subpattern count = 0
+Capture group count = 0
 Options: dotall
 Last code unit = 'b'
 Subject length lower bound = 2
 
 /^a(*PRUNE)b/Is
-Capturing subpattern count = 0
+Capture group count = 0
 Compile options: dotall
 Overall options: anchored dotall
 First code unit = 'a'
 Subject length lower bound = 2
 
 /.*?a(*SKIP)b/I
-Capturing subpattern count = 0
+Capture group count = 0
 Last code unit = 'b'
 Subject length lower bound = 2
 
 /(?>.*?a)b/Is
-Capturing subpattern count = 0
+Capture group count = 0
 Options: dotall
 Last code unit = 'b'
 Subject length lower bound = 2
 
 /(?>.*?a)b/I
-Capturing subpattern count = 0
+Capture group count = 0
 Last code unit = 'b'
 Subject length lower bound = 2
 
 /(?>^a)b/Is
-Capturing subpattern count = 0
+Capture group count = 0
 Compile options: dotall
 Overall options: anchored dotall
 First code unit = 'a'
 Subject length lower bound = 2
 
 /(?>.*?)(?<=(abcd)|(wxyz))/I
-Capturing subpattern count = 2
+Capture group count = 2
 Max lookbehind = 4
 May match empty string
 Subject length lower bound = 0
 
 /(?>.*)(?<=(abcd)|(wxyz))/I
-Capturing subpattern count = 2
+Capture group count = 2
 Max lookbehind = 4
 May match empty string
 Subject length lower bound = 0
 
 "(?>.*)foo"I
-Capturing subpattern count = 0
+Capture group count = 0
 Last code unit = 'o'
 Subject length lower bound = 3
 
 "(?>.*?)foo"I
-Capturing subpattern count = 0
+Capture group count = 0
 Last code unit = 'o'
 Subject length lower bound = 3
 
 /(?>^abc)/Im
-Capturing subpattern count = 0
+Capture group count = 0
 Options: multiline
 First code unit at start or follows newline
 Last code unit = 'c'
 Subject length lower bound = 3
 
 /(?>.*abc)/Im
-Capturing subpattern count = 0
+Capture group count = 0
 Options: multiline
 Last code unit = 'c'
 Subject length lower bound = 3
 
 /(?:.*abc)/Im
-Capturing subpattern count = 0
+Capture group count = 0
 Options: multiline
 First code unit at start or follows newline
 Last code unit = 'c'
@@ -12057,8 +12057,8 @@ No match
  0: ba
 
 /(?|(?<n>f)|(?<n>b))/I,dupnames
-Capturing subpattern count = 1
-Named capturing subpatterns:
+Capture group count = 1
+Named capture groups:
   n   1
 Options: dupnames
 Starting code units: b f 
@@ -12079,9 +12079,9 @@ Subject length lower bound = 1
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 3
+Capture group count = 3
 Max back reference = 2
-Named capturing subpatterns:
+Named capture groups:
   a   1
   a   2
 Options: dupnames
@@ -13124,7 +13124,7 @@ Subject length lower bound = 5
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Starting code units: a b c d 
 Last code unit = 'd'
 Subject length lower bound = 1
@@ -13137,7 +13137,7 @@ Subject length lower bound = 1
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Starting code units: a b c 
 Last code unit = 'd'
 Subject length lower bound = 2
@@ -13150,7 +13150,7 @@ Subject length lower bound = 2
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Starting code units: a b c d 
 Last code unit = 'd'
 Subject length lower bound = 1
@@ -13163,7 +13163,7 @@ Subject length lower bound = 1
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Starting code units: a b c 
 Last code unit = 'd'
 Subject length lower bound = 5
@@ -13176,7 +13176,7 @@ Subject length lower bound = 5
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Starting code units: a b c d 
 Last code unit = 'd'
 Subject length lower bound = 1
@@ -13254,40 +13254,40 @@ Failed: error 108 at offset 3: range out of order in character class
 Failed: error 150 at offset 5: invalid range in character class
 
 /(?<0abc>xx)/
-Failed: error 144 at offset 3: group name must start with a non-digit
+Failed: error 144 at offset 3: subpattern name must start with a non-digit
 
 /(?&1abc)xx(?<1abc>y)/
-Failed: error 144 at offset 3: group name must start with a non-digit
+Failed: error 144 at offset 3: subpattern name must start with a non-digit
 
 /(?<ab-cd>xx)/
-Failed: error 142 at offset 5: syntax error in subpattern name (missing terminator)
+Failed: error 142 at offset 5: syntax error in subpattern name (missing terminator?)
 
 /(?'0abc'xx)/
-Failed: error 144 at offset 3: group name must start with a non-digit
+Failed: error 144 at offset 3: subpattern name must start with a non-digit
 
 /(?P<0abc>xx)/
-Failed: error 144 at offset 4: group name must start with a non-digit
+Failed: error 144 at offset 4: subpattern name must start with a non-digit
 
 /\k<5ghj>/
-Failed: error 144 at offset 3: group name must start with a non-digit
+Failed: error 144 at offset 3: subpattern name must start with a non-digit
 
 /\k'5ghj'/
-Failed: error 144 at offset 3: group name must start with a non-digit
+Failed: error 144 at offset 3: subpattern name must start with a non-digit
 
 /\k{2fgh}/
-Failed: error 144 at offset 3: group name must start with a non-digit
+Failed: error 144 at offset 3: subpattern name must start with a non-digit
 
 /(?P=8yuki)/
-Failed: error 144 at offset 4: group name must start with a non-digit
+Failed: error 144 at offset 4: subpattern name must start with a non-digit
 
 /\g{4df}/
 Failed: error 157 at offset 2: \g is not followed by a braced, angle-bracketed, or quoted name/number or by a plain number
 
 /(?&1abc)xx(?<1abc>y)/
-Failed: error 144 at offset 3: group name must start with a non-digit
+Failed: error 144 at offset 3: subpattern name must start with a non-digit
 
 /(?P>1abc)xx(?<1abc>y)/
-Failed: error 144 at offset 4: group name must start with a non-digit
+Failed: error 144 at offset 4: subpattern name must start with a non-digit
 
 /\g'3gh'/
 Failed: error 157 at offset 2: \g is not followed by a braced, angle-bracketed, or quoted name/number or by a plain number
@@ -13296,16 +13296,16 @@ Failed: error 157 at offset 2: \g is not followed by a braced, angle-bracketed, 
 Failed: error 157 at offset 2: \g is not followed by a braced, angle-bracketed, or quoted name/number or by a plain number
 
 /(?(<4gh>)abc)/
-Failed: error 144 at offset 4: group name must start with a non-digit
+Failed: error 144 at offset 4: subpattern name must start with a non-digit
 
 /(?('4gh')abc)/
-Failed: error 144 at offset 4: group name must start with a non-digit
+Failed: error 144 at offset 4: subpattern name must start with a non-digit
 
 /(?(4gh)abc)/
 Failed: error 124 at offset 4: missing closing parenthesis for condition
 
 /(?(R&6yh)abc)/
-Failed: error 144 at offset 5: group name must start with a non-digit
+Failed: error 144 at offset 5: subpattern name must start with a non-digit
 
 /(((a\2)|(a*)\g<-1>))*a?/B
 ------------------------------------------------------------------
@@ -13487,7 +13487,7 @@ No match
  0+ dab
 
 /(?(VERSION>=10.0)yes|no)/I
-Capturing subpattern count = 0
+Capture group count = 0
 Subject length lower bound = 2
     yesno
  0: yes
@@ -13506,7 +13506,7 @@ Subject length lower bound = 2
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 May match empty string
 Subject length lower bound = 0
     yesno
@@ -13514,7 +13514,7 @@ Subject length lower bound = 0
  0+ yesno
 
 /(?(VERSION=8)yes|no){3}/I
-Capturing subpattern count = 0
+Capture group count = 0
 Subject length lower bound = 6
     yesnononoyes
  0: nonono
@@ -13523,9 +13523,9 @@ Subject length lower bound = 6
 No match
 
 /(?:(?<VERSION>abc)|xyz)(?(VERSION)yes|no)/I
-Capturing subpattern count = 1
+Capture group count = 1
 Max back reference = 1
-Named capturing subpatterns:
+Named capture groups:
   VERSION   1
 Starting code units: a x 
 Subject length lower bound = 5
@@ -13553,18 +13553,18 @@ Failed: error 179 at offset 16: syntax error or number too big in (?(VERSION con
 Failed: error 179 at offset 16: syntax error or number too big in (?(VERSION condition
 
 /abcd/I
-Capturing subpattern count = 0
+Capture group count = 0
 First code unit = 'a'
 Last code unit = 'd'
 Subject length lower bound = 4
 
 /abcd/I,no_start_optimize
-Capturing subpattern count = 0
+Capture group count = 0
 Options: no_start_optimize
 Subject length lower bound = 0
 
 /(|ab)*?d/I
-Capturing subpattern count = 1
+Capture group count = 1
 Starting code units: a d 
 Last code unit = 'd'
 Subject length lower bound = 1
@@ -13575,7 +13575,7 @@ Subject length lower bound = 1
  0: d
 
 /(|ab)*?d/I,no_start_optimize
-Capturing subpattern count = 1
+Capture group count = 1
 Options: no_start_optimize
 Subject length lower bound = 0
    abd
@@ -13839,21 +13839,21 @@ Copy substring 1 failed (-2): partial match
 get substring list failed (-2): partial match
 
 /^abc/info
-Capturing subpattern count = 0
+Capture group count = 0
 Compile options: <none>
 Overall options: anchored
 First code unit = 'a'
 Subject length lower bound = 3
 
 /^abc/info,no_dotstar_anchor
-Capturing subpattern count = 0
+Capture group count = 0
 Compile options: no_dotstar_anchor
 Overall options: anchored no_dotstar_anchor
 First code unit = 'a'
 Subject length lower bound = 3
 
 /.*\d/info,auto_callout
-Capturing subpattern count = 0
+Capture group count = 0
 Options: auto_callout
 First code unit at start or follows newline
 Subject length lower bound = 1
@@ -13868,7 +13868,7 @@ Subject length lower bound = 1
 No match
 
 /.*\d/info,no_dotstar_anchor,auto_callout
-Capturing subpattern count = 0
+Capture group count = 0
 Options: auto_callout no_dotstar_anchor
 Subject length lower bound = 1
 \= Expect no match
@@ -13889,18 +13889,18 @@ Subject length lower bound = 1
 No match
 
 /.*\d/dotall,info
-Capturing subpattern count = 0
+Capture group count = 0
 Compile options: dotall
 Overall options: anchored dotall
 Subject length lower bound = 1
 
 /.*\d/dotall,no_dotstar_anchor,info
-Capturing subpattern count = 0
+Capture group count = 0
 Options: dotall no_dotstar_anchor
 Subject length lower bound = 1
 
 /(*NO_DOTSTAR_ANCHOR)(?s).*\d/info
-Capturing subpattern count = 0
+Capture group count = 0
 Compile options: <none>
 Overall options: no_dotstar_anchor
 Subject length lower bound = 1
@@ -14323,7 +14323,7 @@ Failed: error 125 at offset 1: lookbehind assertion is not fixed length
  0+ 
 
 /((?2){73}(?2))((?1))/info
-Capturing subpattern count = 2
+Capture group count = 2
 May match empty string
 Subject length lower bound = 0
 
@@ -14383,8 +14383,8 @@ Failed: error 115 at offset 2: reference to non-existent subpattern
 /(?x:((?'a')) # comment (with parentheses) and | vertical
 (?-x:#not a comment (?'b')) # this is a comment ()
 (?'c')) # not a comment (?'d')/info
-Capturing subpattern count = 5
-Named capturing subpatterns:
+Capture group count = 5
+Named capture groups:
   a   2
   b   3
   c   4
@@ -14394,8 +14394,8 @@ Last code unit = ' '
 Subject length lower bound = 32
 
 /(?|(?'a')(2)(?'b')|(?'a')(?'a')(3))/I,dupnames
-Capturing subpattern count = 3
-Named capturing subpatterns:
+Capture group count = 3
+Named capture groups:
   a   1
   a   2
   b   3
@@ -14482,7 +14482,7 @@ Failed: error 162 at offset 4: subpattern name expected
 "(?J:(?|(?'R')(\k'R')|((?'R'))))"
 
 /(?<=|(\,\$(?73591620449005828816)\xa8.{7}){6}\x09)/
-Failed: error 161 at offset 17: group number is too big
+Failed: error 161 at offset 17: subpattern number is too big
 
 /^(?:(?(1)x|)+)+$()/B
 ------------------------------------------------------------------
@@ -14533,8 +14533,8 @@ Failed: error 162 at offset 10: subpattern name expected
 Failed: error 162 at offset 14: subpattern name expected
 
 /((?x)(?#))#(?'abc')/I
-Capturing subpattern count = 2
-Named capturing subpatterns:
+Capture group count = 2
+Named capture groups:
   abc   2
 First code unit = '#'
 Subject length lower bound = 1
@@ -14543,8 +14543,8 @@ Subject length lower bound = 1
 Failed: error 162 at offset 9: subpattern name expected
 
 /[[:\\](?'abc')[a:]/I
-Capturing subpattern count = 1
-Named capturing subpatterns:
+Capture group count = 1
+Named capture groups:
   abc   1
 Starting code units: : [ \ 
 Subject length lower bound = 2
@@ -14578,16 +14578,16 @@ Failed: error 158 at offset 3: (?R (recursive pattern call) must be followed by 
 Failed: error 162 at offset 16: subpattern name expected
 
 /(?(?C{\Q})(?!(?'abc')))/I
-Capturing subpattern count = 1
-Named capturing subpatterns:
+Capture group count = 1
+Named capture groups:
   abc   1
 May match empty string
 Subject length lower bound = 0
 
 /(?1){3918}(((((0(\k'R'))))(?J)(?'R'(?'R'\3){99})))/I
-Capturing subpattern count = 8
+Capture group count = 8
 Max back reference = 8
-Named capturing subpatterns:
+Named capture groups:
   R   7
   R   8
 Duplicate name status changes
@@ -14595,33 +14595,33 @@ Last code unit = '0'
 Subject length lower bound = 65535
 
 /(?|(aaa)|(b))\g{1}/I
-Capturing subpattern count = 1
+Capture group count = 1
 Max back reference = 1
 Starting code units: a b 
 Subject length lower bound = 0
 
 /(?|(aaa)|(b))(?1)/I
-Capturing subpattern count = 1
+Capture group count = 1
 Starting code units: a b 
 Subject length lower bound = 4
 
 /(?|(aaa)|(b))/I
-Capturing subpattern count = 1
+Capture group count = 1
 Starting code units: a b 
 Subject length lower bound = 1
 
 /(?|(?'a'aaa)|(?'a'b))\k'a'/I
-Capturing subpattern count = 1
+Capture group count = 1
 Max back reference = 1
-Named capturing subpatterns:
+Named capture groups:
   a   1
 Starting code units: a b 
 Subject length lower bound = 0
 
 /(?|(?'a'aaa)|(?'a'b))(?'a'cccc)\k'a'/I,dupnames
-Capturing subpattern count = 2
+Capture group count = 2
 Max back reference = 2
-Named capturing subpatterns:
+Named capture groups:
   a   1
   a   2
 Options: dupnames
@@ -14673,10 +14673,10 @@ No match
  0: ab
 
 /(?(8000000000/
-Failed: error 161 at offset 8: group number is too big
+Failed: error 161 at offset 8: subpattern number is too big
 
 /((?(R8000000000)))/
-Failed: error 161 at offset 9: group number is too big
+Failed: error 161 at offset 9: subpattern number is too big
 
 /0(?0)|(1)(*THEN)(*SKIP:0)(*FAIL)/
 \= Expect no match
@@ -14684,7 +14684,7 @@ Failed: error 161 at offset 9: group number is too big
 No match
 
 /(?(1)()\983040\2)/
-Failed: error 161 at offset 14: group number is too big
+Failed: error 161 at offset 14: subpattern number is too big
 
 /(*LIMIT_MATCH=)abc/
 Failed: error 160 at offset 14: (*VERB) not recognized or malformed
@@ -14883,7 +14883,7 @@ Failed: error -55 at offset 3 in replacement: requested value is not set
  1: AAbbaa..AAbBaa
 
 /^(o(\1{72}{\"{\\{00000059079}\d*){74}}){19}/I
-Capturing subpattern count = 2
+Capture group count = 2
 Max back reference = 1
 Compile options: <none>
 Overall options: anchored
@@ -14892,10 +14892,10 @@ Last code unit = '}'
 Subject length lower bound = 65535
 
 /((p(?'K/
-Failed: error 142 at offset 7: syntax error in subpattern name (missing terminator)
+Failed: error 142 at offset 7: syntax error in subpattern name (missing terminator?)
 
 /((p(?'K/no_auto_capture
-Failed: error 142 at offset 7: syntax error in subpattern name (missing terminator)
+Failed: error 142 at offset 7: syntax error in subpattern name (missing terminator?)
 
 /abc/replace=A$3123456789Z
     abc
@@ -14905,7 +14905,7 @@ Failed: error -49 at offset 3 in replacement: unknown substring
 Failed: error 187 at offset 0: lookbehind assertion is too long
 
 /(?<!a{65535})x/I
-Capturing subpattern count = 0
+Capture group count = 0
 Max lookbehind = 65535
 First code unit = 'x'
 Subject length lower bound = 1
@@ -14919,7 +14919,7 @@ Failed: error -60: match with end before start or start moved backwards is not s
 Failed: error -60: match with end before start or start moved backwards is not supported
 
 /(?'abcdefghijklmnopqrstuvwxyzABCDEFG'toolong)/
-Failed: error 148 at offset 36: subpattern name is too long (maximum 32 characters)
+Failed: error 148 at offset 36: subpattern name is too long (maximum 32 code units)
 
 /(?'abcdefghijklmnopqrstuvwxyzABCDEF'justright)/
 
@@ -14941,7 +14941,7 @@ Failed: error 188 at offset 0: pattern string is longer than the limit set by th
 ((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))
 ((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))
 ((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))"xI
-Capturing subpattern count = 12
+Capture group count = 12
 May match empty string
 Options: extended
 First code unit at start or follows newline
@@ -14952,7 +14952,7 @@ Subject length lower bound = 0
 ((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))
 ((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))
 a)"xI
-Capturing subpattern count = 12
+Capture group count = 12
 Max lookbehind = 2
 May match empty string
 Options: extended
@@ -14962,7 +14962,7 @@ Subject length lower bound = 0
 ((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))
 ((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))
 ((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))"xI
-Capturing subpattern count = 13
+Capture group count = 13
 May match empty string
 Options: extended
 Subject length lower bound = 0
@@ -14979,14 +14979,14 @@ Failed: error 135 at offset 9: lookbehind is too complicated
 
 /\[()]{1024}/I,expand
 Expanded: ()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()
-Capturing subpattern count = 1024
+Capture group count = 1024
 May match empty string
 Subject length lower bound = 0
 
 # Test minlength capped at 65535
 
 /(A{65000})\1{65000}/I
-Capturing subpattern count = 1
+Capture group count = 1
 Max back reference = 1
 First code unit = 'A'
 Last code unit = 'A'
@@ -15008,7 +15008,7 @@ Subject length lower bound = 65535
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 1
+Capture group count = 1
 May match empty string
 Subject length lower bound = 0
 
@@ -15026,7 +15026,7 @@ Subject length lower bound = 0
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 1
+Capture group count = 1
 May match empty string
 Subject length lower bound = 0
 
@@ -15044,7 +15044,7 @@ Subject length lower bound = 0
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 1
+Capture group count = 1
 May match empty string
 Subject length lower bound = 0
 
@@ -15062,7 +15062,7 @@ Subject length lower bound = 0
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 1
+Capture group count = 1
 May match empty string
 Subject length lower bound = 0
 
@@ -15510,7 +15510,7 @@ Failed: error 150 at offset 5: invalid range in character class
 ------------------------------------------------------------------
 
 /(?=.*[A-Z])/I
-Capturing subpattern count = 0
+Capture group count = 0
 May match empty string
 Subject length lower bound = 0
 
@@ -15592,7 +15592,7 @@ Failed: error -33: bad offset value
 # complicated to find a minimum matching length.
 
 "()X|((((((((()))))))((((())))))\2())((((((\2\2)))\2)(\22((((\2\2)2))\2)))(2\ZZZ)+:)Z^|91ZiZZnter(ZZ |91Z(ZZ ZZ(\r2Z( or#(\Z2(Z\Z(\2\2)2))\2Z)Z(\22Z((\Z2(Z\Z(\2\2)2))\2Z+:)Z|91Z(ZZ ZZ(\r2Z( or#(\Z2(Z\Z((Z*(\2(Z\':))\0)i|||||||||||||||loZ\2\2)2))\2Z)Z(\22Z((\Z2(Z\Z(\2\2)2))\2Z)))int \)\0nte!rnal errpr\2\\21r(2\ZZZ)+:)Z!|91Z(ZZ ZZ(\r2Z( or#(\Z2(Z\Z(\2\2)2))\2Z)Z(\22Z((\Z2(Z\Z(\2\2)2))\2Z)))int \)\0(2\ZZZ)+:)Z^|91ZiZZnter(ZZ |91Z(ZZ ZZ(\r2Z( or#(\Z2(Z\Z(\2\2)2))\2Z)Z(\22Z((\Z2(Z\Z(\2\2)2))\2Z)))int \)\0(2\ZZZ)+:)Z^)))int \)\0(2\ZZZ)+:)Z^|91ZiZZnter(ZZernZal ZZ(\r2Z( or#(\Z2(Z\Z(\2\2)2))\2Z)Z(\22Z((\Z2(Z\Z(\2\2)2))\2Z)))int \))\ZZ(\r2Z( or#(\Z2(Z\Z(\2\2)2))\2Z)Z(\22Z((\Z2(Z\Z(\2\2)))\2))))((((((\2\2))))))"I
-Capturing subpattern count = 108
+Capture group count = 108
 Max back reference = 22
 Contains explicit CR or LF match
 Subject length lower bound = 1
@@ -15626,29 +15626,29 @@ Failed: error 128 at offset 11: assertion expected after (?( or (?(?C)
 Failed: error -37: callout error code
 
 /()(\g+65534)/
-Failed: error 161 at offset 11: group number is too big
+Failed: error 161 at offset 11: subpattern number is too big
 
 /()(\g+65533)/
 Failed: error 115 at offset 10: reference to non-existent subpattern
 
 /Á\x00\x00\x00š(\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\2*\x00k\d+\x00â€Ž\x00\x00\x00\x00\x00\2*\x00\x00\1*.){36}int^\x00\x00ÿÿ\x00š(\1{50779}?)J\w2/I
-Capturing subpattern count = 2
+Capture group count = 2
 Max back reference = 2
 First code unit = \xc1
 Last code unit = '2'
 Subject length lower bound = 65535
 
 /(a)(b)\2\1\1\1\1/I
-Capturing subpattern count = 2
+Capture group count = 2
 Max back reference = 2
 First code unit = 'a'
 Last code unit = 'b'
 Subject length lower bound = 7
 
 /(?<a>a)(?<b>b)\g{b}\g{a}\g{a}\g{a}\g{a}(?<a>xx)(?<b>zz)/I,dupnames
-Capturing subpattern count = 4
+Capture group count = 4
 Max back reference = 4
-Named capturing subpatterns:
+Named capture groups:
   a   1
   a   3
   b   2
@@ -15816,14 +15816,14 @@ No match
 # the start of a branch.
 
 /(?(DEFINE)(a))^bc/I
-Capturing subpattern count = 1
+Capture group count = 1
 Compile options: <none>
 Overall options: anchored
 First code unit = 'b'
 Subject length lower bound = 2
 
 /(a){0}.*bc/sI
-Capturing subpattern count = 1
+Capture group count = 1
 Compile options: dotall
 Overall options: anchored dotall
 Last code unit = 'c'
@@ -15833,7 +15833,7 @@ Subject length lower bound = 2
 # no alternative branch.
 
 /(?(VERSION>=999)yes)^bc/I
-Capturing subpattern count = 0
+Capture group count = 0
 Compile options: <none>
 Overall options: anchored
 Subject length lower bound = 2
@@ -15841,12 +15841,12 @@ Subject length lower bound = 2
 # This should not be anchored.
 
 /(?(VERSION>=999)yes|no)^bc/I
-Capturing subpattern count = 0
+Capture group count = 0
 Last code unit = 'c'
 Subject length lower bound = 4
 
 /(*LIMIT_HEAP=0)xxx/I
-Capturing subpattern count = 0
+Capture group count = 0
 Heap limit = 0
 First code unit = 'x'
 Last code unit = 'x'
@@ -16122,7 +16122,7 @@ Failed: error -37: callout error code
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Options: extended_more
 Starting code units: a b c 
 Subject length lower bound = 1
@@ -16134,7 +16134,7 @@ Subject length lower bound = 1
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Options: extended extended_more
 Starting code units: a b c 
 Subject length lower bound = 1
@@ -16218,7 +16218,7 @@ Subject length lower bound = 1
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
+Capture group count = 0
 Extra options: bad_escape_is_literal
 First code unit = 'N'
 Last code unit = 'c'
@@ -16324,7 +16324,7 @@ Failed: error 192 at offset 0: invalid option bits with PCRE2_LITERAL
  0: (*CR)abc
 
 /cat|dog/I,match_word
-Capturing subpattern count = 0
+Capture group count = 0
 Max lookbehind = 1
 Extra options: match_word
 Starting code units: c d 
@@ -16340,7 +16340,7 @@ No match
 No match
 
 /(cat)|dog/I,match_line,literal
-Capturing subpattern count = 0
+Capture group count = 0
 Compile options: literal
 Overall options: anchored literal
 Extra options: match_line
@@ -16408,7 +16408,7 @@ Failed: error 150 at offset 3: invalid range in character class
 # Perl gets the second of these wrong, giving no match.
 
 "(?<=(a))\1?b"I
-Capturing subpattern count = 1
+Capture group count = 1
 Max back reference = 1
 Max lookbehind = 1
 Last code unit = 'b'
@@ -16421,7 +16421,7 @@ Subject length lower bound = 1
  1: a
 
 "(?=(a))\1?b"I
-Capturing subpattern count = 1
+Capture group count = 1
 Max back reference = 1
 First code unit = 'a'
 Last code unit = 'b'
@@ -16650,21 +16650,21 @@ Failed: error 194 at offset 3: invalid hyphen in option setting
 Failed: error 194 at offset 5: invalid hyphen in option setting
 
 /(?(?=^))b/I
-Capturing subpattern count = 0
+Capture group count = 0
 Last code unit = 'b'
 Subject length lower bound = 1
     abc
  0: b
 
 /(?(?=^)|)b/I
-Capturing subpattern count = 0
+Capture group count = 0
 First code unit = 'b'
 Subject length lower bound = 1
     abc
  0: b
 
 /(?(?=^)|^)b/I
-Capturing subpattern count = 0
+Capture group count = 0
 Compile options: <none>
 Overall options: anchored
 First code unit = 'b'
@@ -16676,7 +16676,7 @@ Subject length lower bound = 1
 No match
 
 /(?(1)^|^())/I
-Capturing subpattern count = 1
+Capture group count = 1
 Max back reference = 1
 May match empty string
 Compile options: <none>
@@ -16684,13 +16684,13 @@ Overall options: anchored
 Subject length lower bound = 0
 
 /(?(1)^())b/I
-Capturing subpattern count = 1
+Capture group count = 1
 Max back reference = 1
 Last code unit = 'b'
 Subject length lower bound = 1
 
 /(?(1)^())+b/I,aftertext
-Capturing subpattern count = 1
+Capture group count = 1
 Max back reference = 1
 Last code unit = 'b'
 Subject length lower bound = 1
@@ -16699,7 +16699,7 @@ Subject length lower bound = 1
  0+ c
 
 /(?(1)^()|^)+b/I,aftertext
-Capturing subpattern count = 1
+Capture group count = 1
 Max back reference = 1
 Compile options: <none>
 Overall options: anchored
@@ -16713,7 +16713,7 @@ Subject length lower bound = 1
 No match
 
 /(?(1)^()|^)*b/I,aftertext
-Capturing subpattern count = 1
+Capture group count = 1
 Max back reference = 1
 First code unit = 'b'
 Subject length lower bound = 1
@@ -16728,7 +16728,7 @@ Subject length lower bound = 1
  0+ c
 
 /(?(1)^())+b/I,aftertext
-Capturing subpattern count = 1
+Capture group count = 1
 Max back reference = 1
 Last code unit = 'b'
 Subject length lower bound = 1
@@ -16737,7 +16737,7 @@ Subject length lower bound = 1
  0+ c
 
 /(?(1)^a()|^a)+b/I,aftertext
-Capturing subpattern count = 1
+Capture group count = 1
 Max back reference = 1
 Compile options: <none>
 Overall options: anchored
@@ -16752,7 +16752,7 @@ Subject length lower bound = 2
 No match
 
 /(?(1)^|^(a))+b/I,aftertext
-Capturing subpattern count = 1
+Capture group count = 1
 Max back reference = 1
 Compile options: <none>
 Overall options: anchored
@@ -16767,7 +16767,7 @@ Subject length lower bound = 1
 No match
 
 /(?(1)^a()|^a)*b/I,aftertext
-Capturing subpattern count = 1
+Capture group count = 1
 Max back reference = 1
 Last code unit = 'b'
 Subject length lower bound = 1
@@ -16894,21 +16894,21 @@ Failed: error 128 at offset 14: assertion expected after (?( or (?(?C)
  0: foobar
 
 /(*:XX)^abc/I
-Capturing subpattern count = 0
+Capture group count = 0
 Compile options: <none>
 Overall options: anchored
 First code unit = 'a'
 Subject length lower bound = 3
 
 /(*COMMIT:XX)^abc/I
-Capturing subpattern count = 0
+Capture group count = 0
 Compile options: <none>
 Overall options: anchored
 First code unit = 'a'
 Subject length lower bound = 3
 
 /(*ACCEPT:XX)^abc/I
-Capturing subpattern count = 0
+Capture group count = 0
 Subject length lower bound = 0
 
 # End of testinput2

@@ -36,10 +36,9 @@ assertion just once). Perl allows some repeat quantifiers on other assertions,
 for example, \b* (but not \b{3}), but these do not seem to have any use.
 </P>
 <P>
-3. Capturing subpatterns that occur inside negative lookaround assertions are
-counted, but their entries in the offsets vector are set only when a negative
-assertion is a condition that has a matching branch (that is, the condition is
-false).
+3. Capture groups that occur inside negative lookaround assertions are counted,
+but their entries in the offsets vector are set only when a negative assertion
+is a condition that has a matching branch (that is, the condition is false).
 </P>
 <P>
 4. The following Perl escape sequences are not supported: \F, \l, \L, \u,
@@ -94,13 +93,13 @@ to PCRE2 release 10.23, but from release 10.30 this changed, and backtracking
 into subroutine calls is now supported, as in Perl.
 </P>
 <P>
-9. If any of the backtracking control verbs are used in a subpattern that is
-called as a subroutine (whether or not recursively), their effect is confined
-to that subpattern; it does not extend to the surrounding pattern. This is not
-always the case in Perl. In particular, if (*THEN) is present in a group that
-is called as a subroutine, its action is limited to that group, even if the
-group does not contain any | characters. Note that such subpatterns are
-processed as anchored at the point where they are tested.
+9. If any of the backtracking control verbs are used in a group that is called
+as a subroutine (whether or not recursively), their effect is confined to that
+group; it does not extend to the surrounding pattern. This is not always the
+case in Perl. In particular, if (*THEN) is present in a group that is called as
+a subroutine, its action is limited to that group, even if the group does not
+contain any | characters. Note that such groups are processed as anchored
+at the point where they are tested.
 </P>
 <P>
 10. If a pattern contains more than one backtracking control verb, the first
@@ -120,22 +119,21 @@ the pattern /^(a(b)?)+$/ in Perl leaves $2 unset, but in PCRE2 it is set to
 "b".
 </P>
 <P>
-13. PCRE2's handling of duplicate subpattern numbers and duplicate subpattern
-names is not as general as Perl's. This is a consequence of the fact the PCRE2
-works internally just with numbers, using an external table to translate
-between numbers and names. In particular, a pattern such as (?|(?&#60;a&#62;A)|(?&#60;b&#62;B),
-where the two capturing parentheses have the same number but different names,
-is not supported, and causes an error at compile time. If it were allowed, it
-would not be possible to distinguish which parentheses matched, because both
-names map to capturing subpattern number 1. To avoid this confusing situation,
-an error is given at compile time.
+13. PCRE2's handling of duplicate capture group numbers and names is not as
+general as Perl's. This is a consequence of the fact the PCRE2 works internally
+just with numbers, using an external table to translate between numbers and
+names. In particular, a pattern such as (?|(?&#60;a&#62;A)|(?&#60;b&#62;B), where the two
+capture groups have the same number but different names, is not supported, and
+causes an error at compile time. If it were allowed, it would not be possible
+to distinguish which group matched, because both names map to capture group
+number 1. To avoid this confusing situation, an error is given at compile time.
 </P>
 <P>
 14. Perl used to recognize comments in some places that PCRE2 does not, for
-example, between the ( and ? at the start of a subpattern. If the /x modifier
-is set, Perl allowed white space between ( and ? though the latest Perls give
-an error (for a while it was just deprecated). There may still be some cases
-where Perl behaves differently.
+example, between the ( and ? at the start of a group. If the /x modifier is
+set, Perl allowed white space between ( and ? though the latest Perls give an
+error (for a while it was just deprecated). There may still be some cases where
+Perl behaves differently.
 </P>
 <P>
 15. Perl, when in warning mode, gives warnings for character classes such as
@@ -235,9 +233,9 @@ Cambridge, England.
 REVISION
 </b><br>
 <P>
-Last updated: 28 July 2018
+Last updated: 03 February 2019
 <br>
-Copyright &copy; 1997-2018 University of Cambridge.
+Copyright &copy; 1997-2019 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE2 index page</a>.

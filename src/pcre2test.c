@@ -169,7 +169,7 @@ commented out the original, but kept it around just in case. */
 /* void vms_setsymbol( char *, char *, int ); Original code from [1]. */
 #endif
 
-/* VC and older compilers don't support %td or %zu, and even some that claim to 
+/* VC and older compilers don't support %td or %zu, and even some that claim to
 be C99 don't support it (hence DISABLE_PERCENT_ZT). */
 
 #if defined(_MSC_VER) || !defined(__STDC_VERSION__) || __STDC_VERSION__ < 199901L || defined(DISABLE_PERCENT_ZT)
@@ -539,7 +539,7 @@ typedef struct patctl {       /* Structure for pattern modifiers. */
   uint32_t  jitstack;         /* Must be in same position as datctl */
    uint8_t  replacement[REPLACE_MODSIZE];  /* So must this */
   uint32_t  substitute_skip;  /* Must be in same position as patctl */
-  uint32_t  substitute_stop;  /* Must be in same position as patctl */ 
+  uint32_t  substitute_stop;  /* Must be in same position as patctl */
   uint32_t  jit;
   uint32_t  stackguard_test;
   uint32_t  tables_id;
@@ -561,7 +561,7 @@ typedef struct datctl {       /* Structure for data line modifiers. */
   uint32_t  jitstack;         /* Must be in same position as patctl */
    uint8_t  replacement[REPLACE_MODSIZE];  /* So must this */
   uint32_t  substitute_skip;  /* Must be in same position as patctl */
-  uint32_t  substitute_stop;  /* Must be in same position as patctl */ 
+  uint32_t  substitute_stop;  /* Must be in same position as patctl */
   uint32_t  startend[2];
   uint32_t  cerror[2];
   uint32_t  cfail[2];
@@ -3049,13 +3049,14 @@ return yield;
 
 
 
-#ifdef SUPPORT_PCRE2_8
 /*************************************************
 *       Convert character value to UTF-8         *
 *************************************************/
 
 /* This function takes an integer value in the range 0 - 0x7fffffff
-and encodes it as a UTF-8 character in 0 to 6 bytes.
+and encodes it as a UTF-8 character in 0 to 6 bytes. It is needed even when the
+8-bit library is not supported, to generate UTF-8 output for non-ASCII
+characters.
 
 Arguments:
   cvalue     the character value
@@ -3081,7 +3082,6 @@ for (j = i; j > 0; j--)
 *utf8bytes = utf8_table2[i] | cvalue;
 return i + 1;
 }
-#endif  /* SUPPORT_PCRE2_8 */
 
 
 
@@ -4374,6 +4374,7 @@ static int
 show_pattern_info(void)
 {
 uint32_t compile_options, overall_options, extra_options;
+BOOL utf = (FLD(compiled_code, overall_options) & PCRE2_UTF) != 0;
 
 if ((pat_patctl.control & (CTL_BINCODE|CTL_FULLBINCODE)) != 0)
   {
@@ -4463,7 +4464,7 @@ if ((pat_patctl.control & CTL_INFO) != 0)
       != 0)
     return PR_ABEND;
 
-  fprintf(outfile, "Capturing subpattern count = %d\n", capture_count);
+  fprintf(outfile, "Capture group count = %d\n", capture_count);
 
   if (backrefmax > 0)
     fprintf(outfile, "Max back reference = %d\n", backrefmax);
@@ -4482,14 +4483,60 @@ if ((pat_patctl.control & CTL_INFO) != 0)
 
   if (namecount > 0)
     {
-    fprintf(outfile, "Named capturing subpatterns:\n");
+    fprintf(outfile, "Named capture groups:\n");
     for (; namecount > 0; namecount--)
       {
       int imm2_size = test_mode == PCRE8_MODE ? 2 : 1;
       uint32_t length = (uint32_t)STRLEN(nametable + imm2_size);
       fprintf(outfile, "  ");
-      PCHARSV(nametable, imm2_size, length, FALSE, outfile);
+
+      /* In UTF mode the name may be a UTF string containing non-ASCII
+      letters and digits. We must output it as a UTF-8 string. In non-UTF mode,
+      use the normal string printing functions, which use escapes for all
+      non-ASCII characters. */
+
+      if (utf)
+        {
+#ifdef SUPPORT_PCRE2_32
+        if (test_mode == PCRE32_MODE)
+          {
+          PCRE2_SPTR32 nameptr = (PCRE2_SPTR32)nametable + imm2_size;
+          while (*nameptr != 0)
+            {
+            uint8_t u8buff[6];
+            int len = ord2utf8(*nameptr++, u8buff);
+            fprintf(outfile, "%.*s", len, u8buff);
+            }
+          }
+#endif
+#ifdef SUPPORT_PCRE2_16
+        if (test_mode == PCRE16_MODE)
+          {
+          PCRE2_SPTR16 nameptr = (PCRE2_SPTR16)nametable + imm2_size;
+          while (*nameptr != 0)
+            {
+            int len;
+            uint8_t u8buff[6];
+            uint32_t c = *nameptr++ & 0xffff;
+            if (c >= 0xD800 && c < 0xDC00)
+              c = ((c & 0x3ff) << 10) + (*nameptr++ & 0x3ff) + 0x10000;
+            len = ord2utf8(c, u8buff);
+            fprintf(outfile, "%.*s", len, u8buff);
+            }
+          }
+#endif
+#ifdef SUPPORT_PCRE2_8
+        if (test_mode == PCRE8_MODE)
+          fprintf(outfile, "%s", (PCRE2_SPTR8)nametable + imm2_size);
+#endif
+        }
+      else  /* Not UTF mode */
+        {
+        PCHARSV(nametable, imm2_size, length, FALSE, outfile);
+        }
+
       while (length++ < nameentrysize - imm2_size) putc(' ', outfile);
+
 #ifdef SUPPORT_PCRE2_32
       if (test_mode == PCRE32_MODE)
         fprintf(outfile, "%3d\n", (int)(((PCRE2_SPTR32)nametable)[0]));
@@ -4503,6 +4550,7 @@ if ((pat_patctl.control & CTL_INFO) != 0)
         fprintf(outfile, "%3d\n", (int)(
         ((((PCRE2_SPTR8)nametable)[0]) << 8) | ((PCRE2_SPTR8)nametable)[1]));
 #endif
+
       nametable = (void*)((PCRE2_SPTR8)nametable + nameentrysize * code_unit_size);
       }
     }
@@ -5971,30 +6019,30 @@ BOOL utf = (FLD(compiled_code, overall_options) & PCRE2_UTF) != 0;
 (void)data_ptr;   /* Not used */
 
 fprintf(outfile, "%2d(%d) Old %" SIZ_FORM " %" SIZ_FORM " \"",
-  scb->subscount, scb->oveccount, 
+  scb->subscount, scb->oveccount,
   SIZ_CAST scb->ovector[0], SIZ_CAST scb->ovector[1]);
 
-PCHARSV(scb->input, scb->ovector[0], scb->ovector[1] - scb->ovector[0], 
+PCHARSV(scb->input, scb->ovector[0], scb->ovector[1] - scb->ovector[0],
   utf, outfile);
 
 fprintf(outfile, "\" New %" SIZ_FORM " %" SIZ_FORM " \"",
   SIZ_CAST scb->output_offsets[0], SIZ_CAST scb->output_offsets[1]);
 
-PCHARSV(scb->output, scb->output_offsets[0], 
+PCHARSV(scb->output, scb->output_offsets[0],
   scb->output_offsets[1] - scb->output_offsets[0], utf, outfile);
 
-if (scb->subscount == dat_datctl.substitute_stop) 
+if (scb->subscount == dat_datctl.substitute_stop)
   {
   yield = -1;
-  fprintf(outfile, " STOPPED"); 
-  } 
-else if (scb->subscount == dat_datctl.substitute_skip) 
+  fprintf(outfile, " STOPPED");
+  }
+else if (scb->subscount == dat_datctl.substitute_skip)
   {
   yield = +1;
-  fprintf(outfile, " SKIPPED"); 
-  } 
+  fprintf(outfile, " SKIPPED");
+  }
 
-fprintf(outfile, "\"\n"); 
+fprintf(outfile, "\"\n");
 return yield;
 }
 
@@ -6867,11 +6915,11 @@ arg_ulen = ulen;                          /* Value to use in match arg */
 
 if (p[-1] != 0 && !decode_modifiers(p, CTX_DAT, NULL, &dat_datctl))
   return PR_OK;
-  
-/* Setting substitute_{skip,fail} implies a substitute callout. */ 
+
+/* Setting substitute_{skip,fail} implies a substitute callout. */
 
 if (dat_datctl.substitute_skip != 0 || dat_datctl.substitute_stop != 0)
-  dat_datctl.control2 |= CTL2_SUBSTITUTE_CALLOUT; 
+  dat_datctl.control2 |= CTL2_SUBSTITUTE_CALLOUT;
 
 /* Check for mutually exclusive modifiers. At present, these are all in the
 first control word. */
@@ -8129,7 +8177,7 @@ if (arg != NULL && arg[0] != CHAR_MINUS)
     break;
     }
 
-/* For VMS, return the value by setting a symbol, for certain values only. This 
+/* For VMS, return the value by setting a symbol, for certain values only. This
 is contributed code which the PCRE2 developers have no means of testing. */
 
 #ifdef __VMS
