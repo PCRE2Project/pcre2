@@ -869,6 +869,7 @@ static struct regression_test_case regression_test_cases[] = {
 	{ MU, A, 0, 0, "((.)(?:.|(*COMMIT)\\2{3}(*ACCEPT).*|.*)){0}_(?1){0,4}_", "_aaaabbbbccccddd_ _aaaabbbbccccdddd_" },
 
 	/* Script runs and iterations. */
+#ifdef SUPPORT_UNICODE         
 	{ MU, A, 0, 0, "!(*sr:\\w\\w|\\w\\w\\w)*#", "!abcdefghijklmno!abcdefghijklmno!abcdef#" },
 	{ MU, A, 0, 0, "!(*sr:\\w\\w|\\w\\w\\w)+#", "!abcdefghijklmno!abcdefghijklmno!abcdef#" },
 	{ MU, A, 0, 0, "!(*sr:\\w\\w|\\w\\w\\w)*?#", "!abcdefghijklmno!abcdefghijklmno!abcdef#" },
@@ -877,6 +878,7 @@ static struct regression_test_case regression_test_cases[] = {
 	{ MU, A, 0, 0, "!(*sr:\\w\\w|\\w\\w\\w)++#", "!abcdefghijklmno!abcdefghijklmno!abcdef#" },
 	{ MU, A, 0, 0, "!(*sr:\\w\\w|\\w\\w\\w)?#", "!ab!abc!ab!ab#" },
 	{ MU, A, 0, 0, "!(*sr:\\w\\w|\\w\\w\\w)??#", "!ab!abc!ab!ab#" },
+#endif
 
 	/* Deep recursion. */
 	{ MU, A, 0, 0, "((((?:(?:(?:\\w)+)?)*|(?>\\w)+?)+|(?>\\w)?\?)*)?\\s", "aaaaa+ " },
