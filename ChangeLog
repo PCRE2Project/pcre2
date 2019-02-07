@@ -122,7 +122,8 @@ tests such as (?(VERSION>=0)...) when the version test was true. Incorrect
 processing or a crash could result.
 
 30. When PCRE2_UTF is set, allow non-ASCII letters and decimal digits in group 
-names, as Perl does.
+names, as Perl does. There was a small bug in this new code, found by
+ClusterFuzz 12950, fixed before release.
 
 
 Version 10.32 10-September-2018
