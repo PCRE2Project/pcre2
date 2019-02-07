@@ -1645,4 +1645,10 @@ Failed: error 148 at offset 36: subpattern name is too long (maximum 32 code uni
 
 /(?'ABZC6789012345678901234567890123'...)/utf
 
+/(?(n/utf
+Failed: error 142 at offset 4: syntax error in subpattern name (missing terminator?)
+
+/(?(á/utf
+Failed: error 142 at offset 5: syntax error in subpattern name (missing terminator?)
+
 # End of testinput10

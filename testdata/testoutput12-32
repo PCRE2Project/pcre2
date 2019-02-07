@@ -1494,4 +1494,10 @@ No match
     \x{d800}\x{dfff}                   Surrogates (Unknown) \=no_utf_check
  0: \x{d800}
 
+/(?(n/utf
+Failed: error 142 at offset 4: syntax error in subpattern name (missing terminator?)
+
+/(?(á/utf
+Failed: error 142 at offset 4: syntax error in subpattern name (missing terminator?)
+
 # End of testinput12

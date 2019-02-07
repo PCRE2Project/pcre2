@@ -2246,8 +2246,8 @@ if (utf && is_group)
     if (type != ucp_Nd && PRIV(ucp_gentype)[type] != ucp_L &&
         c != CHAR_UNDERSCORE) break;
     ptr++;
+    FORWARDCHARTEST(ptr, ptrend);
     if (ptr >= ptrend) break;
-    FORWARDCHAR(ptr);
     GETCHAR(c, ptr);
     type = UCD_CHARTYPE(c);
     }

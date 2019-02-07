@@ -398,4 +398,8 @@
     \x{2e80}\x{3105}\x{2e80}\x{30a1}   Han Bopomofo Han Katakana
     \x{d800}\x{dfff}                   Surrogates (Unknown) \=no_utf_check
 
+/(?(n/utf
+
+/(?(á/utf
+
 # End of testinput12
