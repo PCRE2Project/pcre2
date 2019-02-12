@@ -8774,7 +8774,7 @@ No match
     cat
 No match
 
-/(\3)(\1)(a)/alt_bsux,allow_empty_class,match_unset_backref,dupnames
+/(\3)(\1)(a)/allow_empty_class,match_unset_backref,dupnames
     cat
  0: a
  1: 
@@ -8785,7 +8785,7 @@ No match
     The ACTA] comes
  0: TA]
 
-/TA]/alt_bsux,allow_empty_class,match_unset_backref,dupnames
+/TA]/allow_empty_class,match_unset_backref,dupnames
     The ACTA] comes
  0: TA]
 
@@ -8833,22 +8833,22 @@ Failed: error 106 at offset 4: missing terminating ] for character class
 /a[^]b/
 Failed: error 106 at offset 5: missing terminating ] for character class
 
-/a[]b/alt_bsux,allow_empty_class,match_unset_backref,dupnames
+/a[]b/allow_empty_class,match_unset_backref,dupnames
 \= Expect no match
     ab
 No match
 
-/a[]+b/alt_bsux,allow_empty_class,match_unset_backref,dupnames
+/a[]+b/allow_empty_class,match_unset_backref,dupnames
 \= Expect no match
     ab
 No match
 
-/a[]*+b/alt_bsux,allow_empty_class,match_unset_backref,dupnames
+/a[]*+b/allow_empty_class,match_unset_backref,dupnames
 \= Expect no match
     ab
 No match
 
-/a[^]b/alt_bsux,allow_empty_class,match_unset_backref,dupnames
+/a[^]b/allow_empty_class,match_unset_backref,dupnames
     aXb
  0: aXb
     a\nb
@@ -8857,7 +8857,7 @@ No match
     ab
 No match
 
-/a[^]+b/alt_bsux,allow_empty_class,match_unset_backref,dupnames
+/a[^]+b/allow_empty_class,match_unset_backref,dupnames
     aXb
  0: aXb
     a\nX\nXb
@@ -9971,17 +9971,17 @@ Partial match: abca
     xxxxabcde\=ph
 Partial match: abcde
 
-/(\3)(\1)(a)/alt_bsux,allow_empty_class,match_unset_backref,dupnames
+/(\3)(\1)(a)/allow_empty_class,match_unset_backref,dupnames
     cat
  0: a
  1: 
  2: 
  3: a
 
-/(\3)(\1)(a)/I,alt_bsux,allow_empty_class,match_unset_backref,dupnames
+/(\3)(\1)(a)/I,allow_empty_class,match_unset_backref,dupnames
 Capture group count = 3
 Max back reference = 3
-Options: alt_bsux allow_empty_class dupnames match_unset_backref
+Options: allow_empty_class dupnames match_unset_backref
 Last code unit = 'a'
 Subject length lower bound = 1
     cat
@@ -11364,6 +11364,17 @@ No match
 \= Expect no match
     aAz
 No match
+    
+/^\u{7a}/alt_bsux
+    u{7a}
+ 0: u{7a}
+\= Expect no match
+    zoo 
+No match
+
+/^\u{7a}/extra_alt_bsux
+    zoo 
+ 0: z
 
 /(?(?=c)c|d)++Y/B
 ------------------------------------------------------------------

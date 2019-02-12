@@ -399,12 +399,33 @@ environment, these escapes are as follows:
   \xhh        character with hex code hh
   \x{hhh..}   character with hex code hhh..
   \N{U+hhh..} character with Unicode hex code point hhh..
-  \uhhhh      character with hex code hhhh (when PCRE2_ALT_BSUX is set)
 </pre>
-There are some legacy applications where the escape sequence \r is expected to
-match a newline. If the PCRE2_EXTRA_ESCAPED_CR_IS_LF option is set, \r in a
-pattern is converted to \n so that it matches a LF (linefeed) instead of a CR
-(carriage return) character.
+By default, after \x that is not followed by {, from zero to two hexadecimal
+digits are read (letters can be in upper or lower case). Any number of
+hexadecimal digits may appear between \x{ and }. If a character other than a
+hexadecimal digit appears between \x{ and }, or if there is no terminating },
+an error occurs.
+</P>
+<P>
+Characters whose code points are less than 256 can be defined by either of the
+two syntaxes for \x or by an octal sequence. There is no difference in the way
+they are handled. For example, \xdc is exactly the same as \x{dc} or \334.
+However, using the braced versions does make such sequences easier to read.
+</P>
+<P>
+Support is available for some ECMAScript (aka JavaScript) escape sequences via
+two compile-time options. If PCRE2_ALT_BSUX is set, the sequence \x followed
+by { is not recognized. Only if \x is followed by two hexadecimal digits is it
+recognized as a character escape. Otherwise it is interpreted as a literal "x"
+character. In this mode, support for code points greater than 256 is provided
+by \u, which must be followed by four hexadecimal digits; otherwise it is 
+interpreted as a literal "u" character.
+</P>
+<P>
+PCRE2_EXTRA_ALT_BSUX has the same effect as PCRE2_ALT_BSUX and, in addition,
+\u{hhh..} is recognized as the character specified by hexadecimal code point.
+There may be any number of hexadecimal digits. This syntax is from ECMAScript 
+6.
 </P>
 <P>
 The \N{U+hhh..} escape sequence is recognized only when the PCRE2_UTF option
@@ -412,6 +433,12 @@ is set, that is, when PCRE2 is operating in a Unicode mode. Perl also uses
 \N{name} to specify characters by Unicode name; PCRE2 does not support this.
 Note that when \N is not followed by an opening brace (curly bracket) it has
 an entirely different meaning, matching any character that is not a newline.
+</P>
+<P>
+There are some legacy applications where the escape sequence \r is expected to
+match a newline. If the PCRE2_EXTRA_ESCAPED_CR_IS_LF option is set, \r in a
+pattern is converted to \n so that it matches a LF (linefeed) instead of a CR
+(carriage return) character.
 </P>
 <P>
 The precise effect of \cx on ASCII characters is as follows: if x is a lower
@@ -500,28 +527,6 @@ Note that octal values of 100 or greater that are specified using this syntax
 must not be introduced by a leading zero, because no more than three octal
 digits are ever read.
 </P>
-<P>
-By default, after \x that is not followed by {, from zero to two hexadecimal
-digits are read (letters can be in upper or lower case). Any number of
-hexadecimal digits may appear between \x{ and }. If a character other than
-a hexadecimal digit appears between \x{ and }, or if there is no terminating
-}, an error occurs.
-</P>
-<P>
-If the PCRE2_ALT_BSUX option is set, the interpretation of \x is as just
-described only when it is followed by two hexadecimal digits. Otherwise, it
-matches a literal "x" character. In this mode, support for code points greater
-than 256 is provided by \u, which must be followed by four hexadecimal digits;
-otherwise it matches a literal "u" character. This syntax makes PCRE2 behave 
-like ECMAscript (aka JavaScript). Code points greater than 0xFFFF are not
-supported.
-</P>
-<P>
-Characters whose value is less than 256 can be defined by either of the two
-syntaxes for \x (or by \u in PCRE2_ALT_BSUX mode). There is no difference in
-the way they are handled. For example, \xdc is exactly the same as \x{dc} (or
-\u00dc in PCRE2_ALT_BSUX mode).
-</P>
 <br><b>
 Constraints on character values
 </b><br>
@@ -560,9 +565,10 @@ Unsupported escape sequences
 <P>
 In Perl, the sequences \F, \l, \L, \u, and \U are recognized by its string
 handler and used to modify the case of following characters. By default, PCRE2
-does not support these escape sequences. However, if the PCRE2_ALT_BSUX option
-is set, \U matches a "U" character, and \u can be used to define a character
-by code point, as described above.
+does not support these escape sequences in patterns. However, if either of the
+PCRE2_ALT_BSUX or PCRE2_EXTRA_ALT_BSUX options is set, \U matches a "U"
+character, and \u can be used to define a character by code point, as
+described above.
 </P>
 <br><b>
 Absolute and relative backreferences
@@ -3721,7 +3727,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC31" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 04 February 2019
+Last updated: 12 February 2019
 <br>
 Copyright &copy; 1997-2019 University of Cambridge.
 <br>

@@ -764,7 +764,7 @@ are allowed. */
 #define PUBLIC_COMPILE_EXTRA_OPTIONS \
    (PUBLIC_LITERAL_COMPILE_EXTRA_OPTIONS| \
     PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES|PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL| \
-    PCRE2_EXTRA_ESCAPED_CR_IS_LF)
+    PCRE2_EXTRA_ESCAPED_CR_IS_LF|PCRE2_EXTRA_ALT_BSUX)
 
 /* Compile time error code numbers. They are given names so that they can more
 easily be tracked. When a new number is added, the tables called eint1 and
@@ -1459,7 +1459,8 @@ Returns:         zero => a data character
 
 int
 PRIV(check_escape)(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *chptr,
-  int *errorcodeptr, uint32_t options, BOOL isclass, compile_block *cb)
+  int *errorcodeptr, uint32_t options, uint32_t extra_options, BOOL isclass, 
+  compile_block *cb)
 {
 BOOL utf = (options & PCRE2_UTF) != 0;
 PCRE2_SPTR ptr = *ptrptr;
@@ -1495,8 +1496,7 @@ else if ((i = escapes[c - ESCAPES_FIRST]) != 0)
   if (i > 0)
     {
     c = (uint32_t)i;
-    if (cb != NULL && c == CHAR_CR &&
-        (cb->cx->extra_options & PCRE2_EXTRA_ESCAPED_CR_IS_LF) != 0)
+    if (c == CHAR_CR && (extra_options & PCRE2_EXTRA_ESCAPED_CR_IS_LF) != 0)
       c = CHAR_LF;
     }
   else  /* Negative table entry */
@@ -1551,22 +1551,28 @@ else if ((i = escapes[c - ESCAPES_FIRST]) != 0)
 
 /* Escapes that need further processing, including those that are unknown, have
 a zero entry in the lookup table. When called from pcre2_substitute(), only \c,
-\o, and \x are recognized (and \u when BSUX is set). */
+\o, and \x are recognized (\u and \U can never appear as they are used for case 
+forcing). */
 
 else
   {
+  int s;
   PCRE2_SPTR oldptr;
   BOOL overflow;
-  int s;
+  BOOL alt_bsux = 
+    ((options & PCRE2_ALT_BSUX) | (extra_options & PCRE2_EXTRA_ALT_BSUX)) != 0;
 
   /* Filter calls from pcre2_substitute(). */
 
-  if (cb == NULL && c != CHAR_c && c != CHAR_o && c != CHAR_x &&
-      (c != CHAR_u || (options & PCRE2_ALT_BSUX) != 0))
+  if (cb == NULL)
     {
-    *errorcodeptr = ERR3;
-    return 0;
-    }
+    if (c != CHAR_c && c != CHAR_o && c != CHAR_x)
+      {
+      *errorcodeptr = ERR3;
+      return 0;
+      }
+    alt_bsux = FALSE;   /* Do not modify \x handling */   
+    }   
 
   switch (c)
     {
@@ -1579,40 +1585,74 @@ else
     *errorcodeptr = ERR37;
     break;
 
-    /* \u is unrecognized when PCRE2_ALT_BSUX is not set. When it is treated
-    specially, \u must be followed by four hex digits. Otherwise it is a
-    lowercase u letter. */
+    /* \u is unrecognized when neither PCRE2_ALT_BSUX nor PCRE2_EXTRA_ALT_BSUX
+    is set. Otherwise, \u must be followed by exactly four hex digits or, if
+    PCRE2_EXTRA_ALT_BSUX is set, by any number of hex digits in braces.
+    Otherwise it is a lowercase u letter. This gives some compatibility with
+    ECMAScript (aka JavaScript). */
 
     case CHAR_u:
-    if ((options & PCRE2_ALT_BSUX) == 0) *errorcodeptr = ERR37; else
+    if (!alt_bsux) *errorcodeptr = ERR37; else
       {
       uint32_t xc;
-      if (ptrend - ptr < 4) break;              /* Less than 4 chars */
-      if ((cc = XDIGIT(ptr[0])) == 0xff) break;  /* Not a hex digit */
-      if ((xc = XDIGIT(ptr[1])) == 0xff) break;  /* Not a hex digit */
-      cc = (cc << 4) | xc;
-      if ((xc = XDIGIT(ptr[2])) == 0xff) break;  /* Not a hex digit */
-      cc = (cc << 4) | xc;
-      if ((xc = XDIGIT(ptr[3])) == 0xff) break;  /* Not a hex digit */
-      c = (cc << 4) | xc;
-      ptr += 4;
+      
+      if (*ptr == CHAR_LEFT_CURLY_BRACKET && 
+          (extra_options & PCRE2_EXTRA_ALT_BSUX) != 0)
+        {
+        PCRE2_SPTR hptr = ptr + 1;
+        cc = 0;
+        
+        while (hptr < ptrend && (xc = XDIGIT(*hptr)) != 0xff)
+          { 
+          if ((cc & 0xf0000000) != 0)  /* Test for 32-bit overflow */
+            {
+            *errorcodeptr = ERR77;
+            ptr = hptr;   /* Show where */
+            break;        /* *hptr != } will cause another break below */  
+            } 
+          cc = (cc << 4) | xc;
+          hptr++; 
+          } 
+          
+        if (hptr == ptr + 1 ||   /* No hex digits */
+            hptr >= ptrend ||    /* Hit end of input */
+            *hptr != CHAR_RIGHT_CURLY_BRACKET)  /* No } terminator */
+          break;         /* Hex escape not recognized */
+           
+        c = cc;          /* Accept the code point */
+        ptr = hptr + 1; 
+        }
+         
+      else  /* Must be exactly 4 hex digits */
+        {      
+        if (ptrend - ptr < 4) break;               /* Less than 4 chars */
+        if ((cc = XDIGIT(ptr[0])) == 0xff) break;  /* Not a hex digit */
+        if ((xc = XDIGIT(ptr[1])) == 0xff) break;  /* Not a hex digit */
+        cc = (cc << 4) | xc;
+        if ((xc = XDIGIT(ptr[2])) == 0xff) break;  /* Not a hex digit */
+        cc = (cc << 4) | xc;
+        if ((xc = XDIGIT(ptr[3])) == 0xff) break;  /* Not a hex digit */
+        c = (cc << 4) | xc;
+        ptr += 4;
+        } 
+ 
       if (utf)
         {
         if (c > 0x10ffffU) *errorcodeptr = ERR77;
         else
           if (c >= 0xd800 && c <= 0xdfff &&
-            (cb->cx->extra_options & PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES) == 0)
-              *errorcodeptr = ERR73;
+              (extra_options & PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES) == 0)
+                *errorcodeptr = ERR73;
         }
       else if (c > MAX_NON_UTF_CHAR) *errorcodeptr = ERR77;
       }
     break;
 
-    /* \U is unrecognized unless PCRE2_ALT_BSUX is set, in which case it is an
-    upper case letter. */
+    /* \U is unrecognized unless PCRE2_ALT_BSUX or PCRE2_EXTRA_ALT_BSUX is set,
+    in which case it is an upper case letter. */
 
     case CHAR_U:
-    if ((options & PCRE2_ALT_BSUX) == 0) *errorcodeptr = ERR37;
+    if (!alt_bsux) *errorcodeptr = ERR37;
     break;
 
     /* In a character class, \g is just a literal "g". Outside a character
@@ -1791,8 +1831,8 @@ else
         }
       else if (ptr < ptrend && *ptr++ == CHAR_RIGHT_CURLY_BRACKET)
         {
-        if (utf && c >= 0xd800 && c <= 0xdfff && (cb == NULL ||
-            (cb->cx->extra_options & PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES) == 0))
+        if (utf && c >= 0xd800 && c <= 0xdfff &&
+            (extra_options & PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES) == 0)
           {
           ptr--;
           *errorcodeptr = ERR73;
@@ -1806,11 +1846,11 @@ else
       }
     break;
 
-    /* \x is complicated. When PCRE2_ALT_BSUX is set, \x must be followed by
-    two hexadecimal digits. Otherwise it is a lowercase x letter. */
+    /* When PCRE2_ALT_BSUX or PCRE2_EXTRA_ALT_BSUX is set, \x must be followed
+    by two hexadecimal digits. Otherwise it is a lowercase x letter. */
 
     case CHAR_x:
-    if ((options & PCRE2_ALT_BSUX) != 0)
+    if (alt_bsux)
       {
       uint32_t xc;
       if (ptrend - ptr < 2) break;               /* Less than 2 characters */
@@ -1818,9 +1858,9 @@ else
       if ((xc = XDIGIT(ptr[1])) == 0xff) break;  /* Not a hex digit */
       c = (cc << 4) | xc;
       ptr += 2;
-      }    /* End PCRE2_ALT_BSUX handling */
+      }
 
-    /* Handle \x in Perl's style. \x{ddd} is a character number which can be
+    /* Handle \x in Perl's style. \x{ddd} is a character code which can be
     greater than 0xff in UTF-8 or non-8bit mode, but only if the ddd are hex
     digits. If not, { used to be treated as a data character. However, Perl
     seems to read hex digits up to the first non-such, and ignore the rest, so
@@ -1864,8 +1904,8 @@ else
           }
         else if (ptr < ptrend && *ptr++ == CHAR_RIGHT_CURLY_BRACKET)
           {
-          if (utf && c >= 0xd800 && c <= 0xdfff && (cb == NULL ||
-              (cb->cx->extra_options & PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES) == 0))
+          if (utf && c >= 0xd800 && c <= 0xdfff &&
+              (extra_options & PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES) == 0)
             {
             ptr--;
             *errorcodeptr = ERR73;
@@ -2438,6 +2478,7 @@ uint32_t *parsed_pattern = cb->parsed_pattern;
 uint32_t *parsed_pattern_end = cb->parsed_pattern_end;
 uint32_t meta_quantifier = 0;
 uint32_t add_after_mark = 0;
+uint32_t extra_options = cb->cx->extra_options;
 uint16_t nest_depth = 0;
 int after_manual_callout = 0;
 int expect_cond_assert = 0;
@@ -2461,12 +2502,12 @@ nest_save *top_nest, *end_nests;
 /* Insert leading items for word and line matching (features provided for the
 benefit of pcre2grep). */
 
-if ((cb->cx->extra_options & PCRE2_EXTRA_MATCH_LINE) != 0)
+if ((extra_options & PCRE2_EXTRA_MATCH_LINE) != 0)
   {
   *parsed_pattern++ = META_CIRCUMFLEX;
   *parsed_pattern++ = META_NOCAPTURE;
   }
-else if ((cb->cx->extra_options & PCRE2_EXTRA_MATCH_WORD) != 0)
+else if ((extra_options & PCRE2_EXTRA_MATCH_WORD) != 0)
   {
   *parsed_pattern++ = META_ESCAPE + ESC_b;
   *parsed_pattern++ = META_NOCAPTURE;
@@ -2631,7 +2672,7 @@ while (ptr < ptrend)
       if ((options & PCRE2_ALT_VERBNAMES) != 0)
         {
         escape = PRIV(check_escape)(&ptr, ptrend, &c, &errorcode, options,
-          FALSE, cb);
+          cb->cx->extra_options, FALSE, cb);
         if (errorcode != 0) goto FAILED;
         }
       else escape = 0;   /* Treat all as literal */
@@ -2821,11 +2862,11 @@ while (ptr < ptrend)
     case CHAR_BACKSLASH:
     tempptr = ptr;
     escape = PRIV(check_escape)(&ptr, ptrend, &c, &errorcode, options,
-      FALSE, cb);
+      cb->cx->extra_options, FALSE, cb);
     if (errorcode != 0)
       {
       ESCAPE_FAILED:
-      if ((cb->cx->extra_options & PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL) == 0)
+      if ((extra_options & PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL) == 0)
         goto FAILED;
       ptr = tempptr;
       if (ptr >= ptrend) c = CHAR_BACKSLASH; else
@@ -3382,12 +3423,12 @@ while (ptr < ptrend)
       else
         {
         tempptr = ptr;
-        escape = PRIV(check_escape)(&ptr, ptrend, &c, &errorcode,
-          options, TRUE, cb);
+        escape = PRIV(check_escape)(&ptr, ptrend, &c, &errorcode, options, 
+          cb->cx->extra_options, TRUE, cb);
 
         if (errorcode != 0)
           {
-          if ((cb->cx->extra_options & PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL) == 0)
+          if ((extra_options & PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL) == 0)
             goto FAILED;
           ptr = tempptr;
           if (ptr >= ptrend) c = CHAR_BACKSLASH; else
@@ -4545,12 +4586,12 @@ parsed_pattern = manage_callouts(ptr, &previous_callout, auto_callout,
 /* Insert trailing items for word and line matching (features provided for the
 benefit of pcre2grep). */
 
-if ((cb->cx->extra_options & PCRE2_EXTRA_MATCH_LINE) != 0)
+if ((extra_options & PCRE2_EXTRA_MATCH_LINE) != 0)
   {
   *parsed_pattern++ = META_KET;
   *parsed_pattern++ = META_DOLLAR;
   }
-else if ((cb->cx->extra_options & PCRE2_EXTRA_MATCH_WORD) != 0)
+else if ((extra_options & PCRE2_EXTRA_MATCH_WORD) != 0)
   {
   *parsed_pattern++ = META_KET;
   *parsed_pattern++ = META_ESCAPE + ESC_b;

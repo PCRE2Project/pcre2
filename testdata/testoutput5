@@ -798,7 +798,7 @@ No match
 /[[:a\x{100}b:]]/utf
 Failed: error 130 at offset 3: unknown POSIX class name
 
-/a[^]b/utf,alt_bsux,allow_empty_class,match_unset_backref
+/a[^]b/utf,allow_empty_class,match_unset_backref
     a\x{1234}b
  0: a\x{1234}b
     a\nb
@@ -807,7 +807,7 @@ Failed: error 130 at offset 3: unknown POSIX class name
     ab
 No match
 
-/a[^]+b/utf,alt_bsux,allow_empty_class,match_unset_backref
+/a[^]+b/utf,allow_empty_class,match_unset_backref
     aXb
  0: aXb
     a\nX\nX\x{1234}b
@@ -1733,6 +1733,10 @@ No match
 
 /\ud800/utf,alt_bsux,allow_empty_class,match_unset_backref
 Failed: error 173 at offset 6: disallowed Unicode code point (>= 0xd800 && <= 0xdfff)
+
+/^\u{0000000000010ffff}/utf,extra_alt_bsux
+    \x{10ffff}
+ 0: \x{10ffff}
 
 /^a+[a\x{200}]/B,utf
 ------------------------------------------------------------------

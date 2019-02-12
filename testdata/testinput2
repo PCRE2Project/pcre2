@@ -2408,13 +2408,13 @@
 \= Expect no match
     cat
 
-/(\3)(\1)(a)/alt_bsux,allow_empty_class,match_unset_backref,dupnames
+/(\3)(\1)(a)/allow_empty_class,match_unset_backref,dupnames
     cat
 
 /TA]/
     The ACTA] comes
 
-/TA]/alt_bsux,allow_empty_class,match_unset_backref,dupnames
+/TA]/allow_empty_class,match_unset_backref,dupnames
     The ACTA] comes
 
 /(?2)[]a()b](abc)/
@@ -2446,25 +2446,25 @@
 
 /a[^]b/
 
-/a[]b/alt_bsux,allow_empty_class,match_unset_backref,dupnames
+/a[]b/allow_empty_class,match_unset_backref,dupnames
 \= Expect no match
     ab
 
-/a[]+b/alt_bsux,allow_empty_class,match_unset_backref,dupnames
+/a[]+b/allow_empty_class,match_unset_backref,dupnames
 \= Expect no match
     ab
 
-/a[]*+b/alt_bsux,allow_empty_class,match_unset_backref,dupnames
+/a[]*+b/allow_empty_class,match_unset_backref,dupnames
 \= Expect no match
     ab
 
-/a[^]b/alt_bsux,allow_empty_class,match_unset_backref,dupnames
+/a[^]b/allow_empty_class,match_unset_backref,dupnames
     aXb
     a\nb
 \= Expect no match
     ab
 
-/a[^]+b/alt_bsux,allow_empty_class,match_unset_backref,dupnames
+/a[^]+b/allow_empty_class,match_unset_backref,dupnames
     aXb
     a\nX\nXb
 \= Expect no match
@@ -2903,10 +2903,10 @@
     xxxxabcde\=ps
     xxxxabcde\=ph
 
-/(\3)(\1)(a)/alt_bsux,allow_empty_class,match_unset_backref,dupnames
+/(\3)(\1)(a)/allow_empty_class,match_unset_backref,dupnames
     cat
 
-/(\3)(\1)(a)/I,alt_bsux,allow_empty_class,match_unset_backref,dupnames
+/(\3)(\1)(a)/I,allow_empty_class,match_unset_backref,dupnames
     cat
 
 /(\3)(\1)(a)/I
@@ -3418,6 +3418,14 @@
     aU0041z
 \= Expect no match
     aAz
+    
+/^\u{7a}/alt_bsux
+    u{7a}
+\= Expect no match
+    zoo 
+
+/^\u{7a}/extra_alt_bsux
+    zoo 
 
 /(?(?=c)c|d)++Y/B
 

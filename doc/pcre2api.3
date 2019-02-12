@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "04 February 2019" "PCRE2 10.33"
+.TH PCRE2API 3 "12 February 2019" "PCRE2 10.33"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -1231,7 +1231,7 @@ are needed. The \fBpcre2_code_copy_with_tables()\fP provides this facility.
 Copies of both the code and the tables are made, with the new code pointing to
 the new tables. The memory for the new tables is automatically freed when
 \fBpcre2_code_free()\fP is called for the new copy of the compiled code. If
-\fBpcre2_code_copy_withy_tables()\fP is called with a NULL argument, it returns
+\fBpcre2_code_copy_with_tables()\fP is called with a NULL argument, it returns
 NULL.
 .P
 NOTE: When one of the matching functions is called, pointers to the compiled
@@ -1252,7 +1252,7 @@ below.
 .\"
 .P
 The \fIoptions\fP argument for \fBpcre2_compile()\fP contains various bit
-settings that affect the compilation. It should be zero if no options are
+settings that affect the compilation. It should be zero if none of them are
 required. The available options are described below. Some of them (in
 particular, those that are compatible with Perl, but some others as well) can
 also be set and unset from within the pattern (see the detailed description in
@@ -1267,8 +1267,9 @@ contents of the \fIoptions\fP argument specifies their settings at the start of
 compilation. The PCRE2_ANCHORED, PCRE2_ENDANCHORED, and PCRE2_NO_UTF_CHECK
 options can be set at the time of matching as well as at compile time.
 .P
-Other, less frequently required compile-time parameters (for example, the
-newline setting) can be provided in a compile context (as described
+Some additional options and less frequently required compile-time parameters
+(for example, the newline setting) can be provided in a compile context (as
+described
 .\" HTML <a href="#compilecontext">
 .\" </a>
 above).
@@ -1325,6 +1326,11 @@ This code fragment shows a typical straightforward call to
     &erroffset,             /* for error offset */
     NULL);                  /* no compile context */
 .sp
+.
+.
+.SS "Main compile options"
+.rs
+.sp
 The following names for option bits are defined in the \fBpcre2.h\fP header
 file:
 .sp
@@ -1361,6 +1367,16 @@ hexadecimal digits, in which case the hexadecimal number defines the code point
 to match. By default, as in Perl, a hexadecimal number is always expected after
 \ex, but it may have zero, one, or two digits (so, for example, \exz matches a
 binary zero character followed by z).
+.P
+ECMAscript 6 added additional functionality to \eu. This can be accessed using
+the PCRE2_EXTRA_ALT_BSUX extra option (see "Extra compile options"
+.\" HTML <a href="#extracompileoptions">
+.\" </a>
+below).
+.\"
+Note that this alternative escape handling applies only to patterns. Neither of 
+these options affects the processing of replacement strings passed to 
+\fBpcre2_substitute()\fP.
 .sp
   PCRE2_ALT_CIRCUMFLEX
 .sp
@@ -1788,9 +1804,8 @@ characters with code points greater than 127.
 .SS "Extra compile options"
 .rs
 .sp
-Unlike the main compile-time options, the extra options are not saved with the
-compiled pattern. The option bits that can be set in a compile context by
-calling the \fBpcre2_set_compile_extra_options()\fP function are as follows:
+The option bits that can be set in a compile context by calling the
+\fBpcre2_set_compile_extra_options()\fP function are as follows:
 .sp
   PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES
 .sp
@@ -1813,6 +1828,14 @@ If the extra option PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES is set, surrogate code
 point values in UTF-8 and UTF-32 patterns no longer provoke errors and are
 incorporated in the compiled pattern. However, they can only match subject
 characters if the matching function is called with PCRE2_NO_UTF_CHECK set.
+.sp
+  PCRE2_EXTRA_ALT_BSUX
+.sp
+The original option PCRE2_ALT_BSUX causes PCRE2 to process \eU, \eu, and \ex in 
+the way that ECMAscript (aka JavaScript) does. Additional functionality was 
+defined by ECMAscript 6; setting PCRE2_EXTRA_ALT_BSUX has the effect of 
+PCRE2_ALT_BSUX, but in addition it recognizes \eu{hhh..} as a hexadecimal 
+character code, where hhh.. is any number of hexadecimal digits.
 .sp
   PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL
 .sp
@@ -3383,7 +3406,8 @@ capture groups and letters within \eQ...\eE quoted sequences.
 .P
 Note that case forcing sequences such as \eU...\eE do not nest. For example,
 the result of processing "\eUaa\eLBB\eEcc\eE" is "AAbbcc"; the final \eE has no
-effect.
+effect. Note also that the PCRE2_ALT_BSUX and PCRE2_EXTRA_ALT_BSUX options do 
+not apply to not apply to replacement strings.
 .P
 The second effect of setting PCRE2_SUBSTITUTE_EXTENDED is to add more
 flexibility to capture group substitution. The syntax is similar to that used
@@ -3792,6 +3816,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 04 February 2019
+Last updated: 12 February 2019
 Copyright (c) 1997-2019 University of Cambridge.
 .fi

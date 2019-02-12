@@ -1,4 +1,4 @@
-.TH PCRE2PATTERN 3 "04 February 2019" "PCRE2 10.33"
+.TH PCRE2PATTERN 3 "12 February 2019" "PCRE2 10.33"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION DETAILS"
@@ -373,18 +373,41 @@ environment, these escapes are as follows:
   \exhh        character with hex code hh
   \ex{hhh..}   character with hex code hhh..
   \eN{U+hhh..} character with Unicode hex code point hhh..
-  \euhhhh      character with hex code hhhh (when PCRE2_ALT_BSUX is set)
 .sp
-There are some legacy applications where the escape sequence \er is expected to
-match a newline. If the PCRE2_EXTRA_ESCAPED_CR_IS_LF option is set, \er in a
-pattern is converted to \en so that it matches a LF (linefeed) instead of a CR
-(carriage return) character.
+By default, after \ex that is not followed by {, from zero to two hexadecimal
+digits are read (letters can be in upper or lower case). Any number of
+hexadecimal digits may appear between \ex{ and }. If a character other than a
+hexadecimal digit appears between \ex{ and }, or if there is no terminating },
+an error occurs.
+.P
+Characters whose code points are less than 256 can be defined by either of the
+two syntaxes for \ex or by an octal sequence. There is no difference in the way
+they are handled. For example, \exdc is exactly the same as \ex{dc} or \e334.
+However, using the braced versions does make such sequences easier to read.
+.P
+Support is available for some ECMAScript (aka JavaScript) escape sequences via
+two compile-time options. If PCRE2_ALT_BSUX is set, the sequence \ex followed
+by { is not recognized. Only if \ex is followed by two hexadecimal digits is it
+recognized as a character escape. Otherwise it is interpreted as a literal "x"
+character. In this mode, support for code points greater than 256 is provided
+by \eu, which must be followed by four hexadecimal digits; otherwise it is 
+interpreted as a literal "u" character.
+.P
+PCRE2_EXTRA_ALT_BSUX has the same effect as PCRE2_ALT_BSUX and, in addition,
+\eu{hhh..} is recognized as the character specified by hexadecimal code point.
+There may be any number of hexadecimal digits. This syntax is from ECMAScript 
+6.
 .P
 The \eN{U+hhh..} escape sequence is recognized only when the PCRE2_UTF option
 is set, that is, when PCRE2 is operating in a Unicode mode. Perl also uses
 \eN{name} to specify characters by Unicode name; PCRE2 does not support this.
 Note that when \eN is not followed by an opening brace (curly bracket) it has
 an entirely different meaning, matching any character that is not a newline.
+.P
+There are some legacy applications where the escape sequence \er is expected to
+match a newline. If the PCRE2_EXTRA_ESCAPED_CR_IS_LF option is set, \er in a
+pattern is converted to \en so that it matches a LF (linefeed) instead of a CR
+(carriage return) character.
 .P
 The precise effect of \ecx on ASCII characters is as follows: if x is a lower
 case letter, it is converted to upper case. Then bit 6 of the character (hex
@@ -477,25 +500,6 @@ for themselves. For example, outside a character class:
 Note that octal values of 100 or greater that are specified using this syntax
 must not be introduced by a leading zero, because no more than three octal
 digits are ever read.
-.P
-By default, after \ex that is not followed by {, from zero to two hexadecimal
-digits are read (letters can be in upper or lower case). Any number of
-hexadecimal digits may appear between \ex{ and }. If a character other than
-a hexadecimal digit appears between \ex{ and }, or if there is no terminating
-}, an error occurs.
-.P
-If the PCRE2_ALT_BSUX option is set, the interpretation of \ex is as just
-described only when it is followed by two hexadecimal digits. Otherwise, it
-matches a literal "x" character. In this mode, support for code points greater
-than 256 is provided by \eu, which must be followed by four hexadecimal digits;
-otherwise it matches a literal "u" character. This syntax makes PCRE2 behave 
-like ECMAscript (aka JavaScript). Code points greater than 0xFFFF are not
-supported.
-.P
-Characters whose value is less than 256 can be defined by either of the two
-syntaxes for \ex (or by \eu in PCRE2_ALT_BSUX mode). There is no difference in
-the way they are handled. For example, \exdc is exactly the same as \ex{dc} (or
-\eu00dc in PCRE2_ALT_BSUX mode).
 .
 .
 .SS "Constraints on character values"
@@ -534,9 +538,10 @@ character class, these sequences have different meanings.
 .sp
 In Perl, the sequences \eF, \el, \eL, \eu, and \eU are recognized by its string
 handler and used to modify the case of following characters. By default, PCRE2
-does not support these escape sequences. However, if the PCRE2_ALT_BSUX option
-is set, \eU matches a "U" character, and \eu can be used to define a character
-by code point, as described above.
+does not support these escape sequences in patterns. However, if either of the
+PCRE2_ALT_BSUX or PCRE2_EXTRA_ALT_BSUX options is set, \eU matches a "U"
+character, and \eu can be used to define a character by code point, as
+described above.
 .
 .
 .SS "Absolute and relative backreferences"
@@ -3758,6 +3763,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 04 February 2019
+Last updated: 12 February 2019
 Copyright (c) 1997-2019 University of Cambridge.
 .fi

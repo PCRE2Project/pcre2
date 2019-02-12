@@ -333,13 +333,13 @@
 
 /[[:a\x{100}b:]]/utf
 
-/a[^]b/utf,alt_bsux,allow_empty_class,match_unset_backref
+/a[^]b/utf,allow_empty_class,match_unset_backref
     a\x{1234}b
     a\nb
 \= Expect no match
     ab
 
-/a[^]+b/utf,alt_bsux,allow_empty_class,match_unset_backref
+/a[^]+b/utf,allow_empty_class,match_unset_backref
     aXb
     a\nX\nX\x{1234}b
 \= Expect no match
@@ -813,6 +813,9 @@
 /[\u0100-\u0200]/B,utf,alt_bsux,allow_empty_class,match_unset_backref
 
 /\ud800/utf,alt_bsux,allow_empty_class,match_unset_backref
+
+/^\u{0000000000010ffff}/utf,extra_alt_bsux
+    \x{10ffff}
 
 /^a+[a\x{200}]/B,utf
     aa

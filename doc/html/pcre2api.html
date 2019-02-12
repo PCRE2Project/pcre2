@@ -1298,7 +1298,7 @@ are needed. The <b>pcre2_code_copy_with_tables()</b> provides this facility.
 Copies of both the code and the tables are made, with the new code pointing to
 the new tables. The memory for the new tables is automatically freed when
 <b>pcre2_code_free()</b> is called for the new copy of the compiled code. If
-<b>pcre2_code_copy_withy_tables()</b> is called with a NULL argument, it returns
+<b>pcre2_code_copy_with_tables()</b> is called with a NULL argument, it returns
 NULL.
 </P>
 <P>
@@ -1315,7 +1315,7 @@ PCRE2_COPY_MATCHED_SUBJECT option, which is described in the section entitled
 </P>
 <P>
 The <i>options</i> argument for <b>pcre2_compile()</b> contains various bit
-settings that affect the compilation. It should be zero if no options are
+settings that affect the compilation. It should be zero if none of them are
 required. The available options are described below. Some of them (in
 particular, those that are compatible with Perl, but some others as well) can
 also be set and unset from within the pattern (see the detailed description in
@@ -1330,8 +1330,9 @@ compilation. The PCRE2_ANCHORED, PCRE2_ENDANCHORED, and PCRE2_NO_UTF_CHECK
 options can be set at the time of matching as well as at compile time.
 </P>
 <P>
-Other, less frequently required compile-time parameters (for example, the
-newline setting) can be provided in a compile context (as described
+Some additional options and less frequently required compile-time parameters
+(for example, the newline setting) can be provided in a compile context (as
+described
 <a href="#compilecontext">above).</a>
 </P>
 <P>
@@ -1384,7 +1385,13 @@ This code fragment shows a typical straightforward call to
     &errorcode,             /* for error code */
     &erroffset,             /* for error offset */
     NULL);                  /* no compile context */
-</pre>
+
+</PRE>
+</P>
+<br><b>
+Main compile options
+</b><br>
+<P>
 The following names for option bits are defined in the <b>pcre2.h</b> header
 file:
 <pre>
@@ -1424,6 +1431,14 @@ hexadecimal digits, in which case the hexadecimal number defines the code point
 to match. By default, as in Perl, a hexadecimal number is always expected after
 \x, but it may have zero, one, or two digits (so, for example, \xz matches a
 binary zero character followed by z).
+</P>
+<P>
+ECMAscript 6 added additional functionality to \u. This can be accessed using
+the PCRE2_EXTRA_ALT_BSUX extra option (see "Extra compile options"
+<a href="#extracompileoptions">below).</a>
+Note that this alternative escape handling applies only to patterns. Neither of 
+these options affects the processing of replacement strings passed to 
+<b>pcre2_substitute()</b>.
 <pre>
   PCRE2_ALT_CIRCUMFLEX
 </pre>
@@ -1830,9 +1845,8 @@ characters with code points greater than 127.
 Extra compile options
 </b><br>
 <P>
-Unlike the main compile-time options, the extra options are not saved with the
-compiled pattern. The option bits that can be set in a compile context by
-calling the <b>pcre2_set_compile_extra_options()</b> function are as follows:
+The option bits that can be set in a compile context by calling the
+<b>pcre2_set_compile_extra_options()</b> function are as follows:
 <pre>
   PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES
 </pre>
@@ -1857,6 +1871,14 @@ If the extra option PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES is set, surrogate code
 point values in UTF-8 and UTF-32 patterns no longer provoke errors and are
 incorporated in the compiled pattern. However, they can only match subject
 characters if the matching function is called with PCRE2_NO_UTF_CHECK set.
+<pre>
+  PCRE2_EXTRA_ALT_BSUX
+</pre>
+The original option PCRE2_ALT_BSUX causes PCRE2 to process \U, \u, and \x in 
+the way that ECMAscript (aka JavaScript) does. Additional functionality was 
+defined by ECMAscript 6; setting PCRE2_EXTRA_ALT_BSUX has the effect of 
+PCRE2_ALT_BSUX, but in addition it recognizes \u{hhh..} as a hexadecimal 
+character code, where hhh.. is any number of hexadecimal digits.
 <pre>
   PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL
 </pre>
@@ -3382,7 +3404,8 @@ capture groups and letters within \Q...\E quoted sequences.
 <P>
 Note that case forcing sequences such as \U...\E do not nest. For example,
 the result of processing "\Uaa\LBB\Ecc\E" is "AAbbcc"; the final \E has no
-effect.
+effect. Note also that the PCRE2_ALT_BSUX and PCRE2_EXTRA_ALT_BSUX options do 
+not apply to not apply to replacement strings.
 </P>
 <P>
 The second effect of setting PCRE2_SUBSTITUTE_EXTENDED is to add more
@@ -3784,7 +3807,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC42" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 04 February 2019
+Last updated: 12 February 2019
 <br>
 Copyright &copy; 1997-2019 University of Cambridge.
 <br>

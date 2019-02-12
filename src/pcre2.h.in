@@ -150,6 +150,7 @@ D   is inspected during pcre2_dfa_match() execution
 #define PCRE2_EXTRA_MATCH_WORD               0x00000004u  /* C */
 #define PCRE2_EXTRA_MATCH_LINE               0x00000008u  /* C */
 #define PCRE2_EXTRA_ESCAPED_CR_IS_LF         0x00000010u  /* C */
+#define PCRE2_EXTRA_ALT_BSUX                 0x00000020u  /* C */
 
 /* These are for pcre2_jit_compile(). */
 

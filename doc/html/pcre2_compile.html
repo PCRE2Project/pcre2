@@ -86,7 +86,12 @@ PCRE2 must be built with Unicode support (the default) in order to use
 PCRE2_UTF, PCRE2_UCP and related options.
 </P>
 <P>
-The yield of the function is a pointer to a private data structure that
+Additional options may be set in the compile context via the
+<a href="pcre2_set_compile_extra_options.html"><b>pcre2_set_compile_extra_options</b></a>
+function.
+</P>
+<P>
+The yield of this function is a pointer to a private data structure that
 contains the compiled pattern, or NULL if an error was detected.
 </P>
 <P>

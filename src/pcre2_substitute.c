@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-          New API code Copyright (c) 2016-2018 University of Cambridge
+          New API code Copyright (c) 2016-2019 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -129,7 +129,7 @@ for (; ptr < ptrend; ptr++)
 
     ptr += 1;  /* Must point after \ */
     erc = PRIV(check_escape)(&ptr, ptrend, &ch, &errorcode,
-      code->overall_options, FALSE, NULL);
+      code->overall_options, code->extra_options, FALSE, NULL);
     ptr -= 1;  /* Back to last code unit of escape */
     if (errorcode != 0)
       {
@@ -774,7 +774,7 @@ do
 
       ptr++;  /* Point after \ */
       rc = PRIV(check_escape)(&ptr, repend, &ch, &errorcode,
-        code->overall_options, FALSE, NULL);
+        code->overall_options, code->extra_options, FALSE, NULL);
       if (errorcode != 0) goto BADESCAPE;
 
       switch(rc)

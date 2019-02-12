@@ -125,6 +125,9 @@ processing or a crash could result.
 names, as Perl does. There was a small bug in this new code, found by
 ClusterFuzz 12950, fixed before release.
 
+31. Implemented PCRE2_EXTRA_ALT_BSUX to support ECMAScript 6's \u{hhh} 
+construct.
+
 
 Version 10.32 10-September-2018
 -------------------------------

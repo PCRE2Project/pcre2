@@ -1,4 +1,4 @@
-.TH PCRE2_SET_COMPILE_EXTRA_OPTIONS 3 "21 September 2018" "PCRE2 10.33"
+.TH PCRE2_SET_COMPILE_EXTRA_OPTIONS 3 "11 February 2019" "PCRE2 10.33"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH SYNOPSIS
@@ -8,7 +8,7 @@ PCRE2 - Perl-compatible regular expressions (revised API)
 .PP
 .nf
 .B int pcre2_set_compile_extra_options(pcre2_compile_context *\fIccontext\fP,
-.B "  PCRE2_SIZE \fIextra_options\fP);"
+.B "  uint32_t \fIextra_options\fP);"
 .fi
 .
 .SH DESCRIPTION
@@ -21,6 +21,9 @@ options are:
 .\" JOIN
   PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES  Allow \ex{df800} to \ex{dfff}
                                          in UTF-8 and UTF-32 modes
+.\" JOIN
+  PCRE2_EXTRA_ALT_BSUX                 Extended alternate \eu, \eU, and \ex
+                                         handling 
 .\" JOIN
   PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL    Treat all invalid escapes as
                                          a literal following character
