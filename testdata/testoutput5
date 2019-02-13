@@ -3294,27 +3294,27 @@ No match
 /\p{Any}+\p{Any} \p{Any}+\P{Any} \p{Any}+\p{L&} \p{Any}+\p{L} \p{Any}+\p{Lu} \p{Any}+\p{Han} \p{Any}+\p{Xan} \p{Any}+\p{Xsp} \p{Any}+\p{Xps} \p{Xwd}+\p{Any} \p{Any}+\p{Xuc}/Bx,ucp
 ------------------------------------------------------------------
         Bra
-        prop Any +
-        prop Any
-        prop Any +
+        AllAny+
+        AllAny
+        AllAny+
         notprop Any
-        prop Any +
+        AllAny+
         prop L&
-        prop Any +
+        AllAny+
         prop L
-        prop Any +
+        AllAny+
         prop Lu
-        prop Any +
+        AllAny+
         prop Han
-        prop Any +
+        AllAny+
         prop Xan
-        prop Any +
+        AllAny+
         prop Xsp
-        prop Any +
+        AllAny+
         prop Xps
         prop Xwd +
-        prop Any
-        prop Any +
+        AllAny
+        AllAny+
         prop Xuc
         Ket
         End
@@ -3324,7 +3324,7 @@ No match
 ------------------------------------------------------------------
         Bra
         prop L& +
-        prop Any
+        AllAny
         prop L& +
         prop L&
         notprop L& ++
@@ -3355,7 +3355,7 @@ No match
 ------------------------------------------------------------------
         Bra
         prop N +
-        prop Any
+        AllAny
         prop N +
         prop L&
         prop N ++
@@ -3386,7 +3386,7 @@ No match
 ------------------------------------------------------------------
         Bra
         prop Lu +
-        prop Any
+        AllAny
         prop Lu +
         prop L&
         prop Lu +
@@ -3448,7 +3448,7 @@ No match
 ------------------------------------------------------------------
         Bra
         prop Xan +
-        prop Any
+        AllAny
         prop Xan +
         prop L&
         notprop Xan ++
@@ -3479,7 +3479,7 @@ No match
 ------------------------------------------------------------------
         Bra
         prop Xsp +
-        prop Any
+        AllAny
         prop Xsp ++
         prop L&
         prop Xsp ++
@@ -3508,7 +3508,7 @@ No match
 ------------------------------------------------------------------
         Bra
         prop Xwd +
-        prop Any
+        AllAny
         prop Xwd +
         prop L&
         prop Xwd +
@@ -3537,7 +3537,7 @@ No match
 ------------------------------------------------------------------
         Bra
         prop Xuc +
-        prop Any
+        AllAny
         prop Xuc +
         prop L&
         prop Xuc +
@@ -4923,5 +4923,14 @@ Failed: error 162 at offset 3: subpattern name expected
 
 /(?'X²ABC'...)/utf
 Failed: error 142 at offset 4: syntax error in subpattern name (missing terminator?)
+
+# -------
+
+/\p{Any}*xyz/I
+Capture group count = 0
+Compile options: <none>
+Overall options: anchored
+Last code unit = 'z'
+Subject length lower bound = 3
 
 # End of testinput5

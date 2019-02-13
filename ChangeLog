@@ -128,6 +128,9 @@ ClusterFuzz 12950, fixed before release.
 31. Implemented PCRE2_EXTRA_ALT_BSUX to support ECMAScript 6's \u{hhh} 
 construct.
 
+32. Compile \p{Any} to be the same as . in DOTALL mode, so that it benefits
+from auto-anchoring if \p{Any}* starts a pattern.
+
 
 Version 10.32 10-September-2018
 -------------------------------

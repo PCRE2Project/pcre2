@@ -1459,7 +1459,7 @@ Returns:         zero => a data character
 
 int
 PRIV(check_escape)(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *chptr,
-  int *errorcodeptr, uint32_t options, uint32_t extra_options, BOOL isclass, 
+  int *errorcodeptr, uint32_t options, uint32_t extra_options, BOOL isclass,
   compile_block *cb)
 {
 BOOL utf = (options & PCRE2_UTF) != 0;
@@ -1551,7 +1551,7 @@ else if ((i = escapes[c - ESCAPES_FIRST]) != 0)
 
 /* Escapes that need further processing, including those that are unknown, have
 a zero entry in the lookup table. When called from pcre2_substitute(), only \c,
-\o, and \x are recognized (\u and \U can never appear as they are used for case 
+\o, and \x are recognized (\u and \U can never appear as they are used for case
 forcing). */
 
 else
@@ -1559,7 +1559,7 @@ else
   int s;
   PCRE2_SPTR oldptr;
   BOOL overflow;
-  BOOL alt_bsux = 
+  BOOL alt_bsux =
     ((options & PCRE2_ALT_BSUX) | (extra_options & PCRE2_EXTRA_ALT_BSUX)) != 0;
 
   /* Filter calls from pcre2_substitute(). */
@@ -1571,8 +1571,8 @@ else
       *errorcodeptr = ERR3;
       return 0;
       }
-    alt_bsux = FALSE;   /* Do not modify \x handling */   
-    }   
+    alt_bsux = FALSE;   /* Do not modify \x handling */
+    }
 
   switch (c)
     {
@@ -1595,37 +1595,37 @@ else
     if (!alt_bsux) *errorcodeptr = ERR37; else
       {
       uint32_t xc;
-      
+
       if (ptr >= ptrend) break;
-      if (*ptr == CHAR_LEFT_CURLY_BRACKET && 
+      if (*ptr == CHAR_LEFT_CURLY_BRACKET &&
           (extra_options & PCRE2_EXTRA_ALT_BSUX) != 0)
         {
         PCRE2_SPTR hptr = ptr + 1;
         cc = 0;
-        
+
         while (hptr < ptrend && (xc = XDIGIT(*hptr)) != 0xff)
-          { 
+          {
           if ((cc & 0xf0000000) != 0)  /* Test for 32-bit overflow */
             {
             *errorcodeptr = ERR77;
             ptr = hptr;   /* Show where */
-            break;        /* *hptr != } will cause another break below */  
-            } 
+            break;        /* *hptr != } will cause another break below */
+            }
           cc = (cc << 4) | xc;
-          hptr++; 
-          } 
-          
+          hptr++;
+          }
+
         if (hptr == ptr + 1 ||   /* No hex digits */
             hptr >= ptrend ||    /* Hit end of input */
             *hptr != CHAR_RIGHT_CURLY_BRACKET)  /* No } terminator */
           break;         /* Hex escape not recognized */
-           
+
         c = cc;          /* Accept the code point */
-        ptr = hptr + 1; 
+        ptr = hptr + 1;
         }
-         
+
       else  /* Must be exactly 4 hex digits */
-        {      
+        {
         if (ptrend - ptr < 4) break;               /* Less than 4 chars */
         if ((cc = XDIGIT(ptr[0])) == 0xff) break;  /* Not a hex digit */
         if ((xc = XDIGIT(ptr[1])) == 0xff) break;  /* Not a hex digit */
@@ -1635,8 +1635,8 @@ else
         if ((xc = XDIGIT(ptr[3])) == 0xff) break;  /* Not a hex digit */
         c = (cc << 4) | xc;
         ptr += 4;
-        } 
- 
+        }
+
       if (utf)
         {
         if (c > 0x10ffffU) *errorcodeptr = ERR77;
@@ -3424,7 +3424,7 @@ while (ptr < ptrend)
       else
         {
         tempptr = ptr;
-        escape = PRIV(check_escape)(&ptr, ptrend, &c, &errorcode, options, 
+        escape = PRIV(check_escape)(&ptr, ptrend, &c, &errorcode, options,
           cb->cx->extra_options, TRUE, cb);
 
         if (errorcode != 0)
@@ -7631,9 +7631,20 @@ for (;; pptr++)
       {
       uint32_t ptype = *(++pptr) >> 16;
       uint32_t pdata = *pptr & 0xffff;
-      *code++ = (meta_arg == ESC_p)? OP_PROP : OP_NOTPROP;
-      *code++ = ptype;
-      *code++ = pdata;
+
+      /* The special case of \p{Any} is compiled to OP_ALLANY so as to benefit
+      from the auto-anchoring code. */
+
+      if (meta_arg == ESC_p && ptype == PT_ANY)
+        {
+        *code++ = OP_ALLANY;
+        }
+      else
+        {
+        *code++ = (meta_arg == ESC_p)? OP_PROP : OP_NOTPROP;
+        *code++ = ptype;
+        *code++ = pdata;
+        }
       break;  /* End META_ESCAPE */
       }
 #endif

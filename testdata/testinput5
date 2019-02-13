@@ -2170,4 +2170,8 @@
 
 /(?'X²ABC'...)/utf
 
+# -------
+
+/\p{Any}*xyz/I
+
 # End of testinput5
