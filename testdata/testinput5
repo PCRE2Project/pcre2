@@ -817,6 +817,9 @@
 /^\u{0000000000010ffff}/utf,extra_alt_bsux
     \x{10ffff}
 
+/\u/utf,alt_bsux
+    \\u
+
 /^a+[a\x{200}]/B,utf
     aa
 

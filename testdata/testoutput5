@@ -1738,6 +1738,10 @@ Failed: error 173 at offset 6: disallowed Unicode code point (>= 0xd800 && <= 0x
     \x{10ffff}
  0: \x{10ffff}
 
+/\u/utf,alt_bsux
+    \\u
+ 0: u
+
 /^a+[a\x{200}]/B,utf
 ------------------------------------------------------------------
         Bra

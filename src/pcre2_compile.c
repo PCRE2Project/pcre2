@@ -1596,6 +1596,7 @@ else
       {
       uint32_t xc;
       
+      if (ptr >= ptrend) break;
       if (*ptr == CHAR_LEFT_CURLY_BRACKET && 
           (extra_options & PCRE2_EXTRA_ALT_BSUX) != 0)
         {
