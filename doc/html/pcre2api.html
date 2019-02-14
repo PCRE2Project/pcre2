@@ -312,7 +312,8 @@ document for an overview of all the PCRE2 documentation.
 <b>const unsigned char *pcre2_maketables(pcre2_general_context *<i>gcontext</i>);</b>
 <br>
 <br>
-<b>int pcre2_pattern_info(const pcre2 *<i>code</i>, uint32_t <i>what</i>, void *<i>where</i>);</b>
+<b>int pcre2_pattern_info(const pcre2_code *<i>code</i>, uint32_t <i>what</i>, </b>
+<b>  void *<i>where</i>);</b>
 <br>
 <br>
 <b>int pcre2_callout_enumerate(const pcre2_code *<i>code</i>,</b>
@@ -3807,7 +3808,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC42" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 12 February 2019
+Last updated: 14 February 2019
 <br>
 Copyright &copy; 1997-2019 University of Cambridge.
 <br>

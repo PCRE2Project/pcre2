@@ -402,7 +402,8 @@ PCRE2 NATIVE API AUXILIARY FUNCTIONS
 
        const unsigned char *pcre2_maketables(pcre2_general_context *gcontext);
 
-       int pcre2_pattern_info(const pcre2 *code, uint32_t what, void *where);
+       int pcre2_pattern_info(const pcre2_code *code, uint32_t what,
+         void *where);
 
        int pcre2_callout_enumerate(const pcre2_code *code,
          int (*callback)(pcre2_callout_enumerate_block *, void *),
@@ -3677,7 +3678,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 12 February 2019
+       Last updated: 14 February 2019
        Copyright (c) 1997-2019 University of Cambridge.
 ------------------------------------------------------------------------------
  

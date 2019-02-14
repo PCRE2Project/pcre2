@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "12 February 2019" "PCRE2 10.33"
+.TH PCRE2API 3 "14 February 2019" "PCRE2 10.33"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -247,7 +247,8 @@ document for an overview of all the PCRE2 documentation.
 .sp
 .B const unsigned char *pcre2_maketables(pcre2_general_context *\fIgcontext\fP);
 .sp
-.B int pcre2_pattern_info(const pcre2 *\fIcode\fP, uint32_t \fIwhat\fP, void *\fIwhere\fP);
+.B int pcre2_pattern_info(const pcre2_code *\fIcode\fP, uint32_t \fIwhat\fP, 
+.B "  void *\fIwhere\fP);"
 .sp
 .B int pcre2_callout_enumerate(const pcre2_code *\fIcode\fP,
 .B "  int (*\fIcallback\fP)(pcre2_callout_enumerate_block *, void *),"
@@ -3816,6 +3817,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 12 February 2019
+Last updated: 14 February 2019
 Copyright (c) 1997-2019 University of Cambridge.
 .fi

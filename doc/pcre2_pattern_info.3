@@ -1,4 +1,4 @@
-.TH PCRE2_PATTERN_INFO 3 "16 December 2017" "PCRE2 10.31"
+.TH PCRE2_PATTERN_INFO 3 "14 February 2019" "PCRE2 10.33"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH SYNOPSIS
@@ -7,7 +7,8 @@ PCRE2 - Perl-compatible regular expressions (revised API)
 .B #include <pcre2.h>
 .PP
 .nf
-.B int pcre2_pattern_info(const pcre2 *\fIcode\fP, uint32_t \fIwhat\fP, void *\fIwhere\fP);
+.B int pcre2_pattern_info(const pcre2_code *\fIcode\fP, uint32_t \fIwhat\fP,
+.B "   void *\fIwhere\fP);"
 .fi
 .
 .SH DESCRIPTION
