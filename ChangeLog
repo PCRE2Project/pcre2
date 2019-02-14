@@ -131,6 +131,8 @@ construct.
 32. Compile \p{Any} to be the same as . in DOTALL mode, so that it benefits
 from auto-anchoring if \p{Any}* starts a pattern.
 
+33. Compile invalid UTF check in JIT test when only pcre32 is enabled.
+
 
 Version 10.32 10-September-2018
 -------------------------------

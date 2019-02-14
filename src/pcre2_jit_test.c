@@ -868,8 +868,8 @@ static struct regression_test_case regression_test_cases[] = {
 	{ MU, A, 0, 0, "(a(*COMMIT)(?:b|bb)|c(*ACCEPT)d|dd){0}_(?1)+_", "_ax_ _cd_ _abbb_ _abcd_ _abbcdd_" },
 	{ MU, A, 0, 0, "((.)(?:.|(*COMMIT)\\2{3}(*ACCEPT).*|.*)){0}_(?1){0,4}_", "_aaaabbbbccccddd_ _aaaabbbbccccdddd_" },
 
+#ifdef SUPPORT_UNICODE
 	/* Script runs and iterations. */
-#ifdef SUPPORT_UNICODE         
 	{ MU, A, 0, 0, "!(*sr:\\w\\w|\\w\\w\\w)*#", "!abcdefghijklmno!abcdefghijklmno!abcdef#" },
 	{ MU, A, 0, 0, "!(*sr:\\w\\w|\\w\\w\\w)+#", "!abcdefghijklmno!abcdefghijklmno!abcdef#" },
 	{ MU, A, 0, 0, "!(*sr:\\w\\w|\\w\\w\\w)*?#", "!abcdefghijklmno!abcdefghijklmno!abcdef#" },
@@ -1770,7 +1770,7 @@ static int regression_tests(void)
 	}
 }
 
-#if defined SUPPORT_UNICODE && (defined SUPPORT_PCRE2_8 || defined SUPPORT_PCRE2_16)
+#if defined SUPPORT_UNICODE && (defined SUPPORT_PCRE2_8 || defined SUPPORT_PCRE2_16 || defined SUPPORT_PCRE2_32)
 
 static int check_invalid_utf_result(int pattern_index, const char *type, int result,
 	int match_start, int match_end, PCRE2_SIZE *ovector)
@@ -1803,7 +1803,7 @@ static int check_invalid_utf_result(int pattern_index, const char *type, int res
 	return 0;
 }
 
-#endif /* SUPPORT_UNICODE && (SUPPORT_PCRE2_8 || SUPPORT_PCRE2_16) */
+#endif /* SUPPORT_UNICODE && (SUPPORT_PCRE2_8 || SUPPORT_PCRE2_16 || SUPPORT_PCRE2_32) */
 
 #if defined SUPPORT_UNICODE && defined SUPPORT_PCRE2_8
 
