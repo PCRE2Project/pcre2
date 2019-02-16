@@ -84,14 +84,16 @@
 # 2018-06-27 PH added Daniel's patch to increase the stack for MSVC
 # 2018-11-14 PH removed unnecessary checks for stdint.h and inttypes.h
 # 2018-11-16 PH added PCRE2GREP_SUPPORT_CALLOUT_FORK support and tidied
+# 2019-02-16 PH hacked to avoid CMP0026 policy issue (see comments below)
 
 PROJECT(PCRE2 C)
 
-# Increased minimum to 2.8.0 to support newer add_test features. Set policy
-# CMP0026 to avoid warnings for the use of LOCATION in GET_TARGET_PROPERTY.
-
+# Increased minimum to 2.8.0 to support newer add_test features. 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.0)
-CMAKE_POLICY(SET CMP0026 OLD)
+
+# Set policy CMP0026 to avoid warnings for the use of LOCATION in
+# GET_TARGET_PROPERTY. This should no longer be required.
+# CMAKE_POLICY(SET CMP0026 OLD)
 
 SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake) # for FindReadline.cmake
 
@@ -647,14 +649,27 @@ IF(PCRE2_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(pcre2_jit_test ${PCRE2_JIT_TEST_LIBS})
   ENDIF(PCRE2_SUPPORT_JIT)
 
-  # exes in Debug location tested by the RunTest shell script
+  # exes in Debug location tested by the RunTest and RunGrepTest shell scripts
   # via "make test"
+  
+  # The commented out code below provokes a warning about future removal
+  # of the facility, and requires policy CMP0026 to be set to "OLD". I have
+  # got fed-up with the warnings, but my plea for help on the mailing list 
+  # produced no response. So, I've hacked. The new code below seems to work on
+  # Linux.
+
+#  IF(PCRE2_BUILD_PCRE2GREP)
+#    GET_TARGET_PROPERTY(PCRE2GREP_EXE pcre2grep DEBUG_LOCATION)
+#  ENDIF(PCRE2_BUILD_PCRE2GREP)
+#
+#  GET_TARGET_PROPERTY(PCRE2TEST_EXE pcre2test DEBUG_LOCATION)
 
   IF(PCRE2_BUILD_PCRE2GREP)
-    GET_TARGET_PROPERTY(PCRE2GREP_EXE pcre2grep DEBUG_LOCATION)
+    SET(PCRE2GREP_EXE $<TARGET_FILE:pcre2grep>)
   ENDIF(PCRE2_BUILD_PCRE2GREP)
 
-  GET_TARGET_PROPERTY(PCRE2TEST_EXE pcre2test DEBUG_LOCATION)
+  SET(PCRE2TEST_EXE $<TARGET_FILE:pcre2test>)
+
 
 # =================================================
   # Write out a CTest configuration file

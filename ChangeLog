@@ -133,6 +133,13 @@ from auto-anchoring if \p{Any}* starts a pattern.
 
 33. Compile invalid UTF check in JIT test when only pcre32 is enabled.
 
+34. For some time now, CMake has been warning about the setting of policy 
+CMP0026 to "OLD" in CmakeLists.txt, and hinting that the feature might be 
+removed in a future version. A request for CMake expertise on the list produced 
+no result, so I have now hacked CMakeLists.txt along the lines of some changes 
+I found on the Internet. The new code no longer needs the policy setting, and 
+it appears to work fine on Linux. 
+
 
 Version 10.32 10-September-2018
 -------------------------------
