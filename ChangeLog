@@ -140,6 +140,10 @@ no result, so I have now hacked CMakeLists.txt along the lines of some changes
 I found on the Internet. The new code no longer needs the policy setting, and 
 it appears to work fine on Linux. 
 
+35. Setting --enable-jit=auto for an out-of-tree build failed because the
+source directory wasn't in the search path for AC_TRY_COMPILE always. Patch 
+from Ross Burton.
+
 
 Version 10.32 10-September-2018
 -------------------------------

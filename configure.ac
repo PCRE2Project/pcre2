@@ -146,12 +146,15 @@ AC_ARG_ENABLE(jit,
 # This code enables JIT if the hardware supports it.
 if test "$enable_jit" = "auto"; then
   AC_LANG(C)
+  SAVE_CPPFLAGS=$CPPFLAGS
+  CPPFLAGS=-I$srcdir  
   AC_COMPILE_IFELSE([AC_LANG_SOURCE([[
   #define SLJIT_CONFIG_AUTO 1
   #include "src/sljit/sljitConfigInternal.h"
   #if (defined SLJIT_CONFIG_UNSUPPORTED && SLJIT_CONFIG_UNSUPPORTED)
   #error unsupported
   #endif]])], enable_jit=yes, enable_jit=no)
+  CPPFLAGS=$SAVE_CPPFLAGS 
   echo checking for JIT support on this hardware... $enable_jit
 fi
 
