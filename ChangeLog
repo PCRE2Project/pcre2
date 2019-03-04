@@ -2,8 +2,8 @@ Change Log for PCRE2
 --------------------
 
 
-Version 10.33-RC1 15-September-2018
------------------------------------
+Version 10.33-RC1 03-March-2019
+-------------------------------
 
 1. Added "allvector" to pcre2test to make it easy to check the part of the
 ovector that shouldn't be changed, in particular after substitute and failed or

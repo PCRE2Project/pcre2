@@ -311,7 +311,11 @@ library. They are also documented in the pcre2build man page.
 . There is support for calling external programs during matching in the
   pcre2grep command, using PCRE2's callout facility with string arguments. This
   support can be disabled by adding --disable-pcre2grep-callout to the
-  "configure" command.
+  "configure" command. There are two kinds of callout: one that generates 
+  output from inbuilt code, and another that calls an external program. The 
+  latter has special support for Windows and VMS; otherwise it assumes the 
+  existence of the fork() function. This facility can be disabled by adding 
+  --disable-pcre2grep-callout-fork to the "configure" command.
 
 . The pcre2grep program currently supports only 8-bit data files, and so
   requires the 8-bit PCRE2 library. It is possible to compile pcre2grep to use
@@ -340,7 +344,7 @@ library. They are also documented in the pcre2build man page.
 
   The default is either 1048576 or the value of --with-pcre2grep-bufsize,
   whichever is the larger.
-
+  
 . It is possible to compile pcre2test so that it links with the libreadline
   or libedit libraries, by specifying, respectively,
 
@@ -886,4 +890,4 @@ The distribution should contain the files listed below.
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 29 January 2019
+Last updated: 03 March 2019

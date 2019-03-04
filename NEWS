@@ -2,6 +2,54 @@ News about PCRE2 releases
 -------------------------
 
 
+Version 10.33-RC1 03-March-2019
+-------------------------------
+
+Yet more bugfixes, tidies, and a few enhancements, summarized here (see 
+ChangeLog for the full list):
+
+1. Callouts from pcre2_substitute() are now available.
+
+2. The POSIX functions are now all called pcre2_regcomp() etc., with wrapper
+functions that use the standard POSIX names. However, in pcre2posix.h the POSIX
+names are defined as macros. This should help avoid linking with the wrong
+library in some environments, while still exporting the POSIX names for
+pre-existing programs that use them.
+
+3. Some new options:
+
+   (a) PCRE2_EXTRA_ESCAPED_CR_IS_LF makes \r behave as \n.
+
+   (b) PCRE2_EXTRA_ALT_BSUX enables support for ECMAScript 6's \u{hh...}
+       construct.
+
+   (c) PCRE2_COPY_MATCHED_SUBJECT causes a copy of a matched subject to be
+       made, instead of just remembering a pointer.
+
+4. Some new Perl features:
+
+   (a) Perl 5.28's experimental alphabetic names for atomic groups and
+       lookaround assertions, for example, (*pla:...) and (*atomic:...).
+
+   (b) The new Perl "script run" features (*script_run:...) and
+       (*atomic_script_run:...) aka (*sr:...) and (*asr:...).
+
+   (c) When PCRE2_UTF is set, allow non-ASCII letters and decimal digits in
+       capture group names.
+
+5. --disable-percent-zt disables the use of %zu and %td in formatting strings
+in pcre2test. They were already automatically disabled for VC and older C
+compilers.
+
+6. Some changes related to callouts in pcre2grep:
+
+   (a) Support for running an external program under VMS has been added, in
+       addition to Windows and fork() support.
+
+   (b) --disable-pcre2grep-callout-fork restricts the callout support in
+       to the inbuilt echo facility.
+
+
 Version 10.32 10-September-2018
 -------------------------------
 

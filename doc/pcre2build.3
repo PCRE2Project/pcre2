@@ -1,4 +1,4 @@
-.TH PCRE2BUILD 3 "15 November 2018" "PCRE2 10.33"
+.TH PCRE2BUILD 3 "03 March 2019" "PCRE2 10.33"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .
@@ -373,14 +373,17 @@ environment.
 .SH "PCRE2GREP SUPPORT FOR EXTERNAL SCRIPTS"
 .rs
 .sp
-By default, on non-Windows systems, \fBpcre2grep\fP supports the use of
-callouts with string arguments within the patterns it is matching, in order to
-run external scripts. For details, see the
+By default \fBpcre2grep\fP supports the use of callouts with string arguments
+within the patterns it is matching. There are two kinds: one that generates
+output using local code, and another that calls an external program or script.
+If --disable-pcre2grep-callout-fork is added to the \fBconfigure\fP command,
+only the first kind of callout is supported; if --disable-pcre2grep-callout is
+used, all callouts are completely ignored. For more details of \fBpcre2grep\fP
+callouts, see the
 .\" HREF
 \fBpcre2grep\fP
 .\"
-documentation. This support can be disabled by adding
---disable-pcre2grep-callout to the \fBconfigure\fP command.
+documentation.
 .
 .
 .SH "PCRE2GREP OPTIONS FOR COMPRESSED FILE SUPPORT"
@@ -536,14 +539,14 @@ documentation.
 .SH "DISABLING THE Z AND T FORMATTING MODIFIERS"
 .rs
 .sp
-The C99 standard defines formatting modifiers z and t for size_t and 
-ptrdiff_t values, respectively. By default, PCRE2 uses these modifiers in 
-environments other than Microsoft Visual Studio when __STDC_VERSION__ is 
+The C99 standard defines formatting modifiers z and t for size_t and
+ptrdiff_t values, respectively. By default, PCRE2 uses these modifiers in
+environments other than Microsoft Visual Studio when __STDC_VERSION__ is
 defined and has a value greater than or equal to 199901L (indicating C99).
 However, there is at least one environment that claims to be C99 but does not
-support these modifiers. If 
+support these modifiers. If
 .sp
-  --disable-percent-zt 
+  --disable-percent-zt
 .sp
 is specified, no use is made of the z or t modifiers. Instead or %td or %zu,
 %lu is used, with a cast for size_t values.
@@ -607,6 +610,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 15 November 2018
-Copyright (c) 1997-2018 University of Cambridge.
+Last updated: 03 March 2019
+Copyright (c) 1997-2019 University of Cambridge.
 .fi
