@@ -22,7 +22,7 @@ documentation. This document contains a quick-reference summary of the syntax.
 .SH "ESCAPED CHARACTERS"
 .rs
 .sp
-This table applies to ASCII and Unicode environments. An unrecognized escape 
+This table applies to ASCII and Unicode environments. An unrecognized escape
 sequence causes an error.
 .sp
   \ea         alarm, that is, the BEL character (hex 07)
@@ -49,7 +49,7 @@ following are also recognized:
 When \ex is not followed by {, from zero to two hexadecimal digits are read,
 but in ALT_BSUX mode \ex must be followed by two hexadecimal digits to be
 recognized as a hexadecimal escape; otherwise it matches a literal "x".
-Likewise, if \eu (in ALT_BSUX mode) is not followed by four hexadecimal digits 
+Likewise, if \eu (in ALT_BSUX mode) is not followed by four hexadecimal digits
 or (in EXTRA_ALT_BSUX mode) a sequence of hex digits in curly brackets, it
 matches a literal "u".
 .P

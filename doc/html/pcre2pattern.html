@@ -418,13 +418,13 @@ two compile-time options. If PCRE2_ALT_BSUX is set, the sequence \x followed
 by { is not recognized. Only if \x is followed by two hexadecimal digits is it
 recognized as a character escape. Otherwise it is interpreted as a literal "x"
 character. In this mode, support for code points greater than 256 is provided
-by \u, which must be followed by four hexadecimal digits; otherwise it is 
+by \u, which must be followed by four hexadecimal digits; otherwise it is
 interpreted as a literal "u" character.
 </P>
 <P>
 PCRE2_EXTRA_ALT_BSUX has the same effect as PCRE2_ALT_BSUX and, in addition,
 \u{hhh..} is recognized as the character specified by hexadecimal code point.
-There may be any number of hexadecimal digits. This syntax is from ECMAScript 
+There may be any number of hexadecimal digits. This syntax is from ECMAScript
 6.
 </P>
 <P>
@@ -1194,7 +1194,7 @@ character. If any other of these assertions appears in a character class, an
 A word boundary is a position in the subject string where the current character
 and the previous character do not both match \w or \W (i.e. one matches
 \w and the other matches \W), or the start or end of the string if the
-first or last character matches \w, respectively. When PCRE2 is built with 
+first or last character matches \w, respectively. When PCRE2 is built with
 Unicode support, the meanings of \w and \W can be changed by setting the
 PCRE2_UCP option. When this is done, it also affects \b and \B. Neither PCRE2
 nor Perl has a separate "start of word" or "end of word" metasequence. However,

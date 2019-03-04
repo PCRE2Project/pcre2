@@ -53,7 +53,7 @@ The header file for the POSIX-style functions is called pcre2posix.h. The
 official POSIX name is regex.h, but I did not want to risk possible problems
 with existing files of that name by distributing it that way. To use PCRE2 with
 an existing program that uses the POSIX API, pcre2posix.h will have to be
-renamed or pointed at by a link (or the program modified, of course). See the 
+renamed or pointed at by a link (or the program modified, of course). See the
 pcre2posix documentation for more details.
 
 
@@ -311,10 +311,10 @@ library. They are also documented in the pcre2build man page.
 . There is support for calling external programs during matching in the
   pcre2grep command, using PCRE2's callout facility with string arguments. This
   support can be disabled by adding --disable-pcre2grep-callout to the
-  "configure" command. There are two kinds of callout: one that generates 
-  output from inbuilt code, and another that calls an external program. The 
-  latter has special support for Windows and VMS; otherwise it assumes the 
-  existence of the fork() function. This facility can be disabled by adding 
+  "configure" command. There are two kinds of callout: one that generates
+  output from inbuilt code, and another that calls an external program. The
+  latter has special support for Windows and VMS; otherwise it assumes the
+  existence of the fork() function. This facility can be disabled by adding
   --disable-pcre2grep-callout-fork to the "configure" command.
 
 . The pcre2grep program currently supports only 8-bit data files, and so
@@ -344,7 +344,7 @@ library. They are also documented in the pcre2build man page.
 
   The default is either 1048576 or the value of --with-pcre2grep-bufsize,
   whichever is the larger.
-  
+
 . It is possible to compile pcre2test so that it links with the libreadline
   or libedit libraries, by specifying, respectively,
 
@@ -367,14 +367,14 @@ library. They are also documented in the pcre2build man page.
   If you get error messages about missing functions tgetstr, tgetent, tputs,
   tgetflag, or tgoto, this is the problem, and linking with the ncurses library
   should fix it.
-  
-. The C99 standard defines formatting modifiers z and t for size_t and 
-  ptrdiff_t values, respectively. By default, PCRE2 uses these modifiers in 
-  environments other than Microsoft Visual Studio when __STDC_VERSION__ is 
+
+. The C99 standard defines formatting modifiers z and t for size_t and
+  ptrdiff_t values, respectively. By default, PCRE2 uses these modifiers in
+  environments other than Microsoft Visual Studio when __STDC_VERSION__ is
   defined and has a value greater than or equal to 199901L (indicating C99).
   However, there is at least one environment that claims to be C99 but does not
   support these modifiers. If --disable-percent-zt is specified, no use is made
-  of the z or t modifiers. Instead or %td or %zu, %lu is used, with a cast for 
+  of the z or t modifiers. Instead or %td or %zu, %lu is used, with a cast for
   size_t values.
 
 . There is a special option called --enable-fuzz-support for use by people who
@@ -790,7 +790,7 @@ The distribution should contain the files listed below.
   src/pcre2_newline.c      )
   src/pcre2_ord2utf.c      )
   src/pcre2_pattern_info.c )
-  src/pcre2_script_run.c   ) 
+  src/pcre2_script_run.c   )
   src/pcre2_serialize.c    )
   src/pcre2_string_utils.c )
   src/pcre2_study.c        )

@@ -50,13 +50,13 @@ expression 8-bit library. There are no POSIX-style wrappers for PCRE2's 16-bit
 and 32-bit libraries. See the
 <a href="pcre2api.html"><b>pcre2api</b></a>
 documentation for a description of PCRE2's native API, which contains much
-additional functionality. 
+additional functionality.
 </P>
 <P>
 The functions described here are wrapper functions that ultimately call the
 PCRE2 native API. Their prototypes are defined in the <b>pcre2posix.h</b> header
 file, and they all have unique names starting with <b>pcre2_</b>. However, the
-<b>pcre2posix.h</b> header also contains macro definitions that convert the 
+<b>pcre2posix.h</b> header also contains macro definitions that convert the
 standard POSIX names such <b>regcomp()</b> into <b>pcre2_regcomp()</b> etc. This
 means that a program can use the usual POSIX names without running the risk of
 accidentally linking with POSIX functions from a different library.
@@ -68,7 +68,7 @@ application. Because the POSIX functions call the native ones, it is also
 necessary to add <b>-lpcre2-8</b>.
 </P>
 <P>
-Although they are not defined as protypes in <b>pcre2posix.h</b>, the library 
+Although they are not defined as protypes in <b>pcre2posix.h</b>, the library
 does contain functions with the POSIX names <b>regcomp()</b> etc. These simply
 pass their arguments to the PCRE2 functions. These functions are provided for
 backwards compatibility with earlier versions of PCRE2, so that existing

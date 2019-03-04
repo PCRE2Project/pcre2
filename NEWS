@@ -5,7 +5,7 @@ News about PCRE2 releases
 Version 10.33-RC1 03-March-2019
 -------------------------------
 
-Yet more bugfixes, tidies, and a few enhancements, summarized here (see 
+Yet more bugfixes, tidies, and a few enhancements, summarized here (see
 ChangeLog for the full list):
 
 1. Callouts from pcre2_substitute() are now available.

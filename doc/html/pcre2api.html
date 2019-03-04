@@ -1309,7 +1309,7 @@ be referenced by the substring extraction functions after a successful match.
 After running a match, you must not free a compiled pattern or a subject string
 until after all operations on the
 <a href="#matchdatablock">match data block</a>
-have taken place, unless, in the case of the subject string, you have used the 
+have taken place, unless, in the case of the subject string, you have used the
 PCRE2_COPY_MATCHED_SUBJECT option, which is described in the section entitled
 "Option bits for <b>pcre2_match()</b>"
 <a href="#matchoptions>">below.</a>
@@ -1437,8 +1437,8 @@ binary zero character followed by z).
 ECMAscript 6 added additional functionality to \u. This can be accessed using
 the PCRE2_EXTRA_ALT_BSUX extra option (see "Extra compile options"
 <a href="#extracompileoptions">below).</a>
-Note that this alternative escape handling applies only to patterns. Neither of 
-these options affects the processing of replacement strings passed to 
+Note that this alternative escape handling applies only to patterns. Neither of
+these options affects the processing of replacement strings passed to
 <b>pcre2_substitute()</b>.
 <pre>
   PCRE2_ALT_CIRCUMFLEX
@@ -1875,10 +1875,10 @@ characters if the matching function is called with PCRE2_NO_UTF_CHECK set.
 <pre>
   PCRE2_EXTRA_ALT_BSUX
 </pre>
-The original option PCRE2_ALT_BSUX causes PCRE2 to process \U, \u, and \x in 
-the way that ECMAscript (aka JavaScript) does. Additional functionality was 
-defined by ECMAscript 6; setting PCRE2_EXTRA_ALT_BSUX has the effect of 
-PCRE2_ALT_BSUX, but in addition it recognizes \u{hhh..} as a hexadecimal 
+The original option PCRE2_ALT_BSUX causes PCRE2 to process \U, \u, and \x in
+the way that ECMAscript (aka JavaScript) does. Additional functionality was
+defined by ECMAscript 6; setting PCRE2_EXTRA_ALT_BSUX has the effect of
+PCRE2_ALT_BSUX, but in addition it recognizes \u{hhh..} as a hexadecimal
 character code, where hhh.. is any number of hexadecimal digits.
 <pre>
   PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL
@@ -1896,7 +1896,7 @@ If the PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL extra option is passed to
 <b>pcre2_compile()</b>, all unrecognized or malformed escape sequences are
 treated as single-character escapes. For example, \j is a literal "j" and
 \x{2z} is treated as the literal string "x{2z}". Setting this option means
-that typos in patterns may go undetected and have unexpected results. Also note 
+that typos in patterns may go undetected and have unexpected results. Also note
 that a sequence such as [\N{] is interpreted as a malformed attempt at
 [\N{...}] and so is treated as [N{] whereas [\N] gives an error because an
 unqualified \N is a valid escape sequence but is not supported in a character
@@ -1904,9 +1904,9 @@ class. To reiterate: this is a dangerous option. Use with great care.
 <pre>
   PCRE2_EXTRA_ESCAPED_CR_IS_LF
 </pre>
-There are some legacy applications where the escape sequence \r in a pattern 
-is expected to match a newline. If this option is set, \r in a pattern is 
-converted to \n so that it matches a LF (linefeed) instead of a CR (carriage 
+There are some legacy applications where the escape sequence \r in a pattern
+is expected to match a newline. If this option is set, \r in a pattern is
+converted to \n so that it matches a LF (linefeed) instead of a CR (carriage
 return) character. The option does not affect a literal CR in the pattern, nor
 does it affect CR specified as an explicit code point such as \x{0D}.
 <pre>
@@ -2564,7 +2564,7 @@ Option bits for <b>pcre2_match()</b>
 </b><br>
 <P>
 The unused bits of the <i>options</i> argument for <b>pcre2_match()</b> must be
-zero. The only bits that may be set are PCRE2_ANCHORED, 
+zero. The only bits that may be set are PCRE2_ANCHORED,
 PCRE2_COPY_MATCHED_SUBJECT, PCRE2_ENDANCHORED, PCRE2_NOTBOL, PCRE2_NOTEOL,
 PCRE2_NOTEMPTY, PCRE2_NOTEMPTY_ATSTART, PCRE2_NO_JIT, PCRE2_NO_UTF_CHECK,
 PCRE2_PARTIAL_HARD, and PCRE2_PARTIAL_SOFT. Their action is described below.
@@ -2585,8 +2585,8 @@ matching.
 <pre>
   PCRE2_COPY_MATCHED_SUBJECT
 </pre>
-By default, a pointer to the subject is remembered in the match data block so 
-that, after a successful match, it can be referenced by the substring 
+By default, a pointer to the subject is remembered in the match data block so
+that, after a successful match, it can be referenced by the substring
 extraction functions. This means that the subject's memory must not be freed
 until all such operations are complete. For some applications where the
 lifetime of the subject string is not guaranteed, it may be necessary to make a
@@ -2866,8 +2866,8 @@ undefined.
 <P>
 After a successful match, a partial match (PCRE2_ERROR_PARTIAL), or a failure
 to match (PCRE2_ERROR_NOMATCH), a mark name may be available. The function
-<b>pcre2_get_mark()</b> can be called to access this name, which can be 
-specified in the pattern by any of the backtracking control verbs, not just 
+<b>pcre2_get_mark()</b> can be called to access this name, which can be
+specified in the pattern by any of the backtracking control verbs, not just
 (*MARK). The same function applies to all the verbs. It returns a pointer to
 the zero-terminated name, which is within the compiled pattern. If no name is
 available, NULL is returned. The length of the name (excluding the terminating
@@ -3002,7 +3002,7 @@ The backtracking match limit was reached.
 If a pattern contains many nested backtracking points, heap memory is used to
 remember them. This error is given when the memory allocation function (default
 or custom) fails. Note that a different error, PCRE2_ERROR_HEAPLIMIT, is given
-if the amount of memory needed exceeds the heap limit. PCRE2_ERROR_NOMEMORY is 
+if the amount of memory needed exceeds the heap limit. PCRE2_ERROR_NOMEMORY is
 also returned if PCRE2_COPY_MATCHED_SUBJECT is set and memory allocation fails.
 <pre>
   PCRE2_ERROR_NULL
@@ -3405,7 +3405,7 @@ capture groups and letters within \Q...\E quoted sequences.
 <P>
 Note that case forcing sequences such as \U...\E do not nest. For example,
 the result of processing "\Uaa\LBB\Ecc\E" is "AAbbcc"; the final \E has no
-effect. Note also that the PCRE2_ALT_BSUX and PCRE2_EXTRA_ALT_BSUX options do 
+effect. Note also that the PCRE2_ALT_BSUX and PCRE2_EXTRA_ALT_BSUX options do
 not apply to not apply to replacement strings.
 </P>
 <P>
@@ -3439,7 +3439,7 @@ substitutions. However, PCRE2_SUBSTITUTE_UNKNOWN_UNSET does cause unknown
 groups in the extended syntax forms to be treated as unset.
 </P>
 <P>
-If successful, <b>pcre2_substitute()</b> returns the number of successful 
+If successful, <b>pcre2_substitute()</b> returns the number of successful
 matches. This may be zero if no matches were found, and is never greater than 1
 unless PCRE2_SUBSTITUTE_GLOBAL is set.
 </P>
@@ -3489,8 +3489,8 @@ Substitution callouts
 <br>
 The <b>pcre2_set_substitution_callout()</b> function can be used to specify a
 callout function for <b>pcre2_substitute()</b>. This information is passed in
-a match context. The callout function is called after each substitution has 
-been processed, but it can cause the replacement not to happen. The callout 
+a match context. The callout function is called after each substitution has
+been processed, but it can cause the replacement not to happen. The callout
 function is not called for simulated substitutions that happen as a result of
 the PCRE2_SUBSTITUTE_OVERFLOW_LENGTH option.
 </P>
@@ -3500,10 +3500,10 @@ block structure, which contains the following fields, not necessarily in this
 order:
 <pre>
   uint32_t    <i>version</i>;
-  uint32_t    <i>subscount</i>;  
+  uint32_t    <i>subscount</i>;
   PCRE2_SPTR  <i>input</i>;
-  PCRE2_SPTR  <i>output</i>; 
-  PCRE2_SIZE <i>*ovector</i>; 
+  PCRE2_SPTR  <i>output</i>;
+  PCRE2_SIZE <i>*ovector</i>;
   uint32_t    <i>oveccount</i>;
   PCRE2_SIZE  <i>output_offsets[2]</i>;
 </pre>
@@ -3517,9 +3517,9 @@ first callout, 2 for the second, and so on. The <i>input</i> and <i>output</i>
 pointers are copies of the values passed to <b>pcre2_substitute()</b>.
 </P>
 <P>
-The <i>ovector</i> field points to the ovector, which contains the result of the 
-most recent match. The <i>oveccount</i> field contains the number of pairs that 
-are set in the ovector, and is always greater than zero. 
+The <i>ovector</i> field points to the ovector, which contains the result of the
+most recent match. The <i>oveccount</i> field contains the number of pairs that
+are set in the ovector, and is always greater than zero.
 </P>
 <P>
 The <i>output_offsets</i> vector contains the offsets of the replacement in the

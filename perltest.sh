@@ -29,7 +29,7 @@ if [ $# -gt 1 -a "$1" = "-perl" ] ; then
   shift
   perl=$1
   shift
-fi     
+fi
 
 if [ $# -gt 0 -a "$1" = "-w" ] ; then
   perlarg="-w"
@@ -386,10 +386,10 @@ for (;;)
     }
   }
 
-# By closing OUTFILE explicitly, we avoid a Perl warning in -w mode 
+# By closing OUTFILE explicitly, we avoid a Perl warning in -w mode
 # "main::OUTFILE" used only once".
 
-close(OUTFILE) if $outfile eq "OUTFILE"; 
+close(OUTFILE) if $outfile eq "OUTFILE";
 
 PERLEND
 ) | $perl $perlarg - $@

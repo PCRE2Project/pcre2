@@ -407,7 +407,7 @@ return 0;
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_set_substitute_callout(pcre2_match_context *mcontext,
-  int (*substitute_callout)(pcre2_substitute_callout_block *, void *), 
+  int (*substitute_callout)(pcre2_substitute_callout_block *, void *),
     void *substitute_callout_data)
 {
 mcontext->substitute_callout = substitute_callout;

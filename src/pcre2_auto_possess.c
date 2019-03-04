@@ -604,15 +604,15 @@ for(;;)
       case OP_SCBRAPOS:
       if (cb->had_recurse) return FALSE;
       break;
-      
+
       /* A script run might have to backtrack if the iterated item can match
-      characters from more than one script. So give up unless repeating an 
+      characters from more than one script. So give up unless repeating an
       explicit character. */
-      
+
       case OP_SCRIPT_RUN:
       if (base_list[0] != OP_CHAR && base_list[0] != OP_CHARI)
-        return FALSE; 
-      break;   
+        return FALSE;
+      break;
 
       /* Atomic sub-patterns and assertions can always auto-possessify their
       last iterator. However, if the group was entered as a result of checking

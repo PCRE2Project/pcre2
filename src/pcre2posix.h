@@ -3,8 +3,8 @@
 *************************************************/
 
 /* PCRE2 is a library of functions to support regular expressions whose syntax
-and semantics are as close as possible to those of the Perl 5 language. This is 
-the public header file to be #included by applications that call PCRE2 via the 
+and semantics are as close as possible to those of the Perl 5 language. This is
+the public header file to be #included by applications that call PCRE2 via the
 POSIX wrapper interface.
 
                        Written by Philip Hazel
@@ -138,7 +138,7 @@ file. */
 #  endif
 #endif
 
-/* The functions. The actual code is in functions with pcre2_xxx names for 
+/* The functions. The actual code is in functions with pcre2_xxx names for
 uniqueness. POSIX names are provided as macros for API compatibility with POSIX
 regex functions. It's done this way to ensure to they are always linked from
 the PCRE2 library and not by accident from elsewhere (regex_t differs in size
@@ -155,7 +155,7 @@ PCRE2POSIX_EXP_DECL void pcre2_regfree(regex_t *);
 #define regerror pcre2_regerror
 #define regfree  pcre2_regfree
 
-/* Debian had a patch that used different names. These are now here to save 
+/* Debian had a patch that used different names. These are now here to save
 them having to maintain their own patch, but are not documented by PCRE2. */
 
 #define PCRE2regcomp  pcre2_regcomp

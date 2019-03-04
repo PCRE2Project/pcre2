@@ -147,14 +147,14 @@ AC_ARG_ENABLE(jit,
 if test "$enable_jit" = "auto"; then
   AC_LANG(C)
   SAVE_CPPFLAGS=$CPPFLAGS
-  CPPFLAGS=-I$srcdir  
+  CPPFLAGS=-I$srcdir
   AC_COMPILE_IFELSE([AC_LANG_SOURCE([[
   #define SLJIT_CONFIG_AUTO 1
   #include "src/sljit/sljitConfigInternal.h"
   #if (defined SLJIT_CONFIG_UNSUPPORTED && SLJIT_CONFIG_UNSUPPORTED)
   #error unsupported
   #endif]])], enable_jit=yes, enable_jit=no)
-  CPPFLAGS=$SAVE_CPPFLAGS 
+  CPPFLAGS=$SAVE_CPPFLAGS
   echo checking for JIT support on this hardware... $enable_jit
 fi
 
@@ -607,7 +607,7 @@ if test "$enable_percent_zt" = "no"; then
     Define to any value to disable the use of the z and t modifiers in
     formatting settings such as %zu or %td (this is rarely needed).])
 else
-  enable_percent_zt=auto     
+  enable_percent_zt=auto
 fi
 
 # Unless running under Windows, JIT support requires pthreads.
@@ -647,13 +647,13 @@ if test "$enable_pcre2grep_callout" = "yes"; then
     fi
     AC_DEFINE([SUPPORT_PCRE2GREP_CALLOUT_FORK], [], [
       Define to any value to enable fork support in pcre2grep callout scripts.
-      This will have no effect unless SUPPORT_PCRE2GREP_CALLOUT is also 
-      defined.])  
+      This will have no effect unless SUPPORT_PCRE2GREP_CALLOUT is also
+      defined.])
   fi
   AC_DEFINE([SUPPORT_PCRE2GREP_CALLOUT], [], [
     Define to any value to enable callout script support in pcre2grep.])
 else
-  enable_pcre2grep_callout_fork="no"     
+  enable_pcre2grep_callout_fork="no"
 fi
 
 if test "$enable_unicode" = "yes"; then
@@ -1055,7 +1055,7 @@ $PACKAGE-$VERSION configuration summary:
     Build static libs .................. : ${enable_static}
     Use JIT in pcre2grep ............... : ${enable_pcre2grep_jit}
     Enable callouts in pcre2grep ....... : ${enable_pcre2grep_callout}
-    Enable fork in pcre2grep callouts .. : ${enable_pcre2grep_callout_fork} 
+    Enable fork in pcre2grep callouts .. : ${enable_pcre2grep_callout_fork}
     Initial buffer size for pcre2grep .. : ${with_pcre2grep_bufsize}
     Maximum buffer size for pcre2grep .. : ${with_pcre2grep_max_bufsize}
     Link pcre2grep with libz ........... : ${enable_pcre2grep_libz}

@@ -29,12 +29,12 @@ and 32-bit libraries. See the
 \fBpcre2api\fP
 .\"
 documentation for a description of PCRE2's native API, which contains much
-additional functionality. 
+additional functionality.
 .P
 The functions described here are wrapper functions that ultimately call the
 PCRE2 native API. Their prototypes are defined in the \fBpcre2posix.h\fP header
 file, and they all have unique names starting with \fBpcre2_\fP. However, the
-\fBpcre2posix.h\fP header also contains macro definitions that convert the 
+\fBpcre2posix.h\fP header also contains macro definitions that convert the
 standard POSIX names such \fBregcomp()\fP into \fBpcre2_regcomp()\fP etc. This
 means that a program can use the usual POSIX names without running the risk of
 accidentally linking with POSIX functions from a different library.
@@ -44,7 +44,7 @@ can be accessed by adding \fB-lpcre2-posix\fP to the command for linking an
 application. Because the POSIX functions call the native ones, it is also
 necessary to add \fB-lpcre2-8\fP.
 .P
-Although they are not defined as protypes in \fBpcre2posix.h\fP, the library 
+Although they are not defined as protypes in \fBpcre2posix.h\fP, the library
 does contain functions with the POSIX names \fBregcomp()\fP etc. These simply
 pass their arguments to the PCRE2 functions. These functions are provided for
 backwards compatibility with earlier versions of PCRE2, so that existing

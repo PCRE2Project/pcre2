@@ -82,7 +82,7 @@ The escape sequence \C can be used to match a single code unit in a UTF mode,
 but its use can lead to some strange effects because it breaks up multi-unit
 characters (see the description of \C in the
 <a href="pcre2pattern.html"><b>pcre2pattern</b></a>
-documentation). For this reason, there is a build-time option that disables 
+documentation). For this reason, there is a build-time option that disables
 support for \C completely. There is also a less draconian compile-time option
 for locking out the use of \C when a pattern is compiled.
 </P>
@@ -144,14 +144,14 @@ scripts are commonly used together, and because some diacritical and other
 marks are used with multiple scripts, it is not that simple.
 </P>
 <P>
-Every Unicode character has a Script property, mostly with a value 
+Every Unicode character has a Script property, mostly with a value
 corresponding to the name of a script, such as Latin, Greek, or Cyrillic. There
 are also three special values:
 </P>
 <P>
 "Unknown" is used for code points that have not been assigned, and also for the
 surrogate code points. In the PCRE2 32-bit library, characters whose code
-points are greater than the Unicode maximum (U+10FFFF), which are accessible 
+points are greater than the Unicode maximum (U+10FFFF), which are accessible
 only in non-UTF mode, are assigned the Unknown script.
 </P>
 <P>
@@ -165,20 +165,20 @@ previous character. These are considered to take on the script of the character
 that they modify.
 </P>
 <P>
-Some Inherited characters are used with many scripts, but many of them are only 
-normally used with a small number of scripts. For example, U+102E0 (Coptic 
-Epact thousands mark) is used only with Arabic and Coptic. In order to make it 
-possible to check this, a Unicode property called Script Extension exists. Its 
-value is a list of scripts that apply to the character. For the majority of 
+Some Inherited characters are used with many scripts, but many of them are only
+normally used with a small number of scripts. For example, U+102E0 (Coptic
+Epact thousands mark) is used only with Arabic and Coptic. In order to make it
+possible to check this, a Unicode property called Script Extension exists. Its
+value is a list of scripts that apply to the character. For the majority of
 characters, the list contains just one script, the same one as the Script
 property. However, for characters such as U+102E0 more than one Script is
 listed. There are also some Common characters that have a single, non-Common
 script in their Script Extension list.
 </P>
 <P>
-The next section describes the basic rules for deciding whether a given string 
-of characters is a script run. Note, however, that there are some special cases 
-involving the Chinese Han script, and an additional constraint for decimal 
+The next section describes the basic rules for deciding whether a given string
+of characters is a script run. Note, however, that there are some special cases
+involving the Chinese Han script, and an additional constraint for decimal
 digits. These are covered in subsequent sections.
 </P>
 <br><b>
@@ -201,17 +201,17 @@ all the sets of scripts must not be empty.
 <P>
 A simple example is an Internet name such as "google.com". The letters are all
 in the Latin script, and the dot is Common, so this string is a script run.
-However, the Cyrillic letter "o" looks exactly the same as the Latin "o"; a 
+However, the Cyrillic letter "o" looks exactly the same as the Latin "o"; a
 string that looks the same, but with Cyrillic "o"s is not a script run.
 </P>
 <P>
-More interesting examples involve characters with more than one script in their 
+More interesting examples involve characters with more than one script in their
 Script Extension. Consider the following characters:
 <pre>
   U+060C  Arabic comma
   U+06D4  Arabic full stop
 </pre>
-The first has the Script Extension list Arabic, Hanifi Rohingya, Syriac, and 
+The first has the Script Extension list Arabic, Hanifi Rohingya, Syriac, and
 Thaana; the second has just Arabic and Hanifi Rohingya. Both of them could
 appear in script runs of either Arabic or Hanifi Rohingya. The first could also
 appear in Syriac or Thaana script runs, but the second could not.
@@ -220,8 +220,8 @@ appear in Syriac or Thaana script runs, but the second could not.
 The Chinese Han script
 </b><br>
 <P>
-The Chinese Han script is commonly used in conjunction with other scripts for 
-writing certain languages. Japanese uses the Hiragana and Katakana scripts 
+The Chinese Han script is commonly used in conjunction with other scripts for
+writing certain languages. Japanese uses the Hiragana and Katakana scripts
 together with Han; Korean uses Hangul and Han; Taiwanese Mandarin uses Bopomofo
 and Han. These three combinations are treated as special cases when checking
 script runs and are, in effect, "virtual scripts". Thus, a script run may

@@ -171,7 +171,7 @@ for (;;)
     /* Fall through */
 
     case OP_ONCE:
-    case OP_SCRIPT_RUN: 
+    case OP_SCRIPT_RUN:
     case OP_SBRA:
     case OP_BRAPOS:
     case OP_SBRAPOS:
@@ -1076,7 +1076,7 @@ do
       case OP_CBRAPOS:
       case OP_SCBRAPOS:
       case OP_ONCE:
-      case OP_SCRIPT_RUN: 
+      case OP_SCRIPT_RUN:
       case OP_ASSERT:
       rc = set_start_bits(re, tcode, utf);
       if (rc == SSB_FAIL || rc == SSB_UNKNOWN) return rc;

@@ -565,10 +565,10 @@ for a description of the effects of these options.
   /s  dotall                    set PCRE2_DOTALL
       dupnames                  set PCRE2_DUPNAMES
       endanchored               set PCRE2_ENDANCHORED
-      escaped_cr_is_lf          set PCRE2_EXTRA_ESCAPED_CR_IS_LF 
+      escaped_cr_is_lf          set PCRE2_EXTRA_ESCAPED_CR_IS_LF
   /x  extended                  set PCRE2_EXTENDED
   /xx extended_more             set PCRE2_EXTENDED_MORE
-      extra_alt_bsux            set PCRE2_EXTRA_ALT_BSUX 
+      extra_alt_bsux            set PCRE2_EXTRA_ALT_BSUX
       firstline                 set PCRE2_FIRSTLINE
       literal                   set PCRE2_LITERAL
       match_line                set PCRE2_EXTRA_MATCH_LINE
@@ -1005,7 +1005,7 @@ process.
       aftertext                  show text after match
       allaftertext               show text after captures
       allcaptures                show all captures
-      allvector                  show the entire ovector 
+      allvector                  show the entire ovector
       allusedtext                show all consulted text
       altglobal                  alternative global matching
   /g  global                     global matching
@@ -1013,9 +1013,9 @@ process.
       mark                       show mark values
       replace=<string>           specify a replacement string
       startchar                  show starting character when relevant
-      substitute_callout         use substitution callouts 
+      substitute_callout         use substitution callouts
       substitute_extended        use PCRE2_SUBSTITUTE_EXTENDED
-      substitute_skip=<n>        skip substitution number n 
+      substitute_skip=<n>        skip substitution number n
       substitute_overflow_length use PCRE2_SUBSTITUTE_OVERFLOW_LENGTH
       substitute_stop=<n>        skip substitution number n and greater
       substitute_unknown_unset   use PCRE2_SUBSTITUTE_UNKNOWN_UNSET
@@ -1160,7 +1160,7 @@ pattern.
       aftertext                  show text after match
       allaftertext               show text after captures
       allcaptures                show all captures
-      allvector                  show the entire ovector 
+      allvector                  show the entire ovector
       allusedtext                show all consulted text (non-JIT only)
       altglobal                  alternative global matching
       callout_capture            show captures at callout time
@@ -1190,9 +1190,9 @@ pattern.
       replace=<string>           specify a replacement string
       startchar                  show startchar when relevant
       startoffset=<n>            same as offset=<n>
-      substitute_callout         use substitution callouts 
+      substitute_callout         use substitution callouts
       substitute_extedded        use PCRE2_SUBSTITUTE_EXTENDED
-      substitute_skip=<n>        skip substitution number n 
+      substitute_skip=<n>        skip substitution number n
       substitute_overflow_length use PCRE2_SUBSTITUTE_OVERFLOW_LENGTH
       substitute_stop=<n>        skip substitution number n and greater
       substitute_unknown_unset   use PCRE2_SUBSTITUTE_UNKNOWN_UNSET
@@ -1273,9 +1273,9 @@ result, and also for DFA matching, provides a means of checking that there are
 no unexpected modifications to ovector fields. Before each match attempt, the
 ovector is filled with a special value, and if this is found in both elements
 of a capturing pair, "<unchanged>" is output. After a successful match, this
-applies to all groups after the maximum capture group for the pattern. In other 
-cases it applies to the entire ovector. After a partial match, the first two 
-elements are the only ones that should be set. After a DFA match, the amount of 
+applies to all groups after the maximum capture group for the pattern. In other
+cases it applies to the entire ovector. After a partial match, the first two
+elements are the only ones that should be set. After a DFA match, the amount of
 ovector that is used depends on the number of matches that were found.
 .
 .
@@ -1288,13 +1288,13 @@ controlled by various modifiers listed above whose names begin with
 \fBcallout_\fP. Details are given in the section entitled "Callouts"
 .\" HTML <a href="#callouts">
 .\" </a>
-below. 
+below.
 .\"
-Testing callouts from \fBpcre2_substitute()\fP is decribed separately in 
+Testing callouts from \fBpcre2_substitute()\fP is decribed separately in
 "Testing the substitution function"
 .\" HTML <a href="#substitution">
 .\" </a>
-below. 
+below.
 .\"
 .
 .
@@ -1416,14 +1416,14 @@ matching provokes an error return ("bad option value") from
 .SS "Testing substitute callouts"
 .rs
 .sp
-If the \fBsubstitute_callout\fP modifier is set, a substitution callout 
+If the \fBsubstitute_callout\fP modifier is set, a substitution callout
 function is set up. When it is called (after each substitution), details of the
 the input and output strings are output. For example:
 .sp
   /abc/g,replace=<$0>,substitute_callout
       abcdefabcpqr
    1(1) Old 0 3 "abc" New 0 5 "<abc>"
-   2(1) Old 6 9 "abc" New 8 13 "<abc>" 
+   2(1) Old 6 9 "abc" New 8 13 "<abc>"
    2: <abc>def<abc>pqr
 .sp
 The first number on each callout line is the count of matches. The
@@ -1432,11 +1432,11 @@ is, one more than the number of capturing groups that were set). Then are
 listed the offsets of the old substring, its contents, and the same for the
 replacement.
 .P
-By default, the substitution callout function returns zero, which accepts the 
-replacement and causes matching to continue if /g was used. Two further 
-modifiers can be used to test other return values. If \fBsubstitute_skip\fP is 
-set to a value greater than zero the callout function returns +1 for the match 
-of that number, and similarly \fBsubstitute_stop\fP returns -1. These cause the 
+By default, the substitution callout function returns zero, which accepts the
+replacement and causes matching to continue if /g was used. Two further
+modifiers can be used to test other return values. If \fBsubstitute_skip\fP is
+set to a value greater than zero the callout function returns +1 for the match
+of that number, and similarly \fBsubstitute_stop\fP returns -1. These cause the
 replacement to be rejected, and -1 causes no further matching to take place. If
 either of them are set, \fBsubstitute_callout\fP is assumed. For example:
 .sp
@@ -1449,7 +1449,7 @@ either of them are set, \fBsubstitute_callout\fP is assumed. For example:
    1(1) Old 0 3 "abc" New 0 5 "<abc> STOPPED"
    1: abcdefabcpqr
 .sp
-If both are set for the same number, stop takes precedence. Only a single skip 
+If both are set for the same number, stop takes precedence. Only a single skip
 or stop is supported, which is sufficient for testing that the feature works.
 .
 .

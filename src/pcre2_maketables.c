@@ -138,7 +138,7 @@ for (i = 0; i < 256; i++)
   int x = 0;
   if (isspace(i)) x += ctype_space;
   if (isalpha(i)) x += ctype_letter;
-  if (islower(i)) x += ctype_lcletter; 
+  if (islower(i)) x += ctype_lcletter;
   if (isdigit(i)) x += ctype_digit;
   if (isalnum(i) || i == '_') x += ctype_word;
   *p++ = x;

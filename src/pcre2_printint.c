@@ -393,7 +393,7 @@ for(;;)
     case OP_ASSERTBACK:
     case OP_ASSERTBACK_NOT:
     case OP_ONCE:
-    case OP_SCRIPT_RUN: 
+    case OP_SCRIPT_RUN:
     case OP_COND:
     case OP_SCOND:
     case OP_REVERSE:

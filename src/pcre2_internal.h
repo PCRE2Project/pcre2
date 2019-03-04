@@ -525,10 +525,10 @@ bytes in a code unit in that mode. */
 enum { PCRE2_MATCHEDBY_INTERPRETER,     /* pcre2_match() */
        PCRE2_MATCHEDBY_DFA_INTERPRETER, /* pcre2_dfa_match() */
        PCRE2_MATCHEDBY_JIT };           /* pcre2_jit_match() */
-       
+
 /* Values for the flags field in a match data block. */
 
-#define PCRE2_MD_COPIED_SUBJECT  0x01u 
+#define PCRE2_MD_COPIED_SUBJECT  0x01u
 
 /* Magic number to provide a small check against being handed junk. */
 
@@ -1774,7 +1774,7 @@ typedef struct {
   uint8_t caseset;    /* offset to multichar other cases or zero */
   int32_t other_case; /* offset to other case, or zero if none */
   int16_t scriptx;    /* script extension value */
-  int16_t dummy;      /* spare - to round to multiple of 4 bytes */  
+  int16_t dummy;      /* spare - to round to multiple of 4 bytes */
 } ucd_record;
 
 /* UCD access macros */

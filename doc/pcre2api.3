@@ -247,7 +247,7 @@ document for an overview of all the PCRE2 documentation.
 .sp
 .B const unsigned char *pcre2_maketables(pcre2_general_context *\fIgcontext\fP);
 .sp
-.B int pcre2_pattern_info(const pcre2_code *\fIcode\fP, uint32_t \fIwhat\fP, 
+.B int pcre2_pattern_info(const pcre2_code *\fIcode\fP, uint32_t \fIwhat\fP,
 .B "  void *\fIwhere\fP);"
 .sp
 .B int pcre2_callout_enumerate(const pcre2_code *\fIcode\fP,
@@ -1244,7 +1244,7 @@ until after all operations on the
 .\" </a>
 match data block
 .\"
-have taken place, unless, in the case of the subject string, you have used the 
+have taken place, unless, in the case of the subject string, you have used the
 PCRE2_COPY_MATCHED_SUBJECT option, which is described in the section entitled
 "Option bits for \fBpcre2_match()\fP"
 .\" HTML <a href="#matchoptions>">
@@ -1375,8 +1375,8 @@ the PCRE2_EXTRA_ALT_BSUX extra option (see "Extra compile options"
 .\" </a>
 below).
 .\"
-Note that this alternative escape handling applies only to patterns. Neither of 
-these options affects the processing of replacement strings passed to 
+Note that this alternative escape handling applies only to patterns. Neither of
+these options affects the processing of replacement strings passed to
 \fBpcre2_substitute()\fP.
 .sp
   PCRE2_ALT_CIRCUMFLEX
@@ -1832,10 +1832,10 @@ characters if the matching function is called with PCRE2_NO_UTF_CHECK set.
 .sp
   PCRE2_EXTRA_ALT_BSUX
 .sp
-The original option PCRE2_ALT_BSUX causes PCRE2 to process \eU, \eu, and \ex in 
-the way that ECMAscript (aka JavaScript) does. Additional functionality was 
-defined by ECMAscript 6; setting PCRE2_EXTRA_ALT_BSUX has the effect of 
-PCRE2_ALT_BSUX, but in addition it recognizes \eu{hhh..} as a hexadecimal 
+The original option PCRE2_ALT_BSUX causes PCRE2 to process \eU, \eu, and \ex in
+the way that ECMAscript (aka JavaScript) does. Additional functionality was
+defined by ECMAscript 6; setting PCRE2_EXTRA_ALT_BSUX has the effect of
+PCRE2_ALT_BSUX, but in addition it recognizes \eu{hhh..} as a hexadecimal
 character code, where hhh.. is any number of hexadecimal digits.
 .sp
   PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL
@@ -1852,7 +1852,7 @@ If the PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL extra option is passed to
 \fBpcre2_compile()\fP, all unrecognized or malformed escape sequences are
 treated as single-character escapes. For example, \ej is a literal "j" and
 \ex{2z} is treated as the literal string "x{2z}". Setting this option means
-that typos in patterns may go undetected and have unexpected results. Also note 
+that typos in patterns may go undetected and have unexpected results. Also note
 that a sequence such as [\eN{] is interpreted as a malformed attempt at
 [\eN{...}] and so is treated as [N{] whereas [\eN] gives an error because an
 unqualified \eN is a valid escape sequence but is not supported in a character
@@ -1860,9 +1860,9 @@ class. To reiterate: this is a dangerous option. Use with great care.
 .sp
   PCRE2_EXTRA_ESCAPED_CR_IS_LF
 .sp
-There are some legacy applications where the escape sequence \er in a pattern 
-is expected to match a newline. If this option is set, \er in a pattern is 
-converted to \en so that it matches a LF (linefeed) instead of a CR (carriage 
+There are some legacy applications where the escape sequence \er in a pattern
+is expected to match a newline. If this option is set, \er in a pattern is
+converted to \en so that it matches a LF (linefeed) instead of a CR (carriage
 return) character. The option does not affect a literal CR in the pattern, nor
 does it affect CR specified as an explicit code point such as \ex{0D}.
 .sp
@@ -2547,7 +2547,7 @@ the use of .* with PCRE2_DOTALL, not by starting the pattern with ^ or \eA.
 .rs
 .sp
 The unused bits of the \fIoptions\fP argument for \fBpcre2_match()\fP must be
-zero. The only bits that may be set are PCRE2_ANCHORED, 
+zero. The only bits that may be set are PCRE2_ANCHORED,
 PCRE2_COPY_MATCHED_SUBJECT, PCRE2_ENDANCHORED, PCRE2_NOTBOL, PCRE2_NOTEOL,
 PCRE2_NOTEMPTY, PCRE2_NOTEMPTY_ATSTART, PCRE2_NO_JIT, PCRE2_NO_UTF_CHECK,
 PCRE2_PARTIAL_HARD, and PCRE2_PARTIAL_SOFT. Their action is described below.
@@ -2567,8 +2567,8 @@ matching.
 .sp
   PCRE2_COPY_MATCHED_SUBJECT
 .sp
-By default, a pointer to the subject is remembered in the match data block so 
-that, after a successful match, it can be referenced by the substring 
+By default, a pointer to the subject is remembered in the match data block so
+that, after a successful match, it can be referenced by the substring
 extraction functions. This means that the subject's memory must not be freed
 until all such operations are complete. For some applications where the
 lifetime of the subject string is not guaranteed, it may be necessary to make a
@@ -2868,8 +2868,8 @@ undefined.
 .P
 After a successful match, a partial match (PCRE2_ERROR_PARTIAL), or a failure
 to match (PCRE2_ERROR_NOMATCH), a mark name may be available. The function
-\fBpcre2_get_mark()\fP can be called to access this name, which can be 
-specified in the pattern by any of the backtracking control verbs, not just 
+\fBpcre2_get_mark()\fP can be called to access this name, which can be
+specified in the pattern by any of the backtracking control verbs, not just
 (*MARK). The same function applies to all the verbs. It returns a pointer to
 the zero-terminated name, which is within the compiled pattern. If no name is
 available, NULL is returned. The length of the name (excluding the terminating
@@ -3016,7 +3016,7 @@ The backtracking match limit was reached.
 If a pattern contains many nested backtracking points, heap memory is used to
 remember them. This error is given when the memory allocation function (default
 or custom) fails. Note that a different error, PCRE2_ERROR_HEAPLIMIT, is given
-if the amount of memory needed exceeds the heap limit. PCRE2_ERROR_NOMEMORY is 
+if the amount of memory needed exceeds the heap limit. PCRE2_ERROR_NOMEMORY is
 also returned if PCRE2_COPY_MATCHED_SUBJECT is set and memory allocation fails.
 .sp
   PCRE2_ERROR_NULL
@@ -3407,7 +3407,7 @@ capture groups and letters within \eQ...\eE quoted sequences.
 .P
 Note that case forcing sequences such as \eU...\eE do not nest. For example,
 the result of processing "\eUaa\eLBB\eEcc\eE" is "AAbbcc"; the final \eE has no
-effect. Note also that the PCRE2_ALT_BSUX and PCRE2_EXTRA_ALT_BSUX options do 
+effect. Note also that the PCRE2_ALT_BSUX and PCRE2_EXTRA_ALT_BSUX options do
 not apply to not apply to replacement strings.
 .P
 The second effect of setting PCRE2_SUBSTITUTE_EXTENDED is to add more
@@ -3439,7 +3439,7 @@ The PCRE2_SUBSTITUTE_UNSET_EMPTY option does not affect these extended
 substitutions. However, PCRE2_SUBSTITUTE_UNKNOWN_UNSET does cause unknown
 groups in the extended syntax forms to be treated as unset.
 .P
-If successful, \fBpcre2_substitute()\fP returns the number of successful 
+If successful, \fBpcre2_substitute()\fP returns the number of successful
 matches. This may be zero if no matches were found, and is never greater than 1
 unless PCRE2_SUBSTITUTE_GLOBAL is set.
 .P
@@ -3487,8 +3487,8 @@ above).
 .sp
 The \fBpcre2_set_substitution_callout()\fP function can be used to specify a
 callout function for \fBpcre2_substitute()\fP. This information is passed in
-a match context. The callout function is called after each substitution has 
-been processed, but it can cause the replacement not to happen. The callout 
+a match context. The callout function is called after each substitution has
+been processed, but it can cause the replacement not to happen. The callout
 function is not called for simulated substitutions that happen as a result of
 the PCRE2_SUBSTITUTE_OVERFLOW_LENGTH option.
 .P
@@ -3497,10 +3497,10 @@ block structure, which contains the following fields, not necessarily in this
 order:
 .sp
   uint32_t    \fIversion\fP;
-  uint32_t    \fIsubscount\fP;  
+  uint32_t    \fIsubscount\fP;
   PCRE2_SPTR  \fIinput\fP;
-  PCRE2_SPTR  \fIoutput\fP; 
-  PCRE2_SIZE \fI*ovector\fP; 
+  PCRE2_SPTR  \fIoutput\fP;
+  PCRE2_SIZE \fI*ovector\fP;
   uint32_t    \fIoveccount\fP;
   PCRE2_SIZE  \fIoutput_offsets[2]\fP;
 .sp
@@ -3512,9 +3512,9 @@ The \fIsubscount\fP field is the number of the current match. It is 1 for the
 first callout, 2 for the second, and so on. The \fIinput\fP and \fIoutput\fP
 pointers are copies of the values passed to \fBpcre2_substitute()\fP.
 .P
-The \fIovector\fP field points to the ovector, which contains the result of the 
-most recent match. The \fIoveccount\fP field contains the number of pairs that 
-are set in the ovector, and is always greater than zero. 
+The \fIovector\fP field points to the ovector, which contains the result of the
+most recent match. The \fIoveccount\fP field contains the number of pairs that
+are set in the ovector, and is always greater than zero.
 .P
 The \fIoutput_offsets\fP vector contains the offsets of the replacement in the
 output string. This has already been processed for dollar and (if requested)

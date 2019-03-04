@@ -376,12 +376,15 @@ environment.
 </P>
 <br><a name="SEC14" href="#TOC1">PCRE2GREP SUPPORT FOR EXTERNAL SCRIPTS</a><br>
 <P>
-By default, on non-Windows systems, <b>pcre2grep</b> supports the use of
-callouts with string arguments within the patterns it is matching, in order to
-run external scripts. For details, see the
+By default <b>pcre2grep</b> supports the use of callouts with string arguments
+within the patterns it is matching. There are two kinds: one that generates
+output using local code, and another that calls an external program or script.
+If --disable-pcre2grep-callout-fork is added to the <b>configure</b> command,
+only the first kind of callout is supported; if --disable-pcre2grep-callout is
+used, all callouts are completely ignored. For more details of <b>pcre2grep</b>
+callouts, see the
 <a href="pcre2grep.html"><b>pcre2grep</b></a>
-documentation. This support can be disabled by adding
---disable-pcre2grep-callout to the <b>configure</b> command.
+documentation.
 </P>
 <br><a name="SEC15" href="#TOC1">PCRE2GREP OPTIONS FOR COMPRESSED FILE SUPPORT</a><br>
 <P>
@@ -526,14 +529,14 @@ documentation.
 </P>
 <br><a name="SEC21" href="#TOC1">DISABLING THE Z AND T FORMATTING MODIFIERS</a><br>
 <P>
-The C99 standard defines formatting modifiers z and t for size_t and 
-ptrdiff_t values, respectively. By default, PCRE2 uses these modifiers in 
-environments other than Microsoft Visual Studio when __STDC_VERSION__ is 
+The C99 standard defines formatting modifiers z and t for size_t and
+ptrdiff_t values, respectively. By default, PCRE2 uses these modifiers in
+environments other than Microsoft Visual Studio when __STDC_VERSION__ is
 defined and has a value greater than or equal to 199901L (indicating C99).
 However, there is at least one environment that claims to be C99 but does not
-support these modifiers. If 
+support these modifiers. If
 <pre>
-  --disable-percent-zt 
+  --disable-percent-zt
 </pre>
 is specified, no use is made of the z or t modifiers. Instead or %td or %zu,
 %lu is used, with a cast for size_t values.
@@ -589,9 +592,9 @@ Cambridge, England.
 </P>
 <br><a name="SEC26" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 15 November 2018
+Last updated: 03 March 2019
 <br>
-Copyright &copy; 1997-2018 University of Cambridge.
+Copyright &copy; 1997-2019 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE2 index page</a>.

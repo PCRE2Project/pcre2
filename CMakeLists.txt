@@ -88,7 +88,7 @@
 
 PROJECT(PCRE2 C)
 
-# Increased minimum to 2.8.0 to support newer add_test features. 
+# Increased minimum to 2.8.0 to support newer add_test features.
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.0)
 
 # Set policy CMP0026 to avoid warnings for the use of LOCATION in
@@ -324,7 +324,7 @@ ENDIF(PCRE2_SUPPORT_VALGRIND)
 
 IF(PCRE2_DISABLE_PERCENT_ZT)
         SET(DISABLE_PERCENT_ZT 1)
-ENDIF(PCRE2_DISABLE_PERCENT_ZT)         
+ENDIF(PCRE2_DISABLE_PERCENT_ZT)
 
 # This next one used to reference ${READLINE_LIBRARY})
 # but I was advised to add the NCURSES test as well, along with
@@ -459,7 +459,7 @@ SET(PCRE2_SOURCES
   src/pcre2_newline.c
   src/pcre2_ord2utf.c
   src/pcre2_pattern_info.c
-  src/pcre2_script_run.c 
+  src/pcre2_script_run.c
   src/pcre2_serialize.c
   src/pcre2_string_utils.c
   src/pcre2_study.c
@@ -651,10 +651,10 @@ IF(PCRE2_BUILD_TESTS)
 
   # exes in Debug location tested by the RunTest and RunGrepTest shell scripts
   # via "make test"
-  
+
   # The commented out code below provokes a warning about future removal
   # of the facility, and requires policy CMP0026 to be set to "OLD". I have
-  # got fed-up with the warnings, but my plea for help on the mailing list 
+  # got fed-up with the warnings, but my plea for help on the mailing list
   # produced no response. So, I've hacked. The new code below seems to work on
   # Linux.
 
@@ -857,9 +857,9 @@ IF(PCRE2_SHOW_REPORT)
   MESSAGE(STATUS "  Support Valgrind .................: ${PCRE2_SUPPORT_VALGRIND}")
   IF(PCRE2_DISABLE_PERCENT_ZT)
     MESSAGE(STATUS "  Use %zu and %td ..................: OFF" )
-  ELSE(PCRE2_DISABLE_PERCENT_ZT)   
+  ELSE(PCRE2_DISABLE_PERCENT_ZT)
     MESSAGE(STATUS "  Use %zu and %td ..................: AUTO" )
-  ENDIF(PCRE2_DISABLE_PERCENT_ZT)   
+  ENDIF(PCRE2_DISABLE_PERCENT_ZT)
 
   IF(MINGW AND NOT PCRE2_STATIC)
     MESSAGE(STATUS "  Non-standard dll names (prefix) . : ${NON_STANDARD_LIB_PREFIX}")
