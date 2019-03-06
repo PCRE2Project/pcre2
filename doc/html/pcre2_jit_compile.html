@@ -40,6 +40,7 @@ bits:
   PCRE2_JIT_COMPLETE      compile code for full matching
   PCRE2_JIT_PARTIAL_SOFT  compile code for soft partial matching
   PCRE2_JIT_PARTIAL_HARD  compile code for hard partial matching
+  PCRE2_JIT_INVALID_UTF   compile code to handle invalid UTF 
 </pre>
 The yield of the function is 0 for success, or a negative error code otherwise.
 In particular, PCRE2_ERROR_JIT_BADOPTION is returned if JIT is not supported or

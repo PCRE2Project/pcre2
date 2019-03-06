@@ -16,16 +16,17 @@ please consult the man page, in case the conversion went wrong.
 <li><a name="TOC1" href="#SEC1">PCRE2 JUST-IN-TIME COMPILER SUPPORT</a>
 <li><a name="TOC2" href="#SEC2">AVAILABILITY OF JIT SUPPORT</a>
 <li><a name="TOC3" href="#SEC3">SIMPLE USE OF JIT</a>
-<li><a name="TOC4" href="#SEC4">UNSUPPORTED OPTIONS AND PATTERN ITEMS</a>
-<li><a name="TOC5" href="#SEC5">RETURN VALUES FROM JIT MATCHING</a>
-<li><a name="TOC6" href="#SEC6">CONTROLLING THE JIT STACK</a>
-<li><a name="TOC7" href="#SEC7">JIT STACK FAQ</a>
-<li><a name="TOC8" href="#SEC8">FREEING JIT SPECULATIVE MEMORY</a>
-<li><a name="TOC9" href="#SEC9">EXAMPLE CODE</a>
-<li><a name="TOC10" href="#SEC10">JIT FAST PATH API</a>
-<li><a name="TOC11" href="#SEC11">SEE ALSO</a>
-<li><a name="TOC12" href="#SEC12">AUTHOR</a>
-<li><a name="TOC13" href="#SEC13">REVISION</a>
+<li><a name="TOC4" href="#SEC4">MATCHING SUBJECTS CONTAINING INVALID UTF</a>
+<li><a name="TOC5" href="#SEC5">UNSUPPORTED OPTIONS AND PATTERN ITEMS</a>
+<li><a name="TOC6" href="#SEC6">RETURN VALUES FROM JIT MATCHING</a>
+<li><a name="TOC7" href="#SEC7">CONTROLLING THE JIT STACK</a>
+<li><a name="TOC8" href="#SEC8">JIT STACK FAQ</a>
+<li><a name="TOC9" href="#SEC9">FREEING JIT SPECULATIVE MEMORY</a>
+<li><a name="TOC10" href="#SEC10">EXAMPLE CODE</a>
+<li><a name="TOC11" href="#SEC11">JIT FAST PATH API</a>
+<li><a name="TOC12" href="#SEC12">SEE ALSO</a>
+<li><a name="TOC13" href="#SEC13">AUTHOR</a>
+<li><a name="TOC14" href="#SEC14">REVISION</a>
 </ul>
 <br><a name="SEC1" href="#TOC1">PCRE2 JUST-IN-TIME COMPILER SUPPORT</a><br>
 <P>
@@ -144,7 +145,29 @@ support is not available, or the pattern was not processed by
 <b>pcre2_jit_compile()</b>, or the JIT compiler was not able to handle the
 pattern.
 </P>
-<br><a name="SEC4" href="#TOC1">UNSUPPORTED OPTIONS AND PATTERN ITEMS</a><br>
+<br><a name="SEC4" href="#TOC1">MATCHING SUBJECTS CONTAINING INVALID UTF</a><br>
+<P>
+When a pattern is compiled with the PCRE2_UTF option, the interpretive matching
+function expects its subject string to be a valid sequence of UTF code units.
+If it is not, the result is undefined. This is also true by default of matching
+via JIT. However, if the option PCRE2_JIT_INVALID_UTF is passed to
+<b>pcre2_jit_compile()</b>, code that can process a subject containing invalid
+UTF is compiled.
+</P>
+<P>
+In this mode, an invalid code unit sequence never matches any pattern item. It 
+does not match dot, it does not match \p{Any}, it does not even match negative 
+items such as [^X]. A lookbehind assertion fails if it encounters an invalid
+sequence while moving the current point backwards. In other words, an invalid 
+UTF code unit sequence acts as a barrier which no match can cross. Reaching an 
+invalid sequence causes an immediate backtrack.
+</P>
+<P>
+Using this option, an application can run matches in arbitrary data, knowing
+that any matched strings that are returned will be valid UTF. This can be
+useful when searching for text in executable or other binary files.
+</P>
+<br><a name="SEC5" href="#TOC1">UNSUPPORTED OPTIONS AND PATTERN ITEMS</a><br>
 <P>
 The <b>pcre2_match()</b> options that are supported for JIT matching are
 PCRE2_COPY_MATCHED_SUBJECT, PCRE2_NOTBOL, PCRE2_NOTEOL, PCRE2_NOTEMPTY,
@@ -161,7 +184,7 @@ The only unsupported pattern items are \C (match a single data unit) when
 running in a UTF mode, and a callout immediately before an assertion condition
 in a conditional group.
 </P>
-<br><a name="SEC5" href="#TOC1">RETURN VALUES FROM JIT MATCHING</a><br>
+<br><a name="SEC6" href="#TOC1">RETURN VALUES FROM JIT MATCHING</a><br>
 <P>
 When a pattern is matched using JIT matching, the return values are the same
 as those given by the interpretive <b>pcre2_match()</b> code, with the addition
@@ -177,7 +200,7 @@ circumstance when JIT is not used, but the details of exactly what is counted
 are not the same. The PCRE2_ERROR_DEPTHLIMIT error code is never returned
 when JIT matching is used.
 <a name="stackcontrol"></a></P>
-<br><a name="SEC6" href="#TOC1">CONTROLLING THE JIT STACK</a><br>
+<br><a name="SEC7" href="#TOC1">CONTROLLING THE JIT STACK</a><br>
 <P>
 When the compiled JIT code runs, it needs a block of memory to use as a stack.
 By default, it uses 32KiB on the machine stack. However, some large or
@@ -270,7 +293,7 @@ non-default JIT stacks might operate:
 </pre>
 All the functions described in this section do nothing if JIT is not available.
 <a name="stackfaq"></a></P>
-<br><a name="SEC7" href="#TOC1">JIT STACK FAQ</a><br>
+<br><a name="SEC8" href="#TOC1">JIT STACK FAQ</a><br>
 <P>
 (1) Why do we need JIT stacks?
 <br>
@@ -349,7 +372,7 @@ stack handling?
 No, thanks to Windows. If POSIX threads were used everywhere, we could throw
 out this complicated API.
 </P>
-<br><a name="SEC8" href="#TOC1">FREEING JIT SPECULATIVE MEMORY</a><br>
+<br><a name="SEC9" href="#TOC1">FREEING JIT SPECULATIVE MEMORY</a><br>
 <P>
 <b>void pcre2_jit_free_unused_memory(pcre2_general_context *<i>gcontext</i>);</b>
 </P>
@@ -361,7 +384,7 @@ all possible memory. You can cause this to happen by calling
 pcre2_jit_free_unused_memory(). Its argument is a general context, for custom
 memory management, or NULL for standard memory management.
 </P>
-<br><a name="SEC9" href="#TOC1">EXAMPLE CODE</a><br>
+<br><a name="SEC10" href="#TOC1">EXAMPLE CODE</a><br>
 <P>
 This is a single-threaded example that specifies a JIT stack without using a
 callback. A real program should include error checking after all the function
@@ -390,7 +413,7 @@ calls.
 
 </PRE>
 </P>
-<br><a name="SEC10" href="#TOC1">JIT FAST PATH API</a><br>
+<br><a name="SEC11" href="#TOC1">JIT FAST PATH API</a><br>
 <P>
 Because the API described above falls back to interpreted matching when JIT is
 not available, it is convenient for programs that are written for general use
@@ -423,11 +446,11 @@ invalid data is passed, the result is undefined.
 Bypassing the sanity checks and the <b>pcre2_match()</b> wrapping can give
 speedups of more than 10%.
 </P>
-<br><a name="SEC11" href="#TOC1">SEE ALSO</a><br>
+<br><a name="SEC12" href="#TOC1">SEE ALSO</a><br>
 <P>
 <b>pcre2api</b>(3)
 </P>
-<br><a name="SEC12" href="#TOC1">AUTHOR</a><br>
+<br><a name="SEC13" href="#TOC1">AUTHOR</a><br>
 <P>
 Philip Hazel (FAQ by Zoltan Herczeg)
 <br>
@@ -436,11 +459,11 @@ University Computing Service
 Cambridge, England.
 <br>
 </P>
-<br><a name="SEC13" href="#TOC1">REVISION</a><br>
+<br><a name="SEC14" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 16 October 2018
+Last updated: 06 March 2019
 <br>
-Copyright &copy; 1997-2018 University of Cambridge.
+Copyright &copy; 1997-2019 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE2 index page</a>.

@@ -180,8 +180,8 @@ REVISION
        Last updated: 17 September 2018
        Copyright (c) 1997-2018 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRE2API(3)                Library Functions Manual                PCRE2API(3)
 
 
@@ -3681,8 +3681,8 @@ REVISION
        Last updated: 14 February 2019
        Copyright (c) 1997-2019 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRE2BUILD(3)              Library Functions Manual              PCRE2BUILD(3)
 
 
@@ -4254,8 +4254,8 @@ REVISION
        Last updated: 03 March 2019
        Copyright (c) 1997-2019 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRE2CALLOUT(3)            Library Functions Manual            PCRE2CALLOUT(3)
 
 
@@ -4685,8 +4685,8 @@ REVISION
        Last updated: 03 February 2019
        Copyright (c) 1997-2019 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRE2COMPAT(3)             Library Functions Manual             PCRE2COMPAT(3)
 
 
@@ -4890,8 +4890,8 @@ REVISION
        Last updated: 12 February 2019
        Copyright (c) 1997-2019 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRE2JIT(3)                Library Functions Manual                PCRE2JIT(3)
 
 
@@ -5008,6 +5008,29 @@ SIMPLE USE OF JIT
        result of 0 means that JIT support is not available, or the pattern was
        not  processed by pcre2_jit_compile(), or the JIT compiler was not able
        to handle the pattern.
+
+
+MATCHING SUBJECTS CONTAINING INVALID UTF
+
+       When a pattern is compiled with the PCRE2_UTF option, the  interpretive
+       matching  function expects its subject string to be a valid sequence of
+       UTF code units.  If it is not, the result is undefined.  This  is  also
+       true   by   default  of  matching  via  JIT.  However,  if  the  option
+       PCRE2_JIT_INVALID_UTF is passed to pcre2_jit_compile(), code  that  can
+       process a subject containing invalid UTF is compiled.
+
+       In  this  mode, an invalid code unit sequence never matches any pattern
+       item. It does not match dot, it does not match  \p{Any},  it  does  not
+       even match negative items such as [^X]. A lookbehind assertion fails if
+       it encounters an invalid sequence while moving the current point  back-
+       wards. In other words, an invalid UTF code unit sequence acts as a bar-
+       rier which no match can cross. Reaching an invalid sequence  causes  an
+       immediate backtrack.
+
+       Using  this  option,  an application can run matches in arbitrary data,
+       knowing that any matched strings that are returned will be  valid  UTF.
+       This  can  be  useful  when  searching  for text in executable or other
+       binary files.
 
 
 UNSUPPORTED OPTIONS AND PATTERN ITEMS
@@ -5287,11 +5310,11 @@ AUTHOR
 
 REVISION
 
-       Last updated: 16 October 2018
-       Copyright (c) 1997-2018 University of Cambridge.
+       Last updated: 06 March 2019
+       Copyright (c) 1997-2019 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRE2LIMITS(3)             Library Functions Manual             PCRE2LIMITS(3)
 
 
@@ -5360,8 +5383,8 @@ REVISION
        Last updated: 02 February 2019
        Copyright (c) 1997-2019 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRE2MATCHING(3)           Library Functions Manual           PCRE2MATCHING(3)
 
 
@@ -5581,8 +5604,8 @@ REVISION
        Last updated: 10 October 2018
        Copyright (c) 1997-2018 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRE2PARTIAL(3)            Library Functions Manual            PCRE2PARTIAL(3)
 
 
@@ -6021,8 +6044,8 @@ REVISION
        Last updated: 22 December 2014
        Copyright (c) 1997-2014 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRE2PATTERN(3)            Library Functions Manual            PCRE2PATTERN(3)
 
 
@@ -9365,8 +9388,8 @@ REVISION
        Last updated: 12 February 2019
        Copyright (c) 1997-2019 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRE2PERFORM(3)            Library Functions Manual            PCRE2PERFORM(3)
 
 
@@ -9600,8 +9623,8 @@ REVISION
        Last updated: 03 February 2019
        Copyright (c) 1997-2019 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRE2POSIX(3)              Library Functions Manual              PCRE2POSIX(3)
 
 
@@ -9930,8 +9953,8 @@ REVISION
        Last updated: 30 January 2019
        Copyright (c) 1997-2019 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRE2SAMPLE(3)             Library Functions Manual             PCRE2SAMPLE(3)
 
 
@@ -10209,8 +10232,8 @@ REVISION
        Last updated: 27 June 2018
        Copyright (c) 1997-2018 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRE2SYNTAX(3)             Library Functions Manual             PCRE2SYNTAX(3)
 
 
@@ -10710,8 +10733,8 @@ REVISION
        Last updated: 11 February 2019
        Copyright (c) 1997-2019 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRE2UNICODE(3)            Library Functions Manual            PCRE2UNICODE(3)
 
 
@@ -10928,59 +10951,63 @@ VALIDITY OF UTF STRINGS
 
        When the PCRE2_UTF option is set, the strings passed  as  patterns  and
        subjects are (by default) checked for validity on entry to the relevant
-       functions.  If an invalid UTF string is passed, an negative error  code
+       functions. If an invalid UTF string is passed, an negative  error  code
        is  returned.  The  code  unit offset to the offending character can be
        extracted from the match data block by  calling  pcre2_get_startchar(),
        which is used for this purpose after a UTF error.
 
-       UTF-16 and UTF-32 strings can indicate their endianness by special code
-       knows as a byte-order mark (BOM). The PCRE2  functions  do  not  handle
-       this, expecting strings to be in host byte order.
-
-       A UTF string is checked before any other processing takes place. In the
-       case of pcre2_match()  and  pcre2_dfa_match()  calls  with  a  non-zero
-       starting  offset, the check is applied only to that part of the subject
-       that could be inspected during matching, and there is a check that  the
-       starting  offset points to the first code unit of a character or to the
-       end of the subject. If there are no lookbehind assertions in  the  pat-
-       tern,  the check starts at the starting offset. Otherwise, it starts at
-       the length of the longest lookbehind before the starting offset, or  at
-       the  start  of the subject if there are not that many characters before
-       the starting offset. Note that the sequences \b and \B are  one-charac-
-       ter lookbehinds.
-
-       In  addition  to checking the format of the string, there is a check to
-       ensure that all code points lie in the range U+0 to U+10FFFF, excluding
-       the  surrogate  area. The so-called "non-character" code points are not
-       excluded because Unicode corrigendum #9 makes it clear that they should
-       not be.
-
-       Characters  in  the "Surrogate Area" of Unicode are reserved for use by
-       UTF-16, where they are used in pairs to encode code points with  values
-       greater  than  0xFFFF. The code points that are encoded by UTF-16 pairs
-       are available independently in the  UTF-8  and  UTF-32  encodings.  (In
-       other  words,  the  whole  surrogate  thing is a fudge for UTF-16 which
-       unfortunately messes up UTF-8 and UTF-32.)
-
-       In some situations, you may already know that your strings  are  valid,
-       and  therefore  want  to  skip these checks in order to improve perfor-
-       mance, for example in the case of a long subject string that  is  being
-       scanned  repeatedly.   If you set the PCRE2_NO_UTF_CHECK option at com-
-       pile time or at match time, PCRE2 assumes that the pattern  or  subject
+       In  some  situations, you may already know that your strings are valid,
+       and therefore want to skip these checks in  order  to  improve  perfor-
+       mance,  for  example in the case of a long subject string that is being
+       scanned repeatedly.  If you set the PCRE2_NO_UTF_CHECK option  at  com-
+       pile  time  or at match time, PCRE2 assumes that the pattern or subject
        it is given (respectively) contains only valid UTF code unit sequences.
+
+       If you pass an invalid UTF string when PCRE2_NO_UTF_CHECK is  set,  the
+       result  is usually undefined and your program may crash or loop indefi-
+       nitely. There is, however, one mode of matching that can handle invalid
+       UTF  subject  strings.  This is matching via the JIT optimization using
+       the PCRE2_JIT_INVALID_UTF option when calling pcre2_jit_compile().  For
+       details, see the pcre2jit documentation.
 
        Passing  PCRE2_NO_UTF_CHECK  to pcre2_compile() just disables the check
        for the pattern; it does not also apply to subject strings. If you want
-       to  disable the check for a subject string you must pass this option to
-       pcre2_match() or pcre2_dfa_match().
+       to  disable  the  check  for  a  subject string you must pass this same
+       option to pcre2_match() or pcre2_dfa_match().
 
-       If you pass an invalid UTF string when PCRE2_NO_UTF_CHECK is  set,  the
-       result is undefined and your program may crash or loop indefinitely.
+       UTF-16 and UTF-32 strings can indicate their endianness by special code
+       knows  as  a  byte-order  mark (BOM). The PCRE2 functions do not handle
+       this, expecting strings to be in host byte order.
 
-       Note  that  setting PCRE2_NO_UTF_CHECK at compile time does not disable
-       the error that is given if an escape sequence for  an  invalid  Unicode
-       code  point  is encountered in the pattern. If you want to allow escape
-       sequences such as \x{d800} (a surrogate code point)  you  can  set  the
+       Unless PCRE2_NO_UTF_CHECK is set, a UTF string is  checked  before  any
+       other  processing  takes  place.  In  the  case  of  pcre2_match()  and
+       pcre2_dfa_match() calls with a non-zero starting offset, the  check  is
+       applied only to that part of the subject that could be inspected during
+       matching, and there is a check that the starting offset points  to  the
+       first  code  unit of a character or to the end of the subject. If there
+       are no lookbehind assertions in the pattern, the check  starts  at  the
+       starting  offset.   Otherwise,  it  starts at the length of the longest
+       lookbehind before the starting offset, or at the start of  the  subject
+       if  there are not that many characters before the starting offset. Note
+       that the sequences \b and \B are one-character lookbehinds.
+
+       In addition to checking the format of the string, there is a  check  to
+       ensure that all code points lie in the range U+0 to U+10FFFF, excluding
+       the surrogate area. The so-called "non-character" code points  are  not
+       excluded because Unicode corrigendum #9 makes it clear that they should
+       not be.
+
+       Characters in the "Surrogate Area" of Unicode are reserved for  use  by
+       UTF-16,  where they are used in pairs to encode code points with values
+       greater than 0xFFFF. The code points that are encoded by  UTF-16  pairs
+       are  available  independently  in  the  UTF-8 and UTF-32 encodings. (In
+       other words, the whole surrogate thing is  a  fudge  for  UTF-16  which
+       unfortunately messes up UTF-8 and UTF-32.)
+
+       Setting  PCRE2_NO_UTF_CHECK  at compile time does not disable the error
+       that is given if an escape sequence for an invalid Unicode  code  point
+       is  encountered  in  the pattern. If you want to allow escape sequences
+       such  as  \x{d800}  (a  surrogate  code  point)   you   can   set   the
        PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES extra option. However, this is pos-
        sible only in UTF-8 and UTF-32 modes, because these values are not rep-
        resentable in UTF-16.
@@ -11079,8 +11106,8 @@ AUTHOR
 
 REVISION
 
-       Last updated: 03 February 2019
+       Last updated: 06 March 2019
        Copyright (c) 1997-2019 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 

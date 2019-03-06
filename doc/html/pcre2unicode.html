@@ -247,11 +247,34 @@ VALIDITY OF UTF STRINGS
 </b><br>
 <P>
 When the PCRE2_UTF option is set, the strings passed as patterns and subjects
-are (by default) checked for validity on entry to the relevant functions.
-If an invalid UTF string is passed, an negative error code is returned. The
-code unit offset to the offending character can be extracted from the match
-data block by calling <b>pcre2_get_startchar()</b>, which is used for this
-purpose after a UTF error.
+are (by default) checked for validity on entry to the relevant functions. If an
+invalid UTF string is passed, an negative error code is returned. The code unit
+offset to the offending character can be extracted from the match data block by
+calling <b>pcre2_get_startchar()</b>, which is used for this purpose after a UTF
+error.
+</P>
+<P>
+In some situations, you may already know that your strings are valid, and
+therefore want to skip these checks in order to improve performance, for
+example in the case of a long subject string that is being scanned repeatedly.
+If you set the PCRE2_NO_UTF_CHECK option at compile time or at match time,
+PCRE2 assumes that the pattern or subject it is given (respectively) contains
+only valid UTF code unit sequences.
+</P>
+<P>
+If you pass an invalid UTF string when PCRE2_NO_UTF_CHECK is set, the result
+is usually undefined and your program may crash or loop indefinitely. There is, 
+however, one mode of matching that can handle invalid UTF subject strings. This
+is matching via the JIT optimization using the PCRE2_JIT_INVALID_UTF option 
+when calling <b>pcre2_jit_compile()</b>. For details, see the
+<a href="pcre2jit.html"><b>pcre2jit</b></a>
+documentation.
+</P>
+<P>
+Passing PCRE2_NO_UTF_CHECK to <b>pcre2_compile()</b> just disables the check for
+the pattern; it does not also apply to subject strings. If you want to disable
+the check for a subject string you must pass this same option to
+<b>pcre2_match()</b> or <b>pcre2_dfa_match()</b>.
 </P>
 <P>
 UTF-16 and UTF-32 strings can indicate their endianness by special code knows
@@ -259,13 +282,14 @@ as a byte-order mark (BOM). The PCRE2 functions do not handle this, expecting
 strings to be in host byte order.
 </P>
 <P>
-A UTF string is checked before any other processing takes place. In the case of
-<b>pcre2_match()</b> and <b>pcre2_dfa_match()</b> calls with a non-zero starting
-offset, the check is applied only to that part of the subject that could be
-inspected during matching, and there is a check that the starting offset points
-to the first code unit of a character or to the end of the subject. If there
-are no lookbehind assertions in the pattern, the check starts at the starting
-offset. Otherwise, it starts at the length of the longest lookbehind before the
+Unless PCRE2_NO_UTF_CHECK is set, a UTF string is checked before any other
+processing takes place. In the case of <b>pcre2_match()</b> and
+<b>pcre2_dfa_match()</b> calls with a non-zero starting offset, the check is
+applied only to that part of the subject that could be inspected during
+matching, and there is a check that the starting offset points to the first
+code unit of a character or to the end of the subject. If there are no
+lookbehind assertions in the pattern, the check starts at the starting offset.
+Otherwise, it starts at the length of the longest lookbehind before the
 starting offset, or at the start of the subject if there are not that many
 characters before the starting offset. Note that the sequences \b and \B are
 one-character lookbehinds.
@@ -285,31 +309,12 @@ surrogate thing is a fudge for UTF-16 which unfortunately messes up UTF-8 and
 UTF-32.)
 </P>
 <P>
-In some situations, you may already know that your strings are valid, and
-therefore want to skip these checks in order to improve performance, for
-example in the case of a long subject string that is being scanned repeatedly.
-If you set the PCRE2_NO_UTF_CHECK option at compile time or at match time,
-PCRE2 assumes that the pattern or subject it is given (respectively) contains
-only valid UTF code unit sequences.
-</P>
-<P>
-Passing PCRE2_NO_UTF_CHECK to <b>pcre2_compile()</b> just disables the check for
-the pattern; it does not also apply to subject strings. If you want to disable
-the check for a subject string you must pass this option to <b>pcre2_match()</b>
-or <b>pcre2_dfa_match()</b>.
-</P>
-<P>
-If you pass an invalid UTF string when PCRE2_NO_UTF_CHECK is set, the result
-is undefined and your program may crash or loop indefinitely.
-</P>
-<P>
-Note that setting PCRE2_NO_UTF_CHECK at compile time does not disable the error
-that is given if an escape sequence for an invalid Unicode code point is
-encountered in the pattern. If you want to allow escape sequences such as
-\x{d800} (a surrogate code point) you can set the
-PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES extra option. However, this is possible
-only in UTF-8 and UTF-32 modes, because these values are not representable in
-UTF-16.
+Setting PCRE2_NO_UTF_CHECK at compile time does not disable the error that is
+given if an escape sequence for an invalid Unicode code point is encountered in
+the pattern. If you want to allow escape sequences such as \x{d800} (a
+surrogate code point) you can set the PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES extra
+option. However, this is possible only in UTF-8 and UTF-32 modes, because these
+values are not representable in UTF-16.
 <a name="utf8strings"></a></P>
 <br><b>
 Errors in UTF-8 strings
@@ -417,7 +422,7 @@ Cambridge, England.
 REVISION
 </b><br>
 <P>
-Last updated: 03 February 2019
+Last updated: 06 March 2019
 <br>
 Copyright &copy; 1997-2019 University of Cambridge.
 <br>
