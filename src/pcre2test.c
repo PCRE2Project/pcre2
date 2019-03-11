@@ -1388,13 +1388,13 @@ are supported. */
 
 #define PCRE2_SUBSTITUTE(a,b,c,d,e,f,g,h,i,j,k,l) \
   if (test_mode == PCRE8_MODE) \
-    a = pcre2_substitute_8(G(b,8),(PCRE2_SPTR8)c,d,e,f,G(g,8),G(h,8), \
+    a = pcre2_substitute_8(G(b,8),(PCRE2_SPTR8)c,d,e,f,G(g,8),h, \
       (PCRE2_SPTR8)i,j,(PCRE2_UCHAR8 *)k,l); \
   else if (test_mode == PCRE16_MODE) \
-    a = pcre2_substitute_16(G(b,16),(PCRE2_SPTR16)c,d,e,f,G(g,16),G(h,16), \
+    a = pcre2_substitute_16(G(b,16),(PCRE2_SPTR16)c,d,e,f,G(g,16),h, \
       (PCRE2_SPTR16)i,j,(PCRE2_UCHAR16 *)k,l); \
   else \
-    a = pcre2_substitute_32(G(b,32),(PCRE2_SPTR32)c,d,e,f,G(g,32),G(h,32), \
+    a = pcre2_substitute_32(G(b,32),(PCRE2_SPTR32)c,d,e,f,G(g,32),h, \
       (PCRE2_SPTR32)i,j,(PCRE2_UCHAR32 *)k,l)
 
 #define PCRE2_SUBSTRING_COPY_BYNAME(a,b,c,d,e) \
@@ -1866,11 +1866,11 @@ the three different cases. */
 #define PCRE2_SUBSTITUTE(a,b,c,d,e,f,g,h,i,j,k,l) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
     a = G(pcre2_substitute_,BITONE)(G(b,BITONE),(G(PCRE2_SPTR,BITONE))c,d,e,f, \
-      G(g,BITONE),G(h,BITONE),(G(PCRE2_SPTR,BITONE))i,j, \
+      G(g,BITONE),h,(G(PCRE2_SPTR,BITONE))i,j, \
       (G(PCRE2_UCHAR,BITONE) *)k,l); \
   else \
     a = G(pcre2_substitute_,BITTWO)(G(b,BITTWO),(G(PCRE2_SPTR,BITTWO))c,d,e,f, \
-      G(g,BITTWO),G(h,BITTWO),(G(PCRE2_SPTR,BITTWO))i,j, \
+      G(g,BITTWO),h,(G(PCRE2_SPTR,BITTWO))i,j, \
       (G(PCRE2_UCHAR,BITTWO) *)k,l)
 
 #define PCRE2_SUBSTRING_COPY_BYNAME(a,b,c,d,e) \
@@ -2068,7 +2068,7 @@ the three different cases. */
   pcre2_set_substitute_callout_8(G(a,8), \
     (int (*)(pcre2_substitute_callout_block_8 *, void *))b,c)
 #define PCRE2_SUBSTITUTE(a,b,c,d,e,f,g,h,i,j,k,l) \
-  a = pcre2_substitute_8(G(b,8),(PCRE2_SPTR8)c,d,e,f,G(g,8),G(h,8), \
+  a = pcre2_substitute_8(G(b,8),(PCRE2_SPTR8)c,d,e,f,G(g,8),h, \
     (PCRE2_SPTR8)i,j,(PCRE2_UCHAR8 *)k,l)
 #define PCRE2_SUBSTRING_COPY_BYNAME(a,b,c,d,e) \
   a = pcre2_substring_copy_byname_8(G(b,8),G(c,8),(PCRE2_UCHAR8 *)d,e)
@@ -2175,7 +2175,7 @@ the three different cases. */
   pcre2_set_substitute_callout_16(G(a,16), \
     (int (*)(pcre2_substitute_callout_block_16 *, void *))b,c)
 #define PCRE2_SUBSTITUTE(a,b,c,d,e,f,g,h,i,j,k,l) \
-  a = pcre2_substitute_16(G(b,16),(PCRE2_SPTR16)c,d,e,f,G(g,16),G(h,16), \
+  a = pcre2_substitute_16(G(b,16),(PCRE2_SPTR16)c,d,e,f,G(g,16),h, \
     (PCRE2_SPTR16)i,j,(PCRE2_UCHAR16 *)k,l)
 #define PCRE2_SUBSTRING_COPY_BYNAME(a,b,c,d,e) \
   a = pcre2_substring_copy_byname_16(G(b,16),G(c,16),(PCRE2_UCHAR16 *)d,e)
@@ -2282,7 +2282,7 @@ the three different cases. */
   pcre2_set_substitute_callout_32(G(a,32), \
     (int (*)(pcre2_substitute_callout_block_32 *, void *))b,c)
 #define PCRE2_SUBSTITUTE(a,b,c,d,e,f,g,h,i,j,k,l) \
-  a = pcre2_substitute_32(G(b,32),(PCRE2_SPTR32)c,d,e,f,G(g,32),G(h,32), \
+  a = pcre2_substitute_32(G(b,32),(PCRE2_SPTR32)c,d,e,f,G(g,32),h, \
     (PCRE2_SPTR32)i,j,(PCRE2_UCHAR32 *)k,l)
 #define PCRE2_SUBSTRING_COPY_BYNAME(a,b,c,d,e) \
   a = pcre2_substring_copy_byname_32(G(b,32),G(c,32),(PCRE2_UCHAR32 *)d,e)
@@ -6939,11 +6939,13 @@ for (k = 0; k < sizeof(exclusive_dat_controls)/sizeof(uint32_t); k++)
 
 if (pat_patctl.replacement[0] != 0)
   {
-  if ((dat_datctl.control & CTL_NULLCONTEXT) != 0)
+  if ((dat_datctl.control2 & CTL2_SUBSTITUTE_CALLOUT) != 0 &&
+      (dat_datctl.control & CTL_NULLCONTEXT) != 0)
     {
-    fprintf(outfile, "** Replacement text is not supported with null_context.\n");
+    fprintf(outfile, "** Replacement callouts are not supported with null_context.\n");
     return PR_OK;
     }
+
   if ((dat_datctl.control & CTL_ALLCAPTURES) != 0)
     fprintf(outfile, "** Ignored with replacement text: allcaptures\n");
   }
@@ -7335,7 +7337,7 @@ if (dat_datctl.replacement[0] != 0)
     }
 
   PCRE2_SUBSTITUTE(rc, compiled_code, pp, arg_ulen, dat_datctl.offset,
-    dat_datctl.options|xoptions, match_data, dat_context,
+    dat_datctl.options|xoptions, match_data, use_dat_context,
     rbuffer, rlen, nbuffer, &nsize);
 
   if (rc < 0)

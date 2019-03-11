@@ -5579,4 +5579,12 @@ a)"xI
 
 /(*ACCEPT:XX)^abc/I
 
+/abc/replace=xyz
+    abc\=null_context
+
+/abc/replace=xyz,substitute_callout
+    abc 
+\= Expect error message
+    abc\=null_context
+
 # End of testinput2

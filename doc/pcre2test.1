@@ -1,4 +1,4 @@
-.TH PCRE2TEST 1 "11 February 2019" "PCRE 10.33"
+.TH PCRE2TEST 1 "11 March 2019" "PCRE 10.33"
 .SH NAME
 pcre2test - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -1417,8 +1417,10 @@ matching provokes an error return ("bad option value") from
 .rs
 .sp
 If the \fBsubstitute_callout\fP modifier is set, a substitution callout
-function is set up. When it is called (after each substitution), details of the
-the input and output strings are output. For example:
+function is set up. The \fBnull_context\fP modifier must not be set, because
+the address of the callout function is passed in a match context. When the
+callout function is called (after each substitution), details of the the input
+and output strings are output. For example:
 .sp
   /abc/g,replace=<$0>,substitute_callout
       abcdefabcpqr
@@ -1587,11 +1589,11 @@ passing the replacement string as zero-terminated.
 .rs
 .sp
 Normally, \fBpcre2test\fP passes a context block to \fBpcre2_match()\fP,
-\fBpcre2_dfa_match()\fP or \fBpcre2_jit_match()\fP. If the \fBnull_context\fP
-modifier is set, however, NULL is passed. This is for testing that the matching
-functions behave correctly in this case (they use default values). This
-modifier cannot be used with the \fBfind_limits\fP modifier or when testing the
-substitution function.
+\fBpcre2_dfa_match()\fP, \fBpcre2_jit_match()\fP or \fBpcre2_substitute()\fP.
+If the \fBnull_context\fP modifier is set, however, NULL is passed. This is for
+testing that the matching and substitution functions behave correctly in this
+case (they use default values). This modifier cannot be used with the
+\fBfind_limits\fP or \fBsubstitute_callout\fP modifiers.
 .
 .
 .SH "THE ALTERNATIVE MATCHING FUNCTION"
@@ -2057,6 +2059,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 11 February 2019
+Last updated: 11 March 2019
 Copyright (c) 1997-2019 University of Cambridge.
 .fi

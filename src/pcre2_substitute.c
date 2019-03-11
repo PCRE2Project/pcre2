@@ -839,7 +839,7 @@ do
   remembered. Do the callout if there is one and we have done an actual 
   replacement. */
   
-  if (!overflowed && mcontext->substitute_callout != NULL)
+  if (!overflowed && mcontext != NULL && mcontext->substitute_callout != NULL)
     {
     scb.subscount = subs;  
     scb.output_offsets[1] = buff_offset;

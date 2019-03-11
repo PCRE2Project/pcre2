@@ -1303,8 +1303,10 @@ SUBJECT MODIFIERS
    Testing substitute callouts
 
        If the substitute_callout modifier is set, a substitution callout func-
-       tion is set up. When it is called (after each substitution), details of
-       the the input and output strings are output. For example:
+       tion  is set up. The null_context modifier must not be set, because the
+       address of the callout function is passed in a match context. When  the
+       callout  function  is  called (after each substitution), details of the
+       the input and output strings are output. For example:
 
          /abc/g,replace=<$0>,substitute_callout
              abcdefabcpqr
@@ -1457,11 +1459,11 @@ SUBJECT MODIFIERS
    Passing a NULL context
 
        Normally,  pcre2test  passes  a   context   block   to   pcre2_match(),
-       pcre2_dfa_match() or pcre2_jit_match(). If the null_context modifier is
-       set, however, NULL is passed. This is for  testing  that  the  matching
-       functions behave correctly in this case (they use default values). This
-       modifier cannot be used with the find_limits modifier or  when  testing
-       the substitution function.
+       pcre2_dfa_match(),  pcre2_jit_match()  or  pcre2_substitute().   If the
+       null_context modifier is set, however, NULL  is  passed.  This  is  for
+       testing  that  the matching and substitution functions behave correctly
+       in this case (they use default values). This modifier  cannot  be  used
+       with the find_limits or substitute_callout modifiers.
 
 
 THE ALTERNATIVE MATCHING FUNCTION
@@ -1888,5 +1890,5 @@ AUTHOR
 
 REVISION
 
-       Last updated: 11 February 2019
+       Last updated: 11 March 2019
        Copyright (c) 1997-2019 University of Cambridge.

@@ -16922,6 +16922,18 @@ Subject length lower bound = 3
 Capture group count = 0
 Subject length lower bound = 0
 
+/abc/replace=xyz
+    abc\=null_context
+ 1: xyz
+
+/abc/replace=xyz,substitute_callout
+    abc 
+ 1(1) Old 0 3 "abc" New 0 3 "xyz"
+ 1: xyz
+\= Expect error message
+    abc\=null_context
+** Replacement callouts are not supported with null_context.
+
 # End of testinput2
 Error -70: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

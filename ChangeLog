@@ -2,8 +2,8 @@ Change Log for PCRE2
 --------------------
 
 
-Version 10.33-RC1 03-March-2019
--------------------------------
+Version 10.33 11-March-2019
+---------------------------
 
 1. Added "allvector" to pcre2test to make it easy to check the part of the
 ovector that shouldn't be changed, in particular after substitute and failed or
@@ -12,7 +12,9 @@ partial matches.
 2. Fix subject buffer overread in JIT when UTF is disabled and \X or \R has
 a greater than 1 fixed quantifier. This issue was found by Yunho Kim.
 
-3. Added support for callouts from pcre2_substitute().
+3. Added support for callouts from pcre2_substitute(). After 10.33-RC1, but
+prior to release, fixed a bug that caused a crash if pcre2_substitute() was
+called with a NULL match context.
 
 4. The POSIX functions are now all called pcre2_regcomp() etc., with wrapper
 functions that use the standard POSIX names. However, in pcre2posix.h the POSIX

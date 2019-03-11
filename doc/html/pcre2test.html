@@ -1450,8 +1450,10 @@ Testing substitute callouts
 </b><br>
 <P>
 If the <b>substitute_callout</b> modifier is set, a substitution callout
-function is set up. When it is called (after each substitution), details of the
-the input and output strings are output. For example:
+function is set up. The <b>null_context</b> modifier must not be set, because
+the address of the callout function is passed in a match context. When the
+callout function is called (after each substitution), details of the the input
+and output strings are output. For example:
 <pre>
   /abc/g,replace=&#60;$0&#62;,substitute_callout
       abcdefabcpqr
@@ -1626,11 +1628,11 @@ Passing a NULL context
 </b><br>
 <P>
 Normally, <b>pcre2test</b> passes a context block to <b>pcre2_match()</b>,
-<b>pcre2_dfa_match()</b> or <b>pcre2_jit_match()</b>. If the <b>null_context</b>
-modifier is set, however, NULL is passed. This is for testing that the matching
-functions behave correctly in this case (they use default values). This
-modifier cannot be used with the <b>find_limits</b> modifier or when testing the
-substitution function.
+<b>pcre2_dfa_match()</b>, <b>pcre2_jit_match()</b> or <b>pcre2_substitute()</b>.
+If the <b>null_context</b> modifier is set, however, NULL is passed. This is for
+testing that the matching and substitution functions behave correctly in this
+case (they use default values). This modifier cannot be used with the
+<b>find_limits</b> or <b>substitute_callout</b> modifiers.
 </P>
 <br><a name="SEC12" href="#TOC1">THE ALTERNATIVE MATCHING FUNCTION</a><br>
 <P>
@@ -2076,7 +2078,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC21" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 11 February 2019
+Last updated: 11 March 2019
 <br>
 Copyright &copy; 1997-2019 University of Cambridge.
 <br>
