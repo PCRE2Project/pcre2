@@ -368,17 +368,17 @@ enum { PSKIP_ALT, PSKIP_CLASS, PSKIP_KET };
 experimenting to figure out how to stop gcc 5.3.0 from warning with
 -Wconversion. This version gets a warning:
 
-  #define SETBIT(a,b) a[(b)/8] |= (uint8_t)(1 << ((b)&7))
+  #define SETBIT(a,b) a[(b)/8] |= (uint8_t)(1u << ((b)&7))
 
 Let's hope the apparently less efficient version isn't actually so bad if the
 compiler is clever with identical subexpressions. */
 
-#define SETBIT(a,b) a[(b)/8] = (uint8_t)(a[(b)/8] | (1 << ((b)&7)))
+#define SETBIT(a,b) a[(b)/8] = (uint8_t)(a[(b)/8] | (1u << ((b)&7)))
 
 /* Private flags added to firstcu and reqcu. */
 
-#define REQ_CASELESS    (1 << 0)        /* Indicates caselessness */
-#define REQ_VARY        (1 << 1)        /* reqcu followed non-literal item */
+#define REQ_CASELESS    (1u << 0)       /* Indicates caselessness */
+#define REQ_VARY        (1u << 1)       /* reqcu followed non-literal item */
 /* Negative values for the firstcu and reqcu flags */
 #define REQ_UNSET       (-2)            /* Not yet found anything */
 #define REQ_NONE        (-1)            /* Found not fixed char */

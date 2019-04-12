@@ -149,6 +149,9 @@ from Ross Burton.
 36. Disable SSE2 JIT optimizations in x86 CPUs when SSE2 is not available.
 Patch by Guillem Jover.
 
+37. Changed expressions such as 1<<10 to 1u<<10 in many places because compiler 
+warnings were reported.
+
 
 Version 10.32 10-September-2018
 -------------------------------

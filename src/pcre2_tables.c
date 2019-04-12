@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-          New API code Copyright (c) 2016-2018 University of Cambridge
+          New API code Copyright (c) 2016-2019 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -142,7 +142,7 @@ ucp_gbXX values defined in pcre2_ucp.h. These changed between Unicode versions
 code points. The left property selects a word from the table, and the right
 property selects a bit from that word like this:
 
-  PRIV(ucp_gbtable)[left-property] & (1 << right-property)
+  PRIV(ucp_gbtable)[left-property] & (1u << right-property)
 
 The value is non-zero if a grapheme break is NOT permitted between the relevant
 two code points. The breaking rules are as follows:
@@ -183,25 +183,25 @@ are implementing).
 #define ESZ (1<<ucp_gbExtend)|(1<<ucp_gbSpacingMark)|(1<<ucp_gbZWJ)
 
 const uint32_t PRIV(ucp_gbtable)[] = {
-   (1<<ucp_gbLF),                                      /*  0 CR */
-   0,                                                  /*  1 LF */
-   0,                                                  /*  2 Control */
-   ESZ,                                                /*  3 Extend */
-   ESZ|(1<<ucp_gbPrepend)|                             /*  4 Prepend */
-       (1<<ucp_gbL)|(1<<ucp_gbV)|(1<<ucp_gbT)|
-       (1<<ucp_gbLV)|(1<<ucp_gbLVT)|(1<<ucp_gbOther)|
-       (1<<ucp_gbRegionalIndicator),
-   ESZ,                                                /*  5 SpacingMark */
-   ESZ|(1<<ucp_gbL)|(1<<ucp_gbV)|(1<<ucp_gbLV)|        /*  6 L */
-       (1<<ucp_gbLVT),
-   ESZ|(1<<ucp_gbV)|(1<<ucp_gbT),                      /*  7 V */
-   ESZ|(1<<ucp_gbT),                                   /*  8 T */
-   ESZ|(1<<ucp_gbV)|(1<<ucp_gbT),                      /*  9 LV */
-   ESZ|(1<<ucp_gbT),                                   /* 10 LVT */
-   (1<<ucp_gbRegionalIndicator),                       /* 11 RegionalIndicator */
-   ESZ,                                                /* 12 Other */
-   ESZ,                                                /* 13 ZWJ */
-   ESZ|(1<<ucp_gbExtended_Pictographic)                /* 14 Extended Pictographic */
+   (1u<<ucp_gbLF),                                      /*  0 CR */
+   0,                                                   /*  1 LF */
+   0,                                                   /*  2 Control */
+   ESZ,                                                 /*  3 Extend */
+   ESZ|(1u<<ucp_gbPrepend)|                             /*  4 Prepend */
+       (1u<<ucp_gbL)|(1u<<ucp_gbV)|(1u<<ucp_gbT)|
+       (1u<<ucp_gbLV)|(1u<<ucp_gbLVT)|(1u<<ucp_gbOther)|
+       (1u<<ucp_gbRegionalIndicator),
+   ESZ,                                                 /*  5 SpacingMark */
+   ESZ|(1u<<ucp_gbL)|(1u<<ucp_gbV)|(1u<<ucp_gbLV)|      /*  6 L */
+       (1u<<ucp_gbLVT),
+   ESZ|(1u<<ucp_gbV)|(1u<<ucp_gbT),                     /*  7 V */
+   ESZ|(1u<<ucp_gbT),                                   /*  8 T */
+   ESZ|(1u<<ucp_gbV)|(1u<<ucp_gbT),                     /*  9 LV */
+   ESZ|(1u<<ucp_gbT),                                   /* 10 LVT */
+   (1u<<ucp_gbRegionalIndicator),                       /* 11 RegionalIndicator */
+   ESZ,                                                 /* 12 Other */
+   ESZ,                                                 /* 13 ZWJ */
+   ESZ|(1u<<ucp_gbExtended_Pictographic)                /* 14 Extended Pictographic */
 };
 
 #undef ESZ

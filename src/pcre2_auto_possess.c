@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-          New API code Copyright (c) 2016-2018 University of Cambridge
+          New API code Copyright (c) 2016-2019 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -1051,7 +1051,7 @@ for(;;)
       if (chr > 255) break;
       class_bitset = (uint8_t *)
         ((list_ptr == list ? code : base_end) - list_ptr[2]);
-      if ((class_bitset[chr >> 3] & (1 << (chr & 7))) != 0) return FALSE;
+      if ((class_bitset[chr >> 3] & (1u << (chr & 7))) != 0) return FALSE;
       break;
 
 #ifdef SUPPORT_WIDE_CHARS

@@ -716,7 +716,7 @@ do
               {
               if (((code->tables + cbits_offset +
                   ((forcecase > 0)? cbit_upper:cbit_lower)
-                  )[ch/8] & (1 << (ch%8))) == 0)
+                  )[ch/8] & (1u << (ch%8))) == 0)
                 ch = (code->tables + fcc_offset)[ch];
               }
             forcecase = forcecasereset;
@@ -818,7 +818,7 @@ do
           {
           if (((code->tables + cbits_offset +
               ((forcecase > 0)? cbit_upper:cbit_lower)
-              )[ch/8] & (1 << (ch%8))) == 0)
+              )[ch/8] & (1u << (ch%8))) == 0)
             ch = (code->tables + fcc_offset)[ch];
           }
         forcecase = forcecasereset;

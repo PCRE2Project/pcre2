@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-          New API code Copyright (c) 2015-2018 University of Cambridge
+          New API code Copyright (c) 2015-2019 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -1849,7 +1849,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
             if (Fop == OP_CLASS) RRETURN(MATCH_NOMATCH);
             }
           else
-            if ((Lbyte_map[fc/8] & (1 << (fc&7))) == 0) RRETURN(MATCH_NOMATCH);
+            if ((Lbyte_map[fc/8] & (1u << (fc&7))) == 0) RRETURN(MATCH_NOMATCH);
           }
         }
       else
@@ -1871,7 +1871,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
             }
           else
 #endif
-          if ((Lbyte_map[fc/8] & (1 << (fc&7))) == 0) RRETURN(MATCH_NOMATCH);
+          if ((Lbyte_map[fc/8] & (1u << (fc&7))) == 0) RRETURN(MATCH_NOMATCH);
           }
         }
 
@@ -1903,7 +1903,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
               if (Fop == OP_CLASS) RRETURN(MATCH_NOMATCH);
               }
             else
-              if ((Lbyte_map[fc/8] & (1 << (fc&7))) == 0) RRETURN(MATCH_NOMATCH);
+              if ((Lbyte_map[fc/8] & (1u << (fc&7))) == 0) RRETURN(MATCH_NOMATCH);
             }
           }
         else
@@ -1928,7 +1928,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
               }
             else
 #endif
-            if ((Lbyte_map[fc/8] & (1 << (fc&7))) == 0) RRETURN(MATCH_NOMATCH);
+            if ((Lbyte_map[fc/8] & (1u << (fc&7))) == 0) RRETURN(MATCH_NOMATCH);
             }
           }
         /* Control never gets here */
@@ -1957,7 +1957,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
               if (Fop == OP_CLASS) break;
               }
             else
-              if ((Lbyte_map[fc/8] & (1 << (fc&7))) == 0) break;
+              if ((Lbyte_map[fc/8] & (1u << (fc&7))) == 0) break;
             Feptr += len;
             }
 
@@ -1994,7 +1994,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
               }
             else
 #endif
-            if ((Lbyte_map[fc/8] & (1 << (fc&7))) == 0) break;
+            if ((Lbyte_map[fc/8] & (1u << (fc&7))) == 0) break;
             Feptr++;
             }
 
@@ -4085,7 +4085,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
               GETCHAR(fc, fptr);
               }
             lgb = UCD_GRAPHBREAK(fc);
-            if ((PRIV(ucp_gbtable)[lgb] & (1 << rgb)) == 0) break;
+            if ((PRIV(ucp_gbtable)[lgb] & (1u << rgb)) == 0) break;
             Feptr = fptr;
             rgb = lgb;
             }
@@ -6459,7 +6459,7 @@ for(;;)
 #if PCRE2_CODE_UNIT_WIDTH != 8
             if (c > 255) c = 255;
 #endif
-            ok = (start_bits[c/8] & (1 << (c&7))) != 0;
+            ok = (start_bits[c/8] & (1u << (c&7))) != 0;
             }
           }
         if (!ok)
@@ -6576,7 +6576,7 @@ for(;;)
 #if PCRE2_CODE_UNIT_WIDTH != 8
           if (c > 255) c = 255;
 #endif
-          if ((start_bits[c/8] & (1 << (c&7))) != 0) break;
+          if ((start_bits[c/8] & (1u << (c&7))) != 0) break;
           start_match++;
           }
 

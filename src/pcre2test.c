@@ -11,7 +11,7 @@ hacked-up (non-) design had also run out of steam.
 
                        Written by Philip Hazel
      Original code Copyright (c) 1997-2012 University of Cambridge
-    Rewritten code Copyright (c) 2016-2018 University of Cambridge
+    Rewritten code Copyright (c) 2016-2019 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -4659,7 +4659,7 @@ if ((pat_patctl.control & CTL_INFO) != 0)
     fprintf(outfile, "Starting code units: ");
     for (i = 0; i < 256; i++)
       {
-      if ((start_bits[i/8] & (1<<(i&7))) != 0)
+      if ((start_bits[i/8] & (1u << (i&7))) != 0)
         {
         if (c > 75)
           {

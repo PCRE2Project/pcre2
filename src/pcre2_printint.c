@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-          New API code Copyright (c) 2016-2018 University of Cambridge
+          New API code Copyright (c) 2016-2019 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -679,11 +679,11 @@ for(;;)
 
         for (i = 0; i < 256; i++)
           {
-          if ((map[i/8] & (1 << (i&7))) != 0)
+          if ((map[i/8] & (1u << (i&7))) != 0)
             {
             int j;
             for (j = i+1; j < 256; j++)
-              if ((map[j/8] & (1 << (j&7))) == 0) break;
+              if ((map[j/8] & (1u << (j&7))) == 0) break;
             if (i == '-' || i == ']') fprintf(f, "\\");
             if (PRINTABLE(i)) fprintf(f, "%c", i);
               else fprintf(f, "\\x%02x", i);

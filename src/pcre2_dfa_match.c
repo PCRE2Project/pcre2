@@ -2567,7 +2567,7 @@ for (;;)
           if (clen > 0)
             {
             isinclass = (c > 255)? (codevalue == OP_NCLASS) :
-              ((((uint8_t *)(code + 1))[c/8] & (1 << (c&7))) != 0);
+              ((((uint8_t *)(code + 1))[c/8] & (1u << (c&7))) != 0);
             }
           }
 
@@ -3609,7 +3609,7 @@ for (;;)
 #if PCRE2_CODE_UNIT_WIDTH != 8
             if (c > 255) c = 255;
 #endif
-            ok = (start_bits[c/8] & (1 << (c&7))) != 0;
+            ok = (start_bits[c/8] & (1u << (c&7))) != 0;
             }
           }
         if (!ok) break;
@@ -3720,7 +3720,7 @@ for (;;)
 #if PCRE2_CODE_UNIT_WIDTH != 8
           if (c > 255) c = 255;
 #endif
-          if ((start_bits[c/8] & (1 << (c&7))) != 0) break;
+          if ((start_bits[c/8] & (1u << (c&7))) != 0) break;
           start_match++;
           }
 
