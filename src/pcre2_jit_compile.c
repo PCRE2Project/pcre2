@@ -3257,13 +3257,13 @@ return (0 << 8) | bit;
 #ifdef SUPPORT_UNICODE
 if (common->utf && c > 65535)
   {
-  if (bit >= (1 << 10))
+  if (bit >= (1u << 10))
     bit >>= 10;
   else
     return (bit < 256) ? ((2 << 8) | bit) : ((3 << 8) | (bit >> 8));
   }
 #endif /* SUPPORT_UNICODE */
-return (bit < 256) ? ((0 << 8) | bit) : ((1 << 8) | (bit >> 8));
+return (bit < 256) ? ((0u << 8) | bit) : ((1u << 8) | (bit >> 8));
 
 #endif /* PCRE2_CODE_UNIT_WIDTH == [8|16|32] */
 }
@@ -5453,16 +5453,16 @@ return CMP(SLJIT_NOT_EQUAL, reg, 0, SLJIT_IMM, 0xdc00);
 
 static sljit_s32 character_to_int32(PCRE2_UCHAR chr)
 {
-sljit_s32 value = (sljit_s32)chr;
+sljit_u32 value = chr;
 #if PCRE2_CODE_UNIT_WIDTH == 8
 #define SSE2_COMPARE_TYPE_INDEX 0
-return (value << 24) | (value << 16) | (value << 8) | value;
+return (sljit_s32)((value << 24) | (value << 16) | (value << 8) | value);
 #elif PCRE2_CODE_UNIT_WIDTH == 16
 #define SSE2_COMPARE_TYPE_INDEX 1
-return (value << 16) | value;
+return (sljit_s32)((value << 16) | value);
 #elif PCRE2_CODE_UNIT_WIDTH == 32
 #define SSE2_COMPARE_TYPE_INDEX 2
-return value;
+return (sljit_s32)(value);
 #else
 #error "Unsupported unit width"
 #endif
@@ -10861,7 +10861,7 @@ if (opcode == OP_ONCE)
   /* We temporarily encode the needs_control_head in the lowest bit.
      Note: on the target architectures of SLJIT the ((x << 1) >> 1) returns
      the same value for small signed numbers (including negative numbers). */
-  BACKTRACK_AS(bracket_backtrack)->u.framesize = (BACKTRACK_AS(bracket_backtrack)->u.framesize << 1) | (needs_control_head ? 1 : 0);
+  BACKTRACK_AS(bracket_backtrack)->u.framesize = (int)((unsigned)BACKTRACK_AS(bracket_backtrack)->u.framesize << 1) | (needs_control_head ? 1 : 0);
   }
 return cc + repeat_length;
 }
