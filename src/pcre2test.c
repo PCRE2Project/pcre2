@@ -6861,7 +6861,7 @@ while ((c = *p++) != 0)
         fprintf(outfile, "** Truncation will probably give the wrong "
           "result.\n");
         }
-      *q8++ = c;
+      *q8++ = (uint8_t)c;
       }
     }
 #endif
@@ -6895,7 +6895,7 @@ while ((c = *p++) != 0)
           "result.\n");
         }
 
-      *q16++ = c;
+      *q16++ = (uint16_t)c;
       }
     }
 #endif

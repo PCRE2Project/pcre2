@@ -673,7 +673,8 @@ for(;;)
         map = (uint8_t *)ccode;
         if (invertmap)
           {
-          for (i = 0; i < 32; i++) inverted_map[i] = ~map[i];
+          /* Using 255 ^ instead of ~ avoids clang sanitize warning. */ 
+          for (i = 0; i < 32; i++) inverted_map[i] = 255 ^ map[i];
           map = inverted_map;
           }
 
