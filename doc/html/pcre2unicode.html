@@ -263,9 +263,9 @@ only valid UTF code unit sequences.
 </P>
 <P>
 If you pass an invalid UTF string when PCRE2_NO_UTF_CHECK is set, the result
-is usually undefined and your program may crash or loop indefinitely. There is, 
+is usually undefined and your program may crash or loop indefinitely. There is,
 however, one mode of matching that can handle invalid UTF subject strings. This
-is matching via the JIT optimization using the PCRE2_JIT_INVALID_UTF option 
+is matching via the JIT optimization using the PCRE2_JIT_INVALID_UTF option
 when calling <b>pcre2_jit_compile()</b>. For details, see the
 <a href="pcre2jit.html"><b>pcre2jit</b></a>
 documentation.

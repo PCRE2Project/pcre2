@@ -1,9 +1,11 @@
 README file for PCRE2 (Perl-compatible regular expression library)
 ------------------------------------------------------------------
 
-PCRE2 is a re-working of the original PCRE library to provide an entirely new
-API. The latest release of PCRE2 is always available in three alternative
-formats from:
+PCRE2 is a re-working of the original PCRE1 library to provide an entirely new
+API. Since its initial release in 2015, there has been further development of
+the code and it now differs from PCRE1 in more than just the API. There are new
+features and the internals have been improved. The latest release of PCRE2 is
+always available in three alternative formats from:
 
   ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/pcre2-xxx.tar.gz
   ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/pcre2-xxx.tar.bz2
@@ -39,15 +41,15 @@ The PCRE2 APIs
 PCRE2 is written in C, and it has its own API. There are three sets of
 functions, one for the 8-bit library, which processes strings of bytes, one for
 the 16-bit library, which processes strings of 16-bit values, and one for the
-32-bit library, which processes strings of 32-bit values. There are no C++
-wrappers.
+32-bit library, which processes strings of 32-bit values. Unlike PCRE1, there
+are no C++ wrappers.
 
-In addition, the distribution contains a set of C wrapper functions for the
-8-bit library that are based on the POSIX regular expression API (see the
-pcre2posix man page). These are built into a library called libpcre2-posix.
-Note that this just provides a POSIX calling interface to PCRE2; the regular
-expressions themselves still follow Perl syntax and semantics. The POSIX API is
-restricted, and does not give full access to all of PCRE2's facilities.
+The distribution does contain a set of C wrapper functions for the 8-bit
+library that are based on the POSIX regular expression API (see the pcre2posix
+man page). These are built into a library called libpcre2-posix. Note that this
+just provides a POSIX calling interface to PCRE2; the regular expressions
+themselves still follow Perl syntax and semantics. The POSIX API is restricted,
+and does not give full access to all of PCRE2's facilities.
 
 The header file for the POSIX-style functions is called pcre2posix.h. The
 official POSIX name is regex.h, but I did not want to risk possible problems
@@ -890,4 +892,4 @@ The distribution should contain the files listed below.
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 03 March 2019
+Last updated: 16 April 2019

@@ -5948,10 +5948,10 @@ for (;; pptr++)
         (void)memmove(code + (32 / sizeof(PCRE2_UCHAR)), code,
           CU2BYTES(class_uchardata - code));
         if (negate_class && !xclass_has_prop)
-          { 
-          /* Using 255 ^ instead of ~ avoids clang sanitize warning. */ 
+          {
+          /* Using 255 ^ instead of ~ avoids clang sanitize warning. */
           for (i = 0; i < 32; i++) classbits[i] = 255 ^ classbits[i];
-          } 
+          }
         memcpy(code, classbits, 32);
         code = class_uchardata + (32 / sizeof(PCRE2_UCHAR));
         }
@@ -5974,10 +5974,10 @@ for (;; pptr++)
     if (lengthptr == NULL)    /* Save time in the pre-compile phase */
       {
       if (negate_class)
-        { 
-       /* Using 255 ^ instead of ~ avoids clang sanitize warning. */ 
+        {
+       /* Using 255 ^ instead of ~ avoids clang sanitize warning. */
        for (i = 0; i < 32; i++) classbits[i] = 255 ^ classbits[i];
-       } 
+       }
       memcpy(code, classbits, 32);
       }
     code += 32 / sizeof(PCRE2_UCHAR);

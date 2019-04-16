@@ -244,9 +244,9 @@ PCRE2 assumes that the pattern or subject it is given (respectively) contains
 only valid UTF code unit sequences.
 .P
 If you pass an invalid UTF string when PCRE2_NO_UTF_CHECK is set, the result
-is usually undefined and your program may crash or loop indefinitely. There is, 
+is usually undefined and your program may crash or loop indefinitely. There is,
 however, one mode of matching that can handle invalid UTF subject strings. This
-is matching via the JIT optimization using the PCRE2_JIT_INVALID_UTF option 
+is matching via the JIT optimization using the PCRE2_JIT_INVALID_UTF option
 when calling \fBpcre2_jit_compile()\fP. For details, see the
 .\" HREF
 \fBpcre2jit\fP

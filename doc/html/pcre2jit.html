@@ -155,11 +155,11 @@ via JIT. However, if the option PCRE2_JIT_INVALID_UTF is passed to
 UTF is compiled.
 </P>
 <P>
-In this mode, an invalid code unit sequence never matches any pattern item. It 
-does not match dot, it does not match \p{Any}, it does not even match negative 
+In this mode, an invalid code unit sequence never matches any pattern item. It
+does not match dot, it does not match \p{Any}, it does not even match negative
 items such as [^X]. A lookbehind assertion fails if it encounters an invalid
-sequence while moving the current point backwards. In other words, an invalid 
-UTF code unit sequence acts as a barrier which no match can cross. Reaching an 
+sequence while moving the current point backwards. In other words, an invalid
+UTF code unit sequence acts as a barrier which no match can cross. Reaching an
 invalid sequence causes an immediate backtrack.
 </P>
 <P>
