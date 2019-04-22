@@ -661,4 +661,7 @@ Subject length lower bound = 1
     abÿAz
     ab\x{80000041}z 
 
+/\[()]{65535}/expand
+Failed: error 120 at offset 131070: regular expression is too large
+
 # End of testinput11

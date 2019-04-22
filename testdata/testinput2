@@ -5587,4 +5587,8 @@ a)"xI
 \= Expect error message
     abc\=null_context
 
+/\[()]{65535}()/expand
+
+/\[()]{65535}(?<A>)/expand
+
 # End of testinput2

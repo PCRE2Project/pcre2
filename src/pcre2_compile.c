@@ -781,7 +781,7 @@ enum { ERR0 = COMPILE_ERROR_BASE,
        ERR61, ERR62, ERR63, ERR64, ERR65, ERR66, ERR67, ERR68, ERR69, ERR70,
        ERR71, ERR72, ERR73, ERR74, ERR75, ERR76, ERR77, ERR78, ERR79, ERR80,
        ERR81, ERR82, ERR83, ERR84, ERR85, ERR86, ERR87, ERR88, ERR89, ERR90,
-       ERR91, ERR92, ERR93, ERR94, ERR95, ERR96 };
+       ERR91, ERR92, ERR93, ERR94, ERR95, ERR96, ERR97 };
 
 /* This is a table of start-of-pattern options such as (*UTF) and settings such
 as (*LIMIT_MATCH=nnnn) and (*CRLF). For completeness and backward
@@ -3611,6 +3611,11 @@ while (ptr < ptrend)
         nest_depth++;
         if ((options & PCRE2_NO_AUTO_CAPTURE) == 0)
           {
+          if (cb->bracount >= MAX_GROUP_NUMBER)
+            {
+            errorcode = ERR97;
+            goto FAILED;
+            }    
           cb->bracount++;
           *parsed_pattern++ = META_CAPTURE | cb->bracount;
           }
@@ -4435,6 +4440,11 @@ while (ptr < ptrend)
       /* We have a name for this capturing group. It is also assigned a number,
       which is its primary means of identification. */
 
+      if (cb->bracount >= MAX_GROUP_NUMBER)
+        {
+        errorcode = ERR97;
+        goto FAILED;
+        }    
       cb->bracount++;
       *parsed_pattern++ = META_CAPTURE | cb->bracount;
       nest_depth++;

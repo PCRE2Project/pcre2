@@ -184,6 +184,7 @@ static const unsigned char compile_error_texts[] =
   /* 95 */
   "(*alpha_assertion) not recognized\0"
   "script runs require Unicode support, which this version of PCRE2 does not have\0"
+  "too many capturing groups (maximum 65535)\0"
   ;
 
 /* Match-time and UTF error texts are in the same format. */
