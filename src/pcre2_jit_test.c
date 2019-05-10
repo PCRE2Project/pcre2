@@ -1770,7 +1770,7 @@ static int regression_tests(void)
 	}
 }
 
-#if defined SUPPORT_UNICODE && (defined SUPPORT_PCRE2_8 || defined SUPPORT_PCRE2_16 || defined SUPPORT_PCRE2_32)
+#if defined SUPPORT_UNICODE
 
 static int check_invalid_utf_result(int pattern_index, const char *type, int result,
 	int match_start, int match_end, PCRE2_SIZE *ovector)
@@ -1803,7 +1803,7 @@ static int check_invalid_utf_result(int pattern_index, const char *type, int res
 	return 0;
 }
 
-#endif /* SUPPORT_UNICODE && (SUPPORT_PCRE2_8 || SUPPORT_PCRE2_16 || SUPPORT_PCRE2_32) */
+#endif /* SUPPORT_UNICODE */
 
 #if defined SUPPORT_UNICODE && defined SUPPORT_PCRE2_8
 
@@ -2314,31 +2314,45 @@ static PCRE2_UCHAR32 grapheme32[] = { '\\', 'X', 0 };
 static PCRE2_UCHAR32 nothashmark32[] = { '[', '^', '#', ']', 0 };
 static PCRE2_UCHAR32 afternl32[] = { '^', '\\', 'W', 0 };
 static PCRE2_UCHAR32 test32_1[] = { 0x10ffff, 0x10ffff, 0x110000, 0x10ffff, 0 };
-static PCRE2_UCHAR32 test32_2[] = { 'a', 'A', 0x110000, 0 };
-static PCRE2_UCHAR32 test32_3[] = { '#', 0x10ffff, 0x110000, 0 };
-static PCRE2_UCHAR32 test32_4[] = { ' ', 0x2028, '#', 0 };
-static PCRE2_UCHAR32 test32_5[] = { ' ', 0x110000, 0x2028, '#', 0 };
+static PCRE2_UCHAR32 test32_2[] = { 0xd7ff, 0xe000, 0xd800, 0xdfff, 0xe000, 0 };
+static PCRE2_UCHAR32 test32_3[] = { 'a', 'A', 0x110000, 0 };
+static PCRE2_UCHAR32 test32_4[] = { '#', 0x10ffff, 0x110000, 0 };
+static PCRE2_UCHAR32 test32_5[] = { ' ', 0x2028, '#', 0 };
+static PCRE2_UCHAR32 test32_6[] = { ' ', 0x110000, 0x2028, '#', 0 };
 
 static struct invalid_utf32_regression_test_case invalid_utf32_regression_test_cases[] = {
 	{ UDA, CI, 0, 0, 0, 0, 1, { allany32, NULL }, test32_1 },
 	{ UDA, CI, 2, 0, 0, -1, -1, { allany32, NULL }, test32_1 },
+	{ UDA, CI, 0, 0, 0, 0, 1, { allany32, NULL }, test32_2 },
+	{ UDA, CI, 1, 0, 0, 1, 2, { allany32, NULL }, test32_2 },
+	{ UDA, CI, 2, 0, 0, -1, -1, { allany32, NULL }, test32_2 },
+	{ UDA, CI, 3, 0, 0, -1, -1, { allany32, NULL }, test32_2 },
 
 	{ UDA, CPI, 1, 0, 0, 1, 1, { non_word_boundary32, NULL }, test32_1 },
 	{ UDA, CPI, 2, 0, 0, -1, -1, { non_word_boundary32, word_boundary32 }, test32_1 },
 	{ UDA, CPI, 3, 0, 0, -1, -1, { non_word_boundary32, word_boundary32 }, test32_1 },
+	{ UDA, CPI, 1, 0, 0, 1, 1, { non_word_boundary32, NULL }, test32_2 },
+	{ UDA, CPI, 2, 0, 0, -1, -1, { non_word_boundary32, word_boundary32 }, test32_2 },
+	{ UDA, CPI, 4, 0, 0, -1, -1, { non_word_boundary32, word_boundary32 }, test32_2 },
 
-	{ UDA | PCRE2_CASELESS, CPI, 0, 0, 0, 0, 2, { backreference32, NULL }, test32_2 },
-	{ UDA | PCRE2_CASELESS, CPI, 1, 0, 0, -1, -1, { backreference32, NULL }, test32_2 },
+	{ UDA | PCRE2_CASELESS, CPI, 0, 0, 0, 0, 2, { backreference32, NULL }, test32_3 },
+	{ UDA | PCRE2_CASELESS, CPI, 1, 0, 0, -1, -1, { backreference32, NULL }, test32_3 },
 
 	{ UDA, CPI, 0, 0, 0, 0, 1, { grapheme32, NULL }, test32_1 },
 	{ UDA, CPI, 2, 0, 0, -1, -1, { grapheme32, NULL }, test32_1 },
+	{ UDA, CPI, 1, 0, 0, 1, 2, { grapheme32, NULL }, test32_2 },
+	{ UDA, CPI, 2, 0, 0, -1, -1, { grapheme32, NULL }, test32_2 },
+	{ UDA, CPI, 3, 0, 0, -1, -1, { grapheme32, NULL }, test32_2 },
+	{ UDA, CPI, 4, 0, 0, 4, 5, { grapheme32, NULL }, test32_2 },
 
-	{ UDA, CPI, 0, 0, 0, -1, -1, { nothashmark32, NULL }, test32_3 },
-	{ UDA, CPI, 1, 0, 0, 1, 2, { nothashmark32, NULL }, test32_3 },
-	{ UDA, CPI, 2, 0, 0, -1, -1, { nothashmark32, NULL }, test32_3 },
+	{ UDA, CPI, 0, 0, 0, -1, -1, { nothashmark32, NULL }, test32_4 },
+	{ UDA, CPI, 1, 0, 0, 1, 2, { nothashmark32, NULL }, test32_4 },
+	{ UDA, CPI, 2, 0, 0, -1, -1, { nothashmark32, NULL }, test32_4 },
+	{ UDA, CPI, 1, 0, 0, 1, 2, { nothashmark32, NULL }, test32_2 },
+	{ UDA, CPI, 2, 0, 0, -1, -1, { nothashmark32, NULL }, test32_2 },
 
-	{ PCRE2_UTF | PCRE2_MULTILINE, CI, 1, 0, 0, 2, 3, { afternl32, NULL }, test32_4 },
-	{ PCRE2_UTF | PCRE2_MULTILINE, CI, 1, 0, 0, 3, 4, { afternl32, NULL }, test32_5 },
+	{ PCRE2_UTF | PCRE2_MULTILINE, CI, 1, 0, 0, 2, 3, { afternl32, NULL }, test32_5 },
+	{ PCRE2_UTF | PCRE2_MULTILINE, CI, 1, 0, 0, 3, 4, { afternl32, NULL }, test32_6 },
 
 	{ 0, 0, 0, 0, 0, 0, 0, { NULL, NULL }, NULL }
 };

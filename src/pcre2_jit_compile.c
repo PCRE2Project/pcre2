@@ -696,11 +696,12 @@ the start pointers when the end of the capturing group has not yet reached. */
 
 #define GETCHARBACK_INVALID(c, ptr, start, invalid_action) \
   { \
-  if (ptr[-1] <= 0x7f) \
-    c = *ptr--; \
+  c = ptr[-1]; \
+  if (c <= 0x7f) \
+    ptr--; \
   else if (ptr - 1 > start && ptr[-1] >= 0x80 && ptr[-1] < 0xc0) \
     { \
-    c = ptr[-1] - 0x80; \
+    c -= 0x80; \
     \
     if (ptr[-2] >= 0xc2 && ptr[-2] <= 0xdf) \
       { \
@@ -775,11 +776,12 @@ the start pointers when the end of the capturing group has not yet reached. */
 
 #define GETCHARBACK_INVALID(c, ptr, start, invalid_action) \
   { \
-  if (ptr[-1] < 0xd800 || ptr[-1] >= 0xe000) \
-    c = *ptr--; \
-  else if (ptr[-1] >= 0xdc00 && ptr - 1 > start && ptr[-2] >= 0xd800 && ptr[-2] < 0xdc00) \
+  c = ptr[-1]; \
+  if (c < 0xd800 || c >= 0xe000) \
+    ptr--; \
+  else if (c >= 0xdc00 && ptr - 1 > start && ptr[-2] >= 0xd800 && ptr[-2] < 0xdc00) \
     { \
-    c = (((ptr[-2] - 0xd800) << 10) | (ptr[-1] - 0xdc00)) + 0x10000; \
+    c = (((ptr[-2] - 0xd800) << 10) | (c - 0xdc00)) + 0x10000; \
     ptr -= 2; \
     } \
   else \
@@ -793,8 +795,19 @@ the start pointers when the end of the capturing group has not yet reached. */
 
 #define GETCHARINC_INVALID(c, ptr, end, invalid_action) \
   { \
-  if (ptr[0] < 0x110000) \
+  if (ptr[0] < 0xd800 || (ptr[0] >= 0xe000 && ptr[0] < 0x110000)) \
     c = *ptr++; \
+  else \
+    { \
+    invalid_action; \
+    } \
+  }
+
+#define GETCHARBACK_INVALID(c, ptr, start, invalid_action) \
+  { \
+  c = ptr[-1]; \
+  if (ptr[-1] < 0xd800 || (ptr[-1] >= 0xe000 && ptr[-1] < 0x110000)) \
+    ptr--; \
   else \
     { \
     invalid_action; \
@@ -3420,12 +3433,21 @@ if (common->utf)
 #elif PCRE2_CODE_UNIT_WIDTH == 32
 if (common->invalid_utf)
   {
+  if (max < 0xd800) return;
+
   if (backtracks != NULL)
+    {
+    OP2(SLJIT_SUB, TMP2, 0, TMP1, 0, SLJIT_IMM, 0xd800);
     add_jump(compiler, backtracks, CMP(SLJIT_GREATER_EQUAL, TMP1, 0, SLJIT_IMM, 0x110000));
+    add_jump(compiler, backtracks, CMP(SLJIT_LESS, TMP2, 0, SLJIT_IMM, 0xe000 - 0xd800));
+    }
   else
     {
+    OP2(SLJIT_SUB, TMP2, 0, TMP1, 0, SLJIT_IMM, 0xd800);
     OP2(SLJIT_SUB | SLJIT_SET_GREATER_EQUAL, SLJIT_UNUSED, 0, TMP1, 0, SLJIT_IMM, 0x110000);
     CMOV(SLJIT_GREATER_EQUAL, TMP1, SLJIT_IMM, INVALID_UTF_CHAR);
+    OP2(SLJIT_SUB | SLJIT_SET_LESS, SLJIT_UNUSED, 0, TMP2, 0, SLJIT_IMM, 0xe000 - 0xd800);
+    CMOV(SLJIT_LESS, TMP1, SLJIT_IMM, INVALID_UTF_CHAR);
     }
   }
 #endif /* PCRE2_CODE_UNIT_WIDTH == [8|16|32] */
@@ -3490,8 +3512,12 @@ if (common->utf)
     JUMPHERE(jump);
   }
 #elif PCRE2_CODE_UNIT_WIDTH == 32
-  if (common->invalid_utf)
-    add_jump(compiler, backtracks, CMP(SLJIT_GREATER_EQUAL, TMP1, 0, SLJIT_IMM, 0x110000));
+if (common->invalid_utf)
+  {
+  OP2(SLJIT_SUB, TMP2, 0, TMP1, 0, SLJIT_IMM, 0xd800);
+  add_jump(compiler, backtracks, CMP(SLJIT_GREATER_EQUAL, TMP1, 0, SLJIT_IMM, 0x110000));
+  add_jump(compiler, backtracks, CMP(SLJIT_LESS, TMP2, 0, SLJIT_IMM, 0xe000 - 0xd800));
+  }
 #endif /* PCRE2_CODE_UNIT_WIDTH == [8|16|32] */
 #endif /* SUPPORT_UNICODE */
 }
@@ -3677,11 +3703,18 @@ if (common->utf)
 if (common->invalid_utf)
   {
   if (backtracks != NULL)
+    {
+    OP2(SLJIT_SUB, TMP2, 0, TMP1, 0, SLJIT_IMM, 0xd800);
     add_jump(compiler, backtracks, CMP(SLJIT_GREATER_EQUAL, TMP1, 0, SLJIT_IMM, 0x110000));
+    add_jump(compiler, backtracks, CMP(SLJIT_LESS, TMP2, 0, SLJIT_IMM, 0xe000 - 0xd800));
+    }
   else
     {
+    OP2(SLJIT_SUB, TMP2, 0, TMP1, 0, SLJIT_IMM, 0xd800);
     OP2(SLJIT_SUB | SLJIT_SET_GREATER_EQUAL, SLJIT_UNUSED, 0, TMP1, 0, SLJIT_IMM, 0x110000);
     CMOV(SLJIT_GREATER_EQUAL, TMP1, SLJIT_IMM, INVALID_UTF_CHAR);
+    OP2(SLJIT_SUB | SLJIT_SET_LESS, SLJIT_UNUSED, 0, TMP2, 0, SLJIT_IMM, 0xe000 - 0xd800);
+    CMOV(SLJIT_LESS, TMP1, SLJIT_IMM, INVALID_UTF_CHAR);
     }
   }
 #endif /* PCRE2_CODE_UNIT_WIDTH == [8|16|32] */
@@ -8402,12 +8435,12 @@ static PCRE2_SPTR SLJIT_FUNC do_extuni_utf(jit_arguments *args, PCRE2_SPTR cc)
 PCRE2_SPTR start_subject = args->begin;
 PCRE2_SPTR end_subject = args->end;
 int lgb, rgb, ricount;
-PCRE2_SPTR prevcc, startcc, bptr;
+PCRE2_SPTR prevcc, endcc, bptr;
 BOOL first = TRUE;
 uint32_t c;
 
 prevcc = cc;
-startcc = NULL;
+endcc = NULL;
 do
   {
   GETCHARINC(c, cc);
@@ -8416,7 +8449,7 @@ do
   if (first)
     {
     lgb = rgb;
-    startcc = cc;
+    endcc = cc;
     first = FALSE;
     continue;
     }
@@ -8455,25 +8488,27 @@ do
        lgb != ucp_gbExtended_Pictographic)
     lgb = rgb;
 
-  prevcc = startcc;
-  startcc = cc;
+  prevcc = endcc;
+  endcc = cc;
   }
 while (cc < end_subject);
 
-return startcc;
+return endcc;
 }
+
+#endif /* PCRE2_CODE_UNIT_WIDTH != 32 */
 
 static PCRE2_SPTR SLJIT_FUNC do_extuni_utf_invalid(jit_arguments *args, PCRE2_SPTR cc)
 {
 PCRE2_SPTR start_subject = args->begin;
 PCRE2_SPTR end_subject = args->end;
 int lgb, rgb, ricount;
-PCRE2_SPTR prevcc, startcc, bptr;
+PCRE2_SPTR prevcc, endcc, bptr;
 BOOL first = TRUE;
 uint32_t c;
 
 prevcc = cc;
-startcc = NULL;
+endcc = NULL;
 do
   {
   GETCHARINC_INVALID(c, cc, end_subject, break);
@@ -8482,7 +8517,7 @@ do
   if (first)
     {
     lgb = rgb;
-    startcc = cc;
+    endcc = cc;
     first = FALSE;
     continue;
     }
@@ -8520,15 +8555,13 @@ do
        lgb != ucp_gbExtended_Pictographic)
     lgb = rgb;
 
-  prevcc = startcc;
-  startcc = cc;
+  prevcc = endcc;
+  endcc = cc;
   }
 while (cc < end_subject);
 
-return startcc;
+return endcc;
 }
-
-#endif /* PCRE2_CODE_UNIT_WIDTH != 32 */
 
 static PCRE2_SPTR SLJIT_FUNC do_extuni_no_utf(jit_arguments *args, PCRE2_SPTR cc)
 {
@@ -8800,8 +8833,10 @@ switch(type)
   if (common->invalid_utf)
     add_jump(compiler, backtracks, CMP(SLJIT_EQUAL, SLJIT_RETURN_REG, 0, SLJIT_IMM, 0));
 #else
-  sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_RET(SW) | SLJIT_ARG1(SW) | SLJIT_ARG2(SW), SLJIT_IMM, SLJIT_FUNC_OFFSET(do_extuni_no_utf));
-  add_jump(compiler, backtracks, CMP(SLJIT_EQUAL, SLJIT_RETURN_REG, 0, SLJIT_IMM, 0));
+  sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_RET(SW) | SLJIT_ARG1(SW) | SLJIT_ARG2(SW), SLJIT_IMM,
+    common->invalid_utf ? SLJIT_FUNC_OFFSET(do_extuni_utf_invalid) : SLJIT_FUNC_OFFSET(do_extuni_no_utf));
+  if (!common->utf || common->invalid_utf)
+    add_jump(compiler, backtracks, CMP(SLJIT_EQUAL, SLJIT_RETURN_REG, 0, SLJIT_IMM, 0));
 #endif
 
   OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_RETURN_REG, 0);
