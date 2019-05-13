@@ -12,6 +12,8 @@ ClusterFuzz 14376.
 2. Improved the invalid utf32 support of the JIT compiler. Now it correctly
 detects invalid characters in the 0xd800-0xdfff range.
 
+3. Fix minor typo bug in JIT compile when \X is used in a non-UTF string.
+
 
 Version 10.33 16-April-2019
 ---------------------------

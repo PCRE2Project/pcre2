@@ -2480,4 +2480,7 @@
 /^(?'אABC'...)(?&אABC)/utf
     123123123456
 
+/\X*/
+    \xF3aaa\xE4\xEA\xEB\xFEa
+
 # End of testinput4

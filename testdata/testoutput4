@@ -4012,4 +4012,8 @@ No match
  0: 123123
  1: 123
 
+/\X*/
+    \xF3aaa\xE4\xEA\xEB\xFEa
+ 0: \xf3aaa\xe4\xea\xeb\xfea
+
 # End of testinput4
