@@ -8571,7 +8571,10 @@ int lgb, rgb, ricount;
 PCRE2_SPTR bptr;
 uint32_t c;
 
-GETCHARINC(c, cc);
+/* Patch by PH */
+/* GETCHARINC(c, cc); */
+
+c = *cc++;
 #if PCRE2_CODE_UNIT_WIDTH == 32
 if (c >= 0x110000)
   return NULL;
