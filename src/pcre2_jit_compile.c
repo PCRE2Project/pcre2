@@ -3898,9 +3898,9 @@ if (common->utf && negated)
 
 static void move_back(compiler_common *common, jump_list **backtracks, BOOL must_be_valid)
 {
-/* Goes one character back. TMP2 must contain the start of
-the subject buffer. Affects STR_PTR and TMP1. Does not modify
-STR_PTR for invalid character sequences. */
+/* Goes one character back. Affects STR_PTR and TMP1. If must_be_valid is TRUE,
+TMP2 is not used. Otherwise TMP2 must contain the start of the subject buffer,
+and it is destroyed. Does not modify STR_PTR for invalid character sequences. */
 DEFINE_COMPILER;
 
 SLJIT_UNUSED_ARG(backtracks);
@@ -4440,7 +4440,7 @@ sljit_emit_fast_return(compiler, RETURN_ADDR, 0);
 
 static void do_utfpeakcharback(compiler_common *common)
 {
-/* Peak a character back. */
+/* Peak a character back. Does not modify STR_PTR. */
 DEFINE_COMPILER;
 struct sljit_jump *jump[2];
 
@@ -4477,7 +4477,7 @@ sljit_emit_fast_return(compiler, RETURN_ADDR, 0);
 
 static void do_utfpeakcharback_invalid(compiler_common *common)
 {
-/* Peak a character back. */
+/* Peak a character back. Does not modify STR_PTR. */
 DEFINE_COMPILER;
 sljit_s32 i;
 sljit_s32 has_cmov = sljit_has_cpu_feature(SLJIT_HAS_CMOV);
@@ -4705,7 +4705,7 @@ sljit_emit_fast_return(compiler, RETURN_ADDR, 0);
 
 static void do_utfpeakcharback_invalid(compiler_common *common)
 {
-/* Peak a character back. */
+/* Peak a character back. Does not modify STR_PTR. */
 DEFINE_COMPILER;
 struct sljit_jump *jump;
 struct sljit_jump *exit_invalid[3];
@@ -4819,18 +4819,12 @@ OP2(SLJIT_ADD, TMP1, 0, TMP1, 0, TMP2, 0);
 OP1(SLJIT_MOV, TMP2, 0, SLJIT_IMM, (sljit_sw)PRIV(ucd_stage2));
 OP1(SLJIT_MOV_U16, TMP2, 0, SLJIT_MEM2(TMP2, TMP1), 1);
 
-// PH hacking
-//fprintf(stderr, "~~A\n");
-  OP2(SLJIT_SHL, TMP1, 0, TMP2, 0, SLJIT_IMM, 2);
-  OP2(SLJIT_SHL, TMP2, 0, TMP2, 0, SLJIT_IMM, 3);
-  OP2(SLJIT_ADD, TMP2, 0, TMP2, 0, TMP1, 0);
-  OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, (sljit_sw)PRIV(ucd_records) + SLJIT_OFFSETOF(ucd_record, chartype));
-
+/* TMP2 is multiplied by 12. Same as (TMP2 << 2) + ((TMP2 << 2) << 1). */
 OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, (sljit_sw)PRIV(ucd_records) + SLJIT_OFFSETOF(ucd_record, chartype));
+OP2(SLJIT_SHL, TMP2, 0, TMP2, 0, SLJIT_IMM, 2);
+OP2(SLJIT_ADD, TMP1, 0, TMP1, 0, TMP2, 0);
+OP1(SLJIT_MOV_U8, TMP1, 0, SLJIT_MEM2(TMP1, TMP2), 1);
 
-  OP1(SLJIT_MOV_U8, TMP1, 0, SLJIT_MEM2(TMP1, TMP2), 0);
-
-// OP1(SLJIT_MOV_U8, TMP1, 0, SLJIT_MEM2(TMP1, TMP2), 3);
 sljit_emit_fast_return(compiler, RETURN_ADDR, 0);
 }
 
@@ -6770,7 +6764,11 @@ static void check_wordboundary(compiler_common *common)
 DEFINE_COMPILER;
 struct sljit_jump *skipread;
 jump_list *skipread_list = NULL;
-jump_list *invalid_utf = NULL;
+#ifdef SUPPORT_UNICODE
+struct sljit_label *valid_utf;
+jump_list *invalid_utf1 = NULL;
+#endif /* SUPPORT_UNICODE */
+jump_list *invalid_utf2 = NULL;
 #if PCRE2_CODE_UNIT_WIDTH != 8 || defined SUPPORT_UNICODE
 struct sljit_jump *jump;
 #endif /* PCRE2_CODE_UNIT_WIDTH != 8 || SUPPORT_UNICODE */
@@ -6784,14 +6782,30 @@ OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(TMP1), SLJIT_OFFSETOF(jit_arguments, begin));
 OP1(SLJIT_MOV, TMP3, 0, SLJIT_IMM, 0);
 skipread = CMP(SLJIT_LESS_EQUAL, STR_PTR, 0, TMP2, 0);
 
-if (common->mode == PCRE2_JIT_COMPLETE)
-  peek_char_back(common, READ_CHAR_MAX, &invalid_utf);
-else
+#ifdef SUPPORT_UNICODE
+if (common->invalid_utf)
   {
-  move_back(common, &invalid_utf, FALSE);
-  check_start_used_ptr(common);
-  /* No need precise read since match fails anyway. */
-  read_char(common, 0, READ_CHAR_MAX, &invalid_utf, READ_CHAR_UPDATE_STR_PTR);
+  peek_char_back(common, READ_CHAR_MAX, &invalid_utf1);
+
+  if (common->mode != PCRE2_JIT_COMPLETE)
+    {
+    OP1(SLJIT_MOV, TMP2, 0, STR_PTR, 0);
+    move_back(common, NULL, TRUE);
+    check_start_used_ptr(common);
+    OP1(SLJIT_MOV, STR_PTR, 0, TMP2, 0);
+    }
+  }
+else
+#endif /* SUPPORT_UNICODE */
+  {
+  if (common->mode == PCRE2_JIT_COMPLETE)
+    peek_char_back(common, READ_CHAR_MAX, NULL);
+  else
+    {
+    move_back(common, NULL, TRUE);
+    check_start_used_ptr(common);
+    read_char(common, 0, READ_CHAR_MAX, NULL, READ_CHAR_UPDATE_STR_PTR);
+    }
   }
 
 /* Testing char type. */
@@ -6835,10 +6849,13 @@ JUMPHERE(skipread);
 
 OP1(SLJIT_MOV, TMP2, 0, SLJIT_IMM, 0);
 check_str_end(common, &skipread_list);
-peek_char(common, READ_CHAR_MAX, SLJIT_MEM1(SLJIT_SP), LOCALS1, &invalid_utf);
+peek_char(common, READ_CHAR_MAX, SLJIT_MEM1(SLJIT_SP), LOCALS1, &invalid_utf2);
 
 /* Testing char type. This is a code duplication. */
 #ifdef SUPPORT_UNICODE
+
+valid_utf = LABEL();
+
 if (common->use_ucp)
   {
   OP1(SLJIT_MOV, TMP2, 0, SLJIT_IMM, 1);
@@ -6884,13 +6901,19 @@ sljit_emit_fast_return(compiler, TMP1, 0);
 #ifdef SUPPORT_UNICODE
 if (common->invalid_utf)
   {
-  SLJIT_ASSERT(invalid_utf != NULL);
+  set_jumps(invalid_utf1, LABEL());
 
-  set_jumps(invalid_utf, LABEL());
+  peek_char(common, READ_CHAR_MAX, SLJIT_MEM1(SLJIT_SP), LOCALS1, NULL);
+  CMPTO(SLJIT_NOT_EQUAL, TMP1, 0, SLJIT_IMM, INVALID_UTF_CHAR, valid_utf);
+
   OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_SP), LOCALS0);
   OP1(SLJIT_MOV, TMP2, 0, SLJIT_IMM, -1);
   sljit_emit_fast_return(compiler, TMP1, 0);
-  return;
+
+  set_jumps(invalid_utf2, LABEL());
+  OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_SP), LOCALS0);
+  OP1(SLJIT_MOV, TMP2, 0, TMP3, 0);
+  sljit_emit_fast_return(compiler, TMP1, 0);
   }
 #endif /* SUPPORT_UNICODE */
 }
@@ -8224,9 +8247,7 @@ switch(type)
 #ifdef SUPPORT_UNICODE
   if (common->invalid_utf)
     {
-    OP2(SLJIT_SUB | SLJIT_SET_Z | SLJIT_SET_SIG_LESS, SLJIT_UNUSED, 0, TMP2, 0, SLJIT_IMM, 0);
-    add_jump(compiler, backtracks, JUMP(SLJIT_SIG_LESS));
-    add_jump(compiler, backtracks, JUMP(type == OP_NOT_WORD_BOUNDARY ? SLJIT_NOT_ZERO : SLJIT_ZERO));
+    add_jump(compiler, backtracks, CMP((type == OP_NOT_WORD_BOUNDARY) ? SLJIT_NOT_EQUAL : SLJIT_SIG_LESS_EQUAL, TMP2, 0, SLJIT_IMM, 0));
     return cc;
     }
 #endif /* SUPPORT_UNICODE */
