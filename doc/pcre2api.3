@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "14 February 2019" "PCRE2 10.33"
+.TH PCRE2API 3 "23 May 2019" "PCRE2 10.34"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -1285,13 +1285,14 @@ and \fBpcre2_compile()\fP returns a non-NULL value.
 .P
 There are nearly 100 positive error codes that \fBpcre2_compile()\fP may return
 if it finds an error in the pattern. There are also some negative error codes
-that are used for invalid UTF strings. These are the same as given by
-\fBpcre2_match()\fP and \fBpcre2_dfa_match()\fP, and are described in the
+that are used for invalid UTF strings when validity checking is in force. These
+are the same as given by \fBpcre2_match()\fP and \fBpcre2_dfa_match()\fP, and
+are described in the
 .\" HREF
 \fBpcre2unicode\fP
 .\"
-page. There is no separate documentation for the positive error codes, because
-the textual error messages that are obtained by calling the
+documentation. There is no separate documentation for the positive error codes,
+because the textual error messages that are obtained by calling the
 \fBpcre2_get_error_message()\fP function (see "Obtaining a textual error
 message"
 .\" HTML <a href="#geterrormessage">
@@ -1557,10 +1558,20 @@ expression engine is not the most efficient way of doing it. If you are doing a
 lot of literal matching and are worried about efficiency, you should consider
 using other approaches. The only other main options that are allowed with
 PCRE2_LITERAL are: PCRE2_ANCHORED, PCRE2_ENDANCHORED, PCRE2_AUTO_CALLOUT,
-PCRE2_CASELESS, PCRE2_FIRSTLINE, PCRE2_NO_START_OPTIMIZE, PCRE2_NO_UTF_CHECK,
-PCRE2_UTF, and PCRE2_USE_OFFSET_LIMIT. The extra options PCRE2_EXTRA_MATCH_LINE
-and PCRE2_EXTRA_MATCH_WORD are also supported. Any other options cause an
-error.
+PCRE2_CASELESS, PCRE2_FIRSTLINE, PCRE2_MATCH_INVALID_UTF,
+PCRE2_NO_START_OPTIMIZE, PCRE2_NO_UTF_CHECK, PCRE2_UTF, and
+PCRE2_USE_OFFSET_LIMIT. The extra options PCRE2_EXTRA_MATCH_LINE and
+PCRE2_EXTRA_MATCH_WORD are also supported. Any other options cause an error.
+.sp
+  PCRE2_MATCH_INVALID_UTF
+.sp
+This option forces PCRE2_UTF (see below) and also enables support for matching
+by \fBpcre2_match()\fP in subject strings that contain invalid UTF sequences.
+This facility is not supported for DFA matching. For details, see the
+.\" HREF
+\fBpcre2unicode\fP
+.\"
+documentation.
 .sp
   PCRE2_MATCH_UNSET_BACKREF
 .sp
@@ -2635,15 +2646,23 @@ of JIT; it forces matching to be done by the interpreter.
   PCRE2_NO_UTF_CHECK
 .sp
 When PCRE2_UTF is set at compile time, the validity of the subject as a UTF
-string is checked by default when \fBpcre2_match()\fP is subsequently called.
-If a non-zero starting offset is given, the check is applied only to that part
-of the subject that could be inspected during matching, and there is a check
-that the starting offset points to the first code unit of a character or to the
-end of the subject. If there are no lookbehind assertions in the pattern, the
-check starts at the starting offset. Otherwise, it starts at the length of the
-longest lookbehind before the starting offset, or at the start of the subject
-if there are not that many characters before the starting offset. Note that the
-sequences \eb and \eB are one-character lookbehinds.
+string is checked unless PCRE2_NO_UTF_CHECK is passed to \fBpcre2_match()\fP or
+PCRE2_MATCH_INVALID_UTF was passed to \fBpcre2_compile()\fP. The latter special
+case is discussed in detail in the
+.\" HREF
+\fBpcre2unicode\fP
+.\"
+documentation.
+.P
+In the default case, if a non-zero starting offset is given, the check is
+applied only to that part of the subject that could be inspected during
+matching, and there is a check that the starting offset points to the first
+code unit of a character or to the end of the subject. If there are no
+lookbehind assertions in the pattern, the check starts at the starting offset.
+Otherwise, it starts at the length of the longest lookbehind before the
+starting offset, or at the start of the subject if there are not that many
+characters before the starting offset. Note that the sequences \eb and \eB are
+one-character lookbehinds.
 .P
 The check is carried out before any other processing takes place, and a
 negative error code is returned if the check fails. There are several UTF error
@@ -2666,17 +2685,18 @@ in the
 .\" HREF
 \fBpcre2unicode\fP
 .\"
-page.
+documentation.
 .P
-If you know that your subject is valid, and you want to skip these checks for
+If you know that your subject is valid, and you want to skip this check for
 performance reasons, you can set the PCRE2_NO_UTF_CHECK option when calling
 \fBpcre2_match()\fP. You might want to do this for the second and subsequent
-calls to \fBpcre2_match()\fP if you are making repeated calls to find other
+calls to \fBpcre2_match()\fP if you are making repeated calls to find multiple
 matches in the same subject string.
 .P
-\fBWarning:\fP When PCRE2_NO_UTF_CHECK is set, the effect of passing an invalid
+\fBWarning:\fP Unless PCRE2_MATCH_INVALID_UTF was set at compile time, when
+PCRE2_NO_UTF_CHECK is set at match time the effect of passing an invalid
 string as a subject, or an invalid value of \fIstartoffset\fP, is undefined.
-Your program may crash or loop indefinitely.
+Your program may crash or loop indefinitely or give wrong results.
 .sp
   PCRE2_PARTIAL_HARD
   PCRE2_PARTIAL_SOFT
@@ -3775,6 +3795,12 @@ This return is given if \fBpcre2_dfa_match()\fP encounters a condition item
 that uses a backreference for the condition, or a test for recursion in a
 specific capture group. These are not supported.
 .sp
+  PCRE2_ERROR_DFA_UINVALID_UTF
+.sp
+This return is given if \fBpcre2_dfa_match()\fP is called for a pattern that
+was compiled with PCRE2_MATCH_INVALID_UTF. This is not supported for DFA
+matching.
+.sp
   PCRE2_ERROR_DFA_WSSIZE
 .sp
 This return is given if \fBpcre2_dfa_match()\fP runs out of space in the
@@ -3817,6 +3843,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 14 February 2019
+Last updated: 23 May 2019
 Copyright (c) 1997-2019 University of Cambridge.
 .fi

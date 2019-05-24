@@ -402,4 +402,49 @@
 
 /(?(á/utf
 
+# Invalid UTF-16/32 tests.
+
+/.../g,match_invalid_utf
+    abcd\x{df00}wxzy\x{df00}pqrs
+    abcd\x{80}wxzy\x{df00}pqrs
+
+/abc/match_invalid_utf
+    ab\x{df00}ab\=ph
+\= Expect no match
+    ab\x{df00}cdef\=ph
+
+/ab$/match_invalid_utf
+    ab\x{df00}cdeab
+\= Expect no match
+    ab\x{df00}cde
+
+/.../g,match_invalid_utf
+    abcd\x{80}wxzy\x{df00}pqrs
+
+/(?<=x)../g,match_invalid_utf
+    abcd\x{80}wxzy\x{df00}pqrs
+    abcd\x{80}wxzy\x{df00}xpqrs
+
+/X$/match_invalid_utf
+\= Expect no match
+    X\x{df00}
+    
+/(?<=..)X/match_invalid_utf,aftertext
+    AB\x{df00}AQXYZ
+    AB\x{df00}AQXYZ\=offset=5
+    AB\x{df00}\x{df00}AXYZXC\=offset=5
+\= Expect no match
+    AB\x{df00}XYZ
+    AB\x{df00}XYZ\=offset=3 
+    AB\x{df00}AXYZ
+    AB\x{df00}AXYZ\=offset=4
+    AB\x{df00}\x{df00}AXYZ\=offset=5
+
+/.../match_invalid_utf
+\= Expect no match
+    A\x{d800}B
+    A\x{110000}B 
+
+# ---------------------------------------------------- 
+
 # End of testinput12

@@ -1,4 +1,4 @@
-.TH PCRE2PATTERN 3 "12 February 2019" "PCRE2 10.33"
+.TH PCRE2PATTERN 3 "23 May 2019" "PCRE2 10.34"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION DETAILS"
@@ -52,10 +52,11 @@ single code units, or as multiple UTF-8 or UTF-16 code units. UTF-32 can be
 specified for the 32-bit library, in which case it constrains the character
 values to valid Unicode code points. To process UTF strings, PCRE2 must be
 built to include Unicode support (which is the default). When using UTF strings
-you must either call the compiling function with the PCRE2_UTF option, or the
-pattern must start with the special sequence (*UTF), which is equivalent to
-setting the relevant option. How setting a UTF mode affects pattern matching is
-mentioned in several places below. There is also a summary of features in the
+you must either call the compiling function with one or both of the PCRE2_UTF
+or PCRE2_MATCH_INVALID_UTF options, or the pattern must start with the special
+sequence (*UTF), which is equivalent to setting the relevant PCRE2_UTF. How
+setting a UTF mode affects pattern matching is mentioned in several places
+below. There is also a summary of features in the
 .\" HREF
 \fBpcre2unicode\fP
 .\"
@@ -398,11 +399,11 @@ PCRE2_EXTRA_ALT_BSUX has the same effect as PCRE2_ALT_BSUX and, in addition,
 There may be any number of hexadecimal digits. This syntax is from ECMAScript
 6.
 .P
-The \eN{U+hhh..} escape sequence is recognized only when the PCRE2_UTF option
-is set, that is, when PCRE2 is operating in a Unicode mode. Perl also uses
-\eN{name} to specify characters by Unicode name; PCRE2 does not support this.
-Note that when \eN is not followed by an opening brace (curly bracket) it has
-an entirely different meaning, matching any character that is not a newline.
+The \eN{U+hhh..} escape sequence is recognized only when PCRE2 is operating in
+UTF mode. Perl also uses \eN{name} to specify characters by Unicode name; PCRE2
+does not support this. Note that when \eN is not followed by an opening brace
+(curly bracket) it has an entirely different meaning, matching any character
+that is not a newline.
 .P
 There are some legacy applications where the escape sequence \er is expected to
 match a newline. If the PCRE2_EXTRA_ESCAPED_CR_IS_LF option is set, \er in a
@@ -1352,7 +1353,7 @@ with \eC in UTF-8 or UTF-16 mode means that the rest of the string may start
 with a malformed UTF character. This has undefined results, because PCRE2
 assumes that it is matching character by character in a valid UTF string (by
 default it checks the subject string's validity at the start of processing
-unless the PCRE2_NO_UTF_CHECK option is used).
+unless the PCRE2_NO_UTF_CHECK or PCRE2_MATCH_INVALID_UTF option is used).
 .P
 An application can lock out the use of \eC by setting the
 PCRE2_NEVER_BACKSLASH_C option when compiling a pattern. It is also possible to
@@ -3763,6 +3764,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 12 February 2019
+Last updated: 23 May 2019
 Copyright (c) 1997-2019 University of Cambridge.
 .fi

@@ -367,7 +367,4 @@ Failed: error 134 at offset 14: character code point value in \x{} or \o{} is to
 /(*:*++++++++++++''''''''''''''''''''+''+++'+++x+++++++++++++++++++++++++++++++++++(++++++++++++++++++++:++++++%++:''''''''''''''''''''''''+++++++++++++++++++++++++++++++++++++++++++++++++++++-++++++++k+++++++''''+++'+++++++++++++++++++++++''''++++++++++++':ƿ)/
 Failed: error 176 at offset 259: name is too long in (*MARK), (*PRUNE), (*SKIP), or (*THEN)
 
-/\[()]{65535}/expand
-Failed: error 120 at offset 131070: regular expression is too large
-
 # End of testinput9

@@ -14,6 +14,10 @@ detects invalid characters in the 0xd800-0xdfff range.
 
 3. Fix minor typo bug in JIT compile when \X is used in a non-UTF string.
 
+4. Add support for matching in invalid UTF strings to the pcre2_match()
+interpreter, and integrate with the existing JIT support via the new
+PCRE2_MATCH_INVALID_UTF compile-time option.
+
 
 Version 10.33 16-April-2019
 ---------------------------

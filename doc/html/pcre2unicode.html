@@ -16,22 +16,33 @@ please consult the man page, in case the conversion went wrong.
 UNICODE AND UTF SUPPORT
 </b><br>
 <P>
-When PCRE2 is built with Unicode support (which is the default), it has
-knowledge of Unicode character properties and can process text strings in
-UTF-8, UTF-16, or UTF-32 format (depending on the code unit width). However, by
-default, PCRE2 assumes that one code unit is one character. To process a
-pattern as a UTF string, where a character may require more than one code unit,
-you must call
-<a href="pcre2_compile.html"><b>pcre2_compile()</b></a>
-with the PCRE2_UTF option flag, or the pattern must start with the sequence
-(*UTF). When either of these is the case, both the pattern and any subject
-strings that are matched against it are treated as UTF strings instead of
-strings of individual one-code-unit characters. There are also some other
-changes to the way characters are handled, as documented below.
+PCRE2 is normally built with Unicode support, though if you do not need it, you
+can build it without, in which case the library will be smaller. With Unicode
+support, PCRE2 has knowledge of Unicode character properties and can process
+text strings in UTF-8, UTF-16, or UTF-32 format (depending on the code unit
+width), but this is not the default. Unless specifically requested, PCRE2
+treats each code unit in a string as one character.
 </P>
 <P>
-If you do not need Unicode support you can build PCRE2 without it, in which
-case the library will be smaller.
+There are two ways of telling PCRE2 to switch to UTF mode, where characters may 
+consist of more than one code unit and the range of values is constrained. The 
+program can call
+<a href="pcre2_compile.html"><b>pcre2_compile()</b></a>
+with the PCRE2_UTF option, or the pattern may start with the sequence (*UTF).
+However, the latter facility can be locked out by the PCRE2_NEVER_UTF option.
+That is, the programmer can prevent the supplier of the pattern from switching 
+to UTF mode.
+</P>
+<P>
+Note that the PCRE2_MATCH_INVALID_UTF option (see
+<a href="#matchinvalid">below)</a>
+forces PCRE2_UTF to be set.
+</P>
+<P>
+In UTF mode, both the pattern and any subject strings that are matched against
+it are treated as UTF strings instead of strings of individual one-code-unit
+characters. There are also some other changes to the way characters are
+handled, as documented below.
 </P>
 <br><b>
 UNICODE PROPERTY SUPPORT
@@ -63,22 +74,22 @@ also recognized; larger ones can be coded using \o{...}.
 <P>
 The escape sequence \N{U+&#60;hex digits&#62;} is recognized as another way of
 specifying a Unicode character by code point in a UTF mode. It is not allowed
-in non-UTF modes.
+in non-UTF mode.
 </P>
 <P>
-In UTF modes, repeat quantifiers apply to complete UTF characters, not to
+In UTF mode, repeat quantifiers apply to complete UTF characters, not to
 individual code units.
 </P>
 <P>
-In UTF modes, the dot metacharacter matches one UTF character instead of a
+In UTF mode, the dot metacharacter matches one UTF character instead of a
 single code unit.
 </P>
 <P>
-In UTF modes, capture group names are not restricted to ASCII, and may contain
+In UTF mode, capture group names are not restricted to ASCII, and may contain
 any Unicode letters and decimal digits, as well as underscore.
 </P>
 <P>
-The escape sequence \C can be used to match a single code unit in a UTF mode,
+The escape sequence \C can be used to match a single code unit in UTF mode,
 but its use can lead to some strange effects because it breaks up multi-unit
 characters (see the description of \C in the
 <a href="pcre2pattern.html"><b>pcre2pattern</b></a>
@@ -93,7 +104,7 @@ may consist of more than one code unit. The use of \C in these modes provokes
 a match-time error. Also, the JIT optimization does not support \C in these
 modes. If JIT optimization is requested for a UTF-8 or UTF-16 pattern that
 contains \C, it will not succeed, and so when <b>pcre2_match()</b> is called,
-the matching will be carried out by the normal interpretive function.
+the matching will be carried out by the interpretive function.
 </P>
 <P>
 The character escapes \b, \B, \d, \D, \s, \S, \w, and \W correctly test
@@ -123,14 +134,14 @@ However, the special horizontal and vertical white space matching escapes (\h,
 not PCRE2_UCP is set.
 </P>
 <br><b>
-CASE-EQUIVALENCE IN UTF MODES
+CASE-EQUIVALENCE IN UTF MODE
 </b><br>
 <P>
-Case-insensitive matching in a UTF mode makes use of Unicode properties except
+Case-insensitive matching in UTF mode makes use of Unicode properties except
 for characters whose code points are less than 128 and that have at most two
 case-equivalent values. For these, a direct table lookup is used for speed. A
 few Unicode characters such as Greek sigma have more than two code points that
-are case-equivalent, and these are treated as such.
+are case-equivalent, and these are treated specially.
 <a name="scriptruns"></a></P>
 <br><b>
 SCRIPT RUNS
@@ -248,7 +259,7 @@ VALIDITY OF UTF STRINGS
 <P>
 When the PCRE2_UTF option is set, the strings passed as patterns and subjects
 are (by default) checked for validity on entry to the relevant functions. If an
-invalid UTF string is passed, an negative error code is returned. The code unit
+invalid UTF string is passed, a negative error code is returned. The code unit
 offset to the offending character can be extracted from the match data block by
 calling <b>pcre2_get_startchar()</b>, which is used for this purpose after a UTF
 error.
@@ -263,17 +274,16 @@ only valid UTF code unit sequences.
 </P>
 <P>
 If you pass an invalid UTF string when PCRE2_NO_UTF_CHECK is set, the result
-is usually undefined and your program may crash or loop indefinitely. There is,
-however, one mode of matching that can handle invalid UTF subject strings. This
-is matching via the JIT optimization using the PCRE2_JIT_INVALID_UTF option
-when calling <b>pcre2_jit_compile()</b>. For details, see the
-<a href="pcre2jit.html"><b>pcre2jit</b></a>
-documentation.
+is undefined and your program may crash or loop indefinitely or give incorrect
+results. There is, however, one mode of matching that can handle invalid UTF
+subject strings. This is enabled by passing PCRE2_MATCH_INVALID_UTF to
+<b>pcre2_compile()</b> and is discussed below in the next section. The rest of
+this section covers the case when PCRE2_MATCH_INVALID_UTF is not set.
 </P>
 <P>
-Passing PCRE2_NO_UTF_CHECK to <b>pcre2_compile()</b> just disables the check for
-the pattern; it does not also apply to subject strings. If you want to disable
-the check for a subject string you must pass this same option to
+Passing PCRE2_NO_UTF_CHECK to <b>pcre2_compile()</b> just disables the UTF check
+for the pattern; it does not also apply to subject strings. If you want to
+disable the check for a subject string you must pass this same option to
 <b>pcre2_match()</b> or <b>pcre2_dfa_match()</b>.
 </P>
 <P>
@@ -352,7 +362,7 @@ these code points are excluded by RFC 3629.
 <pre>
   PCRE2_ERROR_UTF8_ERR13
 </pre>
-A 4-byte character has a value greater than 0x10fff; these code points are
+A 4-byte character has a value greater than 0x10ffff; these code points are
 excluded by RFC 3629.
 <pre>
   PCRE2_ERROR_UTF8_ERR14
@@ -405,7 +415,59 @@ The following negative error codes are given for invalid UTF-32 strings:
   PCRE2_ERROR_UTF32_ERR1  Surrogate character (0xd800 to 0xdfff)
   PCRE2_ERROR_UTF32_ERR2  Code point is greater than 0x10ffff
 
-</PRE>
+<a name="matchinvalid"></a></PRE>
+</P>
+<br><b>
+MATCHING IN INVALID UTF STRINGS
+</b><br>
+<P>
+You can run pattern matches on subject strings that may contain invalid UTF
+sequences if you call <b>pcre2_compile()</b> with the PCRE2_MATCH_INVALID_UTF
+option. This is supported by <b>pcre2_match()</b>, including JIT matching, but
+not by <b>pcre2_dfa_match()</b>. When PCRE2_MATCH_INVALID_UTF is set, it forces
+PCRE2_UTF to be set as well. Note, however, that the pattern itself must be a 
+valid UTF string.
+</P>
+<P>
+Setting PCRE2_MATCH_INVALID_UTF does not affect what <b>pcre2_compile()</b>
+generates, but if <b>pcre2_jit_compile()</b> is subsequently called, it does
+generate different code. If JIT is not used, the option affects the behaviour
+of the interpretive code in <b>pcre2_match()</b>. When PCRE2_MATCH_INVALID_UTF
+is set at compile time, PCRE2_NO_UTF_CHECK is ignored at match time.
+</P>
+<P>
+In this mode, an invalid code unit sequence in the subject never matches any
+pattern item. It does not match dot, it does not match \p{Any}, it does not
+even match negative items such as [^X]. A lookbehind assertion fails if it
+encounters an invalid sequence while moving the current point backwards. In
+other words, an invalid UTF code unit sequence acts as a barrier which no match
+can cross.
+</P>
+<P>
+You can also think of this as the subject being split up into fragments of
+valid UTF, delimited internally by invalid code unit sequences. The pattern is
+matched fragment by fragment. The result of a successful match, however, is
+given as code unit offsets in the entire subject string in the usual way. There
+are a few points to consider:
+</P>
+<P>
+The internal boundaries are not interpreted as the beginnings or ends of lines
+and so do not match circumflex or dollar characters in the pattern.
+</P>
+<P>
+If <b>pcre2_match()</b> is called with an offset that points to an invalid
+UTF-sequence, that sequence is skipped, and the match starts at the next valid
+UTF character, or the end of the subject.
+</P>
+<P>
+At internal fragment boundaries, \b and \B behave in the same way as at the
+beginning and end of the subject. For example, a sequence such as \bWORD\b 
+would match an instance of WORD that is surrounded by invalid UTF code units.
+</P>
+<P>
+Using PCRE2_MATCH_INVALID_UTF, an application can run matches on arbitrary
+data, knowing that any matched strings that are returned are valid UTF. This
+can be useful when searching for UTF text in executable or other binary files.
 </P>
 <br><b>
 AUTHOR
@@ -422,7 +484,7 @@ Cambridge, England.
 REVISION
 </b><br>
 <P>
-Last updated: 06 March 2019
+Last updated: 24 May 2019
 <br>
 Copyright &copy; 1997-2019 University of Cambridge.
 <br>

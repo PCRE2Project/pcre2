@@ -91,10 +91,11 @@ single code units, or as multiple UTF-8 or UTF-16 code units. UTF-32 can be
 specified for the 32-bit library, in which case it constrains the character
 values to valid Unicode code points. To process UTF strings, PCRE2 must be
 built to include Unicode support (which is the default). When using UTF strings
-you must either call the compiling function with the PCRE2_UTF option, or the
-pattern must start with the special sequence (*UTF), which is equivalent to
-setting the relevant option. How setting a UTF mode affects pattern matching is
-mentioned in several places below. There is also a summary of features in the
+you must either call the compiling function with one or both of the PCRE2_UTF
+or PCRE2_MATCH_INVALID_UTF options, or the pattern must start with the special
+sequence (*UTF), which is equivalent to setting the relevant PCRE2_UTF. How
+setting a UTF mode affects pattern matching is mentioned in several places
+below. There is also a summary of features in the
 <a href="pcre2unicode.html"><b>pcre2unicode</b></a>
 page.
 </P>
@@ -428,11 +429,11 @@ There may be any number of hexadecimal digits. This syntax is from ECMAScript
 6.
 </P>
 <P>
-The \N{U+hhh..} escape sequence is recognized only when the PCRE2_UTF option
-is set, that is, when PCRE2 is operating in a Unicode mode. Perl also uses
-\N{name} to specify characters by Unicode name; PCRE2 does not support this.
-Note that when \N is not followed by an opening brace (curly bracket) it has
-an entirely different meaning, matching any character that is not a newline.
+The \N{U+hhh..} escape sequence is recognized only when PCRE2 is operating in
+UTF mode. Perl also uses \N{name} to specify characters by Unicode name; PCRE2
+does not support this. Note that when \N is not followed by an opening brace
+(curly bracket) it has an entirely different meaning, matching any character
+that is not a newline.
 </P>
 <P>
 There are some legacy applications where the escape sequence \r is expected to
@@ -1360,7 +1361,7 @@ with \C in UTF-8 or UTF-16 mode means that the rest of the string may start
 with a malformed UTF character. This has undefined results, because PCRE2
 assumes that it is matching character by character in a valid UTF string (by
 default it checks the subject string's validity at the start of processing
-unless the PCRE2_NO_UTF_CHECK option is used).
+unless the PCRE2_NO_UTF_CHECK or PCRE2_MATCH_INVALID_UTF option is used).
 </P>
 <P>
 An application can lock out the use of \C by setting the
@@ -3727,7 +3728,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC31" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 12 February 2019
+Last updated: 23 May 2019
 <br>
 Copyright &copy; 1997-2019 University of Cambridge.
 <br>

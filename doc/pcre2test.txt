@@ -551,6 +551,7 @@ PATTERN MODIFIERS
              firstline                 set PCRE2_FIRSTLINE
              literal                   set PCRE2_LITERAL
              match_line                set PCRE2_EXTRA_MATCH_LINE
+             match_invalid_utf         set PCRE2_MATCH_INVALID_UTF
              match_unset_backref       set PCRE2_MATCH_UNSET_BACKREF
              match_word                set PCRE2_EXTRA_MATCH_WORD
          /m  multiline                 set PCRE2_MULTILINE
@@ -1890,5 +1891,5 @@ AUTHOR
 
 REVISION
 
-       Last updated: 11 March 2019
+       Last updated: 23 May 2019
        Copyright (c) 1997-2019 University of Cambridge.

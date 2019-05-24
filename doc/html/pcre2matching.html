@@ -188,6 +188,10 @@ code unit) at a time, for all active paths through the tree.
 9. Except for (*FAIL), the backtracking control verbs such as (*PRUNE) are not
 supported. (*FAIL) is supported, and behaves like a failing negative assertion.
 </P>
+<P>
+10. The PCRE2_MATCH_INVALID_UTF option for <b>pcre2_compile()</b> is not 
+supported by <b>pcre2_dfa_match()</b>.
+</P>
 <br><a name="SEC5" href="#TOC1">ADVANTAGES OF THE ALTERNATIVE ALGORITHM</a><br>
 <P>
 Using the alternative matching algorithm provides the following advantages:
@@ -219,7 +223,8 @@ because it has to search for all possible matches, but is also because it is
 less susceptible to optimization.
 </P>
 <P>
-2. Capturing parentheses, backreferences, and script runs are not supported.
+2. Capturing parentheses, backreferences, script runs, and matching within 
+invalid UTF string are not supported.
 </P>
 <P>
 3. Although atomic groups are supported, their use does not provide the
@@ -236,9 +241,9 @@ Cambridge, England.
 </P>
 <br><a name="SEC8" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 10 October 2018
+Last updated: 23 May 2019
 <br>
-Copyright &copy; 1997-2018 University of Cambridge.
+Copyright &copy; 1997-2019 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE2 index page</a>.

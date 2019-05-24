@@ -1,7 +1,7 @@
 # This set of tests is for UTF-8 support and Unicode property support, with
 # relevance only for the 8-bit library.
 
-# The next 4 patterns have UTF-8 errors
+# The next 5 patterns have UTF-8 errors
 
 /[Ã]/utf
 Failed: error -8 at offset 1: UTF-8 error: byte 2 top bits not 0x80
@@ -13,6 +13,9 @@ Failed: error -3 at offset 0: UTF-8 error: 1 byte missing at end
 Failed: error -8 at offset 0: UTF-8 error: byte 2 top bits not 0x80
 
 /Ã‚‚‚‚‚‚‚‚Ã/utf
+Failed: error -22 at offset 2: UTF-8 error: isolated byte with 0x80 bit set
+
+/Ã‚‚‚‚‚‚‚‚Ã/match_invalid_utf
 Failed: error -22 at offset 2: UTF-8 error: isolated byte with 0x80 bit set
 
 # Now test subjects
@@ -1650,5 +1653,108 @@ Failed: error 142 at offset 4: syntax error in subpattern name (missing terminat
 
 /(?(Ã¡/utf
 Failed: error 142 at offset 5: syntax error in subpattern name (missing terminator?)
+
+# Invalid UTF-8 tests
+
+/.../g,match_invalid_utf
+    abcd\x80wxzy\x80pqrs
+ 0: abc
+ 0: wxz
+ 0: pqr
+    abcd\x{80}wxzy\x80pqrs
+ 0: abc
+ 0: d\x{80}w
+ 0: xzy
+ 0: pqr
+
+/abc/match_invalid_utf
+    ab\x80ab\=ph
+Partial match: ab
+\= Expect no match
+    ab\x80cdef\=ph
+No match
+
+/ab$/match_invalid_utf
+    ab\x80cdeab
+ 0: ab
+\= Expect no match
+    ab\x80cde
+No match
+
+/.../g,match_invalid_utf
+    abcd\x{80}wxzy\x80pqrs
+ 0: abc
+ 0: d\x{80}w
+ 0: xzy
+ 0: pqr
+
+/(?<=x)../g,match_invalid_utf
+    abcd\x{80}wxzy\x80pqrs
+ 0: zy
+    abcd\x{80}wxzy\x80xpqrs
+ 0: zy
+ 0: pq
+    
+/X$/match_invalid_utf
+\= Expect no match
+    X\xc4
+No match
+    
+/(?<=..)X/match_invalid_utf,aftertext
+    AB\x80AQXYZ
+ 0: X
+ 0+ YZ
+    AB\x80AQXYZ\=offset=5
+ 0: X
+ 0+ YZ
+    AB\x80\x80AXYZXC\=offset=5
+ 0: X
+ 0+ C
+\= Expect no match
+    AB\x80XYZ
+No match
+    AB\x80XYZ\=offset=3 
+No match
+    AB\xfeXYZ
+No match
+    AB\xffXYZ\=offset=3 
+No match
+    AB\x80AXYZ
+No match
+    AB\x80AXYZ\=offset=4
+No match
+    AB\x80\x80AXYZ\=offset=5
+No match
+
+/.../match_invalid_utf
+    AB\xc4CCC
+ 0: CCC
+\= Expect no match
+    A\x{d800}B
+No match
+    A\x{110000}B
+No match
+    A\xc4B  
+No match
+
+/\bX/match_invalid_utf
+    A\x80X
+ 0: X
+
+/\BX/match_invalid_utf
+\= Expect no match
+    A\x80X
+No match
+    
+/(?<=...)X/match_invalid_utf
+    AAA\x80BBBXYZ 
+ 0: X
+\= Expect no match
+    AAA\x80BXYZ 
+No match
+    AAA\x80BBXYZ 
+No match
+
+# -------------------------------------
 
 # End of testinput10

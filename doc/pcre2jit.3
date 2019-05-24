@@ -1,4 +1,4 @@
-.TH PCRE2JIT 3 "06 March 2019" "PCRE2 10.33"
+.TH PCRE2JIT 3 "23 May 2019" "PCRE2 10.34"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 JUST-IN-TIME COMPILER SUPPORT"
@@ -123,23 +123,29 @@ pattern.
 .SH "MATCHING SUBJECTS CONTAINING INVALID UTF"
 .rs
 .sp
-When a pattern is compiled with the PCRE2_UTF option, the interpretive matching
-function expects its subject string to be a valid sequence of UTF code units.
-If it is not, the result is undefined. This is also true by default of matching
-via JIT. However, if the option PCRE2_JIT_INVALID_UTF is passed to
-\fBpcre2_jit_compile()\fP, code that can process a subject containing invalid
-UTF is compiled.
+When a pattern is compiled with the PCRE2_UTF option, subject strings are
+normally expected to be a valid sequence of UTF code units. By default, this is
+checked at the start of matching and an error is generated if invalid UTF is
+detected. The PCRE2_NO_UTF_CHECK option can be passed to \fBpcre2_match()\fP to
+skip the check (for improved performance) if you are sure that a subject string
+is valid. If this option is used with an invalid string, the result is
+undefined.
 .P
-In this mode, an invalid code unit sequence never matches any pattern item. It
-does not match dot, it does not match \ep{Any}, it does not even match negative
-items such as [^X]. A lookbehind assertion fails if it encounters an invalid
-sequence while moving the current point backwards. In other words, an invalid
-UTF code unit sequence acts as a barrier which no match can cross. Reaching an
-invalid sequence causes an immediate backtrack.
+However, a way of running matches on strings that may contain invalid UTF
+sequences is available. Calling \fBpcre2_compile()\fP with the
+PCRE2_MATCH_INVALID_UTF option has two effects: it tells the interpreter in
+\fBpcre2_match()\fP to support invalid UTF, and, if \fBpcre2_jit_compile()\fP
+is called, the compiled JIT code also supports invalid UTF. Details of how this
+support works, in both the JIT and the interpretive cases, is given in the
+.\" HREF
+\fBpcre2unicode\fP
+.\"
+documentation.
 .P
-Using this option, an application can run matches in arbitrary data, knowing
-that any matched strings that are returned will be valid UTF. This can be
-useful when searching for text in executable or other binary files.
+There is also an obsolete option for \fBpcre2_jit_compile()\fP called
+PCRE2_JIT_INVALID_UTF, which currently exists only for backward compatibility.
+It is superseded by the \fBpcre2_compile()\fP option PCRE2_MATCH_INVALID_UTF
+and should no longer be used. It may be removed in future.
 .
 .
 .SH "UNSUPPORTED OPTIONS AND PATTERN ITEMS"
@@ -438,6 +444,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 06 March 2019
+Last updated: 23 May 2019
 Copyright (c) 1997-2019 University of Cambridge.
 .fi

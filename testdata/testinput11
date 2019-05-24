@@ -368,6 +368,4 @@
     abÿAz
     ab\x{80000041}z 
 
-/\[()]{65535}/expand
-
 # End of testinput11

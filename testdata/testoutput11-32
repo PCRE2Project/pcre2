@@ -667,6 +667,4 @@ Subject length lower bound = 1
     ab\x{80000041}z 
  0: ab\x{80000041}z
 
-/\[()]{65535}/expand
-
 # End of testinput11

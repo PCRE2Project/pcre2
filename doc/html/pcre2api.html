@@ -1347,11 +1347,12 @@ and <b>pcre2_compile()</b> returns a non-NULL value.
 <P>
 There are nearly 100 positive error codes that <b>pcre2_compile()</b> may return
 if it finds an error in the pattern. There are also some negative error codes
-that are used for invalid UTF strings. These are the same as given by
-<b>pcre2_match()</b> and <b>pcre2_dfa_match()</b>, and are described in the
+that are used for invalid UTF strings when validity checking is in force. These
+are the same as given by <b>pcre2_match()</b> and <b>pcre2_dfa_match()</b>, and
+are described in the
 <a href="pcre2unicode.html"><b>pcre2unicode</b></a>
-page. There is no separate documentation for the positive error codes, because
-the textual error messages that are obtained by calling the
+documentation. There is no separate documentation for the positive error codes,
+because the textual error messages that are obtained by calling the
 <b>pcre2_get_error_message()</b> function (see "Obtaining a textual error
 message"
 <a href="#geterrormessage">below)</a>
@@ -1615,10 +1616,18 @@ expression engine is not the most efficient way of doing it. If you are doing a
 lot of literal matching and are worried about efficiency, you should consider
 using other approaches. The only other main options that are allowed with
 PCRE2_LITERAL are: PCRE2_ANCHORED, PCRE2_ENDANCHORED, PCRE2_AUTO_CALLOUT,
-PCRE2_CASELESS, PCRE2_FIRSTLINE, PCRE2_NO_START_OPTIMIZE, PCRE2_NO_UTF_CHECK,
-PCRE2_UTF, and PCRE2_USE_OFFSET_LIMIT. The extra options PCRE2_EXTRA_MATCH_LINE
-and PCRE2_EXTRA_MATCH_WORD are also supported. Any other options cause an
-error.
+PCRE2_CASELESS, PCRE2_FIRSTLINE, PCRE2_MATCH_INVALID_UTF,
+PCRE2_NO_START_OPTIMIZE, PCRE2_NO_UTF_CHECK, PCRE2_UTF, and
+PCRE2_USE_OFFSET_LIMIT. The extra options PCRE2_EXTRA_MATCH_LINE and
+PCRE2_EXTRA_MATCH_WORD are also supported. Any other options cause an error.
+<pre>
+  PCRE2_MATCH_INVALID_UTF
+</pre>
+This option forces PCRE2_UTF (see below) and also enables support for matching
+by <b>pcre2_match()</b> in subject strings that contain invalid UTF sequences.
+This facility is not supported for DFA matching. For details, see the
+<a href="pcre2unicode.html"><b>pcre2unicode</b></a>
+documentation.
 <pre>
   PCRE2_MATCH_UNSET_BACKREF
 </pre>
@@ -2653,15 +2662,22 @@ of JIT; it forces matching to be done by the interpreter.
   PCRE2_NO_UTF_CHECK
 </pre>
 When PCRE2_UTF is set at compile time, the validity of the subject as a UTF
-string is checked by default when <b>pcre2_match()</b> is subsequently called.
-If a non-zero starting offset is given, the check is applied only to that part
-of the subject that could be inspected during matching, and there is a check
-that the starting offset points to the first code unit of a character or to the
-end of the subject. If there are no lookbehind assertions in the pattern, the
-check starts at the starting offset. Otherwise, it starts at the length of the
-longest lookbehind before the starting offset, or at the start of the subject
-if there are not that many characters before the starting offset. Note that the
-sequences \b and \B are one-character lookbehinds.
+string is checked unless PCRE2_NO_UTF_CHECK is passed to <b>pcre2_match()</b> or
+PCRE2_MATCH_INVALID_UTF was passed to <b>pcre2_compile()</b>. The latter special
+case is discussed in detail in the
+<a href="pcre2unicode.html"><b>pcre2unicode</b></a>
+documentation.
+</P>
+<P>
+In the default case, if a non-zero starting offset is given, the check is
+applied only to that part of the subject that could be inspected during
+matching, and there is a check that the starting offset points to the first
+code unit of a character or to the end of the subject. If there are no
+lookbehind assertions in the pattern, the check starts at the starting offset.
+Otherwise, it starts at the length of the longest lookbehind before the
+starting offset, or at the start of the subject if there are not that many
+characters before the starting offset. Note that the sequences \b and \B are
+one-character lookbehinds.
 </P>
 <P>
 The check is carried out before any other processing takes place, and a
@@ -2674,19 +2690,20 @@ and
 <a href="pcre2unicode.html#utf32strings">UTF-32 strings</a>
 in the
 <a href="pcre2unicode.html"><b>pcre2unicode</b></a>
-page.
+documentation.
 </P>
 <P>
-If you know that your subject is valid, and you want to skip these checks for
+If you know that your subject is valid, and you want to skip this check for
 performance reasons, you can set the PCRE2_NO_UTF_CHECK option when calling
 <b>pcre2_match()</b>. You might want to do this for the second and subsequent
-calls to <b>pcre2_match()</b> if you are making repeated calls to find other
+calls to <b>pcre2_match()</b> if you are making repeated calls to find multiple
 matches in the same subject string.
 </P>
 <P>
-<b>Warning:</b> When PCRE2_NO_UTF_CHECK is set, the effect of passing an invalid
+<b>Warning:</b> Unless PCRE2_MATCH_INVALID_UTF was set at compile time, when
+PCRE2_NO_UTF_CHECK is set at match time the effect of passing an invalid
 string as a subject, or an invalid value of <i>startoffset</i>, is undefined.
-Your program may crash or loop indefinitely.
+Your program may crash or loop indefinitely or give wrong results.
 <pre>
   PCRE2_PARTIAL_HARD
   PCRE2_PARTIAL_SOFT
@@ -3772,6 +3789,12 @@ This return is given if <b>pcre2_dfa_match()</b> encounters a condition item
 that uses a backreference for the condition, or a test for recursion in a
 specific capture group. These are not supported.
 <pre>
+  PCRE2_ERROR_DFA_UINVALID_UTF
+</pre>
+This return is given if <b>pcre2_dfa_match()</b> is called for a pattern that
+was compiled with PCRE2_MATCH_INVALID_UTF. This is not supported for DFA
+matching.
+<pre>
   PCRE2_ERROR_DFA_WSSIZE
 </pre>
 This return is given if <b>pcre2_dfa_match()</b> runs out of space in the
@@ -3808,7 +3831,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC42" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 14 February 2019
+Last updated: 23 May 2019
 <br>
 Copyright &copy; 1997-2019 University of Cambridge.
 <br>

@@ -746,8 +746,8 @@ are allowed. */
 
 #define PUBLIC_LITERAL_COMPILE_OPTIONS \
   (PCRE2_ANCHORED|PCRE2_AUTO_CALLOUT|PCRE2_CASELESS|PCRE2_ENDANCHORED| \
-   PCRE2_FIRSTLINE|PCRE2_LITERAL|PCRE2_NO_START_OPTIMIZE| \
-   PCRE2_NO_UTF_CHECK|PCRE2_USE_OFFSET_LIMIT|PCRE2_UTF)
+   PCRE2_FIRSTLINE|PCRE2_LITERAL|PCRE2_MATCH_INVALID_UTF| \
+   PCRE2_NO_START_OPTIMIZE|PCRE2_NO_UTF_CHECK|PCRE2_USE_OFFSET_LIMIT|PCRE2_UTF)
 
 #define PUBLIC_COMPILE_OPTIONS \
   (PUBLIC_LITERAL_COMPILE_OPTIONS| \
@@ -3615,7 +3615,7 @@ while (ptr < ptrend)
             {
             errorcode = ERR97;
             goto FAILED;
-            }    
+            }
           cb->bracount++;
           *parsed_pattern++ = META_CAPTURE | cb->bracount;
           }
@@ -4444,7 +4444,7 @@ while (ptr < ptrend)
         {
         errorcode = ERR97;
         goto FAILED;
-        }    
+        }
       cb->bracount++;
       *parsed_pattern++ = META_CAPTURE | cb->bracount;
       nest_depth++;
@@ -9503,6 +9503,10 @@ if (pattern == NULL)
 
 if (ccontext == NULL)
   ccontext = (pcre2_compile_context *)(&PRIV(default_compile_context));
+  
+/* PCRE2_MATCH_INVALID_UTF implies UTF */
+
+if ((options & PCRE2_MATCH_INVALID_UTF) != 0) options |= PCRE2_UTF; 
 
 /* Check that all undefined public option bits are zero. */
 
@@ -9682,7 +9686,7 @@ if ((options & PCRE2_LITERAL) == 0)
 
 ptr += skipatstart;
 
-/* Can't support UTF or UCP unless PCRE2 has been compiled with UTF support. */
+/* Can't support UTF or UCP if PCRE2 was built without Unicode support. */
 
 #ifndef SUPPORT_UNICODE
 if ((cb.external_options & (PCRE2_UTF|PCRE2_UCP)) != 0)

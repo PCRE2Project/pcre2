@@ -147,25 +147,29 @@ pattern.
 </P>
 <br><a name="SEC4" href="#TOC1">MATCHING SUBJECTS CONTAINING INVALID UTF</a><br>
 <P>
-When a pattern is compiled with the PCRE2_UTF option, the interpretive matching
-function expects its subject string to be a valid sequence of UTF code units.
-If it is not, the result is undefined. This is also true by default of matching
-via JIT. However, if the option PCRE2_JIT_INVALID_UTF is passed to
-<b>pcre2_jit_compile()</b>, code that can process a subject containing invalid
-UTF is compiled.
+When a pattern is compiled with the PCRE2_UTF option, subject strings are
+normally expected to be a valid sequence of UTF code units. By default, this is
+checked at the start of matching and an error is generated if invalid UTF is
+detected. The PCRE2_NO_UTF_CHECK option can be passed to <b>pcre2_match()</b> to
+skip the check (for improved performance) if you are sure that a subject string
+is valid. If this option is used with an invalid string, the result is
+undefined.
 </P>
 <P>
-In this mode, an invalid code unit sequence never matches any pattern item. It
-does not match dot, it does not match \p{Any}, it does not even match negative
-items such as [^X]. A lookbehind assertion fails if it encounters an invalid
-sequence while moving the current point backwards. In other words, an invalid
-UTF code unit sequence acts as a barrier which no match can cross. Reaching an
-invalid sequence causes an immediate backtrack.
+However, a way of running matches on strings that may contain invalid UTF
+sequences is available. Calling <b>pcre2_compile()</b> with the
+PCRE2_MATCH_INVALID_UTF option has two effects: it tells the interpreter in
+<b>pcre2_match()</b> to support invalid UTF, and, if <b>pcre2_jit_compile()</b>
+is called, the compiled JIT code also supports invalid UTF. Details of how this
+support works, in both the JIT and the interpretive cases, is given in the
+<a href="pcre2unicode.html"><b>pcre2unicode</b></a>
+documentation.
 </P>
 <P>
-Using this option, an application can run matches in arbitrary data, knowing
-that any matched strings that are returned will be valid UTF. This can be
-useful when searching for text in executable or other binary files.
+There is also an obsolete option for <b>pcre2_jit_compile()</b> called
+PCRE2_JIT_INVALID_UTF, which currently exists only for backward compatibility.
+It is superseded by the <b>pcre2_compile()</b> option PCRE2_MATCH_INVALID_UTF
+and should no longer be used. It may be removed in future.
 </P>
 <br><a name="SEC5" href="#TOC1">UNSUPPORTED OPTIONS AND PATTERN ITEMS</a><br>
 <P>
@@ -461,7 +465,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC14" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 06 March 2019
+Last updated: 23 May 2019
 <br>
 Copyright &copy; 1997-2019 University of Cambridge.
 <br>

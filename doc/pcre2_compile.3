@@ -1,4 +1,4 @@
-.TH PCRE2_COMPILE 3 "11 February 2019" "PCRE2 10.33"
+.TH PCRE2_COMPILE 3 "23 May 2019" "PCRE2 10.34"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH SYNOPSIS
@@ -53,6 +53,7 @@ The option bits are:
   PCRE2_EXTENDED           Ignore white space and # comments
   PCRE2_FIRSTLINE          Force matching to be before newline
   PCRE2_LITERAL            Pattern characters are all literal
+  PCRE2_MATCH_INVALID_UTF  Enable support for matching invalid UTF 
   PCRE2_MATCH_UNSET_BACKREF  Match unset backreferences
   PCRE2_MULTILINE          ^ and $ match newlines within data
   PCRE2_NEVER_BACKSLASH_C  Lock out the use of \eC in patterns

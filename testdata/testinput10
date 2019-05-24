@@ -1,7 +1,7 @@
 # This set of tests is for UTF-8 support and Unicode property support, with
 # relevance only for the 8-bit library.
 
-# The next 4 patterns have UTF-8 errors
+# The next 5 patterns have UTF-8 errors
 
 /[√]/utf
 
@@ -10,6 +10,8 @@
 /√√√xxx/utf
 
 /√ÇÇÇÇÇÇÇÇ√/utf
+
+/√ÇÇÇÇÇÇÇÇ√/match_invalid_utf
 
 # Now test subjects
 
@@ -492,5 +494,67 @@
 /(?(n/utf
 
 /(?(√°/utf
+
+# Invalid UTF-8 tests
+
+/.../g,match_invalid_utf
+    abcd\x80wxzy\x80pqrs
+    abcd\x{80}wxzy\x80pqrs
+
+/abc/match_invalid_utf
+    ab\x80ab\=ph
+\= Expect no match
+    ab\x80cdef\=ph
+
+/ab$/match_invalid_utf
+    ab\x80cdeab
+\= Expect no match
+    ab\x80cde
+
+/.../g,match_invalid_utf
+    abcd\x{80}wxzy\x80pqrs
+
+/(?<=x)../g,match_invalid_utf
+    abcd\x{80}wxzy\x80pqrs
+    abcd\x{80}wxzy\x80xpqrs
+    
+/X$/match_invalid_utf
+\= Expect no match
+    X\xc4
+    
+/(?<=..)X/match_invalid_utf,aftertext
+    AB\x80AQXYZ
+    AB\x80AQXYZ\=offset=5
+    AB\x80\x80AXYZXC\=offset=5
+\= Expect no match
+    AB\x80XYZ
+    AB\x80XYZ\=offset=3 
+    AB\xfeXYZ
+    AB\xffXYZ\=offset=3 
+    AB\x80AXYZ
+    AB\x80AXYZ\=offset=4
+    AB\x80\x80AXYZ\=offset=5
+
+/.../match_invalid_utf
+    AB\xc4CCC
+\= Expect no match
+    A\x{d800}B
+    A\x{110000}B
+    A\xc4B  
+
+/\bX/match_invalid_utf
+    A\x80X
+
+/\BX/match_invalid_utf
+\= Expect no match
+    A\x80X
+    
+/(?<=...)X/match_invalid_utf
+    AAA\x80BBBXYZ 
+\= Expect no match
+    AAA\x80BXYZ 
+    AAA\x80BBXYZ 
+
+# -------------------------------------
 
 # End of testinput10

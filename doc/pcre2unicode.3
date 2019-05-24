@@ -1,26 +1,38 @@
-.TH PCRE2UNICODE 3 "11 May 2019" "PCRE2 10.33"
+.TH PCRE2UNICODE 3 "24 May 2019" "PCRE2 10.34"
 .SH NAME
 PCRE - Perl-compatible regular expressions (revised API)
 .SH "UNICODE AND UTF SUPPORT"
 .rs
 .sp
-When PCRE2 is built with Unicode support (which is the default), it has
-knowledge of Unicode character properties and can process text strings in
-UTF-8, UTF-16, or UTF-32 format (depending on the code unit width). However, by
-default, PCRE2 assumes that one code unit is one character. To process a
-pattern as a UTF string, where a character may require more than one code unit,
-you must call
+PCRE2 is normally built with Unicode support, though if you do not need it, you
+can build it without, in which case the library will be smaller. With Unicode
+support, PCRE2 has knowledge of Unicode character properties and can process
+text strings in UTF-8, UTF-16, or UTF-32 format (depending on the code unit
+width), but this is not the default. Unless specifically requested, PCRE2
+treats each code unit in a string as one character.
+.P
+There are two ways of telling PCRE2 to switch to UTF mode, where characters may 
+consist of more than one code unit and the range of values is constrained. The 
+program can call
 .\" HREF
 \fBpcre2_compile()\fP
 .\"
-with the PCRE2_UTF option flag, or the pattern must start with the sequence
-(*UTF). When either of these is the case, both the pattern and any subject
-strings that are matched against it are treated as UTF strings instead of
-strings of individual one-code-unit characters. There are also some other
-changes to the way characters are handled, as documented below.
+with the PCRE2_UTF option, or the pattern may start with the sequence (*UTF).
+However, the latter facility can be locked out by the PCRE2_NEVER_UTF option.
+That is, the programmer can prevent the supplier of the pattern from switching 
+to UTF mode.
 .P
-If you do not need Unicode support you can build PCRE2 without it, in which
-case the library will be smaller.
+Note that the PCRE2_MATCH_INVALID_UTF option (see
+.\" HTML <a href="#matchinvalid">
+.\" </a>
+below)
+.\"
+forces PCRE2_UTF to be set.
+.P
+In UTF mode, both the pattern and any subject strings that are matched against
+it are treated as UTF strings instead of strings of individual one-code-unit
+characters. There are also some other changes to the way characters are
+handled, as documented below.
 .
 .
 .SH "UNICODE PROPERTY SUPPORT"
@@ -55,18 +67,18 @@ also recognized; larger ones can be coded using \eo{...}.
 .P
 The escape sequence \eN{U+<hex digits>} is recognized as another way of
 specifying a Unicode character by code point in a UTF mode. It is not allowed
-in non-UTF modes.
+in non-UTF mode.
 .P
-In UTF modes, repeat quantifiers apply to complete UTF characters, not to
+In UTF mode, repeat quantifiers apply to complete UTF characters, not to
 individual code units.
 .P
-In UTF modes, the dot metacharacter matches one UTF character instead of a
+In UTF mode, the dot metacharacter matches one UTF character instead of a
 single code unit.
 .P
-In UTF modes, capture group names are not restricted to ASCII, and may contain
+In UTF mode, capture group names are not restricted to ASCII, and may contain
 any Unicode letters and decimal digits, as well as underscore.
 .P
-The escape sequence \eC can be used to match a single code unit in a UTF mode,
+The escape sequence \eC can be used to match a single code unit in UTF mode,
 but its use can lead to some strange effects because it breaks up multi-unit
 characters (see the description of \eC in the
 .\" HREF
@@ -82,7 +94,7 @@ may consist of more than one code unit. The use of \eC in these modes provokes
 a match-time error. Also, the JIT optimization does not support \eC in these
 modes. If JIT optimization is requested for a UTF-8 or UTF-16 pattern that
 contains \eC, it will not succeed, and so when \fBpcre2_match()\fP is called,
-the matching will be carried out by the normal interpretive function.
+the matching will be carried out by the interpretive function.
 .P
 The character escapes \eb, \eB, \ed, \eD, \es, \eS, \ew, and \eW correctly test
 characters of any code value, but, by default, the characters that PCRE2
@@ -114,14 +126,14 @@ However, the special horizontal and vertical white space matching escapes (\eh,
 not PCRE2_UCP is set.
 .
 .
-.SH "CASE-EQUIVALENCE IN UTF MODES"
+.SH "CASE-EQUIVALENCE IN UTF MODE"
 .rs
 .sp
-Case-insensitive matching in a UTF mode makes use of Unicode properties except
+Case-insensitive matching in UTF mode makes use of Unicode properties except
 for characters whose code points are less than 128 and that have at most two
 case-equivalent values. For these, a direct table lookup is used for speed. A
 few Unicode characters such as Greek sigma have more than two code points that
-are case-equivalent, and these are treated as such.
+are case-equivalent, and these are treated specially.
 .
 .
 .\" HTML <a name="scriptruns"></a>
@@ -231,7 +243,7 @@ adjacent characters.
 .sp
 When the PCRE2_UTF option is set, the strings passed as patterns and subjects
 are (by default) checked for validity on entry to the relevant functions. If an
-invalid UTF string is passed, an negative error code is returned. The code unit
+invalid UTF string is passed, a negative error code is returned. The code unit
 offset to the offending character can be extracted from the match data block by
 calling \fBpcre2_get_startchar()\fP, which is used for this purpose after a UTF
 error.
@@ -244,18 +256,15 @@ PCRE2 assumes that the pattern or subject it is given (respectively) contains
 only valid UTF code unit sequences.
 .P
 If you pass an invalid UTF string when PCRE2_NO_UTF_CHECK is set, the result
-is usually undefined and your program may crash or loop indefinitely. There is,
-however, one mode of matching that can handle invalid UTF subject strings. This
-is matching via the JIT optimization using the PCRE2_JIT_INVALID_UTF option
-when calling \fBpcre2_jit_compile()\fP. For details, see the
-.\" HREF
-\fBpcre2jit\fP
-.\"
-documentation.
+is undefined and your program may crash or loop indefinitely or give incorrect
+results. There is, however, one mode of matching that can handle invalid UTF
+subject strings. This is enabled by passing PCRE2_MATCH_INVALID_UTF to
+\fBpcre2_compile()\fP and is discussed below in the next section. The rest of
+this section covers the case when PCRE2_MATCH_INVALID_UTF is not set.
 .P
-Passing PCRE2_NO_UTF_CHECK to \fBpcre2_compile()\fP just disables the check for
-the pattern; it does not also apply to subject strings. If you want to disable
-the check for a subject string you must pass this same option to
+Passing PCRE2_NO_UTF_CHECK to \fBpcre2_compile()\fP just disables the UTF check
+for the pattern; it does not also apply to subject strings. If you want to
+disable the check for a subject string you must pass this same option to
 \fBpcre2_match()\fP or \fBpcre2_dfa_match()\fP.
 .P
 UTF-16 and UTF-32 strings can indicate their endianness by special code knows
@@ -386,6 +395,52 @@ The following negative error codes are given for invalid UTF-32 strings:
 .sp
 .
 .
+.\" HTML <a name="matchinvalid"></a>
+.SH "MATCHING IN INVALID UTF STRINGS"
+.rs
+.sp
+You can run pattern matches on subject strings that may contain invalid UTF
+sequences if you call \fBpcre2_compile()\fP with the PCRE2_MATCH_INVALID_UTF
+option. This is supported by \fBpcre2_match()\fP, including JIT matching, but
+not by \fBpcre2_dfa_match()\fP. When PCRE2_MATCH_INVALID_UTF is set, it forces
+PCRE2_UTF to be set as well. Note, however, that the pattern itself must be a 
+valid UTF string.
+.P
+Setting PCRE2_MATCH_INVALID_UTF does not affect what \fBpcre2_compile()\fP
+generates, but if \fBpcre2_jit_compile()\fP is subsequently called, it does
+generate different code. If JIT is not used, the option affects the behaviour
+of the interpretive code in \fBpcre2_match()\fP. When PCRE2_MATCH_INVALID_UTF
+is set at compile time, PCRE2_NO_UTF_CHECK is ignored at match time.
+.P
+In this mode, an invalid code unit sequence in the subject never matches any
+pattern item. It does not match dot, it does not match \ep{Any}, it does not
+even match negative items such as [^X]. A lookbehind assertion fails if it
+encounters an invalid sequence while moving the current point backwards. In
+other words, an invalid UTF code unit sequence acts as a barrier which no match
+can cross.
+.P
+You can also think of this as the subject being split up into fragments of
+valid UTF, delimited internally by invalid code unit sequences. The pattern is
+matched fragment by fragment. The result of a successful match, however, is
+given as code unit offsets in the entire subject string in the usual way. There
+are a few points to consider:
+.P
+The internal boundaries are not interpreted as the beginnings or ends of lines
+and so do not match circumflex or dollar characters in the pattern.
+.P
+If \fBpcre2_match()\fP is called with an offset that points to an invalid
+UTF-sequence, that sequence is skipped, and the match starts at the next valid
+UTF character, or the end of the subject.
+.P
+At internal fragment boundaries, \eb and \eB behave in the same way as at the
+beginning and end of the subject. For example, a sequence such as \ebWORD\eb 
+would match an instance of WORD that is surrounded by invalid UTF code units.
+.P
+Using PCRE2_MATCH_INVALID_UTF, an application can run matches on arbitrary
+data, knowing that any matched strings that are returned are valid UTF. This
+can be useful when searching for UTF text in executable or other binary files.
+.
+.
 .SH AUTHOR
 .rs
 .sp
@@ -400,6 +455,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 11 May 2019
+Last updated: 24 May 2019
 Copyright (c) 1997-2019 University of Cambridge.
 .fi

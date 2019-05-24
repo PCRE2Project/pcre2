@@ -1,4 +1,4 @@
-.TH PCRE2MATCHING 3 "10 October 2018" "PCRE2 10.33"
+.TH PCRE2MATCHING 3 "23 May 2019" "PCRE2 10.34"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 MATCHING ALGORITHMS"
@@ -157,6 +157,9 @@ code unit) at a time, for all active paths through the tree.
 .P
 9. Except for (*FAIL), the backtracking control verbs such as (*PRUNE) are not
 supported. (*FAIL) is supported, and behaves like a failing negative assertion.
+.P
+10. The PCRE2_MATCH_INVALID_UTF option for \fBpcre2_compile()\fP is not 
+supported by \fBpcre2_dfa_match()\fP.
 .
 .
 .SH "ADVANTAGES OF THE ALTERNATIVE ALGORITHM"
@@ -191,7 +194,8 @@ The alternative algorithm suffers from a number of disadvantages:
 because it has to search for all possible matches, but is also because it is
 less susceptible to optimization.
 .P
-2. Capturing parentheses, backreferences, and script runs are not supported.
+2. Capturing parentheses, backreferences, script runs, and matching within 
+invalid UTF string are not supported.
 .P
 3. Although atomic groups are supported, their use does not provide the
 performance advantage that it does for the standard algorithm.
@@ -211,6 +215,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 10 October 2018
-Copyright (c) 1997-2018 University of Cambridge.
+Last updated: 23 May 2019
+Copyright (c) 1997-2019 University of Cambridge.
 .fi

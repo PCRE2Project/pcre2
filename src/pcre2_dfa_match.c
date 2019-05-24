@@ -3294,6 +3294,11 @@ time. */
 if ((options & (PCRE2_PARTIAL_HARD|PCRE2_PARTIAL_SOFT)) != 0 &&
    ((re->overall_options | options) & PCRE2_ENDANCHORED) != 0)
   return PCRE2_ERROR_BADOPTION;
+  
+/* Invalid UTF support is not available for DFA matching. */
+
+if ((re->overall_options & PCRE2_MATCH_INVALID_UTF) != 0) 
+  return PCRE2_ERROR_DFA_UINVALID_UTF;
 
 /* Check that the first field in the block is the magic number. If it is not,
 return with PCRE2_ERROR_BADMAGIC. */

@@ -212,6 +212,12 @@ be C99 don't support it (hence DISABLE_PERCENT_ZT). */
 #define REPLACE_MODSIZE 100       /* Field for reading 8-bit replacement */
 #define VERSION_SIZE 64           /* Size of buffer for the version strings */
 
+/* Default JIT compile options */
+
+#define JIT_DEFAULT (PCRE2_JIT_COMPLETE|\
+                     PCRE2_JIT_PARTIAL_SOFT|\
+                     PCRE2_JIT_PARTIAL_HARD)
+
 /* Make sure the buffer into which replacement strings are copied is big enough
 to hold them as 32-bit code units. */
 
@@ -664,6 +670,7 @@ static modstruct modlist[] = {
   { "literal",                    MOD_PAT,  MOD_OPT, PCRE2_LITERAL,              PO(options) },
   { "locale",                     MOD_PAT,  MOD_STR, LOCALESIZE,                 PO(locale) },
   { "mark",                       MOD_PNDP, MOD_CTL, CTL_MARK,                   PO(control) },
+  { "match_invalid_utf",          MOD_PAT,  MOD_OPT, PCRE2_MATCH_INVALID_UTF,    PO(options) },
   { "match_limit",                MOD_CTM,  MOD_INT, 0,                          MO(match_limit) },
   { "match_line",                 MOD_CTC,  MOD_OPT, PCRE2_EXTRA_MATCH_LINE,     CO(extra_options) },
   { "match_unset_backref",        MOD_PAT,  MOD_OPT, PCRE2_MATCH_UNSET_BACKREF,  PO(options) },
@@ -4136,7 +4143,7 @@ static void
 show_compile_options(uint32_t options, const char *before, const char *after)
 {
 if (options == 0) fprintf(outfile, "%s <none>%s", before, after);
-else fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
+else fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
   before,
   ((options & PCRE2_ALT_BSUX) != 0)? " alt_bsux" : "",
   ((options & PCRE2_ALT_CIRCUMFLEX) != 0)? " alt_circumflex" : "",
@@ -4153,6 +4160,7 @@ else fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%
   ((options & PCRE2_EXTENDED_MORE) != 0)? " extended_more" : "",
   ((options & PCRE2_FIRSTLINE) != 0)? " firstline" : "",
   ((options & PCRE2_LITERAL) != 0)? " literal" : "",
+  ((options & PCRE2_MATCH_INVALID_UTF) != 0)? " match_invalid_utf" : "",
   ((options & PCRE2_MATCH_UNSET_BACKREF) != 0)? " match_unset_backref" : "",
   ((options & PCRE2_MULTILINE) != 0)? " multiline" : "",
   ((options & PCRE2_NEVER_BACKSLASH_C) != 0)? " never_backslash_c" : "",
@@ -4867,7 +4875,7 @@ switch(cmd)
   case CMD_PATTERN:
   (void)decode_modifiers(argptr, CTX_DEFPAT, &def_patctl, NULL);
   if (def_patctl.jit == 0 && (def_patctl.control & CTL_JITVERIFY) != 0)
-    def_patctl.jit = 7;
+    def_patctl.jit = JIT_DEFAULT;
   break;
 
   /* Set default subject modifiers */
@@ -5114,7 +5122,11 @@ patlen = p - buffer - 2;
 /* Look for modifiers and options after the final delimiter. */
 
 if (!decode_modifiers(p, CTX_PAT, &pat_patctl, NULL)) return PR_SKIP;
-utf = (pat_patctl.options & PCRE2_UTF) != 0;
+
+/* Note that the match_invalid_utf option also sets utf when passed to 
+pcre2_compile(). */
+
+utf = (pat_patctl.options & (PCRE2_UTF|PCRE2_MATCH_INVALID_UTF)) != 0;
 
 /* The utf8_input modifier is not allowed in 8-bit mode, and is mutually
 exclusive with the utf modifier. */
@@ -5161,7 +5173,7 @@ specified. */
 
 if (pat_patctl.jit == 0 &&
     (pat_patctl.control & (CTL_JITVERIFY|CTL_JITFAST)) != 0)
-  pat_patctl.jit = 7;
+  pat_patctl.jit = JIT_DEFAULT;
 
 /* Now copy the pattern to pbuffer8 for use in 8-bit testing and for reflecting
 in callouts. Convert from hex if requested (literal strings in quotes may be
@@ -5744,6 +5756,7 @@ if (TEST(compiled_code, !=, NULL) && pat_patctl.jit != 0)
     {
     int i;
     clock_t time_taken = 0;
+
     for (i = 0; i < timeit; i++)
       {
       clock_t start_time;
@@ -5752,7 +5765,7 @@ if (TEST(compiled_code, !=, NULL) && pat_patctl.jit != 0)
         pat_patctl.options|use_forbid_utf, &errorcode, &erroroffset,
         use_pat_context);
       start_time = clock();
-      PCRE2_JIT_COMPILE(jitrc,compiled_code, pat_patctl.jit);
+      PCRE2_JIT_COMPILE(jitrc, compiled_code, pat_patctl.jit);
       time_taken += clock() - start_time;
       }
     total_jit_compile_time += time_taken;
@@ -8615,7 +8628,7 @@ while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
   else if (strcmp(arg, "-jit") == 0 || strcmp(arg, "-jitverify") == 0)
     {
     if (arg[4] != 0) def_patctl.control |= CTL_JITVERIFY;
-    def_patctl.jit = 7;  /* full & partial */
+    def_patctl.jit = JIT_DEFAULT;  /* full & partial */
 #ifndef SUPPORT_JIT
     fprintf(stderr, "** Warning: JIT support is not available: "
                     "-jit[verify] calls functions that do nothing.\n");

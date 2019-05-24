@@ -1500,4 +1500,81 @@ Failed: error 142 at offset 4: syntax error in subpattern name (missing terminat
 /(?(á/utf
 Failed: error 142 at offset 4: syntax error in subpattern name (missing terminator?)
 
+# Invalid UTF-16/32 tests.
+
+/.../g,match_invalid_utf
+    abcd\x{df00}wxzy\x{df00}pqrs
+ 0: abc
+ 0: wxz
+ 0: pqr
+    abcd\x{80}wxzy\x{df00}pqrs
+ 0: abc
+ 0: d\x{80}w
+ 0: xzy
+ 0: pqr
+
+/abc/match_invalid_utf
+    ab\x{df00}ab\=ph
+Partial match: ab
+\= Expect no match
+    ab\x{df00}cdef\=ph
+No match
+
+/ab$/match_invalid_utf
+    ab\x{df00}cdeab
+ 0: ab
+\= Expect no match
+    ab\x{df00}cde
+No match
+
+/.../g,match_invalid_utf
+    abcd\x{80}wxzy\x{df00}pqrs
+ 0: abc
+ 0: d\x{80}w
+ 0: xzy
+ 0: pqr
+
+/(?<=x)../g,match_invalid_utf
+    abcd\x{80}wxzy\x{df00}pqrs
+ 0: zy
+    abcd\x{80}wxzy\x{df00}xpqrs
+ 0: zy
+ 0: pq
+
+/X$/match_invalid_utf
+\= Expect no match
+    X\x{df00}
+No match
+    
+/(?<=..)X/match_invalid_utf,aftertext
+    AB\x{df00}AQXYZ
+ 0: X
+ 0+ YZ
+    AB\x{df00}AQXYZ\=offset=5
+ 0: X
+ 0+ YZ
+    AB\x{df00}\x{df00}AXYZXC\=offset=5
+ 0: X
+ 0+ C
+\= Expect no match
+    AB\x{df00}XYZ
+No match
+    AB\x{df00}XYZ\=offset=3 
+No match
+    AB\x{df00}AXYZ
+No match
+    AB\x{df00}AXYZ\=offset=4
+No match
+    AB\x{df00}\x{df00}AXYZ\=offset=5
+No match
+
+/.../match_invalid_utf
+\= Expect no match
+    A\x{d800}B
+No match
+    A\x{110000}B 
+No match
+
+# ---------------------------------------------------- 
+
 # End of testinput12
