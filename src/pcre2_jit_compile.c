@@ -6,7 +6,7 @@
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
-                    This module by Zoltan Herczeg 
+                    This module by Zoltan Herczeg
      Original API code Copyright (c) 1997-2012 University of Cambridge
           New API code Copyright (c) 2016-2019 University of Cambridge
 
@@ -14152,39 +14152,40 @@ PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_jit_compile(pcre2_code *code, uint32_t options)
 {
 pcre2_real_code *re = (pcre2_real_code *)code;
-executable_functions *functions;
+
+#ifdef SUPPORT_JIT
+executable_functions *functions = (executable_functions *)re->executable_jit;
+#endif
 
 if (code == NULL)
   return PCRE2_ERROR_NULL;
 
 if ((options & ~PUBLIC_JIT_COMPILE_OPTIONS) != 0)
   return PCRE2_ERROR_JIT_BADOPTION;
-  
-functions = (executable_functions *)re->executable_jit;
 
-/* Support for invalid UTF was first introduced in JIT, with the option 
-PCRE2_JIT_INVALID_UTF. Later, support was added to the interpreter, and the 
-compile-time option PCRE2_MATCH_INVALID_UTF was created. This is now the 
-preferred feature, with the earlier option deprecated. However, for backward 
-compatibility, if the earlier option is set, it forces the new option so that 
-if JIT matching falls back to the interpreter, there is still support for 
+/* Support for invalid UTF was first introduced in JIT, with the option
+PCRE2_JIT_INVALID_UTF. Later, support was added to the interpreter, and the
+compile-time option PCRE2_MATCH_INVALID_UTF was created. This is now the
+preferred feature, with the earlier option deprecated. However, for backward
+compatibility, if the earlier option is set, it forces the new option so that
+if JIT matching falls back to the interpreter, there is still support for
 invalid UTF. However, if this function has already been successfully called
-without PCRE2_JIT_INVALID_UTF and without PCRE2_MATCH_INVALID_UTF (meaning that 
-non-invalid-supporting JIT code was compiled), give an error. 
+without PCRE2_JIT_INVALID_UTF and without PCRE2_MATCH_INVALID_UTF (meaning that
+non-invalid-supporting JIT code was compiled), give an error.
 
-If in the future support for PCRE2_JIT_INVALID_UTF is withdrawn, the following 
+If in the future support for PCRE2_JIT_INVALID_UTF is withdrawn, the following
 actions are needed:
 
   1. Remove the definition from pcre2.h.in and from the list in
      PUBLIC_JIT_COMPILE_OPTIONS above.
-     
+
   2. Replace PCRE2_JIT_INVALID_UTF with a local flag in this module.
-  
+
   3. Replace PCRE2_JIT_INVALID_UTF in pcre2_jit_test.c.
-  
-  4. Delete the following short block of code. The setting of "re" and 
-     "functions" can be moved into the JIT-only block below, but if that is 
-     done, (void)re and (void)functions will be needed in the non-JIT case, to 
+
+  4. Delete the following short block of code. The setting of "re" and
+     "functions" can be moved into the JIT-only block below, but if that is
+     done, (void)re and (void)functions will be needed in the non-JIT case, to
      avoid compiler warnings.
 */
 
@@ -14192,13 +14193,15 @@ if ((options & PCRE2_JIT_INVALID_UTF) != 0)
   {
   if ((re->overall_options & PCRE2_MATCH_INVALID_UTF) == 0)
     {
+#ifdef SUPPORT_JIT
     if (functions != NULL) return PCRE2_ERROR_JIT_BADOPTION;
-    re->overall_options |= PCRE2_MATCH_INVALID_UTF; 
-    }  
+#endif
+    re->overall_options |= PCRE2_MATCH_INVALID_UTF;
+    }
   }
-  
-/* The above tests are run with and without JIT support. This means that 
-PCRE2_JIT_INVALID_UTF propagates back into the regex options (ensuring 
+
+/* The above tests are run with and without JIT support. This means that
+PCRE2_JIT_INVALID_UTF propagates back into the regex options (ensuring
 interpreter support) even in the absence of JIT. But now, if there is no JIT
 support, give an error return. */
 
@@ -14210,8 +14213,8 @@ return PCRE2_ERROR_JIT_BADOPTION;
 
 if ((re->flags & PCRE2_NOJIT) != 0) return 0;
 if ((re->overall_options & PCRE2_MATCH_INVALID_UTF) != 0)
-  options |= PCRE2_JIT_INVALID_UTF;  
-  
+  options |= PCRE2_JIT_INVALID_UTF;
+
 if ((options & PCRE2_JIT_COMPLETE) != 0 && (functions == NULL
     || functions->executable_funcs[0] == NULL)) {
   uint32_t excluded_options = (PCRE2_JIT_PARTIAL_SOFT | PCRE2_JIT_PARTIAL_HARD);
