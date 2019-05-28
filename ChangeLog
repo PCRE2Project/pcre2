@@ -22,6 +22,9 @@ PCRE2_MATCH_INVALID_UTF compile-time option.
 
 6. Add support for invalid UTF-8 to pcre2grep.
 
+7. Adjust the limit for "must have" code unit searching, in particular,
+increase it substantially for non-anchored patterns.
+
 
 Version 10.33 16-April-2019
 ---------------------------

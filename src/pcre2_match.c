@@ -6783,6 +6783,8 @@ for(;;)
 
     if (!mb->partial)
       {
+      PCRE2_SPTR p;
+
       /* The minimum matching length is a lower bound; no string of that length
       may actually match the pattern. Although the value is, strictly, in
       characters, we treat it as code units to avoid spending too much time in
@@ -6806,60 +6808,57 @@ for(;;)
       memchr() twice in the caseless case because we only need to check for the
       presence of the character in either case, not find the first occurrence.
 
+      The search can be skipped if the code unit was found later than the
+      current starting point in a previous iteration of the bumpalong loop.
+
       HOWEVER: when the subject string is very, very long, searching to its end
       can take a long time, and give bad performance on quite ordinary
-      patterns. This showed up when somebody was matching something like
-      /^\d+C/ on a 32-megabyte string... so we don't do this when the string is
-      sufficiently long. */
+      anchored patterns. This showed up when somebody was matching something
+      like /^\d+C/ on a 32-megabyte string... so we don't do this when the
+      string is sufficiently long, but it's worth searching a lot more for
+      unanchored patterns. */
 
-      if (has_req_cu && end_subject - start_match < REQ_CU_MAX)
+      p = start_match + (has_first_cu? 1:0);
+      if (has_req_cu && p > req_cu_ptr)
         {
-        PCRE2_SPTR p = start_match + (has_first_cu? 1:0);
+        PCRE2_SIZE check_length = end_subject - start_match;
 
-        /* We don't need to repeat the search if we haven't yet reached the
-        place we found it last time round the bumpalong loop. */
-
-        if (p > req_cu_ptr)
+        if (check_length < REQ_CU_MAX ||
+              (!anchored && check_length < REQ_CU_MAX * 1000))
           {
-          if (p < end_subject)
+          if (req_cu != req_cu2)  /* Caseless */
             {
-            if (req_cu != req_cu2)  /* Caseless */
-              {
 #if PCRE2_CODE_UNIT_WIDTH != 8
-              do
-                {
-                uint32_t pp = UCHAR21INCTEST(p);
-                if (pp == req_cu || pp == req_cu2) { p--; break; }
-                }
-              while (p < end_subject);
-
-#else  /* 8-bit code units */
-              PCRE2_SPTR pp = p;
-              p = memchr(pp, req_cu, end_subject - pp);
-              if (p == NULL)
-                {
-                p = memchr(pp, req_cu2, end_subject - pp);
-                if (p == NULL) p = end_subject;
-                }
-#endif /* PCRE2_CODE_UNIT_WIDTH != 8 */
+            while (p < end_subject)
+              {
+              uint32_t pp = UCHAR21INCTEST(p);
+              if (pp == req_cu || pp == req_cu2) { p--; break; }
               }
-
-            /* The caseful case */
-
-            else
-              {
-#if PCRE2_CODE_UNIT_WIDTH != 8
-              do
-                {
-                if (UCHAR21INCTEST(p) == req_cu) { p--; break; }
-                }
-              while (p < end_subject);
-
 #else  /* 8-bit code units */
-              p = memchr(p, req_cu, end_subject - p);
+            PCRE2_SPTR pp = p;
+            p = memchr(pp, req_cu, end_subject - pp);
+            if (p == NULL)
+              {
+              p = memchr(pp, req_cu2, end_subject - pp);
               if (p == NULL) p = end_subject;
-#endif
               }
+#endif /* PCRE2_CODE_UNIT_WIDTH != 8 */
+            }
+
+          /* The caseful case */
+
+          else
+            {
+#if PCRE2_CODE_UNIT_WIDTH != 8
+            while (p < end_subject)
+              {
+              if (UCHAR21INCTEST(p) == req_cu) { p--; break; }
+              }
+
+#else  /* 8-bit code units */
+            p = memchr(p, req_cu, end_subject - p);
+            if (p == NULL) p = end_subject;
+#endif
             }
 
           /* If we can't find the required code unit, break the bumpalong loop,
