@@ -1,4 +1,4 @@
-.TH PCRE2GREP 1 "24 November 2018" "PCRE2 10.33"
+.TH PCRE2GREP 1 "28 May 2019" "PCRE2 10.34"
 .SH NAME
 pcre2grep - a grep with Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -644,11 +644,21 @@ is listed. If file names are being output, the grand total is preceded by
 ignored when used with \fB-L\fP (list files without matches), because the grand
 total would always be zero.
 .TP
-\fB-u\fP, \fB--utf-8\fP
+\fB-u\fP, \fB--utf\fP
 Operate in UTF-8 mode. This option is available only if PCRE2 has been compiled
 with UTF-8 support. All patterns (including those for any \fB--exclude\fP and
 \fB--include\fP options) and all subject lines that are scanned must be valid
 strings of UTF-8 characters.
+.TP
+\fb-U\fP, \fB--utf-allow-invalid\fP
+As \fB--utf\fP, but in addition subject lines may contain invalid UTF-8 code
+unit sequences. These can never form part of any pattern match. This facility
+allows valid UTF-8 strings to be sought in executable or other binary files.
+For more details about matching in non-valid UTF-8 strings, see the
+.\" HREF
+\fBpcre2unicode\fP(3)
+.\"
+documentation.
 .TP
 \fB-V\fP, \fB--version\fP
 Write the version numbers of \fBpcre2grep\fP and the PCRE2 library to the
@@ -711,9 +721,9 @@ as in the GNU \fBgrep\fP program. Any long option of the form
 \fB--file-offsets\fP, \fB--heap-limit\fP, \fB--include-dir\fP,
 \fB--line-offsets\fP, \fB--locale\fP, \fB--match-limit\fP, \fB-M\fP,
 \fB--multiline\fP, \fB-N\fP, \fB--newline\fP, \fB--om-separator\fP,
-\fB--output\fP, \fB-u\fP, and \fB--utf-8\fP options are specific to
-\fBpcre2grep\fP, as is the use of the \fB--only-matching\fP option with a
-capturing parentheses number.
+\fB--output\fP, \fB-u\fP, \fB--utf\fP, \fB-U\fP, and \fB--utf-allow-invalid\fP
+options are specific to \fBpcre2grep\fP, as is the use of the
+\fB--only-matching\fP option with a capturing parentheses number.
 .P
 Although most of the common options work the same way, a few are different in
 \fBpcre2grep\fP. For example, the \fB--include\fP option's argument is a glob
@@ -884,6 +894,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 24 November 2018
-Copyright (c) 1997-2018 University of Cambridge.
+Last updated: 28 May 2019
+Copyright (c) 1997-2019 University of Cambridge.
 .fi

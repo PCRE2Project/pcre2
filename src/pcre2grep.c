@@ -13,7 +13,7 @@ distribution because other apparatus is needed to compile pcre2grep for z/OS.
 The header can be found in the special z/OS distribution, which is available
 from www.zaconsultants.net or from www.cbttape.org.
 
-           Copyright (c) 1997-2018 University of Cambridge
+           Copyright (c) 1997-2019 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -108,6 +108,19 @@ MSVC 10/2010. Except for VC6 (which is missing some fundamentals and fails). */
 
 #if defined(_MSC_VER) && (_MSC_VER < 1900)
 #define snprintf _snprintf
+#endif
+
+/* VC and older compilers don't support %td or %zu, and even some that claim to
+be C99 don't support it (hence DISABLE_PERCENT_ZT). */
+
+#if defined(_MSC_VER) || !defined(__STDC_VERSION__) || __STDC_VERSION__ < 199901L || defined(DISABLE_PERCENT_ZT)
+#define PTR_FORM "lu"
+#define SIZ_FORM "lu"
+#define SIZ_CAST (unsigned long int)
+#else
+#define PTR_FORM "td"
+#define SIZ_FORM "zu"
+#define SIZ_CAST
 #endif
 
 #define FALSE 0
@@ -451,6 +464,7 @@ static option_item optionlist[] = {
   { OP_NODATA,    's',      NULL,              "no-messages",   "suppress error messages" },
   { OP_NODATA,    't',      NULL,              "total-count",   "print total count of matching lines" },
   { OP_NODATA,    'u',      NULL,              "utf",           "use UTF mode" },
+  { OP_NODATA,    'U',      NULL,              "utf-allow-invalid", "use UTF mode, allow for invalid code units" },
   { OP_NODATA,    'V',      NULL,              "version",       "print version information and exit" },
   { OP_NODATA,    'v',      NULL,              "invert-match",  "select non-matching lines" },
   { OP_NODATA,    'w',      NULL,              "word-regex(p)", "force patterns to match only as words"  },
@@ -1733,6 +1747,15 @@ for (i = 1; p != NULL; p = p->next, i++)
   fprintf(stderr, "%s", msg);
   FWRITE_IGNORE(matchptr, 1, slen, stderr);   /* In case binary zero included */
   fprintf(stderr, "\n\n");
+  if (*mrc <= PCRE2_ERROR_UTF8_ERR1 &&
+      *mrc >= PCRE2_ERROR_UTF8_ERR21)
+    {
+    unsigned char mbuffer[256];
+    PCRE2_SIZE startchar = pcre2_get_startchar(match_data);
+    (void)pcre2_get_error_message(*mrc, mbuffer, sizeof(mbuffer));
+    fprintf(stderr, "%s at offset %" SIZ_FORM "\n\n", mbuffer, 
+      SIZ_CAST startchar);
+    }
   if (*mrc == PCRE2_ERROR_MATCHLIMIT || *mrc == PCRE2_ERROR_DEPTHLIMIT ||
       *mrc == PCRE2_ERROR_HEAPLIMIT || *mrc == PCRE2_ERROR_JIT_STACKLIMIT)
     resource_error = TRUE;
@@ -3401,6 +3424,7 @@ switch(letter)
   case 's': silent = TRUE; break;
   case 't': show_total_count = TRUE; break;
   case 'u': options |= PCRE2_UTF; utf = TRUE; break;
+  case 'U': options |= PCRE2_UTF|PCRE2_MATCH_INVALID_UTF; utf = TRUE; break;
   case 'v': invert = TRUE; break;
   case 'w': extra_options |= PCRE2_EXTRA_MATCH_WORD; break;
   case 'x': extra_options |= PCRE2_EXTRA_MATCH_LINE; break;

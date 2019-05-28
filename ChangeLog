@@ -18,6 +18,10 @@ detects invalid characters in the 0xd800-0xdfff range.
 interpreter, and integrate with the existing JIT support via the new
 PCRE2_MATCH_INVALID_UTF compile-time option.
 
+5. Give more error detail for invalid UTF-8 when detected in pcre2grep.
+
+6. Add support for invalid UTF-8 to pcre2grep.
+
 
 Version 10.33 16-April-2019
 ---------------------------

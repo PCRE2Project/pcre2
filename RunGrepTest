@@ -8,7 +8,7 @@
 # * Put printf arguments in single, not double quotes to avoid unwanted
 #     escaping.
 # * Use \0 for binary zero in printf, not \x0, for the benefit of older
-#     versions.
+#     versions (and use octal for other special values).
 
 # Set the C locale, so that sort(1) behaves predictably.
 
@@ -675,6 +675,16 @@ if [ $utf8 -ne 0 ] ; then
 
   echo "---------------------------- Test U3 ------------------------------" >>testtrygrep
   (cd $srcdir; $valgrind $vjs $pcre2grep --line-offsets -u --newline=any '(?<=\K\x{17f})' ./testdata/grepinput8) >>testtrygrep
+  echo "RC=$?" >>testtrygrep
+  
+  echo "---------------------------- Test U4 ------------------------------" >>testtrygrep
+  printf 'A\341\200\200\200CD\342\200\200Z\n' >testtemp1grep
+  (cd $srcdir; $valgrind $vjs $pcre2grep -u -o '....' testtemp1grep) >>testtrygrep 2>&1
+  echo "RC=$?" >>testtrygrep
+
+  echo "---------------------------- Test U5 ------------------------------" >>testtrygrep
+  printf 'A\341\200\200\200CD\342\200\200Z\n' >testtemp1grep
+  (cd $srcdir; $valgrind $vjs $pcre2grep -U -o '....' testtemp1grep) >>testtrygrep
   echo "RC=$?" >>testtrygrep
 
   $cf $srcdir/testdata/grepoutput8 testtrygrep
