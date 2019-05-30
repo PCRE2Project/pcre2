@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "23 May 2019" "PCRE2 10.34"
+.TH PCRE2API 3 "30 May 2019" "PCRE2 10.34"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -1701,17 +1701,22 @@ subject string does not happen. The first match attempt is run starting from
 "D" and when this fails, (*COMMIT) prevents any further matches being tried, so
 the overall result is "no match".
 .P
-There are also other start-up optimizations. For example, a minimum length for
-the subject may be recorded. Consider the pattern
+As another start-up optimization makes use of a minimum length for a matching
+subject, which is recorded when possible. Consider the pattern
 .sp
-  (*MARK:A)(X|Y)
+  (*MARK:1)B(*MARK:2)(X|Y)
 .sp
-The minimum length for a match is one character. If the subject is "ABC", there
-will be attempts to match "ABC", "BC", and "C". An attempt to match an empty
-string at the end of the subject does not take place, because PCRE2 knows that
-the subject is now too short, and so the (*MARK) is never encountered. In this
-case, the optimization does not affect the overall match result, which is still
-"no match", but it does affect the auxiliary information that is returned.
+The minimum length for a match is two characters. If the subject is "XXBB", the 
+"starting character" optimization skips "XX", then tries to match "BB", which 
+is long enough. In the process, (*MARK:2) is encountered and remembered. When 
+the match attempt fails, the next "B" is found, but there is only one character
+left, so there are no more attempts, and "no match" is returned with the "last
+mark seen" set to "2". If NO_START_OPTIMIZE is set, however, matches are tried
+at every possible starting position, including at the end of the subject, where
+(*MARK:1) is encountered, but there is no "B", so the "last mark seen" that is
+returned is "1". In this case, the optimizations do not affect the overall
+match result, which is still "no match", but they do affect the auxiliary
+information that is returned.
 .sp
   PCRE2_NO_UTF_CHECK
 .sp
@@ -3843,6 +3848,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 23 May 2019
+Last updated: 30 May 2019
 Copyright (c) 1997-2019 University of Cambridge.
 .fi

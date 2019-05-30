@@ -741,11 +741,20 @@ ignored when used with <b>-L</b> (list files without matches), because the grand
 total would always be zero.
 </P>
 <P>
-<b>-u</b>, <b>--utf-8</b>
+<b>-u</b>, <b>--utf</b>
 Operate in UTF-8 mode. This option is available only if PCRE2 has been compiled
 with UTF-8 support. All patterns (including those for any <b>--exclude</b> and
 <b>--include</b> options) and all subject lines that are scanned must be valid
 strings of UTF-8 characters.
+</P>
+<P>
+<b>-U</b>, <b>--utf-allow-invalid</b>
+As <b>--utf</b>, but in addition subject lines may contain invalid UTF-8 code
+unit sequences. These can never form part of any pattern match. This facility
+allows valid UTF-8 strings to be sought in executable or other binary files.
+For more details about matching in non-valid UTF-8 strings, see the
+<a href="pcre2unicode.html"><b>pcre2unicode</b>(3)</a>
+documentation.
 </P>
 <P>
 <b>-V</b>, <b>--version</b>
@@ -806,9 +815,9 @@ as in the GNU <b>grep</b> program. Any long option of the form
 <b>--file-offsets</b>, <b>--heap-limit</b>, <b>--include-dir</b>,
 <b>--line-offsets</b>, <b>--locale</b>, <b>--match-limit</b>, <b>-M</b>,
 <b>--multiline</b>, <b>-N</b>, <b>--newline</b>, <b>--om-separator</b>,
-<b>--output</b>, <b>-u</b>, and <b>--utf-8</b> options are specific to
-<b>pcre2grep</b>, as is the use of the <b>--only-matching</b> option with a
-capturing parentheses number.
+<b>--output</b>, <b>-u</b>, <b>--utf</b>, <b>-U</b>, and <b>--utf-allow-invalid</b>
+options are specific to <b>pcre2grep</b>, as is the use of the
+<b>--only-matching</b> option with a capturing parentheses number.
 </P>
 <P>
 Although most of the common options work the same way, a few are different in
@@ -971,9 +980,9 @@ Cambridge, England.
 </P>
 <br><a name="SEC16" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 24 November 2018
+Last updated: 28 May 2019
 <br>
-Copyright &copy; 1997-2018 University of Cambridge.
+Copyright &copy; 1997-2019 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE2 index page</a>.
