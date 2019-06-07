@@ -3371,6 +3371,35 @@ else
 JUMPHERE(jump);
 }
 
+static void process_partial_match(compiler_common *common)
+{
+DEFINE_COMPILER;
+struct sljit_jump *jump;
+
+/* Partial matching mode. */
+if (common->mode == PCRE2_JIT_PARTIAL_SOFT)
+  {
+  jump = CMP(SLJIT_GREATER_EQUAL, SLJIT_MEM1(SLJIT_SP), common->start_used_ptr, STR_PTR, 0);
+  OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), common->hit_start, SLJIT_IMM, 0);
+  JUMPHERE(jump);
+  }
+else if (common->mode == PCRE2_JIT_PARTIAL_HARD)
+  {
+  if (common->partialmatchlabel != NULL)
+    CMPTO(SLJIT_LESS, SLJIT_MEM1(SLJIT_SP), common->start_used_ptr, STR_PTR, 0, common->partialmatchlabel);
+  else
+    add_jump(compiler, &common->partialmatch, CMP(SLJIT_LESS, SLJIT_MEM1(SLJIT_SP), common->start_used_ptr, STR_PTR, 0));
+  }
+}
+
+static void detect_partial_match_to(compiler_common *common, struct sljit_label *label)
+{
+DEFINE_COMPILER;
+
+CMPTO(SLJIT_LESS, STR_PTR, 0, STR_END, 0, label);
+process_partial_match(common);
+}
+
 static void peek_char(compiler_common *common, sljit_u32 max, sljit_s32 dst, sljit_sw dstw, jump_list **backtracks)
 {
 /* Reads the character into TMP1, keeps STR_PTR.
@@ -11466,174 +11495,232 @@ switch(opcode)
     JUMPTO(SLJIT_JUMP, label);
     if (jump != NULL)
       JUMPHERE(jump);
+    BACKTRACK_AS(char_iterator_backtrack)->matchingpath = LABEL();
+    break;
     }
-  else
-    {
-    charpos_enabled = FALSE;
-    charpos_char = 0;
-    charpos_othercasebit = 0;
-
-    if ((type != OP_CHAR && type != OP_CHARI) && (*end == OP_CHAR || *end == OP_CHARI))
-      {
-      charpos_enabled = TRUE;
 #ifdef SUPPORT_UNICODE
-      charpos_enabled = !common->utf || !HAS_EXTRALEN(end[1]);
+  else if (type == OP_ALLANY && !common->invalid_utf)
+#else
+  else if (type == OP_ALLANY)
 #endif
-      if (charpos_enabled && *end == OP_CHARI && char_has_othercase(common, end + 1))
+    {
+    if (opcode == OP_STAR)
+      {
+      if (private_data_ptr == 0)
+        allocate_stack(common, 2);
+
+      OP1(SLJIT_MOV, base, offset0, STR_END, 0);
+      OP1(SLJIT_MOV, base, offset1, STR_PTR, 0);
+
+      OP1(SLJIT_MOV, STR_PTR, 0, STR_END, 0);
+      process_partial_match(common);
+
+      if (fast_str_ptr != 0)
+        OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), fast_str_ptr, STR_END, 0);
+      BACKTRACK_AS(char_iterator_backtrack)->matchingpath = LABEL();
+      break;
+      }
+#ifdef SUPPORT_UNICODE
+    else if (!common->utf)
+#else
+    else
+#endif
+      {
+      if (private_data_ptr == 0)
+        allocate_stack(common, 2);
+
+      OP1(SLJIT_MOV, base, offset1, STR_PTR, 0);
+      OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(max));
+
+      if (common->mode == PCRE2_JIT_COMPLETE)
         {
-        charpos_othercasebit = char_get_othercase_bit(common, end + 1);
-        if (charpos_othercasebit == 0)
-          charpos_enabled = FALSE;
+        OP2(SLJIT_SUB | SLJIT_SET_GREATER, SLJIT_UNUSED, 0, STR_PTR, 0, STR_END, 0);
+        CMOV(SLJIT_GREATER, STR_PTR, STR_END, 0);
+        }
+      else
+        {
+        jump = CMP(SLJIT_LESS_EQUAL, STR_PTR, 0, STR_END, 0);
+        process_partial_match(common);
+        JUMPHERE(jump);
         }
 
-      if (charpos_enabled)
-        {
-        charpos_char = end[1];
-        /* Consumpe the OP_CHAR opcode. */
-        end += 2;
-#if PCRE2_CODE_UNIT_WIDTH == 8
-        SLJIT_ASSERT((charpos_othercasebit >> 8) == 0);
-#elif PCRE2_CODE_UNIT_WIDTH == 16 || PCRE2_CODE_UNIT_WIDTH == 32
-        SLJIT_ASSERT((charpos_othercasebit >> 9) == 0);
-        if ((charpos_othercasebit & 0x100) != 0)
-          charpos_othercasebit = (charpos_othercasebit & 0xff) << 8;
-#endif
-        if (charpos_othercasebit != 0)
-          charpos_char |= charpos_othercasebit;
+      OP1(SLJIT_MOV, base, offset0, STR_PTR, 0);
 
-        BACKTRACK_AS(char_iterator_backtrack)->u.charpos.enabled = TRUE;
-        BACKTRACK_AS(char_iterator_backtrack)->u.charpos.chr = charpos_char;
-        BACKTRACK_AS(char_iterator_backtrack)->u.charpos.othercasebit = charpos_othercasebit;
-        }
+      if (fast_str_ptr != 0)
+        OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), fast_str_ptr, STR_PTR, 0);
+      BACKTRACK_AS(char_iterator_backtrack)->matchingpath = LABEL();
+      break;
+      }
+    }
+
+  charpos_enabled = FALSE;
+  charpos_char = 0;
+  charpos_othercasebit = 0;
+
+  if ((type != OP_CHAR && type != OP_CHARI) && (*end == OP_CHAR || *end == OP_CHARI))
+    {
+#ifdef SUPPORT_UNICODE
+    charpos_enabled = !common->utf || !HAS_EXTRALEN(end[1]);
+#else
+    charpos_enabled = TRUE;
+#endif
+    if (charpos_enabled && *end == OP_CHARI && char_has_othercase(common, end + 1))
+      {
+      charpos_othercasebit = char_get_othercase_bit(common, end + 1);
+      if (charpos_othercasebit == 0)
+        charpos_enabled = FALSE;
       }
 
     if (charpos_enabled)
       {
-      if (opcode == OP_UPTO)
-        OP1(SLJIT_MOV, tmp_base, tmp_offset, SLJIT_IMM, max + 1);
-
-      /* Search the first instance of charpos_char. */
-      jump = JUMP(SLJIT_JUMP);
-      label = LABEL();
-      if (opcode == OP_UPTO)
-        {
-        OP2(SLJIT_SUB | SLJIT_SET_Z, tmp_base, tmp_offset, tmp_base, tmp_offset, SLJIT_IMM, 1);
-        add_jump(compiler, &backtrack->topbacktracks, JUMP(SLJIT_ZERO));
-        }
-      compile_char1_matchingpath(common, type, cc, &backtrack->topbacktracks, FALSE);
-      if (fast_str_ptr != 0)
-        OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), fast_str_ptr, STR_PTR, 0);
-      JUMPHERE(jump);
-
-      detect_partial_match(common, &backtrack->topbacktracks);
-      OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(0));
-      if (charpos_othercasebit != 0)
-        OP2(SLJIT_OR, TMP1, 0, TMP1, 0, SLJIT_IMM, charpos_othercasebit);
-      CMPTO(SLJIT_NOT_EQUAL, TMP1, 0, SLJIT_IMM, charpos_char, label);
-
-      if (private_data_ptr == 0)
-        allocate_stack(common, 2);
-      OP1(SLJIT_MOV, base, offset0, STR_PTR, 0);
-      OP1(SLJIT_MOV, base, offset1, STR_PTR, 0);
-      if (opcode == OP_UPTO)
-        {
-        OP2(SLJIT_SUB | SLJIT_SET_Z, tmp_base, tmp_offset, tmp_base, tmp_offset, SLJIT_IMM, 1);
-        add_jump(compiler, &no_match, JUMP(SLJIT_ZERO));
-        }
-
-      /* Search the last instance of charpos_char. */
-      label = LABEL();
-      compile_char1_matchingpath(common, type, cc, &no_match, FALSE);
-      if (fast_str_ptr != 0)
-        OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), fast_str_ptr, STR_PTR, 0);
-      detect_partial_match(common, &no_match);
-      OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(0));
-      if (charpos_othercasebit != 0)
-        OP2(SLJIT_OR, TMP1, 0, TMP1, 0, SLJIT_IMM, charpos_othercasebit);
-      if (opcode == OP_STAR)
-        {
-        CMPTO(SLJIT_NOT_EQUAL, TMP1, 0, SLJIT_IMM, charpos_char, label);
-        OP1(SLJIT_MOV, base, offset0, STR_PTR, 0);
-        }
-      else
-        {
-        jump = CMP(SLJIT_NOT_EQUAL, TMP1, 0, SLJIT_IMM, charpos_char);
-        OP1(SLJIT_MOV, base, offset0, STR_PTR, 0);
-        JUMPHERE(jump);
-        }
-
-      if (opcode == OP_UPTO)
-        {
-        OP2(SLJIT_SUB | SLJIT_SET_Z, tmp_base, tmp_offset, tmp_base, tmp_offset, SLJIT_IMM, 1);
-        JUMPTO(SLJIT_NOT_ZERO, label);
-        }
-      else
-        JUMPTO(SLJIT_JUMP, label);
-
-      set_jumps(no_match, LABEL());
-      OP1(SLJIT_MOV, STR_PTR, 0, base, offset0);
-      OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
-      OP1(SLJIT_MOV, base, offset0, STR_PTR, 0);
-      }
-#if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
-    else if (common->utf)
-      {
-      if (private_data_ptr == 0)
-        allocate_stack(common, 2);
-
-      OP1(SLJIT_MOV, base, offset0, STR_PTR, 0);
-      OP1(SLJIT_MOV, base, offset1, STR_PTR, 0);
-
-      if (opcode == OP_UPTO)
-        OP1(SLJIT_MOV, tmp_base, tmp_offset, SLJIT_IMM, max);
-
-      label = LABEL();
-      compile_char1_matchingpath(common, type, cc, &no_match, TRUE);
-      OP1(SLJIT_MOV, base, offset0, STR_PTR, 0);
-
-      if (opcode == OP_UPTO)
-        {
-        OP2(SLJIT_SUB | SLJIT_SET_Z, tmp_base, tmp_offset, tmp_base, tmp_offset, SLJIT_IMM, 1);
-        JUMPTO(SLJIT_NOT_ZERO, label);
-        }
-      else
-        JUMPTO(SLJIT_JUMP, label);
-
-      set_jumps(no_match, LABEL());
-      OP1(SLJIT_MOV, STR_PTR, 0, base, offset0);
-      if (fast_str_ptr != 0)
-        OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), fast_str_ptr, STR_PTR, 0);
-      }
+      charpos_char = end[1];
+      /* Consumpe the OP_CHAR opcode. */
+      end += 2;
+#if PCRE2_CODE_UNIT_WIDTH == 8
+      SLJIT_ASSERT((charpos_othercasebit >> 8) == 0);
+#elif PCRE2_CODE_UNIT_WIDTH == 16 || PCRE2_CODE_UNIT_WIDTH == 32
+      SLJIT_ASSERT((charpos_othercasebit >> 9) == 0);
+      if ((charpos_othercasebit & 0x100) != 0)
+        charpos_othercasebit = (charpos_othercasebit & 0xff) << 8;
 #endif
-    else
-      {
-      if (private_data_ptr == 0)
-        allocate_stack(common, 2);
+      if (charpos_othercasebit != 0)
+        charpos_char |= charpos_othercasebit;
 
-      OP1(SLJIT_MOV, base, offset1, STR_PTR, 0);
-      if (opcode == OP_UPTO)
-        OP1(SLJIT_MOV, tmp_base, tmp_offset, SLJIT_IMM, max);
-
-      label = LABEL();
-      detect_partial_match(common, &no_match);
-      compile_char1_matchingpath(common, type, cc, &no_char1_match, FALSE);
-      if (opcode == OP_UPTO)
-        {
-        OP2(SLJIT_SUB | SLJIT_SET_Z, tmp_base, tmp_offset, tmp_base, tmp_offset, SLJIT_IMM, 1);
-        JUMPTO(SLJIT_NOT_ZERO, label);
-        OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
-        }
-      else
-        JUMPTO(SLJIT_JUMP, label);
-
-      set_jumps(no_char1_match, LABEL());
-      OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
-      set_jumps(no_match, LABEL());
-      OP1(SLJIT_MOV, base, offset0, STR_PTR, 0);
-      if (fast_str_ptr != 0)
-        OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), fast_str_ptr, STR_PTR, 0);
+      BACKTRACK_AS(char_iterator_backtrack)->u.charpos.enabled = TRUE;
+      BACKTRACK_AS(char_iterator_backtrack)->u.charpos.chr = charpos_char;
+      BACKTRACK_AS(char_iterator_backtrack)->u.charpos.othercasebit = charpos_othercasebit;
       }
     }
+
+  if (charpos_enabled)
+    {
+    if (opcode == OP_UPTO)
+      OP1(SLJIT_MOV, tmp_base, tmp_offset, SLJIT_IMM, max + 1);
+
+    /* Search the first instance of charpos_char. */
+    jump = JUMP(SLJIT_JUMP);
+    label = LABEL();
+    if (opcode == OP_UPTO)
+      {
+      OP2(SLJIT_SUB | SLJIT_SET_Z, tmp_base, tmp_offset, tmp_base, tmp_offset, SLJIT_IMM, 1);
+      add_jump(compiler, &backtrack->topbacktracks, JUMP(SLJIT_ZERO));
+      }
+    compile_char1_matchingpath(common, type, cc, &backtrack->topbacktracks, FALSE);
+    if (fast_str_ptr != 0)
+      OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), fast_str_ptr, STR_PTR, 0);
+    JUMPHERE(jump);
+
+    detect_partial_match(common, &backtrack->topbacktracks);
+    OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(0));
+    if (charpos_othercasebit != 0)
+      OP2(SLJIT_OR, TMP1, 0, TMP1, 0, SLJIT_IMM, charpos_othercasebit);
+    CMPTO(SLJIT_NOT_EQUAL, TMP1, 0, SLJIT_IMM, charpos_char, label);
+
+    if (private_data_ptr == 0)
+      allocate_stack(common, 2);
+    OP1(SLJIT_MOV, base, offset0, STR_PTR, 0);
+    OP1(SLJIT_MOV, base, offset1, STR_PTR, 0);
+    if (opcode == OP_UPTO)
+      {
+      OP2(SLJIT_SUB | SLJIT_SET_Z, tmp_base, tmp_offset, tmp_base, tmp_offset, SLJIT_IMM, 1);
+      add_jump(compiler, &no_match, JUMP(SLJIT_ZERO));
+      }
+
+    /* Search the last instance of charpos_char. */
+    label = LABEL();
+    compile_char1_matchingpath(common, type, cc, &no_match, FALSE);
+    if (fast_str_ptr != 0)
+      OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), fast_str_ptr, STR_PTR, 0);
+    detect_partial_match(common, &no_match);
+    OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(0));
+    if (charpos_othercasebit != 0)
+      OP2(SLJIT_OR, TMP1, 0, TMP1, 0, SLJIT_IMM, charpos_othercasebit);
+    if (opcode == OP_STAR)
+      {
+      CMPTO(SLJIT_NOT_EQUAL, TMP1, 0, SLJIT_IMM, charpos_char, label);
+      OP1(SLJIT_MOV, base, offset0, STR_PTR, 0);
+      }
+    else
+      {
+      jump = CMP(SLJIT_NOT_EQUAL, TMP1, 0, SLJIT_IMM, charpos_char);
+      OP1(SLJIT_MOV, base, offset0, STR_PTR, 0);
+      JUMPHERE(jump);
+      }
+
+    if (opcode == OP_UPTO)
+      {
+      OP2(SLJIT_SUB | SLJIT_SET_Z, tmp_base, tmp_offset, tmp_base, tmp_offset, SLJIT_IMM, 1);
+      JUMPTO(SLJIT_NOT_ZERO, label);
+      }
+    else
+      JUMPTO(SLJIT_JUMP, label);
+
+    set_jumps(no_match, LABEL());
+    OP1(SLJIT_MOV, STR_PTR, 0, base, offset0);
+    OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
+    OP1(SLJIT_MOV, base, offset0, STR_PTR, 0);
+    }
+#if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
+  else if (common->utf)
+    {
+    if (private_data_ptr == 0)
+      allocate_stack(common, 2);
+
+    OP1(SLJIT_MOV, base, offset0, STR_PTR, 0);
+    OP1(SLJIT_MOV, base, offset1, STR_PTR, 0);
+
+    if (opcode == OP_UPTO)
+      OP1(SLJIT_MOV, tmp_base, tmp_offset, SLJIT_IMM, max);
+
+    detect_partial_match(common, &no_match);
+    label = LABEL();
+    compile_char1_matchingpath(common, type, cc, &no_match, FALSE);
+    OP1(SLJIT_MOV, base, offset0, STR_PTR, 0);
+
+    if (opcode == OP_UPTO)
+      {
+      OP2(SLJIT_SUB | SLJIT_SET_Z, tmp_base, tmp_offset, tmp_base, tmp_offset, SLJIT_IMM, 1);
+      add_jump(compiler, &no_match, JUMP(SLJIT_ZERO));
+      }
+
+    detect_partial_match_to(common, label);
+    OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
+
+    set_jumps(no_match, LABEL());
+    OP1(SLJIT_MOV, STR_PTR, 0, base, offset0);
+    if (fast_str_ptr != 0)
+      OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), fast_str_ptr, STR_PTR, 0);
+    }
+#endif
+  else
+    {
+    if (private_data_ptr == 0)
+      allocate_stack(common, 2);
+
+    OP1(SLJIT_MOV, base, offset1, STR_PTR, 0);
+    if (opcode == OP_UPTO)
+      OP1(SLJIT_MOV, tmp_base, tmp_offset, SLJIT_IMM, max);
+
+    detect_partial_match(common, &no_match);
+    label = LABEL();
+    compile_char1_matchingpath(common, type, cc, &no_char1_match, FALSE);
+    if (opcode == OP_UPTO)
+      {
+      OP2(SLJIT_SUB | SLJIT_SET_Z, tmp_base, tmp_offset, tmp_base, tmp_offset, SLJIT_IMM, 1);
+      add_jump(compiler, &no_match, JUMP(SLJIT_ZERO));
+      }
+
+    detect_partial_match_to(common, label);
+    OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
+
+    set_jumps(no_char1_match, LABEL());
+    OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
+    set_jumps(no_match, LABEL());
+    OP1(SLJIT_MOV, base, offset0, STR_PTR, 0);
+    if (fast_str_ptr != 0)
+      OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), fast_str_ptr, STR_PTR, 0);
+    }
+
   BACKTRACK_AS(char_iterator_backtrack)->matchingpath = LABEL();
   break;
 
@@ -11670,25 +11757,47 @@ switch(opcode)
   break;
 
   case OP_POSSTAR:
+#if defined SUPPORT_UNICODE
+  if (type == OP_ALLANY && !common->invalid_utf)
+#else
+  if (type == OP_ALLANY)
+#endif
+    {
+    OP1(SLJIT_MOV, STR_PTR, 0, STR_END, 0);
+    process_partial_match(common);
+    if (fast_str_ptr != 0)
+      OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), fast_str_ptr, STR_END, 0);
+    break;
+    }
+
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
   if (common->utf)
     {
     OP1(SLJIT_MOV, tmp_base, tmp_offset, STR_PTR, 0);
+    detect_partial_match(common, &no_match);
     label = LABEL();
-    compile_char1_matchingpath(common, type, cc, &no_match, TRUE);
+    compile_char1_matchingpath(common, type, cc, &no_match, FALSE);
     OP1(SLJIT_MOV, tmp_base, tmp_offset, STR_PTR, 0);
-    JUMPTO(SLJIT_JUMP, label);
+    detect_partial_match_to(common, label);
+
     set_jumps(no_match, LABEL());
     OP1(SLJIT_MOV, STR_PTR, 0, tmp_base, tmp_offset);
     if (fast_str_ptr != 0)
-      OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), fast_str_ptr, STR_PTR, 0);
+      {
+      if (tmp_base == TMP3)
+        OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), fast_str_ptr, TMP3, 0);
+      else
+        OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), fast_str_ptr, STR_PTR, 0);
+      }
     break;
     }
 #endif
-  label = LABEL();
   detect_partial_match(common, &no_match);
+  label = LABEL();
   compile_char1_matchingpath(common, type, cc, &no_char1_match, FALSE);
-  JUMPTO(SLJIT_JUMP, label);
+  detect_partial_match_to(common, label);
+  OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
+
   set_jumps(no_char1_match, LABEL());
   OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
   set_jumps(no_match, LABEL());
@@ -11703,23 +11812,52 @@ switch(opcode)
     {
     OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), POSSESSIVE1, STR_PTR, 0);
     OP1(SLJIT_MOV, tmp_base, tmp_offset, SLJIT_IMM, max);
+
+    detect_partial_match(common, &no_match);
     label = LABEL();
-    compile_char1_matchingpath(common, type, cc, &no_match, TRUE);
+    compile_char1_matchingpath(common, type, cc, &no_match, FALSE);
     OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), POSSESSIVE1, STR_PTR, 0);
     OP2(SLJIT_SUB | SLJIT_SET_Z, tmp_base, tmp_offset, tmp_base, tmp_offset, SLJIT_IMM, 1);
-    JUMPTO(SLJIT_NOT_ZERO, label);
+    add_jump(compiler, &no_match, JUMP(SLJIT_ZERO));
+    detect_partial_match_to(common, label);
+
     set_jumps(no_match, LABEL());
     OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(SLJIT_SP), POSSESSIVE1);
     break;
     }
 #endif
+
+  if (type == OP_ALLANY)
+    {
+    OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(max));
+
+    if (common->mode == PCRE2_JIT_COMPLETE)
+      {
+      OP2(SLJIT_SUB | SLJIT_SET_GREATER, SLJIT_UNUSED, 0, STR_PTR, 0, STR_END, 0);
+      CMOV(SLJIT_GREATER, STR_PTR, STR_END, 0);
+      }
+    else
+      {
+      jump = CMP(SLJIT_LESS_EQUAL, STR_PTR, 0, STR_END, 0);
+      process_partial_match(common);
+      JUMPHERE(jump);
+      }
+
+    if (fast_str_ptr != 0)
+      OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), fast_str_ptr, STR_PTR, 0);
+    break;
+    }
+
   OP1(SLJIT_MOV, tmp_base, tmp_offset, SLJIT_IMM, max);
-  label = LABEL();
+
   detect_partial_match(common, &no_match);
+  label = LABEL();
   compile_char1_matchingpath(common, type, cc, &no_char1_match, FALSE);
   OP2(SLJIT_SUB | SLJIT_SET_Z, tmp_base, tmp_offset, tmp_base, tmp_offset, SLJIT_IMM, 1);
-  JUMPTO(SLJIT_NOT_ZERO, label);
+  add_jump(compiler, &no_match, JUMP(SLJIT_ZERO));
+  detect_partial_match_to(common, label);
   OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
+
   set_jumps(no_char1_match, LABEL());
   OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
   set_jumps(no_match, LABEL());
