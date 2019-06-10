@@ -5591,4 +5591,16 @@ a)"xI
 
 /\[()]{65535}(?<A>)/expand
 
+/a(?:(*ACCEPT))??bc/
+    abc
+    axy
+
+/a(*ACCEPT)??bc/
+    abc
+    axy
+
+/a(*ACCEPT:XX)??bc/mark
+    abc
+    axy
+
 # End of testinput2

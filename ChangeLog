@@ -25,6 +25,9 @@ PCRE2_MATCH_INVALID_UTF compile-time option.
 7. Adjust the limit for "must have" code unit searching, in particular,
 increase it substantially for non-anchored patterns.
 
+8. Allow (*ACCEPT) to be quantified, because an ungreedy quantifier with a zero 
+minimum is potentially useful.
+
 
 Version 10.33 16-April-2019
 ---------------------------

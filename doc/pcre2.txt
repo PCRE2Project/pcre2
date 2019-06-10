@@ -8947,8 +8947,8 @@ BACKTRACKING CONTROL
        There  are  a  number  of  special "Backtracking Control Verbs" (to use
        Perl's terminology) that modify the behaviour  of  backtracking  during
        matching.  They are generally of the form (*VERB) or (*VERB:NAME). Some
-       verbs take either form,  possibly  behaving  differently  depending  on
-       whether  or  not  a  name is present.  The names are not required to be
+       verbs take either form, and may behave differently depending on whether
+       or  not  a  name  argument is present. The names are not required to be
        unique within the pattern.
 
        By default, for compatibility with Perl, a  name  is  any  sequence  of
@@ -8975,7 +8975,7 @@ BACKTRACKING CONTROL
        the  16-bit and 32-bit libraries. If the name is empty, that is, if the
        closing parenthesis immediately follows the colon, the effect is as  if
        the colon were not there. Any number of these verbs may occur in a pat-
-       tern.
+       tern. Except for (*ACCEPT), they may not be quantified.
 
        Since these verbs are specifically related  to  backtracking,  most  of
        them  can be used only when the pattern is to be matched using the tra-
@@ -9025,6 +9025,18 @@ BACKTRACKING CONTROL
        This  matches  "AB", "AAD", or "ACD"; when it matches "AB", "B" is cap-
        tured by the outer parentheses.
 
+       (*ACCEPT) is the only backtracking verb that is allowed to  be  quanti-
+       fied  because  an  ungreedy  quantification with a minimum of zero acts
+       only when a backtrack happens. Consider, for example,
+
+         A(*ACCEPT)??BC
+
+       where A, B, and C may be complex expressions. After matching  "A",  the
+       matcher  processes  "BC"; if that fails, causing a backtrack, (*ACCEPT)
+       is triggered and the match  succeeds.  Whereas  (*COMMIT)  (see  below)
+       means  "fail  on  backtrack",  a  repeated (*ACCEPT) of this type means
+       "succeed on backtrack".
+
        Warning: (*ACCEPT) should not  be  used  within  a  script  run  group,
        because  it  causes  an  immediate  exit  from the group, bypassing the
        script run checking.
@@ -9043,31 +9055,32 @@ BACKTRACKING CONTROL
        A  match  with the string "aaaa" always fails, but the callout is taken
        before each backtrack happens (in this example, 10 times).
 
-       (*ACCEPT:NAME) and (*FAIL:NAME) are  treated  as  (*MARK:NAME)(*ACCEPT)
-       and (*MARK:NAME)(*FAIL), respectively.
+       (*ACCEPT:NAME)    and    (*FAIL:NAME)    behave     the     same     as
+       (*MARK:NAME)(*ACCEPT) and (*MARK:NAME)(*FAIL), respectively, that is, a
+       (*MARK) is recorded just before the verb acts.
 
    Recording which path was taken
 
-       There  is  one  verb  whose  main  purpose  is to track how a match was
-       arrived at, though it also has a  secondary  use  in  conjunction  with
+       There is one verb whose main purpose  is  to  track  how  a  match  was
+       arrived  at,  though  it  also  has a secondary use in conjunction with
        advancing the match starting point (see (*SKIP) below).
 
          (*MARK:NAME) or (*:NAME)
 
-       A  name is always required with this verb. For all the other backtrack-
+       A name is always required with this verb. For all the other  backtrack-
        ing control verbs, a NAME argument is optional.
 
-       When a match succeeds, the name of the last-encountered  mark  name  on
+       When  a  match  succeeds, the name of the last-encountered mark name on
        the matching path is passed back to the caller as described in the sec-
        tion entitled "Other information about the match" in the pcre2api docu-
-       mentation.  This  applies  to all instances of (*MARK) and other verbs,
+       mentation. This applies to all instances of (*MARK)  and  other  verbs,
        including those inside assertions and atomic groups. However, there are
-       differences  in  those  cases  when (*MARK) is used in conjunction with
+       differences in those cases when (*MARK) is  used  in  conjunction  with
        (*SKIP) as described below.
 
-       The mark name that was last encountered on the matching path is  passed
-       back.  A verb without a NAME argument is ignored for this purpose. Here
-       is an example of pcre2test output, where the "mark"  modifier  requests
+       The  mark name that was last encountered on the matching path is passed
+       back. A verb without a NAME argument is ignored for this purpose.  Here
+       is  an  example of pcre2test output, where the "mark" modifier requests
        the retrieval and outputting of (*MARK) data:
 
            re> /X(*MARK:A)Y|X(*MARK:B)Z/mark
@@ -9079,76 +9092,76 @@ BACKTRACKING CONTROL
          MK: B
 
        The (*MARK) name is tagged with "MK:" in this output, and in this exam-
-       ple it indicates which of the two alternatives matched. This is a  more
-       efficient  way of obtaining this information than putting each alterna-
+       ple  it indicates which of the two alternatives matched. This is a more
+       efficient way of obtaining this information than putting each  alterna-
        tive in its own capturing parentheses.
 
-       If a verb with a name is encountered in a positive  assertion  that  is
-       true,  the  name  is recorded and passed back if it is the last-encoun-
+       If  a  verb  with a name is encountered in a positive assertion that is
+       true, the name is recorded and passed back if it  is  the  last-encoun-
        tered. This does not happen for negative assertions or failing positive
        assertions.
 
-       After  a  partial match or a failed match, the last encountered name in
+       After a partial match or a failed match, the last encountered  name  in
        the entire match process is returned. For example:
 
            re> /X(*MARK:A)Y|X(*MARK:B)Z/mark
          data> XP
          No match, mark = B
 
-       Note that in this unanchored example the  mark  is  retained  from  the
+       Note  that  in  this  unanchored  example the mark is retained from the
        match attempt that started at the letter "X" in the subject. Subsequent
        match attempts starting at "P" and then with an empty string do not get
        as far as the (*MARK) item, but nevertheless do not reset it.
 
-       If  you  are  interested  in  (*MARK)  values after failed matches, you
-       should probably set the PCRE2_NO_START_OPTIMIZE option (see  above)  to
+       If you are interested in  (*MARK)  values  after  failed  matches,  you
+       should  probably  set the PCRE2_NO_START_OPTIMIZE option (see above) to
        ensure that the match is always attempted.
 
    Verbs that act after backtracking
 
        The following verbs do nothing when they are encountered. Matching con-
-       tinues with what follows, but if there is a subsequent  match  failure,
-       causing  a  backtrack  to the verb, a failure is forced. That is, back-
-       tracking cannot pass to the left of the  verb.  However,  when  one  of
+       tinues  with  what follows, but if there is a subsequent match failure,
+       causing a backtrack to the verb, a failure is forced.  That  is,  back-
+       tracking  cannot  pass  to  the  left of the verb. However, when one of
        these verbs appears inside an atomic group or in a lookaround assertion
-       that is true, its effect is confined to that group,  because  once  the
-       group  has been matched, there is never any backtracking into it. Back-
+       that  is  true,  its effect is confined to that group, because once the
+       group has been matched, there is never any backtracking into it.  Back-
        tracking from beyond an assertion or an atomic group ignores the entire
        group, and seeks a preceding backtracking point.
 
-       These  verbs  differ  in exactly what kind of failure occurs when back-
-       tracking reaches them. The behaviour described below  is  what  happens
-       when  the  verb is not in a subroutine or an assertion. Subsequent sec-
+       These verbs differ in exactly what kind of failure  occurs  when  back-
+       tracking  reaches  them.  The behaviour described below is what happens
+       when the verb is not in a subroutine or an assertion.  Subsequent  sec-
        tions cover these special cases.
 
          (*COMMIT) or (*COMMIT:NAME)
 
-       This verb causes the whole match to fail outright if there is  a  later
+       This  verb  causes the whole match to fail outright if there is a later
        matching failure that causes backtracking to reach it. Even if the pat-
-       tern is unanchored, no further attempts to find a  match  by  advancing
-       the  starting  point  take place. If (*COMMIT) is the only backtracking
+       tern  is  unanchored,  no further attempts to find a match by advancing
+       the starting point take place. If (*COMMIT) is  the  only  backtracking
        verb that is encountered, once it has been passed pcre2_match() is com-
        mitted to finding a match at the current starting point, or not at all.
        For example:
 
          a+(*COMMIT)b
 
-       This matches "xxaab" but not "aacaab". It can be thought of as  a  kind
+       This  matches  "xxaab" but not "aacaab". It can be thought of as a kind
        of dynamic anchor, or "I've started, so I must finish."
 
-       The  behaviour  of (*COMMIT:NAME) is not the same as (*MARK:NAME)(*COM-
-       MIT). It is like (*MARK:NAME) in that the name is remembered for  pass-
-       ing  back  to the caller. However, (*SKIP:NAME) searches only for names
+       The behaviour of (*COMMIT:NAME) is not the same  as  (*MARK:NAME)(*COM-
+       MIT).  It is like (*MARK:NAME) in that the name is remembered for pass-
+       ing back to the caller. However, (*SKIP:NAME) searches only  for  names
        that are set with (*MARK), ignoring those set by any of the other back-
        tracking verbs.
 
-       If  there  is more than one backtracking verb in a pattern, a different
-       one that follows (*COMMIT) may be triggered first,  so  merely  passing
+       If there is more than one backtracking verb in a pattern,  a  different
+       one  that  follows  (*COMMIT) may be triggered first, so merely passing
        (*COMMIT) during a match does not always guarantee that a match must be
        at this starting point.
 
-       Note that (*COMMIT) at the start of a pattern is not  the  same  as  an
-       anchor,  unless PCRE2's start-of-match optimizations are turned off, as
+       Note  that  (*COMMIT)  at  the start of a pattern is not the same as an
+       anchor, unless PCRE2's start-of-match optimizations are turned off,  as
        shown in this output from pcre2test:
 
            re> /(*COMMIT)abc/
@@ -9159,63 +9172,63 @@ BACKTRACKING CONTROL
          data> xyzabc
          No match
 
-       For the first pattern, PCRE2 knows that any match must start with  "a",
-       so  the optimization skips along the subject to "a" before applying the
-       pattern to the first set of data. The match attempt then succeeds.  The
-       second  pattern disables the optimization that skips along to the first
-       character. The pattern is now applied  starting  at  "x",  and  so  the
-       (*COMMIT)  causes  the  match to fail without trying any other starting
+       For  the first pattern, PCRE2 knows that any match must start with "a",
+       so the optimization skips along the subject to "a" before applying  the
+       pattern  to the first set of data. The match attempt then succeeds. The
+       second pattern disables the optimization that skips along to the  first
+       character.  The  pattern  is  now  applied  starting at "x", and so the
+       (*COMMIT) causes the match to fail without trying  any  other  starting
        points.
 
          (*PRUNE) or (*PRUNE:NAME)
 
-       This verb causes the match to fail at the current starting position  in
+       This  verb causes the match to fail at the current starting position in
        the subject if there is a later matching failure that causes backtrack-
-       ing to reach it. If the pattern is unanchored, the  normal  "bumpalong"
-       advance  to  the next starting character then happens. Backtracking can
-       occur as usual to the left of (*PRUNE), before it is reached,  or  when
-       matching  to  the  right  of  (*PRUNE), but if there is no match to the
-       right, backtracking cannot cross (*PRUNE). In simple cases, the use  of
-       (*PRUNE)  is just an alternative to an atomic group or possessive quan-
+       ing  to  reach it. If the pattern is unanchored, the normal "bumpalong"
+       advance to the next starting character then happens.  Backtracking  can
+       occur  as  usual to the left of (*PRUNE), before it is reached, or when
+       matching to the right of (*PRUNE), but if there  is  no  match  to  the
+       right,  backtracking cannot cross (*PRUNE). In simple cases, the use of
+       (*PRUNE) is just an alternative to an atomic group or possessive  quan-
        tifier, but there are some uses of (*PRUNE) that cannot be expressed in
-       any  other  way. In an anchored pattern (*PRUNE) has the same effect as
+       any other way. In an anchored pattern (*PRUNE) has the same  effect  as
        (*COMMIT).
 
        The behaviour of (*PRUNE:NAME) is not the same as (*MARK:NAME)(*PRUNE).
        It is like (*MARK:NAME) in that the name is remembered for passing back
-       to the caller. However, (*SKIP:NAME) searches only for names  set  with
+       to  the  caller. However, (*SKIP:NAME) searches only for names set with
        (*MARK), ignoring those set by other backtracking verbs.
 
          (*SKIP)
 
-       This  verb, when given without a name, is like (*PRUNE), except that if
-       the pattern is unanchored, the "bumpalong" advance is not to  the  next
+       This verb, when given without a name, is like (*PRUNE), except that  if
+       the  pattern  is unanchored, the "bumpalong" advance is not to the next
        character, but to the position in the subject where (*SKIP) was encoun-
-       tered. (*SKIP) signifies that whatever text was matched leading  up  to
-       it  cannot  be part of a successful match if there is a later mismatch.
+       tered.  (*SKIP)  signifies that whatever text was matched leading up to
+       it cannot be part of a successful match if there is a  later  mismatch.
        Consider:
 
          a+(*SKIP)b
 
-       If the subject is "aaaac...",  after  the  first  match  attempt  fails
-       (starting  at  the  first  character in the string), the starting point
+       If  the  subject  is  "aaaac...",  after  the first match attempt fails
+       (starting at the first character in the  string),  the  starting  point
        skips on to start the next attempt at "c". Note that a possessive quan-
-       tifer  does not have the same effect as this example; although it would
-       suppress backtracking  during  the  first  match  attempt,  the  second
-       attempt  would  start at the second character instead of skipping on to
+       tifer does not have the same effect as this example; although it  would
+       suppress  backtracking  during  the  first  match  attempt,  the second
+       attempt would start at the second character instead of skipping  on  to
        "c".
 
          (*SKIP:NAME)
 
-       When (*SKIP) has an associated name, its behaviour  is  modified.  When
-       such  a  (*SKIP) is triggered, the previous path through the pattern is
-       searched for the most recent (*MARK) that has the same name. If one  is
-       found,  the  "bumpalong" advance is to the subject position that corre-
-       sponds to that (*MARK) instead of to where (*SKIP) was encountered.  If
+       When  (*SKIP)  has  an associated name, its behaviour is modified. When
+       such a (*SKIP) is triggered, the previous path through the  pattern  is
+       searched  for the most recent (*MARK) that has the same name. If one is
+       found, the "bumpalong" advance is to the subject position  that  corre-
+       sponds  to that (*MARK) instead of to where (*SKIP) was encountered. If
        no (*MARK) with a matching name is found, the (*SKIP) is ignored.
 
-       The  search  for a (*MARK) name uses the normal backtracking mechanism,
-       which means that it does not  see  (*MARK)  settings  that  are  inside
+       The search for a (*MARK) name uses the normal  backtracking  mechanism,
+       which  means  that  it  does  not  see (*MARK) settings that are inside
        atomic groups or assertions, because they are never re-entered by back-
        tracking. Compare the following pcre2test examples:
 
@@ -9229,105 +9242,105 @@ BACKTRACKING CONTROL
           0: b
           1: b
 
-       In the first example, the (*MARK) setting is in an atomic group, so  it
+       In  the first example, the (*MARK) setting is in an atomic group, so it
        is not seen when (*SKIP:X) triggers, causing the (*SKIP) to be ignored.
-       This allows the second branch of the pattern to be tried at  the  first
-       character  position.  In the second example, the (*MARK) setting is not
-       in an atomic group. This allows (*SKIP:X) to find the (*MARK)  when  it
+       This  allows  the second branch of the pattern to be tried at the first
+       character position.  In the second example, the (*MARK) setting is  not
+       in  an  atomic group. This allows (*SKIP:X) to find the (*MARK) when it
        backtracks, and this causes a new matching attempt to start at the sec-
-       ond character. This time, the (*MARK) is never seen  because  "a"  does
+       ond  character.  This  time, the (*MARK) is never seen because "a" does
        not match "b", so the matcher immediately jumps to the second branch of
        the pattern.
 
-       Note that (*SKIP:NAME) searches only for names set by (*MARK:NAME).  It
+       Note  that (*SKIP:NAME) searches only for names set by (*MARK:NAME). It
        ignores names that are set by other backtracking verbs.
 
          (*THEN) or (*THEN:NAME)
 
-       This  verb  causes  a skip to the next innermost alternative when back-
-       tracking reaches it. That  is,  it  cancels  any  further  backtracking
-       within  the  current  alternative.  Its name comes from the observation
+       This verb causes a skip to the next innermost  alternative  when  back-
+       tracking  reaches  it.  That  is,  it  cancels any further backtracking
+       within the current alternative. Its name  comes  from  the  observation
        that it can be used for a pattern-based if-then-else block:
 
          ( COND1 (*THEN) FOO | COND2 (*THEN) BAR | COND3 (*THEN) BAZ ) ...
 
-       If the COND1 pattern matches, FOO is tried (and possibly further  items
-       after  the  end  of the group if FOO succeeds); on failure, the matcher
-       skips to the second alternative and tries COND2,  without  backtracking
-       into  COND1.  If that succeeds and BAR fails, COND3 is tried. If subse-
-       quently BAZ fails, there are no more alternatives, so there is a  back-
-       track  to  whatever  came  before  the  entire group. If (*THEN) is not
+       If  the COND1 pattern matches, FOO is tried (and possibly further items
+       after the end of the group if FOO succeeds); on  failure,  the  matcher
+       skips  to  the second alternative and tries COND2, without backtracking
+       into COND1. If that succeeds and BAR fails, COND3 is tried.  If  subse-
+       quently  BAZ fails, there are no more alternatives, so there is a back-
+       track to whatever came before the  entire  group.  If  (*THEN)  is  not
        inside an alternation, it acts like (*PRUNE).
 
-       The behaviour of (*THEN:NAME) is not the same  as  (*MARK:NAME)(*THEN).
+       The  behaviour  of (*THEN:NAME) is not the same as (*MARK:NAME)(*THEN).
        It is like (*MARK:NAME) in that the name is remembered for passing back
-       to the caller. However, (*SKIP:NAME) searches only for names  set  with
+       to  the  caller. However, (*SKIP:NAME) searches only for names set with
        (*MARK), ignoring those set by other backtracking verbs.
 
-       A  group  that  does  not  contain  a | character is just a part of the
-       enclosing alternative; it is not a nested  alternation  with  only  one
-       alternative.  The  effect of (*THEN) extends beyond such a group to the
-       enclosing alternative.  Consider this pattern, where  A,  B,  etc.  are
-       complex  pattern fragments that do not contain any | characters at this
+       A group that does not contain a | character  is  just  a  part  of  the
+       enclosing  alternative;  it  is  not a nested alternation with only one
+       alternative. The effect of (*THEN) extends beyond such a group  to  the
+       enclosing  alternative.   Consider  this  pattern, where A, B, etc. are
+       complex pattern fragments that do not contain any | characters at  this
        level:
 
          A (B(*THEN)C) | D
 
-       If A and B are matched, but there is a failure in C, matching does  not
+       If  A and B are matched, but there is a failure in C, matching does not
        backtrack into A; instead it moves to the next alternative, that is, D.
-       However, if the group containing (*THEN) is given  an  alternative,  it
+       However,  if  the  group containing (*THEN) is given an alternative, it
        behaves differently:
 
          A (B(*THEN)C | (*FAIL)) | D
 
        The effect of (*THEN) is now confined to the inner group. After a fail-
-       ure in C, matching moves to (*FAIL), which causes the  whole  group  to
-       fail  because  there  are  no  more  alternatives to try. In this case,
+       ure  in  C,  matching moves to (*FAIL), which causes the whole group to
+       fail because there are no more  alternatives  to  try.  In  this  case,
        matching does backtrack into A.
 
-       Note that a conditional group is not considered as having two  alterna-
-       tives,  because  only one is ever used. In other words, the | character
-       in a conditional group has a different meaning. Ignoring  white  space,
+       Note  that a conditional group is not considered as having two alterna-
+       tives, because only one is ever used. In other words, the  |  character
+       in  a  conditional group has a different meaning. Ignoring white space,
        consider:
 
          ^.*? (?(?=a) a | b(*THEN)c )
 
-       If  the  subject  is  "ba", this pattern does not match. Because .*? is
-       ungreedy, it initially matches zero  characters.  The  condition  (?=a)
-       then  fails,  the  character  "b"  is  matched, but "c" is not. At this
-       point, matching does not backtrack to .*? as might perhaps be  expected
-       from  the presence of the | character. The conditional group is part of
-       the single alternative that comprises the whole  pattern,  and  so  the
-       match  fails.  (If there was a backtrack into .*?, allowing it to match
+       If the subject is "ba", this pattern does not  match.  Because  .*?  is
+       ungreedy,  it  initially  matches  zero characters. The condition (?=a)
+       then fails, the character "b" is matched,  but  "c"  is  not.  At  this
+       point,  matching does not backtrack to .*? as might perhaps be expected
+       from the presence of the | character. The conditional group is part  of
+       the  single  alternative  that  comprises the whole pattern, and so the
+       match fails. (If there was a backtrack into .*?, allowing it  to  match
        "b", the match would succeed.)
 
-       The verbs just described provide four different "strengths" of  control
+       The  verbs just described provide four different "strengths" of control
        when subsequent matching fails. (*THEN) is the weakest, carrying on the
-       match at the next alternative. (*PRUNE) comes next, failing  the  match
-       at  the  current starting position, but allowing an advance to the next
-       character (for an unanchored pattern). (*SKIP) is similar, except  that
+       match  at  the next alternative. (*PRUNE) comes next, failing the match
+       at the current starting position, but allowing an advance to  the  next
+       character  (for an unanchored pattern). (*SKIP) is similar, except that
        the advance may be more than one character. (*COMMIT) is the strongest,
        causing the entire match to fail.
 
    More than one backtracking verb
 
-       If more than one backtracking verb is present in  a  pattern,  the  one
-       that  is  backtracked  onto first acts. For example, consider this pat-
+       If  more  than  one  backtracking verb is present in a pattern, the one
+       that is backtracked onto first acts. For example,  consider  this  pat-
        tern, where A, B, etc. are complex pattern fragments:
 
          (A(*COMMIT)B(*THEN)C|ABD)
 
-       If A matches but B fails, the backtrack to (*COMMIT) causes the  entire
+       If  A matches but B fails, the backtrack to (*COMMIT) causes the entire
        match to fail. However, if A and B match, but C fails, the backtrack to
-       (*THEN) causes the next alternative (ABD) to be tried.  This  behaviour
-       is  consistent,  but is not always the same as Perl's. It means that if
-       two or more backtracking verbs appear in succession, all the  the  last
+       (*THEN)  causes  the next alternative (ABD) to be tried. This behaviour
+       is consistent, but is not always the same as Perl's. It means  that  if
+       two  or  more backtracking verbs appear in succession, all the the last
        of them has no effect. Consider this example:
 
          ...(*COMMIT)(*PRUNE)...
 
        If there is a matching failure to the right, backtracking onto (*PRUNE)
-       causes it to be triggered, and its action is taken. There can never  be
+       causes  it to be triggered, and its action is taken. There can never be
        a backtrack onto (*COMMIT).
 
    Backtracking verbs in repeated groups
@@ -9337,42 +9350,42 @@ BACKTRACKING CONTROL
 
          /(a(*COMMIT)b)+ac/
 
-       If the subject is "abac", Perl matches  unless  its  optimizations  are
-       disabled,  but  PCRE2  always fails because the (*COMMIT) in the second
+       If  the  subject  is  "abac", Perl matches unless its optimizations are
+       disabled, but PCRE2 always fails because the (*COMMIT)  in  the  second
        repeat of the group acts.
 
    Backtracking verbs in assertions
 
-       (*FAIL) in any assertion has its normal effect: it forces an  immediate
-       backtrack.  The  behaviour  of  the other backtracking verbs depends on
-       whether or not the assertion is standalone or acting as  the  condition
+       (*FAIL)  in any assertion has its normal effect: it forces an immediate
+       backtrack. The behaviour of the other  backtracking  verbs  depends  on
+       whether  or  not the assertion is standalone or acting as the condition
        in a conditional group.
 
-       (*ACCEPT)  in  a  standalone positive assertion causes the assertion to
-       succeed without any further processing; captured  strings  and  a  mark
-       name  (if  set)  are  retained.  In  a  standalone  negative assertion,
-       (*ACCEPT) causes the assertion to fail without any further  processing;
+       (*ACCEPT) in a standalone positive assertion causes  the  assertion  to
+       succeed  without  any  further  processing; captured strings and a mark
+       name (if  set)  are  retained.  In  a  standalone  negative  assertion,
+       (*ACCEPT)  causes the assertion to fail without any further processing;
        captured substrings and any mark name are discarded.
 
-       If  the  assertion is a condition, (*ACCEPT) causes the condition to be
-       true for a positive assertion and false for a  negative  one;  captured
+       If the assertion is a condition, (*ACCEPT) causes the condition  to  be
+       true  for  a  positive assertion and false for a negative one; captured
        substrings are retained in both cases.
 
        The remaining verbs act only when a later failure causes a backtrack to
-       reach them. This means that their effect is confined to the  assertion,
+       reach  them. This means that their effect is confined to the assertion,
        because lookaround assertions are atomic. A backtrack that occurs after
        an assertion is complete does not jump back into the assertion. Note in
-       particular  that  a  (*MARK)  name  that  is set in an assertion is not
+       particular that a (*MARK) name that is  set  in  an  assertion  is  not
        "seen" by an instance of (*SKIP:NAME) latter in the pattern.
 
-       The effect of (*THEN) is not allowed to escape beyond an assertion.  If
-       there  are no more branches to try, (*THEN) causes a positive assertion
+       The  effect of (*THEN) is not allowed to escape beyond an assertion. If
+       there are no more branches to try, (*THEN) causes a positive  assertion
        to be false, and a negative assertion to be true.
 
-       The other backtracking verbs are not treated specially if  they  appear
-       in  a  standalone  positive assertion. In a conditional positive asser-
+       The  other  backtracking verbs are not treated specially if they appear
+       in a standalone positive assertion. In a  conditional  positive  asser-
        tion, backtracking (from within the assertion) into (*COMMIT), (*SKIP),
-       or  (*PRUNE) causes the condition to be false. However, for both stand-
+       or (*PRUNE) causes the condition to be false. However, for both  stand-
        alone and conditional negative assertions, backtracking into (*COMMIT),
        (*SKIP), or (*PRUNE) causes the assertion to be true, without consider-
        ing any further alternative branches.
@@ -9382,26 +9395,26 @@ BACKTRACKING CONTROL
        These behaviours occur whether or not the group is called recursively.
 
        (*ACCEPT) in a group called as a subroutine causes the subroutine match
-       to  succeed  without  any  further  processing. Matching then continues
+       to succeed without any  further  processing.  Matching  then  continues
        after the subroutine call. Perl documents this behaviour. Perl's treat-
        ment of the other verbs in subroutines is different in some cases.
 
-       (*FAIL)  in  a  group  called as a subroutine has its normal effect: it
+       (*FAIL) in a group called as a subroutine has  its  normal  effect:  it
        forces an immediate backtrack.
 
-       (*COMMIT), (*SKIP), and (*PRUNE) cause the  subroutine  match  to  fail
-       when  triggered  by being backtracked to in a group called as a subrou-
+       (*COMMIT),  (*SKIP),  and  (*PRUNE)  cause the subroutine match to fail
+       when triggered by being backtracked to in a group called as  a  subrou-
        tine. There is then a backtrack at the outer level.
 
        (*THEN), when triggered, skips to the next alternative in the innermost
-       enclosing  group that has alternatives (its normal behaviour). However,
+       enclosing group that has alternatives (its normal behaviour).  However,
        if there is no such group within the subroutine's group, the subroutine
        match fails and there is a backtrack at the outer level.
 
 
 SEE ALSO
 
-       pcre2api(3),    pcre2callout(3),    pcre2matching(3),   pcre2syntax(3),
+       pcre2api(3),   pcre2callout(3),    pcre2matching(3),    pcre2syntax(3),
        pcre2(3).
 
 
@@ -9414,7 +9427,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 23 May 2019
+       Last updated: 10 June 2019
        Copyright (c) 1997-2019 University of Cambridge.
 ------------------------------------------------------------------------------
  

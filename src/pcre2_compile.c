@@ -1419,9 +1419,6 @@ the result is "not a repeat quantifier". */
 EXIT:
 if (yield || *errorcodeptr != 0) *ptrptr = p;
 return yield;
-
-
-
 }
 
 
@@ -2450,8 +2447,9 @@ must be last. */
 
 enum { RANGE_NO, RANGE_STARTED, RANGE_OK_ESCAPED, RANGE_OK_LITERAL };
 
-/* Only in 32-bit mode can there be literals > META_END. A macros encapsulates
-the storing of literal values in the parsed pattern. */
+/* Only in 32-bit mode can there be literals > META_END. A macro encapsulates
+the storing of literal values in the main parsed pattern, where they can always 
+be quantified. */
 
 #if PCRE2_CODE_UNIT_WIDTH == 32
 #define PARSED_LITERAL(c, p) \
@@ -2474,6 +2472,7 @@ uint32_t delimiter;
 uint32_t namelen;
 uint32_t class_range_state;
 uint32_t *verblengthptr = NULL;     /* Value avoids compiler warning */
+uint32_t *verbstartptr = NULL;
 uint32_t *previous_callout = NULL;
 uint32_t *parsed_pattern = cb->parsed_pattern;
 uint32_t *parsed_pattern_end = cb->parsed_pattern_end;
@@ -2640,13 +2639,15 @@ while (ptr < ptrend)
 
     switch(c)
       {
-      default:
-      PARSED_LITERAL(c, parsed_pattern);
+      default:                     /* Don't use PARSED_LITERAL() because it */
+#if PCRE2_CODE_UNIT_WIDTH == 32    /* sets okquantifier. */
+      if (c >= META_END) *parsed_pattern++ = META_BIGVALUE;
+#endif       
+      *parsed_pattern++ = c;
       break;
-
+      
       case CHAR_RIGHT_PARENTHESIS:
       inverbname = FALSE;
-      okquantifier = FALSE;   /* Was probably set by literals */
       /* This is the length in characters */
       verbnamelength = (PCRE2_SIZE)(parsed_pattern - verblengthptr - 1);
       /* But the limit on the length is in code units */
@@ -3133,6 +3134,21 @@ while (ptr < ptrend)
       {
       errorcode = ERR9;
       goto FAILED_BACK;
+      }
+
+    /* Most (*VERB)s are not allowed to be quantified, but an ungreedy
+    quantifier can be useful for (*ACCEPT) - meaning "succeed on backtrack", a
+    sort of negated (*COMMIT). We therefore allow (*ACCEPT) to be quantified by
+    wrapping it in non-capturing brackets, but we have to allow for a preceding
+    (*MARK) for when (*ACCEPT) has an argument. */
+
+    if (parsed_pattern[-1] == META_ACCEPT)
+      {
+      uint32_t *p;
+      for (p = parsed_pattern - 1; p >= verbstartptr; p--) p[1] = p[0];
+      *verbstartptr = META_NOCAPTURE;
+      parsed_pattern[1] = META_KET;
+      parsed_pattern += 2;
       }
 
     /* Now we can put the quantifier into the parsed pattern vector. At this
@@ -3774,6 +3790,12 @@ while (ptr < ptrend)
           errorcode = ERR66;
           goto FAILED;
           }
+
+        /* Remember where this verb, possibly with a preceding (*MARK), starts,
+        for handling quantified (*ACCEPT). */
+        
+        verbstartptr = parsed_pattern;
+        okquantifier = (verbs[i].meta == META_ACCEPT);
 
         /* It appears that Perl allows any characters whatsoever, other than a
         closing parenthesis, to appear in arguments ("names"), so we no longer
@@ -9503,10 +9525,10 @@ if (pattern == NULL)
 
 if (ccontext == NULL)
   ccontext = (pcre2_compile_context *)(&PRIV(default_compile_context));
-  
+
 /* PCRE2_MATCH_INVALID_UTF implies UTF */
 
-if ((options & PCRE2_MATCH_INVALID_UTF) != 0) options |= PCRE2_UTF; 
+if ((options & PCRE2_MATCH_INVALID_UTF) != 0) options |= PCRE2_UTF;
 
 /* Check that all undefined public option bits are zero. */
 
