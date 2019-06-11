@@ -16959,6 +16959,9 @@ Failed: error 197 at offset 131075: too many capturing groups (maximum 65535)
  0: a
 MK: XX
 
+/(*:\)?/
+Failed: error 109 at offset 5: quantifier does not follow a repeatable item
+
 # End of testinput2
 Error -70: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

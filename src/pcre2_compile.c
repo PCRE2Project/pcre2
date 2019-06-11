@@ -2448,7 +2448,7 @@ must be last. */
 enum { RANGE_NO, RANGE_STARTED, RANGE_OK_ESCAPED, RANGE_OK_LITERAL };
 
 /* Only in 32-bit mode can there be literals > META_END. A macro encapsulates
-the storing of literal values in the main parsed pattern, where they can always 
+the storing of literal values in the main parsed pattern, where they can always
 be quantified. */
 
 #if PCRE2_CODE_UNIT_WIDTH == 32
@@ -2642,10 +2642,10 @@ while (ptr < ptrend)
       default:                     /* Don't use PARSED_LITERAL() because it */
 #if PCRE2_CODE_UNIT_WIDTH == 32    /* sets okquantifier. */
       if (c >= META_END) *parsed_pattern++ = META_BIGVALUE;
-#endif       
+#endif
       *parsed_pattern++ = c;
       break;
-      
+
       case CHAR_RIGHT_PARENTHESIS:
       inverbname = FALSE;
       /* This is the length in characters */
@@ -2681,8 +2681,11 @@ while (ptr < ptrend)
 
       switch(escape)
         {
-        case 0:
-        PARSED_LITERAL(c, parsed_pattern);
+        case 0:                    /* Don't use PARSED_LITERAL() because it */
+#if PCRE2_CODE_UNIT_WIDTH == 32    /* sets okquantifier. */
+        if (c >= META_END) *parsed_pattern++ = META_BIGVALUE;
+#endif
+        *parsed_pattern++ = c;
         break;
 
         case ESC_Q:
@@ -3793,7 +3796,7 @@ while (ptr < ptrend)
 
         /* Remember where this verb, possibly with a preceding (*MARK), starts,
         for handling quantified (*ACCEPT). */
-        
+
         verbstartptr = parsed_pattern;
         okquantifier = (verbs[i].meta == META_ACCEPT);
 
