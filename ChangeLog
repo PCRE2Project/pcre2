@@ -28,6 +28,14 @@ increase it substantially for non-anchored patterns.
 8. Allow (*ACCEPT) to be quantified, because an ungreedy quantifier with a zero 
 minimum is potentially useful.
 
+9. Some changes to the way the minimum subject length is handled:
+
+   * When PCRE2_NO_START_OPTIMIZE is set, no minimum length is computed; 
+     pcre2test no longer shows a value (of zero).
+     
+   * When no minimum length is set by the normal scan, but a first and/or last 
+     code unit is recorded, set the minimum to 1 or 2 as appropriate.
+
 
 Version 10.33 16-April-2019
 ---------------------------

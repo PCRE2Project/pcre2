@@ -10151,6 +10151,8 @@ unit. */
 
 if ((re->overall_options & PCRE2_NO_START_OPTIMIZE) == 0)
   {
+  int minminlength = 0;  /* For minimal minlength from first/required CU */
+
   /* If we do not have a first code unit, see if there is one that is asserted
   (these are not saved during the compile because they can cause conflicts with
   actual literals that follow). */
@@ -10158,12 +10160,14 @@ if ((re->overall_options & PCRE2_NO_START_OPTIMIZE) == 0)
   if (firstcuflags < 0)
     firstcu = find_firstassertedcu(codestart, &firstcuflags, 0);
 
-  /* Save the data for a first code unit. */
+  /* Save the data for a first code unit. The existence of one means the
+  minimum length must be at least 1. */
 
   if (firstcuflags >= 0)
     {
     re->first_codeunit = firstcu;
     re->flags |= PCRE2_FIRSTSET;
+    minminlength++;
 
     /* Handle caseless first code units. */
 
@@ -10197,39 +10201,65 @@ if ((re->overall_options & PCRE2_NO_START_OPTIMIZE) == 0)
            is_startline(codestart, 0, &cb, 0, FALSE))
     re->flags |= PCRE2_STARTLINE;
 
-  /* Handle the "required code unit", if one is set. In the case of an anchored
-  pattern, do this only if it follows a variable length item in the pattern. */
+  /* Handle the "required code unit", if one is set. We can increment the
+  minimum minimum length only if we are sure this really is a different
+  character, because the count is in characters, not code units. */
 
-  if (reqcuflags >= 0 &&
-       ((re->overall_options & PCRE2_ANCHORED) == 0 ||
-        (reqcuflags & REQ_VARY) != 0))
+  if (reqcuflags >= 0)
     {
-    re->last_codeunit = reqcu;
-    re->flags |= PCRE2_LASTSET;
-
-    /* Handle caseless required code units as for first code units (above). */
-
-    if ((reqcuflags & REQ_CASELESS) != 0)
-      {
-      if (reqcu < 128 || (!utf && reqcu < 255))
-        {
-        if (cb.fcc[reqcu] != reqcu) re->flags |= PCRE2_LASTCASELESS;
-        }
-#if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 8
-      else if (reqcu <= MAX_UTF_CODE_POINT && UCD_OTHERCASE(reqcu) != reqcu)
-        re->flags |= PCRE2_LASTCASELESS;
+#if PCRE2_CODE_UNIT_WIDTH == 16
+    if ((re->overall_options & PCRE2_UTF) == 0 ||   /* Not UTF */
+        firstcuflags < 0 ||                         /* First not set */
+        (firstcu & 0xf800) != 0xd800 ||             /* First not surrogate */
+        (reqcu & 0xfc00) != 0xdc00)                 /* Req not low surrogate */
+#elif PCRE2_CODE_UNIT_WIDTH == 8
+    if ((re->overall_options & PCRE2_UTF) == 0 ||   /* Not UTF */
+        firstcuflags < 0 ||                         /* First not set */
+        (firstcu & 0x80) == 0 ||                    /* First is ASCII */
+        (reqcu & 0x80) == 0)                        /* Req is ASCII */
 #endif
+      {
+      minminlength++;
+      }
+
+    /* In the case of an anchored pattern, set up the value only if it follows
+    a variable length item in the pattern. */
+
+    if ((re->overall_options & PCRE2_ANCHORED) == 0 ||
+        (reqcuflags & REQ_VARY) != 0)
+      {
+      re->last_codeunit = reqcu;
+      re->flags |= PCRE2_LASTSET;
+
+      /* Handle caseless required code units as for first code units (above). */
+
+      if ((reqcuflags & REQ_CASELESS) != 0)
+        {
+        if (reqcu < 128 || (!utf && reqcu < 255))
+          {
+          if (cb.fcc[reqcu] != reqcu) re->flags |= PCRE2_LASTCASELESS;
+          }
+#if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 8
+        else if (reqcu <= MAX_UTF_CODE_POINT && UCD_OTHERCASE(reqcu) != reqcu)
+          re->flags |= PCRE2_LASTCASELESS;
+#endif
+        }
       }
     }
 
-  /* Finally, study the compiled pattern to set up information such as a bitmap
-  of starting code units and a minimum matching length. */
+  /* Study the compiled pattern to set up information such as a bitmap of
+  starting code units and a minimum matching length. */
 
   if (PRIV(study)(re) != 0)
     {
     errorcode = ERR31;
     goto HAD_CB_ERROR;
     }
+
+  /* If the minimum length set (or not set) by study() is less than the minimum
+  implied by required code units, override it. */
+
+  if (re->minlength < minminlength) re->minlength = minminlength;
   }   /* End of start-of-match optimizations. */
 
 /* Control ends up here in all cases. When running under valgrind, make a

@@ -1480,7 +1480,7 @@ Subject length lower bound = 2
 Capture group count = 0
 First code unit = 'a'
 Last code unit = 'a'
-Subject length lower bound = 1
+Subject length lower bound = 2
 
 /(?=a)a.*/I
 Capture group count = 0
@@ -3406,7 +3406,7 @@ Subject length lower bound = 2
 Capture group count = 0
 May match empty string
 First code unit = 'a'
-Subject length lower bound = 0
+Subject length lower bound = 1
 
 /(?=abc).xyz/Ii
 Capture group count = 0
@@ -3425,7 +3425,7 @@ Subject length lower bound = 4
 Capture group count = 0
 May match empty string
 First code unit = 'a'
-Subject length lower bound = 0
+Subject length lower bound = 1
 
 /(?=.)a/I
 Capture group count = 0
@@ -3436,7 +3436,7 @@ Subject length lower bound = 1
 Capture group count = 1
 First code unit = 'a'
 Last code unit = 'a'
-Subject length lower bound = 1
+Subject length lower bound = 2
 
 /((?=abcda)ab)/I
 Capture group count = 1
@@ -10780,7 +10780,7 @@ Capture group count = 0
 Options: caseless
 First code unit = 'a' (caseless)
 Last code unit = 'a' (caseless)
-Subject length lower bound = 1
+Subject length lower bound = 2
 
 /(abc)\1+/
 
@@ -11254,7 +11254,7 @@ Subject length lower bound = 0
 /z(*ACCEPT)a/I,aftertext
 Capture group count = 0
 First code unit = 'z'
-Subject length lower bound = 0
+Subject length lower bound = 1
     baxzbx
  0: z
  0+ bx
@@ -13572,7 +13572,6 @@ Subject length lower bound = 4
 /abcd/I,no_start_optimize
 Capture group count = 0
 Options: no_start_optimize
-Subject length lower bound = 0
 
 /(|ab)*?d/I
 Capture group count = 1
@@ -13588,7 +13587,6 @@ Subject length lower bound = 1
 /(|ab)*?d/I,no_start_optimize
 Capture group count = 1
 Options: no_start_optimize
-Subject length lower bound = 0
    abd
  0: abd
  1: ab
@@ -14638,7 +14636,7 @@ Named capture groups:
 Options: dupnames
 Starting code units: a b 
 Last code unit = 'c'
-Subject length lower bound = 0
+Subject length lower bound = 1
 
 /ab{3cd/
     ab{3cd
@@ -16436,7 +16434,7 @@ Capture group count = 1
 Max back reference = 1
 First code unit = 'a'
 Last code unit = 'b'
-Subject length lower bound = 1
+Subject length lower bound = 2
     ab
  0: ab
  1: a

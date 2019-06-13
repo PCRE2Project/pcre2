@@ -4704,7 +4704,8 @@ if ((pat_patctl.control & CTL_INFO) != 0)
       }
     }
 
-  fprintf(outfile, "Subject length lower bound = %d\n", minlength);
+  if ((FLD(compiled_code, overall_options) & PCRE2_NO_START_OPTIMIZE) == 0)
+    fprintf(outfile, "Subject length lower bound = %d\n", minlength);
 
   if (pat_patctl.jit != 0 && (pat_patctl.control & CTL_JITVERIFY) != 0)
     {

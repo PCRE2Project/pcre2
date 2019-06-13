@@ -9,7 +9,7 @@ Contains \C
 Options: utf
 First code unit = 'a'
 Last code unit = 'e'
-Subject length lower bound = 0
+Subject length lower bound = 2
     abXde
  0: abXde
 

@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "30 May 2019" "PCRE2 10.34"
+.TH PCRE2API 3 "11 June 2019" "PCRE2 10.34"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -2229,12 +2229,12 @@ segment.
   PCRE2_INFO_MINLENGTH
 .sp
 If a minimum length for matching subject strings was computed, its value is
-returned. Otherwise the returned value is 0. The value is a number of
-characters, which in UTF mode may be different from the number of code units.
-The third argument should point to an \fBuint32_t\fP variable. The value is a
-lower bound to the length of any matching string. There may not be any strings
-of that length that do actually match, but every string that does match is at
-least that long.
+returned. Otherwise the returned value is 0. This value is not computed when
+PCRE2_NO_START_OPTIMIZE is set. The value is a number of characters, which in
+UTF mode may be different from the number of code units. The third argument
+should point to an \fBuint32_t\fP variable. The value is a lower bound to the
+length of any matching string. There may not be any strings of that length that
+do actually match, but every string that does match is at least that long.
 .sp
   PCRE2_INFO_NAMECOUNT
   PCRE2_INFO_NAMEENTRYSIZE
@@ -3848,6 +3848,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 30 May 2019
+Last updated: 11 June 2019
 Copyright (c) 1997-2019 University of Cambridge.
 .fi

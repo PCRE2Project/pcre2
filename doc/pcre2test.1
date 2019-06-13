@@ -1,4 +1,4 @@
-.TH PCRE2TEST 1 "23 May 2019" "PCRE 10.34"
+.TH PCRE2TEST 1 "11 June 2019" "PCRE 10.34"
 .SH NAME
 pcre2test - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -695,7 +695,9 @@ options, the line is omitted. "First code unit" is where any match must start;
 if there is more than one they are listed as "starting code units". "Last code
 unit" is the last literal code unit that must be present in any match. This is
 not necessarily the last character. These lines are omitted if no starting or
-ending code units are recorded.
+ending code units are recorded. The subject length line is omitted when 
+\fBno_start_optimize\fP is set because the minimum length is not calculated 
+when it can never be used.
 .P
 The \fBframesize\fP modifier shows the size, in bytes, of the storage frames
 used by \fBpcre2_match()\fP for handling backtracking. The size depends on the
@@ -2060,6 +2062,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 23 May 2019
+Last updated: 11 June 2019
 Copyright (c) 1997-2019 University of Cambridge.
 .fi

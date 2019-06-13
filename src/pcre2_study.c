@@ -214,9 +214,7 @@ for (;;)
 
     /* Reached end of a branch; if it's a ket it is the end of a nested
     call. If it's ALT it is an alternation in a nested call. If it is END it's
-    the end of the outer call. All can be handled by the same code. If an
-    ACCEPT was previously encountered, use the length that was in force at that
-    time, and pass back the shortest ACCEPT length. */
+    the end of the outer call. All can be handled by the same code. */
 
     case OP_ALT:
     case OP_KET:
