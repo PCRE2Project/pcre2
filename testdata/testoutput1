@@ -10049,4 +10049,18 @@ No match
  0: pokus.hokus
  1: hokus
 
+/a(?(?=(*:2)b).)/mark
+    abc
+ 0: ab
+MK: 2
+    acb     
+ 0: a
+
+/a(?(?!(*:2)b).)/mark
+    acb
+ 0: ac
+    abc     
+ 0: a
+MK: 2
+
 # End of testinput1 

@@ -5472,15 +5472,16 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
 
       /* If we are at the end of an assertion that is a condition, return a
       match, discarding any intermediate backtracking points. Copy back the
-      captures into the frame before N so that they are set on return. Doing
-      this for all assertions, both positive and negative, seems to match what
-      Perl does. */
+      mark setting and the captures into the frame before N so that they are
+      set on return. Doing this for all assertions, both positive and negative,
+      seems to match what Perl does. */
 
       if (GF_IDMASK(N->group_frame_type) == GF_CONDASSERT)
         {
         memcpy((char *)P + offsetof(heapframe, ovector), Fovector,
           Foffset_top * sizeof(PCRE2_SIZE));
         P->offset_top = Foffset_top;
+        P->mark = Fmark;
         Fback_frame = (char *)F - (char *)P;
         RRETURN(MATCH_MATCH);
         }

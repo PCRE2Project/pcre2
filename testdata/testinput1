@@ -6343,4 +6343,12 @@ ef) x/x,mark
 /(?&word)*  \. (?<word> \w+ )/xi
     pokus.hokus
 
+/a(?(?=(*:2)b).)/mark
+    abc
+    acb     
+
+/a(?(?!(*:2)b).)/mark
+    acb
+    abc     
+
 # End of testinput1 

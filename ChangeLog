@@ -35,6 +35,9 @@ minimum is potentially useful.
      
    * When no minimum length is set by the normal scan, but a first and/or last 
      code unit is recorded, set the minimum to 1 or 2 as appropriate.
+     
+10. A (*MARK) value inside a successful condition was not being returned by the 
+interpretive matcher (it was returned by JIT). This bug has been mended.
 
 
 Version 10.33 16-April-2019
