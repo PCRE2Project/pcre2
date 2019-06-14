@@ -16960,6 +16960,9 @@ MK: XX
 /(*:\)?/
 Failed: error 109 at offset 5: quantifier does not follow a repeatable item
 
+/(*:\Q \E){5}/alt_verbnames
+Failed: error 109 at offset 11: quantifier does not follow a repeatable item
+
 # End of testinput2
 Error -70: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

@@ -2599,10 +2599,20 @@ while (ptr < ptrend)
         errorcode = ERR28;
         goto FAILED;
         }
-      if (!inverbname && after_manual_callout-- <= 0)
-        parsed_pattern = manage_callouts(thisptr, &previous_callout,
-          auto_callout, parsed_pattern, cb);
-      PARSED_LITERAL(c, parsed_pattern);
+      if (inverbname)
+        {                          /* Don't use PARSED_LITERAL() because it */
+#if PCRE2_CODE_UNIT_WIDTH == 32    /* sets okquantifier. */
+        if (c >= META_END) *parsed_pattern++ = META_BIGVALUE;
+#endif
+        *parsed_pattern++ = c;
+        }
+      else
+        {
+        if (after_manual_callout-- <= 0)
+          parsed_pattern = manage_callouts(thisptr, &previous_callout,
+            auto_callout, parsed_pattern, cb);
+        PARSED_LITERAL(c, parsed_pattern);
+        }
       meta_quantifier = 0;
       }
     continue;  /* Next character */

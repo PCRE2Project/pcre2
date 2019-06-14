@@ -5605,4 +5605,6 @@ a)"xI
 
 /(*:\)?/
 
+/(*:\Q \E){5}/alt_verbnames
+
 # End of testinput2
