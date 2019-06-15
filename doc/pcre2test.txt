@@ -670,7 +670,9 @@ PATTERN MODIFIERS
        as "starting code units". "Last code unit" is  the  last  literal  code
        unit  that  must  be  present in any match. This is not necessarily the
        last character. These lines are omitted if no starting or  ending  code
-       units are recorded.
+       units   are   recorded.   The  subject  length  line  is  omitted  when
+       no_start_optimize is set because the minimum length is  not  calculated
+       when it can never be used.
 
        The  framesize modifier shows the size, in bytes, of the storage frames
        used by pcre2_match() for handling backtracking. The  size  depends  on
@@ -1891,5 +1893,5 @@ AUTHOR
 
 REVISION
 
-       Last updated: 23 May 2019
+       Last updated: 11 June 2019
        Copyright (c) 1997-2019 University of Cambridge.

@@ -739,7 +739,9 @@ options, the line is omitted. "First code unit" is where any match must start;
 if there is more than one they are listed as "starting code units". "Last code
 unit" is the last literal code unit that must be present in any match. This is
 not necessarily the last character. These lines are omitted if no starting or
-ending code units are recorded.
+ending code units are recorded. The subject length line is omitted when 
+<b>no_start_optimize</b> is set because the minimum length is not calculated 
+when it can never be used.
 </P>
 <P>
 The <b>framesize</b> modifier shows the size, in bytes, of the storage frames
@@ -2079,7 +2081,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC21" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 23 May 2019
+Last updated: 11 June 2019
 <br>
 Copyright &copy; 1997-2019 University of Cambridge.
 <br>

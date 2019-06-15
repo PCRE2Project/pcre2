@@ -39,6 +39,12 @@ minimum is potentially useful.
 10. A (*MARK) value inside a successful condition was not being returned by the 
 interpretive matcher (it was returned by JIT). This bug has been mended.
 
+11. A bug in pcre2grep meant that -o without an argument (or -o0) didn't work 
+if the pattern had more than 32 capturing parentheses. This is fixed. In 
+addition (a) the default limit for groups requested by -o<n> has been raised to 
+50, (b) the new --om-capture option changes the limit, (c) an error is raised 
+if -o asks for a group that is above the limit.
+
 
 Version 10.33 16-April-2019
 ---------------------------

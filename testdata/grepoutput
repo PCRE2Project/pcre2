@@ -949,3 +949,10 @@ RC=0
 ---------------------------- Test 126 -----------------------------
 ABC XYZ
 RC=0
+---------------------------- Test 127 -----------------------------
+pattern
+RC=0
+---------------------------- Test 128 -----------------------------
+pcre2grep: Requested group 1 cannot be captured.
+pcre2grep: Use --om-capture to increase the size of the capture vector.
+RC=2

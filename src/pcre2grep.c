@@ -128,7 +128,7 @@ be C99 don't support it (hence DISABLE_PERCENT_ZT). */
 
 typedef int BOOL;
 
-#define OFFSET_SIZE 33
+#define DEFAULT_CAPTURE_MAX 50
 
 #if BUFSIZ > 8192
 #define MAXPATLEN BUFSIZ
@@ -255,6 +255,8 @@ static pcre2_compile_context *compile_context;
 static pcre2_match_context *match_context;
 static pcre2_match_data *match_data;
 static PCRE2_SIZE *offsets;
+static uint32_t offset_size;
+static uint32_t capture_max = DEFAULT_CAPTURE_MAX;
 
 static BOOL count_only = FALSE;
 static BOOL do_colour = FALSE;
@@ -404,6 +406,7 @@ used to identify them. */
 #define N_INCLUDE_FROM (-21)
 #define N_OM_SEPARATOR (-22)
 #define N_MAX_BUFSIZE  (-23)
+#define N_OM_CAPTURE   (-24)
 
 static option_item optionlist[] = {
   { OP_NODATA,     N_NULL,   NULL,              "",              "terminate options" },
@@ -450,6 +453,7 @@ static option_item optionlist[] = {
   { OP_STRING,     'O',      &output_text,       "output=text",   "show only this text (possibly expanded)" },
   { OP_OP_NUMBERS, 'o',      &only_matching_data, "only-matching=n", "show only the part of the line that matched" },
   { OP_STRING,     N_OM_SEPARATOR, &om_separator, "om-separator=text", "set separator for multiple -o output" },
+  { OP_U32NUMBER,  N_OM_CAPTURE, &capture_max,  "om-capture=n",  "set capture count for --only-matching" },
   { OP_NODATA,     'q',      NULL,              "quiet",         "suppress output, just set return code" },
   { OP_NODATA,     'r',      NULL,              "recursive",     "recursively scan sub-directories" },
   { OP_PATLIST,    N_EXCLUDE,&exclude_patdata,  "exclude=pattern","exclude matching files when recursing" },
@@ -1753,7 +1757,7 @@ for (i = 1; p != NULL; p = p->next, i++)
     unsigned char mbuffer[256];
     PCRE2_SIZE startchar = pcre2_get_startchar(match_data);
     (void)pcre2_get_error_message(*mrc, mbuffer, sizeof(mbuffer));
-    fprintf(stderr, "%s at offset %" SIZ_FORM "\n\n", mbuffer, 
+    fprintf(stderr, "%s at offset %" SIZ_FORM "\n\n", mbuffer,
       SIZ_CAST startchar);
     }
   if (*mrc == PCRE2_ERROR_MATCHLIMIT || *mrc == PCRE2_ERROR_DEPTHLIMIT ||
@@ -2591,7 +2595,7 @@ while (ptr < endptr)
 
       for (i = 0; i < jfriedl_XR; i++)
           match = (pcre_exec(patterns->compiled, patterns->hint, ptr, length, 0,
-              PCRE2_NOTEMPTY, offsets, OFFSET_SIZE) >= 0);
+              PCRE2_NOTEMPTY, offsets, offset_size) >= 0);
 
       if (gettimeofday(&end_time, &dummy) != 0)
               perror("bad gettimeofday");
@@ -2711,7 +2715,7 @@ while (ptr < endptr)
           for (om = only_matching; om != NULL; om = om->next)
             {
             int n = om->groupnum;
-            if (n < mrc)
+            if (n == 0 || n < mrc)
               {
               int plen = offsets[2*n + 1] - offsets[2*n];
               if (plen > 0)
@@ -3663,6 +3667,7 @@ int rc = 1;
 BOOL only_one_at_top;
 patstr *cp;
 fnstr *fn;
+omstr *om;
 const char *locale_from = "--locale";
 
 #ifdef SUPPORT_PCRE2GREP_JIT
@@ -3677,20 +3682,6 @@ must use STDOUT_NL to terminate lines. */
 
 #ifdef WIN32
 _setmode(_fileno(stdout), _O_BINARY);
-#endif
-
-/* Set up a default compile and match contexts and a match data block. */
-
-compile_context = pcre2_compile_context_create(NULL);
-match_context = pcre2_match_context_create(NULL);
-match_data = pcre2_match_data_create(OFFSET_SIZE, NULL);
-offsets = pcre2_get_ovector_pointer(match_data);
-
-/* If string (script) callouts are supported, set up the callout processing
-function. */
-
-#ifdef SUPPORT_PCRE2GREP_CALLOUT
-pcre2_set_callout(match_context, pcre2grep_callout, NULL);
 #endif
 
 /* Process the options */
@@ -4039,11 +4030,39 @@ if (only_matching_count > 1)
   pcre2grep_exit(usage(2));
   }
 
+/* Check that there is a big enough ovector for all -o settings. */
+
+for (om = only_matching; om != NULL; om = om->next)
+  {
+  int n = om->groupnum;
+  if (n > (int)capture_max)
+    {
+    fprintf(stderr, "pcre2grep: Requested group %d cannot be captured.\n", n);
+    fprintf(stderr, "pcre2grep: Use --om-capture to increase the size of the capture vector.\n");
+    goto EXIT2;
+    }
+  }
+
 /* Check the text supplied to --output for errors. */
 
 if (output_text != NULL &&
     !syntax_check_output_text((PCRE2_SPTR)output_text, FALSE))
   goto EXIT2;
+
+/* Set up default compile and match contexts and a match data block. */
+
+offset_size = capture_max + 1;
+compile_context = pcre2_compile_context_create(NULL);
+match_context = pcre2_match_context_create(NULL);
+match_data = pcre2_match_data_create(offset_size, NULL);
+offsets = pcre2_get_ovector_pointer(match_data);
+
+/* If string (script) callouts are supported, set up the callout processing
+function. */
+
+#ifdef SUPPORT_PCRE2GREP_CALLOUT
+pcre2_set_callout(match_context, pcre2grep_callout, NULL);
+#endif
 
 /* Put limits into the match data block. */
 

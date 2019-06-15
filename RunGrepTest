@@ -653,6 +653,13 @@ printf 'ABC\0XYZ\nABCDEF\nDEFABC\n' >testtemp2grep
 $valgrind $vjs $pcre2grep -a -f testtemp1grep testtemp2grep >>testtrygrep
 echo "RC=$?" >>testtrygrep
 
+echo "---------------------------- Test 127 -----------------------------" >>testtrygrep
+(cd $srcdir; $valgrind $vjs $pcre2grep -o --om-capture=0 'pattern()()()()' testdata/grepinput) >>testtrygrep
+echo "RC=$?" >>testtrygrep
+
+echo "---------------------------- Test 128 -----------------------------" >>testtrygrep
+(cd $srcdir; $valgrind $vjs $pcre2grep -o1 --om-capture=0 'pattern()()()()' testdata/grepinput) >>testtrygrep 2>&1
+echo "RC=$?" >>testtrygrep
 
 # Now compare the results.
 

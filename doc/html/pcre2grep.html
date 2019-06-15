@@ -685,20 +685,32 @@ otherwise empty line. This option is mutually exclusive with <b>--output</b>,
 <P>
 <b>-o</b><i>number</i>, <b>--only-matching</b>=<i>number</i>
 Show only the part of the line that matched the capturing parentheses of the
-given number. Up to 32 capturing parentheses are supported, and -o0 is
-equivalent to <b>-o</b> without a number. Because these options can be given
-without an argument (see above), if an argument is present, it must be given in
-the same shell item, for example, -o3 or --only-matching=2. The comments given
-for the non-argument case above also apply to this option. If the specified
-capturing parentheses do not exist in the pattern, or were not set in the
-match, nothing is output unless the file name or line number are being output.
+given number. Up to 50 capturing parentheses are supported by default. This
+limit can be changed via the <b>--om-capture</b> option. A pattern may contain
+any number of capturing parentheses, but only those whose number is within the
+limit can be accessed by <b>-o</b>. An error occurs if the number specified by
+<b>-o</b> is greater than the limit.
+<br>
+<br>
+-o0 is the same as <b>-o</b> without a number. Because these options can be
+given without an argument (see above), if an argument is present, it must be
+given in the same shell item, for example, -o3 or --only-matching=2. The
+comments given for the non-argument case above also apply to this option. If
+the specified capturing parentheses do not exist in the pattern, or were not
+set in the match, nothing is output unless the file name or line number are
+being output.
 <br>
 <br>
 If this option is given multiple times, multiple substrings are output for each
 match, in the order the options are given, and all on one line. For example,
 -o3 -o1 -o3 causes the substrings matched by capturing parentheses 3 and 1 and
 then 3 again to be output. By default, there is no separator (but see the next
-option).
+but one option).
+</P>
+<P>
+<b>--om-capture</b>=<i>number</i>
+Set the number of capturing parentheses that can be accessed by <b>-o</b>. The 
+default is 50.
 </P>
 <P>
 <b>--om-separator</b>=<i>text</i>
@@ -980,7 +992,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC16" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 28 May 2019
+Last updated: 15 June 2019
 <br>
 Copyright &copy; 1997-2019 University of Cambridge.
 <br>
