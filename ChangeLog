@@ -31,10 +31,16 @@ minimum is potentially useful.
 9. Some changes to the way the minimum subject length is handled:
 
    * When PCRE2_NO_START_OPTIMIZE is set, no minimum length is computed; 
-     pcre2test no longer shows a value (of zero).
+     pcre2test omits this item instead of showing a value of zero.
      
    * When no minimum length is set by the normal scan, but a first and/or last 
      code unit is recorded, set the minimum to 1 or 2 as appropriate.
+     
+   * When a pattern contains multiple groups with the same number, a back
+     reference cannot know which one to scan for a minimum length. This used to
+     cause the minimum length finder to give up with no result. Now it treats
+     such references as not adding to the minimum length (which it should have 
+     done all along).
      
 10. A (*MARK) value inside a successful condition was not being returned by the 
 interpretive matcher (it was returned by JIT). This bug has been mended.

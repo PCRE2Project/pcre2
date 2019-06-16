@@ -92,7 +92,6 @@ Returns:   the minimum length
            -1 \C in UTF-8 mode
               or (*ACCEPT)
               or pattern too complicated
-              or back reference to duplicate name/number
            -2 internal error (missing capturing bracket)
            -3 internal error (opcode not listed)
 */
@@ -135,7 +134,7 @@ for (;;)
   int d, min, recno;
   PCRE2_UCHAR *cs, *ce;
   PCRE2_UCHAR op = *cc;
-
+  
   if (branchlength >= UINT16_MAX) return UINT16_MAX;
 
   switch (op)
@@ -452,12 +451,12 @@ for (;;)
     that case we must set the minimum length to zero. */
 
     /* Duplicate named pattern back reference. We cannot reliably find a length
-    for this if duplicate numbers are present in the pattern. */
+    for this if duplicate numbers are present in the pattern, so we set the 
+    length to zero here also. */
 
     case OP_DNREF:
     case OP_DNREFI:
-    if (dupcapused) return -1;
-    if ((re->overall_options & PCRE2_MATCH_UNSET_BACKREF) == 0)
+    if (!dupcapused && (re->overall_options & PCRE2_MATCH_UNSET_BACKREF) == 0)
       {
       int count = GET2(cc, 1+IMM2_SIZE);
       PCRE2_UCHAR *slot =
@@ -524,14 +523,13 @@ for (;;)
 
     case OP_REF:
     case OP_REFI:
-    if (dupcapused) return -1;
     recno = GET2(cc, 1);
     if (recno <= backref_cache[0] && backref_cache[recno] >= 0)
       d = backref_cache[recno];
     else
       {
       int i;
-      if ((re->overall_options & PCRE2_MATCH_UNSET_BACKREF) == 0)
+      if (!dupcapused && (re->overall_options & PCRE2_MATCH_UNSET_BACKREF) == 0)
         {
         ce = cs = (PCRE2_UCHAR *)PRIV(find_bracket)(startcode, utf, recno);
         if (cs == NULL) return -2;
