@@ -1757,4 +1757,13 @@ No match
 
 # -------------------------------------
 
+/(*UTF)(?=\x{123})/I
+Capture group count = 0
+May match empty string
+Compile options: <none>
+Overall options: utf
+First code unit = \xc4
+Last code unit = \xa3
+Subject length lower bound = 1
+
 # End of testinput10

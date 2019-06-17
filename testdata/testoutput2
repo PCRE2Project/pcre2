@@ -16963,6 +16963,69 @@ Failed: error 109 at offset 5: quantifier does not follow a repeatable item
 /(*:\Q \E){5}/alt_verbnames
 Failed: error 109 at offset 11: quantifier does not follow a repeatable item
 
+/(?=abc)/I
+Capture group count = 0
+May match empty string
+First code unit = 'a'
+Last code unit = 'c'
+Subject length lower bound = 2
+
+/(?|(X)|(XY))\1abc/I
+Capture group count = 1
+Max back reference = 1
+First code unit = 'X'
+Last code unit = 'c'
+Subject length lower bound = 4
+
+/(?|(a)|(bcde))(c)\2/I
+Capture group count = 2
+Max back reference = 2
+Starting code units: a b 
+Last code unit = 'c'
+Subject length lower bound = 3
+
+/(?|(a)|(bcde))(c)\1/I
+Capture group count = 2
+Max back reference = 1
+Starting code units: a b 
+Last code unit = 'c'
+Subject length lower bound = 2
+
+/(?|(?'A'a)|(?'A'bcde))(?'B'c)\k'B'(?'A')/I,dupnames
+Capture group count = 3
+Max back reference = 2
+Named capture groups:
+  A   1
+  A   3
+  B   2
+Options: dupnames
+Starting code units: a b 
+Last code unit = 'c'
+Subject length lower bound = 3
+
+/(?|(?'A'a)|(?'A'bcde))(?'B'c)\k'A'(?'A')/I,dupnames
+Capture group count = 3
+Max back reference = 3
+Named capture groups:
+  A   1
+  A   3
+  B   2
+Options: dupnames
+Starting code units: a b 
+Last code unit = 'c'
+Subject length lower bound = 2
+
+/((a|)+)+Z/I
+Capture group count = 2
+Starting code units: Z a 
+Last code unit = 'Z'
+Subject length lower bound = 1
+
+/((?=a))[abcd]/I
+Capture group count = 1
+First code unit = 'a'
+Subject length lower bound = 1
+
 # End of testinput2
 Error -70: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

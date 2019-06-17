@@ -134,7 +134,7 @@ for (;;)
   int d, min, recno;
   PCRE2_UCHAR *cs, *ce;
   PCRE2_UCHAR op = *cc;
-  
+
   if (branchlength >= UINT16_MAX) return UINT16_MAX;
 
   switch (op)
@@ -448,11 +448,13 @@ for (;;)
 
     If PCRE2_MATCH_UNSET_BACKREF is set, a backreference to an unset bracket
     matches an empty string (by default it causes a matching failure), so in
-    that case we must set the minimum length to zero. */
+    that case we must set the minimum length to zero.
 
-    /* Duplicate named pattern back reference. We cannot reliably find a length
-    for this if duplicate numbers are present in the pattern, so we set the 
-    length to zero here also. */
+    For backreferenes, if duplicate numbers are present in the pattern we check
+    for a reference to a duplicate. If it is, we don't know which version will
+    be referenced, so we have to set the minimum length to zero. */
+    
+    /* Duplicate named pattern back reference. */ 
 
     case OP_DNREF:
     case OP_DNREFI:
@@ -479,30 +481,34 @@ for (;;)
           ce = cs = (PCRE2_UCHAR *)PRIV(find_bracket)(startcode, utf, recno);
           if (cs == NULL) return -2;
           do ce += GET(ce, 1); while (*ce == OP_ALT);
-          if (cc > cs && cc < ce)    /* Simple recursion */
+          
+          dd = 0;
+          if (!dupcapused ||
+              (PCRE2_UCHAR *)PRIV(find_bracket)(ce, utf, recno) == NULL)
             {
-            dd = 0;
-            had_recurse = TRUE;
-            }
-          else
-            {
-            recurse_check *r = recurses;
-            for (r = recurses; r != NULL; r = r->prev)
-              if (r->group == cs) break;
-            if (r != NULL)           /* Mutual recursion */
+            if (cc > cs && cc < ce)    /* Simple recursion */
               {
-              dd = 0;
               had_recurse = TRUE;
               }
             else
               {
-              this_recurse.prev = recurses;
-              this_recurse.group = cs;
-              dd = find_minlength(re, cs, startcode, utf, &this_recurse,
-                countptr, backref_cache);
-              if (dd < 0) return dd;
+              recurse_check *r = recurses;
+              for (r = recurses; r != NULL; r = r->prev)
+                if (r->group == cs) break;
+              if (r != NULL)           /* Mutual recursion */
+                {
+                had_recurse = TRUE;
+                }
+              else
+                {
+                this_recurse.prev = recurses;  /* No recursion */
+                this_recurse.group = cs;
+                dd = find_minlength(re, cs, startcode, utf, &this_recurse,
+                  countptr, backref_cache);
+                if (dd < 0) return dd;
+                }
               }
-            }
+            }   
 
           backref_cache[recno] = dd;
           for (i = backref_cache[0] + 1; i < recno; i++) backref_cache[i] = -1;
@@ -518,8 +524,8 @@ for (;;)
     cc += 1 + 2*IMM2_SIZE;
     goto REPEAT_BACK_REFERENCE;
 
-    /* Single back reference. We cannot find a length for this if duplicate
-    numbers are present in the pattern. */
+    /* Single back reference by number. References by name are converted to by 
+    number when there is no duplication. */
 
     case OP_REF:
     case OP_REFI:
@@ -529,36 +535,40 @@ for (;;)
     else
       {
       int i;
-      if (!dupcapused && (re->overall_options & PCRE2_MATCH_UNSET_BACKREF) == 0)
+      d = 0;
+
+      if ((re->overall_options & PCRE2_MATCH_UNSET_BACKREF) == 0)
         {
         ce = cs = (PCRE2_UCHAR *)PRIV(find_bracket)(startcode, utf, recno);
         if (cs == NULL) return -2;
         do ce += GET(ce, 1); while (*ce == OP_ALT);
-        if (cc > cs && cc < ce)    /* Simple recursion */
+
+        if (!dupcapused ||
+            (PCRE2_UCHAR *)PRIV(find_bracket)(ce, utf, recno) == NULL)
           {
-          d = 0;
-          had_recurse = TRUE;
-          }
-        else
-          {
-          recurse_check *r = recurses;
-          for (r = recurses; r != NULL; r = r->prev) if (r->group == cs) break;
-          if (r != NULL)           /* Mutual recursion */
+          if (cc > cs && cc < ce)    /* Simple recursion */
             {
-            d = 0;
             had_recurse = TRUE;
             }
           else
             {
-            this_recurse.prev = recurses;
-            this_recurse.group = cs;
-            d = find_minlength(re, cs, startcode, utf, &this_recurse, countptr,
-              backref_cache);
-            if (d < 0) return d;
+            recurse_check *r = recurses;
+            for (r = recurses; r != NULL; r = r->prev) if (r->group == cs) break;
+            if (r != NULL)           /* Mutual recursion */
+              {
+              had_recurse = TRUE;
+              }
+            else                     /* No recursion */
+              {
+              this_recurse.prev = recurses;
+              this_recurse.group = cs;
+              d = find_minlength(re, cs, startcode, utf, &this_recurse, countptr,
+                backref_cache);
+              if (d < 0) return d;
+              }
             }
           }
         }
-      else d = 0;
 
       backref_cache[recno] = d;
       for (i = backref_cache[0] + 1; i < recno; i++) backref_cache[i] = -1;

@@ -5607,4 +5607,20 @@ a)"xI
 
 /(*:\Q \E){5}/alt_verbnames
 
+/(?=abc)/I
+
+/(?|(X)|(XY))\1abc/I
+
+/(?|(a)|(bcde))(c)\2/I
+
+/(?|(a)|(bcde))(c)\1/I
+
+/(?|(?'A'a)|(?'A'bcde))(?'B'c)\k'B'(?'A')/I,dupnames
+
+/(?|(?'A'a)|(?'A'bcde))(?'B'c)\k'A'(?'A')/I,dupnames
+
+/((a|)+)+Z/I
+
+/((?=a))[abcd]/I
+
 # End of testinput2

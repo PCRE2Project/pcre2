@@ -42,6 +42,10 @@ minimum is potentially useful.
      such references as not adding to the minimum length (which it should have 
      done all along).
      
+   * Furthermore, the above action now happens only if the back reference is to 
+     a group that exists more than once in a pattern instead of any back 
+     reference in a pattern with duplicate numbers.  
+     
 10. A (*MARK) value inside a successful condition was not being returned by the 
 interpretive matcher (it was returned by JIT). This bug has been mended.
 
