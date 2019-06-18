@@ -5623,4 +5623,6 @@ a)"xI
 
 /((?=a))[abcd]/I
 
+/A(?:(*ACCEPT))?B/info
+
 # End of testinput2

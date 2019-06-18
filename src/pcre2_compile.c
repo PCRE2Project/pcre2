@@ -10039,8 +10039,9 @@ re->max_lookbehind = cb.max_lookbehind;
 
 if (cb.had_accept)
   {
-  reqcu = 0;              /* Must disable after (*ACCEPT) */
+  reqcu = 0;                     /* Must disable after (*ACCEPT) */
   reqcuflags = REQ_NONE;
+  re->flags |= PCRE2_HASACCEPT;  /* Disables minimum length */ 
   }
 
 /* Fill in the final opcode and check for disastrous overflow. If no overflow,

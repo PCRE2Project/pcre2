@@ -31,7 +31,13 @@ minimum is potentially useful.
 9. Some changes to the way the minimum subject length is handled:
 
    * When PCRE2_NO_START_OPTIMIZE is set, no minimum length is computed; 
-     pcre2test omits this item instead of showing a value of zero.
+     pcre2test now omits this item instead of showing a value of zero.
+     
+   * An incorrect minimum length could be calculated for a pattern that 
+     contained (*ACCEPT) inside a qualified group whose minimum repetition was 
+     zero, for example /A(?:(*ACCEPT))?B/, which incorrectly computed a minimum
+     of 2. The minimum length scan no longer happens for a pattern that 
+     contains (*ACCEPT).
      
    * When no minimum length is set by the normal scan, but a first and/or last 
      code unit is recorded, set the minimum to 1 or 2 as appropriate.

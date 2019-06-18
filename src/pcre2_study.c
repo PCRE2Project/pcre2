@@ -1607,13 +1607,13 @@ if ((re->flags & (PCRE2_FIRSTSET|PCRE2_STARTLINE)) == 0)
   }
 
 /* Find the minimum length of subject string. If the pattern can match an empty
-string, the minimum length is already known. If there are more back references
-than the size of the vector we are going to cache them in, do nothing. A
-pattern that complicated will probably take a long time to analyze and may in
-any case turn out to be too complicated. Note that back reference minima are
-held as 16-bit numbers. */
+string, the minimum length is already known. If the pattern contains (*ACCEPT) 
+all bets are off. If there are more back references than the size of the vector
+we are going to cache them in, do nothing. A pattern that complicated will
+probably take a long time to analyze and may in any case turn out to be too
+complicated. Note that back reference minima are held as 16-bit numbers. */
 
-if ((re->flags & PCRE2_MATCH_EMPTY) == 0 &&
+if ((re->flags & (PCRE2_MATCH_EMPTY|PCRE2_HASACCEPT)) == 0 &&
      re->top_backref <= MAX_CACHE_BACKREF)
   {
   int backref_cache[MAX_CACHE_BACKREF+1];
