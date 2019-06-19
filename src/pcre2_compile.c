@@ -6758,10 +6758,6 @@ for (;; pptr++)
     reqvary = (repeat_min == repeat_max)? 0 : REQ_VARY;
     op_type = 0;
 
-    /* If the repeat is {1} we can ignore it. */
-
-    if (repeat_max == 1 && repeat_min == 1) goto END_REPEAT;
-
     /* Adjust first and required code units for a zero repeat. */
 
     if (repeat_min == 0)
@@ -6804,7 +6800,10 @@ for (;; pptr++)
     tempcode = previous;
     op_previous = *previous;
 
-    /* Now handle repetition for the different types of item. */
+    /* Now handle repetition for the different types of item. If the repeat
+    minimum and the repeat maximum are both 1, we can ignore the quantifier for
+    non-parenthesized items, as they have only one alternative. For anything in
+    parentheses, we must not ignore if {1} is possessive. */
 
     switch (op_previous)
       {
@@ -6818,6 +6817,7 @@ for (;; pptr++)
       case OP_CHARI:
       case OP_NOT:
       case OP_NOTI:
+      if (repeat_max == 1 && repeat_min == 1) goto END_REPEAT;
       op_type = chartypeoffset[op_previous - OP_CHAR];
 
       /* Deal with UTF characters that take up more than one code unit. */
@@ -6864,6 +6864,7 @@ for (;; pptr++)
         code = previous;
         goto END_REPEAT;
         }
+      if (repeat_max == 1 && repeat_min == 1) goto END_REPEAT;
 
       if (repeat_min == 0 && repeat_max == REPEAT_UNLIMITED)
         *code++ = OP_CRSTAR + repeat_type;
@@ -6898,6 +6899,8 @@ for (;; pptr++)
       repetition. */
 
       case OP_RECURSE:
+      if (repeat_max == 1 && repeat_min == 1 && !possessive_quantifier)
+        goto END_REPEAT;
 
       /* Generate unwrapped repeats for a non-zero minimum, except when the
       minimum is 1 and the maximum unlimited, because that can be handled with
@@ -6979,6 +6982,9 @@ for (;; pptr++)
         int len = (int)(code - previous);
         PCRE2_UCHAR *bralink = NULL;
         PCRE2_UCHAR *brazeroptr = NULL;
+
+        if (repeat_max == 1 && repeat_min == 1 && !possessive_quantifier)
+          goto END_REPEAT;
 
         /* Repeating a DEFINE group (or any group where the condition is always
         FALSE and there is only one branch) is pointless, but Perl allows the
@@ -7196,11 +7202,12 @@ for (;; pptr++)
         and SCRIPT_RUN groups at runtime, but in a different way.]
 
         Then, if the quantifier was possessive and the bracket is not a
-        conditional, we convert the BRA code to the POS form, and the KET code to
-        KETRPOS. (It turns out to be convenient at runtime to detect this kind of
-        subpattern at both the start and at the end.) The use of special opcodes
-        makes it possible to reduce greatly the stack usage in pcre2_match(). If
-        the group is preceded by OP_BRAZERO, convert this to OP_BRAPOSZERO.
+        conditional, we convert the BRA code to the POS form, and the KET code
+        to KETRPOS. (It turns out to be convenient at runtime to detect this
+        kind of subpattern at both the start and at the end.) The use of
+        special opcodes makes it possible to reduce greatly the stack usage in
+        pcre2_match(). If the group is preceded by OP_BRAZERO, convert this to
+        OP_BRAPOSZERO.
 
         Then, if the minimum number of matches is 1 or 0, cancel the possessive
         flag so that the default action below, of wrapping everything inside
@@ -7300,6 +7307,8 @@ for (;; pptr++)
         {
         int prop_type, prop_value;
         PCRE2_UCHAR *oldcode;
+
+        if (repeat_max == 1 && repeat_min == 1) goto END_REPEAT;
 
         op_type = OP_TYPESTAR - OP_STAR;      /* Use type opcodes */
         mclength = 0;                         /* Not a character */
@@ -10041,7 +10050,7 @@ if (cb.had_accept)
   {
   reqcu = 0;                     /* Must disable after (*ACCEPT) */
   reqcuflags = REQ_NONE;
-  re->flags |= PCRE2_HASACCEPT;  /* Disables minimum length */ 
+  re->flags |= PCRE2_HASACCEPT;  /* Disables minimum length */
   }
 
 /* Fill in the final opcode and check for disastrous overflow. If no overflow,

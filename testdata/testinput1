@@ -6351,4 +6351,18 @@ ef) x/x,mark
     acb
     abc     
 
+/(?:a|ab){1}+c/
+\= Expect no match
+    abc
+
+/(a|ab){1}+c/
+    abc
+    
+/(a+){1}+a/
+\= Expect no match
+    aaaa
+
+/(?(DEFINE)(a|ab))(?1){1}+c/
+    abc    
+
 # End of testinput1 

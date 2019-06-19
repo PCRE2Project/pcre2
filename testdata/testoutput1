@@ -10063,4 +10063,22 @@ MK: 2
  0: a
 MK: 2
 
+/(?:a|ab){1}+c/
+\= Expect no match
+    abc
+No match
+
+/(a|ab){1}+c/
+    abc
+No match
+    
+/(a+){1}+a/
+\= Expect no match
+    aaaa
+No match
+
+/(?(DEFINE)(a|ab))(?1){1}+c/
+    abc    
+No match
+
 # End of testinput1 
