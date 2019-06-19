@@ -88,6 +88,9 @@ Arguments:
   countptr        pointer to call count (to catch over complexity)
   backref_cache   vector for caching back references.
 
+This function is no longer called when the pattern contains (*ACCEPT); however,
+the old code for returning -1 is retained, just in case.
+
 Returns:   the minimum length
            -1 \C in UTF-8 mode
               or (*ACCEPT)
@@ -205,7 +208,9 @@ for (;;)
     cc += 1 + LINK_SIZE;
     break;
 
-    /* ACCEPT makes things far too complicated; we have to give up. */
+    /* ACCEPT makes things far too complicated; we have to give up. In fact,
+    from 10.34 onwards, if a pattern contains (*ACCEPT), this function is not
+    used. However, leave the code in place, just in case. */
 
     case OP_ACCEPT:
     case OP_ASSERT_ACCEPT:
@@ -453,8 +458,8 @@ for (;;)
     For backreferenes, if duplicate numbers are present in the pattern we check
     for a reference to a duplicate. If it is, we don't know which version will
     be referenced, so we have to set the minimum length to zero. */
-    
-    /* Duplicate named pattern back reference. */ 
+
+    /* Duplicate named pattern back reference. */
 
     case OP_DNREF:
     case OP_DNREFI:
@@ -481,7 +486,7 @@ for (;;)
           ce = cs = (PCRE2_UCHAR *)PRIV(find_bracket)(startcode, utf, recno);
           if (cs == NULL) return -2;
           do ce += GET(ce, 1); while (*ce == OP_ALT);
-          
+
           dd = 0;
           if (!dupcapused ||
               (PCRE2_UCHAR *)PRIV(find_bracket)(ce, utf, recno) == NULL)
@@ -508,7 +513,7 @@ for (;;)
                 if (dd < 0) return dd;
                 }
               }
-            }   
+            }
 
           backref_cache[recno] = dd;
           for (i = backref_cache[0] + 1; i < recno; i++) backref_cache[i] = -1;
@@ -524,7 +529,7 @@ for (;;)
     cc += 1 + 2*IMM2_SIZE;
     goto REPEAT_BACK_REFERENCE;
 
-    /* Single back reference by number. References by name are converted to by 
+    /* Single back reference by number. References by name are converted to by
     number when there is no duplication. */
 
     case OP_REF:
@@ -1585,7 +1590,6 @@ Returns:   0 normally; non-zero should never normally occur
 int
 PRIV(study)(pcre2_real_code *re)
 {
-int min;
 int count = 0;
 PCRE2_UCHAR *code;
 BOOL utf = (re->overall_options & PCRE2_UTF) != 0;
@@ -1607,21 +1611,23 @@ if ((re->flags & (PCRE2_FIRSTSET|PCRE2_STARTLINE)) == 0)
   }
 
 /* Find the minimum length of subject string. If the pattern can match an empty
-string, the minimum length is already known. If the pattern contains (*ACCEPT) 
-all bets are off. If there are more back references than the size of the vector
-we are going to cache them in, do nothing. A pattern that complicated will
-probably take a long time to analyze and may in any case turn out to be too
-complicated. Note that back reference minima are held as 16-bit numbers. */
+string, the minimum length is already known. If the pattern contains (*ACCEPT)
+all bets are off, and we don't even try to find a minimum length. If there are
+more back references than the size of the vector we are going to cache them in,
+do nothing. A pattern that complicated will probably take a long time to
+analyze and may in any case turn out to be too complicated. Note that back
+reference minima are held as 16-bit numbers. */
 
 if ((re->flags & (PCRE2_MATCH_EMPTY|PCRE2_HASACCEPT)) == 0 &&
      re->top_backref <= MAX_CACHE_BACKREF)
   {
+  int min;
   int backref_cache[MAX_CACHE_BACKREF+1];
   backref_cache[0] = 0;    /* Highest one that is set */
   min = find_minlength(re, code, code, utf, NULL, &count, backref_cache);
   switch(min)
     {
-    case -1:  /* \C in UTF mode or (*ACCEPT) or over-complex regex */
+    case -1:  /* \C in UTF mode or over-complex regex */
     break;    /* Leave minlength unchanged (will be zero) */
 
     case -2:
@@ -1631,8 +1637,7 @@ if ((re->flags & (PCRE2_MATCH_EMPTY|PCRE2_HASACCEPT)) == 0 &&
     return 3; /* unrecognized opcode */
 
     default:
-    if (min > UINT16_MAX) min = UINT16_MAX;
-    re->minlength = min;
+    re->minlength = (min > UINT16_MAX)? UINT16_MAX : min;
     break;
     }
   }
