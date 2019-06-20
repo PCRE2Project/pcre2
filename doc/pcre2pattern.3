@@ -3558,6 +3558,10 @@ next attempt at "c". Note that a possessive quantifer does not have the same
 effect as this example; although it would suppress backtracking during the
 first match attempt, the second attempt would start at the second character
 instead of skipping on to "c".
+.P
+If (*SKIP) is used inside a lookbehind to specify a new starting point that is
+not later than the starting point of the current match, it is ignored, and the
+normal "bumpalong" occurs.
 .sp
   (*SKIP:NAME)
 .sp

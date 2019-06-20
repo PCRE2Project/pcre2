@@ -9219,6 +9219,10 @@ BACKTRACKING CONTROL
        attempt would start at the second character instead of skipping  on  to
        "c".
 
+       If  (*SKIP) is used inside a lookbehind to specify a new starting point
+       that is not later than the starting point of the current match,  it  is
+       ignored, and the normal "bumpalong" occurs.
+
          (*SKIP:NAME)
 
        When  (*SKIP)  has  an associated name, its behaviour is modified. When
