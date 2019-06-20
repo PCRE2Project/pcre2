@@ -6365,4 +6365,16 @@ ef) x/x,mark
 /(?(DEFINE)(a|ab))(?1){1}+c/
     abc    
 
+/(?:a|(?=b)|.)*\z/
+    abc
+    
+/(?:a|(?=b)|.)*/
+    abc 
+    
+/(?<=a(*SKIP)x)|c/
+    abcd
+    
+/(?<=a(*SKIP)x)|d/
+    abcd
+ 
 # End of testinput1 

@@ -10081,4 +10081,20 @@ No match
     abc    
 No match
 
+/(?:a|(?=b)|.)*\z/
+    abc
+ 0: abc
+    
+/(?:a|(?=b)|.)*/
+    abc 
+ 0: a
+    
+/(?<=a(*SKIP)x)|c/
+    abcd
+No match
+    
+/(?<=a(*SKIP)x)|d/
+    abcd
+ 0: d
+ 
 # End of testinput1 

@@ -1,4 +1,4 @@
-.TH PCRE2TEST 1 "11 June 2019" "PCRE 10.34"
+.TH PCRE2TEST 1 "20 June 2019" "PCRE 10.34"
 .SH NAME
 pcre2test - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -1748,7 +1748,7 @@ restart the match with additional subject data by means of the
 \fBdfa_restart\fP modifier. For example:
 .sp
     re> /^\ed?\ed(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\ed\ed$/
-  data> 23ja\e=P,dfa
+  data> 23ja\e=ps,dfa
   Partial match: 23ja
   data> n05\e=dfa,dfa_restart
    0: n05
@@ -2062,6 +2062,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 11 June 2019
+Last updated: 20 June 2019
 Copyright (c) 1997-2019 University of Cambridge.
 .fi

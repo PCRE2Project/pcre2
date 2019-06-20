@@ -1612,7 +1612,7 @@ RESTARTING AFTER A PARTIAL MATCH
        dfa_restart modifier. For example:
 
            re> /^\d?\d(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\d\d$/
-         data> 23ja\=P,dfa
+         data> 23ja\=ps,dfa
          Partial match: 23ja
          data> n05\=dfa,dfa_restart
           0: n05
@@ -1893,5 +1893,5 @@ AUTHOR
 
 REVISION
 
-       Last updated: 11 June 2019
+       Last updated: 20 June 2019
        Copyright (c) 1997-2019 University of Cambridge.
