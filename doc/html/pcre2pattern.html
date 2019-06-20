@@ -3321,12 +3321,13 @@ the outer parentheses.
 because an ungreedy quantification with a minimum of zero acts only when a
 backtrack happens. Consider, for example,
 <pre>
-  A(*ACCEPT)??BC
+  (A(*ACCEPT)??B)C
 </pre>
 where A, B, and C may be complex expressions. After matching "A", the matcher
 processes "BC"; if that fails, causing a backtrack, (*ACCEPT) is triggered and
-the match succeeds. Whereas (*COMMIT) (see below) means "fail on backtrack", a
-repeated (*ACCEPT) of this type means "succeed on backtrack".
+the match succeeds. In both cases, all but C is captured. Whereas (*COMMIT)
+(see below) means "fail on backtrack", a repeated (*ACCEPT) of this type means
+"succeed on backtrack".
 </P>
 <P>
 <b>Warning:</b> (*ACCEPT) should not be used within a script run group, because
@@ -3742,7 +3743,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC31" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 10 June 2019
+Last updated: 20 June 2019
 <br>
 Copyright &copy; 1997-2019 University of Cambridge.
 <br>

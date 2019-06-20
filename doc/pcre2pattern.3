@@ -1,4 +1,4 @@
-.TH PCRE2PATTERN 3 "10 June 2019" "PCRE2 10.34"
+.TH PCRE2PATTERN 3 "20 June 2019" "PCRE2 10.34"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION DETAILS"
@@ -3366,12 +3366,13 @@ the outer parentheses.
 because an ungreedy quantification with a minimum of zero acts only when a
 backtrack happens. Consider, for example,
 .sp
-  A(*ACCEPT)??BC
+  (A(*ACCEPT)??B)C
 .sp
 where A, B, and C may be complex expressions. After matching "A", the matcher
 processes "BC"; if that fails, causing a backtrack, (*ACCEPT) is triggered and
-the match succeeds. Whereas (*COMMIT) (see below) means "fail on backtrack", a
-repeated (*ACCEPT) of this type means "succeed on backtrack".
+the match succeeds. In both cases, all but C is captured. Whereas (*COMMIT)
+(see below) means "fail on backtrack", a repeated (*ACCEPT) of this type means
+"succeed on backtrack".
 .P
 \fBWarning:\fP (*ACCEPT) should not be used within a script run group, because
 it causes an immediate exit from the group, bypassing the script run checking.
@@ -3777,6 +3778,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 10 June 2019
+Last updated: 20 June 2019
 Copyright (c) 1997-2019 University of Cambridge.
 .fi
