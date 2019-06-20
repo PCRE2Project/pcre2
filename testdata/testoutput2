@@ -17031,6 +17031,14 @@ Capture group count = 0
 First code unit = 'A'
 Subject length lower bound = 1
 
+/(A(*ACCEPT)??B)C/
+    ABC
+ 0: ABC
+ 1: AB
+    AXY 
+ 0: A
+ 1: A
+
 # End of testinput2
 Error -70: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

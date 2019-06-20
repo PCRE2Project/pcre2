@@ -5625,4 +5625,8 @@ a)"xI
 
 /A(?:(*ACCEPT))?B/info
 
+/(A(*ACCEPT)??B)C/
+    ABC
+    AXY 
+
 # End of testinput2
