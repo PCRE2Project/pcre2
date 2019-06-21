@@ -355,7 +355,14 @@ characters:
 </PRE>
 </P>
 <P>
-3. Because a partial match must always contain at least one character, what
+3. The maximum lookbehind count is also important when the result of a partial
+match attempt is "no match". In this case, the maximum lookbehind characters
+from the end of the current segment must be retained at the start of the next
+segment, in case the lookbehind is at the start of the pattern. Matching the
+next segment must then start at the appropriate offset.
+</P>
+<P>
+4. Because a partial match must always contain at least one character, what
 might be considered a partial match of an empty string actually gives a "no
 match" result. For example:
 <pre>
@@ -369,7 +376,7 @@ happen if characters from the previous segment are retained. For this reason, a
 when the pattern contains lookbehinds.
 </P>
 <P>
-4. Matching a subject string that is split into multiple segments may not
+5. Matching a subject string that is split into multiple segments may not
 always produce exactly the same result as matching over one single long string,
 especially when PCRE2_PARTIAL_SOFT is used. The section "Partial Matching and
 Word Boundaries" above describes an issue that arises if the pattern ends with
@@ -411,7 +418,7 @@ multi-segment data. The example above then behaves differently:
   data&#62; gsb\=ph,dfa,dfa_restart
   Partial match: gsb
 </pre>
-5. Patterns that contain alternatives at the top level which do not all start
+6. Patterns that contain alternatives at the top level which do not all start
 with the same pattern item may not work as expected when PCRE2_DFA_RESTART is
 used. For example, consider this pattern:
 <pre>
@@ -456,9 +463,9 @@ Cambridge, England.
 </P>
 <br><a name="SEC10" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 22 December 2014
+Last updated: 21 June 2019
 <br>
-Copyright &copy; 1997-2014 University of Cambridge.
+Copyright &copy; 1997-2019 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE2 index page</a>.

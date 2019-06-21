@@ -2014,8 +2014,10 @@ no characters with a quantifier that has no upper limit, for example:
 </pre>
 Earlier versions of Perl and PCRE1 used to give an error at compile time for
 such patterns. However, because there are cases where this can be useful, such
-patterns are now accepted, but if any repetition of the group does in fact
-match no characters, the loop is forcibly broken.
+patterns are now accepted, but whenever an iteration of such a group matches no
+characters, matching moves on to the next item in the pattern instead of
+repeatedly matching an empty string. This does not prevent backtracking into 
+any of the iterations if a subsequent item fails to match. 
 </P>
 <P>
 By default, quantifiers are "greedy", that is, they match as much as possible
@@ -2369,6 +2371,10 @@ A lookaround assertion may also appear as the condition in a
 <a href="#conditions">conditional group</a>
 (see below). In this case, the result of matching the assertion determines
 which branch of the condition is followed.
+</P>
+<P>
+Lookaround assertions are atomic. If an assertion is true, but there is a
+subsequent matching failure, there is no backtracking into the assertion.
 </P>
 <P>
 Assertion groups are not capture groups. If an assertion contains capture
@@ -3519,9 +3525,9 @@ first match attempt, the second attempt would start at the second character
 instead of skipping on to "c".
 </P>
 <P>
-If (*SKIP) is used inside a lookbehind to specify a new starting point that is
-not later than the starting point of the current match, it is ignored, and the
-normal "bumpalong" occurs.
+If (*SKIP) is used inside a lookbehind to specify a new starting position that
+is not later than the starting point of the current match, the position 
+specified by (*SKIP) is ignored, and instead the normal "bumpalong" occurs.
 <pre>
   (*SKIP:NAME)
 </pre>
@@ -3748,7 +3754,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC31" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 20 June 2019
+Last updated: 21 June 2019
 <br>
 Copyright &copy; 1997-2019 University of Cambridge.
 <br>
