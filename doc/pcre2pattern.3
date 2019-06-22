@@ -1,4 +1,4 @@
-.TH PCRE2PATTERN 3 "21 June 2019" "PCRE2 10.34"
+.TH PCRE2PATTERN 3 "22 June 2019" "PCRE2 10.34"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION DETAILS"
@@ -3564,9 +3564,10 @@ effect as this example; although it would suppress backtracking during the
 first match attempt, the second attempt would start at the second character
 instead of skipping on to "c".
 .P
-If (*SKIP) is used inside a lookbehind to specify a new starting position that
-is not later than the starting point of the current match, the position 
-specified by (*SKIP) is ignored, and instead the normal "bumpalong" occurs.
+If (*SKIP) is used to specify a new starting position that is the same as the
+starting position of the current match, or (by being inside a lookbehind)
+earlier, the position specified by (*SKIP) is ignored, and instead the normal
+"bumpalong" occurs.
 .sp
   (*SKIP:NAME)
 .sp
@@ -3787,6 +3788,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 21 June 2019
+Last updated: 22 June 2019
 Copyright (c) 1997-2019 University of Cambridge.
 .fi

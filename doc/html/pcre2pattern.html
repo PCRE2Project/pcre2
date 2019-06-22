@@ -3525,9 +3525,10 @@ first match attempt, the second attempt would start at the second character
 instead of skipping on to "c".
 </P>
 <P>
-If (*SKIP) is used inside a lookbehind to specify a new starting position that
-is not later than the starting point of the current match, the position 
-specified by (*SKIP) is ignored, and instead the normal "bumpalong" occurs.
+If (*SKIP) is used to specify a new starting position that is the same as the
+starting position of the current match, or (by being inside a lookbehind)
+earlier, the position specified by (*SKIP) is ignored, and instead the normal
+"bumpalong" occurs.
 <pre>
   (*SKIP:NAME)
 </pre>
@@ -3754,7 +3755,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC31" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 21 June 2019
+Last updated: 22 June 2019
 <br>
 Copyright &copy; 1997-2019 University of Cambridge.
 <br>
