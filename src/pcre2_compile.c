@@ -132,8 +132,8 @@ static int
     compile_block *);
 
 static BOOL
-  set_lookbehind_lengths(uint32_t **, int *, int *, parsed_recurse_check *,
-    compile_block *);
+  set_lookbehind_lengths(uint32_t **, int *, int *, int *,
+    parsed_recurse_check *, compile_block *);
 
 
 
@@ -8902,7 +8902,8 @@ return -1;
 
 /* Return a fixed length for a branch in a lookbehind, giving an error if the
 length is not fixed. If any lookbehinds are encountered on the way, they get
-their length set. On entry, *pptrptr points to the first element inside the
+their length set, and there is a check for them looking further back than the
+current lookbehind. On entry, *pptrptr points to the first element inside the
 branch. On exit it is set to point to the ALT or KET.
 
 Arguments:
@@ -8921,6 +8922,8 @@ get_branchlength(uint32_t **pptrptr, int *errcodeptr, int *lcptr,
 {
 int branchlength = 0;
 int grouplength;
+int max;
+int extra = 0;   /* Additional lookbehind from nesting */
 uint32_t lastitemlength = 0;
 uint32_t *pptr = *pptrptr;
 PCRE2_SIZE offset;
@@ -9067,12 +9070,17 @@ for (;; pptr++)
       }
     break;
 
-    /* Lookbehinds can be ignored, but must themselves be checked. */
+    /* A lookbehind does not contribute any length to this lookbehind, but must
+    itself be checked and have its lengths set. If the maximum lookebhind of
+    any branch is greater than the length so far computed for this branch, we
+    must set an extra value for use when setting the maximum overall
+    lookbehind. */
 
     case META_LOOKBEHIND:
     case META_LOOKBEHINDNOT:
-    if (!set_lookbehind_lengths(&pptr, errcodeptr, lcptr, recurses, cb))
+    if (!set_lookbehind_lengths(&pptr, &max, errcodeptr, lcptr, recurses, cb))
       return -1;
+    if (max - branchlength > extra) extra = max - branchlength;
     break;
 
     /* Back references and recursions are handled by very similar code. At this
@@ -9264,7 +9272,15 @@ for (;; pptr++)
 
 EXIT:
 *pptrptr = pptr;
-if (branchlength > cb->max_lookbehind) cb->max_lookbehind = branchlength;
+
+/* The overall maximum lookbehind for any branch in the pattern takes note of
+any extra value that is generated from a nested lookbehind. For example, for
+/(?<=a(?<=ba)c)/ each individual lookbehind has length 2, but the
+max_lookbehind setting is 3 because matching inspects 3 characters before the
+match starting point. */
+
+if (branchlength + extra > cb->max_lookbehind)
+  cb->max_lookbehind = branchlength + extra;
 return branchlength;
 
 PARSED_SKIP_FAILED:
@@ -9285,6 +9301,7 @@ ket.
 
 Arguments:
   pptrptr     pointer to pointer in the parsed pattern
+  maxptr      where to return maximum length for the whole group
   errcodeptr  pointer to error code
   lcptr       pointer to loop counter
   recurses    chain of recurse_check to catch mutual recursion
@@ -9295,11 +9312,12 @@ Returns:      TRUE if all is well
 */
 
 static BOOL
-set_lookbehind_lengths(uint32_t **pptrptr, int *errcodeptr, int *lcptr,
-  parsed_recurse_check *recurses, compile_block *cb)
+set_lookbehind_lengths(uint32_t **pptrptr, int *maxptr, int *errcodeptr,
+  int *lcptr, parsed_recurse_check *recurses, compile_block *cb)
 {
 PCRE2_SIZE offset;
 int branchlength;
+int max = 0;
 uint32_t *bptr = *pptrptr;
 
 READPLUSOFFSET(offset, bptr);  /* Offset for error messages */
@@ -9316,11 +9334,13 @@ do
     if (cb->erroroffset == PCRE2_UNSET) cb->erroroffset = offset;
     return FALSE;
     }
+  if (branchlength > max) max = branchlength;
   *bptr |= branchlength;  /* branchlength never more than 65535 */
   bptr = *pptrptr;
   }
 while (*bptr == META_ALT);
 
+*maxptr = max;
 return TRUE;
 }
 
@@ -9344,6 +9364,7 @@ static int
 check_lookbehinds(compile_block *cb)
 {
 uint32_t *pptr;
+int max;
 int errorcode = 0;
 int loopcount = 0;
 
@@ -9446,7 +9467,7 @@ for (pptr = cb->parsed_pattern; *pptr != META_END; pptr++)
 
     case META_LOOKBEHIND:
     case META_LOOKBEHINDNOT:
-    if (!set_lookbehind_lengths(&pptr, &errorcode, &loopcount, NULL, cb))
+    if (!set_lookbehind_lengths(&pptr, &max, &errorcode, &loopcount, NULL, cb))
       return errorcode;
     break;
     }

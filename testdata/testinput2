@@ -5629,4 +5629,22 @@ a)"xI
     ABC
     AXY 
 
+/(?<=(?<=a)b)c.*/I
+    abc\=ph
+\= Expect no match
+    xbc\=ph
+
+/(?<=ab)c.*/I
+    abc\=ph
+\= Expect no match
+    xbc\=ph
+
+/(?<=a(?<=a|a)c)/I
+
+/(?<=a(?<=a|ba)c)/I
+
+/(?<=(?<=a)b)(?<!abcd)/I
+
+/(?<=(?<=a)b)(?<!abcd)(?<=(?<=a)bcde)/I
+
 # End of testinput2

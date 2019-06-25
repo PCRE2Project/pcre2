@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "11 June 2019" "PCRE2 10.34"
+.TH PCRE2API 3 "25 June 2019" "PCRE2 10.34"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -1706,9 +1706,9 @@ subject, which is recorded when possible. Consider the pattern
 .sp
   (*MARK:1)B(*MARK:2)(X|Y)
 .sp
-The minimum length for a match is two characters. If the subject is "XXBB", the 
-"starting character" optimization skips "XX", then tries to match "BB", which 
-is long enough. In the process, (*MARK:2) is encountered and remembered. When 
+The minimum length for a match is two characters. If the subject is "XXBB", the
+"starting character" optimization skips "XX", then tries to match "BB", which
+is long enough. In the process, (*MARK:2) is encountered and remembered. When
 the match attempt fails, the next "B" is found, but there is only one character
 left, so there are no more attempts, and "no match" is returned with the "last
 mark seen" set to "2". If NO_START_OPTIMIZE is set, however, matches are tried
@@ -2215,16 +2215,27 @@ defaulted by the caller of the match function.
 .sp
   PCRE2_INFO_MAXLOOKBEHIND
 .sp
-Return the number of characters (not code units) in the longest lookbehind
-assertion in the pattern. The third argument should point to a uint32_t
-integer. This information is useful when doing multi-segment matching using the
-partial matching facilities. Note that the simple assertions \eb and \eB
-require a one-character lookbehind. \eA also registers a one-character
-lookbehind, though it does not actually inspect the previous character. This is
-to ensure that at least one character from the old segment is retained when a
-new segment is processed. Otherwise, if there are no lookbehinds in the
-pattern, \eA might match incorrectly at the start of a second or subsequent
-segment.
+Return the largest number of characters (not code units) before the current
+matching point that could be inspected while processing a lookbehind assertion
+in the pattern. Before release 10.34 this request used to give the largest
+value for any individual assertion. Now it takes into account nested
+lookbehinds, which can mean that the overall value is greater. For example, the
+pattern (?<=a(?<=ba)c) previously returned 2, because that is the length of the
+largest individual lookbehind. Now it returns 3, because matching actually
+looks back 3 characters.
+.P
+The third argument should point to a uint32_t integer. This information is
+useful when doing multi-segment matching using the partial matching facilities.
+Note that the simple assertions \eb and \eB require a one-character lookbehind.
+\eA also registers a one-character lookbehind, though it does not actually
+inspect the previous character. This is to ensure that at least one character
+from the old segment is retained when a new segment is processed. Otherwise, if
+there are no lookbehinds in the pattern, \eA might match incorrectly at the
+start of a second or subsequent segment. There are more details in the
+.\" HREF
+\fBpcre2partial\fP
+.\"
+documentation.
 .sp
   PCRE2_INFO_MINLENGTH
 .sp
@@ -3848,6 +3859,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 11 June 2019
+Last updated: 25 June 2019
 Copyright (c) 1997-2019 University of Cambridge.
 .fi

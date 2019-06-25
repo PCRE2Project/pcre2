@@ -17039,6 +17039,54 @@ Subject length lower bound = 1
  0: A
  1: A
 
+/(?<=(?<=a)b)c.*/I
+Capture group count = 0
+Max lookbehind = 2
+First code unit = 'c'
+Subject length lower bound = 1
+    abc\=ph
+Partial match: abc
+               <<
+\= Expect no match
+    xbc\=ph
+No match
+
+/(?<=ab)c.*/I
+Capture group count = 0
+Max lookbehind = 2
+First code unit = 'c'
+Subject length lower bound = 1
+    abc\=ph
+Partial match: abc
+               <<
+\= Expect no match
+    xbc\=ph
+No match
+
+/(?<=a(?<=a|a)c)/I
+Capture group count = 0
+Max lookbehind = 2
+May match empty string
+Subject length lower bound = 0
+
+/(?<=a(?<=a|ba)c)/I
+Capture group count = 0
+Max lookbehind = 3
+May match empty string
+Subject length lower bound = 0
+
+/(?<=(?<=a)b)(?<!abcd)/I
+Capture group count = 0
+Max lookbehind = 4
+May match empty string
+Subject length lower bound = 0
+
+/(?<=(?<=a)b)(?<!abcd)(?<=(?<=a)bcde)/I
+Capture group count = 0
+Max lookbehind = 5
+May match empty string
+Subject length lower bound = 0
+
 # End of testinput2
 Error -70: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

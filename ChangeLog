@@ -66,6 +66,11 @@ is made possessive and applied to an item in parentheses, because a
 parenthesized item may contain multiple branches or other backtracking points,
 for example /(a|ab){1}+c/ or /(a+){1}+a/.
 
+13. Nested lookbehinds are now taken into account when computing the maximum 
+lookbehind value. For example /(?<=a(?<=ba)c)/ previously set a maximum 
+lookbehind of 2, because that is the largest individual lookbehind. Now it sets 
+it to 3, because matching looks back 3 characters.
+
 
 Version 10.33 16-April-2019
 ---------------------------
