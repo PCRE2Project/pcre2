@@ -3152,8 +3152,8 @@ for (;;)
 
   /* We have finished the processing at the current subject character. If no
   new states have been set for the next character, we have found all the
-  matches that we are going to find. If we are at the top level and partial
-  matching has been requested, check for appropriate conditions.
+  matches that we are going to find. If partial matching has been requested,
+  check for appropriate conditions.
 
   The "forced_ fail" variable counts the number of (*F) encountered for the
   character. If it is equal to the original active_count (saved in
@@ -3165,8 +3165,7 @@ for (;;)
 
   if (new_count <= 0)
     {
-    if (rlevel == 1 &&                               /* Top level, and */
-        could_continue &&                            /* Some could go on, and */
+    if (could_continue &&                            /* Some could go on, and */
         forced_fail != workspace[1] &&               /* Not all forced fail & */
         (                                            /* either... */
         (mb->moptions & PCRE2_PARTIAL_HARD) != 0      /* Hard partial */
@@ -3175,8 +3174,8 @@ for (;;)
          match_count < 0)                            /* no matches */
         ) &&                                         /* And... */
         (
-        partial_newline ||                           /* Either partial NL */
-          (                                          /* or ... */
+        partial_newline ||                     /* Either partial NL */
+          (                                    /* or ... */
           ptr >= end_subject &&                /* End of subject and */
           ptr > mb->start_used_ptr)            /* Inspected non-empty string */
           )

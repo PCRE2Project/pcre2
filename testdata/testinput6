@@ -4972,4 +4972,26 @@
 \= Expect no match
     0
 
+/(?<=pqr)abc(?=xyz)/
+    123pqrabcxy\=ps,allusedtext
+    123pqrabcxyz\=ps,allusedtext
+
+/(?>a+b)/
+    aaaa\=ps
+    aaaab\=ps
+    
+/(abc)(?1)/
+    abca\=ps
+    abcabc\=ps
+
+/(?(?=abc).*|Z)/
+    ab\=ps
+    abcxyz\=ps
+
+/(abc)++x/
+    abcab\=ps
+    abc\=ps 
+    ab\=ps
+    abcx  
+
 # End of testinput6

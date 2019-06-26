@@ -5,7 +5,7 @@ Change Log for PCRE2
 Version 10.34 22-April-2019
 ---------------------------
 
-1. The maximum number of capturing subpatterns is 65535 (documented), but no 
+1. The maximum number of capturing subpatterns is 65535 (documented), but no
 check on this was ever implemented. This omission has been rectified; it fixes
 ClusterFuzz 14376.
 
@@ -25,40 +25,40 @@ PCRE2_MATCH_INVALID_UTF compile-time option.
 7. Adjust the limit for "must have" code unit searching, in particular,
 increase it substantially for non-anchored patterns.
 
-8. Allow (*ACCEPT) to be quantified, because an ungreedy quantifier with a zero 
+8. Allow (*ACCEPT) to be quantified, because an ungreedy quantifier with a zero
 minimum is potentially useful.
 
 9. Some changes to the way the minimum subject length is handled:
 
-   * When PCRE2_NO_START_OPTIMIZE is set, no minimum length is computed; 
+   * When PCRE2_NO_START_OPTIMIZE is set, no minimum length is computed;
      pcre2test now omits this item instead of showing a value of zero.
-     
-   * An incorrect minimum length could be calculated for a pattern that 
-     contained (*ACCEPT) inside a qualified group whose minimum repetition was 
+
+   * An incorrect minimum length could be calculated for a pattern that
+     contained (*ACCEPT) inside a qualified group whose minimum repetition was
      zero, for example /A(?:(*ACCEPT))?B/, which incorrectly computed a minimum
-     of 2. The minimum length scan no longer happens for a pattern that 
+     of 2. The minimum length scan no longer happens for a pattern that
      contains (*ACCEPT).
-     
-   * When no minimum length is set by the normal scan, but a first and/or last 
+
+   * When no minimum length is set by the normal scan, but a first and/or last
      code unit is recorded, set the minimum to 1 or 2 as appropriate.
-     
+
    * When a pattern contains multiple groups with the same number, a back
      reference cannot know which one to scan for a minimum length. This used to
      cause the minimum length finder to give up with no result. Now it treats
-     such references as not adding to the minimum length (which it should have 
+     such references as not adding to the minimum length (which it should have
      done all along).
-     
-   * Furthermore, the above action now happens only if the back reference is to 
-     a group that exists more than once in a pattern instead of any back 
-     reference in a pattern with duplicate numbers.  
-     
-10. A (*MARK) value inside a successful condition was not being returned by the 
+
+   * Furthermore, the above action now happens only if the back reference is to
+     a group that exists more than once in a pattern instead of any back
+     reference in a pattern with duplicate numbers.
+
+10. A (*MARK) value inside a successful condition was not being returned by the
 interpretive matcher (it was returned by JIT). This bug has been mended.
 
-11. A bug in pcre2grep meant that -o without an argument (or -o0) didn't work 
-if the pattern had more than 32 capturing parentheses. This is fixed. In 
-addition (a) the default limit for groups requested by -o<n> has been raised to 
-50, (b) the new --om-capture option changes the limit, (c) an error is raised 
+11. A bug in pcre2grep meant that -o without an argument (or -o0) didn't work
+if the pattern had more than 32 capturing parentheses. This is fixed. In
+addition (a) the default limit for groups requested by -o<n> has been raised to
+50, (b) the new --om-capture option changes the limit, (c) an error is raised
 if -o asks for a group that is above the limit.
 
 12. The quantifier {1} was always being ignored, but this is incorrect when it
@@ -66,18 +66,22 @@ is made possessive and applied to an item in parentheses, because a
 parenthesized item may contain multiple branches or other backtracking points,
 for example /(a|ab){1}+c/ or /(a+){1}+a/.
 
-13. Nested lookbehinds are now taken into account when computing the maximum 
-lookbehind value. For example /(?<=a(?<=ba)c)/ previously set a maximum 
-lookbehind of 2, because that is the largest individual lookbehind. Now it sets 
+13. Nested lookbehinds are now taken into account when computing the maximum
+lookbehind value. For example /(?<=a(?<=ba)c)/ previously set a maximum
+lookbehind of 2, because that is the largest individual lookbehind. Now it sets
 it to 3, because matching looks back 3 characters.
 
-14. For partial matches, pcre2test was always showing the maximum lookbehind 
-characters, flagged with "<", which is misleading when the lookbehind didn't 
+14. For partial matches, pcre2test was always showing the maximum lookbehind
+characters, flagged with "<", which is misleading when the lookbehind didn't
 actually look behind the start (because it was later in the pattern). Showing
 all consulted preceding characters for partial matches is now controlled by the
 existing "allusedtext" modifier and, as for complete matches, this facility is
 available only for non-JIT matching, because JIT does not maintain the first
 and last consulted characters.
+
+15. DFA matching (using pcre2_dfa_match()) was not recognising a partial match
+if the end of the subject was encountered in a lookahead (conditional or
+otherwise), an atomic group, or a recursion.
 
 
 Version 10.33 16-April-2019

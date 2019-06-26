@@ -7809,4 +7809,40 @@ No match
     0
 No match
 
+/(?<=pqr)abc(?=xyz)/
+    123pqrabcxy\=ps,allusedtext
+Partial match: pqrabcxy
+               <<<
+    123pqrabcxyz\=ps,allusedtext
+ 0: pqrabcxyz
+    <<<   >>>
+
+/(?>a+b)/
+    aaaa\=ps
+Partial match: aaaa
+    aaaab\=ps
+ 0: aaaab
+    
+/(abc)(?1)/
+    abca\=ps
+Partial match: abca
+    abcabc\=ps
+ 0: abcabc
+
+/(?(?=abc).*|Z)/
+    ab\=ps
+Partial match: ab
+    abcxyz\=ps
+ 0: abcxyz
+
+/(abc)++x/
+    abcab\=ps
+Partial match: abcab
+    abc\=ps 
+Partial match: abc
+    ab\=ps
+Partial match: ab
+    abcx  
+ 0: abcx
+
 # End of testinput6
