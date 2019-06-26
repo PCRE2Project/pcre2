@@ -71,6 +71,14 @@ lookbehind value. For example /(?<=a(?<=ba)c)/ previously set a maximum
 lookbehind of 2, because that is the largest individual lookbehind. Now it sets 
 it to 3, because matching looks back 3 characters.
 
+14. For partial matches, pcre2test was always showing the maximum lookbehind 
+characters, flagged with "<", which is misleading when the lookbehind didn't 
+actually look behind the start (because it was later in the pattern). Showing
+all consulted preceding characters for partial matches is now controlled by the
+existing "allusedtext" modifier and, as for complete matches, this facility is
+available only for non-JIT matching, because JIT does not maintain the first
+and last consulted characters.
+
 
 Version 10.33 16-April-2019
 ---------------------------

@@ -876,7 +876,7 @@ Partial match: abc
  0: def
    
 /(?<=foo)bar/
-   foob\=ps,offset=2
+   foob\=ps,offset=2,allusedtext
 Partial match: foob
                <<<
    foobar...\=ps,dfa_restart,offset=4
@@ -6803,9 +6803,10 @@ Partial match: dogs
     xyzabc123pqr
 Failed: error -42: pattern contains an item that is not supported for DFA matching
     
-/(?<=abc)123/
+/(?<=abc)123/allusedtext
     xyzabc123pqr 
- 0: 123
+ 0: abc123
+    <<<   
     xyzabc12\=ps
 Partial match: abc12
                <<<
@@ -6813,9 +6814,10 @@ Partial match: abc12
 Partial match: abc12
                <<<
 
-/\babc\b/
+/\babc\b/allusedtext
     +++abc+++
- 0: abc
+ 0: +abc+
+    <   >
     +++ab\=ps
 Partial match: +ab
                <
@@ -6932,7 +6934,7 @@ Failed: error -42: pattern contains an item that is not supported for DFA matchi
     ac
 Failed: error -42: pattern contains an item that is not supported for DFA matching
 
-/(?<=abc)def/
+/(?<=abc)def/allusedtext
     abc\=ph
 Partial match: abc
                <<<

@@ -45,7 +45,7 @@ Minimum heap limit = 0
 Minimum match limit = 12
 Minimum depth limit = 3
  0: aaaaaaaaa
-    
+
 /(a)(?1)++/
     aa\=find_limits
 Minimum heap limit = 0
@@ -66,7 +66,7 @@ Minimum heap limit = 0
 Minimum match limit = 24
 Minimum depth limit = 3
  0: abbbbbbbbbbbbbbbbbbbbba
-    
+
 /a(?:.(*THEN))*?a/ims
     abbbbbbbbbbbbbbbbbbbbba\=find_limits
 Minimum heap limit = 0
@@ -207,9 +207,9 @@ No match
 \= Expect limit exceeded
     aaaaaaaaaaaaaz\=depth_limit=10
 Failed: error -53: matching depth limit exceeded
-    
-# These three have infinitely nested recursions. 
-    
+
+# These three have infinitely nested recursions.
+
 /((?2))((?1))/
     abc
 Failed: error -52: nested recursion at the same subject position
@@ -221,7 +221,7 @@ Failed: error -52: nested recursion at the same subject position
 /(?(R)a*(?1)|((?R))b)/
     aaaabcde
 Failed: error -52: nested recursion at the same subject position
-    
+
 # The allusedtext modifier does not work with JIT, which does not maintain
 # the leftchar/rightchar data.
 
@@ -233,7 +233,7 @@ Failed: error -52: nested recursion at the same subject position
  0: abcxyz
        >>>
  0+ xyzpqr
-    
+
 /(?<=pqr)abc(?=xyz)/allusedtext
     xyzpqrabcxyzpqr
  0: pqrabcxyz
@@ -242,12 +242,12 @@ Failed: error -52: nested recursion at the same subject position
  0: pqrabcxyz
     <<<   >>>
  0+ xyzpqr
-    
+
 /a\b/
     a.\=allusedtext
  0: a.
      >
-    a\=allusedtext  
+    a\=allusedtext
  0: a
 
 /abc\Kxyz/
@@ -264,7 +264,80 @@ Failed: error -52: nested recursion at the same subject position
     abcabcdefg
  0: abcabcde
        >>>>>
-    
+
+#subject allusedtext
+
+/(?<=abc)123/
+    xyzabc123pqr
+ 0: abc123
+    <<<   
+    xyzabc12\=ps
+Partial match: abc12
+               <<<
+    xyzabc12\=ph
+Partial match: abc12
+               <<<
+
+/\babc\b/
+    +++abc+++
+ 0: +abc+
+    <   >
+    +++ab\=ps
+Partial match: +ab
+               <
+    +++ab\=ph
+Partial match: +ab
+               <
+
+/(?<=abc)def/
+    abc\=ph
+Partial match: abc
+               <<<
+
+/(?<=123)(*MARK:xx)abc/mark
+    xxxx123a\=ph
+Partial match, mark=xx: 123a
+                        <<<
+    xxxx123a\=ps
+Partial match, mark=xx: 123a
+                        <<<
+
+/(?<=(?<=a)b)c.*/I
+Capture group count = 0
+Max lookbehind = 2
+First code unit = 'c'
+Subject length lower bound = 1
+    abc\=ph
+Partial match: abc
+               <<
+\= Expect no match
+    xbc\=ph
+No match
+
+/(?<=ab)c.*/I
+Capture group count = 0
+Max lookbehind = 2
+First code unit = 'c'
+Subject length lower bound = 1
+    abc\=ph
+Partial match: abc
+               <<
+\= Expect no match
+    xbc\=ph
+No match
+
+/abc(?<=bc)def/
+    xxxabcd\=ph
+Partial match: abcd
+
+/(?<=ab)cdef/
+    xxabcd\=ph
+Partial match: abcd
+               <<
+
+#subject
+# -------------------------------------------------------------------
+
 # These tests provoke recursion loops, which give a different error message
 # when JIT is used.
 
@@ -282,7 +355,7 @@ Subject length lower bound = 0
     abcd
  0: a
  1: a
-    defg 
+    defg
 Failed: error -52: nested recursion at the same subject position
 
 /(ab|(bc|(de|(?R))))/I
@@ -292,7 +365,7 @@ Subject length lower bound = 0
     abcd
  0: ab
  1: ab
-    fghi 
+    fghi
 Failed: error -52: nested recursion at the same subject position
 
 /(ab|(bc|(de|(?1))))/I
@@ -302,7 +375,7 @@ Subject length lower bound = 0
     abcd
  0: ab
  1: ab
-    fghi 
+    fghi
 Failed: error -52: nested recursion at the same subject position
 
 /x(ab|(bc|(de|(?1)x)x)x)/I
@@ -312,17 +385,17 @@ Subject length lower bound = 3
     xab123
  0: xab
  1: ab
-    xfghi 
+    xfghi
 Failed: error -52: nested recursion at the same subject position
 
 /(?!\w)(?R)/
     abcd
 Failed: error -52: nested recursion at the same subject position
-    =abc 
+    =abc
 Failed: error -52: nested recursion at the same subject position
 
 /(?=\w)(?R)/
-    =abc 
+    =abc
 Failed: error -52: nested recursion at the same subject position
     abcd
 Failed: error -52: nested recursion at the same subject position
@@ -339,7 +412,7 @@ Failed: error -52: nested recursion at the same subject position
     aaa
  0: aaa
  1: aaa
-    bbb 
+    bbb
 Failed: error -52: nested recursion at the same subject position
 
 /[^\xff]((?1))/BI
@@ -356,8 +429,8 @@ Capture group count = 1
 Subject length lower bound = 1
     abcd
 Failed: error -52: nested recursion at the same subject position
-    
-# These tests don't behave the same with JIT 
+
+# These tests don't behave the same with JIT
 
 /\w+(?C1)/BI,no_auto_possess
 ------------------------------------------------------------------
@@ -406,7 +479,7 @@ Subject length lower bound = 1
   1   ^^    End of pattern
 No match
 
-# This test breaks the JIT stack limit 
+# This test breaks the JIT stack limit
 
 /(|]+){2,2452}/
     (|]+){2,2452}

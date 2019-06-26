@@ -5124,7 +5124,7 @@ patlen = p - buffer - 2;
 
 if (!decode_modifiers(p, CTX_PAT, &pat_patctl, NULL)) return PR_SKIP;
 
-/* Note that the match_invalid_utf option also sets utf when passed to 
+/* Note that the match_invalid_utf option also sets utf when passed to
 pcre2_compile(). */
 
 utf = (pat_patctl.options & (PCRE2_UTF|PCRE2_MATCH_INVALID_UTF)) != 0;
@@ -7761,13 +7761,21 @@ for (gmatched = 0;; gmatched++)
     }    /* End of handling a successful match */
 
   /* There was a partial match. The value of ovector[0] is the bumpalong point,
-  that is, startchar, not any \K point that might have been passed. */
+  that is, startchar, not any \K point that might have been passed. When JIT is
+  not in use, "allusedtext" may be set, in which case we indicate the leftmost
+  consulted character. */
 
   else if (capcount == PCRE2_ERROR_PARTIAL)
     {
-    PCRE2_SIZE poffset;
+    PCRE2_SIZE leftchar;
     int backlength;
     int rubriclength = 0;
+
+    if ((dat_datctl.control & CTL_ALLUSEDTEXT) != 0)
+      {
+      leftchar = FLD(match_data, leftchar);
+      }
+    else leftchar = ovector[0];
 
     fprintf(outfile, "Partial match");
     if ((dat_datctl.control & CTL_MARK) != 0 &&
@@ -7781,8 +7789,7 @@ for (gmatched = 0;; gmatched++)
     fprintf(outfile, ": ");
     rubriclength += 15;
 
-    poffset = backchars(pp, ovector[0], maxlookbehind, utf);
-    PCHARS(backlength, pp, poffset, ovector[0] - poffset, utf, outfile);
+    PCHARS(backlength, pp, leftchar, ovector[0] - leftchar, utf, outfile);
     PCHARSV(pp, ovector[0], ulen - ovector[0], utf, outfile);
 
     if ((pat_patctl.control & CTL_JITVERIFY) != 0 && jit_was_used)

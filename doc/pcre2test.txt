@@ -1122,29 +1122,33 @@ SUBJECT MODIFIERS
        capture number.
 
        The  allusedtext modifier requests that all the text that was consulted
-       during a successful pattern match by the interpreter should  be  shown.
-       This  feature  is not supported for JIT matching, and if requested with
-       JIT it is ignored (with a warning message). Setting this  modifier  af-
-       fects the output if there is a lookbehind at the start of a match, or a
-       lookahead at the end, or if \K is used in the pattern. Characters  that
-       precede  or  follow the start and end of the actual match are indicated
-       in the output by '<' or '>' characters underneath them. Here is an  ex-
-       ample:
+       during a successful pattern match by the interpreter should  be  shown,
+       for  both  full  and partial matches. This feature is not supported for
+       JIT matching, and if requested with JIT it is ignored (with  a  warning
+       message).  Setting this modifier affects the output if there is a look-
+       behind at the start of a match, or, for a complete match,  a  lookahead
+       at the end, or if \K is used in the pattern. Characters that precede or
+       follow the start and end of the actual match are indicated in the  out-
+       put by '<' or '>' characters underneath them.  Here is an example:
 
            re> /(?<=pqr)abc(?=xyz)/
          data> 123pqrabcxyz456\=allusedtext
           0: pqrabcxyz
              <<<   >>>
+         data> 123pqrabcxy\=ph,allusedtext
+         Partial match: pqrabcxy
+                        <<<
 
-       This  shows  that  the  matched string is "abc", with the preceding and
-       following strings "pqr" and "xyz"  having  been  consulted  during  the
-       match (when processing the assertions).
+       The  first, complete match shows that the matched string is "abc", with
+       the preceding and following strings "pqr" and "xyz"  having  been  con-
+       sulted  during  the match (when processing the assertions). The partial
+       match can indicate only the preceding string.
 
-       The  startchar  modifier  requests  that the starting character for the
-       match be indicated, if it is different to  the  start  of  the  matched
+       The startchar modifier requests that the  starting  character  for  the
+       match  be  indicated,  if  it  is different to the start of the matched
        string. The only time when this occurs is when \K has been processed as
        part of the match. In this situation, the output for the matched string
-       is  displayed  from  the  starting  character instead of from the match
+       is displayed from the starting character  instead  of  from  the  match
        point, with circumflex characters under the earlier characters. For ex-
        ample:
 
@@ -1153,7 +1157,7 @@ SUBJECT MODIFIERS
           0: abcxyz
              ^^^
 
-       Unlike  allusedtext, the startchar modifier can be used with JIT.  How-
+       Unlike allusedtext, the startchar modifier can be used with JIT.   How-
        ever, these two modifiers are mutually exclusive.
 
    Showing the value of all capture groups
@@ -1161,97 +1165,97 @@ SUBJECT MODIFIERS
        The allcaptures modifier requests that the values of all potential cap-
        tured parentheses be output after a match. By default, only those up to
        the highest one actually used in the match are output (corresponding to
-       the  return  code from pcre2_match()). Groups that did not take part in
-       the match are output as "<unset>". This modifier is  not  relevant  for
-       DFA  matching (which does no capturing) and does not apply when replace
+       the return code from pcre2_match()). Groups that did not take  part  in
+       the  match  are  output as "<unset>". This modifier is not relevant for
+       DFA matching (which does no capturing) and does not apply when  replace
        is specified; it is ignored, with a warning message, if present.
 
    Showing the entire ovector, for all outcomes
 
        The allvector modifier requests that the entire ovector be shown, what-
        ever the outcome of the match. Compare allcaptures, which shows only up
-       to the maximum number of capture groups for the pattern, and then  only
-       for  a successful complete non-DFA match. This modifier, which acts af-
-       ter any match result, and also for DFA matching, provides  a  means  of
-       checking  that there are no unexpected modifications to ovector fields.
-       Before each match attempt, the ovector is filled with a special  value,
-       and  if  this  is  found  in  both  elements of a capturing pair, "<un-
-       changed>" is output. After a successful  match,  this  applies  to  all
-       groups  after the maximum capture group for the pattern. In other cases
-       it applies to the entire ovector. After a partial match, the first  two
-       elements  are  the only ones that should be set. After a DFA match, the
-       amount of ovector that is used depends on the number  of  matches  that
+       to  the maximum number of capture groups for the pattern, and then only
+       for a successful complete non-DFA match. This modifier, which acts  af-
+       ter  any  match  result, and also for DFA matching, provides a means of
+       checking that there are no unexpected modifications to ovector  fields.
+       Before  each match attempt, the ovector is filled with a special value,
+       and if this is found in  both  elements  of  a  capturing  pair,  "<un-
+       changed>"  is  output.  After  a  successful match, this applies to all
+       groups after the maximum capture group for the pattern. In other  cases
+       it  applies to the entire ovector. After a partial match, the first two
+       elements are the only ones that should be set. After a DFA  match,  the
+       amount  of  ovector  that is used depends on the number of matches that
        were found.
 
    Testing pattern callouts
 
-       A  callout function is supplied when pcre2test calls the library match-
-       ing functions, unless callout_none is specified. Its behaviour  can  be
-       controlled  by  various  modifiers  listed above whose names begin with
-       callout_. Details are given in the section entitled  "Callouts"  below.
-       Testing  callouts  from  pcre2_substitute()  is  decribed separately in
+       A callout function is supplied when pcre2test calls the library  match-
+       ing  functions,  unless callout_none is specified. Its behaviour can be
+       controlled by various modifiers listed above  whose  names  begin  with
+       callout_.  Details  are given in the section entitled "Callouts" below.
+       Testing callouts from  pcre2_substitute()  is  decribed  separately  in
        "Testing the substitution function" below.
 
    Finding all matches in a string
 
        Searching for all possible matches within a subject can be requested by
-       the  global  or altglobal modifier. After finding a match, the matching
-       function is called again to search the remainder of  the  subject.  The
-       difference  between  global  and  altglobal is that the former uses the
-       start_offset argument to pcre2_match() or  pcre2_dfa_match()  to  start
-       searching  at  a new point within the entire string (which is what Perl
+       the global or altglobal modifier. After finding a match,  the  matching
+       function  is  called  again to search the remainder of the subject. The
+       difference between global and altglobal is that  the  former  uses  the
+       start_offset  argument  to  pcre2_match() or pcre2_dfa_match() to start
+       searching at a new point within the entire string (which is  what  Perl
        does), whereas the latter passes over a shortened subject. This makes a
        difference to the matching process if the pattern begins with a lookbe-
        hind assertion (including \b or \B).
 
-       If an empty string  is  matched,  the  next  match  is  done  with  the
+       If  an  empty  string  is  matched,  the  next  match  is done with the
        PCRE2_NOTEMPTY_ATSTART and PCRE2_ANCHORED flags set, in order to search
        for another, non-empty, match at the same point in the subject. If this
-       match  fails, the start offset is advanced, and the normal match is re-
-       tried. This imitates the way Perl handles such cases when using the  /g
-       modifier  or  the  split()  function. Normally, the start offset is ad-
-       vanced by one character, but if the newline convention recognizes  CRLF
-       as  a  newline,  and the current character is CR followed by LF, an ad-
+       match fails, the start offset is advanced, and the normal match is  re-
+       tried.  This imitates the way Perl handles such cases when using the /g
+       modifier or the split() function. Normally, the  start  offset  is  ad-
+       vanced  by one character, but if the newline convention recognizes CRLF
+       as a newline, and the current character is CR followed by  LF,  an  ad-
        vance of two characters occurs.
 
    Testing substring extraction functions
 
-       The copy  and  get  modifiers  can  be  used  to  test  the  pcre2_sub-
+       The  copy  and  get  modifiers  can  be  used  to  test  the pcre2_sub-
        string_copy_xxx() and pcre2_substring_get_xxx() functions.  They can be
        given more than once, and each can specify a capture group name or num-
        ber, for example:
 
           abcd\=copy=1,copy=3,get=G1
 
-       If  the  #subject command is used to set default copy and/or get lists,
-       these can be unset by specifying a negative number to cancel  all  num-
+       If the #subject command is used to set default copy and/or  get  lists,
+       these  can  be unset by specifying a negative number to cancel all num-
        bered groups and an empty name to cancel all named groups.
 
-       The  getall  modifier  tests pcre2_substring_list_get(), which extracts
+       The getall modifier tests  pcre2_substring_list_get(),  which  extracts
        all captured substrings.
 
-       If the subject line is successfully matched, the  substrings  extracted
-       by  the  convenience  functions  are  output  with C, G, or L after the
-       string number instead of a colon. This is in  addition  to  the  normal
-       full  list.  The string length (that is, the return from the extraction
+       If  the  subject line is successfully matched, the substrings extracted
+       by the convenience functions are output with  C,  G,  or  L  after  the
+       string  number  instead  of  a colon. This is in addition to the normal
+       full list. The string length (that is, the return from  the  extraction
        function) is given in parentheses after each substring, followed by the
        name when the extraction was by name.
 
    Testing the substitution function
 
-       If  the  replace  modifier  is  set, the pcre2_substitute() function is
-       called instead of one of the matching functions. Note that  replacement
-       strings  cannot  contain commas, because a comma signifies the end of a
+       If the replace modifier is  set,  the  pcre2_substitute()  function  is
+       called  instead of one of the matching functions. Note that replacement
+       strings cannot contain commas, because a comma signifies the end  of  a
        modifier. This is not thought to be an issue in a test program.
 
-       Unlike subject strings, pcre2test does not process replacement  strings
-       for  escape  sequences. In UTF mode, a replacement string is checked to
-       see if it is a valid UTF-8 string. If so, it is correctly converted  to
-       a  UTF  string of the appropriate code unit width. If it is not a valid
-       UTF-8 string, the individual code units are copied directly. This  pro-
+       Unlike  subject strings, pcre2test does not process replacement strings
+       for escape sequences. In UTF mode, a replacement string is  checked  to
+       see  if it is a valid UTF-8 string. If so, it is correctly converted to
+       a UTF string of the appropriate code unit width. If it is not  a  valid
+       UTF-8  string, the individual code units are copied directly. This pro-
        vides a means of passing an invalid UTF-8 string for testing purposes.
 
-       The  following modifiers set options (in additional to the normal match
+       The following modifiers set options (in additional to the normal  match
        options) for pcre2_substitute():
 
          global                      PCRE2_SUBSTITUTE_GLOBAL
@@ -1261,8 +1265,8 @@ SUBJECT MODIFIERS
          substitute_unset_empty      PCRE2_SUBSTITUTE_UNSET_EMPTY
 
 
-       After a successful substitution, the modified string  is  output,  pre-
-       ceded  by the number of replacements. This may be zero if there were no
+       After  a  successful  substitution, the modified string is output, pre-
+       ceded by the number of replacements. This may be zero if there were  no
        matches. Here is a simple example of a substitution test:
 
          /abc/replace=xxx
@@ -1271,12 +1275,12 @@ SUBJECT MODIFIERS
              =abc=abc=\=global
           2: =xxx=xxx=
 
-       Subject and replacement strings should be kept relatively short  (fewer
-       than  256 characters) for substitution tests, as fixed-size buffers are
-       used. To make it easy to test for buffer overflow, if  the  replacement
-       string  starts  with a number in square brackets, that number is passed
-       to pcre2_substitute() as the size of the output buffer,  with  the  re-
-       placement  string  starting  at  the next character. Here is an example
+       Subject  and replacement strings should be kept relatively short (fewer
+       than 256 characters) for substitution tests, as fixed-size buffers  are
+       used.  To  make it easy to test for buffer overflow, if the replacement
+       string starts with a number in square brackets, that number  is  passed
+       to  pcre2_substitute()  as  the size of the output buffer, with the re-
+       placement string starting at the next character.  Here  is  an  example
        that tests the edge case:
 
          /abc/
@@ -1286,12 +1290,12 @@ SUBJECT MODIFIERS
          Failed: error -47: no more memory
 
        The  default  action  of  pcre2_substitute()  is  to  return  PCRE2_ER-
-       ROR_NOMEMORY  when  the  output  buffer  is  too small. However, if the
-       PCRE2_SUBSTITUTE_OVERFLOW_LENGTH option is set (by  using  the  substi-
+       ROR_NOMEMORY when the output buffer  is  too  small.  However,  if  the
+       PCRE2_SUBSTITUTE_OVERFLOW_LENGTH  option  is  set (by using the substi-
        tute_overflow_length  modifier),  pcre2_substitute()  continues  to  go
-       through the motions of matching and substituting  (but  not  doing  any
-       callouts),  in  order  to  compute the size of buffer that is required.
-       When this happens, pcre2test shows the required  buffer  length  (which
+       through  the  motions  of  matching and substituting (but not doing any
+       callouts), in order to compute the size of  buffer  that  is  required.
+       When  this  happens,  pcre2test shows the required buffer length (which
        includes space for the trailing zero) as part of the error message. For
        example:
 
@@ -1300,15 +1304,15 @@ SUBJECT MODIFIERS
          Failed: error -47: no more memory: 10 code units are needed
 
        A replacement string is ignored with POSIX and DFA matching. Specifying
-       partial  matching  provokes  an  error return ("bad option value") from
+       partial matching provokes an error return  ("bad  option  value")  from
        pcre2_substitute().
 
    Testing substitute callouts
 
        If the substitute_callout modifier is set, a substitution callout func-
-       tion  is set up. The null_context modifier must not be set, because the
-       address of the callout function is passed in a match context. When  the
-       callout  function  is  called (after each substitution), details of the
+       tion is set up. The null_context modifier must not be set, because  the
+       address  of the callout function is passed in a match context. When the
+       callout function is called (after each substitution),  details  of  the
        the input and output strings are output. For example:
 
          /abc/g,replace=<$0>,substitute_callout
@@ -1317,19 +1321,19 @@ SUBJECT MODIFIERS
           2(1) Old 6 9 "abc" New 8 13 "<abc>"
           2: <abc>def<abc>pqr
 
-       The first number on each callout line is  the  count  of  matches.  The
+       The  first  number  on  each  callout line is the count of matches. The
        parenthesized number is the number of pairs that are set in the ovector
-       (that is, one more than the number of capturing groups that were  set).
+       (that  is, one more than the number of capturing groups that were set).
        Then are listed the offsets of the old substring, its contents, and the
        same for the replacement.
 
-       By default, the substitution callout function returns zero,  which  ac-
-       cepts  the  replacement and causes matching to continue if /g was used.
-       Two further modifiers can be used to test other return values. If  sub-
-       stitute_skip  is  set to a value greater than zero the callout function
-       returns +1 for the match of that number, and similarly  substitute_stop
-       returns  -1.  These cause the replacement to be rejected, and -1 causes
-       no further matching to take place. If either of them are  set,  substi-
+       By  default,  the substitution callout function returns zero, which ac-
+       cepts the replacement and causes matching to continue if /g  was  used.
+       Two  further modifiers can be used to test other return values. If sub-
+       stitute_skip is set to a value greater than zero the  callout  function
+       returns  +1 for the match of that number, and similarly substitute_stop
+       returns -1. These cause the replacement to be rejected, and  -1  causes
+       no  further  matching to take place. If either of them are set, substi-
        tute_callout is assumed. For example:
 
          /abc/g,replace=<$0>,substitute_skip=1
@@ -1347,160 +1351,160 @@ SUBJECT MODIFIERS
 
    Setting the JIT stack size
 
-       The  jitstack modifier provides a way of setting the maximum stack size
-       that is used by the just-in-time optimization code. It  is  ignored  if
-       JIT  optimization is not being used. The value is a number of kibibytes
-       (units of 1024 bytes). Setting zero reverts to the  default  of  32KiB.
+       The jitstack modifier provides a way of setting the maximum stack  size
+       that  is  used  by the just-in-time optimization code. It is ignored if
+       JIT optimization is not being used. The value is a number of  kibibytes
+       (units  of  1024  bytes). Setting zero reverts to the default of 32KiB.
        Providing a stack that is larger than the default is necessary only for
-       very complicated patterns. If jitstack is set  non-zero  on  a  subject
+       very  complicated  patterns.  If  jitstack is set non-zero on a subject
        line it overrides any value that was set on the pattern.
 
    Setting heap, match, and depth limits
 
-       The  heap_limit,  match_limit, and depth_limit modifiers set the appro-
-       priate limits in the match context. These values are ignored  when  the
+       The heap_limit, match_limit, and depth_limit modifiers set  the  appro-
+       priate  limits  in the match context. These values are ignored when the
        find_limits modifier is specified.
 
    Finding minimum limits
 
-       If  the  find_limits  modifier  is present on a subject line, pcre2test
-       calls the relevant matching function several times,  setting  different
-       values    in    the    match    context   via   pcre2_set_heap_limit(),
-       pcre2_set_match_limit(), or pcre2_set_depth_limit() until it finds  the
-       minimum  values  for  each  parameter that allows the match to complete
+       If the find_limits modifier is present on  a  subject  line,  pcre2test
+       calls  the  relevant matching function several times, setting different
+       values   in   the    match    context    via    pcre2_set_heap_limit(),
+       pcre2_set_match_limit(),  or pcre2_set_depth_limit() until it finds the
+       minimum values for each parameter that allows  the  match  to  complete
        without error. If JIT is being used, only the match limit is relevant.
 
        When using this modifier, the pattern should not contain any limit set-
-       tings  such  as  (*LIMIT_MATCH=...)  within  it.  If  such a setting is
+       tings such as (*LIMIT_MATCH=...)  within  it.  If  such  a  setting  is
        present and is lower than the minimum matching value, the minimum value
-       cannot  be  found because pcre2_set_match_limit() etc. are only able to
+       cannot be found because pcre2_set_match_limit() etc. are only  able  to
        reduce the value of an in-pattern limit; they cannot increase it.
 
-       For non-DFA matching, the minimum depth_limit number is  a  measure  of
+       For  non-DFA  matching,  the minimum depth_limit number is a measure of
        how much nested backtracking happens (that is, how deeply the pattern's
-       tree is searched). In the case of DFA  matching,  depth_limit  controls
-       the  depth of recursive calls of the internal function that is used for
+       tree  is  searched).  In the case of DFA matching, depth_limit controls
+       the depth of recursive calls of the internal function that is used  for
        handling pattern recursion, lookaround assertions, and atomic groups.
 
        For non-DFA matching, the match_limit number is a measure of the amount
        of backtracking that takes place, and learning the minimum value can be
-       instructive. For most simple matches, the number is  quite  small,  but
-       for  patterns with very large numbers of matching possibilities, it can
-       become large very quickly with increasing length of subject string.  In
-       the  case  of  DFA  matching,  match_limit controls the total number of
+       instructive.  For  most  simple matches, the number is quite small, but
+       for patterns with very large numbers of matching possibilities, it  can
+       become  large very quickly with increasing length of subject string. In
+       the case of DFA matching, match_limit  controls  the  total  number  of
        calls, both recursive and non-recursive, to the internal matching func-
        tion, thus controlling the overall amount of computing resource that is
        used.
 
-       For both  kinds  of  matching,  the  heap_limit  number,  which  is  in
-       kibibytes  (units of 1024 bytes), limits the amount of heap memory used
+       For  both  kinds  of  matching,  the  heap_limit  number,  which  is in
+       kibibytes (units of 1024 bytes), limits the amount of heap memory  used
        for matching. A value of zero disables the use of any heap memory; many
-       simple  pattern  matches can be done without using the heap, so zero is
+       simple pattern matches can be done without using the heap, so  zero  is
        not an unreasonable setting.
 
    Showing MARK names
 
 
        The mark modifier causes the names from backtracking control verbs that
-       are  returned from calls to pcre2_match() to be displayed. If a mark is
-       returned for a match, non-match, or partial match, pcre2test shows  it.
-       For  a  match, it is on a line by itself, tagged with "MK:". Otherwise,
+       are returned from calls to pcre2_match() to be displayed. If a mark  is
+       returned  for a match, non-match, or partial match, pcre2test shows it.
+       For a match, it is on a line by itself, tagged with  "MK:".  Otherwise,
        it is added to the non-match message.
 
    Showing memory usage
 
-       The memory modifier causes pcre2test to log the sizes of all heap  mem-
-       ory   allocation  and  freeing  calls  that  occur  during  a  call  to
-       pcre2_match() or pcre2_dfa_match(). These occur only when a  match  re-
-       quires  a  bigger  vector than the default for remembering backtracking
-       points (pcre2_match()) or for internal  workspace  (pcre2_dfa_match()).
-       In  many cases there will be no heap memory used and therefore no addi-
+       The  memory modifier causes pcre2test to log the sizes of all heap mem-
+       ory  allocation  and  freeing  calls  that  occur  during  a  call   to
+       pcre2_match()  or  pcre2_dfa_match(). These occur only when a match re-
+       quires a bigger vector than the default  for  remembering  backtracking
+       points  (pcre2_match())  or for internal workspace (pcre2_dfa_match()).
+       In many cases there will be no heap memory used and therefore no  addi-
        tional output. No heap memory is allocated during matching with JIT, so
-       in  that  case the memory modifier never has any effect. For this modi-
-       fier to work, the null_context modifier must not be  set  on  both  the
+       in that case the memory modifier never has any effect. For  this  modi-
+       fier  to  work,  the  null_context modifier must not be set on both the
        pattern and the subject, though it can be set on one or the other.
 
    Setting a starting offset
 
-       The  offset  modifier  sets  an  offset  in the subject string at which
+       The offset modifier sets an offset  in  the  subject  string  at  which
        matching starts. Its value is a number of code units, not characters.
 
    Setting an offset limit
 
-       The offset_limit modifier sets a limit for  unanchored  matches.  If  a
+       The  offset_limit  modifier  sets  a limit for unanchored matches. If a
        match cannot be found starting at or before this offset in the subject,
        a "no match" return is given. The data value is a number of code units,
-       not  characters. When this modifier is used, the use_offset_limit modi-
+       not characters. When this modifier is used, the use_offset_limit  modi-
        fier must have been set for the pattern; if not, an error is generated.
 
    Setting the size of the output vector
 
-       The ovector modifier applies only to the subject line in which  it  ap-
+       The  ovector  modifier applies only to the subject line in which it ap-
        pears, though of course it can also be used to set a default in a #sub-
-       ject command. It specifies the number of  pairs  of  offsets  that  are
+       ject  command.  It  specifies  the  number of pairs of offsets that are
        available for storing matching information. The default is 15.
 
-       A  value of zero is useful when testing the POSIX API because it causes
+       A value of zero is useful when testing the POSIX API because it  causes
        regexec() to be called with a NULL capture vector. When not testing the
-       POSIX  API,  a  value  of  zero  is used to cause pcre2_match_data_cre-
-       ate_from_pattern() to be called, in order to create a  match  block  of
+       POSIX API, a value of  zero  is  used  to  cause  pcre2_match_data_cre-
+       ate_from_pattern()  to  be  called, in order to create a match block of
        exactly the right size for the pattern. (It is not possible to create a
-       match block with a zero-length ovector; there is always  at  least  one
+       match  block  with  a zero-length ovector; there is always at least one
        pair of offsets.)
 
    Passing the subject as zero-terminated
 
        By default, the subject string is passed to a native API matching func-
        tion with its correct length. In order to test the facility for passing
-       a  zero-terminated  string, the zero_terminate modifier is provided. It
-       causes the length to be passed as PCRE2_ZERO_TERMINATED. When  matching
+       a zero-terminated string, the zero_terminate modifier is  provided.  It
+       causes  the length to be passed as PCRE2_ZERO_TERMINATED. When matching
        via the POSIX interface, this modifier is ignored, with a warning.
 
-       When  testing  pcre2_substitute(), this modifier also has the effect of
+       When testing pcre2_substitute(), this modifier also has the  effect  of
        passing the replacement string as zero-terminated.
 
    Passing a NULL context
 
-       Normally,  pcre2test  passes  a   context   block   to   pcre2_match(),
-       pcre2_dfa_match(),  pcre2_jit_match()  or  pcre2_substitute().   If the
-       null_context modifier is set, however, NULL  is  passed.  This  is  for
-       testing  that  the matching and substitution functions behave correctly
-       in this case (they use default values). This modifier  cannot  be  used
+       Normally,   pcre2test   passes   a   context  block  to  pcre2_match(),
+       pcre2_dfa_match(), pcre2_jit_match()  or  pcre2_substitute().   If  the
+       null_context  modifier  is  set,  however,  NULL is passed. This is for
+       testing that the matching and substitution functions  behave  correctly
+       in  this  case  (they use default values). This modifier cannot be used
        with the find_limits or substitute_callout modifiers.
 
 
 THE ALTERNATIVE MATCHING FUNCTION
 
-       By  default,  pcre2test  uses  the  standard  PCRE2  matching function,
+       By default,  pcre2test  uses  the  standard  PCRE2  matching  function,
        pcre2_match() to match each subject line. PCRE2 also supports an alter-
-       native  matching  function, pcre2_dfa_match(), which operates in a dif-
-       ferent way, and has some restrictions. The differences between the  two
+       native matching function, pcre2_dfa_match(), which operates in  a  dif-
+       ferent  way, and has some restrictions. The differences between the two
        functions are described in the pcre2matching documentation.
 
-       If  the dfa modifier is set, the alternative matching function is used.
-       This function finds all possible matches at a given point in  the  sub-
-       ject.  If,  however, the dfa_shortest modifier is set, processing stops
-       after the first match is found. This is always  the  shortest  possible
+       If the dfa modifier is set, the alternative matching function is  used.
+       This  function  finds all possible matches at a given point in the sub-
+       ject. If, however, the dfa_shortest modifier is set,  processing  stops
+       after  the  first  match is found. This is always the shortest possible
        match.
 
 
 DEFAULT OUTPUT FROM pcre2test
 
-       This  section  describes  the output when the normal matching function,
+       This section describes the output when the  normal  matching  function,
        pcre2_match(), is being used.
 
-       When a match succeeds, pcre2test outputs  the  list  of  captured  sub-
-       strings,  starting  with number 0 for the string that matched the whole
+       When  a  match  succeeds,  pcre2test  outputs the list of captured sub-
+       strings, starting with number 0 for the string that matched  the  whole
        pattern.  Otherwise, it outputs "No match" when the return is PCRE2_ER-
-       ROR_NOMATCH,  or  "Partial  match:"  followed by the partially matching
-       substring when the return is PCRE2_ERROR_PARTIAL. (Note  that  this  is
-       the  entire  substring  that was inspected during the partial match; it
-       may include characters before the actual match start  if  a  lookbehind
+       ROR_NOMATCH, or "Partial match:" followed  by  the  partially  matching
+       substring  when  the  return is PCRE2_ERROR_PARTIAL. (Note that this is
+       the entire substring that was inspected during the  partial  match;  it
+       may  include  characters  before the actual match start if a lookbehind
        assertion, \K, \b, or \B was involved.)
 
        For any other return, pcre2test outputs the PCRE2 negative error number
-       and a short descriptive phrase. If the error is  a  failed  UTF  string
-       check,  the  code  unit offset of the start of the failing character is
+       and  a  short  descriptive  phrase. If the error is a failed UTF string
+       check, the code unit offset of the start of the  failing  character  is
        also output. Here is an example of an interactive pcre2test run.
 
          $ pcre2test
@@ -1516,8 +1520,8 @@ DEFAULT OUTPUT FROM pcre2test
        Unset capturing substrings that are not followed by one that is set are
        not shown by pcre2test unless the allcaptures modifier is specified. In
        the following example, there are two capturing substrings, but when the
-       first  data  line is matched, the second, unset substring is not shown.
-       An "internal" unset substring is shown as "<unset>", as for the  second
+       first data line is matched, the second, unset substring is  not  shown.
+       An  "internal" unset substring is shown as "<unset>", as for the second
        data line.
 
            re> /(a)|(b)/
@@ -1529,11 +1533,11 @@ DEFAULT OUTPUT FROM pcre2test
           1: <unset>
           2: b
 
-       If  the strings contain any non-printing characters, they are output as
-       \xhh escapes if the value is less than 256 and UTF  mode  is  not  set.
+       If the strings contain any non-printing characters, they are output  as
+       \xhh  escapes  if  the  value is less than 256 and UTF mode is not set.
        Otherwise they are output as \x{hh...} escapes. See below for the defi-
-       nition of non-printing characters. If the aftertext  modifier  is  set,
-       the  output  for substring 0 is followed by the the rest of the subject
+       nition  of  non-printing  characters. If the aftertext modifier is set,
+       the output for substring 0 is followed by the the rest of  the  subject
        string, identified by "0+" like this:
 
            re> /cat/aftertext
@@ -1553,8 +1557,8 @@ DEFAULT OUTPUT FROM pcre2test
           0: ipp
           1: pp
 
-       "No  match" is output only if the first match attempt fails. Here is an
-       example of a failure message (the offset 4 that  is  specified  by  the
+       "No match" is output only if the first match attempt fails. Here is  an
+       example  of  a  failure  message (the offset 4 that is specified by the
        offset modifier is past the end of the subject string):
 
            re> /xyz/
@@ -1562,7 +1566,7 @@ DEFAULT OUTPUT FROM pcre2test
          Error -24 (bad offset value)
 
        Note that whereas patterns can be continued over several lines (a plain
-       ">" prompt is used for continuations), subject lines may  not.  However
+       ">"  prompt  is used for continuations), subject lines may not. However
        newlines can be included in a subject by means of the \n escape (or \r,
        \r\n, etc., depending on the newline sequence setting).
 
@@ -1570,7 +1574,7 @@ DEFAULT OUTPUT FROM pcre2test
 OUTPUT FROM THE ALTERNATIVE MATCHING FUNCTION
 
        When the alternative matching function, pcre2_dfa_match(), is used, the
-       output  consists  of  a list of all the matches that start at the first
+       output consists of a list of all the matches that start  at  the  first
        point in the subject where there is at least one match. For example:
 
            re> /(tang|tangerine|tan)/
@@ -1579,11 +1583,11 @@ OUTPUT FROM THE ALTERNATIVE MATCHING FUNCTION
           1: tang
           2: tan
 
-       Using the normal matching function on this data finds only "tang".  The
-       longest  matching string is always given first (and numbered zero). Af-
-       ter a PCRE2_ERROR_PARTIAL return, the output is "Partial match:",  fol-
+       Using  the normal matching function on this data finds only "tang". The
+       longest matching string is always given first (and numbered zero).  Af-
+       ter  a PCRE2_ERROR_PARTIAL return, the output is "Partial match:", fol-
        lowed by the partially matching substring. Note that this is the entire
-       substring that was inspected during the partial match; it  may  include
+       substring  that  was inspected during the partial match; it may include
        characters before the actual match start if a lookbehind assertion, \b,
        or \B was involved. (\K is not supported for DFA matching.)
 
@@ -1599,16 +1603,16 @@ OUTPUT FROM THE ALTERNATIVE MATCHING FUNCTION
           1: tan
           0: tan
 
-       The  alternative  matching function does not support substring capture,
-       so the modifiers that are concerned with captured  substrings  are  not
+       The alternative matching function does not support  substring  capture,
+       so  the  modifiers  that are concerned with captured substrings are not
        relevant.
 
 
 RESTARTING AFTER A PARTIAL MATCH
 
-       When  the  alternative matching function has given the PCRE2_ERROR_PAR-
+       When the alternative matching function has given  the  PCRE2_ERROR_PAR-
        TIAL return, indicating that the subject partially matched the pattern,
-       you  can restart the match with additional subject data by means of the
+       you can restart the match with additional subject data by means of  the
        dfa_restart modifier. For example:
 
            re> /^\d?\d(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\d\d$/
@@ -1617,37 +1621,37 @@ RESTARTING AFTER A PARTIAL MATCH
          data> n05\=dfa,dfa_restart
           0: n05
 
-       For further information about partial matching,  see  the  pcre2partial
+       For  further  information  about partial matching, see the pcre2partial
        documentation.
 
 
 CALLOUTS
 
        If the pattern contains any callout requests, pcre2test's callout func-
-       tion is called during matching unless callout_none is  specified.  This
+       tion  is  called during matching unless callout_none is specified. This
        works with both matching functions, and with JIT, though there are some
-       differences in behaviour. The output for callouts with numerical  argu-
+       differences  in behaviour. The output for callouts with numerical argu-
        ments and those with string arguments is slightly different.
 
    Callouts with numerical arguments
 
        By default, the callout function displays the callout number, the start
-       and current positions in the subject text at the callout time, and  the
+       and  current positions in the subject text at the callout time, and the
        next pattern item to be tested. For example:
 
          --->pqrabcdef
            0    ^  ^     \d
 
-       This  output  indicates  that callout number 0 occurred for a match at-
-       tempt starting at the fourth character of the subject string, when  the
-       pointer  was  at  the seventh character, and when the next pattern item
-       was \d. Just one circumflex is output if the start  and  current  posi-
+       This output indicates that callout number 0 occurred for  a  match  at-
+       tempt  starting at the fourth character of the subject string, when the
+       pointer was at the seventh character, and when the  next  pattern  item
+       was  \d.  Just  one circumflex is output if the start and current posi-
        tions are the same, or if the current position precedes the start posi-
        tion, which can happen if the callout is in a lookbehind assertion.
 
        Callouts numbered 255 are assumed to be automatic callouts, inserted as
        a result of the auto_callout pattern modifier. In this case, instead of
-       showing the callout number, the offset in the pattern,  preceded  by  a
+       showing  the  callout  number, the offset in the pattern, preceded by a
        plus, is output. For example:
 
            re> /\d?[A-E]\*/auto_callout
@@ -1674,17 +1678,17 @@ CALLOUTS
          +12 ^  ^
           0: abc
 
-       The  mark  changes between matching "a" and "b", but stays the same for
-       the rest of the match, so nothing more is output. If, as  a  result  of
-       backtracking,  the  mark  reverts to being unset, the text "<unset>" is
+       The mark changes between matching "a" and "b", but stays the  same  for
+       the  rest  of  the match, so nothing more is output. If, as a result of
+       backtracking, the mark reverts to being unset, the  text  "<unset>"  is
        output.
 
    Callouts with string arguments
 
        The output for a callout with a string argument is similar, except that
-       instead  of outputting a callout number before the position indicators,
-       the callout string and its offset in the pattern string are output  be-
-       fore  the  reflection  of the subject string, and the subject string is
+       instead of outputting a callout number before the position  indicators,
+       the  callout string and its offset in the pattern string are output be-
+       fore the reflection of the subject string, and the  subject  string  is
        reflected for each callout. For example:
 
            re> /^ab(?C'first')cd(?C"second")ef/
@@ -1700,26 +1704,26 @@ CALLOUTS
 
    Callout modifiers
 
-       The callout function in pcre2test returns zero (carry on  matching)  by
-       default,  but  you can use a callout_fail modifier in a subject line to
+       The  callout  function in pcre2test returns zero (carry on matching) by
+       default, but you can use a callout_fail modifier in a subject  line  to
        change this and other parameters of the callout (see below).
 
        If the callout_capture modifier is set, the current captured groups are
        output when a callout occurs. This is useful only for non-DFA matching,
-       as pcre2_dfa_match() does not support capturing,  so  no  captures  are
+       as  pcre2_dfa_match()  does  not  support capturing, so no captures are
        ever shown.
 
        The normal callout output, showing the callout number or pattern offset
-       (as described above) is suppressed if the callout_no_where modifier  is
+       (as  described above) is suppressed if the callout_no_where modifier is
        set.
 
-       When  using  the  interpretive  matching function pcre2_match() without
-       JIT, setting the callout_extra modifier causes additional  output  from
-       pcre2test's  callout function to be generated. For the first callout in
-       a match attempt at a new starting position in the subject,  "New  match
-       attempt"  is output. If there has been a backtrack since the last call-
+       When using the interpretive  matching  function  pcre2_match()  without
+       JIT,  setting  the callout_extra modifier causes additional output from
+       pcre2test's callout function to be generated. For the first callout  in
+       a  match  attempt at a new starting position in the subject, "New match
+       attempt" is output. If there has been a backtrack since the last  call-
        out (or start of matching if this is the first callout), "Backtrack" is
-       output,  followed  by  "No other matching paths" if the backtrack ended
+       output, followed by "No other matching paths" if  the  backtrack  ended
        the previous match attempt. For example:
 
           re> /(a+)b/auto_callout,no_start_optimize,no_auto_possess
@@ -1756,86 +1760,86 @@ CALLOUTS
           +1    ^    a+
          No match
 
-       Notice that various optimizations must be turned off if  you  want  all
-       possible  matching  paths  to  be  scanned. If no_start_optimize is not
-       used, there is an immediate "no match", without any  callouts,  because
-       the  starting  optimization  fails to find "b" in the subject, which it
-       knows must be present for any match. If no_auto_possess  is  not  used,
-       the  "a+"  item is turned into "a++", which reduces the number of back-
+       Notice  that  various  optimizations must be turned off if you want all
+       possible matching paths to be  scanned.  If  no_start_optimize  is  not
+       used,  there  is an immediate "no match", without any callouts, because
+       the starting optimization fails to find "b" in the  subject,  which  it
+       knows  must  be  present for any match. If no_auto_possess is not used,
+       the "a+" item is turned into "a++", which reduces the number  of  back-
        tracks.
 
-       The callout_extra modifier has no effect if used with the DFA  matching
+       The  callout_extra modifier has no effect if used with the DFA matching
        function, or with JIT.
 
    Return values from callouts
 
-       The  default  return  from  the  callout function is zero, which allows
+       The default return from the callout  function  is  zero,  which  allows
        matching to continue. The callout_fail modifier can be given one or two
        numbers. If there is only one number, 1 is returned instead of 0 (caus-
        ing matching to backtrack) when a callout of that number is reached. If
-       two  numbers  (<n>:<m>)  are  given,  1 is returned when callout <n> is
-       reached and there have been at least <m>  callouts.  The  callout_error
+       two numbers (<n>:<m>) are given, 1 is  returned  when  callout  <n>  is
+       reached  and  there  have been at least <m> callouts. The callout_error
        modifier is similar, except that PCRE2_ERROR_CALLOUT is returned, caus-
-       ing the entire matching process to be aborted. If both these  modifiers
-       are  set  for  the same callout number, callout_error takes precedence.
-       Note that callouts with string arguments are always  given  the  number
+       ing  the entire matching process to be aborted. If both these modifiers
+       are set for the same callout number,  callout_error  takes  precedence.
+       Note  that  callouts  with string arguments are always given the number
        zero.
 
-       The  callout_data  modifier can be given an unsigned or a negative num-
-       ber.  This is set as the "user data" that is  passed  to  the  matching
-       function,  and  passed  back  when the callout function is invoked. Any
-       value other than zero is used as  a  return  from  pcre2test's  callout
+       The callout_data modifier can be given an unsigned or a  negative  num-
+       ber.   This  is  set  as the "user data" that is passed to the matching
+       function, and passed back when the callout  function  is  invoked.  Any
+       value  other  than  zero  is  used as a return from pcre2test's callout
        function.
 
        Inserting callouts can be helpful when using pcre2test to check compli-
-       cated regular expressions. For further information about callouts,  see
+       cated  regular expressions. For further information about callouts, see
        the pcre2callout documentation.
 
 
 NON-PRINTING CHARACTERS
 
        When pcre2test is outputting text in the compiled version of a pattern,
-       bytes other than 32-126 are always treated as  non-printing  characters
+       bytes  other  than 32-126 are always treated as non-printing characters
        and are therefore shown as hex escapes.
 
-       When  pcre2test  is outputting text that is a matched part of a subject
-       string, it behaves in the same way, unless a different locale has  been
-       set  for the pattern (using the locale modifier). In this case, the is-
+       When pcre2test is outputting text that is a matched part of  a  subject
+       string,  it behaves in the same way, unless a different locale has been
+       set for the pattern (using the locale modifier). In this case, the  is-
        print() function is used to distinguish printing and non-printing char-
        acters.
 
 
 SAVING AND RESTORING COMPILED PATTERNS
 
-       It  is  possible  to  save  compiled patterns on disc or elsewhere, and
+       It is possible to save compiled patterns  on  disc  or  elsewhere,  and
        reload them later, subject to a number of restrictions. JIT data cannot
-       be  saved.  The host on which the patterns are reloaded must be running
+       be saved. The host on which the patterns are reloaded must  be  running
        the same version of PCRE2, with the same code unit width, and must also
-       have  the  same  endianness,  pointer width and PCRE2_SIZE type. Before
-       compiled patterns can be saved they must be serialized, that  is,  con-
-       verted  to a stream of bytes. A single byte stream may contain any num-
-       ber of compiled patterns, but they must all use the same character  ta-
-       bles.  A  single copy of the tables is included in the byte stream (its
+       have the same endianness, pointer width  and  PCRE2_SIZE  type.  Before
+       compiled  patterns  can be saved they must be serialized, that is, con-
+       verted to a stream of bytes. A single byte stream may contain any  num-
+       ber  of compiled patterns, but they must all use the same character ta-
+       bles. A single copy of the tables is included in the byte  stream  (its
        size is 1088 bytes).
 
-       The functions whose names begin with pcre2_serialize_ are used for  se-
-       rializing  and de-serializing. They are described in the pcre2serialize
-       documentation. In this section we describe the  features  of  pcre2test
+       The  functions whose names begin with pcre2_serialize_ are used for se-
+       rializing and de-serializing. They are described in the  pcre2serialize
+       documentation.  In  this  section we describe the features of pcre2test
        that can be used to test these functions.
 
-       Note  that  "serialization" in PCRE2 does not convert compiled patterns
-       to an abstract format like Java or .NET. It  just  makes  a  reloadable
+       Note that "serialization" in PCRE2 does not convert  compiled  patterns
+       to  an  abstract  format  like Java or .NET. It just makes a reloadable
        byte code stream.  Hence the restrictions on reloading mentioned above.
 
-       In  pcre2test,  when  a pattern with push modifier is successfully com-
-       piled, it is pushed onto a stack of compiled  patterns,  and  pcre2test
-       expects  the next line to contain a new pattern (or command) instead of
+       In pcre2test, when a pattern with push modifier  is  successfully  com-
+       piled,  it  is  pushed onto a stack of compiled patterns, and pcre2test
+       expects the next line to contain a new pattern (or command) instead  of
        a subject line. By contrast, the pushcopy modifier causes a copy of the
-       compiled  pattern to be stacked, leaving the original available for im-
-       mediate matching. By using push and/or pushcopy, a number  of  patterns
-       can  be  compiled  and  retained. These modifiers are incompatible with
+       compiled pattern to be stacked, leaving the original available for  im-
+       mediate  matching.  By using push and/or pushcopy, a number of patterns
+       can be compiled and retained. These  modifiers  are  incompatible  with
        posix, and control modifiers that act at match time are ignored (with a
-       message)  for the stacked patterns. The jitverify modifier applies only
+       message) for the stacked patterns. The jitverify modifier applies  only
        at compile time.
 
        The command
@@ -1843,21 +1847,21 @@ SAVING AND RESTORING COMPILED PATTERNS
          #save <filename>
 
        causes all the stacked patterns to be serialized and the result written
-       to  the named file. Afterwards, all the stacked patterns are freed. The
+       to the named file. Afterwards, all the stacked patterns are freed.  The
        command
 
          #load <filename>
 
-       reads the data in the file, and then arranges for it to  be  de-serial-
-       ized,  with the resulting compiled patterns added to the pattern stack.
-       The pattern on the top of the stack can be retrieved by the  #pop  com-
-       mand,  which  must  be  followed  by  lines  of subjects that are to be
-       matched with the pattern, terminated as usual by an empty line  or  end
-       of  file.  This  command  may be followed by a modifier list containing
-       only control modifiers that act after a pattern has been  compiled.  In
-       particular,  hex,  posix,  posix_nosub,  push, and pushcopy are not al-
-       lowed, nor are any option-setting modifiers.  The  JIT  modifiers  are,
-       however  permitted.  Here is an example that saves and reloads two pat-
+       reads  the  data in the file, and then arranges for it to be de-serial-
+       ized, with the resulting compiled patterns added to the pattern  stack.
+       The  pattern  on the top of the stack can be retrieved by the #pop com-
+       mand, which must be followed by  lines  of  subjects  that  are  to  be
+       matched  with  the pattern, terminated as usual by an empty line or end
+       of file. This command may be followed by  a  modifier  list  containing
+       only  control  modifiers that act after a pattern has been compiled. In
+       particular, hex, posix, posix_nosub, push, and  pushcopy  are  not  al-
+       lowed,  nor  are  any option-setting modifiers.  The JIT modifiers are,
+       however permitted. Here is an example that saves and reloads  two  pat-
        terns.
 
          /abc/push
@@ -1870,10 +1874,10 @@ SAVING AND RESTORING COMPILED PATTERNS
          #pop jit,bincode
          abc
 
-       If jitverify is used with #pop, it does not  automatically  imply  jit,
+       If  jitverify  is  used with #pop, it does not automatically imply jit,
        which is different behaviour from when it is used on a pattern.
 
-       The  #popcopy  command is analagous to the pushcopy modifier in that it
+       The #popcopy command is analagous to the pushcopy modifier in  that  it
        makes current a copy of the topmost stack pattern, leaving the original
        still on the stack.
 
@@ -1893,5 +1897,5 @@ AUTHOR
 
 REVISION
 
-       Last updated: 20 June 2019
+       Last updated: 26 June 2019
        Copyright (c) 1997-2019 University of Cambridge.

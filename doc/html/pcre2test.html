@@ -1252,22 +1252,27 @@ following line with a plus character following the capture number.
 </P>
 <P>
 The <b>allusedtext</b> modifier requests that all the text that was consulted
-during a successful pattern match by the interpreter should be shown. This
-feature is not supported for JIT matching, and if requested with JIT it is
-ignored (with a warning message). Setting this modifier affects the output if
-there is a lookbehind at the start of a match, or a lookahead at the end, or if
-\K is used in the pattern. Characters that precede or follow the start and end
-of the actual match are indicated in the output by '&#60;' or '&#62;' characters
-underneath them. Here is an example:
+during a successful pattern match by the interpreter should be shown, for both
+full and partial matches. This feature is not supported for JIT matching, and
+if requested with JIT it is ignored (with a warning message). Setting this
+modifier affects the output if there is a lookbehind at the start of a match,
+or, for a complete match, a lookahead at the end, or if \K is used in the
+pattern. Characters that precede or follow the start and end of the actual
+match are indicated in the output by '&#60;' or '&#62;' characters underneath them.
+Here is an example:
 <pre>
     re&#62; /(?&#60;=pqr)abc(?=xyz)/
   data&#62; 123pqrabcxyz456\=allusedtext
    0: pqrabcxyz
       &#60;&#60;&#60;   &#62;&#62;&#62;
+  data&#62; 123pqrabcxy\=ph,allusedtext
+  Partial match: pqrabcxy
+                 &#60;&#60;&#60;
 </pre>
-This shows that the matched string is "abc", with the preceding and following
-strings "pqr" and "xyz" having been consulted during the match (when processing
-the assertions).
+The first, complete match shows that the matched string is "abc", with the
+preceding and following strings "pqr" and "xyz" having been consulted during
+the match (when processing the assertions). The partial match can indicate only 
+the preceding string.
 </P>
 <P>
 The <b>startchar</b> modifier requests that the starting character for the match
@@ -2081,7 +2086,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC21" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 20 June 2019
+Last updated: 26 June 2019
 <br>
 Copyright &copy; 1997-2019 University of Cambridge.
 <br>
