@@ -128,7 +128,7 @@ static int
     compile_block *, PCRE2_SIZE *);
 
 static int
-  get_branchlength(uint32_t **, int *, int *, parsed_recurse_check *,
+  get_branchlength(uint32_t **, int *, int *, int *, parsed_recurse_check *,
     compile_block *);
 
 static BOOL
@@ -388,6 +388,9 @@ compiler is clever with identical subexpressions. */
 #define GI_SET_FIXED_LENGTH    0x80000000u
 #define GI_NOT_FIXED_LENGTH    0x40000000u
 #define GI_FIXED_LENGTH_MASK   0x0000ffffu
+#define GI_EXTRA_MASK          0x0fff0000u
+#define GI_EXTRA_MAX                 0xfff  /* NB not unsigned */
+#define GI_EXTRA_SHIFT                  16
 
 /* This simple test for a decimal digit works for both ASCII/Unicode and EBCDIC
 and is fast (a good compiler can turn it into a subtraction and unsigned
@@ -8841,6 +8844,7 @@ improve processing speed when the same capturing group occurs many times.
 Arguments:
   pptrptr     pointer to pointer in the parsed pattern
   isinline    FALSE if a reference or recursion; TRUE for inline group
+  extraptr    pointer to where to return extra lookbehind length
   errcodeptr  pointer to the errorcode
   lcptr       pointer to the loop counter
   group       number of captured group or -1 for a non-capturing group
@@ -8851,11 +8855,13 @@ Returns:      the group length or a negative number
 */
 
 static int
-get_grouplength(uint32_t **pptrptr, BOOL isinline, int *errcodeptr, int *lcptr,
-  int group, parsed_recurse_check *recurses, compile_block *cb)
+get_grouplength(uint32_t **pptrptr, BOOL isinline, int *extraptr,
+  int *errcodeptr, int *lcptr, int group, parsed_recurse_check *recurses,
+  compile_block *cb)
 {
 int branchlength;
 int grouplength = -1;
+int extra = 0;
 
 /* The cache can be used only if there is no possibility of there being two
 groups with the same number. We do not need to set the end pointer for a group
@@ -8869,6 +8875,7 @@ if (group > 0 && (cb->external_flags & PCRE2_DUPCAPUSED) == 0)
   if ((groupinfo & GI_SET_FIXED_LENGTH) != 0)
     {
     if (isinline) *pptrptr = parsed_skip(*pptrptr, PSKIP_KET);
+    *extraptr = (groupinfo & GI_EXTRA_MASK) >> GI_EXTRA_SHIFT;
     return groupinfo & GI_FIXED_LENGTH_MASK;
     }
   }
@@ -8877,16 +8884,28 @@ if (group > 0 && (cb->external_flags & PCRE2_DUPCAPUSED) == 0)
 
 for(;;)
   {
-  branchlength = get_branchlength(pptrptr, errcodeptr, lcptr, recurses, cb);
+  int branchextra;
+  branchlength = get_branchlength(pptrptr, &branchextra, errcodeptr, lcptr,
+    recurses, cb);
   if (branchlength < 0) goto ISNOTFIXED;
-  if (grouplength == -1) grouplength = branchlength;
-    else if (grouplength != branchlength) goto ISNOTFIXED;
+  if (grouplength == -1)
+    {
+    grouplength = branchlength;
+    extra = branchextra;
+    }
+  else if (grouplength != branchlength || extra != branchextra) goto ISNOTFIXED;
   if (**pptrptr == META_KET) break;
   *pptrptr += 1;   /* Skip META_ALT */
   }
 
-if (group > 0)
-  cb->groupinfo[group] |= (uint32_t)(GI_SET_FIXED_LENGTH | grouplength);
+/* There are only 12 bits for caching the extra value, but a pattern that
+needs more than that is weird indeed. */
+
+if (group > 0 && extra <= GI_EXTRA_MAX)
+  cb->groupinfo[group] |= (uint32_t)
+    (GI_SET_FIXED_LENGTH | (extra << GI_EXTRA_SHIFT) | grouplength);
+
+*extraptr = extra;
 return grouplength;
 
 ISNOTFIXED:
@@ -8901,13 +8920,17 @@ return -1;
 *************************************************/
 
 /* Return a fixed length for a branch in a lookbehind, giving an error if the
-length is not fixed. If any lookbehinds are encountered on the way, they get
-their length set, and there is a check for them looking further back than the
-current lookbehind. On entry, *pptrptr points to the first element inside the
-branch. On exit it is set to point to the ALT or KET.
+length is not fixed. We also take note of any extra value that is generated
+from a nested lookbehind. For example, for /(?<=a(?<=ba)c)/ each individual
+lookbehind has length 2, but the max_lookbehind setting must be 3 because
+matching inspects 3 characters before the match starting point.
+
+On entry, *pptrptr points to the first element inside the branch. On exit it is
+set to point to the ALT or KET.
 
 Arguments:
   pptrptr     pointer to pointer in the parsed pattern
+  extraptr    pointer to where to return extra lookbehind length
   errcodeptr  pointer to error code
   lcptr       pointer to loop counter
   recurses    chain of recurse_check to catch mutual recursion
@@ -8917,11 +8940,12 @@ Returns:      the length, or a negative value on error
 */
 
 static int
-get_branchlength(uint32_t **pptrptr, int *errcodeptr, int *lcptr,
+get_branchlength(uint32_t **pptrptr, int *extraptr, int *errcodeptr, int *lcptr,
   parsed_recurse_check *recurses, compile_block *cb)
 {
 int branchlength = 0;
 int grouplength;
+int groupextra;
 int max;
 int extra = 0;   /* Additional lookbehind from nesting */
 uint32_t lastitemlength = 0;
@@ -9070,11 +9094,11 @@ for (;; pptr++)
       }
     break;
 
-    /* A lookbehind does not contribute any length to this lookbehind, but must
-    itself be checked and have its lengths set. If the maximum lookebhind of
-    any branch is greater than the length so far computed for this branch, we
-    must set an extra value for use when setting the maximum overall
-    lookbehind. */
+    /* A nested lookbehind does not contribute any length to this lookbehind,
+    but must itself be checked and have its lengths set. If the maximum
+    lookbehind for the nested lookbehind is greater than the length so far
+    computed for this branch, we must compute an extra value and keep the
+    largest encountered for use when setting the maximum overall lookbehind. */
 
     case META_LOOKBEHIND:
     case META_LOOKBEHINDNOT:
@@ -9188,15 +9212,14 @@ for (;; pptr++)
     in the cache. */
 
     gptr++;
-    grouplength = get_grouplength(&gptr, FALSE, errcodeptr, lcptr, group,
-      &this_recurse, cb);
+    grouplength = get_grouplength(&gptr, FALSE, &groupextra, errcodeptr, lcptr,
+      group, &this_recurse, cb);
     if (grouplength < 0)
       {
       if (*errcodeptr == 0) goto ISNOTFIXED;
       return -1;  /* Error already set */
       }
-    itemlength = grouplength;
-    break;
+    goto OK_GROUP;
 
     /* Check nested groups - advance past the initial data for each type and
     then seek a fixed length with get_grouplength(). */
@@ -9226,10 +9249,16 @@ for (;; pptr++)
     case META_SCRIPT_RUN:
     pptr++;
     CHECK_GROUP:
-    grouplength = get_grouplength(&pptr, TRUE, errcodeptr, lcptr, group,
-      recurses, cb);
+    grouplength = get_grouplength(&pptr, TRUE, &groupextra, errcodeptr, lcptr,
+      group, recurses, cb);
     if (grouplength < 0) return -1;
+
+    /* A nested lookbehind within the group may require looking back further
+    than the length of the group. */
+
+    OK_GROUP:
     itemlength = grouplength;
+    if (groupextra - branchlength > extra) extra = groupextra - branchlength;
     break;
 
     /* Exact repetition is OK; variable repetition is not. A repetition of zero
@@ -9272,15 +9301,7 @@ for (;; pptr++)
 
 EXIT:
 *pptrptr = pptr;
-
-/* The overall maximum lookbehind for any branch in the pattern takes note of
-any extra value that is generated from a nested lookbehind. For example, for
-/(?<=a(?<=ba)c)/ each individual lookbehind has length 2, but the
-max_lookbehind setting is 3 because matching inspects 3 characters before the
-match starting point. */
-
-if (branchlength + extra > cb->max_lookbehind)
-  cb->max_lookbehind = branchlength + extra;
+*extraptr = extra;
 return branchlength;
 
 PARSED_SKIP_FAILED:
@@ -9299,9 +9320,14 @@ branches. An error occurs if any branch does not have a fixed length that is
 less than the maximum (65535). On exit, the pointer must be left on the final
 ket.
 
+The function also maintains the max_lookbehind value. Any lookbehind branch
+that contains a nested lookbehind may actually look further back than the
+length of the branch. The additional amount is passed back from
+get_branchlength() as an "extra" value.
+
 Arguments:
   pptrptr     pointer to pointer in the parsed pattern
-  maxptr      where to return maximum length for the whole group
+  maxptr      where to return maximum lookbehind for the whole group
   errcodeptr  pointer to error code
   lcptr       pointer to loop counter
   recurses    chain of recurse_check to catch mutual recursion
@@ -9317,6 +9343,7 @@ set_lookbehind_lengths(uint32_t **pptrptr, int *maxptr, int *errcodeptr,
 {
 PCRE2_SIZE offset;
 int branchlength;
+int branchextra;
 int max = 0;
 uint32_t *bptr = *pptrptr;
 
@@ -9326,7 +9353,8 @@ READPLUSOFFSET(offset, bptr);  /* Offset for error messages */
 do
   {
   *pptrptr += 1;
-  branchlength = get_branchlength(pptrptr, errcodeptr, lcptr, recurses, cb);
+  branchlength = get_branchlength(pptrptr, &branchextra, errcodeptr, lcptr,
+    recurses, cb);
   if (branchlength < 0)
     {
     /* The errorcode and offset may already be set from a nested lookbehind. */
@@ -9334,12 +9362,13 @@ do
     if (cb->erroroffset == PCRE2_UNSET) cb->erroroffset = offset;
     return FALSE;
     }
-  if (branchlength > max) max = branchlength;
+  if (branchlength + branchextra > max) max = branchlength + branchextra;
   *bptr |= branchlength;  /* branchlength never more than 65535 */
   bptr = *pptrptr;
   }
 while (*bptr == META_ALT);
 
+if (max > cb->max_lookbehind) cb->max_lookbehind = max;
 *maxptr = max;
 return TRUE;
 }

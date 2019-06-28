@@ -335,6 +335,41 @@ Partial match: abcd
 Partial match: abcd
                <<
 
+/(?<=(?<=(?<=a)b)c)./I
+Capture group count = 0
+Max lookbehind = 3
+Subject length lower bound = 1
+    123abcXYZ
+ 0: abcX
+    <<< 
+
+/(?<=ab(cd(?<=...)))./I
+Capture group count = 1
+Max lookbehind = 4
+Subject length lower bound = 1
+    abcdX
+ 0: abcdX
+    <<<< 
+ 1: cd
+
+/(?<=ab((?<=...)cd))./I
+Capture group count = 1
+Max lookbehind = 5
+Subject length lower bound = 1
+    ZabcdX
+ 0: ZabcdX
+    <<<<< 
+ 1: cd
+
+/(?<=((?<=(?<=ab).))(?1)(?1))./I
+Capture group count = 1
+Max lookbehind = 3
+Subject length lower bound = 1
+    abxZ
+ 0: abxZ
+    <<< 
+ 1: 
+
 #subject
 # -------------------------------------------------------------------
 
