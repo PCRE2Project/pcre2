@@ -3269,6 +3269,11 @@ return 0;
 
 
 
+/* This function is no longer used. Keep it around for a while, just in case it 
+needs to be re-instated. */
+
+#ifdef NEVERNEVERNEVER
+
 /*************************************************
 *         Move back by so many characters        *
 *************************************************/
@@ -3313,6 +3318,7 @@ else  /* 16-bit mode */
   return pp - (PCRE2_SPTR16)subject;
   }
 }
+#endif  /* NEVERNEVERNEVER */
 
 
 
@@ -8652,6 +8658,11 @@ while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
     showtotaltimes = arg[1] == 'T';
     if (argc > 2 && (uli = strtoul(argv[op+1], &endptr, 10), *endptr == 0))
       {
+      if (uli == 0)
+        {
+        fprintf(stderr, "** Argument for %s must not be zero\n", arg);
+        exit(1);
+        }    
       if (U32OVERFLOW(uli))
         {
         fprintf(stderr, "** Argument for %s is too big\n", arg);
