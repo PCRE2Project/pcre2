@@ -85,6 +85,9 @@ otherwise), an atomic group, or a recursion.
 
 16. Give error if pcre2test -t, -T, -tm or -TM is given an argument of zero.
 
+17. Check for integer overflow when computing lookbehind lengths. Fixes 
+Clusterfuzz issue 15636.
+
 
 Version 10.33 16-April-2019
 ---------------------------

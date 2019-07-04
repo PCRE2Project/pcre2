@@ -9269,8 +9269,26 @@ for (;; pptr++)
     case META_MINMAX_QUERY:
     if (pptr[1] == pptr[2])
       {
-      if (pptr[1] == 0) branchlength -= lastitemlength;
-        else itemlength = (pptr[1] - 1) * lastitemlength;
+      switch(pptr[1])
+        {
+        case 0:
+        branchlength -= lastitemlength;
+        break;
+
+        case 1:
+        itemlength = 0;
+        break;
+
+        default:  /* Check for integer overflow */
+        if (lastitemlength != 0 &&  /* Should not occur, but just in case */
+            INT_MAX/lastitemlength < pptr[1] - 1)
+          {
+          *errcodeptr = ERR87;  /* Integer overflow; lookbehind too big */
+          return -1;
+          }
+        itemlength = (pptr[1] - 1) * lastitemlength;
+        break;
+        }
       pptr += 2;
       break;
       }
@@ -9284,19 +9302,19 @@ for (;; pptr++)
     return -1;
     }
 
-  /* Add the item length to the branchlength, and save it for use if the next
-  thing is a quantifier. */
+  /* Add the item length to the branchlength, checking for integer overflow and
+  for the branch length exceeding the limit. */
 
-  branchlength += itemlength;
-  lastitemlength = itemlength;
-
-  /* Ensure that the length does not overflow the limit. */
-
-  if (branchlength > LOOKBEHIND_MAX)
+  if (INT_MAX - branchlength < (int)itemlength ||
+      (branchlength += itemlength) > LOOKBEHIND_MAX)
     {
     *errcodeptr = ERR87;
     return -1;
     }
+
+  /* Save this item length for use if the next item is a quantifier. */
+
+  lastitemlength = itemlength;
   }
 
 EXIT:
