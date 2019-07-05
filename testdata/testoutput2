@@ -17078,8 +17078,13 @@ Max lookbehind = 5
 May match empty string
 Subject length lower bound = 0
 
+# Addition overflow
 /( {32742} {42})(?<!\1{65481})/
 Failed: error 187 at offset 15: lookbehind assertion is too long
+
+# Multiplication overflow
+/(X{65535})(?<=\1{32770})/
+Failed: error 187 at offset 10: lookbehind assertion is too long
 
 # End of testinput2
 Error -70: PCRE2_ERROR_BADDATA (unknown error number)

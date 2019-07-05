@@ -5647,6 +5647,10 @@ a)"xI
 
 /(?<=(?<=a)b)(?<!abcd)(?<=(?<=a)bcde)/I
 
+# Addition overflow
 /( {32742} {42})(?<!\1{65481})/
+
+# Multiplication overflow
+/(X{65535})(?<=\1{32770})/
 
 # End of testinput2
