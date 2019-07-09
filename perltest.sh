@@ -140,7 +140,7 @@ if (@ARGV > 1)
   }
 else { $outfile = "STDOUT"; }
 
-printf($outfile "Perl $] Regular Expressions\n\n");
+printf($outfile "Perl $^V\n\n");
 
 $extra_modifiers = "";
 $default_show_mark = 0;
