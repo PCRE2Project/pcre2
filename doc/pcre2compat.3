@@ -1,4 +1,4 @@
-.TH PCRE2COMPAT 3 "12 February 2019" "PCRE2 10.33"
+.TH PCRE2COMPAT 3 "13 July 2019" "PCRE2 10.34"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "DIFFERENCES BETWEEN PCRE2 AND PERL"
@@ -170,6 +170,10 @@ different way and is not Perl-compatible.
 (l) PCRE2 recognizes some special sequences such as (*CR) or (*NO_JIT) at
 the start of a pattern that set overall options that cannot be changed within
 the pattern.
+.sp
+(m) PCRE2 supports non-atomic positive lookaround assertions. This is an 
+extension to the lookaround facilities. The default, Perl-compatible
+lookarounds are atomic.
 .P
 18. The Perl /a modifier restricts /d numbers to pure ascii, and the /aa
 modifier restricts /i case-insensitive matching to pure ascii, ignoring Unicode
@@ -199,6 +203,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 12 February 2019
+Last updated: 13 July 2019
 Copyright (c) 1997-2019 University of Cambridge.
 .fi

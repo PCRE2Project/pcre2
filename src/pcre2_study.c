@@ -240,6 +240,8 @@ for (;;)
     case OP_ASSERT_NOT:
     case OP_ASSERTBACK:
     case OP_ASSERTBACK_NOT:
+    case OP_ASSERT_NA:
+    case OP_ASSERTBACK_NA:  
     do cc += GET(cc, 1); while (*cc == OP_ALT);
     /* Fall through */
 
@@ -1089,6 +1091,7 @@ do
       case OP_ONCE:
       case OP_SCRIPT_RUN:
       case OP_ASSERT:
+      case OP_ASSERT_NA: 
       rc = set_start_bits(re, tcode, utf);
       if (rc == SSB_FAIL || rc == SSB_UNKNOWN) return rc;
       if (rc == SSB_DONE) try_next = FALSE; else
@@ -1131,6 +1134,7 @@ do
       case OP_ASSERT_NOT:
       case OP_ASSERTBACK:
       case OP_ASSERTBACK_NOT:
+      case OP_ASSERTBACK_NA: 
       do tcode += GET(tcode, 1); while (*tcode == OP_ALT);
       tcode += 1 + LINK_SIZE;
       break;

@@ -5127,6 +5127,8 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
 
     case OP_ASSERT:
     case OP_ASSERTBACK:
+    case OP_ASSERT_NA:
+    case OP_ASSERTBACK_NA:
     Lframe_type = GF_NOCAPTURE | Fop;
     for (;;)
       {
@@ -5497,8 +5499,18 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
       case OP_SCOND:
       break;
 
-      /* Positive assertions are like OP_ONCE, except that in addition the
+      /* Non-atomic positive assertions are like OP_BRA, except that the
       subject pointer must be put back to where it was at the start of the
+      assertion. */
+
+      case OP_ASSERT_NA:
+      case OP_ASSERTBACK_NA:
+      if (Feptr > mb->last_used_ptr) mb->last_used_ptr = Feptr;
+      Feptr = P->eptr;
+      break;
+
+      /* Atomic positive assertions are like OP_ONCE, except that in addition
+      the subject pointer must be put back to where it was at the start of the
       assertion. */
 
       case OP_ASSERT:

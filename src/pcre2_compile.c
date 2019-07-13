@@ -250,36 +250,41 @@ is present where expected in a conditional group. */
 #define META_LOOKBEHIND       0x80250000u  /* (?<= */
 #define META_LOOKBEHINDNOT    0x80260000u  /* (?<! */
 
+/* These cannot be conditions */
+
+#define META_LOOKAHEAD_NA     0x80270000u  /* (*napla: */
+#define META_LOOKBEHIND_NA    0x80280000u  /* (*naplb: */
+
 /* These must be kept in this order, with consecutive values, and the _ARG
 versions of COMMIT, PRUNE, SKIP, and THEN immediately after their non-argument
 versions. */
 
-#define META_MARK             0x80270000u  /* (*MARK) */
-#define META_ACCEPT           0x80280000u  /* (*ACCEPT) */
-#define META_FAIL             0x80290000u  /* (*FAIL) */
-#define META_COMMIT           0x802a0000u  /* These               */
-#define META_COMMIT_ARG       0x802b0000u  /*   pairs             */
-#define META_PRUNE            0x802c0000u  /*     must            */
-#define META_PRUNE_ARG        0x802d0000u  /*       be            */
-#define META_SKIP             0x802e0000u  /*         kept        */
-#define META_SKIP_ARG         0x802f0000u  /*           in        */
-#define META_THEN             0x80300000u  /*             this    */
-#define META_THEN_ARG         0x80310000u  /*               order */
+#define META_MARK             0x80290000u  /* (*MARK) */
+#define META_ACCEPT           0x802a0000u  /* (*ACCEPT) */
+#define META_FAIL             0x802b0000u  /* (*FAIL) */
+#define META_COMMIT           0x802c0000u  /* These               */
+#define META_COMMIT_ARG       0x802d0000u  /*   pairs             */
+#define META_PRUNE            0x802e0000u  /*     must            */
+#define META_PRUNE_ARG        0x802f0000u  /*       be            */
+#define META_SKIP             0x80300000u  /*         kept        */
+#define META_SKIP_ARG         0x80310000u  /*           in        */
+#define META_THEN             0x80320000u  /*             this    */
+#define META_THEN_ARG         0x80330000u  /*               order */
 
 /* These must be kept in groups of adjacent 3 values, and all together. */
 
-#define META_ASTERISK         0x80320000u  /* *  */
-#define META_ASTERISK_PLUS    0x80330000u  /* *+ */
-#define META_ASTERISK_QUERY   0x80340000u  /* *? */
-#define META_PLUS             0x80350000u  /* +  */
-#define META_PLUS_PLUS        0x80360000u  /* ++ */
-#define META_PLUS_QUERY       0x80370000u  /* +? */
-#define META_QUERY            0x80380000u  /* ?  */
-#define META_QUERY_PLUS       0x80390000u  /* ?+ */
-#define META_QUERY_QUERY      0x803a0000u  /* ?? */
-#define META_MINMAX           0x803b0000u  /* {n,m}  repeat */
-#define META_MINMAX_PLUS      0x803c0000u  /* {n,m}+ repeat */
-#define META_MINMAX_QUERY     0x803d0000u  /* {n,m}? repeat */
+#define META_ASTERISK         0x80340000u  /* *  */
+#define META_ASTERISK_PLUS    0x80350000u  /* *+ */
+#define META_ASTERISK_QUERY   0x80360000u  /* *? */
+#define META_PLUS             0x80370000u  /* +  */
+#define META_PLUS_PLUS        0x80380000u  /* ++ */
+#define META_PLUS_QUERY       0x80390000u  /* +? */
+#define META_QUERY            0x803a0000u  /* ?  */
+#define META_QUERY_PLUS       0x803b0000u  /* ?+ */
+#define META_QUERY_QUERY      0x803c0000u  /* ?? */
+#define META_MINMAX           0x803d0000u  /* {n,m}  repeat */
+#define META_MINMAX_PLUS      0x803e0000u  /* {n,m}+ repeat */
+#define META_MINMAX_QUERY     0x803f0000u  /* {n,m}? repeat */
 
 #define META_FIRST_QUANTIFIER META_ASTERISK
 #define META_LAST_QUANTIFIER  META_MINMAX_QUERY
@@ -335,6 +340,8 @@ static unsigned char meta_extra_lengths[] = {
   0,             /* META_LOOKAHEADNOT */
   SIZEOFFSET,    /* META_LOOKBEHIND */
   SIZEOFFSET,    /* META_LOOKBEHINDNOT */
+  0,             /* META_LOOKAHEAD_NA */
+  SIZEOFFSET,    /* META_LOOKBEHIND_NA */
   1,             /* META_MARK - plus the string length */
   0,             /* META_ACCEPT */
   0,             /* META_FAIL */
@@ -637,10 +644,14 @@ typedef struct alasitem {
 static const char alasnames[] =
   STRING_pla0
   STRING_plb0
+  STRING_napla0
+  STRING_naplb0
   STRING_nla0
   STRING_nlb0
   STRING_positive_lookahead0
   STRING_positive_lookbehind0
+  STRING_non_atomic_positive_lookahead0
+  STRING_non_atomic_positive_lookbehind0  
   STRING_negative_lookahead0
   STRING_negative_lookbehind0
   STRING_atomic0
@@ -652,10 +663,14 @@ static const char alasnames[] =
 static const alasitem alasmeta[] = {
   {  3, META_LOOKAHEAD         },
   {  3, META_LOOKBEHIND        },
+  {  5, META_LOOKAHEAD_NA      },
+  {  5, META_LOOKBEHIND_NA     },
   {  3, META_LOOKAHEADNOT      },
   {  3, META_LOOKBEHINDNOT     },
   { 18, META_LOOKAHEAD         },
   { 19, META_LOOKBEHIND        },
+  { 29, META_LOOKAHEAD_NA      },
+  { 30, META_LOOKBEHIND_NA     }, 
   { 18, META_LOOKAHEADNOT      },
   { 19, META_LOOKBEHINDNOT     },
   {  6, META_ATOMIC            },
@@ -784,7 +799,7 @@ enum { ERR0 = COMPILE_ERROR_BASE,
        ERR61, ERR62, ERR63, ERR64, ERR65, ERR66, ERR67, ERR68, ERR69, ERR70,
        ERR71, ERR72, ERR73, ERR74, ERR75, ERR76, ERR77, ERR78, ERR79, ERR80,
        ERR81, ERR82, ERR83, ERR84, ERR85, ERR86, ERR87, ERR88, ERR89, ERR90,
-       ERR91, ERR92, ERR93, ERR94, ERR95, ERR96, ERR97 };
+       ERR91, ERR92, ERR93, ERR94, ERR95, ERR96, ERR97, ERR98 };
 
 /* This is a table of start-of-pattern options such as (*UTF) and settings such
 as (*LIMIT_MATCH=nnnn) and (*CRLF). For completeness and backward
@@ -1015,6 +1030,7 @@ for (;;)
     case META_NOCAPTURE: fprintf(stderr, "META (?:"); break;
     case META_LOOKAHEAD: fprintf(stderr, "META (?="); break;
     case META_LOOKAHEADNOT: fprintf(stderr, "META (?!"); break;
+    case META_LOOKAHEAD_NA: fprintf(stderr, "META (*napla:"); break;
     case META_SCRIPT_RUN: fprintf(stderr, "META (*sr:"); break;
     case META_KET: fprintf(stderr, "META )"); break;
     case META_ALT: fprintf(stderr, "META | %d", meta_arg); break;
@@ -1042,6 +1058,12 @@ for (;;)
 
     case META_LOOKBEHIND:
     fprintf(stderr, "META (?<= %d offset=", meta_arg);
+    GETOFFSET(offset, pptr);
+    fprintf(stderr, "%zd", offset);
+    break;
+
+    case META_LOOKBEHIND_NA:
+    fprintf(stderr, "META (*naplb: %d offset=", meta_arg);
     GETOFFSET(offset, pptr);
     fprintf(stderr, "%zd", offset);
     break;
@@ -3695,19 +3717,20 @@ while (ptr < ptrend)
           goto FAILED;
           }
 
-        /* Check for expecting an assertion condition. If so, only lookaround
-        assertions are valid. */
+        /* Check for expecting an assertion condition. If so, only atomic
+        lookaround assertions are valid. */
 
         meta = alasmeta[i].meta;
         if (prev_expect_cond_assert > 0 &&
             (meta < META_LOOKAHEAD || meta > META_LOOKBEHINDNOT))
           {
-          errorcode = ERR28;  /* Assertion expected */
+          errorcode = (meta == META_LOOKAHEAD_NA || meta == META_LOOKBEHIND_NA)?
+            ERR98 : ERR28;  /* (Atomic) assertion expected */
           goto FAILED;
           }
 
-        /* The lookaround alphabetic synonyms can be almost entirely handled by
-        jumping to the code that handles the traditional symbolic forms. */
+        /* The lookaround alphabetic synonyms can mostly be handled by jumping
+        to the code that handles the traditional symbolic forms. */
 
         switch(meta)
           {
@@ -3721,11 +3744,17 @@ while (ptr < ptrend)
           case META_LOOKAHEAD:
           goto POSITIVE_LOOK_AHEAD;
 
+          case META_LOOKAHEAD_NA:
+          *parsed_pattern++ = meta;
+          ptr++;
+          goto POST_ASSERTION;
+
           case META_LOOKAHEADNOT:
           goto NEGATIVE_LOOK_AHEAD;
 
           case META_LOOKBEHIND:
           case META_LOOKBEHINDNOT:
+          case META_LOOKBEHIND_NA:
           *parsed_pattern++ = meta;
           ptr--;
           goto POST_LOOKBEHIND;
@@ -4429,7 +4458,7 @@ while (ptr < ptrend)
       *parsed_pattern++ = (ptr[1] == CHAR_EQUALS_SIGN)?
         META_LOOKBEHIND : META_LOOKBEHINDNOT;
 
-      POST_LOOKBEHIND:              /* Come from (*plb: and (*nlb: */
+      POST_LOOKBEHIND:              /* Come from (*plb: (*naplb: and (*nlb: */
       *has_lookbehind = TRUE;
       offset = (PCRE2_SIZE)(ptr - cb->start_pattern - 2);
       PUTOFFSET(offset, parsed_pattern);
@@ -6300,6 +6329,11 @@ for (;; pptr++)
     cb->assert_depth += 1;
     goto GROUP_PROCESS;
 
+    case META_LOOKAHEAD_NA:
+    bravalue = OP_ASSERT_NA;
+    cb->assert_depth += 1;
+    goto GROUP_PROCESS;
+
     /* Optimize (?!) to (*FAIL) unless it is quantified - which is a weird
     thing to do, but Perl allows all assertions to be quantified, and when
     they contain capturing parentheses there may be a potential use for
@@ -6328,6 +6362,11 @@ for (;; pptr++)
 
     case META_LOOKBEHINDNOT:
     bravalue = OP_ASSERTBACK_NOT;
+    cb->assert_depth += 1;
+    goto GROUP_PROCESS;
+
+    case META_LOOKBEHIND_NA:
+    bravalue = OP_ASSERTBACK_NA;
     cb->assert_depth += 1;
     goto GROUP_PROCESS;
 
@@ -7931,7 +7970,10 @@ length = 2 + 2*LINK_SIZE + skipunits;
 /* Remember if this is a lookbehind assertion, and if it is, save its length
 and skip over the pattern offset. */
 
-lookbehind = *code == OP_ASSERTBACK || *code == OP_ASSERTBACK_NOT;
+lookbehind = *code == OP_ASSERTBACK || 
+             *code == OP_ASSERTBACK_NOT ||
+             *code == OP_ASSERTBACK_NA;
+
 if (lookbehind)
   {
   lookbehindlength = META_DATA(pptr[-1]);
@@ -8802,8 +8844,10 @@ for (;; pptr++)
     case META_COND_VERSION:
     case META_LOOKAHEAD:
     case META_LOOKAHEADNOT:
+    case META_LOOKAHEAD_NA:
     case META_LOOKBEHIND:
     case META_LOOKBEHINDNOT:
+    case META_LOOKBEHIND_NA:
     case META_NOCAPTURE:
     case META_SCRIPT_RUN:
     nestlevel++;
@@ -9064,6 +9108,7 @@ for (;; pptr++)
 
     case META_LOOKAHEAD:
     case META_LOOKAHEADNOT:
+    case META_LOOKAHEAD_NA:
     pptr = parsed_skip(pptr + 1, PSKIP_KET);
     if (pptr == NULL) goto PARSED_SKIP_FAILED;
 
@@ -9102,6 +9147,7 @@ for (;; pptr++)
 
     case META_LOOKBEHIND:
     case META_LOOKBEHINDNOT:
+    case META_LOOKBEHIND_NA:
     if (!set_lookbehind_lengths(&pptr, &max, errcodeptr, lcptr, recurses, cb))
       return -1;
     if (max - branchlength > extra) extra = max - branchlength;
@@ -9453,6 +9499,7 @@ for (pptr = cb->parsed_pattern; *pptr != META_END; pptr++)
     case META_KET:
     case META_LOOKAHEAD:
     case META_LOOKAHEADNOT:
+    case META_LOOKAHEAD_NA:
     case META_NOCAPTURE:
     case META_PLUS:
     case META_PLUS_PLUS:
@@ -9514,6 +9561,7 @@ for (pptr = cb->parsed_pattern; *pptr != META_END; pptr++)
 
     case META_LOOKBEHIND:
     case META_LOOKBEHINDNOT:
+    case META_LOOKBEHIND_NA:
     if (!set_lookbehind_lengths(&pptr, &max, &errorcode, &loopcount, NULL, cb))
       return errorcode;
     break;

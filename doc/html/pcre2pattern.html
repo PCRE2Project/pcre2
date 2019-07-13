@@ -33,17 +33,18 @@ please consult the man page, in case the conversion went wrong.
 <li><a name="TOC18" href="#SEC18">ATOMIC GROUPING AND POSSESSIVE QUANTIFIERS</a>
 <li><a name="TOC19" href="#SEC19">BACKREFERENCES</a>
 <li><a name="TOC20" href="#SEC20">ASSERTIONS</a>
-<li><a name="TOC21" href="#SEC21">SCRIPT RUNS</a>
-<li><a name="TOC22" href="#SEC22">CONDITIONAL GROUPS</a>
-<li><a name="TOC23" href="#SEC23">COMMENTS</a>
-<li><a name="TOC24" href="#SEC24">RECURSIVE PATTERNS</a>
-<li><a name="TOC25" href="#SEC25">GROUPS AS SUBROUTINES</a>
-<li><a name="TOC26" href="#SEC26">ONIGURUMA SUBROUTINE SYNTAX</a>
-<li><a name="TOC27" href="#SEC27">CALLOUTS</a>
-<li><a name="TOC28" href="#SEC28">BACKTRACKING CONTROL</a>
-<li><a name="TOC29" href="#SEC29">SEE ALSO</a>
-<li><a name="TOC30" href="#SEC30">AUTHOR</a>
-<li><a name="TOC31" href="#SEC31">REVISION</a>
+<li><a name="TOC21" href="#SEC21">NON-ATOMIC ASSERTIONS</a>
+<li><a name="TOC22" href="#SEC22">SCRIPT RUNS</a>
+<li><a name="TOC23" href="#SEC23">CONDITIONAL GROUPS</a>
+<li><a name="TOC24" href="#SEC24">COMMENTS</a>
+<li><a name="TOC25" href="#SEC25">RECURSIVE PATTERNS</a>
+<li><a name="TOC26" href="#SEC26">GROUPS AS SUBROUTINES</a>
+<li><a name="TOC27" href="#SEC27">ONIGURUMA SUBROUTINE SYNTAX</a>
+<li><a name="TOC28" href="#SEC28">CALLOUTS</a>
+<li><a name="TOC29" href="#SEC29">BACKTRACKING CONTROL</a>
+<li><a name="TOC30" href="#SEC30">SEE ALSO</a>
+<li><a name="TOC31" href="#SEC31">AUTHOR</a>
+<li><a name="TOC32" href="#SEC32">REVISION</a>
 </ul>
 <br><a name="SEC1" href="#TOC1">PCRE2 REGULAR EXPRESSION DETAILS</a><br>
 <P>
@@ -2364,17 +2365,21 @@ those that look behind it, and in each case an assertion may be positive (must
 match for the assertion to be true) or negative (must not match for the
 assertion to be true). An assertion group is matched in the normal way,
 and if it is true, matching continues after it, but with the matching position
-in the subject string is was it was before the assertion was processed.
+in the subject string reset to what it was before the assertion was processed.
 </P>
 <P>
-A lookaround assertion may also appear as the condition in a
+The Perl-compatible lookaround assertions are atomic. If an assertion is true,
+but there is a subsequent matching failure, there is no backtracking into the
+assertion. However, there are some cases where non-atomic assertions can be 
+useful. PCRE2 has some support for these, described in the section entitled
+<a href="#nonatomicassertions">"Non-atomic assertions"</a>
+below, but they are not Perl-compatible.
+</P>
+<P>
+A lookaround assertion may appear as the condition in a
 <a href="#conditions">conditional group</a>
 (see below). In this case, the result of matching the assertion determines
 which branch of the condition is followed.
-</P>
-<P>
-Lookaround assertions are atomic. If an assertion is true, but there is a
-subsequent matching failure, there is no backtracking into the assertion.
 </P>
 <P>
 Assertion groups are not capture groups. If an assertion contains capture
@@ -2429,11 +2434,11 @@ The assertion is obeyed just once when encountered during matching.
 Alphabetic assertion names
 </b><br>
 <P>
-Traditionally, symbolic sequences such as (?= and (?&#60;= have been used to specify
-lookaround assertions. Perl 5.28 introduced some experimental alphabetic
-alternatives which might be easier to remember. They all start with (* instead
-of (? and must be written using lower case letters. PCRE2 supports the
-following synonyms:
+Traditionally, symbolic sequences such as (?= and (?&#60;= have been used to
+specify lookaround assertions. Perl 5.28 introduced some experimental
+alphabetic alternatives which might be easier to remember. They all start with
+(* instead of (? and must be written using lower case letters. PCRE2 supports
+the following synonyms:
 <pre>
   (*positive_lookahead:  or (*pla: is the same as (?=
   (*negative_lookahead:  or (*nla: is the same as (?!
@@ -2606,8 +2611,63 @@ preceded by "foo", while
 </pre>
 is another pattern that matches "foo" preceded by three digits and any three
 characters that are not "999".
+<a name="nonatomicassertions"></a></P>
+<br><a name="SEC21" href="#TOC1">NON-ATOMIC ASSERTIONS</a><br>
+<P>
+The traditional Perl-compatible lookaround assertions are atomic. That is, if
+an assertion is true, but there is a subsequent matching failure, there is no
+backtracking into the assertion. However, there are some cases where non-atomic
+positive assertions can be useful. PCRE2 provides these using the following 
+syntax:
+<pre>
+  (*non_atomic_positive_lookahead:  or (*napla:
+  (*non_atomic_positive_lookbehind: or (*naplb: 
+</pre>
+Consider the problem of finding the right-most word in a string that also
+appears earlier in the string, that is, it must appear at least twice in total.
+This pattern returns the required result as captured substring 1:
+<pre>
+  ^(?x)(*napla: .* \b(\w++)) (?&#62; .*? \b\1\b ){2}
+</pre>
+For a subject such as "word1 word2 word3 word2 word3 word4" the result is 
+"word3". How does it work? At the start, ^(?x) anchors the pattern and sets the 
+"x" option, which causes white space (introduced for readability) to be
+ignored. Inside the assertion, the greedy .* at first consumes the entire
+string, but then has to backtrack until the rest of the assertion can match a
+word, which is captured by group 1. In other words, when the assertion first
+succeeds, it captures the right-most word in the string.
 </P>
-<br><a name="SEC21" href="#TOC1">SCRIPT RUNS</a><br>
+<P>
+The current matching point is then reset to the start of the subject, and the
+rest of the pattern match checks for two occurrences of the captured word, 
+using an ungreedy .*? to scan from the left. If this succeeds, we are done, but 
+if the last word in the string does not occur twice, this part of the pattern 
+fails. If a traditional atomic lookhead (?= or (*pla: had been used, the
+assertion could not be re-entered, and the whole match would fail. The pattern
+would succeed only if the very last word in the subject was found twice.
+</P>
+<P>
+Using a non-atomic lookahead, however, means that when the last word does not
+occur twice in the string, the lookahead can backtrack and find the second-last
+word, and so on, until either the match succeeds, or all words have been
+tested.
+</P>
+<P>
+Two conditions must be met for a non-atomic assertion to be useful: the
+contents of one or more capturing groups must change after a backtrack into the
+assertion, and there must be a backreference to a changed group later in the
+pattern. If this is not the case, the rest of the pattern match fails exactly
+as before because nothing has changed, so using a non-atomic assertion just
+wastes resources.
+</P>
+<P>
+Non-atomic assertions are not supported by the alternative matching function
+<b>pcre2_dfa_match()</b>. They are also not supported by JIT (but may be in
+future). Note that assertions that appear as conditions for
+<a href="#conditions">conditional groups</a>
+(see below) must be atomic.
+</P>
+<br><a name="SEC22" href="#TOC1">SCRIPT RUNS</a><br>
 <P>
 In concept, a script run is a sequence of characters that are all from the same
 Unicode script such as Latin or Greek. However, because some scripts are
@@ -2669,7 +2729,7 @@ parentheses.
 should not be used within a script run group, because it causes an immediate
 exit from the group, bypassing the script run checking.
 <a name="conditions"></a></P>
-<br><a name="SEC22" href="#TOC1">CONDITIONAL GROUPS</a><br>
+<br><a name="SEC23" href="#TOC1">CONDITIONAL GROUPS</a><br>
 <P>
 It is possible to cause the matching process to obey a pattern fragment
 conditionally or to choose between two alternative fragments, depending on
@@ -2845,8 +2905,13 @@ Assertion conditions
 <P>
 If the condition is not in any of the above formats, it must be a parenthesized
 assertion. This may be a positive or negative lookahead or lookbehind
-assertion. Consider this pattern, again containing non-significant white space,
-and with the two alternatives on the second line:
+assertion. However, it must be a traditional atomic assertion, not one of the
+PCRE2-specific
+<a href="#nonatomicassertions">non-atomic assertions.</a>
+</P>
+<P>
+Consider this pattern, again containing non-significant white space, and with
+the two alternatives on the second line:
 <pre>
   (?(?=[^a-z]*[a-z])
   \d{2}-[a-z]{3}-\d{2}  |  \d{2}-\d{2}-\d{2} )
@@ -2865,7 +2930,7 @@ positive and negative assertions, because matching always continues after the
 assertion, whether it succeeds or fails. (Compare non-conditional assertions,
 for which captures are retained only for positive assertions that succeed.)
 <a name="comments"></a></P>
-<br><a name="SEC23" href="#TOC1">COMMENTS</a><br>
+<br><a name="SEC24" href="#TOC1">COMMENTS</a><br>
 <P>
 There are two ways of including comments in patterns that are processed by
 PCRE2. In both cases, the start of the comment must not be in a character
@@ -2895,7 +2960,7 @@ a newline in the pattern. The sequence \n is still literal at this stage, so
 it does not terminate the comment. Only an actual character with the code value
 0x0a (the default newline) does so.
 <a name="recursion"></a></P>
-<br><a name="SEC24" href="#TOC1">RECURSIVE PATTERNS</a><br>
+<br><a name="SEC25" href="#TOC1">RECURSIVE PATTERNS</a><br>
 <P>
 Consider the problem of matching a string in parentheses, allowing for
 unlimited nested parentheses. Without the use of recursion, the best that can
@@ -3083,7 +3148,7 @@ alternative matches "a" and then recurses. In the recursion, \1 does now match
 "b" and so the whole match succeeds. This match used to fail in Perl, but in
 later versions (I tried 5.024) it now works.
 <a name="groupsassubroutines"></a></P>
-<br><a name="SEC25" href="#TOC1">GROUPS AS SUBROUTINES</a><br>
+<br><a name="SEC26" href="#TOC1">GROUPS AS SUBROUTINES</a><br>
 <P>
 If the syntax for a recursive group call (either by number or by name) is used
 outside the parentheses to which it refers, it operates a bit like a subroutine
@@ -3131,7 +3196,7 @@ in groups when called as subroutines is described in the section entitled
 <a href="#btsub">"Backtracking verbs in subroutines"</a>
 below.
 <a name="onigurumasubroutines"></a></P>
-<br><a name="SEC26" href="#TOC1">ONIGURUMA SUBROUTINE SYNTAX</a><br>
+<br><a name="SEC27" href="#TOC1">ONIGURUMA SUBROUTINE SYNTAX</a><br>
 <P>
 For compatibility with Oniguruma, the non-Perl syntax \g followed by a name or
 a number enclosed either in angle brackets or single quotes, is an alternative
@@ -3149,7 +3214,7 @@ plus or a minus sign it is taken as a relative reference. For example:
 Note that \g{...} (Perl syntax) and \g&#60;...&#62; (Oniguruma syntax) are <i>not</i>
 synonymous. The former is a backreference; the latter is a subroutine call.
 </P>
-<br><a name="SEC27" href="#TOC1">CALLOUTS</a><br>
+<br><a name="SEC28" href="#TOC1">CALLOUTS</a><br>
 <P>
 Perl has a feature whereby using the sequence (?{...}) causes arbitrary Perl
 code to be obeyed in the middle of matching a regular expression. This makes it
@@ -3225,7 +3290,7 @@ example:
 </pre>
 The doubling is removed before the string is passed to the callout function.
 <a name="backtrackcontrol"></a></P>
-<br><a name="SEC28" href="#TOC1">BACKTRACKING CONTROL</a><br>
+<br><a name="SEC29" href="#TOC1">BACKTRACKING CONTROL</a><br>
 <P>
 There are a number of special "Backtracking Control Verbs" (to use Perl's
 terminology) that modify the behaviour of backtracking during matching. They
@@ -3739,12 +3804,12 @@ enclosing group that has alternatives (its normal behaviour). However, if there
 is no such group within the subroutine's group, the subroutine match fails and
 there is a backtrack at the outer level.
 </P>
-<br><a name="SEC29" href="#TOC1">SEE ALSO</a><br>
+<br><a name="SEC30" href="#TOC1">SEE ALSO</a><br>
 <P>
 <b>pcre2api</b>(3), <b>pcre2callout</b>(3), <b>pcre2matching</b>(3),
 <b>pcre2syntax</b>(3), <b>pcre2</b>(3).
 </P>
-<br><a name="SEC30" href="#TOC1">AUTHOR</a><br>
+<br><a name="SEC31" href="#TOC1">AUTHOR</a><br>
 <P>
 Philip Hazel
 <br>
@@ -3753,9 +3818,9 @@ University Computing Service
 Cambridge, England.
 <br>
 </P>
-<br><a name="SEC31" href="#TOC1">REVISION</a><br>
+<br><a name="SEC32" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 22 June 2019
+Last updated: 13 July 2019
 <br>
 Copyright &copy; 1997-2019 University of Cambridge.
 <br>

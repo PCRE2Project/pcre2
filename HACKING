@@ -195,6 +195,7 @@ META_END              End of pattern (this value is 0x80000000)
 META_FAIL             (*FAIL)
 META_KET              ) closing parenthesis
 META_LOOKAHEAD        (?= start of lookahead
+META_LOOKAHEAD_NA     (*napla: start of non-atomic lookahead
 META_LOOKAHEADNOT     (?! start of negative lookahead
 META_NOCAPTURE        (?: no capture parens
 META_PLUS             +
@@ -286,8 +287,9 @@ The following are also followed just by an offset, but also the lower 16 bits
 of the main word contain the length of the first branch of the lookbehind
 group; this is used when generating OP_REVERSE for that branch.
 
-META_LOOKBEHIND       (?<=
-META_LOOKBEHINDNOT    (?<!
+META_LOOKBEHIND       (?<=      start of lookbehind
+META_LOOKBEHIND_NA    (*naplb:  start of non-atomic lookbehind
+META_LOOKBEHINDNOT    (?<!      start of negative lookbehind
 
 The following are followed by two elements, the minimum and maximum. Repeat
 values are limited to 65535 (MAX_REPEAT). A maximum value of "unlimited" is
@@ -715,13 +717,15 @@ Assertions
 ----------
 
 Forward assertions are also just like other subpatterns, but starting with one
-of the opcodes OP_ASSERT or OP_ASSERT_NOT. Backward assertions use the opcodes
-OP_ASSERTBACK and OP_ASSERTBACK_NOT, and the first opcode inside the assertion
-is OP_REVERSE, followed by a count of the number of characters to move back the
-pointer in the subject string. In ASCII or UTF-32 mode, the count is also the
-number of code units, but in UTF-8/16 mode each character may occupy more than
-one code unit. A separate count is present in each alternative of a lookbehind
-assertion, allowing them to have different (but fixed) lengths.
+of the opcodes OP_ASSERT, OP_ASSERT_NA (non-atomic assertion), or
+OP_ASSERT_NOT. Backward assertions use the opcodes OP_ASSERTBACK, 
+OP_ASSERTBACK_NA, and OP_ASSERTBACK_NOT, and the first opcode inside the
+assertion is OP_REVERSE, followed by a count of the number of characters to
+move back the pointer in the subject string. In ASCII or UTF-32 mode, the count
+is also the number of code units, but in UTF-8/16 mode each character may
+occupy more than one code unit. A separate count is present in each alternative
+of a lookbehind assertion, allowing each branch to have a different (but fixed)
+length.
 
 
 Conditional subpatterns
@@ -754,11 +758,11 @@ tests the PCRE2 version number. This compiles into one of the opcodes OP_TRUE
 or OP_FALSE.
 
 If a condition is not a back reference, recursion test, DEFINE, or VERSION, it
-must start with a parenthesized assertion, whose opcode normally immediately
-follows OP_COND or OP_SCOND. However, if automatic callouts are enabled, a
-callout is inserted immediately before the assertion. It is also possible to
-insert a manual callout at this point. Only assertion conditions may have
-callouts preceding the condition.
+must start with a parenthesized atomic assertion, whose opcode normally
+immediately follows OP_COND or OP_SCOND. However, if automatic callouts are
+enabled, a callout is inserted immediately before the assertion. It is also
+possible to insert a manual callout at this point. Only assertion conditions
+may have callouts preceding the condition.
 
 A condition that is the negative assertion (?!) is optimized to OP_FAIL in all
 parts of the pattern, so this is another opcode that may appear as a condition.
@@ -823,4 +827,4 @@ not a real opcode, but is used to check at compile time that tables indexed by
 opcode are the correct length, in order to catch updating errors.
 
 Philip Hazel
-20 July 2018
+12 July 2019

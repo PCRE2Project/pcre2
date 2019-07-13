@@ -11117,7 +11117,7 @@ Matched, but too many substrings
 ------------------------------------------------------------------
         Bra
         Brazero
-        AssertB
+        Assert back
         Reverse
         CBra 1
         abc
@@ -13346,7 +13346,7 @@ Failed: error 144 at offset 5: subpattern name must start with a non-digit
         Ket
         red
         \b
-        AssertB
+        Assert back
         Reverse
         \w
         Ket
@@ -13403,7 +13403,7 @@ Failed: error 133 at offset 7: parentheses are too deeply nested (stack check)
         Once
         \s*+
         Ket
-        AssertB
+        Assert back
         Reverse
         \w
         Ket
@@ -16619,7 +16619,7 @@ No match
 /(?<=(?=.){4,5}x)/B
 ------------------------------------------------------------------
         Bra
-        AssertB
+        Assert back
         Reverse
         Assert
         Any
@@ -17085,6 +17085,87 @@ Failed: error 187 at offset 15: lookbehind assertion is too long
 # Multiplication overflow
 /(X{65535})(?<=\1{32770})/
 Failed: error 187 at offset 10: lookbehind assertion is too long
+
+# ---- Non-atomic assertion tests ----
+
+# Expect error: not allowed as a condition
+/(?(*napla:xx)bc)/
+Failed: error 198 at offset 9: atomic assertion expected after (?( or (?(?C)
+
+/\A(*pla:.*\b(\w++))(?>.*?\b\1\b){3}/
+    word1 word3 word1 word2 word3 word2 word2 word1 word3 word4
+No match
+
+/\A(*napla:.*\b(\w++))(?>.*?\b\1\b){3}/
+    word1 word3 word1 word2 word3 word2 word2 word1 word3 word4
+ 0: word1 word3 word1 word2 word3 word2 word2 word1 word3
+ 1: word3
+
+/(*plb:(.)..|(.)...)(\1|\2)/
+    abcdb\=offset=4 
+ 0: b
+ 1: b
+ 2: <unset>
+ 3: b
+    abcda\=offset=4 
+No match
+
+/(*naplb:(.)..|(.)...)(\1|\2)/
+    abcdb\=offset=4 
+ 0: b
+ 1: b
+ 2: <unset>
+ 3: b
+    abcda\=offset=4 
+ 0: a
+ 1: <unset>
+ 2: a
+ 3: a
+    
+/(*non_atomic_positive_lookahead:ab)/B
+------------------------------------------------------------------
+        Bra
+        Non-atomic assert
+        ab
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+ 
+/(*non_atomic_positive_lookbehind:ab)/B 
+------------------------------------------------------------------
+        Bra
+        Non-atomic assert back
+        Reverse
+        ab
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+
+/(*pla:ab+)/B
+------------------------------------------------------------------
+        Bra
+        Assert
+        a
+        b++
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+
+/(*napla:ab+)/B
+------------------------------------------------------------------
+        Bra
+        Non-atomic assert
+        a
+        b+
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+
+# ----
 
 # End of testinput2
 Error -70: PCRE2_ERROR_BADDATA (unknown error number)

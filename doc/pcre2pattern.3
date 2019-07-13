@@ -1,4 +1,4 @@
-.TH PCRE2PATTERN 3 "22 June 2019" "PCRE2 10.34"
+.TH PCRE2PATTERN 3 "13 July 2019" "PCRE2 10.34"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION DETAILS"
@@ -2370,18 +2370,25 @@ those that look behind it, and in each case an assertion may be positive (must
 match for the assertion to be true) or negative (must not match for the
 assertion to be true). An assertion group is matched in the normal way,
 and if it is true, matching continues after it, but with the matching position
-in the subject string is was it was before the assertion was processed.
+in the subject string reset to what it was before the assertion was processed.
 .P
-A lookaround assertion may also appear as the condition in a
+The Perl-compatible lookaround assertions are atomic. If an assertion is true,
+but there is a subsequent matching failure, there is no backtracking into the
+assertion. However, there are some cases where non-atomic assertions can be 
+useful. PCRE2 has some support for these, described in the section entitled
+.\" HTML <a href="#nonatomicassertions">
+.\" </a>
+"Non-atomic assertions"
+.\"
+below, but they are not Perl-compatible.
+.P
+A lookaround assertion may appear as the condition in a
 .\" HTML <a href="#conditions">
 .\" </a>
 conditional group
 .\"
 (see below). In this case, the result of matching the assertion determines
 which branch of the condition is followed.
-.P
-Lookaround assertions are atomic. If an assertion is true, but there is a
-subsequent matching failure, there is no backtracking into the assertion.
 .P
 Assertion groups are not capture groups. If an assertion contains capture
 groups within it, these are counted for the purposes of numbering the capture
@@ -2435,11 +2442,11 @@ The assertion is obeyed just once when encountered during matching.
 .SS "Alphabetic assertion names"
 .rs
 .sp
-Traditionally, symbolic sequences such as (?= and (?<= have been used to specify
-lookaround assertions. Perl 5.28 introduced some experimental alphabetic
-alternatives which might be easier to remember. They all start with (* instead
-of (? and must be written using lower case letters. PCRE2 supports the
-following synonyms:
+Traditionally, symbolic sequences such as (?= and (?<= have been used to
+specify lookaround assertions. Perl 5.28 introduced some experimental
+alphabetic alternatives which might be easier to remember. They all start with
+(* instead of (? and must be written using lower case letters. PCRE2 supports
+the following synonyms:
 .sp
   (*positive_lookahead:  or (*pla: is the same as (?=
   (*negative_lookahead:  or (*nla: is the same as (?!
@@ -2614,6 +2621,63 @@ preceded by "foo", while
 .sp
 is another pattern that matches "foo" preceded by three digits and any three
 characters that are not "999".
+.
+.
+.\" HTML <a name="nonatomicassertions"></a>
+.SH "NON-ATOMIC ASSERTIONS"
+.rs
+.sp
+The traditional Perl-compatible lookaround assertions are atomic. That is, if
+an assertion is true, but there is a subsequent matching failure, there is no
+backtracking into the assertion. However, there are some cases where non-atomic
+positive assertions can be useful. PCRE2 provides these using the following 
+syntax:
+.sp
+  (*non_atomic_positive_lookahead:  or (*napla:
+  (*non_atomic_positive_lookbehind: or (*naplb: 
+.sp
+Consider the problem of finding the right-most word in a string that also
+appears earlier in the string, that is, it must appear at least twice in total.
+This pattern returns the required result as captured substring 1:
+.sp
+  ^(?x)(*napla: .* \eb(\ew++)) (?> .*? \eb\e1\eb ){2}
+.sp
+For a subject such as "word1 word2 word3 word2 word3 word4" the result is 
+"word3". How does it work? At the start, ^(?x) anchors the pattern and sets the 
+"x" option, which causes white space (introduced for readability) to be
+ignored. Inside the assertion, the greedy .* at first consumes the entire
+string, but then has to backtrack until the rest of the assertion can match a
+word, which is captured by group 1. In other words, when the assertion first
+succeeds, it captures the right-most word in the string.
+.P
+The current matching point is then reset to the start of the subject, and the
+rest of the pattern match checks for two occurrences of the captured word, 
+using an ungreedy .*? to scan from the left. If this succeeds, we are done, but 
+if the last word in the string does not occur twice, this part of the pattern 
+fails. If a traditional atomic lookhead (?= or (*pla: had been used, the
+assertion could not be re-entered, and the whole match would fail. The pattern
+would succeed only if the very last word in the subject was found twice.
+.P
+Using a non-atomic lookahead, however, means that when the last word does not
+occur twice in the string, the lookahead can backtrack and find the second-last
+word, and so on, until either the match succeeds, or all words have been
+tested.
+.P
+Two conditions must be met for a non-atomic assertion to be useful: the
+contents of one or more capturing groups must change after a backtrack into the
+assertion, and there must be a backreference to a changed group later in the
+pattern. If this is not the case, the rest of the pattern match fails exactly
+as before because nothing has changed, so using a non-atomic assertion just
+wastes resources.
+.P
+Non-atomic assertions are not supported by the alternative matching function
+\fBpcre2_dfa_match()\fP. They are also not supported by JIT (but may be in
+future). Note that assertions that appear as conditions for
+.\" HTML <a href="#conditions">
+.\" </a>
+conditional groups
+.\"
+(see below) must be atomic.
 .
 .
 .SH "SCRIPT RUNS"
@@ -2867,8 +2931,15 @@ than two digits.
 .sp
 If the condition is not in any of the above formats, it must be a parenthesized
 assertion. This may be a positive or negative lookahead or lookbehind
-assertion. Consider this pattern, again containing non-significant white space,
-and with the two alternatives on the second line:
+assertion. However, it must be a traditional atomic assertion, not one of the
+PCRE2-specific
+.\" HTML <a href="#nonatomicassertions">
+.\" </a>
+non-atomic assertions.
+.\"
+.P
+Consider this pattern, again containing non-significant white space, and with
+the two alternatives on the second line:
 .sp
   (?(?=[^a-z]*[a-z])
   \ed{2}-[a-z]{3}-\ed{2}  |  \ed{2}-\ed{2}-\ed{2} )
@@ -3788,6 +3859,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 22 June 2019
+Last updated: 13 July 2019
 Copyright (c) 1997-2019 University of Cambridge.
 .fi

@@ -4017,7 +4017,7 @@ MK: a\x{12345}b\x{09}(d)c
 ------------------------------------------------------------------
         Bra
         \b
-        AssertB
+        Assert back
         Reverse
         prop Xwd
         Ket
@@ -4196,7 +4196,7 @@ Failed: error 125 at offset 2: lookbehind assertion is not fixed length
 ------------------------------------------------------------------
         Bra
         ^
-        AssertB not
+        Assert back not
         Assert
         \x{10385c}
         Ket
@@ -4828,7 +4828,7 @@ MK: ABC
 /(?<!)(*sr:)/B
 ------------------------------------------------------------------
         Bra
-        AssertB not
+        Assert back not
         Ket
         Script run
         Ket
@@ -4839,7 +4839,7 @@ MK: ABC
 /(?<=abc(?=X(*sr:BXY)CCC)XBXYCCC)./B
 ------------------------------------------------------------------
         Bra
-        AssertB
+        Assert back
         Reverse
         abc
         Assert

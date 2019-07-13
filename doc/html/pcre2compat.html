@@ -205,6 +205,11 @@ different way and is not Perl-compatible.
 (l) PCRE2 recognizes some special sequences such as (*CR) or (*NO_JIT) at
 the start of a pattern that set overall options that cannot be changed within
 the pattern.
+<br>
+<br>
+(m) PCRE2 supports non-atomic positive lookaround assertions. This is an 
+extension to the lookaround facilities. The default, Perl-compatible
+lookarounds are atomic.
 </P>
 <P>
 18. The Perl /a modifier restricts /d numbers to pure ascii, and the /aa
@@ -234,7 +239,7 @@ Cambridge, England.
 REVISION
 </b><br>
 <P>
-Last updated: 12 February 2019
+Last updated: 13 July 2019
 <br>
 Copyright &copy; 1997-2019 University of Cambridge.
 <br>
