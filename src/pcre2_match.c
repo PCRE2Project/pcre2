@@ -498,12 +498,13 @@ matching, we then return immediately. The second one is used when we already
 know we are past the end of the subject. */
 
 #define CHECK_PARTIAL()\
-  if (mb->partial != 0 && Feptr >= mb->end_subject && \
-      Feptr > mb->start_used_ptr) \
+  if (Feptr >= mb->end_subject) \
     { \
-    mb->hitend = TRUE; \
-    if (mb->partial > 1) return PCRE2_ERROR_PARTIAL; \
+    SCHECK_PARTIAL(); \
     }
+
+/* Original version that allows hard partial to continue if no inspected
+characters. */
 
 #define SCHECK_PARTIAL()\
   if (mb->partial != 0 && Feptr > mb->start_used_ptr) \
@@ -511,6 +512,22 @@ know we are past the end of the subject. */
     mb->hitend = TRUE; \
     if (mb->partial > 1) return PCRE2_ERROR_PARTIAL; \
     }
+
+/* Experimental version that makes hard partial give no match instead of
+continuing if no characters have been inspected. */
+
+#ifdef NEVERNEVER
+#define SCHECK_PARTIAL()\
+  if (mb->partial != 0) \
+    { \
+    if (Feptr > mb->start_used_ptr) \
+      { \
+      mb->hitend = TRUE; \
+      if (mb->partial > 1) return PCRE2_ERROR_PARTIAL; \
+      } \
+    else if (mb->partial > 1) RRETURN(MATCH_NOMATCH); \
+    }
+#endif  /* NEVERNEVER */
 
 /* These macros are used to implement backtracking. They simulate a recursive
 call to the match() function by means of a local vector of frames which
@@ -6721,7 +6738,7 @@ for(;;)
         we also let the cycle run, because the matching string is legitimately
         allowed to start with the first code unit of a newline. */
 
-        if (!mb->partial && start_match >= mb->end_subject)
+        if (mb->partial == 0 && start_match >= mb->end_subject)
           {
           rc = MATCH_NOMATCH;
           break;
@@ -6780,7 +6797,7 @@ for(;;)
 
         /* See comment above in first_cu checking about the next few lines. */
 
-        if (!mb->partial && start_match >= mb->end_subject)
+        if (mb->partial == 0 && start_match >= mb->end_subject)
           {
           rc = MATCH_NOMATCH;
           break;
@@ -6794,7 +6811,7 @@ for(;;)
 
     /* The following two optimizations must be disabled for partial matching. */
 
-    if (!mb->partial)
+    if (mb->partial == 0)
       {
       PCRE2_SPTR p;
 
