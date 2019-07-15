@@ -4738,6 +4738,7 @@ for (;;)
     case OP_ASSERT_NOT:
     case OP_ASSERTBACK:
     case OP_ASSERTBACK_NOT:
+    case OP_ASSERTBACK_NA: 
     if (!skipassert) return code;
     do code += GET(code, 1); while (*code == OP_ALT);
     code += PRIV(OP_lengths)[*code];
@@ -6428,7 +6429,7 @@ for (;; pptr++)
 
     /* If we've just compiled an assertion, pop the assert depth. */
 
-    if (bravalue >= OP_ASSERT && bravalue <= OP_ASSERTBACK_NOT)
+    if (bravalue >= OP_ASSERT && bravalue <= OP_ASSERTBACK_NA)
       cb->assert_depth -= 1;
 
     /* At the end of compiling, code is still pointing to the start of the
@@ -6578,8 +6579,8 @@ for (;; pptr++)
     we must only take the reqcu when the group also set a firstcu. Otherwise,
     in that example, 'X' ends up set for both. */
 
-    else if (bravalue == OP_ASSERT && subreqcuflags >= 0 &&
-             subfirstcuflags >= 0)
+    else if ((bravalue == OP_ASSERT || bravalue == OP_ASSERT_NA) && 
+             subreqcuflags >= 0 && subfirstcuflags >= 0)
       {
       reqcu = subreqcu;
       reqcuflags = subreqcuflags;
@@ -7013,8 +7014,10 @@ for (;; pptr++)
 
       case OP_ASSERT:
       case OP_ASSERT_NOT:
+      case OP_ASSERT_NA: 
       case OP_ASSERTBACK:
       case OP_ASSERTBACK_NOT:
+      case OP_ASSERTBACK_NA: 
       case OP_ONCE:
       case OP_SCRIPT_RUN:
       case OP_BRA:
@@ -8266,7 +8269,7 @@ do {
 
    /* Positive forward assertion */
 
-   else if (op == OP_ASSERT)
+   else if (op == OP_ASSERT || op == OP_ASSERT_NA)
      {
      if (!is_anchored(scode, bracket_map, cb, atomcount, TRUE)) return FALSE;
      }
@@ -8404,7 +8407,7 @@ do {
 
    /* Positive forward assertions */
 
-   else if (op == OP_ASSERT)
+   else if (op == OP_ASSERT || op == OP_ASSERT_NA)
      {
      if (!is_startline(scode, bracket_map, cb, atomcount, TRUE))
        return FALSE;
@@ -8646,9 +8649,11 @@ do {
      case OP_CBRAPOS:
      case OP_SCBRAPOS:
      case OP_ASSERT:
+     case OP_ASSERT_NA: 
      case OP_ONCE:
      case OP_SCRIPT_RUN:
-     d = find_firstassertedcu(scode, &dflags, inassert + ((op==OP_ASSERT)?1:0));
+     d = find_firstassertedcu(scode, &dflags, inassert + 
+       ((op == OP_ASSERT || op == OP_ASSERT_NA)?1:0));
      if (dflags < 0)
        return 0;
      if (cflags < 0) { c = d; cflags = dflags; }

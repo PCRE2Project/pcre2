@@ -5680,6 +5680,14 @@ a)"xI
 
 /(*napla:ab+)/B
 
+/(*napla:)+/
+
+/(*naplb:)+/
+
+/(*napla:^x|^y)/I
+
+/(*napla:abc|abd)/I
+
 # ----
 
 # End of testinput2

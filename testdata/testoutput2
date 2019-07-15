@@ -17165,6 +17165,24 @@ No match
         End
 ------------------------------------------------------------------
 
+/(*napla:)+/
+
+/(*naplb:)+/
+
+/(*napla:^x|^y)/I
+Capture group count = 0
+May match empty string
+Compile options: <none>
+Overall options: anchored
+Starting code units: x y 
+Subject length lower bound = 0
+
+/(*napla:abc|abd)/I
+Capture group count = 0
+May match empty string
+First code unit = 'a'
+Subject length lower bound = 1
+
 # ----
 
 # End of testinput2
