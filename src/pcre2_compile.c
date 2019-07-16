@@ -10416,6 +10416,12 @@ if ((re->overall_options & PCRE2_NO_START_OPTIMIZE) == 0)
     errorcode = ERR31;
     goto HAD_CB_ERROR;
     }
+    
+  /* If study() set a bitmap of starting code units, it implies a minimum 
+  length of at least one. */
+    
+  if ((re->flags & PCRE2_FIRSTMAPSET) != 0 && minminlength == 0)
+    minminlength = 1; 
 
   /* If the minimum length set (or not set) by study() is less than the minimum
   implied by required code units, override it. */
