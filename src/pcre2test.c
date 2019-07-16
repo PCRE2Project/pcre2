@@ -3269,7 +3269,7 @@ return 0;
 
 
 
-/* This function is no longer used. Keep it around for a while, just in case it 
+/* This function is no longer used. Keep it around for a while, just in case it
 needs to be re-instated. */
 
 #ifdef NEVERNEVERNEVER
@@ -8662,7 +8662,7 @@ while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
         {
         fprintf(stderr, "** Argument for %s must not be zero\n", arg);
         exit(1);
-        }    
+        }
       if (U32OVERFLOW(uli))
         {
         fprintf(stderr, "** Argument for %s is too big\n", arg);
@@ -8820,8 +8820,8 @@ least 128 code units, because it is used for retrieving error messages. */
   }  /* End of -error handling */
 
 /* Initialize things that cannot be done until we know which test mode we are
-running in. Exercise the general context copying function, which is not
-otherwise used. */
+running in. Exercise the general context copying and match data size functions,
+which are not otherwise used. */
 
 code_unit_size = test_mode/8;
 max_oveccount = DEFAULT_OVECCOUNT;
@@ -8843,7 +8843,9 @@ max_oveccount = DEFAULT_OVECCOUNT;
   (void)G(pcre2_set_compile_extra_options_,BITS)(G(pat_context,BITS), 0); \
   (void)G(pcre2_set_max_pattern_length_,BITS)(G(pat_context,BITS), 0); \
   (void)G(pcre2_set_offset_limit_,BITS)(G(dat_context,BITS), 0); \
-  (void)G(pcre2_set_recursion_memory_management_,BITS)(G(dat_context,BITS), my_malloc, my_free, NULL)
+  (void)G(pcre2_set_recursion_memory_management_,BITS)(G(dat_context,BITS), my_malloc, my_free, NULL); \
+  (void)G(pcre2_get_match_data_size_,BITS)(G(match_data,BITS))
+
 
 /* Call the appropriate functions for the current mode, and exercise some
 functions that are not otherwise called. */

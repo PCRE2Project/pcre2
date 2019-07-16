@@ -146,6 +146,9 @@ in the library.
 <tr><td><a href="pcre2_get_mark.html">pcre2_get_mark</a></td>
     <td>&nbsp;&nbsp;Get a (*MARK) name</td></tr>
 
+<tr><td><a href="pcre2_get_match_data_size.html">pcre2_get_match_data_size</a></td>
+    <td>&nbsp;&nbsp;Get the size of a match data block</td></tr>
+
 <tr><td><a href="pcre2_get_ovector_count.html">pcre2_get_ovector_count</a></td>
     <td>&nbsp;&nbsp;Get the ovector count</td></tr>
 

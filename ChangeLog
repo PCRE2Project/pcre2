@@ -88,12 +88,14 @@ otherwise), an atomic group, or a recursion.
 17. Check for integer overflow when computing lookbehind lengths. Fixes 
 Clusterfuzz issue 15636.
 
-18. Implement non-atomic positive lookaround assertions.
+18. Implemented non-atomic positive lookaround assertions.
 
 19. If a lookbehind contained a lookahead that contained another lookbehind
 within it, the nested lookbehind was not correctly processed. For example, if 
 /(?<=(?=(?<=a)))b/ was matched to "ab" it gave no match instead of matching 
 "b".
+
+20. Implemented pcre2_get_match_data_size().
 
 
 Version 10.33 16-April-2019
