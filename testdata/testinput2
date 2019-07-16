@@ -5690,4 +5690,7 @@ a)"xI
 
 # ----
 
+/(?<=(?=.(?<=x)))/
+    ab\=ph
+
 # End of testinput2

@@ -10097,4 +10097,13 @@ No match
     abcd
  0: d
  
+/(?<=(?=.(?<=x)))/aftertext
+    abx
+ 0: 
+ 0+ x
+
+/(?<=(?=(?<=a)))b/
+    ab
+ 0: b
+
 # End of testinput1 

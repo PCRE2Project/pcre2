@@ -135,6 +135,8 @@ static BOOL
   set_lookbehind_lengths(uint32_t **, int *, int *, int *,
     parsed_recurse_check *, compile_block *);
 
+static int
+  check_lookbehinds(uint32_t *, uint32_t **, compile_block *);
 
 
 /*************************************************
@@ -651,7 +653,7 @@ static const char alasnames[] =
   STRING_positive_lookahead0
   STRING_positive_lookbehind0
   STRING_non_atomic_positive_lookahead0
-  STRING_non_atomic_positive_lookbehind0  
+  STRING_non_atomic_positive_lookbehind0
   STRING_negative_lookahead0
   STRING_negative_lookbehind0
   STRING_atomic0
@@ -670,7 +672,7 @@ static const alasitem alasmeta[] = {
   { 18, META_LOOKAHEAD         },
   { 19, META_LOOKBEHIND        },
   { 29, META_LOOKAHEAD_NA      },
-  { 30, META_LOOKBEHIND_NA     }, 
+  { 30, META_LOOKBEHIND_NA     },
   { 18, META_LOOKAHEADNOT      },
   { 19, META_LOOKBEHINDNOT     },
   {  6, META_ATOMIC            },
@@ -4738,7 +4740,7 @@ for (;;)
     case OP_ASSERT_NOT:
     case OP_ASSERTBACK:
     case OP_ASSERTBACK_NOT:
-    case OP_ASSERTBACK_NA: 
+    case OP_ASSERTBACK_NA:
     if (!skipassert) return code;
     do code += GET(code, 1); while (*code == OP_ALT);
     code += PRIV(OP_lengths)[*code];
@@ -6579,7 +6581,7 @@ for (;; pptr++)
     we must only take the reqcu when the group also set a firstcu. Otherwise,
     in that example, 'X' ends up set for both. */
 
-    else if ((bravalue == OP_ASSERT || bravalue == OP_ASSERT_NA) && 
+    else if ((bravalue == OP_ASSERT || bravalue == OP_ASSERT_NA) &&
              subreqcuflags >= 0 && subfirstcuflags >= 0)
       {
       reqcu = subreqcu;
@@ -7014,10 +7016,10 @@ for (;; pptr++)
 
       case OP_ASSERT:
       case OP_ASSERT_NOT:
-      case OP_ASSERT_NA: 
+      case OP_ASSERT_NA:
       case OP_ASSERTBACK:
       case OP_ASSERTBACK_NOT:
-      case OP_ASSERTBACK_NA: 
+      case OP_ASSERTBACK_NA:
       case OP_ONCE:
       case OP_SCRIPT_RUN:
       case OP_BRA:
@@ -7973,7 +7975,7 @@ length = 2 + 2*LINK_SIZE + skipunits;
 /* Remember if this is a lookbehind assertion, and if it is, save its length
 and skip over the pattern offset. */
 
-lookbehind = *code == OP_ASSERTBACK || 
+lookbehind = *code == OP_ASSERTBACK ||
              *code == OP_ASSERTBACK_NOT ||
              *code == OP_ASSERTBACK_NA;
 
@@ -8649,10 +8651,10 @@ do {
      case OP_CBRAPOS:
      case OP_SCBRAPOS:
      case OP_ASSERT:
-     case OP_ASSERT_NA: 
+     case OP_ASSERT_NA:
      case OP_ONCE:
      case OP_SCRIPT_RUN:
-     d = find_firstassertedcu(scode, &dflags, inassert + 
+     d = find_firstassertedcu(scode, &dflags, inassert +
        ((op == OP_ASSERT || op == OP_ASSERT_NA)?1:0));
      if (dflags < 0)
        return 0;
@@ -9108,16 +9110,16 @@ for (;; pptr++)
       }
     break;
 
-    /* Lookaheads can be ignored, but we must start the skip inside the group
-    so that it isn't treated as a group within the branch. */
+    /* Lookaheads do not contribute to the length of this branch, but they may
+    contain lookbehinds within them whose lengths need to be set. */
 
     case META_LOOKAHEAD:
     case META_LOOKAHEADNOT:
     case META_LOOKAHEAD_NA:
-    pptr = parsed_skip(pptr + 1, PSKIP_KET);
-    if (pptr == NULL) goto PARSED_SKIP_FAILED;
+    *errcodeptr = check_lookbehinds(pptr + 1, &pptr, cb);
+    if (*errcodeptr != 0) return -1;
 
-    /* Also ignore any qualifiers that follow a lookahead assertion. */
+    /* Ignore any qualifiers that follow a lookahead assertion. */
 
     switch (pptr[1])
       {
@@ -9454,21 +9456,29 @@ set_lookbehind_lengths() for each one. At the start, the errorcode is zero and
 the error offset is marked unset. The enables the functions above not to
 override settings from deeper nestings.
 
-Arguments cb      points to the compile block
-Returns:          0 on success, or an errorcode (cb->erroroffset will be set)
+This function is called recursively from get_branchlength() for lookaheads in
+order to process any lookbehinds that they may contain. It stops when it hits a
+non-nested closing parenthesis in this case, returning a pointer to it.
+
+Arguments
+  pptr    points to where to start (start of pattern or start of lookahead)
+  retptr  if not NULL, return the ket pointer here
+  cb      points to the compile block
+
+Returns:  0 on success, or an errorcode (cb->erroroffset will be set)
 */
 
 static int
-check_lookbehinds(compile_block *cb)
+check_lookbehinds(uint32_t *pptr, uint32_t **retptr, compile_block *cb)
 {
-uint32_t *pptr;
 int max;
 int errorcode = 0;
 int loopcount = 0;
+int nestlevel = 0;
 
 cb->erroroffset = PCRE2_UNSET;
 
-for (pptr = cb->parsed_pattern; *pptr != META_END; pptr++)
+for (; *pptr != META_END; pptr++)
   {
   if (*pptr < META_END) continue;  /* Literal */
 
@@ -9482,14 +9492,31 @@ for (pptr = cb->parsed_pattern; *pptr != META_END; pptr++)
       pptr += 1;
     break;
 
+    case META_KET:
+    if (--nestlevel < 0)
+      {
+      if (retptr != NULL) *retptr = pptr;
+      return 0;
+      }
+    break;
+
+    case META_ATOMIC:
+    case META_CAPTURE:
+    case META_COND_ASSERT:
+    case META_LOOKAHEAD:
+    case META_LOOKAHEADNOT:
+    case META_LOOKAHEAD_NA:
+    case META_NOCAPTURE:
+    case META_SCRIPT_RUN:
+    nestlevel++;
+    break;
+
     case META_ACCEPT:
     case META_ALT:
     case META_ASTERISK:
     case META_ASTERISK_PLUS:
     case META_ASTERISK_QUERY:
-    case META_ATOMIC:
     case META_BACKREF:
-    case META_CAPTURE:
     case META_CIRCUMFLEX:
     case META_CLASS:
     case META_CLASS_EMPTY:
@@ -9497,15 +9524,9 @@ for (pptr = cb->parsed_pattern; *pptr != META_END; pptr++)
     case META_CLASS_END:
     case META_CLASS_NOT:
     case META_COMMIT:
-    case META_COND_ASSERT:
     case META_DOLLAR:
     case META_DOT:
     case META_FAIL:
-    case META_KET:
-    case META_LOOKAHEAD:
-    case META_LOOKAHEADNOT:
-    case META_LOOKAHEAD_NA:
-    case META_NOCAPTURE:
     case META_PLUS:
     case META_PLUS_PLUS:
     case META_PLUS_QUERY:
@@ -9515,7 +9536,6 @@ for (pptr = cb->parsed_pattern; *pptr != META_END; pptr++)
     case META_QUERY_QUERY:
     case META_RANGE_ESCAPED:
     case META_RANGE_LITERAL:
-    case META_SCRIPT_RUN:
     case META_SKIP:
     case META_THEN:
     break;
@@ -10021,7 +10041,7 @@ lengths. */
 
 if (has_lookbehind)
   {
-  errorcode = check_lookbehinds(&cb);
+  errorcode = check_lookbehinds(cb.parsed_pattern, NULL, &cb);
   if (errorcode != 0) goto HAD_CB_ERROR;
   }
 

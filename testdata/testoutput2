@@ -17185,6 +17185,10 @@ Subject length lower bound = 1
 
 # ----
 
+/(?<=(?=.(?<=x)))/
+    ab\=ph
+No match
+
 # End of testinput2
 Error -70: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

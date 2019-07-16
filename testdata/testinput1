@@ -6377,4 +6377,10 @@ ef) x/x,mark
 /(?<=a(*SKIP)x)|d/
     abcd
  
+/(?<=(?=.(?<=x)))/aftertext
+    abx
+
+/(?<=(?=(?<=a)))b/
+    ab
+
 # End of testinput1 
