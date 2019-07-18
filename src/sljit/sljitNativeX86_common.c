@@ -611,15 +611,15 @@ SLJIT_API_FUNC_ATTRIBUTE void* sljit_generate_code(struct sljit_compiler *compil
 	put_label = compiler->put_labels;
 	while (put_label) {
 #if (defined SLJIT_CONFIG_X86_32 && SLJIT_CONFIG_X86_32)
-		sljit_unaligned_store_sw((void*)put_label->addr - sizeof(sljit_sw), (sljit_sw)put_label->label->addr);
+		sljit_unaligned_store_sw((void*)(put_label->addr - sizeof(sljit_sw)), (sljit_sw)put_label->label->addr);
 #else
 		if (put_label->flags & PATCH_MD) {
 			SLJIT_ASSERT(put_label->label->addr > HALFWORD_MAX);
-			sljit_unaligned_store_sw((void*)put_label->addr - sizeof(sljit_sw), (sljit_sw)put_label->label->addr);
+			sljit_unaligned_store_sw((void*)(put_label->addr - sizeof(sljit_sw)), (sljit_sw)put_label->label->addr);
 		}
 		else {
 			SLJIT_ASSERT(put_label->label->addr <= HALFWORD_MAX);
-			sljit_unaligned_store_s32((void*)put_label->addr - sizeof(sljit_s32), (sljit_s32)put_label->label->addr);
+			sljit_unaligned_store_s32((void*)(put_label->addr - sizeof(sljit_s32)), (sljit_s32)put_label->label->addr);
 		}
 #endif
 

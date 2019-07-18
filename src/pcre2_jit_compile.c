@@ -213,12 +213,6 @@ typedef struct stub_list {
   struct stub_list *next;
 } stub_list;
 
-typedef struct label_addr_list {
-  struct sljit_label *label;
-  sljit_uw *update_addr;
-  struct label_addr_list *next;
-} label_addr_list;
-
 enum frame_types {
   no_frame = -1,
   no_stack = -2
@@ -272,6 +266,8 @@ typedef struct bracket_backtrack {
     assert_backtrack *assert;
     /* For OP_ONCE. Less than 0 if not needed. */
     int framesize;
+    /* For brackets with >3 alternatives. */
+    struct sljit_put_label *matching_put_label;
   } u;
   /* Points to our private memory word on the stack. */
   int private_data_ptr;
@@ -455,7 +451,6 @@ typedef struct compiler_common {
   struct sljit_label *accept_label;
   struct sljit_label *ff_newline_shortcut;
   stub_list *stubs;
-  label_addr_list *label_addrs;
   recurse_entry *entries;
   recurse_entry *currententry;
   jump_list *partialmatch;
@@ -2847,20 +2842,6 @@ while (list_item)
   list_item = list_item->next;
   }
 common->stubs = NULL;
-}
-
-static void add_label_addr(compiler_common *common, sljit_uw *update_addr)
-{
-DEFINE_COMPILER;
-label_addr_list *label_addr;
-
-label_addr = sljit_alloc_memory(compiler, sizeof(label_addr_list));
-if (label_addr == NULL)
-  return;
-label_addr->label = LABEL();
-label_addr->update_addr = update_addr;
-label_addr->next = common->label_addrs;
-common->label_addrs = label_addr;
 }
 
 static SLJIT_INLINE void count_match(compiler_common *common)
@@ -10880,10 +10861,23 @@ if (ket != OP_KET || bra != OP_BRA)
 if (offset != 0)
   stacksize = match_capture_common(common, stacksize, offset, private_data_ptr);
 
+/* Skip and count the other alternatives. */
+i = 1;
+while (*cc == OP_ALT)
+  {
+  cc += GET(cc, 1);
+  i++;
+  }
+
 if (has_alternatives)
   {
   if (opcode != OP_ONCE)
-    OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(stacksize), SLJIT_IMM, 0);
+    {
+    if (i <= 3)
+      OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(stacksize), SLJIT_IMM, 0);
+    else
+      BACKTRACK_AS(bracket_backtrack)->u.matching_put_label = sljit_emit_put_label(compiler, SLJIT_MEM1(STACK_TOP), STACK(stacksize));
+    }
   if (ket != OP_KETRMAX)
     BACKTRACK_AS(bracket_backtrack)->alternative_matchingpath = LABEL();
   }
@@ -10972,9 +10966,6 @@ if (bra == OP_BRAMINZERO)
 if ((ket != OP_KET && bra != OP_BRAMINZERO) || bra == OP_BRAZERO)
   count_match(common);
 
-/* Skip the other alternatives. */
-while (*cc == OP_ALT)
-  cc += GET(cc, 1);
 cc += 1 + LINK_SIZE;
 
 if (opcode == OP_ONCE)
@@ -12643,16 +12634,15 @@ PCRE2_SPTR ccprev;
 PCRE2_UCHAR bra = OP_BRA;
 PCRE2_UCHAR ket;
 assert_backtrack *assert;
-sljit_uw *next_update_addr = NULL;
 BOOL has_alternatives;
 BOOL needs_control_head = FALSE;
 struct sljit_jump *brazero = NULL;
-struct sljit_jump *alt1 = NULL;
-struct sljit_jump *alt2 = NULL;
+struct sljit_jump *next_alt = NULL;
 struct sljit_jump *once = NULL;
 struct sljit_jump *cond = NULL;
 struct sljit_label *rmin_label = NULL;
 struct sljit_label *exact_label = NULL;
+struct sljit_put_label *put_label;
 
 if (*cc == OP_BRAZERO || *cc == OP_BRAMINZERO)
   {
@@ -12801,7 +12791,7 @@ else if (SLJIT_UNLIKELY(opcode == OP_COND) || SLJIT_UNLIKELY(opcode == OP_SCOND)
     free_stack(common, 1);
 
     alt_max = 2;
-    alt1 = CMP(SLJIT_EQUAL, TMP1, 0, SLJIT_IMM, sizeof(sljit_uw));
+    next_alt = CMP(SLJIT_NOT_EQUAL, TMP1, 0, SLJIT_IMM, 0);
     }
   }
 else if (has_alternatives)
@@ -12809,21 +12799,15 @@ else if (has_alternatives)
   OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(STACK_TOP), STACK(0));
   free_stack(common, 1);
 
-  if (alt_max > 4)
+  if (alt_max > 3)
     {
-    /* Table jump if alt_max is greater than 4. */
-    next_update_addr = allocate_read_only_data(common, alt_max * sizeof(sljit_uw));
-    if (SLJIT_UNLIKELY(next_update_addr == NULL))
-      return;
-    sljit_emit_ijump(compiler, SLJIT_JUMP, SLJIT_MEM1(TMP1), (sljit_sw)next_update_addr);
-    add_label_addr(common, next_update_addr++);
+    sljit_emit_ijump(compiler, SLJIT_JUMP, TMP1, 0);
+
+    SLJIT_ASSERT(CURRENT_AS(bracket_backtrack)->u.matching_put_label);
+    sljit_set_put_label(CURRENT_AS(bracket_backtrack)->u.matching_put_label, LABEL());
     }
   else
-    {
-    if (alt_max == 4)
-      alt2 = CMP(SLJIT_GREATER_EQUAL, TMP1, 0, SLJIT_IMM, 2 * sizeof(sljit_uw));
-    alt1 = CMP(SLJIT_GREATER_EQUAL, TMP1, 0, SLJIT_IMM, sizeof(sljit_uw));
-    }
+    next_alt = CMP(SLJIT_NOT_EQUAL, TMP1, 0, SLJIT_IMM, 0);
   }
 
 COMPILE_BACKTRACKINGPATH(current->top);
@@ -12860,7 +12844,7 @@ if (SLJIT_UNLIKELY(opcode == OP_COND) || SLJIT_UNLIKELY(opcode == OP_SCOND))
 
 if (has_alternatives)
   {
-  alt_count = sizeof(sljit_uw);
+  alt_count = 1;
   do
     {
     current->top = NULL;
@@ -12939,7 +12923,12 @@ if (has_alternatives)
       stacksize = match_capture_common(common, stacksize, offset, private_data_ptr);
 
     if (opcode != OP_ONCE)
-      OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(stacksize), SLJIT_IMM, alt_count);
+      {
+      if (alt_max <= 3)
+        OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(stacksize), SLJIT_IMM, alt_count);
+      else
+        put_label = sljit_emit_put_label(compiler, SLJIT_MEM1(STACK_TOP), STACK(stacksize));
+      }
 
     if (offset != 0 && ket == OP_KETRMAX && common->optimized_cbracket[offset >> 1] != 0)
       {
@@ -12952,24 +12941,18 @@ if (has_alternatives)
 
     if (opcode != OP_ONCE)
       {
-      if (alt_max > 4)
-        add_label_addr(common, next_update_addr++);
-      else
+      if (alt_max <= 3)
         {
-        if (alt_count != 2 * sizeof(sljit_uw))
+        JUMPHERE(next_alt);
+        alt_count++;
+        if (alt_count < alt_max)
           {
-          JUMPHERE(alt1);
-          if (alt_max == 3 && alt_count == sizeof(sljit_uw))
-            alt2 = CMP(SLJIT_GREATER_EQUAL, TMP1, 0, SLJIT_IMM, 2 * sizeof(sljit_uw));
-          }
-        else
-          {
-          JUMPHERE(alt2);
-          if (alt_max == 4)
-            alt1 = CMP(SLJIT_GREATER_EQUAL, TMP1, 0, SLJIT_IMM, 3 * sizeof(sljit_uw));
+          SLJIT_ASSERT(alt_count == 2 && alt_max == 3);
+          next_alt = CMP(SLJIT_NOT_EQUAL, TMP1, 0, SLJIT_IMM, 1);
           }
         }
-      alt_count += sizeof(sljit_uw);
+      else
+        sljit_set_put_label(put_label, LABEL());
       }
 
     COMPILE_BACKTRACKINGPATH(current->top);
@@ -13459,11 +13442,10 @@ int private_data_size = get_recurse_data_length(common, ccbegin, ccend, &needs_c
 int alt_count, alt_max, local_size;
 backtrack_common altbacktrack;
 jump_list *match = NULL;
-sljit_uw *next_update_addr = NULL;
-struct sljit_jump *alt1 = NULL;
-struct sljit_jump *alt2 = NULL;
+struct sljit_jump *next_alt = NULL;
 struct sljit_jump *accept_exit = NULL;
 struct sljit_label *quit;
+struct sljit_put_label *put_label;
 
 /* Recurse captures then. */
 common->then_trap = NULL;
@@ -13524,7 +13506,12 @@ while (1)
   OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(SLJIT_SP), common->recursive_head_ptr);
 
   if (alt_max > 1 || has_accept)
-    OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(1), SLJIT_IMM, alt_count);
+    {
+    if (alt_max > 3)
+      put_label = sljit_emit_put_label(compiler, SLJIT_MEM1(STACK_TOP), STACK(1));
+    else
+      OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(1), SLJIT_IMM, alt_count);
+    }
 
   add_jump(compiler, &match, JUMP(SLJIT_JUMP));
 
@@ -13538,7 +13525,7 @@ while (1)
     sljit_emit_fast_enter(compiler, TMP1, 0);
 
     if (has_accept)
-      accept_exit = CMP(SLJIT_EQUAL, SLJIT_MEM1(STACK_TOP), STACK(1), SLJIT_IMM, alt_max * sizeof (sljit_sw));
+      accept_exit = CMP(SLJIT_EQUAL, SLJIT_MEM1(STACK_TOP), STACK(1), SLJIT_IMM, -1);
 
     OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(STACK_TOP), STACK(0));
     /* Save return address. */
@@ -13551,44 +13538,30 @@ while (1)
       OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(STACK_TOP), STACK(1));
       free_stack(common, 2);
 
-      if (alt_max > 4)
+      if (alt_max > 3)
         {
-          /* Table jump if alt_max is greater than 4. */
-          next_update_addr = allocate_read_only_data(common, alt_max * sizeof(sljit_uw));
-          if (SLJIT_UNLIKELY(next_update_addr == NULL))
-            return;
-          sljit_emit_ijump(compiler, SLJIT_JUMP, SLJIT_MEM1(TMP1), (sljit_sw)next_update_addr);
-          add_label_addr(common, next_update_addr++);
+        sljit_emit_ijump(compiler, SLJIT_JUMP, TMP1, 0);
+        sljit_set_put_label(put_label, LABEL());
         }
       else
-        {
-        if (alt_max == 4)
-          alt2 = CMP(SLJIT_GREATER_EQUAL, TMP1, 0, SLJIT_IMM, 2 * sizeof(sljit_uw));
-        alt1 = CMP(SLJIT_GREATER_EQUAL, TMP1, 0, SLJIT_IMM, sizeof(sljit_uw));
-        }
+        next_alt = CMP(SLJIT_NOT_EQUAL, TMP1, 0, SLJIT_IMM, 0);
       }
     else
       free_stack(common, has_accept ? 2 : 1);
     }
-  else if (alt_max > 4)
-    add_label_addr(common, next_update_addr++);
+  else if (alt_max > 3)
+    sljit_set_put_label(put_label, LABEL());
   else
     {
-    if (alt_count != 2 * sizeof(sljit_uw))
+    JUMPHERE(next_alt);
+    if (alt_count + 1 < alt_max)
       {
-      JUMPHERE(alt1);
-      if (alt_max == 3 && alt_count == sizeof(sljit_uw))
-        alt2 = CMP(SLJIT_GREATER_EQUAL, TMP1, 0, SLJIT_IMM, 2 * sizeof(sljit_uw));
-      }
-    else
-      {
-      JUMPHERE(alt2);
-      if (alt_max == 4)
-        alt1 = CMP(SLJIT_GREATER_EQUAL, TMP1, 0, SLJIT_IMM, 3 * sizeof(sljit_uw));
+      SLJIT_ASSERT(alt_count == 1 && alt_max == 3);
+      next_alt = CMP(SLJIT_NOT_EQUAL, TMP1, 0, SLJIT_IMM, 1);
       }
     }
 
-  alt_count += sizeof(sljit_uw);
+  alt_count++;
 
   compile_backtrackingpath(common, altbacktrack.top);
   if (SLJIT_UNLIKELY(sljit_get_compiler_error(compiler)))
@@ -13649,7 +13622,7 @@ if (common->accept != NULL)
   OP1(SLJIT_MOV, TMP2, 0, STACK_TOP, 0);
 
   allocate_stack(common, 2);
-  OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(1), SLJIT_IMM, alt_count);
+  OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(1), SLJIT_IMM, -1);
   }
 
 set_jumps(match, LABEL());
@@ -13684,7 +13657,6 @@ executable_functions *functions;
 void *executable_func;
 sljit_uw executable_size;
 sljit_uw total_length;
-label_addr_list *label_addr;
 struct sljit_label *mainloop_label = NULL;
 struct sljit_label *continue_match_label;
 struct sljit_label *empty_match_found_label = NULL;
@@ -14276,13 +14248,8 @@ SLJIT_FREE(common->private_data_ptrs, allocator_data);
 
 executable_func = sljit_generate_code(compiler);
 executable_size = sljit_get_generated_code_size(compiler);
-label_addr = common->label_addrs;
-while (label_addr != NULL)
-  {
-  *label_addr->update_addr = sljit_get_label_addr(label_addr->label);
-  label_addr = label_addr->next;
-  }
 sljit_free_compiler(compiler);
+
 if (executable_func == NULL)
   {
   PRIV(jit_free_rodata)(common->read_only_data_head, compiler->allocator_data);

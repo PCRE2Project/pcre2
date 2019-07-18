@@ -721,6 +721,7 @@ static SLJIT_INLINE void set_const(struct sljit_const *const_, struct sljit_comp
 static SLJIT_INLINE void set_put_label(struct sljit_put_label *put_label, struct sljit_compiler *compiler, sljit_uw offset)
 {
 	put_label->next = NULL;
+	put_label->label = NULL;
 	put_label->addr = compiler->size - offset;
 	put_label->flags = 0;
 	if (compiler->last_put_label)
