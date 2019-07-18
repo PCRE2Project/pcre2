@@ -136,7 +136,8 @@ static BOOL
     parsed_recurse_check *, compile_block *);
 
 static int
-  check_lookbehinds(uint32_t *, uint32_t **, compile_block *);
+  check_lookbehinds(uint32_t *, uint32_t **, parsed_recurse_check *,
+    compile_block *);
 
 
 /*************************************************
@@ -9116,7 +9117,7 @@ for (;; pptr++)
     case META_LOOKAHEAD:
     case META_LOOKAHEADNOT:
     case META_LOOKAHEAD_NA:
-    *errcodeptr = check_lookbehinds(pptr + 1, &pptr, cb);
+    *errcodeptr = check_lookbehinds(pptr + 1, &pptr, recurses, cb);
     if (*errcodeptr != 0) return -1;
 
     /* Ignore any qualifiers that follow a lookahead assertion. */
@@ -9461,15 +9462,17 @@ order to process any lookbehinds that they may contain. It stops when it hits a
 non-nested closing parenthesis in this case, returning a pointer to it.
 
 Arguments
-  pptr    points to where to start (start of pattern or start of lookahead)
-  retptr  if not NULL, return the ket pointer here
-  cb      points to the compile block
+  pptr      points to where to start (start of pattern or start of lookahead)
+  retptr    if not NULL, return the ket pointer here
+  recurses  chain of recurse_check to catch mutual recursion 
+  cb        points to the compile block
 
-Returns:  0 on success, or an errorcode (cb->erroroffset will be set)
+Returns:    0 on success, or an errorcode (cb->erroroffset will be set)
 */
 
 static int
-check_lookbehinds(uint32_t *pptr, uint32_t **retptr, compile_block *cb)
+check_lookbehinds(uint32_t *pptr, uint32_t **retptr, 
+  parsed_recurse_check *recurses, compile_block *cb)
 {
 int max;
 int errorcode = 0;
@@ -9587,7 +9590,8 @@ for (; *pptr != META_END; pptr++)
     case META_LOOKBEHIND:
     case META_LOOKBEHINDNOT:
     case META_LOOKBEHIND_NA:
-    if (!set_lookbehind_lengths(&pptr, &max, &errorcode, &loopcount, NULL, cb))
+    if (!set_lookbehind_lengths(&pptr, &max, &errorcode, &loopcount, 
+         recurses, cb))
       return errorcode;
     break;
     }
@@ -10041,7 +10045,7 @@ lengths. */
 
 if (has_lookbehind)
   {
-  errorcode = check_lookbehinds(cb.parsed_pattern, NULL, &cb);
+  errorcode = check_lookbehinds(cb.parsed_pattern, NULL, NULL, &cb);
   if (errorcode != 0) goto HAD_CB_ERROR;
   }
 

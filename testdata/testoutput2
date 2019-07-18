@@ -17189,6 +17189,10 @@ Subject length lower bound = 1
     ab\=ph
 No match
 
+# Expect error (recursion => not fixed length)
+/(\2)((?=(?<=\1)))/
+Failed: error 125 at offset 8: lookbehind assertion is not fixed length
+
 # End of testinput2
 Error -70: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

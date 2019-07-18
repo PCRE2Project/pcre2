@@ -5693,4 +5693,7 @@ a)"xI
 /(?<=(?=.(?<=x)))/
     ab\=ph
 
+# Expect error (recursion => not fixed length)
+/(\2)((?=(?<=\1)))/
+
 # End of testinput2
