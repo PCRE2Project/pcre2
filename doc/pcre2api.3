@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "25 June 2019" "PCRE2 10.34"
+.TH PCRE2API 3 "20 July 2019" "PCRE2 10.34"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -2719,12 +2719,15 @@ Your program may crash or loop indefinitely or give wrong results.
 .sp
 These options turn on the partial matching feature. A partial match occurs if
 the end of the subject string is reached successfully, but there are not enough
-subject characters to complete the match. If this happens when
-PCRE2_PARTIAL_SOFT (but not PCRE2_PARTIAL_HARD) is set, matching continues by
-testing any remaining alternatives. Only if no complete match can be found is
-PCRE2_ERROR_PARTIAL returned instead of PCRE2_ERROR_NOMATCH. In other words,
-PCRE2_PARTIAL_SOFT specifies that the caller is prepared to handle a partial
-match, but only if no complete match can be found.
+subject characters to complete the match. In addition, either at least one 
+character must have been inspected or the pattern must contain a lookbehind.
+.P
+If this situation arises when PCRE2_PARTIAL_SOFT (but not PCRE2_PARTIAL_HARD)
+is set, matching continues by testing any remaining alternatives. Only if no
+complete match can be found is PCRE2_ERROR_PARTIAL returned instead of
+PCRE2_ERROR_NOMATCH. In other words, PCRE2_PARTIAL_SOFT specifies that the
+caller is prepared to handle a partial match, but only if no complete match can
+be found.
 .P
 If PCRE2_PARTIAL_HARD is set, it overrides PCRE2_PARTIAL_SOFT. In this case, if
 a partial match is found, \fBpcre2_match()\fP immediately returns
@@ -3859,6 +3862,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 25 June 2019
+Last updated: 20 July 2019
 Copyright (c) 1997-2019 University of Cambridge.
 .fi

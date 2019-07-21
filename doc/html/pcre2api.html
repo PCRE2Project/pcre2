@@ -2725,12 +2725,16 @@ Your program may crash or loop indefinitely or give wrong results.
 </pre>
 These options turn on the partial matching feature. A partial match occurs if
 the end of the subject string is reached successfully, but there are not enough
-subject characters to complete the match. If this happens when
-PCRE2_PARTIAL_SOFT (but not PCRE2_PARTIAL_HARD) is set, matching continues by
-testing any remaining alternatives. Only if no complete match can be found is
-PCRE2_ERROR_PARTIAL returned instead of PCRE2_ERROR_NOMATCH. In other words,
-PCRE2_PARTIAL_SOFT specifies that the caller is prepared to handle a partial
-match, but only if no complete match can be found.
+subject characters to complete the match. In addition, either at least one 
+character must have been inspected or the pattern must contain a lookbehind.
+</P>
+<P>
+If this situation arises when PCRE2_PARTIAL_SOFT (but not PCRE2_PARTIAL_HARD)
+is set, matching continues by testing any remaining alternatives. Only if no
+complete match can be found is PCRE2_ERROR_PARTIAL returned instead of
+PCRE2_ERROR_NOMATCH. In other words, PCRE2_PARTIAL_SOFT specifies that the
+caller is prepared to handle a partial match, but only if no complete match can
+be found.
 </P>
 <P>
 If PCRE2_PARTIAL_HARD is set, it overrides PCRE2_PARTIAL_SOFT. In this case, if
@@ -3846,7 +3850,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC42" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 25 June 2019
+Last updated: 20 July 2019
 <br>
 Copyright &copy; 1997-2019 University of Cambridge.
 <br>

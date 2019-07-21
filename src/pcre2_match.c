@@ -415,8 +415,7 @@ if (caseless)
   else
 #endif
 
-    /* Not in UTF mode */
-
+  /* Not in UTF mode */
     {
     for (; length > 0; length--)
       {
@@ -491,11 +490,16 @@ heap is used for a larger vector.
 *************************************************/
 
 /* These macros pack up tests that are used for partial matching several times
-in the code. We set the "hit end" flag if the pointer is at the end of the
-subject and also past the earliest inspected character (i.e. something has been
-matched, even if not part of the actual matched string). For hard partial
-matching, we then return immediately. The second one is used when we already
-know we are past the end of the subject. */
+in the code. The second one is used when we already know we are past the end of
+the subject. We set the "hit end" flag if the pointer is at the end of the
+subject and either (a) the pointer is past the earliest inspected character
+(i.e. something has been matched, even if not part of the actual matched
+string), or (b) the pattern contains a lookbehind. These are the conditions for 
+which adding more characters may allow the current match to continue.
+
+For hard partial matching, we immediately return a partial match. Otherwise,
+carrying on means that a complete match on the current subject will be sought. 
+A partial match is returned only if no complete match can be found. */
 
 #define CHECK_PARTIAL()\
   if (Feptr >= mb->end_subject) \
@@ -503,31 +507,13 @@ know we are past the end of the subject. */
     SCHECK_PARTIAL(); \
     }
 
-/* Original version that allows hard partial to continue if no inspected
-characters. */
-
 #define SCHECK_PARTIAL()\
-  if (mb->partial != 0 && Feptr > mb->start_used_ptr) \
+  if (mb->partial != 0 && (Feptr > mb->start_used_ptr || mb->haslookbehind)) \
     { \
     mb->hitend = TRUE; \
     if (mb->partial > 1) return PCRE2_ERROR_PARTIAL; \
     }
 
-/* Experimental version that makes hard partial give no match instead of
-continuing if no characters have been inspected. */
-
-#ifdef NEVERNEVER
-#define SCHECK_PARTIAL()\
-  if (mb->partial != 0) \
-    { \
-    if (Feptr > mb->start_used_ptr) \
-      { \
-      mb->hitend = TRUE; \
-      if (mb->partial > 1) return PCRE2_ERROR_PARTIAL; \
-      } \
-    else if (mb->partial > 1) RRETURN(MATCH_NOMATCH); \
-    }
-#endif  /* NEVERNEVER */
 
 /* These macros are used to implement backtracking. They simulate a recursive
 call to the match() function by means of a local vector of frames which
@@ -5670,7 +5656,11 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
 
     case OP_EOD:
     if (Feptr < mb->end_subject) RRETURN(MATCH_NOMATCH);
-    SCHECK_PARTIAL();
+    if (mb->partial != 0)
+      { 
+      mb->hitend = TRUE;
+      if (mb->partial > 1) return PCRE2_ERROR_PARTIAL;
+      } 
     Fecode++;
     break;
 
@@ -5695,7 +5685,11 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
 
     /* Either at end of string or \n before end. */
 
-    SCHECK_PARTIAL();
+    if (mb->partial != 0)
+      { 
+      mb->hitend = TRUE;
+      if (mb->partial > 1) return PCRE2_ERROR_PARTIAL;
+      } 
     Fecode++;
     break;
 
@@ -6457,9 +6451,10 @@ mb->start_subject = subject;
 mb->start_offset = start_offset;
 mb->end_subject = end_subject;
 mb->hasthen = (re->flags & PCRE2_HASTHEN) != 0;
-mb->poptions = re->overall_options;     /* Pattern options */
+mb->haslookbehind = (re->max_lookbehind > 0);
+mb->poptions = re->overall_options;          /* Pattern options */
 mb->ignore_skip_arg = 0;
-mb->mark = mb->nomatch_mark = NULL;     /* In case never set */
+mb->mark = mb->nomatch_mark = NULL;          /* In case never set */
 
 /* The name table is needed for finding all the numbers associated with a
 given name, for condition testing. The code follows the name table. */

@@ -4994,4 +4994,30 @@
     ab\=ps
     abcx  
 
+/\z/
+    abc\=ph 
+    abc\=ps 
+   
+/\Z/
+    abc\=ph 
+    abc\=ps 
+    abc\n\=ph
+    abc\n\=ps
+
+/c*+(?<=[bc])/
+    abc\=ph
+    ab\=ph
+    abc\=ps
+    ab\=ps
+
+/c++(?<=[bc])/
+    abc\=ph
+    ab\=ph
+
+/(?<=(?=.(?<=x)))/
+    abx
+    ab\=ph
+    bxyz 
+    xyz
+
 # End of testinput6

@@ -97,6 +97,16 @@ within it, the nested lookbehind was not correctly processed. For example, if
 
 20. Implemented pcre2_get_match_data_size().
 
+21. Two alterations to partial matching (not yet done by JIT):
+
+    (a) The definition of a partial match is slightly changed: if a pattern
+    contains any lookbehinds, an empty partial match may be given, because this
+    is another situation where adding characters to the current subject can
+    lead to a full match. Example: /c*+(?<=[bc])/ with subject "ab".
+    
+    (b) An empty string partial hard match can be returned for \z and \Z as it
+    is documented that they shouldn't match. 
+
 
 Version 10.33 16-April-2019
 ---------------------------

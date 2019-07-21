@@ -174,7 +174,7 @@ static const uint8_t coptable[] = {
   0,                             /* Assert behind                          */
   0,                             /* Assert behind not                      */
   0,                             /* NA assert                              */
-  0,                             /* NA assert behind                       */ 
+  0,                             /* NA assert behind                       */
   0,                             /* ONCE                                   */
   0,                             /* SCRIPT_RUN                             */
   0, 0, 0, 0, 0,                 /* BRA, BRAPOS, CBRA, CBRAPOS, COND       */
@@ -251,7 +251,7 @@ static const uint8_t poptable[] = {
   0,                             /* Assert behind                          */
   0,                             /* Assert behind not                      */
   0,                             /* NA assert                              */
-  0,                             /* NA assert behind                       */ 
+  0,                             /* NA assert behind                       */
   0,                             /* ONCE                                   */
   0,                             /* SCRIPT_RUN                             */
   0, 0, 0, 0, 0,                 /* BRA, BRAPOS, CBRA, CBRAPOS, COND       */
@@ -966,7 +966,7 @@ for (;;)
       if (ptr >= end_subject)
         {
         if ((mb->moptions & PCRE2_PARTIAL_HARD) != 0)
-          could_continue = TRUE;
+          return PCRE2_ERROR_PARTIAL;
         else { ADD_ACTIVE(state_offset + 1, 0); }
         }
       break;
@@ -1015,10 +1015,12 @@ for (;;)
 
       /*-----------------------------------------------------------------*/
       case OP_EODN:
-      if (clen == 0 && (mb->moptions & PCRE2_PARTIAL_HARD) != 0)
-        could_continue = TRUE;
-      else if (clen == 0 || (IS_NEWLINE(ptr) && ptr == end_subject - mb->nllen))
-        { ADD_ACTIVE(state_offset + 1, 0); }
+      if (clen == 0 || (IS_NEWLINE(ptr) && ptr == end_subject - mb->nllen))
+        {
+        if ((mb->moptions & PCRE2_PARTIAL_HARD) != 0)
+          return PCRE2_ERROR_PARTIAL;
+        ADD_ACTIVE(state_offset + 1, 0);
+        }
       break;
 
       /*-----------------------------------------------------------------*/
@@ -3175,15 +3177,18 @@ for (;;)
         (mb->moptions & PCRE2_PARTIAL_HARD) != 0      /* Hard partial */
         ||                                           /* or... */
         ((mb->moptions & PCRE2_PARTIAL_SOFT) != 0 &&  /* Soft partial and */
-         match_count < 0)                            /* no matches */
+         match_count < 0)                             /* no matches */
         ) &&                                         /* And... */
         (
-        partial_newline ||                     /* Either partial NL */
-          (                                    /* or ... */
-          ptr >= end_subject &&                /* End of subject and */
-          ptr > mb->start_used_ptr)            /* Inspected non-empty string */
+        partial_newline ||                   /* Either partial NL */
+          (                                  /* or ... */
+          ptr >= end_subject &&              /* End of subject and */
+            (                                  /* either */
+            ptr > mb->start_used_ptr ||        /* Inspected non-empty string */
+            mb->haslookbehind                  /* or pattern has lookbehind */
+            )
           )
-        )
+        ))
       match_count = PCRE2_ERROR_PARTIAL;
     break;  /* Exit from loop along the subject string */
     }
@@ -3412,6 +3417,7 @@ mb->tables = re->tables;
 mb->start_subject = subject;
 mb->end_subject = end_subject;
 mb->start_offset = start_offset;
+mb->haslookbehind = (re->max_lookbehind > 0);
 mb->moptions = options;
 mb->poptions = re->overall_options;
 mb->match_call_count = 0;

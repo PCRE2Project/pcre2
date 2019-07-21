@@ -45,7 +45,7 @@ as soon as a mistake is made, by beeping and not reflecting the character that
 has been typed, for example. This immediate feedback is likely to be a better
 user interface than a check that is delayed until the entire string has been
 entered. Partial matching can also be useful when the subject string is very
-long and is not all available at once.
+long and is not all available at once, as discussed below.
 </P>
 <P>
 PCRE2 supports partial matching by means of the PCRE2_PARTIAL_SOFT and
@@ -79,13 +79,18 @@ is also disabled for partial matching.
 <P>
 A partial match occurs during a call to <b>pcre2_match()</b> when the end of the
 subject string is reached successfully, but matching cannot continue because
-more characters are needed. However, at least one character in the subject must
-have been inspected. This character need not form part of the final matched
-string; lookbehind assertions and the \K escape sequence provide ways of
-inspecting characters before the start of a matched string. The requirement for
-inspecting at least one character exists because an empty string can always be
-matched; without such a restriction there would always be a partial match of an
-empty string at the end of the subject.
+more characters are needed, and in addition, either at least one character in
+the subject has been inspected or the pattern contains a lookbehind. An
+inspected character need not form part of the final matched string; lookbehind
+assertions and the \K escape sequence provide ways of inspecting characters
+before the start of a matched string.
+</P>
+<P>
+The two additional requirements define the cases where adding more characters
+to the existing subject may complete the match. Without these conditions there
+would be a partial match of an empty string at the end of the subject for all 
+unanchored patterns (and also for anchored patterns if the subject itself is 
+empty).
 </P>
 <P>
 When a partial match is returned, the first two elements in the ovector point
@@ -104,7 +109,7 @@ characters.
 </P>
 <P>
 What happens when a partial match is identified depends on which of the two
-partial matching options are set.
+partial matching options is set.
 </P>
 <br><b>
 PCRE2_PARTIAL_SOFT WITH pcre2_match()
@@ -128,12 +133,12 @@ the data that is returned. Consider this pattern:
 <pre>
   /123\w+X|dogY/
 </pre>
-If this is matched against the subject string "abc123dog", both
-alternatives fail to match, but the end of the subject is reached during
-matching, so PCRE2_ERROR_PARTIAL is returned. The offsets are set to 3 and 9,
-identifying "123dog" as the first partial match that was found. (In this
-example, there are two partial matches, because "dog" on its own partially
-matches the second alternative.)
+If this is matched against the subject string "abc123dog", both alternatives
+fail to match, but the end of the subject is reached during matching, so
+PCRE2_ERROR_PARTIAL is returned. The offsets are set to 3 and 9, identifying
+"123dog" as the first partial match that was found. (In this example, there are
+two partial matches, because "dog" on its own partially matches the second
+alternative.)
 </P>
 <br><b>
 PCRE2_PARTIAL_HARD WITH pcre2_match()
@@ -145,8 +150,8 @@ possible complete matches. This option is "hard" because it prefers an earlier
 partial match over a later complete match. For this reason, the assumption is
 made that the end of the supplied subject string may not be the true end of the
 available data, and so, if \z, \Z, \b, \B, or $ are encountered at the end
-of the subject, the result is PCRE2_ERROR_PARTIAL, provided that at least one
-character in the subject has been inspected.
+of the subject, the result is PCRE2_ERROR_PARTIAL, whether or not any 
+characters have been inspected.
 </P>
 <br><b>
 Comparing hard and soft partial matching
@@ -346,44 +351,25 @@ string "xx123ab", the ovector offsets are 5 and 7 ("ab"). The maximum
 lookbehind count is 3, so all characters before offset 2 can be discarded. The
 value of <b>startoffset</b> for the next match should be 3. When <b>pcre2test</b>
 displays a partial match, it indicates the lookbehind characters with '&#60;'
-characters:
+characters if the "allusedtext" modifier is set:
 <pre>
     re&#62; "(?&#60;=123)abc"
-  data&#62; xx123ab\=ph
+  data&#62; xx123ab\=ph,allusedtext
   Partial match: 123ab
                  &#60;&#60;&#60;
-</PRE>
-</P>
-<P>
-3. The maximum lookbehind count is also important when the result of a partial
-match attempt is "no match". In this case, the maximum lookbehind characters
-from the end of the current segment must be retained at the start of the next
-segment, in case the lookbehind is at the start of the pattern. Matching the
-next segment must then start at the appropriate offset.
-</P>
-<P>
-4. Because a partial match must always contain at least one character, what
-might be considered a partial match of an empty string actually gives a "no
-match" result. For example:
-<pre>
-    re&#62; /c(?&#60;=abc)x/
-  data&#62; ab\=ps
-  No match
 </pre>
-If the next segment begins "cx", a match should be found, but this will only
-happen if characters from the previous segment are retained. For this reason, a
-"no match" result should be interpreted as "partial match of an empty string"
-when the pattern contains lookbehinds.
+However, the "allusedtext" modifier is not available for JIT matching, because 
+JIT matching does not maintain the first and last consulted characters.
 </P>
 <P>
-5. Matching a subject string that is split into multiple segments may not
-always produce exactly the same result as matching over one single long string,
-especially when PCRE2_PARTIAL_SOFT is used. The section "Partial Matching and
-Word Boundaries" above describes an issue that arises if the pattern ends with
-\b or \B. Another kind of difference may occur when there are multiple
-matching possibilities, because (for PCRE2_PARTIAL_SOFT) a partial match result
-is given only when there are no completed matches. This means that as soon as
-the shortest match has been found, continuation to a new subject segment is no
+3. Matching a subject string that is split into multiple segments may not
+always produce exactly the same result as matching over one single long string
+when PCRE2_PARTIAL_SOFT is used. The section "Partial Matching and Word
+Boundaries" above describes an issue that arises if the pattern ends with \b
+or \B. Another kind of difference may occur when there are multiple matching
+possibilities, because (for PCRE2_PARTIAL_SOFT) a partial match result is given
+only when there are no completed matches. This means that as soon as the
+shortest match has been found, continuation to a new subject segment is no
 longer possible. Consider this <b>pcre2test</b> example:
 <pre>
     re&#62; /dog(sbody)?/
@@ -418,7 +404,7 @@ multi-segment data. The example above then behaves differently:
   data&#62; gsb\=ph,dfa,dfa_restart
   Partial match: gsb
 </pre>
-6. Patterns that contain alternatives at the top level which do not all start
+4. Patterns that contain alternatives at the top level which do not all start
 with the same pattern item may not work as expected when PCRE2_DFA_RESTART is
 used. For example, consider this pattern:
 <pre>
@@ -463,7 +449,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC10" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 21 June 2019
+Last updated: 21 July 2019
 <br>
 Copyright &copy; 1997-2019 University of Cambridge.
 <br>

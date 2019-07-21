@@ -5690,10 +5690,33 @@ a)"xI
 
 # ----
 
-/(?<=(?=.(?<=x)))/
-    ab\=ph
-
 # Expect error (recursion => not fixed length)
 /(\2)((?=(?<=\1)))/
+
+/c*+(?<=[bc])/
+    abc\=ph,no_jit
+    ab\=ph,no_jit
+    abc\=ps,no_jit
+    ab\=ps,no_jit
+
+/c++(?<=[bc])/
+    abc\=ph,no_jit
+    ab\=ph,no_jit
+
+/(?<=(?=.(?<=x)))/
+    abx
+    ab\=ph,no_jit
+    bxyz 
+    xyz
+    
+/\z/
+   abc\=ph,no_jit 
+   abc\=ps 
+   
+/\Z/
+   abc\=ph,no_jit 
+   abc\=ps 
+   abc\n\=ph,no_jit
+   abc\n\=ps
 
 # End of testinput2

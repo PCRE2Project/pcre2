@@ -17185,13 +17185,51 @@ Subject length lower bound = 1
 
 # ----
 
-/(?<=(?=.(?<=x)))/
-    ab\=ph
-No match
-
 # Expect error (recursion => not fixed length)
 /(\2)((?=(?<=\1)))/
 Failed: error 125 at offset 8: lookbehind assertion is not fixed length
+
+/c*+(?<=[bc])/
+    abc\=ph,no_jit
+Partial match: c
+    ab\=ph,no_jit
+Partial match: 
+    abc\=ps,no_jit
+ 0: c
+    ab\=ps,no_jit
+ 0: 
+
+/c++(?<=[bc])/
+    abc\=ph,no_jit
+Partial match: c
+    ab\=ph,no_jit
+Partial match: 
+
+/(?<=(?=.(?<=x)))/
+    abx
+ 0: 
+    ab\=ph,no_jit
+Partial match: 
+    bxyz 
+ 0: 
+    xyz
+ 0: 
+    
+/\z/
+   abc\=ph,no_jit 
+Partial match: 
+   abc\=ps 
+ 0: 
+   
+/\Z/
+   abc\=ph,no_jit 
+Partial match: 
+   abc\=ps 
+ 0: 
+   abc\n\=ph,no_jit
+Partial match: \x0a
+   abc\n\=ps
+ 0: 
 
 # End of testinput2
 Error -70: PCRE2_ERROR_BADDATA (unknown error number)
