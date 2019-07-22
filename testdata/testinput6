@@ -5020,4 +5020,10 @@
     bxyz 
     xyz
 
+/(?![ab]).*/
+    ab\=ph
+
+/c*+/
+    ab\=ph,offset=2
+
 # End of testinput6

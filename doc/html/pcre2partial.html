@@ -80,16 +80,18 @@ is also disabled for partial matching.
 A partial match occurs during a call to <b>pcre2_match()</b> when the end of the
 subject string is reached successfully, but matching cannot continue because
 more characters are needed, and in addition, either at least one character in
-the subject has been inspected or the pattern contains a lookbehind. An
+the subject has been inspected or the pattern contains a lookbehind, or (when 
+PCRE2_PARTIAL_HARD is set) the pattern could match an empty string. An
 inspected character need not form part of the final matched string; lookbehind
 assertions and the \K escape sequence provide ways of inspecting characters
 before the start of a matched string.
 </P>
 <P>
-The two additional requirements define the cases where adding more characters
-to the existing subject may complete the match. Without these conditions there
-would be a partial match of an empty string at the end of the subject for all 
-unanchored patterns (and also for anchored patterns if the subject itself is 
+The three additional requirements define the cases where adding more characters
+to the existing subject may complete the same match that would occur if they
+had all been present in the first place. Without these conditions there would
+be a partial match of an empty string at the end of the subject for all
+unanchored patterns (and also for anchored patterns if the subject itself is
 empty).
 </P>
 <P>
@@ -449,7 +451,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC10" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 21 July 2019
+Last updated: 22 July 2019
 <br>
 Copyright &copy; 1997-2019 University of Cambridge.
 <br>

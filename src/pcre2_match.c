@@ -508,7 +508,8 @@ A partial match is returned only if no complete match can be found. */
     }
 
 #define SCHECK_PARTIAL()\
-  if (mb->partial != 0 && (Feptr > mb->start_used_ptr || mb->haslookbehind)) \
+  if (mb->partial != 0 && \
+      (Feptr > mb->start_used_ptr || mb->allowemptypartial)) \
     { \
     mb->hitend = TRUE; \
     if (mb->partial > 1) return PCRE2_ERROR_PARTIAL; \
@@ -6451,7 +6452,8 @@ mb->start_subject = subject;
 mb->start_offset = start_offset;
 mb->end_subject = end_subject;
 mb->hasthen = (re->flags & PCRE2_HASTHEN) != 0;
-mb->haslookbehind = (re->max_lookbehind > 0);
+mb->allowemptypartial = (re->max_lookbehind > 0) || 
+    (re->flags & PCRE2_MATCH_EMPTY) != 0;
 mb->poptions = re->overall_options;          /* Pattern options */
 mb->ignore_skip_arg = 0;
 mb->mark = mb->nomatch_mark = NULL;          /* In case never set */

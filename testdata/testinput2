@@ -5719,4 +5719,10 @@ a)"xI
    abc\n\=ph,no_jit
    abc\n\=ps
 
+/(?![ab]).*/
+    ab\=ph,no_jit
+
+/c*+/
+    ab\=ph,offset=2,no_jit
+
 # End of testinput2

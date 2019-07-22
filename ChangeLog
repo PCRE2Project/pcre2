@@ -104,7 +104,11 @@ within it, the nested lookbehind was not correctly processed. For example, if
     is another situation where adding characters to the current subject can
     lead to a full match. Example: /c*+(?<=[bc])/ with subject "ab".
     
-    (b) An empty string partial hard match can be returned for \z and \Z as it
+    (b) Similarly, if a pattern could match an empty string, an empty partial 
+    match may be given. Example: /(?![ab]).*/ with subject "ab". This case 
+    applies only to PCRE2_PARTIAL_HARD.
+    
+    (c) An empty string partial hard match can be returned for \z and \Z as it
     is documented that they shouldn't match. 
 
 

@@ -2057,7 +2057,7 @@ the following negative numbers:
   PCRE2_ERROR_BADOPTION      the value of <i>what</i> was invalid
   PCRE2_ERROR_UNSET          the requested field is not set
 </pre>
-The "magic number" is placed at the start of each compiled pattern as an simple
+The "magic number" is placed at the start of each compiled pattern as a simple
 check against passing an arbitrary memory pointer. Here is a typical call of
 <b>pcre2_pattern_info()</b>, to obtain the length of the compiled pattern:
 <pre>
@@ -2114,7 +2114,7 @@ options returned for PCRE2_INFO_ALLOPTIONS.
   PCRE2_INFO_BACKREFMAX
 </pre>
 Return the number of the highest backreference in the pattern. The third
-argument should point to an <b>uint32_t</b> variable. Named capture groups
+argument should point to a <b>uint32_t</b> variable. Named capture groups
 acquire numbers as well as names, and these count towards the highest
 backreference. Backreferences such as \4 or \g{12} match the captured
 characters of the given group, but in addition, the check that a capture
@@ -2132,7 +2132,7 @@ that \R matches only CR, LF, or CRLF.
 </pre>
 Return the highest capture group number in the pattern. In patterns where (?|
 is not used, this is also the total number of capture groups. The third
-argument should point to an <b>uint32_t</b> variable.
+argument should point to a <b>uint32_t</b> variable.
 <pre>
   PCRE2_INFO_DEPTHLIMIT
 </pre>
@@ -2157,7 +2157,7 @@ returned. Otherwise NULL is returned. The third argument should point to a
   PCRE2_INFO_FIRSTCODETYPE
 </pre>
 Return information about the first code unit of any matched string, for a
-non-anchored pattern. The third argument should point to an <b>uint32_t</b>
+non-anchored pattern. The third argument should point to a <b>uint32_t</b>
 variable. If there is a fixed first value, for example, the letter "c" from a
 pattern such as (cat|cow|coyote), 1 is returned, and the value can be retrieved
 using PCRE2_INFO_FIRSTCODEUNIT. If there is no fixed first value, but it is
@@ -2169,7 +2169,7 @@ is returned.
 </pre>
 Return the value of the first code unit of any matched string for a pattern
 where PCRE2_INFO_FIRSTCODETYPE returns 1; otherwise return 0. The third
-argument should point to an <b>uint32_t</b> variable. In the 8-bit library, the
+argument should point to a <b>uint32_t</b> variable. In the 8-bit library, the
 value is always less than 256. In the 16-bit library the value can be up to
 0xffff. In the 32-bit library in UTF-32 mode the value can be up to 0x10ffff,
 and up to 0xffffffff when not using UTF-32 mode.
@@ -2185,12 +2185,12 @@ pattern. Each additional capture group adds two PCRE2_SIZE variables.
   PCRE2_INFO_HASBACKSLASHC
 </pre>
 Return 1 if the pattern contains any instances of \C, otherwise 0. The third
-argument should point to an <b>uint32_t</b> variable.
+argument should point to a <b>uint32_t</b> variable.
 <pre>
   PCRE2_INFO_HASCRORLF
 </pre>
 Return 1 if the pattern contains any explicit matches for CR or LF characters,
-otherwise 0. The third argument should point to an <b>uint32_t</b> variable. An
+otherwise 0. The third argument should point to a <b>uint32_t</b> variable. An
 explicit match is either a literal CR or LF character, or \r or \n or one of
 the equivalent hexadecimal or octal escape sequences.
 <pre>
@@ -2206,7 +2206,7 @@ defaulted by the caller of the match function.
   PCRE2_INFO_JCHANGED
 </pre>
 Return 1 if the (?J) or (?-J) option setting is used in the pattern, otherwise
-0. The third argument should point to an <b>uint32_t</b> variable. (?J) and
+0. The third argument should point to a <b>uint32_t</b> variable. (?J) and
 (?-J) set and unset the local PCRE2_DUPNAMES option, respectively.
 <pre>
   PCRE2_INFO_JITSIZE
@@ -2218,7 +2218,7 @@ return zero. The third argument should point to a <b>size_t</b> variable.
   PCRE2_INFO_LASTCODETYPE
 </pre>
 Returns 1 if there is a rightmost literal code unit that must exist in any
-matched string, other than at its start. The third argument should  point to an
+matched string, other than at its start. The third argument should  point to a
 <b>uint32_t</b> variable. If there is no such value, 0 is returned. When 1 is
 returned, the code unit value itself can be retrieved using
 PCRE2_INFO_LASTCODEUNIT. For anchored patterns, a last literal value is
@@ -2231,12 +2231,12 @@ PCRE2_INFO_LASTCODEUNIT), but for /^a\dz\d/ the returned value is 0.
 Return the value of the rightmost literal code unit that must exist in any
 matched string, other than at its start, for a pattern where
 PCRE2_INFO_LASTCODETYPE returns 1. Otherwise, return 0. The third argument
-should point to an <b>uint32_t</b> variable.
+should point to a <b>uint32_t</b> variable.
 <pre>
   PCRE2_INFO_MATCHEMPTY
 </pre>
 Return 1 if the pattern might match an empty string, otherwise 0. The third
-argument should point to an <b>uint32_t</b> variable. When a pattern contains
+argument should point to a <b>uint32_t</b> variable. When a pattern contains
 recursive subroutine calls it is not always possible to determine whether or
 not it can match an empty string. PCRE2 takes a cautious approach and returns 1
 in such cases.
@@ -2279,7 +2279,7 @@ If a minimum length for matching subject strings was computed, its value is
 returned. Otherwise the returned value is 0. This value is not computed when
 PCRE2_NO_START_OPTIMIZE is set. The value is a number of characters, which in
 UTF mode may be different from the number of code units. The third argument
-should point to an <b>uint32_t</b> variable. The value is a lower bound to the
+should point to a <b>uint32_t</b> variable. The value is a lower bound to the
 length of any matching string. There may not be any strings of that length that
 do actually match, but every string that does match is at least that long.
 <pre>
@@ -2726,7 +2726,8 @@ Your program may crash or loop indefinitely or give wrong results.
 These options turn on the partial matching feature. A partial match occurs if
 the end of the subject string is reached successfully, but there are not enough
 subject characters to complete the match. In addition, either at least one 
-character must have been inspected or the pattern must contain a lookbehind.
+character must have been inspected or the pattern must contain a lookbehind, or 
+the pattern must be one that could match an empty string.
 </P>
 <P>
 If this situation arises when PCRE2_PARTIAL_SOFT (but not PCRE2_PARTIAL_HARD)
@@ -3850,7 +3851,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC42" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 20 July 2019
+Last updated: 22 July 2019
 <br>
 Copyright &copy; 1997-2019 University of Cambridge.
 <br>

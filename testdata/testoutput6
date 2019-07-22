@@ -7887,4 +7887,12 @@ Partial match:
     xyz
  0: 
 
+/(?![ab]).*/
+    ab\=ph
+Partial match: 
+
+/c*+/
+    ab\=ph,offset=2
+Partial match: 
+
 # End of testinput6

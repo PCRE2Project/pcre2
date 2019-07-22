@@ -3185,8 +3185,8 @@ for (;;)
           ptr >= end_subject &&              /* End of subject and */
             (                                  /* either */
             ptr > mb->start_used_ptr ||        /* Inspected non-empty string */
-            mb->haslookbehind                  /* or pattern has lookbehind */
-            )
+            mb->allowemptypartial              /* or pattern has lookbehind */
+            )                                  /* or could match empty */
           )
         ))
       match_count = PCRE2_ERROR_PARTIAL;
@@ -3417,7 +3417,8 @@ mb->tables = re->tables;
 mb->start_subject = subject;
 mb->end_subject = end_subject;
 mb->start_offset = start_offset;
-mb->haslookbehind = (re->max_lookbehind > 0);
+mb->allowemptypartial = (re->max_lookbehind > 0) ||
+  (re->flags & PCRE2_MATCH_EMPTY) != 0;
 mb->moptions = options;
 mb->poptions = re->overall_options;
 mb->match_call_count = 0;

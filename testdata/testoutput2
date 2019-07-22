@@ -17231,6 +17231,14 @@ Partial match: \x0a
    abc\n\=ps
  0: 
 
+/(?![ab]).*/
+    ab\=ph,no_jit
+Partial match: 
+
+/c*+/
+    ab\=ph,offset=2,no_jit
+Partial match: 
+
 # End of testinput2
 Error -70: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

@@ -2720,7 +2720,8 @@ Your program may crash or loop indefinitely or give wrong results.
 These options turn on the partial matching feature. A partial match occurs if
 the end of the subject string is reached successfully, but there are not enough
 subject characters to complete the match. In addition, either at least one 
-character must have been inspected or the pattern must contain a lookbehind.
+character must have been inspected or the pattern must contain a lookbehind, or 
+the pattern must be one that could match an empty string.
 .P
 If this situation arises when PCRE2_PARTIAL_SOFT (but not PCRE2_PARTIAL_HARD)
 is set, matching continues by testing any remaining alternatives. Only if no
