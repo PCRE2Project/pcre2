@@ -17190,25 +17190,25 @@ Subject length lower bound = 1
 Failed: error 125 at offset 8: lookbehind assertion is not fixed length
 
 /c*+(?<=[bc])/
-    abc\=ph,no_jit
+    abc\=ph
 Partial match: c
-    ab\=ph,no_jit
+    ab\=ph
 Partial match: 
-    abc\=ps,no_jit
+    abc\=ps
  0: c
-    ab\=ps,no_jit
+    ab\=ps
  0: 
 
 /c++(?<=[bc])/
-    abc\=ph,no_jit
+    abc\=ph
 Partial match: c
-    ab\=ph,no_jit
+    ab\=ph
 Partial match: 
 
 /(?<=(?=.(?<=x)))/
     abx
  0: 
-    ab\=ph,no_jit
+    ab\=ph
 Partial match: 
     bxyz 
  0: 
@@ -17216,27 +17216,27 @@ Partial match:
  0: 
     
 /\z/
-   abc\=ph,no_jit 
+   abc\=ph
 Partial match: 
    abc\=ps 
  0: 
    
 /\Z/
-   abc\=ph,no_jit 
+   abc\=ph
 Partial match: 
    abc\=ps 
  0: 
-   abc\n\=ph,no_jit
+   abc\n\=ph
 Partial match: \x0a
    abc\n\=ps
  0: 
 
 /(?![ab]).*/
-    ab\=ph,no_jit
+    ab\=ph
 Partial match: 
 
 /c*+/
-    ab\=ph,offset=2,no_jit
+    ab\=ph,offset=2
 Partial match: 
 
 # End of testinput2

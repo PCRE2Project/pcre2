@@ -103,7 +103,7 @@ static sljit_u8* generate_put_label_code(struct sljit_put_label *put_label, slji
 	}
 
 	code_ptr -= put_label->flags + (2 + sizeof(sljit_uw));
-	SLJIT_MEMCPY(code_ptr, code_ptr + (2 + sizeof(sljit_uw)), put_label->flags);
+	SLJIT_MEMMOVE(code_ptr, code_ptr + (2 + sizeof(sljit_uw)), put_label->flags);
 
 	SLJIT_ASSERT((code_ptr[0] & 0xf8) == REX_W);
 

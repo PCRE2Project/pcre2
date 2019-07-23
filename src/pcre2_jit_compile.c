@@ -413,6 +413,8 @@ typedef struct compiler_common {
   sljit_sw lcc;
   /* Mode can be PCRE2_JIT_COMPLETE and others. */
   int mode;
+  /* TRUE, when empty match is accepted for partial matching. */
+  BOOL allow_empty_partial;
   /* TRUE, when minlength is greater than 0. */
   BOOL might_be_empty;
   /* \K is found in the pattern. */
@@ -3303,7 +3305,7 @@ SLJIT_ASSERT(!force || common->mode != PCRE2_JIT_COMPLETE);
 if (common->mode == PCRE2_JIT_COMPLETE)
   return;
 
-if (!force)
+if (!force && !common->allow_empty_partial)
   jump = CMP(SLJIT_GREATER_EQUAL, SLJIT_MEM1(SLJIT_SP), common->start_used_ptr, STR_PTR, 0);
 else if (common->mode == PCRE2_JIT_PARTIAL_SOFT)
   jump = CMP(SLJIT_EQUAL, SLJIT_MEM1(SLJIT_SP), common->start_used_ptr, SLJIT_IMM, -1);
@@ -3365,7 +3367,11 @@ if (common->mode == PCRE2_JIT_COMPLETE)
 
 /* Partial matching mode. */
 jump = CMP(SLJIT_LESS, STR_PTR, 0, STR_END, 0);
-add_jump(compiler, backtracks, CMP(SLJIT_GREATER_EQUAL, SLJIT_MEM1(SLJIT_SP), common->start_used_ptr, STR_PTR, 0));
+if (!common->allow_empty_partial)
+  add_jump(compiler, backtracks, CMP(SLJIT_GREATER_EQUAL, SLJIT_MEM1(SLJIT_SP), common->start_used_ptr, STR_PTR, 0));
+else if (common->mode == PCRE2_JIT_PARTIAL_SOFT)
+  add_jump(compiler, backtracks, CMP(SLJIT_EQUAL, SLJIT_MEM1(SLJIT_SP), common->start_used_ptr, SLJIT_IMM, -1));
+
 if (common->mode == PCRE2_JIT_PARTIAL_SOFT)
   {
   OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), common->hit_start, SLJIT_IMM, 0);
@@ -8332,12 +8338,14 @@ switch(type)
     JUMPHERE(jump[3]);
     }
   JUMPHERE(jump[0]);
-  check_partial(common, FALSE);
+  if (common->mode != PCRE2_JIT_COMPLETE)
+    check_partial(common, TRUE);
   return cc;
 
   case OP_EOD:
   add_jump(compiler, backtracks, CMP(SLJIT_LESS, STR_PTR, 0, STR_END, 0));
-  check_partial(common, FALSE);
+  if (common->mode != PCRE2_JIT_COMPLETE)
+    check_partial(common, TRUE);
   return cc;
 
   case OP_DOLL:
@@ -12642,7 +12650,7 @@ struct sljit_jump *once = NULL;
 struct sljit_jump *cond = NULL;
 struct sljit_label *rmin_label = NULL;
 struct sljit_label *exact_label = NULL;
-struct sljit_put_label *put_label;
+struct sljit_put_label *put_label = NULL;
 
 if (*cc == OP_BRAZERO || *cc == OP_BRAMINZERO)
   {
@@ -13696,6 +13704,7 @@ common->fcc = tables + fcc_offset;
 common->lcc = (sljit_sw)(tables + lcc_offset);
 common->mode = mode;
 common->might_be_empty = re->minlength == 0;
+common->allow_empty_partial = (re->max_lookbehind > 0) || (re->flags & PCRE2_MATCH_EMPTY) != 0;
 common->nltype = NLTYPE_FIXED;
 switch(re->newline_convention)
   {

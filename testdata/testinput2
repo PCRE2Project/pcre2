@@ -5694,35 +5694,35 @@ a)"xI
 /(\2)((?=(?<=\1)))/
 
 /c*+(?<=[bc])/
-    abc\=ph,no_jit
-    ab\=ph,no_jit
-    abc\=ps,no_jit
-    ab\=ps,no_jit
+    abc\=ph
+    ab\=ph
+    abc\=ps
+    ab\=ps
 
 /c++(?<=[bc])/
-    abc\=ph,no_jit
-    ab\=ph,no_jit
+    abc\=ph
+    ab\=ph
 
 /(?<=(?=.(?<=x)))/
     abx
-    ab\=ph,no_jit
+    ab\=ph
     bxyz 
     xyz
     
 /\z/
-   abc\=ph,no_jit 
+   abc\=ph
    abc\=ps 
    
 /\Z/
-   abc\=ph,no_jit 
+   abc\=ph
    abc\=ps 
-   abc\n\=ph,no_jit
+   abc\n\=ph
    abc\n\=ps
 
 /(?![ab]).*/
-    ab\=ph,no_jit
+    ab\=ph
 
 /c*+/
-    ab\=ph,offset=2,no_jit
+    ab\=ph,offset=2
 
 # End of testinput2
