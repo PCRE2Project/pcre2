@@ -5302,6 +5302,7 @@ PCRE2_UCHAR *tempcode;
 PCRE2_UCHAR *previous = NULL;
 PCRE2_UCHAR op_previous;
 BOOL groupsetfirstcu = FALSE;
+BOOL had_accept = FALSE;
 BOOL matched_char = FALSE;
 BOOL previous_matched_char = FALSE;
 const uint8_t *cbits = cb->cbits;
@@ -5436,7 +5437,7 @@ for (;; pptr++)
   if (meta < META_ASTERISK || meta > META_MINMAX_QUERY)
     {
     previous = code;
-    if (matched_char) okreturn = 1;
+    if (matched_char && !had_accept) okreturn = 1;
     }
 
   previous_matched_char = matched_char;
@@ -6075,7 +6076,7 @@ for (;; pptr++)
     workspace overflow. Do not set firstcu after *ACCEPT. */
 
     case META_ACCEPT:
-    cb->had_accept = TRUE;
+    cb->had_accept = had_accept = TRUE;
     for (oc = cb->open_caps;
          oc != NULL && oc->assert_depth >= cb->assert_depth;
          oc = oc->next)

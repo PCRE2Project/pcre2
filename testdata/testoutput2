@@ -11241,6 +11241,7 @@ No match
 
 /(*ACCEPT)a/I,aftertext
 Capture group count = 0
+May match empty string
 Subject length lower bound = 0
     bax
  0: 
@@ -16911,6 +16912,7 @@ Subject length lower bound = 3
 
 /(*ACCEPT:XX)^abc/I
 Capture group count = 0
+May match empty string
 Subject length lower bound = 0
 
 /abc/replace=xyz
