@@ -5688,6 +5688,21 @@ a)"xI
 
 /(*napla:abc|abd)/I
 
+/(*napla:a|(.)(*ACCEPT)zz)\1../
+    abcd
+    
+/(*napla:a(*ACCEPT)zz|(.))\1../
+    abcd
+    
+/(*napla:a|(*COMMIT)(.))\1\1/
+    aabc
+\= Expect no match     
+    abbc   
+
+/(*napla:a|(.))\1\1/
+    aabc
+    abbc   
+
 # ----
 
 # Expect error (recursion => not fixed length)

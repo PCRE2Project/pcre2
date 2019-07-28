@@ -17185,6 +17185,32 @@ May match empty string
 First code unit = 'a'
 Subject length lower bound = 1
 
+/(*napla:a|(.)(*ACCEPT)zz)\1../
+    abcd
+ 0: abc
+ 1: a
+    
+/(*napla:a(*ACCEPT)zz|(.))\1../
+    abcd
+ 0: bcd
+ 1: b
+    
+/(*napla:a|(*COMMIT)(.))\1\1/
+    aabc
+ 0: aa
+ 1: a
+\= Expect no match     
+    abbc   
+No match
+
+/(*napla:a|(.))\1\1/
+    aabc
+ 0: aa
+ 1: a
+    abbc   
+ 0: bb
+ 1: b
+
 # ----
 
 # Expect error (recursion => not fixed length)

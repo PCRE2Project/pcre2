@@ -1,4 +1,4 @@
-.TH PCRE2PATTERN 3 "13 July 2019" "PCRE2 10.34"
+.TH PCRE2PATTERN 3 "28 July 2019" "PCRE2 10.34"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION DETAILS"
@@ -3796,11 +3796,22 @@ a positive assertion and false for a negative one; captured substrings are
 retained in both cases.
 .P
 The remaining verbs act only when a later failure causes a backtrack to
-reach them. This means that their effect is confined to the assertion,
-because lookaround assertions are atomic. A backtrack that occurs after an
-assertion is complete does not jump back into the assertion. Note in particular
-that a (*MARK) name that is set in an assertion is not "seen" by an instance of
-(*SKIP:NAME) latter in the pattern.
+reach them. This means that, for the Perl-compatible assertions, their effect
+is confined to the assertion, because Perl lookaround assertions are atomic. A
+backtrack that occurs after such an assertion is complete does not jump back
+into the assertion. Note in particular that a (*MARK) name that is set in an
+assertion is not "seen" by an instance of (*SKIP:NAME) later in the pattern.
+.P
+PCRE2 now supports non-atomic positive assertions, as described in the section
+entitled
+.\" HTML <a href="#nonatomicassertions">                                       
+.\" </a>                                                                      
+"Non-atomic assertions"                                                        
+.\"                                                                            
+above. These assertions must be standalone (not used as conditions). They are
+not Perl-compatible. For these assertions, a later backtrack does jump back
+into the assertion, and therefore verbs such as (*COMMIT) can be triggered by
+backtracks from later in the pattern.
 .P
 The effect of (*THEN) is not allowed to escape beyond an assertion. If there
 are no more branches to try, (*THEN) causes a positive assertion to be false,
@@ -3859,6 +3870,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 13 July 2019
+Last updated: 28 July 2019
 Copyright (c) 1997-2019 University of Cambridge.
 .fi
