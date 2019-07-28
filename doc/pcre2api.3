@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "22 July 2019" "PCRE2 10.34"
+.TH PCRE2API 3 "28 July 2019" "PCRE2 10.34"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -88,7 +88,7 @@ document for an overview of all the PCRE2 documentation.
 .B "  uint32_t \fIvalue\fP);"
 .sp
 .B int pcre2_set_character_tables(pcre2_compile_context *\fIccontext\fP,
-.B "  const unsigned char *\fItables\fP);"
+.B "  const uint8_t *\fItables\fP);"
 .sp
 .B int pcre2_set_compile_extra_options(pcre2_compile_context *\fIccontext\fP,
 .B "  uint32_t \fIextra_options\fP);"
@@ -725,7 +725,7 @@ interpreted matching functions, \fIpcre2_match()\fP and
 .sp
 .nf
 .B int pcre2_set_character_tables(pcre2_compile_context *\fIccontext\fP,
-.B "  const unsigned char *\fItables\fP);"
+.B "  const uint8_t *\fItables\fP);"
 .fi
 .sp
 The value must be the result of a call to \fIpcre2_maketables()\fP, whose only
@@ -3863,6 +3863,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 22 July 2019
+Last updated: 28 July 2019
 Copyright (c) 1997-2019 University of Cambridge.
 .fi

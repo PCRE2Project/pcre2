@@ -584,7 +584,7 @@ PCRE2_EXP_DECL void PCRE2_CALL_CONVENTION \
 PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION \
   pcre2_set_bsr(pcre2_compile_context *, uint32_t); \
 PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION \
-  pcre2_set_character_tables(pcre2_compile_context *, const unsigned char *); \
+  pcre2_set_character_tables(pcre2_compile_context *, const uint8_t *); \
 PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION \
   pcre2_set_compile_extra_options(pcre2_compile_context *, uint32_t); \
 PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION \
