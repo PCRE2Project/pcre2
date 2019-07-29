@@ -28,6 +28,7 @@ appropriate graphic for the codepoint. */
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <string.h>
 
 /* The valid ranges for UTF-8 characters are:
 
@@ -172,7 +173,7 @@ if (argc > 1 && strcmp(argv[1], "-s") == 0)
 
 for (; i < argc; i++)
   {
-  unsigned char *x = argv[i];
+  char *x = argv[i];
   if (strncmp(x, "0x", 2) == 0)
     {
     int j; 
