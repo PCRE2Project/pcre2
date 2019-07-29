@@ -87,6 +87,7 @@
 #                      Pictographic property.
 # 01-October-2018:   Added the 'Unknown' script name
 # 03-October-2018:   Added new field for Script Extensions
+# 27-July-2019:      Updated for Unicode 12.1.0
 # ----------------------------------------------------------------------------
 #
 #
@@ -424,7 +425,9 @@ script_names = ['Unknown', 'Arabic', 'Armenian', 'Bengali', 'Bopomofo', 'Braille
  'Nushu', 'Soyombo', 'Zanabazar_Square',
 # New for Unicode 11.0.0
   'Dogra', 'Gunjala_Gondi', 'Hanifi_Rohingya', 'Makasar', 'Medefaidrin',
-  'Old_Sogdian', 'Sogdian'
+  'Old_Sogdian', 'Sogdian',
+# New for Unicode 12.0.0
+  'Elymaic', 'Nandinagari', 'Nyiakeng_Puachue_Hmong', 'Wancho'
  ]
 
 script_abbrevs = [
@@ -457,7 +460,9 @@ script_abbrevs = [
   'Adlm', 'Bhks', 'Marc', 'Newa', 'Osge', 'Tang', 'Gonm', 'Nshu', 'Soyo',
   'Zanb',
 #New for Unicode 11.0.0
-  'Dogr', 'Gong', 'Rohg', 'Maka', 'Medf', 'Sogo', 'Sogd'
+  'Dogr', 'Gong', 'Rohg', 'Maka', 'Medf', 'Sogo', 'Sogd',
+#New for Unicode 12.0.0
+  'Elym', 'Nand', 'Hmnp', 'Wcho'
   ]
 
 category_names = ['Cc', 'Cf', 'Cn', 'Co', 'Cs', 'Ll', 'Lm', 'Lo', 'Lt', 'Lu',

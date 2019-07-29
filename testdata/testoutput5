@@ -4893,6 +4893,12 @@ MK: ABC
  0: \x{1d7ce}\x{1d7cf},,
     A\x{1d7ce}BC           Latin fancy-common-digit Latin Latin
  0: A\x{1d7ce}BC
+    
+# Some Unicode 12.1.0 new script characters
+
+/\p{Elymaic}\p{Nandinagari}\p{Nyiakeng_Puachue_Hmong}\p{Wancho}/utf
+    \x{10fe5}\x{119AC}\x{1E10E}\x{1E2D1} 
+ 0: \x{10fe5}\x{119ac}\x{1e10e}\x{1e2d1}
 
 # ------- 
 

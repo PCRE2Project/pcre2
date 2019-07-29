@@ -247,7 +247,12 @@ const unsigned char *script_names[] = {
   US"Makasar",
   US"Medefaidrin",
   US"Old_Sogdian",
-  US"Sogdian"
+  US"Sogdian",
+  /* New for Unicode 12.0.0 */
+  US"Elymaic",
+  US"Nandinagari",
+  US"Nyiakeng_Puachue_Hmong",
+  US"Wancho"
 };
 
 const unsigned char *type_names[] = {
