@@ -1,4 +1,4 @@
-.TH PCRE2TEST 1 "26 June 2019" "PCRE 10.34"
+.TH PCRE2TEST 1 "30 July 2019" "PCRE 10.34"
 .SH NAME
 pcre2test - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -202,10 +202,16 @@ compiled pattern is given after compilation.
 Behave as if each pattern line has the \fBjit\fP modifier; after successful
 compilation, each pattern is passed to the just-in-time compiler, if available.
 .TP 10
+\fB-jitfast\fP
+Behave as if each pattern line has the \fBjitfast\fP modifier; after
+successful compilation, each pattern is passed to the just-in-time compiler, if
+available, and each subject line is passed directly to the JIT matcher via its 
+"fast path".
+.TP 10
 \fB-jitverify\fP
 Behave as if each pattern line has the \fBjitverify\fP modifier; after
 successful compilation, each pattern is passed to the just-in-time compiler, if
-available, and the use of JIT is verified.
+available, and the use of JIT for matching is verified.
 .TP 10
 \fB-LM\fP
 List modifiers: write a list of available pattern and subject modifiers to the
@@ -2067,6 +2073,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 26 June 2019
+Last updated: 30 July 2019
 Copyright (c) 1997-2019 University of Cambridge.
 .fi

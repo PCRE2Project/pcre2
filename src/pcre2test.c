@@ -8078,7 +8078,7 @@ Returns:     nothing
 static void
 print_newline_config(uint32_t optval, BOOL isc)
 {
-if (!isc) printf("  Newline sequence is ");
+if (!isc) printf("  Default newline sequence is ");
 if (optval < sizeof(newlines)/sizeof(char *))
   printf("%s\n", newlines[optval]);
 else
@@ -8134,6 +8134,7 @@ printf("  -error <n,m,..>  show messages for error numbers, then exit\n");
 printf("  -help         show usage information\n");
 printf("  -i            set default pattern modifier 'info'\n");
 printf("  -jit          set default pattern modifier 'jit'\n");
+printf("  -jitfast      set default pattern modifier 'jitfast'\n");
 printf("  -jitverify    set default pattern modifier 'jitverify'\n");
 printf("  -LM           list pattern and subject modifiers, then exit\n");
 printf("  -q            quiet: do not output PCRE2 version number at start\n");
@@ -8303,6 +8304,15 @@ printf("  Default heap limit = %d kibibytes\n", optval);
 printf("  Default match limit = %d\n", optval);
 (void)PCRE2_CONFIG(PCRE2_CONFIG_DEPTHLIMIT, &optval);
 printf("  Default depth limit = %d\n", optval);
+
+#if defined SUPPORT_LIBREADLINE
+printf("  pcre2test has libreadline support\n");
+#elif defined SUPPORT_LIBEDIT
+printf("  pcre2test has libedit support\n");
+#else
+printf("  pcre2test has neither libreadline nor libedit support\n");
+#endif
+
 return 0;
 }
 
@@ -8639,13 +8649,15 @@ while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
   else if (strcmp(arg, "-d") == 0)   def_patctl.control |= CTL_DEBUG;
   else if (strcmp(arg, "-dfa") == 0) def_datctl.control |= CTL_DFA;
   else if (strcmp(arg, "-i") == 0)   def_patctl.control |= CTL_INFO;
-  else if (strcmp(arg, "-jit") == 0 || strcmp(arg, "-jitverify") == 0)
+  else if (strcmp(arg, "-jit") == 0 || strcmp(arg, "-jitverify") == 0 ||
+           strcmp(arg, "-jitfast") == 0)
     {
-    if (arg[4] != 0) def_patctl.control |= CTL_JITVERIFY;
+    if (arg[4] == 'v') def_patctl.control |= CTL_JITVERIFY;
+      else if (arg[4] == 'f') def_patctl.control |= CTL_JITFAST;
     def_patctl.jit = JIT_DEFAULT;  /* full & partial */
 #ifndef SUPPORT_JIT
     fprintf(stderr, "** Warning: JIT support is not available: "
-                    "-jit[verify] calls functions that do nothing.\n");
+                    "-jit[fast|verify] calls functions that do nothing.\n");
 #endif
     }
 

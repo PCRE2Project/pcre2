@@ -242,10 +242,17 @@ Behave as if each pattern line has the <b>jit</b> modifier; after successful
 compilation, each pattern is passed to the just-in-time compiler, if available.
 </P>
 <P>
+<b>-jitfast</b>
+Behave as if each pattern line has the <b>jitfast</b> modifier; after
+successful compilation, each pattern is passed to the just-in-time compiler, if
+available, and each subject line is passed directly to the JIT matcher via its 
+"fast path".
+</P>
+<P>
 <b>-jitverify</b>
 Behave as if each pattern line has the <b>jitverify</b> modifier; after
 successful compilation, each pattern is passed to the just-in-time compiler, if
-available, and the use of JIT is verified.
+available, and the use of JIT for matching is verified.
 </P>
 <P>
 <b>-LM</b>
@@ -2086,7 +2093,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC21" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 26 June 2019
+Last updated: 30 July 2019
 <br>
 Copyright &copy; 1997-2019 University of Cambridge.
 <br>

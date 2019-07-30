@@ -2,12 +2,15 @@
 * A program for testing the Unicode property table *
 ***************************************************/
 
-/* Copyright (c) University of Cambridge 2008 - 2018 */
+/* Copyright (c) University of Cambridge 2008-2019 */
 
 /* Compile thus:
+
    gcc -DHAVE_CONFIG_H -DPCRE2_CODE_UNIT_WIDTH=8 -o ucptest \
      ucptest.c ../src/pcre2_ucd.c ../src/pcre2_tables.c
-   Add -lreadline or -ledit if required.
+
+   Add -lreadline or -ledit if PCRE2 was configured with readline or libedit
+   support in pcre2test.
 */
 
 /* This is a hacked-up program for testing the Unicode properties tables of
