@@ -1,6 +1,6 @@
 # This set of tests is for features that are compatible with all versions of
 # Perl >= 5.10, in non-UTF mode. It should run clean for the 8-bit, 16-bit, and
-# 32-bit PCRE libraries, and also using the perltest.pl script.
+# 32-bit PCRE libraries, and also using the perltest.sh script.
     
 #forbid_utf
 #newline_default lf any anycrlf
