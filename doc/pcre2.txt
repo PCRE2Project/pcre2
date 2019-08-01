@@ -400,7 +400,7 @@ PCRE2 NATIVE API AUXILIARY FUNCTIONS
        int pcre2_get_error_message(int errorcode, PCRE2_UCHAR *buffer,
          PCRE2_SIZE bufflen);
 
-       const unsigned char *pcre2_maketables(pcre2_general_context *gcontext);
+       const uint8_t *pcre2_maketables(pcre2_general_context *gcontext);
 
        int pcre2_pattern_info(const pcre2_code *code, uint32_t what,
          void *where);
@@ -3706,7 +3706,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 28 July 2019
+       Last updated: 01 August 2019
        Copyright (c) 1997-2019 University of Cambridge.
 ------------------------------------------------------------------------------
  
