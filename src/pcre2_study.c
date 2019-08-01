@@ -1584,7 +1584,9 @@ return yield;
 /* This function is handed a compiled expression that it must study to produce
 information that will speed up the matching.
 
-Argument:  points to the compiled expression
+Argument:  
+  re       points to the compiled expression
+   
 Returns:   0 normally; non-zero should never normally occur
            1 unknown opcode in set_start_bits
            2 missing capturing bracket

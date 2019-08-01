@@ -6024,9 +6024,9 @@ Arguments:
 
 Returns:          > 0 => success; value is the number of ovector pairs filled
                   = 0 => success, but ovector is not big enough
-                   -1 => failed to match (PCRE2_ERROR_NOMATCH)
-                   -2 => partial match (PCRE2_ERROR_PARTIAL)
-                 < -2 => some kind of unexpected problem
+                  = -1 => failed to match (PCRE2_ERROR_NOMATCH)
+                  = -2 => partial match (PCRE2_ERROR_PARTIAL)
+                  < -2 => some kind of unexpected problem
 */
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
