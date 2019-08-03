@@ -105,6 +105,7 @@ find_minlength(const pcre2_real_code *re, PCRE2_SPTR code,
   int *backref_cache)
 {
 int length = -1;
+int branchlength = 0;
 int prev_cap_recno = -1;
 int prev_cap_d = 0;
 int prev_recurse_recno = -1;
@@ -112,9 +113,9 @@ int prev_recurse_d = 0;
 uint32_t once_fudge = 0;
 BOOL had_recurse = FALSE;
 BOOL dupcapused = (re->flags & PCRE2_DUPCAPUSED) != 0;
-recurse_check this_recurse;
-int branchlength = 0;
+PCRE2_SPTR nextbranch = code + GET(code, 1);
 PCRE2_UCHAR *cc = (PCRE2_UCHAR *)code + 1 + LINK_SIZE;
+recurse_check this_recurse;
 
 /* If this is a "could be empty" group, its minimum length is 0. */
 
@@ -130,16 +131,20 @@ if ((*countptr)++ > 1000) return -1;
 
 /* Scan along the opcodes for this branch. If we get to the end of the branch,
 check the length against that of the other branches. If the accumulated length
-passes 16-bits, stop. */
+passes 16-bits, reset to that value and skip the rest of the branch. */
 
 for (;;)
   {
   int d, min, recno;
-  PCRE2_UCHAR *cs, *ce;
-  PCRE2_UCHAR op = *cc;
+  PCRE2_UCHAR op, *cs, *ce;
 
-  if (branchlength >= UINT16_MAX) return UINT16_MAX;
+  if (branchlength >= UINT16_MAX)
+    {
+    branchlength = UINT16_MAX;
+    cc = (PCRE2_UCHAR *)nextbranch;
+    }
 
+  op = *cc;
   switch (op)
     {
     case OP_COND:
@@ -229,6 +234,7 @@ for (;;)
     if (length < 0 || (!had_recurse && branchlength < length))
       length = branchlength;
     if (op != OP_ALT) return length;
+    nextbranch = cc + GET(cc, 1);
     cc += 1 + LINK_SIZE;
     branchlength = 0;
     had_recurse = FALSE;
@@ -241,7 +247,7 @@ for (;;)
     case OP_ASSERTBACK:
     case OP_ASSERTBACK_NOT:
     case OP_ASSERT_NA:
-    case OP_ASSERTBACK_NA:  
+    case OP_ASSERTBACK_NA:
     do cc += GET(cc, 1); while (*cc == OP_ALT);
     /* Fall through */
 
@@ -1091,7 +1097,7 @@ do
       case OP_ONCE:
       case OP_SCRIPT_RUN:
       case OP_ASSERT:
-      case OP_ASSERT_NA: 
+      case OP_ASSERT_NA:
       rc = set_start_bits(re, tcode, utf);
       if (rc == SSB_FAIL || rc == SSB_UNKNOWN) return rc;
       if (rc == SSB_DONE) try_next = FALSE; else
@@ -1134,7 +1140,7 @@ do
       case OP_ASSERT_NOT:
       case OP_ASSERTBACK:
       case OP_ASSERTBACK_NOT:
-      case OP_ASSERTBACK_NA: 
+      case OP_ASSERTBACK_NA:
       do tcode += GET(tcode, 1); while (*tcode == OP_ALT);
       tcode += 1 + LINK_SIZE;
       break;
@@ -1584,9 +1590,9 @@ return yield;
 /* This function is handed a compiled expression that it must study to produce
 information that will speed up the matching.
 
-Argument:  
+Argument:
   re       points to the compiled expression
-   
+
 Returns:   0 normally; non-zero should never normally occur
            1 unknown opcode in set_start_bits
            2 missing capturing bracket

@@ -17267,6 +17267,33 @@ Partial match:
     ab\=ph,offset=2
 Partial match: 
 
+/\A\s*(a|(?:[^`]{28500}){4})/I
+Capture group count = 1
+Max lookbehind = 1
+Compile options: <none>
+Overall options: anchored
+Subject length lower bound = 1
+    a
+ 0: a
+ 1: a
+
+/\A\s*((?:[^`]{28500}){4})/I
+Capture group count = 1
+Max lookbehind = 1
+Compile options: <none>
+Overall options: anchored
+Subject length lower bound = 65535
+
+/\A\s*((?:[^`]{28500}){4}|a)/I
+Capture group count = 1
+Max lookbehind = 1
+Compile options: <none>
+Overall options: anchored
+Subject length lower bound = 1
+    a
+ 0: a
+ 1: a
+
 # End of testinput2
 Error -70: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data
