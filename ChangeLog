@@ -129,6 +129,10 @@ that is remembered as a minimum length), the whole group's length was
 incorrectly recorded as 65535, leading to incorrect "no match" when start-up 
 optimizations were in force.
 
+29. The "rightmost consulted character" value was not always correct; in 
+particular, if a pattern ended with a negative lookahead, characters that were 
+inspected in that lookahead were not included.
+
 
 Version 10.33 16-April-2019
 ---------------------------

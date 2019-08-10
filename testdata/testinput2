@@ -4584,7 +4584,7 @@ B)x/alt_verbnames,mark
 
 /abcd/null_context
     abcd\=null_context
-\= Expect error
+\= Expect error - not allowed together
     abcd\=null_context,find_limits
     abcd\=allusedtext,startchar
 

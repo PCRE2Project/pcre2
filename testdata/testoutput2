@@ -14803,7 +14803,7 @@ No match
 /abcd/null_context
     abcd\=null_context
  0: abcd
-\= Expect error
+\= Expect error - not allowed together
     abcd\=null_context,find_limits
 ** Not allowed together: find_limits null_context
     abcd\=allusedtext,startchar

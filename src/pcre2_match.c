@@ -5971,6 +5971,7 @@ in rrc. */
 #define LBL(val) case val: goto L_RM##val;
 
 RETURN_SWITCH:
+if (Feptr > mb->last_used_ptr) mb->last_used_ptr = Feptr;
 if (Frdepth == 0) return rrc;                     /* Exit from the top level */
 F = (heapframe *)((char *)F - Fback_frame);       /* Backtrack */
 mb->cb->callout_flags |= PCRE2_CALLOUT_BACKTRACK; /* Note for callouts */

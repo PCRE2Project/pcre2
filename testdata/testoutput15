@@ -525,4 +525,12 @@ No match
     \[a]{60}
 Failed: error -63: heap limit exceeded
 
+/b(?<!ax)(?!cx)/allusedtext
+    abc
+ 0: abc
+    < >
+    abcz
+ 0: abcz
+    < >>
+
 # End of testinput15

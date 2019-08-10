@@ -231,4 +231,8 @@
 /(*LIMIT_HEAP=21)\[(a)]{60}/expand
     \[a]{60}
 
+/b(?<!ax)(?!cx)/allusedtext
+    abc
+    abcz
+
 # End of testinput15
