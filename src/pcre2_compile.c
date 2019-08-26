@@ -9465,14 +9465,14 @@ non-nested closing parenthesis in this case, returning a pointer to it.
 Arguments
   pptr      points to where to start (start of pattern or start of lookahead)
   retptr    if not NULL, return the ket pointer here
-  recurses  chain of recurse_check to catch mutual recursion 
+  recurses  chain of recurse_check to catch mutual recursion
   cb        points to the compile block
 
 Returns:    0 on success, or an errorcode (cb->erroroffset will be set)
 */
 
 static int
-check_lookbehinds(uint32_t *pptr, uint32_t **retptr, 
+check_lookbehinds(uint32_t *pptr, uint32_t **retptr,
   parsed_recurse_check *recurses, compile_block *cb)
 {
 int max;
@@ -9549,13 +9549,22 @@ for (; *pptr != META_END; pptr++)
     break;
 
     case META_BACKREF_BYNAME:
+    case META_RECURSE_BYNAME:
+    pptr += 1 + SIZEOFFSET;
+    break;
+
     case META_COND_DEFINE:
     case META_COND_NAME:
     case META_COND_NUMBER:
     case META_COND_RNAME:
     case META_COND_RNUMBER:
-    case META_RECURSE_BYNAME:
     pptr += 1 + SIZEOFFSET;
+    nestlevel++;
+    break;
+
+    case META_COND_VERSION:
+    pptr += 3;
+    nestlevel++;
     break;
 
     case META_CALLOUT_STRING:
@@ -9576,7 +9585,6 @@ for (; *pptr != META_END; pptr++)
     break;
 
     case META_CALLOUT_NUMBER:
-    case META_COND_VERSION:
     pptr += 3;
     break;
 
@@ -9591,7 +9599,7 @@ for (; *pptr != META_END; pptr++)
     case META_LOOKBEHIND:
     case META_LOOKBEHINDNOT:
     case META_LOOKBEHIND_NA:
-    if (!set_lookbehind_lengths(&pptr, &max, &errorcode, &loopcount, 
+    if (!set_lookbehind_lengths(&pptr, &max, &errorcode, &loopcount,
          recurses, cb))
       return errorcode;
     break;
@@ -10421,12 +10429,12 @@ if ((re->overall_options & PCRE2_NO_START_OPTIMIZE) == 0)
     errorcode = ERR31;
     goto HAD_CB_ERROR;
     }
-    
-  /* If study() set a bitmap of starting code units, it implies a minimum 
+
+  /* If study() set a bitmap of starting code units, it implies a minimum
   length of at least one. */
-    
+
   if ((re->flags & PCRE2_FIRSTMAPSET) != 0 && minminlength == 0)
-    minminlength = 1; 
+    minminlength = 1;
 
   /* If the minimum length set (or not set) by study() is less than the minimum
   implied by required code units, override it. */

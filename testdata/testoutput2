@@ -17294,6 +17294,99 @@ Subject length lower bound = 1
  0: a
  1: a
 
+/(?<A>a)(?(<A>)b)((?<=b).*)/B
+------------------------------------------------------------------
+        Bra
+        CBra 1
+        a
+        Ket
+        Cond
+      1 Cond ref
+        b
+        Ket
+        CBra 2
+        Assert back
+        Reverse
+        b
+        Ket
+        Any*+
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+
+/(?(1)b)((?<=b).*)/B
+------------------------------------------------------------------
+        Bra
+        Cond
+      1 Cond ref
+        b
+        Ket
+        CBra 1
+        Assert back
+        Reverse
+        b
+        Ket
+        Any*+
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+
+/(?(R1)b)((?<=b).*)/B
+------------------------------------------------------------------
+        Bra
+        Cond
+        Cond recurse 1
+        b
+        Ket
+        CBra 1
+        Assert back
+        Reverse
+        b
+        Ket
+        Any*+
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+
+/(?(DEFINE)b)((?<=b).*)/B
+------------------------------------------------------------------
+        Bra
+        Cond
+        Cond false
+        b
+        Ket
+        CBra 1
+        Assert back
+        Reverse
+        b
+        Ket
+        Any*+
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+
+/(?(VERSION=10.4)b)((?<=b).*)/B
+------------------------------------------------------------------
+        Bra
+        Cond
+        Cond false
+        b
+        Ket
+        CBra 1
+        Assert back
+        Reverse
+        b
+        Ket
+        Any*+
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+
 # End of testinput2
 Error -70: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

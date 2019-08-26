@@ -6383,4 +6383,7 @@ ef) x/x,mark
 /(?<=(?=(?<=a)))b/
     ab
 
+/^(?<A>a)(?(<A>)b)((?<=b).*)$/
+    abc
+
 # End of testinput1 
