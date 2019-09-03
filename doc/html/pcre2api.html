@@ -312,6 +312,10 @@ document for an overview of all the PCRE2 documentation.
 <b>const uint8_t *pcre2_maketables(pcre2_general_context *<i>gcontext</i>);</b>
 <br>
 <br>
+<b>void pcre2_maketables_free(pcre2_general_context *<i>gcontext</i>, </b>
+<b>  const uint8_t *<i>tables</i>);</b>
+<br>
+<br>
 <b>int pcre2_pattern_info(const pcre2_code *<i>code</i>, uint32_t <i>what</i>,</b>
 <b>  void *<i>where</i>);</b>
 <br>
@@ -794,7 +798,7 @@ interpreted matching functions, <i>pcre2_match()</i> and
 <b>  const uint8_t *<i>tables</i>);</b>
 <br>
 <br>
-The value must be the result of a call to <i>pcre2_maketables()</i>, whose only
+The value must be the result of a call to <b>pcre2_maketables()</b>, whose only
 argument is a general context. This function builds a set of character tables
 in the current locale.
 <br>
@@ -1982,13 +1986,20 @@ Most (but not all) patterns can be optimized by the JIT compiler.
 <a name="localesupport"></a></P>
 <br><a name="SEC22" href="#TOC1">LOCALE SUPPORT</a><br>
 <P>
+<b>const uint8_t *pcre2_maketables(pcre2_general_context *<i>gcontext</i>);</b>
+<br>
+<br>
+<b>void pcre2_maketables_free(pcre2_general_context *<i>gcontext</i>, </b>
+<b>  const uint8_t *<i>tables</i>);</b>
+</P>
+<P>
 PCRE2 handles caseless matching, and determines whether characters are letters,
 digits, or whatever, by reference to a set of tables, indexed by character code
-point. This applies only to characters whose code points are less than 256. By
-default, higher-valued code points never match escapes such as \w or \d.
-However, if PCRE2 is built with Unicode support, all characters can be tested
-with \p and \P, or, alternatively, the PCRE2_UCP option can be set when a
-pattern is compiled; this causes \w and friends to use Unicode property
+point. However, this applies only to characters whose code points are less than
+256. By default, higher-valued code points never match escapes such as \w or
+\d. When PCRE2 is built with Unicode support (the default), all characters can
+be tested with \p and \P, or, alternatively, the PCRE2_UCP option can be set
+when a pattern is compiled; this causes \w and friends to use Unicode property
 support instead of the built-in tables.
 </P>
 <P>
@@ -1997,24 +2008,28 @@ with code points greater than 128, you should either use Unicode support, or
 use locales, but not try to mix the two.
 </P>
 <P>
-PCRE2 contains an internal set of character tables that are used by default.
+PCRE2 contains a built-in set of character tables that are used by default.
 These are sufficient for many applications. Normally, the internal tables
 recognize only ASCII characters. However, when PCRE2 is built, it is possible
 to cause the internal tables to be rebuilt in the default "C" locale of the
 local system, which may cause them to be different.
 </P>
 <P>
-The internal tables can be overridden by tables supplied by the application
+The built-in tables can be overridden by tables supplied by the application
 that calls PCRE2. These may be created in a different locale from the default.
 As more and more applications change to using Unicode, the need for this locale
 support is expected to die away.
 </P>
 <P>
 External tables are built by calling the <b>pcre2_maketables()</b> function, in
-the relevant locale. The result can be passed to <b>pcre2_compile()</b> as often
-as necessary, by creating a compile context and calling
-<b>pcre2_set_character_tables()</b> to set the tables pointer therein. For
-example, to build and use tables that are appropriate for the French locale
+the relevant locale. The only argument to this function is a general context,
+which can be used to pass a custom memory allocator. If the argument is NULL,
+the system <b>malloc()</b> is used. The result can be passed to
+<b>pcre2_compile()</b> as often as necessary, by creating a compile context and
+calling <b>pcre2_set_character_tables()</b> to set the tables pointer therein.
+</P>
+<P>
+For example, to build and use tables that are appropriate for the French locale
 (where accented characters with values greater than 128 are treated as
 letters), the following code could be used:
 <pre>
@@ -2025,9 +2040,7 @@ letters), the following code could be used:
   re = pcre2_compile(..., ccontext);
 </pre>
 The locale name "fr_FR" is used on Linux and other Unix-like systems; if you
-are using Windows, the name for the French locale is "french". It is the
-caller's responsibility to ensure that the memory containing the tables remains
-available for as long as it is needed.
+are using Windows, the name for the French locale is "french". 
 </P>
 <P>
 The pointer that is passed (via the compile context) to <b>pcre2_compile()</b>
@@ -2035,6 +2048,13 @@ is saved with the compiled pattern, and the same tables are used by
 <b>pcre2_match()</b> and <b>pcre_dfa_match()</b>. Thus, for any single pattern,
 compilation and matching both happen in the same locale, but different patterns
 can be processed in different locales.
+</P>
+<P>
+It is the caller's responsibility to ensure that the memory containing the
+tables remains available while they are still in use. When they are no longer
+needed, you can discard them using <b>pcre2_maketables_free()</b>, which should
+pass as its first parameter the same global context that was used to create the
+tables.
 <a name="infoaboutpattern"></a></P>
 <br><a name="SEC23" href="#TOC1">INFORMATION ABOUT A COMPILED PATTERN</a><br>
 <P>
@@ -3851,7 +3871,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC42" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 01 August 2019
+Last updated: 02 September 2019
 <br>
 Copyright &copy; 1997-2019 University of Cambridge.
 <br>

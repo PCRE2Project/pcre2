@@ -4390,7 +4390,7 @@ if (jit_stack != NULL) pcre2_jit_stack_free(jit_stack);
 #endif
 
 free(main_buffer);
-free((void *)character_tables);
+if (character_tables != NULL) pcre2_maketables_free(NULL, character_tables);
 
 pcre2_compile_context_free(compile_context);
 pcre2_match_context_free(match_context);

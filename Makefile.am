@@ -57,6 +57,7 @@ dist_html_DATA = \
   doc/html/pcre2_jit_stack_create.html \
   doc/html/pcre2_jit_stack_free.html \
   doc/html/pcre2_maketables.html \
+  doc/html/pcre2_maketables_free.html \
   doc/html/pcre2_match.html \
   doc/html/pcre2_match_context_copy.html \
   doc/html/pcre2_match_context_create.html \
@@ -152,6 +153,7 @@ dist_man_MANS = \
   doc/pcre2_jit_stack_create.3 \
   doc/pcre2_jit_stack_free.3 \
   doc/pcre2_maketables.3 \
+  doc/pcre2_maketables_free.3 \
   doc/pcre2_match.3 \
   doc/pcre2_match_context_copy.3 \
   doc/pcre2_match_context_create.3 \
@@ -360,7 +362,7 @@ COMMON_SOURCES = \
   src/pcre2_internal.h \
   src/pcre2_intmodedep.h \
   src/pcre2_jit_compile.c \
-  src/pcre2_jit_simd_inc.h \ 
+  src/pcre2_jit_simd_inc.h \
   src/pcre2_maketables.c \
   src/pcre2_match.c \
   src/pcre2_match_data.c \

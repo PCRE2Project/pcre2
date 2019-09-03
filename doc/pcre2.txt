@@ -402,6 +402,9 @@ PCRE2 NATIVE API AUXILIARY FUNCTIONS
 
        const uint8_t *pcre2_maketables(pcre2_general_context *gcontext);
 
+       void pcre2_maketables_free(pcre2_general_context *gcontext,
+         const uint8_t *tables);
+
        int pcre2_pattern_info(const pcre2_code *code, uint32_t what,
          void *where);
 
@@ -1941,39 +1944,48 @@ JUST-IN-TIME (JIT) COMPILATION
 
 LOCALE SUPPORT
 
+       const uint8_t *pcre2_maketables(pcre2_general_context *gcontext);
+
+       void pcre2_maketables_free(pcre2_general_context *gcontext,
+         const uint8_t *tables);
+
        PCRE2  handles caseless matching, and determines whether characters are
        letters, digits, or whatever, by reference to a set of tables,  indexed
-       by  character  code  point.  This applies only to characters whose code
-       points are less than 256. By default, higher-valued code  points  never
-       match  escapes  such as \w or \d.  However, if PCRE2 is built with Uni-
-       code support, all characters can be tested with \p and \P, or, alterna-
-       tively,  the  PCRE2_UCP  option  can be set when a pattern is compiled;
-       this causes \w and friends to use Unicode property support  instead  of
-       the built-in tables.
+       by character code point. However, this applies only to characters whose
+       code points are less than 256. By default,  higher-valued  code  points
+       never  match escapes such as \w or \d. When PCRE2 is built with Unicode
+       support (the default), all characters can be tested with \p and \P, or,
+       alternatively,  the  PCRE2_UCP option can be set when a pattern is com-
+       piled; this causes \w and friends to use Unicode property  support  in-
+       stead of the built-in tables.
 
        The  use  of  locales  with Unicode is discouraged. If you are handling
        characters with code points greater than 128,  you  should  either  use
        Unicode support, or use locales, but not try to mix the two.
 
-       PCRE2 contains an internal set of character tables that are used by de-
+       PCRE2  contains a built-in set of character tables that are used by de-
        fault.  These are sufficient for many applications. Normally,  the  in-
        ternal  tables  recognize only ASCII characters. However, when PCRE2 is
        built, it is possible to cause the internal tables to be rebuilt in the
        default "C" locale of the local system, which may cause them to be dif-
        ferent.
 
-       The internal tables can be overridden by tables supplied by the  appli-
+       The built-in tables can be overridden by tables supplied by the  appli-
        cation  that  calls  PCRE2.  These may be created in a different locale
        from the default.  As more and more applications change to  using  Uni-
        code, the need for this locale support is expected to die away.
 
        External  tables  are built by calling the pcre2_maketables() function,
-       in the relevant locale. The result can be passed to pcre2_compile()  as
-       often   as  necessary,  by  creating  a  compile  context  and  calling
-       pcre2_set_character_tables() to set the tables pointer therein. For ex-
-       ample,  to build and use tables that are appropriate for the French lo-
-       cale (where accented  characters  with  values  greater  than  128  are
-       treated as letters), the following code could be used:
+       in the relevant locale. The only argument to this function is a general
+       context,  which  can  be used to pass a custom memory allocator. If the
+       argument is NULL, the system malloc() is used. The result can be passed
+       to pcre2_compile() as often as necessary, by creating a compile context
+       and calling pcre2_set_character_tables()  to  set  the  tables  pointer
+       therein.
+
+       For  example,  to  build  and  use  tables that are appropriate for the
+       French locale (where accented characters with values greater  than  128
+       are treated as letters), the following code could be used:
 
          setlocale(LC_CTYPE, "fr_FR");
          tables = pcre2_maketables(NULL);
@@ -1982,15 +1994,19 @@ LOCALE SUPPORT
          re = pcre2_compile(..., ccontext);
 
        The  locale  name "fr_FR" is used on Linux and other Unix-like systems;
-       if you are using Windows, the name for the French locale  is  "french".
-       It  is the caller's responsibility to ensure that the memory containing
-       the tables remains available for as long as it is needed.
+       if you are using Windows, the name for the French locale is "french".
 
        The pointer that is passed (via the compile context) to pcre2_compile()
        is  saved  with  the  compiled pattern, and the same tables are used by
        pcre2_match() and pcre_dfa_match(). Thus, for any single pattern,  com-
        pilation  and  matching  both  happen in the same locale, but different
        patterns can be processed in different locales.
+
+       It is the caller's responsibility to ensure that the memory  containing
+       the tables remains available while they are still in use. When they are
+       no longer needed, you can discard them  using  pcre2_maketables_free(),
+       which  should  pass as its first parameter the same global context that
+       was used to create the tables.
 
 
 INFORMATION ABOUT A COMPILED PATTERN
@@ -3706,7 +3722,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 01 August 2019
+       Last updated: 02 September 2019
        Copyright (c) 1997-2019 University of Cambridge.
 ------------------------------------------------------------------------------
  

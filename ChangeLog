@@ -133,6 +133,8 @@ optimizations were in force.
 particular, if a pattern ended with a negative lookahead, characters that were 
 inspected in that lookahead were not included.
 
+30. Add the pcre2_maketables_free() function.
+
 
 Version 10.33 16-April-2019
 ---------------------------
