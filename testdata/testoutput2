@@ -17036,7 +17036,7 @@ Subject length lower bound = 1
 
 /(?<=(?<=a)b)c.*/I
 Capture group count = 0
-Max lookbehind = 2
+Max lookbehind = 1
 First code unit = 'c'
 Subject length lower bound = 1
     abc\=ph
@@ -17064,7 +17064,7 @@ Subject length lower bound = 0
 
 /(?<=a(?<=a|ba)c)/I
 Capture group count = 0
-Max lookbehind = 3
+Max lookbehind = 2
 May match empty string
 Subject length lower bound = 0
 
@@ -17076,7 +17076,7 @@ Subject length lower bound = 0
 
 /(?<=(?<=a)b)(?<!abcd)(?<=(?<=a)bcde)/I
 Capture group count = 0
-Max lookbehind = 5
+Max lookbehind = 4
 May match empty string
 Subject length lower bound = 0
 

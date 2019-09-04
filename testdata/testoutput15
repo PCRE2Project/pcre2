@@ -304,7 +304,7 @@ Partial match, mark=xx: 123a
 
 /(?<=(?<=a)b)c.*/I
 Capture group count = 0
-Max lookbehind = 2
+Max lookbehind = 1
 First code unit = 'c'
 Subject length lower bound = 1
     abc\=ph
@@ -337,7 +337,7 @@ Partial match: abcd
 
 /(?<=(?<=(?<=a)b)c)./I
 Capture group count = 0
-Max lookbehind = 3
+Max lookbehind = 1
 Subject length lower bound = 1
     123abcXYZ
  0: abcX
@@ -354,7 +354,7 @@ Subject length lower bound = 1
 
 /(?<=ab((?<=...)cd))./I
 Capture group count = 1
-Max lookbehind = 5
+Max lookbehind = 4
 Subject length lower bound = 1
     ZabcdX
  0: ZabcdX
@@ -363,7 +363,7 @@ Subject length lower bound = 1
 
 /(?<=((?<=(?<=ab).))(?1)(?1))./I
 Capture group count = 1
-Max lookbehind = 3
+Max lookbehind = 2
 Subject length lower bound = 1
     abxZ
  0: abxZ

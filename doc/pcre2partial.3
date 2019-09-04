@@ -1,4 +1,4 @@
-.TH PCRE2PARTIAL 3 "07 August 2019" "PCRE2 10.34"
+.TH PCRE2PARTIAL 3 "04 September 2019" "PCRE2 10.34"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions
 .SH "PARTIAL MATCHING IN PCRE2"
@@ -25,7 +25,7 @@ options is whether or not a partial match is preferred to an alternative
 complete match, though the details differ between the two types of matching
 function. If both options are set, PCRE2_PARTIAL_HARD takes precedence.
 .P
-If you want to use partial matching with just-in-time optimized code, as well 
+If you want to use partial matching with just-in-time optimized code, as well
 as setting a partial match option for the matching function, you must also call
 \fBpcre2_jit_compile()\fP with one or both of these options:
 .sp
@@ -73,7 +73,7 @@ need not form part of the final matched string; lookbehind assertions and the
 matched string.
 .P
 (2) The pattern contains one or more lookbehind assertions. This condition
-exists in case there is a lookbehind that inspects characters before the start 
+exists in case there is a lookbehind that inspects characters before the start
 of the match.
 .P
 (3) There is a special case when the whole pattern can match an empty string.
@@ -139,7 +139,7 @@ If PCRE2_PARTIAL_HARD is set, PCRE2_ERROR_PARTIAL is returned as soon as a
 partial match is found, without continuing to search for possible complete
 matches. This option is "hard" because it prefers an earlier partial match over
 a later complete match. For this reason, the assumption is made that the end of
-the supplied subject string is not the true end of the available data, which is 
+the supplied subject string is not the true end of the available data, which is
 why \ez, \eZ, \eb, \eB, and $ always give a partial match.
 .P
 If PCRE2_PARTIAL_SOFT is set, the partial match is remembered, but matching
@@ -192,7 +192,7 @@ date:
   data> 3juj\e=ph
   No match
 .sp
-This example gives the same results for both hard and soft partial matching 
+This example gives the same results for both hard and soft partial matching
 options. Here is an example where there is a difference:
 .sp
     re> /^\ed?\ed(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\ed\ed$/
@@ -200,8 +200,8 @@ options. Here is an example where there is a difference:
    0: 25jun04
    1: jun
   data> 25jun04\e=ph
-  Partial match: 25jun04 
-.sp    
+  Partial match: 25jun04
+.sp
 With PCRE2_PARTIAL_SOFT, the subject is matched completely. For
 PCRE2_PARTIAL_HARD, however, the subject is assumed not to be complete, so
 there is only a partial match.
@@ -213,9 +213,12 @@ there is only a partial match.
 .sp
 PCRE was not originally designed with multi-segment matching in mind. However,
 over time, features (including partial matching) that make multi-segment
-matching possible have been added. The string is searched segment by segment by
-calling \fBpcre2_match()\fP repeatedly, with the aim of achieving the same 
-results that would happen if the entire string was available for searching.
+matching possible have been added. A very long string can be searched segment
+by segment by calling \fBpcre2_match()\fP repeatedly, with the aim of achieving
+the same results that would happen if the entire string was available for
+searching all the time. Normally, the strings that are being sought are much
+shorter than each individual segment, and are in the middle of very long
+strings, so the pattern is normally not anchored.
 .P
 Special logic must be implemented to handle a matched substring that spans a
 segment boundary. PCRE2_PARTIAL_HARD should be used, because it returns a
@@ -223,11 +226,10 @@ partial match at the end of a segment whenever there is the possibility of
 changing the match by adding more characters. The PCRE2_NOTBOL option should
 also be set for all but the first segment.
 .P
-When a partial match occurs, the next segment must be added to the current 
-subject and the match re-run, using the \fIstartoffset\fP argument of 
+When a partial match occurs, the next segment must be added to the current
+subject and the match re-run, using the \fIstartoffset\fP argument of
 \fBpcre2_match()\fP to begin at the point where the partial match started.
-Multi-segment matching is usually used to search for substrings in the middle
-of very long sequences, so the patterns are normally not anchored. For example:
+For example:
 .sp
     re> /\ed?\ed(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\ed\ed/
   data> ...the date is 23ja\e=ph
@@ -236,48 +238,49 @@ of very long sequences, so the patterns are normally not anchored. For example:
    0: 23jan19
    1: jan
 .sp
-Note the use of the \fBoffset\fP modifier to start the new match where the 
-partial match was found.
+Note the use of the \fBoffset\fP modifier to start the new match where the
+partial match was found. In this example, the next segment was added to the one
+in which the partial match was found. This is the most straightforward
+approach, typically using a memory buffer that is twice the size of each
+segment. After a partial match, the first half of the buffer is discarded, the 
+second half is moved to the start of the buffer, and a new segment is added 
+before repeating the match as in the example above. After a no match, the 
+entire buffer can be discarded.
 .P
-In this simple example, the next segment was just added to the one in which the 
-partial match was found. However, if there are memory constraints, it may be 
-necessary to discard text that precedes the partial match before adding the 
-next segment. In cases such as the above, where the pattern does not contain
-any lookbehinds, it is sufficient to retain only the partially matched
-substring. However, if a pattern contains a lookbehind assertion, characters
+If there are memory constraints, you may want to discard text that precedes a
+partial match before adding the next segment. Unfortunately, this is not at
+present straightforward. In cases such as the above, where the pattern does not
+contain any lookbehinds, it is sufficient to retain only the partially matched
+substring. However, if the pattern contains a lookbehind assertion, characters
 that precede the start of the partial match may have been inspected during the
-matching process.
-.P
-The only lookbehind information that is available is the length of the longest
-lookbehind in a pattern. This may not, of course, be at the start of the
-pattern, but retaining that many characters before the partial match is
-sufficient, if not always strictly necessary. The way to do this is as follows:
-.P
-Before doing any matching, find the length of the longest lookbehind in the
-pattern by calling \fBpcre2_pattern_info()\fP with the PCRE2_INFO_MAXLOOKBEHIND
-option. Note that the resulting count is in characters, not code units. After a
-partial match, moving back from the ovector[0] offset in the subject by the
-number of characters given for the maximum lookbehind gets you to the earliest
-character that must be retained. In a non-UTF or a 32-bit situation, moving
-back is just a subtraction, but in UTF-8 or UTF-16 you have to count characters
-while moving back through the code units. Characters before the point you have
-now reached can be discarded.
-.P
-For example, if the pattern "(?<=123)abc" is partially matched against the
-string "xx123ab", the ovector offsets are 5 and 7 ("ab"). The maximum
-lookbehind count is 3, so all characters before offset 2 can be discarded. The
-value of \fBstartoffset\fP for the next match should be 3. When \fBpcre2test\fP
-displays a partial match, it indicates the lookbehind characters with '<'
-characters if the \fBallusedtext\fP modifier is set:
+matching process. When \fBpcre2test\fP displays a partial match, it indicates
+these characters with '<' if the \fBallusedtext\fP modifier is set:
 .sp
     re> "(?<=123)abc"
   data> xx123ab\e=ph,allusedtext
   Partial match: 123ab
                  <<<
-.sp                  
-Note that the \fPallusedtext\fP modifier is not available for JIT matching,
-because JIT matching does not maintain the first and last consulted characters.
-.
+.sp
+However, the \fPallusedtext\fP modifier is not available for JIT matching,
+because JIT matching does not record the first (or last) consulted characters.
+For this reason, this information is not available via the API. It is therefore
+not possible in general to obtain the exact number of characters that must be
+retained in order to get the right match result. If you cannot retain the
+entire segment, you must find some heuristic way of choosing.
+.P
+If you know the approximate length of the matching substrings, you can use that
+to decide how much text to retain. The only lookbehind information that is
+currently available via the API is the length of the longest individual
+lookbehind in a pattern, but this can be misleading if there are nested
+lookbehinds. The value returned by calling \fBpcre2_pattern_info()\fP with the
+PCRE2_INFO_MAXLOOKBEHIND option is the maximum number of characters (not code
+units) that any individual lookbehind moves back when it is processed. A
+pattern such as "(?<=(?<!b)a)" has a maximum lookbehind value of one, but
+inspects two characters before its starting point.
+.P
+In a non-UTF or a 32-bit case, moving back is just a subtraction, but in
+UTF-8 or UTF-16 you have to count characters while moving back through the code
+units.
 .
 .
 .SH "PARTIAL MATCHING USING pcre2_dfa_match()"
@@ -344,11 +347,11 @@ are remembered. Depending on the application, this may or may not be what you
 want.
 .P
 If you do want to allow for starting again at the next character, one way of
-doing it is to retain the matched part of the segment and try a new complete
-match, as described for \fBpcre2_match()\fP above. Another possibility is to
-work with two buffers. If a partial match at offset \fIn\fP in the first buffer
-is followed by "no match" when PCRE2_DFA_RESTART is used on the second buffer,
-you can then try a new match starting at offset \fIn+1\fP in the first buffer.
+doing it is to retain some or all of the segment and try a new complete match,
+as described for \fBpcre2_match()\fP above. Another possibility is to work with
+two buffers. If a partial match at offset \fIn\fP in the first buffer is
+followed by "no match" when PCRE2_DFA_RESTART is used on the second buffer, you
+can then try a new match starting at offset \fIn+1\fP in the first buffer.
 .
 .
 .SH AUTHOR
@@ -365,6 +368,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 07 August 2019
+Last updated: 04 September 2019
 Copyright (c) 1997-2019 University of Cambridge.
 .fi
