@@ -494,11 +494,11 @@ in the code. The second one is used when we already know we are past the end of
 the subject. We set the "hit end" flag if the pointer is at the end of the
 subject and either (a) the pointer is past the earliest inspected character
 (i.e. something has been matched, even if not part of the actual matched
-string), or (b) the pattern contains a lookbehind. These are the conditions for 
+string), or (b) the pattern contains a lookbehind. These are the conditions for
 which adding more characters may allow the current match to continue.
 
 For hard partial matching, we immediately return a partial match. Otherwise,
-carrying on means that a complete match on the current subject will be sought. 
+carrying on means that a complete match on the current subject will be sought.
 A partial match is returned only if no complete match can be found. */
 
 #define CHECK_PARTIAL()\
@@ -5658,10 +5658,10 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
     case OP_EOD:
     if (Feptr < mb->end_subject) RRETURN(MATCH_NOMATCH);
     if (mb->partial != 0)
-      { 
+      {
       mb->hitend = TRUE;
       if (mb->partial > 1) return PCRE2_ERROR_PARTIAL;
-      } 
+      }
     Fecode++;
     break;
 
@@ -5687,10 +5687,10 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
     /* Either at end of string or \n before end. */
 
     if (mb->partial != 0)
-      { 
+      {
       mb->hitend = TRUE;
       if (mb->partial > 1) return PCRE2_ERROR_PARTIAL;
-      } 
+      }
     Fecode++;
     break;
 
@@ -6046,6 +6046,11 @@ BOOL has_first_cu = FALSE;
 BOOL has_req_cu = FALSE;
 BOOL startline;
 BOOL utf;
+
+#if PCRE2_CODE_UNIT_WIDTH == 8
+BOOL memchr_not_found_first_cu = FALSE;
+BOOL memchr_not_found_first_cu2 = FALSE;
+#endif
 
 PCRE2_UCHAR first_cu = 0;
 PCRE2_UCHAR first_cu2 = 0;
@@ -6453,7 +6458,7 @@ mb->start_subject = subject;
 mb->start_offset = start_offset;
 mb->end_subject = end_subject;
 mb->hasthen = (re->flags & PCRE2_HASTHEN) != 0;
-mb->allowemptypartial = (re->max_lookbehind > 0) || 
+mb->allowemptypartial = (re->max_lookbehind > 0) ||
     (re->flags & PCRE2_MATCH_EMPTY) != 0;
 mb->poptions = re->overall_options;          /* Pattern options */
 mb->ignore_skip_arg = 0;
@@ -6686,7 +6691,10 @@ for(;;)
     /* Not anchored. Advance to a unique first code unit if there is one. In
     8-bit mode, the use of memchr() gives a big speed up, even though we have
     to call it twice in caseless mode, in order to find the earliest occurrence
-    of the character in either of its cases. */
+    of the character in either of its cases. If a call to memchr() that
+    searches the rest of the subject fails to find one case, remember that in
+    order not to keep on repeating the search. This can make a huge difference
+    when the strings are very long and only one case is present. */
 
     else
       {
@@ -6700,11 +6708,29 @@ for(;;)
                 (smc = UCHAR21TEST(start_match)) != first_cu &&
                   smc != first_cu2)
             start_match++;
+
 #else  /* 8-bit code units */
-          PCRE2_SPTR pp1 =
-            memchr(start_match, first_cu, end_subject-start_match);
-          PCRE2_SPTR pp2 =
-            memchr(start_match, first_cu2, end_subject-start_match);
+          PCRE2_SPTR pp1 = NULL;
+          PCRE2_SPTR pp2 = NULL;
+          PCRE2_SIZE cu2size = end_subject - start_match;
+
+          if (!memchr_not_found_first_cu)
+            {
+            pp1 = memchr(start_match, first_cu, end_subject - start_match);
+            if (pp1 == NULL) memchr_not_found_first_cu = TRUE;
+              else cu2size = pp1 - start_match;
+            }
+
+          /* If pp1 is not NULL, we have arranged to search only as far as pp1,
+          to see if the other case is earlier, so we can set "not found" only
+          when both searches have returned NULL. */
+
+          if (!memchr_not_found_first_cu2)
+            {
+            pp2 = memchr(start_match, first_cu2, cu2size);
+            memchr_not_found_first_cu2 = (pp2 == NULL && pp1 == NULL);
+            }
+
           if (pp1 == NULL)
             start_match = (pp2 == NULL)? end_subject : pp2;
           else

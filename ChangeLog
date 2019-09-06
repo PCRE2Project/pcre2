@@ -92,7 +92,7 @@ within it, the nested lookbehind was not correctly processed. For example, if
 
 19. Implemented pcre2_get_match_data_size().
 
-20. Two alterations to partial matching (not yet done by JIT):
+20. Two alterations to partial matching:
 
     (a) The definition of a partial match is slightly changed: if a pattern
     contains any lookbehinds, an empty partial match may be given, because this
@@ -129,6 +129,15 @@ particular, if a pattern ended with a negative lookahead, characters that were
 inspected in that lookahead were not included.
 
 28. Add the pcre2_maketables_free() function.
+
+29. The start-up optimization that looks for a unique initial matching
+code unit in the interpretive engines uses memchr() in 8-bit mode. When the
+search is caseless, it was doing so inefficiently, which ended up slowing down
+the match drastically when the subject was very long. The revised code (a)
+remembers if one case is not found, so it never repeats the search for that 
+case after a bumpalong and (b) when one case has been found, it searches only
+up to that position for an earlier occurrence of the other case. This fix
+applies to both interpretive pcre2_match() and to pcre2_dfa_match(). 
 
 
 Version 10.33 16-April-2019
