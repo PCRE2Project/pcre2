@@ -143,6 +143,9 @@ applies to both interpretive pcre2_match() and to pcre2_dfa_match().
 minimum length zero, there is no need to scan any subsequent branches (a small 
 compile-time performance improvement).
 
+31. Installed a .gitignore file on a user's suggestion. When using the svn
+repository with git (through git svn) this helps keep it tidy.
+
 
 Version 10.33 16-April-2019
 ---------------------------
