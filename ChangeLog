@@ -139,6 +139,10 @@ case after a bumpalong and (b) when one case has been found, it searches only
 up to that position for an earlier occurrence of the other case. This fix
 applies to both interpretive pcre2_match() and to pcre2_dfa_match(). 
 
+30. While scanning to find the minimum length of a group, if any branch has 
+minimum length zero, there is no need to scan any subsequent branches (a small 
+compile-time performance improvement).
+
 
 Version 10.33 16-April-2019
 ---------------------------

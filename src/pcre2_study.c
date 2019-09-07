@@ -223,7 +223,9 @@ for (;;)
 
     /* Reached end of a branch; if it's a ket it is the end of a nested
     call. If it's ALT it is an alternation in a nested call. If it is END it's
-    the end of the outer call. All can be handled by the same code. */
+    the end of the outer call. All can be handled by the same code. If the
+    length of any branch is zero, there is no need to scan any subsequent
+    branches. */
 
     case OP_ALT:
     case OP_KET:
@@ -233,7 +235,7 @@ for (;;)
     case OP_END:
     if (length < 0 || (!had_recurse && branchlength < length))
       length = branchlength;
-    if (op != OP_ALT) return length;
+    if (op != OP_ALT || length == 0) return length;
     nextbranch = cc + GET(cc, 1);
     cc += 1 + LINK_SIZE;
     branchlength = 0;
