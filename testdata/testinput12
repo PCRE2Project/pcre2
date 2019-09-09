@@ -449,4 +449,6 @@
 
 /(*UTF)(?=\x{123})/I
 
+/[\x{c1}\x{e1}]X[\x{145}\x{146}]/I,utf
+
 # End of testinput12

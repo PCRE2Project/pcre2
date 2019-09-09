@@ -132,7 +132,7 @@ static int
     compile_block *);
 
 static BOOL
-  set_lookbehind_lengths(uint32_t **, int *, int *, parsed_recurse_check *, 
+  set_lookbehind_lengths(uint32_t **, int *, int *, parsed_recurse_check *,
     compile_block *);
 
 static int
@@ -3635,6 +3635,8 @@ while (ptr < ptrend)
       if (c == CHAR_RIGHT_SQUARE_BRACKET && !inescq) break;
       }     /* End of class-processing loop */
 
+    /* -] at the end of a class is a literal '-' */
+
     if (class_range_state == RANGE_STARTED)
       {
       parsed_pattern[-1] = CHAR_MINUS;
@@ -5302,6 +5304,7 @@ BOOL groupsetfirstcu = FALSE;
 BOOL had_accept = FALSE;
 BOOL matched_char = FALSE;
 BOOL previous_matched_char = FALSE;
+BOOL reset_caseful = FALSE;
 const uint8_t *cbits = cb->cbits;
 uint8_t classbits[32];
 
@@ -5578,7 +5581,37 @@ for (;; pptr++)
       }        /* End of 1-char optimization */
 
     /* Handle character classes that contain more than just one literal
-    character. */
+    character. If there are exactly two characters in a positive class, see if
+    they are case partners. This can be optimized to generate a caseless single
+    character match (which also sets first/required code units if relevant). */
+
+    if (meta == META_CLASS && pptr[1] < META_END && pptr[2] < META_END && 
+        pptr[3] == META_CLASS_END)
+      {
+      uint32_t c = pptr[1];
+
+#ifdef SUPPORT_UNICODE
+      if (UCD_CASESET(c) == 0)
+#endif
+        {
+        uint32_t d = TABLE_GET(c, cb->fcc, c);
+#ifdef SUPPORT_UNICODE
+        if (utf && c > 127) d = UCD_OTHERCASE(c);
+#endif
+        if (c != d && pptr[2] == d)
+          {
+          pptr += 3;                 /* Move on to class end */
+          meta = c;
+          if ((options & PCRE2_CASELESS) == 0)
+            {
+            reset_caseful = TRUE;
+            options |= PCRE2_CASELESS;
+            req_caseopt = REQ_CASELESS;
+            } 
+          goto CLASS_CASELESS_CHAR;
+          }
+        }
+      }
 
     /* If a non-extended class contains a negative special such as \S, we need
     to flip the negation flag at the end, so that support for characters > 255
@@ -7818,9 +7851,15 @@ for (;; pptr++)
       }
 #endif
 
-    /* Caseful matches, or not one of the multicase characters. Get the
-    character's code units into mcbuffer, with the length in mclength. When not
-    in UTF mode, the length is always 1. */
+    /* Caseful matches, or caseless and not one of the multicase characters. We
+    come here by goto in the case of a positive class that contains only
+    case-partners of a character with just two cases; matched_char has already
+    been set TRUE and options fudged if necessary. */
+
+    CLASS_CASELESS_CHAR:
+
+    /* Get the character's code units into mcbuffer, with the length in
+    mclength. When not in UTF mode, the length is always 1. */
 
 #ifdef SUPPORT_UNICODE
     if (utf) mclength = PRIV(ord2utf)(meta, mcbuffer); else
@@ -7852,8 +7891,9 @@ for (;; pptr++)
       zeroreqcu = reqcu;
       zeroreqcuflags = reqcuflags;
 
-      /* If the character is more than one code unit long, we can set firstcu
-      only if it is not to be matched caselessly. */
+      /* If the character is more than one code unit long, we can set a single
+      firstcu only if it is not to be matched caselessly. Multiple possible 
+      starting code units may be picked up later in the studying code. */
 
       if (mclength == 1 || req_caseopt == 0)
         {
@@ -7883,7 +7923,17 @@ for (;; pptr++)
         reqcuflags = req_caseopt | cb->req_varyopt;
         }
       }
-    break;    /* End default meta handling */
+
+    /* If caselessness was temporarily instated, reset it. */
+
+    if (reset_caseful)
+      {
+      options &= ~PCRE2_CASELESS;
+      req_caseopt = 0;
+      reset_caseful = FALSE;
+      }
+
+    break;    /* End literal character handling */
     }         /* End of big switch */
   }           /* End of big loop */
 
@@ -8051,7 +8101,7 @@ for (;;)
     /* If this is not the first branch, the first char and reqcu have to
     match the values from all the previous branches, except that if the
     previous value for reqcu didn't have REQ_VARY set, it can still match,
-    and we set REQ_VARY for the regex. */
+    and we set REQ_VARY for the group from this branch's value. */
 
     else
       {
@@ -8090,7 +8140,7 @@ for (;;)
       else
         {
         reqcu = branchreqcu;
-        reqcuflags |= branchreqcuflags; /* To "or" REQ_VARY */
+        reqcuflags |= branchreqcuflags; /* To "or" REQ_VARY if present */
         }
       }
     }
@@ -8938,7 +8988,7 @@ for(;;)
   *pptrptr += 1;   /* Skip META_ALT */
   }
 
-if (group > 0) 
+if (group > 0)
   cb->groupinfo[group] |= (uint32_t)(GI_SET_FIXED_LENGTH | grouplength);
 return grouplength;
 
@@ -9235,7 +9285,7 @@ for (;; pptr++)
     in the cache. */
 
     gptr++;
-    grouplength = get_grouplength(&gptr, FALSE, errcodeptr, lcptr, group, 
+    grouplength = get_grouplength(&gptr, FALSE, errcodeptr, lcptr, group,
       &this_recurse, cb);
     if (grouplength < 0)
       {
@@ -9273,7 +9323,7 @@ for (;; pptr++)
     case META_SCRIPT_RUN:
     pptr++;
     CHECK_GROUP:
-    grouplength = get_grouplength(&pptr, TRUE, errcodeptr, lcptr, group, 
+    grouplength = get_grouplength(&pptr, TRUE, errcodeptr, lcptr, group,
       recurses, cb);
     if (grouplength < 0) return -1;
     itemlength = grouplength;
@@ -9372,7 +9422,7 @@ Returns:      TRUE if all is well
 */
 
 static BOOL
-set_lookbehind_lengths(uint32_t **pptrptr, int *errcodeptr, int *lcptr, 
+set_lookbehind_lengths(uint32_t **pptrptr, int *errcodeptr, int *lcptr,
   parsed_recurse_check *recurses, compile_block *cb)
 {
 PCRE2_SIZE offset;
@@ -10329,9 +10379,10 @@ if ((re->overall_options & PCRE2_NO_START_OPTIMIZE) == 0)
            is_startline(codestart, 0, &cb, 0, FALSE))
     re->flags |= PCRE2_STARTLINE;
 
-  /* Handle the "required code unit", if one is set. We can increment the
-  minimum minimum length only if we are sure this really is a different
-  character, because the count is in characters, not code units. */
+  /* Handle the "required code unit", if one is set. In the UTF case we can
+  increment the minimum minimum length only if we are sure this really is a
+  different character and not a non-starting code unit of the first character,
+  because the minimum length count is in characters, not code units. */
 
   if (reqcuflags >= 0)
     {

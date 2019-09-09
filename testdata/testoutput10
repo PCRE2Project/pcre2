@@ -1766,4 +1766,11 @@ First code unit = \xc4
 Last code unit = \xa3
 Subject length lower bound = 1
 
+/[\x{c1}\x{e1}]X[\x{145}\x{146}]/I,utf
+Capture group count = 0
+Options: utf
+Starting code units: \xc3 
+Last code unit = 'X'
+Subject length lower bound = 3
+
 # End of testinput10

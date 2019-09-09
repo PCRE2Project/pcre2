@@ -1585,4 +1585,11 @@ Overall options: utf
 First code unit = \x{123}
 Subject length lower bound = 1
 
+/[\x{c1}\x{e1}]X[\x{145}\x{146}]/I,utf
+Capture group count = 0
+Options: utf
+First code unit = \xc1 (caseless)
+Last code unit = \x{145} (caseless)
+Subject length lower bound = 3
+
 # End of testinput12

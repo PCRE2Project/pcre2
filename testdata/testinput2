@@ -5758,4 +5758,6 @@ a)"xI
 
 /(?(VERSION=10.4)b)((?<=b).*)/B
 
+/[aA]b[cC]/IB
+
 # End of testinput2

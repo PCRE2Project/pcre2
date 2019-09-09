@@ -17387,6 +17387,20 @@ Subject length lower bound = 1
         End
 ------------------------------------------------------------------
 
+/[aA]b[cC]/IB
+------------------------------------------------------------------
+        Bra
+     /i a
+        b
+     /i c
+        Ket
+        End
+------------------------------------------------------------------
+Capture group count = 0
+First code unit = 'a' (caseless)
+Last code unit = 'c' (caseless)
+Subject length lower bound = 3
+
 # End of testinput2
 Error -70: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data
