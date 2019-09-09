@@ -146,6 +146,9 @@ compile-time performance improvement).
 31. Installed a .gitignore file on a user's suggestion. When using the svn
 repository with git (through git svn) this helps keep it tidy.
 
+32. Add underflow check in JIT which may occure when the value of subject
+string pointer is close to 0.
+
 
 Version 10.33 16-April-2019
 ---------------------------

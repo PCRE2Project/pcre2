@@ -5793,12 +5793,16 @@ if (common->match_end_ptr != 0)
   {
   OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_SP), common->match_end_ptr);
   OP1(SLJIT_MOV, TMP3, 0, STR_END, 0);
-  OP2(SLJIT_SUB, STR_END, 0, STR_END, 0, SLJIT_IMM, IN_UCHARS(max));
+  OP2(SLJIT_SUB | SLJIT_SET_LESS, STR_END, 0, STR_END, 0, SLJIT_IMM, IN_UCHARS(max));
+  add_jump(compiler, &common->failed_match, JUMP(SLJIT_LESS));
   OP2(SLJIT_SUB | SLJIT_SET_GREATER, SLJIT_UNUSED, 0, STR_END, 0, TMP1, 0);
   CMOV(SLJIT_GREATER, STR_END, TMP1, 0);
   }
 else
-  OP2(SLJIT_SUB, STR_END, 0, STR_END, 0, SLJIT_IMM, IN_UCHARS(max));
+  {
+  OP2(SLJIT_SUB | SLJIT_SET_LESS, STR_END, 0, STR_END, 0, SLJIT_IMM, IN_UCHARS(max));
+  add_jump(compiler, &common->failed_match, JUMP(SLJIT_LESS));
+  }
 
 SLJIT_ASSERT(range_right >= 0);
 
