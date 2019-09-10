@@ -153,6 +153,13 @@ string pointer is close to 0.
 same character, to be treated as a single caseless character. This causes the 
 first and required code unit optimizations to kick in where relevant.
 
+34. Improve the bitmap of starting bytes for positive classes that include wide
+characters, but no property types, in UTF-8 mode. Previously, on encountering
+such a class, the bits for all bytes greater than \xc4 were set, thus
+specifying any character with codepoint >= 0x100. Now the only bits that are
+set are for the relevant bytes that start the wide characters. This can give a 
+noticeable performance improvement.
+
 
 Version 10.33 16-April-2019
 ---------------------------

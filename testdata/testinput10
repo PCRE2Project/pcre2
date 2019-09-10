@@ -561,4 +561,10 @@
 
 /[\x{c1}\x{e1}]X[\x{145}\x{146}]/I,utf
 
+/[󿾟,]/BI,utf
+
+/[\x{fff4}-\x{ffff8}]/I,utf
+
+/[\x{fff4}-\x{afff8}\x{10ffff}]/I,utf
+
 # End of testinput10

@@ -909,7 +909,7 @@ if (table_limit != 32) for (c = 24; c < 32; c++) re->start_bitmap[c] = 0xff;
 
 
 /*************************************************
-*          Create bitmap of starting bytes       *
+*      Create bitmap of starting code units      *
 *************************************************/
 
 /* This function scans a compiled unanchored expression recursively and
@@ -959,6 +959,9 @@ do
     {
     int rc;
     uint8_t *classmap = NULL;
+#ifdef SUPPORT_WIDE_CHARS
+    PCRE2_UCHAR xclassflags;
+#endif
 
     switch(*tcode)
       {
@@ -1467,20 +1470,59 @@ do
       negative XCLASS without a map, give up. If there are no property checks,
       there must be wide characters on the XCLASS list, because otherwise an
       XCLASS would not have been created. This means that code points >= 255
-      are always potential starters. */
+      are potential starters. In the UTF-8 case we can scan them and set bits
+      for the relevant leading bytes. */
 
 #ifdef SUPPORT_WIDE_CHARS
       case OP_XCLASS:
-      if ((tcode[1 + LINK_SIZE] & XCL_HASPROP) != 0 ||
-          (tcode[1 + LINK_SIZE] & (XCL_MAP|XCL_NOT)) == XCL_NOT)
+      xclassflags = tcode[1 + LINK_SIZE];
+      if ((xclassflags & XCL_HASPROP) != 0 ||
+          (xclassflags & (XCL_MAP|XCL_NOT)) == XCL_NOT)
         return SSB_FAIL;
 
       /* We have a positive XCLASS or a negative one without a map. Set up the
       map pointer if there is one, and fall through. */
 
-      classmap = ((tcode[1 + LINK_SIZE] & XCL_MAP) == 0)? NULL :
+      classmap = ((xclassflags & XCL_MAP) == 0)? NULL :
         (uint8_t *)(tcode + 1 + LINK_SIZE + 1);
-#endif
+
+      /* In UTF-8 mode, scan the character list and set bits for leading bytes,
+      then jump to handle the map. */
+
+#if PCRE2_CODE_UNIT_WIDTH == 8
+      if (utf && (xclassflags & XCL_NOT) == 0)
+        {
+        PCRE2_UCHAR b, e;
+        PCRE2_SPTR p = tcode + 1 + LINK_SIZE + 1 + ((classmap == NULL)? 0:32);
+        tcode += GET(tcode, 1);
+
+        for (;;) switch (*p++)
+          {
+          case XCL_SINGLE:
+          b = *p++;
+          while ((*p & 0xc0) == 0x80) p++;
+          re->start_bitmap[b/8] |= (1u << (b&7));
+          break;
+
+          case XCL_RANGE:
+          b = *p++;
+          while ((*p & 0xc0) == 0x80) p++;
+          e = *p++;
+          while ((*p & 0xc0) == 0x80) p++;
+          for (; b <= e; b++)
+            re->start_bitmap[b/8] |= (1u << (b&7));
+          break;
+
+          case XCL_END:
+          goto HANDLE_CLASSMAP;
+
+          default:
+          return SSB_UNKNOWN;   /* Internal error, should not occur */
+          }
+        }
+#endif  /* SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH == 8 */
+#endif  /* SUPPORT_WIDE_CHARS */
+
       /* It seems that the fall through comment must be outside the #ifdef if
       it is to avoid the gcc compiler warning. */
 
@@ -1522,6 +1564,9 @@ do
       greater than 127. In fact, there are only two possible starting bytes for
       characters in the range 128 - 255. */
 
+#if defined SUPPORT_WIDE_CHARS && PCRE2_CODE_UNIT_WIDTH == 8
+      HANDLE_CLASSMAP:
+#endif
       if (classmap != NULL)
         {
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH == 8

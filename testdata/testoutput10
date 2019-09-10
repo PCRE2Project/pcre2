@@ -1256,11 +1256,7 @@ Subject length lower bound = 1
 ------------------------------------------------------------------
 Capture group count = 0
 Options: utf
-Starting code units: Z \xc4 \xc5 \xc6 \xc7 \xc8 \xc9 \xca \xcb \xcc \xcd 
-  \xce \xcf \xd0 \xd1 \xd2 \xd3 \xd4 \xd5 \xd6 \xd7 \xd8 \xd9 \xda \xdb \xdc 
-  \xdd \xde \xdf \xe0 \xe1 \xe2 \xe3 \xe4 \xe5 \xe6 \xe7 \xe8 \xe9 \xea \xeb 
-  \xec \xed \xee \xef \xf0 \xf1 \xf2 \xf3 \xf4 \xf5 \xf6 \xf7 \xf8 \xf9 \xfa 
-  \xfb \xfc \xfd \xfe \xff 
+Starting code units: Z \xc4 
 Subject length lower bound = 1
     Z\x{100}
  0: Z
@@ -1278,11 +1274,7 @@ Subject length lower bound = 1
 ------------------------------------------------------------------
 Capture group count = 0
 Options: utf
-Starting code units: z { | } ~ \x7f \xc2 \xc3 \xc4 \xc5 \xc6 \xc7 \xc8 \xc9 
-  \xca \xcb \xcc \xcd \xce \xcf \xd0 \xd1 \xd2 \xd3 \xd4 \xd5 \xd6 \xd7 \xd8 
-  \xd9 \xda \xdb \xdc \xdd \xde \xdf \xe0 \xe1 \xe2 \xe3 \xe4 \xe5 \xe6 \xe7 
-  \xe8 \xe9 \xea \xeb \xec \xed \xee \xef \xf0 \xf1 \xf2 \xf3 \xf4 \xf5 \xf6 
-  \xf7 \xf8 \xf9 \xfa \xfb \xfc \xfd \xfe \xff 
+Starting code units: z { | } ~ \x7f \xc2 \xc3 \xc4 
 Subject length lower bound = 1
 
 /[z\Qa-d]Ā\E]/IB,utf
@@ -1294,11 +1286,7 @@ Subject length lower bound = 1
 ------------------------------------------------------------------
 Capture group count = 0
 Options: utf
-Starting code units: - ] a d z \xc4 \xc5 \xc6 \xc7 \xc8 \xc9 \xca \xcb \xcc 
-  \xcd \xce \xcf \xd0 \xd1 \xd2 \xd3 \xd4 \xd5 \xd6 \xd7 \xd8 \xd9 \xda \xdb 
-  \xdc \xdd \xde \xdf \xe0 \xe1 \xe2 \xe3 \xe4 \xe5 \xe6 \xe7 \xe8 \xe9 \xea 
-  \xeb \xec \xed \xee \xef \xf0 \xf1 \xf2 \xf3 \xf4 \xf5 \xf6 \xf7 \xf8 \xf9 
-  \xfa \xfb \xfc \xfd \xfe \xff 
+Starting code units: - ] a d z \xc4 
 Subject length lower bound = 1
     \x{100}
  0: \x{100}
@@ -1319,11 +1307,7 @@ Subject length lower bound = 1
 ------------------------------------------------------------------
 Capture group count = 1
 Options: utf
-Starting code units: a b \xc4 \xc5 \xc6 \xc7 \xc8 \xc9 \xca \xcb \xcc \xcd 
-  \xce \xcf \xd0 \xd1 \xd2 \xd3 \xd4 \xd5 \xd6 \xd7 \xd8 \xd9 \xda \xdb \xdc 
-  \xdd \xde \xdf \xe0 \xe1 \xe2 \xe3 \xe4 \xe5 \xe6 \xe7 \xe8 \xe9 \xea \xeb 
-  \xec \xed \xee \xef \xf0 \xf1 \xf2 \xf3 \xf4 \xf5 \xf6 \xf7 \xf8 \xf9 \xfa 
-  \xfb \xfc \xfd \xfe \xff 
+Starting code units: a b \xc4 
 Last code unit = 'z'
 Subject length lower bound = 7
 
@@ -1440,11 +1424,7 @@ Subject length lower bound = 1
 ------------------------------------------------------------------
 Capture group count = 0
 Options: caseless utf
-Starting code units: \xc4 \xc5 \xc6 \xc7 \xc8 \xc9 \xca \xcb \xcc \xcd \xce 
-  \xcf \xd0 \xd1 \xd2 \xd3 \xd4 \xd5 \xd6 \xd7 \xd8 \xd9 \xda \xdb \xdc \xdd 
-  \xde \xdf \xe0 \xe1 \xe2 \xe3 \xe4 \xe5 \xe6 \xe7 \xe8 \xe9 \xea \xeb \xec 
-  \xed \xee \xef \xf0 \xf1 \xf2 \xf3 \xf4 \xf5 \xf6 \xf7 \xf8 \xf9 \xfa \xfb 
-  \xfc \xfd \xfe \xff 
+Starting code units: \xc4 
 Subject length lower bound = 1
     \x{104}
  0: \x{104}
@@ -1467,11 +1447,7 @@ No match
 ------------------------------------------------------------------
 Capture group count = 0
 Options: caseless utf
-Starting code units: Z z { | } ~ \x7f \xc2 \xc3 \xc4 \xc5 \xc6 \xc7 \xc8 
-  \xc9 \xca \xcb \xcc \xcd \xce \xcf \xd0 \xd1 \xd2 \xd3 \xd4 \xd5 \xd6 \xd7 
-  \xd8 \xd9 \xda \xdb \xdc \xdd \xde \xdf \xe0 \xe1 \xe2 \xe3 \xe4 \xe5 \xe6 
-  \xe7 \xe8 \xe9 \xea \xeb \xec \xed \xee \xef \xf0 \xf1 \xf2 \xf3 \xf4 \xf5 
-  \xf6 \xf7 \xf8 \xf9 \xfa \xfb \xfc \xfd \xfe \xff 
+Starting code units: Z z { | } ~ \x7f \xc2 \xc3 \xc4 \xc5 \xce \xe1 \xe2 
 Subject length lower bound = 1
     Z
  0: Z
@@ -1508,11 +1484,7 @@ No match
 ------------------------------------------------------------------
 Capture group count = 0
 Options: caseless utf
-Starting code units: Z z { | } ~ \x7f \xc2 \xc3 \xc4 \xc5 \xc6 \xc7 \xc8 
-  \xc9 \xca \xcb \xcc \xcd \xce \xcf \xd0 \xd1 \xd2 \xd3 \xd4 \xd5 \xd6 \xd7 
-  \xd8 \xd9 \xda \xdb \xdc \xdd \xde \xdf \xe0 \xe1 \xe2 \xe3 \xe4 \xe5 \xe6 
-  \xe7 \xe8 \xe9 \xea \xeb \xec \xed \xee \xef \xf0 \xf1 \xf2 \xf3 \xf4 \xf5 
-  \xf6 \xf7 \xf8 \xf9 \xfa \xfb \xfc \xfd \xfe \xff 
+Starting code units: Z z { | } ~ \x7f \xc2 \xc3 \xc4 \xc5 \xce \xe1 \xe2 
 Subject length lower bound = 1
 
 /\x{3a3}B/IBi,utf
@@ -1772,5 +1744,29 @@ Options: utf
 Starting code units: \xc3 
 Last code unit = 'X'
 Subject length lower bound = 3
+
+/[󿾟,]/BI,utf
+------------------------------------------------------------------
+        Bra
+        [,\x{fff9f}]
+        Ket
+        End
+------------------------------------------------------------------
+Capture group count = 0
+Options: utf
+Starting code units: , \xf3 
+Subject length lower bound = 1
+
+/[\x{fff4}-\x{ffff8}]/I,utf
+Capture group count = 0
+Options: utf
+Starting code units: \xef \xf0 \xf1 \xf2 \xf3 
+Subject length lower bound = 1
+
+/[\x{fff4}-\x{afff8}\x{10ffff}]/I,utf
+Capture group count = 0
+Options: utf
+Starting code units: \xef \xf0 \xf1 \xf2 \xf4 
+Subject length lower bound = 1
 
 # End of testinput10
