@@ -5585,7 +5585,7 @@ for (;; pptr++)
     they are case partners. This can be optimized to generate a caseless single
     character match (which also sets first/required code units if relevant). */
 
-    if (meta == META_CLASS && pptr[1] < META_END && pptr[2] < META_END && 
+    if (meta == META_CLASS && pptr[1] < META_END && pptr[2] < META_END &&
         pptr[3] == META_CLASS_END)
       {
       uint32_t c = pptr[1];
@@ -5594,10 +5594,18 @@ for (;; pptr++)
       if (UCD_CASESET(c) == 0)
 #endif
         {
-        uint32_t d = TABLE_GET(c, cb->fcc, c);
+        uint32_t d;
+        
 #ifdef SUPPORT_UNICODE
-        if (utf && c > 127) d = UCD_OTHERCASE(c);
+        if (utf && c > 127) d = UCD_OTHERCASE(c); else
 #endif
+          {
+#if PCRE2_CODE_UNIT_WIDTH != 8
+          if (c > 255) d = c; else
+#endif 
+          d = TABLE_GET(c, cb->fcc, c);
+          }  
+
         if (c != d && pptr[2] == d)
           {
           pptr += 3;                 /* Move on to class end */
@@ -5607,7 +5615,7 @@ for (;; pptr++)
             reset_caseful = TRUE;
             options |= PCRE2_CASELESS;
             req_caseopt = REQ_CASELESS;
-            } 
+            }
           goto CLASS_CASELESS_CHAR;
           }
         }
@@ -7892,7 +7900,7 @@ for (;; pptr++)
       zeroreqcuflags = reqcuflags;
 
       /* If the character is more than one code unit long, we can set a single
-      firstcu only if it is not to be matched caselessly. Multiple possible 
+      firstcu only if it is not to be matched caselessly. Multiple possible
       starting code units may be picked up later in the studying code. */
 
       if (mclength == 1 || req_caseopt == 0)

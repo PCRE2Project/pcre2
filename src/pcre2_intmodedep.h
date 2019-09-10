@@ -205,19 +205,19 @@ whether its argument, which is assumed to be one code unit, is less than 256.
 The CHMAX_255 macro does not assume one code unit. The maximum length of a MARK
 name must fit in one code unit; currently it is set to 255 or 65535. The
 TABLE_GET macro is used to access elements of tables containing exactly 256
-items. When code points can be greater than 255, a check is needed before
-accessing these tables. */
+items. Its argument is a code unit. When code points can be greater than 255, a
+check is needed before accessing these tables. */
 
 #if PCRE2_CODE_UNIT_WIDTH == 8
 #define MAX_255(c) TRUE
 #define MAX_MARK ((1u << 8) - 1)
+#define TABLE_GET(c, table, default) ((table)[c])
 #ifdef SUPPORT_UNICODE
 #define SUPPORT_WIDE_CHARS
 #define CHMAX_255(c) ((c) <= 255u)
 #else
 #define CHMAX_255(c) TRUE
 #endif  /* SUPPORT_UNICODE */
-#define TABLE_GET(c, table, default) ((table)[c])
 
 #else  /* Code units are 16 or 32 bits */
 #define CHMAX_255(c) ((c) <= 255u)
@@ -226,7 +226,6 @@ accessing these tables. */
 #define SUPPORT_WIDE_CHARS
 #define TABLE_GET(c, table, default) (MAX_255(c)? ((table)[c]):(default))
 #endif
-
 
 
 /* ----------------- Character-handling macros ----------------- */
