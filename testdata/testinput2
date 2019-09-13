@@ -1625,6 +1625,7 @@
 /^a*A\d/IBi
     aaaA5
     aaaa5
+    a5 
 
 /(a*|b*)[cd]/I
 
@@ -5759,5 +5760,16 @@ a)"xI
 /(?(VERSION=10.4)b)((?<=b).*)/B
 
 /[aA]b[cC]/IB
+
+/[cc]abcd/I
+
+/[Cc]abcd/I
+
+/[c]abcd/I
+
+/(?:c|C)abcd/I
+
+/(a)?a/I
+    manm
 
 # End of testinput2

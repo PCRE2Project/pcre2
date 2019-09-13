@@ -816,7 +816,7 @@ Capture group count = 1
 Max back reference = 1
 Compile options: <none>
 Overall options: anchored
-Starting code units: a 
+First code unit = 'a'
 Subject length lower bound = 4
 \= Expect no match
     aaaa
@@ -6492,6 +6492,8 @@ Subject length lower bound = 2
  0: aaaA5
     aaaa5
  0: aaaa5
+    a5 
+ 0: a5
 
 /(a*|b*)[cd]/I
 Capture group count = 1
@@ -17400,6 +17402,38 @@ Capture group count = 0
 First code unit = 'a' (caseless)
 Last code unit = 'c' (caseless)
 Subject length lower bound = 3
+
+/[cc]abcd/I
+Capture group count = 0
+First code unit = 'c'
+Last code unit = 'd'
+Subject length lower bound = 5
+
+/[Cc]abcd/I
+Capture group count = 0
+First code unit = 'C' (caseless)
+Last code unit = 'd'
+Subject length lower bound = 5
+
+/[c]abcd/I
+Capture group count = 0
+First code unit = 'c'
+Last code unit = 'd'
+Subject length lower bound = 5
+
+/(?:c|C)abcd/I
+Capture group count = 0
+First code unit = 'C' (caseless)
+Last code unit = 'd'
+Subject length lower bound = 5
+
+/(a)?a/I
+Capture group count = 1
+Starting code units: a 
+Last code unit = 'a'
+Subject length lower bound = 1
+    manm
+ 0: a
 
 # End of testinput2
 Error -70: PCRE2_ERROR_BADDATA (unknown error number)

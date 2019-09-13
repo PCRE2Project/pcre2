@@ -451,4 +451,16 @@
 
 /[\x{c1}\x{e1}]X[\x{145}\x{146}]/I,utf
 
+/[\xff\x{ffff}]/I,utf
+
+/[\xff\x{ff}]/I,utf
+
+/[\xff\x{ff}]/I
+
+/[Ss]/I
+
+/[Ss]/I,utf
+
+/(?:\x{ff}|\x{3000})/I,utf
+
 # End of testinput12

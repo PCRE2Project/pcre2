@@ -567,4 +567,16 @@
 
 /[\x{fff4}-\x{afff8}\x{10ffff}]/I,utf
 
+/[\xff\x{ffff}]/I,utf
+
+/[\xff\x{ff}]/I,utf
+
+/[\xff\x{ff}]/I
+
+/[Ss]/I
+
+/[Ss]/I,utf
+
+/(?:\x{ff}|\x{3000})/I,utf
+
 # End of testinput10

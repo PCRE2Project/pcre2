@@ -1666,7 +1666,101 @@ if ((re->flags & (PCRE2_FIRSTSET|PCRE2_STARTLINE)) == 0)
   {
   int rc = set_start_bits(re, code, utf);
   if (rc == SSB_UNKNOWN) return 1;
-  if (rc == SSB_DONE) re->flags |= PCRE2_FIRSTMAPSET;
+
+  /* If a list of starting code units was set up, scan the list to see if only
+  one or two were listed. Having only one listed is rare because usually a
+  single starting code unit will have been recognized and PCRE2_FIRSTSET set.
+  If two are listed, see if they are caseless versions of the same character;
+  if so we can replace the list with a caseless first code unit. This gives
+  better performance and is plausibly worth doing for patterns such as [Ww]ord
+  or (word|WORD). */
+
+  if (rc == SSB_DONE)
+    {
+    int i;
+    int a = -1;
+    int b = -1;
+    uint8_t *p = re->start_bitmap;
+    uint32_t flags = PCRE2_FIRSTMAPSET;
+
+    for (i = 0; i < 256; p++, i += 8)
+      {
+      uint8_t x = *p;
+      if (x != 0)
+        {
+        int c;
+        uint8_t y = x & (~x + 1);   /* Least significant bit */
+        if (y != x) goto DONE;      /* More than one bit set */
+
+        /* In the 16-bit and 32-bit libraries, the bit for 0xff means "0xff and
+        all wide characters", so we cannot use it here. */
+
+#if PCRE2_CODE_UNIT_WIDTH != 8
+        if (i == 248 && x == 0x80) goto DONE;
+#endif
+
+        /* Compute the character value */
+
+        c = i;
+        switch (x)
+          {
+          case 1:   break;
+          case 2:   c += 1; break;  case 4:  c += 2; break;
+          case 8:   c += 3; break;  case 16: c += 4; break;
+          case 32:  c += 5; break;  case 64: c += 6; break;
+          case 128: c += 7; break;
+          }
+
+        /* c contains the code unit value, in the range 0-255. In 8-bit UTF
+        mode, only values < 128 can be used. */
+
+#if PCRE2_CODE_UNIT_WIDTH == 8
+        if (c > 127) goto DONE;
+#endif
+        if (a < 0) a = c;   /* First one found */
+        else if (b < 0)     /* Second one found */
+          {
+          int d = TABLE_GET((unsigned int)c, re->tables + fcc_offset, c);
+
+#ifdef SUPPORT_UNICODE
+#if PCRE2_CODE_UNIT_WIDTH == 8
+          if (utf && UCD_CASESET(c) != 0) goto DONE;   /* Multiple case set */
+#else   /* 16-bit or 32-bit */
+          if (UCD_CASESET(c) != 0) goto DONE;     /* Multiple case set */
+          if (utf && c > 127) d = UCD_OTHERCASE(c);
+#endif  /* Code width */
+#endif  /* SUPPORT_UNICODE */
+
+          if (d != a) goto DONE;   /* Not other case of a */
+          b = c;
+          }
+        else goto DONE;   /* More than two characters found */
+        }
+      }
+
+    /* Replace the start code unit bits with a first code unit, but only if it 
+    is not the same as a required later code unit. This is because a search for
+    a required code unit starts after an explicit first code unit, but at a
+    code unit found from the bitmap. Patterns such as /a*a/ don't work 
+    if both the start unit and required unit are the same. */
+
+    if (a >= 0 && 
+        (
+        (re->flags & PCRE2_LASTSET) == 0 || 
+          (
+          re->last_codeunit != (uint32_t)a && 
+          (b < 0 || re->last_codeunit != (uint32_t)b)
+          )
+        ))
+      {
+      re->first_codeunit = a;
+      flags = PCRE2_FIRSTSET;
+      if (b >= 0) flags |= PCRE2_FIRSTCASELESS;
+      }
+
+    DONE:
+    re->flags |= flags;
+    }
   }
 
 /* Find the minimum length of subject string. If the pattern can match an empty

@@ -160,6 +160,16 @@ specifying any character with codepoint >= 0x100. Now the only bits that are
 set are for the relevant bytes that start the wide characters. This can give a 
 noticeable performance improvement.
 
+35. If the bitmap of starting code units contains only 1 or 2 bits, replace it 
+with a single starting code unit (1 bit) or a caseless single starting code 
+unit if the two relevant characters are case-partners. This is particularly 
+relevant to the 8-bit library, though it applies to all. It can give a 
+performance boost for patterns such as [Ww]ord and (word|WORD). However, this 
+optimization doesn't happen if there is a "required" code unit of the same 
+value (because the search for a "required" code unit starts at the match start 
+for non-unique first code unit patterns, but after a unique first code unit, 
+and patterns such as a*a need the former action).
+
 
 Version 10.33 16-April-2019
 ---------------------------

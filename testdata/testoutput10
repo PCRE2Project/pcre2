@@ -1769,4 +1769,38 @@ Options: utf
 Starting code units: \xef \xf0 \xf1 \xf2 \xf4 
 Subject length lower bound = 1
 
+/[\xff\x{ffff}]/I,utf
+Capture group count = 0
+Options: utf
+Starting code units: \xc3 \xef 
+Subject length lower bound = 1
+
+/[\xff\x{ff}]/I,utf
+Capture group count = 0
+Options: utf
+Starting code units: \xc3 
+Subject length lower bound = 1
+
+/[\xff\x{ff}]/I
+Capture group count = 0
+Starting code units: \xff 
+Subject length lower bound = 1
+
+/[Ss]/I
+Capture group count = 0
+First code unit = 'S' (caseless)
+Subject length lower bound = 1
+
+/[Ss]/I,utf
+Capture group count = 0
+Options: utf
+Starting code units: S s 
+Subject length lower bound = 1
+
+/(?:\x{ff}|\x{3000})/I,utf
+Capture group count = 0
+Options: utf
+Starting code units: \xc3 \xe3 
+Subject length lower bound = 1
+
 # End of testinput10
