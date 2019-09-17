@@ -346,7 +346,7 @@ if (common->utf && offset > 0)
 
 #ifndef _WIN64
 
-static SLJIT_INLINE sljit_u32 max_fast_forward_char_pair_sse2_offset(void)
+static SLJIT_INLINE sljit_u32 max_fast_forward_char_pair_offset(void)
 {
 #if PCRE2_CODE_UNIT_WIDTH == 8
 return 15;
@@ -390,7 +390,7 @@ sljit_u8 instruction[8];
 int i;
 
 SLJIT_ASSERT(common->mode == PCRE2_JIT_COMPLETE && offs1 > offs2);
-SLJIT_ASSERT(diff <= IN_UCHARS(max_fast_forward_char_pair_sse2_offset()));
+SLJIT_ASSERT(diff <= IN_UCHARS(max_fast_forward_char_pair_offset()));
 SLJIT_ASSERT(tmp1_reg_ind < 8 && tmp2_reg_ind == 1);
 
 /* Initialize. */
@@ -631,3 +631,347 @@ if (common->match_end_ptr != 0)
 #undef SSE2_COMPARE_TYPE_INDEX
 
 #endif /* SLJIT_CONFIG_X86 && !SUPPORT_VALGRIND */
+
+#if (defined SLJIT_CONFIG_ARM_64 && SLJIT_CONFIG_ARM_64 && (defined __ARM_NEON || defined __ARM_NEON__))
+
+#include <arm_neon.h>
+
+typedef union {
+       uint8_t mem[16];
+       uint64_t dw[2];
+} quad_word;
+
+typedef union {
+  unsigned int x;
+  struct { unsigned char c1, c2, c3, c4; } c;
+} int_char;
+
+static SLJIT_INLINE void emit_memchr(struct sljit_compiler *compiler, PCRE2_UCHAR char1)
+{
+SLJIT_ASSERT(STR_PTR == SLJIT_R1);
+/* We need to be careful in the order we store argument passing registers, as STR_PTR is same as SLJIT_R1. */
+OP1(SLJIT_MOV, SLJIT_R0, 0, STR_PTR, 0);
+OP2(SLJIT_SUB, SLJIT_R2, 0, STR_END, 0, STR_PTR, 0);
+OP1(SLJIT_MOV_U8, SLJIT_R1, 0, SLJIT_IMM, char1);
+sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_RET(SW) | SLJIT_ARG1(SW) | SLJIT_ARG2(UW) | SLJIT_ARG3(UW),
+                 SLJIT_IMM, SLJIT_FUNC_OFFSET(memchr));
+}
+
+static sljit_u8* SLJIT_FUNC sljit_memchr_mask(sljit_u8 *str, sljit_uw n, sljit_u8 c1mask, sljit_u8 mask)
+{
+if (n >= 16)
+  {
+  quad_word qw;
+  uint8x16_t vmask = vdupq_n_u8(mask);
+  uint8x16_t vc1mask = vdupq_n_u8(c1mask);
+  for (; n >= 16; n -= 16, str += 16)
+    {
+    uint8x16_t x = vld1q_u8(str);
+    uint8x16_t xmask = vorrq_u8(x, vmask);
+    uint8x16_t eq = vceqq_u8(xmask, vc1mask);
+    vst1q_u8(qw.mem, eq);
+    if (qw.dw[0])
+      return str + __builtin_ctzll(qw.dw[0]) / 8;
+    if (qw.dw[1])
+      return str + 8 + __builtin_ctzll(qw.dw[1]) / 8;
+    }
+  }
+for (; n > 0; --n, ++str)
+  if (c1mask == (*str | mask))
+    return str;
+return NULL;
+}
+
+static SLJIT_INLINE void emit_memchr_mask(struct sljit_compiler *compiler, PCRE2_UCHAR char1, PCRE2_UCHAR mask, sljit_s32 offset)
+{
+OP1(SLJIT_MOV_U8, SLJIT_R2, 0, SLJIT_IMM, char1 | mask);
+OP1(SLJIT_MOV_U8, SLJIT_R3, 0, SLJIT_IMM, mask);
+sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_RET(SW) | SLJIT_ARG1(SW) | SLJIT_ARG2(UW) | SLJIT_ARG3(UW) | SLJIT_ARG4(UW),
+                 SLJIT_IMM, SLJIT_FUNC_OFFSET(sljit_memchr_mask));
+}
+
+/* Like memchr except that we are looking for either one of the two chars c1 or c2. */
+static sljit_u8* SLJIT_FUNC sljit_memchr_2(sljit_u8 *str, sljit_uw n, sljit_u8 c1, sljit_u8 c2)
+{
+if (n >= 16)
+  {
+  quad_word qw;
+  uint8x16_t vc1 = vdupq_n_u8(c1);
+  uint8x16_t vc2 = vdupq_n_u8(c2);
+  for (; n >= 16; n -= 16, str += 16)
+    {
+    uint8x16_t x = vld1q_u8(str);
+    uint8x16_t eq1 = vceqq_u8(x, vc1);
+    uint8x16_t eq2 = vceqq_u8(x, vc2);
+    uint8x16_t eq = vorrq_u8(eq1, eq2);
+    vst1q_u8(qw.mem, eq);
+    if (qw.dw[0])
+      return str + __builtin_ctzll(qw.dw[0]) / 8;
+    if (qw.dw[1])
+      return str + 8 + __builtin_ctzll(qw.dw[1]) / 8;
+    }
+  }
+for (; n > 0; --n, ++str)
+  {
+  sljit_u8 x = *str;
+  if (x == c1 || x == c2)
+    return str;
+  }
+return NULL;
+}
+
+static SLJIT_INLINE void emit_memchr_2(struct sljit_compiler *compiler, PCRE2_UCHAR char1, PCRE2_UCHAR char2)
+{
+OP1(SLJIT_MOV_U8, SLJIT_R2, 0, SLJIT_IMM, char1);
+OP1(SLJIT_MOV_U8, SLJIT_R3, 0, SLJIT_IMM, char2);
+sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_RET(SW) | SLJIT_ARG1(SW) | SLJIT_ARG2(UW) | SLJIT_ARG3(UW) | SLJIT_ARG4(UW),
+                 SLJIT_IMM, SLJIT_FUNC_OFFSET(sljit_memchr_2));
+}
+
+
+#if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
+
+static SLJIT_INLINE int utf_continue(sljit_u8 *s)
+{
+#if PCRE2_CODE_UNIT_WIDTH == 8
+return (*s & 0xc0) == 0x80;
+#elif PCRE2_CODE_UNIT_WIDTH == 16
+return (*s & 0xfc00) == 0xdc00;
+#else
+#error "Unknown code width"
+#endif
+}
+
+static sljit_u8* SLJIT_FUNC exec_memchr_mask_utf(sljit_u8 *str, sljit_uw n, sljit_uw c, sljit_uw offset)
+{
+sljit_u8 c1mask, mask;
+int_char ic;
+ic.x = c;
+c1mask = ic.c.c1;
+mask = ic.c.c2;
+if (n >= 16)
+  {
+  quad_word qw;
+  uint8x16_t vmask = vdupq_n_u8(mask);
+  uint8x16_t vc1mask = vdupq_n_u8(c1mask);
+  for (; n >= 16; n -= 16, str += 16)
+    {
+    sljit_u8 *s;
+    uint8x16_t x = vld1q_u8(str);
+    uint8x16_t xmask = vorrq_u8(x, vmask);
+    uint8x16_t eq = vceqq_u8(xmask, vc1mask);
+    vst1q_u8(qw.mem, eq);
+    if (qw.dw[0] == 0 && qw.dw[1] == 0)
+      continue;
+    if (qw.dw[0])
+      s = str + __builtin_ctzll(qw.dw[0]) / 8;
+    else
+      s = str + 8 + __builtin_ctzll(qw.dw[1]) / 8;
+    if (utf_continue(s - offset))
+      {
+      /* Increment by 1 over the matching byte (i.e., -15 + 16). */
+      str = s - 15;
+      continue;
+      }
+    return s;
+    }
+  }
+for (; n > 0; --n, ++str)
+  {
+  if (c1mask != (*str | mask))
+    continue;
+  if (utf_continue(str - offset))
+    continue;
+  return str;
+  }
+return NULL;
+}
+
+static SLJIT_INLINE void emit_memchr_mask_utf(struct sljit_compiler *compiler, PCRE2_UCHAR char1, PCRE2_UCHAR mask, sljit_s32 offset)
+{
+int_char ic;
+ic.c.c1 = char1 | mask;
+ic.c.c2 = mask;
+OP1(SLJIT_MOV, SLJIT_R2, 0, SLJIT_IMM, ic.x);
+OP1(SLJIT_MOV, SLJIT_R3, 0, SLJIT_IMM, offset);
+sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_RET(SW) | SLJIT_ARG1(SW) | SLJIT_ARG2(UW) | SLJIT_ARG3(UW) | SLJIT_ARG4(UW),
+                 SLJIT_IMM, SLJIT_FUNC_OFFSET(exec_memchr_mask_utf));
+}
+
+
+/* Like sljit_memchr_2 and handle utf. */
+static sljit_u8* SLJIT_FUNC exec_memchr_2_utf(sljit_u8 *str, sljit_uw n, sljit_uw c, sljit_uw offset)
+{
+sljit_u8 c1, c2;
+int_char ic;
+ic.x = c;
+c1 = ic.c.c1;
+c2 = ic.c.c2;
+if (n >= 16)
+  {
+  quad_word qw;
+  uint8x16_t vc1 = vdupq_n_u8(c1);
+  uint8x16_t vc2 = vdupq_n_u8(c2);
+  for (; n >= 16; n -= 16, str += 16)
+    {
+    sljit_u8 *s;
+    uint8x16_t x = vld1q_u8(str);
+    uint8x16_t eq1 = vceqq_u8(x, vc1);
+    uint8x16_t eq2 = vceqq_u8(x, vc2);
+    uint8x16_t eq = vorrq_u8(eq1, eq2);
+    vst1q_u8(qw.mem, eq);
+    if (qw.dw[0])
+      s = str + __builtin_ctzll(qw.dw[0]) / 8;
+    else if (qw.dw[1])
+      s = str + 8 + __builtin_ctzll(qw.dw[1]) / 8;
+    else
+      continue;
+    if (utf_continue(s - offset))
+      {
+      /* Increment by 1 over the matching byte (i.e., -15 + 16). */
+      str = s - 15;
+      continue;
+      }
+    return s;
+    }
+  }
+for (; n > 0; --n, ++str)
+  {
+  sljit_u8 x = *str;
+  if (x != c1 && x != c2)
+    continue;
+  if (utf_continue(str - offset))
+    continue;
+  return str;
+  }
+return NULL;
+}
+
+static SLJIT_INLINE void emit_memchr_2_utf(struct sljit_compiler *compiler, PCRE2_UCHAR char1, PCRE2_UCHAR char2, sljit_s32 offset)
+{
+int_char ic;
+ic.c.c1 = char1;
+ic.c.c2 = char2;
+
+OP1(SLJIT_MOV, SLJIT_R2, 0, SLJIT_IMM, ic.x);
+OP1(SLJIT_MOV, SLJIT_R3, 0, SLJIT_IMM, offset);
+sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_RET(SW) | SLJIT_ARG1(SW) | SLJIT_ARG2(UW) | SLJIT_ARG3(UW) | SLJIT_ARG4(UW),
+                 SLJIT_IMM, SLJIT_FUNC_OFFSET(exec_memchr_2_utf));
+}
+
+/* Like memchr and handle utf. */
+static sljit_u8* SLJIT_FUNC exec_memchr_utf(sljit_u8 *str, sljit_uw n, sljit_u8 c, sljit_uw offset)
+{
+if (n >= 16)
+  {
+  quad_word qw;
+  uint8x16_t vc = vdupq_n_u8(c);
+  for (; n >= 16; n -= 16, str += 16)
+    {
+    sljit_u8 *s;
+    uint8x16_t x = vld1q_u8(str);
+    uint8x16_t eq = vceqq_u8(x, vc);
+    vst1q_u8(qw.mem, eq);
+    if (qw.dw[0])
+      s = str + __builtin_ctzll(qw.dw[0]) / 8;
+    else if (qw.dw[1])
+      s = str + 8 + __builtin_ctzll(qw.dw[1]) / 8;
+    else
+      continue;
+    if (utf_continue(s - offset))
+      {
+      /* Increment by 1 over the matching byte (i.e., -15 + 16). */
+      str = s - 15;
+      continue;
+      }
+    return s;
+    }
+  }
+for (; n > 0; --n, ++str)
+  {
+  if (*str != c)
+    continue;
+  if (utf_continue(str - offset))
+    continue;
+  return str;
+  }
+return NULL;
+}
+
+static SLJIT_INLINE void emit_memchr_utf(struct sljit_compiler *compiler, PCRE2_UCHAR char1, sljit_s32 offset)
+{
+OP1(SLJIT_MOV, SLJIT_R0, 0, STR_PTR, 0);
+OP2(SLJIT_SUB, SLJIT_R1, 0, STR_END, 0, STR_PTR, 0);
+OP1(SLJIT_MOV_U8, SLJIT_R2, 0, SLJIT_IMM, char1);
+OP1(SLJIT_MOV, SLJIT_R3, 0, SLJIT_IMM, offset);
+sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_RET(SW) | SLJIT_ARG1(SW) | SLJIT_ARG2(UW) | SLJIT_ARG3(UW) | SLJIT_ARG4(UW),
+                 SLJIT_IMM, SLJIT_FUNC_OFFSET(exec_memchr_utf));
+}
+
+#endif /* SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32 */
+
+#define JIT_HAS_FAST_FORWARD_CHAR_SIMD 1
+
+static void fast_forward_char_simd(compiler_common *common, PCRE2_UCHAR char1, PCRE2_UCHAR char2, sljit_s32 offset)
+{
+DEFINE_COMPILER;
+struct sljit_jump *partial_quit;
+/* Save temporary registers. */
+OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), LOCALS0, STR_PTR, 0);
+OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), LOCALS1, TMP3, 0);
+
+if (char1 == char2)
+  {
+#if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
+  if (common->utf && offset > 0)
+    emit_memchr_utf(compiler, char1, offset);
+  else
+    emit_memchr(compiler, char1);
+#else
+  emit_memchr(compiler, char1);
+#endif
+  }
+else
+  {
+  PCRE2_UCHAR mask = char1 ^ char2;
+  OP1(SLJIT_MOV, SLJIT_R0, 0, STR_PTR, 0);
+  OP2(SLJIT_SUB, SLJIT_R1, 0, STR_END, 0, STR_PTR, 0);
+  if (is_powerof2(mask))
+    {
+#if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
+    if (common->utf && offset > 0)
+      emit_memchr_mask_utf(compiler, char1, mask, offset);
+    else
+      emit_memchr_mask(compiler, char1, mask, offset);
+#else
+    emit_memchr_mask(compiler, char1, mask, offset);
+#endif
+    }
+  else
+    {
+#if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
+    if (common->utf && offset > 0)
+      emit_memchr_2_utf(compiler, char1, char2, offset);
+    else
+      emit_memchr_2(compiler, char1, char2);
+#else
+    emit_memchr_2(compiler, char1, char2);
+#endif
+    }
+  }
+/* Restore registers. */
+OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(SLJIT_SP), LOCALS0);
+OP1(SLJIT_MOV, TMP3, 0, SLJIT_MEM1(SLJIT_SP), LOCALS1);
+
+/* Check return value. */
+partial_quit = CMP(SLJIT_EQUAL, SLJIT_RETURN_REG, 0, SLJIT_IMM, 0);
+if (common->mode == PCRE2_JIT_COMPLETE)
+  add_jump(compiler, &common->failed_match, partial_quit);
+
+/* Fast forward STR_PTR to the result of memchr. */
+OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_RETURN_REG, 0);
+
+if (common->mode != PCRE2_JIT_COMPLETE)
+  JUMPHERE(partial_quit);
+}
+#endif /* SLJIT_CONFIG_ARM_64 && SLJIT_CONFIG_ARM_64 */

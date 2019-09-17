@@ -5537,7 +5537,7 @@ static BOOL check_fast_forward_char_pair_simd(compiler_common *common, fast_forw
       a2 = chars[i].chars[1];
       a_pri = chars[i].last_count;
 
-      j = i - max_fast_forward_char_pair_sse2_offset();
+      j = i - max_fast_forward_char_pair_offset();
       if (j < 0)
         j = 0;
 
