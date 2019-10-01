@@ -161,7 +161,7 @@ fi
 # Handle --enable-jit-sealloc (disabled by default)
 AC_ARG_ENABLE(jit-sealloc,
               AS_HELP_STRING([--enable-jit-sealloc],
-                             [enable SELinux compatible execmem allocator in JIT]),
+                             [enable SELinux compatible execmem allocator in JIT (experimental)]),
               , enable_jit_sealloc=no)
 
 # Handle --disable-pcre2grep-jit (enabled by default)

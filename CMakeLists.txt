@@ -178,7 +178,7 @@ SET(PCRE2_SUPPORT_JIT OFF CACHE BOOL
     "Enable support for Just-in-time compiling.")
 
 SET(PCRE2_SUPPORT_JIT_SEALLOC OFF CACHE BOOL
-    "Enable SELinux compatible execmem allocator in JIT.")
+    "Enable SELinux compatible execmem allocator in JIT (experimental).")
 
 SET(PCRE2GREP_SUPPORT_JIT ON CACHE BOOL
     "Enable use of Just-in-time compiling in pcre2grep.")

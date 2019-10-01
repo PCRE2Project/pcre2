@@ -13740,11 +13740,32 @@ Returns:        0: success or (*NOJIT) was used
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_jit_compile(pcre2_code *code, uint32_t options)
 {
+static int executable_allocator_is_working = 0;
+
 pcre2_real_code *re = (pcre2_real_code *)code;
 
 #ifdef SUPPORT_JIT
 executable_functions *functions = (executable_functions *)re->executable_jit;
 #endif
+
+if (executable_allocator_is_working == 0)
+  {
+  /* Checks whether the executable allocator is working. This check
+     might run multiple times in multi-threaded environments, but the result
+     should not be affected by it. */
+  void *ptr = SLJIT_MALLOC_EXEC(32);
+
+  executable_allocator_is_working = -1;
+
+  if (ptr != NULL)
+    {
+    SLJIT_FREE_EXEC(((sljit_u8*)(ptr)) + SLJIT_EXEC_OFFSET(ptr));
+    executable_allocator_is_working = 1;
+    }
+  }
+
+if (executable_allocator_is_working < 0)
+  return PCRE2_ERROR_NOMEMORY;
 
 if (code == NULL)
   return PCRE2_ERROR_NULL;
