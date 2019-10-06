@@ -13390,7 +13390,7 @@ if (SLJIT_UNLIKELY(sljit_get_compiler_error(compiler)))
   sljit_free_compiler(compiler);
   SLJIT_FREE(common->optimized_cbracket, allocator_data);
   SLJIT_FREE(common->private_data_ptrs, allocator_data);
-  PRIV(jit_free_rodata)(common->read_only_data_head, compiler->allocator_data);
+  PRIV(jit_free_rodata)(common->read_only_data_head, allocator_data);
   return PCRE2_ERROR_NOMEMORY;
   }
 
@@ -13444,7 +13444,7 @@ if (SLJIT_UNLIKELY(sljit_get_compiler_error(compiler)))
   sljit_free_compiler(compiler);
   SLJIT_FREE(common->optimized_cbracket, allocator_data);
   SLJIT_FREE(common->private_data_ptrs, allocator_data);
-  PRIV(jit_free_rodata)(common->read_only_data_head, compiler->allocator_data);
+  PRIV(jit_free_rodata)(common->read_only_data_head, allocator_data);
   return PCRE2_ERROR_NOMEMORY;
   }
 
@@ -13533,7 +13533,7 @@ while (common->currententry != NULL)
     sljit_free_compiler(compiler);
     SLJIT_FREE(common->optimized_cbracket, allocator_data);
     SLJIT_FREE(common->private_data_ptrs, allocator_data);
-    PRIV(jit_free_rodata)(common->read_only_data_head, compiler->allocator_data);
+    PRIV(jit_free_rodata)(common->read_only_data_head, allocator_data);
     return PCRE2_ERROR_NOMEMORY;
     }
   flush_stubs(common);
@@ -13680,7 +13680,7 @@ sljit_free_compiler(compiler);
 
 if (executable_func == NULL)
   {
-  PRIV(jit_free_rodata)(common->read_only_data_head, compiler->allocator_data);
+  PRIV(jit_free_rodata)(common->read_only_data_head, allocator_data);
   return PCRE2_ERROR_NOMEMORY;
   }
 
@@ -13695,7 +13695,7 @@ else
     /* This case is highly unlikely since we just recently
     freed a lot of memory. Not impossible though. */
     sljit_free_code(executable_func);
-    PRIV(jit_free_rodata)(common->read_only_data_head, compiler->allocator_data);
+    PRIV(jit_free_rodata)(common->read_only_data_head, allocator_data);
     return PCRE2_ERROR_NOMEMORY;
     }
   memset(functions, 0, sizeof(executable_functions));
@@ -13740,32 +13740,12 @@ Returns:        0: success or (*NOJIT) was used
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_jit_compile(pcre2_code *code, uint32_t options)
 {
-static int executable_allocator_is_working = 0;
-
 pcre2_real_code *re = (pcre2_real_code *)code;
 
 #ifdef SUPPORT_JIT
 executable_functions *functions = (executable_functions *)re->executable_jit;
+static int executable_allocator_is_working = 0;
 #endif
-
-if (executable_allocator_is_working == 0)
-  {
-  /* Checks whether the executable allocator is working. This check
-     might run multiple times in multi-threaded environments, but the result
-     should not be affected by it. */
-  void *ptr = SLJIT_MALLOC_EXEC(32);
-
-  executable_allocator_is_working = -1;
-
-  if (ptr != NULL)
-    {
-    SLJIT_FREE_EXEC(((sljit_u8*)(ptr)) + SLJIT_EXEC_OFFSET(ptr));
-    executable_allocator_is_working = 1;
-    }
-  }
-
-if (executable_allocator_is_working < 0)
-  return PCRE2_ERROR_NOMEMORY;
 
 if (code == NULL)
   return PCRE2_ERROR_NULL;
@@ -13822,6 +13802,26 @@ return PCRE2_ERROR_JIT_BADOPTION;
 /* There is JIT support. Do the necessary. */
 
 if ((re->flags & PCRE2_NOJIT) != 0) return 0;
+
+if (executable_allocator_is_working == 0)
+  {
+  /* Checks whether the executable allocator is working. This check
+     might run multiple times in multi-threaded environments, but the
+     result should not be affected by it. */
+  void *ptr = SLJIT_MALLOC_EXEC(32);
+
+  executable_allocator_is_working = -1;
+
+  if (ptr != NULL)
+    {
+    SLJIT_FREE_EXEC(((sljit_u8*)(ptr)) + SLJIT_EXEC_OFFSET(ptr));
+    executable_allocator_is_working = 1;
+    }
+  }
+
+if (executable_allocator_is_working < 0)
+  return PCRE2_ERROR_NOMEMORY;
+
 if ((re->overall_options & PCRE2_MATCH_INVALID_UTF) != 0)
   options |= PCRE2_JIT_INVALID_UTF;
 
