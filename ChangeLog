@@ -170,6 +170,10 @@ value (because the search for a "required" code unit starts at the match start
 for non-unique first code unit patterns, but after a unique first code unit, 
 and patterns such as a*a need the former action).
 
+36. Small patch to pcre2posix.c to set the erroroffset field to -1 immediately 
+after a successful compile, instead of at the start of matching to avoid a 
+sanitizer complaint (regexec is supposed to be thread safe).
+
 
 Version 10.33 16-April-2019
 ---------------------------
