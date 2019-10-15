@@ -686,12 +686,12 @@ if [ $utf8 -ne 0 ] ; then
   
   echo "---------------------------- Test U4 ------------------------------" >>testtrygrep
   printf 'A\341\200\200\200CD\342\200\200Z\n' >testtemp1grep
-  (cd $srcdir; $valgrind $vjs $pcre2grep -u -o '....' testtemp1grep) >>testtrygrep 2>&1
+  (cd $srcdir; $valgrind $vjs $pcre2grep -u -o '....' $builddir/testtemp1grep) >>testtrygrep 2>&1
   echo "RC=$?" >>testtrygrep
 
   echo "---------------------------- Test U5 ------------------------------" >>testtrygrep
   printf 'A\341\200\200\200CD\342\200\200Z\n' >testtemp1grep
-  (cd $srcdir; $valgrind $vjs $pcre2grep -U -o '....' testtemp1grep) >>testtrygrep
+  (cd $srcdir; $valgrind $vjs $pcre2grep -U -o '....' $builddir/testtemp1grep) >>testtrygrep
   echo "RC=$?" >>testtrygrep
 
   $cf $srcdir/testdata/grepoutput8 testtrygrep

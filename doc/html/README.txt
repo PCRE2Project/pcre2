@@ -5,11 +5,11 @@ PCRE2 is a re-working of the original PCRE1 library to provide an entirely new
 API. Since its initial release in 2015, there has been further development of
 the code and it now differs from PCRE1 in more than just the API. There are new
 features and the internals have been improved. The latest release of PCRE2 is
-always available in three alternative formats from:
+available in three alternative formats from:
 
-  ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/pcre2-xxx.tar.gz
-  ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/pcre2-xxx.tar.bz2
-  ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/pcre2-xxx.zip
+https://ftp.pcre.org/pub/pcre/pcre2-10.xx.tar.gz
+https://ftp.pcre.org/pub/pcre/pcre2-10.xx.tar.bz2
+https://ftp.pcre.org/pub/pcre/pcre2-10.xx.tar.zip
 
 There is a mailing list for discussion about the development of PCRE (both the
 original and new APIs) at pcre-dev@exim.org. You can access the archives and
@@ -164,9 +164,11 @@ library. They are also documented in the pcre2build man page.
   will be a compile time error. If in doubt, use --enable-jit=auto, which
   enables JIT only if the current hardware is supported.
 
-. If you are enabling JIT under SELinux you may also want to add
-  --enable-jit-sealloc, which enables the use of an execmem allocator in JIT
-  that is compatible with SELinux. This has no effect if JIT is not enabled.
+. If you are enabling JIT under SELinux environment you may also want to add
+  --enable-jit-sealloc, which enables the use of an executable memory allocator
+  that is compatible with SELinux. Warning: this allocator is experimental!
+  It does not support fork() operation and may crash when no disk space is
+  available. This option has no effect if JIT is disabled.
 
 . If you do not want to make use of the default support for UTF-8 Unicode
   character strings in the 8-bit library, UTF-16 Unicode character strings in

@@ -28,6 +28,8 @@
 # The -v option causes a call to 'pcre2test -C' to happen for each
 # configuration.
 
+# Currently -fsanitize=undefined is not working (locks machine).
+
 useasan=1
 useusan=1
 usedebug=1
@@ -293,9 +295,10 @@ if [ $ISGCC -ne 0 -a $usemain -ne 0 ]; then
     opts="--disable-shared $enable_jit --enable-pcre2-16 --enable-pcre2-32"
     runtest
   fi
+# This also seems to be the case for sanitize undefined.   
   if [ $useusan -ne 0 ]; then
     echo "------- Maximally configured test with -fsanitize=undefined -fno-sanitize=shift -fno-sanitize=alignment -std=gnu99 -------"
-    CFLAGS="$OFLAGS $SAVECFLAGS -fsanitize=undefined -fno-sanitize=shift -fno-sanitize=alignment -std=gnu99"
+    CFLAGS="$OFLAGS $SAVECFLAGS -no-pie -fno-PIE -fsanitize=undefined -fno-sanitize=shift -fno-sanitize=alignment -std=gnu99"
     echo "CFLAGS=$CFLAGS"
     opts="--disable-shared $enable_jit --enable-pcre2-16 --enable-pcre2-32"
     runtest

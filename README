@@ -5,11 +5,11 @@ PCRE2 is a re-working of the original PCRE1 library to provide an entirely new
 API. Since its initial release in 2015, there has been further development of
 the code and it now differs from PCRE1 in more than just the API. There are new
 features and the internals have been improved. The latest release of PCRE2 is
-always available in three alternative formats from:
+available in three alternative formats from:
 
-  ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/pcre2-xxx.tar.gz
-  ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/pcre2-xxx.tar.bz2
-  ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/pcre2-xxx.zip
+https://ftp.pcre.org/pub/pcre/pcre2-10.xx.tar.gz
+https://ftp.pcre.org/pub/pcre/pcre2-10.xx.tar.bz2
+https://ftp.pcre.org/pub/pcre/pcre2-10.xx.tar.zip
 
 There is a mailing list for discussion about the development of PCRE (both the
 original and new APIs) at pcre-dev@exim.org. You can access the archives and
