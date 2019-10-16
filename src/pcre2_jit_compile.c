@@ -1050,8 +1050,8 @@ switch(*cc)
   return cc + 1 + 2 + cc[1];
 
   default:
-  /* All opcodes are supported now! */
-  SLJIT_UNREACHABLE();
+  /* Unsupported opcodes: OP_ASSERT_NA and OP_ASSERTBACK_NA */
+  /* SLJIT_UNREACHABLE(); */
   return NULL;
   }
 }
