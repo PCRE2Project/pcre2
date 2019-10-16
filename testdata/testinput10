@@ -579,4 +579,10 @@
 
 /(?:\x{ff}|\x{3000})/I,utf
 
+/x/utf
+    abxyz
+    \x80\=startchar
+    abc\x80\=startchar
+    abc\x80\=startchar,offset=3
+
 # End of testinput10

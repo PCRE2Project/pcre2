@@ -6184,6 +6184,10 @@ if ((match_data->flags & PCRE2_MD_COPIED_SUBJECT) != 0)
   }
 match_data->subject = NULL;
 
+/* Zero the error offset in case the first code unit is invalid UTF. */
+
+match_data->startchar = 0;
+
 
 /* ============================= JIT matching ============================== */
 

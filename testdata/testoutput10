@@ -1803,4 +1803,14 @@ Options: utf
 Starting code units: \xc3 \xe3 
 Subject length lower bound = 1
 
+/x/utf
+    abxyz
+ 0: x
+    \x80\=startchar
+Failed: error -22: UTF-8 error: isolated byte with 0x80 bit set at offset 0
+    abc\x80\=startchar
+Failed: error -22: UTF-8 error: isolated byte with 0x80 bit set at offset 3
+    abc\x80\=startchar,offset=3
+Error -36 (bad UTF-8 offset)
+
 # End of testinput10
