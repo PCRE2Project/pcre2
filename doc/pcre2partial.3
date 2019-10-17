@@ -242,9 +242,9 @@ Note the use of the \fBoffset\fP modifier to start the new match where the
 partial match was found. In this example, the next segment was added to the one
 in which the partial match was found. This is the most straightforward
 approach, typically using a memory buffer that is twice the size of each
-segment. After a partial match, the first half of the buffer is discarded, the 
-second half is moved to the start of the buffer, and a new segment is added 
-before repeating the match as in the example above. After a no match, the 
+segment. After a partial match, the first half of the buffer is discarded, the
+second half is moved to the start of the buffer, and a new segment is added
+before repeating the match as in the example above. After a no match, the
 entire buffer can be discarded.
 .P
 If there are memory constraints, you may want to discard text that precedes a

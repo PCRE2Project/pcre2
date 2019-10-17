@@ -5,15 +5,15 @@ News about PCRE2 releases
 Version 10.34 15-October-2019
 -----------------------------
 
-Another release with a few enhancements as well as bugfixes and tidies. The 
+Another release with a few enhancements as well as bugfixes and tidies. The
 main new features are:
 
 1. There is now some support for matching in invalid UTF strings.
 
-2. Non-atomic positive lookarounds are implemented in the pcre2_match() 
+2. Non-atomic positive lookarounds are implemented in the pcre2_match()
 interpreter, but not in JIT.
 
-3. Added two new functions: pcre2_get_match_data_size() and 
+3. Added two new functions: pcre2_get_match_data_size() and
 pcre2_maketables_free().
 
 4. Upgraded to Unicode 12.1.0.

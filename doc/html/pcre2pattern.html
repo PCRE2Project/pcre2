@@ -2021,8 +2021,8 @@ Earlier versions of Perl and PCRE1 used to give an error at compile time for
 such patterns. However, because there are cases where this can be useful, such
 patterns are now accepted, but whenever an iteration of such a group matches no
 characters, matching moves on to the next item in the pattern instead of
-repeatedly matching an empty string. This does not prevent backtracking into 
-any of the iterations if a subsequent item fails to match. 
+repeatedly matching an empty string. This does not prevent backtracking into
+any of the iterations if a subsequent item fails to match.
 </P>
 <P>
 By default, quantifiers are "greedy", that is, they match as much as possible
@@ -2374,7 +2374,7 @@ in the subject string reset to what it was before the assertion was processed.
 <P>
 The Perl-compatible lookaround assertions are atomic. If an assertion is true,
 but there is a subsequent matching failure, there is no backtracking into the
-assertion. However, there are some cases where non-atomic assertions can be 
+assertion. However, there are some cases where non-atomic assertions can be
 useful. PCRE2 has some support for these, described in the section entitled
 <a href="#nonatomicassertions">"Non-atomic assertions"</a>
 below, but they are not Perl-compatible.
@@ -2621,11 +2621,11 @@ characters that are not "999".
 The traditional Perl-compatible lookaround assertions are atomic. That is, if
 an assertion is true, but there is a subsequent matching failure, there is no
 backtracking into the assertion. However, there are some cases where non-atomic
-positive assertions can be useful. PCRE2 provides these using the following 
+positive assertions can be useful. PCRE2 provides these using the following
 syntax:
 <pre>
   (*non_atomic_positive_lookahead:  or (*napla:
-  (*non_atomic_positive_lookbehind: or (*naplb: 
+  (*non_atomic_positive_lookbehind: or (*naplb:
 </pre>
 Consider the problem of finding the right-most word in a string that also
 appears earlier in the string, that is, it must appear at least twice in total.
@@ -2633,8 +2633,8 @@ This pattern returns the required result as captured substring 1:
 <pre>
   ^(?x)(*napla: .* \b(\w++)) (?&#62; .*? \b\1\b ){2}
 </pre>
-For a subject such as "word1 word2 word3 word2 word3 word4" the result is 
-"word3". How does it work? At the start, ^(?x) anchors the pattern and sets the 
+For a subject such as "word1 word2 word3 word2 word3 word4" the result is
+"word3". How does it work? At the start, ^(?x) anchors the pattern and sets the
 "x" option, which causes white space (introduced for readability) to be
 ignored. Inside the assertion, the greedy .* at first consumes the entire
 string, but then has to backtrack until the rest of the assertion can match a
@@ -2643,9 +2643,9 @@ succeeds, it captures the right-most word in the string.
 </P>
 <P>
 The current matching point is then reset to the start of the subject, and the
-rest of the pattern match checks for two occurrences of the captured word, 
-using an ungreedy .*? to scan from the left. If this succeeds, we are done, but 
-if the last word in the string does not occur twice, this part of the pattern 
+rest of the pattern match checks for two occurrences of the captured word,
+using an ungreedy .*? to scan from the left. If this succeeds, we are done, but
+if the last word in the string does not occur twice, this part of the pattern
 fails. If a traditional atomic lookhead (?= or (*pla: had been used, the
 assertion could not be re-entered, and the whole match would fail. The pattern
 would succeed only if the very last word in the subject was found twice.

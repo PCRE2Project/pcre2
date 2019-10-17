@@ -393,7 +393,7 @@ for(;;)
     case OP_ASSERTBACK:
     case OP_ASSERTBACK_NOT:
     case OP_ASSERT_NA:
-    case OP_ASSERTBACK_NA:  
+    case OP_ASSERTBACK_NA:
     case OP_ONCE:
     case OP_SCRIPT_RUN:
     case OP_COND:

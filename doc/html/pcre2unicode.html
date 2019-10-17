@@ -24,13 +24,13 @@ width), but this is not the default. Unless specifically requested, PCRE2
 treats each code unit in a string as one character.
 </P>
 <P>
-There are two ways of telling PCRE2 to switch to UTF mode, where characters may 
-consist of more than one code unit and the range of values is constrained. The 
+There are two ways of telling PCRE2 to switch to UTF mode, where characters may
+consist of more than one code unit and the range of values is constrained. The
 program can call
 <a href="pcre2_compile.html"><b>pcre2_compile()</b></a>
 with the PCRE2_UTF option, or the pattern may start with the sequence (*UTF).
 However, the latter facility can be locked out by the PCRE2_NEVER_UTF option.
-That is, the programmer can prevent the supplier of the pattern from switching 
+That is, the programmer can prevent the supplier of the pattern from switching
 to UTF mode.
 </P>
 <P>
@@ -425,7 +425,7 @@ You can run pattern matches on subject strings that may contain invalid UTF
 sequences if you call <b>pcre2_compile()</b> with the PCRE2_MATCH_INVALID_UTF
 option. This is supported by <b>pcre2_match()</b>, including JIT matching, but
 not by <b>pcre2_dfa_match()</b>. When PCRE2_MATCH_INVALID_UTF is set, it forces
-PCRE2_UTF to be set as well. Note, however, that the pattern itself must be a 
+PCRE2_UTF to be set as well. Note, however, that the pattern itself must be a
 valid UTF string.
 </P>
 <P>
@@ -461,7 +461,7 @@ UTF character, or the end of the subject.
 </P>
 <P>
 At internal fragment boundaries, \b and \B behave in the same way as at the
-beginning and end of the subject. For example, a sequence such as \bWORD\b 
+beginning and end of the subject. For example, a sequence such as \bWORD\b
 would match an instance of WORD that is surrounded by invalid UTF code units.
 </P>
 <P>

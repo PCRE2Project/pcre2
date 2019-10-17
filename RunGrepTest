@@ -683,7 +683,7 @@ if [ $utf8 -ne 0 ] ; then
   echo "---------------------------- Test U3 ------------------------------" >>testtrygrep
   (cd $srcdir; $valgrind $vjs $pcre2grep --line-offsets -u --newline=any '(?<=\K\x{17f})' ./testdata/grepinput8) >>testtrygrep
   echo "RC=$?" >>testtrygrep
-  
+
   echo "---------------------------- Test U4 ------------------------------" >>testtrygrep
   printf 'A\341\200\200\200CD\342\200\200Z\n' >testtemp1grep
   (cd $srcdir; $valgrind $vjs $pcre2grep -u -o '....' $builddir/testtemp1grep) >>testtrygrep 2>&1

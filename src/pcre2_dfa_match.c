@@ -3678,7 +3678,7 @@ for (;;)
             pp2 = memchr(start_match, first_cu2, cu2size);
             memchr_not_found_first_cu2 = (pp2 == NULL && pp1 == NULL);
             }
- 
+
           if (pp1 == NULL)
             start_match = (pp2 == NULL)? end_subject : pp2;
           else

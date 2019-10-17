@@ -2040,7 +2040,7 @@ letters), the following code could be used:
   re = pcre2_compile(..., ccontext);
 </pre>
 The locale name "fr_FR" is used on Linux and other Unix-like systems; if you
-are using Windows, the name for the French locale is "french". 
+are using Windows, the name for the French locale is "french".
 </P>
 <P>
 The pointer that is passed (via the compile context) to <b>pcre2_compile()</b>
@@ -2282,8 +2282,8 @@ actually inspect the previous character.
 </P>
 <P>
 Note that this information is useful for multi-segment matching only
-if the pattern contains no nested lookbehinds. For example, the pattern 
-(?&#60;=a(?&#60;=ba)c) returns a maximum lookbehind of 2, but when it is processed, the 
+if the pattern contains no nested lookbehinds. For example, the pattern
+(?&#60;=a(?&#60;=ba)c) returns a maximum lookbehind of 2, but when it is processed, the
 first lookbehind moves back by two characters, matches one character, then the
 nested lookbehind also moves back by two characters. This puts the matching
 point three characters earlier than it was at the start.
@@ -2743,8 +2743,8 @@ Your program may crash or loop indefinitely or give wrong results.
 </pre>
 These options turn on the partial matching feature. A partial match occurs if
 the end of the subject string is reached successfully, but there are not enough
-subject characters to complete the match. In addition, either at least one 
-character must have been inspected or the pattern must contain a lookbehind, or 
+subject characters to complete the match. In addition, either at least one
+character must have been inspected or the pattern must contain a lookbehind, or
 the pattern must be one that could match an empty string.
 </P>
 <P>

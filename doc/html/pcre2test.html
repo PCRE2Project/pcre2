@@ -245,7 +245,7 @@ compilation, each pattern is passed to the just-in-time compiler, if available.
 <b>-jitfast</b>
 Behave as if each pattern line has the <b>jitfast</b> modifier; after
 successful compilation, each pattern is passed to the just-in-time compiler, if
-available, and each subject line is passed directly to the JIT matcher via its 
+available, and each subject line is passed directly to the JIT matcher via its
 "fast path".
 </P>
 <P>
@@ -620,7 +620,7 @@ for a description of the effects of these options.
       firstline                 set PCRE2_FIRSTLINE
       literal                   set PCRE2_LITERAL
       match_line                set PCRE2_EXTRA_MATCH_LINE
-      match_invalid_utf         set PCRE2_MATCH_INVALID_UTF 
+      match_invalid_utf         set PCRE2_MATCH_INVALID_UTF
       match_unset_backref       set PCRE2_MATCH_UNSET_BACKREF
       match_word                set PCRE2_EXTRA_MATCH_WORD
   /m  multiline                 set PCRE2_MULTILINE
@@ -746,8 +746,8 @@ options, the line is omitted. "First code unit" is where any match must start;
 if there is more than one they are listed as "starting code units". "Last code
 unit" is the last literal code unit that must be present in any match. This is
 not necessarily the last character. These lines are omitted if no starting or
-ending code units are recorded. The subject length line is omitted when 
-<b>no_start_optimize</b> is set because the minimum length is not calculated 
+ending code units are recorded. The subject length line is omitted when
+<b>no_start_optimize</b> is set because the minimum length is not calculated
 when it can never be used.
 </P>
 <P>
@@ -1278,7 +1278,7 @@ Here is an example:
 </pre>
 The first, complete match shows that the matched string is "abc", with the
 preceding and following strings "pqr" and "xyz" having been consulted during
-the match (when processing the assertions). The partial match can indicate only 
+the match (when processing the assertions). The partial match can indicate only
 the preceding string.
 </P>
 <P>

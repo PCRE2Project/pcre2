@@ -11,15 +11,15 @@ text strings in UTF-8, UTF-16, or UTF-32 format (depending on the code unit
 width), but this is not the default. Unless specifically requested, PCRE2
 treats each code unit in a string as one character.
 .P
-There are two ways of telling PCRE2 to switch to UTF mode, where characters may 
-consist of more than one code unit and the range of values is constrained. The 
+There are two ways of telling PCRE2 to switch to UTF mode, where characters may
+consist of more than one code unit and the range of values is constrained. The
 program can call
 .\" HREF
 \fBpcre2_compile()\fP
 .\"
 with the PCRE2_UTF option, or the pattern may start with the sequence (*UTF).
 However, the latter facility can be locked out by the PCRE2_NEVER_UTF option.
-That is, the programmer can prevent the supplier of the pattern from switching 
+That is, the programmer can prevent the supplier of the pattern from switching
 to UTF mode.
 .P
 Note that the PCRE2_MATCH_INVALID_UTF option (see
@@ -403,7 +403,7 @@ You can run pattern matches on subject strings that may contain invalid UTF
 sequences if you call \fBpcre2_compile()\fP with the PCRE2_MATCH_INVALID_UTF
 option. This is supported by \fBpcre2_match()\fP, including JIT matching, but
 not by \fBpcre2_dfa_match()\fP. When PCRE2_MATCH_INVALID_UTF is set, it forces
-PCRE2_UTF to be set as well. Note, however, that the pattern itself must be a 
+PCRE2_UTF to be set as well. Note, however, that the pattern itself must be a
 valid UTF string.
 .P
 Setting PCRE2_MATCH_INVALID_UTF does not affect what \fBpcre2_compile()\fP
@@ -433,7 +433,7 @@ UTF-sequence, that sequence is skipped, and the match starts at the next valid
 UTF character, or the end of the subject.
 .P
 At internal fragment boundaries, \eb and \eB behave in the same way as at the
-beginning and end of the subject. For example, a sequence such as \ebWORD\eb 
+beginning and end of the subject. For example, a sequence such as \ebWORD\eb
 would match an instance of WORD that is surrounded by invalid UTF code units.
 .P
 Using PCRE2_MATCH_INVALID_UTF, an application can run matches on arbitrary

@@ -853,7 +853,7 @@ typedef struct match_block {
   uint32_t match_call_count;      /* Number of times a new frame is created */
   BOOL hitend;                    /* Hit the end of the subject at some point */
   BOOL hasthen;                   /* Pattern contains (*THEN) */
-  BOOL allowemptypartial;         /* Allow empty hard partial */ 
+  BOOL allowemptypartial;         /* Allow empty hard partial */
   const uint8_t *lcc;             /* Points to lower casing table */
   const uint8_t *fcc;             /* Points to case-flipping table */
   const uint8_t *ctypes;          /* Points to table of type maps */
@@ -909,7 +909,7 @@ typedef struct dfa_match_block {
   uint32_t poptions;              /* Pattern options */
   uint32_t nltype;                /* Newline type */
   uint32_t nllen;                 /* Newline string length */
-  BOOL allowemptypartial;         /* Allow empty hard partial */ 
+  BOOL allowemptypartial;         /* Allow empty hard partial */
   PCRE2_UCHAR nl[4];              /* Newline string when fixed */
   uint16_t bsr_convention;        /* \R interpretation */
   pcre2_callout_block *cb;        /* Points to a callout block */

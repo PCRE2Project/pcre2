@@ -5595,16 +5595,16 @@ for (;; pptr++)
 #endif
         {
         uint32_t d;
-        
+
 #ifdef SUPPORT_UNICODE
         if (utf && c > 127) d = UCD_OTHERCASE(c); else
 #endif
           {
 #if PCRE2_CODE_UNIT_WIDTH != 8
           if (c > 255) d = c; else
-#endif 
+#endif
           d = TABLE_GET(c, cb->fcc, c);
-          }  
+          }
 
         if (c != d && pptr[2] == d)
           {

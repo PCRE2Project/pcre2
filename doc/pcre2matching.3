@@ -158,7 +158,7 @@ code unit) at a time, for all active paths through the tree.
 9. Except for (*FAIL), the backtracking control verbs such as (*PRUNE) are not
 supported. (*FAIL) is supported, and behaves like a failing negative assertion.
 .P
-10. The PCRE2_MATCH_INVALID_UTF option for \fBpcre2_compile()\fP is not 
+10. The PCRE2_MATCH_INVALID_UTF option for \fBpcre2_compile()\fP is not
 supported by \fBpcre2_dfa_match()\fP.
 .
 .
@@ -194,7 +194,7 @@ The alternative algorithm suffers from a number of disadvantages:
 because it has to search for all possible matches, but is also because it is
 less susceptible to optimization.
 .P
-2. Capturing parentheses, backreferences, script runs, and matching within 
+2. Capturing parentheses, backreferences, script runs, and matching within
 invalid UTF string are not supported.
 .P
 3. Although atomic groups are supported, their use does not provide the

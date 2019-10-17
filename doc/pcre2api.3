@@ -247,7 +247,7 @@ document for an overview of all the PCRE2 documentation.
 .sp
 .B const uint8_t *pcre2_maketables(pcre2_general_context *\fIgcontext\fP);
 .sp
-.B void pcre2_maketables_free(pcre2_general_context *\fIgcontext\fP, 
+.B void pcre2_maketables_free(pcre2_general_context *\fIgcontext\fP,
 .B "  const uint8_t *\fItables\fP);"
 .sp
 .B int pcre2_pattern_info(const pcre2_code *\fIcode\fP, uint32_t \fIwhat\fP,
@@ -1949,7 +1949,7 @@ Most (but not all) patterns can be optimized by the JIT compiler.
 .nf
 .B const uint8_t *pcre2_maketables(pcre2_general_context *\fIgcontext\fP);
 .sp
-.B void pcre2_maketables_free(pcre2_general_context *\fIgcontext\fP, 
+.B void pcre2_maketables_free(pcre2_general_context *\fIgcontext\fP,
 .B "  const uint8_t *\fItables\fP);"
 .fi
 .P
@@ -1995,7 +1995,7 @@ letters), the following code could be used:
   re = pcre2_compile(..., ccontext);
 .sp
 The locale name "fr_FR" is used on Linux and other Unix-like systems; if you
-are using Windows, the name for the French locale is "french". 
+are using Windows, the name for the French locale is "french".
 .P
 The pointer that is passed (via the compile context) to \fBpcre2_compile()\fP
 is saved with the compiled pattern, and the same tables are used by
@@ -2241,8 +2241,8 @@ longer. \eA also registers a one-character lookbehind, though it does not
 actually inspect the previous character.
 .P
 Note that this information is useful for multi-segment matching only
-if the pattern contains no nested lookbehinds. For example, the pattern 
-(?<=a(?<=ba)c) returns a maximum lookbehind of 2, but when it is processed, the 
+if the pattern contains no nested lookbehinds. For example, the pattern
+(?<=a(?<=ba)c) returns a maximum lookbehind of 2, but when it is processed, the
 first lookbehind moves back by two characters, matches one character, then the
 nested lookbehind also moves back by two characters. This puts the matching
 point three characters earlier than it was at the start.
@@ -2734,8 +2734,8 @@ Your program may crash or loop indefinitely or give wrong results.
 .sp
 These options turn on the partial matching feature. A partial match occurs if
 the end of the subject string is reached successfully, but there are not enough
-subject characters to complete the match. In addition, either at least one 
-character must have been inspected or the pattern must contain a lookbehind, or 
+subject characters to complete the match. In addition, either at least one
+character must have been inspected or the pattern must contain a lookbehind, or
 the pattern must be one that could match an empty string.
 .P
 If this situation arises when PCRE2_PARTIAL_SOFT (but not PCRE2_PARTIAL_HARD)
