@@ -112,14 +112,14 @@ compare_type compare2_type = compare_match1;
 vect_t cmp1a, cmp1b, cmp2a, cmp2b;
 const sljit_u32 diff = IN_UCHARS(offs1 - offs2);
 PCRE2_UCHAR char1a = ic.c.c1;
-PCRE2_UCHAR char1b = ic.c.c2;
 PCRE2_UCHAR char2a = ic.c.c3;
-PCRE2_UCHAR char2b = ic.c.c4;
 
 # ifdef FFCPS_CHAR1A2A
 cmp1a = VDUPQ(char1a);
 cmp2a = VDUPQ(char2a);
 # else
+PCRE2_UCHAR char1b = ic.c.c2;
+PCRE2_UCHAR char2b = ic.c.c4;
 if (char1a == char1b)
   cmp1a = VDUPQ(char1a);
 else
@@ -159,17 +159,27 @@ else
   }
 # endif
 
-str_ptr += offs1;
+str_ptr += IN_UCHARS(offs1);
 #endif
 
+#if PCRE2_CODE_UNIT_WIDTH != 8
+vect_t char_mask = VDUPQ(0xff);
+#endif
+
+#if defined(FF_UTF)
 restart:;
+#endif
+
 #if defined(FFCPS)
 sljit_u8 *p1 = str_ptr - diff;
 #endif
 sljit_s32 align_offset = ((uint64_t)str_ptr & 0xf);
 str_ptr = (sljit_u8 *) ((uint64_t)str_ptr & ~0xf);
 vect_t data = VLD1Q(str_ptr);
-
+#if PCRE2_CODE_UNIT_WIDTH != 8
+data = VANDQ(data, char_mask);
+#endif
+ 
 #if defined(FFCS)
 vect_t eq = VCEQQ(data, vc1);
 
@@ -186,7 +196,17 @@ eq = VCEQQ(eq, vc1);
 # if defined(FFCPS_DIFF1)
 vect_t prev_data = data;
 # endif
-vect_t data2 = VLD1Q(str_ptr - diff);
+
+vect_t data2;
+if (p1 < str_ptr)
+  {
+  data2 = VLD1Q(str_ptr - diff);
+#if PCRE2_CODE_UNIT_WIDTH != 8
+  data2 = VANDQ(data2, char_mask);
+#endif
+  }
+else
+  data2 = shift_left_n_lanes(data, offs1 - offs2);
  
 data = fast_forward_char_pair_compare(compare1_type, data, cmp1a, cmp1b);
 data2 = fast_forward_char_pair_compare(compare2_type, data2, cmp2a, cmp2b);
@@ -223,6 +243,9 @@ str_ptr += 16;
 while (str_ptr < str_end)
   {
   vect_t orig_data = VLD1Q(str_ptr);
+#if PCRE2_CODE_UNIT_WIDTH != 8
+  orig_data = VANDQ(orig_data, char_mask);
+#endif
   data = orig_data;
 
 #if defined(FFCS)
@@ -240,9 +263,12 @@ while (str_ptr < str_end)
 
 #if defined(FFCPS)
 # if defined (FFCPS_DIFF1)
-  data2 = VEXTQ(prev_data, data, 15);
+  data2 = VEXTQ(prev_data, data, VECTOR_FACTOR - 1);
 # else
   data2 = VLD1Q(str_ptr - diff);
+#  if PCRE2_CODE_UNIT_WIDTH != 8
+  data2 = VANDQ(data2, char_mask);
+#  endif
 # endif
 
 # ifdef FFCPS_CHAR1A2A

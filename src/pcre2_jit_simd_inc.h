@@ -655,8 +655,9 @@ return (*s & 0xfc00) == 0xdc00;
 #endif /* SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32 */
 
 #if PCRE2_CODE_UNIT_WIDTH == 8
+# define VECTOR_FACTOR 16
 # define vect_t uint8x16_t
-# define VLD1Q vld1q_u8
+# define VLD1Q(X) vld1q_u8((sljit_u8 *)(X))
 # define VCEQQ vceqq_u8
 # define VORRQ vorrq_u8
 # define VST1Q vst1q_u8
@@ -668,8 +669,9 @@ typedef union {
        uint64_t dw[2];
 } quad_word;
 #elif PCRE2_CODE_UNIT_WIDTH == 16
+# define VECTOR_FACTOR 8
 # define vect_t uint16x8_t
-# define VLD1Q vld1q_u16
+# define VLD1Q(X) vld1q_u16((sljit_u16 *)(X))
 # define VCEQQ vceqq_u16
 # define VORRQ vorrq_u16
 # define VST1Q vst1q_u16
@@ -681,8 +683,9 @@ typedef union {
        uint64_t dw[2];
 } quad_word;
 #else
+# define VECTOR_FACTOR 4
 # define vect_t uint32x4_t
-# define VLD1Q vld1q_u32
+# define VLD1Q(X) vld1q_u32((sljit_u32 *)(X))
 # define VCEQQ vceqq_u32
 # define VORRQ vorrq_u32
 # define VST1Q vst1q_u32
@@ -697,23 +700,29 @@ typedef union {
 
 #define FFCS
 #include "pcre2_jit_neon_inc.h"
-#define FF_UTF
-#include "pcre2_jit_neon_inc.h"
+#if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
+# define FF_UTF
+# include "pcre2_jit_neon_inc.h"
+# undef FF_UTF
+#endif
 #undef FFCS
-#undef FF_UTF
 
 #define FFCS_2
 #include "pcre2_jit_neon_inc.h"
-#define FF_UTF
-#include "pcre2_jit_neon_inc.h"
-#undef FF_UTF
+#if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
+# define FF_UTF
+# include "pcre2_jit_neon_inc.h"
+# undef FF_UTF
+#endif
 #undef FFCS_2
 
 #define FFCS_MASK
 #include "pcre2_jit_neon_inc.h"
-#define FF_UTF
-#include "pcre2_jit_neon_inc.h"
-#undef FF_UTF
+#if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
+# define FF_UTF
+# include "pcre2_jit_neon_inc.h"
+# undef FF_UTF
+#endif
 #undef FFCS_MASK
 
 #define JIT_HAS_FAST_FORWARD_CHAR_SIMD 1
@@ -842,33 +851,62 @@ return 3;
 #endif
 }
 
+/* ARM doesn't have a shift left across lanes. */
+static SLJIT_INLINE vect_t shift_left_n_lanes(vect_t a, sljit_u8 n)
+{
+vect_t zero = VDUPQ(0);
+SLJIT_ASSERT(0 < n && n < VECTOR_FACTOR);
+/* VEXTQ takes an immediate as last argument. */
+#define C(X) case X: return VEXTQ(zero, a, VECTOR_FACTOR - X);
+switch (n)
+  {
+  C(1); C(2); C(3);
+#if PCRE2_CODE_UNIT_WIDTH != 32
+  C(4); C(5); C(6); C(7);
+# if PCRE2_CODE_UNIT_WIDTH != 16
+  C(8); C(9); C(10); C(11); C(12); C(13); C(14); C(15);
+# endif
+#endif
+  default:
+    /* Based on the ASSERT(0 < n && n < VECTOR_FACTOR) above, this won't
+       happen. The return is still here for compilers to not warn. */
+    return a;
+  }
+}
+
 #define FFCPS
 #define FFCPS_DIFF1
 #define FFCPS_CHAR1A2A
 
 #define FFCPS_0
 #include "pcre2_jit_neon_inc.h"
-#define FF_UTF
-#include "pcre2_jit_neon_inc.h"
-#undef FF_UTF
+#if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
+# define FF_UTF
+# include "pcre2_jit_neon_inc.h"
+# undef FF_UTF
+#endif
 #undef FFCPS_0
 
 #undef FFCPS_CHAR1A2A
 
 #define FFCPS_1
 #include "pcre2_jit_neon_inc.h"
-#define FF_UTF
-#include "pcre2_jit_neon_inc.h"
-#undef FF_UTF
+#if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
+# define FF_UTF
+# include "pcre2_jit_neon_inc.h"
+# undef FF_UTF
+#endif
 #undef FFCPS_1
 
 #undef FFCPS_DIFF1
 
 #define FFCPS_DEFAULT
 #include "pcre2_jit_neon_inc.h"
-#define FF_UTF
-#include "pcre2_jit_neon_inc.h"
-#undef FF_UTF
+#if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
+# define FF_UTF
+# include "pcre2_jit_neon_inc.h"
+# undef FF_UTF
+#endif
 #undef FFCPS
 
 #define JIT_HAS_FAST_FORWARD_CHAR_PAIR_SIMD 1
