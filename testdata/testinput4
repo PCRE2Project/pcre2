@@ -2483,4 +2483,12 @@
 /\X*/
     \xF3aaa\xE4\xEA\xEB\xFEa
 
+/Я/i,utf
+    \x{42f} 
+    \x{44f} 
+
+/(?=Я)/i,utf
+    \x{42f} 
+    \x{44f} 
+
 # End of testinput4

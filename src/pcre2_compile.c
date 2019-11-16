@@ -8741,6 +8741,19 @@ do {
      case OP_MINPLUSI:
      case OP_POSPLUSI:
      if (inassert == 0) return 0;
+
+     /* If the character is more than one code unit long, we cannot set its
+     first code unit when matching caselessly. Later scanning may pick up 
+     multiple code units. */
+     
+#ifdef SUPPORT_UNICODE
+#if PCRE2_CODE_UNIT_WIDTH == 8
+     if (scode[1] >= 0x80) return 0;
+#elif PCRE2_CODE_UNIT_WIDTH == 16
+     if (scode[1] >= 0xd800 && scode[1] <= 0xdfff) return 0;
+#endif
+#endif
+
      if (cflags < 0) { c = scode[1]; cflags = REQ_CASELESS; }
        else if (c != scode[1]) return 0;
      break;
