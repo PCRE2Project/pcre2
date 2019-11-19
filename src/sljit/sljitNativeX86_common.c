@@ -2515,6 +2515,7 @@ SLJIT_API_FUNC_ATTRIBUTE struct sljit_jump* sljit_emit_jump(struct sljit_compile
 	jump = (struct sljit_jump*)ensure_abuf(compiler, sizeof(struct sljit_jump));
 	PTR_FAIL_IF_NULL(jump);
 	set_jump(jump, compiler, (type & SLJIT_REWRITABLE_JUMP) | ((type & 0xff) << TYPE_SHIFT));
+	type &= 0xff;
 
 	/* Worst case size. */
 #if (defined SLJIT_CONFIG_X86_32 && SLJIT_CONFIG_X86_32)
