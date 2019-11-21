@@ -8743,9 +8743,9 @@ do {
      if (inassert == 0) return 0;
 
      /* If the character is more than one code unit long, we cannot set its
-     first code unit when matching caselessly. Later scanning may pick up 
+     first code unit when matching caselessly. Later scanning may pick up
      multiple code units. */
-     
+
 #ifdef SUPPORT_UNICODE
 #if PCRE2_CODE_UNIT_WIDTH == 8
      if (scode[1] >= 0x80) return 0;
