@@ -1,6 +1,11 @@
 Change Log for PCRE2
 --------------------
 
+Version 10.35
+-------------
+
+1. Use PCRE2_MATCH_EMPTY flag to detect empty matches in JIT.
+
 
 Version 10.34 21-November-2019
 ------------------------------

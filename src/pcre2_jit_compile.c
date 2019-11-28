@@ -13122,8 +13122,8 @@ common->read_only_data_head = NULL;
 common->fcc = tables + fcc_offset;
 common->lcc = (sljit_sw)(tables + lcc_offset);
 common->mode = mode;
-common->might_be_empty = re->minlength == 0;
-common->allow_empty_partial = (re->max_lookbehind > 0) || (re->flags & PCRE2_MATCH_EMPTY) != 0;
+common->might_be_empty = (re->minlength == 0) || (re->flags & PCRE2_MATCH_EMPTY);
+common->allow_empty_partial = (re->max_lookbehind > 0) || (re->flags & PCRE2_MATCH_EMPTY);
 common->nltype = NLTYPE_FIXED;
 switch(re->newline_convention)
   {
