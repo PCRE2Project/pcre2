@@ -8,6 +8,9 @@ Version 10.35
 
 2. Fix ARMv5 JIT improper handling of labels right after a constant pool.
 
+3. A JIT bug is fixed which allowed to read the fields of the compiled
+pattern before its existence is checked.
+
 
 Version 10.34 21-November-2019
 ------------------------------

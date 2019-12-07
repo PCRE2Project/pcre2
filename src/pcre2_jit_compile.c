@@ -13742,11 +13742,6 @@ pcre2_jit_compile(pcre2_code *code, uint32_t options)
 {
 pcre2_real_code *re = (pcre2_real_code *)code;
 
-#ifdef SUPPORT_JIT
-executable_functions *functions = (executable_functions *)re->executable_jit;
-static int executable_allocator_is_working = 0;
-#endif
-
 if (code == NULL)
   return PCRE2_ERROR_NULL;
 
@@ -13778,6 +13773,11 @@ actions are needed:
      done, (void)re and (void)functions will be needed in the non-JIT case, to
      avoid compiler warnings.
 */
+
+#ifdef SUPPORT_JIT
+executable_functions *functions = (executable_functions *)re->executable_jit;
+static int executable_allocator_is_working = 0;
+#endif
 
 if ((options & PCRE2_JIT_INVALID_UTF) != 0)
   {
