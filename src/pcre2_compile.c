@@ -6671,23 +6671,11 @@ for (;; pptr++)
             }
 
           /* For a back reference, update the back reference map and the
-          maximum back reference. Then, for each group, we must check to
-          see if it is recursive, that is, it is inside the group that it
-          references. A flag is set so that the group can be made atomic.
-          */
+          maximum back reference. */
 
           cb->backref_map |= (groupnumber < 32)? (1u << groupnumber) : 1;
           if (groupnumber > cb->top_backref)
             cb->top_backref = groupnumber;
-
-          for (oc = cb->open_caps; oc != NULL; oc = oc->next)
-            {
-            if (oc->number == groupnumber)
-              {
-              oc->flag = TRUE;
-              break;
-              }
-            }
           }
         }
 
@@ -7682,19 +7670,6 @@ for (;; pptr++)
 
     cb->backref_map |= (meta_arg < 32)? (1u << meta_arg) : 1;
     if (meta_arg > cb->top_backref) cb->top_backref = meta_arg;
-
-    /* Check to see if this back reference is recursive, that it, it
-    is inside the group that it references. A flag is set so that the
-    group can be made atomic. */
-
-    for (oc = cb->open_caps; oc != NULL; oc = oc->next)
-      {
-      if (oc->number == meta_arg)
-        {
-        oc->flag = TRUE;
-        break;
-        }
-      }
     break;
 
 
@@ -8035,7 +8010,6 @@ and skip over the pattern offset. */
 lookbehind = *code == OP_ASSERTBACK ||
              *code == OP_ASSERTBACK_NOT ||
              *code == OP_ASSERTBACK_NA;
-
 if (lookbehind)
   {
   lookbehindlength = META_DATA(pptr[-1]);
@@ -8053,7 +8027,6 @@ if (*code == OP_CBRA)
   capnumber = GET2(code, 1 + LINK_SIZE);
   capitem.number = capnumber;
   capitem.next = cb->open_caps;
-  capitem.flag = FALSE;
   capitem.assert_depth = cb->assert_depth;
   cb->open_caps = &capitem;
   }
@@ -8182,26 +8155,9 @@ for (;;)
     PUT(code, 1, (int)(code - start_bracket));
     code += 1 + LINK_SIZE;
 
-    /* If it was a capturing subpattern, check to see if it contained any
-    recursive back references. If so, we must wrap it in atomic brackets. In
-    any event, remove the block from the chain. */
+    /* If it was a capturing subpattern, remove the block from the chain. */
 
-    if (capnumber > 0)
-      {
-      if (cb->open_caps->flag)
-        {
-        (void)memmove(start_bracket + 1 + LINK_SIZE, start_bracket,
-          CU2BYTES(code - start_bracket));
-        *start_bracket = OP_ONCE;
-        code += 1 + LINK_SIZE;
-        PUT(start_bracket, 1, (int)(code - start_bracket));
-        *code = OP_KET;
-        PUT(code, 1, (int)(code - start_bracket));
-        code += 1 + LINK_SIZE;
-        length += 2 + 2*LINK_SIZE;
-        }
-      cb->open_caps = cb->open_caps->next;
-      }
+    if (capnumber > 0) cb->open_caps = cb->open_caps->next;
 
     /* Set values to pass back */
 

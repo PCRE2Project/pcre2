@@ -1,4 +1,4 @@
-.TH PCRE2PATTERN 3 "29 July 2019" "PCRE2 10.34"
+.TH PCRE2PATTERN 3 "18 December 2019" "PCRE2 10.35"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION DETAILS"
@@ -2346,14 +2346,14 @@ the first iteration does not need to match the backreference. This can be done
 using alternation, as in the example above, or by a quantifier with a minimum
 of zero.
 .P
-Backreferences of this type cause the group that they reference to be treated
-as an
+For versions of PCRE2 less than 10.25, backreferences of this type used to
+cause the group that they reference to be treated as an
 .\" HTML <a href="#atomicgroup">
 .\" </a>
 atomic group.
 .\"
-Once the whole group has been matched, a subsequent matching failure cannot
-cause backtracking into the middle of the group.
+This restriction no longer applies, and backtracking into such groups can occur 
+as normal.
 .
 .
 .\" HTML <a name="bigassertions"></a>
@@ -3874,6 +3874,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 29 July 2019
+Last updated: 18 December 2019
 Copyright (c) 1997-2019 University of Cambridge.
 .fi

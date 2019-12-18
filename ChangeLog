@@ -11,6 +11,17 @@ Version 10.35
 3. A JIT bug is fixed which allowed to read the fields of the compiled
 pattern before its existence is checked.
 
+4. Back in the PCRE1 day, capturing groups that contained recursive back 
+references to themselves were made atomic (version 8.01, change 18) because 
+after the end a repeated group, the captured substrings had their values from 
+the final repetition, not from an earlier repetition that might be the 
+destination of a backtrack. This feature was documented, and was carried over 
+into PCRE2. However, it has now been realized that the major refactoring that 
+was done for 10.30 has made this atomicizing unnecessary, and it is confusing 
+when users are unaware of it, making some patterns appear not to be working as 
+expected. Capture values of recursive back references in repeated groups are
+now correctly backtracked, so this unnecessary restriction has been removed.
+
 
 Version 10.34 21-November-2019
 ------------------------------

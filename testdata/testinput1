@@ -6386,4 +6386,11 @@ ef) x/x,mark
 /^(?<A>a)(?(<A>)b)((?<=b).*)$/
     abc
 
+/^(a\1?){4}$/
+    aaaa
+    aaaaaa
+
+/^((\1+)|\d)+133X$/
+    111133X
+
 # End of testinput1 

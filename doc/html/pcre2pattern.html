@@ -2349,11 +2349,11 @@ using alternation, as in the example above, or by a quantifier with a minimum
 of zero.
 </P>
 <P>
-Backreferences of this type cause the group that they reference to be treated
-as an
+For versions of PCRE2 less than 10.25, backreferences of this type used to
+cause the group that they reference to be treated as an
 <a href="#atomicgroup">atomic group.</a>
-Once the whole group has been matched, a subsequent matching failure cannot
-cause backtracking into the middle of the group.
+This restriction no longer applies, and backtracking into such groups can occur 
+as normal.
 <a name="bigassertions"></a></P>
 <br><a name="SEC20" href="#TOC1">ASSERTIONS</a><br>
 <P>
@@ -3833,7 +3833,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC32" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 29 July 2019
+Last updated: 18 December 2019
 <br>
 Copyright &copy; 1997-2019 University of Cambridge.
 <br>

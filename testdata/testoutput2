@@ -809,24 +809,7 @@ Subject length lower bound = 3
     fooabar
 No match
 
-# This one is here because Perl behaves differently; see also the following.
-
-/^(a\1?){4}$/I
-Capture group count = 1
-Max back reference = 1
-Compile options: <none>
-Overall options: anchored
-First code unit = 'a'
-Subject length lower bound = 4
-\= Expect no match
-    aaaa
-No match
-    aaaaaa
-No match
-
-# Perl does not fail these two for the final subjects. Neither did PCRE until
-# release 8.01. The problem is in backtracking into a subpattern that contains
-# a recursive reference to itself. PCRE has now made these into atomic patterns.
+# Perl does not fail these two for the final subjects.
 
 /^(xa|=?\1a){2}$/
     xa=xaa
@@ -10060,7 +10043,6 @@ No match
 ------------------------------------------------------------------
         Bra
         ^
-        Once
         CBra 1
         ab
         CBra 2
@@ -10071,8 +10053,6 @@ No match
         Alt
         x
         Ket
-        Ket
-        Once
         CBra 1
         ab
         CBra 2
@@ -10082,7 +10062,6 @@ No match
         d
         Alt
         x
-        Ket
         Ket
         $
         Ket
@@ -10479,11 +10458,9 @@ Failed: error 168 at offset 3: \c must be followed by a printable ASCII characte
 /(?P<abn>(?P=abn)xxx)/B
 ------------------------------------------------------------------
         Bra
-        Once
         CBra 1
         \1
         xxx
-        Ket
         Ket
         Ket
         End
@@ -10492,12 +10469,10 @@ Failed: error 168 at offset 3: \c must be followed by a printable ASCII characte
 /(a\1z)/B
 ------------------------------------------------------------------
         Bra
-        Once
         CBra 1
         a
         \1
         z
-        Ket
         Ket
         Ket
         End
@@ -11299,11 +11274,9 @@ No match
 /(?P<abn>(?P=abn)xxx)/B
 ------------------------------------------------------------------
         Bra
-        Once
         CBra 1
         \1
         xxx
-        Ket
         Ket
         Ket
         End
@@ -11312,12 +11285,10 @@ No match
 /(a\1z)/B
 ------------------------------------------------------------------
         Bra
-        Once
         CBra 1
         a
         \1
         z
-        Ket
         Ket
         Ket
         End
@@ -13319,7 +13290,6 @@ Failed: error 144 at offset 5: subpattern name must start with a non-digit
         Bra
         Brazero
         SCBra 1
-        Once
         CBra 2
         CBra 3
         a
@@ -13330,7 +13300,6 @@ Failed: error 144 at offset 5: subpattern name must start with a non-digit
         a*
         Ket
         Recurse
-        Ket
         Ket
         KetRmax
         a?+
@@ -13999,12 +13968,10 @@ Matched, but too many substrings
 /((?+1)(\1))/B
 ------------------------------------------------------------------
         Bra
-        Once
         CBra 1
         Recurse
         CBra 2
         \1
-        Ket
         Ket
         Ket
         Ket
@@ -14425,7 +14392,6 @@ Subject length lower bound = 1
 ------------------------------------------------------------------
         Bra
         Any
-        Once
         CBra 1
         Recurse
         Recurse
@@ -14433,7 +14399,6 @@ Subject length lower bound = 1
         \1
         Alt
         $
-        Ket
         Ket
         CBra 2
         Ket
@@ -14445,7 +14410,6 @@ Subject length lower bound = 1
 ------------------------------------------------------------------
         Bra
         Any
-        Once
         CBra 1
         Recurse
         Recurse
@@ -14456,7 +14420,6 @@ Subject length lower bound = 1
         \1
         Alt
         $
-        Ket
         Ket
         CBra 3
         Ket
@@ -17434,6 +17397,45 @@ Last code unit = 'a'
 Subject length lower bound = 1
     manm
  0: a
+
+/^(?|(\*)(*napla:\S*_(\2?+.+))|(\w)(?=\S*_(\2?+\1)))+_\2$/
+    *abc_12345abc
+ 0: *abc_12345abc
+ 1: c
+ 2: 12345abc
+
+/^(?|(\*)(*napla:\S*_(\3?+.+))|(\w)(?=\S*_((\2?+\1))))+_\2$/
+    *abc_12345abc
+ 0: *abc_12345abc
+ 1: c
+ 2: 12345abc
+ 3: 12345abc
+
+/^((\1+)(?C)|\d)+133X$/
+    111133X\=callout_capture
+Callout 0: last capture = 2
+ 1: 1
+ 2: 111
+--->111133X
+    ^   ^       |
+Callout 0: last capture = 2
+ 1: 3
+ 2: 3
+--->111133X
+    ^     ^     |
+Callout 0: last capture = 2
+ 1: 1
+ 2: 11
+--->111133X
+    ^  ^        |
+Callout 0: last capture = 2
+ 1: 3
+ 2: 3
+--->111133X
+    ^     ^     |
+ 0: 111133X
+ 1: 11
+ 2: 11
 
 # End of testinput2
 Error -70: PCRE2_ERROR_BADDATA (unknown error number)

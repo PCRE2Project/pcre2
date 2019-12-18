@@ -1759,13 +1759,11 @@ typedef struct pcre2_memctl {
 
 /* Structure for building a chain of open capturing subpatterns during
 compiling, so that instructions to close them can be compiled when (*ACCEPT) is
-encountered. This is also used to identify subpatterns that contain recursive
-back references to themselves, so that they can be made atomic. */
+encountered. */
 
 typedef struct open_capitem {
   struct open_capitem *next;    /* Chain link */
   uint16_t number;              /* Capture number */
-  uint16_t flag;                /* Set TRUE if recursive back ref */
   uint16_t assert_depth;        /* Assertion depth when opened */
 } open_capitem;
 

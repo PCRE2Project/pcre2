@@ -10112,4 +10112,18 @@ No match
  1: a
  2: c
 
+/^(a\1?){4}$/
+    aaaa
+ 0: aaaa
+ 1: a
+    aaaaaa
+ 0: aaaaaa
+ 1: aa
+
+/^((\1+)|\d)+133X$/
+    111133X
+ 0: 111133X
+ 1: 11
+ 2: 11
+
 # End of testinput1 

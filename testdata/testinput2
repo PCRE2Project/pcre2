@@ -324,16 +324,7 @@
 \= Expect no match
     fooabar
 
-# This one is here because Perl behaves differently; see also the following.
-
-/^(a\1?){4}$/I
-\= Expect no match
-    aaaa
-    aaaaaa
-
-# Perl does not fail these two for the final subjects. Neither did PCRE until
-# release 8.01. The problem is in backtracking into a subpattern that contains
-# a recursive reference to itself. PCRE has now made these into atomic patterns.
+# Perl does not fail these two for the final subjects.
 
 /^(xa|=?\1a){2}$/
     xa=xaa
@@ -5771,5 +5762,14 @@ a)"xI
 
 /(a)?a/I
     manm
+
+/^(?|(\*)(*napla:\S*_(\2?+.+))|(\w)(?=\S*_(\2?+\1)))+_\2$/
+    *abc_12345abc
+
+/^(?|(\*)(*napla:\S*_(\3?+.+))|(\w)(?=\S*_((\2?+\1))))+_\2$/
+    *abc_12345abc
+
+/^((\1+)(?C)|\d)+133X$/
+    111133X\=callout_capture
 
 # End of testinput2
