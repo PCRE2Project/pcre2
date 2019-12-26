@@ -574,8 +574,8 @@ match(PCRE2_SPTR start_eptr, PCRE2_SPTR start_ecode, PCRE2_SIZE *ovector,
 heapframe *F;           /* Current frame pointer */
 heapframe *N = NULL;    /* Temporary frame pointers */
 heapframe *P = NULL;
-heapframe *assert_accept_frame;  /* For passing back the frame with captures */
-PCRE2_SIZE frame_copy_size;      /* Amount to copy when creating a new frame */
+heapframe *assert_accept_frame = NULL;  /* For passing back a frame with captures */
+PCRE2_SIZE frame_copy_size;     /* Amount to copy when creating a new frame */
 
 /* Local variables that do not need to be preserved over calls to RRMATCH(). */
 

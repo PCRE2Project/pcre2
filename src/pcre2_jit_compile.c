@@ -12872,7 +12872,7 @@ jump_list *match = NULL;
 struct sljit_jump *next_alt = NULL;
 struct sljit_jump *accept_exit = NULL;
 struct sljit_label *quit;
-struct sljit_put_label *put_label;
+struct sljit_put_label *put_label = NULL;
 
 /* Recurse captures then. */
 common->then_trap = NULL;

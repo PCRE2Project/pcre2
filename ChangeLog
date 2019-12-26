@@ -24,6 +24,8 @@ now correctly backtracked, so this unnecessary restriction has been removed.
 
 5. Added PCRE2_SUBSTITUTE_LITERAL.
 
+6. Avoid some VS compiler warnings.
+
 
 Version 10.34 21-November-2019
 ------------------------------
