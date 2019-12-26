@@ -22,6 +22,8 @@ when users are unaware of it, making some patterns appear not to be working as
 expected. Capture values of recursive back references in repeated groups are
 now correctly backtracked, so this unnecessary restriction has been removed.
 
+5. Added PCRE2_SUBSTITUTE_LITERAL.
+
 
 Version 10.34 21-November-2019
 ------------------------------

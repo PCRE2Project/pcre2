@@ -1,4 +1,4 @@
-.TH PCRE2_SUBSTITUTE 3 "04 April 2017" "PCRE2 10.30"
+.TH PCRE2_SUBSTITUTE 3 "26 December 2019" "PCRE2 10.35"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH SYNOPSIS
@@ -66,10 +66,14 @@ zero-terminated strings. The options are:
                               PCRE2_UTF was set at compile time)
   PCRE2_SUBSTITUTE_EXTENDED  Do extended replacement processing
   PCRE2_SUBSTITUTE_GLOBAL    Replace all occurrences in the subject
+  PCRE2_SUBSTITUTE_LITERAL   The replacement string is literal 
   PCRE2_SUBSTITUTE_OVERFLOW_LENGTH  If overflow, compute needed length
   PCRE2_SUBSTITUTE_UNKNOWN_UNSET  Treat unknown group as unset
   PCRE2_SUBSTITUTE_UNSET_EMPTY  Simple unset insert = empty string
 .sp
+PCRE2_SUBSTITUTE_LITERAL overrides PCRE2_SUBSTITUTE_EXTENDED, 
+PCRE2_SUBSTITUTE_UNKNOWN_UNSET, and PCRE2_SUBSTITUTE_UNSET_EMPTY.
+.P
 The function returns the number of substitutions, which may be zero if there
 were no matches. The result can be greater than one only when
 PCRE2_SUBSTITUTE_GLOBAL is set. In the event of an error, a negative error code

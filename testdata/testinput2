@@ -4583,6 +4583,12 @@ B)x/alt_verbnames,mark
 /abcd/replace=w\rx\x82y\o{333}z(\Q12\$34$$\x34\E5$$),substitute_extended
     abcd
 
+/abcd/replace=w\rx\x82y\o{333}z(\Q12\$34$$\x34\E5$$),substitute_extended,substitute_literal
+    >>abcd<<
+    
+/abcd/g,replace=\$1$2\,substitute_literal
+    XabcdYabcdZ
+
 /a(bc)(DE)/replace=a\u$1\U$1\E$1\l$2\L$2\Eab\Uab\LYZ\EDone,substitute_extended
     abcDE
 
@@ -4594,6 +4600,7 @@ B)x/alt_verbnames,mark
     ac
     ab\=replace=${1:+$1\:$1:$2}
     ac\=replace=${1:+$1\:$1:$2}
+    >>ac<<\=replace=${1:+$1\:$1:$2},substitute_literal
 
 /a(?:(b)|(c))/substitute_extended,replace=X${1:-1:-1}X${2:-2:-2}
     ab

@@ -3349,11 +3349,12 @@ of giving an error return as soon as the buffer overflows. Note also that the
 length is in code units, not bytes.
 </P>
 <P>
-In the replacement string, which is interpreted as a UTF string in UTF mode,
-and is checked for UTF validity unless the PCRE2_NO_UTF_CHECK option is set, a
-dollar character is an escape character that can specify the insertion of
-characters from capture groups or names from (*MARK) or other control verbs
-in the pattern. The following forms are always recognized:
+The replacement string, which is interpreted as a UTF string in UTF mode,
+is checked for UTF validity unless the PCRE2_NO_UTF_CHECK option is set. If the
+PCRE2_SUBSTITUTE_LITERAL option is set, it is not interpreted in any way. By
+default, however, a dollar character is an escape character that can specify
+the insertion of characters from capture groups or names from (*MARK) or other
+control verbs in the pattern. The following forms are always recognized:
 <pre>
   $$                  insert a dollar character
   $&#60;n&#62; or ${&#60;n&#62;}      insert the contents of group &#60;n&#62;
@@ -3379,6 +3380,12 @@ facility can be used to perform simple simultaneous substitutions, as this
 </pre>
 As well as the usual options for <b>pcre2_match()</b>, a number of additional
 options can be set in the <i>options</i> argument of <b>pcre2_substitute()</b>.
+</P>
+<P>
+As mentioned above, PCRE2_SUBSTITUTE_LITERAL causes the replacement string to 
+be treated as a literal, with no interpretation. If this option is set, 
+PCRE2_SUBSTITUTE_EXTENDED, PCRE2_SUBSTITUTE_UNKNOWN_UNSET, and 
+PCRE2_SUBSTITUTE_UNSET_EMPTY are irrelevant and are ignored.
 </P>
 <P>
 PCRE2_SUBSTITUTE_GLOBAL causes the function to iterate over the subject string,
@@ -3869,7 +3876,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC42" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 02 September 2019
+Last updated: 26 December 2019
 <br>
 Copyright &copy; 1997-2019 University of Cambridge.
 <br>

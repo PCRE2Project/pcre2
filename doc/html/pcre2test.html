@@ -1063,8 +1063,9 @@ process.
       startchar                  show starting character when relevant
       substitute_callout         use substitution callouts
       substitute_extended        use PCRE2_SUBSTITUTE_EXTENDED
-      substitute_skip=&#60;n&#62;        skip substitution number n
+      substitute_literal         use PCRE2_SUBSTITUTE_LITERAL 
       substitute_overflow_length use PCRE2_SUBSTITUTE_OVERFLOW_LENGTH
+      substitute_skip=&#60;n&#62;        skip substitution number n
       substitute_stop=&#60;n&#62;        skip substitution number n and greater
       substitute_unknown_unset   use PCRE2_SUBSTITUTE_UNKNOWN_UNSET
       substitute_unset_empty     use PCRE2_SUBSTITUTE_UNSET_EMPTY
@@ -1233,8 +1234,9 @@ pattern.
       startoffset=&#60;n&#62;            same as offset=&#60;n&#62;
       substitute_callout         use substitution callouts
       substitute_extedded        use PCRE2_SUBSTITUTE_EXTENDED
-      substitute_skip=&#60;n&#62;        skip substitution number n
+      substitute_literal         use PCRE2_SUBSTITUTE_LITERAL 
       substitute_overflow_length use PCRE2_SUBSTITUTE_OVERFLOW_LENGTH
+      substitute_skip=&#60;n&#62;        skip substitution number n
       substitute_stop=&#60;n&#62;        skip substitution number n and greater
       substitute_unknown_unset   use PCRE2_SUBSTITUTE_UNKNOWN_UNSET
       substitute_unset_empty     use PCRE2_SUBSTITUTE_UNSET_EMPTY
@@ -1413,6 +1415,7 @@ for <b>pcre2_substitute()</b>:
 <pre>
   global                      PCRE2_SUBSTITUTE_GLOBAL
   substitute_extended         PCRE2_SUBSTITUTE_EXTENDED
+  substitute_literal          PCRE2_SUBSTITUTE_LITERAL 
   substitute_overflow_length  PCRE2_SUBSTITUTE_OVERFLOW_LENGTH
   substitute_unknown_unset    PCRE2_SUBSTITUTE_UNKNOWN_UNSET
   substitute_unset_empty      PCRE2_SUBSTITUTE_UNSET_EMPTY
@@ -2093,7 +2096,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC21" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 30 July 2019
+Last updated: 26 December 2019
 <br>
 Copyright &copy; 1997-2019 University of Cambridge.
 <br>

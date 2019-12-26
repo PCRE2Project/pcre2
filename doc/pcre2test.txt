@@ -949,8 +949,9 @@ PATTERN MODIFIERS
              startchar                  show starting character when relevant
              substitute_callout         use substitution callouts
              substitute_extended        use PCRE2_SUBSTITUTE_EXTENDED
-             substitute_skip=<n>        skip substitution number n
+             substitute_literal         use PCRE2_SUBSTITUTE_LITERAL
              substitute_overflow_length use PCRE2_SUBSTITUTE_OVERFLOW_LENGTH
+             substitute_skip=<n>        skip substitution number n
              substitute_stop=<n>        skip substitution number n and greater
              substitute_unknown_unset   use PCRE2_SUBSTITUTE_UNKNOWN_UNSET
              substitute_unset_empty     use PCRE2_SUBSTITUTE_UNSET_EMPTY
@@ -1103,8 +1104,9 @@ SUBJECT MODIFIERS
              startoffset=<n>            same as offset=<n>
              substitute_callout         use substitution callouts
              substitute_extedded        use PCRE2_SUBSTITUTE_EXTENDED
-             substitute_skip=<n>        skip substitution number n
+             substitute_literal         use PCRE2_SUBSTITUTE_LITERAL
              substitute_overflow_length use PCRE2_SUBSTITUTE_OVERFLOW_LENGTH
+             substitute_skip=<n>        skip substitution number n
              substitute_stop=<n>        skip substitution number n and greater
              substitute_unknown_unset   use PCRE2_SUBSTITUTE_UNKNOWN_UNSET
              substitute_unset_empty     use PCRE2_SUBSTITUTE_UNSET_EMPTY
@@ -1265,6 +1267,7 @@ SUBJECT MODIFIERS
 
          global                      PCRE2_SUBSTITUTE_GLOBAL
          substitute_extended         PCRE2_SUBSTITUTE_EXTENDED
+         substitute_literal          PCRE2_SUBSTITUTE_LITERAL
          substitute_overflow_length  PCRE2_SUBSTITUTE_OVERFLOW_LENGTH
          substitute_unknown_unset    PCRE2_SUBSTITUTE_UNKNOWN_UNSET
          substitute_unset_empty      PCRE2_SUBSTITUTE_UNSET_EMPTY
@@ -1902,5 +1905,5 @@ AUTHOR
 
 REVISION
 
-       Last updated: 30 July 2019
+       Last updated: 26 December 2019
        Copyright (c) 1997-2019 University of Cambridge.

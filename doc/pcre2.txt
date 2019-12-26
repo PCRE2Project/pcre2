@@ -3236,37 +3236,43 @@ CREATING A NEW STRING WITH SUBSTITUTIONS
        ing an error return as soon as the buffer overflows. Note also that the
        length is in code units, not bytes.
 
-       In  the replacement string, which is interpreted as a UTF string in UTF
-       mode, and is checked for UTF validity unless the PCRE2_NO_UTF_CHECK op-
-       tion is set, a dollar character is an escape character that can specify
-       the insertion of characters from capture groups or names  from  (*MARK)
-       or  other  control verbs in the pattern. The following forms are always
-       recognized:
+       The  replacement  string,  which  is interpreted as a UTF string in UTF
+       mode, is checked for UTF validity unless the PCRE2_NO_UTF_CHECK  option
+       is set. If the PCRE2_SUBSTITUTE_LITERAL option is set, it is not inter-
+       preted in any way. By default, however, a dollar character is an escape
+       character  that  can  specify  the insertion of characters from capture
+       groups or names from (*MARK) or other control verbs in the pattern. The
+       following forms are always recognized:
 
          $$                  insert a dollar character
          $<n> or ${<n>}      insert the contents of group <n>
          $*MARK or ${*MARK}  insert a control verb name
 
-       Either a group number or a group name  can  be  given  for  <n>.  Curly
-       brackets  are  required only if the following character would be inter-
+       Either  a  group  number  or  a  group name can be given for <n>. Curly
+       brackets are required only if the following character would  be  inter-
        preted as part of the number or name. The number may be zero to include
-       the  entire  matched  string.   For  example,  if  the pattern a(b)c is
-       matched with "=abc=" and the replacement string "+$1$0$1+", the  result
+       the entire matched string.   For  example,  if  the  pattern  a(b)c  is
+       matched  with "=abc=" and the replacement string "+$1$0$1+", the result
        is "=+babcb+=".
 
-       $*MARK  inserts the name from the last encountered backtracking control
-       verb on the matching path that has a name. (*MARK) must always  include
-       a  name,  but  the  other  verbs  need not. For example, in the case of
+       $*MARK inserts the name from the last encountered backtracking  control
+       verb  on the matching path that has a name. (*MARK) must always include
+       a name, but the other verbs need not.  For  example,  in  the  case  of
        (*MARK:A)(*PRUNE) the name inserted is "A", but for (*MARK:A)(*PRUNE:B)
-       the  relevant  name is "B". This facility can be used to perform simple
+       the relevant name is "B". This facility can be used to  perform  simple
        simultaneous substitutions, as this pcre2test example shows:
 
          /(*MARK:pear)apple|(*MARK:orange)lemon/g,replace=${*MARK}
              apple lemon
           2: pear orange
 
-       As well as the usual options for pcre2_match(), a number of  additional
+       As  well as the usual options for pcre2_match(), a number of additional
        options can be set in the options argument of pcre2_substitute().
+
+       As mentioned above,  PCRE2_SUBSTITUTE_LITERAL  causes  the  replacement
+       string  to be treated as a literal, with no interpretation. If this op-
+       tion is set, PCRE2_SUBSTITUTE_EXTENDED, PCRE2_SUBSTITUTE_UNKNOWN_UNSET,
+       and PCRE2_SUBSTITUTE_UNSET_EMPTY are irrelevant and are ignored.
 
        PCRE2_SUBSTITUTE_GLOBAL causes the function to iterate over the subject
        string, replacing every matching substring. If this option is not  set,
@@ -3721,7 +3727,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 02 September 2019
+       Last updated: 26 December 2019
        Copyright (c) 1997-2019 University of Cambridge.
 ------------------------------------------------------------------------------
  

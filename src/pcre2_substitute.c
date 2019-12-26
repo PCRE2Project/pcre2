@@ -49,8 +49,8 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #define SUBSTITUTE_OPTIONS \
   (PCRE2_SUBSTITUTE_EXTENDED|PCRE2_SUBSTITUTE_GLOBAL| \
-   PCRE2_SUBSTITUTE_OVERFLOW_LENGTH|PCRE2_SUBSTITUTE_UNKNOWN_UNSET| \
-   PCRE2_SUBSTITUTE_UNSET_EMPTY)
+   PCRE2_SUBSTITUTE_LITERAL|PCRE2_SUBSTITUTE_OVERFLOW_LENGTH| \
+   PCRE2_SUBSTITUTE_UNKNOWN_UNSET|PCRE2_SUBSTITUTE_UNSET_EMPTY)
 
 
 
@@ -227,7 +227,7 @@ uint32_t ovector_count;
 uint32_t goptions = 0;
 uint32_t suboptions;
 BOOL match_data_created = FALSE;
-BOOL literal = FALSE;
+BOOL escaped_literal = FALSE;
 BOOL overflowed = FALSE;
 #ifdef SUPPORT_UNICODE
 BOOL utf = (code->overall_options & PCRE2_UTF) != 0;
@@ -421,12 +421,21 @@ do
   scb.output_offsets[0] = buff_offset;
   scb.oveccount = rc;
 
-  /* Process the replacement string. Literal mode is set by \Q, but only in
-  extended mode when backslashes are being interpreted. In extended mode we
-  must handle nested substrings that are to be reprocessed. */
-
+  /* Process the replacement string. If the entire replacement is literal, just 
+  copy it with length check. */
+  
   ptr = replacement;
-  for (;;)
+  if ((suboptions & PCRE2_SUBSTITUTE_LITERAL) != 0)
+    {
+    CHECKMEMCPY(ptr, rlength);  
+    }
+
+  /* Within a non-literal replacement, which must be scanned character by 
+  character, local literal mode can be set by \Q, but only in extended mode
+  when backslashes are being interpreted. In extended mode we must handle
+  nested substrings that are to be reprocessed. */
+ 
+  else for (;;)
     {
     uint32_t ch;
     unsigned int chlen;
@@ -443,11 +452,11 @@ do
 
     /* Handle the next character */
 
-    if (literal)
+    if (escaped_literal)
       {
       if (ptr[0] == CHAR_BACKSLASH && ptr < repend - 1 && ptr[1] == CHAR_E)
         {
-        literal = FALSE;
+        escaped_literal = FALSE;
         ptr += 2;
         continue;
         }
@@ -784,7 +793,7 @@ do
         continue;
 
         case ESC_Q:
-        literal = TRUE;
+        escaped_literal = TRUE;
         continue;
 
         case 0:      /* Data character */

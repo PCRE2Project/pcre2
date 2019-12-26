@@ -14778,6 +14778,14 @@ No match
     abcd
  1: w\x0dx\x82y\xdbz(12\$34$$\x345$)
 
+/abcd/replace=w\rx\x82y\o{333}z(\Q12\$34$$\x34\E5$$),substitute_extended,substitute_literal
+    >>abcd<<
+ 1: >>w\rx\x82y\o{333}z(\Q12\$34$$\x34\E5$$)<<
+    
+/abcd/g,replace=\$1$2\,substitute_literal
+    XabcdYabcdZ
+ 2: X\$1$2\Y\$1$2\Z
+
 /a(bc)(DE)/replace=a\u$1\U$1\E$1\l$2\L$2\Eab\Uab\LYZ\EDone,substitute_extended
     abcDE
  1: aBcBCbcdEdeabAByzDone
@@ -14795,6 +14803,8 @@ Failed: error -57 at offset 4 in replacement: bad escape sequence in replacement
  1: b:b
     ac\=replace=${1:+$1\:$1:$2}
  1: c
+    >>ac<<\=replace=${1:+$1\:$1:$2},substitute_literal
+ 1: >>${1:+$1\:$1:$2}<<
 
 /a(?:(b)|(c))/substitute_extended,replace=X${1:-1:-1}X${2:-2:-2}
     ab
