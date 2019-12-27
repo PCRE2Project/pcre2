@@ -49,8 +49,9 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #define SUBSTITUTE_OPTIONS \
   (PCRE2_SUBSTITUTE_EXTENDED|PCRE2_SUBSTITUTE_GLOBAL| \
-   PCRE2_SUBSTITUTE_LITERAL|PCRE2_SUBSTITUTE_OVERFLOW_LENGTH| \
-   PCRE2_SUBSTITUTE_UNKNOWN_UNSET|PCRE2_SUBSTITUTE_UNSET_EMPTY)
+   PCRE2_SUBSTITUTE_LITERAL|PCRE2_SUBSTITUTE_MATCHED| \
+   PCRE2_SUBSTITUTE_OVERFLOW_LENGTH|PCRE2_SUBSTITUTE_UNKNOWN_UNSET| \
+   PCRE2_SUBSTITUTE_UNSET_EMPTY)
 
 
 
@@ -229,6 +230,7 @@ uint32_t suboptions;
 BOOL match_data_created = FALSE;
 BOOL escaped_literal = FALSE;
 BOOL overflowed = FALSE;
+BOOL use_existing_match;
 #ifdef SUPPORT_UNICODE
 BOOL utf = (code->overall_options & PCRE2_UTF) != 0;
 #endif
@@ -248,15 +250,25 @@ lengthleft = buff_length = *blength;
 *blength = PCRE2_UNSET;
 ovecsave[0] = ovecsave[1] = ovecsave[2] = PCRE2_UNSET;
 
-/* Partial matching is not valid. This must come after setting *blength to 
+/* Partial matching is not valid. This must come after setting *blength to
 PCRE2_UNSET, so as not to imply an offset in the replacement. */
 
 if ((options & (PCRE2_PARTIAL_HARD|PCRE2_PARTIAL_SOFT)) != 0)
   return PCRE2_ERROR_BADOPTION;
 
-/* If no match data block is provided, create one. */
+/* Check for using a match that has already happened. Note that the subject 
+pointer in the match data may be NULL after a no-match. */
 
-if (match_data == NULL)
+use_existing_match = ((options & PCRE2_SUBSTITUTE_MATCHED) != 0);
+
+if (use_existing_match)
+  {
+  if (match_data == NULL) return PCRE2_ERROR_NULL;
+  }
+
+/* Otherwise, if no match data block is provided, create one. */
+
+else if (match_data == NULL)
   {
   pcre2_general_context *gcontext = (mcontext == NULL)?
     (pcre2_general_context *)code :
@@ -310,7 +322,8 @@ if (start_offset > length)
   }
 CHECKMEMCPY(subject, start_offset);
 
-/* Loop for global substituting. */
+/* Loop for global substituting. If PCRE2_SUBSTITUTE_MATCHED is set, the first
+match is taken from the match_data that was passed in. */
 
 subs = 0;
 do
@@ -318,8 +331,13 @@ do
   PCRE2_SPTR ptrstack[PTR_STACK_SIZE];
   uint32_t ptrstackptr = 0;
 
-  rc = pcre2_match(code, subject, length, start_offset, options|goptions,
-    match_data, mcontext);
+  if (use_existing_match)
+    {
+    rc = match_data->rc;
+    use_existing_match = FALSE;
+    }
+  else rc = pcre2_match(code, subject, length, start_offset, options|goptions,
+      match_data, mcontext);
 
 #ifdef SUPPORT_UNICODE
   if (utf) options |= PCRE2_NO_UTF_CHECK;  /* Only need to check once */
@@ -375,33 +393,33 @@ do
 
   /* Handle a successful match. Matches that use \K to end before they start
   or start before the current point in the subject are not supported. */
-  
+
   if (ovector[1] < ovector[0] || ovector[0] < start_offset)
     {
     rc = PCRE2_ERROR_BADSUBSPATTERN;
     goto EXIT;
     }
-    
-  /* Check for the same match as previous. This is legitimate after matching an 
+
+  /* Check for the same match as previous. This is legitimate after matching an
   empty string that starts after the initial match offset. We have tried again
   at the match point in case the pattern is one like /(?<=\G.)/ which can never
   match at its starting point, so running the match achieves the bumpalong. If
   we do get the same (null) match at the original match point, it isn't such a
   pattern, so we now do the empty string magic. In all other cases, a repeat
   match should never occur. */
-    
+
   if (ovecsave[0] == ovector[0] && ovecsave[1] == ovector[1])
-    {                                                                        
-    if (ovector[0] == ovector[1] && ovecsave[2] != start_offset)     
-      {                                                                   
-      goptions = PCRE2_NOTEMPTY_ATSTART | PCRE2_ANCHORED;                 
-      ovecsave[2] = start_offset;                                     
-      continue;    /* Back to the top of the loop */                        
+    {
+    if (ovector[0] == ovector[1] && ovecsave[2] != start_offset)
+      {
+      goptions = PCRE2_NOTEMPTY_ATSTART | PCRE2_ANCHORED;
+      ovecsave[2] = start_offset;
+      continue;    /* Back to the top of the loop */
       }
     rc = PCRE2_ERROR_INTERNAL_DUPMATCH;
-    goto EXIT;   
-    }   
-    
+    goto EXIT;
+    }
+
   /* Count substitutions with a paranoid check for integer overflow; surely no
   real call to this function would ever hit this! */
 
@@ -421,20 +439,20 @@ do
   scb.output_offsets[0] = buff_offset;
   scb.oveccount = rc;
 
-  /* Process the replacement string. If the entire replacement is literal, just 
+  /* Process the replacement string. If the entire replacement is literal, just
   copy it with length check. */
-  
+
   ptr = replacement;
   if ((suboptions & PCRE2_SUBSTITUTE_LITERAL) != 0)
     {
-    CHECKMEMCPY(ptr, rlength);  
+    CHECKMEMCPY(ptr, rlength);
     }
 
-  /* Within a non-literal replacement, which must be scanned character by 
+  /* Within a non-literal replacement, which must be scanned character by
   character, local literal mode can be set by \Q, but only in extended mode
   when backslashes are being interpreted. In extended mode we must handle
   nested substrings that are to be reprocessed. */
- 
+
   else for (;;)
     {
     uint32_t ch;
@@ -844,42 +862,42 @@ do
       } /* End handling a literal code unit */
     }   /* End of loop for scanning the replacement. */
 
-  /* The replacement has been copied to the output, or its size has been 
-  remembered. Do the callout if there is one and we have done an actual 
+  /* The replacement has been copied to the output, or its size has been
+  remembered. Do the callout if there is one and we have done an actual
   replacement. */
-  
+
   if (!overflowed && mcontext != NULL && mcontext->substitute_callout != NULL)
     {
-    scb.subscount = subs;  
+    scb.subscount = subs;
     scb.output_offsets[1] = buff_offset;
-    rc = mcontext->substitute_callout(&scb, mcontext->substitute_callout_data); 
+    rc = mcontext->substitute_callout(&scb, mcontext->substitute_callout_data);
 
-    /* A non-zero return means cancel this substitution. Instead, copy the 
+    /* A non-zero return means cancel this substitution. Instead, copy the
     matched string fragment. */
 
     if (rc != 0)
       {
       PCRE2_SIZE newlength = scb.output_offsets[1] - scb.output_offsets[0];
       PCRE2_SIZE oldlength = ovector[1] - ovector[0];
-      
+
       buff_offset -= newlength;
       lengthleft += newlength;
-      CHECKMEMCPY(subject + ovector[0], oldlength);    
-      
+      CHECKMEMCPY(subject + ovector[0], oldlength);
+
       /* A negative return means do not do any more. */
-      
+
       if (rc < 0) suboptions &= (~PCRE2_SUBSTITUTE_GLOBAL);
       }
-    }   
- 
+    }
+
   /* Save the details of this match. See above for how this data is used. If we
   matched an empty string, do the magic for global matches. Finally, update the
   start offset to point to the rest of the subject string. */
-  
-  ovecsave[0] = ovector[0];                                
-  ovecsave[1] = ovector[1];                                        
+
+  ovecsave[0] = ovector[0];
+  ovecsave[1] = ovector[1];
   ovecsave[2] = start_offset;
-   
+
   goptions = (ovector[0] != ovector[1] || ovector[0] > start_offset)? 0 :
     PCRE2_ANCHORED|PCRE2_NOTEMPTY_ATSTART;
   start_offset = ovector[1];

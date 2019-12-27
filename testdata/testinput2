@@ -4640,6 +4640,13 @@ B)x/alt_verbnames,mark
 
 /(aa)(BB)/substitute_extended,replace=\U$1\L$2\E$1..\U$1\l$2$1
     aaBB
+    
+/abcd/replace=wxyz,substitute_matched
+    abcd
+    pqrs 
+
+/abcd/g
+    >abcd1234abcd5678<\=replace=wxyz,substitute_matched
 
 /^(o(\1{72}{\"{\\{00000059079}\d*){74}}){19}/I
 

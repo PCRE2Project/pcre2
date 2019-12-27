@@ -48,8 +48,8 @@ Its arguments are:
   <i>outlengthptr</i>  Points to the length of the output buffer
 </pre>
 A match data block is needed only if you want to inspect the data from the
-match that is returned in that block. A match context is needed only if you
-want to:
+match that is returned in that block or if PCRE2_SUBSTITUTE_MATCHED is set. A
+match context is needed only if you want to:
 <pre>
   Set up a callout function
   Set a matching offset limit
@@ -75,16 +75,17 @@ zero-terminated strings. The options are:
   PCRE2_SUBSTITUTE_EXTENDED  Do extended replacement processing
   PCRE2_SUBSTITUTE_GLOBAL    Replace all occurrences in the subject
   PCRE2_SUBSTITUTE_LITERAL   The replacement string is literal 
+  PCRE2_SUBSTITUTE_MATCHED   Use pre-existing match data for 1st match 
   PCRE2_SUBSTITUTE_OVERFLOW_LENGTH  If overflow, compute needed length
   PCRE2_SUBSTITUTE_UNKNOWN_UNSET  Treat unknown group as unset
   PCRE2_SUBSTITUTE_UNSET_EMPTY  Simple unset insert = empty string
 </pre>
-PCRE2_SUBSTITUTE_LITERAL overrides PCRE2_SUBSTITUTE_EXTENDED, 
-PCRE2_SUBSTITUTE_UNKNOWN_UNSET, and PCRE2_SUBSTITUTE_UNSET_EMPTY.
+If PCRE2_SUBSTITUTE_LITERAL is set, PCRE2_SUBSTITUTE_EXTENDED, 
+PCRE2_SUBSTITUTE_UNKNOWN_UNSET, and PCRE2_SUBSTITUTE_UNSET_EMPTY are ignored.
 </P>
 <P>
 The function returns the number of substitutions, which may be zero if there
-were no matches. The result can be greater than one only when
+are no matches. The result may be greater than one only when
 PCRE2_SUBSTITUTE_GLOBAL is set. In the event of an error, a negative error code
 is returned.
 </P>

@@ -182,6 +182,7 @@ pcre2_jit_match() ignores the latter since it bypasses all sanity checks). */
 #define PCRE2_NO_JIT                      0x00002000u  /* Not for pcre2_dfa_match() */
 #define PCRE2_COPY_MATCHED_SUBJECT        0x00004000u
 #define PCRE2_SUBSTITUTE_LITERAL          0x00008000u  /* pcre2_substitute() only */
+#define PCRE2_SUBSTITUTE_MATCHED          0x00010000u  /* pcre2_substitute() only */
 
 /* Options for pcre2_pattern_convert(). */
 

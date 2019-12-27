@@ -503,13 +503,14 @@ so many of them that they are split into two fields. */
 #define CTL2_SUBSTITUTE_CALLOUT          0x00000001u
 #define CTL2_SUBSTITUTE_EXTENDED         0x00000002u
 #define CTL2_SUBSTITUTE_LITERAL          0x00000004u
-#define CTL2_SUBSTITUTE_OVERFLOW_LENGTH  0x00000008u
-#define CTL2_SUBSTITUTE_UNKNOWN_UNSET    0x00000010u
-#define CTL2_SUBSTITUTE_UNSET_EMPTY      0x00000020u
-#define CTL2_SUBJECT_LITERAL             0x00000040u
-#define CTL2_CALLOUT_NO_WHERE            0x00000080u
-#define CTL2_CALLOUT_EXTRA               0x00000100u
-#define CTL2_ALLVECTOR                   0x00000200u
+#define CTL2_SUBSTITUTE_MATCHED          0x00000008u
+#define CTL2_SUBSTITUTE_OVERFLOW_LENGTH  0x00000010u
+#define CTL2_SUBSTITUTE_UNKNOWN_UNSET    0x00000020u
+#define CTL2_SUBSTITUTE_UNSET_EMPTY      0x00000040u
+#define CTL2_SUBJECT_LITERAL             0x00000080u
+#define CTL2_CALLOUT_NO_WHERE            0x00000100u
+#define CTL2_CALLOUT_EXTRA               0x00000200u
+#define CTL2_ALLVECTOR                   0x00000400u
 
 #define CTL2_NL_SET                      0x40000000u  /* Informational */
 #define CTL2_BSR_SET                     0x80000000u  /* Informational */
@@ -532,6 +533,7 @@ different things in the two cases. */
 #define CTL2_ALLPD (CTL2_SUBSTITUTE_CALLOUT|\
                     CTL2_SUBSTITUTE_EXTENDED|\
                     CTL2_SUBSTITUTE_LITERAL|\
+                    CTL2_SUBSTITUTE_MATCHED|\
                     CTL2_SUBSTITUTE_OVERFLOW_LENGTH|\
                     CTL2_SUBSTITUTE_UNKNOWN_UNSET|\
                     CTL2_SUBSTITUTE_UNSET_EMPTY|\
@@ -721,6 +723,7 @@ static modstruct modlist[] = {
   { "substitute_callout",         MOD_PND,  MOD_CTL, CTL2_SUBSTITUTE_CALLOUT,    PO(control2) },
   { "substitute_extended",        MOD_PND,  MOD_CTL, CTL2_SUBSTITUTE_EXTENDED,   PO(control2) },
   { "substitute_literal",         MOD_PND,  MOD_CTL, CTL2_SUBSTITUTE_LITERAL,    PO(control2) },
+  { "substitute_matched",         MOD_PND,  MOD_CTL, CTL2_SUBSTITUTE_MATCHED,    PO(control2) },
   { "substitute_overflow_length", MOD_PND,  MOD_CTL, CTL2_SUBSTITUTE_OVERFLOW_LENGTH, PO(control2) },
   { "substitute_skip",            MOD_PND,  MOD_INT, 0,                          PO(substitute_skip) },
   { "substitute_stop",            MOD_PND,  MOD_INT, 0,                          PO(substitute_stop) },
@@ -4088,7 +4091,7 @@ Returns:      nothing
 static void
 show_controls(uint32_t controls, uint32_t controls2, const char *before)
 {
-fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
+fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
   before,
   ((controls & CTL_AFTERTEXT) != 0)? " aftertext" : "",
   ((controls & CTL_ALLAFTERTEXT) != 0)? " allaftertext" : "",
@@ -4127,6 +4130,7 @@ fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s
   ((controls2 & CTL2_SUBSTITUTE_CALLOUT) != 0)? " substitute_callout" : "",
   ((controls2 & CTL2_SUBSTITUTE_EXTENDED) != 0)? " substitute_extended" : "",
   ((controls2 & CTL2_SUBSTITUTE_LITERAL) != 0)? " substitute_literal" : "",
+  ((controls2 & CTL2_SUBSTITUTE_MATCHED) != 0)? " substitute_matched" : "",
   ((controls2 & CTL2_SUBSTITUTE_OVERFLOW_LENGTH) != 0)? " substitute_overflow_length" : "",
   ((controls2 & CTL2_SUBSTITUTE_UNKNOWN_UNSET) != 0)? " substitute_unknown_unset" : "",
   ((controls2 & CTL2_SUBSTITUTE_UNSET_EMPTY) != 0)? " substitute_unset_empty" : "",
@@ -7232,6 +7236,7 @@ if (dat_datctl.replacement[0] != 0)
   uint8_t rbuffer[REPLACE_BUFFSIZE];
   uint8_t nbuffer[REPLACE_BUFFSIZE];
   uint32_t xoptions;
+  uint32_t emoption;  /* External match option */
   PCRE2_SIZE j, rlen, nsize, erroroffset;
   BOOL badutf = FALSE;
 
@@ -7252,11 +7257,25 @@ if (dat_datctl.replacement[0] != 0)
 
   if (timeitm)
     fprintf(outfile, "** Timing is not supported with replace: ignored\n");
-
+    
   if ((dat_datctl.control & CTL_ALTGLOBAL) != 0)
     fprintf(outfile, "** Altglobal is not supported with replace: ignored\n");
 
-  xoptions = (((dat_datctl.control & CTL_GLOBAL) == 0)? 0 :
+  /* Check for a test that does substitution after an initial external match. 
+  If this is set, we run the external match, but leave the interpretation of 
+  its output to pcre2_substitute(). */
+
+  emoption = ((dat_datctl.control2 & CTL2_SUBSTITUTE_MATCHED) == 0)? 0 :
+    PCRE2_SUBSTITUTE_MATCHED;
+     
+  if (emoption != 0)
+    {
+    PCRE2_MATCH(rc, compiled_code, pp, arg_ulen, dat_datctl.offset,
+      dat_datctl.options, match_data, use_dat_context);
+    }
+
+  xoptions = emoption |
+             (((dat_datctl.control & CTL_GLOBAL) == 0)? 0 :
                 PCRE2_SUBSTITUTE_GLOBAL) |
              (((dat_datctl.control2 & CTL2_SUBSTITUTE_EXTENDED) == 0)? 0 :
                 PCRE2_SUBSTITUTE_EXTENDED) |
@@ -7268,7 +7287,7 @@ if (dat_datctl.replacement[0] != 0)
                 PCRE2_SUBSTITUTE_UNKNOWN_UNSET) |
              (((dat_datctl.control2 & CTL2_SUBSTITUTE_UNSET_EMPTY) == 0)? 0 :
                 PCRE2_SUBSTITUTE_UNSET_EMPTY);
-                
+
   SETCASTPTR(r, rbuffer);  /* Sets r8, r16, or r32, as appropriate. */
   pr = dat_datctl.replacement;
 

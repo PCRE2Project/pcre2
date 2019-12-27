@@ -14859,6 +14859,16 @@ Failed: error -55 at offset 3 in replacement: requested value is not set
 /(aa)(BB)/substitute_extended,replace=\U$1\L$2\E$1..\U$1\l$2$1
     aaBB
  1: AAbbaa..AAbBaa
+    
+/abcd/replace=wxyz,substitute_matched
+    abcd
+ 1: wxyz
+    pqrs 
+ 0: pqrs
+
+/abcd/g
+    >abcd1234abcd5678<\=replace=wxyz,substitute_matched
+ 2: >wxyz1234wxyz5678<
 
 /^(o(\1{72}{\"{\\{00000059079}\d*){74}}){19}/I
 Capture group count = 2

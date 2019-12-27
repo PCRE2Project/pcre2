@@ -3193,97 +3193,110 @@ CREATING A NEW STRING WITH SUBSTITUTIONS
          PCRE2_SIZE rlength, PCRE2_UCHAR *outputbuffer,
          PCRE2_SIZE *outlengthptr);
 
-       This function calls pcre2_match() and then makes a copy of the  subject
-       string  in  outputbuffer, replacing one or more parts that were matched
+       This function optionally calls pcre2_match() and then makes a  copy  of
+       the  subject  string in outputbuffer, replacing parts that were matched
        with the replacement string, whose length is supplied in rlength.  This
-       can  be  given  as  PCRE2_ZERO_TERMINATED for a zero-terminated string.
-       The default is to perform just one replacement, but there is an  option
-       that  requests multiple replacements (see PCRE2_SUBSTITUTE_GLOBAL below
-       for details).
+       can be given as PCRE2_ZERO_TERMINATED for a zero-terminated string. The
+       default is to perform just one replacement if the pattern matches,  but
+       there  is an option that requests multiple replacements (see PCRE2_SUB-
+       STITUTE_GLOBAL below for details).
 
-       Matches in which a \K item in a lookahead in  the  pattern  causes  the
-       match  to  end  before it starts are not supported, and give rise to an
+       If successful, pcre2_substitute() returns the number  of  substitutions
+       that  were  carried out. This may be zero if no match was found, and is
+       never greater than one unless PCRE2_SUBSTITUTE_GLOBAL is set.  A  nega-
+       tive value is returned if an error is detected (see below for details).
+
+       Matches  in  which  a  \K item in a lookahead in the pattern causes the
+       match to end before it starts are not supported, and give  rise  to  an
        error return. For global replacements, matches in which \K in a lookbe-
-       hind  causes the match to start earlier than the point that was reached
+       hind causes the match to start earlier than the point that was  reached
        in the previous iteration are also not supported.
 
-       The first seven arguments of pcre2_substitute() are  the  same  as  for
+       The  first  seven  arguments  of pcre2_substitute() are the same as for
        pcre2_match(), except that the partial matching options are not permit-
-       ted, and match_data may be passed as NULL, in which case a  match  data
-       block  is obtained and freed within this function, using memory manage-
-       ment functions from the match context, if provided, or else those  that
+       ted,  and  match_data may be passed as NULL, in which case a match data
+       block is obtained and freed within this function, using memory  manage-
+       ment  functions from the match context, if provided, or else those that
        were used to allocate memory for the compiled code.
 
-       If  an  external  match_data block is provided, its contents afterwards
-       are those set by the final call to pcre2_match(). For  global  changes,
-       this  will  have ended in a matching error. The contents of the ovector
+       If an external match_data block is provided,  its  contents  afterwards
+       are  those  set by the final call to pcre2_match(). For global changes,
+       this will have ended in a no-match error. The contents of  the  ovector
        within the match data block may or may not have been changed.
 
-       The outlengthptr argument must point to a variable  that  contains  the
-       length,  in  code  units, of the output buffer. If the function is suc-
-       cessful, the value is updated to contain the length of the new  string,
-       excluding the trailing zero that is automatically added.
+       As  well as the usual options for pcre2_match(), a number of additional
+       options can be set in the options argument of pcre2_substitute().   One
+       such  option is PCRE2_SUBSTITUTE_MATCHED. When this is set, an external
+       match_data block must be provided, and it must have been  used  for  an
+       external  call  to pcre2_match(). The data in the match_data block (re-
+       turn code, offset vector) is used for the first substitution instead of
+       calling  pcre2_match()  from  within pcre2_substitute(). This allows an
+       application to check for a match before choosing to substitute, without
+       having to repeat the match.
 
-       If  the  function is not successful, the value set via outlengthptr de-
-       pends on the type of  error.  For  syntax  errors  in  the  replacement
+       The  code  argument  is  not  used  for  the first substitution, but if
+       PCRE2_SUBSTITUTE_GLOBAL is set, pcre2_match() will be called after  the
+       first  substitution  to  check for further matches, and the contents of
+       the match_data block will be changed.
+
+       The outlengthptr argument of pcre2_substitute() must point to  a  vari-
+       able  that contains the length, in code units, of the output buffer. If
+       the function is successful, the value is updated to contain the  length
+       of  the  new  string, excluding the trailing zero that is automatically
+       added.
+
+       If the function is not successful, the value set via  outlengthptr  de-
+       pends  on  the  type  of  error.  For  syntax errors in the replacement
        string, the value is the offset in the replacement string where the er-
-       ror was detected. For other errors, the value  is  PCRE2_UNSET  by  de-
+       ror  was  detected.  For  other errors, the value is PCRE2_UNSET by de-
        fault. This includes the case of the output buffer being too small, un-
        less PCRE2_SUBSTITUTE_OVERFLOW_LENGTH is set (see below), in which case
-       the  value is the minimum length needed, including space for the trail-
+       the value is the minimum length needed, including space for the  trail-
        ing zero. Note that in order to compute the required length, pcre2_sub-
        stitute() has to simulate all the matching and copying, instead of giv-
        ing an error return as soon as the buffer overflows. Note also that the
        length is in code units, not bytes.
 
-       The  replacement  string,  which  is interpreted as a UTF string in UTF
-       mode, is checked for UTF validity unless the PCRE2_NO_UTF_CHECK  option
+       The replacement string, which is interpreted as a  UTF  string  in  UTF
+       mode,  is checked for UTF validity unless the PCRE2_NO_UTF_CHECK option
        is set. If the PCRE2_SUBSTITUTE_LITERAL option is set, it is not inter-
        preted in any way. By default, however, a dollar character is an escape
-       character  that  can  specify  the insertion of characters from capture
-       groups or names from (*MARK) or other control verbs in the pattern. The
-       following forms are always recognized:
+       character that can specify the insertion  of  characters  from  capture
+       groups  and  names  from (*MARK) or other control verbs in the pattern.
+       The following forms are always recognized:
 
          $$                  insert a dollar character
          $<n> or ${<n>}      insert the contents of group <n>
          $*MARK or ${*MARK}  insert a control verb name
 
-       Either  a  group  number  or  a  group name can be given for <n>. Curly
-       brackets are required only if the following character would  be  inter-
+       Either a group number or a group name  can  be  given  for  <n>.  Curly
+       brackets  are  required only if the following character would be inter-
        preted as part of the number or name. The number may be zero to include
-       the entire matched string.   For  example,  if  the  pattern  a(b)c  is
-       matched  with "=abc=" and the replacement string "+$1$0$1+", the result
+       the  entire  matched  string.   For  example,  if  the pattern a(b)c is
+       matched with "=abc=" and the replacement string "+$1$0$1+", the  result
        is "=+babcb+=".
 
-       $*MARK inserts the name from the last encountered backtracking  control
-       verb  on the matching path that has a name. (*MARK) must always include
-       a name, but the other verbs need not.  For  example,  in  the  case  of
+       $*MARK  inserts the name from the last encountered backtracking control
+       verb on the matching path that has a name. (*MARK) must always  include
+       a  name,  but  the  other  verbs  need not. For example, in the case of
        (*MARK:A)(*PRUNE) the name inserted is "A", but for (*MARK:A)(*PRUNE:B)
-       the relevant name is "B". This facility can be used to  perform  simple
+       the  relevant  name is "B". This facility can be used to perform simple
        simultaneous substitutions, as this pcre2test example shows:
 
          /(*MARK:pear)apple|(*MARK:orange)lemon/g,replace=${*MARK}
              apple lemon
           2: pear orange
 
-       As  well as the usual options for pcre2_match(), a number of additional
-       options can be set in the options argument of pcre2_substitute().
-
-       As mentioned above,  PCRE2_SUBSTITUTE_LITERAL  causes  the  replacement
-       string  to be treated as a literal, with no interpretation. If this op-
-       tion is set, PCRE2_SUBSTITUTE_EXTENDED, PCRE2_SUBSTITUTE_UNKNOWN_UNSET,
-       and PCRE2_SUBSTITUTE_UNSET_EMPTY are irrelevant and are ignored.
-
        PCRE2_SUBSTITUTE_GLOBAL causes the function to iterate over the subject
-       string, replacing every matching substring. If this option is not  set,
-       only  the  first matching substring is replaced. The search for matches
-       takes place in the original subject string (that is, previous  replace-
-       ments  do  not  affect  it).  Iteration is implemented by advancing the
-       startoffset value for each search, which is always  passed  the  entire
+       string,  replacing every matching substring. If this option is not set,
+       only the first matching substring is replaced. The search  for  matches
+       takes  place in the original subject string (that is, previous replace-
+       ments do not affect it).  Iteration is  implemented  by  advancing  the
+       startoffset  value  for  each search, which is always passed the entire
        subject string. If an offset limit is set in the match context, search-
        ing stops when that limit is reached.
 
-       You can restrict the effect of a global substitution to  a  portion  of
+       You  can  restrict  the effect of a global substitution to a portion of
        the subject string by setting either or both of startoffset and an off-
        set limit. Here is a pcre2test example:
 
@@ -3291,87 +3304,87 @@ CREATING A NEW STRING WITH SUBSTITUTIONS
          ABC ABC ABC ABC\=offset=3,offset_limit=12
           2: ABC A!C A!C ABC
 
-       When continuing with global substitutions after  matching  a  substring
+       When  continuing  with  global substitutions after matching a substring
        with zero length, an attempt to find a non-empty match at the same off-
        set is performed.  If this is not successful, the offset is advanced by
        one character except when CRLF is a valid newline sequence and the next
-       two characters are CR, LF. In this case, the offset is advanced by  two
+       two  characters are CR, LF. In this case, the offset is advanced by two
        characters.
 
-       PCRE2_SUBSTITUTE_OVERFLOW_LENGTH  changes  what happens when the output
+       PCRE2_SUBSTITUTE_OVERFLOW_LENGTH changes what happens when  the  output
        buffer is too small. The default action is to return PCRE2_ERROR_NOMEM-
-       ORY  immediately.  If  this  option is set, however, pcre2_substitute()
+       ORY immediately. If this option  is  set,  however,  pcre2_substitute()
        continues to go through the motions of matching and substituting (with-
-       out,  of course, writing anything) in order to compute the size of buf-
-       fer that is needed. This value is  passed  back  via  the  outlengthptr
-       variable,  with  the  result  of  the  function  still  being PCRE2_ER-
+       out, of course, writing anything) in order to compute the size of  buf-
+       fer  that  is  needed.  This  value is passed back via the outlengthptr
+       variable, with  the  result  of  the  function  still  being  PCRE2_ER-
        ROR_NOMEMORY.
 
-       Passing a buffer size of zero is a permitted way  of  finding  out  how
-       much  memory  is needed for given substitution. However, this does mean
+       Passing  a  buffer  size  of zero is a permitted way of finding out how
+       much memory is needed for given substitution. However, this  does  mean
        that the entire operation is carried out twice. Depending on the appli-
-       cation,  it  may  be more efficient to allocate a large buffer and free
-       the  excess  afterwards,  instead   of   using   PCRE2_SUBSTITUTE_OVER-
+       cation, it may be more efficient to allocate a large  buffer  and  free
+       the   excess   afterwards,   instead  of  using  PCRE2_SUBSTITUTE_OVER-
        FLOW_LENGTH.
 
        PCRE2_SUBSTITUTE_UNKNOWN_UNSET causes references to capture groups that
        do not appear in the pattern to be treated as unset groups. This option
-       should  be used with care, because it means that a typo in a group name
+       should be used with care, because it means that a typo in a group  name
        or number no longer causes the PCRE2_ERROR_NOSUBSTRING error.
 
        PCRE2_SUBSTITUTE_UNSET_EMPTY causes unset capture groups (including un-
-       known  groups when PCRE2_SUBSTITUTE_UNKNOWN_UNSET is set) to be treated
-       as empty strings when inserted as described above. If  this  option  is
+       known groups when PCRE2_SUBSTITUTE_UNKNOWN_UNSET is set) to be  treated
+       as  empty  strings  when inserted as described above. If this option is
        not set, an attempt to insert an unset group causes the PCRE2_ERROR_UN-
-       SET error. This option does not  influence  the  extended  substitution
+       SET  error.  This  option  does not influence the extended substitution
        syntax described below.
 
-       PCRE2_SUBSTITUTE_EXTENDED  causes extra processing to be applied to the
-       replacement string. Without this option, only the dollar  character  is
-       special,  and  only  the  group insertion forms listed above are valid.
+       PCRE2_SUBSTITUTE_EXTENDED causes extra processing to be applied to  the
+       replacement  string.  Without this option, only the dollar character is
+       special, and only the group insertion forms  listed  above  are  valid.
        When PCRE2_SUBSTITUTE_EXTENDED is set, two things change:
 
-       Firstly, backslash in a replacement string is interpreted as an  escape
+       Firstly,  backslash in a replacement string is interpreted as an escape
        character. The usual forms such as \n or \x{ddd} can be used to specify
-       particular character codes, and backslash followed by any  non-alphanu-
-       meric  character  quotes  that character. Extended quoting can be coded
+       particular  character codes, and backslash followed by any non-alphanu-
+       meric character quotes that character. Extended quoting  can  be  coded
        using \Q...\E, exactly as in pattern strings.
 
-       There are also four escape sequences for forcing the case  of  inserted
-       letters.   The  insertion  mechanism has three states: no case forcing,
+       There  are  also four escape sequences for forcing the case of inserted
+       letters.  The insertion mechanism has three states:  no  case  forcing,
        force upper case, and force lower case. The escape sequences change the
        current state: \U and \L change to upper or lower case forcing, respec-
-       tively, and \E (when not terminating a \Q quoted sequence)  reverts  to
-       no  case  forcing. The sequences \u and \l force the next character (if
-       it is a letter) to upper or lower  case,  respectively,  and  then  the
+       tively,  and  \E (when not terminating a \Q quoted sequence) reverts to
+       no case forcing. The sequences \u and \l force the next  character  (if
+       it  is  a  letter)  to  upper or lower case, respectively, and then the
        state automatically reverts to no case forcing. Case forcing applies to
-       all inserted  characters, including those from capture groups and  let-
+       all  inserted  characters, including those from capture groups and let-
        ters within \Q...\E quoted sequences.
 
        Note that case forcing sequences such as \U...\E do not nest. For exam-
-       ple, the result of processing "\Uaa\LBB\Ecc\E" is "AAbbcc";  the  final
-       \E  has  no  effect.  Note  also  that the PCRE2_ALT_BSUX and PCRE2_EX-
+       ple,  the  result of processing "\Uaa\LBB\Ecc\E" is "AAbbcc"; the final
+       \E has no effect. Note  also  that  the  PCRE2_ALT_BSUX  and  PCRE2_EX-
        TRA_ALT_BSUX options do not apply to replacement strings.
 
-       The second effect of setting PCRE2_SUBSTITUTE_EXTENDED is to  add  more
-       flexibility  to  capture  group  substitution. The syntax is similar to
+       The  second  effect of setting PCRE2_SUBSTITUTE_EXTENDED is to add more
+       flexibility to capture group substitution. The  syntax  is  similar  to
        that used by Bash:
 
          ${<n>:-<string>}
          ${<n>:+<string1>:<string2>}
 
-       As before, <n> may be a group number or a name. The first  form  speci-
-       fies  a  default  value. If group <n> is set, its value is inserted; if
-       not, <string> is expanded and the  result  inserted.  The  second  form
-       specifies  strings that are expanded and inserted when group <n> is set
-       or unset, respectively. The first form is just a  convenient  shorthand
+       As  before,  <n> may be a group number or a name. The first form speci-
+       fies a default value. If group <n> is set, its value  is  inserted;  if
+       not,  <string>  is  expanded  and  the result inserted. The second form
+       specifies strings that are expanded and inserted when group <n> is  set
+       or  unset,  respectively. The first form is just a convenient shorthand
        for
 
          ${<n>:+${<n>}:<string>}
 
-       Backslash  can  be  used to escape colons and closing curly brackets in
-       the replacement strings. A change of the case forcing  state  within  a
-       replacement  string  remains  in  force  afterwards,  as  shown in this
+       Backslash can be used to escape colons and closing  curly  brackets  in
+       the  replacement  strings.  A change of the case forcing state within a
+       replacement string remains  in  force  afterwards,  as  shown  in  this
        pcre2test example:
 
          /(some)?(body)/substitute_extended,replace=${1:+\U:\L}HeLLo
@@ -3380,30 +3393,35 @@ CREATING A NEW STRING WITH SUBSTITUTIONS
              somebody
           1: HELLO
 
-       The PCRE2_SUBSTITUTE_UNSET_EMPTY option does not affect these  extended
-       substitutions.  However,  PCRE2_SUBSTITUTE_UNKNOWN_UNSET does cause un-
+       The  PCRE2_SUBSTITUTE_UNSET_EMPTY option does not affect these extended
+       substitutions. However, PCRE2_SUBSTITUTE_UNKNOWN_UNSET does  cause  un-
        known groups in the extended syntax forms to be treated as unset.
 
-       If successful, pcre2_substitute()  returns  the  number  of  successful
-       matches.  This  may  be  zero  if  no  matches were found, and is never
-       greater than 1 unless PCRE2_SUBSTITUTE_GLOBAL is set.
+       If  PCRE2_SUBSTITUTE_LITERAL  is  set,  PCRE2_SUBSTITUTE_UNKNOWN_UNSET,
+       PCRE2_SUBSTITUTE_UNSET_EMPTY, and PCRE2_SUBSTITUTE_EXTENDED are irrele-
+       vant and are ignored.
 
-       In the event of an error, a negative error code is returned. Except for
-       PCRE2_ERROR_NOMATCH    (which   is   never   returned),   errors   from
-       pcre2_match() are passed straight back.
+   Substitution errors
+
+       In  the  event of an error, pcre2_substitute() returns a negative error
+       code. Except for PCRE2_ERROR_NOMATCH (which is never returned),  errors
+       from pcre2_match() are passed straight back.
 
        PCRE2_ERROR_NOSUBSTRING is returned for a non-existent substring inser-
        tion, unless PCRE2_SUBSTITUTE_UNKNOWN_UNSET is set.
 
        PCRE2_ERROR_UNSET is returned for an unset substring insertion (includ-
-       ing an unknown substring when  PCRE2_SUBSTITUTE_UNKNOWN_UNSET  is  set)
-       when  the simple (non-extended) syntax is used and PCRE2_SUBSTITUTE_UN-
+       ing  an  unknown  substring when PCRE2_SUBSTITUTE_UNKNOWN_UNSET is set)
+       when the simple (non-extended) syntax is used and  PCRE2_SUBSTITUTE_UN-
        SET_EMPTY is not set.
 
-       PCRE2_ERROR_NOMEMORY is returned  if  the  output  buffer  is  not  big
+       PCRE2_ERROR_NOMEMORY  is  returned  if  the  output  buffer  is not big
        enough. If the PCRE2_SUBSTITUTE_OVERFLOW_LENGTH option is set, the size
-       of buffer that is needed is returned via outlengthptr. Note  that  this
+       of  buffer  that is needed is returned via outlengthptr. Note that this
        does not happen by default.
+
+       PCRE2_ERROR_NULL is returned if PCRE2_SUBSTITUTE_MATCHED is set but the
+       match_data argument is NULL.
 
        PCRE2_ERROR_BADREPLACEMENT  is  used for miscellaneous syntax errors in
        the replacement string, with more  particular  errors  being  PCRE2_ER-
@@ -3727,7 +3745,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 26 December 2019
+       Last updated: 27 December 2019
        Copyright (c) 1997-2019 University of Cambridge.
 ------------------------------------------------------------------------------
  

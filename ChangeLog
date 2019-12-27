@@ -26,6 +26,8 @@ now correctly backtracked, so this unnecessary restriction has been removed.
 
 6. Avoid some VS compiler warnings.
 
+7. Added PCRE2_SUBSTITUTE_MATCHED.
+
 
 Version 10.34 21-November-2019
 ------------------------------
