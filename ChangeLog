@@ -28,6 +28,10 @@ now correctly backtracked, so this unnecessary restriction has been removed.
 
 7. Added PCRE2_SUBSTITUTE_MATCHED.
 
+8. Added (?* and (?<* as synonms for (*napla: and (*naplb: to match another 
+regex engine. The Perl regex folks are aware of this usage and have made a note 
+about it.
+
 
 Version 10.34 21-November-2019
 ------------------------------

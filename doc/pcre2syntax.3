@@ -1,4 +1,4 @@
-.TH PCRE2SYNTAX 3 "29 July 2019" "PCRE2 10.34"
+.TH PCRE2SYNTAX 3 "28 December 2019" "PCRE2 10.35"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION SYNTAX SUMMARY"
@@ -531,11 +531,13 @@ Each top-level branch of a lookbehind must be of a fixed length.
 .sp
 These assertions are specific to PCRE2 and are not Perl-compatible.
 .sp
-  (*napla:...)
-  (*non_atomic_positive_lookahead:...)
-.sp
-  (*naplb:...)
-  (*non_atomic_positive_lookbehind:...)
+  (?*...)                                )
+  (*napla:...)                           ) synonyms
+  (*non_atomic_positive_lookahead:...)   )
+.sp                                      
+  (?<*...)                               )
+  (*naplb:...)                           ) synonyms
+  (*non_atomic_positive_lookbehind:...)  )
 .
 .
 .SH "SCRIPT RUNS"
@@ -670,6 +672,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 29 July 2019
+Last updated: 28 December 2019
 Copyright (c) 1997-2019 University of Cambridge.
 .fi

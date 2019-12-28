@@ -3653,7 +3653,7 @@ while (ptr < ptrend)
     if (ptr >= ptrend) goto UNCLOSED_PARENTHESIS;
 
     /* If ( is not followed by ? it is either a capture or a special verb or an
-    alpha assertion. */
+    alpha assertion or a positive non-atomic lookahead. */
 
     if (*ptr != CHAR_QUESTION_MARK)
       {
@@ -3685,10 +3685,10 @@ while (ptr < ptrend)
         break;
 
       /* Handle "alpha assertions" such as (*pla:...). Most of these are
-      synonyms for the historical symbolic assertions, but the script run ones
-      are new. They are distinguished by starting with a lower case letter.
-      Checking both ends of the alphabet makes this work in all character
-      codes. */
+      synonyms for the historical symbolic assertions, but the script run and
+      non-atomic lookaround ones are new. They are distinguished by starting
+      with a lower case letter. Checking both ends of the alphabet makes this
+      work in all character codes. */
 
       else if (CHMAX_255(c) && (cb->ctypes[c] & ctype_lcletter) != 0)
         {
@@ -3747,9 +3747,7 @@ while (ptr < ptrend)
           goto POSITIVE_LOOK_AHEAD;
 
           case META_LOOKAHEAD_NA:
-          *parsed_pattern++ = meta;
-          ptr++;
-          goto POST_ASSERTION;
+          goto POSITIVE_NONATOMIC_LOOK_AHEAD;
 
           case META_LOOKAHEADNOT:
           goto NEGATIVE_LOOK_AHEAD;
@@ -4438,6 +4436,12 @@ while (ptr < ptrend)
       ptr++;
       goto POST_ASSERTION;
 
+      case CHAR_ASTERISK:
+      POSITIVE_NONATOMIC_LOOK_AHEAD:         /* Come from (?* */
+      *parsed_pattern++ = META_LOOKAHEAD_NA;
+      ptr++;
+      goto POST_ASSERTION;
+
       case CHAR_EXCLAMATION_MARK:
       NEGATIVE_LOOK_AHEAD:                   /* Come from (*nla: */
       *parsed_pattern++ = META_LOOKAHEADNOT;
@@ -4447,20 +4451,23 @@ while (ptr < ptrend)
 
       /* ---- Lookbehind assertions ---- */
 
-      /* (?< followed by = or ! is a lookbehind assertion. Otherwise (?< is the
-      start of the name of a capturing group. */
+      /* (?< followed by = or ! or * is a lookbehind assertion. Otherwise (?<
+      is the start of the name of a capturing group. */
 
       case CHAR_LESS_THAN_SIGN:
       if (ptrend - ptr <= 1 ||
-         (ptr[1] != CHAR_EQUALS_SIGN && ptr[1] != CHAR_EXCLAMATION_MARK))
+         (ptr[1] != CHAR_EQUALS_SIGN &&
+          ptr[1] != CHAR_EXCLAMATION_MARK &&
+          ptr[1] != CHAR_ASTERISK))
         {
         terminator = CHAR_GREATER_THAN_SIGN;
         goto DEFINE_NAME;
         }
       *parsed_pattern++ = (ptr[1] == CHAR_EQUALS_SIGN)?
-        META_LOOKBEHIND : META_LOOKBEHINDNOT;
+        META_LOOKBEHIND : (ptr[1] == CHAR_EXCLAMATION_MARK)?
+        META_LOOKBEHINDNOT : META_LOOKBEHIND_NA;
 
-      POST_LOOKBEHIND:              /* Come from (*plb: (*naplb: and (*nlb: */
+      POST_LOOKBEHIND:           /* Come from (*plb: (*naplb: and (*nlb: */
       *has_lookbehind = TRUE;
       offset = (PCRE2_SIZE)(ptr - cb->start_pattern - 2);
       PUTOFFSET(offset, parsed_pattern);
@@ -4632,8 +4639,6 @@ while (ptr < ptrend)
         {
         *parsed_pattern++ = META_KET;
         }
-
-
 
       if (top_nest == (nest_save *)(cb->start_workspace)) top_nest = NULL;
         else top_nest--;

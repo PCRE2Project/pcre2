@@ -2624,8 +2624,8 @@ backtracking into the assertion. However, there are some cases where non-atomic
 positive assertions can be useful. PCRE2 provides these using the following
 syntax:
 <pre>
-  (*non_atomic_positive_lookahead:  or (*napla:
-  (*non_atomic_positive_lookbehind: or (*naplb:
+  (*non_atomic_positive_lookahead:  or (*napla: or (?*
+  (*non_atomic_positive_lookbehind: or (*naplb: or (?&#60;*
 </pre>
 Consider the problem of finding the right-most word in a string that also
 appears earlier in the string, that is, it must appear at least twice in total.
@@ -3833,7 +3833,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC32" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 18 December 2019
+Last updated: 28 December 2019
 <br>
 Copyright &copy; 1997-2019 University of Cambridge.
 <br>

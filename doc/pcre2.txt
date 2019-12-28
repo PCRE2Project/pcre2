@@ -8354,8 +8354,8 @@ NON-ATOMIC ASSERTIONS
        some  cases  where  non-atomic positive assertions can be useful. PCRE2
        provides these using the following syntax:
 
-         (*non_atomic_positive_lookahead:  or (*napla:
-         (*non_atomic_positive_lookbehind: or (*naplb:
+         (*non_atomic_positive_lookahead:  or (*napla: or (?*
+         (*non_atomic_positive_lookbehind: or (*naplb: or (?<*
 
        Consider the problem of finding the right-most word in  a  string  that
        also  appears  earlier  in the string, that is, it must appear at least
@@ -9487,7 +9487,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 18 December 2019
+       Last updated: 28 December 2019
        Copyright (c) 1997-2019 University of Cambridge.
 ------------------------------------------------------------------------------
  
@@ -10716,11 +10716,13 @@ NON-ATOMIC LOOKAROUND ASSERTIONS
 
        These assertions are specific to PCRE2 and are not Perl-compatible.
 
-         (*napla:...)
-         (*non_atomic_positive_lookahead:...)
+         (?*...)                                )
+         (*napla:...)                           ) synonyms
+         (*non_atomic_positive_lookahead:...)   )
 
-         (*naplb:...)
-         (*non_atomic_positive_lookbehind:...)
+         (?<*...)                               )
+         (*naplb:...)                           ) synonyms
+         (*non_atomic_positive_lookbehind:...)  )
 
 
 SCRIPT RUNS
@@ -10844,7 +10846,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 29 July 2019
+       Last updated: 28 December 2019
        Copyright (c) 1997-2019 University of Cambridge.
 ------------------------------------------------------------------------------
  

@@ -17088,6 +17088,11 @@ No match
  0: word1 word3 word1 word2 word3 word2 word2 word1 word3
  1: word3
 
+/\A(?*.*\b(\w++))(?>.*?\b\1\b){3}/
+    word1 word3 word1 word2 word3 word2 word2 word1 word3 word4
+ 0: word1 word3 word1 word2 word3 word2 word2 word1 word3
+ 1: word3
+
 /(*plb:(.)..|(.)...)(\1|\2)/
     abcdb\=offset=4 
  0: b
@@ -17098,6 +17103,18 @@ No match
 No match
 
 /(*naplb:(.)..|(.)...)(\1|\2)/
+    abcdb\=offset=4 
+ 0: b
+ 1: b
+ 2: <unset>
+ 3: b
+    abcda\=offset=4 
+ 0: a
+ 1: <unset>
+ 2: a
+ 3: a
+    
+/(?<*(.)..|(.)...)(\1|\2)/
     abcdb\=offset=4 
  0: b
  1: b

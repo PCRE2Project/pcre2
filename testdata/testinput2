@@ -5670,11 +5670,18 @@ a)"xI
 /\A(*napla:.*\b(\w++))(?>.*?\b\1\b){3}/
     word1 word3 word1 word2 word3 word2 word2 word1 word3 word4
 
+/\A(?*.*\b(\w++))(?>.*?\b\1\b){3}/
+    word1 word3 word1 word2 word3 word2 word2 word1 word3 word4
+
 /(*plb:(.)..|(.)...)(\1|\2)/
     abcdb\=offset=4 
     abcda\=offset=4 
 
 /(*naplb:(.)..|(.)...)(\1|\2)/
+    abcdb\=offset=4 
+    abcda\=offset=4 
+    
+/(?<*(.)..|(.)...)(\1|\2)/
     abcdb\=offset=4 
     abcda\=offset=4 
     

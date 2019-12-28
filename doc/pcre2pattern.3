@@ -1,4 +1,4 @@
-.TH PCRE2PATTERN 3 "18 December 2019" "PCRE2 10.35"
+.TH PCRE2PATTERN 3 "28 December 2019" "PCRE2 10.35"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION DETAILS"
@@ -2637,8 +2637,8 @@ backtracking into the assertion. However, there are some cases where non-atomic
 positive assertions can be useful. PCRE2 provides these using the following
 syntax:
 .sp
-  (*non_atomic_positive_lookahead:  or (*napla:
-  (*non_atomic_positive_lookbehind: or (*naplb:
+  (*non_atomic_positive_lookahead:  or (*napla: or (?*
+  (*non_atomic_positive_lookbehind: or (*naplb: or (?<*
 .sp
 Consider the problem of finding the right-most word in a string that also
 appears earlier in the string, that is, it must appear at least twice in total.
@@ -3874,6 +3874,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 18 December 2019
+Last updated: 28 December 2019
 Copyright (c) 1997-2019 University of Cambridge.
 .fi

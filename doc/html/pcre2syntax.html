@@ -553,11 +553,13 @@ Each top-level branch of a lookbehind must be of a fixed length.
 <P>
 These assertions are specific to PCRE2 and are not Perl-compatible.
 <pre>
-  (*napla:...)
-  (*non_atomic_positive_lookahead:...)
+  (?*...)                                )
+  (*napla:...)                           ) synonyms
+  (*non_atomic_positive_lookahead:...)   )
 
-  (*naplb:...)
-  (*non_atomic_positive_lookbehind:...)
+  (?&#60;*...)                               )
+  (*naplb:...)                           ) synonyms
+  (*non_atomic_positive_lookbehind:...)  )
 </PRE>
 </P>
 <br><a name="SEC21" href="#TOC1">SCRIPT RUNS</a><br>
@@ -683,7 +685,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC29" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 29 July 2019
+Last updated: 28 December 2019
 <br>
 Copyright &copy; 1997-2019 University of Cambridge.
 <br>
