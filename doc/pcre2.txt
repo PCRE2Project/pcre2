@@ -7678,6 +7678,7 @@ NAMED CAPTURE GROUPS
        and in both cases you want to extract the  abbreviation.  This  pattern
        (ignoring the line breaks) does the job:
 
+         (?J)
          (?<DN>Mon|Fri|Sun)(?:day)?|
          (?<DN>Tue)(?:sday)?|
          (?<DN>Wed)(?:nesday)?|
@@ -7697,7 +7698,7 @@ NAMED CAPTURE GROUPS
        is  set  is  used  for the reference. For example, this pattern matches
        both "foofoo" and "barbar" but not "foobar" or "barfoo":
 
-         (?:(?<n>foo)|(?<n>bar))\k<n>
+         (?J)(?:(?<n>foo)|(?<n>bar))\k<n>
 
 
        If you make a subroutine call to a non-unique named group, the one that
@@ -10629,7 +10630,7 @@ OPTION SETTING
        the end of the group.
 
          (?i)            caseless
-         (?J)            allow duplicate names
+         (?J)            allow duplicate named groups
          (?m)            multiline
          (?n)            no auto capture
          (?s)            single line (dotall)

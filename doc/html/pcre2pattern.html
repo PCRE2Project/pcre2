@@ -1907,6 +1907,7 @@ group can match. Suppose you want to match the name of a weekday, either as a
 3-letter abbreviation or as the full name, and in both cases you want to
 extract the abbreviation. This pattern (ignoring the line breaks) does the job:
 <pre>
+  (?J)
   (?&#60;DN&#62;Mon|Fri|Sun)(?:day)?|
   (?&#60;DN&#62;Tue)(?:sday)?|
   (?&#60;DN&#62;Wed)(?:nesday)?|
@@ -1927,7 +1928,7 @@ they appear in the overall pattern. The first one that is set is used for the
 reference. For example, this pattern matches both "foofoo" and "barbar" but not
 "foobar" or "barfoo":
 <pre>
-  (?:(?&#60;n&#62;foo)|(?&#60;n&#62;bar))\k&#60;n&#62;
+  (?J)(?:(?&#60;n&#62;foo)|(?&#60;n&#62;bar))\k&#60;n&#62;
 
 </PRE>
 </P>

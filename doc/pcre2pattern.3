@@ -1907,6 +1907,7 @@ group can match. Suppose you want to match the name of a weekday, either as a
 3-letter abbreviation or as the full name, and in both cases you want to
 extract the abbreviation. This pattern (ignoring the line breaks) does the job:
 .sp
+  (?J)
   (?<DN>Mon|Fri|Sun)(?:day)?|
   (?<DN>Tue)(?:sday)?|
   (?<DN>Wed)(?:nesday)?|
@@ -1926,7 +1927,7 @@ they appear in the overall pattern. The first one that is set is used for the
 reference. For example, this pattern matches both "foofoo" and "barbar" but not
 "foobar" or "barfoo":
 .sp
-  (?:(?<n>foo)|(?<n>bar))\ek<n>
+  (?J)(?:(?<n>foo)|(?<n>bar))\ek<n>
 .sp
 .P
 If you make a subroutine call to a non-unique named group, the one that
