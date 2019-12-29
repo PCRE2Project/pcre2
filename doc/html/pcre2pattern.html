@@ -1650,7 +1650,7 @@ that succeeds is used. If the alternatives are within a group
 <a href="#group">(defined below),</a>
 "succeeds" means matching the rest of the main pattern as well as the
 alternative in the group.
-</P>
+<a name="internaloptions"></a></P>
 <br><a name="SEC13" href="#TOC1">INTERNAL OPTION SETTING</a><br>
 <P>
 The settings of the PCRE2_CASELESS, PCRE2_MULTILINE, PCRE2_DOTALL,
@@ -1901,11 +1901,17 @@ are permitted for groups with the same number, for example:
   (?|(?&#60;AA&#62;aa)|(?&#60;AA&#62;bb))
 </pre>
 The duplicate name constraint can be disabled by setting the PCRE2_DUPNAMES
-option at compile time, or by the use of (?J) within the pattern. Duplicate
-names can be useful for patterns where only one instance of the named capture
-group can match. Suppose you want to match the name of a weekday, either as a
-3-letter abbreviation or as the full name, and in both cases you want to
-extract the abbreviation. This pattern (ignoring the line breaks) does the job:
+option at compile time, or by the use of (?J) within the pattern, as described 
+in the section entitiled 
+<a href="#internaloptions">"Internal Option Setting"</a>
+above.
+</P>
+<P>
+Duplicate names can be useful for patterns where only one instance of the named
+capture group can match. Suppose you want to match the name of a weekday,
+either as a 3-letter abbreviation or as the full name, and in both cases you
+want to extract the abbreviation. This pattern (ignoring the line breaks) does
+the job:
 <pre>
   (?J)
   (?&#60;DN&#62;Mon|Fri|Sun)(?:day)?|
@@ -3834,7 +3840,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC32" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 28 December 2019
+Last updated: 29 December 2019
 <br>
 Copyright &copy; 1997-2019 University of Cambridge.
 <br>

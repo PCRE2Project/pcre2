@@ -1,4 +1,4 @@
-.TH PCRE2PATTERN 3 "28 December 2019" "PCRE2 10.35"
+.TH PCRE2PATTERN 3 "29 December 2019" "PCRE2 10.35"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION DETAILS"
@@ -1643,6 +1643,7 @@ that succeeds is used. If the alternatives are within a group
 alternative in the group.
 .
 .
+.\" HTML <a name="internaloptions"></a>
 .SH "INTERNAL OPTION SETTING"
 .rs
 .sp
@@ -1901,11 +1902,19 @@ are permitted for groups with the same number, for example:
   (?|(?<AA>aa)|(?<AA>bb))
 .sp
 The duplicate name constraint can be disabled by setting the PCRE2_DUPNAMES
-option at compile time, or by the use of (?J) within the pattern. Duplicate
-names can be useful for patterns where only one instance of the named capture
-group can match. Suppose you want to match the name of a weekday, either as a
-3-letter abbreviation or as the full name, and in both cases you want to
-extract the abbreviation. This pattern (ignoring the line breaks) does the job:
+option at compile time, or by the use of (?J) within the pattern, as described 
+in the section entitiled 
+.\" HTML <a href="#internaloptions">
+.\" </a>
+"Internal Option Setting"
+.\"
+above.
+.P
+Duplicate names can be useful for patterns where only one instance of the named
+capture group can match. Suppose you want to match the name of a weekday,
+either as a 3-letter abbreviation or as the full name, and in both cases you
+want to extract the abbreviation. This pattern (ignoring the line breaks) does
+the job:
 .sp
   (?J)
   (?<DN>Mon|Fri|Sun)(?:day)?|
@@ -3875,6 +3884,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 28 December 2019
+Last updated: 29 December 2019
 Copyright (c) 1997-2019 University of Cambridge.
 .fi
