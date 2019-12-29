@@ -7672,7 +7672,7 @@ NAMED CAPTURE GROUPS
 
        The duplicate name constraint can be disabled by setting the PCRE2_DUP-
        NAMES option at compile time, or by the use of (?J) within the pattern,
-       as described in the section entitiled "Internal Option Setting" above.
+       as described in the section entitled "Internal Option Setting" above.
 
        Duplicate  names  can be useful for patterns where only one instance of
        the named capture group can match. Suppose you want to match  the  name
