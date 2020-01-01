@@ -32,6 +32,13 @@ now correctly backtracked, so this unnecessary restriction has been removed.
 regex engine. The Perl regex folks are aware of this usage and have made a note 
 about it.
 
+9. When an assertion is repeated, PCRE2 used to limit the maximum repetition to 
+1, believing that repeating an assertion is pointless. However, if a positive
+assertion contains capturing groups, repetition can be useful. In any case, an 
+assertion could always be wrapped in a repeated group. The only restriction 
+that is now imposed is that an unlimited maximum is changed to one more than 
+the minimum.
+
 
 Version 10.34 21-November-2019
 ------------------------------

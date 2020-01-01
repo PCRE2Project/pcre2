@@ -10126,4 +10126,25 @@ No match
  1: 11
  2: 11
 
+/^(?=.*(?=(([A-Z]).*(?(1)\1)))(?!.+\2)){26}/i
+    The quick brown fox jumps over the lazy dog.
+ 0: 
+ 1: quick brown fox jumps over the lazy dog.
+ 2: q
+    Jackdaws love my big sphinx of quartz.
+ 0: 
+ 1: Jackdaws love my big sphinx of quartz.
+ 2: J
+    Pack my box with five dozen liquor jugs.
+ 0: 
+ 1: Pack my box with five dozen liquor jugs.
+ 2: P
+\= Expect no match
+    The quick brown fox jumps over the lazy cat.
+No match
+    Hackdaws love my big sphinx of quartz.
+No match
+    Pack my fox with five dozen liquor jugs.
+No match
+
 # End of testinput1 

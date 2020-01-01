@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-          New API code Copyright (c) 2016-2019 University of Cambridge
+          New API code Copyright (c) 2016-2020 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -7074,15 +7074,18 @@ for (;; pptr++)
             previous[GET(previous, 1)] != OP_ALT)
           goto END_REPEAT;
 
-        /* There is no sense in actually repeating assertions. The only
-        potential use of repetition is in cases when the assertion is optional.
-        Therefore, if the minimum is greater than zero, just ignore the repeat.
-        If the maximum is not zero or one, set it to 1. */
+        /* Perl allows all assertions to be quantified, and when they contain
+        capturing parentheses and/or are optional there are potential uses for
+        this feature. PCRE2 used to force the maximum quantifier to 1 on the
+        invalid grounds that further repetition was never useful. This was
+        always a bit pointless, since an assertion could be wrapped with a
+        repeated group to achieve the effect. General repetition is now
+        permitted, but if the maximum is unlimited it is set to one more than
+        the minimum. */
 
         if (op_previous < OP_ONCE)    /* Assertion */
           {
-          if (repeat_min > 0) goto END_REPEAT;
-          if (repeat_max > 1) repeat_max = 1;
+          if (repeat_max == REPEAT_UNLIMITED) repeat_max = repeat_min + 1;
           }
 
         /* The case of a zero minimum is special because of the need to stick

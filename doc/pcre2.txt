@@ -7729,7 +7729,7 @@ REPETITION
          an escape such as \d or \pL that matches a single character
          a character class
          a backreference
-         a parenthesized group (including most assertions)
+         a parenthesized group (including lookaround assertions)
          a subroutine call (recursive or otherwise)
 
        The  general repetition quantifier specifies a minimum and maximum num-
@@ -8162,24 +8162,14 @@ ASSERTIONS
        passes to the previous backtracking point, thus discarding any captured
        strings within the assertion.
 
-       For  compatibility  with  Perl,  most assertion groups may be repeated;
-       though it makes no sense to assert the same thing  several  times,  the
-       side effect of capturing may occasionally be useful. However, an asser-
-       tion that forms the condition for a conditional group may not be  quan-
-       tified. In practice, for other assertions, there only three cases:
-
-       (1)  If  the  quantifier  is  {0}, the assertion is never obeyed during
-       matching.  However, it may contain internal  capture  groups  that  are
-       called from elsewhere via the subroutine mechanism.
-
-       (2)  If quantifier is {0,n} where n is greater than zero, it is treated
-       as if it were {0,1}. At run time, the rest  of  the  pattern  match  is
-       tried with and without the assertion, the order depending on the greed-
-       iness of the quantifier.
-
-       (3) If the minimum repetition is greater than zero, the  quantifier  is
-       ignored.   The  assertion  is  obeyed just once when encountered during
-       matching.
+       Most  assertion groups may be repeated; though it makes no sense to as-
+       sert the same thing several times, the side effect of capturing in pos-
+       itive assertions may occasionally be useful. However, an assertion that
+       forms the condition for a conditional  group  may  not  be  quantified.
+       PCRE2  used  to restrict the repetition of assertions, but from release
+       10.35 the only restriction is that an unlimited maximum  repetition  is
+       changed  to  be one more than the minimum. For example, {3,} is treated
+       as {3,4}.
 
    Alphabetic assertion names
 
@@ -9490,8 +9480,8 @@ AUTHOR
 
 REVISION
 
-       Last updated: 29 December 2019
-       Copyright (c) 1997-2019 University of Cambridge.
+       Last updated: 01 January 2020
+       Copyright (c) 1997-2020 University of Cambridge.
 ------------------------------------------------------------------------------
  
  

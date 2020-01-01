@@ -6393,4 +6393,13 @@ ef) x/x,mark
 /^((\1+)|\d)+133X$/
     111133X
 
+/^(?=.*(?=(([A-Z]).*(?(1)\1)))(?!.+\2)){26}/i
+    The quick brown fox jumps over the lazy dog.
+    Jackdaws love my big sphinx of quartz.
+    Pack my box with five dozen liquor jugs.
+\= Expect no match
+    The quick brown fox jumps over the lazy cat.
+    Hackdaws love my big sphinx of quartz.
+    Pack my fox with five dozen liquor jugs.
+
 # End of testinput1 

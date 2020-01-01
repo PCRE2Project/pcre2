@@ -1901,8 +1901,8 @@ are permitted for groups with the same number, for example:
   (?|(?&#60;AA&#62;aa)|(?&#60;AA&#62;bb))
 </pre>
 The duplicate name constraint can be disabled by setting the PCRE2_DUPNAMES
-option at compile time, or by the use of (?J) within the pattern, as described 
-in the section entitled 
+option at compile time, or by the use of (?J) within the pattern, as described
+in the section entitled
 <a href="#internaloptions">"Internal Option Setting"</a>
 above.
 </P>
@@ -1968,7 +1968,7 @@ items:
   an escape such as \d or \pL that matches a single character
   a character class
   a backreference
-  a parenthesized group (including most assertions)
+  a parenthesized group (including lookaround assertions)
   a subroutine call (recursive or otherwise)
 </pre>
 The general repetition quantifier specifies a minimum and maximum number of
@@ -2359,7 +2359,7 @@ of zero.
 For versions of PCRE2 less than 10.25, backreferences of this type used to
 cause the group that they reference to be treated as an
 <a href="#atomicgroup">atomic group.</a>
-This restriction no longer applies, and backtracking into such groups can occur 
+This restriction no longer applies, and backtracking into such groups can occur
 as normal.
 <a name="bigassertions"></a></P>
 <br><a name="SEC20" href="#TOC1">ASSERTIONS</a><br>
@@ -2420,26 +2420,13 @@ control passes to the previous backtracking point, thus discarding any captured
 strings within the assertion.
 </P>
 <P>
-For compatibility with Perl, most assertion groups may be repeated; though it
-makes no sense to assert the same thing several times, the side effect of
-capturing may occasionally be useful. However, an assertion that forms the
-condition for a conditional group may not be quantified. In practice, for
-other assertions, there only three cases:
-<br>
-<br>
-(1) If the quantifier is {0}, the assertion is never obeyed during matching.
-However, it may contain internal capture groups that are called from elsewhere
-via the
-<a href="#groupsassubroutines">subroutine mechanism.</a>
-<br>
-<br>
-(2) If quantifier is {0,n} where n is greater than zero, it is treated as if it
-were {0,1}. At run time, the rest of the pattern match is tried with and
-without the assertion, the order depending on the greediness of the quantifier.
-<br>
-<br>
-(3) If the minimum repetition is greater than zero, the quantifier is ignored.
-The assertion is obeyed just once when encountered during matching.
+Most assertion groups may be repeated; though it makes no sense to assert the
+same thing several times, the side effect of capturing in positive assertions
+may occasionally be useful. However, an assertion that forms the condition for
+a conditional group may not be quantified. PCRE2 used to restrict the
+repetition of assertions, but from release 10.35 the only restriction is that
+an unlimited maximum repetition is changed to be one more than the minimum. For
+example, {3,} is treated as {3,4}.
 </P>
 <br><b>
 Alphabetic assertion names
@@ -3840,9 +3827,9 @@ Cambridge, England.
 </P>
 <br><a name="SEC32" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 29 December 2019
+Last updated: 01 January 2020
 <br>
-Copyright &copy; 1997-2019 University of Cambridge.
+Copyright &copy; 1997-2020 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE2 index page</a>.

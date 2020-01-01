@@ -10962,6 +10962,12 @@ Matched, but too many substrings
         Assert
         abc
         Ket
+        Assert
+        abc
+        Ket
+        Assert
+        abc
+        Ket
         abc
         Ket
         End
@@ -10973,6 +10979,10 @@ Matched, but too many substrings
         Assert
         abc
         Ket
+        Brazero
+        Assert
+        abc
+        Ket
         abc
         Ket
         End
@@ -10981,8 +10991,14 @@ Matched, but too many substrings
 /(?=abc)++abc/B
 ------------------------------------------------------------------
         Bra
+        Once
         Assert
         abc
+        Ket
+        Brazero
+        Assert
+        abc
+        Ket
         Ket
         abc
         Ket
@@ -16607,6 +16623,19 @@ No match
         Bra
         Assert back
         Reverse
+        Assert
+        Any
+        Ket
+        Assert
+        Any
+        Ket
+        Assert
+        Any
+        Ket
+        Assert
+        Any
+        Ket
+        Brazero
         Assert
         Any
         Ket
