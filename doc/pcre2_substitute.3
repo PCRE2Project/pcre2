@@ -1,4 +1,4 @@
-.TH PCRE2_SUBSTITUTE 3 "27 December 2019" "PCRE2 10.35"
+.TH PCRE2_SUBSTITUTE 3 "05 January 2020" "PCRE2 10.35"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH SYNOPSIS
@@ -36,8 +36,8 @@ Its arguments are:
   \fIoutlengthptr\fP  Points to the length of the output buffer
 .sp
 A match data block is needed only if you want to inspect the data from the
-match that is returned in that block or if PCRE2_SUBSTITUTE_MATCHED is set. A
-match context is needed only if you want to:
+final match that is returned in that block or if PCRE2_SUBSTITUTE_MATCHED is
+set. A match context is needed only if you want to:
 .sp
   Set up a callout function
   Set a matching offset limit
@@ -45,9 +45,13 @@ match context is needed only if you want to:
   Change the backtracking depth limit
   Set custom memory management in the match context
 .sp
-The \fIlength\fP, \fIstartoffset\fP and \fIrlength\fP values are code
-units, not characters, as is the contents of the variable pointed at by
-\fIoutlengthptr\fP, which is updated to the actual length of the new string.
+The \fIlength\fP, \fIstartoffset\fP and \fIrlength\fP values are code units,
+not characters, as is the contents of the variable pointed at by
+\fIoutlengthptr\fP. This variable must contain the length of the output buffer
+when the function is called. If the function is successful, the value is
+changed to the length of the new string, excluding the trailing zero that is
+automatically added.
+.P
 The subject and replacement lengths can be given as PCRE2_ZERO_TERMINATED for
 zero-terminated strings. The options are:
 .sp
@@ -66,14 +70,18 @@ zero-terminated strings. The options are:
                               PCRE2_UTF was set at compile time)
   PCRE2_SUBSTITUTE_EXTENDED  Do extended replacement processing
   PCRE2_SUBSTITUTE_GLOBAL    Replace all occurrences in the subject
-  PCRE2_SUBSTITUTE_LITERAL   The replacement string is literal 
-  PCRE2_SUBSTITUTE_MATCHED   Use pre-existing match data for 1st match 
+  PCRE2_SUBSTITUTE_LITERAL   The replacement string is literal
+  PCRE2_SUBSTITUTE_MATCHED   Use pre-existing match data for 1st match
   PCRE2_SUBSTITUTE_OVERFLOW_LENGTH  If overflow, compute needed length
   PCRE2_SUBSTITUTE_UNKNOWN_UNSET  Treat unknown group as unset
   PCRE2_SUBSTITUTE_UNSET_EMPTY  Simple unset insert = empty string
 .sp
-If PCRE2_SUBSTITUTE_LITERAL is set, PCRE2_SUBSTITUTE_EXTENDED, 
+If PCRE2_SUBSTITUTE_LITERAL is set, PCRE2_SUBSTITUTE_EXTENDED,
 PCRE2_SUBSTITUTE_UNKNOWN_UNSET, and PCRE2_SUBSTITUTE_UNSET_EMPTY are ignored.
+.P
+If PCRE2_SUBSTITUTE_MATCHED is set, \fImatch_data\fP must be non-zero; its
+contents must be the result of a call to \fBpcre2_match()\fP using the same
+pattern and subject.
 .P
 The function returns the number of substitutions, which may be zero if there
 are no matches. The result may be greater than one only when

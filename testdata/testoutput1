@@ -10147,4 +10147,22 @@ No match
     Pack my fox with five dozen liquor jugs.
 No match
 
+/^(?>.*?([A-Z])(?!.*\1)){26}/i
+    The quick brown fox jumps over the lazy dog.
+ 0: The quick brown fox jumps over the lazy dog
+ 1: g
+    Jackdaws love my big sphinx of quartz.
+ 0: Jackdaws love my big sphinx of quartz
+ 1: z
+    Pack my box with five dozen liquor jugs.
+ 0: Pack my box with five dozen liquor jugs
+ 1: s
+\= Expect no match
+    The quick brown fox jumps over the lazy cat.
+No match
+    Hackdaws love my big sphinx of quartz.
+No match
+    Pack my fox with five dozen liquor jugs.
+No match
+
 # End of testinput1 
