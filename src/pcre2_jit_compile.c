@@ -9597,7 +9597,8 @@ if (opcode == OP_ASSERT || opcode == OP_ASSERTBACK)
         }
       else
         {
-        OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(STACK_TOP), 0);
+        SLJIT_ASSERT(extrasize == 3);
+        OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(STACK_TOP), STACK(-1));
         OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(0), bra == OP_BRAZERO ? STR_PTR : SLJIT_IMM, 0);
         }
       }

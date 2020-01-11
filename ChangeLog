@@ -39,6 +39,8 @@ assertion could always be wrapped in a repeated group. The only restriction
 that is now imposed is that an unlimited maximum is changed to one more than 
 the minimum.
 
+10. Fix *THEN verbs in lookahead assertions in JIT.
+
 
 Version 10.34 21-November-2019
 ------------------------------
