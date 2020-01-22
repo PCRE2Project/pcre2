@@ -11,7 +11,7 @@ hacked-up (non-) design had also run out of steam.
 
                        Written by Philip Hazel
      Original code Copyright (c) 1997-2012 University of Cambridge
-    Rewritten code Copyright (c) 2016-2019 University of Cambridge
+    Rewritten code Copyright (c) 2016-2020 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -505,12 +505,13 @@ so many of them that they are split into two fields. */
 #define CTL2_SUBSTITUTE_LITERAL          0x00000004u
 #define CTL2_SUBSTITUTE_MATCHED          0x00000008u
 #define CTL2_SUBSTITUTE_OVERFLOW_LENGTH  0x00000010u
-#define CTL2_SUBSTITUTE_UNKNOWN_UNSET    0x00000020u
-#define CTL2_SUBSTITUTE_UNSET_EMPTY      0x00000040u
-#define CTL2_SUBJECT_LITERAL             0x00000080u
-#define CTL2_CALLOUT_NO_WHERE            0x00000100u
-#define CTL2_CALLOUT_EXTRA               0x00000200u
-#define CTL2_ALLVECTOR                   0x00000400u
+#define CTL2_SUBSTITUTE_REPLACEMENT_ONLY 0x00000020u
+#define CTL2_SUBSTITUTE_UNKNOWN_UNSET    0x00000040u
+#define CTL2_SUBSTITUTE_UNSET_EMPTY      0x00000080u
+#define CTL2_SUBJECT_LITERAL             0x00000100u
+#define CTL2_CALLOUT_NO_WHERE            0x00000200u
+#define CTL2_CALLOUT_EXTRA               0x00000400u
+#define CTL2_ALLVECTOR                   0x00000800u
 
 #define CTL2_NL_SET                      0x40000000u  /* Informational */
 #define CTL2_BSR_SET                     0x80000000u  /* Informational */
@@ -535,6 +536,7 @@ different things in the two cases. */
                     CTL2_SUBSTITUTE_LITERAL|\
                     CTL2_SUBSTITUTE_MATCHED|\
                     CTL2_SUBSTITUTE_OVERFLOW_LENGTH|\
+                    CTL2_SUBSTITUTE_REPLACEMENT_ONLY|\
                     CTL2_SUBSTITUTE_UNKNOWN_UNSET|\
                     CTL2_SUBSTITUTE_UNSET_EMPTY|\
                     CTL2_ALLVECTOR)
@@ -614,129 +616,130 @@ typedef struct modstruct {
 } modstruct;
 
 static modstruct modlist[] = {
-  { "aftertext",                  MOD_PNDP, MOD_CTL, CTL_AFTERTEXT,              PO(control) },
-  { "allaftertext",               MOD_PNDP, MOD_CTL, CTL_ALLAFTERTEXT,           PO(control) },
-  { "allcaptures",                MOD_PND,  MOD_CTL, CTL_ALLCAPTURES,            PO(control) },
-  { "allow_empty_class",          MOD_PAT,  MOD_OPT, PCRE2_ALLOW_EMPTY_CLASS,    PO(options) },
-  { "allow_surrogate_escapes",    MOD_CTC,  MOD_OPT, PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES, CO(extra_options) },
-  { "allusedtext",                MOD_PNDP, MOD_CTL, CTL_ALLUSEDTEXT,            PO(control) },
-  { "allvector",                  MOD_PND,  MOD_CTL, CTL2_ALLVECTOR,             PO(control2) },
-  { "alt_bsux",                   MOD_PAT,  MOD_OPT, PCRE2_ALT_BSUX,             PO(options) },
-  { "alt_circumflex",             MOD_PAT,  MOD_OPT, PCRE2_ALT_CIRCUMFLEX,       PO(options) },
-  { "alt_verbnames",              MOD_PAT,  MOD_OPT, PCRE2_ALT_VERBNAMES,        PO(options) },
-  { "altglobal",                  MOD_PND,  MOD_CTL, CTL_ALTGLOBAL,              PO(control) },
-  { "anchored",                   MOD_PD,   MOD_OPT, PCRE2_ANCHORED,             PD(options) },
-  { "auto_callout",               MOD_PAT,  MOD_OPT, PCRE2_AUTO_CALLOUT,         PO(options) },
-  { "bad_escape_is_literal",      MOD_CTC,  MOD_OPT, PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL, CO(extra_options) },
-  { "bincode",                    MOD_PAT,  MOD_CTL, CTL_BINCODE,                PO(control) },
-  { "bsr",                        MOD_CTC,  MOD_BSR, 0,                          CO(bsr_convention) },
-  { "callout_capture",            MOD_DAT,  MOD_CTL, CTL_CALLOUT_CAPTURE,        DO(control) },
-  { "callout_data",               MOD_DAT,  MOD_INS, 0,                          DO(callout_data) },
-  { "callout_error",              MOD_DAT,  MOD_IN2, 0,                          DO(cerror) },
-  { "callout_extra",              MOD_DAT,  MOD_CTL, CTL2_CALLOUT_EXTRA,         DO(control2) },
-  { "callout_fail",               MOD_DAT,  MOD_IN2, 0,                          DO(cfail) },
-  { "callout_info",               MOD_PAT,  MOD_CTL, CTL_CALLOUT_INFO,           PO(control) },
-  { "callout_no_where",           MOD_DAT,  MOD_CTL, CTL2_CALLOUT_NO_WHERE,      DO(control2) },
-  { "callout_none",               MOD_DAT,  MOD_CTL, CTL_CALLOUT_NONE,           DO(control) },
-  { "caseless",                   MOD_PATP, MOD_OPT, PCRE2_CASELESS,             PO(options) },
-  { "convert",                    MOD_PAT,  MOD_CON, 0,                          PO(convert_type) },
-  { "convert_glob_escape",        MOD_PAT,  MOD_CHR, 0,                          PO(convert_glob_escape) },
-  { "convert_glob_separator",     MOD_PAT,  MOD_CHR, 0,                          PO(convert_glob_separator) },
-  { "convert_length",             MOD_PAT,  MOD_INT, 0,                          PO(convert_length) },
-  { "copy",                       MOD_DAT,  MOD_NN,  DO(copy_numbers),           DO(copy_names) },
-  { "copy_matched_subject",       MOD_DAT,  MOD_OPT, PCRE2_COPY_MATCHED_SUBJECT, DO(options) },
-  { "debug",                      MOD_PAT,  MOD_CTL, CTL_DEBUG,                  PO(control) },
-  { "depth_limit",                MOD_CTM,  MOD_INT, 0,                          MO(depth_limit) },
-  { "dfa",                        MOD_DAT,  MOD_CTL, CTL_DFA,                    DO(control) },
-  { "dfa_restart",                MOD_DAT,  MOD_OPT, PCRE2_DFA_RESTART,          DO(options) },
-  { "dfa_shortest",               MOD_DAT,  MOD_OPT, PCRE2_DFA_SHORTEST,         DO(options) },
-  { "dollar_endonly",             MOD_PAT,  MOD_OPT, PCRE2_DOLLAR_ENDONLY,       PO(options) },
-  { "dotall",                     MOD_PATP, MOD_OPT, PCRE2_DOTALL,               PO(options) },
-  { "dupnames",                   MOD_PATP, MOD_OPT, PCRE2_DUPNAMES,             PO(options) },
-  { "endanchored",                MOD_PD,   MOD_OPT, PCRE2_ENDANCHORED,          PD(options) },
-  { "escaped_cr_is_lf",           MOD_CTC,  MOD_OPT, PCRE2_EXTRA_ESCAPED_CR_IS_LF, CO(extra_options) },
-  { "expand",                     MOD_PAT,  MOD_CTL, CTL_EXPAND,                 PO(control) },
-  { "extended",                   MOD_PATP, MOD_OPT, PCRE2_EXTENDED,             PO(options) },
-  { "extended_more",              MOD_PATP, MOD_OPT, PCRE2_EXTENDED_MORE,        PO(options) },
-  { "extra_alt_bsux",             MOD_CTC,  MOD_OPT, PCRE2_EXTRA_ALT_BSUX,       CO(extra_options) },
-  { "find_limits",                MOD_DAT,  MOD_CTL, CTL_FINDLIMITS,             DO(control) },
-  { "firstline",                  MOD_PAT,  MOD_OPT, PCRE2_FIRSTLINE,            PO(options) },
-  { "framesize",                  MOD_PAT,  MOD_CTL, CTL_FRAMESIZE,              PO(control) },
-  { "fullbincode",                MOD_PAT,  MOD_CTL, CTL_FULLBINCODE,            PO(control) },
-  { "get",                        MOD_DAT,  MOD_NN,  DO(get_numbers),            DO(get_names) },
-  { "getall",                     MOD_DAT,  MOD_CTL, CTL_GETALL,                 DO(control) },
-  { "global",                     MOD_PNDP, MOD_CTL, CTL_GLOBAL,                 PO(control) },
-  { "heap_limit",                 MOD_CTM,  MOD_INT, 0,                          MO(heap_limit) },
-  { "hex",                        MOD_PAT,  MOD_CTL, CTL_HEXPAT,                 PO(control) },
-  { "info",                       MOD_PAT,  MOD_CTL, CTL_INFO,                   PO(control) },
-  { "jit",                        MOD_PAT,  MOD_IND, 7,                          PO(jit) },
-  { "jitfast",                    MOD_PAT,  MOD_CTL, CTL_JITFAST,                PO(control) },
-  { "jitstack",                   MOD_PNDP, MOD_INT, 0,                          PO(jitstack) },
-  { "jitverify",                  MOD_PAT,  MOD_CTL, CTL_JITVERIFY,              PO(control) },
-  { "literal",                    MOD_PAT,  MOD_OPT, PCRE2_LITERAL,              PO(options) },
-  { "locale",                     MOD_PAT,  MOD_STR, LOCALESIZE,                 PO(locale) },
-  { "mark",                       MOD_PNDP, MOD_CTL, CTL_MARK,                   PO(control) },
-  { "match_invalid_utf",          MOD_PAT,  MOD_OPT, PCRE2_MATCH_INVALID_UTF,    PO(options) },
-  { "match_limit",                MOD_CTM,  MOD_INT, 0,                          MO(match_limit) },
-  { "match_line",                 MOD_CTC,  MOD_OPT, PCRE2_EXTRA_MATCH_LINE,     CO(extra_options) },
-  { "match_unset_backref",        MOD_PAT,  MOD_OPT, PCRE2_MATCH_UNSET_BACKREF,  PO(options) },
-  { "match_word",                 MOD_CTC,  MOD_OPT, PCRE2_EXTRA_MATCH_WORD,     CO(extra_options) },
-  { "max_pattern_length",         MOD_CTC,  MOD_SIZ, 0,                          CO(max_pattern_length) },
-  { "memory",                     MOD_PD,   MOD_CTL, CTL_MEMORY,                 PD(control) },
-  { "multiline",                  MOD_PATP, MOD_OPT, PCRE2_MULTILINE,            PO(options) },
-  { "never_backslash_c",          MOD_PAT,  MOD_OPT, PCRE2_NEVER_BACKSLASH_C,    PO(options) },
-  { "never_ucp",                  MOD_PAT,  MOD_OPT, PCRE2_NEVER_UCP,            PO(options) },
-  { "never_utf",                  MOD_PAT,  MOD_OPT, PCRE2_NEVER_UTF,            PO(options) },
-  { "newline",                    MOD_CTC,  MOD_NL,  0,                          CO(newline_convention) },
-  { "no_auto_capture",            MOD_PAT,  MOD_OPT, PCRE2_NO_AUTO_CAPTURE,      PO(options) },
-  { "no_auto_possess",            MOD_PATP, MOD_OPT, PCRE2_NO_AUTO_POSSESS,      PO(options) },
-  { "no_dotstar_anchor",          MOD_PAT,  MOD_OPT, PCRE2_NO_DOTSTAR_ANCHOR,    PO(options) },
-  { "no_jit",                     MOD_DAT,  MOD_OPT, PCRE2_NO_JIT,               DO(options) },
-  { "no_start_optimize",          MOD_PATP, MOD_OPT, PCRE2_NO_START_OPTIMIZE,    PO(options) },
-  { "no_utf_check",               MOD_PD,   MOD_OPT, PCRE2_NO_UTF_CHECK,         PD(options) },
-  { "notbol",                     MOD_DAT,  MOD_OPT, PCRE2_NOTBOL,               DO(options) },
-  { "notempty",                   MOD_DAT,  MOD_OPT, PCRE2_NOTEMPTY,             DO(options) },
-  { "notempty_atstart",           MOD_DAT,  MOD_OPT, PCRE2_NOTEMPTY_ATSTART,     DO(options) },
-  { "noteol",                     MOD_DAT,  MOD_OPT, PCRE2_NOTEOL,               DO(options) },
-  { "null_context",               MOD_PD,   MOD_CTL, CTL_NULLCONTEXT,            PO(control) },
-  { "offset",                     MOD_DAT,  MOD_INT, 0,                          DO(offset) },
-  { "offset_limit",               MOD_CTM,  MOD_SIZ, 0,                          MO(offset_limit)},
-  { "ovector",                    MOD_DAT,  MOD_INT, 0,                          DO(oveccount) },
-  { "parens_nest_limit",          MOD_CTC,  MOD_INT, 0,                          CO(parens_nest_limit) },
-  { "partial_hard",               MOD_DAT,  MOD_OPT, PCRE2_PARTIAL_HARD,         DO(options) },
-  { "partial_soft",               MOD_DAT,  MOD_OPT, PCRE2_PARTIAL_SOFT,         DO(options) },
-  { "ph",                         MOD_DAT,  MOD_OPT, PCRE2_PARTIAL_HARD,         DO(options) },
-  { "posix",                      MOD_PAT,  MOD_CTL, CTL_POSIX,                  PO(control) },
-  { "posix_nosub",                MOD_PAT,  MOD_CTL, CTL_POSIX|CTL_POSIX_NOSUB,  PO(control) },
-  { "posix_startend",             MOD_DAT,  MOD_IN2, 0,                          DO(startend) },
-  { "ps",                         MOD_DAT,  MOD_OPT, PCRE2_PARTIAL_SOFT,         DO(options) },
-  { "push",                       MOD_PAT,  MOD_CTL, CTL_PUSH,                   PO(control) },
-  { "pushcopy",                   MOD_PAT,  MOD_CTL, CTL_PUSHCOPY,               PO(control) },
-  { "pushtablescopy",             MOD_PAT,  MOD_CTL, CTL_PUSHTABLESCOPY,         PO(control) },
-  { "recursion_limit",            MOD_CTM,  MOD_INT, 0,                          MO(depth_limit) },  /* Obsolete synonym */
-  { "regerror_buffsize",          MOD_PAT,  MOD_INT, 0,                          PO(regerror_buffsize) },
-  { "replace",                    MOD_PND,  MOD_STR, REPLACE_MODSIZE,            PO(replacement) },
-  { "stackguard",                 MOD_PAT,  MOD_INT, 0,                          PO(stackguard_test) },
-  { "startchar",                  MOD_PND,  MOD_CTL, CTL_STARTCHAR,              PO(control) },
-  { "startoffset",                MOD_DAT,  MOD_INT, 0,                          DO(offset) },
-  { "subject_literal",            MOD_PATP, MOD_CTL, CTL2_SUBJECT_LITERAL,       PO(control2) },
-  { "substitute_callout",         MOD_PND,  MOD_CTL, CTL2_SUBSTITUTE_CALLOUT,    PO(control2) },
-  { "substitute_extended",        MOD_PND,  MOD_CTL, CTL2_SUBSTITUTE_EXTENDED,   PO(control2) },
-  { "substitute_literal",         MOD_PND,  MOD_CTL, CTL2_SUBSTITUTE_LITERAL,    PO(control2) },
-  { "substitute_matched",         MOD_PND,  MOD_CTL, CTL2_SUBSTITUTE_MATCHED,    PO(control2) },
-  { "substitute_overflow_length", MOD_PND,  MOD_CTL, CTL2_SUBSTITUTE_OVERFLOW_LENGTH, PO(control2) },
-  { "substitute_skip",            MOD_PND,  MOD_INT, 0,                          PO(substitute_skip) },
-  { "substitute_stop",            MOD_PND,  MOD_INT, 0,                          PO(substitute_stop) },
-  { "substitute_unknown_unset",   MOD_PND,  MOD_CTL, CTL2_SUBSTITUTE_UNKNOWN_UNSET, PO(control2) },
-  { "substitute_unset_empty",     MOD_PND,  MOD_CTL, CTL2_SUBSTITUTE_UNSET_EMPTY, PO(control2) },
-  { "tables",                     MOD_PAT,  MOD_INT, 0,                          PO(tables_id) },
-  { "ucp",                        MOD_PATP, MOD_OPT, PCRE2_UCP,                  PO(options) },
-  { "ungreedy",                   MOD_PAT,  MOD_OPT, PCRE2_UNGREEDY,             PO(options) },
-  { "use_length",                 MOD_PAT,  MOD_CTL, CTL_USE_LENGTH,             PO(control) },
-  { "use_offset_limit",           MOD_PAT,  MOD_OPT, PCRE2_USE_OFFSET_LIMIT,     PO(options) },
-  { "utf",                        MOD_PATP, MOD_OPT, PCRE2_UTF,                  PO(options) },
-  { "utf8_input",                 MOD_PAT,  MOD_CTL, CTL_UTF8_INPUT,             PO(control) },
-  { "zero_terminate",             MOD_DAT,  MOD_CTL, CTL_ZERO_TERMINATE,         DO(control) }
+  { "aftertext",                   MOD_PNDP, MOD_CTL, CTL_AFTERTEXT,              PO(control) },
+  { "allaftertext",                MOD_PNDP, MOD_CTL, CTL_ALLAFTERTEXT,           PO(control) },
+  { "allcaptures",                 MOD_PND,  MOD_CTL, CTL_ALLCAPTURES,            PO(control) },
+  { "allow_empty_class",           MOD_PAT,  MOD_OPT, PCRE2_ALLOW_EMPTY_CLASS,    PO(options) },
+  { "allow_surrogate_escapes",     MOD_CTC,  MOD_OPT, PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES, CO(extra_options) },
+  { "allusedtext",                 MOD_PNDP, MOD_CTL, CTL_ALLUSEDTEXT,            PO(control) },
+  { "allvector",                   MOD_PND,  MOD_CTL, CTL2_ALLVECTOR,             PO(control2) },
+  { "alt_bsux",                    MOD_PAT,  MOD_OPT, PCRE2_ALT_BSUX,             PO(options) },
+  { "alt_circumflex",              MOD_PAT,  MOD_OPT, PCRE2_ALT_CIRCUMFLEX,       PO(options) },
+  { "alt_verbnames",               MOD_PAT,  MOD_OPT, PCRE2_ALT_VERBNAMES,        PO(options) },
+  { "altglobal",                   MOD_PND,  MOD_CTL, CTL_ALTGLOBAL,              PO(control) },
+  { "anchored",                    MOD_PD,   MOD_OPT, PCRE2_ANCHORED,             PD(options) },
+  { "auto_callout",                MOD_PAT,  MOD_OPT, PCRE2_AUTO_CALLOUT,         PO(options) },
+  { "bad_escape_is_literal",       MOD_CTC,  MOD_OPT, PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL, CO(extra_options) },
+  { "bincode",                     MOD_PAT,  MOD_CTL, CTL_BINCODE,                PO(control) },
+  { "bsr",                         MOD_CTC,  MOD_BSR, 0,                          CO(bsr_convention) },
+  { "callout_capture",             MOD_DAT,  MOD_CTL, CTL_CALLOUT_CAPTURE,        DO(control) },
+  { "callout_data",                MOD_DAT,  MOD_INS, 0,                          DO(callout_data) },
+  { "callout_error",               MOD_DAT,  MOD_IN2, 0,                          DO(cerror) },
+  { "callout_extra",               MOD_DAT,  MOD_CTL, CTL2_CALLOUT_EXTRA,         DO(control2) },
+  { "callout_fail",                MOD_DAT,  MOD_IN2, 0,                          DO(cfail) },
+  { "callout_info",                MOD_PAT,  MOD_CTL, CTL_CALLOUT_INFO,           PO(control) },
+  { "callout_no_where",            MOD_DAT,  MOD_CTL, CTL2_CALLOUT_NO_WHERE,      DO(control2) },
+  { "callout_none",                MOD_DAT,  MOD_CTL, CTL_CALLOUT_NONE,           DO(control) },
+  { "caseless",                    MOD_PATP, MOD_OPT, PCRE2_CASELESS,             PO(options) },
+  { "convert",                     MOD_PAT,  MOD_CON, 0,                          PO(convert_type) },
+  { "convert_glob_escape",         MOD_PAT,  MOD_CHR, 0,                          PO(convert_glob_escape) },
+  { "convert_glob_separator",      MOD_PAT,  MOD_CHR, 0,                          PO(convert_glob_separator) },
+  { "convert_length",              MOD_PAT,  MOD_INT, 0,                          PO(convert_length) },
+  { "copy",                        MOD_DAT,  MOD_NN,  DO(copy_numbers),           DO(copy_names) },
+  { "copy_matched_subject",        MOD_DAT,  MOD_OPT, PCRE2_COPY_MATCHED_SUBJECT, DO(options) },
+  { "debug",                       MOD_PAT,  MOD_CTL, CTL_DEBUG,                  PO(control) },
+  { "depth_limit",                 MOD_CTM,  MOD_INT, 0,                          MO(depth_limit) },
+  { "dfa",                         MOD_DAT,  MOD_CTL, CTL_DFA,                    DO(control) },
+  { "dfa_restart",                 MOD_DAT,  MOD_OPT, PCRE2_DFA_RESTART,          DO(options) },
+  { "dfa_shortest",                MOD_DAT,  MOD_OPT, PCRE2_DFA_SHORTEST,         DO(options) },
+  { "dollar_endonly",              MOD_PAT,  MOD_OPT, PCRE2_DOLLAR_ENDONLY,       PO(options) },
+  { "dotall",                      MOD_PATP, MOD_OPT, PCRE2_DOTALL,               PO(options) },
+  { "dupnames",                    MOD_PATP, MOD_OPT, PCRE2_DUPNAMES,             PO(options) },
+  { "endanchored",                 MOD_PD,   MOD_OPT, PCRE2_ENDANCHORED,          PD(options) },
+  { "escaped_cr_is_lf",            MOD_CTC,  MOD_OPT, PCRE2_EXTRA_ESCAPED_CR_IS_LF, CO(extra_options) },
+  { "expand",                      MOD_PAT,  MOD_CTL, CTL_EXPAND,                 PO(control) },
+  { "extended",                    MOD_PATP, MOD_OPT, PCRE2_EXTENDED,             PO(options) },
+  { "extended_more",               MOD_PATP, MOD_OPT, PCRE2_EXTENDED_MORE,        PO(options) },
+  { "extra_alt_bsux",              MOD_CTC,  MOD_OPT, PCRE2_EXTRA_ALT_BSUX,       CO(extra_options) },
+  { "find_limits",                 MOD_DAT,  MOD_CTL, CTL_FINDLIMITS,             DO(control) },
+  { "firstline",                   MOD_PAT,  MOD_OPT, PCRE2_FIRSTLINE,            PO(options) },
+  { "framesize",                   MOD_PAT,  MOD_CTL, CTL_FRAMESIZE,              PO(control) },
+  { "fullbincode",                 MOD_PAT,  MOD_CTL, CTL_FULLBINCODE,            PO(control) },
+  { "get",                         MOD_DAT,  MOD_NN,  DO(get_numbers),            DO(get_names) },
+  { "getall",                      MOD_DAT,  MOD_CTL, CTL_GETALL,                 DO(control) },
+  { "global",                      MOD_PNDP, MOD_CTL, CTL_GLOBAL,                 PO(control) },
+  { "heap_limit",                  MOD_CTM,  MOD_INT, 0,                          MO(heap_limit) },
+  { "hex",                         MOD_PAT,  MOD_CTL, CTL_HEXPAT,                 PO(control) },
+  { "info",                        MOD_PAT,  MOD_CTL, CTL_INFO,                   PO(control) },
+  { "jit",                         MOD_PAT,  MOD_IND, 7,                          PO(jit) },
+  { "jitfast",                     MOD_PAT,  MOD_CTL, CTL_JITFAST,                PO(control) },
+  { "jitstack",                    MOD_PNDP, MOD_INT, 0,                          PO(jitstack) },
+  { "jitverify",                   MOD_PAT,  MOD_CTL, CTL_JITVERIFY,              PO(control) },
+  { "literal",                     MOD_PAT,  MOD_OPT, PCRE2_LITERAL,              PO(options) },
+  { "locale",                      MOD_PAT,  MOD_STR, LOCALESIZE,                 PO(locale) },
+  { "mark",                        MOD_PNDP, MOD_CTL, CTL_MARK,                   PO(control) },
+  { "match_invalid_utf",           MOD_PAT,  MOD_OPT, PCRE2_MATCH_INVALID_UTF,    PO(options) },
+  { "match_limit",                 MOD_CTM,  MOD_INT, 0,                          MO(match_limit) },
+  { "match_line",                  MOD_CTC,  MOD_OPT, PCRE2_EXTRA_MATCH_LINE,     CO(extra_options) },
+  { "match_unset_backref",         MOD_PAT,  MOD_OPT, PCRE2_MATCH_UNSET_BACKREF,  PO(options) },
+  { "match_word",                  MOD_CTC,  MOD_OPT, PCRE2_EXTRA_MATCH_WORD,     CO(extra_options) },
+  { "max_pattern_length",          MOD_CTC,  MOD_SIZ, 0,                          CO(max_pattern_length) },
+  { "memory",                      MOD_PD,   MOD_CTL, CTL_MEMORY,                 PD(control) },
+  { "multiline",                   MOD_PATP, MOD_OPT, PCRE2_MULTILINE,            PO(options) },
+  { "never_backslash_c",           MOD_PAT,  MOD_OPT, PCRE2_NEVER_BACKSLASH_C,    PO(options) },
+  { "never_ucp",                   MOD_PAT,  MOD_OPT, PCRE2_NEVER_UCP,            PO(options) },
+  { "never_utf",                   MOD_PAT,  MOD_OPT, PCRE2_NEVER_UTF,            PO(options) },
+  { "newline",                     MOD_CTC,  MOD_NL,  0,                          CO(newline_convention) },
+  { "no_auto_capture",             MOD_PAT,  MOD_OPT, PCRE2_NO_AUTO_CAPTURE,      PO(options) },
+  { "no_auto_possess",             MOD_PATP, MOD_OPT, PCRE2_NO_AUTO_POSSESS,      PO(options) },
+  { "no_dotstar_anchor",           MOD_PAT,  MOD_OPT, PCRE2_NO_DOTSTAR_ANCHOR,    PO(options) },
+  { "no_jit",                      MOD_DAT,  MOD_OPT, PCRE2_NO_JIT,               DO(options) },
+  { "no_start_optimize",           MOD_PATP, MOD_OPT, PCRE2_NO_START_OPTIMIZE,    PO(options) },
+  { "no_utf_check",                MOD_PD,   MOD_OPT, PCRE2_NO_UTF_CHECK,         PD(options) },
+  { "notbol",                      MOD_DAT,  MOD_OPT, PCRE2_NOTBOL,               DO(options) },
+  { "notempty",                    MOD_DAT,  MOD_OPT, PCRE2_NOTEMPTY,             DO(options) },
+  { "notempty_atstart",            MOD_DAT,  MOD_OPT, PCRE2_NOTEMPTY_ATSTART,     DO(options) },
+  { "noteol",                      MOD_DAT,  MOD_OPT, PCRE2_NOTEOL,               DO(options) },
+  { "null_context",                MOD_PD,   MOD_CTL, CTL_NULLCONTEXT,            PO(control) },
+  { "offset",                      MOD_DAT,  MOD_INT, 0,                          DO(offset) },
+  { "offset_limit",                MOD_CTM,  MOD_SIZ, 0,                          MO(offset_limit)},
+  { "ovector",                     MOD_DAT,  MOD_INT, 0,                          DO(oveccount) },
+  { "parens_nest_limit",           MOD_CTC,  MOD_INT, 0,                          CO(parens_nest_limit) },
+  { "partial_hard",                MOD_DAT,  MOD_OPT, PCRE2_PARTIAL_HARD,         DO(options) },
+  { "partial_soft",                MOD_DAT,  MOD_OPT, PCRE2_PARTIAL_SOFT,         DO(options) },
+  { "ph",                          MOD_DAT,  MOD_OPT, PCRE2_PARTIAL_HARD,         DO(options) },
+  { "posix",                       MOD_PAT,  MOD_CTL, CTL_POSIX,                  PO(control) },
+  { "posix_nosub",                 MOD_PAT,  MOD_CTL, CTL_POSIX|CTL_POSIX_NOSUB,  PO(control) },
+  { "posix_startend",              MOD_DAT,  MOD_IN2, 0,                          DO(startend) },
+  { "ps",                          MOD_DAT,  MOD_OPT, PCRE2_PARTIAL_SOFT,         DO(options) },
+  { "push",                        MOD_PAT,  MOD_CTL, CTL_PUSH,                   PO(control) },
+  { "pushcopy",                    MOD_PAT,  MOD_CTL, CTL_PUSHCOPY,               PO(control) },
+  { "pushtablescopy",              MOD_PAT,  MOD_CTL, CTL_PUSHTABLESCOPY,         PO(control) },
+  { "recursion_limit",             MOD_CTM,  MOD_INT, 0,                          MO(depth_limit) },  /* Obsolete synonym */
+  { "regerror_buffsize",           MOD_PAT,  MOD_INT, 0,                          PO(regerror_buffsize) },
+  { "replace",                     MOD_PND,  MOD_STR, REPLACE_MODSIZE,            PO(replacement) },
+  { "stackguard",                  MOD_PAT,  MOD_INT, 0,                          PO(stackguard_test) },
+  { "startchar",                   MOD_PND,  MOD_CTL, CTL_STARTCHAR,              PO(control) },
+  { "startoffset",                 MOD_DAT,  MOD_INT, 0,                          DO(offset) },
+  { "subject_literal",             MOD_PATP, MOD_CTL, CTL2_SUBJECT_LITERAL,       PO(control2) },
+  { "substitute_callout",          MOD_PND,  MOD_CTL, CTL2_SUBSTITUTE_CALLOUT,    PO(control2) },
+  { "substitute_extended",         MOD_PND,  MOD_CTL, CTL2_SUBSTITUTE_EXTENDED,   PO(control2) },
+  { "substitute_literal",          MOD_PND,  MOD_CTL, CTL2_SUBSTITUTE_LITERAL,    PO(control2) },
+  { "substitute_matched",          MOD_PND,  MOD_CTL, CTL2_SUBSTITUTE_MATCHED,    PO(control2) },
+  { "substitute_overflow_length",  MOD_PND,  MOD_CTL, CTL2_SUBSTITUTE_OVERFLOW_LENGTH, PO(control2) },
+  { "substitute_replacement_only", MOD_PND,  MOD_CTL, CTL2_SUBSTITUTE_REPLACEMENT_ONLY, PO(control2) },
+  { "substitute_skip",             MOD_PND,  MOD_INT, 0,                          PO(substitute_skip) },
+  { "substitute_stop",             MOD_PND,  MOD_INT, 0,                          PO(substitute_stop) },
+  { "substitute_unknown_unset",    MOD_PND,  MOD_CTL, CTL2_SUBSTITUTE_UNKNOWN_UNSET, PO(control2) },
+  { "substitute_unset_empty",      MOD_PND,  MOD_CTL, CTL2_SUBSTITUTE_UNSET_EMPTY, PO(control2) },
+  { "tables",                      MOD_PAT,  MOD_INT, 0,                          PO(tables_id) },
+  { "ucp",                         MOD_PATP, MOD_OPT, PCRE2_UCP,                  PO(options) },
+  { "ungreedy",                    MOD_PAT,  MOD_OPT, PCRE2_UNGREEDY,             PO(options) },
+  { "use_length",                  MOD_PAT,  MOD_CTL, CTL_USE_LENGTH,             PO(control) },
+  { "use_offset_limit",            MOD_PAT,  MOD_OPT, PCRE2_USE_OFFSET_LIMIT,     PO(options) },
+  { "utf",                         MOD_PATP, MOD_OPT, PCRE2_UTF,                  PO(options) },
+  { "utf8_input",                  MOD_PAT,  MOD_CTL, CTL_UTF8_INPUT,             PO(control) },
+  { "zero_terminate",              MOD_DAT,  MOD_CTL, CTL_ZERO_TERMINATE,         DO(control) }
 };
 
 #define MODLISTCOUNT sizeof(modlist)/sizeof(modstruct)
@@ -4091,7 +4094,7 @@ Returns:      nothing
 static void
 show_controls(uint32_t controls, uint32_t controls2, const char *before)
 {
-fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
+fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
   before,
   ((controls & CTL_AFTERTEXT) != 0)? " aftertext" : "",
   ((controls & CTL_ALLAFTERTEXT) != 0)? " allaftertext" : "",
@@ -4132,6 +4135,7 @@ fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s
   ((controls2 & CTL2_SUBSTITUTE_LITERAL) != 0)? " substitute_literal" : "",
   ((controls2 & CTL2_SUBSTITUTE_MATCHED) != 0)? " substitute_matched" : "",
   ((controls2 & CTL2_SUBSTITUTE_OVERFLOW_LENGTH) != 0)? " substitute_overflow_length" : "",
+  ((controls2 & CTL2_SUBSTITUTE_REPLACEMENT_ONLY) != 0)? " substitute_replacement_only" : "",
   ((controls2 & CTL2_SUBSTITUTE_UNKNOWN_UNSET) != 0)? " substitute_unknown_unset" : "",
   ((controls2 & CTL2_SUBSTITUTE_UNSET_EMPTY) != 0)? " substitute_unset_empty" : "",
   ((controls & CTL_USE_LENGTH) != 0)? " use_length" : "",
@@ -7257,17 +7261,17 @@ if (dat_datctl.replacement[0] != 0)
 
   if (timeitm)
     fprintf(outfile, "** Timing is not supported with replace: ignored\n");
-    
+
   if ((dat_datctl.control & CTL_ALTGLOBAL) != 0)
     fprintf(outfile, "** Altglobal is not supported with replace: ignored\n");
 
-  /* Check for a test that does substitution after an initial external match. 
-  If this is set, we run the external match, but leave the interpretation of 
+  /* Check for a test that does substitution after an initial external match.
+  If this is set, we run the external match, but leave the interpretation of
   its output to pcre2_substitute(). */
 
   emoption = ((dat_datctl.control2 & CTL2_SUBSTITUTE_MATCHED) == 0)? 0 :
     PCRE2_SUBSTITUTE_MATCHED;
-     
+
   if (emoption != 0)
     {
     PCRE2_MATCH(rc, compiled_code, pp, arg_ulen, dat_datctl.offset,
@@ -7283,6 +7287,8 @@ if (dat_datctl.replacement[0] != 0)
                 PCRE2_SUBSTITUTE_LITERAL) |
              (((dat_datctl.control2 & CTL2_SUBSTITUTE_OVERFLOW_LENGTH) == 0)? 0 :
                 PCRE2_SUBSTITUTE_OVERFLOW_LENGTH) |
+             (((dat_datctl.control2 & CTL2_SUBSTITUTE_REPLACEMENT_ONLY) == 0)? 0 :
+                PCRE2_SUBSTITUTE_REPLACEMENT_ONLY) |
              (((dat_datctl.control2 & CTL2_SUBSTITUTE_UNKNOWN_UNSET) == 0)? 0 :
                 PCRE2_SUBSTITUTE_UNKNOWN_UNSET) |
              (((dat_datctl.control2 & CTL2_SUBSTITUTE_UNSET_EMPTY) == 0)? 0 :

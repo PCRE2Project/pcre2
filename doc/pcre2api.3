@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "27 December 2019" "PCRE2 10.35"
+.TH PCRE2API 3 "22 January 2020" "PCRE2 10.35"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -3324,10 +3324,11 @@ same number causes an error at compile time.
 This function optionally calls \fBpcre2_match()\fP and then makes a copy of the
 subject string in \fIoutputbuffer\fP, replacing parts that were matched with
 the \fIreplacement\fP string, whose length is supplied in \fBrlength\fP. This
-can be given as PCRE2_ZERO_TERMINATED for a zero-terminated string. The default
-is to perform just one replacement if the pattern matches, but there is an
-option that requests multiple replacements (see PCRE2_SUBSTITUTE_GLOBAL below
-for details).
+can be given as PCRE2_ZERO_TERMINATED for a zero-terminated string. There is an
+option (see PCRE2_SUBSTITUTE_REPLACEMENT_ONLY below) to return just the
+replacement string(s). The default action is to perform just one replacement if
+the pattern matches, but there is an option that requests multiple replacements
+(see PCRE2_SUBSTITUTE_GLOBAL below for details).
 .P
 If successful, \fBpcre2_substitute()\fP returns the number of substitutions
 that were carried out. This may be zero if no match was found, and is never
@@ -3362,10 +3363,21 @@ calling \fBpcre2_match()\fP from within \fBpcre2_substitute()\fP. This allows
 an application to check for a match before choosing to substitute, without
 having to repeat the match.
 .P
-The \fIcode\fP argument is not used for the first substitution, but if
-PCRE2_SUBSTITUTE_GLOBAL is set, \fBpcre2_match()\fP will be called after the
-first substitution to check for further matches, and the contents of the
-\fImatch_data\fP block will be changed.
+The \fIcode\fP argument is not used for the first substitution when
+PCRE2_SUBSTITUTE_MATCHED is set, but if PCRE2_SUBSTITUTE_GLOBAL is also set,
+\fBpcre2_match()\fP will be called after the first substitution to check for
+further matches, and the contents of the \fImatch_data\fP block will be
+changed.
+.P
+The default is to return a copy of the subject string with matched substrings 
+replaced. However, if PCRE2_SUBSTITUTE_REPLACEMENT_ONLY is set, only the 
+replacement substrings are returned. In the global case, multiple replacements 
+are concatenated in the output buffer. Substitution callouts (see
+.\" HTML <a href="#subcallouts">
+.\" </a>
+below)
+.\"
+can be used to separate them if necessary.
 .P
 The \fIoutlengthptr\fP argument of \fBpcre2_substitute()\fP must point to a
 variable that contains the length, in code units, of the output buffer. If the
@@ -3557,6 +3569,7 @@ above).
 .\"
 .
 .
+.\" HTML <a name="subcallouts"></a>
 .SS "Substitution callouts"
 .rs
 .sp
@@ -3904,6 +3917,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 27 December 2019
-Copyright (c) 1997-2019 University of Cambridge.
+Last updated: 22 January 2020
+Copyright (c) 1997-2020 University of Cambridge.
 .fi

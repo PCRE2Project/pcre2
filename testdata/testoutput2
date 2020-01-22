@@ -17503,6 +17503,39 @@ Callout 0: last capture = 2
  1: 11
  2: 11
 
+/abc/replace=xyz,substitute_replacement_only
+    123abc456
+ 1: xyz
+
+/a(?<ONE>b)c(?<TWO>d)e/g,replace=X$ONE+${TWO}Z,substitute_replacement_only
+    "abcde-abcde-"
+ 2: Xb+dZXb+dZ
+     
+/a(b)c|xyz/g,replace=<$0>,substitute_callout,substitute_replacement_only
+    abcdefabcpqr                
+ 1(2) Old 0 3 "abc" New 0 5 "<abc>"
+ 2(2) Old 6 9 "abc" New 5 10 "<abc>"
+ 2: <abc><abc>
+    abxyzpqrabcxyz              
+ 1(1) Old 2 5 "xyz" New 0 5 "<xyz>"
+ 2(2) Old 8 11 "abc" New 5 10 "<abc>"
+ 3(1) Old 11 14 "xyz" New 10 15 "<xyz>"
+ 3: <xyz><abc><xyz>
+    12abc34xyz99abc55\=substitute_stop=2                          
+ 1(2) Old 2 5 "abc" New 0 5 "<abc>"
+ 2(1) Old 7 10 "xyz" New 5 10 "<xyz> STOPPED"
+ 2: <abc>
+    12abc34xyz99abc55\=substitute_skip=1
+ 1(2) Old 2 5 "abc" New 0 5 "<abc> SKIPPED"
+ 2(1) Old 7 10 "xyz" New 0 5 "<xyz>"
+ 3(2) Old 12 15 "abc" New 5 10 "<abc>"
+ 3: <xyz><abc>
+    12abc34xyz99abc55\=substitute_skip=2
+ 1(2) Old 2 5 "abc" New 0 5 "<abc>"
+ 2(1) Old 7 10 "xyz" New 5 10 "<xyz> SKIPPED"
+ 3(2) Old 12 15 "abc" New 5 10 "<abc>"
+ 3: <abc><abc>
+
 # End of testinput2
 Error -70: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

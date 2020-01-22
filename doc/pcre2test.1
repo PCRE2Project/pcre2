@@ -1,4 +1,4 @@
-.TH PCRE2TEST 1 "26 December 2019" "PCRE 10.35"
+.TH PCRE2TEST 1 "22 January 2020" "PCRE 10.35"
 .SH NAME
 pcre2test - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -1011,25 +1011,27 @@ modifier list, in which case they are applied to every subject line that is
 processed with that pattern. These modifiers do not affect the compilation
 process.
 .sp
-      aftertext                  show text after match
-      allaftertext               show text after captures
-      allcaptures                show all captures
-      allvector                  show the entire ovector
-      allusedtext                show all consulted text
-      altglobal                  alternative global matching
-  /g  global                     global matching
-      jitstack=<n>               set size of JIT stack
-      mark                       show mark values
-      replace=<string>           specify a replacement string
-      startchar                  show starting character when relevant
-      substitute_callout         use substitution callouts
-      substitute_extended        use PCRE2_SUBSTITUTE_EXTENDED
-      substitute_literal         use PCRE2_SUBSTITUTE_LITERAL 
-      substitute_overflow_length use PCRE2_SUBSTITUTE_OVERFLOW_LENGTH
-      substitute_skip=<n>        skip substitution number n
-      substitute_stop=<n>        skip substitution number n and greater
-      substitute_unknown_unset   use PCRE2_SUBSTITUTE_UNKNOWN_UNSET
-      substitute_unset_empty     use PCRE2_SUBSTITUTE_UNSET_EMPTY
+      aftertext                   show text after match
+      allaftertext                show text after captures
+      allcaptures                 show all captures
+      allvector                   show the entire ovector
+      allusedtext                 show all consulted text
+      altglobal                   alternative global matching
+  /g  global                      global matching
+      jitstack=<n>                set size of JIT stack
+      mark                        show mark values
+      replace=<string>            specify a replacement string
+      startchar                   show starting character when relevant
+      substitute_callout          use substitution callouts
+      substitute_extended         use PCRE2_SUBSTITUTE_EXTENDED
+      substitute_literal          use PCRE2_SUBSTITUTE_LITERAL
+      substitute_matched          use PCRE2_SUBSTITUTE_MATCHED  
+      substitute_overflow_length  use PCRE2_SUBSTITUTE_OVERFLOW_LENGTH
+      substitute_replacement_only use PCRE2_SUBSTITUTE_REPLACEMENT_ONLY 
+      substitute_skip=<n>         skip substitution <n>
+      substitute_stop=<n>         skip substitution <n> and following
+      substitute_unknown_unset    use PCRE2_SUBSTITUTE_UNKNOWN_UNSET
+      substitute_unset_empty      use PCRE2_SUBSTITUTE_UNSET_EMPTY
 .sp
 These modifiers may not appear in a \fB#pattern\fP command. If you want them as
 defaults, set them in a \fB#subject\fP command.
@@ -1203,7 +1205,9 @@ pattern.
       substitute_callout         use substitution callouts
       substitute_extedded        use PCRE2_SUBSTITUTE_EXTENDED
       substitute_literal         use PCRE2_SUBSTITUTE_LITERAL 
+      substitute_matched         use PCRE2_SUBSTITUTE_MATCHED 
       substitute_overflow_length use PCRE2_SUBSTITUTE_OVERFLOW_LENGTH
+      substitute_replacement_only use PCRE2_SUBSTITUTE_REPLACEMENT_ONLY 
       substitute_skip=<n>        skip substitution number n
       substitute_stop=<n>        skip substitution number n and greater
       substitute_unknown_unset   use PCRE2_SUBSTITUTE_UNKNOWN_UNSET
@@ -1367,9 +1371,10 @@ by name.
 .rs
 .sp
 If the \fBreplace\fP modifier is set, the \fBpcre2_substitute()\fP function is
-called instead of one of the matching functions. Note that replacement strings
-cannot contain commas, because a comma signifies the end of a modifier. This is
-not thought to be an issue in a test program.
+called instead of one of the matching functions (or after one call of 
+\fBpcre2_match()\fP in the case of PCRE2_SUBSTITUTE_MATCHED). Note that
+replacement strings cannot contain commas, because a comma signifies the end of
+a modifier. This is not thought to be an issue in a test program.
 .P
 Unlike subject strings, \fBpcre2test\fP does not process replacement strings
 for escape sequences. In UTF mode, a replacement string is checked to see if it
@@ -1384,10 +1389,17 @@ for \fBpcre2_substitute()\fP:
   global                      PCRE2_SUBSTITUTE_GLOBAL
   substitute_extended         PCRE2_SUBSTITUTE_EXTENDED
   substitute_literal          PCRE2_SUBSTITUTE_LITERAL 
+  substitute_matched          PCRE2_SUBSTITUTE_MATCHED 
   substitute_overflow_length  PCRE2_SUBSTITUTE_OVERFLOW_LENGTH
+  substitute_replacement_only PCRE2_SUBSTITUTE_REPLACEMENT_ONLY 
   substitute_unknown_unset    PCRE2_SUBSTITUTE_UNKNOWN_UNSET
   substitute_unset_empty      PCRE2_SUBSTITUTE_UNSET_EMPTY
 .sp
+See the
+.\" HREF
+\fBpcre2api\fP
+.\"
+documentation for details of these options.
 .P
 After a successful substitution, the modified string is output, preceded by the
 number of replacements. This may be zero if there were no matches. Here is a
@@ -2076,6 +2088,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 26 December 2019
-Copyright (c) 1997-2019 University of Cambridge.
+Last updated: 22 January 2020
+Copyright (c) 1997-2020 University of Cambridge.
 .fi

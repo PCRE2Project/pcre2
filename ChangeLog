@@ -11,14 +11,14 @@ Version 10.35
 3. A JIT bug is fixed which allowed to read the fields of the compiled
 pattern before its existence is checked.
 
-4. Back in the PCRE1 day, capturing groups that contained recursive back 
-references to themselves were made atomic (version 8.01, change 18) because 
-after the end a repeated group, the captured substrings had their values from 
-the final repetition, not from an earlier repetition that might be the 
-destination of a backtrack. This feature was documented, and was carried over 
-into PCRE2. However, it has now been realized that the major refactoring that 
-was done for 10.30 has made this atomicizing unnecessary, and it is confusing 
-when users are unaware of it, making some patterns appear not to be working as 
+4. Back in the PCRE1 day, capturing groups that contained recursive back
+references to themselves were made atomic (version 8.01, change 18) because
+after the end a repeated group, the captured substrings had their values from
+the final repetition, not from an earlier repetition that might be the
+destination of a backtrack. This feature was documented, and was carried over
+into PCRE2. However, it has now been realized that the major refactoring that
+was done for 10.30 has made this atomicizing unnecessary, and it is confusing
+when users are unaware of it, making some patterns appear not to be working as
 expected. Capture values of recursive back references in repeated groups are
 now correctly backtracked, so this unnecessary restriction has been removed.
 
@@ -28,18 +28,20 @@ now correctly backtracked, so this unnecessary restriction has been removed.
 
 7. Added PCRE2_SUBSTITUTE_MATCHED.
 
-8. Added (?* and (?<* as synonms for (*napla: and (*naplb: to match another 
-regex engine. The Perl regex folks are aware of this usage and have made a note 
+8. Added (?* and (?<* as synonms for (*napla: and (*naplb: to match another
+regex engine. The Perl regex folks are aware of this usage and have made a note
 about it.
 
-9. When an assertion is repeated, PCRE2 used to limit the maximum repetition to 
+9. When an assertion is repeated, PCRE2 used to limit the maximum repetition to
 1, believing that repeating an assertion is pointless. However, if a positive
-assertion contains capturing groups, repetition can be useful. In any case, an 
-assertion could always be wrapped in a repeated group. The only restriction 
-that is now imposed is that an unlimited maximum is changed to one more than 
+assertion contains capturing groups, repetition can be useful. In any case, an
+assertion could always be wrapped in a repeated group. The only restriction
+that is now imposed is that an unlimited maximum is changed to one more than
 the minimum.
 
 10. Fix *THEN verbs in lookahead assertions in JIT.
+
+11. Added PCRE2_SUBSTITUTE_REPLACEMENT_ONLY.
 
 
 Version 10.34 21-November-2019

@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-          New API code Copyright (c) 2016-2019 University of Cambridge
+          New API code Copyright (c) 2016-2020 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -50,8 +50,8 @@ POSSIBILITY OF SUCH DAMAGE.
 #define SUBSTITUTE_OPTIONS \
   (PCRE2_SUBSTITUTE_EXTENDED|PCRE2_SUBSTITUTE_GLOBAL| \
    PCRE2_SUBSTITUTE_LITERAL|PCRE2_SUBSTITUTE_MATCHED| \
-   PCRE2_SUBSTITUTE_OVERFLOW_LENGTH|PCRE2_SUBSTITUTE_UNKNOWN_UNSET| \
-   PCRE2_SUBSTITUTE_UNSET_EMPTY)
+   PCRE2_SUBSTITUTE_OVERFLOW_LENGTH|PCRE2_SUBSTITUTE_REPLACEMENT_ONLY| \
+   PCRE2_SUBSTITUTE_UNKNOWN_UNSET|PCRE2_SUBSTITUTE_UNSET_EMPTY)
 
 
 
@@ -195,6 +195,7 @@ overflow, either give an error immediately, or keep on, accumulating the
 length. */
 
 #define CHECKMEMCPY(from,length) \
+  { \
   if (!overflowed && lengthleft < length) \
     { \
     if ((suboptions & PCRE2_SUBSTITUTE_OVERFLOW_LENGTH) == 0) goto NOROOM; \
@@ -210,7 +211,8 @@ length. */
     memcpy(buffer + buff_offset, from, CU2BYTES(length)); \
     buff_offset += length; \
     lengthleft -= length; \
-    }
+    } \
+  }
 
 /* Here's the function */
 
@@ -231,6 +233,7 @@ BOOL match_data_created = FALSE;
 BOOL escaped_literal = FALSE;
 BOOL overflowed = FALSE;
 BOOL use_existing_match;
+BOOL replacement_only;
 #ifdef SUPPORT_UNICODE
 BOOL utf = (code->overall_options & PCRE2_UTF) != 0;
 #endif
@@ -256,10 +259,11 @@ PCRE2_UNSET, so as not to imply an offset in the replacement. */
 if ((options & (PCRE2_PARTIAL_HARD|PCRE2_PARTIAL_SOFT)) != 0)
   return PCRE2_ERROR_BADOPTION;
 
-/* Check for using a match that has already happened. Note that the subject 
+/* Check for using a match that has already happened. Note that the subject
 pointer in the match data may be NULL after a no-match. */
 
 use_existing_match = ((options & PCRE2_SUBSTITUTE_MATCHED) != 0);
+replacement_only = ((options & PCRE2_SUBSTITUTE_REPLACEMENT_ONLY) != 0);
 
 if (use_existing_match)
   {
@@ -312,7 +316,7 @@ if (utf && (options & PCRE2_NO_UTF_CHECK) == 0)
 suboptions = options & SUBSTITUTE_OPTIONS;
 options &= ~SUBSTITUTE_OPTIONS;
 
-/* Copy up to the start offset */
+/* Error if the start match offset it greater than the length of the subject. */
 
 if (start_offset > length)
   {
@@ -320,7 +324,10 @@ if (start_offset > length)
   rc = PCRE2_ERROR_BADOFFSET;
   goto EXIT;
   }
-CHECKMEMCPY(subject, start_offset);
+
+/* Copy up to the start offset, unless only the replacement is required. */
+
+if (!replacement_only) CHECKMEMCPY(subject, start_offset);
 
 /* Loop for global substituting. If PCRE2_SUBSTITUTE_MATCHED is set, the first
 match is taken from the match_data that was passed in. */
@@ -382,11 +389,11 @@ do
 #endif
       }
 
-    /* Copy what we have advanced past, reset the special global options, and
-    continue to the next match. */
+    /* Copy what we have advanced past (unless not required), reset the special
+    global options, and continue to the next match. */
 
     fraglength = start_offset - save_start;
-    CHECKMEMCPY(subject + save_start, fraglength);
+    if (!replacement_only) CHECKMEMCPY(subject + save_start, fraglength);
     goptions = 0;
     continue;
     }
@@ -430,12 +437,12 @@ do
     }
   subs++;
 
-  /* Copy the text leading up to the match, and remember where the insert
-  begins and how many ovector pairs are set. */
+  /* Copy the text leading up to the match (unless not required), and remember
+  where the insert begins and how many ovector pairs are set. */
 
   if (rc == 0) rc = ovector_count;
   fraglength = ovector[0] - start_offset;
-  CHECKMEMCPY(subject + start_offset, fraglength);
+  if (!replacement_only) CHECKMEMCPY(subject + start_offset, fraglength);
   scb.output_offsets[0] = buff_offset;
   scb.oveccount = rc;
 
@@ -882,7 +889,7 @@ do
 
       buff_offset -= newlength;
       lengthleft += newlength;
-      CHECKMEMCPY(subject + ovector[0], oldlength);
+      if (!replacement_only) CHECKMEMCPY(subject + ovector[0], oldlength);
 
       /* A negative return means do not do any more. */
 
@@ -903,12 +910,17 @@ do
   start_offset = ovector[1];
   } while ((suboptions & PCRE2_SUBSTITUTE_GLOBAL) != 0);  /* Repeat "do" loop */
 
-/* Copy the rest of the subject. */
+/* Copy the rest of the subject unless not required, and terminate the output
+with a binary zero. */
 
-fraglength = length - start_offset;
-CHECKMEMCPY(subject + start_offset, fraglength);
+if (!replacement_only)
+  {
+  fraglength = length - start_offset;
+  CHECKMEMCPY(subject + start_offset, fraglength);
+  }
+
 temp[0] = 0;
-CHECKMEMCPY(temp , 1);
+CHECKMEMCPY(temp, 1);
 
 /* If overflowed is set it means the PCRE2_SUBSTITUTE_OVERFLOW_LENGTH is set,
 and matching has carried on after a full buffer, in order to compute the length

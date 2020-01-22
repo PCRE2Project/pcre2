@@ -3305,10 +3305,11 @@ same number causes an error at compile time.
 This function optionally calls <b>pcre2_match()</b> and then makes a copy of the
 subject string in <i>outputbuffer</i>, replacing parts that were matched with
 the <i>replacement</i> string, whose length is supplied in <b>rlength</b>. This
-can be given as PCRE2_ZERO_TERMINATED for a zero-terminated string. The default
-is to perform just one replacement if the pattern matches, but there is an
-option that requests multiple replacements (see PCRE2_SUBSTITUTE_GLOBAL below
-for details).
+can be given as PCRE2_ZERO_TERMINATED for a zero-terminated string. There is an
+option (see PCRE2_SUBSTITUTE_REPLACEMENT_ONLY below) to return just the
+replacement string(s). The default action is to perform just one replacement if
+the pattern matches, but there is an option that requests multiple replacements
+(see PCRE2_SUBSTITUTE_GLOBAL below for details).
 </P>
 <P>
 If successful, <b>pcre2_substitute()</b> returns the number of substitutions
@@ -3349,10 +3350,19 @@ an application to check for a match before choosing to substitute, without
 having to repeat the match.
 </P>
 <P>
-The <i>code</i> argument is not used for the first substitution, but if
-PCRE2_SUBSTITUTE_GLOBAL is set, <b>pcre2_match()</b> will be called after the
-first substitution to check for further matches, and the contents of the
-<i>match_data</i> block will be changed.
+The <i>code</i> argument is not used for the first substitution when
+PCRE2_SUBSTITUTE_MATCHED is set, but if PCRE2_SUBSTITUTE_GLOBAL is also set,
+<b>pcre2_match()</b> will be called after the first substitution to check for
+further matches, and the contents of the <i>match_data</i> block will be
+changed.
+</P>
+<P>
+The default is to return a copy of the subject string with matched substrings 
+replaced. However, if PCRE2_SUBSTITUTE_REPLACEMENT_ONLY is set, only the 
+replacement substrings are returned. In the global case, multiple replacements 
+are concatenated in the output buffer. Substitution callouts (see
+<a href="#subcallouts">below)</a>
+can be used to separate them if necessary.
 </P>
 <P>
 The <i>outlengthptr</i> argument of <b>pcre2_substitute()</b> must point to a
@@ -3560,7 +3570,7 @@ As for all PCRE2 errors, a text message that describes the error can be
 obtained by calling the <b>pcre2_get_error_message()</b> function (see
 "Obtaining a textual error message"
 <a href="#geterrormessage">above).</a>
-</P>
+<a name="subcallouts"></a></P>
 <br><b>
 Substitution callouts
 </b><br>
@@ -3897,9 +3907,9 @@ Cambridge, England.
 </P>
 <br><a name="SEC42" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 27 December 2019
+Last updated: 22 January 2020
 <br>
-Copyright &copy; 1997-2019 University of Cambridge.
+Copyright &copy; 1997-2020 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE2 index page</a>.

@@ -5793,4 +5793,17 @@ a)"xI
 /^((\1+)(?C)|\d)+133X$/
     111133X\=callout_capture
 
+/abc/replace=xyz,substitute_replacement_only
+    123abc456
+
+/a(?<ONE>b)c(?<TWO>d)e/g,replace=X$ONE+${TWO}Z,substitute_replacement_only
+    "abcde-abcde-"
+     
+/a(b)c|xyz/g,replace=<$0>,substitute_callout,substitute_replacement_only
+    abcdefabcpqr                
+    abxyzpqrabcxyz              
+    12abc34xyz99abc55\=substitute_stop=2                          
+    12abc34xyz99abc55\=substitute_skip=1
+    12abc34xyz99abc55\=substitute_skip=2
+
 # End of testinput2

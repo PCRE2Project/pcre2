@@ -936,25 +936,27 @@ PATTERN MODIFIERS
        ject  line  that is processed with that pattern. These modifiers do not
        affect the compilation process.
 
-             aftertext                  show text after match
-             allaftertext               show text after captures
-             allcaptures                show all captures
-             allvector                  show the entire ovector
-             allusedtext                show all consulted text
-             altglobal                  alternative global matching
-         /g  global                     global matching
-             jitstack=<n>               set size of JIT stack
-             mark                       show mark values
-             replace=<string>           specify a replacement string
-             startchar                  show starting character when relevant
-             substitute_callout         use substitution callouts
-             substitute_extended        use PCRE2_SUBSTITUTE_EXTENDED
-             substitute_literal         use PCRE2_SUBSTITUTE_LITERAL
-             substitute_overflow_length use PCRE2_SUBSTITUTE_OVERFLOW_LENGTH
-             substitute_skip=<n>        skip substitution number n
-             substitute_stop=<n>        skip substitution number n and greater
-             substitute_unknown_unset   use PCRE2_SUBSTITUTE_UNKNOWN_UNSET
-             substitute_unset_empty     use PCRE2_SUBSTITUTE_UNSET_EMPTY
+             aftertext                   show text after match
+             allaftertext                show text after captures
+             allcaptures                 show all captures
+             allvector                   show the entire ovector
+             allusedtext                 show all consulted text
+             altglobal                   alternative global matching
+         /g  global                      global matching
+             jitstack=<n>                set size of JIT stack
+             mark                        show mark values
+             replace=<string>            specify a replacement string
+             startchar                   show starting character when relevant
+             substitute_callout          use substitution callouts
+             substitute_extended         use PCRE2_SUBSTITUTE_EXTENDED
+             substitute_literal          use PCRE2_SUBSTITUTE_LITERAL
+             substitute_matched          use PCRE2_SUBSTITUTE_MATCHED
+             substitute_overflow_length  use PCRE2_SUBSTITUTE_OVERFLOW_LENGTH
+             substitute_replacement_only use PCRE2_SUBSTITUTE_REPLACEMENT_ONLY
+             substitute_skip=<n>         skip substitution <n>
+             substitute_stop=<n>         skip substitution <n> and following
+             substitute_unknown_unset    use PCRE2_SUBSTITUTE_UNKNOWN_UNSET
+             substitute_unset_empty      use PCRE2_SUBSTITUTE_UNSET_EMPTY
 
        These modifiers may not appear in a #pattern command. If you want  them
        as defaults, set them in a #subject command.
@@ -1105,7 +1107,9 @@ SUBJECT MODIFIERS
              substitute_callout         use substitution callouts
              substitute_extedded        use PCRE2_SUBSTITUTE_EXTENDED
              substitute_literal         use PCRE2_SUBSTITUTE_LITERAL
+             substitute_matched         use PCRE2_SUBSTITUTE_MATCHED
              substitute_overflow_length use PCRE2_SUBSTITUTE_OVERFLOW_LENGTH
+             substitute_replacement_only use PCRE2_SUBSTITUTE_REPLACEMENT_ONLY
              substitute_skip=<n>        skip substitution number n
              substitute_stop=<n>        skip substitution number n and greater
              substitute_unknown_unset   use PCRE2_SUBSTITUTE_UNKNOWN_UNSET
@@ -1251,9 +1255,11 @@ SUBJECT MODIFIERS
    Testing the substitution function
 
        If  the  replace  modifier  is  set, the pcre2_substitute() function is
-       called instead of one of the matching functions. Note that  replacement
-       strings  cannot  contain commas, because a comma signifies the end of a
-       modifier. This is not thought to be an issue in a test program.
+       called instead of one of the matching functions (or after one  call  of
+       pcre2_match()  in  the case of PCRE2_SUBSTITUTE_MATCHED). Note that re-
+       placement strings cannot contain commas, because a comma signifies  the
+       end  of  a  modifier. This is not thought to be an issue in a test pro-
+       gram.
 
        Unlike subject strings, pcre2test does not process replacement  strings
        for  escape  sequences. In UTF mode, a replacement string is checked to
@@ -1268,10 +1274,13 @@ SUBJECT MODIFIERS
          global                      PCRE2_SUBSTITUTE_GLOBAL
          substitute_extended         PCRE2_SUBSTITUTE_EXTENDED
          substitute_literal          PCRE2_SUBSTITUTE_LITERAL
+         substitute_matched          PCRE2_SUBSTITUTE_MATCHED
          substitute_overflow_length  PCRE2_SUBSTITUTE_OVERFLOW_LENGTH
+         substitute_replacement_only PCRE2_SUBSTITUTE_REPLACEMENT_ONLY
          substitute_unknown_unset    PCRE2_SUBSTITUTE_UNKNOWN_UNSET
          substitute_unset_empty      PCRE2_SUBSTITUTE_UNSET_EMPTY
 
+       See the pcre2api documentation for details of these options.
 
        After a successful substitution, the modified string  is  output,  pre-
        ceded  by the number of replacements. This may be zero if there were no
@@ -1905,5 +1914,5 @@ AUTHOR
 
 REVISION
 
-       Last updated: 26 December 2019
-       Copyright (c) 1997-2019 University of Cambridge.
+       Last updated: 22 January 2020
+       Copyright (c) 1997-2020 University of Cambridge.
