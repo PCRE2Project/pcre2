@@ -823,7 +823,7 @@ the start pointers when the end of the capturing group has not yet reached. */
 
 static PCRE2_SPTR bracketend(PCRE2_SPTR cc)
 {
-SLJIT_ASSERT((*cc >= OP_ASSERT && *cc <= OP_ASSERTBACK_NOT) || (*cc >= OP_ONCE && *cc <= OP_SCOND));
+SLJIT_ASSERT((*cc >= OP_ASSERT && *cc <= OP_ASSERTBACK_NA) || (*cc >= OP_ONCE && *cc <= OP_SCOND));
 do cc += GET(cc, 1); while (*cc == OP_ALT);
 SLJIT_ASSERT(*cc >= OP_KET && *cc <= OP_KETRPOS);
 cc += 1 + LINK_SIZE;
@@ -833,7 +833,7 @@ return cc;
 static int no_alternatives(PCRE2_SPTR cc)
 {
 int count = 0;
-SLJIT_ASSERT((*cc >= OP_ASSERT && *cc <= OP_ASSERTBACK_NOT) || (*cc >= OP_ONCE && *cc <= OP_SCOND));
+SLJIT_ASSERT((*cc >= OP_ASSERT && *cc <= OP_ASSERTBACK_NA) || (*cc >= OP_ONCE && *cc <= OP_SCOND));
 do
   {
   cc += GET(cc, 1);
@@ -918,6 +918,8 @@ switch(*cc)
   case OP_ASSERT_NOT:
   case OP_ASSERTBACK:
   case OP_ASSERTBACK_NOT:
+  case OP_ASSERT_NA:
+  case OP_ASSERTBACK_NA:
   case OP_ONCE:
   case OP_SCRIPT_RUN:
   case OP_BRA:
@@ -1050,8 +1052,7 @@ switch(*cc)
   return cc + 1 + 2 + cc[1];
 
   default:
-  /* Unsupported opcodes: OP_ASSERT_NA and OP_ASSERTBACK_NA */
-  /* SLJIT_UNREACHABLE(); */
+  SLJIT_UNREACHABLE();
   return NULL;
   }
 }
@@ -1061,6 +1062,7 @@ static BOOL check_opcode_types(compiler_common *common, PCRE2_SPTR cc, PCRE2_SPT
 int count;
 PCRE2_SPTR slot;
 PCRE2_SPTR assert_back_end = cc - 1;
+PCRE2_SPTR assert_na_end = cc - 1;
 
 /* Calculate important variables (like stack size) and checks whether all opcodes are supported. */
 while (cc < ccend)
@@ -1085,6 +1087,14 @@ while (cc < ccend)
     case OP_REF:
     common->optimized_cbracket[GET2(cc, 1)] = 0;
     cc += 1 + IMM2_SIZE;
+    break;
+
+    case OP_ASSERT_NA:
+    case OP_ASSERTBACK_NA:
+    slot = bracketend(cc);
+    if (slot > assert_na_end)
+      assert_na_end = slot;
+    cc += 1 + LINK_SIZE;
     break;
 
     case OP_CBRAPOS:
@@ -1154,6 +1164,8 @@ while (cc < ccend)
 
     case OP_COMMIT_ARG:
     case OP_PRUNE_ARG:
+    if (cc < assert_na_end)
+      return FALSE;
     case OP_MARK:
     if (common->mark_ptr == 0)
       {
@@ -1172,6 +1184,8 @@ while (cc < ccend)
     case OP_SKIP:
     if (cc < assert_back_end)
       common->has_skip_in_assert_back = TRUE;
+    if (cc < assert_na_end)
+      return FALSE;
     cc += 1;
     break;
 
@@ -1180,7 +1194,17 @@ while (cc < ccend)
     common->has_skip_arg = TRUE;
     if (cc < assert_back_end)
       common->has_skip_in_assert_back = TRUE;
+    if (cc < assert_na_end)
+      return FALSE;
     cc += 1 + 2 + cc[1];
+    break;
+
+    case OP_PRUNE:
+    case OP_COMMIT:
+    case OP_ASSERT_ACCEPT:
+    if (cc < assert_na_end)
+      return FALSE;
+    cc++;
     break;
 
     default:
@@ -1586,6 +1610,8 @@ while (cc < ccend)
     case OP_ASSERT_NOT:
     case OP_ASSERTBACK:
     case OP_ASSERTBACK_NOT:
+    case OP_ASSERT_NA:
+    case OP_ASSERTBACK_NA:
     case OP_ONCE:
     case OP_SCRIPT_RUN:
     case OP_BRAPOS:
@@ -2163,6 +2189,8 @@ while (cc < ccend)
     case OP_ASSERT_NOT:
     case OP_ASSERTBACK:
     case OP_ASSERTBACK_NOT:
+    case OP_ASSERT_NA:
+    case OP_ASSERTBACK_NA:
     case OP_ONCE:
     case OP_SCRIPT_RUN:
     case OP_BRAPOS:
@@ -2487,6 +2515,8 @@ while (cc < ccend)
     case OP_ASSERT_NOT:
     case OP_ASSERTBACK:
     case OP_ASSERTBACK_NOT:
+    case OP_ASSERT_NA:
+    case OP_ASSERTBACK_NA:
     case OP_ONCE:
     case OP_SCRIPT_RUN:
     case OP_BRAPOS:
@@ -2756,7 +2786,7 @@ PCRE2_SPTR end = bracketend(cc);
 BOOL has_alternatives = cc[GET(cc, 1)] == OP_ALT;
 
 /* Assert captures then. */
-if (*cc >= OP_ASSERT && *cc <= OP_ASSERTBACK_NOT)
+if (*cc >= OP_ASSERT && *cc <= OP_ASSERTBACK_NA)
   current_offset = NULL;
 /* Conditional block does not. */
 if (*cc == OP_COND || *cc == OP_SCOND)
@@ -2768,7 +2798,7 @@ if (has_alternatives)
 
 while (cc < end)
   {
-  if ((*cc >= OP_ASSERT && *cc <= OP_ASSERTBACK_NOT) || (*cc >= OP_ONCE && *cc <= OP_SCOND))
+  if ((*cc >= OP_ASSERT && *cc <= OP_ASSERTBACK_NA) || (*cc >= OP_ONCE && *cc <= OP_SCOND))
     cc = set_then_offsets(common, cc, current_offset);
   else
     {
@@ -5159,6 +5189,8 @@ while (TRUE)
     case OP_ASSERT_NOT:
     case OP_ASSERTBACK:
     case OP_ASSERTBACK_NOT:
+    case OP_ASSERT_NA:
+    case OP_ASSERTBACK_NA:
     cc = bracketend(cc);
     continue;
 
@@ -9930,7 +9962,7 @@ if (opcode == OP_CBRA || opcode == OP_SCBRA)
   BACKTRACK_AS(bracket_backtrack)->private_data_ptr = private_data_ptr;
   matchingpath += IMM2_SIZE;
   }
-else if (opcode == OP_ONCE || opcode == OP_SCRIPT_RUN || opcode == OP_SBRA || opcode == OP_SCOND)
+else if (opcode == OP_ASSERT_NA || opcode == OP_ASSERTBACK_NA || opcode == OP_ONCE || opcode == OP_SCRIPT_RUN || opcode == OP_SBRA || opcode == OP_SCOND)
   {
   /* Other brackets simply allocate the next entry. */
   private_data_ptr = PRIVATE_DATA(ccbegin);
@@ -10115,7 +10147,7 @@ else if (opcode == OP_CBRA || opcode == OP_SCBRA)
     OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(0), TMP2, 0);
     }
   }
-else if (opcode == OP_SCRIPT_RUN || opcode == OP_SBRA || opcode == OP_SCOND)
+else if (opcode == OP_ASSERT_NA || opcode == OP_ASSERTBACK_NA || opcode == OP_SCRIPT_RUN || opcode == OP_SBRA || opcode == OP_SCOND)
   {
   /* Saving the previous value. */
   OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(SLJIT_SP), private_data_ptr);
@@ -10240,6 +10272,9 @@ if (opcode == OP_COND || opcode == OP_SCOND)
 compile_matchingpath(common, matchingpath, cc, backtrack);
 if (SLJIT_UNLIKELY(sljit_get_compiler_error(compiler)))
   return NULL;
+
+if (opcode == OP_ASSERT_NA || opcode == OP_ASSERTBACK_NA)
+  OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(SLJIT_SP), private_data_ptr);
 
 if (opcode == OP_ONCE)
   match_once_common(common, ket, BACKTRACK_AS(bracket_backtrack)->u.framesize, private_data_ptr, has_alternatives, needs_control_head);
@@ -11696,6 +11731,8 @@ while (cc < ccend)
     count_match(common);
     break;
 
+    case OP_ASSERT_NA:
+    case OP_ASSERTBACK_NA:
     case OP_ONCE:
     case OP_SCRIPT_RUN:
     case OP_BRA:
@@ -12299,6 +12336,9 @@ if (has_alternatives)
       if (SLJIT_UNLIKELY(sljit_get_compiler_error(compiler)))
         return;
 
+      if (opcode == OP_ASSERT_NA || opcode == OP_ASSERTBACK_NA)
+        OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(SLJIT_SP), private_data_ptr);
+
       if (opcode == OP_SCRIPT_RUN)
         match_script_run_common(common, private_data_ptr, current);
       }
@@ -12428,7 +12468,7 @@ if (offset != 0)
     OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), private_data_ptr, TMP1, 0);
     }
   }
-else if (opcode == OP_SCRIPT_RUN || opcode == OP_SBRA || opcode == OP_SCOND)
+else if (opcode == OP_ASSERT_NA || opcode == OP_ASSERTBACK_NA || opcode == OP_SCRIPT_RUN || opcode == OP_SBRA || opcode == OP_SCOND)
   {
   OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), private_data_ptr, SLJIT_MEM1(STACK_TOP), STACK(0));
   free_stack(common, 1);
@@ -12776,6 +12816,8 @@ while (current)
     compile_assert_backtrackingpath(common, current);
     break;
 
+    case OP_ASSERT_NA:
+    case OP_ASSERTBACK_NA:
     case OP_ONCE:
     case OP_SCRIPT_RUN:
     case OP_BRA:
