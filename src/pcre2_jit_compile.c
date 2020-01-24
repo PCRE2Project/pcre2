@@ -1166,6 +1166,7 @@ while (cc < ccend)
     case OP_PRUNE_ARG:
     if (cc < assert_na_end)
       return FALSE;
+    /* Fall through */   
     case OP_MARK:
     if (common->mark_ptr == 0)
       {
