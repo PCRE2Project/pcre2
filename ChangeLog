@@ -43,6 +43,8 @@ the minimum.
 
 11. Added PCRE2_SUBSTITUTE_REPLACEMENT_ONLY.
 
+12. The JIT stack should be freed when the low-level stack allocation fails.
+
 
 Version 10.34 21-November-2019
 ------------------------------
