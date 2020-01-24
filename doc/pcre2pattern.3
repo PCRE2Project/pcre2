@@ -1,4 +1,4 @@
-.TH PCRE2PATTERN 3 "01 January 2020" "PCRE2 10.35"
+.TH PCRE2PATTERN 3 "24 January 2020" "PCRE2 10.35"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION DETAILS"
@@ -2672,8 +2672,9 @@ as before because nothing has changed, so using a non-atomic assertion just
 wastes resources.
 .P
 Non-atomic assertions are not supported by the alternative matching function
-\fBpcre2_dfa_match()\fP. They are also not supported by JIT (but may be in
-future). Note that assertions that appear as conditions for
+\fBpcre2_dfa_match()\fP. They are supported by JIT, but only if they do not
+contain any control verbs such as (*ACCEPT). (This may change in future). Note
+that assertions that appear as conditions for
 .\" HTML <a href="#conditions">
 .\" </a>
 conditional groups
@@ -3871,6 +3872,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 01 January 2020
+Last updated: 24 January 2020
 Copyright (c) 1997-2020 University of Cambridge.
 .fi

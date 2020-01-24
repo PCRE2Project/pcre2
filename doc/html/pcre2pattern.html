@@ -2660,8 +2660,9 @@ wastes resources.
 </P>
 <P>
 Non-atomic assertions are not supported by the alternative matching function
-<b>pcre2_dfa_match()</b>. They are also not supported by JIT (but may be in
-future). Note that assertions that appear as conditions for
+<b>pcre2_dfa_match()</b>. They are supported by JIT, but only if they do not
+contain any control verbs such as (*ACCEPT). (This may change in future). Note
+that assertions that appear as conditions for
 <a href="#conditions">conditional groups</a>
 (see below) must be atomic.
 </P>
@@ -3827,7 +3828,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC32" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 01 January 2020
+Last updated: 24 January 2020
 <br>
 Copyright &copy; 1997-2020 University of Cambridge.
 <br>
