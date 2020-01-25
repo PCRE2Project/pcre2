@@ -45,6 +45,9 @@ the minimum.
 
 12. The JIT stack should be freed when the low-level stack allocation fails.
 
+13. In pcre2grep, if the final line in a scanned file is output but does not 
+end with a newline sequence, add a newline according to the --newline setting.
+
 
 Version 10.34 21-November-2019
 ------------------------------

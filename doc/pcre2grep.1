@@ -1,4 +1,4 @@
-.TH PCRE2GREP 1 "15 June 2019" "PCRE2 10.34"
+.TH PCRE2GREP 1 "25 January 2020" "PCRE2 10.35"
 .SH NAME
 pcre2grep - a grep with Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -117,7 +117,7 @@ ignored.
 By default, a file that contains a binary zero byte within the first 1024 bytes
 is identified as a binary file, and is processed specially. (GNU grep
 identifies binary files in this manner.) However, if the newline type is
-specified as "nul", that is, the line terminator is a binary zero, the test for
+specified as NUL, that is, the line terminator is a binary zero, the test for
 a binary file is not applied. See the \fB--binary-files\fP option for a means
 of changing the way binary files are handled.
 .
@@ -523,24 +523,30 @@ large processing buffer, this should not be a problem, but the \fB-M\fP option
 does not work when input is read line by line (see \fP--line-buffered\fP.)
 .TP
 \fB-N\fP \fInewline-type\fP, \fB--newline\fP=\fInewline-type\fP
-The PCRE2 library supports five different conventions for indicating
-the ends of lines. They are the single-character sequences CR (carriage return)
-and LF (linefeed), the two-character sequence CRLF, an "anycrlf" convention,
-which recognizes any of the preceding three types, and an "any" convention, in
-which any Unicode line ending sequence is assumed to end a line. The Unicode
-sequences are the three just mentioned, plus VT (vertical tab, U+000B), FF
-(form feed, U+000C), NEL (next line, U+0085), LS (line separator, U+2028), and
-PS (paragraph separator, U+2029).
+Six different conventions for indicating the ends of lines in scanned files are
+supported. For example:
+.sp
+  pcre2grep -N CRLF 'some pattern' <file>
+.sp
+The newline type may be specified in upper, lower, or mixed case. If the
+newline type is NUL, lines are separated by binary zero characters. The other
+types are the single-character sequences CR (carriage return) and LF
+(linefeed), the two-character sequence CRLF, an "anycrlf" type, which
+recognizes any of the preceding three types, and an "any" type, for which any
+Unicode line ending sequence is assumed to end a line. The Unicode sequences
+are the three just mentioned, plus VT (vertical tab, U+000B), FF (form feed,
+U+000C), NEL (next line, U+0085), LS (line separator, U+2028), and PS
+(paragraph separator, U+2029).
 .sp
 When the PCRE2 library is built, a default line-ending sequence is specified.
 This is normally the standard sequence for the operating system. Unless
 otherwise specified by this option, \fBpcre2grep\fP uses the library's default.
-The possible values for this option are CR, LF, CRLF, ANYCRLF, or ANY. This
-makes it possible to use \fBpcre2grep\fP to scan files that have come from
-other environments without having to modify their line endings. If the data
-that is being scanned does not agree with the convention set by this option,
-\fBpcre2grep\fP may behave in strange ways. Note that this option does not
-apply to files specified by the \fB-f\fP, \fB--exclude-from\fP, or
+.sp
+This option makes it possible to use \fBpcre2grep\fP to scan files that have
+come from other environments without having to modify their line endings. If
+the data that is being scanned does not agree with the convention set by this
+option, \fBpcre2grep\fP may behave in strange ways. Note that this option does
+not apply to files specified by the \fB-f\fP, \fB--exclude-from\fP, or
 \fB--include-from\fP options, which are expected to use the operating system's
 standard newline sequence.
 .TP
@@ -558,12 +564,14 @@ was explicitly disabled at build time. This option can be used to disable the
 use of JIT at run time. It is provided for testing and working round problems.
 It should never be needed in normal use.
 .TP
-\fB-O\fP \fItext\fP, \fB--output\fP=\fItext\fP
+\fB-O\fP \fItext\fP, \fB--output\fP=\fItext\fP 
 When there is a match, instead of outputting the whole line that matched,
-output just the given text. This option is mutually exclusive with
-\fB--only-matching\fP, \fB--file-offsets\fP, and \fB--line-offsets\fP. Escape
-sequences starting with a dollar character may be used to insert the contents
-of the matched part of the line and/or captured substrings into the text.
+output just the given text, followed by an operating-system standard newline.
+The \fB--newline\fP option has no effect on this option, which is mutually
+exclusive with \fB--only-matching\fP, \fB--file-offsets\fP, and
+\fB--line-offsets\fP. Escape sequences starting with a dollar character may be
+used to insert the contents of the matched part of the line and/or captured
+substrings into the text.
 .sp
 $<digits> or ${<digits>} is replaced by the captured
 substring of the given decimal number; zero substitutes the whole match. If
@@ -709,16 +717,25 @@ by the \fB--locale\fP option. If no locale is set, the PCRE2 library's default
 .rs
 .sp
 The \fB-N\fP (\fB--newline\fP) option allows \fBpcre2grep\fP to scan files with
-different newline conventions from the default. Any parts of the input files
-that are written to the standard output are copied identically, with whatever
-newline sequences they have in the input. However, the setting of this option
-affects only the way scanned files are processed. It does not affect the
-interpretation of files specified by the \fB-f\fP, \fB--file-list\fP,
-\fB--exclude-from\fP, or \fB--include-from\fP options, nor does it affect the
-way in which \fBpcre2grep\fP writes informational messages to the standard
-error and output streams. For these it uses the string "\en" to indicate
-newlines, relying on the C I/O library to convert this to an appropriate
-sequence.
+newline conventions that differ from the default. This option affects only the
+way scanned files are processed. It does not affect the interpretation of files
+specified by the \fB-f\fP, \fB--file-list\fP, \fB--exclude-from\fP, or
+\fB--include-from\fP options.
+.P
+Any parts of the scanned input files that are written to the standard output
+are copied with whatever newline sequences they have in the input. However, if
+the final line of a file is output, and it does not end with a newline
+sequence, a newline sequence is added. If the newline setting is CR, LF, CRLF
+or NUL, that line ending is output; for the other settings (ANYCRLF or ANY) a
+single NL is used.
+.P
+The newline setting does not affect the way in which \fBpcre2grep\fP writes
+newlines in informational messages to the standard output and error streams.
+Under Windows, the standard output is set to be binary, so that "\er\en" at the
+ends of output lines that are copied from the input is not converted to
+"\er\er\en" by the C I/O library. This means that any messages written to the
+standard output must end with "\er\en". For all other operating systems, and
+for all messages to the standard error stream, "\en" is used.
 .
 .
 .SH "OPTIONS COMPATIBILITY"
@@ -904,6 +921,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 15 June 2019
-Copyright (c) 1997-2019 University of Cambridge.
+Last updated: 25 January 2020
+Copyright (c) 1997-2020 University of Cambridge.
 .fi

@@ -148,7 +148,7 @@ ignored.
 By default, a file that contains a binary zero byte within the first 1024 bytes
 is identified as a binary file, and is processed specially. (GNU grep
 identifies binary files in this manner.) However, if the newline type is
-specified as "nul", that is, the line terminator is a binary zero, the test for
+specified as NUL, that is, the line terminator is a binary zero, the test for
 a binary file is not applied. See the <b>--binary-files</b> option for a means
 of changing the way binary files are handled.
 </P>
@@ -601,25 +601,32 @@ does not work when input is read line by line (see \fP--line-buffered\fP.)
 </P>
 <P>
 <b>-N</b> <i>newline-type</i>, <b>--newline</b>=<i>newline-type</i>
-The PCRE2 library supports five different conventions for indicating
-the ends of lines. They are the single-character sequences CR (carriage return)
-and LF (linefeed), the two-character sequence CRLF, an "anycrlf" convention,
-which recognizes any of the preceding three types, and an "any" convention, in
-which any Unicode line ending sequence is assumed to end a line. The Unicode
-sequences are the three just mentioned, plus VT (vertical tab, U+000B), FF
-(form feed, U+000C), NEL (next line, U+0085), LS (line separator, U+2028), and
-PS (paragraph separator, U+2029).
+Six different conventions for indicating the ends of lines in scanned files are
+supported. For example:
+<pre>
+  pcre2grep -N CRLF 'some pattern' &#60;file&#62;
+</pre>
+The newline type may be specified in upper, lower, or mixed case. If the
+newline type is NUL, lines are separated by binary zero characters. The other
+types are the single-character sequences CR (carriage return) and LF
+(linefeed), the two-character sequence CRLF, an "anycrlf" type, which
+recognizes any of the preceding three types, and an "any" type, for which any
+Unicode line ending sequence is assumed to end a line. The Unicode sequences
+are the three just mentioned, plus VT (vertical tab, U+000B), FF (form feed,
+U+000C), NEL (next line, U+0085), LS (line separator, U+2028), and PS
+(paragraph separator, U+2029).
 <br>
 <br>
 When the PCRE2 library is built, a default line-ending sequence is specified.
 This is normally the standard sequence for the operating system. Unless
 otherwise specified by this option, <b>pcre2grep</b> uses the library's default.
-The possible values for this option are CR, LF, CRLF, ANYCRLF, or ANY. This
-makes it possible to use <b>pcre2grep</b> to scan files that have come from
-other environments without having to modify their line endings. If the data
-that is being scanned does not agree with the convention set by this option,
-<b>pcre2grep</b> may behave in strange ways. Note that this option does not
-apply to files specified by the <b>-f</b>, <b>--exclude-from</b>, or
+<br>
+<br>
+This option makes it possible to use <b>pcre2grep</b> to scan files that have
+come from other environments without having to modify their line endings. If
+the data that is being scanned does not agree with the convention set by this
+option, <b>pcre2grep</b> may behave in strange ways. Note that this option does
+not apply to files specified by the <b>-f</b>, <b>--exclude-from</b>, or
 <b>--include-from</b> options, which are expected to use the operating system's
 standard newline sequence.
 </P>
@@ -640,12 +647,14 @@ use of JIT at run time. It is provided for testing and working round problems.
 It should never be needed in normal use.
 </P>
 <P>
-<b>-O</b> <i>text</i>, <b>--output</b>=<i>text</i>
+<b>-O</b> <i>text</i>, <b>--output</b>=<i>text</i> 
 When there is a match, instead of outputting the whole line that matched,
-output just the given text. This option is mutually exclusive with
-<b>--only-matching</b>, <b>--file-offsets</b>, and <b>--line-offsets</b>. Escape
-sequences starting with a dollar character may be used to insert the contents
-of the matched part of the line and/or captured substrings into the text.
+output just the given text, followed by an operating-system standard newline.
+The <b>--newline</b> option has no effect on this option, which is mutually
+exclusive with <b>--only-matching</b>, <b>--file-offsets</b>, and
+<b>--line-offsets</b>. Escape sequences starting with a dollar character may be
+used to insert the contents of the matched part of the line and/or captured
+substrings into the text.
 <br>
 <br>
 $&#60;digits&#62; or ${&#60;digits&#62;} is replaced by the captured
@@ -807,16 +816,27 @@ by the <b>--locale</b> option. If no locale is set, the PCRE2 library's default
 <br><a name="SEC8" href="#TOC1">NEWLINES</a><br>
 <P>
 The <b>-N</b> (<b>--newline</b>) option allows <b>pcre2grep</b> to scan files with
-different newline conventions from the default. Any parts of the input files
-that are written to the standard output are copied identically, with whatever
-newline sequences they have in the input. However, the setting of this option
-affects only the way scanned files are processed. It does not affect the
-interpretation of files specified by the <b>-f</b>, <b>--file-list</b>,
-<b>--exclude-from</b>, or <b>--include-from</b> options, nor does it affect the
-way in which <b>pcre2grep</b> writes informational messages to the standard
-error and output streams. For these it uses the string "\n" to indicate
-newlines, relying on the C I/O library to convert this to an appropriate
-sequence.
+newline conventions that differ from the default. This option affects only the
+way scanned files are processed. It does not affect the interpretation of files
+specified by the <b>-f</b>, <b>--file-list</b>, <b>--exclude-from</b>, or
+<b>--include-from</b> options.
+</P>
+<P>
+Any parts of the scanned input files that are written to the standard output
+are copied with whatever newline sequences they have in the input. However, if
+the final line of a file is output, and it does not end with a newline
+sequence, a newline sequence is added. If the newline setting is CR, LF, CRLF
+or NUL, that line ending is output; for the other settings (ANYCRLF or ANY) a
+single NL is used.
+</P>
+<P>
+The newline setting does not affect the way in which <b>pcre2grep</b> writes
+newlines in informational messages to the standard output and error streams.
+Under Windows, the standard output is set to be binary, so that "\r\n" at the
+ends of output lines that are copied from the input is not converted to
+"\r\r\n" by the C I/O library. This means that any messages written to the
+standard output must end with "\r\n". For all other operating systems, and
+for all messages to the standard error stream, "\n" is used.
 </P>
 <br><a name="SEC9" href="#TOC1">OPTIONS COMPATIBILITY</a><br>
 <P>
@@ -992,9 +1012,9 @@ Cambridge, England.
 </P>
 <br><a name="SEC16" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 15 June 2019
+Last updated: 25 January 2020
 <br>
-Copyright &copy; 1997-2019 University of Cambridge.
+Copyright &copy; 1997-2020 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE2 index page</a>.

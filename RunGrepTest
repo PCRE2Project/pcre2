@@ -742,11 +742,11 @@ uname=`uname`
 case $uname in
   Linux)
     printf 'abc\0def' >testNinputgrep
-    $valgrind $vjs $pcre2grep -na --newline=nul "^(abc|def)" testNinputgrep | sed 's/\x00/ZERO/' >>testtrygrep
+    $valgrind $vjs $pcre2grep -na --newline=nul "^(abc|def)" testNinputgrep | sed 's/\x00/ZERO/g' >>testtrygrep
     echo "" >>testtrygrep
     ;;
   *)
-    echo '1:abcZERO2:def' >>testtrygrep
+    echo '1:abcZERO2:defZERO' >>testtrygrep
     ;;
 esac
 

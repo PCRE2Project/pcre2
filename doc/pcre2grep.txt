@@ -116,9 +116,9 @@ BINARY FILES
        By  default,  a  file that contains a binary zero byte within the first
        1024 bytes is identified as a binary file, and is processed  specially.
        (GNU grep identifies binary files in this manner.) However, if the new-
-       line type is specified as "nul", that is, the line terminator is a  bi-
-       nary zero, the test for a binary file is not applied. See the --binary-
-       files option for a means of changing the way binary files are handled.
+       line type is specified as NUL, that is, the line terminator is a binary
+       zero, the test for a binary file is not applied. See the --binary-files
+       option for a means of changing the way binary files are handled.
 
 
 BINARY ZEROS IN PATTERNS
@@ -578,30 +578,36 @@ OPTIONS
                  when input is read line by line (see --line-buffered.)
 
        -N newline-type, --newline=newline-type
-                 The PCRE2 library supports five different conventions for in-
-                 dicating the ends of lines. They are the single-character se-
-                 quences CR (carriage return) and LF (linefeed), the two-char-
-                 acter sequence CRLF, an "anycrlf"  convention,  which  recog-
-                 nizes  any of the preceding three types, and an "any" conven-
-                 tion, in which any Unicode line ending sequence is assumed to
-                 end  a  line.  The  Unicode sequences are the three just men-
-                 tioned, plus  VT  (vertical  tab,  U+000B),  FF  (form  feed,
-                 U+000C),   NEL  (next  line,  U+0085),  LS  (line  separator,
-                 U+2028), and PS (paragraph separator, U+2029).
+                 Six different conventions for indicating the ends of lines in
+                 scanned files are supported. For example:
+
+                   pcre2grep -N CRLF 'some pattern' <file>
+
+                 The newline type may be specified in upper, lower,  or  mixed
+                 case.  If the newline type is NUL, lines are separated by bi-
+                 nary zero characters. The other types are the  single-charac-
+                 ter  sequences  CR  (carriage  return) and LF (linefeed), the
+                 two-character sequence CRLF, an "anycrlf" type, which  recog-
+                 nizes  any  of  the preceding three types, and an "any" type,
+                 for which any Unicode line ending sequence is assumed to  end
+                 a  line.  The Unicode sequences are the three just mentioned,
+                 plus VT (vertical tab, U+000B), FF (form feed,  U+000C),  NEL
+                 (next  line,  U+0085),  LS  (line  separator, U+2028), and PS
+                 (paragraph separator, U+2029).
 
                  When the PCRE2 library is built, a  default  line-ending  se-
                  quence  is specified.  This is normally the standard sequence
                  for the operating system. Unless otherwise specified by  this
-                 option,  pcre2grep  uses the library's default.  The possible
-                 values for this option are CR, LF,  CRLF,  ANYCRLF,  or  ANY.
-                 This  makes  it  possible to use pcre2grep to scan files that
-                 have come from other environments without  having  to  modify
-                 their  line  endings.  If the data that is being scanned does
-                 not agree with the convention set by this  option,  pcre2grep
-                 may  behave  in  strange ways. Note that this option does not
-                 apply to files specified by the -f, --exclude-from, or  --in-
-                 clude-from  options,  which are expected to use the operating
-                 system's standard newline sequence.
+                 option, pcre2grep uses the library's default.
+
+                 This  option makes it possible to use pcre2grep to scan files
+                 that have come from other environments without having to mod-
+                 ify  their  line  endings.  If the data that is being scanned
+                 does not agree  with  the  convention  set  by  this  option,
+                 pcre2grep  may  behave in strange ways. Note that this option
+                 does not apply to files specified by the -f,  --exclude-from,
+                 or  --include-from options, which are expected to use the op-
+                 erating system's standard newline sequence.
 
        -n, --line-number
                  Precede each output line by its line number in the file, fol-
@@ -620,11 +626,13 @@ OPTIONS
 
        -O text, --output=text
                  When there is a match, instead of outputting the  whole  line
-                 that  matched, output just the given text. This option is mu-
-                 tually exclusive with  --only-matching,  --file-offsets,  and
-                 --line-offsets. Escape sequences starting with a dollar char-
-                 acter may be used to insert the contents of the matched  part
-                 of the line and/or captured substrings into the text.
+                 that  matched, output just the given text, followed by an op-
+                 erating-system standard newline.  The --newline option has no
+                 effect  on  this  option,  which  is  mutually exclusive with
+                 --only-matching, --file-offsets, and  --line-offsets.  Escape
+                 sequences starting with a dollar character may be used to in-
+                 sert the contents of the matched part of the line and/or cap-
+                 tured substrings into the text.
 
                  $<digits>  or  ${<digits>}  is  replaced by the captured sub-
                  string of the given  decimal  number;  zero  substitutes  the
@@ -780,17 +788,27 @@ ENVIRONMENT VARIABLES
 
 NEWLINES
 
-       The -N (--newline) option allows pcre2grep to scan files with different
-       newline conventions from the default. Any parts of the input files that
-       are  written  to the standard output are copied identically, with what-
-       ever newline sequences they have in the input. However, the setting  of
-       this  option  affects only the way scanned files are processed. It does
-       not affect the interpretation of files specified  by  the  -f,  --file-
-       list, --exclude-from, or --include-from options, nor does it affect the
-       way in which pcre2grep writes informational messages  to  the  standard
-       error and output streams. For these it uses the string "\n" to indicate
-       newlines, relying on the C I/O library to convert this to an  appropri-
-       ate sequence.
+       The  -N  (--newline) option allows pcre2grep to scan files with newline
+       conventions that differ from the default. This option affects only  the
+       way  scanned files are processed. It does not affect the interpretation
+       of files specified by the -f,  --file-list,  --exclude-from,  or  --in-
+       clude-from options.
+
+       Any  parts  of the scanned input files that are written to the standard
+       output are copied with whatever newline sequences they have in the  in-
+       put.  However,  if  the final line of a file is output, and it does not
+       end with a newline sequence, a newline sequence is added. If  the  new-
+       line  setting  is  CR, LF, CRLF or NUL, that line ending is output; for
+       the other settings (ANYCRLF or ANY) a single NL is used.
+
+       The newline setting does not affect the way in which  pcre2grep  writes
+       newlines  in  informational  messages  to the standard output and error
+       streams.  Under Windows, the standard output is set to  be  binary,  so
+       that  "\r\n" at the ends of output lines that are copied from the input
+       is not converted to "\r\r\n" by the C I/O library. This means that  any
+       messages  written  to the standard output must end with "\r\n". For all
+       other operating systems, and for all messages  to  the  standard  error
+       stream, "\n" is used.
 
 
 OPTIONS COMPATIBILITY
@@ -963,5 +981,5 @@ AUTHOR
 
 REVISION
 
-       Last updated: 15 June 2019
-       Copyright (c) 1997-2019 University of Cambridge.
+       Last updated: 25 January 2020
+       Copyright (c) 1997-2020 University of Cambridge.

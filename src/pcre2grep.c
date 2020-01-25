@@ -13,7 +13,7 @@ distribution because other apparatus is needed to compile pcre2grep for z/OS.
 The header can be found in the special z/OS distribution, which is available
 from www.zaconsultants.net or from www.cbttape.org.
 
-           Copyright (c) 1997-2019 University of Cambridge
+           Copyright (c) 1997-2020 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -1666,6 +1666,44 @@ switch(endlinetype)
 
 
 /*************************************************
+*              Output newline at end             *
+*************************************************/
+
+/* This function is called if the final line of a file has been written to
+stdout, but it does not have a terminating newline.
+
+Arguments:  none
+Returns:    nothing
+*/
+
+static void
+write_final_newline(void)
+{
+switch(endlinetype)
+  {
+  default:      /* Just in case */
+  case PCRE2_NEWLINE_LF:
+  case PCRE2_NEWLINE_ANY:
+  case PCRE2_NEWLINE_ANYCRLF:
+  fprintf(stdout, "\n");
+  break;
+
+  case PCRE2_NEWLINE_CR:
+  fprintf(stdout, "\r");
+  break;
+
+  case PCRE2_NEWLINE_CRLF:
+  fprintf(stdout, "\r\n");
+  break;
+
+  case PCRE2_NEWLINE_NUL:
+  fprintf(stdout, "%c", 0);
+  break;
+  }
+}
+
+
+/*************************************************
 *       Print the previous "after" lines         *
 *************************************************/
 
@@ -1689,9 +1727,9 @@ do_after_lines(unsigned long int lastmatchnumber, char *lastmatchrestart,
 if (after_context > 0 && lastmatchnumber > 0)
   {
   int count = 0;
+  int ellength = 0;
   while (lastmatchrestart < endptr && count < after_context)
     {
-    int ellength;
     char *pp = end_of_line(lastmatchrestart, endptr, &ellength);
     if (ellength == 0 && pp == main_buffer + bufsize) break;
     if (printname != NULL) fprintf(stdout, "%s-", printname);
@@ -1700,7 +1738,17 @@ if (after_context > 0 && lastmatchnumber > 0)
     lastmatchrestart = pp;
     count++;
     }
-  if (count > 0) hyphenpending = TRUE;
+
+  /* If we have printed any lines, arrange for a hyphen separator if anything
+  else follows. Also, if the last line is the final line in the file and it had
+  no newline, add one. */
+
+  if (count > 0)
+    {
+    hyphenpending = TRUE;
+    if (ellength == 0 && lastmatchrestart >= endptr)
+      write_final_newline();
+    }
   }
 }
 
@@ -2437,6 +2485,7 @@ char *endptr;
 PCRE2_SIZE bufflength;
 BOOL binary = FALSE;
 BOOL endhyphenpending = FALSE;
+BOOL lines_printed = FALSE;
 BOOL input_line_buffered = line_buffered;
 FILE *in = NULL;                    /* Ensure initialized */
 
@@ -2777,6 +2826,8 @@ while (ptr < endptr)
 
     else
       {
+      lines_printed = TRUE;
+
       /* See if there is a requirement to print some "after" lines from a
       previous match. We never print any overlaps. */
 
@@ -2825,7 +2876,8 @@ while (ptr < endptr)
         int linecount = 0;
         char *p = ptr;
 
-        while (p > main_buffer && (lastmatchnumber == 0 || p > lastmatchrestart) &&
+        while (p > main_buffer &&
+               (lastmatchnumber == 0 || p > lastmatchrestart) &&
                linecount < before_context)
           {
           linecount++;
@@ -2981,6 +3033,12 @@ while (ptr < endptr)
 
     lastmatchrestart = ptr + linelength + endlinelength;
     lastmatchnumber = linenumber + 1;
+
+    /* If a line was printed and we are now at the end of the file and the last
+    line had no newline, output one. */
+
+    if (lines_printed && lastmatchrestart >= endptr && endlinelength == 0)
+      write_final_newline();
     }
 
   /* For a match in multiline inverted mode (which of course did not cause
