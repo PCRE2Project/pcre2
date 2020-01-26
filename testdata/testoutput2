@@ -17536,6 +17536,11 @@ Callout 0: last capture = 2
  3(2) Old 12 15 "abc" New 5 10 "<abc>"
  3: <abc><abc>
 
+# Expect non-fixed-length error
+
+"(?<=X(?(DEFINE)(.*))(?1))."
+Failed: error 125 at offset 0: lookbehind assertion is not fixed length
+
 # End of testinput2
 Error -70: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

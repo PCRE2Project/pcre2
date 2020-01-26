@@ -5806,4 +5806,8 @@ a)"xI
     12abc34xyz99abc55\=substitute_skip=1
     12abc34xyz99abc55\=substitute_skip=2
 
+# Expect non-fixed-length error
+
+"(?<=X(?(DEFINE)(.*))(?1))."
+
 # End of testinput2

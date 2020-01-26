@@ -6411,4 +6411,17 @@ ef) x/x,mark
     Hackdaws love my big sphinx of quartz.
     Pack my fox with five dozen liquor jugs.
 
+"(?<=X(?(DEFINE)(A)))X(*F)"
+\= Expect no match
+    AXYZ
+
+"(?<=X(?(DEFINE)(A)))."
+    AXYZ
+
+"(?<=X(?(DEFINE)(.*))Y)."
+    AXYZ
+
+"(?<=X(?(DEFINE)(Y))(?1))."
+    AXYZ
+
 # End of testinput1 

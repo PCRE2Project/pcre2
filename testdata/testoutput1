@@ -10165,4 +10165,21 @@ No match
     Pack my fox with five dozen liquor jugs.
 No match
 
+"(?<=X(?(DEFINE)(A)))X(*F)"
+\= Expect no match
+    AXYZ
+No match
+
+"(?<=X(?(DEFINE)(A)))."
+    AXYZ
+ 0: Y
+
+"(?<=X(?(DEFINE)(.*))Y)."
+    AXYZ
+ 0: Z
+
+"(?<=X(?(DEFINE)(Y))(?1))."
+    AXYZ
+ 0: Z
+
 # End of testinput1 

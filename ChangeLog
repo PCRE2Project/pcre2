@@ -48,6 +48,14 @@ the minimum.
 13. In pcre2grep, if the final line in a scanned file is output but does not 
 end with a newline sequence, add a newline according to the --newline setting.
 
+14. (?(DEFINE)...) groups were not being handled correctly when checking for 
+the fixed length of a lookbehind assertion. Such a group within a lookbehind 
+should be skipped, as it does not contribute to the length of the group. 
+Instead, the (DEFINE) group was being processed, and if at the end of the 
+lookbehind, that end was not correctly recognized. Errors such as "lookbehind 
+assertion is not fixed length" and also "internal error: bad code value in 
+parsed_skip()" could result.
+
 
 Version 10.34 21-November-2019
 ------------------------------

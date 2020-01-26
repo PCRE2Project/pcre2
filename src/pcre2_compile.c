@@ -8800,9 +8800,10 @@ memset(slot + IMM2_SIZE + length, 0,
 
 /* This function is called to skip parts of the parsed pattern when finding the
 length of a lookbehind branch. It is called after (*ACCEPT) and (*FAIL) to find
-the end of the branch, it is called to skip over an internal lookaround, and it
-is also called to skip to the end of a class, during which it will never
-encounter nested groups (but there's no need to have special code for that).
+the end of the branch, it is called to skip over an internal lookaround or
+(DEFINE) group, and it is also called to skip to the end of a class, during
+which it will never encounter nested groups (but there's no need to have
+special code for that).
 
 When called to find the end of a branch or group, pptr must point to the first
 meta code inside the branch, not the branch-starting code. In other cases it
@@ -9280,14 +9281,21 @@ for (;; pptr++)
     itemlength = grouplength;
     break;
 
-    /* Check nested groups - advance past the initial data for each type and
-    then seek a fixed length with get_grouplength(). */
+    /* A (DEFINE) group is never obeyed inline and so it does not contribute to
+    the length of this branch. Skip from the following item to the next
+    unpaired ket. */
+
+    case META_COND_DEFINE:
+    pptr = parsed_skip(pptr + 1, PSKIP_KET);
+    break;
+
+    /* Check other nested groups - advance past the initial data for each type
+    and then seek a fixed length with get_grouplength(). */
 
     case META_COND_NAME:
     case META_COND_NUMBER:
     case META_COND_RNAME:
     case META_COND_RNUMBER:
-    case META_COND_DEFINE:
     pptr += 2 + SIZEOFFSET;
     goto CHECK_GROUP;
 
