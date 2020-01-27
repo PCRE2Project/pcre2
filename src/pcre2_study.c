@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-          New API code Copyright (c) 2016-2019 University of Cambridge
+          New API code Copyright (c) 2016-2020 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -58,7 +58,7 @@ collecting data (e.g. minimum matching length). */
 
 /* Returns from set_start_bits() */
 
-enum { SSB_FAIL, SSB_DONE, SSB_CONTINUE, SSB_UNKNOWN };
+enum { SSB_FAIL, SSB_DONE, SSB_CONTINUE, SSB_UNKNOWN, SSB_TOODEEP };
 
 
 /*************************************************
@@ -924,19 +924,24 @@ The SSB_CONTINUE return is useful for parenthesized groups in patterns such as
 must continue at the outer level to find at least one mandatory code unit. At
 the outermost level, this function fails unless the result is SSB_DONE.
 
+We restrict recursion (for nested groups) to 1000 to avoid stack overflow
+issues.
+
 Arguments:
   re           points to the compiled regex block
   code         points to an expression
   utf          TRUE if in UTF mode
+  depthptr     pointer to recurse depth
 
 Returns:       SSB_FAIL     => Failed to find any starting code units
                SSB_DONE     => Found mandatory starting code units
                SSB_CONTINUE => Found optional starting code units
                SSB_UNKNOWN  => Hit an unrecognized opcode
+               SSB_TOODEEP  => Recursion is too deep
 */
 
 static int
-set_start_bits(pcre2_real_code *re, PCRE2_SPTR code, BOOL utf)
+set_start_bits(pcre2_real_code *re, PCRE2_SPTR code, BOOL utf, int *depthptr)
 {
 uint32_t c;
 int yield = SSB_DONE;
@@ -946,6 +951,9 @@ int table_limit = utf? 16:32;
 #else
 int table_limit = 32;
 #endif
+
+*depthptr += 1;
+if (*depthptr > 1000) return SSB_TOODEEP;
 
 do
   {
@@ -1103,13 +1111,17 @@ do
       case OP_SCRIPT_RUN:
       case OP_ASSERT:
       case OP_ASSERT_NA:
-      rc = set_start_bits(re, tcode, utf);
-      if (rc == SSB_FAIL || rc == SSB_UNKNOWN) return rc;
-      if (rc == SSB_DONE) try_next = FALSE; else
+      rc = set_start_bits(re, tcode, utf, depthptr);
+      if (rc == SSB_DONE)
+        {
+        try_next = FALSE;
+        }
+      else if (rc == SSB_CONTINUE)
         {
         do tcode += GET(tcode, 1); while (*tcode == OP_ALT);
         tcode += 1 + LINK_SIZE;
         }
+      else return rc;   /* FAIL, UNKNOWN, or TOODEEP */
       break;
 
       /* If we hit ALT or KET, it means we haven't found anything mandatory in
@@ -1155,8 +1167,8 @@ do
       case OP_BRAZERO:
       case OP_BRAMINZERO:
       case OP_BRAPOSZERO:
-      rc = set_start_bits(re, ++tcode, utf);
-      if (rc == SSB_FAIL || rc == SSB_UNKNOWN) return rc;
+      rc = set_start_bits(re, ++tcode, utf, depthptr);
+      if (rc == SSB_FAIL || rc == SSB_UNKNOWN || rc == SSB_TOODEEP) return rc;
       do tcode += GET(tcode,1); while (*tcode == OP_ALT);
       tcode += 1 + LINK_SIZE;
       break;
@@ -1664,7 +1676,8 @@ code units. */
 
 if ((re->flags & (PCRE2_FIRSTSET|PCRE2_STARTLINE)) == 0)
   {
-  int rc = set_start_bits(re, code, utf);
+  int depth = 0;
+  int rc = set_start_bits(re, code, utf, &depth);
   if (rc == SSB_UNKNOWN) return 1;
 
   /* If a list of starting code units was set up, scan the list to see if only

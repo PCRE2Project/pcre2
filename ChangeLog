@@ -56,6 +56,10 @@ lookbehind, that end was not correctly recognized. Errors such as "lookbehind
 assertion is not fixed length" and also "internal error: bad code value in 
 parsed_skip()" could result.
 
+15. Put a limit of 1000 on recursive calls in pcre2_study() when searching 
+nested groups for starting code units, in order to avoid stack overflow issues. 
+If the limit is reached, it just gives up trying for this optimization.
+
 
 Version 10.34 21-November-2019
 ------------------------------
