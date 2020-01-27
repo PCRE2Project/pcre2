@@ -1,4 +1,4 @@
-.TH PCRE2PATTERN 3 "24 January 2020" "PCRE2 10.35"
+.TH PCRE2PATTERN 3 "27 January 2020" "PCRE2 10.35"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION DETAILS"
@@ -2671,6 +2671,10 @@ pattern. If this is not the case, the rest of the pattern match fails exactly
 as before because nothing has changed, so using a non-atomic assertion just
 wastes resources.
 .P
+There is one exception to backtracking into a non-atomic assertion. If an 
+(*ACCEPT) control verb is triggered, the assertion succeeds atomically. That 
+is, a subsequent match failure cannot backtrack into the assertion.
+.P
 Non-atomic assertions are not supported by the alternative matching function
 \fBpcre2_dfa_match()\fP. They are supported by JIT, but only if they do not
 contain any control verbs such as (*ACCEPT). (This may change in future). Note
@@ -3872,6 +3876,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 24 January 2020
+Last updated: 27 January 2020
 Copyright (c) 1997-2020 University of Cambridge.
 .fi

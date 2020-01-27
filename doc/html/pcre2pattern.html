@@ -2659,6 +2659,11 @@ as before because nothing has changed, so using a non-atomic assertion just
 wastes resources.
 </P>
 <P>
+There is one exception to backtracking into a non-atomic assertion. If an 
+(*ACCEPT) control verb is triggered, the assertion succeeds atomically. That 
+is, a subsequent match failure cannot backtrack into the assertion.
+</P>
+<P>
 Non-atomic assertions are not supported by the alternative matching function
 <b>pcre2_dfa_match()</b>. They are supported by JIT, but only if they do not
 contain any control verbs such as (*ACCEPT). (This may change in future). Note
@@ -3828,7 +3833,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC32" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 24 January 2020
+Last updated: 27 January 2020
 <br>
 Copyright &copy; 1997-2020 University of Cambridge.
 <br>
