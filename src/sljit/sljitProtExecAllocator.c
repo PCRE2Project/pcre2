@@ -97,7 +97,9 @@ struct chunk_header {
 #endif
 
 int mkostemp(char *template, int flags);
+#if !defined(__NetBSD__)
 char *secure_getenv(const char *name);
+#endif
 
 static SLJIT_INLINE int create_tempfile(void)
 {
@@ -124,7 +126,11 @@ static SLJIT_INLINE int create_tempfile(void)
 	tmp_name_len = 4;
 #endif
 
+#if defined(__NetBSD__)
+	dir = getenv("TMPDIR");
+#else
 	dir = secure_getenv("TMPDIR");
+#endif
 	if (dir) {
 		len = strlen(dir);
 		if (len > 0 && len < sizeof(tmp_name)) {
