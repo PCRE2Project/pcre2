@@ -2693,8 +2693,8 @@ while (cc < ccend)
       }
     if (common->control_head_ptr != 0 && !control_head_found)
       {
-      shared_srcw[0] = common->control_head_ptr;
-      shared_count = 1;
+      private_srcw[0] = common->control_head_ptr;
+      private_count = 1;
       control_head_found = TRUE;
       }
     cc += 1 + 2 + cc[1];
@@ -2704,8 +2704,8 @@ while (cc < ccend)
     SLJIT_ASSERT(common->control_head_ptr != 0);
     if (!control_head_found)
       {
-      shared_srcw[0] = common->control_head_ptr;
-      shared_count = 1;
+      private_srcw[0] = common->control_head_ptr;
+      private_count = 1;
       control_head_found = TRUE;
       }
     cc++;

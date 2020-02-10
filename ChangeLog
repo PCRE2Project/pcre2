@@ -60,6 +60,9 @@ parsed_skip()" could result.
 nested groups for starting code units, in order to avoid stack overflow issues. 
 If the limit is reached, it just gives up trying for this optimization.
 
+16. The control verb chain list must always be restored when exiting from a
+recurse function in JIT.
+
 
 Version 10.34 21-November-2019
 ------------------------------
