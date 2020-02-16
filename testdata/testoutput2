@@ -17536,6 +17536,45 @@ Callout 0: last capture = 2
  3(2) Old 12 15 "abc" New 5 10 "<abc>"
  3: <abc><abc>
 
+/a(..)d/replace=>$1<,substitute_matched
+    xyzabcdxyzabcdxyz
+ 1: xyz>bc<xyzabcdxyz
+    xyzabcdxyzabcdxyz\=ovector=2
+ 1: xyz>bc<xyzabcdxyz
+\= Expect error     
+    xyzabcdxyzabcdxyz\=ovector=1
+Failed: error -54 at offset 3 in replacement: requested value is not available
+
+/a(..)d/g,replace=>$1<,substitute_matched
+    xyzabcdxyzabcdxyz
+ 2: xyz>bc<xyz>bc<xyz
+    xyzabcdxyzabcdxyz\=ovector=2
+ 2: xyz>bc<xyz>bc<xyz
+\= Expect error     
+    xyzabcdxyzabcdxyz\=ovector=1
+Failed: error -54 at offset 3 in replacement: requested value is not available
+    xyzabcdxyzabcdxyz\=ovector=1,substitute_unset_empty
+Failed: error -54 at offset 3 in replacement: requested value is not available
+
+/55|a(..)d/g,replace=>$1<,substitute_matched
+    xyz55abcdxyzabcdxyz\=ovector=2,substitute_unset_empty
+ 3: xyz><>bc<xyz>bc<xyz
+\= Expect error     
+    xyz55abcdxyzabcdxyz\=ovector=2
+Failed: error -55 at offset 3 in replacement: requested value is not set
+
+/55|a(..)d/replace=>$1<,substitute_matched
+    xyz55abcdxyzabcdxyz\=ovector=2,substitute_unset_empty
+ 1: xyz><abcdxyzabcdxyz
+
+/55|a(..)d/replace=>$1<
+    xyz55abcdxyzabcdxyz\=ovector=2,substitute_unset_empty
+ 1: xyz><abcdxyzabcdxyz
+
+/55|a(..)d/g,replace=>$1<
+    xyz55abcdxyzabcdxyz\=ovector=2,substitute_unset_empty
+ 3: xyz><>bc<xyz>bc<xyz
+
 # Expect non-fixed-length error
 
 "(?<=X(?(DEFINE)(.*))(?1))."

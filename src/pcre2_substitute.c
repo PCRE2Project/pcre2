@@ -229,7 +229,7 @@ int forcecasereset = 0;
 uint32_t ovector_count;
 uint32_t goptions = 0;
 uint32_t suboptions;
-BOOL match_data_created = FALSE;
+pcre2_match_data *internal_match_data = NULL;
 BOOL escaped_literal = FALSE;
 BOOL overflowed = FALSE;
 BOOL use_existing_match;
@@ -265,22 +265,42 @@ pointer in the match data may be NULL after a no-match. */
 use_existing_match = ((options & PCRE2_SUBSTITUTE_MATCHED) != 0);
 replacement_only = ((options & PCRE2_SUBSTITUTE_REPLACEMENT_ONLY) != 0);
 
-if (use_existing_match)
+/* If starting from an existing match, there must be an externally provided
+match data block. We create an internal match_data block in two cases: (a) an
+external one is not supplied (and we are not starting from an existing match);
+(b) an existing match is to be used for the first substitution. In the latter
+case, we copy the existing match into the internal block. This ensures that no
+changes are made to the existing match data block. */
+
+if (match_data == NULL)
   {
-  if (match_data == NULL) return PCRE2_ERROR_NULL;
+  pcre2_general_context *gcontext;
+  if (use_existing_match) return PCRE2_ERROR_NULL;
+  gcontext = (mcontext == NULL)?
+    (pcre2_general_context *)code :
+    (pcre2_general_context *)mcontext;
+  match_data = internal_match_data =
+    pcre2_match_data_create_from_pattern(code, gcontext);
+  if (internal_match_data == NULL) return PCRE2_ERROR_NOMEMORY;
   }
 
-/* Otherwise, if no match data block is provided, create one. */
-
-else if (match_data == NULL)
+else if (use_existing_match)
   {
   pcre2_general_context *gcontext = (mcontext == NULL)?
     (pcre2_general_context *)code :
     (pcre2_general_context *)mcontext;
-  match_data = pcre2_match_data_create_from_pattern(code, gcontext);
-  if (match_data == NULL) return PCRE2_ERROR_NOMEMORY;
-  match_data_created = TRUE;
+  int pairs = (code->top_bracket + 1 < match_data->oveccount)?
+    code->top_bracket + 1 : match_data->oveccount;
+  internal_match_data = pcre2_match_data_create(match_data->oveccount,
+    gcontext);
+  if (internal_match_data == NULL) return PCRE2_ERROR_NOMEMORY;
+  memcpy(internal_match_data, match_data, offsetof(pcre2_match_data, ovector)
+    + 2*pairs*sizeof(PCRE2_SIZE));
+  match_data = internal_match_data;
   }
+
+/* Remember ovector details */
+
 ovector = pcre2_get_ovector_pointer(match_data);
 ovector_count = pcre2_get_ovector_count(match_data);
 
@@ -302,7 +322,7 @@ repend = replacement + rlength;
 #ifdef SUPPORT_UNICODE
 if (utf && (options & PCRE2_NO_UTF_CHECK) == 0)
   {
-  rc = PRIV(valid_utf)(replacement, rlength, &(match_data->rightchar));
+  rc = PRIV(valid_utf)(replacement, rlength, &(match_data->startchar));
   if (rc != 0)
     {
     match_data->leftchar = 0;
@@ -316,7 +336,7 @@ if (utf && (options & PCRE2_NO_UTF_CHECK) == 0)
 suboptions = options & SUBSTITUTE_OPTIONS;
 options &= ~SUBSTITUTE_OPTIONS;
 
-/* Error if the start match offset it greater than the length of the subject. */
+/* Error if the start match offset is greater than the length of the subject. */
 
 if (start_offset > length)
   {
@@ -344,7 +364,7 @@ do
     use_existing_match = FALSE;
     }
   else rc = pcre2_match(code, subject, length, start_offset, options|goptions,
-      match_data, mcontext);
+    match_data, mcontext);
 
 #ifdef SUPPORT_UNICODE
   if (utf) options |= PCRE2_NO_UTF_CHECK;  /* Only need to check once */
@@ -898,8 +918,9 @@ do
     }
 
   /* Save the details of this match. See above for how this data is used. If we
-  matched an empty string, do the magic for global matches. Finally, update the
-  start offset to point to the rest of the subject string. */
+  matched an empty string, do the magic for global matches. Update the start
+  offset to point to the rest of the subject string. If we re-used an existing
+  match for the first match, switch to the internal match data block. */
 
   ovecsave[0] = ovector[0];
   ovecsave[1] = ovector[1];
@@ -942,7 +963,7 @@ else
   }
 
 EXIT:
-if (match_data_created) pcre2_match_data_free(match_data);
+if (internal_match_data != NULL) pcre2_match_data_free(internal_match_data);
   else match_data->rc = rc;
 return rc;
 

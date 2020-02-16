@@ -5806,6 +5806,33 @@ a)"xI
     12abc34xyz99abc55\=substitute_skip=1
     12abc34xyz99abc55\=substitute_skip=2
 
+/a(..)d/replace=>$1<,substitute_matched
+    xyzabcdxyzabcdxyz
+    xyzabcdxyzabcdxyz\=ovector=2
+\= Expect error     
+    xyzabcdxyzabcdxyz\=ovector=1
+
+/a(..)d/g,replace=>$1<,substitute_matched
+    xyzabcdxyzabcdxyz
+    xyzabcdxyzabcdxyz\=ovector=2
+\= Expect error     
+    xyzabcdxyzabcdxyz\=ovector=1
+    xyzabcdxyzabcdxyz\=ovector=1,substitute_unset_empty
+
+/55|a(..)d/g,replace=>$1<,substitute_matched
+    xyz55abcdxyzabcdxyz\=ovector=2,substitute_unset_empty
+\= Expect error     
+    xyz55abcdxyzabcdxyz\=ovector=2
+
+/55|a(..)d/replace=>$1<,substitute_matched
+    xyz55abcdxyzabcdxyz\=ovector=2,substitute_unset_empty
+
+/55|a(..)d/replace=>$1<
+    xyz55abcdxyzabcdxyz\=ovector=2,substitute_unset_empty
+
+/55|a(..)d/g,replace=>$1<
+    xyz55abcdxyzabcdxyz\=ovector=2,substitute_unset_empty
+
 # Expect non-fixed-length error
 
 "(?<=X(?(DEFINE)(.*))(?1))."
