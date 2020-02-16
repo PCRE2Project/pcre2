@@ -3309,13 +3309,13 @@ can be given as PCRE2_ZERO_TERMINATED for a zero-terminated string. There is an
 option (see PCRE2_SUBSTITUTE_REPLACEMENT_ONLY below) to return just the
 replacement string(s). The default action is to perform just one replacement if
 the pattern matches, but there is an option that requests multiple replacements
-(see PCRE2_SUBSTITUTE_GLOBAL below for details).
+(see PCRE2_SUBSTITUTE_GLOBAL below).
 </P>
 <P>
 If successful, <b>pcre2_substitute()</b> returns the number of substitutions
 that were carried out. This may be zero if no match was found, and is never
 greater than one unless PCRE2_SUBSTITUTE_GLOBAL is set. A negative value is
-returned if an error is detected (see below for details).
+returned if an error is detected.
 </P>
 <P>
 Matches in which a \K item in a lookahead in the pattern causes the match to
@@ -3333,10 +3333,11 @@ functions from the match context, if provided, or else those that were used to
 allocate memory for the compiled code.
 </P>
 <P>
-If an external <i>match_data</i> block is provided, its contents afterwards
-are those set by the final call to <b>pcre2_match()</b>. For global changes,
-this will have ended in a no-match error. The contents of the ovector within
-the match data block may or may not have been changed.
+If <i>match_data</i> is not NULL and PCRE2_SUBSTITUTE_MATCHED is not set, the
+provided block is used for all calls to <b>pcre2_match()</b>, and its contents
+afterwards are the result of the final call. For global changes, this will
+always be a no-match error. The contents of the ovector within the match data
+block may or may not have been changed.
 </P>
 <P>
 As well as the usual options for <b>pcre2_match()</b>, a number of additional
@@ -3350,45 +3351,68 @@ an application to check for a match before choosing to substitute, without
 having to repeat the match.
 </P>
 <P>
-The <i>code</i> argument is not used for the first substitution when
-PCRE2_SUBSTITUTE_MATCHED is set, but if PCRE2_SUBSTITUTE_GLOBAL is also set,
-<b>pcre2_match()</b> will be called after the first substitution to check for
-further matches, and the contents of the <i>match_data</i> block will be
-changed.
+The contents of the externally supplied match data block are not changed when
+PCRE2_SUBSTITUTE_MATCHED is set. If PCRE2_SUBSTITUTE_GLOBAL is also set,
+<b>pcre2_match()</b> is called after the first substitution to check for further
+matches, but this is done using an internally obtained match data block, thus
+always leaving the external block unchanged.
 </P>
 <P>
-The default is to return a copy of the subject string with matched substrings 
-replaced. However, if PCRE2_SUBSTITUTE_REPLACEMENT_ONLY is set, only the 
-replacement substrings are returned. In the global case, multiple replacements 
-are concatenated in the output buffer. Substitution callouts (see
+The <i>code</i> argument is not used for matching before the first substitution
+when PCRE2_SUBSTITUTE_MATCHED is set, but it must be provided, even when
+PCRE2_SUBSTITUTE_GLOBAL is not set, because it contains information such as the
+UTF setting and the number of capturing parentheses in the pattern.
+</P>
+<P>
+The default action of <b>pcre2_substitute()</b> is to return a copy of the
+subject string with matched substrings replaced. However, if
+PCRE2_SUBSTITUTE_REPLACEMENT_ONLY is set, only the replacement substrings are
+returned. In the global case, multiple replacements are concatenated in the
+output buffer. Substitution callouts (see
 <a href="#subcallouts">below)</a>
 can be used to separate them if necessary.
 </P>
 <P>
 The <i>outlengthptr</i> argument of <b>pcre2_substitute()</b> must point to a
 variable that contains the length, in code units, of the output buffer. If the
-function is successful, the value is updated to contain the length of the new
-string, excluding the trailing zero that is automatically added.
+function is successful, the value is updated to contain the length in code
+units of the new string, excluding the trailing zero that is automatically
+added.
 </P>
 <P>
 If the function is not successful, the value set via <i>outlengthptr</i> depends
 on the type of error. For syntax errors in the replacement string, the value is
 the offset in the replacement string where the error was detected. For other
 errors, the value is PCRE2_UNSET by default. This includes the case of the
-output buffer being too small, unless PCRE2_SUBSTITUTE_OVERFLOW_LENGTH is set
-(see below), in which case the value is the minimum length needed, including
-space for the trailing zero. Note that in order to compute the required length,
-<b>pcre2_substitute()</b> has to simulate all the matching and copying, instead
-of giving an error return as soon as the buffer overflows. Note also that the
-length is in code units, not bytes.
+output buffer being too small, unless PCRE2_SUBSTITUTE_OVERFLOW_LENGTH is set.
 </P>
 <P>
-The replacement string, which is interpreted as a UTF string in UTF mode,
-is checked for UTF validity unless the PCRE2_NO_UTF_CHECK option is set. If the
-PCRE2_SUBSTITUTE_LITERAL option is set, it is not interpreted in any way. By
-default, however, a dollar character is an escape character that can specify
-the insertion of characters from capture groups and names from (*MARK) or other
-control verbs in the pattern. The following forms are always recognized:
+PCRE2_SUBSTITUTE_OVERFLOW_LENGTH changes what happens when the output buffer is
+too small. The default action is to return PCRE2_ERROR_NOMEMORY immediately. If
+this option is set, however, <b>pcre2_substitute()</b> continues to go through
+the motions of matching and substituting (without, of course, writing anything)
+in order to compute the size of buffer that is needed. This value is passed
+back via the <i>outlengthptr</i> variable, with the result of the function still
+being PCRE2_ERROR_NOMEMORY.
+</P>
+<P>
+Passing a buffer size of zero is a permitted way of finding out how much memory
+is needed for given substitution. However, this does mean that the entire
+operation is carried out twice. Depending on the application, it may be more
+efficient to allocate a large buffer and free the excess afterwards, instead of
+using PCRE2_SUBSTITUTE_OVERFLOW_LENGTH.
+</P>
+<P>
+The replacement string, which is interpreted as a UTF string in UTF mode, is
+checked for UTF validity unless PCRE2_NO_UTF_CHECK is set. An invalid UTF
+replacement string causes an immediate return with the relevant UTF error code.
+</P>
+<P>
+If PCRE2_SUBSTITUTE_LITERAL is set, the replacement string is not interpreted
+in any way. By default, however, a dollar character is an escape character that
+can specify the insertion of characters from capture groups and names from
+(*MARK) or other control verbs in the pattern. The following forms are always
+recognized:
 <pre>
   $$                  insert a dollar character
   $&#60;n&#62; or ${&#60;n&#62;}      insert the contents of group &#60;n&#62;
@@ -3434,22 +3458,6 @@ length, an attempt to find a non-empty match at the same offset is performed.
 If this is not successful, the offset is advanced by one character except when
 CRLF is a valid newline sequence and the next two characters are CR, LF. In
 this case, the offset is advanced by two characters.
-</P>
-<P>
-PCRE2_SUBSTITUTE_OVERFLOW_LENGTH changes what happens when the output buffer is
-too small. The default action is to return PCRE2_ERROR_NOMEMORY immediately. If
-this option is set, however, <b>pcre2_substitute()</b> continues to go through
-the motions of matching and substituting (without, of course, writing anything)
-in order to compute the size of buffer that is needed. This value is passed
-back via the <i>outlengthptr</i> variable, with the result of the function still
-being PCRE2_ERROR_NOMEMORY.
-</P>
-<P>
-Passing a buffer size of zero is a permitted way of finding out how much memory
-is needed for given substitution. However, this does mean that the entire
-operation is carried out twice. Depending on the application, it may be more
-efficient to allocate a large buffer and free the excess afterwards, instead of
-using PCRE2_SUBSTITUTE_OVERFLOW_LENGTH.
 </P>
 <P>
 PCRE2_SUBSTITUTE_UNKNOWN_UNSET causes references to capture groups that do
@@ -3907,7 +3915,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC42" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 22 January 2020
+Last updated: 16 February 2020
 <br>
 Copyright &copy; 1997-2020 University of Cambridge.
 <br>
