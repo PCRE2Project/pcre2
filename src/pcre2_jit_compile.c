@@ -7224,7 +7224,13 @@ cc = ccbegin;
 if ((cc[-1] & XCL_NOT) != 0)
   read_char(common, min, max, backtracks, READ_CHAR_UPDATE_STR_PTR);
 else
+  {
+#ifdef SUPPORT_UNICODE
+  read_char(common, min, max, (needstype || needsscript) ? backtracks : NULL, 0);
+#else /* !SUPPORT_UNICODE */
   read_char(common, min, max, NULL, 0);
+#endif /* SUPPORT_UNICODE */
+  }
 
 if ((cc[-1] & XCL_HASPROP) == 0)
   {

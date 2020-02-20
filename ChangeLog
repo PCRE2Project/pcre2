@@ -63,6 +63,9 @@ If the limit is reached, it just gives up trying for this optimization.
 16. The control verb chain list must always be restored when exiting from a
 recurse function in JIT.
 
+17. Fix a crash which occurs when the character type of an invalid UTF
+character is decoded in JIT.
+
 
 Version 10.34 21-November-2019
 ------------------------------
