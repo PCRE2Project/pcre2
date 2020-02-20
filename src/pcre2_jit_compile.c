@@ -7316,16 +7316,11 @@ if (needstype || needsscript)
   /* Before anything else, we deal with scripts. */
   if (needsscript)
     {
-// PH hacking
-      OP2(SLJIT_SHL, TMP1, 0, TMP2, 0, SLJIT_IMM, 2);
-      OP2(SLJIT_SHL, TMP2, 0, TMP2, 0, SLJIT_IMM, 3);
-      OP2(SLJIT_ADD, TMP2, 0, TMP2, 0, TMP1, 0);
+    OP2(SLJIT_SHL, TMP1, 0, TMP2, 0, SLJIT_IMM, 3);
+    OP2(SLJIT_SHL, TMP2, 0, TMP2, 0, SLJIT_IMM, 2);
+    OP2(SLJIT_ADD, TMP1, 0, TMP1, 0, TMP2, 0);
 
-    OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, (sljit_sw)PRIV(ucd_records) + SLJIT_OFFSETOF(ucd_record, script));
-
-      OP1(SLJIT_MOV_U8, TMP1, 0, SLJIT_MEM2(TMP1, TMP2), 0);
-
-    // OP1(SLJIT_MOV_U8, TMP1, 0, SLJIT_MEM2(TMP1, TMP2), 3);
+    OP1(SLJIT_MOV_U8, TMP1, 0, SLJIT_MEM1(TMP1), (sljit_sw)PRIV(ucd_records) + SLJIT_OFFSETOF(ucd_record, script));
 
     ccbegin = cc;
 
@@ -7369,28 +7364,19 @@ if (needstype || needsscript)
     {
     if (!needschar)
       {
-// PH hacking
-  OP2(SLJIT_SHL, TMP1, 0, TMP2, 0, SLJIT_IMM, 2);
-  OP2(SLJIT_SHL, TMP2, 0, TMP2, 0, SLJIT_IMM, 3);
-  OP2(SLJIT_ADD, TMP2, 0, TMP2, 0, TMP1, 0);
-  OP2(SLJIT_ADD, TMP1, 0, TMP2, 0, TMP1, 0);
+      OP2(SLJIT_SHL, TMP1, 0, TMP2, 0, SLJIT_IMM, 3);
+      OP2(SLJIT_SHL, TMP2, 0, TMP2, 0, SLJIT_IMM, 2);
+      OP2(SLJIT_ADD, TMP1, 0, TMP1, 0, TMP2, 0);
 
-      OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, (sljit_sw)PRIV(ucd_records) + SLJIT_OFFSETOF(ucd_record, chartype));
-
-  OP1(SLJIT_MOV_U8, TMP1, 0, SLJIT_MEM2(TMP1, TMP2), 0);
-
-//      OP1(SLJIT_MOV_U8, TMP1, 0, SLJIT_MEM2(TMP1, TMP2), 3);
+      OP1(SLJIT_MOV_U8, TMP1, 0, SLJIT_MEM1(TMP1), (sljit_sw)PRIV(ucd_records) + SLJIT_OFFSETOF(ucd_record, chartype));
       }
     else
       {
-// PH hacking
-  OP2(SLJIT_SHL, TMP1, 0, TMP2, 0, SLJIT_IMM, 2);
-
+      OP2(SLJIT_SHL, TMP1, 0, TMP2, 0, SLJIT_IMM, 2);
       OP2(SLJIT_SHL, TMP2, 0, TMP2, 0, SLJIT_IMM, 3);
+      OP2(SLJIT_ADD, TMP2, 0, TMP2, 0, TMP1, 0);
 
-  OP2(SLJIT_ADD, TMP2, 0, TMP2, 0, TMP1, 0);
-  OP1(SLJIT_MOV, TMP1, 0, RETURN_ADDR, 0);
-
+      OP1(SLJIT_MOV, TMP1, 0, RETURN_ADDR, 0);
       OP1(SLJIT_MOV_U8, RETURN_ADDR, 0, SLJIT_MEM1(TMP2), (sljit_sw)PRIV(ucd_records) + SLJIT_OFFSETOF(ucd_record, chartype));
       typereg = RETURN_ADDR;
       }
@@ -8769,16 +8755,13 @@ if (common->utf && *cc == OP_REFI)
 
   CMPTO(SLJIT_EQUAL, TMP1, 0, char1_reg, 0, loop);
 
-// PH hacking
   OP1(SLJIT_MOV, TMP3, 0, TMP1, 0);
 
   add_jump(compiler, &common->getucd, JUMP(SLJIT_FAST_CALL));
 
-    OP2(SLJIT_SHL, TMP1, 0, TMP2, 0, SLJIT_IMM, 2);
-
+  OP2(SLJIT_SHL, TMP1, 0, TMP2, 0, SLJIT_IMM, 2);
   OP2(SLJIT_SHL, TMP2, 0, TMP2, 0, SLJIT_IMM, 3);
-
-    OP2(SLJIT_ADD, TMP2, 0, TMP2, 0, TMP1, 0);
+  OP2(SLJIT_ADD, TMP2, 0, TMP2, 0, TMP1, 0);
 
   OP2(SLJIT_ADD, TMP2, 0, TMP2, 0, SLJIT_IMM, (sljit_sw)PRIV(ucd_records));
 
