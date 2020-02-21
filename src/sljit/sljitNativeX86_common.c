@@ -726,7 +726,7 @@ static SLJIT_INLINE sljit_s32 emit_endbranch(struct sljit_compiler *compiler)
 	*inst = 0xfa;
 #endif
 #else
-	(void)compiler;
+	SLJIT_UNUSED_ARG(compiler);
 #endif
 	return SLJIT_SUCCESS;
 }
@@ -754,7 +754,8 @@ static SLJIT_INLINE sljit_s32 emit_rdssp(struct sljit_compiler *compiler, sljit_
 	*inst++ = 0x1e;
 	*inst = (0x3 << 6) | (0x1 << 3) | (reg_map[reg] & 0x7);
 #else
-	(void)compiler;
+	SLJIT_UNUSED_ARG(compiler);
+	SLJIT_UNUSED_ARG(reg);
 #endif
 	return SLJIT_SUCCESS;
 }
@@ -782,7 +783,8 @@ static SLJIT_INLINE sljit_s32 emit_incssp(struct sljit_compiler *compiler, sljit
 	*inst++ = 0xae;
 	*inst = (0x3 << 6) | (0x5 << 3) | (reg_map[reg] & 0x7);
 #else
-	(void)compiler;
+	SLJIT_UNUSED_ARG(compiler);
+	SLJIT_UNUSED_ARG(reg);
 #endif
 	return SLJIT_SUCCESS;
 }
@@ -860,6 +862,10 @@ static SLJIT_INLINE sljit_s32 adjust_shadow_stack(struct sljit_compiler *compile
 	*jz_after_cmp_inst = compiler->size - size_jz_after_cmp_inst;
 #else /* SLJIT_CONFIG_X86_CET */
 	SLJIT_UNUSED_ARG(compiler);
+	SLJIT_UNUSED_ARG(src);
+	SLJIT_UNUSED_ARG(srcw);
+	SLJIT_UNUSED_ARG(base);
+	SLJIT_UNUSED_ARG(disp);
 #endif /* SLJIT_CONFIG_X86_CET */
 	return SLJIT_SUCCESS;
 }

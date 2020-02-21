@@ -297,6 +297,7 @@ extern "C" {
 /* Type of public API functions. */
 /*********************************/
 
+#ifndef SLJIT_API_FUNC_ATTRIBUTE 
 #if (defined SLJIT_CONFIG_STATIC && SLJIT_CONFIG_STATIC)
 /* Static ABI functions. For all-in-one programs. */
 
@@ -310,6 +311,7 @@ extern "C" {
 #else
 #define SLJIT_API_FUNC_ATTRIBUTE
 #endif /* (defined SLJIT_CONFIG_STATIC && SLJIT_CONFIG_STATIC) */
+#endif /* defined SLJIT_API_FUNC_ATTRIBUTE */
 
 /****************************/
 /* Instruction cache flush. */
