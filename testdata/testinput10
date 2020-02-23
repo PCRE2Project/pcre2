@@ -570,8 +570,10 @@
 /[\xff\x{ffff}]/I,utf
 
 /[\xff\x{ff}]/I,utf
+    abc\x{ff}def
 
 /[\xff\x{ff}]/I
+    abc\x{ff}def
 
 /[Ss]/I
 
@@ -584,5 +586,32 @@
     \x80\=startchar
     abc\x80\=startchar
     abc\x80\=startchar,offset=3
+
+#subject no_jit
+
+/\x{c1}+\x{e1}/iIB,ucp
+    \x{c1}\x{c1}\x{c1}
+    \x{e1}\x{e1}\x{e1} 
+
+/a|\x{c1}/iI,ucp
+    \x{e1}xxx
+
+/a|\x{c1}/iI,utf
+    \x{e1}xxx
+
+/\x{c1}|\x{e1}/iI,ucp
+
+/X(\x{e1})Y/ucp,replace=>\U$1<,substitute_extended
+    X\x{e1}Y
+
+/X(\x{e1})Y/i,ucp,replace=>\L$1<,substitute_extended
+    X\x{c1}Y
+
+# Without UTF or UCP characters > 127 have only one case in the default locale.
+
+/X(\x{e1})Y/replace=>\U$1<,substitute_extended
+    X\x{e1}Y
+
+#subject     
 
 # End of testinput10

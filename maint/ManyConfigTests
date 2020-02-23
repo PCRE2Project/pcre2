@@ -28,8 +28,6 @@
 # The -v option causes a call to 'pcre2test -C' to happen for each
 # configuration.
 
-# Currently -fsanitize=undefined is not working (locks machine).
-
 useasan=1
 useusan=1
 usedebug=1

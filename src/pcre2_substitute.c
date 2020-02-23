@@ -236,6 +236,7 @@ BOOL use_existing_match;
 BOOL replacement_only;
 #ifdef SUPPORT_UNICODE
 BOOL utf = (code->overall_options & PCRE2_UTF) != 0;
+BOOL ucp = (code->overall_options & PCRE2_UCP) != 0;
 #endif
 PCRE2_UCHAR temp[6];
 PCRE2_SPTR ptr;
@@ -758,7 +759,7 @@ do
           if (forcecase != 0)
             {
 #ifdef SUPPORT_UNICODE
-            if (utf)
+            if (utf || ucp)
               {
               uint32_t type = UCD_CHARTYPE(ch);
               if (PRIV(ucp_gentype)[type] == ucp_L &&
@@ -860,7 +861,7 @@ do
       if (forcecase != 0)
         {
 #ifdef SUPPORT_UNICODE
-        if (utf)
+        if (utf || ucp)
           {
           uint32_t type = UCD_CHARTYPE(ch);
           if (PRIV(ucp_gentype)[type] == ucp_L &&

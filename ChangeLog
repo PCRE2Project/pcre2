@@ -66,6 +66,11 @@ recurse function in JIT.
 17. Fix a crash which occurs when the character type of an invalid UTF
 character is decoded in JIT.
 
+18. Changes in many areas of the code so that when Unicode is supported and 
+PCRE2_UCP is set without PCRE2_UTF, Unicode character properties are used for 
+upper/lower case computations on characters whose code points are greater than 
+127. Documentation is not yet updated. JIT is not yet updated.
+
 
 Version 10.34 21-November-2019
 ------------------------------

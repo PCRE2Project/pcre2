@@ -1613,7 +1613,7 @@ Subject length lower bound = 1
 
 /[Ss]/I
 Capture group count = 0
-Starting code units: S s 
+First code unit = 'S' (caseless)
 Subject length lower bound = 1
 
 /[Ss]/I,utf
@@ -1627,5 +1627,135 @@ Capture group count = 0
 Options: utf
 Starting code units: \xff 
 Subject length lower bound = 1
+
+# ---------------------------------------------------- 
+# UCP and casing tests
+
+/\x{120}/i,I
+Capture group count = 0
+Options: caseless
+First code unit = \x{120}
+Subject length lower bound = 1
+
+/\x{c1}/i,I,ucp
+Capture group count = 0
+Options: caseless ucp
+First code unit = \xc1 (caseless)
+Subject length lower bound = 1
+
+/[\x{120}\x{121}]/iB,ucp
+------------------------------------------------------------------
+        Bra
+     /i \x{120}
+        Ket
+        End
+------------------------------------------------------------------
+
+/[ab\x{120}]+/iB,ucp
+------------------------------------------------------------------
+        Bra
+        [ABab\x{120}-\x{121}]++
+        Ket
+        End
+------------------------------------------------------------------
+    aABb\x{121}\x{120}
+ 0: aABb\x{121}\x{120}
+
+#subject no_jit
+
+/\x{c1}/i,no_start_optimize
+\= Expect no match
+    \x{e1}
+No match
+
+/\x{120}\x{c1}/i,ucp,no_start_optimize
+    \x{121}\x{e1}
+ 0: \x{121}\xe1
+
+/\x{120}\x{c1}/i,ucp
+    \x{121}\x{e1}
+ 0: \x{121}\xe1
+
+/[^\x{120}]/i,no_start_optimize
+    \x{121}
+ 0: \x{121}
+
+/[^\x{120}]/i,ucp,no_start_optimize
+\= Expect no match
+    \x{121}
+No match
+
+/[^\x{120}]/i
+    \x{121}
+ 0: \x{121}
+
+/[^\x{120}]/i,ucp
+\= Expect no match
+    \x{121}
+No match
+    
+/\x{120}{2}/i,ucp
+    \x{121}\x{121}
+ 0: \x{121}\x{121}
+
+/[^\x{120}]{2}/i,ucp
+\= Expect no match
+    \x{121}\x{121}
+No match
+
+/\x{c1}+\x{e1}/iB,ucp
+------------------------------------------------------------------
+        Bra
+     /i \x{c1}+
+     /i \x{e1}
+        Ket
+        End
+------------------------------------------------------------------
+    \x{c1}\x{c1}\x{c1}
+ 0: \xc1\xc1\xc1
+
+/\x{c1}+\x{e1}/iIB,ucp
+------------------------------------------------------------------
+        Bra
+     /i \x{c1}+
+     /i \x{e1}
+        Ket
+        End
+------------------------------------------------------------------
+Capture group count = 0
+Options: caseless ucp
+First code unit = \xc1 (caseless)
+Last code unit = \xe1 (caseless)
+Subject length lower bound = 2
+    \x{c1}\x{c1}\x{c1}
+ 0: \xc1\xc1\xc1
+    \x{e1}\x{e1}\x{e1} 
+ 0: \xe1\xe1\xe1
+
+/a|\x{c1}/iI,ucp
+Capture group count = 0
+Options: caseless ucp
+Starting code units: A a \xc1 \xe1 
+Subject length lower bound = 1
+    \x{e1}xxx
+ 0: \xe1
+
+/\x{c1}|\x{e1}/iI,ucp
+Capture group count = 0
+Options: caseless ucp
+First code unit = \xc1 (caseless)
+Subject length lower bound = 1
+
+/X(\x{e1})Y/ucp,replace=>\U$1<,substitute_extended
+    X\x{e1}Y
+ 1: >\xc1<
+
+/X(\x{121})Y/ucp,replace=>\U$1<,substitute_extended
+    X\x{121}Y
+ 1: >\x{120}<
+
+#subject 
+
+# ---------------------------------------------------- 
 
 # End of testinput12

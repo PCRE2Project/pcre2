@@ -4904,7 +4904,7 @@ range. */
 if ((options & PCRE2_CASELESS) != 0)
   {
 #ifdef SUPPORT_UNICODE
-  if ((options & PCRE2_UTF) != 0)
+  if ((options & (PCRE2_UTF|PCRE2_UCP)) != 0)
     {
     int rc;
     uint32_t oc, od;
@@ -5319,7 +5319,8 @@ dynamically as we process the pattern. */
 
 #ifdef SUPPORT_UNICODE
 BOOL utf = (options & PCRE2_UTF) != 0;
-#else  /* No UTF support */
+BOOL ucp = (options & PCRE2_UCP) != 0;
+#else  /* No Unicode support */
 BOOL utf = FALSE;
 #endif
 
@@ -5602,7 +5603,7 @@ for (;; pptr++)
         uint32_t d;
 
 #ifdef SUPPORT_UNICODE
-        if (utf && c > 127) d = UCD_OTHERCASE(c); else
+        if ((utf || ucp) && c > 127) d = UCD_OTHERCASE(c); else
 #endif
           {
 #if PCRE2_CODE_UNIT_WIDTH != 8
@@ -9632,6 +9633,7 @@ pcre2_compile(PCRE2_SPTR pattern, PCRE2_SIZE patlen, uint32_t options,
    int *errorptr, PCRE2_SIZE *erroroffset, pcre2_compile_context *ccontext)
 {
 BOOL utf;                             /* Set TRUE for UTF mode */
+BOOL ucp;                             /* Set TRUE for UCP mode */
 BOOL has_lookbehind = FALSE;          /* Set TRUE if a lookbehind is found */
 BOOL zero_terminated;                 /* Set TRUE for zero-terminated pattern */
 pcre2_real_code *re = NULL;           /* What we will return */
@@ -9919,8 +9921,8 @@ if (utf)
 
 /* Check UCP lockout. */
 
-if ((cb.external_options & (PCRE2_UCP|PCRE2_NEVER_UCP)) ==
-    (PCRE2_UCP|PCRE2_NEVER_UCP))
+ucp = (cb.external_options & PCRE2_UCP) != 0;
+if (ucp && (cb.external_options & PCRE2_NEVER_UCP) != 0)
   {
   errorcode = ERR75;
   goto HAD_EARLY_ERROR;
@@ -10296,7 +10298,7 @@ function call. */
 if (errorcode == 0 && (re->overall_options & PCRE2_NO_AUTO_POSSESS) == 0)
   {
   PCRE2_UCHAR *temp = (PCRE2_UCHAR *)codestart;
-  if (PRIV(auto_possessify)(temp, utf, &cb) != 0) errorcode = ERR80;
+  if (PRIV(auto_possessify)(temp, &cb) != 0) errorcode = ERR80;
   }
 
 /* Failed to compile, or error while post-processing. */
@@ -10344,21 +10346,25 @@ if ((re->overall_options & PCRE2_NO_START_OPTIMIZE) == 0)
 
     if ((firstcuflags & REQ_CASELESS) != 0)
       {
-      if (firstcu < 128 || (!utf && firstcu < 255))
+      if (firstcu < 128 || (!utf && !ucp && firstcu < 255))
         {
         if (cb.fcc[firstcu] != firstcu) re->flags |= PCRE2_FIRSTCASELESS;
         }
 
-      /* The first code unit is > 128 in UTF mode, or > 255 otherwise. In
-      8-bit UTF mode, codepoints in the range 128-255 are introductory code
-      points and cannot have another case. In 16-bit and 32-bit modes, we can
-      check wide characters when UTF (and therefore UCP) is supported. */
+      /* The first code unit is > 128 in UTF or UCP mode, or > 255 otherwise.
+      In 8-bit UTF mode, codepoints in the range 128-255 are introductory code
+      points and cannot have another case, but if UCP is set they may do. */
 
-#if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 8
-      else if (firstcu <= MAX_UTF_CODE_POINT &&
+#ifdef SUPPORT_UNICODE
+#if PCRE2_CODE_UNIT_WIDTH == 8
+      else if (ucp && !utf && UCD_OTHERCASE(firstcu) != firstcu)
+        re->flags |= PCRE2_FIRSTCASELESS;
+#else
+      else if ((utf || ucp) && firstcu <= MAX_UTF_CODE_POINT &&
                UCD_OTHERCASE(firstcu) != firstcu)
         re->flags |= PCRE2_FIRSTCASELESS;
 #endif
+#endif  /* SUPPORT_UNICODE */
       }
     }
 
@@ -10407,14 +10413,20 @@ if ((re->overall_options & PCRE2_NO_START_OPTIMIZE) == 0)
 
       if ((reqcuflags & REQ_CASELESS) != 0)
         {
-        if (reqcu < 128 || (!utf && reqcu < 255))
+        if (reqcu < 128 || (!utf && !ucp && reqcu < 255))
           {
           if (cb.fcc[reqcu] != reqcu) re->flags |= PCRE2_LASTCASELESS;
           }
-#if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 8
-        else if (reqcu <= MAX_UTF_CODE_POINT && UCD_OTHERCASE(reqcu) != reqcu)
-          re->flags |= PCRE2_LASTCASELESS;
+#ifdef SUPPORT_UNICODE
+#if PCRE2_CODE_UNIT_WIDTH == 8
+      else if (ucp && !utf && UCD_OTHERCASE(reqcu) != reqcu)
+        re->flags |= PCRE2_LASTCASELESS;
+#else
+      else if ((utf || ucp) && reqcu <= MAX_UTF_CODE_POINT &&
+               UCD_OTHERCASE(reqcu) != reqcu)
+        re->flags |= PCRE2_LASTCASELESS;
 #endif
+#endif  /* SUPPORT_UNICODE */
         }
       }
     }

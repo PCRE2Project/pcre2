@@ -463,4 +463,71 @@
 
 /(?:\x{ff}|\x{3000})/I,utf
 
+# ---------------------------------------------------- 
+# UCP and casing tests
+
+/\x{120}/i,I
+
+/\x{c1}/i,I,ucp
+
+/[\x{120}\x{121}]/iB,ucp
+
+/[ab\x{120}]+/iB,ucp
+    aABb\x{121}\x{120}
+
+#subject no_jit
+
+/\x{c1}/i,no_start_optimize
+\= Expect no match
+    \x{e1}
+
+/\x{120}\x{c1}/i,ucp,no_start_optimize
+    \x{121}\x{e1}
+
+/\x{120}\x{c1}/i,ucp
+    \x{121}\x{e1}
+
+/[^\x{120}]/i,no_start_optimize
+    \x{121}
+
+/[^\x{120}]/i,ucp,no_start_optimize
+\= Expect no match
+    \x{121}
+
+/[^\x{120}]/i
+    \x{121}
+
+/[^\x{120}]/i,ucp
+\= Expect no match
+    \x{121}
+    
+/\x{120}{2}/i,ucp
+    \x{121}\x{121}
+
+/[^\x{120}]{2}/i,ucp
+\= Expect no match
+    \x{121}\x{121}
+
+/\x{c1}+\x{e1}/iB,ucp
+    \x{c1}\x{c1}\x{c1}
+
+/\x{c1}+\x{e1}/iIB,ucp
+    \x{c1}\x{c1}\x{c1}
+    \x{e1}\x{e1}\x{e1} 
+
+/a|\x{c1}/iI,ucp
+    \x{e1}xxx
+
+/\x{c1}|\x{e1}/iI,ucp
+
+/X(\x{e1})Y/ucp,replace=>\U$1<,substitute_extended
+    X\x{e1}Y
+
+/X(\x{121})Y/ucp,replace=>\U$1<,substitute_extended
+    X\x{121}Y
+
+#subject 
+
+# ---------------------------------------------------- 
+
 # End of testinput12

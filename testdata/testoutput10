@@ -1780,11 +1780,15 @@ Capture group count = 0
 Options: utf
 Starting code units: \xc3 
 Subject length lower bound = 1
+    abc\x{ff}def
+ 0: \x{ff}
 
 /[\xff\x{ff}]/I
 Capture group count = 0
-Starting code units: \xff 
+First code unit = \xff
 Subject length lower bound = 1
+    abc\x{ff}def
+ 0: \xff
 
 /[Ss]/I
 Capture group count = 0
@@ -1812,5 +1816,63 @@ Failed: error -22: UTF-8 error: isolated byte with 0x80 bit set at offset 0
 Failed: error -22: UTF-8 error: isolated byte with 0x80 bit set at offset 3
     abc\x80\=startchar,offset=3
 Error -36 (bad UTF-8 offset)
+
+#subject no_jit
+
+/\x{c1}+\x{e1}/iIB,ucp
+------------------------------------------------------------------
+        Bra
+     /i \x{c1}+
+     /i \x{e1}
+        Ket
+        End
+------------------------------------------------------------------
+Capture group count = 0
+Options: caseless ucp
+First code unit = \xc1 (caseless)
+Last code unit = \xe1 (caseless)
+Subject length lower bound = 2
+    \x{c1}\x{c1}\x{c1}
+ 0: \xc1\xc1\xc1
+    \x{e1}\x{e1}\x{e1} 
+ 0: \xe1\xe1\xe1
+
+/a|\x{c1}/iI,ucp
+Capture group count = 0
+Options: caseless ucp
+Starting code units: A a \xc1 \xe1 
+Subject length lower bound = 1
+    \x{e1}xxx
+ 0: \xe1
+
+/a|\x{c1}/iI,utf
+Capture group count = 0
+Options: caseless utf
+Starting code units: A a \xc3 
+Subject length lower bound = 1
+    \x{e1}xxx
+ 0: \x{e1}
+
+/\x{c1}|\x{e1}/iI,ucp
+Capture group count = 0
+Options: caseless ucp
+First code unit = \xc1 (caseless)
+Subject length lower bound = 1
+
+/X(\x{e1})Y/ucp,replace=>\U$1<,substitute_extended
+    X\x{e1}Y
+ 1: >\xc1<
+
+/X(\x{e1})Y/i,ucp,replace=>\L$1<,substitute_extended
+    X\x{c1}Y
+ 1: >\xe1<
+
+# Without UTF or UCP characters > 127 have only one case in the default locale.
+
+/X(\x{e1})Y/replace=>\U$1<,substitute_extended
+    X\x{e1}Y
+ 1: >\xe1<
+
+#subject     
 
 # End of testinput10
