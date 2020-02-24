@@ -10182,4 +10182,8 @@ No match
     AXYZ
  0: Z
 
+"(?(DEFINE)(?<foo>bar))(?<![-a-z0-9])word"
+    word
+ 0: word
+
 # End of testinput1 

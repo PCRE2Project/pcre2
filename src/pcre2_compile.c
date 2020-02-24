@@ -8019,6 +8019,7 @@ and skip over the pattern offset. */
 lookbehind = *code == OP_ASSERTBACK ||
              *code == OP_ASSERTBACK_NOT ||
              *code == OP_ASSERTBACK_NA;
+
 if (lookbehind)
   {
   lookbehindlength = META_DATA(pptr[-1]);
@@ -9553,6 +9554,10 @@ for (; *pptr != META_END; pptr++)
     break;
 
     case META_COND_DEFINE:
+    pptr += SIZEOFFSET;
+    nestlevel++;
+    break;
+
     case META_COND_NAME:
     case META_COND_NUMBER:
     case META_COND_RNAME:

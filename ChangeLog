@@ -77,6 +77,11 @@ low surrogate. This caused incorrect behaviour, for example when
 PCRE2_MATCH_INVALID_UTF was set and a match started immediately following the
 invalid high surrogate, such as /aa/ matching "\x{d800}aa".
 
+20. If a DEFINE group immediately preceded a lookbehind assertion, the pattern 
+could be mis-compiled and therefore not match correctly. This is the example 
+that found this: /(?(DEFINE)(?<foo>bar))(?<![-a-z0-9])word/ which failed to 
+match "word" because the "move back" value was set to zero.
+
 
 Version 10.34 21-November-2019
 ------------------------------

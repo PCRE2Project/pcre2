@@ -6424,4 +6424,7 @@ ef) x/x,mark
 "(?<=X(?(DEFINE)(Y))(?1))."
     AXYZ
 
+"(?(DEFINE)(?<foo>bar))(?<![-a-z0-9])word"
+    word
+
 # End of testinput1 
