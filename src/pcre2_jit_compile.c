@@ -6107,32 +6107,28 @@ if (common->match_end_ptr != 0)
   OP1(SLJIT_MOV, STR_END, 0, RETURN_ADDR, 0);
 }
 
-static SLJIT_INLINE struct sljit_jump *search_requested_char(compiler_common *common, PCRE2_UCHAR req_char, BOOL caseless, BOOL has_firstchar)
+static SLJIT_INLINE jump_list *search_requested_char(compiler_common *common, PCRE2_UCHAR req_char, BOOL caseless, BOOL has_firstchar)
 {
 DEFINE_COMPILER;
 struct sljit_label *loop;
 struct sljit_jump *toolong;
-struct sljit_jump *alreadyfound;
+struct sljit_jump *already_found;
 struct sljit_jump *found;
-struct sljit_jump *foundoc = NULL;
-struct sljit_jump *notfound;
+struct sljit_jump *found_oc = NULL;
+jump_list *not_found = NULL;
 sljit_u32 oc, bit;
 
 SLJIT_ASSERT(common->req_char_ptr != 0);
-OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(SLJIT_SP), common->req_char_ptr);
-OP2(SLJIT_ADD, TMP1, 0, STR_PTR, 0, SLJIT_IMM, REQ_CU_MAX);
-toolong = CMP(SLJIT_LESS, TMP1, 0, STR_END, 0);
-alreadyfound = CMP(SLJIT_LESS, STR_PTR, 0, TMP2, 0);
+OP2(SLJIT_ADD, TMP2, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(REQ_CU_MAX) * 100);
+OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_SP), common->req_char_ptr);
+toolong = CMP(SLJIT_LESS, TMP2, 0, STR_END, 0);
+already_found = CMP(SLJIT_LESS, STR_PTR, 0, TMP1, 0);
 
 if (has_firstchar)
   OP2(SLJIT_ADD, TMP1, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
 else
   OP1(SLJIT_MOV, TMP1, 0, STR_PTR, 0);
 
-loop = LABEL();
-notfound = CMP(SLJIT_GREATER_EQUAL, TMP1, 0, STR_END, 0);
-
-OP1(MOV_UCHAR, TMP2, 0, SLJIT_MEM1(TMP1), 0);
 oc = req_char;
 if (caseless)
   {
@@ -6142,32 +6138,49 @@ if (caseless)
     oc = UCD_OTHERCASE(req_char);
 #endif
   }
-if (req_char == oc)
-  found = CMP(SLJIT_EQUAL, TMP2, 0, SLJIT_IMM, req_char);
-else
+
+#ifdef JIT_HAS_FAST_REQUESTED_CHAR_SIMD
+if (JIT_HAS_FAST_REQUESTED_CHAR_SIMD)
   {
-  bit = req_char ^ oc;
-  if (is_powerof2(bit))
-    {
-    OP2(SLJIT_OR, TMP2, 0, TMP2, 0, SLJIT_IMM, bit);
-    found = CMP(SLJIT_EQUAL, TMP2, 0, SLJIT_IMM, req_char | bit);
-    }
+  not_found = fast_requested_char_simd(common, req_char, oc);
+  }
+else
+#endif
+  {
+  loop = LABEL();
+  add_jump(compiler, &not_found, CMP(SLJIT_GREATER_EQUAL, TMP1, 0, STR_END, 0));
+
+  OP1(MOV_UCHAR, TMP2, 0, SLJIT_MEM1(TMP1), 0);
+
+  if (req_char == oc)
+    found = CMP(SLJIT_EQUAL, TMP2, 0, SLJIT_IMM, req_char);
   else
     {
-    found = CMP(SLJIT_EQUAL, TMP2, 0, SLJIT_IMM, req_char);
-    foundoc = CMP(SLJIT_EQUAL, TMP2, 0, SLJIT_IMM, oc);
+    bit = req_char ^ oc;
+    if (is_powerof2(bit))
+      {
+       OP2(SLJIT_OR, TMP2, 0, TMP2, 0, SLJIT_IMM, bit);
+      found = CMP(SLJIT_EQUAL, TMP2, 0, SLJIT_IMM, req_char | bit);
+      }
+    else
+      {
+      found = CMP(SLJIT_EQUAL, TMP2, 0, SLJIT_IMM, req_char);
+      found_oc = CMP(SLJIT_EQUAL, TMP2, 0, SLJIT_IMM, oc);
+      }
     }
-  }
-OP2(SLJIT_ADD, TMP1, 0, TMP1, 0, SLJIT_IMM, IN_UCHARS(1));
-JUMPTO(SLJIT_JUMP, loop);
+  OP2(SLJIT_ADD, TMP1, 0, TMP1, 0, SLJIT_IMM, IN_UCHARS(1));
+  JUMPTO(SLJIT_JUMP, loop);
 
-JUMPHERE(found);
-if (foundoc)
-  JUMPHERE(foundoc);
+  JUMPHERE(found);
+  if (found_oc)
+    JUMPHERE(found_oc);
+  }
+
 OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), common->req_char_ptr, TMP1, 0);
-JUMPHERE(alreadyfound);
+
+JUMPHERE(already_found);
 JUMPHERE(toolong);
-return notfound;
+return not_found;
 }
 
 static void do_revertframes(compiler_common *common)
@@ -13135,9 +13148,9 @@ struct sljit_label *reset_match_label;
 struct sljit_label *quit_label;
 struct sljit_jump *jump;
 struct sljit_jump *minlength_check_failed = NULL;
-struct sljit_jump *reqbyte_notfound = NULL;
 struct sljit_jump *empty_match = NULL;
 struct sljit_jump *end_anchor_failed = NULL;
+jump_list *reqcu_not_found = NULL;
 
 SLJIT_ASSERT(tables);
 
@@ -13403,7 +13416,7 @@ if (mode == PCRE2_JIT_COMPLETE && re->minlength > 0 && (re->overall_options & PC
   minlength_check_failed = CMP(SLJIT_GREATER, TMP2, 0, STR_END, 0);
   }
 if (common->req_char_ptr != 0)
-  reqbyte_notfound = search_requested_char(common, (PCRE2_UCHAR)(re->last_codeunit), (re->flags & PCRE2_LASTCASELESS) != 0, (re->flags & PCRE2_FIRSTSET) != 0);
+  reqcu_not_found = search_requested_char(common, (PCRE2_UCHAR)(re->last_codeunit), (re->flags & PCRE2_LASTCASELESS) != 0, (re->flags & PCRE2_FIRSTSET) != 0);
 
 /* Store the current STR_PTR in OVECTOR(0). */
 OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), OVECTOR(0), STR_PTR, 0);
@@ -13538,8 +13551,8 @@ if ((re->overall_options & PCRE2_ANCHORED) == 0)
   }
 
 /* No more remaining characters. */
-if (reqbyte_notfound != NULL)
-  JUMPHERE(reqbyte_notfound);
+if (reqcu_not_found != NULL)
+  set_jumps(reqcu_not_found, LABEL());
 
 if (mode == PCRE2_JIT_PARTIAL_SOFT)
   CMPTO(SLJIT_NOT_EQUAL, SLJIT_MEM1(SLJIT_SP), common->hit_start, SLJIT_IMM, -1, common->partialmatchlabel);
