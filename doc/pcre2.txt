@@ -1454,14 +1454,14 @@ COMPILING A PATTERN
 
        If  this  bit is set, letters in the pattern match both upper and lower
        case letters in the subject. It is equivalent to Perl's /i option,  and
-       it  can  be  changed  within  a  pattern  by  a (?i) option setting. If
-       PCRE2_UTF is set, Unicode properties are used for all  characters  with
-       more  than one other case, and for all characters whose code points are
-       greater than U+007F. For lower valued characters with  only  one  other
-       case,  a  lookup  table is used for speed. When PCRE2_UTF is not set, a
-       lookup table is used for all code points less than 256, and higher code
-       points  (available  only  in  16-bit or 32-bit mode) are treated as not
-       having another case.
+       it  can be changed within a pattern by a (?i) option setting. If either
+       PCRE2_UTF or PCRE2_UCP is set, Unicode  properties  are  used  for  all
+       characters  with more than one other case, and for all characters whose
+       code points are greater than U+007F. For lower valued  characters  with
+       only  one  other  case,  a lookup table is used for speed. When neither
+       PCRE2_UTF nor PCRE2_UCP is set, a lookup table is  used  for  all  code
+       points  less than 256, and higher code points (available only in 16-bit
+       or 32-bit mode) are treated as not having another case.
 
          PCRE2_DOLLAR_ENDONLY
 
@@ -1786,14 +1786,20 @@ COMPILING A PATTERN
 
          PCRE2_UCP
 
-       This option changes the way PCRE2 processes \B, \b, \D, \d, \S, \s, \W,
-       \w,  and  some  of  the POSIX character classes. By default, only ASCII
-       characters are recognized, but if PCRE2_UCP is set, Unicode  properties
-       are  used instead to classify characters. More details are given in the
-       section on generic character types in the pcre2pattern page. If you set
-       PCRE2_UCP,  matching one of the items it affects takes much longer. The
-       option is available only if PCRE2 has been compiled with  Unicode  sup-
-       port (which is the default).
+       This option has two effects. Firstly, it change the way PCRE2 processes
+       \B,  \b,  \D,  \d,  \S,  \s,  \W,  \w,  and some of the POSIX character
+       classes. By default, only  ASCII  characters  are  recognized,  but  if
+       PCRE2_UCP is set, Unicode properties are used instead to classify char-
+       acters. More details are given in  the  section  on  generic  character
+       types  in  the pcre2pattern page. If you set PCRE2_UCP, matching one of
+       the items it affects takes much longer.
+
+       The second effect of PCRE2_UCP is to force the use of  Unicode  proper-
+       ties  for  upper/lower casing operations on characters with code points
+       greater than 127, even when PCRE2_UTF is not set. This makes it  possi-
+       ble, for example, to process strings in the 16-bit UCS-2 code. This op-
+       tion is available only if PCRE2 has been compiled with Unicode  support
+       (which is the default).
 
          PCRE2_UNGREEDY
 
@@ -1953,14 +1959,18 @@ LOCALE SUPPORT
        letters, digits, or whatever, by reference to a set of tables,  indexed
        by character code point. However, this applies only to characters whose
        code points are less than 256. By default,  higher-valued  code  points
-       never  match escapes such as \w or \d. When PCRE2 is built with Unicode
-       support (the default), all characters can be tested with \p and \P, or,
-       alternatively,  the  PCRE2_UCP option can be set when a pattern is com-
-       piled; this causes \w and friends to use Unicode property  support  in-
-       stead of the built-in tables.
+       never match escapes such as \w or \d.
+
+       When  PCRE2  is  built  with Unicode support (the default), the Unicode
+       properties of all characters can be tested with \p and \P, or, alterna-
+       tively,  the  PCRE2_UCP  option  can be set when a pattern is compiled;
+       this causes \w and friends to use Unicode property support  instead  of
+       the  built-in  tables.  PCRE2_UCP also causes upper/lower casing opera-
+       tions on characters with code points greater than 127  to  use  Unicode
+       properties. These effects apply even when PCRE2_UTF is not set.
 
        The  use  of  locales  with Unicode is discouraged. If you are handling
-       characters with code points greater than 128,  you  should  either  use
+       characters with code points greater than 127,  you  should  either  use
        Unicode support, or use locales, but not try to mix the two.
 
        PCRE2  contains a built-in set of character tables that are used by de-
@@ -3375,7 +3385,9 @@ CREATING A NEW STRING WITH SUBSTITUTIONS
        it  is  a  letter)  to  upper or lower case, respectively, and then the
        state automatically reverts to no case forcing. Case forcing applies to
        all  inserted  characters, including those from capture groups and let-
-       ters within \Q...\E quoted sequences.
+       ters within \Q...\E quoted sequences. If either PCRE2_UTF or  PCRE2_UCP
+       was  set when the pattern was compiled, Unicode properties are used for
+       case forcing characters whose code points are greater than 127.
 
        Note that case forcing sequences such as \U...\E do not nest. For exam-
        ple,  the  result of processing "\Uaa\LBB\Ecc\E" is "AAbbcc"; the final
@@ -3761,7 +3773,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 16 February 2020
+       Last updated: 24 February 2020
        Copyright (c) 1997-2020 University of Cambridge.
 ------------------------------------------------------------------------------
  
@@ -6145,7 +6157,9 @@ SPECIAL START-OF-PATTERN ITEMS
        (*UCP).   This  has the same effect as setting the PCRE2_UCP option: it
        causes sequences such as \d and \w to use Unicode properties to  deter-
        mine character types, instead of recognizing only characters with codes
-       less than 256 via a lookup table.
+       less than 256 via a lookup table. If also causes upper/lower casing op-
+       erations  to  use  Unicode  properties  for characters with code points
+       greater than 127, even when UTF is not set.
 
        Some applications that allow their users to supply patterns may wish to
        restrict  them  for  security reasons. If the PCRE2_NEVER_UCP option is
@@ -9502,7 +9516,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 27 January 2020
+       Last updated: 24 February 2020
        Copyright (c) 1997-2020 University of Cambridge.
 ------------------------------------------------------------------------------
  
@@ -10878,7 +10892,7 @@ UNICODE AND UTF SUPPORT
        PCRE2 is normally built with Unicode support, though if you do not need
        it, you can build it  without,  in  which  case  the  library  will  be
        smaller. With Unicode support, PCRE2 has knowledge of Unicode character
-       properties and can process text strings in  UTF-8,  UTF-16,  or  UTF-32
+       properties and can process strings of text in UTF-8, UTF-16, and UTF-32
        format (depending on the code unit width), but this is not the default.
        Unless specifically requested, PCRE2 treats each code unit in a  string
        as one character.
@@ -10974,14 +10988,16 @@ WIDE CHARACTERS AND UTF MODES
        ters, whether or not PCRE2_UCP is set.
 
 
-CASE-EQUIVALENCE IN UTF MODE
+UNICODE CASE-EQUIVALENCE
 
-       Case-insensitive  matching  in UTF mode makes use of Unicode properties
-       except for characters whose code points are less than 128 and that have
-       at most two case-equivalent values. For these, a direct table lookup is
-       used for speed. A few Unicode characters such as Greek sigma have  more
-       than  two  code  points that are case-equivalent, and these are treated
-       specially.
+       If  either  PCRE2_UTF  or PCRE2_UCP is set, upper/lower case processing
+       makes use of Unicode properties except for characters whose code points
+       are less than 128 and that have at most two case-equivalent values. For
+       these, a direct table lookup is used for speed. A few  Unicode  charac-
+       ters  such as Greek sigma have more than two code points that are case-
+       equivalent, and these are treated specially. Setting PCRE2_UCP  without
+       PCRE2_UTF  allows  Unicode-style  case processing for non-UTF character
+       encodings such as UCS-2.
 
 
 SCRIPT RUNS
@@ -11294,8 +11310,8 @@ AUTHOR
 
 REVISION
 
-       Last updated: 24 May 2019
-       Copyright (c) 1997-2019 University of Cambridge.
+       Last updated: 23 February 2020
+       Copyright (c) 1997-2020 University of Cambridge.
 ------------------------------------------------------------------------------
  
  

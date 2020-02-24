@@ -114,7 +114,8 @@ Another special sequence that may appear at the start of a pattern is (*UCP).
 This has the same effect as setting the PCRE2_UCP option: it causes sequences
 such as \d and \w to use Unicode properties to determine character types,
 instead of recognizing only characters with codes less than 256 via a lookup
-table.
+table. If also causes upper/lower casing operations to use Unicode properties 
+for characters with code points greater than 127, even when UTF is not set.
 </P>
 <P>
 Some applications that allow their users to supply patterns may wish to
@@ -3833,7 +3834,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC32" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 27 January 2020
+Last updated: 24 February 2020
 <br>
 Copyright &copy; 1997-2020 University of Cambridge.
 <br>

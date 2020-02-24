@@ -1,4 +1,4 @@
-.TH PCRE2PATTERN 3 "27 January 2020" "PCRE2 10.35"
+.TH PCRE2PATTERN 3 "24 February 2020" "PCRE2 10.35"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION DETAILS"
@@ -75,7 +75,8 @@ Another special sequence that may appear at the start of a pattern is (*UCP).
 This has the same effect as setting the PCRE2_UCP option: it causes sequences
 such as \ed and \ew to use Unicode properties to determine character types,
 instead of recognizing only characters with codes less than 256 via a lookup
-table.
+table. If also causes upper/lower casing operations to use Unicode properties 
+for characters with code points greater than 127, even when UTF is not set.
 .P
 Some applications that allow their users to supply patterns may wish to
 restrict them for security reasons. If the PCRE2_NEVER_UCP option is passed to
@@ -3876,6 +3877,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 27 January 2020
+Last updated: 24 February 2020
 Copyright (c) 1997-2020 University of Cambridge.
 .fi

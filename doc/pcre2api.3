@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "16 February 2020" "PCRE2 10.35"
+.TH PCRE2API 3 "24 February 2020" "PCRE2 10.35"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -1420,13 +1420,13 @@ documentation.
 .sp
 If this bit is set, letters in the pattern match both upper and lower case
 letters in the subject. It is equivalent to Perl's /i option, and it can be
-changed within a pattern by a (?i) option setting. If PCRE2_UTF is set, Unicode
-properties are used for all characters with more than one other case, and for
-all characters whose code points are greater than U+007F. For lower valued
-characters with only one other case, a lookup table is used for speed. When
-PCRE2_UTF is not set, a lookup table is used for all code points less than 256,
-and higher code points (available only in 16-bit or 32-bit mode) are treated as
-not having another case.
+changed within a pattern by a (?i) option setting. If either PCRE2_UTF or 
+PCRE2_UCP is set, Unicode properties are used for all characters with more than
+one other case, and for all characters whose code points are greater than
+U+007F. For lower valued characters with only one other case, a lookup table is
+used for speed. When neither PCRE2_UTF nor PCRE2_UCP is set, a lookup table is
+used for all code points less than 256, and higher code points (available only
+in 16-bit or 32-bit mode) are treated as not having another case.
 .sp
   PCRE2_DOLLAR_ENDONLY
 .sp
@@ -1769,10 +1769,11 @@ are not representable in UTF-16.
 .sp
   PCRE2_UCP
 .sp
-This option changes the way PCRE2 processes \eB, \eb, \eD, \ed, \eS, \es, \eW,
-\ew, and some of the POSIX character classes. By default, only ASCII characters
-are recognized, but if PCRE2_UCP is set, Unicode properties are used instead to
-classify characters. More details are given in the section on
+This option has two effects. Firstly, it change the way PCRE2 processes \eB,
+\eb, \eD, \ed, \eS, \es, \eW, \ew, and some of the POSIX character classes. By
+default, only ASCII characters are recognized, but if PCRE2_UCP is set, Unicode
+properties are used instead to classify characters. More details are given in
+the section on
 .\" HTML <a href="pcre2pattern.html#genericchartypes">
 .\" </a>
 generic character types
@@ -1782,8 +1783,13 @@ in the
 \fBpcre2pattern\fP
 .\"
 page. If you set PCRE2_UCP, matching one of the items it affects takes much
-longer. The option is available only if PCRE2 has been compiled with Unicode
-support (which is the default).
+longer. 
+.P
+The second effect of PCRE2_UCP is to force the use of Unicode properties for
+upper/lower casing operations on characters with code points greater than 127,
+even when PCRE2_UTF is not set. This makes it possible, for example, to process
+strings in the 16-bit UCS-2 code. This option is available only if PCRE2 has
+been compiled with Unicode support (which is the default).
 .sp
   PCRE2_UNGREEDY
 .sp
@@ -1957,13 +1963,18 @@ PCRE2 handles caseless matching, and determines whether characters are letters,
 digits, or whatever, by reference to a set of tables, indexed by character code
 point. However, this applies only to characters whose code points are less than
 256. By default, higher-valued code points never match escapes such as \ew or
-\ed. When PCRE2 is built with Unicode support (the default), all characters can
-be tested with \ep and \eP, or, alternatively, the PCRE2_UCP option can be set
-when a pattern is compiled; this causes \ew and friends to use Unicode property
-support instead of the built-in tables.
+\ed. 
+.P
+When PCRE2 is built with Unicode support (the default), the Unicode properties 
+of all characters can be tested with \ep and \eP, or, alternatively, the
+PCRE2_UCP option can be set when a pattern is compiled; this causes \ew and
+friends to use Unicode property support instead of the built-in tables.
+PCRE2_UCP also causes upper/lower casing operations on characters with code
+points greater than 127 to use Unicode properties. These effects apply even
+when PCRE2_UTF is not set.
 .P
 The use of locales with Unicode is discouraged. If you are handling characters
-with code points greater than 128, you should either use Unicode support, or
+with code points greater than 127, you should either use Unicode support, or
 use locales, but not try to mix the two.
 .P
 PCRE2 contains a built-in set of character tables that are used by default.
@@ -3495,7 +3506,10 @@ terminating a \eQ quoted sequence) reverts to no case forcing. The sequences
 \eu and \el force the next character (if it is a letter) to upper or lower
 case, respectively, and then the state automatically reverts to no case
 forcing. Case forcing applies to all inserted  characters, including those from
-capture groups and letters within \eQ...\eE quoted sequences.
+capture groups and letters within \eQ...\eE quoted sequences. If either 
+PCRE2_UTF or PCRE2_UCP was set when the pattern was compiled, Unicode 
+properties are used for case forcing characters whose code points are greater
+than 127.
 .P
 Note that case forcing sequences such as \eU...\eE do not nest. For example,
 the result of processing "\eUaa\eLBB\eEcc\eE" is "AAbbcc"; the final \eE has no
@@ -3923,6 +3937,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 16 February 2020
+Last updated: 24 February 2020
 Copyright (c) 1997-2020 University of Cambridge.
 .fi

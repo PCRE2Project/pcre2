@@ -19,7 +19,7 @@ UNICODE AND UTF SUPPORT
 PCRE2 is normally built with Unicode support, though if you do not need it, you
 can build it without, in which case the library will be smaller. With Unicode
 support, PCRE2 has knowledge of Unicode character properties and can process
-text strings in UTF-8, UTF-16, or UTF-32 format (depending on the code unit
+strings of text in UTF-8, UTF-16, and UTF-32 format (depending on the code unit
 width), but this is not the default. Unless specifically requested, PCRE2
 treats each code unit in a string as one character.
 </P>
@@ -134,14 +134,16 @@ However, the special horizontal and vertical white space matching escapes (\h,
 not PCRE2_UCP is set.
 </P>
 <br><b>
-CASE-EQUIVALENCE IN UTF MODE
+UNICODE CASE-EQUIVALENCE
 </b><br>
 <P>
-Case-insensitive matching in UTF mode makes use of Unicode properties except
-for characters whose code points are less than 128 and that have at most two
-case-equivalent values. For these, a direct table lookup is used for speed. A
-few Unicode characters such as Greek sigma have more than two code points that
-are case-equivalent, and these are treated specially.
+If either PCRE2_UTF or PCRE2_UCP is set, upper/lower case processing makes use
+of Unicode properties except for characters whose code points are less than 128
+and that have at most two case-equivalent values. For these, a direct table
+lookup is used for speed. A few Unicode characters such as Greek sigma have
+more than two code points that are case-equivalent, and these are treated
+specially. Setting PCRE2_UCP without PCRE2_UTF allows Unicode-style case 
+processing for non-UTF character encodings such as UCS-2.
 <a name="scriptruns"></a></P>
 <br><b>
 SCRIPT RUNS
@@ -484,9 +486,9 @@ Cambridge, England.
 REVISION
 </b><br>
 <P>
-Last updated: 24 May 2019
+Last updated: 23 February 2020
 <br>
-Copyright &copy; 1997-2019 University of Cambridge.
+Copyright &copy; 1997-2020 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE2 index page</a>.
