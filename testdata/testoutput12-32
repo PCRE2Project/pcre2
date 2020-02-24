@@ -1574,6 +1574,15 @@ No match
 No match
     A\x{110000}B 
 No match
+    
+/aa/utf,ucp,match_invalid_utf,global
+    aa\x{d800}aa
+ 0: aa
+ 0: aa
+
+/aa/utf,ucp,match_invalid_utf,global
+    \x{d800}aa
+ 0: aa
 
 # ---------------------------------------------------- 
 

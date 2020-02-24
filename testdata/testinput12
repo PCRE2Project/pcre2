@@ -444,6 +444,12 @@
 \= Expect no match
     A\x{d800}B
     A\x{110000}B 
+    
+/aa/utf,ucp,match_invalid_utf,global
+    aa\x{d800}aa
+
+/aa/utf,ucp,match_invalid_utf,global
+    \x{d800}aa
 
 # ---------------------------------------------------- 
 

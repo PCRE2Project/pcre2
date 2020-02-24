@@ -33,7 +33,7 @@ Failed: error -26: UTF-16 error: isolated low surrogate at offset 2
     XX\x{110000}
 ** Failed: character \x{110000} is greater than 0x10ffff and so cannot be converted to UTF-16
     XX\x{d800}\x{1234}
-Failed: error -25: UTF-16 error: invalid low surrogate at offset 3
+Failed: error -25: UTF-16 error: invalid low surrogate at offset 2
           
 /badutf/utf
     X\xdf

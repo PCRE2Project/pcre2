@@ -71,6 +71,12 @@ PCRE2_UCP is set without PCRE2_UTF, Unicode character properties are used for
 upper/lower case computations on characters whose code points are greater than 
 127. Documentation is not yet updated. JIT is not yet updated.
 
+19. The function for checking UTF-16 validity was returning an incorrect offset
+for the start of the error when a high surrogate was not followed by a valid
+low surrogate. This caused incorrect behaviour, for example when
+PCRE2_MATCH_INVALID_UTF was set and a match started immediately following the
+invalid high surrogate, such as /aa/ matching "\x{d800}aa".
+
 
 Version 10.34 21-November-2019
 ------------------------------
