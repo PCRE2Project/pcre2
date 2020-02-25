@@ -2179,4 +2179,6 @@
 
 /\p{Any}*xyz/I
 
+/(|ß)7/caseless,ucp
+
 # End of testinput5

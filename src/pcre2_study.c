@@ -824,7 +824,7 @@ if (caseless)
       (void)PRIV(ord2utf)(c, buff);
       SET_BIT(buff[0]);
       }
-    else SET_BIT(c);    
+    else if (c < 256) SET_BIT(c);    
 #else  /* 16-bit or 32-bit mode */
     if (c > 0xff) SET_BIT(0xff); else SET_BIT(c);
 #endif

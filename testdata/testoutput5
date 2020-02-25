@@ -4938,4 +4938,6 @@ Overall options: anchored
 Last code unit = 'z'
 Subject length lower bound = 3
 
+/(|ß)7/caseless,ucp
+
 # End of testinput5
