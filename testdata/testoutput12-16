@@ -1761,6 +1761,24 @@ Subject length lower bound = 1
     X\x{121}Y
  1: >\x{120}<
 
+/s/i,ucp
+    \x{17f} 
+ 0: \x{17f}
+
+/s/i,utf
+    \x{17f} 
+ 0: \x{17f}
+
+/[^s]/i,ucp
+\= Expect no match
+    \x{17f} 
+No match
+
+/[^s]/i,utf
+\= Expect no match
+    \x{17f} 
+No match
+
 # ---------------------------------------------------- 
 
 # End of testinput12

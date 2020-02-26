@@ -381,8 +381,12 @@ length = Fovector[offset+1] - Fovector[offset];
 if (caseless)
   {
 #if defined SUPPORT_UNICODE
-  if ((mb->poptions & PCRE2_UTF) != 0)
+  BOOL utf = (mb->poptions & PCRE2_UTF) != 0;
+   
+  if (utf || (mb->poptions & PCRE2_UCP) != 0)
     {
+    PCRE2_SPTR endptr = p + length;
+
     /* Match characters up to the end of the reference. NOTE: the number of
     code units matched may differ, because in UTF-8 there are some characters
     whose upper and lower case codes have different numbers of bytes. For
@@ -390,16 +394,25 @@ if (caseless)
     bytes in UTF-8); a sequence of 3 of the former uses 6 bytes, as does a
     sequence of two of the latter. It is important, therefore, to check the
     length along the reference, not along the subject (earlier code did this
-    wrong). */
-
-    PCRE2_SPTR endptr = p + length;
+    wrong). UCP without uses Unicode properties but without UTF encoding. */
+     
     while (p < endptr)
       {
       uint32_t c, d;
       const ucd_record *ur;
       if (eptr >= mb->end_subject) return 1;   /* Partial match */
-      GETCHARINC(c, eptr);
-      GETCHARINC(d, p);
+      
+      if (utf)
+        { 
+        GETCHARINC(c, eptr);
+        GETCHARINC(d, p);
+        }
+      else
+        {
+        c = *eptr++;
+        d = *p++;  
+        }
+ 
       ur = GET_UCD(d);
       if (c != d && c != (uint32_t)((int)d + ur->other_case))
         {
@@ -415,7 +428,7 @@ if (caseless)
   else
 #endif
 
-  /* Not in UTF mode */
+  /* Not in UTF or UCP mode */
     {
     for (; length > 0; length--)
       {
@@ -432,7 +445,8 @@ if (caseless)
   }
 
 /* In the caseful case, we can just compare the code units, whether or not we
-are in UTF mode. When partial matching, we have to do this unit-by-unit. */
+are in UTF and/or UCP mode. When partial matching, we have to do this unit by
+unit. */
 
 else
   {

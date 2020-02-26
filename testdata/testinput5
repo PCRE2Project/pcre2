@@ -2181,4 +2181,7 @@
 
 /(|ß)7/caseless,ucp
 
+/(\xc1)\1/i,ucp
+    \xc1\xe1\=no_jit
+    
 # End of testinput5

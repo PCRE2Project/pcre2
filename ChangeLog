@@ -69,7 +69,7 @@ character is decoded in JIT.
 18. Changes in many areas of the code so that when Unicode is supported and 
 PCRE2_UCP is set without PCRE2_UTF, Unicode character properties are used for 
 upper/lower case computations on characters whose code points are greater than 
-127. Documentation is not yet updated. JIT is not yet updated.
+127.
 
 19. The function for checking UTF-16 validity was returning an incorrect offset
 for the start of the error when a high surrogate was not followed by a valid

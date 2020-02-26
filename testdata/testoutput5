@@ -4940,4 +4940,9 @@ Subject length lower bound = 3
 
 /(|ß)7/caseless,ucp
 
+/(\xc1)\1/i,ucp
+    \xc1\xe1\=no_jit
+ 0: \xc1\xe1
+ 1: \xc1
+    
 # End of testinput5

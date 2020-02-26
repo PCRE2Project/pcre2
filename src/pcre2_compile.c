@@ -5565,12 +5565,12 @@ for (;; pptr++)
       zerofirstcu = firstcu;
       zerofirstcuflags = firstcuflags;
 
-      /* For caseless UTF mode, check whether this character has more than
-      one other case. If so, generate a special OP_NOTPROP item instead of
+      /* For caseless UTF or UCP mode, check whether this character has more
+      than one other case. If so, generate a special OP_NOTPROP item instead of
       OP_NOTI. */
 
 #ifdef SUPPORT_UNICODE
-      if (utf && (options & PCRE2_CASELESS) != 0 &&
+      if ((utf||ucp) && (options & PCRE2_CASELESS) != 0 &&
           (d = UCD_CASESET(c)) != 0)
         {
         *code++ = OP_NOTPROP;
@@ -7824,11 +7824,12 @@ for (;; pptr++)
     NORMAL_CHAR_SET:  /* Character is already in meta */
     matched_char = TRUE;
 
-    /* For caseless UTF mode, check whether this character has more than one
-    other case. If so, generate a special OP_PROP item instead of OP_CHARI. */
+    /* For caseless UTF or UCP mode, check whether this character has more than
+    one other case. If so, generate a special OP_PROP item instead of OP_CHARI.
+    */
 
 #ifdef SUPPORT_UNICODE
-    if (utf && (options & PCRE2_CASELESS) != 0)
+    if ((utf||ucp) && (options & PCRE2_CASELESS) != 0)
       {
       uint32_t caseset = UCD_CASESET(meta);
       if (caseset != 0)

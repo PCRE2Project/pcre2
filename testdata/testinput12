@@ -530,6 +530,20 @@
 /X(\x{121})Y/ucp,replace=>\U$1<,substitute_extended
     X\x{121}Y
 
+/s/i,ucp
+    \x{17f} 
+
+/s/i,utf
+    \x{17f} 
+
+/[^s]/i,ucp
+\= Expect no match
+    \x{17f} 
+
+/[^s]/i,utf
+\= Expect no match
+    \x{17f} 
+
 # ---------------------------------------------------- 
 
 # End of testinput12
