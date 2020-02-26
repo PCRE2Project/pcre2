@@ -587,8 +587,6 @@
     abc\x80\=startchar
     abc\x80\=startchar,offset=3
 
-#subject no_jit
-
 /\x{c1}+\x{e1}/iIB,ucp
     \x{c1}\x{c1}\x{c1}
     \x{e1}\x{e1}\x{e1} 
@@ -611,7 +609,5 @@
 
 /X(\x{e1})Y/replace=>\U$1<,substitute_extended
     X\x{e1}Y
-
-#subject     
 
 # End of testinput10

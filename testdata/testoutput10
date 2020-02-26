@@ -1817,8 +1817,6 @@ Failed: error -22: UTF-8 error: isolated byte with 0x80 bit set at offset 3
     abc\x80\=startchar,offset=3
 Error -36 (bad UTF-8 offset)
 
-#subject no_jit
-
 /\x{c1}+\x{e1}/iIB,ucp
 ------------------------------------------------------------------
         Bra
@@ -1872,7 +1870,5 @@ Subject length lower bound = 1
 /X(\x{e1})Y/replace=>\U$1<,substitute_extended
     X\x{e1}Y
  1: >\xe1<
-
-#subject     
 
 # End of testinput10

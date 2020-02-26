@@ -1670,8 +1670,6 @@ Subject length lower bound = 1
     aABb\x{121}\x{120}
  0: aABb\x{121}\x{120}
 
-#subject no_jit
-
 /\x{c1}/i,no_start_optimize
 \= Expect no match
     \x{e1}
@@ -1762,8 +1760,6 @@ Subject length lower bound = 1
 /X(\x{121})Y/ucp,replace=>\U$1<,substitute_extended
     X\x{121}Y
  1: >\x{120}<
-
-#subject 
 
 # ---------------------------------------------------- 
 

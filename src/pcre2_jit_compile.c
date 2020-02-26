@@ -476,7 +476,7 @@ typedef struct compiler_common {
 #ifdef SUPPORT_UNICODE
   BOOL utf;
   BOOL invalid_utf;
-  BOOL use_ucp;
+  BOOL ucp;
   /* Points to saving area for iref. */
   sljit_s32 iref_ptr;
   jump_list *getucd;
@@ -3226,16 +3226,19 @@ static SLJIT_INLINE BOOL char_has_othercase(compiler_common *common, PCRE2_SPTR 
 unsigned int c;
 
 #ifdef SUPPORT_UNICODE
-if (common->utf)
+if (common->utf || common->ucp)
   {
-  GETCHAR(c, cc);
-  if (c > 127)
+  if (common->utf)
     {
-    return c != UCD_OTHERCASE(c);
+    GETCHAR(c, cc);
     }
-#if PCRE2_CODE_UNIT_WIDTH != 8
+  else
+    c = *cc;
+
+  if (c > 127)
+    return c != UCD_OTHERCASE(c);
+
   return common->fcc[c] != c;
-#endif
   }
 else
 #endif
@@ -3247,10 +3250,8 @@ static SLJIT_INLINE unsigned int char_othercase(compiler_common *common, unsigne
 {
 /* Returns with the othercase. */
 #ifdef SUPPORT_UNICODE
-if (common->utf && c > 127)
-  {
+if ((common->utf || common->ucp) && c > 127)
   return UCD_OTHERCASE(c);
-  }
 #endif
 return TABLE_GET(c, common->fcc, c);
 }
@@ -3264,15 +3265,19 @@ int n;
 #endif
 
 #ifdef SUPPORT_UNICODE
-if (common->utf)
+if (common->utf || common->ucp)
   {
-  GETCHAR(c, cc);
+  if (common->utf)
+    {
+    GETCHAR(c, cc);
+    }
+  else
+    c = *cc;
+
   if (c <= 127)
     oc = common->fcc[c];
   else
-    {
     oc = UCD_OTHERCASE(c);
-    }
   }
 else
   {
@@ -5493,7 +5498,12 @@ while (TRUE)
 #endif
       {
       chr = *cc;
-      othercase[0] = TABLE_GET(chr, common->fcc, chr);
+#ifdef SUPPORT_UNICODE
+      if (common->ucp && chr > 127)
+        othercase[0] = UCD_OTHERCASE(chr);
+      else
+#endif
+        othercase[0] = TABLE_GET(chr, common->fcc, chr);
       }
     }
   else
@@ -5922,8 +5932,8 @@ oc = first_char;
 if ((common->re->flags & PCRE2_FIRSTCASELESS) != 0)
   {
   oc = TABLE_GET(first_char, common->fcc, first_char);
-#if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 8
-  if (first_char > 127 && common->utf)
+#if defined SUPPORT_UNICODE
+  if (first_char > 127 && (common->utf || common->ucp))
     oc = UCD_OTHERCASE(first_char);
 #endif
   }
@@ -6133,8 +6143,8 @@ oc = req_char;
 if (caseless)
   {
   oc = TABLE_GET(req_char, common->fcc, req_char);
-#if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 8
-  if (req_char > 127 && common->utf)
+#if defined SUPPORT_UNICODE
+  if (req_char > 127 && (common->utf || common->ucp))
     oc = UCD_OTHERCASE(req_char);
 #endif
   }
@@ -6288,7 +6298,7 @@ else
 
 /* Testing char type. */
 #ifdef SUPPORT_UNICODE
-if (common->use_ucp)
+if (common->ucp)
   {
   OP1(SLJIT_MOV, TMP2, 0, SLJIT_IMM, 1);
   jump = CMP(SLJIT_EQUAL, TMP1, 0, SLJIT_IMM, CHAR_UNDERSCORE);
@@ -6334,7 +6344,7 @@ peek_char(common, READ_CHAR_MAX, SLJIT_MEM1(SLJIT_SP), LOCALS1, &invalid_utf2);
 
 valid_utf = LABEL();
 
-if (common->use_ucp)
+if (common->ucp)
   {
   OP1(SLJIT_MOV, TMP2, 0, SLJIT_IMM, 1);
   jump = CMP(SLJIT_EQUAL, TMP1, 0, SLJIT_IMM, CHAR_UNDERSCORE);
@@ -13216,7 +13226,7 @@ common->alt_circumflex = (re->overall_options & PCRE2_ALT_CIRCUMFLEX) != 0;
 #ifdef SUPPORT_UNICODE
 /* PCRE_UTF[16|32] have the same value as PCRE_UTF8. */
 common->utf = (re->overall_options & PCRE2_UTF) != 0;
-common->use_ucp = (re->overall_options & PCRE2_UCP) != 0;
+common->ucp = (re->overall_options & PCRE2_UCP) != 0;
 if (common->utf)
   {
   if (common->nltype == NLTYPE_ANY)
