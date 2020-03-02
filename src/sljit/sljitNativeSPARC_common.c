@@ -451,6 +451,9 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_has_cpu_feature(sljit_s32 feature_type)
 		return 1;
 #endif
 
+	case SLJIT_HAS_ZERO_REGISTER:
+		return 1;
+
 #if (defined SLJIT_CONFIG_SPARC_64 && SLJIT_CONFIG_SPARC_64)
 	case SLJIT_HAS_CMOV:
 		return 1;

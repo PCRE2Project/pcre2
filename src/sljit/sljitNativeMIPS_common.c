@@ -684,6 +684,8 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_has_cpu_feature(sljit_s32 feature_type)
 #else
 #error "FIR check is not implemented for this architecture"
 #endif
+	case SLJIT_HAS_ZERO_REGISTER:
+		return 1;
 
 #if (defined SLJIT_MIPS_REV && SLJIT_MIPS_REV >= 1)
 	case SLJIT_HAS_CLZ:

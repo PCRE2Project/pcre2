@@ -3048,13 +3048,50 @@ else
 static SLJIT_INLINE void reset_fast_fail(compiler_common *common)
 {
 DEFINE_COMPILER;
+sljit_s32 size = common->fast_fail_end_ptr - common->fast_fail_start_ptr;
+sljit_s32 src = SLJIT_IMM;
 sljit_s32 i;
+struct sljit_label *loop;
 
 SLJIT_ASSERT(common->fast_fail_start_ptr < common->fast_fail_end_ptr);
 
-OP2(SLJIT_SUB, TMP1, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
-for (i = common->fast_fail_start_ptr; i < common->fast_fail_end_ptr; i += sizeof(sljit_sw))
-  OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), i, TMP1, 0);
+if (size == sizeof(sljit_sw))
+  {
+  OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), common->fast_fail_start_ptr, SLJIT_IMM, 0);
+  return;
+  }
+
+if (sljit_get_register_index(TMP3) >= 0 && !sljit_has_cpu_feature(SLJIT_HAS_ZERO_REGISTER))
+  {
+  OP1(SLJIT_MOV, TMP3, 0, SLJIT_IMM, 0);
+  src = TMP3;
+  }
+
+if (size <= 6 * sizeof(sljit_sw))
+  {
+  for (i = common->fast_fail_start_ptr; i < common->fast_fail_end_ptr; i += sizeof(sljit_sw))
+    OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), i, src, 0);
+  return;
+  }
+
+GET_LOCAL_BASE(TMP1, 0, common->fast_fail_start_ptr);
+
+i = ((size / (sljit_s32)sizeof(sljit_sw)) % 3) * sizeof(sljit_sw);
+
+OP2(SLJIT_ADD, TMP2, 0, TMP1, 0, SLJIT_IMM, size - i);
+
+loop = LABEL();
+OP1(SLJIT_MOV, SLJIT_MEM1(TMP1), 0, src, 0);
+OP2(SLJIT_ADD, TMP1, 0, TMP1, 0, SLJIT_IMM, 3 * sizeof(sljit_sw));
+OP1(SLJIT_MOV, SLJIT_MEM1(TMP1), -2 * (sljit_sw)sizeof(sljit_sw), src, 0);
+OP1(SLJIT_MOV, SLJIT_MEM1(TMP1), -1 * (sljit_sw)sizeof(sljit_sw), src, 0);
+CMPTO(SLJIT_LESS, TMP1, 0, TMP2, 0, loop);
+
+if (i >= (sljit_sw)sizeof(sljit_sw))
+  OP1(SLJIT_MOV, SLJIT_MEM1(TMP1), 0, src, 0);
+
+if (i >= 2 * (sljit_sw)sizeof(sljit_sw))
+  OP1(SLJIT_MOV, SLJIT_MEM1(TMP1), sizeof(sljit_sw), src, 0);
 }
 
 static SLJIT_INLINE void do_reset_match(compiler_common *common, int length)

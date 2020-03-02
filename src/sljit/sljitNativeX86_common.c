@@ -2316,6 +2316,10 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op2(struct sljit_compiler *compile
 		if (!HAS_FLAGS(op)) {
 			if ((src2 & SLJIT_IMM) && emit_lea_binary(compiler, dst, dstw, src1, src1w, SLJIT_IMM, -src2w) != SLJIT_ERR_UNSUPPORTED)
 				return compiler->error;
+			if (SLOW_IS_REG(dst) && src2 == dst) {
+				FAIL_IF(emit_non_cum_binary(compiler, BINARY_OPCODE(SUB), dst, 0, dst, 0, src1, src1w));
+				return emit_unary(compiler, NEG_rm, dst, 0, dst, 0);
+			}
 		}
 
 		if (dst == SLJIT_UNUSED)

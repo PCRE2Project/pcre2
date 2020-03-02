@@ -626,6 +626,8 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_has_cpu_feature(sljit_s32 feature_type)
 		return 1;
 #endif
 
+	/* A saved register is set to a zero value. */
+	case SLJIT_HAS_ZERO_REGISTER:
 	case SLJIT_HAS_CLZ:
 	case SLJIT_HAS_PREFETCH:
 		return 1;
