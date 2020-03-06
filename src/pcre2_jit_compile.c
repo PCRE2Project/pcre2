@@ -1285,13 +1285,19 @@ do
       case OP_ANY:
       case OP_ALLANY:
       case OP_ANYBYTE:
-      case OP_ANYNL:
       case OP_NOT_HSPACE:
       case OP_HSPACE:
       case OP_NOT_VSPACE:
       case OP_VSPACE:
+      fast_forward_allowed = FALSE;
+      cc++;
+      continue;
+
+      case OP_ANYNL:
       case OP_EXTUNI:
       fast_forward_allowed = FALSE;
+      if (count == 0)
+        count = 1;
       cc++;
       continue;
 
@@ -1337,6 +1343,7 @@ do
       case OP_TYPEEXACT:
       case OP_TYPEPOSUPTO:
       cc += IMM2_SIZE;
+      /* Fall through */
 
       case OP_TYPEQUERY:
       case OP_TYPEMINQUERY:
@@ -1399,6 +1406,7 @@ do
       case OP_NOTEXACTI:
       case OP_NOTPOSUPTOI:
       cc += IMM2_SIZE;
+      /* Fall through */
 
       case OP_QUERY:
       case OP_MINQUERY:
@@ -1425,27 +1433,41 @@ do
       case OP_NCLASS:
 #if defined SUPPORT_UNICODE || PCRE2_CODE_UNIT_WIDTH != 8
       case OP_XCLASS:
-      end = cc + ((*cc == OP_XCLASS) ? GET(cc, 1) : (unsigned int)(1 + (32 / sizeof(PCRE2_UCHAR))));
+      accelerated_start = cc;
+      cc += ((*cc == OP_XCLASS) ? GET(cc, 1) : (unsigned int)(1 + (32 / sizeof(PCRE2_UCHAR))));
 #else
-      end = cc + (1 + (32 / sizeof(PCRE2_UCHAR)));
+      accelerated_start = cc;
+      cc += (1 + (32 / sizeof(PCRE2_UCHAR)));
 #endif
 
-      if ((*end >= OP_CRSTAR && *end <= OP_CRMINPLUS) || (*end >= OP_CRPOSSTAR && *end <= OP_CRPOSPLUS))
+      switch (*cc)
         {
-        accelerated_start = cc;
-        cc = end + 1;
+        case OP_CRSTAR:
+        case OP_CRMINSTAR:
+        case OP_CRPLUS:
+        case OP_CRMINPLUS:
+        case OP_CRPOSSTAR:
+        case OP_CRPOSPLUS:
+        cc++;
+        break;
+
+        case OP_CRRANGE:
+        case OP_CRMINRANGE:
+        case OP_CRPOSRANGE:
+        cc += 2 * IMM2_SIZE;
+        /* Fall through */
+        case OP_CRQUERY:
+        case OP_CRMINQUERY:
+        case OP_CRPOSQUERY:
+        cc++;
+        if (count == 0)
+          count = 1;
+        /* Fall through */
+        default:
+        accelerated_start = NULL;
+        fast_forward_allowed = FALSE;
         break;
         }
-
-      fast_forward_allowed = FALSE;
-      if (count == 0)
-        count = 1;
-
-      cc = end;
-      if (*end == OP_CRQUERY || *end == OP_CRMINQUERY || *end == OP_CRPOSQUERY)
-        cc++;
-      else if (*end == OP_CRRANGE || *end == OP_CRMINRANGE || *end == OP_CRPOSRANGE)
-        cc += 1 + 2 * IMM2_SIZE;
       continue;
 
       case OP_ONCE:
@@ -1505,7 +1527,7 @@ do
           common->private_data_ptrs[(accelerated_start + 1) - common->start] = ((*private_data_start) << 3) | type_skip;
           *private_data_start += sizeof(sljit_sw);
           }
-        else 
+        else
           {
           common->private_data_ptrs[(accelerated_start + 1) - common->start] = ((*private_data_start) << 3) | type_fail;
 
