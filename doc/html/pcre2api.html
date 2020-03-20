@@ -1105,10 +1105,11 @@ less than the limit set by the caller of <b>pcre2_match()</b> or
 <b>int pcre2_config(uint32_t <i>what</i>, void *<i>where</i>);</b>
 </P>
 <P>
-The function <b>pcre2_config()</b> makes it possible for a PCRE2 client to
-discover which optional features have been compiled into the PCRE2 library. The
+The function <b>pcre2_config()</b> makes it possible for a PCRE2 client to find
+the value of certain configuration parameters and to discover which optional
+features have been compiled into the PCRE2 library. The
 <a href="pcre2build.html"><b>pcre2build</b></a>
-documentation has more details about these optional features.
+documentation has more details about these features.
 </P>
 <P>
 The first argument for <b>pcre2_config()</b> specifies which information is
@@ -1224,6 +1225,13 @@ over compilation stack usage, see <b>pcre2_set_compile_recursion_guard()</b>.
 </pre>
 This parameter is obsolete and should not be used in new code. The output is a
 uint32_t integer that is always set to zero.
+<pre>
+  PCRE2_CONFIG_TABLES_LENGTH
+</pre>
+The output is a uint32_t integer that gives the length of PCRE2's character 
+processing tables in bytes. For details of these tables see the
+<a href="#localesupport">section on locale support</a>
+below.
 <pre>
   PCRE2_CONFIG_UNICODE_VERSION
 </pre>
@@ -2043,7 +2051,7 @@ calling <b>pcre2_set_character_tables()</b> to set the tables pointer therein.
 </P>
 <P>
 For example, to build and use tables that are appropriate for the French locale
-(where accented characters with values greater than 128 are treated as
+(where accented characters with values greater than 127 are treated as
 letters), the following code could be used:
 <pre>
   setlocale(LC_CTYPE, "fr_FR");
@@ -2057,10 +2065,10 @@ are using Windows, the name for the French locale is "french".
 </P>
 <P>
 The pointer that is passed (via the compile context) to <b>pcre2_compile()</b>
-is saved with the compiled pattern, and the same tables are used by
-<b>pcre2_match()</b> and <b>pcre_dfa_match()</b>. Thus, for any single pattern,
-compilation and matching both happen in the same locale, but different patterns
-can be processed in different locales.
+is saved with the compiled pattern, and the same tables are used by the
+matching functions. Thus, for any single pattern, compilation and matching both
+happen in the same locale, but different patterns can be processed in different
+locales.
 </P>
 <P>
 It is the caller's responsibility to ensure that the memory containing the
@@ -2068,6 +2076,23 @@ tables remains available while they are still in use. When they are no longer
 needed, you can discard them using <b>pcre2_maketables_free()</b>, which should
 pass as its first parameter the same global context that was used to create the
 tables.
+</P>
+<br><b>
+Saving locale tables
+</b><br>
+<P>
+The tables described above are just a sequence of binary bytes, which makes
+them independent of hardware characteristics such as endianness or whether the
+processor is 32-bit or 64-bit. A copy of the result of <b>pcre2_maketables()</b>
+can therefore be saved in a file or elsewhere and re-used later, even in a
+different program or on another computer. The size of the tables (number of
+bytes) must be obtained by calling <b>pcre2_config()</b> with the
+PCRE2_CONFIG_TABLES_LENGTH option because <b>pcre2_maketables()</b> does not
+return this value. Note that the <b>pcre2_dftables</b> program, which is part of
+the PCRE2 build system, can be used stand-alone to create a file that contains
+a set of binary tables. See the
+<a href="pcre2build.html#createtables"><b>pcre2build</b></a>
+documentation for details.
 <a name="infoaboutpattern"></a></P>
 <br><a name="SEC23" href="#TOC1">INFORMATION ABOUT A COMPILED PATTERN</a><br>
 <P>
@@ -2076,7 +2101,7 @@ tables.
 <P>
 The <b>pcre2_pattern_info()</b> function returns general information about a
 compiled pattern. For information about callouts, see the
-<a href="pcre2pattern.html#infoaboutcallouts">next section.</a>
+<a href="#infoaboutcallouts">next section.</a>
 The first argument for <b>pcre2_pattern_info()</b> is a pointer to the compiled
 pattern. The second argument specifies which piece of information is required,
 and the third argument is a pointer to a variable to receive the data. If the
@@ -3931,7 +3956,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC42" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 24 February 2020
+Last updated: 19 March 2020
 <br>
 Copyright &copy; 1997-2020 University of Cambridge.
 <br>

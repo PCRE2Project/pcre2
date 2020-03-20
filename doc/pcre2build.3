@@ -1,4 +1,4 @@
-.TH PCRE2BUILD 3 "03 March 2019" "PCRE2 10.33"
+.TH PCRE2BUILD 3 "20 March 2020" "PCRE2 10.35"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .
@@ -110,7 +110,7 @@ To build it without Unicode support, add
   --disable-unicode
 .sp
 to the \fBconfigure\fP command. This setting applies to all three libraries. It
-is not possible to build one library with Unicode support, and another without,
+is not possible to build one library with Unicode support and another without
 in the same configuration.
 .P
 Of itself, Unicode support does not make PCRE2 treat strings as UTF-8, UTF-16
@@ -175,11 +175,11 @@ SELinux. This has no effect if JIT is not enabled. See the
 \fBpcre2jit\fP
 .\"
 documentation for a discussion of JIT usage. When JIT support is enabled,
-pcre2grep automatically makes use of it, unless you add
+\fBpcre2grep\fP automatically makes use of it, unless you add
 .sp
   --disable-pcre2grep-jit
 .sp
-to the "configure" command.
+to the \fBconfigure\fP command.
 .
 .
 .SH "NEWLINE RECOGNITION"
@@ -317,6 +317,7 @@ used for lookaround assertions, atomic groups, and recursion within patterns.
 The limit does not apply to JIT matching.
 .
 .
+.\" HTML <a name="createtables"></a>
 .SH "CREATING CHARACTER TABLES AT BUILD TIME"
 .rs
 .sp
@@ -328,12 +329,33 @@ only. If you add
   --enable-rebuild-chartables
 .sp
 to the \fBconfigure\fP command, the distributed tables are no longer used.
-Instead, a program called \fBdftables\fP is compiled and run. This outputs the
-source for new set of tables, created in the default locale of your C run-time
-system. This method of replacing the tables does not work if you are cross
-compiling, because \fBdftables\fP is run on the local host. If you need to
-create alternative tables when cross compiling, you will have to do so "by
-hand".
+Instead, a program called \fBpcre2_dftables\fP is compiled and run. This
+outputs the source for new set of tables, created in the default locale of your
+C run-time system. This method of replacing the tables does not work if you are
+cross compiling, because \fBpcre2_dftables\fP needs to be run on the local
+host and therefore not compiled with the cross compiler.
+.P
+If you need to create alternative tables when cross compiling, you will have to
+do so "by hand". There may also be other reasons for creating tables manually.
+To cause \fBpcre2_dftables\fP to be built on the local host, run a normal
+compiling command, and then run the program with the output file as its 
+argument, for example:
+.sp
+  cc src/pcre2_dftables.c -o pcre2_dftables
+  ./pcre2_dftables src/pcre2_chartables.c 
+.sp
+This builds the tables in the default locale of the local host. If you want to 
+specify a locale, you must use the -L option:
+.sp
+  LC_ALL=fr_FR ./pcre2_dftables -L src/pcre2_chartables.c
+.sp   
+You can also specify -b (with or without -L). This causes the tables to be 
+written in binary instead of as source code. A set of binary tables can be 
+loaded into memory by an application and passed to \fBpcre2_compile()\fP in the 
+same way as tables created by calling \fBpcre2_maketables()\fP. The tables are 
+just a string of bytes, independent of hardware characteristics such as 
+endianness. This means they can be bundled with an application that runs in 
+different environments, to ensure consistent behaviour.
 .
 .
 .SH "USING EBCDIC CODE"
@@ -548,7 +570,7 @@ support these modifiers. If
 .sp
   --disable-percent-zt
 .sp
-is specified, no use is made of the z or t modifiers. Instead or %td or %zu,
+is specified, no use is made of the z or t modifiers. Instead of %td or %zu,
 %lu is used, with a cast for size_t values.
 .
 .
@@ -610,6 +632,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 03 March 2019
-Copyright (c) 1997-2019 University of Cambridge.
+Last updated: 20 March 2020
+Copyright (c) 1997-2020 University of Cambridge.
 .fi

@@ -389,12 +389,14 @@ typedef struct cmdstruct {
   int  value;
 } cmdstruct;
 
-enum { CMD_FORBID_UTF, CMD_LOAD, CMD_NEWLINE_DEFAULT, CMD_PATTERN,
-  CMD_PERLTEST, CMD_POP, CMD_POPCOPY, CMD_SAVE, CMD_SUBJECT, CMD_UNKNOWN };
+enum { CMD_FORBID_UTF, CMD_LOAD, CMD_LOADTABLES, CMD_NEWLINE_DEFAULT,
+  CMD_PATTERN, CMD_PERLTEST, CMD_POP, CMD_POPCOPY, CMD_SAVE, CMD_SUBJECT,
+  CMD_UNKNOWN };
 
 static cmdstruct cmdlist[] = {
   { "forbid_utf",      CMD_FORBID_UTF },
   { "load",            CMD_LOAD },
+  { "loadtables",      CMD_LOADTABLES },
   { "newline_default", CMD_NEWLINE_DEFAULT },
   { "pattern",         CMD_PATTERN },
   { "perltest",        CMD_PERLTEST },
@@ -957,6 +959,8 @@ static int *dfa_workspace = NULL;
 static const uint8_t *locale_tables = NULL;
 static const uint8_t *use_tables = NULL;
 static uint8_t locale_name[32];
+static uint8_t *tables3 = NULL;         /* For binary-loaded tables */
+static uint32_t loadtables_length = 0;
 
 /* We need buffers for building 16/32-bit strings; 8-bit strings don't need
 rebuilding, but set up the same naming scheme for use in macros. The "buffer"
@@ -4795,12 +4799,13 @@ Arguments:
   buffptr     point after the #command
   mode        open mode
   fptr        points to the FILE variable
+  name        name of # command
 
 Returns:      PR_OK or PR_ABEND
 */
 
 static int
-open_file(uint8_t *buffptr, const char *mode, FILE **fptr)
+open_file(uint8_t *buffptr, const char *mode, FILE **fptr, const char *name)
 {
 char *endf;
 char *filename = (char *)buffptr;
@@ -4810,7 +4815,7 @@ while (endf > filename && isspace(endf[-1])) endf--;
 
 if (endf == filename)
   {
-  fprintf(outfile, "** File name expected after #save\n");
+  fprintf(outfile, "** File name expected after %s\n", name);
   return PR_ABEND;
   }
 
@@ -4976,7 +4981,7 @@ switch(cmd)
     return PR_OK;
     }
 
-  rc = open_file(argptr+1, BINARY_OUTPUT_MODE, &f);
+  rc = open_file(argptr+1, BINARY_OUTPUT_MODE, &f, "#save");
   if (rc != PR_OK) return rc;
 
   PCRE2_SERIALIZE_ENCODE(rc, patstack, patstacknext, &serial, &serial_size,
@@ -5015,7 +5020,7 @@ switch(cmd)
   /* Load a set of compiled patterns from a file onto the stack */
 
   case CMD_LOAD:
-  rc = open_file(argptr+1, BINARY_INPUT_MODE, &f);
+  rc = open_file(argptr+1, BINARY_INPUT_MODE, &f, "#load");
   if (rc != PR_OK) return rc;
 
   serial_size = 0;
@@ -5066,6 +5071,31 @@ switch(cmd)
     }
 
   free(serial);
+  break;
+
+  /* Load a set of binary tables into tables3. */
+
+  case CMD_LOADTABLES:
+  rc = open_file(argptr+1, BINARY_INPUT_MODE, &f, "#loadtables");
+  if (rc != PR_OK) return rc;
+
+  if (tables3 == NULL)
+    {
+    (void)PCRE2_CONFIG(PCRE2_CONFIG_TABLES_LENGTH, &loadtables_length);
+    tables3 = malloc(loadtables_length);
+    if (tables3 == NULL)
+      {
+      fprintf(outfile, "** Failed: malloc failed for #loadtables\n");
+      return PR_ABEND;
+      }
+    }
+
+  if (fread(tables3, 1, loadtables_length, f) != loadtables_length)
+    {
+    fprintf(outfile, "** Wrong return from fread()\n");
+    yield = PR_ABEND;
+    }
+  fclose(f);
   break;
   }
 
@@ -5382,8 +5412,19 @@ else switch (pat_patctl.tables_id)
   case 0: use_tables = NULL; break;
   case 1: use_tables = tables1; break;
   case 2: use_tables = tables2; break;
+
+  case 3:
+  if (tables3 == NULL)
+    {
+    fprintf(outfile, "** 'Tables = 3' is invalid: binary tables have not "
+      "been loaded\n");
+    return PR_SKIP;
+    }
+  use_tables = tables3;
+  break;
+
   default:
-  fprintf(outfile, "** 'Tables' must specify 0, 1, or 2.\n");
+  fprintf(outfile, "** 'Tables' must specify 0, 1, 2, or 3.\n");
   return PR_SKIP;
   }
 
@@ -9112,6 +9153,7 @@ free(dbuffer);
 free(pbuffer8);
 free(dfa_workspace);
 free((void *)locale_tables);
+free(tables3);
 PCRE2_MATCH_DATA_FREE(match_data);
 SUB1(pcre2_code_free, compiled_code);
 

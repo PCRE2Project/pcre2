@@ -325,18 +325,18 @@ include_HEADERS = src/pcre2posix.h
 bin_SCRIPTS = pcre2-config
 
 ## ---------------------------------------------------------------
-## The dftables program is used to rebuild character tables before compiling
-## PCRE2, if --enable-rebuild-chartables is specified. It is not a user-visible
-## program. The default (when --enable-rebuild-chartables is not specified) is
-## to copy a distributed set of tables that are defined for ASCII code. In this
-## case, dftables is not needed.
+## The pcre2_dftables program is used to rebuild character tables before
+## compiling PCRE2, if --enable-rebuild-chartables is specified. It is not an
+## installed program. The default (when --enable-rebuild-chartables is not
+## specified) is to copy a distributed set of tables that are defined for ASCII
+## code. In this case, pcre2_dftables is not needed.
 
 if WITH_REBUILD_CHARTABLES
-noinst_PROGRAMS += dftables
-dftables_SOURCES = src/dftables.c
-src/pcre2_chartables.c: dftables$(EXEEXT)
+noinst_PROGRAMS += pcre2_dftables
+pcre2_dftables_SOURCES = src/pcre2_dftables.c
+src/pcre2_chartables.c: pcre2_dftables$(EXEEXT)
 	rm -f $@
-	./dftables$(EXEEXT) $@
+	./pcre2_dftables$(EXEEXT) $@
 else
 src/pcre2_chartables.c: $(srcdir)/src/pcre2_chartables.c.dist
 	rm -f $@
@@ -634,6 +634,7 @@ EXTRA_DIST += \
   testdata/grepoutputCN \
   testdata/grepoutputN \
   testdata/greppatN4 \
+  testdata/testbtables \
   testdata/testinput1 \
   testdata/testinput2 \
   testdata/testinput3 \

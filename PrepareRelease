@@ -190,7 +190,7 @@ files="\
   libpcre2-16.pc.in \
   libpcre2-32.pc.in \
   libpcre2-posix.pc.in \
-  src/dftables.c \
+  src/pcre2_dftables.c \
   src/pcre2.h.in \
   src/pcre2_auto_possess.c \
   src/pcre2_compile.c \

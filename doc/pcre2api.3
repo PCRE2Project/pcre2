@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "24 February 2020" "PCRE2 10.35"
+.TH PCRE2API 3 "19 March 2020" "PCRE2 10.35"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -1034,12 +1034,13 @@ less than the limit set by the caller of \fBpcre2_match()\fP or
 .sp
 .B int pcre2_config(uint32_t \fIwhat\fP, void *\fIwhere\fP);
 .P
-The function \fBpcre2_config()\fP makes it possible for a PCRE2 client to
-discover which optional features have been compiled into the PCRE2 library. The
+The function \fBpcre2_config()\fP makes it possible for a PCRE2 client to find
+the value of certain configuration parameters and to discover which optional
+features have been compiled into the PCRE2 library. The
 .\" HREF
 \fBpcre2build\fP
 .\"
-documentation has more details about these optional features.
+documentation has more details about these features.
 .P
 The first argument for \fBpcre2_config()\fP specifies which information is
 required. The second argument is a pointer to memory into which the information
@@ -1152,6 +1153,16 @@ over compilation stack usage, see \fBpcre2_set_compile_recursion_guard()\fP.
 .sp
 This parameter is obsolete and should not be used in new code. The output is a
 uint32_t integer that is always set to zero.
+.sp
+  PCRE2_CONFIG_TABLES_LENGTH
+.sp
+The output is a uint32_t integer that gives the length of PCRE2's character 
+processing tables in bytes. For details of these tables see the
+.\" HTML <a href="#localesupport">
+.\" </a>
+section on locale support
+.\"
+below.
 .sp
   PCRE2_CONFIG_UNICODE_VERSION
 .sp
@@ -1996,7 +2007,7 @@ the system \fBmalloc()\fP is used. The result can be passed to
 calling \fBpcre2_set_character_tables()\fP to set the tables pointer therein.
 .P
 For example, to build and use tables that are appropriate for the French locale
-(where accented characters with values greater than 128 are treated as
+(where accented characters with values greater than 127 are treated as
 letters), the following code could be used:
 .sp
   setlocale(LC_CTYPE, "fr_FR");
@@ -2009,16 +2020,36 @@ The locale name "fr_FR" is used on Linux and other Unix-like systems; if you
 are using Windows, the name for the French locale is "french".
 .P
 The pointer that is passed (via the compile context) to \fBpcre2_compile()\fP
-is saved with the compiled pattern, and the same tables are used by
-\fBpcre2_match()\fP and \fBpcre_dfa_match()\fP. Thus, for any single pattern,
-compilation and matching both happen in the same locale, but different patterns
-can be processed in different locales.
+is saved with the compiled pattern, and the same tables are used by the
+matching functions. Thus, for any single pattern, compilation and matching both
+happen in the same locale, but different patterns can be processed in different
+locales.
 .P
 It is the caller's responsibility to ensure that the memory containing the
 tables remains available while they are still in use. When they are no longer
 needed, you can discard them using \fBpcre2_maketables_free()\fP, which should
 pass as its first parameter the same global context that was used to create the
 tables.
+.
+.
+.SS "Saving locale tables"
+.rs
+.sp
+The tables described above are just a sequence of binary bytes, which makes
+them independent of hardware characteristics such as endianness or whether the
+processor is 32-bit or 64-bit. A copy of the result of \fBpcre2_maketables()\fP
+can therefore be saved in a file or elsewhere and re-used later, even in a
+different program or on another computer. The size of the tables (number of
+bytes) must be obtained by calling \fBpcre2_config()\fP with the
+PCRE2_CONFIG_TABLES_LENGTH option because \fBpcre2_maketables()\fP does not
+return this value. Note that the \fBpcre2_dftables\fP program, which is part of
+the PCRE2 build system, can be used stand-alone to create a file that contains
+a set of binary tables. See the
+.\" HTML <a href="pcre2build.html#createtables">
+.\" </a>
+\fBpcre2build\fP
+.\"
+documentation for details.
 .
 .
 .\" HTML <a name="infoaboutpattern"></a>
@@ -2031,7 +2062,7 @@ tables.
 .P
 The \fBpcre2_pattern_info()\fP function returns general information about a
 compiled pattern. For information about callouts, see the
-.\" HTML <a href="pcre2pattern.html#infoaboutcallouts">
+.\" HTML <a href="#infoaboutcallouts">
 .\" </a>
 next section.
 .\"
@@ -3937,6 +3968,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 24 February 2020
+Last updated: 19 March 2020
 Copyright (c) 1997-2020 University of Cambridge.
 .fi

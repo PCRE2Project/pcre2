@@ -82,6 +82,18 @@ could be mis-compiled and therefore not match correctly. This is the example
 that found this: /(?(DEFINE)(?<foo>bar))(?<![-a-z0-9])word/ which failed to 
 match "word" because the "move back" value was set to zero.
 
+21. Following a request from a user, some extensions and tidies to the 
+character tables handling have been done:
+
+  (a) The dftables auxiliary program is renamed pcre2_dftables, but it is still 
+  not installed for public use.
+  
+  (b) There is now a -b option for pcre2_dftables, which causes the tables to 
+  be written in binary. There is also a -help option.
+  
+  (c) PCRE2_CONFIG_TABLES_LENGTH is added to pcre2_config() so that an 
+  application that wants to save tables in binary knows how long they are. 
+
 
 Version 10.34 21-November-2019
 ------------------------------

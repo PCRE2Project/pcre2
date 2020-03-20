@@ -74,14 +74,14 @@ can skip ahead to the CMake section.
        src/pcre2_chartables.c.
 
      OR:
-       Compile src/dftables.c as a stand-alone program (using -DHAVE_CONFIG_H
-       if you have set up src/config.h), and then run it with the single
-       argument "src/pcre2_chartables.c". This generates a set of standard
-       character tables and writes them to that file. The tables are generated
-       using the default C locale for your system. If you want to use a locale
-       that is specified by LC_xxx environment variables, add the -L option to
-       the dftables command. You must use this method if you are building on a
-       system that uses EBCDIC code.
+       Compile src/pcre2_dftables.c as a stand-alone program (using
+       -DHAVE_CONFIG_H if you have set up src/config.h), and then run it with
+       the single argument "src/pcre2_chartables.c". This generates a set of
+       standard character tables and writes them to that file. The tables are
+       generated using the default C locale for your system. If you want to use
+       a locale that is specified by LC_xxx environment variables, add the -L
+       option to the pcre2_dftables command. You must use this method if you
+       are building on a system that uses EBCDIC code.
 
      The tables in src/pcre2_chartables.c are defaults. The caller of PCRE2 can
      specify alternative tables at run time.

@@ -17580,6 +17580,29 @@ Failed: error -55 at offset 3 in replacement: requested value is not set
 "(?<=X(?(DEFINE)(.*))(?1))."
 Failed: error 125 at offset 0: lookbehind assertion is not fixed length
 
+/\sxxx\s/tables=1
+\= Expect no match
+    AB\x{85}xxx\x{a0}XYZ
+No match
+
+/\sxxx\s/tables=2
+    AB\x{85}xxx\x{a0}XYZ
+ 0: \x85xxx\xa0
+
+/^\w+/tables=2
+    École
+ 0: \xc3
+
+/^\w+/tables=3
+** 'Tables = 3' is invalid: binary tables have not been loaded
+    École
+
+#loadtables ./testdata/testbtables
+
+/^\w+/tables=3
+    École
+ 0: \xc3
+
 # End of testinput2
 Error -70: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

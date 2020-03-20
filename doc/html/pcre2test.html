@@ -376,6 +376,12 @@ This command is used to load a set of precompiled patterns from a file, as
 described in the section entitled "Saving and restoring compiled patterns"
 <a href="#saverestore">below.</a>
 <pre>
+  #loadtables &#60;filename&#62;
+</pre>
+This command is used to load a set of binary character tables that can be
+accessed by the tables=3 qualifier. Such tables can be created by the 
+<b>pcre2_dftables</b> program with the -b option.
+<pre>
   #newline_default [&#60;newline-list&#62;]
 </pre>
 When PCRE2 is built, a default newline convention can be specified. This
@@ -679,7 +685,7 @@ heavily used in the test files.
       pushcopy                  push a copy onto the stack
       stackguard=&#60;number&#62;       test the stackguard feature
       subject_literal           treat all subject lines as literal
-      tables=[0|1|2]            select internal tables
+      tables=[0|1|2|3]          select internal tables
       use_length                do not zero-terminate the pattern
       utf8_input                treat input as UTF-8
 </pre>
@@ -1027,18 +1033,20 @@ Using alternative character tables
 </b><br>
 <P>
 The value specified for the <b>tables</b> modifier must be one of the digits 0,
-1, or 2. It causes a specific set of built-in character tables to be passed to
-<b>pcre2_compile()</b>. This is used in the PCRE2 tests to check behaviour with
-different character tables. The digit specifies the tables as follows:
+1, 2, or 3. It causes a specific set of built-in character tables to be passed
+to <b>pcre2_compile()</b>. This is used in the PCRE2 tests to check behaviour
+with different character tables. The digit specifies the tables as follows:
 <pre>
   0   do not pass any special character tables
   1   the default ASCII tables, as distributed in
         pcre2_chartables.c.dist
   2   a set of tables defining ISO 8859 characters
+  3   a set of tables loaded by the #loadtables command 
 </pre>
-In table 2, some characters whose codes are greater than 128 are identified as
-letters, digits, spaces, etc. Setting alternate character tables and a locale
-are mutually exclusive.
+In tables 2, some characters whose codes are greater than 128 are identified as
+letters, digits, spaces, etc. Tables 3 can be used only after a
+<b>#loadtables</b> command has loaded them from a binary file. Setting alternate
+character tables and a locale are mutually exclusive.
 </P>
 <br><b>
 Setting certain match controls
@@ -2105,7 +2113,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC21" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 22 January 2020
+Last updated: 20 March 2020
 <br>
 Copyright &copy; 1997-2020 University of Cambridge.
 <br>

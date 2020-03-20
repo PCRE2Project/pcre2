@@ -128,7 +128,7 @@ To build it without Unicode support, add
   --disable-unicode
 </pre>
 to the <b>configure</b> command. This setting applies to all three libraries. It
-is not possible to build one library with Unicode support, and another without,
+is not possible to build one library with Unicode support and another without
 in the same configuration.
 </P>
 <P>
@@ -188,11 +188,11 @@ which enables the use of an execmem allocator in JIT that is compatible with
 SELinux. This has no effect if JIT is not enabled. See the
 <a href="pcre2jit.html"><b>pcre2jit</b></a>
 documentation for a discussion of JIT usage. When JIT support is enabled,
-pcre2grep automatically makes use of it, unless you add
+<b>pcre2grep</b> automatically makes use of it, unless you add
 <pre>
   --disable-pcre2grep-jit
 </pre>
-to the "configure" command.
+to the <b>configure</b> command.
 </P>
 <br><a name="SEC8" href="#TOC1">NEWLINE RECOGNITION</a><br>
 <P>
@@ -321,7 +321,7 @@ As well as applying to <b>pcre2_match()</b>, the depth limit also controls
 the depth of recursive function calls in <b>pcre2_dfa_match()</b>. These are
 used for lookaround assertions, atomic groups, and recursion within patterns.
 The limit does not apply to JIT matching.
-</P>
+<a name="createtables"></a></P>
 <br><a name="SEC12" href="#TOC1">CREATING CHARACTER TABLES AT BUILD TIME</a><br>
 <P>
 PCRE2 uses fixed tables for processing characters whose code points are less
@@ -332,12 +332,34 @@ only. If you add
   --enable-rebuild-chartables
 </pre>
 to the <b>configure</b> command, the distributed tables are no longer used.
-Instead, a program called <b>dftables</b> is compiled and run. This outputs the
-source for new set of tables, created in the default locale of your C run-time
-system. This method of replacing the tables does not work if you are cross
-compiling, because <b>dftables</b> is run on the local host. If you need to
-create alternative tables when cross compiling, you will have to do so "by
-hand".
+Instead, a program called <b>pcre2_dftables</b> is compiled and run. This
+outputs the source for new set of tables, created in the default locale of your
+C run-time system. This method of replacing the tables does not work if you are
+cross compiling, because <b>pcre2_dftables</b> needs to be run on the local
+host and therefore not compiled with the cross compiler.
+</P>
+<P>
+If you need to create alternative tables when cross compiling, you will have to
+do so "by hand". There may also be other reasons for creating tables manually.
+To cause <b>pcre2_dftables</b> to be built on the local host, run a normal
+compiling command, and then run the program with the output file as its 
+argument, for example:
+<pre>
+  cc src/pcre2_dftables.c -o pcre2_dftables
+  ./pcre2_dftables src/pcre2_chartables.c 
+</pre>
+This builds the tables in the default locale of the local host. If you want to 
+specify a locale, you must use the -L option:
+<pre>
+  LC_ALL=fr_FR ./pcre2_dftables -L src/pcre2_chartables.c
+</pre>
+You can also specify -b (with or without -L). This causes the tables to be 
+written in binary instead of as source code. A set of binary tables can be 
+loaded into memory by an application and passed to <b>pcre2_compile()</b> in the 
+same way as tables created by calling <b>pcre2_maketables()</b>. The tables are 
+just a string of bytes, independent of hardware characteristics such as 
+endianness. This means they can be bundled with an application that runs in 
+different environments, to ensure consistent behaviour.
 </P>
 <br><a name="SEC13" href="#TOC1">USING EBCDIC CODE</a><br>
 <P>
@@ -538,7 +560,7 @@ support these modifiers. If
 <pre>
   --disable-percent-zt
 </pre>
-is specified, no use is made of the z or t modifiers. Instead or %td or %zu,
+is specified, no use is made of the z or t modifiers. Instead of %td or %zu,
 %lu is used, with a cast for size_t values.
 </P>
 <br><a name="SEC22" href="#TOC1">SUPPORT FOR FUZZERS</a><br>
@@ -592,9 +614,9 @@ Cambridge, England.
 </P>
 <br><a name="SEC26" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 03 March 2019
+Last updated: 20 March 2020
 <br>
-Copyright &copy; 1997-2019 University of Cambridge.
+Copyright &copy; 1997-2020 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE2 index page</a>.

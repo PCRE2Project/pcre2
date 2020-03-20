@@ -448,6 +448,7 @@ released, the numbers must not be changed. */
 #define PCRE2_CONFIG_HEAPLIMIT              12
 #define PCRE2_CONFIG_NEVER_BACKSLASH_C      13
 #define PCRE2_CONFIG_COMPILED_WIDTHS        14
+#define PCRE2_CONFIG_TABLES_LENGTH          15
 
 
 /* Types for code units in patterns and subject strings. */

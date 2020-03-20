@@ -5837,4 +5837,22 @@ a)"xI
 
 "(?<=X(?(DEFINE)(.*))(?1))."
 
+/\sxxx\s/tables=1
+\= Expect no match
+    AB\x{85}xxx\x{a0}XYZ
+
+/\sxxx\s/tables=2
+    AB\x{85}xxx\x{a0}XYZ
+
+/^\w+/tables=2
+    École
+
+/^\w+/tables=3
+    École
+
+#loadtables ./testdata/testbtables
+
+/^\w+/tables=3
+    École
+
 # End of testinput2

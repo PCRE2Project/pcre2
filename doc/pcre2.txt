@@ -1103,9 +1103,9 @@ CHECKING BUILD-TIME OPTIONS
        int pcre2_config(uint32_t what, void *where);
 
        The  function  pcre2_config()  makes  it possible for a PCRE2 client to
-       discover which optional features have been compiled into the PCRE2  li-
-       brary.  The  pcre2build  documentation has more details about these op-
-       tional features.
+       find the value of certain  configuration  parameters  and  to  discover
+       which  optional features have been compiled into the PCRE2 library. The
+       pcre2build documentation has more details about these features.
 
        The first argument for pcre2_config() specifies  which  information  is
        required. The second argument is a pointer to memory into which the in-
@@ -1224,6 +1224,12 @@ CHECKING BUILD-TIME OPTIONS
 
        This parameter is obsolete and should not be used in new code. The out-
        put is a uint32_t integer that is always set to zero.
+
+         PCRE2_CONFIG_TABLES_LENGTH
+
+       The output is a uint32_t integer that gives the length of PCRE2's char-
+       acter processing tables in bytes. For details of these tables  see  the
+       section on locale support below.
 
          PCRE2_CONFIG_UNICODE_VERSION
 
@@ -1994,7 +2000,7 @@ LOCALE SUPPORT
        therein.
 
        For  example,  to  build  and  use  tables that are appropriate for the
-       French locale (where accented characters with values greater  than  128
+       French locale (where accented characters with values greater  than  127
        are treated as letters), the following code could be used:
 
          setlocale(LC_CTYPE, "fr_FR");
@@ -2007,16 +2013,30 @@ LOCALE SUPPORT
        if you are using Windows, the name for the French locale is "french".
 
        The pointer that is passed (via the compile context) to pcre2_compile()
-       is  saved  with  the  compiled pattern, and the same tables are used by
-       pcre2_match() and pcre_dfa_match(). Thus, for any single pattern,  com-
-       pilation  and  matching  both  happen in the same locale, but different
-       patterns can be processed in different locales.
+       is saved with the compiled pattern, and the same tables are used by the
+       matching functions. Thus,  for  any  single  pattern,  compilation  and
+       matching  both happen in the same locale, but different patterns can be
+       processed in different locales.
 
        It is the caller's responsibility to ensure that the memory  containing
        the tables remains available while they are still in use. When they are
        no longer needed, you can discard them  using  pcre2_maketables_free(),
        which  should  pass as its first parameter the same global context that
        was used to create the tables.
+
+   Saving locale tables
+
+       The tables described above are just a sequence of binary  bytes,  which
+       makes  them  independent of hardware characteristics such as endianness
+       or whether the processor is 32-bit or 64-bit. A copy of the  result  of
+       pcre2_maketables()  can  therefore  be saved in a file or elsewhere and
+       re-used later, even in a different program or on another computer.  The
+       size  of  the  tables  (number  of  bytes)  must be obtained by calling
+       pcre2_config()  with  the  PCRE2_CONFIG_TABLES_LENGTH  option   because
+       pcre2_maketables()   does   not   return  this  value.  Note  that  the
+       pcre2_dftables program, which is part of the PCRE2 build system, can be
+       used stand-alone to create a file that contains a set of binary tables.
+       See the pcre2build documentation for details.
 
 
 INFORMATION ABOUT A COMPILED PATTERN
@@ -3773,7 +3793,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 24 February 2020
+       Last updated: 19 March 2020
        Copyright (c) 1997-2020 University of Cambridge.
 ------------------------------------------------------------------------------
  
@@ -3873,8 +3893,8 @@ UNICODE AND UTF SUPPORT
          --disable-unicode
 
        to the configure command. This setting applies to all three  libraries.
-       It  is  not possible to build one library with Unicode support, and an-
-       other without, in the same configuration.
+       It  is  not  possible to build one library with Unicode support and an-
+       other without in the same configuration.
 
        Of itself, Unicode support does not make PCRE2 treat strings as  UTF-8,
        UTF-16 or UTF-32. To do that, applications that use the library can set
@@ -3935,7 +3955,7 @@ JUST-IN-TIME COMPILER SUPPORT
 
          --disable-pcre2grep-jit
 
-       to the "configure" command.
+       to the configure command.
 
 
 NEWLINE RECOGNITION
@@ -4079,39 +4099,61 @@ CREATING CHARACTER TABLES AT BUILD TIME
          --enable-rebuild-chartables
 
        to  the  configure  command, the distributed tables are no longer used.
-       Instead, a program called dftables is compiled and  run.  This  outputs
-       the source for new set of tables, created in the default locale of your
-       C run-time system. This method of replacing the tables does not work if
-       you  are cross compiling, because dftables is run on the local host. If
-       you need to create alternative tables when cross  compiling,  you  will
-       have to do so "by hand".
+       Instead, a program called pcre2_dftables is compiled and run. This out-
+       puts the source for new set of tables, created in the default locale of
+       your C run-time system. This method of replacing the  tables  does  not
+       work if you are cross compiling, because pcre2_dftables needs to be run
+       on the local host and therefore not compiled with the cross compiler.
+
+       If you need to create alternative tables when cross compiling, you will
+       have  to  do so "by hand". There may also be other reasons for creating
+       tables manually.  To cause pcre2_dftables to  be  built  on  the  local
+       host, run a normal compiling command, and then run the program with the
+       output file as its argument, for example:
+
+         cc src/pcre2_dftables.c -o pcre2_dftables
+         ./pcre2_dftables src/pcre2_chartables.c
+
+       This builds the tables in the default locale of the local host. If  you
+       want to specify a locale, you must use the -L option:
+
+         LC_ALL=fr_FR ./pcre2_dftables -L src/pcre2_chartables.c
+
+       You can also specify -b (with or without -L). This causes the tables to
+       be written in binary instead of as source code. A set of binary  tables
+       can  be  loaded  into memory by an application and passed to pcre2_com-
+       pile() in the same way as tables created by calling pcre2_maketables().
+       The  tables are just a string of bytes, independent of hardware charac-
+       teristics such as endianness. This means they can be  bundled  with  an
+       application  that  runs in different environments, to ensure consistent
+       behaviour.
 
 
 USING EBCDIC CODE
 
-       PCRE2  assumes  by default that it will run in an environment where the
-       character code is ASCII or Unicode, which is a superset of ASCII.  This
+       PCRE2 assumes by default that it will run in an environment  where  the
+       character  code is ASCII or Unicode, which is a superset of ASCII. This
        is the case for most computer operating systems. PCRE2 can, however, be
        compiled to run in an 8-bit EBCDIC environment by adding
 
          --enable-ebcdic --disable-unicode
 
        to the configure command. This setting implies --enable-rebuild-charta-
-       bles.  You should only use it if you know that you are in an EBCDIC en-
+       bles. You should only use it if you know that you are in an EBCDIC  en-
        vironment (for example, an IBM mainframe operating system).
 
-       It is not possible to support both EBCDIC and UTF-8 codes in  the  same
-       version  of  the  library. Consequently, --enable-unicode and --enable-
+       It  is  not possible to support both EBCDIC and UTF-8 codes in the same
+       version of the library. Consequently,  --enable-unicode  and  --enable-
        ebcdic are mutually exclusive.
 
        The EBCDIC character that corresponds to an ASCII LF is assumed to have
-       the  value  0x15 by default. However, in some EBCDIC environments, 0x25
+       the value 0x15 by default. However, in some EBCDIC  environments,  0x25
        is used. In such an environment you should use
 
          --enable-ebcdic-nl25
 
        as well as, or instead of, --enable-ebcdic. The EBCDIC character for CR
-       has  the  same  value  as in ASCII, namely, 0x0d. Whichever of 0x15 and
+       has the same value as in ASCII, namely, 0x0d.  Whichever  of  0x15  and
        0x25 is not chosen as LF is made to correspond to the Unicode NEL char-
        acter (which, in Unicode, is 0x85).
 
@@ -4123,47 +4165,47 @@ USING EBCDIC CODE
 PCRE2GREP SUPPORT FOR EXTERNAL SCRIPTS
 
        By default pcre2grep supports the use of callouts with string arguments
-       within the patterns it is matching. There are two kinds: one that  gen-
+       within  the patterns it is matching. There are two kinds: one that gen-
        erates output using local code, and another that calls an external pro-
-       gram or script.  If --disable-pcre2grep-callout-fork is  added  to  the
-       configure  command,  only  the  first  kind of callout is supported; if
-       --disable-pcre2grep-callout is used, all callouts  are  completely  ig-
-       nored.  For more details of pcre2grep callouts, see the pcre2grep docu-
+       gram  or  script.   If --disable-pcre2grep-callout-fork is added to the
+       configure command, only the first kind  of  callout  is  supported;  if
+       --disable-pcre2grep-callout  is  used,  all callouts are completely ig-
+       nored. For more details of pcre2grep callouts, see the pcre2grep  docu-
        mentation.
 
 
 PCRE2GREP OPTIONS FOR COMPRESSED FILE SUPPORT
 
-       By default, pcre2grep reads all files as plain text. You can  build  it
-       so  that  it recognizes files whose names end in .gz or .bz2, and reads
+       By  default,  pcre2grep reads all files as plain text. You can build it
+       so that it recognizes files whose names end in .gz or .bz2,  and  reads
        them with libz or libbz2, respectively, by adding one or both of
 
          --enable-pcre2grep-libz
          --enable-pcre2grep-libbz2
 
        to the configure command. These options naturally require that the rel-
-       evant  libraries  are installed on your system. Configuration will fail
+       evant libraries are installed on your system. Configuration  will  fail
        if they are not.
 
 
 PCRE2GREP BUFFER SIZE
 
-       pcre2grep uses an internal buffer to hold a "window" on the file it  is
+       pcre2grep  uses an internal buffer to hold a "window" on the file it is
        scanning, in order to be able to output "before" and "after" lines when
        it finds a match. The default starting size of the buffer is 20KiB. The
-       buffer  itself  is  three times this size, but because of the way it is
+       buffer itself is three times this size, but because of the  way  it  is
        used for holding "before" lines, the longest line that is guaranteed to
        be processable is the notional buffer size. If a longer line is encoun-
-       tered, pcre2grep automatically expands the buffer, up  to  a  specified
-       maximum  size, whose default is 1MiB or the starting size, whichever is
-       the larger. You can change the default parameter values by adding,  for
+       tered,  pcre2grep  automatically  expands the buffer, up to a specified
+       maximum size, whose default is 1MiB or the starting size, whichever  is
+       the  larger. You can change the default parameter values by adding, for
        example,
 
          --with-pcre2grep-bufsize=51200
          --with-pcre2grep-max-bufsize=2097152
 
-       to  the  configure  command. The caller of pcre2grep can override these
-       values by using --buffer-size  and  --max-buffer-size  on  the  command
+       to the configure command. The caller of pcre2grep  can  override  these
+       values  by  using  --buffer-size  and  --max-buffer-size on the command
        line.
 
 
@@ -4174,26 +4216,26 @@ PCRE2TEST OPTION FOR LIBREADLINE SUPPORT
          --enable-pcre2test-libreadline
          --enable-pcre2test-libedit
 
-       to  the configure command, pcre2test is linked with the libreadline or-
-       libedit library, respectively, and when its input is from  a  terminal,
-       it  reads  it using the readline() function. This provides line-editing
-       and history facilities. Note that libreadline is  GPL-licensed,  so  if
-       you  distribute  a binary of pcre2test linked in this way, there may be
+       to the configure command, pcre2test is linked with the libreadline  or-
+       libedit  library,  respectively, and when its input is from a terminal,
+       it reads it using the readline() function. This  provides  line-editing
+       and  history  facilities.  Note that libreadline is GPL-licensed, so if
+       you distribute a binary of pcre2test linked in this way, there  may  be
        licensing issues. These can be avoided by linking instead with libedit,
        which has a BSD licence.
 
-       Setting  --enable-pcre2test-libreadline causes the -lreadline option to
-       be added to the pcre2test build. In many operating environments with  a
-       sytem-installed  readline  library this is sufficient. However, in some
+       Setting --enable-pcre2test-libreadline causes the -lreadline option  to
+       be  added to the pcre2test build. In many operating environments with a
+       sytem-installed readline library this is sufficient. However,  in  some
        environments (e.g. if an unmodified distribution version of readline is
-       in  use),  some  extra configuration may be necessary. The INSTALL file
+       in use), some extra configuration may be necessary.  The  INSTALL  file
        for libreadline says this:
 
          "Readline uses the termcap functions, but does not link with
          the termcap or curses library itself, allowing applications
          which link with readline the to choose an appropriate library."
 
-       If your environment has not been set up so that an appropriate  library
+       If  your environment has not been set up so that an appropriate library
        is automatically included, you may need to add something like
 
          LIBS="-ncurses"
@@ -4207,7 +4249,7 @@ INCLUDING DEBUGGING CODE
 
          --enable-debug
 
-       to  the configure command, additional debugging code is included in the
+       to the configure command, additional debugging code is included in  the
        build. This feature is intended for use by the PCRE2 maintainers.
 
 
@@ -4217,14 +4259,14 @@ DEBUGGING WITH VALGRIND SUPPORT
 
          --enable-valgrind
 
-       to the configure command, PCRE2 will use valgrind annotations  to  mark
-       certain  memory  regions as unaddressable. This allows it to detect in-
+       to  the  configure command, PCRE2 will use valgrind annotations to mark
+       certain memory regions as unaddressable. This allows it to  detect  in-
        valid memory accesses, and is mostly useful for debugging PCRE2 itself.
 
 
 CODE COVERAGE REPORTING
 
-       If your C compiler is gcc, you can build a version of  PCRE2  that  can
+       If  your  C  compiler is gcc, you can build a version of PCRE2 that can
        generate a code coverage report for its test suite. To enable this, you
        must install lcov version 1.6 or above. Then specify
 
@@ -4233,20 +4275,20 @@ CODE COVERAGE REPORTING
        to the configure command and build PCRE2 in the usual way.
 
        Note that using ccache (a caching C compiler) is incompatible with code
-       coverage  reporting. If you have configured ccache to run automatically
+       coverage reporting. If you have configured ccache to run  automatically
        on your system, you must set the environment variable
 
          CCACHE_DISABLE=1
 
        before running make to build PCRE2, so that ccache is not used.
 
-       When --enable-coverage is used,  the  following  addition  targets  are
+       When  --enable-coverage  is  used,  the  following addition targets are
        added to the Makefile:
 
          make coverage
 
-       This  creates  a  fresh coverage report for the PCRE2 test suite. It is
-       equivalent to running "make coverage-reset", "make  coverage-baseline",
+       This creates a fresh coverage report for the PCRE2 test  suite.  It  is
+       equivalent  to running "make coverage-reset", "make coverage-baseline",
        "make check", and then "make coverage-report".
 
          make coverage-reset
@@ -4263,71 +4305,71 @@ CODE COVERAGE REPORTING
 
          make coverage-clean-report
 
-       This  removes the generated coverage report without cleaning the cover-
+       This removes the generated coverage report without cleaning the  cover-
        age data itself.
 
          make coverage-clean-data
 
-       This removes the captured coverage data without removing  the  coverage
+       This  removes  the captured coverage data without removing the coverage
        files created at compile time (*.gcno).
 
          make coverage-clean
 
-       This  cleans all coverage data including the generated coverage report.
-       For more information about code coverage, see the gcov and  lcov  docu-
+       This cleans all coverage data including the generated coverage  report.
+       For  more  information about code coverage, see the gcov and lcov docu-
        mentation.
 
 
 DISABLING THE Z AND T FORMATTING MODIFIERS
 
-       The  C99  standard  defines formatting modifiers z and t for size_t and
-       ptrdiff_t values, respectively. By default, PCRE2 uses these  modifiers
-       in  environments  other  than  Microsoft Visual Studio when __STDC_VER-
+       The C99 standard defines formatting modifiers z and t  for  size_t  and
+       ptrdiff_t  values, respectively. By default, PCRE2 uses these modifiers
+       in environments other than Microsoft  Visual  Studio  when  __STDC_VER-
        SION__ is defined and has a value greater than or equal to 199901L (in-
-       dicating  C99).  However, there is at least one environment that claims
+       dicating C99).  However, there is at least one environment that  claims
        to be C99 but does not support these modifiers. If
 
          --disable-percent-zt
 
-       is specified, no use is made of the z or t modifiers. Instead or %td or
+       is specified, no use is made of the z or t modifiers. Instead of %td or
        %zu, %lu is used, with a cast for size_t values.
 
 
 SUPPORT FOR FUZZERS
 
-       There  is  a  special  option for use by people who want to run fuzzing
+       There is a special option for use by people who  want  to  run  fuzzing
        tests on PCRE2:
 
          --enable-fuzz-support
 
        At present this applies only to the 8-bit library. If set, it causes an
-       extra  library  called  libpcre2-fuzzsupport.a to be built, but not in-
-       stalled. This contains a single  function  called  LLVMFuzzerTestOneIn-
-       put()  whose  arguments are a pointer to a string and the length of the
-       string. When called, this function tries to compile  the  string  as  a
-       pattern,  and if that succeeds, to match it.  This is done both with no
-       options and with some random options bits that are generated  from  the
+       extra library called libpcre2-fuzzsupport.a to be built,  but  not  in-
+       stalled.  This  contains  a single function called LLVMFuzzerTestOneIn-
+       put() whose arguments are a pointer to a string and the length  of  the
+       string.  When  called,  this  function tries to compile the string as a
+       pattern, and if that succeeds, to match it.  This is done both with  no
+       options  and  with some random options bits that are generated from the
        string.
 
-       Setting  --enable-fuzz-support  also  causes  a binary called pcre2fuz-
-       zcheck to be created. This is normally run under valgrind or used  when
+       Setting --enable-fuzz-support also causes  a  binary  called  pcre2fuz-
+       zcheck  to be created. This is normally run under valgrind or used when
        PCRE2 is compiled with address sanitizing enabled. It calls the fuzzing
-       function and outputs information about what  it  is  doing.  The  input
-       strings  are specified by arguments: if an argument starts with "=" the
-       rest of it is a literal input string. Otherwise, it is assumed to be  a
+       function  and  outputs  information  about  what it is doing. The input
+       strings are specified by arguments: if an argument starts with "="  the
+       rest  of it is a literal input string. Otherwise, it is assumed to be a
        file name, and the contents of the file are the test string.
 
 
 OBSOLETE OPTION
 
-       In  versions  of  PCRE2 prior to 10.30, there were two ways of handling
-       backtracking in the pcre2_match() function. The default was to use  the
+       In versions of PCRE2 prior to 10.30, there were two  ways  of  handling
+       backtracking  in the pcre2_match() function. The default was to use the
        system stack, but if
 
          --disable-stack-for-recursion
 
-       was  set,  memory on the heap was used. From release 10.30 onwards this
-       has changed (the stack is no longer used)  and  this  option  now  does
+       was set, memory on the heap was used. From release 10.30  onwards  this
+       has  changed  (the  stack  is  no longer used) and this option now does
        nothing except give a warning.
 
 
@@ -4345,8 +4387,8 @@ AUTHOR
 
 REVISION
 
-       Last updated: 03 March 2019
-       Copyright (c) 1997-2019 University of Cambridge.
+       Last updated: 20 March 2020
+       Copyright (c) 1997-2020 University of Cambridge.
 ------------------------------------------------------------------------------
  
  

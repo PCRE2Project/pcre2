@@ -85,6 +85,7 @@
 # 2018-11-14 PH removed unnecessary checks for stdint.h and inttypes.h
 # 2018-11-16 PH added PCRE2GREP_SUPPORT_CALLOUT_FORK support and tidied
 # 2019-02-16 PH hacked to avoid CMP0026 policy issue (see comments below)
+# 2020-03-26 PH renamed dftables as pcre2_dftables (as elsewhere)
 
 PROJECT(PCRE2 C)
 
@@ -423,11 +424,11 @@ CONFIGURE_FILE(src/pcre2.h.in
 
 OPTION(PCRE2_REBUILD_CHARTABLES "Rebuild char tables" OFF)
 IF(PCRE2_REBUILD_CHARTABLES)
-  ADD_EXECUTABLE(dftables src/dftables.c)
+  ADD_EXECUTABLE(pcre2_dftables src/pcre2_dftables.c)
   ADD_CUSTOM_COMMAND(
     COMMENT "Generating character tables (pcre2_chartables.c) for current locale"
-    DEPENDS dftables
-    COMMAND dftables
+    DEPENDS pcre2_dftables
+    COMMAND pcre2_dftables
     ARGS        ${PROJECT_BINARY_DIR}/pcre2_chartables.c
     OUTPUT      ${PROJECT_BINARY_DIR}/pcre2_chartables.c
   )

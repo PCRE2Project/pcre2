@@ -1202,7 +1202,7 @@ in the decoded tables. */
 
 if ((code->flags & PCRE2_DEREF_TABLES) != 0)
   {
-  ref_count = (PCRE2_SIZE *)(code->tables + tables_length);
+  ref_count = (PCRE2_SIZE *)(code->tables + TABLES_LENGTH);
   (*ref_count)++;
   }
 
@@ -1232,15 +1232,15 @@ if (newcode == NULL) return NULL;
 memcpy(newcode, code, code->blocksize);
 newcode->executable_jit = NULL;
 
-newtables = code->memctl.malloc(tables_length + sizeof(PCRE2_SIZE),
+newtables = code->memctl.malloc(TABLES_LENGTH + sizeof(PCRE2_SIZE),
   code->memctl.memory_data);
 if (newtables == NULL)
   {
   code->memctl.free((void *)newcode, code->memctl.memory_data);
   return NULL;
   }
-memcpy(newtables, code->tables, tables_length);
-ref_count = (PCRE2_SIZE *)(newtables + tables_length);
+memcpy(newtables, code->tables, TABLES_LENGTH);
+ref_count = (PCRE2_SIZE *)(newtables + TABLES_LENGTH);
 *ref_count = 1;
 
 newcode->tables = newtables;
@@ -1270,7 +1270,7 @@ if (code != NULL)
     be freed when there are no more references to them. The *ref_count should
     always be > 0. */
 
-    ref_count = (PCRE2_SIZE *)(code->tables + tables_length);
+    ref_count = (PCRE2_SIZE *)(code->tables + TABLES_LENGTH);
     if (*ref_count > 0)
       {
       (*ref_count)--;
