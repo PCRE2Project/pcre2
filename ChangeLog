@@ -93,6 +93,9 @@ character tables handling have been done:
   
   (c) PCRE2_CONFIG_TABLES_LENGTH is added to pcre2_config() so that an 
   application that wants to save tables in binary knows how long they are. 
+  
+22. Changed setting of CMAKE_MODULE_PATH in CMakeLists.txt from SET to 
+LIST(APPEND...) to allow a setting from the command line to be included.
 
 
 Version 10.34 21-November-2019

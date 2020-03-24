@@ -85,7 +85,8 @@
 # 2018-11-14 PH removed unnecessary checks for stdint.h and inttypes.h
 # 2018-11-16 PH added PCRE2GREP_SUPPORT_CALLOUT_FORK support and tidied
 # 2019-02-16 PH hacked to avoid CMP0026 policy issue (see comments below)
-# 2020-03-26 PH renamed dftables as pcre2_dftables (as elsewhere)
+# 2020-03-16 PH renamed dftables as pcre2_dftables (as elsewhere)
+# 2020-03-24 PH changed CMAKE_MODULE_PATH definition to add, not replace
 
 PROJECT(PCRE2 C)
 
@@ -96,7 +97,11 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8.0)
 # GET_TARGET_PROPERTY. This should no longer be required.
 # CMAKE_POLICY(SET CMP0026 OLD)
 
-SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake) # for FindReadline.cmake
+# For FindReadline.cmake. This was changed to allow setting CMAKE_MODULE_PATH
+# on the command line.
+# SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
+
+LIST(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -I${PROJECT_SOURCE_DIR}/src")
 
