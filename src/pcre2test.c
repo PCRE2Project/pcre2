@@ -5083,18 +5083,19 @@ switch(cmd)
     {
     (void)PCRE2_CONFIG(PCRE2_CONFIG_TABLES_LENGTH, &loadtables_length);
     tables3 = malloc(loadtables_length);
-    if (tables3 == NULL)
-      {
-      fprintf(outfile, "** Failed: malloc failed for #loadtables\n");
-      return PR_ABEND;
-      }
     }
 
-  if (fread(tables3, 1, loadtables_length, f) != loadtables_length)
+  if (tables3 == NULL)
+    {
+    fprintf(outfile, "** Failed: malloc failed for #loadtables\n");
+    yield = PR_ABEND;
+    }
+  else if (fread(tables3, 1, loadtables_length, f) != loadtables_length)
     {
     fprintf(outfile, "** Wrong return from fread()\n");
     yield = PR_ABEND;
     }
+
   fclose(f);
   break;
   }
