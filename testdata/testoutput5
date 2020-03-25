@@ -4736,8 +4736,6 @@ No match
 No match
     
 /^\p{Common}/utf
-    \x{589}
- 0: \x{589}
     \x{60c}
  0: \x{60c}
     \x{61f}  
@@ -4899,6 +4897,12 @@ MK: ABC
 /\p{Elymaic}\p{Nandinagari}\p{Nyiakeng_Puachue_Hmong}\p{Wancho}/utf
     \x{10fe5}\x{119AC}\x{1E10E}\x{1E2D1} 
  0: \x{10fe5}\x{119ac}\x{1e10e}\x{1e2d1}
+
+# Some Unicode 13.0.0 new script characters
+
+/\p{Chorasmian}\p{Dives_Akuru}\p{Khitan_Small_Script}\p{Yezidi}/utf
+    \x{10FB0}\x{11900}\x{18B00}\x{10E80}
+ 0: \x{10fb0}\x{11900}\x{18b00}\x{10e80}
 
 # ------- 
 

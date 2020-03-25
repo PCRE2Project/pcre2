@@ -1342,12 +1342,12 @@ No match
  0: \x{4db4}
     \x{4db5}     
  0: \x{4db5}
+    \x{4db6} 
+ 0: \x{4db6}
 \= Expect no match
     a 
 No match
     \x{2b0}
-No match
-    \x{4db6} 
 No match
   
 /^\p{Lt}/utf

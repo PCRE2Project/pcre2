@@ -81,11 +81,11 @@ script names.
 
 MultiStage2.py has two lists: the full names and the abbreviations that are
 found in the ScriptExtensions.txt file. A list of script names and their
-abbreviations s can be found in the PropertyValueAliases.txt file on the
+abbreviations can be found in the PropertyValueAliases.txt file on the
 Unicode web site. There is also a Wikipedia page that lists them, and notes the
 Unicode version in which they were introduced:
 
-http://en.wikipedia.org/wiki/Unicode_scripts#Table_of_Unicode_scripts
+https://en.wikipedia.org/wiki/Unicode_scripts#Table_of_Unicode_scripts
 
 Once the script name lists have been updated, MultiStage2.py can be run to
 generate a new version of pcre2_ucd.c, and GenerateUtt.py can be run to

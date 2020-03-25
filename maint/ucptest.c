@@ -2,7 +2,7 @@
 * A program for testing the Unicode property table *
 ***************************************************/
 
-/* Copyright (c) University of Cambridge 2008-2019 */
+/* Copyright (c) University of Cambridge 2008-2020 */
 
 /* Compile thus:
 
@@ -255,7 +255,12 @@ const unsigned char *script_names[] = {
   US"Elymaic",
   US"Nandinagari",
   US"Nyiakeng_Puachue_Hmong",
-  US"Wancho"
+  US"Wancho",
+  /* New for Unicode 13.0.0 */
+  US"Chorasmian",
+  US"Dives_Akuru",
+  US"Khitan_Small_Script",
+  US"Yezidi"
 };
 
 const unsigned char *type_names[] = {

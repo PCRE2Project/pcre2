@@ -386,3 +386,13 @@ a833 Number: Other number, Common, Other, [Devanagari, Dogra, Gujarati, Gurmukhi
 1cf4 Mark: Non-spacing mark, Inherited, Extend, [Devanagari, Grantha, Kannada]
 20f0 Mark: Non-spacing mark, Inherited, Extend, [Devanagari, Grantha, Latin]
 1cd0 Mark: Non-spacing mark, Inherited, Extend, [Bengali, Devanagari, Grantha, Kannada]
+
+findprop 32ff
+32ff Symbol: Other symbol, Common, Other, [Han]
+
+findprop 1f16d
+1f16d Symbol: Other symbol, Common, Extended Pictographic
+
+findprop 10e93 10eaa
+10e93 Letter: Other letter, Yezidi, Other
+10eaa Control: Unassigned, Unknown, Other

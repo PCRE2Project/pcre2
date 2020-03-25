@@ -23,11 +23,14 @@
 # DerivedGeneralCategory.txt is found in the "extracted" subdirectory of the
 # Unicode database (UCD) on the Unicode web site; GraphemeBreakProperty.txt is
 # in the "auxiliary" subdirectory. Scripts.txt, ScriptExtensions.txt, and
-# CaseFolding.txt are directly in the UCD directory. The emoji-data.txt file is
+# CaseFolding.txt are directly in the UCD directory.
+#
+# The emoji-data.txt file is found in the "emoji" subdirectory even though it
+# is technically part of a different (but coordinated) standard as shown
 # in files associated with Unicode Technical Standard #51 ("Unicode Emoji"),
 # for example:
 #
-# http://unicode.org/Public/emoji/11.0/emoji-data.txt
+# http://unicode.org/Public/emoji/13.0/ReadMe.txt
 #
 # -----------------------------------------------------------------------------
 # Minor modifications made to this script:
@@ -88,6 +91,7 @@
 # 01-October-2018:   Added the 'Unknown' script name
 # 03-October-2018:   Added new field for Script Extensions
 # 27-July-2019:      Updated for Unicode 12.1.0
+# 10-March-2020:     Updated for Unicode 13.0.0
 # ----------------------------------------------------------------------------
 #
 #
@@ -179,7 +183,6 @@
 # any of those scripts, which are Bengali, Devanagari, Grantha, and Kannada.
 #
 #  Philip Hazel, 03 July 2008
-#  Last Updated: 07 October 2018
 ##############################################################################
 
 
@@ -427,7 +430,9 @@ script_names = ['Unknown', 'Arabic', 'Armenian', 'Bengali', 'Bopomofo', 'Braille
   'Dogra', 'Gunjala_Gondi', 'Hanifi_Rohingya', 'Makasar', 'Medefaidrin',
   'Old_Sogdian', 'Sogdian',
 # New for Unicode 12.0.0
-  'Elymaic', 'Nandinagari', 'Nyiakeng_Puachue_Hmong', 'Wancho'
+  'Elymaic', 'Nandinagari', 'Nyiakeng_Puachue_Hmong', 'Wancho',
+# New for Unicode 13.0.0
+  'Chorasmian', 'Dives_Akuru', 'Khitan_Small_Script', 'Yezidi'
  ]
 
 script_abbrevs = [
@@ -462,7 +467,9 @@ script_abbrevs = [
 #New for Unicode 11.0.0
   'Dogr', 'Gong', 'Rohg', 'Maka', 'Medf', 'Sogo', 'Sogd',
 #New for Unicode 12.0.0
-  'Elym', 'Nand', 'Hmnp', 'Wcho'
+  'Elym', 'Nand', 'Hmnp', 'Wcho',
+#New for Unicode 13.0.0
+  'Chrs', 'Diak', 'Kits', 'Yezi'
   ]
 
 category_names = ['Cc', 'Cf', 'Cn', 'Co', 'Cs', 'Ll', 'Lm', 'Lo', 'Lt', 'Lu',

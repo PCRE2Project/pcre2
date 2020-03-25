@@ -804,10 +804,10 @@
     \x{4d00}
     \x{4db4}
     \x{4db5}     
+    \x{4db6} 
 \= Expect no match
     a 
     \x{2b0}
-    \x{4db6} 
   
 /^\p{Lt}/utf
     \x{1c5}

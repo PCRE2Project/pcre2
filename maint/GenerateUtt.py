@@ -27,6 +27,7 @@
 # Added script names for Unicode 11.0.0, 03-July-2018.
 # Added 'Unknown' script, 01-October-2018.
 # Added script names for Unicode 12.1.0, 27-July-2019.
+# Added script names for Unicode 13.0.0, 10-March-2020.
 
 script_names = ['Unknown', 'Arabic', 'Armenian', 'Bengali', 'Bopomofo', 'Braille', 'Buginese', 'Buhid', 'Canadian_Aboriginal', \
  'Cherokee', 'Common', 'Coptic', 'Cypriot', 'Cyrillic', 'Deseret', 'Devanagari', 'Ethiopic', 'Georgian', \
@@ -63,7 +64,9 @@ script_names = ['Unknown', 'Arabic', 'Armenian', 'Bengali', 'Bopomofo', 'Braille
   'Dogra', 'Gunjala_Gondi', 'Hanifi_Rohingya', 'Makasar', 'Medefaidrin',
   'Old_Sogdian', 'Sogdian',
 # New for Unicode 12.0.0
-  'Elymaic', 'Nandinagari', 'Nyiakeng_Puachue_Hmong', 'Wancho'
+  'Elymaic', 'Nandinagari', 'Nyiakeng_Puachue_Hmong', 'Wancho',
+# New for Unicode 13.0.0
+  'Chorasmian', 'Dives_Akuru', 'Khitan_Small_Script', 'Yezidi'
  ]
 
 category_names = ['Cc', 'Cf', 'Cn', 'Co', 'Cs', 'Ll', 'Lm', 'Lo', 'Lt', 'Lu',

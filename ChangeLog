@@ -97,6 +97,8 @@ character tables handling have been done:
 22. Changed setting of CMAKE_MODULE_PATH in CMakeLists.txt from SET to 
 LIST(APPEND...) to allow a setting from the command line to be included.
 
+23. Updated to Unicode 13.0.0.
+
 
 Version 10.34 21-November-2019
 ------------------------------
