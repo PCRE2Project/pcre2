@@ -1,0 +1,188 @@
+find script Han
+U+2E80..U+2E99 Symbol: Other symbol, Han, Other
+U+2E9B..U+2EF3 Symbol: Other symbol, Han, Other
+U+2F00..U+2FD5 Symbol: Other symbol, Han, Other
+        U+3005 Letter: Modifier letter, Han, Other
+        U+3007 Number: Letter number, Han, Other
+U+3021..U+3029 Number: Letter number, Han, Other
+U+3038..U+303A Number: Letter number, Han, Other
+        U+303B Letter: Modifier letter, Han, Other
+U+3400..U+4DBF Letter: Other letter, Han, Other
+U+4E00..U+9FFC Letter: Other letter, Han, Other
+U+F900..U+FA6D Letter: Other letter, Han, Other
+U+FA70..U+FAD9 Letter: Other letter, Han, Other
+U+16FF0..U+16FF1 Mark: Spacing mark, Han, SpacingMark
+U+20000..U+2A6DD Letter: Other letter, Han, Other
+U+2A700..U+2B734 Letter: Other letter, Han, Other
+U+2B740..U+2B81D Letter: Other letter, Han, Other
+U+2B820..U+2CEA1 Letter: Other letter, Han, Other
+U+2CEB0..U+2EBE0 Letter: Other letter, Han, Other
+U+2F800..U+2FA1D Letter: Other letter, Han, Other
+U+30000..U+3134A Letter: Other letter, Han, Other
+find type Pe script Common scriptx Hangul
+U+3009 Punctuation: Close punctuation, Common, Other, [Bopomofo, Hangul, Han, Hiragana, Katakana, Yi]
+U+300B Punctuation: Close punctuation, Common, Other, [Bopomofo, Hangul, Han, Hiragana, Katakana, Yi]
+U+300D Punctuation: Close punctuation, Common, Other, [Bopomofo, Hangul, Han, Hiragana, Katakana, Yi]
+U+300F Punctuation: Close punctuation, Common, Other, [Bopomofo, Hangul, Han, Hiragana, Katakana, Yi]
+U+3011 Punctuation: Close punctuation, Common, Other, [Bopomofo, Hangul, Han, Hiragana, Katakana, Yi]
+U+3015 Punctuation: Close punctuation, Common, Other, [Bopomofo, Hangul, Han, Hiragana, Katakana, Yi]
+U+3017 Punctuation: Close punctuation, Common, Other, [Bopomofo, Hangul, Han, Hiragana, Katakana, Yi]
+U+3019 Punctuation: Close punctuation, Common, Other, [Bopomofo, Hangul, Han, Hiragana, Katakana, Yi]
+U+301B Punctuation: Close punctuation, Common, Other, [Bopomofo, Hangul, Han, Hiragana, Katakana, Yi]
+U+301E..U+301F Punctuation: Close punctuation, Common, Other, [Bopomofo, Hangul, Han, Hiragana, Katakana]
+        U+FF63 Punctuation: Close punctuation, Common, Other, [Bopomofo, Hangul, Han, Hiragana, Katakana, Yi]
+find type Sk
+U+005E Symbol: Modifier symbol, Common, Other
+U+0060 Symbol: Modifier symbol, Common, Other
+U+00A8 Symbol: Modifier symbol, Common, Other
+U+00AF Symbol: Modifier symbol, Common, Other
+U+00B4 Symbol: Modifier symbol, Common, Other
+U+00B8 Symbol: Modifier symbol, Common, Other
+U+02C2..U+02C5 Symbol: Modifier symbol, Common, Other
+U+02D2..U+02DF Symbol: Modifier symbol, Common, Other
+U+02E5..U+02E9 Symbol: Modifier symbol, Common, Other
+U+02EA..U+02EB Symbol: Modifier symbol, Bopomofo, Other
+        U+02ED Symbol: Modifier symbol, Common, Other
+U+02EF..U+02FF Symbol: Modifier symbol, Common, Other
+        U+0375 Symbol: Modifier symbol, Greek, Other
+        U+0384 Symbol: Modifier symbol, Greek, Other
+        U+0385 Symbol: Modifier symbol, Common, Other
+        U+1FBD Symbol: Modifier symbol, Greek, Other
+U+1FBF..U+1FC1 Symbol: Modifier symbol, Greek, Other
+U+1FCD..U+1FCF Symbol: Modifier symbol, Greek, Other
+U+1FDD..U+1FDF Symbol: Modifier symbol, Greek, Other
+U+1FED..U+1FEF Symbol: Modifier symbol, Greek, Other
+U+1FFD..U+1FFE Symbol: Modifier symbol, Greek, Other
+U+309B..U+309C Symbol: Modifier symbol, Common, Other, [Hiragana, Katakana]
+U+A700..U+A707 Symbol: Modifier symbol, Common, Other, [Han, Latin]
+U+A708..U+A716 Symbol: Modifier symbol, Common, Other
+U+A720..U+A721 Symbol: Modifier symbol, Common, Other
+U+A789..U+A78A Symbol: Modifier symbol, Common, Other
+        U+AB5B Symbol: Modifier symbol, Common, Other
+U+AB6A..U+AB6B Symbol: Modifier symbol, Common, Other
+U+FBB2..U+FBC1 Symbol: Modifier symbol, Arabic, Other
+        U+FF3E Symbol: Modifier symbol, Common, Other
+        U+FF40 Symbol: Modifier symbol, Common, Other
+        U+FFE3 Symbol: Modifier symbol, Common, Other
+U+1F3FB..U+1F3FF Symbol: Modifier symbol, Common, Extend
+find type Pd
+U+002D Punctuation: Dash punctuation, Common, Other
+U+058A Punctuation: Dash punctuation, Armenian, Other
+U+05BE Punctuation: Dash punctuation, Hebrew, Other
+U+1400 Punctuation: Dash punctuation, Canadian_Aboriginal, Other
+U+1806 Punctuation: Dash punctuation, Mongolian, Other
+U+2010..U+2015 Punctuation: Dash punctuation, Common, Other
+        U+2E17 Punctuation: Dash punctuation, Common, Other
+        U+2E1A Punctuation: Dash punctuation, Common, Other
+U+2E3A..U+2E3B Punctuation: Dash punctuation, Common, Other
+        U+2E40 Punctuation: Dash punctuation, Common, Other
+        U+301C Punctuation: Dash punctuation, Common, Other, [Bopomofo, Hangul, Han, Hiragana, Katakana]
+        U+3030 Punctuation: Dash punctuation, Common, Extended Pictographic, [Bopomofo, Hangul, Han, Hiragana, Katakana]
+        U+30A0 Punctuation: Dash punctuation, Common, Other, [Hiragana, Katakana]
+U+FE31..U+FE32 Punctuation: Dash punctuation, Common, Other
+        U+FE58 Punctuation: Dash punctuation, Common, Other
+        U+FE63 Punctuation: Dash punctuation, Common, Other
+        U+FF0D Punctuation: Dash punctuation, Common, Other
+        U+10EAD Punctuation: Dash punctuation, Yezidi, Other
+find gbreak LVT
+U+AC01..U+AC1B Letter: Other letter, Hangul, Hangul syllable type LVT
+U+AC1D..U+AC37 Letter: Other letter, Hangul, Hangul syllable type LVT
+U+AC39..U+AC53 Letter: Other letter, Hangul, Hangul syllable type LVT
+U+AC55..U+AC6F Letter: Other letter, Hangul, Hangul syllable type LVT
+U+AC71..U+AC8B Letter: Other letter, Hangul, Hangul syllable type LVT
+U+AC8D..U+ACA7 Letter: Other letter, Hangul, Hangul syllable type LVT
+U+ACA9..U+ACC3 Letter: Other letter, Hangul, Hangul syllable type LVT
+U+ACC5..U+ACDF Letter: Other letter, Hangul, Hangul syllable type LVT
+U+ACE1..U+ACFB Letter: Other letter, Hangul, Hangul syllable type LVT
+U+ACFD..U+AD17 Letter: Other letter, Hangul, Hangul syllable type LVT
+U+AD19..U+AD33 Letter: Other letter, Hangul, Hangul syllable type LVT
+U+AD35..U+AD4F Letter: Other letter, Hangul, Hangul syllable type LVT
+U+AD51..U+AD6B Letter: Other letter, Hangul, Hangul syllable type LVT
+U+AD6D..U+AD87 Letter: Other letter, Hangul, Hangul syllable type LVT
+U+AD89..U+ADA3 Letter: Other letter, Hangul, Hangul syllable type LVT
+U+ADA5..U+ADBF Letter: Other letter, Hangul, Hangul syllable type LVT
+U+ADC1..U+ADDB Letter: Other letter, Hangul, Hangul syllable type LVT
+U+ADDD..U+ADF7 Letter: Other letter, Hangul, Hangul syllable type LVT
+U+ADF9..U+AE13 Letter: Other letter, Hangul, Hangul syllable type LVT
+U+AE15..U+AE2F Letter: Other letter, Hangul, Hangul syllable type LVT
+U+AE31..U+AE4B Letter: Other letter, Hangul, Hangul syllable type LVT
+U+AE4D..U+AE67 Letter: Other letter, Hangul, Hangul syllable type LVT
+U+AE69..U+AE83 Letter: Other letter, Hangul, Hangul syllable type LVT
+U+AE85..U+AE9F Letter: Other letter, Hangul, Hangul syllable type LVT
+U+AEA1..U+AEBB Letter: Other letter, Hangul, Hangul syllable type LVT
+U+AEBD..U+AED7 Letter: Other letter, Hangul, Hangul syllable type LVT
+U+AED9..U+AEF3 Letter: Other letter, Hangul, Hangul syllable type LVT
+U+AEF5..U+AF0F Letter: Other letter, Hangul, Hangul syllable type LVT
+U+AF11..U+AF2B Letter: Other letter, Hangul, Hangul syllable type LVT
+U+AF2D..U+AF47 Letter: Other letter, Hangul, Hangul syllable type LVT
+U+AF49..U+AF63 Letter: Other letter, Hangul, Hangul syllable type LVT
+U+AF65..U+AF7F Letter: Other letter, Hangul, Hangul syllable type LVT
+U+AF81..U+AF9B Letter: Other letter, Hangul, Hangul syllable type LVT
+U+AF9D..U+AFB7 Letter: Other letter, Hangul, Hangul syllable type LVT
+U+AFB9..U+AFD3 Letter: Other letter, Hangul, Hangul syllable type LVT
+U+AFD5..U+AFEF Letter: Other letter, Hangul, Hangul syllable type LVT
+U+AFF1..U+B00B Letter: Other letter, Hangul, Hangul syllable type LVT
+U+B00D..U+B027 Letter: Other letter, Hangul, Hangul syllable type LVT
+U+B029..U+B043 Letter: Other letter, Hangul, Hangul syllable type LVT
+U+B045..U+B05F Letter: Other letter, Hangul, Hangul syllable type LVT
+U+B061..U+B07B Letter: Other letter, Hangul, Hangul syllable type LVT
+U+B07D..U+B097 Letter: Other letter, Hangul, Hangul syllable type LVT
+U+B099..U+B0B3 Letter: Other letter, Hangul, Hangul syllable type LVT
+U+B0B5..U+B0CF Letter: Other letter, Hangul, Hangul syllable type LVT
+U+B0D1..U+B0EB Letter: Other letter, Hangul, Hangul syllable type LVT
+U+B0ED..U+B107 Letter: Other letter, Hangul, Hangul syllable type LVT
+U+B109..U+B123 Letter: Other letter, Hangul, Hangul syllable type LVT
+U+B125..U+B13F Letter: Other letter, Hangul, Hangul syllable type LVT
+U+B141..U+B15B Letter: Other letter, Hangul, Hangul syllable type LVT
+U+B15D..U+B177 Letter: Other letter, Hangul, Hangul syllable type LVT
+U+B179..U+B193 Letter: Other letter, Hangul, Hangul syllable type LVT
+U+B195..U+B1AF Letter: Other letter, Hangul, Hangul syllable type LVT
+U+B1B1..U+B1CB Letter: Other letter, Hangul, Hangul syllable type LVT
+U+B1CD..U+B1E7 Letter: Other letter, Hangul, Hangul syllable type LVT
+U+B1E9..U+B203 Letter: Other letter, Hangul, Hangul syllable type LVT
+U+B205..U+B21F Letter: Other letter, Hangul, Hangul syllable type LVT
+U+B221..U+B23B Letter: Other letter, Hangul, Hangul syllable type LVT
+U+B23D..U+B257 Letter: Other letter, Hangul, Hangul syllable type LVT
+U+B259..U+B273 Letter: Other letter, Hangul, Hangul syllable type LVT
+U+B275..U+B28F Letter: Other letter, Hangul, Hangul syllable type LVT
+U+B291..U+B2AB Letter: Other letter, Hangul, Hangul syllable type LVT
+U+B2AD..U+B2C7 Letter: Other letter, Hangul, Hangul syllable type LVT
+U+B2C9..U+B2E3 Letter: Other letter, Hangul, Hangul syllable type LVT
+U+B2E5..U+B2FF Letter: Other letter, Hangul, Hangul syllable type LVT
+U+B301..U+B31B Letter: Other letter, Hangul, Hangul syllable type LVT
+U+B31D..U+B337 Letter: Other letter, Hangul, Hangul syllable type LVT
+U+B339..U+B353 Letter: Other letter, Hangul, Hangul syllable type LVT
+U+B355..U+B36F Letter: Other letter, Hangul, Hangul syllable type LVT
+U+B371..U+B38B Letter: Other letter, Hangul, Hangul syllable type LVT
+U+B38D..U+B3A7 Letter: Other letter, Hangul, Hangul syllable type LVT
+U+B3A9..U+B3C3 Letter: Other letter, Hangul, Hangul syllable type LVT
+U+B3C5..U+B3DF Letter: Other letter, Hangul, Hangul syllable type LVT
+U+B3E1..U+B3FB Letter: Other letter, Hangul, Hangul syllable type LVT
+U+B3FD..U+B417 Letter: Other letter, Hangul, Hangul syllable type LVT
+U+B419..U+B433 Letter: Other letter, Hangul, Hangul syllable type LVT
+U+B435..U+B44F Letter: Other letter, Hangul, Hangul syllable type LVT
+U+B451..U+B46B Letter: Other letter, Hangul, Hangul syllable type LVT
+U+B46D..U+B487 Letter: Other letter, Hangul, Hangul syllable type LVT
+U+B489..U+B4A3 Letter: Other letter, Hangul, Hangul syllable type LVT
+U+B4A5..U+B4BF Letter: Other letter, Hangul, Hangul syllable type LVT
+U+B4C1..U+B4DB Letter: Other letter, Hangul, Hangul syllable type LVT
+U+B4DD..U+B4F7 Letter: Other letter, Hangul, Hangul syllable type LVT
+U+B4F9..U+B513 Letter: Other letter, Hangul, Hangul syllable type LVT
+U+B515..U+B52F Letter: Other letter, Hangul, Hangul syllable type LVT
+U+B531..U+B54B Letter: Other letter, Hangul, Hangul syllable type LVT
+U+B54D..U+B567 Letter: Other letter, Hangul, Hangul syllable type LVT
+U+B569..U+B583 Letter: Other letter, Hangul, Hangul syllable type LVT
+U+B585..U+B59F Letter: Other letter, Hangul, Hangul syllable type LVT
+U+B5A1..U+B5BB Letter: Other letter, Hangul, Hangul syllable type LVT
+U+B5BD..U+B5D7 Letter: Other letter, Hangul, Hangul syllable type LVT
+U+B5D9..U+B5F3 Letter: Other letter, Hangul, Hangul syllable type LVT
+U+B5F5..U+B60F Letter: Other letter, Hangul, Hangul syllable type LVT
+U+B611..U+B62B Letter: Other letter, Hangul, Hangul syllable type LVT
+U+B62D..U+B647 Letter: Other letter, Hangul, Hangul syllable type LVT
+U+B649..U+B663 Letter: Other letter, Hangul, Hangul syllable type LVT
+U+B665..U+B67F Letter: Other letter, Hangul, Hangul syllable type LVT
+U+B681..U+B69B Letter: Other letter, Hangul, Hangul syllable type LVT
+U+B69D..U+B6B7 Letter: Other letter, Hangul, Hangul syllable type LVT
+U+B6B9..U+B6D3 Letter: Other letter, Hangul, Hangul syllable type LVT
+U+B6D5..U+B6EF Letter: Other letter, Hangul, Hangul syllable type LVT
+...

@@ -1,29 +1,46 @@
-/* A test program for converting characters to UTF-8 and vice versa. Note that
-this program conforms to the original definition of UTF-8, which allows
-codepoints up to 7fffffff. The more recent definition limits the validity of
-UTF-8 codepoints to a maximum of 10ffffff.
+/****************************************************
+* PCRE maintainers' helper program: UTF-8 converter *
+****************************************************/
 
-The arguments are either single codepoint values, written as 0xhhhh, for 
-conversion to UTF-8, or sequences of hex values, written without 0x and 
-optionally including spaces (but such arguments must be quoted), for conversion 
+/* This is a test program for converting character code points to UTF-8 and
+vice versa. Note that this program conforms to the original definition of
+UTF-8, which allows codepoints up to 7fffffff. The more recent definition
+limits the validity of Unicode UTF-8 codepoints to a maximum of 10ffffff, and
+forbids the "surrogate" code points. This program now gives warnings for these
+invalid code points.
+
+The arguments are either single code point values written as U+hh.. or 0xhh..
+for conversion to UTF-8, or sequences of hex values, written without 0x and
+optionally including spaces (but such arguments must be quoted), for conversion
 from UTF-8 to codepoints. For example:
 
 ./utf8 0x1234
-0x00001234 => e1 88 b4
+U+00001234 => e1 88 b4
 
 ./utf8 "e1 88 b4"
-0x00001234 <= e1 88 b4
+U+00001234 <= e1 88 b4
 
-In the second case, a number of characters can be present in one argument:
+In the second case, a number of UTF-8 characters can be present in one
+argument. In other words, each such argument is interpreted (after ignoring
+spaces) as a string of UTF-8 bytes representing a string of characters:
 
 ./utf8 "65 e188b4 77"
-0x00000065 <= 65 
-0x00001234 <= e1 88 b4 
-0x00000077 <= 77 
+0x00000065 <= 65
+0x00001234 <= e1 88 b4
+0x00000077 <= 77
 
-If the option -s is given, the sequence of UTF-bytes is written out between 
+If the option -s is given, the sequence of UTF-bytes is written out between
 angle brackets at the end of the line. On a UTF-8 terminal, this will show the
-appropriate graphic for the codepoint. */
+appropriate graphic for the code point.
+
+Errors provoke error messages, but the program carries on with the next
+argument. The return code is always zero.
+
+Philip Hazel
+Original creation data: unknown
+Code extended and tidied to avoid compiler warnings: 26 March 2020
+*/
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -41,47 +58,38 @@ appropriate graphic for the codepoint. */
 */
 
 
-static const int utf8_table1[] = {
-  0x0000007f, 0x000007ff, 0x0000ffff, 0x001fffff, 0x03ffffff, 0x7fffffff};  
+static const unsigned int utf8_table1[] = {
+  0x0000007f, 0x000007ff, 0x0000ffff, 0x001fffff, 0x03ffffff, 0x7fffffff};
 
 static const int utf8_table2[] = {
-  0, 0xc0, 0xe0, 0xf0, 0xf8, 0xfc};  
-  
+  0, 0xc0, 0xe0, 0xf0, 0xf8, 0xfc};
+
 static const int utf8_table3[] = {
-  0xff, 0x1f, 0x0f, 0x07, 0x03, 0x01};  
-  
-static const unsigned char utf8_table4[] = {
-  1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-  1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-  2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
-  3,3,3,3,3,3,3,3,4,4,4,4,5,5,6,6 };
+  0xff, 0x1f, 0x0f, 0x07, 0x03, 0x01};
 
 
 /*************************************************
 *       Convert character value to UTF-8         *
 *************************************************/
 
-/* This function takes an integer value in the range 0 - 0x7fffffff
-and encodes it as a UTF-8 character in 1 to 6 bytes.
+/* This function takes an unsigned long integer value in the range 0 -
+0x7fffffff and encodes it as a UTF-8 character in 1 to 6 bytes.
 
-Arguments:   
-  cvalue     the character value 
+Arguments:
+  cvalue     the character value
   buffer     pointer to buffer for result - at least 6 bytes long
-  
-Returns:     number of characters placed in the buffer
-             -1 if input character is negative  
-             0 if input character is positive but too big (only when
-             int is longer than 32 bits) 
+
+Returns:     number of bytes placed in the buffer
+             0 if input code point is too big
 */
 
-int
-ord2utf8(int cvalue, unsigned char *buffer)
+static size_t
+ord2utf8(unsigned long int cvalue, unsigned char *buffer)
 {
-register int i, j;
+size_t i, j;
 for (i = 0; i < sizeof(utf8_table1)/sizeof(int); i++)
   if (cvalue <= utf8_table1[i]) break;
 if (i >= sizeof(utf8_table1)/sizeof(int)) return 0;
-if (cvalue < 0) return -1;
 buffer += i;
 for (j = i; j > 0; j--)
  {
@@ -98,32 +106,59 @@ return i + 1;
 *            Convert UTF-8 string to value       *
 *************************************************/
 
-/* This function takes one or more bytes that represents a UTF-8 character,
-and returns the value of the character.
+/* This function takes one or more bytes that represent a UTF-8 character from
+the start of a string of bytes. It returns the value of the character, or the
+offset of a malformation. For an overlong encoding that works but is not the
+correct (shortest) one, the error offset is just after the last byte.
 
-Argument:  
+Argument:
   buffer   a pointer to the byte vector
-  vptr     a pointer to an int to receive the value 
+  buffend  a pointer to the end of the buffer
+  vptr     a pointer to a variable to receive the value
+  lenptr   a pointer to a variable to receive the offset when error detected
 
-Returns:   >  0 => the number of bytes consumed
-           -6 to 0 => malformed UTF-8 character at offset = (-return)
+Returns:   > 0 => the number of bytes consumed
+             0 => invalid UTF-8: first byte missing 0x40 bit
+            -1 => invalid UTF-8: first byte has too many high-order 1-bits
+            -2 => incomplete sequence at end of string
+            -3 => incomplete sequence within string
+            -4 => overlong code sequence
 */
 
-int
-utf82ord(unsigned char *buffer, int *vptr)
+static int
+utf82ord(unsigned char *buffer, unsigned char *buffend,
+  long unsigned int *vptr, int *lenptr)
 {
-int c = *buffer++;
-int d = c;
+unsigned int c = *buffer++;
+unsigned int d = c;
 int i, j, s;
 
-for (i = -1; i < 6; i++)               /* i is number of additional bytes */
+/* Check for an ASCII character, or find the number of additional bytes in a
+multibyte character. */
+
+for (i = -1; i < 6; i++)
   {
   if ((d & 0x80) == 0) break;
   d <<= 1;
   }
 
-if (i == -1) { *vptr = c; return 1; }  /* ascii character */
-if (i == 0 || i == 6) return 0;        /* invalid UTF-8 */
+switch (i)
+  {
+  case -1:      /* ASCII character; first byte does not have 0x80 bit */
+  *vptr = c;
+  return 1;
+
+  case 0:       /* First byte has 0x80 but is missing 0x40 bit */
+  *lenptr = 0;
+  return 0;
+
+  case 6:
+  *lenptr = 0;  /* Too many high bits */
+  return -1;
+
+  default:
+  break;
+  }
 
 /* i now has a value in the range 1-5 */
 
@@ -132,31 +167,45 @@ d = (c & utf8_table3[i]) << s;
 
 for (j = 0; j < i; j++)
   {
+  if (buffer >= buffend)
+    {
+    *lenptr = j + 1;
+    return -2;
+    }
   c = *buffer++;
-  if ((c & 0xc0) != 0x80) return -(j+1);
+  if ((c & 0xc0) != 0x80)
+    {
+    *lenptr = j + 1;
+    return -3;
+    }
   s -= 6;
   d |= (c & 0x3f) << s;
   }
 
-/* Check that encoding was the correct unique one */
+/* Valid UTF-8 syntax */
 
-for (j = 0; j < sizeof(utf8_table1)/sizeof(int); j++)
+*vptr = d;
+
+/* Check that encoding was the correct one, not overlong */
+
+for (j = 0; j < (int)(sizeof(utf8_table1)/sizeof(int)); j++)
   if (d <= utf8_table1[j]) break;
-if (j != i) return -(i+1);
+if (j != i)
+  {
+  *lenptr = i + 1;
+  return -4;
+  }
 
 /* Valid value */
 
-*vptr = d;
-return i+1;
+return i + 1;
 }
-
 
 
 
 /*************************************************
 *                 Main Program                   *
 *************************************************/
-
 
 int
 main(int argc, char **argv)
@@ -169,85 +218,129 @@ if (argc > 1 && strcmp(argv[1], "-s") == 0)
   {
   show = 1;
   i = 2;
-  }   
+  }
 
 for (; i < argc; i++)
   {
   char *x = argv[i];
-  if (strncmp(x, "0x", 2) == 0)
+  char *endptr;
+  if (strncmp(x, "0x", 2) == 0 || strncmp(x, "U+", 2) == 0)
     {
-    int j; 
-    int d = strtol(x+2, NULL, 16);
-    int rc = ord2utf8(d, buffer);
-    printf("0x%08x => ", d); 
-    if (rc <= 0) printf("*** Error %d ***", rc); else 
+    size_t rc, j;
+    unsigned long int d = strtoul(x+2, &endptr, 16);
+    if (*endptr != 0)
+      {
+      printf("** Invalid hex number %s\n", x);
+      continue;   /* With next argument */
+      }
+    rc = ord2utf8(d, buffer);
+    printf("U+%08lx => ", d);
+    if (rc == 0)
+      printf("** Code point greater than 0x7fffffff cannot be encoded");
+    else
       {
       for (j = 0; j < rc; j++) printf("%02x ", buffer[j]);
       if (show)
         {
         printf(">");
         for (j = 0; j < rc; j++) printf("%c", buffer[j]);
-        printf("<"); 
-        }  
-      } 
-    printf("\n");   
+        printf("< ");
+        }
+      if (d >= 0xd800 && d <= 0xdfff)
+        printf("** Invalid Unicode (surrogate)");
+      else if (d > 0x10ffff)
+        printf("** Invalid Unicode (greater than U+10ffff)");
+      }
+    printf("\n");
     }
   else
     {
-    int d, rc; 
-    int j = 0;
-    int y = 0; 
-    int z = 0;
     unsigned char *bptr;
-       
-    for (;;) 
-      { 
-      while (*x == ' ') x++; 
+    unsigned char *buffend;
+    int len = 0;
+    int y = 0;
+    int z = 0;
+
+    for (;;)
+      {
+      while (*x == ' ') x++;
       if (*x == 0 && !z) break;
-      if (!isxdigit(*x)) 
+      if (!isxdigit(*x))
         {
-        printf("Malformed hex string: %s\n", argv[i]);
-        j = -1;
-        break;    
-        } 
+        printf("** Malformed hex string: %s\n", argv[i]);
+        len = -1;
+        break;
+        }
       y = y * 16 + tolower(*x) - ((isdigit(*x))? '0' : 'W');
-      x++; 
+      x++;
       if (z)
-        { 
-        buffer[j++] = y;
+        {
+        buffer[len++] = y;
         y = 0;
         }
-      z ^= 1;     
-      } 
-    buffer[j] = 0;
-    bptr = buffer;
+      z ^= 1;
+      }
 
-    while (*bptr != 0)
-      { 
-      rc = utf82ord(bptr, &d);
-      if (rc > 0) 
+    if (len < 0) continue;  /* With next argument after malformation */
+
+    bptr = buffer;
+    buffend = buffer + len;
+
+    while (bptr < buffend)
+      {
+      unsigned long int d;
+      int j;
+      int offset;
+      int rc = utf82ord(bptr, buffend, &d, &offset);
+
+      if (rc > 0)
         {
-        printf("0x%08x <= ", d);
+        printf("U+%08lx <= ", d);
         for (j = 0; j < rc; j++) printf("%02x ", bptr[j]);
         if (show)
           {
           printf(">");
           for (j = 0; j < rc; j++) printf("%c", bptr[j]);
-          printf("<"); 
-          }  
+          printf("<");
+          }
         printf("\n");
-        bptr += rc; 
-        } 
-      else 
+        bptr += rc;
+        }
+      else if (rc == -4)
         {
-        printf("Malformed UTF-8 at offset %d <= ", -rc);
-        while (*bptr != 0) printf("%02x ", *bptr++);
-        printf("\n"); 
-        break;  
-        } 
-      }   
-    }       
-  } 
+        printf("U+%08lx <= ", d);
+        for (j = 0; j < offset; j++) printf("%02x ", bptr[j]);
+        printf("** Overlong UTF-8 sequence\n");
+        bptr += offset;
+        }
+      else
+        {
+        switch (rc)
+          {
+          case 0:  printf("** First byte missing 0x40 bit");
+          break;
+
+          case -1: printf("** First byte has too many high-order bits");
+          break;
+
+          case -2: printf("** Incomplete UTF-8 sequence at end of string");
+          break;
+
+          case -3: printf("** Incomplete UTF-8 sequence");
+          break;
+
+          default: printf("** Unexpected return %d from utf82ord()", rc);
+          break;
+          }
+        printf(" at offset %d in string ", offset);
+        while (bptr < buffend) printf("%02x ", *bptr++);
+        printf("\n");
+        break;
+        }
+      }
+    }
+  }
+
 return 0;
 }
 

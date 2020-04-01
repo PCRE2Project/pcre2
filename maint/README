@@ -54,10 +54,12 @@ Unicode.tables   The files in this directory were downloaded from the Unicode
 ucptest.c        A short C program for testing the Unicode property macros
                  that do lookups in the pcre2_ucd.c data, mainly useful after
                  rebuilding the Unicode property table. Compile and run this in
-                 the "maint" directory (see comments at its head).
+                 the "maint" directory (see comments at its head). This program 
+                 can also be used to find characters with specific properties. 
 
-ucptestdata      A directory containing two files, testinput1 and testoutput1,
-                 to use in conjunction with the ucptest program.
+ucptestdata      A directory containing four files, testinput{1,2} and
+                 testoutput{1,2}, for use in conjunction with the ucptest
+                 program.
 
 utf8.c           A short, freestanding C program for converting a Unicode code
                  point into a sequence of bytes in the UTF-8 encoding, and vice
@@ -65,7 +67,7 @@ utf8.c           A short, freestanding C program for converting a Unicode code
                  outputs a list of the equivalent UTF-8 bytes. If its argument
                  is a sequence of concatenated UTF-8 bytes (e.g. e188b4) it
                  treats them as a UTF-8 character and outputs the equivalent
-                 code point in hex.
+                 code point in hex. See comments at its head for details.
 
 
 Updating to a new Unicode release
@@ -96,9 +98,10 @@ lists of scripts.
 
 The ucptest program can be compiled and used to check that the new tables in
 pcre2_ucd.c work properly, using the data files in ucptestdata to check a
-number of test characters. The source file ucptest.c should also be updated
-whenever new Unicode script names are added, and adding a few tests for new
-scripts is a good idea.
+number of test characters. It used to be necessary to update the source
+ucptest.c whenever new Unicode scripts were added, but this is no longer
+required because that program now uses the lists in the PCRE2 source. However,
+adding a few tests for new scripts to the files in ucptestdata is a good idea.
 
 
 Preparing for a PCRE2 release
@@ -437,4 +440,4 @@ very sensible; some are rather wacky. Some have been on this list for years.
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 03 June 2019
+Last updated: 01 April 2020
