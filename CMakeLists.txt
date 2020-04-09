@@ -1,6 +1,5 @@
 # CMakeLists.txt
 #
-#
 # This file enables PCRE2 to be built with the CMake configuration and build
 # tool. Download CMake in source or binary form from http://www.cmake.org/
 # Converted to support PCRE2 from the original PCRE file, August 2014.
@@ -87,6 +86,7 @@
 # 2019-02-16 PH hacked to avoid CMP0026 policy issue (see comments below)
 # 2020-03-16 PH renamed dftables as pcre2_dftables (as elsewhere)
 # 2020-03-24 PH changed CMAKE_MODULE_PATH definition to add, not replace
+# 2020-04-08 Carlo added function check for secure_getenv, fixed strerror
 
 PROJECT(PCRE2 C)
 
@@ -125,9 +125,10 @@ CHECK_INCLUDE_FILE(sys/types.h  HAVE_SYS_TYPES_H)
 CHECK_INCLUDE_FILE(unistd.h     HAVE_UNISTD_H)
 CHECK_INCLUDE_FILE(windows.h    HAVE_WINDOWS_H)
 
-CHECK_FUNCTION_EXISTS(bcopy     HAVE_BCOPY)
-CHECK_FUNCTION_EXISTS(memmove   HAVE_MEMMOVE)
-CHECK_FUNCTION_EXISTS(strerror  HAVE_STRERROR)
+CHECK_FUNCTION_EXISTS(bcopy         HAVE_BCOPY)
+CHECK_FUNCTION_EXISTS(memmove       HAVE_MEMMOVE)
+CHECK_FUNCTION_EXISTS(strerror      HAVE_STRERROR)
+CHECK_FUNCTION_EXISTS(secure_getenv HAVE_SECURE_GETENV)
 
 # User-configurable options
 #

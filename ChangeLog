@@ -99,6 +99,8 @@ LIST(APPEND...) to allow a setting from the command line to be included.
 
 23. Updated to Unicode 13.0.0.
 
+24. CMake build now checks for secure_getenv() and strerror(). Patch by Carlo.
+
 
 Version 10.34 21-November-2019
 ------------------------------
