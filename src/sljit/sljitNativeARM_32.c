@@ -2633,11 +2633,11 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_mem(struct sljit_compiler *compile
 	}
 	else {
 		if (is_type1_transfer) {
-			if (memw > 4095 && memw < -4095)
+			if (memw > 4095 || memw < -4095)
 				return SLJIT_ERR_UNSUPPORTED;
 		}
 		else {
-			if (memw > 255 && memw < -255)
+			if (memw > 255 || memw < -255)
 				return SLJIT_ERR_UNSUPPORTED;
 		}
 	}

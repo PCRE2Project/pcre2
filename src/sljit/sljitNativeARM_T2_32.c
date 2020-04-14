@@ -2274,7 +2274,7 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_mem(struct sljit_compiler *compile
 	CHECK_ERROR();
 	CHECK(check_sljit_emit_mem(compiler, type, reg, mem, memw));
 
-	if ((mem & OFFS_REG_MASK) || (memw > 255 && memw < -255))
+	if ((mem & OFFS_REG_MASK) || (memw > 255 || memw < -255))
 		return SLJIT_ERR_UNSUPPORTED;
 
 	if (type & SLJIT_MEM_SUPP)
