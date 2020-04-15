@@ -338,23 +338,23 @@ host and therefore not compiled with the cross compiler.
 If you need to create alternative tables when cross compiling, you will have to
 do so "by hand". There may also be other reasons for creating tables manually.
 To cause \fBpcre2_dftables\fP to be built on the local host, run a normal
-compiling command, and then run the program with the output file as its 
+compiling command, and then run the program with the output file as its
 argument, for example:
 .sp
   cc src/pcre2_dftables.c -o pcre2_dftables
-  ./pcre2_dftables src/pcre2_chartables.c 
+  ./pcre2_dftables src/pcre2_chartables.c
 .sp
-This builds the tables in the default locale of the local host. If you want to 
+This builds the tables in the default locale of the local host. If you want to
 specify a locale, you must use the -L option:
 .sp
   LC_ALL=fr_FR ./pcre2_dftables -L src/pcre2_chartables.c
-.sp   
-You can also specify -b (with or without -L). This causes the tables to be 
-written in binary instead of as source code. A set of binary tables can be 
-loaded into memory by an application and passed to \fBpcre2_compile()\fP in the 
-same way as tables created by calling \fBpcre2_maketables()\fP. The tables are 
-just a string of bytes, independent of hardware characteristics such as 
-endianness. This means they can be bundled with an application that runs in 
+.sp
+You can also specify -b (with or without -L). This causes the tables to be
+written in binary instead of as source code. A set of binary tables can be
+loaded into memory by an application and passed to \fBpcre2_compile()\fP in the
+same way as tables created by calling \fBpcre2_maketables()\fP. The tables are
+just a string of bytes, independent of hardware characteristics such as
+endianness. This means they can be bundled with an application that runs in
 different environments, to ensure consistent behaviour.
 .
 .

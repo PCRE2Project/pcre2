@@ -505,7 +505,7 @@ which case the base cannot be possessified.
 Arguments:
   code        points to the byte code
   utf         TRUE in UTF mode
-  ucp         TRUE in UCP mode 
+  ucp         TRUE in UCP mode
   cb          compile data block
   base_list   the data list of the base opcode
   base_end    the end of the base opcode
@@ -675,7 +675,7 @@ for(;;)
     /* The bracket content will be checked by the OP_BRA/OP_CBRA case above. */
 
     next_code += 1 + LINK_SIZE;
-    if (!compare_opcodes(next_code, utf, ucp, cb, base_list, base_end, 
+    if (!compare_opcodes(next_code, utf, ucp, cb, base_list, base_end,
          rec_limit))
       return FALSE;
 
@@ -1134,7 +1134,7 @@ for (;;)
       get_chr_property_list(code, utf, ucp, cb->fcc, list) : NULL;
     list[1] = c == OP_STAR || c == OP_PLUS || c == OP_QUERY || c == OP_UPTO;
 
-    if (end != NULL && compare_opcodes(end, utf, ucp, cb, list, end, 
+    if (end != NULL && compare_opcodes(end, utf, ucp, cb, list, end,
         &rec_limit))
       {
       switch(c)

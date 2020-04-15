@@ -3527,14 +3527,14 @@ if ((re->flags & PCRE2_FIRSTSET) != 0)
   if ((re->flags & PCRE2_FIRSTCASELESS) != 0)
     {
     first_cu2 = TABLE_GET(first_cu, mb->tables + fcc_offset, first_cu);
-#ifdef SUPPORT_UNICODE 
+#ifdef SUPPORT_UNICODE
 #if PCRE2_CODE_UNIT_WIDTH == 8
     if (first_cu > 127 && !utf && (re->overall_options & PCRE2_UCP) != 0)
       first_cu2 = (PCRE2_UCHAR)UCD_OTHERCASE(first_cu);
 #else
     if (first_cu > 127 && (utf || (re->overall_options & PCRE2_UCP) != 0))
       first_cu2 = (PCRE2_UCHAR)UCD_OTHERCASE(first_cu);
-#endif       
+#endif
 #endif  /* SUPPORT_UNICODE */
     }
   }
@@ -3553,10 +3553,10 @@ if ((re->flags & PCRE2_LASTSET) != 0)
     req_cu2 = TABLE_GET(req_cu, mb->tables + fcc_offset, req_cu);
 #ifdef SUPPORT_UNICODE
 #if PCRE2_CODE_UNIT_WIDTH == 8
-    if (req_cu > 127 && !utf && (re->overall_options & PCRE2_UCP) != 0) 
+    if (req_cu > 127 && !utf && (re->overall_options & PCRE2_UCP) != 0)
       req_cu2 = (PCRE2_UCHAR)UCD_OTHERCASE(req_cu);
 #else
-    if (req_cu > 127 && (utf || (re->overall_options & PCRE2_UCP) != 0)) 
+    if (req_cu > 127 && (utf || (re->overall_options & PCRE2_UCP) != 0))
       req_cu2 = (PCRE2_UCHAR)UCD_OTHERCASE(req_cu);
 #endif
 #endif  /* SUPPORT_UNICODE */

@@ -562,7 +562,7 @@ not be a problem.
 If you need to modify the character tables when cross-compiling, you should
 move pcre2_chartables.c.dist out of the way, then compile pcre2_dftables.c by
 hand and run it on the local host to make a new version of
-pcre2_chartables.c.dist. See the pcre2build section "Creating character tables 
+pcre2_chartables.c.dist. See the pcre2build section "Creating character tables
 at build time" for more details.
 
 
@@ -753,7 +753,7 @@ that represent character classes for code points less than 256. The final
 
     1   white space character
     2   letter
-    4   lower case letter 
+    4   lower case letter
     8   decimal digit
    16   alphanumeric or '_'
 

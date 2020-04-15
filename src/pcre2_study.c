@@ -772,13 +772,13 @@ Arguments:
   p             points to the first code unit of the character
   caseless      TRUE if caseless
   utf           TRUE for UTF mode
-  ucp           TRUE for UCP mode 
+  ucp           TRUE for UCP mode
 
 Returns:        pointer after the character
 */
 
 static PCRE2_SPTR
-set_table_bit(pcre2_real_code *re, PCRE2_SPTR p, BOOL caseless, BOOL utf, 
+set_table_bit(pcre2_real_code *re, PCRE2_SPTR p, BOOL caseless, BOOL utf,
   BOOL ucp)
 {
 uint32_t c = *p++;   /* First code unit */
@@ -819,17 +819,17 @@ if (caseless)
     c = UCD_OTHERCASE(c);
 #if PCRE2_CODE_UNIT_WIDTH == 8
     if (utf)
-      { 
+      {
       PCRE2_UCHAR buff[6];
       (void)PRIV(ord2utf)(c, buff);
       SET_BIT(buff[0]);
       }
-    else if (c < 256) SET_BIT(c);    
+    else if (c < 256) SET_BIT(c);
 #else  /* 16-bit or 32-bit mode */
     if (c > 0xff) SET_BIT(0xff); else SET_BIT(c);
 #endif
     }
- 
+
   else
 #endif  /* SUPPORT_UNICODE */
 
@@ -939,7 +939,7 @@ Arguments:
   re           points to the compiled regex block
   code         points to an expression
   utf          TRUE if in UTF mode
-  ucp          TRUE if in UCP mode 
+  ucp          TRUE if in UCP mode
   depthptr     pointer to recurse depth
 
 Returns:       SSB_FAIL     => Failed to find any starting code units
@@ -1706,7 +1706,7 @@ if ((re->flags & (PCRE2_FIRSTSET|PCRE2_STARTLINE)) == 0)
     int b = -1;
     uint8_t *p = re->start_bitmap;
     uint32_t flags = PCRE2_FIRSTMAPSET;
-    
+
     for (i = 0; i < 256; p++, i += 8)
       {
       uint8_t x = *p;
@@ -1736,7 +1736,7 @@ if ((re->flags & (PCRE2_FIRSTSET|PCRE2_STARTLINE)) == 0)
           }
 
         /* c contains the code unit value, in the range 0-255. In 8-bit UTF
-        mode, only values < 128 can be used. In all the other cases, c is a 
+        mode, only values < 128 can be used. In all the other cases, c is a
         character value. */
 
 #if PCRE2_CODE_UNIT_WIDTH == 8
@@ -1746,10 +1746,10 @@ if ((re->flags & (PCRE2_FIRSTSET|PCRE2_STARTLINE)) == 0)
         else if (b < 0)     /* Second one found */
           {
           int d = TABLE_GET((unsigned int)c, re->tables + fcc_offset, c);
-          
+
 #ifdef SUPPORT_UNICODE
           if (utf || ucp)
-            { 
+            {
             if (UCD_CASESET(c) != 0) goto DONE;     /* Multiple case set */
             if (c > 127) d = UCD_OTHERCASE(c);
             }

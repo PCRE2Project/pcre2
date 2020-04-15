@@ -330,7 +330,7 @@ below.
   #loadtables <filename>
 .sp
 This command is used to load a set of binary character tables that can be
-accessed by the tables=3 qualifier. Such tables can be created by the 
+accessed by the tables=3 qualifier. Such tables can be created by the
 \fBpcre2_dftables\fP program with the -b option.
 .sp
   #newline_default [<newline-list>]
@@ -1002,7 +1002,7 @@ with different character tables. The digit specifies the tables as follows:
   1   the default ASCII tables, as distributed in
         pcre2_chartables.c.dist
   2   a set of tables defining ISO 8859 characters
-  3   a set of tables loaded by the #loadtables command 
+  3   a set of tables loaded by the #loadtables command
 .sp
 In tables 2, some characters whose codes are greater than 128 are identified as
 letters, digits, spaces, etc. Tables 3 can be used only after a
@@ -1033,9 +1033,9 @@ process.
       substitute_callout          use substitution callouts
       substitute_extended         use PCRE2_SUBSTITUTE_EXTENDED
       substitute_literal          use PCRE2_SUBSTITUTE_LITERAL
-      substitute_matched          use PCRE2_SUBSTITUTE_MATCHED  
+      substitute_matched          use PCRE2_SUBSTITUTE_MATCHED
       substitute_overflow_length  use PCRE2_SUBSTITUTE_OVERFLOW_LENGTH
-      substitute_replacement_only use PCRE2_SUBSTITUTE_REPLACEMENT_ONLY 
+      substitute_replacement_only use PCRE2_SUBSTITUTE_REPLACEMENT_ONLY
       substitute_skip=<n>         skip substitution <n>
       substitute_stop=<n>         skip substitution <n> and following
       substitute_unknown_unset    use PCRE2_SUBSTITUTE_UNKNOWN_UNSET
@@ -1212,10 +1212,10 @@ pattern.
       startoffset=<n>            same as offset=<n>
       substitute_callout         use substitution callouts
       substitute_extedded        use PCRE2_SUBSTITUTE_EXTENDED
-      substitute_literal         use PCRE2_SUBSTITUTE_LITERAL 
-      substitute_matched         use PCRE2_SUBSTITUTE_MATCHED 
+      substitute_literal         use PCRE2_SUBSTITUTE_LITERAL
+      substitute_matched         use PCRE2_SUBSTITUTE_MATCHED
       substitute_overflow_length use PCRE2_SUBSTITUTE_OVERFLOW_LENGTH
-      substitute_replacement_only use PCRE2_SUBSTITUTE_REPLACEMENT_ONLY 
+      substitute_replacement_only use PCRE2_SUBSTITUTE_REPLACEMENT_ONLY
       substitute_skip=<n>        skip substitution number n
       substitute_stop=<n>        skip substitution number n and greater
       substitute_unknown_unset   use PCRE2_SUBSTITUTE_UNKNOWN_UNSET
@@ -1379,7 +1379,7 @@ by name.
 .rs
 .sp
 If the \fBreplace\fP modifier is set, the \fBpcre2_substitute()\fP function is
-called instead of one of the matching functions (or after one call of 
+called instead of one of the matching functions (or after one call of
 \fBpcre2_match()\fP in the case of PCRE2_SUBSTITUTE_MATCHED). Note that
 replacement strings cannot contain commas, because a comma signifies the end of
 a modifier. This is not thought to be an issue in a test program.
@@ -1396,10 +1396,10 @@ for \fBpcre2_substitute()\fP:
 .sp
   global                      PCRE2_SUBSTITUTE_GLOBAL
   substitute_extended         PCRE2_SUBSTITUTE_EXTENDED
-  substitute_literal          PCRE2_SUBSTITUTE_LITERAL 
-  substitute_matched          PCRE2_SUBSTITUTE_MATCHED 
+  substitute_literal          PCRE2_SUBSTITUTE_LITERAL
+  substitute_matched          PCRE2_SUBSTITUTE_MATCHED
   substitute_overflow_length  PCRE2_SUBSTITUTE_OVERFLOW_LENGTH
-  substitute_replacement_only PCRE2_SUBSTITUTE_REPLACEMENT_ONLY 
+  substitute_replacement_only PCRE2_SUBSTITUTE_REPLACEMENT_ONLY
   substitute_unknown_unset    PCRE2_SUBSTITUTE_UNKNOWN_UNSET
   substitute_unset_empty      PCRE2_SUBSTITUTE_UNSET_EMPTY
 .sp

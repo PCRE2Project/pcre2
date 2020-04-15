@@ -2,6 +2,27 @@ News about PCRE2 releases
 -------------------------
 
 
+Version 10.35 15-April-2020
+---------------------------
+
+Bugfixes, tidies, and a few new enhancements.
+
+1. Capturing groups that contain recursive backreferences to themselves are no
+longer automatically atomic, because the restriction is no longer necessary
+as a result of the 10.30 restructuring.
+
+2. Several new options for pcre2_substitute().
+
+3. When Unicode is supported and PCRE2_UCP is set without PCRE2_UTF, Unicode
+character properties are used for upper/lower case computations on characters
+whose code points are greater than 127.
+
+4. The character tabless (for low-valued characters) can now more easily be
+saved and restored in binary.
+
+5. Updated to Unicode 13.0.0.
+
+
 Version 10.34 21-November-2019
 ------------------------------
 

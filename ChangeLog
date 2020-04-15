@@ -1,8 +1,8 @@
 Change Log for PCRE2
 --------------------
 
-Version 10.35
--------------
+Version 10.35 15-April-2020
+---------------------------
 
 1. Use PCRE2_MATCH_EMPTY flag to detect empty matches in JIT.
 
@@ -45,19 +45,19 @@ the minimum.
 
 12. The JIT stack should be freed when the low-level stack allocation fails.
 
-13. In pcre2grep, if the final line in a scanned file is output but does not 
+13. In pcre2grep, if the final line in a scanned file is output but does not
 end with a newline sequence, add a newline according to the --newline setting.
 
-14. (?(DEFINE)...) groups were not being handled correctly when checking for 
-the fixed length of a lookbehind assertion. Such a group within a lookbehind 
-should be skipped, as it does not contribute to the length of the group. 
-Instead, the (DEFINE) group was being processed, and if at the end of the 
-lookbehind, that end was not correctly recognized. Errors such as "lookbehind 
-assertion is not fixed length" and also "internal error: bad code value in 
+14. (?(DEFINE)...) groups were not being handled correctly when checking for
+the fixed length of a lookbehind assertion. Such a group within a lookbehind
+should be skipped, as it does not contribute to the length of the group.
+Instead, the (DEFINE) group was being processed, and if at the end of the
+lookbehind, that end was not correctly recognized. Errors such as "lookbehind
+assertion is not fixed length" and also "internal error: bad code value in
 parsed_skip()" could result.
 
-15. Put a limit of 1000 on recursive calls in pcre2_study() when searching 
-nested groups for starting code units, in order to avoid stack overflow issues. 
+15. Put a limit of 1000 on recursive calls in pcre2_study() when searching
+nested groups for starting code units, in order to avoid stack overflow issues.
 If the limit is reached, it just gives up trying for this optimization.
 
 16. The control verb chain list must always be restored when exiting from a
@@ -66,9 +66,9 @@ recurse function in JIT.
 17. Fix a crash which occurs when the character type of an invalid UTF
 character is decoded in JIT.
 
-18. Changes in many areas of the code so that when Unicode is supported and 
-PCRE2_UCP is set without PCRE2_UTF, Unicode character properties are used for 
-upper/lower case computations on characters whose code points are greater than 
+18. Changes in many areas of the code so that when Unicode is supported and
+PCRE2_UCP is set without PCRE2_UTF, Unicode character properties are used for
+upper/lower case computations on characters whose code points are greater than
 127.
 
 19. The function for checking UTF-16 validity was returning an incorrect offset
@@ -77,24 +77,24 @@ low surrogate. This caused incorrect behaviour, for example when
 PCRE2_MATCH_INVALID_UTF was set and a match started immediately following the
 invalid high surrogate, such as /aa/ matching "\x{d800}aa".
 
-20. If a DEFINE group immediately preceded a lookbehind assertion, the pattern 
-could be mis-compiled and therefore not match correctly. This is the example 
-that found this: /(?(DEFINE)(?<foo>bar))(?<![-a-z0-9])word/ which failed to 
+20. If a DEFINE group immediately preceded a lookbehind assertion, the pattern
+could be mis-compiled and therefore not match correctly. This is the example
+that found this: /(?(DEFINE)(?<foo>bar))(?<![-a-z0-9])word/ which failed to
 match "word" because the "move back" value was set to zero.
 
-21. Following a request from a user, some extensions and tidies to the 
+21. Following a request from a user, some extensions and tidies to the
 character tables handling have been done:
 
-  (a) The dftables auxiliary program is renamed pcre2_dftables, but it is still 
+  (a) The dftables auxiliary program is renamed pcre2_dftables, but it is still
   not installed for public use.
-  
-  (b) There is now a -b option for pcre2_dftables, which causes the tables to 
+
+  (b) There is now a -b option for pcre2_dftables, which causes the tables to
   be written in binary. There is also a -help option.
-  
-  (c) PCRE2_CONFIG_TABLES_LENGTH is added to pcre2_config() so that an 
-  application that wants to save tables in binary knows how long they are. 
-  
-22. Changed setting of CMAKE_MODULE_PATH in CMakeLists.txt from SET to 
+
+  (c) PCRE2_CONFIG_TABLES_LENGTH is added to pcre2_config() so that an
+  application that wants to save tables in binary knows how long they are.
+
+22. Changed setting of CMAKE_MODULE_PATH in CMakeLists.txt from SET to
 LIST(APPEND...) to allow a setting from the command line to be included.
 
 23. Updated to Unicode 13.0.0.

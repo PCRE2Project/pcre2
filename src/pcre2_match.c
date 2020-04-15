@@ -382,7 +382,7 @@ if (caseless)
   {
 #if defined SUPPORT_UNICODE
   BOOL utf = (mb->poptions & PCRE2_UTF) != 0;
-   
+
   if (utf || (mb->poptions & PCRE2_UCP) != 0)
     {
     PCRE2_SPTR endptr = p + length;
@@ -395,24 +395,24 @@ if (caseless)
     sequence of two of the latter. It is important, therefore, to check the
     length along the reference, not along the subject (earlier code did this
     wrong). UCP without uses Unicode properties but without UTF encoding. */
-     
+
     while (p < endptr)
       {
       uint32_t c, d;
       const ucd_record *ur;
       if (eptr >= mb->end_subject) return 1;   /* Partial match */
-      
+
       if (utf)
-        { 
+        {
         GETCHARINC(c, eptr);
         GETCHARINC(d, p);
         }
       else
         {
         c = *eptr++;
-        d = *p++;  
+        d = *p++;
         }
- 
+
       ur = GET_UCD(d);
       if (c != d && c != (uint32_t)((int)d + ur->other_case))
         {

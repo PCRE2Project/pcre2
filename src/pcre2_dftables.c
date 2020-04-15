@@ -65,23 +65,23 @@ given, they are written in binary. */
 
 static char *classlist[] =
   {
-  "space", "xdigit", "digit", "upper", "lower", 
-  "word", "graph", "print", "punct", "cntrl" 
-  }; 
+  "space", "xdigit", "digit", "upper", "lower",
+  "word", "graph", "print", "punct", "cntrl"
+  };
 
 
 
-/*************************************************                             
+/*************************************************
 *                  Usage                         *
 *************************************************/
-                                                          
-static void                                       
-usage(void)                                                        
-{               
-(void)fprintf(stderr, 
+
+static void
+usage(void)
+{
+(void)fprintf(stderr,
   "Usage: pcre2_dftables [options] <output file>\n"
   "  -b    Write output in binary (default is source code)\n"
-  "  -L    Use locale from LC_ALL (default is \"C\" locale)\n"  
+  "  -L    Use locale from LC_ALL (default is \"C\" locale)\n"
   );
 }
 
@@ -97,7 +97,7 @@ FILE *f;
 int i;
 int nclass = 0;
 BOOL binary = FALSE;
-char *env = "C"; 
+char *env = "C";
 const unsigned char *tables;
 const unsigned char *base_of_tables;
 
@@ -107,40 +107,40 @@ for (i = 1; i < argc; i++)
   {
   unsigned char *arg = (unsigned char *)argv[i];
   if (*arg != '-') break;
-  
+
   if (strcmp(arg, "-help") == 0 || strcmp(arg, "--help") == 0)
     {
     usage();
-    return 0;  
-    }    
-  
+    return 0;
+    }
+
   else if (strcmp(arg, "-L") == 0)
-    { 
+    {
     if (setlocale(LC_ALL, "") == NULL)
       {
       (void)fprintf(stderr, "pcre2_dftables: setlocale() failed\n");
-      return 1;  
+      return 1;
       }
-    env = getenv("LC_ALL");     
-    } 
-    
+    env = getenv("LC_ALL");
+    }
+
   else if (strcmp(arg, "-b") == 0)
     binary = TRUE;
-    
-  else   
+
+  else
     {
     (void)fprintf(stderr, "pcre2_dftables: unrecognized option %s\n", arg);
     return 1;
-    }    
-  } 
+    }
+  }
 
 if (i != argc - 1)
   {
   (void)fprintf(stderr, "pcre2_dftables: one filename argument is required\n");
   return 1;
   }
-  
-/* Make the tables */ 
+
+/* Make the tables */
 
 tables = maketables();
 base_of_tables = tables;
@@ -151,19 +151,19 @@ if (f == NULL)
   fprintf(stderr, "pcre2_dftables: failed to open %s for writing\n", argv[1]);
   return 1;
   }
-  
+
 /* If -b was specified, we write the tables in binary. */
 
 if (binary)
   {
-  int yield = 0; 
+  int yield = 0;
   size_t len = fwrite(tables, 1, TABLES_LENGTH, f);
   if (len != TABLES_LENGTH)
     {
     (void)fprintf(stderr, "pcre2_dftables: fwrite() returned wrong length %d "
      "instead of %d\n", (int)len, TABLES_LENGTH);
     yield = 1;
-    }     
+    }
   fclose(f);
   free((void *)base_of_tables);
   return yield;
@@ -181,9 +181,9 @@ the very long string otherwise. */
   "program. It contains character tables that are used when no external\n"
   "tables are passed to PCRE2 by the application that calls it. The tables\n"
   "are used only for characters whose code values are less than 256. */\n\n");
-  
+
 (void)fprintf(f,
-  "/* This set of tables was written in the %s locale. */\n\n", env); 
+  "/* This set of tables was written in the %s locale. */\n\n", env);
 
 (void)fprintf(f,
   "/* The pcre2_ftables program (which is distributed with PCRE2) can be used\n"
@@ -255,7 +255,7 @@ for (i = 0; i < cbit_length; i++)
   if ((i & 7) == 0 && i != 0)
     {
     if ((i & 31) == 0) (void)fprintf(f, "\n");
-    if ((i & 24) == 8) (void)fprintf(f, "  /* %s */", classlist[nclass++]); 
+    if ((i & 24) == 8) (void)fprintf(f, "  /* %s */", classlist[nclass++]);
     (void)fprintf(f, "\n  ");
     }
   (void)fprintf(f, "0x%02x", *tables++);

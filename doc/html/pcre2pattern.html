@@ -114,7 +114,7 @@ Another special sequence that may appear at the start of a pattern is (*UCP).
 This has the same effect as setting the PCRE2_UCP option: it causes sequences
 such as \d and \w to use Unicode properties to determine character types,
 instead of recognizing only characters with codes less than 256 via a lookup
-table. If also causes upper/lower casing operations to use Unicode properties 
+table. If also causes upper/lower casing operations to use Unicode properties
 for characters with code points greater than 127, even when UTF is not set.
 </P>
 <P>
@@ -2664,8 +2664,8 @@ as before because nothing has changed, so using a non-atomic assertion just
 wastes resources.
 </P>
 <P>
-There is one exception to backtracking into a non-atomic assertion. If an 
-(*ACCEPT) control verb is triggered, the assertion succeeds atomically. That 
+There is one exception to backtracking into a non-atomic assertion. If an
+(*ACCEPT) control verb is triggered, the assertion succeeds atomically. That
 is, a subsequent match failure cannot backtrack into the assertion.
 </P>
 <P>

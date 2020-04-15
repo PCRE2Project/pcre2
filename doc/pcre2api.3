@@ -1156,7 +1156,7 @@ uint32_t integer that is always set to zero.
 .sp
   PCRE2_CONFIG_TABLES_LENGTH
 .sp
-The output is a uint32_t integer that gives the length of PCRE2's character 
+The output is a uint32_t integer that gives the length of PCRE2's character
 processing tables in bytes. For details of these tables see the
 .\" HTML <a href="#localesupport">
 .\" </a>
@@ -1431,7 +1431,7 @@ documentation.
 .sp
 If this bit is set, letters in the pattern match both upper and lower case
 letters in the subject. It is equivalent to Perl's /i option, and it can be
-changed within a pattern by a (?i) option setting. If either PCRE2_UTF or 
+changed within a pattern by a (?i) option setting. If either PCRE2_UTF or
 PCRE2_UCP is set, Unicode properties are used for all characters with more than
 one other case, and for all characters whose code points are greater than
 U+007F. For lower valued characters with only one other case, a lookup table is
@@ -1794,7 +1794,7 @@ in the
 \fBpcre2pattern\fP
 .\"
 page. If you set PCRE2_UCP, matching one of the items it affects takes much
-longer. 
+longer.
 .P
 The second effect of PCRE2_UCP is to force the use of Unicode properties for
 upper/lower casing operations on characters with code points greater than 127,
@@ -1974,9 +1974,9 @@ PCRE2 handles caseless matching, and determines whether characters are letters,
 digits, or whatever, by reference to a set of tables, indexed by character code
 point. However, this applies only to characters whose code points are less than
 256. By default, higher-valued code points never match escapes such as \ew or
-\ed. 
+\ed.
 .P
-When PCRE2 is built with Unicode support (the default), the Unicode properties 
+When PCRE2 is built with Unicode support (the default), the Unicode properties
 of all characters can be tested with \ep and \eP, or, alternatively, the
 PCRE2_UCP option can be set when a pattern is compiled; this causes \ew and
 friends to use Unicode property support instead of the built-in tables.
@@ -3537,8 +3537,8 @@ terminating a \eQ quoted sequence) reverts to no case forcing. The sequences
 \eu and \el force the next character (if it is a letter) to upper or lower
 case, respectively, and then the state automatically reverts to no case
 forcing. Case forcing applies to all inserted  characters, including those from
-capture groups and letters within \eQ...\eE quoted sequences. If either 
-PCRE2_UTF or PCRE2_UCP was set when the pattern was compiled, Unicode 
+capture groups and letters within \eQ...\eE quoted sequences. If either
+PCRE2_UTF or PCRE2_UCP was set when the pattern was compiled, Unicode
 properties are used for case forcing characters whose code points are greater
 than 127.
 .P
