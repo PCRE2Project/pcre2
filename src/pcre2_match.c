@@ -6164,7 +6164,8 @@ proves to be too small, it is replaced by a larger one on the heap. To get a
 vector of the size required that is aligned for pointers, allocate it as a
 vector of pointers. */
 
-PCRE2_SPTR stack_frames_vector[START_FRAMES_SIZE/sizeof(PCRE2_SPTR)];
+PCRE2_SPTR stack_frames_vector[START_FRAMES_SIZE/sizeof(PCRE2_SPTR)]
+    PCRE2_KEEP_UNINITIALIZED;
 mb->stack_frames = (heapframe *)stack_frames_vector;
 
 /* A length equal to PCRE2_ZERO_TERMINATED implies a zero-terminated

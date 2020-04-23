@@ -104,6 +104,12 @@ LIST(APPEND...) to allow a setting from the command line to be included.
 25. Avoid using [-1] as a suffix in pcre2test because it can provoke a compiler 
 warning.
 
+26. Added tests for __attribute__((uninitialized)) to both the configure and 
+CMake build files, and then applied this attribute to the variable called 
+stack_frames_vector[] in pcre2_match(). When implemented, this disables 
+automatic initialization (a facility in clang), which can take time on big
+variables.
+
 
 Version 10.34 21-November-2019
 ------------------------------

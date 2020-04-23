@@ -76,6 +76,17 @@ typedef int BOOL;
 #include <valgrind/memcheck.h>
 #endif
 
+/* -ftrivial-auto-var-init support supports initializing all local variables
+to avoid some classes of bug, but this can cause an unacceptable slowdown
+for large on-stack arrays in hot functions. This macro lets us annotate
+such arrays. */
+
+#ifdef HAVE_ATTRIBUTE_UNINITIALIZED
+#define PCRE2_KEEP_UNINITIALIZED __attribute__((uninitialized))
+#else
+#define PCRE2_KEEP_UNINITIALIZED
+#endif
+
 /* Older versions of MSVC lack snprintf(). This define allows for
 warning/error-free compilation and testing with MSVC compilers back to at least
 MSVC 10/2010. Except for VC6 (which is missing some fundamentals and fails). */
