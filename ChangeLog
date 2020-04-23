@@ -101,6 +101,9 @@ LIST(APPEND...) to allow a setting from the command line to be included.
 
 24. CMake build now checks for secure_getenv() and strerror(). Patch by Carlo.
 
+25. Avoid using [-1] as a suffix in pcre2test because it can provoke a compiler 
+warning.
+
 
 Version 10.34 21-November-2019
 ------------------------------

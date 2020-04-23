@@ -2980,15 +2980,21 @@ return (int)(pp - p);
 *************************************************/
 
 /* Must handle UTF-8 strings in utf8 mode. Yields number of characters printed.
-For printing *MARK strings, a negative length is given. If handed a NULL file,
-just counts chars without printing (because pchar() does that). */
+For printing *MARK strings, a negative length is given, indicating that the
+length is in the previous code unit. We can't use strlen() because the string
+may contain binary zeros. Avoid using [-1] as a suffix because this can provoke
+a compiler warning. If handed a NULL file, this function just counts chars
+without printing (because pchar() does that). */
 
 static int pchars8(PCRE2_SPTR8 p, int length, BOOL utf, FILE *f)
 {
 uint32_t c = 0;
 int yield = 0;
-
-if (length < 0) length = p[-1];
+if (length < 0)
+  {
+  PCRE2_SPTR8 pp = p - 1;
+  length = *pp;
+  }
 while (length-- > 0)
   {
   if (utf)
@@ -3017,13 +3023,19 @@ return yield;
 *************************************************/
 
 /* Must handle UTF-16 strings in utf mode. Yields number of characters printed.
-For printing *MARK strings, a negative length is given. If handed a NULL file,
-just counts chars without printing. */
+For printing *MARK strings, a negative length is given, indicating that the
+length is in the previous code unit. Avoid using [-1] as a suffix because this
+can provoke a compiler warning. If handed a NULL file, just counts chars
+without printing. */
 
 static int pchars16(PCRE2_SPTR16 p, int length, BOOL utf, FILE *f)
 {
 int yield = 0;
-if (length < 0) length = p[-1];
+if (length < 0)
+  {
+  PCRE2_SPTR16 pp = p - 1;
+  length = *pp;
+  }
 while (length-- > 0)
   {
   uint32_t c = *p++ & 0xffff;
@@ -3051,15 +3063,20 @@ return yield;
 *************************************************/
 
 /* Must handle UTF-32 strings in utf mode. Yields number of characters printed.
-For printing *MARK strings, a negative length is given. If handed a NULL file,
-just counts chars without printing. */
+For printing *MARK strings, a negative length is given, indicating that the
+length is in the previous code unit. Avoid using [-1] as a suffix because this
+can provoke a compiler warning. If handed a NULL file, just counts chars
+without printing. */
 
 static int pchars32(PCRE2_SPTR32 p, int length, BOOL utf, FILE *f)
 {
 int yield = 0;
 (void)(utf);  /* Avoid compiler warning */
-
-if (length < 0) length = p[-1];
+if (length < 0)
+  {
+  PCRE2_SPTR32 pp = p - 1;
+  length = *pp;
+  }
 while (length-- > 0)
   {
   uint32_t c = *p++;
