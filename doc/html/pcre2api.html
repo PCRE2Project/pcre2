@@ -252,7 +252,7 @@ document for an overview of all the PCRE2 documentation.
 <b>int pcre2_substitute(const pcre2_code *<i>code</i>, PCRE2_SPTR <i>subject</i>,</b>
 <b>  PCRE2_SIZE <i>length</i>, PCRE2_SIZE <i>startoffset</i>,</b>
 <b>  uint32_t <i>options</i>, pcre2_match_data *<i>match_data</i>,</b>
-<b>  pcre2_match_context *<i>mcontext</i>, PCRE2_SPTR \fIreplacementzfP,</b>
+<b>  pcre2_match_context *<i>mcontext</i>, PCRE2_SPTR <i>replacementz</i>,</b>
 <b>  PCRE2_SIZE <i>rlength</i>, PCRE2_UCHAR *<i>outputbuffer</i>,</b>
 <b>  PCRE2_SIZE *<i>outlengthptr</i>);</b>
 </P>
@@ -3485,7 +3485,7 @@ set in the match context, searching stops when that limit is reached.
 <P>
 You can restrict the effect of a global substitution to a portion of the
 subject string by setting either or both of <i>startoffset</i> and an offset
-limit. Here is a \fPpcre2test\fP example:
+limit. Here is a <b>pcre2test</b> example:
 <pre>
   /B/g,replace=!,use_offset_limit
   ABC ABC ABC ABC\=offset=3,offset_limit=12

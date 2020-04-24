@@ -562,7 +562,7 @@ when the PCRE2 library is compiled; if they are not specified, the defaults
 are very large and so effectively unlimited.
 </P>
 <P>
-\fB--max-buffer-size=<i>number</i>
+<b>--max-buffer-size</b>=<i>number</i>
 This limits the expansion of the processing buffer, whose initial size can be
 set by <b>--buffer-size</b>. The maximum buffer size is silently forced to be no
 smaller than the starting buffer size.
@@ -597,7 +597,7 @@ well as possibly handling a two-character newline sequence.
 There is a limit to the number of lines that can be matched, imposed by the way
 that <b>pcre2grep</b> buffers the input file as it scans it. With a sufficiently
 large processing buffer, this should not be a problem, but the <b>-M</b> option
-does not work when input is read line by line (see \fP--line-buffered\fP.)
+does not work when input is read line by line (see <b>--line-buffered</b>.)
 </P>
 <P>
 <b>-N</b> <i>newline-type</i>, <b>--newline</b>=<i>newline-type</i>

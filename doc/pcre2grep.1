@@ -488,7 +488,7 @@ There are no short forms for these options. The default limits can be set
 when the PCRE2 library is compiled; if they are not specified, the defaults
 are very large and so effectively unlimited.
 .TP
-\fB--max-buffer-size=\fInumber\fP
+\fB--max-buffer-size\fP=\fInumber\fP
 This limits the expansion of the processing buffer, whose initial size can be
 set by \fB--buffer-size\fP. The maximum buffer size is silently forced to be no
 smaller than the starting buffer size.
@@ -520,7 +520,7 @@ well as possibly handling a two-character newline sequence.
 There is a limit to the number of lines that can be matched, imposed by the way
 that \fBpcre2grep\fP buffers the input file as it scans it. With a sufficiently
 large processing buffer, this should not be a problem, but the \fB-M\fP option
-does not work when input is read line by line (see \fP--line-buffered\fP.)
+does not work when input is read line by line (see \fB--line-buffered\fP.)
 .TP
 \fB-N\fP \fInewline-type\fP, \fB--newline\fP=\fInewline-type\fP
 Six different conventions for indicating the ends of lines in scanned files are

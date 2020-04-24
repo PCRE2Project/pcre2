@@ -64,7 +64,7 @@ or a negative error code.
 There is a limit to the size of pattern that JIT supports, imposed by the size
 of machine stack that it uses. The exact rules are not documented because they
 may change at any time, in particular, when new optimizations are introduced.
-If a pattern is too big, a call to \fBpcre2_jit_compile()\fB returns
+If a pattern is too big, a call to \fBpcre2_jit_compile()\fP returns
 PCRE2_ERROR_NOMEMORY.
 .P
 PCRE2_JIT_COMPLETE requests the JIT compiler to generate code for complete
@@ -315,12 +315,12 @@ stack through the JIT callback function.
 You can free a JIT stack at any time, as long as it will not be used by
 \fBpcre2_match()\fP again. When you assign the stack to a match context, only a
 pointer is set. There is no reference counting or any other magic. You can free
-compiled patterns, contexts, and stacks in any order, anytime. Just \fIdo
-not\fP call \fBpcre2_match()\fP with a match context pointing to an already
-freed stack, as that will cause SEGFAULT. (Also, do not free a stack currently
-used by \fBpcre2_match()\fP in another thread). You can also replace the stack
-in a context at any time when it is not in use. You should free the previous
-stack before assigning a replacement.
+compiled patterns, contexts, and stacks in any order, anytime.
+Just \fIdo not\fP call \fBpcre2_match()\fP with a match context pointing to an
+already freed stack, as that will cause SEGFAULT. (Also, do not free a stack
+currently used by \fBpcre2_match()\fP in another thread). You can also replace
+the stack in a context at any time when it is not in use. You should free the
+previous stack before assigning a replacement.
 .P
 (5) Should I allocate/free a stack every time before/after calling
 \fBpcre2_match()\fP?
