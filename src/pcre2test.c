@@ -2981,20 +2981,14 @@ return (int)(pp - p);
 
 /* Must handle UTF-8 strings in utf8 mode. Yields number of characters printed.
 For printing *MARK strings, a negative length is given, indicating that the
-length is in the previous code unit. We can't use strlen() because the string
-may contain binary zeros. Avoid using [-1] as a suffix because this can provoke
-a compiler warning. If handed a NULL file, this function just counts chars
-without printing (because pchar() does that). */
+length is in the first code unit. If handed a NULL file, this function just
+counts chars without printing (because pchar() does that). */
 
 static int pchars8(PCRE2_SPTR8 p, int length, BOOL utf, FILE *f)
 {
 uint32_t c = 0;
 int yield = 0;
-if (length < 0)
-  {
-  PCRE2_SPTR8 pp = p - 1;
-  length = *pp;
-  }
+if (length < 0) length = *p++;
 while (length-- > 0)
   {
   if (utf)
@@ -3024,18 +3018,13 @@ return yield;
 
 /* Must handle UTF-16 strings in utf mode. Yields number of characters printed.
 For printing *MARK strings, a negative length is given, indicating that the
-length is in the previous code unit. Avoid using [-1] as a suffix because this
-can provoke a compiler warning. If handed a NULL file, just counts chars
+length is in the first code unit. If handed a NULL file, just counts chars
 without printing. */
 
 static int pchars16(PCRE2_SPTR16 p, int length, BOOL utf, FILE *f)
 {
 int yield = 0;
-if (length < 0)
-  {
-  PCRE2_SPTR16 pp = p - 1;
-  length = *pp;
-  }
+if (length < 0) length = *p++;
 while (length-- > 0)
   {
   uint32_t c = *p++ & 0xffff;
@@ -3064,19 +3053,14 @@ return yield;
 
 /* Must handle UTF-32 strings in utf mode. Yields number of characters printed.
 For printing *MARK strings, a negative length is given, indicating that the
-length is in the previous code unit. Avoid using [-1] as a suffix because this
-can provoke a compiler warning. If handed a NULL file, just counts chars
+length is in the first code unit. If handed a NULL file, just counts chars
 without printing. */
 
 static int pchars32(PCRE2_SPTR32 p, int length, BOOL utf, FILE *f)
 {
 int yield = 0;
 (void)(utf);  /* Avoid compiler warning */
-if (length < 0)
-  {
-  PCRE2_SPTR32 pp = p - 1;
-  length = *pp;
-  }
+if (length < 0) length = *p++;
 while (length-- > 0)
   {
   uint32_t c = *p++;
@@ -6327,7 +6311,7 @@ if (cb->mark != last_callout_mark)
   else
     {
     fprintf(outfile, "Latest Mark: ");
-    PCHARSV(cb->mark, 0, -1, utf, outfile);
+    PCHARSV(cb->mark, -1, -1, utf, outfile);
     putc('\n', outfile);
     }
   last_callout_mark = cb->mark;
@@ -7848,7 +7832,7 @@ for (gmatched = 0;; gmatched++)
          TESTFLD(match_data, mark, !=, NULL))
       {
       fprintf(outfile, "MK: ");
-      PCHARSV(CASTFLD(void *, match_data, mark), 0, -1, utf, outfile);
+      PCHARSV(CASTFLD(void *, match_data, mark), -1, -1, utf, outfile);
       fprintf(outfile, "\n");
       }
 
@@ -7880,7 +7864,7 @@ for (gmatched = 0;; gmatched++)
          TESTFLD(match_data, mark, !=, NULL))
       {
       fprintf(outfile, ", mark=");
-      PCHARS(rubriclength, CASTFLD(void *, match_data, mark), 0, -1, utf,
+      PCHARS(rubriclength, CASTFLD(void *, match_data, mark), -1, -1, utf,
         outfile);
       rubriclength += 7;
       }
@@ -7979,7 +7963,7 @@ for (gmatched = 0;; gmatched++)
              TESTFLD(match_data, mark, !=, NULL))
           {
           fprintf(outfile, ", mark = ");
-          PCHARSV(CASTFLD(void *, match_data, mark), 0, -1, utf, outfile);
+          PCHARSV(CASTFLD(void *, match_data, mark), -1, -1, utf, outfile);
           }
         if ((pat_patctl.control & CTL_JITVERIFY) != 0 && jit_was_used)
           fprintf(outfile, " (JIT)");

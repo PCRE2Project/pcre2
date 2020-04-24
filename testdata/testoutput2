@@ -17603,6 +17603,24 @@ No match
     École
  0: \xc3
 
+/"(*MARK:>" 00 "<).."/hex,mark,no_start_optimize
+    AB
+ 0: AB
+MK: >\x00<
+    A\=ph 
+Partial match, mark=>\x00<: A
+\= Expect no match
+    A
+No match, mark = >\x00<
+
+/"(*MARK:>" 00 "<).(?C1)."/hex,mark,no_start_optimize
+    AB
+--->AB
+  1 ^^     .
+Latest Mark: >\x00<
+ 0: AB
+MK: >\x00<
+
 # End of testinput2
 Error -70: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

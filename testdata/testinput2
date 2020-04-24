@@ -5855,4 +5855,13 @@ a)"xI
 /^\w+/tables=3
     École
 
+/"(*MARK:>" 00 "<).."/hex,mark,no_start_optimize
+    AB
+    A\=ph 
+\= Expect no match
+    A
+
+/"(*MARK:>" 00 "<).(?C1)."/hex,mark,no_start_optimize
+    AB
+
 # End of testinput2
