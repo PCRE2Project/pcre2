@@ -88,6 +88,8 @@
 # 2020-03-24 PH changed CMAKE_MODULE_PATH definition to add, not replace
 # 2020-04-08 Carlo added function check for secure_getenv, fixed strerror
 # 2020-04-16 enh added check for __attribute__((uninitialized))
+# 2020=04-25 PH applied patches from Uwe Korn to support pkg-config and
+#            library versioning.
 
 PROJECT(PCRE2 C)
 
@@ -417,12 +419,13 @@ file(STRINGS ${PROJECT_SOURCE_DIR}/configure.ac
   LIMIT_COUNT 50 # Read only the first 50 lines of the file
 )
 
-set(SEARCHED_VARIABLES "pcre2_major" "pcre2_minor" "pcre2_prerelease" "pcre2_date")
+set(SEARCHED_VARIABLES "pcre2_major" "pcre2_minor" "pcre2_prerelease" "pcre2_date"
+  "libpcre2_posix_version" "libpcre2_8_version" "libpcre2_16_version" "libpcre2_32_version")
 foreach(configure_line ${configure_lines})
     foreach(_substitution_variable ${SEARCHED_VARIABLES})
         string(TOUPPER ${_substitution_variable} _substitution_variable_upper)
         if (NOT ${_substitution_variable_upper})
-            string(REGEX MATCH "m4_define\\(${_substitution_variable}, \\[(.*)\\]" MACTHED_STRING ${configure_line})
+            string(REGEX MATCH "m4_define\\(${_substitution_variable}, *\\[(.*)\\]" MACTHED_STRING ${configure_line})
             if (CMAKE_MATCH_1)
                 set(${_substitution_variable_upper} ${CMAKE_MATCH_1})
             endif()
@@ -430,11 +433,64 @@ foreach(configure_line ${configure_lines})
     endforeach()
 endforeach()
 
+macro(PARSE_LIB_VERSION VARIABLE_PREFIX)
+  string(REPLACE ":" ";" ${VARIABLE_PREFIX}_VERSION_LIST ${${VARIABLE_PREFIX}_VERSION})
+  list(GET ${VARIABLE_PREFIX}_VERSION_LIST 0 ${VARIABLE_PREFIX}_VERSION_CURRENT)
+  list(GET ${VARIABLE_PREFIX}_VERSION_LIST 1 ${VARIABLE_PREFIX}_VERSION_REVISION)
+  list(GET ${VARIABLE_PREFIX}_VERSION_LIST 2 ${VARIABLE_PREFIX}_VERSION_AGE)
+
+  math(EXPR ${VARIABLE_PREFIX}_SOVERSION "${${VARIABLE_PREFIX}_VERSION_CURRENT} - ${${VARIABLE_PREFIX}_VERSION_AGE}")
+  math(EXPR ${VARIABLE_PREFIX}_MACHO_COMPATIBILITY_VERSION "${${VARIABLE_PREFIX}_VERSION_CURRENT} + 1")
+  math(EXPR ${VARIABLE_PREFIX}_MACHO_CURRENT_VERSION "${${VARIABLE_PREFIX}_VERSION_CURRENT} + 1")
+  set(${VARIABLE_PREFIX}_MACHO_CURRENT_VERSION "${${VARIABLE_PREFIX}_MACHO_CURRENT_VERSION}.${${VARIABLE_PREFIX}_VERSION_REVISION}}")
+  set(${VARIABLE_PREFIX}_VERSION "${${VARIABLE_PREFIX}_SOVERSION}.${${VARIABLE_PREFIX}_VERSION_AGE}.${${VARIABLE_PREFIX}_VERSION_REVISION}")
+endmacro()
+
+PARSE_LIB_VERSION(LIBPCRE2_POSIX)
+PARSE_LIB_VERSION(LIBPCRE2_8)
+PARSE_LIB_VERSION(LIBPCRE2_16)
+PARSE_LIB_VERSION(LIBPCRE2_32)
+
 CONFIGURE_FILE(src/pcre2.h.in
                ${PROJECT_BINARY_DIR}/pcre2.h
                @ONLY)
 
-# What about pcre2-config and libpcre2.pc?
+# Generate pkg-config files
+
+SET(PACKAGE_VERSION "${PCRE2_MAJOR}.${PCRE2_MINOR}")
+SET(prefix ${CMAKE_INSTALL_PREFIX})
+
+SET(exec_prefix "\${prefix}")
+SET(libdir "\${exec_prefix}/lib")
+SET(includedir "\${prefix}/include")
+CONFIGURE_FILE(libpcre2-posix.pc.in libpcre2-posix.pc @ONLY)
+SET(pkg_config_files ${pkg_config_files} "${CMAKE_CURRENT_BINARY_DIR}/libpcre2-posix.pc")
+
+IF(PCRE2_BUILD_PCRE2_8)
+  CONFIGURE_FILE(libpcre2-8.pc.in libpcre2-8.pc @ONLY)
+  SET(pkg_config_files ${pkg_config_files} "${CMAKE_CURRENT_BINARY_DIR}/libpcre2-8.pc")
+  SET(enable_pcre2_8 "yes")
+ELSE()
+  SET(enable_pcre2_8 "no")
+ENDIF()
+
+IF(PCRE2_BUILD_PCRE2_16)
+  CONFIGURE_FILE(libpcre2-16.pc.in libpcre2-16.pc @ONLY)
+  SET(pkg_config_files ${pkg_config_files} "${CMAKE_CURRENT_BINARY_DIR}/libpcre2-16.pc")
+  SET(enable_pcre2_16 "yes")
+ELSE()
+  SET(enable_pcre2_16 "no")
+ENDIF()
+
+IF(PCRE2_BUILD_PCRE2_32)
+  CONFIGURE_FILE(libpcre2-32.pc.in libpcre2-32.pc @ONLY)
+  SET(pkg_config_files ${pkg_config_files} "${CMAKE_CURRENT_BINARY_DIR}/libpcre2-32.pc")
+  SET(enable_pcre2_32 "yes")
+ELSE()
+  SET(enable_pcre2_32 "no")
+ENDIF()
+
+CONFIGURE_FILE(pcre2-config.in pcre2-config @ONLY)
 
 # Character table generation
 
@@ -558,12 +614,20 @@ SET(targets)
 
 IF(PCRE2_BUILD_PCRE2_8)
 ADD_LIBRARY(pcre2-8 ${PCRE2_HEADERS} ${PCRE2_SOURCES} ${PROJECT_BINARY_DIR}/config.h)
-SET_PROPERTY(TARGET pcre2-8
-  PROPERTY COMPILE_DEFINITIONS PCRE2_CODE_UNIT_WIDTH=8)
+SET_TARGET_PROPERTIES(pcre2-8 PROPERTIES
+  COMPILE_DEFINITIONS PCRE2_CODE_UNIT_WIDTH=8
+  MACHO_COMPATIBILITY_VERSION "${LIBPCRE2_8_MACHO_COMPATIBILITY_VERSION}"
+  MACHO_CURRENT_VERSION "${LIBPCRE2_8_MACHO_CURRENT_VERSION}"
+  VERSION ${LIBPCRE2_8_VERSION}
+  SOVERSION ${LIBPCRE2_8_SOVERSION})
 SET(targets ${targets} pcre2-8)
 ADD_LIBRARY(pcre2-posix ${PCRE2POSIX_HEADERS} ${PCRE2POSIX_SOURCES})
-SET_PROPERTY(TARGET pcre2-posix
-  PROPERTY COMPILE_DEFINITIONS PCRE2_CODE_UNIT_WIDTH=8)
+SET_TARGET_PROPERTIES(pcre2-posix PROPERTIES
+  COMPILE_DEFINITIONS PCRE2_CODE_UNIT_WIDTH=8
+  MACHO_COMPATIBILITY_VERSION "${LIBPCRE2_POSIX_MACHO_COMPATIBILITY_VERSION}"
+  MACHO_CURRENT_VERSION "${LIBPCRE2_POSIX_MACHO_CURRENT_VERSION}"
+  VERSION ${LIBPCRE2_POSIX_VERSION}
+  SOVERSION ${LIBPCRE2_POSIX_SOVERSION})
 SET(targets ${targets} pcre2-posix)
 TARGET_LINK_LIBRARIES(pcre2-posix pcre2-8)
 
@@ -581,8 +645,12 @@ ENDIF(PCRE2_BUILD_PCRE2_8)
 
 IF(PCRE2_BUILD_PCRE2_16)
 ADD_LIBRARY(pcre2-16 ${PCRE2_HEADERS} ${PCRE2_SOURCES} ${PROJECT_BINARY_DIR}/config.h)
-SET_PROPERTY(TARGET pcre2-16
-  PROPERTY COMPILE_DEFINITIONS PCRE2_CODE_UNIT_WIDTH=16)
+SET_TARGET_PROPERTIES(pcre2-16 PROPERTIES
+  COMPILE_DEFINITIONS PCRE2_CODE_UNIT_WIDTH=16
+  MACHO_COMPATIBILITY_VERSION "${LIBPCRE2_32_MACHO_COMPATIBILITY_VERSION}"
+  MACHO_CURRENT_VERSION "${LIBPCRE2_32_MACHO_CURRENT_VERSION}"
+  VERSION ${LIBPCRE2_16_VERSION}
+  SOVERSION ${LIBPCRE2_16_SOVERSION})
 SET(targets ${targets} pcre2-16)
 
 IF(MINGW AND NOT PCRE2_STATIC)
@@ -599,8 +667,12 @@ ENDIF(PCRE2_BUILD_PCRE2_16)
 
 IF(PCRE2_BUILD_PCRE2_32)
 ADD_LIBRARY(pcre2-32 ${PCRE2_HEADERS} ${PCRE2_SOURCES} ${PROJECT_BINARY_DIR}/config.h)
-SET_PROPERTY(TARGET pcre2-32
-  PROPERTY COMPILE_DEFINITIONS PCRE2_CODE_UNIT_WIDTH=32)
+SET_TARGET_PROPERTIES(pcre2-32 PROPERTIES
+  COMPILE_DEFINITIONS PCRE2_CODE_UNIT_WIDTH=32
+  MACHO_COMPATIBILITY_VERSION "${LIBPCRE2_32_MACHO_COMPATIBILITY_VERSION}"
+  MACHO_CURRENT_VERSION "${LIBPCRE2_32_MACHO_CURRENT_VERSION}"
+  VERSION ${LIBPCRE2_32_VERSION}
+  SOVERSION ${LIBPCRE2_32_SOVERSION})
 SET(targets ${targets} pcre2-32)
 
 IF(MINGW AND NOT PCRE2_STATIC)
@@ -773,6 +845,11 @@ INSTALL(TARGETS ${targets}
         RUNTIME DESTINATION bin
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib)
+INSTALL(FILES ${pkg_config_files} DESTINATION lib/pkgconfig)
+INSTALL(FILES "${CMAKE_CURRENT_BINARY_DIR}/pcre2-config"
+  DESTINATION bin
+  # Set 0755 permissions
+  PERMISSIONS OWNER_WRITE OWNER_READ OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
 
 INSTALL(FILES ${PCRE2_HEADERS} ${PCRE2POSIX_HEADERS} DESTINATION include)
 

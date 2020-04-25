@@ -110,6 +110,10 @@ stack_frames_vector[] in pcre2_match(). When implemented, this disables
 automatic initialization (a facility in clang), which can take time on big
 variables.
 
+27. Updated CMakeLists.txt (patches by Uwe Korn) to add support for 
+pcre2-config, the libpcre*.pc files, SOVERSION, VERSION and the 
+MACHO_*_VERSIONS settings for CMake builds.
+
 
 Version 10.34 21-November-2019
 ------------------------------
