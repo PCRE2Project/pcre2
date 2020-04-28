@@ -114,6 +114,9 @@ variables.
 pcre2-config, the libpcre*.pc files, SOVERSION, VERSION and the 
 MACHO_*_VERSIONS settings for CMake builds.
 
+28. Another patch to CMakeLists.txt to check for mkostemp (configure already 
+does). Patch by Carlo Marcelo Arenas Belon.
+
 
 Version 10.34 21-November-2019
 ------------------------------

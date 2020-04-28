@@ -88,8 +88,9 @@
 # 2020-03-24 PH changed CMAKE_MODULE_PATH definition to add, not replace
 # 2020-04-08 Carlo added function check for secure_getenv, fixed strerror
 # 2020-04-16 enh added check for __attribute__((uninitialized))
-# 2020=04-25 PH applied patches from Uwe Korn to support pkg-config and
+# 2020-04-25 PH applied patches from Uwe Korn to support pkg-config and
 #            library versioning.
+# 2020-04-25 Carlo added function check for mkostemp used in ProtExecAllocator
 
 PROJECT(PCRE2 C)
 
@@ -118,6 +119,7 @@ FIND_PACKAGE( Editline )
 
 INCLUDE(CheckCSourceCompiles)
 INCLUDE(CheckFunctionExists)
+INCLUDE(CheckSymbolExists)
 INCLUDE(CheckIncludeFile)
 INCLUDE(CheckTypeSize)
 
@@ -323,7 +325,15 @@ IF(PCRE2_SUPPORT_JIT)
 ENDIF(PCRE2_SUPPORT_JIT)
 
 IF(PCRE2_SUPPORT_JIT_SEALLOC)
-        SET(SLJIT_PROT_EXECUTABLE_ALLOCATOR 1)
+        SET(CMAKE_REQUIRED_DEFINITIONS -D_GNU_SOURCE)
+        CHECK_SYMBOL_EXISTS(mkostemp stdlib.h REQUIRED)	
+        UNSET(CMAKE_REQUIRED_DEFINITIONS)
+        IF(${REQUIRED})
+                ADD_DEFINITIONS(-D_GNU_SOURCE)
+                SET(SLJIT_PROT_EXECUTABLE_ALLOCATOR 1)
+        ELSE(${REQUIRED})
+                SET(PCRE2_SUPPORT_JIT_SEALLOC OFF)
+        ENDIF(${REQUIRED})
 ENDIF(PCRE2_SUPPORT_JIT_SEALLOC)
 
 IF(PCRE2GREP_SUPPORT_JIT)
