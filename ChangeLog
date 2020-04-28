@@ -117,6 +117,9 @@ MACHO_*_VERSIONS settings for CMake builds.
 28. Another patch to CMakeLists.txt to check for mkostemp (configure already 
 does). Patch by Carlo Marcelo Arenas Belon.
 
+29. Check for the existence of memfd_create in both CMake and configure 
+configurations. Patch by Carlo Marcelo Arenas Belon.
+
 
 Version 10.34 21-November-2019
 ------------------------------

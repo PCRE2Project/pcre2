@@ -507,7 +507,7 @@ AC_TYPE_SIZE_T
 
 # Checks for library functions.
 
-AC_CHECK_FUNCS(bcopy memmove strerror mkostemp secure_getenv)
+AC_CHECK_FUNCS(bcopy memfd_create memmove mkostemp secure_getenv strerror)
 
 # Check for the availability of libz (aka zlib)
 

@@ -79,6 +79,9 @@ sure both macros are undefined; an emulation function will then be used. */
 /* Define to 1 if you have the <limits.h> header file. */
 #undef HAVE_LIMITS_H
 
+/* Define to 1 if you have the `memfd_create' function. */
+#undef HAVE_MEMFD_CREATE
+
 /* Define to 1 if you have the `memmove' function. */
 #undef HAVE_MEMMOVE
 

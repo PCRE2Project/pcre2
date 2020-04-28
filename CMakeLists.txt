@@ -91,6 +91,7 @@
 # 2020-04-25 PH applied patches from Uwe Korn to support pkg-config and
 #            library versioning.
 # 2020-04-25 Carlo added function check for mkostemp used in ProtExecAllocator
+# 2020-04-28 PH added function check for memfd_create based on Carlo's patch
 
 PROJECT(PCRE2 C)
 
@@ -132,9 +133,10 @@ CHECK_INCLUDE_FILE(unistd.h     HAVE_UNISTD_H)
 CHECK_INCLUDE_FILE(windows.h    HAVE_WINDOWS_H)
 
 CHECK_FUNCTION_EXISTS(bcopy         HAVE_BCOPY)
+CHECK_FUNCTION_EXISTS(memfd_create  HAVE_MEMFD_CREATE)
 CHECK_FUNCTION_EXISTS(memmove       HAVE_MEMMOVE)
-CHECK_FUNCTION_EXISTS(strerror      HAVE_STRERROR)
 CHECK_FUNCTION_EXISTS(secure_getenv HAVE_SECURE_GETENV)
+CHECK_FUNCTION_EXISTS(strerror      HAVE_STRERROR)
 
 set(ORIG_CMAKE_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS})
 set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -Werror")
@@ -326,7 +328,7 @@ ENDIF(PCRE2_SUPPORT_JIT)
 
 IF(PCRE2_SUPPORT_JIT_SEALLOC)
         SET(CMAKE_REQUIRED_DEFINITIONS -D_GNU_SOURCE)
-        CHECK_SYMBOL_EXISTS(mkostemp stdlib.h REQUIRED)	
+	CHECK_SYMBOL_EXISTS(mkostemp stdlib.h REQUIRED) 
         UNSET(CMAKE_REQUIRED_DEFINITIONS)
         IF(${REQUIRED})
                 ADD_DEFINITIONS(-D_GNU_SOURCE)
