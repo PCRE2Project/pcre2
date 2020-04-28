@@ -200,8 +200,12 @@ SET(PCRE2_HEAP_MATCH_RECURSE OFF CACHE BOOL
 SET(PCRE2_SUPPORT_JIT OFF CACHE BOOL
     "Enable support for Just-in-time compiling.")
 
-SET(PCRE2_SUPPORT_JIT_SEALLOC OFF CACHE BOOL
-    "Enable SELinux compatible execmem allocator in JIT (experimental).")
+IF(${CMAKE_SYSTEM_NAME} MATCHES Linux|NetBSD)
+    SET(PCRE2_SUPPORT_JIT_SEALLOC OFF CACHE BOOL
+        "Enable SELinux compatible execmem allocator in JIT (experimental).")
+ELSE(${CMAKE_SYSTEM_NAME} MATCHES Linux|NetBSD)       
+    SET(PCRE2_SUPPORT_JIT_SEALLOC IGNORE)              
+ENDIF(${CMAKE_SYSTEM_NAME} MATCHES Linux|NetBSD)
 
 SET(PCRE2GREP_SUPPORT_JIT ON CACHE BOOL
     "Enable use of Just-in-time compiling in pcre2grep.")
@@ -331,8 +335,12 @@ IF(PCRE2_SUPPORT_JIT_SEALLOC)
 	CHECK_SYMBOL_EXISTS(mkostemp stdlib.h REQUIRED) 
         UNSET(CMAKE_REQUIRED_DEFINITIONS)
         IF(${REQUIRED})
-                ADD_DEFINITIONS(-D_GNU_SOURCE)
-                SET(SLJIT_PROT_EXECUTABLE_ALLOCATOR 1)
+                IF(${CMAKE_SYSTEM_NAME} MATCHES Linux|NetBSD)          
+                        ADD_DEFINITIONS(-D_GNU_SOURCE)
+                        SET(SLJIT_PROT_EXECUTABLE_ALLOCATOR 1)
+                ELSE(${CMAKE_SYSTEM_NAME} MATCHES Linux|NetBSD)
+                        MESSAGE(FATAL_ERROR "Your configuration is not supported")
+                ENDIF(${CMAKE_SYSTEM_NAME} MATCHES Linux|NetBSD)
         ELSE(${REQUIRED})
                 SET(PCRE2_SUPPORT_JIT_SEALLOC OFF)
         ENDIF(${REQUIRED})

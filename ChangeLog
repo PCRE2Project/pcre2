@@ -120,6 +120,9 @@ does). Patch by Carlo Marcelo Arenas Belon.
 29. Check for the existence of memfd_create in both CMake and configure 
 configurations. Patch by Carlo Marcelo Arenas Belon.
 
+30. Restrict the configuration setting for the SELinux compatible execmem 
+allocator (change 10.30/44) to Linux and NetBSD.
+
 
 Version 10.34 21-November-2019
 ------------------------------

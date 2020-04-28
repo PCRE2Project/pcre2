@@ -176,11 +176,18 @@ if test "$enable_jit" = "auto"; then
   echo checking for JIT support on this hardware... $enable_jit
 fi
 
-# Handle --enable-jit-sealloc (disabled by default)
-AC_ARG_ENABLE(jit-sealloc,
-              AS_HELP_STRING([--enable-jit-sealloc],
-                             [enable SELinux compatible execmem allocator in JIT (experimental)]),
-              , enable_jit_sealloc=no)
+# Handle --enable-jit-sealloc (disabled by default and only experimental)
+case $host_os in                                     
+  linux* | netbsd*)         
+    AC_ARG_ENABLE(jit-sealloc,
+      AS_HELP_STRING([--enable-jit-sealloc],
+        [enable SELinux compatible execmem allocator in JIT (experimental)]),
+        ,enable_jit_sealloc=no)
+    ;;
+  *)
+    enable_jit_sealloc=unsupported
+    ;;
+esac
 
 # Handle --disable-pcre2grep-jit (enabled by default)
 AC_ARG_ENABLE(pcre2grep-jit,
