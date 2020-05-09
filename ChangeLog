@@ -1,7 +1,7 @@
 Change Log for PCRE2
 --------------------
 
-Version 10.35 15-April-2020
+Version 10.35 09-May-2020
 ---------------------------
 
 1. Use PCRE2_MATCH_EMPTY flag to detect empty matches in JIT.
@@ -101,26 +101,26 @@ LIST(APPEND...) to allow a setting from the command line to be included.
 
 24. CMake build now checks for secure_getenv() and strerror(). Patch by Carlo.
 
-25. Avoid using [-1] as a suffix in pcre2test because it can provoke a compiler 
+25. Avoid using [-1] as a suffix in pcre2test because it can provoke a compiler
 warning.
 
-26. Added tests for __attribute__((uninitialized)) to both the configure and 
-CMake build files, and then applied this attribute to the variable called 
-stack_frames_vector[] in pcre2_match(). When implemented, this disables 
+26. Added tests for __attribute__((uninitialized)) to both the configure and
+CMake build files, and then applied this attribute to the variable called
+stack_frames_vector[] in pcre2_match(). When implemented, this disables
 automatic initialization (a facility in clang), which can take time on big
 variables.
 
-27. Updated CMakeLists.txt (patches by Uwe Korn) to add support for 
-pcre2-config, the libpcre*.pc files, SOVERSION, VERSION and the 
+27. Updated CMakeLists.txt (patches by Uwe Korn) to add support for
+pcre2-config, the libpcre*.pc files, SOVERSION, VERSION and the
 MACHO_*_VERSIONS settings for CMake builds.
 
-28. Another patch to CMakeLists.txt to check for mkostemp (configure already 
+28. Another patch to CMakeLists.txt to check for mkostemp (configure already
 does). Patch by Carlo Marcelo Arenas Belon.
 
-29. Check for the existence of memfd_create in both CMake and configure 
+29. Check for the existence of memfd_create in both CMake and configure
 configurations. Patch by Carlo Marcelo Arenas Belon.
 
-30. Restrict the configuration setting for the SELinux compatible execmem 
+30. Restrict the configuration setting for the SELinux compatible execmem
 allocator (change 10.30/44) to Linux and NetBSD.
 
 

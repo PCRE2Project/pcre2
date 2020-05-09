@@ -10,8 +10,8 @@ dnl be defined as -RC2, for example. For real releases, it should be empty.
 
 m4_define(pcre2_major, [10])
 m4_define(pcre2_minor, [35])
-m4_define(pcre2_prerelease, [-RC2])
-m4_define(pcre2_date, [2020-04-15])
+m4_define(pcre2_prerelease, [])
+m4_define(pcre2_date, [2020-05-09])
 
 # Libtool shared library interface versions (current:revision:age)
 m4_define(libpcre2_8_version,     [10:0:10])
@@ -177,8 +177,8 @@ if test "$enable_jit" = "auto"; then
 fi
 
 # Handle --enable-jit-sealloc (disabled by default and only experimental)
-case $host_os in                                     
-  linux* | netbsd*)         
+case $host_os in
+  linux* | netbsd*)
     AC_ARG_ENABLE(jit-sealloc,
       AS_HELP_STRING([--enable-jit-sealloc],
         [enable SELinux compatible execmem allocator in JIT (experimental)]),

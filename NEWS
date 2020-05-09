@@ -17,7 +17,7 @@ as a result of the 10.30 restructuring.
 character properties are used for upper/lower case computations on characters
 whose code points are greater than 127.
 
-4. The character tabless (for low-valued characters) can now more easily be
+4. The character tables (for low-valued characters) can now more easily be
 saved and restored in binary.
 
 5. Updated to Unicode 13.0.0.
