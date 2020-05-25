@@ -1,6 +1,15 @@
 Change Log for PCRE2
 --------------------
 
+Version 10.36-RC1 25-May-2020
+-----------------------------
+
+1. Add CET_CFLAGS so that when Intel CET is enabled, pass -mshstk to
+compiler. This fixes https://bugs.exim.org/show_bug.cgi?id=2578. Patch for 
+Makefile.am and configure.ac by H.J. Lu. Equivalent patch for CMakeLists.txt 
+invented by PH.
+
+
 Version 10.35 09-May-2020
 ---------------------------
 

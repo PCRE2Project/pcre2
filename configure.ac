@@ -1006,6 +1006,21 @@ fi # enable_coverage
 
 AM_CONDITIONAL([WITH_GCOV],[test "x$enable_coverage" = "xyes"])
 
+AC_MSG_CHECKING([whether Intel CET is enabled])
+AC_LANG_PUSH([C])
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM(,
+                   [[#ifndef __CET__
+# error CET is not enabled
+#endif]])],
+                   [pcre2_cc_cv_intel_cet_enabled=yes],
+                   [pcre2_cc_cv_intel_cet_enabled=no])
+AC_MSG_RESULT([$pcre2_cc_cv_intel_cet_enabled])
+if test "$pcre2_cc_cv_intel_cet_enabled" = yes; then
+  CET_CFLAGS="-mshstk"
+  AC_SUBST([CET_CFLAGS])
+fi
+AC_LANG_POP([C])
+
 # Produce these files, in addition to config.h.
 AC_CONFIG_FILES(
 	Makefile

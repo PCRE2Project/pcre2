@@ -391,6 +391,7 @@ nodist_libpcre2_8_la_SOURCES = \
 libpcre2_8_la_CFLAGS = \
   -DPCRE2_CODE_UNIT_WIDTH=8 \
   $(VISIBILITY_CFLAGS) \
+  $(CET_CFLAGS) \
   $(AM_CFLAGS)
 libpcre2_8_la_LIBADD =
 endif # WITH_PCRE2_8

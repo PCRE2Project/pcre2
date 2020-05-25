@@ -92,6 +92,7 @@
 #            library versioning.
 # 2020-04-25 Carlo added function check for mkostemp used in ProtExecAllocator
 # 2020-04-28 PH added function check for memfd_create based on Carlo's patch
+# 2020-05-25 PH added a check for Intel CET
 
 PROJECT(PCRE2 C)
 
@@ -145,6 +146,24 @@ CHECK_C_SOURCE_COMPILES(
   HAVE_ATTRIBUTE_UNINITIALIZED
 )
 set(CMAKE_REQUIRED_FLAGS ${ORIG_CMAKE_REQUIRED_FLAGS})
+
+# Check whether Intel CET is enabled, and if so, adjust compiler flags. This
+# code was written by PH, trying to imitate the logic from the autotools 
+# configuration.
+
+CHECK_C_SOURCE_COMPILES(
+  "#ifndef __CET__
+   #error CET is not enabled
+   #endif
+   int main() { return 0; }"
+  INTEL_CET_ENABLED
+)
+
+IF (INTEL_CET_ENABLED)
+  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mshstk")
+ENDIF(INTEL_CET_ENABLED)   
+        
+
 
 # User-configurable options
 #
