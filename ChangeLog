@@ -9,6 +9,9 @@ compiler. This fixes https://bugs.exim.org/show_bug.cgi?id=2578. Patch for
 Makefile.am and configure.ac by H.J. Lu. Equivalent patch for CMakeLists.txt 
 invented by PH.
 
+2. Fix inifinite loop when a single byte newline is searched in JIT when
+invalid utf8 mode is enabled.
+
 
 Version 10.35 09-May-2020
 ---------------------------
