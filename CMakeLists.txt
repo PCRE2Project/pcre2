@@ -96,8 +96,8 @@
 
 PROJECT(PCRE2 C)
 
-# Increased minimum to 2.8.0 to support newer add_test features.
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8.0)
+# Increased minimum to 2.8.5 to support GNUInstallDirs.
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8.5)
 
 # Set policy CMP0026 to avoid warnings for the use of LOCATION in
 # GET_TARGET_PROPERTY. This should no longer be required.
@@ -124,6 +124,7 @@ INCLUDE(CheckFunctionExists)
 INCLUDE(CheckSymbolExists)
 INCLUDE(CheckIncludeFile)
 INCLUDE(CheckTypeSize)
+INCLUDE(GNUInstallDirs) # for CMAKE_INSTALL_LIBDIR
 
 CHECK_INCLUDE_FILE(dirent.h     HAVE_DIRENT_H)
 CHECK_INCLUDE_FILE(stdint.h     HAVE_STDINT_H)
@@ -464,7 +465,7 @@ foreach(configure_line ${configure_lines})
     foreach(_substitution_variable ${SEARCHED_VARIABLES})
         string(TOUPPER ${_substitution_variable} _substitution_variable_upper)
         if (NOT ${_substitution_variable_upper})
-            string(REGEX MATCH "m4_define\\(${_substitution_variable}, *\\[(.*)\\]" MACTHED_STRING ${configure_line})
+            string(REGEX MATCH "m4_define\\(${_substitution_variable}, *\\[(.*)\\]" MATCHED_STRING ${configure_line})
             if (CMAKE_MATCH_1)
                 set(${_substitution_variable_upper} ${CMAKE_MATCH_1})
             endif()
@@ -500,7 +501,7 @@ SET(PACKAGE_VERSION "${PCRE2_MAJOR}.${PCRE2_MINOR}")
 SET(prefix ${CMAKE_INSTALL_PREFIX})
 
 SET(exec_prefix "\${prefix}")
-SET(libdir "\${exec_prefix}/lib")
+SET(libdir "\${exec_prefix}/${CMAKE_INSTALL_LIBDIR}")
 SET(includedir "\${prefix}/include")
 CONFIGURE_FILE(libpcre2-posix.pc.in libpcre2-posix.pc @ONLY)
 SET(pkg_config_files ${pkg_config_files} "${CMAKE_CURRENT_BINARY_DIR}/libpcre2-posix.pc")
@@ -882,9 +883,9 @@ SET(CMAKE_INSTALL_ALWAYS 1)
 
 INSTALL(TARGETS ${targets}
         RUNTIME DESTINATION bin
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib)
-INSTALL(FILES ${pkg_config_files} DESTINATION lib/pkgconfig)
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+INSTALL(FILES ${pkg_config_files} DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 INSTALL(FILES "${CMAKE_CURRENT_BINARY_DIR}/pcre2-config"
   DESTINATION bin
   # Set 0755 permissions
@@ -935,7 +936,7 @@ IF(PCRE2_SHOW_REPORT)
   ENDIF(CMAKE_C_FLAGS)
   MESSAGE(STATUS "")
   MESSAGE(STATUS "")
-  MESSAGE(STATUS "PCRE2 configuration summary:")
+  MESSAGE(STATUS "PCRE2-${PCRE2_MAJOR}.${PCRE2_MINOR} configuration summary:")
   MESSAGE(STATUS "")
   MESSAGE(STATUS "  Install prefix .................. : ${CMAKE_INSTALL_PREFIX}")
   MESSAGE(STATUS "  C compiler ...................... : ${CMAKE_C_COMPILER}")

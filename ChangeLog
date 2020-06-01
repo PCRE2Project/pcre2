@@ -12,6 +12,18 @@ invented by PH.
 2. Fix inifinite loop when a single byte newline is searched in JIT when
 invalid utf8 mode is enabled.
 
+3. Updated CMakeLists.txt with patch from Wolfgang Stöggl (Bugzilla #2584):
+
+  - Include GNUInstallDirs and use ${CMAKE_INSTALL_LIBDIR} instead of hardcoded
+    lib. This allows differentiation between lib and lib64.
+    CMAKE_INSTALL_LIBDIR is used for installation of libraries and also for
+    pkgconfig file generation.
+   
+  - Add the version of PCRE2 to the configuration summary like ./configure
+    does.
+   
+  - Fix typo: MACTHED_STRING->MATCHED_STRING
+
 
 Version 10.35 09-May-2020
 ---------------------------
