@@ -6183,6 +6183,7 @@ if (common->match_end_ptr != 0)
 
 if (common->nltype == NLTYPE_FIXED && common->newline > 255)
   {
+#ifdef JIT_HAS_FAST_FORWARD_CHAR_PAIR_SIMD
   if (JIT_HAS_FAST_FORWARD_CHAR_PAIR_SIMD && common->mode == PCRE2_JIT_COMPLETE)
     {
     if (HAS_VIRTUAL_REGISTERS)
@@ -6210,6 +6211,7 @@ if (common->nltype == NLTYPE_FIXED && common->newline > 255)
     OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(2));
     }
   else
+#endif /* JIT_HAS_FAST_FORWARD_CHAR_PAIR_SIMD */
     {
     lastchar = CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0);
     if (HAS_VIRTUAL_REGISTERS)
@@ -6271,6 +6273,7 @@ else
 loop = LABEL();
 common->ff_newline_shortcut = loop;
 
+#ifdef JIT_HAS_FAST_FORWARD_CHAR_SIMD
 if (JIT_HAS_FAST_FORWARD_CHAR_SIMD && (common->nltype == NLTYPE_FIXED || common->nltype == NLTYPE_ANYCRLF))
   {
   if (common->nltype == NLTYPE_ANYCRLF)
@@ -6296,6 +6299,7 @@ if (JIT_HAS_FAST_FORWARD_CHAR_SIMD && (common->nltype == NLTYPE_FIXED || common-
     }
   }
 else
+#endif /* JIT_HAS_FAST_FORWARD_CHAR_SIMD */
   {
   read_char(common, common->nlmin, common->nlmax, NULL, READ_CHAR_NEWLINE);
   lastchar = CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0);
