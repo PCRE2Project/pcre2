@@ -31,6 +31,12 @@ invalid utf8 mode is enabled.
     allow spaces in directory names.
 
   - This fixes a cmake error, if the path of the pcre2 source contains a space.
+  
+5. Updated CMakeLists.txt with a patch from B. Scott Michel: CMake's 
+documentation suggests using CHECK_SYMBOL_EXISTS over CHECK_FUNCTION_EXIST. 
+Moreover, these functions come from specific header files, which need to be 
+specified (and, thankfully, are the same on both the Linux and WinXX 
+platforms.)  
 
 
 Version 10.35 09-May-2020
