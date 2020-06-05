@@ -23,6 +23,14 @@ invalid utf8 mode is enabled.
     does.
    
   - Fix typo: MACTHED_STRING->MATCHED_STRING
+  
+4. Updated CMakeLists.txt with another patch from Wolfgang Stöggl (Bugzilla
+#2588):
+
+  - Add escaped double quotes around include directory in CMakeLists.txt to
+    allow spaces in directory names.
+
+  - This fixes a cmake error, if the path of the pcre2 source contains a space.
 
 
 Version 10.35 09-May-2020
