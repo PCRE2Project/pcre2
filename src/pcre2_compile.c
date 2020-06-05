@@ -2344,7 +2344,7 @@ if (ptr > *nameptr + MAX_NAME_SIZE)
   *errorcodeptr = ERR48;
   goto FAILED;
   }
-*namelenptr = ptr - *nameptr;
+*namelenptr = (uint32_t)(ptr - *nameptr);
 
 /* Subpattern names must not be empty, and their terminator is checked here.
 (What follows a verb or alpha assertion name is checked separately.) */

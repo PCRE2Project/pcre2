@@ -38,6 +38,8 @@ Moreover, these functions come from specific header files, which need to be
 specified (and, thankfully, are the same on both the Linux and WinXX 
 platforms.)  
 
+6. Added a (uint32_t) cast to prevent a compiler warning in pcre2_compile.c.
+
 
 Version 10.35 09-May-2020
 ---------------------------
