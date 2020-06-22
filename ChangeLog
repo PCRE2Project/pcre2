@@ -40,6 +40,10 @@ platforms.)
 
 6. Added a (uint32_t) cast to prevent a compiler warning in pcre2_compile.c.
 
+7. Applied a patch from Wolfgang Stöggl (Bugzilla #2600) to fix postfix for
+debug Windows builds using CMake. This also updated configure so that it
+generates *.pc files and pcre2-config with the same content, as in the past.
+
 
 Version 10.35 09-May-2020
 ---------------------------

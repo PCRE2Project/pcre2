@@ -495,6 +495,12 @@ CONFIGURE_FILE(src/pcre2.h.in
                ${PROJECT_BINARY_DIR}/pcre2.h
                @ONLY)
 
+# Make sure to not link debug libs
+# against release libs and vice versa
+IF(WIN32)
+  SET(CMAKE_DEBUG_POSTFIX "d")
+ENDIF(WIN32)
+
 # Generate pkg-config files
 
 SET(PACKAGE_VERSION "${PCRE2_MAJOR}.${PCRE2_MINOR}")
@@ -503,6 +509,9 @@ SET(prefix ${CMAKE_INSTALL_PREFIX})
 SET(exec_prefix "\${prefix}")
 SET(libdir "\${exec_prefix}/${CMAKE_INSTALL_LIBDIR}")
 SET(includedir "\${prefix}/include")
+IF(WIN32 AND (CMAKE_BUILD_TYPE MATCHES Debug))
+  SET(LIB_POSTFIX ${CMAKE_DEBUG_POSTFIX})
+ENDIF()
 CONFIGURE_FILE(libpcre2-posix.pc.in libpcre2-posix.pc @ONLY)
 SET(pkg_config_files ${pkg_config_files} "${CMAKE_CURRENT_BINARY_DIR}/libpcre2-posix.pc")
 
@@ -642,11 +651,6 @@ IF(MSVC)
 ENDIF(MSVC)
 
 SET(CMAKE_INCLUDE_CURRENT_DIR 1)
-# needed to make sure to not link debug libs
-# against release libs and vice versa
-IF(WIN32)
-  SET(CMAKE_DEBUG_POSTFIX "d")
-ENDIF(WIN32)
 
 SET(targets)
 

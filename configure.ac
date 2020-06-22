@@ -1021,7 +1021,12 @@ if test "$pcre2_cc_cv_intel_cet_enabled" = yes; then
 fi
 AC_LANG_POP([C])
 
+# LIB_POSTFIX is used by CMakeLists.txt for Windows debug builds.
+# Pass empty LIB_POSTFIX to *.pc files and pcre2-config here.
+AC_SUBST(LIB_POSTFIX)
+
 # Produce these files, in addition to config.h.
+
 AC_CONFIG_FILES(
 	Makefile
 	libpcre2-8.pc
