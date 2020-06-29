@@ -44,6 +44,10 @@ platforms.)
 debug Windows builds using CMake. This also updated configure so that it
 generates *.pc files and pcre2-config with the same content, as in the past.
 
+8. If a pattern ended with (?(VERSION=n.d where n is any number but d is just a 
+single digit, the code unit beyond d was being read (i.e. there was a read 
+buffer overflow). Fixes ClusterFuzz 23779.
+
 
 Version 10.35 09-May-2020
 ---------------------------

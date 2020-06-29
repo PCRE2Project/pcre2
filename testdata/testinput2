@@ -5864,4 +5864,6 @@ a)"xI
 /"(*MARK:>" 00 "<).(?C1)."/hex,mark,no_start_optimize
     AB
 
+/(?(VERSION=0.0/
+
 # End of testinput2

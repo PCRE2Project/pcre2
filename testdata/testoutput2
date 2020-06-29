@@ -17621,6 +17621,9 @@ Latest Mark: >\x00<
  0: AB
 MK: >\x00<
 
+/(?(VERSION=0.0/
+Failed: error 179 at offset 14: syntax error or number too big in (?(VERSION condition
+
 # End of testinput2
 Error -70: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data
