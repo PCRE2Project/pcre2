@@ -13659,7 +13659,7 @@ if (common->has_then)
   set_then_offsets(common, common->start, NULL);
   }
 
-compiler = sljit_create_compiler(allocator_data);
+compiler = sljit_create_compiler(allocator_data, NULL);
 if (!compiler)
   {
   SLJIT_FREE(common->optimized_cbracket, allocator_data);
@@ -14061,7 +14061,7 @@ else
     {
     /* This case is highly unlikely since we just recently
     freed a lot of memory. Not impossible though. */
-    sljit_free_code(executable_func);
+    sljit_free_code(executable_func, NULL);
     PRIV(jit_free_rodata)(common->read_only_data_head, allocator_data);
     return PCRE2_ERROR_NOMEMORY;
     }
@@ -14175,13 +14175,13 @@ if (executable_allocator_is_working == 0)
   /* Checks whether the executable allocator is working. This check
      might run multiple times in multi-threaded environments, but the
      result should not be affected by it. */
-  void *ptr = SLJIT_MALLOC_EXEC(32);
+  void *ptr = SLJIT_MALLOC_EXEC(32, NULL);
 
   executable_allocator_is_working = -1;
 
   if (ptr != NULL)
     {
-    SLJIT_FREE_EXEC(((sljit_u8*)(ptr)) + SLJIT_EXEC_OFFSET(ptr));
+    SLJIT_FREE_EXEC(((sljit_u8*)(ptr)) + SLJIT_EXEC_OFFSET(ptr), NULL);
     executable_allocator_is_working = 1;
     }
   }

@@ -28,7 +28,6 @@
 
 #ifdef _WIN32
 
-/* For SLJIT_CACHE_FLUSH, which can expand to FlushInstructionCache. */
 #include <windows.h>
 
 #endif /* _WIN32 */
@@ -274,6 +273,8 @@
 
 #if (defined SLJIT_PROT_EXECUTABLE_ALLOCATOR && SLJIT_PROT_EXECUTABLE_ALLOCATOR)
 #include "sljitProtExecAllocator.c"
+#elif (defined SLJIT_WX_EXECUTABLE_ALLOCATOR && SLJIT_WX_EXECUTABLE_ALLOCATOR)
+#include "sljitWXExecAllocator.c"
 #else
 #include "sljitExecAllocator.c"
 #endif
@@ -284,6 +285,10 @@
 #define SLJIT_ADD_EXEC_OFFSET(ptr, exec_offset) ((sljit_u8 *)(ptr) + (exec_offset))
 #else
 #define SLJIT_ADD_EXEC_OFFSET(ptr, exec_offset) ((sljit_u8 *)(ptr))
+#endif
+
+#ifndef SLJIT_UPDATE_WX_FLAGS
+#define SLJIT_UPDATE_WX_FLAGS(from, to, enable_exec)
 #endif
 
 /* Argument checking features. */
@@ -366,7 +371,7 @@ static sljit_s32 compiler_initialized = 0;
 static void init_compiler(void);
 #endif
 
-SLJIT_API_FUNC_ATTRIBUTE struct sljit_compiler* sljit_create_compiler(void *allocator_data)
+SLJIT_API_FUNC_ATTRIBUTE struct sljit_compiler* sljit_create_compiler(void *allocator_data, void *exec_allocator_data)
 {
 	struct sljit_compiler *compiler = (struct sljit_compiler*)SLJIT_MALLOC(sizeof(struct sljit_compiler), allocator_data);
 	if (!compiler)
@@ -393,6 +398,7 @@ SLJIT_API_FUNC_ATTRIBUTE struct sljit_compiler* sljit_create_compiler(void *allo
 	compiler->error = SLJIT_SUCCESS;
 
 	compiler->allocator_data = allocator_data;
+	compiler->exec_allocator_data = exec_allocator_data;
 	compiler->buf = (struct sljit_memory_fragment*)SLJIT_MALLOC(BUF_SIZE, allocator_data);
 	compiler->abuf = (struct sljit_memory_fragment*)SLJIT_MALLOC(ABUF_SIZE, allocator_data);
 
@@ -485,22 +491,22 @@ SLJIT_API_FUNC_ATTRIBUTE void sljit_set_compiler_memory_error(struct sljit_compi
 }
 
 #if (defined SLJIT_CONFIG_ARM_THUMB2 && SLJIT_CONFIG_ARM_THUMB2)
-SLJIT_API_FUNC_ATTRIBUTE void sljit_free_code(void* code)
+SLJIT_API_FUNC_ATTRIBUTE void sljit_free_code(void* code, void *exec_allocator_data)
 {
 	/* Remove thumb mode flag. */
-	SLJIT_FREE_EXEC((void*)((sljit_uw)code & ~0x1));
+	SLJIT_FREE_EXEC((void*)((sljit_uw)code & ~0x1), exec_allocator_data);
 }
 #elif (defined SLJIT_INDIRECT_CALL && SLJIT_INDIRECT_CALL)
-SLJIT_API_FUNC_ATTRIBUTE void sljit_free_code(void* code)
+SLJIT_API_FUNC_ATTRIBUTE void sljit_free_code(void* code, void *exec_allocator_data)
 {
 	/* Resolve indirection. */
 	code = (void*)(*(sljit_uw*)code);
-	SLJIT_FREE_EXEC(code);
+	SLJIT_FREE_EXEC(code, exec_allocator_data);
 }
 #else
-SLJIT_API_FUNC_ATTRIBUTE void sljit_free_code(void* code)
+SLJIT_API_FUNC_ATTRIBUTE void sljit_free_code(void* code, void *exec_allocator_data)
 {
-	SLJIT_FREE_EXEC(code);
+	SLJIT_FREE_EXEC(code, exec_allocator_data);
 }
 #endif
 
@@ -2292,9 +2298,10 @@ SLJIT_API_FUNC_ATTRIBUTE const char* sljit_get_platform_name(void)
 	return "unsupported";
 }
 
-SLJIT_API_FUNC_ATTRIBUTE struct sljit_compiler* sljit_create_compiler(void *allocator_data)
+SLJIT_API_FUNC_ATTRIBUTE struct sljit_compiler* sljit_create_compiler(void *allocator_data, void *exec_allocator_data)
 {
 	SLJIT_UNUSED_ARG(allocator_data);
+	SLJIT_UNUSED_ARG(exec_allocator_data);
 	SLJIT_UNREACHABLE();
 	return NULL;
 }
@@ -2342,9 +2349,10 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_has_cpu_feature(sljit_s32 feature_type)
 	return 0;
 }
 
-SLJIT_API_FUNC_ATTRIBUTE void sljit_free_code(void* code)
+SLJIT_API_FUNC_ATTRIBUTE void sljit_free_code(void* code, void *exec_allocator_data)
 {
 	SLJIT_UNUSED_ARG(code);
+	SLJIT_UNUSED_ARG(exec_allocator_data);
 	SLJIT_UNREACHABLE();
 }
 

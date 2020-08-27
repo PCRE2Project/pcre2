@@ -290,9 +290,9 @@ static const sljit_u8 freg_map[SLJIT_NUMBER_OF_FLOAT_REGISTERS + 4] = {
    Useful for reordering instructions in the delay slot. */
 static sljit_s32 push_inst(struct sljit_compiler *compiler, sljit_ins ins, sljit_s32 delay_slot)
 {
+	sljit_ins *ptr = (sljit_ins*)ensure_buf(compiler, sizeof(sljit_ins));
 	SLJIT_ASSERT(delay_slot == MOVABLE_INS || delay_slot >= UNMOVABLE_INS
 		|| delay_slot == ((ins >> 11) & 0x1f) || delay_slot == ((ins >> 16) & 0x1f));
-	sljit_ins *ptr = (sljit_ins*)ensure_buf(compiler, sizeof(sljit_ins));
 	FAIL_IF(!ptr);
 	*ptr = ins;
 	compiler->size++;
@@ -520,7 +520,7 @@ SLJIT_API_FUNC_ATTRIBUTE void* sljit_generate_code(struct sljit_compiler *compil
 	CHECK_PTR(check_sljit_generate_code(compiler));
 	reverse_buf(compiler);
 
-	code = (sljit_ins*)SLJIT_MALLOC_EXEC(compiler->size * sizeof(sljit_ins));
+	code = (sljit_ins*)SLJIT_MALLOC_EXEC(compiler->size * sizeof(sljit_ins), compiler->exec_allocator_data);
 	PTR_FAIL_WITH_EXEC_IF(code);
 	buf = compiler->buf;
 
@@ -667,6 +667,7 @@ SLJIT_API_FUNC_ATTRIBUTE void* sljit_generate_code(struct sljit_compiler *compil
 	/* GCC workaround for invalid code generation with -O2. */
 	sljit_cache_flush(code, code_ptr);
 #endif
+	SLJIT_UPDATE_WX_FLAGS(code, code_ptr, 1);
 	return code;
 }
 
@@ -679,7 +680,7 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_has_cpu_feature(sljit_s32 feature_type)
 #ifdef SLJIT_IS_FPU_AVAILABLE
 		return SLJIT_IS_FPU_AVAILABLE;
 #elif defined(__GNUC__)
-		asm ("cfc1 %0, $0" : "=r"(fir));
+		__asm__ ("cfc1 %0, $0" : "=r"(fir));
 		return (fir >> 22) & 0x1;
 #else
 #error "FIR check is not implemented for this architecture"

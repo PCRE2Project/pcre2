@@ -24,8 +24,8 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _SLJIT_CONFIG_INTERNAL_H_
-#define _SLJIT_CONFIG_INTERNAL_H_
+#ifndef SLJIT_CONFIG_INTERNAL_H_
+#define SLJIT_CONFIG_INTERNAL_H_
 
 #if (defined SLJIT_VERBOSE && SLJIT_VERBOSE) \
 	|| (defined SLJIT_DEBUG && SLJIT_DEBUG && (!defined(SLJIT_ASSERT) || !defined(SLJIT_UNREACHABLE)))
@@ -81,7 +81,7 @@ extern "C" {
 
    Other macros:
      SLJIT_FUNC : calling convention attribute for both calling JIT from C and C calling back from JIT
-     SLJIT_W(number) : defining 64 bit constants on 64 bit architectures (compiler independent helper)
+     SLJIT_W(number) : defining 64 bit constants on 64 bit architectures (platform independent helper)
 */
 
 /*****************/
@@ -210,18 +210,16 @@ extern "C" {
 /***********************************************************/
 
 #ifdef SLJIT_CONFIG_X86
-#if defined(__CET__)
+
+#if defined(__CET__) && !(defined SLJIT_CONFIG_X86_CET && SLJIT_CONFIG_X86_CET)
 #define SLJIT_CONFIG_X86_CET 1
 #endif
-#if (defined SLJIT_CONFIG_X86_CET && SLJIT_CONFIG_X86_CET)
-#if defined(__GNUC__)
-#if !defined (__SHSTK__)
-#error "-mshstk is needed to compile with -fcf-protection"
-#endif
+
+#if (defined SLJIT_CONFIG_X86_CET && SLJIT_CONFIG_X86_CET) && defined(__GNUC__)
 #include <x86intrin.h>
 #endif
-#endif
-#endif
+
+#endif /* SLJIT_CONFIG_X86 */
 
 /**********************************/
 /* External function definitions. */
@@ -453,10 +451,14 @@ typedef double sljit_f64;
 #if (defined SLJIT_CONFIG_UNSUPPORTED && SLJIT_CONFIG_UNSUPPORTED)
 #define SLJIT_W(w)	(w##l)
 #elif (defined SLJIT_64BIT_ARCHITECTURE && SLJIT_64BIT_ARCHITECTURE)
+#ifdef _WIN64
 #define SLJIT_W(w)	(w##ll)
-#else
+#else /* !windows */
+#define SLJIT_W(w)	(w##l)
+#endif /* windows */
+#else /* 32 bit */
 #define SLJIT_W(w)	(w)
-#endif
+#endif /* unknown */
 
 #endif /* !SLJIT_W */
 
@@ -549,17 +551,19 @@ typedef double sljit_f64;
 
 #ifndef SLJIT_FUNC
 
-#if (defined SLJIT_USE_CDECL_CALLING_CONVENTION && SLJIT_USE_CDECL_CALLING_CONVENTION)
+#if (defined SLJIT_USE_CDECL_CALLING_CONVENTION && SLJIT_USE_CDECL_CALLING_CONVENTION) \
+	|| !(defined SLJIT_CONFIG_X86_32 && SLJIT_CONFIG_X86_32)
 
-/* Force cdecl. */
 #define SLJIT_FUNC
 
-#elif (defined SLJIT_CONFIG_X86_32 && SLJIT_CONFIG_X86_32)
+#elif defined(__GNUC__) && !defined(__APPLE__)
 
-#if defined(__GNUC__) && !defined(__APPLE__)
-
+#if __GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR__ >= 4)
 #define SLJIT_FUNC __attribute__ ((fastcall))
 #define SLJIT_X86_32_FASTCALL 1
+#else
+#define SLJIT_FUNC
+#endif /* gcc >= 3.4 */
 
 #elif defined(_MSC_VER)
 
@@ -573,16 +577,10 @@ typedef double sljit_f64;
 
 #else /* Unknown compiler. */
 
-/* The cdecl attribute is the default. */
+/* The cdecl calling convention is usually the x86 default. */
 #define SLJIT_FUNC
 
-#endif
-
-#else /* Non x86-32 architectures. */
-
-#define SLJIT_FUNC
-
-#endif /* SLJIT_CONFIG_X86_32 */
+#endif /* SLJIT_USE_CDECL_CALLING_CONVENTION */
 
 #endif /* !SLJIT_FUNC */
 
@@ -613,8 +611,16 @@ determine the next executed instruction after return. */
 SLJIT_API_FUNC_ATTRIBUTE void* sljit_malloc_exec(sljit_uw size);
 SLJIT_API_FUNC_ATTRIBUTE void sljit_free_exec(void* ptr);
 SLJIT_API_FUNC_ATTRIBUTE void sljit_free_unused_memory_exec(void);
-#define SLJIT_MALLOC_EXEC(size) sljit_malloc_exec(size)
-#define SLJIT_FREE_EXEC(ptr) sljit_free_exec(ptr)
+#define SLJIT_BUILTIN_MALLOC_EXEC(size, exec_allocator_data) sljit_malloc_exec(size)
+#define SLJIT_BUILTIN_FREE_EXEC(ptr, exec_allocator_data) sljit_free_exec(ptr)
+
+#ifndef SLJIT_MALLOC_EXEC
+#define SLJIT_MALLOC_EXEC(size, exec_allocator_data) SLJIT_BUILTIN_MALLOC_EXEC((size), (exec_allocator_data))
+#endif /* SLJIT_MALLOC_EXEC */
+
+#ifndef SLJIT_FREE_EXEC
+#define SLJIT_FREE_EXEC(ptr, exec_allocator_data) SLJIT_BUILTIN_FREE_EXEC((ptr), (exec_allocator_data))
+#endif /* SLJIT_FREE_EXEC */
 
 #if (defined SLJIT_PROT_EXECUTABLE_ALLOCATOR && SLJIT_PROT_EXECUTABLE_ALLOCATOR)
 SLJIT_API_FUNC_ATTRIBUTE sljit_sw sljit_exec_offset(void* ptr);
@@ -623,7 +629,7 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_sw sljit_exec_offset(void* ptr);
 #define SLJIT_EXEC_OFFSET(ptr) 0
 #endif
 
-#endif
+#endif /* SLJIT_EXECUTABLE_ALLOCATOR */
 
 /**********************************************/
 /* Registers and locals offset determination. */
@@ -791,4 +797,4 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_sw sljit_exec_offset(void* ptr);
 } /* extern "C" */
 #endif
 
-#endif
+#endif /* SLJIT_CONFIG_INTERNAL_H_ */
