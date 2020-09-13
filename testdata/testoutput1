@@ -1,6 +1,10 @@
 # This set of tests is for features that are compatible with all versions of
 # Perl >= 5.10, in non-UTF mode. It should run clean for the 8-bit, 16-bit, and
 # 32-bit PCRE libraries, and also using the perltest.sh script.
+
+# WARNING: Use only / as the pattern delimiter. Although pcre2test supports
+# a number of delimiters, all those other than / give problems with the
+# perltest.sh script.
     
 #forbid_utf
 #newline_default lf any anycrlf
@@ -2949,7 +2953,7 @@ No match
     qqq\nabc\nzzz
 No match
 
-"(?>.*/)foo"
+/(?>.*\/)foo/
     /this/is/a/very/long/line/in/deed/with/very/many/slashes/in/and/foo
  0: /this/is/a/very/long/line/in/deed/with/very/many/slashes/in/and/foo
 \= Expect no match     
@@ -6081,14 +6085,16 @@ No match
     A\x20B
  0:  
     
-"(?x)(?-x: \s*#\s*)"
+/(?x)(?-x: \s*#\s*)/
     A # B
  0:  # 
 \= Expect no match
     #  
 No match
+    A s#s B
+No match
 
-"(?x-is)(?:(?-ixs) \s*#\s*) include"
+/(?x-is)(?:(?-ixs) \s*#\s*) include/
     A #include
  0:  #include
 \= Expect no match
@@ -8402,12 +8408,12 @@ No match
  1: <unset>
  2: wxyz
 
-"(?>.*)foo"
+/(?>.*)foo/
 \= Expect no match
     abcdfooxyz
 No match
     
-"(?>.*?)foo"
+/(?>.*?)foo/
     abcdfooxyz
  0: foo
 
@@ -8647,22 +8653,6 @@ No match
 \= Expect no match
     a
 No match
-
-/(?=a\Kb)ab/
-    ab 
- 0: b
-
-/(?!a\Kb)ac/
-    ac 
- 0: ac
-    
-/^abc(?<=b\Kc)d/
-    abcd
- 0: cd
-
-/^abc(?<!b\Kq)d/
-    abcd
- 0: abcd
 
 /A(*PRUNE:A)A+(*SKIP:A)(B|Z) | AC/x,mark
 \= Expect no match
@@ -9128,9 +9118,9 @@ No match
 
 /(\2)(\1)/
 
-"Z*(|d*){216}"
+/Z*(|d*){216}/
 
-"(?1)(?#?'){8}(a)"
+/(?1)(?#?'){8}(a)/
     baaaaaaaaac
  0: aaaaaaaaa
  1: a
@@ -9166,7 +9156,7 @@ No match
  6: 
  7: 
 
-"(?|(\k'Pm')|(?'Pm'))"
+/(?|(\k'Pm')|(?'Pm'))/
     abcd
  0: 
  1: 
@@ -10165,24 +10155,24 @@ No match
     Pack my fox with five dozen liquor jugs.
 No match
 
-"(?<=X(?(DEFINE)(A)))X(*F)"
+/(?<=X(?(DEFINE)(A)))X(*F)/
 \= Expect no match
     AXYZ
 No match
 
-"(?<=X(?(DEFINE)(A)))."
+/(?<=X(?(DEFINE)(A)))./
     AXYZ
  0: Y
 
-"(?<=X(?(DEFINE)(.*))Y)."
+/(?<=X(?(DEFINE)(.*))Y)./
     AXYZ
  0: Z
 
-"(?<=X(?(DEFINE)(Y))(?1))."
+/(?<=X(?(DEFINE)(Y))(?1))./
     AXYZ
  0: Z
 
-"(?(DEFINE)(?<foo>bar))(?<![-a-z0-9])word"
+/(?(DEFINE)(?<foo>bar))(?<![-a-z0-9])word/
     word
  0: word
 

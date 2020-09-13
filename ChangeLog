@@ -52,6 +52,17 @@ buffer overflow). Fixes ClusterFuzz 23779.
 handled by an optimization in JIT. Furthermore a wrong offset was used to
 read a value from a buffer which could lead to memory overread.
 
+10. Unnoticed for many years was the fact that delimiters other than / in the 
+testinput1 and testinput4 files could cause incorrect behaviour when these 
+files were processed by perltest.sh. There were several tests that used quotes 
+as delimiters, and it was just luck that they didn't go wrong with perltest.sh.
+All the patterns in testinput1 and testinput4 now use / as their delimiter. 
+This fixes Bugzilla #2641.
+
+11. Perl has started to give an error for \K within lookarounds (though there 
+are cases where it doesn't). PCRE2 still allows this, so the tests that include 
+this case have been moved from test 1 to test 2.
+
 
 Version 10.35 09-May-2020
 ---------------------------

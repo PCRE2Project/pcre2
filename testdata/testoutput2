@@ -17624,6 +17624,26 @@ MK: >\x00<
 /(?(VERSION=0.0/
 Failed: error 179 at offset 14: syntax error or number too big in (?(VERSION condition
 
+# Perl has made \K in lookarounds an error. At the moment PCRE2 still accepts.
+
+/(?=a\Kb)ab/
+    ab 
+ 0: b
+
+/(?!a\Kb)ac/
+    ac 
+ 0: ac
+    
+/^abc(?<=b\Kc)d/
+    abcd
+ 0: cd
+
+/^abc(?<!b\Kq)d/
+    abcd
+ 0: abcd
+    
+# --------- 
+
 # End of testinput2
 Error -70: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

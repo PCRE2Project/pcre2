@@ -3,6 +3,10 @@
 # some of the property tests may differ because of different versions of
 # Unicode in use by PCRE2 and Perl.
 
+# WARNING: Use only / as the pattern delimiter. Although pcre2test supports
+# a number of delimiters, all those other than / give problems with the
+# perltest.sh script.
+    
 #newline_default lf anycrlf any
 #perltest
 
@@ -795,7 +799,7 @@ No match
     ሴ
  0: \x{1234}
 
-"(?s)(.{1,5})"utf
+/(?s)(.{1,5})/utf
     abcdefg
  0: abcde
  1: abcde
@@ -3596,7 +3600,7 @@ No match
     abcdefghijklmno
  0: a
 
-"[\S\V\H]"utf
+/[\S\V\H]/utf
 
 /[^\p{Any}]*+x/utf
     x
