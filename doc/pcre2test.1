@@ -1,4 +1,4 @@
-.TH PCRE2TEST 1 "20 March 2020" "PCRE 10.35"
+.TH PCRE2TEST 1 "14 September 2020" "PCRE 10.36"
 .SH NAME
 pcre2test - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -273,7 +273,7 @@ test data, command lines that begin with # may appear. This file format, with
 some restrictions, can also be processed by the \fBperltest.sh\fP script that
 is distributed with PCRE2 as a means of checking that the behaviour of PCRE2
 and Perl is the same. For a specification of \fBperltest.sh\fP, see the
-comments near its beginning.
+comments near its beginning. See also the #perltest command below.
 .P
 When the input is a terminal, \fBpcre2test\fP prompts for each line of input,
 using "re>" to prompt for regular expression patterns, and "data>" to prompt
@@ -369,14 +369,19 @@ patterns. Modifiers on a pattern can change these settings.
 .sp
   #perltest
 .sp
-The appearance of this line causes all subsequent modifier settings to be
-checked for compatibility with the \fBperltest.sh\fP script, which is used to
-confirm that Perl gives the same results as PCRE2. Also, apart from comment
-lines, #pattern commands, and #subject commands that set or unset "mark", no
-command lines are permitted, because they and many of the modifiers are
-specific to \fBpcre2test\fP, and should not be used in test files that are also
-processed by \fBperltest.sh\fP. The \fB#perltest\fP command helps detect tests
-that are accidentally put in the wrong file.
+This line is used in test files that can also be processed by \fBperltest.sh\fP
+to confirm that Perl gives the same results as PCRE2. Subsequent tests are
+checked for the use of \fBpcre2test\fP features that are incompatible with the
+\fBperltest.sh\fP script. 
+.P
+Patterns must use '/' as their delimiter, and only certain modifiers are
+supported. Comment lines, #pattern commands, and #subject commands that set or
+unset "mark" are recognized and acted on. The #perltest, #forbid_utf, and
+#newline_default commands, which are needed in the relevant pcre2test files,
+are silently ignored. All other command lines are ignored, but give a warning
+message. The \fB#perltest\fP command helps detect tests that are accidentally
+put in the wrong file or use the wrong delimiter. For more details of the
+\fBperltest.sh\fP script see the comments it contains.
 .sp
   #pop [<modifiers>]
   #popcopy [<modifiers>]
@@ -2096,6 +2101,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 20 March 2020
+Last updated: 14 September 2020
 Copyright (c) 1997-2020 University of Cambridge.
 .fi

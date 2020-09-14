@@ -5652,16 +5652,16 @@ name)/mark
 \= Expect no match
     acb
 
-'\A(?:[^\"]++|\"(?:[^\"]*+|\"\")*+\")++'
+/\A(?:[^\"]++|\"(?:[^\"]*+|\"\")*+\")++/
     NON QUOTED \"QUOT\"\"ED\" AFTER \"NOT MATCHED
 
-'\A(?:[^\"]++|\"(?:[^\"]++|\"\")*+\")++'
+/\A(?:[^\"]++|\"(?:[^\"]++|\"\")*+\")++/
     NON QUOTED \"QUOT\"\"ED\" AFTER \"NOT MATCHED
 
-'\A(?:[^\"]++|\"(?:[^\"]++|\"\")++\")++'
+/\A(?:[^\"]++|\"(?:[^\"]++|\"\")++\")++/
     NON QUOTED \"QUOT\"\"ED\" AFTER \"NOT MATCHED
 
-'\A([^\"1]++|[\"2]([^\"3]*+|[\"4][\"5])*+[\"6])++'
+/\A([^\"1]++|[\"2]([^\"3]*+|[\"4][\"5])*+[\"6])++/
     NON QUOTED \"QUOT\"\"ED\" AFTER \"NOT MATCHED
 
 /^\w+(?>\s*)(?<=\w)/
@@ -5826,19 +5826,19 @@ ef) x/x,mark
 \= Expect no match     
     aab
     
-'(?>ab|abab){1,5}?M'
+/(?>ab|abab){1,5}?M/
     abababababababababababM
 
-'(?>ab|abab){2}?M'
+/(?>ab|abab){2}?M/
     abababM
 
-'((?(?=(a))a)+k)'
+/((?(?=(a))a)+k)/
     bbak
 
-'((?(?=(a))a|)+k)'
+/((?(?=(a))a|)+k)/
     bbak
 
-'(?(?!(b))a|b)+k'
+/(?(?!(b))a|b)+k/
     ababbalbbadabak
 
 /(?!(b))c|b/

@@ -5136,6 +5136,14 @@ PCRE2_SIZE patlen;
 PCRE2_SIZE valgrind_access_length;
 PCRE2_SIZE erroroffset;
 
+/* The perltest.sh script supports only / as a delimiter. */
+
+if (restrict_for_perl_test && delimiter != '/')
+  {
+  fprintf(outfile, "** The only allowed delimiter after #perltest is '/'\n");
+  return PR_ABEND;  
+  } 
+
 /* Initialize the context and pattern/data controls for this test from the
 defaults. */
 

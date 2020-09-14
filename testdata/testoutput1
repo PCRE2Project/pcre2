@@ -8978,19 +8978,19 @@ No match
     acb
 No match
 
-'\A(?:[^\"]++|\"(?:[^\"]*+|\"\")*+\")++'
+/\A(?:[^\"]++|\"(?:[^\"]*+|\"\")*+\")++/
     NON QUOTED \"QUOT\"\"ED\" AFTER \"NOT MATCHED
  0: NON QUOTED "QUOT""ED" AFTER 
 
-'\A(?:[^\"]++|\"(?:[^\"]++|\"\")*+\")++'
+/\A(?:[^\"]++|\"(?:[^\"]++|\"\")*+\")++/
     NON QUOTED \"QUOT\"\"ED\" AFTER \"NOT MATCHED
  0: NON QUOTED "QUOT""ED" AFTER 
 
-'\A(?:[^\"]++|\"(?:[^\"]++|\"\")++\")++'
+/\A(?:[^\"]++|\"(?:[^\"]++|\"\")++\")++/
     NON QUOTED \"QUOT\"\"ED\" AFTER \"NOT MATCHED
  0: NON QUOTED "QUOT""ED" AFTER 
 
-'\A([^\"1]++|[\"2]([^\"3]*+|[\"4][\"5])*+[\"6])++'
+/\A([^\"1]++|[\"2]([^\"3]*+|[\"4][\"5])*+[\"6])++/
     NON QUOTED \"QUOT\"\"ED\" AFTER \"NOT MATCHED
  0: NON QUOTED "QUOT""ED" AFTER 
  1:  AFTER 
@@ -9312,27 +9312,27 @@ No match
     aab
 No match
     
-'(?>ab|abab){1,5}?M'
+/(?>ab|abab){1,5}?M/
     abababababababababababM
  0: abababababM
 
-'(?>ab|abab){2}?M'
+/(?>ab|abab){2}?M/
     abababM
  0: ababM
 
-'((?(?=(a))a)+k)'
+/((?(?=(a))a)+k)/
     bbak
  0: ak
  1: ak
  2: a
 
-'((?(?=(a))a|)+k)'
+/((?(?=(a))a|)+k)/
     bbak
  0: ak
  1: ak
  2: a
 
-'(?(?!(b))a|b)+k'
+/(?(?!(b))a|b)+k/
     ababbalbbadabak
  0: abak
  1: b
