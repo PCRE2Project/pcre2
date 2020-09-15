@@ -610,4 +610,7 @@
 /X(\x{e1})Y/replace=>\U$1<,substitute_extended
     X\x{e1}Y
 
+/A/utf,match_invalid_utf,caseless
+    \xe5A
+
 # End of testinput10

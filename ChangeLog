@@ -66,6 +66,13 @@ this case have been moved from test 1 to test 2.
 12. Further to 10 above, pcre2test has been updated to detect and grumble if a 
 delimiter other than / is used after #perltest.
 
+13. Fixed a bug with PCRE2_MATCH_INVALID_UTF in 8-bit mode when PCRE2_CASELESS 
+was set and PCRE2_NO_START_OPTIMIZE was not set. The optimization for finding 
+the start of a match was not resetting correctly after a failed match on the 
+first valid fragment of the subject, possibly causing incorrect "no match" 
+returns on subsequent fragments. For example, the pattern /A/ failed to match 
+the subject \xe5A. Fixes Bugzilla #2642. 
+
 
 Version 10.35 09-May-2020
 ---------------------------

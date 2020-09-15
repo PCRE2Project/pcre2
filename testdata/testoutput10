@@ -1871,4 +1871,8 @@ Subject length lower bound = 1
     X\x{e1}Y
  1: >\xe1<
 
+/A/utf,match_invalid_utf,caseless
+    \xe5A
+ 0: A
+
 # End of testinput10
