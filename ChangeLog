@@ -73,6 +73,9 @@ first valid fragment of the subject, possibly causing incorrect "no match"
 returns on subsequent fragments. For example, the pattern /A/ failed to match 
 the subject \xe5A. Fixes Bugzilla #2642. 
 
+14. Fixed a bug in character set matching when JIT is enabled and both unicode
+scripts and unicode classes are present at the same time.
+
 
 Version 10.35 09-May-2020
 ---------------------------
