@@ -76,6 +76,16 @@ the subject \xe5A. Fixes Bugzilla #2642.
 14. Fixed a bug in character set matching when JIT is enabled and both unicode
 scripts and unicode classes are present at the same time.
 
+15. Added GNU grep's -m (aka --max-count) option to pcre2grep.
+
+16. Refactored substitution processing in pcre2grep strings, both for the -O 
+option and when dealing with callouts. There is now a single function that 
+handles $ expansion in all cases (instead of multiple copies of almost 
+identical code). This means that the same escape sequences are available 
+everywhere, which was not previously the case. At the same time, the escape 
+sequences $x{...} and $o{...} have been introduced, to allow for characters 
+whose code points are greater than 255 in Unicode mode.
+
 
 Version 10.35 09-May-2020
 ---------------------------

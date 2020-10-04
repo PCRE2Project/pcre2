@@ -111,8 +111,8 @@ matching substrings, or if <b>--only-matching</b>, <b>--file-offsets</b>, or
 (either shown literally, or as an offset), scanning resumes immediately
 following the match, so that further matches on the same line can be found. If
 there are multiple patterns, they are all tried on the remainder of the line,
-but patterns that follow the one that matched are not tried on the earlier part
-of the line.
+but patterns that follow the one that matched are not tried on the earlier 
+matched part of the line.
 </P>
 <P>
 This behaviour means that the order in which multiple patterns are specified
@@ -146,11 +146,10 @@ ignored.
 <br><a name="SEC4" href="#TOC1">BINARY FILES</a><br>
 <P>
 By default, a file that contains a binary zero byte within the first 1024 bytes
-is identified as a binary file, and is processed specially. (GNU grep
-identifies binary files in this manner.) However, if the newline type is
-specified as NUL, that is, the line terminator is a binary zero, the test for
-a binary file is not applied. See the <b>--binary-files</b> option for a means
-of changing the way binary files are handled.
+is identified as a binary file, and is processed specially. However, if the
+newline type is specified as NUL, that is, the line terminator is a binary
+zero, the test for a binary file is not applied. See the <b>--binary-files</b>
+option for a means of changing the way binary files are handled.
 </P>
 <br><a name="SEC5" href="#TOC1">BINARY ZEROS IN PATTERNS</a><br>
 <P>
@@ -443,8 +442,8 @@ Ignore upper/lower case distinctions during comparisons.
 <P>
 <b>--include</b>=<i>pattern</i>
 If any <b>--include</b> patterns are specified, the only files that are
-processed are those that match one of the patterns (and do not match an
-<b>--exclude</b> pattern). This option does not affect directories, but it
+processed are those whose names match one of the patterns and do not match an
+<b>--exclude</b> pattern. This option does not affect directories, but it
 applies to all files, whether listed on the command line, obtained from
 <b>--file-list</b>, or by scanning a directory. The pattern is a PCRE2 regular
 expression, and is matched against the final component of the file name, not
@@ -463,8 +462,8 @@ may be given any number of times; all the files are read.
 <P>
 <b>--include-dir</b>=<i>pattern</i>
 If any <b>--include-dir</b> patterns are specified, the only directories that
-are processed are those that match one of the patterns (and do not match an
-<b>--exclude-dir</b> pattern). This applies to all directories, whether listed
+are processed are those whose names match one of the patterns and do not match
+an <b>--exclude-dir</b> pattern. This applies to all directories, whether listed
 on the command line, obtained from <b>--file-list</b>, or by scanning a parent
 directory. The pattern is a PCRE2 regular expression, and is matched against
 the final component of the directory name, not the entire path. The <b>-F</b>,
@@ -487,8 +486,9 @@ a separate line. Searching normally stops as soon as a matching line is found
 in a file. However, if the <b>-c</b> (count) option is also used, matching
 continues in order to obtain the correct count, and those files that have at
 least one match are listed along with their counts. Using this option with
-<b>-c</b> is a way of suppressing the listing of files with no matches. This
-opeion overrides any previous <b>-H</b>, <b>-h</b>, or <b>-L</b> options.
+<b>-c</b> is a way of suppressing the listing of files with no matches that 
+occurs with <b>-c</b> on its own. This option overrides any previous <b>-H</b>,
+<b>-h</b>, or <b>-L</b> options.
 </P>
 <P>
 <b>--label</b>=<i>name</i>
@@ -501,8 +501,8 @@ short form for this option.
 When this option is given, non-compressed input is read and processed line by
 line, and the output is flushed after each write. By default, input is read in
 large chunks, unless <b>pcre2grep</b> can determine that it is reading from a
-terminal (which is currently possible only in Unix-like environments or
-Windows). Output to terminal is normally automatically flushed by the operating
+terminal, which is currently possible only in Unix-like environments or
+Windows. Output to terminal is normally automatically flushed by the operating
 system. This option can be useful when the input or output is attached to a
 pipe and you do not want <b>pcre2grep</b> to buffer up large amounts of data.
 However, its use will affect performance, and the <b>-M</b> (multiline) option
@@ -526,6 +526,49 @@ This option specifies a locale to be used for pattern matching. It overrides
 the value in the <b>LC_ALL</b> or <b>LC_CTYPE</b> environment variables. If no
 locale is specified, the PCRE2 library's default (usually the "C" locale) is
 used. There is no short form for this option.
+</P>
+<P>
+<b>-M</b>, <b>--multiline</b>
+Allow patterns to match more than one line. When this option is set, the PCRE2
+library is called in "multiline" mode. This allows a matched string to extend
+past the end of a line and continue on one or more subsequent lines. Patterns
+used with <b>-M</b> may usefully contain literal newline characters and internal
+occurrences of ^ and $ characters. The output for a successful match may
+consist of more than one line. The first line is the line in which the match
+started, and the last line is the line in which the match ended. If the matched
+string ends with a newline sequence, the output ends at the end of that line.
+If <b>-v</b> is set, none of the lines in a multi-line match are output. Once a
+match has been handled, scanning restarts at the beginning of the line after
+the one in which the match ended.
+<br>
+<br>
+The newline sequence that separates multiple lines must be matched as part of
+the pattern. For example, to find the phrase "regular expression" in a file
+where "regular" might be at the end of a line and "expression" at the start of
+the next line, you could use this command:
+<pre>
+  pcre2grep -M 'regular\s+expression' &#60;file&#62;
+</pre>
+The \s escape sequence matches any white space character, including newlines,
+and is followed by + so as to match trailing white space on the first line as
+well as possibly handling a two-character newline sequence.
+<br>
+<br>
+There is a limit to the number of lines that can be matched, imposed by the way
+that <b>pcre2grep</b> buffers the input file as it scans it. With a sufficiently
+large processing buffer, this should not be a problem, but the <b>-M</b> option
+does not work when input is read line by line (see <b>--line-buffered</b>.)
+</P>
+<P>
+<b>-m</b> <i>number</i>, <b>--max-count</b>=<i>number</i>
+Stop processing after finding <i>number</i> matching lines, or non-matching 
+lines if <b>-v</b> is also set. Any trailing context lines are output after the
+final match. In multiline mode, each multiline match counts as just one line
+for this purpose. If this limit is reached when reading the standard input from
+a regular file, the file is left positioned just after the last matching line.
+If <b>-c</b> is also set, the count that is output is never greater than 
+<i>number</i>. This option has no effect if used with <b>-L</b>, <b>-l</b>, or
+<b>-q</b>, or when just checking for a match in a binary file.
 </P>
 <P>
 <b>--match-limit</b>=<i>number</i>
@@ -566,38 +609,6 @@ are very large and so effectively unlimited.
 This limits the expansion of the processing buffer, whose initial size can be
 set by <b>--buffer-size</b>. The maximum buffer size is silently forced to be no
 smaller than the starting buffer size.
-</P>
-<P>
-<b>-M</b>, <b>--multiline</b>
-Allow patterns to match more than one line. When this option is set, the PCRE2
-library is called in "multiline" mode. This allows a matched string to extend
-past the end of a line and continue on one or more subsequent lines. Patterns
-used with <b>-M</b> may usefully contain literal newline characters and internal
-occurrences of ^ and $ characters. The output for a successful match may
-consist of more than one line. The first line is the line in which the match
-started, and the last line is the line in which the match ended. If the matched
-string ends with a newline sequence, the output ends at the end of that line.
-If <b>-v</b> is set, none of the lines in a multi-line match are output. Once a
-match has been handled, scanning restarts at the beginning of the line after
-the one in which the match ended.
-<br>
-<br>
-The newline sequence that separates multiple lines must be matched as part of
-the pattern. For example, to find the phrase "regular expression" in a file
-where "regular" might be at the end of a line and "expression" at the start of
-the next line, you could use this command:
-<pre>
-  pcre2grep -M 'regular\s+expression' &#60;file&#62;
-</pre>
-The \s escape sequence matches any white space character, including newlines,
-and is followed by + so as to match trailing white space on the first line as
-well as possibly handling a two-character newline sequence.
-<br>
-<br>
-There is a limit to the number of lines that can be matched, imposed by the way
-that <b>pcre2grep</b> buffers the input file as it scans it. With a sufficiently
-large processing buffer, this should not be a problem, but the <b>-M</b> option
-does not work when input is read line by line (see <b>--line-buffered</b>.)
 </P>
 <P>
 <b>-N</b> <i>newline-type</i>, <b>--newline</b>=<i>newline-type</i>
@@ -648,31 +659,41 @@ It should never be needed in normal use.
 </P>
 <P>
 <b>-O</b> <i>text</i>, <b>--output</b>=<i>text</i>
-When there is a match, instead of outputting the whole line that matched,
-output just the given text, followed by an operating-system standard newline.
-The <b>--newline</b> option has no effect on this option, which is mutually
-exclusive with <b>--only-matching</b>, <b>--file-offsets</b>, and
-<b>--line-offsets</b>. Escape sequences starting with a dollar character may be
-used to insert the contents of the matched part of the line and/or captured
-substrings into the text.
+When there is a match, instead of outputting the line that matched, output just
+the text specified in this option, followed by an operating-system standard
+newline. In this mode, no context is shown. That is, the <b>-A</b>, <b>-B</b>,
+and <b>-C</b> options are ignored. The <b>--newline</b> option has no effect on
+this option, which is mutually exclusive with <b>--only-matching</b>,
+<b>--file-offsets</b>, and <b>--line-offsets</b>. However, like
+<b>--only-matching</b>, if there is more than one match in a line, each of them
+causes a line of output.
 <br>
 <br>
-$&#60;digits&#62; or ${&#60;digits&#62;} is replaced by the captured
-substring of the given decimal number; zero substitutes the whole match. If
-the number is greater than the number of capturing substrings, or if the
-capture is unset, the replacement is empty.
+Escape sequences starting with a dollar character may be used to insert the
+contents of the matched part of the line and/or captured substrings into the
+text.
+<br>
+<br>
+$&#60;digits&#62; or ${&#60;digits&#62;} is replaced by the captured substring of the given
+decimal number; zero substitutes the whole match. If the number is greater than
+the number of capturing substrings, or if the capture is unset, the replacement
+is empty.
 <br>
 <br>
 $a is replaced by bell; $b by backspace; $e by escape; $f by form feed; $n by
 newline; $r by carriage return; $t by tab; $v by vertical tab.
 <br>
 <br>
-$o&#60;digits&#62; is replaced by the character represented by the given octal
-number; up to three digits are processed.
+$o&#60;digits&#62; or $o{&#60;digits&#62;} is replaced by the character whose code point is the
+given octal number. In the first form, up to three octal digits are processed.
+When more digits are needed in Unicode mode to specify a wide character, the 
+second form must be used.
 <br>
 <br>
-$x&#60;digits&#62; is replaced by the character represented by the given hexadecimal
-number; up to two digits are processed.
+$x&#60;digits&#62; or $x{&#60;digits&#62;} is replaced by the character represented by the
+given hexadecimal number. In the first form, up to two hexadecimal digits are
+processed. When more digits are needed in Unicode mode to specify a wide
+character, the second form must be used.
 <br>
 <br>
 Any other character is substituted by itself. In particular, $$ is replaced by
@@ -741,7 +762,8 @@ option to "recurse".
 </P>
 <P>
 <b>--recursion-limit</b>=<i>number</i>
-See <b>--match-limit</b> above.
+This is an obsolete synonym for <b>--depth-limit</b>. See <b>--match-limit</b>
+above for details.
 </P>
 <P>
 <b>-s</b>, <b>--no-messages</b>
@@ -765,15 +787,18 @@ total would always be zero.
 <b>-u</b>, <b>--utf</b>
 Operate in UTF-8 mode. This option is available only if PCRE2 has been compiled
 with UTF-8 support. All patterns (including those for any <b>--exclude</b> and
-<b>--include</b> options) and all subject lines that are scanned must be valid
-strings of UTF-8 characters.
+<b>--include</b> options) and all lines that are scanned must be valid strings
+of UTF-8 characters. If an invalid UTF-8 string is encountered, an error 
+occurs.
 </P>
 <P>
 <b>-U</b>, <b>--utf-allow-invalid</b>
 As <b>--utf</b>, but in addition subject lines may contain invalid UTF-8 code
-unit sequences. These can never form part of any pattern match. This facility
-allows valid UTF-8 strings to be sought in executable or other binary files.
-For more details about matching in non-valid UTF-8 strings, see the
+unit sequences. These can never form part of any pattern match. Patterns 
+themselves, however, must still be valid UTF-8 strings. This facility allows
+valid UTF-8 strings to be sought within arbitrary byte sequences in executable
+or other binary files. For more details about matching in non-valid UTF-8
+strings, see the
 <a href="pcre2unicode.html"><b>pcre2unicode</b>(3)</a>
 documentation.
 </P>
@@ -786,7 +811,9 @@ ignored.
 <P>
 <b>-v</b>, <b>--invert-match</b>
 Invert the sense of the match, so that lines which do <i>not</i> match any of
-the patterns are the ones that are found.
+the patterns are the ones that are found. When this option is set, options such 
+as <b>--only-matching</b> and <b>--output</b>, which specify parts of a match
+that are to be output, are ignored.
 </P>
 <P>
 <b>-w</b>, <b>--word-regex</b>, <b>--word-regexp</b>
@@ -909,12 +936,36 @@ documentation for details). Numbered callouts are ignored by <b>pcre2grep</b>;
 only callouts with string arguments are useful.
 </P>
 <br><b>
+Echoing a specific string
+</b><br>
+<P>
+Starting the callout string with a pipe character invokes an echoing facility
+that avoids calling an external program or script. This facility is always
+available, provided that callouts were not completely disabled when
+<b>pcre2grep</b> was built. The rest of the callout string is processed as a
+zero-terminated string, which means it should not contain any internal binary
+zeros. It is written to the output, having first been passed through the same
+escape processing as text from the <b>--output</b> (<b>-O</b>) option (see
+above). However, $0 cannot be used to insert a matched substring because the
+match is still in progress. Instead, the single character '0' is inserted. Any
+syntax errors in the string (for example, a dollar not followed by another
+character) causes the callout to be ignored. No terminator is added to the
+output string, so if you want a newline, you must include it explicitly using
+the escape $n. For example:
+<pre>
+  pcre2grep '(.)(..(.))(?C"|[$1] [$2] [$3]$n")' &#60;some file&#62;
+</pre>
+Matching continues normally after the string is output. If you want to see only
+the callout output but not any output from an actual match, you should end the
+pattern with (*FAIL).
+</P>
+<br><b>
 Calling external programs or scripts
 </b><br>
 <P>
 This facility can be independently disabled when <b>pcre2grep</b> is built. It
 is supported for Windows, where a call to <b>_spawnvp()</b> is used, for VMS,
-where <b>lib$spawn()</b> is used, and for any other Unix-like environment where
+where <b>lib$spawn()</b> is used, and for any Unix-like environment where
 <b>fork()</b> and <b>execv()</b> are available.
 </P>
 <P>
@@ -926,14 +977,11 @@ arguments:
   executable_name|arg1|arg2|...
 </pre>
 Any substring (including the executable name) may contain escape sequences
-started by a dollar character: $&#60;digits&#62; or ${&#60;digits&#62;} is replaced by the
-captured substring of the given decimal number, which must be greater than
-zero. If the number is greater than the number of capturing substrings, or if
-the capture is unset, the replacement is empty.
-</P>
-<P>
-Any other character is substituted by itself. In particular, $$ is replaced by
-a single dollar and $| is replaced by a pipe character. Here is an example:
+started by a dollar character. These are the same as for the <b>--output</b>
+(<b>-O</b>) option documented above, except that $0 cannot insert the matched
+string because the match is still in progress. Instead, the character '0'
+is inserted. If you need a literal dollar or pipe character in any
+substring, use $$ or $| respectively. Here is an example:
 <pre>
   echo -e "abcde\n12345" | pcre2grep \
     '(?x)(.)(..(.))
@@ -946,28 +994,14 @@ a single dollar and $| is replaced by a pipe character. Here is an example:
     Arg1: [1] [234] [4] Arg2: |1| ()
     12345
 </pre>
-The parameters for the system call that is used to run the
-program or script are zero-terminated strings. This means that binary zero
-characters in the callout argument will cause premature termination of their
-substrings, and therefore should not be present. Any syntax errors in the
-string (for example, a dollar not followed by another character) cause the
-callout to be ignored. If running the program fails for any reason (including
-the non-existence of the executable), a local matching failure occurs and the
-matcher backtracks in the normal way.
-</P>
-<br><b>
-Echoing a specific string
-</b><br>
-<P>
-This facility is always available, provided that callouts were not completely
-disabled when <b>pcre2grep</b> was built. If the callout string starts with a
-pipe (vertical bar) character, the rest of the string is written to the output,
-having been passed through the same escape processing as text from the --output
-option. This provides a simple echoing facility that avoids calling an external
-program or script. No terminator is added to the string, so if you want a
-newline, you must include it explicitly. Matching continues normally after the
-string is output. If you want to see only the callout output but not any output
-from an actual match, you should end the relevant pattern with (*FAIL).
+The parameters for the system call that is used to run the program or script
+are zero-terminated strings. This means that binary zero characters in the
+callout argument will cause premature termination of their substrings, and
+therefore should not be present. Any syntax errors in the string (for example,
+a dollar not followed by another character) causes the callout to be ignored.
+If running the program fails for any reason (including the non-existence of the
+executable), a local matching failure occurs and the matcher backtracks in the
+normal way.
 </P>
 <br><a name="SEC12" href="#TOC1">MATCHING ERRORS</a><br>
 <P>
@@ -999,7 +1033,8 @@ because VMS does not distinguish between exit(0) and exit(1).
 </P>
 <br><a name="SEC14" href="#TOC1">SEE ALSO</a><br>
 <P>
-<b>pcre2pattern</b>(3), <b>pcre2syntax</b>(3), <b>pcre2callout</b>(3).
+<b>pcre2pattern</b>(3), <b>pcre2syntax</b>(3), <b>pcre2callout</b>(3),
+<b>pcre2unicode</b>(3).
 </P>
 <br><a name="SEC15" href="#TOC1">AUTHOR</a><br>
 <P>
@@ -1012,7 +1047,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC16" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 25 January 2020
+Last updated: 04 October 2020
 <br>
 Copyright &copy; 1997-2020 University of Cambridge.
 <br>

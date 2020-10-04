@@ -323,7 +323,7 @@ test data, command lines that begin with # may appear. This file format, with
 some restrictions, can also be processed by the <b>perltest.sh</b> script that
 is distributed with PCRE2 as a means of checking that the behaviour of PCRE2
 and Perl is the same. For a specification of <b>perltest.sh</b>, see the
-comments near its beginning.
+comments near its beginning. See also the #perltest command below.
 </P>
 <P>
 When the input is a terminal, <b>pcre2test</b> prompts for each line of input,
@@ -420,14 +420,20 @@ patterns. Modifiers on a pattern can change these settings.
 <pre>
   #perltest
 </pre>
-The appearance of this line causes all subsequent modifier settings to be
-checked for compatibility with the <b>perltest.sh</b> script, which is used to
-confirm that Perl gives the same results as PCRE2. Also, apart from comment
-lines, #pattern commands, and #subject commands that set or unset "mark", no
-command lines are permitted, because they and many of the modifiers are
-specific to <b>pcre2test</b>, and should not be used in test files that are also
-processed by <b>perltest.sh</b>. The <b>#perltest</b> command helps detect tests
-that are accidentally put in the wrong file.
+This line is used in test files that can also be processed by <b>perltest.sh</b>
+to confirm that Perl gives the same results as PCRE2. Subsequent tests are
+checked for the use of <b>pcre2test</b> features that are incompatible with the
+<b>perltest.sh</b> script. 
+</P>
+<P>
+Patterns must use '/' as their delimiter, and only certain modifiers are
+supported. Comment lines, #pattern commands, and #subject commands that set or
+unset "mark" are recognized and acted on. The #perltest, #forbid_utf, and
+#newline_default commands, which are needed in the relevant pcre2test files,
+are silently ignored. All other command lines are ignored, but give a warning
+message. The <b>#perltest</b> command helps detect tests that are accidentally
+put in the wrong file or use the wrong delimiter. For more details of the
+<b>perltest.sh</b> script see the comments it contains.
 <pre>
   #pop [&#60;modifiers&#62;]
   #popcopy [&#60;modifiers&#62;]
@@ -2113,7 +2119,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC21" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 20 March 2020
+Last updated: 14 September 2020
 <br>
 Copyright &copy; 1997-2020 University of Cambridge.
 <br>

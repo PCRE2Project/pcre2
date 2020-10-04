@@ -892,6 +892,6 @@ The distribution should contain the files listed below.
                           )   environments
 
 Philip Hazel
-Email local part: ph10
-Email domain: cam.ac.uk
-Last updated: 20 March 2020
+Email local part: Philip.Hazel
+Email domain: gmail.com
+Last updated: 22 September 2020

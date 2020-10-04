@@ -956,3 +956,27 @@ RC=0
 pcre2grep: Requested group 1 cannot be captured.
 pcre2grep: Use --om-capture to increase the size of the capture vector.
 RC=2
+---------------------------- Test 129 -----------------------------
+The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the
+lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox
+RC=0
+---------------------------- Test 130 -----------------------------
+fox
+fox
+fox
+fox
+RC=0
+---------------------------- Test 131 -----------------------------
+2
+RC=0
+---------------------------- Test 132 -----------------------------
+match 1:
+ a
+match 2:
+ b
+---
+ a
+RC=0
+---------------------------- Test 133 -----------------------------
+=AB3CD5=
+RC=0
