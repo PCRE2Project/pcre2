@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "19 March 2020" "PCRE2 10.35"
+.TH PCRE2API 3 "05 October 2020" "PCRE2 10.36"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -1434,10 +1434,13 @@ letters in the subject. It is equivalent to Perl's /i option, and it can be
 changed within a pattern by a (?i) option setting. If either PCRE2_UTF or
 PCRE2_UCP is set, Unicode properties are used for all characters with more than
 one other case, and for all characters whose code points are greater than
-U+007F. For lower valued characters with only one other case, a lookup table is
-used for speed. When neither PCRE2_UTF nor PCRE2_UCP is set, a lookup table is
-used for all code points less than 256, and higher code points (available only
-in 16-bit or 32-bit mode) are treated as not having another case.
+U+007F. Note that there are two ASCII characters, K and S, that, in addition to
+their lower case ASCII equivalents, are case-equivalent with U+212A (Kelvin
+sign) and U+017F (long S) respectively. For lower valued characters with only
+one other case, a lookup table is used for speed. When neither PCRE2_UTF nor
+PCRE2_UCP is set, a lookup table is used for all code points less than 256, and
+higher code points (available only in 16-bit or 32-bit mode) are treated as not
+having another case.
 .sp
   PCRE2_DOLLAR_ENDONLY
 .sp
@@ -3968,6 +3971,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 19 March 2020
+Last updated: 05 October 2020
 Copyright (c) 1997-2020 University of Cambridge.
 .fi

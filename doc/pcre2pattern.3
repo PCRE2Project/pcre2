@@ -1,4 +1,4 @@
-.TH PCRE2PATTERN 3 "24 February 2020" "PCRE2 10.35"
+.TH PCRE2PATTERN 3 "05 October 2020" "PCRE2 10.35"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION DETAILS"
@@ -263,8 +263,11 @@ corresponding characters in the subject. As a trivial example, the pattern
   The quick brown fox
 .sp
 matches a portion of a subject string that is identical to itself. When
-caseless matching is specified (the PCRE2_CASELESS option), letters are matched
-independently of case.
+caseless matching is specified (the PCRE2_CASELESS option or (?i) within the
+pattern), letters are matched independently of case. Note that there are two
+ASCII characters, K and S, that, in addition to their lower case ASCII
+equivalents, are case-equivalent with Unicode U+212A (Kelvin sign) and U+017F
+(long S) respectively when either PCRE2_UTF or PCRE2_UCP is set.
 .P
 The power of regular expressions comes from the ability to include wild cards,
 character classes, alternatives, and repetitions in the pattern. These are
@@ -298,6 +301,22 @@ a character class the only metacharacters are:
   [      POSIX character class (if followed by POSIX syntax)
   ]      terminates the character class
 .sp
+If a pattern is compiled with the PCRE2_EXTENDED option, most white space in
+the pattern, other than in a character class, and characters between a #
+outside a character class and the next newline, inclusive, are ignored. An
+escaping backslash can be used to include a white space or a # character as
+part of the pattern. If the PCRE2_EXTENDED_MORE option is set, the same
+applies, but in addition unescaped space and horizontal tab characters are
+ignored inside a character class. Note: only these two characters are ignored,
+not the full set of pattern white space characters that are ignored outside a
+character class. Option settings can be changed within a pattern; see the 
+section entitled
+.\" HTML <a href="#internaloptions">
+.\" </a>
+"Internal Option Setting"
+.\"
+below.
+.P
 The following sections describe the use of each of the metacharacters.
 .
 .
@@ -315,15 +334,9 @@ would otherwise be interpreted as a metacharacter, so it is always safe to
 precede a non-alphanumeric with backslash to specify that it stands for itself.
 In particular, if you want to match a backslash, you write \e\e.
 .P
-In a UTF mode, only ASCII digits and letters have any special meaning after a
-backslash. All other characters (in particular, those whose code points are
-greater than 127) are treated as literals.
-.P
-If a pattern is compiled with the PCRE2_EXTENDED option, most white space in
-the pattern (other than in a character class), and characters between a #
-outside a character class and the next newline, inclusive, are ignored. An
-escaping backslash can be used to include a white space or # character as part
-of the pattern.
+Only ASCII digits and letters have any special meaning after a backslash. All
+other characters (in particular, those whose code points are greater than 127)
+are treated as literals.
 .P
 If you want to treat all characters in a sequence as literals, you can do so by
 putting them between \eQ and \eE. This is different from Perl in that $ and @
@@ -1436,7 +1449,10 @@ Characters in a class may be specified by their code points using \eo, \ex, or
 \eN{U+hh..} in the usual way. When caseless matching is set, any letters in a
 class represent both their upper case and lower case versions, so for example,
 a caseless [aeiou] matches "A" as well as "a", and a caseless [^aeiou] does not
-match "A", whereas a caseful version would.
+match "A", whereas a caseful version would. Note that there are two ASCII
+characters, K and S, that, in addition to their lower case ASCII equivalents,
+are case-equivalent with Unicode U+212A (Kelvin sign) and U+017F (long S)
+respectively when either PCRE2_UTF or PCRE2_UCP is set.
 .P
 Characters that might indicate line breaks are never treated in any special way
 when matching character classes, whatever line-ending sequence is in use, and
@@ -3881,6 +3897,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 24 February 2020
+Last updated: 05 October 2020
 Copyright (c) 1997-2020 University of Cambridge.
 .fi
