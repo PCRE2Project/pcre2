@@ -2390,8 +2390,10 @@ while (length > 0)
         }
       break;
 
-      default:         /* Should not occur */
-      case DDE_ERROR:
+      default:         /* Even though this should not occur, the string having */
+      case DDE_ERROR:  /* been checked above, we need to include the free() */
+      free(args);      /* calls so that source checkers do not complain. */
+      free(argsvector);
       return 0;
       }
 
