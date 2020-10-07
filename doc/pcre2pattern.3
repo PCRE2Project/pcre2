@@ -1,4 +1,4 @@
-.TH PCRE2PATTERN 3 "05 October 2020" "PCRE2 10.35"
+.TH PCRE2PATTERN 3 "06 October 2020" "PCRE2 10.35"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION DETAILS"
@@ -1168,8 +1168,9 @@ For example, when the pattern
 .sp
 matches "foobar", the first substring is still set to "foo".
 .P
-Perl documents that the use of \eK within assertions is "not well defined". In
-PCRE2, \eK is acted upon when it occurs inside positive assertions, but is
+Perl used to document that the use of \eK within lookaround assertions is "not
+well defined", but from version 5.32.0 Perl does not support this usage at all.
+In PCRE2, \eK is acted upon when it occurs inside positive assertions, but is
 ignored in negative assertions. Note that when a pattern such as (?=ab\eK)
 matches, the reported start of the match can be greater than the end of the
 match. Using \eK in a lookbehind assertion at the start of a pattern can also
@@ -3897,6 +3898,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 05 October 2020
+Last updated: 06 October 2020
 Copyright (c) 1997-2020 University of Cambridge.
 .fi
