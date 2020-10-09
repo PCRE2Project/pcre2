@@ -86,6 +86,10 @@ everywhere, which was not previously the case. At the same time, the escape
 sequences $x{...} and $o{...} have been introduced, to allow for characters 
 whose code points are greater than 255 in Unicode mode.
 
+17. Applied the patch from Bugzilla #2628 to RunGrepTest. This does an explicit 
+test for a version of sed that can handle binary zero, instead of assuming that 
+any Linux version will work.
+
 
 Version 10.35 09-May-2020
 ---------------------------
