@@ -458,9 +458,9 @@ struct sljit_compiler {
 	sljit_sw cache_argw;
 #endif
 
-#if (defined SLJIT_CONFIG_TILEGX && SLJIT_CONFIG_TILEGX)
-	sljit_s32 cache_arg;
-	sljit_sw cache_argw;
+#if (defined SLJIT_CONFIG_S390X && SLJIT_CONFIG_S390X)
+	/* Need to allocate register save area to make calls. */
+	sljit_s32 have_save_area;
 #endif
 
 #if (defined SLJIT_VERBOSE && SLJIT_VERBOSE)
@@ -750,6 +750,9 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_fast_enter(struct sljit_compiler *
    mips:   [reg+imm], -65536 <= imm <= 65535
    sparc:  [reg+imm], -4096 <= imm <= 4095
            [reg+reg] is supported
+   s390x:  [reg+imm], -2^19 <= imm < 2^19
+           [reg+reg] is supported
+           Write-back is not supported
 */
 
 /* Macros for specifying operand types. */

@@ -222,14 +222,6 @@
 #	define FCSR_FCC		33
 #endif
 
-#if (defined SLJIT_CONFIG_TILEGX && SLJIT_CONFIG_TILEGX)
-#	define IS_JAL		0x04
-#	define IS_COND		0x08
-
-#	define PATCH_B		0x10
-#	define PATCH_J		0x20
-#endif
-
 #if (defined SLJIT_CONFIG_SPARC_32 && SLJIT_CONFIG_SPARC_32)
 #	define IS_MOVABLE	0x04
 #	define IS_COND		0x08
@@ -493,12 +485,16 @@ SLJIT_API_FUNC_ATTRIBUTE void sljit_set_compiler_memory_error(struct sljit_compi
 #if (defined SLJIT_CONFIG_ARM_THUMB2 && SLJIT_CONFIG_ARM_THUMB2)
 SLJIT_API_FUNC_ATTRIBUTE void sljit_free_code(void* code, void *exec_allocator_data)
 {
+	SLJIT_UNUSED_ARG(exec_allocator_data);
+
 	/* Remove thumb mode flag. */
 	SLJIT_FREE_EXEC((void*)((sljit_uw)code & ~0x1), exec_allocator_data);
 }
 #elif (defined SLJIT_INDIRECT_CALL && SLJIT_INDIRECT_CALL)
 SLJIT_API_FUNC_ATTRIBUTE void sljit_free_code(void* code, void *exec_allocator_data)
 {
+	SLJIT_UNUSED_ARG(exec_allocator_data);
+
 	/* Resolve indirection. */
 	code = (void*)(*(sljit_uw*)code);
 	SLJIT_FREE_EXEC(code, exec_allocator_data);
@@ -506,6 +502,8 @@ SLJIT_API_FUNC_ATTRIBUTE void sljit_free_code(void* code, void *exec_allocator_d
 #else
 SLJIT_API_FUNC_ATTRIBUTE void sljit_free_code(void* code, void *exec_allocator_data)
 {
+	SLJIT_UNUSED_ARG(exec_allocator_data);
+
 	SLJIT_FREE_EXEC(code, exec_allocator_data);
 }
 #endif
@@ -633,7 +631,10 @@ static SLJIT_INLINE sljit_s32 get_arg_count(sljit_s32 arg_types)
 	return arg_count;
 }
 
-#if !(defined SLJIT_CONFIG_X86 && SLJIT_CONFIG_X86)
+
+/* Only used in RISC architectures where the instruction size is constant */
+#if !(defined SLJIT_CONFIG_X86 && SLJIT_CONFIG_X86) \
+	&& !(defined SLJIT_CONFIG_S390X && SLJIT_CONFIG_S390X)
 
 static SLJIT_INLINE sljit_uw compute_next_addr(struct sljit_label *label, struct sljit_jump *jump,
 	struct sljit_const *const_, struct sljit_put_label *put_label)
@@ -655,7 +656,7 @@ static SLJIT_INLINE sljit_uw compute_next_addr(struct sljit_label *label, struct
 	return result;
 }
 
-#endif /* !SLJIT_CONFIG_X86 */
+#endif /* !SLJIT_CONFIG_X86 && !SLJIT_CONFIG_S390X */
 
 static SLJIT_INLINE void set_emit_enter(struct sljit_compiler *compiler,
 	sljit_s32 options, sljit_s32 args, sljit_s32 scratches, sljit_s32 saveds,
@@ -1384,6 +1385,8 @@ static SLJIT_INLINE CHECK_RETURN_TYPE check_sljit_emit_op_custom(struct sljit_co
 #elif (defined SLJIT_CONFIG_ARM_THUMB2 && SLJIT_CONFIG_ARM_THUMB2)
 	CHECK_ARGUMENT((size == 2 && (((sljit_sw)instruction) & 0x1) == 0)
 		|| (size == 4 && (((sljit_sw)instruction) & 0x3) == 0));
+#elif (defined SLJIT_CONFIG_S390X && SLJIT_CONFIG_S390X)
+	CHECK_ARGUMENT(size == 2 || size == 4 || size == 6);
 #else
 	CHECK_ARGUMENT(size == 4 && (((sljit_sw)instruction) & 0x3) == 0);
 #endif
@@ -2117,8 +2120,8 @@ static SLJIT_INLINE sljit_s32 sljit_emit_cmov_generic(struct sljit_compiler *com
 #	include "sljitNativeMIPS_common.c"
 #elif (defined SLJIT_CONFIG_SPARC && SLJIT_CONFIG_SPARC)
 #	include "sljitNativeSPARC_common.c"
-#elif (defined SLJIT_CONFIG_TILEGX && SLJIT_CONFIG_TILEGX)
-#	include "sljitNativeTILEGX_64.c"
+#elif (defined SLJIT_CONFIG_S390X && SLJIT_CONFIG_S390X)
+#	include "sljitNativeS390X.c"
 #endif
 
 #if !(defined SLJIT_CONFIG_MIPS && SLJIT_CONFIG_MIPS)
@@ -2149,7 +2152,7 @@ SLJIT_API_FUNC_ATTRIBUTE struct sljit_jump* sljit_emit_cmp(struct sljit_compiler
 #endif
 
 	if (SLJIT_UNLIKELY((src1 & SLJIT_IMM) && !(src2 & SLJIT_IMM))) {
-		/* Immediate is prefered as second argument by most architectures. */
+		/* Immediate is preferred as second argument by most architectures. */
 		switch (condition) {
 		case SLJIT_LESS:
 			condition = SLJIT_GREATER;
