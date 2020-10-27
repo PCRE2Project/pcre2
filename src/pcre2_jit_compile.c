@@ -6571,9 +6571,11 @@ if (common->invalid_utf)
 
   if (common->mode != PCRE2_JIT_COMPLETE)
     {
+    OP1(SLJIT_MOV, RETURN_ADDR, 0, TMP1, 0);
     OP1(SLJIT_MOV, TMP2, 0, STR_PTR, 0);
     move_back(common, NULL, TRUE);
     check_start_used_ptr(common);
+    OP1(SLJIT_MOV, TMP1, 0, RETURN_ADDR, 0);
     OP1(SLJIT_MOV, STR_PTR, 0, TMP2, 0);
     }
   }

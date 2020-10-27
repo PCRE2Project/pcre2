@@ -90,6 +90,8 @@ whose code points are greater than 255 in Unicode mode.
 test for a version of sed that can handle binary zero, instead of assuming that 
 any Linux version will work.
 
+18. Fixed a word boundary check bug in JIT when partial matching is enabled.
+
 
 Version 10.35 09-May-2020
 ---------------------------

@@ -1875,4 +1875,10 @@ Subject length lower bound = 1
     \xe5A
  0: A
 
+/\bch\b/utf,match_invalid_utf
+    qchq\=ph
+Partial match: 
+    qchq\=ps
+Partial match: 
+
 # End of testinput10

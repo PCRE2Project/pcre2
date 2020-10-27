@@ -613,4 +613,8 @@
 /A/utf,match_invalid_utf,caseless
     \xe5A
 
+/\bch\b/utf,match_invalid_utf
+    qchq\=ph
+    qchq\=ps
+
 # End of testinput10
