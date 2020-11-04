@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "05 October 2020" "PCRE2 10.36"
+.TH PCRE2API 3 "04 November 2020" "PCRE2 10.36"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -564,24 +564,53 @@ documentation for more details.
 .P
 In a more complicated situation, where patterns are compiled only when they are
 first needed, but are still shared between threads, pointers to compiled
-patterns must be protected from simultaneous writing by multiple threads, at
-least until a pattern has been compiled. The logic can be something like this:
+patterns must be protected from simultaneous writing by multiple threads. This
+is somewhat tricky to do correctly. If you know that writing to a pointer is
+atomic in your environment, you can use logic like this:
 .sp
   Get a read-only (shared) lock (mutex) for pointer
   if (pointer == NULL)
     {
     Get a write (unique) lock for pointer
-    pointer = pcre2_compile(...
+    if (pointer == NULL) pointer = pcre2_compile(...
     }
   Release the lock
   Use pointer in pcre2_match()
 .sp
 Of course, testing for compilation errors should also be included in the code.
 .P
-If JIT is being used, but the JIT compilation is not being done immediately,
-(perhaps waiting to see if the pattern is used often enough) similar logic is
-required. JIT compilation updates a pointer within the compiled code block, so
-a thread must gain unique write access to the pointer before calling
+The reason for checking the pointer a second time is as follows: Several
+threads may have acquired the shared lock and tested the pointer for being
+NULL, but only one of them will be given the write lock, with the rest kept
+waiting. The winning thread will compile the pattern and store the result.
+After this thread releases the write lock, another thread will get it, and if
+it does not retest pointer for being NULL, will recompile the pattern and
+overwrite the pointer, creating a memory leak and possibly causing other
+issues.
+.P
+In an environment where writing to a pointer may not be atomic, the above logic
+is not sufficient. The thread that is doing the compiling may be descheduled
+after writing only part of the pointer, which could cause other threads to use
+an invalid value. Instead of checking the pointer itself, a separate "pointer
+is valid" flag (that can be updated atomically) must be used:
+.sp
+  Get a read-only (shared) lock (mutex) for pointer
+  if (!pointer_is_valid)
+    {
+    Get a write (unique) lock for pointer
+    if (!pointer_is_valid) 
+      {
+      pointer = pcre2_compile(...
+      pointer_is_valid = TRUE
+      }  
+    }
+  Release the lock
+  Use pointer in pcre2_match()
+.sp
+If JIT is being used, but the JIT compilation is not being done immediately
+(perhaps waiting to see if the pattern is used often enough), similar logic is
+required. JIT compilation updates a value within the compiled code block, so a
+thread must gain unique write access to the pointer before calling
 \fBpcre2_jit_compile()\fP. Alternatively, \fBpcre2_code_copy()\fP or
 \fBpcre2_code_copy_with_tables()\fP can be used to obtain a private copy of the
 compiled code before calling the JIT compiler.
@@ -3971,6 +4000,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 05 October 2020
+Last updated: 04 November 2020
 Copyright (c) 1997-2020 University of Cambridge.
 .fi
