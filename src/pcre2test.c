@@ -5141,8 +5141,8 @@ PCRE2_SIZE erroroffset;
 if (restrict_for_perl_test && delimiter != '/')
   {
   fprintf(outfile, "** The only allowed delimiter after #perltest is '/'\n");
-  return PR_ABEND;  
-  } 
+  return PR_ABEND;
+  }
 
 /* Initialize the context and pattern/data controls for this test from the
 defaults. */

@@ -149,7 +149,7 @@ CHECK_C_SOURCE_COMPILES(
 set(CMAKE_REQUIRED_FLAGS ${ORIG_CMAKE_REQUIRED_FLAGS})
 
 # Check whether Intel CET is enabled, and if so, adjust compiler flags. This
-# code was written by PH, trying to imitate the logic from the autotools 
+# code was written by PH, trying to imitate the logic from the autotools
 # configuration.
 
 CHECK_C_SOURCE_COMPILES(
@@ -162,8 +162,8 @@ CHECK_C_SOURCE_COMPILES(
 
 IF (INTEL_CET_ENABLED)
   SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mshstk")
-ENDIF(INTEL_CET_ENABLED)   
-        
+ENDIF(INTEL_CET_ENABLED)
+
 
 
 # User-configurable options

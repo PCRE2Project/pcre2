@@ -2070,7 +2070,7 @@ if (rc == DDE_CHAR && *value != STDOUT_NL_CODE)
   uint32_t max = utf? 0x0010ffffu : 0xffu;
   if (*value > max)
     {
-    if (!callout) 
+    if (!callout)
       fprintf(stderr, "pcre2grep: Error in output text at offset %d: "
         "code point greater than 0x%x is invalid\n", (int)(string - begin), max);
     rc = DDE_ERROR;
@@ -2376,8 +2376,8 @@ while (length > 0)
       if (value == STDOUT_NL_CODE)
         {
         memcpy(argsptr, STDOUT_NL, STDOUT_NL_LEN);
-        argsptr += STDOUT_NL_LEN;  
-        }   
+        argsptr += STDOUT_NL_LEN;
+        }
       else if (utf && value > 127)
         {
         int n = ord2utf8(value);

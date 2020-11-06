@@ -79,7 +79,7 @@ matching substrings, or if \fB--only-matching\fP, \fB--file-offsets\fP, or
 (either shown literally, or as an offset), scanning resumes immediately
 following the match, so that further matches on the same line can be found. If
 there are multiple patterns, they are all tried on the remainder of the line,
-but patterns that follow the one that matched are not tried on the earlier 
+but patterns that follow the one that matched are not tried on the earlier
 matched part of the line.
 .P
 This behaviour means that the order in which multiple patterns are specified
@@ -422,7 +422,7 @@ a separate line. Searching normally stops as soon as a matching line is found
 in a file. However, if the \fB-c\fP (count) option is also used, matching
 continues in order to obtain the correct count, and those files that have at
 least one match are listed along with their counts. Using this option with
-\fB-c\fP is a way of suppressing the listing of files with no matches that 
+\fB-c\fP is a way of suppressing the listing of files with no matches that
 occurs with \fB-c\fP on its own. This option overrides any previous \fB-H\fP,
 \fB-h\fP, or \fB-L\fP options.
 .TP
@@ -489,12 +489,12 @@ large processing buffer, this should not be a problem, but the \fB-M\fP option
 does not work when input is read line by line (see \fB--line-buffered\fP.)
 .TP
 \fB-m\fP \fInumber\fP, \fB--max-count\fP=\fInumber\fP
-Stop processing after finding \fInumber\fP matching lines, or non-matching 
+Stop processing after finding \fInumber\fP matching lines, or non-matching
 lines if \fB-v\fP is also set. Any trailing context lines are output after the
 final match. In multiline mode, each multiline match counts as just one line
 for this purpose. If this limit is reached when reading the standard input from
 a regular file, the file is left positioned just after the last matching line.
-If \fB-c\fP is also set, the count that is output is never greater than 
+If \fB-c\fP is also set, the count that is output is never greater than
 \fInumber\fP. This option has no effect if used with \fB-L\fP, \fB-l\fP, or
 \fB-q\fP, or when just checking for a match in a binary file.
 .TP
@@ -598,7 +598,7 @@ newline; $r by carriage return; $t by tab; $v by vertical tab.
 .sp
 $o<digits> or $o{<digits>} is replaced by the character whose code point is the
 given octal number. In the first form, up to three octal digits are processed.
-When more digits are needed in Unicode mode to specify a wide character, the 
+When more digits are needed in Unicode mode to specify a wide character, the
 second form must be used.
 .sp
 $x<digits> or $x{<digits>} is replaced by the character represented by the
@@ -686,12 +686,12 @@ total would always be zero.
 Operate in UTF-8 mode. This option is available only if PCRE2 has been compiled
 with UTF-8 support. All patterns (including those for any \fB--exclude\fP and
 \fB--include\fP options) and all lines that are scanned must be valid strings
-of UTF-8 characters. If an invalid UTF-8 string is encountered, an error 
+of UTF-8 characters. If an invalid UTF-8 string is encountered, an error
 occurs.
 .TP
 \fB-U\fP, \fB--utf-allow-invalid\fP
 As \fB--utf\fP, but in addition subject lines may contain invalid UTF-8 code
-unit sequences. These can never form part of any pattern match. Patterns 
+unit sequences. These can never form part of any pattern match. Patterns
 themselves, however, must still be valid UTF-8 strings. This facility allows
 valid UTF-8 strings to be sought within arbitrary byte sequences in executable
 or other binary files. For more details about matching in non-valid UTF-8
@@ -708,7 +708,7 @@ ignored.
 .TP
 \fB-v\fP, \fB--invert-match\fP
 Invert the sense of the match, so that lines which do \fInot\fP match any of
-the patterns are the ones that are found. When this option is set, options such 
+the patterns are the ones that are found. When this option is set, options such
 as \fB--only-matching\fP and \fB--output\fP, which specify parts of a match
 that are to be output, are ignored.
 .TP
@@ -855,7 +855,7 @@ output string, so if you want a newline, you must include it explicitly using
 the escape $n. For example:
 .sp
   pcre2grep '(.)(..(.))(?C"|[$1] [$2] [$3]$n")' <some file>
-.sp   
+.sp
 Matching continues normally after the string is output. If you want to see only
 the callout output but not any output from an actual match, you should end the
 pattern with (*FAIL).

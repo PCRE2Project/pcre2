@@ -111,7 +111,7 @@ matching substrings, or if <b>--only-matching</b>, <b>--file-offsets</b>, or
 (either shown literally, or as an offset), scanning resumes immediately
 following the match, so that further matches on the same line can be found. If
 there are multiple patterns, they are all tried on the remainder of the line,
-but patterns that follow the one that matched are not tried on the earlier 
+but patterns that follow the one that matched are not tried on the earlier
 matched part of the line.
 </P>
 <P>
@@ -486,7 +486,7 @@ a separate line. Searching normally stops as soon as a matching line is found
 in a file. However, if the <b>-c</b> (count) option is also used, matching
 continues in order to obtain the correct count, and those files that have at
 least one match are listed along with their counts. Using this option with
-<b>-c</b> is a way of suppressing the listing of files with no matches that 
+<b>-c</b> is a way of suppressing the listing of files with no matches that
 occurs with <b>-c</b> on its own. This option overrides any previous <b>-H</b>,
 <b>-h</b>, or <b>-L</b> options.
 </P>
@@ -561,12 +561,12 @@ does not work when input is read line by line (see <b>--line-buffered</b>.)
 </P>
 <P>
 <b>-m</b> <i>number</i>, <b>--max-count</b>=<i>number</i>
-Stop processing after finding <i>number</i> matching lines, or non-matching 
+Stop processing after finding <i>number</i> matching lines, or non-matching
 lines if <b>-v</b> is also set. Any trailing context lines are output after the
 final match. In multiline mode, each multiline match counts as just one line
 for this purpose. If this limit is reached when reading the standard input from
 a regular file, the file is left positioned just after the last matching line.
-If <b>-c</b> is also set, the count that is output is never greater than 
+If <b>-c</b> is also set, the count that is output is never greater than
 <i>number</i>. This option has no effect if used with <b>-L</b>, <b>-l</b>, or
 <b>-q</b>, or when just checking for a match in a binary file.
 </P>
@@ -686,7 +686,7 @@ newline; $r by carriage return; $t by tab; $v by vertical tab.
 <br>
 $o&#60;digits&#62; or $o{&#60;digits&#62;} is replaced by the character whose code point is the
 given octal number. In the first form, up to three octal digits are processed.
-When more digits are needed in Unicode mode to specify a wide character, the 
+When more digits are needed in Unicode mode to specify a wide character, the
 second form must be used.
 <br>
 <br>
@@ -788,13 +788,13 @@ total would always be zero.
 Operate in UTF-8 mode. This option is available only if PCRE2 has been compiled
 with UTF-8 support. All patterns (including those for any <b>--exclude</b> and
 <b>--include</b> options) and all lines that are scanned must be valid strings
-of UTF-8 characters. If an invalid UTF-8 string is encountered, an error 
+of UTF-8 characters. If an invalid UTF-8 string is encountered, an error
 occurs.
 </P>
 <P>
 <b>-U</b>, <b>--utf-allow-invalid</b>
 As <b>--utf</b>, but in addition subject lines may contain invalid UTF-8 code
-unit sequences. These can never form part of any pattern match. Patterns 
+unit sequences. These can never form part of any pattern match. Patterns
 themselves, however, must still be valid UTF-8 strings. This facility allows
 valid UTF-8 strings to be sought within arbitrary byte sequences in executable
 or other binary files. For more details about matching in non-valid UTF-8
@@ -811,7 +811,7 @@ ignored.
 <P>
 <b>-v</b>, <b>--invert-match</b>
 Invert the sense of the match, so that lines which do <i>not</i> match any of
-the patterns are the ones that are found. When this option is set, options such 
+the patterns are the ones that are found. When this option is set, options such
 as <b>--only-matching</b> and <b>--output</b>, which specify parts of a match
 that are to be output, are ignored.
 </P>

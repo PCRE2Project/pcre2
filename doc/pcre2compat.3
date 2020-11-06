@@ -22,12 +22,12 @@ that the next three characters are not "a". It just asserts that the next
 character is not "a" three times (in principle; PCRE2 optimizes this to run the
 assertion just once). Perl allows some repeat quantifiers on other assertions,
 for example, \eb* (but not \eb{3}, though oddly it does allow ^{3}), but these
-do not seem to have any use. PCRE2 does not allow any kind of quantifier on 
+do not seem to have any use. PCRE2 does not allow any kind of quantifier on
 non-lookaround assertions.
 .P
 3. Capture groups that occur inside negative lookaround assertions are counted,
 but their entries in the offsets vector are set only when a negative assertion
-is a condition that has a matching branch (that is, the condition is false). 
+is a condition that has a matching branch (that is, the condition is false).
 Perl may set such capture groups in other circumstances.
 .P
 4. The following Perl escape sequences are not supported: \eF, \el, \eL, \eu,
@@ -72,7 +72,7 @@ other character. Note the following examples:
     \eQA\eB\eE            A\eB               A\eB
     \eQ\e\eE              \e                 \e\eE
 .sp
-The \eQ...\eE sequence is recognized both inside and outside character classes 
+The \eQ...\eE sequence is recognized both inside and outside character classes
 by both PCRE2 and Perl.
 .P
 7. Fairly obviously, PCRE2 does not support the (?{code}) and (??{code})
@@ -132,8 +132,8 @@ always matches an upper case letter. I think Perl has changed in this respect;
 in the release at the time of writing (5.32), \ep{Lu} and \ep{Ll} match all
 letters, regardless of case, when case independence is specified.
 .P
-16. From release 5.32.0, Perl locks out the use of \eK in lookaround 
-assertions. In PCRE2, \eK is acted on when it occurs in positive assertions, 
+16. From release 5.32.0, Perl locks out the use of \eK in lookaround
+assertions. In PCRE2, \eK is acted on when it occurs in positive assertions,
 but is ignored in negative assertions.
 .P
 17. PCRE2 provides some extensions to the Perl regular expression facilities.

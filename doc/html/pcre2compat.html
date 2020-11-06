@@ -34,13 +34,13 @@ that the next three characters are not "a". It just asserts that the next
 character is not "a" three times (in principle; PCRE2 optimizes this to run the
 assertion just once). Perl allows some repeat quantifiers on other assertions,
 for example, \b* (but not \b{3}, though oddly it does allow ^{3}), but these
-do not seem to have any use. PCRE2 does not allow any kind of quantifier on 
+do not seem to have any use. PCRE2 does not allow any kind of quantifier on
 non-lookaround assertions.
 </P>
 <P>
 3. Capture groups that occur inside negative lookaround assertions are counted,
 but their entries in the offsets vector are set only when a negative assertion
-is a condition that has a matching branch (that is, the condition is false). 
+is a condition that has a matching branch (that is, the condition is false).
 Perl may set such capture groups in other circumstances.
 </P>
 <P>
@@ -84,7 +84,7 @@ other character. Note the following examples:
     \QA\B\E            A\B               A\B
     \Q\\E              \                 \\E
 </pre>
-The \Q...\E sequence is recognized both inside and outside character classes 
+The \Q...\E sequence is recognized both inside and outside character classes
 by both PCRE2 and Perl.
 </P>
 <P>
@@ -152,8 +152,8 @@ in the release at the time of writing (5.32), \p{Lu} and \p{Ll} match all
 letters, regardless of case, when case independence is specified.
 </P>
 <P>
-16. From release 5.32.0, Perl locks out the use of \K in lookaround 
-assertions. In PCRE2, \K is acted on when it occurs in positive assertions, 
+16. From release 5.32.0, Perl locks out the use of \K in lookaround
+assertions. In PCRE2, \K is acted on when it occurs in positive assertions,
 but is ignored in negative assertions.
 </P>
 <P>

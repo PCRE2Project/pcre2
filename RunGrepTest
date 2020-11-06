@@ -674,11 +674,11 @@ echo "---------------------------- Test 131 -----------------------------" >>tes
 echo "RC=$?" >>testtrygrep
 
 echo "---------------------------- Test 132 -----------------------------" >>testtrygrep
-(cd $srcdir; $valgrind $vjs $pcre2grep -m1 -A3 '^match'; echo '---'; head -1) <testdata/grepinput >>testtrygrep 2>&1
+(cd $srcdir; $valgrind $vjs $pcre2grep -m1 -A3 '^match'; echo '---'; head -1) <$srcdir/testdata/grepinput >>testtrygrep 2>&1
 echo "RC=$?" >>testtrygrep
 
 echo "---------------------------- Test 133 -----------------------------" >>testtrygrep
-(cd $srcdir; $valgrind $vjs $pcre2grep -m1 -O '=$x{41}$x423$o{103}$o1045=' 'fox') <testdata/grepinputv >>testtrygrep 2>&1
+(cd $srcdir; $valgrind $vjs $pcre2grep -m1 -O '=$x{41}$x423$o{103}$o1045=' 'fox') <$srcdir/testdata/grepinputv >>testtrygrep 2>&1
 echo "RC=$?" >>testtrygrep
 
 # Now compare the results.
@@ -715,7 +715,7 @@ if [ $utf8 -ne 0 ] ; then
   echo "RC=$?" >>testtrygrep
 
   echo "---------------------------- Test U6 -----------------------------" >>testtrygrep
-  (cd $srcdir; $valgrind $vjs $pcre2grep -u -m1 -O '=$x{1d3}$o{744}=' 'fox') <testdata/grepinputv >>testtrygrep 2>&1
+  (cd $srcdir; $valgrind $vjs $pcre2grep -u -m1 -O '=$x{1d3}$o{744}=' 'fox') <$srcdir/testdata/grepinputv >>testtrygrep 2>&1
   echo "RC=$?" >>testtrygrep
 
   $cf $srcdir/testdata/grepoutput8 testtrygrep
@@ -759,7 +759,7 @@ $valgrind $vjs $pcre2grep -n --newline=anycrlf "^(abc|def|ghi|jkl)" testNinputgr
 # systems, including Solaris (aka SunOS), where the version of sed explicitly
 # doesn't like them, and also MacOS (Darwin), OpenBSD, FreeBSD, NetBSD, and
 # some Linux distributions like Alpine, even when using GNU sed, so test for
-# a usable sed and fudge the output so that the comparison works when sed 
+# a usable sed and fudge the output so that the comparison works when sed
 # doesn't.
 
 printf '%c--------------------------- Test N7 ------------------------------\r\n' - >>testtrygrep

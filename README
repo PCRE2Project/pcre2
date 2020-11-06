@@ -297,8 +297,8 @@ library. They are also documented in the pcre2build man page.
   unaddressable. This allows it to detect invalid memory accesses, and is
   mostly useful for debugging PCRE2 itself.
 
-. In environments where the gcc compiler is used and lcov version 1.6 or above
-  is installed, if you specify
+. In environments where the gcc compiler is used and lcov is installed, if you
+  specify
 
   --enable-coverage
 
@@ -894,4 +894,4 @@ The distribution should contain the files listed below.
 Philip Hazel
 Email local part: Philip.Hazel
 Email domain: gmail.com
-Last updated: 22 September 2020
+Last updated: 06 November 2020

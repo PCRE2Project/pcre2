@@ -1,12 +1,12 @@
 Change Log for PCRE2
 --------------------
 
-Version 10.36-RC1 25-May-2020
------------------------------
+Version 10.36-RC1 05-November-2020
+----------------------------------
 
 1. Add CET_CFLAGS so that when Intel CET is enabled, pass -mshstk to
-compiler. This fixes https://bugs.exim.org/show_bug.cgi?id=2578. Patch for 
-Makefile.am and configure.ac by H.J. Lu. Equivalent patch for CMakeLists.txt 
+compiler. This fixes https://bugs.exim.org/show_bug.cgi?id=2578. Patch for
+Makefile.am and configure.ac by H.J. Lu. Equivalent patch for CMakeLists.txt
 invented by PH.
 
 2. Fix inifinite loop when a single byte newline is searched in JIT when
@@ -18,12 +18,12 @@ invalid utf8 mode is enabled.
     lib. This allows differentiation between lib and lib64.
     CMAKE_INSTALL_LIBDIR is used for installation of libraries and also for
     pkgconfig file generation.
-   
+
   - Add the version of PCRE2 to the configuration summary like ./configure
     does.
-   
+
   - Fix typo: MACTHED_STRING->MATCHED_STRING
-  
+
 4. Updated CMakeLists.txt with another patch from Wolfgang Stöggl (Bugzilla
 #2588):
 
@@ -31,12 +31,12 @@ invalid utf8 mode is enabled.
     allow spaces in directory names.
 
   - This fixes a cmake error, if the path of the pcre2 source contains a space.
-  
-5. Updated CMakeLists.txt with a patch from B. Scott Michel: CMake's 
-documentation suggests using CHECK_SYMBOL_EXISTS over CHECK_FUNCTION_EXIST. 
-Moreover, these functions come from specific header files, which need to be 
-specified (and, thankfully, are the same on both the Linux and WinXX 
-platforms.)  
+
+5. Updated CMakeLists.txt with a patch from B. Scott Michel: CMake's
+documentation suggests using CHECK_SYMBOL_EXISTS over CHECK_FUNCTION_EXIST.
+Moreover, these functions come from specific header files, which need to be
+specified (and, thankfully, are the same on both the Linux and WinXX
+platforms.)
 
 6. Added a (uint32_t) cast to prevent a compiler warning in pcre2_compile.c.
 
@@ -44,50 +44,50 @@ platforms.)
 debug Windows builds using CMake. This also updated configure so that it
 generates *.pc files and pcre2-config with the same content, as in the past.
 
-8. If a pattern ended with (?(VERSION=n.d where n is any number but d is just a 
-single digit, the code unit beyond d was being read (i.e. there was a read 
+8. If a pattern ended with (?(VERSION=n.d where n is any number but d is just a
+single digit, the code unit beyond d was being read (i.e. there was a read
 buffer overflow). Fixes ClusterFuzz 23779.
 
 9. After the rework in r1235, certain character ranges were incorrectly
 handled by an optimization in JIT. Furthermore a wrong offset was used to
 read a value from a buffer which could lead to memory overread.
 
-10. Unnoticed for many years was the fact that delimiters other than / in the 
-testinput1 and testinput4 files could cause incorrect behaviour when these 
-files were processed by perltest.sh. There were several tests that used quotes 
+10. Unnoticed for many years was the fact that delimiters other than / in the
+testinput1 and testinput4 files could cause incorrect behaviour when these
+files were processed by perltest.sh. There were several tests that used quotes
 as delimiters, and it was just luck that they didn't go wrong with perltest.sh.
-All the patterns in testinput1 and testinput4 now use / as their delimiter. 
+All the patterns in testinput1 and testinput4 now use / as their delimiter.
 This fixes Bugzilla #2641.
 
-11. Perl has started to give an error for \K within lookarounds (though there 
-are cases where it doesn't). PCRE2 still allows this, so the tests that include 
+11. Perl has started to give an error for \K within lookarounds (though there
+are cases where it doesn't). PCRE2 still allows this, so the tests that include
 this case have been moved from test 1 to test 2.
 
-12. Further to 10 above, pcre2test has been updated to detect and grumble if a 
+12. Further to 10 above, pcre2test has been updated to detect and grumble if a
 delimiter other than / is used after #perltest.
 
-13. Fixed a bug with PCRE2_MATCH_INVALID_UTF in 8-bit mode when PCRE2_CASELESS 
-was set and PCRE2_NO_START_OPTIMIZE was not set. The optimization for finding 
-the start of a match was not resetting correctly after a failed match on the 
-first valid fragment of the subject, possibly causing incorrect "no match" 
-returns on subsequent fragments. For example, the pattern /A/ failed to match 
-the subject \xe5A. Fixes Bugzilla #2642. 
+13. Fixed a bug with PCRE2_MATCH_INVALID_UTF in 8-bit mode when PCRE2_CASELESS
+was set and PCRE2_NO_START_OPTIMIZE was not set. The optimization for finding
+the start of a match was not resetting correctly after a failed match on the
+first valid fragment of the subject, possibly causing incorrect "no match"
+returns on subsequent fragments. For example, the pattern /A/ failed to match
+the subject \xe5A. Fixes Bugzilla #2642.
 
 14. Fixed a bug in character set matching when JIT is enabled and both unicode
 scripts and unicode classes are present at the same time.
 
 15. Added GNU grep's -m (aka --max-count) option to pcre2grep.
 
-16. Refactored substitution processing in pcre2grep strings, both for the -O 
-option and when dealing with callouts. There is now a single function that 
-handles $ expansion in all cases (instead of multiple copies of almost 
-identical code). This means that the same escape sequences are available 
-everywhere, which was not previously the case. At the same time, the escape 
-sequences $x{...} and $o{...} have been introduced, to allow for characters 
+16. Refactored substitution processing in pcre2grep strings, both for the -O
+option and when dealing with callouts. There is now a single function that
+handles $ expansion in all cases (instead of multiple copies of almost
+identical code). This means that the same escape sequences are available
+everywhere, which was not previously the case. At the same time, the escape
+sequences $x{...} and $o{...} have been introduced, to allow for characters
 whose code points are greater than 255 in Unicode mode.
 
-17. Applied the patch from Bugzilla #2628 to RunGrepTest. This does an explicit 
-test for a version of sed that can handle binary zero, instead of assuming that 
+17. Applied the patch from Bugzilla #2628 to RunGrepTest. This does an explicit
+test for a version of sed that can handle binary zero, instead of assuming that
 any Linux version will work.
 
 18. Fixed a word boundary check bug in JIT when partial matching is enabled.

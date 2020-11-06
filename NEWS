@@ -2,6 +2,16 @@ News about PCRE2 releases
 -------------------------
 
 
+Version 10.36 05-November-2020
+------------------------------
+
+Again, mainly bug fixes and tidies. The only enhancements are the addition of
+GNU grep's -m (aka --max-count) option to pcre2grep, and also unifying the
+handling of substitution strings for both -O and callouts in pcre2grep, with
+the addition of $x{...} and $o{...} to allow for characters whose code points
+are greater than 255 in Unicode mode.
+
+
 Version 10.35 15-April-2020
 ---------------------------
 

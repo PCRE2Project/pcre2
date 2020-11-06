@@ -598,11 +598,11 @@ is valid" flag (that can be updated atomically) must be used:
   if (!pointer_is_valid)
     {
     Get a write (unique) lock for pointer
-    if (!pointer_is_valid) 
+    if (!pointer_is_valid)
       {
       pointer = pcre2_compile(...
       pointer_is_valid = TRUE
-      }  
+      }
     }
   Release the lock
   Use pointer in pcre2_match()
