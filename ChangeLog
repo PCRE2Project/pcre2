@@ -92,6 +92,8 @@ any Linux version will work.
 
 18. Fixed a word boundary check bug in JIT when partial matching is enabled.
 
+19. Fix ARM64 compilation warning in JIT. Patch by Carlo.
+
 
 Version 10.35 09-May-2020
 ---------------------------
