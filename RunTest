@@ -493,15 +493,20 @@ for bmode in "$test8" "$test16" "$test32"; do
     done
   fi
 
-  # PCRE2 tests that are not Perl-compatible: API, errors, internals
+  # PCRE2 tests that are not Perl-compatible: API, errors, internals. We copy
+  # the testbtables file to the current directory for use by this test.  
 
   if [ $do2 = yes ] ; then
     echo $title2 "(excluding UTF-$bits)"
+    cp $testdata/testbtables . 
     for opt in "" $jitopt; do
       $sim $valgrind ${opt:+$vjs} ./pcre2test -q $setstack $bmode $opt $testdata/testinput2 testtry
-      if [ $? = 0 ] ; then
+      saverc=$?
+      if [ $saverc = 0 ] ; then
         $sim $valgrind ${opt:+$vjs} ./pcre2test -q $bmode $opt -error -70,-62,-2,-1,0,100,101,191,200 >>testtry
         checkresult $? 2 "$opt"
+      else
+        checkresult $saverc 2 "$opt"
       fi
     done
   fi
@@ -859,6 +864,6 @@ for bmode in "$test8" "$test16" "$test32"; do
 done
 
 # Clean up local working files
-rm -f testSinput test3input testsaved1 testsaved2 test3output test3outputA test3outputB teststdout teststderr testtry
+rm -f testbtables testSinput test3input testsaved1 testsaved2 test3output test3outputA test3outputB teststdout teststderr testtry
 
 # End

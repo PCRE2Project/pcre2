@@ -5850,7 +5850,7 @@ a)"xI
 /^\w+/tables=3
     École
 
-#loadtables ./testdata/testbtables
+#loadtables ./testbtables
 
 /^\w+/tables=3
     École

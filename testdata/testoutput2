@@ -17597,7 +17597,7 @@ No match
 ** 'Tables = 3' is invalid: binary tables have not been loaded
     École
 
-#loadtables ./testdata/testbtables
+#loadtables ./testbtables
 
 /^\w+/tables=3
     École

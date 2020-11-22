@@ -26,6 +26,7 @@
 @rem Updated for new test 14 (moving others up a number), August 2015.
 @rem Tidied and updated for new tests 21, 22, 23 by PH, October 2015.
 @rem PH added missing "set type" for test 22, April 2016.
+@rem PH added copy command for new testbtables file, November 2020
 
 
 setlocal enabledelayedexpansion
@@ -305,6 +306,7 @@ if %jit% EQU 1 call :runsub 1 testoutjit "Test with JIT Override" -q -jit
 goto :eof
 
 :do2
+  copy /y %srcdir%\testdata\testbtables testbtables 
   call :runsub 2 testout "API, errors, internals, and non-Perl stuff" -q
   if %jit% EQU 1 call :runsub 2 testoutjit "Test with JIT Override" -q -jit
 goto :eof

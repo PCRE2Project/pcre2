@@ -94,6 +94,13 @@ any Linux version will work.
 
 19. Fix ARM64 compilation warning in JIT. Patch by Carlo.
 
+20. A bug in the RunTest script meant that if the first part of test 2 failed, 
+the failure was not reported.
+
+21. Test 2 was failing when run from a directory other than the source 
+directory. This failure was previously missed in RunTest because of 20 above.
+Fixes added to both RunTest and RunTest.bat.
+
 
 Version 10.35 09-May-2020
 ---------------------------
