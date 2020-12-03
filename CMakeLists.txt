@@ -93,6 +93,7 @@
 # 2020-04-25 Carlo added function check for mkostemp used in ProtExecAllocator
 # 2020-04-28 PH added function check for memfd_create based on Carlo's patch
 # 2020-05-25 PH added a check for Intel CET
+# 2020-12-03 PH altered the definition of pcre2test as suggested by Daniel
 
 PROJECT(PCRE2 C)
 
@@ -851,7 +852,9 @@ if test \"$?\" != \"0\"; then exit 1; fi
 \@echo off
 setlocal
 SET srcdir=\"${winsrc}\"
-SET pcre2test=\"${winexe}\"
+# The next line was replaced by the following one after a user comment.
+# SET pcre2test=\"${winexe}\"
+SET pcre2test=\"${winbin}\\pcre2test.exe\"
 if not [%CMAKE_CONFIG_TYPE%]==[] SET pcre2test=\"${winbin}\\%CMAKE_CONFIG_TYPE%\\pcre2test.exe\"
 call %srcdir%\\RunTest.Bat
 if errorlevel 1 exit /b 1
