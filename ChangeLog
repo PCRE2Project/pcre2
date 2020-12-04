@@ -1,7 +1,7 @@
 Change Log for PCRE2
 --------------------
 
-Version 10.36-RC1 05-November-2020
+Version 10.36-RC1 04-December-2020
 ----------------------------------
 
 1. Add CET_CFLAGS so that when Intel CET is enabled, pass -mshstk to
@@ -88,18 +88,22 @@ whose code points are greater than 255 in Unicode mode.
 
 17. Applied the patch from Bugzilla #2628 to RunGrepTest. This does an explicit
 test for a version of sed that can handle binary zero, instead of assuming that
-any Linux version will work.
+any Linux version will work. Later: replaced $(...) by `...` because not all
+shells recognize the former.
 
 18. Fixed a word boundary check bug in JIT when partial matching is enabled.
 
 19. Fix ARM64 compilation warning in JIT. Patch by Carlo.
 
-20. A bug in the RunTest script meant that if the first part of test 2 failed, 
+20. A bug in the RunTest script meant that if the first part of test 2 failed,
 the failure was not reported.
 
-21. Test 2 was failing when run from a directory other than the source 
+21. Test 2 was failing when run from a directory other than the source
 directory. This failure was previously missed in RunTest because of 20 above.
 Fixes added to both RunTest and RunTest.bat.
+
+22. Patch to CMakeLists.txt from Daniel to fix problem with testing under
+Windows.
 
 
 Version 10.35 09-May-2020

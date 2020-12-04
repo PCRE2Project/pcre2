@@ -494,11 +494,11 @@ for bmode in "$test8" "$test16" "$test32"; do
   fi
 
   # PCRE2 tests that are not Perl-compatible: API, errors, internals. We copy
-  # the testbtables file to the current directory for use by this test.  
+  # the testbtables file to the current directory for use by this test.
 
   if [ $do2 = yes ] ; then
     echo $title2 "(excluding UTF-$bits)"
-    cp $testdata/testbtables . 
+    cp $testdata/testbtables .
     for opt in "" $jitopt; do
       $sim $valgrind ${opt:+$vjs} ./pcre2test -q $setstack $bmode $opt $testdata/testinput2 testtry
       saverc=$?
