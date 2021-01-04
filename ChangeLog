@@ -1,8 +1,17 @@
 Change Log for PCRE2
 --------------------
 
-Version 10.36-RC1 04-December-2020
-----------------------------------
+Version 10.37-RC1 04-January-2021
+---------------------------------
+
+1. Change RunGrepTest to use tr instead of sed when testing with binary 
+zero bytes, because sed varies a lot from system to system and has problems 
+with binary zeros. This is from Bugzilla #2681. Patch from Jeremie 
+Courreges-Anglas via Nam Nguyen. This fixes RunGrepTest for OpenBSD.
+
+
+Version 10.36 04-December-2020
+------------------------------
 
 1. Add CET_CFLAGS so that when Intel CET is enabled, pass -mshstk to
 compiler. This fixes https://bugs.exim.org/show_bug.cgi?id=2578. Patch for
