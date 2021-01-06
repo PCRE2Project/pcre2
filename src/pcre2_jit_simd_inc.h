@@ -39,7 +39,15 @@ POSSIBILITY OF SUCH DAMAGE.
 -----------------------------------------------------------------------------
 */
 
-#if (defined SLJIT_CONFIG_X86 && SLJIT_CONFIG_X86) && !(defined SUPPORT_VALGRIND)
+#if !(defined SUPPORT_VALGRIND) && \
+   ((defined SLJIT_CONFIG_X86 && SLJIT_CONFIG_X86) \
+    || (defined SLJIT_CONFIG_S390X && SLJIT_CONFIG_S390X))
+
+typedef enum {
+  vector_compare_match1,
+  vector_compare_match1i,
+  vector_compare_match2,
+} vector_compare_type;
 
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
 static struct sljit_jump *jump_if_utf_char_start(struct sljit_compiler *compiler, sljit_s32 reg)
@@ -55,6 +63,10 @@ return CMP(SLJIT_NOT_EQUAL, reg, 0, SLJIT_IMM, 0xdc00);
 #endif
 }
 #endif
+
+#endif /* SUPPORT_VALGRIND && (SLJIT_CONFIG_X86 || SLJIT_CONFIG_S390X) */
+
+#if (defined SLJIT_CONFIG_X86 && SLJIT_CONFIG_X86) && !(defined SUPPORT_VALGRIND)
 
 static sljit_s32 character_to_int32(PCRE2_UCHAR chr)
 {
@@ -97,13 +109,7 @@ instruction[4] = (sljit_u8)offset;
 sljit_emit_op_custom(compiler, instruction, 5);
 }
 
-typedef enum {
-    sse2_compare_match1,
-    sse2_compare_match1i,
-    sse2_compare_match2,
-} sse2_compare_type;
-
-static void fast_forward_char_pair_sse2_compare(struct sljit_compiler *compiler, sse2_compare_type compare_type,
+static void fast_forward_char_pair_sse2_compare(struct sljit_compiler *compiler, vector_compare_type compare_type,
   int step, sljit_s32 dst_ind, sljit_s32 cmp1_ind, sljit_s32 cmp2_ind, sljit_s32 tmp_ind)
 {
 sljit_u8 instruction[4];
@@ -112,11 +118,11 @@ instruction[1] = 0x0f;
 
 SLJIT_ASSERT(step >= 0 && step <= 3);
 
-if (compare_type != sse2_compare_match2)
+if (compare_type != vector_compare_match2)
   {
   if (step == 0)
     {
-    if (compare_type == sse2_compare_match1i)
+    if (compare_type == vector_compare_match1i)
       {
       /* POR xmm1, xmm2/m128 */
       /* instruction[0] = 0x66; */
@@ -191,7 +197,7 @@ struct sljit_label *restart;
 #endif
 struct sljit_jump *quit;
 struct sljit_jump *partial_quit[2];
-sse2_compare_type compare_type = sse2_compare_match1;
+vector_compare_type compare_type = vector_compare_match1;
 sljit_u8 instruction[8];
 sljit_s32 tmp1_reg_ind = sljit_get_register_index(TMP1);
 sljit_s32 str_ptr_reg_ind = sljit_get_register_index(STR_PTR);
@@ -207,12 +213,12 @@ SLJIT_UNUSED_ARG(offset);
 if (char1 != char2)
   {
   bit = char1 ^ char2;
-  compare_type = sse2_compare_match1i;
+  compare_type = vector_compare_match1i;
 
   if (!is_powerof2(bit))
     {
     bit = 0;
-    compare_type = sse2_compare_match2;
+    compare_type = vector_compare_match2;
     }
   }
 
@@ -352,7 +358,7 @@ DEFINE_COMPILER;
 struct sljit_label *start;
 struct sljit_jump *quit;
 jump_list *not_found = NULL;
-sse2_compare_type compare_type = sse2_compare_match1;
+vector_compare_type compare_type = vector_compare_match1;
 sljit_u8 instruction[8];
 sljit_s32 tmp1_reg_ind = sljit_get_register_index(TMP1);
 sljit_s32 str_ptr_reg_ind = sljit_get_register_index(STR_PTR);
@@ -366,12 +372,12 @@ int i;
 if (char1 != char2)
   {
   bit = char1 ^ char2;
-  compare_type = sse2_compare_match1i;
+  compare_type = vector_compare_match1i;
 
   if (!is_powerof2(bit))
     {
     bit = 0;
-    compare_type = sse2_compare_match2;
+    compare_type = vector_compare_match2;
     }
   }
 
@@ -495,8 +501,8 @@ static void fast_forward_char_pair_simd(compiler_common *common, sljit_s32 offs1
   PCRE2_UCHAR char1a, PCRE2_UCHAR char1b, sljit_s32 offs2, PCRE2_UCHAR char2a, PCRE2_UCHAR char2b)
 {
 DEFINE_COMPILER;
-sse2_compare_type compare1_type = sse2_compare_match1;
-sse2_compare_type compare2_type = sse2_compare_match1;
+vector_compare_type compare1_type = vector_compare_match1;
+vector_compare_type compare2_type = vector_compare_match1;
 sljit_u32 bit1 = 0;
 sljit_u32 bit2 = 0;
 sljit_u32 diff = IN_UCHARS(offs1 - offs2);
@@ -549,13 +555,13 @@ else
   bit1 = char1a ^ char1b;
   if (is_powerof2(bit1))
     {
-    compare1_type = sse2_compare_match1i;
+    compare1_type = vector_compare_match1i;
     OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, character_to_int32(char1a | bit1));
     OP1(SLJIT_MOV, TMP2, 0, SLJIT_IMM, character_to_int32(bit1));
     }
   else
     {
-    compare1_type = sse2_compare_match2;
+    compare1_type = vector_compare_match2;
     bit1 = 0;
     OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, character_to_int32(char1a));
     OP1(SLJIT_MOV, TMP2, 0, SLJIT_IMM, character_to_int32(char1b));
@@ -578,13 +584,13 @@ else
   bit2 = char2a ^ char2b;
   if (is_powerof2(bit2))
     {
-    compare2_type = sse2_compare_match1i;
+    compare2_type = vector_compare_match1i;
     OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, character_to_int32(char2a | bit2));
     OP1(SLJIT_MOV, TMP2, 0, SLJIT_IMM, character_to_int32(bit2));
     }
   else
     {
-    compare2_type = sse2_compare_match2;
+    compare2_type = vector_compare_match2;
     bit2 = 0;
     OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, character_to_int32(char2a));
     OP1(SLJIT_MOV, TMP2, 0, SLJIT_IMM, character_to_int32(char2b));
@@ -1121,3 +1127,323 @@ JUMPHERE(partial_quit);
 }
 
 #endif /* SLJIT_CONFIG_ARM_64 && SLJIT_CONFIG_ARM_64 */
+
+#if (defined SLJIT_CONFIG_S390X && SLJIT_CONFIG_S390X) && !(defined SUPPORT_VALGRIND)
+
+#define JIT_HAS_FAST_FORWARD_CHAR_SIMD 1
+
+#if PCRE2_CODE_UNIT_WIDTH == 8
+#define VECTOR_ELEMENT_SIZE 0
+#elif PCRE2_CODE_UNIT_WIDTH == 16
+#define VECTOR_ELEMENT_SIZE 1
+#elif PCRE2_CODE_UNIT_WIDTH == 32
+#define VECTOR_ELEMENT_SIZE 2
+#else
+#error "Unsupported unit width"
+#endif
+
+static void load_from_mem_vector(struct sljit_compiler *compiler, BOOL vlbb, sljit_s32 dst_vreg, sljit_s32 src_general_reg)
+{
+sljit_u16 instruction[3];
+
+instruction[0] = (sljit_u16)(0xe700 | (dst_vreg << 4));
+instruction[1] = (sljit_u16)(src_general_reg << 12);
+instruction[2] = (sljit_u16)(vlbb ? ((6 << 12) | (0x8 << 8) | 0x07) : ((0x8 << 8) | 0x06));
+
+sljit_emit_op_custom(compiler, instruction, 6);
+}
+
+#if PCRE2_CODE_UNIT_WIDTH == 32
+
+static void replicate_imm_vector(struct sljit_compiler *compiler, int step, sljit_s32 dst_vreg,
+  PCRE2_UCHAR chr, sljit_s32 tmp_general_reg)
+{
+sljit_u16 instruction[3];
+
+SLJIT_ASSERT(step >= 0 && step <= 1);
+
+if (chr < 0x7fff)
+  {
+  if (step == 1)
+    return;
+
+  /* VREPI */
+  instruction[0] = (sljit_u16)(0xe700 | (dst_vreg << 4));
+  instruction[1] = (sljit_u16)chr;
+  instruction[2] = (sljit_u16)((VECTOR_ELEMENT_SIZE << 12) | (0x8 << 8) | 0x45);
+  sljit_emit_op_custom(compiler, instruction, 6);
+  return;
+  }
+
+if (step == 0)
+  {
+  OP1(SLJIT_MOV, tmp_general_reg, 0, SLJIT_IMM, chr);
+
+  /* VLVG */
+  instruction[0] = (sljit_u16)(0xe700 | (dst_vreg << 4) | sljit_get_register_index(tmp_general_reg));
+  instruction[1] = 0;
+  instruction[2] = (sljit_u16)((VECTOR_ELEMENT_SIZE << 12) | (0x8 << 8) | 0x22);
+  sljit_emit_op_custom(compiler, instruction, 6);
+  return;
+  }
+
+/* VREP */
+instruction[0] = (sljit_u16)(0xe700 | (dst_vreg << 4) | dst_vreg);
+instruction[1] = 0;
+instruction[2] = (sljit_u16)((VECTOR_ELEMENT_SIZE << 12) | (0xc << 8) | 0x4d);
+sljit_emit_op_custom(compiler, instruction, 6);
+}
+
+#endif
+
+static void fast_forward_char_pair_sse2_compare(struct sljit_compiler *compiler, vector_compare_type compare_type,
+  int step, sljit_s32 dst_ind, sljit_s32 cmp1_ind, sljit_s32 cmp2_ind, sljit_s32 tmp_ind)
+{
+sljit_u16 instruction[3];
+
+SLJIT_ASSERT(step >= 0 && step <= 2);
+
+if (step == 1)
+  {
+  /* VCEQ */
+  instruction[0] = (sljit_u16)(0xe700 | (dst_ind << 4) | dst_ind);
+  instruction[1] = (sljit_u16)(cmp1_ind << 12);
+  instruction[2] = (sljit_u16)((VECTOR_ELEMENT_SIZE << 12) | (0xe << 8) | 0xf8);
+  sljit_emit_op_custom(compiler, instruction, 6);
+  return;
+  }
+
+if (compare_type != vector_compare_match2)
+  {
+  if (step == 0 && compare_type == vector_compare_match1i)
+    {
+    /* VO */
+    instruction[0] = (sljit_u16)(0xe700 | (dst_ind << 4) | dst_ind);
+    instruction[1] = (sljit_u16)(cmp2_ind << 12);
+    instruction[2] = (sljit_u16)((0xe << 8) | 0x6a);
+    sljit_emit_op_custom(compiler, instruction, 6);
+    }
+  return;
+  }
+
+switch (step)
+  {
+  case 0:
+  /* VCEQ */
+  instruction[0] = (sljit_u16)(0xe700 | (tmp_ind << 4) | dst_ind);
+  instruction[1] = (sljit_u16)(cmp2_ind << 12);
+  instruction[2] = (sljit_u16)((VECTOR_ELEMENT_SIZE << 12) | (0xe << 8) | 0xf8);
+  sljit_emit_op_custom(compiler, instruction, 6);
+  return;
+
+  case 2:
+  /* VO */
+  instruction[0] = (sljit_u16)(0xe700 | (dst_ind << 4) | dst_ind);
+  instruction[1] = (sljit_u16)(tmp_ind << 12);
+  instruction[2] = (sljit_u16)((0xe << 8) | 0x6a);
+  sljit_emit_op_custom(compiler, instruction, 6);
+  return;
+  }
+}
+
+static void fast_forward_char_simd(compiler_common *common, PCRE2_UCHAR char1, PCRE2_UCHAR char2, sljit_s32 offset)
+{
+DEFINE_COMPILER;
+struct sljit_label *start;
+#if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
+struct sljit_label *restart;
+#endif
+struct sljit_jump *quit;
+struct sljit_jump *partial_quit[2];
+vector_compare_type compare_type = vector_compare_match1;
+sljit_u16 instruction[3];
+sljit_s32 tmp1_reg_ind = sljit_get_register_index(TMP1);
+sljit_s32 str_ptr_reg_ind = sljit_get_register_index(STR_PTR);
+sljit_s32 data_ind = 0;
+sljit_s32 tmp_ind = 1;
+sljit_s32 cmp1_ind = 2;
+sljit_s32 cmp2_ind = 3;
+sljit_s32 zero_ind = 4;
+sljit_u32 bit = 0;
+int i;
+
+SLJIT_UNUSED_ARG(offset);
+
+if (char1 != char2)
+  {
+  bit = char1 ^ char2;
+  compare_type = vector_compare_match1i;
+
+  if (!is_powerof2(bit))
+    {
+    bit = 0;
+    compare_type = vector_compare_match2;
+    }
+  }
+
+partial_quit[0] = CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0);
+if (common->mode == PCRE2_JIT_COMPLETE)
+  add_jump(compiler, &common->failed_match, partial_quit[0]);
+
+/* First part (unaligned start) */
+
+OP2(SLJIT_ADD, TMP2, 0, STR_PTR, 0, SLJIT_IMM, 16);
+
+#if PCRE2_CODE_UNIT_WIDTH != 32
+
+/* VREPI */
+instruction[0] = (sljit_u16)(0xe700 | (cmp1_ind << 4));
+instruction[1] = (sljit_u16)(char1 | bit);
+instruction[2] = (sljit_u16)((VECTOR_ELEMENT_SIZE << 12) | (0x8 << 8) | 0x45);
+sljit_emit_op_custom(compiler, instruction, 6);
+
+if (char1 != char2)
+  {
+  /* VREPI */
+  instruction[0] = (sljit_u16)(0xe700 | (cmp2_ind << 4));
+  instruction[1] = (sljit_u16)(bit != 0 ? bit : char2);
+  sljit_emit_op_custom(compiler, instruction, 6);
+  }
+
+#else /* PCRE2_CODE_UNIT_WIDTH == 32 */
+
+replicate_imm_vector(compiler, 0, cmp1_ind, char1 | bit, TMP1);
+
+if (char1 != char2)
+  replicate_imm_vector(compiler, 0, cmp2_ind, bit != 0 ? bit : char2, TMP1);
+
+replicate_imm_vector(compiler, 1, cmp1_ind, char1 | bit, TMP1);
+
+if (char1 != char2)
+  replicate_imm_vector(compiler, 1, cmp2_ind, bit != 0 ? bit : char2, TMP1);
+
+#endif /* PCRE2_CODE_UNIT_WIDTH != 32 */
+
+/* VX */
+instruction[0] = (sljit_u16)(0xe700 | (zero_ind << 4) | zero_ind);
+instruction[1] = (sljit_u16)(zero_ind << 12);
+instruction[2] = (sljit_u16)((0xe << 8) | 0x6d);
+sljit_emit_op_custom(compiler, instruction, 6);
+
+#if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
+restart = LABEL();
+#endif
+
+load_from_mem_vector(compiler, TRUE, data_ind, str_ptr_reg_ind);
+OP2(SLJIT_AND, TMP2, 0, TMP2, 0, SLJIT_IMM, ~15);
+
+if (compare_type != vector_compare_match2)
+  {
+  if (compare_type == vector_compare_match1i)
+    fast_forward_char_pair_sse2_compare(compiler, compare_type, 0, data_ind, cmp1_ind, cmp2_ind, tmp_ind);
+
+  /* VFEE */
+  instruction[0] = (sljit_u16)(0xe700 | (data_ind << 4) | data_ind);
+  instruction[1] = (sljit_u16)((cmp1_ind << 12) | (1 << 4));
+  instruction[2] = (sljit_u16)((VECTOR_ELEMENT_SIZE << 12) | (0xe << 8) | 0x80);
+  sljit_emit_op_custom(compiler, instruction, 6);
+  }
+else
+  {
+  for (i = 0; i < 3; i++)
+    fast_forward_char_pair_sse2_compare(compiler, compare_type, i, data_ind, cmp1_ind, cmp2_ind, tmp_ind);
+
+  /* VFENE */
+  instruction[0] = (sljit_u16)(0xe700 | (data_ind << 4) | data_ind);
+  instruction[1] = (sljit_u16)((zero_ind << 12) | (1 << 4));
+  instruction[2] = (sljit_u16)((0xe << 8) | 0x81);
+  sljit_emit_op_custom(compiler, instruction, 6);
+  }
+
+/* TODO: use sljit_set_current_flags */
+
+/* VLGVB */
+instruction[0] = (sljit_u16)(0xe700 | (tmp1_reg_ind << 4) | data_ind);
+instruction[1] = 7;
+instruction[2] = (sljit_u16)((0x4 << 8) | 0x21);
+sljit_emit_op_custom(compiler, instruction, 6);
+
+OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, TMP1, 0);
+quit = CMP(SLJIT_LESS, STR_PTR, 0, TMP2, 0);
+
+OP2(SLJIT_SUB, STR_PTR, 0, TMP2, 0, SLJIT_IMM, 16);
+
+/* Second part (aligned) */
+start = LABEL();
+
+OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, 16);
+
+partial_quit[1] = CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0);
+if (common->mode == PCRE2_JIT_COMPLETE)
+  add_jump(compiler, &common->failed_match, partial_quit[1]);
+
+load_from_mem_vector(compiler, TRUE, data_ind, str_ptr_reg_ind);
+
+if (compare_type != vector_compare_match2)
+  {
+  if (compare_type == vector_compare_match1i)
+    fast_forward_char_pair_sse2_compare(compiler, compare_type, 0, data_ind, cmp1_ind, cmp2_ind, tmp_ind);
+
+  /* VFEE */
+  instruction[0] = (sljit_u16)(0xe700 | (data_ind << 4) | data_ind);
+  instruction[1] = (sljit_u16)((cmp1_ind << 12) | (1 << 4));
+  instruction[2] = (sljit_u16)((VECTOR_ELEMENT_SIZE << 12) | (0xe << 8) | 0x80);
+  sljit_emit_op_custom(compiler, instruction, 6);
+  }
+else
+  {
+  for (i = 0; i < 3; i++)
+    fast_forward_char_pair_sse2_compare(compiler, compare_type, i, data_ind, cmp1_ind, cmp2_ind, tmp_ind);
+
+  /* VFENE */
+  instruction[0] = (sljit_u16)(0xe700 | (data_ind << 4) | data_ind);
+  instruction[1] = (sljit_u16)((zero_ind << 12) | (1 << 4));
+  instruction[2] = (sljit_u16)((0xe << 8) | 0x81);
+  sljit_emit_op_custom(compiler, instruction, 6);
+  }
+
+/* TODO: use sljit_set_current_flags */
+
+/* VLGVB */
+instruction[0] = (sljit_u16)(0xe700 | (tmp1_reg_ind << 4) | data_ind);
+instruction[1] = 7;
+instruction[2] = (sljit_u16)((0x4 << 8) | 0x21);
+sljit_emit_op_custom(compiler, instruction, 6);
+
+CMPTO(SLJIT_GREATER_EQUAL, TMP1, 0, SLJIT_IMM, 16, start);
+
+OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, TMP1, 0);
+
+JUMPHERE(quit);
+
+if (common->mode != PCRE2_JIT_COMPLETE)
+  {
+  JUMPHERE(partial_quit[0]);
+  JUMPHERE(partial_quit[1]);
+  OP2(SLJIT_SUB | SLJIT_SET_GREATER, SLJIT_UNUSED, 0, STR_PTR, 0, STR_END, 0);
+  CMOV(SLJIT_GREATER, STR_PTR, STR_END, 0);
+  }
+else
+  add_jump(compiler, &common->failed_match, CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0));
+
+#if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
+if (common->utf && offset > 0)
+  {
+  SLJIT_ASSERT(common->mode == PCRE2_JIT_COMPLETE);
+
+  OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(-offset));
+
+  quit = jump_if_utf_char_start(compiler, TMP1);
+
+  OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
+  add_jump(compiler, &common->failed_match, CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0));
+
+  OP2(SLJIT_ADD, TMP2, 0, STR_PTR, 0, SLJIT_IMM, 16);
+  JUMPTO(SLJIT_JUMP, restart);
+
+  JUMPHERE(quit);
+  }
+#endif
+}
+
+#endif /* SLJIT_CONFIG_S390X && !SUPPORT_VALGRIND */
