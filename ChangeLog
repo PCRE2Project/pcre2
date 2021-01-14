@@ -9,6 +9,10 @@ zero bytes, because sed varies a lot from system to system and has problems
 with binary zeros. This is from Bugzilla #2681. Patch from Jeremie 
 Courreges-Anglas via Nam Nguyen. This fixes RunGrepTest for OpenBSD.
 
+2. Compiling with gcc 10.2's -fanalyzer option showed up a hypothetical problem 
+with a NULL dereference. I don't think this case could ever occur in practice, 
+but I have put in a check in order to get rid of the compiler error.
+
 
 Version 10.36 04-December-2020
 ------------------------------
