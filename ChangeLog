@@ -16,6 +16,15 @@ but I have put in a check in order to get rid of the compiler error.
 3. An alternative patch for CMakeLists.txt because 10.36 # 4 breaks CMake on
 Windows. Patch from email@cs-ware.de fixes bugzilla #2688.
 
+4. Two bugs related to over-large numbers have been fixed so the behaviour is 
+now the same as Perl.
+  
+  (a) A pattern such as /\214748364/ gave an overflow error instead of being 
+  treated as the octal number \214 followed by literal digits.
+  
+  (b) A sequence such as {65536 that has no terminating } so is not a 
+  quantifier was nevertheless complaining that a quantifier number was too big.
+
 
 Version 10.36 04-December-2020
 ------------------------------

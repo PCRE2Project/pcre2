@@ -6420,4 +6420,13 @@ ef) x/x,mark
 /(?(DEFINE)(?<foo>bar))(?<![-a-z0-9])word/
     word
 
+/a{1,2,3}b/
+    a{1,2,3}b
+
+/\214748364/
+    >\x{8c}748364<
+    
+/a{65536/
+    >a{65536<
+
 # End of testinput1 

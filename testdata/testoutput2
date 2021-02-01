@@ -8374,9 +8374,6 @@ No match
 /a(*MARK)b/
 Failed: error 166 at offset 7: (*MARK) must have an argument
 
-/(?i:A{1,}\6666666666)/
-Failed: error 161 at offset 19: subpattern number is too big
-
 /\g6666666666/
 Failed: error 161 at offset 7: subpattern number is too big
 

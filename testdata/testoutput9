@@ -367,4 +367,8 @@ Failed: error 134 at offset 14: character code point value in \x{} or \o{} is to
 /(*:*++++++++++++''''''''''''''''''''+''+++'+++x+++++++++++++++++++++++++++++++++++(++++++++++++++++++++:++++++%++:''''''''''''''''''''''''+++++++++++++++++++++++++++++++++++++++++++++++++++++-++++++++k+++++++''''+++'+++++++++++++++++++++++''''++++++++++++':ƿ)/
 Failed: error 176 at offset 259: name is too long in (*MARK), (*PRUNE), (*SKIP), or (*THEN)
 
+/(?i:A{1,}\6666666666)/
+Failed: error 151 at offset 13: octal value is greater than \377 in 8-bit non-UTF-8 mode
+    A\x{1b6}6666666
+
 # End of testinput9
