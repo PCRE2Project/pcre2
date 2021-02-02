@@ -25,6 +25,12 @@ now the same as Perl.
   (b) A sequence such as {65536 that has no terminating } so is not a 
   quantifier was nevertheless complaining that a quantifier number was too big.
 
+5. A run of autoconf suggested that configure.ac was out-of-date with respect
+to the lastest autoconf. Running autoupdate made some valid changes, some valid
+suggestions, and also some invalid changes, which were fixed by hand. Autoconf 
+now runs clean and the resulting "configure" seems to work, so I hope nothing 
+is broken.
+
 
 Version 10.36 04-December-2020
 ------------------------------

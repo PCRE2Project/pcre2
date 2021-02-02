@@ -22,8 +22,8 @@ m4_define(libpcre2_posix_version, [2:3:0])
 # NOTE: The CMakeLists.txt file searches for the above variables in the first
 # 50 lines of this file. Please update that if the variables above are moved.
 
-AC_PREREQ(2.57)
-AC_INIT(PCRE2, pcre2_major.pcre2_minor[]pcre2_prerelease, , pcre2)
+AC_PREREQ([2.70])
+AC_INIT([PCRE2],pcre2_major.pcre2_minor[]pcre2_prerelease,[],[pcre2])
 AC_CONFIG_SRCDIR([src/pcre2.h.in])
 AM_INIT_AUTOMAKE([dist-bzip2 dist-zip])
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
@@ -64,8 +64,7 @@ m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 AC_TYPE_INT64_T
 
 AC_PROG_INSTALL
-AC_LIBTOOL_WIN32_DLL
-LT_INIT
+LT_INIT([win32-dll])
 AC_PROG_LN_S
 
 # Check for GCC visibility feature
@@ -424,7 +423,7 @@ case "$enable_newline" in
   anycrlf) ac_pcre2_newline_value=5 ;;
   nul)     ac_pcre2_newline_value=6 ;;
   *)
-  AC_MSG_ERROR([invalid argument \"$enable_newline\" to --enable-newline option])
+  AC_MSG_ERROR([invalid argument "$enable_newline" to --enable-newline option])
   ;;
 esac
 
@@ -453,7 +452,7 @@ fi
 case "$with_link_size" in
   2|3|4) ;;
   *)
-  AC_MSG_ERROR([invalid argument \"$with_link_size\" to --with-link-size option])
+  AC_MSG_ERROR([invalid argument "$with_link_size" to --with-link-size option])
   ;;
 esac
 
@@ -486,7 +485,6 @@ HAVE_BCOPY is defined. If your system has neither bcopy() nor memmove(), make
 sure both macros are undefined; an emulation function will then be used. */])
 
 # Checks for header files.
-AC_HEADER_STDC
 AC_CHECK_HEADERS(limits.h sys/types.h sys/stat.h dirent.h)
 AC_CHECK_HEADERS([windows.h], [HAVE_WINDOWS_H=1])
 AC_CHECK_HEADERS([sys/wait.h], [HAVE_SYS_WAIT_H=1])
