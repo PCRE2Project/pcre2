@@ -29,7 +29,8 @@ now the same as Perl.
 to the lastest autoconf. Running autoupdate made some valid changes, some valid
 suggestions, and also some invalid changes, which were fixed by hand. Autoconf 
 now runs clean and the resulting "configure" seems to work, so I hope nothing 
-is broken.
+is broken. Later: the requirement for autoconf 2.70 broke some automatic test 
+robots. It doesn't seem to be necessary: trying a reduction to 2.60.
 
 
 Version 10.36 04-December-2020
