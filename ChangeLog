@@ -7,7 +7,10 @@ Version 10.37-RC1 04-January-2021
 1. Change RunGrepTest to use tr instead of sed when testing with binary 
 zero bytes, because sed varies a lot from system to system and has problems 
 with binary zeros. This is from Bugzilla #2681. Patch from Jeremie 
-Courreges-Anglas via Nam Nguyen. This fixes RunGrepTest for OpenBSD.
+Courreges-Anglas via Nam Nguyen. This fixes RunGrepTest for OpenBSD. Later: 
+it broke it for at least one version of Solaris, where tr can't handle binary 
+zeros. However, that system had /usr/xpg4/bin/tr installed, which works OK, so 
+RunGrepTest now checks for that command and use it if found.
 
 2. Compiling with gcc 10.2's -fanalyzer option showed up a hypothetical problem 
 with a NULL dereference. I don't think this case could ever occur in practice, 
