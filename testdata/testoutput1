@@ -10188,4 +10188,8 @@ No match
     >a{65536<
  0: a{65536
 
+/a\K.(?0)*/
+    abac
+ 0: c
+
 # End of testinput1 

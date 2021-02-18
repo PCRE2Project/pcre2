@@ -35,6 +35,10 @@ now runs clean and the resulting "configure" seems to work, so I hope nothing
 is broken. Later: the requirement for autoconf 2.70 broke some automatic test 
 robots. It doesn't seem to be necessary: trying a reduction to 2.60.
 
+6. The pattern /a\K.(?0)*/ when matched against "abac" by the interpreter gave
+the answer "bac", whereas Perl and JIT both yield "c". This was because the 
+effect of \K was not propagating back from the recursion. This is now fixed.
+
 
 Version 10.36 04-December-2020
 ------------------------------
