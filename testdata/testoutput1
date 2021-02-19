@@ -10192,4 +10192,9 @@ No match
     abac
  0: c
 
+/(a\K.(?1)*)/
+    abac
+ 0: c
+ 1: abac
+
 # End of testinput1 

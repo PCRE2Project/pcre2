@@ -1,14 +1,8 @@
 Change Log for PCRE2
 --------------------
 
-Version 10.38
--------------
 
-1. Restore single character repetition optimization in JIT.
-Currently fewer character repetitions are optimized than in 10.34.
-
-
-Version 10.37-RC1 04-January-2021
+Version 10.37-RC1 xx-xxxx-2021
 ---------------------------------
 
 1. Change RunGrepTest to use tr instead of sed when testing with binary 
@@ -43,8 +37,13 @@ is broken. Later: the requirement for autoconf 2.70 broke some automatic test
 robots. It doesn't seem to be necessary: trying a reduction to 2.60.
 
 6. The pattern /a\K.(?0)*/ when matched against "abac" by the interpreter gave
-the answer "bac", whereas Perl and JIT both yield "c". This was because the 
-effect of \K was not propagating back from the recursion. This is now fixed.
+the answer "bac", whereas Perl and JIT both yield "c". This was because the
+effect of \K was not propagating back from the full pattern recursion. Other
+recursions such as /(a\K.(?1)*)/ did not have this problem.
+
+7. Restore single character repetition optimization in JIT. Currently fewer
+character repetitions are optimized than in 10.34.
+
 
 
 Version 10.36 04-December-2020

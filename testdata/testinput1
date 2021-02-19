@@ -6432,4 +6432,7 @@ ef) x/x,mark
 /a\K.(?0)*/
     abac
 
+/(a\K.(?1)*)/
+    abac
+
 # End of testinput1 
