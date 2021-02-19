@@ -1,6 +1,13 @@
 Change Log for PCRE2
 --------------------
 
+Version 10.38
+-------------
+
+1. Restore single character repetition optimization in JIT.
+Currently fewer character repetitions are optimized than in 10.34.
+
+
 Version 10.37-RC1 04-January-2021
 ---------------------------------
 

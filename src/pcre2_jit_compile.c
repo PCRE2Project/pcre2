@@ -1226,7 +1226,7 @@ while (cc < ccend)
 return TRUE;
 }
 
-#define EARLY_FAIL_ENHANCE_MAX (1 + 1)
+#define EARLY_FAIL_ENHANCE_MAX (1 + 3)
 
 /*
 start:
