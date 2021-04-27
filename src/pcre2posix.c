@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-          New API code Copyright (c) 2016-2019 University of Cambridge
+          New API code Copyright (c) 2016-2021 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -175,6 +175,20 @@ static const char *const pstring[] = {
 
 
 
+#if 0  /* REMOVE THIS CODE */
+
+The code below was created for 10.33 (see ChangeLog 10.33 #4) when the
+POSIX functions were given pcre2_... names instead of the traditional POSIX 
+names. However, it has proved to be more troublesome than useful. There have
+been at least two cases where a program links with two others, one of which
+uses the POSIX library and the other uses the PCRE2 POSIX functions, thus
+causing two instances of the POSIX runctions to exist, leading to trouble. For
+10.37 this code is commented out. In due course it can be removed if there are
+no issues. The only small worry is the comment below about languages that do 
+not include pcre2posix.h. If there are any such cases, they will have to use
+the PCRE2 names.
+
+
 /*************************************************
 *      Wrappers with traditional POSIX names     *
 *************************************************/
@@ -218,7 +232,7 @@ regexec(const regex_t *preg, const char *string, size_t nmatch,
 {
 return pcre2_regexec(preg, string, nmatch, pmatch, eflags);
 }
-
+#endif
 
 
 /*************************************************

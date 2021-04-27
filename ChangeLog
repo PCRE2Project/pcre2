@@ -11,13 +11,13 @@ with binary zeros. This is from Bugzilla #2681. Patch from Jeremie
 Courreges-Anglas via Nam Nguyen. This fixes RunGrepTest for OpenBSD. Later: 
 it broke it for at least one version of Solaris, where tr can't handle binary 
 zeros. However, that system had /usr/xpg4/bin/tr installed, which works OK, so 
-RunGrepTest now checks for that command and use it if found.
+RunGrepTest now checks for that command and uses it if found.
 
 2. Compiling with gcc 10.2's -fanalyzer option showed up a hypothetical problem 
 with a NULL dereference. I don't think this case could ever occur in practice, 
 but I have put in a check in order to get rid of the compiler error.
 
-3. An alternative patch for CMakeLists.txt because 10.36 # 4 breaks CMake on
+3. An alternative patch for CMakeLists.txt because 10.36 #4 breaks CMake on
 Windows. Patch from email@cs-ware.de fixes bugzilla #2688.
 
 4. Two bugs related to over-large numbers have been fixed so the behaviour is 
@@ -44,6 +44,14 @@ recursions such as /(a\K.(?1)*)/ did not have this problem.
 7. Restore single character repetition optimization in JIT. Currently fewer
 character repetitions are optimized than in 10.34.
 
+8. When the names of the functions in the POSIX wrapper were changed to
+pcre2_regcomp() etc. (see change 10.33 #4 below), functions with the original 
+names were left in the library so that pre-compiled programs would still work. 
+However, this has proved troublesome when programs link with several libraries, 
+some of which use PCRE2 via the POSIX interface while others use a native POSIX 
+library. For this reason, the POSIX function names are removed in this release.
+The macros in pcre2posix.h should ensure that re-compiling fixes any programs 
+that haven't been compiled since before 10.33.
 
 
 Version 10.36 04-December-2020

@@ -68,11 +68,14 @@ application. Because the POSIX functions call the native ones, it is also
 necessary to add <b>-lpcre2-8</b>.
 </P>
 <P>
-Although they are not defined as protypes in <b>pcre2posix.h</b>, the library
-does contain functions with the POSIX names <b>regcomp()</b> etc. These simply
-pass their arguments to the PCRE2 functions. These functions are provided for
-backwards compatibility with earlier versions of PCRE2, so that existing
-programs do not have to be recompiled.
+Although they were not defined as protypes in <b>pcre2posix.h</b>, releases
+10.33 to 10.36 of the library contained functions with the POSIX names
+<b>regcomp()</b> etc. These simply passed their arguments to the PCRE2
+functions. These functions were provided for backwards compatibility with
+earlier versions of PCRE2, which had only POSIX names. However, this has proved
+troublesome in situations where a program links with several libraries, some of 
+which use PCRE2's POSIX interface while others use the real POSIX functions. 
+For this reason, the POSIX names have been removed since release 10.37.
 </P>
 <P>
 Calling the header file <b>pcre2posix.h</b> avoids any conflict with other POSIX
@@ -344,9 +347,9 @@ Cambridge, England.
 </P>
 <br><a name="SEC10" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 30 January 2019
+Last updated: 26 April 2021
 <br>
-Copyright &copy; 1997-2019 University of Cambridge.
+Copyright &copy; 1997-2021 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE2 index page</a>.

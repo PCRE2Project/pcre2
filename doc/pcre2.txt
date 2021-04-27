@@ -180,8 +180,8 @@ REVISION
        Last updated: 17 September 2018
        Copyright (c) 1997-2018 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRE2API(3)                Library Functions Manual                PCRE2API(3)
 
 
@@ -3829,8 +3829,8 @@ REVISION
        Last updated: 04 November 2020
        Copyright (c) 1997-2020 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRE2BUILD(3)              Library Functions Manual              PCRE2BUILD(3)
 
 
@@ -4423,8 +4423,8 @@ REVISION
        Last updated: 20 March 2020
        Copyright (c) 1997-2020 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRE2CALLOUT(3)            Library Functions Manual            PCRE2CALLOUT(3)
 
 
@@ -4853,8 +4853,8 @@ REVISION
        Last updated: 03 February 2019
        Copyright (c) 1997-2019 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRE2COMPAT(3)             Library Functions Manual             PCRE2COMPAT(3)
 
 
@@ -5066,8 +5066,8 @@ REVISION
        Last updated: 06 October 2020
        Copyright (c) 1997-2019 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRE2JIT(3)                Library Functions Manual                PCRE2JIT(3)
 
 
@@ -5491,8 +5491,8 @@ REVISION
        Last updated: 23 May 2019
        Copyright (c) 1997-2019 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRE2LIMITS(3)             Library Functions Manual             PCRE2LIMITS(3)
 
 
@@ -5561,8 +5561,8 @@ REVISION
        Last updated: 02 February 2019
        Copyright (c) 1997-2019 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRE2MATCHING(3)           Library Functions Manual           PCRE2MATCHING(3)
 
 
@@ -5785,8 +5785,8 @@ REVISION
        Last updated: 23 May 2019
        Copyright (c) 1997-2019 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRE2PARTIAL(3)            Library Functions Manual            PCRE2PARTIAL(3)
 
 
@@ -6165,8 +6165,8 @@ REVISION
        Last updated: 04 September 2019
        Copyright (c) 1997-2019 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRE2PATTERN(3)            Library Functions Manual            PCRE2PATTERN(3)
 
 
@@ -9613,8 +9613,8 @@ REVISION
        Last updated: 06 October 2020
        Copyright (c) 1997-2020 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRE2PERFORM(3)            Library Functions Manual            PCRE2PERFORM(3)
 
 
@@ -9848,8 +9848,8 @@ REVISION
        Last updated: 03 February 2019
        Copyright (c) 1997-2019 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRE2POSIX(3)              Library Functions Manual              PCRE2POSIX(3)
 
 
@@ -9895,11 +9895,15 @@ DESCRIPTION
        an application. Because the POSIX functions call the native ones, it is
        also necessary to add -lpcre2-8.
 
-       Although  they are not defined as protypes in pcre2posix.h, the library
-       does contain functions with the POSIX names regcomp() etc. These simply
-       pass  their  arguments to the PCRE2 functions. These functions are pro-
-       vided for backwards compatibility with earlier versions  of  PCRE2,  so
-       that existing programs do not have to be recompiled.
+       Although  they  were  not defined as protypes in pcre2posix.h, releases
+       10.33 to 10.36 of the library contained functions with the POSIX  names
+       regcomp()  etc.  These simply passed their arguments to the PCRE2 func-
+       tions. These functions were provided for backwards  compatibility  with
+       earlier  versions  of  PCRE2, which had only POSIX names. However, this
+       has proved troublesome in situations where a program links with several
+       libraries,  some  of which use PCRE2's POSIX interface while others use
+       the real POSIX functions.  For this reason, the POSIX names  have  been
+       removed since release 10.37.
 
        Calling  the  header  file  pcre2posix.h avoids any conflict with other
        POSIX libraries. It can, of course, be renamed or aliased  as  regex.h,
@@ -10175,11 +10179,11 @@ AUTHOR
 
 REVISION
 
-       Last updated: 30 January 2019
-       Copyright (c) 1997-2019 University of Cambridge.
+       Last updated: 26 April 2021
+       Copyright (c) 1997-2021 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRE2SAMPLE(3)             Library Functions Manual             PCRE2SAMPLE(3)
 
 
@@ -10457,8 +10461,8 @@ REVISION
        Last updated: 27 June 2018
        Copyright (c) 1997-2018 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRE2SYNTAX(3)             Library Functions Manual             PCRE2SYNTAX(3)
 
 
@@ -10973,8 +10977,8 @@ REVISION
        Last updated: 28 December 2019
        Copyright (c) 1997-2019 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRE2UNICODE(3)            Library Functions Manual            PCRE2UNICODE(3)
 
 
@@ -11408,5 +11412,5 @@ REVISION
        Last updated: 23 February 2020
        Copyright (c) 1997-2020 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 

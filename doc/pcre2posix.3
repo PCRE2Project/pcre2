@@ -1,4 +1,4 @@
-.TH PCRE2POSIX 3 "30 January 2019" "PCRE2 10.33"
+.TH PCRE2POSIX 3 "26 April 2021" "PCRE2 10.37"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "SYNOPSIS"
@@ -44,11 +44,14 @@ can be accessed by adding \fB-lpcre2-posix\fP to the command for linking an
 application. Because the POSIX functions call the native ones, it is also
 necessary to add \fB-lpcre2-8\fP.
 .P
-Although they are not defined as protypes in \fBpcre2posix.h\fP, the library
-does contain functions with the POSIX names \fBregcomp()\fP etc. These simply
-pass their arguments to the PCRE2 functions. These functions are provided for
-backwards compatibility with earlier versions of PCRE2, so that existing
-programs do not have to be recompiled.
+Although they were not defined as protypes in \fBpcre2posix.h\fP, releases
+10.33 to 10.36 of the library contained functions with the POSIX names
+\fBregcomp()\fP etc. These simply passed their arguments to the PCRE2
+functions. These functions were provided for backwards compatibility with
+earlier versions of PCRE2, which had only POSIX names. However, this has proved
+troublesome in situations where a program links with several libraries, some of 
+which use PCRE2's POSIX interface while others use the real POSIX functions. 
+For this reason, the POSIX names have been removed since release 10.37.
 .P
 Calling the header file \fBpcre2posix.h\fP avoids any conflict with other POSIX
 libraries. It can, of course, be renamed or aliased as \fBregex.h\fP, which is
@@ -321,6 +324,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 30 January 2019
-Copyright (c) 1997-2019 University of Cambridge.
+Last updated: 26 April 2021
+Copyright (c) 1997-2021 University of Cambridge.
 .fi
