@@ -5830,6 +5830,19 @@ a)"xI
 
 /55|a(..)d/g,replace=>$1<
     xyz55abcdxyzabcdxyz\=ovector=2,substitute_unset_empty
+    
+/abc/replace=,caseless
+    XabcY
+    XABCY 
+
+/abc/replace=[4],caseless
+    XabcY
+    XABCY 
+
+/abc/replace=*,caseless
+    XabcY
+    XABCY
+    XabcY\=replace=  
 
 # Expect non-fixed-length error
 

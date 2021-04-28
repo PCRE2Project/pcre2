@@ -17571,6 +17571,26 @@ Failed: error -55 at offset 3 in replacement: requested value is not set
 /55|a(..)d/g,replace=>$1<
     xyz55abcdxyzabcdxyz\=ovector=2,substitute_unset_empty
  3: xyz><>bc<xyz>bc<xyz
+    
+/abc/replace=,caseless
+    XabcY
+ 0: abc
+    XABCY 
+ 0: ABC
+
+/abc/replace=[4],caseless
+    XabcY
+ 1: XY
+    XABCY 
+ 1: XY
+
+/abc/replace=*,caseless
+    XabcY
+ 1: X*Y
+    XABCY
+ 1: X*Y
+    XabcY\=replace=  
+ 0: abc
 
 # Expect non-fixed-length error
 

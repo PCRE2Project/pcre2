@@ -1,4 +1,4 @@
-.TH PCRE2 3 "17 September 2018" "PCRE2 10.33"
+.TH PCRE2 3 "28 April 2021" "PCRE2 10.37"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH INTRODUCTION
@@ -19,8 +19,13 @@ using the Python syntax. There is also some support for one or two .NET and
 Oniguruma syntax items, and there are options for requesting some minor changes
 that give better ECMAScript (aka JavaScript) compatibility.
 .P
-The source code for PCRE2 can be compiled to support 8-bit, 16-bit, or 32-bit
-code units, which means that up to three separate libraries may be installed.
+The source code for PCRE2 can be compiled to support strings of 8-bit, 16-bit,
+or 32-bit code units, which means that up to three separate libraries may be
+installed, one for each code unit size. The size of code unit is not related to
+the bit size of the underlying hardware. In a 64-bit environment that also
+supports 32-bit applications, versions of PCRE2 that are compiled in both
+64-bit and 32-bit modes may be needed.
+.P
 The original work to extend PCRE to 16-bit and 32-bit code units was done by
 Zoltan Herczeg and Christian Persch, respectively. In all three cases, strings
 can be interpreted either as one character per code unit, or as UTF-encoded
@@ -197,6 +202,6 @@ use my two initials, followed by the two digits 10, at the domain cam.ac.uk.
 .rs
 .sp
 .nf
-Last updated: 17 September 2018
-Copyright (c) 1997-2018 University of Cambridge.
+Last updated: 28 April 2021
+Copyright (c) 1997-2021 University of Cambridge.
 .fi
