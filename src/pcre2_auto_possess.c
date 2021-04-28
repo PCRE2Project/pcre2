@@ -1188,10 +1188,10 @@ for (;;)
     if (c >= OP_CRSTAR && c <= OP_CRMINRANGE)
       {
       /* The return from get_chr_property_list() will never be NULL when
-      *code (aka c) is one of the three class opcodes. However, gcc with 
-      -fanalyzer notes that a NULL return is possible, and grumbles. Hence we 
-      put in a check. */ 
-       
+      *code (aka c) is one of the three class opcodes. However, gcc with
+      -fanalyzer notes that a NULL return is possible, and grumbles. Hence we
+      put in a check. */
+
       end = get_chr_property_list(code, utf, ucp, cb->fcc, list);
       list[1] = (c & 1) == 0;
 

@@ -40,9 +40,9 @@ GENERIC INSTRUCTIONS FOR THE PCRE2 C LIBRARY
 
 The following are generic instructions for building the PCRE2 C library "by
 hand". If you are going to use CMake, this section does not apply to you; you
-can skip ahead to the CMake section. Note that the settings concerned with 
-8-bit, 16-bit, and 32-bit code units relate to the type of data string that 
-PCRE2 processes. They are NOT referring to the underlying operating system bit 
+can skip ahead to the CMake section. Note that the settings concerned with
+8-bit, 16-bit, and 32-bit code units relate to the type of data string that
+PCRE2 processes. They are NOT referring to the underlying operating system bit
 width. You do not have to do anything special to compile in a 64-bit
 environment, for example.
 
@@ -90,7 +90,7 @@ environment, for example.
      The tables in src/pcre2_chartables.c are defaults. The caller of PCRE2 can
      specify alternative tables at run time.
 
- (4) For a library that supports 8-bit code units in the character strings that 
+ (4) For a library that supports 8-bit code units in the character strings that
      it processes, compile the following source files from the src directory,
      setting -DPCRE2_CODE_UNIT_WIDTH=8 as a compiler option. Also set
      -DHAVE_CONFIG_H if you have set up src/config.h with your configuration,

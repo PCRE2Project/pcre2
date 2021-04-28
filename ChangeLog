@@ -2,38 +2,38 @@ Change Log for PCRE2
 --------------------
 
 
-Version 10.37-RC1 xx-xxxx-2021
----------------------------------
+Version 10.37-RC1 28-April-2021
+-------------------------------
 
-1. Change RunGrepTest to use tr instead of sed when testing with binary 
-zero bytes, because sed varies a lot from system to system and has problems 
-with binary zeros. This is from Bugzilla #2681. Patch from Jeremie 
-Courreges-Anglas via Nam Nguyen. This fixes RunGrepTest for OpenBSD. Later: 
-it broke it for at least one version of Solaris, where tr can't handle binary 
-zeros. However, that system had /usr/xpg4/bin/tr installed, which works OK, so 
+1. Change RunGrepTest to use tr instead of sed when testing with binary
+zero bytes, because sed varies a lot from system to system and has problems
+with binary zeros. This is from Bugzilla #2681. Patch from Jeremie
+Courreges-Anglas via Nam Nguyen. This fixes RunGrepTest for OpenBSD. Later:
+it broke it for at least one version of Solaris, where tr can't handle binary
+zeros. However, that system had /usr/xpg4/bin/tr installed, which works OK, so
 RunGrepTest now checks for that command and uses it if found.
 
-2. Compiling with gcc 10.2's -fanalyzer option showed up a hypothetical problem 
-with a NULL dereference. I don't think this case could ever occur in practice, 
+2. Compiling with gcc 10.2's -fanalyzer option showed up a hypothetical problem
+with a NULL dereference. I don't think this case could ever occur in practice,
 but I have put in a check in order to get rid of the compiler error.
 
 3. An alternative patch for CMakeLists.txt because 10.36 #4 breaks CMake on
 Windows. Patch from email@cs-ware.de fixes bugzilla #2688.
 
-4. Two bugs related to over-large numbers have been fixed so the behaviour is 
+4. Two bugs related to over-large numbers have been fixed so the behaviour is
 now the same as Perl.
-  
-  (a) A pattern such as /\214748364/ gave an overflow error instead of being 
+
+  (a) A pattern such as /\214748364/ gave an overflow error instead of being
   treated as the octal number \214 followed by literal digits.
-  
-  (b) A sequence such as {65536 that has no terminating } so is not a 
+
+  (b) A sequence such as {65536 that has no terminating } so is not a
   quantifier was nevertheless complaining that a quantifier number was too big.
 
 5. A run of autoconf suggested that configure.ac was out-of-date with respect
 to the lastest autoconf. Running autoupdate made some valid changes, some valid
-suggestions, and also some invalid changes, which were fixed by hand. Autoconf 
-now runs clean and the resulting "configure" seems to work, so I hope nothing 
-is broken. Later: the requirement for autoconf 2.70 broke some automatic test 
+suggestions, and also some invalid changes, which were fixed by hand. Autoconf
+now runs clean and the resulting "configure" seems to work, so I hope nothing
+is broken. Later: the requirement for autoconf 2.70 broke some automatic test
 robots. It doesn't seem to be necessary: trying a reduction to 2.60.
 
 6. The pattern /a\K.(?0)*/ when matched against "abac" by the interpreter gave
@@ -45,12 +45,12 @@ recursions such as /(a\K.(?1)*)/ did not have this problem.
 character repetitions are optimized than in 10.34.
 
 8. When the names of the functions in the POSIX wrapper were changed to
-pcre2_regcomp() etc. (see change 10.33 #4 below), functions with the original 
-names were left in the library so that pre-compiled programs would still work. 
-However, this has proved troublesome when programs link with several libraries, 
-some of which use PCRE2 via the POSIX interface while others use a native POSIX 
+pcre2_regcomp() etc. (see change 10.33 #4 below), functions with the original
+names were left in the library so that pre-compiled programs would still work.
+However, this has proved troublesome when programs link with several libraries,
+some of which use PCRE2 via the POSIX interface while others use a native POSIX
 library. For this reason, the POSIX function names are removed in this release.
-The macros in pcre2posix.h should ensure that re-compiling fixes any programs 
+The macros in pcre2posix.h should ensure that re-compiling fixes any programs
 that haven't been compiled since before 10.33.
 
 

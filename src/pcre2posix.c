@@ -178,13 +178,13 @@ static const char *const pstring[] = {
 #if 0  /* REMOVE THIS CODE */
 
 The code below was created for 10.33 (see ChangeLog 10.33 #4) when the
-POSIX functions were given pcre2_... names instead of the traditional POSIX 
+POSIX functions were given pcre2_... names instead of the traditional POSIX
 names. However, it has proved to be more troublesome than useful. There have
 been at least two cases where a program links with two others, one of which
 uses the POSIX library and the other uses the PCRE2 POSIX functions, thus
 causing two instances of the POSIX runctions to exist, leading to trouble. For
 10.37 this code is commented out. In due course it can be removed if there are
-no issues. The only small worry is the comment below about languages that do 
+no issues. The only small worry is the comment below about languages that do
 not include pcre2posix.h. If there are any such cases, they will have to use
 the PCRE2 names.
 

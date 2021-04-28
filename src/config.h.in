@@ -347,6 +347,11 @@ sure both macros are undefined; an emulation function will then be used. */
 #ifndef _GNU_SOURCE
 # undef _GNU_SOURCE
 #endif
+/* Enable X/Open compliant socket functions that do not require linking
+   with -lxnet on HP-UX 11.11.  */
+#ifndef _HPUX_ALT_XOPEN_SOCKET_API
+# undef _HPUX_ALT_XOPEN_SOCKET_API
+#endif
 /* Identify the host operating system as Minix.
    This macro does not affect the system headers' behavior.
    A future release of Autoconf may stop defining this macro.  */

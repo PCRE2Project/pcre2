@@ -1419,7 +1419,7 @@ for (p = *ptrptr;; p++)
     if (had_comma) return FALSE;
     had_comma = TRUE;
     }
-  else return FALSE;   
+  else return FALSE;
   }
 
 /* The only error from read_number() is for a number that is too big. */

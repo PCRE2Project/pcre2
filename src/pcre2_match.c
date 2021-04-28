@@ -823,7 +823,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
 
       P->eptr = Feptr;
       P->mark = Fmark;
-      P->start_match = Fstart_match; 
+      P->start_match = Fstart_match;
       F = P;
       Fecode += 1 + LINK_SIZE;
       continue;

@@ -2,6 +2,14 @@ News about PCRE2 releases
 -------------------------
 
 
+Version 10.37-RC1 28_April-2021
+-------------------------------
+
+A few more bug fixes and tidies. The only change of real note is the removal of
+the actual POSIX names regcomp etc. from the POSIX wrapper library because
+these have caused issues for some applications (see 10.33 #2 below).
+
+
 Version 10.36 04-December-2020
 ------------------------------
 
