@@ -40,7 +40,11 @@ GENERIC INSTRUCTIONS FOR THE PCRE2 C LIBRARY
 
 The following are generic instructions for building the PCRE2 C library "by
 hand". If you are going to use CMake, this section does not apply to you; you
-can skip ahead to the CMake section.
+can skip ahead to the CMake section. Note that the settings concerned with 
+8-bit, 16-bit, and 32-bit code units relate to the type of data string that 
+PCRE2 processes. They are NOT referring to the underlying operating system bit 
+width. You do not have to do anything special to compile in a 64-bit
+environment, for example.
 
  (1) Copy or rename the file src/config.h.generic as src/config.h, and edit the
      macro settings that it contains to whatever is appropriate for your
@@ -86,11 +90,11 @@ can skip ahead to the CMake section.
      The tables in src/pcre2_chartables.c are defaults. The caller of PCRE2 can
      specify alternative tables at run time.
 
- (4) For an 8-bit library, compile the following source files from the src
-     directory, setting -DPCRE2_CODE_UNIT_WIDTH=8 as a compiler option. Also
-     set -DHAVE_CONFIG_H if you have set up src/config.h with your
-     configuration, or else use other -D settings to change the configuration
-     as required.
+ (4) For a library that supports 8-bit code units in the character strings that 
+     it processes, compile the following source files from the src directory,
+     setting -DPCRE2_CODE_UNIT_WIDTH=8 as a compiler option. Also set
+     -DHAVE_CONFIG_H if you have set up src/config.h with your configuration,
+     or else use other -D settings to change the configuration as required.
 
        pcre2_auto_possess.c
        pcre2_chartables.c
@@ -142,9 +146,9 @@ can skip ahead to the CMake section.
      If your system has static and shared libraries, you may have to do this
      once for each type.
 
- (6) If you want to build a 16-bit library or 32-bit library (as well as, or
-     instead of the 8-bit library) just supply 16 or 32 as the value of
-     -DPCRE2_CODE_UNIT_WIDTH when you are compiling.
+ (6) If you want to build a library that supports 16-bit or 32-bit code units,
+     (as well as, or instead of the 8-bit library) just supply 16 or 32 as the
+     value of -DPCRE2_CODE_UNIT_WIDTH when you are compiling.
 
  (7) If you want to build the POSIX wrapper functions (which apply only to the
      8-bit library), ensure that you have the src/pcre2posix.h file and then
@@ -401,6 +405,6 @@ Everything in that location, source and executable, is in EBCDIC and native
 z/OS file formats. The port provides an API for LE languages such as COBOL and
 for the z/OS and z/VM versions of the Rexx languages.
 
-==============================
-Last Updated: 14 November 2018
-==============================
+===========================
+Last Updated: 28 April 2021
+===========================

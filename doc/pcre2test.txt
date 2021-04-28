@@ -1084,7 +1084,8 @@ SUBJECT MODIFIERS
        The  following  modifiers  affect the matching process or request addi-
        tional information. Some of them may also be  specified  on  a  pattern
        line  (see  above), in which case they apply to every subject line that
-       is matched against that pattern.
+       is matched against that pattern, but can be overridden by modifiers  on
+       the subject.
 
              aftertext                  show text after match
              allaftertext               show text after captures
@@ -1132,29 +1133,29 @@ SUBJECT MODIFIERS
              zero_terminate             pass the subject as zero-terminated
 
        The effects of these modifiers are described in the following sections.
-       When  matching  via the POSIX wrapper API, the aftertext, allaftertext,
-       and ovector subject modifiers work as described below. All other  modi-
+       When matching via the POSIX wrapper API, the  aftertext,  allaftertext,
+       and  ovector subject modifiers work as described below. All other modi-
        fiers are either ignored, with a warning message, or cause an error.
 
    Showing more text
 
-       The  aftertext modifier requests that as well as outputting the part of
+       The aftertext modifier requests that as well as outputting the part  of
        the subject string that matched the entire pattern, pcre2test should in
        addition output the remainder of the subject string. This is useful for
        tests where the subject contains multiple copies of the same substring.
-       The  allaftertext  modifier  requests the same action for captured sub-
+       The allaftertext modifier requests the same action  for  captured  sub-
        strings as well as the main matched substring. In each case the remain-
        der is output on the following line with a plus character following the
        capture number.
 
-       The allusedtext modifier requests that all the text that was  consulted
-       during  a  successful pattern match by the interpreter should be shown,
-       for both full and partial matches. This feature is  not  supported  for
-       JIT  matching,  and if requested with JIT it is ignored (with a warning
-       message). Setting this modifier affects the output if there is a  look-
-       behind  at  the start of a match, or, for a complete match, a lookahead
+       The  allusedtext modifier requests that all the text that was consulted
+       during a successful pattern match by the interpreter should  be  shown,
+       for  both  full  and partial matches. This feature is not supported for
+       JIT matching, and if requested with JIT it is ignored (with  a  warning
+       message).  Setting this modifier affects the output if there is a look-
+       behind at the start of a match, or, for a complete match,  a  lookahead
        at the end, or if \K is used in the pattern. Characters that precede or
-       follow  the start and end of the actual match are indicated in the out-
+       follow the start and end of the actual match are indicated in the  out-
        put by '<' or '>' characters underneath them.  Here is an example:
 
            re> /(?<=pqr)abc(?=xyz)/
@@ -1165,16 +1166,16 @@ SUBJECT MODIFIERS
          Partial match: pqrabcxy
                         <<<
 
-       The first, complete match shows that the matched string is "abc",  with
-       the  preceding  and  following strings "pqr" and "xyz" having been con-
-       sulted during the match (when processing the assertions).  The  partial
+       The  first, complete match shows that the matched string is "abc", with
+       the preceding and following strings "pqr" and "xyz"  having  been  con-
+       sulted  during  the match (when processing the assertions). The partial
        match can indicate only the preceding string.
 
-       The  startchar  modifier  requests  that the starting character for the
-       match be indicated, if it is different to  the  start  of  the  matched
+       The startchar modifier requests that the  starting  character  for  the
+       match  be  indicated,  if  it  is different to the start of the matched
        string. The only time when this occurs is when \K has been processed as
        part of the match. In this situation, the output for the matched string
-       is  displayed  from  the  starting  character instead of from the match
+       is displayed from the starting character  instead  of  from  the  match
        point, with circumflex characters under the earlier characters. For ex-
        ample:
 
@@ -1183,7 +1184,7 @@ SUBJECT MODIFIERS
           0: abcxyz
              ^^^
 
-       Unlike  allusedtext, the startchar modifier can be used with JIT.  How-
+       Unlike allusedtext, the startchar modifier can be used with JIT.   How-
        ever, these two modifiers are mutually exclusive.
 
    Showing the value of all capture groups
@@ -1191,90 +1192,95 @@ SUBJECT MODIFIERS
        The allcaptures modifier requests that the values of all potential cap-
        tured parentheses be output after a match. By default, only those up to
        the highest one actually used in the match are output (corresponding to
-       the  return  code from pcre2_match()). Groups that did not take part in
-       the match are output as "<unset>". This modifier is  not  relevant  for
-       DFA  matching (which does no capturing) and does not apply when replace
+       the return code from pcre2_match()). Groups that did not take  part  in
+       the  match  are  output as "<unset>". This modifier is not relevant for
+       DFA matching (which does no capturing) and does not apply when  replace
        is specified; it is ignored, with a warning message, if present.
 
    Showing the entire ovector, for all outcomes
 
        The allvector modifier requests that the entire ovector be shown, what-
        ever the outcome of the match. Compare allcaptures, which shows only up
-       to the maximum number of capture groups for the pattern, and then  only
-       for  a successful complete non-DFA match. This modifier, which acts af-
-       ter any match result, and also for DFA matching, provides  a  means  of
-       checking  that there are no unexpected modifications to ovector fields.
-       Before each match attempt, the ovector is filled with a special  value,
-       and  if  this  is  found  in  both  elements of a capturing pair, "<un-
-       changed>" is output. After a successful  match,  this  applies  to  all
-       groups  after the maximum capture group for the pattern. In other cases
-       it applies to the entire ovector. After a partial match, the first  two
-       elements  are  the only ones that should be set. After a DFA match, the
-       amount of ovector that is used depends on the number  of  matches  that
+       to  the maximum number of capture groups for the pattern, and then only
+       for a successful complete non-DFA match. This modifier, which acts  af-
+       ter  any  match  result, and also for DFA matching, provides a means of
+       checking that there are no unexpected modifications to ovector  fields.
+       Before  each match attempt, the ovector is filled with a special value,
+       and if this is found in  both  elements  of  a  capturing  pair,  "<un-
+       changed>"  is  output.  After  a  successful match, this applies to all
+       groups after the maximum capture group for the pattern. In other  cases
+       it  applies to the entire ovector. After a partial match, the first two
+       elements are the only ones that should be set. After a DFA  match,  the
+       amount  of  ovector  that is used depends on the number of matches that
        were found.
 
    Testing pattern callouts
 
-       A  callout function is supplied when pcre2test calls the library match-
-       ing functions, unless callout_none is specified. Its behaviour  can  be
-       controlled  by  various  modifiers  listed above whose names begin with
-       callout_. Details are given in the section entitled  "Callouts"  below.
-       Testing  callouts  from  pcre2_substitute()  is  decribed separately in
+       A callout function is supplied when pcre2test calls the library  match-
+       ing  functions,  unless callout_none is specified. Its behaviour can be
+       controlled by various modifiers listed above  whose  names  begin  with
+       callout_.  Details  are given in the section entitled "Callouts" below.
+       Testing callouts from  pcre2_substitute()  is  decribed  separately  in
        "Testing the substitution function" below.
 
    Finding all matches in a string
 
        Searching for all possible matches within a subject can be requested by
-       the  global  or altglobal modifier. After finding a match, the matching
-       function is called again to search the remainder of  the  subject.  The
-       difference  between  global  and  altglobal is that the former uses the
-       start_offset argument to pcre2_match() or  pcre2_dfa_match()  to  start
-       searching  at  a new point within the entire string (which is what Perl
+       the global or altglobal modifier. After finding a match,  the  matching
+       function  is  called  again to search the remainder of the subject. The
+       difference between global and altglobal is that  the  former  uses  the
+       start_offset  argument  to  pcre2_match() or pcre2_dfa_match() to start
+       searching at a new point within the entire string (which is  what  Perl
        does), whereas the latter passes over a shortened subject. This makes a
        difference to the matching process if the pattern begins with a lookbe-
        hind assertion (including \b or \B).
 
-       If an empty string  is  matched,  the  next  match  is  done  with  the
+       If  an  empty  string  is  matched,  the  next  match  is done with the
        PCRE2_NOTEMPTY_ATSTART and PCRE2_ANCHORED flags set, in order to search
        for another, non-empty, match at the same point in the subject. If this
-       match  fails, the start offset is advanced, and the normal match is re-
-       tried. This imitates the way Perl handles such cases when using the  /g
-       modifier  or  the  split()  function. Normally, the start offset is ad-
-       vanced by one character, but if the newline convention recognizes  CRLF
-       as  a  newline,  and the current character is CR followed by LF, an ad-
+       match fails, the start offset is advanced, and the normal match is  re-
+       tried.  This imitates the way Perl handles such cases when using the /g
+       modifier or the split() function. Normally, the  start  offset  is  ad-
+       vanced  by one character, but if the newline convention recognizes CRLF
+       as a newline, and the current character is CR followed by  LF,  an  ad-
        vance of two characters occurs.
 
    Testing substring extraction functions
 
-       The copy  and  get  modifiers  can  be  used  to  test  the  pcre2_sub-
+       The  copy  and  get  modifiers  can  be  used  to  test  the pcre2_sub-
        string_copy_xxx() and pcre2_substring_get_xxx() functions.  They can be
        given more than once, and each can specify a capture group name or num-
        ber, for example:
 
           abcd\=copy=1,copy=3,get=G1
 
-       If  the  #subject command is used to set default copy and/or get lists,
-       these can be unset by specifying a negative number to cancel  all  num-
+       If the #subject command is used to set default copy and/or  get  lists,
+       these  can  be unset by specifying a negative number to cancel all num-
        bered groups and an empty name to cancel all named groups.
 
-       The  getall  modifier  tests pcre2_substring_list_get(), which extracts
+       The getall modifier tests  pcre2_substring_list_get(),  which  extracts
        all captured substrings.
 
-       If the subject line is successfully matched, the  substrings  extracted
-       by  the  convenience  functions  are  output  with C, G, or L after the
-       string number instead of a colon. This is in  addition  to  the  normal
-       full  list.  The string length (that is, the return from the extraction
+       If  the  subject line is successfully matched, the substrings extracted
+       by the convenience functions are output with  C,  G,  or  L  after  the
+       string  number  instead  of  a colon. This is in addition to the normal
+       full list. The string length (that is, the return from  the  extraction
        function) is given in parentheses after each substring, followed by the
        name when the extraction was by name.
 
    Testing the substitution function
 
-       If  the  replace  modifier  is  set, the pcre2_substitute() function is
-       called instead of one of the matching functions (or after one  call  of
-       pcre2_match()  in  the case of PCRE2_SUBSTITUTE_MATCHED). Note that re-
-       placement strings cannot contain commas, because a comma signifies  the
-       end  of  a  modifier. This is not thought to be an issue in a test pro-
+       If the replace modifier is  set,  the  pcre2_substitute()  function  is
+       called  instead  of one of the matching functions (or after one call of
+       pcre2_match() in the case of PCRE2_SUBSTITUTE_MATCHED). Note  that  re-
+       placement  strings cannot contain commas, because a comma signifies the
+       end of a modifier. This is not thought to be an issue in  a  test  pro-
        gram.
+
+       Specifying  a  completely  empty replacement string disables this modi-
+       fier.  However, it is possible to specify an empty replacement by  pro-
+       viding  a buffer length, as described below, for an otherwise empty re-
+       placement.
 
        Unlike subject strings, pcre2test does not process replacement  strings
        for  escape  sequences. In UTF mode, a replacement string is checked to
@@ -1929,5 +1935,5 @@ AUTHOR
 
 REVISION
 
-       Last updated: 14 September 2020
-       Copyright (c) 1997-2020 University of Cambridge.
+       Last updated: 28 April 2021
+       Copyright (c) 1997-2021 University of Cambridge.
