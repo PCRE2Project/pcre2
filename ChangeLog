@@ -2,8 +2,8 @@ Change Log for PCRE2
 --------------------
 
 
-Version 10.37-RC1 28-April-2021
--------------------------------
+Version 10.37 26-May-2021
+-------------------------
 
 1. Change RunGrepTest to use tr instead of sed when testing with binary
 zero bytes, because sed varies a lot from system to system and has problems
