@@ -8135,7 +8135,7 @@ switch(type)
     }
   else
     OP2(SLJIT_AND32 | SLJIT_SET_Z, SLJIT_UNUSED, 0, SLJIT_MEM1(ARGUMENTS), SLJIT_OFFSETOF(jit_arguments, options), SLJIT_IMM, PCRE2_NOTEOL);
-  add_jump(compiler, backtracks, JUMP(SLJIT_NOT_ZERO32));
+  add_jump(compiler, backtracks, JUMP(SLJIT_NOT_ZERO));
 
   if (!common->endonly)
     compile_simple_assertion_matchingpath(common, OP_EODN, cc, backtracks);
@@ -8155,7 +8155,7 @@ switch(type)
     }
   else
     OP2(SLJIT_AND32 | SLJIT_SET_Z, SLJIT_UNUSED, 0, SLJIT_MEM1(ARGUMENTS), SLJIT_OFFSETOF(jit_arguments, options), SLJIT_IMM, PCRE2_NOTEOL);
-  add_jump(compiler, backtracks, JUMP(SLJIT_NOT_ZERO32));
+  add_jump(compiler, backtracks, JUMP(SLJIT_NOT_ZERO));
   check_partial(common, FALSE);
   jump[0] = JUMP(SLJIT_JUMP);
   JUMPHERE(jump[1]);
@@ -8195,14 +8195,14 @@ switch(type)
     OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(TMP2), SLJIT_OFFSETOF(jit_arguments, begin));
     add_jump(compiler, backtracks, CMP(SLJIT_GREATER, STR_PTR, 0, TMP1, 0));
     OP2(SLJIT_AND32 | SLJIT_SET_Z, SLJIT_UNUSED, 0, SLJIT_MEM1(TMP2), SLJIT_OFFSETOF(jit_arguments, options), SLJIT_IMM, PCRE2_NOTBOL);
-    add_jump(compiler, backtracks, JUMP(SLJIT_NOT_ZERO32));
+    add_jump(compiler, backtracks, JUMP(SLJIT_NOT_ZERO));
     }
   else
     {
     OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(ARGUMENTS), SLJIT_OFFSETOF(jit_arguments, begin));
     add_jump(compiler, backtracks, CMP(SLJIT_GREATER, STR_PTR, 0, TMP1, 0));
     OP2(SLJIT_AND32 | SLJIT_SET_Z, SLJIT_UNUSED, 0, SLJIT_MEM1(ARGUMENTS), SLJIT_OFFSETOF(jit_arguments, options), SLJIT_IMM, PCRE2_NOTBOL);
-    add_jump(compiler, backtracks, JUMP(SLJIT_NOT_ZERO32));
+    add_jump(compiler, backtracks, JUMP(SLJIT_NOT_ZERO));
     }
   return cc;
 
@@ -8221,7 +8221,7 @@ switch(type)
     jump[1] = CMP(SLJIT_GREATER, STR_PTR, 0, TMP2, 0);
     OP2(SLJIT_AND32 | SLJIT_SET_Z, SLJIT_UNUSED, 0, SLJIT_MEM1(ARGUMENTS), SLJIT_OFFSETOF(jit_arguments, options), SLJIT_IMM, PCRE2_NOTBOL);
     }
-  add_jump(compiler, backtracks, JUMP(SLJIT_NOT_ZERO32));
+  add_jump(compiler, backtracks, JUMP(SLJIT_NOT_ZERO));
   jump[0] = JUMP(SLJIT_JUMP);
   JUMPHERE(jump[1]);
 
@@ -9575,11 +9575,11 @@ free_stack(common, callout_arg_size);
 
 /* Check return value. */
 OP2(SLJIT_SUB32 | SLJIT_SET_Z | SLJIT_SET_SIG_GREATER, SLJIT_UNUSED, 0, SLJIT_RETURN_REG, 0, SLJIT_IMM, 0);
-add_jump(compiler, &backtrack->topbacktracks, JUMP(SLJIT_SIG_GREATER32));
+add_jump(compiler, &backtrack->topbacktracks, JUMP(SLJIT_SIG_GREATER));
 if (common->abort_label == NULL)
-  add_jump(compiler, &common->abort, JUMP(SLJIT_NOT_EQUAL32) /* SIG_LESS */);
+  add_jump(compiler, &common->abort, JUMP(SLJIT_NOT_EQUAL) /* SIG_LESS */);
 else
-  JUMPTO(SLJIT_NOT_EQUAL32 /* SIG_LESS */, common->abort_label);
+  JUMPTO(SLJIT_NOT_EQUAL /* SIG_LESS */, common->abort_label);
 return cc + callout_length;
 }
 
