@@ -1,6 +1,13 @@
 Change Log for PCRE2
 --------------------
 
+Version 10.38-RC1 xx-xxx-2021
+-----------------------------
+
+1. Fix invalid single character repetition issues in JIT when the repetition
+is inside a capturing bracket and the bracket is preceeded by character
+literals.
+
 
 Version 10.37 26-May-2021
 -------------------------
