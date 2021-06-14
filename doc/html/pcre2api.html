@@ -2643,10 +2643,10 @@ lookbehind. For example, consider the pattern
 </pre>
 which finds occurrences of "iss" in the middle of words. (\B matches only if
 the current position in the subject is not a word boundary.) When applied to
-the string "Mississipi" the first call to <b>pcre2_match()</b> finds the first
+the string "Mississippi" the first call to <b>pcre2_match()</b> finds the first
 occurrence. If <b>pcre2_match()</b> is called again with just the remainder of
-the subject, namely "issipi", it does not match, because \B is always false at
-the start of the subject, which is deemed to be a word boundary. However, if
+the subject, namely "issippi", it does not match, because \B is always false
+at the start of the subject, which is deemed to be a word boundary. However, if
 <b>pcre2_match()</b> is passed the entire string again, but with
 <i>startoffset</i> set to 4, it finds the second occurrence of "iss" because it
 is able to look behind the starting point to discover that it is preceded by a

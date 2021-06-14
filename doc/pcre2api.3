@@ -2628,10 +2628,10 @@ lookbehind. For example, consider the pattern
 .sp
 which finds occurrences of "iss" in the middle of words. (\eB matches only if
 the current position in the subject is not a word boundary.) When applied to
-the string "Mississipi" the first call to \fBpcre2_match()\fP finds the first
+the string "Mississippi" the first call to \fBpcre2_match()\fP finds the first
 occurrence. If \fBpcre2_match()\fP is called again with just the remainder of
-the subject, namely "issipi", it does not match, because \eB is always false at
-the start of the subject, which is deemed to be a word boundary. However, if
+the subject, namely "issippi", it does not match, because \eB is always false
+at the start of the subject, which is deemed to be a word boundary. However, if
 \fBpcre2_match()\fP is passed the entire string again, but with
 \fIstartoffset\fP set to 4, it finds the second occurrence of "iss" because it
 is able to look behind the starting point to discover that it is preceded by a

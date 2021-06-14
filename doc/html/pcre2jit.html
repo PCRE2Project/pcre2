@@ -54,6 +54,7 @@ platforms:
 <pre>
   ARM 32-bit (v5, v7, and Thumb2)
   ARM 64-bit
+  IBM s390x 64 bit
   Intel x86 32-bit and 64-bit
   MIPS 32-bit and 64-bit
   Power PC 32-bit and 64-bit
@@ -286,7 +287,7 @@ inefficient solution, and not recommended.
 This is a suggestion for how a multithreaded program that needs to set up
 non-default JIT stacks might operate:
 <pre>
-  During thread initalization
+  During thread initialization
     thread_local_var = pcre2_jit_stack_create(...)
 
   During thread exit

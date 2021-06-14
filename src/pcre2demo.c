@@ -198,8 +198,8 @@ if (rc < 0)
   return 1;
   }
 
-/* Match succeded. Get a pointer to the output vector, where string offsets are
-stored. */
+/* Match succeeded. Get a pointer to the output vector, where string offsets
+are stored. */
 
 ovector = pcre2_get_ovector_pointer(match_data);
 printf("Match succeeded at offset %d\n", (int)ovector[0]);
@@ -436,7 +436,7 @@ for (;;)
     return 1;
     }
 
-  /* Match succeded */
+  /* Match succeeded */
 
   printf("\nMatch succeeded again at offset %d\n", (int)ovector[0]);
 
