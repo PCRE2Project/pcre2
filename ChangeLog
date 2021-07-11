@@ -8,6 +8,32 @@ Version 10.38-RC1 xx-xxx-2021
 is inside a capturing bracket and the bracket is preceeded by character
 literals.
 
+2. Installed revised CMake configuration files provided by Jan-Willem Blokland. 
+This extends the CMake build system to build both static and shared libraries
+in one go, builds the static library with PIC, and exposes PCRE2 libraries
+using the CMake config files. JWB provided these notes:
+
+- Introduced CMake variable BUILD_STATIC_LIBS to build the static library.
+
+- Make a small modification to config-cmake.h.in by removing the PCRE2_STATIC 
+  variable. Added PCRE2_STATIC variable to the static build using the
+  target_compile_definitions() function.
+
+- Extended the CMake config files.
+
+  - Introduced CMake variable PCRE2_USE_STATIC_LIBS to easily switch between
+    the static and shared libraries.
+
+  - Added the PCRE_STATIC variable to the target compile definitions for the 
+    import of the static library.
+
+Building static and shared libraries using MSVC results in a name clash of
+the libraries. Both static and shared library builds create, for example, the
+file pcre2-8.lib. Therefore, I decided to change the static library names by
+adding "-static". For example, pcre2-8.lib has become pcre2-8-static.lib.
+[Comment by PH: this seems to be MSVC-specific. It doesn't happen on Linux.]
+
+
 
 Version 10.37 26-May-2021
 -------------------------

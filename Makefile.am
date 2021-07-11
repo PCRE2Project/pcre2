@@ -859,9 +859,11 @@ endif # WITH_GCOV
 
 EXTRA_DIST += \
   cmake/COPYING-CMAKE-SCRIPTS \
+  cmake/FindEditline.cmake \
   cmake/FindPackageHandleStandardArgs.cmake \
   cmake/FindReadline.cmake \
-  cmake/FindEditline.cmake \
+  cmake/pcre2-config-version.cmake.in \
+  cmake/pcre2-config.cmake.in \
   CMakeLists.txt \
   config-cmake.h.in
 

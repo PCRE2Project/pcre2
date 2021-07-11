@@ -16,8 +16,6 @@
 #cmakedefine HAVE_SECURE_GETENV 1
 #cmakedefine HAVE_STRERROR 1
 
-#cmakedefine PCRE2_STATIC 1
-
 #cmakedefine SUPPORT_PCRE2_8 1
 #cmakedefine SUPPORT_PCRE2_16 1
 #cmakedefine SUPPORT_PCRE2_32 1
