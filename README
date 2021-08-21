@@ -8,6 +8,11 @@ features, and the internals have been improved. The original PCRE1 library is
 now obsolete and should not be used in new projects. The latest release of
 PCRE2 is available in three alternative formats from:
 
+=============================================================================
+This information is still current (21 August 2021), but the PCRE2 project is in 
+the process of moving to different infrastructure, so in the near future there 
+will be new URLs here. The mailing list will also change.
+
 https://ftp.pcre.org/pub/pcre/pcre2-10.xx.tar.gz
 https://ftp.pcre.org/pub/pcre/pcre2-10.xx.tar.bz2
 https://ftp.pcre.org/pub/pcre/pcre2-10.xx.tar.zip
@@ -17,6 +22,9 @@ pcre-dev@exim.org. You can access the archives and subscribe or manage your
 subscription here:
 
    https://lists.exim.org/mailman/listinfo/pcre-dev
+
+=============================================================================
+
 
 Please read the NEWS file if you are upgrading from a previous release. The
 contents of this README file are:

@@ -222,12 +222,19 @@ Once PrepareRelease has run clean, run "make distcheck" to create the tarballs
 and the zipball. Double-check with "svn status", then create an SVN tagged
 copy:
 
+==============================================================================
+This information is out-of-date: the PCRE2 project is moving to different 
+infrastructure (as of 21 August 2021). This file will be updated in due course.
+
   svn copy svn://vcs.exim.org/pcre2/code/trunk \
            svn://vcs.exim.org/pcre2/code/tags/pcre2-10.xx
 
 When the new release is out, don't forget to tell webmaster@pcre.org and the
 mailing list. Also, update the list of version numbers in Bugzilla
 (administration > products > PCRE > Edit versions).
+
+==============================================================================
+
 
 
 Future ideas (wish list)
