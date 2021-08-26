@@ -54,8 +54,8 @@ Unicode.tables   The files in this directory were downloaded from the Unicode
 ucptest.c        A short C program for testing the Unicode property macros
                  that do lookups in the pcre2_ucd.c data, mainly useful after
                  rebuilding the Unicode property table. Compile and run this in
-                 the "maint" directory (see comments at its head). This program 
-                 can also be used to find characters with specific properties. 
+                 the "maint" directory (see comments at its head). This program
+                 can also be used to find characters with specific properties.
 
 ucptestdata      A directory containing four files, testinput{1,2} and
                  testoutput{1,2}, for use in conjunction with the ucptest
@@ -129,7 +129,8 @@ distribution for a new release.
   different configurations, and it also runs some of them with valgrind, all of
   which can take quite some time.
 
-. Run tests in both 32-bit and 64-bit environments if possible.
+. Run tests in both 32-bit and 64-bit environments if possible. I can no longer
+  run 32-bit tests.
 
 . Run tests with two or more different compilers (e.g. clang and gcc), and
   make use of -fsanitize=address and friends where possible. For gcc,
@@ -140,7 +141,8 @@ distribution for a new release.
   be added when compiling with JIT. Another useful clang option is
   -fsanitize=signed-integer-overflow
 
-. Do a test build using CMake.
+. Do a test build using CMake. Remove src/config.h first, lest it override the
+  version that CMake creates. Do NOT use parallel make.
 
 . Run perltest.sh on the test data for tests 1 and 4. The output should match
   the PCRE2 test output, apart from the version identification at the start of
@@ -160,8 +162,7 @@ distribution for a new release.
   compiler as a change from gcc. Adding -xarch=v9 to the cc options does a
   64-bit test, but it also needs -S 64 for pcre2test to increase the stack size
   for test 2. Since I retired I can no longer do much of this, but instead I
-  rely on putting out release candidates for folks on the pcre-dev list to
-  test.
+  rely on putting out release candidates for testing by the community.
 
 . The buildbots at http://buildfarm.opencsw.org/ do some automated testing
   of PCRE2 and should be checked before putting out a release.
@@ -214,27 +215,19 @@ changes in a shared library:
 Making a PCRE2 release
 ======================
 
-Run PrepareRelease and commit the files that it changes (by removing trailing
-spaces). The first thing this script does is to run CheckMan on the man pages;
-if it finds any markup errors, it reports them and then aborts.
+Run PrepareRelease and commit the files that it changes. The first thing this
+script does is to run CheckMan on the man pages; if it finds any markup errors,
+it reports them and then aborts. Otherwise it removes trailing spaces from
+sources and refreshes the HTML documentation. Update the GitHub repository with
+"git push".
 
-Once PrepareRelease has run clean, run "make distcheck" to create the tarballs
-and the zipball. Double-check with "svn status", then create an SVN tagged
-copy:
-
-==============================================================================
-This information is out-of-date: the PCRE2 project is moving to different 
-infrastructure (as of 21 August 2021). This file will be updated in due course.
-
-  svn copy svn://vcs.exim.org/pcre2/code/trunk \
-           svn://vcs.exim.org/pcre2/code/tags/pcre2-10.xx
+Once PrepareRelease has run clean, run "make distcheck" to create the tarball
+and the zipball. I then sign these files. Double-check with "git status" that
+the repository is fully up-to-date, then create a new tag on GitHub. Upload the
+tarball, zipball, and the signatures as "assets" of the GitHub release.
 
 When the new release is out, don't forget to tell webmaster@pcre.org and the
-mailing list. Also, update the list of version numbers in Bugzilla
-(administration > products > PCRE > Edit versions).
-
-==============================================================================
-
+mailing list.
 
 
 Future ideas (wish list)
@@ -242,7 +235,8 @@ Future ideas (wish list)
 
 This section records a list of ideas so that they do not get forgotten. They
 vary enormously in their usefulness and potential for implementation. Some are
-very sensible; some are rather wacky. Some have been on this list for years.
+very sensible; some are rather wacky. Some have been on this list for many
+years.
 
 . Optimization
 
@@ -283,9 +277,6 @@ very sensible; some are rather wacky. Some have been on this list for years.
 
 . An option to convert results into character offsets and character lengths.
 
-. An option for pcre2grep to scan only the start of a file. I am not keen -
-  this is the job of "head".
-
 . A (non-Unix) user wanted pcregrep options to (a) list a file name just once,
   preceded by a blank line, instead of adding it to every matched line, and (b)
   support --outputfile=name.
@@ -324,10 +315,9 @@ very sensible; some are rather wacky. Some have been on this list for years.
 
 . PCRE2 cannot at present distinguish between subpatterns with different names,
   but the same number (created by the use of ?|). In order to do so, a way of
-  remembering *which* subpattern numbered n matched is needed. Bugzilla #760.
-  (*MARK) can perhaps be used as a way round this problem. However, note that
-  Perl does not distinguish: like PCRE2, a name is just an alias for a number
-  in Perl.
+  remembering *which* subpattern numbered n matched is needed. (*MARK) can
+  perhaps be used as a way round this problem. However, note that Perl does not
+  distinguish: like PCRE2, a name is just an alias for a number in Perl.
 
 . Instead of having #ifdef HAVE_CONFIG_H in each module, put #include
   "something" and the the #ifdef appears only in one place, in "something".
@@ -355,8 +345,6 @@ very sensible; some are rather wacky. Some have been on this list for years.
 
 . (?[...]) extended classes: big project.
 
-. Bugzilla #1694 requests backwards searching.
-
 . Allow a callout to specify a number of characters to skip. This can be done
   compatibly via an extra callout field.
 
@@ -367,9 +355,6 @@ very sensible; some are rather wacky. Some have been on this list for years.
 
 . A limit on substitutions: a user suggested somehow finding a way of making
   match_limit apply to the whole operation instead of each match separately.
-
-. Redesign handling of class/nclass/xclass because the compile code logic is
-  currently very contorted and obscure.
 
 . Some #defines could be replaced with enums to improve robustness.
 
@@ -387,7 +372,8 @@ very sensible; some are rather wacky. Some have been on this list for years.
   The test function could make use of get_substrings() to cover more code.
 
 . A neater way of handling recursion file names in pcre2grep, e.g. a single
-  buffer that can grow.
+  buffer that can grow. See also GitHub issue #2 (recursion looping via
+  symlinks).
 
 . A user suggested that before/after parameters in pcre2grep could have
   negative values, to list lines near to the matched line, but not necessarily
@@ -402,14 +388,7 @@ very sensible; some are rather wacky. Some have been on this list for years.
 . Breaking loops that match an empty string: perhaps find a way of continuing
   if *something* has changed, but this might mean remembering additional data.
   "Something" could be a capture value, but then a list of previous values
-  would be needed to avoid a cycle of changes. Bugzilla #2182.
-
-. The use of \K in assertions is problematic. There was some talk of Perl
-  banning this, but it hasn't happened. Some problems could be avoided by
-  not allowing it to set a value before the match start; others by not allowing
-  it to set a value after the match end. This could be controlled by an option
-  such as PCRE2_SANE_BACKSLASH_K, for compatibility (or possibly make the sane
-  behaviour the default and implement PCRE2_INSANE_BACKSLASH_K).
+  would be needed to avoid a cycle of changes.
 
 . If a function could be written to find 3-character (or other length) fixed
   strings, at least one of which must be present for a match, efficient
@@ -417,6 +396,8 @@ very sensible; some are rather wacky. Some have been on this list for years.
 
 . If pcre2grep had --first-line (match only in the first line) it could be
   efficiently used to find files "starting with xxx". What about --last-line?
+  There was also the suggestion of an option for pcre2grep to scan only the
+  start of a file. I am not keen - this is the job of "head".
 
 . A user requested a means of determining whether a failed match was failed by
   the start-of-match optimizations, or by running the match engine. Easy enough
@@ -426,12 +407,14 @@ very sensible; some are rather wacky. Some have been on this list for years.
   interpreters? JIT already does some of this, but it may not be worth it for
   the interpreters.
 
-. There was a request for a way of re-defining \w (and therefore \W, \b, and
-  \B). An in-pattern sequence such as (?w=[...]) was suggested. Easiest way
-  would be simply to inline the class, with lookarounds for \b and \B. Ideally
-  the setting should last till the end of the group, which means remembering
-  all previous settings; maybe a fixed amount of stack would do - how deep
-  would anyone want to nest these things? Bugzilla #2301.
+. Redesign handling of class/nclass/xclass because the compile code logic is
+  currently very contorted and obscure. Also there was a request for a way of
+  re-defining \w (and therefore \W, \b, and \B). An in-pattern sequence such as
+  (?w=[...]) was suggested. Easiest way would be simply to inline the class,
+  with lookarounds for \b and \B. Ideally the setting should last till the end
+  of the group, which means remembering all previous settings; maybe a fixed
+  amount of stack would do - how deep would anyone want to nest these things?
+  See GitHub issue #13 for a compendium of character class issues.
 
 . Recognize the short script names. They are already listed in maint/
   Multistage2.py because they are needed for scanning the script extensions
@@ -444,7 +427,16 @@ very sensible; some are rather wacky. Some have been on this list for years.
   facility for a length limit in pcre2_config(), and what would be the
   encoding?
 
+. Quantified groups with a fixed count currently operate by replicating the
+  group in the compiled bytecode. This may not really matter in these days of
+  gigabyte memory, but perhaps another implementation might be considered.
+  Needs coordination between the interpreters and JIT.
+
+. There are regular requests for variable-length lookbehinds.
+
+. See also any suggestions in the GitHub issues.
+
 Philip Hazel
-Email local part: ph10
-Email domain: cam.ac.uk
-Last updated: 01 April 2020
+Email local part: Philip.Hazel
+Email domain: gmail.com
+Last updated: 26 August 2021
