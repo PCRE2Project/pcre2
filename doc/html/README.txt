@@ -6,25 +6,18 @@ API. Since its initial release in 2015, there has been further development of
 the code and it now differs from PCRE1 in more than just the API. There are new
 features, and the internals have been improved. The original PCRE1 library is
 now obsolete and should not be used in new projects. The latest release of
-PCRE2 is available in three alternative formats from:
+PCRE2 is available in .tar.gz or .zip form from its GitHub repository:
 
-=============================================================================
-This information is still current (21 August 2021), but the PCRE2 project is in 
-the process of moving to different infrastructure, so in the near future there 
-will be new URLs here. The mailing list will also change.
+https://github.com/PhilipHazel/pcre2/releases
 
-https://ftp.pcre.org/pub/pcre/pcre2-10.xx.tar.gz
-https://ftp.pcre.org/pub/pcre/pcre2-10.xx.tar.bz2
-https://ftp.pcre.org/pub/pcre/pcre2-10.xx.tar.zip
+There is a mailing list for discussion about the development of PCRE2 at
+pcre2-dev@googlegroups.com. You can subscribe by sending an email to 
+pcre2-dev+subscribe@googlegroups.com.
 
-There is a mailing list for discussion about the development of PCRE at
-pcre-dev@exim.org. You can access the archives and subscribe or manage your
-subscription here:
+You can access the archives and also subscribe or manage your subscription
+here:
 
-   https://lists.exim.org/mailman/listinfo/pcre-dev
-
-=============================================================================
-
+https://groups.google.com/pcre2-dev
 
 Please read the NEWS file if you are upgrading from a previous release. The
 contents of this README file are:
@@ -387,7 +380,7 @@ library. They are also documented in the pcre2build man page.
   defined and has a value greater than or equal to 199901L (indicating C99).
   However, there is at least one environment that claims to be C99 but does not
   support these modifiers. If --disable-percent-zt is specified, no use is made
-  of the z or t modifiers. Instead or %td or %zu, %lu is used, with a cast for
+  of the z or t modifiers. Instead of %td or %zu, %lu is used, with a cast for
   size_t values.
 
 . There is a special option called --enable-fuzz-support for use by people who
@@ -578,9 +571,9 @@ at build time" for more details.
 Making new tarballs
 -------------------
 
-The command "make dist" creates three PCRE2 tarballs, in tar.gz, tar.bz2, and
-zip formats. The command "make distcheck" does the same, but then does a trial
-build of the new distribution to ensure that it works.
+The command "make dist" creates two PCRE2 tarballs, in tar.gz and zip formats.
+The command "make distcheck" does the same, but then does a trial build of the
+new distribution to ensure that it works.
 
 If you have modified any of the man page sources in the doc directory, you
 should first run the PrepareRelease script before making a distribution. This
@@ -912,4 +905,4 @@ The distribution should contain the files listed below.
 Philip Hazel
 Email local part: Philip.Hazel
 Email domain: gmail.com
-Last updated: 28 April 2021
+Last updated: 25 August 2021
