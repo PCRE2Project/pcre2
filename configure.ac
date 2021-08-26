@@ -25,7 +25,7 @@ m4_define(libpcre2_posix_version, [3:0:0])
 AC_PREREQ([2.60])
 AC_INIT([PCRE2],pcre2_major.pcre2_minor[]pcre2_prerelease,[],[pcre2])
 AC_CONFIG_SRCDIR([src/pcre2.h.in])
-AM_INIT_AUTOMAKE([dist-bzip2 dist-zip])
+AM_INIT_AUTOMAKE([dist-zip])
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 AC_CONFIG_HEADERS(src/config.h)
 
