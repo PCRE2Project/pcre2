@@ -6,7 +6,8 @@ API. Since its initial release in 2015, there has been further development of
 the code and it now differs from PCRE1 in more than just the API. There are new
 features, and the internals have been improved. The original PCRE1 library is
 now obsolete and should not be used in new projects. The latest release of
-PCRE2 is available in .tar.gz or .zip form from its GitHub repository:
+PCRE2 is available in .tar.gz, tar.bz2, or .zip form from this GitHub
+repository:
 
 https://github.com/PhilipHazel/pcre2/releases
 
@@ -905,4 +906,4 @@ The distribution should contain the files listed below.
 Philip Hazel
 Email local part: Philip.Hazel
 Email domain: gmail.com
-Last updated: 25 August 2021
+Last updated: 27 August 2021
