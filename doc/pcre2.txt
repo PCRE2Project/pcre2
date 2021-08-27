@@ -177,12 +177,12 @@ AUTHOR
        Cambridge, England.
 
        Putting an actual email address here is a spam magnet. If you  want  to
-       email me, use my two names separated by a dot at google.com.
+       email me, use my two names separated by a dot at gmail.com.
 
 
 REVISION
 
-       Last updated: 25 August 2021
+       Last updated: 27 August 2021
        Copyright (c) 1997-2021 University of Cambridge.
 ------------------------------------------------------------------------------
  
