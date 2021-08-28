@@ -97,11 +97,13 @@
 # 2021-06-29 JWSB added the option to build static library with PIC.
 # 2021-07-05 JWSB modified such both the static and shared library can be
 #            build in one go.
+# 2021-08-28 PH increased minimum version
 
 PROJECT(PCRE2 C)
 
 # Increased minimum to 2.8.5 to support GNUInstallDirs.
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8.5)
+# Increased minimum to 3.0.0 because older than 2.8.12 is deprecated.
+CMAKE_MINIMUM_REQUIRED(VERSION 3.0.0)
 
 # Set policy CMP0026 to avoid warnings for the use of LOCATION in
 # GET_TARGET_PROPERTY. This should no longer be required.

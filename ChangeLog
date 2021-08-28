@@ -31,7 +31,11 @@ Building static and shared libraries using MSVC results in a name clash of
 the libraries. Both static and shared library builds create, for example, the
 file pcre2-8.lib. Therefore, I decided to change the static library names by
 adding "-static". For example, pcre2-8.lib has become pcre2-8-static.lib.
-[Comment by PH: this seems to be MSVC-specific. It doesn't happen on Linux.]
+[Comment by PH: this is MSVC-specific. It doesn't happen on Linux.]
+
+3. Increased the minimum release number for CMake to 3.0.0 because older than 
+2.8.12 is deprecated (it was set to 2.8.5) and causes warnings. Even 3.0.0 is 
+quote old; it was released in 2014.
 
 
 
