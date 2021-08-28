@@ -15,8 +15,8 @@ flexible API, the code of PCRE2 has been much improved since the fork.
 
 As well as downloading from the 
 [GitHub site](https://github.com/PhilipHazel/pcre2), you can download PCRE2 
-or the older, unmaintained PCRE1 library from an [*unofficial* mirror] 
-(https://sourceforge.net/projects/pcre/files/) at SourceForge.
+or the older, unmaintained PCRE1 library from an 
+[*unofficial* mirror](https://sourceforge.net/projects/pcre/files/) at SourceForge.
 
 You can check out the PCRE2 source code via Git or Subversion:
 
@@ -26,12 +26,12 @@ You can check out the PCRE2 source code via Git or Subversion:
 ## Contributed Ports
 
 If you just need the command-line PCRE2 tools on Windows, precompiled binary
-versions are available at this [Rexegg page]
-(http://www.rexegg.com/pcregrep-pcretest.html).
+versions are available at this 
+[Rexegg page](http://www.rexegg.com/pcregrep-pcretest.html).
 
 A PCRE2 port for z/OS, a mainframe operating system which uses EBCDIC as its
-default character encoding, can be found at [http://www.cbttape.org]
-(http://www.cbttape.org/) (File 939).
+default character encoding, can be found at 
+[http://www.cbttape.org](http://www.cbttape.org/) (File 939).
 
 ## Documentation
 
@@ -43,8 +43,8 @@ community authored Wikipedia entry for PCRE.
 
 There is a curated summary of changes for each PCRE release, copies of
 documentation from older releases, and other useful information from the third
-party authored [RexEgg PCRE Documentation and Change Log page]
-(http://www.rexegg.com/pcre-documentation.html).
+party authored 
+[RexEgg PCRE Documentation and Change Log page](http://www.rexegg.com/pcre-documentation.html).
 
 ## Contact
 
