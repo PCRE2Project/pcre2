@@ -13,8 +13,10 @@ flexible API, the code of PCRE2 has been much improved since the fork.
  
 ## Download
 
-As well as downloading from this site, you can download PCRE2 or the older,
-unmaintained PCRE1 library from an *unofficial* mirror at SourceForge:
+As well as downloading from the 
+[GitHub site](https://github.com/PhilipHazel/pcre2), you can download PCRE2 
+or the older, unmaintained PCRE1 library from an *unofficial* mirror at 
+SourceForge:
 
 https://sourceforge.net/projects/pcre/files/
 
