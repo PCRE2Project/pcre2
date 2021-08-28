@@ -78,8 +78,9 @@ tried is controlled by the greedy or ungreedy nature of the quantifier.
 If a leaf node is reached, a matching string has been found, and at that point
 the algorithm stops. Thus, if there is more than one possible match, this
 algorithm returns the first one that it finds. Whether this is the shortest,
-the longest, or some intermediate length depends on the way the greedy and
-ungreedy repetition quantifiers are specified in the pattern.
+the longest, or some intermediate length depends on the way the alternations
+and the greedy or ungreedy repetition quantifiers are specified in the
+pattern.
 </P>
 <P>
 Because it ends up with a single path through the tree, it is relatively
@@ -109,11 +110,17 @@ no more unterminated paths. At this point, terminated paths represent the
 different matching possibilities (if there are none, the match has failed).
 Thus, if there is more than one possible match, this algorithm finds all of
 them, and in particular, it finds the longest. The matches are returned in
-decreasing order of length. There is an option to stop the algorithm after the
-first match (which is necessarily the shortest) is found.
+the output vector in decreasing order of length. There is an option to stop the
+algorithm after the first match (which is necessarily the shortest) is found.
 </P>
 <P>
-Note that all the matches that are found start at the same point in the
+Note that the size of vector needed to contain all the results depends on the
+number of simultaneous matches, not on the number of parentheses in the
+pattern. Using <b>pcre2_match_data_create_from_pattern()</b> to create the match
+data block is therefore not advisable when doing DFA matching.
+</P>
+<P>
+Note also that all the matches that are found start at the same point in the
 subject. If the pattern
 <pre>
   cat(er(pillar)?)?
@@ -194,21 +201,14 @@ supported by <b>pcre2_dfa_match()</b>.
 </P>
 <br><a name="SEC5" href="#TOC1">ADVANTAGES OF THE ALTERNATIVE ALGORITHM</a><br>
 <P>
-Using the alternative matching algorithm provides the following advantages:
+The main advantage of the alternative algorithm is that all possible matches
+(at a single point in the subject) are automatically found, and in particular,
+the longest match is found. To find more than one match at the same point using
+the standard algorithm, you have to do kludgy things with callouts.
 </P>
 <P>
-1. All possible matches (at a single point in the subject) are automatically
-found, and in particular, the longest match is found. To find more than one
-match using the standard algorithm, you have to do kludgy things with
-callouts.
-</P>
-<P>
-2. Because the alternative algorithm scans the subject string just once, and
-never needs to backtrack (except for lookbehinds), it is possible to pass very
-long subject strings to the matching function in several pieces, checking for
-partial matching each time. Although it is also possible to do multi-segment
-matching using the standard algorithm, by retaining partially matched
-substrings, it is more complicated. The
+Partial matching is possible with this algorithm, though it has some
+limitations. The
 <a href="pcre2partial.html"><b>pcre2partial</b></a>
 documentation gives details of partial matching and discusses multi-segment
 matching.
@@ -230,20 +230,23 @@ invalid UTF string are not supported.
 3. Although atomic groups are supported, their use does not provide the
 performance advantage that it does for the standard algorithm.
 </P>
+<P>
+4. JIT optimization is not supported.
+</P>
 <br><a name="SEC7" href="#TOC1">AUTHOR</a><br>
 <P>
 Philip Hazel
 <br>
-University Computing Service
+Retired from University Computing Service
 <br>
 Cambridge, England.
 <br>
 </P>
 <br><a name="SEC8" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 23 May 2019
+Last updated: 28 August 2021
 <br>
-Copyright &copy; 1997-2019 University of Cambridge.
+Copyright &copy; 1997-2021 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE2 index page</a>.

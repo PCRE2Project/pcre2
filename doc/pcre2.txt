@@ -2468,20 +2468,28 @@ THE MATCH DATA BLOCK
        Information about a successful or unsuccessful match  is  placed  in  a
        match  data  block,  which  is  an opaque structure that is accessed by
        function calls. In particular, the match data block contains  a  vector
-       of  offsets into the subject string that define the matched part of the
-       subject and any substrings that were captured. This  is  known  as  the
-       ovector.
+       of offsets into the subject string that define the matched parts of the
+       subject. This is known as the ovector.
 
-       Before  calling  pcre2_match(), pcre2_dfa_match(), or pcre2_jit_match()
+       Before calling pcre2_match(), pcre2_dfa_match(),  or  pcre2_jit_match()
        you must create a match data block by calling one of the creation func-
-       tions  above.  For pcre2_match_data_create(), the first argument is the
-       number of pairs of offsets in the ovector. One pair of offsets  is  re-
-       quired  to  identify the string that matched the whole pattern, with an
-       additional pair for each captured substring. For example, a value of  4
-       creates  enough space to record the matched portion of the subject plus
-       three captured substrings. A minimum of at least 1 pair is  imposed  by
-       pcre2_match_data_create(), so it is always possible to return the over-
-       all matched string.
+       tions above. For pcre2_match_data_create(), the first argument  is  the
+       number of pairs of offsets in the ovector.
+
+       When  using  pcre2_match(), one pair of offsets is required to identify
+       the string that matched the whole pattern, with an additional pair  for
+       each captured substring. For example, a value of 4 creates enough space
+       to record the matched portion of the subject plus three  captured  sub-
+       strings.
+
+       When  using  pcre2_dfa_match() there may be multiple matched substrings
+       of different lengths at the same point  in  the  subject.  The  ovector
+       should be made large enough to hold as many as are expected.
+
+       A  minimum  of at least 1 pair is imposed by pcre2_match_data_create(),
+       so it is always possible to return the overall matched  string  in  the
+       case   of   pcre2_match()   or   the  longest  match  in  the  case  of
+       pcre2_dfa_match().
 
        The second argument of pcre2_match_data_create() is a pointer to a gen-
        eral  context, which can specify custom memory management for obtaining
@@ -2490,10 +2498,12 @@ THE MATCH DATA BLOCK
 
        For  pcre2_match_data_create_from_pattern(),  the  first  argument is a
        pointer to a compiled pattern. The ovector is created to be exactly the
-       right size to hold all the substrings a pattern might capture. The sec-
-       ond argument is again a pointer to a general context, but in this  case
-       if NULL is passed, the memory is obtained using the same allocator that
-       was used for the compiled pattern (custom or default).
+       right  size  to  hold  all  the substrings a pattern might capture when
+       matched using pcre2_match(). You should not use this call when matching
+       with  pcre2_dfa_match().  The  second  argument is again a pointer to a
+       general context, but in this case if NULL is passed, the memory is  ob-
+       tained  using the same allocator that was used for the compiled pattern
+       (custom or default).
 
        A match data block can be used many times, with the same  or  different
        compiled  patterns. You can extract information from a match data block
@@ -3825,14 +3835,14 @@ SEE ALSO
 AUTHOR
 
        Philip Hazel
-       University Computing Service
+       Retired from University Computing Service
        Cambridge, England.
 
 
 REVISION
 
-       Last updated: 04 November 2020
-       Copyright (c) 1997-2020 University of Cambridge.
+       Last updated: 28 August 2021
+       Copyright (c) 1997-2021 University of Cambridge.
 ------------------------------------------------------------------------------
  
  
@@ -5635,8 +5645,8 @@ THE STANDARD MATCHING ALGORITHM
        that  point the algorithm stops. Thus, if there is more than one possi-
        ble match, this algorithm returns the first one that it finds.  Whether
        this  is the shortest, the longest, or some intermediate length depends
-       on the way the greedy and ungreedy repetition quantifiers are specified
-       in the pattern.
+       on the way the alternations and the greedy or ungreedy repetition quan-
+       tifiers are specified in the pattern.
 
        Because  it  ends  up  with a single path through the tree, it is rela-
        tively straightforward for this algorithm to keep  track  of  the  sub-
@@ -5665,12 +5675,18 @@ THE ALTERNATIVE MATCHING ALGORITHM
        represent the different matching possibilities (if there are none,  the
        match  has  failed).   Thus,  if there is more than one possible match,
        this algorithm finds all of them, and in particular, it finds the long-
-       est.  The  matches are returned in decreasing order of length. There is
-       an option to stop the algorithm after the first match (which is  neces-
-       sarily the shortest) is found.
+       est.  The matches are returned in the output vector in decreasing order
+       of length. There is an option to stop the  algorithm  after  the  first
+       match (which is necessarily the shortest) is found.
 
-       Note that all the matches that are found start at the same point in the
-       subject. If the pattern
+       Note  that the size of vector needed to contain all the results depends
+       on the number of simultaneous matches, not on the number of parentheses
+       in  the pattern. Using pcre2_match_data_create_from_pattern() to create
+       the match data block is therefore not advisable when doing  DFA  match-
+       ing.
+
+       Note  also  that all the matches that are found start at the same point
+       in the subject. If the pattern
 
          cat(er(pillar)?)?
 
@@ -5746,50 +5762,45 @@ THE ALTERNATIVE MATCHING ALGORITHM
 
 ADVANTAGES OF THE ALTERNATIVE ALGORITHM
 
-       Using  the alternative matching algorithm provides the following advan-
-       tages:
-
-       1. All possible matches (at a single point in the subject) are automat-
-       ically  found,  and  in particular, the longest match is found. To find
-       more than one match using the standard algorithm, you have to do kludgy
+       The  main  advantage  of the alternative algorithm is that all possible
+       matches (at a single point in the subject) are automatically found, and
+       in  particular, the longest match is found. To find more than one match
+       at the same point using the standard algorithm, you have to  do  kludgy
        things with callouts.
 
-       2.  Because  the  alternative  algorithm  scans the subject string just
-       once, and never needs to backtrack (except for lookbehinds), it is pos-
-       sible  to  pass  very  long subject strings to the matching function in
-       several pieces, checking for partial matching each time. Although it is
-       also  possible  to  do  multi-segment matching using the standard algo-
-       rithm, by retaining partially matched substrings, it  is  more  compli-
-       cated. The pcre2partial documentation gives details of partial matching
-       and discusses multi-segment matching.
+       Partial  matching  is  possible with this algorithm, though it has some
+       limitations. The pcre2partial documentation gives  details  of  partial
+       matching and discusses multi-segment matching.
 
 
 DISADVANTAGES OF THE ALTERNATIVE ALGORITHM
 
        The alternative algorithm suffers from a number of disadvantages:
 
-       1. It is substantially slower than  the  standard  algorithm.  This  is
-       partly  because  it has to search for all possible matches, but is also
+       1.  It  is  substantially  slower  than the standard algorithm. This is
+       partly because it has to search for all possible matches, but  is  also
        because it is less susceptible to optimization.
 
-       2. Capturing parentheses, backreferences,  script  runs,  and  matching
+       2.  Capturing  parentheses,  backreferences,  script runs, and matching
        within invalid UTF string are not supported.
 
        3. Although atomic groups are supported, their use does not provide the
        performance advantage that it does for the standard algorithm.
 
+       4. JIT optimization is not supported.
+
 
 AUTHOR
 
        Philip Hazel
-       University Computing Service
+       Retired from University Computing Service
        Cambridge, England.
 
 
 REVISION
 
-       Last updated: 23 May 2019
-       Copyright (c) 1997-2019 University of Cambridge.
+       Last updated: 28 August 2021
+       Copyright (c) 1997-2021 University of Cambridge.
 ------------------------------------------------------------------------------
  
  

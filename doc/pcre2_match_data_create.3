@@ -1,4 +1,4 @@
-.TH PCRE2_MATCH_DATA_CREATE 3 "29 July 2015" "PCRE2 10.21"
+.TH PCRE2_MATCH_DATA_CREATE 3 "28 August 2021" "PCRE2 10.38"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH SYNOPSIS
@@ -18,8 +18,9 @@ This function creates a new match data block, which is used for holding the
 result of a match. The first argument specifies the number of pairs of offsets
 that are required. These form the "output vector" (ovector) within the match
 data block, and are used to identify the matched string and any captured
-substrings. There is always one pair of offsets; if \fBovecsize\fP is zero, it
-is treated as one.
+substrings when matching with \fBpcre2_match()\fP, or a number of different
+matches at the same point when used with \fBpcre2_dfa_match()\fP. There is
+always one pair of offsets; if \fBovecsize\fP is zero, it is treated as one.
 .P
 The second argument points to a general context, for custom memory management,
 or is NULL for system memory management. The result of the function is NULL if

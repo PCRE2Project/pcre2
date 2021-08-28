@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "04 November 2020" "PCRE2 10.36"
+.TH PCRE2API 3 "28 August 2021" "PCRE2 10.38"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -2490,19 +2490,27 @@ to an abstract format like Java or .NET serialization.
 Information about a successful or unsuccessful match is placed in a match
 data block, which is an opaque structure that is accessed by function calls. In
 particular, the match data block contains a vector of offsets into the subject
-string that define the matched part of the subject and any substrings that were
-captured. This is known as the \fIovector\fP.
+string that define the matched parts of the subject. This is known as the
+\fIovector\fP.
 .P
 Before calling \fBpcre2_match()\fP, \fBpcre2_dfa_match()\fP, or
 \fBpcre2_jit_match()\fP you must create a match data block by calling one of
 the creation functions above. For \fBpcre2_match_data_create()\fP, the first
-argument is the number of pairs of offsets in the \fIovector\fP. One pair of
-offsets is required to identify the string that matched the whole pattern, with
-an additional pair for each captured substring. For example, a value of 4
-creates enough space to record the matched portion of the subject plus three
-captured substrings. A minimum of at least 1 pair is imposed by
-\fBpcre2_match_data_create()\fP, so it is always possible to return the overall
-matched string.
+argument is the number of pairs of offsets in the \fIovector\fP. 
+.P
+When using \fBpcre2_match()\fP, one pair of offsets is required to identify the
+string that matched the whole pattern, with an additional pair for each
+captured substring. For example, a value of 4 creates enough space to record
+the matched portion of the subject plus three captured substrings.
+.P
+When using \fBpcre2_dfa_match()\fP there may be multiple matched substrings of 
+different lengths at the same point in the subject. The ovector should be made
+large enough to hold as many as are expected.
+.P
+A minimum of at least 1 pair is imposed by \fBpcre2_match_data_create()\fP, so
+it is always possible to return the overall matched string in the case of 
+\fBpcre2_match()\fP or the longest match in the case of 
+\fBpcre2_dfa_match()\fP.
 .P
 The second argument of \fBpcre2_match_data_create()\fP is a pointer to a
 general context, which can specify custom memory management for obtaining the
@@ -2511,10 +2519,11 @@ pass NULL, which causes \fBmalloc()\fP to be used.
 .P
 For \fBpcre2_match_data_create_from_pattern()\fP, the first argument is a
 pointer to a compiled pattern. The ovector is created to be exactly the right
-size to hold all the substrings a pattern might capture. The second argument is
-again a pointer to a general context, but in this case if NULL is passed, the
-memory is obtained using the same allocator that was used for the compiled
-pattern (custom or default).
+size to hold all the substrings a pattern might capture when matched using
+\fBpcre2_match()\fP. You should not use this call when matching with
+\fBpcre2_dfa_match()\fP. The second argument is again a pointer to a general
+context, but in this case if NULL is passed, the memory is obtained using the
+same allocator that was used for the compiled pattern (custom or default).
 .P
 A match data block can be used many times, with the same or different compiled
 patterns. You can extract information from a match data block after a match
@@ -3991,7 +4000,7 @@ fail, this error is given.
 .sp
 .nf
 Philip Hazel
-University Computing Service
+Retired from University Computing Service
 Cambridge, England.
 .fi
 .
@@ -4000,6 +4009,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 04 November 2020
-Copyright (c) 1997-2020 University of Cambridge.
+Last updated: 28 August 2021
+Copyright (c) 1997-2021 University of Cambridge.
 .fi

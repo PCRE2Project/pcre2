@@ -30,8 +30,9 @@ This function creates a new match data block, which is used for holding the
 result of a match. The first argument specifies the number of pairs of offsets
 that are required. These form the "output vector" (ovector) within the match
 data block, and are used to identify the matched string and any captured
-substrings. There is always one pair of offsets; if <b>ovecsize</b> is zero, it
-is treated as one.
+substrings when matching with <b>pcre2_match()</b>, or a number of different
+matches at the same point when used with <b>pcre2_dfa_match()</b>. There is
+always one pair of offsets; if <b>ovecsize</b> is zero, it is treated as one.
 </P>
 <P>
 The second argument points to a general context, for custom memory management,

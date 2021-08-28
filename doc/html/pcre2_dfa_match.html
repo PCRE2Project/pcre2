@@ -45,10 +45,16 @@ just once (except when processing lookaround assertions). This function is
   <i>workspace</i>    Points to a vector of ints used as working space
   <i>wscount</i>      Number of elements in the vector
 </pre>
-For <b>pcre2_dfa_match()</b>, a match context is needed only if you want to set
-up a callout function or specify the heap limit or the match or the recursion
-depth limits. The <i>length</i> and <i>startoffset</i> values are code units, not
-characters. The options are:
+The size of output vector needed to contain all the results depends on the  
+number of simultaneous matches, not on the number of parentheses in the        
+pattern. Using <b>pcre2_match_data_create_from_pattern()</b> to create the match 
+data block is therefore not advisable when using this function.   
+</P>
+<P>
+A match context is needed only if you want to set up a callout function or
+specify the heap limit or the match or the recursion depth limits. The
+<i>length</i> and <i>startoffset</i> values are code units, not characters. The
+options are:
 <pre>
   PCRE2_ANCHORED          Match only at the first position
   PCRE2_COPY_MATCHED_SUBJECT

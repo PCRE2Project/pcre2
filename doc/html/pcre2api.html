@@ -2512,20 +2512,31 @@ to an abstract format like Java or .NET serialization.
 Information about a successful or unsuccessful match is placed in a match
 data block, which is an opaque structure that is accessed by function calls. In
 particular, the match data block contains a vector of offsets into the subject
-string that define the matched part of the subject and any substrings that were
-captured. This is known as the <i>ovector</i>.
+string that define the matched parts of the subject. This is known as the
+<i>ovector</i>.
 </P>
 <P>
 Before calling <b>pcre2_match()</b>, <b>pcre2_dfa_match()</b>, or
 <b>pcre2_jit_match()</b> you must create a match data block by calling one of
 the creation functions above. For <b>pcre2_match_data_create()</b>, the first
-argument is the number of pairs of offsets in the <i>ovector</i>. One pair of
-offsets is required to identify the string that matched the whole pattern, with
-an additional pair for each captured substring. For example, a value of 4
-creates enough space to record the matched portion of the subject plus three
-captured substrings. A minimum of at least 1 pair is imposed by
-<b>pcre2_match_data_create()</b>, so it is always possible to return the overall
-matched string.
+argument is the number of pairs of offsets in the <i>ovector</i>. 
+</P>
+<P>
+When using <b>pcre2_match()</b>, one pair of offsets is required to identify the
+string that matched the whole pattern, with an additional pair for each
+captured substring. For example, a value of 4 creates enough space to record
+the matched portion of the subject plus three captured substrings.
+</P>
+<P>
+When using <b>pcre2_dfa_match()</b> there may be multiple matched substrings of 
+different lengths at the same point in the subject. The ovector should be made
+large enough to hold as many as are expected.
+</P>
+<P>
+A minimum of at least 1 pair is imposed by <b>pcre2_match_data_create()</b>, so
+it is always possible to return the overall matched string in the case of 
+<b>pcre2_match()</b> or the longest match in the case of 
+<b>pcre2_dfa_match()</b>.
 </P>
 <P>
 The second argument of <b>pcre2_match_data_create()</b> is a pointer to a
@@ -2536,10 +2547,11 @@ pass NULL, which causes <b>malloc()</b> to be used.
 <P>
 For <b>pcre2_match_data_create_from_pattern()</b>, the first argument is a
 pointer to a compiled pattern. The ovector is created to be exactly the right
-size to hold all the substrings a pattern might capture. The second argument is
-again a pointer to a general context, but in this case if NULL is passed, the
-memory is obtained using the same allocator that was used for the compiled
-pattern (custom or default).
+size to hold all the substrings a pattern might capture when matched using
+<b>pcre2_match()</b>. You should not use this call when matching with
+<b>pcre2_dfa_match()</b>. The second argument is again a pointer to a general
+context, but in this case if NULL is passed, the memory is obtained using the
+same allocator that was used for the compiled pattern (custom or default).
 </P>
 <P>
 A match data block can be used many times, with the same or different compiled
@@ -3982,16 +3994,16 @@ fail, this error is given.
 <P>
 Philip Hazel
 <br>
-University Computing Service
+Retired from University Computing Service
 <br>
 Cambridge, England.
 <br>
 </P>
 <br><a name="SEC42" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 04 November 2020
+Last updated: 28 August 2021
 <br>
-Copyright &copy; 1997-2020 University of Cambridge.
+Copyright &copy; 1997-2021 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE2 index page</a>.

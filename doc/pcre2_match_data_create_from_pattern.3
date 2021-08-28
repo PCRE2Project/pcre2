@@ -1,4 +1,4 @@
-.TH PCRE2_MATCH_DATA_CREATE_FROM_PATTERN 3 "29 July 2015" "PCRE2 10.21"
+.TH PCRE2_MATCH_DATA_CREATE_FROM_PATTERN 3 "28 August 2021" "PCRE2 10.38"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH SYNOPSIS
@@ -14,12 +14,15 @@ PCRE2 - Perl-compatible regular expressions (revised API)
 .SH DESCRIPTION
 .rs
 .sp
-This function creates a new match data block, which is used for holding the
-result of a match. The first argument points to a compiled pattern. The number
-of capturing parentheses within the pattern is used to compute the number of
-pairs of offsets that are required in the match data block. These form the
-"output vector" (ovector) within the match data block, and are used to identify
-the matched string and any captured substrings.
+This function creates a new match data block for holding the result of a match.
+The first argument points to a compiled pattern. The number of capturing
+parentheses within the pattern is used to compute the number of pairs of
+offsets that are required in the match data block. These form the "output
+vector" (ovector) within the match data block, and are used to identify the
+matched string and any captured substrings when matching with
+\fBpcre2_match()\fP. If you are using \fBpcre2_dfa_match()\fP, which uses the
+outut vector in a different way, you should use \fBpcre2_match_data_create()\fP
+instead of this function.
 .P
 The second argument points to a general context, for custom memory management,
 or is NULL to use the same memory allocator as was used for the compiled

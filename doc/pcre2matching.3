@@ -1,4 +1,4 @@
-.TH PCRE2MATCHING 3 "23 May 2019" "PCRE2 10.34"
+.TH PCRE2MATCHING 3 "28 August 2021" "PCRE2 10.38"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 MATCHING ALGORITHMS"
@@ -61,8 +61,9 @@ tried is controlled by the greedy or ungreedy nature of the quantifier.
 If a leaf node is reached, a matching string has been found, and at that point
 the algorithm stops. Thus, if there is more than one possible match, this
 algorithm returns the first one that it finds. Whether this is the shortest,
-the longest, or some intermediate length depends on the way the greedy and
-ungreedy repetition quantifiers are specified in the pattern.
+the longest, or some intermediate length depends on the way the alternations
+and the greedy or ungreedy repetition quantifiers are specified in the
+pattern.
 .P
 Because it ends up with a single path through the tree, it is relatively
 straightforward for this algorithm to keep track of the substrings that are
@@ -91,10 +92,15 @@ no more unterminated paths. At this point, terminated paths represent the
 different matching possibilities (if there are none, the match has failed).
 Thus, if there is more than one possible match, this algorithm finds all of
 them, and in particular, it finds the longest. The matches are returned in
-decreasing order of length. There is an option to stop the algorithm after the
-first match (which is necessarily the shortest) is found.
+the output vector in decreasing order of length. There is an option to stop the
+algorithm after the first match (which is necessarily the shortest) is found.
 .P
-Note that all the matches that are found start at the same point in the
+Note that the size of vector needed to contain all the results depends on the
+number of simultaneous matches, not on the number of parentheses in the
+pattern. Using \fBpcre2_match_data_create_from_pattern()\fP to create the match
+data block is therefore not advisable when doing DFA matching.
+.P
+Note also that all the matches that are found start at the same point in the
 subject. If the pattern
 .sp
   cat(er(pillar)?)?
@@ -165,19 +171,13 @@ supported by \fBpcre2_dfa_match()\fP.
 .SH "ADVANTAGES OF THE ALTERNATIVE ALGORITHM"
 .rs
 .sp
-Using the alternative matching algorithm provides the following advantages:
+The main advantage of the alternative algorithm is that all possible matches
+(at a single point in the subject) are automatically found, and in particular,
+the longest match is found. To find more than one match at the same point using
+the standard algorithm, you have to do kludgy things with callouts.
 .P
-1. All possible matches (at a single point in the subject) are automatically
-found, and in particular, the longest match is found. To find more than one
-match using the standard algorithm, you have to do kludgy things with
-callouts.
-.P
-2. Because the alternative algorithm scans the subject string just once, and
-never needs to backtrack (except for lookbehinds), it is possible to pass very
-long subject strings to the matching function in several pieces, checking for
-partial matching each time. Although it is also possible to do multi-segment
-matching using the standard algorithm, by retaining partially matched
-substrings, it is more complicated. The
+Partial matching is possible with this algorithm, though it has some
+limitations. The
 .\" HREF
 \fBpcre2partial\fP
 .\"
@@ -199,6 +199,8 @@ invalid UTF string are not supported.
 .P
 3. Although atomic groups are supported, their use does not provide the
 performance advantage that it does for the standard algorithm.
+.P
+4. JIT optimization is not supported.
 .
 .
 .SH AUTHOR
@@ -206,7 +208,7 @@ performance advantage that it does for the standard algorithm.
 .sp
 .nf
 Philip Hazel
-University Computing Service
+Retired from University Computing Service
 Cambridge, England.
 .fi
 .
@@ -215,6 +217,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 23 May 2019
-Copyright (c) 1997-2019 University of Cambridge.
+Last updated: 28 August 2021
+Copyright (c) 1997-2021 University of Cambridge.
 .fi
