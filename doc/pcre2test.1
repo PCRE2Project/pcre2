@@ -1,4 +1,4 @@
-.TH PCRE2TEST 1 "28 April 2021" "PCRE 10.37"
+.TH PCRE2TEST 1 "28 August 2021" "PCRE 10.38"
 .SH NAME
 pcre2test - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -443,15 +443,17 @@ excluding pattern meta-characters):
 .sp
 This is interpreted as the pattern's delimiter. A regular expression may be
 continued over several input lines, in which case the newline characters are
-included within it. It is possible to include the delimiter within the pattern
-by escaping it with a backslash, for example
+included within it. It is possible to include the delimiter as a literal within
+the pattern by escaping it with a backslash, for example
 .sp
   /abc\e/def/
 .sp
 If you do this, the escape and the delimiter form part of the pattern, but
-since the delimiters are all non-alphanumeric, this does not affect its
-interpretation. If the terminating delimiter is immediately followed by a
-backslash, for example,
+since the delimiters are all non-alphanumeric, the inclusion of the backslash
+does not affect the pattern's interpretation. Note, however, that this trick
+does not work within \eQ...\eE literal bracketing because the backslash will
+itself be interpreted as a literal. If the terminating delimiter is immediately
+followed by a backslash, for example,
 .sp
   /abc/\e
 .sp
@@ -2096,7 +2098,7 @@ on the stack.
 .sp
 .nf
 Philip Hazel
-University Computing Service
+Retired from University Computing Service
 Cambridge, England.
 .fi
 .
@@ -2105,6 +2107,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 28 April 2021
+Last updated: 28 August 2021
 Copyright (c) 1997-2021 University of Cambridge.
 .fi
