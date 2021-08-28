@@ -63,7 +63,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #define WIN32
 #endif
 
-/* Some cmake's define it still */
+/* Some CMake's define it still */
 #if defined(__CYGWIN__) && defined(WIN32)
 #undef WIN32
 #endif
@@ -3327,7 +3327,7 @@ if (isdirectory(pathname))
 
   if (dee_action == dee_RECURSE)
     {
-    char buffer[FNBUFSIZ];
+    char childpath[FNBUFSIZ];
     char *nextfile;
     directory_type *dir = opendirectory(pathname);
 
@@ -3349,8 +3349,31 @@ if (isdirectory(pathname))
         rc = 2;
         break;
         }
-      sprintf(buffer, "%s%c%s", pathname, FILESEP, nextfile);
-      frc = grep_or_recurse(buffer, dir_recurse, FALSE);
+      sprintf(childpath, "%s%c%s", pathname, FILESEP, nextfile);
+
+      /* If the realpath() function is available, we can try to prevent endless
+      recursion caused by a symlink pointing to a parent directory (GitHub
+      issue #2 (old Bugzilla #2794). Original patch from Thomas Tempelmann.
+      Modified to avoid using strlcat() because that isn't a standard C
+      function, and also modified not to copy back the fully resolved path,
+      because that affects the output from pcre2grep. */
+
+#ifdef HAVE_REALPATH
+      char resolvedpath[PATH_MAX];
+      if (realpath(childpath, resolvedpath) == NULL)
+        continue;     /* This path is invalid - we can skip processing this */
+      BOOL isSame = strcmp(pathname, resolvedpath) == 0;
+      if (isSame) continue;    /* We have a recursion */
+      size_t rlen = strlen(resolvedpath);
+      if (rlen++ < sizeof(resolvedpath) - 3)
+        {
+        strcat(resolvedpath, "/");
+        BOOL contained = strncmp(pathname, resolvedpath, rlen) == 0;
+        if (contained) continue;    /* We have a recursion */
+        }
+#endif  /* HAVE_REALPATH */
+
+      frc = grep_or_recurse(childpath, dir_recurse, FALSE);
       if (frc > 1) rc = frc;
        else if (frc == 0 && rc == 1) rc = 0;
       }

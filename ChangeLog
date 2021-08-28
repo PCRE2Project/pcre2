@@ -37,6 +37,10 @@ adding "-static". For example, pcre2-8.lib has become pcre2-8-static.lib.
 2.8.12 is deprecated (it was set to 2.8.5) and causes warnings. Even 3.0.0 is 
 quote old; it was released in 2014.
 
+4. Implemented a modified version of Thomas Tempelmann's pcre2grep patch for 
+detecting symlink loops. This is dependent on the availability of realpath(), 
+which is now tested for in ./configure and CMakeLists.txt. 
+
 
 
 Version 10.37 26-May-2021

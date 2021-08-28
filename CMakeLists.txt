@@ -98,6 +98,7 @@
 # 2021-07-05 JWSB modified such both the static and shared library can be
 #            build in one go.
 # 2021-08-28 PH increased minimum version
+# 2021-08-28 PH added test for realpath()
 
 PROJECT(PCRE2 C)
 
@@ -143,6 +144,7 @@ CHECK_INCLUDE_FILE(windows.h    HAVE_WINDOWS_H)
 CHECK_SYMBOL_EXISTS(bcopy         "strings.h"  HAVE_BCOPY)
 CHECK_SYMBOL_EXISTS(memfd_create  "sys/mman.h" HAVE_MEMFD_CREATE)
 CHECK_SYMBOL_EXISTS(memmove       "string.h"   HAVE_MEMMOVE)
+CHECK_SYMBOL_EXISTS(realpath      "stdlib.h"   HAVE_REALPATH)
 CHECK_SYMBOL_EXISTS(secure_getenv "stdlib.h"   HAVE_SECURE_GETENV)
 CHECK_SYMBOL_EXISTS(strerror      "string.h"   HAVE_STRERROR)
 
