@@ -35,8 +35,8 @@ default character encoding, can be found at
 
 ## Documentation
 
-You can read the PCRE2 documentation [here]
-(https://philiphazel.github.io/pcre2/doc/html/index.html).
+You can read the PCRE2 documentation 
+[here](https://philiphazel.github.io/pcre2/doc/html/index.html).
 
 Comparisons to Perl's regular expression semantics can be found in the
 community authored Wikipedia entry for PCRE.
@@ -51,6 +51,6 @@ party authored
 To report a problem with the PCRE2 library, or to make a feature request, please
 use the PCRE2 GitHub issues tracker. There is a mailing list for discussion of
  PCRE2 issues and development at pcre2-dev@googlegroups.com, which is where any
-announcements will be made. You can browse the [list archives]
-(https://groups.google.com/g/pcre2-dev).
+announcements will be made. You can browse the 
+[list archives](https://groups.google.com/g/pcre2-dev).
 
