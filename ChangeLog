@@ -41,6 +41,11 @@ quote old; it was released in 2014.
 detecting symlink loops. This is dependent on the availability of realpath(), 
 which is now tested for in ./configure and CMakeLists.txt. 
 
+5. Implemented a modified version of Thomas Tempelmann's patch for handling 
+case-independent "first code unit" searches for unanchored patterns in 8-bit
+mode in the interpreters. Instead of just remembering whether one case matched
+or not, it remembers the position of a previous match so as to avoid
+unnecessary repeated searching.
 
 
 Version 10.37 26-May-2021
