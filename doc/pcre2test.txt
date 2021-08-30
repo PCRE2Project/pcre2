@@ -24,17 +24,11 @@ SYNOPSIS
        tion  options, control how the subject is processed, and what output is
        produced.
 
-       As the original fairly simple PCRE library evolved,  it  acquired  many
-       different  features,  and  as  a  result, the original pcretest program
-       ended up with a lot of options in a messy, arcane  syntax  for  testing
-       all the features. The move to the new PCRE2 API provided an opportunity
-       to re-implement the test program as pcre2test, with a cleaner  modifier
-       syntax.  Nevertheless,  there are still many obscure modifiers, some of
-       which are specifically designed for use in conjunction  with  the  test
-       script  and  data  files that are distributed as part of PCRE2. All the
-       modifiers are documented here, some  without  much  justification,  but
-       many  of  them  are  unlikely  to be of use except when testing the li-
-       braries.
+       There are many obscure modifiers, some of which  are  specifically  de-
+       signed  for use in conjunction with the test script and data files that
+       are distributed as part of PCRE2.  All  the  modifiers  are  documented
+       here, some without much justification, but many of them are unlikely to
+       be of use except when testing the libraries.
 
 
 PCRE2's 8-BIT, 16-BIT AND 32-BIT LIBRARIES
@@ -58,10 +52,10 @@ PCRE2's 8-BIT, 16-BIT AND 32-BIT LIBRARIES
 INPUT ENCODING
 
        Input  to  pcre2test is processed line by line, either by calling the C
-       library's fgets() function, or via the  libreadline  library.  In  some
-       Windows  environments  character 26 (hex 1A) causes an immediate end of
-       file, and no further data is read, so this character should be  avoided
-       unless you really want that action.
+       library's fgets() function, or via the libreadline or libedit  library.
+       In  some Windows environments character 26 (hex 1A) causes an immediate
+       end of file, and no further data is read, so this character  should  be
+       avoided unless you really want that action.
 
        The  input  is  processed using using C's string functions, so must not
        contain binary zeros, even though in  Unix-like  environments,  fgets()
@@ -454,11 +448,11 @@ PATTERN SYNTAX
 
 SUBJECT LINE SYNTAX
 
-       Before   each   subject   line   is   passed   to   pcre2_match()    or
-       pcre2_dfa_match(), leading and trailing white space is removed, and the
-       line is scanned for backslash escapes, unless the subject_literal modi-
-       fier was set for the pattern. The following provide a means of encoding
-       non-printing characters in a visible way:
+       Before each subject line is passed to pcre2_match(), pcre2_dfa_match(),
+       or  pcre2_jit_match(), leading and trailing white space is removed, and
+       the line is scanned for backslash escapes, unless  the  subject_literal
+       modifier  was set for the pattern. The following provide a means of en-
+       coding non-printing characters in a visible way:
 
          \a         alarm (BEL, \x07)
          \b         backspace (\x08)
@@ -553,6 +547,7 @@ PATTERN MODIFIERS
        options.
 
              allow_empty_class         set PCRE2_ALLOW_EMPTY_CLASS
+             allow_lookaround_bsk      set PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK
              allow_surrogate_escapes   set PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES
              alt_bsux                  set PCRE2_ALT_BSUX
              alt_circumflex            set PCRE2_ALT_CIRCUMFLEX
@@ -1938,5 +1933,5 @@ AUTHOR
 
 REVISION
 
-       Last updated: 28 August 2021
+       Last updated: 30 August 2021
        Copyright (c) 1997-2021 University of Cambridge.

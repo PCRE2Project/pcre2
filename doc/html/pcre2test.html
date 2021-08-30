@@ -59,12 +59,7 @@ patterns, and the subject lines specify PCRE2 function options, control how the
 subject is processed, and what output is produced.
 </P>
 <P>
-As the original fairly simple PCRE library evolved, it acquired many different
-features, and as a result, the original <b>pcretest</b> program ended up with a
-lot of options in a messy, arcane syntax for testing all the features. The
-move to the new PCRE2 API provided an opportunity to re-implement the test
-program as <b>pcre2test</b>, with a cleaner modifier syntax. Nevertheless, there
-are still many obscure modifiers, some of which are specifically designed for
+There are many obscure modifiers, some of which are specifically designed for
 use in conjunction with the test script and data files that are distributed as
 part of PCRE2. All the modifiers are documented here, some without much
 justification, but many of them are unlikely to be of use except when testing
@@ -89,10 +84,10 @@ names used in the libraries have a suffix _8, _16, or _32, as appropriate.
 <br><a name="SEC3" href="#TOC1">INPUT ENCODING</a><br>
 <P>
 Input to <b>pcre2test</b> is processed line by line, either by calling the C
-library's <b>fgets()</b> function, or via the <b>libreadline</b> library. In some
-Windows environments character 26 (hex 1A) causes an immediate end of file, and
-no further data is read, so this character should be avoided unless you really
-want that action.
+library's <b>fgets()</b> function, or via the <b>libreadline</b> or <b>libedit</b> 
+library. In some Windows environments character 26 (hex 1A) causes an immediate
+end of file, and no further data is read, so this character should be avoided
+unless you really want that action.
 </P>
 <P>
 The input is processed using using C's string functions, so must not
@@ -514,11 +509,11 @@ A pattern can be followed by a modifier list (details below).
 </P>
 <br><a name="SEC9" href="#TOC1">SUBJECT LINE SYNTAX</a><br>
 <P>
-Before each subject line is passed to <b>pcre2_match()</b> or
-<b>pcre2_dfa_match()</b>, leading and trailing white space is removed, and the
-line is scanned for backslash escapes, unless the <b>subject_literal</b>
-modifier was set for the pattern. The following provide a means of encoding
-non-printing characters in a visible way:
+Before each subject line is passed to <b>pcre2_match()</b>,
+<b>pcre2_dfa_match()</b>, or <b>pcre2_jit_match()</b>, leading and trailing white
+space is removed, and the line is scanned for backslash escapes, unless the
+<b>subject_literal</b> modifier was set for the pattern. The following provide a
+means of encoding non-printing characters in a visible way:
 <pre>
   \a         alarm (BEL, \x07)
   \b         backspace (\x08)
@@ -615,6 +610,7 @@ way <b>pcre2_compile()</b> behaves. See
 for a description of the effects of these options.
 <pre>
       allow_empty_class         set PCRE2_ALLOW_EMPTY_CLASS
+      allow_lookaround_bsk      set PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK 
       allow_surrogate_escapes   set PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES
       alt_bsux                  set PCRE2_ALT_BSUX
       alt_circumflex            set PCRE2_ALT_CIRCUMFLEX
@@ -2126,7 +2122,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC21" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 28 August 2021
+Last updated: 30 August 2021
 <br>
 Copyright &copy; 1997-2021 University of Cambridge.
 <br>

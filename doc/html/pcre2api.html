@@ -1915,6 +1915,13 @@ Extra compile options
 The option bits that can be set in a compile context by calling the
 <b>pcre2_set_compile_extra_options()</b> function are as follows:
 <pre>
+  PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK
+</pre>
+Since release 10.38 PCRE2 has forbidden the use of \K within lookaround 
+assertions, following Perl's lead. This option is provided to re-enable the 
+previous behaviour (act in positive lookarounds, ignore in negative ones) in 
+case anybody is relying on it.   
+<pre>
   PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES
 </pre>
 This option applies when compiling a pattern in UTF-8 or UTF-32 mode. It is
@@ -4001,7 +4008,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC42" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 28 August 2021
+Last updated: 30 August 2021
 <br>
 Copyright &copy; 1997-2021 University of Cambridge.
 <br>

@@ -153,8 +153,10 @@ letters, regardless of case, when case independence is specified.
 </P>
 <P>
 16. From release 5.32.0, Perl locks out the use of \K in lookaround
-assertions. In PCRE2, \K is acted on when it occurs in positive assertions,
-but is ignored in negative assertions.
+assertions. From release 10.38 PCRE2 does the same by default. However, there
+is an option for re-enabling the previous behaviour. When this option is set,
+\K is acted on when it occurs in positive assertions, but is ignored in
+negative assertions.
 </P>
 <P>
 17. PCRE2 provides some extensions to the Perl regular expression facilities.
@@ -237,7 +239,7 @@ AUTHOR
 <P>
 Philip Hazel
 <br>
-University Computing Service
+Retired from University Computing Service
 <br>
 Cambridge, England.
 <br>
@@ -246,9 +248,9 @@ Cambridge, England.
 REVISION
 </b><br>
 <P>
-Last updated: 06 October 2020
+Last updated: 30 August 2021
 <br>
-Copyright &copy; 1997-2019 University of Cambridge.
+Copyright &copy; 1997-2021 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE2 index page</a>.
