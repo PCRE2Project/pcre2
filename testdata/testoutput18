@@ -169,12 +169,6 @@ Failed: POSIX code 4: ? * + invalid at offset 1000001
 ** Ignored with POSIX interface: offset
 Matched with REG_NOSUB
 
-/(?=(a\K))/
-    a
-Start of matched string is beyond its end - displaying from end to start.
- 0: a
- 1: a
-     
 /^d(e)$/posix
     acdef\=posix_startend=2:4
  0: de

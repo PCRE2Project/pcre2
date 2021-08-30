@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "28 August 2021" "PCRE2 10.38"
+.TH PCRE2API 3 "30 August 2021" "PCRE2 10.38"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -1875,6 +1875,13 @@ characters with code points greater than 127.
 .sp
 The option bits that can be set in a compile context by calling the
 \fBpcre2_set_compile_extra_options()\fP function are as follows:
+.sp
+  PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK
+.sp
+Since release 10.38 PCRE2 has forbidden the use of \eK within lookaround 
+assertions, following Perl's lead. This option is provided to re-enable the 
+previous behaviour (act in positive lookarounds, ignore in negative ones) in 
+case anybody is relying on it.   
 .sp
   PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES
 .sp
@@ -4009,6 +4016,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 28 August 2021
+Last updated: 30 August 2021
 Copyright (c) 1997-2021 University of Cambridge.
 .fi

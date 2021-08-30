@@ -1,4 +1,4 @@
-.TH PCRE2TEST 1 "28 August 2021" "PCRE 10.38"
+.TH PCRE2TEST 1 "30 August 2021" "PCRE 10.38"
 .SH NAME
 pcre2test - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -27,12 +27,7 @@ each match attempt. Modifiers on external or internal command lines, the
 patterns, and the subject lines specify PCRE2 function options, control how the
 subject is processed, and what output is produced.
 .P
-As the original fairly simple PCRE library evolved, it acquired many different
-features, and as a result, the original \fBpcretest\fP program ended up with a
-lot of options in a messy, arcane syntax for testing all the features. The
-move to the new PCRE2 API provided an opportunity to re-implement the test
-program as \fBpcre2test\fP, with a cleaner modifier syntax. Nevertheless, there
-are still many obscure modifiers, some of which are specifically designed for
+There are many obscure modifiers, some of which are specifically designed for
 use in conjunction with the test script and data files that are distributed as
 part of PCRE2. All the modifiers are documented here, some without much
 justification, but many of them are unlikely to be of use except when testing
@@ -61,10 +56,10 @@ names used in the libraries have a suffix _8, _16, or _32, as appropriate.
 .rs
 .sp
 Input to \fBpcre2test\fP is processed line by line, either by calling the C
-library's \fBfgets()\fP function, or via the \fBlibreadline\fP library. In some
-Windows environments character 26 (hex 1A) causes an immediate end of file, and
-no further data is read, so this character should be avoided unless you really
-want that action.
+library's \fBfgets()\fP function, or via the \fBlibreadline\fP or \fBlibedit\fP 
+library. In some Windows environments character 26 (hex 1A) causes an immediate
+end of file, and no further data is read, so this character should be avoided
+unless you really want that action.
 .P
 The input is processed using using C's string functions, so must not
 contain binary zeros, even though in Unix-like environments, \fBfgets()\fP
@@ -472,11 +467,11 @@ A pattern can be followed by a modifier list (details below).
 .SH "SUBJECT LINE SYNTAX"
 .rs
 .sp
-Before each subject line is passed to \fBpcre2_match()\fP or
-\fBpcre2_dfa_match()\fP, leading and trailing white space is removed, and the
-line is scanned for backslash escapes, unless the \fBsubject_literal\fP
-modifier was set for the pattern. The following provide a means of encoding
-non-printing characters in a visible way:
+Before each subject line is passed to \fBpcre2_match()\fP,
+\fBpcre2_dfa_match()\fP, or \fBpcre2_jit_match()\fP, leading and trailing white
+space is removed, and the line is scanned for backslash escapes, unless the
+\fBsubject_literal\fP modifier was set for the pattern. The following provide a
+means of encoding non-printing characters in a visible way:
 .sp
   \ea         alarm (BEL, \ex07)
   \eb         backspace (\ex08)
@@ -572,6 +567,7 @@ way \fBpcre2_compile()\fP behaves. See
 for a description of the effects of these options.
 .sp
       allow_empty_class         set PCRE2_ALLOW_EMPTY_CLASS
+      allow_lookaround_bsk      set PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK 
       allow_surrogate_escapes   set PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES
       alt_bsux                  set PCRE2_ALT_BSUX
       alt_circumflex            set PCRE2_ALT_CIRCUMFLEX
@@ -2107,6 +2103,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 28 August 2021
+Last updated: 30 August 2021
 Copyright (c) 1997-2021 University of Cambridge.
 .fi

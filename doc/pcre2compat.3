@@ -1,4 +1,4 @@
-.TH PCRE2COMPAT 3 "06 October 2020" "PCRE2 10.36"
+.TH PCRE2COMPAT 3 "30 August 2021" "PCRE2 10.38"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "DIFFERENCES BETWEEN PCRE2 AND PERL"
@@ -133,8 +133,10 @@ in the release at the time of writing (5.32), \ep{Lu} and \ep{Ll} match all
 letters, regardless of case, when case independence is specified.
 .P
 16. From release 5.32.0, Perl locks out the use of \eK in lookaround
-assertions. In PCRE2, \eK is acted on when it occurs in positive assertions,
-but is ignored in negative assertions.
+assertions. From release 10.38 PCRE2 does the same by default. However, there
+is an option for re-enabling the previous behaviour. When this option is set,
+\eK is acted on when it occurs in positive assertions, but is ignored in
+negative assertions.
 .P
 17. PCRE2 provides some extensions to the Perl regular expression facilities.
 Perl 5.10 included new features that were not in earlier versions of Perl, some
@@ -203,7 +205,7 @@ fall into any stack-overflow limit. PCRE2 made a similar change at release
 .sp
 .nf
 Philip Hazel
-University Computing Service
+Retired from University Computing Service
 Cambridge, England.
 .fi
 .
@@ -212,6 +214,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 06 October 2020
-Copyright (c) 1997-2019 University of Cambridge.
+Last updated: 30 August 2021
+Copyright (c) 1997-2021 University of Cambridge.
 .fi

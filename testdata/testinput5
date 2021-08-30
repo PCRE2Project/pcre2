@@ -1654,10 +1654,10 @@
 /[A-`]/iB,utf
     abcdefghijklmno
 
-/(?<=\K\x{17f})/g,utf,aftertext
+/(?<=\K\x{17f})/g,utf,aftertext,allow_lookaround_bsk
     \x{17f}\x{17f}\x{17f}\x{17f}\x{17f}
 
-/(?<=\K\x{17f})/altglobal,utf,aftertext
+/(?<=\K\x{17f})/altglobal,utf,aftertext,allow_lookaround_bsk
     \x{17f}\x{17f}\x{17f}\x{17f}\x{17f}
 
 "\xa\xf<(.\pZ*\P{Xwd}+^\xa8\3'3yq.::?(?J:()\xd1+!~:3'(8?:)':(?'d'(?'d'^u]!.+.+\\A\Ah(n+?9){7}+\K;(?'X'u'(?'c'(?'z'(?<y>\xb::\xf0'|\xd3(\xae?'w(z\x8?P>l)\x8?P>a)'\H\R\xd1+!!~:3'(?:h$N{26875}\W+?\\=D{2}\x89(?i:Uy0\N({2\xa(\v\x85*){y*\A(()\p{L}+?\P{^Xan}'+?\xff\+pS\?|).{;y*\A(()\p{L}+?\8}\d?1(|)(/1){7}.+[Lp{Me}].\s\xdcC*?(?(<y>))(?<!^)$C((;*?(R))+(\xbf(R))\x8a\X*?\x8a\xb\xd1^9\3*+(\xc1,\k'R'\xb4)\xcc(z\z(?J)(?'X'\x1b(\xb\xd1^9\?'3*+P{^Xan}+?\xff\+(\xc1.]k+\xb'Pm'\xb4)\xcc4f\xa7'\xd1V(?i:U,{2,2})'(?'X'))?-%--\x95$9*\4'|\xd1(\x9c''%\x94$9)#(?'R')3\x7?('P\xed7'\xa8\xb1^u\xeaw\1\0\0\(|(?1){7}.+[\p{Me}].\s\xdcC*^\x14?(?(<y>))(?<!^)$C((;*?(R*?))+(?(R)\x8a\X*?\x8a\xb\xd1^9\3*+|(\xc1,\k'R'\xb4)\xcc! z)\z(?JJ)(?'X';(\xb\xd1^9\?'3*+(\xc1.]k+\xb'Pm'\xb4))':(?'d')(?'RD'(d')|)|$)'|(?<x>\g{d});\g{x}\x11\g{d}\x81\|$((?'X'\'X'(?'W''\x92()'9'\x83*))\xba*\!?^ <){)':;\xcc4'\xd1'(?'X'28))?-%--\x95$9*\4'|\xd1((''e\x94*$9:)*#(?'R')3)\x7?('P\xed')\\x16:;()\x1e\x10*:(?<y>)\xd1+0!~:(?)'d'E:yD!\s(?'R'\x1e;\x10:U))|'\x9g!\xb0*){)\\x16:;()\x1e\x10\x87*:(?<y>)\xd1+!~:(?)'}'\d'E:yD!\s(?'R'\x1e;\x10:U))|'))|)g!\xb0*R+9{29+)#(?'P'})*?pS\{3,}\x85,{0,}l{*UTF)(\xe{7}){3722,{9,}d{2,?|))|{)\(A?&d}}{\xa,}2}){3,}7,l{)22}(,}l:7{2,4}}29\x19+)#?'P'})*v?))\x5"

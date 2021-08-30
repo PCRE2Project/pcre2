@@ -47,6 +47,10 @@ mode in the interpreters. Instead of just remembering whether one case matched
 or not, it remembers the position of a previous match so as to avoid
 unnecessary repeated searching.
 
+6. Perl now locks out \K in lookarounds, so PCRE2 now does the same by default. 
+However, just in case anybody was relying on the old behaviour, there is an 
+option called PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK that enables the old behaviour.
+
 
 Version 10.37 26-May-2021
 -------------------------

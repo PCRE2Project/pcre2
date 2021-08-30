@@ -11,7 +11,7 @@ hacked-up (non-) design had also run out of steam.
 
                        Written by Philip Hazel
      Original code Copyright (c) 1997-2012 University of Cambridge
-    Rewritten code Copyright (c) 2016-2020 University of Cambridge
+    Rewritten code Copyright (c) 2016-2021 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -622,6 +622,7 @@ static modstruct modlist[] = {
   { "allaftertext",                MOD_PNDP, MOD_CTL, CTL_ALLAFTERTEXT,           PO(control) },
   { "allcaptures",                 MOD_PND,  MOD_CTL, CTL_ALLCAPTURES,            PO(control) },
   { "allow_empty_class",           MOD_PAT,  MOD_OPT, PCRE2_ALLOW_EMPTY_CLASS,    PO(options) },
+  { "allow_lookaround_bsk",        MOD_CTC,  MOD_OPT, PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK, CO(extra_options) },
   { "allow_surrogate_escapes",     MOD_CTC,  MOD_OPT, PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES, CO(extra_options) },
   { "allusedtext",                 MOD_PNDP, MOD_CTL, CTL_ALLUSEDTEXT,            PO(control) },
   { "allvector",                   MOD_PND,  MOD_CTL, CTL2_ALLVECTOR,             PO(control2) },

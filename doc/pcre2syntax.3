@@ -1,4 +1,4 @@
-.TH PCRE2SYNTAX 3 "28 December 2019" "PCRE2 10.35"
+.TH PCRE2SYNTAX 3 "30 August 2021" "PCRE2 10.38"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION SYNTAX SUMMARY"
@@ -401,6 +401,9 @@ but some of them use Unicode properties if PCRE2_UCP is set. You can use
 .sp
   \eK          set reported start of match
 .sp
+From release 10.38 \eK is not permitted by default in lookaround assertions, 
+for compatibility with Perl. However, if the PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK
+option is set, the previous behaviour is re-enabled. When this option is set,
 \eK is honoured in positive assertions, but ignored in negative ones.
 .
 .
@@ -667,7 +670,7 @@ delimiter }. To encode the ending delimiter within the string, double it.
 .sp
 .nf
 Philip Hazel
-University Computing Service
+Retired from University Computing Service
 Cambridge, England.
 .fi
 .
@@ -676,6 +679,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 28 December 2019
-Copyright (c) 1997-2019 University of Cambridge.
+Last updated: 30 August 2021
+Copyright (c) 1997-2021 University of Cambridge.
 .fi

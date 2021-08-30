@@ -110,9 +110,6 @@
 //posix_nosub
     \=offset=70000
 
-/(?=(a\K))/
-    a
-     
 /^d(e)$/posix
     acdef\=posix_startend=2:4
     acde\=posix_startend=2 

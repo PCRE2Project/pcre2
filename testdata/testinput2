@@ -3932,7 +3932,7 @@
 
 /[a[:<:]] should give error/
 
-/(?=ab\K)/aftertext
+/(?=ab\K)/aftertext,allow_lookaround_bsk
     abcd\=startchar
 
 /abcd/newline=lf,firstline
@@ -4185,7 +4185,7 @@
 /(a)(b)|(c)/
     XcX\=ovector=2,get=1,get=2,get=3,get=4,getall
 
-/x(?=ab\K)/
+/x(?=ab\K)/allow_lookaround_bsk
     xab\=get=0
     xab\=copy=0
     xab\=getall
@@ -4345,10 +4345,10 @@
 
 # Perl loops on this (PCRE2 used to!)
 
-/(?<=\Ka)/g,aftertext
+/(?<=\Ka)/g,aftertext,allow_lookaround_bsk
     aaaaa
 
-/(?<=\Ka)/altglobal,aftertext
+/(?<=\Ka)/altglobal,aftertext,allow_lookaround_bsk
     aaaaa
 
 /((?2){73}(?2))((?1))/info
@@ -4659,10 +4659,10 @@ B)x/alt_verbnames,mark
 
 /(?<!a{65535})x/I
 
-/(?=a\K)/replace=z
+/(?=a\K)/replace=z,allow_lookaround_bsk
     BaCaD
     
-/(?<=\K.)/g,replace=-
+/(?<=\K.)/g,replace=-,allow_lookaround_bsk
     ab
 
 /(?'abcdefghijklmnopqrstuvwxyzABCDEFG'toolong)/
@@ -5877,18 +5877,27 @@ a)"xI
 
 /(?(VERSION=0.0/
 
-# Perl has made \K in lookarounds an error. At the moment PCRE2 still accepts.
+# Perl has made \K in lookarounds an error. PCRE2 now rejects as well, unless
+# explicitly authorized.
 
 /(?=a\Kb)ab/
+
+/(?=a\Kb)ab/allow_lookaround_bsk
     ab 
 
 /(?!a\Kb)ac/
+
+/(?!a\Kb)ac/allow_lookaround_bsk
     ac 
     
 /^abc(?<=b\Kc)d/
+
+/^abc(?<=b\Kc)d/allow_lookaround_bsk
     abcd
 
 /^abc(?<!b\Kq)d/
+
+/^abc(?<!b\Kq)d/,allow_lookaround_bsk
     abcd
     
 # --------- 

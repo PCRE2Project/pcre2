@@ -13355,7 +13355,7 @@ No match
 /[a[:<:]] should give error/
 Failed: error 130 at offset 4: unknown POSIX class name
 
-/(?=ab\K)/aftertext
+/(?=ab\K)/aftertext,allow_lookaround_bsk
     abcd\=startchar
 Start of matched string is beyond its end - displaying from end to start.
  0: ab
@@ -13783,7 +13783,7 @@ Get substring 4 failed (-49): unknown substring
  0L c
  1L 
 
-/x(?=ab\K)/
+/x(?=ab\K)/allow_lookaround_bsk
     xab\=get=0
 Start of matched string is beyond its end - displaying from end to start.
  0: ab
@@ -14281,7 +14281,7 @@ Failed: error 125 at offset 1: lookbehind assertion is not fixed length
 
 # Perl loops on this (PCRE2 used to!)
 
-/(?<=\Ka)/g,aftertext
+/(?<=\Ka)/g,aftertext,allow_lookaround_bsk
     aaaaa
  0: a
  0+ aaaa
@@ -14294,7 +14294,7 @@ Failed: error 125 at offset 1: lookbehind assertion is not fixed length
  0: a
  0+ 
 
-/(?<=\Ka)/altglobal,aftertext
+/(?<=\Ka)/altglobal,aftertext,allow_lookaround_bsk
     aaaaa
  0: a
  0+ aaaa
@@ -14911,11 +14911,11 @@ Max lookbehind = 65535
 First code unit = 'x'
 Subject length lower bound = 1
 
-/(?=a\K)/replace=z
+/(?=a\K)/replace=z,allow_lookaround_bsk
     BaCaD
 Failed: error -60: match with end before start or start moved backwards is not supported
     
-/(?<=\K.)/g,replace=-
+/(?<=\K.)/g,replace=-,allow_lookaround_bsk
     ab
 Failed: error -60: match with end before start or start moved backwards is not supported
 
@@ -17641,21 +17641,34 @@ MK: >\x00<
 /(?(VERSION=0.0/
 Failed: error 179 at offset 14: syntax error or number too big in (?(VERSION condition
 
-# Perl has made \K in lookarounds an error. At the moment PCRE2 still accepts.
+# Perl has made \K in lookarounds an error. PCRE2 now rejects as well, unless
+# explicitly authorized.
 
 /(?=a\Kb)ab/
+Failed: error 199 at offset 10: \K is not allowed in lookarounds (but see PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK)
+
+/(?=a\Kb)ab/allow_lookaround_bsk
     ab 
  0: b
 
 /(?!a\Kb)ac/
+Failed: error 199 at offset 10: \K is not allowed in lookarounds (but see PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK)
+
+/(?!a\Kb)ac/allow_lookaround_bsk
     ac 
  0: ac
     
 /^abc(?<=b\Kc)d/
+Failed: error 199 at offset 14: \K is not allowed in lookarounds (but see PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK)
+
+/^abc(?<=b\Kc)d/allow_lookaround_bsk
     abcd
  0: cd
 
 /^abc(?<!b\Kq)d/
+Failed: error 199 at offset 14: \K is not allowed in lookarounds (but see PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK)
+
+/^abc(?<!b\Kq)d/,allow_lookaround_bsk
     abcd
  0: abcd
     
