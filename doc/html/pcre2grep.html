@@ -188,6 +188,12 @@ Treat binary files as text. This is equivalent to
 <b>--binary-files</b>=<i>text</i>.
 </P>
 <P>
+<b>--allow-lookaround-bsk</b>
+PCRE2 now forbids the use of \K in lookarounds by default, in line with Perl.
+This option causes <b>pcre2grep</b> to set the PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK
+option, which enables this somewhat dangerous usage.
+</P>
+<P>
 <b>-B</b> <i>number</i>, <b>--before-context=</b><i>number</i>
 Output up to <i>number</i> lines of context before each matching line. Fewer
 lines are output if the previous match or the start of the file is within
@@ -1040,16 +1046,16 @@ because VMS does not distinguish between exit(0) and exit(1).
 <P>
 Philip Hazel
 <br>
-University Computing Service
+Retired from University Computing Service
 <br>
 Cambridge, England.
 <br>
 </P>
 <br><a name="SEC16" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 04 October 2020
+Last updated: 31 August 2021
 <br>
-Copyright &copy; 1997-2020 University of Cambridge.
+Copyright &copy; 1997-2021 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE2 index page</a>.

@@ -423,6 +423,7 @@ used to identify them. */
 #define N_OM_SEPARATOR (-22)
 #define N_MAX_BUFSIZE  (-23)
 #define N_OM_CAPTURE   (-24)
+#define N_ALLABSK      (-25)
 
 static option_item optionlist[] = {
   { OP_NODATA,     N_NULL,   NULL,              "",              "terminate options" },
@@ -490,6 +491,7 @@ static option_item optionlist[] = {
   { OP_NODATA,    'v',      NULL,              "invert-match",  "select non-matching lines" },
   { OP_NODATA,    'w',      NULL,              "word-regex(p)", "force patterns to match only as words"  },
   { OP_NODATA,    'x',      NULL,              "line-regex(p)", "force patterns to match only whole lines" },
+  { OP_NODATA,   N_ALLABSK, NULL,              "allow-lookaround-bsk", "allow \\K in lookarounds" },
   { OP_NODATA,    0,        NULL,               NULL,            NULL }
 };
 
@@ -3544,7 +3546,7 @@ return rc;
 
 
 /*************************************************
-*    Handle a single-letter, no data option      *
+*          Handle a no-data option               *
 *************************************************/
 
 static int
@@ -3557,6 +3559,7 @@ switch(letter)
   case N_LBUFFER: line_buffered = TRUE; break;
   case N_LOFFSETS: line_offsets = number = TRUE; break;
   case N_NOJIT: use_jit = FALSE; break;
+  case N_ALLABSK: extra_options |= PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK; break;
   case 'a': binary_files = BIN_TEXT; break;
   case 'c': count_only = TRUE; break;
   case 'F': options |= PCRE2_LITERAL; break;

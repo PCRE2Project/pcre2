@@ -1,4 +1,4 @@
-.TH PCRE2GREP 1 "04 October 2020" "PCRE2 10.36"
+.TH PCRE2GREP 1 "31 August 2021" "PCRE2 10.38"
 .SH NAME
 pcre2grep - a grep with Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -156,6 +156,11 @@ is expected to be relatively small. When \fB-c\fP is used, \fB-A\fP is ignored.
 \fB-a\fP, \fB--text\fP
 Treat binary files as text. This is equivalent to
 \fB--binary-files\fP=\fItext\fP.
+.TP
+\fB--allow-lookaround-bsk\fP
+PCRE2 now forbids the use of \eK in lookarounds by default, in line with Perl.
+This option causes \fBpcre2grep\fP to set the PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK
+option, which enables this somewhat dangerous usage.
 .TP
 \fB-B\fP \fInumber\fP, \fB--before-context=\fP\fInumber\fP
 Output up to \fInumber\fP lines of context before each matching line. Fewer
@@ -946,7 +951,7 @@ because VMS does not distinguish between exit(0) and exit(1).
 .sp
 .nf
 Philip Hazel
-University Computing Service
+Retired from University Computing Service
 Cambridge, England.
 .fi
 .
@@ -955,6 +960,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 04 October 2020
-Copyright (c) 1997-2020 University of Cambridge.
+Last updated: 31 August 2021
+Copyright (c) 1997-2021 University of Cambridge.
 .fi
