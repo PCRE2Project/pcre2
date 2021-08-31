@@ -788,8 +788,8 @@ are allowed. */
 /* Compile time error code numbers. They are given names so that they can more
 easily be tracked. When a new number is added, the tables called eint1 and
 eint2 in pcre2posix.c may need to be updated, and a new error text must be
-added to compile_error_texts in pcre2_error.c. Also, the error codes in 
-pcre2.h.in must be updated - their values are exactly 100 greater than these 
+added to compile_error_texts in pcre2_error.c. Also, the error codes in
+pcre2.h.in must be updated - their values are exactly 100 greater than these
 values. */
 
 enum { ERR0 = COMPILE_ERROR_BASE,
@@ -7802,15 +7802,15 @@ for (;; pptr++)
       }
 #endif
 
-    /* \K is forbidden in lookarounds since 10.38 because that's what Perl has 
+    /* \K is forbidden in lookarounds since 10.38 because that's what Perl has
     done. However, there's an option, in case anyone was relying on it. */
-    
+
     if (cb->assert_depth > 0 && meta_arg == ESC_K &&
         (cb->cx->extra_options & PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK) == 0)
       {
       *errorcodeptr = ERR99;
-      return 0;  
-      }    
+      return 0;
+      }
 
     /* For the rest (including \X when Unicode is supported - if not it's
     faulted at parse time), the OP value is the escape value when PCRE2_UCP is

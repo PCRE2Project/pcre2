@@ -6847,7 +6847,7 @@ for(;;)
             start_match = (pp2 == NULL)? end_subject : pp2;
           else
             start_match = (pp2 == NULL || pp1 < pp2)? pp1 : pp2;
-             
+
 #endif  /* 8-bit handling */
           }
 

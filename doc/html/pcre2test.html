@@ -84,7 +84,7 @@ names used in the libraries have a suffix _8, _16, or _32, as appropriate.
 <br><a name="SEC3" href="#TOC1">INPUT ENCODING</a><br>
 <P>
 Input to <b>pcre2test</b> is processed line by line, either by calling the C
-library's <b>fgets()</b> function, or via the <b>libreadline</b> or <b>libedit</b> 
+library's <b>fgets()</b> function, or via the <b>libreadline</b> or <b>libedit</b>
 library. In some Windows environments character 26 (hex 1A) causes an immediate
 end of file, and no further data is read, so this character should be avoided
 unless you really want that action.
@@ -610,7 +610,7 @@ way <b>pcre2_compile()</b> behaves. See
 for a description of the effects of these options.
 <pre>
       allow_empty_class         set PCRE2_ALLOW_EMPTY_CLASS
-      allow_lookaround_bsk      set PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK 
+      allow_lookaround_bsk      set PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK
       allow_surrogate_escapes   set PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES
       alt_bsux                  set PCRE2_ALT_BSUX
       alt_circumflex            set PCRE2_ALT_CIRCUMFLEX

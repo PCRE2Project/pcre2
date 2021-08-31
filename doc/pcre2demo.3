@@ -234,11 +234,11 @@ pcre2_match_data_create_from_pattern() above. */
 if (rc == 0)
   printf("ovector was not big enough for all the captured substrings\en");
 
-/* Since release 10.38 PCRE2 has locked out the use of \eK in lookaround 
-assertions. However, there is an option to re-enable the old behaviour. If that 
+/* Since release 10.38 PCRE2 has locked out the use of \eK in lookaround
+assertions. However, there is an option to re-enable the old behaviour. If that
 is set, it is possible to run patterns such as /(?=.\eK)/ that use \eK in an
 assertion to set the start of a match later than its end. In this demonstration
-program, we show how to detect this case, but it shouldn't arise because the 
+program, we show how to detect this case, but it shouldn't arise because the
 option is never set. */
 
 if (ovector[0] > ovector[1])

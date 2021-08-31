@@ -12,7 +12,7 @@ repository:
 https://github.com/PhilipHazel/pcre2/releases
 
 There is a mailing list for discussion about the development of PCRE2 at
-pcre2-dev@googlegroups.com. You can subscribe by sending an email to 
+pcre2-dev@googlegroups.com. You can subscribe by sending an email to
 pcre2-dev+subscribe@googlegroups.com.
 
 You can access the archives and also subscribe or manage your subscription

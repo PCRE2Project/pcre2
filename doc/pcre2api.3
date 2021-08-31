@@ -1878,10 +1878,10 @@ The option bits that can be set in a compile context by calling the
 .sp
   PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK
 .sp
-Since release 10.38 PCRE2 has forbidden the use of \eK within lookaround 
-assertions, following Perl's lead. This option is provided to re-enable the 
-previous behaviour (act in positive lookarounds, ignore in negative ones) in 
-case anybody is relying on it.   
+Since release 10.38 PCRE2 has forbidden the use of \eK within lookaround
+assertions, following Perl's lead. This option is provided to re-enable the
+previous behaviour (act in positive lookarounds, ignore in negative ones) in
+case anybody is relying on it.
 .sp
   PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES
 .sp
@@ -2503,20 +2503,20 @@ string that define the matched parts of the subject. This is known as the
 Before calling \fBpcre2_match()\fP, \fBpcre2_dfa_match()\fP, or
 \fBpcre2_jit_match()\fP you must create a match data block by calling one of
 the creation functions above. For \fBpcre2_match_data_create()\fP, the first
-argument is the number of pairs of offsets in the \fIovector\fP. 
+argument is the number of pairs of offsets in the \fIovector\fP.
 .P
 When using \fBpcre2_match()\fP, one pair of offsets is required to identify the
 string that matched the whole pattern, with an additional pair for each
 captured substring. For example, a value of 4 creates enough space to record
 the matched portion of the subject plus three captured substrings.
 .P
-When using \fBpcre2_dfa_match()\fP there may be multiple matched substrings of 
+When using \fBpcre2_dfa_match()\fP there may be multiple matched substrings of
 different lengths at the same point in the subject. The ovector should be made
 large enough to hold as many as are expected.
 .P
 A minimum of at least 1 pair is imposed by \fBpcre2_match_data_create()\fP, so
-it is always possible to return the overall matched string in the case of 
-\fBpcre2_match()\fP or the longest match in the case of 
+it is always possible to return the overall matched string in the case of
+\fBpcre2_match()\fP or the longest match in the case of
 \fBpcre2_dfa_match()\fP.
 .P
 The second argument of \fBpcre2_match_data_create()\fP is a pointer to a

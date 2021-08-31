@@ -33,10 +33,10 @@ just once (except when processing lookaround assertions). This function is
   \fIworkspace\fP    Points to a vector of ints used as working space
   \fIwscount\fP      Number of elements in the vector
 .sp
-The size of output vector needed to contain all the results depends on the  
-number of simultaneous matches, not on the number of parentheses in the        
-pattern. Using \fBpcre2_match_data_create_from_pattern()\fP to create the match 
-data block is therefore not advisable when using this function.   
+The size of output vector needed to contain all the results depends on the
+number of simultaneous matches, not on the number of parentheses in the
+pattern. Using \fBpcre2_match_data_create_from_pattern()\fP to create the match
+data block is therefore not advisable when using this function.
 .P
 A match context is needed only if you want to set up a callout function or
 specify the heap limit or the match or the recursion depth limits. The

@@ -1175,10 +1175,10 @@ For example, when the pattern
 matches "foobar", the first substring is still set to "foo".
 </P>
 <P>
-From version 5.32.0 Perl forbids the use of \K in lookaround assertions. From 
-release 10.38 PCRE2 also forbids this by default. However, the 
-PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK option can be used when calling 
-<b>pcre2_compile()</b> to re-enable the previous behaviour. When this option is 
+From version 5.32.0 Perl forbids the use of \K in lookaround assertions. From
+release 10.38 PCRE2 also forbids this by default. However, the
+PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK option can be used when calling
+<b>pcre2_compile()</b> to re-enable the previous behaviour. When this option is
 set, \K is acted upon when it occurs inside positive assertions, but is
 ignored in negative assertions. Note that when a pattern such as (?=ab\K)
 matches, the reported start of the match can be greater than the end of the

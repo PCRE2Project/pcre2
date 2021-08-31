@@ -185,8 +185,8 @@ REVISION
        Last updated: 27 August 2021
        Copyright (c) 1997-2021 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCRE2API(3)                Library Functions Manual                PCRE2API(3)
 
 
@@ -3851,8 +3851,8 @@ REVISION
        Last updated: 30 August 2021
        Copyright (c) 1997-2021 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCRE2BUILD(3)              Library Functions Manual              PCRE2BUILD(3)
 
 
@@ -4445,8 +4445,8 @@ REVISION
        Last updated: 20 March 2020
        Copyright (c) 1997-2020 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCRE2CALLOUT(3)            Library Functions Manual            PCRE2CALLOUT(3)
 
 
@@ -4875,8 +4875,8 @@ REVISION
        Last updated: 03 February 2019
        Copyright (c) 1997-2019 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCRE2COMPAT(3)             Library Functions Manual             PCRE2COMPAT(3)
 
 
@@ -5090,8 +5090,8 @@ REVISION
        Last updated: 30 August 2021
        Copyright (c) 1997-2021 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCRE2JIT(3)                Library Functions Manual                PCRE2JIT(3)
 
 
@@ -5516,8 +5516,8 @@ REVISION
        Last updated: 23 May 2019
        Copyright (c) 1997-2019 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCRE2LIMITS(3)             Library Functions Manual             PCRE2LIMITS(3)
 
 
@@ -5586,8 +5586,8 @@ REVISION
        Last updated: 02 February 2019
        Copyright (c) 1997-2019 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCRE2MATCHING(3)           Library Functions Manual           PCRE2MATCHING(3)
 
 
@@ -5811,8 +5811,8 @@ REVISION
        Last updated: 28 August 2021
        Copyright (c) 1997-2021 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCRE2PARTIAL(3)            Library Functions Manual            PCRE2PARTIAL(3)
 
 
@@ -6191,8 +6191,8 @@ REVISION
        Last updated: 04 September 2019
        Copyright (c) 1997-2019 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCRE2PATTERN(3)            Library Functions Manual            PCRE2PATTERN(3)
 
 
@@ -9641,8 +9641,8 @@ REVISION
        Last updated: 30 August 2021
        Copyright (c) 1997-2021 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCRE2PERFORM(3)            Library Functions Manual            PCRE2PERFORM(3)
 
 
@@ -9876,8 +9876,8 @@ REVISION
        Last updated: 03 February 2019
        Copyright (c) 1997-2019 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCRE2POSIX(3)              Library Functions Manual              PCRE2POSIX(3)
 
 
@@ -10210,8 +10210,8 @@ REVISION
        Last updated: 26 April 2021
        Copyright (c) 1997-2021 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCRE2SAMPLE(3)             Library Functions Manual             PCRE2SAMPLE(3)
 
 
@@ -10489,8 +10489,8 @@ REVISION
        Last updated: 27 June 2018
        Copyright (c) 1997-2018 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCRE2SYNTAX(3)             Library Functions Manual             PCRE2SYNTAX(3)
 
 
@@ -11009,8 +11009,8 @@ REVISION
        Last updated: 30 August 2021
        Copyright (c) 1997-2021 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCRE2UNICODE(3)            Library Functions Manual            PCRE2UNICODE(3)
 
 
@@ -11444,5 +11444,5 @@ REVISION
        Last updated: 23 February 2020
        Copyright (c) 1997-2020 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
