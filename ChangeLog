@@ -1,21 +1,21 @@
 Change Log for PCRE2
 --------------------
 
-Version 10.38-RC1 xx-xxx-2021
------------------------------
+Version 10.38-RC1 31-August-2021
+--------------------------------
 
 1. Fix invalid single character repetition issues in JIT when the repetition
 is inside a capturing bracket and the bracket is preceeded by character
 literals.
 
-2. Installed revised CMake configuration files provided by Jan-Willem Blokland. 
+2. Installed revised CMake configuration files provided by Jan-Willem Blokland.
 This extends the CMake build system to build both static and shared libraries
 in one go, builds the static library with PIC, and exposes PCRE2 libraries
 using the CMake config files. JWB provided these notes:
 
 - Introduced CMake variable BUILD_STATIC_LIBS to build the static library.
 
-- Make a small modification to config-cmake.h.in by removing the PCRE2_STATIC 
+- Make a small modification to config-cmake.h.in by removing the PCRE2_STATIC
   variable. Added PCRE2_STATIC variable to the static build using the
   target_compile_definitions() function.
 
@@ -24,7 +24,7 @@ using the CMake config files. JWB provided these notes:
   - Introduced CMake variable PCRE2_USE_STATIC_LIBS to easily switch between
     the static and shared libraries.
 
-  - Added the PCRE_STATIC variable to the target compile definitions for the 
+  - Added the PCRE_STATIC variable to the target compile definitions for the
     import of the static library.
 
 Building static and shared libraries using MSVC results in a name clash of
@@ -33,23 +33,24 @@ file pcre2-8.lib. Therefore, I decided to change the static library names by
 adding "-static". For example, pcre2-8.lib has become pcre2-8-static.lib.
 [Comment by PH: this is MSVC-specific. It doesn't happen on Linux.]
 
-3. Increased the minimum release number for CMake to 3.0.0 because older than 
-2.8.12 is deprecated (it was set to 2.8.5) and causes warnings. Even 3.0.0 is 
-quote old; it was released in 2014.
+3. Increased the minimum release number for CMake to 3.0.0 because older than
+2.8.12 is deprecated (it was set to 2.8.5) and causes warnings. Even 3.0.0 is
+quite old; it was released in 2014.
 
-4. Implemented a modified version of Thomas Tempelmann's pcre2grep patch for 
-detecting symlink loops. This is dependent on the availability of realpath(), 
-which is now tested for in ./configure and CMakeLists.txt. 
+4. Implemented a modified version of Thomas Tempelmann's pcre2grep patch for
+detecting symlink loops. This is dependent on the availability of realpath(),
+which is now tested for in ./configure and CMakeLists.txt.
 
-5. Implemented a modified version of Thomas Tempelmann's patch for handling 
+5. Implemented a modified version of Thomas Tempelmann's patch for faster
 case-independent "first code unit" searches for unanchored patterns in 8-bit
 mode in the interpreters. Instead of just remembering whether one case matched
 or not, it remembers the position of a previous match so as to avoid
 unnecessary repeated searching.
 
-6. Perl now locks out \K in lookarounds, so PCRE2 now does the same by default. 
-However, just in case anybody was relying on the old behaviour, there is an 
+6. Perl now locks out \K in lookarounds, so PCRE2 now does the same by default.
+However, just in case anybody was relying on the old behaviour, there is an
 option called PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK that enables the old behaviour.
+An option has also been added to pcre2grep to enable this.
 
 
 Version 10.37 26-May-2021

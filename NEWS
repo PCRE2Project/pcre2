@@ -2,6 +2,20 @@ News about PCRE2 releases
 -------------------------
 
 
+Version 10.38-RC1 31-August-2021
+--------------------------------
+
+As well as some bug fixes and tidies (as always, see ChangeLog for details),
+the documentation is updated to list the new URLs, following the move of the
+source repository to GitHub and the mailing list to Google Groups.
+
+* The CMake build system can now build both static and shared libraries in one
+go.
+
+* Following Perl's lead, \K is now locked out in lookaround assertions by
+default, but an option is provided to re-enable the previous behaviour.
+
+
 Version 10.37 26-May-2021
 -------------------------
 
