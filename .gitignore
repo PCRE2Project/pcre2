@@ -42,6 +42,21 @@ pcre2grep
 pcre2test
 test-driver
 test-suite.log
+test3input
+test3output
+testNinput
+testNinputgrep
+teststderr
+teststderrM
+teststderrgrep
+teststdout
+teststdoutM
+testtemp1
+testtemp1grep
+testtemp2
+testtemp2grep
+testtry
+testtrygrep
 
 m4/libtool.m4
 m4/ltoptions.m4
