@@ -52,6 +52,8 @@ However, just in case anybody was relying on the old behaviour, there is an
 option called PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK that enables the old behaviour.
 An option has also been added to pcre2grep to enable this.
 
+7. Re-enable an optimization which was unintentionally disabled in 10.35.
+
 
 Version 10.37 26-May-2021
 -------------------------
