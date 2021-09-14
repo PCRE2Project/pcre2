@@ -54,6 +54,12 @@ An option has also been added to pcre2grep to enable this.
 
 7. Re-enable an optimization which was unintentionally disabled in 10.35.
 
+8. There is a loop counter to catch excessively crazy patterns when checking
+the lengths of lookbehinds at compile time. This was incorrectly getting reset
+whenever a lookahead was processed, leading to some fuzzer-generated patterns
+taking a very long time to compile when (?|) was present in the pattern,
+because (?|) disables caching of group lengths.
+
 
 Version 10.37 26-May-2021
 -------------------------

@@ -137,7 +137,7 @@ static BOOL
 
 static int
   check_lookbehinds(uint32_t *, uint32_t **, parsed_recurse_check *,
-    compile_block *);
+    compile_block *, int *);
 
 
 /*************************************************
@@ -9161,7 +9161,7 @@ for (;; pptr++)
     case META_LOOKAHEAD:
     case META_LOOKAHEADNOT:
     case META_LOOKAHEAD_NA:
-    *errcodeptr = check_lookbehinds(pptr + 1, &pptr, recurses, cb);
+    *errcodeptr = check_lookbehinds(pptr + 1, &pptr, recurses, cb, lcptr);
     if (*errcodeptr != 0) return -1;
 
     /* Ignore any qualifiers that follow a lookahead assertion. */
@@ -9501,16 +9501,16 @@ Arguments
   retptr    if not NULL, return the ket pointer here
   recurses  chain of recurse_check to catch mutual recursion
   cb        points to the compile block
+  lcptr     points to loop counter 
 
 Returns:    0 on success, or an errorcode (cb->erroroffset will be set)
 */
 
 static int
 check_lookbehinds(uint32_t *pptr, uint32_t **retptr,
-  parsed_recurse_check *recurses, compile_block *cb)
+  parsed_recurse_check *recurses, compile_block *cb, int *lcptr)
 {
 int errorcode = 0;
-int loopcount = 0;
 int nestlevel = 0;
 
 cb->erroroffset = PCRE2_UNSET;
@@ -9636,7 +9636,7 @@ for (; *pptr != META_END; pptr++)
     case META_LOOKBEHIND:
     case META_LOOKBEHINDNOT:
     case META_LOOKBEHIND_NA:
-    if (!set_lookbehind_lengths(&pptr, &errorcode, &loopcount, recurses, cb))
+    if (!set_lookbehind_lengths(&pptr, &errorcode, lcptr, recurses, cb))
       return errorcode;
     break;
     }
@@ -10091,7 +10091,8 @@ lengths. */
 
 if (has_lookbehind)
   {
-  errorcode = check_lookbehinds(cb.parsed_pattern, NULL, NULL, &cb);
+  int loopcount = 0; 
+  errorcode = check_lookbehinds(cb.parsed_pattern, NULL, NULL, &cb, &loopcount);
   if (errorcode != 0) goto HAD_CB_ERROR;
   }
 
