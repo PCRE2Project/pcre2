@@ -1,8 +1,8 @@
 Change Log for PCRE2
 --------------------
 
-Version 10.38-RC1 31-August-2021
---------------------------------
+Version 10.38 01-October-2021
+-----------------------------
 
 1. Fix invalid single character repetition issues in JIT when the repetition
 is inside a capturing bracket and the bracket is preceeded by character
@@ -52,7 +52,7 @@ However, just in case anybody was relying on the old behaviour, there is an
 option called PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK that enables the old behaviour.
 An option has also been added to pcre2grep to enable this.
 
-7. Re-enable an optimization which was unintentionally disabled in 10.35.
+7. Re-enable a JIT optimization which was unintentionally disabled in 10.35.
 
 8. There is a loop counter to catch excessively crazy patterns when checking
 the lengths of lookbehinds at compile time. This was incorrectly getting reset

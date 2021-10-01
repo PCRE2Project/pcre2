@@ -9501,7 +9501,7 @@ Arguments
   retptr    if not NULL, return the ket pointer here
   recurses  chain of recurse_check to catch mutual recursion
   cb        points to the compile block
-  lcptr     points to loop counter 
+  lcptr     points to loop counter
 
 Returns:    0 on success, or an errorcode (cb->erroroffset will be set)
 */
@@ -10091,7 +10091,7 @@ lengths. */
 
 if (has_lookbehind)
   {
-  int loopcount = 0; 
+  int loopcount = 0;
   errorcode = check_lookbehinds(cb.parsed_pattern, NULL, NULL, &cb, &loopcount);
   if (errorcode != 0) goto HAD_CB_ERROR;
   }
