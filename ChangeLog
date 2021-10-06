@@ -1,6 +1,12 @@
 Change Log for PCRE2
 --------------------
 
+Version 10.39-RC1 xx-xxx-2021
+-----------------------------
+
+1. Fix incorrect detection of alternatives in first character search.
+
+
 Version 10.38 01-October-2021
 -----------------------------
 
