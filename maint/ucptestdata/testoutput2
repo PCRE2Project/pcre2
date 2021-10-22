@@ -8,12 +8,14 @@ U+3021..U+3029 Number: Letter number, Han, Other
 U+3038..U+303A Number: Letter number, Han, Other
         U+303B Letter: Modifier letter, Han, Other
 U+3400..U+4DBF Letter: Other letter, Han, Other
-U+4E00..U+9FFC Letter: Other letter, Han, Other
+U+4E00..U+9FFF Letter: Other letter, Han, Other
 U+F900..U+FA6D Letter: Other letter, Han, Other
 U+FA70..U+FAD9 Letter: Other letter, Han, Other
+        U+16FE2 Punctuation: Other punctuation, Han, Other
+       U+16FE3 Letter: Modifier letter, Han, Other
 U+16FF0..U+16FF1 Mark: Spacing mark, Han, SpacingMark
-U+20000..U+2A6DD Letter: Other letter, Han, Other
-U+2A700..U+2B734 Letter: Other letter, Han, Other
+U+20000..U+2A6DF Letter: Other letter, Han, Other
+U+2A700..U+2B738 Letter: Other letter, Han, Other
 U+2B740..U+2B81D Letter: Other letter, Han, Other
 U+2B820..U+2CEA1 Letter: Other letter, Han, Other
 U+2CEB0..U+2EBE0 Letter: Other letter, Han, Other
@@ -47,6 +49,7 @@ U+02EF..U+02FF Symbol: Modifier symbol, Common, Other
         U+0375 Symbol: Modifier symbol, Greek, Other
         U+0384 Symbol: Modifier symbol, Greek, Other
         U+0385 Symbol: Modifier symbol, Common, Other
+        U+0888 Symbol: Modifier symbol, Arabic, Other
         U+1FBD Symbol: Modifier symbol, Greek, Other
 U+1FBF..U+1FC1 Symbol: Modifier symbol, Greek, Other
 U+1FCD..U+1FCF Symbol: Modifier symbol, Greek, Other
@@ -60,7 +63,7 @@ U+A720..U+A721 Symbol: Modifier symbol, Common, Other
 U+A789..U+A78A Symbol: Modifier symbol, Common, Other
         U+AB5B Symbol: Modifier symbol, Common, Other
 U+AB6A..U+AB6B Symbol: Modifier symbol, Common, Other
-U+FBB2..U+FBC1 Symbol: Modifier symbol, Arabic, Other
+U+FBB2..U+FBC2 Symbol: Modifier symbol, Arabic, Other
         U+FF3E Symbol: Modifier symbol, Common, Other
         U+FF40 Symbol: Modifier symbol, Common, Other
         U+FFE3 Symbol: Modifier symbol, Common, Other
@@ -76,6 +79,7 @@ U+2010..U+2015 Punctuation: Dash punctuation, Common, Other
         U+2E1A Punctuation: Dash punctuation, Common, Other
 U+2E3A..U+2E3B Punctuation: Dash punctuation, Common, Other
         U+2E40 Punctuation: Dash punctuation, Common, Other
+        U+2E5D Punctuation: Dash punctuation, Common, Other
         U+301C Punctuation: Dash punctuation, Common, Other, [Bopomofo, Hangul, Han, Hiragana, Katakana]
         U+3030 Punctuation: Dash punctuation, Common, Extended Pictographic, [Bopomofo, Hangul, Han, Hiragana, Katakana]
         U+30A0 Punctuation: Dash punctuation, Common, Other, [Hiragana, Katakana]
@@ -186,3 +190,7 @@ U+B69D..U+B6B7 Letter: Other letter, Hangul, Hangul syllable type LVT
 U+B6B9..U+B6D3 Letter: Other letter, Hangul, Hangul syllable type LVT
 U+B6D5..U+B6EF Letter: Other letter, Hangul, Hangul syllable type LVT
 ...
+find script Old_Uyghur
+U+10F70..U+10F81 Letter: Other letter, Old_Uyghur, Other
+U+10F82..U+10F85 Mark: Non-spacing mark, Old_Uyghur, Extend
+U+10F86..U+10F89 Punctuation: Other punctuation, Old_Uyghur, Other
