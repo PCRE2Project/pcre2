@@ -110,17 +110,18 @@ MSVC 10/2010. Except for VC6 (which is missing some fundamentals and fails). */
 #define snprintf _snprintf
 #endif
 
-/* VC and older compilers don't support %td or %zu, and even some that claim to
+/* old VC and older compilers don't support %td or %zu, and even some that claim to
 be C99 don't support it (hence DISABLE_PERCENT_ZT). */
 
-#if defined(_MSC_VER) || !defined(__STDC_VERSION__) || __STDC_VERSION__ < 199901L || defined(DISABLE_PERCENT_ZT)
-#define PTR_FORM "lu"
-#define SIZ_FORM "lu"
-#define SIZ_CAST (unsigned long int)
+#if defined(DISABLE_PERCENT_ZT) || (defined(_MSC_VER) && (_MSC_VER < 1800)) || \
+  (!defined(_MSC_VER) && (!defined(__STDC_VERSION__) || __STDC_VERSION__ < 199901L))
+#ifdef _WIN64
+#define SIZ_FORM "llu"
 #else
-#define PTR_FORM "td"
+#define SIZ_FORM "lu"
+#endif
+#else
 #define SIZ_FORM "zu"
-#define SIZ_CAST
 #endif
 
 #define FALSE 0
@@ -1856,8 +1857,7 @@ for (i = 1; p != NULL; p = p->next, i++)
     unsigned char mbuffer[256];
     PCRE2_SIZE startchar = pcre2_get_startchar(match_data);
     (void)pcre2_get_error_message(*mrc, mbuffer, sizeof(mbuffer));
-    fprintf(stderr, "%s at offset %" SIZ_FORM "\n\n", mbuffer,
-      SIZ_CAST startchar);
+    fprintf(stderr, "%s at offset %" SIZ_FORM "\n\n", mbuffer, startchar);
     }
   if (*mrc == PCRE2_ERROR_MATCHLIMIT || *mrc == PCRE2_ERROR_DEPTHLIMIT ||
       *mrc == PCRE2_ERROR_HEAPLIMIT || *mrc == PCRE2_ERROR_JIT_STACKLIMIT)
