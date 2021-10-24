@@ -73,9 +73,6 @@ sure both macros are undefined; an emulation function will then be used. */
 /* Define to 1 if you have the <edit/readline/readline.h> header file. */
 /* #undef HAVE_EDIT_READLINE_READLINE_H */
 
-/* Define to 1 if you have the <inttypes.h> header file. */
-/* #undef HAVE_INTTYPES_H */
-
 /* Define to 1 if you have the <limits.h> header file. */
 /* #undef HAVE_LIMITS_H */
 
