@@ -6,6 +6,21 @@ Version 10.39-RC1 xx-xxx-2021
 
 1. Fix incorrect detection of alternatives in first character search in JIT.
 
+2. Merged patch from @carenas (GitHub issue #28):
+
+  Visual Studio 2013 includes support for %zu and %td, so let newer
+  versions of it avoid the fallback, and while at it, make sure that
+  the first check is for DISABLE_PERCENT_ZT so it will be always
+  honoured if chosen.
+
+  prtdiff_t is signed, so use a signed type instead, and make sure
+  that an appropiate width is chosen if pointers are 64bit wide and
+  long is not (ex: Windows 64bit).
+
+  IMHO removing the cast (and therefore the positibilty of truncation)
+  make the code cleaner and the fallback is likely portable enough
+  with all 64-bit POSIX systems doing LP64 except for Windows.
+
 
 Version 10.38 01-October-2021
 -----------------------------
