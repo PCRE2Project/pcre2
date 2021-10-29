@@ -43,7 +43,25 @@ Version 10.39-RC1 xx-xxx-2021
   Alternatively, the header could be checked to make the configuration fail
   instead of breaking the build, but that was punted, as it was missing anyway
   from autotools.
+  
+5. Merged patch from @carenas (GitHub #32):
 
+  * jit: allow building with ancient MSVC versions
+  
+  Visual Studio older than 2013 fails to build with JIT enabled, because it is
+  unable to parse non C89 compatible syntax, with mixed declarations and code.
+  While most recent compilers wouldn't even report this as a warning since it
+  is valid C99, it could be also made visible by adding to gcc/clang the
+  -Wdeclaration-after-statement flag at build time.
+  
+  Move the code below the affected definitions.
+  
+  * pcre2grep: avoid mixing declarations with code
+  
+  Since d5a61ee8 (Patch to detect (and ignore) symlink loops in pcre2grep,
+  2021-08-28), code will fail to build in a strict C89 compiler.
+  
+  Reformat slightly to make it C89 compatible again.
 
 
 Version 10.38 01-October-2021
