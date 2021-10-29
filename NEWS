@@ -2,6 +2,18 @@ News about PCRE2 releases
 -------------------------
 
 
+Version 10.39 29-October-2021
+-----------------------------
+
+This release is happening soon after 10.38 because the bug fix is important.
+
+1. Fix incorrect detection of alternatives in first character search in JIT.
+
+2. Update to Unicode 14.0.0.
+
+3. Some code cleanups (see ChangeLog).
+
+
 Version 10.38 01-October-2021
 -----------------------------
 
