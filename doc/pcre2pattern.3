@@ -2930,7 +2930,7 @@ breaks):
   (?(DEFINE) (?<byte> 2[0-4]\ed | 25[0-5] | 1\ed\ed | [1-9]?\ed) )
   \eb (?&byte) (\e.(?&byte)){3} \eb
 .sp
-The first part of the pattern is a DEFINE group inside which a another group
+The first part of the pattern is a DEFINE group inside which another group
 named "byte" is defined. This matches an individual component of an IPv4
 address (a number less than 256). When matching takes place, this part of the
 pattern is skipped because DEFINE acts like a false condition. The rest of the
