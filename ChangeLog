@@ -6,7 +6,7 @@ Version 10.39-RC1 xx-xxx-2021
 
 1. Fix incorrect detection of alternatives in first character search in JIT.
 
-2. Merged patch from @carenas (GitHub issue #28):
+2. Merged patch from @carenas (GitHub #28):
 
   Visual Studio 2013 includes support for %zu and %td, so let newer
   versions of it avoid the fallback, and while at it, make sure that
@@ -21,7 +21,29 @@ Version 10.39-RC1 xx-xxx-2021
   make the code cleaner and the fallback is likely portable enough
   with all 64-bit POSIX systems doing LP64 except for Windows.
   
-3. Merged patch from @carenas (GitHub issue #29) to update to Unicode 14.0.0. 
+3. Merged patch from @carenas (GitHub #29) to update to Unicode 14.0.0. 
+
+4. Merged patch from @carenas (GitHub #30):
+
+  * Cleanup: remove references to no longer used stdint.h
+  
+  Since 19c50b9d (Unconditionally use inttypes.h instead of trying for stdint.h
+  (simplification) and remove the now unnecessary inclusion in
+  pcre2_internal.h., 2018-11-14), stdint.h is no longer used.
+  
+  Remove checks for it in autotools and CMake and document better the expected
+  build failures for systems that might have stdint.h (C99) and not inttypes.h
+  (from POSIX), like old Windows.
+  
+  * Cleanup: remove detection for inttypes.h which is a hard dependency
+  
+  CMake checks for standard headers are not meant to be used for hard
+  dependencies, so will prevent a possible fallback to work.
+  
+  Alternatively, the header could be checked to make the configuration fail
+  instead of breaking the build, but that was punted, as it was missing anyway
+  from autotools.
+
 
 
 Version 10.38 01-October-2021

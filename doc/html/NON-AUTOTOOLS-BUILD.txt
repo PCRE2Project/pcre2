@@ -343,10 +343,10 @@ cache can be deleted by selecting "File > Delete Cache".
 
 BUILDING PCRE2 ON WINDOWS WITH VISUAL STUDIO
 
-The code currently cannot be compiled without a stdint.h header, which is
-available only in relatively recent versions of Visual Studio. However, this
-portable and permissively-licensed implementation of the header worked without
-issue:
+The code currently cannot be compiled without an inttypes.h header, which is
+available only with Visual Studio 2013 or newer. However, this
+portable and permissively-licensed implementation of the stdint.h header
+could be used as an alternative:
 
   http://www.azillionmonkeys.com/qed/pstdint.h
 

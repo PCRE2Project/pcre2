@@ -553,15 +553,16 @@ documentation.
 <P>
 The C99 standard defines formatting modifiers z and t for size_t and
 ptrdiff_t values, respectively. By default, PCRE2 uses these modifiers in
-environments other than Microsoft Visual Studio when __STDC_VERSION__ is
-defined and has a value greater than or equal to 199901L (indicating C99).
+environments other than old versions of Microsoft Visual Studio when
+__STDC_VERSION__ is defined and has a value greater than or equal to 199901L
+(indicating support for C99).
 However, there is at least one environment that claims to be C99 but does not
 support these modifiers. If
 <pre>
   --disable-percent-zt
 </pre>
 is specified, no use is made of the z or t modifiers. Instead of %td or %zu,
-%lu is used, with a cast for size_t values.
+a suitable format is used depending in the size of long for the platform.
 </P>
 <br><a name="SEC22" href="#TOC1">SUPPORT FOR FUZZERS</a><br>
 <P>

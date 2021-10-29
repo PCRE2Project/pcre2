@@ -4379,15 +4379,17 @@ DISABLING THE Z AND T FORMATTING MODIFIERS
 
        The C99 standard defines formatting modifiers z and t  for  size_t  and
        ptrdiff_t  values, respectively. By default, PCRE2 uses these modifiers
-       in environments other than Microsoft  Visual  Studio  when  __STDC_VER-
-       SION__ is defined and has a value greater than or equal to 199901L (in-
-       dicating C99).  However, there is at least one environment that  claims
-       to be C99 but does not support these modifiers. If
+       in environments other than old versions of Microsoft Visual Studio when
+       __STDC_VERSION__  is  defined  and has a value greater than or equal to
+       199901L (indicating support for C99).  However, there is at  least  one
+       environment that claims to be C99 but does not support these modifiers.
+       If
 
          --disable-percent-zt
 
        is specified, no use is made of the z or t modifiers. Instead of %td or
-       %zu, %lu is used, with a cast for size_t values.
+       %zu,  a  suitable  format is used depending in the size of long for the
+       platform.
 
 
 SUPPORT FOR FUZZERS
@@ -6899,27 +6901,27 @@ BACKSLASH
        nese,  Bamum,  Bassa_Vah,  Batak, Bengali, Bhaiksuki, Bopomofo, Brahmi,
        Braille, Buginese, Buhid, Canadian_Aboriginal, Carian,  Caucasian_Alba-
        nian,  Chakma,  Cham,  Cherokee, Chorasmian, Common, Coptic, Cuneiform,
-       Cypriot, Cyrillic, Deseret, Devanagari, Dives_Akuru,  Dogra,  Duployan,
-       Egyptian_Hieroglyphs, Elbasan, Elymaic, Ethiopic, Georgian, Glagolitic,
-       Gothic, Grantha, Greek, Gujarati, Gunjala_Gondi, Gurmukhi, Han, Hangul,
-       Hanifi_Rohingya,  Hanunoo,  Hatran, Hebrew, Hiragana, Imperial_Aramaic,
-       Inherited,  Inscriptional_Pahlavi,  Inscriptional_Parthian,   Javanese,
-       Kaithi,  Kannada,  Katakana, Kayah_Li, Kharoshthi, Khitan_Small_Script,
-       Khmer, Khojki, Khudawadi, Lao, Latin,  Lepcha,  Limbu,  Linear_A,  Lin-
-       ear_B,  Lisu,  Lycian,  Lydian,  Mahajani, Makasar, Malayalam, Mandaic,
-       Manichaean,   Marchen,   Masaram_Gondi,   Medefaidrin,    Meetei_Mayek,
-       Mende_Kikakui, Meroitic_Cursive, Meroitic_Hieroglyphs, Miao, Modi, Mon-
-       golian, Mro, Multani,  Myanmar,  Nabataean,  Nandinagari,  New_Tai_Lue,
-       Newa,  Nko,  Nushu, Nyakeng_Puachue_Hmong, Ogham, Ol_Chiki, Old_Hungar-
-       ian, Old_Italic, Old_North_Arabian, Old_Permic,  Old_Persian,  Old_Sog-
-       dian,   Old_South_Arabian,   Old_Turkic,  Oriya,  Osage,  Osmanya,  Pa-
-       hawh_Hmong,    Palmyrene,    Pau_Cin_Hau,     Phags_Pa,     Phoenician,
-       Psalter_Pahlavi,  Rejang,  Runic,  Samaritan, Saurashtra, Sharada, Sha-
-       vian, Siddham, SignWriting, Sinhala,  Sogdian,  Sora_Sompeng,  Soyombo,
-       Sundanese,  Syloti_Nagri,  Syriac, Tagalog, Tagbanwa, Tai_Le, Tai_Tham,
-       Tai_Viet, Takri, Tamil, Tangut, Telugu, Thaana,  Thai,  Tibetan,  Tifi-
-       nagh, Tirhuta, Ugaritic, Unknown, Vai, Wancho, Warang_Citi, Yezidi, Yi,
-       Zanabazar_Square.
+       Cypriot, Cypro_Minoan, Cyrillic, Deseret, Devanagari, Dives_Akuru,  Do-
+       gra,  Duployan, Egyptian_Hieroglyphs, Elbasan, Elymaic, Ethiopic, Geor-
+       gian, Glagolitic, Gothic, Grantha, Greek, Gujarati, Gunjala_Gondi, Gur-
+       mukhi, Han, Hangul, Hanifi_Rohingya, Hanunoo, Hatran, Hebrew, Hiragana,
+       Imperial_Aramaic,    Inherited,     Inscriptional_Pahlavi,     Inscrip-
+       tional_Parthian,   Javanese,   Kaithi,   Kannada,  Katakana,  Kayah_Li,
+       Kharoshthi, Khitan_Small_Script, Khmer, Khojki, Khudawadi, Lao,  Latin,
+       Lepcha,  Limbu,  Linear_A,  Linear_B,  Lisu,  Lycian, Lydian, Mahajani,
+       Makasar, Malayalam, Mandaic, Manichaean, Marchen, Masaram_Gondi,  Mede-
+       faidrin, Meetei_Mayek, Mende_Kikakui, Meroitic_Cursive, Meroitic_Hiero-
+       glyphs, Miao, Modi, Mongolian, Mro, Multani, Myanmar, Nabataean, Nandi-
+       nagari,  New_Tai_Lue,  Newa,  Nko, Nushu, Nyakeng_Puachue_Hmong, Ogham,
+       Ol_Chiki,  Old_Hungarian,  Old_Italic,  Old_North_Arabian,  Old_Permic,
+       Old_Persian,  Old_Sogdian,  Old_South_Arabian,  Old_Turkic, Old_Uyghur,
+       Oriya, Osage, Osmanya, Pahawh_Hmong, Palmyrene, Pau_Cin_Hau,  Phags_Pa,
+       Phoenician,  Psalter_Pahlavi,  Rejang,  Runic,  Samaritan,  Saurashtra,
+       Sharada, Shavian, Siddham, SignWriting, Sinhala, Sogdian, Sora_Sompeng,
+       Soyombo,  Sundanese,  Syloti_Nagri,  Syriac, Tagalog, Tagbanwa, Tai_Le,
+       Tai_Tham, Tai_Viet, Takri, Tamil, Tangsa, Tangut, Telugu, Thaana, Thai,
+       Tibetan,  Tifinagh,  Tirhuta,  Toto,  Ugaritic, Unknown, Vai, Vithkuqi,
+       Wancho, Warang_Citi, Yezidi, Yi, Zanabazar_Square.
 
        Each character has exactly one Unicode general category property, spec-
        ified  by a two-letter abbreviation. For compatibility with Perl, nega-
@@ -10654,27 +10656,27 @@ SCRIPT NAMES FOR \p AND \P
        nese, Bamum, Bassa_Vah, Batak, Bengali,  Bhaiksuki,  Bopomofo,  Brahmi,
        Braille,  Buginese, Buhid, Canadian_Aboriginal, Carian, Caucasian_Alba-
        nian, Chakma, Cham, Cherokee, Chorasmian,  Common,  Coptic,  Cuneiform,
-       Cypriot,  Cyrillic,  Deseret, Devanagari, Dives_Akuru, Dogra, Duployan,
-       Egyptian_Hieroglyphs, Elbasan, Elymaic, Ethiopic, Georgian, Glagolitic,
-       Gothic, Grantha, Greek, Gujarati, Gunjala_Gondi, Gurmukhi, Han, Hangul,
-       Hanifi_Rohingya, Hanunoo, Hatran, Hebrew,  Hiragana,  Imperial_Aramaic,
-       Inherited,   Inscriptional_Pahlavi,  Inscriptional_Parthian,  Javanese,
-       Kaithi, Kannada, Katakana, Kayah_Li,  Kharoshthi,  Khitan_Small_Script,
-       Khmer,  Khojki,  Khudawadi,  Lao,  Latin, Lepcha, Limbu, Linear_A, Lin-
-       ear_B, Lisu, Lycian, Lydian,  Mahajani,  Makasar,  Malayalam,  Mandaic,
-       Manichaean,    Marchen,   Masaram_Gondi,   Medefaidrin,   Meetei_Mayek,
-       Mende_Kikakui, Meroitic_Cursive, Meroitic_Hieroglyphs, Miao, Modi, Mon-
-       golian,  Mro,  Multani,  Myanmar,  Nabataean, Nandinagari, New_Tai_Lue,
-       Newa, Nko, Nushu, Nyakeng_Puachue_Hmong, Ogham,  Ol_Chiki,  Old_Hungar-
-       ian,  Old_Italic,  Old_North_Arabian, Old_Permic, Old_Persian, Old_Sog-
-       dian,  Old_South_Arabian,  Old_Turkic,  Oriya,  Osage,   Osmanya,   Pa-
-       hawh_Hmong,     Palmyrene,     Pau_Cin_Hau,    Phags_Pa,    Phoenician,
-       Psalter_Pahlavi, Rejang, Runic, Samaritan,  Saurashtra,  Sharada,  Sha-
-       vian,  Siddham,  SignWriting,  Sinhala, Sogdian, Sora_Sompeng, Soyombo,
-       Sundanese, Syloti_Nagri, Syriac, Tagalog, Tagbanwa,  Tai_Le,  Tai_Tham,
-       Tai_Viet,  Takri,  Tamil,  Tangut, Telugu, Thaana, Thai, Tibetan, Tifi-
-       nagh, Tirhuta, Ugaritic, Vai, Wancho,  Warang_Citi,  Yezidi,  Yi,  Zan-
-       abazar_Square.
+       Cypriot,  Cypro_Minoan, Cyrillic, Deseret, Devanagari, Dives_Akuru, Do-
+       gra, Duployan, Egyptian_Hieroglyphs, Elbasan, Elymaic, Ethiopic,  Geor-
+       gian, Glagolitic, Gothic, Grantha, Greek, Gujarati, Gunjala_Gondi, Gur-
+       mukhi, Han, Hangul, Hanifi_Rohingya, Hanunoo, Hatran, Hebrew, Hiragana,
+       Imperial_Aramaic,     Inherited,     Inscriptional_Pahlavi,    Inscrip-
+       tional_Parthian,  Javanese,  Kaithi,   Kannada,   Katakana,   Kayah_Li,
+       Kharoshthi,  Khitan_Small_Script, Khmer, Khojki, Khudawadi, Lao, Latin,
+       Lepcha, Limbu, Linear_A,  Linear_B,  Lisu,  Lycian,  Lydian,  Mahajani,
+       Makasar,  Malayalam, Mandaic, Manichaean, Marchen, Masaram_Gondi, Mede-
+       faidrin, Meetei_Mayek, Mende_Kikakui, Meroitic_Cursive, Meroitic_Hiero-
+       glyphs, Miao, Modi, Mongolian, Mro, Multani, Myanmar, Nabataean, Nandi-
+       nagari, New_Tai_Lue, Newa, Nko,  Nushu,  Nyakeng_Puachue_Hmong,  Ogham,
+       Ol_Chiki,  Old_Hungarian,  Old_Italic,  Old_North_Arabian,  Old_Permic,
+       Old_Persian, Old_Sogdian,  Old_South_Arabian,  Old_Turkic,  Old_Uyghur,
+       Oriya,  Osage, Osmanya, Pahawh_Hmong, Palmyrene, Pau_Cin_Hau, Phags_Pa,
+       Phoenician,  Psalter_Pahlavi,  Rejang,  Runic,  Samaritan,  Saurashtra,
+       Sharada, Shavian, Siddham, SignWriting, Sinhala, Sogdian, Sora_Sompeng,
+       Soyombo, Sundanese, Syloti_Nagri, Syriac,  Tagalog,  Tagbanwa,  Tai_Le,
+       Tai_Tham, Tai_Viet, Takri, Tamil, Tangsa, Tangut, Telugu, Thaana, Thai,
+       Tibetan, Tifinagh, Tirhuta,  Toto,  Ugaritic,  Vai,  Vithkuqi,  Wancho,
+       Warang_Citi, Yezidi, Yi, Zanabazar_Square.
 
 
 CHARACTER CLASSES
