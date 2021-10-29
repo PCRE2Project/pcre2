@@ -20,6 +20,8 @@ Version 10.39-RC1 xx-xxx-2021
   IMHO removing the cast (and therefore the positibilty of truncation)
   make the code cleaner and the fallback is likely portable enough
   with all 64-bit POSIX systems doing LP64 except for Windows.
+  
+3. Merged patch from @carenas (GitHub issue #29) to update to Unicode 14.0.0. 
 
 
 Version 10.38 01-October-2021
