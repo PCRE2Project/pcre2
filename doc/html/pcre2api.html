@@ -2316,7 +2316,7 @@ return zero. The third argument should point to a <b>size_t</b> variable.
   PCRE2_INFO_LASTCODETYPE
 </pre>
 Returns 1 if there is a rightmost literal code unit that must exist in any
-matched string, other than at its start. The third argument should  point to a
+matched string, other than at its start. The third argument should point to a
 <b>uint32_t</b> variable. If there is no such value, 0 is returned. When 1 is
 returned, the code unit value itself can be retrieved using
 PCRE2_INFO_LASTCODEUNIT. For anchored patterns, a last literal value is
@@ -3583,7 +3583,7 @@ and force lower case. The escape sequences change the current state: \U and
 terminating a \Q quoted sequence) reverts to no case forcing. The sequences
 \u and \l force the next character (if it is a letter) to upper or lower
 case, respectively, and then the state automatically reverts to no case
-forcing. Case forcing applies to all inserted  characters, including those from
+forcing. Case forcing applies to all inserted characters, including those from
 capture groups and letters within \Q...\E quoted sequences. If either
 PCRE2_UTF or PCRE2_UCP was set when the pattern was compiled, Unicode
 properties are used for case forcing characters whose code points are greater
