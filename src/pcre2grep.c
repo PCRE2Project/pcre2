@@ -3266,6 +3266,7 @@ FILE *zos_test_file;
 
 if (strcmp(pathname, "-") == 0)
   {
+  if (count_limit >= 0) setbuf(stdin, NULL);
   return pcre2grep(stdin, FR_PLAIN, stdin_name,
     (filenames > FN_DEFAULT || (filenames == FN_DEFAULT && !only_one_at_top))?
       stdin_name : NULL);
@@ -4473,6 +4474,11 @@ no file arguments, search stdin, and then exit. */
 
 if (file_lists == NULL && i >= argc)
   {
+  /* Using a buffered stdin, that then is seek is not portable,
+     so attempt to remove the buffer, to workaround reported issues
+     affecting several BSD and AIX */
+  if (count_limit >= 0)
+    setbuf(stdin, NULL);
   rc = pcre2grep(stdin, FR_PLAIN, stdin_name,
     (filenames > FN_DEFAULT)? stdin_name : NULL);
   goto EXIT;
