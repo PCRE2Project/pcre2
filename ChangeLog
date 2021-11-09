@@ -11,6 +11,9 @@ handling of multiple passes.
 2. Merged patch from @carenas (GitHub #36, dae47509) to fix portability issue 
 in pcre2grep with buffered fseek(stdin).
 
+3. Merged patch from @carenas (GitHub #37, acc520924) to fix tests when -S is 
+not supported.
+
 
 Version 10.39 29-October-2021
 -----------------------------
