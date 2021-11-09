@@ -5767,7 +5767,7 @@ a)"xI
 
 /(?(DEFINE)b)((?<=b).*)/B
 
-/(?(VERSION=10.4)b)((?<=b).*)/B
+/(?(VERSION=10.3)b)((?<=b).*)/B
 
 /[aA]b[cC]/IB
 
