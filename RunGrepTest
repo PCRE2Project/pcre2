@@ -674,10 +674,14 @@ echo "---------------------------- Test 131 -----------------------------" >>tes
 echo "RC=$?" >>testtrygrep
 
 echo "---------------------------- Test 132 -----------------------------" >>testtrygrep
-(cd $srcdir; $valgrind $vjs $pcre2grep -m1 -A3 '^match'; echo '---'; head -1) <$srcdir/testdata/grepinput >>testtrygrep 2>&1
+(cd $srcdir; exec 3<$srcdir/testdata/grepinput; $valgrind $vjs $pcre2grep -m1 -A3 '^match' <&3; echo '---'; head -1 <&3; exec 3<&-) >>testtrygrep 2>&1
 echo "RC=$?" >>testtrygrep
 
 echo "---------------------------- Test 133 -----------------------------" >>testtrygrep
+(cd $srcdir; exec 3<$srcdir/testdata/grepinput; $valgrind $vjs $pcre2grep -m1 -A3 '^match' <&3; echo '---'; $valgrind $vjs $pcre2grep -m1 -A3 '^match' <&3; exec 3<&-) >>testtrygrep 2>&1
+echo "RC=$?" >>testtrygrep
+
+echo "---------------------------- Test 134 -----------------------------" >>testtrygrep
 (cd $srcdir; $valgrind $vjs $pcre2grep -m1 -O '=$x{41}$x423$o{103}$o1045=' 'fox') <$srcdir/testdata/grepinputv >>testtrygrep 2>&1
 echo "RC=$?" >>testtrygrep
 
