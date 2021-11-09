@@ -8689,7 +8689,7 @@ while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
   else if (strcmp(arg, "-S") == 0 && argc > 2 &&
       ((uli = strtoul(argv[op+1], &endptr, 10)), *endptr == 0))
     {
-#if defined(_WIN32) || defined(WIN32) || defined(__minix) || defined(NATIVE_ZOS) || defined(__VMS)
+#if defined(_WIN32) || defined(WIN32) || defined(__HAIKU__) || defined(NATIVE_ZOS) || defined(__VMS)
     fprintf(stderr, "pcre2test: -S is not supported on this OS\n");
     exit(1);
 #else

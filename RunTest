@@ -320,7 +320,8 @@ fi
 # set up a large stack.
 
 $sim ./pcre2test -S 64 /dev/null /dev/null
-if [ $? -eq 0 -a "$bigstack" != "" ] ; then
+support_setstack=$?
+if [ $support_setstack -eq 0 -a "$bigstack" != "" ] ; then
   setstack="-S 64"
 else
   setstack=""
@@ -479,7 +480,9 @@ for bmode in "$test8" "$test16" "$test32"; do
     echo '' >testtry
     checkspecial '-C'
     checkspecial '--help'
-    checkspecial '-S 1 -t 10 testSinput'
+    if [ $support_setstack -eq 0 ] ; then
+      checkspecial '-S 1 -t 10 testSinput'
+    fi
     echo "  OK"
   fi
 
