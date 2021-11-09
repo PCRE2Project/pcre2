@@ -8,6 +8,9 @@ Version 10.40-RC1 xx-xxx-2021
 1. Merged patch from @carenas (GitHub #35, 7db87842) to fix pcre2grep incorrect
 handling of multiple passes.
 
+2. Merged patch from @carenas (GitHub #36, dae47509) to fix portability issue 
+in pcre2grep with buffered fseek(stdin).
+
 
 Version 10.39 29-October-2021
 -----------------------------
