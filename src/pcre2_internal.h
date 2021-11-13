@@ -465,8 +465,8 @@ PCRE (both APIs) for a long time. */
 
 
 /* PCRE2 is able to support several different kinds of newline (CR, LF, CRLF,
-"any" and "anycrlf" at present). The following macros are used to package up
-testing for newlines. NLBLOCK, PSSTART, and PSEND are defined in the various
+NUL, "any" and "anycrlf" at present). The following macros are used to package
+up testing for newlines. NLBLOCK, PSSTART, and PSEND are defined in the various
 modules to indicate in which datablock the parameters exist, and what the
 start/end of string field names are. */
 

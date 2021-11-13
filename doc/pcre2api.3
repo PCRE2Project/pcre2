@@ -497,12 +497,13 @@ maximum.
 .SH NEWLINES
 .rs
 .sp
-PCRE2 supports five different conventions for indicating line breaks in
+PCRE2 supports six different conventions for indicating line breaks in
 strings: a single CR (carriage return) character, a single LF (linefeed)
-character, the two-character sequence CRLF, any of the three preceding, or any
-Unicode newline sequence. The Unicode newline sequences are the three just
-mentioned, plus the single characters VT (vertical tab, U+000B), FF (form feed,
-U+000C), NEL (next line, U+0085), LS (line separator, U+2028), and PS
+character, the two-character sequence CRLF, any of the three preceding, any
+Unicode newline sequence, or the NUL character (binary zero).
+The Unicode newline sequences are the three just mentioned, plus the
+single characters VT (vertical tab, U+000B), FF (form feed, U+000C),
+NEL (next line, U+0085), LS (line separator, U+2028), and PS
 (paragraph separator, U+2029).
 .P
 Each of the first three conventions is used by at least one operating system as
