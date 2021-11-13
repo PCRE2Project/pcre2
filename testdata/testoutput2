@@ -7506,6 +7506,26 @@ No match
     a\x85b
 No match
 
+/^a.b/newline=cr,dot_no_lf
+    a\0b
+ 0: a\x00b
+\= Expect no match
+    a\nb
+No match
+    a\rb
+No match
+
+/^a.b/newline=nul,dot_no_lf
+    a\rb
+ 0: a\x0db
+    a\x85b
+ 0: a\x85b
+\= Expect no match
+    a\nb
+No match
+    a\0b
+No match
+
 /^abc./gmx,newline=any
     abc1 \x0aabc2 \x0babc3xx \x0cabc4 \x0dabc5xx \x0d\x0aabc6 \x85abc7 JUNK
  0: abc1
@@ -7679,13 +7699,6 @@ Failed: error 157 at offset 6: \g is not followed by a braced, angle-bracketed, 
 /^(a)\g{aa}/
 Failed: error 115 at offset 7: reference to non-existent subpattern
 
-/^a.b/newline=lf
-    a\rb
- 0: a\x0db
-\= Expect no match
-    a\nb
-No match
-
 /.+foo/
     afoo
  0: afoo
@@ -7713,7 +7726,32 @@ No match
     \r\nfoo
 No match
 
+/.+foo/newline=nul
+    afoo
+ 0: afoo
+    \nfoo
+ 0: \x0afoo
+    \r\nfoo
+ 0: \x0d\x0afoo
+
+/.+foo/newline=nul,dot_no_lf
+    afoo
+ 0: afoo
+\= Expect no match
+    \nfoo
+No match
+    \r\nfoo
+No match
+
 /.+foo/s
+    afoo
+ 0: afoo
+    \r\nfoo
+ 0: \x0d\x0afoo
+    \nfoo
+ 0: \x0afoo
+
+/.+foo/s,dot_no_lf
     afoo
  0: afoo
     \r\nfoo

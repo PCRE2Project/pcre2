@@ -1909,6 +1909,19 @@
     a\rb
     a\x85b
 
+/^a.b/newline=cr,dot_no_lf
+    a\0b
+\= Expect no match
+    a\nb
+    a\rb
+
+/^a.b/newline=nul,dot_no_lf
+    a\rb
+    a\x85b
+\= Expect no match
+    a\nb
+    a\0b
+
 /^abc./gmx,newline=any
     abc1 \x0aabc2 \x0babc3xx \x0cabc4 \x0dabc5xx \x0d\x0aabc6 \x85abc7 JUNK
 
@@ -1999,11 +2012,6 @@
 
 /^(a)\g{aa}/
 
-/^a.b/newline=lf
-    a\rb
-\= Expect no match
-    a\nb
-
 /.+foo/
     afoo
 \= Expect no match
@@ -2022,7 +2030,23 @@
     \nfoo
     \r\nfoo
 
+/.+foo/newline=nul
+    afoo
+    \nfoo
+    \r\nfoo
+
+/.+foo/newline=nul,dot_no_lf
+    afoo
+\= Expect no match
+    \nfoo
+    \r\nfoo
+
 /.+foo/s
+    afoo
+    \r\nfoo
+    \nfoo
+
+/.+foo/s,dot_no_lf
     afoo
     \r\nfoo
     \nfoo

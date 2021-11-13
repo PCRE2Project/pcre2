@@ -658,6 +658,7 @@ static modstruct modlist[] = {
   { "dfa_restart",                 MOD_DAT,  MOD_OPT, PCRE2_DFA_RESTART,          DO(options) },
   { "dfa_shortest",                MOD_DAT,  MOD_OPT, PCRE2_DFA_SHORTEST,         DO(options) },
   { "dollar_endonly",              MOD_PAT,  MOD_OPT, PCRE2_DOLLAR_ENDONLY,       PO(options) },
+  { "dot_no_lf",                   MOD_PAT,  MOD_OPT, PCRE2_NO_DOTNL,             PO(options) },
   { "dotall",                      MOD_PATP, MOD_OPT, PCRE2_DOTALL,               PO(options) },
   { "dupnames",                    MOD_PATP, MOD_OPT, PCRE2_DUPNAMES,             PO(options) },
   { "endanchored",                 MOD_PD,   MOD_OPT, PCRE2_ENDANCHORED,          PD(options) },
@@ -4171,7 +4172,7 @@ static void
 show_compile_options(uint32_t options, const char *before, const char *after)
 {
 if (options == 0) fprintf(outfile, "%s <none>%s", before, after);
-else fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
+else fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
   before,
   ((options & PCRE2_ALT_BSUX) != 0)? " alt_bsux" : "",
   ((options & PCRE2_ALT_CIRCUMFLEX) != 0)? " alt_circumflex" : "",
@@ -4181,6 +4182,7 @@ else fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%
   ((options & PCRE2_AUTO_CALLOUT) != 0)? " auto_callout" : "",
   ((options & PCRE2_CASELESS) != 0)? " caseless" : "",
   ((options & PCRE2_DOLLAR_ENDONLY) != 0)? " dollar_endonly" : "",
+  ((options & PCRE2_NO_DOTNL) != 0)? " dot_no_lf" : "",
   ((options & PCRE2_DOTALL) != 0)? " dotall" : "",
   ((options & PCRE2_DUPNAMES) != 0)? " dupnames" : "",
   ((options & PCRE2_ENDANCHORED) != 0)? " endanchored" : "",
