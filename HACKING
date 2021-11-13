@@ -389,6 +389,7 @@ These items are all just one unit long:
 
   OP_END                 end of pattern
   OP_ANY                 match any one character other than newline
+  OP_ANY_NOTNL           match any one character other than '\n' or newline
   OP_ALLANY              match any one character, including newline
   OP_ANYBYTE             match any single code unit, even in UTF-8/16 mode
   OP_SOD                 match start of data: \A
@@ -426,6 +427,9 @@ These items are all just one unit long:
 OP_ASSERT_ACCEPT is used when (*ACCEPT) is encountered within an assertion.
 This ends the assertion, not the entire pattern match. The assertion (?!) is
 always optimized to OP_FAIL.
+
+OP_ANY_NOTNL is used for '.' when PCRE2_NO_DOTNL is set and unless
+PCRE2_DOTALL is also set as explained below.
 
 OP_ALLANY is used for '.' when PCRE2_DOTALL is set. It is also used for \C in
 non-UTF modes and in UTF-32 mode (since one code unit still equals one

@@ -875,6 +875,12 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
 
 
     /*===================================================================== */
+    /* Match any single character type except '\n'; falls through OP_ALLANY */
+
+    case OP_ANY_NOTNL:
+    if (*Feptr == CHAR_LF) RRETURN(MATCH_NOMATCH);
+    /* Fall through */
+
     /* Match any single character type except newline; have to take care with
     CRLF newlines and partial matching. */
 
@@ -2840,6 +2846,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
 #ifdef SUPPORT_UNICODE
       if (utf) switch(Lctype)
         {
+        case OP_ANY_NOTNL:
         case OP_ANY:
         for (i = 1; i <= Lmin; i++)
           {
@@ -2848,6 +2855,8 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
             SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
             }
+          if ((Lctype == OP_ANY_NOTNL) && (*Feptr == CHAR_LF))
+            RRETURN(MATCH_NOMATCH);
           if (IS_NEWLINE(Feptr)) RRETURN(MATCH_NOMATCH);
           if (mb->partial != 0 &&
               Feptr + 1 >= mb->end_subject &&
@@ -3093,6 +3102,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
 
       switch(Lctype)
         {
+        case OP_ANY_NOTNL:
         case OP_ANY:
         for (i = 1; i <= Lmin; i++)
           {
@@ -3101,6 +3111,8 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
             SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
             }
+          if ((Lctype == OP_ANY_NOTNL) && (*Feptr == CHAR_LF))
+            RRETURN(MATCH_NOMATCH);
           if (IS_NEWLINE(Feptr)) RRETURN(MATCH_NOMATCH);
           if (mb->partial != 0 &&
               Feptr + 1 >= mb->end_subject &&
@@ -3610,6 +3622,8 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
             SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
             }
+          if ((Lctype == OP_ANY_NOTNL) && (*Feptr == CHAR_LF))
+            RRETURN(MATCH_NOMATCH);
           if (Lctype == OP_ANY && IS_NEWLINE(Feptr)) RRETURN(MATCH_NOMATCH);
           GETCHARINC(fc, Feptr);
           switch(Lctype)
@@ -3737,6 +3751,8 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
             SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
             }
+          if ((Lctype == OP_ANY_NOTNL) && (*Feptr == CHAR_LF))
+            RRETURN(MATCH_NOMATCH);
           if (Lctype == OP_ANY && IS_NEWLINE(Feptr))
             RRETURN(MATCH_NOMATCH);
           fc = *Feptr++;
@@ -4174,6 +4190,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
         {
         switch(Lctype)
           {
+          case OP_ANY_NOTNL:
           case OP_ANY:
           for (i = Lmin; i < Lmax; i++)
             {
@@ -4182,6 +4199,8 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
               SCHECK_PARTIAL();
               break;
               }
+            if ((Lctype == OP_ANY_NOTNL) && (*Feptr == CHAR_LF))
+              RRETURN(MATCH_NOMATCH);
             if (IS_NEWLINE(Feptr)) break;
             if (mb->partial != 0 &&    /* Take care with CRLF partial */
                 Feptr + 1 >= mb->end_subject &&
@@ -4423,6 +4442,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
         {
         switch(Lctype)
           {
+          case OP_ANY_NOTNL:
           case OP_ANY:
           for (i = Lmin; i < Lmax; i++)
             {
@@ -4431,6 +4451,8 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
               SCHECK_PARTIAL();
               break;
               }
+            if ((Lctype == OP_ANY_NOTNL) && (*Feptr == CHAR_LF))
+              RRETURN(MATCH_NOMATCH);
             if (IS_NEWLINE(Feptr)) break;
             if (mb->partial != 0 &&    /* Take care with CRLF partial */
                 Feptr + 1 >= mb->end_subject &&

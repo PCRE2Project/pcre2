@@ -1596,6 +1596,10 @@ enum {
 
   OP_DEFINE,         /* 167 */
 
+  /* This is like OP_ANY but also rejects '\n' for compatibility with perl's . */
+
+  OP_ANY_NOTNL,      /* 168 */
+
   /* This is not an opcode, but is used to check that tables indexed by opcode
   are the correct length, in order to catch updating errors - there have been
   some in the past. */
@@ -1655,7 +1659,8 @@ some cases doesn't actually use these names at all). */
   "*MARK", "*PRUNE", "*PRUNE", "*SKIP", "*SKIP",                  \
   "*THEN", "*THEN", "*COMMIT", "*COMMIT", "*FAIL",                \
   "*ACCEPT", "*ASSERT_ACCEPT",                                    \
-  "Close", "Skip zero", "Define"
+  "Close", "Skip zero", "Define",                                 \
+  "."
 
 
 /* This macro defines the length of fixed length operations in the compiled
@@ -1751,7 +1756,8 @@ in UTF-8 mode. The code that uses this table must know about such things. */
   1, 3,                          /* COMMIT, COMMIT_ARG                     */ \
   1, 1, 1,                       /* FAIL, ACCEPT, ASSERT_ACCEPT            */ \
   1+IMM2_SIZE, 1,                /* CLOSE, SKIPZERO                        */ \
-  1                              /* DEFINE                                 */
+  1,                             /* DEFINE                                 */ \
+  1                              /* .                                      */
 
 /* A magic value for OP_RREF to indicate the "any recursion" condition. */
 

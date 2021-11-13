@@ -774,7 +774,7 @@ are allowed. */
    PCRE2_EXTENDED|PCRE2_EXTENDED_MORE|PCRE2_MATCH_UNSET_BACKREF| \
    PCRE2_MULTILINE|PCRE2_NEVER_BACKSLASH_C|PCRE2_NEVER_UCP| \
    PCRE2_NEVER_UTF|PCRE2_NO_AUTO_CAPTURE|PCRE2_NO_AUTO_POSSESS| \
-   PCRE2_NO_DOTSTAR_ANCHOR|PCRE2_UCP|PCRE2_UNGREEDY)
+   PCRE2_NO_DOTSTAR_ANCHOR|PCRE2_UCP|PCRE2_UNGREEDY|PCRE2_NO_DOTNL)
 
 #define PUBLIC_LITERAL_COMPILE_EXTRA_OPTIONS \
    (PCRE2_EXTRA_MATCH_LINE|PCRE2_EXTRA_MATCH_WORD)
@@ -5518,7 +5518,8 @@ for (;; pptr++)
     zerofirstcuflags = firstcuflags;
     zeroreqcu = reqcu;
     zeroreqcuflags = reqcuflags;
-    *code++ = ((options & PCRE2_DOTALL) != 0)? OP_ALLANY: OP_ANY;
+    *code++ = ((options & PCRE2_DOTALL) != 0)? OP_ALLANY :
+	       (options & PCRE2_NO_DOTNL)? OP_ANY_NOTNL : OP_ANY;
     break;
 
 
@@ -7404,7 +7405,8 @@ for (;; pptr++)
       here because it just makes it horribly messy. */
 
       default:
-      if (op_previous >= OP_EODN)   /* Not a character type - internal error */
+      /* FIXME: instead of this exception OP_ANY_NOTNL should be renumbered */
+      if (op_previous >= OP_EODN && op_previous != OP_ANY_NOTNL)   /* Not a character type - internal error */
         {
         *errorcodeptr = ERR10;
         return 0;

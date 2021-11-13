@@ -187,7 +187,8 @@ static const uint8_t coptable[] = {
   0, 0, 0, 0,                    /* SKIP, SKIP_ARG, THEN, THEN_ARG         */
   0, 0,                          /* COMMIT, COMMIT_ARG                     */
   0, 0, 0,                       /* FAIL, ACCEPT, ASSERT_ACCEPT            */
-  0, 0, 0                        /* CLOSE, SKIPZERO, DEFINE                */
+  0, 0, 0,                       /* CLOSE, SKIPZERO, DEFINE                */
+  0                              /* .                                      */
 };
 
 /* This table identifies those opcodes that inspect a character. It is used to
@@ -264,7 +265,8 @@ static const uint8_t poptable[] = {
   0, 0, 0, 0,                    /* SKIP, SKIP_ARG, THEN, THEN_ARG         */
   0, 0,                          /* COMMIT, COMMIT_ARG                     */
   0, 0, 0,                       /* FAIL, ACCEPT, ASSERT_ACCEPT            */
-  0, 0, 0                        /* CLOSE, SKIPZERO, DEFINE                */
+  0, 0, 0,                       /* CLOSE, SKIPZERO, DEFINE                */
+  0                              /* .                                      */
 };
 
 /* These 2 tables allow for compact code for testing for \D, \d, \S, \s, \W,

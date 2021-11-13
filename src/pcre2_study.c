@@ -358,6 +358,7 @@ for (;;)
     case OP_WORDCHAR:
     case OP_ANY:
     case OP_ALLANY:
+    case OP_ANY_NOTNL:
     case OP_EXTUNI:
     case OP_HSPACE:
     case OP_NOT_HSPACE:
@@ -996,6 +997,7 @@ do
       case OP_ASSERT_ACCEPT:
       case OP_ALLANY:
       case OP_ANY:
+      case OP_ANY_NOTNL:
       case OP_ANYBYTE:
       case OP_CIRCM:
       case OP_CLOSE:
@@ -1392,6 +1394,7 @@ do
         default:
         case OP_ANY:
         case OP_ALLANY:
+        case OP_ANY_NOTNL:
         return SSB_FAIL;
 
         case OP_HSPACE:
