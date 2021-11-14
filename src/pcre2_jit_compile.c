@@ -880,6 +880,7 @@ switch(*cc)
   case OP_WHITESPACE:
   case OP_NOT_WORDCHAR:
   case OP_WORDCHAR:
+  case OP_ANY_NOTNL:
   case OP_ANY:
   case OP_ALLANY:
   case OP_NOTPROP:
@@ -1287,6 +1288,7 @@ do
       case OP_WHITESPACE:
       case OP_NOT_WORDCHAR:
       case OP_WORDCHAR:
+      case OP_ANY_NOTNL:
       case OP_ANY:
       case OP_ALLANY:
       case OP_ANYBYTE:
@@ -2042,6 +2044,7 @@ while (cc < ccend)
     case OP_WHITESPACE:
     case OP_NOT_WORDCHAR:
     case OP_WORDCHAR:
+    case OP_ANY_NOTNL:
     case OP_ANY:
     case OP_ALLANY:
     case OP_ANYBYTE:
@@ -5550,6 +5553,7 @@ while (TRUE)
     case OP_NOT_DIGIT:
     case OP_NOT_WHITESPACE:
     case OP_NOT_WORDCHAR:
+    case OP_ANY_NOTNL:
     case OP_ANY:
     case OP_ALLANY:
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
@@ -8552,10 +8556,13 @@ switch(type)
   add_jump(compiler, backtracks, JUMP(type == OP_WORDCHAR ? SLJIT_ZERO : SLJIT_NOT_ZERO));
   return cc;
 
+  case OP_ANY_NOTNL:
   case OP_ANY:
   if (check_str_ptr)
     detect_partial_match(common, backtracks);
   read_char(common, common->nlmin, common->nlmax, backtracks, READ_CHAR_UPDATE_STR_PTR);
+  if (type == OP_ANY_NOTNL && common->newline != CHAR_NL)
+    add_jump(compiler, backtracks, CMP(SLJIT_EQUAL, TMP1, 0, SLJIT_IMM, CHAR_NL));
   if (common->nltype == NLTYPE_FIXED && common->newline > 255)
     {
     jump[0] = CMP(SLJIT_NOT_EQUAL, TMP1, 0, SLJIT_IMM, (common->newline >> 8) & 0xff);
@@ -11894,6 +11901,7 @@ while (cc < ccend)
     case OP_WHITESPACE:
     case OP_NOT_WORDCHAR:
     case OP_WORDCHAR:
+    case OP_ANY_NOTNL:
     case OP_ANY:
     case OP_ALLANY:
     case OP_ANYBYTE:
