@@ -1794,7 +1794,7 @@ it is set, the effect of passing an invalid UTF string as a pattern is
 undefined. It may cause your program to crash or loop.
 .P
 Note that this option can also be passed to \fBpcre2_match()\fP and
-\fBpcre_dfa_match()\fP, to suppress UTF validity checking of the subject
+\fBpcre2_dfa_match()\fP, to suppress UTF validity checking of the subject
 string.
 .P
 Note also that setting PCRE2_NO_UTF_CHECK at compile time does not disable the
@@ -3848,7 +3848,7 @@ Here is an example of a simple call to \fBpcre2_dfa_match()\fP:
     wspace,         /* working space vector */
     20);            /* number of elements (NOT size in bytes) */
 .
-.SS "Option bits for \fBpcre_dfa_match()\fP"
+.SS "Option bits for \fBpcre2_dfa_match()\fP"
 .rs
 .sp
 The unused bits of the \fIoptions\fP argument for \fBpcre2_dfa_match()\fP must

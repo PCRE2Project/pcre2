@@ -1,5 +1,5 @@
 # This set of tests checks UTF and Unicode property support with the DFA
-# matching functionality of pcre_dfa_match(). A default subject modifier is
+# matching functionality of pcre2_dfa_match(). A default subject modifier is
 # used to force DFA matching for all tests.
 
 #subject dfa

@@ -519,7 +519,7 @@ it is. This is called only in UTF-32 mode - we don't put a test within the
 macro because almost all calls are already within a block of UTF-32 only
 code.
 
-These are all no-ops since all UTF-32 characters fit into one pcre_uchar. */
+These are all no-ops since all UTF-32 characters fit into one PCRE2_UCHAR. */
 
 #define BACKCHAR(eptr) do { } while (0)
 
@@ -764,7 +764,7 @@ typedef struct pcre2_real_jit_stack {
 } pcre2_real_jit_stack;
 
 /* Structure for items in a linked list that represents an explicit recursive
-call within the pattern when running pcre_dfa_match(). */
+call within the pattern when running pcre2_dfa_match(). */
 
 typedef struct dfa_recursion_info {
   struct dfa_recursion_info *prevrec;

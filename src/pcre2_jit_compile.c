@@ -13692,7 +13692,7 @@ if (!compiler)
   }
 common->compiler = compiler;
 
-/* Main pcre_jit_exec entry. */
+/* Main pcre2_jit_exec entry. */
 sljit_emit_enter(compiler, 0, SLJIT_ARG1(SW), 5, 5, 0, 0, private_data_size);
 
 /* Register init. */
