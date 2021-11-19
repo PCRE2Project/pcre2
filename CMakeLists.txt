@@ -142,9 +142,15 @@ CHECK_INCLUDE_FILE(windows.h    HAVE_WINDOWS_H)
 CHECK_SYMBOL_EXISTS(bcopy         "strings.h"  HAVE_BCOPY)
 CHECK_SYMBOL_EXISTS(memfd_create  "sys/mman.h" HAVE_MEMFD_CREATE)
 CHECK_SYMBOL_EXISTS(memmove       "string.h"   HAVE_MEMMOVE)
-CHECK_SYMBOL_EXISTS(realpath      "stdlib.h"   HAVE_REALPATH)
 CHECK_SYMBOL_EXISTS(secure_getenv "stdlib.h"   HAVE_SECURE_GETENV)
 CHECK_SYMBOL_EXISTS(strerror      "string.h"   HAVE_STRERROR)
+
+CHECK_C_SOURCE_COMPILES(
+  "#include <stdlib.h>
+   #include <limits.h>
+   int main(int c, char *v[]) { char buf[PATH_MAX]; realpath(v[1], buf); return 0; }"
+  HAVE_REALPATH
+)
 
 set(ORIG_CMAKE_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS})
 set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -Werror")

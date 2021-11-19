@@ -512,7 +512,20 @@ AC_TYPE_SIZE_T
 
 # Checks for library functions.
 
-AC_CHECK_FUNCS(bcopy memfd_create memmove mkostemp realpath secure_getenv strerror)
+AC_CHECK_FUNCS(bcopy memfd_create memmove mkostemp secure_getenv strerror)
+AC_MSG_CHECKING([for realpath])
+AC_LINK_IFELSE([AC_LANG_PROGRAM([[
+#include <stdlib.h>
+#include <limits.h>
+]],[[
+char buffer[PATH_MAX];
+realpath(".", buffer);
+]])],
+[AC_MSG_RESULT([yes])
+ AC_DEFINE([HAVE_REALPATH], 1,
+  [Define to 1 if you have the `realpath' function.])
+],
+AC_MSG_RESULT([no]))
 
 # Check for the availability of libz (aka zlib)
 
