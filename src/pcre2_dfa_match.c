@@ -3285,8 +3285,11 @@ rws->next = NULL;
 rws->size = RWS_BASE_SIZE;
 rws->free = RWS_BASE_SIZE - RWS_ANCHOR_SIZE;
 
-/* A length equal to PCRE2_ZERO_TERMINATED implies a zero-terminated
-subject string. */
+/* Plausibility checks */
+
+if ((options & ~PUBLIC_DFA_MATCH_OPTIONS) != 0) return PCRE2_ERROR_BADOPTION;
+if (re == NULL || subject == NULL || workspace == NULL || match_data == NULL)
+  return PCRE2_ERROR_NULL;
 
 if (length == PCRE2_ZERO_TERMINATED)
   {
@@ -3294,11 +3297,6 @@ if (length == PCRE2_ZERO_TERMINATED)
   was_zero_terminated = 1;
   }
 
-/* Plausibility checks */
-
-if ((options & ~PUBLIC_DFA_MATCH_OPTIONS) != 0) return PCRE2_ERROR_BADOPTION;
-if (re == NULL || subject == NULL || workspace == NULL || match_data == NULL)
-  return PCRE2_ERROR_NULL;
 if (wscount < 20) return PCRE2_ERROR_DFA_WSSIZE;
 if (start_offset > length) return PCRE2_ERROR_BADOFFSET;
 
