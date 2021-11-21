@@ -3649,7 +3649,9 @@ needed is returned via \fIoutlengthptr\fP. Note that this does not happen by
 default.
 .P
 PCRE2_ERROR_NULL is returned if PCRE2_SUBSTITUTE_MATCHED is set but the
-\fImatch_data\fP argument is NULL.
+\fImatch_data\fP argument is NULL or if the \fIsubject\fP or \fIreplacement\fP
+arguments are NULL. For backward compatibility reasons an exception is made for
+the \fIreplacement\fP argument if the \fIrlength\fP argument is also 0.
 .P
 PCRE2_ERROR_BADREPLACEMENT is used for miscellaneous syntax errors in the
 replacement string, with more particular errors being PCRE2_ERROR_BADREPESCAPE
