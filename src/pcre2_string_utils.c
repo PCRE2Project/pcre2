@@ -209,6 +209,7 @@ PCRE2_SIZE
 PRIV(strlen)(PCRE2_SPTR str)
 {
 PCRE2_SIZE c = 0;
+if (str == NULL) return 0;
 while (*str++ != 0) c++;
 return c;
 }

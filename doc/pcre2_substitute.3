@@ -53,7 +53,7 @@ changed to the length of the new string, excluding the trailing zero that is
 automatically added.
 .P
 The subject and replacement lengths can be given as PCRE2_ZERO_TERMINATED for
-zero-terminated strings. The options are:
+zero-terminated strings. if used with a replacement string of NULL, then it is assumed to be equivalent to the behaviour expected from a replacement string of NULL and a length of 0. The options are:
 .sp
   PCRE2_ANCHORED             Match only at the first position
   PCRE2_ENDANCHORED          Pattern can match only at end of subject
