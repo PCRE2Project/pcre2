@@ -14,6 +14,8 @@ in pcre2grep with buffered fseek(stdin).
 3. Merged patch from @carenas (GitHub #37, acc520924) to fix tests when -S is 
 not supported.
 
+4. Revert an unintended change in JIT repeat detection.
+
 
 Version 10.39 29-October-2021
 -----------------------------

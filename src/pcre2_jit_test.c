@@ -291,6 +291,7 @@ static struct regression_test_case regression_test_cases[] = {
 	{ MU, A, 0, 0, "(a(?:bc|cb|b|c)+?|ss)+e", "accssabccbcacbccbbXaccssabccbcacbccbbe" },
 	{ MU, A, 0, 0, "(a(?:bc|cb|b|c)+|ss)+?e", "accssabccbcacbccbbXaccssabccbcacbccbbe" },
 	{ MU, A, 0, 0, "(?:(b(c)+?)+)?\?(?:(bc)+|(cb)+)+(?:m)+", "bccbcccbcbccbcbPbccbcccbcbccbcbmmn" },
+	{ MU, A, 0, 0, "(aa|bb){8,1000}", "abaabbaabbaabbaab_aabbaabbaabbaabbaabbaabb_" },
 
 	/* Greedy and non-greedy * operators */
 	{ CMU, A, 0, 0, "(?:AA)*AB", "aaaaaaamaaaaaaab" },
