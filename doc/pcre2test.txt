@@ -44,7 +44,7 @@ PCRE2's 8-BIT, 16-BIT AND 32-BIT LIBRARIES
        output.
 
        In the rest of this document, the names of library functions and struc-
-       tures  are  given in generic form, for example, pcre_compile(). The ac-
+       tures  are given in generic form, for example, pcre2_compile(). The ac-
        tual names used in the libraries have a suffix _8, _16, or _32, as  ap-
        propriate.
 

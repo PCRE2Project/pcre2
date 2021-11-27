@@ -1815,7 +1815,7 @@ COMPILING A PATTERN
        to crash or loop.
 
        Note  that  this  option  can  also  be  passed  to  pcre2_match()  and
-       pcre_dfa_match(),  to  suppress  UTF  validity  checking of the subject
+       pcre2_dfa_match(),  to  suppress  UTF  validity checking of the subject
        string.
 
        Note also that setting PCRE2_NO_UTF_CHECK at compile time does not dis-
@@ -3698,7 +3698,7 @@ MATCHING A PATTERN: THE ALTERNATIVE FUNCTION
            wspace,         /* working space vector */
            20);            /* number of elements (NOT size in bytes) */
 
-   Option bits for pcre_dfa_match()
+   Option bits for pcre2_dfa_match()
 
        The  unused  bits of the options argument for pcre2_dfa_match() must be
        zero.  The  only   bits   that   may   be   set   are   PCRE2_ANCHORED,

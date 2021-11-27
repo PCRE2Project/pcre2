@@ -18,6 +18,8 @@ not supported.
 
 5. Merged patch from @carenas (GitHub #52, b037bfa1) to fix build on GNU Hurd.
 
+6. Merged documentation and comments patches from @carenas (GitHub #47).
+
 
 Version 10.39 29-October-2021
 -----------------------------
