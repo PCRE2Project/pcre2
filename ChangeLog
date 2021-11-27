@@ -20,6 +20,14 @@ not supported.
 
 6. Merged documentation and comments patches from @carenas (GitHub #47).
 
+7. Merged patch from @carenas (GitHub #49) to remove obsolete JFriedl test code
+from pcre2grep.
+
+8. Merged patch from @carenas (GitHub #48) to fix CMake install issue #46.
+
+9. Merged patch from @carenas (GitHub #53) fixing NULL checks in matching and 
+substituting.
+
 
 Version 10.39 29-October-2021
 -----------------------------
