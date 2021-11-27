@@ -1816,7 +1816,7 @@ to find all possible matches.
 Arguments:
   matchptr     the start of the subject
   length       the length of the subject to match
-  options      options for pcre_exec
+  options      options for pcre2_match
   startoffset  where to start matching
   mrc          address of where to put the result of pcre2_match()
 
