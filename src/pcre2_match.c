@@ -49,7 +49,7 @@ POSSIBILITY OF SUCH DAMAGE.
 /* #define DEBUG_SHOW_OPS */
 /* #define DEBUG_SHOW_RMATCH */
 
-#ifdef DEBUG_FRAME_DISPLAY
+#ifdef DEBUG_FRAMES_DISPLAY
 #include <stdarg.h>
 #endif
 
@@ -6129,8 +6129,8 @@ PCRE2_UCHAR req_cu2 = 0;
 PCRE2_SPTR bumpalong_limit;
 PCRE2_SPTR end_subject;
 PCRE2_SPTR true_end_subject;
-PCRE2_SPTR start_match = subject + start_offset;
-PCRE2_SPTR req_cu_ptr = start_match - 1;
+PCRE2_SPTR start_match;
+PCRE2_SPTR req_cu_ptr;
 PCRE2_SPTR start_partial;
 PCRE2_SPTR match_partial;
 
@@ -6170,9 +6170,14 @@ PCRE2_SPTR stack_frames_vector[START_FRAMES_SIZE/sizeof(PCRE2_SPTR)]
     PCRE2_KEEP_UNINITIALIZED;
 mb->stack_frames = (heapframe *)stack_frames_vector;
 
-/* A length equal to PCRE2_ZERO_TERMINATED implies a zero-terminated
-subject string. */
+/* Plausibility checks */
 
+if ((options & ~PUBLIC_MATCH_OPTIONS) != 0) return PCRE2_ERROR_BADOPTION;
+if (code == NULL || subject == NULL || match_data == NULL)
+  return PCRE2_ERROR_NULL;
+
+start_match = subject + start_offset;
+req_cu_ptr = start_match - 1;
 if (length == PCRE2_ZERO_TERMINATED)
   {
   length = PRIV(strlen)(subject);
@@ -6180,11 +6185,6 @@ if (length == PCRE2_ZERO_TERMINATED)
   }
 true_end_subject = end_subject = subject + length;
 
-/* Plausibility checks */
-
-if ((options & ~PUBLIC_MATCH_OPTIONS) != 0) return PCRE2_ERROR_BADOPTION;
-if (code == NULL || subject == NULL || match_data == NULL)
-  return PCRE2_ERROR_NULL;
 if (start_offset > length) return PCRE2_ERROR_BADOFFSET;
 
 /* Check that the first field in the block is the magic number. */
