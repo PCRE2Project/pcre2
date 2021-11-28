@@ -771,7 +771,7 @@ static modstruct modlist[] = {
   PCRE2_NOTBOL|PCRE2_NOTEMPTY|PCRE2_NOTEOL)
 
 #define POSIX_SUPPORTED_MATCH_CONTROLS  (CTL_AFTERTEXT|CTL_ALLAFTERTEXT)
-#define POSIX_SUPPORTED_MATCH_CONTROLS2 (0)
+#define POSIX_SUPPORTED_MATCH_CONTROLS2 (CTL2_NULL_SUBJECT)
 
 /* Control bits that are not ignored with 'push'. */
 
@@ -4106,7 +4106,7 @@ Returns:      nothing
 static void
 show_controls(uint32_t controls, uint32_t controls2, const char *before)
 {
-fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
+fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
   before,
   ((controls & CTL_AFTERTEXT) != 0)? " aftertext" : "",
   ((controls & CTL_ALLAFTERTEXT) != 0)? " allaftertext" : "",
@@ -4136,6 +4136,8 @@ fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s
   ((controls & CTL_MEMORY) != 0)? " memory" : "",
   ((controls2 & CTL2_NL_SET) != 0)? " newline" : "",
   ((controls & CTL_NULLCONTEXT) != 0)? " null_context" : "",
+  ((controls2 & CTL2_NULL_REPLACEMENT) != 0)? " null_replacement" : "",
+  ((controls2 & CTL2_NULL_SUBJECT) != 0)? " null_subject" : "",
   ((controls & CTL_POSIX) != 0)? " posix" : "",
   ((controls & CTL_POSIX_NOSUB) != 0)? " posix_nosub" : "",
   ((controls & CTL_PUSH) != 0)? " push" : "",

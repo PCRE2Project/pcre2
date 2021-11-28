@@ -30,6 +30,8 @@ substituting.
 
 10. Add null_subject and null_replacement modifiers to pcre2test.
 
+11. Add check for NULL subject to POSIX regexec() function.
+
 
 Version 10.39 29-October-2021
 -----------------------------
