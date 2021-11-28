@@ -3655,7 +3655,9 @@ default.
 </P>
 <P>
 PCRE2_ERROR_NULL is returned if PCRE2_SUBSTITUTE_MATCHED is set but the
-<i>match_data</i> argument is NULL.
+<i>match_data</i> argument is NULL or if the <i>subject</i> or <i>replacement</i>
+arguments are NULL. For backward compatibility reasons an exception is made for
+the <i>replacement</i> argument if the <i>rlength</i> argument is also 0.
 </P>
 <P>
 PCRE2_ERROR_BADREPLACEMENT is used for miscellaneous syntax errors in the

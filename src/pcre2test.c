@@ -516,6 +516,8 @@ so many of them that they are split into two fields. */
 #define CTL2_CALLOUT_NO_WHERE            0x00000200u
 #define CTL2_CALLOUT_EXTRA               0x00000400u
 #define CTL2_ALLVECTOR                   0x00000800u
+#define CTL2_NULL_SUBJECT                0x00001000u
+#define CTL2_NULL_REPLACEMENT            0x00002000u
 
 #define CTL2_NL_SET                      0x40000000u  /* Informational */
 #define CTL2_BSR_SET                     0x80000000u  /* Informational */
@@ -706,6 +708,8 @@ static modstruct modlist[] = {
   { "notempty_atstart",            MOD_DAT,  MOD_OPT, PCRE2_NOTEMPTY_ATSTART,     DO(options) },
   { "noteol",                      MOD_DAT,  MOD_OPT, PCRE2_NOTEOL,               DO(options) },
   { "null_context",                MOD_PD,   MOD_CTL, CTL_NULLCONTEXT,            PO(control) },
+  { "null_replacement",            MOD_DAT,  MOD_CTL, CTL2_NULL_REPLACEMENT,      DO(control2) },
+  { "null_subject",                MOD_DAT,  MOD_CTL, CTL2_NULL_SUBJECT,          DO(control2) },
   { "offset",                      MOD_DAT,  MOD_INT, 0,                          DO(offset) },
   { "offset_limit",                MOD_CTM,  MOD_SIZ, 0,                          MO(offset_limit)},
   { "ovector",                     MOD_DAT,  MOD_INT, 0,                          DO(oveccount) },
@@ -7064,9 +7068,14 @@ pp = memmove(dbuffer + dbuffer_size - len - c, dbuffer, len + c);
   VALGRIND_MAKE_MEM_NOACCESS(dbuffer, dbuffer_size - (len + c));
 #endif
 
-/* Now pp points to the subject string. POSIX matching is only possible in
-8-bit mode, and it does not support timing or other fancy features. Some were
-checked at compile time, but we need to check the match-time settings here. */
+/* Now pp points to the subject string, but if null_subject was specified, set
+it to NULL to test PCRE2's behaviour. */
+
+if ((dat_datctl.control2 & CTL2_NULL_SUBJECT) != 0) pp = NULL;
+
+/* POSIX matching is only possible in 8-bit mode, and it does not support
+timing or other fancy features. Some were checked at compile time, but we need
+to check the match-time settings here. */
 
 #ifdef SUPPORT_PCRE2_8
 if ((pat_patctl.control & CTL_POSIX) != 0)
@@ -7293,6 +7302,7 @@ if (dat_datctl.replacement[0] != 0)
   uint8_t *pr;
   uint8_t rbuffer[REPLACE_BUFFSIZE];
   uint8_t nbuffer[REPLACE_BUFFSIZE];
+  uint8_t *rbptr; 
   uint32_t xoptions;
   uint32_t emoption;  /* External match option */
   PCRE2_SIZE j, rlen, nsize, erroroffset;
@@ -7442,10 +7452,15 @@ if (dat_datctl.replacement[0] != 0)
     {
     PCRE2_SET_SUBSTITUTE_CALLOUT(dat_context, NULL, NULL);  /* No callout */
     }
+    
+  /* There is a special option to set the replacement to NULL in order to test
+  that case. */
+  
+  rbptr = ((dat_datctl.control2 & CTL2_NULL_REPLACEMENT) == 0)? rbuffer : NULL;
 
   PCRE2_SUBSTITUTE(rc, compiled_code, pp, arg_ulen, dat_datctl.offset,
     dat_datctl.options|xoptions, match_data, use_dat_context,
-    rbuffer, rlen, nbuffer, &nsize);
+    rbptr, rlen, nbuffer, &nsize);
 
   if (rc < 0)
     {

@@ -1,4 +1,4 @@
-.TH PCRE2TEST 1 "30 August 2021" "PCRE 10.38"
+.TH PCRE2TEST 1 "28 November 2021" "PCRE 10.40"
 .SH NAME
 pcre2test - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -1206,6 +1206,8 @@ pattern, but can be overridden by modifiers on the subject.
       match_limit=<n>            set a match limit
       memory                     show heap memory usage
       null_context               match with a NULL context
+      null_replacement           substitute with NULL replacement
+      null_subject               match with NULL subject  
       offset=<n>                 set starting offset
       offset_limit=<n>           set offset limit
       ovector=<n>                set size of output vector
@@ -1629,7 +1631,7 @@ When testing \fBpcre2_substitute()\fP, this modifier also has the effect of
 passing the replacement string as zero-terminated.
 .
 .
-.SS "Passing a NULL context"
+.SS "Passing a NULL context, subject, or replacement"
 .rs
 .sp
 Normally, \fBpcre2test\fP passes a context block to \fBpcre2_match()\fP,
@@ -1638,6 +1640,10 @@ If the \fBnull_context\fP modifier is set, however, NULL is passed. This is for
 testing that the matching and substitution functions behave correctly in this
 case (they use default values). This modifier cannot be used with the
 \fBfind_limits\fP or \fBsubstitute_callout\fP modifiers.
+.P
+Similarly, for testing purposes, if the \fBnull_subject\fP or 
+\fBnull_replacement\fP modifier is set, the subject or replacement string 
+pointers are passed as NULL, respectively, to the relevant functions.
 .
 .
 .SH "THE ALTERNATIVE MATCHING FUNCTION"
@@ -2103,6 +2109,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 30 August 2021
+Last updated: 28 November 2021
 Copyright (c) 1997-2021 University of Cambridge.
 .fi

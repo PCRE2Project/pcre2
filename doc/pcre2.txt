@@ -3524,7 +3524,9 @@ CREATING A NEW STRING WITH SUBSTITUTIONS
        does not happen by default.
 
        PCRE2_ERROR_NULL is returned if PCRE2_SUBSTITUTE_MATCHED is set but the
-       match_data argument is NULL.
+       match_data argument is NULL or if the subject or replacement  arguments
+       are  NULL.  For backward compatibility reasons an exception is made for
+       the replacement argument if the rlength argument is also 0.
 
        PCRE2_ERROR_BADREPLACEMENT is used for miscellaneous syntax  errors  in
        the  replacement  string,  with  more particular errors being PCRE2_ER-

@@ -1111,6 +1111,8 @@ SUBJECT MODIFIERS
              match_limit=<n>            set a match limit
              memory                     show heap memory usage
              null_context               match with a NULL context
+             null_replacement           substitute with NULL replacement
+             null_subject               match with NULL subject
              offset=<n>                 set starting offset
              offset_limit=<n>           set offset limit
              ovector=<n>                set size of output vector
@@ -1499,7 +1501,7 @@ SUBJECT MODIFIERS
        When testing pcre2_substitute(), this modifier also has the  effect  of
        passing the replacement string as zero-terminated.
 
-   Passing a NULL context
+   Passing a NULL context, subject, or replacement
 
        Normally,   pcre2test   passes   a   context  block  to  pcre2_match(),
        pcre2_dfa_match(), pcre2_jit_match()  or  pcre2_substitute().   If  the
@@ -1507,6 +1509,10 @@ SUBJECT MODIFIERS
        testing that the matching and substitution functions  behave  correctly
        in  this  case  (they use default values). This modifier cannot be used
        with the find_limits or substitute_callout modifiers.
+
+       Similarly, for testing purposes, if the null_subject  or  null_replace-
+       ment  modifier  is  set, the subject or replacement string pointers are
+       passed as NULL, respectively, to the relevant functions.
 
 
 THE ALTERNATIVE MATCHING FUNCTION
@@ -1933,5 +1939,5 @@ AUTHOR
 
 REVISION
 
-       Last updated: 30 August 2021
+       Last updated: 28 November 2021
        Copyright (c) 1997-2021 University of Cambridge.

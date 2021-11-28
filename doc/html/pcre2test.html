@@ -1239,6 +1239,8 @@ pattern, but can be overridden by modifiers on the subject.
       match_limit=&#60;n&#62;            set a match limit
       memory                     show heap memory usage
       null_context               match with a NULL context
+      null_replacement           substitute with NULL replacement
+      null_subject               match with NULL subject  
       offset=&#60;n&#62;                 set starting offset
       offset_limit=&#60;n&#62;           set offset limit
       ovector=&#60;n&#62;                set size of output vector
@@ -1668,7 +1670,7 @@ When testing <b>pcre2_substitute()</b>, this modifier also has the effect of
 passing the replacement string as zero-terminated.
 </P>
 <br><b>
-Passing a NULL context
+Passing a NULL context, subject, or replacement
 </b><br>
 <P>
 Normally, <b>pcre2test</b> passes a context block to <b>pcre2_match()</b>,
@@ -1677,6 +1679,11 @@ If the <b>null_context</b> modifier is set, however, NULL is passed. This is for
 testing that the matching and substitution functions behave correctly in this
 case (they use default values). This modifier cannot be used with the
 <b>find_limits</b> or <b>substitute_callout</b> modifiers.
+</P>
+<P>
+Similarly, for testing purposes, if the <b>null_subject</b> or 
+<b>null_replacement</b> modifier is set, the subject or replacement string 
+pointers are passed as NULL, respectively, to the relevant functions.
 </P>
 <br><a name="SEC12" href="#TOC1">THE ALTERNATIVE MATCHING FUNCTION</a><br>
 <P>
@@ -2122,7 +2129,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC21" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 30 August 2021
+Last updated: 28 November 2021
 <br>
 Copyright &copy; 1997-2021 University of Cambridge.
 <br>
