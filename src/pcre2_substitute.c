@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-          New API code Copyright (c) 2016-2020 University of Cambridge
+          New API code Copyright (c) 2016-2021 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -261,9 +261,9 @@ if ((options & (PCRE2_PARTIAL_HARD|PCRE2_PARTIAL_SOFT)) != 0)
   return PCRE2_ERROR_BADOPTION;
 
 /* Validate length and find the end of the replacement. */
-if (replacement == NULL && rlength > 0) return PCRE2_ERROR_NULL;
-else if (rlength == PCRE2_ZERO_TERMINATED)
-  rlength = PRIV(strlen)(replacement);
+
+if (replacement == NULL) return PCRE2_ERROR_NULL;
+if (rlength == PCRE2_ZERO_TERMINATED) rlength = PRIV(strlen)(replacement);
 repend = replacement + rlength;
 
 /* Check for using a match that has already happened. Note that the subject

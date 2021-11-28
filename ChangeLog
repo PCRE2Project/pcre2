@@ -32,6 +32,8 @@ substituting.
 
 11. Add check for NULL subject to POSIX regexec() function.
 
+12. Add check for NULL replacement to pcre2_substitute().
+
 
 Version 10.39 29-October-2021
 -----------------------------
