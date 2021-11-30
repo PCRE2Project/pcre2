@@ -5902,4 +5902,25 @@ a)"xI
     
 # --------- 
 
+# Tests for zero-length NULL to be treated as an empty string.
+
+//
+    \=null_subject
+\= Expect error     
+    abc\=null_subject
+
+//replace=[20]
+    abc\=null_replacement
+    \=null_subject
+    \=null_replacement
+
+/X*/g,replace=xy
+\= Expect error
+    >X<\=null_replacement
+
+/X+/replace=[20]
+    >XX<\=null_replacement
+
+# --------- 
+
 # End of testinput2

@@ -6170,6 +6170,10 @@ PCRE2_SPTR stack_frames_vector[START_FRAMES_SIZE/sizeof(PCRE2_SPTR)]
     PCRE2_KEEP_UNINITIALIZED;
 mb->stack_frames = (heapframe *)stack_frames_vector;
 
+/* Recognize NULL, length 0 as an empty string. */
+
+if (subject == NULL && length == 0) subject = (PCRE2_SPTR)"";
+
 /* Plausibility checks */
 
 if ((options & ~PUBLIC_MATCH_OPTIONS) != 0) return PCRE2_ERROR_BADOPTION;

@@ -260,9 +260,15 @@ PCRE2_UNSET, so as not to imply an offset in the replacement. */
 if ((options & (PCRE2_PARTIAL_HARD|PCRE2_PARTIAL_SOFT)) != 0)
   return PCRE2_ERROR_BADOPTION;
 
-/* Validate length and find the end of the replacement. */
+/* Validate length and find the end of the replacement. A NULL replacement of 
+zero length is interpreted as an empty string. */
 
-if (replacement == NULL) return PCRE2_ERROR_NULL;
+if (replacement == NULL) 
+  {
+  if (rlength != 0) return PCRE2_ERROR_NULL;
+  replacement = (PCRE2_SPTR)""; 
+  } 
+   
 if (rlength == PCRE2_ZERO_TERMINATED) rlength = PRIV(strlen)(replacement);
 repend = replacement + rlength;
 

@@ -215,4 +215,11 @@ Failed: POSIX code 16: bad argument at offset 0
  3: <unset>
  4: c
 
+//posix
+\= Expect errors
+    \=null_subject
+No match: POSIX code 16: bad argument
+    abc\=null_subject
+No match: POSIX code 16: bad argument
+
 # End of testdata/testinput18

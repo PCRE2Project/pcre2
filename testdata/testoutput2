@@ -17674,6 +17674,34 @@ Failed: error 199 at offset 14: \K is not allowed in lookarounds (but see PCRE2_
     
 # --------- 
 
+# Tests for zero-length NULL to be treated as an empty string.
+
+//
+    \=null_subject
+ 0: 
+\= Expect error     
+    abc\=null_subject
+Failed: error -51: NULL argument passed with non-zero length
+
+//replace=[20]
+    abc\=null_replacement
+ 1: abc
+    \=null_subject
+ 1: 
+    \=null_replacement
+ 1: 
+
+/X*/g,replace=xy
+\= Expect error
+    >X<\=null_replacement
+Failed: error -51: NULL argument passed with non-zero length
+
+/X+/replace=[20]
+    >XX<\=null_replacement
+ 1: ><
+
+# --------- 
+
 # End of testinput2
 Error -70: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

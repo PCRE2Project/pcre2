@@ -34,6 +34,11 @@ substituting.
 
 12. Add check for NULL replacement to pcre2_substitute().
 
+13. For the subject arguments of pcre2_match(), pcre2_dfa_match(), and 
+pcre2_substitute(), and the replacement argument of the latter, if the pointer 
+is NULL and the length is zero, treat as an empty string. Apparently a number 
+of applications treat NULL/0 in this way.
+
 
 Version 10.39 29-October-2021
 -----------------------------

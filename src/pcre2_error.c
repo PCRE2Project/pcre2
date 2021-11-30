@@ -253,7 +253,7 @@ static const unsigned char match_error_texts[] =
   "unknown substring\0"
   /* 50 */
   "non-unique substring name\0"
-  "NULL argument passed\0"
+  "NULL argument passed with non-zero length\0"
   "nested recursion at the same subject position\0"
   "matching depth limit exceeded\0"
   "requested value is not available\0"

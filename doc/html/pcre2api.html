@@ -2640,7 +2640,9 @@ The subject string is passed to <b>pcre2_match()</b> as a pointer in
 <i>startoffset</i>. The length and offset are in code units, not characters.
 That is, they are in bytes for the 8-bit library, 16-bit code units for the
 16-bit library, and 32-bit code units for the 32-bit library, whether or not
-UTF processing is enabled.
+UTF processing is enabled. As a special case, if <i>subject</i> is NULL and 
+<i>length</i> is zero, the subject is assumed to be an empty string. If 
+<i>length</i> is non-zero, an error occurs if <i>subject</i> is NULL.
 </P>
 <P>
 If <i>startoffset</i> is greater than the length of the subject,
@@ -3394,12 +3396,17 @@ same number causes an error at compile time.
 <P>
 This function optionally calls <b>pcre2_match()</b> and then makes a copy of the
 subject string in <i>outputbuffer</i>, replacing parts that were matched with
-the <i>replacement</i> string, whose length is supplied in <b>rlength</b>. This
-can be given as PCRE2_ZERO_TERMINATED for a zero-terminated string. There is an
-option (see PCRE2_SUBSTITUTE_REPLACEMENT_ONLY below) to return just the
-replacement string(s). The default action is to perform just one replacement if
-the pattern matches, but there is an option that requests multiple replacements
-(see PCRE2_SUBSTITUTE_GLOBAL below).
+the <i>replacement</i> string, whose length is supplied in <b>rlength</b>, which
+can be given as PCRE2_ZERO_TERMINATED for a zero-terminated string. As a
+special case, if <i>replacement</i> is NULL and <i>rlength</i> is zero, the
+replacement is assumed to be an empty string. If <i>rlength</i> is non-zero, an
+error occurs if <i>replacement</i> is NULL.
+</P>
+<P>
+There is an option (see PCRE2_SUBSTITUTE_REPLACEMENT_ONLY below) to return just
+the replacement string(s). The default action is to perform just one
+replacement if the pattern matches, but there is an option that requests
+multiple replacements (see PCRE2_SUBSTITUTE_GLOBAL below).
 </P>
 <P>
 If successful, <b>pcre2_substitute()</b> returns the number of substitutions
@@ -3812,12 +3819,13 @@ other alternatives. Ultimately, when it runs out of matches,
 <P>
 The function <b>pcre2_dfa_match()</b> is called to match a subject string
 against a compiled pattern, using a matching algorithm that scans the subject
-string just once (not counting lookaround assertions), and does not backtrack.
-This has different characteristics to the normal algorithm, and is not
-compatible with Perl. Some of the features of PCRE2 patterns are not supported.
-Nevertheless, there are times when this kind of matching can be useful. For a
-discussion of the two matching algorithms, and a list of features that
-<b>pcre2_dfa_match()</b> does not support, see the
+string just once (not counting lookaround assertions), and does not backtrack
+(except when processing lookaround assertions). This has different
+characteristics to the normal algorithm, and is not compatible with Perl. Some
+of the features of PCRE2 patterns are not supported. Nevertheless, there are
+times when this kind of matching can be useful. For a discussion of the two
+matching algorithms, and a list of features that <b>pcre2_dfa_match()</b> does
+not support, see the
 <a href="pcre2matching.html"><b>pcre2matching</b></a>
 documentation.
 </P>
@@ -4010,7 +4018,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC42" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 30 August 2021
+Last updated: 30 November 2021
 <br>
 Copyright &copy; 1997-2021 University of Cambridge.
 <br>

@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "30 August 2021" "PCRE2 10.38"
+.TH PCRE2API 3 "30 November 2021" "PCRE2 10.40"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -2624,7 +2624,9 @@ The subject string is passed to \fBpcre2_match()\fP as a pointer in
 \fIstartoffset\fP. The length and offset are in code units, not characters.
 That is, they are in bytes for the 8-bit library, 16-bit code units for the
 16-bit library, and 32-bit code units for the 32-bit library, whether or not
-UTF processing is enabled.
+UTF processing is enabled. As a special case, if \fIsubject\fP is NULL and 
+\fIlength\fP is zero, the subject is assumed to be an empty string. If 
+\fIlength\fP is non-zero, an error occurs if \fIsubject\fP is NULL.
 .P
 If \fIstartoffset\fP is greater than the length of the subject,
 \fBpcre2_match()\fP returns PCRE2_ERROR_BADOFFSET. When the starting offset is
@@ -3413,12 +3415,16 @@ same number causes an error at compile time.
 .P
 This function optionally calls \fBpcre2_match()\fP and then makes a copy of the
 subject string in \fIoutputbuffer\fP, replacing parts that were matched with
-the \fIreplacement\fP string, whose length is supplied in \fBrlength\fP. This
-can be given as PCRE2_ZERO_TERMINATED for a zero-terminated string. There is an
-option (see PCRE2_SUBSTITUTE_REPLACEMENT_ONLY below) to return just the
-replacement string(s). The default action is to perform just one replacement if
-the pattern matches, but there is an option that requests multiple replacements
-(see PCRE2_SUBSTITUTE_GLOBAL below).
+the \fIreplacement\fP string, whose length is supplied in \fBrlength\fP, which
+can be given as PCRE2_ZERO_TERMINATED for a zero-terminated string. As a
+special case, if \fIreplacement\fP is NULL and \fIrlength\fP is zero, the
+replacement is assumed to be an empty string. If \fIrlength\fP is non-zero, an
+error occurs if \fIreplacement\fP is NULL.
+.P
+There is an option (see PCRE2_SUBSTITUTE_REPLACEMENT_ONLY below) to return just
+the replacement string(s). The default action is to perform just one
+replacement if the pattern matches, but there is an option that requests
+multiple replacements (see PCRE2_SUBSTITUTE_GLOBAL below).
 .P
 If successful, \fBpcre2_substitute()\fP returns the number of substitutions
 that were carried out. This may be zero if no match was found, and is never
@@ -3813,12 +3819,13 @@ other alternatives. Ultimately, when it runs out of matches,
 .P
 The function \fBpcre2_dfa_match()\fP is called to match a subject string
 against a compiled pattern, using a matching algorithm that scans the subject
-string just once (not counting lookaround assertions), and does not backtrack.
-This has different characteristics to the normal algorithm, and is not
-compatible with Perl. Some of the features of PCRE2 patterns are not supported.
-Nevertheless, there are times when this kind of matching can be useful. For a
-discussion of the two matching algorithms, and a list of features that
-\fBpcre2_dfa_match()\fP does not support, see the
+string just once (not counting lookaround assertions), and does not backtrack
+(except when processing lookaround assertions). This has different
+characteristics to the normal algorithm, and is not compatible with Perl. Some
+of the features of PCRE2 patterns are not supported. Nevertheless, there are
+times when this kind of matching can be useful. For a discussion of the two
+matching algorithms, and a list of features that \fBpcre2_dfa_match()\fP does
+not support, see the
 .\" HREF
 \fBpcre2matching\fP
 .\"
@@ -4018,6 +4025,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 30 August 2021
+Last updated: 30 November 2021
 Copyright (c) 1997-2021 University of Cambridge.
 .fi
