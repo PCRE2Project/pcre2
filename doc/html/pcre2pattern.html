@@ -1341,15 +1341,17 @@ end of the subject in both modes, and if all branches of a pattern start with
 <P>
 Outside a character class, a dot in the pattern matches any one character in
 the subject string except (by default) a character that signifies the end of a
-line.
+line. One or more characters may be specified as line terminators (see
+<a href="#newlines">"Newline conventions"</a>
+above).
 </P>
 <P>
-When a line ending is defined as a single character, dot never matches that
-character; when the two-character sequence CRLF is used, dot does not match CR
-if it is immediately followed by LF, but otherwise it matches all characters
-(including isolated CRs and LFs). When any Unicode line endings are being
-recognized, dot does not match CR or LF or any of the other line ending
-characters.
+Dot never matches a single line-ending character. When the two-character
+sequence CRLF is the only line ending, dot does not match CR if it is
+immediately followed by LF, but otherwise it matches all characters (including
+isolated CRs and LFs). When ANYCRLF is selected for line endings, no occurences
+of CR of LF match dot. When all Unicode line endings are being recognized, dot
+does not match CR or LF or any of the other line ending characters.
 </P>
 <P>
 The behaviour of dot with regard to newlines can be changed. If the
@@ -3859,7 +3861,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC32" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 30 August 2021
+Last updated: 01 December 2021
 <br>
 Copyright &copy; 1997-2021 University of Cambridge.
 <br>
