@@ -46,3 +46,5 @@ findprop 32ff
 findprop 1f16d
 
 findprop U+10e93 U+10eaa
+
+findprop 0602 202a 202b 202c 2068 2069 202d 202e 2067

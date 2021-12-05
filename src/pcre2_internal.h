@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-          New API code Copyright (c) 2016-2020 University of Cambridge
+          New API code Copyright (c) 2016-2021 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -1798,7 +1798,8 @@ typedef struct {
   uint8_t caseset;    /* offset to multichar other cases or zero */
   int32_t other_case; /* offset to other case, or zero if none */
   int16_t scriptx;    /* script extension value */
-  int16_t dummy;      /* spare - to round to multiple of 4 bytes */
+  uint8_t bidi;       /* bidi class and control flag */
+  uint8_t dummy;      /* spare - to round to multiple of 4 bytes */
 } ucd_record;
 
 /* UCD access macros */
@@ -1822,6 +1823,13 @@ typedef struct {
 #define UCD_CASESET(ch)     GET_UCD(ch)->caseset
 #define UCD_OTHERCASE(ch)   ((uint32_t)((int)ch + (int)(GET_UCD(ch)->other_case)))
 #define UCD_SCRIPTX(ch)     GET_UCD(ch)->scriptx
+
+/* The "bidi" field has the 0x80 bit set if the character has the Bidi_Control
+property. The remaining bits hold the bidi class, but as there are only 23
+classes, we can mask off 5 bits - leaving two free for the future. */
+
+#define UCD_BIDICLASS(ch)   (GET_UCD(ch)->bidi & 0x1fu)
+#define UCD_BIDICONTROL(ch) (GET_UCD(ch)->bidi & 0x80u)
 
 /* Header for serialized pcre2 codes. */
 

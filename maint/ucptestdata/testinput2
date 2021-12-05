@@ -4,3 +4,14 @@ find type Sk
 find type Pd
 find gbreak LVT
 find script Old_Uyghur
+find bidi PDF
+find bidi CS
+find bidi CS type Sm
+find bidi B
+find bidi FSI
+find bidi PDI
+find bidi RLI
+find bidi RLO
+find bidi S
+find bidi WS
+find bidi_control

@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-          New API code Copyright (c) 2016-2018 University of Cambridge
+          New API code Copyright (c) 2016-2021 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -98,6 +98,34 @@ enum {
   ucp_Zl,    /* Line separator */
   ucp_Zp,    /* Paragraph separator */
   ucp_Zs     /* Space separator */
+};
+
+/* These are the bidi class values. */
+
+enum {
+  ucp_bidiAL,   /* Arabic letter */
+  ucp_bidiAN,   /* Arabic number */
+  ucp_bidiB,    /* Paragraph separator */
+  ucp_bidiBN,   /* Boundary neutral */
+  ucp_bidiCS,   /* Common separator */
+  ucp_bidiEN,   /* European number */
+  ucp_bidiES,   /* European separator */
+  ucp_bidiET,   /* European terminator */
+  ucp_bidiFSI,  /* First strong isolate */
+  ucp_bidiL,    /* Left to right */
+  ucp_bidiLRE,  /* Left to right embedding */
+  ucp_bidiLRI,  /* Left to right isolate */
+  ucp_bidiLRO,  /* Left to right override */
+  ucp_bidiNSM,  /* Non-spacing mark */
+  ucp_bidiON,   /* Other neutral */
+  ucp_bidiPDF,  /* Pop directional format */
+  ucp_bidiPDI,  /* Pop directional isolate */
+  ucp_bidiR,    /* Right to left */
+  ucp_bidiRLE,  /* Right to left embedding */
+  ucp_bidiRLI,  /* Right to left isolate */
+  ucp_bidiRLO,  /* Right to left override */
+  ucp_bidiS,    /* Segment separator */
+  ucp_bidiWS    /* White space */
 };
 
 /* These are grapheme break properties. The Extended Pictographic property

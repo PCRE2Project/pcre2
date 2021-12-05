@@ -2,7 +2,7 @@
 * A program for testing the Unicode property table *
 ***************************************************/
 
-/* Copyright (c) University of Cambridge 2008-2020 */
+/* Copyright (c) University of Cambridge 2008-2021 */
 
 /* Compile thus:
 
@@ -19,33 +19,35 @@ I wrote it to help with debugging PCRE, and have added things that I found
 useful, in a rather haphazard way. The code has never been seriously tidied or
 checked for robustness, but it shouldn't now give compiler warnings.
 
-There is only one option: "-s". If given, it applies only to the "findprop" 
-command. It causes the UTF-8 sequence of bytes that encode the character to be 
-output between angle brackets at the end of the line. On a UTF-8 terminal, this 
+There is only one option: "-s". If given, it applies only to the "findprop"
+command. It causes the UTF-8 sequence of bytes that encode the character to be
+output between angle brackets at the end of the line. On a UTF-8 terminal, this
 will show the appropriate graphic for the code point.
 
 If the command has arguments, they are concatenated into a buffer, separated by
 spaces. If the first argument starts "U+" or consists entirely of hexadecimal
 digits, "findprop" is inserted at the start. The buffer is then processed as a
 single line file, after which the program exits. If there are no arguments, the
-program reads commands line by line on stdin and writes output to stdout. The 
+program reads commands line by line on stdin and writes output to stdout. The
 return code is always zero.
 
 There are three commands:
 
 "findprop" must be followed by a space-separated list of Unicode code points as
 hex numbers, either without any prefix or starting with "U+". The output is one
-line per character, giving its Unicode properties followed by its other case or 
+line per character, giving its Unicode properties followed by its other case or
 cases if one or more exist, followed by its Script Extension list if it is not
 just the same as the base script. This list is in square brackets. The
 properties are:
 
+Bidi control        shown as '*' if true
+Bidi class          e.g. NSM (most common is L)
 General type        e.g. Letter
 Specific type       e.g. Upper case letter
 Script              e.g. Medefaidrin
 Grapheme break type e.g. Extend (most common is Other)
 
-"find" must be followed by a list of property names and their values. The 
+"find" must be followed by a list of property names and their values. The
 values are case-sensitive. This finds characters that have those properties. If
 multiple properties are listed, they must all be matched. Currently supported:
 
@@ -56,6 +58,8 @@ multiple properties are listed, they must all be matched. Currently supported:
                      scripts must be present.
   type <abbrev>    The character's specific type (e.g. Lu or Nd) must match.
   gbreak <name>    The grapheme break property must match.
+  bidi <class>     The character's bidi class must match.
+  bidi_control     The character must be a bidi control character 
 
 If a <name> or <abbrev> is preceded by !, the value must NOT be present. For
 Script Extensions, there may be a mixture of positive and negative
@@ -63,10 +67,10 @@ requirements. All must be satisfied.
 
 Sequences of two or more characters are shown as ranges, for example
 U+0041..U+004A. No more than 100 lines are are output. If there are more
-characters, the list ends with ... 
+characters, the list ends with ...
 
-"list" must be followed by a property name (script, type, or gbreak). The
-defined values for that property are listed. */
+"list" must be followed by one of property names script, type, gbreak or bidi.
+The defined values for that property are listed. */
 
 
 #ifdef HAVE_CONFIG_H
@@ -145,7 +149,7 @@ static const unsigned char *type_names[] = {
   US"So", US"Other symbol",
   US"Zl", US"Line separator",
   US"Zp", US"Paragraph separator",
-  US"Zs", US"Space separator" 
+  US"Zs", US"Space separator"
 };
 
 static const unsigned char *gb_names[] = {
@@ -166,6 +170,31 @@ static const unsigned char *gb_names[] = {
   US"Extended_Pictographic", US""
 };
 
+static const unsigned char *bd_names[] = {
+  US"AL",   US"Arabic letter",
+  US"AN",   US"Arabid number",
+  US"B",    US"Paragraph separator",
+  US"BN",   US"Boundary neutral",
+  US"CS",   US"Common separator",
+  US"EN",   US"European number",
+  US"ES",   US"European separator",
+  US"ET",   US"European terminator",
+  US"FSI",  US"First string isolate",
+  US"L",    US"Left-to-right",
+  US"LRE",  US"Left-to-right embedding",
+  US"LRI",  US"Left-to-right isolate",
+  US"LRO",  US"Left-to-right override",
+  US"NSM",  US"Non-spacing mark",
+  US"ON",   US"Other neutral",
+  US"PDF",  US"Pop directional format",
+  US"PDI",  US"Pop directional isolate",
+  US"R",    US"Right-to-left",
+  US"RLE",  US"Right-to-left embedding",
+  US"RLI",  US"Right-to-left isolate",
+  US"RLO",  US"Right-to-left override",
+  US"S",    US"Segment separator",
+  US"WS",   US"White space"
+};
 
 static const unsigned int utf8_table1[] = {
   0x0000007f, 0x000007ff, 0x0000ffff, 0x001fffff, 0x03ffffff, 0x7fffffff};
@@ -235,14 +264,14 @@ const ucp_type_table *u;
 
 for (i = 0; i < PRIV(utt_size); i++)
   {
-  u = PRIV(utt) + i; 
+  u = PRIV(utt) + i;
   if (u->type == PT_SC && u->value == script) break;
   }
 if (i < PRIV(utt_size))
   return PRIV(utt_names) + u->name_offset;
-  
+
 return "??";
-}  
+}
 
 
 /*************************************************
@@ -257,12 +286,15 @@ int fulltype = UCD_CHARTYPE(c);
 int script = UCD_SCRIPT(c);
 int scriptx = UCD_SCRIPTX(c);
 int gbprop = UCD_GRAPHBREAK(c);
+int bidi = UCD_BIDICLASS(c);
+int bidicontrol = UCD_BIDICONTROL(c);
 unsigned int othercase = UCD_OTHERCASE(c);
 int caseset = UCD_CASESET(c);
 
 const unsigned char *fulltypename = US"??";
 const unsigned char *typename = US"??";
 const unsigned char *graphbreak = US"??";
+const unsigned char *bidiclass = US"??";
 const unsigned char *scriptname = CUS get_scriptname(script);
 
 switch (type)
@@ -332,7 +364,37 @@ switch(gbprop)
   default:                 graphbreak = US"Unknown"; break;
   }
 
-printf("U+%04X %s: %s, %s, %s", c, typename, fulltypename, scriptname, graphbreak);
+switch(bidi)
+  {
+  case ucp_bidiAL:   bidiclass = US"AL "; break;
+  case ucp_bidiFSI:  bidiclass = US"FSI"; break;
+  case ucp_bidiL:    bidiclass = US"L  "; break;
+  case ucp_bidiLRE:  bidiclass = US"LRE"; break;
+  case ucp_bidiLRI:  bidiclass = US"LRI"; break;
+  case ucp_bidiLRO:  bidiclass = US"LRO"; break;
+  case ucp_bidiPDF:  bidiclass = US"PDF"; break;
+  case ucp_bidiPDI:  bidiclass = US"PDI"; break;
+  case ucp_bidiR:    bidiclass = US"R  "; break;
+  case ucp_bidiRLE:  bidiclass = US"RLE"; break;
+  case ucp_bidiRLI:  bidiclass = US"RLI"; break;
+  case ucp_bidiRLO:  bidiclass = US"RLO"; break;
+  case ucp_bidiAN:   bidiclass = US"AN "; break;
+  case ucp_bidiB:    bidiclass = US"B  "; break;
+  case ucp_bidiBN:   bidiclass = US"BN "; break;
+  case ucp_bidiCS:   bidiclass = US"CS "; break;
+  case ucp_bidiEN:   bidiclass = US"EN "; break;
+  case ucp_bidiES:   bidiclass = US"ES "; break;
+  case ucp_bidiET:   bidiclass = US"ET "; break;
+  case ucp_bidiNSM:  bidiclass = US"NSM"; break;
+  case ucp_bidiON:   bidiclass = US"ON "; break;
+  case ucp_bidiS:    bidiclass = US"S  "; break;
+  case ucp_bidiWS:   bidiclass = US"WS "; break;
+  default:           bidiclass = US"???"; break;
+  }
+
+printf("U+%04X %c%s %s: %s, %s, %s", c, bidicontrol? '*':' ', bidiclass,
+  typename, fulltypename, scriptname, graphbreak);
+
 if (is_just_one && othercase != c)
   {
   printf(", U+%04X", othercase);
@@ -341,9 +403,9 @@ if (is_just_one && othercase != c)
     const uint32_t *p = PRIV(ucd_caseless_sets) + caseset - 1;
     while (*(++p) < NOTACHAR)
       {
-      unsigned int d = *p;  
+      unsigned int d = *p;
       if (d != othercase && d != c) printf(", U+%04X", d);
-      } 
+      }
     }
   }
 
@@ -364,13 +426,13 @@ if (scriptx != script)
     }
   printf("]");
   }
-  
+
 if (show_character && is_just_one)
   {
   unsigned char buffer[8];
   size_t len = ord2utf8(c, buffer);
-  printf(", >%.*s<", (int)len, buffer);  
-  }  
+  printf(", >%.*s<", (int)len, buffer);
+  }
 
 printf("\n");
 }
@@ -394,9 +456,12 @@ uint32_t i, c;
 int script = -1;
 int type = -1;
 int gbreak = -1;
+int bidiclass = -1;
+BOOL bidicontrol = FALSE;
 BOOL script_not = FALSE;
 BOOL type_not = FALSE;
 BOOL gbreak_not = FALSE;
+BOOL bidiclass_not = FALSE;
 BOOL hadrange = FALSE;
 const ucd_record *ucd, *next_ucd;
 const char *pad = "        ";
@@ -405,10 +470,12 @@ while (*s != 0)
   {
   unsigned int offset = 0;
   BOOL scriptx_not = FALSE;
+  char *value_start;
 
   for (t = name; *s != 0 && !isspace(*s); s++) *t++ = *s;
   *t = 0;
   while (isspace(*s)) s++;
+  value_start = s;
 
   for (t = value; *s != 0 && !isspace(*s); s++) *t++ = *s;
   *t = 0;
@@ -426,11 +493,11 @@ while (*s != 0)
 
     for (i = 0; i < PRIV(utt_size); i++)
       {
-      const ucp_type_table *u = PRIV(utt) + i; 
-      if (u->type == PT_SC && strcmp(CS(value + offset), 
+      const ucp_type_table *u = PRIV(utt) + i;
+      if (u->type == PT_SC && strcmp(CS(value + offset),
             PRIV(utt_names) + u->name_offset) == 0)
         {
-        c = u->value; 
+        c = u->value;
         if (name[6] == 'x')
           {
           scriptx_list[scriptx_count++] = scriptx_not? (-c):c;
@@ -516,6 +583,45 @@ while (*s != 0)
       }
     }
 
+  else if (strcmp(CS name, "bidi") == 0 ||
+           strcmp(CS name, "bidiclass") == 0 ||
+           strcmp(CS name, "bidi_class") == 0 )
+    {
+    if (bidiclass >= 0)
+      {
+      printf("** Only 1 bidi class value allowed\n");
+      return;
+      }
+    else
+      {
+      if (value[0] == '!')
+        {
+        bidiclass_not = TRUE;
+        offset = 1;
+        }
+      for (i = 0; i < sizeof(bd_names)/sizeof(char *); i += 2)
+        {
+        if (strcmp(CS (value + offset), CS bd_names[i]) == 0)
+          {
+          bidiclass = i/2;
+          break;
+          }
+        }
+      if (i >= sizeof(bd_names)/sizeof(char *))
+        {
+        printf("** Unrecognized bidi class name \"%s\"\n", value);
+        return;
+        }
+      }
+    }
+
+  else if (strcmp(CS name, "bidi_control") == 0 ||
+           strcmp(CS name, "bidicontrol") == 0)
+    {
+    bidicontrol = TRUE;
+    s = value_start;     /* No data */
+    }
+
   else
     {
     printf("** Unrecognized property name \"%s\"\n", name);
@@ -523,7 +629,8 @@ while (*s != 0)
     }
   }
 
-if (script < 0 && scriptx_count == 0 && type < 0 && gbreak < 0)
+if (script < 0 && scriptx_count == 0 && type < 0 && gbreak < 0 && 
+    bidiclass < 0 && !bidicontrol)
   {
   printf("** No properties specified\n");
   return;
@@ -608,6 +715,20 @@ for (c = 0; c <= 0x10ffff; c++)
       }
     }
 
+  if (bidiclass >= 0)
+    {
+    if (bidiclass_not)
+      {
+      if (bidiclass == UCD_BIDICLASS(c)) continue;
+      }
+    else
+      {
+      if (bidiclass != UCD_BIDICLASS(c)) continue;
+      }
+    }
+
+  if (bidicontrol && UCD_BIDICONTROL(c) == 0) continue;
+
   /* All conditions are met. Look for runs. */
 
   ucd = GET_UCD(c);
@@ -663,9 +784,9 @@ if (strcmp(CS name, "findprop") == 0)
   {
   while (*s != 0)
     {
-    unsigned int c; 
+    unsigned int c;
     unsigned char *endptr;
-    t = s; 
+    t = s;
     if (strncmp(CS t, "U+", 2) == 0) t += 2;
     c = strtoul(CS t, CSS(&endptr), 16);
     if (*endptr != 0 && !isspace(*endptr))
@@ -673,13 +794,13 @@ if (strcmp(CS name, "findprop") == 0)
       while (*endptr != 0 && !isspace(*endptr)) endptr++;
       printf("** Invalid hex number: ignored \"%.*s\"\n", (int)(endptr-s), s);
       }
-    else  
+    else
       {
-      if (c > 0x10ffff) 
+      if (c > 0x10ffff)
         printf("** U+%x is too big for a Unicode code point\n", c);
-      else   
+      else
         print_prop(c, TRUE);
-      } 
+      }
     s = endptr;
     while (isspace(*s)) s++;
     }
@@ -689,7 +810,7 @@ else if (strcmp(CS name, "find") == 0)
   {
   find_chars(s);
   }
-  
+
 else if (strcmp(CS name, "list") == 0)
   {
   while (*s != 0)
@@ -698,38 +819,45 @@ else if (strcmp(CS name, "list") == 0)
     for (t = name; *s != 0 && !isspace(*s); s++) *t++ = *s;
     *t = 0;
     while (isspace(*s)) s++;
-    
+
     if (strcmp(CS name, "script") == 0 || strcmp(CS name, "scripts") == 0)
       {
-      for (i = 0; i < PRIV(utt_size); i++) 
+      for (i = 0; i < PRIV(utt_size); i++)
         if (PRIV(utt)[i].type == PT_SC)
-          printf("%s\n", PRIV(utt_names) + PRIV(utt)[i].name_offset);  
+          printf("%s\n", PRIV(utt_names) + PRIV(utt)[i].name_offset);
       }
-      
+
     else if (strcmp(CS name, "type") == 0 || strcmp(CS name, "types") == 0)
       {
       for (i = 0; i < sizeof(type_names)/sizeof(char *); i += 2)
-        printf("%s %s\n", type_names[i], type_names[i+1]); 
-      }  
-      
+        printf("%s %s\n", type_names[i], type_names[i+1]);
+      }
+
     else if (strcmp(CS name, "gbreak") == 0 || strcmp(CS name, "gbreaks") == 0)
       {
       for (i = 0; i < sizeof(gb_names)/sizeof(char *); i += 2)
         {
-        if (gb_names[i+1][0] != 0)  
+        if (gb_names[i+1][0] != 0)
           printf("%-3s (%s)\n", gb_names[i], gb_names[i+1]);
-        else   
+        else
           printf("%s\n", gb_names[i]);
-        } 
-      }    
+        }
+      }
 
-    else 
+    else if (strcmp(CS name, "bidi") == 0 ||
+             strcmp(CS name, "bidiclasses") == 0)
       {
-      printf("** Unknown property \"%s\"\n", name);  
+      for (i = 0; i < sizeof(bd_names)/sizeof(char *); i += 2)
+        printf("%3s %s\n", bd_names[i], bd_names[i+1]);
+      }
+
+    else
+      {
+      printf("** Unknown property \"%s\"\n", name);
       break;
-      }  
-    }  
-  }  
+      }
+    }
+  }
 
 else printf("** Unknown test command \"%s\"\n", name);
 }
@@ -751,32 +879,32 @@ if (argc > 1 && strcmp(argv[1], "-s") == 0)
   {
   show_character = TRUE;
   first_arg++;
-  }   
+  }
 
 if (argc > first_arg)
   {
   int i;
-  BOOL hexfirst = TRUE; 
-  char *arg = argv[first_arg]; 
+  BOOL hexfirst = TRUE;
+  char *arg = argv[first_arg];
   unsigned char *s = buffer;
-  
-  if (strncmp(arg, "U+", 2) != 0 && !isdigit(*arg)) 
+
+  if (strncmp(arg, "U+", 2) != 0 && !isdigit(*arg))
     {
-    while (*arg != 0) 
+    while (*arg != 0)
       {
-      if (!isxdigit(*arg++)) { hexfirst = FALSE; break; }  
-      } 
-    } 
-     
+      if (!isxdigit(*arg++)) { hexfirst = FALSE; break; }
+      }
+    }
+
   if (hexfirst)
     {
     strcpy(CS s, "findprop ");
     s += 9;
     }
-    
+
   for (i = first_arg; i < argc; i++)
     {
-    s += sprintf(CS s, "%s ", argv[i]);       
+    s += sprintf(CS s, "%s ", argv[i]);
     }
 
   process_command_line(buffer);
@@ -812,7 +940,7 @@ for(;;)
     if (fgets(CS buffer, sizeof(buffer), stdin) == NULL) break;
     if (!interactive) printf("%s", buffer);
     }
-    
+
   process_command_line(buffer);
   }
 

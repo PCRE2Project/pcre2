@@ -15,15 +15,16 @@
 #
 # [python3] ./MultiStage2.py >../src/pcre2_ucd.c
 #
-# It requires six Unicode data tables: DerivedGeneralCategory.txt,
-# GraphemeBreakProperty.txt, Scripts.txt, ScriptExtensions.txt,
-# CaseFolding.txt, and emoji-data.txt. These must be in the
-# maint/Unicode.tables subdirectory.
+# It requires eight Unicode data tables: DerivedBidiClass.txt,
+# DerivedGeneralCategory.txt, GraphemeBreakProperty.txt, PropList.txt,
+# Scripts.txt, ScriptExtensions.txt, CaseFolding.txt, and emoji-data.txt. These
+# must be in the maint/Unicode.tables subdirectory.
 #
-# DerivedGeneralCategory.txt is found in the "extracted" subdirectory of the
-# Unicode database (UCD) on the Unicode web site; GraphemeBreakProperty.txt is
-# in the "auxiliary" subdirectory. Scripts.txt, ScriptExtensions.txt, and
-# CaseFolding.txt are directly in the UCD directory.
+# DerivedBidiClass.txt and DerivedGeneralCategory.txt are in the "extracted"
+# subdirectory of the Unicode database (UCD) on the Unicode web site;
+# GraphemeBreakProperty.txt is in the "auxiliary" subdirectory. PropList.txt,
+# Scripts.txt, ScriptExtensions.txt, and CaseFolding.txt are directly in the
+# UCD directory.
 #
 # The emoji-data.txt file is found in the "emoji" subdirectory even though it
 # is technically part of a different (but coordinated) standard as shown
@@ -69,6 +70,10 @@
 #  Added code to add a Script Extensions field to records. This has increased
 #  their size from 8 to 12 bytes, only 10 of which are currently used.
 #
+#  Added code to add a bidi class field to records by scanning the
+#  DerivedBidiClass.txt and PropList.txt files. This uses one of the two spare
+#  bytes, so now 11 out of 12 are in use.
+#
 # 01-March-2010:     Updated list of scripts for Unicode 5.2.0
 # 30-April-2011:     Updated list of scripts for Unicode 6.0.0
 #     July-2012:     Updated list of scripts for Unicode 6.1.0
@@ -93,6 +98,8 @@
 # 27-July-2019:      Updated for Unicode 12.1.0
 # 10-March-2020:     Updated for Unicode 13.0.0
 # PCRE2-10.39:       Updated for Unicode 14.0.0
+# 05-December-2021:  Added code to scan DerivedBidiClass.txt for bidi class,
+#                      and also PropList.txt for the Bidi_Control property
 # ----------------------------------------------------------------------------
 #
 #
@@ -100,14 +107,15 @@
 # pcre2_internal.h. They look up Unicode character properties using short
 # sequences of code that contains no branches, which makes for greater speed.
 #
-# Conceptually, there is a table of records (of type ucd_record), containing a
-# script number, script extension value, character type, grapheme break type,
-# offset to caseless matching set, offset to the character's other case, for
-# every Unicode character. However, a real table covering all Unicode
-# characters would be far too big. It can be efficiently compressed by
-# observing that many characters have the same record, and many blocks of
-# characters (taking 128 characters in a block) have the same set of records as
-# other blocks. This leads to a 2-stage lookup process.
+# Conceptually, there is a table of records (of type ucd_record), one for each
+# Unicode character. Each record contains the script number, script extension
+# value, character type, grapheme break type, offset to caseless matching set,
+# offset to the character's other case, and the bidi class/control. However, a
+# real table covering all Unicode characters would be far too big. It can be
+# efficiently compressed by observing that many characters have the same
+# record, and many blocks of characters (taking 128 characters in a block) have
+# the same set of records as other blocks. This leads to a 2-stage lookup
+# process.
 #
 # This script constructs six tables. The ucd_caseless_sets table contains
 # lists of characters that all match each other caselessly. Each list is
@@ -136,19 +144,20 @@
 # the offset of a character within its own block, and the result is the index
 # number of the required record in the ucd_records vector.
 #
-# The following examples are correct for the Unicode 11.0.0 database. Future
+# The following examples are correct for the Unicode 14.0.0 database. Future
 # updates may make change the actual lookup values.
 #
 # Example: lowercase "a" (U+0061) is in block 0
 #          lookup 0 in stage1 table yields 0
-#          lookup 97 (0x61) in the first table in stage2 yields 17
-#          record 17 is { 34, 5, 12, 0, -32, 34, 0 }
+#          lookup 97 (0x61) in the first table in stage2 yields 22
+#          record 22 is { 34, 5, 12, 0, -32, 34, 2, 0 }
 #            34 = ucp_Latin   => Latin script
 #             5 = ucp_Ll      => Lower case letter
 #            12 = ucp_gbOther => Grapheme break property "Other"
 #             0               => Not part of a caseless set
 #           -32 (-0x20)       => Other case is U+0041
 #            34 = ucp_Latin   => No special Script Extension property
+#             2 = ucp_bidiL   => Bidi class left-to-right
 #             0               => Dummy value, unused at present
 #
 # Almost all lowercase latin characters resolve to the same record. One or two
@@ -156,34 +165,36 @@
 # example, k, K and the Kelvin symbol are such a set).
 #
 # Example: hiragana letter A (U+3042) is in block 96 (0x60)
-#          lookup 96 in stage1 table yields 90
-#          lookup 66 (0x42) in table 90 in stage2 yields 564
-#          record 564 is { 27, 7, 12, 0, 0, 27, 0 }
+#          lookup 96 in stage1 table yields 91
+#          lookup 66 (0x42) in table 91 in stage2 yields 613
+#          record 613 is { 27, 7, 12, 0, 0, 27, 2, 0 }
 #            27 = ucp_Hiragana => Hiragana script
 #             7 = ucp_Lo       => Other letter
 #            12 = ucp_gbOther  => Grapheme break property "Other"
 #             0                => Not part of a caseless set
 #             0                => No other case
 #            27 = ucp_Hiragana => No special Script Extension property
+#             2 = ucp_bidiL    => Bidi class left-to-right
 #             0                => Dummy value, unused at present
 #
 # Example: vedic tone karshana (U+1CD0) is in block 57 (0x39)
 #          lookup 57 in stage1 table yields 55
-#          lookup 80 (0x50) in table 55 in stage2 yields 458
-#          record 458 is { 28, 12, 3, 0, 0, -101, 0 }
+#          lookup 80 (0x50) in table 55 in stage2 yields 485
+#          record 485 is { 28, 12, 3, 0, 0, -122, 19, 0 }
 #            28 = ucp_Inherited => Script inherited from predecessor
 #            12 = ucp_Mn        => Non-spacing mark
 #             3 = ucp_gbExtend  => Grapheme break property "Extend"
 #             0                 => Not part of a caseless set
 #             0                 => No other case
-#          -101                 => Script Extension list offset = 101
+#          -122                 => Script Extension list offset = 122
+#            19 = ucp_bidiNSM   => Bidi class non-spacing mark
 #             0                 => Dummy value, unused at present
 #
 # At offset 101 in the ucd_script_sets vector we find the list 3, 15, 107, 29,
 # and terminator 0. This means that this character is expected to be used with
 # any of those scripts, which are Bengali, Devanagari, Grantha, and Kannada.
 #
-#  Philip Hazel, 03 July 2008
+#  Philip Hazel, last updated 05 December 2021.
 ##############################################################################
 
 
@@ -195,17 +206,21 @@ MAX_UNICODE = 0x110000
 NOTACHAR = 0xffffffff
 
 
-# Parse a line of Scripts.txt, GraphemeBreakProperty.txt or DerivedGeneralCategory.txt
+# Parse a line of Scripts.txt, GraphemeBreakProperty.txt,
+# DerivedBidiClass.txt or DerivedGeneralCategory.txt
+
 def make_get_names(enum):
         return lambda chardata: enum.index(chardata[1])
 
 # Parse a line of CaseFolding.txt
+
 def get_other_case(chardata):
         if chardata[1] == 'C' or chardata[1] == 'S':
           return int(chardata[2], 16) - int(chardata[0], 16)
         return 0
 
 # Parse a line of ScriptExtensions.txt
+
 def get_script_extension(chardata):
         this_script_list = list(chardata[1].split(' '))
         if len(this_script_list) == 1:
@@ -233,6 +248,7 @@ def get_script_extension(chardata):
         return -return_value
 
 # Read the whole table in memory, setting/checking the Unicode version
+
 def read_table(file_name, get_value, default_value):
         global unicode_version
 
@@ -489,6 +505,14 @@ break_property_names = ['CR', 'LF', 'Control', 'Extend', 'Prepend',
   'SpacingMark', 'L', 'V', 'T', 'LV', 'LVT', 'Regional_Indicator', 'Other',
   'ZWJ', 'Extended_Pictographic' ]
 
+# BIDI class property names in the DerivedBidiClass.txt file
+
+bidiclass_names = ['AL', 'AN', 'B', 'BN', 'CS', 'EN', 'ES', 'ET', 'FSI', 'L', 
+  'LRE', 'LRI', 'LRO', 'NSM', 'ON',  'PDF', 'PDI', 'R', 'RLE', 'RLI', 'RLO',
+  'S', 'WS' ]
+
+# Create the various tables
+
 test_record_size()
 unicode_version = ""
 
@@ -496,6 +520,28 @@ script = read_table('Unicode.tables/Scripts.txt', make_get_names(script_names), 
 category = read_table('Unicode.tables/DerivedGeneralCategory.txt', make_get_names(category_names), category_names.index('Cn'))
 break_props = read_table('Unicode.tables/GraphemeBreakProperty.txt', make_get_names(break_property_names), break_property_names.index('Other'))
 other_case = read_table('Unicode.tables/CaseFolding.txt', get_other_case, 0)
+bidi_class = read_table('Unicode.tables/DerivedBidiClass.txt', make_get_names(bidiclass_names), bidiclass_names.index('L'))
+
+# The Bidi_Control property is a Y/N value, so needs only one bit. We scan the
+# PropList.txt file and set 0x80 bit in the bidi_class table.
+
+file = open('Unicode.tables/PropList.txt', 'r', encoding='utf-8')
+for line in file:
+        line = re.sub(r'#.*', '', line)
+        chardata = list(map(str.strip, line.split(';')))
+        if len(chardata) <= 1:
+                continue
+        if chardata[1] != "Bidi_Control":
+                continue
+        m = re.match(r'([0-9a-fA-F]+)(\.\.([0-9a-fA-F]+))?$', chardata[0])
+        char = int(m.group(1), 16)
+        if m.group(3) is None:
+                last = char
+        else:
+                last = int(m.group(3), 16)
+        for i in range(char, last + 1):
+                bidi_class[i] |= 0x80;
+file.close()
 
 # The grapheme breaking rules were changed for Unicode 11.0.0 (June 2018). Now
 # we need to find the Extended_Pictographic property for emoji characters. This
@@ -509,10 +555,8 @@ for line in file:
         chardata = list(map(str.strip, line.split(';')))
         if len(chardata) <= 1:
                 continue
-
         if chardata[1] != "Extended_Pictographic":
                 continue
-
         m = re.match(r'([0-9a-fA-F]+)(\.\.([0-9a-fA-F]+))?$', chardata[0])
         char = int(m.group(1), 16)
         if m.group(3) is None:
@@ -542,12 +586,13 @@ for i in range(0, MAX_UNICODE):
   if scriptx[i] == script_abbrevs_default:
     scriptx[i] = script[i]
 
-# With the addition of the new Script Extensions field, we need some padding
-# to get the Unicode records up to 12 bytes (multiple of 4). Set a value
-# greater than 255 to make the field 16 bits.
+# With the addition of the Script Extensions field, we needed some padding to
+# get the Unicode records up to 12 bytes (multiple of 4). Originally this was a
+# 16-bit field and padding_dummy[0] was set to 256 to ensure this, but 8 bits
+# are now used for the bidi class, so zero will do.
 
 padding_dummy = [0] * MAX_UNICODE
-padding_dummy[0] = 256
+padding_dummy[0] = 0
 
 # This block of code was added by PH in September 2012. I am not a Python
 # programmer, so the style is probably dreadful, but it does the job. It scans
@@ -622,7 +667,7 @@ for s in sets:
 # Combine the tables
 
 table, records = combine_tables(script, category, break_props,
-  caseless_offsets, other_case, scriptx, padding_dummy)
+  caseless_offsets, other_case, scriptx, bidi_class, padding_dummy)
 
 record_size, record_struct = get_record_size_struct(list(records.keys()))
 
@@ -673,7 +718,7 @@ print("a totally empty module because some compilers barf at that.")
 print("Instead, just supply some small dummy tables. */")
 print()
 print("#ifndef SUPPORT_UNICODE")
-print("const ucd_record PRIV(ucd_records)[] = {{0,0,0,0,0,0,0 }};")
+print("const ucd_record PRIV(ucd_records)[] = {{0,0,0,0,0,0,0,0 }};")
 print("const uint16_t PRIV(ucd_stage1)[] = {0};")
 print("const uint16_t PRIV(ucd_stage2)[] = {0};")
 print("const uint32_t PRIV(ucd_caseless_sets)[] = {0};")
@@ -693,6 +738,7 @@ print("  ucp_gbOther,    /* grapheme break property */")
 print("  0,              /* case set */")
 print("  0,              /* other case */")
 print("  ucp_Unknown,    /* script extension */")
+print("  ucp_bidiL,      /* bidi class */")
 print("  0,              /* dummy filler */")
 print("  }};")
 print("#endif")
@@ -775,8 +821,9 @@ print("\n};\n")
 print("/* These are the main two-stage UCD tables. The fields in each record are:")
 print("script (8 bits), character type (8 bits), grapheme break property (8 bits),")
 print("offset to multichar other cases or zero (8 bits), offset to other case")
-print("or zero (32 bits, signed), script extension (16 bits, signed), and a dummy")
-print("16-bit field to make the whole thing a multiple of 4 bytes. */\n")
+print("or zero (32 bits, signed), script extension (16 bits, signed), bidi class")
+print("(8 bits), and a dummy 8-bit field to make the whole thing a multiple")
+print("of 4 bytes. */\n")
 
 print_records(records, record_size)
 print_table(min_stage1, 'PRIV(ucd_stage1)')

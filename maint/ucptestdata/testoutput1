@@ -1,398 +1,409 @@
 findprop 00 01 02 03 04 05 06 07 08 09 0a 0b 0c 0d 0e 0f 
-U+0000 Control: Control, Common, Control
-U+0001 Control: Control, Common, Control
-U+0002 Control: Control, Common, Control
-U+0003 Control: Control, Common, Control
-U+0004 Control: Control, Common, Control
-U+0005 Control: Control, Common, Control
-U+0006 Control: Control, Common, Control
-U+0007 Control: Control, Common, Control
-U+0008 Control: Control, Common, Control
-U+0009 Control: Control, Common, Control
-U+000A Control: Control, Common, LF
-U+000B Control: Control, Common, Control
-U+000C Control: Control, Common, Control
-U+000D Control: Control, Common, CR
-U+000E Control: Control, Common, Control
-U+000F Control: Control, Common, Control
+U+0000  BN  Control: Control, Common, Control
+U+0001  BN  Control: Control, Common, Control
+U+0002  BN  Control: Control, Common, Control
+U+0003  BN  Control: Control, Common, Control
+U+0004  BN  Control: Control, Common, Control
+U+0005  BN  Control: Control, Common, Control
+U+0006  BN  Control: Control, Common, Control
+U+0007  BN  Control: Control, Common, Control
+U+0008  BN  Control: Control, Common, Control
+U+0009  S   Control: Control, Common, Control
+U+000A  B   Control: Control, Common, LF
+U+000B  S   Control: Control, Common, Control
+U+000C  WS  Control: Control, Common, Control
+U+000D  B   Control: Control, Common, CR
+U+000E  BN  Control: Control, Common, Control
+U+000F  BN  Control: Control, Common, Control
 findprop 10 11 12 13 14 15 16 17 18 19 1a 1b 1c 1d 1e 1f 
-U+0010 Control: Control, Common, Control
-U+0011 Control: Control, Common, Control
-U+0012 Control: Control, Common, Control
-U+0013 Control: Control, Common, Control
-U+0014 Control: Control, Common, Control
-U+0015 Control: Control, Common, Control
-U+0016 Control: Control, Common, Control
-U+0017 Control: Control, Common, Control
-U+0018 Control: Control, Common, Control
-U+0019 Control: Control, Common, Control
-U+001A Control: Control, Common, Control
-U+001B Control: Control, Common, Control
-U+001C Control: Control, Common, Control
-U+001D Control: Control, Common, Control
-U+001E Control: Control, Common, Control
-U+001F Control: Control, Common, Control
+U+0010  BN  Control: Control, Common, Control
+U+0011  BN  Control: Control, Common, Control
+U+0012  BN  Control: Control, Common, Control
+U+0013  BN  Control: Control, Common, Control
+U+0014  BN  Control: Control, Common, Control
+U+0015  BN  Control: Control, Common, Control
+U+0016  BN  Control: Control, Common, Control
+U+0017  BN  Control: Control, Common, Control
+U+0018  BN  Control: Control, Common, Control
+U+0019  BN  Control: Control, Common, Control
+U+001A  BN  Control: Control, Common, Control
+U+001B  BN  Control: Control, Common, Control
+U+001C  B   Control: Control, Common, Control
+U+001D  B   Control: Control, Common, Control
+U+001E  B   Control: Control, Common, Control
+U+001F  S   Control: Control, Common, Control
 findprop 20 21 22 23 24 25 26 27 28 29 2a 2b 2c 2d 2e 2f 
-U+0020 Separator: Space separator, Common, Other
-U+0021 Punctuation: Other punctuation, Common, Other
-U+0022 Punctuation: Other punctuation, Common, Other
-U+0023 Punctuation: Other punctuation, Common, Other
-U+0024 Symbol: Currency symbol, Common, Other
-U+0025 Punctuation: Other punctuation, Common, Other
-U+0026 Punctuation: Other punctuation, Common, Other
-U+0027 Punctuation: Other punctuation, Common, Other
-U+0028 Punctuation: Open punctuation, Common, Other
-U+0029 Punctuation: Close punctuation, Common, Other
-U+002A Punctuation: Other punctuation, Common, Other
-U+002B Symbol: Mathematical symbol, Common, Other
-U+002C Punctuation: Other punctuation, Common, Other
-U+002D Punctuation: Dash punctuation, Common, Other
-U+002E Punctuation: Other punctuation, Common, Other
-U+002F Punctuation: Other punctuation, Common, Other
+U+0020  WS  Separator: Space separator, Common, Other
+U+0021  ON  Punctuation: Other punctuation, Common, Other
+U+0022  ON  Punctuation: Other punctuation, Common, Other
+U+0023  ET  Punctuation: Other punctuation, Common, Other
+U+0024  ET  Symbol: Currency symbol, Common, Other
+U+0025  ET  Punctuation: Other punctuation, Common, Other
+U+0026  ON  Punctuation: Other punctuation, Common, Other
+U+0027  ON  Punctuation: Other punctuation, Common, Other
+U+0028  ON  Punctuation: Open punctuation, Common, Other
+U+0029  ON  Punctuation: Close punctuation, Common, Other
+U+002A  ON  Punctuation: Other punctuation, Common, Other
+U+002B  ES  Symbol: Mathematical symbol, Common, Other
+U+002C  CS  Punctuation: Other punctuation, Common, Other
+U+002D  ES  Punctuation: Dash punctuation, Common, Other
+U+002E  CS  Punctuation: Other punctuation, Common, Other
+U+002F  CS  Punctuation: Other punctuation, Common, Other
 findprop 30 31 32 33 34 35 36 37 38 39 3a 3b 3c 3d 3e 3f 
-U+0030 Number: Decimal number, Common, Other
-U+0031 Number: Decimal number, Common, Other
-U+0032 Number: Decimal number, Common, Other
-U+0033 Number: Decimal number, Common, Other
-U+0034 Number: Decimal number, Common, Other
-U+0035 Number: Decimal number, Common, Other
-U+0036 Number: Decimal number, Common, Other
-U+0037 Number: Decimal number, Common, Other
-U+0038 Number: Decimal number, Common, Other
-U+0039 Number: Decimal number, Common, Other
-U+003A Punctuation: Other punctuation, Common, Other
-U+003B Punctuation: Other punctuation, Common, Other
-U+003C Symbol: Mathematical symbol, Common, Other
-U+003D Symbol: Mathematical symbol, Common, Other
-U+003E Symbol: Mathematical symbol, Common, Other
-U+003F Punctuation: Other punctuation, Common, Other
+U+0030  EN  Number: Decimal number, Common, Other
+U+0031  EN  Number: Decimal number, Common, Other
+U+0032  EN  Number: Decimal number, Common, Other
+U+0033  EN  Number: Decimal number, Common, Other
+U+0034  EN  Number: Decimal number, Common, Other
+U+0035  EN  Number: Decimal number, Common, Other
+U+0036  EN  Number: Decimal number, Common, Other
+U+0037  EN  Number: Decimal number, Common, Other
+U+0038  EN  Number: Decimal number, Common, Other
+U+0039  EN  Number: Decimal number, Common, Other
+U+003A  CS  Punctuation: Other punctuation, Common, Other
+U+003B  ON  Punctuation: Other punctuation, Common, Other
+U+003C  ON  Symbol: Mathematical symbol, Common, Other
+U+003D  ON  Symbol: Mathematical symbol, Common, Other
+U+003E  ON  Symbol: Mathematical symbol, Common, Other
+U+003F  ON  Punctuation: Other punctuation, Common, Other
 findprop 40 41 42 43 44 45 46 47 48 49 4a 4b 4c 4d 4e 4f 
-U+0040 Punctuation: Other punctuation, Common, Other
-U+0041 Letter: Upper case letter, Latin, Other, U+0061
-U+0042 Letter: Upper case letter, Latin, Other, U+0062
-U+0043 Letter: Upper case letter, Latin, Other, U+0063
-U+0044 Letter: Upper case letter, Latin, Other, U+0064
-U+0045 Letter: Upper case letter, Latin, Other, U+0065
-U+0046 Letter: Upper case letter, Latin, Other, U+0066
-U+0047 Letter: Upper case letter, Latin, Other, U+0067
-U+0048 Letter: Upper case letter, Latin, Other, U+0068
-U+0049 Letter: Upper case letter, Latin, Other, U+0069
-U+004A Letter: Upper case letter, Latin, Other, U+006A
-U+004B Letter: Upper case letter, Latin, Other, U+006B, U+212A
-U+004C Letter: Upper case letter, Latin, Other, U+006C
-U+004D Letter: Upper case letter, Latin, Other, U+006D
-U+004E Letter: Upper case letter, Latin, Other, U+006E
-U+004F Letter: Upper case letter, Latin, Other, U+006F
+U+0040  ON  Punctuation: Other punctuation, Common, Other
+U+0041  L   Letter: Upper case letter, Latin, Other, U+0061
+U+0042  L   Letter: Upper case letter, Latin, Other, U+0062
+U+0043  L   Letter: Upper case letter, Latin, Other, U+0063
+U+0044  L   Letter: Upper case letter, Latin, Other, U+0064
+U+0045  L   Letter: Upper case letter, Latin, Other, U+0065
+U+0046  L   Letter: Upper case letter, Latin, Other, U+0066
+U+0047  L   Letter: Upper case letter, Latin, Other, U+0067
+U+0048  L   Letter: Upper case letter, Latin, Other, U+0068
+U+0049  L   Letter: Upper case letter, Latin, Other, U+0069
+U+004A  L   Letter: Upper case letter, Latin, Other, U+006A
+U+004B  L   Letter: Upper case letter, Latin, Other, U+006B, U+212A
+U+004C  L   Letter: Upper case letter, Latin, Other, U+006C
+U+004D  L   Letter: Upper case letter, Latin, Other, U+006D
+U+004E  L   Letter: Upper case letter, Latin, Other, U+006E
+U+004F  L   Letter: Upper case letter, Latin, Other, U+006F
 findprop 50 51 52 53 54 55 56 57 58 59 5a 5b 5c 5d 5e 5f 
-U+0050 Letter: Upper case letter, Latin, Other, U+0070
-U+0051 Letter: Upper case letter, Latin, Other, U+0071
-U+0052 Letter: Upper case letter, Latin, Other, U+0072
-U+0053 Letter: Upper case letter, Latin, Other, U+0073, U+017F
-U+0054 Letter: Upper case letter, Latin, Other, U+0074
-U+0055 Letter: Upper case letter, Latin, Other, U+0075
-U+0056 Letter: Upper case letter, Latin, Other, U+0076
-U+0057 Letter: Upper case letter, Latin, Other, U+0077
-U+0058 Letter: Upper case letter, Latin, Other, U+0078
-U+0059 Letter: Upper case letter, Latin, Other, U+0079
-U+005A Letter: Upper case letter, Latin, Other, U+007A
-U+005B Punctuation: Open punctuation, Common, Other
-U+005C Punctuation: Other punctuation, Common, Other
-U+005D Punctuation: Close punctuation, Common, Other
-U+005E Symbol: Modifier symbol, Common, Other
-U+005F Punctuation: Connector punctuation, Common, Other
+U+0050  L   Letter: Upper case letter, Latin, Other, U+0070
+U+0051  L   Letter: Upper case letter, Latin, Other, U+0071
+U+0052  L   Letter: Upper case letter, Latin, Other, U+0072
+U+0053  L   Letter: Upper case letter, Latin, Other, U+0073, U+017F
+U+0054  L   Letter: Upper case letter, Latin, Other, U+0074
+U+0055  L   Letter: Upper case letter, Latin, Other, U+0075
+U+0056  L   Letter: Upper case letter, Latin, Other, U+0076
+U+0057  L   Letter: Upper case letter, Latin, Other, U+0077
+U+0058  L   Letter: Upper case letter, Latin, Other, U+0078
+U+0059  L   Letter: Upper case letter, Latin, Other, U+0079
+U+005A  L   Letter: Upper case letter, Latin, Other, U+007A
+U+005B  ON  Punctuation: Open punctuation, Common, Other
+U+005C  ON  Punctuation: Other punctuation, Common, Other
+U+005D  ON  Punctuation: Close punctuation, Common, Other
+U+005E  ON  Symbol: Modifier symbol, Common, Other
+U+005F  ON  Punctuation: Connector punctuation, Common, Other
 findprop 60 61 62 63 64 65 66 67 68 69 6a 6b 6c 6d 6e 6f 
-U+0060 Symbol: Modifier symbol, Common, Other
-U+0061 Letter: Lower case letter, Latin, Other, U+0041
-U+0062 Letter: Lower case letter, Latin, Other, U+0042
-U+0063 Letter: Lower case letter, Latin, Other, U+0043
-U+0064 Letter: Lower case letter, Latin, Other, U+0044
-U+0065 Letter: Lower case letter, Latin, Other, U+0045
-U+0066 Letter: Lower case letter, Latin, Other, U+0046
-U+0067 Letter: Lower case letter, Latin, Other, U+0047
-U+0068 Letter: Lower case letter, Latin, Other, U+0048
-U+0069 Letter: Lower case letter, Latin, Other, U+0049
-U+006A Letter: Lower case letter, Latin, Other, U+004A
-U+006B Letter: Lower case letter, Latin, Other, U+004B, U+212A
-U+006C Letter: Lower case letter, Latin, Other, U+004C
-U+006D Letter: Lower case letter, Latin, Other, U+004D
-U+006E Letter: Lower case letter, Latin, Other, U+004E
-U+006F Letter: Lower case letter, Latin, Other, U+004F
+U+0060  ON  Symbol: Modifier symbol, Common, Other
+U+0061  L   Letter: Lower case letter, Latin, Other, U+0041
+U+0062  L   Letter: Lower case letter, Latin, Other, U+0042
+U+0063  L   Letter: Lower case letter, Latin, Other, U+0043
+U+0064  L   Letter: Lower case letter, Latin, Other, U+0044
+U+0065  L   Letter: Lower case letter, Latin, Other, U+0045
+U+0066  L   Letter: Lower case letter, Latin, Other, U+0046
+U+0067  L   Letter: Lower case letter, Latin, Other, U+0047
+U+0068  L   Letter: Lower case letter, Latin, Other, U+0048
+U+0069  L   Letter: Lower case letter, Latin, Other, U+0049
+U+006A  L   Letter: Lower case letter, Latin, Other, U+004A
+U+006B  L   Letter: Lower case letter, Latin, Other, U+004B, U+212A
+U+006C  L   Letter: Lower case letter, Latin, Other, U+004C
+U+006D  L   Letter: Lower case letter, Latin, Other, U+004D
+U+006E  L   Letter: Lower case letter, Latin, Other, U+004E
+U+006F  L   Letter: Lower case letter, Latin, Other, U+004F
 findprop 70 71 72 73 74 75 76 77 78 79 7a 7b 7c 7d 7e 7f 
-U+0070 Letter: Lower case letter, Latin, Other, U+0050
-U+0071 Letter: Lower case letter, Latin, Other, U+0051
-U+0072 Letter: Lower case letter, Latin, Other, U+0052
-U+0073 Letter: Lower case letter, Latin, Other, U+0053, U+017F
-U+0074 Letter: Lower case letter, Latin, Other, U+0054
-U+0075 Letter: Lower case letter, Latin, Other, U+0055
-U+0076 Letter: Lower case letter, Latin, Other, U+0056
-U+0077 Letter: Lower case letter, Latin, Other, U+0057
-U+0078 Letter: Lower case letter, Latin, Other, U+0058
-U+0079 Letter: Lower case letter, Latin, Other, U+0059
-U+007A Letter: Lower case letter, Latin, Other, U+005A
-U+007B Punctuation: Open punctuation, Common, Other
-U+007C Symbol: Mathematical symbol, Common, Other
-U+007D Punctuation: Close punctuation, Common, Other
-U+007E Symbol: Mathematical symbol, Common, Other
-U+007F Control: Control, Common, Control
+U+0070  L   Letter: Lower case letter, Latin, Other, U+0050
+U+0071  L   Letter: Lower case letter, Latin, Other, U+0051
+U+0072  L   Letter: Lower case letter, Latin, Other, U+0052
+U+0073  L   Letter: Lower case letter, Latin, Other, U+0053, U+017F
+U+0074  L   Letter: Lower case letter, Latin, Other, U+0054
+U+0075  L   Letter: Lower case letter, Latin, Other, U+0055
+U+0076  L   Letter: Lower case letter, Latin, Other, U+0056
+U+0077  L   Letter: Lower case letter, Latin, Other, U+0057
+U+0078  L   Letter: Lower case letter, Latin, Other, U+0058
+U+0079  L   Letter: Lower case letter, Latin, Other, U+0059
+U+007A  L   Letter: Lower case letter, Latin, Other, U+005A
+U+007B  ON  Punctuation: Open punctuation, Common, Other
+U+007C  ON  Symbol: Mathematical symbol, Common, Other
+U+007D  ON  Punctuation: Close punctuation, Common, Other
+U+007E  ON  Symbol: Mathematical symbol, Common, Other
+U+007F  BN  Control: Control, Common, Control
 
 findprop 80 81 82 83 84 85 86 87 88 89 8a 8b 8c 8d 8e 8f 
-U+0080 Control: Control, Common, Control
-U+0081 Control: Control, Common, Control
-U+0082 Control: Control, Common, Control
-U+0083 Control: Control, Common, Control
-U+0084 Control: Control, Common, Control
-U+0085 Control: Control, Common, Control
-U+0086 Control: Control, Common, Control
-U+0087 Control: Control, Common, Control
-U+0088 Control: Control, Common, Control
-U+0089 Control: Control, Common, Control
-U+008A Control: Control, Common, Control
-U+008B Control: Control, Common, Control
-U+008C Control: Control, Common, Control
-U+008D Control: Control, Common, Control
-U+008E Control: Control, Common, Control
-U+008F Control: Control, Common, Control
+U+0080  BN  Control: Control, Common, Control
+U+0081  BN  Control: Control, Common, Control
+U+0082  BN  Control: Control, Common, Control
+U+0083  BN  Control: Control, Common, Control
+U+0084  BN  Control: Control, Common, Control
+U+0085  B   Control: Control, Common, Control
+U+0086  BN  Control: Control, Common, Control
+U+0087  BN  Control: Control, Common, Control
+U+0088  BN  Control: Control, Common, Control
+U+0089  BN  Control: Control, Common, Control
+U+008A  BN  Control: Control, Common, Control
+U+008B  BN  Control: Control, Common, Control
+U+008C  BN  Control: Control, Common, Control
+U+008D  BN  Control: Control, Common, Control
+U+008E  BN  Control: Control, Common, Control
+U+008F  BN  Control: Control, Common, Control
 findprop 90 91 92 93 94 95 96 97 98 99 9a 9b 9c 9d 9e 9f 
-U+0090 Control: Control, Common, Control
-U+0091 Control: Control, Common, Control
-U+0092 Control: Control, Common, Control
-U+0093 Control: Control, Common, Control
-U+0094 Control: Control, Common, Control
-U+0095 Control: Control, Common, Control
-U+0096 Control: Control, Common, Control
-U+0097 Control: Control, Common, Control
-U+0098 Control: Control, Common, Control
-U+0099 Control: Control, Common, Control
-U+009A Control: Control, Common, Control
-U+009B Control: Control, Common, Control
-U+009C Control: Control, Common, Control
-U+009D Control: Control, Common, Control
-U+009E Control: Control, Common, Control
-U+009F Control: Control, Common, Control
+U+0090  BN  Control: Control, Common, Control
+U+0091  BN  Control: Control, Common, Control
+U+0092  BN  Control: Control, Common, Control
+U+0093  BN  Control: Control, Common, Control
+U+0094  BN  Control: Control, Common, Control
+U+0095  BN  Control: Control, Common, Control
+U+0096  BN  Control: Control, Common, Control
+U+0097  BN  Control: Control, Common, Control
+U+0098  BN  Control: Control, Common, Control
+U+0099  BN  Control: Control, Common, Control
+U+009A  BN  Control: Control, Common, Control
+U+009B  BN  Control: Control, Common, Control
+U+009C  BN  Control: Control, Common, Control
+U+009D  BN  Control: Control, Common, Control
+U+009E  BN  Control: Control, Common, Control
+U+009F  BN  Control: Control, Common, Control
 findprop a0 a1 a2 a3 a4 a5 a6 a7 a8 a9 aa ab ac ad ae af 
-U+00A0 Separator: Space separator, Common, Other
-U+00A1 Punctuation: Other punctuation, Common, Other
-U+00A2 Symbol: Currency symbol, Common, Other
-U+00A3 Symbol: Currency symbol, Common, Other
-U+00A4 Symbol: Currency symbol, Common, Other
-U+00A5 Symbol: Currency symbol, Common, Other
-U+00A6 Symbol: Other symbol, Common, Other
-U+00A7 Punctuation: Other punctuation, Common, Other
-U+00A8 Symbol: Modifier symbol, Common, Other
-U+00A9 Symbol: Other symbol, Common, Extended Pictographic
-U+00AA Letter: Other letter, Latin, Other
-U+00AB Punctuation: Initial punctuation, Common, Other
-U+00AC Symbol: Mathematical symbol, Common, Other
-U+00AD Control: Format, Common, Control
-U+00AE Symbol: Other symbol, Common, Extended Pictographic
-U+00AF Symbol: Modifier symbol, Common, Other
+U+00A0  CS  Separator: Space separator, Common, Other
+U+00A1  ON  Punctuation: Other punctuation, Common, Other
+U+00A2  ET  Symbol: Currency symbol, Common, Other
+U+00A3  ET  Symbol: Currency symbol, Common, Other
+U+00A4  ET  Symbol: Currency symbol, Common, Other
+U+00A5  ET  Symbol: Currency symbol, Common, Other
+U+00A6  ON  Symbol: Other symbol, Common, Other
+U+00A7  ON  Punctuation: Other punctuation, Common, Other
+U+00A8  ON  Symbol: Modifier symbol, Common, Other
+U+00A9  ON  Symbol: Other symbol, Common, Extended Pictographic
+U+00AA  L   Letter: Other letter, Latin, Other
+U+00AB  ON  Punctuation: Initial punctuation, Common, Other
+U+00AC  ON  Symbol: Mathematical symbol, Common, Other
+U+00AD  BN  Control: Format, Common, Control
+U+00AE  ON  Symbol: Other symbol, Common, Extended Pictographic
+U+00AF  ON  Symbol: Modifier symbol, Common, Other
 findprop b0 b1 b2 b3 b4 b5 b6 b7 b8 b9 ba bb bc bd be bf 
-U+00B0 Symbol: Other symbol, Common, Other
-U+00B1 Symbol: Mathematical symbol, Common, Other
-U+00B2 Number: Other number, Common, Other
-U+00B3 Number: Other number, Common, Other
-U+00B4 Symbol: Modifier symbol, Common, Other
-U+00B5 Letter: Lower case letter, Common, Other, U+03BC, U+039C
-U+00B6 Punctuation: Other punctuation, Common, Other
-U+00B7 Punctuation: Other punctuation, Common, Other
-U+00B8 Symbol: Modifier symbol, Common, Other
-U+00B9 Number: Other number, Common, Other
-U+00BA Letter: Other letter, Latin, Other
-U+00BB Punctuation: Final punctuation, Common, Other
-U+00BC Number: Other number, Common, Other
-U+00BD Number: Other number, Common, Other
-U+00BE Number: Other number, Common, Other
-U+00BF Punctuation: Other punctuation, Common, Other
+U+00B0  ET  Symbol: Other symbol, Common, Other
+U+00B1  ET  Symbol: Mathematical symbol, Common, Other
+U+00B2  EN  Number: Other number, Common, Other
+U+00B3  EN  Number: Other number, Common, Other
+U+00B4  ON  Symbol: Modifier symbol, Common, Other
+U+00B5  L   Letter: Lower case letter, Common, Other, U+03BC, U+039C
+U+00B6  ON  Punctuation: Other punctuation, Common, Other
+U+00B7  ON  Punctuation: Other punctuation, Common, Other
+U+00B8  ON  Symbol: Modifier symbol, Common, Other
+U+00B9  EN  Number: Other number, Common, Other
+U+00BA  L   Letter: Other letter, Latin, Other
+U+00BB  ON  Punctuation: Final punctuation, Common, Other
+U+00BC  ON  Number: Other number, Common, Other
+U+00BD  ON  Number: Other number, Common, Other
+U+00BE  ON  Number: Other number, Common, Other
+U+00BF  ON  Punctuation: Other punctuation, Common, Other
 findprop c0 c1 c2 c3 c4 c5 c6 c7 c8 c9 ca cb cc cd ce cf 
-U+00C0 Letter: Upper case letter, Latin, Other, U+00E0
-U+00C1 Letter: Upper case letter, Latin, Other, U+00E1
-U+00C2 Letter: Upper case letter, Latin, Other, U+00E2
-U+00C3 Letter: Upper case letter, Latin, Other, U+00E3
-U+00C4 Letter: Upper case letter, Latin, Other, U+00E4
-U+00C5 Letter: Upper case letter, Latin, Other, U+00E5, U+212B
-U+00C6 Letter: Upper case letter, Latin, Other, U+00E6
-U+00C7 Letter: Upper case letter, Latin, Other, U+00E7
-U+00C8 Letter: Upper case letter, Latin, Other, U+00E8
-U+00C9 Letter: Upper case letter, Latin, Other, U+00E9
-U+00CA Letter: Upper case letter, Latin, Other, U+00EA
-U+00CB Letter: Upper case letter, Latin, Other, U+00EB
-U+00CC Letter: Upper case letter, Latin, Other, U+00EC
-U+00CD Letter: Upper case letter, Latin, Other, U+00ED
-U+00CE Letter: Upper case letter, Latin, Other, U+00EE
-U+00CF Letter: Upper case letter, Latin, Other, U+00EF
+U+00C0  L   Letter: Upper case letter, Latin, Other, U+00E0
+U+00C1  L   Letter: Upper case letter, Latin, Other, U+00E1
+U+00C2  L   Letter: Upper case letter, Latin, Other, U+00E2
+U+00C3  L   Letter: Upper case letter, Latin, Other, U+00E3
+U+00C4  L   Letter: Upper case letter, Latin, Other, U+00E4
+U+00C5  L   Letter: Upper case letter, Latin, Other, U+00E5, U+212B
+U+00C6  L   Letter: Upper case letter, Latin, Other, U+00E6
+U+00C7  L   Letter: Upper case letter, Latin, Other, U+00E7
+U+00C8  L   Letter: Upper case letter, Latin, Other, U+00E8
+U+00C9  L   Letter: Upper case letter, Latin, Other, U+00E9
+U+00CA  L   Letter: Upper case letter, Latin, Other, U+00EA
+U+00CB  L   Letter: Upper case letter, Latin, Other, U+00EB
+U+00CC  L   Letter: Upper case letter, Latin, Other, U+00EC
+U+00CD  L   Letter: Upper case letter, Latin, Other, U+00ED
+U+00CE  L   Letter: Upper case letter, Latin, Other, U+00EE
+U+00CF  L   Letter: Upper case letter, Latin, Other, U+00EF
 findprop d0 d1 d2 d3 d4 d5 d6 d7 d8 d9 da db dc dd de df 
-U+00D0 Letter: Upper case letter, Latin, Other, U+00F0
-U+00D1 Letter: Upper case letter, Latin, Other, U+00F1
-U+00D2 Letter: Upper case letter, Latin, Other, U+00F2
-U+00D3 Letter: Upper case letter, Latin, Other, U+00F3
-U+00D4 Letter: Upper case letter, Latin, Other, U+00F4
-U+00D5 Letter: Upper case letter, Latin, Other, U+00F5
-U+00D6 Letter: Upper case letter, Latin, Other, U+00F6
-U+00D7 Symbol: Mathematical symbol, Common, Other
-U+00D8 Letter: Upper case letter, Latin, Other, U+00F8
-U+00D9 Letter: Upper case letter, Latin, Other, U+00F9
-U+00DA Letter: Upper case letter, Latin, Other, U+00FA
-U+00DB Letter: Upper case letter, Latin, Other, U+00FB
-U+00DC Letter: Upper case letter, Latin, Other, U+00FC
-U+00DD Letter: Upper case letter, Latin, Other, U+00FD
-U+00DE Letter: Upper case letter, Latin, Other, U+00FE
-U+00DF Letter: Lower case letter, Latin, Other, U+1E9E
+U+00D0  L   Letter: Upper case letter, Latin, Other, U+00F0
+U+00D1  L   Letter: Upper case letter, Latin, Other, U+00F1
+U+00D2  L   Letter: Upper case letter, Latin, Other, U+00F2
+U+00D3  L   Letter: Upper case letter, Latin, Other, U+00F3
+U+00D4  L   Letter: Upper case letter, Latin, Other, U+00F4
+U+00D5  L   Letter: Upper case letter, Latin, Other, U+00F5
+U+00D6  L   Letter: Upper case letter, Latin, Other, U+00F6
+U+00D7  ON  Symbol: Mathematical symbol, Common, Other
+U+00D8  L   Letter: Upper case letter, Latin, Other, U+00F8
+U+00D9  L   Letter: Upper case letter, Latin, Other, U+00F9
+U+00DA  L   Letter: Upper case letter, Latin, Other, U+00FA
+U+00DB  L   Letter: Upper case letter, Latin, Other, U+00FB
+U+00DC  L   Letter: Upper case letter, Latin, Other, U+00FC
+U+00DD  L   Letter: Upper case letter, Latin, Other, U+00FD
+U+00DE  L   Letter: Upper case letter, Latin, Other, U+00FE
+U+00DF  L   Letter: Lower case letter, Latin, Other, U+1E9E
 findprop e0 e1 e2 e3 e4 e5 e6 e7 e8 e9 ea eb ec ed ee ef 
-U+00E0 Letter: Lower case letter, Latin, Other, U+00C0
-U+00E1 Letter: Lower case letter, Latin, Other, U+00C1
-U+00E2 Letter: Lower case letter, Latin, Other, U+00C2
-U+00E3 Letter: Lower case letter, Latin, Other, U+00C3
-U+00E4 Letter: Lower case letter, Latin, Other, U+00C4
-U+00E5 Letter: Lower case letter, Latin, Other, U+00C5, U+212B
-U+00E6 Letter: Lower case letter, Latin, Other, U+00C6
-U+00E7 Letter: Lower case letter, Latin, Other, U+00C7
-U+00E8 Letter: Lower case letter, Latin, Other, U+00C8
-U+00E9 Letter: Lower case letter, Latin, Other, U+00C9
-U+00EA Letter: Lower case letter, Latin, Other, U+00CA
-U+00EB Letter: Lower case letter, Latin, Other, U+00CB
-U+00EC Letter: Lower case letter, Latin, Other, U+00CC
-U+00ED Letter: Lower case letter, Latin, Other, U+00CD
-U+00EE Letter: Lower case letter, Latin, Other, U+00CE
-U+00EF Letter: Lower case letter, Latin, Other, U+00CF
+U+00E0  L   Letter: Lower case letter, Latin, Other, U+00C0
+U+00E1  L   Letter: Lower case letter, Latin, Other, U+00C1
+U+00E2  L   Letter: Lower case letter, Latin, Other, U+00C2
+U+00E3  L   Letter: Lower case letter, Latin, Other, U+00C3
+U+00E4  L   Letter: Lower case letter, Latin, Other, U+00C4
+U+00E5  L   Letter: Lower case letter, Latin, Other, U+00C5, U+212B
+U+00E6  L   Letter: Lower case letter, Latin, Other, U+00C6
+U+00E7  L   Letter: Lower case letter, Latin, Other, U+00C7
+U+00E8  L   Letter: Lower case letter, Latin, Other, U+00C8
+U+00E9  L   Letter: Lower case letter, Latin, Other, U+00C9
+U+00EA  L   Letter: Lower case letter, Latin, Other, U+00CA
+U+00EB  L   Letter: Lower case letter, Latin, Other, U+00CB
+U+00EC  L   Letter: Lower case letter, Latin, Other, U+00CC
+U+00ED  L   Letter: Lower case letter, Latin, Other, U+00CD
+U+00EE  L   Letter: Lower case letter, Latin, Other, U+00CE
+U+00EF  L   Letter: Lower case letter, Latin, Other, U+00CF
 findprop f0 f1 f2 f3 f4 f5 f6 f7 f8 f9 fa fb fc fd fe ff 
-U+00F0 Letter: Lower case letter, Latin, Other, U+00D0
-U+00F1 Letter: Lower case letter, Latin, Other, U+00D1
-U+00F2 Letter: Lower case letter, Latin, Other, U+00D2
-U+00F3 Letter: Lower case letter, Latin, Other, U+00D3
-U+00F4 Letter: Lower case letter, Latin, Other, U+00D4
-U+00F5 Letter: Lower case letter, Latin, Other, U+00D5
-U+00F6 Letter: Lower case letter, Latin, Other, U+00D6
-U+00F7 Symbol: Mathematical symbol, Common, Other
-U+00F8 Letter: Lower case letter, Latin, Other, U+00D8
-U+00F9 Letter: Lower case letter, Latin, Other, U+00D9
-U+00FA Letter: Lower case letter, Latin, Other, U+00DA
-U+00FB Letter: Lower case letter, Latin, Other, U+00DB
-U+00FC Letter: Lower case letter, Latin, Other, U+00DC
-U+00FD Letter: Lower case letter, Latin, Other, U+00DD
-U+00FE Letter: Lower case letter, Latin, Other, U+00DE
-U+00FF Letter: Lower case letter, Latin, Other, U+0178
+U+00F0  L   Letter: Lower case letter, Latin, Other, U+00D0
+U+00F1  L   Letter: Lower case letter, Latin, Other, U+00D1
+U+00F2  L   Letter: Lower case letter, Latin, Other, U+00D2
+U+00F3  L   Letter: Lower case letter, Latin, Other, U+00D3
+U+00F4  L   Letter: Lower case letter, Latin, Other, U+00D4
+U+00F5  L   Letter: Lower case letter, Latin, Other, U+00D5
+U+00F6  L   Letter: Lower case letter, Latin, Other, U+00D6
+U+00F7  ON  Symbol: Mathematical symbol, Common, Other
+U+00F8  L   Letter: Lower case letter, Latin, Other, U+00D8
+U+00F9  L   Letter: Lower case letter, Latin, Other, U+00D9
+U+00FA  L   Letter: Lower case letter, Latin, Other, U+00DA
+U+00FB  L   Letter: Lower case letter, Latin, Other, U+00DB
+U+00FC  L   Letter: Lower case letter, Latin, Other, U+00DC
+U+00FD  L   Letter: Lower case letter, Latin, Other, U+00DD
+U+00FE  L   Letter: Lower case letter, Latin, Other, U+00DE
+U+00FF  L   Letter: Lower case letter, Latin, Other, U+0178
 
 findprop 0100 0101 0102 0103 0104 0105 0106
-U+0100 Letter: Upper case letter, Latin, Other, U+0101
-U+0101 Letter: Lower case letter, Latin, Other, U+0100
-U+0102 Letter: Upper case letter, Latin, Other, U+0103
-U+0103 Letter: Lower case letter, Latin, Other, U+0102
-U+0104 Letter: Upper case letter, Latin, Other, U+0105
-U+0105 Letter: Lower case letter, Latin, Other, U+0104
-U+0106 Letter: Upper case letter, Latin, Other, U+0107
+U+0100  L   Letter: Upper case letter, Latin, Other, U+0101
+U+0101  L   Letter: Lower case letter, Latin, Other, U+0100
+U+0102  L   Letter: Upper case letter, Latin, Other, U+0103
+U+0103  L   Letter: Lower case letter, Latin, Other, U+0102
+U+0104  L   Letter: Upper case letter, Latin, Other, U+0105
+U+0105  L   Letter: Lower case letter, Latin, Other, U+0104
+U+0106  L   Letter: Upper case letter, Latin, Other, U+0107
 
 findprop ffe0 ffe1 ffe2 ffe3 ffe4 ffe5 ffe6 ffe7 
-U+FFE0 Symbol: Currency symbol, Common, Other
-U+FFE1 Symbol: Currency symbol, Common, Other
-U+FFE2 Symbol: Mathematical symbol, Common, Other
-U+FFE3 Symbol: Modifier symbol, Common, Other
-U+FFE4 Symbol: Other symbol, Common, Other
-U+FFE5 Symbol: Currency symbol, Common, Other
-U+FFE6 Symbol: Currency symbol, Common, Other
-U+FFE7 Control: Unassigned, Unknown, Other
+U+FFE0  ET  Symbol: Currency symbol, Common, Other
+U+FFE1  ET  Symbol: Currency symbol, Common, Other
+U+FFE2  ON  Symbol: Mathematical symbol, Common, Other
+U+FFE3  ON  Symbol: Modifier symbol, Common, Other
+U+FFE4  ON  Symbol: Other symbol, Common, Other
+U+FFE5  ET  Symbol: Currency symbol, Common, Other
+U+FFE6  ET  Symbol: Currency symbol, Common, Other
+U+FFE7  L   Control: Unassigned, Unknown, Other
 findprop ffe8 ffe9 ffea ffeb ffec ffed ffee ffef
-U+FFE8 Symbol: Other symbol, Common, Other
-U+FFE9 Symbol: Mathematical symbol, Common, Other
-U+FFEA Symbol: Mathematical symbol, Common, Other
-U+FFEB Symbol: Mathematical symbol, Common, Other
-U+FFEC Symbol: Mathematical symbol, Common, Other
-U+FFED Symbol: Other symbol, Common, Other
-U+FFEE Symbol: Other symbol, Common, Other
-U+FFEF Control: Unassigned, Unknown, Other
+U+FFE8  ON  Symbol: Other symbol, Common, Other
+U+FFE9  ON  Symbol: Mathematical symbol, Common, Other
+U+FFEA  ON  Symbol: Mathematical symbol, Common, Other
+U+FFEB  ON  Symbol: Mathematical symbol, Common, Other
+U+FFEC  ON  Symbol: Mathematical symbol, Common, Other
+U+FFED  ON  Symbol: Other symbol, Common, Other
+U+FFEE  ON  Symbol: Other symbol, Common, Other
+U+FFEF  L   Control: Unassigned, Unknown, Other
 findprop fff8 fff9 fffa fffb fffc fffd fffe ffff
-U+FFF8 Control: Unassigned, Unknown, Control
-U+FFF9 Control: Format, Common, Control
-U+FFFA Control: Format, Common, Control
-U+FFFB Control: Format, Common, Control
-U+FFFC Symbol: Other symbol, Common, Other
-U+FFFD Symbol: Other symbol, Common, Other
-U+FFFE Control: Unassigned, Unknown, Other
-U+FFFF Control: Unassigned, Unknown, Other
+U+FFF8  BN  Control: Unassigned, Unknown, Control
+U+FFF9  ON  Control: Format, Common, Control
+U+FFFA  ON  Control: Format, Common, Control
+U+FFFB  ON  Control: Format, Common, Control
+U+FFFC  ON  Symbol: Other symbol, Common, Other
+U+FFFD  ON  Symbol: Other symbol, Common, Other
+U+FFFE  BN  Control: Unassigned, Unknown, Other
+U+FFFF  BN  Control: Unassigned, Unknown, Other
 findprop 10000 10001 e01ef f0000 100000
-U+10000 Letter: Other letter, Linear_B, Other
-U+10001 Letter: Other letter, Linear_B, Other
-U+E01EF Mark: Non-spacing mark, Inherited, Extend
-U+F0000 Control: Private use, Unknown, Other
-U+100000 Control: Private use, Unknown, Other
+U+10000  L   Letter: Other letter, Linear_B, Other
+U+10001  L   Letter: Other letter, Linear_B, Other
+U+E01EF  NSM Mark: Non-spacing mark, Inherited, Extend
+U+F0000  L   Control: Private use, Unknown, Other
+U+100000  L   Control: Private use, Unknown, Other
 
 findprop 1b00 12000 7c0 a840 10900
-U+1B00 Mark: Non-spacing mark, Balinese, Extend
-U+12000 Letter: Other letter, Cuneiform, Other
-U+07C0 Number: Decimal number, Nko, Other
-U+A840 Letter: Other letter, Phags_Pa, Other
-U+10900 Letter: Other letter, Phoenician, Other
+U+1B00  NSM Mark: Non-spacing mark, Balinese, Extend
+U+12000  L   Letter: Other letter, Cuneiform, Other
+U+07C0  R   Number: Decimal number, Nko, Other
+U+A840  L   Letter: Other letter, Phags_Pa, Other
+U+10900  R   Letter: Other letter, Phoenician, Other
 findprop 1d79 a77d
-U+1D79 Letter: Lower case letter, Latin, Other, U+A77D
-U+A77D Letter: Upper case letter, Latin, Other, U+1D79
+U+1D79  L   Letter: Lower case letter, Latin, Other, U+A77D
+U+A77D  L   Letter: Upper case letter, Latin, Other, U+1D79
 
 findprop  0800  083e  a4d0  a4f7  aa80  aadf
-U+0800 Letter: Other letter, Samaritan, Other
-U+083E Punctuation: Other punctuation, Samaritan, Other
-U+A4D0 Letter: Other letter, Lisu, Other
-U+A4F7 Letter: Other letter, Lisu, Other
-U+AA80 Letter: Other letter, Tai_Viet, Other
-U+AADF Punctuation: Other punctuation, Tai_Viet, Other
+U+0800  R   Letter: Other letter, Samaritan, Other
+U+083E  R   Punctuation: Other punctuation, Samaritan, Other
+U+A4D0  L   Letter: Other letter, Lisu, Other
+U+A4F7  L   Letter: Other letter, Lisu, Other
+U+AA80  L   Letter: Other letter, Tai_Viet, Other
+U+AADF  L   Punctuation: Other punctuation, Tai_Viet, Other
 findprop 10b00 10b35 13000 1342e 10840 10855
-U+10B00 Letter: Other letter, Avestan, Other
-U+10B35 Letter: Other letter, Avestan, Other
-U+13000 Letter: Other letter, Egyptian_Hieroglyphs, Other
-U+1342E Letter: Other letter, Egyptian_Hieroglyphs, Other
-U+10840 Letter: Other letter, Imperial_Aramaic, Other
-U+10855 Letter: Other letter, Imperial_Aramaic, Other
+U+10B00  R   Letter: Other letter, Avestan, Other
+U+10B35  R   Letter: Other letter, Avestan, Other
+U+13000  L   Letter: Other letter, Egyptian_Hieroglyphs, Other
+U+1342E  L   Letter: Other letter, Egyptian_Hieroglyphs, Other
+U+10840  R   Letter: Other letter, Imperial_Aramaic, Other
+U+10855  R   Letter: Other letter, Imperial_Aramaic, Other
 
 findprop 11100 1113c 11680 116c0
-U+11100 Mark: Non-spacing mark, Chakma, Extend
-U+1113C Number: Decimal number, Chakma, Other
-U+11680 Letter: Other letter, Takri, Other
-U+116C0 Number: Decimal number, Takri, Other
+U+11100  NSM Mark: Non-spacing mark, Chakma, Extend
+U+1113C  L   Number: Decimal number, Chakma, Other
+U+11680  L   Letter: Other letter, Takri, Other
+U+116C0  L   Number: Decimal number, Takri, Other
 
 findprop 0d 0a 0e 0711 1b04 1111 1169 11fe ae4c ad89
-U+000D Control: Control, Common, CR
-U+000A Control: Control, Common, LF
-U+000E Control: Control, Common, Control
-U+0711 Mark: Non-spacing mark, Syriac, Extend
-U+1B04 Mark: Spacing mark, Balinese, SpacingMark
-U+1111 Letter: Other letter, Hangul, Hangul syllable type L
-U+1169 Letter: Other letter, Hangul, Hangul syllable type V
-U+11FE Letter: Other letter, Hangul, Hangul syllable type T
-U+AE4C Letter: Other letter, Hangul, Hangul syllable type LV
-U+AD89 Letter: Other letter, Hangul, Hangul syllable type LVT
+U+000D  B   Control: Control, Common, CR
+U+000A  B   Control: Control, Common, LF
+U+000E  BN  Control: Control, Common, Control
+U+0711  NSM Mark: Non-spacing mark, Syriac, Extend
+U+1B04  L   Mark: Spacing mark, Balinese, SpacingMark
+U+1111  L   Letter: Other letter, Hangul, Hangul syllable type L
+U+1169  L   Letter: Other letter, Hangul, Hangul syllable type V
+U+11FE  L   Letter: Other letter, Hangul, Hangul syllable type T
+U+AE4C  L   Letter: Other letter, Hangul, Hangul syllable type LV
+U+AD89  L   Letter: Other letter, Hangul, Hangul syllable type LVT
 
 findprop 118a0 11ac7 16ad0
-U+118A0 Letter: Upper case letter, Warang_Citi, Other, U+118C0
-U+11AC7 Letter: Other letter, Pau_Cin_Hau, Other
-U+16AD0 Letter: Other letter, Bassa_Vah, Other
+U+118A0  L   Letter: Upper case letter, Warang_Citi, Other, U+118C0
+U+11AC7  L   Letter: Other letter, Pau_Cin_Hau, Other
+U+16AD0  L   Letter: Other letter, Bassa_Vah, Other
 
 findprop 11700 14400 108e0 11280 1d800
-U+11700 Letter: Other letter, Ahom, Other
-U+14400 Letter: Other letter, Anatolian_Hieroglyphs, Other
-U+108E0 Letter: Other letter, Hatran, Other
-U+11280 Letter: Other letter, Multani, Other
-U+1D800 Symbol: Other symbol, SignWriting, Other
+U+11700  L   Letter: Other letter, Ahom, Other
+U+14400  L   Letter: Other letter, Anatolian_Hieroglyphs, Other
+U+108E0  R   Letter: Other letter, Hatran, Other
+U+11280  L   Letter: Other letter, Multani, Other
+U+1D800  L   Symbol: Other symbol, SignWriting, Other
 
 findprop 11800 1e903 11da9 10d27 11ee0 16e48 10f27 10f30
-U+11800 Letter: Other letter, Dogra, Other
-U+1E903 Letter: Upper case letter, Adlam, Other, U+1E925
-U+11DA9 Number: Decimal number, Gunjala_Gondi, Other
-U+10D27 Mark: Non-spacing mark, Hanifi_Rohingya, Extend
-U+11EE0 Letter: Other letter, Makasar, Other
-U+16E48 Letter: Upper case letter, Medefaidrin, Other, U+16E68
-U+10F27 Letter: Other letter, Old_Sogdian, Other
-U+10F30 Letter: Other letter, Sogdian, Other
+U+11800  L   Letter: Other letter, Dogra, Other
+U+1E903  R   Letter: Upper case letter, Adlam, Other, U+1E925
+U+11DA9  L   Number: Decimal number, Gunjala_Gondi, Other
+U+10D27  NSM Mark: Non-spacing mark, Hanifi_Rohingya, Extend
+U+11EE0  L   Letter: Other letter, Makasar, Other
+U+16E48  L   Letter: Upper case letter, Medefaidrin, Other, U+16E68
+U+10F27  R   Letter: Other letter, Old_Sogdian, Other
+U+10F30  AL  Letter: Other letter, Sogdian, Other
 
 findprop  a836  a833  1cf4  20f0  1cd0
-U+A836 Symbol: Other symbol, Common, Other, [Devanagari, Dogra, Gujarati, Gurmukhi, Khojki, Kaithi, Mahajani, Modi, Khudawadi, Takri, Tirhuta]
-U+A833 Number: Other number, Common, Other, [Devanagari, Dogra, Gujarati, Gurmukhi, Khojki, Kannada, Kaithi, Mahajani, Modi, Nandinagari, Khudawadi, Takri, Tirhuta]
-U+1CF4 Mark: Non-spacing mark, Inherited, Extend, [Devanagari, Grantha, Kannada]
-U+20F0 Mark: Non-spacing mark, Inherited, Extend, [Devanagari, Grantha, Latin]
-U+1CD0 Mark: Non-spacing mark, Inherited, Extend, [Bengali, Devanagari, Grantha, Kannada]
+U+A836  L   Symbol: Other symbol, Common, Other, [Devanagari, Dogra, Gujarati, Gurmukhi, Khojki, Kaithi, Mahajani, Modi, Khudawadi, Takri, Tirhuta]
+U+A833  L   Number: Other number, Common, Other, [Devanagari, Dogra, Gujarati, Gurmukhi, Khojki, Kannada, Kaithi, Mahajani, Modi, Nandinagari, Khudawadi, Takri, Tirhuta]
+U+1CF4  NSM Mark: Non-spacing mark, Inherited, Extend, [Devanagari, Grantha, Kannada]
+U+20F0  NSM Mark: Non-spacing mark, Inherited, Extend, [Devanagari, Grantha, Latin]
+U+1CD0  NSM Mark: Non-spacing mark, Inherited, Extend, [Bengali, Devanagari, Grantha, Kannada]
 
 findprop 32ff
-U+32FF Symbol: Other symbol, Common, Other, [Han]
+U+32FF  L   Symbol: Other symbol, Common, Other, [Han]
 
 findprop 1f16d
-U+1F16D Symbol: Other symbol, Common, Extended Pictographic
+U+1F16D  ON  Symbol: Other symbol, Common, Extended Pictographic
 
 findprop U+10e93 U+10eaa
-U+10E93 Letter: Other letter, Yezidi, Other
-U+10EAA Control: Unassigned, Unknown, Other
+U+10E93  R   Letter: Other letter, Yezidi, Other
+U+10EAA  R   Control: Unassigned, Unknown, Other
+
+findprop 0602 202a 202b 202c 2068 2069 202d 202e 2067
+U+0602  AN  Control: Format, Arabic, Prepend
+U+202A *LRE Control: Format, Common, Control
+U+202B *RLE Control: Format, Common, Control
+U+202C *PDF Control: Format, Common, Control
+U+2068 *FSI Control: Format, Common, Control
+U+2069 *PDI Control: Format, Common, Control
+U+202D *LRO Control: Format, Common, Control
+U+202E *RLO Control: Format, Common, Control
+U+2067 *RLI Control: Format, Common, Control
