@@ -1,4 +1,4 @@
-.TH PCRE2BUILD 3 "20 March 2020" "PCRE2 10.35"
+.TH PCRE2BUILD 3 "08 December 2021" "PCRE2 10.40"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .
@@ -122,8 +122,9 @@ locked this out by setting PCRE2_NEVER_UTF.
 UTF support allows the libraries to process character code points up to
 0x10ffff in the strings that they handle. Unicode support also gives access to
 the Unicode properties of characters, using pattern escapes such as \eP, \ep,
-and \eX. Only the general category properties such as \fILu\fP and \fINd\fP are
-supported. Details are given in the
+and \eX. Only the general category properties such as \fILu\fP and \fINd\fP,
+script names, and some bi-directional properties are supported. Details are
+given in the
 .\" HREF
 \fBpcre2pattern\fP
 .\"
@@ -633,6 +634,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 20 March 2020
-Copyright (c) 1997-2020 University of Cambridge.
+Last updated: 08 December 2021
+Copyright (c) 1997-2021 University of Cambridge.
 .fi

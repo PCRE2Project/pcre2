@@ -39,6 +39,8 @@ pcre2_substitute(), and the replacement argument of the latter, if the pointer
 is NULL and the length is zero, treat as an empty string. Apparently a number 
 of applications treat NULL/0 in this way.
 
+14. Added support for Bidi_Class and Bidi_Control Unicode properties.
+
 
 Version 10.39 29-October-2021
 -----------------------------

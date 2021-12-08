@@ -1,4 +1,4 @@
-.TH PCRE2SYNTAX 3 "30 August 2021" "PCRE2 10.38"
+.TH PCRE2SYNTAX 3 "08 December 2021" "PCRE2 10.40"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION SYNTAX SUMMARY"
@@ -331,6 +331,39 @@ Warang_Citi,
 Yezidi,
 Yi,
 Zanabazar_Square.
+.
+.
+.SH "BIDI_PROPERTIES FOR \ep AND \eP"
+.rs
+.sp
+  \ep{Bidi_Control}         matches a Bidi control character
+  \ep{Bidi_Class:<class>}   matches a character with the given class
+.sp
+The recognized classes are:
+.sp
+  AL          Arabic letter
+  AN          Arabic number
+  B           paragraph separator
+  BN          boundary neutral
+  CS          common separator
+  EN          European number
+  ES          European separator
+  ET          European terminator
+  FSI         first strong isolate
+  L           left-to-right            
+  LRE         left-to-right embedding
+  LRI         left-to-right isolate
+  LRO         left-to-right override
+  NSM         non-spacing mark
+  ON          other neutral
+  PDF         pop directional format
+  PDI         pop directional isolate
+  R           right-to-left
+  RLE         right-to-left embedding
+  RLI         right-to-left isolate
+  RLO         right-to-left override
+  S           segment separator
+  WS          which space             
 .
 .
 .SH "CHARACTER CLASSES"
@@ -684,6 +717,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 30 August 2021
+Last updated: 08 December 2021
 Copyright (c) 1997-2021 University of Cambridge.
 .fi

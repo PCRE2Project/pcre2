@@ -783,11 +783,13 @@ escape sequences are:
   \P{<i>xx</i>}   a character without the <i>xx</i> property
   \X       a Unicode extended grapheme cluster
 </pre>
-The property names represented by <i>xx</i> above are case-sensitive. There is
-support for Unicode script names, Unicode general category properties, "Any",
-which matches any character (including newline), and some special PCRE2
-properties (described in the
-<a href="#extraprops">next section).</a>
+The property names represented by <i>xx</i> above are not case-sensitive, and in 
+accordance with Unicode's "loose matching" rules, spaces, hyphens, and
+underscores are ignored. There is support for Unicode script names, Unicode
+general category properties, "Any", which matches any character (including
+newline), Bidi_Control, Bidi_Class, and some special PCRE2 properties
+(described
+<a href="#extraprops">below).</a>
 Other Perl properties such as "InMusicalSymbols" are not supported by PCRE2.
 Note that \P{Any} does not match any characters, so always causes a match
 failure.
@@ -1030,9 +1032,9 @@ The following general category property codes are supported:
   Zp    Paragraph separator
   Zs    Space separator
 </pre>
-The special property L& is also supported: it matches a character that has
-the Lu, Ll, or Lt property, in other words, a letter that is not classified as
-a modifier or "other".
+The special property LC, which has the synonym L&, is also supported: it
+matches a character that has the Lu, Ll, or Lt property, in other words, a
+letter that is not classified as a modifier or "other".
 </P>
 <P>
 The Cs (Surrogate) property applies only to characters whose code points are in
@@ -1065,6 +1067,45 @@ multistage table lookup in order to find a character's property. That is why
 the traditional escape sequences such as \d and \w do not use Unicode
 properties in PCRE2 by default, though you can make them do so by setting the
 PCRE2_UCP option or by starting the pattern with (*UCP).
+</P>
+<br><b>
+Bi-directional properties for \p and \P
+</b><br>
+<P>
+Two properties relating to bi-directional text are supported:
+<pre>
+  \p{Bidi_Control}         matches a Bidi control character
+  \p{Bidi_Class:&#60;class&#62;}   matches a character with the given class
+</pre>
+The recognized classes are:
+<pre>
+  AL          Arabic letter
+  AN          Arabic number
+  B           paragraph separator
+  BN          boundary neutral
+  CS          common separator
+  EN          European number
+  ES          European separator
+  ET          European terminator
+  FSI         first strong isolate
+  L           left-to-right            
+  LRE         left-to-right embedding
+  LRI         left-to-right isolate
+  LRO         left-to-right override
+  NSM         non-spacing mark
+  ON          other neutral
+  PDF         pop directional format
+  PDI         pop directional isolate
+  R           right-to-left
+  RLE         right-to-left embedding
+  RLI         right-to-left isolate
+  RLO         right-to-left override
+  S           segment separator
+  WS          which space             
+</pre>
+For Bidi_Class, an equals sign may be used instead of a colon. The class names 
+are case-insensitive. As for other properties, only the short names are 
+recognized.
 </P>
 <br><b>
 Extended grapheme clusters
@@ -3861,7 +3902,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC32" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 01 December 2021
+Last updated: 08 December 2021
 <br>
 Copyright &copy; 1997-2021 University of Cambridge.
 <br>

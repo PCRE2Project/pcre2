@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "30 November 2021" "PCRE2 10.40"
+.TH PCRE2API 3 "08 December 2021" "PCRE2 10.40"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -2015,8 +2015,8 @@ point. However, this applies only to characters whose code points are less than
 256. By default, higher-valued code points never match escapes such as \ew or
 \ed.
 .P
-When PCRE2 is built with Unicode support (the default), the Unicode properties
-of all characters can be tested with \ep and \eP, or, alternatively, the
+When PCRE2 is built with Unicode support (the default), certain Unicode
+character properties can be tested with \ep and \eP, or, alternatively, the
 PCRE2_UCP option can be set when a pattern is compiled; this causes \ew and
 friends to use Unicode property support instead of the built-in tables.
 PCRE2_UCP also causes upper/lower casing operations on characters with code
@@ -4025,6 +4025,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 30 November 2021
+Last updated: 08 December 2021
 Copyright (c) 1997-2021 University of Cambridge.
 .fi
