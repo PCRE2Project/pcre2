@@ -2188,4 +2188,8 @@
 /(\xc1)\1/i,ucp
     \xc1\xe1\=no_jit
     
+/\p{L&}+\p{bidi_control}/B
+
+/\p{bidi_control}+\p{L&}/B
+
 # End of testinput5

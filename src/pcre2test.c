@@ -441,6 +441,7 @@ enum { MOD_CTC,    /* Applies to a compile context */
        MOD_PAT,    /* Applies to a pattern */
        MOD_PATP,   /* Ditto, OK for Perl test */
        MOD_DAT,    /* Applies to a data line */
+       MOD_DATP,   /* Ditto, OK for Perl test */
        MOD_PD,     /* Applies to a pattern or a data line */
        MOD_PDP,    /* As MOD_PD, OK for Perl test */
        MOD_PND,    /* As MOD_PD, but not for a default pattern */
@@ -700,7 +701,7 @@ static modstruct modlist[] = {
   { "no_auto_capture",             MOD_PAT,  MOD_OPT, PCRE2_NO_AUTO_CAPTURE,      PO(options) },
   { "no_auto_possess",             MOD_PATP, MOD_OPT, PCRE2_NO_AUTO_POSSESS,      PO(options) },
   { "no_dotstar_anchor",           MOD_PAT,  MOD_OPT, PCRE2_NO_DOTSTAR_ANCHOR,    PO(options) },
-  { "no_jit",                      MOD_DAT,  MOD_OPT, PCRE2_NO_JIT,               DO(options) },
+  { "no_jit",                      MOD_DATP, MOD_OPT, PCRE2_NO_JIT,               DO(options) },
   { "no_start_optimize",           MOD_PATP, MOD_OPT, PCRE2_NO_START_OPTIMIZE,    PO(options) },
   { "no_utf_check",                MOD_PD,   MOD_OPT, PCRE2_NO_UTF_CHECK,         PD(options) },
   { "notbol",                      MOD_DAT,  MOD_OPT, PCRE2_NOTBOL,               DO(options) },
@@ -3583,6 +3584,7 @@ if (restrict_for_perl_test) switch(m->which)
   {
   case MOD_PNDP:
   case MOD_PATP:
+  case MOD_DATP:
   case MOD_PDP:
   break;
 
@@ -3604,7 +3606,8 @@ switch (m->which)
     else if (ctx == CTX_DAT) field = PTR(dat_context);
   break;
 
-  case MOD_DAT:  /* Data line modifier */
+  case MOD_DAT:    /* Data line modifier */
+  case MOD_DATP:   /* Allowed for Perl test */
   if (dctl != NULL) field = dctl;
   break;
 

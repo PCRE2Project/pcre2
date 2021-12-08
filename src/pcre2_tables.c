@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-          New API code Copyright (c) 2016-2019 University of Cambridge
+          New API code Copyright (c) 2016-2021 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -236,630 +236,709 @@ to generate this data automatically instead of maintaining it by hand.
 The script was updated in March 2009 to generate a new EBCDIC-compliant
 version. Like all other character and string literals that are compared against
 the regular expression pattern, we must use STR_ macros instead of literal
-strings to make sure that UTF-8 support works on EBCDIC platforms. */
+strings to make sure that UTF-8 support works on EBCDIC platforms. 
 
-#define STRING_Adlam0 STR_A STR_d STR_l STR_a STR_m "\0"
-#define STRING_Ahom0 STR_A STR_h STR_o STR_m "\0"
-#define STRING_Anatolian_Hieroglyphs0 STR_A STR_n STR_a STR_t STR_o STR_l STR_i STR_a STR_n STR_UNDERSCORE STR_H STR_i STR_e STR_r STR_o STR_g STR_l STR_y STR_p STR_h STR_s "\0"
-#define STRING_Any0 STR_A STR_n STR_y "\0"
-#define STRING_Arabic0 STR_A STR_r STR_a STR_b STR_i STR_c "\0"
-#define STRING_Armenian0 STR_A STR_r STR_m STR_e STR_n STR_i STR_a STR_n "\0"
-#define STRING_Avestan0 STR_A STR_v STR_e STR_s STR_t STR_a STR_n "\0"
-#define STRING_Balinese0 STR_B STR_a STR_l STR_i STR_n STR_e STR_s STR_e "\0"
-#define STRING_Bamum0 STR_B STR_a STR_m STR_u STR_m "\0"
-#define STRING_Bassa_Vah0 STR_B STR_a STR_s STR_s STR_a STR_UNDERSCORE STR_V STR_a STR_h "\0"
-#define STRING_Batak0 STR_B STR_a STR_t STR_a STR_k "\0"
-#define STRING_Bengali0 STR_B STR_e STR_n STR_g STR_a STR_l STR_i "\0"
-#define STRING_Bhaiksuki0 STR_B STR_h STR_a STR_i STR_k STR_s STR_u STR_k STR_i "\0"
-#define STRING_Bopomofo0 STR_B STR_o STR_p STR_o STR_m STR_o STR_f STR_o "\0"
-#define STRING_Brahmi0 STR_B STR_r STR_a STR_h STR_m STR_i "\0"
-#define STRING_Braille0 STR_B STR_r STR_a STR_i STR_l STR_l STR_e "\0"
-#define STRING_Buginese0 STR_B STR_u STR_g STR_i STR_n STR_e STR_s STR_e "\0"
-#define STRING_Buhid0 STR_B STR_u STR_h STR_i STR_d "\0"
-#define STRING_C0 STR_C "\0"
-#define STRING_Canadian_Aboriginal0 STR_C STR_a STR_n STR_a STR_d STR_i STR_a STR_n STR_UNDERSCORE STR_A STR_b STR_o STR_r STR_i STR_g STR_i STR_n STR_a STR_l "\0"
-#define STRING_Carian0 STR_C STR_a STR_r STR_i STR_a STR_n "\0"
-#define STRING_Caucasian_Albanian0 STR_C STR_a STR_u STR_c STR_a STR_s STR_i STR_a STR_n STR_UNDERSCORE STR_A STR_l STR_b STR_a STR_n STR_i STR_a STR_n "\0"
-#define STRING_Cc0 STR_C STR_c "\0"
-#define STRING_Cf0 STR_C STR_f "\0"
-#define STRING_Chakma0 STR_C STR_h STR_a STR_k STR_m STR_a "\0"
-#define STRING_Cham0 STR_C STR_h STR_a STR_m "\0"
-#define STRING_Cherokee0 STR_C STR_h STR_e STR_r STR_o STR_k STR_e STR_e "\0"
-#define STRING_Chorasmian0 STR_C STR_h STR_o STR_r STR_a STR_s STR_m STR_i STR_a STR_n "\0"
-#define STRING_Cn0 STR_C STR_n "\0"
-#define STRING_Co0 STR_C STR_o "\0"
-#define STRING_Common0 STR_C STR_o STR_m STR_m STR_o STR_n "\0"
-#define STRING_Coptic0 STR_C STR_o STR_p STR_t STR_i STR_c "\0"
-#define STRING_Cs0 STR_C STR_s "\0"
-#define STRING_Cuneiform0 STR_C STR_u STR_n STR_e STR_i STR_f STR_o STR_r STR_m "\0"
-#define STRING_Cypriot0 STR_C STR_y STR_p STR_r STR_i STR_o STR_t "\0"
-#define STRING_Cypro_Minoan0 STR_C STR_y STR_p STR_r STR_o STR_UNDERSCORE STR_M STR_i STR_n STR_o STR_a STR_n "\0"
-#define STRING_Cyrillic0 STR_C STR_y STR_r STR_i STR_l STR_l STR_i STR_c "\0"
-#define STRING_Deseret0 STR_D STR_e STR_s STR_e STR_r STR_e STR_t "\0"
-#define STRING_Devanagari0 STR_D STR_e STR_v STR_a STR_n STR_a STR_g STR_a STR_r STR_i "\0"
-#define STRING_Dives_Akuru0 STR_D STR_i STR_v STR_e STR_s STR_UNDERSCORE STR_A STR_k STR_u STR_r STR_u "\0"
-#define STRING_Dogra0 STR_D STR_o STR_g STR_r STR_a "\0"
-#define STRING_Duployan0 STR_D STR_u STR_p STR_l STR_o STR_y STR_a STR_n "\0"
-#define STRING_Egyptian_Hieroglyphs0 STR_E STR_g STR_y STR_p STR_t STR_i STR_a STR_n STR_UNDERSCORE STR_H STR_i STR_e STR_r STR_o STR_g STR_l STR_y STR_p STR_h STR_s "\0"
-#define STRING_Elbasan0 STR_E STR_l STR_b STR_a STR_s STR_a STR_n "\0"
-#define STRING_Elymaic0 STR_E STR_l STR_y STR_m STR_a STR_i STR_c "\0"
-#define STRING_Ethiopic0 STR_E STR_t STR_h STR_i STR_o STR_p STR_i STR_c "\0"
-#define STRING_Georgian0 STR_G STR_e STR_o STR_r STR_g STR_i STR_a STR_n "\0"
-#define STRING_Glagolitic0 STR_G STR_l STR_a STR_g STR_o STR_l STR_i STR_t STR_i STR_c "\0"
-#define STRING_Gothic0 STR_G STR_o STR_t STR_h STR_i STR_c "\0"
-#define STRING_Grantha0 STR_G STR_r STR_a STR_n STR_t STR_h STR_a "\0"
-#define STRING_Greek0 STR_G STR_r STR_e STR_e STR_k "\0"
-#define STRING_Gujarati0 STR_G STR_u STR_j STR_a STR_r STR_a STR_t STR_i "\0"
-#define STRING_Gunjala_Gondi0 STR_G STR_u STR_n STR_j STR_a STR_l STR_a STR_UNDERSCORE STR_G STR_o STR_n STR_d STR_i "\0"
-#define STRING_Gurmukhi0 STR_G STR_u STR_r STR_m STR_u STR_k STR_h STR_i "\0"
-#define STRING_Han0 STR_H STR_a STR_n "\0"
-#define STRING_Hangul0 STR_H STR_a STR_n STR_g STR_u STR_l "\0"
-#define STRING_Hanifi_Rohingya0 STR_H STR_a STR_n STR_i STR_f STR_i STR_UNDERSCORE STR_R STR_o STR_h STR_i STR_n STR_g STR_y STR_a "\0"
-#define STRING_Hanunoo0 STR_H STR_a STR_n STR_u STR_n STR_o STR_o "\0"
-#define STRING_Hatran0 STR_H STR_a STR_t STR_r STR_a STR_n "\0"
-#define STRING_Hebrew0 STR_H STR_e STR_b STR_r STR_e STR_w "\0"
-#define STRING_Hiragana0 STR_H STR_i STR_r STR_a STR_g STR_a STR_n STR_a "\0"
-#define STRING_Imperial_Aramaic0 STR_I STR_m STR_p STR_e STR_r STR_i STR_a STR_l STR_UNDERSCORE STR_A STR_r STR_a STR_m STR_a STR_i STR_c "\0"
-#define STRING_Inherited0 STR_I STR_n STR_h STR_e STR_r STR_i STR_t STR_e STR_d "\0"
-#define STRING_Inscriptional_Pahlavi0 STR_I STR_n STR_s STR_c STR_r STR_i STR_p STR_t STR_i STR_o STR_n STR_a STR_l STR_UNDERSCORE STR_P STR_a STR_h STR_l STR_a STR_v STR_i "\0"
-#define STRING_Inscriptional_Parthian0 STR_I STR_n STR_s STR_c STR_r STR_i STR_p STR_t STR_i STR_o STR_n STR_a STR_l STR_UNDERSCORE STR_P STR_a STR_r STR_t STR_h STR_i STR_a STR_n "\0"
-#define STRING_Javanese0 STR_J STR_a STR_v STR_a STR_n STR_e STR_s STR_e "\0"
-#define STRING_Kaithi0 STR_K STR_a STR_i STR_t STR_h STR_i "\0"
-#define STRING_Kannada0 STR_K STR_a STR_n STR_n STR_a STR_d STR_a "\0"
-#define STRING_Katakana0 STR_K STR_a STR_t STR_a STR_k STR_a STR_n STR_a "\0"
-#define STRING_Kayah_Li0 STR_K STR_a STR_y STR_a STR_h STR_UNDERSCORE STR_L STR_i "\0"
-#define STRING_Kharoshthi0 STR_K STR_h STR_a STR_r STR_o STR_s STR_h STR_t STR_h STR_i "\0"
-#define STRING_Khitan_Small_Script0 STR_K STR_h STR_i STR_t STR_a STR_n STR_UNDERSCORE STR_S STR_m STR_a STR_l STR_l STR_UNDERSCORE STR_S STR_c STR_r STR_i STR_p STR_t "\0"
-#define STRING_Khmer0 STR_K STR_h STR_m STR_e STR_r "\0"
-#define STRING_Khojki0 STR_K STR_h STR_o STR_j STR_k STR_i "\0"
-#define STRING_Khudawadi0 STR_K STR_h STR_u STR_d STR_a STR_w STR_a STR_d STR_i "\0"
-#define STRING_L0 STR_L "\0"
-#define STRING_L_AMPERSAND0 STR_L STR_AMPERSAND "\0"
-#define STRING_Lao0 STR_L STR_a STR_o "\0"
-#define STRING_Latin0 STR_L STR_a STR_t STR_i STR_n "\0"
-#define STRING_Lepcha0 STR_L STR_e STR_p STR_c STR_h STR_a "\0"
-#define STRING_Limbu0 STR_L STR_i STR_m STR_b STR_u "\0"
-#define STRING_Linear_A0 STR_L STR_i STR_n STR_e STR_a STR_r STR_UNDERSCORE STR_A "\0"
-#define STRING_Linear_B0 STR_L STR_i STR_n STR_e STR_a STR_r STR_UNDERSCORE STR_B "\0"
-#define STRING_Lisu0 STR_L STR_i STR_s STR_u "\0"
-#define STRING_Ll0 STR_L STR_l "\0"
-#define STRING_Lm0 STR_L STR_m "\0"
-#define STRING_Lo0 STR_L STR_o "\0"
-#define STRING_Lt0 STR_L STR_t "\0"
-#define STRING_Lu0 STR_L STR_u "\0"
-#define STRING_Lycian0 STR_L STR_y STR_c STR_i STR_a STR_n "\0"
-#define STRING_Lydian0 STR_L STR_y STR_d STR_i STR_a STR_n "\0"
-#define STRING_M0 STR_M "\0"
-#define STRING_Mahajani0 STR_M STR_a STR_h STR_a STR_j STR_a STR_n STR_i "\0"
-#define STRING_Makasar0 STR_M STR_a STR_k STR_a STR_s STR_a STR_r "\0"
-#define STRING_Malayalam0 STR_M STR_a STR_l STR_a STR_y STR_a STR_l STR_a STR_m "\0"
-#define STRING_Mandaic0 STR_M STR_a STR_n STR_d STR_a STR_i STR_c "\0"
-#define STRING_Manichaean0 STR_M STR_a STR_n STR_i STR_c STR_h STR_a STR_e STR_a STR_n "\0"
-#define STRING_Marchen0 STR_M STR_a STR_r STR_c STR_h STR_e STR_n "\0"
-#define STRING_Masaram_Gondi0 STR_M STR_a STR_s STR_a STR_r STR_a STR_m STR_UNDERSCORE STR_G STR_o STR_n STR_d STR_i "\0"
-#define STRING_Mc0 STR_M STR_c "\0"
-#define STRING_Me0 STR_M STR_e "\0"
-#define STRING_Medefaidrin0 STR_M STR_e STR_d STR_e STR_f STR_a STR_i STR_d STR_r STR_i STR_n "\0"
-#define STRING_Meetei_Mayek0 STR_M STR_e STR_e STR_t STR_e STR_i STR_UNDERSCORE STR_M STR_a STR_y STR_e STR_k "\0"
-#define STRING_Mende_Kikakui0 STR_M STR_e STR_n STR_d STR_e STR_UNDERSCORE STR_K STR_i STR_k STR_a STR_k STR_u STR_i "\0"
-#define STRING_Meroitic_Cursive0 STR_M STR_e STR_r STR_o STR_i STR_t STR_i STR_c STR_UNDERSCORE STR_C STR_u STR_r STR_s STR_i STR_v STR_e "\0"
-#define STRING_Meroitic_Hieroglyphs0 STR_M STR_e STR_r STR_o STR_i STR_t STR_i STR_c STR_UNDERSCORE STR_H STR_i STR_e STR_r STR_o STR_g STR_l STR_y STR_p STR_h STR_s "\0"
-#define STRING_Miao0 STR_M STR_i STR_a STR_o "\0"
-#define STRING_Mn0 STR_M STR_n "\0"
-#define STRING_Modi0 STR_M STR_o STR_d STR_i "\0"
-#define STRING_Mongolian0 STR_M STR_o STR_n STR_g STR_o STR_l STR_i STR_a STR_n "\0"
-#define STRING_Mro0 STR_M STR_r STR_o "\0"
-#define STRING_Multani0 STR_M STR_u STR_l STR_t STR_a STR_n STR_i "\0"
-#define STRING_Myanmar0 STR_M STR_y STR_a STR_n STR_m STR_a STR_r "\0"
-#define STRING_N0 STR_N "\0"
-#define STRING_Nabataean0 STR_N STR_a STR_b STR_a STR_t STR_a STR_e STR_a STR_n "\0"
-#define STRING_Nandinagari0 STR_N STR_a STR_n STR_d STR_i STR_n STR_a STR_g STR_a STR_r STR_i "\0"
-#define STRING_Nd0 STR_N STR_d "\0"
-#define STRING_New_Tai_Lue0 STR_N STR_e STR_w STR_UNDERSCORE STR_T STR_a STR_i STR_UNDERSCORE STR_L STR_u STR_e "\0"
-#define STRING_Newa0 STR_N STR_e STR_w STR_a "\0"
-#define STRING_Nko0 STR_N STR_k STR_o "\0"
-#define STRING_Nl0 STR_N STR_l "\0"
-#define STRING_No0 STR_N STR_o "\0"
-#define STRING_Nushu0 STR_N STR_u STR_s STR_h STR_u "\0"
-#define STRING_Nyiakeng_Puachue_Hmong0 STR_N STR_y STR_i STR_a STR_k STR_e STR_n STR_g STR_UNDERSCORE STR_P STR_u STR_a STR_c STR_h STR_u STR_e STR_UNDERSCORE STR_H STR_m STR_o STR_n STR_g "\0"
-#define STRING_Ogham0 STR_O STR_g STR_h STR_a STR_m "\0"
-#define STRING_Ol_Chiki0 STR_O STR_l STR_UNDERSCORE STR_C STR_h STR_i STR_k STR_i "\0"
-#define STRING_Old_Hungarian0 STR_O STR_l STR_d STR_UNDERSCORE STR_H STR_u STR_n STR_g STR_a STR_r STR_i STR_a STR_n "\0"
-#define STRING_Old_Italic0 STR_O STR_l STR_d STR_UNDERSCORE STR_I STR_t STR_a STR_l STR_i STR_c "\0"
-#define STRING_Old_North_Arabian0 STR_O STR_l STR_d STR_UNDERSCORE STR_N STR_o STR_r STR_t STR_h STR_UNDERSCORE STR_A STR_r STR_a STR_b STR_i STR_a STR_n "\0"
-#define STRING_Old_Permic0 STR_O STR_l STR_d STR_UNDERSCORE STR_P STR_e STR_r STR_m STR_i STR_c "\0"
-#define STRING_Old_Persian0 STR_O STR_l STR_d STR_UNDERSCORE STR_P STR_e STR_r STR_s STR_i STR_a STR_n "\0"
-#define STRING_Old_Sogdian0 STR_O STR_l STR_d STR_UNDERSCORE STR_S STR_o STR_g STR_d STR_i STR_a STR_n "\0"
-#define STRING_Old_South_Arabian0 STR_O STR_l STR_d STR_UNDERSCORE STR_S STR_o STR_u STR_t STR_h STR_UNDERSCORE STR_A STR_r STR_a STR_b STR_i STR_a STR_n "\0"
-#define STRING_Old_Turkic0 STR_O STR_l STR_d STR_UNDERSCORE STR_T STR_u STR_r STR_k STR_i STR_c "\0"
-#define STRING_Old_Uyghur0 STR_O STR_l STR_d STR_UNDERSCORE STR_U STR_y STR_g STR_h STR_u STR_r "\0"
-#define STRING_Oriya0 STR_O STR_r STR_i STR_y STR_a "\0"
-#define STRING_Osage0 STR_O STR_s STR_a STR_g STR_e "\0"
-#define STRING_Osmanya0 STR_O STR_s STR_m STR_a STR_n STR_y STR_a "\0"
-#define STRING_P0 STR_P "\0"
-#define STRING_Pahawh_Hmong0 STR_P STR_a STR_h STR_a STR_w STR_h STR_UNDERSCORE STR_H STR_m STR_o STR_n STR_g "\0"
-#define STRING_Palmyrene0 STR_P STR_a STR_l STR_m STR_y STR_r STR_e STR_n STR_e "\0"
-#define STRING_Pau_Cin_Hau0 STR_P STR_a STR_u STR_UNDERSCORE STR_C STR_i STR_n STR_UNDERSCORE STR_H STR_a STR_u "\0"
-#define STRING_Pc0 STR_P STR_c "\0"
-#define STRING_Pd0 STR_P STR_d "\0"
-#define STRING_Pe0 STR_P STR_e "\0"
-#define STRING_Pf0 STR_P STR_f "\0"
-#define STRING_Phags_Pa0 STR_P STR_h STR_a STR_g STR_s STR_UNDERSCORE STR_P STR_a "\0"
-#define STRING_Phoenician0 STR_P STR_h STR_o STR_e STR_n STR_i STR_c STR_i STR_a STR_n "\0"
-#define STRING_Pi0 STR_P STR_i "\0"
-#define STRING_Po0 STR_P STR_o "\0"
-#define STRING_Ps0 STR_P STR_s "\0"
-#define STRING_Psalter_Pahlavi0 STR_P STR_s STR_a STR_l STR_t STR_e STR_r STR_UNDERSCORE STR_P STR_a STR_h STR_l STR_a STR_v STR_i "\0"
-#define STRING_Rejang0 STR_R STR_e STR_j STR_a STR_n STR_g "\0"
-#define STRING_Runic0 STR_R STR_u STR_n STR_i STR_c "\0"
-#define STRING_S0 STR_S "\0"
-#define STRING_Samaritan0 STR_S STR_a STR_m STR_a STR_r STR_i STR_t STR_a STR_n "\0"
-#define STRING_Saurashtra0 STR_S STR_a STR_u STR_r STR_a STR_s STR_h STR_t STR_r STR_a "\0"
-#define STRING_Sc0 STR_S STR_c "\0"
-#define STRING_Sharada0 STR_S STR_h STR_a STR_r STR_a STR_d STR_a "\0"
-#define STRING_Shavian0 STR_S STR_h STR_a STR_v STR_i STR_a STR_n "\0"
-#define STRING_Siddham0 STR_S STR_i STR_d STR_d STR_h STR_a STR_m "\0"
-#define STRING_SignWriting0 STR_S STR_i STR_g STR_n STR_W STR_r STR_i STR_t STR_i STR_n STR_g "\0"
-#define STRING_Sinhala0 STR_S STR_i STR_n STR_h STR_a STR_l STR_a "\0"
-#define STRING_Sk0 STR_S STR_k "\0"
-#define STRING_Sm0 STR_S STR_m "\0"
-#define STRING_So0 STR_S STR_o "\0"
-#define STRING_Sogdian0 STR_S STR_o STR_g STR_d STR_i STR_a STR_n "\0"
-#define STRING_Sora_Sompeng0 STR_S STR_o STR_r STR_a STR_UNDERSCORE STR_S STR_o STR_m STR_p STR_e STR_n STR_g "\0"
-#define STRING_Soyombo0 STR_S STR_o STR_y STR_o STR_m STR_b STR_o "\0"
-#define STRING_Sundanese0 STR_S STR_u STR_n STR_d STR_a STR_n STR_e STR_s STR_e "\0"
-#define STRING_Syloti_Nagri0 STR_S STR_y STR_l STR_o STR_t STR_i STR_UNDERSCORE STR_N STR_a STR_g STR_r STR_i "\0"
-#define STRING_Syriac0 STR_S STR_y STR_r STR_i STR_a STR_c "\0"
-#define STRING_Tagalog0 STR_T STR_a STR_g STR_a STR_l STR_o STR_g "\0"
-#define STRING_Tagbanwa0 STR_T STR_a STR_g STR_b STR_a STR_n STR_w STR_a "\0"
-#define STRING_Tai_Le0 STR_T STR_a STR_i STR_UNDERSCORE STR_L STR_e "\0"
-#define STRING_Tai_Tham0 STR_T STR_a STR_i STR_UNDERSCORE STR_T STR_h STR_a STR_m "\0"
-#define STRING_Tai_Viet0 STR_T STR_a STR_i STR_UNDERSCORE STR_V STR_i STR_e STR_t "\0"
-#define STRING_Takri0 STR_T STR_a STR_k STR_r STR_i "\0"
-#define STRING_Tamil0 STR_T STR_a STR_m STR_i STR_l "\0"
-#define STRING_Tangsa0 STR_T STR_a STR_n STR_g STR_s STR_a "\0"
-#define STRING_Tangut0 STR_T STR_a STR_n STR_g STR_u STR_t "\0"
-#define STRING_Telugu0 STR_T STR_e STR_l STR_u STR_g STR_u "\0"
-#define STRING_Thaana0 STR_T STR_h STR_a STR_a STR_n STR_a "\0"
-#define STRING_Thai0 STR_T STR_h STR_a STR_i "\0"
-#define STRING_Tibetan0 STR_T STR_i STR_b STR_e STR_t STR_a STR_n "\0"
-#define STRING_Tifinagh0 STR_T STR_i STR_f STR_i STR_n STR_a STR_g STR_h "\0"
-#define STRING_Tirhuta0 STR_T STR_i STR_r STR_h STR_u STR_t STR_a "\0"
-#define STRING_Toto0 STR_T STR_o STR_t STR_o "\0"
-#define STRING_Ugaritic0 STR_U STR_g STR_a STR_r STR_i STR_t STR_i STR_c "\0"
-#define STRING_Unknown0 STR_U STR_n STR_k STR_n STR_o STR_w STR_n "\0"
-#define STRING_Vai0 STR_V STR_a STR_i "\0"
-#define STRING_Vithkuqi0 STR_V STR_i STR_t STR_h STR_k STR_u STR_q STR_i "\0"
-#define STRING_Wancho0 STR_W STR_a STR_n STR_c STR_h STR_o "\0"
-#define STRING_Warang_Citi0 STR_W STR_a STR_r STR_a STR_n STR_g STR_UNDERSCORE STR_C STR_i STR_t STR_i "\0"
-#define STRING_Xan0 STR_X STR_a STR_n "\0"
-#define STRING_Xps0 STR_X STR_p STR_s "\0"
-#define STRING_Xsp0 STR_X STR_s STR_p "\0"
-#define STRING_Xuc0 STR_X STR_u STR_c "\0"
-#define STRING_Xwd0 STR_X STR_w STR_d "\0"
-#define STRING_Yezidi0 STR_Y STR_e STR_z STR_i STR_d STR_i "\0"
-#define STRING_Yi0 STR_Y STR_i "\0"
-#define STRING_Z0 STR_Z "\0"
-#define STRING_Zanabazar_Square0 STR_Z STR_a STR_n STR_a STR_b STR_a STR_z STR_a STR_r STR_UNDERSCORE STR_S STR_q STR_u STR_a STR_r STR_e "\0"
-#define STRING_Zl0 STR_Z STR_l "\0"
-#define STRING_Zp0 STR_Z STR_p "\0"
-#define STRING_Zs0 STR_Z STR_s "\0"
+December 2021: the script now ensures that all letters are lower cased, and
+that underscores are removed, in accordance with the "loose matching" rules
+that Unicode advises and Perl uses. */
+
+#define STRING_adlam0 STR_a STR_d STR_l STR_a STR_m "\0"
+#define STRING_ahom0 STR_a STR_h STR_o STR_m "\0"
+#define STRING_anatolianhieroglyphs0 STR_a STR_n STR_a STR_t STR_o STR_l STR_i STR_a STR_n STR_h STR_i STR_e STR_r STR_o STR_g STR_l STR_y STR_p STR_h STR_s "\0"
+#define STRING_any0 STR_a STR_n STR_y "\0"
+#define STRING_arabic0 STR_a STR_r STR_a STR_b STR_i STR_c "\0"
+#define STRING_armenian0 STR_a STR_r STR_m STR_e STR_n STR_i STR_a STR_n "\0"
+#define STRING_avestan0 STR_a STR_v STR_e STR_s STR_t STR_a STR_n "\0"
+#define STRING_balinese0 STR_b STR_a STR_l STR_i STR_n STR_e STR_s STR_e "\0"
+#define STRING_bamum0 STR_b STR_a STR_m STR_u STR_m "\0"
+#define STRING_bassavah0 STR_b STR_a STR_s STR_s STR_a STR_v STR_a STR_h "\0"
+#define STRING_batak0 STR_b STR_a STR_t STR_a STR_k "\0"
+#define STRING_bengali0 STR_b STR_e STR_n STR_g STR_a STR_l STR_i "\0"
+#define STRING_bhaiksuki0 STR_b STR_h STR_a STR_i STR_k STR_s STR_u STR_k STR_i "\0"
+#define STRING_bidial0 STR_b STR_i STR_d STR_i STR_a STR_l "\0"
+#define STRING_bidian0 STR_b STR_i STR_d STR_i STR_a STR_n "\0"
+#define STRING_bidib0 STR_b STR_i STR_d STR_i STR_b "\0"
+#define STRING_bidibn0 STR_b STR_i STR_d STR_i STR_b STR_n "\0"
+#define STRING_bidicontrol0 STR_b STR_i STR_d STR_i STR_c STR_o STR_n STR_t STR_r STR_o STR_l "\0"
+#define STRING_bidics0 STR_b STR_i STR_d STR_i STR_c STR_s "\0"
+#define STRING_bidien0 STR_b STR_i STR_d STR_i STR_e STR_n "\0"
+#define STRING_bidies0 STR_b STR_i STR_d STR_i STR_e STR_s "\0"
+#define STRING_bidiet0 STR_b STR_i STR_d STR_i STR_e STR_t "\0"
+#define STRING_bidifsi0 STR_b STR_i STR_d STR_i STR_f STR_s STR_i "\0"
+#define STRING_bidil0 STR_b STR_i STR_d STR_i STR_l "\0"
+#define STRING_bidilre0 STR_b STR_i STR_d STR_i STR_l STR_r STR_e "\0"
+#define STRING_bidilri0 STR_b STR_i STR_d STR_i STR_l STR_r STR_i "\0"
+#define STRING_bidilro0 STR_b STR_i STR_d STR_i STR_l STR_r STR_o "\0"
+#define STRING_bidinsm0 STR_b STR_i STR_d STR_i STR_n STR_s STR_m "\0"
+#define STRING_bidion0 STR_b STR_i STR_d STR_i STR_o STR_n "\0"
+#define STRING_bidipdf0 STR_b STR_i STR_d STR_i STR_p STR_d STR_f "\0"
+#define STRING_bidipdi0 STR_b STR_i STR_d STR_i STR_p STR_d STR_i "\0"
+#define STRING_bidir0 STR_b STR_i STR_d STR_i STR_r "\0"
+#define STRING_bidirle0 STR_b STR_i STR_d STR_i STR_r STR_l STR_e "\0"
+#define STRING_bidirli0 STR_b STR_i STR_d STR_i STR_r STR_l STR_i "\0"
+#define STRING_bidirlo0 STR_b STR_i STR_d STR_i STR_r STR_l STR_o "\0"
+#define STRING_bidis0 STR_b STR_i STR_d STR_i STR_s "\0"
+#define STRING_bidiws0 STR_b STR_i STR_d STR_i STR_w STR_s "\0"
+#define STRING_bopomofo0 STR_b STR_o STR_p STR_o STR_m STR_o STR_f STR_o "\0"
+#define STRING_brahmi0 STR_b STR_r STR_a STR_h STR_m STR_i "\0"
+#define STRING_braille0 STR_b STR_r STR_a STR_i STR_l STR_l STR_e "\0"
+#define STRING_buginese0 STR_b STR_u STR_g STR_i STR_n STR_e STR_s STR_e "\0"
+#define STRING_buhid0 STR_b STR_u STR_h STR_i STR_d "\0"
+#define STRING_c0 STR_c "\0"
+#define STRING_canadianaboriginal0 STR_c STR_a STR_n STR_a STR_d STR_i STR_a STR_n STR_a STR_b STR_o STR_r STR_i STR_g STR_i STR_n STR_a STR_l "\0"
+#define STRING_carian0 STR_c STR_a STR_r STR_i STR_a STR_n "\0"
+#define STRING_caucasianalbanian0 STR_c STR_a STR_u STR_c STR_a STR_s STR_i STR_a STR_n STR_a STR_l STR_b STR_a STR_n STR_i STR_a STR_n "\0"
+#define STRING_cc0 STR_c STR_c "\0"
+#define STRING_cf0 STR_c STR_f "\0"
+#define STRING_chakma0 STR_c STR_h STR_a STR_k STR_m STR_a "\0"
+#define STRING_cham0 STR_c STR_h STR_a STR_m "\0"
+#define STRING_cherokee0 STR_c STR_h STR_e STR_r STR_o STR_k STR_e STR_e "\0"
+#define STRING_chorasmian0 STR_c STR_h STR_o STR_r STR_a STR_s STR_m STR_i STR_a STR_n "\0"
+#define STRING_cn0 STR_c STR_n "\0"
+#define STRING_co0 STR_c STR_o "\0"
+#define STRING_common0 STR_c STR_o STR_m STR_m STR_o STR_n "\0"
+#define STRING_coptic0 STR_c STR_o STR_p STR_t STR_i STR_c "\0"
+#define STRING_cs0 STR_c STR_s "\0"
+#define STRING_cuneiform0 STR_c STR_u STR_n STR_e STR_i STR_f STR_o STR_r STR_m "\0"
+#define STRING_cypriot0 STR_c STR_y STR_p STR_r STR_i STR_o STR_t "\0"
+#define STRING_cyprominoan0 STR_c STR_y STR_p STR_r STR_o STR_m STR_i STR_n STR_o STR_a STR_n "\0"
+#define STRING_cyrillic0 STR_c STR_y STR_r STR_i STR_l STR_l STR_i STR_c "\0"
+#define STRING_deseret0 STR_d STR_e STR_s STR_e STR_r STR_e STR_t "\0"
+#define STRING_devanagari0 STR_d STR_e STR_v STR_a STR_n STR_a STR_g STR_a STR_r STR_i "\0"
+#define STRING_divesakuru0 STR_d STR_i STR_v STR_e STR_s STR_a STR_k STR_u STR_r STR_u "\0"
+#define STRING_dogra0 STR_d STR_o STR_g STR_r STR_a "\0"
+#define STRING_duployan0 STR_d STR_u STR_p STR_l STR_o STR_y STR_a STR_n "\0"
+#define STRING_egyptianhieroglyphs0 STR_e STR_g STR_y STR_p STR_t STR_i STR_a STR_n STR_h STR_i STR_e STR_r STR_o STR_g STR_l STR_y STR_p STR_h STR_s "\0"
+#define STRING_elbasan0 STR_e STR_l STR_b STR_a STR_s STR_a STR_n "\0"
+#define STRING_elymaic0 STR_e STR_l STR_y STR_m STR_a STR_i STR_c "\0"
+#define STRING_ethiopic0 STR_e STR_t STR_h STR_i STR_o STR_p STR_i STR_c "\0"
+#define STRING_georgian0 STR_g STR_e STR_o STR_r STR_g STR_i STR_a STR_n "\0"
+#define STRING_glagolitic0 STR_g STR_l STR_a STR_g STR_o STR_l STR_i STR_t STR_i STR_c "\0"
+#define STRING_gothic0 STR_g STR_o STR_t STR_h STR_i STR_c "\0"
+#define STRING_grantha0 STR_g STR_r STR_a STR_n STR_t STR_h STR_a "\0"
+#define STRING_greek0 STR_g STR_r STR_e STR_e STR_k "\0"
+#define STRING_gujarati0 STR_g STR_u STR_j STR_a STR_r STR_a STR_t STR_i "\0"
+#define STRING_gunjalagondi0 STR_g STR_u STR_n STR_j STR_a STR_l STR_a STR_g STR_o STR_n STR_d STR_i "\0"
+#define STRING_gurmukhi0 STR_g STR_u STR_r STR_m STR_u STR_k STR_h STR_i "\0"
+#define STRING_han0 STR_h STR_a STR_n "\0"
+#define STRING_hangul0 STR_h STR_a STR_n STR_g STR_u STR_l "\0"
+#define STRING_hanifirohingya0 STR_h STR_a STR_n STR_i STR_f STR_i STR_r STR_o STR_h STR_i STR_n STR_g STR_y STR_a "\0"
+#define STRING_hanunoo0 STR_h STR_a STR_n STR_u STR_n STR_o STR_o "\0"
+#define STRING_hatran0 STR_h STR_a STR_t STR_r STR_a STR_n "\0"
+#define STRING_hebrew0 STR_h STR_e STR_b STR_r STR_e STR_w "\0"
+#define STRING_hiragana0 STR_h STR_i STR_r STR_a STR_g STR_a STR_n STR_a "\0"
+#define STRING_imperialaramaic0 STR_i STR_m STR_p STR_e STR_r STR_i STR_a STR_l STR_a STR_r STR_a STR_m STR_a STR_i STR_c "\0"
+#define STRING_inherited0 STR_i STR_n STR_h STR_e STR_r STR_i STR_t STR_e STR_d "\0"
+#define STRING_inscriptionalpahlavi0 STR_i STR_n STR_s STR_c STR_r STR_i STR_p STR_t STR_i STR_o STR_n STR_a STR_l STR_p STR_a STR_h STR_l STR_a STR_v STR_i "\0"
+#define STRING_inscriptionalparthian0 STR_i STR_n STR_s STR_c STR_r STR_i STR_p STR_t STR_i STR_o STR_n STR_a STR_l STR_p STR_a STR_r STR_t STR_h STR_i STR_a STR_n "\0"
+#define STRING_javanese0 STR_j STR_a STR_v STR_a STR_n STR_e STR_s STR_e "\0"
+#define STRING_kaithi0 STR_k STR_a STR_i STR_t STR_h STR_i "\0"
+#define STRING_kannada0 STR_k STR_a STR_n STR_n STR_a STR_d STR_a "\0"
+#define STRING_katakana0 STR_k STR_a STR_t STR_a STR_k STR_a STR_n STR_a "\0"
+#define STRING_kayahli0 STR_k STR_a STR_y STR_a STR_h STR_l STR_i "\0"
+#define STRING_kharoshthi0 STR_k STR_h STR_a STR_r STR_o STR_s STR_h STR_t STR_h STR_i "\0"
+#define STRING_khitansmallscript0 STR_k STR_h STR_i STR_t STR_a STR_n STR_s STR_m STR_a STR_l STR_l STR_s STR_c STR_r STR_i STR_p STR_t "\0"
+#define STRING_khmer0 STR_k STR_h STR_m STR_e STR_r "\0"
+#define STRING_khojki0 STR_k STR_h STR_o STR_j STR_k STR_i "\0"
+#define STRING_khudawadi0 STR_k STR_h STR_u STR_d STR_a STR_w STR_a STR_d STR_i "\0"
+#define STRING_l0 STR_l "\0"
+#define STRING_l_AMPERSAND0 STR_l STR_AMPERSAND "\0"
+#define STRING_lao0 STR_l STR_a STR_o "\0"
+#define STRING_latin0 STR_l STR_a STR_t STR_i STR_n "\0"
+#define STRING_lc0 STR_l STR_c "\0"
+#define STRING_lepcha0 STR_l STR_e STR_p STR_c STR_h STR_a "\0"
+#define STRING_limbu0 STR_l STR_i STR_m STR_b STR_u "\0"
+#define STRING_lineara0 STR_l STR_i STR_n STR_e STR_a STR_r STR_a "\0"
+#define STRING_linearb0 STR_l STR_i STR_n STR_e STR_a STR_r STR_b "\0"
+#define STRING_lisu0 STR_l STR_i STR_s STR_u "\0"
+#define STRING_ll0 STR_l STR_l "\0"
+#define STRING_lm0 STR_l STR_m "\0"
+#define STRING_lo0 STR_l STR_o "\0"
+#define STRING_lt0 STR_l STR_t "\0"
+#define STRING_lu0 STR_l STR_u "\0"
+#define STRING_lycian0 STR_l STR_y STR_c STR_i STR_a STR_n "\0"
+#define STRING_lydian0 STR_l STR_y STR_d STR_i STR_a STR_n "\0"
+#define STRING_m0 STR_m "\0"
+#define STRING_mahajani0 STR_m STR_a STR_h STR_a STR_j STR_a STR_n STR_i "\0"
+#define STRING_makasar0 STR_m STR_a STR_k STR_a STR_s STR_a STR_r "\0"
+#define STRING_malayalam0 STR_m STR_a STR_l STR_a STR_y STR_a STR_l STR_a STR_m "\0"
+#define STRING_mandaic0 STR_m STR_a STR_n STR_d STR_a STR_i STR_c "\0"
+#define STRING_manichaean0 STR_m STR_a STR_n STR_i STR_c STR_h STR_a STR_e STR_a STR_n "\0"
+#define STRING_marchen0 STR_m STR_a STR_r STR_c STR_h STR_e STR_n "\0"
+#define STRING_masaramgondi0 STR_m STR_a STR_s STR_a STR_r STR_a STR_m STR_g STR_o STR_n STR_d STR_i "\0"
+#define STRING_mc0 STR_m STR_c "\0"
+#define STRING_me0 STR_m STR_e "\0"
+#define STRING_medefaidrin0 STR_m STR_e STR_d STR_e STR_f STR_a STR_i STR_d STR_r STR_i STR_n "\0"
+#define STRING_meeteimayek0 STR_m STR_e STR_e STR_t STR_e STR_i STR_m STR_a STR_y STR_e STR_k "\0"
+#define STRING_mendekikakui0 STR_m STR_e STR_n STR_d STR_e STR_k STR_i STR_k STR_a STR_k STR_u STR_i "\0"
+#define STRING_meroiticcursive0 STR_m STR_e STR_r STR_o STR_i STR_t STR_i STR_c STR_c STR_u STR_r STR_s STR_i STR_v STR_e "\0"
+#define STRING_meroitichieroglyphs0 STR_m STR_e STR_r STR_o STR_i STR_t STR_i STR_c STR_h STR_i STR_e STR_r STR_o STR_g STR_l STR_y STR_p STR_h STR_s "\0"
+#define STRING_miao0 STR_m STR_i STR_a STR_o "\0"
+#define STRING_mn0 STR_m STR_n "\0"
+#define STRING_modi0 STR_m STR_o STR_d STR_i "\0"
+#define STRING_mongolian0 STR_m STR_o STR_n STR_g STR_o STR_l STR_i STR_a STR_n "\0"
+#define STRING_mro0 STR_m STR_r STR_o "\0"
+#define STRING_multani0 STR_m STR_u STR_l STR_t STR_a STR_n STR_i "\0"
+#define STRING_myanmar0 STR_m STR_y STR_a STR_n STR_m STR_a STR_r "\0"
+#define STRING_n0 STR_n "\0"
+#define STRING_nabataean0 STR_n STR_a STR_b STR_a STR_t STR_a STR_e STR_a STR_n "\0"
+#define STRING_nandinagari0 STR_n STR_a STR_n STR_d STR_i STR_n STR_a STR_g STR_a STR_r STR_i "\0"
+#define STRING_nd0 STR_n STR_d "\0"
+#define STRING_newa0 STR_n STR_e STR_w STR_a "\0"
+#define STRING_newtailue0 STR_n STR_e STR_w STR_t STR_a STR_i STR_l STR_u STR_e "\0"
+#define STRING_nko0 STR_n STR_k STR_o "\0"
+#define STRING_nl0 STR_n STR_l "\0"
+#define STRING_no0 STR_n STR_o "\0"
+#define STRING_nushu0 STR_n STR_u STR_s STR_h STR_u "\0"
+#define STRING_nyiakengpuachuehmong0 STR_n STR_y STR_i STR_a STR_k STR_e STR_n STR_g STR_p STR_u STR_a STR_c STR_h STR_u STR_e STR_h STR_m STR_o STR_n STR_g "\0"
+#define STRING_ogham0 STR_o STR_g STR_h STR_a STR_m "\0"
+#define STRING_olchiki0 STR_o STR_l STR_c STR_h STR_i STR_k STR_i "\0"
+#define STRING_oldhungarian0 STR_o STR_l STR_d STR_h STR_u STR_n STR_g STR_a STR_r STR_i STR_a STR_n "\0"
+#define STRING_olditalic0 STR_o STR_l STR_d STR_i STR_t STR_a STR_l STR_i STR_c "\0"
+#define STRING_oldnortharabian0 STR_o STR_l STR_d STR_n STR_o STR_r STR_t STR_h STR_a STR_r STR_a STR_b STR_i STR_a STR_n "\0"
+#define STRING_oldpermic0 STR_o STR_l STR_d STR_p STR_e STR_r STR_m STR_i STR_c "\0"
+#define STRING_oldpersian0 STR_o STR_l STR_d STR_p STR_e STR_r STR_s STR_i STR_a STR_n "\0"
+#define STRING_oldsogdian0 STR_o STR_l STR_d STR_s STR_o STR_g STR_d STR_i STR_a STR_n "\0"
+#define STRING_oldsoutharabian0 STR_o STR_l STR_d STR_s STR_o STR_u STR_t STR_h STR_a STR_r STR_a STR_b STR_i STR_a STR_n "\0"
+#define STRING_oldturkic0 STR_o STR_l STR_d STR_t STR_u STR_r STR_k STR_i STR_c "\0"
+#define STRING_olduyghur0 STR_o STR_l STR_d STR_u STR_y STR_g STR_h STR_u STR_r "\0"
+#define STRING_oriya0 STR_o STR_r STR_i STR_y STR_a "\0"
+#define STRING_osage0 STR_o STR_s STR_a STR_g STR_e "\0"
+#define STRING_osmanya0 STR_o STR_s STR_m STR_a STR_n STR_y STR_a "\0"
+#define STRING_p0 STR_p "\0"
+#define STRING_pahawhhmong0 STR_p STR_a STR_h STR_a STR_w STR_h STR_h STR_m STR_o STR_n STR_g "\0"
+#define STRING_palmyrene0 STR_p STR_a STR_l STR_m STR_y STR_r STR_e STR_n STR_e "\0"
+#define STRING_paucinhau0 STR_p STR_a STR_u STR_c STR_i STR_n STR_h STR_a STR_u "\0"
+#define STRING_pc0 STR_p STR_c "\0"
+#define STRING_pd0 STR_p STR_d "\0"
+#define STRING_pe0 STR_p STR_e "\0"
+#define STRING_pf0 STR_p STR_f "\0"
+#define STRING_phagspa0 STR_p STR_h STR_a STR_g STR_s STR_p STR_a "\0"
+#define STRING_phoenician0 STR_p STR_h STR_o STR_e STR_n STR_i STR_c STR_i STR_a STR_n "\0"
+#define STRING_pi0 STR_p STR_i "\0"
+#define STRING_po0 STR_p STR_o "\0"
+#define STRING_ps0 STR_p STR_s "\0"
+#define STRING_psalterpahlavi0 STR_p STR_s STR_a STR_l STR_t STR_e STR_r STR_p STR_a STR_h STR_l STR_a STR_v STR_i "\0"
+#define STRING_rejang0 STR_r STR_e STR_j STR_a STR_n STR_g "\0"
+#define STRING_runic0 STR_r STR_u STR_n STR_i STR_c "\0"
+#define STRING_s0 STR_s "\0"
+#define STRING_samaritan0 STR_s STR_a STR_m STR_a STR_r STR_i STR_t STR_a STR_n "\0"
+#define STRING_saurashtra0 STR_s STR_a STR_u STR_r STR_a STR_s STR_h STR_t STR_r STR_a "\0"
+#define STRING_sc0 STR_s STR_c "\0"
+#define STRING_sharada0 STR_s STR_h STR_a STR_r STR_a STR_d STR_a "\0"
+#define STRING_shavian0 STR_s STR_h STR_a STR_v STR_i STR_a STR_n "\0"
+#define STRING_siddham0 STR_s STR_i STR_d STR_d STR_h STR_a STR_m "\0"
+#define STRING_signwriting0 STR_s STR_i STR_g STR_n STR_w STR_r STR_i STR_t STR_i STR_n STR_g "\0"
+#define STRING_sinhala0 STR_s STR_i STR_n STR_h STR_a STR_l STR_a "\0"
+#define STRING_sk0 STR_s STR_k "\0"
+#define STRING_sm0 STR_s STR_m "\0"
+#define STRING_so0 STR_s STR_o "\0"
+#define STRING_sogdian0 STR_s STR_o STR_g STR_d STR_i STR_a STR_n "\0"
+#define STRING_sorasompeng0 STR_s STR_o STR_r STR_a STR_s STR_o STR_m STR_p STR_e STR_n STR_g "\0"
+#define STRING_soyombo0 STR_s STR_o STR_y STR_o STR_m STR_b STR_o "\0"
+#define STRING_sundanese0 STR_s STR_u STR_n STR_d STR_a STR_n STR_e STR_s STR_e "\0"
+#define STRING_sylotinagri0 STR_s STR_y STR_l STR_o STR_t STR_i STR_n STR_a STR_g STR_r STR_i "\0"
+#define STRING_syriac0 STR_s STR_y STR_r STR_i STR_a STR_c "\0"
+#define STRING_tagalog0 STR_t STR_a STR_g STR_a STR_l STR_o STR_g "\0"
+#define STRING_tagbanwa0 STR_t STR_a STR_g STR_b STR_a STR_n STR_w STR_a "\0"
+#define STRING_taile0 STR_t STR_a STR_i STR_l STR_e "\0"
+#define STRING_taitham0 STR_t STR_a STR_i STR_t STR_h STR_a STR_m "\0"
+#define STRING_taiviet0 STR_t STR_a STR_i STR_v STR_i STR_e STR_t "\0"
+#define STRING_takri0 STR_t STR_a STR_k STR_r STR_i "\0"
+#define STRING_tamil0 STR_t STR_a STR_m STR_i STR_l "\0"
+#define STRING_tangsa0 STR_t STR_a STR_n STR_g STR_s STR_a "\0"
+#define STRING_tangut0 STR_t STR_a STR_n STR_g STR_u STR_t "\0"
+#define STRING_telugu0 STR_t STR_e STR_l STR_u STR_g STR_u "\0"
+#define STRING_thaana0 STR_t STR_h STR_a STR_a STR_n STR_a "\0"
+#define STRING_thai0 STR_t STR_h STR_a STR_i "\0"
+#define STRING_tibetan0 STR_t STR_i STR_b STR_e STR_t STR_a STR_n "\0"
+#define STRING_tifinagh0 STR_t STR_i STR_f STR_i STR_n STR_a STR_g STR_h "\0"
+#define STRING_tirhuta0 STR_t STR_i STR_r STR_h STR_u STR_t STR_a "\0"
+#define STRING_toto0 STR_t STR_o STR_t STR_o "\0"
+#define STRING_ugaritic0 STR_u STR_g STR_a STR_r STR_i STR_t STR_i STR_c "\0"
+#define STRING_unknown0 STR_u STR_n STR_k STR_n STR_o STR_w STR_n "\0"
+#define STRING_vai0 STR_v STR_a STR_i "\0"
+#define STRING_vithkuqi0 STR_v STR_i STR_t STR_h STR_k STR_u STR_q STR_i "\0"
+#define STRING_wancho0 STR_w STR_a STR_n STR_c STR_h STR_o "\0"
+#define STRING_warangciti0 STR_w STR_a STR_r STR_a STR_n STR_g STR_c STR_i STR_t STR_i "\0"
+#define STRING_xan0 STR_x STR_a STR_n "\0"
+#define STRING_xps0 STR_x STR_p STR_s "\0"
+#define STRING_xsp0 STR_x STR_s STR_p "\0"
+#define STRING_xuc0 STR_x STR_u STR_c "\0"
+#define STRING_xwd0 STR_x STR_w STR_d "\0"
+#define STRING_yezidi0 STR_y STR_e STR_z STR_i STR_d STR_i "\0"
+#define STRING_yi0 STR_y STR_i "\0"
+#define STRING_z0 STR_z "\0"
+#define STRING_zanabazarsquare0 STR_z STR_a STR_n STR_a STR_b STR_a STR_z STR_a STR_r STR_s STR_q STR_u STR_a STR_r STR_e "\0"
+#define STRING_zl0 STR_z STR_l "\0"
+#define STRING_zp0 STR_z STR_p "\0"
+#define STRING_zs0 STR_z STR_s "\0"
 
 const char PRIV(utt_names)[] =
-  STRING_Adlam0
-  STRING_Ahom0
-  STRING_Anatolian_Hieroglyphs0
-  STRING_Any0
-  STRING_Arabic0
-  STRING_Armenian0
-  STRING_Avestan0
-  STRING_Balinese0
-  STRING_Bamum0
-  STRING_Bassa_Vah0
-  STRING_Batak0
-  STRING_Bengali0
-  STRING_Bhaiksuki0
-  STRING_Bopomofo0
-  STRING_Brahmi0
-  STRING_Braille0
-  STRING_Buginese0
-  STRING_Buhid0
-  STRING_C0
-  STRING_Canadian_Aboriginal0
-  STRING_Carian0
-  STRING_Caucasian_Albanian0
-  STRING_Cc0
-  STRING_Cf0
-  STRING_Chakma0
-  STRING_Cham0
-  STRING_Cherokee0
-  STRING_Chorasmian0
-  STRING_Cn0
-  STRING_Co0
-  STRING_Common0
-  STRING_Coptic0
-  STRING_Cs0
-  STRING_Cuneiform0
-  STRING_Cypriot0
-  STRING_Cypro_Minoan0
-  STRING_Cyrillic0
-  STRING_Deseret0
-  STRING_Devanagari0
-  STRING_Dives_Akuru0
-  STRING_Dogra0
-  STRING_Duployan0
-  STRING_Egyptian_Hieroglyphs0
-  STRING_Elbasan0
-  STRING_Elymaic0
-  STRING_Ethiopic0
-  STRING_Georgian0
-  STRING_Glagolitic0
-  STRING_Gothic0
-  STRING_Grantha0
-  STRING_Greek0
-  STRING_Gujarati0
-  STRING_Gunjala_Gondi0
-  STRING_Gurmukhi0
-  STRING_Han0
-  STRING_Hangul0
-  STRING_Hanifi_Rohingya0
-  STRING_Hanunoo0
-  STRING_Hatran0
-  STRING_Hebrew0
-  STRING_Hiragana0
-  STRING_Imperial_Aramaic0
-  STRING_Inherited0
-  STRING_Inscriptional_Pahlavi0
-  STRING_Inscriptional_Parthian0
-  STRING_Javanese0
-  STRING_Kaithi0
-  STRING_Kannada0
-  STRING_Katakana0
-  STRING_Kayah_Li0
-  STRING_Kharoshthi0
-  STRING_Khitan_Small_Script0
-  STRING_Khmer0
-  STRING_Khojki0
-  STRING_Khudawadi0
-  STRING_L0
-  STRING_L_AMPERSAND0
-  STRING_Lao0
-  STRING_Latin0
-  STRING_Lepcha0
-  STRING_Limbu0
-  STRING_Linear_A0
-  STRING_Linear_B0
-  STRING_Lisu0
-  STRING_Ll0
-  STRING_Lm0
-  STRING_Lo0
-  STRING_Lt0
-  STRING_Lu0
-  STRING_Lycian0
-  STRING_Lydian0
-  STRING_M0
-  STRING_Mahajani0
-  STRING_Makasar0
-  STRING_Malayalam0
-  STRING_Mandaic0
-  STRING_Manichaean0
-  STRING_Marchen0
-  STRING_Masaram_Gondi0
-  STRING_Mc0
-  STRING_Me0
-  STRING_Medefaidrin0
-  STRING_Meetei_Mayek0
-  STRING_Mende_Kikakui0
-  STRING_Meroitic_Cursive0
-  STRING_Meroitic_Hieroglyphs0
-  STRING_Miao0
-  STRING_Mn0
-  STRING_Modi0
-  STRING_Mongolian0
-  STRING_Mro0
-  STRING_Multani0
-  STRING_Myanmar0
-  STRING_N0
-  STRING_Nabataean0
-  STRING_Nandinagari0
-  STRING_Nd0
-  STRING_New_Tai_Lue0
-  STRING_Newa0
-  STRING_Nko0
-  STRING_Nl0
-  STRING_No0
-  STRING_Nushu0
-  STRING_Nyiakeng_Puachue_Hmong0
-  STRING_Ogham0
-  STRING_Ol_Chiki0
-  STRING_Old_Hungarian0
-  STRING_Old_Italic0
-  STRING_Old_North_Arabian0
-  STRING_Old_Permic0
-  STRING_Old_Persian0
-  STRING_Old_Sogdian0
-  STRING_Old_South_Arabian0
-  STRING_Old_Turkic0
-  STRING_Old_Uyghur0
-  STRING_Oriya0
-  STRING_Osage0
-  STRING_Osmanya0
-  STRING_P0
-  STRING_Pahawh_Hmong0
-  STRING_Palmyrene0
-  STRING_Pau_Cin_Hau0
-  STRING_Pc0
-  STRING_Pd0
-  STRING_Pe0
-  STRING_Pf0
-  STRING_Phags_Pa0
-  STRING_Phoenician0
-  STRING_Pi0
-  STRING_Po0
-  STRING_Ps0
-  STRING_Psalter_Pahlavi0
-  STRING_Rejang0
-  STRING_Runic0
-  STRING_S0
-  STRING_Samaritan0
-  STRING_Saurashtra0
-  STRING_Sc0
-  STRING_Sharada0
-  STRING_Shavian0
-  STRING_Siddham0
-  STRING_SignWriting0
-  STRING_Sinhala0
-  STRING_Sk0
-  STRING_Sm0
-  STRING_So0
-  STRING_Sogdian0
-  STRING_Sora_Sompeng0
-  STRING_Soyombo0
-  STRING_Sundanese0
-  STRING_Syloti_Nagri0
-  STRING_Syriac0
-  STRING_Tagalog0
-  STRING_Tagbanwa0
-  STRING_Tai_Le0
-  STRING_Tai_Tham0
-  STRING_Tai_Viet0
-  STRING_Takri0
-  STRING_Tamil0
-  STRING_Tangsa0
-  STRING_Tangut0
-  STRING_Telugu0
-  STRING_Thaana0
-  STRING_Thai0
-  STRING_Tibetan0
-  STRING_Tifinagh0
-  STRING_Tirhuta0
-  STRING_Toto0
-  STRING_Ugaritic0
-  STRING_Unknown0
-  STRING_Vai0
-  STRING_Vithkuqi0
-  STRING_Wancho0
-  STRING_Warang_Citi0
-  STRING_Xan0
-  STRING_Xps0
-  STRING_Xsp0
-  STRING_Xuc0
-  STRING_Xwd0
-  STRING_Yezidi0
-  STRING_Yi0
-  STRING_Z0
-  STRING_Zanabazar_Square0
-  STRING_Zl0
-  STRING_Zp0
-  STRING_Zs0;
+  STRING_adlam0
+  STRING_ahom0
+  STRING_anatolianhieroglyphs0
+  STRING_any0
+  STRING_arabic0
+  STRING_armenian0
+  STRING_avestan0
+  STRING_balinese0
+  STRING_bamum0
+  STRING_bassavah0
+  STRING_batak0
+  STRING_bengali0
+  STRING_bhaiksuki0
+  STRING_bidial0
+  STRING_bidian0
+  STRING_bidib0
+  STRING_bidibn0
+  STRING_bidicontrol0
+  STRING_bidics0
+  STRING_bidien0
+  STRING_bidies0
+  STRING_bidiet0
+  STRING_bidifsi0
+  STRING_bidil0
+  STRING_bidilre0
+  STRING_bidilri0
+  STRING_bidilro0
+  STRING_bidinsm0
+  STRING_bidion0
+  STRING_bidipdf0
+  STRING_bidipdi0
+  STRING_bidir0
+  STRING_bidirle0
+  STRING_bidirli0
+  STRING_bidirlo0
+  STRING_bidis0
+  STRING_bidiws0
+  STRING_bopomofo0
+  STRING_brahmi0
+  STRING_braille0
+  STRING_buginese0
+  STRING_buhid0
+  STRING_c0
+  STRING_canadianaboriginal0
+  STRING_carian0
+  STRING_caucasianalbanian0
+  STRING_cc0
+  STRING_cf0
+  STRING_chakma0
+  STRING_cham0
+  STRING_cherokee0
+  STRING_chorasmian0
+  STRING_cn0
+  STRING_co0
+  STRING_common0
+  STRING_coptic0
+  STRING_cs0
+  STRING_cuneiform0
+  STRING_cypriot0
+  STRING_cyprominoan0
+  STRING_cyrillic0
+  STRING_deseret0
+  STRING_devanagari0
+  STRING_divesakuru0
+  STRING_dogra0
+  STRING_duployan0
+  STRING_egyptianhieroglyphs0
+  STRING_elbasan0
+  STRING_elymaic0
+  STRING_ethiopic0
+  STRING_georgian0
+  STRING_glagolitic0
+  STRING_gothic0
+  STRING_grantha0
+  STRING_greek0
+  STRING_gujarati0
+  STRING_gunjalagondi0
+  STRING_gurmukhi0
+  STRING_han0
+  STRING_hangul0
+  STRING_hanifirohingya0
+  STRING_hanunoo0
+  STRING_hatran0
+  STRING_hebrew0
+  STRING_hiragana0
+  STRING_imperialaramaic0
+  STRING_inherited0
+  STRING_inscriptionalpahlavi0
+  STRING_inscriptionalparthian0
+  STRING_javanese0
+  STRING_kaithi0
+  STRING_kannada0
+  STRING_katakana0
+  STRING_kayahli0
+  STRING_kharoshthi0
+  STRING_khitansmallscript0
+  STRING_khmer0
+  STRING_khojki0
+  STRING_khudawadi0
+  STRING_l0
+  STRING_l_AMPERSAND0
+  STRING_lao0
+  STRING_latin0
+  STRING_lc0
+  STRING_lepcha0
+  STRING_limbu0
+  STRING_lineara0
+  STRING_linearb0
+  STRING_lisu0
+  STRING_ll0
+  STRING_lm0
+  STRING_lo0
+  STRING_lt0
+  STRING_lu0
+  STRING_lycian0
+  STRING_lydian0
+  STRING_m0
+  STRING_mahajani0
+  STRING_makasar0
+  STRING_malayalam0
+  STRING_mandaic0
+  STRING_manichaean0
+  STRING_marchen0
+  STRING_masaramgondi0
+  STRING_mc0
+  STRING_me0
+  STRING_medefaidrin0
+  STRING_meeteimayek0
+  STRING_mendekikakui0
+  STRING_meroiticcursive0
+  STRING_meroitichieroglyphs0
+  STRING_miao0
+  STRING_mn0
+  STRING_modi0
+  STRING_mongolian0
+  STRING_mro0
+  STRING_multani0
+  STRING_myanmar0
+  STRING_n0
+  STRING_nabataean0
+  STRING_nandinagari0
+  STRING_nd0
+  STRING_newa0
+  STRING_newtailue0
+  STRING_nko0
+  STRING_nl0
+  STRING_no0
+  STRING_nushu0
+  STRING_nyiakengpuachuehmong0
+  STRING_ogham0
+  STRING_olchiki0
+  STRING_oldhungarian0
+  STRING_olditalic0
+  STRING_oldnortharabian0
+  STRING_oldpermic0
+  STRING_oldpersian0
+  STRING_oldsogdian0
+  STRING_oldsoutharabian0
+  STRING_oldturkic0
+  STRING_olduyghur0
+  STRING_oriya0
+  STRING_osage0
+  STRING_osmanya0
+  STRING_p0
+  STRING_pahawhhmong0
+  STRING_palmyrene0
+  STRING_paucinhau0
+  STRING_pc0
+  STRING_pd0
+  STRING_pe0
+  STRING_pf0
+  STRING_phagspa0
+  STRING_phoenician0
+  STRING_pi0
+  STRING_po0
+  STRING_ps0
+  STRING_psalterpahlavi0
+  STRING_rejang0
+  STRING_runic0
+  STRING_s0
+  STRING_samaritan0
+  STRING_saurashtra0
+  STRING_sc0
+  STRING_sharada0
+  STRING_shavian0
+  STRING_siddham0
+  STRING_signwriting0
+  STRING_sinhala0
+  STRING_sk0
+  STRING_sm0
+  STRING_so0
+  STRING_sogdian0
+  STRING_sorasompeng0
+  STRING_soyombo0
+  STRING_sundanese0
+  STRING_sylotinagri0
+  STRING_syriac0
+  STRING_tagalog0
+  STRING_tagbanwa0
+  STRING_taile0
+  STRING_taitham0
+  STRING_taiviet0
+  STRING_takri0
+  STRING_tamil0
+  STRING_tangsa0
+  STRING_tangut0
+  STRING_telugu0
+  STRING_thaana0
+  STRING_thai0
+  STRING_tibetan0
+  STRING_tifinagh0
+  STRING_tirhuta0
+  STRING_toto0
+  STRING_ugaritic0
+  STRING_unknown0
+  STRING_vai0
+  STRING_vithkuqi0
+  STRING_wancho0
+  STRING_warangciti0
+  STRING_xan0
+  STRING_xps0
+  STRING_xsp0
+  STRING_xuc0
+  STRING_xwd0
+  STRING_yezidi0
+  STRING_yi0
+  STRING_z0
+  STRING_zanabazarsquare0
+  STRING_zl0
+  STRING_zp0
+  STRING_zs0;
 
 const ucp_type_table PRIV(utt)[] = {
   {   0, PT_SC, ucp_Adlam },
   {   6, PT_SC, ucp_Ahom },
   {  11, PT_SC, ucp_Anatolian_Hieroglyphs },
-  {  33, PT_ANY, 0 },
-  {  37, PT_SC, ucp_Arabic },
-  {  44, PT_SC, ucp_Armenian },
-  {  53, PT_SC, ucp_Avestan },
-  {  61, PT_SC, ucp_Balinese },
-  {  70, PT_SC, ucp_Bamum },
-  {  76, PT_SC, ucp_Bassa_Vah },
-  {  86, PT_SC, ucp_Batak },
-  {  92, PT_SC, ucp_Bengali },
-  { 100, PT_SC, ucp_Bhaiksuki },
-  { 110, PT_SC, ucp_Bopomofo },
-  { 119, PT_SC, ucp_Brahmi },
-  { 126, PT_SC, ucp_Braille },
-  { 134, PT_SC, ucp_Buginese },
-  { 143, PT_SC, ucp_Buhid },
-  { 149, PT_GC, ucp_C },
-  { 151, PT_SC, ucp_Canadian_Aboriginal },
-  { 171, PT_SC, ucp_Carian },
-  { 178, PT_SC, ucp_Caucasian_Albanian },
-  { 197, PT_PC, ucp_Cc },
-  { 200, PT_PC, ucp_Cf },
-  { 203, PT_SC, ucp_Chakma },
-  { 210, PT_SC, ucp_Cham },
-  { 215, PT_SC, ucp_Cherokee },
-  { 224, PT_SC, ucp_Chorasmian },
-  { 235, PT_PC, ucp_Cn },
-  { 238, PT_PC, ucp_Co },
-  { 241, PT_SC, ucp_Common },
-  { 248, PT_SC, ucp_Coptic },
-  { 255, PT_PC, ucp_Cs },
-  { 258, PT_SC, ucp_Cuneiform },
-  { 268, PT_SC, ucp_Cypriot },
-  { 276, PT_SC, ucp_Cypro_Minoan },
-  { 289, PT_SC, ucp_Cyrillic },
-  { 298, PT_SC, ucp_Deseret },
-  { 306, PT_SC, ucp_Devanagari },
-  { 317, PT_SC, ucp_Dives_Akuru },
-  { 329, PT_SC, ucp_Dogra },
-  { 335, PT_SC, ucp_Duployan },
-  { 344, PT_SC, ucp_Egyptian_Hieroglyphs },
-  { 365, PT_SC, ucp_Elbasan },
-  { 373, PT_SC, ucp_Elymaic },
-  { 381, PT_SC, ucp_Ethiopic },
-  { 390, PT_SC, ucp_Georgian },
-  { 399, PT_SC, ucp_Glagolitic },
-  { 410, PT_SC, ucp_Gothic },
-  { 417, PT_SC, ucp_Grantha },
-  { 425, PT_SC, ucp_Greek },
-  { 431, PT_SC, ucp_Gujarati },
-  { 440, PT_SC, ucp_Gunjala_Gondi },
-  { 454, PT_SC, ucp_Gurmukhi },
-  { 463, PT_SC, ucp_Han },
-  { 467, PT_SC, ucp_Hangul },
-  { 474, PT_SC, ucp_Hanifi_Rohingya },
-  { 490, PT_SC, ucp_Hanunoo },
-  { 498, PT_SC, ucp_Hatran },
-  { 505, PT_SC, ucp_Hebrew },
-  { 512, PT_SC, ucp_Hiragana },
-  { 521, PT_SC, ucp_Imperial_Aramaic },
-  { 538, PT_SC, ucp_Inherited },
-  { 548, PT_SC, ucp_Inscriptional_Pahlavi },
-  { 570, PT_SC, ucp_Inscriptional_Parthian },
-  { 593, PT_SC, ucp_Javanese },
-  { 602, PT_SC, ucp_Kaithi },
-  { 609, PT_SC, ucp_Kannada },
-  { 617, PT_SC, ucp_Katakana },
-  { 626, PT_SC, ucp_Kayah_Li },
-  { 635, PT_SC, ucp_Kharoshthi },
-  { 646, PT_SC, ucp_Khitan_Small_Script },
-  { 666, PT_SC, ucp_Khmer },
-  { 672, PT_SC, ucp_Khojki },
-  { 679, PT_SC, ucp_Khudawadi },
-  { 689, PT_GC, ucp_L },
-  { 691, PT_LAMP, 0 },
-  { 694, PT_SC, ucp_Lao },
-  { 698, PT_SC, ucp_Latin },
-  { 704, PT_SC, ucp_Lepcha },
-  { 711, PT_SC, ucp_Limbu },
-  { 717, PT_SC, ucp_Linear_A },
-  { 726, PT_SC, ucp_Linear_B },
-  { 735, PT_SC, ucp_Lisu },
-  { 740, PT_PC, ucp_Ll },
-  { 743, PT_PC, ucp_Lm },
-  { 746, PT_PC, ucp_Lo },
-  { 749, PT_PC, ucp_Lt },
-  { 752, PT_PC, ucp_Lu },
-  { 755, PT_SC, ucp_Lycian },
-  { 762, PT_SC, ucp_Lydian },
-  { 769, PT_GC, ucp_M },
-  { 771, PT_SC, ucp_Mahajani },
-  { 780, PT_SC, ucp_Makasar },
-  { 788, PT_SC, ucp_Malayalam },
-  { 798, PT_SC, ucp_Mandaic },
-  { 806, PT_SC, ucp_Manichaean },
-  { 817, PT_SC, ucp_Marchen },
-  { 825, PT_SC, ucp_Masaram_Gondi },
-  { 839, PT_PC, ucp_Mc },
-  { 842, PT_PC, ucp_Me },
-  { 845, PT_SC, ucp_Medefaidrin },
-  { 857, PT_SC, ucp_Meetei_Mayek },
-  { 870, PT_SC, ucp_Mende_Kikakui },
-  { 884, PT_SC, ucp_Meroitic_Cursive },
-  { 901, PT_SC, ucp_Meroitic_Hieroglyphs },
-  { 922, PT_SC, ucp_Miao },
-  { 927, PT_PC, ucp_Mn },
-  { 930, PT_SC, ucp_Modi },
-  { 935, PT_SC, ucp_Mongolian },
-  { 945, PT_SC, ucp_Mro },
-  { 949, PT_SC, ucp_Multani },
-  { 957, PT_SC, ucp_Myanmar },
-  { 965, PT_GC, ucp_N },
-  { 967, PT_SC, ucp_Nabataean },
-  { 977, PT_SC, ucp_Nandinagari },
-  { 989, PT_PC, ucp_Nd },
-  { 992, PT_SC, ucp_New_Tai_Lue },
-  { 1004, PT_SC, ucp_Newa },
-  { 1009, PT_SC, ucp_Nko },
-  { 1013, PT_PC, ucp_Nl },
-  { 1016, PT_PC, ucp_No },
-  { 1019, PT_SC, ucp_Nushu },
-  { 1025, PT_SC, ucp_Nyiakeng_Puachue_Hmong },
-  { 1048, PT_SC, ucp_Ogham },
-  { 1054, PT_SC, ucp_Ol_Chiki },
-  { 1063, PT_SC, ucp_Old_Hungarian },
-  { 1077, PT_SC, ucp_Old_Italic },
-  { 1088, PT_SC, ucp_Old_North_Arabian },
-  { 1106, PT_SC, ucp_Old_Permic },
-  { 1117, PT_SC, ucp_Old_Persian },
-  { 1129, PT_SC, ucp_Old_Sogdian },
-  { 1141, PT_SC, ucp_Old_South_Arabian },
-  { 1159, PT_SC, ucp_Old_Turkic },
-  { 1170, PT_SC, ucp_Old_Uyghur },
-  { 1181, PT_SC, ucp_Oriya },
-  { 1187, PT_SC, ucp_Osage },
-  { 1193, PT_SC, ucp_Osmanya },
-  { 1201, PT_GC, ucp_P },
-  { 1203, PT_SC, ucp_Pahawh_Hmong },
-  { 1216, PT_SC, ucp_Palmyrene },
-  { 1226, PT_SC, ucp_Pau_Cin_Hau },
-  { 1238, PT_PC, ucp_Pc },
-  { 1241, PT_PC, ucp_Pd },
-  { 1244, PT_PC, ucp_Pe },
-  { 1247, PT_PC, ucp_Pf },
-  { 1250, PT_SC, ucp_Phags_Pa },
-  { 1259, PT_SC, ucp_Phoenician },
-  { 1270, PT_PC, ucp_Pi },
-  { 1273, PT_PC, ucp_Po },
-  { 1276, PT_PC, ucp_Ps },
-  { 1279, PT_SC, ucp_Psalter_Pahlavi },
-  { 1295, PT_SC, ucp_Rejang },
-  { 1302, PT_SC, ucp_Runic },
-  { 1308, PT_GC, ucp_S },
-  { 1310, PT_SC, ucp_Samaritan },
-  { 1320, PT_SC, ucp_Saurashtra },
-  { 1331, PT_PC, ucp_Sc },
-  { 1334, PT_SC, ucp_Sharada },
-  { 1342, PT_SC, ucp_Shavian },
-  { 1350, PT_SC, ucp_Siddham },
-  { 1358, PT_SC, ucp_SignWriting },
-  { 1370, PT_SC, ucp_Sinhala },
-  { 1378, PT_PC, ucp_Sk },
-  { 1381, PT_PC, ucp_Sm },
-  { 1384, PT_PC, ucp_So },
-  { 1387, PT_SC, ucp_Sogdian },
-  { 1395, PT_SC, ucp_Sora_Sompeng },
-  { 1408, PT_SC, ucp_Soyombo },
-  { 1416, PT_SC, ucp_Sundanese },
-  { 1426, PT_SC, ucp_Syloti_Nagri },
-  { 1439, PT_SC, ucp_Syriac },
-  { 1446, PT_SC, ucp_Tagalog },
-  { 1454, PT_SC, ucp_Tagbanwa },
-  { 1463, PT_SC, ucp_Tai_Le },
-  { 1470, PT_SC, ucp_Tai_Tham },
-  { 1479, PT_SC, ucp_Tai_Viet },
-  { 1488, PT_SC, ucp_Takri },
-  { 1494, PT_SC, ucp_Tamil },
-  { 1500, PT_SC, ucp_Tangsa },
-  { 1507, PT_SC, ucp_Tangut },
-  { 1514, PT_SC, ucp_Telugu },
-  { 1521, PT_SC, ucp_Thaana },
-  { 1528, PT_SC, ucp_Thai },
-  { 1533, PT_SC, ucp_Tibetan },
-  { 1541, PT_SC, ucp_Tifinagh },
-  { 1550, PT_SC, ucp_Tirhuta },
-  { 1558, PT_SC, ucp_Toto },
-  { 1563, PT_SC, ucp_Ugaritic },
-  { 1572, PT_SC, ucp_Unknown },
-  { 1580, PT_SC, ucp_Vai },
-  { 1584, PT_SC, ucp_Vithkuqi },
-  { 1593, PT_SC, ucp_Wancho },
-  { 1600, PT_SC, ucp_Warang_Citi },
-  { 1612, PT_ALNUM, 0 },
-  { 1616, PT_PXSPACE, 0 },
-  { 1620, PT_SPACE, 0 },
-  { 1624, PT_UCNC, 0 },
-  { 1628, PT_WORD, 0 },
-  { 1632, PT_SC, ucp_Yezidi },
-  { 1639, PT_SC, ucp_Yi },
-  { 1642, PT_GC, ucp_Z },
-  { 1644, PT_SC, ucp_Zanabazar_Square },
-  { 1661, PT_PC, ucp_Zl },
-  { 1664, PT_PC, ucp_Zp },
-  { 1667, PT_PC, ucp_Zs }
+  {  32, PT_ANY, 0 },
+  {  36, PT_SC, ucp_Arabic },
+  {  43, PT_SC, ucp_Armenian },
+  {  52, PT_SC, ucp_Avestan },
+  {  60, PT_SC, ucp_Balinese },
+  {  69, PT_SC, ucp_Bamum },
+  {  75, PT_SC, ucp_Bassa_Vah },
+  {  84, PT_SC, ucp_Batak },
+  {  90, PT_SC, ucp_Bengali },
+  {  98, PT_SC, ucp_Bhaiksuki },
+  { 108, PT_BIDICL, ucp_bidiAL },
+  { 115, PT_BIDICL, ucp_bidiAN },
+  { 122, PT_BIDICL, ucp_bidiB },
+  { 128, PT_BIDICL, ucp_bidiBN },
+  { 135, PT_BIDICO, 0 },
+  { 147, PT_BIDICL, ucp_bidiCS },
+  { 154, PT_BIDICL, ucp_bidiEN },
+  { 161, PT_BIDICL, ucp_bidiES },
+  { 168, PT_BIDICL, ucp_bidiET },
+  { 175, PT_BIDICL, ucp_bidiFSI },
+  { 183, PT_BIDICL, ucp_bidiL },
+  { 189, PT_BIDICL, ucp_bidiLRE },
+  { 197, PT_BIDICL, ucp_bidiLRI },
+  { 205, PT_BIDICL, ucp_bidiLRO },
+  { 213, PT_BIDICL, ucp_bidiNSM },
+  { 221, PT_BIDICL, ucp_bidiON },
+  { 228, PT_BIDICL, ucp_bidiPDF },
+  { 236, PT_BIDICL, ucp_bidiPDI },
+  { 244, PT_BIDICL, ucp_bidiR },
+  { 250, PT_BIDICL, ucp_bidiRLE },
+  { 258, PT_BIDICL, ucp_bidiRLI },
+  { 266, PT_BIDICL, ucp_bidiRLO },
+  { 274, PT_BIDICL, ucp_bidiS },
+  { 280, PT_BIDICL, ucp_bidiWS },
+  { 287, PT_SC, ucp_Bopomofo },
+  { 296, PT_SC, ucp_Brahmi },
+  { 303, PT_SC, ucp_Braille },
+  { 311, PT_SC, ucp_Buginese },
+  { 320, PT_SC, ucp_Buhid },
+  { 326, PT_GC, ucp_C },
+  { 328, PT_SC, ucp_Canadian_Aboriginal },
+  { 347, PT_SC, ucp_Carian },
+  { 354, PT_SC, ucp_Caucasian_Albanian },
+  { 372, PT_PC, ucp_Cc },
+  { 375, PT_PC, ucp_Cf },
+  { 378, PT_SC, ucp_Chakma },
+  { 385, PT_SC, ucp_Cham },
+  { 390, PT_SC, ucp_Cherokee },
+  { 399, PT_SC, ucp_Chorasmian },
+  { 410, PT_PC, ucp_Cn },
+  { 413, PT_PC, ucp_Co },
+  { 416, PT_SC, ucp_Common },
+  { 423, PT_SC, ucp_Coptic },
+  { 430, PT_PC, ucp_Cs },
+  { 433, PT_SC, ucp_Cuneiform },
+  { 443, PT_SC, ucp_Cypriot },
+  { 451, PT_SC, ucp_Cypro_Minoan },
+  { 463, PT_SC, ucp_Cyrillic },
+  { 472, PT_SC, ucp_Deseret },
+  { 480, PT_SC, ucp_Devanagari },
+  { 491, PT_SC, ucp_Dives_Akuru },
+  { 502, PT_SC, ucp_Dogra },
+  { 508, PT_SC, ucp_Duployan },
+  { 517, PT_SC, ucp_Egyptian_Hieroglyphs },
+  { 537, PT_SC, ucp_Elbasan },
+  { 545, PT_SC, ucp_Elymaic },
+  { 553, PT_SC, ucp_Ethiopic },
+  { 562, PT_SC, ucp_Georgian },
+  { 571, PT_SC, ucp_Glagolitic },
+  { 582, PT_SC, ucp_Gothic },
+  { 589, PT_SC, ucp_Grantha },
+  { 597, PT_SC, ucp_Greek },
+  { 603, PT_SC, ucp_Gujarati },
+  { 612, PT_SC, ucp_Gunjala_Gondi },
+  { 625, PT_SC, ucp_Gurmukhi },
+  { 634, PT_SC, ucp_Han },
+  { 638, PT_SC, ucp_Hangul },
+  { 645, PT_SC, ucp_Hanifi_Rohingya },
+  { 660, PT_SC, ucp_Hanunoo },
+  { 668, PT_SC, ucp_Hatran },
+  { 675, PT_SC, ucp_Hebrew },
+  { 682, PT_SC, ucp_Hiragana },
+  { 691, PT_SC, ucp_Imperial_Aramaic },
+  { 707, PT_SC, ucp_Inherited },
+  { 717, PT_SC, ucp_Inscriptional_Pahlavi },
+  { 738, PT_SC, ucp_Inscriptional_Parthian },
+  { 760, PT_SC, ucp_Javanese },
+  { 769, PT_SC, ucp_Kaithi },
+  { 776, PT_SC, ucp_Kannada },
+  { 784, PT_SC, ucp_Katakana },
+  { 793, PT_SC, ucp_Kayah_Li },
+  { 801, PT_SC, ucp_Kharoshthi },
+  { 812, PT_SC, ucp_Khitan_Small_Script },
+  { 830, PT_SC, ucp_Khmer },
+  { 836, PT_SC, ucp_Khojki },
+  { 843, PT_SC, ucp_Khudawadi },
+  { 853, PT_GC, ucp_L },
+  { 855, PT_LAMP, 0 },
+  { 858, PT_SC, ucp_Lao },
+  { 862, PT_SC, ucp_Latin },
+  { 868, PT_LAMP, 0 },
+  { 871, PT_SC, ucp_Lepcha },
+  { 878, PT_SC, ucp_Limbu },
+  { 884, PT_SC, ucp_Linear_A },
+  { 892, PT_SC, ucp_Linear_B },
+  { 900, PT_SC, ucp_Lisu },
+  { 905, PT_PC, ucp_Ll },
+  { 908, PT_PC, ucp_Lm },
+  { 911, PT_PC, ucp_Lo },
+  { 914, PT_PC, ucp_Lt },
+  { 917, PT_PC, ucp_Lu },
+  { 920, PT_SC, ucp_Lycian },
+  { 927, PT_SC, ucp_Lydian },
+  { 934, PT_GC, ucp_M },
+  { 936, PT_SC, ucp_Mahajani },
+  { 945, PT_SC, ucp_Makasar },
+  { 953, PT_SC, ucp_Malayalam },
+  { 963, PT_SC, ucp_Mandaic },
+  { 971, PT_SC, ucp_Manichaean },
+  { 982, PT_SC, ucp_Marchen },
+  { 990, PT_SC, ucp_Masaram_Gondi },
+  { 1003, PT_PC, ucp_Mc },
+  { 1006, PT_PC, ucp_Me },
+  { 1009, PT_SC, ucp_Medefaidrin },
+  { 1021, PT_SC, ucp_Meetei_Mayek },
+  { 1033, PT_SC, ucp_Mende_Kikakui },
+  { 1046, PT_SC, ucp_Meroitic_Cursive },
+  { 1062, PT_SC, ucp_Meroitic_Hieroglyphs },
+  { 1082, PT_SC, ucp_Miao },
+  { 1087, PT_PC, ucp_Mn },
+  { 1090, PT_SC, ucp_Modi },
+  { 1095, PT_SC, ucp_Mongolian },
+  { 1105, PT_SC, ucp_Mro },
+  { 1109, PT_SC, ucp_Multani },
+  { 1117, PT_SC, ucp_Myanmar },
+  { 1125, PT_GC, ucp_N },
+  { 1127, PT_SC, ucp_Nabataean },
+  { 1137, PT_SC, ucp_Nandinagari },
+  { 1149, PT_PC, ucp_Nd },
+  { 1152, PT_SC, ucp_Newa },
+  { 1157, PT_SC, ucp_New_Tai_Lue },
+  { 1167, PT_SC, ucp_Nko },
+  { 1171, PT_PC, ucp_Nl },
+  { 1174, PT_PC, ucp_No },
+  { 1177, PT_SC, ucp_Nushu },
+  { 1183, PT_SC, ucp_Nyiakeng_Puachue_Hmong },
+  { 1204, PT_SC, ucp_Ogham },
+  { 1210, PT_SC, ucp_Ol_Chiki },
+  { 1218, PT_SC, ucp_Old_Hungarian },
+  { 1231, PT_SC, ucp_Old_Italic },
+  { 1241, PT_SC, ucp_Old_North_Arabian },
+  { 1257, PT_SC, ucp_Old_Permic },
+  { 1267, PT_SC, ucp_Old_Persian },
+  { 1278, PT_SC, ucp_Old_Sogdian },
+  { 1289, PT_SC, ucp_Old_South_Arabian },
+  { 1305, PT_SC, ucp_Old_Turkic },
+  { 1315, PT_SC, ucp_Old_Uyghur },
+  { 1325, PT_SC, ucp_Oriya },
+  { 1331, PT_SC, ucp_Osage },
+  { 1337, PT_SC, ucp_Osmanya },
+  { 1345, PT_GC, ucp_P },
+  { 1347, PT_SC, ucp_Pahawh_Hmong },
+  { 1359, PT_SC, ucp_Palmyrene },
+  { 1369, PT_SC, ucp_Pau_Cin_Hau },
+  { 1379, PT_PC, ucp_Pc },
+  { 1382, PT_PC, ucp_Pd },
+  { 1385, PT_PC, ucp_Pe },
+  { 1388, PT_PC, ucp_Pf },
+  { 1391, PT_SC, ucp_Phags_Pa },
+  { 1399, PT_SC, ucp_Phoenician },
+  { 1410, PT_PC, ucp_Pi },
+  { 1413, PT_PC, ucp_Po },
+  { 1416, PT_PC, ucp_Ps },
+  { 1419, PT_SC, ucp_Psalter_Pahlavi },
+  { 1434, PT_SC, ucp_Rejang },
+  { 1441, PT_SC, ucp_Runic },
+  { 1447, PT_GC, ucp_S },
+  { 1449, PT_SC, ucp_Samaritan },
+  { 1459, PT_SC, ucp_Saurashtra },
+  { 1470, PT_PC, ucp_Sc },
+  { 1473, PT_SC, ucp_Sharada },
+  { 1481, PT_SC, ucp_Shavian },
+  { 1489, PT_SC, ucp_Siddham },
+  { 1497, PT_SC, ucp_SignWriting },
+  { 1509, PT_SC, ucp_Sinhala },
+  { 1517, PT_PC, ucp_Sk },
+  { 1520, PT_PC, ucp_Sm },
+  { 1523, PT_PC, ucp_So },
+  { 1526, PT_SC, ucp_Sogdian },
+  { 1534, PT_SC, ucp_Sora_Sompeng },
+  { 1546, PT_SC, ucp_Soyombo },
+  { 1554, PT_SC, ucp_Sundanese },
+  { 1564, PT_SC, ucp_Syloti_Nagri },
+  { 1576, PT_SC, ucp_Syriac },
+  { 1583, PT_SC, ucp_Tagalog },
+  { 1591, PT_SC, ucp_Tagbanwa },
+  { 1600, PT_SC, ucp_Tai_Le },
+  { 1606, PT_SC, ucp_Tai_Tham },
+  { 1614, PT_SC, ucp_Tai_Viet },
+  { 1622, PT_SC, ucp_Takri },
+  { 1628, PT_SC, ucp_Tamil },
+  { 1634, PT_SC, ucp_Tangsa },
+  { 1641, PT_SC, ucp_Tangut },
+  { 1648, PT_SC, ucp_Telugu },
+  { 1655, PT_SC, ucp_Thaana },
+  { 1662, PT_SC, ucp_Thai },
+  { 1667, PT_SC, ucp_Tibetan },
+  { 1675, PT_SC, ucp_Tifinagh },
+  { 1684, PT_SC, ucp_Tirhuta },
+  { 1692, PT_SC, ucp_Toto },
+  { 1697, PT_SC, ucp_Ugaritic },
+  { 1706, PT_SC, ucp_Unknown },
+  { 1714, PT_SC, ucp_Vai },
+  { 1718, PT_SC, ucp_Vithkuqi },
+  { 1727, PT_SC, ucp_Wancho },
+  { 1734, PT_SC, ucp_Warang_Citi },
+  { 1745, PT_ALNUM, 0 },
+  { 1749, PT_PXSPACE, 0 },
+  { 1753, PT_SPACE, 0 },
+  { 1757, PT_UCNC, 0 },
+  { 1761, PT_WORD, 0 },
+  { 1765, PT_SC, ucp_Yezidi },
+  { 1772, PT_SC, ucp_Yi },
+  { 1775, PT_GC, ucp_Z },
+  { 1777, PT_SC, ucp_Zanabazar_Square },
+  { 1793, PT_PC, ucp_Zl },
+  { 1796, PT_PC, ucp_Zp },
+  { 1799, PT_PC, ucp_Zs }
 };
 
 const size_t PRIV(utt_size) = sizeof(PRIV(utt)) / sizeof(ucp_type_table);

@@ -2088,7 +2088,8 @@ get_ucp(PCRE2_SPTR *ptrptr, BOOL *negptr, uint16_t *ptypeptr,
 PCRE2_UCHAR c;
 PCRE2_SIZE i, bot, top;
 PCRE2_SPTR ptr = *ptrptr;
-PCRE2_UCHAR name[32];
+PCRE2_UCHAR name[50];
+PCRE2_UCHAR *vptr = NULL;
 
 if (ptr >= cb->end_pattern) goto ERROR_RETURN;
 c = *ptr++;
@@ -2109,9 +2110,11 @@ if (c == CHAR_LEFT_CURLY_BRACKET)
     {
     if (ptr >= cb->end_pattern) goto ERROR_RETURN;
     c = *ptr++;
+    while (c == '_' || c == '-' || isspace(c)) c = *ptr++;
     if (c == CHAR_NUL) goto ERROR_RETURN;
     if (c == CHAR_RIGHT_CURLY_BRACKET) break;
-    name[i] = c;
+    name[i] = tolower(c);
+    if (c == ':' || c == '=') vptr = name + i;
     }
   if (c != CHAR_RIGHT_CURLY_BRACKET) goto ERROR_RETURN;
   name[i] = 0;
@@ -2122,12 +2125,27 @@ letter. */
 
 else if (MAX_255(c) && (cb->ctypes[c] & ctype_letter) != 0)
   {
-  name[0] = c;
+  name[0] = tolower(c);
   name[1] = 0;
   }
 else goto ERROR_RETURN;
 
 *ptrptr = ptr;
+
+/* If the property contains ':' or '=' we have class name and value separately
+specified. The only case currently supported is Bidi_Class, for which the
+property names are "bidi<name>". */
+
+if (vptr != NULL)
+  {
+  *vptr = 0;   /* Terminate class name */
+  if (PRIV(strcmp_c8)(name, "bidiclass") != 0)
+    {
+    *errorcodeptr = ERR47;
+    return FALSE;
+    }
+  memmove(name + 4, vptr + 1, (name + i - vptr)*sizeof(PCRE2_UCHAR));
+  }
 
 /* Search for a recognized property name using binary chop. */
 
@@ -2147,6 +2165,7 @@ while (bot < top)
     }
   if (r > 0) bot = i + 1; else top = i;
   }
+
 *errorcodeptr = ERR47;   /* Unrecognized name */
 return FALSE;
 

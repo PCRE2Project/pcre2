@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-          New API code Copyright (c) 2016-2019 University of Cambridge
+          New API code Copyright (c) 2016-2021 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -206,6 +206,16 @@ while ((t = *data++) != XCL_END)
           return !negated;
         }
       break;
+      
+      case PT_BIDICO:
+      if (((prop->bidi & UCD_BIDICONTROL_BIT) != 0) == isprop)
+        return !negated;
+      break;    
+      
+      case PT_BIDICL:
+      if (((prop->bidi & UCD_BIDICLASS_MASK) == data[1]) == isprop)
+        return !negated;
+      break;    
 
       /* The following three properties can occur only in an XCLASS, as there
       is no \p or \P coding for them. */

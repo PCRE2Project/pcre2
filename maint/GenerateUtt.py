@@ -29,6 +29,9 @@
 # Added script names for Unicode 12.1.0, 27-July-2019.
 # Added script names for Unicode 13.0.0, 10-March-2020.
 # Added Script names for Unicode 14.0.0, PCRE2-10.39
+# Added support for bidi class and bidi control, 06-December-2021
+#   This also involved lower casing strings and removing underscores, in
+#   accordance with Unicode's "loose matching" rules, which Perl observes.
 
 script_names = ['Unknown', 'Arabic', 'Armenian', 'Bengali', 'Bopomofo', 'Braille', 'Buginese', 'Buhid', 'Canadian_Aboriginal', \
  'Cherokee', 'Common', 'Coptic', 'Cypriot', 'Cyrillic', 'Deseret', 'Devanagari', 'Ethiopic', 'Georgian', \
@@ -78,21 +81,46 @@ category_names = ['Cc', 'Cf', 'Cn', 'Co', 'Cs', 'Ll', 'Lm', 'Lo', 'Lt', 'Lu',
 
 general_category_names = ['C', 'L', 'M', 'N', 'P', 'S', 'Z']
 
-# First add the Unicode script and category names.
+bidiclass_names = ['bidiAL', 'bidiAN', 'bidiB', 'bidiBN', 'bidiCS', 'bidiEN',
+  'bidiES', 'bidiET', 'bidiFSI', 'bidiL', 'bidiLRE', 'bidiLRI', 'bidiLRO',
+  'bidiNSM', 'bidiON', 'bidiPDF', 'bidiPDI', 'bidiR', 'bidiRLE', 'bidiRLI',
+  'bidiRLO', 'bidiS', 'bidiWS' ]
 
-utt_table  = list(zip(script_names, ['PT_SC'] * len(script_names)))
-utt_table += list(zip(category_names, ['PT_PC'] * len(category_names)))
-utt_table += list(zip(general_category_names, ['PT_GC'] * len(general_category_names)))
+# Create standardized versions of the names by lowercasing and removing
+# ampersands.
 
-# Now add our own specials.
+def stdnames(x):
+        y = [''] * len(x)
+        for i in range(len(x)):
+                y[i] = x[i].lower().replace('_', '')
+        return y         
 
-utt_table.append(('Any', 'PT_ANY'))
-utt_table.append(('L&',  'PT_LAMP'))
-utt_table.append(('Xan', 'PT_ALNUM'))
-utt_table.append(('Xps', 'PT_PXSPACE'))
-utt_table.append(('Xsp', 'PT_SPACE'))
-utt_table.append(('Xuc', 'PT_UCNC'))
-utt_table.append(('Xwd', 'PT_WORD'))
+std_script_names = stdnames(script_names)
+std_category_names = stdnames(category_names)
+std_general_category_names = stdnames(general_category_names)
+std_bidiclass_names = stdnames(bidiclass_names)
+
+# Create the table, starting with the Unicode script, category and bidi class
+# names. We keep both the standardized name and the original, because the 
+# latter is used for the ucp_xx names.
+
+utt_table  = list(zip(std_script_names, script_names, ['PT_SC'] * len(script_names)))
+utt_table += list(zip(std_category_names, category_names, ['PT_PC'] * len(category_names)))
+utt_table += list(zip(std_general_category_names, general_category_names, ['PT_GC'] * len(general_category_names)))
+utt_table += list(zip(std_bidiclass_names, bidiclass_names, ['PT_BIDICL'] * len(bidiclass_names)))
+
+# Now add our own specials. Note both the standardized and capitalized forms 
+# are needed.
+
+utt_table.append(('any', 'Any', 'PT_ANY'))
+utt_table.append(('bidicontrol', 'Bidi_Control', 'PT_BIDICO'))
+utt_table.append(('l&',  'L&', 'PT_LAMP'))
+utt_table.append(('lc',  'LC', 'PT_LAMP'))
+utt_table.append(('xan', 'Xan', 'PT_ALNUM'))
+utt_table.append(('xps', 'Xps', 'PT_PXSPACE'))
+utt_table.append(('xsp', 'Xsp', 'PT_SPACE'))
+utt_table.append(('xuc', 'Xuc', 'PT_UCNC'))
+utt_table.append(('xwd', 'Xwd', 'PT_WORD'))
 
 # Sort the table.
 
@@ -104,9 +132,7 @@ utt_table.sort()
 for utt in utt_table:
         print('#define STRING_%s0' % (utt[0].replace('&', '_AMPERSAND')), end=' ')
         for c in utt[0]:
-                if c == '_':
-                        print('STR_UNDERSCORE', end=' ')
-                elif c == '&':
+                if c == '&':
                         print('STR_AMPERSAND', end=' ')
                 else:
                         print('STR_%s' % c, end=' ');
@@ -121,20 +147,18 @@ for utt in utt_table:
         if utt == utt_table[-1]:
                 last = ';'
         print('  STRING_%s0%s' % (utt[0].replace('&', '_AMPERSAND'), last))
-# This was how it was done before the EBCDIC-compatible modification.
-#        print '  "%s\\0"%s' % (utt[0], last)
 
 print('\nconst ucp_type_table PRIV(utt)[] = {')
 offset = 0
 last = ','
 for utt in utt_table:
-        if utt[1] in ('PT_ANY', 'PT_LAMP', 'PT_ALNUM', 'PT_PXSPACE', 
-          'PT_SPACE', 'PT_UCNC', 'PT_WORD'):
+        if utt[2] in ('PT_ANY', 'PT_LAMP', 'PT_ALNUM', 'PT_PXSPACE',
+          'PT_SPACE', 'PT_UCNC', 'PT_WORD', 'PT_BIDICO'):
                 value = '0'
         else:
-                value = 'ucp_' + utt[0]
+                value = 'ucp_' + utt[1]
         if utt == utt_table[-1]:
                 last = ''
-        print('  { %3d, %s, %s }%s' % (offset, utt[1], value, last))
+        print('  { %3d, %s, %s }%s' % (offset, utt[2], value, last))
         offset += len(utt[0]) + 1
 print('};')

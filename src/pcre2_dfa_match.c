@@ -1240,6 +1240,14 @@ for (;;)
                c >= 0xe000;
           break;
 
+          case PT_BIDICO:
+          OK = UCD_BIDICONTROL(c) != 0;
+          break;
+
+          case PT_BIDICL:
+          OK = UCD_BIDICLASS(c) == code[2];
+          break;
+
           /* Should never occur, but keep compilers from grumbling. */
 
           default:
@@ -1498,6 +1506,14 @@ for (;;)
                c >= 0xe000;
           break;
 
+          case PT_BIDICO:
+          OK = UCD_BIDICONTROL(c) != 0;
+          break;
+
+          case PT_BIDICL:
+          OK = UCD_BIDICLASS(c) == code[3];
+          break;
+
           /* Should never occur, but keep compilers from grumbling. */
 
           default:
@@ -1737,6 +1753,14 @@ for (;;)
           OK = c == CHAR_DOLLAR_SIGN || c == CHAR_COMMERCIAL_AT ||
                c == CHAR_GRAVE_ACCENT || (c >= 0xa0 && c <= 0xd7ff) ||
                c >= 0xe000;
+          break;
+
+          case PT_BIDICO:
+          OK = UCD_BIDICONTROL(c) != 0;
+          break;
+
+          case PT_BIDICL:
+          OK = UCD_BIDICLASS(c) == code[3];
           break;
 
           /* Should never occur, but keep compilers from grumbling. */
@@ -2003,6 +2027,14 @@ for (;;)
           OK = c == CHAR_DOLLAR_SIGN || c == CHAR_COMMERCIAL_AT ||
                c == CHAR_GRAVE_ACCENT || (c >= 0xa0 && c <= 0xd7ff) ||
                c >= 0xe000;
+          break;
+
+          case PT_BIDICO:
+          OK = UCD_BIDICONTROL(c) != 0;
+          break;
+
+          case PT_BIDICL:
+          OK = UCD_BIDICLASS(c) == code[1 + IMM2_SIZE + 2];
           break;
 
           /* Should never occur, but keep compilers from grumbling. */

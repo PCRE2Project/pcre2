@@ -34,11 +34,15 @@ return code is always zero.
 There are three commands:
 
 "findprop" must be followed by a space-separated list of Unicode code points as
-hex numbers, either without any prefix or starting with "U+". The output is one
-line per character, giving its Unicode properties followed by its other case or
-cases if one or more exist, followed by its Script Extension list if it is not
-just the same as the base script. This list is in square brackets. The
-properties are:
+hex numbers, either without any prefix or starting with "U+", or as individual
+UTF-8 characters preceded by '+'. For example:
+
+  findprop U+1234 5Abc +?
+
+The output is one line per character, giving its Unicode properties followed by
+its other case or cases if one or more exist, followed by its Script Extension
+list if it is not just the same as the base script. This list is in square
+brackets. The properties are:
 
 Bidi control        shown as '*' if true
 Bidi class          e.g. NSM (most common is L)
@@ -47,9 +51,13 @@ Specific type       e.g. Upper case letter
 Script              e.g. Medefaidrin
 Grapheme break type e.g. Extend (most common is Other)
 
+The scripts names are all in lower case, with underscores removed, because
+that's how they are stored for "loose" matching.
+
 "find" must be followed by a list of property names and their values. The
-values are case-sensitive. This finds characters that have those properties. If
-multiple properties are listed, they must all be matched. Currently supported:
+values are case-sensitive, except for bidi class. This finds characters that
+have those properties. If multiple properties are listed, they must all be
+matched. Currently supported:
 
   script <name>    The character must have this script property. Only one
                      such script may be given.
@@ -59,7 +67,7 @@ multiple properties are listed, they must all be matched. Currently supported:
   type <abbrev>    The character's specific type (e.g. Lu or Nd) must match.
   gbreak <name>    The grapheme break property must match.
   bidi <class>     The character's bidi class must match.
-  bidi_control     The character must be a bidi control character 
+  bidi_control     The character must be a bidi control character
 
 If a <name> or <abbrev> is preceded by !, the value must NOT be present. For
 Script Extensions, there may be a mixture of positive and negative
@@ -202,6 +210,41 @@ static const unsigned int utf8_table1[] = {
 static const int utf8_table2[] = {
   0, 0xc0, 0xe0, 0xf0, 0xf8, 0xfc};
 
+/* Macro to pick up the remaining bytes of a UTF-8 character, advancing
+the pointer. */
+
+#define GETUTF8INC(c, eptr) \
+    { \
+    if ((c & 0x20u) == 0) \
+      c = ((c & 0x1fu) << 6) | (*eptr++ & 0x3fu); \
+    else if ((c & 0x10u) == 0) \
+      { \
+      c = ((c & 0x0fu) << 12) | ((*eptr & 0x3fu) << 6) | (eptr[1] & 0x3fu); \
+      eptr += 2; \
+      } \
+    else if ((c & 0x08u) == 0) \
+      { \
+      c = ((c & 0x07u) << 18) | ((*eptr & 0x3fu) << 12) | \
+          ((eptr[1] & 0x3fu) << 6) | (eptr[2] & 0x3fu); \
+      eptr += 3; \
+      } \
+    else if ((c & 0x04u) == 0) \
+      { \
+      c = ((c & 0x03u) << 24) | ((*eptr & 0x3fu) << 18) | \
+          ((eptr[1] & 0x3fu) << 12) | ((eptr[2] & 0x3fu) << 6) | \
+          (eptr[3] & 0x3fu); \
+      eptr += 4; \
+      } \
+    else \
+      { \
+      c = ((c & 0x01u) << 30) | ((*eptr & 0x3fu) << 24) | \
+          ((eptr[1] & 0x3fu) << 18) | ((eptr[2] & 0x3fu) << 12) | \
+          ((eptr[3] & 0x3fu) << 6) | (eptr[4] & 0x3fu); \
+      eptr += 5; \
+      } \
+    }
+
+
 
 /*************************************************
 *       Convert character value to UTF-8         *
@@ -267,6 +310,7 @@ for (i = 0; i < PRIV(utt_size); i++)
   u = PRIV(utt) + i;
   if (u->type == PT_SC && u->value == script) break;
   }
+
 if (i < PRIV(utt_size))
   return PRIV(utt_names) + u->name_offset;
 
@@ -601,7 +645,7 @@ while (*s != 0)
         }
       for (i = 0; i < sizeof(bd_names)/sizeof(char *); i += 2)
         {
-        if (strcmp(CS (value + offset), CS bd_names[i]) == 0)
+        if (strcasecmp(CS (value + offset), CS bd_names[i]) == 0)
           {
           bidiclass = i/2;
           break;
@@ -629,7 +673,7 @@ while (*s != 0)
     }
   }
 
-if (script < 0 && scriptx_count == 0 && type < 0 && gbreak < 0 && 
+if (script < 0 && scriptx_count == 0 && type < 0 && gbreak < 0 &&
     bidiclass < 0 && !bidicontrol)
   {
   printf("** No properties specified\n");
@@ -787,12 +831,26 @@ if (strcmp(CS name, "findprop") == 0)
     unsigned int c;
     unsigned char *endptr;
     t = s;
-    if (strncmp(CS t, "U+", 2) == 0) t += 2;
-    c = strtoul(CS t, CSS(&endptr), 16);
+
+    if (*t == '+')
+      {
+      c = *(++t);
+      if (c > 0x7fu) 
+        {
+        GETCHARINC(c, t);
+        }    
+      endptr = t+1;
+      }
+    else
+      {
+      if (strncmp(CS t, "U+", 2) == 0) t += 2;
+      c = strtoul(CS t, CSS(&endptr), 16);
+      }
+
     if (*endptr != 0 && !isspace(*endptr))
       {
       while (*endptr != 0 && !isspace(*endptr)) endptr++;
-      printf("** Invalid hex number: ignored \"%.*s\"\n", (int)(endptr-s), s);
+      printf("** Invalid character specifier: ignored \"%.*s\"\n", (int)(endptr-s), s);
       }
     else
       {
@@ -884,19 +942,19 @@ if (argc > 1 && strcmp(argv[1], "-s") == 0)
 if (argc > first_arg)
   {
   int i;
-  BOOL hexfirst = TRUE;
+  BOOL datafirst = TRUE;
   char *arg = argv[first_arg];
   unsigned char *s = buffer;
 
-  if (strncmp(arg, "U+", 2) != 0 && !isdigit(*arg))
+  if (*arg != '+' && strncmp(arg, "U+", 2) != 0 && !isdigit(*arg))
     {
     while (*arg != 0)
       {
-      if (!isxdigit(*arg++)) { hexfirst = FALSE; break; }
+      if (!isxdigit(*arg++)) { datafirst = FALSE; break; }
       }
     }
 
-  if (hexfirst)
+  if (datafirst)
     {
     strcpy(CS s, "findprop ");
     s += 9;

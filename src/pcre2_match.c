@@ -159,7 +159,8 @@ enum { RM100=100, RM101 };
 #ifdef SUPPORT_UNICODE
 enum { RM200=200, RM201, RM202, RM203, RM204, RM205, RM206, RM207,
        RM208,     RM209, RM210, RM211, RM212, RM213, RM214, RM215,
-       RM216,     RM217, RM218, RM219, RM220, RM221, RM222 };
+       RM216,     RM217, RM218, RM219, RM220, RM221, RM222, RM223,
+       RM224 };
 #endif
 
 /* Define short names for general fields in the current backtrack frame, which
@@ -2503,6 +2504,16 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
           RRETURN(MATCH_NOMATCH);
         break;
 
+        case PT_BIDICO:
+        if (((prop->bidi & UCD_BIDICONTROL_BIT) != 0) == (Fop == OP_NOTPROP))
+          RRETURN(MATCH_NOMATCH);
+        break;
+
+        case PT_BIDICL:
+        if (((prop->bidi & UCD_BIDICLASS_MASK) == Fecode[2]) == (Fop == OP_NOTPROP))
+          RRETURN(MATCH_NOMATCH);
+        break;
+
         /* This should never occur */
 
         default:
@@ -2800,6 +2811,34 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
             if ((fc == CHAR_DOLLAR_SIGN || fc == CHAR_COMMERCIAL_AT ||
                  fc == CHAR_GRAVE_ACCENT || (fc >= 0xa0 && fc <= 0xd7ff) ||
                  fc >= 0xe000) == (Lctype == OP_NOTPROP))
+              RRETURN(MATCH_NOMATCH);
+            }
+          break;
+
+          case PT_BIDICO:
+          for (i = 1; i <= Lmin; i++)
+            {
+            if (Feptr >= mb->end_subject)
+              {
+              SCHECK_PARTIAL();
+              RRETURN(MATCH_NOMATCH);
+              }
+            GETCHARINCTEST(fc, Feptr);
+            if ((UCD_BIDICONTROL(fc) != 0) == (Lctype == OP_NOTPROP))
+              RRETURN(MATCH_NOMATCH);
+            }
+          break;
+
+          case PT_BIDICL:
+          for (i = 1; i <= Lmin; i++)
+            {
+            if (Feptr >= mb->end_subject)
+              {
+              SCHECK_PARTIAL();
+              RRETURN(MATCH_NOMATCH);
+              }
+            GETCHARINCTEST(fc, Feptr);
+            if ((UCD_BIDICLASS(fc) == Lpropvalue) == (Lctype == OP_NOTPROP))
               RRETURN(MATCH_NOMATCH);
             }
           break;
@@ -3562,6 +3601,40 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
             }
           /* Control never gets here */
 
+          case PT_BIDICO:
+          for (;;)
+            {
+            RMATCH(Fecode, RM223);
+            if (rrc != MATCH_NOMATCH) RRETURN(rrc);
+            if (Lmin++ >= Lmax) RRETURN(MATCH_NOMATCH);
+            if (Feptr >= mb->end_subject)
+              {
+              SCHECK_PARTIAL();
+              RRETURN(MATCH_NOMATCH);
+              }
+            GETCHARINCTEST(fc, Feptr);
+            if ((UCD_BIDICONTROL(fc) != 0) == (Lctype == OP_NOTPROP))
+              RRETURN(MATCH_NOMATCH);
+            }
+          /* Control never gets here */
+
+          case PT_BIDICL:
+          for (;;)
+            {
+            RMATCH(Fecode, RM224);
+            if (rrc != MATCH_NOMATCH) RRETURN(rrc);
+            if (Lmin++ >= Lmax) RRETURN(MATCH_NOMATCH);
+            if (Feptr >= mb->end_subject)
+              {
+              SCHECK_PARTIAL();
+              RRETURN(MATCH_NOMATCH);
+              }
+            GETCHARINCTEST(fc, Feptr);
+            if ((UCD_BIDICLASS(fc) == Lpropvalue) == (Lctype == OP_NOTPROP))
+              RRETURN(MATCH_NOMATCH);
+            }
+          /* Control never gets here */
+
           /* This should never occur */
           default:
           return PCRE2_ERROR_INTERNAL;
@@ -4073,6 +4146,38 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
                  fc >= 0xe000) == (Lctype == OP_NOTPROP))
               break;
             Feptr += len;
+            }
+          break;
+
+          case PT_BIDICO:
+          for (i = Lmin; i < Lmax; i++)
+            {
+            int len = 1;
+            if (Feptr >= mb->end_subject)
+              {
+              SCHECK_PARTIAL();
+              break;
+              }
+            GETCHARLENTEST(fc, Feptr, len);
+            if ((UCD_BIDICONTROL(fc) != 0) == (Lctype == OP_NOTPROP))
+              break;
+            Feptr+= len;
+            }
+          break;
+
+          case PT_BIDICL:
+          for (i = Lmin; i < Lmax; i++)
+            {
+            int len = 1;
+            if (Feptr >= mb->end_subject)
+              {
+              SCHECK_PARTIAL();
+              break;
+              }
+            GETCHARLENTEST(fc, Feptr, len);
+            if ((UCD_BIDICLASS(fc) == Lpropvalue) == (Lctype == OP_NOTPROP))
+              break;
+            Feptr+= len;
             }
           break;
 
@@ -6066,7 +6171,7 @@ switch (Freturn_id)
   LBL(200) LBL(201) LBL(202) LBL(203) LBL(204) LBL(205) LBL(206)
   LBL(207) LBL(208) LBL(209) LBL(210) LBL(211) LBL(212) LBL(213)
   LBL(214) LBL(215) LBL(216) LBL(217) LBL(218) LBL(219) LBL(220)
-  LBL(221) LBL(222)
+  LBL(221) LBL(222) LBL(223) LBL(224)
 #endif
 
   default:

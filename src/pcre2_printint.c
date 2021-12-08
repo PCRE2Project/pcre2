@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-          New API code Copyright (c) 2016-2019 University of Cambridge
+          New API code Copyright (c) 2016-2021 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -273,8 +273,8 @@ print_prop(FILE *f, PCRE2_SPTR code, const char *before, const char *after)
 {
 if (code[1] != PT_CLIST)
   {
-  fprintf(f, "%s%s %s%s", before, OP_names[*code], get_ucpname(code[1],
-    code[2]), after);
+  const char *s = get_ucpname(code[1], code[2]);
+  fprintf(f, "%s%s %c%s%s", before, OP_names[*code], toupper(s[0]), s+1, after);
   }
 else
   {
@@ -724,6 +724,7 @@ for(;;)
               {
               unsigned int ptype = *ccode++;
               unsigned int pvalue = *ccode++;
+              const char *s; 
 
               switch(ptype)
                 {
@@ -740,8 +741,8 @@ for(;;)
                 break;
 
                 default:
-                fprintf(f, "\\%c{%s}", (not? 'P':'p'),
-                  get_ucpname(ptype, pvalue));
+                s = get_ucpname(ptype, pvalue); 
+                fprintf(f, "\\%c{%c%s}", (not? 'P':'p'), toupper(s[0]), s+1);
                 break;
                 }
               }

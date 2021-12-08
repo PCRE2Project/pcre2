@@ -546,8 +546,9 @@ Each is followed by two code units that encode the desired property as a type
 and a value. The types are a set of #defines of the form PT_xxx, and the values
 are enumerations of the form ucp_xx, defined in the pcre2_ucp.h source file.
 The value is relevant only for PT_GC (General Category), PT_PC (Particular
-Category), PT_SC (Script), and the pseudo-property PT_CLIST, which is used to
-identify a list of case-equivalent characters when there are three or more.
+Category), PT_SC (Script), PT_BIDICL (Bidi Class), and the pseudo-property
+PT_CLIST, which is used to identify a list of case-equivalent characters when
+there are three or more.
 
 Repeats of these items use the OP_TYPESTAR etc. set of opcodes, followed by
 three code units: OP_PROP or OP_NOTPROP, and then the desired property type and
@@ -827,4 +828,4 @@ not a real opcode, but is used to check at compile time that tables indexed by
 opcode are the correct length, in order to catch updating errors.
 
 Philip Hazel
-12 July 2019
+December 2021

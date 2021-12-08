@@ -1,253 +1,220 @@
 find script Han
-U+2E80..U+2E99  ON  Symbol: Other symbol, Han, Other
-U+2E9B..U+2EF3  ON  Symbol: Other symbol, Han, Other
-U+2F00..U+2FD5  ON  Symbol: Other symbol, Han, Other
-        U+3005  L   Letter: Modifier letter, Han, Other
-        U+3007  L   Number: Letter number, Han, Other
-U+3021..U+3029  L   Number: Letter number, Han, Other
-U+3038..U+303A  L   Number: Letter number, Han, Other
-        U+303B  L   Letter: Modifier letter, Han, Other
-U+3400..U+4DBF  L   Letter: Other letter, Han, Other
-U+4E00..U+9FFF  L   Letter: Other letter, Han, Other
-U+F900..U+FA6D  L   Letter: Other letter, Han, Other
-U+FA70..U+FAD9  L   Letter: Other letter, Han, Other
-        U+16FE2  ON  Punctuation: Other punctuation, Han, Other
-       U+16FE3  L   Letter: Modifier letter, Han, Other
-U+16FF0..U+16FF1  L   Mark: Spacing mark, Han, SpacingMark
-U+20000..U+2A6DF  L   Letter: Other letter, Han, Other
-U+2A700..U+2B738  L   Letter: Other letter, Han, Other
-U+2B740..U+2B81D  L   Letter: Other letter, Han, Other
-U+2B820..U+2CEA1  L   Letter: Other letter, Han, Other
-U+2CEB0..U+2EBE0  L   Letter: Other letter, Han, Other
-U+2F800..U+2FA1D  L   Letter: Other letter, Han, Other
-U+30000..U+3134A  L   Letter: Other letter, Han, Other
+** Unrecognized script name "Han"
 find type Pe script Common scriptx Hangul
-U+3009  ON  Punctuation: Close punctuation, Common, Other, [Bopomofo, Hangul, Han, Hiragana, Katakana, Yi]
-U+300B  ON  Punctuation: Close punctuation, Common, Other, [Bopomofo, Hangul, Han, Hiragana, Katakana, Yi]
-U+300D  ON  Punctuation: Close punctuation, Common, Other, [Bopomofo, Hangul, Han, Hiragana, Katakana, Yi]
-U+300F  ON  Punctuation: Close punctuation, Common, Other, [Bopomofo, Hangul, Han, Hiragana, Katakana, Yi]
-U+3011  ON  Punctuation: Close punctuation, Common, Other, [Bopomofo, Hangul, Han, Hiragana, Katakana, Yi]
-U+3015  ON  Punctuation: Close punctuation, Common, Other, [Bopomofo, Hangul, Han, Hiragana, Katakana, Yi]
-U+3017  ON  Punctuation: Close punctuation, Common, Other, [Bopomofo, Hangul, Han, Hiragana, Katakana, Yi]
-U+3019  ON  Punctuation: Close punctuation, Common, Other, [Bopomofo, Hangul, Han, Hiragana, Katakana, Yi]
-U+301B  ON  Punctuation: Close punctuation, Common, Other, [Bopomofo, Hangul, Han, Hiragana, Katakana, Yi]
-U+301E..U+301F  ON  Punctuation: Close punctuation, Common, Other, [Bopomofo, Hangul, Han, Hiragana, Katakana]
-        U+FF63  ON  Punctuation: Close punctuation, Common, Other, [Bopomofo, Hangul, Han, Hiragana, Katakana, Yi]
+** Unrecognized script name "Common"
 find type Sk
-U+005E  ON  Symbol: Modifier symbol, Common, Other
-U+0060  ON  Symbol: Modifier symbol, Common, Other
-U+00A8  ON  Symbol: Modifier symbol, Common, Other
-U+00AF  ON  Symbol: Modifier symbol, Common, Other
-U+00B4  ON  Symbol: Modifier symbol, Common, Other
-U+00B8  ON  Symbol: Modifier symbol, Common, Other
-U+02C2..U+02C5  ON  Symbol: Modifier symbol, Common, Other
-U+02D2..U+02DF  ON  Symbol: Modifier symbol, Common, Other
-U+02E5..U+02E9  ON  Symbol: Modifier symbol, Common, Other
-U+02EA..U+02EB  ON  Symbol: Modifier symbol, Bopomofo, Other
-        U+02ED  ON  Symbol: Modifier symbol, Common, Other
-U+02EF..U+02FF  ON  Symbol: Modifier symbol, Common, Other
-        U+0375  ON  Symbol: Modifier symbol, Greek, Other
-        U+0384  ON  Symbol: Modifier symbol, Greek, Other
-        U+0385  ON  Symbol: Modifier symbol, Common, Other
-        U+0888  AL  Symbol: Modifier symbol, Arabic, Other
-        U+1FBD  ON  Symbol: Modifier symbol, Greek, Other
-U+1FBF..U+1FC1  ON  Symbol: Modifier symbol, Greek, Other
-U+1FCD..U+1FCF  ON  Symbol: Modifier symbol, Greek, Other
-U+1FDD..U+1FDF  ON  Symbol: Modifier symbol, Greek, Other
-U+1FED..U+1FEF  ON  Symbol: Modifier symbol, Greek, Other
-U+1FFD..U+1FFE  ON  Symbol: Modifier symbol, Greek, Other
-U+309B..U+309C  ON  Symbol: Modifier symbol, Common, Other, [Hiragana, Katakana]
-U+A700..U+A707  ON  Symbol: Modifier symbol, Common, Other, [Han, Latin]
-U+A708..U+A716  ON  Symbol: Modifier symbol, Common, Other
-U+A720..U+A721  ON  Symbol: Modifier symbol, Common, Other
-U+A789..U+A78A  L   Symbol: Modifier symbol, Common, Other
-        U+AB5B  L   Symbol: Modifier symbol, Common, Other
-U+AB6A..U+AB6B  ON  Symbol: Modifier symbol, Common, Other
-U+FBB2..U+FBC2  AL  Symbol: Modifier symbol, Arabic, Other
-        U+FF3E  ON  Symbol: Modifier symbol, Common, Other
-        U+FF40  ON  Symbol: Modifier symbol, Common, Other
-        U+FFE3  ON  Symbol: Modifier symbol, Common, Other
-U+1F3FB..U+1F3FF  ON  Symbol: Modifier symbol, Common, Extend
+U+005E  ON  Symbol: Modifier symbol, common, Other
+U+0060  ON  Symbol: Modifier symbol, common, Other
+U+00A8  ON  Symbol: Modifier symbol, common, Other
+U+00AF  ON  Symbol: Modifier symbol, common, Other
+U+00B4  ON  Symbol: Modifier symbol, common, Other
+U+00B8  ON  Symbol: Modifier symbol, common, Other
+U+02C2..U+02C5  ON  Symbol: Modifier symbol, common, Other
+U+02D2..U+02DF  ON  Symbol: Modifier symbol, common, Other
+U+02E5..U+02E9  ON  Symbol: Modifier symbol, common, Other
+U+02EA..U+02EB  ON  Symbol: Modifier symbol, bopomofo, Other
+        U+02ED  ON  Symbol: Modifier symbol, common, Other
+U+02EF..U+02FF  ON  Symbol: Modifier symbol, common, Other
+        U+0375  ON  Symbol: Modifier symbol, greek, Other
+        U+0384  ON  Symbol: Modifier symbol, greek, Other
+        U+0385  ON  Symbol: Modifier symbol, common, Other
+        U+0888  AL  Symbol: Modifier symbol, arabic, Other
+        U+1FBD  ON  Symbol: Modifier symbol, greek, Other
+U+1FBF..U+1FC1  ON  Symbol: Modifier symbol, greek, Other
+U+1FCD..U+1FCF  ON  Symbol: Modifier symbol, greek, Other
+U+1FDD..U+1FDF  ON  Symbol: Modifier symbol, greek, Other
+U+1FED..U+1FEF  ON  Symbol: Modifier symbol, greek, Other
+U+1FFD..U+1FFE  ON  Symbol: Modifier symbol, greek, Other
+U+309B..U+309C  ON  Symbol: Modifier symbol, common, Other, [hiragana, katakana]
+U+A700..U+A707  ON  Symbol: Modifier symbol, common, Other, [han, latin]
+U+A708..U+A716  ON  Symbol: Modifier symbol, common, Other
+U+A720..U+A721  ON  Symbol: Modifier symbol, common, Other
+U+A789..U+A78A  L   Symbol: Modifier symbol, common, Other
+        U+AB5B  L   Symbol: Modifier symbol, common, Other
+U+AB6A..U+AB6B  ON  Symbol: Modifier symbol, common, Other
+U+FBB2..U+FBC2  AL  Symbol: Modifier symbol, arabic, Other
+        U+FF3E  ON  Symbol: Modifier symbol, common, Other
+        U+FF40  ON  Symbol: Modifier symbol, common, Other
+        U+FFE3  ON  Symbol: Modifier symbol, common, Other
+U+1F3FB..U+1F3FF  ON  Symbol: Modifier symbol, common, Extend
 find type Pd
-U+002D  ES  Punctuation: Dash punctuation, Common, Other
-U+058A  ON  Punctuation: Dash punctuation, Armenian, Other
-U+05BE  R   Punctuation: Dash punctuation, Hebrew, Other
-U+1400  ON  Punctuation: Dash punctuation, Canadian_Aboriginal, Other
-U+1806  ON  Punctuation: Dash punctuation, Mongolian, Other
-U+2010..U+2015  ON  Punctuation: Dash punctuation, Common, Other
-        U+2E17  ON  Punctuation: Dash punctuation, Common, Other
-        U+2E1A  ON  Punctuation: Dash punctuation, Common, Other
-U+2E3A..U+2E3B  ON  Punctuation: Dash punctuation, Common, Other
-        U+2E40  ON  Punctuation: Dash punctuation, Common, Other
-        U+2E5D  ON  Punctuation: Dash punctuation, Common, Other
-        U+301C  ON  Punctuation: Dash punctuation, Common, Other, [Bopomofo, Hangul, Han, Hiragana, Katakana]
-        U+3030  ON  Punctuation: Dash punctuation, Common, Extended Pictographic, [Bopomofo, Hangul, Han, Hiragana, Katakana]
-        U+30A0  ON  Punctuation: Dash punctuation, Common, Other, [Hiragana, Katakana]
-U+FE31..U+FE32  ON  Punctuation: Dash punctuation, Common, Other
-        U+FE58  ON  Punctuation: Dash punctuation, Common, Other
-        U+FE63  ES  Punctuation: Dash punctuation, Common, Other
-        U+FF0D  ES  Punctuation: Dash punctuation, Common, Other
-        U+10EAD  R   Punctuation: Dash punctuation, Yezidi, Other
+U+002D  ES  Punctuation: Dash punctuation, common, Other
+U+058A  ON  Punctuation: Dash punctuation, armenian, Other
+U+05BE  R   Punctuation: Dash punctuation, hebrew, Other
+U+1400  ON  Punctuation: Dash punctuation, canadianaboriginal, Other
+U+1806  ON  Punctuation: Dash punctuation, mongolian, Other
+U+2010..U+2015  ON  Punctuation: Dash punctuation, common, Other
+        U+2E17  ON  Punctuation: Dash punctuation, common, Other
+        U+2E1A  ON  Punctuation: Dash punctuation, common, Other
+U+2E3A..U+2E3B  ON  Punctuation: Dash punctuation, common, Other
+        U+2E40  ON  Punctuation: Dash punctuation, common, Other
+        U+2E5D  ON  Punctuation: Dash punctuation, common, Other
+        U+301C  ON  Punctuation: Dash punctuation, common, Other, [bopomofo, hangul, han, hiragana, katakana]
+        U+3030  ON  Punctuation: Dash punctuation, common, Extended Pictographic, [bopomofo, hangul, han, hiragana, katakana]
+        U+30A0  ON  Punctuation: Dash punctuation, common, Other, [hiragana, katakana]
+U+FE31..U+FE32  ON  Punctuation: Dash punctuation, common, Other
+        U+FE58  ON  Punctuation: Dash punctuation, common, Other
+        U+FE63  ES  Punctuation: Dash punctuation, common, Other
+        U+FF0D  ES  Punctuation: Dash punctuation, common, Other
+        U+10EAD  R   Punctuation: Dash punctuation, yezidi, Other
 find gbreak LVT
-U+AC01..U+AC1B  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+AC1D..U+AC37  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+AC39..U+AC53  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+AC55..U+AC6F  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+AC71..U+AC8B  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+AC8D..U+ACA7  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+ACA9..U+ACC3  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+ACC5..U+ACDF  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+ACE1..U+ACFB  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+ACFD..U+AD17  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+AD19..U+AD33  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+AD35..U+AD4F  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+AD51..U+AD6B  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+AD6D..U+AD87  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+AD89..U+ADA3  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+ADA5..U+ADBF  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+ADC1..U+ADDB  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+ADDD..U+ADF7  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+ADF9..U+AE13  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+AE15..U+AE2F  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+AE31..U+AE4B  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+AE4D..U+AE67  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+AE69..U+AE83  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+AE85..U+AE9F  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+AEA1..U+AEBB  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+AEBD..U+AED7  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+AED9..U+AEF3  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+AEF5..U+AF0F  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+AF11..U+AF2B  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+AF2D..U+AF47  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+AF49..U+AF63  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+AF65..U+AF7F  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+AF81..U+AF9B  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+AF9D..U+AFB7  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+AFB9..U+AFD3  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+AFD5..U+AFEF  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+AFF1..U+B00B  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+B00D..U+B027  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+B029..U+B043  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+B045..U+B05F  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+B061..U+B07B  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+B07D..U+B097  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+B099..U+B0B3  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+B0B5..U+B0CF  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+B0D1..U+B0EB  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+B0ED..U+B107  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+B109..U+B123  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+B125..U+B13F  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+B141..U+B15B  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+B15D..U+B177  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+B179..U+B193  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+B195..U+B1AF  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+B1B1..U+B1CB  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+B1CD..U+B1E7  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+B1E9..U+B203  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+B205..U+B21F  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+B221..U+B23B  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+B23D..U+B257  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+B259..U+B273  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+B275..U+B28F  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+B291..U+B2AB  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+B2AD..U+B2C7  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+B2C9..U+B2E3  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+B2E5..U+B2FF  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+B301..U+B31B  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+B31D..U+B337  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+B339..U+B353  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+B355..U+B36F  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+B371..U+B38B  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+B38D..U+B3A7  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+B3A9..U+B3C3  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+B3C5..U+B3DF  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+B3E1..U+B3FB  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+B3FD..U+B417  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+B419..U+B433  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+B435..U+B44F  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+B451..U+B46B  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+B46D..U+B487  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+B489..U+B4A3  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+B4A5..U+B4BF  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+B4C1..U+B4DB  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+B4DD..U+B4F7  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+B4F9..U+B513  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+B515..U+B52F  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+B531..U+B54B  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+B54D..U+B567  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+B569..U+B583  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+B585..U+B59F  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+B5A1..U+B5BB  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+B5BD..U+B5D7  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+B5D9..U+B5F3  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+B5F5..U+B60F  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+B611..U+B62B  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+B62D..U+B647  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+B649..U+B663  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+B665..U+B67F  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+B681..U+B69B  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+B69D..U+B6B7  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+B6B9..U+B6D3  L   Letter: Other letter, Hangul, Hangul syllable type LVT
-U+B6D5..U+B6EF  L   Letter: Other letter, Hangul, Hangul syllable type LVT
+U+AC01..U+AC1B  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+AC1D..U+AC37  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+AC39..U+AC53  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+AC55..U+AC6F  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+AC71..U+AC8B  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+AC8D..U+ACA7  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+ACA9..U+ACC3  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+ACC5..U+ACDF  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+ACE1..U+ACFB  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+ACFD..U+AD17  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+AD19..U+AD33  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+AD35..U+AD4F  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+AD51..U+AD6B  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+AD6D..U+AD87  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+AD89..U+ADA3  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+ADA5..U+ADBF  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+ADC1..U+ADDB  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+ADDD..U+ADF7  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+ADF9..U+AE13  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+AE15..U+AE2F  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+AE31..U+AE4B  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+AE4D..U+AE67  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+AE69..U+AE83  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+AE85..U+AE9F  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+AEA1..U+AEBB  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+AEBD..U+AED7  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+AED9..U+AEF3  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+AEF5..U+AF0F  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+AF11..U+AF2B  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+AF2D..U+AF47  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+AF49..U+AF63  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+AF65..U+AF7F  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+AF81..U+AF9B  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+AF9D..U+AFB7  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+AFB9..U+AFD3  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+AFD5..U+AFEF  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+AFF1..U+B00B  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+B00D..U+B027  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+B029..U+B043  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+B045..U+B05F  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+B061..U+B07B  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+B07D..U+B097  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+B099..U+B0B3  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+B0B5..U+B0CF  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+B0D1..U+B0EB  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+B0ED..U+B107  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+B109..U+B123  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+B125..U+B13F  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+B141..U+B15B  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+B15D..U+B177  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+B179..U+B193  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+B195..U+B1AF  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+B1B1..U+B1CB  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+B1CD..U+B1E7  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+B1E9..U+B203  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+B205..U+B21F  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+B221..U+B23B  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+B23D..U+B257  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+B259..U+B273  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+B275..U+B28F  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+B291..U+B2AB  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+B2AD..U+B2C7  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+B2C9..U+B2E3  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+B2E5..U+B2FF  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+B301..U+B31B  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+B31D..U+B337  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+B339..U+B353  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+B355..U+B36F  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+B371..U+B38B  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+B38D..U+B3A7  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+B3A9..U+B3C3  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+B3C5..U+B3DF  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+B3E1..U+B3FB  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+B3FD..U+B417  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+B419..U+B433  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+B435..U+B44F  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+B451..U+B46B  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+B46D..U+B487  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+B489..U+B4A3  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+B4A5..U+B4BF  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+B4C1..U+B4DB  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+B4DD..U+B4F7  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+B4F9..U+B513  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+B515..U+B52F  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+B531..U+B54B  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+B54D..U+B567  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+B569..U+B583  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+B585..U+B59F  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+B5A1..U+B5BB  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+B5BD..U+B5D7  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+B5D9..U+B5F3  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+B5F5..U+B60F  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+B611..U+B62B  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+B62D..U+B647  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+B649..U+B663  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+B665..U+B67F  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+B681..U+B69B  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+B69D..U+B6B7  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+B6B9..U+B6D3  L   Letter: Other letter, hangul, Hangul syllable type LVT
+U+B6D5..U+B6EF  L   Letter: Other letter, hangul, Hangul syllable type LVT
 ...
 find script Old_Uyghur
-U+10F70..U+10F81  R   Letter: Other letter, Old_Uyghur, Other
-U+10F82..U+10F85  NSM Mark: Non-spacing mark, Old_Uyghur, Extend
-U+10F86..U+10F89  R   Punctuation: Other punctuation, Old_Uyghur, Other
+** Unrecognized script name "Old_Uyghur"
 find bidi PDF
-U+202C *PDF Control: Format, Common, Control
+U+202C *PDF Control: Format, common, Control
 find bidi CS
-U+002C  CS  Punctuation: Other punctuation, Common, Other
-U+002E..U+002F  CS  Punctuation: Other punctuation, Common, Other
-        U+003A  CS  Punctuation: Other punctuation, Common, Other
-        U+00A0  CS  Separator: Space separator, Common, Other
-        U+060C  CS  Punctuation: Other punctuation, Common, Other, [Arabic, Nko, Hanifi_Rohingya, Syriac, Thaana, Yezidi]
-        U+202F  CS  Separator: Space separator, Common, Other, [Latin, Mongolian]
-        U+2044  CS  Symbol: Mathematical symbol, Common, Other
-        U+FE50  CS  Punctuation: Other punctuation, Common, Other
-        U+FE52  CS  Punctuation: Other punctuation, Common, Other
-        U+FE55  CS  Punctuation: Other punctuation, Common, Other
-        U+FF0C  CS  Punctuation: Other punctuation, Common, Other
-U+FF0E..U+FF0F  CS  Punctuation: Other punctuation, Common, Other
-        U+FF1A  CS  Punctuation: Other punctuation, Common, Other
+U+002C  CS  Punctuation: Other punctuation, common, Other
+U+002E..U+002F  CS  Punctuation: Other punctuation, common, Other
+        U+003A  CS  Punctuation: Other punctuation, common, Other
+        U+00A0  CS  Separator: Space separator, common, Other
+        U+060C  CS  Punctuation: Other punctuation, common, Other, [arabic, nko, hanifirohingya, syriac, thaana, yezidi]
+        U+202F  CS  Separator: Space separator, common, Other, [latin, mongolian]
+        U+2044  CS  Symbol: Mathematical symbol, common, Other
+        U+FE50  CS  Punctuation: Other punctuation, common, Other
+        U+FE52  CS  Punctuation: Other punctuation, common, Other
+        U+FE55  CS  Punctuation: Other punctuation, common, Other
+        U+FF0C  CS  Punctuation: Other punctuation, common, Other
+U+FF0E..U+FF0F  CS  Punctuation: Other punctuation, common, Other
+        U+FF1A  CS  Punctuation: Other punctuation, common, Other
 find bidi CS type Sm
-U+2044  CS  Symbol: Mathematical symbol, Common, Other
+U+2044  CS  Symbol: Mathematical symbol, common, Other
 find bidi B
-U+000A  B   Control: Control, Common, LF
-U+000D  B   Control: Control, Common, CR
-U+001C..U+001E  B   Control: Control, Common, Control
-        U+0085  B   Control: Control, Common, Control
-        U+2029  B   Separator: Paragraph separator, Common, Control
+U+000A  B   Control: Control, common, LF
+U+000D  B   Control: Control, common, CR
+U+001C..U+001E  B   Control: Control, common, Control
+        U+0085  B   Control: Control, common, Control
+        U+2029  B   Separator: Paragraph separator, common, Control
 find bidi FSI
-U+2068 *FSI Control: Format, Common, Control
+U+2068 *FSI Control: Format, common, Control
 find bidi PDI
-U+2069 *PDI Control: Format, Common, Control
+U+2069 *PDI Control: Format, common, Control
 find bidi RLI
-U+2067 *RLI Control: Format, Common, Control
+U+2067 *RLI Control: Format, common, Control
 find bidi RLO
-U+202E *RLO Control: Format, Common, Control
+U+202E *RLO Control: Format, common, Control
 find bidi S
-U+0009  S   Control: Control, Common, Control
-U+000B  S   Control: Control, Common, Control
-U+001F  S   Control: Control, Common, Control
+U+0009  S   Control: Control, common, Control
+U+000B  S   Control: Control, common, Control
+U+001F  S   Control: Control, common, Control
 find bidi WS
-U+000C  WS  Control: Control, Common, Control
-U+0020  WS  Separator: Space separator, Common, Other
-U+1680  WS  Separator: Space separator, Ogham, Other
-U+2000..U+200A  WS  Separator: Space separator, Common, Other
-        U+2028  WS  Separator: Line separator, Common, Control
-        U+205F  WS  Separator: Space separator, Common, Other
-        U+3000  WS  Separator: Space separator, Common, Other
+U+000C  WS  Control: Control, common, Control
+U+0020  WS  Separator: Space separator, common, Other
+U+1680  WS  Separator: Space separator, ogham, Other
+U+2000..U+200A  WS  Separator: Space separator, common, Other
+        U+2028  WS  Separator: Line separator, common, Control
+        U+205F  WS  Separator: Space separator, common, Other
+        U+3000  WS  Separator: Space separator, common, Other
 find bidi_control
-U+061C *AL  Control: Format, Arabic, Control, [Arabic, Syriac, Thaana]
-U+200E *L   Control: Format, Common, Control
-U+200F *R   Control: Format, Common, Control
-U+202A *LRE Control: Format, Common, Control
-U+202B *RLE Control: Format, Common, Control
-U+202C *PDF Control: Format, Common, Control
-U+202D *LRO Control: Format, Common, Control
-U+202E *RLO Control: Format, Common, Control
-U+2066 *LRT Control: Format, Common, Control
-U+2067 *RLI Control: Format, Common, Control
-U+2068 *FSI Control: Format, Common, Control
-U+2069 *PDI Control: Format, Common, Control
+U+061C *AL  Control: Format, arabic, Control, [arabic, syriac, thaana]
+U+200E *L   Control: Format, common, Control
+U+200F *R   Control: Format, common, Control
+U+202A *LRE Control: Format, common, Control
+U+202B *RLE Control: Format, common, Control
+U+202C *PDF Control: Format, common, Control
+U+202D *LRO Control: Format, common, Control
+U+202E *RLO Control: Format, common, Control
+U+2066 *LRI Control: Format, common, Control
+U+2067 *RLI Control: Format, common, Control
+U+2068 *FSI Control: Format, common, Control
+U+2069 *PDI Control: Format, common, Control
