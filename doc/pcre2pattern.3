@@ -1,4 +1,4 @@
-.TH PCRE2PATTERN 3 "08 December 2021" "PCRE2 10.40"
+.TH PCRE2PATTERN 3 "10 December 2021" "PCRE2 10.40"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION DETAILS"
@@ -779,7 +779,7 @@ escape sequences are:
   \eP{\fIxx\fP}   a character without the \fIxx\fP property
   \eX       a Unicode extended grapheme cluster
 .sp
-The property names represented by \fIxx\fP above are not case-sensitive, and in 
+The property names represented by \fIxx\fP above are not case-sensitive, and in
 accordance with Unicode's "loose matching" rules, spaces, hyphens, and
 underscores are ignored. There is support for Unicode script names, Unicode
 general category properties, "Any", which matches any character (including
@@ -1064,10 +1064,13 @@ PCRE2_UCP option or by starting the pattern with (*UCP).
 .SS "Bi-directional properties for \ep and \eP"
 .rs
 .sp
-Two properties relating to bi-directional text are supported:
+Two properties relating to bi-directional text (each with a shorter synonym)
+are supported:
 .sp
   \ep{Bidi_Control}         matches a Bidi control character
+  \ep{Bidi_C}               matches a Bidi control character
   \ep{Bidi_Class:<class>}   matches a character with the given class
+  \ep{BC:<class>}           matches a character with the given class
 .sp
 The recognized classes are:
 .sp
@@ -1080,7 +1083,7 @@ The recognized classes are:
   ES          European separator
   ET          European terminator
   FSI         first strong isolate
-  L           left-to-right            
+  L           left-to-right
   LRE         left-to-right embedding
   LRI         left-to-right isolate
   LRO         left-to-right override
@@ -1093,11 +1096,10 @@ The recognized classes are:
   RLI         right-to-left isolate
   RLO         right-to-left override
   S           segment separator
-  WS          which space             
+  WS          which space
 .sp
-For Bidi_Class, an equals sign may be used instead of a colon. The class names 
-are case-insensitive. As for other properties, only the short names are 
-recognized.
+For Bidi_Class, an equals sign may be used instead of a colon. The class names
+are case-insensitive; only the short names listed above are recognized.
 .
 .
 .SS Extended grapheme clusters
@@ -3950,6 +3952,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 08 December 2021
+Last updated: 10 December 2021
 Copyright (c) 1997-2021 University of Cambridge.
 .fi

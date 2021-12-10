@@ -137,6 +137,11 @@ happening, \s and \w may also match characters with code points in the range
 sequences is changed to use Unicode properties and they match many more
 characters.
 </P>
+<P>
+Property descriptions in \p and \P are matched caselessly; hyphens,
+underscores, and white space are ignored, in accordance with Unicode's "loose
+matching" rules.
+</P>
 <br><a name="SEC5" href="#TOC1">GENERAL CATEGORY PROPERTIES FOR \p and \P</a><br>
 <P>
 <pre>
@@ -367,7 +372,9 @@ Zanabazar_Square.
 <P>
 <pre>
   \p{Bidi_Control}         matches a Bidi control character
+  \p{Bidi_C}               matches a Bidi control character
   \p{Bidi_Class:&#60;class&#62;}   matches a character with the given class
+  \p{BC:&#60;class&#62;}           matches a character with the given class
 </pre>
 The recognized classes are:
 <pre>
@@ -731,7 +738,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC30" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 08 December 2021
+Last updated: 10 December 2021
 <br>
 Copyright &copy; 1997-2021 University of Cambridge.
 <br>

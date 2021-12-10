@@ -1,4 +1,4 @@
-.TH PCRE2SYNTAX 3 "08 December 2021" "PCRE2 10.40"
+.TH PCRE2SYNTAX 3 "10 December 2021" "PCRE2 10.40"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION SYNTAX SUMMARY"
@@ -102,6 +102,10 @@ happening, \es and \ew may also match characters with code points in the range
 128-255. If the PCRE2_UCP option is set, the behaviour of these escape
 sequences is changed to use Unicode properties and they match many more
 characters.
+.P
+Property descriptions in \ep and \eP are matched caselessly; hyphens,
+underscores, and white space are ignored, in accordance with Unicode's "loose
+matching" rules.
 .
 .
 .SH "GENERAL CATEGORY PROPERTIES FOR \ep and \eP"
@@ -337,7 +341,9 @@ Zanabazar_Square.
 .rs
 .sp
   \ep{Bidi_Control}         matches a Bidi control character
+  \ep{Bidi_C}               matches a Bidi control character
   \ep{Bidi_Class:<class>}   matches a character with the given class
+  \ep{BC:<class>}           matches a character with the given class
 .sp
 The recognized classes are:
 .sp
@@ -717,6 +723,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 08 December 2021
+Last updated: 10 December 2021
 Copyright (c) 1997-2021 University of Cambridge.
 .fi

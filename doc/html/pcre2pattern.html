@@ -783,7 +783,7 @@ escape sequences are:
   \P{<i>xx</i>}   a character without the <i>xx</i> property
   \X       a Unicode extended grapheme cluster
 </pre>
-The property names represented by <i>xx</i> above are not case-sensitive, and in 
+The property names represented by <i>xx</i> above are not case-sensitive, and in
 accordance with Unicode's "loose matching" rules, spaces, hyphens, and
 underscores are ignored. There is support for Unicode script names, Unicode
 general category properties, "Any", which matches any character (including
@@ -1072,10 +1072,13 @@ PCRE2_UCP option or by starting the pattern with (*UCP).
 Bi-directional properties for \p and \P
 </b><br>
 <P>
-Two properties relating to bi-directional text are supported:
+Two properties relating to bi-directional text (each with a shorter synonym)
+are supported:
 <pre>
   \p{Bidi_Control}         matches a Bidi control character
+  \p{Bidi_C}               matches a Bidi control character
   \p{Bidi_Class:&#60;class&#62;}   matches a character with the given class
+  \p{BC:&#60;class&#62;}           matches a character with the given class
 </pre>
 The recognized classes are:
 <pre>
@@ -1088,7 +1091,7 @@ The recognized classes are:
   ES          European separator
   ET          European terminator
   FSI         first strong isolate
-  L           left-to-right            
+  L           left-to-right
   LRE         left-to-right embedding
   LRI         left-to-right isolate
   LRO         left-to-right override
@@ -1101,11 +1104,10 @@ The recognized classes are:
   RLI         right-to-left isolate
   RLO         right-to-left override
   S           segment separator
-  WS          which space             
+  WS          which space
 </pre>
-For Bidi_Class, an equals sign may be used instead of a colon. The class names 
-are case-insensitive. As for other properties, only the short names are 
-recognized.
+For Bidi_Class, an equals sign may be used instead of a colon. The class names
+are case-insensitive; only the short names listed above are recognized.
 </P>
 <br><b>
 Extended grapheme clusters
@@ -3902,7 +3904,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC32" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 08 December 2021
+Last updated: 10 December 2021
 <br>
 Copyright &copy; 1997-2021 University of Cambridge.
 <br>

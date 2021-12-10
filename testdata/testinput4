@@ -2507,15 +2507,15 @@
     -->\x{061c}\x{200e}\x{200f}\x{202a}\x{202b}\x{202c}\x{202d}<--
     -->\x{2066}\x{2067}\x{2068}\x{2069}<--
 
-/\p{bidicontrol}+?/utf
+/\p{bidic}+?/utf
     -->\x{061c}\x{200e}\x{200f}\x{202a}\x{202b}\x{202c}\x{202d}<--
     -->\x{2066}\x{2067}\x{2068}\x{2069}<--
 
-/\p{bidicontrol}++/utf
+/\p{bidi_control}++/utf
     -->\x{061c}\x{200e}\x{200f}\x{202a}\x{202b}\x{202c}\x{202d}<--
     -->\x{2066}\x{2067}\x{2068}\x{2069}<--
 
-/[\p{bidi_control}]/utf
+/[\p{bidi_c}]/utf
     -->\x{202c}<--
 
 /[\p{bidicontrol}]+/utf
@@ -2545,7 +2545,7 @@
 /\p{bidi class = al}/utf
     -->\x{061D}<--
 
-/\p{bidi class = al}+/utf
+/\p{bc = al}+/utf
     -->\x{061D}\x{061e}\x{061f}<--
 
 /\p{bidi_class : AL}+?/utf
@@ -2554,7 +2554,7 @@
 /\p{Bidi_Class : AL}++/utf
     -->\x{061D}\x{061e}\x{061f}<--
 
-/\p{bidi class = aN}+/utf
+/\p{b_c = aN}+/utf
     -->\x{061D}\x{0602}\x{0604}\x{061f}<--
 
 /\p{bidi class = B}+/utf

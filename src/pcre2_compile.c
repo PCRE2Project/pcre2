@@ -688,6 +688,15 @@ static uint32_t chartypeoffset[] = {
   OP_STAR - OP_STAR,    OP_STARI - OP_STAR,
   OP_NOTSTAR - OP_STAR, OP_NOTSTARI - OP_STAR };
 
+/* Table of synonyms for Unicode properties. Each pair has the synonym first,
+followed by the name that's in the UCD table (lower case, no hyphens,
+underscores, or spaces). */
+
+static const char *prop_synonyms[] = {
+  "bc",       "bidiclass",
+  "bidic",    "bidicontrol"
+};
+
 /* Tables of names of POSIX character classes and their lengths. The names are
 now all in a single string, to reduce the number of relocations when a shared
 library is dynamically loaded. The list of lengths is terminated by a zero
@@ -2101,11 +2110,13 @@ negation. */
 if (c == CHAR_LEFT_CURLY_BRACKET)
   {
   if (ptr >= cb->end_pattern) goto ERROR_RETURN;
+
   if (*ptr == CHAR_CIRCUMFLEX_ACCENT)
     {
     *negptr = TRUE;
     ptr++;
     }
+
   for (i = 0; i < (int)(sizeof(name) / sizeof(PCRE2_UCHAR)) - 1; i++)
     {
     if (ptr >= cb->end_pattern) goto ERROR_RETURN;
@@ -2118,10 +2129,39 @@ if (c == CHAR_LEFT_CURLY_BRACKET)
     }
   if (c != CHAR_RIGHT_CURLY_BRACKET) goto ERROR_RETURN;
   name[i] = 0;
+
+  /* Implement a general synonym feature for class names. */
+
+  if (vptr != NULL) *vptr = 0;   /* Terminate class name */
+
+  bot = 0;
+  top = sizeof(prop_synonyms)/sizeof(char *);
+
+  while (top != bot)
+    {
+    size_t mid = ((top + bot)/2) & (-2);
+    int cf = PRIV(strcmp_c8)(name, prop_synonyms[mid]);
+    if (cf == 0)
+      {
+      const char *s = prop_synonyms[mid+1];
+      size_t slen = strlen(s);
+      if (vptr != NULL)
+        {
+        size_t vlen = name + i - vptr;
+        memmove(name + slen + 1, vptr + 1, (vlen + 1) * sizeof(PCRE2_UCHAR));
+        vptr = name + slen;
+        i = slen + vlen + 1;
+        }
+      for (size_t k = 0; k <= slen; k++) name[k] = s[k];
+      break;
+      }
+
+    if (cf > 0) bot = mid + 2; else top = mid;
+    }
   }
 
-/* Otherwise there is just one following character, which must be an ASCII
-letter. */
+/* If { doesn't follow \p or \P there is just one following character, which
+must be an ASCII letter. */
 
 else if (MAX_255(c) && (cb->ctypes[c] & ctype_letter) != 0)
   {
@@ -2138,7 +2178,6 @@ property names are "bidi<name>". */
 
 if (vptr != NULL)
   {
-  *vptr = 0;   /* Terminate class name */
   if (PRIV(strcmp_c8)(name, "bidiclass") != 0)
     {
     *errorcodeptr = ERR47;
