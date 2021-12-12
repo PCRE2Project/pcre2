@@ -7412,6 +7412,16 @@ return cc;
 
 static PCRE2_SPTR compile_char1_matchingpath(compiler_common *common, PCRE2_UCHAR type, PCRE2_SPTR cc, jump_list **backtracks, BOOL check_str_ptr);
 
+#ifdef SUPPORT_UNICODE
+#define XCLASS_SAVE_CHAR 0x01
+#define XCLASS_CHAR_SAVED 0x02
+#define XCLASS_HAS_TYPE 0x04
+#define XCLASS_HAS_SCRIPT 0x08
+#define XCLASS_HAS_BIDICO 0x10
+#define XCLASS_HAS_BIDICL 0x20
+#define XCLASS_NEEDS_UCD (XCLASS_HAS_TYPE | XCLASS_HAS_SCRIPT | XCLASS_HAS_BIDICO | XCLASS_HAS_BIDICL)
+#endif /* SUPPORT_UNICODE */
+
 static void compile_xclass_matchingpath(compiler_common *common, PCRE2_SPTR cc, jump_list **backtracks)
 {
 DEFINE_COMPILER;
@@ -7426,8 +7436,7 @@ BOOL utf = common->utf;
 #endif /* SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH == [8|16] */
 
 #ifdef SUPPORT_UNICODE
-BOOL needstype = FALSE, needsscript = FALSE, needschar = FALSE;
-BOOL charsaved = FALSE;
+sljit_u32 unicode_status = 0;
 int typereg = TMP1;
 const sljit_u32 *other_cases;
 sljit_uw typeoffset;
@@ -7454,7 +7463,7 @@ while (*cc != XCL_END)
     if (c > max) max = c;
     if (c < min) min = c;
 #ifdef SUPPORT_UNICODE
-    needschar = TRUE;
+    unicode_status |= XCLASS_SAVE_CHAR;
 #endif /* SUPPORT_UNICODE */
     }
   else if (*cc == XCL_RANGE)
@@ -7465,7 +7474,7 @@ while (*cc != XCL_END)
     GETCHARINCTEST(c, cc);
     if (c > max) max = c;
 #ifdef SUPPORT_UNICODE
-    needschar = TRUE;
+    unicode_status |= XCLASS_SAVE_CHAR;
 #endif /* SUPPORT_UNICODE */
     }
 #ifdef SUPPORT_UNICODE
@@ -7506,11 +7515,11 @@ while (*cc != XCL_END)
       case PT_GC:
       case PT_PC:
       case PT_ALNUM:
-      needstype = TRUE;
+      unicode_status |= XCLASS_HAS_TYPE;
       break;
 
       case PT_SC:
-      needsscript = TRUE;
+      unicode_status |= XCLASS_HAS_SCRIPT;
       break;
 
       case PT_SPACE:
@@ -7519,13 +7528,20 @@ while (*cc != XCL_END)
       case PT_PXGRAPH:
       case PT_PXPRINT:
       case PT_PXPUNCT:
-      needstype = TRUE;
-      needschar = TRUE;
+      unicode_status |= XCLASS_SAVE_CHAR | XCLASS_HAS_TYPE;
       break;
 
       case PT_CLIST:
       case PT_UCNC:
-      needschar = TRUE;
+      unicode_status |= XCLASS_SAVE_CHAR;
+      break;
+
+      case PT_BIDICO:
+      unicode_status |= XCLASS_HAS_BIDICO;
+      break;
+
+      case PT_BIDICL:
+      unicode_status |= XCLASS_HAS_BIDICL;
       break;
 
       default:
@@ -7545,7 +7561,7 @@ if ((cc[-1] & XCL_NOT) != 0)
 else
   {
 #ifdef SUPPORT_UNICODE
-  read_char(common, min, max, (needstype || needsscript) ? backtracks : NULL, 0);
+  read_char(common, min, max, (unicode_status & XCLASS_NEEDS_UCD) ? backtracks : NULL, 0);
 #else /* !SUPPORT_UNICODE */
   read_char(common, min, max, NULL, 0);
 #endif /* SUPPORT_UNICODE */
@@ -7581,7 +7597,7 @@ else if ((cc[-1] & XCL_MAP) != 0)
   {
   OP1(SLJIT_MOV, RETURN_ADDR, 0, TMP1, 0);
 #ifdef SUPPORT_UNICODE
-  charsaved = TRUE;
+  unicode_status |= XCLASS_CHAR_SAVED;
 #endif /* SUPPORT_UNICODE */
   if (!optimize_class(common, (const sljit_u8 *)cc, FALSE, TRUE, list))
     {
@@ -7609,9 +7625,9 @@ else if ((cc[-1] & XCL_MAP) != 0)
   }
 
 #ifdef SUPPORT_UNICODE
-if (needstype || needsscript)
+if (unicode_status & XCLASS_NEEDS_UCD)
   {
-  if (needschar && !charsaved)
+  if ((unicode_status & (XCLASS_SAVE_CHAR | XCLASS_CHAR_SAVED)) == XCLASS_SAVE_CHAR)
     OP1(SLJIT_MOV, RETURN_ADDR, 0, TMP1, 0);
 
 #if PCRE2_CODE_UNIT_WIDTH == 32
@@ -7631,17 +7647,15 @@ if (needstype || needsscript)
   OP2(SLJIT_ADD, TMP1, 0, TMP1, 0, TMP2, 0);
   OP1(SLJIT_MOV, TMP2, 0, SLJIT_IMM, (sljit_sw)PRIV(ucd_stage2));
   OP1(SLJIT_MOV_U16, TMP2, 0, SLJIT_MEM2(TMP2, TMP1), 1);
+  OP2(SLJIT_SHL, TMP1, 0, TMP2, 0, SLJIT_IMM, 3);
+  OP2(SLJIT_SHL, TMP2, 0, TMP2, 0, SLJIT_IMM, 2);
+  OP2(SLJIT_ADD, TMP2, 0, TMP2, 0, TMP1, 0);
 
-  /* Before anything else, we deal with scripts. */
-  if (needsscript)
+  ccbegin = cc;
+
+  if (unicode_status & XCLASS_HAS_SCRIPT)
     {
-    OP2(SLJIT_SHL, TMP1, 0, TMP2, 0, SLJIT_IMM, 3);
-    OP2(SLJIT_SHL, TMP2, 0, TMP2, 0, SLJIT_IMM, 2);
-    OP2(SLJIT_ADD, TMP1, 0, TMP1, 0, TMP2, 0);
-
-    OP1(SLJIT_MOV_U8, TMP1, 0, SLJIT_MEM1(TMP1), (sljit_sw)PRIV(ucd_records) + SLJIT_OFFSETOF(ucd_record, script));
-
-    ccbegin = cc;
+    OP1(SLJIT_MOV_U8, TMP1, 0, SLJIT_MEM1(TMP2), (sljit_sw)PRIV(ucd_records) + SLJIT_OFFSETOF(ucd_record, script));
 
     while (*cc != XCL_END)
       {
@@ -7674,52 +7688,96 @@ if (needstype || needsscript)
       }
 
     cc = ccbegin;
-
-    if (needstype)
-      {
-      /* TMP2 has already been shifted by 2 */
-      if (!needschar)
-        {
-        OP2(SLJIT_ADD, TMP1, 0, TMP2, 0, TMP2, 0);
-        OP2(SLJIT_ADD, TMP1, 0, TMP1, 0, TMP2, 0);
-
-        OP1(SLJIT_MOV_U8, TMP1, 0, SLJIT_MEM1(TMP1), (sljit_sw)PRIV(ucd_records) + SLJIT_OFFSETOF(ucd_record, chartype));
-        }
-      else
-        {
-        OP2(SLJIT_ADD, TMP1, 0, TMP2, 0, TMP2, 0);
-        OP2(SLJIT_ADD, TMP2, 0, TMP2, 0, TMP1, 0);
-
-        OP1(SLJIT_MOV, TMP1, 0, RETURN_ADDR, 0);
-        OP1(SLJIT_MOV_U8, RETURN_ADDR, 0, SLJIT_MEM1(TMP2), (sljit_sw)PRIV(ucd_records) + SLJIT_OFFSETOF(ucd_record, chartype));
-        typereg = RETURN_ADDR;
-        }
-      }
-    else if (needschar)
-      OP1(SLJIT_MOV, TMP1, 0, RETURN_ADDR, 0);
     }
-  else if (needstype)
+
+  if (unicode_status & (XCLASS_HAS_BIDICO | XCLASS_HAS_BIDICL))
     {
-    OP2(SLJIT_SHL, TMP1, 0, TMP2, 0, SLJIT_IMM, 3);
-    OP2(SLJIT_SHL, TMP2, 0, TMP2, 0, SLJIT_IMM, 2);
+    OP1(SLJIT_MOV_U8, TMP1, 0, SLJIT_MEM1(TMP2), (sljit_sw)PRIV(ucd_records) + SLJIT_OFFSETOF(ucd_record, bidi));
 
-    if (!needschar)
+    if (unicode_status & XCLASS_HAS_BIDICO)
       {
-      OP2(SLJIT_ADD, TMP1, 0, TMP1, 0, TMP2, 0);
+      while (*cc != XCL_END)
+        {
+        if (*cc == XCL_SINGLE)
+          {
+          cc ++;
+          GETCHARINCTEST(c, cc);
+          }
+        else if (*cc == XCL_RANGE)
+          {
+          cc ++;
+          GETCHARINCTEST(c, cc);
+          GETCHARINCTEST(c, cc);
+          }
+        else
+          {
+          SLJIT_ASSERT(*cc == XCL_PROP || *cc == XCL_NOTPROP);
+          cc++;
+          if (*cc == PT_BIDICO)
+            {
+            compares--;
+            invertcmp = (compares == 0 && list != backtracks);
+            if (cc[-1] == XCL_NOTPROP)
+              invertcmp ^= 0x1;
+            OP2(SLJIT_AND | SLJIT_SET_Z, SLJIT_UNUSED, 0, TMP1, 0, SLJIT_IMM, UCD_BIDICONTROL_BIT);
+            jump = JUMP(SLJIT_NOT_ZERO ^ invertcmp);
+            add_jump(compiler, compares > 0 ? list : backtracks, jump);
+            }
+          cc += 2;
+          }
+        }
 
-      OP1(SLJIT_MOV_U8, TMP1, 0, SLJIT_MEM1(TMP1), (sljit_sw)PRIV(ucd_records) + SLJIT_OFFSETOF(ucd_record, chartype));
+      cc = ccbegin;
       }
-    else
-      {
-      OP2(SLJIT_ADD, TMP2, 0, TMP2, 0, TMP1, 0);
 
-      OP1(SLJIT_MOV, TMP1, 0, RETURN_ADDR, 0);
-      OP1(SLJIT_MOV_U8, RETURN_ADDR, 0, SLJIT_MEM1(TMP2), (sljit_sw)PRIV(ucd_records) + SLJIT_OFFSETOF(ucd_record, chartype));
-      typereg = RETURN_ADDR;
+    if (unicode_status & XCLASS_HAS_BIDICL)
+      {
+      OP2(SLJIT_AND, TMP1, 0, TMP1, 0, SLJIT_IMM, UCD_BIDICLASS_MASK);
+
+      while (*cc != XCL_END)
+        {
+        if (*cc == XCL_SINGLE)
+          {
+          cc ++;
+          GETCHARINCTEST(c, cc);
+          }
+        else if (*cc == XCL_RANGE)
+          {
+          cc ++;
+          GETCHARINCTEST(c, cc);
+          GETCHARINCTEST(c, cc);
+          }
+        else
+          {
+          SLJIT_ASSERT(*cc == XCL_PROP || *cc == XCL_NOTPROP);
+          cc++;
+          if (*cc == PT_BIDICL)
+            {
+            compares--;
+            invertcmp = (compares == 0 && list != backtracks);
+            if (cc[-1] == XCL_NOTPROP)
+              invertcmp ^= 0x1;
+            jump = CMP(SLJIT_EQUAL ^ invertcmp, TMP1, 0, SLJIT_IMM, (int)cc[1]);
+            add_jump(compiler, compares > 0 ? list : backtracks, jump);
+            }
+          cc += 2;
+          }
+        }
+
+      cc = ccbegin;
       }
     }
-  else if (needschar)
+
+  if (unicode_status & XCLASS_SAVE_CHAR)
     OP1(SLJIT_MOV, TMP1, 0, RETURN_ADDR, 0);
+
+  if (unicode_status & XCLASS_HAS_TYPE)
+    {
+    if (unicode_status & XCLASS_SAVE_CHAR)
+      typereg = RETURN_ADDR;
+
+    OP1(SLJIT_MOV_U8, typereg, 0, SLJIT_MEM1(TMP2), (sljit_sw)PRIV(ucd_records) + SLJIT_OFFSETOF(ucd_record, chartype));
+    }
   }
 #endif /* SUPPORT_UNICODE */
 
@@ -7821,6 +7879,8 @@ while (*cc != XCL_END)
       break;
 
       case PT_SC:
+      case PT_BIDICO:
+      case PT_BIDICL:
       compares++;
       /* Do nothing. */
       break;

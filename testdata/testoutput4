@@ -4035,8 +4035,6 @@ No match
 # -----------------------------------------------------------------------------
 # Tests for bidi control and bidi class properties, not yet supported by JIT.
 
-#subject no_jit
-
 /\p{ bidi_control }/utf
     -->\x{202c}<--
  0: \x{202c}
@@ -4186,8 +4184,6 @@ No match
 /\p{bidi class:S}+\p{bidiclass:WS}+/utf
     -->\x{9}\x{b}\x{1f}  \x{c} \x{2000} \x{3000}<--
  0: \x{09}\x{0b}\x{1f}  \x{0c} \x{2000} \x{3000}
-
-#subject -no_jit
 
 # -----------------------------------------------------------------------------
 
