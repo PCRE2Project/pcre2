@@ -41,6 +41,8 @@ of applications treat NULL/0 in this way.
 
 14. Added support for Bidi_Class and Bidi_Control Unicode properties.
 
+15. Fix some minor issues raised by clang sanitize.
+
 
 Version 10.39 29-October-2021
 -----------------------------

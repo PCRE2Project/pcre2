@@ -124,7 +124,7 @@ static unsigned int
 
 static int
   compile_regex(uint32_t, PCRE2_UCHAR **, uint32_t **, int *, uint32_t,
-    uint32_t *, int32_t *, uint32_t *, int32_t *, branch_chain *,
+    uint32_t *, uint32_t *, uint32_t *, uint32_t *, branch_chain *,
     compile_block *, PCRE2_SIZE *);
 
 static int
@@ -385,13 +385,15 @@ compiler is clever with identical subexpressions. */
 
 #define SETBIT(a,b) a[(b)/8] = (uint8_t)(a[(b)/8] | (1u << ((b)&7)))
 
-/* Private flags added to firstcu and reqcu. */
+/* Values and flags for the unsigned xxcuflags variables that accompany xxcu
+variables, which are concerned with first and required code units. A value
+greater than or equal to REQ_NONE means "no code unit set"; otherwise the
+matching xxcu variable is set, and the low valued bits are relevant. */
 
-#define REQ_CASELESS    (1u << 0)       /* Indicates caselessness */
-#define REQ_VARY        (1u << 1)       /* reqcu followed non-literal item */
-/* Negative values for the firstcu and reqcu flags */
-#define REQ_UNSET       (-2)            /* Not yet found anything */
-#define REQ_NONE        (-1)            /* Found not fixed char */
+#define REQ_UNSET     0xffffffffu  /* Not yet found anything */
+#define REQ_NONE      0xfffffffeu  /* Found not fixed character */
+#define REQ_CASELESS  0x00000001u  /* Code unit in xxcu is caseless */
+#define REQ_VARY      0x00000002u  /* Code unit is followed by non-literal */
 
 /* These flags are used in the groupinfo vector. */
 
@@ -2139,7 +2141,7 @@ if (c == CHAR_LEFT_CURLY_BRACKET)
 
   while (top != bot)
     {
-    size_t mid = ((top + bot)/2) & (-2);
+    size_t mid = ((top + bot)/2) & (size_t)(~2+1);   /* Mask off bottom bit */
     int cf = PRIV(strcmp_c8)(name, prop_synonyms[mid]);
     if (cf == 0)
       {
@@ -5343,9 +5345,9 @@ Arguments:
   pptrptr           points to the current parsed pattern pointer
   errorcodeptr      points to error code variable
   firstcuptr        place to put the first required code unit
-  firstcuflagsptr   place to put the first code unit flags, or a negative number
+  firstcuflagsptr   place to put the first code unit flags
   reqcuptr          place to put the last required code unit
-  reqcuflagsptr     place to put the last required code unit flags, or a negative number
+  reqcuflagsptr     place to put the last required code unit flags
   bcptr             points to current branch chain
   cb                contains pointers to tables etc.
   lengthptr         NULL during the real compile phase
@@ -5358,8 +5360,8 @@ Returns:            0 There's been an error, *errorcodeptr is non-zero
 
 static int
 compile_branch(uint32_t *optionsptr, PCRE2_UCHAR **codeptr, uint32_t **pptrptr,
-  int *errorcodeptr, uint32_t *firstcuptr, int32_t *firstcuflagsptr,
-  uint32_t *reqcuptr, int32_t *reqcuflagsptr, branch_chain *bcptr,
+  int *errorcodeptr, uint32_t *firstcuptr, uint32_t *firstcuflagsptr,
+  uint32_t *reqcuptr, uint32_t *reqcuflagsptr, branch_chain *bcptr,
   compile_block *cb, PCRE2_SIZE *lengthptr)
 {
 int bravalue = 0;
@@ -5374,9 +5376,9 @@ uint32_t zeroreqcu, zerofirstcu;
 uint32_t escape;
 uint32_t *pptr = *pptrptr;
 uint32_t meta, meta_arg;
-int32_t firstcuflags, reqcuflags;
-int32_t zeroreqcuflags, zerofirstcuflags;
-int32_t req_caseopt, reqvary, tempreqvary;
+uint32_t firstcuflags, reqcuflags;
+uint32_t zeroreqcuflags, zerofirstcuflags;
+uint32_t req_caseopt, reqvary, tempreqvary;
 PCRE2_SIZE offset = 0;
 PCRE2_SIZE length_prevgroup = 0;
 PCRE2_UCHAR *code = *codeptr;
@@ -5432,13 +5434,13 @@ item types that can be repeated set these backoff variables appropriately. */
 firstcu = reqcu = zerofirstcu = zeroreqcu = 0;
 firstcuflags = reqcuflags = zerofirstcuflags = zeroreqcuflags = REQ_UNSET;
 
-/* The variable req_caseopt contains either the REQ_CASELESS value or zero,
+/* The variable req_caseopt contains either the REQ_CASELESS bit or zero,
 according to the current setting of the caseless flag. The REQ_CASELESS value
 leaves the lower 28 bit empty. It is added into the firstcu or reqcu variables
 to record the case status of the value. This is used only for ASCII characters.
 */
 
-req_caseopt = ((options & PCRE2_CASELESS) != 0)? REQ_CASELESS:0;
+req_caseopt = ((options & PCRE2_CASELESS) != 0)? REQ_CASELESS : 0;
 
 /* Switch on next META item until the end of the branch */
 
@@ -5453,13 +5455,12 @@ for (;; pptr++)
   BOOL possessive_quantifier;
   BOOL note_group_empty;
   int class_has_8bitchar;
-  int i;
   uint32_t mclength;
   uint32_t skipunits;
   uint32_t subreqcu, subfirstcu;
   uint32_t groupnumber;
   uint32_t verbarglen, verbculen;
-  int32_t subreqcuflags, subfirstcuflags;  /* Must be signed */
+  uint32_t subreqcuflags, subfirstcuflags;
   open_capitem *oc;
   PCRE2_UCHAR mcbuffer[8];
 
@@ -5828,9 +5829,9 @@ for (;; pptr++)
         if (taboffset >= 0)
           {
           if (tabopt >= 0)
-            for (i = 0; i < 32; i++) pbits[i] |= cbits[(int)i + taboffset];
+            for (int i = 0; i < 32; i++) pbits[i] |= cbits[(int)i + taboffset];
           else
-            for (i = 0; i < 32; i++) pbits[i] &= ~cbits[(int)i + taboffset];
+            for (int i = 0; i < 32; i++) pbits[i] &= ~cbits[(int)i + taboffset];
           }
 
         /* Now see if we need to remove any special characters. An option
@@ -5844,9 +5845,9 @@ for (;; pptr++)
         being built and we are done. */
 
         if (local_negate)
-          for (i = 0; i < 32; i++) classbits[i] |= ~pbits[i];
+          for (int i = 0; i < 32; i++) classbits[i] |= (uint8_t)(~pbits[i]);
         else
-          for (i = 0; i < 32; i++) classbits[i] |= pbits[i];
+          for (int i = 0; i < 32; i++) classbits[i] |= pbits[i];
 
         /* Every class contains at least one < 256 character. */
 
@@ -5885,21 +5886,23 @@ for (;; pptr++)
         switch(escape)
           {
           case ESC_d:
-          for (i = 0; i < 32; i++) classbits[i] |= cbits[i+cbit_digit];
+          for (int i = 0; i < 32; i++) classbits[i] |= cbits[i+cbit_digit];
           break;
 
           case ESC_D:
           should_flip_negation = TRUE;
-          for (i = 0; i < 32; i++) classbits[i] |= ~cbits[i+cbit_digit];
+          for (int i = 0; i < 32; i++) 
+            classbits[i] |= (uint8_t)(~cbits[i+cbit_digit]);
           break;
 
           case ESC_w:
-          for (i = 0; i < 32; i++) classbits[i] |= cbits[i+cbit_word];
+          for (int i = 0; i < 32; i++) classbits[i] |= cbits[i+cbit_word];
           break;
 
           case ESC_W:
           should_flip_negation = TRUE;
-          for (i = 0; i < 32; i++) classbits[i] |= ~cbits[i+cbit_word];
+          for (int i = 0; i < 32; i++) 
+            classbits[i] |= (uint8_t)(~cbits[i+cbit_word]);
           break;
 
           /* Perl 5.004 onwards omitted VT from \s, but restored it at Perl
@@ -5910,12 +5913,13 @@ for (;; pptr++)
           longer treat \s and \S specially. */
 
           case ESC_s:
-          for (i = 0; i < 32; i++) classbits[i] |= cbits[i+cbit_space];
+          for (int i = 0; i < 32; i++) classbits[i] |= cbits[i+cbit_space];
           break;
 
           case ESC_S:
           should_flip_negation = TRUE;
-          for (i = 0; i < 32; i++) classbits[i] |= ~cbits[i+cbit_space];
+          for (int i = 0; i < 32; i++) 
+            classbits[i] |= (uint8_t)(~cbits[i+cbit_space]);
           break;
 
           /* When adding the horizontal or vertical space lists to a class, or
@@ -6156,7 +6160,7 @@ for (;; pptr++)
         if (negate_class && !xclass_has_prop)
           {
           /* Using 255 ^ instead of ~ avoids clang sanitize warning. */
-          for (i = 0; i < 32; i++) classbits[i] = 255 ^ classbits[i];
+          for (int i = 0; i < 32; i++) classbits[i] = 255 ^ classbits[i];
           }
         memcpy(code, classbits, 32);
         code = class_uchardata + (32 / sizeof(PCRE2_UCHAR));
@@ -6182,7 +6186,7 @@ for (;; pptr++)
       if (negate_class)
         {
        /* Using 255 ^ instead of ~ avoids clang sanitize warning. */
-       for (i = 0; i < 32; i++) classbits[i] = 255 ^ classbits[i];
+       for (int i = 0; i < 32; i++) classbits[i] = 255 ^ classbits[i];
        }
       memcpy(code, classbits, 32);
       }
@@ -6256,7 +6260,7 @@ for (;; pptr++)
     verbarglen = *(++pptr);
     verbculen = 0;
     tempcode = code++;
-    for (i = 0; i < (int)verbarglen; i++)
+    for (int i = 0; i < (int)verbarglen; i++)
       {
       meta = *(++pptr);
 #ifdef SUPPORT_UNICODE
@@ -6305,6 +6309,7 @@ for (;; pptr++)
     bravalue = OP_COND;
       {
       int count, index;
+      unsigned int i; 
       PCRE2_SPTR name;
       named_group *ng = cb->named_groups;
       uint32_t length = *(++pptr);
@@ -6344,7 +6349,7 @@ for (;; pptr++)
         groupnumber = 0;
         if (meta == META_COND_RNUMBER)
           {
-          for (i = 1; i < (int)length; i++)
+          for (i = 1; i < length; i++)
             {
             groupnumber = groupnumber * 10 + name[i] - CHAR_0;
             if (groupnumber > MAX_GROUP_NUMBER)
@@ -6666,7 +6671,7 @@ for (;; pptr++)
 
       if (firstcuflags == REQ_UNSET && subfirstcuflags != REQ_UNSET)
         {
-        if (subfirstcuflags >= 0)
+        if (subfirstcuflags < REQ_NONE)
           {
           firstcu = subfirstcu;
           firstcuflags = subfirstcuflags;
@@ -6680,7 +6685,7 @@ for (;; pptr++)
       into reqcu if there wasn't one, using the vary flag that was in
       existence beforehand. */
 
-      else if (subfirstcuflags >= 0 && subreqcuflags < 0)
+      else if (subfirstcuflags < REQ_NONE && subreqcuflags >= REQ_NONE)
         {
         subreqcu = subfirstcu;
         subreqcuflags = subfirstcuflags | tempreqvary;
@@ -6689,7 +6694,7 @@ for (;; pptr++)
       /* If the subpattern set a required code unit (or set a first code unit
       that isn't really the first code unit - see above), set it. */
 
-      if (subreqcuflags >= 0)
+      if (subreqcuflags < REQ_NONE)
         {
         reqcu = subreqcu;
         reqcuflags = subreqcuflags;
@@ -6708,7 +6713,7 @@ for (;; pptr++)
     in that example, 'X' ends up set for both. */
 
     else if ((bravalue == OP_ASSERT || bravalue == OP_ASSERT_NA) &&
-             subreqcuflags >= 0 && subfirstcuflags >= 0)
+             subreqcuflags < REQ_NONE && subfirstcuflags < REQ_NONE)
       {
       reqcu = subreqcu;
       reqcuflags = subreqcuflags;
@@ -6738,7 +6743,7 @@ for (;; pptr++)
       this name is duplicated. */
 
       groupnumber = 0;
-      for (i = 0; i < cb->names_found; i++, ng++)
+      for (unsigned int i = 0; i < cb->names_found; i++, ng++)
         {
         if (length == ng->length &&
             PRIV(strncmp)(name, ng->name, length) == 0)
@@ -7092,7 +7097,7 @@ for (;; pptr++)
           *lengthptr += delta;
           }
 
-        else for (i = 0; i < replicate; i++)
+        else for (int i = 0; i < replicate; i++)
           {
           memcpy(code, previous, CU2BYTES(1 + LINK_SIZE));
           previous = code;
@@ -7268,12 +7273,12 @@ for (;; pptr++)
 
             else
               {
-              if (groupsetfirstcu && reqcuflags < 0)
+              if (groupsetfirstcu && reqcuflags >= REQ_NONE)
                 {
                 reqcu = firstcu;
                 reqcuflags = firstcuflags;
                 }
-              for (i = 1; (uint32_t)i < repeat_min; i++)
+              for (uint32_t i = 1; i < repeat_min; i++)
                 {
                 memcpy(code, previous, CU2BYTES(len));
                 code += len;
@@ -7317,14 +7322,14 @@ for (;; pptr++)
 
           /* This is compiling for real */
 
-          else for (i = repeat_max - 1; i >= 0; i--)
+          else for (uint32_t i = repeat_max; i >= 1; i--)
             {
             *code++ = OP_BRAZERO + repeat_type;
 
             /* All but the final copy start a new nesting, maintaining the
             chain of brackets outstanding. */
 
-            if (i != 0)
+            if (i != 1)
               {
               int linkoffset;
               *code++ = OP_BRA;
@@ -8043,9 +8048,9 @@ Arguments:
   errorcodeptr      -> pointer to error code variable
   skipunits         skip this many code units at start (for brackets and OP_COND)
   firstcuptr        place to put the first required code unit
-  firstcuflagsptr   place to put the first code unit flags, or a negative number
+  firstcuflagsptr   place to put the first code unit flags
   reqcuptr          place to put the last required code unit
-  reqcuflagsptr     place to put the last required code unit flags, or a negative number
+  reqcuflagsptr     place to put the last required code unit flags
   bcptr             pointer to the chain of currently open branches
   cb                points to the data block with tables pointers etc.
   lengthptr         NULL during the real compile phase
@@ -8059,7 +8064,7 @@ Returns:            0 There has been an error
 static int
 compile_regex(uint32_t options, PCRE2_UCHAR **codeptr, uint32_t **pptrptr,
   int *errorcodeptr, uint32_t skipunits, uint32_t *firstcuptr,
-  int32_t *firstcuflagsptr, uint32_t *reqcuptr,int32_t *reqcuflagsptr,
+  uint32_t *firstcuflagsptr, uint32_t *reqcuptr, uint32_t *reqcuflagsptr,
   branch_chain *bcptr, compile_block *cb, PCRE2_SIZE *lengthptr)
 {
 PCRE2_UCHAR *code = *codeptr;
@@ -8072,9 +8077,9 @@ int okreturn = 1;
 uint32_t *pptr = *pptrptr;
 uint32_t firstcu, reqcu;
 uint32_t lookbehindlength;
-int32_t firstcuflags, reqcuflags;
+uint32_t firstcuflags, reqcuflags;
 uint32_t branchfirstcu, branchreqcu;
-int32_t branchfirstcuflags, branchreqcuflags;
+uint32_t branchfirstcuflags, branchreqcuflags;
 PCRE2_SIZE length;
 branch_chain bc;
 
@@ -8193,9 +8198,9 @@ for (;;)
 
       if (firstcuflags != branchfirstcuflags || firstcu != branchfirstcu)
         {
-        if (firstcuflags >= 0)
+        if (firstcuflags < REQ_NONE)
           {
-          if (reqcuflags < 0)
+          if (reqcuflags >= REQ_NONE)
             {
             reqcu = firstcu;
             reqcuflags = firstcuflags;
@@ -8207,8 +8212,8 @@ for (;;)
       /* If we (now or from before) have no firstcu, a firstcu from the
       branch becomes a reqcu if there isn't a branch reqcu. */
 
-      if (firstcuflags < 0 && branchfirstcuflags >= 0 &&
-          branchreqcuflags < 0)
+      if (firstcuflags >= REQ_NONE && branchfirstcuflags < REQ_NONE &&
+          branchreqcuflags >= REQ_NONE)
         {
         branchreqcu = branchfirstcu;
         branchreqcuflags = branchfirstcuflags;
@@ -8356,7 +8361,7 @@ Returns:     TRUE or FALSE
 */
 
 static BOOL
-is_anchored(PCRE2_SPTR code, unsigned int bracket_map, compile_block *cb,
+is_anchored(PCRE2_SPTR code, uint32_t bracket_map, compile_block *cb,
   int atomcount, BOOL inassert)
 {
 do {
@@ -8379,7 +8384,7 @@ do {
             op == OP_SCBRA || op == OP_SCBRAPOS)
      {
      int n = GET2(scode, 1+LINK_SIZE);
-     int new_map = bracket_map | ((n < 32)? (1u << n) : 1);
+     uint32_t new_map = bracket_map | ((n < 32)? (1u << n) : 1);
      if (!is_anchored(scode, new_map, cb, atomcount, inassert)) return FALSE;
      }
 
@@ -8739,15 +8744,15 @@ Returns:     the fixed first code unit, or 0 with REQ_NONE in flags
 */
 
 static uint32_t
-find_firstassertedcu(PCRE2_SPTR code, int32_t *flags, uint32_t inassert)
+find_firstassertedcu(PCRE2_SPTR code, uint32_t *flags, uint32_t inassert)
 {
 uint32_t c = 0;
-int cflags = REQ_NONE;
+uint32_t cflags = REQ_NONE;
 
 *flags = REQ_NONE;
 do {
    uint32_t d;
-   int dflags;
+   uint32_t dflags;
    int xl = (*code == OP_CBRA || *code == OP_SCBRA ||
              *code == OP_CBRAPOS || *code == OP_SCBRAPOS)? IMM2_SIZE:0;
    PCRE2_SPTR scode = first_significant_code(code + 1+LINK_SIZE + xl, TRUE);
@@ -8770,9 +8775,8 @@ do {
      case OP_SCRIPT_RUN:
      d = find_firstassertedcu(scode, &dflags, inassert +
        ((op == OP_ASSERT || op == OP_ASSERT_NA)?1:0));
-     if (dflags < 0)
-       return 0;
-     if (cflags < 0) { c = d; cflags = dflags; }
+     if (dflags >= REQ_NONE) return 0;
+     if (cflags >= REQ_NONE) { c = d; cflags = dflags; }
        else if (c != d || cflags != dflags) return 0;
      break;
 
@@ -8785,7 +8789,7 @@ do {
      case OP_MINPLUS:
      case OP_POSPLUS:
      if (inassert == 0) return 0;
-     if (cflags < 0) { c = scode[1]; cflags = 0; }
+     if (cflags >= REQ_NONE) { c = scode[1]; cflags = 0; }
        else if (c != scode[1]) return 0;
      break;
 
@@ -8811,7 +8815,7 @@ do {
 #endif
 #endif
 
-     if (cflags < 0) { c = scode[1]; cflags = REQ_CASELESS; }
+     if (cflags >= REQ_NONE) { c = scode[1]; cflags = REQ_CASELESS; }
        else if (c != scode[1]) return 0;
      break;
      }
@@ -9747,7 +9751,7 @@ PCRE2_SIZE re_blocksize;              /* Size of memory block */
 PCRE2_SIZE big32count = 0;            /* 32-bit literals >= 0x80000000 */
 PCRE2_SIZE parsed_size_needed;        /* Needed for parsed pattern */
 
-int32_t firstcuflags, reqcuflags;     /* Type of first/req code unit */
+uint32_t firstcuflags, reqcuflags;    /* Type of first/req code unit */
 uint32_t firstcu, reqcu;              /* Value of first/req code unit */
 uint32_t setflags = 0;                /* NL and BSR set flags */
 
@@ -10427,13 +10431,13 @@ if ((re->overall_options & PCRE2_NO_START_OPTIMIZE) == 0)
   (these are not saved during the compile because they can cause conflicts with
   actual literals that follow). */
 
-  if (firstcuflags < 0)
+  if (firstcuflags >= REQ_NONE)
     firstcu = find_firstassertedcu(codestart, &firstcuflags, 0);
 
   /* Save the data for a first code unit. The existence of one means the
   minimum length must be at least 1. */
 
-  if (firstcuflags >= 0)
+  if (firstcuflags < REQ_NONE)
     {
     re->first_codeunit = firstcu;
     re->flags |= PCRE2_FIRSTSET;
@@ -10480,16 +10484,16 @@ if ((re->overall_options & PCRE2_NO_START_OPTIMIZE) == 0)
   different character and not a non-starting code unit of the first character,
   because the minimum length count is in characters, not code units. */
 
-  if (reqcuflags >= 0)
+  if (reqcuflags < REQ_NONE)
     {
 #if PCRE2_CODE_UNIT_WIDTH == 16
     if ((re->overall_options & PCRE2_UTF) == 0 ||   /* Not UTF */
-        firstcuflags < 0 ||                         /* First not set */
+        firstcuflags >= REQ_NONE ||                 /* First not set */
         (firstcu & 0xf800) != 0xd800 ||             /* First not surrogate */
         (reqcu & 0xfc00) != 0xdc00)                 /* Req not low surrogate */
 #elif PCRE2_CODE_UNIT_WIDTH == 8
     if ((re->overall_options & PCRE2_UTF) == 0 ||   /* Not UTF */
-        firstcuflags < 0 ||                         /* First not set */
+        firstcuflags >= REQ_NONE ||                 /* First not set */
         (firstcu & 0x80) == 0 ||                    /* First is ASCII */
         (reqcu & 0x80) == 0)                        /* Req is ASCII */
 #endif

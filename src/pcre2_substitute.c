@@ -259,7 +259,7 @@ PCRE2_UNSET, so as not to imply an offset in the replacement. */
 
 if ((options & (PCRE2_PARTIAL_HARD|PCRE2_PARTIAL_SOFT)) != 0)
   return PCRE2_ERROR_BADOPTION;
-
+  
 /* Validate length and find the end of the replacement. A NULL replacement of 
 zero length is interpreted as an empty string. */
 
@@ -304,7 +304,6 @@ else if (use_existing_match)
     (pcre2_general_context *)mcontext;
   int pairs = (code->top_bracket + 1 < match_data->oveccount)?
     code->top_bracket + 1 : match_data->oveccount;
-  if (subject == NULL) return PCRE2_ERROR_NULL;
   internal_match_data = pcre2_match_data_create(match_data->oveccount,
     gcontext);
   if (internal_match_data == NULL) return PCRE2_ERROR_NOMEMORY;
@@ -325,7 +324,16 @@ scb.input = subject;
 scb.output = (PCRE2_SPTR)buffer;
 scb.ovector = ovector;
 
-/* Find lengths of zero-terminated subject */
+/* A NULL subject of zero length is treated as an empty string. */
+
+if (subject == NULL)
+  {
+  if (length != 0) return PCRE2_ERROR_NULL; 
+  subject = (PCRE2_SPTR)"";
+  } 
+
+/* Find length of zero-terminated subject */
+
 if (length == PCRE2_ZERO_TERMINATED)
   length = subject? PRIV(strlen)(subject) : 0;
 

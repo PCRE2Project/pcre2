@@ -3440,12 +3440,12 @@ block may or may not have been changed.
 As well as the usual options for <b>pcre2_match()</b>, a number of additional
 options can be set in the <i>options</i> argument of <b>pcre2_substitute()</b>.
 One such option is PCRE2_SUBSTITUTE_MATCHED. When this is set, an external
-<i>match_data</i> block must be provided, and it must have been used for an
-external call to <b>pcre2_match()</b>. The data in the <i>match_data</i> block
-(return code, offset vector) is used for the first substitution instead of
-calling <b>pcre2_match()</b> from within <b>pcre2_substitute()</b>. This allows
-an application to check for a match before choosing to substitute, without
-having to repeat the match.
+<i>match_data</i> block must be provided, and it must have already been used for
+an external call to <b>pcre2_match()</b> with the same pattern and subject
+arguments. The data in the <i>match_data</i> block (return code, offset vector)
+is then used for the first substitution instead of calling <b>pcre2_match()</b>
+from within <b>pcre2_substitute()</b>. This allows an application to check for a
+match before choosing to substitute, without having to repeat the match.
 </P>
 <P>
 The contents of the externally supplied match data block are not changed when
@@ -4018,7 +4018,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC42" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 08 December 2021
+Last updated: 14 December 2021
 <br>
 Copyright &copy; 1997-2021 University of Cambridge.
 <br>

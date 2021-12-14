@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "08 December 2021" "PCRE2 10.40"
+.TH PCRE2API 3 "14 December 2021" "PCRE2 10.40"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -3453,12 +3453,12 @@ block may or may not have been changed.
 As well as the usual options for \fBpcre2_match()\fP, a number of additional
 options can be set in the \fIoptions\fP argument of \fBpcre2_substitute()\fP.
 One such option is PCRE2_SUBSTITUTE_MATCHED. When this is set, an external
-\fImatch_data\fP block must be provided, and it must have been used for an
-external call to \fBpcre2_match()\fP. The data in the \fImatch_data\fP block
-(return code, offset vector) is used for the first substitution instead of
-calling \fBpcre2_match()\fP from within \fBpcre2_substitute()\fP. This allows
-an application to check for a match before choosing to substitute, without
-having to repeat the match.
+\fImatch_data\fP block must be provided, and it must have already been used for
+an external call to \fBpcre2_match()\fP with the same pattern and subject
+arguments. The data in the \fImatch_data\fP block (return code, offset vector)
+is then used for the first substitution instead of calling \fBpcre2_match()\fP
+from within \fBpcre2_substitute()\fP. This allows an application to check for a
+match before choosing to substitute, without having to repeat the match.
 .P
 The contents of the externally supplied match data block are not changed when
 PCRE2_SUBSTITUTE_MATCHED is set. If PCRE2_SUBSTITUTE_GLOBAL is also set,
@@ -4025,6 +4025,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 08 December 2021
+Last updated: 14 December 2021
 Copyright (c) 1997-2021 University of Cambridge.
 .fi

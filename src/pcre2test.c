@@ -3152,7 +3152,7 @@ Returns:     0 on success, with the length updated to the number of 16-bit
              OR -3 if a value > 0xffff is encountered when not in UTF mode
 */
 
-static PCRE2_SIZE
+static int
 to16(uint8_t *p, int utf, PCRE2_SIZE *lenptr)
 {
 uint16_t *pp;
@@ -3239,7 +3239,7 @@ Returns:     0 on success, with the length updated to the number of 32-bit
              OR -2 if a value > 0x10ffff is encountered in UTF mode
 */
 
-static PCRE2_SIZE
+static int
 to32(uint8_t *p, int utf, PCRE2_SIZE *lenptr)
 {
 uint32_t *pp;
@@ -5490,24 +5490,27 @@ if ((pat_patctl.control & CTL_POSIX) != 0)
   if ((pat_patctl.options & ~POSIX_SUPPORTED_COMPILE_OPTIONS) != 0)
     {
     show_compile_options(
-      pat_patctl.options & ~POSIX_SUPPORTED_COMPILE_OPTIONS, msg, "");
-    msg = "";
-    }
-
-  if ((FLD(pat_context, extra_options) &
-       ~POSIX_SUPPORTED_COMPILE_EXTRA_OPTIONS) != 0)
-    {
-    show_compile_extra_options(
-      FLD(pat_context, extra_options) & ~POSIX_SUPPORTED_COMPILE_EXTRA_OPTIONS,
+      pat_patctl.options & (uint32_t)(~POSIX_SUPPORTED_COMPILE_OPTIONS), 
         msg, "");
     msg = "";
     }
 
-  if ((pat_patctl.control & ~POSIX_SUPPORTED_COMPILE_CONTROLS) != 0 ||
-      (pat_patctl.control2 & ~POSIX_SUPPORTED_COMPILE_CONTROLS2) != 0)
+  if ((FLD(pat_context, extra_options) &
+       (uint32_t)(~POSIX_SUPPORTED_COMPILE_EXTRA_OPTIONS)) != 0)
     {
-    show_controls(pat_patctl.control & ~POSIX_SUPPORTED_COMPILE_CONTROLS,
-      pat_patctl.control2 & ~POSIX_SUPPORTED_COMPILE_CONTROLS2, msg);
+    show_compile_extra_options(
+      FLD(pat_context, extra_options) & 
+        (uint32_t)(~POSIX_SUPPORTED_COMPILE_EXTRA_OPTIONS), msg, "");
+    msg = "";
+    }
+
+  if ((pat_patctl.control & (uint32_t)(~POSIX_SUPPORTED_COMPILE_CONTROLS)) != 0 ||
+      (pat_patctl.control2 & (uint32_t)(~POSIX_SUPPORTED_COMPILE_CONTROLS2)) != 0)
+    {
+    show_controls(
+      pat_patctl.control & (uint32_t)(~POSIX_SUPPORTED_COMPILE_CONTROLS),
+      pat_patctl.control2 & (uint32_t)(~POSIX_SUPPORTED_COMPILE_CONTROLS2), 
+      msg);
     msg = "";
     }
 
@@ -7652,11 +7655,15 @@ for (gmatched = 0;; gmatched++)
     }
 
   /* The result of the match is now in capcount. First handle a successful
-  match. */
+  match. If pp was forced to be NULL (to test NULL handling) it will have been 
+  treated as an empty string if the length was zero. So re-create that for 
+  outputting. */
 
   if (capcount >= 0)
     {
     int i;
+    
+    if (pp == NULL) pp = (uint8_t *)""; 
 
     if (capcount > (int)oveccount)   /* Check for lunatic return value */
       {

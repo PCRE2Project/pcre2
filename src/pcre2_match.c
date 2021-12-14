@@ -6571,7 +6571,7 @@ if (utf &&
   /* Validate the relevant portion of the subject. There's a loop in case we
   encounter bad UTF in the characters preceding start_match which we are
   scanning because of a lookbehind. */
-
+  
   for (;;)
     {
     match_data->rc = PRIV(valid_utf)(mb->check_subject,
@@ -6591,7 +6591,7 @@ if (utf &&
     /* If the end precedes start_match, it means there is invalid UTF in the
     extra code units we reversed over because of a lookbehind. Advance past the
     first bad code unit, and then skip invalid character starting code units in
-    8-bit and 16-bit modes, and try again. */
+    8-bit and 16-bit modes, and try again with the original end point. */
 
     if (end_subject < start_match)
       {
@@ -6600,6 +6600,7 @@ if (utf &&
       while (mb->check_subject < start_match && NOT_FIRSTCU(*mb->check_subject))
         mb->check_subject++;
 #endif
+      end_subject = true_end_subject;
       }
 
     /* Otherwise, set the not end of line option, and do the match. */
