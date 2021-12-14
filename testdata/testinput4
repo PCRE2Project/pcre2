@@ -2496,7 +2496,7 @@
     \x{44f} 
 
 # -----------------------------------------------------------------------------
-# Tests for bidi control and bidi class properties, not yet supported by JIT.
+# Tests for bidi control and bidi class properties.
 
 /\p{ bidi_control }/utf
     -->\x{202c}<--
