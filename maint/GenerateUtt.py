@@ -109,10 +109,11 @@ utt_table += list(zip(std_category_names, category_names, ['PT_PC'] * len(catego
 utt_table += list(zip(std_general_category_names, general_category_names, ['PT_GC'] * len(general_category_names)))
 utt_table += list(zip(std_bidiclass_names, bidiclass_names, ['PT_BIDICL'] * len(bidiclass_names)))
 
-# Now add our own specials. Note both the standardized and capitalized forms 
-# are needed.
+# Now add our own specials and synonyms. Note both the standardized and
+# capitalized forms are needed.
 
 utt_table.append(('any', 'Any', 'PT_ANY'))
+utt_table.append(('bidic', 'BidiC', 'PT_BIDICO'))
 utt_table.append(('bidicontrol', 'Bidi_Control', 'PT_BIDICO'))
 utt_table.append(('l&',  'L&', 'PT_LAMP'))
 utt_table.append(('lc',  'LC', 'PT_LAMP'))

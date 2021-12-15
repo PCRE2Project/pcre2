@@ -690,15 +690,6 @@ static uint32_t chartypeoffset[] = {
   OP_STAR - OP_STAR,    OP_STARI - OP_STAR,
   OP_NOTSTAR - OP_STAR, OP_NOTSTARI - OP_STAR };
 
-/* Table of synonyms for Unicode properties. Each pair has the synonym first,
-followed by the name that's in the UCD table (lower case, no hyphens,
-underscores, or spaces). */
-
-static const char *prop_synonyms[] = {
-  "bc",       "bidiclass",
-  "bidic",    "bidicontrol"
-};
-
 /* Tables of names of POSIX character classes and their lengths. The names are
 now all in a single string, to reduce the number of relocations when a shared
 library is dynamically loaded. The list of lengths is terminated by a zero
@@ -2131,35 +2122,6 @@ if (c == CHAR_LEFT_CURLY_BRACKET)
     }
   if (c != CHAR_RIGHT_CURLY_BRACKET) goto ERROR_RETURN;
   name[i] = 0;
-
-  /* Implement a general synonym feature for class names. */
-
-  if (vptr != NULL) *vptr = 0;   /* Terminate class name */
-
-  bot = 0;
-  top = sizeof(prop_synonyms)/sizeof(char *);
-
-  while (top != bot)
-    {
-    size_t mid = ((top + bot)/2) & (size_t)(~2+1);   /* Mask off bottom bit */
-    int cf = PRIV(strcmp_c8)(name, prop_synonyms[mid]);
-    if (cf == 0)
-      {
-      const char *s = prop_synonyms[mid+1];
-      size_t slen = strlen(s);
-      if (vptr != NULL)
-        {
-        size_t vlen = name + i - vptr;
-        memmove(name + slen + 1, vptr + 1, (vlen + 1) * sizeof(PCRE2_UCHAR));
-        vptr = name + slen;
-        i = slen + vlen + 1;
-        }
-      for (size_t k = 0; k <= slen; k++) name[k] = s[k];
-      break;
-      }
-
-    if (cf > 0) bot = mid + 2; else top = mid;
-    }
   }
 
 /* If { doesn't follow \p or \P there is just one following character, which
@@ -2175,17 +2137,22 @@ else goto ERROR_RETURN;
 *ptrptr = ptr;
 
 /* If the property contains ':' or '=' we have class name and value separately
-specified. The only case currently supported is Bidi_Class, for which the
-property names are "bidi<name>". */
+specified. The only case currently supported is Bidi_Class (synonym BC), for
+which the property names are "bidi<name>". */
 
 if (vptr != NULL)
   {
-  if (PRIV(strcmp_c8)(name, "bidiclass") != 0)
+  *vptr = 0;   /* Terminate property name */ 
+  if (PRIV(strcmp_c8)(name, "bidiclass") != 0 &&
+      PRIV(strcmp_c8)(name, "bc") != 0)
     {
     *errorcodeptr = ERR47;
     return FALSE;
     }
   memmove(name + 4, vptr + 1, (name + i - vptr)*sizeof(PCRE2_UCHAR));
+  name[1] = 'i';    /* Can't use PRIV(strcpy)() because it adds 0 */
+  name[2] = 'd';
+  name[3] = 'i';  
   }
 
 /* Search for a recognized property name using binary chop. */
