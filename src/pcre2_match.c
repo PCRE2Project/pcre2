@@ -2422,32 +2422,33 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
       {
       const uint32_t *cp;
       const ucd_record *prop = GET_UCD(fc);
+      BOOL notmatch = Fop == OP_NOTPROP;
 
       switch(Fecode[1])
         {
         case PT_ANY:
-        if (Fop == OP_NOTPROP) RRETURN(MATCH_NOMATCH);
+        if (notmatch) RRETURN(MATCH_NOMATCH);
         break;
 
         case PT_LAMP:
         if ((prop->chartype == ucp_Lu ||
              prop->chartype == ucp_Ll ||
-             prop->chartype == ucp_Lt) == (Fop == OP_NOTPROP))
+             prop->chartype == ucp_Lt) == notmatch)
           RRETURN(MATCH_NOMATCH);
         break;
 
         case PT_GC:
-        if ((Fecode[2] != PRIV(ucp_gentype)[prop->chartype]) == (Fop == OP_PROP))
+        if ((Fecode[2] == PRIV(ucp_gentype)[prop->chartype]) == notmatch)
           RRETURN(MATCH_NOMATCH);
         break;
 
         case PT_PC:
-        if ((Fecode[2] != prop->chartype) == (Fop == OP_PROP))
+        if ((Fecode[2] == prop->chartype) == notmatch)
           RRETURN(MATCH_NOMATCH);
         break;
 
         case PT_SC:
-        if ((Fecode[2] != prop->script) == (Fop == OP_PROP))
+        if ((Fecode[2] == prop->script) == notmatch)
           RRETURN(MATCH_NOMATCH);
         break;
 
@@ -2455,7 +2456,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
 
         case PT_ALNUM:
         if ((PRIV(ucp_gentype)[prop->chartype] == ucp_L ||
-             PRIV(ucp_gentype)[prop->chartype] == ucp_N) == (Fop == OP_NOTPROP))
+             PRIV(ucp_gentype)[prop->chartype] == ucp_N) == notmatch)
           RRETURN(MATCH_NOMATCH);
         break;
 
@@ -2469,12 +2470,12 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
           {
           HSPACE_CASES:
           VSPACE_CASES:
-          if (Fop == OP_NOTPROP) RRETURN(MATCH_NOMATCH);
+          if (notmatch) RRETURN(MATCH_NOMATCH);
           break;
 
           default:
-          if ((PRIV(ucp_gentype)[prop->chartype] == ucp_Z) ==
-            (Fop == OP_NOTPROP)) RRETURN(MATCH_NOMATCH);
+          if ((PRIV(ucp_gentype)[prop->chartype] == ucp_Z) == notmatch)
+            RRETURN(MATCH_NOMATCH);
           break;
           }
         break;
@@ -2482,7 +2483,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
         case PT_WORD:
         if ((PRIV(ucp_gentype)[prop->chartype] == ucp_L ||
              PRIV(ucp_gentype)[prop->chartype] == ucp_N ||
-             fc == CHAR_UNDERSCORE) == (Fop == OP_NOTPROP))
+             fc == CHAR_UNDERSCORE) == notmatch)
           RRETURN(MATCH_NOMATCH);
         break;
 
@@ -2491,26 +2492,26 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
         for (;;)
           {
           if (fc < *cp)
-            { if (Fop == OP_PROP) { RRETURN(MATCH_NOMATCH); } else break; }
+            { if (notmatch) break; else { RRETURN(MATCH_NOMATCH); } }
           if (fc == *cp++)
-            { if (Fop == OP_PROP) break; else { RRETURN(MATCH_NOMATCH); } }
+            { if (notmatch) { RRETURN(MATCH_NOMATCH); } else break; }
           }
         break;
 
         case PT_UCNC:
         if ((fc == CHAR_DOLLAR_SIGN || fc == CHAR_COMMERCIAL_AT ||
              fc == CHAR_GRAVE_ACCENT || (fc >= 0xa0 && fc <= 0xd7ff) ||
-             fc >= 0xe000) == (Fop == OP_NOTPROP))
+             fc >= 0xe000) == notmatch)
           RRETURN(MATCH_NOMATCH);
         break;
 
         case PT_BIDICO:
-        if (((prop->bidi & UCD_BIDICONTROL_BIT) != 0) == (Fop == OP_NOTPROP))
+        if (((prop->bidi & UCD_BIDICONTROL_BIT) != 0) == notmatch)
           RRETURN(MATCH_NOMATCH);
         break;
 
         case PT_BIDICL:
-        if (((prop->bidi & UCD_BIDICLASS_MASK) == Fecode[2]) == (Fop == OP_NOTPROP))
+        if (((prop->bidi & UCD_BIDICLASS_MASK) == Fecode[2]) == notmatch)
           RRETURN(MATCH_NOMATCH);
         break;
 
@@ -2627,18 +2628,20 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
 
     /* First, ensure the minimum number of matches are present. Use inline
     code for maximizing the speed, and do the type test once at the start
-    (i.e. keep it out of the loop). The code for UTF mode is separated out for
-    tidiness, except for Unicode property tests. */
+    (i.e. keep it out of the loops). As there are no calls to RMATCH in the
+    loops, we can use an ordinary variable for "notmatch". The code for UTF
+    mode is separated out for tidiness, except for Unicode property tests. */
 
     if (Lmin > 0)
       {
 #ifdef SUPPORT_UNICODE
       if (proptype >= 0)  /* Property tests in all modes */
         {
+        BOOL notmatch = Lctype == OP_NOTPROP;
         switch(proptype)
           {
           case PT_ANY:
-          if (Lctype == OP_NOTPROP) RRETURN(MATCH_NOMATCH);
+          if (notmatch) RRETURN(MATCH_NOMATCH);
           for (i = 1; i <= Lmin; i++)
             {
             if (Feptr >= mb->end_subject)
@@ -2663,7 +2666,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
             chartype = UCD_CHARTYPE(fc);
             if ((chartype == ucp_Lu ||
                  chartype == ucp_Ll ||
-                 chartype == ucp_Lt) == (Lctype == OP_NOTPROP))
+                 chartype == ucp_Lt) == notmatch)
               RRETURN(MATCH_NOMATCH);
             }
           break;
@@ -2677,7 +2680,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
               RRETURN(MATCH_NOMATCH);
               }
             GETCHARINCTEST(fc, Feptr);
-            if ((UCD_CATEGORY(fc) == Lpropvalue) == (Lctype == OP_NOTPROP))
+            if ((UCD_CATEGORY(fc) == Lpropvalue) == notmatch)
               RRETURN(MATCH_NOMATCH);
             }
           break;
@@ -2691,7 +2694,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
               RRETURN(MATCH_NOMATCH);
               }
             GETCHARINCTEST(fc, Feptr);
-            if ((UCD_CHARTYPE(fc) == Lpropvalue) == (Lctype == OP_NOTPROP))
+            if ((UCD_CHARTYPE(fc) == Lpropvalue) == notmatch)
               RRETURN(MATCH_NOMATCH);
             }
           break;
@@ -2705,7 +2708,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
               RRETURN(MATCH_NOMATCH);
               }
             GETCHARINCTEST(fc, Feptr);
-            if ((UCD_SCRIPT(fc) == Lpropvalue) == (Lctype == OP_NOTPROP))
+            if ((UCD_SCRIPT(fc) == Lpropvalue) == notmatch)
               RRETURN(MATCH_NOMATCH);
             }
           break;
@@ -2721,7 +2724,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
               }
             GETCHARINCTEST(fc, Feptr);
             category = UCD_CATEGORY(fc);
-            if ((category == ucp_L || category == ucp_N) == (Lctype == OP_NOTPROP))
+            if ((category == ucp_L || category == ucp_N) == notmatch)
               RRETURN(MATCH_NOMATCH);
             }
           break;
@@ -2744,11 +2747,11 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
               {
               HSPACE_CASES:
               VSPACE_CASES:
-              if (Lctype == OP_NOTPROP) RRETURN(MATCH_NOMATCH);
+              if (notmatch) RRETURN(MATCH_NOMATCH);
               break;
 
               default:
-              if ((UCD_CATEGORY(fc) == ucp_Z) == (Lctype == OP_NOTPROP))
+              if ((UCD_CATEGORY(fc) == ucp_Z) == notmatch)
                 RRETURN(MATCH_NOMATCH);
               break;
               }
@@ -2767,7 +2770,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
             GETCHARINCTEST(fc, Feptr);
             category = UCD_CATEGORY(fc);
             if ((category == ucp_L || category == ucp_N ||
-                fc == CHAR_UNDERSCORE) == (Lctype == OP_NOTPROP))
+                fc == CHAR_UNDERSCORE) == notmatch)
               RRETURN(MATCH_NOMATCH);
             }
           break;
@@ -2787,12 +2790,12 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
               {
               if (fc < *cp)
                 {
-                if (Lctype == OP_NOTPROP) break;
+                if (notmatch) break;
                 RRETURN(MATCH_NOMATCH);
                 }
               if (fc == *cp++)
                 {
-                if (Lctype == OP_NOTPROP) RRETURN(MATCH_NOMATCH);
+                if (notmatch) RRETURN(MATCH_NOMATCH);
                 break;
                 }
               }
@@ -2810,7 +2813,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
             GETCHARINCTEST(fc, Feptr);
             if ((fc == CHAR_DOLLAR_SIGN || fc == CHAR_COMMERCIAL_AT ||
                  fc == CHAR_GRAVE_ACCENT || (fc >= 0xa0 && fc <= 0xd7ff) ||
-                 fc >= 0xe000) == (Lctype == OP_NOTPROP))
+                 fc >= 0xe000) == notmatch)
               RRETURN(MATCH_NOMATCH);
             }
           break;
@@ -2824,7 +2827,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
               RRETURN(MATCH_NOMATCH);
               }
             GETCHARINCTEST(fc, Feptr);
-            if ((UCD_BIDICONTROL(fc) != 0) == (Lctype == OP_NOTPROP))
+            if ((UCD_BIDICONTROL(fc) != 0) == notmatch)
               RRETURN(MATCH_NOMATCH);
             }
           break;
@@ -2838,7 +2841,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
               RRETURN(MATCH_NOMATCH);
               }
             GETCHARINCTEST(fc, Feptr);
-            if ((UCD_BIDICLASS(fc) == Lpropvalue) == (Lctype == OP_NOTPROP))
+            if ((UCD_BIDICLASS(fc) == Lpropvalue) == notmatch)
               RRETURN(MATCH_NOMATCH);
             }
           break;
@@ -3382,7 +3385,9 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
     if (Lmin == Lmax) continue;
 
     /* If minimizing, we have to test the rest of the pattern before each
-    subsequent match. */
+    subsequent match. This means we cannot use a local "notmatch" variable as 
+    in the other cases. As all 4 temporary 32-bit values in the frame are 
+    already in use, just test the type each time. */
 
     if (reptype == REPTYPE_MIN)
       {
@@ -3493,8 +3498,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
               }
             GETCHARINCTEST(fc, Feptr);
             category = UCD_CATEGORY(fc);
-            if ((category == ucp_L || category == ucp_N) ==
-                (Lctype == OP_NOTPROP))
+            if ((category == ucp_L || category == ucp_N) == (Lctype == OP_NOTPROP))
               RRETURN(MATCH_NOMATCH);
             }
           /* Control never gets here */
@@ -3943,7 +3947,9 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
       }
 
     /* If maximizing, it is worth using inline code for speed, doing the type
-    test once at the start (i.e. keep it out of the loop). */
+    test once at the start (i.e. keep it out of the loops). Once again, 
+    "notmatch" can be an ordinary local variable because the loops do not call 
+    RMATCH. */
 
     else
       {
@@ -3952,6 +3958,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
 #ifdef SUPPORT_UNICODE
       if (proptype >= 0)
         {
+        BOOL notmatch = Lctype == OP_NOTPROP;
         switch(proptype)
           {
           case PT_ANY:
@@ -3964,7 +3971,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
               break;
               }
             GETCHARLENTEST(fc, Feptr, len);
-            if (Lctype == OP_NOTPROP) break;
+            if (notmatch) break;
             Feptr+= len;
             }
           break;
@@ -3983,7 +3990,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
             chartype = UCD_CHARTYPE(fc);
             if ((chartype == ucp_Lu ||
                  chartype == ucp_Ll ||
-                 chartype == ucp_Lt) == (Lctype == OP_NOTPROP))
+                 chartype == ucp_Lt) == notmatch)
               break;
             Feptr+= len;
             }
@@ -3999,8 +4006,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
               break;
               }
             GETCHARLENTEST(fc, Feptr, len);
-            if ((UCD_CATEGORY(fc) == Lpropvalue) == (Lctype == OP_NOTPROP))
-              break;
+            if ((UCD_CATEGORY(fc) == Lpropvalue) == notmatch) break;
             Feptr+= len;
             }
           break;
@@ -4015,8 +4021,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
               break;
               }
             GETCHARLENTEST(fc, Feptr, len);
-            if ((UCD_CHARTYPE(fc) == Lpropvalue) == (Lctype == OP_NOTPROP))
-              break;
+            if ((UCD_CHARTYPE(fc) == Lpropvalue) == notmatch) break;
             Feptr+= len;
             }
           break;
@@ -4031,8 +4036,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
               break;
               }
             GETCHARLENTEST(fc, Feptr, len);
-            if ((UCD_SCRIPT(fc) == Lpropvalue) == (Lctype == OP_NOTPROP))
-              break;
+            if ((UCD_SCRIPT(fc) == Lpropvalue) == notmatch) break;
             Feptr+= len;
             }
           break;
@@ -4049,8 +4053,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
               }
             GETCHARLENTEST(fc, Feptr, len);
             category = UCD_CATEGORY(fc);
-            if ((category == ucp_L || category == ucp_N) ==
-                (Lctype == OP_NOTPROP))
+            if ((category == ucp_L || category == ucp_N) == notmatch)
               break;
             Feptr+= len;
             }
@@ -4075,11 +4078,11 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
               {
               HSPACE_CASES:
               VSPACE_CASES:
-              if (Lctype == OP_NOTPROP) goto ENDLOOP99;  /* Break the loop */
+              if (notmatch) goto ENDLOOP99;  /* Break the loop */
               break;
 
               default:
-              if ((UCD_CATEGORY(fc) == ucp_Z) == (Lctype == OP_NOTPROP))
+              if ((UCD_CATEGORY(fc) == ucp_Z) == notmatch)
                 goto ENDLOOP99;   /* Break the loop */
               break;
               }
@@ -4101,7 +4104,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
             GETCHARLENTEST(fc, Feptr, len);
             category = UCD_CATEGORY(fc);
             if ((category == ucp_L || category == ucp_N ||
-                 fc == CHAR_UNDERSCORE) == (Lctype == OP_NOTPROP))
+                 fc == CHAR_UNDERSCORE) == notmatch)
               break;
             Feptr+= len;
             }
@@ -4122,9 +4125,9 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
             for (;;)
               {
               if (fc < *cp)
-                { if (Lctype == OP_NOTPROP) break; else goto GOT_MAX; }
+                { if (notmatch) break; else goto GOT_MAX; }
               if (fc == *cp++)
-                { if (Lctype == OP_NOTPROP) goto GOT_MAX; else break; }
+                { if (notmatch) goto GOT_MAX; else break; }
               }
             Feptr += len;
             }
@@ -4143,7 +4146,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
             GETCHARLENTEST(fc, Feptr, len);
             if ((fc == CHAR_DOLLAR_SIGN || fc == CHAR_COMMERCIAL_AT ||
                  fc == CHAR_GRAVE_ACCENT || (fc >= 0xa0 && fc <= 0xd7ff) ||
-                 fc >= 0xe000) == (Lctype == OP_NOTPROP))
+                 fc >= 0xe000) == notmatch)
               break;
             Feptr += len;
             }
@@ -4159,8 +4162,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
               break;
               }
             GETCHARLENTEST(fc, Feptr, len);
-            if ((UCD_BIDICONTROL(fc) != 0) == (Lctype == OP_NOTPROP))
-              break;
+            if ((UCD_BIDICONTROL(fc) != 0) == notmatch) break;
             Feptr+= len;
             }
           break;
@@ -4175,8 +4177,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
               break;
               }
             GETCHARLENTEST(fc, Feptr, len);
-            if ((UCD_BIDICLASS(fc) == Lpropvalue) == (Lctype == OP_NOTPROP))
-              break;
+            if ((UCD_BIDICLASS(fc) == Lpropvalue) == notmatch) break;
             Feptr+= len;
             }
           break;
@@ -6571,7 +6572,7 @@ if (utf &&
   /* Validate the relevant portion of the subject. There's a loop in case we
   encounter bad UTF in the characters preceding start_match which we are
   scanning because of a lookbehind. */
-  
+
   for (;;)
     {
     match_data->rc = PRIV(valid_utf)(mb->check_subject,

@@ -43,6 +43,8 @@ of applications treat NULL/0 in this way.
 
 15. Fix some minor issues raised by clang sanitize.
 
+16. Very minor code speed up for maximizing character property matches.
+
 
 Version 10.39 29-October-2021
 -----------------------------
