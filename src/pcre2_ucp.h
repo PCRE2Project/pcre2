@@ -325,7 +325,10 @@ enum {
   ucp_Old_Uyghur,
   ucp_Tangsa,
   ucp_Toto,
-  ucp_Vithkuqi
+  ucp_Vithkuqi,
+  
+  /* This must be last */
+  ucp_Script_Count 
 };
 
 #endif  /* PCRE2_UCP_H_IDEMPOTENT_GUARD */

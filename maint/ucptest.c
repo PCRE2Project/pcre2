@@ -308,7 +308,7 @@ const ucp_type_table *u;
 for (i = 0; i < PRIV(utt_size); i++)
   {
   u = PRIV(utt) + i;
-  if (u->type == PT_SC && u->value == script) break;
+  if (u->type == PT_SCX && u->value == script) break;
   }
 
 if (i < PRIV(utt_size))
@@ -461,12 +461,30 @@ if (scriptx != script)
   else
     {
     const char *sep = "";
+    
+
+/* 
     const uint8_t *p = PRIV(ucd_script_sets) - scriptx;
     while (*p != 0)
       {
       printf("%s%s", sep, get_scriptname(*p++));
       sep = ", ";
       }
+*/
+
+    const uint32_t *p = PRIV(ucd_script_sets) - scriptx;
+    for (int i = 0; i < ucp_Script_Count; i++)
+      {
+      int x = i/32;
+      int y = i%32;
+      
+      if ((p[x] & (1u<<y)) != 0)
+        {
+        printf("%s%s", sep, get_scriptname(i));
+        sep = ", ";
+        }
+      }  
+ 
     }
   printf("]");
   }
@@ -538,7 +556,7 @@ while (*s != 0)
     for (i = 0; i < PRIV(utt_size); i++)
       {
       const ucp_type_table *u = PRIV(utt) + i;
-      if (u->type == PT_SC && strcmp(CS(value + offset),
+      if (u->type == PT_SCX && strcmp(CS(value + offset),
             PRIV(utt_names) + u->name_offset) == 0)
         {
         c = u->value;
@@ -686,11 +704,11 @@ for (c = 0; c <= 0x10ffff; c++)
 
   if (scriptx_count > 0)
     {
-    const uint8_t *char_scriptx = NULL;
+    const uint32_t *bits_scriptx = NULL;
     unsigned int found = 0;
     int scriptx = UCD_SCRIPTX(c);
 
-    if (scriptx < 0) char_scriptx = PRIV(ucd_script_sets) - scriptx;
+    if (scriptx < 0) bits_scriptx = PRIV(ucd_script_sets) - scriptx;
 
     for (i = 0; i < scriptx_count; i++)
       {
@@ -704,15 +722,9 @@ for (c = 0; c <= 0x10ffff; c++)
 
         else
           {
-          const uint8_t *p;
-          for (p = char_scriptx; *p != 0; p++)
-            {
-            if (scriptx_list[i] == *p)
-              {
-              found++;
-              break;
-              }
-            }
+          int x = scriptx_list[i]/32;
+          int y = scriptx_list[i]%32; 
+          if ((bits_scriptx[x] & (1u<<y)) != 0) found++;  
           }
         }
       /* Negative requirement */
@@ -724,10 +736,9 @@ for (c = 0; c <= 0x10ffff; c++)
           }
         else
           {
-          const uint8_t *p;
-          for (p = char_scriptx; *p != 0; p++)
-            if (-scriptx_list[i] == *p) break;
-          if (*p == 0) found++;
+          int x = scriptx_list[i]/32;
+          int y = scriptx_list[i]%32; 
+          if ((bits_scriptx[x] & (1u<<y)) == 0) found++;  
           }
         }
       }
@@ -881,7 +892,7 @@ else if (strcmp(CS name, "list") == 0)
     if (strcmp(CS name, "script") == 0 || strcmp(CS name, "scripts") == 0)
       {
       for (i = 0; i < PRIV(utt_size); i++)
-        if (PRIV(utt)[i].type == PT_SC)
+        if (PRIV(utt)[i].type == PT_SCX)
           printf("%s\n", PRIV(utt_names) + PRIV(utt)[i].name_offset);
       }
 

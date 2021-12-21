@@ -49,8 +49,8 @@ U+2010..U+2015  ON  Punctuation: Dash punctuation, common, Other
 U+2E3A..U+2E3B  ON  Punctuation: Dash punctuation, common, Other
         U+2E40  ON  Punctuation: Dash punctuation, common, Other
         U+2E5D  ON  Punctuation: Dash punctuation, common, Other
-        U+301C  ON  Punctuation: Dash punctuation, common, Other, [bopomofo, hangul, han, hiragana, katakana]
-        U+3030  ON  Punctuation: Dash punctuation, common, Extended Pictographic, [bopomofo, hangul, han, hiragana, katakana]
+        U+301C  ON  Punctuation: Dash punctuation, common, Other, [bopomofo, han, hangul, hiragana, katakana]
+        U+3030  ON  Punctuation: Dash punctuation, common, Extended Pictographic, [bopomofo, han, hangul, hiragana, katakana]
         U+30A0  ON  Punctuation: Dash punctuation, common, Other, [hiragana, katakana]
 U+FE31..U+FE32  ON  Punctuation: Dash punctuation, common, Other
         U+FE58  ON  Punctuation: Dash punctuation, common, Other
@@ -168,7 +168,7 @@ U+002C  CS  Punctuation: Other punctuation, common, Other
 U+002E..U+002F  CS  Punctuation: Other punctuation, common, Other
         U+003A  CS  Punctuation: Other punctuation, common, Other
         U+00A0  CS  Separator: Space separator, common, Other
-        U+060C  CS  Punctuation: Other punctuation, common, Other, [arabic, nko, hanifirohingya, syriac, thaana, yezidi]
+        U+060C  CS  Punctuation: Other punctuation, common, Other, [arabic, syriac, thaana, nko, hanifirohingya, yezidi]
         U+202F  CS  Separator: Space separator, common, Other, [latin, mongolian]
         U+2044  CS  Symbol: Mathematical symbol, common, Other
         U+FE50  CS  Punctuation: Other punctuation, common, Other

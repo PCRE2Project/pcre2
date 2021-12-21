@@ -1337,6 +1337,8 @@
 
 # These scripts weren't yet in Perl when I added Unicode 6.0.0 to PCRE
 
+#subject no_jit
+
 /^[\p{Batak}]/utf
     \x{1bc0}
     \x{1bff}
@@ -1355,6 +1357,8 @@
 \= Expect no match
     \x{85c}
     \x{85d}
+
+#subject -no_jit
 
 /(\X*)(.)/s,utf
     A\x{300}
@@ -2035,6 +2039,8 @@
 # doesn't recognize all these scripts. In time these three tests can be moved
 # to test 4.
 
+#subject no_jit
+
 /^(\p{Adlam}+)(\p{Bhaiksuki}+)(\p{Marchen}+)(\p{Newa}+)(\p{Osage}+)
   (\p{Tangut}+)(\p{Masaram_Gondi}+)(\p{Nushu}+)(\p{Soyombo}+)
   (\p{Zanabazar_Square}+)/x,utf
@@ -2043,7 +2049,7 @@
 /^\x{1E900}\x{104B0}/i,utf
     \x{1E900}\x{104B0}
     \x{1E922}\x{104D8}
-
+    
 /^(?:(\X)(?C))+$/utf
     \x{1E900}\x{1E924}\x{1E953}\x{11C00}\x{11C2D}\x{11C3E}\x{11C70}\x{11C77}\x{11CAB}\x{11400}\x{1142F}\x{11455}\x{104B0}\x{104D8}\x{104FB}\x{16FE0}\x{18800}\x{18AF2}\x{11D00}\x{11D3A}\x{11D59}\x{16FE1}\x{1B170}\x{1B2FB}\x{11A50}\x{11A58}\x{11AA2}\x{11A00}\x{11A07}\x{11A47}\=callout_capture,callout_no_where 
 
@@ -2091,6 +2097,8 @@
     \x{654}
     \x{655}
     \x{1D1AA} 
+
+#subject -no_jit 
 
 /\N{U+}/
 
@@ -2191,5 +2199,19 @@
 /\p{L&}+\p{bidi_control}/B
 
 /\p{bidi_control}+\p{L&}/B
+
+/\p{han}/B
+
+/\p{script:han}/B
+
+/\p{sc:han}/B
+
+/\p{script extensions:han}/B
+
+/\p{scx:han}/B
+
+# Test error - invalid script name
+
+/\p{sc:L}/
 
 # End of testinput5

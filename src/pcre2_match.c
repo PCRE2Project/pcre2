@@ -160,7 +160,7 @@ enum { RM100=100, RM101 };
 enum { RM200=200, RM201, RM202, RM203, RM204, RM205, RM206, RM207,
        RM208,     RM209, RM210, RM211, RM212, RM213, RM214, RM215,
        RM216,     RM217, RM218, RM219, RM220, RM221, RM222, RM223,
-       RM224 };
+       RM224,     RM225 };
 #endif
 
 /* Define short names for general fields in the current backtrack frame, which
@@ -2452,6 +2452,17 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
           RRETURN(MATCH_NOMATCH);
         break;
 
+        case PT_SCX:
+          {
+          int scriptx = prop->scriptx;
+          BOOL ok = Fecode[2] == prop->script ||
+                    Fecode[2] == (unsigned int)scriptx;
+          if (!ok && scriptx < 0)
+            ok = MAPBIT((PRIV(ucd_script_sets) - scriptx), Fecode[2]) != 0;
+          if (ok == notmatch) RRETURN(MATCH_NOMATCH);
+          }
+        break;
+
         /* These are specials */
 
         case PT_ALNUM:
@@ -2709,6 +2720,28 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
               }
             GETCHARINCTEST(fc, Feptr);
             if ((UCD_SCRIPT(fc) == Lpropvalue) == notmatch)
+              RRETURN(MATCH_NOMATCH);
+            }
+          break;
+
+          case PT_SCX:
+          for (i = 1; i <= Lmin; i++)
+            {
+            BOOL ok;
+            int scriptx;
+            const ucd_record *prop;
+            if (Feptr >= mb->end_subject)
+              {
+              SCHECK_PARTIAL();
+              RRETURN(MATCH_NOMATCH);
+              }
+            GETCHARINCTEST(fc, Feptr);
+            prop = GET_UCD(fc);
+            scriptx = prop->scriptx;
+            ok = prop->script == Lpropvalue || scriptx == (int)Lpropvalue;
+            if (!ok && scriptx < 0)
+              ok = MAPBIT(PRIV(ucd_script_sets) - scriptx, Lpropvalue) != 0;
+            if (ok == notmatch)
               RRETURN(MATCH_NOMATCH);
             }
           break;
@@ -3385,8 +3418,8 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
     if (Lmin == Lmax) continue;
 
     /* If minimizing, we have to test the rest of the pattern before each
-    subsequent match. This means we cannot use a local "notmatch" variable as 
-    in the other cases. As all 4 temporary 32-bit values in the frame are 
+    subsequent match. This means we cannot use a local "notmatch" variable as
+    in the other cases. As all 4 temporary 32-bit values in the frame are
     already in use, just test the type each time. */
 
     if (reptype == REPTYPE_MIN)
@@ -3480,6 +3513,31 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
               }
             GETCHARINCTEST(fc, Feptr);
             if ((UCD_SCRIPT(fc) == Lpropvalue) == (Lctype == OP_NOTPROP))
+              RRETURN(MATCH_NOMATCH);
+            }
+          /* Control never gets here */
+
+          case PT_SCX:
+          for (;;)
+            {
+            BOOL ok;
+            int scriptx;
+            const ucd_record *prop;
+            RMATCH(Fecode, RM225);
+            if (rrc != MATCH_NOMATCH) RRETURN(rrc);
+            if (Lmin++ >= Lmax) RRETURN(MATCH_NOMATCH);
+            if (Feptr >= mb->end_subject)
+              {
+              SCHECK_PARTIAL();
+              RRETURN(MATCH_NOMATCH);
+              }
+            GETCHARINCTEST(fc, Feptr);
+            prop = GET_UCD(fc);
+            scriptx = prop->scriptx;
+            ok = prop->script == Lpropvalue || scriptx == (int)Lpropvalue;
+            if (!ok && scriptx < 0)
+              ok = MAPBIT(PRIV(ucd_script_sets) - scriptx, Lpropvalue) != 0;
+            if (ok == (Lctype == OP_NOTPROP))
               RRETURN(MATCH_NOMATCH);
             }
           /* Control never gets here */
@@ -3947,8 +4005,8 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
       }
 
     /* If maximizing, it is worth using inline code for speed, doing the type
-    test once at the start (i.e. keep it out of the loops). Once again, 
-    "notmatch" can be an ordinary local variable because the loops do not call 
+    test once at the start (i.e. keep it out of the loops). Once again,
+    "notmatch" can be an ordinary local variable because the loops do not call
     RMATCH. */
 
     else
@@ -4037,6 +4095,29 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
               }
             GETCHARLENTEST(fc, Feptr, len);
             if ((UCD_SCRIPT(fc) == Lpropvalue) == notmatch) break;
+            Feptr+= len;
+            }
+          break;
+
+          case PT_SCX:
+          for (i = Lmin; i < Lmax; i++)
+            {
+            BOOL ok;
+            const ucd_record *prop;
+            int scriptx;
+            int len = 1;
+            if (Feptr >= mb->end_subject)
+              {
+              SCHECK_PARTIAL();
+              break;
+              }
+            GETCHARLENTEST(fc, Feptr, len);
+            prop = GET_UCD(fc);
+            scriptx = prop->scriptx;
+            ok = prop->script == Lpropvalue || scriptx == (int)Lpropvalue;
+            if (!ok && scriptx < 0)
+              ok = MAPBIT(PRIV(ucd_script_sets) - scriptx, Lpropvalue) != 0;
+            if (ok == notmatch) break;
             Feptr+= len;
             }
           break;
@@ -6172,7 +6253,7 @@ switch (Freturn_id)
   LBL(200) LBL(201) LBL(202) LBL(203) LBL(204) LBL(205) LBL(206)
   LBL(207) LBL(208) LBL(209) LBL(210) LBL(211) LBL(212) LBL(213)
   LBL(214) LBL(215) LBL(216) LBL(217) LBL(218) LBL(219) LBL(220)
-  LBL(221) LBL(222) LBL(223) LBL(224)
+  LBL(221) LBL(222) LBL(223) LBL(224) LBL(225)
 #endif
 
   default:

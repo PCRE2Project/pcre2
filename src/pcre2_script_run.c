@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-          New API code Copyright (c) 2016-2018 University of Cambridge
+          New API code Copyright (c) 2016-2021 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -77,17 +77,17 @@ records (and is only likely to be a few hundred). */
 #define SCRIPT_HANHIRAKATA  (-99997)
 #define SCRIPT_HANBOPOMOFO  (-99996)
 #define SCRIPT_HANHANGUL    (-99995)
-#define SCRIPT_LIST         (-99994)
+#define SCRIPT_MAP          (-99994)
 
-#define INTERSECTION_LIST_SIZE 50
+#define MAPSIZE (ucp_Script_Count/32 + 1)
 
 BOOL
 PRIV(script_run)(PCRE2_SPTR ptr, PCRE2_SPTR endptr, BOOL utf)
 {
 #ifdef SUPPORT_UNICODE
 int require_script = SCRIPT_UNSET;
-uint8_t intersection_list[INTERSECTION_LIST_SIZE];
-const uint8_t *require_list = NULL;
+uint32_t intersection_map[MAPSIZE];
+const uint32_t *require_map = NULL;
 uint32_t require_digitset = 0;
 uint32_t c;
 
@@ -197,20 +197,13 @@ for (;;)
           if (scriptx != ucp_Han && scriptx != ucp_Hangul) return FALSE;
           break;
 
-          /* We have a list of scripts to check that is derived from one or
-          more previous characters. This is either one of the lists in
+          /* We have a bitmap of scripts to check that is derived from one or
+          more previous characters. This is either one of the maps in
           ucd_script_sets[] (for one previous character) or the intersection of
-          several lists for multiple characters. */
+          several maps for multiple characters. */
 
-          case SCRIPT_LIST:
-            {
-            const uint8_t *list;
-            for (list = require_list; *list != 0; list++)
-              {
-              if (*list == scriptx) break;
-              }
-            if (*list == 0) return FALSE;
-            }
+          case SCRIPT_MAP:
+          if (MAPBIT(require_map, scriptx) == 0) return FALSE; 
 
           /* The rest of the string must be in this script, but we have to 
           allow for the Han complications. */
@@ -249,19 +242,18 @@ for (;;)
         }  /* End of handing positive scriptx */
 
       /* If scriptx is negative, this character is a mark-type character that
-      has a list of permitted scripts. */
+      has a list of permitted scripts, which are encoded in a bitmap. */
 
       else
         {
         uint32_t chspecial;
-        const uint8_t *clist, *rlist;
-        const uint8_t *list = PRIV(ucd_script_sets) - scriptx;
+        const uint32_t *map = PRIV(ucd_script_sets) - scriptx;
         
         switch(require_script)
           {
           case SCRIPT_UNSET:
-          require_list = PRIV(ucd_script_sets) - scriptx;
-          require_script = SCRIPT_LIST;
+          require_map = PRIV(ucd_script_sets) - scriptx;
+          require_script = SCRIPT_MAP;
           break;
 
           /* An inspection of the Unicode 11.0.0 files shows that there are the
@@ -282,17 +274,11 @@ for (;;)
 
           case SCRIPT_HANPENDING:
           chspecial = 0;
-          for (; *list != 0; list++)
-            {
-            switch (*list)
-              {
-              case ucp_Bopomofo: chspecial |= FOUND_BOPOMOFO; break;
-              case ucp_Hiragana: chspecial |= FOUND_HIRAGANA; break;
-              case ucp_Katakana: chspecial |= FOUND_KATAKANA; break;
-              case ucp_Hangul:   chspecial |= FOUND_HANGUL; break;
-              default: break;
-              }
-            }
+
+          if (MAPBIT(map, ucp_Bopomofo) != 0) chspecial |= FOUND_BOPOMOFO;
+          if (MAPBIT(map, ucp_Hiragana) != 0) chspecial |= FOUND_HIRAGANA;
+          if (MAPBIT(map, ucp_Katakana) != 0) chspecial |= FOUND_KATAKANA;
+          if (MAPBIT(map, ucp_Hangul) != 0)   chspecial |= FOUND_HANGUL;
 
            if (chspecial == 0) return FALSE;
 
@@ -311,76 +297,44 @@ for (;;)
           break;
 
           case SCRIPT_HANHIRAKATA:
-          for (; *list != 0; list++)
-            {
-            if (*list == ucp_Hiragana || *list == ucp_Katakana) break;
-            }
-          if (*list == 0) return FALSE;
-          break;
+          if (MAPBIT(map, ucp_Hiragana) != 0) break;
+          if (MAPBIT(map, ucp_Katakana) != 0) break;
+          return FALSE;
 
           case SCRIPT_HANBOPOMOFO:
-          for (; *list != 0; list++)
-            {
-            if (*list == ucp_Bopomofo) break;
-            }
-          if (*list == 0) return FALSE;
-          break;
+          if (MAPBIT(map, ucp_Bopomofo) != 0) break;
+          return FALSE;
 
           case SCRIPT_HANHANGUL:
-          for (; *list != 0; list++)
-            {
-            if (*list == ucp_Hangul) break;
-            }
-          if (*list == 0) return FALSE;
-          break;
+          if (MAPBIT(map, ucp_Hangul) != 0) break;
+          return FALSE;
 
           /* Previously encountered one or more characters that are allowed
           with a list of scripts. Build the intersection of the required list
-          with this character's list in intersection_list[]. This code is
-          written so that it still works OK if the required list is already in
-          that vector. */
+          with this character's list in intersection_map[]. */
 
-          case SCRIPT_LIST:
-            {
-            int i = 0;
-            for (rlist = require_list; *rlist != 0; rlist++)
-              {
-              for (clist = list; *clist != 0; clist++)
-                {
-                if (*rlist == *clist)
-                  {
-                  intersection_list[i++] = *rlist;
-                  break;
-                  }
-                }
-              }
-            if (i == 0) return FALSE;  /* No scripts in common */
+          case SCRIPT_MAP:
+          for (int i = 0; i < MAPSIZE; i++)
+            intersection_map[i] = require_map[i] & map[i];
+          
+          /* If there's just one script in common, we could set it as the
+          unique required script. However, in the new bitmap arrangements, 
+          finding the one script is expensive, so leave this out for now.
+          Otherwise, make the intersection map the required map. */
 
-            /* If there's just one script in common, we can set it as the
-            unique required script. Otherwise, terminate the intersection list
-            and make it the required list. */
+          /*
+          if (onescript >= 0) require_script = onescript;
+            else require_map = intersection_map;
+          */   
 
-            if (i == 1)
-              {
-              require_script = intersection_list[0];
-              }
-            else
-              {
-              intersection_list[i] = 0;
-              require_list = intersection_list;
-              }
-            }
+          require_map = intersection_map;
           break;
 
           /* The previously set required script is a single script, not
           Han-related. Check that it is in this character's list. */
 
           default:
-          for (; *list != 0; list++)
-            {
-            if (*list == require_script) break;
-            }
-          if (*list == 0) return FALSE;
+          if (MAPBIT(map, require_script) == 0) return FALSE; 
           break;
           }
         }  /* End of handling negative scriptx */

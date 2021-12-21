@@ -100,6 +100,8 @@
 # PCRE2-10.39:       Updated for Unicode 14.0.0
 # 05-December-2021:  Added code to scan DerivedBidiClass.txt for bidi class,
 #                      and also PropList.txt for the Bidi_Control property
+# 19-December-2021:  Reworked script extensions lists to be bit maps instead
+#                      of zero-terminated lists of script numbers.
 # ----------------------------------------------------------------------------
 #
 #
@@ -128,11 +130,12 @@
 # in script runs all come from the same set. The first element in the vector
 # contains the number of subsequent elements, which are in ascending order.
 #
-# The ucd_script_sets vector contains lists of script numbers that are the
-# Script Extensions properties of certain characters. Each list is terminated
-# by zero (ucp_Unknown). A character with more than one script listed for its
-# Script Extension property has a negative value in its record. This is the
-# negated offset to the start of the relevant list in the ucd_script_sets
+# The ucd_script_sets vector contains bitmaps that represent lists of scripts
+# for the Script Extensions properties of certain characters. Each bitmap
+# consists of a fixed number of unsigned 32-bit numbers, enough to allocate
+# a bit for every known script. A character with more than one script listed
+# for its Script Extension property has a negative value in its record. This is
+# the negated offset to the start of the relevant bitmap in the ucd_script_sets
 # vector.
 #
 # The ucd_records table contains one instance of every unique record that is
@@ -186,15 +189,15 @@
 #             3 = ucp_gbExtend  => Grapheme break property "Extend"
 #             0                 => Not part of a caseless set
 #             0                 => No other case
-#          -122                 => Script Extension list offset = 122
-#            19 = ucp_bidiNSM   => Bidi class non-spacing mark
+#          -228                 => Script Extension list offset = 228
+#            13 = ucp_bidiNSM   => Bidi class non-spacing mark
 #             0                 => Dummy value, unused at present
 #
-# At offset 101 in the ucd_script_sets vector we find the list 3, 15, 107, 29,
-# and terminator 0. This means that this character is expected to be used with
-# any of those scripts, which are Bengali, Devanagari, Grantha, and Kannada.
+# At offset 228 in the ucd_script_sets vector we find a bitmap with bits 3, 15,
+# 29, and 107 set. This means that this character is expected to be used with
+# any of those scripts, which are Bengali, Devanagari, Kannada, and Grantha.
 #
-#  Philip Hazel, last updated 05 December 2021.
+#  Philip Hazel, last updated 19 December 2021.
 ##############################################################################
 
 
@@ -507,7 +510,7 @@ break_property_names = ['CR', 'LF', 'Control', 'Extend', 'Prepend',
 
 # BIDI class property names in the DerivedBidiClass.txt file
 
-bidiclass_names = ['AL', 'AN', 'B', 'BN', 'CS', 'EN', 'ES', 'ET', 'FSI', 'L', 
+bidiclass_names = ['AL', 'AN', 'B', 'BN', 'CS', 'EN', 'ES', 'ET', 'FSI', 'L',
   'LRE', 'LRI', 'LRO', 'NSM', 'ON',  'PDF', 'PDI', 'R', 'RLE', 'RLI', 'RLO',
   'S', 'WS' ]
 
@@ -574,7 +577,7 @@ file.close()
 # file, setting 'Unknown' as the default (this will never be a Script Extension
 # value), then scan it and fill in the default from Scripts. Code added by PH
 # in October 2018. Positive values are used for just a single script for a
-# code point. Negative values are negated offsets in a list of lists of
+# code point. Negative values are negated offsets in a list of bitsets of
 # multiple scripts. Initialize this list with a single entry, as the zeroth
 # element is never used.
 
@@ -582,9 +585,22 @@ script_lists = [0]
 script_abbrevs_default = script_abbrevs.index('Zzzz')
 scriptx = read_table('Unicode.tables/ScriptExtensions.txt', get_script_extension, script_abbrevs_default)
 
+# Scan all characters and set their default script extension to the main
+# script. We also have to adjust negative scriptx values, following a change in
+# the way these work. They are currently negated offsets into the script_lists
+# list, but have to be changed into indices in the new ucd_script_sets vector,
+# which has fixed-size entries. We can compute the new offset by counting the
+# zeros that precede the current offset.
+
 for i in range(0, MAX_UNICODE):
   if scriptx[i] == script_abbrevs_default:
     scriptx[i] = script[i]
+  elif scriptx[i] < 0:
+    count = 1
+    for j in range(-scriptx[i], 0, -1):
+      if script_lists[j] == 0:
+        count += 1
+    scriptx[i] = -count * (int(len(script_names)/32) + 1)
 
 # With the addition of the Script Extensions field, we needed some padding to
 # get the Unicode records up to 12 bytes (multiple of 4). Originally this was a
@@ -803,18 +819,30 @@ for d in digitsets:
   count += 1
 print("\n};\n")
 
-print("/* This vector is a list of lists of scripts for the Script Extension")
-print("property. Each sublist is zero-terminated. */\n")
-print("const uint8_t PRIV(ucd_script_sets)[] = {")
+print("/* This vector is a list of script bitsets for the Script Extension")
+print("property. */\n")
+print("const uint32_t PRIV(ucd_script_sets)[] = {")
 
-count = 0
-print("  /*   0 */", end='')
+bitword_count = len(script_names)/32 + 1
+bitwords = [0] * int(bitword_count)
+
 for d in script_lists:
-  print(" %3d," % d, end='')
-  count += 1
   if d == 0:
-    print("\n  /* %3d */" % count, end='')
-print("\n};\n")
+    s = " "
+    print("  ", end='')
+    for x in bitwords:
+      print("%s" %s, end='')
+      s = ", "
+      print("0x%08xu" % x, end='')
+    print(",\n", end='')
+    bitwords = [0] * int(bitword_count)
+
+  else:
+    x = int(d/32)
+    y = int(d%32)
+    bitwords[x] = bitwords[x] | (1 << y)
+
+print("};\n")
 
 # Output the main UCD tables.
 

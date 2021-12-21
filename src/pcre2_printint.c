@@ -237,11 +237,15 @@ get_ucpname(unsigned int ptype, unsigned int pvalue)
 {
 #ifdef SUPPORT_UNICODE
 int i;
+
+if (ptype == PT_SC) ptype = PT_SCX;  /* Table has scx values */
 for (i = PRIV(utt_size) - 1; i >= 0; i--)
   {
   if (ptype == PRIV(utt)[i].type && pvalue == PRIV(utt)[i].value) break;
   }
+
 return (i >= 0)? PRIV(utt_names) + PRIV(utt)[i].name_offset : "??";
+
 #else   /* No UTF support */
 (void)ptype;
 (void)pvalue;
@@ -273,8 +277,9 @@ print_prop(FILE *f, PCRE2_SPTR code, const char *before, const char *after)
 {
 if (code[1] != PT_CLIST)
   {
+  const char *sc = (code[1] == PT_SC)? "script:" : ""; 
   const char *s = get_ucpname(code[1], code[2]);
-  fprintf(f, "%s%s %c%s%s", before, OP_names[*code], toupper(s[0]), s+1, after);
+  fprintf(f, "%s%s %s%c%s%s", before, OP_names[*code], sc, toupper(s[0]), s+1, after);
   }
 else
   {

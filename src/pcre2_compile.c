@@ -2092,6 +2092,7 @@ PCRE2_SIZE i, bot, top;
 PCRE2_SPTR ptr = *ptrptr;
 PCRE2_UCHAR name[50];
 PCRE2_UCHAR *vptr = NULL;
+uint16_t ptscript = PT_NOTSCRIPT;
 
 if (ptr >= cb->end_pattern) goto ERROR_RETURN;
 c = *ptr++;
@@ -2118,8 +2119,9 @@ if (c == CHAR_LEFT_CURLY_BRACKET)
     if (c == CHAR_NUL) goto ERROR_RETURN;
     if (c == CHAR_RIGHT_CURLY_BRACKET) break;
     name[i] = tolower(c);
-    if (c == ':' || c == '=') vptr = name + i;
+    if ((c == ':' || c == '=') && vptr == NULL) vptr = name + i;
     }
+     
   if (c != CHAR_RIGHT_CURLY_BRACKET) goto ERROR_RETURN;
   name[i] = 0;
   }
@@ -2137,25 +2139,56 @@ else goto ERROR_RETURN;
 *ptrptr = ptr;
 
 /* If the property contains ':' or '=' we have class name and value separately
-specified. The only case currently supported is Bidi_Class (synonym BC), for
-which the property names are "bidi<name>". */
+specified. The following are supported:
+
+  . Bidi_Class (synonym bc), for which the property names are "bidi<name>".
+  . Script (synonym sc) for which the property name is the script name
+  . Script_Extensions (synonym scx), ditto
+
+As this is a small number, we currently just check the names directly. If this
+grows, a sorted table and a switch will be neater.
+
+For both the script properties, set a PT_xxx value so that (1) they can be
+distinguished and (2) invalid script names that happen to be the name of
+another property can be diagnosed. */
 
 if (vptr != NULL)
   {
-  *vptr = 0;   /* Terminate property name */ 
-  if (PRIV(strcmp_c8)(name, "bidiclass") != 0 &&
-      PRIV(strcmp_c8)(name, "bc") != 0)
+  int offset = 0;
+  PCRE2_UCHAR sname[8]; 
+
+  *vptr = 0;   /* Terminate property name */
+  if (PRIV(strcmp_c8)(name, STRING_bidiclass) == 0 ||
+      PRIV(strcmp_c8)(name, STRING_bc) == 0)
+    {
+    offset = 4;
+    sname[0] = CHAR_b; 
+    sname[1] = CHAR_i;  /* There is no strcpy_c8 function */
+    sname[2] = CHAR_d;  
+    sname[3] = CHAR_i;
+    }
+
+  else if (PRIV(strcmp_c8)(name, STRING_script) == 0 ||
+           PRIV(strcmp_c8)(name, STRING_sc) == 0)
+    ptscript = PT_SC;
+
+  else if (PRIV(strcmp_c8)(name, STRING_scriptextensions) == 0 ||
+           PRIV(strcmp_c8)(name, STRING_scx) == 0)
+    ptscript = PT_SCX;
+
+  else
     {
     *errorcodeptr = ERR47;
     return FALSE;
     }
-  memmove(name + 4, vptr + 1, (name + i - vptr)*sizeof(PCRE2_UCHAR));
-  name[1] = 'i';    /* Can't use PRIV(strcpy)() because it adds 0 */
-  name[2] = 'd';
-  name[3] = 'i';  
+
+  /* Adjust the string in name[] as needed */
+
+  memmove(name + offset, vptr + 1, (name + i - vptr)*sizeof(PCRE2_UCHAR));
+  if (offset != 0) memmove(name, sname, offset*sizeof(PCRE2_UCHAR));
   }
 
-/* Search for a recognized property name using binary chop. */
+/* Search for a recognized property using binary chop. */
 
 bot = 0;
 top = PRIV(utt_size);
@@ -2165,16 +2198,27 @@ while (bot < top)
   int r;
   i = (bot + top) >> 1;
   r = PRIV(strcmp_c8)(name, PRIV(utt_names) + PRIV(utt)[i].name_offset);
+
+  /* When a matching property is found, some extra checking is needed when the
+  \p{xx:yy} syntax is used and xx is either sc or scx. */
+
   if (r == 0)
     {
-    *ptypeptr = PRIV(utt)[i].type;
     *pdataptr = PRIV(utt)[i].value;
+    if (vptr == NULL || ptscript == PT_NOTSCRIPT)
+      *ptypeptr = PRIV(utt)[i].type;
+    else
+      {
+      if (PRIV(utt)[i].type != PT_SCX) break;  /* Non-script found */
+      *ptypeptr = ptscript;
+      }
     return TRUE;
     }
+
   if (r > 0) bot = i + 1; else top = i;
   }
 
-*errorcodeptr = ERR47;   /* Unrecognized name */
+*errorcodeptr = ERR47;   /* Unrecognized property */
 return FALSE;
 
 ERROR_RETURN:            /* Malformed \P or \p */
@@ -5858,7 +5902,7 @@ for (;; pptr++)
 
           case ESC_D:
           should_flip_negation = TRUE;
-          for (int i = 0; i < 32; i++) 
+          for (int i = 0; i < 32; i++)
             classbits[i] |= (uint8_t)(~cbits[i+cbit_digit]);
           break;
 
@@ -5868,7 +5912,7 @@ for (;; pptr++)
 
           case ESC_W:
           should_flip_negation = TRUE;
-          for (int i = 0; i < 32; i++) 
+          for (int i = 0; i < 32; i++)
             classbits[i] |= (uint8_t)(~cbits[i+cbit_word]);
           break;
 
@@ -5885,7 +5929,7 @@ for (;; pptr++)
 
           case ESC_S:
           should_flip_negation = TRUE;
-          for (int i = 0; i < 32; i++) 
+          for (int i = 0; i < 32; i++)
             classbits[i] |= (uint8_t)(~cbits[i+cbit_space]);
           break;
 
@@ -6276,7 +6320,7 @@ for (;; pptr++)
     bravalue = OP_COND;
       {
       int count, index;
-      unsigned int i; 
+      unsigned int i;
       PCRE2_SPTR name;
       named_group *ng = cb->named_groups;
       uint32_t length = *(++pptr);

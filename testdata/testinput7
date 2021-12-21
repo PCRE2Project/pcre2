@@ -2203,4 +2203,32 @@
 
 # -----------------------------------------------------------------------------
 
+/\p{katakana}/utf
+    \x{30a1}
+    \x{3001} 
+
+/\p{scx:katakana}/utf
+    \x{30a1}
+    \x{3001} 
+    
+/\p{script extensions:katakana}/utf
+    \x{30a1}
+    \x{3001} 
+    
+/\p{sc:katakana}/utf
+    \x{30a1}
+\= Expect no match     
+    \x{3001} 
+    
+/\p{script:katakana}/utf
+    \x{30a1}
+\= Expect no match     
+    \x{3001}
+    
+/\p{sc:katakana}{3,}/utf
+    \x{30a1}\x{30fa}\x{32d0}\x{1b122}\x{ff66}\x{3001}ABC
+
+/\p{sc:katakana}{3,}?/utf
+    \x{30a1}\x{30fa}\x{32d0}\x{1b122}\x{ff66}\x{3001}ABC
+
 # End of testinput7

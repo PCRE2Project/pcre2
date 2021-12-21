@@ -32,6 +32,7 @@
 # Added support for bidi class and bidi control, 06-December-2021
 #   This also involved lower casing strings and removing underscores, in
 #   accordance with Unicode's "loose matching" rules, which Perl observes.
+# Changed default script type from PT_SC to PT_SCX, 18-December-2021
 
 script_names = ['Unknown', 'Arabic', 'Armenian', 'Bengali', 'Bopomofo', 'Braille', 'Buginese', 'Buhid', 'Canadian_Aboriginal', \
  'Cherokee', 'Common', 'Coptic', 'Cypriot', 'Cyrillic', 'Deseret', 'Devanagari', 'Ethiopic', 'Georgian', \
@@ -104,7 +105,7 @@ std_bidiclass_names = stdnames(bidiclass_names)
 # names. We keep both the standardized name and the original, because the 
 # latter is used for the ucp_xx names.
 
-utt_table  = list(zip(std_script_names, script_names, ['PT_SC'] * len(script_names)))
+utt_table  = list(zip(std_script_names, script_names, ['PT_SCX'] * len(script_names)))
 utt_table += list(zip(std_category_names, category_names, ['PT_PC'] * len(category_names)))
 utt_table += list(zip(std_general_category_names, general_category_names, ['PT_GC'] * len(general_category_names)))
 utt_table += list(zip(std_bidiclass_names, bidiclass_names, ['PT_BIDICL'] * len(bidiclass_names)))

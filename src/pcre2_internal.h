@@ -954,6 +954,13 @@ a positive value. */
 #define STRING_LIMIT_RECURSION_EQ         "LIMIT_RECURSION="
 #define STRING_MARK                       "MARK"
 
+#define STRING_bc                         "bc"
+#define STRING_bidiclass                  "bidiclass"
+#define STRING_sc                         "sc"
+#define STRING_script                     "script"
+#define STRING_scriptextensions           "scriptextensions"
+#define STRING_scx                        "scx"
+
 #else  /* SUPPORT_UNICODE */
 
 /* UTF-8 support is enabled; always use UTF-8 (=ASCII) character codes. This
@@ -1248,28 +1255,39 @@ only. */
 #define STRING_LIMIT_RECURSION_EQ         STR_L STR_I STR_M STR_I STR_T STR_UNDERSCORE STR_R STR_E STR_C STR_U STR_R STR_S STR_I STR_O STR_N STR_EQUALS_SIGN
 #define STRING_MARK                       STR_M STR_A STR_R STR_K
 
+#define STRING_bc                         STR_b STR_c
+#define STRING_bidiclass                  STR_b STR_i STR_d STR_i STR_c STR_l STR_a STR_s STR_s
+#define STRING_sc                         STR_s STR_c
+#define STRING_script                     STR_s STR_c STR_r STR_i STR_p STR_t
+#define STRING_scriptextensions           STR_s STR_c STR_r STR_i STR_p STR_t STR_e STR_x STR_t STR_e STR_n STR_s STR_i STR_o STR_n STR_s
+#define STRING_scx                        STR_s STR_c STR_x
+
+
 #endif  /* SUPPORT_UNICODE */
 
 /* -------------------- End of character and string names -------------------*/
 
 /* -------------------- Definitions for compiled patterns -------------------*/
 
-/* Codes for different types of Unicode property */
+/* Codes for different types of Unicode property. If these definitions are
+changed, the autopossessifying table in pcre2_auto_possess.c must be updated to
+match. */
 
 #define PT_ANY        0    /* Any property - matches all chars */
 #define PT_LAMP       1    /* L& - the union of Lu, Ll, Lt */
 #define PT_GC         2    /* Specified general characteristic (e.g. L) */
 #define PT_PC         3    /* Specified particular characteristic (e.g. Lu) */
-#define PT_SC         4    /* Script (e.g. Han) */
-#define PT_ALNUM      5    /* Alphanumeric - the union of L and N */
-#define PT_SPACE      6    /* Perl space - general category Z plus 9,10,12,13 */
-#define PT_PXSPACE    7    /* POSIX space - Z plus 9,10,11,12,13 */
-#define PT_WORD       8    /* Word - L plus N plus underscore */
-#define PT_CLIST      9    /* Pseudo-property: match character list */
-#define PT_UCNC      10    /* Universal Character nameable character */
-#define PT_BIDICL    11    /* Specified bidi class */
-#define PT_BIDICO    12    /* Bidi control character */
-#define PT_TABSIZE   13    /* Size of square table for autopossessify tests */
+#define PT_SC         4    /* Script only (e.g. Han) */
+#define PT_SCX        5    /* Script extensions (includes SC) */
+#define PT_ALNUM      6    /* Alphanumeric - the union of L and N */
+#define PT_SPACE      7    /* Perl space - general category Z plus 9,10,12,13 */
+#define PT_PXSPACE    8    /* POSIX space - Z plus 9,10,11,12,13 */
+#define PT_WORD       9    /* Word - L plus N plus underscore */
+#define PT_CLIST     10    /* Pseudo-property: match character list */
+#define PT_UCNC      11    /* Universal Character nameable character */
+#define PT_BIDICL    12    /* Specified bidi class */
+#define PT_BIDICO    13    /* Bidi control character */
+#define PT_TABSIZE   14    /* Size of square table for autopossessify tests */
 
 /* The following special properties are used only in XCLASS items, when POSIX
 classes are specified and PCRE2_UCP is set - in other words, for Unicode
@@ -1277,9 +1295,14 @@ handling of these classes. They are not available via the \p or \P escapes like
 those in the above list, and so they do not take part in the autopossessifying
 table. */
 
-#define PT_PXGRAPH   13    /* [:graph:] - characters that mark the paper */
-#define PT_PXPRINT   14    /* [:print:] - [:graph:] plus non-control spaces */
-#define PT_PXPUNCT   15    /* [:punct:] - punctuation characters */
+#define PT_PXGRAPH   14    /* [:graph:] - characters that mark the paper */
+#define PT_PXPRINT   15    /* [:print:] - [:graph:] plus non-control spaces */
+#define PT_PXPUNCT   16    /* [:punct:] - punctuation characters */
+
+/* This value is used when parsing \p and \P escapes to indicate that neither
+\p{script:...} nor \p{scx:...} has been encountered. */
+
+#define PT_NOTSCRIPT 255
 
 /* Flag bits and data types for the extended class (OP_XCLASS) for classes that
 contain characters with values greater than 255. */
@@ -1826,6 +1849,12 @@ typedef struct {
 #define UCD_OTHERCASE(ch)   ((uint32_t)((int)ch + (int)(GET_UCD(ch)->other_case)))
 #define UCD_SCRIPTX(ch)     GET_UCD(ch)->scriptx
 
+/* The "scriptx" field, when negative, gives an offset into a vector of 32-bit
+words that form a bitmap representing a list of scripts. This macro tests for a
+script in the map by number. */
+
+#define MAPBIT(map,script) ((map)[(script)/32]&(1u<<((script)%32)))
+
 /* The "bidi" field has the 0x80 bit set if the character has the Bidi_Control
 property. The remaining bits hold the bidi class, but as there are only 23
 classes, we can mask off 5 bits - leaving two free for the future. */
@@ -1916,7 +1945,7 @@ extern const uint32_t                  PRIV(hspace_list)[];
 extern const uint32_t                  PRIV(vspace_list)[];
 extern const uint32_t                  PRIV(ucd_caseless_sets)[];
 extern const uint32_t                  PRIV(ucd_digit_sets)[];
-extern const uint8_t                   PRIV(ucd_script_sets)[];
+extern const uint32_t                  PRIV(ucd_script_sets)[];
 extern const ucd_record                PRIV(ucd_records)[];
 #if PCRE2_CODE_UNIT_WIDTH == 32
 extern const ucd_record                PRIV(dummy_ucd_record)[];

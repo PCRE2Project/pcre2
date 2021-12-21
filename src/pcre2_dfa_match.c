@@ -1193,6 +1193,12 @@ for (;;)
           OK = prop->script == code[2];
           break;
 
+          case PT_SCX:
+          OK = prop->script == code[2] || prop->scriptx == (int)code[2];
+          if (!OK && prop->scriptx < 0)
+            OK = MAPBIT(PRIV(ucd_script_sets) - prop->scriptx, code[2]) != 0;
+          break;
+
           /* These are specials for combination cases. */
 
           case PT_ALNUM:
@@ -1459,6 +1465,12 @@ for (;;)
           OK = prop->script == code[3];
           break;
 
+          case PT_SCX:
+          OK = prop->script == code[3] || prop->scriptx == (int)code[3];
+          if (!OK && prop->scriptx < 0)
+            OK = MAPBIT(PRIV(ucd_script_sets) - prop->scriptx, code[3]) != 0;
+          break;
+
           /* These are specials for combination cases. */
 
           case PT_ALNUM:
@@ -1706,6 +1718,12 @@ for (;;)
 
           case PT_SC:
           OK = prop->script == code[3];
+          break;
+
+          case PT_SCX:
+          OK = prop->script == code[3] || prop->scriptx == (int)code[3];
+          if (!OK && prop->scriptx < 0)
+            OK = MAPBIT(PRIV(ucd_script_sets) - prop->scriptx, code[3]) != 0;
           break;
 
           /* These are specials for combination cases. */
@@ -1980,6 +1998,14 @@ for (;;)
 
           case PT_SC:
           OK = prop->script == code[1 + IMM2_SIZE + 2];
+          break;
+
+          case PT_SCX:
+          OK = prop->script == code[1 + IMM2_SIZE + 2] ||
+               prop->scriptx == (int)code[1 + IMM2_SIZE + 2];
+          if (!OK && prop->scriptx < 0)
+            OK = MAPBIT(PRIV(ucd_script_sets) - prop->scriptx,
+              code[1 + IMM2_SIZE + 2]) != 0;
           break;
 
           /* These are specials for combination cases. */

@@ -381,11 +381,11 @@ U+10F27  R   Letter: Other letter, oldsogdian, Other
 U+10F30  AL  Letter: Other letter, sogdian, Other
 
 findprop  a836  a833  1cf4  20f0  1cd0
-U+A836  L   Symbol: Other symbol, common, Other, [devanagari, dogra, gujarati, gurmukhi, khojki, kaithi, mahajani, modi, khudawadi, takri, tirhuta]
-U+A833  L   Number: Other number, common, Other, [devanagari, dogra, gujarati, gurmukhi, khojki, kannada, kaithi, mahajani, modi, nandinagari, khudawadi, takri, tirhuta]
-U+1CF4  NSM Mark: Non-spacing mark, inherited, Extend, [devanagari, grantha, kannada]
-U+20F0  NSM Mark: Non-spacing mark, inherited, Extend, [devanagari, grantha, latin]
-U+1CD0  NSM Mark: Non-spacing mark, inherited, Extend, [bengali, devanagari, grantha, kannada]
+U+A836  L   Symbol: Other symbol, common, Other, [devanagari, gujarati, gurmukhi, kaithi, takri, khojki, khudawadi, mahajani, modi, tirhuta, dogra]
+U+A833  L   Number: Other number, common, Other, [devanagari, gujarati, gurmukhi, kannada, kaithi, takri, khojki, khudawadi, mahajani, modi, tirhuta, dogra, nandinagari]
+U+1CF4  NSM Mark: Non-spacing mark, inherited, Extend, [devanagari, kannada, grantha]
+U+20F0  NSM Mark: Non-spacing mark, inherited, Extend, [devanagari, latin, grantha]
+U+1CD0  NSM Mark: Non-spacing mark, inherited, Extend, [bengali, devanagari, kannada, grantha]
 
 findprop 32ff
 U+32FF  L   Symbol: Other symbol, common, Other, [han]
