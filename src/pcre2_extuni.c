@@ -105,7 +105,7 @@ while (eptr < end_subject)
   /* Not breaking between Regional Indicators is allowed only if there
   are an even number of preceding RIs. */
 
-  if (lgb == ucp_gbRegionalIndicator && rgb == ucp_gbRegionalIndicator)
+  if (lgb == ucp_gbRegional_Indicator && rgb == ucp_gbRegional_Indicator)
     {
     int ricount = 0;
     PCRE2_SPTR bptr = eptr - 1;
@@ -123,7 +123,7 @@ while (eptr < end_subject)
         }
       else
       c = *bptr;
-      if (UCD_GRAPHBREAK(c) != ucp_gbRegionalIndicator) break;
+      if (UCD_GRAPHBREAK(c) != ucp_gbRegional_Indicator) break;
       ricount++;
       }
     if ((ricount & 1) != 0) break;  /* Grapheme break required */
