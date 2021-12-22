@@ -19,7 +19,7 @@ please consult the man page, in case the conversion went wrong.
 <li><a name="TOC4" href="#SEC4">CHARACTER TYPES</a>
 <li><a name="TOC5" href="#SEC5">GENERAL CATEGORY PROPERTIES FOR \p and \P</a>
 <li><a name="TOC6" href="#SEC6">PCRE2 SPECIAL CATEGORY PROPERTIES FOR \p and \P</a>
-<li><a name="TOC7" href="#SEC7">SCRIPT NAMES FOR \p AND \P</a>
+<li><a name="TOC7" href="#SEC7">SCRIPT MATCHING WITH \p AND \P</a>
 <li><a name="TOC8" href="#SEC8">BIDI_PROPERTIES FOR \p AND \P</a>
 <li><a name="TOC9" href="#SEC9">CHARACTER CLASSES</a>
 <li><a name="TOC10" href="#SEC10">QUANTIFIERS</a>
@@ -158,6 +158,7 @@ matching" rules.
   Lo         Other letter
   Lt         Title case letter
   Lu         Upper case letter
+  Lc         Ll, Lu, or Lt
   L&         Ll, Lu, or Lt
 
   M          Mark
@@ -204,7 +205,11 @@ matching" rules.
 Perl and POSIX space are now the same. Perl added VT to its space character set
 at release 5.18.
 </P>
-<br><a name="SEC7" href="#TOC1">SCRIPT NAMES FOR \p AND \P</a><br>
+<br><a name="SEC7" href="#TOC1">SCRIPT MATCHING WITH \p AND \P</a><br>
+<P>
+The following script names are recognized in \p{sc:...} or \p{scx:...} items,
+or on their own with \p (and also \P of course):
+</P>
 <P>
 Adlam,
 Ahom,
@@ -738,7 +743,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC30" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 10 December 2021
+Last updated: 22 December 2021
 <br>
 Copyright &copy; 1997-2021 University of Cambridge.
 <br>

@@ -1,4 +1,4 @@
-.TH PCRE2SYNTAX 3 "10 December 2021" "PCRE2 10.40"
+.TH PCRE2SYNTAX 3 "22 December 2021" "PCRE2 10.40"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION SYNTAX SUMMARY"
@@ -124,6 +124,7 @@ matching" rules.
   Lo         Other letter
   Lt         Title case letter
   Lu         Upper case letter
+  Lc         Ll, Lu, or Lt
   L&         Ll, Lu, or Lt
 .sp
   M          Mark
@@ -171,9 +172,12 @@ Perl and POSIX space are now the same. Perl added VT to its space character set
 at release 5.18.
 .
 .
-.SH "SCRIPT NAMES FOR \ep AND \eP"
+.SH "SCRIPT MATCHING WITH \ep AND \eP"
 .rs
 .sp
+The following script names are recognized in \ep{sc:...} or \ep{scx:...} items,
+or on their own with \ep (and also \eP of course):
+.P
 Adlam,
 Ahom,
 Anatolian_Hieroglyphs,
@@ -723,6 +727,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 10 December 2021
+Last updated: 22 December 2021
 Copyright (c) 1997-2021 University of Cambridge.
 .fi

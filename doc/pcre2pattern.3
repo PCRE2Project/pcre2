@@ -1,4 +1,4 @@
-.TH PCRE2PATTERN 3 "10 December 2021" "PCRE2 10.40"
+.TH PCRE2PATTERN 3 "22 December 2021" "PCRE2 10.40"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION DETAILS"
@@ -793,13 +793,17 @@ Other Perl properties such as "InMusicalSymbols" are not supported by PCRE2.
 Note that \eP{Any} does not match any characters, so always causes a match
 failure.
 .P
-Sets of Unicode characters are defined as belonging to certain scripts. A
-character from one of these sets can be matched using a script name. For
-example:
-.sp
-  \ep{Greek}
-  \eP{Han}
-.sp
+There are three different syntax forms for matching a script. Each Unicode
+character has a basic script and, optionally, a list of other scripts ("Script
+Extentions") with which it is commonly used. Using the Adlam script as an
+example, \ep{sc:Adlam} matches characters whose basic script is Adlam, whereas
+\ep{scx:Adlam} matches, in addition, characters that have Adlam in their
+extensions list. The full names "script" and "script extensions" for the
+property types are recognized, and a equals sign is an alternative to the
+colon. If a script name is given without a property type, for example,
+\ep{Adlam}, it is treated as \ep{scx:Adlam}. Perl changed to this
+interpretation at release 5.26 and PCRE2 changed at release 10.40.
+.P
 Unassigned characters (and in non-UTF 32-bit mode, characters with code points
 greater than 0x10FFFF) are assigned the "Unknown" script. Others that are not
 part of an identified script are lumped together as "Common". The current list
@@ -3952,6 +3956,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 10 December 2021
+Last updated: 22 December 2021
 Copyright (c) 1997-2021 University of Cambridge.
 .fi
