@@ -382,6 +382,10 @@ COMMON_SOURCES = \
   src/pcre2_valid_utf.c \
   src/pcre2_xclass.c
 
+# The pcre2_ucptables.c file is #included by pcre2_tables.c
+
+EXTRA_DIST += src/pcre2_ucptables.c
+
 if WITH_PCRE2_8
 lib_LTLIBRARIES += libpcre2-8.la
 libpcre2_8_la_SOURCES = \
