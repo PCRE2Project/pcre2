@@ -8,7 +8,7 @@ and semantics are as close as possible to those of the Perl 5 language.
                        Written by Philip Hazel
                     This module by Zoltan Herczeg
      Original API code Copyright (c) 1997-2012 University of Cambridge
-          New API code Copyright (c) 2016-2019 University of Cambridge
+          New API code Copyright (c) 2016-2021 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -8379,7 +8379,7 @@ do
   /* Not breaking between Regional Indicators is allowed only if there
   are an even number of preceding RIs. */
 
-  if (lgb == ucp_gbRegionalIndicator && rgb == ucp_gbRegionalIndicator)
+  if (lgb == ucp_gbRegional_Indicator && rgb == ucp_gbRegional_Indicator)
     {
     ricount = 0;
     bptr = prevcc;
@@ -8391,7 +8391,7 @@ do
       BACKCHAR(bptr);
       GETCHAR(c, bptr);
 
-      if (UCD_GRAPHBREAK(c) != ucp_gbRegionalIndicator)
+      if (UCD_GRAPHBREAK(c) != ucp_gbRegional_Indicator)
         break;
 
       ricount++;
@@ -8447,7 +8447,7 @@ do
   /* Not breaking between Regional Indicators is allowed only if there
   are an even number of preceding RIs. */
 
-  if (lgb == ucp_gbRegionalIndicator && rgb == ucp_gbRegionalIndicator)
+  if (lgb == ucp_gbRegional_Indicator && rgb == ucp_gbRegional_Indicator)
     {
     ricount = 0;
     bptr = prevcc;
@@ -8457,7 +8457,7 @@ do
       {
       GETCHARBACK_INVALID(c, bptr, start_subject, break);
 
-      if (UCD_GRAPHBREAK(c) != ucp_gbRegionalIndicator)
+      if (UCD_GRAPHBREAK(c) != ucp_gbRegional_Indicator)
         break;
 
       ricount++;
@@ -8515,7 +8515,7 @@ while (cc < end_subject)
   /* Not breaking between Regional Indicators is allowed only if there
   are an even number of preceding RIs. */
 
-  if (lgb == ucp_gbRegionalIndicator && rgb == ucp_gbRegionalIndicator)
+  if (lgb == ucp_gbRegional_Indicator && rgb == ucp_gbRegional_Indicator)
     {
     ricount = 0;
     bptr = cc - 1;
@@ -8530,7 +8530,7 @@ while (cc < end_subject)
         break;
 #endif /* PCRE2_CODE_UNIT_WIDTH == 32 */
 
-      if (UCD_GRAPHBREAK(c) != ucp_gbRegionalIndicator) break;
+      if (UCD_GRAPHBREAK(c) != ucp_gbRegional_Indicator) break;
 
       ricount++;
       }

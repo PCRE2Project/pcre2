@@ -172,7 +172,7 @@ static const unsigned char *gb_names[] = {
   US"T",                     US"Hangul syllable type T",
   US"LV",                    US"Hangul syllable type LV",
   US"LVT",                   US"Hangul syllable type LVT",
-  US"RegionalIndicator",     US"",
+  US"Regional_Indicator",    US"",
   US"Other",                 US"",
   US"ZWJ",                   US"zero width joiner",
   US"Extended_Pictographic", US""
@@ -399,7 +399,7 @@ switch(gbprop)
   case ucp_gbT:            graphbreak = US"Hangul syllable type T"; break;
   case ucp_gbLV:           graphbreak = US"Hangul syllable type LV"; break;
   case ucp_gbLVT:          graphbreak = US"Hangul syllable type LVT"; break;
-  case ucp_gbRegionalIndicator:
+  case ucp_gbRegional_Indicator:
                            graphbreak = US"Regional Indicator"; break;
   case ucp_gbOther:        graphbreak = US"Other"; break;
   case ucp_gbZWJ:          graphbreak = US"Zero Width Joiner"; break;

@@ -193,7 +193,7 @@ const uint32_t PRIV(ucp_gbtable)[] = {
    ESZ|(1u<<ucp_gbPrepend)|                             /*  4 Prepend */
        (1u<<ucp_gbL)|(1u<<ucp_gbV)|(1u<<ucp_gbT)|
        (1u<<ucp_gbLV)|(1u<<ucp_gbLVT)|(1u<<ucp_gbOther)|
-       (1u<<ucp_gbRegionalIndicator),
+       (1u<<ucp_gbRegional_Indicator),
    ESZ,                                                 /*  5 SpacingMark */
    ESZ|(1u<<ucp_gbL)|(1u<<ucp_gbV)|(1u<<ucp_gbLV)|      /*  6 L */
        (1u<<ucp_gbLVT),
@@ -201,7 +201,7 @@ const uint32_t PRIV(ucp_gbtable)[] = {
    ESZ|(1u<<ucp_gbT),                                   /*  8 T */
    ESZ|(1u<<ucp_gbV)|(1u<<ucp_gbT),                     /*  9 LV */
    ESZ|(1u<<ucp_gbT),                                   /* 10 LVT */
-   (1u<<ucp_gbRegionalIndicator),                       /* 11 RegionalIndicator */
+   (1u<<ucp_gbRegional_Indicator),                      /* 11 Regional Indicator */
    ESZ,                                                 /* 12 Other */
    ESZ,                                                 /* 13 ZWJ */
    ESZ|(1u<<ucp_gbExtended_Pictographic)                /* 14 Extended Pictographic */

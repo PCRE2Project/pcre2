@@ -9,6 +9,10 @@ and semantics are as close as possible to those of the Perl 5 language.
      Original API code Copyright (c) 1997-2012 University of Cambridge
           New API code Copyright (c) 2016-2021 University of Cambridge
 
+This module is auto-generated from Unicode data files. DO NOT EDIT MANUALLY!
+Instead, modify the maint/GenerateUcpTables.py script and run it to generate
+a new version of this code.
+
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -38,10 +42,6 @@ POSSIBILITY OF SUCH DAMAGE.
 -----------------------------------------------------------------------------
 */
 
-
-/* This module is auto-generated from the Unicode data files, and #included at 
-the end of pcre2_tables.c. Do not edit by hand. */
-
 #ifdef SUPPORT_UNICODE
 
 /* The PRIV(utt)[] table below translates Unicode property names into type and
@@ -49,21 +49,9 @@ code values. It is searched by binary chop, so must be in collating sequence of
 name. Originally, the table contained pointers to the name strings in the first
 field of each entry. However, that leads to a large number of relocations when
 a shared library is dynamically loaded. A significant reduction is made by
-putting all the names into a single, large string and then using offsets in the
-table itself. Maintenance is more error-prone, but frequent changes to this
-data are unlikely.
-
-July 2008: There is now a script called maint/GenerateUtt.py that can be used
-to generate this data automatically instead of maintaining it by hand.
-
-The script was updated in March 2009 to generate a new EBCDIC-compliant
-version. Like all other character and string literals that are compared against
-the regular expression pattern, we must use STR_ macros instead of literal
-strings to make sure that UTF-8 support works on EBCDIC platforms. 
-
-December 2021: the script now ensures that all letters are lower cased, and
-that underscores are removed, in accordance with the "loose matching" rules
-that Unicode advises and Perl uses. */
+putting all the names into a single, large string and using offsets instead.
+All letters are lower cased, and underscores are removed, in accordance with
+the "loose matching" rules that Unicode advises and Perl uses. */
 
 #define STRING_adlam0 STR_a STR_d STR_l STR_a STR_m "\0"
 #define STRING_ahom0 STR_a STR_h STR_o STR_m "\0"
