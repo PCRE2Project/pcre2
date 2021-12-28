@@ -252,30 +252,15 @@ def get_other_case(chardata):
 # Parse a line of ScriptExtensions.txt
 
 def get_script_extension(chardata):
-  this_script_list = list(chardata[1].split(' '))
-  if len(this_script_list) == 1:
-    return script_abbrevs.index(this_script_list[0])
+  global last_script_extension
 
-  script_numbers = []
-  for d in this_script_list:
-    script_numbers.append(script_abbrevs.index(d))
-  script_numbers.append(0)
-  script_numbers_length = len(script_numbers)
+  offset = len(script_lists) * script_list_item_size
+  if last_script_extension == chardata[1]:
+    return offset - script_list_item_size
 
-  for i in range(1, len(script_lists) - script_numbers_length + 1):
-    for j in range(0, script_numbers_length):
-      found = True
-      if script_lists[i+j] != script_numbers[j]:
-        found = False
-        break
-    if found:
-      return -i
-
-  # Not found in existing lists
-
-  return_value = len(script_lists)
-  script_lists.extend(script_numbers)
-  return -return_value
+  last_script_extension = chardata[1]
+  script_lists.append(tuple(script_abbrevs.index(abbrev) for abbrev in last_script_extension.split(' ')))
+  return offset
 
 
 # Read a whole table in memory, setting/checking the Unicode version
@@ -538,26 +523,10 @@ file.close()
 # multiple scripts. Initialize this list with a single entry, as the zeroth
 # element is never used.
 
-script_lists = [0]
-script_abbrevs_default = script_abbrevs.index('Zzzz')
-scriptx = read_table('Unicode.tables/ScriptExtensions.txt', get_script_extension, script_abbrevs_default)
-
-# Scan all characters and set their default script extension to the main
-# script. We also have to adjust negative scriptx values, following a change in
-# the way these work. They are currently negated offsets into the script_lists
-# list, but have to be changed into indices in the new ucd_script_sets vector,
-# which has fixed-size entries. We can compute the new offset by counting the
-# zeros that precede the current offset.
-
-for i in range(0, MAX_UNICODE):
-  if scriptx[i] == script_abbrevs_default:
-    scriptx[i] = script[i]
-  elif scriptx[i] < 0:
-    count = 1
-    for j in range(-scriptx[i], 0, -1):
-      if script_lists[j] == 0:
-        count += 1
-    scriptx[i] = -count * (int(len(script_names)/32) + 1)
+script_lists = [[]]
+script_list_item_size = (script_names.index('Unknown') + 31) // 32
+last_script_extension = ""
+scriptx = read_table('Unicode.tables/ScriptExtensions.txt', get_script_extension, 0)
 
 # With the addition of the Script Extensions field, we needed some padding to
 # get the Unicode records up to 12 bytes (multiple of 4). Originally this was a
@@ -565,7 +534,7 @@ for i in range(0, MAX_UNICODE):
 # are now used for the bidi class, so zero will do.
 
 padding_dummy = [0] * MAX_UNICODE
-padding_dummy[0] = 0
+padding_dummy[0] = 256
 
 # This block of code was added by PH in September 2012. It scans the other_case
 # table to find sets of more than two characters that must all match each other
@@ -806,24 +775,19 @@ f.write("""\
 const uint32_t PRIV(ucd_script_sets)[] = {
 """)
 
-bitword_count = len(script_names)/32 + 1
-bitwords = [0] * int(bitword_count)
 
 for d in script_lists:
-  if d == 0:
-    s = " "
-    f.write("  ")
-    for x in bitwords:
-      f.write("%s" % s)
-      s = ", "
-      f.write("0x%08xu" % x)
-    f.write(",\n")
-    bitwords = [0] * int(bitword_count)
+  bitwords = [0] * script_list_item_size
 
-  else:
-    x = int(d/32)
-    y = int(d%32)
-    bitwords[x] = bitwords[x] | (1 << y)
+  for idx in d:
+    bitwords[idx // 32] |= 1 << (idx % 31)
+
+  s = " "
+  for x in bitwords:
+    f.write("%s" % s)
+    s = ", "
+    f.write("0x%08xu" % x)
+  f.write(",\n")
 
 f.write("};\n\n")
 

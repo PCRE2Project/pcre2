@@ -134,7 +134,6 @@ while ((t = *data++) != XCL_END)
   else  /* XCL_PROP & XCL_NOTPROP */
     {
     const ucd_record *prop = GET_UCD(c);
-    int scriptx; 
     BOOL isprop = t == XCL_PROP;
     BOOL ok; 
 
@@ -163,10 +162,8 @@ while ((t = *data++) != XCL_END)
       break;
 
       case PT_SCX:
-      scriptx = prop->scriptx; 
-      ok = data[1] == prop->script || data[1] == (PCRE2_UCHAR)scriptx;
-      if (!ok && scriptx < 0)
-        ok = MAPBIT(PRIV(ucd_script_sets) - scriptx, data[1]);  
+      ok = (data[1] == prop->script ||
+            MAPBIT(PRIV(ucd_script_sets) + prop->scriptx, data[1]) != 0);
       if (ok == isprop) return !negated;
       break;
 

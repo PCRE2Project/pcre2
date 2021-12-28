@@ -2206,13 +2206,23 @@ while (bot < top)
     {
     *pdataptr = PRIV(utt)[i].value;
     if (vptr == NULL || ptscript == PT_NOTSCRIPT)
-      *ptypeptr = PRIV(utt)[i].type;
-    else
       {
-      if (PRIV(utt)[i].type != PT_SCX) break;  /* Non-script found */
-      *ptypeptr = ptscript;
+      *ptypeptr = PRIV(utt)[i].type;
+      return TRUE;
       }
-    return TRUE;
+
+    switch (PRIV(utt)[i].type)
+      {
+      case PT_SC:
+      *ptypeptr = PT_SC;
+      return TRUE;
+
+      case PT_SCX:
+      *ptypeptr = ptscript;
+      return TRUE;
+      }
+
+    break;  /* Non-script found */
     }
 
   if (r > 0) bot = i + 1; else top = i;

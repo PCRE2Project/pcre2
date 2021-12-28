@@ -1822,9 +1822,9 @@ typedef struct {
   uint8_t gbprop;     /* ucp_gbControl, etc. (grapheme break property) */
   uint8_t caseset;    /* offset to multichar other cases or zero */
   int32_t other_case; /* offset to other case, or zero if none */
-  int16_t scriptx;    /* script extension value */
+  uint8_t scriptx;    /* script extension value */
   uint8_t bidi;       /* bidi class and control flag */
-  uint8_t dummy;      /* spare - to round to multiple of 4 bytes */
+  uint16_t dummy;     /* spare - to round to multiple of 4 bytes */
 } ucd_record;
 
 /* UCD access macros */
@@ -1849,8 +1849,8 @@ typedef struct {
 #define UCD_OTHERCASE(ch)   ((uint32_t)((int)ch + (int)(GET_UCD(ch)->other_case)))
 #define UCD_SCRIPTX(ch)     GET_UCD(ch)->scriptx
 
-/* The "scriptx" field, when negative, gives an offset into a vector of 32-bit
-words that form a bitmap representing a list of scripts. This macro tests for a
+/* The "scriptx" field gives an offset into a vector of 32-bit words that
+form a bitmap representing a list of scripts. This macro tests for a
 script in the map by number. */
 
 #define MAPBIT(map,script) ((map)[(script)/32]&(1u<<((script)%32)))

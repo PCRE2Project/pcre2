@@ -64,8 +64,10 @@ for i in range(0, len(break_properties), 2):
     f.write("  ucp_gb%s,%s /* %s */\n" % (break_properties[i], sp, break_properties[i+1]))
 f.write("};\n\n")
 
-f.write("/* These are the script identifications, additions happen at the end. */\n\nenum {\n")
+f.write("/* These are the script identifications. */\n\nenum {\n  /* Scripts which has characters in other scripts. */\n")
 for i in script_names:
+    if i == "Unknown":
+      f.write("\n  /* Scripts which has no characters in other scripts. */\n")
     f.write("  ucp_%s,\n" % i)
 f.write("\n")
 

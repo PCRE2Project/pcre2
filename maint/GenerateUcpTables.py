@@ -92,8 +92,12 @@ std_bidi_class_names = stdnames(bidi_class_names)
 # latter is used for the ucp_xx names. NOTE: for the script abbreviations, we
 # still use the full original names.
 
-utt_table  = list(zip(std_script_names, script_names, ['PT_SCX'] * len(script_names)))
-utt_table += list(zip(std_script_abbrevs, script_names, ['PT_SCX'] * len(script_abbrevs)))
+scx_end = script_names.index('Unknown')
+
+utt_table  = list(zip(std_script_names[0:scx_end], script_names[0:scx_end], ['PT_SCX'] * scx_end))
+utt_table += list(zip(std_script_names[scx_end:], script_names[scx_end:], ['PT_SC'] * (len(script_names) - scx_end)))
+utt_table += list(zip(std_script_abbrevs[0:scx_end], script_names[0:scx_end], ['PT_SCX'] * scx_end))
+utt_table += list(zip(std_script_abbrevs[scx_end:], script_names[scx_end:], ['PT_SC'] * (len(script_names) - scx_end)))
 
 # At lease one script abbreviation is the same as the full name of the script,
 # so we must remove duplicates. It doesn't matter if this operation changes the
