@@ -15,3 +15,4 @@ find bidi RLO
 find bidi S
 find bidi WS
 find bidi_control
+find script bopo

@@ -218,3 +218,7 @@ U+2066 *LRI Control: Format, common, Control
 U+2067 *RLI Control: Format, common, Control
 U+2068 *FSI Control: Format, common, Control
 U+2069 *PDI Control: Format, common, Control
+find script bopo
+U+02EA..U+02EB  ON  Symbol: Modifier symbol, bopomofo, Other
+U+3105..U+312F  L   Letter: Other letter, bopomofo, Other
+U+31A0..U+31BF  L   Letter: Other letter, bopomofo, Other

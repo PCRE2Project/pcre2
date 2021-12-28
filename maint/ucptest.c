@@ -299,22 +299,48 @@ return isatty(fileno(stdin));
 *      Get script name from ucp ident            *
 *************************************************/
 
+/* The utt table contains both the full script names and the 4-letter 
+abbreviations. So search for both and use the longer if two are found, unless 
+the first one is only 3 characters (some scripts have 3-character names). If
+this were not just a test program it might be worth making some kind of reverse
+index. */
+
 static const char *
 get_scriptname(int script)
 {
-size_t i;
-const ucp_type_table *u;
+size_t i, j, len;
+size_t foundlist[2];
+const char *yield;
 
+j = 0;
 for (i = 0; i < PRIV(utt_size); i++)
   {
-  u = PRIV(utt) + i;
-  if (u->type == PT_SCX && u->value == script) break;
+  const ucp_type_table *u = PRIV(utt) + i;
+  if (u->type == PT_SCX && u->value == script) 
+    {
+    foundlist[j++] = i;
+    if (j >= 2) break;
+    } 
+  }
+  
+if (j == 0) return "??"; 
+
+yield = NULL;
+len = 0;
+
+for (i = 0; i < j; i++)
+  {
+  const char *s = PRIV(utt_names) + (PRIV(utt) + foundlist[i])->name_offset;
+  size_t sl = strlen(s);
+  if (sl > len)
+    {
+    yield = s;
+    if (sl == 3) break; 
+    len = sl; 
+    }     
   }
 
-if (i < PRIV(utt_size))
-  return PRIV(utt_names) + u->name_offset;
-
-return "??";
+return yield;
 }
 
 

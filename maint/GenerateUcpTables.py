@@ -38,8 +38,11 @@
 #   accordance with Unicode's "loose matching" rules, which Perl observes.
 # Changed default script type from PT_SC to PT_SCX, 18-December-2021
 # -----------------------------------------------------------------------------
-
+#
 # Note subsequent changes here:
+#
+# 27-December_2021: Added support for 4-letter script abbreviations.
+# -----------------------------------------------------------------------------
 
 
 # Import common data lists and functions
@@ -79,15 +82,27 @@ def stdnames(x):
   return y
 
 std_script_names = stdnames(script_names)
+std_script_abbrevs = stdnames(script_abbrevs)
 std_category_names = stdnames(category_names)
 std_general_category_names = stdnames(general_category_names)
 std_bidi_class_names = stdnames(bidi_class_names)
 
 # Create the table, starting with the Unicode script, category and bidi class
 # names. We keep both the standardized name and the original, because the
-# latter is used for the ucp_xx names.
+# latter is used for the ucp_xx names. NOTE: for the script abbreviations, we
+# still use the full original names.
 
 utt_table  = list(zip(std_script_names, script_names, ['PT_SCX'] * len(script_names)))
+utt_table += list(zip(std_script_abbrevs, script_names, ['PT_SCX'] * len(script_abbrevs)))
+
+# At lease one script abbreviation is the same as the full name of the script,
+# so we must remove duplicates. It doesn't matter if this operation changes the
+# order, because we are going to sort the list later.
+
+utt_table = list(set(utt_table))
+
+# Add the remaining property lists
+
 utt_table += list(zip(std_category_names, category_names, ['PT_PC'] * len(category_names)))
 utt_table += list(zip(std_general_category_names, general_category_names, ['PT_GC'] * len(general_category_names)))
 utt_table += list(zip(std_bidi_class_names, bidi_class_names, ['PT_BIDICL'] * len(bidi_class_names)))

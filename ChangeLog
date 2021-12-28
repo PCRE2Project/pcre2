@@ -57,6 +57,9 @@ of applications treat NULL/0 in this way.
     (c) Changed \p{scriptname} from being the same as \p{sc:scriptname} to being
         the same as \p{scx:scriptname} because this change happened in Perl at
         release 5.26.
+        
+    (d) The standard Unicode 4-letter abbreviations for script names are now 
+        recognized.
 
 18. The Python scripts in the maint directory have been refactored. There are
 now three scripts that generate pcre2_ucd.c, pcre2_ucp.h, and pcre2_ucptables.c

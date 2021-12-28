@@ -230,21 +230,48 @@ for (; len > 0; len--)
 /* When there is no UTF/UCP support, the table of names does not exist. This
 function should not be called in such configurations, because a pattern that
 tries to use Unicode properties won't compile. Rather than put lots of #ifdefs
-into the main code, however, we just put one into this function. */
+into the main code, however, we just put one into this function. 
+
+Now that the table contains both full script names and their 4-character
+abbreviations, we do some fiddling to try to get the full name, which is either
+the longer of two found names, or a 3-character name. */
 
 static const char *
 get_ucpname(unsigned int ptype, unsigned int pvalue)
 {
 #ifdef SUPPORT_UNICODE
-int i;
+int count = 0;
+const char *yield = "??";
+size_t len = 0;
 
 if (ptype == PT_SC) ptype = PT_SCX;  /* Table has scx values */
-for (i = PRIV(utt_size) - 1; i >= 0; i--)
-  {
-  if (ptype == PRIV(utt)[i].type && pvalue == PRIV(utt)[i].value) break;
-  }
 
-return (i >= 0)? PRIV(utt_names) + PRIV(utt)[i].name_offset : "??";
+for (int i = PRIV(utt_size) - 1; i >= 0; i--)
+  {
+  const ucp_type_table *u = PRIV(utt) + i;
+ 
+  if (ptype == u->type && pvalue == u->value) 
+    {
+    const char *s = PRIV(utt_names) + u->name_offset;
+    size_t sl = strlen(s);
+    
+    if (sl == 3)
+      {
+      yield = s;
+      break;
+      }    
+
+    if (sl > len)
+      {
+      yield = s;
+      len = sl;
+      }    
+ 
+    if (++count >= 2) break;
+    } 
+  }
+  
+return yield;
 
 #else   /* No UTF support */
 (void)ptype;
