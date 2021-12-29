@@ -780,7 +780,7 @@ for d in script_lists:
   bitwords = [0] * script_list_item_size
 
   for idx in d:
-    bitwords[idx // 32] |= 1 << (idx % 31)
+    bitwords[idx // 32] |= 1 << (idx & 31)
 
   s = " "
   for x in bitwords:

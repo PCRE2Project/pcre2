@@ -2842,8 +2842,6 @@ No match
 
 # These scripts weren't yet in Perl when I added Unicode 6.0.0 to PCRE
 
-#subject no_jit
-
 /^[\p{Batak}]/utf
     \x{1bc0}
  0: \x{1bc0}
@@ -2872,8 +2870,6 @@ No match
 No match
     \x{85d}
 No match
-
-#subject -no_jit
 
 /(\X*)(.)/s,utf
     A\x{300}

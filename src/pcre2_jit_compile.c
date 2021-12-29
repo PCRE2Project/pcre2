@@ -7417,9 +7417,10 @@ static PCRE2_SPTR compile_char1_matchingpath(compiler_common *common, PCRE2_UCHA
 #define XCLASS_CHAR_SAVED 0x02
 #define XCLASS_HAS_TYPE 0x04
 #define XCLASS_HAS_SCRIPT 0x08
-#define XCLASS_HAS_BIDICO 0x10
-#define XCLASS_HAS_BIDICL 0x20
-#define XCLASS_NEEDS_UCD (XCLASS_HAS_TYPE | XCLASS_HAS_SCRIPT | XCLASS_HAS_BIDICO | XCLASS_HAS_BIDICL)
+#define XCLASS_HAS_SCRIPT_EXTENSION 0x10
+#define XCLASS_HAS_BIDICO 0x20
+#define XCLASS_HAS_BIDICL 0x40
+#define XCLASS_NEEDS_UCD (XCLASS_HAS_TYPE | XCLASS_HAS_SCRIPT | XCLASS_HAS_SCRIPT_EXTENSION | XCLASS_HAS_BIDICO | XCLASS_HAS_BIDICL)
 #endif /* SUPPORT_UNICODE */
 
 static void compile_xclass_matchingpath(compiler_common *common, PCRE2_SPTR cc, jump_list **backtracks)
@@ -7517,6 +7518,10 @@ while (*cc != XCL_END)
       case PT_ALNUM:
       unicode_status |= XCLASS_HAS_TYPE;
       break;
+
+      case PT_SCX:
+      unicode_status |= XCLASS_HAS_SCRIPT_EXTENSION;
+      compares++;
 
       case PT_SC:
       unicode_status |= XCLASS_HAS_SCRIPT;
@@ -7674,13 +7679,53 @@ if (unicode_status & XCLASS_NEEDS_UCD)
         {
         SLJIT_ASSERT(*cc == XCL_PROP || *cc == XCL_NOTPROP);
         cc++;
-        if (*cc == PT_SC)
+        if (*cc == PT_SC || *cc == PT_SCX)
           {
           compares--;
           invertcmp = (compares == 0 && list != backtracks);
           if (cc[-1] == XCL_NOTPROP)
             invertcmp ^= 0x1;
           jump = CMP(SLJIT_EQUAL ^ invertcmp, TMP1, 0, SLJIT_IMM, (int)cc[1]);
+          add_jump(compiler, compares > 0 ? list : backtracks, jump);
+          }
+        cc += 2;
+        }
+      }
+
+    cc = ccbegin;
+    }
+
+  if (unicode_status & XCLASS_HAS_SCRIPT_EXTENSION)
+    {
+    while (*cc != XCL_END)
+      {
+      if (*cc == XCL_SINGLE)
+        {
+        cc ++;
+        GETCHARINCTEST(c, cc);
+        }
+      else if (*cc == XCL_RANGE)
+        {
+        cc ++;
+        GETCHARINCTEST(c, cc);
+        GETCHARINCTEST(c, cc);
+        }
+      else
+        {
+        SLJIT_ASSERT(*cc == XCL_PROP || *cc == XCL_NOTPROP);
+        cc++;
+        if (*cc == PT_SCX)
+          {
+          OP1(SLJIT_MOV_U8, TMP1, 0, SLJIT_MEM1(TMP2), (sljit_sw)PRIV(ucd_records) + SLJIT_OFFSETOF(ucd_record, scriptx));
+          OP2(SLJIT_SHL, TMP1, 0, TMP1, 0, SLJIT_IMM, 2);
+          OP1(SLJIT_MOV_U32, TMP1, 0, SLJIT_MEM1(TMP1), (sljit_sw)(PRIV(ucd_script_sets) + (cc[1] >> 5)));
+          OP2(SLJIT_AND | SLJIT_SET_Z, SLJIT_UNUSED, 0, TMP1, 0, SLJIT_IMM, (sljit_sw)1 << (cc[1] & 0x1f));
+
+          compares--;
+          invertcmp = (compares == 0 && list != backtracks);
+          if (cc[-1] == XCL_NOTPROP)
+            invertcmp ^= 0x1;
+          jump = JUMP(SLJIT_NOT_ZERO ^ invertcmp);
           add_jump(compiler, compares > 0 ? list : backtracks, jump);
           }
         cc += 2;
@@ -7879,6 +7924,7 @@ while (*cc != XCL_END)
       break;
 
       case PT_SC:
+      case PT_SCX:
       case PT_BIDICO:
       case PT_BIDICL:
       compares++;
