@@ -2454,11 +2454,8 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
 
         case PT_SCX:
           {
-          int scriptx = prop->scriptx;
-          BOOL ok = Fecode[2] == prop->script ||
-                    Fecode[2] == (unsigned int)scriptx;
-          if (!ok && scriptx < 0)
-            ok = MAPBIT((PRIV(ucd_script_sets) - scriptx), Fecode[2]) != 0;
+          BOOL ok = (Fecode[2] == prop->script ||
+                     MAPBIT((PRIV(ucd_script_sets) + prop->scriptx), Fecode[2]) != 0);
           if (ok == notmatch) RRETURN(MATCH_NOMATCH);
           }
         break;
@@ -2728,7 +2725,6 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
           for (i = 1; i <= Lmin; i++)
             {
             BOOL ok;
-            int scriptx;
             const ucd_record *prop;
             if (Feptr >= mb->end_subject)
               {
@@ -2737,10 +2733,8 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
               }
             GETCHARINCTEST(fc, Feptr);
             prop = GET_UCD(fc);
-            scriptx = prop->scriptx;
-            ok = prop->script == Lpropvalue || scriptx == (int)Lpropvalue;
-            if (!ok && scriptx < 0)
-              ok = MAPBIT(PRIV(ucd_script_sets) - scriptx, Lpropvalue) != 0;
+            ok = (prop->script == Lpropvalue ||
+                  MAPBIT(PRIV(ucd_script_sets) + prop->scriptx, Lpropvalue) != 0);
             if (ok == notmatch)
               RRETURN(MATCH_NOMATCH);
             }
@@ -3521,7 +3515,6 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
           for (;;)
             {
             BOOL ok;
-            int scriptx;
             const ucd_record *prop;
             RMATCH(Fecode, RM225);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
@@ -3533,10 +3526,8 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
               }
             GETCHARINCTEST(fc, Feptr);
             prop = GET_UCD(fc);
-            scriptx = prop->scriptx;
-            ok = prop->script == Lpropvalue || scriptx == (int)Lpropvalue;
-            if (!ok && scriptx < 0)
-              ok = MAPBIT(PRIV(ucd_script_sets) - scriptx, Lpropvalue) != 0;
+            ok = (prop->script == Lpropvalue
+                  || MAPBIT(PRIV(ucd_script_sets) + prop->scriptx, Lpropvalue) != 0);
             if (ok == (Lctype == OP_NOTPROP))
               RRETURN(MATCH_NOMATCH);
             }
@@ -4104,7 +4095,6 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
             {
             BOOL ok;
             const ucd_record *prop;
-            int scriptx;
             int len = 1;
             if (Feptr >= mb->end_subject)
               {
@@ -4113,10 +4103,8 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
               }
             GETCHARLENTEST(fc, Feptr, len);
             prop = GET_UCD(fc);
-            scriptx = prop->scriptx;
-            ok = prop->script == Lpropvalue || scriptx == (int)Lpropvalue;
-            if (!ok && scriptx < 0)
-              ok = MAPBIT(PRIV(ucd_script_sets) - scriptx, Lpropvalue) != 0;
+            ok = (prop->script == Lpropvalue ||
+                  MAPBIT(PRIV(ucd_script_sets) + prop->scriptx, Lpropvalue) != 0);
             if (ok == notmatch) break;
             Feptr+= len;
             }

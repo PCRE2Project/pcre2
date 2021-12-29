@@ -200,7 +200,6 @@ check_char_prop(uint32_t c, unsigned int ptype, unsigned int pdata,
   BOOL negated)
 {
 BOOL ok;
-int scriptx;
 const uint32_t *p;
 const ucd_record *prop = GET_UCD(c);
 
@@ -221,10 +220,8 @@ switch(ptype)
   return (pdata == prop->script) == negated;
 
   case PT_SCX:
-  scriptx = prop->scriptx;
-  ok = pdata == prop->script || pdata == (unsigned int)scriptx;
-  if (!ok && scriptx < 0)
-    ok = MAPBIT(PRIV(ucd_script_sets) - scriptx, pdata) != 0;
+  ok = (pdata == prop->script
+        || MAPBIT(PRIV(ucd_script_sets) + prop->scriptx, pdata) != 0);
   return ok == negated;
 
   /* These are specials */

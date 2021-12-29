@@ -184,6 +184,46 @@ break_properties = [
   'Extended_Pictographic', '14'
   ]
 
+# ---------------------------------------------------------------------------
+#                      REORDERING SCRIPT NAMES
+# ---------------------------------------------------------------------------
+
+import re
+
+def reorder_scripts():
+  global script_names
+  global script_abbrevs
+
+  extended_script_abbrevs = set()
+  with open("Unicode.tables/ScriptExtensions.txt") as f:
+    names_re = re.compile(r'^[0-9A-F]{4,6}(?:\.\.[0-9A-F]{4,6})? +; ([A-Za-z_ ]+) #')
+
+    for line in f:
+      match_obj = names_re.match(line)
+
+      if match_obj == None:
+        continue
+
+      for name in match_obj.group(1).split(" "):
+        extended_script_abbrevs.add(name)
+
+  new_script_names = []
+  new_script_abbrevs = []
+
+  for idx, abbrev in enumerate(script_abbrevs):
+    if abbrev in extended_script_abbrevs:
+      new_script_names.append(script_names[idx])
+      new_script_abbrevs.append(abbrev)
+
+  for idx, abbrev in enumerate(script_abbrevs):
+    if abbrev not in extended_script_abbrevs:
+      new_script_names.append(script_names[idx])
+      new_script_abbrevs.append(abbrev)
+
+  script_names = new_script_names
+  script_abbrevs = new_script_abbrevs
+
+reorder_scripts()
 
 # ---------------------------------------------------------------------------
 #                         DERIVED LISTS
