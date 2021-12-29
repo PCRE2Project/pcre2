@@ -1876,8 +1876,6 @@ No match
     \x{300}
  0: \x{300}
 
-#subject no_jit
-
 /^\p{Han}+/utf
     \x{2e81}\x{3007}\x{2f804}\x{31a0}
  0: \x{2e81}\x{3007}\x{2f804}
@@ -1909,8 +1907,6 @@ No match
 No match
     \x{a4c6}
 No match
-
-#subject -no_jit
 
 /^\p{Any}X/utf
     AXYZ
