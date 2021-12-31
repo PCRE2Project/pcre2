@@ -18,7 +18,11 @@ Files in the maint directory
 
 GenerateCommon.py
   A Python module containing data and functions that are used by the other
-  Generate scripts. Each o
+  Generate scripts.
+  
+GenerateTest26.py
+  A Python script that generates input and expected output test data for test
+  26, which tests Unicode property support.  
 
 GenerateUcd.py
   A Python script that generates the file pcre2_ucd.c from GenerateCommon.py
@@ -120,6 +124,13 @@ The ucptest program can be compiled and used to check that the new tables work
 properly, using the data files in ucptestdata to check a number of test
 characters. See the comments at the start of ucptest.c. If there are new
 scripts, adding a few tests to the files in ucptestdata is a good idea.
+
+Finally, you should run the GenerateTest26.py script to regenerate new versions 
+of the input and expected output from a series of Unicode property tests that 
+are automatically generated from the Unicode data files. By default, the files
+are written to testinput26 and testoutput26 in the current directory, but you
+can give an alternative directory name as an argument to the script. These
+files should eventually be installed in the main testdata directory.
 
 
 Preparing for a PCRE2 release
@@ -457,4 +468,4 @@ years.
 Philip Hazel
 Email local part: Philip.Hazel
 Email domain: gmail.com
-Last updated: 26 December 2021
+Last updated: 31 December 2021
